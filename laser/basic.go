@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"time"
 
 	"goki.dev/enums"
 	"goki.dev/glop/bools"
@@ -988,22 +989,6 @@ func SetRobust(to, frm any) error {
 			return nil
 		}
 	}
-
-	if AnyIsNil(to) {
-		return fmt.Errorf("got nil destination value")
-	}
-	v := reflect.ValueOf(to)
-	vnp := NonPtrValue(v)
-	if !vnp.IsValid() {
-		return fmt.Errorf("got invalid destination value %v of type %T", to, to)
-	}
-	typ := vnp.Type()
-	vp := OnePtrValue(vnp)
-	vk := vnp.Kind()
-	if !vp.Elem().CanSet() {
-		return fmt.Errorf("destination value cannot be set; it must be a variable or field, not a const or tmp or other value that cannot be set (value: %v of type %T)", vp, vp)
-	}
-
 	if es, ok := to.(enums.EnumSetter); ok {
 		if en, ok := frm.(enums.Enum); ok {
 			es.SetInt64(en.Int64())
@@ -1027,6 +1012,31 @@ func SetRobust(to, frm any) error {
 		}
 		bv.SetBool(fb)
 		return nil
+	}
+	if td, ok := to.(*time.Duration); ok {
+		if fs, ok := frm.(string); ok {
+			fd, err := time.ParseDuration(fs)
+			if err != nil {
+				return err
+			}
+			*td = fd
+			return nil
+		}
+	}
+
+	if AnyIsNil(to) {
+		return fmt.Errorf("got nil destination value")
+	}
+	v := reflect.ValueOf(to)
+	vnp := NonPtrValue(v)
+	if !vnp.IsValid() {
+		return fmt.Errorf("got invalid destination value %v of type %T", to, to)
+	}
+	typ := vnp.Type()
+	vp := OnePtrValue(vnp)
+	vk := vnp.Kind()
+	if !vp.Elem().CanSet() {
+		return fmt.Errorf("destination value cannot be set; it must be a variable or field, not a const or tmp or other value that cannot be set (value: %v of type %T)", vp, vp)
 	}
 
 	switch {

@@ -12,6 +12,7 @@ import (
 	"log/slog"
 
 	"goki.dev/colors"
+	"goki.dev/laser"
 	"goki.dev/mat32"
 	"goki.dev/units"
 )
@@ -156,11 +157,6 @@ func (s *Sides[T]) SetLeft(left T) *Sides[T] {
 	return s
 }
 
-// SetStringer is a type that can be set from a string
-type SetStringer interface {
-	SetString(str string) error
-}
-
 // SetAny sets the sides/corners from the given value of any type
 func (s *Sides[T]) SetAny(a any) error {
 	switch val := a.(type) {
@@ -189,9 +185,9 @@ func (s *Sides[T]) SetString(str string) error {
 	fields := strings.Fields(str)
 	vals := make([]T, len(fields))
 	for i, field := range fields {
-		ss, ok := any(&vals[i]).(SetStringer)
+		ss, ok := any(&vals[i]).(laser.SetStringer)
 		if !ok {
-			err := fmt.Errorf("(Sides).SetString('%s'): to set from a string, the sides type (%T) must implement SetStringer (needs SetString(str string) error function)", str, s)
+			err := fmt.Errorf("(Sides).SetString('%s'): to set from a string, the sides type (%T) must implement laser.SetStringer (needs SetString(str string) error function)", str, s)
 			slog.Error(err.Error())
 			return err
 		}

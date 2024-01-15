@@ -2,6 +2,3 @@ Version = 'v0.0.1'
 
 [Release]
   Package = 'goki'
-
-[Web]
-  AutoUpdateInterval = 0
