@@ -220,9 +220,9 @@ func TestNonDefaultFields(t *testing.T) {
 		ProgrammingLanguage: "Go",
 		FavoriteFruit:       "Peach",
 		Pet: pet{
-			Name: "Go Gopher's Pet",
+			Name: "Pet Gopher",
 			Type: "Dog",
-			Age:  5,
+			Age:  7,
 		},
 	}
 	ndf := NonDefaultFields(p)
