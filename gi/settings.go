@@ -134,18 +134,23 @@ func SaveSettings(se Settings) error {
 }
 
 // ResetSettings resets the given settings to their default values.
+// It process their `def:` struct tags in addition to calling their
+// [Settings.Default] method.
 func ResetSettings(se Settings) error {
 	err := os.Remove(se.Filename())
 	if err != nil {
 		return err
 	}
+	grr.Log(laser.SetFromDefaultTags(se))
 	se.Defaults()
 	return nil
 }
 
 // LoadSettings sets the defaults of, opens, and applies the given settings.
-// If they are not already saved, it saves them.
+// If they are not already saved, it saves them. It process their `def:` struct
+// tags in addition to calling their [Settings.Default] method.
 func LoadSettings(se Settings) error {
+	grr.Log(laser.SetFromDefaultTags(se))
 	se.Defaults()
 	err := OpenSettings(se)
 	// we always apply the settings even if we can't open them
@@ -405,38 +410,30 @@ type DeviceSettingsData struct { //gti:add
 	KeyMaps option.Option[keyfun.Maps]
 
 	// The maximum time interval between button press events to count as a double-click
-	DoubleClickInterval time.Duration `min:"100" step:"50"`
+	DoubleClickInterval time.Duration `def:"500ms" min:"100ms" step:"50ms"`
 
 	// How fast the scroll wheel moves, which is typically pixels per wheel step
 	// but units can be arbitrary. It is generally impossible to standardize speed
 	// and variable across devices, and we don't have access to the system settings,
 	// so unfortunately you have to set it here.
-	ScrollWheelSpeed float32 `min:"0.01" step:"1"`
+	ScrollWheelSpeed float32 `def:"1" min:"0.01" step:"1"`
 
-	// The amount of time to wait before initiating a regular slide event
+	// The amount of time to wait before initiating a slide/drag event
 	// (as opposed to a basic press event)
-	SlideStartTime time.Duration `def:"50" min:"5" max:"1000" step:"5"`
+	DragStartTime time.Duration `def:"50ms" min:"5ms" max:"1s" step:"5ms"`
 
-	// The number of pixels that must be moved before initiating a regular
-	// slide event (as opposed to a basic press event)
-	SlideStartDistance int `def:"4" min:"0" max:"100" step:"1"`
-
-	// TODO(kai): maybe remove this and just use Slide properties for both
-
-	// The amount of time to wait before initiating a drag-n-drop event
-	DragStartTime time.Duration `def:"50" min:"5" max:"1000" step:"5"`
-
-	// The number of pixels that must be moved before initiating a drag-n-drop event
+	// The number of pixels that must be moved before initiating a slide/drag
+	// event (as opposed to a basic press event)
 	DragStartDistance int `def:"4" min:"0" max:"100" step:"1"`
 
 	// The amount of time to wait before initiating a long hover event (e.g., for opening a tooltip)
-	LongHoverTime time.Duration `def:"500" min:"10" max:"10000" step:"10"`
+	LongHoverTime time.Duration `def:"500ms" min:"10ms" max:"10s" step:"10ms"`
 
 	// The maximum number of pixels that mouse can move and still register a long hover event
-	LongHoverStopDistance int `def:"50" min:"0" max:"1000" step:"1"`
+	LongHoverStopDistance int `def:"5" min:"0" max:"1000" step:"1"`
 
 	// The amount of time to wait before initiating a long press event (e.g., for opening a tooltip)
-	LongPressTime time.Duration `def:"500" min:"10" max:"10000" step:"10"`
+	LongPressTime time.Duration `def:"500ms" min:"10ms" max:"10s" step:"10ms"`
 
 	// The maximum number of pixels that mouse/finger can move and still register a long press event
 	LongPressStopDistance int `def:"50" min:"0" max:"1000" step:"1"`
@@ -445,17 +442,6 @@ type DeviceSettingsData struct { //gti:add
 func (ds *DeviceSettingsData) Defaults() {
 	ds.KeyMap = keyfun.DefaultMap
 	ds.KeyMaps.Value = keyfun.AvailMaps
-
-	ds.DoubleClickInterval = 500 * time.Millisecond
-	ds.ScrollWheelSpeed = events.ScrollWheelSpeed
-	ds.SlideStartTime = 50 * time.Millisecond
-	ds.SlideStartDistance = 4
-	ds.DragStartTime = 50 * time.Millisecond
-	ds.DragStartDistance = 4
-	ds.LongHoverTime = 500 * time.Millisecond
-	ds.LongHoverStopDistance = 5
-	ds.LongPressTime = 500 * time.Millisecond
-	ds.LongPressStopDistance = 50
 }
 
 func (ds *DeviceSettingsData) Apply() {

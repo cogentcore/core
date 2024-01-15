@@ -342,7 +342,7 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 				}
 			}
 			if em.SlidePress != nil {
-				if em.DragStartCheck(e, DeviceSettings.SlideStartTime, DeviceSettings.SlideStartDistance) {
+				if em.DragStartCheck(e, DeviceSettings.DragStartTime, DeviceSettings.DragStartDistance) {
 					em.Slide = em.SlidePress
 					em.Slide.Send(events.SlideStart, e)
 				}
