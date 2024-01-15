@@ -464,6 +464,9 @@ func NonDefaultFields(v any) map[string]any {
 // for being used as a value in [SetRobust]. If it returns "", the default value
 // should not be used.
 func FormatDefault(def string) string {
+	if def == "" {
+		return ""
+	}
 	if def[0] == '{' || def[0] == '[' { // complex type
 		return strings.ReplaceAll(def, `'`, `"`) // allow single quote to work as double quote for JSON format
 	}

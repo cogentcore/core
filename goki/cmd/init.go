@@ -10,6 +10,7 @@ import (
 
 	"goki.dev/goki/config"
 	"goki.dev/grows/tomls"
+	"goki.dev/laser"
 )
 
 // Init initializes the ".goki" directory
@@ -22,7 +23,7 @@ func Init(c *config.Config) error { //gti:add
 	if err != nil {
 		return fmt.Errorf("error creating %q directory: %w", ".goki", err)
 	}
-	err = tomls.Save(c, ".goki/config.toml")
+	err = tomls.Save(laser.NonDefaultFields(c), ".goki/config.toml")
 	if err != nil {
 		return fmt.Errorf("error writing to configuration file: %w", err)
 	}
