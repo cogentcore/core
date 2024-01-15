@@ -291,6 +291,11 @@ func (tf *TextField) SetStyles() {
 	})
 }
 
+func (tf *TextField) Destroy() {
+	tf.StopCursor()
+	tf.WidgetBase.Destroy()
+}
+
 // TextFieldTypes is an enum containing the
 // different possible types of text fields
 type TextFieldTypes int32 //enums:enum

@@ -261,6 +261,11 @@ const (
 	EditorTargetSet
 )
 
+func (ed *Editor) Destroy() {
+	ed.StopCursor()
+	ed.Layout.Destroy()
+}
+
 // EditDone completes editing and copies the active edited text to the text --
 // called when the return key is pressed or goes out of focus
 func (ed *Editor) EditDone() {

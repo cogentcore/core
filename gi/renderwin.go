@@ -585,6 +585,7 @@ func (w *RenderWin) EventLoop() {
 		WinWait.Done()
 	}
 	// our last act must be self destruction!
+	w.MainStageMgr.DeleteAll()
 }
 
 // HandleEvent processes given events.Event.
