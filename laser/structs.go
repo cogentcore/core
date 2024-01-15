@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"log/slog"
 	"reflect"
 	"strings"
 )
@@ -407,28 +408,69 @@ func SetFromDefaultTags(obj any) error {
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		fv := val.Field(i)
-		def, ok := f.Tag.Lookup("def")
-		if NonPtrType(f.Type).Kind() == reflect.Struct && (!ok || def == "") {
+		def := f.Tag.Get("def")
+		if NonPtrType(f.Type).Kind() == reflect.Struct && def == "" {
 			SetFromDefaultTags(PtrValue(fv).Interface())
 			continue
 		}
-		if !ok || def == "" {
+		def = FormatDefault(def)
+		if def == "" {
 			continue
 		}
-		if def[0] == '{' || def[0] == '[' { // complex type
-			def = strings.ReplaceAll(def, `'`, `"`) // allow single quote to work as double quote for JSON format
-		} else {
-			def = strings.Split(def, ",")[0]
-			if strings.Contains(def, ":") { // don't do ranges
-				continue
-			}
-		}
 		err := SetRobust(PtrValue(fv).Interface(), def) // overkill but whatever
-		if !ok {
+		if err != nil {
 			return fmt.Errorf("laser.SetFromDefaultTags: error setting field %q in object of type %q from val %q: %w", f.Name, typ.Name(), def, err)
 		}
 	}
 	return nil
+}
+
+// NonDefaultFields returns a map representing all of the fields of the given
+// struct (or pointer to a struct) that have values different than their default
+// values as specified by the `def:` struct tag.
+func NonDefaultFields(v any) map[string]any {
+	res := map[string]any{}
+
+	rv := NonPtrValue(reflect.ValueOf(v))
+	rt := rv.Type()
+	nf := rt.NumField()
+	for i := 0; i < nf; i++ {
+		fv := rv.Field(i)
+		ft := rt.Field(i)
+		def := ft.Tag.Get("def")
+		if NonPtrType(ft.Type).Kind() == reflect.Struct && def == "" {
+			sfm := NonDefaultFields(fv.Interface())
+			res[ft.Name] = sfm
+			continue
+		}
+		def = FormatDefault(def)
+		if def == "" {
+			continue
+		}
+		dv := reflect.New(ft.Type)
+		err := SetRobust(dv.Interface(), def)
+		if err != nil {
+			slog.Error("laser.NonDefaultFields: error getting value from default struct tag", "field", ft.Name, "type", rt, "defaultStructTag", def, "err", err)
+		}
+		if err != nil || !reflect.DeepEqual(fv, dv.Elem()) {
+			res[ft.Name] = fv.Interface()
+		}
+	}
+	return res
+}
+
+// FormatDefault converts the given `def:` struct tag string into a format suitable
+// for being used as a value in [SetRobust]. If it returns "", the default value
+// should not be used.
+func FormatDefault(def string) string {
+	if def[0] == '{' || def[0] == '[' { // complex type
+		return strings.ReplaceAll(def, `'`, `"`) // allow single quote to work as double quote for JSON format
+	}
+	def = strings.Split(def, ",")[0]
+	if strings.Contains(def, ":") { // don't do ranges
+		return ""
+	}
+	return def
 }
 
 // StructTags returns a map[string]string of the tag string from a reflect.StructTag value
