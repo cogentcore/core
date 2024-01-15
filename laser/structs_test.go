@@ -198,3 +198,33 @@ func TestFieldPaths(t *testing.T) {
 	}
 	// fmt.Printf("fi: %v\n", fi)
 }
+
+type person struct {
+	Name                string `def:"Go Gopher"`
+	Age                 int    `def:"35"`
+	ProgrammingLanguage string `def:"Go"`
+	Pet                 pet
+	FavoriteFruit       string `def:"Apple"`
+}
+
+type pet struct {
+	Name string `def:"Go Gopher's Pet"`
+	Type string `def:"Gopher"`
+	Age  int    `def:"7"`
+}
+
+func TestNonDefaultFields(t *testing.T) {
+	p := &person{
+		Name:                "Go Gopher",
+		Age:                 23,
+		ProgrammingLanguage: "Go",
+		FavoriteFruit:       "Peach",
+		Pet: pet{
+			Name: "Go Gopher's Pet",
+			Type: "Dog",
+			Age:  5,
+		},
+	}
+	ndf := NonDefaultFields(p)
+	fmt.Println(ndf)
+}
