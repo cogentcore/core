@@ -17,7 +17,7 @@ import (
 
 // ObjectFits are the different ways in which a replaced element
 // (image, video, etc) can be fit into its containing box.
-type ObjectFits int32 //enums:enum -trim-prefix Fit
+type ObjectFits int32 //enums:enum -trim-prefix Fit -transform kebab
 
 const (
 	// FitFill indicates that the replaced object will fill
@@ -117,7 +117,7 @@ func (st *Style) ResizeImage(img image.Image, size mat32.Vec2) image.Image {
 // }
 
 // BorderStyles determines how to draw the border
-type BorderStyles int32 //enums:enum -trim-prefix Border
+type BorderStyles int32 //enums:enum -trim-prefix Border -transform kebab
 
 const (
 	// BorderSolid indicates to render a solid border.

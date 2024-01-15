@@ -21,8 +21,6 @@ import (
 	"goki.dev/colors"
 	"goki.dev/colors/matcolor"
 	"goki.dev/gi"
-	"goki.dev/icons"
-	"goki.dev/keyfun"
 	"goki.dev/ki"
 	"goki.dev/pi/token"
 	"goki.dev/styles"
@@ -352,58 +350,5 @@ func (hs Style) SaveJSON(filename gi.Filename) error {
 var Props = map[token.Tokens]ki.Props{
 	token.TextSpellErr: {
 		"text-decoration": 1 << uint32(styles.DecoDottedUnderline), // bitflag!
-	},
-}
-
-// StyleProps define the Toolbar and MenuBar for view
-var StyleProps = ki.Props{
-	"MainMenu": ki.PropSlice{
-		{"AppMenu", ki.BlankProp{}},
-		{"File", ki.PropSlice{
-			{"OpenJSON", ki.Props{
-				"label":    "Open from file",
-				"desc":     "You can save and open styles to / from files to share, experiment, transfer, etc",
-				"shortcut": keyfun.Open,
-				"Args": ki.PropSlice{
-					{"File Name", ki.Props{
-						"ext": ".histy",
-					}},
-				},
-			}},
-			{"SaveJSON", ki.Props{
-				"label":    "Save to file",
-				"desc":     "You can save and open styles to / from files to share, experiment, transfer, etc",
-				"shortcut": keyfun.SaveAs,
-				"Args": ki.PropSlice{
-					{"File Name", ki.Props{
-						"ext": ".histy",
-					}},
-				},
-			}},
-		}},
-		{"Edit", "Copy Cut Paste Dupe"},
-		{"RenderWin", "RenderWins"},
-	},
-	"Toolbar": ki.PropSlice{
-		{"OpenJSON", ki.Props{
-			"label": "Open from file",
-			"icon":  icons.Open,
-			"desc":  "You can save and open styles to / from files to share, experiment, transfer, etc -- save from standard ones and load into custom ones for example",
-			"Args": ki.PropSlice{
-				{"File Name", ki.Props{
-					"ext": ".histy",
-				}},
-			},
-		}},
-		{"SaveJSON", ki.Props{
-			"label": "Save to file",
-			"icon":  icons.SaveAs,
-			"desc":  "You can save and open styles to / from files to share, experiment, transfer, etc -- save from standard ones and load into custom ones for example",
-			"Args": ki.PropSlice{
-				{"File Name", ki.Props{
-					"ext": ".histy",
-				}},
-			},
-		}},
 	},
 }

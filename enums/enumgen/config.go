@@ -35,7 +35,7 @@ type Config struct { //gti:add
 	LineComment bool
 
 	// whether to accept lowercase versions of enum names in SetString
-	AcceptLower bool `def:"true"`
+	AcceptLower bool
 
 	// whether to generate text marshaling methods
 	Text bool `def:"true"`

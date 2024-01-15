@@ -100,7 +100,7 @@ func (d Directions) Other() Directions {
 }
 
 // Displays determines how items are displayed
-type Displays int32 //enums:enum -trim-prefix Display
+type Displays int32 //enums:enum -trim-prefix Display -transform kebab
 
 const (
 	// Flex is the default layout model, based on a simplified version of the
@@ -125,7 +125,7 @@ const (
 )
 
 // Aligns has all different types of alignment and justification.
-type Aligns int32 //enums:enum
+type Aligns int32 //enums:enum -transform kebab
 
 const (
 	// Auto means the item uses the container's AlignItems value
@@ -196,7 +196,7 @@ func ItemAlign(parItems, self Aligns) Aligns {
 }
 
 // overflow type -- determines what happens when there is too much stuff in a layout
-type Overflows int32 //enums:enum -trim-prefix Overflow
+type Overflows int32 //enums:enum -trim-prefix Overflow -transform kebab
 
 const (
 	// OverflowVisible makes the overflow visible, meaning that the size

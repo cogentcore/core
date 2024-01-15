@@ -152,7 +152,7 @@ func (ts *Text) AlignFactors() (ax, ay float32) {
 
 // https://godoc.org/golang.org/x/text/unicode/bidi
 // UnicodeBidi determines how
-type UnicodeBidi int32 //enums:enum -trim-prefix Bidi
+type UnicodeBidi int32 //enums:enum -trim-prefix Bidi -transform kebab
 
 const (
 	BidiNormal UnicodeBidi = iota
@@ -161,7 +161,7 @@ const (
 )
 
 // TextDirections are for direction of text writing, used in direction and writing-mode styles
-type TextDirections int32 //enums:enum
+type TextDirections int32 //enums:enum -transform lower
 
 const (
 	LRTB TextDirections = iota
@@ -175,7 +175,7 @@ const (
 )
 
 // TextAnchors are for direction of text writing, used in direction and writing-mode styles
-type TextAnchors int32 //enums:enum -trim-prefix Anchor
+type TextAnchors int32 //enums:enum -trim-prefix Anchor -transform kebab
 
 const (
 	AnchorStart TextAnchors = iota

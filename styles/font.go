@@ -175,7 +175,7 @@ var FontSizePoints = map[string]float32{
 }
 
 // FontStyles styles of font: normal, italic, etc
-type FontStyles int32 //enums:enum -trim-prefix Font
+type FontStyles int32 //enums:enum -trim-prefix Font -transform kebab
 
 const (
 	FontNormal FontStyles = iota
@@ -191,7 +191,7 @@ var FontStyleNames = []string{"Normal", "Italic", "Oblique"}
 // FontWeights are the valid names for different weights of font, with both
 // the numeric and standard names given.  The regularized font names in the
 // font library use the names, as those are typically found in the font files.
-type FontWeights int32 //enums:enum -trim-prefix Weight
+type FontWeights int32 //enums:enum -trim-prefix Weight -transform kebab
 
 const (
 	WeightNormal FontWeights = iota
@@ -279,7 +279,7 @@ var FontStretchNames = []string{"Normal", "UltraCondensed", "ExtraCondensed", "S
 
 // TextDecorations are underline, line-through, etc -- operates as bit flags
 // -- also used for additional layout hints for RuneRender
-type TextDecorations int64 //enums:bitflag -trim-prefix Deco
+type TextDecorations int64 //enums:bitflag -trim-prefix Deco -transform kebab
 
 const (
 	DecoNone TextDecorations = iota
@@ -309,7 +309,7 @@ const (
 )
 
 // BaselineShifts are for super / sub script
-type BaselineShifts int32 //enums:enum -trim-prefix Shift
+type BaselineShifts int32 //enums:enum -trim-prefix Shift -transform kebab
 
 const (
 	ShiftBaseline BaselineShifts = iota
@@ -318,7 +318,7 @@ const (
 )
 
 // FontVariants is just normal vs. small caps. todo: not currently supported
-type FontVariants int32 //enums:enum -trim-prefix FontVar
+type FontVariants int32 //enums:enum -trim-prefix FontVar -transform kebab
 
 const (
 	FontVarNormal FontVariants = iota

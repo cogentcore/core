@@ -135,7 +135,7 @@ func (pc *Paint) ToDots() {
 /////////////////////////////////////////////////////////////////
 //  enums
 
-type FillRules int32 //enums:enum -trim-prefix FillRule
+type FillRules int32 //enums:enum -trim-prefix FillRule -transform kebab
 
 const (
 	FillRuleNonZero FillRules = iota
@@ -143,7 +143,7 @@ const (
 )
 
 // VectorEffects contains special effects for rendering
-type VectorEffects int32 //enums:enum -trim-prefix VecEff
+type VectorEffects int32 //enums:enum -trim-prefix VecEff -transform kebab
 
 const (
 	VecEffNone VectorEffects = iota
@@ -183,7 +183,7 @@ func (fs *Fill) ToDots(uc *units.Context) {
 // Stroke
 
 // end-cap of a line: stroke-linecap property in SVG
-type LineCaps int32 //enums:enum -trim-prefix LineCap
+type LineCaps int32 //enums:enum -trim-prefix LineCap -transform kebab
 
 const (
 	// LineCapButt indicates to draw no line caps; it draws a
@@ -206,7 +206,7 @@ const (
 )
 
 // the way in which lines are joined together: stroke-linejoin property in SVG
-type LineJoins int32 //enums:enum -trim-prefix LineJoin
+type LineJoins int32 //enums:enum -trim-prefix LineJoin -transform kebab
 
 const (
 	LineJoinMiter LineJoins = iota
