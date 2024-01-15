@@ -466,6 +466,9 @@ func TestLayoutScrollLabel(t *testing.T) {
 	sc.Style(func(s *styles.Style) {
 		s.Max.Set(units.Dp(50))
 	})
-	NewLabel(sc).SetText(LongText)
+	fr := NewFrame(sc).Style(func(s *styles.Style) {
+		s.Overflow.Set(styles.OverflowAuto)
+	})
+	NewLabel(fr).SetText(LongText)
 	sc.AssertPixelsOnShow(t, filepath.Join("layout", "scroll", "label"))
 }
