@@ -76,10 +76,10 @@ type SettingsSaver interface {
 type SettingsBase struct {
 
 	// Name is the name of the settings.
-	Name string `view:"-" toml:"-" json:"-"`
+	Name string `view:"-" save:"-"`
 
 	// File is the filename/filepath at which the settings are stored relative to [DataDir].
-	File string `view:"-" toml:"-" json:"-"`
+	File string `view:"-" save:"-"`
 }
 
 // Label returns the label text for the settings.
@@ -239,7 +239,7 @@ type AppearanceSettingsData struct { //gti:add
 	MonoFont FontName `def:"Roboto Mono"`
 
 	// toolbar configuration function -- set in giv -- allows use of FuncButton
-	TBConfig func(tb *Toolbar) `set:"-" view:"-" toml:"-" json:"-" xml:"-"`
+	TBConfig func(tb *Toolbar) `set:"-" view:"-" save:"-"`
 }
 
 // OverrideSettingsColor is whether to override the color specified in [Prefs.Color]
