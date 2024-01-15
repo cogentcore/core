@@ -333,9 +333,3 @@ func (pr *Parser) SaveGrammar(filename string) error {
 	pr.Parser.WriteGrammar(ofl, 0)
 	return ofl.Close()
 }
-
-// VersionInfo returns Pi version information
-func VersionInfo() string {
-	vinfo := Version + " date: " + VersionDate + " UTC; git commit-1: " + GitCommit
-	return vinfo
-}
