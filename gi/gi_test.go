@@ -19,7 +19,7 @@ import (
 func TestBasic(t *testing.T) {
 	sc := NewScene()
 	NewLabel(sc).SetText("Test")
-	sc.AssertPixelsOnShow(t, "basic")
+	sc.AssertRender(t, "basic")
 }
 
 var (

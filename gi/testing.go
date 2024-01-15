@@ -9,7 +9,7 @@ import (
 	"goki.dev/grows/images"
 )
 
-// AssertPixelsOnShow is a helper function that makes a new window from
+// AssertRender is a helper function that makes a new window from
 // the scene, waits until it is shown, calls [Scene.AssertPixels]
 // with the given values, and then closes the window.
 // It does not return until all of those steps are completed.
@@ -17,7 +17,7 @@ import (
 // scene is shown, right before [Scene.AssertPixels] is called. Also,
 // if a function is passed, [Scene.DoNeedsRender] is also called before
 // [Scene.AssertPixels].
-func (sc *Scene) AssertPixelsOnShow(t images.TestingT, filename string, fun ...func()) {
+func (sc *Scene) AssertRender(t images.TestingT, filename string, fun ...func()) {
 	showed := make(chan struct{})
 	sc.OnShow(func(e events.Event) {
 		if len(fun) > 0 {

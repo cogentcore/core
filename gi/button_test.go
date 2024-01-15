@@ -16,7 +16,7 @@ func TestButton(t *testing.T) {
 					sc := NewScene()
 					bt := NewButton(sc).SetType(typ).SetText(str).SetIcon(ic).SetState(true, st...)
 					nm := testName("button", typ, str, ic, bt.Styles.State)
-					sc.AssertPixelsOnShow(t, nm)
+					sc.AssertRender(t, nm)
 				}
 			}
 		}

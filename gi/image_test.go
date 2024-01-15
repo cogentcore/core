@@ -22,7 +22,7 @@ func TestImageBasic(t *testing.T) {
 	fr := NewFrame(sc)
 	img := NewImage(fr)
 	grr.Test(t, img.OpenImage(testImagePath))
-	sc.AssertPixelsOnShow(t, filepath.Join("image", "basic"))
+	sc.AssertRender(t, filepath.Join("image", "basic"))
 }
 
 func TestImageCropped(t *testing.T) {
@@ -35,7 +35,7 @@ func TestImageCropped(t *testing.T) {
 	})
 	img := NewImage(fr)
 	grr.Test(t, img.OpenImage(testImagePath))
-	sc.AssertPixelsOnShow(t, filepath.Join("image", "cropped"))
+	sc.AssertRender(t, filepath.Join("image", "cropped"))
 }
 
 func TestImageScrolled(t *testing.T) {
@@ -49,7 +49,7 @@ func TestImageScrolled(t *testing.T) {
 	img := NewImage(fr)
 	grr.Test(t, img.OpenImage(testImagePath))
 	sc.ScrollToPos(mat32.Y, 75)
-	sc.AssertPixelsOnShow(t, filepath.Join("image", "scrolled"), func() {
+	sc.AssertRender(t, filepath.Join("image", "scrolled"), func() {
 		sc.GoosiEventMgr().Scroll(image.Pt(10, 10), mat32.V2(30, 30))
 	})
 }

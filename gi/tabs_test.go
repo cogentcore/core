@@ -27,6 +27,6 @@ func TestTabs(t *testing.T) {
 		configTab(ts.NewTab("Search", icons.Search))
 		configTab(ts.NewTab("Discover", icons.Explore))
 		configTab(ts.NewTab("History", icons.History))
-		sc.AssertPixelsOnShow(t, testName("tabs", typ))
+		sc.AssertRender(t, testName("tabs", typ))
 	}
 }
