@@ -22,24 +22,19 @@ type Icon struct {
 	WidgetBase
 
 	// icon name that has been set.
-	IconName icons.Icon `set:"-"`
+	Icon icons.Icon `set:"-"`
 
 	// file name for the loaded icon, if loaded
 	Filename string `set:"-"`
 
-	// SVG drawing
+	// SVG drawing of the icon
 	SVG svg.SVG `set:"-"`
-
-	// RendSize is the last rendered size of the Icon SVG.
-	// if the SVG.Name == IconName and this size is the same
-	// then the current SVG image is used.
-	RendSize image.Point `set:"-"`
 }
 
 func (ic *Icon) CopyFieldsFrom(frm any) {
 	fr := frm.(*Icon)
 	ic.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	ic.IconName = fr.IconName
+	ic.Icon = fr.Icon
 	ic.Filename = fr.Filename
 }
 
@@ -84,7 +79,7 @@ func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
 		ic.Config()
 		return false, nil
 	}
-	if ic.SVG.Root.HasChildren() && ic.IconName == icon {
+	if ic.SVG.Root.HasChildren() && ic.Icon == icon {
 		// fmt.Println("icon already set:", icon)
 		return false, nil
 	}
@@ -95,7 +90,7 @@ func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
 		ic.Config()
 		return false, err
 	}
-	ic.IconName = icon
+	ic.Icon = icon
 	// fmt.Println("icon set:", icon)
 	return true, nil
 
@@ -125,18 +120,18 @@ func (ic *Icon) DrawIntoScene() {
 func (ic *Icon) RenderSVG() {
 	rc := ic.Sc.RenderCtx()
 	sv := &ic.SVG
+	sz := ic.Geom.Size.Actual.Content.ToPoint()
 	clr := colors.ApplyOpacity(ic.Styles.Color, ic.Styles.Opacity)
 	if !rc.HasFlag(RenderRebuild) && sv.Pixels != nil { // if rebuilding rebuild..
 		isz := sv.Pixels.Bounds().Size()
 		// if nothing has changed, we don't need to re-render
-		if isz == ic.RendSize && sv.Name == string(ic.IconName) && colors.ToUniform(sv.Color) == clr {
+		if isz == sz && sv.Name == string(ic.Icon) && colors.ToUniform(sv.Color) == clr {
 			return
 		}
 	}
 	// todo: units context from us to SVG??
-	sz := ic.Geom.Size.Actual.Content.ToPoint()
+
 	if sz == (image.Point{}) {
-		ic.RendSize = image.Point{}
 		return
 	}
 	// ensure that we have new pixels to render to in order to prevent
@@ -152,8 +147,7 @@ func (ic *Icon) RenderSVG() {
 
 	sv.Scale = 1
 	sv.Render()
-	ic.RendSize = sz
-	sv.Name = string(ic.IconName)
+	sv.Name = string(ic.Icon)
 	// fmt.Println("re-rendered icon:", sv.Name, "size:", sz)
 }
 
