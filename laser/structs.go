@@ -427,7 +427,8 @@ func SetFromDefaultTags(obj any) error {
 
 // NonDefaultFields returns a map representing all of the fields of the given
 // struct (or pointer to a struct) that have values different than their default
-// values as specified by the `def:` struct tag.
+// values as specified by the `def:` struct tag. The resulting map is then typically
+// saved using something like JSON or TOML.
 func NonDefaultFields(v any) map[string]any {
 	res := map[string]any{}
 

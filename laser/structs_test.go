@@ -225,6 +225,16 @@ func TestNonDefaultFields(t *testing.T) {
 			Age:  7,
 		},
 	}
-	ndf := NonDefaultFields(p)
-	fmt.Println(ndf)
+	want := map[string]any{
+		"Age":           23,
+		"FavoriteFruit": "Peach",
+		"Pet": map[string]any{
+			"Name": "Pet Gopher",
+			"Type": "Dog",
+		},
+	}
+	have := NonDefaultFields(p)
+	if !reflect.DeepEqual(have, want) {
+		t.Errorf("expected\n%v\n\tbut got\n%v", want, have)
+	}
 }
