@@ -24,6 +24,7 @@ import (
 	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/keyfun"
+	"goki.dev/laser"
 	"goki.dev/mat32"
 	"goki.dev/paint"
 )
@@ -118,16 +119,18 @@ func OpenSettings(se Settings) error {
 // SaveSettings saves the given settings to their [Settings.Filename].
 // The settings will be encoded in TOML unless they have a .json file
 // extension. If they satisfy the [SettingsSaver] interface,
-// [SettingsSaver.Save] will be used instead.
+// [SettingsSaver.Save] will be used instead. Any non default
+// fields are not saved, following [laser.NonDefaultFields].
 func SaveSettings(se Settings) error {
 	if ss, ok := se.(SettingsSaver); ok {
 		return ss.Save()
 	}
 	fnm := se.Filename()
+	ndf := laser.NonDefaultFields(se)
 	if filepath.Ext(fnm) == ".json" {
-		return jsons.Save(se, fnm)
+		return jsons.Save(ndf, fnm)
 	}
-	return tomls.Save(se, fnm)
+	return tomls.Save(ndf, fnm)
 }
 
 // ResetSettings resets the given settings to their default values.

@@ -10,6 +10,7 @@ import (
 
 	"goki.dev/glop/dirs"
 	"goki.dev/grows/tomls"
+	"goki.dev/laser"
 )
 
 // TODO: use glop/dirs and grows for these things
@@ -62,6 +63,8 @@ func OpenFS(cfg any, fsys fs.FS, file string) error {
 }
 
 // Save writes the given config object to the given file.
+// It only saves the non-default fields of the given object,
+// as specified by [laser.NonDefaultFields].
 func Save(cfg any, file string) error {
-	return tomls.Save(cfg, file)
+	return tomls.Save(laser.NonDefaultFields(cfg), file)
 }
