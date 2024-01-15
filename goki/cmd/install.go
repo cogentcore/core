@@ -45,8 +45,8 @@ func Install(c *config.Config) error { //gti:add
 			if err != nil {
 				return fmt.Errorf("install: %w", err)
 			}
-		case "js":
-			return fmt.Errorf("can not install on platform js; use build or run instead")
+		case "web":
+			return fmt.Errorf("can not install on platform web; use build or run instead")
 		case "darwin":
 			c.Pack.DMG = false
 			err := Pack(c)

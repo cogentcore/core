@@ -21,7 +21,7 @@ import (
 )
 
 // Pack builds and packages the app for the target platform.
-// For android, ios, and js, it is equivalent to build.
+// For android, ios, and web, it is equivalent to build.
 func Pack(c *config.Config) error { //gti:add
 	err := Build(c)
 	if err != nil {
@@ -29,7 +29,7 @@ func Pack(c *config.Config) error { //gti:add
 	}
 	for _, platform := range c.Build.Target {
 		switch platform.OS {
-		case "android", "ios", "js": // build already packages
+		case "android", "ios", "web": // build already packages
 			continue
 		case "linux":
 			err := PackLinux(c)

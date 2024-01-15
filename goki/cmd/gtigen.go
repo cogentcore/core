@@ -14,7 +14,7 @@ var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/goki/cmd.Install", Doc: "Install i
 
 var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/goki/cmd.Log", Doc: "Log prints the logs from your app running on Android to the terminal.\nAndroid is the only supported platform for log; use the -debug flag on\nrun for other platforms.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/goki/cmd.Pack", Doc: "Pack builds and packages the app for the target platform.\nFor android, ios, and js, it is equivalent to build.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
+var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/goki/cmd.Pack", Doc: "Pack builds and packages the app for the target platform.\nFor android, ios, and web, it is equivalent to build.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
 
 var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/goki/cmd.VersionRelease", Doc: "VersionRelease calls update-version and then release. It is the standard release path.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
 

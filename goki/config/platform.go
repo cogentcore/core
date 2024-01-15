@@ -88,7 +88,7 @@ var SupportedOS = map[string]bool{
 	"hurd":      false,
 	"illumos":   false,
 	"ios":       true,
-	"js":        true,
+	"web":       true,
 	"linux":     true,
 	"nacl":      false,
 	"netbsd":    false,

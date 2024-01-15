@@ -48,10 +48,10 @@ func Build(c *config.Config) error { //gti:add
 			}
 			return mobile.Build(c)
 		}
-		if platform.OS == "js" {
+		if platform.OS == "web" {
 			// need to get real output location so that commands work
 			if c.Build.Output == "" {
-				c.Build.Output = filepath.Join(".goki", "bin", "js", "app.wasm")
+				c.Build.Output = filepath.Join(".goki", "bin", "web", "app.wasm")
 			}
 			// we must end with a wasm file
 			if !strings.Contains(filepath.Base(c.Build.Output), ".wasm") {
