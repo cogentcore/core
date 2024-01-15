@@ -65,12 +65,6 @@ type Node struct {
 // check implementation of [Ki] interface
 var _ = Ki(&Node{})
 
-// EnumTypeFlag is a [Props] property name that
-// indicates what enum type to use as the type for
-// the flags field in GUI views. Its value should be
-// of the type [reflect.Type]
-const EnumTypeFlag string = "EnumType:Flag"
-
 //////////////////////////////////////////////////////////////////////////
 //  fmt.Stringer
 

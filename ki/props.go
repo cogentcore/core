@@ -9,16 +9,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"strings"
 )
 
 // Props is the type used for holding generic properties -- the actual Go type
 // is a mouthful and not very gui-friendly, and we need some special json methods
 type Props map[string]any
-
-var PropsProps = Props{
-	"basic-type": true, // registers props as a basic type avail for type selection in creating property values -- many cases call for nested properties
-}
 
 // Set sets props value -- safely creates map
 func (pr *Props) Set(key string, val any) {
@@ -82,14 +77,6 @@ func SetPropStr(pr Props, key, val string) {
 func SetSubProps(pr Props, key string, sp Props) {
 	pr[key] = sp
 }
-
-// TODO(kai): do we need this?
-
-// special key prefix indicating type info
-var struTypeKey = "__type:"
-
-// BlankProp is an empty property, for when there isn't any need for the value
-type BlankProp struct{}
 
 // PropStruct is a struct of Name and Value, for use in a PropSlice to hold
 // properties that require order information (maps do not retain any order)
@@ -309,9 +296,6 @@ func (p *Props) UnmarshalJSON(b []byte) error {
 
 	// now can re-iterate
 	for key, val := range tmp {
-		if strings.HasPrefix(key, struTypeKey) {
-			continue
-		}
 		if _, ok := (*p)[key]; ok { // already created -- was a struct -- skip
 			continue
 		}
