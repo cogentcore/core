@@ -429,7 +429,8 @@ func SetFromDefaultTags(obj any) error {
 // struct (or pointer to a struct) that have values different than their default
 // values as specified by the `def:` struct tag. The resulting map is then typically
 // saved using something like JSON or TOML. If a value has no default value, it
-// checks whether its value is non-zero.
+// checks whether its value is non-zero. If a field has a `save:"-"` tag, it wil
+// not be included in the resulting map.
 func NonDefaultFields(v any) map[string]any {
 	res := map[string]any{}
 
@@ -442,6 +443,9 @@ func NonDefaultFields(v any) map[string]any {
 	for i := 0; i < nf; i++ {
 		fv := rv.Field(i)
 		ft := rt.Field(i)
+		if ft.Tag.Get("save") == "-" {
+			continue
+		}
 		def := ft.Tag.Get("def")
 		if NonPtrType(ft.Type).Kind() == reflect.Struct && def == "" {
 			sfm := NonDefaultFields(fv.Interface())

@@ -205,6 +205,7 @@ type person struct {
 	ProgrammingLanguage string `def:"Go"`
 	Pet                 pet
 	FavoriteFruit       string `def:"Apple"`
+	Data                string `save:"-"`
 	OtherPet            *pet
 }
 
@@ -222,6 +223,7 @@ func TestNonDefaultFields(t *testing.T) {
 		Age:                 23,
 		ProgrammingLanguage: "Go",
 		FavoriteFruit:       "Peach",
+		Data:                "abcdef",
 		Pet: pet{
 			Name: "Pet Gopher",
 			Type: "Dog",
