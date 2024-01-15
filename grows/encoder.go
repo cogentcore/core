@@ -28,10 +28,10 @@ func NewEncoderFunc[T Encoder](f func(w io.Writer) T) EncoderFunc {
 // Save writes the given object to the given filename using the given [EncoderFunc]
 func Save(v any, filename string, f EncoderFunc) error {
 	fp, err := os.Create(filename)
-	defer fp.Close()
 	if err != nil {
 		return err
 	}
+	defer fp.Close()
 	bw := bufio.NewWriter(fp)
 	err = Write(v, bw, f)
 	if err != nil {
