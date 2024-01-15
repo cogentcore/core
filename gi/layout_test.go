@@ -460,3 +460,12 @@ var (
 		{150, 100},
 	}
 )
+
+func TestLayoutScrollLabel(t *testing.T) {
+	sc := NewScene()
+	sc.Style(func(s *styles.Style) {
+		s.Max.Set(units.Dp(50))
+	})
+	NewLabel(sc).SetText(LongText)
+	sc.AssertPixelsOnShow(t, filepath.Join("layout", "scroll", "label"))
+}
