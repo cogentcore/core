@@ -895,14 +895,16 @@ func (vv *ValueBase) StdConfigWidget(w gi.Widget) {
 // is read only.
 func ConfigDialogWidget(vv Value, w gi.Widget, allowReadOnly bool) {
 	vb := vv.AsValueBase()
-	tip := vv.Doc()
+	doc := vv.Doc()
+	tip := ""
 	// windows are never new on mobile
 	if !gi.Platform().IsMobile() {
-		if tip != "" {
+		tip += "[Shift: new window]"
+		if doc != "" {
 			tip += " "
 		}
-		tip += "(press shift to open in a new window)"
 	}
+	tip += doc
 	w.AsWidget().SetTooltip(tip)
 	w.OnClick(func(e events.Event) {
 		if allowReadOnly || !vv.IsReadOnly() {
