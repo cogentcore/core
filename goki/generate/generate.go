@@ -42,14 +42,10 @@ var KiMethodsTmpl = template.Must(template.New("KiMethods").
 	{{end}}
 
 	// KiType returns the [*gti.Type] of [{{.LocalName}}]
-	func (t *{{.LocalName}}) KiType() *gti.Type {
-		return {{.LocalName}}Type
-	}
+	func (t *{{.LocalName}}) KiType() *gti.Type { return {{.LocalName}}Type }
 
 	// New returns a new [*{{.LocalName}}] value
-	func (t *{{.LocalName}}) New() {{KiPkg .}}Ki {
-		return &{{.LocalName}}{}
-	}
+	func (t *{{.LocalName}}) New() {{KiPkg .}}Ki { return &{{.LocalName}}{} }
 	
 	{{if HasEmbedDirective .}}
 	// {{.LocalName}}Embedder is an interface that all types that embed {{.LocalName}} satisfy
@@ -70,9 +66,7 @@ var KiMethodsTmpl = template.Must(template.New("KiMethods").
 	}
 	
 	// As{{.LocalName}} satisfies the [{{.LocalName}}Embedder] interface
-	func (t *{{.LocalName}}) As{{.LocalName}}() *{{.LocalName}} {
-		return t
-	}
+	func (t *{{.LocalName}}) As{{.LocalName}}() *{{.LocalName}} { return t }
 	{{end}}
 	`,
 ))
