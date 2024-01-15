@@ -13,11 +13,11 @@ package gi
 // using giv Value.
 type FontName string
 
-// FileName is used to specify an filename (including path).
+// Filename is used to specify an filename (including path).
 // Automatically opens the FileView dialog using Value system.
 // Use this for any method args that are filenames to trigger
 // use of FileViewDialog under FuncButton automatic method calling.
-type FileName string
+type Filename string
 
 // HiStyleName is a highlighting style name
 type HiStyleName string

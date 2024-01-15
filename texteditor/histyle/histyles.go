@@ -78,7 +78,7 @@ func MergeAvailStyles() {
 
 // Open hi styles from a JSON-formatted file. You can save and open
 // styles to / from files to share, experiment, transfer, etc.
-func (hs *Styles) OpenJSON(filename gi.FileName) error { //gti:add
+func (hs *Styles) OpenJSON(filename gi.Filename) error { //gti:add
 	b, err := os.ReadFile(string(filename))
 	if err != nil {
 		// PromptDialog(nil, "File Not Found", err.Error(), true, false, nil, nil, nil)
@@ -90,7 +90,7 @@ func (hs *Styles) OpenJSON(filename gi.FileName) error { //gti:add
 
 // Save hi styles to a JSON-formatted file. You can save and open
 // styles to / from files to share, experiment, transfer, etc.
-func (hs *Styles) SaveJSON(filename gi.FileName) error { //gti:add
+func (hs *Styles) SaveJSON(filename gi.Filename) error { //gti:add
 	b, err := json.MarshalIndent(hs, "", "  ")
 	if err != nil {
 		slog.Error(err.Error()) // unlikely
@@ -116,7 +116,7 @@ func (hs *Styles) OpenPrefs() error {
 	pdir := gi.GokiDataDir()
 	pnm := filepath.Join(pdir, PrefsStylesFileName)
 	StylesChanged = false
-	return hs.OpenJSON(gi.FileName(pnm))
+	return hs.OpenJSON(gi.Filename(pnm))
 }
 
 // SavePrefs saves Styles to GoGi standard prefs directory, using PrefsStylesFileName
@@ -125,14 +125,14 @@ func (hs *Styles) SavePrefs() error {
 	pnm := filepath.Join(pdir, PrefsStylesFileName)
 	StylesChanged = false
 	MergeAvailStyles()
-	return hs.SaveJSON(gi.FileName(pnm))
+	return hs.SaveJSON(gi.Filename(pnm))
 }
 
 // SaveAll saves all styles individually to chosen directory
-func (hs *Styles) SaveAll(dir gi.FileName) {
+func (hs *Styles) SaveAll(dir gi.Filename) {
 	for nm, st := range *hs {
 		fnm := filepath.Join(string(dir), nm+".histy")
-		st.SaveJSON(gi.FileName(fnm))
+		st.SaveJSON(gi.Filename(fnm))
 	}
 }
 

@@ -228,7 +228,7 @@ func (dv *DiffView) PrevDiff(ab int) bool {
 
 // SaveAs saves A or B edits into given file.
 // It checks for an existing file, prompts to overwrite or not.
-func (dv *DiffView) SaveAs(ab bool, filename gi.FileName) {
+func (dv *DiffView) SaveAs(ab bool, filename gi.Filename) {
 	if !grr.Log1(dirs.FileExists(string(filename))) {
 		dv.SaveFile(ab, filename)
 	} else {
@@ -245,7 +245,7 @@ func (dv *DiffView) SaveAs(ab bool, filename gi.FileName) {
 }
 
 // SaveFile writes A or B edits to file, with no prompting, etc
-func (dv *DiffView) SaveFile(ab bool, filename gi.FileName) error {
+func (dv *DiffView) SaveFile(ab bool, filename gi.Filename) error {
 	var txt string
 	if ab {
 		txt = strings.Join(dv.Diffs.B.Edit, "\n")
@@ -261,13 +261,13 @@ func (dv *DiffView) SaveFile(ab bool, filename gi.FileName) error {
 }
 
 // SaveFileA saves the current state of file A to given filename
-func (dv *DiffView) SaveFileA(fname gi.FileName) { //gti:add
+func (dv *DiffView) SaveFileA(fname gi.Filename) { //gti:add
 	dv.SaveAs(false, fname)
 	// dv.UpdateToolbar()
 }
 
 // SaveFileB saves the current state of file B to given filename
-func (dv *DiffView) SaveFileB(fname gi.FileName) { //gti:add
+func (dv *DiffView) SaveFileB(fname gi.Filename) { //gti:add
 	dv.SaveAs(true, fname)
 	// dv.UpdateToolbar()
 }

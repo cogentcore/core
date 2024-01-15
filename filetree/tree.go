@@ -108,9 +108,9 @@ func (ft *Tree) OpenPath(path string) {
 		log.Printf("giv.Tree:OpenPath: %s\n", err)
 		abs = effpath
 	}
-	ft.FPath = gi.FileName(abs)
+	ft.FPath = gi.Filename(abs)
 	ft.Open()
-	ft.SetDirOpen(gi.FileName(abs))
+	ft.SetDirOpen(gi.Filename(abs))
 	ft.UpdateAll()
 }
 
@@ -203,7 +203,7 @@ func (ft *Tree) WatchUpdt(path string) {
 	// fmt.Println(path)
 
 	dir, _ := filepath.Split(path)
-	rp := ft.RelPath(gi.FileName(dir))
+	rp := ft.RelPath(gi.Filename(dir))
 	if rp == ft.LastWatchUpdt {
 		now := time.Now()
 		lagMs := int(now.Sub(ft.LastWatchTime) / time.Millisecond)
@@ -228,7 +228,7 @@ func (ft *Tree) WatchUpdt(path string) {
 }
 
 // WatchPath adds given path to those watched
-func (ft *Tree) WatchPath(path gi.FileName) error {
+func (ft *Tree) WatchPath(path gi.Filename) error {
 	return nil // TODO: disable for all platforms for now -- getting some issues
 	if gi.Platform() == goosi.MacOS {
 		return nil // mac is not supported in a high-capacity fashion at this point
@@ -251,7 +251,7 @@ func (ft *Tree) WatchPath(path gi.FileName) error {
 }
 
 // UnWatchPath removes given path from those watched
-func (ft *Tree) UnWatchPath(path gi.FileName) {
+func (ft *Tree) UnWatchPath(path gi.Filename) {
 	rp := ft.RelPath(path)
 	on, has := ft.WatchedPaths[rp]
 	if !on || !has {
@@ -264,7 +264,7 @@ func (ft *Tree) UnWatchPath(path gi.FileName) {
 
 // IsDirOpen returns true if given directory path is open (i.e., has been
 // opened in the view)
-func (ft *Tree) IsDirOpen(fpath gi.FileName) bool {
+func (ft *Tree) IsDirOpen(fpath gi.Filename) bool {
 	if fpath == ft.FPath { // we are always open
 		return true
 	}
@@ -272,7 +272,7 @@ func (ft *Tree) IsDirOpen(fpath gi.FileName) bool {
 }
 
 // SetDirOpen sets the given directory path to be open
-func (ft *Tree) SetDirOpen(fpath gi.FileName) {
+func (ft *Tree) SetDirOpen(fpath gi.Filename) {
 	rp := ft.RelPath(fpath)
 	// fmt.Printf("setdiropen: %s\n", rp)
 	ft.Dirs.SetOpen(rp, true)
@@ -281,7 +281,7 @@ func (ft *Tree) SetDirOpen(fpath gi.FileName) {
 }
 
 // SetDirClosed sets the given directory path to be closed
-func (ft *Tree) SetDirClosed(fpath gi.FileName) {
+func (ft *Tree) SetDirClosed(fpath gi.Filename) {
 	rp := ft.RelPath(fpath)
 	ft.Dirs.SetOpen(rp, false)
 	ft.Dirs.SetMark(rp)
@@ -289,17 +289,17 @@ func (ft *Tree) SetDirClosed(fpath gi.FileName) {
 }
 
 // SetDirSortBy sets the given directory path sort by option
-func (ft *Tree) SetDirSortBy(fpath gi.FileName, modTime bool) {
+func (ft *Tree) SetDirSortBy(fpath gi.Filename, modTime bool) {
 	ft.Dirs.SetSortBy(ft.RelPath(fpath), modTime)
 }
 
 // DirSortByName returns true if dir is sorted by name
-func (ft *Tree) DirSortByName(fpath gi.FileName) bool {
+func (ft *Tree) DirSortByName(fpath gi.Filename) bool {
 	return ft.Dirs.SortByName(ft.RelPath(fpath))
 }
 
 // DirSortByModTime returns true if dir is sorted by mod time
-func (ft *Tree) DirSortByModTime(fpath gi.FileName) bool {
+func (ft *Tree) DirSortByModTime(fpath gi.Filename) bool {
 	return ft.Dirs.SortByModTime(ft.RelPath(fpath))
 }
 

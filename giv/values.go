@@ -43,7 +43,7 @@ func init() {
 	ValueMapAdd(gi.FontName(""), func() Value {
 		return &FontValue{}
 	})
-	ValueMapAdd(gi.FileName(""), func() Value {
+	ValueMapAdd(gi.Filename(""), func() Value {
 		return &FileValue{}
 	})
 	ValueMapAdd(keyfun.MapName(""), func() Value {

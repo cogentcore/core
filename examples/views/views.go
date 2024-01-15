@@ -32,7 +32,7 @@ type TableStruct struct { //gti:add
 	StrField string
 
 	// a file
-	File gi.FileName
+	File gi.Filename
 }
 
 // ILStruct is an inline-viewed struct

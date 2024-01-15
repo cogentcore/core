@@ -179,7 +179,7 @@ type Editor struct { //goki:embedder
 
 	lastRecenter   int         `set:"-"`
 	lastAutoInsert rune        `set:"-"`
-	lastFilename   gi.FileName `set:"-"`
+	lastFilename   gi.Filename `set:"-"`
 }
 
 func (ed *Editor) FlagType() enums.BitFlagSetter {

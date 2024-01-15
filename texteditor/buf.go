@@ -51,7 +51,7 @@ import (
 type Buf struct {
 
 	// filename of file last loaded or saved
-	Filename gi.FileName `json:"-" xml:"-"`
+	Filename gi.Filename `json:"-" xml:"-"`
 
 	// Flags are key state flags
 	Flags BufFlags
@@ -407,7 +407,7 @@ func (tb *Buf) SetReadOnly(readonly bool) *Buf {
 }
 
 func (tb *Buf) SetFilename(fn string) *Buf {
-	tb.Filename = gi.FileName(fn)
+	tb.Filename = gi.Filename(fn)
 	tb.Stat()
 	tb.Hi.Init(&tb.Info, &tb.PiState)
 	return tb
@@ -513,7 +513,7 @@ func (tb *Buf) FileModCheck() bool {
 }
 
 // Open loads text from a file into the buffer
-func (tb *Buf) Open(filename gi.FileName) error {
+func (tb *Buf) Open(filename gi.Filename) error {
 	err := tb.OpenFile(filename)
 	if err != nil {
 		// vp := tb.SceneFromView()
@@ -530,7 +530,7 @@ func (tb *Buf) Open(filename gi.FileName) error {
 
 // OpenFile just loads a file into the buffer -- doesn't do any markup or
 // notification -- for temp bufs
-func (tb *Buf) OpenFile(filename gi.FileName) error {
+func (tb *Buf) OpenFile(filename gi.Filename) error {
 	fp, err := os.Open(string(filename))
 	if err != nil {
 		return err
@@ -587,7 +587,7 @@ func (tb *Buf) Revert() bool {
 // Does an EditDone first to save edits and checks for an existing file.
 // If it does exist then prompts to overwrite or not.
 // If afterFunc is non-nil, then it is called with the status of the user action.
-func (tb *Buf) SaveAsFunc(filename gi.FileName, afterFunc func(canceled bool)) {
+func (tb *Buf) SaveAsFunc(filename gi.Filename, afterFunc func(canceled bool)) {
 	// todo: filemodcheck!
 	tb.EditDone()
 	if !grr.Log1(dirs.FileExists(string(filename))) {
@@ -618,12 +618,12 @@ func (tb *Buf) SaveAsFunc(filename gi.FileName, afterFunc func(canceled bool)) {
 
 // SaveAs saves the current text into given file -- does an EditDone first to save edits
 // and checks for an existing file -- if it does exist then prompts to overwrite or not.
-func (tb *Buf) SaveAs(filename gi.FileName) {
+func (tb *Buf) SaveAs(filename gi.Filename) {
 	tb.SaveAsFunc(filename, nil)
 }
 
 // SaveFile writes current buffer to file, with no prompting, etc
-func (tb *Buf) SaveFile(filename gi.FileName) error {
+func (tb *Buf) SaveFile(filename gi.Filename) error {
 	err := os.WriteFile(string(filename), tb.Txt, 0644)
 	if err != nil {
 		gi.ErrorSnackbar(tb.SceneFromView(), err)

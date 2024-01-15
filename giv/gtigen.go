@@ -243,7 +243,7 @@ func (t *Inspector) SetKiRoot(v ki.Ki) *Inspector { t.KiRoot = v; return t }
 
 // SetFilename sets the [Inspector.Filename]:
 // current filename for saving / loading
-func (t *Inspector) SetFilename(v gi.FileName) *Inspector { t.Filename = v; return t }
+func (t *Inspector) SetFilename(v gi.Filename) *Inspector { t.Filename = v; return t }
 
 // SetTooltip sets the [Inspector.Tooltip]
 func (t *Inspector) SetTooltip(v string) *Inspector { t.Tooltip = v; return t }

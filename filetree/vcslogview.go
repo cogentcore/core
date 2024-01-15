@@ -127,7 +127,7 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 		}
 		d := gi.NewBody().AddTitle("Commit Info: " + cmt.Rev)
 		buf := texteditor.NewBuf()
-		buf.Filename = gi.FileName(lv.File)
+		buf.Filename = gi.Filename(lv.File)
 		buf.Opts.LineNos = true
 		buf.Stat()
 		texteditor.NewEditor(d).SetBuf(buf)

@@ -40,7 +40,7 @@ type Node struct { //goki:embedder
 	giv.TreeView
 
 	// full path to this file
-	FPath gi.FileName `edit:"-" set:"-" json:"-" xml:"-" copy:"-"`
+	FPath gi.Filename `edit:"-" set:"-" json:"-" xml:"-" copy:"-"`
 
 	// full standard file info about this file
 	Info fi.FileInfo `edit:"-" set:"-" json:"-" xml:"-" copy:"-"`
@@ -190,7 +190,7 @@ func (fn *Node) ReadDir(path string) error {
 	if err != nil {
 		return err
 	}
-	fn.FPath = gi.FileName(pth)
+	fn.FPath = gi.Filename(pth)
 	err = fn.Info.InitFile(string(fn.FPath))
 	if err != nil {
 		log.Printf("giv.Tree: could not read directory: %v err: %v\n", fn.FPath, err)
@@ -282,7 +282,7 @@ func (fn *Node) ConfigOfFiles(path string) ki.Config {
 		}
 		return nil
 	})
-	modSort := fn.FRoot.DirSortByModTime(gi.FileName(path))
+	modSort := fn.FRoot.DirSortByModTime(gi.Filename(path))
 	if fn.FRoot.DirsOnTop {
 		if modSort {
 			fn.SortConfigByModTime(config2) // just sort files, not dirs
@@ -327,7 +327,7 @@ func (fn *Node) SetNodePath(path string) error {
 	if err != nil {
 		return err
 	}
-	fn.FPath = gi.FileName(pth)
+	fn.FPath = gi.Filename(pth)
 	err = fn.InitFileInfo()
 	if err != nil {
 		return err
@@ -350,7 +350,7 @@ func (fn *Node) InitFileInfo() error {
 		// log.Printf("filetree.Node Path: %v could not be opened -- error: %v\n", fn.FPath, err)
 		return err
 	}
-	fn.FPath = gi.FileName(effpath)
+	fn.FPath = gi.Filename(effpath)
 	err = fn.Info.InitFile(string(fn.FPath))
 	if err != nil {
 		emsg := fmt.Errorf("filetree.Node InitFileInfo Path %q: Error: %v", fn.FPath, err)
@@ -533,7 +533,7 @@ func (fn *Node) CloseBuf() bool {
 }
 
 // RelPath returns the relative path from node for given full path
-func (fn *Node) RelPath(fpath gi.FileName) string {
+func (fn *Node) RelPath(fpath gi.Filename) string {
 	return dirs.RelFilePath(string(fpath), string(fn.FPath))
 }
 
@@ -545,7 +545,7 @@ func (fn *Node) DirsTo(path string) (*Node, error) {
 		log.Printf("filetree.Node DirsTo path %v could not be turned into an absolute path: %v\n", path, err)
 		return nil, err
 	}
-	rpath := fn.RelPath(gi.FileName(pth))
+	rpath := fn.RelPath(gi.Filename(pth))
 	if rpath == "." {
 		return fn, nil
 	}

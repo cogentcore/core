@@ -30,7 +30,7 @@ type Image struct {
 	WidgetBase
 
 	// file name of image loaded -- set by OpenImage
-	Filename FileName `set:"-"`
+	Filename Filename `set:"-"`
 
 	// the bitmap image
 	Pixels *image.RGBA `copy:"-" view:"-" xml:"-" json:"-" set:"-"`
@@ -67,7 +67,7 @@ func (im *Image) SetStyles() {
 }
 
 // OpenImage sets the image to the image located at the given filename.
-func (im *Image) OpenImage(filename FileName) error {
+func (im *Image) OpenImage(filename Filename) error {
 	img, _, err := images.Open(string(filename))
 	if err != nil {
 		slog.Error("gi.Image.OpenImage: could not open", "file", filename, "err", err)
@@ -79,7 +79,7 @@ func (im *Image) OpenImage(filename FileName) error {
 }
 
 // OpenImageFS sets the image to the image located at the given filename in the given fs.
-func (im *Image) OpenImageFS(fsys fs.FS, filename FileName) error {
+func (im *Image) OpenImageFS(fsys fs.FS, filename Filename) error {
 	img, _, err := images.OpenFS(fsys, string(filename))
 	if err != nil {
 		slog.Error("gi.Image.OpenImage: could not open", "file", filename, "err", err)

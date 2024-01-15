@@ -34,7 +34,7 @@ type Inspector struct {
 	Changed bool `set:"-"`
 
 	// current filename for saving / loading
-	Filename gi.FileName
+	Filename gi.Filename
 }
 
 func (is *Inspector) OnInit() {
@@ -85,7 +85,7 @@ func (is *Inspector) Save() { //gti:add
 }
 
 // SaveAs saves tree to given filename, in a standard JSON-formatted file
-func (is *Inspector) SaveAs(filename gi.FileName) { //gti:add
+func (is *Inspector) SaveAs(filename gi.Filename) { //gti:add
 	if is.KiRoot == nil {
 		return
 	}
@@ -96,7 +96,7 @@ func (is *Inspector) SaveAs(filename gi.FileName) { //gti:add
 }
 
 // Open opens tree from given filename, in a standard JSON-formatted file
-func (is *Inspector) Open(filename gi.FileName) { //gti:add
+func (is *Inspector) Open(filename gi.Filename) { //gti:add
 	if is.KiRoot == nil {
 		return
 	}

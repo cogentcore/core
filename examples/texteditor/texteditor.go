@@ -10,7 +10,7 @@ import (
 	"goki.dev/texteditor"
 )
 
-var samplefile gi.FileName = "texteditor.go"
+var samplefile gi.Filename = "texteditor.go"
 
 // var samplefile gi.FileName = "../../Makefile"
 

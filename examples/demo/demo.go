@@ -312,7 +312,7 @@ func makeValues(ts *gi.Tabs) {
 	giv.NewValue(values, colors.Orange)
 	giv.NewValue(values, time.Now())
 	giv.NewValue(values, 5*time.Minute)
-	giv.NewValue(values, gi.FileName("demo.go"))
+	giv.NewValue(values, gi.Filename("demo.go"))
 	giv.NewValue(values, giv.ColorMapName("ColdHot"))
 	giv.NewFuncButton(values, hello).SetShowReturn(true)
 }

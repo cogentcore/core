@@ -273,7 +273,7 @@ func (fn *Node) RenameFile(newpath string) error { //gti:add
 	}
 	if fn.IsDir() {
 		if fn.FRoot.IsDirOpen(orgpath) {
-			fn.FRoot.SetDirOpen(gi.FileName(newpath))
+			fn.FRoot.SetDirOpen(gi.Filename(newpath))
 		}
 	}
 	repo, _ := fn.Repo()
@@ -290,7 +290,7 @@ func (fn *Node) RenameFile(newpath string) error { //gti:add
 		err = fn.Info.InitFile(newpath)
 	}
 	if err == nil {
-		fn.FPath = gi.FileName(fn.Info.Path)
+		fn.FPath = gi.Filename(fn.Info.Path)
 		fn.SetName(fn.Info.Name)
 		fn.SetText(fn.Info.Name)
 	}

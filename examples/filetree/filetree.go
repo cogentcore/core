@@ -32,10 +32,10 @@ type FileBrowse struct {
 	gi.Frame
 
 	// root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjFilename
-	ProjRoot gi.FileName `desc:"root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjFilename"`
+	ProjRoot gi.Filename `desc:"root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjFilename"`
 
 	// filename of the currently-active texteditor
-	ActiveFilename gi.FileName `desc:"filename of the currently-active texteditor"`
+	ActiveFilename gi.Filename `desc:"filename of the currently-active texteditor"`
 
 	// has the root changed?  we receive update signals from root for changes
 	Changed bool `json:"-" desc:"has the root changed?  we receive update signals from root for changes"`
@@ -107,7 +107,7 @@ func (fb *FileBrowse) IsEmpty() bool {
 // specific file or a directory containing multiple files of interest -- opens
 // in current FileBrowse object if it is empty, or otherwise opens a new
 // window.
-func (fb *FileBrowse) OpenPath(path gi.FileName) { //gti:add
+func (fb *FileBrowse) OpenPath(path gi.Filename) { //gti:add
 	if !fb.IsEmpty() {
 		NewFileBrowser(string(path))
 		return
@@ -117,7 +117,7 @@ func (fb *FileBrowse) OpenPath(path gi.FileName) { //gti:add
 	if !ok {
 		return
 	}
-	fb.ProjRoot = gi.FileName(root)
+	fb.ProjRoot = gi.Filename(root)
 	fb.SetName(pnm)
 	fb.UpdateProj()
 	fb.Files.OpenPath(root)
@@ -218,7 +218,7 @@ func (fb *FileBrowse) SaveActiveView() { //gti:add
 
 // SaveActiveViewAs save with specified filename the contents of the
 // currently-active texteditor
-func (fb *FileBrowse) SaveActiveViewAs(filename gi.FileName) { //gti:add
+func (fb *FileBrowse) SaveActiveViewAs(filename gi.Filename) { //gti:add
 	tv := fb.ActiveTextEditor()
 	if tv.Buf != nil {
 		tv.Buf.SaveAs(filename)
@@ -400,7 +400,7 @@ func NewFileBrowser(path string) (*FileBrowse, *gi.Stage) {
 	b := gi.NewAppBody(nm).SetTitle("Browser: " + projnm)
 	fb := NewFileBrowse(b, "browser")
 	b.AddAppBar(fb.ConfigToolbar)
-	fb.OpenPath(gi.FileName(path))
+	fb.OpenPath(gi.Filename(path))
 	return fb, b.NewWindow().Run()
 }
 

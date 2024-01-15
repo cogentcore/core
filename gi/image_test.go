@@ -15,7 +15,7 @@ import (
 	"goki.dev/units"
 )
 
-var testImagePath = FileName(filepath.Join("..", "logo", "goki_logo.png"))
+var testImagePath = Filename(filepath.Join("..", "logo", "goki_logo.png"))
 
 func TestImageBasic(t *testing.T) {
 	sc := NewScene()

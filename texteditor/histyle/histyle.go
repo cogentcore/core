@@ -322,7 +322,7 @@ func (hs Style) ToProps() ki.Props {
 }
 
 // Open hi style from a JSON-formatted file.
-func (hs Style) OpenJSON(filename gi.FileName) error {
+func (hs Style) OpenJSON(filename gi.Filename) error {
 	b, err := os.ReadFile(string(filename))
 	if err != nil {
 		// PromptDialog(nil, "File Not Found", err.Error(), true, false, nil, nil, nil)
@@ -333,7 +333,7 @@ func (hs Style) OpenJSON(filename gi.FileName) error {
 }
 
 // Save hi style to a JSON-formatted file.
-func (hs Style) SaveJSON(filename gi.FileName) error {
+func (hs Style) SaveJSON(filename gi.Filename) error {
 	b, err := json.MarshalIndent(hs, "", "  ")
 	if err != nil {
 		slog.Error(err.Error()) // unlikely
