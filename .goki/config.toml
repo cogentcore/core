@@ -1,8 +1,7 @@
-Name = "Goki"
-ID = "com.goki.goki"
-Desc = ""
-Version = "v0.0.1"
-Type = "Library"
+Version = 'v0.0.1'
 
 [Release]
-  Package = "goki"
+  Package = 'goki'
+
+[Web]
+  AutoUpdateInterval = 0

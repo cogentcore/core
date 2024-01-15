@@ -433,6 +433,9 @@ func NonDefaultFields(v any) map[string]any {
 	res := map[string]any{}
 
 	rv := NonPtrValue(reflect.ValueOf(v))
+	if !rv.IsValid() {
+		return nil
+	}
 	rt := rv.Type()
 	nf := rt.NumField()
 	for i := 0; i < nf; i++ {
@@ -441,7 +444,9 @@ func NonDefaultFields(v any) map[string]any {
 		def := ft.Tag.Get("def")
 		if NonPtrType(ft.Type).Kind() == reflect.Struct && def == "" {
 			sfm := NonDefaultFields(fv.Interface())
-			res[ft.Name] = sfm
+			if len(sfm) > 0 {
+				res[ft.Name] = sfm
+			}
 			continue
 		}
 		def = FormatDefault(def)

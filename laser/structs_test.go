@@ -205,6 +205,7 @@ type person struct {
 	ProgrammingLanguage string `def:"Go"`
 	Pet                 pet
 	FavoriteFruit       string `def:"Apple"`
+	OtherPet            *pet
 }
 
 type pet struct {
