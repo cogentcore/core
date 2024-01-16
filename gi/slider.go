@@ -391,6 +391,9 @@ func (sr *Slider) SetValueAction(val float32) {
 
 func (sr *Slider) WidgetTooltip() string {
 	res := sr.Tooltip
+	if sr.Type == SliderScrollbar {
+		return res
+	}
 	if res != "" {
 		res += " "
 	}

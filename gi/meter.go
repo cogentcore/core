@@ -42,7 +42,7 @@ func (m *Meter) SetStyles() {
 	m.Max = 1
 	m.Style(func(s *styles.Style) {
 		m.ValueColor = colors.C(colors.Scheme.Primary.Base)
-		s.Background = colors.C(colors.Scheme.Primary.Container)
+		s.Background = colors.C(colors.Scheme.SurfaceVariant)
 		s.Border.Radius = styles.BorderRadiusFull
 	})
 	m.StyleFinal(func(s *styles.Style) {
