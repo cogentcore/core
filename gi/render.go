@@ -670,8 +670,8 @@ func (wb *WidgetBase) RenderStdBox(st *styles.Style) {
 
 	pc := &wb.Sc.PaintContext
 
-	pos := mat32.V2FromPoint(wb.Geom.TotalBBox.Min)
-	sz := mat32.V2FromPoint(wb.Geom.TotalBBox.Size())
+	pos := wb.Geom.Pos.Total
+	sz := wb.Geom.Size.Actual.Total
 	pc.DrawStdBox(st, pos, sz, wb.ParentActualBackground())
 }
 
