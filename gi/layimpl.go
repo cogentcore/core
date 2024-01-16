@@ -312,6 +312,13 @@ func (ls *GeomState) ContentRect() image.Rectangle {
 	return mat32.RectFromPosSizeMax(ls.Pos.Content, ls.Size.Actual.Content)
 }
 
+// ScrollOffset computes the net scrolling offset as a function of
+// the difference between the allocated position and the actual
+// content position according to the clipped bounding box.
+func (ls *GeomState) ScrollOffset() image.Point {
+	return ls.ContentBBox.Min.Sub(ls.Pos.Content.ToPoint())
+}
+
 //////////////////////////////////////////////////////////////
 //  LayImplState -- for Layout only
 

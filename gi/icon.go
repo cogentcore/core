@@ -101,18 +101,7 @@ func (ic *Icon) DrawIntoScene() {
 		return
 	}
 	r := ic.Geom.ContentBBox
-	sp := image.Point{}
-	if ic.Par != nil { // use parents children bbox to determine where we can draw
-		_, pwb := AsWidget(ic.Par)
-		pbb := pwb.Geom.ContentBBox
-		nr := r.Intersect(pbb)
-		sp = nr.Min.Sub(r.Min)
-		if sp.X < 0 || sp.Y < 0 || sp.X > 10000 || sp.Y > 10000 {
-			slog.Error("gi.Icon bad bounding box", "path", ic, "startPos", sp, "bbox", r, "parBBox", pbb)
-			return
-		}
-		r = nr
-	}
+	sp := ic.Geom.ScrollOffset()
 	draw.Draw(ic.Sc.Pixels, r, ic.SVG.Pixels, sp, draw.Over)
 }
 

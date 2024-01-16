@@ -129,19 +129,9 @@ func (im *Image) DrawIntoScene() {
 	if im.Pixels == nil {
 		return
 	}
-	r := im.Geom.TotalBBox
-	sp := image.Point{}
-	if im.Par != nil { // use parents children bbox to determine where we can draw
-		_, pwb := AsWidget(im.Par)
-		pbb := pwb.Geom.ContentBBox
-		nr := r.Intersect(pbb)
-		sp = nr.Min.Sub(r.Min)
-		if sp.X < 0 || sp.Y < 0 || sp.X > 10000 || sp.Y > 10000 {
-			slog.Error("gi.Image bad bounding box", "path", im, "startPos", sp, "bbox", r, "parBBox", pbb)
-			return
-		}
-		r = nr
-	}
+	r := im.Geom.ContentBBox
+	sp := im.Geom.ScrollOffset()
+
 	var rimg image.Image
 	if im.PrevPixels != nil && im.Styles.ObjectFit == im.PrevObjectFit && im.Geom.Size.Actual.Content == im.PrevSize {
 		rimg = im.PrevPixels

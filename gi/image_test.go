@@ -48,8 +48,7 @@ func TestImageScrolled(t *testing.T) {
 	})
 	img := NewImage(fr)
 	grr.Test(t, img.OpenImage(testImagePath))
-	sc.ScrollToPos(mat32.Y, 75)
 	sc.AssertRender(t, filepath.Join("image", "scrolled"), func() {
-		sc.GoosiEventMgr().Scroll(image.Pt(10, 10), mat32.V2(30, 30))
+		sc.GoosiEventMgr().Scroll(image.Pt(10, 10), mat32.V2(2, 3))
 	})
 }

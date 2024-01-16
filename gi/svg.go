@@ -7,7 +7,6 @@ package gi
 import (
 	"bytes"
 	"fmt"
-	"image"
 	"io"
 	"io/fs"
 
@@ -157,7 +156,7 @@ func (sv *SVG) DrawIntoScene() {
 	}
 	sv.SVG.Render()
 	r := sv.Geom.ContentBBox
-	sp := image.Point{}
+	sp := sv.Geom.ScrollOffset()
 	draw.Draw(sv.Sc.Pixels, r, sv.SVG.Pixels, sp, draw.Over)
 }
 
