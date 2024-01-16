@@ -41,16 +41,16 @@ func (m *Meter) SetStyles() {
 	m.Max = 1
 	m.Style(func(s *styles.Style) {
 		m.ValueColor = colors.C(colors.Scheme.Primary.Base)
-		s.Background = colors.C(colors.Scheme.SurfaceVariant)
+		s.Background = colors.C(colors.Scheme.Primary.Container)
 		s.Border.Radius = styles.BorderRadiusFull
 	})
 	m.StyleFinal(func(s *styles.Style) {
 		if s.Direction == styles.Row {
 			s.Min.X.Em(20)
-			s.Min.Y.Em(1)
+			s.Min.Y.Em(0.5)
 		} else {
 			s.Min.Y.Em(20)
-			s.Min.X.Em(1)
+			s.Min.X.Em(0.5)
 		}
 	})
 }
