@@ -5,6 +5,8 @@
 package gi
 
 import (
+	"time"
+
 	"goki.dev/events"
 	"goki.dev/grows/images"
 )
@@ -24,11 +26,12 @@ func (sc *Scene) AssertRender(t images.TestingT, filename string, fun ...func())
 			fun[0]()
 			sc.DoNeedsRender()
 		}
-		sc.AssertPixels(t, filename)
 		showed <- struct{}{}
 	})
 	sc.NewWindow().Run()
 	<-showed
+	time.Sleep(50 * time.Millisecond)
+	sc.AssertPixels(t, filename)
 	sc.Close()
 }
 
