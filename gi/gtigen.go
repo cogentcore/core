@@ -409,7 +409,7 @@ func (t *Handle) SetPos(v float32) *Handle { t.Pos = v; return t }
 func (t *Handle) SetTooltip(v string) *Handle { t.Tooltip = v; return t }
 
 // IconType is the [gti.Type] for [Icon]
-var IconType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Icon", IDName: "icon", Doc: "Icon contains a svg.SVG element.\nThe rendered version is cached for a given size.\nIcons do not render a background or border independent of their SVG object.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "IconName", Doc: "icon name that has been set."}, {Name: "Filename", Doc: "file name for the loaded icon, if loaded"}, {Name: "SVG", Doc: "SVG drawing"}, {Name: "RendSize", Doc: "RendSize is the last rendered size of the Icon SVG.\nif the SVG.Name == IconName and this size is the same\nthen the current SVG image is used."}}, Instance: &Icon{}})
+var IconType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Icon", IDName: "icon", Doc: "Icon contains a svg.SVG element.\nThe rendered version is cached for a given size.\nIcons do not render a background or border independent of their SVG object.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Icon", Doc: "icon name that has been set."}, {Name: "Filename", Doc: "file name for the loaded icon, if loaded"}, {Name: "SVG", Doc: "SVG drawing of the icon"}}, Instance: &Icon{}})
 
 // NewIcon adds a new [Icon] with the given name to the given parent:
 // Icon contains a svg.SVG element.
@@ -659,80 +659,41 @@ func (t *Space) New() ki.Ki { return &Space{} }
 // SetTooltip sets the [Space.Tooltip]
 func (t *Space) SetTooltip(v string) *Space { t.Tooltip = v; return t }
 
-// ProgressBarType is the [gti.Type] for [ProgressBar]
-var ProgressBarType = gti.AddType(&gti.Type{Name: "goki.dev/gi.ProgressBar", IDName: "progress-bar", Doc: "ProgressBar is a progress bar that fills up bar as progress continues.\nCall Start with a maximum value to work toward, and ProgStep each time\na progress step has been accomplished -- increments the ProgCur by one\nand display is updated every ProgInc such steps.", Embeds: []gti.Field{{Name: "Slider"}}, Fields: []gti.Field{{Name: "ProgMax", Doc: "maximum amount of progress to be achieved"}, {Name: "ProgInc", Doc: "progress increment when display is updated -- automatically computed from ProgMax at Start but can be overwritten"}, {Name: "ProgCur", Doc: "current progress level"}, {Name: "ProgMu", Doc: "mutex for updating progress"}}, Instance: &ProgressBar{}})
+// MeterType is the [gti.Type] for [Meter]
+var MeterType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Meter", IDName: "meter", Doc: "Meter is a widget that renders a current value on as a filled bar\nrelative to a minimum and maximum potential value.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Value", Doc: "Value is the current value of the meter"}, {Name: "Min", Doc: "Min is the minimum possible value of the meter"}, {Name: "Max", Doc: "Max is the maximum possible value of the meter"}, {Name: "ValueColor", Doc: "ValueColor is the image color that will be used to\nrender the filled value bar. It should be set in Style."}}, Instance: &Meter{}})
 
-// NewProgressBar adds a new [ProgressBar] with the given name to the given parent:
-// ProgressBar is a progress bar that fills up bar as progress continues.
-// Call Start with a maximum value to work toward, and ProgStep each time
-// a progress step has been accomplished -- increments the ProgCur by one
-// and display is updated every ProgInc such steps.
-func NewProgressBar(par ki.Ki, name ...string) *ProgressBar {
-	return par.NewChild(ProgressBarType, name...).(*ProgressBar)
+// NewMeter adds a new [Meter] with the given name to the given parent:
+// Meter is a widget that renders a current value on as a filled bar
+// relative to a minimum and maximum potential value.
+func NewMeter(par ki.Ki, name ...string) *Meter {
+	return par.NewChild(MeterType, name...).(*Meter)
 }
 
-// KiType returns the [*gti.Type] of [ProgressBar]
-func (t *ProgressBar) KiType() *gti.Type { return ProgressBarType }
+// KiType returns the [*gti.Type] of [Meter]
+func (t *Meter) KiType() *gti.Type { return MeterType }
 
-// New returns a new [*ProgressBar] value
-func (t *ProgressBar) New() ki.Ki { return &ProgressBar{} }
+// New returns a new [*Meter] value
+func (t *Meter) New() ki.Ki { return &Meter{} }
 
-// SetProgMax sets the [ProgressBar.ProgMax]:
-// maximum amount of progress to be achieved
-func (t *ProgressBar) SetProgMax(v int) *ProgressBar { t.ProgMax = v; return t }
+// SetValue sets the [Meter.Value]:
+// Value is the current value of the meter
+func (t *Meter) SetValue(v float32) *Meter { t.Value = v; return t }
 
-// SetProgInc sets the [ProgressBar.ProgInc]:
-// progress increment when display is updated -- automatically computed from ProgMax at Start but can be overwritten
-func (t *ProgressBar) SetProgInc(v int) *ProgressBar { t.ProgInc = v; return t }
+// SetMin sets the [Meter.Min]:
+// Min is the minimum possible value of the meter
+func (t *Meter) SetMin(v float32) *Meter { t.Min = v; return t }
 
-// SetProgCur sets the [ProgressBar.ProgCur]:
-// current progress level
-func (t *ProgressBar) SetProgCur(v int) *ProgressBar { t.ProgCur = v; return t }
+// SetMax sets the [Meter.Max]:
+// Max is the maximum possible value of the meter
+func (t *Meter) SetMax(v float32) *Meter { t.Max = v; return t }
 
-// SetTooltip sets the [ProgressBar.Tooltip]
-func (t *ProgressBar) SetTooltip(v string) *ProgressBar { t.Tooltip = v; return t }
+// SetValueColor sets the [Meter.ValueColor]:
+// ValueColor is the image color that will be used to
+// render the filled value bar. It should be set in Style.
+func (t *Meter) SetValueColor(v image.Image) *Meter { t.ValueColor = v; return t }
 
-// SetDim sets the [ProgressBar.Dim]
-func (t *ProgressBar) SetDim(v mat32.Dims) *ProgressBar { t.Dim = v; return t }
-
-// SetMin sets the [ProgressBar.Min]
-func (t *ProgressBar) SetMin(v float32) *ProgressBar { t.Min = v; return t }
-
-// SetMax sets the [ProgressBar.Max]
-func (t *ProgressBar) SetMax(v float32) *ProgressBar { t.Max = v; return t }
-
-// SetStep sets the [ProgressBar.Step]
-func (t *ProgressBar) SetStep(v float32) *ProgressBar { t.Step = v; return t }
-
-// SetPageStep sets the [ProgressBar.PageStep]
-func (t *ProgressBar) SetPageStep(v float32) *ProgressBar { t.PageStep = v; return t }
-
-// SetThumbSize sets the [ProgressBar.ThumbSize]
-func (t *ProgressBar) SetThumbSize(v mat32.Vec2) *ProgressBar { t.ThumbSize = v; return t }
-
-// SetTrackSize sets the [ProgressBar.TrackSize]
-func (t *ProgressBar) SetTrackSize(v float32) *ProgressBar { t.TrackSize = v; return t }
-
-// SetIcon sets the [ProgressBar.Icon]
-func (t *ProgressBar) SetIcon(v icons.Icon) *ProgressBar { t.Icon = v; return t }
-
-// SetInputThreshold sets the [ProgressBar.InputThreshold]
-func (t *ProgressBar) SetInputThreshold(v float32) *ProgressBar { t.InputThreshold = v; return t }
-
-// SetSnap sets the [ProgressBar.Snap]
-func (t *ProgressBar) SetSnap(v bool) *ProgressBar { t.Snap = v; return t }
-
-// SetPrec sets the [ProgressBar.Prec]
-func (t *ProgressBar) SetPrec(v int) *ProgressBar { t.Prec = v; return t }
-
-// SetValueColor sets the [ProgressBar.ValueColor]
-func (t *ProgressBar) SetValueColor(v image.Image) *ProgressBar { t.ValueColor = v; return t }
-
-// SetThumbColor sets the [ProgressBar.ThumbColor]
-func (t *ProgressBar) SetThumbColor(v image.Image) *ProgressBar { t.ThumbColor = v; return t }
-
-// SetStayInView sets the [ProgressBar.StayInView]
-func (t *ProgressBar) SetStayInView(v bool) *ProgressBar { t.StayInView = v; return t }
+// SetTooltip sets the [Meter.Tooltip]
+func (t *Meter) SetTooltip(v string) *Meter { t.Tooltip = v; return t }
 
 // SceneType is the [gti.Type] for [Scene]
 var SceneType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Scene", IDName: "scene", Doc: "Scene contains a Widget tree, rooted in an embedded Frame layout,\nwhich renders into its Pixels image.\nThe Scene is set in a Stage (pointer retained in Scene).\nStage has a StageMgr manager for controlling things like Popups\n(Menus and Dialogs, etc).\n\nEach Scene and Widget tree contains state specific to its particular usage\nwithin a given Stage and overall rendering context, representing the unit\nof rendering in the GoGi framework.", Directives: []gti.Directive{{Tool: "goki", Directive: "no-new"}, {Tool: "goki", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "App", Doc: "App is the pointer to the application to which this scene belongs.\nThe first Main Window Scene must set this, and others will automatically\ngrab from there."}, {Name: "Bars", Doc: "Bars contains functions for constructing the control bars for this Scene,\nattached to different sides of a Scene (e.g., TopAppBar at Top,\nNavBar at Bottom, etc).  Functions are called in forward order\nso first added are called first."}, {Name: "BarsInherit", Doc: "BarsInherit determines which of the Bars side functions are inherited\nfrom the context widget, for FullWindow Dialogs"}, {Name: "AppBars", Doc: "AppBars contains functions for configuring a top-level App toolbar,\n(e.g., TopAppBar) for elements contained within this Scene,\nthat should be represented in any app-level toolbar constructed\nfor this Scene."}, {Name: "Body", Doc: "Body provides the main contents of scenes that use control Bars\nto allow the main window contents to be specified separately\nfrom that dynamic control content.  When constructing scenes using\na Body, you can operate directly on the [Body], which has wrappers\nfor most major Scene functions."}, {Name: "Data", Doc: "Data is the optional data value being represented by this scene.\nUsed e.g., for recycling views of a given item instead of creating new one."}, {Name: "SceneGeom", Doc: "Size and position relative to overall rendering context."}, {Name: "PaintContext", Doc: "paint context for rendering"}, {Name: "Pixels", Doc: "live pixels that we render into"}, {Name: "EventMgr", Doc: "event manager for this scene"}, {Name: "Stage", Doc: "current stage in which this Scene is set"}, {Name: "RenderBBoxHue", Doc: "RenderBBoxHue is current hue for rendering bounding box in ScRenderBBoxes mode"}, {Name: "SelectedWidget", Doc: "the currently selected widget through the inspect editor selection mode"}, {Name: "SelectedWidgetChan", Doc: "the channel on which the selected widget through the inspect editor\nselection mode is transmitted to the inspect editor after the user is done selecting"}, {Name: "LastRender", Doc: "LastRender captures key params from last render.\nIf different then a new ApplyStyleScene is needed."}, {Name: "StyleMu", Doc: "StyleMu is RW mutex protecting access to Style-related global vars"}, {Name: "ShowIter", Doc: "ShowIter counts up at start of showing a Scene\nto trigger Show event and other steps at start of first show"}, {Name: "ReRender", Doc: "ReRender items are re-rendered after the current pass"}}, Instance: &Scene{}})
@@ -847,7 +808,7 @@ func (t *Separator) SetTooltip(v string) *Separator { t.Tooltip = v; return t }
 
 var _ = gti.AddType(&gti.Type{Name: "goki.dev/gi.AppearanceSettingsData", IDName: "appearance-settings-data", Doc: "AppearanceSettingsData is the data type for the global Goki appearance settings.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Methods: []gti.Method{{Name: "Apply", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "SaveZoom", Doc: "SaveZoom saves the current LogicalDPI scaling, either as the overall\ndefault or specific to the current screen. If for current screen is true,\nit saves only for the current screen.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"forCurrentScreen"}}, {Name: "DeleteSavedWindowGeoms", Doc: "DeleteSavedWindowGeoms deletes the file that saves the position and size of\neach window, by screen, and clear current in-memory cache. You shouldn't generally\nneed to do this, but sometimes it is useful for testing or windows that are\nshowing up in bad places that you can't recover from.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}}, Embeds: []gti.Field{{Name: "SettingsBase"}}, Fields: []gti.Field{{Name: "Theme", Doc: "the color theme"}, {Name: "Color", Doc: "the primary color used to generate the color scheme"}, {Name: "Zoom", Doc: "overall zoom factor as a percentage of the default zoom"}, {Name: "Spacing", Doc: "the overall spacing factor as a percentage of the default amount of spacing\n(higher numbers lead to more space and lower numbers lead to higher density)"}, {Name: "FontSize", Doc: "the overall font size factor applied to all text as a percentage\nof the default font size (higher numbers lead to larger text)"}, {Name: "Screens", Doc: "screen-specific preferences, which will override overall defaults if set"}, {Name: "HiStyle", Doc: "text highlighting style / theme"}, {Name: "FontFamily", Doc: "default font family when otherwise not specified"}, {Name: "MonoFont", Doc: "default mono-spaced font family"}, {Name: "TBConfig", Doc: "toolbar configuration function -- set in giv -- allows use of FuncButton"}}})
 
-var _ = gti.AddType(&gti.Type{Name: "goki.dev/gi.DeviceSettingsData", IDName: "device-settings-data", Doc: "DeviceSettingsData is the data type for the device settings.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Embeds: []gti.Field{{Name: "SettingsBase"}}, Fields: []gti.Field{{Name: "KeyMap", Doc: "The keyboard shortcut map to use"}, {Name: "KeyMaps", Doc: "The keyboard shortcut maps available as options for Key map.\nIf you do not want to have custom key maps, you should leave\nthis unset so that you always have the latest standard key maps."}, {Name: "DoubleClickInterval", Doc: "The maximum time interval between button press events to count as a double-click"}, {Name: "ScrollWheelSpeed", Doc: "How fast the scroll wheel moves, which is typically pixels per wheel step\nbut units can be arbitrary. It is generally impossible to standardize speed\nand variable across devices, and we don't have access to the system settings,\nso unfortunately you have to set it here."}, {Name: "SlideStartTime", Doc: "The amount of time to wait before initiating a regular slide event\n(as opposed to a basic press event)"}, {Name: "SlideStartDistance", Doc: "The number of pixels that must be moved before initiating a regular\nslide event (as opposed to a basic press event)"}, {Name: "DragStartTime", Doc: "The amount of time to wait before initiating a drag-n-drop event"}, {Name: "DragStartDistance", Doc: "The number of pixels that must be moved before initiating a drag-n-drop event"}, {Name: "LongHoverTime", Doc: "The amount of time to wait before initiating a long hover event (e.g., for opening a tooltip)"}, {Name: "LongHoverStopDistance", Doc: "The maximum number of pixels that mouse can move and still register a long hover event"}, {Name: "LongPressTime", Doc: "The amount of time to wait before initiating a long press event (e.g., for opening a tooltip)"}, {Name: "LongPressStopDistance", Doc: "The maximum number of pixels that mouse/finger can move and still register a long press event"}}})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/gi.DeviceSettingsData", IDName: "device-settings-data", Doc: "DeviceSettingsData is the data type for the device settings.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Embeds: []gti.Field{{Name: "SettingsBase"}}, Fields: []gti.Field{{Name: "KeyMap", Doc: "The keyboard shortcut map to use"}, {Name: "KeyMaps", Doc: "The keyboard shortcut maps available as options for Key map.\nIf you do not want to have custom key maps, you should leave\nthis unset so that you always have the latest standard key maps."}, {Name: "DoubleClickInterval", Doc: "The maximum time interval between button press events to count as a double-click"}, {Name: "ScrollWheelSpeed", Doc: "How fast the scroll wheel moves, which is typically pixels per wheel step\nbut units can be arbitrary. It is generally impossible to standardize speed\nand variable across devices, and we don't have access to the system settings,\nso unfortunately you have to set it here."}, {Name: "DragStartTime", Doc: "The amount of time to wait before initiating a slide/drag event\n(as opposed to a basic press event)"}, {Name: "DragStartDistance", Doc: "The number of pixels that must be moved before initiating a slide/drag\nevent (as opposed to a basic press event)"}, {Name: "LongHoverTime", Doc: "The amount of time to wait before initiating a long hover event (e.g., for opening a tooltip)"}, {Name: "LongHoverStopDistance", Doc: "The maximum number of pixels that mouse can move and still register a long hover event"}, {Name: "LongPressTime", Doc: "The amount of time to wait before initiating a long press event (e.g., for opening a tooltip)"}, {Name: "LongPressStopDistance", Doc: "The maximum number of pixels that mouse/finger can move and still register a long press event"}}})
 
 var _ = gti.AddType(&gti.Type{Name: "goki.dev/gi.ScreenSettings", IDName: "screen-settings", Doc: "ScreenSettings are the per-screen preferences -- see [goosi.App.Screen] for\ninfo on the different screens -- these prefs are indexed by the Screen.Name\n-- settings here override those in the global preferences.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Fields: []gti.Field{{Name: "Zoom", Doc: "overall zoom factor as a percentage of the default zoom"}}})
 
@@ -864,7 +825,7 @@ var _ = gti.AddType(&gti.Type{Name: "goki.dev/gi.FavPathItem", IDName: "fav-path
 var _ = gti.AddType(&gti.Type{Name: "goki.dev/gi.DebugSettingsData", IDName: "debug-settings-data", Doc: "DebugSettingsData is the data type for debugging settings.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Embeds: []gti.Field{{Name: "SettingsBase"}}, Fields: []gti.Field{{Name: "UpdateTrace", Doc: "Print a trace of updates that trigger re-rendering"}, {Name: "RenderTrace", Doc: "Print a trace of the nodes rendering"}, {Name: "LayoutTrace", Doc: "Print a trace of all layouts"}, {Name: "LayoutTraceDetail", Doc: "Print more detailed info about the underlying layout computations"}, {Name: "WinEventTrace", Doc: "Print a trace of window events"}, {Name: "WinRenderTrace", Doc: "Print the stack trace leading up to win publish events\nwhich are expensive; wrap multiple updates in\nUpdateStart / End to prevent"}, {Name: "WinGeomTrace", Doc: "Print a trace of window geometry saving / loading functions"}, {Name: "KeyEventTrace", Doc: "Print a trace of keyboard events"}, {Name: "EventTrace", Doc: "Print a trace of event handling"}, {Name: "FocusTrace", Doc: "Print a trace of focus changes"}, {Name: "DNDTrace", Doc: "Print a trace of DND event handling"}, {Name: "GoCompleteTrace", Doc: "Print a trace of Go language completion and lookup process"}, {Name: "GoTypeTrace", Doc: "Print a trace of Go language type parsing and inference process"}}})
 
 // SliderType is the [gti.Type] for [Slider]
-var SliderType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Slider", IDName: "slider", Doc: "Slider is a slideable widget that provides slider functionality for two Types:\nSlider type provides a movable thumb that represents Value as the center of thumb\nPos position, with room reserved at ends for 1/2 of the thumb size.\nScrollbar has a VisiblePct factor that specifies the percent of the content\ncurrently visible, which determines the size of the thumb, and thus the range of motion\nremaining for the thumb Value (VisiblePct = 1 means thumb is full size, and no remaining\nrange of motion).\nThe Content size (inside the margin and padding) determines the outer bounds of\nthe rendered area.", Directives: []gti.Directive{{Tool: "goki", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Type", Doc: "the type of the slider, which determines the visual and functional properties"}, {Name: "Value", Doc: "Current value, represented by the position of the thumb."}, {Name: "Dim", Doc: "dimension along which the slider slides"}, {Name: "Min", Doc: "minimum value in range"}, {Name: "Max", Doc: "maximum value in range"}, {Name: "Step", Doc: "smallest step size to increment"}, {Name: "PageStep", Doc: "larger PageUp / Dn step size"}, {Name: "VisiblePct", Doc: "For Scrollbar type only: proportion (1 max) of the full range of scrolled data\nthat is currently visible.  This determines the thumb size and range of motion:\nif 1, full slider is the thumb and no motion is possible."}, {Name: "ThumbSize", Doc: "Size of the thumb as a proportion of the slider thickness, which is\nContent size (inside the padding).  This is for actual X,Y dimensions,\nso must be sensitive to Dim dimension alignment."}, {Name: "TrackSize", Doc: "TrackSize is the proportion of slider thickness for the visible track\nfor the Slider type.  It is often thinner than the thumb, achieved by\nvalues < 1 (.5 default)"}, {Name: "Icon", Doc: "optional icon for the dragging knob"}, {Name: "InputThreshold", Doc: "threshold for amount of change in scroll value before emitting an input event"}, {Name: "Snap", Doc: "whether to snap the values to Step size increments"}, {Name: "Prec", Doc: "specifies the precision of decimal places (total, not after the decimal point)\nto use in representing the number. This helps to truncate small weird floating\npoint values in the nether regions."}, {Name: "ValueColor", Doc: "The background color that is used for styling the selected value section of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no value is rendered, so the value section of the slider\njust looks like the rest of the slider."}, {Name: "ThumbColor", Doc: "The background color that is used for styling the thumb (handle) of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no thumb is rendered, so the thumb section of the slider\njust looks like the rest of the slider."}, {Name: "StayInView", Doc: "If true, keep the slider (typically a Scrollbar) within the parent Scene\nbounding box, if the parent is in view.  This is the default behavior\nfor Layout scrollbars, and setting this flag replicates that behavior\nin other scrollbars."}, {Name: "Pos", Doc: "logical position of the slider relative to Size"}, {Name: "LastValue", Doc: "previous Change event emitted value - don't re-emit Change if it is the same"}, {Name: "PrevSlide", Doc: "previous sliding value - for computing the Input change"}, {Name: "Size", Doc: "Computed size of the slide box in the relevant dimension\nrange of motion, exclusive of spacing, based on layout allocation."}, {Name: "SlideStartPos", Doc: "underlying drag position of slider -- not subject to snapping"}}, Instance: &Slider{}})
+var SliderType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Slider", IDName: "slider", Doc: "Slider is a slideable widget that provides slider functionality for two Types:\nSlider type provides a movable thumb that represents Value as the center of thumb\nPos position, with room reserved at ends for 1/2 of the thumb size.\nScrollbar has a VisiblePct factor that specifies the percent of the content\ncurrently visible, which determines the size of the thumb, and thus the range of motion\nremaining for the thumb Value (VisiblePct = 1 means thumb is full size, and no remaining\nrange of motion).\nThe Content size (inside the margin and padding) determines the outer bounds of\nthe rendered area.\nThe [styles.Style.Direction] determines the direction in which the slider slides.", Directives: []gti.Directive{{Tool: "goki", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Type", Doc: "the type of the slider, which determines the visual and functional properties"}, {Name: "Value", Doc: "Current value, represented by the position of the thumb."}, {Name: "Min", Doc: "minimum value in range"}, {Name: "Max", Doc: "maximum value in range"}, {Name: "Step", Doc: "smallest step size to increment"}, {Name: "PageStep", Doc: "larger PageUp / Dn step size"}, {Name: "VisiblePct", Doc: "For Scrollbar type only: proportion (1 max) of the full range of scrolled data\nthat is currently visible.  This determines the thumb size and range of motion:\nif 1, full slider is the thumb and no motion is possible."}, {Name: "ThumbSize", Doc: "Size of the thumb as a proportion of the slider thickness, which is\nContent size (inside the padding).  This is for actual X,Y dimensions,\nso must be sensitive to Dim dimension alignment."}, {Name: "TrackSize", Doc: "TrackSize is the proportion of slider thickness for the visible track\nfor the Slider type.  It is often thinner than the thumb, achieved by\nvalues < 1 (.5 default)"}, {Name: "Icon", Doc: "optional icon for the dragging knob"}, {Name: "InputThreshold", Doc: "threshold for amount of change in scroll value before emitting an input event"}, {Name: "Snap", Doc: "whether to snap the values to Step size increments"}, {Name: "Prec", Doc: "specifies the precision of decimal places (total, not after the decimal point)\nto use in representing the number. This helps to truncate small weird floating\npoint values in the nether regions."}, {Name: "ValueColor", Doc: "The background color that is used for styling the selected value section of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no value is rendered, so the value section of the slider\njust looks like the rest of the slider."}, {Name: "ThumbColor", Doc: "The background color that is used for styling the thumb (handle) of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no thumb is rendered, so the thumb section of the slider\njust looks like the rest of the slider."}, {Name: "StayInView", Doc: "If true, keep the slider (typically a Scrollbar) within the parent Scene\nbounding box, if the parent is in view.  This is the default behavior\nfor Layout scrollbars, and setting this flag replicates that behavior\nin other scrollbars."}, {Name: "Pos", Doc: "logical position of the slider relative to Size"}, {Name: "LastValue", Doc: "previous Change event emitted value - don't re-emit Change if it is the same"}, {Name: "PrevSlide", Doc: "previous sliding value - for computing the Input change"}, {Name: "Size", Doc: "Computed size of the slide box in the relevant dimension\nrange of motion, exclusive of spacing, based on layout allocation."}, {Name: "SlideStartPos", Doc: "underlying drag position of slider -- not subject to snapping"}}, Instance: &Slider{}})
 
 // NewSlider adds a new [Slider] with the given name to the given parent:
 // Slider is a slideable widget that provides slider functionality for two Types:
@@ -876,6 +837,7 @@ var SliderType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Slider", IDName: "slid
 // range of motion).
 // The Content size (inside the margin and padding) determines the outer bounds of
 // the rendered area.
+// The [styles.Style.Direction] determines the direction in which the slider slides.
 func NewSlider(par ki.Ki, name ...string) *Slider {
 	return par.NewChild(SliderType, name...).(*Slider)
 }
@@ -905,10 +867,6 @@ func AsSlider(k ki.Ki) *Slider {
 
 // AsSlider satisfies the [SliderEmbedder] interface
 func (t *Slider) AsSlider() *Slider { return t }
-
-// SetDim sets the [Slider.Dim]:
-// dimension along which the slider slides
-func (t *Slider) SetDim(v mat32.Dims) *Slider { t.Dim = v; return t }
 
 // SetMin sets the [Slider.Min]:
 // minimum value in range

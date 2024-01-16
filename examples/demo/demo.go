@@ -19,7 +19,6 @@ import (
 	"goki.dev/glop/sentence"
 	"goki.dev/grr"
 	"goki.dev/icons"
-	"goki.dev/mat32"
 	"goki.dev/states"
 	"goki.dev/styles"
 	"goki.dev/units"
@@ -254,13 +253,17 @@ func makeInputs(ts *gi.Tabs) {
 	gi.NewSwitches(inputs).SetType(gi.SwitchSegmentedButton).SetMutex(true).SetItems("Segmented Button 1", "Segmented Button 2", "Segmented Button 3").
 		SetTooltips("A description for Segmented Button 1", "A description for Segmented Button 2", "A description for Segmented Button 3")
 
-	gi.NewSlider(inputs).SetDim(mat32.X).SetValue(0.5)
-	gi.NewSlider(inputs).SetDim(mat32.X).SetValue(0.7).SetState(true, states.Disabled)
+	gi.NewSlider(inputs).SetValue(0.5)
+	gi.NewSlider(inputs).SetValue(0.7).SetState(true, states.Disabled)
 
-	sliderys := gi.NewLayout(inputs, "sliderys")
+	colsliders := gi.NewLayout(inputs)
 
-	gi.NewSlider(sliderys).SetDim(mat32.Y).SetValue(0.3)
-	gi.NewSlider(sliderys).SetDim(mat32.Y).SetValue(0.2).SetState(true, states.Disabled)
+	gi.NewSlider(colsliders).SetValue(0.3).Style(func(s *styles.Style) {
+		s.Direction = styles.Column
+	})
+	gi.NewSlider(colsliders).SetValue(0.2).SetState(true, states.Disabled).Style(func(s *styles.Style) {
+		s.Direction = styles.Column
+	})
 }
 
 func makeLayouts(ts *gi.Tabs) {

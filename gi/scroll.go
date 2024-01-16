@@ -66,14 +66,16 @@ func (ly *Layout) ConfigScroll(d mat32.Dims) {
 	ki.SetParent(sb, ly.This())
 	// sr.SetFlag(true, ki.Field) // note: do not turn on -- breaks pos
 	sb.SetType(SliderScrollbar)
-	sb.Dim = d
 	sb.InputThreshold = 1
 	sb.Min = 0.0
 	sb.Style(func(s *styles.Style) {
+		s.Direction = styles.Directions(d)
 		s.Padding.Zero()
 		s.Margin.Zero()
 		s.MaxBorder.Width.Zero()
 		s.Border.Width.Zero()
+	})
+	sb.StyleFinal(func(s *styles.Style) {
 		od := d.Other()
 		_, sz := ly.This().(Layouter).ScrollGeom(d)
 		if sz.X > 0 && sz.Y > 0 {

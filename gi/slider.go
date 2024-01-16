@@ -29,6 +29,7 @@ import (
 // range of motion).
 // The Content size (inside the margin and padding) determines the outer bounds of
 // the rendered area.
+// The [styles.Style.Direction] determines the direction in which the slider slides.
 type Slider struct { //goki:embedder
 	WidgetBase
 
@@ -37,9 +38,6 @@ type Slider struct { //goki:embedder
 
 	// Current value, represented by the position of the thumb.
 	Value float32 `set:"-"`
-
-	// dimension along which the slider slides
-	Dim mat32.Dims
 
 	// minimum value in range
 	Min float32
@@ -173,24 +171,12 @@ func (sr *Slider) SetStyles() {
 		// correct state layer
 		s.Color = colors.Scheme.Primary.On
 
-		if sr.Dim == mat32.X {
-			s.Min.X.Em(20)
-			s.Min.Y.Em(1)
-		} else {
-			s.Min.Y.Em(20)
-			s.Min.X.Em(1)
-		}
 		if sr.Type == SliderSlider {
 			sr.ValueColor = colors.C(colors.Scheme.Primary.Base)
 			sr.ThumbColor = colors.C(colors.Scheme.Primary.Base)
 			s.Padding.Set(units.Dp(8))
 			s.Background = colors.C(colors.Scheme.SurfaceVariant)
 		} else {
-			if sr.Dim == mat32.X {
-				s.Min.Y = s.ScrollBarWidth
-			} else {
-				s.Min.X = s.ScrollBarWidth
-			}
 			sr.ValueColor = colors.C(colors.Scheme.OutlineVariant)
 			sr.ThumbColor = colors.C(colors.Scheme.OutlineVariant)
 			s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
@@ -209,6 +195,22 @@ func (sr *Slider) SetStyles() {
 				s.Cursor = cursors.Grabbing
 			case s.Is(states.Active):
 				s.Cursor = cursors.Grabbing
+			}
+		}
+	})
+	sr.StyleFinal(func(s *styles.Style) {
+		if s.Direction == styles.Row {
+			s.Min.X.Em(20)
+			s.Min.Y.Em(1)
+		} else {
+			s.Min.Y.Em(20)
+			s.Min.X.Em(1)
+		}
+		if sr.Type == SliderScrollbar {
+			if s.Direction == styles.Row {
+				s.Min.Y = s.ScrollBarWidth
+			} else {
+				s.Min.X = s.ScrollBarWidth
 			}
 		}
 	})
@@ -255,17 +257,17 @@ func (sr *Slider) SendChanged(e ...events.Event) bool {
 
 // SliderSize returns the size available for sliding, based on allocation
 func (sr *Slider) SliderSize() float32 {
-	sz := sr.Geom.Size.Actual.Content.Dim(sr.Dim)
+	sz := sr.Geom.Size.Actual.Content.Dim(sr.Styles.Direction.Dim())
 	if sr.Type != SliderScrollbar {
 		thsz := sr.ThumbSizeDots()
-		sz -= thsz.Dim(sr.Dim) // half on each size
+		sz -= thsz.Dim(sr.Styles.Direction.Dim()) // half on each size
 	}
 	return sz
 }
 
 // SliderThickness returns the thickness of the slider: Content size in other dim.
 func (sr *Slider) SliderThickness() float32 {
-	return sr.Geom.Size.Actual.Content.Dim(sr.Dim.Other())
+	return sr.Geom.Size.Actual.Content.Dim(sr.Styles.Direction.Dim().Other())
 }
 
 // ThumbSizeDots returns the thumb size in dots, based on ThumbSize
@@ -280,7 +282,7 @@ func (sr *Slider) SlideThumbSize() float32 {
 		minsz := sr.SliderThickness()
 		return max(mat32.Clamp(sr.VisiblePct, 0, 1)*sr.SliderSize(), minsz)
 	}
-	return sr.ThumbSizeDots().Dim(sr.Dim)
+	return sr.ThumbSizeDots().Dim(sr.Styles.Direction.Dim())
 }
 
 // EffectiveMax returns the effective maximum value represented.
@@ -303,7 +305,7 @@ func (sr *Slider) ScrollThumbValue() float32 {
 // relative position within the usable Content sliding range,
 // in pixels, and updates the corresponding Value based on that position.
 func (sr *Slider) SetSliderPos(pos float32) {
-	sz := sr.Geom.Size.Actual.Content.Dim(sr.Dim)
+	sz := sr.Geom.Size.Actual.Content.Dim(sr.Styles.Direction.Dim())
 	if sz <= 0 {
 		return
 	}
@@ -339,7 +341,7 @@ func (sr *Slider) SetSliderPosAction(pos float32) {
 // SetPosFromValue sets the slider position based on the given value
 // (typically rs.Value)
 func (sr *Slider) SetPosFromValue(val float32) {
-	sz := sr.Geom.Size.Actual.Content.Dim(sr.Dim)
+	sz := sr.Geom.Size.Actual.Content.Dim(sr.Styles.Direction.Dim())
 	if sz <= 0 {
 		return
 	}
@@ -411,8 +413,8 @@ func (sr *Slider) HandleEvents() {
 func (sr *Slider) PointToRelPos(pt image.Point) float32 {
 	sr.BBoxMu.RLock()
 	defer sr.BBoxMu.RUnlock()
-	ptf := mat32.V2FromPoint(pt).Dim(sr.Dim)
-	return ptf - sr.Geom.Pos.Content.Dim(sr.Dim)
+	ptf := mat32.V2FromPoint(pt).Dim(sr.Styles.Direction.Dim())
+	return ptf - sr.Geom.Pos.Content.Dim(sr.Styles.Direction.Dim())
 }
 
 // ScrollScale returns scaled value of scroll delta
@@ -430,7 +432,7 @@ func (sr *Slider) HandleMouse() {
 	// note: not doing anything in particular on SlideStart
 	sr.On(events.SlideMove, func(e events.Event) {
 		del := e.StartDelta()
-		if sr.Dim == mat32.X {
+		if sr.Styles.Direction == styles.Row {
 			sr.SetSliderPosAction(sr.SlideStartPos + float32(del.X))
 		} else {
 			sr.SetSliderPosAction(sr.SlideStartPos + float32(del.Y))
@@ -447,7 +449,7 @@ func (sr *Slider) HandleMouse() {
 		var del float32
 		// if we are scrolling in the y direction on an x slider,
 		// we still count it
-		if sr.Dim == mat32.X && se.Delta.X != 0 {
+		if sr.Styles.Direction == styles.Row && se.Delta.X != 0 {
 			del = se.Delta.X
 		} else {
 			del = se.Delta.Y
@@ -541,7 +543,8 @@ func (sr *Slider) RenderSlider() {
 
 	sr.SetPosFromValue(sr.Value)
 
-	od := sr.Dim.Other()
+	dim := sr.Styles.Direction.Dim()
+	od := dim.Other()
 	sz := sr.Geom.Size.Actual.Content
 	pos := sr.Geom.Pos.Content
 
@@ -553,10 +556,10 @@ func (sr *Slider) RenderSlider() {
 			thsz := sr.SlideThumbSize()
 			osz := sr.ThumbSizeDots().Dim(od)
 			tpos := pos
-			tpos.SetAddDim(sr.Dim, sr.Pos)
-			tpos.SetSubDim(sr.Dim, thsz*.5)
+			tpos.SetAddDim(dim, sr.Pos)
+			tpos.SetSubDim(dim, thsz*.5)
 			tsz := sz
-			tsz.SetDim(sr.Dim, thsz)
+			tsz.SetDim(dim, thsz)
 			origsz := sz.Dim(od)
 			tsz.SetDim(od, osz)
 			tpos.SetAddDim(od, 0.5*(osz-origsz))
@@ -579,7 +582,7 @@ func (sr *Slider) RenderSlider() {
 		sr.RenderBoxImpl(bpos, bsz, st.Border) // track
 
 		if sr.ValueColor != nil {
-			bsz.SetDim(sr.Dim, sr.Pos)
+			bsz.SetDim(dim, sr.Pos)
 			vabg := sr.Styles.ComputeActualBackgroundFor(sr.ValueColor, pabg)
 			pc.FillStyle.Color = vabg
 			sr.RenderBoxImpl(bpos, bsz, st.Border)
@@ -587,7 +590,7 @@ func (sr *Slider) RenderSlider() {
 
 		thsz := sr.ThumbSizeDots()
 		tpos := pos
-		tpos.SetDim(sr.Dim, pos.Dim(sr.Dim)+sr.Pos)
+		tpos.SetDim(dim, pos.Dim(dim)+sr.Pos)
 		tpos.SetAddDim(od, 0.5*sz.Dim(od)) // ctr
 
 		// render thumb as icon or box
