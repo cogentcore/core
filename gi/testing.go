@@ -10,18 +10,17 @@ import (
 )
 
 // AssertRender makes a new window from the scene, waits until it is shown
-// and all events have been handled, asserts that its rendered image is the
-// same as that stored at the given filename, saving the image to that filename
-// if it does not already exist, and then closes the window.
-// It does not return until all of those steps are completed.
-// If a function is passed for the final argument, it is called after the
-// scene is shown, and [Scene.DoNeedsRender] is also called after it.
+// and all events have been handled, does any necessary re-rendering,
+// asserts that its rendered image is the same as that stored at the given
+// filename, saving the image to that filename if it does not already exist,
+// and then closes the window. It does not return until all of those steps\
+// are completed. If a function is passed for the final argument, it is called
+// after the scene is shown.
 func (sc *Scene) AssertRender(t images.TestingT, filename string, fun ...func()) {
 	showed := make(chan struct{})
 	sc.OnShow(func(e events.Event) {
 		if len(fun) > 0 {
 			fun[0]()
-			sc.DoNeedsRender()
 		}
 		showed <- struct{}{}
 	})
@@ -32,6 +31,8 @@ func (sc *Scene) AssertRender(t images.TestingT, filename string, fun ...func())
 	rw.NoEventsChan = make(chan struct{})
 	<-rw.NoEventsChan
 	rw.NoEventsChan = nil
+
+	sc.DoNeedsRender()
 
 	sc.AssertPixels(t, filename)
 	sc.Close()
