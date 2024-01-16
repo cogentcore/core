@@ -1098,8 +1098,8 @@ func _DirectionsNoOp() {
 }
 
 var _DirectionsNameToValueMap = map[string]Directions{
-	`Row`:    0,
-	`Column`: 1,
+	`row`:    0,
+	`column`: 1,
 }
 
 var _DirectionsDescMap = map[Directions]string{
@@ -1108,8 +1108,8 @@ var _DirectionsDescMap = map[Directions]string{
 }
 
 var _DirectionsMap = map[Directions]string{
-	0: `Row`,
-	1: `Column`,
+	0: `row`,
+	1: `column`,
 }
 
 // String returns the string representation

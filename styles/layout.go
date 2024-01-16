@@ -79,7 +79,7 @@ func AlignPos(align Aligns, inner, outer float32) float32 {
 /////////////////////////////////////////////////////////////////
 
 // Direction specifies which way items are laid out.
-type Directions int32 //enums:enum
+type Directions int32 //enums:enum -transform kebab
 
 const (
 	Row Directions = iota
