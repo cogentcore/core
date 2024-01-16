@@ -96,6 +96,12 @@ type RenderWin struct {
 
 	// below are internal vars used during the event loop
 
+	// NoEventsChan is a channel on which a signal is sent when there are
+	// no events left in the window [events.Deque]. It is used internally
+	// for event handling in tests, and should typically not be used by
+	// end-users.
+	NoEventsChan chan struct{}
+
 	// todo: need some other way of freeing GPU resources -- this is not clean:
 	// // the phongs for the window
 	// Phongs []*vphong.Phong ` json:"-" xml:"-" desc:"the phongs for the window"`
@@ -580,9 +586,9 @@ func (w *RenderWin) EventLoop() {
 			break
 		}
 		w.HandleEvent(e)
-		// if len(d.Back) == 0 && len(d.Front) == 0 {
-		// 	fmt.Println("empty event deque")
-		// }
+		if w.NoEventsChan != nil && len(d.Back) == 0 && len(d.Front) == 0 {
+			w.NoEventsChan <- struct{}{}
+		}
 	}
 	if DebugSettings.WinEventTrace {
 		fmt.Printf("Win: %v out of event loop\n", w.Name)

@@ -5,20 +5,17 @@
 package gi
 
 import (
-	"time"
-
 	"goki.dev/events"
 	"goki.dev/grows/images"
 )
 
-// AssertRender is a helper function that makes a new window from
-// the scene, waits until it is shown, calls [Scene.AssertPixels]
-// with the given values, and then closes the window.
+// AssertRender makes a new window from the scene, waits until it is shown
+// and all events have been handled, asserts that its rendered image is the
+// same as that stored at the given filename, saving the image to that filename
+// if it does not already exist, and then closes the window.
 // It does not return until all of those steps are completed.
 // If a function is passed for the final argument, it is called after the
-// scene is shown, right before [Scene.AssertPixels] is called. Also,
-// if a function is passed, [Scene.DoNeedsRender] is also called before
-// [Scene.AssertPixels].
+// scene is shown, and [Scene.DoNeedsRender] is also called after it.
 func (sc *Scene) AssertRender(t images.TestingT, filename string, fun ...func()) {
 	showed := make(chan struct{})
 	sc.OnShow(func(e events.Event) {
@@ -30,7 +27,11 @@ func (sc *Scene) AssertRender(t images.TestingT, filename string, fun ...func())
 	})
 	sc.NewWindow().Run()
 	<-showed
-	time.Sleep(50 * time.Millisecond)
+
+	rw := sc.RenderWin()
+	rw.NoEventsChan = make(chan struct{})
+	<-rw.NoEventsChan
+
 	sc.AssertPixels(t, filename)
 	sc.Close()
 }
