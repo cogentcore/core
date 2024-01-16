@@ -348,36 +348,6 @@ func (as *AppearanceSettingsData) DeleteSavedWindowGeoms() { //gti:add
 	WinGeomMgr.DeleteAll()
 }
 
-// Densities is an enum representing the different
-// density options in user preferences
-type Densities int32 //enums:enum -trimprefix Density
-
-const (
-	// DensityCompact represents a compact density
-	// with minimal whitespace
-	DensityCompact Densities = iota
-	// DensityMedium represents a medium density
-	// with medium whitespace
-	DensityMedium
-	// DensitySpread represents a spread-out density
-	// with a lot of whitespace
-	DensitySpread
-)
-
-// DensityMul returns an enum value representing the type
-// of density that the user has selected, based on a set of
-// fixed breakpoints.
-func (as *AppearanceSettingsData) DensityType() Densities {
-	switch {
-	case as.Spacing < 50:
-		return DensityCompact
-	case as.Spacing > 150:
-		return DensitySpread
-	default:
-		return DensityMedium
-	}
-}
-
 // DeviceSettings are the global device settings.
 var DeviceSettings = &DeviceSettingsData{
 	SettingsBase: SettingsBase{
