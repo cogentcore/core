@@ -60,6 +60,7 @@ func (gl *GoLang) ParseFile(fss *pi.FileStates, txt []byte) {
 		return
 	}
 	pfs := fss.StartProc(txt) // current processing one
+	// fmt.Println("\nstarting Parse:", pfs.Src.Filename)
 	// lprf := prof.Start("LexAll")
 	pr.LexAll(pfs)
 	// lprf.End()
