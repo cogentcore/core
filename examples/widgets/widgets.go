@@ -147,24 +147,30 @@ func main() {
 			s.Gap.X.Ex(2)
 		})
 
-	slider0 := gi.NewSlider(srow).SetDim(mat32.X).SetValue(0.5).SetSnap(true).SetIcon(icons.RadioButtonChecked)
+	slider0 := gi.NewSlider(srow).SetValue(0.5).SetSnap(true).SetIcon(icons.RadioButtonChecked)
 	slider0.OnChange(func(e events.Event) {
 		fmt.Println("slider0", slider0.Value)
 	})
 
-	slider1 := gi.NewSlider(srow).SetDim(mat32.Y).SetValue(0.5).SetThumbSize(mat32.V2(1, 4))
+	slider1 := gi.NewSlider(srow).SetValue(0.5).SetThumbSize(mat32.V2(1, 4))
+	slider1.Style(func(s *styles.Style) {
+		s.Direction = styles.Column
+	})
 	slider1.OnInput(func(e events.Event) {
 		fmt.Println("slider1", slider1.Value)
 	})
 
-	scroll0 := gi.NewSlider(srow).SetType(gi.SliderScrollbar).SetDim(mat32.X).
+	scroll0 := gi.NewSlider(srow).SetType(gi.SliderScrollbar).
 		SetVisiblePct(0.25).SetValue(0.25).SetStep(0.05).SetSnap(true)
 	scroll0.OnInput(func(e events.Event) {
 		fmt.Println("scroll0", scroll0.Value)
 	})
 
-	scroll1 := gi.NewSlider(srow).SetType(gi.SliderScrollbar).SetDim(mat32.Y).SetVisiblePct(.01).
+	scroll1 := gi.NewSlider(srow).SetType(gi.SliderScrollbar).SetVisiblePct(.01).
 		SetValue(0).SetMax(3000).SetStep(1).SetPageStep(10)
+	scroll1.Style(func(s *styles.Style) {
+		s.Direction = styles.Column
+	})
 	scroll1.OnInput(func(e events.Event) {
 		fmt.Println("scroll1", scroll1.Value)
 	})
