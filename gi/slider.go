@@ -175,11 +175,10 @@ func (sr *Slider) SetStyles() {
 			sr.ValueColor = colors.C(colors.Scheme.Primary.Base)
 			sr.ThumbColor = colors.C(colors.Scheme.Primary.Base)
 			s.Padding.Set(units.Dp(8))
-			s.Background = colors.C(colors.Scheme.SurfaceVariant)
+			s.Background = colors.C(colors.Scheme.Primary.Container)
 		} else {
 			sr.ValueColor = colors.C(colors.Scheme.OutlineVariant)
 			sr.ThumbColor = colors.C(colors.Scheme.OutlineVariant)
-			s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
 		}
 
 		// sr.ValueColor = s.StateBackgroundColor(sr.ValueColor)
