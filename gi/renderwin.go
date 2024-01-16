@@ -567,17 +567,22 @@ func (w *RenderWin) SendWinFocusEvent(act events.WinActions) {
 func (w *RenderWin) EventLoop() {
 	defer func() { goosi.HandleRecover(recover()) }()
 
+	d := &w.GoosiWin.EventMgr().Deque
+
 	for {
 		if w.HasFlag(WinStopEventLoop) {
 			w.SetFlag(false, WinStopEventLoop)
 			break
 		}
-		e := w.GoosiWin.EventMgr().Deque.NextEvent()
+		e := d.NextEvent()
 		if w.HasFlag(WinStopEventLoop) {
 			w.SetFlag(false, WinStopEventLoop)
 			break
 		}
 		w.HandleEvent(e)
+		// if len(d.Back) == 0 && len(d.Front) == 0 {
+		// 	fmt.Println("empty event deque")
+		// }
 	}
 	if DebugSettings.WinEventTrace {
 		fmt.Printf("Win: %v out of event loop\n", w.Name)
