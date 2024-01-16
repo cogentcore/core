@@ -156,7 +156,7 @@ func (sr *Slider) OnInit() {
 }
 
 func (sr *Slider) SetStyles() {
-	sr.Max = 1.0
+	sr.Max = 1
 	sr.VisiblePct = 1
 	sr.Step = 0.1
 	sr.PageStep = 0.2
