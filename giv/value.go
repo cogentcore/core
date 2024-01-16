@@ -467,7 +467,7 @@ func (vv *ValueBase) IsReadOnly() bool {
 		}
 	}
 	npv := laser.NonPtrValue(vv.Value)
-	if npv.Kind() == reflect.Interface && laser.ValueIsZero(npv) {
+	if npv.Kind() == reflect.Interface && npv.IsZero() {
 		vv.SetReadOnly(true) // cache
 		return true
 	}
@@ -534,7 +534,7 @@ func (vv *ValueBase) SetValueMap(val any) (bool, error) {
 		kv := laser.NonPtrValue(vv.Value)
 		cv := ov.MapIndex(kv)    // get current value
 		curnv := ov.MapIndex(nv) // see if new value there already
-		if val != kv.Interface() && !laser.ValueIsZero(curnv) {
+		if val != kv.Interface() && !curnv.IsZero() {
 			// actually new key and current exists
 			d := gi.NewBody().AddTitle("Map Key Conflict").
 				AddText(fmt.Sprintf("The map key value: %v already exists in the map; are you sure you want to overwrite the current value?", val))
@@ -748,7 +748,7 @@ func (vv *ValueBase) OwnerLabel() string {
 // can be used for not proceeding in case of non-value-based types.
 func (vv *ValueBase) GetTitle() (label, newPath string, isZero bool) {
 	var npt reflect.Type
-	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(laser.NonPtrValue(vv.Value)) {
+	if vv.Value.IsZero() || laser.NonPtrValue(vv.Value).IsZero() {
 		npt = laser.NonPtrType(vv.Value.Type())
 		isZero = true
 	} else {
@@ -783,7 +783,7 @@ func (vv *ValueBase) UpdateWidget() {
 	tf := vv.Widget.(*gi.TextField)
 	npv := laser.NonPtrValue(vv.Value)
 	// fmt.Printf("vvb val: %v  type: %v  kind: %v\n", npv.Interface(), npv.Type().String(), npv.Kind())
-	if npv.Kind() == reflect.Interface && laser.ValueIsZero(npv) {
+	if npv.Kind() == reflect.Interface && npv.IsZero() {
 		tf.SetText("None")
 	} else {
 		txt := laser.ToString(vv.Value.Interface())
@@ -815,7 +815,7 @@ func (vv *ValueBase) ConfigWidget(w gi.Widget) {
 		in := []reflect.Value{reflect.ValueOf(tf)}
 		in = append(in, reflect.ValueOf(completetag)) // pass tag value - object may doing completion on multiple fields
 		cmpfv := reflect.ValueOf(vv.Owner).MethodByName("SetCompleter")
-		if laser.ValueIsZero(cmpfv) {
+		if cmpfv.IsZero() {
 			log.Printf("giv.ValueBase: programmer error -- SetCompleter method not found in type: %T\n", vv.Owner)
 		} else {
 			cmpfv.Call(in)

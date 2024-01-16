@@ -462,7 +462,7 @@ func (tv *TableView) ConfigRows() {
 		} else {
 			val = tv.ElVal
 		}
-		if laser.ValueIsZero(val) {
+		if val.IsZero() {
 			val = tv.ElVal
 		}
 		stru := val.Interface()
@@ -603,7 +603,7 @@ func (tv *TableView) UpdateWidgets() {
 			var val reflect.Value
 			if si < tv.SliceSize {
 				val = laser.OnePtrUnderlyingValue(tv.SliceNPVal.Index(si)) // deal with pointer lists
-				if laser.ValueIsZero(val) {
+				if val.IsZero() {
 					val = tv.ElVal
 				}
 			} else {

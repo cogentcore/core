@@ -278,7 +278,7 @@ func (mv *MapView) MapChangeValueType(idx int, typ reflect.Type) {
 
 	// create a new item of selected type, and attempt to convert existing to it
 	var evn reflect.Value
-	if laser.ValueIsZero(cv) {
+	if cv.IsZero() {
 		evn = laser.MakeOfType(typ)
 	} else {
 		evn = laser.CloneToType(typ, cv.Interface())

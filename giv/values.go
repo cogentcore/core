@@ -229,7 +229,7 @@ func ToValue(it any, tags string) Value {
 			return &NilValue{}
 		}
 		v := reflect.ValueOf(it)
-		if !laser.ValueIsZero(v) {
+		if !v.IsZero() {
 			// note: interfaces go here:
 			// fmt.Printf("vv indirecting on pointer: %v type: %v\n", it, nptyp.String())
 			return ToValue(v.Elem().Interface(), tags)
@@ -365,7 +365,7 @@ func (vv *StructValue) UpdateWidget() {
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	bt := vv.Widget.(*gi.Button)
 	npv := laser.NonPtrValue(vv.Value)
-	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(npv) {
+	if vv.Value.IsZero() || npv.IsZero() {
 		bt.SetTextUpdate("None")
 	} else {
 		opv := laser.OnePtrUnderlyingValue(vv.Value)
@@ -396,7 +396,7 @@ func (vv *StructValue) HasDialog() bool                      { return true }
 func (vv *StructValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
 
 func (vv *StructValue) ConfigDialog(d *gi.Body) (bool, func()) {
-	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(laser.NonPtrValue(vv.Value)) {
+	if vv.Value.IsZero() || laser.NonPtrValue(vv.Value).IsZero() {
 		return false, nil
 	}
 	opv := laser.OnePtrUnderlyingValue(vv.Value)
@@ -517,7 +517,7 @@ func (vv *SliceValue) HasDialog() bool                      { return true }
 func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
 
 func (vv *SliceValue) ConfigDialog(d *gi.Body) (bool, func()) {
-	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(laser.NonPtrValue(vv.Value)) {
+	if vv.Value.IsZero() || laser.NonPtrValue(vv.Value).IsZero() {
 		return false, nil
 	}
 	vvp := laser.OnePtrValue(vv.Value)
@@ -637,7 +637,7 @@ func (vv *MapValue) HasDialog() bool                      { return true }
 func (vv *MapValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
 
 func (vv *MapValue) ConfigDialog(d *gi.Body) (bool, func()) {
-	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(laser.NonPtrValue(vv.Value)) {
+	if vv.Value.IsZero() || laser.NonPtrValue(vv.Value).IsZero() {
 		return false, nil
 	}
 	mpi := vv.Value.Interface()
