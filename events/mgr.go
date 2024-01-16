@@ -102,6 +102,7 @@ func (em *Mgr) MouseButton(typ Types, but Buttons, where image.Point, mods key.M
 	em.Last.MousePos = where
 	ev.Init()
 	if typ == MouseDown {
+		em.Last.MouseDownPos = where
 		em.Last.MouseDownTime = ev.GenTime
 		em.Last.MouseMoveTime = ev.GenTime
 	}
