@@ -134,6 +134,16 @@ func (a Vec2) Fixed() fixed.Point26_6 {
 	return ToFixedPoint(a.X, a.Y)
 }
 
+func (a Vec2) AddDim(d Dims, val float32) Vec2 {
+	switch d {
+	case X:
+		a.X += val
+	case Y:
+		a.Y += val
+	}
+	return a
+}
+
 func (a *Vec2) SetAddDim(d Dims, val float32) {
 	switch d {
 	case X:
@@ -141,6 +151,16 @@ func (a *Vec2) SetAddDim(d Dims, val float32) {
 	case Y:
 		a.Y += val
 	}
+}
+
+func (a Vec2) SubDim(d Dims, val float32) Vec2 {
+	switch d {
+	case X:
+		a.X -= val
+	case Y:
+		a.Y -= val
+	}
+	return a
 }
 
 func (a *Vec2) SetSubDim(d Dims, val float32) {
@@ -152,6 +172,16 @@ func (a *Vec2) SetSubDim(d Dims, val float32) {
 	}
 }
 
+func (a Vec2) MulDim(d Dims, val float32) Vec2 {
+	switch d {
+	case X:
+		a.X *= val
+	case Y:
+		a.Y *= val
+	}
+	return a
+}
+
 func (a *Vec2) SetMulDim(d Dims, val float32) {
 	switch d {
 	case X:
@@ -159,6 +189,16 @@ func (a *Vec2) SetMulDim(d Dims, val float32) {
 	case Y:
 		a.Y *= val
 	}
+}
+
+func (a Vec2) DivDim(d Dims, val float32) Vec2 {
+	switch d {
+	case X:
+		a.X /= val
+	case Y:
+		a.Y /= val
+	}
+	return a
 }
 
 func (a *Vec2) SetDivDim(d Dims, val float32) {

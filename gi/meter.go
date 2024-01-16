@@ -13,6 +13,8 @@ import (
 
 // Meter is a widget that renders a current value on as a filled bar
 // relative to a minimum and maximum potential value.
+// The [styles.Style.Direction] determines the direction in which the
+// meter goes.
 type Meter struct {
 	WidgetBase
 
@@ -36,8 +38,30 @@ func (m *Meter) OnInit() {
 }
 
 func (m *Meter) SetStyles() {
+	m.Max = 1
 	m.Style(func(s *styles.Style) {
 		m.ValueColor = colors.C(colors.Scheme.Primary.Base)
 		s.Background = colors.C(colors.Scheme.SurfaceVariant)
 	})
+}
+
+func (m *Meter) Render() {
+	if m.PushBounds() {
+		m.RenderMeter()
+		m.PopBounds()
+	}
+}
+
+func (m *Meter) RenderMeter() {
+	_, st := m.RenderLock()
+	defer m.RenderUnlock()
+	m.RenderStdBox(st)
+
+	if m.ValueColor != nil {
+		dim := m.Styles.Direction.Dim()
+		prop := (m.Value - m.Min) / (m.Max - m.Min)
+		pos := m.Geom.Pos.Content.AddDim(dim, prop*m.Geom.Size.Actual.Content.Dim(dim))
+		size := m.Geom.Size.Actual.Content.MulDim(dim, prop)
+		m.RenderBoxImpl(pos, size, styles.Border{})
+	}
 }
