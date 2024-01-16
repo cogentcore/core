@@ -60,6 +60,10 @@ const (
 	// succession.
 	DoubleClick
 
+	// TripleClick represents three Click events in a row in rapid
+	// succession.
+	TripleClick
+
 	// ContextMenu represents a MouseDown/Up event with the
 	// Right mouse button (which is also activated by
 	// Control key + Left Click).

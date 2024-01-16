@@ -1466,15 +1466,17 @@ func (tf *TextField) HandleMouse() {
 			tf.SetFocusEvent()
 		}
 		e.SetHandled()
-		if tf.HasSelection() {
-			if tf.SelectStart == 0 && tf.SelectEnd == len(tf.EditTxt) {
-				tf.SelectReset()
-			} else {
-				tf.SelectAll()
-			}
-		} else {
-			tf.SelectWord()
+		tf.SelectWord()
+	})
+	tf.On(events.TripleClick, func(e events.Event) {
+		if tf.IsReadOnly() {
+			return
 		}
+		if !tf.IsReadOnly() && !tf.StateIs(states.Focused) {
+			tf.SetFocusEvent()
+		}
+		e.SetHandled()
+		tf.SelectAll()
 	})
 	tf.On(events.SlideMove, func(e events.Event) {
 		if tf.IsReadOnly() {

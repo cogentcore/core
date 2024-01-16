@@ -595,23 +595,21 @@ func (ed *Editor) HandleMouse() {
 		}
 		updt := ed.UpdateStart()
 		e.SetHandled()
-		if ed.HasSelection() {
-			if ed.SelectReg.Start.Ln == ed.SelectReg.End.Ln {
-				sz := ed.Buf.LineLen(ed.SelectReg.Start.Ln)
-				if ed.SelectReg.Start.Ch == 0 && ed.SelectReg.End.Ch == sz {
-					ed.SelectReset()
-				} else { // assume word, go line
-					ed.SelectReg.Start.Ch = 0
-					ed.SelectReg.End.Ch = sz
-				}
-			} else {
-				ed.SelectReset()
-			}
-		} else {
-			if ed.SelectWord() {
-				ed.CursorPos = ed.SelectReg.Start
-			}
+		if ed.SelectWord() {
+			ed.CursorPos = ed.SelectReg.Start
 		}
+		ed.UpdateEndRender(updt)
+	})
+	ed.On(events.TripleClick, func(e events.Event) {
+		if !ed.StateIs(states.Focused) {
+			ed.SetFocusEvent()
+			ed.Send(events.Focus, e) // sets focused flag
+		}
+		updt := ed.UpdateStart()
+		e.SetHandled()
+		sz := ed.Buf.LineLen(ed.SelectReg.Start.Ln)
+		ed.SelectReg.Start.Ch = 0
+		ed.SelectReg.End.Ch = sz
 		ed.UpdateEndRender(updt)
 	})
 	ed.On(events.SlideMove, func(e events.Event) {

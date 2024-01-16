@@ -32,10 +32,15 @@ func _DropModsNoOp() {
 
 var _DropModsNameToValueMap = map[string]DropMods{
 	`NoDropMod`: 0,
+	`nodropmod`: 0,
 	`Copy`:      1,
+	`copy`:      1,
 	`Move`:      2,
+	`move`:      2,
 	`Link`:      3,
+	`link`:      3,
 	`Ignore`:    4,
+	`ignore`:    4,
 }
 
 var _DropModsDescMap = map[DropMods]string{
@@ -68,6 +73,10 @@ func (i DropMods) String() string {
 // error if the string is invalid.
 func (i *DropMods) SetString(s string) error {
 	if val, ok := _DropModsNameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+	if val, ok := _DropModsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -146,9 +155,13 @@ func _ButtonsNoOp() {
 
 var _ButtonsNameToValueMap = map[string]Buttons{
 	`NoButton`: 0,
+	`nobutton`: 0,
 	`Left`:     1,
+	`left`:     1,
 	`Middle`:   2,
+	`middle`:   2,
 	`Right`:    3,
+	`right`:    3,
 }
 
 var _ButtonsDescMap = map[Buttons]string{
@@ -179,6 +192,10 @@ func (i Buttons) String() string {
 // error if the string is invalid.
 func (i *Buttons) SetString(s string) error {
 	if val, ok := _ButtonsNameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+	if val, ok := _ButtonsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -260,12 +277,19 @@ func _SelectModesNoOp() {
 
 var _SelectModesNameToValueMap = map[string]SelectModes{
 	`SelectOne`:        0,
+	`selectone`:        0,
 	`ExtendContinuous`: 1,
+	`extendcontinuous`: 1,
 	`ExtendOne`:        2,
+	`extendone`:        2,
 	`NoSelect`:         3,
+	`noselect`:         3,
 	`Unselect`:         4,
+	`unselect`:         4,
 	`SelectQuiet`:      5,
+	`selectquiet`:      5,
 	`UnselectQuiet`:    6,
+	`unselectquiet`:    6,
 }
 
 var _SelectModesDescMap = map[SelectModes]string{
@@ -302,6 +326,10 @@ func (i SelectModes) String() string {
 // error if the string is invalid.
 func (i *SelectModes) SetString(s string) error {
 	if val, ok := _SelectModesNameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+	if val, ok := _SelectModesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -362,11 +390,11 @@ func (i *SelectModes) UnmarshalText(text []byte) error {
 	return nil
 }
 
-var _TypesValues = []Types{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44}
+var _TypesValues = []Types{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45}
 
 // TypesN is the highest valid value
 // for type Types, plus one.
-const TypesN Types = 45
+const TypesN Types = 46
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -379,92 +407,140 @@ func _TypesNoOp() {
 	_ = x[MouseDrag-(4)]
 	_ = x[Click-(5)]
 	_ = x[DoubleClick-(6)]
-	_ = x[ContextMenu-(7)]
-	_ = x[LongPressStart-(8)]
-	_ = x[LongPressEnd-(9)]
-	_ = x[MouseEnter-(10)]
-	_ = x[MouseLeave-(11)]
-	_ = x[LongHoverStart-(12)]
-	_ = x[LongHoverEnd-(13)]
-	_ = x[DragStart-(14)]
-	_ = x[DragMove-(15)]
-	_ = x[DragEnter-(16)]
-	_ = x[DragLeave-(17)]
-	_ = x[Drop-(18)]
-	_ = x[DropDeleteSource-(19)]
-	_ = x[SlideStart-(20)]
-	_ = x[SlideMove-(21)]
-	_ = x[SlideStop-(22)]
-	_ = x[Scroll-(23)]
-	_ = x[KeyDown-(24)]
-	_ = x[KeyUp-(25)]
-	_ = x[KeyChord-(26)]
-	_ = x[TouchStart-(27)]
-	_ = x[TouchEnd-(28)]
-	_ = x[TouchMove-(29)]
-	_ = x[Magnify-(30)]
-	_ = x[Rotate-(31)]
-	_ = x[Select-(32)]
-	_ = x[Focus-(33)]
-	_ = x[FocusLost-(34)]
-	_ = x[Change-(35)]
-	_ = x[Input-(36)]
-	_ = x[Show-(37)]
-	_ = x[Close-(38)]
-	_ = x[Window-(39)]
-	_ = x[WindowResize-(40)]
-	_ = x[WindowPaint-(41)]
-	_ = x[OS-(42)]
-	_ = x[OSOpenFiles-(43)]
-	_ = x[Custom-(44)]
+	_ = x[TripleClick-(7)]
+	_ = x[ContextMenu-(8)]
+	_ = x[LongPressStart-(9)]
+	_ = x[LongPressEnd-(10)]
+	_ = x[MouseEnter-(11)]
+	_ = x[MouseLeave-(12)]
+	_ = x[LongHoverStart-(13)]
+	_ = x[LongHoverEnd-(14)]
+	_ = x[DragStart-(15)]
+	_ = x[DragMove-(16)]
+	_ = x[DragEnter-(17)]
+	_ = x[DragLeave-(18)]
+	_ = x[Drop-(19)]
+	_ = x[DropDeleteSource-(20)]
+	_ = x[SlideStart-(21)]
+	_ = x[SlideMove-(22)]
+	_ = x[SlideStop-(23)]
+	_ = x[Scroll-(24)]
+	_ = x[KeyDown-(25)]
+	_ = x[KeyUp-(26)]
+	_ = x[KeyChord-(27)]
+	_ = x[TouchStart-(28)]
+	_ = x[TouchEnd-(29)]
+	_ = x[TouchMove-(30)]
+	_ = x[Magnify-(31)]
+	_ = x[Rotate-(32)]
+	_ = x[Select-(33)]
+	_ = x[Focus-(34)]
+	_ = x[FocusLost-(35)]
+	_ = x[Change-(36)]
+	_ = x[Input-(37)]
+	_ = x[Show-(38)]
+	_ = x[Close-(39)]
+	_ = x[Window-(40)]
+	_ = x[WindowResize-(41)]
+	_ = x[WindowPaint-(42)]
+	_ = x[OS-(43)]
+	_ = x[OSOpenFiles-(44)]
+	_ = x[Custom-(45)]
 }
 
 var _TypesNameToValueMap = map[string]Types{
 	`UnknownType`:      0,
+	`unknowntype`:      0,
 	`MouseDown`:        1,
+	`mousedown`:        1,
 	`MouseUp`:          2,
+	`mouseup`:          2,
 	`MouseMove`:        3,
+	`mousemove`:        3,
 	`MouseDrag`:        4,
+	`mousedrag`:        4,
 	`Click`:            5,
+	`click`:            5,
 	`DoubleClick`:      6,
-	`ContextMenu`:      7,
-	`LongPressStart`:   8,
-	`LongPressEnd`:     9,
-	`MouseEnter`:       10,
-	`MouseLeave`:       11,
-	`LongHoverStart`:   12,
-	`LongHoverEnd`:     13,
-	`DragStart`:        14,
-	`DragMove`:         15,
-	`DragEnter`:        16,
-	`DragLeave`:        17,
-	`Drop`:             18,
-	`DropDeleteSource`: 19,
-	`SlideStart`:       20,
-	`SlideMove`:        21,
-	`SlideStop`:        22,
-	`Scroll`:           23,
-	`KeyDown`:          24,
-	`KeyUp`:            25,
-	`KeyChord`:         26,
-	`TouchStart`:       27,
-	`TouchEnd`:         28,
-	`TouchMove`:        29,
-	`Magnify`:          30,
-	`Rotate`:           31,
-	`Select`:           32,
-	`Focus`:            33,
-	`FocusLost`:        34,
-	`Change`:           35,
-	`Input`:            36,
-	`Show`:             37,
-	`Close`:            38,
-	`Window`:           39,
-	`WindowResize`:     40,
-	`WindowPaint`:      41,
-	`OS`:               42,
-	`OSOpenFiles`:      43,
-	`Custom`:           44,
+	`doubleclick`:      6,
+	`TripleClick`:      7,
+	`tripleclick`:      7,
+	`ContextMenu`:      8,
+	`contextmenu`:      8,
+	`LongPressStart`:   9,
+	`longpressstart`:   9,
+	`LongPressEnd`:     10,
+	`longpressend`:     10,
+	`MouseEnter`:       11,
+	`mouseenter`:       11,
+	`MouseLeave`:       12,
+	`mouseleave`:       12,
+	`LongHoverStart`:   13,
+	`longhoverstart`:   13,
+	`LongHoverEnd`:     14,
+	`longhoverend`:     14,
+	`DragStart`:        15,
+	`dragstart`:        15,
+	`DragMove`:         16,
+	`dragmove`:         16,
+	`DragEnter`:        17,
+	`dragenter`:        17,
+	`DragLeave`:        18,
+	`dragleave`:        18,
+	`Drop`:             19,
+	`drop`:             19,
+	`DropDeleteSource`: 20,
+	`dropdeletesource`: 20,
+	`SlideStart`:       21,
+	`slidestart`:       21,
+	`SlideMove`:        22,
+	`slidemove`:        22,
+	`SlideStop`:        23,
+	`slidestop`:        23,
+	`Scroll`:           24,
+	`scroll`:           24,
+	`KeyDown`:          25,
+	`keydown`:          25,
+	`KeyUp`:            26,
+	`keyup`:            26,
+	`KeyChord`:         27,
+	`keychord`:         27,
+	`TouchStart`:       28,
+	`touchstart`:       28,
+	`TouchEnd`:         29,
+	`touchend`:         29,
+	`TouchMove`:        30,
+	`touchmove`:        30,
+	`Magnify`:          31,
+	`magnify`:          31,
+	`Rotate`:           32,
+	`rotate`:           32,
+	`Select`:           33,
+	`select`:           33,
+	`Focus`:            34,
+	`focus`:            34,
+	`FocusLost`:        35,
+	`focuslost`:        35,
+	`Change`:           36,
+	`change`:           36,
+	`Input`:            37,
+	`input`:            37,
+	`Show`:             38,
+	`show`:             38,
+	`Close`:            39,
+	`close`:            39,
+	`Window`:           40,
+	`window`:           40,
+	`WindowResize`:     41,
+	`windowresize`:     41,
+	`WindowPaint`:      42,
+	`windowpaint`:      42,
+	`OS`:               43,
+	`os`:               43,
+	`OSOpenFiles`:      44,
+	`osopenfiles`:      44,
+	`Custom`:           45,
+	`custom`:           45,
 }
 
 var _TypesDescMap = map[Types]string{
@@ -475,44 +551,45 @@ var _TypesDescMap = map[Types]string{
 	4:  `MouseDrag is always sent when the mouse is moving and there is a button down, even if there might be other higher-level events too. The start pos indicates where (and when) button first was pressed. Not unique and Prev position is updated during compression.`,
 	5:  `Click represents a MouseDown followed by MouseUp in sequence on the same element, with the Left (primary) button. This is the typical event for most basic user interaction.`,
 	6:  `DoubleClick represents two Click events in a row in rapid succession.`,
-	7:  `ContextMenu represents a MouseDown/Up event with the Right mouse button (which is also activated by Control key + Left Click).`,
-	8:  `LongPressStart is when the mouse has been relatively stable after MouseDown on an element for a minimum duration (500 msec default).`,
-	9:  `LongPressEnd is sent after LongPressStart when the mouse has gone up, moved sufficiently, left the current element, or another input event has happened.`,
-	10: `MouseEnter is when the mouse enters the bounding box of a new element. It is used for setting the Hover state, and can trigger cursor changes. See DragEnter for alternative case during Drag events.`,
-	11: `MouseLeave is when the mouse leaves the bounding box of an element, that previously had a MouseEnter event. Given that elements can have overlapping bounding boxes (e.g., child elements within a container), it is not the case that a MouseEnter on a child triggers a MouseLeave on surrounding containers. See DragLeave for alternative case during Drag events.`,
-	12: `LongHoverStart is when the mouse has been relatively stable after MouseEnter on an element for a minimum duration (500 msec default). This triggers the LongHover state typically used for Tooltips.`,
-	13: `LongHoverEnd is after LongHoverStart when the mouse has moved sufficiently, left the current element, or another input event has happened, thereby terminating the LongHover state.`,
-	14: `DragStart is at the start of a drag-n-drop event sequence, when a Draggable element is Active and a sufficient distance of MouseDrag events has occurred to engage the DragStart event.`,
-	15: `DragMove is for a MouseDrag event during the drag-n-drop sequence. Usually don&#39;t need to listen to this one. MouseDrag is also sent.`,
-	16: `DragEnter is like MouseEnter but after a DragStart during a drag-n-drop sequence. MouseEnter is not sent in this case.`,
-	17: `DragLeave is like MouseLeave but after a DragStart during a drag-n-drop sequence. MouseLeave is not sent in this case.`,
-	18: `Drop is sent when an item being Dragged is dropped on top of a target element. The event struct should be DragDrop.`,
-	19: `DropDeleteSource is sent to the source Drag element if the Drag-n-Drop event is a Move type, which requires deleting the source element. The event struct should be DragDrop.`,
-	20: `SlideStart is for a Slideable element when Active and a sufficient distance of MouseDrag events has occurred to engage the SlideStart event. Sets the Sliding state.`,
-	21: `SlideMove is for a Slideable element after SlideStart is being dragged via MouseDrag events.`,
-	22: `SlideStop is when the mouse button is released on a Slideable element being dragged via MouseDrag events. This typically also accompanied by a Changed event for the new slider value.`,
-	23: `Scroll is for scroll wheel or other scrolling events (gestures). These are not unique and Delta is updated during compression.`,
-	24: `KeyDown is when a key is pressed down. This provides fine-grained data about each key as it happens. KeyChord is recommended for a more complete Key event.`,
-	25: `KeyUp is when a key is released. This provides fine-grained data about each key as it happens. KeyChord is recommended for a more complete Key event.`,
-	26: `KeyChord is only generated when a non-modifier key is released, and it also contains a string representation of the full chord, suitable for translation into keyboard commands, emacs-style etc. It can be somewhat delayed relative to the KeyUp.`,
-	27: `TouchStart is when a touch event starts, for the low-level touch event processing. TouchStart also activates MouseDown, Scroll, Magnify, or Rotate events depending on gesture recognition.`,
-	28: `TouchEnd is when a touch event ends, for the low-level touch event processing. TouchEnd also activates MouseUp events depending on gesture recognition.`,
-	29: `TouchMove is when a touch event moves, for the low-level touch event processing. TouchMove also activates MouseMove, Scroll, Magnify, or Rotate events depending on gesture recognition.`,
-	30: `Magnify is a touch-based magnify event (e.g., pinch)`,
-	31: `Rotate is a touch-based rotate event.`,
-	32: `Select is sent for any direction of selection change on (or within if relevant) a Selectable element. Typically need to query the element(s) to determine current selection state.`,
-	33: `Focus is sent when Focsable element receives Focus`,
-	34: `FocusLost is sent when Focsable element loses Focus`,
-	35: `Change is when a value represented by the element has been changed by the user and committed (for example, someone has typed text in a textfield and then pressed enter). This is *not* triggered when the value has not been committed; see [Input] for that. This is for Editable, Checkable, and Slidable items.`,
-	36: `Input is when a value represented by the element has changed, but has not necessarily been committed (for example, this triggers each time someone presses a key in a text field). This *is* triggered when the value has not been committed; see [Change] for a version that only occurs when the value is committed. This is for Editable, Checkable, and Slidable items.`,
-	37: `Show is generated by an overall Scene or Window level container when the content is first shown to the user in its final form. Listening to this event enables other elements to perform initial one-time activities on startup, in the context of a fully rendered display.`,
-	38: `Close is generated by an overall Scene or Window level container when being closed (e.g., on dialog closing). This is an opportunity to save unsaved edits, for example.`,
-	39: `Window reports on changes in the window position, visibility (iconify), focus changes, screen update, and closing. These are only sent once per event (Unique).`,
-	40: `WindowResize happens when the window has been resized, which can happen continuously during a user resizing episode. These are not Unique events, and are compressed to minimize lag.`,
-	41: `WindowPaint is sent continuously at FPS frequency (60 frames per second by default) to drive updating check on the window. It is not unique, will be compressed to keep pace with updating.`,
-	42: `OS is an operating system generated event (app level typically)`,
-	43: `OSOpenFiles is an event telling app to open given files`,
-	44: `Custom is a user-defined event with a data any field`,
+	7:  `TripleClick represents three Click events in a row in rapid succession.`,
+	8:  `ContextMenu represents a MouseDown/Up event with the Right mouse button (which is also activated by Control key + Left Click).`,
+	9:  `LongPressStart is when the mouse has been relatively stable after MouseDown on an element for a minimum duration (500 msec default).`,
+	10: `LongPressEnd is sent after LongPressStart when the mouse has gone up, moved sufficiently, left the current element, or another input event has happened.`,
+	11: `MouseEnter is when the mouse enters the bounding box of a new element. It is used for setting the Hover state, and can trigger cursor changes. See DragEnter for alternative case during Drag events.`,
+	12: `MouseLeave is when the mouse leaves the bounding box of an element, that previously had a MouseEnter event. Given that elements can have overlapping bounding boxes (e.g., child elements within a container), it is not the case that a MouseEnter on a child triggers a MouseLeave on surrounding containers. See DragLeave for alternative case during Drag events.`,
+	13: `LongHoverStart is when the mouse has been relatively stable after MouseEnter on an element for a minimum duration (500 msec default). This triggers the LongHover state typically used for Tooltips.`,
+	14: `LongHoverEnd is after LongHoverStart when the mouse has moved sufficiently, left the current element, or another input event has happened, thereby terminating the LongHover state.`,
+	15: `DragStart is at the start of a drag-n-drop event sequence, when a Draggable element is Active and a sufficient distance of MouseDrag events has occurred to engage the DragStart event.`,
+	16: `DragMove is for a MouseDrag event during the drag-n-drop sequence. Usually don&#39;t need to listen to this one. MouseDrag is also sent.`,
+	17: `DragEnter is like MouseEnter but after a DragStart during a drag-n-drop sequence. MouseEnter is not sent in this case.`,
+	18: `DragLeave is like MouseLeave but after a DragStart during a drag-n-drop sequence. MouseLeave is not sent in this case.`,
+	19: `Drop is sent when an item being Dragged is dropped on top of a target element. The event struct should be DragDrop.`,
+	20: `DropDeleteSource is sent to the source Drag element if the Drag-n-Drop event is a Move type, which requires deleting the source element. The event struct should be DragDrop.`,
+	21: `SlideStart is for a Slideable element when Active and a sufficient distance of MouseDrag events has occurred to engage the SlideStart event. Sets the Sliding state.`,
+	22: `SlideMove is for a Slideable element after SlideStart is being dragged via MouseDrag events.`,
+	23: `SlideStop is when the mouse button is released on a Slideable element being dragged via MouseDrag events. This typically also accompanied by a Changed event for the new slider value.`,
+	24: `Scroll is for scroll wheel or other scrolling events (gestures). These are not unique and Delta is updated during compression.`,
+	25: `KeyDown is when a key is pressed down. This provides fine-grained data about each key as it happens. KeyChord is recommended for a more complete Key event.`,
+	26: `KeyUp is when a key is released. This provides fine-grained data about each key as it happens. KeyChord is recommended for a more complete Key event.`,
+	27: `KeyChord is only generated when a non-modifier key is released, and it also contains a string representation of the full chord, suitable for translation into keyboard commands, emacs-style etc. It can be somewhat delayed relative to the KeyUp.`,
+	28: `TouchStart is when a touch event starts, for the low-level touch event processing. TouchStart also activates MouseDown, Scroll, Magnify, or Rotate events depending on gesture recognition.`,
+	29: `TouchEnd is when a touch event ends, for the low-level touch event processing. TouchEnd also activates MouseUp events depending on gesture recognition.`,
+	30: `TouchMove is when a touch event moves, for the low-level touch event processing. TouchMove also activates MouseMove, Scroll, Magnify, or Rotate events depending on gesture recognition.`,
+	31: `Magnify is a touch-based magnify event (e.g., pinch)`,
+	32: `Rotate is a touch-based rotate event.`,
+	33: `Select is sent for any direction of selection change on (or within if relevant) a Selectable element. Typically need to query the element(s) to determine current selection state.`,
+	34: `Focus is sent when Focsable element receives Focus`,
+	35: `FocusLost is sent when Focsable element loses Focus`,
+	36: `Change is when a value represented by the element has been changed by the user and committed (for example, someone has typed text in a textfield and then pressed enter). This is *not* triggered when the value has not been committed; see [Input] for that. This is for Editable, Checkable, and Slidable items.`,
+	37: `Input is when a value represented by the element has changed, but has not necessarily been committed (for example, this triggers each time someone presses a key in a text field). This *is* triggered when the value has not been committed; see [Change] for a version that only occurs when the value is committed. This is for Editable, Checkable, and Slidable items.`,
+	38: `Show is generated by an overall Scene or Window level container when the content is first shown to the user in its final form. Listening to this event enables other elements to perform initial one-time activities on startup, in the context of a fully rendered display.`,
+	39: `Close is generated by an overall Scene or Window level container when being closed (e.g., on dialog closing). This is an opportunity to save unsaved edits, for example.`,
+	40: `Window reports on changes in the window position, visibility (iconify), focus changes, screen update, and closing. These are only sent once per event (Unique).`,
+	41: `WindowResize happens when the window has been resized, which can happen continuously during a user resizing episode. These are not Unique events, and are compressed to minimize lag.`,
+	42: `WindowPaint is sent continuously at FPS frequency (60 frames per second by default) to drive updating check on the window. It is not unique, will be compressed to keep pace with updating.`,
+	43: `OS is an operating system generated event (app level typically)`,
+	44: `OSOpenFiles is an event telling app to open given files`,
+	45: `Custom is a user-defined event with a data any field`,
 }
 
 var _TypesMap = map[Types]string{
@@ -523,44 +600,45 @@ var _TypesMap = map[Types]string{
 	4:  `MouseDrag`,
 	5:  `Click`,
 	6:  `DoubleClick`,
-	7:  `ContextMenu`,
-	8:  `LongPressStart`,
-	9:  `LongPressEnd`,
-	10: `MouseEnter`,
-	11: `MouseLeave`,
-	12: `LongHoverStart`,
-	13: `LongHoverEnd`,
-	14: `DragStart`,
-	15: `DragMove`,
-	16: `DragEnter`,
-	17: `DragLeave`,
-	18: `Drop`,
-	19: `DropDeleteSource`,
-	20: `SlideStart`,
-	21: `SlideMove`,
-	22: `SlideStop`,
-	23: `Scroll`,
-	24: `KeyDown`,
-	25: `KeyUp`,
-	26: `KeyChord`,
-	27: `TouchStart`,
-	28: `TouchEnd`,
-	29: `TouchMove`,
-	30: `Magnify`,
-	31: `Rotate`,
-	32: `Select`,
-	33: `Focus`,
-	34: `FocusLost`,
-	35: `Change`,
-	36: `Input`,
-	37: `Show`,
-	38: `Close`,
-	39: `Window`,
-	40: `WindowResize`,
-	41: `WindowPaint`,
-	42: `OS`,
-	43: `OSOpenFiles`,
-	44: `Custom`,
+	7:  `TripleClick`,
+	8:  `ContextMenu`,
+	9:  `LongPressStart`,
+	10: `LongPressEnd`,
+	11: `MouseEnter`,
+	12: `MouseLeave`,
+	13: `LongHoverStart`,
+	14: `LongHoverEnd`,
+	15: `DragStart`,
+	16: `DragMove`,
+	17: `DragEnter`,
+	18: `DragLeave`,
+	19: `Drop`,
+	20: `DropDeleteSource`,
+	21: `SlideStart`,
+	22: `SlideMove`,
+	23: `SlideStop`,
+	24: `Scroll`,
+	25: `KeyDown`,
+	26: `KeyUp`,
+	27: `KeyChord`,
+	28: `TouchStart`,
+	29: `TouchEnd`,
+	30: `TouchMove`,
+	31: `Magnify`,
+	32: `Rotate`,
+	33: `Select`,
+	34: `Focus`,
+	35: `FocusLost`,
+	36: `Change`,
+	37: `Input`,
+	38: `Show`,
+	39: `Close`,
+	40: `Window`,
+	41: `WindowResize`,
+	42: `WindowPaint`,
+	43: `OS`,
+	44: `OSOpenFiles`,
+	45: `Custom`,
 }
 
 // String returns the string representation
@@ -577,6 +655,10 @@ func (i Types) String() string {
 // error if the string is invalid.
 func (i *Types) SetString(s string) error {
 	if val, ok := _TypesNameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+	if val, ok := _TypesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -653,7 +735,9 @@ func _EventFlagsNoOp() {
 
 var _EventFlagsNameToValueMap = map[string]EventFlags{
 	`Handled`: 0,
+	`handled`: 0,
 	`Unique`:  1,
+	`unique`:  1,
 }
 
 var _EventFlagsDescMap = map[EventFlags]string{
@@ -711,6 +795,8 @@ func (i *EventFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _EventFlagsNameToValueMap[flg]; ok {
+			i.SetFlag(true, &val)
+		} else if val, ok := _EventFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue
@@ -820,13 +906,21 @@ func _WinActionsNoOp() {
 
 var _WinActionsNameToValueMap = map[string]WinActions{
 	`NoWinAction`:  0,
+	`nowinaction`:  0,
 	`Close`:        1,
+	`close`:        1,
 	`Minimize`:     2,
+	`minimize`:     2,
 	`Move`:         3,
+	`move`:         3,
 	`Focus`:        4,
+	`focus`:        4,
 	`FocusLost`:    5,
+	`focuslost`:    5,
 	`Show`:         6,
+	`show`:         6,
 	`ScreenUpdate`: 7,
+	`screenupdate`: 7,
 }
 
 var _WinActionsDescMap = map[WinActions]string{
@@ -865,6 +959,10 @@ func (i WinActions) String() string {
 // error if the string is invalid.
 func (i *WinActions) SetString(s string) error {
 	if val, ok := _WinActionsNameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+	if val, ok := _WinActionsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}

@@ -54,6 +54,9 @@ type EventMgr struct {
 	// LastClickWidget is the last widget that has been clicked on
 	LastClickWidget Widget
 
+	// LastDoubleClickWidget is the last widget that has been clicked on
+	LastDoubleClickWidget Widget
+
 	// LastClickTime is the time the last widget was clicked on
 	LastClickTime time.Time
 
@@ -368,25 +371,37 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 				if sc.SelectedWidgetChan != nil {
 					sc.SelectedWidgetChan <- up
 				}
-				sentDouble := false
-				if em.LastClickWidget == up && time.Since(em.LastClickTime) < DeviceSettings.DoubleClickInterval {
+				dcInTime := time.Since(em.LastClickTime) < DeviceSettings.DoubleClickInterval
+				em.LastClickTime = time.Now()
+				em.LastClickWidget = up
+				sentMulti := false
+				switch {
+				case em.LastDoubleClickWidget == up && dcInTime:
 					for i := n - 1; i >= 0; i-- {
 						w := em.MouseInBBox[i]
 						wb := w.AsWidget()
 						if !wb.StateIs(states.Disabled) && wb.AbilityIs(abilities.DoubleClickable) {
-							sentDouble = true
+							sentMulti = true
+							wb.Send(events.TripleClick, e)
+							break
+						}
+					}
+				case em.LastClickWidget == up && dcInTime:
+					for i := n - 1; i >= 0; i-- {
+						w := em.MouseInBBox[i]
+						wb := w.AsWidget()
+						if !wb.StateIs(states.Disabled) && wb.AbilityIs(abilities.DoubleClickable) {
+							em.LastDoubleClickWidget = up // not actually who gets the event
+							sentMulti = true
 							wb.Send(events.DoubleClick, e)
 							break
 						}
 					}
 				}
-				if sentDouble {
-					em.LastClickWidget = nil
-					break
+				if !sentMulti {
+					em.LastDoubleClickWidget = nil
+					up.Send(events.Click, e)
 				}
-				up.Send(events.Click, e)
-				em.LastClickTime = time.Now()
-				em.LastClickWidget = up
 			case events.Right: // note: automatically gets Control+Left
 				up.Send(events.ContextMenu, e)
 			}
