@@ -39,6 +39,7 @@ func main() {
 	inputs(ts)
 	layouts(ts)
 	values(ts)
+	other(ts)
 
 	b.NewWindow().Run().Wait()
 }
@@ -330,4 +331,14 @@ func hello(firstName string, lastName string, age int, likesGo bool) (greeting s
 		greeting += "You should reconsider what programming languages you like."
 	}
 	return
+}
+
+func other(ts *gi.Tabs) {
+	tab := ts.NewTab("Other")
+
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Other")
+
+	gi.NewLabel(tab).SetType(gi.LabelBodyLarge).SetText(`Other features of the Goki framework`)
+
+	gi.NewMeter(tab).SetValue(0.5)
 }
