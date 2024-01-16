@@ -31,6 +31,7 @@ func (sc *Scene) AssertRender(t images.TestingT, filename string, fun ...func())
 	rw := sc.RenderWin()
 	rw.NoEventsChan = make(chan struct{})
 	<-rw.NoEventsChan
+	rw.NoEventsChan = nil
 
 	sc.AssertPixels(t, filename)
 	sc.Close()
