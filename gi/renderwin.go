@@ -254,7 +254,7 @@ func (w *RenderWin) SetName(name string) {
 		if wgp != nil {
 			WinGeomMgr.SettingStart()
 			if w.GoosiWin.Size() != wgp.Size() || w.GoosiWin.Position() != wgp.Pos() {
-				if WinGeomTrace {
+				if DebugSettings.WinGeomTrace {
 					log.Printf("WinGeomPrefs: SetName setting geom for window: %v pos: %v size: %v\n", w.Name, wgp.Pos(), wgp.Size())
 				}
 				w.GoosiWin.SetGeom(wgp.Pos(), wgp.Size())
@@ -399,7 +399,7 @@ func (w *RenderWin) Resized() {
 	rctx.LogicalDPI = w.LogicalDPI()
 	// fmt.Printf("resize dpi: %v\n", w.LogicalDPI())
 	w.MainStageMgr.Resize(rg)
-	if WinGeomTrace {
+	if DebugSettings.WinGeomTrace {
 		log.Printf("WinGeomPrefs: recording from Resize\n")
 	}
 	WinGeomMgr.RecordPref(w)
@@ -672,7 +672,7 @@ func (w *RenderWin) HandleWindowEvents(e events.Event) {
 		case events.WinMove:
 			e.SetHandled()
 			// fmt.Printf("win move: %v\n", w.GoosiWin.Position())
-			if WinGeomTrace {
+			if DebugSettings.WinGeomTrace {
 				log.Printf("WinGeomPrefs: recording from Move\n")
 			}
 			WinGeomMgr.RecordPref(w)

@@ -23,9 +23,6 @@ var (
 	// WinGeomMgr is the manager of window geometry preferences
 	WinGeomMgr = WinGeomPrefsMgr{}
 
-	// WinGeomTrace logs window geometry saving / loading functions
-	WinGeomTrace = false
-
 	ErrWinGeomNoLock = errors.New("WinGeom could not lock lock file")
 )
 
@@ -245,21 +242,21 @@ func (mgr *WinGeomPrefsMgr) RecordPref(win *RenderWin) {
 	}
 	wsz := win.GoosiWin.Size()
 	if wsz == (image.Point{}) {
-		if WinGeomTrace {
+		if DebugSettings.WinGeomTrace {
 			log.Printf("WinGeomPrefs: RecordPref: NOT storing null size for win: %v\n", win.Name)
 		}
 		return
 	}
 	pos := win.GoosiWin.Position()
 	if pos.X == -32000 || pos.Y == -32000 { // windows badness
-		if WinGeomTrace {
+		if DebugSettings.WinGeomTrace {
 			log.Printf("WinGeomPrefs: RecordPref: NOT storing very negative pos: %v for win: %v\n", pos, win.Name)
 		}
 		return
 	}
 	mgr.Mu.Lock()
 	if mgr.SettingNoSave {
-		if WinGeomTrace {
+		if DebugSettings.WinGeomTrace {
 			log.Printf("WinGeomPrefs: RecordPref: SettingNoSave so NOT storing for win: %v\n", win.Name)
 		}
 		mgr.Mu.Unlock()
@@ -296,7 +293,7 @@ func (mgr *WinGeomPrefsMgr) AbortSave() {
 	if mgr.saveTimer != nil {
 		mgr.saveTimer.Stop()
 		mgr.saveTimer = nil
-		if WinGeomTrace {
+		if DebugSettings.WinGeomTrace {
 			if len(mgr.Cache) == 0 {
 				log.Printf("WinGeomPrefs: AbortSave: no cached geoms but timer was != nil -- probably already saved\n")
 			} else {
@@ -304,7 +301,7 @@ func (mgr *WinGeomPrefsMgr) AbortSave() {
 			}
 		}
 	} else {
-		if WinGeomTrace {
+		if DebugSettings.WinGeomTrace {
 			log.Printf("WinGeomPrefs: AbortSave: no saveTimer -- already happened or nothing to save\n")
 		}
 	}
@@ -328,7 +325,7 @@ func (mgr *WinGeomPrefsMgr) SaveCached() {
 				mgr.Geoms[winName] = make(map[string]RenderWinGeom)
 			}
 			mgr.Geoms[winName][sc.Name] = wgr
-			if WinGeomTrace {
+			if DebugSettings.WinGeomTrace {
 				log.Printf("WinGeomPrefs: RecordPref: Saving for window: %v pos: %v size: %v  screen: %v  dpi: %v  device pixel ratio: %v\n", winName, wgr.Pos(), wgr.Size(), sc.Name, sc.LogicalDPI, sc.DevicePixelRatio)
 			}
 		}
@@ -359,14 +356,14 @@ func (mgr *WinGeomPrefsMgr) Pref(winName string, scrn *goosi.Screen) *RenderWinG
 
 	if scrn == nil {
 		scrn = goosi.TheApp.Screen(0)
-		if WinGeomTrace {
+		if DebugSettings.WinGeomTrace {
 			log.Printf("WinGeomPrefs: Pref: scrn is nil, using scrn 0: %v\n", scrn.Name)
 		}
 	}
 	wp, ok := wps[scrn.Name]
 	if ok {
 		wp.ConstrainGeom(scrn)
-		if WinGeomTrace {
+		if DebugSettings.WinGeomTrace {
 			log.Printf("WinGeomPrefs: Pref: Setting geom for window: %v pos: %v size: %v  screen: %v  dpi: %v  device pixel ratio: %v\n", winName, wp.Pos(), wp.Size(), scrn.Name, scrn.LogicalDPI, scrn.DevicePixelRatio)
 		}
 		return &wp
@@ -392,21 +389,21 @@ func (mgr *WinGeomPrefsMgr) DeleteAll() {
 func (mgr *WinGeomPrefsMgr) RestoreAll() {
 	RenderWinGlobalMu.Lock()
 	defer RenderWinGlobalMu.Unlock()
-	if WinGeomTrace {
+	if DebugSettings.WinGeomTrace {
 		log.Printf("WinGeomPrefs: RestoreAll: starting\n")
 	}
 	mgr.SettingStart()
 	for _, w := range AllRenderWins {
 		wgp := mgr.Pref(w.Title, w.GoosiWin.Screen())
 		if wgp != nil {
-			if WinGeomTrace {
+			if DebugSettings.WinGeomTrace {
 				log.Printf("WinGeomPrefs: RestoreAll: restoring geom for window: %v pos: %v size: %v\n", w.Name, wgp.Pos(), wgp.Size())
 			}
 			w.GoosiWin.SetGeom(wgp.Pos(), wgp.Size())
 		}
 	}
 	mgr.SettingEnd()
-	if WinGeomTrace {
+	if DebugSettings.WinGeomTrace {
 		log.Printf("WinGeomPrefs: RestoreAll: done\n")
 	}
 }

@@ -1128,7 +1128,6 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 		e.SetHandled()
 	case keyfun.Refresh:
 		e.SetHandled()
-		fmt.Printf("Win: %v display refreshed\n", sc.Name())
 		goosi.TheApp.GetScreens()
 		UpdateAll()
 		WinGeomMgr.RestoreAll()
