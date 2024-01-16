@@ -12,6 +12,7 @@ package mat32
 
 import (
 	"math"
+	"strconv"
 
 	"github.com/chewxy/math32"
 )
@@ -844,13 +845,21 @@ func IntMultipleGE(val, mod float32) float32 {
 // Truncate rounds a float32 number to the given level of precision,
 // which the number of significant digits to include in the result.
 func Truncate(val float32, prec int) float32 {
-	pow := Pow(10, float32(prec))
-	return Round(val*pow) / pow
+	frep := strconv.FormatFloat(float64(val), 'g', prec, 32)
+	tval, _ := strconv.ParseFloat(frep, 32)
+	return float32(tval)
+	// note: this unfortunately does not work.  also Pow(prec) is not likely to be that much faster ;)
+	// pow := Pow(10, float32(prec))
+	// return Round(val*pow) / pow
 }
 
 // Truncate64 rounds a float64 number to the given level of precision,
 // which the number of significant digits to include in the result.
 func Truncate64(val float64, prec int) float64 {
-	pow := math.Pow(10, float64(prec))
-	return math.Round(val*pow) / pow
+	frep := strconv.FormatFloat(val, 'g', prec, 64)
+	val, _ = strconv.ParseFloat(frep, 64)
+	return val
+	// note: this unfortunately does not work.  also Pow(prec) is not likely to be that much faster ;)
+	// pow := math.Pow(10, float64(prec))
+	// return math.Round(val*pow) / pow
 }
