@@ -142,6 +142,10 @@ type Event interface {
 	// and the Handled flag is reset.  This is suitable for repurposing.
 	Clone() Event
 
+	// NewFromClone returns a duplicate of this event with the basic event parameters
+	// copied, and type set to given type.  The resulting type is ready for sending.
+	NewFromClone(typ Types) Event
+
 	// SetTime sets the event time to Now
 	SetTime()
 

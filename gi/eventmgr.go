@@ -377,24 +377,30 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 				sentMulti := false
 				switch {
 				case em.LastDoubleClickWidget == up && dcInTime:
+					tce := e.NewFromClone(events.TripleClick)
 					for i := n - 1; i >= 0; i-- {
 						w := em.MouseInBBox[i]
 						wb := w.AsWidget()
 						if !wb.StateIs(states.Disabled) && wb.AbilityIs(abilities.DoubleClickable) {
 							sentMulti = true
-							wb.Send(events.TripleClick, e)
-							break
+							w.HandleEvent(tce)
+							if tce.IsHandled() {
+								break
+							}
 						}
 					}
 				case em.LastClickWidget == up && dcInTime:
+					dce := e.NewFromClone(events.DoubleClick)
 					for i := n - 1; i >= 0; i-- {
 						w := em.MouseInBBox[i]
 						wb := w.AsWidget()
 						if !wb.StateIs(states.Disabled) && wb.AbilityIs(abilities.DoubleClickable) {
 							em.LastDoubleClickWidget = up // not actually who gets the event
 							sentMulti = true
-							wb.Send(events.DoubleClick, e)
-							break
+							w.HandleEvent(dce)
+							if dce.IsHandled() {
+								break
+							}
 						}
 					}
 				}

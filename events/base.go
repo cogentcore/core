@@ -253,3 +253,11 @@ func (ev Base) Clone() Event {
 	nb.Flags.SetFlag(false, Handled)
 	return nb
 }
+
+func (ev Base) NewFromClone(typ Types) Event {
+	e := ev.Clone()
+	eb := e.AsBase()
+	eb.Typ = typ
+	eb.ClearHandled()
+	return e
+}
