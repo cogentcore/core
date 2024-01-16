@@ -42,7 +42,7 @@ func (m *Meter) SetStyles() {
 	m.Style(func(s *styles.Style) {
 		m.ValueColor = colors.C(colors.Scheme.Primary.Base)
 		s.Background = colors.C(colors.Scheme.SurfaceVariant)
-		s.Border.Radius = styles.BorderRadiusExtraSmall
+		s.Border.Radius = styles.BorderRadiusFull
 	})
 	m.StyleFinal(func(s *styles.Style) {
 		if s.Direction == styles.Row {
@@ -63,15 +63,15 @@ func (m *Meter) Render() {
 }
 
 func (m *Meter) RenderMeter() {
-	_, st := m.RenderLock()
+	pc, st := m.RenderLock()
 	defer m.RenderUnlock()
 	m.RenderStdBox(st)
 
 	if m.ValueColor != nil {
 		dim := m.Styles.Direction.Dim()
 		prop := (m.Value - m.Min) / (m.Max - m.Min)
-		pos := m.Geom.Pos.Content.AddDim(dim, prop*m.Geom.Size.Actual.Content.Dim(dim))
 		size := m.Geom.Size.Actual.Content.MulDim(dim, prop)
-		m.RenderBoxImpl(pos, size, st.Border)
+		pc.FillStyle.Color = m.ValueColor
+		m.RenderBoxImpl(m.Geom.Pos.Content, size, st.Border)
 	}
 }
