@@ -114,6 +114,18 @@ func (ed *Editor) RenderCursor(on bool) {
 	if ed == nil || ed.This() == nil {
 		return
 	}
+	if !on {
+		if ed.Sc == nil {
+			return
+		}
+		ms := ed.Sc.Stage.Main
+		if ms == nil {
+			return
+		}
+		spnm := ed.CursorSpriteName()
+		ms.Sprites.InactivateSprite(spnm)
+		return
+	}
 	if !ed.This().(gi.Widget).IsVisible() {
 		return
 	}

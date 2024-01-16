@@ -54,6 +54,10 @@ type TreeViewer interface {
 	// The base version does nothing.
 	OnClose()
 
+	// OnDoubleClick is called when a node is double-clicked
+	// The base version does ToggleClose
+	OnDoubleClick(e events.Event)
+
 	// UpdateBranchIcons is called during DoLayout to update branch icons
 	// when everything should be configured, prior to rendering.
 	UpdateBranchIcons()
@@ -299,9 +303,7 @@ func (tv *TreeView) SetStyles() {
 				if tv.This() == nil || tv.Is(ki.Deleted) {
 					return
 				}
-				if tv.HasChildren() {
-					tv.ToggleClose()
-				}
+				tv.This().(TreeViewer).OnDoubleClick(e)
 			})
 			w.On(events.DragStart, func(e events.Event) {
 				if tv.This() == nil || tv.Is(ki.Deleted) {
@@ -1180,6 +1182,12 @@ func (tv *TreeView) Close() {
 // OnOpen is called when a node is opened.
 // The base version does nothing.
 func (tv *TreeView) OnOpen() {
+}
+
+func (tv *TreeView) OnDoubleClick(e events.Event) {
+	if tv.HasChildren() {
+		tv.ToggleClose()
+	}
 }
 
 // CanOpen returns true if the node is able to open.

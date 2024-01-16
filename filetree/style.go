@@ -65,8 +65,12 @@ func (fn *Node) SetStyles() {
 				fn.OpenEmptyDir()
 			})
 			parts.OnDoubleClick(func(e events.Event) {
-				if fn.OpenEmptyDir() {
-					e.SetHandled()
+				if fn.FRoot != nil && fn.FRoot.DoubleClickFun != nil {
+					fn.FRoot.DoubleClickFun(e)
+				} else {
+					if fn.IsDir() && fn.OpenEmptyDir() {
+						e.SetHandled()
+					}
 				}
 			})
 		case "parts/branch":

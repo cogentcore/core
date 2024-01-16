@@ -1189,6 +1189,18 @@ func (tf *TextField) RenderCursor(on bool) {
 	if tf == nil || tf.This() == nil {
 		return
 	}
+	if !on {
+		if tf.Sc == nil {
+			return
+		}
+		ms := tf.Sc.Stage.Main
+		if ms == nil {
+			return
+		}
+		spnm := fmt.Sprintf("%v-%v", TextFieldSpriteName, tf.FontHeight)
+		ms.Sprites.InactivateSprite(spnm)
+		return
+	}
 	if !tf.This().(Widget).IsVisible() {
 		return
 	}

@@ -363,7 +363,7 @@ func (fb *FileBrowse) ConfigSplits() {
 				}
 			}
 		})
-		fb.Files.OnDoubleClick(func(e events.Event) {
+		fb.Files.DoubleClickFun = func(e events.Event) {
 			e.SetHandled()
 			if len(fb.Files.SelectedNodes) > 0 {
 				sn, ok := fb.Files.SelectedNodes[0].This().(*filetree.Node)
@@ -371,7 +371,7 @@ func (fb *FileBrowse) ConfigSplits() {
 					fb.FileNodeOpened(sn)
 				}
 			}
-		})
+		}
 		split.SetSplits(.2, .4, .4)
 		split.UpdateEnd(updt)
 	}
@@ -382,7 +382,13 @@ func (fb *FileBrowse) FileNodeSelected(fn *filetree.Node) {
 }
 
 func (fb *FileBrowse) FileNodeOpened(fn *filetree.Node) {
-	if !fn.IsDir() {
+	if fn.IsDir() {
+		if !fn.HasChildren() {
+			fn.OpenEmptyDir()
+		} else {
+			fn.ToggleClose()
+		}
+	} else {
 		fb.ViewFileNode(fn)
 		fn.UpdateNode()
 	}

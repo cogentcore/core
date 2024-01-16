@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"goki.dev/events"
 	"goki.dev/gi"
 	"goki.dev/glop/dirs"
 	"goki.dev/goosi"
@@ -47,6 +48,10 @@ type Tree struct {
 
 	// type of node to create -- defaults to filetree.Node but can use custom node types
 	NodeType *gti.Type `view:"-" json:"-" xml:"-"`
+
+	// DoubleClickFun is a function to call when a node receives a DoubleClick event.
+	// if not set, defaults to OpenEmptyDir() (for folders)
+	DoubleClickFun func(e events.Event) `view:"-" json:"-" xml:"-"`
 
 	// if true, we are in midst of an OpenAll call -- nodes should open all dirs
 	InOpenAll bool `set:"-"`
