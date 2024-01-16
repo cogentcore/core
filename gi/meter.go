@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"image"
 
 	"goki.dev/colors"
@@ -53,6 +54,15 @@ func (m *Meter) SetStyles() {
 			s.Min.X.Em(0.5)
 		}
 	})
+}
+
+func (m *Meter) WidgetTooltip() string {
+	res := m.Tooltip
+	if res != "" {
+		res += " "
+	}
+	res += fmt.Sprintf("(value: %9.4g, minimum: %g, maximum: %g)", m.Value, m.Min, m.Max)
+	return res
 }
 
 func (m *Meter) Render() {

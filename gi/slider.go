@@ -394,9 +394,7 @@ func (sr *Slider) WidgetTooltip() string {
 	if res != "" {
 		res += " "
 	}
-	res += fmt.Sprintf("(value: %9.4g, ", sr.Value)
-	res += fmt.Sprintf("minimum: %g, ", sr.Min)
-	res += fmt.Sprintf("maximum: %g)", sr.Max)
+	res += fmt.Sprintf("(value: %9.4g, minimum: %g, maximum: %g)", sr.Value, sr.Min, sr.Max)
 	return res
 }
 
