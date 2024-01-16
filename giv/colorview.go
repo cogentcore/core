@@ -80,7 +80,7 @@ func (cv *ColorView) ConfigWidget() {
 		s.Direction = styles.Column
 	})
 
-	bs := func(s *styles.Style) {
+	sf := func(s *styles.Style) {
 		s.Min.Y.Em(2)
 		s.Min.X.Em(1)
 		s.Max.X.Em(40)
@@ -96,7 +96,6 @@ func (cv *ColorView) ConfigWidget() {
 		cv.SetHCT(cv.Color)
 	})
 	hue.Style(func(s *styles.Style) {
-		bs(s)
 		hue.ValueColor = nil
 		hue.ThumbColor = colors.C(cv.Color)
 		g := gradient.NewLinear()
@@ -106,6 +105,7 @@ func (cv *ColorView) ConfigWidget() {
 		}
 		s.Background = g
 	})
+	hue.StyleFinal(sf)
 
 	chroma := gi.NewSlider(cv, "chroma").SetMin(0).SetMax(150).SetValue(cv.Color.Chroma).
 		SetTooltip("The chroma, which is the colorfulness/saturation of the color")
@@ -114,7 +114,6 @@ func (cv *ColorView) ConfigWidget() {
 		cv.SetHCT(cv.Color)
 	})
 	chroma.Style(func(s *styles.Style) {
-		bs(s)
 		chroma.ValueColor = nil
 		chroma.ThumbColor = colors.C(cv.Color)
 		g := gradient.NewLinear()
@@ -124,6 +123,7 @@ func (cv *ColorView) ConfigWidget() {
 		}
 		s.Background = g
 	})
+	chroma.StyleFinal(sf)
 
 	tone := gi.NewSlider(cv, "tone").SetMin(0).SetMax(100).SetValue(cv.Color.Tone).
 		SetTooltip("The tone, which is the lightness of the color")
@@ -132,7 +132,6 @@ func (cv *ColorView) ConfigWidget() {
 		cv.SetHCT(cv.Color)
 	})
 	tone.Style(func(s *styles.Style) {
-		bs(s)
 		tone.ValueColor = nil
 		tone.ThumbColor = colors.C(cv.Color)
 		g := gradient.NewLinear()
@@ -142,7 +141,7 @@ func (cv *ColorView) ConfigWidget() {
 		}
 		s.Background = g
 	})
-
+	tone.StyleFinal(sf)
 }
 
 /*
