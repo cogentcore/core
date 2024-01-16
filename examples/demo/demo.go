@@ -33,26 +33,26 @@ func main() {
 
 	ts := gi.NewTabs(b)
 
-	makeHome(ts)
-	makeText(ts)
-	makeButtons(ts)
-	makeInputs(ts)
-	makeLayouts(ts)
-	makeValues(ts)
+	home(ts)
+	text(ts)
+	buttons(ts)
+	inputs(ts)
+	layouts(ts)
+	values(ts)
 
 	b.NewWindow().Run().Wait()
 }
 
-func makeHome(ts *gi.Tabs) {
-	home := ts.NewTab("Home")
-	home.Style(func(s *styles.Style) {
+func home(ts *gi.Tabs) {
+	tab := ts.NewTab("Home")
+	tab.Style(func(s *styles.Style) {
 		s.Justify.Content = styles.Center
 		s.Align.Content = styles.Center
 		s.Align.Items = styles.Center
 		s.Text.Align = styles.Center
 	})
 
-	sv := gi.NewSVG(home)
+	sv := gi.NewSVG(tab)
 	sv.SetReadOnly(true)
 	grr.Log(sv.ReadBytes(icon))
 	sv.Style(func(s *styles.Style) {
@@ -60,45 +60,45 @@ func makeHome(ts *gi.Tabs) {
 		s.Min.Set(units.Dp(256))
 	})
 
-	gi.NewLabel(home).SetType(gi.LabelDisplayLarge).SetText("The Goki Demo")
+	gi.NewLabel(tab).SetType(gi.LabelDisplayLarge).SetText("The Goki Demo")
 
-	gi.NewLabel(home).SetType(gi.LabelTitleLarge).SetText(`A <b>demonstration</b> of the <i>various</i> features of the <a href="https://goki.dev">Goki</a> 2D and 3D Go GUI <u>framework</u>`)
+	gi.NewLabel(tab).SetType(gi.LabelTitleLarge).SetText(`A <b>demonstration</b> of the <i>various</i> features of the <a href="https://goki.dev">Goki</a> 2D and 3D Go GUI <u>framework</u>`)
 }
 
-func makeText(ts *gi.Tabs) {
-	text := ts.NewTab("Text")
+func text(ts *gi.Tabs) {
+	tab := ts.NewTab("Text")
 
-	gi.NewLabel(text).SetType(gi.LabelHeadlineLarge).SetText("Text")
-	gi.NewLabel(text).SetText(
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Text")
+	gi.NewLabel(tab).SetText(
 		`Goki provides fully customizable text elements that can be styled in any way you want. Also, there are pre-configured style types for text that allow you to easily create common text types.`)
 
 	for _, typ := range gi.LabelTypesValues() {
 		s := sentence.Case(typ.String())
-		gi.NewLabel(text, "label"+typ.String()).SetType(typ).SetText(s)
+		gi.NewLabel(tab, "label"+typ.String()).SetType(typ).SetText(s)
 	}
 }
 
-func makeButtons(ts *gi.Tabs) {
-	buttons := ts.NewTab("Buttons")
+func buttons(ts *gi.Tabs) {
+	tab := ts.NewTab("Buttons")
 
-	gi.NewLabel(buttons).SetType(gi.LabelHeadlineLarge).SetText("Buttons")
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Buttons")
 
-	gi.NewLabel(buttons).SetText(
+	gi.NewLabel(tab).SetText(
 		`Goki provides customizable buttons that support various events and can be styled in any way you want. Also, there are pre-configured style types for buttons that allow you to achieve common functionality with ease. All buttons support any combination of a label, icon, and indicator.`)
 
 	makeRow := func() gi.Widget {
-		return gi.NewLayout(buttons).Style(func(s *styles.Style) {
+		return gi.NewLayout(tab).Style(func(s *styles.Style) {
 			s.Wrap = true
 			s.Align.Items = styles.Center
 		})
 	}
 
-	gi.NewLabel(buttons).SetType(gi.LabelHeadlineSmall).SetText("Standard buttons")
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineSmall).SetText("Standard buttons")
 	brow := makeRow()
 	browt := makeRow()
 	browi := makeRow()
 
-	gi.NewLabel(buttons).SetType(gi.LabelHeadlineSmall).SetText("Menu buttons")
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineSmall).SetText("Menu buttons")
 	mbrow := makeRow()
 	mbrowt := makeRow()
 	mbrowi := makeRow()
@@ -179,31 +179,31 @@ func makeButtons(ts *gi.Tabs) {
 	}
 }
 
-func makeInputs(ts *gi.Tabs) {
-	inputs := ts.NewTab("Inputs")
+func inputs(ts *gi.Tabs) {
+	tab := ts.NewTab("Inputs")
 
-	gi.NewLabel(inputs).SetType(gi.LabelHeadlineLarge).SetText("Inputs")
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Inputs")
 
-	gi.NewLabel(inputs).SetType(gi.LabelBodyLarge).SetText(
+	gi.NewLabel(tab).SetType(gi.LabelBodyLarge).SetText(
 		`Goki provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.`)
 
-	gi.NewTextField(inputs).SetPlaceholder("Filled")
-	gi.NewTextField(inputs).SetType(gi.TextFieldOutlined).SetPlaceholder("Outlined")
-	gi.NewTextField(inputs).AddClearButton()
-	gi.NewTextField(inputs).SetType(gi.TextFieldOutlined).AddClearButton()
-	gi.NewTextField(inputs).AddClearButton().SetLeadingIcon(icons.Search)
-	gi.NewTextField(inputs).SetType(gi.TextFieldOutlined).AddClearButton().SetLeadingIcon(icons.Search)
-	gi.NewTextField(inputs).SetTypePassword().SetPlaceholder("Password")
-	gi.NewTextField(inputs).SetType(gi.TextFieldOutlined).SetTypePassword().SetPlaceholder("Password")
+	gi.NewTextField(tab).SetPlaceholder("Filled")
+	gi.NewTextField(tab).SetType(gi.TextFieldOutlined).SetPlaceholder("Outlined")
+	gi.NewTextField(tab).AddClearButton()
+	gi.NewTextField(tab).SetType(gi.TextFieldOutlined).AddClearButton()
+	gi.NewTextField(tab).AddClearButton().SetLeadingIcon(icons.Search)
+	gi.NewTextField(tab).SetType(gi.TextFieldOutlined).AddClearButton().SetLeadingIcon(icons.Search)
+	gi.NewTextField(tab).SetTypePassword().SetPlaceholder("Password")
+	gi.NewTextField(tab).SetType(gi.TextFieldOutlined).SetTypePassword().SetPlaceholder("Password")
 
-	gi.NewLabeledTextField(inputs).SetLabel("Labeled text field").SetHintText("Hint text")
+	gi.NewLabeledTextField(tab).SetLabel("Labeled text field").SetHintText("Hint text")
 
-	spinners := gi.NewLayout(inputs, "spinners")
+	spinners := gi.NewLayout(tab, "spinners")
 
 	gi.NewSpinner(spinners).SetStep(5).SetMin(-50).SetMax(100).SetValue(15)
 	gi.NewSpinner(spinners).SetFormat("%#X").SetStep(1).SetMax(255).SetValue(44)
 
-	choosers := gi.NewLayout(inputs, "choosers")
+	choosers := gi.NewLayout(tab, "choosers")
 
 	fruits := []any{"Apple", "Apricot", "Blueberry", "Blackberry", "Peach", "Strawberry"}
 	fruitDescs := []string{
@@ -217,21 +217,21 @@ func makeInputs(ts *gi.Tabs) {
 
 	gi.NewChooser(choosers).SetPlaceholder("Select a fruit").SetItems(fruits...).SetTooltips(fruitDescs...)
 	gi.NewChooser(choosers).SetPlaceholder("Select a fruit").SetItems(fruits...).SetTooltips(fruitDescs...).SetType(gi.ChooserOutlined)
-	gi.NewChooser(inputs).SetEditable(true).SetPlaceholder("Select or type a fruit").SetItems(fruits...).SetTooltips(fruitDescs...)
-	gi.NewChooser(inputs).SetEditable(true).SetPlaceholder("Select or type a fruit").SetItems(fruits...).SetTooltips(fruitDescs...).SetType(gi.ChooserOutlined)
+	gi.NewChooser(tab).SetEditable(true).SetPlaceholder("Select or type a fruit").SetItems(fruits...).SetTooltips(fruitDescs...)
+	gi.NewChooser(tab).SetEditable(true).SetPlaceholder("Select or type a fruit").SetItems(fruits...).SetTooltips(fruitDescs...).SetType(gi.ChooserOutlined)
 
-	gi.NewSwitch(inputs).SetText("Toggle")
+	gi.NewSwitch(tab).SetText("Toggle")
 
-	gi.NewSwitches(inputs).SetItems("Switch 1", "Switch 2", "Switch 3").
+	gi.NewSwitches(tab).SetItems("Switch 1", "Switch 2", "Switch 3").
 		SetTooltips("A description for Switch 1", "A description for Switch 2", "A description for Switch 3")
 
-	gi.NewSwitches(inputs).SetType(gi.SwitchChip).SetItems("Chip 1", "Chip 2", "Chip 3").
+	gi.NewSwitches(tab).SetType(gi.SwitchChip).SetItems("Chip 1", "Chip 2", "Chip 3").
 		SetTooltips("A description for Chip 1", "A description for Chip 2", "A description for Chip 3")
 
-	gi.NewSwitches(inputs).SetType(gi.SwitchCheckbox).SetItems("Checkbox 1", "Checkbox 2", "Checkbox 3").
+	gi.NewSwitches(tab).SetType(gi.SwitchCheckbox).SetItems("Checkbox 1", "Checkbox 2", "Checkbox 3").
 		SetTooltips("A description for Checkbox 1", "A description for Checkbox 2", "A description for Checkbox 3")
 
-	is := gi.NewSwitches(inputs).SetType(gi.SwitchCheckbox).SetItems("Indeterminate 1", "Indeterminate 2", "Indeterminate 3").
+	is := gi.NewSwitches(tab).SetType(gi.SwitchCheckbox).SetItems("Indeterminate 1", "Indeterminate 2", "Indeterminate 3").
 		SetTooltips("A description for Checkbox 1", "A description for Checkbox 2", "A description for Checkbox 3")
 	is.Config()
 	for _, swi := range is.Kids {
@@ -239,10 +239,10 @@ func makeInputs(ts *gi.Tabs) {
 		sw.SetState(true, states.Indeterminate)
 	}
 
-	gi.NewSwitches(inputs).SetType(gi.SwitchRadioButton).SetMutex(true).SetItems("Radio Button 1", "Radio Button 2", "Radio Button 3").
+	gi.NewSwitches(tab).SetType(gi.SwitchRadioButton).SetMutex(true).SetItems("Radio Button 1", "Radio Button 2", "Radio Button 3").
 		SetTooltips("A description for Radio Button 1", "A description for Radio Button 2", "A description for Radio Button 3")
 
-	is = gi.NewSwitches(inputs).SetType(gi.SwitchRadioButton).SetItems("Indeterminate 1", "Indeterminate 2", "Indeterminate 3").
+	is = gi.NewSwitches(tab).SetType(gi.SwitchRadioButton).SetItems("Indeterminate 1", "Indeterminate 2", "Indeterminate 3").
 		SetTooltips("A description for Radio Button 1", "A description for Radio Button 2", "A description for Radio Button 3")
 	is.Config()
 	for _, swi := range is.Kids {
@@ -250,13 +250,13 @@ func makeInputs(ts *gi.Tabs) {
 		sw.SetState(true, states.Indeterminate)
 	}
 
-	gi.NewSwitches(inputs).SetType(gi.SwitchSegmentedButton).SetMutex(true).SetItems("Segmented Button 1", "Segmented Button 2", "Segmented Button 3").
+	gi.NewSwitches(tab).SetType(gi.SwitchSegmentedButton).SetMutex(true).SetItems("Segmented Button 1", "Segmented Button 2", "Segmented Button 3").
 		SetTooltips("A description for Segmented Button 1", "A description for Segmented Button 2", "A description for Segmented Button 3")
 
-	gi.NewSlider(inputs).SetValue(0.5)
-	gi.NewSlider(inputs).SetValue(0.7).SetState(true, states.Disabled)
+	gi.NewSlider(tab).SetValue(0.5)
+	gi.NewSlider(tab).SetValue(0.7).SetState(true, states.Disabled)
 
-	colsliders := gi.NewLayout(inputs)
+	colsliders := gi.NewLayout(tab)
 
 	gi.NewSlider(colsliders).SetValue(0.3).Style(func(s *styles.Style) {
 		s.Direction = styles.Column
@@ -266,12 +266,12 @@ func makeInputs(ts *gi.Tabs) {
 	})
 }
 
-func makeLayouts(ts *gi.Tabs) {
-	layouts := ts.NewTab("Layouts")
+func layouts(ts *gi.Tabs) {
+	tab := ts.NewTab("Layouts")
 
-	gi.NewLabel(layouts).SetType(gi.LabelHeadlineLarge).SetText("Layout")
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Layout")
 
-	gi.NewLabel(layouts).SetType(gi.LabelBodyLarge).SetText(
+	gi.NewLabel(tab).SetType(gi.LabelBodyLarge).SetText(
 		`Goki provides various adaptable layout types that allow you to easily organize content so that it is easy to use, customize, and understand.`)
 
 	// vw := gi.NewLabel(layouts, "vw", "50vw")
@@ -288,7 +288,7 @@ func makeLayouts(ts *gi.Tabs) {
 	// 	s.Color = colors.Scheme.Primary.OnContainer
 	// })
 
-	sv := gi.NewSplits(layouts)
+	sv := gi.NewSplits(tab)
 
 	left := gi.NewFrame(sv).Style(func(s *styles.Style) {
 		s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
@@ -300,24 +300,24 @@ func makeLayouts(ts *gi.Tabs) {
 	gi.NewLabel(right).SetType(gi.LabelHeadlineMedium).SetText("Right")
 }
 
-func makeValues(ts *gi.Tabs) {
-	values := ts.NewTab("Values")
+func values(ts *gi.Tabs) {
+	tab := ts.NewTab("Values")
 
-	gi.NewLabel(values).SetType(gi.LabelHeadlineLarge).SetText("Values")
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Values")
 
-	gi.NewLabel(values).SetType(gi.LabelBodyLarge).SetText(
+	gi.NewLabel(tab).SetType(gi.LabelBodyLarge).SetText(
 		`Goki provides the giv value system, which allows you to instantly turn Go values and functions into type-specific widgets bound to the original values. This powerful system means that you can automatically turn backend data structures into GUI apps with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.`)
 
-	gi.NewButton(values).SetText("Inspector").OnClick(func(e events.Event) {
+	gi.NewButton(tab).SetText("Inspector").OnClick(func(e events.Event) {
 		giv.InspectorWindow(ts.Sc)
 	})
 
-	giv.NewValue(values, colors.Orange)
-	giv.NewValue(values, time.Now())
-	giv.NewValue(values, 5*time.Minute)
-	giv.NewValue(values, gi.Filename("demo.go"))
-	giv.NewValue(values, giv.ColorMapName("ColdHot"))
-	giv.NewFuncButton(values, hello).SetShowReturn(true)
+	giv.NewValue(tab, colors.Orange)
+	giv.NewValue(tab, time.Now())
+	giv.NewValue(tab, 5*time.Minute)
+	giv.NewValue(tab, gi.Filename("demo.go"))
+	giv.NewValue(tab, giv.ColorMapName("ColdHot"))
+	giv.NewFuncButton(tab, hello).SetShowReturn(true)
 }
 
 // Hello displays a greeting message and an age in weeks based on the given information.
