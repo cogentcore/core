@@ -836,11 +836,7 @@ func IntMultipleGE(val, mod float32) float32 {
 	return Ceil(val/mod) * mod
 }
 
-// TODO(kai): these functions might not work correctly for big numbers
-// (see https://stackoverflow.com/questions/18390266/how-can-we-truncate-float64-type-to-a-particular-precision)
-
-// TODO(kai): should these functions truncate instead of round?
-// if not, should they be called Round*?
+// TODO: maybe make these functions faster at some point
 
 // Truncate rounds a float32 number to the given level of precision,
 // which the number of significant digits to include in the result.
