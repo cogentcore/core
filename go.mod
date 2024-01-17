@@ -25,8 +25,6 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/muesli/termenv v0.15.2
 	github.com/pelletier/go-toml/v2 v2.1.1
-	github.com/pkg/errors v0.9.1
-	github.com/robert-nix/ansihtml v1.0.1
 	golang.org/x/image v0.15.0
 	golang.org/x/mod v0.14.0
 	golang.org/x/net v0.20.0

@@ -21,11 +21,12 @@ import (
 	"syscall/js"
 	"time"
 
+	"errors"
+
 	"github.com/hack-pad/hackpadfs"
 	"github.com/hack-pad/hackpadfs/indexeddb"
 	"github.com/hack-pad/hackpadfs/mem"
 	"github.com/hack-pad/hackpadfs/mount"
-	"github.com/pkg/errors"
 )
 
 // FS represents a filesystem that implements the Node.js fs API.

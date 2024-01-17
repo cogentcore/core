@@ -17,8 +17,9 @@ import (
 	"syscall"
 	"syscall/js"
 
+	"errors"
+
 	"github.com/hack-pad/hackpadfs"
-	"github.com/pkg/errors"
 )
 
 // JsError converts the given error value into a JS error value.
@@ -27,7 +28,7 @@ func JSError(err error, message string, args ...js.Value) js.Value {
 		return js.Null()
 	}
 
-	errMessage := errors.Wrap(err, message).Error()
+	errMessage := fmt.Sprintf("%s: %v", message, err)
 	for _, arg := range args {
 		errMessage += fmt.Sprintf("\n%v", arg)
 	}
