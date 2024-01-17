@@ -7,7 +7,7 @@ import (
 	"log"
 	"strconv"
 
-	"goki.dev/enums"
+	"cogentcore.org/core/enums"
 )
 
 var _PathCommandValues = []PathCommand{0, 1, 2, 3, 4}

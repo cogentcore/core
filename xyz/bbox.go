@@ -5,7 +5,7 @@
 package xyz
 
 import (
-	"goki.dev/mat32"
+	"cogentcore.org/core/mat32"
 )
 
 // BBox contains bounding box and other gross solid properties

@@ -9,7 +9,7 @@
 package raster
 
 import (
-	"goki.dev/mat32"
+	"cogentcore.org/core/mat32"
 	"golang.org/x/image/math/fixed"
 )
 

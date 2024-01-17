@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"goki.dev/fi"
+	"cogentcore.org/core/fi"
 )
 
 // GoPiCacheDir returns the GoPi cache directory for given language, and ensures that it exists

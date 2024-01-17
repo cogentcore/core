@@ -12,9 +12,9 @@ package base
 import (
 	"image"
 
-	"goki.dev/events"
-	"goki.dev/goosi"
-	"goki.dev/mat32"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/mat32"
 )
 
 // WindowSingle contains the data and logic common to all implementations of [goosi.Window]

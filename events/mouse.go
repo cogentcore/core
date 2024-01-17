@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"image"
 
-	"goki.dev/events/key"
-	"goki.dev/mat32"
+	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/mat32"
 )
 
 var (

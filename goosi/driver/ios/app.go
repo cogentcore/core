@@ -15,13 +15,13 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/goosi/driver/base"
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/vgpu"
+	"cogentcore.org/core/vgpu/vdraw"
 	vk "github.com/goki/vulkan"
-	"goki.dev/events"
-	"goki.dev/goosi"
-	"goki.dev/goosi/driver/base"
-	"goki.dev/grr"
-	"goki.dev/vgpu"
-	"goki.dev/vgpu/vdraw"
 )
 
 func Init() {

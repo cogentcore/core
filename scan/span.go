@@ -13,7 +13,7 @@ import (
 	"image/color"
 	"image/draw"
 
-	"goki.dev/colors"
+	"cogentcore.org/core/colors"
 )
 
 const (

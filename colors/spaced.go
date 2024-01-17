@@ -7,8 +7,8 @@ package colors
 import (
 	"image/color"
 
-	"goki.dev/cam/hct"
-	"goki.dev/colors/matcolor"
+	"cogentcore.org/core/cam/hct"
+	"cogentcore.org/core/colors/matcolor"
 )
 
 // Spaced returns a maximally widely-spaced sequence of colors

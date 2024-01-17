@@ -14,10 +14,10 @@ import (
 	"os"
 	"time"
 
-	"goki.dev/fi"
-	"goki.dev/ki"
-	"goki.dev/pi/lex"
-	"goki.dev/pi/parse"
+	"cogentcore.org/core/fi"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/parse"
 )
 
 // Parser is the overall parser for managing the parsing

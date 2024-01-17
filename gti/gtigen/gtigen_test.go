@@ -10,9 +10,9 @@ import (
 	"testing"
 	"text/template"
 
+	"cogentcore.org/core/grease"
+	"cogentcore.org/core/ordmap"
 	"github.com/iancoleman/strcase"
-	"goki.dev/grease"
-	"goki.dev/ordmap"
 )
 
 func TestGenerate(t *testing.T) {
@@ -68,7 +68,7 @@ func TestGenerate(t *testing.T) {
 
 func TestPerson(t *testing.T) {
 	// want := testdata.PersonType
-	// have := gti.TypeByName("goki.dev/gti/gtigen/testdata.Person")
+	// have := gti.TypeByName("cogentcore.org/core/gti/gtigen/testdata.Person")
 	// if have != want {
 	// 	t.Errorf("expected TypeByName to return %v, but got %v", want, have)
 	// }
@@ -79,8 +79,8 @@ func TestPerson(t *testing.T) {
 	// if _, ok := have.Instance.(*testdata.Person); !ok {
 	// 	t.Errorf("expected instance to be a Person, but it is a %T (value %v)", have.Instance, have.Instance)
 	// }
-	// if have.Name != "goki.dev/gti/gtigen/testdata.Person" {
-	// 	t.Errorf("expected name to be 'goki.dev/gti/gtigen/testdata.Person', but got %s", have.Name)
+	// if have.Name != "cogentcore.org/core/gti/gtigen/testdata.Person" {
+	// 	t.Errorf("expected name to be 'cogentcore.org/core/gti/gtigen/testdata.Person', but got %s", have.Name)
 	// }
 	// if len(have.Directives) != 2 {
 	// 	t.Errorf("expected 2 directives, but got %d", len(have.Directives))
@@ -97,7 +97,7 @@ func TestPerson(t *testing.T) {
 }
 
 func BenchmarkIDName(b *testing.B) {
-	const path = "goki.dev/gi.Button"
+	const path = "cogentcore.org/core/gi.Button"
 	for i := 0; i < b.N; i++ {
 		li := strings.LastIndex(path, ".")
 		_ = strcase.ToKebab(path[li+1:])

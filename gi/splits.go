@@ -8,12 +8,12 @@ import (
 	"strconv"
 	"strings"
 
-	"goki.dev/events"
-	"goki.dev/goosi"
-	"goki.dev/ki"
-	"goki.dev/mat32"
-	"goki.dev/states"
-	"goki.dev/styles"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/states"
+	"cogentcore.org/core/styles"
 )
 
 // Config notes: only needs config when number of kids changes

@@ -6,14 +6,14 @@ package video
 
 import (
 	"github.com/zergon321/reisen"
-	"goki.dev/gti"
-	"goki.dev/ki"
-	"goki.dev/ordmap"
+	"cogentcore.org/core/gti"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/ordmap"
 )
 
 // VideoType is the [gti.Type] for [Video]
 var VideoType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/video.Video",
+	Name:       "cogentcore.org/core/video.Video",
 	ShortName:  "video.Video",
 	IDName:     "video",
 	Doc:        "Video represents a video playback widget without any controls.\nSee [Player] for a version with controls.",
@@ -22,7 +22,7 @@ var VideoType = gti.AddType(&gti.Type{
 		{"Media", &gti.Field{Name: "Media", Type: "*github.com/zergon321/reisen.Media", LocalType: "*reisen.Media", Doc: "Media is the video media.", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Image", &gti.Field{Name: "Image", Type: "goki.dev/gi.Image", LocalType: "gi.Image", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Image", &gti.Field{Name: "Image", Type: "cogentcore.org/core/gi.Image", LocalType: "gi.Image", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Video{},

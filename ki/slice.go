@@ -7,7 +7,7 @@ package ki
 import (
 	"fmt"
 
-	"goki.dev/gti"
+	"cogentcore.org/core/gti"
 )
 
 // Slice is just a slice of ki elements: []Ki, providing methods for accessing

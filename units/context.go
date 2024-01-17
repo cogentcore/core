@@ -4,7 +4,7 @@
 
 package units
 
-import "goki.dev/laser"
+import "cogentcore.org/core/laser"
 
 // Context specifies everything about the current context necessary for converting the number
 // into specific display-dependent pixels

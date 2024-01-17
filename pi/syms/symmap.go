@@ -12,8 +12,8 @@ import (
 	"sort"
 	"strings"
 
-	"goki.dev/pi/lex"
-	"goki.dev/pi/token"
+	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/token"
 )
 
 // SymMap is a map between symbol names and their full information.

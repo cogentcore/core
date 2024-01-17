@@ -10,10 +10,10 @@ import (
 	"testing"
 	"unicode"
 
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/laser"
+	"cogentcore.org/core/states"
 	"github.com/iancoleman/strcase"
-	"goki.dev/icons"
-	"goki.dev/laser"
-	"goki.dev/states"
 )
 
 func TestBasic(t *testing.T) {

@@ -10,9 +10,9 @@ import (
 	"strings"
 	"testing"
 
-	"goki.dev/enums"
-	"goki.dev/enums/enumgen/testdata"
-	"goki.dev/grease"
+	"cogentcore.org/core/enums"
+	"cogentcore.org/core/enums/enumgen/testdata"
+	"cogentcore.org/core/grease"
 )
 
 func TestGenerate(t *testing.T) {

@@ -12,17 +12,17 @@ import (
 	"sync"
 	"time"
 
-	"goki.dev/abilities"
-	"goki.dev/cursors"
-	"goki.dev/events"
-	"goki.dev/events/key"
-	"goki.dev/goosi"
-	"goki.dev/grows/images"
-	"goki.dev/grr"
-	"goki.dev/keyfun"
-	"goki.dev/ki"
-	"goki.dev/mat32"
-	"goki.dev/states"
+	"cogentcore.org/core/abilities"
+	"cogentcore.org/core/cursors"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/grows/images"
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/states"
 )
 
 const (

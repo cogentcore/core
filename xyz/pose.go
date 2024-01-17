@@ -5,7 +5,7 @@
 package xyz
 
 import (
-	"goki.dev/mat32"
+	"cogentcore.org/core/mat32"
 )
 
 // Pose contains the full specification of position and orientation,

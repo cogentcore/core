@@ -7,12 +7,12 @@ package desktop
 import (
 	"image"
 
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/mimedata"
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"goki.dev/events"
-	"goki.dev/events/key"
-	"goki.dev/goosi"
-	"goki.dev/mat32"
-	"goki.dev/mimedata"
 )
 
 func GlfwMods(mod glfw.ModifierKey) key.Modifiers {

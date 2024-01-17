@@ -9,8 +9,8 @@ import (
 	"math/rand"
 	"runtime"
 
-	"goki.dev/mat32"
-	"goki.dev/vgpu"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/vgpu"
 )
 
 func init() {

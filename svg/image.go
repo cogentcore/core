@@ -9,9 +9,9 @@ import (
 	"image"
 	"log"
 
-	"goki.dev/grows/images"
-	"goki.dev/mat32"
-	"goki.dev/paint"
+	"cogentcore.org/core/grows/images"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/paint"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/math/f64"
 )

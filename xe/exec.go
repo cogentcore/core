@@ -15,7 +15,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"goki.dev/grog"
+	"cogentcore.org/core/grog"
 )
 
 // Exec executes the command, piping its stdout and stderr to the config

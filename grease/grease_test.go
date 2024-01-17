@@ -13,9 +13,9 @@ import (
 
 	"log/slog"
 
-	"goki.dev/grease/testdata"
-	"goki.dev/grog"
-	"goki.dev/grows/tomls"
+	"cogentcore.org/core/grease/testdata"
+	"cogentcore.org/core/grog"
+	"cogentcore.org/core/grows/tomls"
 )
 
 // TestSubConfig is a sub-struct with special params

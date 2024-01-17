@@ -11,14 +11,14 @@ import (
 	"log/slog"
 	"strings"
 
-	"goki.dev/events"
-	"goki.dev/fi"
-	"goki.dev/gi"
-	"goki.dev/gti"
-	"goki.dev/ki"
-	"goki.dev/laser"
-	"goki.dev/mimedata"
-	"goki.dev/states"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/fi"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/gti"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/laser"
+	"cogentcore.org/core/mimedata"
+	"cogentcore.org/core/states"
 )
 
 // note: see this file has all the SyncNode specific

@@ -8,9 +8,9 @@ import (
 	"image"
 	"math"
 
+	"cogentcore.org/core/mat32"
 	"github.com/anthonynsimon/bild/clone"
 	"github.com/anthonynsimon/bild/convolution"
-	"goki.dev/mat32"
 )
 
 // scipy impl:

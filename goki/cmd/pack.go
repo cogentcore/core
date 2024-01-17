@@ -12,12 +12,12 @@ import (
 	"strings"
 	"text/template"
 
+	"cogentcore.org/core/goki/config"
+	"cogentcore.org/core/goki/rendericon"
+	"cogentcore.org/core/grows/images"
+	"cogentcore.org/core/xe"
 	"github.com/iancoleman/strcase"
 	"github.com/jackmordaunt/icns/v2"
-	"goki.dev/goki/config"
-	"goki.dev/goki/rendericon"
-	"goki.dev/grows/images"
-	"goki.dev/xe"
 )
 
 // Pack builds and packages the app for the target platform.

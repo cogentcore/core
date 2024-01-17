@@ -11,11 +11,11 @@ import (
 	"sync"
 	"time"
 
-	"goki.dev/gi"
-	"goki.dev/ki"
-	"goki.dev/mat32"
-	"goki.dev/pi/lex"
-	"goki.dev/states"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/states"
 )
 
 // ViewBlinkMu is mutex protecting ViewBlink updating and access

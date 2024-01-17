@@ -7,17 +7,17 @@ package gi
 import (
 	"log/slog"
 
-	"goki.dev/abilities"
-	"goki.dev/colors"
-	"goki.dev/cursors"
-	"goki.dev/events"
-	"goki.dev/events/key"
-	"goki.dev/icons"
-	"goki.dev/keyfun"
-	"goki.dev/ki"
-	"goki.dev/states"
-	"goki.dev/styles"
-	"goki.dev/units"
+	"cogentcore.org/core/abilities"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/cursors"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/states"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 // todo: autoRepeat, autoRepeatInterval, autoRepeatDelay

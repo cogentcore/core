@@ -5,9 +5,9 @@
 package giv
 
 import (
-	"goki.dev/events"
-	"goki.dev/gi"
-	"goki.dev/icons"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/icons"
 )
 
 func init() {

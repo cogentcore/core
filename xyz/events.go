@@ -9,10 +9,10 @@ import (
 	"image"
 	"strings"
 
-	"goki.dev/events"
-	"goki.dev/events/key"
-	"goki.dev/ki"
-	"goki.dev/mat32"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/mat32"
 )
 
 var (

@@ -7,7 +7,7 @@ package events
 import (
 	"fmt"
 
-	"goki.dev/events/key"
+	"cogentcore.org/core/events/key"
 )
 
 // events.Key is a low-level immediately-generated key event, tracking press

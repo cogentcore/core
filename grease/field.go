@@ -12,9 +12,9 @@ import (
 
 	"slices"
 
+	"cogentcore.org/core/laser"
+	"cogentcore.org/core/ordmap"
 	"github.com/iancoleman/strcase"
-	"goki.dev/laser"
-	"goki.dev/ordmap"
 )
 
 // Field represents a struct field in a configuration struct.

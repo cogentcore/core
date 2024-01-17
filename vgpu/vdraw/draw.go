@@ -11,9 +11,9 @@ import (
 	"log"
 	"unsafe"
 
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/vgpu"
 	vk "github.com/goki/vulkan"
-	"goki.dev/mat32"
-	"goki.dev/vgpu"
 )
 
 // These draw.Op constants are provided so that users of this package don't

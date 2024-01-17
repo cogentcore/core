@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"image/color"
 
-	"goki.dev/gti"
+	"cogentcore.org/core/gti"
 )
 
 // Person represents a person and their attributes.

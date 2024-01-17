@@ -7,7 +7,7 @@ import (
 	"log"
 	"strconv"
 
-	"goki.dev/enums"
+	"cogentcore.org/core/enums"
 )
 
 var _FileStatusValues = []FileStatus{0, 1, 2, 3, 4, 5, 6}

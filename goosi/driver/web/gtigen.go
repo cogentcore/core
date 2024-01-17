@@ -3,9 +3,9 @@
 package web
 
 import (
-	"goki.dev/gti"
+	"cogentcore.org/core/gti"
 )
 
-var _ = gti.AddType(&gti.Type{Name: "goki.dev/goosi/driver/web.App", IDName: "app", Doc: "App is the [goosi.App] implementation for the web platform", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Embeds: []gti.Field{{Name: "AppSingle"}}, Fields: []gti.Field{{Name: "SystemPlatform", Doc: "SystemPlatform is the underlying system SystemPlatform (Android, iOS, etc)"}, {Name: "KeyMods", Doc: "KeyMods are the current key mods"}}})
+var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/goosi/driver/web.App", IDName: "app", Doc: "App is the [goosi.App] implementation for the web platform", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Embeds: []gti.Field{{Name: "AppSingle"}}, Fields: []gti.Field{{Name: "SystemPlatform", Doc: "SystemPlatform is the underlying system SystemPlatform (Android, iOS, etc)"}, {Name: "KeyMods", Doc: "KeyMods are the current key mods"}}})
 
-var _ = gti.AddType(&gti.Type{Name: "goki.dev/goosi/driver/web.Window", IDName: "window", Doc: "Window is the implementation of [goosi.Window] for the web platform.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Embeds: []gti.Field{{Name: "WindowSingle"}}})
+var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/goosi/driver/web.Window", IDName: "window", Doc: "Window is the implementation of [goosi.Window] for the web platform.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Embeds: []gti.Field{{Name: "WindowSingle"}}})

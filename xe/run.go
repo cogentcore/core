@@ -14,8 +14,8 @@ import (
 	"os"
 	"strings"
 
+	"cogentcore.org/core/grog"
 	"github.com/mattn/go-shellwords"
-	"goki.dev/grog"
 )
 
 // Args returns a string parsed into separate args

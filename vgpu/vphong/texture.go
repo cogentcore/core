@@ -10,8 +10,8 @@ import (
 	"log"
 	"log/slog"
 
-	"goki.dev/mat32"
-	"goki.dev/vgpu"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/vgpu"
 )
 
 // Texture has texture image -- stored as image.RGBA for GPU compatibility

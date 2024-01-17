@@ -13,11 +13,11 @@ import (
 	"image"
 	"log"
 
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/goosi/driver/base"
+	"cogentcore.org/core/vgpu/vdraw"
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"goki.dev/events"
-	"goki.dev/goosi"
-	"goki.dev/goosi/driver/base"
-	"goki.dev/vgpu/vdraw"
 
 	vk "github.com/goki/vulkan"
 )

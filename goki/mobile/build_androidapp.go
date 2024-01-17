@@ -19,11 +19,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"goki.dev/goki/config"
-	"goki.dev/goki/mobile/binres"
-	"goki.dev/goki/rendericon"
-	"goki.dev/grog"
-	"goki.dev/xe"
+	"cogentcore.org/core/goki/config"
+	"cogentcore.org/core/goki/mobile/binres"
+	"cogentcore.org/core/goki/rendericon"
+	"cogentcore.org/core/grog"
+	"cogentcore.org/core/xe"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -181,7 +181,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 	// TODO: what should we do about OpenAL?
 	for _, t := range targets {
 		toolchain := NDK.Toolchain(t.Arch)
-		if nmpkgs[t.Arch]["goki.dev/mobile/exp/audio/al"] {
+		if nmpkgs[t.Arch]["cogentcore.org/core/mobile/exp/audio/al"] {
 			dst := "lib/" + toolchain.ABI + "/libopenal.so"
 			src := filepath.Join(GoMobilePath, dst)
 			if _, err := os.Stat(src); err != nil {

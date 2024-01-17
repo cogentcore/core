@@ -14,10 +14,10 @@ import (
 
 	"slices"
 
-	"goki.dev/goki/config"
-	"goki.dev/goki/mobile/sdkpath"
-	"goki.dev/grog"
-	"goki.dev/xe"
+	"cogentcore.org/core/goki/config"
+	"cogentcore.org/core/goki/mobile/sdkpath"
+	"cogentcore.org/core/grog"
+	"cogentcore.org/core/xe"
 )
 
 // General mobile build environment. Initialized by envInit.

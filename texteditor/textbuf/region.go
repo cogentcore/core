@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"goki.dev/glop/nptime"
-	"goki.dev/pi/lex"
+	"cogentcore.org/core/glop/nptime"
+	"cogentcore.org/core/pi/lex"
 )
 
 // Region represents a text region as a start / end position, and includes

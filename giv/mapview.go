@@ -8,14 +8,14 @@ import (
 	"reflect"
 	"strings"
 
-	"goki.dev/colors"
-	"goki.dev/events"
-	"goki.dev/gi"
-	"goki.dev/gti"
-	"goki.dev/icons"
-	"goki.dev/ki"
-	"goki.dev/laser"
-	"goki.dev/styles"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/gti"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/laser"
+	"cogentcore.org/core/styles"
 )
 
 // MapView represents a map, creating a property editor of the values --

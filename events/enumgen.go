@@ -10,7 +10,7 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"goki.dev/enums"
+	"cogentcore.org/core/enums"
 )
 
 var _DropModsValues = []DropMods{0, 1, 2, 3, 4}

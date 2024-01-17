@@ -14,11 +14,11 @@ import (
 
 	"testing"
 
-	"goki.dev/colors"
-	"goki.dev/colors/gradient"
-	"goki.dev/grows/images"
-	"goki.dev/mat32"
-	"goki.dev/scan"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/gradient"
+	"cogentcore.org/core/grows/images"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/scan"
 	"golang.org/x/image/math/fixed"
 )
 

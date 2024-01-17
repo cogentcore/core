@@ -15,10 +15,10 @@ import (
 	"strings"
 	"text/template"
 
+	"cogentcore.org/core/goki/config"
+	"cogentcore.org/core/goki/rendericon"
+	"cogentcore.org/core/xe"
 	"github.com/jackmordaunt/icns/v2"
-	"goki.dev/goki/config"
-	"goki.dev/goki/rendericon"
-	"goki.dev/xe"
 	"golang.org/x/tools/go/packages"
 )
 

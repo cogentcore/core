@@ -9,9 +9,9 @@ import (
 	"image/color"
 	"math"
 
-	"goki.dev/ki"
-	"goki.dev/mat32"
-	"goki.dev/vgpu/vshape"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/vgpu/vshape"
 )
 
 // Note: Raw line rendering via OpenGL is not very effective

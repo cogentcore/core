@@ -7,7 +7,7 @@ package gti
 import (
 	"reflect"
 
-	"goki.dev/laser"
+	"cogentcore.org/core/laser"
 )
 
 // Field represents a field or embed in a struct.

@@ -5,7 +5,7 @@
 package cam16
 
 import (
-	"goki.dev/mat32"
+	"cogentcore.org/core/mat32"
 )
 
 // XYZToLMS converts XYZ to Long, Medium, Short cone-based responses,

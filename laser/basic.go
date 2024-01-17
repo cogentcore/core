@@ -12,9 +12,9 @@ import (
 	"strconv"
 	"time"
 
-	"goki.dev/colors"
-	"goki.dev/enums"
-	"goki.dev/glop/bools"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/enums"
+	"cogentcore.org/core/glop/bools"
 )
 
 // Has convenience functions for converting any (e.g. properties) to given
@@ -53,7 +53,7 @@ func KindIsBasic(vk reflect.Kind) bool {
 
 // ToBool robustly converts to a bool any basic elemental type
 // (including pointers to such) using a big type switch organized
-// for greatest efficiency. It tries the [goki.dev/glop/bools.Booler]
+// for greatest efficiency. It tries the [cogentcore.org/core/glop/bools.Booler]
 // interface if not a bool type. It falls back on reflection when all
 // else fails.
 //

@@ -12,9 +12,9 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/grog"
+	"cogentcore.org/core/gti"
 	"github.com/iancoleman/strcase"
-	"goki.dev/grog"
-	"goki.dev/gti"
 )
 
 // Indent is the value used for indentation in [Usage].

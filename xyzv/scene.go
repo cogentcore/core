@@ -12,14 +12,14 @@ import (
 	"log"
 	"log/slog"
 
-	"goki.dev/abilities"
-	"goki.dev/events"
-	"goki.dev/gi"
-	"goki.dev/goosi"
-	"goki.dev/styles"
-	"goki.dev/units"
-	"goki.dev/vgpu"
-	"goki.dev/xyz"
+	"cogentcore.org/core/abilities"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
+	"cogentcore.org/core/vgpu"
+	"cogentcore.org/core/xyz"
 )
 
 // Scene is a gi.Widget that manages a xyz.Scene,

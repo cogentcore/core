@@ -16,7 +16,7 @@ import (
 	"strings"
 	"testing"
 
-	"goki.dev/goki/mobile/sdkpath"
+	"cogentcore.org/core/goki/mobile/sdkpath"
 )
 
 func init() {

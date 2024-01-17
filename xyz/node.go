@@ -11,8 +11,8 @@ import (
 	"reflect"
 	"sync"
 
-	"goki.dev/ki"
-	"goki.dev/mat32"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/mat32"
 )
 
 // Node is the common interface for all xyz scenegraph nodes

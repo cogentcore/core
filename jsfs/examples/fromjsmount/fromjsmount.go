@@ -13,9 +13,9 @@ import (
 	"context"
 	"syscall/js"
 
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/jsfs"
 	"github.com/hack-pad/hackpadfs/indexeddb"
-	"goki.dev/grr"
-	"goki.dev/jsfs"
 )
 
 func main() {

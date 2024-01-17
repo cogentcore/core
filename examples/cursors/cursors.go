@@ -5,7 +5,7 @@
 package main
 
 import (
-	"goki.dev/gi"
+	"cogentcore.org/core/gi"
 )
 
 // TODO: fix

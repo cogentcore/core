@@ -5,13 +5,13 @@
 package filetree
 
 import (
-	"goki.dev/colors"
-	"goki.dev/events"
-	"goki.dev/gi"
-	"goki.dev/grr"
-	"goki.dev/icons"
-	"goki.dev/styles"
-	"goki.dev/vci"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/vci"
 )
 
 func (ft *Tree) OnInit() {

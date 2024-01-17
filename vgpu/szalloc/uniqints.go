@@ -8,7 +8,7 @@ import (
 	"image"
 	"sort"
 
-	"goki.dev/mat32"
+	"cogentcore.org/core/mat32"
 )
 
 // UniqSortedInts returns the ints in sorted order with only unique vals

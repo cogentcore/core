@@ -7,8 +7,8 @@ package gi
 import (
 	"reflect"
 
-	"goki.dev/ki"
-	"goki.dev/laser"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/laser"
 )
 
 // This file contains all the special-purpose interfaces

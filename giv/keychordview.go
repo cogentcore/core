@@ -5,18 +5,18 @@
 package giv
 
 import (
-	"goki.dev/colors"
-	"goki.dev/cursors"
-	"goki.dev/events"
-	"goki.dev/events/key"
-	"goki.dev/gi"
-	"goki.dev/gti"
-	"goki.dev/icons"
-	"goki.dev/laser"
-	"goki.dev/mimedata"
-	"goki.dev/states"
-	"goki.dev/styles"
-	"goki.dev/units"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/cursors"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/gti"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/laser"
+	"cogentcore.org/core/mimedata"
+	"cogentcore.org/core/states"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////

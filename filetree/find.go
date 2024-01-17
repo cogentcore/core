@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"goki.dev/fi"
-	"goki.dev/gi"
-	"goki.dev/ki"
+	"cogentcore.org/core/fi"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/ki"
 )
 
 // FindDirNode finds directory node by given path.

@@ -3,7 +3,7 @@
 package main
 
 import (
-	"goki.dev/gti"
+	"cogentcore.org/core/gti"
 )
 
 var _ = gti.AddFunc(&gti.Func{Name: "main.hello", Doc: "Hello displays a greeting message and an age in weeks based on the given information.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"firstName", "lastName", "age", "likesGo"}, Returns: []string{"greeting", "weeksOld"}})

@@ -20,9 +20,9 @@
 package hct
 
 import (
-	"goki.dev/cam/cam16"
-	"goki.dev/glop/num"
-	"goki.dev/mat32"
+	"cogentcore.org/core/cam/cam16"
+	"cogentcore.org/core/glop/num"
+	"cogentcore.org/core/mat32"
 )
 
 // double ChromaticAdaptation(double component) {

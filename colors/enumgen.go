@@ -7,7 +7,7 @@ import (
 	"log"
 	"strconv"
 
-	"goki.dev/enums"
+	"cogentcore.org/core/enums"
 )
 
 var _BlendTypesValues = []BlendTypes{0, 1, 2}

@@ -12,16 +12,16 @@ import (
 	"strings"
 	"time"
 
-	"goki.dev/colors"
-	"goki.dev/events"
-	"goki.dev/gi"
-	"goki.dev/giv"
-	"goki.dev/glop/sentence"
-	"goki.dev/grr"
-	"goki.dev/icons"
-	"goki.dev/states"
-	"goki.dev/styles"
-	"goki.dev/units"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/giv"
+	"cogentcore.org/core/glop/sentence"
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/states"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 //go:embed .goki/icon.svg
@@ -63,7 +63,7 @@ func home(ts *gi.Tabs) {
 
 	gi.NewLabel(tab).SetType(gi.LabelDisplayLarge).SetText("The Goki Demo")
 
-	gi.NewLabel(tab).SetType(gi.LabelTitleLarge).SetText(`A <b>demonstration</b> of the <i>various</i> features of the <a href="https://goki.dev">Goki</a> 2D and 3D Go GUI <u>framework</u>`)
+	gi.NewLabel(tab).SetType(gi.LabelTitleLarge).SetText(`A <b>demonstration</b> of the <i>various</i> features of the <a href="https://cogentcore.org/core">Goki</a> 2D and 3D Go GUI <u>framework</u>`)
 }
 
 func text(ts *gi.Tabs) {

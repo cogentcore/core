@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"math/rand"
 
-	"goki.dev/events"
-	"goki.dev/gi"
-	"goki.dev/giv"
-	"goki.dev/styles"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/giv"
+	"cogentcore.org/core/styles"
 )
 
 func MakeTree(tv *giv.TreeView, iter, maxIter, maxKids int) {

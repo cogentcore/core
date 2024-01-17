@@ -14,7 +14,7 @@ import (
 	"slices"
 	"strings"
 
-	"goki.dev/grog"
+	"cogentcore.org/core/grog"
 )
 
 // TODO: can we get rid of ConfigFiles somehow? we need it in greasi and probably other places too

@@ -11,12 +11,12 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"goki.dev/events"
-	"goki.dev/fi"
-	"goki.dev/gi"
-	"goki.dev/giv"
-	"goki.dev/goosi"
-	"goki.dev/vci"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/fi"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/giv"
+	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/vci"
 )
 
 // OSOpenCommand returns the generic file 'open' command to open file with default app

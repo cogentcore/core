@@ -7,7 +7,7 @@ package textbuf
 import (
 	"slices"
 
-	"goki.dev/difflib"
+	"cogentcore.org/core/difflib"
 )
 
 // DiffSelData contains data for one set of text

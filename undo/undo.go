@@ -27,7 +27,7 @@ import (
 	"strings"
 	"sync"
 
-	"goki.dev/texteditor/textbuf"
+	"cogentcore.org/core/texteditor/textbuf"
 )
 
 // DefaultRawInterval is interval for saving raw state -- need to do this

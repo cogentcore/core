@@ -9,10 +9,10 @@ import (
 	"image/color"
 	"image/draw"
 
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/units"
 	"github.com/anthonynsimon/bild/transform"
-	"goki.dev/colors"
-	"goki.dev/mat32"
-	"goki.dev/units"
 )
 
 // ObjectFits are the different ways in which a replaced element

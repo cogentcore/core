@@ -7,9 +7,9 @@ package paint
 import (
 	"image"
 
-	"goki.dev/colors"
-	"goki.dev/mat32"
-	"goki.dev/styles"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/styles"
 )
 
 // DrawStdBox draws the CSS "standard box" model using the given styling information,

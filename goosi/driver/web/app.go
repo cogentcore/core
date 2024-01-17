@@ -17,13 +17,13 @@ import (
 	"strings"
 	"syscall/js"
 
-	"goki.dev/cursor"
-	"goki.dev/events"
-	"goki.dev/events/key"
-	"goki.dev/goosi"
-	"goki.dev/goosi/driver/base"
-	"goki.dev/jsfs"
-	"goki.dev/mat32"
+	"cogentcore.org/core/cursor"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/goosi/driver/base"
+	"cogentcore.org/core/jsfs"
+	"cogentcore.org/core/mat32"
 )
 
 func Init() {

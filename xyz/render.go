@@ -9,9 +9,9 @@ import (
 	"image"
 	"sort"
 
-	"goki.dev/ki"
-	"goki.dev/mat32"
-	"goki.dev/vgpu"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/vgpu"
 
 	vk "github.com/goki/vulkan"
 )

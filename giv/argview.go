@@ -7,11 +7,11 @@ package giv
 import (
 	"fmt"
 
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/laser"
+	"cogentcore.org/core/styles"
 	"github.com/iancoleman/strcase"
-	"goki.dev/gi"
-	"goki.dev/ki"
-	"goki.dev/laser"
-	"goki.dev/styles"
 )
 
 // ArgView represents a slice of reflect.Value's and associated names, for the

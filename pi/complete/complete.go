@@ -9,10 +9,10 @@ import (
 	"strings"
 	"unicode"
 
+	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/syms"
+	"cogentcore.org/core/pi/token"
 	"github.com/akutz/sortfold"
-	"goki.dev/pi/lex"
-	"goki.dev/pi/syms"
-	"goki.dev/pi/token"
 )
 
 // Completion holds one potential completion

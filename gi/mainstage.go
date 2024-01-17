@@ -9,9 +9,9 @@ import (
 	"image"
 	"log/slog"
 
-	"goki.dev/events"
-	"goki.dev/goosi"
-	"goki.dev/mat32"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/mat32"
 )
 
 // NewMainStage returns a new MainStage with given type and scene contents.

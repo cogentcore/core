@@ -10,10 +10,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"goki.dev/pi"
-	"goki.dev/pi/parse"
-	"goki.dev/pi/syms"
-	"goki.dev/pi/token"
+	"cogentcore.org/core/pi"
+	"cogentcore.org/core/pi/parse"
+	"cogentcore.org/core/pi/syms"
+	"cogentcore.org/core/pi/token"
 )
 
 // TypeFromAstExprStart starts walking the ast expression to find the type.

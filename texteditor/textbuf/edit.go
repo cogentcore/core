@@ -8,7 +8,7 @@ import (
 	"slices"
 	"time"
 
-	"goki.dev/pi/lex"
+	"cogentcore.org/core/pi/lex"
 )
 
 // Edit describes an edit action to a buffer -- this is the data passed

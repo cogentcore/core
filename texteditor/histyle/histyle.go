@@ -17,13 +17,13 @@ import (
 	"os"
 	"strings"
 
-	"goki.dev/cam/hct"
-	"goki.dev/colors"
-	"goki.dev/colors/matcolor"
-	"goki.dev/gi"
-	"goki.dev/ki"
-	"goki.dev/pi/token"
-	"goki.dev/styles"
+	"cogentcore.org/core/cam/hct"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/matcolor"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/pi/token"
+	"cogentcore.org/core/styles"
 )
 
 // Trilean value for StyleEntry value inheritance.

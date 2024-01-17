@@ -46,10 +46,10 @@ import (
 	"path/filepath"
 	"unsafe"
 
-	"goki.dev/fi"
-	"goki.dev/goosi"
-	"goki.dev/grr"
-	"goki.dev/mimedata"
+	"cogentcore.org/core/fi"
+	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/mimedata"
 )
 
 /////////////////////////////////////////////////////////////////

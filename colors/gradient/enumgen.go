@@ -7,7 +7,7 @@ import (
 	"log"
 	"strconv"
 
-	"goki.dev/enums"
+	"cogentcore.org/core/enums"
 )
 
 var _SpreadsValues = []Spreads{0, 1, 2}

@@ -11,13 +11,13 @@ import (
 	"time"
 	"unicode"
 
-	"goki.dev/abilities"
-	"goki.dev/enums"
-	"goki.dev/events"
-	"goki.dev/keyfun"
-	"goki.dev/ki"
-	"goki.dev/mat32"
-	"goki.dev/styles"
+	"cogentcore.org/core/abilities"
+	"cogentcore.org/core/enums"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/styles"
 )
 
 var (

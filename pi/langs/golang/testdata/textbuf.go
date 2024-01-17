@@ -15,21 +15,21 @@ import (
 	"sync"
 	"time"
 
-	"goki.dev/difflib"
+	"cogentcore.org/core/difflib"
 
+	"cogentcore.org/core/glop/indent"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/ki/nptime"
+	"cogentcore.org/core/ki/runes"
+	"cogentcore.org/core/pi/complete"
+	"cogentcore.org/core/pi/filecat"
+	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/pi"
+	"cogentcore.org/core/pi/token"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/spell"
 	"github.com/goki/ki/kit"
-	"goki.dev/glop/indent"
-	"goki.dev/ki"
-	"goki.dev/ki/nptime"
-	"goki.dev/ki/runes"
-	"goki.dev/pi/complete"
-	"goki.dev/pi/filecat"
-	"goki.dev/pi/lex"
-	"goki.dev/pi/pi"
-	"goki.dev/pi/token"
 )
 
 // TextBufOpts contains options for TextBufs -- contains everything necessary to

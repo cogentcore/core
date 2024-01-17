@@ -12,10 +12,10 @@ import (
 	"os/user"
 	"path/filepath"
 
+	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/mimedata"
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"goki.dev/goosi"
-	"goki.dev/grr"
-	"goki.dev/mimedata"
 )
 
 // Notes on intermixing glfw and xgb: bottom line, can't do:

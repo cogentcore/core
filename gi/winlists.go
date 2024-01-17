@@ -7,8 +7,8 @@ package gi
 import (
 	"reflect"
 
-	"goki.dev/goosi"
-	"goki.dev/laser"
+	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/laser"
 )
 
 // RenderWinList is a list of windows.

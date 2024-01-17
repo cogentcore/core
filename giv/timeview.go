@@ -9,16 +9,16 @@ import (
 	"strconv"
 	"time"
 
-	"goki.dev/colors"
-	"goki.dev/events"
-	"goki.dev/fi"
-	"goki.dev/gi"
-	"goki.dev/gti"
-	"goki.dev/icons"
-	"goki.dev/ki"
-	"goki.dev/laser"
-	"goki.dev/styles"
-	"goki.dev/units"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/fi"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/gti"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/laser"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 // TimeView is a view for selecting a time

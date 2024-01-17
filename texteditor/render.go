@@ -9,16 +9,16 @@ import (
 	"image"
 	"image/color"
 
-	"goki.dev/cam/hct"
-	"goki.dev/colors"
-	"goki.dev/colors/gradient"
-	"goki.dev/colors/matcolor"
-	"goki.dev/ki"
-	"goki.dev/mat32"
-	"goki.dev/pi/lex"
-	"goki.dev/states"
-	"goki.dev/styles"
-	"goki.dev/texteditor/textbuf"
+	"cogentcore.org/core/cam/hct"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/gradient"
+	"cogentcore.org/core/colors/matcolor"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/states"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/texteditor/textbuf"
 )
 
 // Rendering Notes: all rendering is done in Render call.

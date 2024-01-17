@@ -5,10 +5,10 @@
 package main
 
 import (
-	"goki.dev/goki/cmd"
-	"goki.dev/goki/config"
-	"goki.dev/goki/generate"
-	"goki.dev/grease"
+	"cogentcore.org/core/goki/cmd"
+	"cogentcore.org/core/goki/config"
+	"cogentcore.org/core/goki/generate"
+	"cogentcore.org/core/grease"
 )
 
 func main() {

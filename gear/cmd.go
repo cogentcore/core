@@ -6,8 +6,8 @@
 package gear
 
 import (
+	"cogentcore.org/core/glop/sentence"
 	"github.com/iancoleman/strcase"
-	"goki.dev/glop/sentence"
 )
 
 // Cmd contains all of the data for a parsed command line command.

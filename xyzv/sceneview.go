@@ -7,13 +7,13 @@ package xyzv
 import (
 	"fmt"
 
-	"goki.dev/events"
-	"goki.dev/events/key"
-	"goki.dev/gi"
-	"goki.dev/giv"
-	"goki.dev/icons"
-	"goki.dev/styles"
-	"goki.dev/xyz"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/giv"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/xyz"
 )
 
 // SceneView provides a toolbar controller for an xyz.Scene,

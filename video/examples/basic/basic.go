@@ -9,9 +9,9 @@ func main() {}
 /*
 
 import (
-	"goki.dev/gi"
-	"goki.dev/grr"
-	"goki.dev/video"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/video"
 )
 
 func main() {

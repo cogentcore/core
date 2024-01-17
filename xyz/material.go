@@ -8,9 +8,9 @@ import (
 	"image/color"
 	"log"
 
-	"goki.dev/colors"
-	"goki.dev/laser"
-	"goki.dev/mat32"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/laser"
+	"cogentcore.org/core/mat32"
 )
 
 // Tiling are the texture tiling parameters

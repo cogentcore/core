@@ -9,13 +9,13 @@ import (
 	"image"
 	"log/slog"
 
-	"goki.dev/abilities"
-	"goki.dev/events"
-	"goki.dev/events/key"
-	"goki.dev/goosi"
-	"goki.dev/keyfun"
-	"goki.dev/ki"
-	"goki.dev/states"
+	"cogentcore.org/core/abilities"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/states"
 )
 
 // EventMgr returns the higher-level gi event manager

@@ -7,17 +7,17 @@ package giv
 import (
 	"log/slog"
 
-	"goki.dev/abilities"
-	"goki.dev/colors"
-	"goki.dev/colors/colormap"
-	"goki.dev/colors/gradient"
-	"goki.dev/cursors"
-	"goki.dev/gi"
-	"goki.dev/gti"
-	"goki.dev/laser"
-	"goki.dev/mat32"
-	"goki.dev/styles"
-	"goki.dev/units"
+	"cogentcore.org/core/abilities"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/colormap"
+	"cogentcore.org/core/colors/gradient"
+	"cogentcore.org/core/cursors"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/gti"
+	"cogentcore.org/core/laser"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 // ColorMapName represents the name of a color map, which can be edited using a [ColorMapValue].

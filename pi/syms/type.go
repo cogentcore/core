@@ -9,9 +9,9 @@ import (
 	"io"
 	"slices"
 
-	"goki.dev/glop/indent"
-	"goki.dev/ki"
-	"goki.dev/pi/lex"
+	"cogentcore.org/core/glop/indent"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/pi/lex"
 )
 
 // Type contains all the information about types.  Types can be builtin

@@ -11,12 +11,12 @@ import (
 	"math"
 	"slices"
 
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/gradient"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/raster"
+	"cogentcore.org/core/styles"
 	"github.com/anthonynsimon/bild/clone"
-	"goki.dev/colors"
-	"goki.dev/colors/gradient"
-	"goki.dev/mat32"
-	"goki.dev/raster"
-	"goki.dev/styles"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/math/f64"
 )

@@ -5,10 +5,10 @@
 package textbuf
 
 import (
-	"goki.dev/fi"
-	"goki.dev/gi"
-	"goki.dev/glop/indent"
-	"goki.dev/pi"
+	"cogentcore.org/core/fi"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/glop/indent"
+	"cogentcore.org/core/pi"
 )
 
 // Opts contains options for textview.Bufs

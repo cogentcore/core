@@ -15,10 +15,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"goki.dev/goki/config"
-	"goki.dev/goki/mobile"
-	"goki.dev/goki/web"
-	"goki.dev/xe"
+	"cogentcore.org/core/goki/config"
+	"cogentcore.org/core/goki/mobile"
+	"cogentcore.org/core/goki/web"
+	"cogentcore.org/core/xe"
 )
 
 // Build builds an executable for the package

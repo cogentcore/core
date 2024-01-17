@@ -3,29 +3,29 @@
 package cmd
 
 import (
-	"goki.dev/gti"
+	"cogentcore.org/core/gti"
 )
 
-var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/goki/cmd.Build", Doc: "Build builds an executable for the package\nat the config path for the config platforms.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
+var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/goki/cmd.Build", Doc: "Build builds an executable for the package\nat the config path for the config platforms.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/goki/cmd.Init", Doc: "Init initializes the \".goki\" directory\nand a \"config.toml\" file inside it.\nThe \"config.toml\" file has the given\nconfig info. Init also sets the config name\nto the current directory if it is unset.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
+var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/goki/cmd.Init", Doc: "Init initializes the \".goki\" directory\nand a \"config.toml\" file inside it.\nThe \"config.toml\" file has the given\nconfig info. Init also sets the config name\nto the current directory if it is unset.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/goki/cmd.Install", Doc: "Install installs the package on the local system.\nIt uses the same config info as build.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
+var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/goki/cmd.Install", Doc: "Install installs the package on the local system.\nIt uses the same config info as build.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/goki/cmd.Log", Doc: "Log prints the logs from your app running on Android to the terminal.\nAndroid is the only supported platform for log; use the -debug flag on\nrun for other platforms.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
+var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/goki/cmd.Log", Doc: "Log prints the logs from your app running on Android to the terminal.\nAndroid is the only supported platform for log; use the -debug flag on\nrun for other platforms.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/goki/cmd.Pack", Doc: "Pack builds and packages the app for the target platform.\nFor android, ios, and web, it is equivalent to build.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
+var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/goki/cmd.Pack", Doc: "Pack builds and packages the app for the target platform.\nFor android, ios, and web, it is equivalent to build.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/goki/cmd.VersionRelease", Doc: "VersionRelease calls update-version and then release. It is the standard release path.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
+var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/goki/cmd.VersionRelease", Doc: "VersionRelease calls update-version and then release. It is the standard release path.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/goki/cmd.Release", Doc: "Release releases the project as a git tag. It should be called after update-version or similar.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
+var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/goki/cmd.Release", Doc: "Release releases the project as a git tag. It should be called after update-version or similar.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/goki/cmd.Run", Doc: "Run builds and runs the config package. It also displays the logs generated\nby the app. It uses the same config info as build.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
+var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/goki/cmd.Run", Doc: "Run builds and runs the config package. It also displays the logs generated\nby the app. It uses the same config info as build.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/goki/cmd.Setup", Doc: "Setup does platform-specific setup that ensures that development can be done\nfor the config platform, mostly by installing necessary tools.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
+var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/goki/cmd.Setup", Doc: "Setup does platform-specific setup that ensures that development can be done\nfor the config platform, mostly by installing necessary tools.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/goki/cmd.GetVersion", Doc: "GetVersion prints the version of the project.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
+var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/goki/cmd.GetVersion", Doc: "GetVersion prints the version of the project.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/goki/cmd.SetVersion", Doc: "SetVersion updates the config and version file of the config project based\non the config version and commits and pushes the changes.\nAfter it, release or similar should be called to push the git tags.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
+var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/goki/cmd.SetVersion", Doc: "SetVersion updates the config and version file of the config project based\non the config version and commits and pushes the changes.\nAfter it, release or similar should be called to push the git tags.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/goki/cmd.UpdateVersion", Doc: "UpdateVersion updates the version of the project by one patch version.\nAfter it, release or similar should be called to push the git tags.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
+var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/goki/cmd.UpdateVersion", Doc: "UpdateVersion updates the version of the project by one patch version.\nAfter it, release or similar should be called to push the git tags.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})

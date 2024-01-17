@@ -23,9 +23,9 @@ import (
 
 	"maps"
 
-	"goki.dev/goki/config"
-	"goki.dev/grog"
-	"goki.dev/xe"
+	"cogentcore.org/core/goki/config"
+	"cogentcore.org/core/grog"
+	"cogentcore.org/core/xe"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -147,7 +147,7 @@ var NmRE = regexp.MustCompile(`[0-9a-f]{8} t _?(?:.*/vendor/)?(golang.org/x.*/[^
 
 func ExtractPkgs(c *config.Config, nm string, path string) (map[string]bool, error) {
 	if c.Build.PrintOnly {
-		return map[string]bool{"goki.dev/goosi/driver": true}, nil // TODO: fix import paths
+		return map[string]bool{"cogentcore.org/core/goosi/driver": true}, nil // TODO: fix import paths
 	}
 	r, w := io.Pipe()
 	cmd := exec.Command(nm, path)

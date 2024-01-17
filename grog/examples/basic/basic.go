@@ -7,7 +7,7 @@ package main
 import (
 	"fmt"
 
-	"goki.dev/colors"
+	"cogentcore.org/core/colors"
 
 	"github.com/muesli/termenv"
 )

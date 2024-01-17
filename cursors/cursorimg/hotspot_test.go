@@ -10,8 +10,8 @@ import (
 	"os"
 	"testing"
 
-	"goki.dev/cursors"
-	"goki.dev/grows/images"
+	"cogentcore.org/core/cursors"
+	"cogentcore.org/core/grows/images"
 )
 
 func TestHotspot(t *testing.T) {

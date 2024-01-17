@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"io/fs"
 
-	"goki.dev/glop/dirs"
-	"goki.dev/grows/tomls"
-	"goki.dev/laser"
+	"cogentcore.org/core/glop/dirs"
+	"cogentcore.org/core/grows/tomls"
+	"cogentcore.org/core/laser"
 )
 
 // TODO: use glop/dirs and grows for these things

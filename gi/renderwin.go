@@ -13,12 +13,12 @@ import (
 	"sync"
 	"time"
 
-	"goki.dev/colors"
-	"goki.dev/colors/matcolor"
-	"goki.dev/enums"
-	"goki.dev/events"
-	"goki.dev/goosi"
-	"goki.dev/mat32"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/matcolor"
+	"cogentcore.org/core/enums"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/mat32"
 	"golang.org/x/image/draw"
 )
 

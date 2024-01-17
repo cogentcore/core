@@ -14,9 +14,9 @@ import (
 	"strings"
 	"time"
 
-	"goki.dev/glop/datasize"
-	"goki.dev/icons"
-	"goki.dev/vci"
+	"cogentcore.org/core/glop/datasize"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/vci"
 )
 
 // FileInfo represents the information about a given file / directory,

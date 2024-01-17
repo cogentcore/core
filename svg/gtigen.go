@@ -5,16 +5,16 @@ package svg
 import (
 	"image"
 
+	"cogentcore.org/core/colors/gradient"
+	"cogentcore.org/core/gti"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/paint"
 	"github.com/aymerick/douceur/css"
-	"goki.dev/colors/gradient"
-	"goki.dev/gti"
-	"goki.dev/ki"
-	"goki.dev/mat32"
-	"goki.dev/paint"
 )
 
 // CircleType is the [gti.Type] for [Circle]
-var CircleType = gti.AddType(&gti.Type{Name: "goki.dev/svg.Circle", IDName: "circle", Doc: "Circle is a SVG circle", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Pos", Doc: "position of the center of the circle"}, {Name: "Radius", Doc: "radius of the circle"}}, Instance: &Circle{}})
+var CircleType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Circle", IDName: "circle", Doc: "Circle is a SVG circle", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Pos", Doc: "position of the center of the circle"}, {Name: "Radius", Doc: "radius of the circle"}}, Instance: &Circle{}})
 
 // NewCircle adds a new [Circle] with the given name to the given parent:
 // Circle is a SVG circle
@@ -36,7 +36,7 @@ func (t *Circle) SetRadius(v float32) *Circle { t.Radius = v; return t }
 func (t *Circle) SetClass(v string) *Circle { t.Class = v; return t }
 
 // ClipPathType is the [gti.Type] for [ClipPath]
-var ClipPathType = gti.AddType(&gti.Type{Name: "goki.dev/svg.ClipPath", IDName: "clip-path", Doc: "ClipPath is used for holding a path that renders as a clip path", Embeds: []gti.Field{{Name: "NodeBase"}}, Instance: &ClipPath{}})
+var ClipPathType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.ClipPath", IDName: "clip-path", Doc: "ClipPath is used for holding a path that renders as a clip path", Embeds: []gti.Field{{Name: "NodeBase"}}, Instance: &ClipPath{}})
 
 // NewClipPath adds a new [ClipPath] with the given name to the given parent:
 // ClipPath is used for holding a path that renders as a clip path
@@ -54,7 +54,7 @@ func (t *ClipPath) New() ki.Ki { return &ClipPath{} }
 func (t *ClipPath) SetClass(v string) *ClipPath { t.Class = v; return t }
 
 // StyleSheetType is the [gti.Type] for [StyleSheet]
-var StyleSheetType = gti.AddType(&gti.Type{Name: "goki.dev/svg.StyleSheet", IDName: "style-sheet", Doc: "StyleSheet is a Node2D node that contains a stylesheet -- property values\ncontained in this sheet can be transformed into ki.Props and set in CSS\nfield of appropriate node", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Sheet"}}, Instance: &StyleSheet{}})
+var StyleSheetType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.StyleSheet", IDName: "style-sheet", Doc: "StyleSheet is a Node2D node that contains a stylesheet -- property values\ncontained in this sheet can be transformed into ki.Props and set in CSS\nfield of appropriate node", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Sheet"}}, Instance: &StyleSheet{}})
 
 // NewStyleSheet adds a new [StyleSheet] with the given name to the given parent:
 // StyleSheet is a Node2D node that contains a stylesheet -- property values
@@ -77,7 +77,7 @@ func (t *StyleSheet) SetSheet(v *css.Stylesheet) *StyleSheet { t.Sheet = v; retu
 func (t *StyleSheet) SetClass(v string) *StyleSheet { t.Class = v; return t }
 
 // MetaDataType is the [gti.Type] for [MetaData]
-var MetaDataType = gti.AddType(&gti.Type{Name: "goki.dev/svg.MetaData", IDName: "meta-data", Doc: "MetaData is used for holding meta data info", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "MetaData"}}, Instance: &MetaData{}})
+var MetaDataType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.MetaData", IDName: "meta-data", Doc: "MetaData is used for holding meta data info", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "MetaData"}}, Instance: &MetaData{}})
 
 // NewMetaData adds a new [MetaData] with the given name to the given parent:
 // MetaData is used for holding meta data info
@@ -98,7 +98,7 @@ func (t *MetaData) SetMetaData(v string) *MetaData { t.MetaData = v; return t }
 func (t *MetaData) SetClass(v string) *MetaData { t.Class = v; return t }
 
 // EllipseType is the [gti.Type] for [Ellipse]
-var EllipseType = gti.AddType(&gti.Type{Name: "goki.dev/svg.Ellipse", IDName: "ellipse", Doc: "Ellipse is a SVG ellipse", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Pos", Doc: "position of the center of the ellipse"}, {Name: "Radii", Doc: "radii of the ellipse in the horizontal, vertical axes"}}, Instance: &Ellipse{}})
+var EllipseType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Ellipse", IDName: "ellipse", Doc: "Ellipse is a SVG ellipse", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Pos", Doc: "position of the center of the ellipse"}, {Name: "Radii", Doc: "radii of the ellipse in the horizontal, vertical axes"}}, Instance: &Ellipse{}})
 
 // NewEllipse adds a new [Ellipse] with the given name to the given parent:
 // Ellipse is a SVG ellipse
@@ -120,7 +120,7 @@ func (t *Ellipse) SetRadii(v mat32.Vec2) *Ellipse { t.Radii = v; return t }
 func (t *Ellipse) SetClass(v string) *Ellipse { t.Class = v; return t }
 
 // FilterType is the [gti.Type] for [Filter]
-var FilterType = gti.AddType(&gti.Type{Name: "goki.dev/svg.Filter", IDName: "filter", Doc: "Filter represents SVG filter* elements", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "FilterType"}}, Instance: &Filter{}})
+var FilterType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Filter", IDName: "filter", Doc: "Filter represents SVG filter* elements", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "FilterType"}}, Instance: &Filter{}})
 
 // NewFilter adds a new [Filter] with the given name to the given parent:
 // Filter represents SVG filter* elements
@@ -141,7 +141,7 @@ func (t *Filter) SetFilterType(v string) *Filter { t.FilterType = v; return t }
 func (t *Filter) SetClass(v string) *Filter { t.Class = v; return t }
 
 // FlowType is the [gti.Type] for [Flow]
-var FlowType = gti.AddType(&gti.Type{Name: "goki.dev/svg.Flow", IDName: "flow", Doc: "Flow represents SVG flow* elements", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "FlowType"}}, Instance: &Flow{}})
+var FlowType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Flow", IDName: "flow", Doc: "Flow represents SVG flow* elements", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "FlowType"}}, Instance: &Flow{}})
 
 // NewFlow adds a new [Flow] with the given name to the given parent:
 // Flow represents SVG flow* elements
@@ -162,7 +162,7 @@ func (t *Flow) SetFlowType(v string) *Flow { t.FlowType = v; return t }
 func (t *Flow) SetClass(v string) *Flow { t.Class = v; return t }
 
 // GradientType is the [gti.Type] for [Gradient]
-var GradientType = gti.AddType(&gti.Type{Name: "goki.dev/svg.Gradient", IDName: "gradient", Doc: "Gradient is used for holding a specified color gradient.\nThe name is the id for lookup in url", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Grad", Doc: "the color gradient"}, {Name: "StopsName", Doc: "name of another gradient to get stops from"}}, Instance: &Gradient{}})
+var GradientType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Gradient", IDName: "gradient", Doc: "Gradient is used for holding a specified color gradient.\nThe name is the id for lookup in url", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Grad", Doc: "the color gradient"}, {Name: "StopsName", Doc: "name of another gradient to get stops from"}}, Instance: &Gradient{}})
 
 // NewGradient adds a new [Gradient] with the given name to the given parent:
 // Gradient is used for holding a specified color gradient.
@@ -189,7 +189,7 @@ func (t *Gradient) SetStopsName(v string) *Gradient { t.StopsName = v; return t 
 func (t *Gradient) SetClass(v string) *Gradient { t.Class = v; return t }
 
 // GroupType is the [gti.Type] for [Group]
-var GroupType = gti.AddType(&gti.Type{Name: "goki.dev/svg.Group", IDName: "group", Doc: "Group groups together SVG elements.\nProvides a common transform for all group elements\nand shared style properties.", Embeds: []gti.Field{{Name: "NodeBase"}}, Instance: &Group{}})
+var GroupType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Group", IDName: "group", Doc: "Group groups together SVG elements.\nProvides a common transform for all group elements\nand shared style properties.", Embeds: []gti.Field{{Name: "NodeBase"}}, Instance: &Group{}})
 
 // NewGroup adds a new [Group] with the given name to the given parent:
 // Group groups together SVG elements.
@@ -209,7 +209,7 @@ func (t *Group) New() ki.Ki { return &Group{} }
 func (t *Group) SetClass(v string) *Group { t.Class = v; return t }
 
 // ImageType is the [gti.Type] for [Image]
-var ImageType = gti.AddType(&gti.Type{Name: "goki.dev/svg.Image", IDName: "image", Doc: "Image is an SVG image (bitmap)", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Pos", Doc: "position of the top-left of the image"}, {Name: "Size", Doc: "rendered size of the image (imposes a scaling on image when it is rendered)"}, {Name: "PreserveAspectRatio", Doc: "directs resize operations to preserve aspect ratio"}, {Name: "Filename", Doc: "file name of image loaded -- set by OpenImage"}, {Name: "Pixels", Doc: "the image pixels"}}, Instance: &Image{}})
+var ImageType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Image", IDName: "image", Doc: "Image is an SVG image (bitmap)", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Pos", Doc: "position of the top-left of the image"}, {Name: "Size", Doc: "rendered size of the image (imposes a scaling on image when it is rendered)"}, {Name: "PreserveAspectRatio", Doc: "directs resize operations to preserve aspect ratio"}, {Name: "Filename", Doc: "file name of image loaded -- set by OpenImage"}, {Name: "Pixels", Doc: "the image pixels"}}, Instance: &Image{}})
 
 // NewImage adds a new [Image] with the given name to the given parent:
 // Image is an SVG image (bitmap)
@@ -247,7 +247,7 @@ func (t *Image) SetPixels(v *image.RGBA) *Image { t.Pixels = v; return t }
 func (t *Image) SetClass(v string) *Image { t.Class = v; return t }
 
 // LineType is the [gti.Type] for [Line]
-var LineType = gti.AddType(&gti.Type{Name: "goki.dev/svg.Line", IDName: "line", Doc: "Line is a SVG line", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Start", Doc: "position of the start of the line"}, {Name: "End", Doc: "position of the end of the line"}}, Instance: &Line{}})
+var LineType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Line", IDName: "line", Doc: "Line is a SVG line", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Start", Doc: "position of the start of the line"}, {Name: "End", Doc: "position of the end of the line"}}, Instance: &Line{}})
 
 // NewLine adds a new [Line] with the given name to the given parent:
 // Line is a SVG line
@@ -273,7 +273,7 @@ func (t *Line) SetEnd(v mat32.Vec2) *Line { t.End = v; return t }
 func (t *Line) SetClass(v string) *Line { t.Class = v; return t }
 
 // MarkerType is the [gti.Type] for [Marker]
-var MarkerType = gti.AddType(&gti.Type{Name: "goki.dev/svg.Marker", IDName: "marker", Doc: "Marker represents marker elements that can be drawn along paths (arrow heads, etc)", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "RefPos", Doc: "reference position to align the vertex position with, specified in ViewBox coordinates"}, {Name: "Size", Doc: "size of marker to render, in Units units"}, {Name: "Units", Doc: "units to use"}, {Name: "ViewBox", Doc: "viewbox defines the internal coordinate system for the drawing elements within the marker"}, {Name: "Orient", Doc: "orientation of the marker -- either 'auto' or an angle"}, {Name: "VertexPos", Doc: "current vertex position"}, {Name: "VertexAngle", Doc: "current vertex angle in radians"}, {Name: "StrokeWidth", Doc: "current stroke width"}, {Name: "Transform", Doc: "net transform computed from settings and current values -- applied prior to rendering"}, {Name: "EffSize", Doc: "effective size for actual rendering"}}, Instance: &Marker{}})
+var MarkerType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Marker", IDName: "marker", Doc: "Marker represents marker elements that can be drawn along paths (arrow heads, etc)", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "RefPos", Doc: "reference position to align the vertex position with, specified in ViewBox coordinates"}, {Name: "Size", Doc: "size of marker to render, in Units units"}, {Name: "Units", Doc: "units to use"}, {Name: "ViewBox", Doc: "viewbox defines the internal coordinate system for the drawing elements within the marker"}, {Name: "Orient", Doc: "orientation of the marker -- either 'auto' or an angle"}, {Name: "VertexPos", Doc: "current vertex position"}, {Name: "VertexAngle", Doc: "current vertex angle in radians"}, {Name: "StrokeWidth", Doc: "current stroke width"}, {Name: "Transform", Doc: "net transform computed from settings and current values -- applied prior to rendering"}, {Name: "EffSize", Doc: "effective size for actual rendering"}}, Instance: &Marker{}})
 
 // NewMarker adds a new [Marker] with the given name to the given parent:
 // Marker represents marker elements that can be drawn along paths (arrow heads, etc)
@@ -331,7 +331,7 @@ func (t *Marker) SetEffSize(v mat32.Vec2) *Marker { t.EffSize = v; return t }
 func (t *Marker) SetClass(v string) *Marker { t.Class = v; return t }
 
 // NodeBaseType is the [gti.Type] for [NodeBase]
-var NodeBaseType = gti.AddType(&gti.Type{Name: "goki.dev/svg.NodeBase", IDName: "node-base", Doc: "svg.NodeBase is the base type for elements within the SVG scenegraph", Embeds: []gti.Field{{Name: "Node"}}, Fields: []gti.Field{{Name: "Class", Doc: "user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard"}, {Name: "CSS", Doc: "cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type"}, {Name: "CSSAgg", Doc: "aggregated css properties from all higher nodes down to me"}, {Name: "BBox", Doc: "bounding box for the node within the SVG Pixels image -- this one can be outside the visible range of the SVG image -- VpBBox is intersected and only shows visible portion."}, {Name: "VisBBox", Doc: "visible bounding box for the node intersected with the SVG image geometry"}, {Name: "Paint", Doc: "paint style information for this node"}}, Instance: &NodeBase{}})
+var NodeBaseType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.NodeBase", IDName: "node-base", Doc: "svg.NodeBase is the base type for elements within the SVG scenegraph", Embeds: []gti.Field{{Name: "Node"}}, Fields: []gti.Field{{Name: "Class", Doc: "user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard"}, {Name: "CSS", Doc: "cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type"}, {Name: "CSSAgg", Doc: "aggregated css properties from all higher nodes down to me"}, {Name: "BBox", Doc: "bounding box for the node within the SVG Pixels image -- this one can be outside the visible range of the SVG image -- VpBBox is intersected and only shows visible portion."}, {Name: "VisBBox", Doc: "visible bounding box for the node intersected with the SVG image geometry"}, {Name: "Paint", Doc: "paint style information for this node"}}, Instance: &NodeBase{}})
 
 // NewNodeBase adds a new [NodeBase] with the given name to the given parent:
 // svg.NodeBase is the base type for elements within the SVG scenegraph
@@ -350,7 +350,7 @@ func (t *NodeBase) New() ki.Ki { return &NodeBase{} }
 func (t *NodeBase) SetClass(v string) *NodeBase { t.Class = v; return t }
 
 // PathType is the [gti.Type] for [Path]
-var PathType = gti.AddType(&gti.Type{Name: "goki.dev/svg.Path", IDName: "path", Doc: "Path renders SVG data sequences that can render just about anything", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Data", Doc: "the path data to render -- path commands and numbers are serialized, with each command specifying the number of floating-point coord data points that follow"}, {Name: "DataStr", Doc: "string version of the path data"}}, Instance: &Path{}})
+var PathType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Path", IDName: "path", Doc: "Path renders SVG data sequences that can render just about anything", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Data", Doc: "the path data to render -- path commands and numbers are serialized, with each command specifying the number of floating-point coord data points that follow"}, {Name: "DataStr", Doc: "string version of the path data"}}, Instance: &Path{}})
 
 // NewPath adds a new [Path] with the given name to the given parent:
 // Path renders SVG data sequences that can render just about anything
@@ -372,7 +372,7 @@ func (t *Path) SetDataStr(v string) *Path { t.DataStr = v; return t }
 func (t *Path) SetClass(v string) *Path { t.Class = v; return t }
 
 // PolygonType is the [gti.Type] for [Polygon]
-var PolygonType = gti.AddType(&gti.Type{Name: "goki.dev/svg.Polygon", IDName: "polygon", Doc: "Polygon is a SVG polygon", Embeds: []gti.Field{{Name: "Polyline"}}, Instance: &Polygon{}})
+var PolygonType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Polygon", IDName: "polygon", Doc: "Polygon is a SVG polygon", Embeds: []gti.Field{{Name: "Polyline"}}, Instance: &Polygon{}})
 
 // NewPolygon adds a new [Polygon] with the given name to the given parent:
 // Polygon is a SVG polygon
@@ -393,7 +393,7 @@ func (t *Polygon) SetClass(v string) *Polygon { t.Class = v; return t }
 func (t *Polygon) SetPoints(v ...mat32.Vec2) *Polygon { t.Points = v; return t }
 
 // PolylineType is the [gti.Type] for [Polyline]
-var PolylineType = gti.AddType(&gti.Type{Name: "goki.dev/svg.Polyline", IDName: "polyline", Doc: "Polyline is a SVG multi-line shape", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Points", Doc: "the coordinates to draw -- does a moveto on the first, then lineto for all the rest"}}, Instance: &Polyline{}})
+var PolylineType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Polyline", IDName: "polyline", Doc: "Polyline is a SVG multi-line shape", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Points", Doc: "the coordinates to draw -- does a moveto on the first, then lineto for all the rest"}}, Instance: &Polyline{}})
 
 // NewPolyline adds a new [Polyline] with the given name to the given parent:
 // Polyline is a SVG multi-line shape
@@ -415,7 +415,7 @@ func (t *Polyline) SetPoints(v ...mat32.Vec2) *Polyline { t.Points = v; return t
 func (t *Polyline) SetClass(v string) *Polyline { t.Class = v; return t }
 
 // RectType is the [gti.Type] for [Rect]
-var RectType = gti.AddType(&gti.Type{Name: "goki.dev/svg.Rect", IDName: "rect", Doc: "Rect is a SVG rectangle, optionally with rounded corners", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Pos", Doc: "position of the top-left of the rectangle"}, {Name: "Size", Doc: "size of the rectangle"}, {Name: "Radius", Doc: "radii for curved corners, as a proportion of width, height"}}, Instance: &Rect{}})
+var RectType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Rect", IDName: "rect", Doc: "Rect is a SVG rectangle, optionally with rounded corners", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Pos", Doc: "position of the top-left of the rectangle"}, {Name: "Size", Doc: "size of the rectangle"}, {Name: "Radius", Doc: "radii for curved corners, as a proportion of width, height"}}, Instance: &Rect{}})
 
 // NewRect adds a new [Rect] with the given name to the given parent:
 // Rect is a SVG rectangle, optionally with rounded corners
@@ -445,7 +445,7 @@ func (t *Rect) SetRadius(v mat32.Vec2) *Rect { t.Radius = v; return t }
 func (t *Rect) SetClass(v string) *Rect { t.Class = v; return t }
 
 // SVGNodeType is the [gti.Type] for [SVGNode]
-var SVGNodeType = gti.AddType(&gti.Type{Name: "goki.dev/svg.SVGNode", IDName: "svg-node", Doc: "SVGNode represents the root of an SVG tree", Embeds: []gti.Field{{Name: "Group"}}, Fields: []gti.Field{{Name: "ViewBox", Doc: "viewbox defines the coordinate system for the drawing -- these units are mapped into the screen space allocated for the SVG during rendering"}}, Instance: &SVGNode{}})
+var SVGNodeType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.SVGNode", IDName: "svg-node", Doc: "SVGNode represents the root of an SVG tree", Embeds: []gti.Field{{Name: "Group"}}, Fields: []gti.Field{{Name: "ViewBox", Doc: "viewbox defines the coordinate system for the drawing -- these units are mapped into the screen space allocated for the SVG during rendering"}}, Instance: &SVGNode{}})
 
 // NewSVGNode adds a new [SVGNode] with the given name to the given parent:
 // SVGNode represents the root of an SVG tree
@@ -467,7 +467,7 @@ func (t *SVGNode) SetViewBox(v ViewBox) *SVGNode { t.ViewBox = v; return t }
 func (t *SVGNode) SetClass(v string) *SVGNode { t.Class = v; return t }
 
 // TextType is the [gti.Type] for [Text]
-var TextType = gti.AddType(&gti.Type{Name: "goki.dev/svg.Text", IDName: "text", Doc: "Text renders SVG text, handling both text and tspan elements.\ntspan is nested under a parent text -- text has empty Text string.", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Pos", Doc: "position of the left, baseline of the text"}, {Name: "Width", Doc: "width of text to render if using word-wrapping"}, {Name: "Text", Doc: "text string to render"}, {Name: "TextRender", Doc: "render version of text"}, {Name: "CharPosX", Doc: "character positions along X axis, if specified"}, {Name: "CharPosY", Doc: "character positions along Y axis, if specified"}, {Name: "CharPosDX", Doc: "character delta-positions along X axis, if specified"}, {Name: "CharPosDY", Doc: "character delta-positions along Y axis, if specified"}, {Name: "CharRots", Doc: "character rotations, if specified"}, {Name: "TextLength", Doc: "author's computed text length, if specified -- we attempt to match"}, {Name: "AdjustGlyphs", Doc: "in attempting to match TextLength, should we adjust glyphs in addition to spacing?"}, {Name: "LastPos", Doc: "last text render position -- lower-left baseline of start"}, {Name: "LastBBox", Doc: "last actual bounding box in display units (dots)"}}, Instance: &Text{}})
+var TextType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Text", IDName: "text", Doc: "Text renders SVG text, handling both text and tspan elements.\ntspan is nested under a parent text -- text has empty Text string.", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Pos", Doc: "position of the left, baseline of the text"}, {Name: "Width", Doc: "width of text to render if using word-wrapping"}, {Name: "Text", Doc: "text string to render"}, {Name: "TextRender", Doc: "render version of text"}, {Name: "CharPosX", Doc: "character positions along X axis, if specified"}, {Name: "CharPosY", Doc: "character positions along Y axis, if specified"}, {Name: "CharPosDX", Doc: "character delta-positions along X axis, if specified"}, {Name: "CharPosDY", Doc: "character delta-positions along Y axis, if specified"}, {Name: "CharRots", Doc: "character rotations, if specified"}, {Name: "TextLength", Doc: "author's computed text length, if specified -- we attempt to match"}, {Name: "AdjustGlyphs", Doc: "in attempting to match TextLength, should we adjust glyphs in addition to spacing?"}, {Name: "LastPos", Doc: "last text render position -- lower-left baseline of start"}, {Name: "LastBBox", Doc: "last actual bounding box in display units (dots)"}}, Instance: &Text{}})
 
 // NewText adds a new [Text] with the given name to the given parent:
 // Text renders SVG text, handling both text and tspan elements.

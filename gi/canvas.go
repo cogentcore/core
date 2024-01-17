@@ -7,7 +7,7 @@ package gi
 import (
 	"image"
 
-	"goki.dev/paint"
+	"cogentcore.org/core/paint"
 	"golang.org/x/image/draw"
 )
 

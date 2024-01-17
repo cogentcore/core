@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"goki.dev/mat32"
-	"goki.dev/svg"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/svg"
 )
 
 func TestSVG(t *testing.T) {

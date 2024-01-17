@@ -16,8 +16,8 @@ import (
 	"path/filepath"
 	"sort"
 
-	"goki.dev/ki"
-	"goki.dev/laser"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/laser"
 )
 
 // In an ErrorList, an error is represented by an *Error.

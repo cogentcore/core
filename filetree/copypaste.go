@@ -12,14 +12,14 @@ import (
 	"path/filepath"
 	"strings"
 
-	"goki.dev/events"
-	"goki.dev/fi"
-	"goki.dev/gi"
-	"goki.dev/giv"
-	"goki.dev/glop/dirs"
-	"goki.dev/grr"
-	"goki.dev/mimedata"
-	"goki.dev/texteditor"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/fi"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/giv"
+	"cogentcore.org/core/glop/dirs"
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/mimedata"
+	"cogentcore.org/core/texteditor"
 )
 
 // MimeData adds mimedata for this node: a text/plain of the Path,

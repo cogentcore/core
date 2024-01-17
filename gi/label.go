@@ -7,16 +7,16 @@ package gi
 import (
 	"fmt"
 
-	"goki.dev/abilities"
-	"goki.dev/cursors"
-	"goki.dev/events"
-	"goki.dev/goosi"
-	"goki.dev/keyfun"
-	"goki.dev/mat32"
-	"goki.dev/mimedata"
-	"goki.dev/paint"
-	"goki.dev/states"
-	"goki.dev/styles"
+	"cogentcore.org/core/abilities"
+	"cogentcore.org/core/cursors"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/mimedata"
+	"cogentcore.org/core/paint"
+	"cogentcore.org/core/states"
+	"cogentcore.org/core/styles"
 )
 
 // Label is a widget for rendering text labels -- supports full widget model

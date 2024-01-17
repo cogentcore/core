@@ -5,23 +5,23 @@
 package main
 
 import (
-	"goki.dev/colors"
-	"goki.dev/events"
-	"goki.dev/gi"
-	"goki.dev/giv"
-	_ "goki.dev/grows/images"
-	"goki.dev/grr"
-	"goki.dev/icons"
-	"goki.dev/ki"
-	"goki.dev/mat32"
-	"goki.dev/xyz"
-	_ "goki.dev/xyz/io/obj"
-	"goki.dev/xyzv"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/giv"
+	_ "cogentcore.org/core/grows/images"
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/xyz"
+	_ "cogentcore.org/core/xyz/io/obj"
+	"cogentcore.org/core/xyzv"
 )
 
 func main() {
 	b := gi.NewAppBody("XYZ Object Viewer")
-	b.App().About = `This is a viewer for the 3D graphics aspect of the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Goki on GitHub</a>. <p>The <a href="https://goki.dev/gi/v2/blob/master/examples/xyzviewer/README.md">README</a> page for this example app has further info.</p>`
+	b.App().About = `This is a viewer for the 3D graphics aspect of the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Goki on GitHub</a>. <p>The <a href="https://cogentcore.org/core/gi/v2/blob/master/examples/xyzviewer/README.md">README</a> page for this example app has further info.</p>`
 
 	sv := xyzv.NewSceneView(b)
 	sv.Config()

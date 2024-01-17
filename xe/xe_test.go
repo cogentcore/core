@@ -8,7 +8,7 @@ import (
 	"log/slog"
 	"testing"
 
-	"goki.dev/grog"
+	"cogentcore.org/core/grog"
 )
 
 func TestRun(t *testing.T) {

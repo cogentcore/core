@@ -7,13 +7,13 @@ package styles
 import (
 	"log/slog"
 
-	"goki.dev/colors"
-	"goki.dev/colors/gradient"
-	"goki.dev/enums"
-	"goki.dev/glop/num"
-	"goki.dev/grr"
-	"goki.dev/laser"
-	"goki.dev/units"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/gradient"
+	"cogentcore.org/core/enums"
+	"cogentcore.org/core/glop/num"
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/laser"
+	"cogentcore.org/core/units"
 )
 
 // StyleInhInit detects the style values of "inherit" and "initial",

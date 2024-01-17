@@ -10,7 +10,7 @@ import (
 
 	"log/slog"
 
-	"goki.dev/grog"
+	"cogentcore.org/core/grog"
 )
 
 // Config contains the configuration information that

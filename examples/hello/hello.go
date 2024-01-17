@@ -1,6 +1,6 @@
 package main
 
-import "goki.dev/gi"
+import "cogentcore.org/core/gi"
 
 func main() {
 	b := gi.NewAppBody("Hello")

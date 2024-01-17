@@ -16,13 +16,13 @@ import (
 	"os"
 	"strconv"
 
-	"goki.dev/grows/jsons"
-	"goki.dev/gti"
+	"cogentcore.org/core/grows/jsons"
+	"cogentcore.org/core/gti"
 )
 
-// see https://goki.dev/ki/wiki/Naming for IO naming conventions
+// see https://cogentcore.org/core/ki/wiki/Naming for IO naming conventions
 
-// note: use [goki.dev/grows/jsons] for standard read / write of JSON files
+// note: use [cogentcore.org/core/grows/jsons] for standard read / write of JSON files
 // for Ki trees.  The Slice Marshal / Unmarshal methods save the type info
 // of each child so that the full tree can be properly reconstructed.
 

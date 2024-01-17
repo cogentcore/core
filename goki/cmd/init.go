@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"os"
 
-	"goki.dev/goki/config"
-	"goki.dev/grease"
+	"cogentcore.org/core/goki/config"
+	"cogentcore.org/core/grease"
 )
 
 // Init initializes the ".goki" directory

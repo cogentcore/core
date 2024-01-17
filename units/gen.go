@@ -13,9 +13,9 @@ import (
 	"strings"
 	"text/template"
 
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/units"
 	"github.com/iancoleman/strcase"
-	"goki.dev/grr"
-	"goki.dev/units"
 )
 
 func main() {

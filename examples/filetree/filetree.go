@@ -13,16 +13,16 @@ import (
 	"os"
 	"path/filepath"
 
-	"goki.dev/events"
-	"goki.dev/filetree"
-	"goki.dev/gi"
-	"goki.dev/giv"
-	"goki.dev/icons"
-	"goki.dev/keyfun"
-	"goki.dev/ki"
-	"goki.dev/styles"
-	"goki.dev/texteditor"
-	"goki.dev/units"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/filetree"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/giv"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/texteditor"
+	"cogentcore.org/core/units"
 )
 
 // FileBrowse is a simple file browser / viewer / editor with a file tree and

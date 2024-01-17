@@ -7,7 +7,7 @@ package pi
 import (
 	"sync"
 
-	"goki.dev/fi"
+	"cogentcore.org/core/fi"
 )
 
 // FileStates contains two FileState's: one is being processed while the

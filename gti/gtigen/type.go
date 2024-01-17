@@ -7,7 +7,7 @@ package gtigen
 import (
 	"go/ast"
 
-	"goki.dev/gti"
+	"cogentcore.org/core/gti"
 )
 
 // Type represents a parsed type.

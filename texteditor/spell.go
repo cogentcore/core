@@ -8,12 +8,12 @@ import (
 	"strings"
 	"unicode"
 
-	"goki.dev/events"
-	"goki.dev/fi"
-	"goki.dev/keyfun"
-	"goki.dev/pi/lex"
-	"goki.dev/pi/token"
-	"goki.dev/texteditor/textbuf"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/fi"
+	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/token"
+	"cogentcore.org/core/texteditor/textbuf"
 )
 
 ///////////////////////////////////////////////////////////////////////////////

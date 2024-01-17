@@ -3,12 +3,12 @@
 package testdata
 
 import (
-	"goki.dev/gti"
-	"goki.dev/ki"
+	"cogentcore.org/core/gti"
+	"cogentcore.org/core/ki"
 )
 
 // TestNodeType is the [gti.Type] for [TestNode]
-var TestNodeType = gti.AddType(&gti.Type{Name: "goki.dev/ki/testdata.TestNode", IDName: "test-node", Embeds: []gti.Field{{Name: "Node"}}, Instance: &TestNode{}})
+var TestNodeType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/ki/testdata.TestNode", IDName: "test-node", Embeds: []gti.Field{{Name: "Node"}}, Instance: &TestNode{}})
 
 // NewTestNode adds a new [TestNode] with the given name to the given parent:
 func NewTestNode(par ki.Ki, name ...string) *TestNode {
@@ -22,7 +22,7 @@ func (t *TestNode) KiType() *gti.Type { return TestNodeType }
 func (t *TestNode) New() ki.Ki { return &TestNode{} }
 
 // NodeEmbedType is the [gti.Type] for [NodeEmbed]
-var NodeEmbedType = gti.AddType(&gti.Type{Name: "goki.dev/ki/testdata.NodeEmbed", IDName: "node-embed", Doc: "NodeEmbed embeds ki.Node and adds a couple of fields.\nAlso has a directive processed by gti", Directives: []gti.Directive{{Tool: "direct", Directive: "value"}}, Embeds: []gti.Field{{Name: "Node"}}, Fields: []gti.Field{{Name: "Mbr1"}, {Name: "Mbr2"}}, Instance: &NodeEmbed{}})
+var NodeEmbedType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/ki/testdata.NodeEmbed", IDName: "node-embed", Doc: "NodeEmbed embeds ki.Node and adds a couple of fields.\nAlso has a directive processed by gti", Directives: []gti.Directive{{Tool: "direct", Directive: "value"}}, Embeds: []gti.Field{{Name: "Node"}}, Fields: []gti.Field{{Name: "Mbr1"}, {Name: "Mbr2"}}, Instance: &NodeEmbed{}})
 
 // NewNodeEmbed adds a new [NodeEmbed] with the given name to the given parent:
 // NodeEmbed embeds ki.Node and adds a couple of fields.
@@ -44,7 +44,7 @@ func (t *NodeEmbed) SetMbr1(v string) *NodeEmbed { t.Mbr1 = v; return t }
 func (t *NodeEmbed) SetMbr2(v int) *NodeEmbed { t.Mbr2 = v; return t }
 
 // NodeFieldType is the [gti.Type] for [NodeField]
-var NodeFieldType = gti.AddType(&gti.Type{Name: "goki.dev/ki/testdata.NodeField", IDName: "node-field", Embeds: []gti.Field{{Name: "NodeEmbed"}}, Fields: []gti.Field{{Name: "Field1"}}, Instance: &NodeField{}})
+var NodeFieldType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/ki/testdata.NodeField", IDName: "node-field", Embeds: []gti.Field{{Name: "NodeEmbed"}}, Fields: []gti.Field{{Name: "Field1"}}, Instance: &NodeField{}})
 
 // NewNodeField adds a new [NodeField] with the given name to the given parent:
 func NewNodeField(par ki.Ki, name ...string) *NodeField {
@@ -67,7 +67,7 @@ func (t *NodeField) SetMbr1(v string) *NodeField { t.Mbr1 = v; return t }
 func (t *NodeField) SetMbr2(v int) *NodeField { t.Mbr2 = v; return t }
 
 // NodeField2Type is the [gti.Type] for [NodeField2]
-var NodeField2Type = gti.AddType(&gti.Type{Name: "goki.dev/ki/testdata.NodeField2", IDName: "node-field-2", Embeds: []gti.Field{{Name: "NodeField"}}, Fields: []gti.Field{{Name: "Field2"}}, Instance: &NodeField2{}})
+var NodeField2Type = gti.AddType(&gti.Type{Name: "cogentcore.org/core/ki/testdata.NodeField2", IDName: "node-field-2", Embeds: []gti.Field{{Name: "NodeField"}}, Fields: []gti.Field{{Name: "Field2"}}, Instance: &NodeField2{}})
 
 // NewNodeField2 adds a new [NodeField2] with the given name to the given parent:
 func NewNodeField2(par ki.Ki, name ...string) *NodeField2 {

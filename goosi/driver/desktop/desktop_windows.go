@@ -12,10 +12,10 @@ import (
 	"path/filepath"
 	"unsafe"
 
+	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/mimedata"
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"goki.dev/goosi"
-	"goki.dev/grr"
-	"goki.dev/mimedata"
 )
 
 /////////////////////////////////////////////////////////////////

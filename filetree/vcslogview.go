@@ -7,17 +7,17 @@ package filetree
 import (
 	"log/slog"
 
-	"goki.dev/events"
-	"goki.dev/gi"
-	"goki.dev/giv"
-	"goki.dev/glop/dirs"
-	"goki.dev/grr"
-	"goki.dev/icons"
-	"goki.dev/mimedata"
-	"goki.dev/states"
-	"goki.dev/styles"
-	"goki.dev/texteditor"
-	"goki.dev/vci"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/giv"
+	"cogentcore.org/core/glop/dirs"
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/mimedata"
+	"cogentcore.org/core/states"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/texteditor"
+	"cogentcore.org/core/vci"
 )
 
 // VCSLogView is a view of the VCS log data

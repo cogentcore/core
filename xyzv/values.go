@@ -9,12 +9,12 @@ import (
 	"reflect"
 	"sort"
 
-	"goki.dev/gi"
-	"goki.dev/giv"
-	"goki.dev/gti"
-	"goki.dev/ki"
-	"goki.dev/laser"
-	"goki.dev/xyz"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/giv"
+	"cogentcore.org/core/gti"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/laser"
+	"cogentcore.org/core/xyz"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////

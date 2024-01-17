@@ -8,11 +8,11 @@ import (
 	"path/filepath"
 	"testing"
 
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 	"github.com/iancoleman/strcase"
-	"goki.dev/colors"
-	"goki.dev/mat32"
-	"goki.dev/styles"
-	"goki.dev/units"
 )
 
 func TestBoxModel(t *testing.T) {

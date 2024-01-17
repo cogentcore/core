@@ -11,8 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"goki.dev/glop/dirs"
-	"goki.dev/ki"
+	"cogentcore.org/core/glop/dirs"
+	"cogentcore.org/core/ki"
 )
 
 // Decoder parses 3D object / scene file(s) and imports into a Group or Scene.

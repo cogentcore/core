@@ -7,10 +7,10 @@ package desktop
 import (
 	"sync"
 
+	"cogentcore.org/core/cursor"
+	"cogentcore.org/core/cursors/cursorimg"
+	"cogentcore.org/core/enums"
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"goki.dev/cursor"
-	"goki.dev/cursors/cursorimg"
-	"goki.dev/enums"
 )
 
 // TheCursor is the single [goosi.Cursor] for the desktop platform

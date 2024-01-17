@@ -35,10 +35,10 @@ import (
 	"os"
 	"strings"
 
-	"goki.dev/glop/indent"
-	"goki.dev/ki"
-	"goki.dev/pi/lex"
-	"goki.dev/pi/token"
+	"cogentcore.org/core/glop/indent"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/token"
 )
 
 // Symbol contains the information for everything about a given

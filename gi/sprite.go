@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"image"
 
-	"goki.dev/goosi"
-	"goki.dev/ki"
-	"goki.dev/mat32"
-	"goki.dev/ordmap"
-	"goki.dev/vgpu/szalloc"
+	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/ordmap"
+	"cogentcore.org/core/vgpu/szalloc"
 	"golang.org/x/image/draw"
 )
 

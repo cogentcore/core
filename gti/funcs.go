@@ -14,7 +14,7 @@ import (
 
 var (
 	// Funcs records all types (i.e., a type registry)
-	// key is long type name: package_url.Func, e.g., goki.dev/gi.Button
+	// key is long type name: package_url.Func, e.g., cogentcore.org/core/gi.Button
 	Funcs = map[string]*Func{}
 
 	// FuncIDCounter is an atomically incremented uint64 used
@@ -22,7 +22,7 @@ var (
 	FuncIDCounter uint64
 )
 
-// FuncByName returns a Func by name (package_url.Type, e.g., goki.dev/gi.Button),
+// FuncByName returns a Func by name (package_url.Type, e.g., cogentcore.org/core/gi.Button),
 func FuncByName(nm string) *Func {
 	fi, ok := Funcs[nm]
 	if !ok {
@@ -31,7 +31,7 @@ func FuncByName(nm string) *Func {
 	return fi
 }
 
-// FuncByNameTry returns a Func by name (package_url.Type, e.g., goki.dev/gi.Button),
+// FuncByNameTry returns a Func by name (package_url.Type, e.g., cogentcore.org/core/gi.Button),
 // or error if not found
 func FuncByNameTry(nm string) (*Func, error) {
 	fi, ok := Funcs[nm]

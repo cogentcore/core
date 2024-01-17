@@ -9,8 +9,8 @@ import (
 	"strings"
 	"unicode"
 
+	"cogentcore.org/core/gti"
 	"github.com/mattn/go-shellwords"
-	"goki.dev/gti"
 )
 
 // ParseDirective parses and returns a comment directive from

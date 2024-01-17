@@ -7,7 +7,7 @@ import (
 	"log"
 	"strconv"
 
-	"goki.dev/enums"
+	"cogentcore.org/core/enums"
 )
 
 var _ActionsValues = []Actions{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}

@@ -9,12 +9,12 @@ import (
 	"image"
 	"image/draw"
 
-	"goki.dev/colors"
-	"goki.dev/mat32"
-	"goki.dev/paint"
-	"goki.dev/styles"
-	"goki.dev/units"
-	"goki.dev/vgpu"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/paint"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
+	"cogentcore.org/core/vgpu"
 )
 
 // Text2D presents 2D rendered text on a vertically-oriented plane, using a texture.

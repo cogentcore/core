@@ -7,7 +7,7 @@ package matcolor
 import (
 	"image/color"
 
-	"goki.dev/cam/hct"
+	"cogentcore.org/core/cam/hct"
 )
 
 // Tones contains cached color values for each tone

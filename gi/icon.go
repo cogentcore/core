@@ -8,10 +8,10 @@ import (
 	"image"
 	"log/slog"
 
-	"goki.dev/colors"
-	"goki.dev/icons"
-	"goki.dev/styles"
-	"goki.dev/svg"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/svg"
 	"golang.org/x/image/draw"
 )
 

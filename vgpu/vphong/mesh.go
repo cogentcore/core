@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"log"
 
-	"goki.dev/mat32"
-	"goki.dev/vgpu"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/vgpu"
 )
 
 // Mesh records the number of elements in an indexed triangle mesh,

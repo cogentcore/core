@@ -12,13 +12,13 @@ import (
 	"log/slog"
 	"os"
 
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/grows/images"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/styles"
 	"github.com/anthonynsimon/bild/clone"
-	"goki.dev/colors"
-	"goki.dev/events"
-	"goki.dev/grows/images"
-	"goki.dev/icons"
-	"goki.dev/mat32"
-	"goki.dev/styles"
 	"golang.org/x/image/draw"
 )
 

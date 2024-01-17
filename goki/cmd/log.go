@@ -7,8 +7,8 @@ package cmd
 import (
 	"fmt"
 
-	"goki.dev/goki/config"
-	"goki.dev/xe"
+	"cogentcore.org/core/goki/config"
+	"cogentcore.org/core/xe"
 )
 
 // Log prints the logs from your app running on Android to the terminal.

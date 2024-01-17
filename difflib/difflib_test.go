@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"goki.dev/difflib/tester"
+	"cogentcore.org/core/difflib/tester"
 )
 
 func assertAlmostEqual(t *testing.T, a, b float64, places int) {

@@ -5,7 +5,7 @@
 package lex
 
 import (
-	"goki.dev/pi/token"
+	"cogentcore.org/core/pi/token"
 )
 
 // BracePair returns the matching brace-like punctuation for given rune,

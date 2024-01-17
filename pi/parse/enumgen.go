@@ -9,8 +9,8 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"goki.dev/enums"
-	"goki.dev/ki"
+	"cogentcore.org/core/enums"
+	"cogentcore.org/core/ki"
 )
 
 var _ActionsValues = []Actions{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}

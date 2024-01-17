@@ -20,9 +20,9 @@ import (
 
 	vk "github.com/goki/vulkan"
 
+	"cogentcore.org/core/vgpu"
+	"cogentcore.org/core/vgpu/vdraw"
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"goki.dev/vgpu"
-	"goki.dev/vgpu/vdraw"
 )
 
 func init() {

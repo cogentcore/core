@@ -5,7 +5,7 @@
 package units
 
 import (
-	"goki.dev/mat32"
+	"cogentcore.org/core/mat32"
 )
 
 // XY represents unit Value for X and Y dimensions

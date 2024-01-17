@@ -5,8 +5,8 @@
 package gi
 
 import (
-	"goki.dev/events"
-	"goki.dev/grows/images"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/grows/images"
 )
 
 // AssertRender makes a new window from the scene, waits until it is shown

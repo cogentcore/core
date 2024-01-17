@@ -6,57 +6,57 @@
     "Kids": [
       {
         "n": 26,
-        "type": "goki.dev/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lex.Rule",
         "name": "InCode",
-        "type": "goki.dev/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lex.Rule",
         "name": "InLinkAttr",
-        "type": "goki.dev/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lex.Rule",
         "name": "InLinkAddr",
-        "type": "goki.dev/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lex.Rule",
         "name": "InLinkTag",
-        "type": "goki.dev/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lex.Rule",
         "name": "LetterText",
-        "type": "goki.dev/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lex.Rule",
         "name": "CodeStart",
-        "type": "goki.dev/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lex.Rule",
         "name": "HeadPound",
-        "type": "goki.dev/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lex.Rule",
         "name": "ItemCheck",
-        "type": "goki.dev/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lex.Rule",
         "name": "ItemStar",
-        "type": "goki.dev/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lex.Rule",
         "name": "ItemPlus",
-        "type": "goki.dev/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lex.Rule",
         "name": "ItemMinus",
-        "type": "goki.dev/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lex.Rule",
         "name": "NumList",
-        "type": "goki.dev/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lex.Rule",
         "name": "CommentStart",
-        "type": "goki.dev/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lex.Rule",
         "name": "QuotePara",
-        "type": "goki.dev/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lex.Rule",
         "name": "BoldStars",
-        "type": "goki.dev/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lex.Rule",
         "name": "BoldUnders",
-        "type": "goki.dev/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lex.Rule",
         "name": "ItemStarSub",
-        "type": "goki.dev/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lex.Rule",
         "name": "ItemPlusSub",
-        "type": "goki.dev/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lex.Rule",
         "name": "ItemMinusSub",
-        "type": "goki.dev/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lex.Rule",
         "name": "LinkTag",
-        "type": "goki.dev/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lex.Rule",
         "name": "BacktickCode",
-        "type": "goki.dev/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lex.Rule",
         "name": "Quote_021",
-        "type": "goki.dev/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lex.Rule",
         "name": "Apostrophe",
-        "type": "goki.dev/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lex.Rule",
         "name": "EmphStar",
-        "type": "goki.dev/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lex.Rule",
         "name": "EmphUnder",
-        "type": "goki.dev/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lex.Rule",
         "name": "AnyText"
       },
       {
@@ -66,9 +66,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "goki.dev/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lex.Rule",
             "name": "CodeEnd",
-            "type": "goki.dev/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lex.Rule",
             "name": "AnyCode"
           },
           {
@@ -134,9 +134,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "goki.dev/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lex.Rule",
             "name": "EndLinkAttr",
-            "type": "goki.dev/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lex.Rule",
             "name": "AnyLinkAttr"
           },
           {
@@ -201,11 +201,11 @@
         "Kids": [
           {
             "n": 3,
-            "type": "goki.dev/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lex.Rule",
             "name": "LinkAttr",
-            "type": "goki.dev/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lex.Rule",
             "name": "EndLinkAddr",
-            "type": "goki.dev/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lex.Rule",
             "name": "AnyLinkAddr"
           },
           {
@@ -292,11 +292,11 @@
         "Kids": [
           {
             "n": 3,
-            "type": "goki.dev/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lex.Rule",
             "name": "LinkAddr",
-            "type": "goki.dev/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lex.Rule",
             "name": "EndLinkTag",
-            "type": "goki.dev/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lex.Rule",
             "name": "AnyLinkTag"
           },
           {
@@ -403,9 +403,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "goki.dev/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lex.Rule",
             "name": "CodeLang",
-            "type": "goki.dev/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lex.Rule",
             "name": "CodePlain"
           },
           {
@@ -473,9 +473,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "goki.dev/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lex.Rule",
             "name": "HeadPound2",
-            "type": "goki.dev/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lex.Rule",
             "name": "Heading"
           },
           {
@@ -485,9 +485,9 @@
             "Kids": [
               {
                 "n": 2,
-                "type": "goki.dev/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lex.Rule",
                 "name": "HeadPound3",
-                "type": "goki.dev/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lex.Rule",
                 "name": "SubHeading"
               },
               {
@@ -497,7 +497,7 @@
                 "Kids": [
                   {
                     "n": 1,
-                    "type": "goki.dev/pi/lex.Rule",
+                    "type": "cogentcore.org/core/pi/lex.Rule",
                     "name": "SubSubHeading"
                   },
                   {
@@ -609,9 +609,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "goki.dev/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lex.Rule",
             "name": "ItemCheckDone",
-            "type": "goki.dev/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lex.Rule",
             "name": "ItemCheckTodo"
           },
           {
@@ -795,7 +795,7 @@
         "Kids": [
           {
             "n": 1,
-            "type": "goki.dev/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lex.Rule",
             "name": "BoldText"
           },
           {
@@ -841,7 +841,7 @@
         "Kids": [
           {
             "n": 1,
-            "type": "goki.dev/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lex.Rule",
             "name": "BoldText"
           },
           {
@@ -1008,9 +1008,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "goki.dev/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lex.Rule",
             "name": "QuoteSingle",
-            "type": "goki.dev/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lex.Rule",
             "name": "Apost"
           },
           {
@@ -1074,7 +1074,7 @@
         "Kids": [
           {
             "n": 1,
-            "type": "goki.dev/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lex.Rule",
             "name": "EmphText"
           },
           {
@@ -1120,7 +1120,7 @@
         "Kids": [
           {
             "n": 1,
-            "type": "goki.dev/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lex.Rule",
             "name": "EmphUnder"
           },
           {

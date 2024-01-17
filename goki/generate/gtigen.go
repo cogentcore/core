@@ -3,7 +3,7 @@
 package generate
 
 import (
-	"goki.dev/gti"
+	"cogentcore.org/core/gti"
 )
 
-var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/goki/generate.Generate", Doc: "Generate is the main entry point to code generation\nthat does all of the generation according to the\ngiven config info. It overrides the\n[config.Config.Generate.Gtigen.InterfaceConfigs] info.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"cfg"}, Returns: []string{"error"}})
+var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/goki/generate.Generate", Doc: "Generate is the main entry point to code generation\nthat does all of the generation according to the\ngiven config info. It overrides the\n[config.Config.Generate.Gtigen.InterfaceConfigs] info.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"cfg"}, Returns: []string{"error"}})

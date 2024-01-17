@@ -13,10 +13,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"goki.dev/colors"
-	"goki.dev/icons"
-	"goki.dev/paint"
-	"goki.dev/svg"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/paint"
+	"cogentcore.org/core/svg"
 )
 
 // Render renders the icon located at .goki/icon.svg at the given size.

@@ -8,12 +8,12 @@ import (
 	"os"
 	"testing"
 
-	"goki.dev/colors"
-	"goki.dev/colors/gradient"
-	"goki.dev/grows/images"
-	"goki.dev/mat32"
-	"goki.dev/styles"
-	"goki.dev/units"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/gradient"
+	"cogentcore.org/core/grows/images"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 func TestMain(m *testing.M) {

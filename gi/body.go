@@ -5,9 +5,9 @@
 package gi
 
 import (
-	"goki.dev/colors"
-	"goki.dev/glop/sentence"
-	"goki.dev/styles"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/glop/sentence"
+	"cogentcore.org/core/styles"
 )
 
 // Body holds the primary content of a Scene

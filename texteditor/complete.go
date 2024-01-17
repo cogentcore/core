@@ -7,12 +7,12 @@ package texteditor
 import (
 	"fmt"
 
-	"goki.dev/gi"
-	"goki.dev/pi"
-	"goki.dev/pi/complete"
-	"goki.dev/pi/lex"
-	"goki.dev/pi/parse"
-	"goki.dev/texteditor/textbuf"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/pi"
+	"cogentcore.org/core/pi/complete"
+	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/parse"
+	"cogentcore.org/core/texteditor/textbuf"
 )
 
 // CompletePi uses GoPi symbols and language -- the string is a line of text

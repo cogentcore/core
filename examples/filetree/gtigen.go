@@ -3,10 +3,10 @@
 package main
 
 import (
-	"goki.dev/filetree"
-	"goki.dev/gi"
-	"goki.dev/gti"
-	"goki.dev/ki"
+	"cogentcore.org/core/filetree"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/gti"
+	"cogentcore.org/core/ki"
 )
 
 // FileBrowseType is the [gti.Type] for [FileBrowse]

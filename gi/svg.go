@@ -10,12 +10,12 @@ import (
 	"io"
 	"io/fs"
 
-	"goki.dev/abilities"
-	"goki.dev/events"
-	"goki.dev/icons"
-	"goki.dev/styles"
-	"goki.dev/svg"
-	"goki.dev/units"
+	"cogentcore.org/core/abilities"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/svg"
+	"cogentcore.org/core/units"
 	"golang.org/x/image/draw"
 )
 

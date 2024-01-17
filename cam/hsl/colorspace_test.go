@@ -10,7 +10,7 @@ import (
 	"image/draw"
 	"testing"
 
-	"goki.dev/grows/images"
+	"cogentcore.org/core/grows/images"
 )
 
 func TestColorSpace(t *testing.T) {

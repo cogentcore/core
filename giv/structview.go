@@ -13,15 +13,15 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/glop/bools"
+	"cogentcore.org/core/glop/sentence"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/laser"
+	"cogentcore.org/core/styles"
 	"github.com/expr-lang/expr"
 	"github.com/expr-lang/expr/ast"
-	"goki.dev/events"
-	"goki.dev/gi"
-	"goki.dev/glop/bools"
-	"goki.dev/glop/sentence"
-	"goki.dev/ki"
-	"goki.dev/laser"
-	"goki.dev/styles"
 )
 
 // StructView represents a struct, creating a property editor of the fields --

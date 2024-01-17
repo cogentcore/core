@@ -13,9 +13,9 @@ import (
 	"testing"
 	"text/template"
 
-	"goki.dev/goki/config"
-	"goki.dev/goki/mobile/sdkpath"
-	"goki.dev/xe"
+	"cogentcore.org/core/goki/config"
+	"cogentcore.org/core/goki/mobile/sdkpath"
+	"cogentcore.org/core/xe"
 )
 
 func TestRFC1034Label(t *testing.T) {
@@ -92,7 +92,7 @@ func TestAndroidBuild(t *testing.T) {
 	if GOOS == "windows" {
 		os.Setenv("HOMEDRIVE", "C:")
 	}
-	c.Build.Package = "goki.dev/goosi/examples/drawtri"
+	c.Build.Package = "cogentcore.org/core/goosi/examples/drawtri"
 	oldTags := c.Build.Tags
 	c.Build.Tags = []string{"tag1"}
 	defer func() {
@@ -194,12 +194,12 @@ func TestRegexImportGolangXPackage(t *testing.T) {
 		want    string
 		wantLen int
 	}{
-		{"ffffffff t golang.org/x/mobile", "goki.dev/mobile", 2},
-		{"ffffffff t github.com/example/repo/vendor/golang.org/x/mobile", "goki.dev/mobile", 2},
+		{"ffffffff t golang.org/x/mobile", "cogentcore.org/core/mobile", 2},
+		{"ffffffff t github.com/example/repo/vendor/golang.org/x/mobile", "cogentcore.org/core/mobile", 2},
 		{"ffffffff t github.com/example/golang.org/x/mobile", "", 0},
 		{"ffffffff t github.com/example/repo", "", 0},
 		{"ffffffff t github.com/example/repo/vendor", "", 0},
-		{"ffffffff t _golang.org/x/mobile/app", "goki.dev/mobile/app", 2},
+		{"ffffffff t _golang.org/x/mobile/app", "cogentcore.org/core/mobile/app", 2},
 	}
 
 	for _, tc := range tests {
@@ -229,7 +229,7 @@ func TestBuildWithGoModules(t *testing.T) {
 	}
 	defer os.RemoveAll(dir)
 
-	if out, err := exec.Command("go", "build", "-o="+dir, "goki.dev/mobile/cmd/gomobile").CombinedOutput(); err != nil {
+	if out, err := exec.Command("go", "build", "-o="+dir, "cogentcore.org/core/mobile/cmd/gomobile").CombinedOutput(); err != nil {
 		t.Fatalf("%v: %s", err, string(out))
 	}
 	path := dir
@@ -265,7 +265,7 @@ func TestBuildWithGoModules(t *testing.T) {
 			}{
 				{
 					Name: "Absolute Path",
-					Path: "goki.dev/goosi/examples/drawtri",
+					Path: "cogentcore.org/core/goosi/examples/drawtri",
 				},
 				{
 					Name: "Relative Path",

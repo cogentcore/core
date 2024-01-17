@@ -9,8 +9,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"goki.dev/goki/config"
-	"goki.dev/xe"
+	"cogentcore.org/core/goki/config"
+	"cogentcore.org/core/xe"
 )
 
 // Setup does platform-specific setup that ensures that development can be done

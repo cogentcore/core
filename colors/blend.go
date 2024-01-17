@@ -8,9 +8,9 @@ import (
 	"image/color"
 	"log/slog"
 
-	"goki.dev/cam/cam16"
-	"goki.dev/cam/hct"
-	"goki.dev/mat32"
+	"cogentcore.org/core/cam/cam16"
+	"cogentcore.org/core/cam/hct"
+	"cogentcore.org/core/mat32"
 )
 
 // BlendTypes are different algorithms (colorspaces) to use for blending

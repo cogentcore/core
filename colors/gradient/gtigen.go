@@ -3,12 +3,12 @@
 package gradient
 
 import (
-	"goki.dev/colors"
-	"goki.dev/gti"
-	"goki.dev/mat32"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/gti"
+	"cogentcore.org/core/mat32"
 )
 
-var _ = gti.AddType(&gti.Type{Name: "goki.dev/colors/gradient.Base", IDName: "base", Doc: "Base contains the data and logic common to all gradient types.", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Fields: []gti.Field{{Name: "Stops", Doc: "the stops for the gradient; use AddStop to add stops"}, {Name: "Spread", Doc: "the spread method used for the gradient if it stops before the end"}, {Name: "Blend", Doc: "the colorspace algorithm to use for blending colors"}, {Name: "Units", Doc: "the units to use for the gradient"}, {Name: "Box", Doc: "the bounding box of the object with the gradient; this is used when rendering\ngradients with [Units] of [ObjectBoundingBox]."}, {Name: "Transform", Doc: "Transform is the transformation matrix applied to the gradient's points."}, {Name: "ObjectMatrix", Doc: "ObjectMatrix is the computed effective object transformation matrix for a gradient\nwith [Units] of [ObjectBoundingBox]. It should not be set by end users."}}})
+var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/colors/gradient.Base", IDName: "base", Doc: "Base contains the data and logic common to all gradient types.", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Fields: []gti.Field{{Name: "Stops", Doc: "the stops for the gradient; use AddStop to add stops"}, {Name: "Spread", Doc: "the spread method used for the gradient if it stops before the end"}, {Name: "Blend", Doc: "the colorspace algorithm to use for blending colors"}, {Name: "Units", Doc: "the units to use for the gradient"}, {Name: "Box", Doc: "the bounding box of the object with the gradient; this is used when rendering\ngradients with [Units] of [ObjectBoundingBox]."}, {Name: "Transform", Doc: "Transform is the transformation matrix applied to the gradient's points."}, {Name: "ObjectMatrix", Doc: "ObjectMatrix is the computed effective object transformation matrix for a gradient\nwith [Units] of [ObjectBoundingBox]. It should not be set by end users."}}})
 
 // SetSpread sets the [Base.Spread]:
 // the spread method used for the gradient if it stops before the end
@@ -31,7 +31,7 @@ func (t *Base) SetBox(v mat32.Box2) *Base { t.Box = v; return t }
 // Transform is the transformation matrix applied to the gradient's points.
 func (t *Base) SetTransform(v mat32.Mat2) *Base { t.Transform = v; return t }
 
-var _ = gti.AddType(&gti.Type{Name: "goki.dev/colors/gradient.Linear", IDName: "linear", Doc: "Linear represents a linear gradient. It implements the [image.Image] interface.", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Embeds: []gti.Field{{Name: "Base"}}, Fields: []gti.Field{{Name: "Start", Doc: "the starting point of the gradient (x1 and y1 in SVG)"}, {Name: "End", Doc: "the ending point of the gradient (x2 and y2 in SVG)"}, {Name: "EffStart", Doc: "EffStart is the computed effective transformed starting point of the gradient.\nIt should not be set by end users."}, {Name: "EffEnd", Doc: "EffEnd is the computed effective transformed ending point of the gradient.\nIt should not be set by end users."}}})
+var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/colors/gradient.Linear", IDName: "linear", Doc: "Linear represents a linear gradient. It implements the [image.Image] interface.", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Embeds: []gti.Field{{Name: "Base"}}, Fields: []gti.Field{{Name: "Start", Doc: "the starting point of the gradient (x1 and y1 in SVG)"}, {Name: "End", Doc: "the ending point of the gradient (x2 and y2 in SVG)"}, {Name: "EffStart", Doc: "EffStart is the computed effective transformed starting point of the gradient.\nIt should not be set by end users."}, {Name: "EffEnd", Doc: "EffEnd is the computed effective transformed ending point of the gradient.\nIt should not be set by end users."}}})
 
 // SetStart sets the [Linear.Start]:
 // the starting point of the gradient (x1 and y1 in SVG)
@@ -56,7 +56,7 @@ func (t *Linear) SetBox(v mat32.Box2) *Linear { t.Box = v; return t }
 // SetTransform sets the [Linear.Transform]
 func (t *Linear) SetTransform(v mat32.Mat2) *Linear { t.Transform = v; return t }
 
-var _ = gti.AddType(&gti.Type{Name: "goki.dev/colors/gradient.Radial", IDName: "radial", Doc: "Radial represents a radial gradient. It implements the [image.Image] interface.", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Embeds: []gti.Field{{Name: "Base"}}, Fields: []gti.Field{{Name: "Center", Doc: "the center point of the gradient (cx and cy in SVG)"}, {Name: "Focal", Doc: "the focal point of the gradient (fx and fy in SVG)"}, {Name: "Radius", Doc: "the radius of the gradient (rx and ry in SVG)"}}})
+var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/colors/gradient.Radial", IDName: "radial", Doc: "Radial represents a radial gradient. It implements the [image.Image] interface.", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Embeds: []gti.Field{{Name: "Base"}}, Fields: []gti.Field{{Name: "Center", Doc: "the center point of the gradient (cx and cy in SVG)"}, {Name: "Focal", Doc: "the focal point of the gradient (fx and fy in SVG)"}, {Name: "Radius", Doc: "the radius of the gradient (rx and ry in SVG)"}}})
 
 // SetCenter sets the [Radial.Center]:
 // the center point of the gradient (cx and cy in SVG)

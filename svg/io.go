@@ -21,19 +21,19 @@ import (
 	"os"
 	"strings"
 
-	"goki.dev/colors"
-	"goki.dev/colors/gradient"
-	"goki.dev/grows/images"
-	"goki.dev/ki"
-	"goki.dev/laser"
-	"goki.dev/mat32"
-	"goki.dev/styles"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/gradient"
+	"cogentcore.org/core/grows/images"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/laser"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/styles"
 	"golang.org/x/net/html/charset"
 )
 
 // this file contains all the IO-related parsing etc routines
 
-// see https://goki.dev/ki/wiki/Naming for IO naming conventions
+// see https://cogentcore.org/core/ki/wiki/Naming for IO naming conventions
 // using standard XML marshal / unmarshal
 
 var (
@@ -979,7 +979,7 @@ func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
 }
 
 // SVGNodeXMLGrad adds the XML for the given gradient to the given encoder.
-// This is not in goki.dev/colors/gradient because it uses a lot of SVG
+// This is not in cogentcore.org/core/colors/gradient because it uses a lot of SVG
 // and XML infrastructure defined here.
 func SVGNodeXMLGrad(nd *Gradient, name string, enc *XMLEncoder) {
 	// TODO(kai): why isn't this in colors/gradient?

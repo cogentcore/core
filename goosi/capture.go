@@ -7,8 +7,8 @@ package goosi
 import (
 	"image"
 
-	"goki.dev/grows/images"
-	"goki.dev/grr"
+	"cogentcore.org/core/grows/images"
+	"cogentcore.org/core/grr"
 )
 
 // Capture tells the app drawer to capture its next frame as an image.

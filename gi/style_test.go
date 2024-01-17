@@ -8,11 +8,11 @@ import (
 	"path/filepath"
 	"testing"
 
-	"goki.dev/abilities"
-	"goki.dev/colors"
-	"goki.dev/states"
-	"goki.dev/styles"
-	"goki.dev/units"
+	"cogentcore.org/core/abilities"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/states"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 func TestParentActualBackground(t *testing.T) {

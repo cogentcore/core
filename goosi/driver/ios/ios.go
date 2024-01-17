@@ -40,8 +40,8 @@ import (
 	"strings"
 	"unsafe"
 
-	"goki.dev/events"
-	"goki.dev/goosi"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/goosi"
 )
 
 // MainLoop is the main app loop.

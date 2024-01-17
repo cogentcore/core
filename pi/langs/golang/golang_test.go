@@ -11,10 +11,10 @@ import (
 	"testing"
 	"time"
 
-	"goki.dev/fi"
-	"goki.dev/pi"
-	"goki.dev/pi/lex"
-	"goki.dev/prof"
+	"cogentcore.org/core/fi"
+	"cogentcore.org/core/pi"
+	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/prof"
 )
 
 func init() {

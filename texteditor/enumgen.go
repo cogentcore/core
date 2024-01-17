@@ -9,8 +9,8 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"goki.dev/enums"
-	"goki.dev/gi"
+	"cogentcore.org/core/enums"
+	"cogentcore.org/core/gi"
 )
 
 var _BufSignalsValues = []BufSignals{0, 1, 2, 3, 4, 5, 6}

@@ -8,11 +8,11 @@ import (
 	"image"
 	"log"
 
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/laser"
+	"cogentcore.org/core/mat32"
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"goki.dev/events"
-	"goki.dev/goosi"
-	"goki.dev/laser"
-	"goki.dev/mat32"
 )
 
 // MonitorDebug turns on various debugging statements about monitor changes

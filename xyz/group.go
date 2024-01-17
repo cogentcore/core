@@ -7,8 +7,8 @@ package xyz
 import (
 	"sort"
 
-	"goki.dev/ki"
-	"goki.dev/mat32"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/mat32"
 )
 
 // Group collects individual elements in a scene but does not have a Mesh or Material of

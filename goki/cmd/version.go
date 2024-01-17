@@ -10,10 +10,10 @@ import (
 	"strings"
 	"time"
 
+	"cogentcore.org/core/goki/config"
+	"cogentcore.org/core/grease"
+	"cogentcore.org/core/xe"
 	"github.com/Masterminds/semver/v3"
-	"goki.dev/goki/config"
-	"goki.dev/grease"
-	"goki.dev/xe"
 )
 
 // GetVersion prints the version of the project.

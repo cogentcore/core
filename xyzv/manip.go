@@ -7,12 +7,12 @@ package xyzv
 import (
 	"image/color"
 
-	"goki.dev/colors"
-	"goki.dev/events"
-	"goki.dev/events/key"
-	"goki.dev/ki"
-	"goki.dev/mat32"
-	"goki.dev/xyz"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/xyz"
 )
 
 // SelModes are selection modes for Scene

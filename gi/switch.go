@@ -5,15 +5,15 @@
 package gi
 
 import (
-	"goki.dev/abilities"
-	"goki.dev/colors"
-	"goki.dev/cursors"
-	"goki.dev/events"
-	"goki.dev/icons"
-	"goki.dev/ki"
-	"goki.dev/states"
-	"goki.dev/styles"
-	"goki.dev/units"
+	"cogentcore.org/core/abilities"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/cursors"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/states"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 // Switch is a widget that can toggle between an on and off state.

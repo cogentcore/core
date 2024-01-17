@@ -9,8 +9,8 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"goki.dev/enums"
-	"goki.dev/gi"
+	"cogentcore.org/core/enums"
+	"cogentcore.org/core/gi"
 )
 
 var _SliceViewFlagsValues = []SliceViewFlags{8, 9, 10, 11, 12, 13, 14, 15, 16, 17}

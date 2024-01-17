@@ -10,12 +10,12 @@ import (
 	"path/filepath"
 	"strings"
 
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 	"github.com/goki/freetype/truetype"
-	"goki.dev/colors"
-	"goki.dev/grr"
-	"goki.dev/ki"
-	"goki.dev/styles"
-	"goki.dev/units"
 	"golang.org/x/image/font/opentype"
 )
 

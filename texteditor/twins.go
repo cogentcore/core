@@ -5,9 +5,9 @@
 package texteditor
 
 import (
-	"goki.dev/events"
-	"goki.dev/gi"
-	"goki.dev/styles"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/styles"
 )
 
 // TwinEditors presents two side-by-side [Editor]s in [gi.Splits]

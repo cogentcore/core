@@ -15,7 +15,7 @@ import (
 	"sync"
 	"time"
 
-	"goki.dev/pi/lex"
+	"cogentcore.org/core/pi/lex"
 )
 
 //go:embed spell_en_us.json

@@ -10,12 +10,12 @@ import (
 	"reflect"
 	"strings"
 
-	"goki.dev/colors"
-	"goki.dev/grr"
-	"goki.dev/ki"
-	"goki.dev/mat32"
-	"goki.dev/paint"
-	"goki.dev/styles"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/paint"
+	"cogentcore.org/core/styles"
 )
 
 // Node is the interface for all SVG nodes

@@ -11,7 +11,7 @@ package gtigen
 import (
 	"fmt"
 
-	"goki.dev/gengo"
+	"cogentcore.org/core/gengo"
 	"golang.org/x/tools/go/packages"
 )
 

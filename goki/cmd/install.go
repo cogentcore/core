@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"goki.dev/goki/config"
-	"goki.dev/goki/mobile"
-	"goki.dev/xe"
+	"cogentcore.org/core/goki/config"
+	"cogentcore.org/core/goki/mobile"
+	"cogentcore.org/core/xe"
 )
 
 // Install installs the package on the local system.

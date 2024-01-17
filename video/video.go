@@ -20,8 +20,8 @@ import (
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/speaker"
 	"github.com/zergon321/reisen"
-	"goki.dev/gi"
-	"goki.dev/ki"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/ki"
 )
 
 // Video represents a video playback widget without any controls.

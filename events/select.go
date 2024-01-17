@@ -5,7 +5,7 @@
 package events
 
 import (
-	"goki.dev/events/key"
+	"cogentcore.org/core/events/key"
 )
 
 // SelectModes interprets the modifier keys to determine what type of selection mode to use.

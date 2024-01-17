@@ -7,7 +7,7 @@ package hsl
 import (
 	"image/color"
 
-	"goki.dev/mat32"
+	"cogentcore.org/core/mat32"
 )
 
 // Lighten returns a color that is lighter by the

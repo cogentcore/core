@@ -4,7 +4,7 @@
 
 package vshape
 
-import "goki.dev/mat32"
+import "cogentcore.org/core/mat32"
 
 // Box is a rectangular-shaped solid (cuboid)
 type Box struct {

@@ -7,8 +7,8 @@ package spell
 import (
 	"strings"
 
-	"goki.dev/pi/lex"
-	"goki.dev/pi/token"
+	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/token"
 )
 
 // CheckLexLine returns the Lex regions for any words that are misspelled

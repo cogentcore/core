@@ -5,9 +5,9 @@
 package main
 
 import (
-	"goki.dev/gi"
-	"goki.dev/styles"
-	"goki.dev/texteditor"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/texteditor"
 )
 
 var samplefile gi.Filename = "texteditor.go"

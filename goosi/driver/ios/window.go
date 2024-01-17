@@ -7,7 +7,7 @@
 package ios
 
 import (
-	"goki.dev/goosi/driver/base"
+	"cogentcore.org/core/goosi/driver/base"
 )
 
 // Window is the implementation of [goosi.Window] for the iOS platform.

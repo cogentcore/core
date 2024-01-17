@@ -5,13 +5,13 @@
 package gi
 
 import (
-	"goki.dev/colors"
-	"goki.dev/icons"
-	"goki.dev/ki"
-	"goki.dev/mat32"
-	"goki.dev/states"
-	"goki.dev/styles"
-	"goki.dev/units"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/states"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 // Toolbar is a [Frame] that is useful for holding [Button]s that do things.

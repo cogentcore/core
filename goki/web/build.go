@@ -13,10 +13,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"goki.dev/goki/config"
-	"goki.dev/goki/rendericon"
-	"goki.dev/grows/images"
-	"goki.dev/xe"
+	"cogentcore.org/core/goki/config"
+	"cogentcore.org/core/goki/rendericon"
+	"cogentcore.org/core/grows/images"
+	"cogentcore.org/core/xe"
 )
 
 // Build builds an app for web using the given configuration information.

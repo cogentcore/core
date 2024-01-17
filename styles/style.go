@@ -12,16 +12,16 @@ import (
 	"image/color"
 	"strings"
 
-	"goki.dev/abilities"
-	"goki.dev/colors"
-	"goki.dev/colors/gradient"
-	"goki.dev/cursors"
-	"goki.dev/enums"
-	"goki.dev/ki"
-	"goki.dev/laser"
-	"goki.dev/mat32"
-	"goki.dev/states"
-	"goki.dev/units"
+	"cogentcore.org/core/abilities"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/gradient"
+	"cogentcore.org/core/cursors"
+	"cogentcore.org/core/enums"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/laser"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/states"
+	"cogentcore.org/core/units"
 )
 
 // style implements CSS-based styling, as in: https://www.w3schools.com/cssref/default.asp

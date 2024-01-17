@@ -8,9 +8,9 @@ import (
 	"strings"
 	"unsafe"
 
-	"goki.dev/pi"
-	"goki.dev/pi/complete"
-	"goki.dev/pi/syms"
+	"cogentcore.org/core/pi"
+	"cogentcore.org/core/pi/complete"
+	"cogentcore.org/core/pi/syms"
 )
 
 var BuiltinTypes syms.TypeMap

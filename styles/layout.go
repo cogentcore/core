@@ -7,8 +7,8 @@ package styles
 import (
 	"log/slog"
 
-	"goki.dev/mat32"
-	"goki.dev/units"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/units"
 )
 
 // todo: for style

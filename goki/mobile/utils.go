@@ -15,9 +15,9 @@ import (
 	"strings"
 	"sync"
 
-	"goki.dev/goki/config"
-	"goki.dev/grog"
-	"goki.dev/xe"
+	"cogentcore.org/core/goki/config"
+	"cogentcore.org/core/grog"
+	"cogentcore.org/core/xe"
 	"golang.org/x/mod/modfile"
 	"golang.org/x/tools/go/packages"
 )

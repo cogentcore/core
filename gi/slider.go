@@ -8,16 +8,16 @@ import (
 	"fmt"
 	"image"
 
-	"goki.dev/abilities"
-	"goki.dev/colors"
-	"goki.dev/cursors"
-	"goki.dev/events"
-	"goki.dev/icons"
-	"goki.dev/keyfun"
-	"goki.dev/mat32"
-	"goki.dev/states"
-	"goki.dev/styles"
-	"goki.dev/units"
+	"cogentcore.org/core/abilities"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/cursors"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/states"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 // Slider is a slideable widget that provides slider functionality for two Types:

@@ -7,7 +7,7 @@ package gi
 import (
 	"time"
 
-	"goki.dev/events"
+	"cogentcore.org/core/events"
 )
 
 // NewPopupStage returns a new PopupStage with given type and scene contents.

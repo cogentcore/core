@@ -13,9 +13,9 @@ import (
 	"strconv"
 	"strings"
 
-	"goki.dev/cam/hct"
-	"goki.dev/cam/hsl"
-	"goki.dev/mat32"
+	"cogentcore.org/core/cam/hct"
+	"cogentcore.org/core/cam/hsl"
+	"cogentcore.org/core/mat32"
 )
 
 // IsNil returns whether the color is the nil initial default color

@@ -12,8 +12,8 @@ package base
 import (
 	"image"
 
-	"goki.dev/events"
-	"goki.dev/goosi"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/goosi"
 )
 
 // WindowMulti contains the data and logic common to all implementations of [goosi.Window]

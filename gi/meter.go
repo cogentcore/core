@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"image"
 
-	"goki.dev/colors"
-	"goki.dev/styles"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/styles"
 )
 
 // Meter is a widget that renders a current value on as a filled bar

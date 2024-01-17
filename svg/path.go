@@ -12,9 +12,9 @@ import (
 	"strings"
 	"unicode"
 
-	"goki.dev/ki"
-	"goki.dev/mat32"
-	"goki.dev/paint"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/paint"
 )
 
 // Path renders SVG data sequences that can render just about anything

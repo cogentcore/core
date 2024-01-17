@@ -4,7 +4,7 @@
 
 package vphong
 
-import "goki.dev/mat32"
+import "cogentcore.org/core/mat32"
 
 // CameraViewMat returns the camera view matrix, based position
 // of camera facing at target position, with given up vector.

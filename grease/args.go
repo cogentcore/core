@@ -16,8 +16,8 @@ import (
 
 	"maps"
 
+	"cogentcore.org/core/laser"
 	"github.com/iancoleman/strcase"
-	"goki.dev/laser"
 )
 
 const (

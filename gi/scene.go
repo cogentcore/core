@@ -10,17 +10,17 @@ import (
 	"io"
 	"sync"
 
-	"goki.dev/abilities"
-	"goki.dev/colors"
-	"goki.dev/cursors"
-	"goki.dev/enums"
-	"goki.dev/events"
-	"goki.dev/goosi"
-	"goki.dev/ki"
-	"goki.dev/mat32"
-	"goki.dev/paint"
-	"goki.dev/styles"
-	"goki.dev/units"
+	"cogentcore.org/core/abilities"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/cursors"
+	"cogentcore.org/core/enums"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/paint"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 // see:

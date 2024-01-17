@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"image"
 
-	"goki.dev/events/key"
-	"goki.dev/glop/nptime"
-	"goki.dev/mat32"
-	"goki.dev/mimedata"
+	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/glop/nptime"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/mimedata"
 )
 
 // TraceWindowPaint prints out a . for each WindowPaint event

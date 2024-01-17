@@ -30,7 +30,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"goki.dev/goki/mobile/sdkpath"
+	"cogentcore.org/core/goki/mobile/sdkpath"
 )
 
 var outfile = flag.String("o", "", "result will be written file")

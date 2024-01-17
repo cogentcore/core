@@ -5,7 +5,7 @@
 package vshape
 
 import (
-	"goki.dev/mat32"
+	"cogentcore.org/core/mat32"
 )
 
 ////////////////////////////////////////////////////////////////

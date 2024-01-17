@@ -3,9 +3,9 @@
 package units
 
 import (
-	"goki.dev/gti"
+	"cogentcore.org/core/gti"
 )
 
-var _ = gti.AddType(&gti.Type{Name: "goki.dev/units.Value", IDName: "value", Doc: "Value and units, and converted value into raw pixels (dots in DPI)", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Fields: []gti.Field{{Name: "Val", Doc: "the value in terms of the specified unit"}, {Name: "Un", Doc: "the unit used for the value"}, {Name: "Dots", Doc: "the computed value in raw pixels (dots in DPI)"}, {Name: "Custom", Doc: "custom function that returns the dots of the value;\nif non-nil, it overrides all other fields;\nif nil, standard ToDots with the other fields is used"}}})
+var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/units.Value", IDName: "value", Doc: "Value and units, and converted value into raw pixels (dots in DPI)", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Fields: []gti.Field{{Name: "Val", Doc: "the value in terms of the specified unit"}, {Name: "Un", Doc: "the unit used for the value"}, {Name: "Dots", Doc: "the computed value in raw pixels (dots in DPI)"}, {Name: "Custom", Doc: "custom function that returns the dots of the value;\nif non-nil, it overrides all other fields;\nif nil, standard ToDots with the other fields is used"}}})
 
-var _ = gti.AddType(&gti.Type{Name: "goki.dev/units.XY", IDName: "xy", Doc: "XY represents unit Value for X and Y dimensions", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Fields: []gti.Field{{Name: "X", Doc: "X is the horizontal axis value"}, {Name: "Y", Doc: "Y is the vertical axis value"}}})
+var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/units.XY", IDName: "xy", Doc: "XY represents unit Value for X and Y dimensions", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Fields: []gti.Field{{Name: "X", Doc: "X is the horizontal axis value"}, {Name: "Y", Doc: "Y is the vertical axis value"}}})

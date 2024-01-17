@@ -9,13 +9,13 @@ import (
 	"strconv"
 	"strings"
 
-	"goki.dev/colors"
-	"goki.dev/colors/gradient"
-	"goki.dev/enums"
-	"goki.dev/grr"
-	"goki.dev/laser"
-	"goki.dev/mat32"
-	"goki.dev/units"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/gradient"
+	"cogentcore.org/core/enums"
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/laser"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/units"
 )
 
 ////////////////////////////////////////////////////////////////////////////

@@ -16,13 +16,13 @@ import (
 	"runtime"
 	"time"
 
+	"cogentcore.org/core/mat32"
 	vk "github.com/goki/vulkan"
-	"goki.dev/mat32"
 
+	"cogentcore.org/core/vgpu"
+	"cogentcore.org/core/vgpu/vphong"
+	"cogentcore.org/core/vgpu/vshape"
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"goki.dev/vgpu"
-	"goki.dev/vgpu/vphong"
-	"goki.dev/vgpu/vshape"
 )
 
 func init() {

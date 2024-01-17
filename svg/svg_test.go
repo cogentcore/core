@@ -10,9 +10,9 @@ import (
 	"strings"
 	"testing"
 
-	"goki.dev/glop/dirs"
-	"goki.dev/grows/images"
-	"goki.dev/paint"
+	"cogentcore.org/core/glop/dirs"
+	"cogentcore.org/core/grows/images"
+	"cogentcore.org/core/paint"
 )
 
 func TestSVG(t *testing.T) {

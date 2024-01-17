@@ -7,8 +7,8 @@ package paint
 import (
 	"image"
 
-	"goki.dev/mat32"
-	"goki.dev/styles"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/styles"
 )
 
 // TextLink represents a hyperlink within rendered text

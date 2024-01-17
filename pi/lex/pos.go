@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"strings"
 
-	"goki.dev/pi/token"
+	"cogentcore.org/core/pi/token"
 )
 
 // Pos is a position within the source file -- it is recorded always in 0, 0

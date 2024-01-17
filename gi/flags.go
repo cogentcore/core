@@ -5,10 +5,10 @@
 package gi
 
 import (
-	"goki.dev/abilities"
-	"goki.dev/enums"
-	"goki.dev/ki"
-	"goki.dev/states"
+	"cogentcore.org/core/abilities"
+	"cogentcore.org/core/enums"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/states"
 )
 
 // WidgetFlags define Widget node bitflags for tracking common high-frequency GUI

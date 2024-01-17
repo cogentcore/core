@@ -9,10 +9,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"goki.dev/grr"
-	"goki.dev/mat32"
-	"goki.dev/styles"
-	"goki.dev/units"
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 var testImagePath = Filename(filepath.Join("..", "logo", "goki_logo.png"))

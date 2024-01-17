@@ -7,12 +7,12 @@ package texteditor
 import (
 	"image"
 
-	"goki.dev/events"
-	"goki.dev/gi"
-	"goki.dev/laser"
-	"goki.dev/mat32"
-	"goki.dev/pi/lex"
-	"goki.dev/texteditor/textbuf"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/laser"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/texteditor/textbuf"
 )
 
 ///////////////////////////////////////////////////////////////////////////////

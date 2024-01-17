@@ -10,9 +10,9 @@ import (
 	"image"
 	"syscall/js"
 
-	"goki.dev/events"
-	"goki.dev/events/key"
-	"goki.dev/mat32"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/mat32"
 )
 
 func (a *App) AddEventListeners() {

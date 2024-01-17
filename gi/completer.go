@@ -9,11 +9,11 @@ import (
 	"sync"
 	"time"
 
-	"goki.dev/events"
-	"goki.dev/icons"
-	"goki.dev/keyfun"
-	"goki.dev/pi/complete"
-	"goki.dev/spell"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/pi/complete"
+	"cogentcore.org/core/spell"
 )
 
 // Completer interface supports the SetCompleter method for setting completer parameters

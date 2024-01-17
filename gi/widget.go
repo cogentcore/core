@@ -11,13 +11,13 @@ import (
 	"log/slog"
 	"sync"
 
-	"goki.dev/abilities"
-	"goki.dev/enums"
-	"goki.dev/events"
-	"goki.dev/gti"
-	"goki.dev/ki"
-	"goki.dev/states"
-	"goki.dev/styles"
+	"cogentcore.org/core/abilities"
+	"cogentcore.org/core/enums"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/gti"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/states"
+	"cogentcore.org/core/styles"
 )
 
 // Widget is the interface for all GoGi Widget Nodes

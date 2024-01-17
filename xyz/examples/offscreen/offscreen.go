@@ -10,12 +10,12 @@ import (
 	"image/color"
 	"log"
 
-	"goki.dev/colors"
-	"goki.dev/grows/images"
-	"goki.dev/mat32"
-	"goki.dev/vgpu"
-	"goki.dev/xyz"
-	"goki.dev/xyz/examples/assets"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/grows/images"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/vgpu"
+	"cogentcore.org/core/xyz"
+	"cogentcore.org/core/xyz/examples/assets"
 )
 
 func main() {

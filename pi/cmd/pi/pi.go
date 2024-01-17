@@ -11,11 +11,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"goki.dev/fi"
-	"goki.dev/glop/dirs"
-	"goki.dev/pi"
-	_ "goki.dev/pi/langs"
-	"goki.dev/pi/syms"
+	"cogentcore.org/core/fi"
+	"cogentcore.org/core/glop/dirs"
+	"cogentcore.org/core/pi"
+	_ "cogentcore.org/core/pi/langs"
+	"cogentcore.org/core/pi/syms"
 )
 
 var Excludes []string

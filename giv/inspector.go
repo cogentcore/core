@@ -7,17 +7,17 @@ package giv
 import (
 	"fmt"
 
-	"goki.dev/colors"
-	"goki.dev/events"
-	"goki.dev/gi"
-	"goki.dev/goosi"
-	"goki.dev/grows/jsons"
-	"goki.dev/grr"
-	"goki.dev/icons"
-	"goki.dev/keyfun"
-	"goki.dev/ki"
-	"goki.dev/styles"
-	"goki.dev/units"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/grows/jsons"
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 // Inspector represents a struct, creating a property editor of the fields --

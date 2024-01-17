@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"strings"
 
+	"cogentcore.org/core/glop/sentence"
+	"cogentcore.org/core/gti"
 	"github.com/iancoleman/strcase"
-	"goki.dev/glop/sentence"
-	"goki.dev/gti"
 )
 
 // Cmd represents a runnable command with configuration options.
@@ -47,7 +47,7 @@ type CmdOrFunc[T any] interface {
 
 // CmdFromFunc returns a new [Cmd] object from the given function
 // and any information specified on it using comment directives,
-// which requires the use of gti (see https://goki.dev/gti)
+// which requires the use of gti (see https://cogentcore.org/core/gti)
 func CmdFromFunc[T any](fun func(T) error) (*Cmd[T], error) {
 	cmd := &Cmd[T]{
 		Func: fun,

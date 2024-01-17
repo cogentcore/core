@@ -14,11 +14,11 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"goki.dev/fi"
-	"goki.dev/glop/dirs"
-	"goki.dev/pi"
-	"goki.dev/pi/syms"
-	"goki.dev/pi/token"
+	"cogentcore.org/core/fi"
+	"cogentcore.org/core/glop/dirs"
+	"cogentcore.org/core/pi"
+	"cogentcore.org/core/pi/syms"
+	"cogentcore.org/core/pi/token"
 	"golang.org/x/tools/go/packages"
 )
 

@@ -9,8 +9,8 @@ package vphong
 import (
 	"sync"
 
-	"goki.dev/ordmap"
-	"goki.dev/vgpu"
+	"cogentcore.org/core/ordmap"
+	"cogentcore.org/core/vgpu"
 )
 
 // MaxLights is upper limit on number of any given type of light

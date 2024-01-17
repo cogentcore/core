@@ -18,8 +18,8 @@ import (
 	"path/filepath"
 	"sync"
 
-	"goki.dev/cursor"
-	"goki.dev/goosi"
+	"cogentcore.org/core/cursor"
+	"cogentcore.org/core/goosi"
 )
 
 // App contains the data and logic common to all implementations of [goosi.App].

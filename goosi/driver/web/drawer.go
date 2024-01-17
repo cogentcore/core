@@ -11,7 +11,7 @@ import (
 	"syscall/js"
 	"unsafe"
 
-	"goki.dev/goosi"
+	"cogentcore.org/core/goosi"
 )
 
 // Drawer is a TEMPORARY, low-performance implementation of [goosi.Drawer].

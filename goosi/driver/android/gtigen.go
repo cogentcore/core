@@ -3,9 +3,9 @@
 package android
 
 import (
-	"goki.dev/gti"
+	"cogentcore.org/core/gti"
 )
 
-var _ = gti.AddType(&gti.Type{Name: "goki.dev/goosi/driver/android.App", IDName: "app", Doc: "App is the [goosi.App] implementation for the Android platform", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Embeds: []gti.Field{{Name: "AppSingle"}}, Fields: []gti.Field{{Name: "GPU", Doc: "GPU is the system GPU used for the app"}, {Name: "Winptr", Doc: "Winptr is the pointer to the underlying system window"}}})
+var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/goosi/driver/android.App", IDName: "app", Doc: "App is the [goosi.App] implementation for the Android platform", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Embeds: []gti.Field{{Name: "AppSingle"}}, Fields: []gti.Field{{Name: "GPU", Doc: "GPU is the system GPU used for the app"}, {Name: "Winptr", Doc: "Winptr is the pointer to the underlying system window"}}})
 
-var _ = gti.AddType(&gti.Type{Name: "goki.dev/goosi/driver/android.Window", IDName: "window", Doc: "Window is the implementation of [goosi.Window] for the Android platform.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Embeds: []gti.Field{{Name: "WindowSingle"}}})
+var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/goosi/driver/android.Window", IDName: "window", Doc: "Window is the implementation of [goosi.Window] for the Android platform.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Embeds: []gti.Field{{Name: "WindowSingle"}}})

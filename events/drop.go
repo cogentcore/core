@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"image"
 
-	"goki.dev/events/key"
+	"cogentcore.org/core/events/key"
 )
 
 // DragDrop represents the drag-and-drop Drop event

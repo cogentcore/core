@@ -8,9 +8,9 @@ import (
 	"image"
 	"image/color"
 
-	"goki.dev/colors"
-	"goki.dev/mat32"
-	"goki.dev/units"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/units"
 )
 
 // Paint provides the styling parameters for SVG-style rendering

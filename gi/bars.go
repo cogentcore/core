@@ -7,8 +7,8 @@ package gi
 import (
 	"strings"
 
-	"goki.dev/ki"
-	"goki.dev/styles"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/styles"
 )
 
 // BarFuncs are functions for creating control bars,

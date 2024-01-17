@@ -12,17 +12,17 @@ import (
 	"log/slog"
 	"reflect"
 
-	"goki.dev/enums"
-	"goki.dev/events"
-	"goki.dev/events/key"
-	"goki.dev/gi"
-	"goki.dev/glop/sentence"
-	"goki.dev/gti"
-	"goki.dev/ki"
-	"goki.dev/laser"
-	"goki.dev/states"
-	"goki.dev/styles"
-	"goki.dev/units"
+	"cogentcore.org/core/enums"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/glop/sentence"
+	"cogentcore.org/core/gti"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/laser"
+	"cogentcore.org/core/states"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 // NewValue makes and returns a new [Value] from the given value and creates
@@ -207,13 +207,13 @@ type Value interface {
 
 	// SetTags sets tags for this valueview, for non-struct values, to
 	// influence interface for this value -- see
-	// https://goki.dev/wiki/Tags for valid options.  Adds to
+	// https://cogentcore.org/core/wiki/Tags for valid options.  Adds to
 	// existing tags if some are already set.
 	SetTags(tags map[string]string)
 
 	// SetTag sets given tag to given value for this valueview, for non-struct
 	// values, to influence interface for this value -- see
-	// https://goki.dev/wiki/Tags for valid options.
+	// https://cogentcore.org/core/wiki/Tags for valid options.
 	SetTag(tag, value string)
 
 	// Tag returns value for given tag -- looks first at tags set by

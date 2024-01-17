@@ -12,10 +12,10 @@ import (
 	"image"
 	"os"
 
-	"goki.dev/events"
-	"goki.dev/goosi"
-	"goki.dev/goosi/driver/base"
-	"goki.dev/grr"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/goosi/driver/base"
+	"cogentcore.org/core/grr"
 )
 
 func Init() {

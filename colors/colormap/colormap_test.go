@@ -11,8 +11,8 @@ import (
 	"slices"
 	"testing"
 
-	"goki.dev/colors"
-	"goki.dev/grows/images"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/grows/images"
 )
 
 func TestColorMaps(t *testing.T) {

@@ -8,9 +8,9 @@ import (
 	"image/color"
 	"log/slog"
 
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/matcolor"
 	"github.com/muesli/termenv"
-	"goki.dev/colors"
-	"goki.dev/colors/matcolor"
 )
 
 var (

@@ -16,10 +16,10 @@ import (
 	"strings"
 	"unicode"
 
-	"goki.dev/enums/enumgen"
-	"goki.dev/glop/sentence"
-	"goki.dev/gti/gtigen"
-	"goki.dev/xe"
+	"cogentcore.org/core/enums/enumgen"
+	"cogentcore.org/core/glop/sentence"
+	"cogentcore.org/core/gti/gtigen"
+	"cogentcore.org/core/xe"
 )
 
 // TODO: make all of the target fields enums

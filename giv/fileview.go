@@ -14,18 +14,18 @@ import (
 
 	"unicode"
 
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/fi"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/pi/complete"
+	"cogentcore.org/core/styles"
 	"github.com/fsnotify/fsnotify"
 	"github.com/mitchellh/go-homedir"
-	"goki.dev/colors"
-	"goki.dev/events"
-	"goki.dev/fi"
-	"goki.dev/gi"
-	"goki.dev/goosi"
-	"goki.dev/grr"
-	"goki.dev/icons"
-	"goki.dev/keyfun"
-	"goki.dev/pi/complete"
-	"goki.dev/styles"
 )
 
 func FileViewDialog(ctx gi.Widget, filename, exts, title string, fun func(selfile string)) {

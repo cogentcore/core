@@ -9,8 +9,8 @@ import (
 	"strings"
 	"text/template"
 
+	"cogentcore.org/core/gti"
 	"github.com/iancoleman/strcase"
-	"goki.dev/gti"
 )
 
 // TypeTmpl is the template for [gti.Type] declarations.

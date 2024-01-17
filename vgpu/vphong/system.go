@@ -8,9 +8,9 @@ import (
 	"embed"
 	"unsafe"
 
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/vgpu"
 	vk "github.com/goki/vulkan"
-	"goki.dev/mat32"
-	"goki.dev/vgpu"
 )
 
 //go:embed shaders/*.spv

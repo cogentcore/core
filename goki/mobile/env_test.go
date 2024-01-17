@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"goki.dev/goki/config"
-	"goki.dev/grease"
+	"cogentcore.org/core/goki/config"
+	"cogentcore.org/core/grease"
 )
 
 func TestNdkRoot(t *testing.T) {

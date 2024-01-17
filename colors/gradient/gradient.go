@@ -15,8 +15,8 @@ import (
 	"image"
 	"image/color"
 
-	"goki.dev/colors"
-	"goki.dev/mat32"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/mat32"
 )
 
 // Gradient is the interface that all gradient types satisfy.

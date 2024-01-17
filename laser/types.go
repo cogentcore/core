@@ -8,7 +8,7 @@ import (
 	"path"
 	"reflect"
 
-	"goki.dev/glop/sentence"
+	"cogentcore.org/core/glop/sentence"
 )
 
 // LongTypeName returns the long, full package-path qualified type name.

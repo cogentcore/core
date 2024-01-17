@@ -5,13 +5,13 @@
 package gi
 
 import (
-	"goki.dev/abilities"
-	"goki.dev/colors"
-	"goki.dev/cursors"
-	"goki.dev/events"
-	"goki.dev/mat32"
-	"goki.dev/styles"
-	"goki.dev/units"
+	"cogentcore.org/core/abilities"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/cursors"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 // Handle represents a draggable handle that can be used to

@@ -8,8 +8,8 @@ import (
 	"errors"
 	"image/color"
 
-	"goki.dev/mat32"
-	"goki.dev/styles"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/styles"
 	"golang.org/x/image/font"
 )
 

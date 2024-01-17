@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"image"
 
-	"goki.dev/ki"
-	"goki.dev/mat32"
-	"goki.dev/states"
-	"goki.dev/styles"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/states"
+	"cogentcore.org/core/styles"
 )
 
 // Layout uses 3 Size passes, 2 Position passes:

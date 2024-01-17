@@ -12,12 +12,12 @@ import (
 	"image/color"
 	"sync"
 
-	"goki.dev/colors"
-	"goki.dev/ki"
-	"goki.dev/mat32"
-	"goki.dev/ordmap"
-	"goki.dev/vgpu"
-	"goki.dev/vgpu/vphong"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/ordmap"
+	"cogentcore.org/core/vgpu"
+	"cogentcore.org/core/vgpu/vphong"
 )
 
 // Set Update3DTrace to true to get a trace of 3D updating

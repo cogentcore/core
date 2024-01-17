@@ -8,9 +8,9 @@ import (
 	"log"
 	"strings"
 
-	"goki.dev/colors/gradient"
-	"goki.dev/ki"
-	"goki.dev/mat32"
+	"cogentcore.org/core/colors/gradient"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/mat32"
 )
 
 /////////////////////////////////////////////////////////////////////////////

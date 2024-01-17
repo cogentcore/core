@@ -16,7 +16,7 @@ import (
 	"sync"
 	"time"
 
-	"goki.dev/goosi"
+	"cogentcore.org/core/goosi"
 )
 
 var (

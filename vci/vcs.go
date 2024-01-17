@@ -11,8 +11,8 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"cogentcore.org/core/glop/dirs"
 	"github.com/Masterminds/vcs"
-	"goki.dev/glop/dirs"
 )
 
 var (

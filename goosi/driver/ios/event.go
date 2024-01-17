@@ -21,8 +21,8 @@ import "C"
 import (
 	"image"
 
-	"goki.dev/events"
-	"goki.dev/events/key"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
 )
 
 // TouchIDs are the current active touches. The position in the array

@@ -7,8 +7,8 @@ package ki
 import (
 	"reflect"
 
-	"goki.dev/enums"
-	"goki.dev/gti"
+	"cogentcore.org/core/enums"
+	"cogentcore.org/core/gti"
 )
 
 // The Ki interface provides the core functionality for a Goki tree.

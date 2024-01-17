@@ -12,8 +12,8 @@ import (
 	"slices"
 	"strings"
 
-	"goki.dev/fi"
-	"goki.dev/pi/token"
+	"cogentcore.org/core/fi"
+	"cogentcore.org/core/pi/token"
 )
 
 // File contains the contents of the file being parsed -- all kept in

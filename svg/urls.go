@@ -12,8 +12,8 @@ import (
 	"strings"
 	"unicode"
 
-	"goki.dev/ki"
-	"goki.dev/laser"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/laser"
 )
 
 /////////////////////////////////////////////////////////////////////////////

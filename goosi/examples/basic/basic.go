@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"image"
 
-	"goki.dev/goosi"
-	_ "goki.dev/goosi/driver"
+	"cogentcore.org/core/goosi"
+	_ "cogentcore.org/core/goosi/driver"
 )
 
 func main() {

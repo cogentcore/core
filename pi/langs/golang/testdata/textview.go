@@ -24,10 +24,10 @@ import (
 	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
-	"goki.dev/glop/indent"
-	"goki.dev/ki"
-	"goki.dev/pi/filecat"
-	"goki.dev/pi/token"
+	"cogentcore.org/core/glop/indent"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/pi/filecat"
+	"cogentcore.org/core/pi/token"
 )
 
 // TextView is a widget for editing multiple lines of text (as compared to

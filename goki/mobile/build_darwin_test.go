@@ -10,9 +10,9 @@ import (
 	"testing"
 	"text/template"
 
-	"goki.dev/goki/config"
-	"goki.dev/grease"
-	"goki.dev/xe"
+	"cogentcore.org/core/goki/config"
+	"cogentcore.org/core/grease"
+	"cogentcore.org/core/xe"
 )
 
 func TestAppleBuild(t *testing.T) {
@@ -40,7 +40,7 @@ func TestAppleBuild(t *testing.T) {
 		pkg  string
 		main bool
 	}{
-		{"goki.dev/goosi/examples/drawtri", true},
+		{"cogentcore.org/core/goosi/examples/drawtri", true},
 	}
 	for _, test := range tests {
 		buf := new(bytes.Buffer)

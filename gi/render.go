@@ -14,13 +14,13 @@ import (
 	"runtime/pprof"
 	"time"
 
-	"goki.dev/cam/hct"
-	"goki.dev/colors"
-	"goki.dev/ki"
-	"goki.dev/mat32"
-	"goki.dev/paint"
-	"goki.dev/prof"
-	"goki.dev/styles"
+	"cogentcore.org/core/cam/hct"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/paint"
+	"cogentcore.org/core/prof"
+	"cogentcore.org/core/styles"
 )
 
 // Rendering logic:

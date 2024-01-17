@@ -14,9 +14,10 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 
-	"goki.dev/goki/mobile/binres"
+	"cogentcore.org/core/goki/mobile/binres"
 )
 
 const tmpl = `// Copyright 2016 The Go Authors.  All rights reserved.

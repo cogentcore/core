@@ -3,7 +3,7 @@
 package main
 
 import (
-	"goki.dev/gti"
+	"cogentcore.org/core/gti"
 )
 
 var _ = gti.AddType(&gti.Type{Name: "main.TableStruct", IDName: "table-struct", Doc: "TableStruct is a testing struct for table view", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Fields: []gti.Field{{Name: "Icon", Doc: "an icon"}, {Name: "IntField", Doc: "an integer field"}, {Name: "FloatField", Doc: "a float field"}, {Name: "StrField", Doc: "a string field"}, {Name: "File", Doc: "a file"}}})

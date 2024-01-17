@@ -9,7 +9,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"goki.dev/mat32"
+	"cogentcore.org/core/mat32"
 )
 
 func TestRandSzAlloc(t *testing.T) {

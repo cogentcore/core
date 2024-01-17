@@ -5,7 +5,7 @@
 package goosi
 
 import (
-	"goki.dev/mimedata"
+	"cogentcore.org/core/mimedata"
 )
 
 // Clipboard defines the methods for reading and writing data to

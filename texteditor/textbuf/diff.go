@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"strings"
 
-	"goki.dev/difflib"
+	"cogentcore.org/core/difflib"
 )
 
 // note: original difflib is: "github.com/pmezard/go-difflib/difflib"

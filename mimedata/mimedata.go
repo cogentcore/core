@@ -22,7 +22,7 @@ import (
 	"net/textproto"
 	"strings"
 
-	"goki.dev/fi"
+	"cogentcore.org/core/fi"
 )
 
 const (

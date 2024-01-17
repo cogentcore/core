@@ -7,8 +7,8 @@ package mobile
 import (
 	"fmt"
 
-	"goki.dev/goki/config"
-	"goki.dev/xe"
+	"cogentcore.org/core/goki/config"
+	"cogentcore.org/core/xe"
 )
 
 // Install installs the app named by the import path on the attached mobile device.

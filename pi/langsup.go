@@ -9,9 +9,9 @@ import (
 	"log"
 	"time"
 
-	"goki.dev/fi"
-	"goki.dev/pi/langs"
-	"goki.dev/pi/lex"
+	"cogentcore.org/core/fi"
+	"cogentcore.org/core/pi/langs"
+	"cogentcore.org/core/pi/lex"
 )
 
 // LangFlags are special properties of a given language

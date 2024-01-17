@@ -7,8 +7,8 @@ package gi
 import (
 	"time"
 
-	"goki.dev/grr"
-	"goki.dev/laser"
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/laser"
 )
 
 // todo: store a map of [value]ticker -- close the ticker if existing.

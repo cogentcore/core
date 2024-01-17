@@ -9,13 +9,13 @@ import (
 	"log/slog"
 	"strconv"
 
-	"goki.dev/events"
-	"goki.dev/grr"
-	"goki.dev/icons"
-	"goki.dev/keyfun"
-	"goki.dev/mat32"
-	"goki.dev/states"
-	"goki.dev/styles"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/states"
+	"cogentcore.org/core/styles"
 )
 
 // Spinner combines a TextField with up / down buttons for incrementing /

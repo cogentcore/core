@@ -7,13 +7,13 @@ package gi
 import (
 	"image"
 
-	"goki.dev/colors"
-	"goki.dev/events"
-	"goki.dev/ki"
-	"goki.dev/mat32"
-	"goki.dev/states"
-	"goki.dev/styles"
-	"goki.dev/units"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/states"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 // MenuSceneConfigStyles configures the default styles

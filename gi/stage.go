@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"goki.dev/goosi"
-	"goki.dev/ki"
+	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/ki"
 )
 
 // StageTypes are the types of Stage containers.

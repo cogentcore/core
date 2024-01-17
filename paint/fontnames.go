@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"goki.dev/styles"
+	"cogentcore.org/core/styles"
 )
 
 var (

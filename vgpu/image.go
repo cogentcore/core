@@ -13,10 +13,10 @@ import (
 	"log"
 	"unsafe"
 
+	"cogentcore.org/core/enums"
+	"cogentcore.org/core/grows/images"
+	"cogentcore.org/core/mat32"
 	vk "github.com/goki/vulkan"
-	"goki.dev/enums"
-	"goki.dev/grows/images"
-	"goki.dev/mat32"
 )
 
 // SRGBToLinearComp converts an sRGB rgb component to linear space (removes gamma).

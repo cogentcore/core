@@ -4,7 +4,7 @@
 
 package hpe
 
-import "goki.dev/cam/cie"
+import "cogentcore.org/core/cam/cie"
 
 // XYZToLMS convert XYZ to Long, Medium, Short cone-based responses,
 // using the Hunt-Pointer-Estevez transform.

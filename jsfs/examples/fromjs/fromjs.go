@@ -12,8 +12,8 @@ package main
 import (
 	"syscall/js"
 
-	"goki.dev/grr"
-	"goki.dev/jsfs"
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/jsfs"
 )
 
 func main() {

@@ -15,10 +15,10 @@ import (
 	"strings"
 	"sync"
 
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/styles"
 	"github.com/fatih/camelcase"
 	"github.com/iancoleman/strcase"
-	"goki.dev/grr"
-	"goki.dev/styles"
 )
 
 // loadFontMu protects the font loading calls, which are not concurrent-safe

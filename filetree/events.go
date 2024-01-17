@@ -8,14 +8,14 @@ import (
 	"fmt"
 	"strings"
 
-	"goki.dev/events"
-	"goki.dev/gi"
-	"goki.dev/giv"
-	"goki.dev/icons"
-	"goki.dev/keyfun"
-	"goki.dev/states"
-	"goki.dev/styles"
-	"goki.dev/vci"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/giv"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/states"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/vci"
 )
 
 func (fn *Node) HandleEvents() {

@@ -9,7 +9,7 @@ import (
 	"io"
 	"io/fs"
 
-	"goki.dev/grows"
+	"cogentcore.org/core/grows"
 )
 
 // Open reads the given object from the given filename using JSON encoding

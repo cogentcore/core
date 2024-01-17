@@ -27,8 +27,8 @@ import (
 	"image"
 	"log"
 
-	"goki.dev/events"
-	"goki.dev/events/key"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
 )
 
 //export keyboardTyped

@@ -5,9 +5,9 @@
 package pi
 
 import (
-	"goki.dev/pi/lex"
-	"goki.dev/pi/parse"
-	"goki.dev/pi/syms"
+	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/parse"
+	"cogentcore.org/core/pi/syms"
 )
 
 // Lang provides a general interface for language-specific management

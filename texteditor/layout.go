@@ -5,8 +5,8 @@
 package texteditor
 
 import (
-	"goki.dev/mat32"
-	"goki.dev/paint"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/paint"
 )
 
 // StyleSizes gets the size info based on Style settings.

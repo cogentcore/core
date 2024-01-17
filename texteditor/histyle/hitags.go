@@ -5,8 +5,8 @@
 package histyle
 
 import (
+	"cogentcore.org/core/pi/token"
 	"github.com/alecthomas/chroma/v2"
-	"goki.dev/pi/token"
 )
 
 // FromChroma converts a chroma.TokenType to a pi token.Tokens

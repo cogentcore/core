@@ -10,10 +10,10 @@ import (
 	"log"
 	"unsafe"
 
+	"cogentcore.org/core/enums"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/vgpu/szalloc"
 	vk "github.com/goki/vulkan"
-	"goki.dev/enums"
-	"goki.dev/mat32"
-	"goki.dev/vgpu/szalloc"
 )
 
 // Val represents a specific value of a Var variable.

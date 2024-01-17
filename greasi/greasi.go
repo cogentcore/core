@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"os"
 
-	"goki.dev/grease"
-	"goki.dev/grog"
+	"cogentcore.org/core/grease"
+	"cogentcore.org/core/grog"
 )
 
 // Run runs the given app with the given default

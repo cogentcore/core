@@ -9,9 +9,9 @@ import (
 	"log/slog"
 	"sync"
 
-	"goki.dev/mat32"
-	"goki.dev/raster"
-	"goki.dev/scan"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/raster"
+	"cogentcore.org/core/scan"
 )
 
 // The State holds all the current rendering state information used

@@ -11,10 +11,10 @@ import (
 
 	"log/slog"
 
-	"goki.dev/colors"
-	"goki.dev/laser"
-	"goki.dev/mat32"
-	"goki.dev/units"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/laser"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/units"
 )
 
 // SideIndexes provides names for the Sides in order defined

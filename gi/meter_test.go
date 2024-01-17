@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"testing"
 
-	"goki.dev/styles"
+	"cogentcore.org/core/styles"
 )
 
 func TestMeter(t *testing.T) {

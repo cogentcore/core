@@ -7,7 +7,7 @@ package styles
 import (
 	"fmt"
 
-	"goki.dev/mat32"
+	"cogentcore.org/core/mat32"
 )
 
 // XY represents X,Y values

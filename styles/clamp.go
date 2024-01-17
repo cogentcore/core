@@ -4,7 +4,7 @@
 
 package styles
 
-import "goki.dev/mat32"
+import "cogentcore.org/core/mat32"
 
 // ClampMax returns given value, not greater than given max _only if_ max > 0
 func ClampMax(v, mx float32) float32 {

@@ -5,8 +5,8 @@
 package xyz
 
 import (
-	"goki.dev/mat32"
-	"goki.dev/vgpu/vshape"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/vgpu/vshape"
 )
 
 const (

@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strings"
 
-	"goki.dev/icons"
+	"cogentcore.org/core/icons"
 )
 
 // URI uniform resource identifier for general app resources.

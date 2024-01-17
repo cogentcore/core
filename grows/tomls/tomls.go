@@ -9,9 +9,9 @@ import (
 	"io"
 	"io/fs"
 
+	"cogentcore.org/core/glop/dirs"
+	"cogentcore.org/core/grows"
 	"github.com/pelletier/go-toml/v2"
-	"goki.dev/glop/dirs"
-	"goki.dev/grows"
 )
 
 // NewDecoder returns a new [grows.Decoder]

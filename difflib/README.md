@@ -14,7 +14,7 @@ The following publicly visible classes and functions have been ported:
 ## Installation
 
 ```sh
-$ go get goki.dev/difflib
+$ go get cogentcore.org/core/difflib
 ```
 
 ### UnifiedDiff Quick Start

@@ -23,8 +23,8 @@ import (
 	"fmt"
 	"image/color"
 
-	"goki.dev/cam/cam16"
-	"goki.dev/cam/cie"
+	"cogentcore.org/core/cam/cam16"
+	"cogentcore.org/core/cam/cie"
 )
 
 // HCT represents a color as hue, chroma, and tone. HCT is a color system

@@ -13,12 +13,12 @@ import (
 	"strings"
 	"unicode"
 
-	"goki.dev/fi"
-	"goki.dev/glop/indent"
-	"goki.dev/pi"
-	"goki.dev/pi/langs"
-	"goki.dev/pi/lex"
-	"goki.dev/pi/token"
+	"cogentcore.org/core/fi"
+	"cogentcore.org/core/glop/indent"
+	"cogentcore.org/core/pi"
+	"cogentcore.org/core/pi/langs"
+	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/token"
 )
 
 //go:embed go.pi

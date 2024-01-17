@@ -7,7 +7,7 @@ package xyz
 import (
 	"image/color"
 
-	"goki.dev/mat32"
+	"cogentcore.org/core/mat32"
 )
 
 // Light represents a light that illuminates a scene

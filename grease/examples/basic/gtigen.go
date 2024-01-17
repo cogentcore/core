@@ -3,7 +3,7 @@
 package main
 
 import (
-	"goki.dev/gti"
+	"cogentcore.org/core/gti"
 )
 
 var _ = gti.AddType(&gti.Type{Name: "main.Config", IDName: "config", Directives: []gti.Directive{{Tool: "go", Directive: "generate", Args: []string{"goki", "generate", "-add-types", "-add-funcs"}}}, Fields: []gti.Field{{Name: "Name", Doc: "the name of the user"}, {Name: "Age", Doc: "the age of the user"}, {Name: "LikesGo", Doc: "whether the user likes Go"}, {Name: "Build"}, {Name: "Server"}, {Name: "Client"}, {Name: "Dir", Doc: "the directory to build in"}}})

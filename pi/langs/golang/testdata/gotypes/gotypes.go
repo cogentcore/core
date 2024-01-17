@@ -1,6 +1,6 @@
 package gotypes
 
-import "goki.dev/ki"
+import "cogentcore.org/core/ki"
 
 type Ityp int
 

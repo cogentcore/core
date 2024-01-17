@@ -3,11 +3,11 @@
 package testdata
 
 import (
-	"goki.dev/gti"
+	"cogentcore.org/core/gti"
 )
 
 // PersonType is the [gti.Type] for [Person]
-var PersonType = gti.AddType(&gti.Type{Name: "goki.dev/gti/gtigen/testdata.Person", IDName: "person", Doc: "Person represents a person and their attributes.\nThe zero value of a Person is not valid.", Directives: []gti.Directive{{Tool: "ki", Directive: "flagtype", Args: []string{"NodeFlags", "-field", "Flag"}}, {Tool: "goki", Directive: "embedder"}}, Methods: []gti.Method{{Name: "Introduction", Doc: "Introduction returns an introduction for the person.\nIt contains the name of the person and their age.", Directives: []gti.Directive{{Tool: "gi", Directive: "toolbar", Args: []string{"-name", "ShowIntroduction", "-icon", "play", "-show-result", "-confirm"}}, {Tool: "gti", Directive: "add"}}, Returns: []string{"string"}}}, Embeds: []gti.Field{{Name: "RGBA"}}, Fields: []gti.Field{{Name: "Name", Doc: "Name is the name of the person"}, {Name: "Age", Doc: "Age is the age of the person"}, {Name: "Type", Doc: "Type is the type of the person"}, {Name: "Nicknames", Doc: "Nicknames are the nicknames of the person"}}, Instance: &Person{}})
+var PersonType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gti/gtigen/testdata.Person", IDName: "person", Doc: "Person represents a person and their attributes.\nThe zero value of a Person is not valid.", Directives: []gti.Directive{{Tool: "ki", Directive: "flagtype", Args: []string{"NodeFlags", "-field", "Flag"}}, {Tool: "goki", Directive: "embedder"}}, Methods: []gti.Method{{Name: "Introduction", Doc: "Introduction returns an introduction for the person.\nIt contains the name of the person and their age.", Directives: []gti.Directive{{Tool: "gi", Directive: "toolbar", Args: []string{"-name", "ShowIntroduction", "-icon", "play", "-show-result", "-confirm"}}, {Tool: "gti", Directive: "add"}}, Returns: []string{"string"}}}, Embeds: []gti.Field{{Name: "RGBA"}}, Fields: []gti.Field{{Name: "Name", Doc: "Name is the name of the person"}, {Name: "Age", Doc: "Age is the age of the person"}, {Name: "Type", Doc: "Type is the type of the person"}, {Name: "Nicknames", Doc: "Nicknames are the nicknames of the person"}}, Instance: &Person{}})
 
 func (t *Person) MyCustomFuncForStringers(a any) error {
 	return nil
@@ -41,14 +41,14 @@ func (t *Person) SetB(v uint8) *Person { t.B = v; return t }
 // SetA sets the [Person.A]
 func (t *Person) SetA(v uint8) *Person { t.A = v; return t }
 
-var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/gti/gtigen/testdata.Alert", Doc: "Alert prints an alert with the given message", Args: []string{"msg"}})
+var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/gti/gtigen/testdata.Alert", Doc: "Alert prints an alert with the given message", Args: []string{"msg"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/gti/gtigen/testdata.TypeOmittedArgs0", Args: []string{"x", "y"}})
+var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/gti/gtigen/testdata.TypeOmittedArgs0", Args: []string{"x", "y"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/gti/gtigen/testdata.TypeOmittedArgs1", Args: []string{"x", "y", "z"}})
+var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/gti/gtigen/testdata.TypeOmittedArgs1", Args: []string{"x", "y", "z"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/gti/gtigen/testdata.TypeOmittedArgs2", Args: []string{"x", "y", "z"}})
+var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/gti/gtigen/testdata.TypeOmittedArgs2", Args: []string{"x", "y", "z"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/gti/gtigen/testdata.TypeOmittedArgs3", Args: []string{"x", "y", "z", "w"}})
+var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/gti/gtigen/testdata.TypeOmittedArgs3", Args: []string{"x", "y", "z", "w"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/gti/gtigen/testdata.TypeOmittedArgs4", Args: []string{"x", "y", "z", "w"}})
+var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/gti/gtigen/testdata.TypeOmittedArgs4", Args: []string{"x", "y", "z", "w"}})

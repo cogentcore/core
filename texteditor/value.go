@@ -7,12 +7,12 @@ package texteditor
 import (
 	"fmt"
 
-	"goki.dev/events"
-	"goki.dev/gi"
-	"goki.dev/giv"
-	"goki.dev/grr"
-	"goki.dev/gti"
-	"goki.dev/laser"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/giv"
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/gti"
+	"cogentcore.org/core/laser"
 )
 
 // Value is a [texteditor.Editor] [giv.Value] for editing longer text

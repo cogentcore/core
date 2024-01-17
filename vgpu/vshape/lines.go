@@ -9,7 +9,7 @@ import (
 	"log"
 	"math"
 
-	"goki.dev/mat32"
+	"cogentcore.org/core/mat32"
 )
 
 // Lines are lines rendered as long thin boxes defined by points

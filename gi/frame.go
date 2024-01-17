@@ -7,9 +7,9 @@ package gi
 import (
 	"log"
 
-	"goki.dev/abilities"
-	"goki.dev/styles"
-	"goki.dev/units"
+	"cogentcore.org/core/abilities"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 // Frame is a Layout that renders a background according to the

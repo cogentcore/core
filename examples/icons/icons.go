@@ -7,10 +7,10 @@ package main
 import (
 	"strings"
 
-	"goki.dev/gi"
-	"goki.dev/icons"
-	"goki.dev/styles"
-	"goki.dev/units"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 func main() {

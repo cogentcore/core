@@ -8,7 +8,7 @@ import (
 	"image"
 	"sync"
 
-	"goki.dev/mat32"
+	"cogentcore.org/core/mat32"
 )
 
 // Camera defines the properties of the camera

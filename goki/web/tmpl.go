@@ -11,7 +11,7 @@ import (
 	"os"
 	"text/template"
 
-	"goki.dev/goki/config"
+	"cogentcore.org/core/goki/config"
 )
 
 // AppJSTmpl is the template used in [MakeAppJS] to build the app.js file

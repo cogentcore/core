@@ -5,13 +5,13 @@
 package greasi
 
 import (
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/giv"
+	"cogentcore.org/core/glop/sentence"
+	"cogentcore.org/core/grease"
+	"cogentcore.org/core/grog"
 	"github.com/iancoleman/strcase"
-	"goki.dev/events"
-	"goki.dev/gi"
-	"goki.dev/giv"
-	"goki.dev/glop/sentence"
-	"goki.dev/grease"
-	"goki.dev/grog"
 )
 
 // GUI starts the GUI for the given Grease app, which must be passed as

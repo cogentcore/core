@@ -10,11 +10,11 @@ import (
 	"image"
 	"time"
 
-	"goki.dev/cursors"
-	"goki.dev/events"
-	"goki.dev/goosi"
-	_ "goki.dev/goosi/driver"
-	"goki.dev/vgpu"
+	"cogentcore.org/core/cursors"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/goosi"
+	_ "cogentcore.org/core/goosi/driver"
+	"cogentcore.org/core/vgpu"
 )
 
 //go:embed *.spv

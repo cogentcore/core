@@ -16,11 +16,11 @@ import (
 
 	"log/slog"
 
+	"cogentcore.org/core/gengo"
+	"cogentcore.org/core/grease"
+	"cogentcore.org/core/gti"
+	"cogentcore.org/core/ordmap"
 	"github.com/iancoleman/strcase"
-	"goki.dev/gengo"
-	"goki.dev/grease"
-	"goki.dev/gti"
-	"goki.dev/ordmap"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -67,7 +67,7 @@ func (g *Generator) Printf(format string, args ...any) {
 func (g *Generator) PrintHeader() {
 	// we need a manual import of gti and ordmap because they are
 	// external, but goimports will handle everything else
-	gengo.PrintHeader(&g.Buf, g.Pkg.Name, "goki.dev/gti", "goki.dev/ordmap")
+	gengo.PrintHeader(&g.Buf, g.Pkg.Name, "cogentcore.org/core/gti", "cogentcore.org/core/ordmap")
 }
 
 // Find goes through all of the types, functions, variables,

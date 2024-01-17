@@ -9,8 +9,8 @@ import (
 	"maps"
 	"sort"
 
-	"goki.dev/colors"
-	"goki.dev/mat32"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/mat32"
 )
 
 // Map maps a value onto a color by interpolating between a list of colors

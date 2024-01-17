@@ -7,7 +7,7 @@ package gti
 // Func represents a global function.
 type Func struct {
 	// Name is the fully-qualified name of the function
-	// (eg: goki.dev/gi.NewButton)
+	// (eg: cogentcore.org/core/gi.NewButton)
 	Name string
 
 	// Doc has all of the comment documentation

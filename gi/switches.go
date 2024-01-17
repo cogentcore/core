@@ -8,12 +8,12 @@ import (
 	"fmt"
 	"slices"
 
-	"goki.dev/enums"
-	"goki.dev/events"
-	"goki.dev/glop/sentence"
-	"goki.dev/ki"
-	"goki.dev/styles"
-	"goki.dev/units"
+	"cogentcore.org/core/enums"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/glop/sentence"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 // Switches is a widget for containing a set of switches.

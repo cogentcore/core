@@ -4,7 +4,7 @@
 
 package cie
 
-import "goki.dev/mat32"
+import "cogentcore.org/core/mat32"
 
 // WhiteD65 is the standard white color for midday sun, D65, in XYZ coordinates.
 // Used as a standard reference illumination condition for most cases.

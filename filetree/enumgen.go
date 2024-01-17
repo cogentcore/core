@@ -9,8 +9,8 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"goki.dev/enums"
-	"goki.dev/giv"
+	"cogentcore.org/core/enums"
+	"cogentcore.org/core/giv"
 )
 
 var _DirFlagsValues = []DirFlags{0, 1, 2, 3}

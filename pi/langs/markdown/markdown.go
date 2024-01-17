@@ -9,15 +9,15 @@ import (
 	"strings"
 	"unicode"
 
-	"goki.dev/fi"
-	"goki.dev/glop/indent"
-	"goki.dev/pi"
-	"goki.dev/pi/complete"
-	"goki.dev/pi/langs"
-	"goki.dev/pi/langs/bibtex"
-	"goki.dev/pi/lex"
-	"goki.dev/pi/syms"
-	"goki.dev/pi/token"
+	"cogentcore.org/core/fi"
+	"cogentcore.org/core/glop/indent"
+	"cogentcore.org/core/pi"
+	"cogentcore.org/core/pi/complete"
+	"cogentcore.org/core/pi/langs"
+	"cogentcore.org/core/pi/langs/bibtex"
+	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/syms"
+	"cogentcore.org/core/pi/token"
 )
 
 //go:embed markdown.pi

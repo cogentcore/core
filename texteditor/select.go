@@ -5,15 +5,15 @@
 package texteditor
 
 import (
-	"goki.dev/events"
-	"goki.dev/fi"
-	"goki.dev/gi"
-	"goki.dev/icons"
-	"goki.dev/keyfun"
-	"goki.dev/mimedata"
-	"goki.dev/pi/lex"
-	"goki.dev/states"
-	"goki.dev/texteditor/textbuf"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/fi"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/mimedata"
+	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/states"
+	"cogentcore.org/core/texteditor/textbuf"
 )
 
 //////////////////////////////////////////////////////////

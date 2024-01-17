@@ -9,7 +9,7 @@ package web
 import (
 	"syscall/js"
 
-	"goki.dev/mimedata"
+	"cogentcore.org/core/mimedata"
 )
 
 // TODO(kai/web): support copying images and other mime formats, etc

@@ -9,11 +9,11 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"goki.dev/goki/config"
-	"goki.dev/goki/mobile"
-	"goki.dev/goki/web"
-	"goki.dev/grog"
-	"goki.dev/xe"
+	"cogentcore.org/core/goki/config"
+	"cogentcore.org/core/goki/mobile"
+	"cogentcore.org/core/goki/web"
+	"cogentcore.org/core/grog"
+	"cogentcore.org/core/xe"
 )
 
 // Run builds and runs the config package. It also displays the logs generated

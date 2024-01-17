@@ -12,12 +12,12 @@ import (
 	"testing"
 	"time"
 
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 	"github.com/iancoleman/strcase"
-	"goki.dev/colors"
-	"goki.dev/grr"
-	"goki.dev/mat32"
-	"goki.dev/styles"
-	"goki.dev/units"
 )
 
 func LayoutTestFile(t *testing.T) string {

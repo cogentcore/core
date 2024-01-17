@@ -7,7 +7,7 @@ package ki
 import (
 	"fmt"
 
-	"goki.dev/gti"
+	"cogentcore.org/core/gti"
 )
 
 // TypeAndName holds a type and a name.

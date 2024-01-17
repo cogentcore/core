@@ -13,10 +13,10 @@ import (
 	"strconv"
 	"strings"
 
-	"goki.dev/gti"
+	"cogentcore.org/core/gti"
 )
 
-// see https://goki.dev/ki/wiki/Naming for IO naming conventions
+// see https://cogentcore.org/core/ki/wiki/Naming for IO naming conventions
 
 // WriteXML writes the tree to an XML-encoded byte string over io.Writer
 // using MarshalXML.

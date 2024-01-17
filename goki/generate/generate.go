@@ -14,12 +14,12 @@ import (
 	"slices"
 	"text/template"
 
-	"goki.dev/enums/enumgen"
-	"goki.dev/gengo"
-	"goki.dev/goki/config"
-	"goki.dev/gti"
-	"goki.dev/gti/gtigen"
-	"goki.dev/ordmap"
+	"cogentcore.org/core/enums/enumgen"
+	"cogentcore.org/core/gengo"
+	"cogentcore.org/core/goki/config"
+	"cogentcore.org/core/gti"
+	"cogentcore.org/core/gti/gtigen"
+	"cogentcore.org/core/ordmap"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -104,7 +104,7 @@ func HasNoNewDirective(typ *gtigen.Type) bool {
 func Generate(cfg *config.Config) error { //gti:add
 	cfg.Generate.Gtigen.InterfaceConfigs = &ordmap.Map[string, *gtigen.Config]{}
 
-	cfg.Generate.Gtigen.InterfaceConfigs.Add("goki.dev/ki.Ki", &gtigen.Config{
+	cfg.Generate.Gtigen.InterfaceConfigs.Add("cogentcore.org/core/ki.Ki", &gtigen.Config{
 		AddTypes:  true,
 		Instance:  true,
 		TypeVar:   true,

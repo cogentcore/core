@@ -21,9 +21,9 @@ import (
 
 	"log/slog"
 
+	"cogentcore.org/core/laser"
+	"cogentcore.org/core/vgpu/vkinit"
 	vk "github.com/goki/vulkan"
-	"goki.dev/laser"
-	"goki.dev/vgpu/vkinit"
 )
 
 // Key docs: https://gpuopen.com/learn/understanding-vulkan-objects/

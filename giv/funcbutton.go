@@ -12,16 +12,16 @@ import (
 	"strings"
 	"unicode"
 
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/glop/dirs"
+	"cogentcore.org/core/glop/sentence"
+	"cogentcore.org/core/gti"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/laser"
 	"github.com/iancoleman/strcase"
-	"goki.dev/events"
-	"goki.dev/gi"
-	"goki.dev/glop/dirs"
-	"goki.dev/glop/sentence"
-	"goki.dev/gti"
-	"goki.dev/icons"
-	"goki.dev/keyfun"
-	"goki.dev/ki"
-	"goki.dev/laser"
 )
 
 // CallFunc calls the given function in the context of the given widget,

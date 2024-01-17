@@ -13,13 +13,13 @@ import (
 	"sync"
 	"time"
 
-	"goki.dev/events"
-	"goki.dev/gi"
-	"goki.dev/glop/dirs"
-	"goki.dev/goosi"
-	"goki.dev/gti"
-	"goki.dev/ki"
-	"goki.dev/vci"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/glop/dirs"
+	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/gti"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/vci"
 	"gopkg.in/fsnotify.v1"
 )
 

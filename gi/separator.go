@@ -5,10 +5,10 @@
 package gi
 
 import (
-	"goki.dev/colors"
-	"goki.dev/mat32"
-	"goki.dev/styles"
-	"goki.dev/units"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 // TODO(kai): this seems bad

@@ -5,7 +5,7 @@
 package goosi
 
 import (
-	"goki.dev/grows/images"
+	"cogentcore.org/core/grows/images"
 )
 
 // AssertCaptureIs asserts that the result of [Capture] is equivalent

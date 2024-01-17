@@ -22,7 +22,7 @@ package matcolor
 import (
 	"image/color"
 
-	"goki.dev/cam/hct"
+	"cogentcore.org/core/cam/hct"
 )
 
 // Key contains the set of key colors used to generate

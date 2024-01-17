@@ -7,7 +7,7 @@ package keyfun
 import (
 	"strings"
 
-	"goki.dev/events/key"
+	"cogentcore.org/core/events/key"
 )
 
 // MarkdownDoc generates a markdown table of all the key mappings

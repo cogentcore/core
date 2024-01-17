@@ -11,13 +11,13 @@ import (
 	"strings"
 	"unicode"
 
-	"goki.dev/ki"
-	"goki.dev/pi"
-	"goki.dev/pi/complete"
-	"goki.dev/pi/lex"
-	"goki.dev/pi/parse"
-	"goki.dev/pi/syms"
-	"goki.dev/pi/token"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/pi"
+	"cogentcore.org/core/pi/complete"
+	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/parse"
+	"cogentcore.org/core/pi/syms"
+	"cogentcore.org/core/pi/token"
 )
 
 var CompleteTrace = false

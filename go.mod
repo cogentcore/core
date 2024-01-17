@@ -1,4 +1,4 @@
-module goki.dev
+module cogentcore.org/core
 
 go 1.21
 

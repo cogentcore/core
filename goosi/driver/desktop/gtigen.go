@@ -3,9 +3,9 @@
 package desktop
 
 import (
-	"goki.dev/gti"
+	"cogentcore.org/core/gti"
 )
 
-var _ = gti.AddType(&gti.Type{Name: "goki.dev/goosi/driver/desktop.App", IDName: "app", Doc: "App is the [goosi.App] implementation for the desktop platform", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Embeds: []gti.Field{{Name: "AppMulti"}}, Fields: []gti.Field{{Name: "GPU", Doc: "GPU is the system GPU used for the app"}, {Name: "ShareWin", Doc: "ShareWin is a non-visible, always-present window that all windows share gl context with"}}})
+var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/goosi/driver/desktop.App", IDName: "app", Doc: "App is the [goosi.App] implementation for the desktop platform", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Embeds: []gti.Field{{Name: "AppMulti"}}, Fields: []gti.Field{{Name: "GPU", Doc: "GPU is the system GPU used for the app"}, {Name: "ShareWin", Doc: "ShareWin is a non-visible, always-present window that all windows share gl context with"}}})
 
-var _ = gti.AddType(&gti.Type{Name: "goki.dev/goosi/driver/desktop.Window", IDName: "window", Doc: "Window is the implementation of [goosi.Window] for the desktop platform.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Embeds: []gti.Field{{Name: "WindowMulti"}}, Fields: []gti.Field{{Name: "Glw", Doc: "Glw is the glfw window associated with this window"}, {Name: "ScreenWindow", Doc: "ScreenName is the name of the last known screen this window was on"}}})
+var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/goosi/driver/desktop.Window", IDName: "window", Doc: "Window is the implementation of [goosi.Window] for the desktop platform.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Embeds: []gti.Field{{Name: "WindowMulti"}}, Fields: []gti.Field{{Name: "Glw", Doc: "Glw is the glfw window associated with this window"}, {Name: "ScreenWindow", Doc: "ScreenName is the name of the last known screen this window was on"}}})

@@ -9,17 +9,17 @@ import (
 	"log/slog"
 	"strings"
 
+	"cogentcore.org/core/fi"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/ki"
+	"cogentcore.org/core/pi"
+	"cogentcore.org/core/pi/lex"
+	_ "cogentcore.org/core/pi/suplangs"
+	"cogentcore.org/core/pi/token"
+	"cogentcore.org/core/texteditor/histyle"
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/alecthomas/chroma/v2/lexers"
-	"goki.dev/fi"
-	"goki.dev/gi"
-	"goki.dev/ki"
-	"goki.dev/pi"
-	"goki.dev/pi/lex"
-	_ "goki.dev/pi/suplangs"
-	"goki.dev/pi/token"
-	"goki.dev/texteditor/histyle"
 )
 
 // HiMarkup manages the syntax highlighting state for Buf.

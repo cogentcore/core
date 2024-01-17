@@ -7,14 +7,14 @@ package gi
 import (
 	"image"
 
-	"goki.dev/abilities"
-	"goki.dev/colors"
-	"goki.dev/cursors"
-	"goki.dev/mat32"
-	"goki.dev/paint"
-	"goki.dev/states"
-	"goki.dev/styles"
-	"goki.dev/units"
+	"cogentcore.org/core/abilities"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/cursors"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/paint"
+	"cogentcore.org/core/states"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 // Styling logic:
@@ -37,7 +37,7 @@ import (
 // By default, it is nil. If you set it, you should mostly call
 // AddStyleFunc within it. For reference on
 // how you should structure your CustomStyleFunc, you
-// should look at https://goki.dev/docs/gi/styling.
+// should look at https://cogentcore.org/core/docs/gi/styling.
 var CustomConfigStyles func(w Widget)
 
 ////////////////////////////////////////////////////////////////////

@@ -9,8 +9,8 @@ import (
 	"image/color"
 	"testing"
 
-	"goki.dev/colors"
-	"goki.dev/mat32"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/mat32"
 )
 
 func ExampleLinear() {

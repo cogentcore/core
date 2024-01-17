@@ -10,9 +10,9 @@ import (
 	"io/fs"
 	"strings"
 
+	"cogentcore.org/core/glop/dirs"
+	"cogentcore.org/core/grr"
 	_ "github.com/iancoleman/strcase" // needed so that it gets included in the mod (the generator uses it)
-	"goki.dev/glop/dirs"
-	"goki.dev/grr"
 )
 
 //go:generate go run gen.go

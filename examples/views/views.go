@@ -9,11 +9,11 @@ package main
 import (
 	"fmt"
 
-	"goki.dev/events"
-	"goki.dev/gi"
-	"goki.dev/giv"
-	"goki.dev/icons"
-	"goki.dev/mat32"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/giv"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/mat32"
 )
 
 // TableStruct is a testing struct for table view
