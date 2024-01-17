@@ -6,7 +6,7 @@
 // cursors that are supported across platforms
 package cursor
 
-//go:generate goki generate
+//go:generate core generate
 
 import (
 	"cogentcore.org/core/enums"

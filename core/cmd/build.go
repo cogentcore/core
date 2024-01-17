@@ -6,7 +6,7 @@
 // apps and packages that use the Cogent Core framework.
 package cmd
 
-//go:generate goki generate
+//go:generate core generate
 
 import (
 	"errors"

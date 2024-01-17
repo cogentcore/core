@@ -4,7 +4,7 @@
 
 package keyfun
 
-//go:generate goki generate
+//go:generate core generate
 
 import (
 	"encoding/json"

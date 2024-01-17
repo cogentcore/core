@@ -7,7 +7,7 @@
 // for Cogent Core code.
 package generate
 
-//go:generate goki generate
+//go:generate core generate
 
 import (
 	"fmt"

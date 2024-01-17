@@ -4,7 +4,7 @@
 
 package events
 
-//go:generate goki generate
+//go:generate core generate
 
 // Types determines the type of GUI event, and also the
 // level at which one can select which events to listen to.

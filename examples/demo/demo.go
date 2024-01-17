@@ -4,7 +4,7 @@
 
 package main
 
-//go:generate goki generate
+//go:generate core generate
 
 import (
 	_ "embed"

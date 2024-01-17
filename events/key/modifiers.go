@@ -4,7 +4,7 @@
 
 package key
 
-//go:generate goki generate
+//go:generate core generate
 
 import (
 	"strings"

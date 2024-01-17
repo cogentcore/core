@@ -4,7 +4,7 @@
 
 package xyz
 
-//go:generate goki generate -add-types
+//go:generate core generate -add-types
 
 import (
 	"fmt"

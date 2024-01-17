@@ -4,8 +4,8 @@
 
 package ki
 
-//go:generate goki generate
-//go:generate goki generate ./testdata
+//go:generate core generate
+//go:generate core generate ./testdata
 
 import (
 	"errors"

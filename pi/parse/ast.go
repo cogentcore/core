@@ -5,7 +5,7 @@
 // Package parse does the parsing stage after lexing
 package parse
 
-//go:generate goki generate
+//go:generate core generate
 
 import (
 	"fmt"

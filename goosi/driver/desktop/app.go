@@ -9,7 +9,7 @@
 
 package desktop
 
-//go:generate goki generate
+//go:generate core generate
 
 import (
 	"log"

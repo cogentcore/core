@@ -11,7 +11,7 @@ import (
 	"cogentcore.org/core/grog"
 )
 
-//go:generate goki generate -add-types -add-funcs
+//go:generate core generate -add-types -add-funcs
 
 type Config struct {
 

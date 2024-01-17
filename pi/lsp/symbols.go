@@ -8,7 +8,7 @@
 // which are used internally in GoPi.
 package lsp
 
-//go:generate goki generate
+//go:generate core generate
 
 import (
 	"cogentcore.org/core/pi/token"

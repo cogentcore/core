@@ -5,7 +5,7 @@
 // Package cursors provides Go constant names for cursors as SVG files.
 package cursors
 
-//go:generate goki generate
+//go:generate core generate
 
 import (
 	"embed"

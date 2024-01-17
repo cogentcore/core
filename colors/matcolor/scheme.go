@@ -4,7 +4,7 @@
 
 package matcolor
 
-//go:generate goki generate
+//go:generate core generate
 
 import "image/color"
 

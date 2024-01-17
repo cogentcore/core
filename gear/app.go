@@ -4,7 +4,7 @@
 
 package gear
 
-//go:generate goki generate
+//go:generate core generate
 
 import (
 	"context"

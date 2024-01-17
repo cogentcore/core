@@ -4,7 +4,7 @@
 
 package abilities
 
-//go:generate goki generate
+//go:generate core generate
 
 import "cogentcore.org/core/enums"
 

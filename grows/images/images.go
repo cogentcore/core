@@ -4,7 +4,7 @@
 
 package images
 
-//go:generate goki generate
+//go:generate core generate
 
 import (
 	"bufio"

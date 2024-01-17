@@ -11,7 +11,7 @@
 // to implement interfaces defined in package goosi.
 package base
 
-//go:generate goki generate
+//go:generate core generate
 
 import (
 	"os"

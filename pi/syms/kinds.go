@@ -4,7 +4,7 @@
 
 package syms
 
-//go:generate goki generate
+//go:generate core generate
 
 import (
 	"reflect"

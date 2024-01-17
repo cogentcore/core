@@ -4,7 +4,7 @@
 
 package testdata
 
-//go:generate goki generate
+//go:generate core generate
 
 // TestEnum is an enum type for testing,
 // and it should not be used by external code.

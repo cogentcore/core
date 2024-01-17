@@ -11,7 +11,7 @@ import (
 	"cogentcore.org/core/greasi"
 )
 
-//go:generate goki generate -add-types -add-methods
+//go:generate core generate -add-types -add-methods
 
 type Config struct {
 

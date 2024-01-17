@@ -7,7 +7,7 @@
 // Package web implements goosi interfaces on the web through WASM
 package web
 
-//go:generate goki generate
+//go:generate core generate
 
 import (
 	"fmt"

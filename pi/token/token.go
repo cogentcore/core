@@ -7,7 +7,7 @@
 // plus all the more detailed tokens needed for actually parsing languages
 package token
 
-//go:generate goki generate
+//go:generate core generate
 
 import (
 	"fmt"

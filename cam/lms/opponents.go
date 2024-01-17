@@ -4,7 +4,7 @@
 
 package lms
 
-//go:generate goki generate
+//go:generate core generate
 
 // OpVals holds color opponent values based on cone-like L,M,S inputs
 // These values are useful for generating inputs to vision models that

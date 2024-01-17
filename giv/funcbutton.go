@@ -48,7 +48,7 @@ func NewSoloFuncButton(ctx gi.Widget, fun any) *FuncButton {
 // the name, text, tooltip, and icon based on the properties of the
 // function, using reflect and gti. The function must be registered
 // with gti to get documentation information, but that is not required;
-// add a `//gti:add` comment directive and run `goki generate`
+// add a `//gti:add` comment directive and run `core generate`
 // if you want tooltips. If the function is a method, both the method and
 // its receiver type must be added to gti to get documentation.
 type FuncButton struct { //core:no-new
