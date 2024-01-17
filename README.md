@@ -2,20 +2,20 @@
 
 <h1 align="center">
     <a href="https://cogentcore.org/core">
-        <img alt="Goki Blue Logo" width="150" height="150" src="logo/gogi_logo_blue_transparent.png">
+        <img alt="Cogent Core Blue Logo" width="150" height="150" src="logo/gogi_logo_blue_transparent.png">
     </a>
 </h1>
 
 <p align="center">
     <a href="https://goreportcard.com/report/cogentcore.org/core"><img src="https://goreportcard.com/badge/cogentcore.org/core" alt="Go Report Card"></a>
     <a href="https://pkg.go.dev/cogentcore.org/core"><img src="https://img.shields.io/badge/dev-reference-007d9c?logo=go&logoColor=white&style=flat" alt="pkg.go.dev docs"></a>
-    <a href="https://github.com/goki/goki/actions"><img alt="GitHub Actions Workflow Status" src="https://img.shields.io/github/actions/workflow/status/goki/goki/go.yml"></a>
-    <a href="https://github.com/goki/goki/releases/"><img src="https://img.shields.io/github/release/goki/goki?include_prereleases=&sort=semver&color=blue" alt="GitHub release"></a>
+    <a href="https://github.com/cogentcore/core/actions"><img alt="GitHub Actions Workflow Status" src="https://img.shields.io/github/actions/workflow/status/cogentcore/core/go.yml"></a>
+    <a href="https://github.com/cogentcore/core/releases/"><img src="https://img.shields.io/github/release/cogentcore/core?include_prereleases=&sort=semver&color=blue" alt="GitHub release"></a>
 </p>
 
-**NOTE:** Goki is currently undergoing a period of significant development to make it easier to make powerful, fast, and beautiful apps and support running apps on mobile. As such, some of the information in this repository and on the [Goki website](https://Goki.dev) may be incorrect. Furthermore, there will be breaking changes soon, so starting new apps with this framework is not recommended at this time; if you do, please be ready to adjust to any breaking changes. If you want to accelerate the improvement of Goki, please contribute by following the [Contribution Guidelines](https://cogentcore.org/core/docs/general/contributionguidelines/). Development of Gi is currently happening on this branch. For the latest stable version of Gi, import version 1.3.19 and see the [v1 branch](https://github.com/goki/gi/tree/v1).
+**NOTE:** Cogent Core is currently undergoing a period of significant development to make it easier to make powerful, fast, and beautiful apps and support running apps on mobile. As such, some of the information in this repository and on the [Cogent Core website](https://Cogentcore.org) may be incorrect. Furthermore, there will be breaking changes soon, so starting new apps with this framework is not recommended at this time; if you do, please be ready to adjust to any breaking changes. If you want to accelerate the improvement of Goki, please contribute by following the [Contribution Guidelines](https://cogentcore.org/core/docs/general/contributionguidelines/). Development of Gi is currently happening on this branch. For the latest stable version of Gi, import version 1.3.19 and see the [v1 branch](https://github.com/goki/gi/tree/v1).
 
-GoGi is part of the [Goki](https://Goki.dev) Go language (golang) full strength tree structure system (ki = 木 = tree in Japanese)
+GoGi is part of the [Goki](https://Cogentcore.org) Go language (golang) full strength tree structure system (ki = 木 = tree in Japanese)
 
 `package gi` is a scenegraph-based 2D and 3D GUI / graphics interface (Gi) in Go, that functions similar to HTML / CSS / SVG  and Qt.
 
@@ -43,7 +43,7 @@ See [Gide](https://github.com/goki/gide) for a complete, complex application wri
 
 * `SVG` element (in [svg](https://github.com/goki/svg)) supports SVG rendering -- used for Icons internally and available for advanced graphics displays -- see `gi/examples/svg` for viewer and [grid](https://github.com/goki/grid) gui editor.
 
-* **Value / View** paradigm with `reflect`ion-based `giv.Value` elements that are the GUI equivalent of `reflect.Value` and enable full GUI interaction with all the standard Go types, in the [giv](giv) sub-package.  Basic types like `int` and `float` display in a `Spinner`, and [enums](https://github.com/goki/enums) `const int` types in a `Chooser` dropdown).  Composite data structures have a corresponding `View`, including `StructView` editor of `struct` fields, `MapView` and `SliceView` displays of `map` and `slice` elements (including full editing / adding / deleting of elements), and full-featured `TableView` for a `slice`-of-`struct` and `TreeView` for Goki trees.
+* **Value / View** paradigm with `reflect`ion-based `giv.Value` elements that are the GUI equivalent of `reflect.Value` and enable full GUI interaction with all the standard Go types, in the [giv](giv) sub-package.  Basic types like `int` and `float` display in a `Spinner`, and [enums](https://github.com/goki/enums) `const int` types in a `Chooser` dropdown).  Composite data structures have a corresponding `View`, including `StructView` editor of `struct` fields, `MapView` and `SliceView` displays of `map` and `slice` elements (including full editing / adding / deleting of elements), and full-featured `TableView` for a `slice`-of-`struct` and `TreeView` for Cogent Core trees.
     + `TreeView` enables a built-in GUI editor / inspector for designing gui elements themselves.  Just press `Control+Alt+I` in any window to pull up this editor / inspector.  Scene graphs can be automatically saved / loaded from JSON files, to provide a basic GUI designer framework -- just load and add appropriate connections..
     
 * GoGi is a "standard" *retained-mode* (scenegraph-based) GUI, as compared to *immediate-mode* GUIs such as [Gio](https://gioui.org).  As such, GoGi automatically takes care of everything for you, but as a result you sacrifice control over every last detail.  Immediate mode gives you full control, but also the full burden of control -- you have to code every last behavior yourself.  In GoGi, you have extensive control through styling and closure-based "callback" methods, in the same way you would in a standard front-end web application (so it will likely be more familiar to many users), but if you want to do something very different, you will likely need to code a new type of Widget, which can be more difficult as then you need to know more about the overall infrastructure.  Thus, if you are likely to be doing fairly standard things and don't feel the need for absolute control, GoGi will likely be an easier experience.

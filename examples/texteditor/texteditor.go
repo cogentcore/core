@@ -1,4 +1,4 @@
-// Copyright (c) 2018, The Goki Authors. All rights reserved.
+// Copyright (c) 2018, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -17,8 +17,8 @@ var samplefile gi.Filename = "texteditor.go"
 // var samplefile gi.Filename = "../../README.md"
 
 func main() {
-	b := gi.NewAppBody("Goki Text Editor Demo")
-	b.App().About = `This is a demo of the texteditor.Editor in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Goki on GitHub</a>`
+	b := gi.NewAppBody("Cogent Core Text Editor Demo")
+	b.App().About = `This is a demo of the texteditor.Editor in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Cogent Core on GitHub</a>`
 
 	splt := gi.NewSplits(b, "split-view")
 	splt.SetSplits(.5, .5)

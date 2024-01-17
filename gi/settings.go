@@ -1,4 +1,4 @@
-// Copyright (c) 2018, The Goki Authors. All rights reserved.
+// Copyright (c) 2018, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -197,15 +197,15 @@ func UpdateAll() { //gti:add
 	}
 }
 
-// AppearanceSettings are the currently active global Goki appearance settings.
+// AppearanceSettings are the currently active global Cogent Core appearance settings.
 var AppearanceSettings = &AppearanceSettingsData{
 	SettingsBase: SettingsBase{
 		Name: "Appearance",
-		File: filepath.Join("Goki", "appearance-settings.toml"),
+		File: filepath.Join("CogentCore", "appearance-settings.toml"),
 	},
 }
 
-// AppearanceSettingsData is the data type for the global Goki appearance settings.
+// AppearanceSettingsData is the data type for the global Cogent Core appearance settings.
 type AppearanceSettingsData struct { //gti:add
 	SettingsBase
 
@@ -352,7 +352,7 @@ func (as *AppearanceSettingsData) DeleteSavedWindowGeoms() { //gti:add
 var DeviceSettings = &DeviceSettingsData{
 	SettingsBase: SettingsBase{
 		Name: "Device",
-		File: filepath.Join("Goki", "device-settings.toml"),
+		File: filepath.Join("CogentCore", "device-settings.toml"),
 	},
 }
 
@@ -423,15 +423,15 @@ type ScreenSettings struct { //gti:add
 	Zoom float32 `def:"100" min:"10" max:"1000" step:"10"`
 }
 
-// SystemSettings are the currently active Goki system settings.
+// SystemSettings are the currently active Cogent Core system settings.
 var SystemSettings = &SystemSettingsData{
 	SettingsBase: SettingsBase{
 		Name: "System",
-		File: filepath.Join("Goki", "system-settings.toml"),
+		File: filepath.Join("CogentCore", "system-settings.toml"),
 	},
 }
 
-// SystemSettingsData is the data type of the global Goki settings.
+// SystemSettingsData is the data type of the global Cogent Core settings.
 type SystemSettingsData struct { //gti:add
 	SettingsBase
 
@@ -676,7 +676,7 @@ var SavedPathsExtras = []string{MenuTextSeparator, FileViewResetPaths, FileViewE
 // SavePaths saves the active SavedPaths to prefs dir
 func SavePaths() {
 	StringsRemoveExtras((*[]string)(&SavedPaths), SavedPathsExtras)
-	pdir := GokiDataDir()
+	pdir := CogentCore()
 	pnm := filepath.Join(pdir, SavedPathsFilename)
 	SavedPaths.Save(pnm)
 	// add back after save
@@ -687,7 +687,7 @@ func SavePaths() {
 func OpenPaths() {
 	// remove to be sure we don't have duplicate extras
 	StringsRemoveExtras((*[]string)(&SavedPaths), SavedPathsExtras)
-	pdir := GokiDataDir()
+	pdir := CogentCore()
 	pnm := filepath.Join(pdir, SavedPathsFilename)
 	SavedPaths.Open(pnm)
 	// add back after save
@@ -701,7 +701,7 @@ func OpenPaths() {
 var DebugSettings = &DebugSettingsData{
 	SettingsBase: SettingsBase{
 		Name: "Debug",
-		File: filepath.Join("Goki", "debug-settings.toml"),
+		File: filepath.Join("CogentCore", "debug-settings.toml"),
 	},
 }
 

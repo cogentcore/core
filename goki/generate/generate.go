@@ -1,10 +1,10 @@
-// Copyright (c) 2023, The Goki Authors. All rights reserved.
+// Copyright (c) 2023, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
 // Package generate provides the generation
 // of useful methods, variables, and constants
-// for Goki code.
+// for Cogent Core code.
 package generate
 
 //go:generate goki generate

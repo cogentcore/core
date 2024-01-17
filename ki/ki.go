@@ -1,4 +1,4 @@
-// Copyright (c) 2018, The Goki Authors. All rights reserved.
+// Copyright (c) 2018, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -11,7 +11,7 @@ import (
 	"cogentcore.org/core/gti"
 )
 
-// The Ki interface provides the core functionality for a Goki tree.
+// The Ki interface provides the core functionality for a Cogent Core tree.
 // Each Ki is a node in the tree and can have child nodes, and no cycles
 // are allowed (i.e., each node can only appear once in the tree).
 // All the usual methods are included for accessing and managing Children,
@@ -37,7 +37,7 @@ import (
 // are exported (have captital names), to be accessed directly in types
 // that embed and extend the ki.Node. The Ki interface has the "formal" name
 // (e.g., Children) while the Node has the "nickname" (e.g., Kids).  See the
-// Naming Conventions on the Goki Wiki for more details.
+// Naming Conventions on the Cogent Core Wiki for more details.
 //
 // Each Node stores the Ki interface version of itself, as This() / Ths
 // which enables full virtual function calling by calling the method

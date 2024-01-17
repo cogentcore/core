@@ -1,4 +1,4 @@
-// Copyright (c) 2018, The Goki Authors. All rights reserved.
+// Copyright (c) 2018, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -32,8 +32,8 @@ func MakeTree(tv *giv.TreeView, iter, maxIter, maxKids int) {
 }
 
 func main() {
-	b := gi.NewAppBody("Goki Tree View Demo")
-	b.App().About = `This is a demo of the treeview in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Goki on GitHub</a>
+	b := gi.NewAppBody("Cogent Core Tree View Demo")
+	b.App().About = `This is a demo of the treeview in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Cogent Core on GitHub</a>
 <p>Full Drag-and-Drop, Copy / Cut / Paste, and Keyboard Navigation is supported.</p>`
 
 	splits := gi.NewSplits(b)

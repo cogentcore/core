@@ -1,4 +1,4 @@
-// Copyright 2023 The Goki Authors. All rights reserved.
+// Copyright 2023 Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -131,8 +131,8 @@ func (a *App) OpenFiles() []string {
 	return a.OpenFls
 }
 
-func (a *App) GokiDataDir() string {
-	pdir := filepath.Join(a.This.DataDir(), "Goki")
+func (a *App) CogentCore() string {
+	pdir := filepath.Join(a.This.DataDir(), "CogentCore")
 	os.MkdirAll(pdir, 0755)
 	return pdir
 }

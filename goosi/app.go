@@ -1,4 +1,4 @@
-// Copyright (c) 2018, The Goki Authors. All rights reserved.
+// Copyright (c) 2018, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -88,9 +88,9 @@ type App interface {
 	// Linux: ~/.config, Windows: ~/AppData/Roaming
 	DataDir() string
 
-	// GokiDataDir returns the Goki data directory: [App.DataDir] + "Goki".
+	// CogentCore returns the Cogent Core data directory: [App.DataDir] + "CogentCore".
 	// It ensures that the directory exists first.
-	GokiDataDir() string
+	CogentCore() string
 
 	// About is an informative message about the app.  Can use HTML
 	// formatting, including links.

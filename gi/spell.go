@@ -1,4 +1,4 @@
-// Copyright (c) 2018, The Goki Authors. All rights reserved.
+// Copyright (c) 2018, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -36,7 +36,7 @@ func InitSpell() error {
 
 // OpenSpellModel loads a saved spelling model
 func OpenSpellModel() error {
-	pdir := GokiDataDir()
+	pdir := CogentCore()
 	openpath := filepath.Join(pdir, "spell_en_us.json")
 	err := spell.Open(openpath)
 	if err != nil {
@@ -93,7 +93,7 @@ func AddToSpellModel(filepath string) error {
 
 // SaveSpellModel saves the spelling model which includes the data and parameters
 func SaveSpellModel() error {
-	pdir := GokiDataDir()
+	pdir := CogentCore()
 	path := filepath.Join(pdir, "spell_en_us.json")
 	err := spell.Save(path)
 	if err != nil {

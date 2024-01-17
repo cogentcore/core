@@ -1,6 +1,6 @@
 # Installing goki
 
-On all platforms, you need to download and install Go from [the Go website](https://go.dev/doc/install) if you do not already have Go 1.21+ installed. Then, run `go install cogentcore.org/core/goki@latest` to install the Goki command line tool.
+On all platforms, you need to download and install Go from [the Go website](https://go.dev/doc/install) if you do not already have Go 1.21+ installed. Then, run `go install cogentcore.org/core/goki@latest` to install the Cogent Core command line tool.
 
 ## MacOS
 

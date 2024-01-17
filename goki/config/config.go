@@ -1,9 +1,9 @@
-// Copyright (c) 2023, The Goki Authors. All rights reserved.
+// Copyright (c) 2023, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
 // Package config contains the configuration
-// structs for the Goki tool.
+// structs for the Cogent Core tool.
 package config
 
 //go:generate goki generate
@@ -26,7 +26,7 @@ import (
 
 // Config is the main config struct
 // that contains all of the configuration
-// options for the Goki tool
+// options for the Cogent Core tool
 type Config struct { //gti:add
 
 	// the user-friendly name of the project

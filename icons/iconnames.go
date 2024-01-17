@@ -3,6180 +3,6180 @@
 package icons
 
 const (
-	// Abc is https://github.com/goki/icons/blob/main/svg/abc.svg
+	// Abc is https://github.com/cogentcore/core/blob/main/icons/svg/abc.svg
 	Abc Icon = "abc"
 
-	// AccountCircle is https://github.com/goki/icons/blob/main/svg/account_circle.svg
+	// AccountCircle is https://github.com/cogentcore/core/blob/main/icons/svg/account_circle.svg
 	AccountCircle Icon = "account_circle"
 
-	// AccountCircleOff is https://github.com/goki/icons/blob/main/svg/account_circle_off.svg
+	// AccountCircleOff is https://github.com/cogentcore/core/blob/main/icons/svg/account_circle_off.svg
 	AccountCircleOff Icon = "account_circle_off"
 
-	// Ad is https://github.com/goki/icons/blob/main/svg/ad.svg
+	// Ad is https://github.com/cogentcore/core/blob/main/icons/svg/ad.svg
 	Ad Icon = "ad"
 
-	// AdOff is https://github.com/goki/icons/blob/main/svg/ad_off.svg
+	// AdOff is https://github.com/cogentcore/core/blob/main/icons/svg/ad_off.svg
 	AdOff Icon = "ad_off"
 
-	// Adb is https://github.com/goki/icons/blob/main/svg/adb.svg
+	// Adb is https://github.com/cogentcore/core/blob/main/icons/svg/adb.svg
 	Adb Icon = "adb"
 
-	// Add is https://github.com/goki/icons/blob/main/svg/add.svg
+	// Add is https://github.com/cogentcore/core/blob/main/icons/svg/add.svg
 	Add Icon = "add"
 
-	// AddAPhoto is https://github.com/goki/icons/blob/main/svg/add_a_photo.svg
+	// AddAPhoto is https://github.com/cogentcore/core/blob/main/icons/svg/add_a_photo.svg
 	AddAPhoto Icon = "add_a_photo"
 
-	// AddAlert is https://github.com/goki/icons/blob/main/svg/add_alert.svg
+	// AddAlert is https://github.com/cogentcore/core/blob/main/icons/svg/add_alert.svg
 	AddAlert Icon = "add_alert"
 
-	// AddBox is https://github.com/goki/icons/blob/main/svg/add_box.svg
+	// AddBox is https://github.com/cogentcore/core/blob/main/icons/svg/add_box.svg
 	AddBox Icon = "add_box"
 
-	// AddCall is https://github.com/goki/icons/blob/main/svg/add_call.svg
+	// AddCall is https://github.com/cogentcore/core/blob/main/icons/svg/add_call.svg
 	AddCall Icon = "add_call"
 
-	// AddCard is https://github.com/goki/icons/blob/main/svg/add_card.svg
+	// AddCard is https://github.com/cogentcore/core/blob/main/icons/svg/add_card.svg
 	AddCard Icon = "add_card"
 
-	// AddChart is https://github.com/goki/icons/blob/main/svg/add_chart.svg
+	// AddChart is https://github.com/cogentcore/core/blob/main/icons/svg/add_chart.svg
 	AddChart Icon = "add_chart"
 
-	// AddCircle is https://github.com/goki/icons/blob/main/svg/add_circle.svg
+	// AddCircle is https://github.com/cogentcore/core/blob/main/icons/svg/add_circle.svg
 	AddCircle Icon = "add_circle"
 
-	// AddComment is https://github.com/goki/icons/blob/main/svg/add_comment.svg
+	// AddComment is https://github.com/cogentcore/core/blob/main/icons/svg/add_comment.svg
 	AddComment Icon = "add_comment"
 
-	// AddHome is https://github.com/goki/icons/blob/main/svg/add_home.svg
+	// AddHome is https://github.com/cogentcore/core/blob/main/icons/svg/add_home.svg
 	AddHome Icon = "add_home"
 
-	// AddHomeWork is https://github.com/goki/icons/blob/main/svg/add_home_work.svg
+	// AddHomeWork is https://github.com/cogentcore/core/blob/main/icons/svg/add_home_work.svg
 	AddHomeWork Icon = "add_home_work"
 
-	// AddLink is https://github.com/goki/icons/blob/main/svg/add_link.svg
+	// AddLink is https://github.com/cogentcore/core/blob/main/icons/svg/add_link.svg
 	AddLink Icon = "add_link"
 
-	// AddLocation is https://github.com/goki/icons/blob/main/svg/add_location.svg
+	// AddLocation is https://github.com/cogentcore/core/blob/main/icons/svg/add_location.svg
 	AddLocation Icon = "add_location"
 
-	// AddNotes is https://github.com/goki/icons/blob/main/svg/add_notes.svg
+	// AddNotes is https://github.com/cogentcore/core/blob/main/icons/svg/add_notes.svg
 	AddNotes Icon = "add_notes"
 
-	// AddShoppingCart is https://github.com/goki/icons/blob/main/svg/add_shopping_cart.svg
+	// AddShoppingCart is https://github.com/cogentcore/core/blob/main/icons/svg/add_shopping_cart.svg
 	AddShoppingCart Icon = "add_shopping_cart"
 
-	// AddTask is https://github.com/goki/icons/blob/main/svg/add_task.svg
+	// AddTask is https://github.com/cogentcore/core/blob/main/icons/svg/add_task.svg
 	AddTask Icon = "add_task"
 
-	// AddToQueue is https://github.com/goki/icons/blob/main/svg/add_to_queue.svg
+	// AddToQueue is https://github.com/cogentcore/core/blob/main/icons/svg/add_to_queue.svg
 	AddToQueue Icon = "add_to_queue"
 
-	// Adjust is https://github.com/goki/icons/blob/main/svg/adjust.svg
+	// Adjust is https://github.com/cogentcore/core/blob/main/icons/svg/adjust.svg
 	Adjust Icon = "adjust"
 
-	// AdminMeds is https://github.com/goki/icons/blob/main/svg/admin_meds.svg
+	// AdminMeds is https://github.com/cogentcore/core/blob/main/icons/svg/admin_meds.svg
 	AdminMeds Icon = "admin_meds"
 
-	// AdminPanelSettings is https://github.com/goki/icons/blob/main/svg/admin_panel_settings.svg
+	// AdminPanelSettings is https://github.com/cogentcore/core/blob/main/icons/svg/admin_panel_settings.svg
 	AdminPanelSettings Icon = "admin_panel_settings"
 
-	// Agender is https://github.com/goki/icons/blob/main/svg/agender.svg
+	// Agender is https://github.com/cogentcore/core/blob/main/icons/svg/agender.svg
 	Agender Icon = "agender"
 
-	// Agriculture is https://github.com/goki/icons/blob/main/svg/agriculture.svg
+	// Agriculture is https://github.com/cogentcore/core/blob/main/icons/svg/agriculture.svg
 	Agriculture Icon = "agriculture"
 
-	// Air is https://github.com/goki/icons/blob/main/svg/air.svg
+	// Air is https://github.com/cogentcore/core/blob/main/icons/svg/air.svg
 	Air Icon = "air"
 
-	// Airplay is https://github.com/goki/icons/blob/main/svg/airplay.svg
+	// Airplay is https://github.com/cogentcore/core/blob/main/icons/svg/airplay.svg
 	Airplay Icon = "airplay"
 
-	// Alarm is https://github.com/goki/icons/blob/main/svg/alarm.svg
+	// Alarm is https://github.com/cogentcore/core/blob/main/icons/svg/alarm.svg
 	Alarm Icon = "alarm"
 
-	// AlarmAdd is https://github.com/goki/icons/blob/main/svg/alarm_add.svg
+	// AlarmAdd is https://github.com/cogentcore/core/blob/main/icons/svg/alarm_add.svg
 	AlarmAdd Icon = "alarm_add"
 
-	// AlarmOff is https://github.com/goki/icons/blob/main/svg/alarm_off.svg
+	// AlarmOff is https://github.com/cogentcore/core/blob/main/icons/svg/alarm_off.svg
 	AlarmOff Icon = "alarm_off"
 
-	// AlarmOn is https://github.com/goki/icons/blob/main/svg/alarm_on.svg
+	// AlarmOn is https://github.com/cogentcore/core/blob/main/icons/svg/alarm_on.svg
 	AlarmOn Icon = "alarm_on"
 
-	// Album is https://github.com/goki/icons/blob/main/svg/album.svg
+	// Album is https://github.com/cogentcore/core/blob/main/icons/svg/album.svg
 	Album Icon = "album"
 
-	// AlignCenter is https://github.com/goki/icons/blob/main/svg/align_center.svg
+	// AlignCenter is https://github.com/cogentcore/core/blob/main/icons/svg/align_center.svg
 	AlignCenter Icon = "align_center"
 
-	// AlignEnd is https://github.com/goki/icons/blob/main/svg/align_end.svg
+	// AlignEnd is https://github.com/cogentcore/core/blob/main/icons/svg/align_end.svg
 	AlignEnd Icon = "align_end"
 
-	// AlignFlexCenter is https://github.com/goki/icons/blob/main/svg/align_flex_center.svg
+	// AlignFlexCenter is https://github.com/cogentcore/core/blob/main/icons/svg/align_flex_center.svg
 	AlignFlexCenter Icon = "align_flex_center"
 
-	// AlignFlexEnd is https://github.com/goki/icons/blob/main/svg/align_flex_end.svg
+	// AlignFlexEnd is https://github.com/cogentcore/core/blob/main/icons/svg/align_flex_end.svg
 	AlignFlexEnd Icon = "align_flex_end"
 
-	// AlignFlexStart is https://github.com/goki/icons/blob/main/svg/align_flex_start.svg
+	// AlignFlexStart is https://github.com/cogentcore/core/blob/main/icons/svg/align_flex_start.svg
 	AlignFlexStart Icon = "align_flex_start"
 
-	// AlignHorizontalCenter is https://github.com/goki/icons/blob/main/svg/align_horizontal_center.svg
+	// AlignHorizontalCenter is https://github.com/cogentcore/core/blob/main/icons/svg/align_horizontal_center.svg
 	AlignHorizontalCenter Icon = "align_horizontal_center"
 
-	// AlignHorizontalLeft is https://github.com/goki/icons/blob/main/svg/align_horizontal_left.svg
+	// AlignHorizontalLeft is https://github.com/cogentcore/core/blob/main/icons/svg/align_horizontal_left.svg
 	AlignHorizontalLeft Icon = "align_horizontal_left"
 
-	// AlignHorizontalRight is https://github.com/goki/icons/blob/main/svg/align_horizontal_right.svg
+	// AlignHorizontalRight is https://github.com/cogentcore/core/blob/main/icons/svg/align_horizontal_right.svg
 	AlignHorizontalRight Icon = "align_horizontal_right"
 
-	// AlignItemsStretch is https://github.com/goki/icons/blob/main/svg/align_items_stretch.svg
+	// AlignItemsStretch is https://github.com/cogentcore/core/blob/main/icons/svg/align_items_stretch.svg
 	AlignItemsStretch Icon = "align_items_stretch"
 
-	// AlignJustifyCenter is https://github.com/goki/icons/blob/main/svg/align_justify_center.svg
+	// AlignJustifyCenter is https://github.com/cogentcore/core/blob/main/icons/svg/align_justify_center.svg
 	AlignJustifyCenter Icon = "align_justify_center"
 
-	// AlignJustifyFlexEnd is https://github.com/goki/icons/blob/main/svg/align_justify_flex_end.svg
+	// AlignJustifyFlexEnd is https://github.com/cogentcore/core/blob/main/icons/svg/align_justify_flex_end.svg
 	AlignJustifyFlexEnd Icon = "align_justify_flex_end"
 
-	// AlignJustifyFlexStart is https://github.com/goki/icons/blob/main/svg/align_justify_flex_start.svg
+	// AlignJustifyFlexStart is https://github.com/cogentcore/core/blob/main/icons/svg/align_justify_flex_start.svg
 	AlignJustifyFlexStart Icon = "align_justify_flex_start"
 
-	// AlignJustifySpaceAround is https://github.com/goki/icons/blob/main/svg/align_justify_space_around.svg
+	// AlignJustifySpaceAround is https://github.com/cogentcore/core/blob/main/icons/svg/align_justify_space_around.svg
 	AlignJustifySpaceAround Icon = "align_justify_space_around"
 
-	// AlignJustifySpaceBetween is https://github.com/goki/icons/blob/main/svg/align_justify_space_between.svg
+	// AlignJustifySpaceBetween is https://github.com/cogentcore/core/blob/main/icons/svg/align_justify_space_between.svg
 	AlignJustifySpaceBetween Icon = "align_justify_space_between"
 
-	// AlignJustifySpaceEven is https://github.com/goki/icons/blob/main/svg/align_justify_space_even.svg
+	// AlignJustifySpaceEven is https://github.com/cogentcore/core/blob/main/icons/svg/align_justify_space_even.svg
 	AlignJustifySpaceEven Icon = "align_justify_space_even"
 
-	// AlignJustifyStretch is https://github.com/goki/icons/blob/main/svg/align_justify_stretch.svg
+	// AlignJustifyStretch is https://github.com/cogentcore/core/blob/main/icons/svg/align_justify_stretch.svg
 	AlignJustifyStretch Icon = "align_justify_stretch"
 
-	// AlignSelfStretch is https://github.com/goki/icons/blob/main/svg/align_self_stretch.svg
+	// AlignSelfStretch is https://github.com/cogentcore/core/blob/main/icons/svg/align_self_stretch.svg
 	AlignSelfStretch Icon = "align_self_stretch"
 
-	// AlignSpaceAround is https://github.com/goki/icons/blob/main/svg/align_space_around.svg
+	// AlignSpaceAround is https://github.com/cogentcore/core/blob/main/icons/svg/align_space_around.svg
 	AlignSpaceAround Icon = "align_space_around"
 
-	// AlignSpaceBetween is https://github.com/goki/icons/blob/main/svg/align_space_between.svg
+	// AlignSpaceBetween is https://github.com/cogentcore/core/blob/main/icons/svg/align_space_between.svg
 	AlignSpaceBetween Icon = "align_space_between"
 
-	// AlignSpaceEven is https://github.com/goki/icons/blob/main/svg/align_space_even.svg
+	// AlignSpaceEven is https://github.com/cogentcore/core/blob/main/icons/svg/align_space_even.svg
 	AlignSpaceEven Icon = "align_space_even"
 
-	// AlignStart is https://github.com/goki/icons/blob/main/svg/align_start.svg
+	// AlignStart is https://github.com/cogentcore/core/blob/main/icons/svg/align_start.svg
 	AlignStart Icon = "align_start"
 
-	// AlignStretch is https://github.com/goki/icons/blob/main/svg/align_stretch.svg
+	// AlignStretch is https://github.com/cogentcore/core/blob/main/icons/svg/align_stretch.svg
 	AlignStretch Icon = "align_stretch"
 
-	// AlignVerticalBottom is https://github.com/goki/icons/blob/main/svg/align_vertical_bottom.svg
+	// AlignVerticalBottom is https://github.com/cogentcore/core/blob/main/icons/svg/align_vertical_bottom.svg
 	AlignVerticalBottom Icon = "align_vertical_bottom"
 
-	// AlignVerticalCenter is https://github.com/goki/icons/blob/main/svg/align_vertical_center.svg
+	// AlignVerticalCenter is https://github.com/cogentcore/core/blob/main/icons/svg/align_vertical_center.svg
 	AlignVerticalCenter Icon = "align_vertical_center"
 
-	// AlignVerticalTop is https://github.com/goki/icons/blob/main/svg/align_vertical_top.svg
+	// AlignVerticalTop is https://github.com/cogentcore/core/blob/main/icons/svg/align_vertical_top.svg
 	AlignVerticalTop Icon = "align_vertical_top"
 
-	// AllInbox is https://github.com/goki/icons/blob/main/svg/all_inbox.svg
+	// AllInbox is https://github.com/cogentcore/core/blob/main/icons/svg/all_inbox.svg
 	AllInbox Icon = "all_inbox"
 
-	// AllMatch is https://github.com/goki/icons/blob/main/svg/all_match.svg
+	// AllMatch is https://github.com/cogentcore/core/blob/main/icons/svg/all_match.svg
 	AllMatch Icon = "all_match"
 
-	// AllOut is https://github.com/goki/icons/blob/main/svg/all_out.svg
+	// AllOut is https://github.com/cogentcore/core/blob/main/icons/svg/all_out.svg
 	AllOut Icon = "all_out"
 
-	// AltRoute is https://github.com/goki/icons/blob/main/svg/alt_route.svg
+	// AltRoute is https://github.com/cogentcore/core/blob/main/icons/svg/alt_route.svg
 	AltRoute Icon = "alt_route"
 
-	// AlternateEmail is https://github.com/goki/icons/blob/main/svg/alternate_email.svg
+	// AlternateEmail is https://github.com/cogentcore/core/blob/main/icons/svg/alternate_email.svg
 	AlternateEmail Icon = "alternate_email"
 
-	// Altitude is https://github.com/goki/icons/blob/main/svg/altitude.svg
+	// Altitude is https://github.com/cogentcore/core/blob/main/icons/svg/altitude.svg
 	Altitude Icon = "altitude"
 
-	// Amend is https://github.com/goki/icons/blob/main/svg/amend.svg
+	// Amend is https://github.com/cogentcore/core/blob/main/icons/svg/amend.svg
 	Amend Icon = "amend"
 
-	// Analytics is https://github.com/goki/icons/blob/main/svg/analytics.svg
+	// Analytics is https://github.com/cogentcore/core/blob/main/icons/svg/analytics.svg
 	Analytics Icon = "analytics"
 
-	// Anchor is https://github.com/goki/icons/blob/main/svg/anchor.svg
+	// Anchor is https://github.com/cogentcore/core/blob/main/icons/svg/anchor.svg
 	Anchor Icon = "anchor"
 
-	// Android is https://github.com/goki/icons/blob/main/svg/android.svg
+	// Android is https://github.com/cogentcore/core/blob/main/icons/svg/android.svg
 	Android Icon = "android"
 
-	// Animation is https://github.com/goki/icons/blob/main/svg/animation.svg
+	// Animation is https://github.com/cogentcore/core/blob/main/icons/svg/animation.svg
 	Animation Icon = "animation"
 
-	// Apartment is https://github.com/goki/icons/blob/main/svg/apartment.svg
+	// Apartment is https://github.com/cogentcore/core/blob/main/icons/svg/apartment.svg
 	Apartment Icon = "apartment"
 
-	// Api is https://github.com/goki/icons/blob/main/svg/api.svg
+	// Api is https://github.com/cogentcore/core/blob/main/icons/svg/api.svg
 	Api Icon = "api"
 
-	// ApkDocument is https://github.com/goki/icons/blob/main/svg/apk_document.svg
+	// ApkDocument is https://github.com/cogentcore/core/blob/main/icons/svg/apk_document.svg
 	ApkDocument Icon = "apk_document"
 
-	// ApkInstall is https://github.com/goki/icons/blob/main/svg/apk_install.svg
+	// ApkInstall is https://github.com/cogentcore/core/blob/main/icons/svg/apk_install.svg
 	ApkInstall Icon = "apk_install"
 
-	// AppBadging is https://github.com/goki/icons/blob/main/svg/app_badging.svg
+	// AppBadging is https://github.com/cogentcore/core/blob/main/icons/svg/app_badging.svg
 	AppBadging Icon = "app_badging"
 
-	// AppBlocking is https://github.com/goki/icons/blob/main/svg/app_blocking.svg
+	// AppBlocking is https://github.com/cogentcore/core/blob/main/icons/svg/app_blocking.svg
 	AppBlocking Icon = "app_blocking"
 
-	// AppPromo is https://github.com/goki/icons/blob/main/svg/app_promo.svg
+	// AppPromo is https://github.com/cogentcore/core/blob/main/icons/svg/app_promo.svg
 	AppPromo Icon = "app_promo"
 
-	// AppRegistration is https://github.com/goki/icons/blob/main/svg/app_registration.svg
+	// AppRegistration is https://github.com/cogentcore/core/blob/main/icons/svg/app_registration.svg
 	AppRegistration Icon = "app_registration"
 
-	// AppShortcut is https://github.com/goki/icons/blob/main/svg/app_shortcut.svg
+	// AppShortcut is https://github.com/cogentcore/core/blob/main/icons/svg/app_shortcut.svg
 	AppShortcut Icon = "app_shortcut"
 
-	// Approval is https://github.com/goki/icons/blob/main/svg/approval.svg
+	// Approval is https://github.com/cogentcore/core/blob/main/icons/svg/approval.svg
 	Approval Icon = "approval"
 
-	// ApprovalDelegation is https://github.com/goki/icons/blob/main/svg/approval_delegation.svg
+	// ApprovalDelegation is https://github.com/cogentcore/core/blob/main/icons/svg/approval_delegation.svg
 	ApprovalDelegation Icon = "approval_delegation"
 
-	// Apps is https://github.com/goki/icons/blob/main/svg/apps.svg
+	// Apps is https://github.com/cogentcore/core/blob/main/icons/svg/apps.svg
 	Apps Icon = "apps"
 
-	// AppsOutage is https://github.com/goki/icons/blob/main/svg/apps_outage.svg
+	// AppsOutage is https://github.com/cogentcore/core/blob/main/icons/svg/apps_outage.svg
 	AppsOutage Icon = "apps_outage"
 
-	// ArOnYou is https://github.com/goki/icons/blob/main/svg/ar_on_you.svg
+	// ArOnYou is https://github.com/cogentcore/core/blob/main/icons/svg/ar_on_you.svg
 	ArOnYou Icon = "ar_on_you"
 
-	// Architecture is https://github.com/goki/icons/blob/main/svg/architecture.svg
+	// Architecture is https://github.com/cogentcore/core/blob/main/icons/svg/architecture.svg
 	Architecture Icon = "architecture"
 
-	// Archive is https://github.com/goki/icons/blob/main/svg/archive.svg
+	// Archive is https://github.com/cogentcore/core/blob/main/icons/svg/archive.svg
 	Archive Icon = "archive"
 
-	// AreaChart is https://github.com/goki/icons/blob/main/svg/area_chart.svg
+	// AreaChart is https://github.com/cogentcore/core/blob/main/icons/svg/area_chart.svg
 	AreaChart Icon = "area_chart"
 
-	// ArrowAndEdge is https://github.com/goki/icons/blob/main/svg/arrow_and_edge.svg
+	// ArrowAndEdge is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_and_edge.svg
 	ArrowAndEdge Icon = "arrow_and_edge"
 
-	// ArrowBack is https://github.com/goki/icons/blob/main/svg/arrow_back.svg
+	// ArrowBack is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_back.svg
 	ArrowBack Icon = "arrow_back"
 
-	// ArrowBackIos is https://github.com/goki/icons/blob/main/svg/arrow_back_ios.svg
+	// ArrowBackIos is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_back_ios.svg
 	ArrowBackIos Icon = "arrow_back_ios"
 
-	// ArrowBackIosNew is https://github.com/goki/icons/blob/main/svg/arrow_back_ios_new.svg
+	// ArrowBackIosNew is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_back_ios_new.svg
 	ArrowBackIosNew Icon = "arrow_back_ios_new"
 
-	// ArrowCircleDown is https://github.com/goki/icons/blob/main/svg/arrow_circle_down.svg
+	// ArrowCircleDown is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_circle_down.svg
 	ArrowCircleDown Icon = "arrow_circle_down"
 
-	// ArrowCircleLeft is https://github.com/goki/icons/blob/main/svg/arrow_circle_left.svg
+	// ArrowCircleLeft is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_circle_left.svg
 	ArrowCircleLeft Icon = "arrow_circle_left"
 
-	// ArrowCircleRight is https://github.com/goki/icons/blob/main/svg/arrow_circle_right.svg
+	// ArrowCircleRight is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_circle_right.svg
 	ArrowCircleRight Icon = "arrow_circle_right"
 
-	// ArrowCircleUp is https://github.com/goki/icons/blob/main/svg/arrow_circle_up.svg
+	// ArrowCircleUp is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_circle_up.svg
 	ArrowCircleUp Icon = "arrow_circle_up"
 
-	// ArrowDownward is https://github.com/goki/icons/blob/main/svg/arrow_downward.svg
+	// ArrowDownward is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_downward.svg
 	ArrowDownward Icon = "arrow_downward"
 
-	// ArrowDownwardAlt is https://github.com/goki/icons/blob/main/svg/arrow_downward_alt.svg
+	// ArrowDownwardAlt is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_downward_alt.svg
 	ArrowDownwardAlt Icon = "arrow_downward_alt"
 
-	// ArrowDropDown is https://github.com/goki/icons/blob/main/svg/arrow_drop_down.svg
+	// ArrowDropDown is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_drop_down.svg
 	ArrowDropDown Icon = "arrow_drop_down"
 
-	// ArrowDropDownCircle is https://github.com/goki/icons/blob/main/svg/arrow_drop_down_circle.svg
+	// ArrowDropDownCircle is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_drop_down_circle.svg
 	ArrowDropDownCircle Icon = "arrow_drop_down_circle"
 
-	// ArrowDropUp is https://github.com/goki/icons/blob/main/svg/arrow_drop_up.svg
+	// ArrowDropUp is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_drop_up.svg
 	ArrowDropUp Icon = "arrow_drop_up"
 
-	// ArrowForward is https://github.com/goki/icons/blob/main/svg/arrow_forward.svg
+	// ArrowForward is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_forward.svg
 	ArrowForward Icon = "arrow_forward"
 
-	// ArrowForwardIos is https://github.com/goki/icons/blob/main/svg/arrow_forward_ios.svg
+	// ArrowForwardIos is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_forward_ios.svg
 	ArrowForwardIos Icon = "arrow_forward_ios"
 
-	// ArrowInsert is https://github.com/goki/icons/blob/main/svg/arrow_insert.svg
+	// ArrowInsert is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_insert.svg
 	ArrowInsert Icon = "arrow_insert"
 
-	// ArrowLeft is https://github.com/goki/icons/blob/main/svg/arrow_left.svg
+	// ArrowLeft is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_left.svg
 	ArrowLeft Icon = "arrow_left"
 
-	// ArrowLeftAlt is https://github.com/goki/icons/blob/main/svg/arrow_left_alt.svg
+	// ArrowLeftAlt is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_left_alt.svg
 	ArrowLeftAlt Icon = "arrow_left_alt"
 
-	// ArrowOrEdge is https://github.com/goki/icons/blob/main/svg/arrow_or_edge.svg
+	// ArrowOrEdge is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_or_edge.svg
 	ArrowOrEdge Icon = "arrow_or_edge"
 
-	// ArrowOutward is https://github.com/goki/icons/blob/main/svg/arrow_outward.svg
+	// ArrowOutward is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_outward.svg
 	ArrowOutward Icon = "arrow_outward"
 
-	// ArrowRange is https://github.com/goki/icons/blob/main/svg/arrow_range.svg
+	// ArrowRange is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_range.svg
 	ArrowRange Icon = "arrow_range"
 
-	// ArrowRight is https://github.com/goki/icons/blob/main/svg/arrow_right.svg
+	// ArrowRight is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_right.svg
 	ArrowRight Icon = "arrow_right"
 
-	// ArrowRightAlt is https://github.com/goki/icons/blob/main/svg/arrow_right_alt.svg
+	// ArrowRightAlt is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_right_alt.svg
 	ArrowRightAlt Icon = "arrow_right_alt"
 
-	// ArrowSelectorTool is https://github.com/goki/icons/blob/main/svg/arrow_selector_tool.svg
+	// ArrowSelectorTool is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_selector_tool.svg
 	ArrowSelectorTool Icon = "arrow_selector_tool"
 
-	// ArrowSplit is https://github.com/goki/icons/blob/main/svg/arrow_split.svg
+	// ArrowSplit is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_split.svg
 	ArrowSplit Icon = "arrow_split"
 
-	// ArrowTopLeft is https://github.com/goki/icons/blob/main/svg/arrow_top_left.svg
+	// ArrowTopLeft is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_top_left.svg
 	ArrowTopLeft Icon = "arrow_top_left"
 
-	// ArrowTopRight is https://github.com/goki/icons/blob/main/svg/arrow_top_right.svg
+	// ArrowTopRight is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_top_right.svg
 	ArrowTopRight Icon = "arrow_top_right"
 
-	// ArrowUpward is https://github.com/goki/icons/blob/main/svg/arrow_upward.svg
+	// ArrowUpward is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_upward.svg
 	ArrowUpward Icon = "arrow_upward"
 
-	// ArrowUpwardAlt is https://github.com/goki/icons/blob/main/svg/arrow_upward_alt.svg
+	// ArrowUpwardAlt is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_upward_alt.svg
 	ArrowUpwardAlt Icon = "arrow_upward_alt"
 
-	// ArrowsMoreDown is https://github.com/goki/icons/blob/main/svg/arrows_more_down.svg
+	// ArrowsMoreDown is https://github.com/cogentcore/core/blob/main/icons/svg/arrows_more_down.svg
 	ArrowsMoreDown Icon = "arrows_more_down"
 
-	// ArrowsMoreUp is https://github.com/goki/icons/blob/main/svg/arrows_more_up.svg
+	// ArrowsMoreUp is https://github.com/cogentcore/core/blob/main/icons/svg/arrows_more_up.svg
 	ArrowsMoreUp Icon = "arrows_more_up"
 
-	// ArrowsOutward is https://github.com/goki/icons/blob/main/svg/arrows_outward.svg
+	// ArrowsOutward is https://github.com/cogentcore/core/blob/main/icons/svg/arrows_outward.svg
 	ArrowsOutward Icon = "arrows_outward"
 
-	// Article is https://github.com/goki/icons/blob/main/svg/article.svg
+	// Article is https://github.com/cogentcore/core/blob/main/icons/svg/article.svg
 	Article Icon = "article"
 
-	// AspectRatio is https://github.com/goki/icons/blob/main/svg/aspect_ratio.svg
+	// AspectRatio is https://github.com/cogentcore/core/blob/main/icons/svg/aspect_ratio.svg
 	AspectRatio Icon = "aspect_ratio"
 
-	// AssistantDirection is https://github.com/goki/icons/blob/main/svg/assistant_direction.svg
+	// AssistantDirection is https://github.com/cogentcore/core/blob/main/icons/svg/assistant_direction.svg
 	AssistantDirection Icon = "assistant_direction"
 
-	// AssistantNavigation is https://github.com/goki/icons/blob/main/svg/assistant_navigation.svg
+	// AssistantNavigation is https://github.com/cogentcore/core/blob/main/icons/svg/assistant_navigation.svg
 	AssistantNavigation Icon = "assistant_navigation"
 
-	// AttachEmail is https://github.com/goki/icons/blob/main/svg/attach_email.svg
+	// AttachEmail is https://github.com/cogentcore/core/blob/main/icons/svg/attach_email.svg
 	AttachEmail Icon = "attach_email"
 
-	// AttachFile is https://github.com/goki/icons/blob/main/svg/attach_file.svg
+	// AttachFile is https://github.com/cogentcore/core/blob/main/icons/svg/attach_file.svg
 	AttachFile Icon = "attach_file"
 
-	// AttachFileAdd is https://github.com/goki/icons/blob/main/svg/attach_file_add.svg
+	// AttachFileAdd is https://github.com/cogentcore/core/blob/main/icons/svg/attach_file_add.svg
 	AttachFileAdd Icon = "attach_file_add"
 
-	// AttachMoney is https://github.com/goki/icons/blob/main/svg/attach_money.svg
+	// AttachMoney is https://github.com/cogentcore/core/blob/main/icons/svg/attach_money.svg
 	AttachMoney Icon = "attach_money"
 
-	// Attachment is https://github.com/goki/icons/blob/main/svg/attachment.svg
+	// Attachment is https://github.com/cogentcore/core/blob/main/icons/svg/attachment.svg
 	Attachment Icon = "attachment"
 
-	// Attribution is https://github.com/goki/icons/blob/main/svg/attribution.svg
+	// Attribution is https://github.com/cogentcore/core/blob/main/icons/svg/attribution.svg
 	Attribution Icon = "attribution"
 
-	// AudioFile is https://github.com/goki/icons/blob/main/svg/audio_file.svg
+	// AudioFile is https://github.com/cogentcore/core/blob/main/icons/svg/audio_file.svg
 	AudioFile Icon = "audio_file"
 
-	// AudioVideoReceiver is https://github.com/goki/icons/blob/main/svg/audio_video_receiver.svg
+	// AudioVideoReceiver is https://github.com/cogentcore/core/blob/main/icons/svg/audio_video_receiver.svg
 	AudioVideoReceiver Icon = "audio_video_receiver"
 
-	// AutoDelete is https://github.com/goki/icons/blob/main/svg/auto_delete.svg
+	// AutoDelete is https://github.com/cogentcore/core/blob/main/icons/svg/auto_delete.svg
 	AutoDelete Icon = "auto_delete"
 
-	// AutoReadPause is https://github.com/goki/icons/blob/main/svg/auto_read_pause.svg
+	// AutoReadPause is https://github.com/cogentcore/core/blob/main/icons/svg/auto_read_pause.svg
 	AutoReadPause Icon = "auto_read_pause"
 
-	// AutoReadPlay is https://github.com/goki/icons/blob/main/svg/auto_read_play.svg
+	// AutoReadPlay is https://github.com/cogentcore/core/blob/main/icons/svg/auto_read_play.svg
 	AutoReadPlay Icon = "auto_read_play"
 
-	// AutofpsSelect is https://github.com/goki/icons/blob/main/svg/autofps_select.svg
+	// AutofpsSelect is https://github.com/cogentcore/core/blob/main/icons/svg/autofps_select.svg
 	AutofpsSelect Icon = "autofps_select"
 
-	// Autopause is https://github.com/goki/icons/blob/main/svg/autopause.svg
+	// Autopause is https://github.com/cogentcore/core/blob/main/icons/svg/autopause.svg
 	Autopause Icon = "autopause"
 
-	// Autoplay is https://github.com/goki/icons/blob/main/svg/autoplay.svg
+	// Autoplay is https://github.com/cogentcore/core/blob/main/icons/svg/autoplay.svg
 	Autoplay Icon = "autoplay"
 
-	// Autorenew is https://github.com/goki/icons/blob/main/svg/autorenew.svg
+	// Autorenew is https://github.com/cogentcore/core/blob/main/icons/svg/autorenew.svg
 	Autorenew Icon = "autorenew"
 
-	// Autostop is https://github.com/goki/icons/blob/main/svg/autostop.svg
+	// Autostop is https://github.com/cogentcore/core/blob/main/icons/svg/autostop.svg
 	Autostop Icon = "autostop"
 
-	// AvTimer is https://github.com/goki/icons/blob/main/svg/av_timer.svg
+	// AvTimer is https://github.com/cogentcore/core/blob/main/icons/svg/av_timer.svg
 	AvTimer Icon = "av_timer"
 
-	// AwardStar is https://github.com/goki/icons/blob/main/svg/award_star.svg
+	// AwardStar is https://github.com/cogentcore/core/blob/main/icons/svg/award_star.svg
 	AwardStar Icon = "award_star"
 
-	// BackHand is https://github.com/goki/icons/blob/main/svg/back_hand.svg
+	// BackHand is https://github.com/cogentcore/core/blob/main/icons/svg/back_hand.svg
 	BackHand Icon = "back_hand"
 
-	// BackToTab is https://github.com/goki/icons/blob/main/svg/back_to_tab.svg
+	// BackToTab is https://github.com/cogentcore/core/blob/main/icons/svg/back_to_tab.svg
 	BackToTab Icon = "back_to_tab"
 
-	// BackgroundDotLarge is https://github.com/goki/icons/blob/main/svg/background_dot_large.svg
+	// BackgroundDotLarge is https://github.com/cogentcore/core/blob/main/icons/svg/background_dot_large.svg
 	BackgroundDotLarge Icon = "background_dot_large"
 
-	// BackgroundGridSmall is https://github.com/goki/icons/blob/main/svg/background_grid_small.svg
+	// BackgroundGridSmall is https://github.com/cogentcore/core/blob/main/icons/svg/background_grid_small.svg
 	BackgroundGridSmall Icon = "background_grid_small"
 
-	// BackgroundReplace is https://github.com/goki/icons/blob/main/svg/background_replace.svg
+	// BackgroundReplace is https://github.com/cogentcore/core/blob/main/icons/svg/background_replace.svg
 	BackgroundReplace Icon = "background_replace"
 
-	// BacklightHigh is https://github.com/goki/icons/blob/main/svg/backlight_high.svg
+	// BacklightHigh is https://github.com/cogentcore/core/blob/main/icons/svg/backlight_high.svg
 	BacklightHigh Icon = "backlight_high"
 
-	// BacklightLow is https://github.com/goki/icons/blob/main/svg/backlight_low.svg
+	// BacklightLow is https://github.com/cogentcore/core/blob/main/icons/svg/backlight_low.svg
 	BacklightLow Icon = "backlight_low"
 
-	// Backspace is https://github.com/goki/icons/blob/main/svg/backspace.svg
+	// Backspace is https://github.com/cogentcore/core/blob/main/icons/svg/backspace.svg
 	Backspace Icon = "backspace"
 
-	// Backup is https://github.com/goki/icons/blob/main/svg/backup.svg
+	// Backup is https://github.com/cogentcore/core/blob/main/icons/svg/backup.svg
 	Backup Icon = "backup"
 
-	// BackupTable is https://github.com/goki/icons/blob/main/svg/backup_table.svg
+	// BackupTable is https://github.com/cogentcore/core/blob/main/icons/svg/backup_table.svg
 	BackupTable Icon = "backup_table"
 
-	// Badge is https://github.com/goki/icons/blob/main/svg/badge.svg
+	// Badge is https://github.com/cogentcore/core/blob/main/icons/svg/badge.svg
 	Badge Icon = "badge"
 
-	// BadgeCriticalBattery is https://github.com/goki/icons/blob/main/svg/badge_critical_battery.svg
+	// BadgeCriticalBattery is https://github.com/cogentcore/core/blob/main/icons/svg/badge_critical_battery.svg
 	BadgeCriticalBattery Icon = "badge_critical_battery"
 
-	// Balance is https://github.com/goki/icons/blob/main/svg/balance.svg
+	// Balance is https://github.com/cogentcore/core/blob/main/icons/svg/balance.svg
 	Balance Icon = "balance"
 
-	// Ballot is https://github.com/goki/icons/blob/main/svg/ballot.svg
+	// Ballot is https://github.com/cogentcore/core/blob/main/icons/svg/ballot.svg
 	Ballot Icon = "ballot"
 
-	// BarChart is https://github.com/goki/icons/blob/main/svg/bar_chart.svg
+	// BarChart is https://github.com/cogentcore/core/blob/main/icons/svg/bar_chart.svg
 	BarChart Icon = "bar_chart"
 
-	// BarChart4Bars is https://github.com/goki/icons/blob/main/svg/bar_chart_4_bars.svg
+	// BarChart4Bars is https://github.com/cogentcore/core/blob/main/icons/svg/bar_chart_4_bars.svg
 	BarChart4Bars Icon = "bar_chart_4_bars"
 
-	// Barcode is https://github.com/goki/icons/blob/main/svg/barcode.svg
+	// Barcode is https://github.com/cogentcore/core/blob/main/icons/svg/barcode.svg
 	Barcode Icon = "barcode"
 
-	// BarcodeReader is https://github.com/goki/icons/blob/main/svg/barcode_reader.svg
+	// BarcodeReader is https://github.com/cogentcore/core/blob/main/icons/svg/barcode_reader.svg
 	BarcodeReader Icon = "barcode_reader"
 
-	// BarcodeScanner is https://github.com/goki/icons/blob/main/svg/barcode_scanner.svg
+	// BarcodeScanner is https://github.com/cogentcore/core/blob/main/icons/svg/barcode_scanner.svg
 	BarcodeScanner Icon = "barcode_scanner"
 
-	// BatchPrediction is https://github.com/goki/icons/blob/main/svg/batch_prediction.svg
+	// BatchPrediction is https://github.com/cogentcore/core/blob/main/icons/svg/batch_prediction.svg
 	BatchPrediction Icon = "batch_prediction"
 
-	// Battery0Bar is https://github.com/goki/icons/blob/main/svg/battery_0_bar.svg
+	// Battery0Bar is https://github.com/cogentcore/core/blob/main/icons/svg/battery_0_bar.svg
 	Battery0Bar Icon = "battery_0_bar"
 
-	// Battery1Bar is https://github.com/goki/icons/blob/main/svg/battery_1_bar.svg
+	// Battery1Bar is https://github.com/cogentcore/core/blob/main/icons/svg/battery_1_bar.svg
 	Battery1Bar Icon = "battery_1_bar"
 
-	// Battery2Bar is https://github.com/goki/icons/blob/main/svg/battery_2_bar.svg
+	// Battery2Bar is https://github.com/cogentcore/core/blob/main/icons/svg/battery_2_bar.svg
 	Battery2Bar Icon = "battery_2_bar"
 
-	// Battery3Bar is https://github.com/goki/icons/blob/main/svg/battery_3_bar.svg
+	// Battery3Bar is https://github.com/cogentcore/core/blob/main/icons/svg/battery_3_bar.svg
 	Battery3Bar Icon = "battery_3_bar"
 
-	// Battery4Bar is https://github.com/goki/icons/blob/main/svg/battery_4_bar.svg
+	// Battery4Bar is https://github.com/cogentcore/core/blob/main/icons/svg/battery_4_bar.svg
 	Battery4Bar Icon = "battery_4_bar"
 
-	// Battery5Bar is https://github.com/goki/icons/blob/main/svg/battery_5_bar.svg
+	// Battery5Bar is https://github.com/cogentcore/core/blob/main/icons/svg/battery_5_bar.svg
 	Battery5Bar Icon = "battery_5_bar"
 
-	// Battery6Bar is https://github.com/goki/icons/blob/main/svg/battery_6_bar.svg
+	// Battery6Bar is https://github.com/cogentcore/core/blob/main/icons/svg/battery_6_bar.svg
 	Battery6Bar Icon = "battery_6_bar"
 
-	// BatteryAlert is https://github.com/goki/icons/blob/main/svg/battery_alert.svg
+	// BatteryAlert is https://github.com/cogentcore/core/blob/main/icons/svg/battery_alert.svg
 	BatteryAlert Icon = "battery_alert"
 
-	// BatteryChange is https://github.com/goki/icons/blob/main/svg/battery_change.svg
+	// BatteryChange is https://github.com/cogentcore/core/blob/main/icons/svg/battery_change.svg
 	BatteryChange Icon = "battery_change"
 
-	// BatteryCharging20 is https://github.com/goki/icons/blob/main/svg/battery_charging_20.svg
+	// BatteryCharging20 is https://github.com/cogentcore/core/blob/main/icons/svg/battery_charging_20.svg
 	BatteryCharging20 Icon = "battery_charging_20"
 
-	// BatteryCharging30 is https://github.com/goki/icons/blob/main/svg/battery_charging_30.svg
+	// BatteryCharging30 is https://github.com/cogentcore/core/blob/main/icons/svg/battery_charging_30.svg
 	BatteryCharging30 Icon = "battery_charging_30"
 
-	// BatteryCharging50 is https://github.com/goki/icons/blob/main/svg/battery_charging_50.svg
+	// BatteryCharging50 is https://github.com/cogentcore/core/blob/main/icons/svg/battery_charging_50.svg
 	BatteryCharging50 Icon = "battery_charging_50"
 
-	// BatteryCharging60 is https://github.com/goki/icons/blob/main/svg/battery_charging_60.svg
+	// BatteryCharging60 is https://github.com/cogentcore/core/blob/main/icons/svg/battery_charging_60.svg
 	BatteryCharging60 Icon = "battery_charging_60"
 
-	// BatteryCharging80 is https://github.com/goki/icons/blob/main/svg/battery_charging_80.svg
+	// BatteryCharging80 is https://github.com/cogentcore/core/blob/main/icons/svg/battery_charging_80.svg
 	BatteryCharging80 Icon = "battery_charging_80"
 
-	// BatteryCharging90 is https://github.com/goki/icons/blob/main/svg/battery_charging_90.svg
+	// BatteryCharging90 is https://github.com/cogentcore/core/blob/main/icons/svg/battery_charging_90.svg
 	BatteryCharging90 Icon = "battery_charging_90"
 
-	// BatteryChargingFull is https://github.com/goki/icons/blob/main/svg/battery_charging_full.svg
+	// BatteryChargingFull is https://github.com/cogentcore/core/blob/main/icons/svg/battery_charging_full.svg
 	BatteryChargingFull Icon = "battery_charging_full"
 
-	// BatteryError is https://github.com/goki/icons/blob/main/svg/battery_error.svg
+	// BatteryError is https://github.com/cogentcore/core/blob/main/icons/svg/battery_error.svg
 	BatteryError Icon = "battery_error"
 
-	// BatteryHoriz000 is https://github.com/goki/icons/blob/main/svg/battery_horiz_000.svg
+	// BatteryHoriz000 is https://github.com/cogentcore/core/blob/main/icons/svg/battery_horiz_000.svg
 	BatteryHoriz000 Icon = "battery_horiz_000"
 
-	// BatteryHoriz050 is https://github.com/goki/icons/blob/main/svg/battery_horiz_050.svg
+	// BatteryHoriz050 is https://github.com/cogentcore/core/blob/main/icons/svg/battery_horiz_050.svg
 	BatteryHoriz050 Icon = "battery_horiz_050"
 
-	// BatteryHoriz075 is https://github.com/goki/icons/blob/main/svg/battery_horiz_075.svg
+	// BatteryHoriz075 is https://github.com/cogentcore/core/blob/main/icons/svg/battery_horiz_075.svg
 	BatteryHoriz075 Icon = "battery_horiz_075"
 
-	// BatteryLow is https://github.com/goki/icons/blob/main/svg/battery_low.svg
+	// BatteryLow is https://github.com/cogentcore/core/blob/main/icons/svg/battery_low.svg
 	BatteryLow Icon = "battery_low"
 
-	// BatteryPlus is https://github.com/goki/icons/blob/main/svg/battery_plus.svg
+	// BatteryPlus is https://github.com/cogentcore/core/blob/main/icons/svg/battery_plus.svg
 	BatteryPlus Icon = "battery_plus"
 
-	// BatteryProfile is https://github.com/goki/icons/blob/main/svg/battery_profile.svg
+	// BatteryProfile is https://github.com/cogentcore/core/blob/main/icons/svg/battery_profile.svg
 	BatteryProfile Icon = "battery_profile"
 
-	// BatterySaver is https://github.com/goki/icons/blob/main/svg/battery_saver.svg
+	// BatterySaver is https://github.com/cogentcore/core/blob/main/icons/svg/battery_saver.svg
 	BatterySaver Icon = "battery_saver"
 
-	// BatteryShare is https://github.com/goki/icons/blob/main/svg/battery_share.svg
+	// BatteryShare is https://github.com/cogentcore/core/blob/main/icons/svg/battery_share.svg
 	BatteryShare Icon = "battery_share"
 
-	// BatteryStatusGood is https://github.com/goki/icons/blob/main/svg/battery_status_good.svg
+	// BatteryStatusGood is https://github.com/cogentcore/core/blob/main/icons/svg/battery_status_good.svg
 	BatteryStatusGood Icon = "battery_status_good"
 
-	// BatteryUnknown is https://github.com/goki/icons/blob/main/svg/battery_unknown.svg
+	// BatteryUnknown is https://github.com/cogentcore/core/blob/main/icons/svg/battery_unknown.svg
 	BatteryUnknown Icon = "battery_unknown"
 
-	// BatteryVeryLow is https://github.com/goki/icons/blob/main/svg/battery_very_low.svg
+	// BatteryVeryLow is https://github.com/cogentcore/core/blob/main/icons/svg/battery_very_low.svg
 	BatteryVeryLow Icon = "battery_very_low"
 
-	// Bed is https://github.com/goki/icons/blob/main/svg/bed.svg
+	// Bed is https://github.com/cogentcore/core/blob/main/icons/svg/bed.svg
 	Bed Icon = "bed"
 
-	// Bedtime is https://github.com/goki/icons/blob/main/svg/bedtime.svg
+	// Bedtime is https://github.com/cogentcore/core/blob/main/icons/svg/bedtime.svg
 	Bedtime Icon = "bedtime"
 
-	// BedtimeOff is https://github.com/goki/icons/blob/main/svg/bedtime_off.svg
+	// BedtimeOff is https://github.com/cogentcore/core/blob/main/icons/svg/bedtime_off.svg
 	BedtimeOff Icon = "bedtime_off"
 
-	// Blanket is https://github.com/goki/icons/blob/main/svg/blanket.svg
+	// Blanket is https://github.com/cogentcore/core/blob/main/icons/svg/blanket.svg
 	Blanket Icon = "blanket"
 
-	// Blender is https://github.com/goki/icons/blob/main/svg/blender.svg
+	// Blender is https://github.com/cogentcore/core/blob/main/icons/svg/blender.svg
 	Blender Icon = "blender"
 
-	// Blind is https://github.com/goki/icons/blob/main/svg/blind.svg
+	// Blind is https://github.com/cogentcore/core/blob/main/icons/svg/blind.svg
 	Blind Icon = "blind"
 
-	// Blinds is https://github.com/goki/icons/blob/main/svg/blinds.svg
+	// Blinds is https://github.com/cogentcore/core/blob/main/icons/svg/blinds.svg
 	Blinds Icon = "blinds"
 
-	// BlindsClosed is https://github.com/goki/icons/blob/main/svg/blinds_closed.svg
+	// BlindsClosed is https://github.com/cogentcore/core/blob/main/icons/svg/blinds_closed.svg
 	BlindsClosed Icon = "blinds_closed"
 
-	// Block is https://github.com/goki/icons/blob/main/svg/block.svg
+	// Block is https://github.com/cogentcore/core/blob/main/icons/svg/block.svg
 	Block Icon = "block"
 
-	// Bluetooth is https://github.com/goki/icons/blob/main/svg/bluetooth.svg
+	// Bluetooth is https://github.com/cogentcore/core/blob/main/icons/svg/bluetooth.svg
 	Bluetooth Icon = "bluetooth"
 
-	// BluetoothConnected is https://github.com/goki/icons/blob/main/svg/bluetooth_connected.svg
+	// BluetoothConnected is https://github.com/cogentcore/core/blob/main/icons/svg/bluetooth_connected.svg
 	BluetoothConnected Icon = "bluetooth_connected"
 
-	// BluetoothDisabled is https://github.com/goki/icons/blob/main/svg/bluetooth_disabled.svg
+	// BluetoothDisabled is https://github.com/cogentcore/core/blob/main/icons/svg/bluetooth_disabled.svg
 	BluetoothDisabled Icon = "bluetooth_disabled"
 
-	// BluetoothDrive is https://github.com/goki/icons/blob/main/svg/bluetooth_drive.svg
+	// BluetoothDrive is https://github.com/cogentcore/core/blob/main/icons/svg/bluetooth_drive.svg
 	BluetoothDrive Icon = "bluetooth_drive"
 
-	// BluetoothSearching is https://github.com/goki/icons/blob/main/svg/bluetooth_searching.svg
+	// BluetoothSearching is https://github.com/cogentcore/core/blob/main/icons/svg/bluetooth_searching.svg
 	BluetoothSearching Icon = "bluetooth_searching"
 
-	// BlurCircular is https://github.com/goki/icons/blob/main/svg/blur_circular.svg
+	// BlurCircular is https://github.com/cogentcore/core/blob/main/icons/svg/blur_circular.svg
 	BlurCircular Icon = "blur_circular"
 
-	// BlurLinear is https://github.com/goki/icons/blob/main/svg/blur_linear.svg
+	// BlurLinear is https://github.com/cogentcore/core/blob/main/icons/svg/blur_linear.svg
 	BlurLinear Icon = "blur_linear"
 
-	// BlurMedium is https://github.com/goki/icons/blob/main/svg/blur_medium.svg
+	// BlurMedium is https://github.com/cogentcore/core/blob/main/icons/svg/blur_medium.svg
 	BlurMedium Icon = "blur_medium"
 
-	// BlurOff is https://github.com/goki/icons/blob/main/svg/blur_off.svg
+	// BlurOff is https://github.com/cogentcore/core/blob/main/icons/svg/blur_off.svg
 	BlurOff Icon = "blur_off"
 
-	// BlurOn is https://github.com/goki/icons/blob/main/svg/blur_on.svg
+	// BlurOn is https://github.com/cogentcore/core/blob/main/icons/svg/blur_on.svg
 	BlurOn Icon = "blur_on"
 
-	// BlurShort is https://github.com/goki/icons/blob/main/svg/blur_short.svg
+	// BlurShort is https://github.com/cogentcore/core/blob/main/icons/svg/blur_short.svg
 	BlurShort Icon = "blur_short"
 
-	// Bolt is https://github.com/goki/icons/blob/main/svg/bolt.svg
+	// Bolt is https://github.com/cogentcore/core/blob/main/icons/svg/bolt.svg
 	Bolt Icon = "bolt"
 
-	// Book is https://github.com/goki/icons/blob/main/svg/book.svg
+	// Book is https://github.com/cogentcore/core/blob/main/icons/svg/book.svg
 	Book Icon = "book"
 
-	// BookOnline is https://github.com/goki/icons/blob/main/svg/book_online.svg
+	// BookOnline is https://github.com/cogentcore/core/blob/main/icons/svg/book_online.svg
 	BookOnline Icon = "book_online"
 
-	// Bookmark is https://github.com/goki/icons/blob/main/svg/bookmark.svg
+	// Bookmark is https://github.com/cogentcore/core/blob/main/icons/svg/bookmark.svg
 	Bookmark Icon = "bookmark"
 
-	// BookmarkAdd is https://github.com/goki/icons/blob/main/svg/bookmark_add.svg
+	// BookmarkAdd is https://github.com/cogentcore/core/blob/main/icons/svg/bookmark_add.svg
 	BookmarkAdd Icon = "bookmark_add"
 
-	// BookmarkAdded is https://github.com/goki/icons/blob/main/svg/bookmark_added.svg
+	// BookmarkAdded is https://github.com/cogentcore/core/blob/main/icons/svg/bookmark_added.svg
 	BookmarkAdded Icon = "bookmark_added"
 
-	// BookmarkManager is https://github.com/goki/icons/blob/main/svg/bookmark_manager.svg
+	// BookmarkManager is https://github.com/cogentcore/core/blob/main/icons/svg/bookmark_manager.svg
 	BookmarkManager Icon = "bookmark_manager"
 
-	// BookmarkRemove is https://github.com/goki/icons/blob/main/svg/bookmark_remove.svg
+	// BookmarkRemove is https://github.com/cogentcore/core/blob/main/icons/svg/bookmark_remove.svg
 	BookmarkRemove Icon = "bookmark_remove"
 
-	// Bookmarks is https://github.com/goki/icons/blob/main/svg/bookmarks.svg
+	// Bookmarks is https://github.com/cogentcore/core/blob/main/icons/svg/bookmarks.svg
 	Bookmarks Icon = "bookmarks"
 
-	// BorderAll is https://github.com/goki/icons/blob/main/svg/border_all.svg
+	// BorderAll is https://github.com/cogentcore/core/blob/main/icons/svg/border_all.svg
 	BorderAll Icon = "border_all"
 
-	// BorderBottom is https://github.com/goki/icons/blob/main/svg/border_bottom.svg
+	// BorderBottom is https://github.com/cogentcore/core/blob/main/icons/svg/border_bottom.svg
 	BorderBottom Icon = "border_bottom"
 
-	// BorderClear is https://github.com/goki/icons/blob/main/svg/border_clear.svg
+	// BorderClear is https://github.com/cogentcore/core/blob/main/icons/svg/border_clear.svg
 	BorderClear Icon = "border_clear"
 
-	// BorderColor is https://github.com/goki/icons/blob/main/svg/border_color.svg
+	// BorderColor is https://github.com/cogentcore/core/blob/main/icons/svg/border_color.svg
 	BorderColor Icon = "border_color"
 
-	// BorderHorizontal is https://github.com/goki/icons/blob/main/svg/border_horizontal.svg
+	// BorderHorizontal is https://github.com/cogentcore/core/blob/main/icons/svg/border_horizontal.svg
 	BorderHorizontal Icon = "border_horizontal"
 
-	// BorderInner is https://github.com/goki/icons/blob/main/svg/border_inner.svg
+	// BorderInner is https://github.com/cogentcore/core/blob/main/icons/svg/border_inner.svg
 	BorderInner Icon = "border_inner"
 
-	// BorderLeft is https://github.com/goki/icons/blob/main/svg/border_left.svg
+	// BorderLeft is https://github.com/cogentcore/core/blob/main/icons/svg/border_left.svg
 	BorderLeft Icon = "border_left"
 
-	// BorderOuter is https://github.com/goki/icons/blob/main/svg/border_outer.svg
+	// BorderOuter is https://github.com/cogentcore/core/blob/main/icons/svg/border_outer.svg
 	BorderOuter Icon = "border_outer"
 
-	// BorderRight is https://github.com/goki/icons/blob/main/svg/border_right.svg
+	// BorderRight is https://github.com/cogentcore/core/blob/main/icons/svg/border_right.svg
 	BorderRight Icon = "border_right"
 
-	// BorderStyle is https://github.com/goki/icons/blob/main/svg/border_style.svg
+	// BorderStyle is https://github.com/cogentcore/core/blob/main/icons/svg/border_style.svg
 	BorderStyle Icon = "border_style"
 
-	// BorderTop is https://github.com/goki/icons/blob/main/svg/border_top.svg
+	// BorderTop is https://github.com/cogentcore/core/blob/main/icons/svg/border_top.svg
 	BorderTop Icon = "border_top"
 
-	// BorderVertical is https://github.com/goki/icons/blob/main/svg/border_vertical.svg
+	// BorderVertical is https://github.com/cogentcore/core/blob/main/icons/svg/border_vertical.svg
 	BorderVertical Icon = "border_vertical"
 
-	// BottomAppBar is https://github.com/goki/icons/blob/main/svg/bottom_app_bar.svg
+	// BottomAppBar is https://github.com/cogentcore/core/blob/main/icons/svg/bottom_app_bar.svg
 	BottomAppBar Icon = "bottom_app_bar"
 
-	// BottomDrawer is https://github.com/goki/icons/blob/main/svg/bottom_drawer.svg
+	// BottomDrawer is https://github.com/cogentcore/core/blob/main/icons/svg/bottom_drawer.svg
 	BottomDrawer Icon = "bottom_drawer"
 
-	// BottomNavigation is https://github.com/goki/icons/blob/main/svg/bottom_navigation.svg
+	// BottomNavigation is https://github.com/cogentcore/core/blob/main/icons/svg/bottom_navigation.svg
 	BottomNavigation Icon = "bottom_navigation"
 
-	// BottomPanelClose is https://github.com/goki/icons/blob/main/svg/bottom_panel_close.svg
+	// BottomPanelClose is https://github.com/cogentcore/core/blob/main/icons/svg/bottom_panel_close.svg
 	BottomPanelClose Icon = "bottom_panel_close"
 
-	// BottomPanelOpen is https://github.com/goki/icons/blob/main/svg/bottom_panel_open.svg
+	// BottomPanelOpen is https://github.com/cogentcore/core/blob/main/icons/svg/bottom_panel_open.svg
 	BottomPanelOpen Icon = "bottom_panel_open"
 
-	// BottomRightClick is https://github.com/goki/icons/blob/main/svg/bottom_right_click.svg
+	// BottomRightClick is https://github.com/cogentcore/core/blob/main/icons/svg/bottom_right_click.svg
 	BottomRightClick Icon = "bottom_right_click"
 
-	// BottomSheets is https://github.com/goki/icons/blob/main/svg/bottom_sheets.svg
+	// BottomSheets is https://github.com/cogentcore/core/blob/main/icons/svg/bottom_sheets.svg
 	BottomSheets Icon = "bottom_sheets"
 
-	// Box is https://github.com/goki/icons/blob/main/svg/box.svg
+	// Box is https://github.com/cogentcore/core/blob/main/icons/svg/box.svg
 	Box Icon = "box"
 
-	// BoxAdd is https://github.com/goki/icons/blob/main/svg/box_add.svg
+	// BoxAdd is https://github.com/cogentcore/core/blob/main/icons/svg/box_add.svg
 	BoxAdd Icon = "box_add"
 
-	// BoxEdit is https://github.com/goki/icons/blob/main/svg/box_edit.svg
+	// BoxEdit is https://github.com/cogentcore/core/blob/main/icons/svg/box_edit.svg
 	BoxEdit Icon = "box_edit"
 
-	// Boy is https://github.com/goki/icons/blob/main/svg/boy.svg
+	// Boy is https://github.com/cogentcore/core/blob/main/icons/svg/boy.svg
 	Boy Icon = "boy"
 
-	// Brightness1 is https://github.com/goki/icons/blob/main/svg/brightness_1.svg
+	// Brightness1 is https://github.com/cogentcore/core/blob/main/icons/svg/brightness_1.svg
 	Brightness1 Icon = "brightness_1"
 
-	// Brightness2 is https://github.com/goki/icons/blob/main/svg/brightness_2.svg
+	// Brightness2 is https://github.com/cogentcore/core/blob/main/icons/svg/brightness_2.svg
 	Brightness2 Icon = "brightness_2"
 
-	// Brightness3 is https://github.com/goki/icons/blob/main/svg/brightness_3.svg
+	// Brightness3 is https://github.com/cogentcore/core/blob/main/icons/svg/brightness_3.svg
 	Brightness3 Icon = "brightness_3"
 
-	// Brightness4 is https://github.com/goki/icons/blob/main/svg/brightness_4.svg
+	// Brightness4 is https://github.com/cogentcore/core/blob/main/icons/svg/brightness_4.svg
 	Brightness4 Icon = "brightness_4"
 
-	// Brightness5 is https://github.com/goki/icons/blob/main/svg/brightness_5.svg
+	// Brightness5 is https://github.com/cogentcore/core/blob/main/icons/svg/brightness_5.svg
 	Brightness5 Icon = "brightness_5"
 
-	// Brightness6 is https://github.com/goki/icons/blob/main/svg/brightness_6.svg
+	// Brightness6 is https://github.com/cogentcore/core/blob/main/icons/svg/brightness_6.svg
 	Brightness6 Icon = "brightness_6"
 
-	// Brightness7 is https://github.com/goki/icons/blob/main/svg/brightness_7.svg
+	// Brightness7 is https://github.com/cogentcore/core/blob/main/icons/svg/brightness_7.svg
 	Brightness7 Icon = "brightness_7"
 
-	// BrightnessAlert is https://github.com/goki/icons/blob/main/svg/brightness_alert.svg
+	// BrightnessAlert is https://github.com/cogentcore/core/blob/main/icons/svg/brightness_alert.svg
 	BrightnessAlert Icon = "brightness_alert"
 
-	// BrightnessAuto is https://github.com/goki/icons/blob/main/svg/brightness_auto.svg
+	// BrightnessAuto is https://github.com/cogentcore/core/blob/main/icons/svg/brightness_auto.svg
 	BrightnessAuto Icon = "brightness_auto"
 
-	// BrightnessEmpty is https://github.com/goki/icons/blob/main/svg/brightness_empty.svg
+	// BrightnessEmpty is https://github.com/cogentcore/core/blob/main/icons/svg/brightness_empty.svg
 	BrightnessEmpty Icon = "brightness_empty"
 
-	// BrightnessHigh is https://github.com/goki/icons/blob/main/svg/brightness_high.svg
+	// BrightnessHigh is https://github.com/cogentcore/core/blob/main/icons/svg/brightness_high.svg
 	BrightnessHigh Icon = "brightness_high"
 
-	// BrightnessLow is https://github.com/goki/icons/blob/main/svg/brightness_low.svg
+	// BrightnessLow is https://github.com/cogentcore/core/blob/main/icons/svg/brightness_low.svg
 	BrightnessLow Icon = "brightness_low"
 
-	// BrightnessMedium is https://github.com/goki/icons/blob/main/svg/brightness_medium.svg
+	// BrightnessMedium is https://github.com/cogentcore/core/blob/main/icons/svg/brightness_medium.svg
 	BrightnessMedium Icon = "brightness_medium"
 
-	// BroadcastOnHome is https://github.com/goki/icons/blob/main/svg/broadcast_on_home.svg
+	// BroadcastOnHome is https://github.com/cogentcore/core/blob/main/icons/svg/broadcast_on_home.svg
 	BroadcastOnHome Icon = "broadcast_on_home"
 
-	// BroadcastOnPersonal is https://github.com/goki/icons/blob/main/svg/broadcast_on_personal.svg
+	// BroadcastOnPersonal is https://github.com/cogentcore/core/blob/main/icons/svg/broadcast_on_personal.svg
 	BroadcastOnPersonal Icon = "broadcast_on_personal"
 
-	// BrokenImage is https://github.com/goki/icons/blob/main/svg/broken_image.svg
+	// BrokenImage is https://github.com/cogentcore/core/blob/main/icons/svg/broken_image.svg
 	BrokenImage Icon = "broken_image"
 
-	// Browse is https://github.com/goki/icons/blob/main/svg/browse.svg
+	// Browse is https://github.com/cogentcore/core/blob/main/icons/svg/browse.svg
 	Browse Icon = "browse"
 
-	// BrowseActivity is https://github.com/goki/icons/blob/main/svg/browse_activity.svg
+	// BrowseActivity is https://github.com/cogentcore/core/blob/main/icons/svg/browse_activity.svg
 	BrowseActivity Icon = "browse_activity"
 
-	// BrowseGallery is https://github.com/goki/icons/blob/main/svg/browse_gallery.svg
+	// BrowseGallery is https://github.com/cogentcore/core/blob/main/icons/svg/browse_gallery.svg
 	BrowseGallery Icon = "browse_gallery"
 
-	// BrowserUpdated is https://github.com/goki/icons/blob/main/svg/browser_updated.svg
+	// BrowserUpdated is https://github.com/cogentcore/core/blob/main/icons/svg/browser_updated.svg
 	BrowserUpdated Icon = "browser_updated"
 
-	// Brush is https://github.com/goki/icons/blob/main/svg/brush.svg
+	// Brush is https://github.com/cogentcore/core/blob/main/icons/svg/brush.svg
 	Brush Icon = "brush"
 
-	// Bubble is https://github.com/goki/icons/blob/main/svg/bubble.svg
+	// Bubble is https://github.com/cogentcore/core/blob/main/icons/svg/bubble.svg
 	Bubble Icon = "bubble"
 
-	// BubbleChart is https://github.com/goki/icons/blob/main/svg/bubble_chart.svg
+	// BubbleChart is https://github.com/cogentcore/core/blob/main/icons/svg/bubble_chart.svg
 	BubbleChart Icon = "bubble_chart"
 
-	// Bubbles is https://github.com/goki/icons/blob/main/svg/bubbles.svg
+	// Bubbles is https://github.com/cogentcore/core/blob/main/icons/svg/bubbles.svg
 	Bubbles Icon = "bubbles"
 
-	// BugReport is https://github.com/goki/icons/blob/main/svg/bug_report.svg
+	// BugReport is https://github.com/cogentcore/core/blob/main/icons/svg/bug_report.svg
 	BugReport Icon = "bug_report"
 
-	// Build is https://github.com/goki/icons/blob/main/svg/build.svg
+	// Build is https://github.com/cogentcore/core/blob/main/icons/svg/build.svg
 	Build Icon = "build"
 
-	// BuildCircle is https://github.com/goki/icons/blob/main/svg/build_circle.svg
+	// BuildCircle is https://github.com/cogentcore/core/blob/main/icons/svg/build_circle.svg
 	BuildCircle Icon = "build_circle"
 
-	// BurstMode is https://github.com/goki/icons/blob/main/svg/burst_mode.svg
+	// BurstMode is https://github.com/cogentcore/core/blob/main/icons/svg/burst_mode.svg
 	BurstMode Icon = "burst_mode"
 
-	// BusinessChip is https://github.com/goki/icons/blob/main/svg/business_chip.svg
+	// BusinessChip is https://github.com/cogentcore/core/blob/main/icons/svg/business_chip.svg
 	BusinessChip Icon = "business_chip"
 
-	// BusinessMessages is https://github.com/goki/icons/blob/main/svg/business_messages.svg
+	// BusinessMessages is https://github.com/cogentcore/core/blob/main/icons/svg/business_messages.svg
 	BusinessMessages Icon = "business_messages"
 
-	// ButtonsAlt is https://github.com/goki/icons/blob/main/svg/buttons_alt.svg
+	// ButtonsAlt is https://github.com/cogentcore/core/blob/main/icons/svg/buttons_alt.svg
 	ButtonsAlt Icon = "buttons_alt"
 
-	// Cable is https://github.com/goki/icons/blob/main/svg/cable.svg
+	// Cable is https://github.com/cogentcore/core/blob/main/icons/svg/cable.svg
 	Cable Icon = "cable"
 
-	// Cached is https://github.com/goki/icons/blob/main/svg/cached.svg
+	// Cached is https://github.com/cogentcore/core/blob/main/icons/svg/cached.svg
 	Cached Icon = "cached"
 
-	// Cake is https://github.com/goki/icons/blob/main/svg/cake.svg
+	// Cake is https://github.com/cogentcore/core/blob/main/icons/svg/cake.svg
 	Cake Icon = "cake"
 
-	// CakeAdd is https://github.com/goki/icons/blob/main/svg/cake_add.svg
+	// CakeAdd is https://github.com/cogentcore/core/blob/main/icons/svg/cake_add.svg
 	CakeAdd Icon = "cake_add"
 
-	// Calculate is https://github.com/goki/icons/blob/main/svg/calculate.svg
+	// Calculate is https://github.com/cogentcore/core/blob/main/icons/svg/calculate.svg
 	Calculate Icon = "calculate"
 
-	// CalendarAddOn is https://github.com/goki/icons/blob/main/svg/calendar_add_on.svg
+	// CalendarAddOn is https://github.com/cogentcore/core/blob/main/icons/svg/calendar_add_on.svg
 	CalendarAddOn Icon = "calendar_add_on"
 
-	// CalendarAppsScript is https://github.com/goki/icons/blob/main/svg/calendar_apps_script.svg
+	// CalendarAppsScript is https://github.com/cogentcore/core/blob/main/icons/svg/calendar_apps_script.svg
 	CalendarAppsScript Icon = "calendar_apps_script"
 
-	// CalendarMonth is https://github.com/goki/icons/blob/main/svg/calendar_month.svg
+	// CalendarMonth is https://github.com/cogentcore/core/blob/main/icons/svg/calendar_month.svg
 	CalendarMonth Icon = "calendar_month"
 
-	// CalendarToday is https://github.com/goki/icons/blob/main/svg/calendar_today.svg
+	// CalendarToday is https://github.com/cogentcore/core/blob/main/icons/svg/calendar_today.svg
 	CalendarToday Icon = "calendar_today"
 
-	// CalendarViewDay is https://github.com/goki/icons/blob/main/svg/calendar_view_day.svg
+	// CalendarViewDay is https://github.com/cogentcore/core/blob/main/icons/svg/calendar_view_day.svg
 	CalendarViewDay Icon = "calendar_view_day"
 
-	// CalendarViewMonth is https://github.com/goki/icons/blob/main/svg/calendar_view_month.svg
+	// CalendarViewMonth is https://github.com/cogentcore/core/blob/main/icons/svg/calendar_view_month.svg
 	CalendarViewMonth Icon = "calendar_view_month"
 
-	// CalendarViewWeek is https://github.com/goki/icons/blob/main/svg/calendar_view_week.svg
+	// CalendarViewWeek is https://github.com/cogentcore/core/blob/main/icons/svg/calendar_view_week.svg
 	CalendarViewWeek Icon = "calendar_view_week"
 
-	// Camera is https://github.com/goki/icons/blob/main/svg/camera.svg
+	// Camera is https://github.com/cogentcore/core/blob/main/icons/svg/camera.svg
 	Camera Icon = "camera"
 
-	// CameraFront is https://github.com/goki/icons/blob/main/svg/camera_front.svg
+	// CameraFront is https://github.com/cogentcore/core/blob/main/icons/svg/camera_front.svg
 	CameraFront Icon = "camera_front"
 
-	// CameraIndoor is https://github.com/goki/icons/blob/main/svg/camera_indoor.svg
+	// CameraIndoor is https://github.com/cogentcore/core/blob/main/icons/svg/camera_indoor.svg
 	CameraIndoor Icon = "camera_indoor"
 
-	// CameraOutdoor is https://github.com/goki/icons/blob/main/svg/camera_outdoor.svg
+	// CameraOutdoor is https://github.com/cogentcore/core/blob/main/icons/svg/camera_outdoor.svg
 	CameraOutdoor Icon = "camera_outdoor"
 
-	// CameraRear is https://github.com/goki/icons/blob/main/svg/camera_rear.svg
+	// CameraRear is https://github.com/cogentcore/core/blob/main/icons/svg/camera_rear.svg
 	CameraRear Icon = "camera_rear"
 
-	// CameraRoll is https://github.com/goki/icons/blob/main/svg/camera_roll.svg
+	// CameraRoll is https://github.com/cogentcore/core/blob/main/icons/svg/camera_roll.svg
 	CameraRoll Icon = "camera_roll"
 
-	// CameraVideo is https://github.com/goki/icons/blob/main/svg/camera_video.svg
+	// CameraVideo is https://github.com/cogentcore/core/blob/main/icons/svg/camera_video.svg
 	CameraVideo Icon = "camera_video"
 
-	// Cameraswitch is https://github.com/goki/icons/blob/main/svg/cameraswitch.svg
+	// Cameraswitch is https://github.com/cogentcore/core/blob/main/icons/svg/cameraswitch.svg
 	Cameraswitch Icon = "cameraswitch"
 
-	// Cancel is https://github.com/goki/icons/blob/main/svg/cancel.svg
+	// Cancel is https://github.com/cogentcore/core/blob/main/icons/svg/cancel.svg
 	Cancel Icon = "cancel"
 
-	// CancelPresentation is https://github.com/goki/icons/blob/main/svg/cancel_presentation.svg
+	// CancelPresentation is https://github.com/cogentcore/core/blob/main/icons/svg/cancel_presentation.svg
 	CancelPresentation Icon = "cancel_presentation"
 
-	// CancelScheduleSend is https://github.com/goki/icons/blob/main/svg/cancel_schedule_send.svg
+	// CancelScheduleSend is https://github.com/cogentcore/core/blob/main/icons/svg/cancel_schedule_send.svg
 	CancelScheduleSend Icon = "cancel_schedule_send"
 
-	// CandlestickChart is https://github.com/goki/icons/blob/main/svg/candlestick_chart.svg
+	// CandlestickChart is https://github.com/cogentcore/core/blob/main/icons/svg/candlestick_chart.svg
 	CandlestickChart Icon = "candlestick_chart"
 
-	// Capture is https://github.com/goki/icons/blob/main/svg/capture.svg
+	// Capture is https://github.com/cogentcore/core/blob/main/icons/svg/capture.svg
 	Capture Icon = "capture"
 
-	// CardMembership is https://github.com/goki/icons/blob/main/svg/card_membership.svg
+	// CardMembership is https://github.com/cogentcore/core/blob/main/icons/svg/card_membership.svg
 	CardMembership Icon = "card_membership"
 
-	// Cards is https://github.com/goki/icons/blob/main/svg/cards.svg
+	// Cards is https://github.com/cogentcore/core/blob/main/icons/svg/cards.svg
 	Cards Icon = "cards"
 
-	// Cast is https://github.com/goki/icons/blob/main/svg/cast.svg
+	// Cast is https://github.com/cogentcore/core/blob/main/icons/svg/cast.svg
 	Cast Icon = "cast"
 
-	// CastConnected is https://github.com/goki/icons/blob/main/svg/cast_connected.svg
+	// CastConnected is https://github.com/cogentcore/core/blob/main/icons/svg/cast_connected.svg
 	CastConnected Icon = "cast_connected"
 
-	// CastPause is https://github.com/goki/icons/blob/main/svg/cast_pause.svg
+	// CastPause is https://github.com/cogentcore/core/blob/main/icons/svg/cast_pause.svg
 	CastPause Icon = "cast_pause"
 
-	// CastWarning is https://github.com/goki/icons/blob/main/svg/cast_warning.svg
+	// CastWarning is https://github.com/cogentcore/core/blob/main/icons/svg/cast_warning.svg
 	CastWarning Icon = "cast_warning"
 
-	// Category is https://github.com/goki/icons/blob/main/svg/category.svg
+	// Category is https://github.com/cogentcore/core/blob/main/icons/svg/category.svg
 	Category Icon = "category"
 
-	// Celebration is https://github.com/goki/icons/blob/main/svg/celebration.svg
+	// Celebration is https://github.com/cogentcore/core/blob/main/icons/svg/celebration.svg
 	Celebration Icon = "celebration"
 
-	// CellMerge is https://github.com/goki/icons/blob/main/svg/cell_merge.svg
+	// CellMerge is https://github.com/cogentcore/core/blob/main/icons/svg/cell_merge.svg
 	CellMerge Icon = "cell_merge"
 
-	// CenterFocusStrong is https://github.com/goki/icons/blob/main/svg/center_focus_strong.svg
+	// CenterFocusStrong is https://github.com/cogentcore/core/blob/main/icons/svg/center_focus_strong.svg
 	CenterFocusStrong Icon = "center_focus_strong"
 
-	// CenterFocusWeak is https://github.com/goki/icons/blob/main/svg/center_focus_weak.svg
+	// CenterFocusWeak is https://github.com/cogentcore/core/blob/main/icons/svg/center_focus_weak.svg
 	CenterFocusWeak Icon = "center_focus_weak"
 
-	// Chair is https://github.com/goki/icons/blob/main/svg/chair.svg
+	// Chair is https://github.com/cogentcore/core/blob/main/icons/svg/chair.svg
 	Chair Icon = "chair"
 
-	// ChangeCircle is https://github.com/goki/icons/blob/main/svg/change_circle.svg
+	// ChangeCircle is https://github.com/cogentcore/core/blob/main/icons/svg/change_circle.svg
 	ChangeCircle Icon = "change_circle"
 
-	// ChangeHistory is https://github.com/goki/icons/blob/main/svg/change_history.svg
+	// ChangeHistory is https://github.com/cogentcore/core/blob/main/icons/svg/change_history.svg
 	ChangeHistory Icon = "change_history"
 
-	// Charger is https://github.com/goki/icons/blob/main/svg/charger.svg
+	// Charger is https://github.com/cogentcore/core/blob/main/icons/svg/charger.svg
 	Charger Icon = "charger"
 
-	// ChartData is https://github.com/goki/icons/blob/main/svg/chart_data.svg
+	// ChartData is https://github.com/cogentcore/core/blob/main/icons/svg/chart_data.svg
 	ChartData Icon = "chart_data"
 
-	// Chat is https://github.com/goki/icons/blob/main/svg/chat.svg
+	// Chat is https://github.com/cogentcore/core/blob/main/icons/svg/chat.svg
 	Chat Icon = "chat"
 
-	// ChatAddOn is https://github.com/goki/icons/blob/main/svg/chat_add_on.svg
+	// ChatAddOn is https://github.com/cogentcore/core/blob/main/icons/svg/chat_add_on.svg
 	ChatAddOn Icon = "chat_add_on"
 
-	// ChatAppsScript is https://github.com/goki/icons/blob/main/svg/chat_apps_script.svg
+	// ChatAppsScript is https://github.com/cogentcore/core/blob/main/icons/svg/chat_apps_script.svg
 	ChatAppsScript Icon = "chat_apps_script"
 
-	// ChatBubble is https://github.com/goki/icons/blob/main/svg/chat_bubble.svg
+	// ChatBubble is https://github.com/cogentcore/core/blob/main/icons/svg/chat_bubble.svg
 	ChatBubble Icon = "chat_bubble"
 
-	// ChatError is https://github.com/goki/icons/blob/main/svg/chat_error.svg
+	// ChatError is https://github.com/cogentcore/core/blob/main/icons/svg/chat_error.svg
 	ChatError Icon = "chat_error"
 
-	// ChatPasteGo is https://github.com/goki/icons/blob/main/svg/chat_paste_go.svg
+	// ChatPasteGo is https://github.com/cogentcore/core/blob/main/icons/svg/chat_paste_go.svg
 	ChatPasteGo Icon = "chat_paste_go"
 
-	// Check is https://github.com/goki/icons/blob/main/svg/check.svg
+	// Check is https://github.com/cogentcore/core/blob/main/icons/svg/check.svg
 	Check Icon = "check"
 
-	// CheckBox is https://github.com/goki/icons/blob/main/svg/check_box.svg
+	// CheckBox is https://github.com/cogentcore/core/blob/main/icons/svg/check_box.svg
 	CheckBox Icon = "check_box"
 
-	// CheckBoxOutlineBlank is https://github.com/goki/icons/blob/main/svg/check_box_outline_blank.svg
+	// CheckBoxOutlineBlank is https://github.com/cogentcore/core/blob/main/icons/svg/check_box_outline_blank.svg
 	CheckBoxOutlineBlank Icon = "check_box_outline_blank"
 
-	// CheckCircle is https://github.com/goki/icons/blob/main/svg/check_circle.svg
+	// CheckCircle is https://github.com/cogentcore/core/blob/main/icons/svg/check_circle.svg
 	CheckCircle Icon = "check_circle"
 
-	// CheckInOut is https://github.com/goki/icons/blob/main/svg/check_in_out.svg
+	// CheckInOut is https://github.com/cogentcore/core/blob/main/icons/svg/check_in_out.svg
 	CheckInOut Icon = "check_in_out"
 
-	// CheckIndeterminateSmall is https://github.com/goki/icons/blob/main/svg/check_indeterminate_small.svg
+	// CheckIndeterminateSmall is https://github.com/cogentcore/core/blob/main/icons/svg/check_indeterminate_small.svg
 	CheckIndeterminateSmall Icon = "check_indeterminate_small"
 
-	// CheckSmall is https://github.com/goki/icons/blob/main/svg/check_small.svg
+	// CheckSmall is https://github.com/cogentcore/core/blob/main/icons/svg/check_small.svg
 	CheckSmall Icon = "check_small"
 
-	// Checklist is https://github.com/goki/icons/blob/main/svg/checklist.svg
+	// Checklist is https://github.com/cogentcore/core/blob/main/icons/svg/checklist.svg
 	Checklist Icon = "checklist"
 
-	// ChecklistRtl is https://github.com/goki/icons/blob/main/svg/checklist_rtl.svg
+	// ChecklistRtl is https://github.com/cogentcore/core/blob/main/icons/svg/checklist_rtl.svg
 	ChecklistRtl Icon = "checklist_rtl"
 
-	// Cheer is https://github.com/goki/icons/blob/main/svg/cheer.svg
+	// Cheer is https://github.com/cogentcore/core/blob/main/icons/svg/cheer.svg
 	Cheer Icon = "cheer"
 
-	// Chess is https://github.com/goki/icons/blob/main/svg/chess.svg
+	// Chess is https://github.com/cogentcore/core/blob/main/icons/svg/chess.svg
 	Chess Icon = "chess"
 
-	// ChevronLeft is https://github.com/goki/icons/blob/main/svg/chevron_left.svg
+	// ChevronLeft is https://github.com/cogentcore/core/blob/main/icons/svg/chevron_left.svg
 	ChevronLeft Icon = "chevron_left"
 
-	// ChevronRight is https://github.com/goki/icons/blob/main/svg/chevron_right.svg
+	// ChevronRight is https://github.com/cogentcore/core/blob/main/icons/svg/chevron_right.svg
 	ChevronRight Icon = "chevron_right"
 
-	// Chips is https://github.com/goki/icons/blob/main/svg/chips.svg
+	// Chips is https://github.com/cogentcore/core/blob/main/icons/svg/chips.svg
 	Chips Icon = "chips"
 
-	// Chronic is https://github.com/goki/icons/blob/main/svg/chronic.svg
+	// Chronic is https://github.com/cogentcore/core/blob/main/icons/svg/chronic.svg
 	Chronic Icon = "chronic"
 
-	// Circle is https://github.com/goki/icons/blob/main/svg/circle.svg
+	// Circle is https://github.com/cogentcore/core/blob/main/icons/svg/circle.svg
 	Circle Icon = "circle"
 
-	// CircleNotifications is https://github.com/goki/icons/blob/main/svg/circle_notifications.svg
+	// CircleNotifications is https://github.com/cogentcore/core/blob/main/icons/svg/circle_notifications.svg
 	CircleNotifications Icon = "circle_notifications"
 
-	// Circles is https://github.com/goki/icons/blob/main/svg/circles.svg
+	// Circles is https://github.com/cogentcore/core/blob/main/icons/svg/circles.svg
 	Circles Icon = "circles"
 
-	// CirclesExt is https://github.com/goki/icons/blob/main/svg/circles_ext.svg
+	// CirclesExt is https://github.com/cogentcore/core/blob/main/icons/svg/circles_ext.svg
 	CirclesExt Icon = "circles_ext"
 
-	// Clarify is https://github.com/goki/icons/blob/main/svg/clarify.svg
+	// Clarify is https://github.com/cogentcore/core/blob/main/icons/svg/clarify.svg
 	Clarify Icon = "clarify"
 
-	// ClearAll is https://github.com/goki/icons/blob/main/svg/clear_all.svg
+	// ClearAll is https://github.com/cogentcore/core/blob/main/icons/svg/clear_all.svg
 	ClearAll Icon = "clear_all"
 
-	// ClearDay is https://github.com/goki/icons/blob/main/svg/clear_day.svg
+	// ClearDay is https://github.com/cogentcore/core/blob/main/icons/svg/clear_day.svg
 	ClearDay Icon = "clear_day"
 
-	// ClearNight is https://github.com/goki/icons/blob/main/svg/clear_night.svg
+	// ClearNight is https://github.com/cogentcore/core/blob/main/icons/svg/clear_night.svg
 	ClearNight Icon = "clear_night"
 
-	// ClockLoader10 is https://github.com/goki/icons/blob/main/svg/clock_loader_10.svg
+	// ClockLoader10 is https://github.com/cogentcore/core/blob/main/icons/svg/clock_loader_10.svg
 	ClockLoader10 Icon = "clock_loader_10"
 
-	// ClockLoader20 is https://github.com/goki/icons/blob/main/svg/clock_loader_20.svg
+	// ClockLoader20 is https://github.com/cogentcore/core/blob/main/icons/svg/clock_loader_20.svg
 	ClockLoader20 Icon = "clock_loader_20"
 
-	// ClockLoader40 is https://github.com/goki/icons/blob/main/svg/clock_loader_40.svg
+	// ClockLoader40 is https://github.com/cogentcore/core/blob/main/icons/svg/clock_loader_40.svg
 	ClockLoader40 Icon = "clock_loader_40"
 
-	// ClockLoader60 is https://github.com/goki/icons/blob/main/svg/clock_loader_60.svg
+	// ClockLoader60 is https://github.com/cogentcore/core/blob/main/icons/svg/clock_loader_60.svg
 	ClockLoader60 Icon = "clock_loader_60"
 
-	// ClockLoader80 is https://github.com/goki/icons/blob/main/svg/clock_loader_80.svg
+	// ClockLoader80 is https://github.com/cogentcore/core/blob/main/icons/svg/clock_loader_80.svg
 	ClockLoader80 Icon = "clock_loader_80"
 
-	// ClockLoader90 is https://github.com/goki/icons/blob/main/svg/clock_loader_90.svg
+	// ClockLoader90 is https://github.com/cogentcore/core/blob/main/icons/svg/clock_loader_90.svg
 	ClockLoader90 Icon = "clock_loader_90"
 
-	// Close is https://github.com/goki/icons/blob/main/svg/close.svg
+	// Close is https://github.com/cogentcore/core/blob/main/icons/svg/close.svg
 	Close Icon = "close"
 
-	// CloseFullscreen is https://github.com/goki/icons/blob/main/svg/close_fullscreen.svg
+	// CloseFullscreen is https://github.com/cogentcore/core/blob/main/icons/svg/close_fullscreen.svg
 	CloseFullscreen Icon = "close_fullscreen"
 
-	// ClosedCaption is https://github.com/goki/icons/blob/main/svg/closed_caption.svg
+	// ClosedCaption is https://github.com/cogentcore/core/blob/main/icons/svg/closed_caption.svg
 	ClosedCaption Icon = "closed_caption"
 
-	// ClosedCaptionDisabled is https://github.com/goki/icons/blob/main/svg/closed_caption_disabled.svg
+	// ClosedCaptionDisabled is https://github.com/cogentcore/core/blob/main/icons/svg/closed_caption_disabled.svg
 	ClosedCaptionDisabled Icon = "closed_caption_disabled"
 
-	// Cloud is https://github.com/goki/icons/blob/main/svg/cloud.svg
+	// Cloud is https://github.com/cogentcore/core/blob/main/icons/svg/cloud.svg
 	Cloud Icon = "cloud"
 
-	// CloudCircle is https://github.com/goki/icons/blob/main/svg/cloud_circle.svg
+	// CloudCircle is https://github.com/cogentcore/core/blob/main/icons/svg/cloud_circle.svg
 	CloudCircle Icon = "cloud_circle"
 
-	// CloudDone is https://github.com/goki/icons/blob/main/svg/cloud_done.svg
+	// CloudDone is https://github.com/cogentcore/core/blob/main/icons/svg/cloud_done.svg
 	CloudDone Icon = "cloud_done"
 
-	// CloudDownload is https://github.com/goki/icons/blob/main/svg/cloud_download.svg
+	// CloudDownload is https://github.com/cogentcore/core/blob/main/icons/svg/cloud_download.svg
 	CloudDownload Icon = "cloud_download"
 
-	// CloudOff is https://github.com/goki/icons/blob/main/svg/cloud_off.svg
+	// CloudOff is https://github.com/cogentcore/core/blob/main/icons/svg/cloud_off.svg
 	CloudOff Icon = "cloud_off"
 
-	// CloudSync is https://github.com/goki/icons/blob/main/svg/cloud_sync.svg
+	// CloudSync is https://github.com/cogentcore/core/blob/main/icons/svg/cloud_sync.svg
 	CloudSync Icon = "cloud_sync"
 
-	// CloudUpload is https://github.com/goki/icons/blob/main/svg/cloud_upload.svg
+	// CloudUpload is https://github.com/cogentcore/core/blob/main/icons/svg/cloud_upload.svg
 	CloudUpload Icon = "cloud_upload"
 
-	// Code is https://github.com/goki/icons/blob/main/svg/code.svg
+	// Code is https://github.com/cogentcore/core/blob/main/icons/svg/code.svg
 	Code Icon = "code"
 
-	// CodeBlocks is https://github.com/goki/icons/blob/main/svg/code_blocks.svg
+	// CodeBlocks is https://github.com/cogentcore/core/blob/main/icons/svg/code_blocks.svg
 	CodeBlocks Icon = "code_blocks"
 
-	// CodeOff is https://github.com/goki/icons/blob/main/svg/code_off.svg
+	// CodeOff is https://github.com/cogentcore/core/blob/main/icons/svg/code_off.svg
 	CodeOff Icon = "code_off"
 
-	// Coffee is https://github.com/goki/icons/blob/main/svg/coffee.svg
+	// Coffee is https://github.com/cogentcore/core/blob/main/icons/svg/coffee.svg
 	Coffee Icon = "coffee"
 
-	// Cognition is https://github.com/goki/icons/blob/main/svg/cognition.svg
+	// Cognition is https://github.com/cogentcore/core/blob/main/icons/svg/cognition.svg
 	Cognition Icon = "cognition"
 
-	// CollapseAll is https://github.com/goki/icons/blob/main/svg/collapse_all.svg
+	// CollapseAll is https://github.com/cogentcore/core/blob/main/icons/svg/collapse_all.svg
 	CollapseAll Icon = "collapse_all"
 
-	// CollectionsBookmark is https://github.com/goki/icons/blob/main/svg/collections_bookmark.svg
+	// CollectionsBookmark is https://github.com/cogentcore/core/blob/main/icons/svg/collections_bookmark.svg
 	CollectionsBookmark Icon = "collections_bookmark"
 
-	// Colorize is https://github.com/goki/icons/blob/main/svg/colorize.svg
+	// Colorize is https://github.com/cogentcore/core/blob/main/icons/svg/colorize.svg
 	Colorize Icon = "colorize"
 
-	// Colors is https://github.com/goki/icons/blob/main/svg/colors.svg
+	// Colors is https://github.com/cogentcore/core/blob/main/icons/svg/colors.svg
 	Colors Icon = "colors"
 
-	// ComicBubble is https://github.com/goki/icons/blob/main/svg/comic_bubble.svg
+	// ComicBubble is https://github.com/cogentcore/core/blob/main/icons/svg/comic_bubble.svg
 	ComicBubble Icon = "comic_bubble"
 
-	// Comment is https://github.com/goki/icons/blob/main/svg/comment.svg
+	// Comment is https://github.com/cogentcore/core/blob/main/icons/svg/comment.svg
 	Comment Icon = "comment"
 
-	// CommentBank is https://github.com/goki/icons/blob/main/svg/comment_bank.svg
+	// CommentBank is https://github.com/cogentcore/core/blob/main/icons/svg/comment_bank.svg
 	CommentBank Icon = "comment_bank"
 
-	// CommentsDisabled is https://github.com/goki/icons/blob/main/svg/comments_disabled.svg
+	// CommentsDisabled is https://github.com/cogentcore/core/blob/main/icons/svg/comments_disabled.svg
 	CommentsDisabled Icon = "comments_disabled"
 
-	// Commit is https://github.com/goki/icons/blob/main/svg/commit.svg
+	// Commit is https://github.com/cogentcore/core/blob/main/icons/svg/commit.svg
 	Commit Icon = "commit"
 
-	// Communication is https://github.com/goki/icons/blob/main/svg/communication.svg
+	// Communication is https://github.com/cogentcore/core/blob/main/icons/svg/communication.svg
 	Communication Icon = "communication"
 
-	// Communities is https://github.com/goki/icons/blob/main/svg/communities.svg
+	// Communities is https://github.com/cogentcore/core/blob/main/icons/svg/communities.svg
 	Communities Icon = "communities"
 
-	// Compare is https://github.com/goki/icons/blob/main/svg/compare.svg
+	// Compare is https://github.com/cogentcore/core/blob/main/icons/svg/compare.svg
 	Compare Icon = "compare"
 
-	// CompareArrows is https://github.com/goki/icons/blob/main/svg/compare_arrows.svg
+	// CompareArrows is https://github.com/cogentcore/core/blob/main/icons/svg/compare_arrows.svg
 	CompareArrows Icon = "compare_arrows"
 
-	// ComponentExchange is https://github.com/goki/icons/blob/main/svg/component_exchange.svg
+	// ComponentExchange is https://github.com/cogentcore/core/blob/main/icons/svg/component_exchange.svg
 	ComponentExchange Icon = "component_exchange"
 
-	// Compress is https://github.com/goki/icons/blob/main/svg/compress.svg
+	// Compress is https://github.com/cogentcore/core/blob/main/icons/svg/compress.svg
 	Compress Icon = "compress"
 
-	// Computer is https://github.com/goki/icons/blob/main/svg/computer.svg
+	// Computer is https://github.com/cogentcore/core/blob/main/icons/svg/computer.svg
 	Computer Icon = "computer"
 
-	// ConfirmationNumber is https://github.com/goki/icons/blob/main/svg/confirmation_number.svg
+	// ConfirmationNumber is https://github.com/cogentcore/core/blob/main/icons/svg/confirmation_number.svg
 	ConfirmationNumber Icon = "confirmation_number"
 
-	// ConnectWithoutContact is https://github.com/goki/icons/blob/main/svg/connect_without_contact.svg
+	// ConnectWithoutContact is https://github.com/cogentcore/core/blob/main/icons/svg/connect_without_contact.svg
 	ConnectWithoutContact Icon = "connect_without_contact"
 
-	// ConnectedTv is https://github.com/goki/icons/blob/main/svg/connected_tv.svg
+	// ConnectedTv is https://github.com/cogentcore/core/blob/main/icons/svg/connected_tv.svg
 	ConnectedTv Icon = "connected_tv"
 
-	// ConnectingAirports is https://github.com/goki/icons/blob/main/svg/connecting_airports.svg
+	// ConnectingAirports is https://github.com/cogentcore/core/blob/main/icons/svg/connecting_airports.svg
 	ConnectingAirports Icon = "connecting_airports"
 
-	// Constant is https://github.com/goki/icons/blob/main/svg/constant.svg
+	// Constant is https://github.com/cogentcore/core/blob/main/icons/svg/constant.svg
 	Constant Icon = "constant"
 
-	// Construction is https://github.com/goki/icons/blob/main/svg/construction.svg
+	// Construction is https://github.com/cogentcore/core/blob/main/icons/svg/construction.svg
 	Construction Icon = "construction"
 
-	// ContactEmergency is https://github.com/goki/icons/blob/main/svg/contact_emergency.svg
+	// ContactEmergency is https://github.com/cogentcore/core/blob/main/icons/svg/contact_emergency.svg
 	ContactEmergency Icon = "contact_emergency"
 
-	// ContactMail is https://github.com/goki/icons/blob/main/svg/contact_mail.svg
+	// ContactMail is https://github.com/cogentcore/core/blob/main/icons/svg/contact_mail.svg
 	ContactMail Icon = "contact_mail"
 
-	// ContactPage is https://github.com/goki/icons/blob/main/svg/contact_page.svg
+	// ContactPage is https://github.com/cogentcore/core/blob/main/icons/svg/contact_page.svg
 	ContactPage Icon = "contact_page"
 
-	// ContactPhone is https://github.com/goki/icons/blob/main/svg/contact_phone.svg
+	// ContactPhone is https://github.com/cogentcore/core/blob/main/icons/svg/contact_phone.svg
 	ContactPhone Icon = "contact_phone"
 
-	// ContactSupport is https://github.com/goki/icons/blob/main/svg/contact_support.svg
+	// ContactSupport is https://github.com/cogentcore/core/blob/main/icons/svg/contact_support.svg
 	ContactSupport Icon = "contact_support"
 
-	// Contactless is https://github.com/goki/icons/blob/main/svg/contactless.svg
+	// Contactless is https://github.com/cogentcore/core/blob/main/icons/svg/contactless.svg
 	Contactless Icon = "contactless"
 
-	// ContactlessOff is https://github.com/goki/icons/blob/main/svg/contactless_off.svg
+	// ContactlessOff is https://github.com/cogentcore/core/blob/main/icons/svg/contactless_off.svg
 	ContactlessOff Icon = "contactless_off"
 
-	// Contacts is https://github.com/goki/icons/blob/main/svg/contacts.svg
+	// Contacts is https://github.com/cogentcore/core/blob/main/icons/svg/contacts.svg
 	Contacts Icon = "contacts"
 
-	// ContentCopy is https://github.com/goki/icons/blob/main/svg/content_copy.svg
+	// ContentCopy is https://github.com/cogentcore/core/blob/main/icons/svg/content_copy.svg
 	ContentCopy Icon = "content_copy"
 
-	// ContentCut is https://github.com/goki/icons/blob/main/svg/content_cut.svg
+	// ContentCut is https://github.com/cogentcore/core/blob/main/icons/svg/content_cut.svg
 	ContentCut Icon = "content_cut"
 
-	// ContentPaste is https://github.com/goki/icons/blob/main/svg/content_paste.svg
+	// ContentPaste is https://github.com/cogentcore/core/blob/main/icons/svg/content_paste.svg
 	ContentPaste Icon = "content_paste"
 
-	// ContentPasteGo is https://github.com/goki/icons/blob/main/svg/content_paste_go.svg
+	// ContentPasteGo is https://github.com/cogentcore/core/blob/main/icons/svg/content_paste_go.svg
 	ContentPasteGo Icon = "content_paste_go"
 
-	// ContentPasteOff is https://github.com/goki/icons/blob/main/svg/content_paste_off.svg
+	// ContentPasteOff is https://github.com/cogentcore/core/blob/main/icons/svg/content_paste_off.svg
 	ContentPasteOff Icon = "content_paste_off"
 
-	// ContentPasteSearch is https://github.com/goki/icons/blob/main/svg/content_paste_search.svg
+	// ContentPasteSearch is https://github.com/cogentcore/core/blob/main/icons/svg/content_paste_search.svg
 	ContentPasteSearch Icon = "content_paste_search"
 
-	// Contract is https://github.com/goki/icons/blob/main/svg/contract.svg
+	// Contract is https://github.com/cogentcore/core/blob/main/icons/svg/contract.svg
 	Contract Icon = "contract"
 
-	// ContractDelete is https://github.com/goki/icons/blob/main/svg/contract_delete.svg
+	// ContractDelete is https://github.com/cogentcore/core/blob/main/icons/svg/contract_delete.svg
 	ContractDelete Icon = "contract_delete"
 
-	// ContractEdit is https://github.com/goki/icons/blob/main/svg/contract_edit.svg
+	// ContractEdit is https://github.com/cogentcore/core/blob/main/icons/svg/contract_edit.svg
 	ContractEdit Icon = "contract_edit"
 
-	// Contrast is https://github.com/goki/icons/blob/main/svg/contrast.svg
+	// Contrast is https://github.com/cogentcore/core/blob/main/icons/svg/contrast.svg
 	Contrast Icon = "contrast"
 
-	// ContrastRtlOff is https://github.com/goki/icons/blob/main/svg/contrast_rtl_off.svg
+	// ContrastRtlOff is https://github.com/cogentcore/core/blob/main/icons/svg/contrast_rtl_off.svg
 	ContrastRtlOff Icon = "contrast_rtl_off"
 
-	// ControlCamera is https://github.com/goki/icons/blob/main/svg/control_camera.svg
+	// ControlCamera is https://github.com/cogentcore/core/blob/main/icons/svg/control_camera.svg
 	ControlCamera Icon = "control_camera"
 
-	// ControlPointDuplicate is https://github.com/goki/icons/blob/main/svg/control_point_duplicate.svg
+	// ControlPointDuplicate is https://github.com/cogentcore/core/blob/main/icons/svg/control_point_duplicate.svg
 	ControlPointDuplicate Icon = "control_point_duplicate"
 
-	// ControllerGen is https://github.com/goki/icons/blob/main/svg/controller_gen.svg
+	// ControllerGen is https://github.com/cogentcore/core/blob/main/icons/svg/controller_gen.svg
 	ControllerGen Icon = "controller_gen"
 
-	// ConversionPath is https://github.com/goki/icons/blob/main/svg/conversion_path.svg
+	// ConversionPath is https://github.com/cogentcore/core/blob/main/icons/svg/conversion_path.svg
 	ConversionPath Icon = "conversion_path"
 
-	// ConversionPathOff is https://github.com/goki/icons/blob/main/svg/conversion_path_off.svg
+	// ConversionPathOff is https://github.com/cogentcore/core/blob/main/icons/svg/conversion_path_off.svg
 	ConversionPathOff Icon = "conversion_path_off"
 
-	// ConveyorBelt is https://github.com/goki/icons/blob/main/svg/conveyor_belt.svg
+	// ConveyorBelt is https://github.com/cogentcore/core/blob/main/icons/svg/conveyor_belt.svg
 	ConveyorBelt Icon = "conveyor_belt"
 
-	// Cookie is https://github.com/goki/icons/blob/main/svg/cookie.svg
+	// Cookie is https://github.com/cogentcore/core/blob/main/icons/svg/cookie.svg
 	Cookie Icon = "cookie"
 
-	// CookieOff is https://github.com/goki/icons/blob/main/svg/cookie_off.svg
+	// CookieOff is https://github.com/cogentcore/core/blob/main/icons/svg/cookie_off.svg
 	CookieOff Icon = "cookie_off"
 
-	// Copy is https://github.com/goki/icons/blob/main/svg/copy.svg
+	// Copy is https://github.com/cogentcore/core/blob/main/icons/svg/copy.svg
 	Copy Icon = "copy"
 
-	// CopyAll is https://github.com/goki/icons/blob/main/svg/copy_all.svg
+	// CopyAll is https://github.com/cogentcore/core/blob/main/icons/svg/copy_all.svg
 	CopyAll Icon = "copy_all"
 
-	// Copyright is https://github.com/goki/icons/blob/main/svg/copyright.svg
+	// Copyright is https://github.com/cogentcore/core/blob/main/icons/svg/copyright.svg
 	Copyright Icon = "copyright"
 
-	// Counter0 is https://github.com/goki/icons/blob/main/svg/counter_0.svg
+	// Counter0 is https://github.com/cogentcore/core/blob/main/icons/svg/counter_0.svg
 	Counter0 Icon = "counter_0"
 
-	// Counter1 is https://github.com/goki/icons/blob/main/svg/counter_1.svg
+	// Counter1 is https://github.com/cogentcore/core/blob/main/icons/svg/counter_1.svg
 	Counter1 Icon = "counter_1"
 
-	// Counter2 is https://github.com/goki/icons/blob/main/svg/counter_2.svg
+	// Counter2 is https://github.com/cogentcore/core/blob/main/icons/svg/counter_2.svg
 	Counter2 Icon = "counter_2"
 
-	// Counter3 is https://github.com/goki/icons/blob/main/svg/counter_3.svg
+	// Counter3 is https://github.com/cogentcore/core/blob/main/icons/svg/counter_3.svg
 	Counter3 Icon = "counter_3"
 
-	// Counter4 is https://github.com/goki/icons/blob/main/svg/counter_4.svg
+	// Counter4 is https://github.com/cogentcore/core/blob/main/icons/svg/counter_4.svg
 	Counter4 Icon = "counter_4"
 
-	// Counter5 is https://github.com/goki/icons/blob/main/svg/counter_5.svg
+	// Counter5 is https://github.com/cogentcore/core/blob/main/icons/svg/counter_5.svg
 	Counter5 Icon = "counter_5"
 
-	// Counter6 is https://github.com/goki/icons/blob/main/svg/counter_6.svg
+	// Counter6 is https://github.com/cogentcore/core/blob/main/icons/svg/counter_6.svg
 	Counter6 Icon = "counter_6"
 
-	// Counter7 is https://github.com/goki/icons/blob/main/svg/counter_7.svg
+	// Counter7 is https://github.com/cogentcore/core/blob/main/icons/svg/counter_7.svg
 	Counter7 Icon = "counter_7"
 
-	// Counter8 is https://github.com/goki/icons/blob/main/svg/counter_8.svg
+	// Counter8 is https://github.com/cogentcore/core/blob/main/icons/svg/counter_8.svg
 	Counter8 Icon = "counter_8"
 
-	// Counter9 is https://github.com/goki/icons/blob/main/svg/counter_9.svg
+	// Counter9 is https://github.com/cogentcore/core/blob/main/icons/svg/counter_9.svg
 	Counter9 Icon = "counter_9"
 
-	// CreateNewFolder is https://github.com/goki/icons/blob/main/svg/create_new_folder.svg
+	// CreateNewFolder is https://github.com/cogentcore/core/blob/main/icons/svg/create_new_folder.svg
 	CreateNewFolder Icon = "create_new_folder"
 
-	// CreditCard is https://github.com/goki/icons/blob/main/svg/credit_card.svg
+	// CreditCard is https://github.com/cogentcore/core/blob/main/icons/svg/credit_card.svg
 	CreditCard Icon = "credit_card"
 
-	// CreditCardOff is https://github.com/goki/icons/blob/main/svg/credit_card_off.svg
+	// CreditCardOff is https://github.com/cogentcore/core/blob/main/icons/svg/credit_card_off.svg
 	CreditCardOff Icon = "credit_card_off"
 
-	// CreditScore is https://github.com/goki/icons/blob/main/svg/credit_score.svg
+	// CreditScore is https://github.com/cogentcore/core/blob/main/icons/svg/credit_score.svg
 	CreditScore Icon = "credit_score"
 
-	// CrisisAlert is https://github.com/goki/icons/blob/main/svg/crisis_alert.svg
+	// CrisisAlert is https://github.com/cogentcore/core/blob/main/icons/svg/crisis_alert.svg
 	CrisisAlert Icon = "crisis_alert"
 
-	// Crop is https://github.com/goki/icons/blob/main/svg/crop.svg
+	// Crop is https://github.com/cogentcore/core/blob/main/icons/svg/crop.svg
 	Crop Icon = "crop"
 
-	// Crop169 is https://github.com/goki/icons/blob/main/svg/crop_16_9.svg
+	// Crop169 is https://github.com/cogentcore/core/blob/main/icons/svg/crop_16_9.svg
 	Crop169 Icon = "crop_16_9"
 
-	// Crop32 is https://github.com/goki/icons/blob/main/svg/crop_3_2.svg
+	// Crop32 is https://github.com/cogentcore/core/blob/main/icons/svg/crop_3_2.svg
 	Crop32 Icon = "crop_3_2"
 
-	// Crop54 is https://github.com/goki/icons/blob/main/svg/crop_5_4.svg
+	// Crop54 is https://github.com/cogentcore/core/blob/main/icons/svg/crop_5_4.svg
 	Crop54 Icon = "crop_5_4"
 
-	// Crop75 is https://github.com/goki/icons/blob/main/svg/crop_7_5.svg
+	// Crop75 is https://github.com/cogentcore/core/blob/main/icons/svg/crop_7_5.svg
 	Crop75 Icon = "crop_7_5"
 
-	// CropFree is https://github.com/goki/icons/blob/main/svg/crop_free.svg
+	// CropFree is https://github.com/cogentcore/core/blob/main/icons/svg/crop_free.svg
 	CropFree Icon = "crop_free"
 
-	// CropLandscape is https://github.com/goki/icons/blob/main/svg/crop_landscape.svg
+	// CropLandscape is https://github.com/cogentcore/core/blob/main/icons/svg/crop_landscape.svg
 	CropLandscape Icon = "crop_landscape"
 
-	// CropPortrait is https://github.com/goki/icons/blob/main/svg/crop_portrait.svg
+	// CropPortrait is https://github.com/cogentcore/core/blob/main/icons/svg/crop_portrait.svg
 	CropPortrait Icon = "crop_portrait"
 
-	// CropRotate is https://github.com/goki/icons/blob/main/svg/crop_rotate.svg
+	// CropRotate is https://github.com/cogentcore/core/blob/main/icons/svg/crop_rotate.svg
 	CropRotate Icon = "crop_rotate"
 
-	// CropSquare is https://github.com/goki/icons/blob/main/svg/crop_square.svg
+	// CropSquare is https://github.com/cogentcore/core/blob/main/icons/svg/crop_square.svg
 	CropSquare Icon = "crop_square"
 
-	// Crowdsource is https://github.com/goki/icons/blob/main/svg/crowdsource.svg
+	// Crowdsource is https://github.com/cogentcore/core/blob/main/icons/svg/crowdsource.svg
 	Crowdsource Icon = "crowdsource"
 
-	// Css is https://github.com/goki/icons/blob/main/svg/css.svg
+	// Css is https://github.com/cogentcore/core/blob/main/icons/svg/css.svg
 	Css Icon = "css"
 
-	// Csv is https://github.com/goki/icons/blob/main/svg/csv.svg
+	// Csv is https://github.com/cogentcore/core/blob/main/icons/svg/csv.svg
 	Csv Icon = "csv"
 
-	// CurrencyBitcoin is https://github.com/goki/icons/blob/main/svg/currency_bitcoin.svg
+	// CurrencyBitcoin is https://github.com/cogentcore/core/blob/main/icons/svg/currency_bitcoin.svg
 	CurrencyBitcoin Icon = "currency_bitcoin"
 
-	// CurrencyExchange is https://github.com/goki/icons/blob/main/svg/currency_exchange.svg
+	// CurrencyExchange is https://github.com/cogentcore/core/blob/main/icons/svg/currency_exchange.svg
 	CurrencyExchange Icon = "currency_exchange"
 
-	// CurrencyFranc is https://github.com/goki/icons/blob/main/svg/currency_franc.svg
+	// CurrencyFranc is https://github.com/cogentcore/core/blob/main/icons/svg/currency_franc.svg
 	CurrencyFranc Icon = "currency_franc"
 
-	// CurrencyLira is https://github.com/goki/icons/blob/main/svg/currency_lira.svg
+	// CurrencyLira is https://github.com/cogentcore/core/blob/main/icons/svg/currency_lira.svg
 	CurrencyLira Icon = "currency_lira"
 
-	// CurrencyPound is https://github.com/goki/icons/blob/main/svg/currency_pound.svg
+	// CurrencyPound is https://github.com/cogentcore/core/blob/main/icons/svg/currency_pound.svg
 	CurrencyPound Icon = "currency_pound"
 
-	// CurrencyRuble is https://github.com/goki/icons/blob/main/svg/currency_ruble.svg
+	// CurrencyRuble is https://github.com/cogentcore/core/blob/main/icons/svg/currency_ruble.svg
 	CurrencyRuble Icon = "currency_ruble"
 
-	// CurrencyRupee is https://github.com/goki/icons/blob/main/svg/currency_rupee.svg
+	// CurrencyRupee is https://github.com/cogentcore/core/blob/main/icons/svg/currency_rupee.svg
 	CurrencyRupee Icon = "currency_rupee"
 
-	// CurrencyYen is https://github.com/goki/icons/blob/main/svg/currency_yen.svg
+	// CurrencyYen is https://github.com/cogentcore/core/blob/main/icons/svg/currency_yen.svg
 	CurrencyYen Icon = "currency_yen"
 
-	// CurrencyYuan is https://github.com/goki/icons/blob/main/svg/currency_yuan.svg
+	// CurrencyYuan is https://github.com/cogentcore/core/blob/main/icons/svg/currency_yuan.svg
 	CurrencyYuan Icon = "currency_yuan"
 
-	// CustomTypography is https://github.com/goki/icons/blob/main/svg/custom_typography.svg
+	// CustomTypography is https://github.com/cogentcore/core/blob/main/icons/svg/custom_typography.svg
 	CustomTypography Icon = "custom_typography"
 
-	// Cut is https://github.com/goki/icons/blob/main/svg/cut.svg
+	// Cut is https://github.com/cogentcore/core/blob/main/icons/svg/cut.svg
 	Cut Icon = "cut"
 
-	// Cycle is https://github.com/goki/icons/blob/main/svg/cycle.svg
+	// Cycle is https://github.com/cogentcore/core/blob/main/icons/svg/cycle.svg
 	Cycle Icon = "cycle"
 
-	// Cyclone is https://github.com/goki/icons/blob/main/svg/cyclone.svg
+	// Cyclone is https://github.com/cogentcore/core/blob/main/icons/svg/cyclone.svg
 	Cyclone Icon = "cyclone"
 
-	// Dangerous is https://github.com/goki/icons/blob/main/svg/dangerous.svg
+	// Dangerous is https://github.com/cogentcore/core/blob/main/icons/svg/dangerous.svg
 	Dangerous Icon = "dangerous"
 
-	// DarkMode is https://github.com/goki/icons/blob/main/svg/dark_mode.svg
+	// DarkMode is https://github.com/cogentcore/core/blob/main/icons/svg/dark_mode.svg
 	DarkMode Icon = "dark_mode"
 
-	// Dashboard is https://github.com/goki/icons/blob/main/svg/dashboard.svg
+	// Dashboard is https://github.com/cogentcore/core/blob/main/icons/svg/dashboard.svg
 	Dashboard Icon = "dashboard"
 
-	// DashboardCustomize is https://github.com/goki/icons/blob/main/svg/dashboard_customize.svg
+	// DashboardCustomize is https://github.com/cogentcore/core/blob/main/icons/svg/dashboard_customize.svg
 	DashboardCustomize Icon = "dashboard_customize"
 
-	// DataAlert is https://github.com/goki/icons/blob/main/svg/data_alert.svg
+	// DataAlert is https://github.com/cogentcore/core/blob/main/icons/svg/data_alert.svg
 	DataAlert Icon = "data_alert"
 
-	// DataArray is https://github.com/goki/icons/blob/main/svg/data_array.svg
+	// DataArray is https://github.com/cogentcore/core/blob/main/icons/svg/data_array.svg
 	DataArray Icon = "data_array"
 
-	// DataCheck is https://github.com/goki/icons/blob/main/svg/data_check.svg
+	// DataCheck is https://github.com/cogentcore/core/blob/main/icons/svg/data_check.svg
 	DataCheck Icon = "data_check"
 
-	// DataExploration is https://github.com/goki/icons/blob/main/svg/data_exploration.svg
+	// DataExploration is https://github.com/cogentcore/core/blob/main/icons/svg/data_exploration.svg
 	DataExploration Icon = "data_exploration"
 
-	// DataInfoAlert is https://github.com/goki/icons/blob/main/svg/data_info_alert.svg
+	// DataInfoAlert is https://github.com/cogentcore/core/blob/main/icons/svg/data_info_alert.svg
 	DataInfoAlert Icon = "data_info_alert"
 
-	// DataLossPrevention is https://github.com/goki/icons/blob/main/svg/data_loss_prevention.svg
+	// DataLossPrevention is https://github.com/cogentcore/core/blob/main/icons/svg/data_loss_prevention.svg
 	DataLossPrevention Icon = "data_loss_prevention"
 
-	// DataObject is https://github.com/goki/icons/blob/main/svg/data_object.svg
+	// DataObject is https://github.com/cogentcore/core/blob/main/icons/svg/data_object.svg
 	DataObject Icon = "data_object"
 
-	// DataSaverOn is https://github.com/goki/icons/blob/main/svg/data_saver_on.svg
+	// DataSaverOn is https://github.com/cogentcore/core/blob/main/icons/svg/data_saver_on.svg
 	DataSaverOn Icon = "data_saver_on"
 
-	// DataTable is https://github.com/goki/icons/blob/main/svg/data_table.svg
+	// DataTable is https://github.com/cogentcore/core/blob/main/icons/svg/data_table.svg
 	DataTable Icon = "data_table"
 
-	// DataThresholding is https://github.com/goki/icons/blob/main/svg/data_thresholding.svg
+	// DataThresholding is https://github.com/cogentcore/core/blob/main/icons/svg/data_thresholding.svg
 	DataThresholding Icon = "data_thresholding"
 
-	// DataUsage is https://github.com/goki/icons/blob/main/svg/data_usage.svg
+	// DataUsage is https://github.com/cogentcore/core/blob/main/icons/svg/data_usage.svg
 	DataUsage Icon = "data_usage"
 
-	// Database is https://github.com/goki/icons/blob/main/svg/database.svg
+	// Database is https://github.com/cogentcore/core/blob/main/icons/svg/database.svg
 	Database Icon = "database"
 
-	// Dataset is https://github.com/goki/icons/blob/main/svg/dataset.svg
+	// Dataset is https://github.com/cogentcore/core/blob/main/icons/svg/dataset.svg
 	Dataset Icon = "dataset"
 
-	// DatasetLinked is https://github.com/goki/icons/blob/main/svg/dataset_linked.svg
+	// DatasetLinked is https://github.com/cogentcore/core/blob/main/icons/svg/dataset_linked.svg
 	DatasetLinked Icon = "dataset_linked"
 
-	// DateRange is https://github.com/goki/icons/blob/main/svg/date_range.svg
+	// DateRange is https://github.com/cogentcore/core/blob/main/icons/svg/date_range.svg
 	DateRange Icon = "date_range"
 
-	// Deblur is https://github.com/goki/icons/blob/main/svg/deblur.svg
+	// Deblur is https://github.com/cogentcore/core/blob/main/icons/svg/deblur.svg
 	Deblur Icon = "deblur"
 
-	// Debug is https://github.com/goki/icons/blob/main/svg/debug.svg
+	// Debug is https://github.com/cogentcore/core/blob/main/icons/svg/debug.svg
 	Debug Icon = "debug"
 
-	// DecimalDecrease is https://github.com/goki/icons/blob/main/svg/decimal_decrease.svg
+	// DecimalDecrease is https://github.com/cogentcore/core/blob/main/icons/svg/decimal_decrease.svg
 	DecimalDecrease Icon = "decimal_decrease"
 
-	// DecimalIncrease is https://github.com/goki/icons/blob/main/svg/decimal_increase.svg
+	// DecimalIncrease is https://github.com/cogentcore/core/blob/main/icons/svg/decimal_increase.svg
 	DecimalIncrease Icon = "decimal_increase"
 
-	// Deck is https://github.com/goki/icons/blob/main/svg/deck.svg
+	// Deck is https://github.com/cogentcore/core/blob/main/icons/svg/deck.svg
 	Deck Icon = "deck"
 
-	// Dehaze is https://github.com/goki/icons/blob/main/svg/dehaze.svg
+	// Dehaze is https://github.com/cogentcore/core/blob/main/icons/svg/dehaze.svg
 	Dehaze Icon = "dehaze"
 
-	// Delete is https://github.com/goki/icons/blob/main/svg/delete.svg
+	// Delete is https://github.com/cogentcore/core/blob/main/icons/svg/delete.svg
 	Delete Icon = "delete"
 
-	// DeleteForever is https://github.com/goki/icons/blob/main/svg/delete_forever.svg
+	// DeleteForever is https://github.com/cogentcore/core/blob/main/icons/svg/delete_forever.svg
 	DeleteForever Icon = "delete_forever"
 
-	// DeleteSweep is https://github.com/goki/icons/blob/main/svg/delete_sweep.svg
+	// DeleteSweep is https://github.com/cogentcore/core/blob/main/icons/svg/delete_sweep.svg
 	DeleteSweep Icon = "delete_sweep"
 
-	// DensityLarge is https://github.com/goki/icons/blob/main/svg/density_large.svg
+	// DensityLarge is https://github.com/cogentcore/core/blob/main/icons/svg/density_large.svg
 	DensityLarge Icon = "density_large"
 
-	// DensityMedium is https://github.com/goki/icons/blob/main/svg/density_medium.svg
+	// DensityMedium is https://github.com/cogentcore/core/blob/main/icons/svg/density_medium.svg
 	DensityMedium Icon = "density_medium"
 
-	// DensitySmall is https://github.com/goki/icons/blob/main/svg/density_small.svg
+	// DensitySmall is https://github.com/cogentcore/core/blob/main/icons/svg/density_small.svg
 	DensitySmall Icon = "density_small"
 
-	// DeployedCode is https://github.com/goki/icons/blob/main/svg/deployed_code.svg
+	// DeployedCode is https://github.com/cogentcore/core/blob/main/icons/svg/deployed_code.svg
 	DeployedCode Icon = "deployed_code"
 
-	// DeployedCodeAlert is https://github.com/goki/icons/blob/main/svg/deployed_code_alert.svg
+	// DeployedCodeAlert is https://github.com/cogentcore/core/blob/main/icons/svg/deployed_code_alert.svg
 	DeployedCodeAlert Icon = "deployed_code_alert"
 
-	// DeployedCodeHistory is https://github.com/goki/icons/blob/main/svg/deployed_code_history.svg
+	// DeployedCodeHistory is https://github.com/cogentcore/core/blob/main/icons/svg/deployed_code_history.svg
 	DeployedCodeHistory Icon = "deployed_code_history"
 
-	// DeployedCodeUpdate is https://github.com/goki/icons/blob/main/svg/deployed_code_update.svg
+	// DeployedCodeUpdate is https://github.com/cogentcore/core/blob/main/icons/svg/deployed_code_update.svg
 	DeployedCodeUpdate Icon = "deployed_code_update"
 
-	// Description is https://github.com/goki/icons/blob/main/svg/description.svg
+	// Description is https://github.com/cogentcore/core/blob/main/icons/svg/description.svg
 	Description Icon = "description"
 
-	// Deselect is https://github.com/goki/icons/blob/main/svg/deselect.svg
+	// Deselect is https://github.com/cogentcore/core/blob/main/icons/svg/deselect.svg
 	Deselect Icon = "deselect"
 
-	// DesignServices is https://github.com/goki/icons/blob/main/svg/design_services.svg
+	// DesignServices is https://github.com/cogentcore/core/blob/main/icons/svg/design_services.svg
 	DesignServices Icon = "design_services"
 
-	// Desk is https://github.com/goki/icons/blob/main/svg/desk.svg
+	// Desk is https://github.com/cogentcore/core/blob/main/icons/svg/desk.svg
 	Desk Icon = "desk"
 
-	// Deskphone is https://github.com/goki/icons/blob/main/svg/deskphone.svg
+	// Deskphone is https://github.com/cogentcore/core/blob/main/icons/svg/deskphone.svg
 	Deskphone Icon = "deskphone"
 
-	// Desktop is https://github.com/goki/icons/blob/main/svg/desktop.svg
+	// Desktop is https://github.com/cogentcore/core/blob/main/icons/svg/desktop.svg
 	Desktop Icon = "desktop"
 
-	// DesktopAccessDisabled is https://github.com/goki/icons/blob/main/svg/desktop_access_disabled.svg
+	// DesktopAccessDisabled is https://github.com/cogentcore/core/blob/main/icons/svg/desktop_access_disabled.svg
 	DesktopAccessDisabled Icon = "desktop_access_disabled"
 
-	// DesktopMac is https://github.com/goki/icons/blob/main/svg/desktop_mac.svg
+	// DesktopMac is https://github.com/cogentcore/core/blob/main/icons/svg/desktop_mac.svg
 	DesktopMac Icon = "desktop_mac"
 
-	// DesktopWindows is https://github.com/goki/icons/blob/main/svg/desktop_windows.svg
+	// DesktopWindows is https://github.com/cogentcore/core/blob/main/icons/svg/desktop_windows.svg
 	DesktopWindows Icon = "desktop_windows"
 
-	// Details is https://github.com/goki/icons/blob/main/svg/details.svg
+	// Details is https://github.com/cogentcore/core/blob/main/icons/svg/details.svg
 	Details Icon = "details"
 
-	// Detector is https://github.com/goki/icons/blob/main/svg/detector.svg
+	// Detector is https://github.com/cogentcore/core/blob/main/icons/svg/detector.svg
 	Detector Icon = "detector"
 
-	// DetectorAlarm is https://github.com/goki/icons/blob/main/svg/detector_alarm.svg
+	// DetectorAlarm is https://github.com/cogentcore/core/blob/main/icons/svg/detector_alarm.svg
 	DetectorAlarm Icon = "detector_alarm"
 
-	// DetectorBattery is https://github.com/goki/icons/blob/main/svg/detector_battery.svg
+	// DetectorBattery is https://github.com/cogentcore/core/blob/main/icons/svg/detector_battery.svg
 	DetectorBattery Icon = "detector_battery"
 
-	// DetectorCo is https://github.com/goki/icons/blob/main/svg/detector_co.svg
+	// DetectorCo is https://github.com/cogentcore/core/blob/main/icons/svg/detector_co.svg
 	DetectorCo Icon = "detector_co"
 
-	// DetectorOffline is https://github.com/goki/icons/blob/main/svg/detector_offline.svg
+	// DetectorOffline is https://github.com/cogentcore/core/blob/main/icons/svg/detector_offline.svg
 	DetectorOffline Icon = "detector_offline"
 
-	// DetectorSmoke is https://github.com/goki/icons/blob/main/svg/detector_smoke.svg
+	// DetectorSmoke is https://github.com/cogentcore/core/blob/main/icons/svg/detector_smoke.svg
 	DetectorSmoke Icon = "detector_smoke"
 
-	// DetectorStatus is https://github.com/goki/icons/blob/main/svg/detector_status.svg
+	// DetectorStatus is https://github.com/cogentcore/core/blob/main/icons/svg/detector_status.svg
 	DetectorStatus Icon = "detector_status"
 
-	// DeveloperBoard is https://github.com/goki/icons/blob/main/svg/developer_board.svg
+	// DeveloperBoard is https://github.com/cogentcore/core/blob/main/icons/svg/developer_board.svg
 	DeveloperBoard Icon = "developer_board"
 
-	// DeveloperBoardOff is https://github.com/goki/icons/blob/main/svg/developer_board_off.svg
+	// DeveloperBoardOff is https://github.com/cogentcore/core/blob/main/icons/svg/developer_board_off.svg
 	DeveloperBoardOff Icon = "developer_board_off"
 
-	// DeveloperGuide is https://github.com/goki/icons/blob/main/svg/developer_guide.svg
+	// DeveloperGuide is https://github.com/cogentcore/core/blob/main/icons/svg/developer_guide.svg
 	DeveloperGuide Icon = "developer_guide"
 
-	// DeveloperMode is https://github.com/goki/icons/blob/main/svg/developer_mode.svg
+	// DeveloperMode is https://github.com/cogentcore/core/blob/main/icons/svg/developer_mode.svg
 	DeveloperMode Icon = "developer_mode"
 
-	// DeveloperModeTv is https://github.com/goki/icons/blob/main/svg/developer_mode_tv.svg
+	// DeveloperModeTv is https://github.com/cogentcore/core/blob/main/icons/svg/developer_mode_tv.svg
 	DeveloperModeTv Icon = "developer_mode_tv"
 
-	// DeviceHub is https://github.com/goki/icons/blob/main/svg/device_hub.svg
+	// DeviceHub is https://github.com/cogentcore/core/blob/main/icons/svg/device_hub.svg
 	DeviceHub Icon = "device_hub"
 
-	// DeviceReset is https://github.com/goki/icons/blob/main/svg/device_reset.svg
+	// DeviceReset is https://github.com/cogentcore/core/blob/main/icons/svg/device_reset.svg
 	DeviceReset Icon = "device_reset"
 
-	// DeviceThermostat is https://github.com/goki/icons/blob/main/svg/device_thermostat.svg
+	// DeviceThermostat is https://github.com/cogentcore/core/blob/main/icons/svg/device_thermostat.svg
 	DeviceThermostat Icon = "device_thermostat"
 
-	// DeviceUnknown is https://github.com/goki/icons/blob/main/svg/device_unknown.svg
+	// DeviceUnknown is https://github.com/cogentcore/core/blob/main/icons/svg/device_unknown.svg
 	DeviceUnknown Icon = "device_unknown"
 
-	// Devices is https://github.com/goki/icons/blob/main/svg/devices.svg
+	// Devices is https://github.com/cogentcore/core/blob/main/icons/svg/devices.svg
 	Devices Icon = "devices"
 
-	// DevicesFold is https://github.com/goki/icons/blob/main/svg/devices_fold.svg
+	// DevicesFold is https://github.com/cogentcore/core/blob/main/icons/svg/devices_fold.svg
 	DevicesFold Icon = "devices_fold"
 
-	// DevicesOff is https://github.com/goki/icons/blob/main/svg/devices_off.svg
+	// DevicesOff is https://github.com/cogentcore/core/blob/main/icons/svg/devices_off.svg
 	DevicesOff Icon = "devices_off"
 
-	// DevicesOther is https://github.com/goki/icons/blob/main/svg/devices_other.svg
+	// DevicesOther is https://github.com/cogentcore/core/blob/main/icons/svg/devices_other.svg
 	DevicesOther Icon = "devices_other"
 
-	// DevicesWearables is https://github.com/goki/icons/blob/main/svg/devices_wearables.svg
+	// DevicesWearables is https://github.com/cogentcore/core/blob/main/icons/svg/devices_wearables.svg
 	DevicesWearables Icon = "devices_wearables"
 
-	// DialerSip is https://github.com/goki/icons/blob/main/svg/dialer_sip.svg
+	// DialerSip is https://github.com/cogentcore/core/blob/main/icons/svg/dialer_sip.svg
 	DialerSip Icon = "dialer_sip"
 
-	// Dialogs is https://github.com/goki/icons/blob/main/svg/dialogs.svg
+	// Dialogs is https://github.com/cogentcore/core/blob/main/icons/svg/dialogs.svg
 	Dialogs Icon = "dialogs"
 
-	// Dialpad is https://github.com/goki/icons/blob/main/svg/dialpad.svg
+	// Dialpad is https://github.com/cogentcore/core/blob/main/icons/svg/dialpad.svg
 	Dialpad Icon = "dialpad"
 
-	// Diamond is https://github.com/goki/icons/blob/main/svg/diamond.svg
+	// Diamond is https://github.com/cogentcore/core/blob/main/icons/svg/diamond.svg
 	Diamond Icon = "diamond"
 
-	// Difference is https://github.com/goki/icons/blob/main/svg/difference.svg
+	// Difference is https://github.com/cogentcore/core/blob/main/icons/svg/difference.svg
 	Difference Icon = "difference"
 
-	// Dining is https://github.com/goki/icons/blob/main/svg/dining.svg
+	// Dining is https://github.com/cogentcore/core/blob/main/icons/svg/dining.svg
 	Dining Icon = "dining"
 
-	// DinnerDining is https://github.com/goki/icons/blob/main/svg/dinner_dining.svg
+	// DinnerDining is https://github.com/cogentcore/core/blob/main/icons/svg/dinner_dining.svg
 	DinnerDining Icon = "dinner_dining"
 
-	// Directions is https://github.com/goki/icons/blob/main/svg/directions.svg
+	// Directions is https://github.com/cogentcore/core/blob/main/icons/svg/directions.svg
 	Directions Icon = "directions"
 
-	// DirectionsOff is https://github.com/goki/icons/blob/main/svg/directions_off.svg
+	// DirectionsOff is https://github.com/cogentcore/core/blob/main/icons/svg/directions_off.svg
 	DirectionsOff Icon = "directions_off"
 
-	// DirectorySync is https://github.com/goki/icons/blob/main/svg/directory_sync.svg
+	// DirectorySync is https://github.com/cogentcore/core/blob/main/icons/svg/directory_sync.svg
 	DirectorySync Icon = "directory_sync"
 
-	// DirtyLens is https://github.com/goki/icons/blob/main/svg/dirty_lens.svg
+	// DirtyLens is https://github.com/cogentcore/core/blob/main/icons/svg/dirty_lens.svg
 	DirtyLens Icon = "dirty_lens"
 
-	// DisabledByDefault is https://github.com/goki/icons/blob/main/svg/disabled_by_default.svg
+	// DisabledByDefault is https://github.com/cogentcore/core/blob/main/icons/svg/disabled_by_default.svg
 	DisabledByDefault Icon = "disabled_by_default"
 
-	// DisabledVisible is https://github.com/goki/icons/blob/main/svg/disabled_visible.svg
+	// DisabledVisible is https://github.com/cogentcore/core/blob/main/icons/svg/disabled_visible.svg
 	DisabledVisible Icon = "disabled_visible"
 
-	// DiscFull is https://github.com/goki/icons/blob/main/svg/disc_full.svg
+	// DiscFull is https://github.com/cogentcore/core/blob/main/icons/svg/disc_full.svg
 	DiscFull Icon = "disc_full"
 
-	// DisplayExternalInput is https://github.com/goki/icons/blob/main/svg/display_external_input.svg
+	// DisplayExternalInput is https://github.com/cogentcore/core/blob/main/icons/svg/display_external_input.svg
 	DisplayExternalInput Icon = "display_external_input"
 
-	// DisplaySettings is https://github.com/goki/icons/blob/main/svg/display_settings.svg
+	// DisplaySettings is https://github.com/cogentcore/core/blob/main/icons/svg/display_settings.svg
 	DisplaySettings Icon = "display_settings"
 
-	// Distance is https://github.com/goki/icons/blob/main/svg/distance.svg
+	// Distance is https://github.com/cogentcore/core/blob/main/icons/svg/distance.svg
 	Distance Icon = "distance"
 
-	// Diversity1 is https://github.com/goki/icons/blob/main/svg/diversity_1.svg
+	// Diversity1 is https://github.com/cogentcore/core/blob/main/icons/svg/diversity_1.svg
 	Diversity1 Icon = "diversity_1"
 
-	// Diversity2 is https://github.com/goki/icons/blob/main/svg/diversity_2.svg
+	// Diversity2 is https://github.com/cogentcore/core/blob/main/icons/svg/diversity_2.svg
 	Diversity2 Icon = "diversity_2"
 
-	// Diversity3 is https://github.com/goki/icons/blob/main/svg/diversity_3.svg
+	// Diversity3 is https://github.com/cogentcore/core/blob/main/icons/svg/diversity_3.svg
 	Diversity3 Icon = "diversity_3"
 
-	// Diversity4 is https://github.com/goki/icons/blob/main/svg/diversity_4.svg
+	// Diversity4 is https://github.com/cogentcore/core/blob/main/icons/svg/diversity_4.svg
 	Diversity4 Icon = "diversity_4"
 
-	// Dns is https://github.com/goki/icons/blob/main/svg/dns.svg
+	// Dns is https://github.com/cogentcore/core/blob/main/icons/svg/dns.svg
 	Dns Icon = "dns"
 
-	// DoNotDisturbOff is https://github.com/goki/icons/blob/main/svg/do_not_disturb_off.svg
+	// DoNotDisturbOff is https://github.com/cogentcore/core/blob/main/icons/svg/do_not_disturb_off.svg
 	DoNotDisturbOff Icon = "do_not_disturb_off"
 
-	// DoNotDisturbOn is https://github.com/goki/icons/blob/main/svg/do_not_disturb_on.svg
+	// DoNotDisturbOn is https://github.com/cogentcore/core/blob/main/icons/svg/do_not_disturb_on.svg
 	DoNotDisturbOn Icon = "do_not_disturb_on"
 
-	// Dock is https://github.com/goki/icons/blob/main/svg/dock.svg
+	// Dock is https://github.com/cogentcore/core/blob/main/icons/svg/dock.svg
 	Dock Icon = "dock"
 
-	// DockToBottom is https://github.com/goki/icons/blob/main/svg/dock_to_bottom.svg
+	// DockToBottom is https://github.com/cogentcore/core/blob/main/icons/svg/dock_to_bottom.svg
 	DockToBottom Icon = "dock_to_bottom"
 
-	// DockToLeft is https://github.com/goki/icons/blob/main/svg/dock_to_left.svg
+	// DockToLeft is https://github.com/cogentcore/core/blob/main/icons/svg/dock_to_left.svg
 	DockToLeft Icon = "dock_to_left"
 
-	// DockToRight is https://github.com/goki/icons/blob/main/svg/dock_to_right.svg
+	// DockToRight is https://github.com/cogentcore/core/blob/main/icons/svg/dock_to_right.svg
 	DockToRight Icon = "dock_to_right"
 
-	// DocsAddOn is https://github.com/goki/icons/blob/main/svg/docs_add_on.svg
+	// DocsAddOn is https://github.com/cogentcore/core/blob/main/icons/svg/docs_add_on.svg
 	DocsAddOn Icon = "docs_add_on"
 
-	// DocsAppsScript is https://github.com/goki/icons/blob/main/svg/docs_apps_script.svg
+	// DocsAppsScript is https://github.com/cogentcore/core/blob/main/icons/svg/docs_apps_script.svg
 	DocsAppsScript Icon = "docs_apps_script"
 
-	// Document is https://github.com/goki/icons/blob/main/svg/document.svg
+	// Document is https://github.com/cogentcore/core/blob/main/icons/svg/document.svg
 	Document Icon = "document"
 
-	// DocumentScanner is https://github.com/goki/icons/blob/main/svg/document_scanner.svg
+	// DocumentScanner is https://github.com/cogentcore/core/blob/main/icons/svg/document_scanner.svg
 	DocumentScanner Icon = "document_scanner"
 
-	// Domain is https://github.com/goki/icons/blob/main/svg/domain.svg
+	// Domain is https://github.com/cogentcore/core/blob/main/icons/svg/domain.svg
 	Domain Icon = "domain"
 
-	// DomainAdd is https://github.com/goki/icons/blob/main/svg/domain_add.svg
+	// DomainAdd is https://github.com/cogentcore/core/blob/main/icons/svg/domain_add.svg
 	DomainAdd Icon = "domain_add"
 
-	// DomainDisabled is https://github.com/goki/icons/blob/main/svg/domain_disabled.svg
+	// DomainDisabled is https://github.com/cogentcore/core/blob/main/icons/svg/domain_disabled.svg
 	DomainDisabled Icon = "domain_disabled"
 
-	// DomainVerification is https://github.com/goki/icons/blob/main/svg/domain_verification.svg
+	// DomainVerification is https://github.com/cogentcore/core/blob/main/icons/svg/domain_verification.svg
 	DomainVerification Icon = "domain_verification"
 
-	// DomainVerificationOff is https://github.com/goki/icons/blob/main/svg/domain_verification_off.svg
+	// DomainVerificationOff is https://github.com/cogentcore/core/blob/main/icons/svg/domain_verification_off.svg
 	DomainVerificationOff Icon = "domain_verification_off"
 
-	// Done is https://github.com/goki/icons/blob/main/svg/done.svg
+	// Done is https://github.com/cogentcore/core/blob/main/icons/svg/done.svg
 	Done Icon = "done"
 
-	// DoneAll is https://github.com/goki/icons/blob/main/svg/done_all.svg
+	// DoneAll is https://github.com/cogentcore/core/blob/main/icons/svg/done_all.svg
 	DoneAll Icon = "done_all"
 
-	// DoneOutline is https://github.com/goki/icons/blob/main/svg/done_outline.svg
+	// DoneOutline is https://github.com/cogentcore/core/blob/main/icons/svg/done_outline.svg
 	DoneOutline Icon = "done_outline"
 
-	// DonutLarge is https://github.com/goki/icons/blob/main/svg/donut_large.svg
+	// DonutLarge is https://github.com/cogentcore/core/blob/main/icons/svg/donut_large.svg
 	DonutLarge Icon = "donut_large"
 
-	// DonutSmall is https://github.com/goki/icons/blob/main/svg/donut_small.svg
+	// DonutSmall is https://github.com/cogentcore/core/blob/main/icons/svg/donut_small.svg
 	DonutSmall Icon = "donut_small"
 
-	// DoorOpen is https://github.com/goki/icons/blob/main/svg/door_open.svg
+	// DoorOpen is https://github.com/cogentcore/core/blob/main/icons/svg/door_open.svg
 	DoorOpen Icon = "door_open"
 
-	// DoubleArrow is https://github.com/goki/icons/blob/main/svg/double_arrow.svg
+	// DoubleArrow is https://github.com/cogentcore/core/blob/main/icons/svg/double_arrow.svg
 	DoubleArrow Icon = "double_arrow"
 
-	// Download is https://github.com/goki/icons/blob/main/svg/download.svg
+	// Download is https://github.com/cogentcore/core/blob/main/icons/svg/download.svg
 	Download Icon = "download"
 
-	// DownloadDone is https://github.com/goki/icons/blob/main/svg/download_done.svg
+	// DownloadDone is https://github.com/cogentcore/core/blob/main/icons/svg/download_done.svg
 	DownloadDone Icon = "download_done"
 
-	// DownloadForOffline is https://github.com/goki/icons/blob/main/svg/download_for_offline.svg
+	// DownloadForOffline is https://github.com/cogentcore/core/blob/main/icons/svg/download_for_offline.svg
 	DownloadForOffline Icon = "download_for_offline"
 
-	// Downloading is https://github.com/goki/icons/blob/main/svg/downloading.svg
+	// Downloading is https://github.com/cogentcore/core/blob/main/icons/svg/downloading.svg
 	Downloading Icon = "downloading"
 
-	// Draft is https://github.com/goki/icons/blob/main/svg/draft.svg
+	// Draft is https://github.com/cogentcore/core/blob/main/icons/svg/draft.svg
 	Draft Icon = "draft"
 
-	// DraftOrders is https://github.com/goki/icons/blob/main/svg/draft_orders.svg
+	// DraftOrders is https://github.com/cogentcore/core/blob/main/icons/svg/draft_orders.svg
 	DraftOrders Icon = "draft_orders"
 
-	// Drafts is https://github.com/goki/icons/blob/main/svg/drafts.svg
+	// Drafts is https://github.com/cogentcore/core/blob/main/icons/svg/drafts.svg
 	Drafts Icon = "drafts"
 
-	// DragClick is https://github.com/goki/icons/blob/main/svg/drag_click.svg
+	// DragClick is https://github.com/cogentcore/core/blob/main/icons/svg/drag_click.svg
 	DragClick Icon = "drag_click"
 
-	// DragHandle is https://github.com/goki/icons/blob/main/svg/drag_handle.svg
+	// DragHandle is https://github.com/cogentcore/core/blob/main/icons/svg/drag_handle.svg
 	DragHandle Icon = "drag_handle"
 
-	// DragIndicator is https://github.com/goki/icons/blob/main/svg/drag_indicator.svg
+	// DragIndicator is https://github.com/cogentcore/core/blob/main/icons/svg/drag_indicator.svg
 	DragIndicator Icon = "drag_indicator"
 
-	// DragPan is https://github.com/goki/icons/blob/main/svg/drag_pan.svg
+	// DragPan is https://github.com/cogentcore/core/blob/main/icons/svg/drag_pan.svg
 	DragPan Icon = "drag_pan"
 
-	// Draw is https://github.com/goki/icons/blob/main/svg/draw.svg
+	// Draw is https://github.com/cogentcore/core/blob/main/icons/svg/draw.svg
 	Draw Icon = "draw"
 
-	// DrawAbstract is https://github.com/goki/icons/blob/main/svg/draw_abstract.svg
+	// DrawAbstract is https://github.com/cogentcore/core/blob/main/icons/svg/draw_abstract.svg
 	DrawAbstract Icon = "draw_abstract"
 
-	// DrawCollage is https://github.com/goki/icons/blob/main/svg/draw_collage.svg
+	// DrawCollage is https://github.com/cogentcore/core/blob/main/icons/svg/draw_collage.svg
 	DrawCollage Icon = "draw_collage"
 
-	// DriveFileMove is https://github.com/goki/icons/blob/main/svg/drive_file_move.svg
+	// DriveFileMove is https://github.com/cogentcore/core/blob/main/icons/svg/drive_file_move.svg
 	DriveFileMove Icon = "drive_file_move"
 
-	// DriveFolderUpload is https://github.com/goki/icons/blob/main/svg/drive_folder_upload.svg
+	// DriveFolderUpload is https://github.com/cogentcore/core/blob/main/icons/svg/drive_folder_upload.svg
 	DriveFolderUpload Icon = "drive_folder_upload"
 
-	// Dropdown is https://github.com/goki/icons/blob/main/svg/dropdown.svg
+	// Dropdown is https://github.com/cogentcore/core/blob/main/icons/svg/dropdown.svg
 	Dropdown Icon = "dropdown"
 
-	// DualScreen is https://github.com/goki/icons/blob/main/svg/dual_screen.svg
+	// DualScreen is https://github.com/cogentcore/core/blob/main/icons/svg/dual_screen.svg
 	DualScreen Icon = "dual_screen"
 
-	// Dvr is https://github.com/goki/icons/blob/main/svg/dvr.svg
+	// Dvr is https://github.com/cogentcore/core/blob/main/icons/svg/dvr.svg
 	Dvr Icon = "dvr"
 
-	// DynamicFeed is https://github.com/goki/icons/blob/main/svg/dynamic_feed.svg
+	// DynamicFeed is https://github.com/cogentcore/core/blob/main/icons/svg/dynamic_feed.svg
 	DynamicFeed Icon = "dynamic_feed"
 
-	// DynamicForm is https://github.com/goki/icons/blob/main/svg/dynamic_form.svg
+	// DynamicForm is https://github.com/cogentcore/core/blob/main/icons/svg/dynamic_form.svg
 	DynamicForm Icon = "dynamic_form"
 
-	// Earbuds is https://github.com/goki/icons/blob/main/svg/earbuds.svg
+	// Earbuds is https://github.com/cogentcore/core/blob/main/icons/svg/earbuds.svg
 	Earbuds Icon = "earbuds"
 
-	// EarbudsBattery is https://github.com/goki/icons/blob/main/svg/earbuds_battery.svg
+	// EarbudsBattery is https://github.com/cogentcore/core/blob/main/icons/svg/earbuds_battery.svg
 	EarbudsBattery Icon = "earbuds_battery"
 
-	// East is https://github.com/goki/icons/blob/main/svg/east.svg
+	// East is https://github.com/cogentcore/core/blob/main/icons/svg/east.svg
 	East Icon = "east"
 
-	// Eco is https://github.com/goki/icons/blob/main/svg/eco.svg
+	// Eco is https://github.com/cogentcore/core/blob/main/icons/svg/eco.svg
 	Eco Icon = "eco"
 
-	// Edit is https://github.com/goki/icons/blob/main/svg/edit.svg
+	// Edit is https://github.com/cogentcore/core/blob/main/icons/svg/edit.svg
 	Edit Icon = "edit"
 
-	// EditAttributes is https://github.com/goki/icons/blob/main/svg/edit_attributes.svg
+	// EditAttributes is https://github.com/cogentcore/core/blob/main/icons/svg/edit_attributes.svg
 	EditAttributes Icon = "edit_attributes"
 
-	// EditCalendar is https://github.com/goki/icons/blob/main/svg/edit_calendar.svg
+	// EditCalendar is https://github.com/cogentcore/core/blob/main/icons/svg/edit_calendar.svg
 	EditCalendar Icon = "edit_calendar"
 
-	// EditDocument is https://github.com/goki/icons/blob/main/svg/edit_document.svg
+	// EditDocument is https://github.com/cogentcore/core/blob/main/icons/svg/edit_document.svg
 	EditDocument Icon = "edit_document"
 
-	// EditLocation is https://github.com/goki/icons/blob/main/svg/edit_location.svg
+	// EditLocation is https://github.com/cogentcore/core/blob/main/icons/svg/edit_location.svg
 	EditLocation Icon = "edit_location"
 
-	// EditLocationAlt is https://github.com/goki/icons/blob/main/svg/edit_location_alt.svg
+	// EditLocationAlt is https://github.com/cogentcore/core/blob/main/icons/svg/edit_location_alt.svg
 	EditLocationAlt Icon = "edit_location_alt"
 
-	// EditNote is https://github.com/goki/icons/blob/main/svg/edit_note.svg
+	// EditNote is https://github.com/cogentcore/core/blob/main/icons/svg/edit_note.svg
 	EditNote Icon = "edit_note"
 
-	// EditNotifications is https://github.com/goki/icons/blob/main/svg/edit_notifications.svg
+	// EditNotifications is https://github.com/cogentcore/core/blob/main/icons/svg/edit_notifications.svg
 	EditNotifications Icon = "edit_notifications"
 
-	// EditOff is https://github.com/goki/icons/blob/main/svg/edit_off.svg
+	// EditOff is https://github.com/cogentcore/core/blob/main/icons/svg/edit_off.svg
 	EditOff Icon = "edit_off"
 
-	// EditSquare is https://github.com/goki/icons/blob/main/svg/edit_square.svg
+	// EditSquare is https://github.com/cogentcore/core/blob/main/icons/svg/edit_square.svg
 	EditSquare Icon = "edit_square"
 
-	// Egg is https://github.com/goki/icons/blob/main/svg/egg.svg
+	// Egg is https://github.com/cogentcore/core/blob/main/icons/svg/egg.svg
 	Egg Icon = "egg"
 
-	// EggAlt is https://github.com/goki/icons/blob/main/svg/egg_alt.svg
+	// EggAlt is https://github.com/cogentcore/core/blob/main/icons/svg/egg_alt.svg
 	EggAlt Icon = "egg_alt"
 
-	// Eject is https://github.com/goki/icons/blob/main/svg/eject.svg
+	// Eject is https://github.com/cogentcore/core/blob/main/icons/svg/eject.svg
 	Eject Icon = "eject"
 
-	// ElectricalServices is https://github.com/goki/icons/blob/main/svg/electrical_services.svg
+	// ElectricalServices is https://github.com/cogentcore/core/blob/main/icons/svg/electrical_services.svg
 	ElectricalServices Icon = "electrical_services"
 
-	// Elevation is https://github.com/goki/icons/blob/main/svg/elevation.svg
+	// Elevation is https://github.com/cogentcore/core/blob/main/icons/svg/elevation.svg
 	Elevation Icon = "elevation"
 
-	// Emergency is https://github.com/goki/icons/blob/main/svg/emergency.svg
+	// Emergency is https://github.com/cogentcore/core/blob/main/icons/svg/emergency.svg
 	Emergency Icon = "emergency"
 
-	// EmojiEvents is https://github.com/goki/icons/blob/main/svg/emoji_events.svg
+	// EmojiEvents is https://github.com/cogentcore/core/blob/main/icons/svg/emoji_events.svg
 	EmojiEvents Icon = "emoji_events"
 
-	// EmojiFlags is https://github.com/goki/icons/blob/main/svg/emoji_flags.svg
+	// EmojiFlags is https://github.com/cogentcore/core/blob/main/icons/svg/emoji_flags.svg
 	EmojiFlags Icon = "emoji_flags"
 
-	// EmojiFoodBeverage is https://github.com/goki/icons/blob/main/svg/emoji_food_beverage.svg
+	// EmojiFoodBeverage is https://github.com/cogentcore/core/blob/main/icons/svg/emoji_food_beverage.svg
 	EmojiFoodBeverage Icon = "emoji_food_beverage"
 
-	// EmojiNature is https://github.com/goki/icons/blob/main/svg/emoji_nature.svg
+	// EmojiNature is https://github.com/cogentcore/core/blob/main/icons/svg/emoji_nature.svg
 	EmojiNature Icon = "emoji_nature"
 
-	// EmojiObjects is https://github.com/goki/icons/blob/main/svg/emoji_objects.svg
+	// EmojiObjects is https://github.com/cogentcore/core/blob/main/icons/svg/emoji_objects.svg
 	EmojiObjects Icon = "emoji_objects"
 
-	// EmojiPeople is https://github.com/goki/icons/blob/main/svg/emoji_people.svg
+	// EmojiPeople is https://github.com/cogentcore/core/blob/main/icons/svg/emoji_people.svg
 	EmojiPeople Icon = "emoji_people"
 
-	// EmojiSymbols is https://github.com/goki/icons/blob/main/svg/emoji_symbols.svg
+	// EmojiSymbols is https://github.com/cogentcore/core/blob/main/icons/svg/emoji_symbols.svg
 	EmojiSymbols Icon = "emoji_symbols"
 
-	// EmojiTransportation is https://github.com/goki/icons/blob/main/svg/emoji_transportation.svg
+	// EmojiTransportation is https://github.com/cogentcore/core/blob/main/icons/svg/emoji_transportation.svg
 	EmojiTransportation Icon = "emoji_transportation"
 
-	// Emoticon is https://github.com/goki/icons/blob/main/svg/emoticon.svg
+	// Emoticon is https://github.com/cogentcore/core/blob/main/icons/svg/emoticon.svg
 	Emoticon Icon = "emoticon"
 
-	// EmptyDashboard is https://github.com/goki/icons/blob/main/svg/empty_dashboard.svg
+	// EmptyDashboard is https://github.com/cogentcore/core/blob/main/icons/svg/empty_dashboard.svg
 	EmptyDashboard Icon = "empty_dashboard"
 
-	// Enable is https://github.com/goki/icons/blob/main/svg/enable.svg
+	// Enable is https://github.com/cogentcore/core/blob/main/icons/svg/enable.svg
 	Enable Icon = "enable"
 
-	// Encrypted is https://github.com/goki/icons/blob/main/svg/encrypted.svg
+	// Encrypted is https://github.com/cogentcore/core/blob/main/icons/svg/encrypted.svg
 	Encrypted Icon = "encrypted"
 
-	// EnergySavingsLeaf is https://github.com/goki/icons/blob/main/svg/energy_savings_leaf.svg
+	// EnergySavingsLeaf is https://github.com/cogentcore/core/blob/main/icons/svg/energy_savings_leaf.svg
 	EnergySavingsLeaf Icon = "energy_savings_leaf"
 
-	// Engineering is https://github.com/goki/icons/blob/main/svg/engineering.svg
+	// Engineering is https://github.com/cogentcore/core/blob/main/icons/svg/engineering.svg
 	Engineering Icon = "engineering"
 
-	// EnhancedEncryption is https://github.com/goki/icons/blob/main/svg/enhanced_encryption.svg
+	// EnhancedEncryption is https://github.com/cogentcore/core/blob/main/icons/svg/enhanced_encryption.svg
 	EnhancedEncryption Icon = "enhanced_encryption"
 
-	// Equal is https://github.com/goki/icons/blob/main/svg/equal.svg
+	// Equal is https://github.com/cogentcore/core/blob/main/icons/svg/equal.svg
 	Equal Icon = "equal"
 
-	// Equalizer is https://github.com/goki/icons/blob/main/svg/equalizer.svg
+	// Equalizer is https://github.com/cogentcore/core/blob/main/icons/svg/equalizer.svg
 	Equalizer Icon = "equalizer"
 
-	// Error is https://github.com/goki/icons/blob/main/svg/error.svg
+	// Error is https://github.com/cogentcore/core/blob/main/icons/svg/error.svg
 	Error Icon = "error"
 
-	// Euro is https://github.com/goki/icons/blob/main/svg/euro.svg
+	// Euro is https://github.com/cogentcore/core/blob/main/icons/svg/euro.svg
 	Euro Icon = "euro"
 
-	// EuroSymbol is https://github.com/goki/icons/blob/main/svg/euro_symbol.svg
+	// EuroSymbol is https://github.com/cogentcore/core/blob/main/icons/svg/euro_symbol.svg
 	EuroSymbol Icon = "euro_symbol"
 
-	// Event is https://github.com/goki/icons/blob/main/svg/event.svg
+	// Event is https://github.com/cogentcore/core/blob/main/icons/svg/event.svg
 	Event Icon = "event"
 
-	// EventAvailable is https://github.com/goki/icons/blob/main/svg/event_available.svg
+	// EventAvailable is https://github.com/cogentcore/core/blob/main/icons/svg/event_available.svg
 	EventAvailable Icon = "event_available"
 
-	// EventBusy is https://github.com/goki/icons/blob/main/svg/event_busy.svg
+	// EventBusy is https://github.com/cogentcore/core/blob/main/icons/svg/event_busy.svg
 	EventBusy Icon = "event_busy"
 
-	// EventList is https://github.com/goki/icons/blob/main/svg/event_list.svg
+	// EventList is https://github.com/cogentcore/core/blob/main/icons/svg/event_list.svg
 	EventList Icon = "event_list"
 
-	// EventNote is https://github.com/goki/icons/blob/main/svg/event_note.svg
+	// EventNote is https://github.com/cogentcore/core/blob/main/icons/svg/event_note.svg
 	EventNote Icon = "event_note"
 
-	// EventRepeat is https://github.com/goki/icons/blob/main/svg/event_repeat.svg
+	// EventRepeat is https://github.com/cogentcore/core/blob/main/icons/svg/event_repeat.svg
 	EventRepeat Icon = "event_repeat"
 
-	// EventSeat is https://github.com/goki/icons/blob/main/svg/event_seat.svg
+	// EventSeat is https://github.com/cogentcore/core/blob/main/icons/svg/event_seat.svg
 	EventSeat Icon = "event_seat"
 
-	// EventUpcoming is https://github.com/goki/icons/blob/main/svg/event_upcoming.svg
+	// EventUpcoming is https://github.com/cogentcore/core/blob/main/icons/svg/event_upcoming.svg
 	EventUpcoming Icon = "event_upcoming"
 
-	// Exclamation is https://github.com/goki/icons/blob/main/svg/exclamation.svg
+	// Exclamation is https://github.com/cogentcore/core/blob/main/icons/svg/exclamation.svg
 	Exclamation Icon = "exclamation"
 
-	// Exercise is https://github.com/goki/icons/blob/main/svg/exercise.svg
+	// Exercise is https://github.com/cogentcore/core/blob/main/icons/svg/exercise.svg
 	Exercise Icon = "exercise"
 
-	// ExitToApp is https://github.com/goki/icons/blob/main/svg/exit_to_app.svg
+	// ExitToApp is https://github.com/cogentcore/core/blob/main/icons/svg/exit_to_app.svg
 	ExitToApp Icon = "exit_to_app"
 
-	// Expand is https://github.com/goki/icons/blob/main/svg/expand.svg
+	// Expand is https://github.com/cogentcore/core/blob/main/icons/svg/expand.svg
 	Expand Icon = "expand"
 
-	// ExpandAll is https://github.com/goki/icons/blob/main/svg/expand_all.svg
+	// ExpandAll is https://github.com/cogentcore/core/blob/main/icons/svg/expand_all.svg
 	ExpandAll Icon = "expand_all"
 
-	// ExpandCircleDown is https://github.com/goki/icons/blob/main/svg/expand_circle_down.svg
+	// ExpandCircleDown is https://github.com/cogentcore/core/blob/main/icons/svg/expand_circle_down.svg
 	ExpandCircleDown Icon = "expand_circle_down"
 
-	// ExpandCircleRight is https://github.com/goki/icons/blob/main/svg/expand_circle_right.svg
+	// ExpandCircleRight is https://github.com/cogentcore/core/blob/main/icons/svg/expand_circle_right.svg
 	ExpandCircleRight Icon = "expand_circle_right"
 
-	// ExpandCircleUp is https://github.com/goki/icons/blob/main/svg/expand_circle_up.svg
+	// ExpandCircleUp is https://github.com/cogentcore/core/blob/main/icons/svg/expand_circle_up.svg
 	ExpandCircleUp Icon = "expand_circle_up"
 
-	// ExpandContent is https://github.com/goki/icons/blob/main/svg/expand_content.svg
+	// ExpandContent is https://github.com/cogentcore/core/blob/main/icons/svg/expand_content.svg
 	ExpandContent Icon = "expand_content"
 
-	// ExpandLess is https://github.com/goki/icons/blob/main/svg/expand_less.svg
+	// ExpandLess is https://github.com/cogentcore/core/blob/main/icons/svg/expand_less.svg
 	ExpandLess Icon = "expand_less"
 
-	// ExpandMore is https://github.com/goki/icons/blob/main/svg/expand_more.svg
+	// ExpandMore is https://github.com/cogentcore/core/blob/main/icons/svg/expand_more.svg
 	ExpandMore Icon = "expand_more"
 
-	// Explicit is https://github.com/goki/icons/blob/main/svg/explicit.svg
+	// Explicit is https://github.com/cogentcore/core/blob/main/icons/svg/explicit.svg
 	Explicit Icon = "explicit"
 
-	// Explore is https://github.com/goki/icons/blob/main/svg/explore.svg
+	// Explore is https://github.com/cogentcore/core/blob/main/icons/svg/explore.svg
 	Explore Icon = "explore"
 
-	// ExploreOff is https://github.com/goki/icons/blob/main/svg/explore_off.svg
+	// ExploreOff is https://github.com/cogentcore/core/blob/main/icons/svg/explore_off.svg
 	ExploreOff Icon = "explore_off"
 
-	// Explosion is https://github.com/goki/icons/blob/main/svg/explosion.svg
+	// Explosion is https://github.com/cogentcore/core/blob/main/icons/svg/explosion.svg
 	Explosion Icon = "explosion"
 
-	// ExportNotes is https://github.com/goki/icons/blob/main/svg/export_notes.svg
+	// ExportNotes is https://github.com/cogentcore/core/blob/main/icons/svg/export_notes.svg
 	ExportNotes Icon = "export_notes"
 
-	// Exposure is https://github.com/goki/icons/blob/main/svg/exposure.svg
+	// Exposure is https://github.com/cogentcore/core/blob/main/icons/svg/exposure.svg
 	Exposure Icon = "exposure"
 
-	// ExposureNeg1 is https://github.com/goki/icons/blob/main/svg/exposure_neg_1.svg
+	// ExposureNeg1 is https://github.com/cogentcore/core/blob/main/icons/svg/exposure_neg_1.svg
 	ExposureNeg1 Icon = "exposure_neg_1"
 
-	// ExposureNeg2 is https://github.com/goki/icons/blob/main/svg/exposure_neg_2.svg
+	// ExposureNeg2 is https://github.com/cogentcore/core/blob/main/icons/svg/exposure_neg_2.svg
 	ExposureNeg2 Icon = "exposure_neg_2"
 
-	// ExposurePlus1 is https://github.com/goki/icons/blob/main/svg/exposure_plus_1.svg
+	// ExposurePlus1 is https://github.com/cogentcore/core/blob/main/icons/svg/exposure_plus_1.svg
 	ExposurePlus1 Icon = "exposure_plus_1"
 
-	// ExposurePlus2 is https://github.com/goki/icons/blob/main/svg/exposure_plus_2.svg
+	// ExposurePlus2 is https://github.com/cogentcore/core/blob/main/icons/svg/exposure_plus_2.svg
 	ExposurePlus2 Icon = "exposure_plus_2"
 
-	// ExposureZero is https://github.com/goki/icons/blob/main/svg/exposure_zero.svg
+	// ExposureZero is https://github.com/cogentcore/core/blob/main/icons/svg/exposure_zero.svg
 	ExposureZero Icon = "exposure_zero"
 
-	// Extension is https://github.com/goki/icons/blob/main/svg/extension.svg
+	// Extension is https://github.com/cogentcore/core/blob/main/icons/svg/extension.svg
 	Extension Icon = "extension"
 
-	// ExtensionOff is https://github.com/goki/icons/blob/main/svg/extension_off.svg
+	// ExtensionOff is https://github.com/cogentcore/core/blob/main/icons/svg/extension_off.svg
 	ExtensionOff Icon = "extension_off"
 
-	// Face is https://github.com/goki/icons/blob/main/svg/face.svg
+	// Face is https://github.com/cogentcore/core/blob/main/icons/svg/face.svg
 	Face Icon = "face"
 
-	// Face2 is https://github.com/goki/icons/blob/main/svg/face_2.svg
+	// Face2 is https://github.com/cogentcore/core/blob/main/icons/svg/face_2.svg
 	Face2 Icon = "face_2"
 
-	// Face3 is https://github.com/goki/icons/blob/main/svg/face_3.svg
+	// Face3 is https://github.com/cogentcore/core/blob/main/icons/svg/face_3.svg
 	Face3 Icon = "face_3"
 
-	// Face4 is https://github.com/goki/icons/blob/main/svg/face_4.svg
+	// Face4 is https://github.com/cogentcore/core/blob/main/icons/svg/face_4.svg
 	Face4 Icon = "face_4"
 
-	// Face5 is https://github.com/goki/icons/blob/main/svg/face_5.svg
+	// Face5 is https://github.com/cogentcore/core/blob/main/icons/svg/face_5.svg
 	Face5 Icon = "face_5"
 
-	// Face6 is https://github.com/goki/icons/blob/main/svg/face_6.svg
+	// Face6 is https://github.com/cogentcore/core/blob/main/icons/svg/face_6.svg
 	Face6 Icon = "face_6"
 
-	// FaceRetouchingOff is https://github.com/goki/icons/blob/main/svg/face_retouching_off.svg
+	// FaceRetouchingOff is https://github.com/cogentcore/core/blob/main/icons/svg/face_retouching_off.svg
 	FaceRetouchingOff Icon = "face_retouching_off"
 
-	// FactCheck is https://github.com/goki/icons/blob/main/svg/fact_check.svg
+	// FactCheck is https://github.com/cogentcore/core/blob/main/icons/svg/fact_check.svg
 	FactCheck Icon = "fact_check"
 
-	// Factory is https://github.com/goki/icons/blob/main/svg/factory.svg
+	// Factory is https://github.com/cogentcore/core/blob/main/icons/svg/factory.svg
 	Factory Icon = "factory"
 
-	// FamilyHistory is https://github.com/goki/icons/blob/main/svg/family_history.svg
+	// FamilyHistory is https://github.com/cogentcore/core/blob/main/icons/svg/family_history.svg
 	FamilyHistory Icon = "family_history"
 
-	// FamilyLink is https://github.com/goki/icons/blob/main/svg/family_link.svg
+	// FamilyLink is https://github.com/cogentcore/core/blob/main/icons/svg/family_link.svg
 	FamilyLink Icon = "family_link"
 
-	// FastForward is https://github.com/goki/icons/blob/main/svg/fast_forward.svg
+	// FastForward is https://github.com/cogentcore/core/blob/main/icons/svg/fast_forward.svg
 	FastForward Icon = "fast_forward"
 
-	// FastRewind is https://github.com/goki/icons/blob/main/svg/fast_rewind.svg
+	// FastRewind is https://github.com/cogentcore/core/blob/main/icons/svg/fast_rewind.svg
 	FastRewind Icon = "fast_rewind"
 
-	// Faucet is https://github.com/goki/icons/blob/main/svg/faucet.svg
+	// Faucet is https://github.com/cogentcore/core/blob/main/icons/svg/faucet.svg
 	Faucet Icon = "faucet"
 
-	// Favorite is https://github.com/goki/icons/blob/main/svg/favorite.svg
+	// Favorite is https://github.com/cogentcore/core/blob/main/icons/svg/favorite.svg
 	Favorite Icon = "favorite"
 
-	// Fax is https://github.com/goki/icons/blob/main/svg/fax.svg
+	// Fax is https://github.com/cogentcore/core/blob/main/icons/svg/fax.svg
 	Fax Icon = "fax"
 
-	// FeatureSearch is https://github.com/goki/icons/blob/main/svg/feature_search.svg
+	// FeatureSearch is https://github.com/cogentcore/core/blob/main/icons/svg/feature_search.svg
 	FeatureSearch Icon = "feature_search"
 
-	// FeaturedPlayList is https://github.com/goki/icons/blob/main/svg/featured_play_list.svg
+	// FeaturedPlayList is https://github.com/cogentcore/core/blob/main/icons/svg/featured_play_list.svg
 	FeaturedPlayList Icon = "featured_play_list"
 
-	// FeaturedVideo is https://github.com/goki/icons/blob/main/svg/featured_video.svg
+	// FeaturedVideo is https://github.com/cogentcore/core/blob/main/icons/svg/featured_video.svg
 	FeaturedVideo Icon = "featured_video"
 
-	// Feed is https://github.com/goki/icons/blob/main/svg/feed.svg
+	// Feed is https://github.com/cogentcore/core/blob/main/icons/svg/feed.svg
 	Feed Icon = "feed"
 
-	// Feedback is https://github.com/goki/icons/blob/main/svg/feedback.svg
+	// Feedback is https://github.com/cogentcore/core/blob/main/icons/svg/feedback.svg
 	Feedback Icon = "feedback"
 
-	// Female is https://github.com/goki/icons/blob/main/svg/female.svg
+	// Female is https://github.com/cogentcore/core/blob/main/icons/svg/female.svg
 	Female Icon = "female"
 
-	// Fence is https://github.com/goki/icons/blob/main/svg/fence.svg
+	// Fence is https://github.com/cogentcore/core/blob/main/icons/svg/fence.svg
 	Fence Icon = "fence"
 
-	// Festival is https://github.com/goki/icons/blob/main/svg/festival.svg
+	// Festival is https://github.com/cogentcore/core/blob/main/icons/svg/festival.svg
 	Festival Icon = "festival"
 
-	// Field is https://github.com/goki/icons/blob/main/svg/field.svg
+	// Field is https://github.com/cogentcore/core/blob/main/icons/svg/field.svg
 	Field Icon = "field"
 
-	// FileExe is https://github.com/goki/icons/blob/main/svg/file-exe.svg
+	// FileExe is https://github.com/cogentcore/core/blob/main/icons/svg/file-exe.svg
 	FileExe Icon = "file-exe"
 
-	// FileMarkdown is https://github.com/goki/icons/blob/main/svg/file-markdown.svg
+	// FileMarkdown is https://github.com/cogentcore/core/blob/main/icons/svg/file-markdown.svg
 	FileMarkdown Icon = "file-markdown"
 
-	// File is https://github.com/goki/icons/blob/main/svg/file.svg
+	// File is https://github.com/cogentcore/core/blob/main/icons/svg/file.svg
 	File Icon = "file"
 
-	// FileCopy is https://github.com/goki/icons/blob/main/svg/file_copy.svg
+	// FileCopy is https://github.com/cogentcore/core/blob/main/icons/svg/file_copy.svg
 	FileCopy Icon = "file_copy"
 
-	// FileDownloadDone is https://github.com/goki/icons/blob/main/svg/file_download_done.svg
+	// FileDownloadDone is https://github.com/cogentcore/core/blob/main/icons/svg/file_download_done.svg
 	FileDownloadDone Icon = "file_download_done"
 
-	// FileDownloadOff is https://github.com/goki/icons/blob/main/svg/file_download_off.svg
+	// FileDownloadOff is https://github.com/cogentcore/core/blob/main/icons/svg/file_download_off.svg
 	FileDownloadOff Icon = "file_download_off"
 
-	// FileOpen is https://github.com/goki/icons/blob/main/svg/file_open.svg
+	// FileOpen is https://github.com/cogentcore/core/blob/main/icons/svg/file_open.svg
 	FileOpen Icon = "file_open"
 
-	// FilePresent is https://github.com/goki/icons/blob/main/svg/file_present.svg
+	// FilePresent is https://github.com/cogentcore/core/blob/main/icons/svg/file_present.svg
 	FilePresent Icon = "file_present"
 
-	// FileUploadOff is https://github.com/goki/icons/blob/main/svg/file_upload_off.svg
+	// FileUploadOff is https://github.com/cogentcore/core/blob/main/icons/svg/file_upload_off.svg
 	FileUploadOff Icon = "file_upload_off"
 
-	// Filter is https://github.com/goki/icons/blob/main/svg/filter.svg
+	// Filter is https://github.com/cogentcore/core/blob/main/icons/svg/filter.svg
 	Filter Icon = "filter"
 
-	// Filter1 is https://github.com/goki/icons/blob/main/svg/filter_1.svg
+	// Filter1 is https://github.com/cogentcore/core/blob/main/icons/svg/filter_1.svg
 	Filter1 Icon = "filter_1"
 
-	// Filter2 is https://github.com/goki/icons/blob/main/svg/filter_2.svg
+	// Filter2 is https://github.com/cogentcore/core/blob/main/icons/svg/filter_2.svg
 	Filter2 Icon = "filter_2"
 
-	// Filter3 is https://github.com/goki/icons/blob/main/svg/filter_3.svg
+	// Filter3 is https://github.com/cogentcore/core/blob/main/icons/svg/filter_3.svg
 	Filter3 Icon = "filter_3"
 
-	// Filter4 is https://github.com/goki/icons/blob/main/svg/filter_4.svg
+	// Filter4 is https://github.com/cogentcore/core/blob/main/icons/svg/filter_4.svg
 	Filter4 Icon = "filter_4"
 
-	// Filter5 is https://github.com/goki/icons/blob/main/svg/filter_5.svg
+	// Filter5 is https://github.com/cogentcore/core/blob/main/icons/svg/filter_5.svg
 	Filter5 Icon = "filter_5"
 
-	// Filter6 is https://github.com/goki/icons/blob/main/svg/filter_6.svg
+	// Filter6 is https://github.com/cogentcore/core/blob/main/icons/svg/filter_6.svg
 	Filter6 Icon = "filter_6"
 
-	// Filter7 is https://github.com/goki/icons/blob/main/svg/filter_7.svg
+	// Filter7 is https://github.com/cogentcore/core/blob/main/icons/svg/filter_7.svg
 	Filter7 Icon = "filter_7"
 
-	// Filter8 is https://github.com/goki/icons/blob/main/svg/filter_8.svg
+	// Filter8 is https://github.com/cogentcore/core/blob/main/icons/svg/filter_8.svg
 	Filter8 Icon = "filter_8"
 
-	// Filter9 is https://github.com/goki/icons/blob/main/svg/filter_9.svg
+	// Filter9 is https://github.com/cogentcore/core/blob/main/icons/svg/filter_9.svg
 	Filter9 Icon = "filter_9"
 
-	// Filter9Plus is https://github.com/goki/icons/blob/main/svg/filter_9_plus.svg
+	// Filter9Plus is https://github.com/cogentcore/core/blob/main/icons/svg/filter_9_plus.svg
 	Filter9Plus Icon = "filter_9_plus"
 
-	// FilterAlt is https://github.com/goki/icons/blob/main/svg/filter_alt.svg
+	// FilterAlt is https://github.com/cogentcore/core/blob/main/icons/svg/filter_alt.svg
 	FilterAlt Icon = "filter_alt"
 
-	// FilterAltOff is https://github.com/goki/icons/blob/main/svg/filter_alt_off.svg
+	// FilterAltOff is https://github.com/cogentcore/core/blob/main/icons/svg/filter_alt_off.svg
 	FilterAltOff Icon = "filter_alt_off"
 
-	// FilterBAndW is https://github.com/goki/icons/blob/main/svg/filter_b_and_w.svg
+	// FilterBAndW is https://github.com/cogentcore/core/blob/main/icons/svg/filter_b_and_w.svg
 	FilterBAndW Icon = "filter_b_and_w"
 
-	// FilterCenterFocus is https://github.com/goki/icons/blob/main/svg/filter_center_focus.svg
+	// FilterCenterFocus is https://github.com/cogentcore/core/blob/main/icons/svg/filter_center_focus.svg
 	FilterCenterFocus Icon = "filter_center_focus"
 
-	// FilterDrama is https://github.com/goki/icons/blob/main/svg/filter_drama.svg
+	// FilterDrama is https://github.com/cogentcore/core/blob/main/icons/svg/filter_drama.svg
 	FilterDrama Icon = "filter_drama"
 
-	// FilterFrames is https://github.com/goki/icons/blob/main/svg/filter_frames.svg
+	// FilterFrames is https://github.com/cogentcore/core/blob/main/icons/svg/filter_frames.svg
 	FilterFrames Icon = "filter_frames"
 
-	// FilterHdr is https://github.com/goki/icons/blob/main/svg/filter_hdr.svg
+	// FilterHdr is https://github.com/cogentcore/core/blob/main/icons/svg/filter_hdr.svg
 	FilterHdr Icon = "filter_hdr"
 
-	// FilterList is https://github.com/goki/icons/blob/main/svg/filter_list.svg
+	// FilterList is https://github.com/cogentcore/core/blob/main/icons/svg/filter_list.svg
 	FilterList Icon = "filter_list"
 
-	// FilterListOff is https://github.com/goki/icons/blob/main/svg/filter_list_off.svg
+	// FilterListOff is https://github.com/cogentcore/core/blob/main/icons/svg/filter_list_off.svg
 	FilterListOff Icon = "filter_list_off"
 
-	// FilterNone is https://github.com/goki/icons/blob/main/svg/filter_none.svg
+	// FilterNone is https://github.com/cogentcore/core/blob/main/icons/svg/filter_none.svg
 	FilterNone Icon = "filter_none"
 
-	// FilterTiltShift is https://github.com/goki/icons/blob/main/svg/filter_tilt_shift.svg
+	// FilterTiltShift is https://github.com/cogentcore/core/blob/main/icons/svg/filter_tilt_shift.svg
 	FilterTiltShift Icon = "filter_tilt_shift"
 
-	// FilterVintage is https://github.com/goki/icons/blob/main/svg/filter_vintage.svg
+	// FilterVintage is https://github.com/cogentcore/core/blob/main/icons/svg/filter_vintage.svg
 	FilterVintage Icon = "filter_vintage"
 
-	// Finance is https://github.com/goki/icons/blob/main/svg/finance.svg
+	// Finance is https://github.com/cogentcore/core/blob/main/icons/svg/finance.svg
 	Finance Icon = "finance"
 
-	// FinanceChip is https://github.com/goki/icons/blob/main/svg/finance_chip.svg
+	// FinanceChip is https://github.com/cogentcore/core/blob/main/icons/svg/finance_chip.svg
 	FinanceChip Icon = "finance_chip"
 
-	// FindInPage is https://github.com/goki/icons/blob/main/svg/find_in_page.svg
+	// FindInPage is https://github.com/cogentcore/core/blob/main/icons/svg/find_in_page.svg
 	FindInPage Icon = "find_in_page"
 
-	// FindReplace is https://github.com/goki/icons/blob/main/svg/find_replace.svg
+	// FindReplace is https://github.com/cogentcore/core/blob/main/icons/svg/find_replace.svg
 	FindReplace Icon = "find_replace"
 
-	// Fingerprint is https://github.com/goki/icons/blob/main/svg/fingerprint.svg
+	// Fingerprint is https://github.com/cogentcore/core/blob/main/icons/svg/fingerprint.svg
 	Fingerprint Icon = "fingerprint"
 
-	// FirstPage is https://github.com/goki/icons/blob/main/svg/first_page.svg
+	// FirstPage is https://github.com/cogentcore/core/blob/main/icons/svg/first_page.svg
 	FirstPage Icon = "first_page"
 
-	// FitPage is https://github.com/goki/icons/blob/main/svg/fit_page.svg
+	// FitPage is https://github.com/cogentcore/core/blob/main/icons/svg/fit_page.svg
 	FitPage Icon = "fit_page"
 
-	// FitScreen is https://github.com/goki/icons/blob/main/svg/fit_screen.svg
+	// FitScreen is https://github.com/cogentcore/core/blob/main/icons/svg/fit_screen.svg
 	FitScreen Icon = "fit_screen"
 
-	// FitWidth is https://github.com/goki/icons/blob/main/svg/fit_width.svg
+	// FitWidth is https://github.com/cogentcore/core/blob/main/icons/svg/fit_width.svg
 	FitWidth Icon = "fit_width"
 
-	// Flag is https://github.com/goki/icons/blob/main/svg/flag.svg
+	// Flag is https://github.com/cogentcore/core/blob/main/icons/svg/flag.svg
 	Flag Icon = "flag"
 
-	// FlagCircle is https://github.com/goki/icons/blob/main/svg/flag_circle.svg
+	// FlagCircle is https://github.com/cogentcore/core/blob/main/icons/svg/flag_circle.svg
 	FlagCircle Icon = "flag_circle"
 
-	// Flaky is https://github.com/goki/icons/blob/main/svg/flaky.svg
+	// Flaky is https://github.com/cogentcore/core/blob/main/icons/svg/flaky.svg
 	Flaky Icon = "flaky"
 
-	// Flare is https://github.com/goki/icons/blob/main/svg/flare.svg
+	// Flare is https://github.com/cogentcore/core/blob/main/icons/svg/flare.svg
 	Flare Icon = "flare"
 
-	// FlashlightOff is https://github.com/goki/icons/blob/main/svg/flashlight_off.svg
+	// FlashlightOff is https://github.com/cogentcore/core/blob/main/icons/svg/flashlight_off.svg
 	FlashlightOff Icon = "flashlight_off"
 
-	// FlashlightOn is https://github.com/goki/icons/blob/main/svg/flashlight_on.svg
+	// FlashlightOn is https://github.com/cogentcore/core/blob/main/icons/svg/flashlight_on.svg
 	FlashlightOn Icon = "flashlight_on"
 
-	// FlexDirection is https://github.com/goki/icons/blob/main/svg/flex_direction.svg
+	// FlexDirection is https://github.com/cogentcore/core/blob/main/icons/svg/flex_direction.svg
 	FlexDirection Icon = "flex_direction"
 
-	// FlexNoWrap is https://github.com/goki/icons/blob/main/svg/flex_no_wrap.svg
+	// FlexNoWrap is https://github.com/cogentcore/core/blob/main/icons/svg/flex_no_wrap.svg
 	FlexNoWrap Icon = "flex_no_wrap"
 
-	// FlexWrap is https://github.com/goki/icons/blob/main/svg/flex_wrap.svg
+	// FlexWrap is https://github.com/cogentcore/core/blob/main/icons/svg/flex_wrap.svg
 	FlexWrap Icon = "flex_wrap"
 
-	// Flight is https://github.com/goki/icons/blob/main/svg/flight.svg
+	// Flight is https://github.com/cogentcore/core/blob/main/icons/svg/flight.svg
 	Flight Icon = "flight"
 
-	// Flightsmode is https://github.com/goki/icons/blob/main/svg/flightsmode.svg
+	// Flightsmode is https://github.com/cogentcore/core/blob/main/icons/svg/flightsmode.svg
 	Flightsmode Icon = "flightsmode"
 
-	// Flip is https://github.com/goki/icons/blob/main/svg/flip.svg
+	// Flip is https://github.com/cogentcore/core/blob/main/icons/svg/flip.svg
 	Flip Icon = "flip"
 
-	// FlipCameraAndroid is https://github.com/goki/icons/blob/main/svg/flip_camera_android.svg
+	// FlipCameraAndroid is https://github.com/cogentcore/core/blob/main/icons/svg/flip_camera_android.svg
 	FlipCameraAndroid Icon = "flip_camera_android"
 
-	// FlipCameraIos is https://github.com/goki/icons/blob/main/svg/flip_camera_ios.svg
+	// FlipCameraIos is https://github.com/cogentcore/core/blob/main/icons/svg/flip_camera_ios.svg
 	FlipCameraIos Icon = "flip_camera_ios"
 
-	// FlipToBack is https://github.com/goki/icons/blob/main/svg/flip_to_back.svg
+	// FlipToBack is https://github.com/cogentcore/core/blob/main/icons/svg/flip_to_back.svg
 	FlipToBack Icon = "flip_to_back"
 
-	// FlipToFront is https://github.com/goki/icons/blob/main/svg/flip_to_front.svg
+	// FlipToFront is https://github.com/cogentcore/core/blob/main/icons/svg/flip_to_front.svg
 	FlipToFront Icon = "flip_to_front"
 
-	// Floor is https://github.com/goki/icons/blob/main/svg/floor.svg
+	// Floor is https://github.com/cogentcore/core/blob/main/icons/svg/floor.svg
 	Floor Icon = "floor"
 
-	// Flowsheet is https://github.com/goki/icons/blob/main/svg/flowsheet.svg
+	// Flowsheet is https://github.com/cogentcore/core/blob/main/icons/svg/flowsheet.svg
 	Flowsheet Icon = "flowsheet"
 
-	// Fluid is https://github.com/goki/icons/blob/main/svg/fluid.svg
+	// Fluid is https://github.com/cogentcore/core/blob/main/icons/svg/fluid.svg
 	Fluid Icon = "fluid"
 
-	// FluidBalance is https://github.com/goki/icons/blob/main/svg/fluid_balance.svg
+	// FluidBalance is https://github.com/cogentcore/core/blob/main/icons/svg/fluid_balance.svg
 	FluidBalance Icon = "fluid_balance"
 
-	// FluidMed is https://github.com/goki/icons/blob/main/svg/fluid_med.svg
+	// FluidMed is https://github.com/cogentcore/core/blob/main/icons/svg/fluid_med.svg
 	FluidMed Icon = "fluid_med"
 
-	// Flutter is https://github.com/goki/icons/blob/main/svg/flutter.svg
+	// Flutter is https://github.com/cogentcore/core/blob/main/icons/svg/flutter.svg
 	Flutter Icon = "flutter"
 
-	// FlutterDash is https://github.com/goki/icons/blob/main/svg/flutter_dash.svg
+	// FlutterDash is https://github.com/cogentcore/core/blob/main/icons/svg/flutter_dash.svg
 	FlutterDash Icon = "flutter_dash"
 
-	// Folder is https://github.com/goki/icons/blob/main/svg/folder.svg
+	// Folder is https://github.com/cogentcore/core/blob/main/icons/svg/folder.svg
 	Folder Icon = "folder"
 
-	// FolderCopy is https://github.com/goki/icons/blob/main/svg/folder_copy.svg
+	// FolderCopy is https://github.com/cogentcore/core/blob/main/icons/svg/folder_copy.svg
 	FolderCopy Icon = "folder_copy"
 
-	// FolderDelete is https://github.com/goki/icons/blob/main/svg/folder_delete.svg
+	// FolderDelete is https://github.com/cogentcore/core/blob/main/icons/svg/folder_delete.svg
 	FolderDelete Icon = "folder_delete"
 
-	// FolderManaged is https://github.com/goki/icons/blob/main/svg/folder_managed.svg
+	// FolderManaged is https://github.com/cogentcore/core/blob/main/icons/svg/folder_managed.svg
 	FolderManaged Icon = "folder_managed"
 
-	// FolderOff is https://github.com/goki/icons/blob/main/svg/folder_off.svg
+	// FolderOff is https://github.com/cogentcore/core/blob/main/icons/svg/folder_off.svg
 	FolderOff Icon = "folder_off"
 
-	// FolderOpen is https://github.com/goki/icons/blob/main/svg/folder_open.svg
+	// FolderOpen is https://github.com/cogentcore/core/blob/main/icons/svg/folder_open.svg
 	FolderOpen Icon = "folder_open"
 
-	// FolderShared is https://github.com/goki/icons/blob/main/svg/folder_shared.svg
+	// FolderShared is https://github.com/cogentcore/core/blob/main/icons/svg/folder_shared.svg
 	FolderShared Icon = "folder_shared"
 
-	// FolderSpecial is https://github.com/goki/icons/blob/main/svg/folder_special.svg
+	// FolderSpecial is https://github.com/cogentcore/core/blob/main/icons/svg/folder_special.svg
 	FolderSpecial Icon = "folder_special"
 
-	// FolderSupervised is https://github.com/goki/icons/blob/main/svg/folder_supervised.svg
+	// FolderSupervised is https://github.com/cogentcore/core/blob/main/icons/svg/folder_supervised.svg
 	FolderSupervised Icon = "folder_supervised"
 
-	// FolderZip is https://github.com/goki/icons/blob/main/svg/folder_zip.svg
+	// FolderZip is https://github.com/cogentcore/core/blob/main/icons/svg/folder_zip.svg
 	FolderZip Icon = "folder_zip"
 
-	// FontDownload is https://github.com/goki/icons/blob/main/svg/font_download.svg
+	// FontDownload is https://github.com/cogentcore/core/blob/main/icons/svg/font_download.svg
 	FontDownload Icon = "font_download"
 
-	// FontDownloadOff is https://github.com/goki/icons/blob/main/svg/font_download_off.svg
+	// FontDownloadOff is https://github.com/cogentcore/core/blob/main/icons/svg/font_download_off.svg
 	FontDownloadOff Icon = "font_download_off"
 
-	// FormatAlignCenter is https://github.com/goki/icons/blob/main/svg/format_align_center.svg
+	// FormatAlignCenter is https://github.com/cogentcore/core/blob/main/icons/svg/format_align_center.svg
 	FormatAlignCenter Icon = "format_align_center"
 
-	// FormatAlignJustify is https://github.com/goki/icons/blob/main/svg/format_align_justify.svg
+	// FormatAlignJustify is https://github.com/cogentcore/core/blob/main/icons/svg/format_align_justify.svg
 	FormatAlignJustify Icon = "format_align_justify"
 
-	// FormatAlignLeft is https://github.com/goki/icons/blob/main/svg/format_align_left.svg
+	// FormatAlignLeft is https://github.com/cogentcore/core/blob/main/icons/svg/format_align_left.svg
 	FormatAlignLeft Icon = "format_align_left"
 
-	// FormatAlignRight is https://github.com/goki/icons/blob/main/svg/format_align_right.svg
+	// FormatAlignRight is https://github.com/cogentcore/core/blob/main/icons/svg/format_align_right.svg
 	FormatAlignRight Icon = "format_align_right"
 
-	// FormatBold is https://github.com/goki/icons/blob/main/svg/format_bold.svg
+	// FormatBold is https://github.com/cogentcore/core/blob/main/icons/svg/format_bold.svg
 	FormatBold Icon = "format_bold"
 
-	// FormatClear is https://github.com/goki/icons/blob/main/svg/format_clear.svg
+	// FormatClear is https://github.com/cogentcore/core/blob/main/icons/svg/format_clear.svg
 	FormatClear Icon = "format_clear"
 
-	// FormatColorFill is https://github.com/goki/icons/blob/main/svg/format_color_fill.svg
+	// FormatColorFill is https://github.com/cogentcore/core/blob/main/icons/svg/format_color_fill.svg
 	FormatColorFill Icon = "format_color_fill"
 
-	// FormatColorReset is https://github.com/goki/icons/blob/main/svg/format_color_reset.svg
+	// FormatColorReset is https://github.com/cogentcore/core/blob/main/icons/svg/format_color_reset.svg
 	FormatColorReset Icon = "format_color_reset"
 
-	// FormatColorText is https://github.com/goki/icons/blob/main/svg/format_color_text.svg
+	// FormatColorText is https://github.com/cogentcore/core/blob/main/icons/svg/format_color_text.svg
 	FormatColorText Icon = "format_color_text"
 
-	// FormatH1 is https://github.com/goki/icons/blob/main/svg/format_h1.svg
+	// FormatH1 is https://github.com/cogentcore/core/blob/main/icons/svg/format_h1.svg
 	FormatH1 Icon = "format_h1"
 
-	// FormatH2 is https://github.com/goki/icons/blob/main/svg/format_h2.svg
+	// FormatH2 is https://github.com/cogentcore/core/blob/main/icons/svg/format_h2.svg
 	FormatH2 Icon = "format_h2"
 
-	// FormatH3 is https://github.com/goki/icons/blob/main/svg/format_h3.svg
+	// FormatH3 is https://github.com/cogentcore/core/blob/main/icons/svg/format_h3.svg
 	FormatH3 Icon = "format_h3"
 
-	// FormatH4 is https://github.com/goki/icons/blob/main/svg/format_h4.svg
+	// FormatH4 is https://github.com/cogentcore/core/blob/main/icons/svg/format_h4.svg
 	FormatH4 Icon = "format_h4"
 
-	// FormatH5 is https://github.com/goki/icons/blob/main/svg/format_h5.svg
+	// FormatH5 is https://github.com/cogentcore/core/blob/main/icons/svg/format_h5.svg
 	FormatH5 Icon = "format_h5"
 
-	// FormatH6 is https://github.com/goki/icons/blob/main/svg/format_h6.svg
+	// FormatH6 is https://github.com/cogentcore/core/blob/main/icons/svg/format_h6.svg
 	FormatH6 Icon = "format_h6"
 
-	// FormatImageLeft is https://github.com/goki/icons/blob/main/svg/format_image_left.svg
+	// FormatImageLeft is https://github.com/cogentcore/core/blob/main/icons/svg/format_image_left.svg
 	FormatImageLeft Icon = "format_image_left"
 
-	// FormatImageRight is https://github.com/goki/icons/blob/main/svg/format_image_right.svg
+	// FormatImageRight is https://github.com/cogentcore/core/blob/main/icons/svg/format_image_right.svg
 	FormatImageRight Icon = "format_image_right"
 
-	// FormatIndentDecrease is https://github.com/goki/icons/blob/main/svg/format_indent_decrease.svg
+	// FormatIndentDecrease is https://github.com/cogentcore/core/blob/main/icons/svg/format_indent_decrease.svg
 	FormatIndentDecrease Icon = "format_indent_decrease"
 
-	// FormatIndentIncrease is https://github.com/goki/icons/blob/main/svg/format_indent_increase.svg
+	// FormatIndentIncrease is https://github.com/cogentcore/core/blob/main/icons/svg/format_indent_increase.svg
 	FormatIndentIncrease Icon = "format_indent_increase"
 
-	// FormatInkHighlighter is https://github.com/goki/icons/blob/main/svg/format_ink_highlighter.svg
+	// FormatInkHighlighter is https://github.com/cogentcore/core/blob/main/icons/svg/format_ink_highlighter.svg
 	FormatInkHighlighter Icon = "format_ink_highlighter"
 
-	// FormatItalic is https://github.com/goki/icons/blob/main/svg/format_italic.svg
+	// FormatItalic is https://github.com/cogentcore/core/blob/main/icons/svg/format_italic.svg
 	FormatItalic Icon = "format_italic"
 
-	// FormatLetterSpacing is https://github.com/goki/icons/blob/main/svg/format_letter_spacing.svg
+	// FormatLetterSpacing is https://github.com/cogentcore/core/blob/main/icons/svg/format_letter_spacing.svg
 	FormatLetterSpacing Icon = "format_letter_spacing"
 
-	// FormatLetterSpacing2 is https://github.com/goki/icons/blob/main/svg/format_letter_spacing_2.svg
+	// FormatLetterSpacing2 is https://github.com/cogentcore/core/blob/main/icons/svg/format_letter_spacing_2.svg
 	FormatLetterSpacing2 Icon = "format_letter_spacing_2"
 
-	// FormatLetterSpacingStandard is https://github.com/goki/icons/blob/main/svg/format_letter_spacing_standard.svg
+	// FormatLetterSpacingStandard is https://github.com/cogentcore/core/blob/main/icons/svg/format_letter_spacing_standard.svg
 	FormatLetterSpacingStandard Icon = "format_letter_spacing_standard"
 
-	// FormatLetterSpacingWide is https://github.com/goki/icons/blob/main/svg/format_letter_spacing_wide.svg
+	// FormatLetterSpacingWide is https://github.com/cogentcore/core/blob/main/icons/svg/format_letter_spacing_wide.svg
 	FormatLetterSpacingWide Icon = "format_letter_spacing_wide"
 
-	// FormatLetterSpacingWider is https://github.com/goki/icons/blob/main/svg/format_letter_spacing_wider.svg
+	// FormatLetterSpacingWider is https://github.com/cogentcore/core/blob/main/icons/svg/format_letter_spacing_wider.svg
 	FormatLetterSpacingWider Icon = "format_letter_spacing_wider"
 
-	// FormatLineSpacing is https://github.com/goki/icons/blob/main/svg/format_line_spacing.svg
+	// FormatLineSpacing is https://github.com/cogentcore/core/blob/main/icons/svg/format_line_spacing.svg
 	FormatLineSpacing Icon = "format_line_spacing"
 
-	// FormatListBulleted is https://github.com/goki/icons/blob/main/svg/format_list_bulleted.svg
+	// FormatListBulleted is https://github.com/cogentcore/core/blob/main/icons/svg/format_list_bulleted.svg
 	FormatListBulleted Icon = "format_list_bulleted"
 
-	// FormatListBulletedAdd is https://github.com/goki/icons/blob/main/svg/format_list_bulleted_add.svg
+	// FormatListBulletedAdd is https://github.com/cogentcore/core/blob/main/icons/svg/format_list_bulleted_add.svg
 	FormatListBulletedAdd Icon = "format_list_bulleted_add"
 
-	// FormatListNumbered is https://github.com/goki/icons/blob/main/svg/format_list_numbered.svg
+	// FormatListNumbered is https://github.com/cogentcore/core/blob/main/icons/svg/format_list_numbered.svg
 	FormatListNumbered Icon = "format_list_numbered"
 
-	// FormatListNumberedRtl is https://github.com/goki/icons/blob/main/svg/format_list_numbered_rtl.svg
+	// FormatListNumberedRtl is https://github.com/cogentcore/core/blob/main/icons/svg/format_list_numbered_rtl.svg
 	FormatListNumberedRtl Icon = "format_list_numbered_rtl"
 
-	// FormatOverline is https://github.com/goki/icons/blob/main/svg/format_overline.svg
+	// FormatOverline is https://github.com/cogentcore/core/blob/main/icons/svg/format_overline.svg
 	FormatOverline Icon = "format_overline"
 
-	// FormatPaint is https://github.com/goki/icons/blob/main/svg/format_paint.svg
+	// FormatPaint is https://github.com/cogentcore/core/blob/main/icons/svg/format_paint.svg
 	FormatPaint Icon = "format_paint"
 
-	// FormatParagraph is https://github.com/goki/icons/blob/main/svg/format_paragraph.svg
+	// FormatParagraph is https://github.com/cogentcore/core/blob/main/icons/svg/format_paragraph.svg
 	FormatParagraph Icon = "format_paragraph"
 
-	// FormatQuote is https://github.com/goki/icons/blob/main/svg/format_quote.svg
+	// FormatQuote is https://github.com/cogentcore/core/blob/main/icons/svg/format_quote.svg
 	FormatQuote Icon = "format_quote"
 
-	// FormatShapes is https://github.com/goki/icons/blob/main/svg/format_shapes.svg
+	// FormatShapes is https://github.com/cogentcore/core/blob/main/icons/svg/format_shapes.svg
 	FormatShapes Icon = "format_shapes"
 
-	// FormatSize is https://github.com/goki/icons/blob/main/svg/format_size.svg
+	// FormatSize is https://github.com/cogentcore/core/blob/main/icons/svg/format_size.svg
 	FormatSize Icon = "format_size"
 
-	// FormatStrikethrough is https://github.com/goki/icons/blob/main/svg/format_strikethrough.svg
+	// FormatStrikethrough is https://github.com/cogentcore/core/blob/main/icons/svg/format_strikethrough.svg
 	FormatStrikethrough Icon = "format_strikethrough"
 
-	// FormatTextClip is https://github.com/goki/icons/blob/main/svg/format_text_clip.svg
+	// FormatTextClip is https://github.com/cogentcore/core/blob/main/icons/svg/format_text_clip.svg
 	FormatTextClip Icon = "format_text_clip"
 
-	// FormatTextOverflow is https://github.com/goki/icons/blob/main/svg/format_text_overflow.svg
+	// FormatTextOverflow is https://github.com/cogentcore/core/blob/main/icons/svg/format_text_overflow.svg
 	FormatTextOverflow Icon = "format_text_overflow"
 
-	// FormatTextWrap is https://github.com/goki/icons/blob/main/svg/format_text_wrap.svg
+	// FormatTextWrap is https://github.com/cogentcore/core/blob/main/icons/svg/format_text_wrap.svg
 	FormatTextWrap Icon = "format_text_wrap"
 
-	// FormatTextdirectionLToR is https://github.com/goki/icons/blob/main/svg/format_textdirection_l_to_r.svg
+	// FormatTextdirectionLToR is https://github.com/cogentcore/core/blob/main/icons/svg/format_textdirection_l_to_r.svg
 	FormatTextdirectionLToR Icon = "format_textdirection_l_to_r"
 
-	// FormatTextdirectionRToL is https://github.com/goki/icons/blob/main/svg/format_textdirection_r_to_l.svg
+	// FormatTextdirectionRToL is https://github.com/cogentcore/core/blob/main/icons/svg/format_textdirection_r_to_l.svg
 	FormatTextdirectionRToL Icon = "format_textdirection_r_to_l"
 
-	// FormatUnderlined is https://github.com/goki/icons/blob/main/svg/format_underlined.svg
+	// FormatUnderlined is https://github.com/cogentcore/core/blob/main/icons/svg/format_underlined.svg
 	FormatUnderlined Icon = "format_underlined"
 
-	// FormatUnderlinedSquiggle is https://github.com/goki/icons/blob/main/svg/format_underlined_squiggle.svg
+	// FormatUnderlinedSquiggle is https://github.com/cogentcore/core/blob/main/icons/svg/format_underlined_squiggle.svg
 	FormatUnderlinedSquiggle Icon = "format_underlined_squiggle"
 
-	// FormsAddOn is https://github.com/goki/icons/blob/main/svg/forms_add_on.svg
+	// FormsAddOn is https://github.com/cogentcore/core/blob/main/icons/svg/forms_add_on.svg
 	FormsAddOn Icon = "forms_add_on"
 
-	// FormsAppsScript is https://github.com/goki/icons/blob/main/svg/forms_apps_script.svg
+	// FormsAppsScript is https://github.com/cogentcore/core/blob/main/icons/svg/forms_apps_script.svg
 	FormsAppsScript Icon = "forms_apps_script"
 
-	// Forum is https://github.com/goki/icons/blob/main/svg/forum.svg
+	// Forum is https://github.com/cogentcore/core/blob/main/icons/svg/forum.svg
 	Forum Icon = "forum"
 
-	// Forward is https://github.com/goki/icons/blob/main/svg/forward.svg
+	// Forward is https://github.com/cogentcore/core/blob/main/icons/svg/forward.svg
 	Forward Icon = "forward"
 
-	// Forward10 is https://github.com/goki/icons/blob/main/svg/forward_10.svg
+	// Forward10 is https://github.com/cogentcore/core/blob/main/icons/svg/forward_10.svg
 	Forward10 Icon = "forward_10"
 
-	// Forward30 is https://github.com/goki/icons/blob/main/svg/forward_30.svg
+	// Forward30 is https://github.com/cogentcore/core/blob/main/icons/svg/forward_30.svg
 	Forward30 Icon = "forward_30"
 
-	// Forward5 is https://github.com/goki/icons/blob/main/svg/forward_5.svg
+	// Forward5 is https://github.com/cogentcore/core/blob/main/icons/svg/forward_5.svg
 	Forward5 Icon = "forward_5"
 
-	// ForwardCircle is https://github.com/goki/icons/blob/main/svg/forward_circle.svg
+	// ForwardCircle is https://github.com/cogentcore/core/blob/main/icons/svg/forward_circle.svg
 	ForwardCircle Icon = "forward_circle"
 
-	// ForwardMedia is https://github.com/goki/icons/blob/main/svg/forward_media.svg
+	// ForwardMedia is https://github.com/cogentcore/core/blob/main/icons/svg/forward_media.svg
 	ForwardMedia Icon = "forward_media"
 
-	// ForwardToInbox is https://github.com/goki/icons/blob/main/svg/forward_to_inbox.svg
+	// ForwardToInbox is https://github.com/cogentcore/core/blob/main/icons/svg/forward_to_inbox.svg
 	ForwardToInbox Icon = "forward_to_inbox"
 
-	// FrameInspect is https://github.com/goki/icons/blob/main/svg/frame_inspect.svg
+	// FrameInspect is https://github.com/cogentcore/core/blob/main/icons/svg/frame_inspect.svg
 	FrameInspect Icon = "frame_inspect"
 
-	// FramePerson is https://github.com/goki/icons/blob/main/svg/frame_person.svg
+	// FramePerson is https://github.com/cogentcore/core/blob/main/icons/svg/frame_person.svg
 	FramePerson Icon = "frame_person"
 
-	// FramePersonOff is https://github.com/goki/icons/blob/main/svg/frame_person_off.svg
+	// FramePersonOff is https://github.com/cogentcore/core/blob/main/icons/svg/frame_person_off.svg
 	FramePersonOff Icon = "frame_person_off"
 
-	// FrameReload is https://github.com/goki/icons/blob/main/svg/frame_reload.svg
+	// FrameReload is https://github.com/cogentcore/core/blob/main/icons/svg/frame_reload.svg
 	FrameReload Icon = "frame_reload"
 
-	// FrameSource is https://github.com/goki/icons/blob/main/svg/frame_source.svg
+	// FrameSource is https://github.com/cogentcore/core/blob/main/icons/svg/frame_source.svg
 	FrameSource Icon = "frame_source"
 
-	// FreeCancellation is https://github.com/goki/icons/blob/main/svg/free_cancellation.svg
+	// FreeCancellation is https://github.com/cogentcore/core/blob/main/icons/svg/free_cancellation.svg
 	FreeCancellation Icon = "free_cancellation"
 
-	// FrontHand is https://github.com/goki/icons/blob/main/svg/front_hand.svg
+	// FrontHand is https://github.com/cogentcore/core/blob/main/icons/svg/front_hand.svg
 	FrontHand Icon = "front_hand"
 
-	// FullCoverage is https://github.com/goki/icons/blob/main/svg/full_coverage.svg
+	// FullCoverage is https://github.com/cogentcore/core/blob/main/icons/svg/full_coverage.svg
 	FullCoverage Icon = "full_coverage"
 
-	// FullStackedBarChart is https://github.com/goki/icons/blob/main/svg/full_stacked_bar_chart.svg
+	// FullStackedBarChart is https://github.com/cogentcore/core/blob/main/icons/svg/full_stacked_bar_chart.svg
 	FullStackedBarChart Icon = "full_stacked_bar_chart"
 
-	// Fullscreen is https://github.com/goki/icons/blob/main/svg/fullscreen.svg
+	// Fullscreen is https://github.com/cogentcore/core/blob/main/icons/svg/fullscreen.svg
 	Fullscreen Icon = "fullscreen"
 
-	// FullscreenExit is https://github.com/goki/icons/blob/main/svg/fullscreen_exit.svg
+	// FullscreenExit is https://github.com/cogentcore/core/blob/main/icons/svg/fullscreen_exit.svg
 	FullscreenExit Icon = "fullscreen_exit"
 
-	// Function is https://github.com/goki/icons/blob/main/svg/function.svg
+	// Function is https://github.com/cogentcore/core/blob/main/icons/svg/function.svg
 	Function Icon = "function"
 
-	// Functions is https://github.com/goki/icons/blob/main/svg/functions.svg
+	// Functions is https://github.com/cogentcore/core/blob/main/icons/svg/functions.svg
 	Functions Icon = "functions"
 
-	// GTranslate is https://github.com/goki/icons/blob/main/svg/g_translate.svg
+	// GTranslate is https://github.com/cogentcore/core/blob/main/icons/svg/g_translate.svg
 	GTranslate Icon = "g_translate"
 
-	// GalleryThumbnail is https://github.com/goki/icons/blob/main/svg/gallery_thumbnail.svg
+	// GalleryThumbnail is https://github.com/cogentcore/core/blob/main/icons/svg/gallery_thumbnail.svg
 	GalleryThumbnail Icon = "gallery_thumbnail"
 
-	// Gamepad is https://github.com/goki/icons/blob/main/svg/gamepad.svg
+	// Gamepad is https://github.com/cogentcore/core/blob/main/icons/svg/gamepad.svg
 	Gamepad Icon = "gamepad"
 
-	// Genres is https://github.com/goki/icons/blob/main/svg/genres.svg
+	// Genres is https://github.com/cogentcore/core/blob/main/icons/svg/genres.svg
 	Genres Icon = "genres"
 
-	// Gesture is https://github.com/goki/icons/blob/main/svg/gesture.svg
+	// Gesture is https://github.com/cogentcore/core/blob/main/icons/svg/gesture.svg
 	Gesture Icon = "gesture"
 
-	// GestureSelect is https://github.com/goki/icons/blob/main/svg/gesture_select.svg
+	// GestureSelect is https://github.com/cogentcore/core/blob/main/icons/svg/gesture_select.svg
 	GestureSelect Icon = "gesture_select"
 
-	// Gif is https://github.com/goki/icons/blob/main/svg/gif.svg
+	// Gif is https://github.com/cogentcore/core/blob/main/icons/svg/gif.svg
 	Gif Icon = "gif"
 
-	// GifBox is https://github.com/goki/icons/blob/main/svg/gif_box.svg
+	// GifBox is https://github.com/cogentcore/core/blob/main/icons/svg/gif_box.svg
 	GifBox Icon = "gif_box"
 
-	// Girl is https://github.com/goki/icons/blob/main/svg/girl.svg
+	// Girl is https://github.com/cogentcore/core/blob/main/icons/svg/girl.svg
 	Girl Icon = "girl"
 
-	// Git is https://github.com/goki/icons/blob/main/svg/git.svg
+	// Git is https://github.com/cogentcore/core/blob/main/icons/svg/git.svg
 	Git Icon = "git"
 
-	// GlassCup is https://github.com/goki/icons/blob/main/svg/glass_cup.svg
+	// GlassCup is https://github.com/cogentcore/core/blob/main/icons/svg/glass_cup.svg
 	GlassCup Icon = "glass_cup"
 
-	// GlobeAsia is https://github.com/goki/icons/blob/main/svg/globe_asia.svg
+	// GlobeAsia is https://github.com/cogentcore/core/blob/main/icons/svg/globe_asia.svg
 	GlobeAsia Icon = "globe_asia"
 
-	// GlobeUk is https://github.com/goki/icons/blob/main/svg/globe_uk.svg
+	// GlobeUk is https://github.com/cogentcore/core/blob/main/icons/svg/globe_uk.svg
 	GlobeUk Icon = "globe_uk"
 
-	// Glyphs is https://github.com/goki/icons/blob/main/svg/glyphs.svg
+	// Glyphs is https://github.com/cogentcore/core/blob/main/icons/svg/glyphs.svg
 	Glyphs Icon = "glyphs"
 
-	// Go is https://github.com/goki/icons/blob/main/svg/go.svg
+	// Go is https://github.com/cogentcore/core/blob/main/icons/svg/go.svg
 	Go Icon = "go"
 
-	// GoToLine is https://github.com/goki/icons/blob/main/svg/go_to_line.svg
+	// GoToLine is https://github.com/cogentcore/core/blob/main/icons/svg/go_to_line.svg
 	GoToLine Icon = "go_to_line"
 
-	// Grade is https://github.com/goki/icons/blob/main/svg/grade.svg
+	// Grade is https://github.com/cogentcore/core/blob/main/icons/svg/grade.svg
 	Grade Icon = "grade"
 
-	// Gradient is https://github.com/goki/icons/blob/main/svg/gradient.svg
+	// Gradient is https://github.com/cogentcore/core/blob/main/icons/svg/gradient.svg
 	Gradient Icon = "gradient"
 
-	// Grading is https://github.com/goki/icons/blob/main/svg/grading.svg
+	// Grading is https://github.com/cogentcore/core/blob/main/icons/svg/grading.svg
 	Grading Icon = "grading"
 
-	// GraphicEq is https://github.com/goki/icons/blob/main/svg/graphic_eq.svg
+	// GraphicEq is https://github.com/cogentcore/core/blob/main/icons/svg/graphic_eq.svg
 	GraphicEq Icon = "graphic_eq"
 
-	// Grid3X3 is https://github.com/goki/icons/blob/main/svg/grid_3x3.svg
+	// Grid3X3 is https://github.com/cogentcore/core/blob/main/icons/svg/grid_3x3.svg
 	Grid3X3 Icon = "grid_3x3"
 
-	// Grid3X3Off is https://github.com/goki/icons/blob/main/svg/grid_3x3_off.svg
+	// Grid3X3Off is https://github.com/cogentcore/core/blob/main/icons/svg/grid_3x3_off.svg
 	Grid3X3Off Icon = "grid_3x3_off"
 
-	// Grid4X4 is https://github.com/goki/icons/blob/main/svg/grid_4x4.svg
+	// Grid4X4 is https://github.com/cogentcore/core/blob/main/icons/svg/grid_4x4.svg
 	Grid4X4 Icon = "grid_4x4"
 
-	// GridGoldenratio is https://github.com/goki/icons/blob/main/svg/grid_goldenratio.svg
+	// GridGoldenratio is https://github.com/cogentcore/core/blob/main/icons/svg/grid_goldenratio.svg
 	GridGoldenratio Icon = "grid_goldenratio"
 
-	// GridGuides is https://github.com/goki/icons/blob/main/svg/grid_guides.svg
+	// GridGuides is https://github.com/cogentcore/core/blob/main/icons/svg/grid_guides.svg
 	GridGuides Icon = "grid_guides"
 
-	// GridOff is https://github.com/goki/icons/blob/main/svg/grid_off.svg
+	// GridOff is https://github.com/cogentcore/core/blob/main/icons/svg/grid_off.svg
 	GridOff Icon = "grid_off"
 
-	// GridOn is https://github.com/goki/icons/blob/main/svg/grid_on.svg
+	// GridOn is https://github.com/cogentcore/core/blob/main/icons/svg/grid_on.svg
 	GridOn Icon = "grid_on"
 
-	// GridView is https://github.com/goki/icons/blob/main/svg/grid_view.svg
+	// GridView is https://github.com/cogentcore/core/blob/main/icons/svg/grid_view.svg
 	GridView Icon = "grid_view"
 
-	// Group is https://github.com/goki/icons/blob/main/svg/group.svg
+	// Group is https://github.com/cogentcore/core/blob/main/icons/svg/group.svg
 	Group Icon = "group"
 
-	// GroupAdd is https://github.com/goki/icons/blob/main/svg/group_add.svg
+	// GroupAdd is https://github.com/cogentcore/core/blob/main/icons/svg/group_add.svg
 	GroupAdd Icon = "group_add"
 
-	// GroupOff is https://github.com/goki/icons/blob/main/svg/group_off.svg
+	// GroupOff is https://github.com/cogentcore/core/blob/main/icons/svg/group_off.svg
 	GroupOff Icon = "group_off"
 
-	// GroupRemove is https://github.com/goki/icons/blob/main/svg/group_remove.svg
+	// GroupRemove is https://github.com/cogentcore/core/blob/main/icons/svg/group_remove.svg
 	GroupRemove Icon = "group_remove"
 
-	// GroupWork is https://github.com/goki/icons/blob/main/svg/group_work.svg
+	// GroupWork is https://github.com/cogentcore/core/blob/main/icons/svg/group_work.svg
 	GroupWork Icon = "group_work"
 
-	// GroupedBarChart is https://github.com/goki/icons/blob/main/svg/grouped_bar_chart.svg
+	// GroupedBarChart is https://github.com/cogentcore/core/blob/main/icons/svg/grouped_bar_chart.svg
 	GroupedBarChart Icon = "grouped_bar_chart"
 
-	// Groups is https://github.com/goki/icons/blob/main/svg/groups.svg
+	// Groups is https://github.com/cogentcore/core/blob/main/icons/svg/groups.svg
 	Groups Icon = "groups"
 
-	// Groups2 is https://github.com/goki/icons/blob/main/svg/groups_2.svg
+	// Groups2 is https://github.com/cogentcore/core/blob/main/icons/svg/groups_2.svg
 	Groups2 Icon = "groups_2"
 
-	// Groups3 is https://github.com/goki/icons/blob/main/svg/groups_3.svg
+	// Groups3 is https://github.com/cogentcore/core/blob/main/icons/svg/groups_3.svg
 	Groups3 Icon = "groups_3"
 
-	// HandGesture is https://github.com/goki/icons/blob/main/svg/hand_gesture.svg
+	// HandGesture is https://github.com/cogentcore/core/blob/main/icons/svg/hand_gesture.svg
 	HandGesture Icon = "hand_gesture"
 
-	// Handshake is https://github.com/goki/icons/blob/main/svg/handshake.svg
+	// Handshake is https://github.com/cogentcore/core/blob/main/icons/svg/handshake.svg
 	Handshake Icon = "handshake"
 
-	// HangoutVideo is https://github.com/goki/icons/blob/main/svg/hangout_video.svg
+	// HangoutVideo is https://github.com/cogentcore/core/blob/main/icons/svg/hangout_video.svg
 	HangoutVideo Icon = "hangout_video"
 
-	// HangoutVideoOff is https://github.com/goki/icons/blob/main/svg/hangout_video_off.svg
+	// HangoutVideoOff is https://github.com/cogentcore/core/blob/main/icons/svg/hangout_video_off.svg
 	HangoutVideoOff Icon = "hangout_video_off"
 
-	// HardDrive is https://github.com/goki/icons/blob/main/svg/hard_drive.svg
+	// HardDrive is https://github.com/cogentcore/core/blob/main/icons/svg/hard_drive.svg
 	HardDrive Icon = "hard_drive"
 
-	// HardDrive2 is https://github.com/goki/icons/blob/main/svg/hard_drive_2.svg
+	// HardDrive2 is https://github.com/cogentcore/core/blob/main/icons/svg/hard_drive_2.svg
 	HardDrive2 Icon = "hard_drive_2"
 
-	// Hardware is https://github.com/goki/icons/blob/main/svg/hardware.svg
+	// Hardware is https://github.com/cogentcore/core/blob/main/icons/svg/hardware.svg
 	Hardware Icon = "hardware"
 
-	// Hd is https://github.com/goki/icons/blob/main/svg/hd.svg
+	// Hd is https://github.com/cogentcore/core/blob/main/icons/svg/hd.svg
 	Hd Icon = "hd"
 
-	// Headphones is https://github.com/goki/icons/blob/main/svg/headphones.svg
+	// Headphones is https://github.com/cogentcore/core/blob/main/icons/svg/headphones.svg
 	Headphones Icon = "headphones"
 
-	// HeadphonesBattery is https://github.com/goki/icons/blob/main/svg/headphones_battery.svg
+	// HeadphonesBattery is https://github.com/cogentcore/core/blob/main/icons/svg/headphones_battery.svg
 	HeadphonesBattery Icon = "headphones_battery"
 
-	// HeadsetMic is https://github.com/goki/icons/blob/main/svg/headset_mic.svg
+	// HeadsetMic is https://github.com/cogentcore/core/blob/main/icons/svg/headset_mic.svg
 	HeadsetMic Icon = "headset_mic"
 
-	// HeadsetOff is https://github.com/goki/icons/blob/main/svg/headset_off.svg
+	// HeadsetOff is https://github.com/cogentcore/core/blob/main/icons/svg/headset_off.svg
 	HeadsetOff Icon = "headset_off"
 
-	// Hearing is https://github.com/goki/icons/blob/main/svg/hearing.svg
+	// Hearing is https://github.com/cogentcore/core/blob/main/icons/svg/hearing.svg
 	Hearing Icon = "hearing"
 
-	// HearingDisabled is https://github.com/goki/icons/blob/main/svg/hearing_disabled.svg
+	// HearingDisabled is https://github.com/cogentcore/core/blob/main/icons/svg/hearing_disabled.svg
 	HearingDisabled Icon = "hearing_disabled"
 
-	// HeartMinus is https://github.com/goki/icons/blob/main/svg/heart_minus.svg
+	// HeartMinus is https://github.com/cogentcore/core/blob/main/icons/svg/heart_minus.svg
 	HeartMinus Icon = "heart_minus"
 
-	// HeartPlus is https://github.com/goki/icons/blob/main/svg/heart_plus.svg
+	// HeartPlus is https://github.com/cogentcore/core/blob/main/icons/svg/heart_plus.svg
 	HeartPlus Icon = "heart_plus"
 
-	// Height is https://github.com/goki/icons/blob/main/svg/height.svg
+	// Height is https://github.com/cogentcore/core/blob/main/icons/svg/height.svg
 	Height Icon = "height"
 
-	// Help is https://github.com/goki/icons/blob/main/svg/help.svg
+	// Help is https://github.com/cogentcore/core/blob/main/icons/svg/help.svg
 	Help Icon = "help"
 
-	// Hexagon is https://github.com/goki/icons/blob/main/svg/hexagon.svg
+	// Hexagon is https://github.com/cogentcore/core/blob/main/icons/svg/hexagon.svg
 	Hexagon Icon = "hexagon"
 
-	// Hide is https://github.com/goki/icons/blob/main/svg/hide.svg
+	// Hide is https://github.com/cogentcore/core/blob/main/icons/svg/hide.svg
 	Hide Icon = "hide"
 
-	// HideImage is https://github.com/goki/icons/blob/main/svg/hide_image.svg
+	// HideImage is https://github.com/cogentcore/core/blob/main/icons/svg/hide_image.svg
 	HideImage Icon = "hide_image"
 
-	// HideSource is https://github.com/goki/icons/blob/main/svg/hide_source.svg
+	// HideSource is https://github.com/cogentcore/core/blob/main/icons/svg/hide_source.svg
 	HideSource Icon = "hide_source"
 
-	// HighDensity is https://github.com/goki/icons/blob/main/svg/high_density.svg
+	// HighDensity is https://github.com/cogentcore/core/blob/main/icons/svg/high_density.svg
 	HighDensity Icon = "high_density"
 
-	// HighQuality is https://github.com/goki/icons/blob/main/svg/high_quality.svg
+	// HighQuality is https://github.com/cogentcore/core/blob/main/icons/svg/high_quality.svg
 	HighQuality Icon = "high_quality"
 
-	// Highlight is https://github.com/goki/icons/blob/main/svg/highlight.svg
+	// Highlight is https://github.com/cogentcore/core/blob/main/icons/svg/highlight.svg
 	Highlight Icon = "highlight"
 
-	// HighlighterSize1 is https://github.com/goki/icons/blob/main/svg/highlighter_size_1.svg
+	// HighlighterSize1 is https://github.com/cogentcore/core/blob/main/icons/svg/highlighter_size_1.svg
 	HighlighterSize1 Icon = "highlighter_size_1"
 
-	// HighlighterSize2 is https://github.com/goki/icons/blob/main/svg/highlighter_size_2.svg
+	// HighlighterSize2 is https://github.com/cogentcore/core/blob/main/icons/svg/highlighter_size_2.svg
 	HighlighterSize2 Icon = "highlighter_size_2"
 
-	// HighlighterSize3 is https://github.com/goki/icons/blob/main/svg/highlighter_size_3.svg
+	// HighlighterSize3 is https://github.com/cogentcore/core/blob/main/icons/svg/highlighter_size_3.svg
 	HighlighterSize3 Icon = "highlighter_size_3"
 
-	// HighlighterSize4 is https://github.com/goki/icons/blob/main/svg/highlighter_size_4.svg
+	// HighlighterSize4 is https://github.com/cogentcore/core/blob/main/icons/svg/highlighter_size_4.svg
 	HighlighterSize4 Icon = "highlighter_size_4"
 
-	// HighlighterSize5 is https://github.com/goki/icons/blob/main/svg/highlighter_size_5.svg
+	// HighlighterSize5 is https://github.com/cogentcore/core/blob/main/icons/svg/highlighter_size_5.svg
 	HighlighterSize5 Icon = "highlighter_size_5"
 
-	// History is https://github.com/goki/icons/blob/main/svg/history.svg
+	// History is https://github.com/cogentcore/core/blob/main/icons/svg/history.svg
 	History Icon = "history"
 
-	// HistoryToggleOff is https://github.com/goki/icons/blob/main/svg/history_toggle_off.svg
+	// HistoryToggleOff is https://github.com/cogentcore/core/blob/main/icons/svg/history_toggle_off.svg
 	HistoryToggleOff Icon = "history_toggle_off"
 
-	// Hive is https://github.com/goki/icons/blob/main/svg/hive.svg
+	// Hive is https://github.com/cogentcore/core/blob/main/icons/svg/hive.svg
 	Hive Icon = "hive"
 
-	// Home is https://github.com/goki/icons/blob/main/svg/home.svg
+	// Home is https://github.com/cogentcore/core/blob/main/icons/svg/home.svg
 	Home Icon = "home"
 
-	// HomeAppLogo is https://github.com/goki/icons/blob/main/svg/home_app_logo.svg
+	// HomeAppLogo is https://github.com/cogentcore/core/blob/main/icons/svg/home_app_logo.svg
 	HomeAppLogo Icon = "home_app_logo"
 
-	// HomeIotDevice is https://github.com/goki/icons/blob/main/svg/home_iot_device.svg
+	// HomeIotDevice is https://github.com/cogentcore/core/blob/main/icons/svg/home_iot_device.svg
 	HomeIotDevice Icon = "home_iot_device"
 
-	// HomePin is https://github.com/goki/icons/blob/main/svg/home_pin.svg
+	// HomePin is https://github.com/cogentcore/core/blob/main/icons/svg/home_pin.svg
 	HomePin Icon = "home_pin"
 
-	// HomeStorage is https://github.com/goki/icons/blob/main/svg/home_storage.svg
+	// HomeStorage is https://github.com/cogentcore/core/blob/main/icons/svg/home_storage.svg
 	HomeStorage Icon = "home_storage"
 
-	// HorizontalDistribute is https://github.com/goki/icons/blob/main/svg/horizontal_distribute.svg
+	// HorizontalDistribute is https://github.com/cogentcore/core/blob/main/icons/svg/horizontal_distribute.svg
 	HorizontalDistribute Icon = "horizontal_distribute"
 
-	// HorizontalRule is https://github.com/goki/icons/blob/main/svg/horizontal_rule.svg
+	// HorizontalRule is https://github.com/cogentcore/core/blob/main/icons/svg/horizontal_rule.svg
 	HorizontalRule Icon = "horizontal_rule"
 
-	// HorizontalSplit is https://github.com/goki/icons/blob/main/svg/horizontal_split.svg
+	// HorizontalSplit is https://github.com/cogentcore/core/blob/main/icons/svg/horizontal_split.svg
 	HorizontalSplit Icon = "horizontal_split"
 
-	// HourglassBottom is https://github.com/goki/icons/blob/main/svg/hourglass_bottom.svg
+	// HourglassBottom is https://github.com/cogentcore/core/blob/main/icons/svg/hourglass_bottom.svg
 	HourglassBottom Icon = "hourglass_bottom"
 
-	// HourglassDisabled is https://github.com/goki/icons/blob/main/svg/hourglass_disabled.svg
+	// HourglassDisabled is https://github.com/cogentcore/core/blob/main/icons/svg/hourglass_disabled.svg
 	HourglassDisabled Icon = "hourglass_disabled"
 
-	// HourglassEmpty is https://github.com/goki/icons/blob/main/svg/hourglass_empty.svg
+	// HourglassEmpty is https://github.com/cogentcore/core/blob/main/icons/svg/hourglass_empty.svg
 	HourglassEmpty Icon = "hourglass_empty"
 
-	// HourglassTop is https://github.com/goki/icons/blob/main/svg/hourglass_top.svg
+	// HourglassTop is https://github.com/cogentcore/core/blob/main/icons/svg/hourglass_top.svg
 	HourglassTop Icon = "hourglass_top"
 
-	// House is https://github.com/goki/icons/blob/main/svg/house.svg
+	// House is https://github.com/cogentcore/core/blob/main/icons/svg/house.svg
 	House Icon = "house"
 
-	// Html is https://github.com/goki/icons/blob/main/svg/html.svg
+	// Html is https://github.com/cogentcore/core/blob/main/icons/svg/html.svg
 	Html Icon = "html"
 
-	// Http is https://github.com/goki/icons/blob/main/svg/http.svg
+	// Http is https://github.com/cogentcore/core/blob/main/icons/svg/http.svg
 	Http Icon = "http"
 
-	// Hub is https://github.com/goki/icons/blob/main/svg/hub.svg
+	// Hub is https://github.com/cogentcore/core/blob/main/icons/svg/hub.svg
 	Hub Icon = "hub"
 
-	// Iframe is https://github.com/goki/icons/blob/main/svg/iframe.svg
+	// Iframe is https://github.com/cogentcore/core/blob/main/icons/svg/iframe.svg
 	Iframe Icon = "iframe"
 
-	// IframeOff is https://github.com/goki/icons/blob/main/svg/iframe_off.svg
+	// IframeOff is https://github.com/cogentcore/core/blob/main/icons/svg/iframe_off.svg
 	IframeOff Icon = "iframe_off"
 
-	// Image is https://github.com/goki/icons/blob/main/svg/image.svg
+	// Image is https://github.com/cogentcore/core/blob/main/icons/svg/image.svg
 	Image Icon = "image"
 
-	// ImageAspectRatio is https://github.com/goki/icons/blob/main/svg/image_aspect_ratio.svg
+	// ImageAspectRatio is https://github.com/cogentcore/core/blob/main/icons/svg/image_aspect_ratio.svg
 	ImageAspectRatio Icon = "image_aspect_ratio"
 
-	// ImageNotSupported is https://github.com/goki/icons/blob/main/svg/image_not_supported.svg
+	// ImageNotSupported is https://github.com/cogentcore/core/blob/main/icons/svg/image_not_supported.svg
 	ImageNotSupported Icon = "image_not_supported"
 
-	// ImageSearch is https://github.com/goki/icons/blob/main/svg/image_search.svg
+	// ImageSearch is https://github.com/cogentcore/core/blob/main/icons/svg/image_search.svg
 	ImageSearch Icon = "image_search"
 
-	// Imagesmode is https://github.com/goki/icons/blob/main/svg/imagesmode.svg
+	// Imagesmode is https://github.com/cogentcore/core/blob/main/icons/svg/imagesmode.svg
 	Imagesmode Icon = "imagesmode"
 
-	// ImportContacts is https://github.com/goki/icons/blob/main/svg/import_contacts.svg
+	// ImportContacts is https://github.com/cogentcore/core/blob/main/icons/svg/import_contacts.svg
 	ImportContacts Icon = "import_contacts"
 
-	// ImportantDevices is https://github.com/goki/icons/blob/main/svg/important_devices.svg
+	// ImportantDevices is https://github.com/cogentcore/core/blob/main/icons/svg/important_devices.svg
 	ImportantDevices Icon = "important_devices"
 
-	// InactiveOrder is https://github.com/goki/icons/blob/main/svg/inactive_order.svg
+	// InactiveOrder is https://github.com/cogentcore/core/blob/main/icons/svg/inactive_order.svg
 	InactiveOrder Icon = "inactive_order"
 
-	// Inbox is https://github.com/goki/icons/blob/main/svg/inbox.svg
+	// Inbox is https://github.com/cogentcore/core/blob/main/icons/svg/inbox.svg
 	Inbox Icon = "inbox"
 
-	// InboxCustomize is https://github.com/goki/icons/blob/main/svg/inbox_customize.svg
+	// InboxCustomize is https://github.com/cogentcore/core/blob/main/icons/svg/inbox_customize.svg
 	InboxCustomize Icon = "inbox_customize"
 
-	// IncompleteCircle is https://github.com/goki/icons/blob/main/svg/incomplete_circle.svg
+	// IncompleteCircle is https://github.com/cogentcore/core/blob/main/icons/svg/incomplete_circle.svg
 	IncompleteCircle Icon = "incomplete_circle"
 
-	// IndeterminateCheckBox is https://github.com/goki/icons/blob/main/svg/indeterminate_check_box.svg
+	// IndeterminateCheckBox is https://github.com/cogentcore/core/blob/main/icons/svg/indeterminate_check_box.svg
 	IndeterminateCheckBox Icon = "indeterminate_check_box"
 
-	// Info is https://github.com/goki/icons/blob/main/svg/info.svg
+	// Info is https://github.com/cogentcore/core/blob/main/icons/svg/info.svg
 	Info Icon = "info"
 
-	// InfoI is https://github.com/goki/icons/blob/main/svg/info_i.svg
+	// InfoI is https://github.com/cogentcore/core/blob/main/icons/svg/info_i.svg
 	InfoI Icon = "info_i"
 
-	// Infrared is https://github.com/goki/icons/blob/main/svg/infrared.svg
+	// Infrared is https://github.com/cogentcore/core/blob/main/icons/svg/infrared.svg
 	Infrared Icon = "infrared"
 
-	// InkEraser is https://github.com/goki/icons/blob/main/svg/ink_eraser.svg
+	// InkEraser is https://github.com/cogentcore/core/blob/main/icons/svg/ink_eraser.svg
 	InkEraser Icon = "ink_eraser"
 
-	// InkEraserOff is https://github.com/goki/icons/blob/main/svg/ink_eraser_off.svg
+	// InkEraserOff is https://github.com/cogentcore/core/blob/main/icons/svg/ink_eraser_off.svg
 	InkEraserOff Icon = "ink_eraser_off"
 
-	// InkHighlighter is https://github.com/goki/icons/blob/main/svg/ink_highlighter.svg
+	// InkHighlighter is https://github.com/cogentcore/core/blob/main/icons/svg/ink_highlighter.svg
 	InkHighlighter Icon = "ink_highlighter"
 
-	// InkMarker is https://github.com/goki/icons/blob/main/svg/ink_marker.svg
+	// InkMarker is https://github.com/cogentcore/core/blob/main/icons/svg/ink_marker.svg
 	InkMarker Icon = "ink_marker"
 
-	// InkPen is https://github.com/goki/icons/blob/main/svg/ink_pen.svg
+	// InkPen is https://github.com/cogentcore/core/blob/main/icons/svg/ink_pen.svg
 	InkPen Icon = "ink_pen"
 
-	// Input is https://github.com/goki/icons/blob/main/svg/input.svg
+	// Input is https://github.com/cogentcore/core/blob/main/icons/svg/input.svg
 	Input Icon = "input"
 
-	// InputCircle is https://github.com/goki/icons/blob/main/svg/input_circle.svg
+	// InputCircle is https://github.com/cogentcore/core/blob/main/icons/svg/input_circle.svg
 	InputCircle Icon = "input_circle"
 
-	// InsertChart is https://github.com/goki/icons/blob/main/svg/insert_chart.svg
+	// InsertChart is https://github.com/cogentcore/core/blob/main/icons/svg/insert_chart.svg
 	InsertChart Icon = "insert_chart"
 
-	// InsertPageBreak is https://github.com/goki/icons/blob/main/svg/insert_page_break.svg
+	// InsertPageBreak is https://github.com/cogentcore/core/blob/main/icons/svg/insert_page_break.svg
 	InsertPageBreak Icon = "insert_page_break"
 
-	// InsertText is https://github.com/goki/icons/blob/main/svg/insert_text.svg
+	// InsertText is https://github.com/cogentcore/core/blob/main/icons/svg/insert_text.svg
 	InsertText Icon = "insert_text"
 
-	// InstallDesktop is https://github.com/goki/icons/blob/main/svg/install_desktop.svg
+	// InstallDesktop is https://github.com/cogentcore/core/blob/main/icons/svg/install_desktop.svg
 	InstallDesktop Icon = "install_desktop"
 
-	// InstallMobile is https://github.com/goki/icons/blob/main/svg/install_mobile.svg
+	// InstallMobile is https://github.com/cogentcore/core/blob/main/icons/svg/install_mobile.svg
 	InstallMobile Icon = "install_mobile"
 
-	// InstantMix is https://github.com/goki/icons/blob/main/svg/instant_mix.svg
+	// InstantMix is https://github.com/cogentcore/core/blob/main/icons/svg/instant_mix.svg
 	InstantMix Icon = "instant_mix"
 
-	// IntegrationInstructions is https://github.com/goki/icons/blob/main/svg/integration_instructions.svg
+	// IntegrationInstructions is https://github.com/cogentcore/core/blob/main/icons/svg/integration_instructions.svg
 	IntegrationInstructions Icon = "integration_instructions"
 
-	// InteractiveSpace is https://github.com/goki/icons/blob/main/svg/interactive_space.svg
+	// InteractiveSpace is https://github.com/cogentcore/core/blob/main/icons/svg/interactive_space.svg
 	InteractiveSpace Icon = "interactive_space"
 
-	// Interests is https://github.com/goki/icons/blob/main/svg/interests.svg
+	// Interests is https://github.com/cogentcore/core/blob/main/icons/svg/interests.svg
 	Interests Icon = "interests"
 
-	// Inventory is https://github.com/goki/icons/blob/main/svg/inventory.svg
+	// Inventory is https://github.com/cogentcore/core/blob/main/icons/svg/inventory.svg
 	Inventory Icon = "inventory"
 
-	// Inventory2 is https://github.com/goki/icons/blob/main/svg/inventory_2.svg
+	// Inventory2 is https://github.com/cogentcore/core/blob/main/icons/svg/inventory_2.svg
 	Inventory2 Icon = "inventory_2"
 
-	// InvertColors is https://github.com/goki/icons/blob/main/svg/invert_colors.svg
+	// InvertColors is https://github.com/cogentcore/core/blob/main/icons/svg/invert_colors.svg
 	InvertColors Icon = "invert_colors"
 
-	// InvertColorsOff is https://github.com/goki/icons/blob/main/svg/invert_colors_off.svg
+	// InvertColorsOff is https://github.com/cogentcore/core/blob/main/icons/svg/invert_colors_off.svg
 	InvertColorsOff Icon = "invert_colors_off"
 
-	// IosShare is https://github.com/goki/icons/blob/main/svg/ios_share.svg
+	// IosShare is https://github.com/cogentcore/core/blob/main/icons/svg/ios_share.svg
 	IosShare Icon = "ios_share"
 
-	// Javascript is https://github.com/goki/icons/blob/main/svg/javascript.svg
+	// Javascript is https://github.com/cogentcore/core/blob/main/icons/svg/javascript.svg
 	Javascript Icon = "javascript"
 
-	// Join is https://github.com/goki/icons/blob/main/svg/join.svg
+	// Join is https://github.com/cogentcore/core/blob/main/icons/svg/join.svg
 	Join Icon = "join"
 
-	// JoinInner is https://github.com/goki/icons/blob/main/svg/join_inner.svg
+	// JoinInner is https://github.com/cogentcore/core/blob/main/icons/svg/join_inner.svg
 	JoinInner Icon = "join_inner"
 
-	// JoinLeft is https://github.com/goki/icons/blob/main/svg/join_left.svg
+	// JoinLeft is https://github.com/cogentcore/core/blob/main/icons/svg/join_left.svg
 	JoinLeft Icon = "join_left"
 
-	// JoinRight is https://github.com/goki/icons/blob/main/svg/join_right.svg
+	// JoinRight is https://github.com/cogentcore/core/blob/main/icons/svg/join_right.svg
 	JoinRight Icon = "join_right"
 
-	// Joystick is https://github.com/goki/icons/blob/main/svg/joystick.svg
+	// Joystick is https://github.com/cogentcore/core/blob/main/icons/svg/joystick.svg
 	Joystick Icon = "joystick"
 
-	// Json is https://github.com/goki/icons/blob/main/svg/json.svg
+	// Json is https://github.com/cogentcore/core/blob/main/icons/svg/json.svg
 	Json Icon = "json"
 
-	// JumpToElement is https://github.com/goki/icons/blob/main/svg/jump_to_element.svg
+	// JumpToElement is https://github.com/cogentcore/core/blob/main/icons/svg/jump_to_element.svg
 	JumpToElement Icon = "jump_to_element"
 
-	// Key is https://github.com/goki/icons/blob/main/svg/key.svg
+	// Key is https://github.com/cogentcore/core/blob/main/icons/svg/key.svg
 	Key Icon = "key"
 
-	// KeyOff is https://github.com/goki/icons/blob/main/svg/key_off.svg
+	// KeyOff is https://github.com/cogentcore/core/blob/main/icons/svg/key_off.svg
 	KeyOff Icon = "key_off"
 
-	// KeyVisualizer is https://github.com/goki/icons/blob/main/svg/key_visualizer.svg
+	// KeyVisualizer is https://github.com/cogentcore/core/blob/main/icons/svg/key_visualizer.svg
 	KeyVisualizer Icon = "key_visualizer"
 
-	// Keyboard is https://github.com/goki/icons/blob/main/svg/keyboard.svg
+	// Keyboard is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard.svg
 	Keyboard Icon = "keyboard"
 
-	// KeyboardAlt is https://github.com/goki/icons/blob/main/svg/keyboard_alt.svg
+	// KeyboardAlt is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_alt.svg
 	KeyboardAlt Icon = "keyboard_alt"
 
-	// KeyboardArrowDown is https://github.com/goki/icons/blob/main/svg/keyboard_arrow_down.svg
+	// KeyboardArrowDown is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_arrow_down.svg
 	KeyboardArrowDown Icon = "keyboard_arrow_down"
 
-	// KeyboardArrowLeft is https://github.com/goki/icons/blob/main/svg/keyboard_arrow_left.svg
+	// KeyboardArrowLeft is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_arrow_left.svg
 	KeyboardArrowLeft Icon = "keyboard_arrow_left"
 
-	// KeyboardArrowRight is https://github.com/goki/icons/blob/main/svg/keyboard_arrow_right.svg
+	// KeyboardArrowRight is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_arrow_right.svg
 	KeyboardArrowRight Icon = "keyboard_arrow_right"
 
-	// KeyboardArrowUp is https://github.com/goki/icons/blob/main/svg/keyboard_arrow_up.svg
+	// KeyboardArrowUp is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_arrow_up.svg
 	KeyboardArrowUp Icon = "keyboard_arrow_up"
 
-	// KeyboardBackspace is https://github.com/goki/icons/blob/main/svg/keyboard_backspace.svg
+	// KeyboardBackspace is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_backspace.svg
 	KeyboardBackspace Icon = "keyboard_backspace"
 
-	// KeyboardCapslock is https://github.com/goki/icons/blob/main/svg/keyboard_capslock.svg
+	// KeyboardCapslock is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_capslock.svg
 	KeyboardCapslock Icon = "keyboard_capslock"
 
-	// KeyboardCapslockBadge is https://github.com/goki/icons/blob/main/svg/keyboard_capslock_badge.svg
+	// KeyboardCapslockBadge is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_capslock_badge.svg
 	KeyboardCapslockBadge Icon = "keyboard_capslock_badge"
 
-	// KeyboardCommandKey is https://github.com/goki/icons/blob/main/svg/keyboard_command_key.svg
+	// KeyboardCommandKey is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_command_key.svg
 	KeyboardCommandKey Icon = "keyboard_command_key"
 
-	// KeyboardControlKey is https://github.com/goki/icons/blob/main/svg/keyboard_control_key.svg
+	// KeyboardControlKey is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_control_key.svg
 	KeyboardControlKey Icon = "keyboard_control_key"
 
-	// KeyboardDoubleArrowDown is https://github.com/goki/icons/blob/main/svg/keyboard_double_arrow_down.svg
+	// KeyboardDoubleArrowDown is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_double_arrow_down.svg
 	KeyboardDoubleArrowDown Icon = "keyboard_double_arrow_down"
 
-	// KeyboardDoubleArrowLeft is https://github.com/goki/icons/blob/main/svg/keyboard_double_arrow_left.svg
+	// KeyboardDoubleArrowLeft is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_double_arrow_left.svg
 	KeyboardDoubleArrowLeft Icon = "keyboard_double_arrow_left"
 
-	// KeyboardDoubleArrowRight is https://github.com/goki/icons/blob/main/svg/keyboard_double_arrow_right.svg
+	// KeyboardDoubleArrowRight is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_double_arrow_right.svg
 	KeyboardDoubleArrowRight Icon = "keyboard_double_arrow_right"
 
-	// KeyboardDoubleArrowUp is https://github.com/goki/icons/blob/main/svg/keyboard_double_arrow_up.svg
+	// KeyboardDoubleArrowUp is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_double_arrow_up.svg
 	KeyboardDoubleArrowUp Icon = "keyboard_double_arrow_up"
 
-	// KeyboardExternalInput is https://github.com/goki/icons/blob/main/svg/keyboard_external_input.svg
+	// KeyboardExternalInput is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_external_input.svg
 	KeyboardExternalInput Icon = "keyboard_external_input"
 
-	// KeyboardFull is https://github.com/goki/icons/blob/main/svg/keyboard_full.svg
+	// KeyboardFull is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_full.svg
 	KeyboardFull Icon = "keyboard_full"
 
-	// KeyboardHide is https://github.com/goki/icons/blob/main/svg/keyboard_hide.svg
+	// KeyboardHide is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_hide.svg
 	KeyboardHide Icon = "keyboard_hide"
 
-	// KeyboardKeys is https://github.com/goki/icons/blob/main/svg/keyboard_keys.svg
+	// KeyboardKeys is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_keys.svg
 	KeyboardKeys Icon = "keyboard_keys"
 
-	// KeyboardOff is https://github.com/goki/icons/blob/main/svg/keyboard_off.svg
+	// KeyboardOff is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_off.svg
 	KeyboardOff Icon = "keyboard_off"
 
-	// KeyboardOnscreen is https://github.com/goki/icons/blob/main/svg/keyboard_onscreen.svg
+	// KeyboardOnscreen is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_onscreen.svg
 	KeyboardOnscreen Icon = "keyboard_onscreen"
 
-	// KeyboardOptionKey is https://github.com/goki/icons/blob/main/svg/keyboard_option_key.svg
+	// KeyboardOptionKey is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_option_key.svg
 	KeyboardOptionKey Icon = "keyboard_option_key"
 
-	// KeyboardPreviousLanguage is https://github.com/goki/icons/blob/main/svg/keyboard_previous_language.svg
+	// KeyboardPreviousLanguage is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_previous_language.svg
 	KeyboardPreviousLanguage Icon = "keyboard_previous_language"
 
-	// KeyboardReturn is https://github.com/goki/icons/blob/main/svg/keyboard_return.svg
+	// KeyboardReturn is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_return.svg
 	KeyboardReturn Icon = "keyboard_return"
 
-	// KeyboardTab is https://github.com/goki/icons/blob/main/svg/keyboard_tab.svg
+	// KeyboardTab is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_tab.svg
 	KeyboardTab Icon = "keyboard_tab"
 
-	// KeyboardTabRtl is https://github.com/goki/icons/blob/main/svg/keyboard_tab_rtl.svg
+	// KeyboardTabRtl is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_tab_rtl.svg
 	KeyboardTabRtl Icon = "keyboard_tab_rtl"
 
-	// KeyboardVoice is https://github.com/goki/icons/blob/main/svg/keyboard_voice.svg
+	// KeyboardVoice is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_voice.svg
 	KeyboardVoice Icon = "keyboard_voice"
 
-	// Label is https://github.com/goki/icons/blob/main/svg/label.svg
+	// Label is https://github.com/cogentcore/core/blob/main/icons/svg/label.svg
 	Label Icon = "label"
 
-	// LabelImportant is https://github.com/goki/icons/blob/main/svg/label_important.svg
+	// LabelImportant is https://github.com/cogentcore/core/blob/main/icons/svg/label_important.svg
 	LabelImportant Icon = "label_important"
 
-	// LabelOff is https://github.com/goki/icons/blob/main/svg/label_off.svg
+	// LabelOff is https://github.com/cogentcore/core/blob/main/icons/svg/label_off.svg
 	LabelOff Icon = "label_off"
 
-	// Labs is https://github.com/goki/icons/blob/main/svg/labs.svg
+	// Labs is https://github.com/cogentcore/core/blob/main/icons/svg/labs.svg
 	Labs Icon = "labs"
 
-	// Lan is https://github.com/goki/icons/blob/main/svg/lan.svg
+	// Lan is https://github.com/cogentcore/core/blob/main/icons/svg/lan.svg
 	Lan Icon = "lan"
 
-	// Landscape is https://github.com/goki/icons/blob/main/svg/landscape.svg
+	// Landscape is https://github.com/cogentcore/core/blob/main/icons/svg/landscape.svg
 	Landscape Icon = "landscape"
 
-	// Landslide is https://github.com/goki/icons/blob/main/svg/landslide.svg
+	// Landslide is https://github.com/cogentcore/core/blob/main/icons/svg/landslide.svg
 	Landslide Icon = "landslide"
 
-	// Language is https://github.com/goki/icons/blob/main/svg/language.svg
+	// Language is https://github.com/cogentcore/core/blob/main/icons/svg/language.svg
 	Language Icon = "language"
 
-	// LanguageChineseArray is https://github.com/goki/icons/blob/main/svg/language_chinese_array.svg
+	// LanguageChineseArray is https://github.com/cogentcore/core/blob/main/icons/svg/language_chinese_array.svg
 	LanguageChineseArray Icon = "language_chinese_array"
 
-	// LanguageChineseCangjie is https://github.com/goki/icons/blob/main/svg/language_chinese_cangjie.svg
+	// LanguageChineseCangjie is https://github.com/cogentcore/core/blob/main/icons/svg/language_chinese_cangjie.svg
 	LanguageChineseCangjie Icon = "language_chinese_cangjie"
 
-	// LanguageChineseDayi is https://github.com/goki/icons/blob/main/svg/language_chinese_dayi.svg
+	// LanguageChineseDayi is https://github.com/cogentcore/core/blob/main/icons/svg/language_chinese_dayi.svg
 	LanguageChineseDayi Icon = "language_chinese_dayi"
 
-	// LanguageChinesePinyin is https://github.com/goki/icons/blob/main/svg/language_chinese_pinyin.svg
+	// LanguageChinesePinyin is https://github.com/cogentcore/core/blob/main/icons/svg/language_chinese_pinyin.svg
 	LanguageChinesePinyin Icon = "language_chinese_pinyin"
 
-	// LanguageChineseQuick is https://github.com/goki/icons/blob/main/svg/language_chinese_quick.svg
+	// LanguageChineseQuick is https://github.com/cogentcore/core/blob/main/icons/svg/language_chinese_quick.svg
 	LanguageChineseQuick Icon = "language_chinese_quick"
 
-	// LanguageChineseWubi is https://github.com/goki/icons/blob/main/svg/language_chinese_wubi.svg
+	// LanguageChineseWubi is https://github.com/cogentcore/core/blob/main/icons/svg/language_chinese_wubi.svg
 	LanguageChineseWubi Icon = "language_chinese_wubi"
 
-	// LanguageFrench is https://github.com/goki/icons/blob/main/svg/language_french.svg
+	// LanguageFrench is https://github.com/cogentcore/core/blob/main/icons/svg/language_french.svg
 	LanguageFrench Icon = "language_french"
 
-	// LanguageGbEnglish is https://github.com/goki/icons/blob/main/svg/language_gb_english.svg
+	// LanguageGbEnglish is https://github.com/cogentcore/core/blob/main/icons/svg/language_gb_english.svg
 	LanguageGbEnglish Icon = "language_gb_english"
 
-	// LanguageInternational is https://github.com/goki/icons/blob/main/svg/language_international.svg
+	// LanguageInternational is https://github.com/cogentcore/core/blob/main/icons/svg/language_international.svg
 	LanguageInternational Icon = "language_international"
 
-	// LanguageKoreanLatin is https://github.com/goki/icons/blob/main/svg/language_korean_latin.svg
+	// LanguageKoreanLatin is https://github.com/cogentcore/core/blob/main/icons/svg/language_korean_latin.svg
 	LanguageKoreanLatin Icon = "language_korean_latin"
 
-	// LanguagePinyin is https://github.com/goki/icons/blob/main/svg/language_pinyin.svg
+	// LanguagePinyin is https://github.com/cogentcore/core/blob/main/icons/svg/language_pinyin.svg
 	LanguagePinyin Icon = "language_pinyin"
 
-	// LanguageSpanish is https://github.com/goki/icons/blob/main/svg/language_spanish.svg
+	// LanguageSpanish is https://github.com/cogentcore/core/blob/main/icons/svg/language_spanish.svg
 	LanguageSpanish Icon = "language_spanish"
 
-	// LanguageUs is https://github.com/goki/icons/blob/main/svg/language_us.svg
+	// LanguageUs is https://github.com/cogentcore/core/blob/main/icons/svg/language_us.svg
 	LanguageUs Icon = "language_us"
 
-	// LanguageUsColemak is https://github.com/goki/icons/blob/main/svg/language_us_colemak.svg
+	// LanguageUsColemak is https://github.com/cogentcore/core/blob/main/icons/svg/language_us_colemak.svg
 	LanguageUsColemak Icon = "language_us_colemak"
 
-	// LanguageUsDvorak is https://github.com/goki/icons/blob/main/svg/language_us_dvorak.svg
+	// LanguageUsDvorak is https://github.com/cogentcore/core/blob/main/icons/svg/language_us_dvorak.svg
 	LanguageUsDvorak Icon = "language_us_dvorak"
 
-	// Laps is https://github.com/goki/icons/blob/main/svg/laps.svg
+	// Laps is https://github.com/cogentcore/core/blob/main/icons/svg/laps.svg
 	Laps Icon = "laps"
 
-	// LaptopChromebook is https://github.com/goki/icons/blob/main/svg/laptop_chromebook.svg
+	// LaptopChromebook is https://github.com/cogentcore/core/blob/main/icons/svg/laptop_chromebook.svg
 	LaptopChromebook Icon = "laptop_chromebook"
 
-	// LaptopMac is https://github.com/goki/icons/blob/main/svg/laptop_mac.svg
+	// LaptopMac is https://github.com/cogentcore/core/blob/main/icons/svg/laptop_mac.svg
 	LaptopMac Icon = "laptop_mac"
 
-	// LaptopWindows is https://github.com/goki/icons/blob/main/svg/laptop_windows.svg
+	// LaptopWindows is https://github.com/cogentcore/core/blob/main/icons/svg/laptop_windows.svg
 	LaptopWindows Icon = "laptop_windows"
 
-	// LassoSelect is https://github.com/goki/icons/blob/main/svg/lasso_select.svg
+	// LassoSelect is https://github.com/cogentcore/core/blob/main/icons/svg/lasso_select.svg
 	LassoSelect Icon = "lasso_select"
 
-	// LastPage is https://github.com/goki/icons/blob/main/svg/last_page.svg
+	// LastPage is https://github.com/cogentcore/core/blob/main/icons/svg/last_page.svg
 	LastPage Icon = "last_page"
 
-	// Latex is https://github.com/goki/icons/blob/main/svg/latex.svg
+	// Latex is https://github.com/cogentcore/core/blob/main/icons/svg/latex.svg
 	Latex Icon = "latex"
 
-	// Layers is https://github.com/goki/icons/blob/main/svg/layers.svg
+	// Layers is https://github.com/cogentcore/core/blob/main/icons/svg/layers.svg
 	Layers Icon = "layers"
 
-	// LayersClear is https://github.com/goki/icons/blob/main/svg/layers_clear.svg
+	// LayersClear is https://github.com/cogentcore/core/blob/main/icons/svg/layers_clear.svg
 	LayersClear Icon = "layers_clear"
 
-	// Leaderboard is https://github.com/goki/icons/blob/main/svg/leaderboard.svg
+	// Leaderboard is https://github.com/cogentcore/core/blob/main/icons/svg/leaderboard.svg
 	Leaderboard Icon = "leaderboard"
 
-	// LeftClick is https://github.com/goki/icons/blob/main/svg/left_click.svg
+	// LeftClick is https://github.com/cogentcore/core/blob/main/icons/svg/left_click.svg
 	LeftClick Icon = "left_click"
 
-	// LeftPanelClose is https://github.com/goki/icons/blob/main/svg/left_panel_close.svg
+	// LeftPanelClose is https://github.com/cogentcore/core/blob/main/icons/svg/left_panel_close.svg
 	LeftPanelClose Icon = "left_panel_close"
 
-	// LeftPanelOpen is https://github.com/goki/icons/blob/main/svg/left_panel_open.svg
+	// LeftPanelOpen is https://github.com/cogentcore/core/blob/main/icons/svg/left_panel_open.svg
 	LeftPanelOpen Icon = "left_panel_open"
 
-	// LegendToggle is https://github.com/goki/icons/blob/main/svg/legend_toggle.svg
+	// LegendToggle is https://github.com/cogentcore/core/blob/main/icons/svg/legend_toggle.svg
 	LegendToggle Icon = "legend_toggle"
 
-	// LensBlur is https://github.com/goki/icons/blob/main/svg/lens_blur.svg
+	// LensBlur is https://github.com/cogentcore/core/blob/main/icons/svg/lens_blur.svg
 	LensBlur Icon = "lens_blur"
 
-	// LetterSwitch is https://github.com/goki/icons/blob/main/svg/letter_switch.svg
+	// LetterSwitch is https://github.com/cogentcore/core/blob/main/icons/svg/letter_switch.svg
 	LetterSwitch Icon = "letter_switch"
 
-	// LibraryAdd is https://github.com/goki/icons/blob/main/svg/library_add.svg
+	// LibraryAdd is https://github.com/cogentcore/core/blob/main/icons/svg/library_add.svg
 	LibraryAdd Icon = "library_add"
 
-	// LibraryAddCheck is https://github.com/goki/icons/blob/main/svg/library_add_check.svg
+	// LibraryAddCheck is https://github.com/cogentcore/core/blob/main/icons/svg/library_add_check.svg
 	LibraryAddCheck Icon = "library_add_check"
 
-	// LibraryBooks is https://github.com/goki/icons/blob/main/svg/library_books.svg
+	// LibraryBooks is https://github.com/cogentcore/core/blob/main/icons/svg/library_books.svg
 	LibraryBooks Icon = "library_books"
 
-	// LibraryMusic is https://github.com/goki/icons/blob/main/svg/library_music.svg
+	// LibraryMusic is https://github.com/cogentcore/core/blob/main/icons/svg/library_music.svg
 	LibraryMusic Icon = "library_music"
 
-	// Light is https://github.com/goki/icons/blob/main/svg/light.svg
+	// Light is https://github.com/cogentcore/core/blob/main/icons/svg/light.svg
 	Light Icon = "light"
 
-	// Lightbulb is https://github.com/goki/icons/blob/main/svg/lightbulb.svg
+	// Lightbulb is https://github.com/cogentcore/core/blob/main/icons/svg/lightbulb.svg
 	Lightbulb Icon = "lightbulb"
 
-	// LightbulbCircle is https://github.com/goki/icons/blob/main/svg/lightbulb_circle.svg
+	// LightbulbCircle is https://github.com/cogentcore/core/blob/main/icons/svg/lightbulb_circle.svg
 	LightbulbCircle Icon = "lightbulb_circle"
 
-	// LineAxis is https://github.com/goki/icons/blob/main/svg/line_axis.svg
+	// LineAxis is https://github.com/cogentcore/core/blob/main/icons/svg/line_axis.svg
 	LineAxis Icon = "line_axis"
 
-	// LineCurve is https://github.com/goki/icons/blob/main/svg/line_curve.svg
+	// LineCurve is https://github.com/cogentcore/core/blob/main/icons/svg/line_curve.svg
 	LineCurve Icon = "line_curve"
 
-	// LineEnd is https://github.com/goki/icons/blob/main/svg/line_end.svg
+	// LineEnd is https://github.com/cogentcore/core/blob/main/icons/svg/line_end.svg
 	LineEnd Icon = "line_end"
 
-	// LineEndArrow is https://github.com/goki/icons/blob/main/svg/line_end_arrow.svg
+	// LineEndArrow is https://github.com/cogentcore/core/blob/main/icons/svg/line_end_arrow.svg
 	LineEndArrow Icon = "line_end_arrow"
 
-	// LineEndArrowNotch is https://github.com/goki/icons/blob/main/svg/line_end_arrow_notch.svg
+	// LineEndArrowNotch is https://github.com/cogentcore/core/blob/main/icons/svg/line_end_arrow_notch.svg
 	LineEndArrowNotch Icon = "line_end_arrow_notch"
 
-	// LineEndCircle is https://github.com/goki/icons/blob/main/svg/line_end_circle.svg
+	// LineEndCircle is https://github.com/cogentcore/core/blob/main/icons/svg/line_end_circle.svg
 	LineEndCircle Icon = "line_end_circle"
 
-	// LineEndDiamond is https://github.com/goki/icons/blob/main/svg/line_end_diamond.svg
+	// LineEndDiamond is https://github.com/cogentcore/core/blob/main/icons/svg/line_end_diamond.svg
 	LineEndDiamond Icon = "line_end_diamond"
 
-	// LineEndSquare is https://github.com/goki/icons/blob/main/svg/line_end_square.svg
+	// LineEndSquare is https://github.com/cogentcore/core/blob/main/icons/svg/line_end_square.svg
 	LineEndSquare Icon = "line_end_square"
 
-	// LineStart is https://github.com/goki/icons/blob/main/svg/line_start.svg
+	// LineStart is https://github.com/cogentcore/core/blob/main/icons/svg/line_start.svg
 	LineStart Icon = "line_start"
 
-	// LineStartArrow is https://github.com/goki/icons/blob/main/svg/line_start_arrow.svg
+	// LineStartArrow is https://github.com/cogentcore/core/blob/main/icons/svg/line_start_arrow.svg
 	LineStartArrow Icon = "line_start_arrow"
 
-	// LineStartArrowNotch is https://github.com/goki/icons/blob/main/svg/line_start_arrow_notch.svg
+	// LineStartArrowNotch is https://github.com/cogentcore/core/blob/main/icons/svg/line_start_arrow_notch.svg
 	LineStartArrowNotch Icon = "line_start_arrow_notch"
 
-	// LineStartCircle is https://github.com/goki/icons/blob/main/svg/line_start_circle.svg
+	// LineStartCircle is https://github.com/cogentcore/core/blob/main/icons/svg/line_start_circle.svg
 	LineStartCircle Icon = "line_start_circle"
 
-	// LineStartDiamond is https://github.com/goki/icons/blob/main/svg/line_start_diamond.svg
+	// LineStartDiamond is https://github.com/cogentcore/core/blob/main/icons/svg/line_start_diamond.svg
 	LineStartDiamond Icon = "line_start_diamond"
 
-	// LineStartSquare is https://github.com/goki/icons/blob/main/svg/line_start_square.svg
+	// LineStartSquare is https://github.com/cogentcore/core/blob/main/icons/svg/line_start_square.svg
 	LineStartSquare Icon = "line_start_square"
 
-	// LineStyle is https://github.com/goki/icons/blob/main/svg/line_style.svg
+	// LineStyle is https://github.com/cogentcore/core/blob/main/icons/svg/line_style.svg
 	LineStyle Icon = "line_style"
 
-	// LineWeight is https://github.com/goki/icons/blob/main/svg/line_weight.svg
+	// LineWeight is https://github.com/cogentcore/core/blob/main/icons/svg/line_weight.svg
 	LineWeight Icon = "line_weight"
 
-	// LinearScale is https://github.com/goki/icons/blob/main/svg/linear_scale.svg
+	// LinearScale is https://github.com/cogentcore/core/blob/main/icons/svg/linear_scale.svg
 	LinearScale Icon = "linear_scale"
 
-	// Link is https://github.com/goki/icons/blob/main/svg/link.svg
+	// Link is https://github.com/cogentcore/core/blob/main/icons/svg/link.svg
 	Link Icon = "link"
 
-	// LinkOff is https://github.com/goki/icons/blob/main/svg/link_off.svg
+	// LinkOff is https://github.com/cogentcore/core/blob/main/icons/svg/link_off.svg
 	LinkOff Icon = "link_off"
 
-	// List is https://github.com/goki/icons/blob/main/svg/list.svg
+	// List is https://github.com/cogentcore/core/blob/main/icons/svg/list.svg
 	List Icon = "list"
 
-	// ListAlt is https://github.com/goki/icons/blob/main/svg/list_alt.svg
+	// ListAlt is https://github.com/cogentcore/core/blob/main/icons/svg/list_alt.svg
 	ListAlt Icon = "list_alt"
 
-	// ListAltAdd is https://github.com/goki/icons/blob/main/svg/list_alt_add.svg
+	// ListAltAdd is https://github.com/cogentcore/core/blob/main/icons/svg/list_alt_add.svg
 	ListAltAdd Icon = "list_alt_add"
 
-	// Lists is https://github.com/goki/icons/blob/main/svg/lists.svg
+	// Lists is https://github.com/cogentcore/core/blob/main/icons/svg/lists.svg
 	Lists Icon = "lists"
 
-	// LiveHelp is https://github.com/goki/icons/blob/main/svg/live_help.svg
+	// LiveHelp is https://github.com/cogentcore/core/blob/main/icons/svg/live_help.svg
 	LiveHelp Icon = "live_help"
 
-	// LiveTv is https://github.com/goki/icons/blob/main/svg/live_tv.svg
+	// LiveTv is https://github.com/cogentcore/core/blob/main/icons/svg/live_tv.svg
 	LiveTv Icon = "live_tv"
 
-	// LocationAway is https://github.com/goki/icons/blob/main/svg/location_away.svg
+	// LocationAway is https://github.com/cogentcore/core/blob/main/icons/svg/location_away.svg
 	LocationAway Icon = "location_away"
 
-	// LocationChip is https://github.com/goki/icons/blob/main/svg/location_chip.svg
+	// LocationChip is https://github.com/cogentcore/core/blob/main/icons/svg/location_chip.svg
 	LocationChip Icon = "location_chip"
 
-	// LocationHome is https://github.com/goki/icons/blob/main/svg/location_home.svg
+	// LocationHome is https://github.com/cogentcore/core/blob/main/icons/svg/location_home.svg
 	LocationHome Icon = "location_home"
 
-	// LocationOff is https://github.com/goki/icons/blob/main/svg/location_off.svg
+	// LocationOff is https://github.com/cogentcore/core/blob/main/icons/svg/location_off.svg
 	LocationOff Icon = "location_off"
 
-	// LocationOn is https://github.com/goki/icons/blob/main/svg/location_on.svg
+	// LocationOn is https://github.com/cogentcore/core/blob/main/icons/svg/location_on.svg
 	LocationOn Icon = "location_on"
 
-	// Lock is https://github.com/goki/icons/blob/main/svg/lock.svg
+	// Lock is https://github.com/cogentcore/core/blob/main/icons/svg/lock.svg
 	Lock Icon = "lock"
 
-	// LockClock is https://github.com/goki/icons/blob/main/svg/lock_clock.svg
+	// LockClock is https://github.com/cogentcore/core/blob/main/icons/svg/lock_clock.svg
 	LockClock Icon = "lock_clock"
 
-	// LockOpen is https://github.com/goki/icons/blob/main/svg/lock_open.svg
+	// LockOpen is https://github.com/cogentcore/core/blob/main/icons/svg/lock_open.svg
 	LockOpen Icon = "lock_open"
 
-	// LockOpenRight is https://github.com/goki/icons/blob/main/svg/lock_open_right.svg
+	// LockOpenRight is https://github.com/cogentcore/core/blob/main/icons/svg/lock_open_right.svg
 	LockOpenRight Icon = "lock_open_right"
 
-	// LockPerson is https://github.com/goki/icons/blob/main/svg/lock_person.svg
+	// LockPerson is https://github.com/cogentcore/core/blob/main/icons/svg/lock_person.svg
 	LockPerson Icon = "lock_person"
 
-	// LockReset is https://github.com/goki/icons/blob/main/svg/lock_reset.svg
+	// LockReset is https://github.com/cogentcore/core/blob/main/icons/svg/lock_reset.svg
 	LockReset Icon = "lock_reset"
 
-	// Login is https://github.com/goki/icons/blob/main/svg/login.svg
+	// Login is https://github.com/cogentcore/core/blob/main/icons/svg/login.svg
 	Login Icon = "login"
 
-	// LogoDev is https://github.com/goki/icons/blob/main/svg/logo_dev.svg
+	// LogoDev is https://github.com/cogentcore/core/blob/main/icons/svg/logo_dev.svg
 	LogoDev Icon = "logo_dev"
 
-	// Logout is https://github.com/goki/icons/blob/main/svg/logout.svg
+	// Logout is https://github.com/cogentcore/core/blob/main/icons/svg/logout.svg
 	Logout Icon = "logout"
 
-	// Loupe is https://github.com/goki/icons/blob/main/svg/loupe.svg
+	// Loupe is https://github.com/cogentcore/core/blob/main/icons/svg/loupe.svg
 	Loupe Icon = "loupe"
 
-	// LowDensity is https://github.com/goki/icons/blob/main/svg/low_density.svg
+	// LowDensity is https://github.com/cogentcore/core/blob/main/icons/svg/low_density.svg
 	LowDensity Icon = "low_density"
 
-	// LowPriority is https://github.com/goki/icons/blob/main/svg/low_priority.svg
+	// LowPriority is https://github.com/cogentcore/core/blob/main/icons/svg/low_priority.svg
 	LowPriority Icon = "low_priority"
 
-	// Loyalty is https://github.com/goki/icons/blob/main/svg/loyalty.svg
+	// Loyalty is https://github.com/cogentcore/core/blob/main/icons/svg/loyalty.svg
 	Loyalty Icon = "loyalty"
 
-	// Lyrics is https://github.com/goki/icons/blob/main/svg/lyrics.svg
+	// Lyrics is https://github.com/cogentcore/core/blob/main/icons/svg/lyrics.svg
 	Lyrics Icon = "lyrics"
 
-	// MacroAuto is https://github.com/goki/icons/blob/main/svg/macro_auto.svg
+	// MacroAuto is https://github.com/cogentcore/core/blob/main/icons/svg/macro_auto.svg
 	MacroAuto Icon = "macro_auto"
 
-	// MacroOff is https://github.com/goki/icons/blob/main/svg/macro_off.svg
+	// MacroOff is https://github.com/cogentcore/core/blob/main/icons/svg/macro_off.svg
 	MacroOff Icon = "macro_off"
 
-	// MagnificationLarge is https://github.com/goki/icons/blob/main/svg/magnification_large.svg
+	// MagnificationLarge is https://github.com/cogentcore/core/blob/main/icons/svg/magnification_large.svg
 	MagnificationLarge Icon = "magnification_large"
 
-	// MagnificationSmall is https://github.com/goki/icons/blob/main/svg/magnification_small.svg
+	// MagnificationSmall is https://github.com/cogentcore/core/blob/main/icons/svg/magnification_small.svg
 	MagnificationSmall Icon = "magnification_small"
 
-	// MagnifyDocked is https://github.com/goki/icons/blob/main/svg/magnify_docked.svg
+	// MagnifyDocked is https://github.com/cogentcore/core/blob/main/icons/svg/magnify_docked.svg
 	MagnifyDocked Icon = "magnify_docked"
 
-	// MagnifyFullscreen is https://github.com/goki/icons/blob/main/svg/magnify_fullscreen.svg
+	// MagnifyFullscreen is https://github.com/cogentcore/core/blob/main/icons/svg/magnify_fullscreen.svg
 	MagnifyFullscreen Icon = "magnify_fullscreen"
 
-	// Mail is https://github.com/goki/icons/blob/main/svg/mail.svg
+	// Mail is https://github.com/cogentcore/core/blob/main/icons/svg/mail.svg
 	Mail Icon = "mail"
 
-	// MailLock is https://github.com/goki/icons/blob/main/svg/mail_lock.svg
+	// MailLock is https://github.com/cogentcore/core/blob/main/icons/svg/mail_lock.svg
 	MailLock Icon = "mail_lock"
 
-	// Make is https://github.com/goki/icons/blob/main/svg/make.svg
+	// Make is https://github.com/cogentcore/core/blob/main/icons/svg/make.svg
 	Make Icon = "make"
 
-	// Makefile is https://github.com/goki/icons/blob/main/svg/makefile.svg
+	// Makefile is https://github.com/cogentcore/core/blob/main/icons/svg/makefile.svg
 	Makefile Icon = "makefile"
 
-	// Male is https://github.com/goki/icons/blob/main/svg/male.svg
+	// Male is https://github.com/cogentcore/core/blob/main/icons/svg/male.svg
 	Male Icon = "male"
 
-	// Man is https://github.com/goki/icons/blob/main/svg/man.svg
+	// Man is https://github.com/cogentcore/core/blob/main/icons/svg/man.svg
 	Man Icon = "man"
 
-	// Man2 is https://github.com/goki/icons/blob/main/svg/man_2.svg
+	// Man2 is https://github.com/cogentcore/core/blob/main/icons/svg/man_2.svg
 	Man2 Icon = "man_2"
 
-	// Man3 is https://github.com/goki/icons/blob/main/svg/man_3.svg
+	// Man3 is https://github.com/cogentcore/core/blob/main/icons/svg/man_3.svg
 	Man3 Icon = "man_3"
 
-	// Man4 is https://github.com/goki/icons/blob/main/svg/man_4.svg
+	// Man4 is https://github.com/cogentcore/core/blob/main/icons/svg/man_4.svg
 	Man4 Icon = "man_4"
 
-	// ManageAccounts is https://github.com/goki/icons/blob/main/svg/manage_accounts.svg
+	// ManageAccounts is https://github.com/cogentcore/core/blob/main/icons/svg/manage_accounts.svg
 	ManageAccounts Icon = "manage_accounts"
 
-	// ManageHistory is https://github.com/goki/icons/blob/main/svg/manage_history.svg
+	// ManageHistory is https://github.com/cogentcore/core/blob/main/icons/svg/manage_history.svg
 	ManageHistory Icon = "manage_history"
 
-	// ManageSearch is https://github.com/goki/icons/blob/main/svg/manage_search.svg
+	// ManageSearch is https://github.com/cogentcore/core/blob/main/icons/svg/manage_search.svg
 	ManageSearch Icon = "manage_search"
 
-	// Manga is https://github.com/goki/icons/blob/main/svg/manga.svg
+	// Manga is https://github.com/cogentcore/core/blob/main/icons/svg/manga.svg
 	Manga Icon = "manga"
 
-	// Map is https://github.com/goki/icons/blob/main/svg/map.svg
+	// Map is https://github.com/cogentcore/core/blob/main/icons/svg/map.svg
 	Map Icon = "map"
 
-	// Margin is https://github.com/goki/icons/blob/main/svg/margin.svg
+	// Margin is https://github.com/cogentcore/core/blob/main/icons/svg/margin.svg
 	Margin Icon = "margin"
 
-	// MarkAsUnread is https://github.com/goki/icons/blob/main/svg/mark_as_unread.svg
+	// MarkAsUnread is https://github.com/cogentcore/core/blob/main/icons/svg/mark_as_unread.svg
 	MarkAsUnread Icon = "mark_as_unread"
 
-	// MarkChatRead is https://github.com/goki/icons/blob/main/svg/mark_chat_read.svg
+	// MarkChatRead is https://github.com/cogentcore/core/blob/main/icons/svg/mark_chat_read.svg
 	MarkChatRead Icon = "mark_chat_read"
 
-	// MarkChatUnread is https://github.com/goki/icons/blob/main/svg/mark_chat_unread.svg
+	// MarkChatUnread is https://github.com/cogentcore/core/blob/main/icons/svg/mark_chat_unread.svg
 	MarkChatUnread Icon = "mark_chat_unread"
 
-	// MarkEmailRead is https://github.com/goki/icons/blob/main/svg/mark_email_read.svg
+	// MarkEmailRead is https://github.com/cogentcore/core/blob/main/icons/svg/mark_email_read.svg
 	MarkEmailRead Icon = "mark_email_read"
 
-	// MarkEmailUnread is https://github.com/goki/icons/blob/main/svg/mark_email_unread.svg
+	// MarkEmailUnread is https://github.com/cogentcore/core/blob/main/icons/svg/mark_email_unread.svg
 	MarkEmailUnread Icon = "mark_email_unread"
 
-	// MarkUnreadChatAlt is https://github.com/goki/icons/blob/main/svg/mark_unread_chat_alt.svg
+	// MarkUnreadChatAlt is https://github.com/cogentcore/core/blob/main/icons/svg/mark_unread_chat_alt.svg
 	MarkUnreadChatAlt Icon = "mark_unread_chat_alt"
 
-	// MarkunreadMailbox is https://github.com/goki/icons/blob/main/svg/markunread_mailbox.svg
+	// MarkunreadMailbox is https://github.com/cogentcore/core/blob/main/icons/svg/markunread_mailbox.svg
 	MarkunreadMailbox Icon = "markunread_mailbox"
 
-	// MaskedTransitions is https://github.com/goki/icons/blob/main/svg/masked_transitions.svg
+	// MaskedTransitions is https://github.com/cogentcore/core/blob/main/icons/svg/masked_transitions.svg
 	MaskedTransitions Icon = "masked_transitions"
 
-	// MatchCase is https://github.com/goki/icons/blob/main/svg/match_case.svg
+	// MatchCase is https://github.com/cogentcore/core/blob/main/icons/svg/match_case.svg
 	MatchCase Icon = "match_case"
 
-	// MatchWord is https://github.com/goki/icons/blob/main/svg/match_word.svg
+	// MatchWord is https://github.com/cogentcore/core/blob/main/icons/svg/match_word.svg
 	MatchWord Icon = "match_word"
 
-	// Maximize is https://github.com/goki/icons/blob/main/svg/maximize.svg
+	// Maximize is https://github.com/cogentcore/core/blob/main/icons/svg/maximize.svg
 	Maximize Icon = "maximize"
 
-	// MeasuringTape is https://github.com/goki/icons/blob/main/svg/measuring_tape.svg
+	// MeasuringTape is https://github.com/cogentcore/core/blob/main/icons/svg/measuring_tape.svg
 	MeasuringTape Icon = "measuring_tape"
 
-	// MediaBluetoothOff is https://github.com/goki/icons/blob/main/svg/media_bluetooth_off.svg
+	// MediaBluetoothOff is https://github.com/cogentcore/core/blob/main/icons/svg/media_bluetooth_off.svg
 	MediaBluetoothOff Icon = "media_bluetooth_off"
 
-	// MediaBluetoothOn is https://github.com/goki/icons/blob/main/svg/media_bluetooth_on.svg
+	// MediaBluetoothOn is https://github.com/cogentcore/core/blob/main/icons/svg/media_bluetooth_on.svg
 	MediaBluetoothOn Icon = "media_bluetooth_on"
 
-	// MediaLink is https://github.com/goki/icons/blob/main/svg/media_link.svg
+	// MediaLink is https://github.com/cogentcore/core/blob/main/icons/svg/media_link.svg
 	MediaLink Icon = "media_link"
 
-	// Memory is https://github.com/goki/icons/blob/main/svg/memory.svg
+	// Memory is https://github.com/cogentcore/core/blob/main/icons/svg/memory.svg
 	Memory Icon = "memory"
 
-	// MemoryAlt is https://github.com/goki/icons/blob/main/svg/memory_alt.svg
+	// MemoryAlt is https://github.com/cogentcore/core/blob/main/icons/svg/memory_alt.svg
 	MemoryAlt Icon = "memory_alt"
 
-	// Menu is https://github.com/goki/icons/blob/main/svg/menu.svg
+	// Menu is https://github.com/cogentcore/core/blob/main/icons/svg/menu.svg
 	Menu Icon = "menu"
 
-	// MenuBook is https://github.com/goki/icons/blob/main/svg/menu_book.svg
+	// MenuBook is https://github.com/cogentcore/core/blob/main/icons/svg/menu_book.svg
 	MenuBook Icon = "menu_book"
 
-	// MenuOpen is https://github.com/goki/icons/blob/main/svg/menu_open.svg
+	// MenuOpen is https://github.com/cogentcore/core/blob/main/icons/svg/menu_open.svg
 	MenuOpen Icon = "menu_open"
 
-	// Merge is https://github.com/goki/icons/blob/main/svg/merge.svg
+	// Merge is https://github.com/cogentcore/core/blob/main/icons/svg/merge.svg
 	Merge Icon = "merge"
 
-	// MergeType is https://github.com/goki/icons/blob/main/svg/merge_type.svg
+	// MergeType is https://github.com/cogentcore/core/blob/main/icons/svg/merge_type.svg
 	MergeType Icon = "merge_type"
 
-	// Method is https://github.com/goki/icons/blob/main/svg/method.svg
+	// Method is https://github.com/cogentcore/core/blob/main/icons/svg/method.svg
 	Method Icon = "method"
 
-	// Mic is https://github.com/goki/icons/blob/main/svg/mic.svg
+	// Mic is https://github.com/cogentcore/core/blob/main/icons/svg/mic.svg
 	Mic Icon = "mic"
 
-	// MicDouble is https://github.com/goki/icons/blob/main/svg/mic_double.svg
+	// MicDouble is https://github.com/cogentcore/core/blob/main/icons/svg/mic_double.svg
 	MicDouble Icon = "mic_double"
 
-	// MicExternalOff is https://github.com/goki/icons/blob/main/svg/mic_external_off.svg
+	// MicExternalOff is https://github.com/cogentcore/core/blob/main/icons/svg/mic_external_off.svg
 	MicExternalOff Icon = "mic_external_off"
 
-	// MicExternalOn is https://github.com/goki/icons/blob/main/svg/mic_external_on.svg
+	// MicExternalOn is https://github.com/cogentcore/core/blob/main/icons/svg/mic_external_on.svg
 	MicExternalOn Icon = "mic_external_on"
 
-	// MicOff is https://github.com/goki/icons/blob/main/svg/mic_off.svg
+	// MicOff is https://github.com/cogentcore/core/blob/main/icons/svg/mic_off.svg
 	MicOff Icon = "mic_off"
 
-	// Minimize is https://github.com/goki/icons/blob/main/svg/minimize.svg
+	// Minimize is https://github.com/cogentcore/core/blob/main/icons/svg/minimize.svg
 	Minimize Icon = "minimize"
 
-	// MissedVideoCall is https://github.com/goki/icons/blob/main/svg/missed_video_call.svg
+	// MissedVideoCall is https://github.com/cogentcore/core/blob/main/icons/svg/missed_video_call.svg
 	MissedVideoCall Icon = "missed_video_call"
 
-	// Mms is https://github.com/goki/icons/blob/main/svg/mms.svg
+	// Mms is https://github.com/cogentcore/core/blob/main/icons/svg/mms.svg
 	Mms Icon = "mms"
 
-	// MobileFriendly is https://github.com/goki/icons/blob/main/svg/mobile_friendly.svg
+	// MobileFriendly is https://github.com/cogentcore/core/blob/main/icons/svg/mobile_friendly.svg
 	MobileFriendly Icon = "mobile_friendly"
 
-	// MobileOff is https://github.com/goki/icons/blob/main/svg/mobile_off.svg
+	// MobileOff is https://github.com/cogentcore/core/blob/main/icons/svg/mobile_off.svg
 	MobileOff Icon = "mobile_off"
 
-	// MobileScreenShare is https://github.com/goki/icons/blob/main/svg/mobile_screen_share.svg
+	// MobileScreenShare is https://github.com/cogentcore/core/blob/main/icons/svg/mobile_screen_share.svg
 	MobileScreenShare Icon = "mobile_screen_share"
 
-	// MobiledataOff is https://github.com/goki/icons/blob/main/svg/mobiledata_off.svg
+	// MobiledataOff is https://github.com/cogentcore/core/blob/main/icons/svg/mobiledata_off.svg
 	MobiledataOff Icon = "mobiledata_off"
 
-	// ModeCool is https://github.com/goki/icons/blob/main/svg/mode_cool.svg
+	// ModeCool is https://github.com/cogentcore/core/blob/main/icons/svg/mode_cool.svg
 	ModeCool Icon = "mode_cool"
 
-	// ModeCoolOff is https://github.com/goki/icons/blob/main/svg/mode_cool_off.svg
+	// ModeCoolOff is https://github.com/cogentcore/core/blob/main/icons/svg/mode_cool_off.svg
 	ModeCoolOff Icon = "mode_cool_off"
 
-	// ModeFan is https://github.com/goki/icons/blob/main/svg/mode_fan.svg
+	// ModeFan is https://github.com/cogentcore/core/blob/main/icons/svg/mode_fan.svg
 	ModeFan Icon = "mode_fan"
 
-	// ModeFanOff is https://github.com/goki/icons/blob/main/svg/mode_fan_off.svg
+	// ModeFanOff is https://github.com/cogentcore/core/blob/main/icons/svg/mode_fan_off.svg
 	ModeFanOff Icon = "mode_fan_off"
 
-	// ModeHeat is https://github.com/goki/icons/blob/main/svg/mode_heat.svg
+	// ModeHeat is https://github.com/cogentcore/core/blob/main/icons/svg/mode_heat.svg
 	ModeHeat Icon = "mode_heat"
 
-	// ModeHeatCool is https://github.com/goki/icons/blob/main/svg/mode_heat_cool.svg
+	// ModeHeatCool is https://github.com/cogentcore/core/blob/main/icons/svg/mode_heat_cool.svg
 	ModeHeatCool Icon = "mode_heat_cool"
 
-	// ModeHeatOff is https://github.com/goki/icons/blob/main/svg/mode_heat_off.svg
+	// ModeHeatOff is https://github.com/cogentcore/core/blob/main/icons/svg/mode_heat_off.svg
 	ModeHeatOff Icon = "mode_heat_off"
 
-	// ModeOffOn is https://github.com/goki/icons/blob/main/svg/mode_off_on.svg
+	// ModeOffOn is https://github.com/cogentcore/core/blob/main/icons/svg/mode_off_on.svg
 	ModeOffOn Icon = "mode_off_on"
 
-	// ModeStandby is https://github.com/goki/icons/blob/main/svg/mode_standby.svg
+	// ModeStandby is https://github.com/cogentcore/core/blob/main/icons/svg/mode_standby.svg
 	ModeStandby Icon = "mode_standby"
 
-	// ModelTraining is https://github.com/goki/icons/blob/main/svg/model_training.svg
+	// ModelTraining is https://github.com/cogentcore/core/blob/main/icons/svg/model_training.svg
 	ModelTraining Icon = "model_training"
 
-	// MonetizationOn is https://github.com/goki/icons/blob/main/svg/monetization_on.svg
+	// MonetizationOn is https://github.com/cogentcore/core/blob/main/icons/svg/monetization_on.svg
 	MonetizationOn Icon = "monetization_on"
 
-	// Money is https://github.com/goki/icons/blob/main/svg/money.svg
+	// Money is https://github.com/cogentcore/core/blob/main/icons/svg/money.svg
 	Money Icon = "money"
 
-	// MoneyOff is https://github.com/goki/icons/blob/main/svg/money_off.svg
+	// MoneyOff is https://github.com/cogentcore/core/blob/main/icons/svg/money_off.svg
 	MoneyOff Icon = "money_off"
 
-	// Monitor is https://github.com/goki/icons/blob/main/svg/monitor.svg
+	// Monitor is https://github.com/cogentcore/core/blob/main/icons/svg/monitor.svg
 	Monitor Icon = "monitor"
 
-	// Monitoring is https://github.com/goki/icons/blob/main/svg/monitoring.svg
+	// Monitoring is https://github.com/cogentcore/core/blob/main/icons/svg/monitoring.svg
 	Monitoring Icon = "monitoring"
 
-	// MonochromePhotos is https://github.com/goki/icons/blob/main/svg/monochrome_photos.svg
+	// MonochromePhotos is https://github.com/cogentcore/core/blob/main/icons/svg/monochrome_photos.svg
 	MonochromePhotos Icon = "monochrome_photos"
 
-	// Mood is https://github.com/goki/icons/blob/main/svg/mood.svg
+	// Mood is https://github.com/cogentcore/core/blob/main/icons/svg/mood.svg
 	Mood Icon = "mood"
 
-	// MoodBad is https://github.com/goki/icons/blob/main/svg/mood_bad.svg
+	// MoodBad is https://github.com/cogentcore/core/blob/main/icons/svg/mood_bad.svg
 	MoodBad Icon = "mood_bad"
 
-	// More is https://github.com/goki/icons/blob/main/svg/more.svg
+	// More is https://github.com/cogentcore/core/blob/main/icons/svg/more.svg
 	More Icon = "more"
 
-	// MoreDown is https://github.com/goki/icons/blob/main/svg/more_down.svg
+	// MoreDown is https://github.com/cogentcore/core/blob/main/icons/svg/more_down.svg
 	MoreDown Icon = "more_down"
 
-	// MoreHoriz is https://github.com/goki/icons/blob/main/svg/more_horiz.svg
+	// MoreHoriz is https://github.com/cogentcore/core/blob/main/icons/svg/more_horiz.svg
 	MoreHoriz Icon = "more_horiz"
 
-	// MoreTime is https://github.com/goki/icons/blob/main/svg/more_time.svg
+	// MoreTime is https://github.com/cogentcore/core/blob/main/icons/svg/more_time.svg
 	MoreTime Icon = "more_time"
 
-	// MoreUp is https://github.com/goki/icons/blob/main/svg/more_up.svg
+	// MoreUp is https://github.com/cogentcore/core/blob/main/icons/svg/more_up.svg
 	MoreUp Icon = "more_up"
 
-	// MoreVert is https://github.com/goki/icons/blob/main/svg/more_vert.svg
+	// MoreVert is https://github.com/cogentcore/core/blob/main/icons/svg/more_vert.svg
 	MoreVert Icon = "more_vert"
 
-	// Mouse is https://github.com/goki/icons/blob/main/svg/mouse.svg
+	// Mouse is https://github.com/cogentcore/core/blob/main/icons/svg/mouse.svg
 	Mouse Icon = "mouse"
 
-	// Move is https://github.com/goki/icons/blob/main/svg/move.svg
+	// Move is https://github.com/cogentcore/core/blob/main/icons/svg/move.svg
 	Move Icon = "move"
 
-	// MoveDown is https://github.com/goki/icons/blob/main/svg/move_down.svg
+	// MoveDown is https://github.com/cogentcore/core/blob/main/icons/svg/move_down.svg
 	MoveDown Icon = "move_down"
 
-	// MoveGroup is https://github.com/goki/icons/blob/main/svg/move_group.svg
+	// MoveGroup is https://github.com/cogentcore/core/blob/main/icons/svg/move_group.svg
 	MoveGroup Icon = "move_group"
 
-	// MoveItem is https://github.com/goki/icons/blob/main/svg/move_item.svg
+	// MoveItem is https://github.com/cogentcore/core/blob/main/icons/svg/move_item.svg
 	MoveItem Icon = "move_item"
 
-	// MoveLocation is https://github.com/goki/icons/blob/main/svg/move_location.svg
+	// MoveLocation is https://github.com/cogentcore/core/blob/main/icons/svg/move_location.svg
 	MoveLocation Icon = "move_location"
 
-	// MoveSelectionDown is https://github.com/goki/icons/blob/main/svg/move_selection_down.svg
+	// MoveSelectionDown is https://github.com/cogentcore/core/blob/main/icons/svg/move_selection_down.svg
 	MoveSelectionDown Icon = "move_selection_down"
 
-	// MoveSelectionLeft is https://github.com/goki/icons/blob/main/svg/move_selection_left.svg
+	// MoveSelectionLeft is https://github.com/cogentcore/core/blob/main/icons/svg/move_selection_left.svg
 	MoveSelectionLeft Icon = "move_selection_left"
 
-	// MoveSelectionRight is https://github.com/goki/icons/blob/main/svg/move_selection_right.svg
+	// MoveSelectionRight is https://github.com/cogentcore/core/blob/main/icons/svg/move_selection_right.svg
 	MoveSelectionRight Icon = "move_selection_right"
 
-	// MoveSelectionUp is https://github.com/goki/icons/blob/main/svg/move_selection_up.svg
+	// MoveSelectionUp is https://github.com/cogentcore/core/blob/main/icons/svg/move_selection_up.svg
 	MoveSelectionUp Icon = "move_selection_up"
 
-	// MoveToInbox is https://github.com/goki/icons/blob/main/svg/move_to_inbox.svg
+	// MoveToInbox is https://github.com/cogentcore/core/blob/main/icons/svg/move_to_inbox.svg
 	MoveToInbox Icon = "move_to_inbox"
 
-	// MoveUp is https://github.com/goki/icons/blob/main/svg/move_up.svg
+	// MoveUp is https://github.com/cogentcore/core/blob/main/icons/svg/move_up.svg
 	MoveUp Icon = "move_up"
 
-	// MovedLocation is https://github.com/goki/icons/blob/main/svg/moved_location.svg
+	// MovedLocation is https://github.com/cogentcore/core/blob/main/icons/svg/moved_location.svg
 	MovedLocation Icon = "moved_location"
 
-	// Movie is https://github.com/goki/icons/blob/main/svg/movie.svg
+	// Movie is https://github.com/cogentcore/core/blob/main/icons/svg/movie.svg
 	Movie Icon = "movie"
 
-	// MovieEdit is https://github.com/goki/icons/blob/main/svg/movie_edit.svg
+	// MovieEdit is https://github.com/cogentcore/core/blob/main/icons/svg/movie_edit.svg
 	MovieEdit Icon = "movie_edit"
 
-	// MovieInfo is https://github.com/goki/icons/blob/main/svg/movie_info.svg
+	// MovieInfo is https://github.com/cogentcore/core/blob/main/icons/svg/movie_info.svg
 	MovieInfo Icon = "movie_info"
 
-	// Moving is https://github.com/goki/icons/blob/main/svg/moving.svg
+	// Moving is https://github.com/cogentcore/core/blob/main/icons/svg/moving.svg
 	Moving Icon = "moving"
 
-	// MultilineChart is https://github.com/goki/icons/blob/main/svg/multiline_chart.svg
+	// MultilineChart is https://github.com/cogentcore/core/blob/main/icons/svg/multiline_chart.svg
 	MultilineChart Icon = "multiline_chart"
 
-	// MultipleStop is https://github.com/goki/icons/blob/main/svg/multiple_stop.svg
+	// MultipleStop is https://github.com/cogentcore/core/blob/main/icons/svg/multiple_stop.svg
 	MultipleStop Icon = "multiple_stop"
 
-	// MusicNote is https://github.com/goki/icons/blob/main/svg/music_note.svg
+	// MusicNote is https://github.com/cogentcore/core/blob/main/icons/svg/music_note.svg
 	MusicNote Icon = "music_note"
 
-	// MusicOff is https://github.com/goki/icons/blob/main/svg/music_off.svg
+	// MusicOff is https://github.com/cogentcore/core/blob/main/icons/svg/music_off.svg
 	MusicOff Icon = "music_off"
 
-	// MusicVideo is https://github.com/goki/icons/blob/main/svg/music_video.svg
+	// MusicVideo is https://github.com/cogentcore/core/blob/main/icons/svg/music_video.svg
 	MusicVideo Icon = "music_video"
 
-	// MyLocation is https://github.com/goki/icons/blob/main/svg/my_location.svg
+	// MyLocation is https://github.com/cogentcore/core/blob/main/icons/svg/my_location.svg
 	MyLocation Icon = "my_location"
 
-	// Mystery is https://github.com/goki/icons/blob/main/svg/mystery.svg
+	// Mystery is https://github.com/cogentcore/core/blob/main/icons/svg/mystery.svg
 	Mystery Icon = "mystery"
 
-	// Nature is https://github.com/goki/icons/blob/main/svg/nature.svg
+	// Nature is https://github.com/cogentcore/core/blob/main/icons/svg/nature.svg
 	Nature Icon = "nature"
 
-	// NavigateBefore is https://github.com/goki/icons/blob/main/svg/navigate_before.svg
+	// NavigateBefore is https://github.com/cogentcore/core/blob/main/icons/svg/navigate_before.svg
 	NavigateBefore Icon = "navigate_before"
 
-	// NavigateNext is https://github.com/goki/icons/blob/main/svg/navigate_next.svg
+	// NavigateNext is https://github.com/cogentcore/core/blob/main/icons/svg/navigate_next.svg
 	NavigateNext Icon = "navigate_next"
 
-	// Navigation is https://github.com/goki/icons/blob/main/svg/navigation.svg
+	// Navigation is https://github.com/cogentcore/core/blob/main/icons/svg/navigation.svg
 	Navigation Icon = "navigation"
 
-	// NetworkCell is https://github.com/goki/icons/blob/main/svg/network_cell.svg
+	// NetworkCell is https://github.com/cogentcore/core/blob/main/icons/svg/network_cell.svg
 	NetworkCell Icon = "network_cell"
 
-	// NetworkCheck is https://github.com/goki/icons/blob/main/svg/network_check.svg
+	// NetworkCheck is https://github.com/cogentcore/core/blob/main/icons/svg/network_check.svg
 	NetworkCheck Icon = "network_check"
 
-	// NetworkLocked is https://github.com/goki/icons/blob/main/svg/network_locked.svg
+	// NetworkLocked is https://github.com/cogentcore/core/blob/main/icons/svg/network_locked.svg
 	NetworkLocked Icon = "network_locked"
 
-	// NetworkManage is https://github.com/goki/icons/blob/main/svg/network_manage.svg
+	// NetworkManage is https://github.com/cogentcore/core/blob/main/icons/svg/network_manage.svg
 	NetworkManage Icon = "network_manage"
 
-	// NetworkPing is https://github.com/goki/icons/blob/main/svg/network_ping.svg
+	// NetworkPing is https://github.com/cogentcore/core/blob/main/icons/svg/network_ping.svg
 	NetworkPing Icon = "network_ping"
 
-	// NetworkWifi is https://github.com/goki/icons/blob/main/svg/network_wifi.svg
+	// NetworkWifi is https://github.com/cogentcore/core/blob/main/icons/svg/network_wifi.svg
 	NetworkWifi Icon = "network_wifi"
 
-	// NetworkWifi1Bar is https://github.com/goki/icons/blob/main/svg/network_wifi_1_bar.svg
+	// NetworkWifi1Bar is https://github.com/cogentcore/core/blob/main/icons/svg/network_wifi_1_bar.svg
 	NetworkWifi1Bar Icon = "network_wifi_1_bar"
 
-	// NetworkWifi2Bar is https://github.com/goki/icons/blob/main/svg/network_wifi_2_bar.svg
+	// NetworkWifi2Bar is https://github.com/cogentcore/core/blob/main/icons/svg/network_wifi_2_bar.svg
 	NetworkWifi2Bar Icon = "network_wifi_2_bar"
 
-	// NetworkWifi3Bar is https://github.com/goki/icons/blob/main/svg/network_wifi_3_bar.svg
+	// NetworkWifi3Bar is https://github.com/cogentcore/core/blob/main/icons/svg/network_wifi_3_bar.svg
 	NetworkWifi3Bar Icon = "network_wifi_3_bar"
 
-	// NewLabel is https://github.com/goki/icons/blob/main/svg/new_label.svg
+	// NewLabel is https://github.com/cogentcore/core/blob/main/icons/svg/new_label.svg
 	NewLabel Icon = "new_label"
 
-	// NewReleases is https://github.com/goki/icons/blob/main/svg/new_releases.svg
+	// NewReleases is https://github.com/cogentcore/core/blob/main/icons/svg/new_releases.svg
 	NewReleases Icon = "new_releases"
 
-	// NewWindow is https://github.com/goki/icons/blob/main/svg/new_window.svg
+	// NewWindow is https://github.com/cogentcore/core/blob/main/icons/svg/new_window.svg
 	NewWindow Icon = "new_window"
 
-	// News is https://github.com/goki/icons/blob/main/svg/news.svg
+	// News is https://github.com/cogentcore/core/blob/main/icons/svg/news.svg
 	News Icon = "news"
 
-	// Newsmode is https://github.com/goki/icons/blob/main/svg/newsmode.svg
+	// Newsmode is https://github.com/cogentcore/core/blob/main/icons/svg/newsmode.svg
 	Newsmode Icon = "newsmode"
 
-	// Newspaper is https://github.com/goki/icons/blob/main/svg/newspaper.svg
+	// Newspaper is https://github.com/cogentcore/core/blob/main/icons/svg/newspaper.svg
 	Newspaper Icon = "newspaper"
 
-	// NextPlan is https://github.com/goki/icons/blob/main/svg/next_plan.svg
+	// NextPlan is https://github.com/cogentcore/core/blob/main/icons/svg/next_plan.svg
 	NextPlan Icon = "next_plan"
 
-	// NextWeek is https://github.com/goki/icons/blob/main/svg/next_week.svg
+	// NextWeek is https://github.com/cogentcore/core/blob/main/icons/svg/next_week.svg
 	NextWeek Icon = "next_week"
 
-	// Nfc is https://github.com/goki/icons/blob/main/svg/nfc.svg
+	// Nfc is https://github.com/cogentcore/core/blob/main/icons/svg/nfc.svg
 	Nfc Icon = "nfc"
 
-	// NoAccounts is https://github.com/goki/icons/blob/main/svg/no_accounts.svg
+	// NoAccounts is https://github.com/cogentcore/core/blob/main/icons/svg/no_accounts.svg
 	NoAccounts Icon = "no_accounts"
 
-	// NoAdultContent is https://github.com/goki/icons/blob/main/svg/no_adult_content.svg
+	// NoAdultContent is https://github.com/cogentcore/core/blob/main/icons/svg/no_adult_content.svg
 	NoAdultContent Icon = "no_adult_content"
 
-	// NoCrash is https://github.com/goki/icons/blob/main/svg/no_crash.svg
+	// NoCrash is https://github.com/cogentcore/core/blob/main/icons/svg/no_crash.svg
 	NoCrash Icon = "no_crash"
 
-	// NoEncryption is https://github.com/goki/icons/blob/main/svg/no_encryption.svg
+	// NoEncryption is https://github.com/cogentcore/core/blob/main/icons/svg/no_encryption.svg
 	NoEncryption Icon = "no_encryption"
 
-	// NoFlash is https://github.com/goki/icons/blob/main/svg/no_flash.svg
+	// NoFlash is https://github.com/cogentcore/core/blob/main/icons/svg/no_flash.svg
 	NoFlash Icon = "no_flash"
 
-	// NoSim is https://github.com/goki/icons/blob/main/svg/no_sim.svg
+	// NoSim is https://github.com/cogentcore/core/blob/main/icons/svg/no_sim.svg
 	NoSim Icon = "no_sim"
 
-	// NoSound is https://github.com/goki/icons/blob/main/svg/no_sound.svg
+	// NoSound is https://github.com/cogentcore/core/blob/main/icons/svg/no_sound.svg
 	NoSound Icon = "no_sound"
 
-	// NoTransfer is https://github.com/goki/icons/blob/main/svg/no_transfer.svg
+	// NoTransfer is https://github.com/cogentcore/core/blob/main/icons/svg/no_transfer.svg
 	NoTransfer Icon = "no_transfer"
 
-	// North is https://github.com/goki/icons/blob/main/svg/north.svg
+	// North is https://github.com/cogentcore/core/blob/main/icons/svg/north.svg
 	North Icon = "north"
 
-	// NorthEast is https://github.com/goki/icons/blob/main/svg/north_east.svg
+	// NorthEast is https://github.com/cogentcore/core/blob/main/icons/svg/north_east.svg
 	NorthEast Icon = "north_east"
 
-	// NorthWest is https://github.com/goki/icons/blob/main/svg/north_west.svg
+	// NorthWest is https://github.com/cogentcore/core/blob/main/icons/svg/north_west.svg
 	NorthWest Icon = "north_west"
 
-	// NotStarted is https://github.com/goki/icons/blob/main/svg/not_started.svg
+	// NotStarted is https://github.com/cogentcore/core/blob/main/icons/svg/not_started.svg
 	NotStarted Icon = "not_started"
 
-	// Note is https://github.com/goki/icons/blob/main/svg/note.svg
+	// Note is https://github.com/cogentcore/core/blob/main/icons/svg/note.svg
 	Note Icon = "note"
 
-	// NoteAdd is https://github.com/goki/icons/blob/main/svg/note_add.svg
+	// NoteAdd is https://github.com/cogentcore/core/blob/main/icons/svg/note_add.svg
 	NoteAdd Icon = "note_add"
 
-	// NoteAlt is https://github.com/goki/icons/blob/main/svg/note_alt.svg
+	// NoteAlt is https://github.com/cogentcore/core/blob/main/icons/svg/note_alt.svg
 	NoteAlt Icon = "note_alt"
 
-	// Notes is https://github.com/goki/icons/blob/main/svg/notes.svg
+	// Notes is https://github.com/cogentcore/core/blob/main/icons/svg/notes.svg
 	Notes Icon = "notes"
 
-	// NotificationAdd is https://github.com/goki/icons/blob/main/svg/notification_add.svg
+	// NotificationAdd is https://github.com/cogentcore/core/blob/main/icons/svg/notification_add.svg
 	NotificationAdd Icon = "notification_add"
 
-	// NotificationImportant is https://github.com/goki/icons/blob/main/svg/notification_important.svg
+	// NotificationImportant is https://github.com/cogentcore/core/blob/main/icons/svg/notification_important.svg
 	NotificationImportant Icon = "notification_important"
 
-	// NotificationMultiple is https://github.com/goki/icons/blob/main/svg/notification_multiple.svg
+	// NotificationMultiple is https://github.com/cogentcore/core/blob/main/icons/svg/notification_multiple.svg
 	NotificationMultiple Icon = "notification_multiple"
 
-	// Notifications is https://github.com/goki/icons/blob/main/svg/notifications.svg
+	// Notifications is https://github.com/cogentcore/core/blob/main/icons/svg/notifications.svg
 	Notifications Icon = "notifications"
 
-	// NotificationsActive is https://github.com/goki/icons/blob/main/svg/notifications_active.svg
+	// NotificationsActive is https://github.com/cogentcore/core/blob/main/icons/svg/notifications_active.svg
 	NotificationsActive Icon = "notifications_active"
 
-	// NotificationsOff is https://github.com/goki/icons/blob/main/svg/notifications_off.svg
+	// NotificationsOff is https://github.com/cogentcore/core/blob/main/icons/svg/notifications_off.svg
 	NotificationsOff Icon = "notifications_off"
 
-	// NotificationsPaused is https://github.com/goki/icons/blob/main/svg/notifications_paused.svg
+	// NotificationsPaused is https://github.com/cogentcore/core/blob/main/icons/svg/notifications_paused.svg
 	NotificationsPaused Icon = "notifications_paused"
 
-	// Numbers is https://github.com/goki/icons/blob/main/svg/numbers.svg
+	// Numbers is https://github.com/cogentcore/core/blob/main/icons/svg/numbers.svg
 	Numbers Icon = "numbers"
 
-	// OfflineBolt is https://github.com/goki/icons/blob/main/svg/offline_bolt.svg
+	// OfflineBolt is https://github.com/cogentcore/core/blob/main/icons/svg/offline_bolt.svg
 	OfflineBolt Icon = "offline_bolt"
 
-	// OfflinePin is https://github.com/goki/icons/blob/main/svg/offline_pin.svg
+	// OfflinePin is https://github.com/cogentcore/core/blob/main/icons/svg/offline_pin.svg
 	OfflinePin Icon = "offline_pin"
 
-	// OfflineShare is https://github.com/goki/icons/blob/main/svg/offline_share.svg
+	// OfflineShare is https://github.com/cogentcore/core/blob/main/icons/svg/offline_share.svg
 	OfflineShare Icon = "offline_share"
 
-	// OnDeviceTraining is https://github.com/goki/icons/blob/main/svg/on_device_training.svg
+	// OnDeviceTraining is https://github.com/cogentcore/core/blob/main/icons/svg/on_device_training.svg
 	OnDeviceTraining Icon = "on_device_training"
 
-	// OnlinePrediction is https://github.com/goki/icons/blob/main/svg/online_prediction.svg
+	// OnlinePrediction is https://github.com/cogentcore/core/blob/main/icons/svg/online_prediction.svg
 	OnlinePrediction Icon = "online_prediction"
 
-	// Opacity is https://github.com/goki/icons/blob/main/svg/opacity.svg
+	// Opacity is https://github.com/cogentcore/core/blob/main/icons/svg/opacity.svg
 	Opacity Icon = "opacity"
 
-	// Open is https://github.com/goki/icons/blob/main/svg/open.svg
+	// Open is https://github.com/cogentcore/core/blob/main/icons/svg/open.svg
 	Open Icon = "open"
 
-	// OpenInBrowser is https://github.com/goki/icons/blob/main/svg/open_in_browser.svg
+	// OpenInBrowser is https://github.com/cogentcore/core/blob/main/icons/svg/open_in_browser.svg
 	OpenInBrowser Icon = "open_in_browser"
 
-	// OpenInFull is https://github.com/goki/icons/blob/main/svg/open_in_full.svg
+	// OpenInFull is https://github.com/cogentcore/core/blob/main/icons/svg/open_in_full.svg
 	OpenInFull Icon = "open_in_full"
 
-	// OpenInNew is https://github.com/goki/icons/blob/main/svg/open_in_new.svg
+	// OpenInNew is https://github.com/cogentcore/core/blob/main/icons/svg/open_in_new.svg
 	OpenInNew Icon = "open_in_new"
 
-	// OpenInNewDown is https://github.com/goki/icons/blob/main/svg/open_in_new_down.svg
+	// OpenInNewDown is https://github.com/cogentcore/core/blob/main/icons/svg/open_in_new_down.svg
 	OpenInNewDown Icon = "open_in_new_down"
 
-	// OpenInNewOff is https://github.com/goki/icons/blob/main/svg/open_in_new_off.svg
+	// OpenInNewOff is https://github.com/cogentcore/core/blob/main/icons/svg/open_in_new_off.svg
 	OpenInNewOff Icon = "open_in_new_off"
 
-	// OpenInPhone is https://github.com/goki/icons/blob/main/svg/open_in_phone.svg
+	// OpenInPhone is https://github.com/cogentcore/core/blob/main/icons/svg/open_in_phone.svg
 	OpenInPhone Icon = "open_in_phone"
 
-	// OpenWith is https://github.com/goki/icons/blob/main/svg/open_with.svg
+	// OpenWith is https://github.com/cogentcore/core/blob/main/icons/svg/open_with.svg
 	OpenWith Icon = "open_with"
 
-	// OrderApprove is https://github.com/goki/icons/blob/main/svg/order_approve.svg
+	// OrderApprove is https://github.com/cogentcore/core/blob/main/icons/svg/order_approve.svg
 	OrderApprove Icon = "order_approve"
 
-	// OrderPlay is https://github.com/goki/icons/blob/main/svg/order_play.svg
+	// OrderPlay is https://github.com/cogentcore/core/blob/main/icons/svg/order_play.svg
 	OrderPlay Icon = "order_play"
 
-	// Outbound is https://github.com/goki/icons/blob/main/svg/outbound.svg
+	// Outbound is https://github.com/cogentcore/core/blob/main/icons/svg/outbound.svg
 	Outbound Icon = "outbound"
 
-	// Outbox is https://github.com/goki/icons/blob/main/svg/outbox.svg
+	// Outbox is https://github.com/cogentcore/core/blob/main/icons/svg/outbox.svg
 	Outbox Icon = "outbox"
 
-	// OutboxAlt is https://github.com/goki/icons/blob/main/svg/outbox_alt.svg
+	// OutboxAlt is https://github.com/cogentcore/core/blob/main/icons/svg/outbox_alt.svg
 	OutboxAlt Icon = "outbox_alt"
 
-	// OutgoingMail is https://github.com/goki/icons/blob/main/svg/outgoing_mail.svg
+	// OutgoingMail is https://github.com/cogentcore/core/blob/main/icons/svg/outgoing_mail.svg
 	OutgoingMail Icon = "outgoing_mail"
 
-	// Outlet is https://github.com/goki/icons/blob/main/svg/outlet.svg
+	// Outlet is https://github.com/cogentcore/core/blob/main/icons/svg/outlet.svg
 	Outlet Icon = "outlet"
 
-	// Output is https://github.com/goki/icons/blob/main/svg/output.svg
+	// Output is https://github.com/cogentcore/core/blob/main/icons/svg/output.svg
 	Output Icon = "output"
 
-	// OutputCircle is https://github.com/goki/icons/blob/main/svg/output_circle.svg
+	// OutputCircle is https://github.com/cogentcore/core/blob/main/icons/svg/output_circle.svg
 	OutputCircle Icon = "output_circle"
 
-	// Overview is https://github.com/goki/icons/blob/main/svg/overview.svg
+	// Overview is https://github.com/cogentcore/core/blob/main/icons/svg/overview.svg
 	Overview Icon = "overview"
 
-	// OverviewKey is https://github.com/goki/icons/blob/main/svg/overview_key.svg
+	// OverviewKey is https://github.com/cogentcore/core/blob/main/icons/svg/overview_key.svg
 	OverviewKey Icon = "overview_key"
 
-	// Pace is https://github.com/goki/icons/blob/main/svg/pace.svg
+	// Pace is https://github.com/cogentcore/core/blob/main/icons/svg/pace.svg
 	Pace Icon = "pace"
 
-	// Package is https://github.com/goki/icons/blob/main/svg/package.svg
+	// Package is https://github.com/cogentcore/core/blob/main/icons/svg/package.svg
 	Package Icon = "package"
 
-	// Padding is https://github.com/goki/icons/blob/main/svg/padding.svg
+	// Padding is https://github.com/cogentcore/core/blob/main/icons/svg/padding.svg
 	Padding Icon = "padding"
 
-	// PageControl is https://github.com/goki/icons/blob/main/svg/page_control.svg
+	// PageControl is https://github.com/cogentcore/core/blob/main/icons/svg/page_control.svg
 	PageControl Icon = "page_control"
 
-	// PageInfo is https://github.com/goki/icons/blob/main/svg/page_info.svg
+	// PageInfo is https://github.com/cogentcore/core/blob/main/icons/svg/page_info.svg
 	PageInfo Icon = "page_info"
 
-	// Pages is https://github.com/goki/icons/blob/main/svg/pages.svg
+	// Pages is https://github.com/cogentcore/core/blob/main/icons/svg/pages.svg
 	Pages Icon = "pages"
 
-	// Pageview is https://github.com/goki/icons/blob/main/svg/pageview.svg
+	// Pageview is https://github.com/cogentcore/core/blob/main/icons/svg/pageview.svg
 	Pageview Icon = "pageview"
 
-	// Paid is https://github.com/goki/icons/blob/main/svg/paid.svg
+	// Paid is https://github.com/cogentcore/core/blob/main/icons/svg/paid.svg
 	Paid Icon = "paid"
 
-	// Palette is https://github.com/goki/icons/blob/main/svg/palette.svg
+	// Palette is https://github.com/cogentcore/core/blob/main/icons/svg/palette.svg
 	Palette Icon = "palette"
 
-	// Pallet is https://github.com/goki/icons/blob/main/svg/pallet.svg
+	// Pallet is https://github.com/cogentcore/core/blob/main/icons/svg/pallet.svg
 	Pallet Icon = "pallet"
 
-	// PanTool is https://github.com/goki/icons/blob/main/svg/pan_tool.svg
+	// PanTool is https://github.com/cogentcore/core/blob/main/icons/svg/pan_tool.svg
 	PanTool Icon = "pan_tool"
 
-	// PanToolAlt is https://github.com/goki/icons/blob/main/svg/pan_tool_alt.svg
+	// PanToolAlt is https://github.com/cogentcore/core/blob/main/icons/svg/pan_tool_alt.svg
 	PanToolAlt Icon = "pan_tool_alt"
 
-	// PanZoom is https://github.com/goki/icons/blob/main/svg/pan_zoom.svg
+	// PanZoom is https://github.com/cogentcore/core/blob/main/icons/svg/pan_zoom.svg
 	PanZoom Icon = "pan_zoom"
 
-	// Panorama is https://github.com/goki/icons/blob/main/svg/panorama.svg
+	// Panorama is https://github.com/cogentcore/core/blob/main/icons/svg/panorama.svg
 	Panorama Icon = "panorama"
 
-	// Password is https://github.com/goki/icons/blob/main/svg/password.svg
+	// Password is https://github.com/cogentcore/core/blob/main/icons/svg/password.svg
 	Password Icon = "password"
 
-	// Paste is https://github.com/goki/icons/blob/main/svg/paste.svg
+	// Paste is https://github.com/cogentcore/core/blob/main/icons/svg/paste.svg
 	Paste Icon = "paste"
 
-	// Pattern is https://github.com/goki/icons/blob/main/svg/pattern.svg
+	// Pattern is https://github.com/cogentcore/core/blob/main/icons/svg/pattern.svg
 	Pattern Icon = "pattern"
 
-	// Pause is https://github.com/goki/icons/blob/main/svg/pause.svg
+	// Pause is https://github.com/cogentcore/core/blob/main/icons/svg/pause.svg
 	Pause Icon = "pause"
 
-	// PauseCircle is https://github.com/goki/icons/blob/main/svg/pause_circle.svg
+	// PauseCircle is https://github.com/cogentcore/core/blob/main/icons/svg/pause_circle.svg
 	PauseCircle Icon = "pause_circle"
 
-	// PausePresentation is https://github.com/goki/icons/blob/main/svg/pause_presentation.svg
+	// PausePresentation is https://github.com/cogentcore/core/blob/main/icons/svg/pause_presentation.svg
 	PausePresentation Icon = "pause_presentation"
 
-	// Payments is https://github.com/goki/icons/blob/main/svg/payments.svg
+	// Payments is https://github.com/cogentcore/core/blob/main/icons/svg/payments.svg
 	Payments Icon = "payments"
 
-	// PenSize1 is https://github.com/goki/icons/blob/main/svg/pen_size_1.svg
+	// PenSize1 is https://github.com/cogentcore/core/blob/main/icons/svg/pen_size_1.svg
 	PenSize1 Icon = "pen_size_1"
 
-	// PenSize2 is https://github.com/goki/icons/blob/main/svg/pen_size_2.svg
+	// PenSize2 is https://github.com/cogentcore/core/blob/main/icons/svg/pen_size_2.svg
 	PenSize2 Icon = "pen_size_2"
 
-	// PenSize3 is https://github.com/goki/icons/blob/main/svg/pen_size_3.svg
+	// PenSize3 is https://github.com/cogentcore/core/blob/main/icons/svg/pen_size_3.svg
 	PenSize3 Icon = "pen_size_3"
 
-	// PenSize4 is https://github.com/goki/icons/blob/main/svg/pen_size_4.svg
+	// PenSize4 is https://github.com/cogentcore/core/blob/main/icons/svg/pen_size_4.svg
 	PenSize4 Icon = "pen_size_4"
 
-	// PenSize5 is https://github.com/goki/icons/blob/main/svg/pen_size_5.svg
+	// PenSize5 is https://github.com/cogentcore/core/blob/main/icons/svg/pen_size_5.svg
 	PenSize5 Icon = "pen_size_5"
 
-	// Pending is https://github.com/goki/icons/blob/main/svg/pending.svg
+	// Pending is https://github.com/cogentcore/core/blob/main/icons/svg/pending.svg
 	Pending Icon = "pending"
 
-	// PendingActions is https://github.com/goki/icons/blob/main/svg/pending_actions.svg
+	// PendingActions is https://github.com/cogentcore/core/blob/main/icons/svg/pending_actions.svg
 	PendingActions Icon = "pending_actions"
 
-	// Pentagon is https://github.com/goki/icons/blob/main/svg/pentagon.svg
+	// Pentagon is https://github.com/cogentcore/core/blob/main/icons/svg/pentagon.svg
 	Pentagon Icon = "pentagon"
 
-	// Percent is https://github.com/goki/icons/blob/main/svg/percent.svg
+	// Percent is https://github.com/cogentcore/core/blob/main/icons/svg/percent.svg
 	Percent Icon = "percent"
 
-	// PermCameraMic is https://github.com/goki/icons/blob/main/svg/perm_camera_mic.svg
+	// PermCameraMic is https://github.com/cogentcore/core/blob/main/icons/svg/perm_camera_mic.svg
 	PermCameraMic Icon = "perm_camera_mic"
 
-	// PermContactCalendar is https://github.com/goki/icons/blob/main/svg/perm_contact_calendar.svg
+	// PermContactCalendar is https://github.com/cogentcore/core/blob/main/icons/svg/perm_contact_calendar.svg
 	PermContactCalendar Icon = "perm_contact_calendar"
 
-	// PermDataSetting is https://github.com/goki/icons/blob/main/svg/perm_data_setting.svg
+	// PermDataSetting is https://github.com/cogentcore/core/blob/main/icons/svg/perm_data_setting.svg
 	PermDataSetting Icon = "perm_data_setting"
 
-	// PermDeviceInformation is https://github.com/goki/icons/blob/main/svg/perm_device_information.svg
+	// PermDeviceInformation is https://github.com/cogentcore/core/blob/main/icons/svg/perm_device_information.svg
 	PermDeviceInformation Icon = "perm_device_information"
 
-	// PermMedia is https://github.com/goki/icons/blob/main/svg/perm_media.svg
+	// PermMedia is https://github.com/cogentcore/core/blob/main/icons/svg/perm_media.svg
 	PermMedia Icon = "perm_media"
 
-	// PermPhoneMsg is https://github.com/goki/icons/blob/main/svg/perm_phone_msg.svg
+	// PermPhoneMsg is https://github.com/cogentcore/core/blob/main/icons/svg/perm_phone_msg.svg
 	PermPhoneMsg Icon = "perm_phone_msg"
 
-	// PermScanWifi is https://github.com/goki/icons/blob/main/svg/perm_scan_wifi.svg
+	// PermScanWifi is https://github.com/cogentcore/core/blob/main/icons/svg/perm_scan_wifi.svg
 	PermScanWifi Icon = "perm_scan_wifi"
 
-	// Person is https://github.com/goki/icons/blob/main/svg/person.svg
+	// Person is https://github.com/cogentcore/core/blob/main/icons/svg/person.svg
 	Person Icon = "person"
 
-	// Person2 is https://github.com/goki/icons/blob/main/svg/person_2.svg
+	// Person2 is https://github.com/cogentcore/core/blob/main/icons/svg/person_2.svg
 	Person2 Icon = "person_2"
 
-	// Person3 is https://github.com/goki/icons/blob/main/svg/person_3.svg
+	// Person3 is https://github.com/cogentcore/core/blob/main/icons/svg/person_3.svg
 	Person3 Icon = "person_3"
 
-	// Person4 is https://github.com/goki/icons/blob/main/svg/person_4.svg
+	// Person4 is https://github.com/cogentcore/core/blob/main/icons/svg/person_4.svg
 	Person4 Icon = "person_4"
 
-	// PersonAdd is https://github.com/goki/icons/blob/main/svg/person_add.svg
+	// PersonAdd is https://github.com/cogentcore/core/blob/main/icons/svg/person_add.svg
 	PersonAdd Icon = "person_add"
 
-	// PersonAddDisabled is https://github.com/goki/icons/blob/main/svg/person_add_disabled.svg
+	// PersonAddDisabled is https://github.com/cogentcore/core/blob/main/icons/svg/person_add_disabled.svg
 	PersonAddDisabled Icon = "person_add_disabled"
 
-	// PersonApron is https://github.com/goki/icons/blob/main/svg/person_apron.svg
+	// PersonApron is https://github.com/cogentcore/core/blob/main/icons/svg/person_apron.svg
 	PersonApron Icon = "person_apron"
 
-	// PersonBook is https://github.com/goki/icons/blob/main/svg/person_book.svg
+	// PersonBook is https://github.com/cogentcore/core/blob/main/icons/svg/person_book.svg
 	PersonBook Icon = "person_book"
 
-	// PersonCelebrate is https://github.com/goki/icons/blob/main/svg/person_celebrate.svg
+	// PersonCelebrate is https://github.com/cogentcore/core/blob/main/icons/svg/person_celebrate.svg
 	PersonCelebrate Icon = "person_celebrate"
 
-	// PersonOff is https://github.com/goki/icons/blob/main/svg/person_off.svg
+	// PersonOff is https://github.com/cogentcore/core/blob/main/icons/svg/person_off.svg
 	PersonOff Icon = "person_off"
 
-	// PersonPin is https://github.com/goki/icons/blob/main/svg/person_pin.svg
+	// PersonPin is https://github.com/cogentcore/core/blob/main/icons/svg/person_pin.svg
 	PersonPin Icon = "person_pin"
 
-	// PersonPinCircle is https://github.com/goki/icons/blob/main/svg/person_pin_circle.svg
+	// PersonPinCircle is https://github.com/cogentcore/core/blob/main/icons/svg/person_pin_circle.svg
 	PersonPinCircle Icon = "person_pin_circle"
 
-	// PersonPlay is https://github.com/goki/icons/blob/main/svg/person_play.svg
+	// PersonPlay is https://github.com/cogentcore/core/blob/main/icons/svg/person_play.svg
 	PersonPlay Icon = "person_play"
 
-	// PersonRaisedHand is https://github.com/goki/icons/blob/main/svg/person_raised_hand.svg
+	// PersonRaisedHand is https://github.com/cogentcore/core/blob/main/icons/svg/person_raised_hand.svg
 	PersonRaisedHand Icon = "person_raised_hand"
 
-	// PersonRemove is https://github.com/goki/icons/blob/main/svg/person_remove.svg
+	// PersonRemove is https://github.com/cogentcore/core/blob/main/icons/svg/person_remove.svg
 	PersonRemove Icon = "person_remove"
 
-	// PersonSearch is https://github.com/goki/icons/blob/main/svg/person_search.svg
+	// PersonSearch is https://github.com/cogentcore/core/blob/main/icons/svg/person_search.svg
 	PersonSearch Icon = "person_search"
 
-	// Phishing is https://github.com/goki/icons/blob/main/svg/phishing.svg
+	// Phishing is https://github.com/cogentcore/core/blob/main/icons/svg/phishing.svg
 	Phishing Icon = "phishing"
 
-	// PhoneAndroid is https://github.com/goki/icons/blob/main/svg/phone_android.svg
+	// PhoneAndroid is https://github.com/cogentcore/core/blob/main/icons/svg/phone_android.svg
 	PhoneAndroid Icon = "phone_android"
 
-	// PhoneBluetoothSpeaker is https://github.com/goki/icons/blob/main/svg/phone_bluetooth_speaker.svg
+	// PhoneBluetoothSpeaker is https://github.com/cogentcore/core/blob/main/icons/svg/phone_bluetooth_speaker.svg
 	PhoneBluetoothSpeaker Icon = "phone_bluetooth_speaker"
 
-	// PhoneCallback is https://github.com/goki/icons/blob/main/svg/phone_callback.svg
+	// PhoneCallback is https://github.com/cogentcore/core/blob/main/icons/svg/phone_callback.svg
 	PhoneCallback Icon = "phone_callback"
 
-	// PhoneDisabled is https://github.com/goki/icons/blob/main/svg/phone_disabled.svg
+	// PhoneDisabled is https://github.com/cogentcore/core/blob/main/icons/svg/phone_disabled.svg
 	PhoneDisabled Icon = "phone_disabled"
 
-	// PhoneEnabled is https://github.com/goki/icons/blob/main/svg/phone_enabled.svg
+	// PhoneEnabled is https://github.com/cogentcore/core/blob/main/icons/svg/phone_enabled.svg
 	PhoneEnabled Icon = "phone_enabled"
 
-	// PhoneForwarded is https://github.com/goki/icons/blob/main/svg/phone_forwarded.svg
+	// PhoneForwarded is https://github.com/cogentcore/core/blob/main/icons/svg/phone_forwarded.svg
 	PhoneForwarded Icon = "phone_forwarded"
 
-	// PhoneInTalk is https://github.com/goki/icons/blob/main/svg/phone_in_talk.svg
+	// PhoneInTalk is https://github.com/cogentcore/core/blob/main/icons/svg/phone_in_talk.svg
 	PhoneInTalk Icon = "phone_in_talk"
 
-	// PhoneIphone is https://github.com/goki/icons/blob/main/svg/phone_iphone.svg
+	// PhoneIphone is https://github.com/cogentcore/core/blob/main/icons/svg/phone_iphone.svg
 	PhoneIphone Icon = "phone_iphone"
 
-	// PhoneLocked is https://github.com/goki/icons/blob/main/svg/phone_locked.svg
+	// PhoneLocked is https://github.com/cogentcore/core/blob/main/icons/svg/phone_locked.svg
 	PhoneLocked Icon = "phone_locked"
 
-	// PhoneMissed is https://github.com/goki/icons/blob/main/svg/phone_missed.svg
+	// PhoneMissed is https://github.com/cogentcore/core/blob/main/icons/svg/phone_missed.svg
 	PhoneMissed Icon = "phone_missed"
 
-	// PhonePaused is https://github.com/goki/icons/blob/main/svg/phone_paused.svg
+	// PhonePaused is https://github.com/cogentcore/core/blob/main/icons/svg/phone_paused.svg
 	PhonePaused Icon = "phone_paused"
 
-	// Photo is https://github.com/goki/icons/blob/main/svg/photo.svg
+	// Photo is https://github.com/cogentcore/core/blob/main/icons/svg/photo.svg
 	Photo Icon = "photo"
 
-	// PhotoAlbum is https://github.com/goki/icons/blob/main/svg/photo_album.svg
+	// PhotoAlbum is https://github.com/cogentcore/core/blob/main/icons/svg/photo_album.svg
 	PhotoAlbum Icon = "photo_album"
 
-	// PhotoCamera is https://github.com/goki/icons/blob/main/svg/photo_camera.svg
+	// PhotoCamera is https://github.com/cogentcore/core/blob/main/icons/svg/photo_camera.svg
 	PhotoCamera Icon = "photo_camera"
 
-	// PhotoCameraBack is https://github.com/goki/icons/blob/main/svg/photo_camera_back.svg
+	// PhotoCameraBack is https://github.com/cogentcore/core/blob/main/icons/svg/photo_camera_back.svg
 	PhotoCameraBack Icon = "photo_camera_back"
 
-	// PhotoCameraFront is https://github.com/goki/icons/blob/main/svg/photo_camera_front.svg
+	// PhotoCameraFront is https://github.com/cogentcore/core/blob/main/icons/svg/photo_camera_front.svg
 	PhotoCameraFront Icon = "photo_camera_front"
 
-	// PhotoFrame is https://github.com/goki/icons/blob/main/svg/photo_frame.svg
+	// PhotoFrame is https://github.com/cogentcore/core/blob/main/icons/svg/photo_frame.svg
 	PhotoFrame Icon = "photo_frame"
 
-	// PhotoLibrary is https://github.com/goki/icons/blob/main/svg/photo_library.svg
+	// PhotoLibrary is https://github.com/cogentcore/core/blob/main/icons/svg/photo_library.svg
 	PhotoLibrary Icon = "photo_library"
 
-	// PhotoPrints is https://github.com/goki/icons/blob/main/svg/photo_prints.svg
+	// PhotoPrints is https://github.com/cogentcore/core/blob/main/icons/svg/photo_prints.svg
 	PhotoPrints Icon = "photo_prints"
 
-	// PhotoSizeSelectLarge is https://github.com/goki/icons/blob/main/svg/photo_size_select_large.svg
+	// PhotoSizeSelectLarge is https://github.com/cogentcore/core/blob/main/icons/svg/photo_size_select_large.svg
 	PhotoSizeSelectLarge Icon = "photo_size_select_large"
 
-	// PhotoSizeSelectSmall is https://github.com/goki/icons/blob/main/svg/photo_size_select_small.svg
+	// PhotoSizeSelectSmall is https://github.com/cogentcore/core/blob/main/icons/svg/photo_size_select_small.svg
 	PhotoSizeSelectSmall Icon = "photo_size_select_small"
 
-	// Php is https://github.com/goki/icons/blob/main/svg/php.svg
+	// Php is https://github.com/cogentcore/core/blob/main/icons/svg/php.svg
 	Php Icon = "php"
 
-	// Piano is https://github.com/goki/icons/blob/main/svg/piano.svg
+	// Piano is https://github.com/cogentcore/core/blob/main/icons/svg/piano.svg
 	Piano Icon = "piano"
 
-	// PianoOff is https://github.com/goki/icons/blob/main/svg/piano_off.svg
+	// PianoOff is https://github.com/cogentcore/core/blob/main/icons/svg/piano_off.svg
 	PianoOff Icon = "piano_off"
 
-	// PictureAsPdf is https://github.com/goki/icons/blob/main/svg/picture_as_pdf.svg
+	// PictureAsPdf is https://github.com/cogentcore/core/blob/main/icons/svg/picture_as_pdf.svg
 	PictureAsPdf Icon = "picture_as_pdf"
 
-	// PictureInPicture is https://github.com/goki/icons/blob/main/svg/picture_in_picture.svg
+	// PictureInPicture is https://github.com/cogentcore/core/blob/main/icons/svg/picture_in_picture.svg
 	PictureInPicture Icon = "picture_in_picture"
 
-	// PictureInPictureAlt is https://github.com/goki/icons/blob/main/svg/picture_in_picture_alt.svg
+	// PictureInPictureAlt is https://github.com/cogentcore/core/blob/main/icons/svg/picture_in_picture_alt.svg
 	PictureInPictureAlt Icon = "picture_in_picture_alt"
 
-	// PieChart is https://github.com/goki/icons/blob/main/svg/pie_chart.svg
+	// PieChart is https://github.com/cogentcore/core/blob/main/icons/svg/pie_chart.svg
 	PieChart Icon = "pie_chart"
 
-	// Pill is https://github.com/goki/icons/blob/main/svg/pill.svg
+	// Pill is https://github.com/cogentcore/core/blob/main/icons/svg/pill.svg
 	Pill Icon = "pill"
 
-	// PillOff is https://github.com/goki/icons/blob/main/svg/pill_off.svg
+	// PillOff is https://github.com/cogentcore/core/blob/main/icons/svg/pill_off.svg
 	PillOff Icon = "pill_off"
 
-	// Pin is https://github.com/goki/icons/blob/main/svg/pin.svg
+	// Pin is https://github.com/cogentcore/core/blob/main/icons/svg/pin.svg
 	Pin Icon = "pin"
 
-	// PinDrop is https://github.com/goki/icons/blob/main/svg/pin_drop.svg
+	// PinDrop is https://github.com/cogentcore/core/blob/main/icons/svg/pin_drop.svg
 	PinDrop Icon = "pin_drop"
 
-	// PinEnd is https://github.com/goki/icons/blob/main/svg/pin_end.svg
+	// PinEnd is https://github.com/cogentcore/core/blob/main/icons/svg/pin_end.svg
 	PinEnd Icon = "pin_end"
 
-	// PinInvoke is https://github.com/goki/icons/blob/main/svg/pin_invoke.svg
+	// PinInvoke is https://github.com/cogentcore/core/blob/main/icons/svg/pin_invoke.svg
 	PinInvoke Icon = "pin_invoke"
 
-	// Pinch is https://github.com/goki/icons/blob/main/svg/pinch.svg
+	// Pinch is https://github.com/cogentcore/core/blob/main/icons/svg/pinch.svg
 	Pinch Icon = "pinch"
 
-	// PinchZoomIn is https://github.com/goki/icons/blob/main/svg/pinch_zoom_in.svg
+	// PinchZoomIn is https://github.com/cogentcore/core/blob/main/icons/svg/pinch_zoom_in.svg
 	PinchZoomIn Icon = "pinch_zoom_in"
 
-	// PinchZoomOut is https://github.com/goki/icons/blob/main/svg/pinch_zoom_out.svg
+	// PinchZoomOut is https://github.com/cogentcore/core/blob/main/icons/svg/pinch_zoom_out.svg
 	PinchZoomOut Icon = "pinch_zoom_out"
 
-	// Pip is https://github.com/goki/icons/blob/main/svg/pip.svg
+	// Pip is https://github.com/cogentcore/core/blob/main/icons/svg/pip.svg
 	Pip Icon = "pip"
 
-	// PipExit is https://github.com/goki/icons/blob/main/svg/pip_exit.svg
+	// PipExit is https://github.com/cogentcore/core/blob/main/icons/svg/pip_exit.svg
 	PipExit Icon = "pip_exit"
 
-	// PivotTableChart is https://github.com/goki/icons/blob/main/svg/pivot_table_chart.svg
+	// PivotTableChart is https://github.com/cogentcore/core/blob/main/icons/svg/pivot_table_chart.svg
 	PivotTableChart Icon = "pivot_table_chart"
 
-	// PlaceItem is https://github.com/goki/icons/blob/main/svg/place_item.svg
+	// PlaceItem is https://github.com/cogentcore/core/blob/main/icons/svg/place_item.svg
 	PlaceItem Icon = "place_item"
 
-	// Plagiarism is https://github.com/goki/icons/blob/main/svg/plagiarism.svg
+	// Plagiarism is https://github.com/cogentcore/core/blob/main/icons/svg/plagiarism.svg
 	Plagiarism Icon = "plagiarism"
 
-	// PlayArrow is https://github.com/goki/icons/blob/main/svg/play_arrow.svg
+	// PlayArrow is https://github.com/cogentcore/core/blob/main/icons/svg/play_arrow.svg
 	PlayArrow Icon = "play_arrow"
 
-	// PlayCircle is https://github.com/goki/icons/blob/main/svg/play_circle.svg
+	// PlayCircle is https://github.com/cogentcore/core/blob/main/icons/svg/play_circle.svg
 	PlayCircle Icon = "play_circle"
 
-	// PlayDisabled is https://github.com/goki/icons/blob/main/svg/play_disabled.svg
+	// PlayDisabled is https://github.com/cogentcore/core/blob/main/icons/svg/play_disabled.svg
 	PlayDisabled Icon = "play_disabled"
 
-	// PlayForWork is https://github.com/goki/icons/blob/main/svg/play_for_work.svg
+	// PlayForWork is https://github.com/cogentcore/core/blob/main/icons/svg/play_for_work.svg
 	PlayForWork Icon = "play_for_work"
 
-	// PlayLesson is https://github.com/goki/icons/blob/main/svg/play_lesson.svg
+	// PlayLesson is https://github.com/cogentcore/core/blob/main/icons/svg/play_lesson.svg
 	PlayLesson Icon = "play_lesson"
 
-	// PlayPause is https://github.com/goki/icons/blob/main/svg/play_pause.svg
+	// PlayPause is https://github.com/cogentcore/core/blob/main/icons/svg/play_pause.svg
 	PlayPause Icon = "play_pause"
 
-	// PlayShapes is https://github.com/goki/icons/blob/main/svg/play_shapes.svg
+	// PlayShapes is https://github.com/cogentcore/core/blob/main/icons/svg/play_shapes.svg
 	PlayShapes Icon = "play_shapes"
 
-	// PlayingCards is https://github.com/goki/icons/blob/main/svg/playing_cards.svg
+	// PlayingCards is https://github.com/cogentcore/core/blob/main/icons/svg/playing_cards.svg
 	PlayingCards Icon = "playing_cards"
 
-	// PlaylistAdd is https://github.com/goki/icons/blob/main/svg/playlist_add.svg
+	// PlaylistAdd is https://github.com/cogentcore/core/blob/main/icons/svg/playlist_add.svg
 	PlaylistAdd Icon = "playlist_add"
 
-	// PlaylistAddCheck is https://github.com/goki/icons/blob/main/svg/playlist_add_check.svg
+	// PlaylistAddCheck is https://github.com/cogentcore/core/blob/main/icons/svg/playlist_add_check.svg
 	PlaylistAddCheck Icon = "playlist_add_check"
 
-	// PlaylistAddCheckCircle is https://github.com/goki/icons/blob/main/svg/playlist_add_check_circle.svg
+	// PlaylistAddCheckCircle is https://github.com/cogentcore/core/blob/main/icons/svg/playlist_add_check_circle.svg
 	PlaylistAddCheckCircle Icon = "playlist_add_check_circle"
 
-	// PlaylistAddCircle is https://github.com/goki/icons/blob/main/svg/playlist_add_circle.svg
+	// PlaylistAddCircle is https://github.com/cogentcore/core/blob/main/icons/svg/playlist_add_circle.svg
 	PlaylistAddCircle Icon = "playlist_add_circle"
 
-	// PlaylistPlay is https://github.com/goki/icons/blob/main/svg/playlist_play.svg
+	// PlaylistPlay is https://github.com/cogentcore/core/blob/main/icons/svg/playlist_play.svg
 	PlaylistPlay Icon = "playlist_play"
 
-	// PlaylistRemove is https://github.com/goki/icons/blob/main/svg/playlist_remove.svg
+	// PlaylistRemove is https://github.com/cogentcore/core/blob/main/icons/svg/playlist_remove.svg
 	PlaylistRemove Icon = "playlist_remove"
 
-	// Podcasts is https://github.com/goki/icons/blob/main/svg/podcasts.svg
+	// Podcasts is https://github.com/cogentcore/core/blob/main/icons/svg/podcasts.svg
 	Podcasts Icon = "podcasts"
 
-	// Podium is https://github.com/goki/icons/blob/main/svg/podium.svg
+	// Podium is https://github.com/cogentcore/core/blob/main/icons/svg/podium.svg
 	Podium Icon = "podium"
 
-	// PointOfSale is https://github.com/goki/icons/blob/main/svg/point_of_sale.svg
+	// PointOfSale is https://github.com/cogentcore/core/blob/main/icons/svg/point_of_sale.svg
 	PointOfSale Icon = "point_of_sale"
 
-	// PointScan is https://github.com/goki/icons/blob/main/svg/point_scan.svg
+	// PointScan is https://github.com/cogentcore/core/blob/main/icons/svg/point_scan.svg
 	PointScan Icon = "point_scan"
 
-	// Policy is https://github.com/goki/icons/blob/main/svg/policy.svg
+	// Policy is https://github.com/cogentcore/core/blob/main/icons/svg/policy.svg
 	Policy Icon = "policy"
 
-	// Polyline is https://github.com/goki/icons/blob/main/svg/polyline.svg
+	// Polyline is https://github.com/cogentcore/core/blob/main/icons/svg/polyline.svg
 	Polyline Icon = "polyline"
 
-	// Polymer is https://github.com/goki/icons/blob/main/svg/polymer.svg
+	// Polymer is https://github.com/cogentcore/core/blob/main/icons/svg/polymer.svg
 	Polymer Icon = "polymer"
 
-	// PortableWifiOff is https://github.com/goki/icons/blob/main/svg/portable_wifi_off.svg
+	// PortableWifiOff is https://github.com/cogentcore/core/blob/main/icons/svg/portable_wifi_off.svg
 	PortableWifiOff Icon = "portable_wifi_off"
 
-	// PositionBottomLeft is https://github.com/goki/icons/blob/main/svg/position_bottom_left.svg
+	// PositionBottomLeft is https://github.com/cogentcore/core/blob/main/icons/svg/position_bottom_left.svg
 	PositionBottomLeft Icon = "position_bottom_left"
 
-	// PositionBottomRight is https://github.com/goki/icons/blob/main/svg/position_bottom_right.svg
+	// PositionBottomRight is https://github.com/cogentcore/core/blob/main/icons/svg/position_bottom_right.svg
 	PositionBottomRight Icon = "position_bottom_right"
 
-	// PositionTopRight is https://github.com/goki/icons/blob/main/svg/position_top_right.svg
+	// PositionTopRight is https://github.com/cogentcore/core/blob/main/icons/svg/position_top_right.svg
 	PositionTopRight Icon = "position_top_right"
 
-	// Post is https://github.com/goki/icons/blob/main/svg/post.svg
+	// Post is https://github.com/cogentcore/core/blob/main/icons/svg/post.svg
 	Post Icon = "post"
 
-	// PostAdd is https://github.com/goki/icons/blob/main/svg/post_add.svg
+	// PostAdd is https://github.com/cogentcore/core/blob/main/icons/svg/post_add.svg
 	PostAdd Icon = "post_add"
 
-	// Power is https://github.com/goki/icons/blob/main/svg/power.svg
+	// Power is https://github.com/cogentcore/core/blob/main/icons/svg/power.svg
 	Power Icon = "power"
 
-	// PowerInput is https://github.com/goki/icons/blob/main/svg/power_input.svg
+	// PowerInput is https://github.com/cogentcore/core/blob/main/icons/svg/power_input.svg
 	PowerInput Icon = "power_input"
 
-	// PowerOff is https://github.com/goki/icons/blob/main/svg/power_off.svg
+	// PowerOff is https://github.com/cogentcore/core/blob/main/icons/svg/power_off.svg
 	PowerOff Icon = "power_off"
 
-	// PowerSettingsNew is https://github.com/goki/icons/blob/main/svg/power_settings_new.svg
+	// PowerSettingsNew is https://github.com/cogentcore/core/blob/main/icons/svg/power_settings_new.svg
 	PowerSettingsNew Icon = "power_settings_new"
 
-	// Preliminary is https://github.com/goki/icons/blob/main/svg/preliminary.svg
+	// Preliminary is https://github.com/cogentcore/core/blob/main/icons/svg/preliminary.svg
 	Preliminary Icon = "preliminary"
 
-	// PresentToAll is https://github.com/goki/icons/blob/main/svg/present_to_all.svg
+	// PresentToAll is https://github.com/cogentcore/core/blob/main/icons/svg/present_to_all.svg
 	PresentToAll Icon = "present_to_all"
 
-	// Preview is https://github.com/goki/icons/blob/main/svg/preview.svg
+	// Preview is https://github.com/cogentcore/core/blob/main/icons/svg/preview.svg
 	Preview Icon = "preview"
 
-	// PreviewOff is https://github.com/goki/icons/blob/main/svg/preview_off.svg
+	// PreviewOff is https://github.com/cogentcore/core/blob/main/icons/svg/preview_off.svg
 	PreviewOff Icon = "preview_off"
 
-	// PriceChange is https://github.com/goki/icons/blob/main/svg/price_change.svg
+	// PriceChange is https://github.com/cogentcore/core/blob/main/icons/svg/price_change.svg
 	PriceChange Icon = "price_change"
 
-	// PriceCheck is https://github.com/goki/icons/blob/main/svg/price_check.svg
+	// PriceCheck is https://github.com/cogentcore/core/blob/main/icons/svg/price_check.svg
 	PriceCheck Icon = "price_check"
 
-	// Print is https://github.com/goki/icons/blob/main/svg/print.svg
+	// Print is https://github.com/cogentcore/core/blob/main/icons/svg/print.svg
 	Print Icon = "print"
 
-	// PrintAdd is https://github.com/goki/icons/blob/main/svg/print_add.svg
+	// PrintAdd is https://github.com/cogentcore/core/blob/main/icons/svg/print_add.svg
 	PrintAdd Icon = "print_add"
 
-	// PrintConnect is https://github.com/goki/icons/blob/main/svg/print_connect.svg
+	// PrintConnect is https://github.com/cogentcore/core/blob/main/icons/svg/print_connect.svg
 	PrintConnect Icon = "print_connect"
 
-	// PrintDisabled is https://github.com/goki/icons/blob/main/svg/print_disabled.svg
+	// PrintDisabled is https://github.com/cogentcore/core/blob/main/icons/svg/print_disabled.svg
 	PrintDisabled Icon = "print_disabled"
 
-	// PrintError is https://github.com/goki/icons/blob/main/svg/print_error.svg
+	// PrintError is https://github.com/cogentcore/core/blob/main/icons/svg/print_error.svg
 	PrintError Icon = "print_error"
 
-	// PrintLock is https://github.com/goki/icons/blob/main/svg/print_lock.svg
+	// PrintLock is https://github.com/cogentcore/core/blob/main/icons/svg/print_lock.svg
 	PrintLock Icon = "print_lock"
 
-	// Priority is https://github.com/goki/icons/blob/main/svg/priority.svg
+	// Priority is https://github.com/cogentcore/core/blob/main/icons/svg/priority.svg
 	Priority Icon = "priority"
 
-	// PriorityHigh is https://github.com/goki/icons/blob/main/svg/priority_high.svg
+	// PriorityHigh is https://github.com/cogentcore/core/blob/main/icons/svg/priority_high.svg
 	PriorityHigh Icon = "priority_high"
 
-	// Privacy is https://github.com/goki/icons/blob/main/svg/privacy.svg
+	// Privacy is https://github.com/cogentcore/core/blob/main/icons/svg/privacy.svg
 	Privacy Icon = "privacy"
 
-	// PrivacyTip is https://github.com/goki/icons/blob/main/svg/privacy_tip.svg
+	// PrivacyTip is https://github.com/cogentcore/core/blob/main/icons/svg/privacy_tip.svg
 	PrivacyTip Icon = "privacy_tip"
 
-	// PrivateConnectivity is https://github.com/goki/icons/blob/main/svg/private_connectivity.svg
+	// PrivateConnectivity is https://github.com/cogentcore/core/blob/main/icons/svg/private_connectivity.svg
 	PrivateConnectivity Icon = "private_connectivity"
 
-	// Problem is https://github.com/goki/icons/blob/main/svg/problem.svg
+	// Problem is https://github.com/cogentcore/core/blob/main/icons/svg/problem.svg
 	Problem Icon = "problem"
 
-	// ProcessChart is https://github.com/goki/icons/blob/main/svg/process_chart.svg
+	// ProcessChart is https://github.com/cogentcore/core/blob/main/icons/svg/process_chart.svg
 	ProcessChart Icon = "process_chart"
 
-	// Productivity is https://github.com/goki/icons/blob/main/svg/productivity.svg
+	// Productivity is https://github.com/cogentcore/core/blob/main/icons/svg/productivity.svg
 	Productivity Icon = "productivity"
 
-	// ProgressActivity is https://github.com/goki/icons/blob/main/svg/progress_activity.svg
+	// ProgressActivity is https://github.com/cogentcore/core/blob/main/icons/svg/progress_activity.svg
 	ProgressActivity Icon = "progress_activity"
 
-	// Publish is https://github.com/goki/icons/blob/main/svg/publish.svg
+	// Publish is https://github.com/cogentcore/core/blob/main/icons/svg/publish.svg
 	Publish Icon = "publish"
 
-	// PublishedWithChanges is https://github.com/goki/icons/blob/main/svg/published_with_changes.svg
+	// PublishedWithChanges is https://github.com/cogentcore/core/blob/main/icons/svg/published_with_changes.svg
 	PublishedWithChanges Icon = "published_with_changes"
 
-	// PunchClock is https://github.com/goki/icons/blob/main/svg/punch_clock.svg
+	// PunchClock is https://github.com/cogentcore/core/blob/main/icons/svg/punch_clock.svg
 	PunchClock Icon = "punch_clock"
 
-	// PushPin is https://github.com/goki/icons/blob/main/svg/push_pin.svg
+	// PushPin is https://github.com/cogentcore/core/blob/main/icons/svg/push_pin.svg
 	PushPin Icon = "push_pin"
 
-	// QrCode is https://github.com/goki/icons/blob/main/svg/qr_code.svg
+	// QrCode is https://github.com/cogentcore/core/blob/main/icons/svg/qr_code.svg
 	QrCode Icon = "qr_code"
 
-	// QrCode2 is https://github.com/goki/icons/blob/main/svg/qr_code_2.svg
+	// QrCode2 is https://github.com/cogentcore/core/blob/main/icons/svg/qr_code_2.svg
 	QrCode2 Icon = "qr_code_2"
 
-	// QrCode2Add is https://github.com/goki/icons/blob/main/svg/qr_code_2_add.svg
+	// QrCode2Add is https://github.com/cogentcore/core/blob/main/icons/svg/qr_code_2_add.svg
 	QrCode2Add Icon = "qr_code_2_add"
 
-	// QrCodeScanner is https://github.com/goki/icons/blob/main/svg/qr_code_scanner.svg
+	// QrCodeScanner is https://github.com/cogentcore/core/blob/main/icons/svg/qr_code_scanner.svg
 	QrCodeScanner Icon = "qr_code_scanner"
 
-	// QueryStats is https://github.com/goki/icons/blob/main/svg/query_stats.svg
+	// QueryStats is https://github.com/cogentcore/core/blob/main/icons/svg/query_stats.svg
 	QueryStats Icon = "query_stats"
 
-	// QuestionExchange is https://github.com/goki/icons/blob/main/svg/question_exchange.svg
+	// QuestionExchange is https://github.com/cogentcore/core/blob/main/icons/svg/question_exchange.svg
 	QuestionExchange Icon = "question_exchange"
 
-	// QuestionMark is https://github.com/goki/icons/blob/main/svg/question_mark.svg
+	// QuestionMark is https://github.com/cogentcore/core/blob/main/icons/svg/question_mark.svg
 	QuestionMark Icon = "question_mark"
 
-	// QueueMusic is https://github.com/goki/icons/blob/main/svg/queue_music.svg
+	// QueueMusic is https://github.com/cogentcore/core/blob/main/icons/svg/queue_music.svg
 	QueueMusic Icon = "queue_music"
 
-	// QueuePlayNext is https://github.com/goki/icons/blob/main/svg/queue_play_next.svg
+	// QueuePlayNext is https://github.com/cogentcore/core/blob/main/icons/svg/queue_play_next.svg
 	QueuePlayNext Icon = "queue_play_next"
 
-	// QuickPhrases is https://github.com/goki/icons/blob/main/svg/quick_phrases.svg
+	// QuickPhrases is https://github.com/cogentcore/core/blob/main/icons/svg/quick_phrases.svg
 	QuickPhrases Icon = "quick_phrases"
 
-	// QuickReference is https://github.com/goki/icons/blob/main/svg/quick_reference.svg
+	// QuickReference is https://github.com/cogentcore/core/blob/main/icons/svg/quick_reference.svg
 	QuickReference Icon = "quick_reference"
 
-	// QuickReferenceAll is https://github.com/goki/icons/blob/main/svg/quick_reference_all.svg
+	// QuickReferenceAll is https://github.com/cogentcore/core/blob/main/icons/svg/quick_reference_all.svg
 	QuickReferenceAll Icon = "quick_reference_all"
 
-	// Quickreply is https://github.com/goki/icons/blob/main/svg/quickreply.svg
+	// Quickreply is https://github.com/cogentcore/core/blob/main/icons/svg/quickreply.svg
 	Quickreply Icon = "quickreply"
 
-	// Quiz is https://github.com/goki/icons/blob/main/svg/quiz.svg
+	// Quiz is https://github.com/cogentcore/core/blob/main/icons/svg/quiz.svg
 	Quiz Icon = "quiz"
 
-	// Radar is https://github.com/goki/icons/blob/main/svg/radar.svg
+	// Radar is https://github.com/cogentcore/core/blob/main/icons/svg/radar.svg
 	Radar Icon = "radar"
 
-	// Radio is https://github.com/goki/icons/blob/main/svg/radio.svg
+	// Radio is https://github.com/cogentcore/core/blob/main/icons/svg/radio.svg
 	Radio Icon = "radio"
 
-	// RadioButtonChecked is https://github.com/goki/icons/blob/main/svg/radio_button_checked.svg
+	// RadioButtonChecked is https://github.com/cogentcore/core/blob/main/icons/svg/radio_button_checked.svg
 	RadioButtonChecked Icon = "radio_button_checked"
 
-	// RadioButtonPartial is https://github.com/goki/icons/blob/main/svg/radio_button_partial.svg
+	// RadioButtonPartial is https://github.com/cogentcore/core/blob/main/icons/svg/radio_button_partial.svg
 	RadioButtonPartial Icon = "radio_button_partial"
 
-	// RadioButtonUnchecked is https://github.com/goki/icons/blob/main/svg/radio_button_unchecked.svg
+	// RadioButtonUnchecked is https://github.com/cogentcore/core/blob/main/icons/svg/radio_button_unchecked.svg
 	RadioButtonUnchecked Icon = "radio_button_unchecked"
 
-	// RateReview is https://github.com/goki/icons/blob/main/svg/rate_review.svg
+	// RateReview is https://github.com/cogentcore/core/blob/main/icons/svg/rate_review.svg
 	RateReview Icon = "rate_review"
 
-	// ReadMore is https://github.com/goki/icons/blob/main/svg/read_more.svg
+	// ReadMore is https://github.com/cogentcore/core/blob/main/icons/svg/read_more.svg
 	ReadMore Icon = "read_more"
 
-	// ReadinessScore is https://github.com/goki/icons/blob/main/svg/readiness_score.svg
+	// ReadinessScore is https://github.com/cogentcore/core/blob/main/icons/svg/readiness_score.svg
 	ReadinessScore Icon = "readiness_score"
 
-	// RearCamera is https://github.com/goki/icons/blob/main/svg/rear_camera.svg
+	// RearCamera is https://github.com/cogentcore/core/blob/main/icons/svg/rear_camera.svg
 	RearCamera Icon = "rear_camera"
 
-	// Rebase is https://github.com/goki/icons/blob/main/svg/rebase.svg
+	// Rebase is https://github.com/cogentcore/core/blob/main/icons/svg/rebase.svg
 	Rebase Icon = "rebase"
 
-	// RebaseEdit is https://github.com/goki/icons/blob/main/svg/rebase_edit.svg
+	// RebaseEdit is https://github.com/cogentcore/core/blob/main/icons/svg/rebase_edit.svg
 	RebaseEdit Icon = "rebase_edit"
 
-	// Receipt is https://github.com/goki/icons/blob/main/svg/receipt.svg
+	// Receipt is https://github.com/cogentcore/core/blob/main/icons/svg/receipt.svg
 	Receipt Icon = "receipt"
 
-	// ReceiptLong is https://github.com/goki/icons/blob/main/svg/receipt_long.svg
+	// ReceiptLong is https://github.com/cogentcore/core/blob/main/icons/svg/receipt_long.svg
 	ReceiptLong Icon = "receipt_long"
 
-	// Recommend is https://github.com/goki/icons/blob/main/svg/recommend.svg
+	// Recommend is https://github.com/cogentcore/core/blob/main/icons/svg/recommend.svg
 	Recommend Icon = "recommend"
 
-	// RecordVoiceOver is https://github.com/goki/icons/blob/main/svg/record_voice_over.svg
+	// RecordVoiceOver is https://github.com/cogentcore/core/blob/main/icons/svg/record_voice_over.svg
 	RecordVoiceOver Icon = "record_voice_over"
 
-	// Rectangle is https://github.com/goki/icons/blob/main/svg/rectangle.svg
+	// Rectangle is https://github.com/cogentcore/core/blob/main/icons/svg/rectangle.svg
 	Rectangle Icon = "rectangle"
 
-	// Recycling is https://github.com/goki/icons/blob/main/svg/recycling.svg
+	// Recycling is https://github.com/cogentcore/core/blob/main/icons/svg/recycling.svg
 	Recycling Icon = "recycling"
 
-	// Redeem is https://github.com/goki/icons/blob/main/svg/redeem.svg
+	// Redeem is https://github.com/cogentcore/core/blob/main/icons/svg/redeem.svg
 	Redeem Icon = "redeem"
 
-	// Redo is https://github.com/goki/icons/blob/main/svg/redo.svg
+	// Redo is https://github.com/cogentcore/core/blob/main/icons/svg/redo.svg
 	Redo Icon = "redo"
 
-	// ReduceCapacity is https://github.com/goki/icons/blob/main/svg/reduce_capacity.svg
+	// ReduceCapacity is https://github.com/cogentcore/core/blob/main/icons/svg/reduce_capacity.svg
 	ReduceCapacity Icon = "reduce_capacity"
 
-	// Refresh is https://github.com/goki/icons/blob/main/svg/refresh.svg
+	// Refresh is https://github.com/cogentcore/core/blob/main/icons/svg/refresh.svg
 	Refresh Icon = "refresh"
 
-	// RegularExpression is https://github.com/goki/icons/blob/main/svg/regular_expression.svg
+	// RegularExpression is https://github.com/cogentcore/core/blob/main/icons/svg/regular_expression.svg
 	RegularExpression Icon = "regular_expression"
 
-	// Relax is https://github.com/goki/icons/blob/main/svg/relax.svg
+	// Relax is https://github.com/cogentcore/core/blob/main/icons/svg/relax.svg
 	Relax Icon = "relax"
 
-	// ReleaseAlert is https://github.com/goki/icons/blob/main/svg/release_alert.svg
+	// ReleaseAlert is https://github.com/cogentcore/core/blob/main/icons/svg/release_alert.svg
 	ReleaseAlert Icon = "release_alert"
 
-	// RememberMe is https://github.com/goki/icons/blob/main/svg/remember_me.svg
+	// RememberMe is https://github.com/cogentcore/core/blob/main/icons/svg/remember_me.svg
 	RememberMe Icon = "remember_me"
 
-	// Reminder is https://github.com/goki/icons/blob/main/svg/reminder.svg
+	// Reminder is https://github.com/cogentcore/core/blob/main/icons/svg/reminder.svg
 	Reminder Icon = "reminder"
 
-	// RemoteGen is https://github.com/goki/icons/blob/main/svg/remote_gen.svg
+	// RemoteGen is https://github.com/cogentcore/core/blob/main/icons/svg/remote_gen.svg
 	RemoteGen Icon = "remote_gen"
 
-	// Remove is https://github.com/goki/icons/blob/main/svg/remove.svg
+	// Remove is https://github.com/cogentcore/core/blob/main/icons/svg/remove.svg
 	Remove Icon = "remove"
 
-	// RemoveDone is https://github.com/goki/icons/blob/main/svg/remove_done.svg
+	// RemoveDone is https://github.com/cogentcore/core/blob/main/icons/svg/remove_done.svg
 	RemoveDone Icon = "remove_done"
 
-	// RemoveFromQueue is https://github.com/goki/icons/blob/main/svg/remove_from_queue.svg
+	// RemoveFromQueue is https://github.com/cogentcore/core/blob/main/icons/svg/remove_from_queue.svg
 	RemoveFromQueue Icon = "remove_from_queue"
 
-	// RemoveModerator is https://github.com/goki/icons/blob/main/svg/remove_moderator.svg
+	// RemoveModerator is https://github.com/cogentcore/core/blob/main/icons/svg/remove_moderator.svg
 	RemoveModerator Icon = "remove_moderator"
 
-	// RemoveSelection is https://github.com/goki/icons/blob/main/svg/remove_selection.svg
+	// RemoveSelection is https://github.com/cogentcore/core/blob/main/icons/svg/remove_selection.svg
 	RemoveSelection Icon = "remove_selection"
 
-	// RemoveShoppingCart is https://github.com/goki/icons/blob/main/svg/remove_shopping_cart.svg
+	// RemoveShoppingCart is https://github.com/cogentcore/core/blob/main/icons/svg/remove_shopping_cart.svg
 	RemoveShoppingCart Icon = "remove_shopping_cart"
 
-	// ReopenWindow is https://github.com/goki/icons/blob/main/svg/reopen_window.svg
+	// ReopenWindow is https://github.com/cogentcore/core/blob/main/icons/svg/reopen_window.svg
 	ReopenWindow Icon = "reopen_window"
 
-	// Reorder is https://github.com/goki/icons/blob/main/svg/reorder.svg
+	// Reorder is https://github.com/cogentcore/core/blob/main/icons/svg/reorder.svg
 	Reorder Icon = "reorder"
 
-	// Repartition is https://github.com/goki/icons/blob/main/svg/repartition.svg
+	// Repartition is https://github.com/cogentcore/core/blob/main/icons/svg/repartition.svg
 	Repartition Icon = "repartition"
 
-	// Repeat is https://github.com/goki/icons/blob/main/svg/repeat.svg
+	// Repeat is https://github.com/cogentcore/core/blob/main/icons/svg/repeat.svg
 	Repeat Icon = "repeat"
 
-	// RepeatOn is https://github.com/goki/icons/blob/main/svg/repeat_on.svg
+	// RepeatOn is https://github.com/cogentcore/core/blob/main/icons/svg/repeat_on.svg
 	RepeatOn Icon = "repeat_on"
 
-	// RepeatOne is https://github.com/goki/icons/blob/main/svg/repeat_one.svg
+	// RepeatOne is https://github.com/cogentcore/core/blob/main/icons/svg/repeat_one.svg
 	RepeatOne Icon = "repeat_one"
 
-	// RepeatOneOn is https://github.com/goki/icons/blob/main/svg/repeat_one_on.svg
+	// RepeatOneOn is https://github.com/cogentcore/core/blob/main/icons/svg/repeat_one_on.svg
 	RepeatOneOn Icon = "repeat_one_on"
 
-	// Replay is https://github.com/goki/icons/blob/main/svg/replay.svg
+	// Replay is https://github.com/cogentcore/core/blob/main/icons/svg/replay.svg
 	Replay Icon = "replay"
 
-	// Replay10 is https://github.com/goki/icons/blob/main/svg/replay_10.svg
+	// Replay10 is https://github.com/cogentcore/core/blob/main/icons/svg/replay_10.svg
 	Replay10 Icon = "replay_10"
 
-	// Replay30 is https://github.com/goki/icons/blob/main/svg/replay_30.svg
+	// Replay30 is https://github.com/cogentcore/core/blob/main/icons/svg/replay_30.svg
 	Replay30 Icon = "replay_30"
 
-	// Replay5 is https://github.com/goki/icons/blob/main/svg/replay_5.svg
+	// Replay5 is https://github.com/cogentcore/core/blob/main/icons/svg/replay_5.svg
 	Replay5 Icon = "replay_5"
 
-	// Reply is https://github.com/goki/icons/blob/main/svg/reply.svg
+	// Reply is https://github.com/cogentcore/core/blob/main/icons/svg/reply.svg
 	Reply Icon = "reply"
 
-	// ReplyAll is https://github.com/goki/icons/blob/main/svg/reply_all.svg
+	// ReplyAll is https://github.com/cogentcore/core/blob/main/icons/svg/reply_all.svg
 	ReplyAll Icon = "reply_all"
 
-	// Report is https://github.com/goki/icons/blob/main/svg/report.svg
+	// Report is https://github.com/cogentcore/core/blob/main/icons/svg/report.svg
 	Report Icon = "report"
 
-	// ReportOff is https://github.com/goki/icons/blob/main/svg/report_off.svg
+	// ReportOff is https://github.com/cogentcore/core/blob/main/icons/svg/report_off.svg
 	ReportOff Icon = "report_off"
 
-	// RequestPage is https://github.com/goki/icons/blob/main/svg/request_page.svg
+	// RequestPage is https://github.com/cogentcore/core/blob/main/icons/svg/request_page.svg
 	RequestPage Icon = "request_page"
 
-	// RequestQuote is https://github.com/goki/icons/blob/main/svg/request_quote.svg
+	// RequestQuote is https://github.com/cogentcore/core/blob/main/icons/svg/request_quote.svg
 	RequestQuote Icon = "request_quote"
 
-	// ResetImage is https://github.com/goki/icons/blob/main/svg/reset_image.svg
+	// ResetImage is https://github.com/cogentcore/core/blob/main/icons/svg/reset_image.svg
 	ResetImage Icon = "reset_image"
 
-	// ResetTv is https://github.com/goki/icons/blob/main/svg/reset_tv.svg
+	// ResetTv is https://github.com/cogentcore/core/blob/main/icons/svg/reset_tv.svg
 	ResetTv Icon = "reset_tv"
 
-	// Resize is https://github.com/goki/icons/blob/main/svg/resize.svg
+	// Resize is https://github.com/cogentcore/core/blob/main/icons/svg/resize.svg
 	Resize Icon = "resize"
 
-	// RestartAlt is https://github.com/goki/icons/blob/main/svg/restart_alt.svg
+	// RestartAlt is https://github.com/cogentcore/core/blob/main/icons/svg/restart_alt.svg
 	RestartAlt Icon = "restart_alt"
 
-	// RestoreFromTrash is https://github.com/goki/icons/blob/main/svg/restore_from_trash.svg
+	// RestoreFromTrash is https://github.com/cogentcore/core/blob/main/icons/svg/restore_from_trash.svg
 	RestoreFromTrash Icon = "restore_from_trash"
 
-	// RestorePage is https://github.com/goki/icons/blob/main/svg/restore_page.svg
+	// RestorePage is https://github.com/cogentcore/core/blob/main/icons/svg/restore_page.svg
 	RestorePage Icon = "restore_page"
 
-	// Resume is https://github.com/goki/icons/blob/main/svg/resume.svg
+	// Resume is https://github.com/cogentcore/core/blob/main/icons/svg/resume.svg
 	Resume Icon = "resume"
 
-	// Reviews is https://github.com/goki/icons/blob/main/svg/reviews.svg
+	// Reviews is https://github.com/cogentcore/core/blob/main/icons/svg/reviews.svg
 	Reviews Icon = "reviews"
 
-	// RightClick is https://github.com/goki/icons/blob/main/svg/right_click.svg
+	// RightClick is https://github.com/cogentcore/core/blob/main/icons/svg/right_click.svg
 	RightClick Icon = "right_click"
 
-	// RightPanelClose is https://github.com/goki/icons/blob/main/svg/right_panel_close.svg
+	// RightPanelClose is https://github.com/cogentcore/core/blob/main/icons/svg/right_panel_close.svg
 	RightPanelClose Icon = "right_panel_close"
 
-	// RightPanelOpen is https://github.com/goki/icons/blob/main/svg/right_panel_open.svg
+	// RightPanelOpen is https://github.com/cogentcore/core/blob/main/icons/svg/right_panel_open.svg
 	RightPanelOpen Icon = "right_panel_open"
 
-	// RingVolume is https://github.com/goki/icons/blob/main/svg/ring_volume.svg
+	// RingVolume is https://github.com/cogentcore/core/blob/main/icons/svg/ring_volume.svg
 	RingVolume Icon = "ring_volume"
 
-	// Robot is https://github.com/goki/icons/blob/main/svg/robot.svg
+	// Robot is https://github.com/cogentcore/core/blob/main/icons/svg/robot.svg
 	Robot Icon = "robot"
 
-	// Robot2 is https://github.com/goki/icons/blob/main/svg/robot_2.svg
+	// Robot2 is https://github.com/cogentcore/core/blob/main/icons/svg/robot_2.svg
 	Robot2 Icon = "robot_2"
 
-	// Rocket is https://github.com/goki/icons/blob/main/svg/rocket.svg
+	// Rocket is https://github.com/cogentcore/core/blob/main/icons/svg/rocket.svg
 	Rocket Icon = "rocket"
 
-	// RocketLaunch is https://github.com/goki/icons/blob/main/svg/rocket_launch.svg
+	// RocketLaunch is https://github.com/cogentcore/core/blob/main/icons/svg/rocket_launch.svg
 	RocketLaunch Icon = "rocket_launch"
 
-	// Rotate90DegreesCcw is https://github.com/goki/icons/blob/main/svg/rotate_90_degrees_ccw.svg
+	// Rotate90DegreesCcw is https://github.com/cogentcore/core/blob/main/icons/svg/rotate_90_degrees_ccw.svg
 	Rotate90DegreesCcw Icon = "rotate_90_degrees_ccw"
 
-	// Rotate90DegreesCw is https://github.com/goki/icons/blob/main/svg/rotate_90_degrees_cw.svg
+	// Rotate90DegreesCw is https://github.com/cogentcore/core/blob/main/icons/svg/rotate_90_degrees_cw.svg
 	Rotate90DegreesCw Icon = "rotate_90_degrees_cw"
 
-	// RotateLeft is https://github.com/goki/icons/blob/main/svg/rotate_left.svg
+	// RotateLeft is https://github.com/cogentcore/core/blob/main/icons/svg/rotate_left.svg
 	RotateLeft Icon = "rotate_left"
 
-	// RotateRight is https://github.com/goki/icons/blob/main/svg/rotate_right.svg
+	// RotateRight is https://github.com/cogentcore/core/blob/main/icons/svg/rotate_right.svg
 	RotateRight Icon = "rotate_right"
 
-	// RoundedCorner is https://github.com/goki/icons/blob/main/svg/rounded_corner.svg
+	// RoundedCorner is https://github.com/cogentcore/core/blob/main/icons/svg/rounded_corner.svg
 	RoundedCorner Icon = "rounded_corner"
 
-	// Route is https://github.com/goki/icons/blob/main/svg/route.svg
+	// Route is https://github.com/cogentcore/core/blob/main/icons/svg/route.svg
 	Route Icon = "route"
 
-	// Router is https://github.com/goki/icons/blob/main/svg/router.svg
+	// Router is https://github.com/cogentcore/core/blob/main/icons/svg/router.svg
 	Router Icon = "router"
 
-	// Routine is https://github.com/goki/icons/blob/main/svg/routine.svg
+	// Routine is https://github.com/cogentcore/core/blob/main/icons/svg/routine.svg
 	Routine Icon = "routine"
 
-	// RssFeed is https://github.com/goki/icons/blob/main/svg/rss_feed.svg
+	// RssFeed is https://github.com/cogentcore/core/blob/main/icons/svg/rss_feed.svg
 	RssFeed Icon = "rss_feed"
 
-	// Rsvp is https://github.com/goki/icons/blob/main/svg/rsvp.svg
+	// Rsvp is https://github.com/cogentcore/core/blob/main/icons/svg/rsvp.svg
 	Rsvp Icon = "rsvp"
 
-	// Rtt is https://github.com/goki/icons/blob/main/svg/rtt.svg
+	// Rtt is https://github.com/cogentcore/core/blob/main/icons/svg/rtt.svg
 	Rtt Icon = "rtt"
 
-	// Rule is https://github.com/goki/icons/blob/main/svg/rule.svg
+	// Rule is https://github.com/cogentcore/core/blob/main/icons/svg/rule.svg
 	Rule Icon = "rule"
 
-	// RuleFolder is https://github.com/goki/icons/blob/main/svg/rule_folder.svg
+	// RuleFolder is https://github.com/cogentcore/core/blob/main/icons/svg/rule_folder.svg
 	RuleFolder Icon = "rule_folder"
 
-	// RuleSettings is https://github.com/goki/icons/blob/main/svg/rule_settings.svg
+	// RuleSettings is https://github.com/cogentcore/core/blob/main/icons/svg/rule_settings.svg
 	RuleSettings Icon = "rule_settings"
 
-	// RunCircle is https://github.com/goki/icons/blob/main/svg/run_circle.svg
+	// RunCircle is https://github.com/cogentcore/core/blob/main/icons/svg/run_circle.svg
 	RunCircle Icon = "run_circle"
 
-	// RunningWithErrors is https://github.com/goki/icons/blob/main/svg/running_with_errors.svg
+	// RunningWithErrors is https://github.com/cogentcore/core/blob/main/icons/svg/running_with_errors.svg
 	RunningWithErrors Icon = "running_with_errors"
 
-	// SafetyCheck is https://github.com/goki/icons/blob/main/svg/safety_check.svg
+	// SafetyCheck is https://github.com/cogentcore/core/blob/main/icons/svg/safety_check.svg
 	SafetyCheck Icon = "safety_check"
 
-	// SafetyCheckOff is https://github.com/goki/icons/blob/main/svg/safety_check_off.svg
+	// SafetyCheckOff is https://github.com/cogentcore/core/blob/main/icons/svg/safety_check_off.svg
 	SafetyCheckOff Icon = "safety_check_off"
 
-	// Sanitizer is https://github.com/goki/icons/blob/main/svg/sanitizer.svg
+	// Sanitizer is https://github.com/cogentcore/core/blob/main/icons/svg/sanitizer.svg
 	Sanitizer Icon = "sanitizer"
 
-	// Satellite is https://github.com/goki/icons/blob/main/svg/satellite.svg
+	// Satellite is https://github.com/cogentcore/core/blob/main/icons/svg/satellite.svg
 	Satellite Icon = "satellite"
 
-	// SatelliteAlt is https://github.com/goki/icons/blob/main/svg/satellite_alt.svg
+	// SatelliteAlt is https://github.com/cogentcore/core/blob/main/icons/svg/satellite_alt.svg
 	SatelliteAlt Icon = "satellite_alt"
 
-	// Save is https://github.com/goki/icons/blob/main/svg/save.svg
+	// Save is https://github.com/cogentcore/core/blob/main/icons/svg/save.svg
 	Save Icon = "save"
 
-	// SaveAs is https://github.com/goki/icons/blob/main/svg/save_as.svg
+	// SaveAs is https://github.com/cogentcore/core/blob/main/icons/svg/save_as.svg
 	SaveAs Icon = "save_as"
 
-	// SavedSearch is https://github.com/goki/icons/blob/main/svg/saved_search.svg
+	// SavedSearch is https://github.com/cogentcore/core/blob/main/icons/svg/saved_search.svg
 	SavedSearch Icon = "saved_search"
 
-	// Savings is https://github.com/goki/icons/blob/main/svg/savings.svg
+	// Savings is https://github.com/cogentcore/core/blob/main/icons/svg/savings.svg
 	Savings Icon = "savings"
 
-	// Scale is https://github.com/goki/icons/blob/main/svg/scale.svg
+	// Scale is https://github.com/cogentcore/core/blob/main/icons/svg/scale.svg
 	Scale Icon = "scale"
 
-	// Scan is https://github.com/goki/icons/blob/main/svg/scan.svg
+	// Scan is https://github.com/cogentcore/core/blob/main/icons/svg/scan.svg
 	Scan Icon = "scan"
 
-	// ScanDelete is https://github.com/goki/icons/blob/main/svg/scan_delete.svg
+	// ScanDelete is https://github.com/cogentcore/core/blob/main/icons/svg/scan_delete.svg
 	ScanDelete Icon = "scan_delete"
 
-	// Scanner is https://github.com/goki/icons/blob/main/svg/scanner.svg
+	// Scanner is https://github.com/cogentcore/core/blob/main/icons/svg/scanner.svg
 	Scanner Icon = "scanner"
 
-	// ScatterPlot is https://github.com/goki/icons/blob/main/svg/scatter_plot.svg
+	// ScatterPlot is https://github.com/cogentcore/core/blob/main/icons/svg/scatter_plot.svg
 	ScatterPlot Icon = "scatter_plot"
 
-	// Scene is https://github.com/goki/icons/blob/main/svg/scene.svg
+	// Scene is https://github.com/cogentcore/core/blob/main/icons/svg/scene.svg
 	Scene Icon = "scene"
 
-	// Schedule is https://github.com/goki/icons/blob/main/svg/schedule.svg
+	// Schedule is https://github.com/cogentcore/core/blob/main/icons/svg/schedule.svg
 	Schedule Icon = "schedule"
 
-	// ScheduleSend is https://github.com/goki/icons/blob/main/svg/schedule_send.svg
+	// ScheduleSend is https://github.com/cogentcore/core/blob/main/icons/svg/schedule_send.svg
 	ScheduleSend Icon = "schedule_send"
 
-	// Schema is https://github.com/goki/icons/blob/main/svg/schema.svg
+	// Schema is https://github.com/cogentcore/core/blob/main/icons/svg/schema.svg
 	Schema Icon = "schema"
 
-	// School is https://github.com/goki/icons/blob/main/svg/school.svg
+	// School is https://github.com/cogentcore/core/blob/main/icons/svg/school.svg
 	School Icon = "school"
 
-	// Science is https://github.com/goki/icons/blob/main/svg/science.svg
+	// Science is https://github.com/cogentcore/core/blob/main/icons/svg/science.svg
 	Science Icon = "science"
 
-	// Score is https://github.com/goki/icons/blob/main/svg/score.svg
+	// Score is https://github.com/cogentcore/core/blob/main/icons/svg/score.svg
 	Score Icon = "score"
 
-	// Scoreboard is https://github.com/goki/icons/blob/main/svg/scoreboard.svg
+	// Scoreboard is https://github.com/cogentcore/core/blob/main/icons/svg/scoreboard.svg
 	Scoreboard Icon = "scoreboard"
 
-	// ScreenLockLandscape is https://github.com/goki/icons/blob/main/svg/screen_lock_landscape.svg
+	// ScreenLockLandscape is https://github.com/cogentcore/core/blob/main/icons/svg/screen_lock_landscape.svg
 	ScreenLockLandscape Icon = "screen_lock_landscape"
 
-	// ScreenLockPortrait is https://github.com/goki/icons/blob/main/svg/screen_lock_portrait.svg
+	// ScreenLockPortrait is https://github.com/cogentcore/core/blob/main/icons/svg/screen_lock_portrait.svg
 	ScreenLockPortrait Icon = "screen_lock_portrait"
 
-	// ScreenLockRotation is https://github.com/goki/icons/blob/main/svg/screen_lock_rotation.svg
+	// ScreenLockRotation is https://github.com/cogentcore/core/blob/main/icons/svg/screen_lock_rotation.svg
 	ScreenLockRotation Icon = "screen_lock_rotation"
 
-	// ScreenRecord is https://github.com/goki/icons/blob/main/svg/screen_record.svg
+	// ScreenRecord is https://github.com/cogentcore/core/blob/main/icons/svg/screen_record.svg
 	ScreenRecord Icon = "screen_record"
 
-	// ScreenRotation is https://github.com/goki/icons/blob/main/svg/screen_rotation.svg
+	// ScreenRotation is https://github.com/cogentcore/core/blob/main/icons/svg/screen_rotation.svg
 	ScreenRotation Icon = "screen_rotation"
 
-	// ScreenRotationAlt is https://github.com/goki/icons/blob/main/svg/screen_rotation_alt.svg
+	// ScreenRotationAlt is https://github.com/cogentcore/core/blob/main/icons/svg/screen_rotation_alt.svg
 	ScreenRotationAlt Icon = "screen_rotation_alt"
 
-	// ScreenRotationUp is https://github.com/goki/icons/blob/main/svg/screen_rotation_up.svg
+	// ScreenRotationUp is https://github.com/cogentcore/core/blob/main/icons/svg/screen_rotation_up.svg
 	ScreenRotationUp Icon = "screen_rotation_up"
 
-	// ScreenSearchDesktop is https://github.com/goki/icons/blob/main/svg/screen_search_desktop.svg
+	// ScreenSearchDesktop is https://github.com/cogentcore/core/blob/main/icons/svg/screen_search_desktop.svg
 	ScreenSearchDesktop Icon = "screen_search_desktop"
 
-	// ScreenShare is https://github.com/goki/icons/blob/main/svg/screen_share.svg
+	// ScreenShare is https://github.com/cogentcore/core/blob/main/icons/svg/screen_share.svg
 	ScreenShare Icon = "screen_share"
 
-	// Screenshot is https://github.com/goki/icons/blob/main/svg/screenshot.svg
+	// Screenshot is https://github.com/cogentcore/core/blob/main/icons/svg/screenshot.svg
 	Screenshot Icon = "screenshot"
 
-	// ScreenshotFrame is https://github.com/goki/icons/blob/main/svg/screenshot_frame.svg
+	// ScreenshotFrame is https://github.com/cogentcore/core/blob/main/icons/svg/screenshot_frame.svg
 	ScreenshotFrame Icon = "screenshot_frame"
 
-	// ScreenshotKeyboard is https://github.com/goki/icons/blob/main/svg/screenshot_keyboard.svg
+	// ScreenshotKeyboard is https://github.com/cogentcore/core/blob/main/icons/svg/screenshot_keyboard.svg
 	ScreenshotKeyboard Icon = "screenshot_keyboard"
 
-	// ScreenshotMonitor is https://github.com/goki/icons/blob/main/svg/screenshot_monitor.svg
+	// ScreenshotMonitor is https://github.com/cogentcore/core/blob/main/icons/svg/screenshot_monitor.svg
 	ScreenshotMonitor Icon = "screenshot_monitor"
 
-	// ScreenshotRegion is https://github.com/goki/icons/blob/main/svg/screenshot_region.svg
+	// ScreenshotRegion is https://github.com/cogentcore/core/blob/main/icons/svg/screenshot_region.svg
 	ScreenshotRegion Icon = "screenshot_region"
 
-	// ScreenshotTablet is https://github.com/goki/icons/blob/main/svg/screenshot_tablet.svg
+	// ScreenshotTablet is https://github.com/cogentcore/core/blob/main/icons/svg/screenshot_tablet.svg
 	ScreenshotTablet Icon = "screenshot_tablet"
 
-	// ScrollableHeader is https://github.com/goki/icons/blob/main/svg/scrollable_header.svg
+	// ScrollableHeader is https://github.com/cogentcore/core/blob/main/icons/svg/scrollable_header.svg
 	ScrollableHeader Icon = "scrollable_header"
 
-	// Sd is https://github.com/goki/icons/blob/main/svg/sd.svg
+	// Sd is https://github.com/cogentcore/core/blob/main/icons/svg/sd.svg
 	Sd Icon = "sd"
 
-	// SdCard is https://github.com/goki/icons/blob/main/svg/sd_card.svg
+	// SdCard is https://github.com/cogentcore/core/blob/main/icons/svg/sd_card.svg
 	SdCard Icon = "sd_card"
 
-	// SdCardAlert is https://github.com/goki/icons/blob/main/svg/sd_card_alert.svg
+	// SdCardAlert is https://github.com/cogentcore/core/blob/main/icons/svg/sd_card_alert.svg
 	SdCardAlert Icon = "sd_card_alert"
 
-	// Search is https://github.com/goki/icons/blob/main/svg/search.svg
+	// Search is https://github.com/cogentcore/core/blob/main/icons/svg/search.svg
 	Search Icon = "search"
 
-	// SearchCheck is https://github.com/goki/icons/blob/main/svg/search_check.svg
+	// SearchCheck is https://github.com/cogentcore/core/blob/main/icons/svg/search_check.svg
 	SearchCheck Icon = "search_check"
 
-	// SearchOff is https://github.com/goki/icons/blob/main/svg/search_off.svg
+	// SearchOff is https://github.com/cogentcore/core/blob/main/icons/svg/search_off.svg
 	SearchOff Icon = "search_off"
 
-	// Security is https://github.com/goki/icons/blob/main/svg/security.svg
+	// Security is https://github.com/cogentcore/core/blob/main/icons/svg/security.svg
 	Security Icon = "security"
 
-	// SecurityUpdateGood is https://github.com/goki/icons/blob/main/svg/security_update_good.svg
+	// SecurityUpdateGood is https://github.com/cogentcore/core/blob/main/icons/svg/security_update_good.svg
 	SecurityUpdateGood Icon = "security_update_good"
 
-	// SecurityUpdateWarning is https://github.com/goki/icons/blob/main/svg/security_update_warning.svg
+	// SecurityUpdateWarning is https://github.com/cogentcore/core/blob/main/icons/svg/security_update_warning.svg
 	SecurityUpdateWarning Icon = "security_update_warning"
 
-	// Segment is https://github.com/goki/icons/blob/main/svg/segment.svg
+	// Segment is https://github.com/cogentcore/core/blob/main/icons/svg/segment.svg
 	Segment Icon = "segment"
 
-	// Select is https://github.com/goki/icons/blob/main/svg/select.svg
+	// Select is https://github.com/cogentcore/core/blob/main/icons/svg/select.svg
 	Select Icon = "select"
 
-	// SelectAll is https://github.com/goki/icons/blob/main/svg/select_all.svg
+	// SelectAll is https://github.com/cogentcore/core/blob/main/icons/svg/select_all.svg
 	SelectAll Icon = "select_all"
 
-	// SelectCheckBox is https://github.com/goki/icons/blob/main/svg/select_check_box.svg
+	// SelectCheckBox is https://github.com/cogentcore/core/blob/main/icons/svg/select_check_box.svg
 	SelectCheckBox Icon = "select_check_box"
 
-	// SelectToSpeak is https://github.com/goki/icons/blob/main/svg/select_to_speak.svg
+	// SelectToSpeak is https://github.com/cogentcore/core/blob/main/icons/svg/select_to_speak.svg
 	SelectToSpeak Icon = "select_to_speak"
 
-	// SelectWindow is https://github.com/goki/icons/blob/main/svg/select_window.svg
+	// SelectWindow is https://github.com/cogentcore/core/blob/main/icons/svg/select_window.svg
 	SelectWindow Icon = "select_window"
 
-	// SelectWindowOff is https://github.com/goki/icons/blob/main/svg/select_window_off.svg
+	// SelectWindowOff is https://github.com/cogentcore/core/blob/main/icons/svg/select_window_off.svg
 	SelectWindowOff Icon = "select_window_off"
 
-	// Sell is https://github.com/goki/icons/blob/main/svg/sell.svg
+	// Sell is https://github.com/cogentcore/core/blob/main/icons/svg/sell.svg
 	Sell Icon = "sell"
 
-	// Send is https://github.com/goki/icons/blob/main/svg/send.svg
+	// Send is https://github.com/cogentcore/core/blob/main/icons/svg/send.svg
 	Send Icon = "send"
 
-	// SendAndArchive is https://github.com/goki/icons/blob/main/svg/send_and_archive.svg
+	// SendAndArchive is https://github.com/cogentcore/core/blob/main/icons/svg/send_and_archive.svg
 	SendAndArchive Icon = "send_and_archive"
 
-	// SendMoney is https://github.com/goki/icons/blob/main/svg/send_money.svg
+	// SendMoney is https://github.com/cogentcore/core/blob/main/icons/svg/send_money.svg
 	SendMoney Icon = "send_money"
 
-	// SendTimeExtension is https://github.com/goki/icons/blob/main/svg/send_time_extension.svg
+	// SendTimeExtension is https://github.com/cogentcore/core/blob/main/icons/svg/send_time_extension.svg
 	SendTimeExtension Icon = "send_time_extension"
 
-	// SendToMobile is https://github.com/goki/icons/blob/main/svg/send_to_mobile.svg
+	// SendToMobile is https://github.com/cogentcore/core/blob/main/icons/svg/send_to_mobile.svg
 	SendToMobile Icon = "send_to_mobile"
 
-	// Sensors is https://github.com/goki/icons/blob/main/svg/sensors.svg
+	// Sensors is https://github.com/cogentcore/core/blob/main/icons/svg/sensors.svg
 	Sensors Icon = "sensors"
 
-	// SensorsOff is https://github.com/goki/icons/blob/main/svg/sensors_off.svg
+	// SensorsOff is https://github.com/cogentcore/core/blob/main/icons/svg/sensors_off.svg
 	SensorsOff Icon = "sensors_off"
 
-	// SentimentCalm is https://github.com/goki/icons/blob/main/svg/sentiment_calm.svg
+	// SentimentCalm is https://github.com/cogentcore/core/blob/main/icons/svg/sentiment_calm.svg
 	SentimentCalm Icon = "sentiment_calm"
 
-	// SentimentContent is https://github.com/goki/icons/blob/main/svg/sentiment_content.svg
+	// SentimentContent is https://github.com/cogentcore/core/blob/main/icons/svg/sentiment_content.svg
 	SentimentContent Icon = "sentiment_content"
 
-	// SentimentDissatisfied is https://github.com/goki/icons/blob/main/svg/sentiment_dissatisfied.svg
+	// SentimentDissatisfied is https://github.com/cogentcore/core/blob/main/icons/svg/sentiment_dissatisfied.svg
 	SentimentDissatisfied Icon = "sentiment_dissatisfied"
 
-	// SentimentExcited is https://github.com/goki/icons/blob/main/svg/sentiment_excited.svg
+	// SentimentExcited is https://github.com/cogentcore/core/blob/main/icons/svg/sentiment_excited.svg
 	SentimentExcited Icon = "sentiment_excited"
 
-	// SentimentExtremelyDissatisfied is https://github.com/goki/icons/blob/main/svg/sentiment_extremely_dissatisfied.svg
+	// SentimentExtremelyDissatisfied is https://github.com/cogentcore/core/blob/main/icons/svg/sentiment_extremely_dissatisfied.svg
 	SentimentExtremelyDissatisfied Icon = "sentiment_extremely_dissatisfied"
 
-	// SentimentFrustrated is https://github.com/goki/icons/blob/main/svg/sentiment_frustrated.svg
+	// SentimentFrustrated is https://github.com/cogentcore/core/blob/main/icons/svg/sentiment_frustrated.svg
 	SentimentFrustrated Icon = "sentiment_frustrated"
 
-	// SentimentNeutral is https://github.com/goki/icons/blob/main/svg/sentiment_neutral.svg
+	// SentimentNeutral is https://github.com/cogentcore/core/blob/main/icons/svg/sentiment_neutral.svg
 	SentimentNeutral Icon = "sentiment_neutral"
 
-	// SentimentSad is https://github.com/goki/icons/blob/main/svg/sentiment_sad.svg
+	// SentimentSad is https://github.com/cogentcore/core/blob/main/icons/svg/sentiment_sad.svg
 	SentimentSad Icon = "sentiment_sad"
 
-	// SentimentSatisfied is https://github.com/goki/icons/blob/main/svg/sentiment_satisfied.svg
+	// SentimentSatisfied is https://github.com/cogentcore/core/blob/main/icons/svg/sentiment_satisfied.svg
 	SentimentSatisfied Icon = "sentiment_satisfied"
 
-	// SentimentStressed is https://github.com/goki/icons/blob/main/svg/sentiment_stressed.svg
+	// SentimentStressed is https://github.com/cogentcore/core/blob/main/icons/svg/sentiment_stressed.svg
 	SentimentStressed Icon = "sentiment_stressed"
 
-	// SentimentVeryDissatisfied is https://github.com/goki/icons/blob/main/svg/sentiment_very_dissatisfied.svg
+	// SentimentVeryDissatisfied is https://github.com/cogentcore/core/blob/main/icons/svg/sentiment_very_dissatisfied.svg
 	SentimentVeryDissatisfied Icon = "sentiment_very_dissatisfied"
 
-	// SentimentVerySatisfied is https://github.com/goki/icons/blob/main/svg/sentiment_very_satisfied.svg
+	// SentimentVerySatisfied is https://github.com/cogentcore/core/blob/main/icons/svg/sentiment_very_satisfied.svg
 	SentimentVerySatisfied Icon = "sentiment_very_satisfied"
 
-	// SentimentWorried is https://github.com/goki/icons/blob/main/svg/sentiment_worried.svg
+	// SentimentWorried is https://github.com/cogentcore/core/blob/main/icons/svg/sentiment_worried.svg
 	SentimentWorried Icon = "sentiment_worried"
 
-	// Settings is https://github.com/goki/icons/blob/main/svg/settings.svg
+	// Settings is https://github.com/cogentcore/core/blob/main/icons/svg/settings.svg
 	Settings Icon = "settings"
 
-	// SettingsAccessibility is https://github.com/goki/icons/blob/main/svg/settings_accessibility.svg
+	// SettingsAccessibility is https://github.com/cogentcore/core/blob/main/icons/svg/settings_accessibility.svg
 	SettingsAccessibility Icon = "settings_accessibility"
 
-	// SettingsAccountBox is https://github.com/goki/icons/blob/main/svg/settings_account_box.svg
+	// SettingsAccountBox is https://github.com/cogentcore/core/blob/main/icons/svg/settings_account_box.svg
 	SettingsAccountBox Icon = "settings_account_box"
 
-	// SettingsAlert is https://github.com/goki/icons/blob/main/svg/settings_alert.svg
+	// SettingsAlert is https://github.com/cogentcore/core/blob/main/icons/svg/settings_alert.svg
 	SettingsAlert Icon = "settings_alert"
 
-	// SettingsApplications is https://github.com/goki/icons/blob/main/svg/settings_applications.svg
+	// SettingsApplications is https://github.com/cogentcore/core/blob/main/icons/svg/settings_applications.svg
 	SettingsApplications Icon = "settings_applications"
 
-	// SettingsBRoll is https://github.com/goki/icons/blob/main/svg/settings_b_roll.svg
+	// SettingsBRoll is https://github.com/cogentcore/core/blob/main/icons/svg/settings_b_roll.svg
 	SettingsBRoll Icon = "settings_b_roll"
 
-	// SettingsBackupRestore is https://github.com/goki/icons/blob/main/svg/settings_backup_restore.svg
+	// SettingsBackupRestore is https://github.com/cogentcore/core/blob/main/icons/svg/settings_backup_restore.svg
 	SettingsBackupRestore Icon = "settings_backup_restore"
 
-	// SettingsBluetooth is https://github.com/goki/icons/blob/main/svg/settings_bluetooth.svg
+	// SettingsBluetooth is https://github.com/cogentcore/core/blob/main/icons/svg/settings_bluetooth.svg
 	SettingsBluetooth Icon = "settings_bluetooth"
 
-	// SettingsBrightness is https://github.com/goki/icons/blob/main/svg/settings_brightness.svg
+	// SettingsBrightness is https://github.com/cogentcore/core/blob/main/icons/svg/settings_brightness.svg
 	SettingsBrightness Icon = "settings_brightness"
 
-	// SettingsCell is https://github.com/goki/icons/blob/main/svg/settings_cell.svg
+	// SettingsCell is https://github.com/cogentcore/core/blob/main/icons/svg/settings_cell.svg
 	SettingsCell Icon = "settings_cell"
 
-	// SettingsEthernet is https://github.com/goki/icons/blob/main/svg/settings_ethernet.svg
+	// SettingsEthernet is https://github.com/cogentcore/core/blob/main/icons/svg/settings_ethernet.svg
 	SettingsEthernet Icon = "settings_ethernet"
 
-	// SettingsInputAntenna is https://github.com/goki/icons/blob/main/svg/settings_input_antenna.svg
+	// SettingsInputAntenna is https://github.com/cogentcore/core/blob/main/icons/svg/settings_input_antenna.svg
 	SettingsInputAntenna Icon = "settings_input_antenna"
 
-	// SettingsInputComponent is https://github.com/goki/icons/blob/main/svg/settings_input_component.svg
+	// SettingsInputComponent is https://github.com/cogentcore/core/blob/main/icons/svg/settings_input_component.svg
 	SettingsInputComponent Icon = "settings_input_component"
 
-	// SettingsPhone is https://github.com/goki/icons/blob/main/svg/settings_phone.svg
+	// SettingsPhone is https://github.com/cogentcore/core/blob/main/icons/svg/settings_phone.svg
 	SettingsPhone Icon = "settings_phone"
 
-	// SettingsPhotoCamera is https://github.com/goki/icons/blob/main/svg/settings_photo_camera.svg
+	// SettingsPhotoCamera is https://github.com/cogentcore/core/blob/main/icons/svg/settings_photo_camera.svg
 	SettingsPhotoCamera Icon = "settings_photo_camera"
 
-	// SettingsPower is https://github.com/goki/icons/blob/main/svg/settings_power.svg
+	// SettingsPower is https://github.com/cogentcore/core/blob/main/icons/svg/settings_power.svg
 	SettingsPower Icon = "settings_power"
 
-	// SettingsRemote is https://github.com/goki/icons/blob/main/svg/settings_remote.svg
+	// SettingsRemote is https://github.com/cogentcore/core/blob/main/icons/svg/settings_remote.svg
 	SettingsRemote Icon = "settings_remote"
 
-	// SettingsVideoCamera is https://github.com/goki/icons/blob/main/svg/settings_video_camera.svg
+	// SettingsVideoCamera is https://github.com/cogentcore/core/blob/main/icons/svg/settings_video_camera.svg
 	SettingsVideoCamera Icon = "settings_video_camera"
 
-	// SettingsVoice is https://github.com/goki/icons/blob/main/svg/settings_voice.svg
+	// SettingsVoice is https://github.com/cogentcore/core/blob/main/icons/svg/settings_voice.svg
 	SettingsVoice Icon = "settings_voice"
 
-	// Shadow is https://github.com/goki/icons/blob/main/svg/shadow.svg
+	// Shadow is https://github.com/cogentcore/core/blob/main/icons/svg/shadow.svg
 	Shadow Icon = "shadow"
 
-	// ShapeLine is https://github.com/goki/icons/blob/main/svg/shape_line.svg
+	// ShapeLine is https://github.com/cogentcore/core/blob/main/icons/svg/shape_line.svg
 	ShapeLine Icon = "shape_line"
 
-	// Shapes is https://github.com/goki/icons/blob/main/svg/shapes.svg
+	// Shapes is https://github.com/cogentcore/core/blob/main/icons/svg/shapes.svg
 	Shapes Icon = "shapes"
 
-	// Share is https://github.com/goki/icons/blob/main/svg/share.svg
+	// Share is https://github.com/cogentcore/core/blob/main/icons/svg/share.svg
 	Share Icon = "share"
 
-	// ShareLocation is https://github.com/goki/icons/blob/main/svg/share_location.svg
+	// ShareLocation is https://github.com/cogentcore/core/blob/main/icons/svg/share_location.svg
 	ShareLocation Icon = "share_location"
 
-	// ShareOff is https://github.com/goki/icons/blob/main/svg/share_off.svg
+	// ShareOff is https://github.com/cogentcore/core/blob/main/icons/svg/share_off.svg
 	ShareOff Icon = "share_off"
 
-	// ShareReviews is https://github.com/goki/icons/blob/main/svg/share_reviews.svg
+	// ShareReviews is https://github.com/cogentcore/core/blob/main/icons/svg/share_reviews.svg
 	ShareReviews Icon = "share_reviews"
 
-	// ShareWindows is https://github.com/goki/icons/blob/main/svg/share_windows.svg
+	// ShareWindows is https://github.com/cogentcore/core/blob/main/icons/svg/share_windows.svg
 	ShareWindows Icon = "share_windows"
 
-	// SheetsRtl is https://github.com/goki/icons/blob/main/svg/sheets_rtl.svg
+	// SheetsRtl is https://github.com/cogentcore/core/blob/main/icons/svg/sheets_rtl.svg
 	SheetsRtl Icon = "sheets_rtl"
 
-	// ShelfAutoHide is https://github.com/goki/icons/blob/main/svg/shelf_auto_hide.svg
+	// ShelfAutoHide is https://github.com/cogentcore/core/blob/main/icons/svg/shelf_auto_hide.svg
 	ShelfAutoHide Icon = "shelf_auto_hide"
 
-	// ShelfPosition is https://github.com/goki/icons/blob/main/svg/shelf_position.svg
+	// ShelfPosition is https://github.com/cogentcore/core/blob/main/icons/svg/shelf_position.svg
 	ShelfPosition Icon = "shelf_position"
 
-	// Shelves is https://github.com/goki/icons/blob/main/svg/shelves.svg
+	// Shelves is https://github.com/cogentcore/core/blob/main/icons/svg/shelves.svg
 	Shelves Icon = "shelves"
 
-	// Shield is https://github.com/goki/icons/blob/main/svg/shield.svg
+	// Shield is https://github.com/cogentcore/core/blob/main/icons/svg/shield.svg
 	Shield Icon = "shield"
 
-	// ShieldLock is https://github.com/goki/icons/blob/main/svg/shield_lock.svg
+	// ShieldLock is https://github.com/cogentcore/core/blob/main/icons/svg/shield_lock.svg
 	ShieldLock Icon = "shield_lock"
 
-	// ShieldLocked is https://github.com/goki/icons/blob/main/svg/shield_locked.svg
+	// ShieldLocked is https://github.com/cogentcore/core/blob/main/icons/svg/shield_locked.svg
 	ShieldLocked Icon = "shield_locked"
 
-	// ShieldMoon is https://github.com/goki/icons/blob/main/svg/shield_moon.svg
+	// ShieldMoon is https://github.com/cogentcore/core/blob/main/icons/svg/shield_moon.svg
 	ShieldMoon Icon = "shield_moon"
 
-	// ShieldPerson is https://github.com/goki/icons/blob/main/svg/shield_person.svg
+	// ShieldPerson is https://github.com/cogentcore/core/blob/main/icons/svg/shield_person.svg
 	ShieldPerson Icon = "shield_person"
 
-	// ShieldWithHeart is https://github.com/goki/icons/blob/main/svg/shield_with_heart.svg
+	// ShieldWithHeart is https://github.com/cogentcore/core/blob/main/icons/svg/shield_with_heart.svg
 	ShieldWithHeart Icon = "shield_with_heart"
 
-	// ShieldWithHouse is https://github.com/goki/icons/blob/main/svg/shield_with_house.svg
+	// ShieldWithHouse is https://github.com/cogentcore/core/blob/main/icons/svg/shield_with_house.svg
 	ShieldWithHouse Icon = "shield_with_house"
 
-	// Shift is https://github.com/goki/icons/blob/main/svg/shift.svg
+	// Shift is https://github.com/cogentcore/core/blob/main/icons/svg/shift.svg
 	Shift Icon = "shift"
 
-	// ShiftLock is https://github.com/goki/icons/blob/main/svg/shift_lock.svg
+	// ShiftLock is https://github.com/cogentcore/core/blob/main/icons/svg/shift_lock.svg
 	ShiftLock Icon = "shift_lock"
 
-	// Shop is https://github.com/goki/icons/blob/main/svg/shop.svg
+	// Shop is https://github.com/cogentcore/core/blob/main/icons/svg/shop.svg
 	Shop Icon = "shop"
 
-	// ShopTwo is https://github.com/goki/icons/blob/main/svg/shop_two.svg
+	// ShopTwo is https://github.com/cogentcore/core/blob/main/icons/svg/shop_two.svg
 	ShopTwo Icon = "shop_two"
 
-	// ShoppingBag is https://github.com/goki/icons/blob/main/svg/shopping_bag.svg
+	// ShoppingBag is https://github.com/cogentcore/core/blob/main/icons/svg/shopping_bag.svg
 	ShoppingBag Icon = "shopping_bag"
 
-	// ShoppingBasket is https://github.com/goki/icons/blob/main/svg/shopping_basket.svg
+	// ShoppingBasket is https://github.com/cogentcore/core/blob/main/icons/svg/shopping_basket.svg
 	ShoppingBasket Icon = "shopping_basket"
 
-	// ShoppingCart is https://github.com/goki/icons/blob/main/svg/shopping_cart.svg
+	// ShoppingCart is https://github.com/cogentcore/core/blob/main/icons/svg/shopping_cart.svg
 	ShoppingCart Icon = "shopping_cart"
 
-	// ShoppingCartCheckout is https://github.com/goki/icons/blob/main/svg/shopping_cart_checkout.svg
+	// ShoppingCartCheckout is https://github.com/cogentcore/core/blob/main/icons/svg/shopping_cart_checkout.svg
 	ShoppingCartCheckout Icon = "shopping_cart_checkout"
 
-	// ShortText is https://github.com/goki/icons/blob/main/svg/short_text.svg
+	// ShortText is https://github.com/cogentcore/core/blob/main/icons/svg/short_text.svg
 	ShortText Icon = "short_text"
 
-	// ShowChart is https://github.com/goki/icons/blob/main/svg/show_chart.svg
+	// ShowChart is https://github.com/cogentcore/core/blob/main/icons/svg/show_chart.svg
 	ShowChart Icon = "show_chart"
 
-	// Shuffle is https://github.com/goki/icons/blob/main/svg/shuffle.svg
+	// Shuffle is https://github.com/cogentcore/core/blob/main/icons/svg/shuffle.svg
 	Shuffle Icon = "shuffle"
 
-	// ShuffleOn is https://github.com/goki/icons/blob/main/svg/shuffle_on.svg
+	// ShuffleOn is https://github.com/cogentcore/core/blob/main/icons/svg/shuffle_on.svg
 	ShuffleOn Icon = "shuffle_on"
 
-	// SideNavigation is https://github.com/goki/icons/blob/main/svg/side_navigation.svg
+	// SideNavigation is https://github.com/cogentcore/core/blob/main/icons/svg/side_navigation.svg
 	SideNavigation Icon = "side_navigation"
 
-	// SignLanguage is https://github.com/goki/icons/blob/main/svg/sign_language.svg
+	// SignLanguage is https://github.com/cogentcore/core/blob/main/icons/svg/sign_language.svg
 	SignLanguage Icon = "sign_language"
 
-	// SignalCellular0Bar is https://github.com/goki/icons/blob/main/svg/signal_cellular_0_bar.svg
+	// SignalCellular0Bar is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_0_bar.svg
 	SignalCellular0Bar Icon = "signal_cellular_0_bar"
 
-	// SignalCellular1Bar is https://github.com/goki/icons/blob/main/svg/signal_cellular_1_bar.svg
+	// SignalCellular1Bar is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_1_bar.svg
 	SignalCellular1Bar Icon = "signal_cellular_1_bar"
 
-	// SignalCellular2Bar is https://github.com/goki/icons/blob/main/svg/signal_cellular_2_bar.svg
+	// SignalCellular2Bar is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_2_bar.svg
 	SignalCellular2Bar Icon = "signal_cellular_2_bar"
 
-	// SignalCellular3Bar is https://github.com/goki/icons/blob/main/svg/signal_cellular_3_bar.svg
+	// SignalCellular3Bar is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_3_bar.svg
 	SignalCellular3Bar Icon = "signal_cellular_3_bar"
 
-	// SignalCellular4Bar is https://github.com/goki/icons/blob/main/svg/signal_cellular_4_bar.svg
+	// SignalCellular4Bar is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_4_bar.svg
 	SignalCellular4Bar Icon = "signal_cellular_4_bar"
 
-	// SignalCellularAdd is https://github.com/goki/icons/blob/main/svg/signal_cellular_add.svg
+	// SignalCellularAdd is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_add.svg
 	SignalCellularAdd Icon = "signal_cellular_add"
 
-	// SignalCellularAlt is https://github.com/goki/icons/blob/main/svg/signal_cellular_alt.svg
+	// SignalCellularAlt is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_alt.svg
 	SignalCellularAlt Icon = "signal_cellular_alt"
 
-	// SignalCellularAlt1Bar is https://github.com/goki/icons/blob/main/svg/signal_cellular_alt_1_bar.svg
+	// SignalCellularAlt1Bar is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_alt_1_bar.svg
 	SignalCellularAlt1Bar Icon = "signal_cellular_alt_1_bar"
 
-	// SignalCellularAlt2Bar is https://github.com/goki/icons/blob/main/svg/signal_cellular_alt_2_bar.svg
+	// SignalCellularAlt2Bar is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_alt_2_bar.svg
 	SignalCellularAlt2Bar Icon = "signal_cellular_alt_2_bar"
 
-	// SignalCellularConnectedNoInternet0Bar is https://github.com/goki/icons/blob/main/svg/signal_cellular_connected_no_internet_0_bar.svg
+	// SignalCellularConnectedNoInternet0Bar is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_connected_no_internet_0_bar.svg
 	SignalCellularConnectedNoInternet0Bar Icon = "signal_cellular_connected_no_internet_0_bar"
 
-	// SignalCellularConnectedNoInternet4Bar is https://github.com/goki/icons/blob/main/svg/signal_cellular_connected_no_internet_4_bar.svg
+	// SignalCellularConnectedNoInternet4Bar is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_connected_no_internet_4_bar.svg
 	SignalCellularConnectedNoInternet4Bar Icon = "signal_cellular_connected_no_internet_4_bar"
 
-	// SignalCellularNodata is https://github.com/goki/icons/blob/main/svg/signal_cellular_nodata.svg
+	// SignalCellularNodata is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_nodata.svg
 	SignalCellularNodata Icon = "signal_cellular_nodata"
 
-	// SignalCellularNull is https://github.com/goki/icons/blob/main/svg/signal_cellular_null.svg
+	// SignalCellularNull is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_null.svg
 	SignalCellularNull Icon = "signal_cellular_null"
 
-	// SignalCellularOff is https://github.com/goki/icons/blob/main/svg/signal_cellular_off.svg
+	// SignalCellularOff is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_off.svg
 	SignalCellularOff Icon = "signal_cellular_off"
 
-	// SignalCellularPause is https://github.com/goki/icons/blob/main/svg/signal_cellular_pause.svg
+	// SignalCellularPause is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_pause.svg
 	SignalCellularPause Icon = "signal_cellular_pause"
 
-	// SignalDisconnected is https://github.com/goki/icons/blob/main/svg/signal_disconnected.svg
+	// SignalDisconnected is https://github.com/cogentcore/core/blob/main/icons/svg/signal_disconnected.svg
 	SignalDisconnected Icon = "signal_disconnected"
 
-	// SignalWifi0Bar is https://github.com/goki/icons/blob/main/svg/signal_wifi_0_bar.svg
+	// SignalWifi0Bar is https://github.com/cogentcore/core/blob/main/icons/svg/signal_wifi_0_bar.svg
 	SignalWifi0Bar Icon = "signal_wifi_0_bar"
 
-	// SignalWifi4Bar is https://github.com/goki/icons/blob/main/svg/signal_wifi_4_bar.svg
+	// SignalWifi4Bar is https://github.com/cogentcore/core/blob/main/icons/svg/signal_wifi_4_bar.svg
 	SignalWifi4Bar Icon = "signal_wifi_4_bar"
 
-	// SignalWifiBad is https://github.com/goki/icons/blob/main/svg/signal_wifi_bad.svg
+	// SignalWifiBad is https://github.com/cogentcore/core/blob/main/icons/svg/signal_wifi_bad.svg
 	SignalWifiBad Icon = "signal_wifi_bad"
 
-	// SignalWifiOff is https://github.com/goki/icons/blob/main/svg/signal_wifi_off.svg
+	// SignalWifiOff is https://github.com/cogentcore/core/blob/main/icons/svg/signal_wifi_off.svg
 	SignalWifiOff Icon = "signal_wifi_off"
 
-	// SignalWifiStatusbarNotConnected is https://github.com/goki/icons/blob/main/svg/signal_wifi_statusbar_not_connected.svg
+	// SignalWifiStatusbarNotConnected is https://github.com/cogentcore/core/blob/main/icons/svg/signal_wifi_statusbar_not_connected.svg
 	SignalWifiStatusbarNotConnected Icon = "signal_wifi_statusbar_not_connected"
 
-	// SignalWifiStatusbarNull is https://github.com/goki/icons/blob/main/svg/signal_wifi_statusbar_null.svg
+	// SignalWifiStatusbarNull is https://github.com/cogentcore/core/blob/main/icons/svg/signal_wifi_statusbar_null.svg
 	SignalWifiStatusbarNull Icon = "signal_wifi_statusbar_null"
 
-	// Signature is https://github.com/goki/icons/blob/main/svg/signature.svg
+	// Signature is https://github.com/cogentcore/core/blob/main/icons/svg/signature.svg
 	Signature Icon = "signature"
 
-	// SkipNext is https://github.com/goki/icons/blob/main/svg/skip_next.svg
+	// SkipNext is https://github.com/cogentcore/core/blob/main/icons/svg/skip_next.svg
 	SkipNext Icon = "skip_next"
 
-	// SkipPrevious is https://github.com/goki/icons/blob/main/svg/skip_previous.svg
+	// SkipPrevious is https://github.com/cogentcore/core/blob/main/icons/svg/skip_previous.svg
 	SkipPrevious Icon = "skip_previous"
 
-	// SlideLibrary is https://github.com/goki/icons/blob/main/svg/slide_library.svg
+	// SlideLibrary is https://github.com/cogentcore/core/blob/main/icons/svg/slide_library.svg
 	SlideLibrary Icon = "slide_library"
 
-	// Sliders is https://github.com/goki/icons/blob/main/svg/sliders.svg
+	// Sliders is https://github.com/cogentcore/core/blob/main/icons/svg/sliders.svg
 	Sliders Icon = "sliders"
 
-	// Slideshow is https://github.com/goki/icons/blob/main/svg/slideshow.svg
+	// Slideshow is https://github.com/cogentcore/core/blob/main/icons/svg/slideshow.svg
 	Slideshow Icon = "slideshow"
 
-	// SlowMotionVideo is https://github.com/goki/icons/blob/main/svg/slow_motion_video.svg
+	// SlowMotionVideo is https://github.com/cogentcore/core/blob/main/icons/svg/slow_motion_video.svg
 	SlowMotionVideo Icon = "slow_motion_video"
 
-	// SmartDisplay is https://github.com/goki/icons/blob/main/svg/smart_display.svg
+	// SmartDisplay is https://github.com/cogentcore/core/blob/main/icons/svg/smart_display.svg
 	SmartDisplay Icon = "smart_display"
 
-	// SmartOutlet is https://github.com/goki/icons/blob/main/svg/smart_outlet.svg
+	// SmartOutlet is https://github.com/cogentcore/core/blob/main/icons/svg/smart_outlet.svg
 	SmartOutlet Icon = "smart_outlet"
 
-	// SmartScreen is https://github.com/goki/icons/blob/main/svg/smart_screen.svg
+	// SmartScreen is https://github.com/cogentcore/core/blob/main/icons/svg/smart_screen.svg
 	SmartScreen Icon = "smart_screen"
 
-	// SmartToy is https://github.com/goki/icons/blob/main/svg/smart_toy.svg
+	// SmartToy is https://github.com/cogentcore/core/blob/main/icons/svg/smart_toy.svg
 	SmartToy Icon = "smart_toy"
 
-	// Smartphone is https://github.com/goki/icons/blob/main/svg/smartphone.svg
+	// Smartphone is https://github.com/cogentcore/core/blob/main/icons/svg/smartphone.svg
 	Smartphone Icon = "smartphone"
 
-	// SmbShare is https://github.com/goki/icons/blob/main/svg/smb_share.svg
+	// SmbShare is https://github.com/cogentcore/core/blob/main/icons/svg/smb_share.svg
 	SmbShare Icon = "smb_share"
 
-	// Sms is https://github.com/goki/icons/blob/main/svg/sms.svg
+	// Sms is https://github.com/cogentcore/core/blob/main/icons/svg/sms.svg
 	Sms Icon = "sms"
 
-	// SnippetFolder is https://github.com/goki/icons/blob/main/svg/snippet_folder.svg
+	// SnippetFolder is https://github.com/cogentcore/core/blob/main/icons/svg/snippet_folder.svg
 	SnippetFolder Icon = "snippet_folder"
 
-	// Snooze is https://github.com/goki/icons/blob/main/svg/snooze.svg
+	// Snooze is https://github.com/cogentcore/core/blob/main/icons/svg/snooze.svg
 	Snooze Icon = "snooze"
 
-	// SocialLeaderboard is https://github.com/goki/icons/blob/main/svg/social_leaderboard.svg
+	// SocialLeaderboard is https://github.com/cogentcore/core/blob/main/icons/svg/social_leaderboard.svg
 	SocialLeaderboard Icon = "social_leaderboard"
 
-	// Sort is https://github.com/goki/icons/blob/main/svg/sort.svg
+	// Sort is https://github.com/cogentcore/core/blob/main/icons/svg/sort.svg
 	Sort Icon = "sort"
 
-	// SortByAlpha is https://github.com/goki/icons/blob/main/svg/sort_by_alpha.svg
+	// SortByAlpha is https://github.com/cogentcore/core/blob/main/icons/svg/sort_by_alpha.svg
 	SortByAlpha Icon = "sort_by_alpha"
 
-	// Sos is https://github.com/goki/icons/blob/main/svg/sos.svg
+	// Sos is https://github.com/cogentcore/core/blob/main/icons/svg/sos.svg
 	Sos Icon = "sos"
 
-	// SourceNotes is https://github.com/goki/icons/blob/main/svg/source_notes.svg
+	// SourceNotes is https://github.com/cogentcore/core/blob/main/icons/svg/source_notes.svg
 	SourceNotes Icon = "source_notes"
 
-	// South is https://github.com/goki/icons/blob/main/svg/south.svg
+	// South is https://github.com/cogentcore/core/blob/main/icons/svg/south.svg
 	South Icon = "south"
 
-	// SouthAmerica is https://github.com/goki/icons/blob/main/svg/south_america.svg
+	// SouthAmerica is https://github.com/cogentcore/core/blob/main/icons/svg/south_america.svg
 	SouthAmerica Icon = "south_america"
 
-	// SouthEast is https://github.com/goki/icons/blob/main/svg/south_east.svg
+	// SouthEast is https://github.com/cogentcore/core/blob/main/icons/svg/south_east.svg
 	SouthEast Icon = "south_east"
 
-	// SouthWest is https://github.com/goki/icons/blob/main/svg/south_west.svg
+	// SouthWest is https://github.com/cogentcore/core/blob/main/icons/svg/south_west.svg
 	SouthWest Icon = "south_west"
 
-	// SpaceBar is https://github.com/goki/icons/blob/main/svg/space_bar.svg
+	// SpaceBar is https://github.com/cogentcore/core/blob/main/icons/svg/space_bar.svg
 	SpaceBar Icon = "space_bar"
 
-	// SpaceDashboard is https://github.com/goki/icons/blob/main/svg/space_dashboard.svg
+	// SpaceDashboard is https://github.com/cogentcore/core/blob/main/icons/svg/space_dashboard.svg
 	SpaceDashboard Icon = "space_dashboard"
 
-	// SpatialAudio is https://github.com/goki/icons/blob/main/svg/spatial_audio.svg
+	// SpatialAudio is https://github.com/cogentcore/core/blob/main/icons/svg/spatial_audio.svg
 	SpatialAudio Icon = "spatial_audio"
 
-	// SpatialAudioOff is https://github.com/goki/icons/blob/main/svg/spatial_audio_off.svg
+	// SpatialAudioOff is https://github.com/cogentcore/core/blob/main/icons/svg/spatial_audio_off.svg
 	SpatialAudioOff Icon = "spatial_audio_off"
 
-	// SpatialTracking is https://github.com/goki/icons/blob/main/svg/spatial_tracking.svg
+	// SpatialTracking is https://github.com/cogentcore/core/blob/main/icons/svg/spatial_tracking.svg
 	SpatialTracking Icon = "spatial_tracking"
 
-	// Speaker is https://github.com/goki/icons/blob/main/svg/speaker.svg
+	// Speaker is https://github.com/cogentcore/core/blob/main/icons/svg/speaker.svg
 	Speaker Icon = "speaker"
 
-	// SpeakerGroup is https://github.com/goki/icons/blob/main/svg/speaker_group.svg
+	// SpeakerGroup is https://github.com/cogentcore/core/blob/main/icons/svg/speaker_group.svg
 	SpeakerGroup Icon = "speaker_group"
 
-	// SpeakerNotes is https://github.com/goki/icons/blob/main/svg/speaker_notes.svg
+	// SpeakerNotes is https://github.com/cogentcore/core/blob/main/icons/svg/speaker_notes.svg
 	SpeakerNotes Icon = "speaker_notes"
 
-	// SpeakerNotesOff is https://github.com/goki/icons/blob/main/svg/speaker_notes_off.svg
+	// SpeakerNotesOff is https://github.com/cogentcore/core/blob/main/icons/svg/speaker_notes_off.svg
 	SpeakerNotesOff Icon = "speaker_notes_off"
 
-	// SpeakerPhone is https://github.com/goki/icons/blob/main/svg/speaker_phone.svg
+	// SpeakerPhone is https://github.com/cogentcore/core/blob/main/icons/svg/speaker_phone.svg
 	SpeakerPhone Icon = "speaker_phone"
 
-	// SpecialCharacter is https://github.com/goki/icons/blob/main/svg/special_character.svg
+	// SpecialCharacter is https://github.com/cogentcore/core/blob/main/icons/svg/special_character.svg
 	SpecialCharacter Icon = "special_character"
 
-	// SpeechToText is https://github.com/goki/icons/blob/main/svg/speech_to_text.svg
+	// SpeechToText is https://github.com/cogentcore/core/blob/main/icons/svg/speech_to_text.svg
 	SpeechToText Icon = "speech_to_text"
 
-	// Speed is https://github.com/goki/icons/blob/main/svg/speed.svg
+	// Speed is https://github.com/cogentcore/core/blob/main/icons/svg/speed.svg
 	Speed Icon = "speed"
 
-	// Spellcheck is https://github.com/goki/icons/blob/main/svg/spellcheck.svg
+	// Spellcheck is https://github.com/cogentcore/core/blob/main/icons/svg/spellcheck.svg
 	Spellcheck Icon = "spellcheck"
 
-	// Splitscreen is https://github.com/goki/icons/blob/main/svg/splitscreen.svg
+	// Splitscreen is https://github.com/cogentcore/core/blob/main/icons/svg/splitscreen.svg
 	Splitscreen Icon = "splitscreen"
 
-	// SplitscreenBottom is https://github.com/goki/icons/blob/main/svg/splitscreen_bottom.svg
+	// SplitscreenBottom is https://github.com/cogentcore/core/blob/main/icons/svg/splitscreen_bottom.svg
 	SplitscreenBottom Icon = "splitscreen_bottom"
 
-	// SplitscreenLeft is https://github.com/goki/icons/blob/main/svg/splitscreen_left.svg
+	// SplitscreenLeft is https://github.com/cogentcore/core/blob/main/icons/svg/splitscreen_left.svg
 	SplitscreenLeft Icon = "splitscreen_left"
 
-	// SplitscreenRight is https://github.com/goki/icons/blob/main/svg/splitscreen_right.svg
+	// SplitscreenRight is https://github.com/cogentcore/core/blob/main/icons/svg/splitscreen_right.svg
 	SplitscreenRight Icon = "splitscreen_right"
 
-	// SplitscreenTop is https://github.com/goki/icons/blob/main/svg/splitscreen_top.svg
+	// SplitscreenTop is https://github.com/cogentcore/core/blob/main/icons/svg/splitscreen_top.svg
 	SplitscreenTop Icon = "splitscreen_top"
 
-	// Spoke is https://github.com/goki/icons/blob/main/svg/spoke.svg
+	// Spoke is https://github.com/cogentcore/core/blob/main/icons/svg/spoke.svg
 	Spoke Icon = "spoke"
 
-	// Sports is https://github.com/goki/icons/blob/main/svg/sports.svg
+	// Sports is https://github.com/cogentcore/core/blob/main/icons/svg/sports.svg
 	Sports Icon = "sports"
 
-	// Sprint is https://github.com/goki/icons/blob/main/svg/sprint.svg
+	// Sprint is https://github.com/cogentcore/core/blob/main/icons/svg/sprint.svg
 	Sprint Icon = "sprint"
 
-	// Square is https://github.com/goki/icons/blob/main/svg/square.svg
+	// Square is https://github.com/cogentcore/core/blob/main/icons/svg/square.svg
 	Square Icon = "square"
 
-	// SquareFoot is https://github.com/goki/icons/blob/main/svg/square_foot.svg
+	// SquareFoot is https://github.com/cogentcore/core/blob/main/icons/svg/square_foot.svg
 	SquareFoot Icon = "square_foot"
 
-	// Stack is https://github.com/goki/icons/blob/main/svg/stack.svg
+	// Stack is https://github.com/cogentcore/core/blob/main/icons/svg/stack.svg
 	Stack Icon = "stack"
 
-	// StackOff is https://github.com/goki/icons/blob/main/svg/stack_off.svg
+	// StackOff is https://github.com/cogentcore/core/blob/main/icons/svg/stack_off.svg
 	StackOff Icon = "stack_off"
 
-	// StackStar is https://github.com/goki/icons/blob/main/svg/stack_star.svg
+	// StackStar is https://github.com/cogentcore/core/blob/main/icons/svg/stack_star.svg
 	StackStar Icon = "stack_star"
 
-	// StackedBarChart is https://github.com/goki/icons/blob/main/svg/stacked_bar_chart.svg
+	// StackedBarChart is https://github.com/cogentcore/core/blob/main/icons/svg/stacked_bar_chart.svg
 	StackedBarChart Icon = "stacked_bar_chart"
 
-	// StackedEmail is https://github.com/goki/icons/blob/main/svg/stacked_email.svg
+	// StackedEmail is https://github.com/cogentcore/core/blob/main/icons/svg/stacked_email.svg
 	StackedEmail Icon = "stacked_email"
 
-	// StackedInbox is https://github.com/goki/icons/blob/main/svg/stacked_inbox.svg
+	// StackedInbox is https://github.com/cogentcore/core/blob/main/icons/svg/stacked_inbox.svg
 	StackedInbox Icon = "stacked_inbox"
 
-	// StackedLineChart is https://github.com/goki/icons/blob/main/svg/stacked_line_chart.svg
+	// StackedLineChart is https://github.com/cogentcore/core/blob/main/icons/svg/stacked_line_chart.svg
 	StackedLineChart Icon = "stacked_line_chart"
 
-	// Star is https://github.com/goki/icons/blob/main/svg/star.svg
+	// Star is https://github.com/cogentcore/core/blob/main/icons/svg/star.svg
 	Star Icon = "star"
 
-	// StarHalf is https://github.com/goki/icons/blob/main/svg/star_half.svg
+	// StarHalf is https://github.com/cogentcore/core/blob/main/icons/svg/star_half.svg
 	StarHalf Icon = "star_half"
 
-	// StarRate is https://github.com/goki/icons/blob/main/svg/star_rate.svg
+	// StarRate is https://github.com/cogentcore/core/blob/main/icons/svg/star_rate.svg
 	StarRate Icon = "star_rate"
 
-	// StarRateHalf is https://github.com/goki/icons/blob/main/svg/star_rate_half.svg
+	// StarRateHalf is https://github.com/cogentcore/core/blob/main/icons/svg/star_rate_half.svg
 	StarRateHalf Icon = "star_rate_half"
 
-	// Stars is https://github.com/goki/icons/blob/main/svg/stars.svg
+	// Stars is https://github.com/cogentcore/core/blob/main/icons/svg/stars.svg
 	Stars Icon = "stars"
 
-	// Start is https://github.com/goki/icons/blob/main/svg/start.svg
+	// Start is https://github.com/cogentcore/core/blob/main/icons/svg/start.svg
 	Start Icon = "start"
 
-	// Stat1 is https://github.com/goki/icons/blob/main/svg/stat_1.svg
+	// Stat1 is https://github.com/cogentcore/core/blob/main/icons/svg/stat_1.svg
 	Stat1 Icon = "stat_1"
 
-	// Stat2 is https://github.com/goki/icons/blob/main/svg/stat_2.svg
+	// Stat2 is https://github.com/cogentcore/core/blob/main/icons/svg/stat_2.svg
 	Stat2 Icon = "stat_2"
 
-	// Stat3 is https://github.com/goki/icons/blob/main/svg/stat_3.svg
+	// Stat3 is https://github.com/cogentcore/core/blob/main/icons/svg/stat_3.svg
 	Stat3 Icon = "stat_3"
 
-	// StatMinus1 is https://github.com/goki/icons/blob/main/svg/stat_minus_1.svg
+	// StatMinus1 is https://github.com/cogentcore/core/blob/main/icons/svg/stat_minus_1.svg
 	StatMinus1 Icon = "stat_minus_1"
 
-	// StatMinus2 is https://github.com/goki/icons/blob/main/svg/stat_minus_2.svg
+	// StatMinus2 is https://github.com/cogentcore/core/blob/main/icons/svg/stat_minus_2.svg
 	StatMinus2 Icon = "stat_minus_2"
 
-	// StatMinus3 is https://github.com/goki/icons/blob/main/svg/stat_minus_3.svg
+	// StatMinus3 is https://github.com/cogentcore/core/blob/main/icons/svg/stat_minus_3.svg
 	StatMinus3 Icon = "stat_minus_3"
 
-	// StayCurrentLandscape is https://github.com/goki/icons/blob/main/svg/stay_current_landscape.svg
+	// StayCurrentLandscape is https://github.com/cogentcore/core/blob/main/icons/svg/stay_current_landscape.svg
 	StayCurrentLandscape Icon = "stay_current_landscape"
 
-	// StayCurrentPortrait is https://github.com/goki/icons/blob/main/svg/stay_current_portrait.svg
+	// StayCurrentPortrait is https://github.com/cogentcore/core/blob/main/icons/svg/stay_current_portrait.svg
 	StayCurrentPortrait Icon = "stay_current_portrait"
 
-	// StayPrimaryLandscape is https://github.com/goki/icons/blob/main/svg/stay_primary_landscape.svg
+	// StayPrimaryLandscape is https://github.com/cogentcore/core/blob/main/icons/svg/stay_primary_landscape.svg
 	StayPrimaryLandscape Icon = "stay_primary_landscape"
 
-	// StayPrimaryPortrait is https://github.com/goki/icons/blob/main/svg/stay_primary_portrait.svg
+	// StayPrimaryPortrait is https://github.com/cogentcore/core/blob/main/icons/svg/stay_primary_portrait.svg
 	StayPrimaryPortrait Icon = "stay_primary_portrait"
 
-	// Step is https://github.com/goki/icons/blob/main/svg/step.svg
+	// Step is https://github.com/cogentcore/core/blob/main/icons/svg/step.svg
 	Step Icon = "step"
 
-	// StepInto is https://github.com/goki/icons/blob/main/svg/step_into.svg
+	// StepInto is https://github.com/cogentcore/core/blob/main/icons/svg/step_into.svg
 	StepInto Icon = "step_into"
 
-	// StepOut is https://github.com/goki/icons/blob/main/svg/step_out.svg
+	// StepOut is https://github.com/cogentcore/core/blob/main/icons/svg/step_out.svg
 	StepOut Icon = "step_out"
 
-	// StepOver is https://github.com/goki/icons/blob/main/svg/step_over.svg
+	// StepOver is https://github.com/cogentcore/core/blob/main/icons/svg/step_over.svg
 	StepOver Icon = "step_over"
 
-	// Steppers is https://github.com/goki/icons/blob/main/svg/steppers.svg
+	// Steppers is https://github.com/cogentcore/core/blob/main/icons/svg/steppers.svg
 	Steppers Icon = "steppers"
 
-	// Steps is https://github.com/goki/icons/blob/main/svg/steps.svg
+	// Steps is https://github.com/cogentcore/core/blob/main/icons/svg/steps.svg
 	Steps Icon = "steps"
 
-	// StickyNote is https://github.com/goki/icons/blob/main/svg/sticky_note.svg
+	// StickyNote is https://github.com/cogentcore/core/blob/main/icons/svg/sticky_note.svg
 	StickyNote Icon = "sticky_note"
 
-	// StickyNote2 is https://github.com/goki/icons/blob/main/svg/sticky_note_2.svg
+	// StickyNote2 is https://github.com/cogentcore/core/blob/main/icons/svg/sticky_note_2.svg
 	StickyNote2 Icon = "sticky_note_2"
 
-	// Stop is https://github.com/goki/icons/blob/main/svg/stop.svg
+	// Stop is https://github.com/cogentcore/core/blob/main/icons/svg/stop.svg
 	Stop Icon = "stop"
 
-	// StopCircle is https://github.com/goki/icons/blob/main/svg/stop_circle.svg
+	// StopCircle is https://github.com/cogentcore/core/blob/main/icons/svg/stop_circle.svg
 	StopCircle Icon = "stop_circle"
 
-	// StopScreenShare is https://github.com/goki/icons/blob/main/svg/stop_screen_share.svg
+	// StopScreenShare is https://github.com/cogentcore/core/blob/main/icons/svg/stop_screen_share.svg
 	StopScreenShare Icon = "stop_screen_share"
 
-	// Straight is https://github.com/goki/icons/blob/main/svg/straight.svg
+	// Straight is https://github.com/cogentcore/core/blob/main/icons/svg/straight.svg
 	Straight Icon = "straight"
 
-	// Straighten is https://github.com/goki/icons/blob/main/svg/straighten.svg
+	// Straighten is https://github.com/cogentcore/core/blob/main/icons/svg/straighten.svg
 	Straighten Icon = "straighten"
 
-	// Strategy is https://github.com/goki/icons/blob/main/svg/strategy.svg
+	// Strategy is https://github.com/cogentcore/core/blob/main/icons/svg/strategy.svg
 	Strategy Icon = "strategy"
 
-	// Stream is https://github.com/goki/icons/blob/main/svg/stream.svg
+	// Stream is https://github.com/cogentcore/core/blob/main/icons/svg/stream.svg
 	Stream Icon = "stream"
 
-	// StreamApps is https://github.com/goki/icons/blob/main/svg/stream_apps.svg
+	// StreamApps is https://github.com/cogentcore/core/blob/main/icons/svg/stream_apps.svg
 	StreamApps Icon = "stream_apps"
 
-	// Streetview is https://github.com/goki/icons/blob/main/svg/streetview.svg
+	// Streetview is https://github.com/cogentcore/core/blob/main/icons/svg/streetview.svg
 	Streetview Icon = "streetview"
 
-	// StrikethroughS is https://github.com/goki/icons/blob/main/svg/strikethrough_s.svg
+	// StrikethroughS is https://github.com/cogentcore/core/blob/main/icons/svg/strikethrough_s.svg
 	StrikethroughS Icon = "strikethrough_s"
 
-	// StrokeFull is https://github.com/goki/icons/blob/main/svg/stroke_full.svg
+	// StrokeFull is https://github.com/cogentcore/core/blob/main/icons/svg/stroke_full.svg
 	StrokeFull Icon = "stroke_full"
 
-	// StrokePartial is https://github.com/goki/icons/blob/main/svg/stroke_partial.svg
+	// StrokePartial is https://github.com/cogentcore/core/blob/main/icons/svg/stroke_partial.svg
 	StrokePartial Icon = "stroke_partial"
 
-	// Style is https://github.com/goki/icons/blob/main/svg/style.svg
+	// Style is https://github.com/cogentcore/core/blob/main/icons/svg/style.svg
 	Style Icon = "style"
 
-	// Styler is https://github.com/goki/icons/blob/main/svg/styler.svg
+	// Styler is https://github.com/cogentcore/core/blob/main/icons/svg/styler.svg
 	Styler Icon = "styler"
 
-	// Stylus is https://github.com/goki/icons/blob/main/svg/stylus.svg
+	// Stylus is https://github.com/cogentcore/core/blob/main/icons/svg/stylus.svg
 	Stylus Icon = "stylus"
 
-	// StylusLaserPointer is https://github.com/goki/icons/blob/main/svg/stylus_laser_pointer.svg
+	// StylusLaserPointer is https://github.com/cogentcore/core/blob/main/icons/svg/stylus_laser_pointer.svg
 	StylusLaserPointer Icon = "stylus_laser_pointer"
 
-	// StylusNote is https://github.com/goki/icons/blob/main/svg/stylus_note.svg
+	// StylusNote is https://github.com/cogentcore/core/blob/main/icons/svg/stylus_note.svg
 	StylusNote Icon = "stylus_note"
 
-	// SubdirectoryArrowLeft is https://github.com/goki/icons/blob/main/svg/subdirectory_arrow_left.svg
+	// SubdirectoryArrowLeft is https://github.com/cogentcore/core/blob/main/icons/svg/subdirectory_arrow_left.svg
 	SubdirectoryArrowLeft Icon = "subdirectory_arrow_left"
 
-	// SubdirectoryArrowRight is https://github.com/goki/icons/blob/main/svg/subdirectory_arrow_right.svg
+	// SubdirectoryArrowRight is https://github.com/cogentcore/core/blob/main/icons/svg/subdirectory_arrow_right.svg
 	SubdirectoryArrowRight Icon = "subdirectory_arrow_right"
 
-	// Subheader is https://github.com/goki/icons/blob/main/svg/subheader.svg
+	// Subheader is https://github.com/cogentcore/core/blob/main/icons/svg/subheader.svg
 	Subheader Icon = "subheader"
 
-	// Subject is https://github.com/goki/icons/blob/main/svg/subject.svg
+	// Subject is https://github.com/cogentcore/core/blob/main/icons/svg/subject.svg
 	Subject Icon = "subject"
 
-	// Subscript is https://github.com/goki/icons/blob/main/svg/subscript.svg
+	// Subscript is https://github.com/cogentcore/core/blob/main/icons/svg/subscript.svg
 	Subscript Icon = "subscript"
 
-	// Subtitles is https://github.com/goki/icons/blob/main/svg/subtitles.svg
+	// Subtitles is https://github.com/cogentcore/core/blob/main/icons/svg/subtitles.svg
 	Subtitles Icon = "subtitles"
 
-	// SubtitlesOff is https://github.com/goki/icons/blob/main/svg/subtitles_off.svg
+	// SubtitlesOff is https://github.com/cogentcore/core/blob/main/icons/svg/subtitles_off.svg
 	SubtitlesOff Icon = "subtitles_off"
 
-	// Subway is https://github.com/goki/icons/blob/main/svg/subway.svg
+	// Subway is https://github.com/cogentcore/core/blob/main/icons/svg/subway.svg
 	Subway Icon = "subway"
 
-	// Summarize is https://github.com/goki/icons/blob/main/svg/summarize.svg
+	// Summarize is https://github.com/cogentcore/core/blob/main/icons/svg/summarize.svg
 	Summarize Icon = "summarize"
 
-	// Superscript is https://github.com/goki/icons/blob/main/svg/superscript.svg
+	// Superscript is https://github.com/cogentcore/core/blob/main/icons/svg/superscript.svg
 	Superscript Icon = "superscript"
 
-	// SupervisorAccount is https://github.com/goki/icons/blob/main/svg/supervisor_account.svg
+	// SupervisorAccount is https://github.com/cogentcore/core/blob/main/icons/svg/supervisor_account.svg
 	SupervisorAccount Icon = "supervisor_account"
 
-	// Support is https://github.com/goki/icons/blob/main/svg/support.svg
+	// Support is https://github.com/cogentcore/core/blob/main/icons/svg/support.svg
 	Support Icon = "support"
 
-	// SupportAgent is https://github.com/goki/icons/blob/main/svg/support_agent.svg
+	// SupportAgent is https://github.com/cogentcore/core/blob/main/icons/svg/support_agent.svg
 	SupportAgent Icon = "support_agent"
 
-	// SurroundSound is https://github.com/goki/icons/blob/main/svg/surround_sound.svg
+	// SurroundSound is https://github.com/cogentcore/core/blob/main/icons/svg/surround_sound.svg
 	SurroundSound Icon = "surround_sound"
 
-	// Svg is https://github.com/goki/icons/blob/main/svg/svg.svg
+	// Svg is https://github.com/cogentcore/core/blob/main/icons/svg/svg.svg
 	Svg Icon = "svg"
 
-	// SwapHoriz is https://github.com/goki/icons/blob/main/svg/swap_horiz.svg
+	// SwapHoriz is https://github.com/cogentcore/core/blob/main/icons/svg/swap_horiz.svg
 	SwapHoriz Icon = "swap_horiz"
 
-	// SwapHorizontalCircle is https://github.com/goki/icons/blob/main/svg/swap_horizontal_circle.svg
+	// SwapHorizontalCircle is https://github.com/cogentcore/core/blob/main/icons/svg/swap_horizontal_circle.svg
 	SwapHorizontalCircle Icon = "swap_horizontal_circle"
 
-	// SwapVert is https://github.com/goki/icons/blob/main/svg/swap_vert.svg
+	// SwapVert is https://github.com/cogentcore/core/blob/main/icons/svg/swap_vert.svg
 	SwapVert Icon = "swap_vert"
 
-	// SwapVerticalCircle is https://github.com/goki/icons/blob/main/svg/swap_vertical_circle.svg
+	// SwapVerticalCircle is https://github.com/cogentcore/core/blob/main/icons/svg/swap_vertical_circle.svg
 	SwapVerticalCircle Icon = "swap_vertical_circle"
 
-	// Sweep is https://github.com/goki/icons/blob/main/svg/sweep.svg
+	// Sweep is https://github.com/cogentcore/core/blob/main/icons/svg/sweep.svg
 	Sweep Icon = "sweep"
 
-	// Swipe is https://github.com/goki/icons/blob/main/svg/swipe.svg
+	// Swipe is https://github.com/cogentcore/core/blob/main/icons/svg/swipe.svg
 	Swipe Icon = "swipe"
 
-	// SwipeDown is https://github.com/goki/icons/blob/main/svg/swipe_down.svg
+	// SwipeDown is https://github.com/cogentcore/core/blob/main/icons/svg/swipe_down.svg
 	SwipeDown Icon = "swipe_down"
 
-	// SwipeDownAlt is https://github.com/goki/icons/blob/main/svg/swipe_down_alt.svg
+	// SwipeDownAlt is https://github.com/cogentcore/core/blob/main/icons/svg/swipe_down_alt.svg
 	SwipeDownAlt Icon = "swipe_down_alt"
 
-	// SwipeLeft is https://github.com/goki/icons/blob/main/svg/swipe_left.svg
+	// SwipeLeft is https://github.com/cogentcore/core/blob/main/icons/svg/swipe_left.svg
 	SwipeLeft Icon = "swipe_left"
 
-	// SwipeLeftAlt is https://github.com/goki/icons/blob/main/svg/swipe_left_alt.svg
+	// SwipeLeftAlt is https://github.com/cogentcore/core/blob/main/icons/svg/swipe_left_alt.svg
 	SwipeLeftAlt Icon = "swipe_left_alt"
 
-	// SwipeRight is https://github.com/goki/icons/blob/main/svg/swipe_right.svg
+	// SwipeRight is https://github.com/cogentcore/core/blob/main/icons/svg/swipe_right.svg
 	SwipeRight Icon = "swipe_right"
 
-	// SwipeRightAlt is https://github.com/goki/icons/blob/main/svg/swipe_right_alt.svg
+	// SwipeRightAlt is https://github.com/cogentcore/core/blob/main/icons/svg/swipe_right_alt.svg
 	SwipeRightAlt Icon = "swipe_right_alt"
 
-	// SwipeUp is https://github.com/goki/icons/blob/main/svg/swipe_up.svg
+	// SwipeUp is https://github.com/cogentcore/core/blob/main/icons/svg/swipe_up.svg
 	SwipeUp Icon = "swipe_up"
 
-	// SwipeUpAlt is https://github.com/goki/icons/blob/main/svg/swipe_up_alt.svg
+	// SwipeUpAlt is https://github.com/cogentcore/core/blob/main/icons/svg/swipe_up_alt.svg
 	SwipeUpAlt Icon = "swipe_up_alt"
 
-	// SwipeVertical is https://github.com/goki/icons/blob/main/svg/swipe_vertical.svg
+	// SwipeVertical is https://github.com/cogentcore/core/blob/main/icons/svg/swipe_vertical.svg
 	SwipeVertical Icon = "swipe_vertical"
 
-	// Switch is https://github.com/goki/icons/blob/main/svg/switch.svg
+	// Switch is https://github.com/cogentcore/core/blob/main/icons/svg/switch.svg
 	Switch Icon = "switch"
 
-	// SwitchAccess is https://github.com/goki/icons/blob/main/svg/switch_access.svg
+	// SwitchAccess is https://github.com/cogentcore/core/blob/main/icons/svg/switch_access.svg
 	SwitchAccess Icon = "switch_access"
 
-	// SwitchAccount is https://github.com/goki/icons/blob/main/svg/switch_account.svg
+	// SwitchAccount is https://github.com/cogentcore/core/blob/main/icons/svg/switch_account.svg
 	SwitchAccount Icon = "switch_account"
 
-	// SwitchCamera is https://github.com/goki/icons/blob/main/svg/switch_camera.svg
+	// SwitchCamera is https://github.com/cogentcore/core/blob/main/icons/svg/switch_camera.svg
 	SwitchCamera Icon = "switch_camera"
 
-	// SwitchLeft is https://github.com/goki/icons/blob/main/svg/switch_left.svg
+	// SwitchLeft is https://github.com/cogentcore/core/blob/main/icons/svg/switch_left.svg
 	SwitchLeft Icon = "switch_left"
 
-	// SwitchRight is https://github.com/goki/icons/blob/main/svg/switch_right.svg
+	// SwitchRight is https://github.com/cogentcore/core/blob/main/icons/svg/switch_right.svg
 	SwitchRight Icon = "switch_right"
 
-	// SwitchVideo is https://github.com/goki/icons/blob/main/svg/switch_video.svg
+	// SwitchVideo is https://github.com/cogentcore/core/blob/main/icons/svg/switch_video.svg
 	SwitchVideo Icon = "switch_video"
 
-	// Switches is https://github.com/goki/icons/blob/main/svg/switches.svg
+	// Switches is https://github.com/cogentcore/core/blob/main/icons/svg/switches.svg
 	Switches Icon = "switches"
 
-	// Sync is https://github.com/goki/icons/blob/main/svg/sync.svg
+	// Sync is https://github.com/cogentcore/core/blob/main/icons/svg/sync.svg
 	Sync Icon = "sync"
 
-	// SyncAlt is https://github.com/goki/icons/blob/main/svg/sync_alt.svg
+	// SyncAlt is https://github.com/cogentcore/core/blob/main/icons/svg/sync_alt.svg
 	SyncAlt Icon = "sync_alt"
 
-	// SyncDisabled is https://github.com/goki/icons/blob/main/svg/sync_disabled.svg
+	// SyncDisabled is https://github.com/cogentcore/core/blob/main/icons/svg/sync_disabled.svg
 	SyncDisabled Icon = "sync_disabled"
 
-	// SyncLock is https://github.com/goki/icons/blob/main/svg/sync_lock.svg
+	// SyncLock is https://github.com/cogentcore/core/blob/main/icons/svg/sync_lock.svg
 	SyncLock Icon = "sync_lock"
 
-	// SyncProblem is https://github.com/goki/icons/blob/main/svg/sync_problem.svg
+	// SyncProblem is https://github.com/cogentcore/core/blob/main/icons/svg/sync_problem.svg
 	SyncProblem Icon = "sync_problem"
 
-	// SyncSavedLocally is https://github.com/goki/icons/blob/main/svg/sync_saved_locally.svg
+	// SyncSavedLocally is https://github.com/cogentcore/core/blob/main/icons/svg/sync_saved_locally.svg
 	SyncSavedLocally Icon = "sync_saved_locally"
 
-	// SystemUpdate is https://github.com/goki/icons/blob/main/svg/system_update.svg
+	// SystemUpdate is https://github.com/cogentcore/core/blob/main/icons/svg/system_update.svg
 	SystemUpdate Icon = "system_update"
 
-	// Tab is https://github.com/goki/icons/blob/main/svg/tab.svg
+	// Tab is https://github.com/cogentcore/core/blob/main/icons/svg/tab.svg
 	Tab Icon = "tab"
 
-	// TabClose is https://github.com/goki/icons/blob/main/svg/tab_close.svg
+	// TabClose is https://github.com/cogentcore/core/blob/main/icons/svg/tab_close.svg
 	TabClose Icon = "tab_close"
 
-	// TabCloseRight is https://github.com/goki/icons/blob/main/svg/tab_close_right.svg
+	// TabCloseRight is https://github.com/cogentcore/core/blob/main/icons/svg/tab_close_right.svg
 	TabCloseRight Icon = "tab_close_right"
 
-	// TabDuplicate is https://github.com/goki/icons/blob/main/svg/tab_duplicate.svg
+	// TabDuplicate is https://github.com/cogentcore/core/blob/main/icons/svg/tab_duplicate.svg
 	TabDuplicate Icon = "tab_duplicate"
 
-	// TabGroup is https://github.com/goki/icons/blob/main/svg/tab_group.svg
+	// TabGroup is https://github.com/cogentcore/core/blob/main/icons/svg/tab_group.svg
 	TabGroup Icon = "tab_group"
 
-	// TabMove is https://github.com/goki/icons/blob/main/svg/tab_move.svg
+	// TabMove is https://github.com/cogentcore/core/blob/main/icons/svg/tab_move.svg
 	TabMove Icon = "tab_move"
 
-	// TabNewRight is https://github.com/goki/icons/blob/main/svg/tab_new_right.svg
+	// TabNewRight is https://github.com/cogentcore/core/blob/main/icons/svg/tab_new_right.svg
 	TabNewRight Icon = "tab_new_right"
 
-	// TabRecent is https://github.com/goki/icons/blob/main/svg/tab_recent.svg
+	// TabRecent is https://github.com/cogentcore/core/blob/main/icons/svg/tab_recent.svg
 	TabRecent Icon = "tab_recent"
 
-	// TabUnselected is https://github.com/goki/icons/blob/main/svg/tab_unselected.svg
+	// TabUnselected is https://github.com/cogentcore/core/blob/main/icons/svg/tab_unselected.svg
 	TabUnselected Icon = "tab_unselected"
 
-	// Table is https://github.com/goki/icons/blob/main/svg/table.svg
+	// Table is https://github.com/cogentcore/core/blob/main/icons/svg/table.svg
 	Table Icon = "table"
 
-	// TableChart is https://github.com/goki/icons/blob/main/svg/table_chart.svg
+	// TableChart is https://github.com/cogentcore/core/blob/main/icons/svg/table_chart.svg
 	TableChart Icon = "table_chart"
 
-	// TableChartView is https://github.com/goki/icons/blob/main/svg/table_chart_view.svg
+	// TableChartView is https://github.com/cogentcore/core/blob/main/icons/svg/table_chart_view.svg
 	TableChartView Icon = "table_chart_view"
 
-	// TableRows is https://github.com/goki/icons/blob/main/svg/table_rows.svg
+	// TableRows is https://github.com/cogentcore/core/blob/main/icons/svg/table_rows.svg
 	TableRows Icon = "table_rows"
 
-	// TableRowsNarrow is https://github.com/goki/icons/blob/main/svg/table_rows_narrow.svg
+	// TableRowsNarrow is https://github.com/cogentcore/core/blob/main/icons/svg/table_rows_narrow.svg
 	TableRowsNarrow Icon = "table_rows_narrow"
 
-	// TableView is https://github.com/goki/icons/blob/main/svg/table_view.svg
+	// TableView is https://github.com/cogentcore/core/blob/main/icons/svg/table_view.svg
 	TableView Icon = "table_view"
 
-	// Tablet is https://github.com/goki/icons/blob/main/svg/tablet.svg
+	// Tablet is https://github.com/cogentcore/core/blob/main/icons/svg/tablet.svg
 	Tablet Icon = "tablet"
 
-	// TabletAndroid is https://github.com/goki/icons/blob/main/svg/tablet_android.svg
+	// TabletAndroid is https://github.com/cogentcore/core/blob/main/icons/svg/tablet_android.svg
 	TabletAndroid Icon = "tablet_android"
 
-	// TabletMac is https://github.com/goki/icons/blob/main/svg/tablet_mac.svg
+	// TabletMac is https://github.com/cogentcore/core/blob/main/icons/svg/tablet_mac.svg
 	TabletMac Icon = "tablet_mac"
 
-	// Tabs is https://github.com/goki/icons/blob/main/svg/tabs.svg
+	// Tabs is https://github.com/cogentcore/core/blob/main/icons/svg/tabs.svg
 	Tabs Icon = "tabs"
 
-	// Tag is https://github.com/goki/icons/blob/main/svg/tag.svg
+	// Tag is https://github.com/cogentcore/core/blob/main/icons/svg/tag.svg
 	Tag Icon = "tag"
 
-	// TapAndPlay is https://github.com/goki/icons/blob/main/svg/tap_and_play.svg
+	// TapAndPlay is https://github.com/cogentcore/core/blob/main/icons/svg/tap_and_play.svg
 	TapAndPlay Icon = "tap_and_play"
 
-	// Tapas is https://github.com/goki/icons/blob/main/svg/tapas.svg
+	// Tapas is https://github.com/cogentcore/core/blob/main/icons/svg/tapas.svg
 	Tapas Icon = "tapas"
 
-	// Target is https://github.com/goki/icons/blob/main/svg/target.svg
+	// Target is https://github.com/cogentcore/core/blob/main/icons/svg/target.svg
 	Target Icon = "target"
 
-	// Task is https://github.com/goki/icons/blob/main/svg/task.svg
+	// Task is https://github.com/cogentcore/core/blob/main/icons/svg/task.svg
 	Task Icon = "task"
 
-	// TaskAlt is https://github.com/goki/icons/blob/main/svg/task_alt.svg
+	// TaskAlt is https://github.com/cogentcore/core/blob/main/icons/svg/task_alt.svg
 	TaskAlt Icon = "task_alt"
 
-	// Terminal is https://github.com/goki/icons/blob/main/svg/terminal.svg
+	// Terminal is https://github.com/cogentcore/core/blob/main/icons/svg/terminal.svg
 	Terminal Icon = "terminal"
 
-	// Tex is https://github.com/goki/icons/blob/main/svg/tex.svg
+	// Tex is https://github.com/cogentcore/core/blob/main/icons/svg/tex.svg
 	Tex Icon = "tex"
 
-	// TextAd is https://github.com/goki/icons/blob/main/svg/text_ad.svg
+	// TextAd is https://github.com/cogentcore/core/blob/main/icons/svg/text_ad.svg
 	TextAd Icon = "text_ad"
 
-	// TextDecrease is https://github.com/goki/icons/blob/main/svg/text_decrease.svg
+	// TextDecrease is https://github.com/cogentcore/core/blob/main/icons/svg/text_decrease.svg
 	TextDecrease Icon = "text_decrease"
 
-	// TextFields is https://github.com/goki/icons/blob/main/svg/text_fields.svg
+	// TextFields is https://github.com/cogentcore/core/blob/main/icons/svg/text_fields.svg
 	TextFields Icon = "text_fields"
 
-	// TextFormat is https://github.com/goki/icons/blob/main/svg/text_format.svg
+	// TextFormat is https://github.com/cogentcore/core/blob/main/icons/svg/text_format.svg
 	TextFormat Icon = "text_format"
 
-	// TextIncrease is https://github.com/goki/icons/blob/main/svg/text_increase.svg
+	// TextIncrease is https://github.com/cogentcore/core/blob/main/icons/svg/text_increase.svg
 	TextIncrease Icon = "text_increase"
 
-	// TextRotateUp is https://github.com/goki/icons/blob/main/svg/text_rotate_up.svg
+	// TextRotateUp is https://github.com/cogentcore/core/blob/main/icons/svg/text_rotate_up.svg
 	TextRotateUp Icon = "text_rotate_up"
 
-	// TextRotateVertical is https://github.com/goki/icons/blob/main/svg/text_rotate_vertical.svg
+	// TextRotateVertical is https://github.com/cogentcore/core/blob/main/icons/svg/text_rotate_vertical.svg
 	TextRotateVertical Icon = "text_rotate_vertical"
 
-	// TextRotationAngledown is https://github.com/goki/icons/blob/main/svg/text_rotation_angledown.svg
+	// TextRotationAngledown is https://github.com/cogentcore/core/blob/main/icons/svg/text_rotation_angledown.svg
 	TextRotationAngledown Icon = "text_rotation_angledown"
 
-	// TextRotationAngleup is https://github.com/goki/icons/blob/main/svg/text_rotation_angleup.svg
+	// TextRotationAngleup is https://github.com/cogentcore/core/blob/main/icons/svg/text_rotation_angleup.svg
 	TextRotationAngleup Icon = "text_rotation_angleup"
 
-	// TextRotationDown is https://github.com/goki/icons/blob/main/svg/text_rotation_down.svg
+	// TextRotationDown is https://github.com/cogentcore/core/blob/main/icons/svg/text_rotation_down.svg
 	TextRotationDown Icon = "text_rotation_down"
 
-	// TextRotationNone is https://github.com/goki/icons/blob/main/svg/text_rotation_none.svg
+	// TextRotationNone is https://github.com/cogentcore/core/blob/main/icons/svg/text_rotation_none.svg
 	TextRotationNone Icon = "text_rotation_none"
 
-	// TextSelectEnd is https://github.com/goki/icons/blob/main/svg/text_select_end.svg
+	// TextSelectEnd is https://github.com/cogentcore/core/blob/main/icons/svg/text_select_end.svg
 	TextSelectEnd Icon = "text_select_end"
 
-	// TextSelectJumpToBeginning is https://github.com/goki/icons/blob/main/svg/text_select_jump_to_beginning.svg
+	// TextSelectJumpToBeginning is https://github.com/cogentcore/core/blob/main/icons/svg/text_select_jump_to_beginning.svg
 	TextSelectJumpToBeginning Icon = "text_select_jump_to_beginning"
 
-	// TextSelectJumpToEnd is https://github.com/goki/icons/blob/main/svg/text_select_jump_to_end.svg
+	// TextSelectJumpToEnd is https://github.com/cogentcore/core/blob/main/icons/svg/text_select_jump_to_end.svg
 	TextSelectJumpToEnd Icon = "text_select_jump_to_end"
 
-	// TextSelectMoveBackCharacter is https://github.com/goki/icons/blob/main/svg/text_select_move_back_character.svg
+	// TextSelectMoveBackCharacter is https://github.com/cogentcore/core/blob/main/icons/svg/text_select_move_back_character.svg
 	TextSelectMoveBackCharacter Icon = "text_select_move_back_character"
 
-	// TextSelectMoveBackWord is https://github.com/goki/icons/blob/main/svg/text_select_move_back_word.svg
+	// TextSelectMoveBackWord is https://github.com/cogentcore/core/blob/main/icons/svg/text_select_move_back_word.svg
 	TextSelectMoveBackWord Icon = "text_select_move_back_word"
 
-	// TextSelectMoveDown is https://github.com/goki/icons/blob/main/svg/text_select_move_down.svg
+	// TextSelectMoveDown is https://github.com/cogentcore/core/blob/main/icons/svg/text_select_move_down.svg
 	TextSelectMoveDown Icon = "text_select_move_down"
 
-	// TextSelectMoveForwardCharacter is https://github.com/goki/icons/blob/main/svg/text_select_move_forward_character.svg
+	// TextSelectMoveForwardCharacter is https://github.com/cogentcore/core/blob/main/icons/svg/text_select_move_forward_character.svg
 	TextSelectMoveForwardCharacter Icon = "text_select_move_forward_character"
 
-	// TextSelectMoveForwardWord is https://github.com/goki/icons/blob/main/svg/text_select_move_forward_word.svg
+	// TextSelectMoveForwardWord is https://github.com/cogentcore/core/blob/main/icons/svg/text_select_move_forward_word.svg
 	TextSelectMoveForwardWord Icon = "text_select_move_forward_word"
 
-	// TextSelectMoveUp is https://github.com/goki/icons/blob/main/svg/text_select_move_up.svg
+	// TextSelectMoveUp is https://github.com/cogentcore/core/blob/main/icons/svg/text_select_move_up.svg
 	TextSelectMoveUp Icon = "text_select_move_up"
 
-	// TextSelectStart is https://github.com/goki/icons/blob/main/svg/text_select_start.svg
+	// TextSelectStart is https://github.com/cogentcore/core/blob/main/icons/svg/text_select_start.svg
 	TextSelectStart Icon = "text_select_start"
 
-	// TextSnippet is https://github.com/goki/icons/blob/main/svg/text_snippet.svg
+	// TextSnippet is https://github.com/cogentcore/core/blob/main/icons/svg/text_snippet.svg
 	TextSnippet Icon = "text_snippet"
 
-	// TextToSpeech is https://github.com/goki/icons/blob/main/svg/text_to_speech.svg
+	// TextToSpeech is https://github.com/cogentcore/core/blob/main/icons/svg/text_to_speech.svg
 	TextToSpeech Icon = "text_to_speech"
 
-	// Texture is https://github.com/goki/icons/blob/main/svg/texture.svg
+	// Texture is https://github.com/cogentcore/core/blob/main/icons/svg/texture.svg
 	Texture Icon = "texture"
 
-	// Thermometer is https://github.com/goki/icons/blob/main/svg/thermometer.svg
+	// Thermometer is https://github.com/cogentcore/core/blob/main/icons/svg/thermometer.svg
 	Thermometer Icon = "thermometer"
 
-	// ThermometerGain is https://github.com/goki/icons/blob/main/svg/thermometer_gain.svg
+	// ThermometerGain is https://github.com/cogentcore/core/blob/main/icons/svg/thermometer_gain.svg
 	ThermometerGain Icon = "thermometer_gain"
 
-	// ThermometerLoss is https://github.com/goki/icons/blob/main/svg/thermometer_loss.svg
+	// ThermometerLoss is https://github.com/cogentcore/core/blob/main/icons/svg/thermometer_loss.svg
 	ThermometerLoss Icon = "thermometer_loss"
 
-	// Thermostat is https://github.com/goki/icons/blob/main/svg/thermostat.svg
+	// Thermostat is https://github.com/cogentcore/core/blob/main/icons/svg/thermostat.svg
 	Thermostat Icon = "thermostat"
 
-	// ThermostatAuto is https://github.com/goki/icons/blob/main/svg/thermostat_auto.svg
+	// ThermostatAuto is https://github.com/cogentcore/core/blob/main/icons/svg/thermostat_auto.svg
 	ThermostatAuto Icon = "thermostat_auto"
 
-	// ThermostatCarbon is https://github.com/goki/icons/blob/main/svg/thermostat_carbon.svg
+	// ThermostatCarbon is https://github.com/cogentcore/core/blob/main/icons/svg/thermostat_carbon.svg
 	ThermostatCarbon Icon = "thermostat_carbon"
 
-	// ThumbDown is https://github.com/goki/icons/blob/main/svg/thumb_down.svg
+	// ThumbDown is https://github.com/cogentcore/core/blob/main/icons/svg/thumb_down.svg
 	ThumbDown Icon = "thumb_down"
 
-	// ThumbUp is https://github.com/goki/icons/blob/main/svg/thumb_up.svg
+	// ThumbUp is https://github.com/cogentcore/core/blob/main/icons/svg/thumb_up.svg
 	ThumbUp Icon = "thumb_up"
 
-	// ThumbnailBar is https://github.com/goki/icons/blob/main/svg/thumbnail_bar.svg
+	// ThumbnailBar is https://github.com/cogentcore/core/blob/main/icons/svg/thumbnail_bar.svg
 	ThumbnailBar Icon = "thumbnail_bar"
 
-	// ThumbsUpDown is https://github.com/goki/icons/blob/main/svg/thumbs_up_down.svg
+	// ThumbsUpDown is https://github.com/cogentcore/core/blob/main/icons/svg/thumbs_up_down.svg
 	ThumbsUpDown Icon = "thumbs_up_down"
 
-	// TimeAuto is https://github.com/goki/icons/blob/main/svg/time_auto.svg
+	// TimeAuto is https://github.com/cogentcore/core/blob/main/icons/svg/time_auto.svg
 	TimeAuto Icon = "time_auto"
 
-	// Timelapse is https://github.com/goki/icons/blob/main/svg/timelapse.svg
+	// Timelapse is https://github.com/cogentcore/core/blob/main/icons/svg/timelapse.svg
 	Timelapse Icon = "timelapse"
 
-	// Timeline is https://github.com/goki/icons/blob/main/svg/timeline.svg
+	// Timeline is https://github.com/cogentcore/core/blob/main/icons/svg/timeline.svg
 	Timeline Icon = "timeline"
 
-	// Timer is https://github.com/goki/icons/blob/main/svg/timer.svg
+	// Timer is https://github.com/cogentcore/core/blob/main/icons/svg/timer.svg
 	Timer Icon = "timer"
 
-	// Timer10 is https://github.com/goki/icons/blob/main/svg/timer_10.svg
+	// Timer10 is https://github.com/cogentcore/core/blob/main/icons/svg/timer_10.svg
 	Timer10 Icon = "timer_10"
 
-	// Timer10Alt1 is https://github.com/goki/icons/blob/main/svg/timer_10_alt_1.svg
+	// Timer10Alt1 is https://github.com/cogentcore/core/blob/main/icons/svg/timer_10_alt_1.svg
 	Timer10Alt1 Icon = "timer_10_alt_1"
 
-	// Timer10Select is https://github.com/goki/icons/blob/main/svg/timer_10_select.svg
+	// Timer10Select is https://github.com/cogentcore/core/blob/main/icons/svg/timer_10_select.svg
 	Timer10Select Icon = "timer_10_select"
 
-	// Timer3 is https://github.com/goki/icons/blob/main/svg/timer_3.svg
+	// Timer3 is https://github.com/cogentcore/core/blob/main/icons/svg/timer_3.svg
 	Timer3 Icon = "timer_3"
 
-	// Timer3Alt1 is https://github.com/goki/icons/blob/main/svg/timer_3_alt_1.svg
+	// Timer3Alt1 is https://github.com/cogentcore/core/blob/main/icons/svg/timer_3_alt_1.svg
 	Timer3Alt1 Icon = "timer_3_alt_1"
 
-	// Timer3Select is https://github.com/goki/icons/blob/main/svg/timer_3_select.svg
+	// Timer3Select is https://github.com/cogentcore/core/blob/main/icons/svg/timer_3_select.svg
 	Timer3Select Icon = "timer_3_select"
 
-	// TimerOff is https://github.com/goki/icons/blob/main/svg/timer_off.svg
+	// TimerOff is https://github.com/cogentcore/core/blob/main/icons/svg/timer_off.svg
 	TimerOff Icon = "timer_off"
 
-	// TireRepair is https://github.com/goki/icons/blob/main/svg/tire_repair.svg
+	// TireRepair is https://github.com/cogentcore/core/blob/main/icons/svg/tire_repair.svg
 	TireRepair Icon = "tire_repair"
 
-	// Title is https://github.com/goki/icons/blob/main/svg/title.svg
+	// Title is https://github.com/cogentcore/core/blob/main/icons/svg/title.svg
 	Title Icon = "title"
 
-	// Toc is https://github.com/goki/icons/blob/main/svg/toc.svg
+	// Toc is https://github.com/cogentcore/core/blob/main/icons/svg/toc.svg
 	Toc Icon = "toc"
 
-	// Today is https://github.com/goki/icons/blob/main/svg/today.svg
+	// Today is https://github.com/cogentcore/core/blob/main/icons/svg/today.svg
 	Today Icon = "today"
 
-	// ToggleMid is https://github.com/goki/icons/blob/main/svg/toggle_mid.svg
+	// ToggleMid is https://github.com/cogentcore/core/blob/main/icons/svg/toggle_mid.svg
 	ToggleMid Icon = "toggle_mid"
 
-	// ToggleOff is https://github.com/goki/icons/blob/main/svg/toggle_off.svg
+	// ToggleOff is https://github.com/cogentcore/core/blob/main/icons/svg/toggle_off.svg
 	ToggleOff Icon = "toggle_off"
 
-	// ToggleOn is https://github.com/goki/icons/blob/main/svg/toggle_on.svg
+	// ToggleOn is https://github.com/cogentcore/core/blob/main/icons/svg/toggle_on.svg
 	ToggleOn Icon = "toggle_on"
 
-	// Token is https://github.com/goki/icons/blob/main/svg/token.svg
+	// Token is https://github.com/cogentcore/core/blob/main/icons/svg/token.svg
 	Token Icon = "token"
 
-	// Tonality is https://github.com/goki/icons/blob/main/svg/tonality.svg
+	// Tonality is https://github.com/cogentcore/core/blob/main/icons/svg/tonality.svg
 	Tonality Icon = "tonality"
 
-	// Toolbar is https://github.com/goki/icons/blob/main/svg/toolbar.svg
+	// Toolbar is https://github.com/cogentcore/core/blob/main/icons/svg/toolbar.svg
 	Toolbar Icon = "toolbar"
 
-	// Tooltip is https://github.com/goki/icons/blob/main/svg/tooltip.svg
+	// Tooltip is https://github.com/cogentcore/core/blob/main/icons/svg/tooltip.svg
 	Tooltip Icon = "tooltip"
 
-	// TopPanelClose is https://github.com/goki/icons/blob/main/svg/top_panel_close.svg
+	// TopPanelClose is https://github.com/cogentcore/core/blob/main/icons/svg/top_panel_close.svg
 	TopPanelClose Icon = "top_panel_close"
 
-	// TopPanelOpen is https://github.com/goki/icons/blob/main/svg/top_panel_open.svg
+	// TopPanelOpen is https://github.com/cogentcore/core/blob/main/icons/svg/top_panel_open.svg
 	TopPanelOpen Icon = "top_panel_open"
 
-	// Topic is https://github.com/goki/icons/blob/main/svg/topic.svg
+	// Topic is https://github.com/cogentcore/core/blob/main/icons/svg/topic.svg
 	Topic Icon = "topic"
 
-	// TouchApp is https://github.com/goki/icons/blob/main/svg/touch_app.svg
+	// TouchApp is https://github.com/cogentcore/core/blob/main/icons/svg/touch_app.svg
 	TouchApp Icon = "touch_app"
 
-	// TouchpadMouse is https://github.com/goki/icons/blob/main/svg/touchpad_mouse.svg
+	// TouchpadMouse is https://github.com/cogentcore/core/blob/main/icons/svg/touchpad_mouse.svg
 	TouchpadMouse Icon = "touchpad_mouse"
 
-	// Tour is https://github.com/goki/icons/blob/main/svg/tour.svg
+	// Tour is https://github.com/cogentcore/core/blob/main/icons/svg/tour.svg
 	Tour Icon = "tour"
 
-	// Toys is https://github.com/goki/icons/blob/main/svg/toys.svg
+	// Toys is https://github.com/cogentcore/core/blob/main/icons/svg/toys.svg
 	Toys Icon = "toys"
 
-	// ToysFan is https://github.com/goki/icons/blob/main/svg/toys_fan.svg
+	// ToysFan is https://github.com/cogentcore/core/blob/main/icons/svg/toys_fan.svg
 	ToysFan Icon = "toys_fan"
 
-	// TrackChanges is https://github.com/goki/icons/blob/main/svg/track_changes.svg
+	// TrackChanges is https://github.com/cogentcore/core/blob/main/icons/svg/track_changes.svg
 	TrackChanges Icon = "track_changes"
 
-	// Traffic is https://github.com/goki/icons/blob/main/svg/traffic.svg
+	// Traffic is https://github.com/cogentcore/core/blob/main/icons/svg/traffic.svg
 	Traffic Icon = "traffic"
 
-	// Transcribe is https://github.com/goki/icons/blob/main/svg/transcribe.svg
+	// Transcribe is https://github.com/cogentcore/core/blob/main/icons/svg/transcribe.svg
 	Transcribe Icon = "transcribe"
 
-	// Transform is https://github.com/goki/icons/blob/main/svg/transform.svg
+	// Transform is https://github.com/cogentcore/core/blob/main/icons/svg/transform.svg
 	Transform Icon = "transform"
 
-	// Translate is https://github.com/goki/icons/blob/main/svg/translate.svg
+	// Translate is https://github.com/cogentcore/core/blob/main/icons/svg/translate.svg
 	Translate Icon = "translate"
 
-	// TrendingDown is https://github.com/goki/icons/blob/main/svg/trending_down.svg
+	// TrendingDown is https://github.com/cogentcore/core/blob/main/icons/svg/trending_down.svg
 	TrendingDown Icon = "trending_down"
 
-	// TrendingFlat is https://github.com/goki/icons/blob/main/svg/trending_flat.svg
+	// TrendingFlat is https://github.com/cogentcore/core/blob/main/icons/svg/trending_flat.svg
 	TrendingFlat Icon = "trending_flat"
 
-	// TrendingUp is https://github.com/goki/icons/blob/main/svg/trending_up.svg
+	// TrendingUp is https://github.com/cogentcore/core/blob/main/icons/svg/trending_up.svg
 	TrendingUp Icon = "trending_up"
 
-	// Trophy is https://github.com/goki/icons/blob/main/svg/trophy.svg
+	// Trophy is https://github.com/cogentcore/core/blob/main/icons/svg/trophy.svg
 	Trophy Icon = "trophy"
 
-	// Troubleshoot is https://github.com/goki/icons/blob/main/svg/troubleshoot.svg
+	// Troubleshoot is https://github.com/cogentcore/core/blob/main/icons/svg/troubleshoot.svg
 	Troubleshoot Icon = "troubleshoot"
 
-	// Tsv is https://github.com/goki/icons/blob/main/svg/tsv.svg
+	// Tsv is https://github.com/cogentcore/core/blob/main/icons/svg/tsv.svg
 	Tsv Icon = "tsv"
 
-	// Tty is https://github.com/goki/icons/blob/main/svg/tty.svg
+	// Tty is https://github.com/cogentcore/core/blob/main/icons/svg/tty.svg
 	Tty Icon = "tty"
 
-	// Tune is https://github.com/goki/icons/blob/main/svg/tune.svg
+	// Tune is https://github.com/cogentcore/core/blob/main/icons/svg/tune.svg
 	Tune Icon = "tune"
 
-	// TurnLeft is https://github.com/goki/icons/blob/main/svg/turn_left.svg
+	// TurnLeft is https://github.com/cogentcore/core/blob/main/icons/svg/turn_left.svg
 	TurnLeft Icon = "turn_left"
 
-	// TurnRight is https://github.com/goki/icons/blob/main/svg/turn_right.svg
+	// TurnRight is https://github.com/cogentcore/core/blob/main/icons/svg/turn_right.svg
 	TurnRight Icon = "turn_right"
 
-	// TurnSharpLeft is https://github.com/goki/icons/blob/main/svg/turn_sharp_left.svg
+	// TurnSharpLeft is https://github.com/cogentcore/core/blob/main/icons/svg/turn_sharp_left.svg
 	TurnSharpLeft Icon = "turn_sharp_left"
 
-	// TurnSharpRight is https://github.com/goki/icons/blob/main/svg/turn_sharp_right.svg
+	// TurnSharpRight is https://github.com/cogentcore/core/blob/main/icons/svg/turn_sharp_right.svg
 	TurnSharpRight Icon = "turn_sharp_right"
 
-	// TurnSlightLeft is https://github.com/goki/icons/blob/main/svg/turn_slight_left.svg
+	// TurnSlightLeft is https://github.com/cogentcore/core/blob/main/icons/svg/turn_slight_left.svg
 	TurnSlightLeft Icon = "turn_slight_left"
 
-	// TurnSlightRight is https://github.com/goki/icons/blob/main/svg/turn_slight_right.svg
+	// TurnSlightRight is https://github.com/cogentcore/core/blob/main/icons/svg/turn_slight_right.svg
 	TurnSlightRight Icon = "turn_slight_right"
 
-	// Tv is https://github.com/goki/icons/blob/main/svg/tv.svg
+	// Tv is https://github.com/cogentcore/core/blob/main/icons/svg/tv.svg
 	Tv Icon = "tv"
 
-	// TvGen is https://github.com/goki/icons/blob/main/svg/tv_gen.svg
+	// TvGen is https://github.com/cogentcore/core/blob/main/icons/svg/tv_gen.svg
 	TvGen Icon = "tv_gen"
 
-	// TvGuide is https://github.com/goki/icons/blob/main/svg/tv_guide.svg
+	// TvGuide is https://github.com/cogentcore/core/blob/main/icons/svg/tv_guide.svg
 	TvGuide Icon = "tv_guide"
 
-	// TvOff is https://github.com/goki/icons/blob/main/svg/tv_off.svg
+	// TvOff is https://github.com/cogentcore/core/blob/main/icons/svg/tv_off.svg
 	TvOff Icon = "tv_off"
 
-	// TvRemote is https://github.com/goki/icons/blob/main/svg/tv_remote.svg
+	// TvRemote is https://github.com/cogentcore/core/blob/main/icons/svg/tv_remote.svg
 	TvRemote Icon = "tv_remote"
 
-	// TvSignin is https://github.com/goki/icons/blob/main/svg/tv_signin.svg
+	// TvSignin is https://github.com/cogentcore/core/blob/main/icons/svg/tv_signin.svg
 	TvSignin Icon = "tv_signin"
 
-	// Unarchive is https://github.com/goki/icons/blob/main/svg/unarchive.svg
+	// Unarchive is https://github.com/cogentcore/core/blob/main/icons/svg/unarchive.svg
 	Unarchive Icon = "unarchive"
 
-	// Undo is https://github.com/goki/icons/blob/main/svg/undo.svg
+	// Undo is https://github.com/cogentcore/core/blob/main/icons/svg/undo.svg
 	Undo Icon = "undo"
 
-	// UnfoldLess is https://github.com/goki/icons/blob/main/svg/unfold_less.svg
+	// UnfoldLess is https://github.com/cogentcore/core/blob/main/icons/svg/unfold_less.svg
 	UnfoldLess Icon = "unfold_less"
 
-	// UnfoldLessDouble is https://github.com/goki/icons/blob/main/svg/unfold_less_double.svg
+	// UnfoldLessDouble is https://github.com/cogentcore/core/blob/main/icons/svg/unfold_less_double.svg
 	UnfoldLessDouble Icon = "unfold_less_double"
 
-	// UnfoldMore is https://github.com/goki/icons/blob/main/svg/unfold_more.svg
+	// UnfoldMore is https://github.com/cogentcore/core/blob/main/icons/svg/unfold_more.svg
 	UnfoldMore Icon = "unfold_more"
 
-	// UnfoldMoreDouble is https://github.com/goki/icons/blob/main/svg/unfold_more_double.svg
+	// UnfoldMoreDouble is https://github.com/cogentcore/core/blob/main/icons/svg/unfold_more_double.svg
 	UnfoldMoreDouble Icon = "unfold_more_double"
 
-	// Ungroup is https://github.com/goki/icons/blob/main/svg/ungroup.svg
+	// Ungroup is https://github.com/cogentcore/core/blob/main/icons/svg/ungroup.svg
 	Ungroup Icon = "ungroup"
 
-	// UniversalCurrencyAlt is https://github.com/goki/icons/blob/main/svg/universal_currency_alt.svg
+	// UniversalCurrencyAlt is https://github.com/cogentcore/core/blob/main/icons/svg/universal_currency_alt.svg
 	UniversalCurrencyAlt Icon = "universal_currency_alt"
 
-	// Unknown2 is https://github.com/goki/icons/blob/main/svg/unknown_2.svg
+	// Unknown2 is https://github.com/cogentcore/core/blob/main/icons/svg/unknown_2.svg
 	Unknown2 Icon = "unknown_2"
 
-	// Unknown5 is https://github.com/goki/icons/blob/main/svg/unknown_5.svg
+	// Unknown5 is https://github.com/cogentcore/core/blob/main/icons/svg/unknown_5.svg
 	Unknown5 Icon = "unknown_5"
 
-	// UnknownDocument is https://github.com/goki/icons/blob/main/svg/unknown_document.svg
+	// UnknownDocument is https://github.com/cogentcore/core/blob/main/icons/svg/unknown_document.svg
 	UnknownDocument Icon = "unknown_document"
 
-	// UnknownMed is https://github.com/goki/icons/blob/main/svg/unknown_med.svg
+	// UnknownMed is https://github.com/cogentcore/core/blob/main/icons/svg/unknown_med.svg
 	UnknownMed Icon = "unknown_med"
 
-	// Unpublished is https://github.com/goki/icons/blob/main/svg/unpublished.svg
+	// Unpublished is https://github.com/cogentcore/core/blob/main/icons/svg/unpublished.svg
 	Unpublished Icon = "unpublished"
 
-	// Unsubscribe is https://github.com/goki/icons/blob/main/svg/unsubscribe.svg
+	// Unsubscribe is https://github.com/cogentcore/core/blob/main/icons/svg/unsubscribe.svg
 	Unsubscribe Icon = "unsubscribe"
 
-	// Upcoming is https://github.com/goki/icons/blob/main/svg/upcoming.svg
+	// Upcoming is https://github.com/cogentcore/core/blob/main/icons/svg/upcoming.svg
 	Upcoming Icon = "upcoming"
 
-	// Update is https://github.com/goki/icons/blob/main/svg/update.svg
+	// Update is https://github.com/cogentcore/core/blob/main/icons/svg/update.svg
 	Update Icon = "update"
 
-	// UpdateDisabled is https://github.com/goki/icons/blob/main/svg/update_disabled.svg
+	// UpdateDisabled is https://github.com/cogentcore/core/blob/main/icons/svg/update_disabled.svg
 	UpdateDisabled Icon = "update_disabled"
 
-	// Upgrade is https://github.com/goki/icons/blob/main/svg/upgrade.svg
+	// Upgrade is https://github.com/cogentcore/core/blob/main/icons/svg/upgrade.svg
 	Upgrade Icon = "upgrade"
 
-	// Upload is https://github.com/goki/icons/blob/main/svg/upload.svg
+	// Upload is https://github.com/cogentcore/core/blob/main/icons/svg/upload.svg
 	Upload Icon = "upload"
 
-	// UploadFile is https://github.com/goki/icons/blob/main/svg/upload_file.svg
+	// UploadFile is https://github.com/cogentcore/core/blob/main/icons/svg/upload_file.svg
 	UploadFile Icon = "upload_file"
 
-	// Urology is https://github.com/goki/icons/blob/main/svg/urology.svg
+	// Urology is https://github.com/cogentcore/core/blob/main/icons/svg/urology.svg
 	Urology Icon = "urology"
 
-	// Usb is https://github.com/goki/icons/blob/main/svg/usb.svg
+	// Usb is https://github.com/cogentcore/core/blob/main/icons/svg/usb.svg
 	Usb Icon = "usb"
 
-	// UsbOff is https://github.com/goki/icons/blob/main/svg/usb_off.svg
+	// UsbOff is https://github.com/cogentcore/core/blob/main/icons/svg/usb_off.svg
 	UsbOff Icon = "usb_off"
 
-	// Valve is https://github.com/goki/icons/blob/main/svg/valve.svg
+	// Valve is https://github.com/cogentcore/core/blob/main/icons/svg/valve.svg
 	Valve Icon = "valve"
 
-	// Variable is https://github.com/goki/icons/blob/main/svg/variable.svg
+	// Variable is https://github.com/cogentcore/core/blob/main/icons/svg/variable.svg
 	Variable Icon = "variable"
 
-	// Variables is https://github.com/goki/icons/blob/main/svg/variables.svg
+	// Variables is https://github.com/cogentcore/core/blob/main/icons/svg/variables.svg
 	Variables Icon = "variables"
 
-	// Verified is https://github.com/goki/icons/blob/main/svg/verified.svg
+	// Verified is https://github.com/cogentcore/core/blob/main/icons/svg/verified.svg
 	Verified Icon = "verified"
 
-	// VerifiedUser is https://github.com/goki/icons/blob/main/svg/verified_user.svg
+	// VerifiedUser is https://github.com/cogentcore/core/blob/main/icons/svg/verified_user.svg
 	VerifiedUser Icon = "verified_user"
 
-	// VerticalAlignBottom is https://github.com/goki/icons/blob/main/svg/vertical_align_bottom.svg
+	// VerticalAlignBottom is https://github.com/cogentcore/core/blob/main/icons/svg/vertical_align_bottom.svg
 	VerticalAlignBottom Icon = "vertical_align_bottom"
 
-	// VerticalAlignCenter is https://github.com/goki/icons/blob/main/svg/vertical_align_center.svg
+	// VerticalAlignCenter is https://github.com/cogentcore/core/blob/main/icons/svg/vertical_align_center.svg
 	VerticalAlignCenter Icon = "vertical_align_center"
 
-	// VerticalAlignTop is https://github.com/goki/icons/blob/main/svg/vertical_align_top.svg
+	// VerticalAlignTop is https://github.com/cogentcore/core/blob/main/icons/svg/vertical_align_top.svg
 	VerticalAlignTop Icon = "vertical_align_top"
 
-	// VerticalDistribute is https://github.com/goki/icons/blob/main/svg/vertical_distribute.svg
+	// VerticalDistribute is https://github.com/cogentcore/core/blob/main/icons/svg/vertical_distribute.svg
 	VerticalDistribute Icon = "vertical_distribute"
 
-	// VerticalShades is https://github.com/goki/icons/blob/main/svg/vertical_shades.svg
+	// VerticalShades is https://github.com/cogentcore/core/blob/main/icons/svg/vertical_shades.svg
 	VerticalShades Icon = "vertical_shades"
 
-	// VerticalShadesClosed is https://github.com/goki/icons/blob/main/svg/vertical_shades_closed.svg
+	// VerticalShadesClosed is https://github.com/cogentcore/core/blob/main/icons/svg/vertical_shades_closed.svg
 	VerticalShadesClosed Icon = "vertical_shades_closed"
 
-	// VerticalSplit is https://github.com/goki/icons/blob/main/svg/vertical_split.svg
+	// VerticalSplit is https://github.com/cogentcore/core/blob/main/icons/svg/vertical_split.svg
 	VerticalSplit Icon = "vertical_split"
 
-	// VideoCall is https://github.com/goki/icons/blob/main/svg/video_call.svg
+	// VideoCall is https://github.com/cogentcore/core/blob/main/icons/svg/video_call.svg
 	VideoCall Icon = "video_call"
 
-	// VideoCameraBack is https://github.com/goki/icons/blob/main/svg/video_camera_back.svg
+	// VideoCameraBack is https://github.com/cogentcore/core/blob/main/icons/svg/video_camera_back.svg
 	VideoCameraBack Icon = "video_camera_back"
 
-	// VideoCameraFront is https://github.com/goki/icons/blob/main/svg/video_camera_front.svg
+	// VideoCameraFront is https://github.com/cogentcore/core/blob/main/icons/svg/video_camera_front.svg
 	VideoCameraFront Icon = "video_camera_front"
 
-	// VideoCameraFrontOff is https://github.com/goki/icons/blob/main/svg/video_camera_front_off.svg
+	// VideoCameraFrontOff is https://github.com/cogentcore/core/blob/main/icons/svg/video_camera_front_off.svg
 	VideoCameraFrontOff Icon = "video_camera_front_off"
 
-	// VideoChat is https://github.com/goki/icons/blob/main/svg/video_chat.svg
+	// VideoChat is https://github.com/cogentcore/core/blob/main/icons/svg/video_chat.svg
 	VideoChat Icon = "video_chat"
 
-	// VideoFile is https://github.com/goki/icons/blob/main/svg/video_file.svg
+	// VideoFile is https://github.com/cogentcore/core/blob/main/icons/svg/video_file.svg
 	VideoFile Icon = "video_file"
 
-	// VideoLabel is https://github.com/goki/icons/blob/main/svg/video_label.svg
+	// VideoLabel is https://github.com/cogentcore/core/blob/main/icons/svg/video_label.svg
 	VideoLabel Icon = "video_label"
 
-	// VideoLibrary is https://github.com/goki/icons/blob/main/svg/video_library.svg
+	// VideoLibrary is https://github.com/cogentcore/core/blob/main/icons/svg/video_library.svg
 	VideoLibrary Icon = "video_library"
 
-	// VideoSearch is https://github.com/goki/icons/blob/main/svg/video_search.svg
+	// VideoSearch is https://github.com/cogentcore/core/blob/main/icons/svg/video_search.svg
 	VideoSearch Icon = "video_search"
 
-	// VideoSettings is https://github.com/goki/icons/blob/main/svg/video_settings.svg
+	// VideoSettings is https://github.com/cogentcore/core/blob/main/icons/svg/video_settings.svg
 	VideoSettings Icon = "video_settings"
 
-	// VideoStable is https://github.com/goki/icons/blob/main/svg/video_stable.svg
+	// VideoStable is https://github.com/cogentcore/core/blob/main/icons/svg/video_stable.svg
 	VideoStable Icon = "video_stable"
 
-	// Videocam is https://github.com/goki/icons/blob/main/svg/videocam.svg
+	// Videocam is https://github.com/cogentcore/core/blob/main/icons/svg/videocam.svg
 	Videocam Icon = "videocam"
 
-	// VideocamOff is https://github.com/goki/icons/blob/main/svg/videocam_off.svg
+	// VideocamOff is https://github.com/cogentcore/core/blob/main/icons/svg/videocam_off.svg
 	VideocamOff Icon = "videocam_off"
 
-	// VideogameAsset is https://github.com/goki/icons/blob/main/svg/videogame_asset.svg
+	// VideogameAsset is https://github.com/cogentcore/core/blob/main/icons/svg/videogame_asset.svg
 	VideogameAsset Icon = "videogame_asset"
 
-	// VideogameAssetOff is https://github.com/goki/icons/blob/main/svg/videogame_asset_off.svg
+	// VideogameAssetOff is https://github.com/cogentcore/core/blob/main/icons/svg/videogame_asset_off.svg
 	VideogameAssetOff Icon = "videogame_asset_off"
 
-	// ViewAgenda is https://github.com/goki/icons/blob/main/svg/view_agenda.svg
+	// ViewAgenda is https://github.com/cogentcore/core/blob/main/icons/svg/view_agenda.svg
 	ViewAgenda Icon = "view_agenda"
 
-	// ViewArray is https://github.com/goki/icons/blob/main/svg/view_array.svg
+	// ViewArray is https://github.com/cogentcore/core/blob/main/icons/svg/view_array.svg
 	ViewArray Icon = "view_array"
 
-	// ViewCarousel is https://github.com/goki/icons/blob/main/svg/view_carousel.svg
+	// ViewCarousel is https://github.com/cogentcore/core/blob/main/icons/svg/view_carousel.svg
 	ViewCarousel Icon = "view_carousel"
 
-	// ViewColumn is https://github.com/goki/icons/blob/main/svg/view_column.svg
+	// ViewColumn is https://github.com/cogentcore/core/blob/main/icons/svg/view_column.svg
 	ViewColumn Icon = "view_column"
 
-	// ViewColumn2 is https://github.com/goki/icons/blob/main/svg/view_column_2.svg
+	// ViewColumn2 is https://github.com/cogentcore/core/blob/main/icons/svg/view_column_2.svg
 	ViewColumn2 Icon = "view_column_2"
 
-	// ViewComfy is https://github.com/goki/icons/blob/main/svg/view_comfy.svg
+	// ViewComfy is https://github.com/cogentcore/core/blob/main/icons/svg/view_comfy.svg
 	ViewComfy Icon = "view_comfy"
 
-	// ViewComfyAlt is https://github.com/goki/icons/blob/main/svg/view_comfy_alt.svg
+	// ViewComfyAlt is https://github.com/cogentcore/core/blob/main/icons/svg/view_comfy_alt.svg
 	ViewComfyAlt Icon = "view_comfy_alt"
 
-	// ViewCompact is https://github.com/goki/icons/blob/main/svg/view_compact.svg
+	// ViewCompact is https://github.com/cogentcore/core/blob/main/icons/svg/view_compact.svg
 	ViewCompact Icon = "view_compact"
 
-	// ViewCompactAlt is https://github.com/goki/icons/blob/main/svg/view_compact_alt.svg
+	// ViewCompactAlt is https://github.com/cogentcore/core/blob/main/icons/svg/view_compact_alt.svg
 	ViewCompactAlt Icon = "view_compact_alt"
 
-	// ViewCozy is https://github.com/goki/icons/blob/main/svg/view_cozy.svg
+	// ViewCozy is https://github.com/cogentcore/core/blob/main/icons/svg/view_cozy.svg
 	ViewCozy Icon = "view_cozy"
 
-	// ViewDay is https://github.com/goki/icons/blob/main/svg/view_day.svg
+	// ViewDay is https://github.com/cogentcore/core/blob/main/icons/svg/view_day.svg
 	ViewDay Icon = "view_day"
 
-	// ViewHeadline is https://github.com/goki/icons/blob/main/svg/view_headline.svg
+	// ViewHeadline is https://github.com/cogentcore/core/blob/main/icons/svg/view_headline.svg
 	ViewHeadline Icon = "view_headline"
 
-	// ViewInAr is https://github.com/goki/icons/blob/main/svg/view_in_ar.svg
+	// ViewInAr is https://github.com/cogentcore/core/blob/main/icons/svg/view_in_ar.svg
 	ViewInAr Icon = "view_in_ar"
 
-	// ViewInArOff is https://github.com/goki/icons/blob/main/svg/view_in_ar_off.svg
+	// ViewInArOff is https://github.com/cogentcore/core/blob/main/icons/svg/view_in_ar_off.svg
 	ViewInArOff Icon = "view_in_ar_off"
 
-	// ViewKanban is https://github.com/goki/icons/blob/main/svg/view_kanban.svg
+	// ViewKanban is https://github.com/cogentcore/core/blob/main/icons/svg/view_kanban.svg
 	ViewKanban Icon = "view_kanban"
 
-	// ViewList is https://github.com/goki/icons/blob/main/svg/view_list.svg
+	// ViewList is https://github.com/cogentcore/core/blob/main/icons/svg/view_list.svg
 	ViewList Icon = "view_list"
 
-	// ViewModule is https://github.com/goki/icons/blob/main/svg/view_module.svg
+	// ViewModule is https://github.com/cogentcore/core/blob/main/icons/svg/view_module.svg
 	ViewModule Icon = "view_module"
 
-	// ViewQuilt is https://github.com/goki/icons/blob/main/svg/view_quilt.svg
+	// ViewQuilt is https://github.com/cogentcore/core/blob/main/icons/svg/view_quilt.svg
 	ViewQuilt Icon = "view_quilt"
 
-	// ViewSidebar is https://github.com/goki/icons/blob/main/svg/view_sidebar.svg
+	// ViewSidebar is https://github.com/cogentcore/core/blob/main/icons/svg/view_sidebar.svg
 	ViewSidebar Icon = "view_sidebar"
 
-	// ViewStream is https://github.com/goki/icons/blob/main/svg/view_stream.svg
+	// ViewStream is https://github.com/cogentcore/core/blob/main/icons/svg/view_stream.svg
 	ViewStream Icon = "view_stream"
 
-	// ViewTimeline is https://github.com/goki/icons/blob/main/svg/view_timeline.svg
+	// ViewTimeline is https://github.com/cogentcore/core/blob/main/icons/svg/view_timeline.svg
 	ViewTimeline Icon = "view_timeline"
 
-	// ViewWeek is https://github.com/goki/icons/blob/main/svg/view_week.svg
+	// ViewWeek is https://github.com/cogentcore/core/blob/main/icons/svg/view_week.svg
 	ViewWeek Icon = "view_week"
 
-	// Vignette is https://github.com/goki/icons/blob/main/svg/vignette.svg
+	// Vignette is https://github.com/cogentcore/core/blob/main/icons/svg/vignette.svg
 	Vignette Icon = "vignette"
 
-	// Visibility is https://github.com/goki/icons/blob/main/svg/visibility.svg
+	// Visibility is https://github.com/cogentcore/core/blob/main/icons/svg/visibility.svg
 	Visibility Icon = "visibility"
 
-	// VisibilityLock is https://github.com/goki/icons/blob/main/svg/visibility_lock.svg
+	// VisibilityLock is https://github.com/cogentcore/core/blob/main/icons/svg/visibility_lock.svg
 	VisibilityLock Icon = "visibility_lock"
 
-	// VisibilityOff is https://github.com/goki/icons/blob/main/svg/visibility_off.svg
+	// VisibilityOff is https://github.com/cogentcore/core/blob/main/icons/svg/visibility_off.svg
 	VisibilityOff Icon = "visibility_off"
 
-	// VoiceChat is https://github.com/goki/icons/blob/main/svg/voice_chat.svg
+	// VoiceChat is https://github.com/cogentcore/core/blob/main/icons/svg/voice_chat.svg
 	VoiceChat Icon = "voice_chat"
 
-	// VoiceOverOff is https://github.com/goki/icons/blob/main/svg/voice_over_off.svg
+	// VoiceOverOff is https://github.com/cogentcore/core/blob/main/icons/svg/voice_over_off.svg
 	VoiceOverOff Icon = "voice_over_off"
 
-	// Voicemail is https://github.com/goki/icons/blob/main/svg/voicemail.svg
+	// Voicemail is https://github.com/cogentcore/core/blob/main/icons/svg/voicemail.svg
 	Voicemail Icon = "voicemail"
 
-	// VolumeDown is https://github.com/goki/icons/blob/main/svg/volume_down.svg
+	// VolumeDown is https://github.com/cogentcore/core/blob/main/icons/svg/volume_down.svg
 	VolumeDown Icon = "volume_down"
 
-	// VolumeDownAlt is https://github.com/goki/icons/blob/main/svg/volume_down_alt.svg
+	// VolumeDownAlt is https://github.com/cogentcore/core/blob/main/icons/svg/volume_down_alt.svg
 	VolumeDownAlt Icon = "volume_down_alt"
 
-	// VolumeMute is https://github.com/goki/icons/blob/main/svg/volume_mute.svg
+	// VolumeMute is https://github.com/cogentcore/core/blob/main/icons/svg/volume_mute.svg
 	VolumeMute Icon = "volume_mute"
 
-	// VolumeOff is https://github.com/goki/icons/blob/main/svg/volume_off.svg
+	// VolumeOff is https://github.com/cogentcore/core/blob/main/icons/svg/volume_off.svg
 	VolumeOff Icon = "volume_off"
 
-	// VolumeUp is https://github.com/goki/icons/blob/main/svg/volume_up.svg
+	// VolumeUp is https://github.com/cogentcore/core/blob/main/icons/svg/volume_up.svg
 	VolumeUp Icon = "volume_up"
 
-	// VotingChip is https://github.com/goki/icons/blob/main/svg/voting_chip.svg
+	// VotingChip is https://github.com/cogentcore/core/blob/main/icons/svg/voting_chip.svg
 	VotingChip Icon = "voting_chip"
 
-	// VpnKey is https://github.com/goki/icons/blob/main/svg/vpn_key.svg
+	// VpnKey is https://github.com/cogentcore/core/blob/main/icons/svg/vpn_key.svg
 	VpnKey Icon = "vpn_key"
 
-	// VpnKeyAlert is https://github.com/goki/icons/blob/main/svg/vpn_key_alert.svg
+	// VpnKeyAlert is https://github.com/cogentcore/core/blob/main/icons/svg/vpn_key_alert.svg
 	VpnKeyAlert Icon = "vpn_key_alert"
 
-	// VpnKeyOff is https://github.com/goki/icons/blob/main/svg/vpn_key_off.svg
+	// VpnKeyOff is https://github.com/cogentcore/core/blob/main/icons/svg/vpn_key_off.svg
 	VpnKeyOff Icon = "vpn_key_off"
 
-	// VpnLock is https://github.com/goki/icons/blob/main/svg/vpn_lock.svg
+	// VpnLock is https://github.com/cogentcore/core/blob/main/icons/svg/vpn_lock.svg
 	VpnLock Icon = "vpn_lock"
 
-	// Wallet is https://github.com/goki/icons/blob/main/svg/wallet.svg
+	// Wallet is https://github.com/cogentcore/core/blob/main/icons/svg/wallet.svg
 	Wallet Icon = "wallet"
 
-	// Wallpaper is https://github.com/goki/icons/blob/main/svg/wallpaper.svg
+	// Wallpaper is https://github.com/cogentcore/core/blob/main/icons/svg/wallpaper.svg
 	Wallpaper Icon = "wallpaper"
 
-	// WallpaperSlideshow is https://github.com/goki/icons/blob/main/svg/wallpaper_slideshow.svg
+	// WallpaperSlideshow is https://github.com/cogentcore/core/blob/main/icons/svg/wallpaper_slideshow.svg
 	WallpaperSlideshow Icon = "wallpaper_slideshow"
 
-	// Warehouse is https://github.com/goki/icons/blob/main/svg/warehouse.svg
+	// Warehouse is https://github.com/cogentcore/core/blob/main/icons/svg/warehouse.svg
 	Warehouse Icon = "warehouse"
 
-	// Warning is https://github.com/goki/icons/blob/main/svg/warning.svg
+	// Warning is https://github.com/cogentcore/core/blob/main/icons/svg/warning.svg
 	Warning Icon = "warning"
 
-	// WarningOff is https://github.com/goki/icons/blob/main/svg/warning_off.svg
+	// WarningOff is https://github.com/cogentcore/core/blob/main/icons/svg/warning_off.svg
 	WarningOff Icon = "warning_off"
 
-	// Wash is https://github.com/goki/icons/blob/main/svg/wash.svg
+	// Wash is https://github.com/cogentcore/core/blob/main/icons/svg/wash.svg
 	Wash Icon = "wash"
 
-	// Watch is https://github.com/goki/icons/blob/main/svg/watch.svg
+	// Watch is https://github.com/cogentcore/core/blob/main/icons/svg/watch.svg
 	Watch Icon = "watch"
 
-	// WatchButtonPress is https://github.com/goki/icons/blob/main/svg/watch_button_press.svg
+	// WatchButtonPress is https://github.com/cogentcore/core/blob/main/icons/svg/watch_button_press.svg
 	WatchButtonPress Icon = "watch_button_press"
 
-	// WatchOff is https://github.com/goki/icons/blob/main/svg/watch_off.svg
+	// WatchOff is https://github.com/cogentcore/core/blob/main/icons/svg/watch_off.svg
 	WatchOff Icon = "watch_off"
 
-	// WatchScreentime is https://github.com/goki/icons/blob/main/svg/watch_screentime.svg
+	// WatchScreentime is https://github.com/cogentcore/core/blob/main/icons/svg/watch_screentime.svg
 	WatchScreentime Icon = "watch_screentime"
 
-	// WatchWake is https://github.com/goki/icons/blob/main/svg/watch_wake.svg
+	// WatchWake is https://github.com/cogentcore/core/blob/main/icons/svg/watch_wake.svg
 	WatchWake Icon = "watch_wake"
 
-	// Water is https://github.com/goki/icons/blob/main/svg/water.svg
+	// Water is https://github.com/cogentcore/core/blob/main/icons/svg/water.svg
 	Water Icon = "water"
 
-	// WaterfallChart is https://github.com/goki/icons/blob/main/svg/waterfall_chart.svg
+	// WaterfallChart is https://github.com/cogentcore/core/blob/main/icons/svg/waterfall_chart.svg
 	WaterfallChart Icon = "waterfall_chart"
 
-	// WavingHand is https://github.com/goki/icons/blob/main/svg/waving_hand.svg
+	// WavingHand is https://github.com/cogentcore/core/blob/main/icons/svg/waving_hand.svg
 	WavingHand Icon = "waving_hand"
 
-	// Web is https://github.com/goki/icons/blob/main/svg/web.svg
+	// Web is https://github.com/cogentcore/core/blob/main/icons/svg/web.svg
 	Web Icon = "web"
 
-	// WebAsset is https://github.com/goki/icons/blob/main/svg/web_asset.svg
+	// WebAsset is https://github.com/cogentcore/core/blob/main/icons/svg/web_asset.svg
 	WebAsset Icon = "web_asset"
 
-	// WebAssetOff is https://github.com/goki/icons/blob/main/svg/web_asset_off.svg
+	// WebAssetOff is https://github.com/cogentcore/core/blob/main/icons/svg/web_asset_off.svg
 	WebAssetOff Icon = "web_asset_off"
 
-	// WebStories is https://github.com/goki/icons/blob/main/svg/web_stories.svg
+	// WebStories is https://github.com/cogentcore/core/blob/main/icons/svg/web_stories.svg
 	WebStories Icon = "web_stories"
 
-	// Webhook is https://github.com/goki/icons/blob/main/svg/webhook.svg
+	// Webhook is https://github.com/cogentcore/core/blob/main/icons/svg/webhook.svg
 	Webhook Icon = "webhook"
 
-	// Weekend is https://github.com/goki/icons/blob/main/svg/weekend.svg
+	// Weekend is https://github.com/cogentcore/core/blob/main/icons/svg/weekend.svg
 	Weekend Icon = "weekend"
 
-	// West is https://github.com/goki/icons/blob/main/svg/west.svg
+	// West is https://github.com/cogentcore/core/blob/main/icons/svg/west.svg
 	West Icon = "west"
 
-	// Whatshot is https://github.com/goki/icons/blob/main/svg/whatshot.svg
+	// Whatshot is https://github.com/cogentcore/core/blob/main/icons/svg/whatshot.svg
 	Whatshot Icon = "whatshot"
 
-	// Widgets is https://github.com/goki/icons/blob/main/svg/widgets.svg
+	// Widgets is https://github.com/cogentcore/core/blob/main/icons/svg/widgets.svg
 	Widgets Icon = "widgets"
 
-	// Width is https://github.com/goki/icons/blob/main/svg/width.svg
+	// Width is https://github.com/cogentcore/core/blob/main/icons/svg/width.svg
 	Width Icon = "width"
 
-	// WidthFull is https://github.com/goki/icons/blob/main/svg/width_full.svg
+	// WidthFull is https://github.com/cogentcore/core/blob/main/icons/svg/width_full.svg
 	WidthFull Icon = "width_full"
 
-	// WidthNormal is https://github.com/goki/icons/blob/main/svg/width_normal.svg
+	// WidthNormal is https://github.com/cogentcore/core/blob/main/icons/svg/width_normal.svg
 	WidthNormal Icon = "width_normal"
 
-	// WidthWide is https://github.com/goki/icons/blob/main/svg/width_wide.svg
+	// WidthWide is https://github.com/cogentcore/core/blob/main/icons/svg/width_wide.svg
 	WidthWide Icon = "width_wide"
 
-	// Wifi is https://github.com/goki/icons/blob/main/svg/wifi.svg
+	// Wifi is https://github.com/cogentcore/core/blob/main/icons/svg/wifi.svg
 	Wifi Icon = "wifi"
 
-	// Wifi1Bar is https://github.com/goki/icons/blob/main/svg/wifi_1_bar.svg
+	// Wifi1Bar is https://github.com/cogentcore/core/blob/main/icons/svg/wifi_1_bar.svg
 	Wifi1Bar Icon = "wifi_1_bar"
 
-	// Wifi2Bar is https://github.com/goki/icons/blob/main/svg/wifi_2_bar.svg
+	// Wifi2Bar is https://github.com/cogentcore/core/blob/main/icons/svg/wifi_2_bar.svg
 	Wifi2Bar Icon = "wifi_2_bar"
 
-	// WifiAdd is https://github.com/goki/icons/blob/main/svg/wifi_add.svg
+	// WifiAdd is https://github.com/cogentcore/core/blob/main/icons/svg/wifi_add.svg
 	WifiAdd Icon = "wifi_add"
 
-	// WifiFind is https://github.com/goki/icons/blob/main/svg/wifi_find.svg
+	// WifiFind is https://github.com/cogentcore/core/blob/main/icons/svg/wifi_find.svg
 	WifiFind Icon = "wifi_find"
 
-	// WifiHome is https://github.com/goki/icons/blob/main/svg/wifi_home.svg
+	// WifiHome is https://github.com/cogentcore/core/blob/main/icons/svg/wifi_home.svg
 	WifiHome Icon = "wifi_home"
 
-	// WifiLock is https://github.com/goki/icons/blob/main/svg/wifi_lock.svg
+	// WifiLock is https://github.com/cogentcore/core/blob/main/icons/svg/wifi_lock.svg
 	WifiLock Icon = "wifi_lock"
 
-	// WifiNotification is https://github.com/goki/icons/blob/main/svg/wifi_notification.svg
+	// WifiNotification is https://github.com/cogentcore/core/blob/main/icons/svg/wifi_notification.svg
 	WifiNotification Icon = "wifi_notification"
 
-	// WifiOff is https://github.com/goki/icons/blob/main/svg/wifi_off.svg
+	// WifiOff is https://github.com/cogentcore/core/blob/main/icons/svg/wifi_off.svg
 	WifiOff Icon = "wifi_off"
 
-	// Window is https://github.com/goki/icons/blob/main/svg/window.svg
+	// Window is https://github.com/cogentcore/core/blob/main/icons/svg/window.svg
 	Window Icon = "window"
 
-	// WindowClosed is https://github.com/goki/icons/blob/main/svg/window_closed.svg
+	// WindowClosed is https://github.com/cogentcore/core/blob/main/icons/svg/window_closed.svg
 	WindowClosed Icon = "window_closed"
 
-	// WindowOpen is https://github.com/goki/icons/blob/main/svg/window_open.svg
+	// WindowOpen is https://github.com/cogentcore/core/blob/main/icons/svg/window_open.svg
 	WindowOpen Icon = "window_open"
 
-	// WindowSensor is https://github.com/goki/icons/blob/main/svg/window_sensor.svg
+	// WindowSensor is https://github.com/cogentcore/core/blob/main/icons/svg/window_sensor.svg
 	WindowSensor Icon = "window_sensor"
 
-	// Woman is https://github.com/goki/icons/blob/main/svg/woman.svg
+	// Woman is https://github.com/cogentcore/core/blob/main/icons/svg/woman.svg
 	Woman Icon = "woman"
 
-	// Woman2 is https://github.com/goki/icons/blob/main/svg/woman_2.svg
+	// Woman2 is https://github.com/cogentcore/core/blob/main/icons/svg/woman_2.svg
 	Woman2 Icon = "woman_2"
 
-	// Work is https://github.com/goki/icons/blob/main/svg/work.svg
+	// Work is https://github.com/cogentcore/core/blob/main/icons/svg/work.svg
 	Work Icon = "work"
 
-	// WorkAlert is https://github.com/goki/icons/blob/main/svg/work_alert.svg
+	// WorkAlert is https://github.com/cogentcore/core/blob/main/icons/svg/work_alert.svg
 	WorkAlert Icon = "work_alert"
 
-	// WorkHistory is https://github.com/goki/icons/blob/main/svg/work_history.svg
+	// WorkHistory is https://github.com/cogentcore/core/blob/main/icons/svg/work_history.svg
 	WorkHistory Icon = "work_history"
 
-	// WorkUpdate is https://github.com/goki/icons/blob/main/svg/work_update.svg
+	// WorkUpdate is https://github.com/cogentcore/core/blob/main/icons/svg/work_update.svg
 	WorkUpdate Icon = "work_update"
 
-	// WorkspacePremium is https://github.com/goki/icons/blob/main/svg/workspace_premium.svg
+	// WorkspacePremium is https://github.com/cogentcore/core/blob/main/icons/svg/workspace_premium.svg
 	WorkspacePremium Icon = "workspace_premium"
 
-	// Workspaces is https://github.com/goki/icons/blob/main/svg/workspaces.svg
+	// Workspaces is https://github.com/cogentcore/core/blob/main/icons/svg/workspaces.svg
 	Workspaces Icon = "workspaces"
 
-	// WrapText is https://github.com/goki/icons/blob/main/svg/wrap_text.svg
+	// WrapText is https://github.com/cogentcore/core/blob/main/icons/svg/wrap_text.svg
 	WrapText Icon = "wrap_text"
 
-	// WrongLocation is https://github.com/goki/icons/blob/main/svg/wrong_location.svg
+	// WrongLocation is https://github.com/cogentcore/core/blob/main/icons/svg/wrong_location.svg
 	WrongLocation Icon = "wrong_location"
 
-	// Wysiwyg is https://github.com/goki/icons/blob/main/svg/wysiwyg.svg
+	// Wysiwyg is https://github.com/cogentcore/core/blob/main/icons/svg/wysiwyg.svg
 	Wysiwyg Icon = "wysiwyg"
 
-	// YoutubeActivity is https://github.com/goki/icons/blob/main/svg/youtube_activity.svg
+	// YoutubeActivity is https://github.com/cogentcore/core/blob/main/icons/svg/youtube_activity.svg
 	YoutubeActivity Icon = "youtube_activity"
 
-	// YoutubeSearchedFor is https://github.com/goki/icons/blob/main/svg/youtube_searched_for.svg
+	// YoutubeSearchedFor is https://github.com/cogentcore/core/blob/main/icons/svg/youtube_searched_for.svg
 	YoutubeSearchedFor Icon = "youtube_searched_for"
 
-	// ZoomIn is https://github.com/goki/icons/blob/main/svg/zoom_in.svg
+	// ZoomIn is https://github.com/cogentcore/core/blob/main/icons/svg/zoom_in.svg
 	ZoomIn Icon = "zoom_in"
 
-	// ZoomInMap is https://github.com/goki/icons/blob/main/svg/zoom_in_map.svg
+	// ZoomInMap is https://github.com/cogentcore/core/blob/main/icons/svg/zoom_in_map.svg
 	ZoomInMap Icon = "zoom_in_map"
 
-	// ZoomOut is https://github.com/goki/icons/blob/main/svg/zoom_out.svg
+	// ZoomOut is https://github.com/cogentcore/core/blob/main/icons/svg/zoom_out.svg
 	ZoomOut Icon = "zoom_out"
 
-	// ZoomOutMap is https://github.com/goki/icons/blob/main/svg/zoom_out_map.svg
+	// ZoomOutMap is https://github.com/cogentcore/core/blob/main/icons/svg/zoom_out_map.svg
 	ZoomOutMap Icon = "zoom_out_map"
 )

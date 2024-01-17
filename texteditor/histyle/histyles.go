@@ -1,4 +1,4 @@
-// Copyright (c) 2018, The Goki Authors. All rights reserved.
+// Copyright (c) 2018, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -113,7 +113,7 @@ var StylesChanged = false
 
 // OpenPrefs opens Styles from GoGi standard prefs directory, using PrefsStylesFilename
 func (hs *Styles) OpenPrefs() error {
-	pdir := gi.GokiDataDir()
+	pdir := gi.CogentCore()
 	pnm := filepath.Join(pdir, PrefsStylesFilename)
 	StylesChanged = false
 	return hs.OpenJSON(gi.Filename(pnm))
@@ -121,7 +121,7 @@ func (hs *Styles) OpenPrefs() error {
 
 // SavePrefs saves Styles to GoGi standard prefs directory, using PrefsStylesFilename
 func (hs *Styles) SavePrefs() error {
-	pdir := gi.GokiDataDir()
+	pdir := gi.CogentCore()
 	pnm := filepath.Join(pdir, PrefsStylesFilename)
 	StylesChanged = false
 	MergeAvailStyles()

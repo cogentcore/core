@@ -1,4 +1,4 @@
-// Copyright 2023 The Goki Authors. All rights reserved.
+// Copyright 2023 Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -131,7 +131,7 @@ func (a *App) Resize() {
 	// we also need to divide by the pixel size by the pixel ratio again instead of just using innerWidth
 	// and innerHeight so that there are no rounding errors (CSS supports fractional pixels but HTML doesn't);
 	// these rounding errors lead to blurriness on devices with fractional device pixel ratios
-	// (see https://github.com/goki/goki/issues/779 and
+	// (see https://github.com/cogentcore/core/issues/779 and
 	// https://stackoverflow.com/questions/15661339/how-do-i-fix-blurry-text-in-my-html5-canvas/54027313#54027313)
 	cstyle := canvas.Get("style")
 	cstyle.Set("width", fmt.Sprintf("%gpx", float32(a.Scrn.PixSize.X)/a.Scrn.DevicePixelRatio))

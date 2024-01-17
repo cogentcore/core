@@ -1,4 +1,4 @@
-// Copyright (c) 2023, The Goki Authors. All rights reserved.
+// Copyright (c) 2023, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -28,8 +28,8 @@ import (
 var icon []byte
 
 func main() {
-	b := gi.NewAppBody("Goki Demo")
-	b.App().SetIconBytes(icon).SetAbout("The Goki Demo demonstrates the various features of the Goki 2D and 3D Go GUI framework.")
+	b := gi.NewAppBody("Cogent Core Demo")
+	b.App().SetIconBytes(icon).SetAbout("The Cogent Core Demo demonstrates the various features of the Cogent Core 2D and 3D Go GUI framework.")
 
 	ts := gi.NewTabs(b)
 
@@ -61,7 +61,7 @@ func home(ts *gi.Tabs) {
 		s.Min.Set(units.Dp(256))
 	})
 
-	gi.NewLabel(tab).SetType(gi.LabelDisplayLarge).SetText("The Goki Demo")
+	gi.NewLabel(tab).SetType(gi.LabelDisplayLarge).SetText("The Cogent Core Demo")
 
 	gi.NewLabel(tab).SetType(gi.LabelTitleLarge).SetText(`A <b>demonstration</b> of the <i>various</i> features of the <a href="https://cogentcore.org/core">Goki</a> 2D and 3D Go GUI <u>framework</u>`)
 }
@@ -71,7 +71,7 @@ func text(ts *gi.Tabs) {
 
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Text")
 	gi.NewLabel(tab).SetText(
-		`Goki provides fully customizable text elements that can be styled in any way you want. Also, there are pre-configured style types for text that allow you to easily create common text types.`)
+		`Cogent Core provides fully customizable text elements that can be styled in any way you want. Also, there are pre-configured style types for text that allow you to easily create common text types.`)
 
 	for _, typ := range gi.LabelTypesValues() {
 		s := sentence.Case(typ.String())
@@ -85,7 +85,7 @@ func buttons(ts *gi.Tabs) {
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Buttons")
 
 	gi.NewLabel(tab).SetText(
-		`Goki provides customizable buttons that support various events and can be styled in any way you want. Also, there are pre-configured style types for buttons that allow you to achieve common functionality with ease. All buttons support any combination of a label, icon, and indicator.`)
+		`Cogent Core provides customizable buttons that support various events and can be styled in any way you want. Also, there are pre-configured style types for buttons that allow you to achieve common functionality with ease. All buttons support any combination of a label, icon, and indicator.`)
 
 	makeRow := func() gi.Widget {
 		return gi.NewLayout(tab).Style(func(s *styles.Style) {
@@ -186,7 +186,7 @@ func inputs(ts *gi.Tabs) {
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Inputs")
 
 	gi.NewLabel(tab).SetType(gi.LabelBodyLarge).SetText(
-		`Goki provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.`)
+		`Cogent Core provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.`)
 
 	gi.NewTextField(tab).SetPlaceholder("Filled")
 	gi.NewTextField(tab).SetType(gi.TextFieldOutlined).SetPlaceholder("Outlined")
@@ -273,7 +273,7 @@ func layouts(ts *gi.Tabs) {
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Layout")
 
 	gi.NewLabel(tab).SetType(gi.LabelBodyLarge).SetText(
-		`Goki provides various adaptable layout types that allow you to easily organize content so that it is easy to use, customize, and understand.`)
+		`Cogent Core provides various adaptable layout types that allow you to easily organize content so that it is easy to use, customize, and understand.`)
 
 	// vw := gi.NewLabel(layouts, "vw", "50vw")
 	// vw.Style(func(s *styles.Style) {
@@ -307,7 +307,7 @@ func values(ts *gi.Tabs) {
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Values")
 
 	gi.NewLabel(tab).SetType(gi.LabelBodyLarge).SetText(
-		`Goki provides the giv value system, which allows you to instantly turn Go values and functions into type-specific widgets bound to the original values. This powerful system means that you can automatically turn backend data structures into GUI apps with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.`)
+		`Cogent Core provides the giv value system, which allows you to instantly turn Go values and functions into type-specific widgets bound to the original values. This powerful system means that you can automatically turn backend data structures into GUI apps with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.`)
 
 	gi.NewButton(tab).SetText("Inspector").OnClick(func(e events.Event) {
 		giv.InspectorWindow(ts.Sc)
@@ -338,7 +338,7 @@ func other(ts *gi.Tabs) {
 
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Other")
 
-	gi.NewLabel(tab).SetType(gi.LabelBodyLarge).SetText(`Other features of the Goki framework`)
+	gi.NewLabel(tab).SetType(gi.LabelBodyLarge).SetText(`Other features of the Cogent Core framework`)
 
 	gi.NewMeter(tab).SetValue(0.5)
 }

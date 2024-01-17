@@ -1,4 +1,4 @@
-// Copyright 2023 The Goki Authors. All rights reserved.
+// Copyright 2023 Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -41,7 +41,7 @@ var HandleRecover = func(r any) {
 // the program exits. This is needed because, without this, the program
 // may exit before it can print the stack trace on some systems like Android,
 // which makes debugging nearly impossible. It also saves a crash log to
-// [TheApp.GokiDataDir].
+// [TheApp.CogentCore].
 func HandleRecoverBase(r any) {
 	if r == nil {
 		return
@@ -59,7 +59,7 @@ func HandleRecoverBase(r any) {
 
 	print(os.Stderr)
 
-	dnm := filepath.Join(TheApp.GokiDataDir(), "crash-logs", TheApp.Name())
+	dnm := filepath.Join(TheApp.CogentCore(), "crash-logs", TheApp.Name())
 	err := os.MkdirAll(dnm, 0755)
 	if grr.Log(err) != nil {
 		return

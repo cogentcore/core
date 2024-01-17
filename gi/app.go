@@ -1,4 +1,4 @@
-// Copyright (c) 2023, The Goki Authors. All rights reserved.
+// Copyright (c) 2023, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -167,10 +167,10 @@ func OpenURL(url string) {
 	goosi.TheApp.OpenURL(url)
 }
 
-// GokiDataDir returns the Goki data directory: [DataDir] + "Goki".
+// CogentCore returns the Cogent Core data directory: [DataDir] + "CogentCore".
 // It ensures that the directory exists first.
-func GokiDataDir() string {
-	return goosi.TheApp.GokiDataDir()
+func CogentCore() string {
+	return goosi.TheApp.CogentCore()
 }
 
 // DataDir returns the OS-specific data directory: Mac: ~/Library,

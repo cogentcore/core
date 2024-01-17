@@ -1,4 +1,4 @@
-// Copyright (c) 2023, The Goki Authors. All rights reserved.
+// Copyright (c) 2023, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -14,7 +14,7 @@ import (
 
 func init() {
 	goosi.InitScreenLogicalDPIFunc = AppearanceSettings.ApplyDPI // called when screens are initialized
-	GokiDataDir()                                                // ensure it exists
+	CogentCore()                                                 // ensure it exists
 	WinGeomMgr.NeedToReload()                                    // gets time stamp associated with open, so it doesn't re-open
 	WinGeomMgr.Open()
 

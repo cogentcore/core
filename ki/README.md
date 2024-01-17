@@ -15,13 +15,13 @@ See the [Wiki](https://cogentcore.org/core/ki/wiki) for more docs, and [Google G
 
 The **Tree** is one of the most flexible, widely-used data structures in programming, including the DOM structure at the core of a web browser, scene graphs for 3D and 2D graphics systems, JSON, XML, SVG, filesystems, programs themselves, etc.  This is because trees can capture most relevant forms of *structure* (hierarchical groupings, categories, relationships, etc) and are most powerful when they are fully *generative* -- arbitrary new types can be inserted flexibly.
 
-Goki provides a general-purpose tree container type, that can support all of these applications, by embedding and extending the `Node` struct type that implements the `Ki` (Ki = Tree in Japanese) `interface`.  Unlike many cases in Go, the need to be able to arbitrarily extend the type space of nodes in the tree within a consistent API, means that the more traditional object-oriented model works best here, with a single common base type, and derived types that handle diverse cases (e.g., different types of widgets in a GUI).  Goki stores a Ki interface of each node, enabling correct virtual function calling on these derived types.
+Cogent Core provides a general-purpose tree container type, that can support all of these applications, by embedding and extending the `Node` struct type that implements the `Ki` (Ki = Tree in Japanese) `interface`.  Unlike many cases in Go, the need to be able to arbitrarily extend the type space of nodes in the tree within a consistent API, means that the more traditional object-oriented model works best here, with a single common base type, and derived types that handle diverse cases (e.g., different types of widgets in a GUI).  Cogent Core stores a Ki interface of each node, enabling correct virtual function calling on these derived types.
 
 A virtue of using an appropriate data representation is that some important operations can be performed particularly concisely and efficiently when they are naturally supported by the data structure.  For example, matrices and vectors as supported by numpy or MATLAB provide a concise high-level language for expressing many algorithms.
 
-For trees, Goki leverages the tree structure for automatically computing the appropriate extent of a scenegraph that needs to be updated, with an arbitrary sequence of individual operations, by propagating updating flags through the tree, and tracking the "high water mark" (see UpdateStart / End).  This makes the GoGi GUI efficient in terms of what needs to be redrawn, while keeping the code local and simple.
+For trees, Cogent Core leverages the tree structure for automatically computing the appropriate extent of a scenegraph that needs to be updated, with an arbitrary sequence of individual operations, by propagating updating flags through the tree, and tracking the "high water mark" (see UpdateStart / End).  This makes the GoGi GUI efficient in terms of what needs to be redrawn, while keeping the code local and simple.
 
-In addition, Goki provides functions that traverse the tree in the usual relevant ways ("natural" me-first depth-first, me-last depth-first, and breadth-first) and take a `func` function argument, so you can easily apply a common operation across the whole tree in a transparent and self-contained manner, like this:
+In addition, Cogent Core provides functions that traverse the tree in the usual relevant ways ("natural" me-first depth-first, me-last depth-first, and breadth-first) and take a `func` function argument, so you can easily apply a common operation across the whole tree in a transparent and self-contained manner, like this:
 
 ```go
 func (n *MyNode) DoSomethingOnMyTree() {
@@ -36,7 +36,7 @@ func (n *MyNode) DoSomethingOnMyTree() {
 
 Many operations are naturally expressed in terms of these traversal algorithms.
 
-Three core Goki features include:
+Three core Cogent Core features include:
 
 * A `Signal` mechanism that allows nodes to communicate changes and other events to arbitrary lists of other nodes (similar to the signals and slots from Qt).
 
@@ -46,13 +46,13 @@ Three core Goki features include:
 
 In addition, Ki nodes support a general-purpose `Props` property `map`, and the `kit` (Ki Types) package provides a `TypeRegistry` and an `EnumRegistry`, along with various `reflect` utilities, to enable fully-automatic saving / loading of Ki trees from JSON or XML, including converting const int (enum) values to / from strings so those numeric values can change in the code without invalidating existing files.
 
-Ki Nodes can be used as fields in a struct -- they function much like pre-defined Children elements, and all the standard FuncDown* iterators traverse the fields automatically.  The Ki Init function automatically names these structs with their field names, and sets the parent to the parent struct.  This was essential in the Goki framework to support separate Widget Parts independent of the larger scenegraph.
+Ki Nodes can be used as fields in a struct -- they function much like pre-defined Children elements, and all the standard FuncDown* iterators traverse the fields automatically.  The Ki Init function automatically names these structs with their field names, and sets the parent to the parent struct.  This was essential in the Cogent Core framework to support separate Widget Parts independent of the larger scenegraph.
 
 ## GoGi Graphical Interface and Gide IDE App
 
-The first and most important application of Goki is the [GoGi](https://github.com/goki/gi) graphical interface system, in the `gi` package, and the [Gide](https://github.com/goki/gide) IDE built on top of GoGi.  The scene graph of Ki elements automatically drives minimal refresh updates, and the signaling framework supports gui event delivery and e.g., the "onclick" event signaling from the `Button` widget, etc.  In short, GoGi provides a complete interactive 2D and 3D GUI environment in native Go, in a compact codebase.  Part of this is the natural elegance of Go, but Goki enhances that by providing the robust natural primitives needed to express all the GUI functionality.  Because GoGi is based around standard CSS styles, SVG rendering, and supports all the major HTML elements, it could even provide a lightweight web browser: [Glide](https://github.com/goki/glide).
+The first and most important application of Cogent Core is the [GoGi](https://github.com/goki/gi) graphical interface system, in the `gi` package, and the [Gide](https://github.com/goki/gide) IDE built on top of GoGi.  The scene graph of Ki elements automatically drives minimal refresh updates, and the signaling framework supports gui event delivery and e.g., the "onclick" event signaling from the `Button` widget, etc.  In short, GoGi provides a complete interactive 2D and 3D GUI environment in native Go, in a compact codebase.  Part of this is the natural elegance of Go, but Cogent Core enhances that by providing the robust natural primitives needed to express all the GUI functionality.  Because GoGi is based around standard CSS styles, SVG rendering, and supports all the major HTML elements, it could even provide a lightweight web browser: [Glide](https://github.com/goki/glide).
 
-The [GoPi](https://github.com/goki/pi) interactive parsing framework also leverages Goki trees to represent the AST (abstract syntax tree) of programs in different langauges.  Further, the parser grammar itself is written (in a GUI interactive way) as a tree of parsing elements using Ki nodes.
+The [GoPi](https://github.com/goki/pi) interactive parsing framework also leverages Cogent Core trees to represent the AST (abstract syntax tree) of programs in different langauges.  Further, the parser grammar itself is written (in a GUI interactive way) as a tree of parsing elements using Ki nodes.
 
 # Code Map
 
@@ -97,7 +97,7 @@ parent.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 
 # Trick for fast finding in a slice
 
-Goki takes an extra starting index arg for all methods that lookup a value in a slice, such as ChildByName.  The search for the item starts at that index, and goes up and down from there.  Thus, if you have any idea where the item might be in the list, it can save (considerable for large lists) time finding it.
+Cogent Core takes an extra starting index arg for all methods that lookup a value in a slice, such as ChildByName.  The search for the item starts at that index, and goes up and down from there.  Thus, if you have any idea where the item might be in the list, it can save (considerable for large lists) time finding it.
 
 Furthermore, it enables a robust optimized lookup map that remembers these indexes for each item, but then always searches from the index, so it is always correct under list modifications, but if the list is unchanged, then it is very efficient, and does not require saving pointers, which minimizes any impact on the GC, prevents stale pointers, etc.
 

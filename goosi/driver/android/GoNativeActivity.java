@@ -1,4 +1,4 @@
-// Copyright 2023 The Goki Authors. All rights reserved.
+// Copyright 2023 Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -9,7 +9,7 @@
 
 // VERY IMPORTANT: after making any changes to this file, you need
 // to run gsm gendex in your base goki directory, or run go generate
-// in github.com/goki/goki/mobile and reinstall the goki tool.
+// in github.com/cogentcore/core/mobile and reinstall the goki tool.
 
 package org.golang.app;
 

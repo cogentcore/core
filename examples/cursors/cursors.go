@@ -1,4 +1,4 @@
-// Copyright (c) 2023, The Goki Authors. All rights reserved.
+// Copyright (c) 2023, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -10,7 +10,7 @@ import (
 
 // TODO: fix
 func main() {
-	b := gi.NewBody().SetTitle("Goki Cursors")
-	gi.NewLabel(b).SetText("The Goki Standard Cursors").SetType(gi.LabelHeadlineSmall)
+	b := gi.NewBody().SetTitle("Cogent Core Cursors")
+	gi.NewLabel(b).SetText("The Cogent Core Standard Cursors").SetType(gi.LabelHeadlineSmall)
 	b.NewWindow().Run().Wait()
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2023, The Goki Authors. All rights reserved.
+// Copyright (c) 2023, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -321,7 +321,7 @@ func (km *Maps) Save(filename string) error { //gti:add
 // OpenSettings opens KeyMaps from GoGi standard prefs directory, in file key_maps_prefs.json.
 // This is called automatically, so calling it manually should not be necessary in most cases.
 func (km *Maps) OpenSettings() error { //gti:add
-	pdir := goosi.TheApp.GokiDataDir()
+	pdir := goosi.TheApp.CogentCore()
 	pnm := filepath.Join(pdir, PrefsMapsFilename)
 	AvailMapsChanged = false
 	return km.Open(pnm)
@@ -331,7 +331,7 @@ func (km *Maps) OpenSettings() error { //gti:add
 // which will be loaded automatically at startup if prefs SaveKeyMaps is checked
 // (should be if you're using custom keymaps)
 func (km *Maps) SavePrefs() error { //gti:add
-	pdir := goosi.TheApp.GokiDataDir()
+	pdir := goosi.TheApp.CogentCore()
 	pnm := filepath.Join(pdir, PrefsMapsFilename)
 	AvailMapsChanged = false
 	return km.Save(pnm)

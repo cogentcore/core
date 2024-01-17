@@ -1,9 +1,9 @@
-// Copyright (c) 2023, The Goki Authors. All rights reserved.
+// Copyright (c) 2023, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
 // Package cmd provides utilities for managing
-// apps and packages that use the Goki framework.
+// apps and packages that use the Cogent Core framework.
 package cmd
 
 //go:generate goki generate
