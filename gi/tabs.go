@@ -31,8 +31,9 @@ import (
 type Tabs struct { //core:embedder
 	Layout
 
-	// Type is the styling type of the tabs. It must be set
-	// before the tabs are first configured.
+	// Type is the styling type of the tabs. If it is changed after
+	// the tabs are first configured, Update needs to be called on
+	// the tabs.
 	Type TabTypes
 
 	// Maximum number of characters to include in tab label.
@@ -49,8 +50,12 @@ type Tabs struct { //core:embedder
 	// tabs will not render a close button and can not be closed.
 	CloseIcon icons.Icon
 
-	// mutex protecting updates to tabs.
-	// Tabs can be driven programmatically and via user input so need extra protection
+	// PrevEffectiveType is the previous effective type of the tabs
+	// as computed by [TabTypes.Effective].
+	PrevEffectiveType TabTypes `copy:"-" json:"-" xml:"-" set:"-"`
+
+	// Mu is a mutex protecting updates to tabs. Tabs can be driven
+	// programmatically and via user input so need extra protection.
 	Mu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
 }
 
