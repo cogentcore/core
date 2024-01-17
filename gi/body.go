@@ -11,7 +11,7 @@ import (
 )
 
 // Body holds the primary content of a Scene
-type Body struct { //goki:no-new
+type Body struct { //core:no-new
 	Frame
 
 	// title of the Body, also used for window title where relevant

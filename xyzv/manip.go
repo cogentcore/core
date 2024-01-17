@@ -170,7 +170,7 @@ func (sw *Scene) SetManipPt(pt *ManipPt) {
 
 // ManipPt is a manipulation control point
 //
-//goki:no-new
+//core:no-new
 type ManipPt struct {
 	xyz.Solid
 }

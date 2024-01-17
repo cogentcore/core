@@ -20,7 +20,7 @@ import (
 // It can optionally enforce mutual exclusivity (i.e., Radio Buttons).
 // The buttons are all in the Parts of the widget and the Parts layout
 // determines how they are displayed.
-type Switches struct { //goki:embedder
+type Switches struct { //core:embedder
 	Frame
 
 	// the type of switches that will be made

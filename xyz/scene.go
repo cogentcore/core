@@ -39,8 +39,8 @@ var Update3DTrace = false
 // set their relative Pos etc to display relative to the camera, to achieve
 // "first person" effects.
 //
-//goki:no-new
-//goki:embedder
+//core:no-new
+//core:embedder
 type Scene struct {
 	ki.Node
 

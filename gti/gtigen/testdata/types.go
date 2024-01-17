@@ -15,7 +15,7 @@ import (
 // The zero value of a Person is not valid.
 //
 //ki:flagtype NodeFlags -field Flag
-type Person struct { //goki:embedder
+type Person struct { //core:embedder
 	color.RGBA
 
 	// Name is the name of the person

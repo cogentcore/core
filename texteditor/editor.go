@@ -58,7 +58,7 @@ var (
 // Multiple views can be attached to a given buffer.  All updating in the
 // Editor should be within a single goroutine, as it would require
 // extensive protections throughout code otherwise.
-type Editor struct { //goki:embedder
+type Editor struct { //core:embedder
 	gi.Layout
 
 	// the text buffer that we're editing

@@ -40,7 +40,7 @@ const force = true
 const dontForce = false
 
 // TextField is a widget for editing a line of text
-type TextField struct { //goki:embedder
+type TextField struct { //core:embedder
 	WidgetBase
 
 	// the last saved value of the text string being edited

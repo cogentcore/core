@@ -51,7 +51,7 @@ func NewSoloFuncButton(ctx gi.Widget, fun any) *FuncButton {
 // add a `//gti:add` comment directive and run `goki generate`
 // if you want tooltips. If the function is a method, both the method and
 // its receiver type must be added to gti to get documentation.
-type FuncButton struct { //goki:no-new
+type FuncButton struct { //core:no-new
 	gi.Button
 
 	// Func is the [gti.Func] associated with this button.

@@ -20,7 +20,7 @@ import (
 
 // Spinner combines a TextField with up / down buttons for incrementing /
 // decrementing values -- all configured within the Parts of the widget
-type Spinner struct { //goki:embedder
+type Spinner struct { //core:embedder
 	TextField
 
 	// Value is the current value

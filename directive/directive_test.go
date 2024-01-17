@@ -46,7 +46,7 @@ var tests = []test{
 			Directive: "ki",
 			Args:      []string{},
 		},
-		Source: "//goki:ki",
+		Source: "//core:ki",
 	},
 	{
 		Dir: &Directive{
@@ -54,7 +54,7 @@ var tests = []test{
 			Directive: "ki",
 			Args:      []string{"-noNew"},
 		},
-		Source: "//goki:ki -noNew",
+		Source: "//core:ki -noNew",
 	},
 	{
 		Dir: &Directive{
@@ -62,8 +62,8 @@ var tests = []test{
 			Directive: "ki",
 			Args:      []string{"-embeds=false"},
 		},
-		Source: "goki:ki -embeds=false",
-		String: "//goki:ki -embeds=false",
+		Source: "core:ki -embeds=false",
+		String: "//core:ki -embeds=false",
 	},
 	{
 		Dir:    nil,

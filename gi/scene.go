@@ -38,8 +38,8 @@ import (
 // within a given Stage and overall rendering context, representing the unit
 // of rendering in the GoGi framework.
 //
-//goki:no-new
-//goki:embedder
+//core:no-new
+//core:embedder
 type Scene struct {
 	Frame
 

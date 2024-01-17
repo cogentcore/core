@@ -28,7 +28,7 @@ import (
 // needed) and a Stacked Frame that actually contains all the children, and
 // provides scrollbars as needed to any content within.  Typically should have
 // max stretch and a set preferred size, so it expands.
-type Tabs struct { //goki:embedder
+type Tabs struct { //core:embedder
 	Layout
 
 	// Type is the styling type of the tabs. It must be set
@@ -527,7 +527,7 @@ func (ts *Tabs) UnselectOtherTabs(idx int) {
 
 // Tab is a tab button that contains any, all, or none of a label, an icon,
 // and a close icon. Tabs should be made using the [Tabs.NewTab] function.
-type Tab struct { //goki:no-new
+type Tab struct { //core:no-new
 	Box
 
 	// Type is the styling type of the tab. This property

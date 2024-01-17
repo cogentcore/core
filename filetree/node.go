@@ -36,7 +36,7 @@ var NodeHiStyle = histyle.StyleDefault
 // Node represents a file in the file system, as a TreeView node.
 // The name of the node is the name of the file.
 // Folders have children containing further nodes.
-type Node struct { //goki:embedder
+type Node struct { //core:embedder
 	giv.TreeView
 
 	// full path to this file

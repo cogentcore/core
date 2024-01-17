@@ -23,7 +23,7 @@ import (
 // dimension.  It uses the Widget Parts to hold the Handle widgets
 // separately from the children that contain the rest of the scene to be
 // displayed within each panel.
-type Splits struct { //goki:embedder
+type Splits struct { //core:embedder
 	Layout
 
 	// proportion (0-1 normalized, enforced) of space allocated to each element.

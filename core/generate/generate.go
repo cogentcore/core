@@ -81,19 +81,19 @@ func KiPkg(typ *gtigen.Type) string {
 	return "ki."
 }
 
-// HasEmbedDirective returns whether the given [gtigen.Type] has a "goki:embedder"
+// HasEmbedDirective returns whether the given [gtigen.Type] has a "core:embedder"
 // comment directive. This function is used in [KiMethodsTmpl].
 func HasEmbedDirective(typ *gtigen.Type) bool {
 	return slices.ContainsFunc(typ.Directives, func(d gti.Directive) bool {
-		return d.Tool == "goki" && d.Directive == "embedder"
+		return d.Tool == "core" && d.Directive == "embedder"
 	})
 }
 
-// HasNoNewDirective returns whether the given [gtigen.Type] has a "goki:no-new"
+// HasNoNewDirective returns whether the given [gtigen.Type] has a "core:no-new"
 // comment directive. This function is used in [KiMethodsTmpl].
 func HasNoNewDirective(typ *gtigen.Type) bool {
 	return slices.ContainsFunc(typ.Directives, func(d gti.Directive) bool {
-		return d.Tool == "goki" && d.Directive == "no-new"
+		return d.Tool == "core" && d.Directive == "no-new"
 	})
 }
 

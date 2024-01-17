@@ -24,7 +24,7 @@ import (
 // emits link with data of URL -- opens default browser if nobody receiving
 // signal.  The default white-space option is 'pre' -- set to 'normal' or
 // other options to get word-wrapping etc.
-type Label struct { //goki:embedder
+type Label struct { //core:embedder
 	WidgetBase
 
 	// label to display

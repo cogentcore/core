@@ -30,7 +30,7 @@ import (
 // The Content size (inside the margin and padding) determines the outer bounds of
 // the rendered area.
 // The [styles.Style.Direction] determines the direction in which the slider slides.
-type Slider struct { //goki:embedder
+type Slider struct { //core:embedder
 	WidgetBase
 
 	// the type of the slider, which determines the visual and functional properties
