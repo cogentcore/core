@@ -1,9 +1,9 @@
-> # IMPORTANT: github.com/goki/goki and goki.dev have been moved to github.com/cogentcore/core and cogentcore.org/core
-
 <h1 align="center">
-    <a href="https://cogentcore.org/core">
-        <img alt="Cogent Core Blue Logo" width="150" height="150" src="logo/gogi_logo_blue_transparent.png">
+    <a href="https://cogentcore.org">
+        <img alt="Cogent Core Logo" width="250" height="250" src="https://avatars.githubusercontent.com/u/156646279?s=250&v=4">
     </a>
+
+  Cogent Core
 </h1>
 
 <p align="center">
@@ -13,7 +13,9 @@
     <a href="https://github.com/cogentcore/core/releases/"><img src="https://img.shields.io/github/release/cogentcore/core?include_prereleases=&sort=semver&color=blue" alt="GitHub release"></a>
 </p>
 
-**NOTE:** Cogent Core is currently undergoing a period of significant development to make it easier to make powerful, fast, and beautiful apps and support running apps on mobile. As such, some of the information in this repository and on the [Cogent Core website](https://Cogentcore.org) may be incorrect. Furthermore, there will be breaking changes soon, so starting new apps with this framework is not recommended at this time; if you do, please be ready to adjust to any breaking changes. If you want to accelerate the improvement of Goki, please contribute by following the [Contribution Guidelines](https://cogentcore.org/core/docs/general/contributionguidelines/). Development of Gi is currently happening on this branch. For the latest stable version of Gi, import version 1.3.19 and see the [v1 branch](https://github.com/goki/gi/tree/v1).
+A free and open source framework for building powerful, fast, and cogent 2D and 3D GUIs that run on macOS, Windows, Linux, iOS, Android, and the Web with a single pure Go codebase, allowing you to Code Once, Run Everywhere.
+
+> **NOTE:** Cogent Core is currently undergoing a period of significant development to make it easier to make powerful, fast, and beautiful apps and support running apps on mobile. As such, some of the information in this repository and on the [Cogent Core website](https://cogentcore.org) may be incorrect. Furthermore, there are ongoing breaking changes, so starting new apps with this framework is not recommended at this time; if you do, please be ready to adjust to any breaking changes. If you want to accelerate the improvement of Cogent Core, please contribute by following the [Contribution Guidelines](https://cogentcore.org/core/docs/general/contributionguidelines/).
 
 GoGi is part of the [Goki](https://Cogentcore.org) Go language (golang) full strength tree structure system (ki = 木 = tree in Japanese)
 
