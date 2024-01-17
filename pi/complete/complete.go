@@ -136,7 +136,7 @@ func MatchSeedString(completions []string, seed string) (matches []string) {
 			continue
 		}
 		if start > -1 {
-			if strings.HasPrefix(text, seed) == false {
+			if !strings.HasPrefix(text, seed) {
 				end = i
 			}
 		}
@@ -189,7 +189,7 @@ func MatchSeedCompletion(completions []Completion, seed string) (matches []Compl
 			continue
 		}
 		if start > -1 {
-			if strings.HasPrefix(text, seed) == false {
+			if !strings.HasPrefix(text, seed) {
 				end = i
 			}
 		}
