@@ -475,22 +475,25 @@ func (ts *Tabs) ConfigNewTabButton() bool {
 	}
 }
 
-// ConfigWidget initializes the tab widget children if it hasn't been done yet.
-// only the 2 primary children (Frames) need to be configured.
-// no re-config needed when adding / deleting tabs -- just new layout.
+// ConfigWidget configures the tabs widget children if necessary.
+// Only the 2 primary children (Frames) need to be configured.
+// Re-config is needed when the type of tabs changes, but not
+// when a new tab is added, which only requires a new layout pass.
 func (ts *Tabs) ConfigWidget() {
-	if len(ts.Kids) != 0 {
-		return
-	}
+	config := ki.Config{}
 	// frame only comes before tabs in bottom nav bar
 	if ts.Type.Effective(ts) == NavigationBar {
-		NewFrame(ts, "frame")
-		NewFrame(ts, "tabs")
+		config.Add(FrameType, "frame")
+		config.Add(FrameType, "tabs")
 	} else {
-		NewFrame(ts, "tabs")
-		NewFrame(ts, "frame")
+		config.Add(FrameType, "tabs")
+		config.Add(FrameType, "frame")
 	}
-	ts.ConfigNewTabButton()
+	mods, updt := ts.ConfigChildren(config)
+	if mods {
+		ts.UpdateEndLayout(updt)
+	}
+	// ts.ConfigNewTabButton()
 }
 
 // Tabs returns the layout containing the tabs (the first element within us).

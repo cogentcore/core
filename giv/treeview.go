@@ -502,7 +502,7 @@ func (tv *TreeView) LabelPart() (*gi.Label, bool) {
 	return nil, false
 }
 
-func (tv *TreeView) ConfigParts() {
+func (tv *TreeView) ConfigWidget() {
 	parts := tv.NewParts()
 	config := ki.Config{}
 	config.Add(gi.SwitchType, "branch")
@@ -529,10 +529,6 @@ func (tv *TreeView) ConfigParts() {
 		parts.UpdateEnd(updt)
 		tv.UpdateEndLayout(updt)
 	}
-}
-
-func (tv *TreeView) ConfigWidget() {
-	tv.ConfigParts()
 }
 
 func (tv *TreeView) StyleTreeView() {

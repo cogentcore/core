@@ -509,14 +509,6 @@ func (sr *Slider) HandleKeys() {
 // 	Config
 
 func (sr *Slider) ConfigWidget() {
-	sr.ConfigSlider()
-}
-
-func (sr *Slider) ConfigSlider() {
-	sr.ConfigParts()
-}
-
-func (sr *Slider) ConfigParts() {
 	if !sr.Icon.IsValid() {
 		if sr.Parts != nil {
 			sr.DeleteParts()
