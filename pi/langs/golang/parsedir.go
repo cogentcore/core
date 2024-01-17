@@ -28,6 +28,8 @@ type ParseDirLock struct {
 	// logical import path
 	Path string
 
+	Processing bool
+
 	// mutex protecting processing of this path
 	Mu sync.Mutex `json:"-" xml:"-"`
 }
@@ -69,7 +71,9 @@ func (pd *ParseDirLocks) ParseDir(gl *GoLang, fs *pi.FileState, path string, opt
 	}
 	pd.Mu.Unlock()
 	ds.Mu.Lock()
+	ds.Processing = true
 	rsym := gl.ParseDirImpl(fs, path, opts)
+	ds.Processing = false
 	ds.Mu.Unlock()
 	return rsym
 }
@@ -345,6 +349,7 @@ func (gl *GoLang) AddImportsToExts(fss *pi.FileStates, pfs *pi.FileState, pkg *s
 	pkg.Children.FindKindScoped(token.NameLibrary, &imps)
 	pfs.SymsMu.RUnlock()
 	if len(imps) == 0 {
+		goto reset
 		return
 	}
 	for _, im := range imps {
@@ -360,10 +365,12 @@ func (gl *GoLang) AddImportsToExts(fss *pi.FileStates, pfs *pi.FileState, pkg *s
 		fmt.Printf("\n#####################\nResolving Types now for: %v\n", pfs.Src.Filename)
 	}
 	gl.ResolveTypes(pfs, pkg, true) // true = do include function-internal scope items
+reset:
+	pfs.ClearAst()
 	pkg.ClearAst()
-	if pfs.Ast.HasChildren() {
-		pfs.Ast.DeleteChildren(true)
-	}
+	// if pfs.Ast.HasChildren() {
+	// 	pfs.Ast.DeleteChildren(true)
+	// }
 }
 
 // AddImportToExts adds given import into pi.FileState.ExtSyms list
@@ -412,8 +419,6 @@ func (gl *GoLang) AddPkgToSyms(fs *pi.FileState, pkg *syms.Symbol) bool {
 	} else {
 		fs.Syms[pkg.Name] = pkg
 	}
-	fs.Syms.ClearAst()
-	fs.Ast.DeleteChildren(true)
 	fs.SymsMu.Unlock()
 	return has
 }

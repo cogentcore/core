@@ -56,18 +56,17 @@ func (ps *State) Init(src *lex.File, ast *Ast) {
 	// 	fmt.Println("new:", src.Filename)
 	// }
 	ps.Src = src
-	if ps.Ast != nil {
+	if ps.Ast != nil && ps.Ast.This() != nil {
 		// fmt.Println("deleting old ast")
 		ps.Ast.DeleteChildren(true)
 	}
 	ps.Ast = ast
-	if ps.Ast != nil {
+	if ps.Ast != nil && ps.Ast.This() != nil {
 		// fmt.Println("deleting new ast")
 		ps.Ast.DeleteChildren(true)
 	}
-	ps.Syms.ClearAst()
+	ps.ClearAst()
 	ps.Syms.Reset()
-	ps.Scopes.ClearAst()
 	ps.Scopes.Reset()
 	ps.Stack.Reset()
 	if ps.Src != nil {
@@ -78,14 +77,18 @@ func (ps *State) Init(src *lex.File, ast *Ast) {
 	ps.AllocRules()
 }
 
+func (ps *State) ClearAst() {
+	ps.Syms.ClearAst()
+	ps.Scopes.ClearAst()
+}
+
 func (ps *State) Destroy() {
 	if ps.Ast != nil && ps.Ast.This() != nil {
 		ps.Ast.DeleteChildren(true)
 	}
 	ps.Ast = nil
-	ps.Syms.ClearAst()
+	ps.ClearAst()
 	ps.Syms.Reset()
-	ps.Scopes.ClearAst()
 	ps.Scopes.Reset()
 	ps.Stack.Reset()
 	if ps.Src != nil {

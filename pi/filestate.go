@@ -64,6 +64,7 @@ type FileState struct {
 
 // Init initializes the file state
 func (fs *FileState) Init() {
+	// fmt.Println("fs init:", fs.Src.Filename)
 	fs.Ast.InitName(&fs.Ast, "Ast")
 	fs.LexState.Init()
 	fs.TwoState.Init()
@@ -81,10 +82,14 @@ func NewFileState() *FileState {
 	return fs
 }
 
-func (fs *FileState) Destroy() {
+func (fs *FileState) ClearAst() {
 	fs.Syms.ClearAst()
-	fs.Syms = nil
 	fs.ExtSyms.ClearAst()
+}
+
+func (fs *FileState) Destroy() {
+	fs.ClearAst()
+	fs.Syms = nil
 	fs.ExtSyms = nil
 	fs.Ast.Destroy()
 	fs.LexState.Init()

@@ -99,9 +99,9 @@ func (sy *Symbol) CopyFromSrc(cp *Symbol) {
 	sy.Filename = cp.Filename
 	sy.Region = cp.Region
 	sy.SelectReg = cp.SelectReg
-	if cp.Ast != nil {
-		sy.Ast = cp.Ast
-	}
+	// if cp.Ast != nil {
+	// 	sy.Ast = cp.Ast
+	// }
 }
 
 // IsTemp returns true if this is temporary symbol that is used for scoping but is not
@@ -144,7 +144,7 @@ func (sy *Symbol) Label() string {
 func (sy *Symbol) Clone() *Symbol {
 	nsy := &Symbol{Name: sy.Name, Detail: sy.Detail, Kind: sy.Kind, Type: sy.Type, Index: sy.Index, Filename: sy.Filename, Region: sy.Region, SelectReg: sy.SelectReg}
 	nsy.Scopes = sy.Scopes.Clone()
-	nsy.Ast = sy.Ast
+	// nsy.Ast = sy.Ast
 	return nsy
 }
 

@@ -74,12 +74,18 @@ func (gl *GoLang) ParseFile(fss *pi.FileStates, txt []byte) {
 		pfs.Syms[pkg.Name] = pkg // keep around..
 		// fmt.Printf("main pkg name: %v\n", pkg.Name)
 		path = strings.TrimSuffix(path, string([]rune{filepath.Separator}))
-		pfs.WaitGp.Add(1)
-		go gl.AddPathToSyms(pfs, path)
-		go gl.AddImportsToExts(fss, pfs, pkg) // will do ResolveTypes when it finishes
+		go func() {
+			pfs.WaitGp.Add(1)
+			gl.AddPathToSyms(pfs, path)
+			gl.AddImportsToExts(fss, pfs, pkg) // will do ResolveTypes when it finishes
+		}()
 	} else {
 		if TraceTypes {
 			fmt.Printf("not importing scope for: %v\n", path)
+		}
+		pfs.ClearAst()
+		if pfs.Ast.HasChildren() {
+			pfs.Ast.DeleteChildren(true)
 		}
 	}
 }
@@ -119,6 +125,7 @@ func (gl *GoLang) HiLine(fss *pi.FileStates, line int, txt []rune) lex.Line {
 			pr.PassTwo.NestDepthLine(mc, initDepth)
 		}
 		lfs.Syms.WriteDoc(os.Stdout, 0)
+		lfs.Destroy()
 		return mc
 	} else {
 		return ll

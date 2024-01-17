@@ -112,7 +112,7 @@ func (st *Stage) RunWindow() *Stage {
 		st.SetMainMgr(st.FirstWinManager())
 	} else {
 		top := CurRenderWin.MainStageMgr.TopOfType(WindowStage)
-		if sc.App == nil { // inherit apps
+		if sc.App == nil && top != nil && top.Scene != nil { // inherit apps
 			sc.App = top.Scene.App
 		}
 		st.SetMainMgr(&CurRenderWin.MainStageMgr)
