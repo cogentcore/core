@@ -1,3 +1,5 @@
+> # IMPORTANT: github.com/goki/goki and goki.dev have been moved to github.com/cogentcore/core and cogentcore.org/core
+
 <h1 align="center">
     <a href="https://cogentcore.org/core">
         <img alt="Goki Blue Logo" width="150" height="150" src="logo/gogi_logo_blue_transparent.png">
