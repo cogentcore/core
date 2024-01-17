@@ -159,6 +159,15 @@ func (w *Window) GetScreenOverlap() *goosi.Screen {
 	return csc
 }
 
+func (w *Window) Position() image.Point {
+	w.Mu.Lock()
+	defer w.Mu.Unlock()
+	var ps image.Point
+	ps.X, ps.Y = w.Glw.GetPos()
+	w.Pos = ps
+	return ps
+}
+
 func (w *Window) SetTitle(title string) {
 	if w.IsClosed() {
 		return
