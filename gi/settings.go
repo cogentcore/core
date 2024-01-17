@@ -518,7 +518,11 @@ func (ss *SystemSettingsData) Apply() { //gti:add
 func (ss *SystemSettingsData) Open() error {
 	ss.FavPaths = nil // toml is just adding to this, need to reset prior
 	fnm := ss.Filename()
-	return tomls.Open(ss, fnm)
+	err := tomls.Open(ss, fnm)
+	if len(ss.FavPaths) == 0 {
+		ss.FavPaths.SetToDefaults()
+	}
+	return err
 }
 
 // TimeFormat returns the Go time format layout string that should
