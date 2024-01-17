@@ -36,3 +36,18 @@ func TestTOML(t *testing.T) {
 		t.Errorf("ReadBytes or WriteBytes failed to read same data as saved: wanted %v != got %v", s, c)
 	}
 }
+
+type testSliceStruct struct {
+	Slice []string
+}
+
+func TestSlice(t *testing.T) {
+	spath := filepath.Join("testdata", "slice.toml")
+	sl := &testSliceStruct{[]string{"a", "b"}}
+	grr.Test(t, Save(sl, spath))
+	grr.Test(t, Open(sl, spath))
+	grr.Test(t, Save(sl, spath))
+	if len(sl.Slice) != 2 {
+		t.Errorf("expected slice to be length 2 but got length %d", len(sl.Slice))
+	}
+}
