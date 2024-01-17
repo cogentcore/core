@@ -140,11 +140,11 @@ func SetQuitReqFunc(fun func()) {
 	goosi.TheApp.SetQuitReqFunc(fun)
 }
 
-// SetQuitCleanFunc sets the function that is called whenever app is
-// actually about to quit (irrevocably) -- can do any necessary
+// AddQuitCleanFunc adds the given function to a list that is called whenever
+// app is actually about to quit (irrevocably). Can do any necessary
 // last-minute cleanup here.
-func SetQuitCleanFunc(fun func()) {
-	goosi.TheApp.SetQuitCleanFunc(fun)
+func AddQuitCleanFunc(fun func()) {
+	goosi.TheApp.AddQuitCleanFunc(fun)
 }
 
 // Quit closes all windows and exits the program.

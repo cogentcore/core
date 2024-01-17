@@ -54,8 +54,8 @@ type App struct { //gti:add
 	// QuitReqFunc is a function to call when a quit is requested
 	QuitReqFunc func()
 
-	// QuitCleanFunc is a function to call when the app is about to quit
-	QuitCleanFunc func()
+	// QuitCleanFuncs are functions to call when the app is about to quit
+	QuitCleanFuncs []func()
 
 	// Dark is whether the system color theme is dark (as opposed to light)
 	Dark bool
@@ -141,8 +141,8 @@ func (a *App) SetQuitReqFunc(fun func()) {
 	a.QuitReqFunc = fun
 }
 
-func (a *App) SetQuitCleanFunc(fun func()) {
-	a.QuitCleanFunc = fun
+func (a *App) AddQuitCleanFunc(fun func()) {
+	a.QuitCleanFuncs = append(a.QuitCleanFuncs, fun)
 }
 
 func (a *App) QuitReq() {

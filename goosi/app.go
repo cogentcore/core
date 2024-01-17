@@ -112,10 +112,10 @@ type App interface {
 	// function can then adjudicate whether and when to actually call Quit.
 	SetQuitReqFunc(fun func())
 
-	// SetQuitCleanFunc sets the function that is called whenever app is
-	// actually about to quit (irrevocably) -- can do any necessary
+	// AddQuitCleanFunc adds the given function to a list that is called whenever
+	// app is actually about to quit (irrevocably). Can do any necessary
 	// last-minute cleanup here.
-	SetQuitCleanFunc(fun func())
+	AddQuitCleanFunc(fun func())
 
 	// QuitReq is a quit request, triggered either by OS or user call (e.g.,
 	// via Quit menu action) -- calls function previously-registered by

@@ -10,7 +10,6 @@ import (
 	"image/color"
 	"strings"
 	"sync"
-	"time"
 	"unicode"
 
 	"cogentcore.org/core/abilities"
@@ -1096,44 +1095,16 @@ func (tf *TextField) ScrollLayoutToCursor() bool {
 	return ly.ScrollToBox(bbox)
 }
 
-// TextFieldBlinkMu is mutex protecting TextFieldBlink updating and access
-var TextFieldBlinkMu sync.Mutex
+var (
+	// TextFieldBlinker manages cursor blinking
+	TextFieldBlinker = Blinker{}
 
-// TextFieldBlinker is the time.Ticker for blinking cursors for text fields,
-// only one of which can be active at at a time
-var TextFieldBlinker *time.Ticker
+	// TextFieldSpriteName is the name of the window sprite used for the cursor
+	TextFieldSpriteName = "gi.TextField.Cursor"
+)
 
-// BlinkingTextField is the text field that is blinking
-var BlinkingTextField *TextField
-
-// TextFieldSpriteName is the name of the window sprite used for the cursor
-var TextFieldSpriteName = "gi.TextField.Cursor"
-
-// TextFieldBlink is function that blinks text field cursor
-func TextFieldBlink() {
-	for {
-		TextFieldBlinkMu.Lock()
-		if TextFieldBlinker == nil {
-			TextFieldBlinkMu.Unlock()
-			return // shutdown..
-		}
-		TextFieldBlinkMu.Unlock()
-		<-TextFieldBlinker.C
-		TextFieldBlinkMu.Lock()
-		if BlinkingTextField == nil || BlinkingTextField.This() == nil || BlinkingTextField.Is(ki.Deleted) {
-			TextFieldBlinkMu.Unlock()
-			continue
-		}
-		tf := BlinkingTextField
-		if tf.Sc == nil || tf.Sc.Stage.Main == nil || !tf.StateIs(states.Focused) || !tf.This().(Widget).IsVisible() {
-			BlinkingTextField = nil
-			TextFieldBlinkMu.Unlock()
-			continue
-		}
-		tf.BlinkOn = !tf.BlinkOn
-		tf.RenderCursor(tf.BlinkOn)
-		TextFieldBlinkMu.Unlock()
-	}
+func init() {
+	AddQuitCleanFunc(TextFieldBlinker.QuitClean)
 }
 
 // StartCursor starts the cursor blinking and renders it
@@ -1145,19 +1116,22 @@ func (tf *TextField) StartCursor() {
 		return
 	}
 	tf.BlinkOn = true
+	tf.RenderCursor(true)
 	if SystemSettings.CursorBlinkTime == 0 {
-		tf.RenderCursor(true)
 		return
 	}
-	TextFieldBlinkMu.Lock()
-	if TextFieldBlinker == nil {
-		TextFieldBlinker = time.NewTicker(SystemSettings.CursorBlinkTime)
-		go TextFieldBlink()
-	}
-	tf.BlinkOn = true
-	tf.RenderCursor(true)
-	BlinkingTextField = tf
-	TextFieldBlinkMu.Unlock()
+	TextFieldBlinker.Blink(SystemSettings.CursorBlinkTime, func(w Widget) {
+		ttf := AsTextField(w)
+		if !ttf.StateIs(states.Focused) || !w.IsVisible() {
+			ttf.BlinkOn = false
+			ttf.RenderCursor(false)
+			TextFieldBlinker.Widget = nil
+		} else {
+			ttf.BlinkOn = !ttf.BlinkOn
+			ttf.RenderCursor(ttf.BlinkOn)
+		}
+	})
+	TextFieldBlinker.SetWidget(tf.This().(Widget))
 }
 
 // ClearCursor turns off cursor and stops it from blinking
@@ -1174,14 +1148,7 @@ func (tf *TextField) StopCursor() {
 	if tf == nil || tf.This() == nil {
 		return
 	}
-	if !tf.This().(Widget).IsVisible() {
-		return
-	}
-	TextFieldBlinkMu.Lock()
-	if BlinkingTextField == tf {
-		BlinkingTextField = nil
-	}
-	TextFieldBlinkMu.Unlock()
+	TextFieldBlinker.ResetWidget(tf.This().(Widget))
 }
 
 // RenderCursor renders the cursor on or off, as a sprite that is either on or off
@@ -1863,9 +1830,10 @@ func (tf *TextField) RenderTextField() {
 }
 
 func (tf *TextField) Render() {
-	if tf.StateIs(states.Focused) && BlinkingTextField == tf {
-		tf.ScrollLayoutToCursor()
-	}
+	// todo: this is probably not a great idea
+	// if tf.StateIs(states.Focused) && TextFieldBlinker.Widget == tf.This().(Widget) {
+	// 	tf.ScrollLayoutToCursor()
+	// }
 	if tf.PushBounds() {
 		tf.RenderTextField()
 		if !tf.IsReadOnly() {

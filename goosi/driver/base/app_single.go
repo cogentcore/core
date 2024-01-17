@@ -151,8 +151,8 @@ func (a *AppSingle[D, W]) RemoveWindow(w goosi.Window) {
 
 func (a *AppSingle[D, W]) QuitClean() {
 	a.Quitting = true
-	if a.QuitCleanFunc != nil {
-		a.QuitCleanFunc()
+	for _, qf := range a.QuitCleanFuncs {
+		qf()
 	}
 	a.Mu.Lock()
 	a.Win.Close()

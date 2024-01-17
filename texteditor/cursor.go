@@ -8,56 +8,24 @@ import (
 	"fmt"
 	"image"
 	"image/draw"
-	"sync"
-	"time"
 
 	"cogentcore.org/core/gi"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/states"
 )
 
-// ViewBlinkMu is mutex protecting ViewBlink updating and access
-var ViewBlinkMu sync.Mutex
-
-// ViewBlinker is the time.Ticker for blinking cursors for text fields,
-// only one of which can be active at at a time
-var ViewBlinker *time.Ticker
-
-// BlinkingView is the text field that is blinking
-var BlinkingView *Editor
-
-// ViewSpriteName is the name of the window sprite used for the cursor
-var ViewSpriteName = "texteditor.Editor.Cursor"
-
-// ViewBlink is function that blinks text field cursor
-func ViewBlink() {
-	for {
-		ViewBlinkMu.Lock()
-		if ViewBlinker == nil {
-			ViewBlinkMu.Unlock()
-			return // shutdown..
-		}
-		ViewBlinkMu.Unlock()
-		<-ViewBlinker.C
-		ViewBlinkMu.Lock()
-		if BlinkingView == nil || BlinkingView.This() == nil || BlinkingView.Is(ki.Deleted) {
-			ViewBlinkMu.Unlock()
-			continue
-		}
-		ed := BlinkingView
-		if ed.Sc == nil || !ed.StateIs(states.Focused) || !ed.This().(gi.Widget).IsVisible() {
-			ed.RenderCursor(false)
-			BlinkingView = nil
-			ViewBlinkMu.Unlock()
-			continue
-		}
-		ed.BlinkOn = !ed.BlinkOn
-		ed.RenderCursor(ed.BlinkOn)
-		ViewBlinkMu.Unlock()
-	}
+func init() {
+	gi.AddQuitCleanFunc(EditorBlinker.QuitClean)
 }
+
+var (
+	// EditorBlinker manages cursor blinking
+	EditorBlinker = gi.Blinker{}
+
+	// EditorSpriteName is the name of the window sprite used for the cursor
+	EditorSpriteName = "texteditor.Editor.Cursor"
+)
 
 // StartCursor starts the cursor blinking and renders it
 func (ed *Editor) StartCursor() {
@@ -68,19 +36,22 @@ func (ed *Editor) StartCursor() {
 		return
 	}
 	ed.BlinkOn = true
+	ed.RenderCursor(true)
 	if gi.SystemSettings.CursorBlinkTime == 0 {
-		ed.RenderCursor(true)
 		return
 	}
-	ViewBlinkMu.Lock()
-	if ViewBlinker == nil {
-		ViewBlinker = time.NewTicker(gi.SystemSettings.CursorBlinkTime)
-		go ViewBlink()
-	}
-	ed.BlinkOn = true
-	ed.RenderCursor(true)
-	BlinkingView = ed
-	ViewBlinkMu.Unlock()
+	EditorBlinker.Blink(gi.SystemSettings.CursorBlinkTime, func(w gi.Widget) {
+		eed := AsEditor(w)
+		if !eed.StateIs(states.Focused) || !w.IsVisible() {
+			eed.BlinkOn = false
+			eed.RenderCursor(false)
+			EditorBlinker.Widget = nil
+		} else {
+			eed.BlinkOn = !eed.BlinkOn
+			eed.RenderCursor(eed.BlinkOn)
+		}
+	})
+	EditorBlinker.SetWidget(ed.This().(gi.Widget))
 }
 
 // StopCursor stops the cursor from blinking
@@ -88,15 +59,7 @@ func (ed *Editor) StopCursor() {
 	if ed == nil || ed.This() == nil {
 		return
 	}
-	if !ed.This().(gi.Widget).IsVisible() {
-		return
-	}
-	ed.RenderCursor(false)
-	ViewBlinkMu.Lock()
-	if BlinkingView == ed {
-		BlinkingView = nil
-	}
-	ViewBlinkMu.Unlock()
+	EditorBlinker.ResetWidget(ed.This().(gi.Widget))
 }
 
 // CursorBBox returns a bounding-box for a cursor at given position
@@ -144,7 +107,7 @@ func (ed *Editor) RenderCursor(on bool) {
 
 // CursorSpriteName returns the name of the cursor sprite
 func (ed *Editor) CursorSpriteName() string {
-	spnm := fmt.Sprintf("%v-%v", ViewSpriteName, ed.FontHeight)
+	spnm := fmt.Sprintf("%v-%v", EditorSpriteName, ed.FontHeight)
 	return spnm
 }
 
