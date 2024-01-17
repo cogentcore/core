@@ -51,7 +51,7 @@ func Build(c *config.Config) error { //gti:add
 		if platform.OS == "web" {
 			// need to get real output location so that commands work
 			if c.Build.Output == "" {
-				c.Build.Output = filepath.Join(".goki", "bin", "web", "app.wasm")
+				c.Build.Output = filepath.Join(".core", "bin", "web", "app.wasm")
 			}
 			// we must end with a wasm file
 			if !strings.Contains(filepath.Base(c.Build.Output), ".wasm") {
@@ -80,7 +80,7 @@ func BuildDesktop(c *config.Config, platform config.Platform) error {
 
 	// need to get real output location so that install commands work later
 	if c.Build.Output == "" {
-		c.Build.Output = filepath.Join(".goki", "bin", platform.OS, c.Name)
+		c.Build.Output = filepath.Join(".core", "bin", platform.OS, c.Name)
 	}
 	err := os.MkdirAll(filepath.Dir(c.Build.Output), 0777)
 	if err != nil {

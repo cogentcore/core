@@ -12,17 +12,17 @@ import (
 	"cogentcore.org/core/grease"
 )
 
-// Init initializes the ".goki" directory
+// Init initializes the ".core" directory
 // and a "config.toml" file inside it.
 // The "config.toml" file has the given
 // config info. Init also sets the config name
 // to the current directory if it is unset.
 func Init(c *config.Config) error { //gti:add
-	err := os.MkdirAll(".goki", 0750)
+	err := os.MkdirAll(".core", 0750)
 	if err != nil {
-		return fmt.Errorf("error creating %q directory: %w", ".goki", err)
+		return fmt.Errorf("error creating %q directory: %w", ".core", err)
 	}
-	err = grease.Save(c, ".goki/config.toml")
+	err = grease.Save(c, ".core/config.toml")
 	if err != nil {
 		return fmt.Errorf("error writing to configuration file: %w", err)
 	}

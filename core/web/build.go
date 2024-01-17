@@ -123,7 +123,7 @@ func MakeFiles(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	err = xe.Run("cp", filepath.Join(".goki", "icon.svg"), filepath.Join(odir, "icons", "svg.svg"))
+	err = xe.Run("cp", filepath.Join(".core", "icon.svg"), filepath.Join(odir, "icons", "svg.svg"))
 	if err != nil {
 		return err
 	}

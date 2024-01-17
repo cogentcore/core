@@ -107,7 +107,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 	}
 
 	if c.Build.Output == "" {
-		c.Build.Output = filepath.Join(".goki", "bin", "android", c.Name+".apk")
+		c.Build.Output = filepath.Join(".core", "bin", "android", c.Name+".apk")
 	}
 	if !strings.HasSuffix(c.Build.Output, ".apk") {
 		return nil, fmt.Errorf("output file name %q does not end in '.apk'", c.Build.Output)

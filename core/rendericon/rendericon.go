@@ -19,7 +19,7 @@ import (
 	"cogentcore.org/core/svg"
 )
 
-// Render renders the icon located at .goki/icon.svg at the given size.
+// Render renders the icon located at .core/icon.svg at the given size.
 // If no such icon exists, it sets it to a placeholder icon, a blue version of
 // [icons.Toolbar].
 func Render(size int) (*image.RGBA, error) {
@@ -29,7 +29,7 @@ func Render(size int) (*image.RGBA, error) {
 	sv.Norm = true
 	sv.Color = colors.C(colors.FromRGB(66, 133, 244)) // Google Blue (#4285f4)
 
-	spath := filepath.Join(".goki", "icon.svg")
+	spath := filepath.Join(".core", "icon.svg")
 	err := sv.OpenXML(spath)
 	if err != nil {
 		if !errors.Is(err, fs.ErrNotExist) {

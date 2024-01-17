@@ -33,7 +33,7 @@ type Config struct { //gti:add
 	Name string
 
 	// the bundle / package ID to use of the project (required for building for mobile platforms
-	// and packaging for desktop platforms). It is typically in the format com.org.app (eg: com.goki.mail)
+	// and packaging for desktop platforms). It is typically in the format com.org.app (eg: com.core.mail)
 	ID string
 
 	// the description of the project

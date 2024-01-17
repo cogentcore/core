@@ -24,7 +24,7 @@ import (
 	"cogentcore.org/core/units"
 )
 
-//go:embed .goki/icon.svg
+//go:embed .core/icon.svg
 var icon []byte
 
 func main() {

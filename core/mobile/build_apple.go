@@ -142,7 +142,7 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 
 	// TODO(jbd): Fallback to copying if renaming fails.
 	if c.Build.Output == "" {
-		c.Build.Output = filepath.Join(".goki", "bin", "ios", c.Name+".app")
+		c.Build.Output = filepath.Join(".core", "bin", "ios", c.Name+".app")
 	}
 	err = os.MkdirAll(filepath.Dir(c.Build.Output), 0777)
 	if err != nil {
