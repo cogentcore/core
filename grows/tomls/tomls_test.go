@@ -37,17 +37,17 @@ func TestTOML(t *testing.T) {
 	}
 }
 
-type slcItem struct {
+type sliceItem struct {
 	F string
 }
 
 type testSliceStruct struct {
-	Slice []slcItem
+	Slice []sliceItem
 }
 
 func TestSlice(t *testing.T) {
 	spath := filepath.Join("testdata", "slice.toml")
-	sl := &testSliceStruct{[]slcItem{slcItem{F: "a"}, slcItem{F: "b"}}}
+	sl := &testSliceStruct{[]sliceItem{{F: "a"}, {F: "b"}}}
 	grr.Test(t, Save(sl, spath))
 	grr.Test(t, Open(sl, spath))
 	grr.Test(t, Open(sl, spath))
