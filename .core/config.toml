@@ -2,10 +2,5 @@ ID = 'com.CogentCore.core'
 Name = 'Cogent Core'
 Version = 'v0.0.2'
 
-[Build]
-[[Build.Target]]
-    OS = 'windows'
-    Arch = 'amd64'
-
 [Release]
   Package = 'core'

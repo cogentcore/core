@@ -75,7 +75,7 @@ type Build struct { //gti:add
 	Package string `def:"." posarg:"0" required:"-"`
 
 	// the target platforms to build executables for
-	Target []Platform `flag:"t,target"`
+	Target []Platform `flag:"t,target" save:"-"`
 
 	// the output file name; if not specified, it depends on the package being built
 	Output string `flag:"o,output"`
