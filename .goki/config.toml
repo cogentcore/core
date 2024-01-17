@@ -1,6 +1,0 @@
-ID = 'com.goki.goki'
-Name = 'Goki'
-Version = 'v0.0.1'
-
-[Release]
-  Package = 'goki'
