@@ -37,16 +37,20 @@ func TestTOML(t *testing.T) {
 	}
 }
 
+type slcItem struct {
+	F string
+}
+
 type testSliceStruct struct {
-	Slice []string
+	Slice []slcItem
 }
 
 func TestSlice(t *testing.T) {
 	spath := filepath.Join("testdata", "slice.toml")
-	sl := &testSliceStruct{[]string{"a", "b"}}
+	sl := &testSliceStruct{[]slcItem{slcItem{F: "a"}, slcItem{F: "b"}}}
 	grr.Test(t, Save(sl, spath))
 	grr.Test(t, Open(sl, spath))
-	grr.Test(t, Save(sl, spath))
+	grr.Test(t, Open(sl, spath))
 	if len(sl.Slice) != 2 {
 		t.Errorf("expected slice to be length 2 but got length %d", len(sl.Slice))
 	}
