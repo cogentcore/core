@@ -22,7 +22,7 @@ func Init() {
 	TheApp.Draw = &Drawer{}
 	TheApp.GetScreens()
 
-	TheApp.TempDataDir = grr.Log1(os.MkdirTemp("", "goki-goosi-offscreen-data-dir-"))
+	TheApp.TempDataDir = grr.Log1(os.MkdirTemp("", "cogent-core-offscreen-data-dir-"))
 
 	base.Init(TheApp, &TheApp.App)
 }

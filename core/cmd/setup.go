@@ -26,7 +26,7 @@ func Setup(c *config.Config) error { //gti:add
 
 // SetupIOS is the implementation of [Setup] for iOS.
 func SetupIOS(c *config.Config) error {
-	tmp, err := os.MkdirTemp("", "goki-setup-ios-vulkan-")
+	tmp, err := os.MkdirTemp("", "cogent-core-setup-ios-vulkan-")
 	if err != nil {
 		return err
 	}
@@ -38,7 +38,7 @@ func SetupIOS(c *config.Config) error {
 	if err != nil {
 		return fmt.Errorf("error getting user home directory: %w", err)
 	}
-	gdir := filepath.Join(hdir, "Library", "goki")
+	gdir := filepath.Join(hdir, "Library", "CogentCore")
 	err = xe.MkdirAll(gdir, 0750)
 	if err != nil {
 		return err

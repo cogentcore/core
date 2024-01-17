@@ -159,7 +159,7 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 		}
 
 		// need to copy framework
-		err := xe.Run("cp", "-r", "$HOME/Library/goki/MoltenVK.framework", c.Build.Output)
+		err := xe.Run("cp", "-r", "$HOME/Library/CogentCore/MoltenVK.framework", c.Build.Output)
 		if err != nil {
 			return nil, err
 		}

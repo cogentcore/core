@@ -164,9 +164,6 @@ type Generate struct { //gti:add
 
 	// the source directory to run generate on (can be multiple through ./...)
 	Dir string `def:"." posarg:"0" required:"-" nest:"-"`
-
-	// the output file location relative to the package on which generate is being called
-	Output string `def:"gokigen.go"`
 }
 
 func (c *Config) OnConfig(cmd string) error {

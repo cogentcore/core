@@ -22,7 +22,7 @@ func (p Platform) String() string {
 	return p.OS + "/" + p.Arch
 }
 
-// OSSupported determines whether the given operating system is supported by Goki. If it is, it returns nil.
+// OSSupported determines whether the given operating system is supported by Cogent Core. If it is, it returns nil.
 // If it isn't, it returns an error detailing the issue with the operating system (not found or not supported).
 func OSSupported(os string) error {
 	supported, ok := SupportedOS[os]
@@ -30,12 +30,12 @@ func OSSupported(os string) error {
 		return fmt.Errorf("could not find operating system %s; please check that you spelled it correctly", os)
 	}
 	if !supported {
-		return fmt.Errorf("operating system %s exists but is not supported by Goki", os)
+		return fmt.Errorf("operating system %s exists but is not supported by Cogent Core", os)
 	}
 	return nil
 }
 
-// ArchSupported determines whether the given architecture is supported by Goki. If it is, it returns nil.
+// ArchSupported determines whether the given architecture is supported by Cogent Core. If it is, it returns nil.
 // If it isn't, it also returns an error detailing the issue with the architecture (not found or not supported).
 func ArchSupported(arch string) error {
 	supported, ok := SupportedArch[arch]
@@ -43,7 +43,7 @@ func ArchSupported(arch string) error {
 		return fmt.Errorf("could not find architecture %s; please check that you spelled it correctly", arch)
 	}
 	if !supported {
-		return fmt.Errorf("architecture %s exists but is not supported by Goki", arch)
+		return fmt.Errorf("architecture %s exists but is not supported by Cogent Core", arch)
 	}
 	return nil
 }
@@ -78,7 +78,7 @@ var ArchsForOS = map[string][]string{
 	"ios":     {"386", "amd64", "arm", "arm64"},
 }
 
-// SupportedOS is a map containing all operating systems and whether they are supported by Goki.
+// SupportedOS is a map containing all operating systems and whether they are supported by Cogent Core.
 var SupportedOS = map[string]bool{
 	"aix":       false,
 	"android":   true,
@@ -100,7 +100,7 @@ var SupportedOS = map[string]bool{
 	"zos":       false,
 }
 
-// SupportedArch is a map containing all computer architectures and whether they are supported by Goki.
+// SupportedArch is a map containing all computer architectures and whether they are supported by Cogent Core.
 var SupportedArch = map[string]bool{
 	"386":         true,
 	"amd64":       true,
