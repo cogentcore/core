@@ -17,7 +17,6 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fi/uri"
-	"cogentcore.org/core/glop/sentence"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
@@ -341,7 +340,6 @@ func (ac *AppChooser) OnInit() {
 				nm = kv.Val.Scene.Name()
 				// -scene is frequently placed at the end of scene names, so we remove it
 				nm = strings.TrimSuffix(nm, "-scene")
-				nm = sentence.Case(nm)
 			}
 			u := uri.URI{Label: nm, Icon: icons.Toolbar}
 			u.SetURL("scene", nm, fmt.Sprintf("%d", i))

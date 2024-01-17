@@ -6,7 +6,6 @@ package gi
 
 import (
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/glop/sentence"
 	"cogentcore.org/core/styles"
 )
 
@@ -32,7 +31,7 @@ func NewBody(name ...string) *Body {
 		nm = name[0]
 	}
 	bd.InitName(bd, nm)
-	bd.Title = sentence.Case(nm)
+	bd.Title = nm
 	bd.Sc = NewBodyScene(bd)
 	return bd
 }
@@ -73,7 +72,7 @@ func (bd *Body) AddText(text string) *Body {
 func (bd *Body) SetApp(app *App) *Body {
 	bd.Sc.App = app
 	bd.Nm = app.Name
-	bd.Title = sentence.Case(bd.Nm)
+	bd.Title = app.Name
 	return bd
 }
 

@@ -71,6 +71,5 @@ func Case(s string) string {
 		// otherwise, we make it lowercase
 		words[i] = strings.ToLower(word)
 	}
-	s = strings.Join(words, " ")
-	return s
+	return strings.Join(words, " ")
 }
