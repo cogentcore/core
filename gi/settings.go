@@ -515,6 +515,12 @@ func (ss *SystemSettingsData) Apply() { //gti:add
 	}
 }
 
+func (ss *SystemSettingsData) Open() error {
+	ss.FavPaths = nil // toml is just adding to this, need to reset prior
+	fnm := ss.Filename()
+	return tomls.Open(ss, fnm)
+}
+
 // TimeFormat returns the Go time format layout string that should
 // be used for displaying times to the user, based on the value of
 // [SystemSettingsData.Clock24].

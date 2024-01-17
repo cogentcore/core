@@ -1989,7 +1989,7 @@ func (sg *SliceViewGrid) ScrollChanged(d mat32.Dims, sb *gi.Slider) {
 		return
 	}
 	updt := sg.UpdateStart()
-	sv.StartIdx = int(sb.Value)
+	sv.StartIdx = int(mat32.Round(sb.Value))
 	sv.This().(SliceViewer).UpdateWidgets()
 	sg.UpdateEndRender(updt)
 }

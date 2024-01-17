@@ -662,7 +662,6 @@ func (tv *TableView) UpdateWidgets() {
 	if tv.IsReadOnly() && tv.SelIdx >= 0 {
 		tv.SelectIdx(tv.SelIdx)
 	}
-	tv.UpdateScroll()
 }
 
 func (tv *TableView) StyleRow(w gi.Widget, idx, fidx int) {
