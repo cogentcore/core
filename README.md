@@ -17,12 +17,6 @@ A free and open source framework for building powerful, fast, and cogent 2D and 
 
 > **NOTE:** Cogent Core is currently undergoing a period of significant development to make it easier to make powerful, fast, and beautiful apps and support running apps on mobile. As such, some of the information in this repository and on the [Cogent Core website](https://cogentcore.org) may be incorrect. Furthermore, there are ongoing breaking changes, so starting new apps with this framework is not recommended at this time; if you do, please be ready to adjust to any breaking changes. If you want to accelerate the improvement of Cogent Core, please contribute by following the [Contribution Guidelines](https://cogentcore.org/core/docs/general/contributionguidelines/).
 
-GoGi is part of the [Goki](https://Cogentcore.org) Go language (golang) full strength tree structure system (ki = 木 = tree in Japanese)
-
-`package gi` is a scenegraph-based 2D and 3D GUI / graphics interface (Gi) in Go, that functions similar to HTML / CSS / SVG  and Qt.
-
-NOTE: Requires Go version `1.18+` -- now using the new generics.
-
 See the [Wiki](https://github.com/goki/gi/wiki) for more docs (increasingly extensive), [Install](https://github.com/goki/gi/wiki/Install) instructions (mostly basic `go build` procedure, but does now depend on `cgo` on all platforms due to `glfw`, so see details for each platform -- for mac you must now install the [Vulkan SDK](https://vulkan.lunarg.com), and [Google Groups goki-gi](https://groups.google.com/forum/#!forum/goki-gi) email list, and the new github [Discussions](https://github.com/goki/gi/discussions) tool.
 
 GoGi uses the [Goki](https://cogentcore.org/core/ki) tree infrastructure to implement a scenegraph-based GUI framework in full native idiomatic Go, with minimal OS-specific backend interfaces based originally on the [Shiny](https://github.com/golang/exp/tree/master/shiny) drivers, now using [go-gl/glfw](https://github.com/go-gl/glfw) and vulkan-based [vgpu](https://cogentcore.org/core/vgpu), and supporting MacOS, Linux, Windows, iOS, and Android.
