@@ -4,7 +4,12 @@
 
 package jsons
 
-import "testing"
+import (
+	"path/filepath"
+	"testing"
+
+	"cogentcore.org/core/grr"
+)
 
 type testStruct struct {
 	A string
@@ -12,36 +17,25 @@ type testStruct struct {
 }
 
 func TestJSON(t *testing.T) {
+	tpath := filepath.Join("testdata", "test.json")
+	tipath := filepath.Join("testdata", "test-indent.json")
+
 	s := &testStruct{A: "aaa", B: 3.14}
-	err := Save(s, "testdata/s.json")
-	if err != nil {
-		t.Error(err)
-	}
+	grr.Test(t, Save(s, tpath))
 	b, err := WriteBytes(s)
-	if err != nil {
-		t.Error(err)
-	}
+	grr.Test(t, err)
 
 	a := &testStruct{}
-	err = Open(a, "testdata/s.json")
-	if err != nil {
-		t.Error(err)
-	}
+	grr.Test(t, Open(a, tpath))
 	if *a != *s {
 		t.Errorf("Open failed to read same data as saved: wanted %v != got %v", s, a)
 	}
 
 	c := &testStruct{}
-	err = ReadBytes(c, b)
-	if err != nil {
-		t.Error(err)
-	}
+	grr.Test(t, ReadBytes(c, b))
 	if *c != *s {
 		t.Errorf("ReadBytes or WriteBytes failed to read same data as saved: wanted %v != got %v", s, c)
 	}
 
-	err = SaveIndent(s, "testdata/s_indent.json")
-	if err != nil {
-		t.Error(err)
-	}
+	grr.Test(t, SaveIndent(s, tipath))
 }
