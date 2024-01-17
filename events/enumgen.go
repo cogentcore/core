@@ -32,15 +32,10 @@ func _DropModsNoOp() {
 
 var _DropModsNameToValueMap = map[string]DropMods{
 	`NoDropMod`: 0,
-	`nodropmod`: 0,
 	`Copy`:      1,
-	`copy`:      1,
 	`Move`:      2,
-	`move`:      2,
 	`Link`:      3,
-	`link`:      3,
 	`Ignore`:    4,
-	`ignore`:    4,
 }
 
 var _DropModsDescMap = map[DropMods]string{
@@ -73,10 +68,6 @@ func (i DropMods) String() string {
 // error if the string is invalid.
 func (i *DropMods) SetString(s string) error {
 	if val, ok := _DropModsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _DropModsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -155,13 +146,9 @@ func _ButtonsNoOp() {
 
 var _ButtonsNameToValueMap = map[string]Buttons{
 	`NoButton`: 0,
-	`nobutton`: 0,
 	`Left`:     1,
-	`left`:     1,
 	`Middle`:   2,
-	`middle`:   2,
 	`Right`:    3,
-	`right`:    3,
 }
 
 var _ButtonsDescMap = map[Buttons]string{
@@ -192,10 +179,6 @@ func (i Buttons) String() string {
 // error if the string is invalid.
 func (i *Buttons) SetString(s string) error {
 	if val, ok := _ButtonsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _ButtonsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -277,19 +260,12 @@ func _SelectModesNoOp() {
 
 var _SelectModesNameToValueMap = map[string]SelectModes{
 	`SelectOne`:        0,
-	`selectone`:        0,
 	`ExtendContinuous`: 1,
-	`extendcontinuous`: 1,
 	`ExtendOne`:        2,
-	`extendone`:        2,
 	`NoSelect`:         3,
-	`noselect`:         3,
 	`Unselect`:         4,
-	`unselect`:         4,
 	`SelectQuiet`:      5,
-	`selectquiet`:      5,
 	`UnselectQuiet`:    6,
-	`unselectquiet`:    6,
 }
 
 var _SelectModesDescMap = map[SelectModes]string{
@@ -326,10 +302,6 @@ func (i SelectModes) String() string {
 // error if the string is invalid.
 func (i *SelectModes) SetString(s string) error {
 	if val, ok := _SelectModesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _SelectModesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -450,97 +422,51 @@ func _TypesNoOp() {
 
 var _TypesNameToValueMap = map[string]Types{
 	`UnknownType`:      0,
-	`unknowntype`:      0,
 	`MouseDown`:        1,
-	`mousedown`:        1,
 	`MouseUp`:          2,
-	`mouseup`:          2,
 	`MouseMove`:        3,
-	`mousemove`:        3,
 	`MouseDrag`:        4,
-	`mousedrag`:        4,
 	`Click`:            5,
-	`click`:            5,
 	`DoubleClick`:      6,
-	`doubleclick`:      6,
 	`TripleClick`:      7,
-	`tripleclick`:      7,
 	`ContextMenu`:      8,
-	`contextmenu`:      8,
 	`LongPressStart`:   9,
-	`longpressstart`:   9,
 	`LongPressEnd`:     10,
-	`longpressend`:     10,
 	`MouseEnter`:       11,
-	`mouseenter`:       11,
 	`MouseLeave`:       12,
-	`mouseleave`:       12,
 	`LongHoverStart`:   13,
-	`longhoverstart`:   13,
 	`LongHoverEnd`:     14,
-	`longhoverend`:     14,
 	`DragStart`:        15,
-	`dragstart`:        15,
 	`DragMove`:         16,
-	`dragmove`:         16,
 	`DragEnter`:        17,
-	`dragenter`:        17,
 	`DragLeave`:        18,
-	`dragleave`:        18,
 	`Drop`:             19,
-	`drop`:             19,
 	`DropDeleteSource`: 20,
-	`dropdeletesource`: 20,
 	`SlideStart`:       21,
-	`slidestart`:       21,
 	`SlideMove`:        22,
-	`slidemove`:        22,
 	`SlideStop`:        23,
-	`slidestop`:        23,
 	`Scroll`:           24,
-	`scroll`:           24,
 	`KeyDown`:          25,
-	`keydown`:          25,
 	`KeyUp`:            26,
-	`keyup`:            26,
 	`KeyChord`:         27,
-	`keychord`:         27,
 	`TouchStart`:       28,
-	`touchstart`:       28,
 	`TouchEnd`:         29,
-	`touchend`:         29,
 	`TouchMove`:        30,
-	`touchmove`:        30,
 	`Magnify`:          31,
-	`magnify`:          31,
 	`Rotate`:           32,
-	`rotate`:           32,
 	`Select`:           33,
-	`select`:           33,
 	`Focus`:            34,
-	`focus`:            34,
 	`FocusLost`:        35,
-	`focuslost`:        35,
 	`Change`:           36,
-	`change`:           36,
 	`Input`:            37,
-	`input`:            37,
 	`Show`:             38,
-	`show`:             38,
 	`Close`:            39,
-	`close`:            39,
 	`Window`:           40,
-	`window`:           40,
 	`WindowResize`:     41,
-	`windowresize`:     41,
 	`WindowPaint`:      42,
-	`windowpaint`:      42,
 	`OS`:               43,
-	`os`:               43,
 	`OSOpenFiles`:      44,
-	`osopenfiles`:      44,
 	`Custom`:           45,
-	`custom`:           45,
 }
 
 var _TypesDescMap = map[Types]string{
@@ -658,10 +584,6 @@ func (i *Types) SetString(s string) error {
 		*i = val
 		return nil
 	}
-	if val, ok := _TypesNameToValueMap[strings.ToLower(s)]; ok {
-		*i = val
-		return nil
-	}
 	return errors.New(s + " is not a valid value for type Types")
 }
 
@@ -735,9 +657,7 @@ func _EventFlagsNoOp() {
 
 var _EventFlagsNameToValueMap = map[string]EventFlags{
 	`Handled`: 0,
-	`handled`: 0,
 	`Unique`:  1,
-	`unique`:  1,
 }
 
 var _EventFlagsDescMap = map[EventFlags]string{
@@ -795,8 +715,6 @@ func (i *EventFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _EventFlagsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _EventFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue
@@ -906,21 +824,13 @@ func _WinActionsNoOp() {
 
 var _WinActionsNameToValueMap = map[string]WinActions{
 	`NoWinAction`:  0,
-	`nowinaction`:  0,
 	`Close`:        1,
-	`close`:        1,
 	`Minimize`:     2,
-	`minimize`:     2,
 	`Move`:         3,
-	`move`:         3,
 	`Focus`:        4,
-	`focus`:        4,
 	`FocusLost`:    5,
-	`focuslost`:    5,
 	`Show`:         6,
-	`show`:         6,
 	`ScreenUpdate`: 7,
-	`screenupdate`: 7,
 }
 
 var _WinActionsDescMap = map[WinActions]string{
@@ -959,10 +869,6 @@ func (i WinActions) String() string {
 // error if the string is invalid.
 func (i *WinActions) SetString(s string) error {
 	if val, ok := _WinActionsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _WinActionsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}

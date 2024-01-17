@@ -9,7 +9,7 @@ import (
 )
 
 // ManipPtType is the [gti.Type] for [ManipPt]
-var ManipPtType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyzv.ManipPt", IDName: "manip-pt", Doc: "ManipPt is a manipulation control point", Directives: []gti.Directive{{Tool: "goki", Directive: "no-new"}}, Embeds: []gti.Field{{Name: "Solid"}}, Instance: &ManipPt{}})
+var ManipPtType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyzv.ManipPt", IDName: "manip-pt", Doc: "ManipPt is a manipulation control point", Directives: []gti.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []gti.Field{{Name: "Solid"}}, Instance: &ManipPt{}})
 
 // KiType returns the [*gti.Type] of [ManipPt]
 func (t *ManipPt) KiType() *gti.Type { return ManipPtType }

@@ -6,7 +6,7 @@ import (
 	"cogentcore.org/core/gti"
 )
 
-var _ = gti.AddType(&gti.Type{Name: "main.Config", IDName: "config", Directives: []gti.Directive{{Tool: "go", Directive: "generate", Args: []string{"goki", "generate", "-add-types", "-add-funcs"}}}, Fields: []gti.Field{{Name: "Name", Doc: "the name of the user"}, {Name: "Age", Doc: "the age of the user"}, {Name: "LikesGo", Doc: "whether the user likes Go"}, {Name: "Build"}, {Name: "Server"}, {Name: "Client"}, {Name: "Dir", Doc: "the directory to build in"}}})
+var _ = gti.AddType(&gti.Type{Name: "main.Config", IDName: "config", Directives: []gti.Directive{{Tool: "go", Directive: "generate", Args: []string{"core", "generate", "-add-types", "-add-funcs"}}}, Fields: []gti.Field{{Name: "Name", Doc: "the name of the user"}, {Name: "Age", Doc: "the age of the user"}, {Name: "LikesGo", Doc: "whether the user likes Go"}, {Name: "Build"}, {Name: "Server"}, {Name: "Client"}, {Name: "Dir", Doc: "the directory to build in"}}})
 
 var _ = gti.AddType(&gti.Type{Name: "main.BuildConfig", IDName: "build-config", Fields: []gti.Field{{Name: "Target", Doc: "the target platform to build for"}, {Name: "Platform", Doc: "the platform to build the executable for"}}})
 
