@@ -29,9 +29,6 @@ var (
 
 func CopyFile(c *config.Config, dst, src string) error {
 	return WriteFile(c, dst, func(w io.Writer) error {
-		if c.Build.PrintOnly {
-			return nil
-		}
 		f, err := os.Open(src)
 		xe.PrintCmd(fmt.Sprintf("cp %s %s", src, dst), err)
 		if err != nil {
@@ -51,10 +48,6 @@ func WriteFile(c *config.Config, filename string, generate func(io.Writer) error
 
 	if err := xe.MkdirAll(filepath.Dir(filename), 0755); err != nil {
 		return err
-	}
-
-	if c.Build.PrintOnly {
-		return generate(io.Discard)
 	}
 
 	f, err := os.Create(filename)

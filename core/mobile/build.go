@@ -95,8 +95,8 @@ func BuildImpl(c *config.Config) (*packages.Package, error) {
 
 	pkg := pkgs[0]
 
-	if pkg.Name != "main" && c.Build.Output != "" {
-		return nil, fmt.Errorf("cannot set -o when building non-main package")
+	if pkg.Name != "main" {
+		return nil, fmt.Errorf("cannot build non-main package")
 	}
 
 	if c.ID == "" {
@@ -146,9 +146,6 @@ func BuildImpl(c *config.Config) (*packages.Package, error) {
 var NmRE = regexp.MustCompile(`[0-9a-f]{8} t _?(?:.*/vendor/)?(golang.org/x.*/[^.]*)`)
 
 func ExtractPkgs(c *config.Config, nm string, path string) (map[string]bool, error) {
-	if c.Build.PrintOnly {
-		return map[string]bool{"cogentcore.org/core/goosi/driver": true}, nil // TODO: fix import paths
-	}
 	r, w := io.Pipe()
 	cmd := exec.Command(nm, path)
 	cmd.Stdout = w
@@ -196,7 +193,7 @@ func GoCmd(c *config.Config, subcmd string, srcs []string, env map[string]string
 func GoCmdAt(c *config.Config, at string, subcmd string, srcs []string, env map[string]string, args ...string) error {
 	cargs := []string{subcmd}
 	// cmd := exec.Command("go", subcmd)
-	tags := c.Build.Tags
+	var tags []string
 	if c.Build.Debug {
 		tags = append(tags, "debug")
 	}
@@ -205,24 +202,6 @@ func GoCmdAt(c *config.Config, at string, subcmd string, srcs []string, env map[
 	}
 	if grog.UserLevel <= slog.LevelInfo {
 		cargs = append(cargs, "-v")
-	}
-	if subcmd != "install" && c.Build.Install {
-		cargs = append(cargs, "-i")
-	}
-	if c.Build.Print {
-		cargs = append(cargs, "-x")
-	}
-	if len(c.Build.GCFlags) != 0 {
-		cargs = append(cargs, "-gcflags", strings.Join(c.Build.GCFlags, ","))
-	}
-	if len(c.Build.LDFlags) != 0 {
-		cargs = append(cargs, "-ldflags", strings.Join(c.Build.LDFlags, ","))
-	}
-	if c.Build.Trimpath {
-		cargs = append(cargs, "-trimpath")
-	}
-	if c.Build.Work {
-		cargs = append(cargs, "-work")
 	}
 	cargs = append(cargs, args...)
 	cargs = append(cargs, srcs...)

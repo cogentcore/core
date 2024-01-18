@@ -107,7 +107,7 @@ func BuildEnvInit(c *config.Config) (cleanup func(), err error) {
 	gopath := GoEnv("GOPATH")
 	for _, p := range filepath.SplitList(gopath) {
 		GoMobilePath = filepath.Join(p, "pkg", "gomobile")
-		if _, err := os.Stat(GoMobilePath); c.Build.PrintOnly || err == nil {
+		if _, err := os.Stat(GoMobilePath); err == nil {
 			break
 		}
 	}
@@ -121,20 +121,11 @@ func BuildEnvInit(c *config.Config) (cleanup func(), err error) {
 	}
 
 	cleanupFn := func() {
-		if c.Build.Work {
-			fmt.Printf("WORK=%s\n", TmpDir)
-			return
-		}
 		xe.RemoveAll(TmpDir)
 	}
-	if c.Build.PrintOnly {
-		TmpDir = "$WORK"
-		cleanupFn = func() {}
-	} else {
-		TmpDir, err = os.MkdirTemp("", "gomobile-work-")
-		if err != nil {
-			return nil, err
-		}
+	TmpDir, err = os.MkdirTemp("", "gomobile-work-")
+	if err != nil {
+		return nil, err
 	}
 	grog.PrintlnInfo("WORK=" + TmpDir)
 
@@ -155,19 +146,17 @@ func EnvInit(c *config.Config) (err error) {
 		for arch, toolchain := range NDK {
 			clang := toolchain.Path(c, ndkRoot, "clang")
 			clangpp := toolchain.Path(c, ndkRoot, "clang++")
-			if !c.Build.PrintOnly {
-				tools := []string{clang, clangpp}
-				if runtime.GOOS == "windows" {
-					// Because of https://github.com/android-ndk/ndk/issues/920,
-					// we require r19c, not just r19b. Fortunately, the clang++.cmd
-					// script only exists in r19c.
-					tools = append(tools, clangpp+".cmd")
-				}
-				for _, tool := range tools {
-					_, err = os.Stat(tool)
-					if err != nil {
-						return fmt.Errorf("no compiler for %s was found in the NDK (tried %s). Make sure your NDK version is >= r19c. Use `sdkmanager --update` to update it", arch, tool)
-					}
+			tools := []string{clang, clangpp}
+			if runtime.GOOS == "windows" {
+				// Because of https://github.com/android-ndk/ndk/issues/920,
+				// we require r19c, not just r19b. Fortunately, the clang++.cmd
+				// script only exists in r19c.
+				tools = append(tools, clangpp+".cmd")
+			}
+			for _, tool := range tools {
+				_, err = os.Stat(tool)
+				if err != nil {
+					return fmt.Errorf("no compiler for %s was found in the NDK (tried %s). Make sure your NDK version is >= r19c. Use `sdkmanager --update` to update it", arch, tool)
 				}
 			}
 			AndroidEnv[arch] = map[string]string{
@@ -376,10 +365,6 @@ func NDKVersion(ndkRoot string) string {
 // specified Android targets. For details of NDK locations, see
 // https://github.com/android/ndk-samples/wiki/Configure-NDK-Path
 func NDKRoot(c *config.Config, targets ...config.Platform) (string, error) {
-	if c.Build.PrintOnly {
-		return "$NDK_PATH", nil
-	}
-
 	// Try the ANDROID_NDK_HOME variable.  This approach is deprecated, but it
 	// has the highest priority because it represents an explicit user choice.
 	if ndkRoot := os.Getenv("ANDROID_NDK_HOME"); ndkRoot != "" {
@@ -421,9 +406,6 @@ func NDKRoot(c *config.Config, targets ...config.Platform) (string, error) {
 }
 
 func EnvClang(c *config.Config, sdkName string) (clang, cflags string, err error) {
-	if c.Build.PrintOnly {
-		return sdkName + "-clang", "-isysroot " + sdkName, nil
-	}
 	out, err := xe.Minor().Output("xcrun", "--sdk", sdkName, "--find", "clang")
 	if err != nil {
 		return "", "", fmt.Errorf("xcrun --find: %v\n%s", err, out)
