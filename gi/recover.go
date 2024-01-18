@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"runtime/debug"
 
 	"cogentcore.org/core/events"
@@ -27,14 +28,16 @@ func HandleRecover(r any) {
 	// right stack for debugging when panicking
 	quit := make(chan struct{})
 
-	b := NewBody("app-exited-unexpectedly").AddTitle(goosi.TheApp.Name() + " exited unexpectedly")
+	b := NewBody("app-stopped-unexpectedly").AddTitle(goosi.TheApp.Name() + " stopped unexpectedly").
+		AddText("There was an unexpected error and " + goosi.TheApp.Name() + " stopped running.")
 	b.AddBottomBar(func(pw Widget) {
 		NewButton(pw).SetText("Details").SetType(ButtonOutlined).OnClick(func(e events.Event) {
 			d := NewBody("crash-details").AddTitle("Crash details")
-			NewLabel(d).SetText(stack).Style(func(s *styles.Style) {
+			NewLabel(d).SetText(fmt.Sprintf("panic: %v\n\n%s", r, stack)).Style(func(s *styles.Style) {
 				s.Font.Family = string(AppearanceSettings.MonoFont)
+				s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 			})
-			d.AddOkOnly().NewDialog(b).Run()
+			d.AddOkOnly().NewFullDialog(b).Run()
 		})
 		NewButton(pw).SetText("Quit").OnClick(func(e events.Event) {
 			quit <- struct{}{}

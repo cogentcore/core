@@ -200,7 +200,7 @@ const (
 	// Use the SetTextWrap method to set both.
 	WhiteSpaceNowrap
 
-	// WhiteSpacePre means that whitespace is preserved by the browser. Text
+	// WhiteSpacePre means that whitespace is preserved. Text
 	// will only wrap on line breaks. Acts like the <pre> tag in HTML.  This
 	// invokes a different hand-written parser because the default golang
 	// parser automatically throws away whitespace
@@ -211,8 +211,8 @@ const (
 	// breaks
 	WhiteSpacePreLine
 
-	// WhiteSpacePreWrap means that whitespace is preserved by the
-	// browser. Text will wrap when necessary, and on line breaks
+	// WhiteSpacePreWrap means that whitespace is preserved.
+	// Text will wrap when necessary, and on line breaks
 	WhiteSpacePreWrap
 )
 
