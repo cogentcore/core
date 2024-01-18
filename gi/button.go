@@ -350,13 +350,6 @@ func (bt *Button) OpenMenu(e events.Event) bool {
 //////////////////////////////////////////////////////////////////
 //		Events
 
-func (bt *Button) ShowContextMenu(e events.Event) {
-	bt.OpenMenu(e)
-}
-
-func (bt *Button) HandleClickMenu() {
-}
-
 func (bt *Button) HandleClickDismissMenu() {
 	// note: must be called last so widgets aren't deleted when the click arrives
 	bt.OnLast(events.Click, func(e events.Event) {
