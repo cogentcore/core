@@ -219,7 +219,9 @@ func (wb *WidgetBase) HandleEvent(ev events.Event) {
 	}
 	s := &wb.Styles
 	state := s.State
+	wb.FirstListeners.Call(ev)
 	wb.Listeners.Call(ev)
+	wb.FinalListeners.Call(ev)
 	// widget can be killed after event
 	if wb.This() == nil || wb.Is(ki.Deleted) {
 		return
