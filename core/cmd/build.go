@@ -13,7 +13,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"cogentcore.org/core/core/config"
 	"cogentcore.org/core/core/mobile"
@@ -49,15 +48,7 @@ func Build(c *config.Config) error { //gti:add
 			return mobile.Build(c)
 		}
 		if platform.OS == "web" {
-			// need to get real output location so that commands work
-			if c.Build.Output == "" {
-				c.Build.Output = filepath.Join(".core", "bin", "web", "app.wasm")
-			}
-			// we must end with a wasm file
-			if !strings.Contains(filepath.Base(c.Build.Output), ".wasm") {
-				c.Build.Output = filepath.Join(c.Build.Output, "app.wasm")
-			}
-			err := os.MkdirAll(filepath.Dir(c.Build.Output), 0777)
+			err := os.MkdirAll(filepath.Join(".core", "bin", "web"), 0777)
 			if err != nil {
 				return err
 			}
@@ -78,11 +69,7 @@ func BuildDesktop(c *config.Config, platform config.Platform) error {
 	xc.Env["GOOS"] = platform.OS
 	xc.Env["GOARCH"] = platform.Arch
 
-	// need to get real output location so that install commands work later
-	if c.Build.Output == "" {
-		c.Build.Output = filepath.Join(".core", "bin", platform.OS, c.Name)
-	}
-	err := os.MkdirAll(filepath.Dir(c.Build.Output), 0777)
+	err := os.MkdirAll(filepath.Join(".core", "bin", platform.OS), 0777)
 	if err != nil {
 		return err
 	}
@@ -92,12 +79,14 @@ func BuildDesktop(c *config.Config, platform config.Platform) error {
 	}
 	// see https://stackoverflow.com/questions/30005878/avoid-debugging-information-on-golang
 	ldflags := "-s -w"
+	output := filepath.Join(".core", "bin", platform.OS, c.Name)
 	if platform.OS == "windows" {
-		c.Build.Output += ".exe"
+		output += ".exe"
+		// TODO(kai)
 		// see https://stackoverflow.com/questions/23250505/how-do-i-create-an-executable-from-golang-that-doesnt-open-a-console-window-whe
 		// tags = append(tags, "-ldflags", "-H=windowsgui")
 	}
-	tags = append(tags, "-ldflags", ldflags, "-o", c.Build.Output, c.Build.Package)
+	tags = append(tags, "-ldflags", ldflags, "-o", output)
 
 	err = xc.Run("go", tags...)
 	if err != nil {

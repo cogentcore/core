@@ -70,7 +70,7 @@ func PackLinux(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	err = xe.Run("cp", "-p", c.Build.Output, filepath.Join(ulbpath, anm))
+	err = xe.Run("cp", "-p", filepath.Join(bpath, c.Name), filepath.Join(ulbpath, anm))
 	if err != nil {
 		return err
 	}
@@ -207,7 +207,7 @@ func PackDarwin(c *config.Config) error {
 		return err
 	}
 
-	err = xe.Run("cp", "-p", c.Build.Output, filepath.Join(mpath, anm))
+	err = xe.Run("cp", "-p", filepath.Join(bpath, c.Name), filepath.Join(mpath, anm))
 	if err != nil {
 		return err
 	}
