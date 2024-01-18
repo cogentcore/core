@@ -238,26 +238,41 @@ type WidgetBase struct {
 	// Stylers are a slice of functions that are called in sequential
 	// ascending order (so the last added styler is called last and
 	// thus overrides all other functions) to style the element.
-	// These should be set using Style function, which can be called
-	// by end-user and internal code. FirstStylers and FinalStylers
-	// are called before and after these stylers, respectively.
+	// These should be set using Style function. FirstStylers and
+	// FinalStylers are called before and after these stylers, respectively.
 	Stylers []func(s *styles.Style) `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// FirstStylers are a slice of functions that are called in sequential
 	// ascending order (so the last added styler is called last and
 	// thus overrides all other functions) to style the element.
-	// These should be set using StyleFirst function, which can be called
-	// by end-user and internal code. These stylers are called before
-	// Stylers and FinalStylers.
+	// These should be set using StyleFirst function. These stylers
+	// are called before Stylers and FinalStylers.
 	FirstStylers []func(s *styles.Style) `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// FinalStylers are a slice of functions that are called in sequential
 	// ascending order (so the last added styler is called last and
 	// thus overrides all other functions) to style the element.
-	// These should be set using StyleFinal function, which can be called
-	// by end-user and internal code. These stylers are called after
-	// FirstStylers and Stylers.
+	// These should be set using StyleFinal function. These stylers
+	// are called after FirstStylers and Stylers.
 	FinalStylers []func(s *styles.Style) `copy:"-" json:"-" xml:"-" set:"-"`
+
+	// Listeners are event listener functions for processing events on this widget.
+	// They are called in sequential descending order (so the last added listener
+	// is called first). They should be added using the On function. FirstListeners
+	// and FinalListeners are called before and after these listeners, respectively.
+	Listeners events.Listeners `copy:"-" json:"-" xml:"-" set:"-"`
+
+	// FirstListeners are event listener functions for processing events on this widget.
+	// They are called in sequential descending order (so the last added listener
+	// is called first). They should be added using the OnFirst function. These listeners
+	// are called before Listeners and FinalListeners.
+	FirstListeners events.Listeners `copy:"-" json:"-" xml:"-" set:"-"`
+
+	// FinalListeners are event listener functions for processing events on this widget.
+	// They are called in sequential descending order (so the last added listener
+	// is called first). They should be added using the OnFinal function. These listeners
+	// are called after FirstListeners and Listeners.
+	FinalListeners events.Listeners `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// A slice of functions to call on all widgets that are added as children
 	// to this widget or its children.  These functions are called in sequential
@@ -265,15 +280,6 @@ type WidgetBase struct {
 	// override anything set by the other ones. These should be set using
 	// OnWidgetAdded, which can be called by both end-user and internal code.
 	OnWidgetAdders []func(w Widget) `copy:"-" json:"-" xml:"-" set:"-"`
-
-	// Listeners are event listener functions for processing events on this widget.
-	// type specific Listeners are added in OnInit when the widget is initialized.
-	Listeners events.Listeners `copy:"-" json:"-" xml:"-" set:"-"`
-
-	// PriorityEvents has event type(s) that this widget gets sent first.
-	// Events are sent in depth-first order, so this enables outer container
-	// widgets to get first access to these events.
-	PriorityEvents []events.Types `set:"-"`
 
 	// ContextMenus is a slice of menu functions to call to construct
 	// the widget's context menu on an [events.ContextMenu]. The
