@@ -42,9 +42,6 @@ type App struct { //gti:add
 	// Nm is the name of the app.
 	Nm string `label:"Name"`
 
-	// Abt is the about information for the app.
-	Abt string `label:"About"`
-
 	// OpenFls are files that have been set by the operating system to open at startup.
 	OpenFls []string `label:"Open files"`
 
@@ -117,14 +114,6 @@ func (a *App) Name() string {
 
 func (a *App) SetName(name string) {
 	a.Nm = name
-}
-
-func (a *App) About() string {
-	return a.Abt
-}
-
-func (a *App) SetAbout(about string) {
-	a.Abt = about
 }
 
 func (a *App) OpenFiles() []string {

@@ -108,7 +108,6 @@ func (a *App) SetIconBytes(b []byte) *App {
 // properties on the App.
 func (a *App) Config() {
 	goosi.TheApp.SetName(a.Name)
-	goosi.TheApp.SetAbout(a.About)
 }
 
 // DataDir returns the application-specific data directory:

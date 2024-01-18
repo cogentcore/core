@@ -92,13 +92,6 @@ type App interface {
 	// It ensures that the directory exists first.
 	CogentCoreDataDir() string
 
-	// About is an informative message about the app.  Can use HTML
-	// formatting, including links.
-	About() string
-
-	// SetAbout sets the about info.
-	SetAbout(about string)
-
 	// OpenURL opens the given URL in the user's default browser.  On Linux
 	// this requires that xdg-utils package has been installed -- uses
 	// xdg-open command.
