@@ -19,7 +19,6 @@ import (
 	"cogentcore.org/core/enums/enumgen"
 	"cogentcore.org/core/glop/sentence"
 	"cogentcore.org/core/gti/gtigen"
-	"cogentcore.org/core/xe"
 )
 
 // TODO: make all of the target fields enums
@@ -71,46 +70,15 @@ type Config struct { //gti:add
 
 type Build struct { //gti:add
 
-	// the path of the package to build
-	Package string `def:"." posarg:"0" required:"-"`
-
 	// the target platforms to build executables for
-	Target []Platform `flag:"t,target" save:"-"`
+	Target []Platform `flag:"t,target" posarg:"0" required:"-" save:"-"`
 
-	// the output file name; if not specified, it depends on the package being built
-	Output string `flag:"o,output"`
-
-	// whether to build/run the app in debug mode; this currently only works on mobile platforms
+	// whether to build/run the app in debug mode, which sets
+	// the "debug" tag when building. On iOS and Android, this
+	// also prints the program output.
 	Debug bool `flag:"d,debug"`
 
-	// force rebuilding of packages that are already up-to-date
-	Rebuild bool `flag:"a,rebuild"`
-
-	// install the generated executable
-	Install bool `flag:"i,install"`
-
-	// print the commands but do not run them
-	PrintOnly bool `flag:"n,print-only"`
-
-	// print the commands
-	Print bool `flag:"x,print"`
-
-	// arguments to pass on each go tool compile invocation
-	GCFlags []string
-
-	// arguments to pass on each go tool link invocation
-	LDFlags []string
-
-	// a comma-separated list of additional build tags to consider satisfied during the build
-	Tags []string
-
-	// remove all file system paths from the resulting executable. Instead of absolute file system paths, the recorded file names will begin either a module path@version (when using modules), or a plain import path (when using the standard library, or GOPATH).
-	Trimpath bool
-
-	// print the name of the temporary work directory and do not delete it when exiting
-	Work bool
-
-	// the minimal version of the iOS SDK to compile against
+	// the minimum version of the iOS SDK to compile against
 	IOSVersion string `def:"13.0"`
 
 	// the minimum supported Android SDK (uses-sdk/android:minSdkVersion in AndroidManifest.xml)
@@ -167,7 +135,6 @@ type Generate struct { //gti:add
 }
 
 func (c *Config) OnConfig(cmd string) error {
-	xe.SetMajor(xe.Major().SetPrintOnly(c.Build.PrintOnly))
 	if c.Name == "" || c.ID == "" {
 		cdir, err := os.Getwd()
 		if err != nil {
