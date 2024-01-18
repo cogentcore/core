@@ -27,6 +27,12 @@ type App interface {
 	// for conditionalizing behavior
 	Platform() Platforms
 
+	// SystemPlatform returns the platform type of the underlying
+	// system, which can be used for conditionalizing behavior. On platforms
+	// other than [Web], this is the same as [App.Platform]. On [Web], it
+	// returns the platform of the underlying operating system.
+	SystemPlatform() Platforms
+
 	// Name is the overall name of the application -- used for specifying an
 	// application-specific preferences directory, etc
 	Name() string

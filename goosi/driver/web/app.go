@@ -84,20 +84,31 @@ func (a *App) SetSystemWindow() {
 	a.AddEventListeners()
 
 	ua := js.Global().Get("navigator").Get("userAgent").String()
-	lua := strings.ToLower(ua)
-	if strings.Contains(lua, "android") {
-		a.UnderlyingPlatform = goosi.Android
-	} else if strings.Contains(lua, "ipad") || strings.Contains(lua, "iphone") || strings.Contains(lua, "ipod") {
-		a.UnderlyingPlatform = goosi.IOS
-	} else {
-		// TODO(kai/web): more specific desktop platform
-		a.UnderlyingPlatform = goosi.Windows
-	}
+	a.UnderlyingPlatform = UserAgentToOS(ua)
 
 	a.Resize()
 	a.EvMgr.Window(events.WinShow)
 	a.EvMgr.Window(events.ScreenUpdate)
 	a.EvMgr.Window(events.WinFocus)
+}
+
+// UserAgentToOS converts the given user agent string to a [goosi.Platforms] value.
+func UserAgentToOS(ua string) goosi.Platforms {
+	lua := strings.ToLower(ua)
+	switch {
+	case strings.Contains(lua, "android"):
+		return goosi.Android
+	case strings.Contains(lua, "ipad"),
+		strings.Contains(lua, "iphone"),
+		strings.Contains(lua, "ipod"):
+		return goosi.IOS
+	case strings.Contains(lua, "mac"):
+		return goosi.MacOS
+	case strings.Contains(lua, "win"):
+		return goosi.Windows
+	default:
+		return goosi.Linux
+	}
 }
 
 // Resize updates the app sizing information and sends a Resize event.
@@ -148,6 +159,10 @@ func (a *App) DataDir() string {
 
 func (a *App) Platform() goosi.Platforms {
 	return goosi.Web
+}
+
+func (a *App) SystemPlatform() goosi.Platforms {
+	return a.UnderlyingPlatform
 }
 
 func (a *App) OpenURL(url string) {

@@ -108,6 +108,11 @@ func (a *App) StopMain() {
 	a.MainDone <- struct{}{}
 }
 
+func (a *App) SystemPlatform() goosi.Platforms {
+	// same as Platform by default
+	return a.This.Platform()
+}
+
 func (a *App) Name() string {
 	return a.Nm
 }
