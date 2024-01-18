@@ -395,9 +395,6 @@ func (ly *Layout) HandleKeys() {
 
 // FocusOnName processes key events to look for an element starting with given name
 func (ly *Layout) FocusOnName(e events.Event) bool {
-	if len(ly.PriorityEvents) > 0 { // don't do for priority
-		return false
-	}
 	if DebugSettings.KeyEventTrace {
 		fmt.Printf("Layout FocusOnName: %v\n", ly.Path())
 	}

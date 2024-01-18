@@ -121,12 +121,6 @@ type EventMgr struct {
 	// Use widget key event processing for more local key functions)
 	Shortcuts Shortcuts
 
-	// PriorityFocus are widgets with Focus PriorityEvents
-	PriorityFocus []Widget
-
-	// PriorityOther are widgets with other PriorityEvents types
-	PriorityOther []Widget
-
 	// source data from DragStart event
 	DragData any
 }
@@ -187,17 +181,6 @@ func (em *EventMgr) HandleFocusEvent(e events.Event) {
 			em.PrevFocus = nil
 		default:
 			em.FocusFirst()
-		}
-	}
-	if em.PriorityFocus != nil {
-		for _, wi := range em.PriorityFocus {
-			wi.HandleEvent(e)
-			if e.IsHandled() {
-				if DebugSettings.FocusTrace {
-					fmt.Println(em.Scene, "PriorityFocus Handled:", wi)
-				}
-				break
-			}
 		}
 	}
 	if !e.IsHandled() && em.Focus != nil {
@@ -1159,26 +1142,13 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 /////////////////////////////////////////////////////////////////////////////////
 // Shortcuts
 
-// GetPriorityWidgets gathers Widgets with PriorityEvents set
-// and also all widgets with Shortcuts
+// GetPriorityWidgets gathers all Widgets with Shortcuts
 func (em *EventMgr) GetPriorityWidgets() {
-	em.PriorityFocus = nil
-	em.PriorityOther = nil
 	em.Shortcuts = nil
 	em.Scene.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		if bt := AsButton(wi.This()); bt != nil {
 			if bt.Shortcut != "" {
 				em.AddShortcut(bt.Shortcut, bt)
-			}
-		}
-		if wb.PriorityEvents == nil {
-			return ki.Continue
-		}
-		for _, tp := range wb.PriorityEvents {
-			if tp.IsKey() {
-				em.PriorityFocus = append(em.PriorityFocus, wi)
-			} else {
-				em.PriorityOther = append(em.PriorityOther, wi)
 			}
 		}
 		return ki.Continue
