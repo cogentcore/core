@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/Masterminds/semver/v3 v3.2.1
-	github.com/Masterminds/vcs v1.13.3
+  	github.com/Masterminds/vcs v1.13.3
 	github.com/akutz/sortfold v0.2.1
 	github.com/alecthomas/chroma/v2 v2.12.0
 	github.com/anthonynsimon/bild v0.13.0

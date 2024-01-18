@@ -60,6 +60,10 @@ func (gl *GoLang) ParseFile(fss *pi.FileStates, txt []byte) {
 		return
 	}
 	pfs := fss.StartProc(txt) // current processing one
+	ext := filepath.Ext(pfs.Src.Filename)
+	if ext == ".mod" { // note: mod doesn't parse!
+		return
+	}
 	// fmt.Println("\nstarting Parse:", pfs.Src.Filename)
 	// lprf := prof.Start("LexAll")
 	pr.LexAll(pfs)
@@ -69,6 +73,7 @@ func (gl *GoLang) ParseFile(fss *pi.FileStates, txt []byte) {
 	// pprf.End()
 	fss.EndProc() // only symbols still need locking, done separately
 	path, _ := filepath.Split(pfs.Src.Filename)
+	// fmt.Println("done parse")
 	if len(pfs.ParseState.Scopes) > 0 { // should be for complete files, not for snippets
 		pkg := pfs.ParseState.Scopes[0]
 		pfs.Syms[pkg.Name] = pkg // keep around..
@@ -78,6 +83,7 @@ func (gl *GoLang) ParseFile(fss *pi.FileStates, txt []byte) {
 			pfs.WaitGp.Add(1)
 			gl.AddPathToSyms(pfs, path)
 			gl.AddImportsToExts(fss, pfs, pkg) // will do ResolveTypes when it finishes
+			// fmt.Println("done import")
 		}()
 	} else {
 		if TraceTypes {
@@ -87,6 +93,7 @@ func (gl *GoLang) ParseFile(fss *pi.FileStates, txt []byte) {
 		if pfs.Ast.HasChildren() {
 			pfs.Ast.DeleteChildren(true)
 		}
+		// fmt.Println("done no import")
 	}
 }
 
