@@ -180,10 +180,10 @@ func (tf *TextField) SetStyles() {
 		s.Min.X.Ch(20)
 		s.Max.X.Ch(60)
 		s.Padding.Set(units.Dp(8), units.Dp(8))
-		if tf.LeadingIcon.IsValid() {
+		if tf.LeadingIcon.IsSet() {
 			s.Padding.Left.Dp(12)
 		}
-		if tf.TrailingIcon.IsValid() {
+		if tf.TrailingIcon.IsSet() {
 			s.Padding.Right.Dp(12)
 		}
 		s.Text.Align = styles.Start
@@ -1673,11 +1673,11 @@ func (tf *TextField) ConfigWidget() {
 
 	lii, tii := -1, -1
 	if !tf.IsReadOnly() {
-		if tf.LeadingIcon.IsValid() {
+		if tf.LeadingIcon.IsSet() {
 			config.Add(ButtonType, "lead-icon")
 			lii = 0
 		}
-		if tf.TrailingIcon.IsValid() {
+		if tf.TrailingIcon.IsSet() {
 			config.Add(StretchType, "trail-icon-str")
 			config.Add(ButtonType, "trail-icon")
 			if lii == -1 {

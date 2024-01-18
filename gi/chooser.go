@@ -227,7 +227,7 @@ func (ch *Chooser) ConfigWidget() {
 
 	ici := -1
 	var lbi, txi, indi int
-	if ch.Icon.IsValid() && !ch.Editable {
+	if ch.Icon.IsSet() && !ch.Editable {
 		config.Add(IconType, "icon")
 		ici = 0
 	}
@@ -240,7 +240,7 @@ func (ch *Chooser) ConfigWidget() {
 		lbi = len(config)
 		config.Add(LabelType, "label")
 	}
-	if !ch.Indicator.IsValid() {
+	if !ch.Indicator.IsSet() {
 		ch.Indicator = icons.KeyboardArrowRight
 	}
 	indi = len(config)

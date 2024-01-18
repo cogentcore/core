@@ -705,7 +705,7 @@ func (tb *Tab) ConfigWidget() {
 	ici := -1
 	lbi := -1
 	clsi := -1
-	if tb.Icon.IsValid() {
+	if tb.Icon.IsSet() {
 		ici = len(config)
 		config.Add(IconType, "icon")
 	}
@@ -713,7 +713,7 @@ func (tb *Tab) ConfigWidget() {
 		lbi = len(config)
 		config.Add(LabelType, "label")
 	}
-	if tb.Type.Effective(tb) == FunctionalTabs && tb.CloseIcon.IsValid() {
+	if tb.Type.Effective(tb) == FunctionalTabs && tb.CloseIcon.IsSet() {
 		clsi = len(config)
 		config.Add(ButtonType, "close")
 	}

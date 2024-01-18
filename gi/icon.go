@@ -74,7 +74,7 @@ func (ic *Icon) SetIconUpdate(icon icons.Icon) *Icon {
 // message if not found etc, and returning true if a new icon was actually set.
 // Does nothing and returns false if IconName is already == icon name.
 func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
-	if !icon.IsValid() {
+	if icon.IsNil() {
 		ic.SVG.DeleteAll()
 		ic.Config()
 		return false, nil

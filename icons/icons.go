@@ -79,6 +79,12 @@ func (i Icon) IsNil() bool {
 	return i == "" || i == None
 }
 
+// IsSet returns whether the icon is set to a value other than "" or [None].
+// It is the opposite of [Icon.IsNil].
+func (i Icon) IsSet() bool {
+	return !i.IsNil()
+}
+
 // IsValid returns whether the icon name corresponds to
 // a valid existing icon.
 func (i Icon) IsValid() bool {

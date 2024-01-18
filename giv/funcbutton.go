@@ -14,7 +14,6 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
-	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/glop/sentence"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
@@ -235,7 +234,7 @@ func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButto
 	// we default to the icon with the same name as
 	// the function, if it exists
 	ic := icons.Icon(strcase.ToSnake(snm))
-	if ok, err := dirs.FileExistsFS(icons.Icons, ic.Filename()); err == nil && ok {
+	if ic.IsValid() {
 		fb.SetIcon(ic)
 	}
 	fb.OnClick(func(e events.Event) {

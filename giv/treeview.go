@@ -506,7 +506,7 @@ func (tv *TreeView) ConfigWidget() {
 	parts := tv.NewParts()
 	config := ki.Config{}
 	config.Add(gi.SwitchType, "branch")
-	if tv.Icon.IsValid() {
+	if tv.Icon.IsSet() {
 		config.Add(gi.IconType, "icon")
 	}
 	config.Add(gi.LabelType, "label")
@@ -517,7 +517,7 @@ func (tv *TreeView) ConfigWidget() {
 			wb.Config()
 		}
 	}
-	if tv.Icon.IsValid() {
+	if tv.Icon.IsSet() {
 		if ic, ok := tv.IconPart(); ok {
 			ic.SetIcon(tv.Icon)
 		}

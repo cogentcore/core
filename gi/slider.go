@@ -509,7 +509,7 @@ func (sr *Slider) HandleKeys() {
 // 	Config
 
 func (sr *Slider) ConfigWidget() {
-	if !sr.Icon.IsValid() {
+	if sr.Icon.IsNil() {
 		if sr.Parts != nil {
 			sr.DeleteParts()
 		}
@@ -587,7 +587,7 @@ func (sr *Slider) RenderSlider() {
 		tpos.SetAddDim(od, 0.5*sz.Dim(od)) // ctr
 
 		// render thumb as icon or box
-		if sr.Icon.IsValid() && sr.Parts.HasChildren() {
+		if sr.Icon.IsSet() && sr.Parts.HasChildren() {
 			sr.RenderUnlock()
 			ic := sr.Parts.Child(0).(*Icon)
 			icsz := ic.Geom.Size.Actual.Content
