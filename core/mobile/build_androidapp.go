@@ -17,7 +17,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"cogentcore.org/core/core/config"
 	"cogentcore.org/core/core/mobile/binres"
@@ -106,39 +105,26 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 		return nil, err
 	}
 
-	if c.Build.Output == "" {
-		c.Build.Output = filepath.Join(".core", "bin", "android", c.Name+".apk")
-	}
-	if !strings.HasSuffix(c.Build.Output, ".apk") {
-		return nil, fmt.Errorf("output file name %q does not end in '.apk'", c.Build.Output)
-	}
-	err = os.MkdirAll(filepath.Dir(c.Build.Output), 0777)
+	err = os.MkdirAll(filepath.Join(".core", "bin", "android"), 0777)
 	if err != nil {
 		return nil, err
 	}
 	var out io.Writer
-	if !c.Build.PrintOnly {
-		f, err := os.Create(c.Build.Output)
-		if err != nil {
-			return nil, err
-		}
-		defer func() {
-			if cerr := f.Close(); err == nil {
-				err = cerr
-			}
-		}()
-		out = f
+	f, err := os.Create(filepath.Join(".core", "bin", "android", c.Name+".apk"))
+	if err != nil {
+		return nil, err
 	}
+	defer func() {
+		if cerr := f.Close(); err == nil {
+			err = cerr
+		}
+	}()
+	out = f
 
 	var apkw *Writer
-	if !c.Build.PrintOnly {
-		apkw = NewWriter(out, privKey)
-	}
+	apkw = NewWriter(out, privKey)
 	apkwCreate := func(name string) (io.Writer, error) {
 		grog.PrintfInfo("apk: %s\n", name)
-		if c.Build.PrintOnly {
-			return io.Discard, nil
-		}
 		return apkw.Create(name)
 	}
 	apkwWriteFile := func(dst, src string) error {
@@ -146,15 +132,13 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 		if err != nil {
 			return err
 		}
-		if !c.Build.PrintOnly {
-			f, err := os.Open(src)
-			if err != nil {
-				return err
-			}
-			defer f.Close()
-			if _, err := io.Copy(w, f); err != nil {
-				return err
-			}
+		f, err := os.Open(src)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+		if _, err := io.Copy(w, f); err != nil {
+			return err
 		}
 		return nil
 	}
@@ -245,10 +229,8 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 
 	// TODO: add gdbserver to apk?
 
-	if !c.Build.PrintOnly {
-		if err := apkw.Close(); err != nil {
-			return nil, err
-		}
+	if err := apkw.Close(); err != nil {
+		return nil, err
 	}
 
 	// TODO: return nmpkgs

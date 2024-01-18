@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// TODO(kai): maybe fix these tests at some point
+
 package mobile
 
 import (
@@ -81,23 +83,12 @@ func TestAndroidBuild(t *testing.T) {
 	c := &config.Config{}
 	defer func() {
 		xe.SetMajor(nil)
-		c.Build.PrintOnly = false
-		c.Build.Print = false
 	}()
-	c.Build.PrintOnly = true
-	c.Build.Print = true
-	c.Build.Output = "basic.apk"
 	c.Build.Target = []config.Platform{{OS: "android", Arch: "arm"}}
 	gopath = filepath.ToSlash(filepath.SplitList(GoEnv("GOPATH"))[0])
 	if GOOS == "windows" {
 		os.Setenv("HOMEDRIVE", "C:")
 	}
-	c.Build.Package = "cogentcore.org/core/goosi/examples/drawtri"
-	oldTags := c.Build.Tags
-	c.Build.Tags = []string{"tag1"}
-	defer func() {
-		c.Build.Tags = oldTags
-	}()
 	err := Build(c)
 	if err != nil {
 		t.Log(buf.String())
