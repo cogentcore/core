@@ -257,6 +257,11 @@ func (tb *Toolbar) StdOverflowMenu(m *Scene) { //gti:add
 		NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keyfun.Cut)
 		NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keyfun.Paste)
 	})
+
+	// no window menu on single-window platforms
+	if Platform().IsMobile() {
+		return
+	}
 	NewButton(m).SetText("Window").SetMenu(func(m *Scene) {
 		NewButton(m).SetText("Focus next").SetIcon(icons.CenterFocusStrong).
 			OnClick(func(e events.Event) {
