@@ -67,7 +67,7 @@ func PackagesConfig(c *config.Config, t *config.Platform) *packages.Config {
 	config := &packages.Config{}
 	// Add CGO_ENABLED=1 explicitly since Cgo is disabled when GOOS is different from host OS.
 	config.Env = append(os.Environ(), "GOARCH="+t.Arch, "GOOS="+PlatformOS(t.OS), "CGO_ENABLED=1")
-	tags := append(c.Build.Tags[:], PlatformTags(t.OS)...)
+	tags := PlatformTags(t.OS)
 
 	if len(tags) > 0 {
 		config.BuildFlags = []string{"-tags=" + strings.Join(tags, ",")}
@@ -79,7 +79,7 @@ func PackagesConfig(c *config.Config, t *config.Platform) *packages.Config {
 func GetModuleVersions(c *config.Config, targetPlatform string, targetArch string, src string) (*modfile.File, error) {
 	xc := xe.Minor().SetDir(src).SetEnv("GOOS", PlatformOS(targetPlatform)).SetEnv("GOARCH", targetArch)
 
-	tags := append(c.Build.Tags[:], PlatformTags(targetPlatform)...)
+	tags := PlatformTags(targetPlatform)
 
 	// TODO(hyangah): probably we don't need to add all the dependencies.
 	output, err := xc.Output("go", "list", "-m", "-json", "-tags="+strings.Join(tags, ","), "all")
@@ -182,9 +182,6 @@ func AreGoModulesUsed() (bool, error) {
 
 func Symlink(c *config.Config, src, dst string) error {
 	xe.PrintCmd(fmt.Sprintf("ln -s %s %s", src, dst), nil)
-	if c.Build.PrintOnly {
-		return nil
-	}
 	if GOOS == "windows" {
 		return DoCopyAll(dst, src) // TODO: do we need to do this?
 	}
@@ -232,18 +229,4 @@ func GoEnv(name string) string {
 		panic(err) // the Go tool was tested to work earlier
 	}
 	return strings.TrimSpace(string(val))
-}
-
-// Major is a replacement for [xe.Major] that also sets the TMP environment
-// variables based on the config options, operating system, and [TmpDir].
-func Major(c *config.Config) *xe.Config {
-	xc := xe.Major()
-	if c.Build.Work {
-		if GOOS == "windows" {
-			xc.SetEnv("TEMP", TmpDir).SetEnv("TMP", TmpDir)
-		} else {
-			xc.SetEnv("TMPDIR", TmpDir)
-		}
-	}
-	return xc
 }
