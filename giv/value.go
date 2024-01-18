@@ -164,7 +164,7 @@ type Value interface {
 	// ConfigWidget configures a widget of WidgetType for representing the
 	// value, including setting up the OnChange event listener to set the value
 	// when the user edits it (values are always set immediately when the
-	// widget is updated).  Note: use OnLast(events.Change) to ensure that
+	// widget is updated).  Note: use OnFinal(events.Change, ...) to ensure that
 	// any other change modifiers have had a chance to intervene first.
 	ConfigWidget(w gi.Widget)
 

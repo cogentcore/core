@@ -444,7 +444,7 @@ func (vv *StructInlineValue) ConfigWidget(w gi.Widget) {
 	sv.TmpSave = vv.TmpSave
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	sv.SetStruct(vv.Value.Interface())
-	sv.OnLast(events.Change, func(e events.Event) {
+	sv.OnFinal(events.Change, func(e events.Event) {
 		vv.SendChange()
 	})
 	vv.UpdateWidget()
@@ -585,7 +585,7 @@ func (vv *SliceInlineValue) ConfigWidget(w gi.Widget) {
 	sv.TmpSave = vv.TmpSave
 	// npv := vv.Value.Elem()
 	sv.SetSlice(vv.Value.Interface())
-	sv.OnLast(events.Change, func(e events.Event) {
+	sv.OnFinal(events.Change, func(e events.Event) {
 		vv.SendChange()
 	})
 }
@@ -688,7 +688,7 @@ func (vv *MapInlineValue) ConfigWidget(w gi.Widget) {
 	sv.TmpSave = vv.TmpSave
 	// npv := vv.Value.Elem()
 	sv.SetMap(vv.Value.Interface())
-	sv.OnLast(events.Change, func(e events.Event) {
+	sv.OnFinal(events.Change, func(e events.Event) {
 		vv.SendChange()
 	})
 }
@@ -796,7 +796,7 @@ func (vv *BoolValue) ConfigWidget(w gi.Widget) {
 	cb := vv.Widget.(*gi.Switch)
 	cb.Tooltip = vv.Doc()
 	cb.Config()
-	cb.OnLast(events.Change, func(e events.Event) {
+	cb.OnFinal(events.Change, func(e events.Event) {
 		vv.SetValue(cb.IsChecked())
 	})
 	vv.UpdateWidget()
@@ -876,7 +876,7 @@ func (vv *IntValue) ConfigWidget(w gi.Widget) {
 		sb.Format = fmttag
 	}
 	sb.Config()
-	sb.OnLast(events.Change, func(e events.Event) {
+	sb.OnFinal(events.Change, func(e events.Event) {
 		vv.SetValue(sb.Value)
 	})
 	vv.UpdateWidget()
@@ -951,7 +951,7 @@ func (vv *FloatValue) ConfigWidget(w gi.Widget) {
 		sb.Format = fmttag
 	}
 	sb.Config()
-	sb.OnLast(events.Change, func(e events.Event) {
+	sb.OnFinal(events.Change, func(e events.Event) {
 		vv.SetValue(sb.Value)
 	})
 	vv.UpdateWidget()
@@ -1019,7 +1019,7 @@ func (vv *SliderValue) ConfigWidget(w gi.Widget) {
 		}
 	}
 	sl.Config()
-	sl.OnLast(events.Change, func(e events.Event) {
+	sl.OnFinal(events.Change, func(e events.Event) {
 		vv.SetValue(sl.Value)
 	})
 	vv.UpdateWidget()
@@ -1082,7 +1082,7 @@ func (vv *EnumValue) ConfigWidget(w gi.Widget) {
 	ev := vv.EnumValue()
 	ch.SetEnum(ev, false, 50)
 	ch.Config()
-	ch.OnLast(events.Change, func(e events.Event) {
+	ch.OnFinal(events.Change, func(e events.Event) {
 		vv.SetValue(ch.CurVal)
 	})
 	vv.UpdateWidget()
@@ -1204,7 +1204,7 @@ func (vv *TypeValue) ConfigWidget(w gi.Widget) {
 	tl := gti.AllEmbeddersOf(typEmbeds)
 	cb.SetTypes(tl, false, true, 50)
 	cb.Config()
-	cb.OnLast(events.Change, func(e events.Event) {
+	cb.OnFinal(events.Change, func(e events.Event) {
 		tval := cb.CurVal.(*gti.Type)
 		vv.SetValue(tval)
 	})
@@ -1251,7 +1251,7 @@ func (vv *ByteSliceValue) ConfigWidget(w gi.Widget) {
 	vv.StdConfigWidget(w)
 	tf.Config()
 
-	tf.OnLast(events.Change, func(e events.Event) {
+	tf.OnFinal(events.Change, func(e events.Event) {
 		vv.SetValue(tf.Text())
 	})
 	vv.UpdateWidget()
@@ -1296,7 +1296,7 @@ func (vv *RuneSliceValue) ConfigWidget(w gi.Widget) {
 	vv.StdConfigWidget(w)
 	tf.Config()
 
-	tf.OnLast(events.Change, func(e events.Event) {
+	tf.OnFinal(events.Change, func(e events.Event) {
 		vv.SetValue(tf.Text())
 	})
 	vv.UpdateWidget()
