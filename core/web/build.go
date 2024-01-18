@@ -21,24 +21,25 @@ import (
 
 // Build builds an app for web using the given configuration information.
 func Build(c *config.Config) error {
-	opath := c.Build.Output
+	output := filepath.Join(".core", "bin", "web", "app.wasm")
+	opath := output
 	if c.Web.Gzip {
 		opath += ".orig"
 	}
-	err := xe.Major().SetEnv("GOOS", "js").SetEnv("GOARCH", "wasm").Run("go", "build", "-o", opath, c.Build.Package)
+	err := xe.Major().SetEnv("GOOS", "js").SetEnv("GOARCH", "wasm").Run("go", "build", "-o", opath)
 	if err != nil {
 		return err
 	}
 	if c.Web.Gzip {
-		err = xe.RemoveAll(c.Build.Output + ".orig.gz")
+		err = xe.RemoveAll(output + ".orig.gz")
 		if err != nil {
 			return err
 		}
-		err = xe.Run("gzip", c.Build.Output+".orig")
+		err = xe.Run("gzip", output+".orig")
 		if err != nil {
 			return err
 		}
-		err = os.Rename(c.Build.Output+".orig.gz", c.Build.Output)
+		err = os.Rename(output+".orig.gz", output)
 		if err != nil {
 			return err
 		}
@@ -48,7 +49,7 @@ func Build(c *config.Config) error {
 
 // MakeFiles makes the necessary static web files based on the given configuration information.
 func MakeFiles(c *config.Config) error {
-	odir := filepath.Dir(c.Build.Output)
+	odir := filepath.Join(".core", "bin", "web")
 
 	if c.Web.RandomVersion {
 		t := time.Now().UTC().String()
