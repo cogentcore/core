@@ -4,15 +4,17 @@
 
 package keyfun
 
-import "runtime"
+import "cogentcore.org/core/goosi"
 
 func init() {
 	AvailMaps.CopyFrom(StdMaps)
-	switch runtime.GOOS {
-	case "darwin":
+	switch goosi.TheApp.SystemPlatform() {
+	case goosi.MacOS:
 		DefaultMap = "MacStd"
-	case "windows":
+	case goosi.Windows:
 		DefaultMap = "WindowsStd"
+	default:
+		DefaultMap = "LinuxStd"
 	}
 	SetActiveMapName(DefaultMap)
 }
