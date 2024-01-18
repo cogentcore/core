@@ -686,7 +686,7 @@ var SavedPathsExtras = []string{MenuTextSeparator, FileViewResetPaths, FileViewE
 // SavePaths saves the active SavedPaths to prefs dir
 func SavePaths() {
 	StringsRemoveExtras((*[]string)(&SavedPaths), SavedPathsExtras)
-	pdir := CogentCore()
+	pdir := CogentCoreDataDir()
 	pnm := filepath.Join(pdir, SavedPathsFilename)
 	SavedPaths.Save(pnm)
 	// add back after save
@@ -697,7 +697,7 @@ func SavePaths() {
 func OpenPaths() {
 	// remove to be sure we don't have duplicate extras
 	StringsRemoveExtras((*[]string)(&SavedPaths), SavedPathsExtras)
-	pdir := CogentCore()
+	pdir := CogentCoreDataDir()
 	pnm := filepath.Join(pdir, SavedPathsFilename)
 	SavedPaths.Open(pnm)
 	// add back after save

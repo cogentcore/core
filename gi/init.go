@@ -13,8 +13,9 @@ import (
 )
 
 func init() {
+	goosi.HandleRecover = HandleRecover
 	goosi.InitScreenLogicalDPIFunc = AppearanceSettings.ApplyDPI // called when screens are initialized
-	CogentCore()                                                 // ensure it exists
+	CogentCoreDataDir()                                          // ensure it exists
 	WinGeomMgr.NeedToReload()                                    // gets time stamp associated with open, so it doesn't re-open
 	WinGeomMgr.Open()
 

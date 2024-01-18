@@ -113,7 +113,7 @@ var StylesChanged = false
 
 // OpenPrefs opens Styles from GoGi standard prefs directory, using PrefsStylesFilename
 func (hs *Styles) OpenPrefs() error {
-	pdir := gi.CogentCore()
+	pdir := gi.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, PrefsStylesFilename)
 	StylesChanged = false
 	return hs.OpenJSON(gi.Filename(pnm))
@@ -121,7 +121,7 @@ func (hs *Styles) OpenPrefs() error {
 
 // SavePrefs saves Styles to GoGi standard prefs directory, using PrefsStylesFilename
 func (hs *Styles) SavePrefs() error {
-	pdir := gi.CogentCore()
+	pdir := gi.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, PrefsStylesFilename)
 	StylesChanged = false
 	MergeAvailStyles()

@@ -88,9 +88,9 @@ type App interface {
 	// Linux: ~/.config, Windows: ~/AppData/Roaming
 	DataDir() string
 
-	// CogentCore returns the Cogent Core data directory: [App.DataDir] + "CogentCore".
+	// CogentCoreDataDir returns the Cogent Core data directory: [App.DataDir] + "CogentCoreDataDir".
 	// It ensures that the directory exists first.
-	CogentCore() string
+	CogentCoreDataDir() string
 
 	// About is an informative message about the app.  Can use HTML
 	// formatting, including links.

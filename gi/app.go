@@ -166,10 +166,10 @@ func OpenURL(url string) {
 	goosi.TheApp.OpenURL(url)
 }
 
-// CogentCore returns the Cogent Core data directory: [DataDir] + "CogentCore".
+// CogentCoreDataDir returns the Cogent Core data directory: [DataDir] + "CogentCoreDataDir".
 // It ensures that the directory exists first.
-func CogentCore() string {
-	return goosi.TheApp.CogentCore()
+func CogentCoreDataDir() string {
+	return goosi.TheApp.CogentCoreDataDir()
 }
 
 // DataDir returns the OS-specific data directory: Mac: ~/Library,

@@ -131,7 +131,7 @@ func (a *App) OpenFiles() []string {
 	return a.OpenFls
 }
 
-func (a *App) CogentCore() string {
+func (a *App) CogentCoreDataDir() string {
 	pdir := filepath.Join(a.This.DataDir(), "CogentCore")
 	os.MkdirAll(pdir, 0755)
 	return pdir
