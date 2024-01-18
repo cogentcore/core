@@ -56,8 +56,8 @@ var TheApp = &App{AppSingle: base.NewAppSingle[*Drawer, *Window]()}
 type App struct { //gti:add
 	base.AppSingle[*Drawer, *Window]
 
-	// SystemPlatform is the underlying system SystemPlatform (Android, iOS, etc)
-	SystemPlatform goosi.Platforms
+	// UnderlyingPlatform is the underlying system platform (Android, iOS, etc)
+	UnderlyingPlatform goosi.Platforms
 
 	// KeyMods are the current key mods
 	KeyMods key.Modifiers
@@ -86,12 +86,12 @@ func (a *App) SetSystemWindow() {
 	ua := js.Global().Get("navigator").Get("userAgent").String()
 	lua := strings.ToLower(ua)
 	if strings.Contains(lua, "android") {
-		a.SystemPlatform = goosi.Android
+		a.UnderlyingPlatform = goosi.Android
 	} else if strings.Contains(lua, "ipad") || strings.Contains(lua, "iphone") || strings.Contains(lua, "ipod") {
-		a.SystemPlatform = goosi.IOS
+		a.UnderlyingPlatform = goosi.IOS
 	} else {
 		// TODO(kai/web): more specific desktop platform
-		a.SystemPlatform = goosi.Windows
+		a.UnderlyingPlatform = goosi.Windows
 	}
 
 	a.Resize()
