@@ -387,6 +387,8 @@ func (wb *WidgetBase) CopyFieldsFrom(from ki.Ki) {
 		wb.ContextMenus = append(wb.ContextMenus, frm.ContextMenus[n:]...)
 	}
 	wb.Listeners.CopyFromExtra(frm.Listeners)
+	wb.FirstListeners.CopyFromExtra(frm.FirstListeners)
+	wb.FinalListeners.CopyFromExtra(frm.FinalListeners)
 }
 
 func (wb *WidgetBase) Destroy() {
