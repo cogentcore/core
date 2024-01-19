@@ -473,12 +473,16 @@ type Ki interface {
 	// cloned tree (see Copy info).
 	Clone() Ki
 
-	// CopyFieldsFrom is the base-level copy method that any copy-intensive
-	// nodes should implement directly to explicitly copy relevant fields
-	// that should be copied, avoiding any internal pointers etc.
-	// Must explicitly call the CopyFieldsFrom method on any embedded
-	// Ki types that you inherit from, and, critically, NONE of those
-	// can rely on the generic Node-level version.
+	// CopyFieldsFrom copies the fields of the node from the given node.
+	// By default, it is [Node.CopyFieldsFrom], which automatically does
+	// a deep copy of all of the fields of the node that do not a have a
+	// `copier:"-"` struct tag. Node types should only implement a custom
+	// CopyFieldsFrom method when they have fields that need special copying
+	// logic that can not be automatically handled. All custom CopyFieldsFrom
+	// methods should call [Node.CopyFieldsFrom] first and then only do manual
+	// handling of specific fields that can not be automatically copied. See
+	// [cogentcore.org/core/gi.WidgetBase.CopyFieldsFrom] for an example of a
+	// custom CopyFieldsFrom method.
 	CopyFieldsFrom(frm Ki)
 
 	//////////////////////////////////////////////////////////////////////////
