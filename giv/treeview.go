@@ -122,6 +122,12 @@ type TreeView struct {
 	// optional icon, displayed to the the left of the text label
 	Icon icons.Icon
 
+	// icon to use for the on, checked state of the switch
+	IconOn icons.Icon `view:"show-name"`
+
+	// icon to use for the off, unchecked state of the switch
+	IconOff icons.Icon `view:"show-name"`
+
 	// amount to indent children relative to this node
 	Indent units.Value `copier:"-" json:"-" xml:"-"`
 
@@ -350,7 +356,9 @@ func (tv *TreeView) SetStyles() {
 			sw := w.(*gi.Switch)
 			sw.Type = gi.SwitchCheckbox
 			sw.SetIcons(icons.KeyboardArrowDown, icons.KeyboardArrowRight, icons.Blank)
-			sw.SetIcons(icons.DownCircleOutlined, icons.RightCircleOutlined, icons.Blank)
+			if tv.IconOn != "" && tv.IconOff != "" {
+				sw.SetIcons(tv.IconOn, tv.IconOff, icons.Blank)
+			}
 			sw.Style(func(s *styles.Style) {
 				// parent will handle our cursor
 				s.Cursor = cursors.None
