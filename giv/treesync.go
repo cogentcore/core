@@ -264,7 +264,7 @@ func (tv *TreeView) InsertAt(rel int, actNm string) {
 	d := gi.NewBody().AddTitle(actNm).AddText("Number and Type of Items to Insert:")
 	nd := &gi.NewItemsData{Number: 1, Type: typ}
 	sg := NewStructView(d).SetStruct(nd).StructGrid()
-	ki.ChildByType[*gi.Chooser](sg, true).SetTypes(gti.AllEmbeddersOf(typ), true, true, 50)
+	ki.ChildByType[*gi.Chooser](sg, true).SetTypes(gti.AllEmbeddersOf(typ), true, true)
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
 		d.AddOk(pw).OnClick(func(e events.Event) {
@@ -291,7 +291,7 @@ func (tv *TreeView) AddChildNode() { //gti:add
 	d := gi.NewBody().AddTitle(ttl).AddText("Number and Type of Items to Add:")
 	nd := &gi.NewItemsData{Number: 1, Type: typ}
 	sg := NewStructView(d).SetStruct(nd).StructGrid()
-	ki.ChildByType[*gi.Chooser](sg, true).SetTypes(gti.AllEmbeddersOf(typ), true, true, 50)
+	ki.ChildByType[*gi.Chooser](sg, true).SetTypes(gti.AllEmbeddersOf(typ), true, true)
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
 		d.AddOk(pw).OnClick(func(e events.Event) {

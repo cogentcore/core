@@ -9,7 +9,6 @@ import (
 	"log/slog"
 	"sort"
 	"strconv"
-	"unicode/utf8"
 
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/colors"
@@ -70,9 +69,6 @@ type Chooser struct {
 
 	// if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner
 	Placeholder string `set:"-"`
-
-	// maximum label length (in runes)
-	MaxLength int
 
 	// ItemsFunc, if non-nil, is a function to call before showing the items
 	// of the chooser, which is typically used to configure them (eg: if they
@@ -324,7 +320,7 @@ func (ch *Chooser) MakeItems(reset bool, capacity int) {
 }
 
 // SortItems sorts the items according to their labels
-func (ch *Chooser) SortItems(ascending bool) {
+func (ch *Chooser) SortItems(ascending bool) *Chooser {
 	sort.Slice(ch.Items, func(i, j int) bool {
 		if ascending {
 			return ToLabel(ch.Items[i]) < ToLabel(ch.Items[j])
@@ -332,28 +328,13 @@ func (ch *Chooser) SortItems(ascending bool) {
 			return ToLabel(ch.Items[i]) > ToLabel(ch.Items[j])
 		}
 	})
-}
-
-// SetToMaxLength gets the maximum label length so that the width of the
-// button label is automatically set according to the max length of all items
-// in the list -- if maxLen > 0 then it is used as an upper do-not-exceed
-// length
-func (ch *Chooser) SetToMaxLength(maxLen int) {
-	ml := 0
-	for _, it := range ch.Items {
-		ml = max(ml, utf8.RuneCountInString(ToLabel(it)))
-	}
-	if maxLen > 0 {
-		ml = min(ml, maxLen)
-	}
-	ch.MaxLength = ml
+	return ch
 }
 
 // SetTypes sets the Items list from a list of types, e.g., from gti.AllEmbedersOf.
-// If setFirst then set current item to the first item in the list,
-// and maxLen if > 0 auto-sets the width of the button to the
-// contents, with the given upper limit.
-func (ch *Chooser) SetTypes(tl []*gti.Type, setFirst, sort bool, maxLen int) *Chooser {
+// If setFirst then set current item to the first item in the list, and if sort
+// then sort the list items in ascending order according to their labels.
+func (ch *Chooser) SetTypes(tl []*gti.Type, setFirst, sort bool) *Chooser {
 	n := len(tl)
 	if n == 0 {
 		return ch
@@ -365,9 +346,6 @@ func (ch *Chooser) SetTypes(tl []*gti.Type, setFirst, sort bool, maxLen int) *Ch
 	if sort {
 		ch.SortItems(true)
 	}
-	if maxLen > 0 {
-		ch.SetToMaxLength(maxLen)
-	}
 	if setFirst {
 		ch.SetCurIndex(0)
 	}
@@ -375,10 +353,8 @@ func (ch *Chooser) SetTypes(tl []*gti.Type, setFirst, sort bool, maxLen int) *Ch
 }
 
 // SetStrings sets the Items list from a list of string values.
-// If setFirst then set current item to the first item in the list,
-// and maxLen if > 0 auto-sets the width of the button to the
-// contents, with the given upper limit.
-func (ch *Chooser) SetStrings(el []string, setFirst bool, maxLen int) *Chooser {
+// If setFirst then set current item to the first item in the list.
+func (ch *Chooser) SetStrings(el []string, setFirst bool) *Chooser {
 	n := len(el)
 	if n == 0 {
 		return ch
@@ -387,9 +363,6 @@ func (ch *Chooser) SetStrings(el []string, setFirst bool, maxLen int) *Chooser {
 	for i, str := range el {
 		ch.Items[i] = str
 	}
-	if maxLen > 0 {
-		ch.SetToMaxLength(maxLen)
-	}
 	if setFirst {
 		ch.SetCurIndex(0)
 	}
@@ -397,10 +370,8 @@ func (ch *Chooser) SetStrings(el []string, setFirst bool, maxLen int) *Chooser {
 }
 
 // SetIconItems sets the Items list from a list of icons.Icon values.
-// If setFirst then set current item to the first item in the list,
-// and maxLen if > 0 auto-sets the width of the button to the
-// contents, with the given upper limit.
-func (ch *Chooser) SetIconItems(el []icons.Icon, setFirst bool, maxLen int) *Chooser {
+// If setFirst then set current item to the first item in the list.
+func (ch *Chooser) SetIconItems(el []icons.Icon, setFirst bool) *Chooser {
 	n := len(el)
 	if n == 0 {
 		return ch
@@ -412,9 +383,6 @@ func (ch *Chooser) SetIconItems(el []icons.Icon, setFirst bool, maxLen int) *Cho
 		ch.Items[i] = ic
 		ch.Labels[i] = sentence.Case(string(ic))
 		ch.Icons[i] = ic
-	}
-	if maxLen > 0 {
-		ch.SetToMaxLength(maxLen)
 	}
 	if setFirst {
 		ch.SetCurIndex(0)
@@ -443,9 +411,6 @@ func (ch *Chooser) SetEnums(el []enums.Enum, setFirst bool, maxLen int) *Chooser
 		// don't have the name of the enum value pre-generator-transformation
 		// (same as with Switches) (#774)
 		ch.Tooltips[i] = sentence.Doc(enum.Desc(), str, lbl)
-	}
-	if maxLen > 0 {
-		ch.SetToMaxLength(maxLen)
 	}
 	if setFirst {
 		ch.SetCurIndex(0)

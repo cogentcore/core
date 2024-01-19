@@ -199,7 +199,7 @@ func main() {
 	})
 
 	ch := gi.NewChooser(txrow).SetType(gi.ChooserOutlined).SetEditable(true).
-		SetTypes(gti.AllEmbeddersOf(gi.WidgetBaseType), true, true, 50)
+		SetTypes(gti.AllEmbeddersOf(gi.WidgetBaseType), true, true)
 	// ItemsFromEnum(gi.ButtonTypesN, true, 50)
 	ch.OnChange(func(e events.Event) {
 		fmt.Printf("Chooser selected index: %d data: %v\n", ch.CurIndex, ch.CurVal)

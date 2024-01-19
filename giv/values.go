@@ -1200,7 +1200,7 @@ func (vv *TypeValue) ConfigWidget(w gi.Widget) {
 	}
 
 	tl := gti.AllEmbeddersOf(typEmbeds)
-	cb.SetTypes(tl, false, true, 50)
+	cb.SetTypes(tl, false, true)
 	cb.Config()
 	cb.OnFinal(events.Change, func(e events.Event) {
 		tval := cb.CurVal.(*gti.Type)

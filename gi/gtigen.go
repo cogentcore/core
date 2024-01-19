@@ -95,9 +95,6 @@ func (t *AppChooser) SetIcons(v ...icons.Icon) *AppChooser { t.Icons = v; return
 // SetTooltips sets the [AppChooser.Tooltips]
 func (t *AppChooser) SetTooltips(v ...string) *AppChooser { t.Tooltips = v; return t }
 
-// SetMaxLength sets the [AppChooser.MaxLength]
-func (t *AppChooser) SetMaxLength(v int) *AppChooser { t.MaxLength = v; return t }
-
 // SetItemsFunc sets the [AppChooser.ItemsFunc]
 func (t *AppChooser) SetItemsFunc(v func()) *AppChooser { t.ItemsFunc = v; return t }
 
@@ -235,7 +232,7 @@ func (t *Canvas) New() ki.Ki { return &Canvas{} }
 func (t *Canvas) SetTooltip(v string) *Canvas { t.Tooltip = v; return t }
 
 // ChooserType is the [gti.Type] for [Chooser]
-var ChooserType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Chooser", IDName: "chooser", Doc: "Chooser is for selecting items from a dropdown list, with an optional\nedit TextField for typing directly.\nThe items can be of any type, including enum values -- they are converted\nto strings for the display.  If the items are of type [icons.Icon], then they\nare displayed using icons instead.", Embeds: []gti.Field{{Name: "Box"}}, Fields: []gti.Field{{Name: "Type", Doc: "the type of combo box"}, {Name: "Icon", Doc: "optional icon"}, {Name: "Indicator", Doc: "name of the indicator icon to present."}, {Name: "Editable", Doc: "provide a text field for editing the value, or just a button for selecting items?  Set the editable property"}, {Name: "AllowNew", Doc: "whether to allow the user to add new items to the combo box through the editable textfield (if Editable is set to true) and a button at the end of the combo box menu"}, {Name: "Items", Doc: "items available for selection"}, {Name: "Labels", Doc: "an optional list of labels displayed for Chooser items;\nthe indices for the labels correspond to those for the items"}, {Name: "Icons", Doc: "an optional list of icons displayed for Chooser items;\nthe indices for the icons correspond to those for the items"}, {Name: "Tooltips", Doc: "an optional list of tooltips displayed on hover for Chooser items;\nthe indices for the tooltips correspond to those for the items"}, {Name: "Placeholder", Doc: "if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner"}, {Name: "MaxLength", Doc: "maximum label length (in runes)"}, {Name: "ItemsFunc", Doc: "ItemsFunc, if non-nil, is a function to call before showing the items\nof the chooser, which is typically used to configure them (eg: if they\nare based on dynamic data)"}, {Name: "CurLabel", Doc: "CurLabel is the string label for the current value"}, {Name: "CurVal", Doc: "current selected value"}, {Name: "CurIndex", Doc: "current index in list of possible items"}}, Instance: &Chooser{}})
+var ChooserType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Chooser", IDName: "chooser", Doc: "Chooser is for selecting items from a dropdown list, with an optional\nedit TextField for typing directly.\nThe items can be of any type, including enum values -- they are converted\nto strings for the display.  If the items are of type [icons.Icon], then they\nare displayed using icons instead.", Embeds: []gti.Field{{Name: "Box"}}, Fields: []gti.Field{{Name: "Type", Doc: "the type of combo box"}, {Name: "Icon", Doc: "optional icon"}, {Name: "Indicator", Doc: "name of the indicator icon to present."}, {Name: "Editable", Doc: "provide a text field for editing the value, or just a button for selecting items?  Set the editable property"}, {Name: "AllowNew", Doc: "whether to allow the user to add new items to the combo box through the editable textfield (if Editable is set to true) and a button at the end of the combo box menu"}, {Name: "Items", Doc: "items available for selection"}, {Name: "Labels", Doc: "an optional list of labels displayed for Chooser items;\nthe indices for the labels correspond to those for the items"}, {Name: "Icons", Doc: "an optional list of icons displayed for Chooser items;\nthe indices for the icons correspond to those for the items"}, {Name: "Tooltips", Doc: "an optional list of tooltips displayed on hover for Chooser items;\nthe indices for the tooltips correspond to those for the items"}, {Name: "Placeholder", Doc: "if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner"}, {Name: "ItemsFunc", Doc: "ItemsFunc, if non-nil, is a function to call before showing the items\nof the chooser, which is typically used to configure them (eg: if they\nare based on dynamic data)"}, {Name: "CurLabel", Doc: "CurLabel is the string label for the current value"}, {Name: "CurVal", Doc: "current selected value"}, {Name: "CurIndex", Doc: "current index in list of possible items"}}, Instance: &Chooser{}})
 
 // NewChooser adds a new [Chooser] with the given name to the given parent:
 // Chooser is for selecting items from a dropdown list, with an optional
@@ -291,10 +288,6 @@ func (t *Chooser) SetIcons(v ...icons.Icon) *Chooser { t.Icons = v; return t }
 // an optional list of tooltips displayed on hover for Chooser items;
 // the indices for the tooltips correspond to those for the items
 func (t *Chooser) SetTooltips(v ...string) *Chooser { t.Tooltips = v; return t }
-
-// SetMaxLength sets the [Chooser.MaxLength]:
-// maximum label length (in runes)
-func (t *Chooser) SetMaxLength(v int) *Chooser { t.MaxLength = v; return t }
 
 // SetItemsFunc sets the [Chooser.ItemsFunc]:
 // ItemsFunc, if non-nil, is a function to call before showing the items
