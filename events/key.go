@@ -34,7 +34,7 @@ func (ev *Key) HasPos() bool {
 }
 
 func (ev *Key) NeedsFocus() bool {
-	return ev.Type() == KeyChord
+	return true
 }
 
 func (ev *Key) String() string {

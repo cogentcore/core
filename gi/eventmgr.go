@@ -162,11 +162,12 @@ func (em *EventMgr) HandleEvent(e events.Event) {
 }
 
 func (em *EventMgr) HandleOtherEvent(e events.Event) {
-	// fmt.Println("TODO: Other event not handled", e)
+	fmt.Println("TODO: Other event not handled", e)
 }
 
 func (em *EventMgr) HandleFocusEvent(e events.Event) {
-	if em.Focus == nil {
+	// key down and key up can not give active focus, only key chord
+	if em.Focus == nil && e.Type() != events.KeyDown && e.Type() != events.KeyUp {
 		switch {
 		case em.StartFocus != nil:
 			if DebugSettings.FocusTrace {
