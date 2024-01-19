@@ -29,12 +29,6 @@ type SVG struct {
 	SVG *svg.SVG `set:"-"`
 }
 
-func (sv *SVG) CopyFieldsFrom(frm any) {
-	fr := frm.(*SVG)
-	sv.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	sv.SVG = fr.SVG
-}
-
 func (sv *SVG) OnInit() {
 	sv.SVG = svg.NewSVG(10, 10)
 	sv.SVG.Norm = true

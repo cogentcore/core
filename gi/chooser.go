@@ -89,16 +89,6 @@ type Chooser struct {
 	CurIndex int `json:"-" xml:"-" set:"-"`
 }
 
-func (ch *Chooser) CopyFieldsFrom(frm any) {
-	fr := frm.(*Chooser)
-	ch.Box.CopyFieldsFrom(&fr.Box)
-	ch.Editable = fr.Editable
-	ch.CurVal = fr.CurVal
-	ch.CurIndex = fr.CurIndex
-	ch.Items = fr.Items
-	ch.MaxLength = fr.MaxLength
-}
-
 // ChooserTypes is an enum containing the
 // different possible types of combo boxes
 type ChooserTypes int32 //enums:enum -trim-prefix Chooser

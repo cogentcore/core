@@ -116,13 +116,6 @@ func (tt TabTypes) IsColumn() bool {
 	return tt == NavigationRail || tt == NavigationDrawer
 }
 
-func (ts *Tabs) CopyFieldsFrom(frm any) {
-	fr := frm.(*Tabs)
-	ts.Layout.CopyFieldsFrom(&fr.Layout)
-	ts.MaxChars = fr.MaxChars
-	ts.NewTabButton = fr.NewTabButton
-}
-
 func (ts *Tabs) OnInit() {
 	ts.WidgetBase.OnInit()
 	ts.Layout.HandleEvents()

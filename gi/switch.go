@@ -55,16 +55,6 @@ const (
 	SwitchSegmentedButton
 )
 
-func (sw *Switch) CopyFieldsFrom(frm any) {
-	fr := frm.(*Switch)
-	sw.Box.CopyFieldsFrom(&fr.Box)
-	sw.Type = fr.Type
-	sw.Text = fr.Text
-	sw.IconOn = fr.IconOn
-	sw.IconOff = fr.IconOff
-	sw.IconUnk = fr.IconUnk
-}
-
 func (sw *Switch) OnInit() {
 	sw.Box.OnInit()
 	sw.HandleEvents()

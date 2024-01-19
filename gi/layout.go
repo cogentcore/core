@@ -485,11 +485,6 @@ func (st *Stretch) OnInit() {
 	})
 }
 
-func (st *Stretch) CopyFieldsFrom(frm any) {
-	fr := frm.(*Stretch)
-	st.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-}
-
 // Space adds a fixed sized (1 ch x 1 em by default) blank space to a layout.
 // Set width / height property to change.
 type Space struct {

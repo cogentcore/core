@@ -39,12 +39,7 @@ type Toolbar struct { //core:embedder
 	ToolbarFuncs ToolbarFuncs
 
 	// This is the overflow button
-	OverflowButton *Button
-}
-
-func (tb *Toolbar) CopyFieldsFrom(frm any) {
-	fr := frm.(*Toolbar)
-	tb.Frame.CopyFieldsFrom(&fr.Frame)
+	OverflowButton *Button `copier:"-"`
 }
 
 func (tb *Toolbar) OnInit() {

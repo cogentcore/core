@@ -45,12 +45,6 @@ type Image struct {
 	PrevSize mat32.Vec2 `copier:"-" xml:"-" json:"-" set:"-"`
 }
 
-func (im *Image) CopyFieldsFrom(frm any) {
-	fr := frm.(*Image)
-	im.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	im.Filename = fr.Filename
-}
-
 func (im *Image) OnInit() {
 	im.WidgetBase.OnInit()
 	im.SetStyles()

@@ -131,24 +131,6 @@ const (
 	SliderScrollbar
 )
 
-func (sr *Slider) CopyFieldsFrom(frm any) {
-	fr := frm.(*Slider)
-	sr.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	sr.Value = fr.Value
-	sr.Min = fr.Min
-	sr.Max = fr.Max
-	sr.Step = fr.Step
-	sr.PageStep = fr.PageStep
-	sr.VisiblePct = fr.VisiblePct
-	sr.ThumbSize = fr.ThumbSize
-	sr.Icon = fr.Icon
-	sr.InputThreshold = fr.InputThreshold
-	sr.Snap = fr.Snap
-	sr.Prec = fr.Prec
-	sr.ValueColor = fr.ValueColor
-	sr.ThumbColor = fr.ThumbColor
-}
-
 func (sr *Slider) OnInit() {
 	sr.WidgetBase.OnInit()
 	sr.HandleEvents()
