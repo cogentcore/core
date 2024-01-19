@@ -8,7 +8,6 @@ package gi
 
 import (
 	"image"
-	"log/slog"
 	"sync"
 
 	"cogentcore.org/core/abilities"
@@ -233,7 +232,7 @@ type WidgetBase struct {
 	// change (e.g., as done by the Update method).  See Stylers for functions
 	// that set all of the styles, ordered from initial base defaults to later
 	// added overrides.
-	Styles styles.Style `copy:"-" json:"-" xml:"-" set:"-"`
+	Styles styles.Style `json:"-" xml:"-" set:"-"`
 
 	// Stylers are a slice of functions that are called in sequential
 	// ascending order (so the last added styler is called last and
@@ -375,23 +374,19 @@ func AsWidgetBase(k ki.Ki) *WidgetBase {
 	return wb
 }
 
-func (wb *WidgetBase) CopyFieldsFrom(frm any) {
-	fr, ok := frm.(*WidgetBase)
-	if !ok {
-		slog.Error("widget needs a CopyFieldsFrom method defined", "type", wb.This().(Widget).KiType())
-		return
-	}
-	wb.Tooltip = fr.Tooltip
-	wb.Styles.CopyFrom(&fr.Styles)
+func (wb *WidgetBase) CopyFieldsFrom(frm ki.Ki) {
+	wb.Node.CopyFieldsFrom(frm)
+	_, fr := AsWidget(frm)
+
 	n := len(wb.Stylers)
 	if len(fr.Stylers) > n {
 		wb.Stylers = append(wb.Stylers, fr.Stylers[n:]...)
 	}
-	wb.Listeners.CopyFromExtra(fr.Listeners)
 	n = len(wb.ContextMenus)
 	if len(fr.ContextMenus) > n {
 		wb.ContextMenus = append(wb.ContextMenus, fr.ContextMenus[n:]...)
 	}
+	wb.Listeners.CopyFromExtra(fr.Listeners)
 }
 
 func (wb *WidgetBase) Destroy() {
