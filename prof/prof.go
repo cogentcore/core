@@ -41,7 +41,8 @@ import (
 // timing on this function; it assumes nested inner / outer loop structure for
 // calls to the same method. It uses the short, package-qualified name of the
 // calling function as the name of the profile struct. Extra information can be
-// passed to Start, which will be added at the end of the name in a dash-delimited format.
+// passed to Start, which will be added at the end of the name in a dash-delimited
+// format. See [StartName] for a version that supports a custom name.
 func Start(info ...string) *Profile {
 	name := ""
 	pc, _, _, ok := runtime.Caller(1)
@@ -56,6 +57,20 @@ func Start(info ...string) *Profile {
 		slog.Error(err)
 		name = "!(" + err + ")"
 	}
+	if len(info) > 0 {
+		name += "-" + strings.Join(info, "-")
+	}
+	return Prof.Start(name)
+}
+
+// StartName starts profiling and returns a Profile struct that must have
+// [Profile.End] called on it when done timing. It will be nil if not the first
+// to start timing on this function; it assumes nested inner / outer loop structure
+// for calls to the same method. It uses the given name as the name of the profile
+// struct. Extra information can be passed to StartName, which will be added at
+// the end of the name in a dash-delimited format. See [Start] for a version that
+// automatically determines the name from the name of the calling function.
+func StartName(name string, info ...string) *Profile {
 	if len(info) > 0 {
 		name += "-" + strings.Join(info, "-")
 	}
