@@ -78,11 +78,17 @@ func AlignPos(align Aligns, inner, outer float32) float32 {
 
 /////////////////////////////////////////////////////////////////
 
-// Direction specifies which way items are laid out.
+// Direction specifies the way in which elements are laid out, or
+// the dimension on which an element is longer / travels in.
 type Directions int32 //enums:enum -transform kebab
 
 const (
+	// Row indicates that elements are laid out in a row
+	// or that an element is longer / travels in the x dimension.
 	Row Directions = iota
+
+	// Column indicates that elements are laid out in a column
+	// or that an element is longer / travels in the y dimension.
 	Column
 )
 

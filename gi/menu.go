@@ -10,7 +10,6 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/ki"
-	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -34,7 +33,9 @@ func MenuSceneConfigStyles(msc *Scene) {
 			return
 		}
 		if sp, ok := w.(*Separator); ok {
-			sp.Dim = mat32.X
+			sp.Style(func(s *styles.Style) {
+				s.Direction = styles.Row
+			})
 		}
 	})
 }

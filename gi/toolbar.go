@@ -307,11 +307,9 @@ func ToolbarStyles(ly Layouter) {
 			return
 		}
 		if sp, ok := w.(*Separator); ok {
-			if lb.Styles.Direction == styles.Row {
-				sp.Dim = mat32.Y
-			} else {
-				sp.Dim = mat32.X
-			}
+			sp.Style(func(s *styles.Style) {
+				s.Direction = lb.Styles.Direction.Other()
+			})
 		}
 	})
 }

@@ -1103,8 +1103,8 @@ var _DirectionsNameToValueMap = map[string]Directions{
 }
 
 var _DirectionsDescMap = map[Directions]string{
-	0: ``,
-	1: ``,
+	0: `Row indicates that elements are laid out in a row or that an element is longer / travels in the x dimension.`,
+	1: `Column indicates that elements are laid out in a column or that an element is longer / travels in the y dimension.`,
 }
 
 var _DirectionsMap = map[Directions]string{
@@ -2459,9 +2459,9 @@ var _WhiteSpacesNameToValueMap = map[string]WhiteSpaces{
 var _WhiteSpacesDescMap = map[WhiteSpaces]string{
 	0: `WhiteSpaceNormal means that all white space is collapsed to a single space, and text wraps when necessary. To get full word wrapping to expand to all available space, you also need to set Grow.X = 1. Use the SetTextWrap convenience method to set both.`,
 	1: `WhiteSpaceNowrap means that sequences of whitespace will collapse into a single whitespace. Text will never wrap to the next line except if there is an explicit line break via a &lt;br&gt; tag. In general you also don&#39;t want simple non-wrapping text labels to Grow (Grow.X = 0). Use the SetTextWrap method to set both.`,
-	2: `WhiteSpacePre means that whitespace is preserved by the browser. Text will only wrap on line breaks. Acts like the &lt;pre&gt; tag in HTML. This invokes a different hand-written parser because the default golang parser automatically throws away whitespace`,
+	2: `WhiteSpacePre means that whitespace is preserved. Text will only wrap on line breaks. Acts like the &lt;pre&gt; tag in HTML. This invokes a different hand-written parser because the default golang parser automatically throws away whitespace`,
 	3: `WhiteSpacePreLine means that sequences of whitespace will collapse into a single whitespace. Text will wrap when necessary, and on line breaks`,
-	4: `WhiteSpacePreWrap means that whitespace is preserved by the browser. Text will wrap when necessary, and on line breaks`,
+	4: `WhiteSpacePreWrap means that whitespace is preserved. Text will wrap when necessary, and on line breaks`,
 }
 
 var _WhiteSpacesMap = map[WhiteSpaces]string{

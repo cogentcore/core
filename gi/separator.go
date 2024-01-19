@@ -6,7 +6,6 @@ package gi
 
 import (
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 )
@@ -16,14 +15,10 @@ import (
 // Separator defines a string to indicate a menu separator item
 var MenuTextSeparator = "-------------"
 
-// Separator draws a vertical or horizontal line
+// Separator draws a separator line. It goes in the direction
+// specified by [style.Style.Direction].
 type Separator struct {
 	Box
-
-	// TODO(kai): remove Dim
-
-	// Dim is the dimension the separator goes along (X means it goes longer horizontally, etc)
-	Dim mat32.Dims
 }
 
 func (sp *Separator) OnInit() {
@@ -32,12 +27,13 @@ func (sp *Separator) OnInit() {
 }
 
 func (sp *Separator) SetStyles() {
-	// TODO: fix disappearing separator in menu
 	sp.Style(func(s *styles.Style) {
 		s.Align.Self = styles.Center
 		s.Justify.Self = styles.Center
 		s.Background = colors.C(colors.Scheme.OutlineVariant)
-		if sp.Dim == mat32.X {
+	})
+	sp.StyleFinal(func(s *styles.Style) {
+		if s.Direction == styles.Row {
 			s.Grow.Set(1, 0)
 			s.Min.Y.Dp(1)
 			s.Margin.SetHoriz(units.Dp(6))

@@ -62,9 +62,8 @@ type Style struct { //gti:add
 	// Display controls how items are displayed, in terms of layout
 	Display Displays
 
-	// Direction specifies the order elements are organized:
-	// Row is horizontal, Col is vertical.
-	// See also [Wrap]
+	// Direction specifies the way in which elements are laid out, or
+	// the dimension on which an element is longer / travels in.
 	Direction Directions
 
 	// Wrap causes elements to wrap around in the CrossAxis dimension
