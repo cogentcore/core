@@ -22,10 +22,10 @@ import (
 type TestSubConfig struct {
 
 	// number of patterns to create
-	NPats int `def:"10"`
+	NPats int `default:"10"`
 
 	// proportion activity of created params
-	Sparseness float32 `def:"0.15"`
+	Sparseness float32 `default:"0.15"`
 }
 
 // TestConfig is a testing config
@@ -35,10 +35,10 @@ type TestConfig struct {
 	Includes []string
 
 	// open the GUI -- does not automatically run -- if false, then runs automatically and quits
-	GUI bool `def:"true"`
+	GUI bool `default:"true"`
 
 	// use the GPU for computation
-	GPU bool `def:"true"`
+	GPU bool `default:"true"`
 
 	// log debugging information
 	Debug bool
@@ -62,40 +62,40 @@ type TestConfig struct {
 	Tag string
 
 	// user note -- describe the run params etc -- like a git commit message for the run
-	Note string `def:"testing is fun"`
+	Note string `default:"testing is fun"`
 
 	// starting run number -- determines the random seed -- runs counts from there -- can do all runs in parallel by launching separate jobs with each run, runs = 1
-	Run int `def:"0"`
+	Run int `default:"0"`
 
 	// total number of runs to do when running Train
-	Runs int `def:"10"`
+	Runs int `default:"10"`
 
 	// total number of epochs per run
-	Epochs int `def:"100"`
+	Epochs int `default:"100"`
 
 	// total number of trials per epoch.  Should be an even multiple of NData.
-	NTrials int `def:"128"`
+	NTrials int `default:"128"`
 
 	// number of data-parallel items to process in parallel per trial -- works (and is significantly faster) for both CPU and GPU.  Results in an effective mini-batch of learning.
-	NData int `def:"16"`
+	NData int `default:"16"`
 
 	// if true, save final weights after each run
 	SaveWts bool
 
 	// if true, save train epoch log to file, as .epc.tsv typically
-	EpochLog bool `def:"true"`
+	EpochLog bool `default:"true"`
 
 	// if true, save run log to file, as .run.tsv typically
-	RunLog bool `def:"true"`
+	RunLog bool `default:"true"`
 
 	// if true, save train trial log to file, as .trl.tsv typically. May be large.
-	TrialLog bool `def:"true"`
+	TrialLog bool `default:"true"`
 
 	// if true, save testing epoch log to file, as .tst_epc.tsv typically.  In general it is better to copy testing items over to the training epoch log and record there.
-	TestEpochLog bool `def:"false"`
+	TestEpochLog bool `default:"false"`
 
 	// if true, save testing trial log to file, as .tst_trl.tsv typically. May be large.
-	TestTrialLog bool `def:"false"`
+	TestTrialLog bool `default:"false"`
 
 	// if true, save network activation etc data from testing trials, for later viewing in netview
 	NetData bool
@@ -104,10 +104,10 @@ type TestConfig struct {
 	Enum testdata.TestEnum
 
 	// ] test slice case
-	Slice []float32 `def:"[1, 2.14, 3.14]"`
+	Slice []float32 `default:"[1, 2.14, 3.14]"`
 
 	// ] test string slice case
-	StrSlice []string `posarg:"all" def:"['cat','dog one','dog two']"`
+	StrSlice []string `posarg:"all" default:"['cat','dog one','dog two']"`
 }
 
 func (cfg *TestConfig) IncludesPtr() *[]string { return &cfg.Includes }

@@ -33,16 +33,16 @@ type View struct {
 	WhitePoint mat32.Vec3
 
 	// the ambient light strength in lux
-	Luminance float32 `def:"200"`
+	Luminance float32 `default:"200"`
 
 	// the average luminance of 10 degrees around the color in question
-	BgLuminance float32 `def:"50"`
+	BgLuminance float32 `default:"50"`
 
 	// the brightness of the entire environment
-	Surround float32 `def:"2"`
+	Surround float32 `default:"2"`
 
 	// whether the person's eyes have adapted to the lighting
-	Adapted bool `def:"false"`
+	Adapted bool `default:"false"`
 
 	// computed from Luminance
 	AdaptingLuminance float32 `view:"-"`

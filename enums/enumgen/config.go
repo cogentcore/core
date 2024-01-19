@@ -16,10 +16,10 @@ package enumgen
 type Config struct { //gti:add
 
 	// the source directory to run enumgen on (can be set to multiple through paths like ./...)
-	Dir string `def:"." posarg:"0" required:"-"`
+	Dir string `default:"." posarg:"0" required:"-"`
 
 	// the output file location relative to the package on which enumgen is being called
-	Output string `def:"enumgen.go"`
+	Output string `default:"enumgen.go"`
 
 	// if specified, the enum item transformation method (upper, lower, snake, snake-upper, kebab, kebab-upper,
 	// camel, camel-lower, title, title-lower, first, first-upper, first-lower, or whitespace)
@@ -38,7 +38,7 @@ type Config struct { //gti:add
 	AcceptLower bool
 
 	// whether to generate text marshaling methods
-	Text bool `def:"true"`
+	Text bool `default:"true"`
 
 	// whether to generate JSON marshaling methods (note that text marshaling methods will also work for JSON, so this should be unnecessary in almost all cases; see the text option)
 	JSON bool
@@ -54,5 +54,5 @@ type Config struct { //gti:add
 
 	// whether to allow enums to extend other enums; this should be on in almost all circumstances,
 	// but can be turned off for specific enum types that extend non-enum types
-	Extend bool `def:"true"`
+	Extend bool `default:"true"`
 }

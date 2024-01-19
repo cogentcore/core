@@ -9,13 +9,13 @@ Docs: [GoDoc](https://pkg.go.dev/github.com/emer/emergent/grease)
 * Standard usage:
     + `cfg := &ss.Config`
     + `cfg.Defaults()` -- sets hard-coded defaults -- user should define and call this method first.
-    + It is better to use the `def:` field tag however because it then shows in `-h` or `--help` usage and in the [GoGi](https://github.com/goki/gi) GUI.  See [Default Tags](#def_default_tags) for how to specify def values for more complex types.
+    + It is better to use the `default:` field tag however because it then shows in `-h` or `--help` usage and in the [GoGi](https://github.com/goki/gi) GUI.  See [Default Tags](#def_default_tags) for how to specify def values for more complex types.
     + `grease.Config(cfg, "config.toml")` -- sets config values according to the standard order, with given file name specifying the default config file name.
 
 * Has support for nested `Include` paths, which are processed in the natural deepest-first order. The processed `Config` struct field will contain a list of all such files processed.  Config must implement the `IncludesPtr() *[]string` method which satisfies the `Includer` interface, and returns a pointer to an `Includes []string` field containing a list of config files to include.  The default `IncludePaths` includes current dir (`.`) and `configs` directory, which is recommended location to store different configs.
 
 * Order of setting in `grease.Config`:
-    + Apply any `def:` field tag default values.
+    + Apply any `default:` field tag default values.
     + Look for `--config`, `--cfg` arg, specifying config file(s) on the command line (comma separated if multiple, with no spaces).
     + Fall back on default config file name passed to `Config` function, if arg not found.
     + Read any `Include[s]` files in config file in deepest-first (natural) order, then the specified config file last -- includee overwrites included settings.
@@ -39,23 +39,23 @@ Docs: [GoDoc](https://pkg.go.dev/github.com/emer/emergent/grease)
 
 * `Field map[string]any` -- allows raw parsing of values that can be applied later.  Use this for `Network`, `Env` etc fields.
 
-* Field tag `def:"value"`, used in the [GoGi](https://github.com/goki/gi) GUI, sets the initial default value and is shown for the `-h` or `--help` usage info.
+* Field tag `default:"value"`, used in the [GoGi](https://github.com/goki/gi) GUI, sets the initial default value and is shown for the `-h` or `--help` usage info.
 
 * [kit](https://cogentcore.org/core/ki) registered "enum" `const` types, with names automatically parsed from string values (including bit flags).  Must use the [goki stringer](https://github.com/goki/stringer) version to generate `FromString()` method, and register the type like this: `var KitTestEnum = laser.Enums.AddEnum(TestEnumN, laser.NotBitFlag, nil)` -- see [enum.go](enum.go) file for example.
 
 # `def` Default Tags
 
-The [GoGi](https://github.com/goki/gi) GUI processes `def:"value"` struct tags to highlight values that are not at their defaults.  grease uses these same tags to auto-initialize fields as well, ensuring that the tag and the actual initial value are the same.  The value for strings or numbers is just the string representation.  For more complex types, here ar some examples:
+The [GoGi](https://github.com/goki/gi) GUI processes `default:"value"` struct tags to highlight values that are not at their defaults.  grease uses these same tags to auto-initialize fields as well, ensuring that the tag and the actual initial value are the same.  The value for strings or numbers is just the string representation.  For more complex types, here ar some examples:
 
 * `struct`: specify using standard Go literal expression as a string, with single-quotes `'` used instead of double-quotes around strings, such as the name of the fields:
-    + `evec.Vec2i`: `def:"{'X':10,'Y':10}"`
+    + `evec.Vec2i`: `default:"{'X':10,'Y':10}"`
 
 * `slice`: comma-separated list of values in square braces -- use `'` for internal string boundaries:
-    + `[]float32`: `def:"[1, 2.14, 3.14]"`
-    + `[]string`: `def:"{'A', 'bbb bbb', 'c c c'}"`
+    + `[]float32`: `default:"[1, 2.14, 3.14]"`
+    + `[]string`: `default:"{'A', 'bbb bbb', 'c c c'}"`
 
 * `map`: comma-separated list of key:value in curly braces -- use `'` for internal string boundaries:
-    + `map[string]float32`: `def:"{'key1': 1, 'key2': 2.14, 'key3': 3.14]"`
+    + `map[string]float32`: `default:"{'key1': 1, 'key2': 2.14, 'key3': 3.14]"`
 
 # Standard Config Example
 
@@ -74,34 +74,34 @@ type ParamConfig struct {
 
 // RunConfig has config parameters related to running the sim
 type RunConfig struct {
-	GPU          bool   `def:"true" desc:"use the GPU for computation -- generally faster even for small models if NData ~16"`
-	Threads      int    `def:"0" desc:"number of parallel threads for CPU computation -- 0 = use default"`
-	Run          int    `def:"0" desc:"starting run number -- determines the random seed -- runs counts from there -- can do all runs in parallel by launching separate jobs with each run, runs = 1"`
-	Runs         int    `def:"5" min:"1" desc:"total number of runs to do when running Train"`
-	Epochs       int    `def:"100" desc:"total number of epochs per run"`
-	NZero        int    `def:"2" desc:"stop run after this number of perfect, zero-error epochs"`
-	NTrials      int    `def:"32" desc:"total number of trials per epoch.  Should be an even multiple of NData."`
-	NData        int    `def:"16" min:"1" desc:"number of data-parallel items to process in parallel per trial -- works (and is significantly faster) for both CPU and GPU.  Results in an effective mini-batch of learning."`
-	TestInterval int    `def:"5" desc:"how often to run through all the test patterns, in terms of training epochs -- can use 0 or -1 for no testing"`
-	PCAInterval  int    `def:"5" desc:"how frequently (in epochs) to compute PCA on hidden representations to measure variance?"`
+	GPU          bool   `default:"true" desc:"use the GPU for computation -- generally faster even for small models if NData ~16"`
+	Threads      int    `default:"0" desc:"number of parallel threads for CPU computation -- 0 = use default"`
+	Run          int    `default:"0" desc:"starting run number -- determines the random seed -- runs counts from there -- can do all runs in parallel by launching separate jobs with each run, runs = 1"`
+	Runs         int    `default:"5" min:"1" desc:"total number of runs to do when running Train"`
+	Epochs       int    `default:"100" desc:"total number of epochs per run"`
+	NZero        int    `default:"2" desc:"stop run after this number of perfect, zero-error epochs"`
+	NTrials      int    `default:"32" desc:"total number of trials per epoch.  Should be an even multiple of NData."`
+	NData        int    `default:"16" min:"1" desc:"number of data-parallel items to process in parallel per trial -- works (and is significantly faster) for both CPU and GPU.  Results in an effective mini-batch of learning."`
+	TestInterval int    `default:"5" desc:"how often to run through all the test patterns, in terms of training epochs -- can use 0 or -1 for no testing"`
+	PCAInterval  int    `default:"5" desc:"how frequently (in epochs) to compute PCA on hidden representations to measure variance?"`
 	StartWts     string `desc:"if non-empty, is the name of weights file to load at start of first run -- for testing"`
 }
 
 // LogConfig has config parameters related to logging data
 type LogConfig struct {
 	SaveWts   bool `desc:"if true, save final weights after each run"`
-	Epoch     bool `def:"true" desc:"if true, save train epoch log to file, as .epc.tsv typically"`
-	Run       bool `def:"true" desc:"if true, save run log to file, as .run.tsv typically"`
-	Trial     bool `def:"false" desc:"if true, save train trial log to file, as .trl.tsv typically. May be large."`
-	TestEpoch bool `def:"false" desc:"if true, save testing epoch log to file, as .tst_epc.tsv typically.  In general it is better to copy testing items over to the training epoch log and record there."`
-	TestTrial bool `def:"false" desc:"if true, save testing trial log to file, as .tst_trl.tsv typically. May be large."`
+	Epoch     bool `default:"true" desc:"if true, save train epoch log to file, as .epc.tsv typically"`
+	Run       bool `default:"true" desc:"if true, save run log to file, as .run.tsv typically"`
+	Trial     bool `default:"false" desc:"if true, save train trial log to file, as .trl.tsv typically. May be large."`
+	TestEpoch bool `default:"false" desc:"if true, save testing epoch log to file, as .tst_epc.tsv typically.  In general it is better to copy testing items over to the training epoch log and record there."`
+	TestTrial bool `default:"false" desc:"if true, save testing trial log to file, as .tst_trl.tsv typically. May be large."`
 	NetData   bool `desc:"if true, save network activation etc data from testing trials, for later viewing in netview"`
 }
 
 // Config is a standard Sim config -- use as a starting point.
 type Config struct {
 	Includes []string    `desc:"specify include files here, and after configuration, it contains list of include files added"`
-	GUI      bool        `def:"true" desc:"open the GUI -- does not automatically run -- if false, then runs automatically and quits"`
+	GUI      bool        `default:"true" desc:"open the GUI -- does not automatically run -- if false, then runs automatically and quits"`
 	Debug    bool        `desc:"log debugging information"`
 	Params   ParamConfig `view:"add-fields" desc:"parameter related configuration options"`
 	Run      RunConfig   `view:"add-fields" desc:"sim running related configuration options"`

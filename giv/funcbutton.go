@@ -86,7 +86,7 @@ type FuncButton struct { //core:no-new
 	// The way that the return values are shown is determined
 	// by ShowReturnAsDialog. ShowReturn is on by default, unless
 	// the function has no return values.
-	ShowReturn bool `def:"true"`
+	ShowReturn bool `default:"true"`
 
 	// ShowReturnAsDialog, if and only if ShowReturn is true,
 	// indicates to show the return values of the function in
@@ -105,7 +105,7 @@ type FuncButton struct { //core:no-new
 	// has not been added to gti is used. It is on by default and
 	// must be set before [FuncButton.SetFunc] is called for it to
 	// have any effect.
-	WarnUnadded bool `def:"true"`
+	WarnUnadded bool `default:"true"`
 
 	// Context is used for opening Dialogs if non-nil.
 	Context gi.Widget

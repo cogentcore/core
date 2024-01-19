@@ -134,7 +134,7 @@ func SaveSettings(se Settings) error {
 }
 
 // ResetSettings resets the given settings to their default values.
-// It process their `def:` struct tags in addition to calling their
+// It process their `default:` struct tags in addition to calling their
 // [Settings.Default] method.
 func ResetSettings(se Settings) error {
 	err := os.Remove(se.Filename())
@@ -147,7 +147,7 @@ func ResetSettings(se Settings) error {
 }
 
 // LoadSettings sets the defaults of, opens, and applies the given settings.
-// If they are not already saved, it saves them. It process their `def:` struct
+// If they are not already saved, it saves them. It process their `default:` struct
 // tags in addition to calling their [Settings.Default] method.
 func LoadSettings(se Settings) error {
 	grr.Log(laser.SetFromDefaultTags(se))
@@ -210,33 +210,33 @@ type AppearanceSettingsData struct { //gti:add
 	SettingsBase
 
 	// the color theme
-	Theme Themes `def:"Auto"`
+	Theme Themes `default:"Auto"`
 
 	// the primary color used to generate the color scheme
-	Color color.RGBA `def:"#4285f4"`
+	Color color.RGBA `default:"#4285f4"`
 
 	// overall zoom factor as a percentage of the default zoom
-	Zoom float32 `def:"100" min:"10" max:"500" step:"10" format:"%g%%"`
+	Zoom float32 `default:"100" min:"10" max:"500" step:"10" format:"%g%%"`
 
 	// the overall spacing factor as a percentage of the default amount of spacing
 	// (higher numbers lead to more space and lower numbers lead to higher density)
-	Spacing float32 `def:"100" min:"10" max:"500" step:"10" format:"%g%%"`
+	Spacing float32 `default:"100" min:"10" max:"500" step:"10" format:"%g%%"`
 
 	// the overall font size factor applied to all text as a percentage
 	// of the default font size (higher numbers lead to larger text)
-	FontSize float32 `def:"100" min:"10" max:"500" step:"10" format:"%g%%"`
+	FontSize float32 `default:"100" min:"10" max:"500" step:"10" format:"%g%%"`
 
 	// screen-specific preferences, which will override overall defaults if set
 	Screens map[string]ScreenSettings
 
 	// text highlighting style / theme
-	HiStyle HiStyleName `def:"emacs"`
+	HiStyle HiStyleName `default:"emacs"`
 
 	// default font family when otherwise not specified
-	FontFamily FontName `def:"Roboto"`
+	FontFamily FontName `default:"Roboto"`
 
 	// default mono-spaced font family
-	MonoFont FontName `def:"Roboto Mono"`
+	MonoFont FontName `default:"Roboto Mono"`
 
 	// toolbar configuration function -- set in giv -- allows use of FuncButton
 	TBConfig func(tb *Toolbar) `set:"-" view:"-" save:"-"`
@@ -369,33 +369,33 @@ type DeviceSettingsData struct { //gti:add
 	KeyMaps option.Option[keyfun.Maps]
 
 	// The maximum time interval between button press events to count as a double-click
-	DoubleClickInterval time.Duration `def:"500ms" min:"100ms" step:"50ms"`
+	DoubleClickInterval time.Duration `default:"500ms" min:"100ms" step:"50ms"`
 
 	// How fast the scroll wheel moves, which is typically pixels per wheel step
 	// but units can be arbitrary. It is generally impossible to standardize speed
 	// and variable across devices, and we don't have access to the system settings,
 	// so unfortunately you have to set it here.
-	ScrollWheelSpeed float32 `def:"1" min:"0.01" step:"1"`
+	ScrollWheelSpeed float32 `default:"1" min:"0.01" step:"1"`
 
 	// The amount of time to wait before initiating a slide/drag event
 	// (as opposed to a basic press event)
-	DragStartTime time.Duration `def:"50ms" min:"5ms" max:"1s" step:"5ms"`
+	DragStartTime time.Duration `default:"50ms" min:"5ms" max:"1s" step:"5ms"`
 
 	// The number of pixels that must be moved before initiating a slide/drag
 	// event (as opposed to a basic press event)
-	DragStartDistance int `def:"4" min:"0" max:"100" step:"1"`
+	DragStartDistance int `default:"4" min:"0" max:"100" step:"1"`
 
 	// The amount of time to wait before initiating a long hover event (e.g., for opening a tooltip)
-	LongHoverTime time.Duration `def:"500ms" min:"10ms" max:"10s" step:"10ms"`
+	LongHoverTime time.Duration `default:"500ms" min:"10ms" max:"10s" step:"10ms"`
 
 	// The maximum number of pixels that mouse can move and still register a long hover event
-	LongHoverStopDistance int `def:"5" min:"0" max:"1000" step:"1"`
+	LongHoverStopDistance int `default:"5" min:"0" max:"1000" step:"1"`
 
 	// The amount of time to wait before initiating a long press event (e.g., for opening a tooltip)
-	LongPressTime time.Duration `def:"500ms" min:"10ms" max:"10s" step:"10ms"`
+	LongPressTime time.Duration `default:"500ms" min:"10ms" max:"10s" step:"10ms"`
 
 	// The maximum number of pixels that mouse/finger can move and still register a long press event
-	LongPressStopDistance int `def:"50" min:"0" max:"1000" step:"1"`
+	LongPressStopDistance int `default:"50" min:"0" max:"1000" step:"1"`
 }
 
 func (ds *DeviceSettingsData) Defaults() {
@@ -420,7 +420,7 @@ func (ds *DeviceSettingsData) Apply() {
 type ScreenSettings struct { //gti:add
 
 	// overall zoom factor as a percentage of the default zoom
-	Zoom float32 `def:"100" min:"10" max:"1000" step:"10"`
+	Zoom float32 `default:"100" min:"10" max:"1000" step:"10"`
 }
 
 // SystemSettings are the currently active Cogent Core system settings.
@@ -458,39 +458,39 @@ type SystemSettingsData struct { //gti:add
 
 	// the maximum height of any menu popup panel in units of font height;
 	// scroll bars are enforced beyond that size.
-	MenuMaxHeight int `def:"30" min:"5" step:"1"`
+	MenuMaxHeight int `default:"30" min:"5" step:"1"`
 
 	// the amount of time to wait before offering completions
-	CompleteWaitDuration time.Duration `def:"0ms" min:"0ms" max:"10s" step:"10ms"`
+	CompleteWaitDuration time.Duration `default:"0ms" min:"0ms" max:"10s" step:"10ms"`
 
 	// the maximum number of completions offered in popup
-	CompleteMaxItems int `def:"25" min:"5" step:"1"`
+	CompleteMaxItems int `default:"25" min:"5" step:"1"`
 
 	// time interval for cursor blinking on and off -- set to 0 to disable blinking
-	CursorBlinkTime time.Duration `def:"500ms" min:"0ms" max:"1s" step:"5ms"`
+	CursorBlinkTime time.Duration `default:"500ms" min:"0ms" max:"1s" step:"5ms"`
 
 	// The amount of time to wait before trying to autoscroll again
-	LayoutAutoScrollDelay time.Duration `def:"25ms" min:"1ms" step:"5ms"`
+	LayoutAutoScrollDelay time.Duration `default:"25ms" min:"1ms" step:"5ms"`
 
 	// number of steps to take in PageUp / Down events in terms of number of items
-	LayoutPageSteps int `def:"10" min:"1" step:"1"`
+	LayoutPageSteps int `default:"10" min:"1" step:"1"`
 
 	// the amount of time between keypresses to combine characters into name to search for within layout -- starts over after this delay
-	LayoutFocusNameTimeout time.Duration `def:"500ms" min:"0ms" max:"5s" step:"20ms"`
+	LayoutFocusNameTimeout time.Duration `default:"500ms" min:"0ms" max:"5s" step:"20ms"`
 
 	// the amount of time since last focus name event to allow tab to focus on next element with same name.
-	LayoutFocusNameTabTime time.Duration `def:"2s" min:"10ms" max:"10s" step:"100ms"`
+	LayoutFocusNameTabTime time.Duration `default:"2s" min:"10ms" max:"10s" step:"100ms"`
 
 	// the number of map elements at or below which an inline representation
 	// of the map will be presented, which is more convenient for small #'s of props
-	MapInlineLength int `def:"2" min:"1" step:"1"`
+	MapInlineLength int `default:"2" min:"1" step:"1"`
 
 	// the number of elemental struct fields at or below which an inline representation
 	// of the struct will be presented, which is more convenient for small structs
-	StructInlineLength int `def:"4" min:"2" step:"1"`
+	StructInlineLength int `default:"4" min:"2" step:"1"`
 
 	// the number of slice elements below which inline will be used
-	SliceInlineLength int `def:"4" min:"2" step:"1"`
+	SliceInlineLength int `default:"4" min:"2" step:"1"`
 }
 
 func (ss *SystemSettingsData) Defaults() {
@@ -546,16 +546,16 @@ func (ss *SystemSettingsData) UpdateUser() {
 // BehaviorSettings contains misc parameters controlling GUI behavior.
 type BehaviorSettings struct { //gti:add
 	// only support closing the currently selected active tab; if this is set to true, pressing the close button on other tabs will take you to that tab, from which you can close it
-	OnlyCloseActiveTab bool `def:"false"`
+	OnlyCloseActiveTab bool `default:"false"`
 
 	// the amount that alternating rows and columns are highlighted when showing tabular data (set to 0 to disable zebra striping)
-	ZebraStripeWeight float32 `def:"0" min:"0" max:"100" step:"1"`
+	ZebraStripeWeight float32 `default:"0" min:"0" max:"100" step:"1"`
 
 	// the limit of file size, above which user will be prompted before opening / copying, etc.
-	BigFileSize int `def:"10000000"`
+	BigFileSize int `default:"10000000"`
 
 	// maximum number of saved paths to save in FileView
-	SavedPathsMax int `def:"50"`
+	SavedPathsMax int `default:"50"`
 }
 
 // User basic user information that might be needed for different apps
@@ -570,31 +570,31 @@ type User struct { //gti:add
 type EditorSettings struct { //gti:add
 
 	// size of a tab, in chars -- also determines indent level for space indent
-	TabSize int `def:"4" xml:"tab-size"`
+	TabSize int `default:"4" xml:"tab-size"`
 
 	// use spaces for indentation, otherwise tabs
 	SpaceIndent bool `xml:"space-indent"`
 
 	// wrap lines at word boundaries -- otherwise long lines scroll off the end
-	WordWrap bool `def:"true" xml:"word-wrap"`
+	WordWrap bool `default:"true" xml:"word-wrap"`
 
 	// show line numbers
-	LineNos bool `def:"true" xml:"line-nos"`
+	LineNos bool `default:"true" xml:"line-nos"`
 
 	// use the completion system to suggest options while typing
-	Completion bool `def:"true" xml:"completion"`
+	Completion bool `default:"true" xml:"completion"`
 
 	// suggest corrections for unknown words while typing
-	SpellCorrect bool `def:"true" xml:"spell-correct"`
+	SpellCorrect bool `default:"true" xml:"spell-correct"`
 
 	// automatically indent lines when enter, tab, }, etc pressed
-	AutoIndent bool `def:"true" xml:"auto-indent"`
+	AutoIndent bool `default:"true" xml:"auto-indent"`
 
 	// use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo
 	EmacsUndo bool `xml:"emacs-undo"`
 
 	// colorize the background according to nesting depth
-	DepthColor bool `def:"true" xml:"depth-color"`
+	DepthColor bool `default:"true" xml:"depth-color"`
 }
 
 //////////////////////////////////////////////////////////////////

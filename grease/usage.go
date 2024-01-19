@@ -192,7 +192,7 @@ func FlagUsage(fields *Fields, b *strings.Builder) {
 		if field != nil {
 			b.WriteString(Indent + Indent + strings.ReplaceAll(field.Doc, "\n", "\n"+Indent+Indent)) // need to put two indents on every newline for formatting
 		}
-		def, ok := f.Field.Tag.Lookup("def")
+		def, ok := f.Field.Tag.Lookup("default")
 		if ok && def != "" {
 			b.WriteString(fmt.Sprintf(" (default: %s)", def))
 		}

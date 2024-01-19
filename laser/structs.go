@@ -394,7 +394,7 @@ func EmbedImplements(typ, iface reflect.Type) bool {
 }
 
 // SetFromDefaultTags sets values of fields in given struct based on
-// `def:` default value field tags.
+// `default:` default value field tags.
 func SetFromDefaultTags(obj any) error {
 	if AnyIsNil(obj) {
 		return nil
@@ -408,7 +408,7 @@ func SetFromDefaultTags(obj any) error {
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		fv := val.Field(i)
-		def := f.Tag.Get("def")
+		def := f.Tag.Get("default")
 		if NonPtrType(f.Type).Kind() == reflect.Struct && def == "" {
 			SetFromDefaultTags(PtrValue(fv).Interface())
 			continue
@@ -427,7 +427,7 @@ func SetFromDefaultTags(obj any) error {
 
 // NonDefaultFields returns a map representing all of the fields of the given
 // struct (or pointer to a struct) that have values different than their default
-// values as specified by the `def:` struct tag. The resulting map is then typically
+// values as specified by the `default:` struct tag. The resulting map is then typically
 // saved using something like JSON or TOML. If a value has no default value, it
 // checks whether its value is non-zero. If a field has a `save:"-"` tag, it wil
 // not be included in the resulting map.
@@ -446,7 +446,7 @@ func NonDefaultFields(v any) map[string]any {
 		if ft.Tag.Get("save") == "-" {
 			continue
 		}
-		def := ft.Tag.Get("def")
+		def := ft.Tag.Get("default")
 		if NonPtrType(ft.Type).Kind() == reflect.Struct && def == "" {
 			sfm := NonDefaultFields(fv.Interface())
 			if len(sfm) > 0 {
@@ -475,7 +475,7 @@ func NonDefaultFields(v any) map[string]any {
 	return res
 }
 
-// FormatDefault converts the given `def:` struct tag string into a format suitable
+// FormatDefault converts the given `default:` struct tag string into a format suitable
 // for being used as a value in [SetRobust]. If it returns "", the default value
 // should not be used.
 func FormatDefault(def string) string {

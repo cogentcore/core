@@ -290,8 +290,6 @@ type WidgetBase struct {
 
 	// Sc is the overall Scene to which we belong. It is automatically
 	// by widgets whenever they are added to another widget parent.
-	// It is passed to most Config, Layout, and Render functions as
-	// a convenience.
 	Sc *Scene `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// mutex protecting the Style field

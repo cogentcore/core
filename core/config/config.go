@@ -39,7 +39,7 @@ type Config struct { //gti:add
 	Desc string
 
 	// the version of the project
-	Version string `cmd:"set-version" posarg:"0" def:"v0.0.0"`
+	Version string `cmd:"set-version" posarg:"0" default:"v0.0.0"`
 
 	// TODO: add def TypeApp for type once fix SetString
 
@@ -79,20 +79,20 @@ type Build struct { //gti:add
 	Debug bool `flag:"d,debug"`
 
 	// the minimum version of the iOS SDK to compile against
-	IOSVersion string `def:"13.0"`
+	IOSVersion string `default:"13.0"`
 
 	// the minimum supported Android SDK (uses-sdk/android:minSdkVersion in AndroidManifest.xml)
-	AndroidMinSDK int `def:"23" min:"23"`
+	AndroidMinSDK int `default:"23" min:"23"`
 
 	// the target Android SDK version (uses-sdk/android:targetSdkVersion in AndroidManifest.xml)
-	AndroidTargetSDK int `def:"29"`
+	AndroidTargetSDK int `default:"29"`
 }
 
 type Pack struct { //gti:add
 
 	// whether to build a .dmg file on macOS in addition to a .app file.
 	// This is automatically disabled for the install command.
-	DMG bool `def:"true"`
+	DMG bool `default:"true"`
 }
 
 type Setup struct { //gti:add
@@ -104,22 +104,22 @@ type Setup struct { //gti:add
 type Log struct { //gti:add
 
 	// the target platform to view the logs for (ios or android)
-	Target string `def:"android"`
+	Target string `default:"android"`
 
 	// whether to keep the previous log messages or clear them
-	Keep bool `def:"false"`
+	Keep bool `default:"false"`
 
 	// messages not generated from your app equal to or above this log level will be shown
-	All string `def:"F"`
+	All string `default:"F"`
 }
 
 type Release struct { //gti:add
 
 	// the Go file to store version information in
-	VersionFile string `def:"version.go"`
+	VersionFile string `default:"version.go"`
 
 	// the Go package in which the version file will be stored
-	Package string `def:"main"`
+	Package string `default:"main"`
 }
 
 type Generate struct { //gti:add
@@ -131,7 +131,7 @@ type Generate struct { //gti:add
 	Gtigen gtigen.Config
 
 	// the source directory to run generate on (can be multiple through ./...)
-	Dir string `def:"." posarg:"0" required:"-" nest:"-"`
+	Dir string `default:"." posarg:"0" required:"-" nest:"-"`
 }
 
 func (c *Config) OnConfig(cmd string) error {

@@ -13,7 +13,7 @@ import (
 type Web struct { //gti:add
 
 	// Port is the port to serve the page at when using the serve command.
-	Port string `def:"8080"`
+	Port string `default:"8080"`
 
 	// RandomVersion is whether to automatically add a random string to the
 	// end of the version string for the app when building for web. This is
@@ -21,7 +21,7 @@ type Web struct { //gti:add
 	// but should not be enabled in release builds to prevent constant inaccurate
 	// update messages. It is enabled by default in the serve command and disabled
 	// by default otherwise.
-	RandomVersion bool `def:"true"`
+	RandomVersion bool `default:"true"`
 
 	// Gzip is whether to gzip the app.wasm file that is built in the build command
 	// and serve it as a gzip-encoded file in the run command.
@@ -31,24 +31,24 @@ type Web struct { //gti:add
 	// its stylesheets are loaded.
 	//
 	// DEFAULT: #2d2c2c.
-	BackgroundColor string `def:"#2d2c2c"`
+	BackgroundColor string `default:"#2d2c2c"`
 
 	// The theme color for the application. This affects how the OS displays the
 	// app (e.g., PWA title bar or Android's task switcher).
 	//
 	// DEFAULT: #2d2c2c.
-	ThemeColor string `def:"#2d2c2c"`
+	ThemeColor string `default:"#2d2c2c"`
 
 	// The text displayed while loading a page. Load progress can be inserted by
 	// including "{progress}" in the loading label.
 	//
 	// DEFAULT: "{progress}%".
-	LoadingLabel string `def:"{progress}%"`
+	LoadingLabel string `default:"{progress}%"`
 
 	// The page language.
 	//
 	// DEFAULT: en.
-	Lang string `def:"en"`
+	Lang string `default:"en"`
 
 	// The page authors.
 	Author string
@@ -64,7 +64,7 @@ type Web struct { //gti:add
 	// Zero or negative values deactivates the auto-update mechanism.
 	//
 	// Default is 10 seconds.
-	AutoUpdateInterval time.Duration `def:"10s"`
+	AutoUpdateInterval time.Duration `default:"10s"`
 
 	// The environment variables that are passed to the progressive web app.
 	//

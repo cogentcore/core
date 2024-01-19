@@ -15,10 +15,10 @@ import (
 type Config struct { //gti:add
 
 	// the source directory to run gtigen on (can be set to multiple through paths like ./...)
-	Dir string `def:"." posarg:"0" required:"-"`
+	Dir string `default:"." posarg:"0" required:"-"`
 
 	// the output file location relative to the package on which gtigen is being called
-	Output string `def:"gtigen.go"`
+	Output string `default:"gtigen.go"`
 
 	// whether to add types to gtigen by default
 	AddTypes bool

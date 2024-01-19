@@ -48,10 +48,10 @@ type Scene struct {
 	Geom mat32.Geom2DInt `set:"-"`
 
 	// number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame
-	MultiSample int `def:"4"`
+	MultiSample int `default:"4"`
 
 	// render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system (i.e., just after Scene is made)
-	Wireframe bool `def:"false"`
+	Wireframe bool `default:"false"`
 
 	// camera determines view onto scene
 	Camera Camera `set:"-"`

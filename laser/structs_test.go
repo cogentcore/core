@@ -200,19 +200,19 @@ func TestFieldPaths(t *testing.T) {
 }
 
 type person struct {
-	Name                string `def:"Go Gopher"`
-	Age                 int    `def:"35"`
-	ProgrammingLanguage string `def:"Go"`
+	Name                string `default:"Go Gopher"`
+	Age                 int    `default:"35"`
+	ProgrammingLanguage string `default:"Go"`
 	Pet                 pet
-	FavoriteFruit       string `def:"Apple"`
+	FavoriteFruit       string `default:"Apple"`
 	Data                string `save:"-"`
 	OtherPet            *pet
 }
 
 type pet struct {
 	Name       string
-	Type       string `def:"Gopher"`
-	Age        int    `def:"7"`
+	Type       string `default:"Gopher"`
+	Age        int    `default:"7"`
 	IsSick     bool
 	LikesFoods []string
 }

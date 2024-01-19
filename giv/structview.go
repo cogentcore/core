@@ -349,7 +349,7 @@ func (sv *StructView) UpdateFieldAction() {
 
 // StructViewFieldTags processes the tags for a field in a struct view, setting
 // the properties on the label or widget appropriately
-// returns true if there were any "def" default tags -- if so, needs updating
+// returns true if there were any "default" default tags -- if so, needs updating
 func StructViewFieldTags(vv Value, lbl *gi.Label, w gi.Widget, isReadOnly bool) (hasDef, readOnlyTag bool) {
 	lbl.Text = vv.Label()
 	if et, has := vv.Tag("edit"); has && et == "-" {
@@ -367,12 +367,12 @@ func StructViewFieldTags(vv Value, lbl *gi.Label, w gi.Widget, isReadOnly bool) 
 	return
 }
 
-// StructViewFieldDefTag processes the "def" tag for default values -- can be
+// StructViewFieldDefTag processes the "default" tag for default values -- can be
 // called multiple times for updating as values change.
 // returns true if value is default, and string to add to tooltip for default vals
 func StructViewFieldDefTag(vv Value, lbl *gi.Label) (hasDef bool, isDef bool, defStr string) {
 	// todo
-	// if dtag, has := vv.Tag("def"); has {
+	// if dtag, has := vv.Tag("default"); has {
 	// 	hasDef = true
 	// 	isDef, defStr = StructFieldIsDef(dtag, vv.Val().Interface(), laser.NonPtrValue(vv.Val()).Kind())
 	// 	if isDef {
@@ -385,7 +385,7 @@ func StructViewFieldDefTag(vv Value, lbl *gi.Label) (hasDef bool, isDef bool, de
 	return
 }
 
-// StructFieldIsDef processses "def" tag for default value(s) of field
+// StructFieldIsDef processses "default" tag for default value(s) of field
 // defs = default values as strings as either comma-separated list of valid values
 // or low:high value range (only for int or float numeric types)
 // valPtr = pointer to value
@@ -393,7 +393,7 @@ func StructViewFieldDefTag(vv Value, lbl *gi.Label) (hasDef bool, isDef bool, de
 // Uses JSON format for composite types (struct, slice, map), replacing " with '
 // so it is easier to use in def tag.
 func StructFieldIsDef(defs string, valPtr any, kind reflect.Kind) (bool, string) {
-	defStr := "[Def: " + defs + "] "
+	defStr := "[Default: " + defs + "] "
 	def := false
 	switch {
 	case kind == reflect.Struct || kind == reflect.Slice || kind == reflect.Map:
@@ -571,7 +571,7 @@ type StructFieldVals struct {
 	Defs string
 }
 
-// StructNonDefFields processses "def" tag for default value(s)
+// StructNonDefFields processses "default" tag for default value(s)
 // of fields in given struct and starting path, and returns all
 // fields not at their default values.
 // See also StructNoDefFieldsStr for a string representation of this information.
@@ -582,7 +582,7 @@ func StructNonDefFields(structPtr any, path string) []StructFieldVals {
 	var flds []StructFieldVals
 	laser.FlatFieldsValueFunc(structPtr, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		vvp := fieldVal.Addr()
-		dtag, got := field.Tag.Lookup("def")
+		dtag, got := field.Tag.Lookup("default")
 		if field.Type.Kind() == reflect.Struct && (!got || dtag == "") {
 			spath := path
 			if path != "" {
@@ -608,7 +608,7 @@ func StructNonDefFields(structPtr any, path string) []StructFieldVals {
 	return flds
 }
 
-// StructNonDefFieldsStr processses "def" tag for default value(s) of fields in
+// StructNonDefFieldsStr processses "default" tag for default value(s) of fields in
 // given struct, and returns a string of all those not at their default values,
 // in format: Path.Field: val // default value(s)
 // Uses a recursive strategy -- any fields that are themselves structs are

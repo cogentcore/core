@@ -122,7 +122,7 @@ type OnConfigurer interface {
 
 // Config is the main, high-level configuration setting function,
 // processing config files and command-line arguments in the following order:
-//   - Apply any `def:` field tag default values.
+//   - Apply any `default:` field tag default values.
 //   - Look for `--config`, `--cfg`, or `-c` arg, specifying a config file on the command line.
 //   - Fall back on default config file name passed to `Config` function, if arg not found.
 //   - Read any `Include[s]` files in config file in deepest-first (natural) order,

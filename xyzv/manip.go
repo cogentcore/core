@@ -50,10 +50,10 @@ type SelParams struct {
 	Color color.RGBA
 
 	// width of the box lines, scaled by view distance
-	Width float32 `def:"0.001"`
+	Width float32 `default:"0.001"`
 
 	// radius of the manipulation control point spheres, scaled by view distance
-	Radius float32 `def:"0.005"`
+	Radius float32 `default:"0.005"`
 }
 
 func (sp *SelParams) Defaults() {

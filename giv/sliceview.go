@@ -208,7 +208,7 @@ type SliceViewBase struct {
 
 	// MinRows specifies the minimum number of rows to display, to ensure
 	// at least this amount is displayed.
-	MinRows int `def:"4"`
+	MinRows int `default:"4"`
 
 	// optional mutex that, if non-nil, will be used around any updates that
 	// read / modify the underlying Slice data.

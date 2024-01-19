@@ -50,7 +50,7 @@ type Phong struct {
 	Spot [MaxLights]SpotLight
 
 	// render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system
-	Wireframe bool `def:"false"`
+	Wireframe bool `default:"false"`
 
 	// state for current rendering
 	Cur CurRender
