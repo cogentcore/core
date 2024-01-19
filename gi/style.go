@@ -121,7 +121,7 @@ func (wb *WidgetBase) ApplyStyleWidget() {
 	if wb.Styles.Display == styles.DisplayNone {
 		wb.SetState(true, states.Invisible)
 	}
-	SetUnitContext(&wb.Styles, wb.Sc, mat32.Vec2{}, mat32.Vec2{})
+	SetUnitContext(&wb.Styles, wb.Scene, mat32.Vec2{}, mat32.Vec2{})
 	wb.ApplyStyleParts()
 }
 

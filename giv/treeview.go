@@ -746,7 +746,7 @@ func (tv *TreeView) Unselect() {
 
 // UnselectAll unselects all selected items in the view
 func (tv *TreeView) UnselectAll() {
-	if tv.Sc == nil {
+	if tv.Scene == nil {
 		return
 	}
 	updt := tv.UpdateStart()
@@ -766,7 +766,7 @@ func (tv *TreeView) UnselectAll() {
 
 // SelectAll all items in view
 func (tv *TreeView) SelectAll() {
-	if tv.Sc == nil {
+	if tv.Scene == nil {
 		return
 	}
 	updt := tv.UpdateStart()
@@ -1334,7 +1334,7 @@ func (tv *TreeView) ContextMenu(m *gi.Scene) {
 		OnClick(func(e events.Event) {
 			tvi.Paste()
 		})
-	cb := tv.Sc.EventMgr.Clipboard()
+	cb := tv.Scene.EventMgr.Clipboard()
 	if cb != nil {
 		pbt.SetState(cb.IsEmpty(), states.Disabled)
 	}
@@ -1508,7 +1508,7 @@ func (tv *TreeView) PasteAssign(md mimedata.Mimes) {
 	}
 	updt := tv.UpdateStart()
 	tv.This().CopyFrom(sl[0]) // nodes with data copy here
-	tv.SetScene(tv.Sc)        // ensure children have scene
+	tv.SetScene(tv.Scene)     // ensure children have scene
 	tv.Update()               // could have children
 	tv.Open()
 	tv.TreeViewChanged(nil)
@@ -1574,7 +1574,7 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, act
 		_, nwb := gi.AsWidget(ns.This())
 		ntv := AsTreeView(ns.This())
 		ntv.RootView = tv.RootView
-		nwb.SetScene(tv.Sc)
+		nwb.SetScene(tv.Scene)
 		nwb.Update() // incl children
 		npath := ns.PathFrom(tv.RootView)
 		if mod == events.DropMove && npath == orgpath { // we will be nuked immediately after drag
@@ -1607,7 +1607,7 @@ func (tv *TreeView) PasteChildren(md mimedata.Mimes, mod events.DropMods) {
 		_, nwb := gi.AsWidget(ns.This())
 		ntv := AsTreeView(ns.This())
 		ntv.RootView = tv.RootView
-		nwb.SetScene(tv.Sc)
+		nwb.SetScene(tv.Scene)
 	}
 	tv.Update()
 	tv.Open()
@@ -1632,7 +1632,7 @@ func (tv *TreeView) DragStart(e events.Event) {
 			}
 		}
 	}
-	tv.Sc.EventMgr.DragStart(tv.This().(gi.Widget), md, e)
+	tv.Scene.EventMgr.DragStart(tv.This().(gi.Widget), md, e)
 }
 
 // DropExternal is not handled by base case but could be in derived
@@ -1655,7 +1655,7 @@ func (tv *TreeView) DragDrop(e events.Event) {
 	}
 	md := de.Data.(mimedata.Mimes)
 	mf := func(m *gi.Scene) {
-		tv.Sc.EventMgr.DragMenuAddModLabel(m, de.DropMod)
+		tv.Scene.EventMgr.DragMenuAddModLabel(m, de.DropMod)
 		tvi.MakePasteMenu(m, md, func() {
 			tvi.DropFinalize(de)
 		})
@@ -1668,7 +1668,7 @@ func (tv *TreeView) DragDrop(e events.Event) {
 // Only relevant for DropMod == DropMove.
 func (tv *TreeView) DropFinalize(de *events.DragDrop) {
 	tv.UnselectAll()
-	tv.Sc.EventMgr.DropFinalize(de) // sends DropDeleteSource to Source
+	tv.Scene.EventMgr.DropFinalize(de) // sends DropDeleteSource to Source
 }
 
 // DropDeleteSource handles delete source event for DropMove case

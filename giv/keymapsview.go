@@ -27,7 +27,7 @@ func KeyMapsView(km *keyfun.Maps) {
 		keyfun.AvailMapsChanged = true
 	})
 
-	d.Sc.Data = km // todo: needed?
+	d.Scene.Data = km // todo: needed?
 	d.AddAppBar(func(tb *gi.Toolbar) {
 		NewFuncButton(tb, km.SavePrefs).SetText("Save to preferences").SetIcon(icons.Save).SetKey(keyfun.Save).
 			StyleFirst(func(s *styles.Style) { s.SetEnabled(keyfun.AvailMapsChanged && km == &keyfun.AvailMaps) })

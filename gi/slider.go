@@ -599,7 +599,7 @@ func (sr *Slider) ScenePos() {
 		return
 	}
 	sbw := mat32.Ceil(sr.Styles.ScrollBarWidth.Dots)
-	scmax := mat32.V2FromPoint(sr.Sc.Geom.ContentBBox.Max).SubScalar(sbw)
+	scmax := mat32.V2FromPoint(sr.Scene.Geom.ContentBBox.Max).SubScalar(sbw)
 	sr.Geom.Pos.Total.SetMin(scmax)
 	sr.SetContentPosFromPos()
 	sr.SetBBoxesFromAllocs()

@@ -131,10 +131,10 @@ func (sc *Scene) InheritBarsWidget(wi Widget) {
 		return
 	}
 	wb := wi.AsWidget()
-	if wb.Sc == nil {
+	if wb.Scene == nil {
 		return
 	}
-	sc.InheritBars(wb.Sc)
+	sc.InheritBars(wb.Scene)
 }
 
 // InheritBars inherits Bars functions from given other scene
@@ -167,33 +167,33 @@ func (sc *Scene) InheritBars(osc *Scene) {
 // AddTopBar adds the given function for configuring a control bar
 // at the top of the window
 func (bd *Body) AddTopBar(fun func(pw Widget)) {
-	bd.Sc.Bars.Top.Add(fun)
+	bd.Scene.Bars.Top.Add(fun)
 }
 
 // AddLeftBar adds the given function for configuring a control bar
 // on the left of the window
 func (bd *Body) AddLeftBar(fun func(pw Widget)) {
-	bd.Sc.Bars.Left.Add(fun)
+	bd.Scene.Bars.Left.Add(fun)
 }
 
 // AddRightBar adds the given function for configuring a control bar
 // on the right of the window
 func (bd *Body) AddRightBar(fun func(pw Widget)) {
-	bd.Sc.Bars.Right.Add(fun)
+	bd.Scene.Bars.Right.Add(fun)
 }
 
 // AddBottomBar adds the given function for configuring a control bar
 // at the bottom of the window
 func (bd *Body) AddBottomBar(fun func(pw Widget)) {
-	bd.Sc.Bars.Bottom.Add(fun)
+	bd.Scene.Bars.Bottom.Add(fun)
 }
 
 // AddAppBar adds an AppBar function for an element within the scene
 func (bd *Body) AddAppBar(fun func(tb *Toolbar)) {
-	bd.Sc.AddAppBar(fun)
+	bd.Scene.AddAppBar(fun)
 }
 
 // GetTopAppBar returns the TopAppBar Toolbar if it exists, nil otherwise.
 func (bd *Body) GetTopAppBar() *Toolbar {
-	return bd.Sc.GetTopAppBar()
+	return bd.Scene.GetTopAppBar()
 }

@@ -288,9 +288,9 @@ type WidgetBase struct {
 	// Separators will be added between each context menu function.
 	ContextMenus []func(m *Scene) `json:"-" xml:"-" set:"-"`
 
-	// Sc is the overall Scene to which we belong. It is automatically
+	// Scene is the overall Scene to which we belong. It is automatically
 	// by widgets whenever they are added to another widget parent.
-	Sc *Scene `copier:"-" json:"-" xml:"-" set:"-"`
+	Scene *Scene `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// mutex protecting the Style field
 	StyMu sync.RWMutex `copier:"-" view:"-" json:"-" xml:"-" set:"-"`
@@ -318,7 +318,7 @@ func (wb *WidgetBase) OnInit() {
 // by widget types.
 func (wb *WidgetBase) OnAdd() {
 	if pwb := wb.ParentWidget(); pwb != nil {
-		wb.Sc = pwb.Sc
+		wb.Scene = pwb.Scene
 	}
 }
 
@@ -327,7 +327,7 @@ func (wb *WidgetBase) OnAdd() {
 // e.g., when reading from a JSON file.
 func (wb *WidgetBase) SetScene(sc *Scene) {
 	wb.WidgetWalkPre(func(kwi Widget, kwb *WidgetBase) bool {
-		kwb.Sc = sc
+		kwb.Scene = sc
 		return ki.Continue
 	})
 }
@@ -458,7 +458,7 @@ func (wb *WidgetBase) ParentWidgetIf(fun func(p *WidgetBase) bool) *WidgetBase {
 // window events.
 // This call recursively calls the parent, which is typically a short path.
 func (wb *WidgetBase) IsVisible() bool {
-	if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) || wb.StateIs(states.Invisible) || wb.Sc == nil {
+	if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) || wb.StateIs(states.Invisible) || wb.Scene == nil {
 		return false
 	}
 	if wb.Par == nil || wb.Par.This() == nil {

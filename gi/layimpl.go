@@ -651,7 +651,7 @@ func (ly *Layout) LaySetContentFitOverflow(nsz mat32.Vec2, pass LayoutPasses) {
 	oflow := &ly.Styles.Overflow
 	nosz := pass == SizeUpPass && ly.Styles.IsFlexWrap()
 	for d := mat32.X; d <= mat32.Y; d++ {
-		if (nosz || (!(ly.Sc != nil && ly.Sc.Is(ScPrefSizing)) && oflow.Dim(d) >= styles.OverflowAuto)) && ly.Par != nil {
+		if (nosz || (!(ly.Scene != nil && ly.Scene.Is(ScPrefSizing)) && oflow.Dim(d) >= styles.OverflowAuto)) && ly.Par != nil {
 			continue
 		}
 		asz.SetDim(d, styles.ClampMin(asz.Dim(d), nsz.Dim(d)))
@@ -1500,7 +1500,7 @@ func (wb *WidgetBase) SizeFinalWidget() {
 // any factor > 1 produces a full fill along that dimension.
 // Returns true if this resulted in a change in our Total size.
 func (wb *WidgetBase) GrowToAlloc() bool {
-	if (wb.Sc != nil && wb.Sc.Is(ScPrefSizing)) || wb.Styles.GrowWrap {
+	if (wb.Scene != nil && wb.Scene.Is(ScPrefSizing)) || wb.Styles.GrowWrap {
 		return false
 	}
 	sz := &wb.Geom.Size
@@ -1576,7 +1576,7 @@ func (wb *WidgetBase) StyleSizeUpdate() bool {
 	if pwb != nil {
 		par = pwb.Geom.Size.Actual.Content
 	}
-	sz := wb.Sc.SceneGeom.Size
+	sz := wb.Scene.SceneGeom.Size
 	chg := wb.Styles.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, par.X, par.Y)
 	if chg {
 		wb.Styles.ToDots()

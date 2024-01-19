@@ -397,7 +397,7 @@ func (fv *FileView) ConfigFilesRow() {
 		if !fv.SelectFile() {
 			e.SetHandled() // don't pass along; keep dialog open
 		} else {
-			fv.Sc.SendKeyFun(keyfun.Accept, e) // activates Ok button code
+			fv.Scene.SendKeyFun(keyfun.Accept, e) // activates Ok button code
 		}
 	})
 }

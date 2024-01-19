@@ -105,7 +105,7 @@ func (sw *Scene) ConfigFrame() {
 		doConfig = true
 	}
 
-	win := sw.Sc.EventMgr.RenderWin()
+	win := sw.WidgetBase.Scene.EventMgr.RenderWin()
 	if win == nil {
 		return
 	}
@@ -142,7 +142,7 @@ func (sw *Scene) DrawIntoScene() {
 		log.Println("frame image err:", err)
 		return
 	}
-	draw.Draw(sw.Sc.Pixels, r, img, sp, draw.Src) // note: critical to not use Over here!
+	draw.Draw(sw.WidgetBase.Scene.Pixels, r, img, sp, draw.Src) // note: critical to not use Over here!
 	sw.Scene.ImageDone()
 }
 

@@ -33,7 +33,7 @@ func (st *Stage) RunPopup() *Stage {
 	sc := st.Scene
 
 	ctx := st.Context.AsWidget()
-	ms := ctx.Sc.Stage.Main
+	ms := ctx.Scene.Stage.Main
 	msc := ms.Scene
 
 	// note: completer and potentially other things drive popup creation asynchronously

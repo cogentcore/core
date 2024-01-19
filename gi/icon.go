@@ -95,12 +95,12 @@ func (ic *Icon) DrawIntoScene() {
 	}
 	r := ic.Geom.ContentBBox
 	sp := ic.Geom.ScrollOffset()
-	draw.Draw(ic.Sc.Pixels, r, ic.SVG.Pixels, sp, draw.Over)
+	draw.Draw(ic.Scene.Pixels, r, ic.SVG.Pixels, sp, draw.Over)
 }
 
 // RenderSVG renders the SVG to Pixels if needs update
 func (ic *Icon) RenderSVG() {
-	rc := ic.Sc.RenderCtx()
+	rc := ic.Scene.RenderCtx()
 	sv := &ic.SVG
 	sz := ic.Geom.Size.Actual.Content.ToPoint()
 	clr := colors.ApplyOpacity(ic.Styles.Color, ic.Styles.Opacity)

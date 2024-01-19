@@ -156,7 +156,7 @@ func NewScene(name ...string) *Scene {
 // }
 
 func (sc *Scene) OnInit() {
-	sc.Sc = sc
+	sc.Scene = sc
 	sc.WidgetBase.OnInit()
 	sc.SetStyles()
 	sc.Layout.HandleEvents()

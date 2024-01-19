@@ -122,7 +122,7 @@ func (a *App) DataDir() string {
 
 // App returns the [App] this widget is contained in
 func (wb *WidgetBase) App() *App {
-	return wb.Sc.App
+	return wb.Scene.App
 }
 
 // Platform returns the current platform / operating system the app is running on.
@@ -205,14 +205,14 @@ func StdAppBarStart(tb *Toolbar) {
 func StdAppBarBack(tb *Toolbar) *Button {
 	bt := NewButton(tb, "back").SetIcon(icons.ArrowBack)
 	bt.OnClick(func(e events.Event) {
-		stg := tb.Sc.Stage.Main
+		stg := tb.Scene.Stage.Main
 		mm := stg.MainMgr
 		// if we are down to the last window, we don't
 		// let people close it with the back button
 		if mm.Stack.Len() <= 1 {
 			return
 		}
-		tb.Sc.Close()
+		tb.Scene.Close()
 	})
 	return bt
 }
@@ -227,7 +227,7 @@ func StdAppBarChooser(tb *Toolbar) *AppChooser {
 // CurrentWindowAppBar calls ConfigToolbar functions registered on
 // the Scene to which the given toolbar belongs.
 func CurrentWindowAppBar(tb *Toolbar) {
-	tb.Sc.AppBars.Call(tb)
+	tb.Scene.AppBars.Call(tb)
 }
 
 // StdOverflowMenu adds the standard overflow menu function.
@@ -248,7 +248,7 @@ func (tb *Toolbar) StdOverflowMenu(m *Scene) { //gti:add
 	if InspectorWindow != nil {
 		NewButton(m).SetText("Inspect").SetIcon(icons.Edit).SetKey(keyfun.Inspector).
 			OnClick(func(e events.Event) {
-				InspectorWindow(tb.Sc)
+				InspectorWindow(tb.Scene)
 			})
 	}
 	NewButton(m).SetText("Edit").SetMenu(func(m *Scene) {
@@ -269,7 +269,7 @@ func (tb *Toolbar) StdOverflowMenu(m *Scene) { //gti:add
 			})
 		NewButton(m).SetText("Minimize").SetIcon(icons.Minimize).
 			OnClick(func(e events.Event) {
-				win := tb.Sc.RenderWin()
+				win := tb.Scene.RenderWin()
 				if win != nil {
 					win.Minimize()
 				}
@@ -277,7 +277,7 @@ func (tb *Toolbar) StdOverflowMenu(m *Scene) { //gti:add
 		NewSeparator(m)
 		NewButton(m).SetText("Close Window").SetIcon(icons.Close).SetKey(keyfun.WinClose).
 			OnClick(func(e events.Event) {
-				win := tb.Sc.RenderWin()
+				win := tb.Scene.RenderWin()
 				if win != nil {
 					win.CloseReq()
 				}
@@ -323,7 +323,7 @@ func (ac *AppChooser) OnInit() {
 	ac.Chooser.OnInit()
 	ac.SetEditable(true).SetType(ChooserOutlined).SetIcon(icons.Search)
 	ac.SetItemsFunc(func() {
-		stg := ac.Sc.Stage.Main
+		stg := ac.Scene.Stage.Main
 		mm := stg.MainMgr
 		urs := ac.Resources.Generate()
 		iln := mm.Stack.Len() + len(urs)
@@ -353,7 +353,7 @@ func (ac *AppChooser) OnInit() {
 		}
 	})
 	ac.OnChange(func(e events.Event) {
-		stg := ac.Sc.Stage.Main
+		stg := ac.Scene.Stage.Main
 		mm := stg.MainMgr
 		cv, ok := ac.CurVal.(uri.URI)
 		if !ok {

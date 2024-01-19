@@ -78,10 +78,10 @@ func (ed *Editor) RenderCursor(on bool) {
 		return
 	}
 	if !on {
-		if ed.Sc == nil {
+		if ed.Scene == nil {
 			return
 		}
-		ms := ed.Sc.Stage.Main
+		ms := ed.Scene.Stage.Main
 		if ms == nil {
 			return
 		}
@@ -115,7 +115,7 @@ func (ed *Editor) CursorSpriteName() string {
 // only rendered once with a vertical bar, and just activated and inactivated
 // depending on render status.
 func (ed *Editor) CursorSprite(on bool) *gi.Sprite {
-	sc := ed.Sc
+	sc := ed.Scene
 	if sc == nil {
 		return nil
 	}

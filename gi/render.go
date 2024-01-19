@@ -130,11 +130,11 @@ func (wb *WidgetBase) UpdateEnd(updt bool) {
 // because it will cause a hang on the Read Lock which
 // was already write locked at the start of the render.
 func (wb *WidgetBase) UpdateStartAsync() bool {
-	if wb.Sc == nil || wb.Sc.RenderCtx() == nil {
+	if wb.Scene == nil || wb.Scene.RenderCtx() == nil {
 		return wb.Node.UpdateStart()
 	}
-	wb.Sc.RenderCtx().ReadLock()
-	wb.Sc.SetFlag(true, ScUpdating)
+	wb.Scene.RenderCtx().ReadLock()
+	wb.Scene.SetFlag(true, ScUpdating)
 	return wb.UpdateStart()
 }
 
@@ -142,12 +142,12 @@ func (wb *WidgetBase) UpdateStartAsync() bool {
 // asynchronous update that happens outside of the usual user event-driven,
 // same-thread updates.
 func (wb *WidgetBase) UpdateEndAsync(updt bool) {
-	if wb.Sc == nil || wb.Sc.RenderCtx() == nil {
+	if wb.Scene == nil || wb.Scene.RenderCtx() == nil {
 		wb.Node.UpdateEnd(updt)
 		return
 	}
-	wb.Sc.SetFlag(false, ScUpdating)
-	wb.Sc.RenderCtx().ReadUnlock()
+	wb.Scene.SetFlag(false, ScUpdating)
+	wb.Scene.RenderCtx().ReadUnlock()
 	wb.UpdateEnd(updt)
 }
 
@@ -176,15 +176,15 @@ func (wb *WidgetBase) UpdateEndAsyncRender(updt bool) {
 // or other update code, _after_ calling UpdateEnd(updt) and passing
 // that same updt flag from UpdateStart.
 func (wb *WidgetBase) SetNeedsRender(updt bool) {
-	if !updt || wb.Sc == nil {
+	if !updt || wb.Scene == nil {
 		return
 	}
 	if DebugSettings.UpdateTrace {
 		fmt.Println("\tDebugSettings.UpdateTrace: NeedsRender:", wb)
 	}
 	wb.SetFlag(true, NeedsRender)
-	if wb.Sc != nil {
-		wb.Sc.SetFlag(true, ScNeedsRender)
+	if wb.Scene != nil {
+		wb.Scene.SetFlag(true, ScNeedsRender)
 	}
 	// parent of Parts needs to render if parent
 	fi := wb.ParentWidgetIf(func(p *WidgetBase) bool {
@@ -220,13 +220,13 @@ func (sc *Scene) AddReRender(w Widget) {
 // _after_ calling UpdateEnd(updt) and passing
 // that same updt flag from UpdateStart.
 func (wb *WidgetBase) SetNeedsLayout(updt bool) {
-	if !updt || wb.Sc == nil {
+	if !updt || wb.Scene == nil {
 		return
 	}
 	if updt && DebugSettings.UpdateTrace {
 		fmt.Println("\tDebugSettings.UpdateTrace: NeedsLayout:", wb)
 	}
-	wb.Sc.SetFlag(true, ScNeedsLayout)
+	wb.Scene.SetFlag(true, ScNeedsLayout)
 }
 
 // UpdateEndLayout should be called instead of UpdateEnd
@@ -244,10 +244,10 @@ func (wb *WidgetBase) UpdateEndLayout(updt bool) {
 // NeedsRebuild returns true if the RenderContext indicates
 // a full rebuild is needed.
 func (wb *WidgetBase) NeedsRebuild() bool {
-	if wb.This() == nil || wb.Sc == nil || wb.Sc.Stage == nil {
+	if wb.This() == nil || wb.Scene == nil || wb.Scene.Stage == nil {
 		return false
 	}
-	rc := wb.Sc.RenderCtx()
+	rc := wb.Scene.RenderCtx()
 	if rc == nil {
 		return false
 	}
@@ -556,7 +556,7 @@ func (wb *WidgetBase) PushBounds() bool {
 		return false
 	}
 	wb.Styles.ComputeActualBackground(wb.ParentActualBackground())
-	pc := &wb.Sc.PaintContext
+	pc := &wb.Scene.PaintContext
 	pc.PushBounds(wb.Geom.TotalBBox)
 	// rs.PushBounds(wb.Sc.Geom.TotalBBox)
 	pc.Defaults() // start with default values
@@ -572,9 +572,9 @@ func (wb *WidgetBase) PopBounds() {
 	if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) {
 		return
 	}
-	pc := &wb.Sc.PaintContext
+	pc := &wb.Scene.PaintContext
 
-	if wb.Sc.Is(ScRenderBBoxes) {
+	if wb.Scene.Is(ScRenderBBoxes) {
 		pos := mat32.V2FromPoint(wb.Geom.TotalBBox.Min)
 		sz := mat32.V2FromPoint(wb.Geom.TotalBBox.Size())
 		// node: we won't necc. get a push prior to next update, so saving these.
@@ -583,9 +583,9 @@ func (wb *WidgetBase) PopBounds() {
 		pcfc := pc.FillStyle.Color
 		pcop := pc.FillStyle.Opacity
 		pc.StrokeStyle.Width.Dot(1)
-		pc.StrokeStyle.Color = colors.C(hct.New(wb.Sc.RenderBBoxHue, 100, 50))
+		pc.StrokeStyle.Color = colors.C(hct.New(wb.Scene.RenderBBoxHue, 100, 50))
 		pc.FillStyle.Color = nil
-		if wb.Sc.SelectedWidget != nil && wb.Sc.SelectedWidget.This() == wb.This() {
+		if wb.Scene.SelectedWidget != nil && wb.Scene.SelectedWidget.This() == wb.This() {
 			fc := pc.StrokeStyle.Color
 			pc.FillStyle.Color = fc
 			pc.FillStyle.Opacity = 0.2
@@ -598,10 +598,10 @@ func (wb *WidgetBase) PopBounds() {
 		pc.StrokeStyle.Width = pcsw
 		pc.StrokeStyle.Color = pcsc
 
-		wb.Sc.RenderBBoxHue += 10
-		if wb.Sc.RenderBBoxHue > 360 {
-			rmdr := (int(wb.Sc.RenderBBoxHue-360) + 1) % 9
-			wb.Sc.RenderBBoxHue = float32(rmdr)
+		wb.Scene.RenderBBoxHue += 10
+		if wb.Scene.RenderBBoxHue > 360 {
+			rmdr := (int(wb.Scene.RenderBBoxHue-360) + 1) % 9
+			wb.Scene.RenderBBoxHue = float32(rmdr)
 		}
 	}
 
@@ -642,7 +642,7 @@ func (wb *WidgetBase) RenderChildren() {
 // be associated with a corresponding [WidgetBase.RenderUnlock].
 func (wb *WidgetBase) RenderLock() (*paint.Context, *styles.Style) {
 	wb.StyMu.RLock()
-	pc := &wb.Sc.PaintContext
+	pc := &wb.Scene.PaintContext
 	pc.Lock()
 	return pc, &wb.Styles
 }
@@ -651,14 +651,14 @@ func (wb *WidgetBase) RenderLock() (*paint.Context, *styles.Style) {
 // This should be called at the end of widget-level rendering, and should always
 // be associated with a corresponding [WidgetBase.RenderLock].
 func (wb *WidgetBase) RenderUnlock() {
-	wb.Sc.PaintContext.Unlock()
+	wb.Scene.PaintContext.Unlock()
 	wb.StyMu.RUnlock()
 }
 
 // RenderBoxImpl implements the standard box model rendering -- assumes all
 // paint params have already been set
 func (wb *WidgetBase) RenderBoxImpl(pos mat32.Vec2, sz mat32.Vec2, bs styles.Border) {
-	pc := &wb.Sc.PaintContext
+	pc := &wb.Scene.PaintContext
 	pc.DrawBorder(pos.X, pos.Y, sz.X, sz.Y, bs)
 }
 
@@ -668,7 +668,7 @@ func (wb *WidgetBase) RenderStdBox(st *styles.Style) {
 	wb.StyMu.RLock()
 	defer wb.StyMu.RUnlock()
 
-	pc := &wb.Sc.PaintContext
+	pc := &wb.Scene.PaintContext
 
 	pos := wb.Geom.Pos.Total
 	sz := wb.Geom.Size.Actual.Total
@@ -681,7 +681,7 @@ func (wb *WidgetBase) RenderStdBox(st *styles.Style) {
 // HasSc checks that the Sc Scene has been set.
 // Called prior to using -- logs an error if not.
 func (wb *WidgetBase) HasSc() bool {
-	if wb.This() == nil || wb.Sc == nil {
+	if wb.This() == nil || wb.Scene == nil {
 		slog.Debug("gi.WidgetBase: object or scene is nil")
 		return false
 	}
@@ -702,7 +702,7 @@ func (wb *WidgetBase) WinBBox() image.Rectangle {
 	if !wb.HasSc() {
 		return wb.Geom.TotalBBox
 	}
-	return wb.Geom.TotalBBox.Add(wb.Sc.SceneGeom.Pos)
+	return wb.Geom.TotalBBox.Add(wb.Scene.SceneGeom.Pos)
 }
 
 // WinPos returns the RenderWin based position within the

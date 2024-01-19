@@ -110,7 +110,7 @@ func (ed *Editor) Lookup() { //gti:add
 	cpos.Y += 10
 	ed.Buf.SetByteOffs() // make sure the pos offset is updated!!
 	ed.Buf.CurView = ed
-	ed.Buf.Complete.Lookup(s, ed.CursorPos.Ln, ed.CursorPos.Ch, ed.Sc, cpos, ed.ForceComplete)
+	ed.Buf.Complete.Lookup(s, ed.CursorPos.Ln, ed.CursorPos.Ch, ed.Scene, cpos, ed.ForceComplete)
 }
 
 // ISpellKeyInput locates the word to spell check based on cursor position and
@@ -258,7 +258,7 @@ func (ed *Editor) OfferCorrect() bool {
 	cpos.X += 5
 	cpos.Y += 10
 	ed.Buf.CurView = ed
-	ed.Buf.Spell.Show(wb, ed.Sc, cpos)
+	ed.Buf.Spell.Show(wb, ed.Scene, cpos)
 	return true
 }
 

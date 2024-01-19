@@ -134,7 +134,7 @@ func (im *Image) DrawIntoScene() {
 		im.PrevObjectFit = im.Styles.ObjectFit
 		im.PrevSize = im.Geom.Size.Actual.Content
 	}
-	draw.Draw(im.Sc.Pixels, r, rimg, sp, draw.Over)
+	draw.Draw(im.Scene.Pixels, r, rimg, sp, draw.Over)
 }
 
 func (im *Image) Render() {
@@ -152,7 +152,7 @@ func (im *Image) Render() {
 // if nil, then image could not be grabbed
 func GrabRenderFrom(wi Widget) *image.RGBA {
 	wb := wi.AsWidget()
-	sc := wb.Sc
+	sc := wb.Scene
 	if sc == nil || sc.Pixels == nil {
 		log.Printf("gi.GrabRenderFrom could not grab from node, scene or pixels nil: %v\n", wb.Path())
 		return nil

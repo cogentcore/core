@@ -124,7 +124,7 @@ func (sv *SVG) DrawIntoScene() {
 	sv.SVG.Render()
 	r := sv.Geom.ContentBBox
 	sp := sv.Geom.ScrollOffset()
-	draw.Draw(sv.Sc.Pixels, r, sv.SVG.Pixels, sp, draw.Over)
+	draw.Draw(sv.Scene.Pixels, r, sv.SVG.Pixels, sp, draw.Over)
 }
 
 func (sv *SVG) Render() {

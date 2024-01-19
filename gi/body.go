@@ -32,7 +32,7 @@ func NewBody(name ...string) *Body {
 	}
 	bd.InitName(bd, nm)
 	bd.Title = nm
-	bd.Sc = NewBodyScene(bd)
+	bd.Scene = NewBodyScene(bd)
 	return bd
 }
 
@@ -53,7 +53,7 @@ func (bd *Body) SetStyles() {
 // which will be used by the Scene etc.
 func (bd *Body) AddTitle(title string) *Body {
 	bd.Title = title
-	bd.Sc.Nm = title
+	bd.Scene.Nm = title
 	NewLabel(bd, "title").SetText(title).SetType(LabelHeadlineSmall)
 	return bd
 }
@@ -70,7 +70,7 @@ func (bd *Body) AddText(text string) *Body {
 
 // SetApp sets the App of the Body's Scene
 func (bd *Body) SetApp(app *App) *Body {
-	bd.Sc.App = app
+	bd.Scene.App = app
 	bd.Nm = app.Name
 	bd.Title = app.Name
 	return bd
@@ -78,6 +78,6 @@ func (bd *Body) SetApp(app *App) *Body {
 
 // SetData sets the Body's [Scene.Data].
 func (bd *Body) SetData(data any) *Body {
-	bd.Sc.SetData(data)
+	bd.Scene.SetData(data)
 	return bd
 }

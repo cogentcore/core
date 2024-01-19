@@ -448,7 +448,7 @@ func (sv *SliceViewBase) BindSelectDialog(val *int) *SliceViewBase {
 	})
 	sv.OnDoubleClick(func(e events.Event) {
 		*val = sv.SelIdx
-		sv.Sc.SendKeyFun(keyfun.Accept, e) // activates Ok button code
+		sv.Scene.SendKeyFun(keyfun.Accept, e) // activates Ok button code
 	})
 	return sv
 }
@@ -1672,7 +1672,7 @@ func (sv *SliceViewBase) DragStart(e events.Event) {
 	ixs := sv.SelectedIdxsList(false) // ascending
 	w, ok := sv.This().(SliceViewer).RowFirstWidget(ixs[0])
 	if ok {
-		sv.Sc.EventMgr.DragStart(w, md, e)
+		sv.Scene.EventMgr.DragStart(w, md, e)
 	}
 }
 
@@ -1687,7 +1687,7 @@ func (sv *SliceViewBase) DragDrop(e events.Event) {
 		sv.SaveDraggedIdxs(idx)
 		md := de.Data.(mimedata.Mimes)
 		mf := func(m *gi.Scene) {
-			sv.Sc.EventMgr.DragMenuAddModLabel(m, de.DropMod)
+			sv.Scene.EventMgr.DragMenuAddModLabel(m, de.DropMod)
 			svi.MakePasteMenu(m, md, idx, de.DropMod, func() {
 				svi.DropFinalize(de)
 			})
@@ -1701,7 +1701,7 @@ func (sv *SliceViewBase) DragDrop(e events.Event) {
 // Only relevant for DropMod == DropMove.
 func (sv *SliceViewBase) DropFinalize(de *events.DragDrop) {
 	sv.UnselectAllIdxs()
-	sv.Sc.EventMgr.DropFinalize(de) // sends DropDeleteSource to Source
+	sv.Scene.EventMgr.DropFinalize(de) // sends DropDeleteSource to Source
 }
 
 // DropDeleteSource handles delete source event for DropMove case

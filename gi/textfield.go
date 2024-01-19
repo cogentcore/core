@@ -950,7 +950,7 @@ func (tf *TextField) ContextMenu(m *Scene) {
 			OnClick(func(e events.Event) {
 				tf.Paste()
 			})
-		cb := tf.Sc.EventMgr.Clipboard()
+		cb := tf.Scene.EventMgr.Clipboard()
 		if cb != nil {
 			pbt.SetState(cb.IsEmpty(), states.Disabled)
 		}
@@ -1063,7 +1063,7 @@ func (tf *TextField) StartCharPos(idx int) float32 {
 func (tf *TextField) CharStartPos(charidx int, wincoords bool) mat32.Vec2 {
 	pos := tf.EffPos
 	if wincoords {
-		sc := tf.Sc
+		sc := tf.Scene
 		pos = pos.Add(mat32.V2FromPoint(sc.SceneGeom.Pos))
 	}
 	cpos := tf.TextWidth(tf.StartPos, charidx)
@@ -1144,10 +1144,10 @@ func (tf *TextField) RenderCursor(on bool) {
 		return
 	}
 	if !on {
-		if tf.Sc == nil {
+		if tf.Scene == nil {
 			return
 		}
-		ms := tf.Sc.Stage.Main
+		ms := tf.Scene.Stage.Main
 		if ms == nil {
 			return
 		}
@@ -1173,7 +1173,7 @@ func (tf *TextField) RenderCursor(on bool) {
 // only rendered once with a vertical bar, and just activated and inactivated
 // depending on render status).  On sets the On status of the cursor.
 func (tf *TextField) CursorSprite(on bool) *Sprite {
-	sc := tf.Sc
+	sc := tf.Scene
 	if sc == nil {
 		return nil
 	}
@@ -1222,7 +1222,7 @@ func (tf *TextField) RenderSelect() {
 
 	spos := tf.CharStartPos(effst, false)
 
-	pc := &tf.Sc.PaintContext
+	pc := &tf.Scene.PaintContext
 	tsz := tf.TextWidth(effst, effed)
 	pc.FillBox(spos, mat32.V2(tsz, tf.FontHeight), tf.SelectColor)
 }

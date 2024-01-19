@@ -76,7 +76,7 @@ func (bl *Blinker) BlinkLoop() {
 			continue
 		}
 		wb := bl.Widget.AsWidget()
-		if wb.Sc == nil || wb.Sc.Stage.Main == nil {
+		if wb.Scene == nil || wb.Scene.Stage.Main == nil {
 			bl.Widget = nil
 			bl.Mu.Unlock()
 			continue

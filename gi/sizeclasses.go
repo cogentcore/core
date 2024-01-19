@@ -23,9 +23,9 @@ const (
 
 // SizeClass returns the size class of the scene in which it is contained.
 func (wb *WidgetBase) SizeClass() SizeClasses {
-	dots := float32(wb.Sc.SceneGeom.Size.X)
-	dpd := wb.Sc.Styles.UnContext.Dp(1) // dots per dp
-	dp := dots / dpd                    // dots / (dots / dp) = dots * (dp / dots) = dp
+	dots := float32(wb.Scene.SceneGeom.Size.X)
+	dpd := wb.Scene.Styles.UnContext.Dp(1) // dots per dp
+	dp := dots / dpd                       // dots / (dots / dp) = dots * (dp / dots) = dp
 	switch {
 	case dp < 600:
 		return SizeCompact

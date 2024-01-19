@@ -917,7 +917,7 @@ func (tb *Buf) DeleteView(vw *Editor) {
 // SceneFromView returns Scene from text editor, if avail
 func (tb *Buf) SceneFromView() *gi.Scene {
 	if len(tb.Views) > 0 {
-		return tb.Views[0].Sc
+		return tb.Views[0].Scene
 	}
 	return nil
 }

@@ -26,7 +26,7 @@ func (c *Canvas) Draw(f func(pc *paint.Context)) {
 }
 
 func (c *Canvas) DrawIntoScene() {
-	draw.Draw(c.Sc.Pixels, c.Geom.ContentBBox, c.Context.Image, image.Point{}, draw.Over)
+	draw.Draw(c.Scene.Pixels, c.Geom.ContentBBox, c.Context.Image, image.Point{}, draw.Over)
 }
 
 func (c *Canvas) Render() {

@@ -955,7 +955,7 @@ func (ed *Editor) ScrollCursorToTarget() {
 	ed.CursorPos = ed.CursorTarg
 	ed.ScrollCursorToVertCenter()
 	ed.SetFlag(false, EditorTargetSet)
-	ed.Sc.AddReRender(ed.This().(gi.Widget))
+	ed.Scene.AddReRender(ed.This().(gi.Widget))
 }
 
 ///////////////////////////////////////////////////////////////////////////////

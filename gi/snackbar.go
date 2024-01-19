@@ -125,6 +125,6 @@ func (sc *Scene) AddSnackbarIcon(icon icons.Icon, onClick ...func(e events.Event
 
 // DeleteSnackbar deletes the popup associated with the snackbar.
 func (sc *Scene) DeleteSnackbar() {
-	sc.Stage.Context.AsWidget().Sc.Stage.Main.
+	sc.Stage.Context.AsWidget().Scene.Stage.Main.
 		PopupMgr.PopDeleteType(SnackbarStage)
 }

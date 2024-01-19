@@ -43,7 +43,7 @@ func (sc *Scene) NewWindow() *Stage {
 // can be chained directly after the New call.
 // Use an appropriate Run call at the end to start the Stage running.
 func (bd *Body) NewWindow() *Stage {
-	return bd.Sc.NewWindow()
+	return bd.Scene.NewWindow()
 }
 
 // NewDialog in dialogs.go
@@ -158,7 +158,7 @@ func (st *Stage) RunWindow() *Stage {
 		return st
 	}
 	if st.Context != nil {
-		ms := st.Context.AsWidget().Sc.MainStageMgr()
+		ms := st.Context.AsWidget().Scene.MainStageMgr()
 		msc := ms.Top().Scene
 		sc.SceneGeom.Size = sz
 		sc.FitInWindow(msc.SceneGeom) // does resize
@@ -185,7 +185,7 @@ func (st *Stage) RunDialog() *Stage {
 		st.Context = CurRenderWin.MainStageMgr.Top().Scene
 	}
 	ctx := st.Context.AsWidget()
-	ms := ctx.Sc.MainStageMgr()
+	ms := ctx.Scene.MainStageMgr()
 
 	// if our main stage manager is nil, we wait until our context is shown and then try again
 	if ms == nil {
@@ -197,7 +197,7 @@ func (st *Stage) RunDialog() *Stage {
 
 	sc := st.Scene
 	if st.FullWindow {
-		sc.App = ctx.Sc.App
+		sc.App = ctx.Scene.App
 	}
 	st.ConfigMainStage()
 	sc.SceneGeom.Pos = st.Pos
@@ -206,7 +206,7 @@ func (st *Stage) RunDialog() *Stage {
 
 	sz := ms.RenderCtx.Geom.Size
 	if !st.FullWindow || st.NewWindow {
-		sc.App = ctx.Sc.App // just for reference
+		sc.App = ctx.Scene.App // just for reference
 		sz = sc.PrefSize(sz)
 		sz = sz.Add(image.Point{50, 50})
 		sc.EventMgr.StartFocusFirst = true // popup dialogs always need focus
@@ -237,7 +237,7 @@ func (st *Stage) RunDialog() *Stage {
 // Sheet MUST have context set.
 func (st *Stage) RunSheet() *Stage {
 	ctx := st.Context.AsWidget()
-	ms := ctx.Sc.MainStageMgr()
+	ms := ctx.Scene.MainStageMgr()
 
 	st.ConfigMainStage() // should set pos and size for side
 	ms.Push(st)

@@ -29,9 +29,9 @@ func (ly *Layout) ScrollGeom(d mat32.Dims) (pos, sz mat32.Vec2) {
 	od := d.Other()
 	bbmin := mat32.V2FromPoint(ly.Geom.ContentBBox.Min)
 	bbmax := mat32.V2FromPoint(ly.Geom.ContentBBox.Max)
-	if ly.This() != ly.Sc.This() { // if not the scene, keep inside the scene
-		bbmin.SetMax(mat32.V2FromPoint(ly.Sc.Geom.ContentBBox.Min))
-		bbmax.SetMin(mat32.V2FromPoint(ly.Sc.Geom.ContentBBox.Max).SubScalar(sbw))
+	if ly.This() != ly.Scene.This() { // if not the scene, keep inside the scene
+		bbmin.SetMax(mat32.V2FromPoint(ly.Scene.Geom.ContentBBox.Min))
+		bbmax.SetMin(mat32.V2FromPoint(ly.Scene.Geom.ContentBBox.Max).SubScalar(sbw))
 	}
 	pos.SetDim(d, bbmin.Dim(d))
 	pos.SetDim(od, bbmax.Dim(od))

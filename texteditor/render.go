@@ -262,7 +262,7 @@ func (ed *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bg i
 		epos.X = ex
 	}
 
-	pc := &ed.Sc.PaintContext
+	pc := &ed.Scene.PaintContext
 	stsi, _, _ := ed.WrappedLineNo(st)
 	edsi, _, _ := ed.WrappedLineNo(end)
 	if st.Ln == end.Ln && stsi == edsi {
@@ -297,7 +297,7 @@ func (ed *Editor) RenderRegionToEnd(st lex.Pos, sty *styles.Style, bg image.Imag
 	if vsz.X <= 0 || vsz.Y <= 0 {
 		return
 	}
-	pc := &ed.Sc.PaintContext
+	pc := &ed.Scene.PaintContext
 	pc.FillBox(spos, epos.Sub(spos), bg) // same line, done
 }
 
@@ -311,7 +311,7 @@ func (ed *Editor) RenderStartPos() mat32.Vec2 {
 // RenderAllLines displays all the visible lines on the screen,
 // after PushBounds has already been called.
 func (ed *Editor) RenderAllLines() {
-	pc := &ed.Sc.PaintContext
+	pc := &ed.Scene.PaintContext
 	pc.Lock()
 	sty := &ed.Styles
 	bb := ed.Geom.ContentBBox
@@ -383,7 +383,7 @@ func (ed *Editor) RenderLineNosBoxAll() {
 	if !ed.HasLineNos() {
 		return
 	}
-	pc := &ed.Sc.PaintContext
+	pc := &ed.Scene.PaintContext
 	bb := ed.Geom.ContentBBox
 	spos := mat32.V2FromPoint(bb.Min)
 	epos := mat32.V2FromPoint(bb.Max)
@@ -396,7 +396,7 @@ func (ed *Editor) RenderLineNosBox(st, end int) {
 	if !ed.HasLineNos() {
 		return
 	}
-	pc := &ed.Sc.PaintContext
+	pc := &ed.Scene.PaintContext
 	// sty := &ed.Styles
 	// spc := sty.BoxSpace()
 	bb := ed.Geom.ContentBBox
@@ -417,7 +417,7 @@ func (ed *Editor) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 		return
 	}
 
-	sc := ed.Sc
+	sc := ed.Scene
 	sty := &ed.Styles
 	fst := sty.FontRender()
 	pc := &sc.PaintContext

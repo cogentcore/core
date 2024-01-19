@@ -21,13 +21,13 @@ import (
 // EventMgr returns the higher-level gi event manager
 // for this [Widget]'s [Scene].
 func (wb *WidgetBase) EventMgr() *EventMgr {
-	return &wb.Sc.EventMgr
+	return &wb.Scene.EventMgr
 }
 
 // GoosiEventMgr returns the lower-level goosi event
 // manager for this [Widget]'s [Scene].
 func (wb *WidgetBase) GoosiEventMgr() *events.Mgr {
-	return wb.Sc.RenderWin().GoosiWin.EventMgr()
+	return wb.Scene.RenderWin().GoosiWin.EventMgr()
 }
 
 // Clipboard returns the clipboard for the [Widget] to use.
@@ -129,14 +129,14 @@ func (wb *WidgetBase) OnSelect(fun func(e events.Event)) *WidgetBase {
 // This must typically be called in OnAdd() or later, and
 // definitely NOT in OnInit, because only then will the Scene be set.
 func (wb *WidgetBase) OnShow(fun func(e events.Event)) *WidgetBase {
-	return wb.Sc.On(events.Show, fun)
+	return wb.Scene.On(events.Show, fun)
 }
 
 // OnClose adds an event listener function for [events.Close] events on
 // the widget's Scene. Directly listening to Close events for non-scene
 // widgets does not work, so it must go through the Scene.
 func (wb *WidgetBase) OnClose(fun func(e events.Event)) *WidgetBase {
-	return wb.Sc.On(events.Close, fun)
+	return wb.Scene.On(events.Close, fun)
 }
 
 // Send sends an NEW event of given type to this widget,
@@ -377,8 +377,8 @@ func (wb *WidgetBase) HandleLongHoverTooltip() {
 		NewTooltip(wi).Run()
 	})
 	wb.On(events.LongHoverEnd, func(e events.Event) {
-		if wb.Sc != nil && wb.Sc.MainStageMgr() != nil {
-			top := wb.Sc.MainStageMgr().Top()
+		if wb.Scene != nil && wb.Scene.MainStageMgr() != nil {
+			top := wb.Scene.MainStageMgr().Top()
 			if top != nil {
 				top.PopupMgr.PopDeleteType(TooltipStage)
 			}
@@ -394,8 +394,8 @@ func (wb *WidgetBase) HandleLongHoverTooltip() {
 		NewTooltip(wi).Run()
 	})
 	wb.On(events.LongPressEnd, func(e events.Event) {
-		if wb.Sc != nil && wb.Sc.MainStageMgr() != nil {
-			top := wb.Sc.MainStageMgr().Top()
+		if wb.Scene != nil && wb.Scene.MainStageMgr() != nil {
+			top := wb.Scene.MainStageMgr().Top()
 			if top != nil {
 				top.PopupMgr.PopDeleteType(TooltipStage)
 			}

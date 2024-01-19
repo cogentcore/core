@@ -82,7 +82,7 @@ func View(st *Styles) {
 	mv.OnChange(func(e events.Event) {
 		StylesChanged = true
 	})
-	d.Sc.Data = st // todo: still needed?
+	d.Scene.Data = st // todo: still needed?
 	d.AddAppBar(func(tb *gi.Toolbar) {
 		oj := giv.NewFuncButton(tb, st.OpenJSON).SetText("Open from file").SetIcon(icons.Open)
 		oj.Args[0].SetTag(".ext", ".histy")

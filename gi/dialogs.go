@@ -55,14 +55,14 @@ func (sc *Scene) NewFullDialog(ctx Widget, name ...string) *Stage {
 // of the given widget, optionally with the given name.
 // See [NewFullDialog] for a full-window dialog.
 func (bd *Body) NewDialog(ctx Widget, name ...string) *Stage {
-	return bd.Sc.NewDialog(ctx, name...)
+	return bd.Scene.NewDialog(ctx, name...)
 }
 
 // NewFullDialog returns a new FullWindow dialog [Stage] in the context
 // of the given widget, optionally with the given name.
 // See [NewDialog] for a popup-window dialog.
 func (bd *Body) NewFullDialog(ctx Widget, name ...string) *Stage {
-	return bd.Sc.NewFullDialog(ctx, name...)
+	return bd.Scene.NewFullDialog(ctx, name...)
 }
 
 // RecycleDialog looks for a dialog with the given data. If it
@@ -172,13 +172,13 @@ func (sc *Scene) AddCancel(pw Widget, name ...string) *Button {
 // specific actions needed beyond Close.
 // Name should be passed when there are multiple effective OK buttons.
 func (bd *Body) AddOk(pw Widget, name ...string) *Button {
-	return bd.Sc.AddOk(pw, name...)
+	return bd.Scene.AddOk(pw, name...)
 }
 
 // AddOkOnly just adds an OK button in the BottomBar
 // for simple popup dialogs that just need that one button
 func (bd *Body) AddOkOnly() *Body {
-	bd.Sc.AddOkOnly()
+	bd.Scene.AddOkOnly()
 	return bd
 }
 
@@ -190,12 +190,12 @@ func (bd *Body) AddOkOnly() *Body {
 // specific actions needed beyond Close.
 // Name should be passed when there are multiple effective Cancel buttons (rare).
 func (bd *Body) AddCancel(pw Widget, name ...string) *Button {
-	return bd.Sc.AddCancel(pw, name...)
+	return bd.Scene.AddCancel(pw, name...)
 }
 
 // Close closes the stage associated with this Scene (typically for Dialog)
 func (bd *Body) Close() {
-	bd.Sc.Close()
+	bd.Scene.Close()
 }
 
 // DialogStyles sets default style functions for dialog Scenes
