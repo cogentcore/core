@@ -121,7 +121,7 @@ func (sv *StructView) UpdateField(field string) {
 	sv.UpdateEndRender(updt)
 }
 
-// Config configures the view
+// ConfigWidget Config configures the view
 func (sv *StructView) ConfigWidget() {
 	if ks, ok := sv.Struct.(ki.Ki); ok {
 		if ks == nil || ks.This() == nil || ks.Is(ki.Deleted) {

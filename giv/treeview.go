@@ -61,7 +61,7 @@ type TreeViewer interface {
 	// when everything should be configured, prior to rendering.
 	UpdateBranchIcons()
 
-	// Following are all tree editing functions:
+	// DeleteNode Following are all tree editing functions:
 	DeleteNode()
 	Duplicate()
 	AddChildNode()
@@ -421,13 +421,13 @@ type TreeViewFlags gi.WidgetFlags //enums:bitflag -trim-prefix TreeViewFlag
 const (
 	// TreeViewFlagClosed means node is toggled closed
 	// (children not visible)  Otherwise Open.
-	TreeViewFlagClosed TreeViewFlags = TreeViewFlags(gi.WidgetFlagsN) + iota
+	TreeViewFlagClosed = TreeViewFlags(gi.WidgetFlagsN) + iota
 
-	// When set on the Root node determines whether keyboard movements
+	// TreeViewFlagSelectMode When set on the Root node determines whether keyboard movements
 	// update selection or not.
 	TreeViewFlagSelectMode
 
-	// Set in the [Open] method to prevent recursive opening for lazy-open nodes
+	// TreeViewInOpen Set in the [Open] method to prevent recursive opening for lazy-open nodes
 	TreeViewInOpen
 )
 
@@ -1409,7 +1409,7 @@ func (tv *TreeView) Copy(reset bool) { //gti:add
 	nitms := max(1, len(sels))
 	md := make(mimedata.Mimes, 0, 2*nitms)
 	tv.This().(TreeViewer).MimeData(&md) // source is always first..
-	if nitms > 1 {
+	if nitms > 1 {                       //todo  Condition 'nitms > 1' is always 'false'
 		for _, sn := range sels {
 			if sn.This() != tv.This() {
 				sn.MimeData(&md)
@@ -1529,7 +1529,7 @@ func (tv *TreeView) PasteAfter(md mimedata.Mimes, mod events.DropMods) {
 	tv.PasteAt(md, mod, 1, "Paste After")
 }
 
-// This is a kind of hack to prevent moved items from being deleted, using DND
+// TreeViewTempMovedTag This is a kind of hack to prevent moved items from being deleted, using DND
 const TreeViewTempMovedTag = `_\&MOVED\&`
 
 // todo: these methods require an interface to work for descended
@@ -1625,7 +1625,7 @@ func (tv *TreeView) DragStart(e events.Event) {
 	nitms := max(1, len(sels))
 	md := make(mimedata.Mimes, 0, 2*nitms)
 	tv.This().(TreeViewer).MimeData(&md) // source is always first..
-	if nitms > 1 {
+	if nitms > 1 {                       //todo Condition 'nitms > 1' is always 'false'
 		for _, sn := range sels {
 			if sn.This() != tv.This() {
 				sn.MimeData(&md)

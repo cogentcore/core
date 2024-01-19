@@ -181,7 +181,7 @@ func (is *Inspector) SetRoot(root ki.Ki) {
 	is.UpdateEnd(updt)
 }
 
-// Config configures the widget
+// ConfigWidget Config configures the widget
 func (is *Inspector) ConfigWidget() {
 	if is.KiRoot == nil {
 		return
@@ -206,7 +206,7 @@ func (is *Inspector) SetTitle(title string) {
 	lab.Text = title
 }
 
-// Title returns the title label widget, and its index, within frame
+// TitleWidget Title returns the title label widget, and its index, within frame
 func (is *Inspector) TitleWidget() *gi.Label {
 	return is.ChildByName("title", 0).(*gi.Label)
 }

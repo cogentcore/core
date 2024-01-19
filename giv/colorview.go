@@ -68,7 +68,7 @@ func (cv *ColorView) OnInit() {
 	cv.Frame.OnInit()
 }
 
-// Config configures a standard setup of entire view
+// ConfigWidget Config configures a standard setup of entire view
 func (cv *ColorView) ConfigWidget() {
 	if cv.HasChildren() {
 		return

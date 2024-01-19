@@ -89,35 +89,35 @@ func (sv *SliceView) StyleRow(w gi.Widget, idx, fidx int) {
 type SliceViewFlags gi.WidgetFlags //enums:bitflag -trim-prefix SliceView
 
 const (
-	// indicates that the widgets have been configured and
-	SliceViewConfiged SliceViewFlags = SliceViewFlags(gi.WidgetFlagsN) + iota
+	// SliceViewConfiged indicates that the widgets have been configured and
+	SliceViewConfiged = SliceViewFlags(gi.WidgetFlagsN) + iota
 
-	// if true, user cannot add elements to the slice
+	// SliceViewNoAdd if true, user cannot add elements to the slice
 	SliceViewNoAdd
 
-	// if true, user cannot delete elements from the slice
+	// SliceViewNoDelete if true, user cannot delete elements from the slice
 	SliceViewNoDelete
 
-	// whether the slice is actually an array -- no modifications -- set by SetSlice
+	// SliceViewIsArray whether the slice is actually an array -- no modifications -- set by SetSlice
 	SliceViewIsArray
 
-	// whether to show index or not
+	// SliceViewShowIndex whether to show index or not
 	SliceViewShowIndex
 
-	// support key navigation when ReadOnly (default true).
+	// SliceViewReadOnlyKeyNav support key navigation when ReadOnly (default true).
 	// uses a capture of up / down events to manipulate selection, not focus.
 	SliceViewReadOnlyKeyNav
 
-	// editing-mode select rows mode
+	// SliceViewSelectMode editing-mode select rows mode
 	SliceViewSelectMode
 
-	// if view is ReadOnly, default selection mode is to choose one row only -- if this is true, standard multiple selection logic with modifier keys is instead supported
+	// SliceViewReadOnlyMultiSel if view is ReadOnly, default selection mode is to choose one row only -- if this is true, standard multiple selection logic with modifier keys is instead supported
 	SliceViewReadOnlyMultiSel
 
-	// guard for recursive focus grabbing
+	// SliceViewInFocusGrab guard for recursive focus grabbing
 	SliceViewInFocusGrab
 
-	// guard for recursive rebuild
+	// SliceViewInFullRebuild guard for recursive rebuild
 	SliceViewInFullRebuild
 )
 
@@ -400,7 +400,7 @@ func (sv *SliceViewBase) SetSlice(sl any) *SliceViewBase {
 	if reflect.TypeOf(sl).Kind() != reflect.Pointer { // prevent crash on non-comparable
 		newslc = true
 	} else {
-		newslc = (sv.Slice != sl)
+		newslc = sv.Slice != sl
 	}
 	if !newslc && sv.Is(SliceViewConfiged) {
 		sv.ConfigIter = 0
@@ -453,7 +453,7 @@ func (sv *SliceViewBase) BindSelectDialog(val *int) *SliceViewBase {
 	return sv
 }
 
-// Config configures a standard setup of the overall Frame
+// ConfigWidget Config configures a standard setup of the overall Frame
 func (sv *SliceViewBase) ConfigWidget() {
 	sv.ConfigSliceView()
 }

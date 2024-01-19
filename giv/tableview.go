@@ -295,7 +295,7 @@ func (tv *TableView) CacheVisFields() {
 	tv.NVisFields = len(tv.VisFields)
 }
 
-// Config configures the view
+// ConfigWidget Config configures the view
 func (tv *TableView) ConfigWidget() {
 	tv.ConfigTableView()
 }
@@ -776,7 +776,7 @@ func (tv *TableView) SortFieldName() string {
 	return ""
 }
 
-// SetSortField sets sorting to happen on given field and direction -- see
+// SetSortFieldName SetSortField sets sorting to happen on given field and direction -- see
 // SortFieldName for details
 func (tv *TableView) SetSortFieldName(nm string) {
 	if nm == "" {

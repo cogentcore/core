@@ -66,7 +66,7 @@ func (av *ArgView) SetStyles() {
 	})
 }
 
-// Config configures the view
+// ConfigWidget Config configures the view
 func (av *ArgView) ConfigWidget() {
 	config := ki.Config{}
 	config.Add(gi.LabelType, "title")
@@ -78,7 +78,7 @@ func (av *ArgView) ConfigWidget() {
 	}
 }
 
-// Title returns the title label widget, and its index, within frame
+// TitleWidget Title returns the title label widget, and its index, within frame
 func (av *ArgView) TitleWidget() *gi.Label {
 	return av.ChildByName("title", 0).(*gi.Label)
 }
