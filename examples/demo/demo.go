@@ -197,8 +197,6 @@ func inputs(ts *gi.Tabs) {
 	gi.NewTextField(tab).SetTypePassword().SetPlaceholder("Password")
 	gi.NewTextField(tab).SetType(gi.TextFieldOutlined).SetTypePassword().SetPlaceholder("Password")
 
-	gi.NewLabeledTextField(tab).SetLabel("Labeled text field").SetHintText("Hint text")
-
 	spinners := gi.NewLayout(tab, "spinners")
 
 	gi.NewSpinner(spinners).SetStep(5).SetMin(-50).SetMax(100).SetValue(15)
