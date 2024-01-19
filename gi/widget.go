@@ -374,19 +374,19 @@ func AsWidgetBase(k ki.Ki) *WidgetBase {
 	return wb
 }
 
-func (wb *WidgetBase) CopyFieldsFrom(frm ki.Ki) {
-	wb.Node.CopyFieldsFrom(frm)
-	_, fr := AsWidget(frm)
+func (wb *WidgetBase) CopyFieldsFrom(from ki.Ki) {
+	wb.Node.CopyFieldsFrom(from)
+	_, frm := AsWidget(from)
 
 	n := len(wb.Stylers)
-	if len(fr.Stylers) > n {
-		wb.Stylers = append(wb.Stylers, fr.Stylers[n:]...)
+	if len(frm.Stylers) > n {
+		wb.Stylers = append(wb.Stylers, frm.Stylers[n:]...)
 	}
 	n = len(wb.ContextMenus)
-	if len(fr.ContextMenus) > n {
-		wb.ContextMenus = append(wb.ContextMenus, fr.ContextMenus[n:]...)
+	if len(frm.ContextMenus) > n {
+		wb.ContextMenus = append(wb.ContextMenus, frm.ContextMenus[n:]...)
 	}
-	wb.Listeners.CopyFromExtra(fr.Listeners)
+	wb.Listeners.CopyFromExtra(frm.Listeners)
 }
 
 func (wb *WidgetBase) Destroy() {

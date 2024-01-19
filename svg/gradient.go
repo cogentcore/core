@@ -22,16 +22,10 @@ type Gradient struct {
 	NodeBase
 
 	// the color gradient
-	Grad gradient.Gradient `copier:"-"`
+	Grad gradient.Gradient
 
 	// name of another gradient to get stops from
 	StopsName string
-}
-
-func (gr *Gradient) CopyFieldsFrom(from ki.Ki) {
-	gr.Node.CopyFieldsFrom(from)
-	frm := from.(*Gradient)
-	gradient.CopyFrom(gr.Grad, frm.Grad)
 }
 
 // GradientTypeName returns the SVG-style type name of gradient: linearGradient or radialGradient

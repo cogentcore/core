@@ -29,7 +29,7 @@ type Text struct {
 	Text string `xml:"text"`
 
 	// render version of text
-	TextRender paint.Text `xml:"-" json:"-"`
+	TextRender paint.Text `xml:"-" json:"-" copier:"-"`
 
 	// character positions along X axis, if specified
 	CharPosX []float32
@@ -53,10 +53,10 @@ type Text struct {
 	AdjustGlyphs bool
 
 	// last text render position -- lower-left baseline of start
-	LastPos mat32.Vec2 `xml:"-" json:"-"`
+	LastPos mat32.Vec2 `xml:"-" json:"-" copier:"-"`
 
 	// last actual bounding box in display units (dots)
-	LastBBox mat32.Box2 `xml:"-" json:"-"`
+	LastBBox mat32.Box2 `xml:"-" json:"-" copier:"-"`
 }
 
 func (g *Text) SVGName() string {
@@ -64,21 +64,6 @@ func (g *Text) SVGName() string {
 		return "text"
 	}
 	return "tspan"
-}
-
-func (g *Text) CopyFieldsFrom(frm any) {
-	fr := frm.(*Text)
-	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
-	g.Pos = fr.Pos
-	g.Width = fr.Width
-	g.Text = fr.Text
-	mat32.CopyFloat32s(&g.CharPosX, fr.CharPosX)
-	mat32.CopyFloat32s(&g.CharPosY, fr.CharPosY)
-	mat32.CopyFloat32s(&g.CharPosDX, fr.CharPosDX)
-	mat32.CopyFloat32s(&g.CharPosDY, fr.CharPosDY)
-	mat32.CopyFloat32s(&g.CharRots, fr.CharRots)
-	g.TextLength = fr.TextLength
-	g.AdjustGlyphs = fr.AdjustGlyphs
 }
 
 // IsParText returns true if this element serves as a parent text element

@@ -25,13 +25,6 @@ func (g *Ellipse) OnInit() {
 	g.Radii.Set(1, 1)
 }
 
-func (g *Ellipse) CopyFieldsFrom(frm any) {
-	fr := frm.(*Ellipse)
-	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
-	g.Pos = fr.Pos
-	g.Radii = fr.Radii
-}
-
 func (g *Ellipse) SetPos(pos mat32.Vec2) *Ellipse {
 	g.Pos = pos.Sub(g.Radii)
 	return g

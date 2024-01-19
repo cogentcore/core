@@ -76,9 +76,3 @@ type MetaData struct {
 	NodeBase
 	MetaData string
 }
-
-func (g *MetaData) CopyFieldsFrom(frm any) {
-	fr := frm.(*MetaData)
-	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
-	g.MetaData = fr.MetaData
-}

@@ -33,7 +33,7 @@ type Image struct {
 	Filename Filename `set:"-"`
 
 	// the bitmap image
-	Pixels *image.RGBA `copier:"-" view:"-" xml:"-" json:"-" set:"-"`
+	Pixels *image.RGBA `view:"-" xml:"-" json:"-" set:"-"`
 
 	// cached last rendered image
 	PrevPixels image.Image `copier:"-" xml:"-" json:"-" set:"-"`

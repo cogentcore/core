@@ -12,8 +12,3 @@ type ClipPath struct {
 }
 
 func (g *ClipPath) SVGName() string { return "clippath" }
-
-func (g *ClipPath) CopyFieldsFrom(frm any) {
-	fr := frm.(*ClipPath)
-	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
-}

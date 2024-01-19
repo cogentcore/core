@@ -25,13 +25,6 @@ func (g *Circle) OnInit() {
 	g.Radius = 1
 }
 
-func (g *Circle) CopyFieldsFrom(frm any) {
-	fr := frm.(*Circle)
-	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
-	g.Pos = fr.Pos
-	g.Radius = fr.Radius
-}
-
 func (g *Circle) SetPos(pos mat32.Vec2) *Circle {
 	g.Pos = pos.SubScalar(g.Radius)
 	return g

@@ -33,20 +33,10 @@ type Image struct {
 	Filename string
 
 	// the image pixels
-	Pixels *image.RGBA `copier:"-" xml:"-" json:"-" view:"-"`
+	Pixels *image.RGBA `xml:"-" json:"-" view:"-"`
 }
 
 func (g *Image) SVGName() string { return "image" }
-
-func (g *Image) CopyFieldsFrom(frm any) {
-	fr := frm.(*Image)
-	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
-	g.Pos = fr.Pos
-	g.Size = fr.Size
-	g.PreserveAspectRatio = fr.PreserveAspectRatio
-	g.Filename = fr.Filename
-	g.Pixels = fr.Pixels
-}
 
 // SetImageSize sets size of the bitmap image.
 // This does not resize any existing image, just makes a new image
