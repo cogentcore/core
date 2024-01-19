@@ -14,14 +14,12 @@ import (
 
 // ConfigImageToolbar configures the given toolbar for the given image.
 func ConfigImageToolbar(tb *gi.Toolbar, im *gi.Image) {
-	gi.NewButton(tb).SetText("Open Image").SetIcon(icons.Open).
-		OnClick(func(e events.Event) {
-			CallFunc(im, im.OpenImage)
-		})
+	NewFuncButton(tb, im.OpenImage).SetIcon(icons.Open)
 }
 
 // ConfigSVGToolbar configures the given toolbar for the given SVG.
 func ConfigSVGToolbar(tb *gi.Toolbar, sv *gi.SVG) {
+	// TODO(kai): resolve svg panning and selection structure
 	gi.NewButton(tb).SetIcon(icons.PanTool).
 		SetTooltip("toggle the ability to zoom and pan the view").OnClick(func(e events.Event) {
 		sv.SetReadOnly(!sv.IsReadOnly())
@@ -33,16 +31,7 @@ func ConfigSVGToolbar(tb *gi.Toolbar, sv *gi.SVG) {
 			fmt.Println("this will select select mode")
 		})
 	gi.NewSeparator(tb)
-	gi.NewButton(tb).SetText("Open SVG").SetIcon(icons.Open).
-		SetTooltip("Open from SVG file").OnClick(func(e events.Event) {
-		CallFunc(sv, sv.OpenSVG)
-	})
-	gi.NewButton(tb).SetText("Save SVG").SetIcon(icons.Save).
-		SetTooltip("Save to SVG file").OnClick(func(e events.Event) {
-		CallFunc(sv, sv.SaveSVG)
-	})
-	gi.NewButton(tb).SetText("Save PNG").SetIcon(icons.Save).
-		SetTooltip("Save to PNG file").OnClick(func(e events.Event) {
-		CallFunc(sv, sv.SavePNG)
-	})
+	NewFuncButton(tb, sv.OpenSVG).SetIcon(icons.Open)
+	NewFuncButton(tb, sv.SaveSVG).SetIcon(icons.Save)
+	NewFuncButton(tb, sv.SavePNG).SetIcon(icons.Save)
 }

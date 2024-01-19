@@ -429,13 +429,14 @@ func (t *Icon) New() ki.Ki { return &Icon{} }
 func (t *Icon) SetTooltip(v string) *Icon { t.Tooltip = v; return t }
 
 // ImageType is the [gti.Type] for [Image]
-var ImageType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Image", IDName: "image", Doc: "Image is a Widget that renders a static bitmap image.\nSee [Styles.ObjectFits] for how to control the image rendering within\nthe allocated size.  The minimum requested size is the pixel size in\nDp units (1/160th of an inch).", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Filename", Doc: "file name of image loaded -- set by OpenImage"}, {Name: "Pixels", Doc: "the bitmap image"}, {Name: "PrevPixels", Doc: "cached last rendered image"}, {Name: "PrevObjectFit", Doc: "cached [styles.Style.ObjectFit] of the last rendered image"}, {Name: "PrevSize", Doc: "cached allocated size for the last rendered image"}}, Instance: &Image{}})
+var ImageType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Image", IDName: "image", Doc: "Image is a Widget that renders a static bitmap image.\nSee [Styles.ObjectFits] for how to control the image rendering within\nthe allocated size.  The default minimum requested size is the pixel\nsize in [units.Dp] units (1/160th of an inch). See [giv.ConfigImageToolbar]\nfor a toolbar with I/O buttons.", Methods: []gti.Method{{Name: "OpenImage", Doc: "OpenImage sets the image to the image located at the given filename.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}}, Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Filename", Doc: "file name of image loaded -- set by OpenImage"}, {Name: "Pixels", Doc: "the bitmap image"}, {Name: "PrevPixels", Doc: "cached last rendered image"}, {Name: "PrevObjectFit", Doc: "cached [styles.Style.ObjectFit] of the last rendered image"}, {Name: "PrevSize", Doc: "cached allocated size for the last rendered image"}}, Instance: &Image{}})
 
 // NewImage adds a new [Image] with the given name to the given parent:
 // Image is a Widget that renders a static bitmap image.
 // See [Styles.ObjectFits] for how to control the image rendering within
-// the allocated size.  The minimum requested size is the pixel size in
-// Dp units (1/160th of an inch).
+// the allocated size.  The default minimum requested size is the pixel
+// size in [units.Dp] units (1/160th of an inch). See [giv.ConfigImageToolbar]
+// for a toolbar with I/O buttons.
 func NewImage(par ki.Ki, name ...string) *Image {
 	return par.NewChild(ImageType, name...).(*Image)
 }
@@ -1109,12 +1110,13 @@ func (t *Stage) SetTimeout(v time.Duration) *Stage { t.Timeout = v; return t }
 var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.StageMgr", IDName: "stage-mgr", Doc: "StageMgr manages a stack of Stage elements", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Fields: []gti.Field{{Name: "Stack", Doc: "stack of stages managed by this stage manager."}, {Name: "Modified", Doc: "Modified is set to true whenever the stack has been modified.\nThis is cleared by the RenderWin each render cycle."}, {Name: "RenderCtx", Doc: "rendering context provides key rendering information and locking\nfor the RenderWin in which the stages are running.\nthe MainStageMgr within the RenderWin"}, {Name: "RenderWin", Doc: "render window to which we are rendering.\nrely on the RenderCtx wherever possible."}, {Name: "History", Doc: "growing stack of viewing history of all stages."}, {Name: "Main", Doc: "Main is the Main Stage that owns this StageMgr, only set for Popup stages"}, {Name: "Mu", Doc: "mutex protecting reading / updating of the Stack.\nDestructive stack updating gets a Write lock, else Read."}}})
 
 // SVGType is the [gti.Type] for [SVG]
-var SVGType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.SVG", IDName: "svg", Doc: "SVG is a Widget that renders an [svg.SVG] object.\nIf it is not [states.ReadOnly], the user can pan and zoom the display.\nSVGs do not render a background or border independent of their SVG object.", Methods: []gti.Method{{Name: "OpenSVG", Doc: "OpenSVG opens an XML-formatted SVG file", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "SaveSVG", Doc: "SaveSVG saves the current SVG to an XML-encoded standard SVG file", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "SavePNG", Doc: "SavePNG saves the current rendered SVG image to an PNG image file", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}}, Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "SVG", Doc: "SVG is the SVG object associated with the element."}}, Instance: &SVG{}})
+var SVGType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.SVG", IDName: "svg", Doc: "SVG is a Widget that renders an [svg.SVG] object.\nIf it is not [states.ReadOnly], the user can pan and zoom the display.\nSVGs do not render a background or border independent of their SVG object.\nSee [giv.ConfigSVGToolbar] for a toolbar with panning, selecting, and I/O buttons.", Methods: []gti.Method{{Name: "OpenSVG", Doc: "OpenSVG opens an XML-formatted SVG file", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "SaveSVG", Doc: "SaveSVG saves the current SVG to an XML-encoded standard SVG file", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "SavePNG", Doc: "SavePNG saves the current rendered SVG image to an PNG image file", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}}, Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "SVG", Doc: "SVG is the SVG object associated with the element."}}, Instance: &SVG{}})
 
 // NewSVG adds a new [SVG] with the given name to the given parent:
 // SVG is a Widget that renders an [svg.SVG] object.
 // If it is not [states.ReadOnly], the user can pan and zoom the display.
 // SVGs do not render a background or border independent of their SVG object.
+// See [giv.ConfigSVGToolbar] for a toolbar with panning, selecting, and I/O buttons.
 func NewSVG(par ki.Ki, name ...string) *SVG {
 	return par.NewChild(SVGType, name...).(*SVG)
 }

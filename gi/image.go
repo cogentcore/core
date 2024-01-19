@@ -25,7 +25,6 @@ import (
 // the allocated size.  The default minimum requested size is the pixel
 // size in [units.Dp] units (1/160th of an inch). See [giv.ConfigImageToolbar]
 // for a toolbar with I/O buttons.
-
 type Image struct {
 	WidgetBase
 
@@ -61,7 +60,7 @@ func (im *Image) SetStyles() {
 }
 
 // OpenImage sets the image to the image located at the given filename.
-func (im *Image) OpenImage(filename Filename) error {
+func (im *Image) OpenImage(filename Filename) error { //gti:add
 	img, _, err := images.Open(string(filename))
 	if err != nil {
 		slog.Error("gi.Image.OpenImage: could not open", "file", filename, "err", err)
