@@ -918,7 +918,6 @@ func (vv *FloatValue) ConfigWidget(w gi.Widget) {
 	vv.StdConfigWidget(w)
 	sb := vv.Widget.(*gi.Spinner)
 	sb.Tooltip = vv.Doc()
-	sb.Step = 1.0
 	sb.PageStep = 10.0
 	if mintag, ok := vv.Tag("min"); ok {
 		minv, err := laser.ToFloat32(mintag)

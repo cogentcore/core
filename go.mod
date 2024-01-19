@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/Masterminds/semver/v3 v3.2.1
-  	github.com/Masterminds/vcs v1.13.3
+	github.com/Masterminds/vcs v1.13.3
 	github.com/akutz/sortfold v0.2.1
 	github.com/alecthomas/chroma/v2 v2.12.0
 	github.com/anthonynsimon/bild v0.13.0
@@ -21,6 +21,7 @@ require (
 	github.com/hack-pad/hackpadfs v0.2.1
 	github.com/iancoleman/strcase v0.3.0
 	github.com/jackmordaunt/icns/v2 v2.2.7
+	github.com/jinzhu/copier v0.4.0
 	github.com/mattn/go-shellwords v1.0.12
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/muesli/termenv v0.15.2

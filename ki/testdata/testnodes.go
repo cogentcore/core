@@ -12,9 +12,6 @@ type TestNode struct {
 	ki.Node
 }
 
-// func (tn *TestNode) CopyFieldsFrom(frm any) { // note nothing to copy here
-// }
-
 // NodeEmbed embeds ki.Node and adds a couple of fields.
 // Also has a directive processed by gti
 //
@@ -25,30 +22,9 @@ type NodeEmbed struct {
 	Mbr2 int
 }
 
-// note: probably not worth auto-generating this method b/c it may require specific logic.
-
-func (ne *NodeEmbed) CopyFieldsFrom(frm any) {
-	ne.Node.CopyFieldsFrom(frm)
-	fm, ok := frm.(*NodeEmbed)
-	if !ok {
-		return // todo: errors??
-	}
-	ne.Mbr1 = fm.Mbr1
-	ne.Mbr2 = fm.Mbr2
-}
-
 type NodeField struct {
 	NodeEmbed
 	Field1 NodeEmbed
-}
-
-func (nf *NodeField) CopyFieldsFrom(frm any) {
-	nf.NodeEmbed.CopyFieldsFrom(frm)
-	fm, ok := frm.(*NodeField)
-	if !ok {
-		return // todo: errors??
-	}
-	nf.Field1.CopyFrom(&fm.Field1) // use ki-specific method here -- hard for gti to know this..
 }
 
 func (nf *NodeField) FieldByName(field string) (ki.Ki, error) {
@@ -61,15 +37,6 @@ func (nf *NodeField) FieldByName(field string) (ki.Ki, error) {
 type NodeField2 struct {
 	NodeField
 	Field2 NodeEmbed
-}
-
-func (nf *NodeField2) CopyFieldsFrom(frm any) {
-	nf.NodeField.CopyFieldsFrom(frm)
-	fm, ok := frm.(*NodeField2)
-	if !ok {
-		return // todo: errors??
-	}
-	nf.Field2.CopyFrom(&fm.Field2) // use ki-specific method here -- hard for gti to know this..
 }
 
 func (nf *NodeField2) FieldByName(field string) (ki.Ki, error) {

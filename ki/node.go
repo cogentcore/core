@@ -19,6 +19,7 @@ import (
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/glop/elide"
 	"cogentcore.org/core/gti"
+	"github.com/jinzhu/copier"
 )
 
 // StringElideMax is the Max width for String() path printout of Ki nodes.
@@ -1173,7 +1174,7 @@ func (n *Node) UpdateEnd(updt bool) {
 // should not be copied (unexported, lower-case fields are not copyable).
 func (n *Node) CopyFrom(frm Ki) error {
 	if frm == nil {
-		err := fmt.Errorf("ki.Node CopyFrom into %v -- null 'from' source", n.Path())
+		err := fmt.Errorf("ki.Node CopyFrom into %v: nil 'from' source", n)
 		log.Println(err)
 		return err
 	}
@@ -1216,8 +1217,12 @@ func CopyFromRaw(kn, frm Ki) error {
 	return nil
 }
 
-// CopyFieldsFrom copies from primary fields of source object,
-// recursively following anonymous embedded structs
-func (n *Node) CopyFieldsFrom(frm any) {
-
+// CopyFieldsFrom is the base implementation of [Ki.CopyFieldsFrom] that copies the fields
+// of the [Node.This] from the fields of the given [Ki.This], recursively following anonymous
+// embedded structs. It uses [copier.Copy] for this.
+func (n *Node) CopyFieldsFrom(frm Ki) {
+	err := copier.Copy(n.This(), frm.This())
+	if err != nil {
+		slog.Error("ki.Node.CopyFieldsFrom", "err", err)
+	}
 }

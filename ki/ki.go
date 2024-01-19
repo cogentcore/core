@@ -479,7 +479,7 @@ type Ki interface {
 	// Must explicitly call the CopyFieldsFrom method on any embedded
 	// Ki types that you inherit from, and, critically, NONE of those
 	// can rely on the generic Node-level version.
-	CopyFieldsFrom(frm any)
+	CopyFieldsFrom(frm Ki)
 
 	//////////////////////////////////////////////////////////////////////////
 	// 	Event-specific methods
