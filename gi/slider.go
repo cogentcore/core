@@ -105,10 +105,10 @@ type Slider struct { //core:embedder
 	Pos float32 `edit:"-" set:"-"`
 
 	// previous Change event emitted value - don't re-emit Change if it is the same
-	LastValue float32 `edit:"-" copy:"-" xml:"-" json:"-" set:"-"`
+	LastValue float32 `edit:"-" copier:"-" xml:"-" json:"-" set:"-"`
 
 	// previous sliding value - for computing the Input change
-	PrevSlide float32 `edit:"-" copy:"-" xml:"-" json:"-" set:"-"`
+	PrevSlide float32 `edit:"-" copier:"-" xml:"-" json:"-" set:"-"`
 
 	// Computed size of the slide box in the relevant dimension
 	// range of motion, exclusive of spacing, based on layout allocation.

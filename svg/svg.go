@@ -69,10 +69,10 @@ type SVG struct {
 	Scale float32
 
 	// render state for rendering
-	RenderState paint.State `copy:"-" json:"-" xml:"-" edit:"-"`
+	RenderState paint.State `copier:"-" json:"-" xml:"-" edit:"-"`
 
 	// live pixels that we render into
-	Pixels *image.RGBA `copy:"-" json:"-" xml:"-" edit:"-"`
+	Pixels *image.RGBA `copier:"-" json:"-" xml:"-" edit:"-"`
 
 	// all defs defined elements go here (gradients, symbols, etc)
 	Defs Group

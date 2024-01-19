@@ -45,7 +45,7 @@ type SliceView struct {
 	SliceViewBase
 
 	// optional styling function
-	StyleFunc SliceViewStyleFunc `copy:"-" view:"-" json:"-" xml:"-"`
+	StyleFunc SliceViewStyleFunc `copier:"-" view:"-" json:"-" xml:"-"`
 }
 
 // check for interface impl
@@ -214,60 +214,60 @@ type SliceViewBase struct {
 	// read / modify the underlying Slice data.
 	// Can be used to protect against random updating if your code has specific
 	// update points that can be likewise protected with this same mutex.
-	ViewMu *sync.Mutex `copy:"-" view:"-" json:"-" xml:"-"`
+	ViewMu *sync.Mutex `copier:"-" view:"-" json:"-" xml:"-"`
 
 	// Changed indicates whether the underlying slice
 	// has been edited in any way
 	Changed bool `set:"-"`
 
 	// non-ptr reflect.Value of the slice
-	SliceNPVal reflect.Value `copy:"-" view:"-" json:"-" xml:"-"`
+	SliceNPVal reflect.Value `copier:"-" view:"-" json:"-" xml:"-"`
 
 	// Value for the slice itself, if this was created within value view framework -- otherwise nil
-	SliceValView Value `copy:"-" view:"-" json:"-" xml:"-"`
+	SliceValView Value `copier:"-" view:"-" json:"-" xml:"-"`
 
 	// Value representations of the slice values
-	Values []Value `copy:"-" view:"-" json:"-" xml:"-"`
+	Values []Value `copier:"-" view:"-" json:"-" xml:"-"`
 
 	// current selection value -- initially select this value if set
-	SelVal any `copy:"-" view:"-" json:"-" xml:"-"`
+	SelVal any `copier:"-" view:"-" json:"-" xml:"-"`
 
 	// index of currently-selected item, in ReadOnly mode only
-	SelIdx int `copy:"-" json:"-" xml:"-"`
+	SelIdx int `copier:"-" json:"-" xml:"-"`
 
 	// list of currently-selected slice indexes
-	SelIdxs map[int]struct{} `copy:"-"`
+	SelIdxs map[int]struct{} `copier:"-"`
 
 	// index of row to select at start
-	InitSelIdx int `copy:"-" json:"-" xml:"-"`
+	InitSelIdx int `copier:"-" json:"-" xml:"-"`
 
 	// list of currently-dragged indexes
-	DraggedIdxs []int `copy:"-"`
+	DraggedIdxs []int `copier:"-"`
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
-	TmpSave Value `copy:"-" json:"-" xml:"-"`
+	TmpSave Value `copier:"-" json:"-" xml:"-"`
 
 	// total number of rows visible in allocated display size
-	VisRows int `edit:"-" copy:"-" json:"-" xml:"-"`
+	VisRows int `edit:"-" copier:"-" json:"-" xml:"-"`
 
 	// starting slice index of visible rows
-	StartIdx int `edit:"-" copy:"-" json:"-" xml:"-"`
+	StartIdx int `edit:"-" copier:"-" json:"-" xml:"-"`
 
 	// size of slice
-	SliceSize int `edit:"-" copy:"-" json:"-" xml:"-"`
+	SliceSize int `edit:"-" copier:"-" json:"-" xml:"-"`
 
 	// iteration through the configuration process, reset when a new slice type is set
-	ConfigIter int `edit:"-" copy:"-" json:"-" xml:"-"`
+	ConfigIter int `edit:"-" copier:"-" json:"-" xml:"-"`
 
 	// temp idx state for e.g., dnd
-	TmpIdx int `copy:"-" view:"-" json:"-" xml:"-"`
+	TmpIdx int `copier:"-" view:"-" json:"-" xml:"-"`
 
 	// ElVal is a Value representation of the underlying element type
 	// which is used whenever there are no slice elements available
-	ElVal reflect.Value `copy:"-" view:"-" json:"-" xml:"-"`
+	ElVal reflect.Value `copier:"-" view:"-" json:"-" xml:"-"`
 }
 
 func (sv *SliceViewBase) FlagType() enums.BitFlagSetter {
@@ -1915,10 +1915,10 @@ type SliceViewGrid struct {
 	MinRows int `edit:"-"`
 
 	// height of a single row, computed during layout
-	RowHeight float32 `edit:"-" copy:"-" json:"-" xml:"-"`
+	RowHeight float32 `edit:"-" copier:"-" json:"-" xml:"-"`
 
 	// total number of rows visible in allocated display size
-	VisRows int `edit:"-" copy:"-" json:"-" xml:"-"`
+	VisRows int `edit:"-" copier:"-" json:"-" xml:"-"`
 }
 
 func (sg *SliceViewGrid) OnInit() {

@@ -73,22 +73,22 @@ type Layout struct {
 	StackTop int
 
 	// LayImpl contains implementational state info for doing layout
-	LayImpl LayImplState `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	LayImpl LayImplState `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// whether scrollbar is used for given dim
-	HasScroll [2]bool `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	HasScroll [2]bool `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// scroll bars -- we fully manage them as needed
-	Scrolls [2]*Slider `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	Scrolls [2]*Slider `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// accumulated name to search for when keys are typed
-	FocusName string `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	FocusName string `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// time of last focus name event -- for timeout
-	FocusNameTime time.Time `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	FocusNameTime time.Time `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// last element focused on -- used as a starting point if name is the same
-	FocusNameLast ki.Ki `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	FocusNameLast ki.Ki `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 }
 
 func (ly *Layout) FlagType() enums.BitFlagSetter {

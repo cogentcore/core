@@ -464,7 +464,7 @@ type Ki interface {
 	// copy from a source to a target that only differ minimally will be
 	// minimally destructive.  Only copies to same types are supported.
 	// Signal connections are NOT copied.  No other Ki pointers are copied,
-	// and the field tag copy:"-" can be added for any other fields that
+	// and the field tag copier:"-" can be added for any other fields that
 	// should not be copied (unexported, lower-case fields are not copyable).
 	CopyFrom(frm Ki) error
 

@@ -98,7 +98,7 @@ type Scene struct {
 	DirUpIdx int `set:"-"`
 
 	// mutex on rendering
-	RenderMu sync.Mutex `view:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	RenderMu sync.Mutex `view:"-" copier:"-" json:"-" xml:"-" set:"-"`
 }
 
 // Defaults sets default scene params (camera, bg = white)

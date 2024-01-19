@@ -121,24 +121,24 @@ type NodeBase struct {
 	Sc *Scene `set:"-"`
 
 	// mutex on pose access -- needed for parallel updating
-	PoseMu sync.RWMutex `view:"-" copy:"-" json:"-" xml:"-"  set:"-"`
+	PoseMu sync.RWMutex `view:"-" copier:"-" json:"-" xml:"-"  set:"-"`
 
 	// mesh-based local bounding box (aggregated for groups)
-	MeshBBox BBox `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	MeshBBox BBox `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// world coordinates bounding box
-	WorldBBox BBox `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	WorldBBox BBox `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// normalized display coordinates bounding box, used for frustrum clipping
-	NDCBBox mat32.Box3 `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	NDCBBox mat32.Box3 `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// raw original bounding box for the widget within its parent Scene.
 	// This is prior to intersecting with Frame bounds.
-	BBox image.Rectangle `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	BBox image.Rectangle `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// 2D bounding box for region occupied within Scene Frame that we render onto.
 	// This is BBox intersected with Frame bounds.
-	ScBBox image.Rectangle `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	ScBBox image.Rectangle `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 }
 
 // NodeFlags extend ki.Flags to hold 3D node state

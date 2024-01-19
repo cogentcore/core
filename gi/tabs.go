@@ -52,11 +52,11 @@ type Tabs struct { //core:embedder
 
 	// PrevEffectiveType is the previous effective type of the tabs
 	// as computed by [TabTypes.Effective].
-	PrevEffectiveType TabTypes `copy:"-" json:"-" xml:"-" set:"-"`
+	PrevEffectiveType TabTypes `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// Mu is a mutex protecting updates to tabs. Tabs can be driven
 	// programmatically and via user input so need extra protection.
-	Mu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
+	Mu sync.Mutex `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 }
 
 // TabTypes are the different styling types of tabs.

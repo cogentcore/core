@@ -33,7 +33,7 @@ type Image struct {
 	Filename string
 
 	// the image pixels
-	Pixels *image.RGBA `copy:"-" xml:"-" json:"-" view:"-"`
+	Pixels *image.RGBA `copier:"-" xml:"-" json:"-" view:"-"`
 }
 
 func (g *Image) SVGName() string { return "image" }

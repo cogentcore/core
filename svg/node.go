@@ -85,13 +85,13 @@ type NodeBase struct {
 	CSS ki.Props `xml:"css" set:"-"`
 
 	// aggregated css properties from all higher nodes down to me
-	CSSAgg ki.Props `copy:"-" json:"-" xml:"-" set:"-" view:"no-inline"`
+	CSSAgg ki.Props `copier:"-" json:"-" xml:"-" set:"-" view:"no-inline"`
 
 	// bounding box for the node within the SVG Pixels image -- this one can be outside the visible range of the SVG image -- VpBBox is intersected and only shows visible portion.
-	BBox image.Rectangle `copy:"-" json:"-" xml:"-" set:"-"`
+	BBox image.Rectangle `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// visible bounding box for the node intersected with the SVG image geometry
-	VisBBox image.Rectangle `copy:"-" json:"-" xml:"-" set:"-"`
+	VisBBox image.Rectangle `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// paint style information for this node
 	Paint styles.Paint `json:"-" xml:"-" set:"-"`

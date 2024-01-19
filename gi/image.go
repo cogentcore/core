@@ -33,16 +33,16 @@ type Image struct {
 	Filename Filename `set:"-"`
 
 	// the bitmap image
-	Pixels *image.RGBA `copy:"-" view:"-" xml:"-" json:"-" set:"-"`
+	Pixels *image.RGBA `copier:"-" view:"-" xml:"-" json:"-" set:"-"`
 
 	// cached last rendered image
-	PrevPixels image.Image `copy:"-" xml:"-" json:"-" set:"-"`
+	PrevPixels image.Image `copier:"-" xml:"-" json:"-" set:"-"`
 
 	// cached [styles.Style.ObjectFit] of the last rendered image
-	PrevObjectFit styles.ObjectFits `copy:"-" xml:"-" json:"-" set:"-"`
+	PrevObjectFit styles.ObjectFits `copier:"-" xml:"-" json:"-" set:"-"`
 
 	// cached allocated size for the last rendered image
-	PrevSize mat32.Vec2 `copy:"-" xml:"-" json:"-" set:"-"`
+	PrevSize mat32.Vec2 `copier:"-" xml:"-" json:"-" set:"-"`
 }
 
 func (im *Image) CopyFieldsFrom(frm any) {

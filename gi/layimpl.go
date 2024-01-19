@@ -262,7 +262,7 @@ type GeomState struct {
 	// Pos is position within the overall Scene that we render into,
 	// including effects of scroll offset, for both Total outer dimension
 	// and inner Content dimension.
-	Pos GeomCT `view:"inline" edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	Pos GeomCT `view:"inline" edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// Cell is the logical X, Y index coordinates (col, row) of element
 	// within its parent layout
@@ -279,12 +279,12 @@ type GeomState struct {
 	// These are the pixels we can draw into, intersected with parent bounding boxes
 	// (empty for invisible). Used for render Bounds clipping.
 	// This includes all space (margin, padding etc).
-	TotalBBox image.Rectangle `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	TotalBBox image.Rectangle `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// 2D bounding box for our Content, which excludes our padding, margin, etc.
 	// starting at Pos.Content and ending at Pos.Content + Size.Content.
 	// It is intersected with parent bounding boxes.
-	ContentBBox image.Rectangle `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	ContentBBox image.Rectangle `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 }
 
 func (ls *GeomState) String() string {

@@ -68,7 +68,7 @@ type Phong struct {
 	Sys vgpu.System
 
 	// mutex on updating
-	UpdtMu sync.Mutex `view:"-" copy:"-" json:"-" xml:"-"`
+	UpdtMu sync.Mutex `view:"-" copier:"-" json:"-" xml:"-"`
 }
 
 func (ph *Phong) Destroy() {
