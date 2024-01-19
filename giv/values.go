@@ -926,7 +926,7 @@ func (vv *FloatValue) ConfigWidget(w gi.Widget) {
 			sb.HasMin = true
 			sb.Min = minv
 		} else {
-			slog.Error("Float Min Value:", "error:", err)
+			slog.Error("Invalid float min value", "value", mintag, "err", err)
 		}
 	}
 	if maxtag, ok := vv.Tag("max"); ok {
@@ -935,7 +935,7 @@ func (vv *FloatValue) ConfigWidget(w gi.Widget) {
 			sb.HasMax = true
 			sb.Max = maxv
 		} else {
-			slog.Error("Float Max Value:", "error:", err)
+			slog.Error("Invalid float max value", "value", maxtag, "err", err)
 		}
 	}
 	sb.Step = .1 // smaller default
@@ -944,7 +944,7 @@ func (vv *FloatValue) ConfigWidget(w gi.Widget) {
 		if err == nil {
 			sb.Step = step
 		} else {
-			slog.Error("Float Step Value:", "error:", err)
+			slog.Error("Invalid float step value", "value", steptag, "err", err)
 		}
 	}
 	if fmttag, ok := vv.Tag("format"); ok {
