@@ -77,7 +77,7 @@ type Chooser struct {
 	// ItemsFunc, if non-nil, is a function to call before showing the items
 	// of the chooser, which is typically used to configure them (eg: if they
 	// are based on dynamic data)
-	ItemsFunc func()
+	ItemsFunc func() `copier:"-"`
 
 	// CurLabel is the string label for the current value
 	CurLabel string `set:"-"`

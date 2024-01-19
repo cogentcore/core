@@ -85,7 +85,7 @@ type TextField struct { //core:embedder
 	Edited bool `json:"-" xml:"-" set:"-"`
 
 	// the live text string being edited, with latest modifications -- encoded as runes
-	EditTxt []rune `json:"-" xml:"-" set:"-"`
+	EditTxt []rune `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// maximum width that field will request, in characters, during GetSize process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override
 	MaxWidthReq int
