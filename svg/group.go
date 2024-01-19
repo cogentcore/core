@@ -17,11 +17,6 @@ type Group struct {
 	NodeBase
 }
 
-func (g *Group) CopyFieldsFrom(frm any) {
-	fr := frm.(*Group)
-	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
-}
-
 func (g *Group) SVGName() string { return "g" }
 
 func (g *Group) EnforceSVGName() bool { return false }

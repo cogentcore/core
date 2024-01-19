@@ -1222,8 +1222,8 @@ func CopyFromRaw(kn, frm Ki) error {
 // embedded structs. It uses [copier.Copy] for this. It ignores any fields with a `copier:"-"`
 // struct tag. Other implementations of [Ki.CopyFieldsFrom] should call this method first and
 // then only do manual handling of specific fields that can not be automatically copied.
-func (n *Node) CopyFieldsFrom(frm Ki) {
-	err := copier.CopyWithOption(n.This(), frm.This(), copier.Option{CaseSensitive: true, DeepCopy: true})
+func (n *Node) CopyFieldsFrom(from Ki) {
+	err := copier.CopyWithOption(n.This(), from.This(), copier.Option{CaseSensitive: true, DeepCopy: true})
 	if err != nil {
 		slog.Error("ki.Node.CopyFieldsFrom", "err", err)
 	}

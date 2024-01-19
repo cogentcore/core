@@ -483,7 +483,7 @@ type Ki interface {
 	// handling of specific fields that can not be automatically copied. See
 	// [cogentcore.org/core/gi.WidgetBase.CopyFieldsFrom] for an example of a
 	// custom CopyFieldsFrom method.
-	CopyFieldsFrom(frm Ki)
+	CopyFieldsFrom(from Ki)
 
 	//////////////////////////////////////////////////////////////////////////
 	// 	Event-specific methods

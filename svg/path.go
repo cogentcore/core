@@ -22,7 +22,7 @@ type Path struct {
 	NodeBase
 
 	// the path data to render -- path commands and numbers are serialized, with each command specifying the number of floating-point coord data points that follow
-	Data []PathData `xml:"-" set:"-"`
+	Data []PathData `xml:"-" set:"-" copier:"-"`
 
 	// string version of the path data
 	DataStr string `xml:"d"`
@@ -30,12 +30,11 @@ type Path struct {
 
 func (g *Path) SVGName() string { return "path" }
 
-func (g *Path) CopyFieldsFrom(frm any) {
-	fr := frm.(*Path)
-	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
-	g.Data = make([]PathData, len(fr.Data))
-	copy(g.Data, fr.Data)
-	g.DataStr = fr.DataStr
+func (g *Path) CopyFieldsFrom(from ki.Ki) {
+	g.Node.CopyFieldsFrom(from)
+	frm := from.(*Path)
+	g.Data = make([]PathData, len(frm.Data))
+	copy(g.Data, frm.Data)
 }
 
 func (g *Path) SetPos(pos mat32.Vec2) {

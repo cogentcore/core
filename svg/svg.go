@@ -298,12 +298,6 @@ type SVGNode struct {
 	ViewBox ViewBox
 }
 
-func (g *SVGNode) CopyFieldsFrom(frm any) {
-	fr := frm.(*SVGNode)
-	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
-	g.ViewBox = fr.ViewBox
-}
-
 func (g *SVGNode) SVGName() string { return "svg" }
 
 func (g *SVGNode) EnforceSVGName() bool { return false }

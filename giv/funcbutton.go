@@ -5,7 +5,6 @@
 package giv
 
 import (
-	"log"
 	"log/slog"
 	"reflect"
 	"strconv"
@@ -121,22 +120,6 @@ func NewFuncButton(par ki.Ki, fun any) *FuncButton {
 func (fb *FuncButton) OnInit() {
 	fb.Button.OnInit()
 	fb.WarnUnadded = true
-}
-
-func (fb *FuncButton) CopyFieldsFrom(frm any) {
-	fr, ok := frm.(*FuncButton)
-	if !ok {
-		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier one\n", fb.KiType().Name)
-		return
-	}
-	fb.Button.CopyFieldsFrom(&fr.Button)
-	fb.Func = fr.Func
-	fb.ReflectFunc = fr.ReflectFunc
-	fb.Args = fr.Args
-	fb.Returns = fr.Returns
-	fb.Confirm = fr.Confirm
-	fb.ShowReturn = fr.ShowReturn
-	fb.ShowReturnAsDialog = fr.ShowReturnAsDialog
 }
 
 // SetText sets the [FuncButton.Text] and updates the tooltip to correspond to the new name.

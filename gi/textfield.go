@@ -136,19 +136,6 @@ type TextField struct { //core:embedder
 	CursorMu sync.Mutex `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 }
 
-func (tf *TextField) CopyFieldsFrom(frm any) {
-	fr := frm.(*TextField)
-	tf.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	tf.Txt = fr.Txt
-	tf.Placeholder = fr.Placeholder
-	tf.NoEcho = fr.NoEcho
-	tf.LeadingIcon = fr.LeadingIcon
-	tf.TrailingIcon = fr.TrailingIcon
-	tf.CursorWidth = fr.CursorWidth
-	tf.Edited = fr.Edited
-	tf.MaxWidthReq = fr.MaxWidthReq
-}
-
 func (tf *TextField) OnInit() {
 	tf.WidgetBase.OnInit()
 	tf.HandleEvents()

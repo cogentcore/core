@@ -18,21 +18,12 @@ import (
 // field of appropriate node
 type StyleSheet struct {
 	NodeBase
-	Sheet *css.Stylesheet
+	Sheet *css.Stylesheet `copier:"-"`
 }
 
 // AddNewStyleSheet adds a new CSS stylesheet to given parent node, with given name.
 func AddNewStyleSheet(parent ki.Ki, name string) *StyleSheet {
 	return parent.NewChild(StyleSheetType, name).(*StyleSheet)
-}
-
-func (ss *StyleSheet) CopyFieldsFrom(frm any) {
-	fr, ok := frm.(*StyleSheet)
-	if !ok {
-		return
-	}
-	ss.NodeBase.CopyFieldsFrom(&fr.NodeBase)
-	// probably don't copy Sheet pointer..
 }
 
 // ParseString parses the string into a StyleSheet of rules, which can then be

@@ -97,11 +97,6 @@ type NodeBase struct {
 	Paint styles.Paint `json:"-" xml:"-" set:"-"`
 }
 
-func (g *NodeBase) CopyFieldsFrom(frm any) {
-	fr := frm.(*NodeBase)
-	g.Paint = fr.Paint
-}
-
 func (g *NodeBase) AsNodeBase() *NodeBase {
 	return g
 }
