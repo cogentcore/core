@@ -51,35 +51,28 @@ type Tree struct {
 
 	// DoubleClickFun is a function to call when a node receives a DoubleClick event.
 	// if not set, defaults to OpenEmptyDir() (for folders)
-	DoubleClickFun func(e events.Event) `view:"-" json:"-" xml:"-"`
+	DoubleClickFun func(e events.Event) `copier:"-" view:"-" json:"-" xml:"-"`
 
 	// if true, we are in midst of an OpenAll call -- nodes should open all dirs
-	InOpenAll bool `set:"-"`
+	InOpenAll bool `copier:"-" set:"-"`
 
 	// change notify for all dirs
-	Watcher *fsnotify.Watcher `set:"-" view:"-"`
+	Watcher *fsnotify.Watcher `copier:"-" set:"-" view:"-"`
 
 	// channel to close watcher watcher
-	DoneWatcher chan bool `set:"-" view:"-"`
+	DoneWatcher chan bool `copier:"-" set:"-" view:"-"`
 
 	// map of paths that have been added to watcher -- only active if bool = true
-	WatchedPaths map[string]bool `set:"-" view:"-"`
+	WatchedPaths map[string]bool `copier:"-" set:"-" view:"-"`
 
 	// last path updated by watcher
-	LastWatchUpdt string `set:"-" view:"-"`
+	LastWatchUpdt string `copier:"-" set:"-" view:"-"`
 
 	// timestamp of last update
-	LastWatchTime time.Time `set:"-" view:"-"`
+	LastWatchTime time.Time `copier:"-" set:"-" view:"-"`
 
 	// Update mutex
-	UpdtMu sync.Mutex `set:"-" view:"-"`
-}
-
-func (ft *Tree) CopyFieldsFrom(frm any) {
-	fr := frm.(*Tree)
-	ft.Node.CopyFieldsFrom(&fr.Node)
-	ft.DirsOnTop = fr.DirsOnTop
-	ft.NodeType = fr.NodeType
+	UpdtMu sync.Mutex `copier:"-" set:"-" view:"-"`
 }
 
 func (fv *Tree) Destroy() {

@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"fmt"
 	"image"
-	"log"
 	"log/slog"
 	"slices"
 	"strings"
@@ -160,16 +159,6 @@ type TreeView struct {
 
 func (tv *TreeView) FlagType() enums.BitFlagSetter {
 	return (*TreeViewFlags)(&tv.Flags)
-}
-
-func (tv *TreeView) CopyFieldsFrom(frm any) {
-	fr, ok := frm.(*TreeView)
-	if !ok {
-		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier one\n", tv.KiType().Name)
-		return
-	}
-	tv.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	// note: can't actually copy anything here
 }
 
 // AsTreeView satisfies the [TreeViewEmbedder] interface
@@ -506,7 +495,7 @@ func (tv *TreeView) ConfigWidget() {
 	parts := tv.NewParts()
 	config := ki.Config{}
 	config.Add(gi.SwitchType, "branch")
-	if tv.Icon.IsValid() {
+	if tv.Icon.IsSet() {
 		config.Add(gi.IconType, "icon")
 	}
 	config.Add(gi.LabelType, "label")
@@ -517,7 +506,7 @@ func (tv *TreeView) ConfigWidget() {
 			wb.Config()
 		}
 	}
-	if tv.Icon.IsValid() {
+	if tv.Icon.IsSet() {
 		if ic, ok := tv.IconPart(); ok {
 			ic.SetIcon(tv.Icon)
 		}

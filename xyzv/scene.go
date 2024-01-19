@@ -44,12 +44,6 @@ type Scene struct {
 	SelParams SelParams `view:"inline"`
 }
 
-func (sw *Scene) CopyFieldsFrom(frm any) {
-	fr := frm.(*Scene)
-	sw.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	sw.Scene.CopyFrom(fr.Scene)
-}
-
 func (sw *Scene) OnInit() {
 	sw.Scene = xyz.NewScene("Scene")
 	sw.Scene.Defaults()

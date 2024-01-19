@@ -17,11 +17,6 @@ type Group struct {
 	NodeBase
 }
 
-func (gp *Group) CopyFieldsFrom(frm any) {
-	fr := frm.(*Group)
-	gp.NodeBase.CopyFieldsFrom(&fr.NodeBase)
-}
-
 // UpdateMeshBBox updates the Mesh-based BBox info for all nodes.
 // groups aggregate over elements
 func (gp *Group) UpdateMeshBBox() {

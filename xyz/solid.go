@@ -28,18 +28,8 @@ type Solid struct {
 	MeshPtr Mesh `view:"-" set:"-"`
 }
 
-var _ Node = (*Solid)(nil)
-
 func (sld *Solid) OnInit() {
 	sld.Defaults()
-}
-
-func (sld *Solid) CopyFieldsFrom(frm any) {
-	fr := frm.(*Solid)
-	sld.NodeBase.CopyFieldsFrom(&fr.NodeBase)
-	sld.Mesh = fr.Mesh
-	sld.Mat = fr.Mat
-	sld.MeshPtr = fr.MeshPtr
 }
 
 func (sld *Solid) IsSolid() bool {

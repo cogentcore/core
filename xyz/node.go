@@ -118,7 +118,7 @@ type NodeBase struct {
 	Pose Pose `set:"-"`
 
 	// Sc is the cached Scene
-	Sc *Scene `set:"-"`
+	Sc *Scene `copier:"-" set:"-"`
 
 	// mutex on pose access -- needed for parallel updating
 	PoseMu sync.RWMutex `view:"-" copier:"-" json:"-" xml:"-"  set:"-"`
@@ -171,16 +171,6 @@ func AsNode(k ki.Ki) (Node, *NodeBase) {
 // least of this type, not-nil, etc
 func AsNodeBase(k ki.Ki) *NodeBase {
 	return k.(Node).AsNode()
-}
-
-func (nb *NodeBase) CopyFieldsFrom(frm any) {
-	fr := frm.(*NodeBase)
-	nb.Pose = fr.Pose
-	nb.MeshBBox = fr.MeshBBox
-	nb.WorldBBox = fr.WorldBBox
-	nb.NDCBBox = fr.NDCBBox
-	nb.BBox = fr.BBox
-	nb.ScBBox = fr.ScBBox
 }
 
 // AsNode returns a generic NodeBase for our node -- gives generic
