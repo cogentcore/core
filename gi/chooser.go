@@ -391,10 +391,8 @@ func (ch *Chooser) SetIconItems(el []icons.Icon, setFirst bool) *Chooser {
 }
 
 // SetEnums sets the Items list from a list of enums.Enum values.
-// If setFirst then set current item to the first item in the list,
-// and maxLen if > 0 auto-sets the width of the button to the
-// contents, with the given upper limit.
-func (ch *Chooser) SetEnums(el []enums.Enum, setFirst bool, maxLen int) *Chooser {
+// If setFirst then set current item to the first item in the list.
+func (ch *Chooser) SetEnums(el []enums.Enum, setFirst bool) *Chooser {
 	n := len(el)
 	if n == 0 {
 		return ch
@@ -419,11 +417,9 @@ func (ch *Chooser) SetEnums(el []enums.Enum, setFirst bool, maxLen int) *Chooser
 }
 
 // SetEnum sets the Items list from given enums.Enum Values().
-// If setFirst then set current item to the first item in the list,
-// and maxLen if > 0 auto-sets the width of the button to the
-// contents, with the given upper limit.
-func (ch *Chooser) SetEnum(enum enums.Enum, setFirst bool, maxLen int) *Chooser {
-	return ch.SetEnums(enum.Values(), setFirst, maxLen)
+// If setFirst then set current item to the first item in the list.
+func (ch *Chooser) SetEnum(enum enums.Enum, setFirst bool) *Chooser {
+	return ch.SetEnums(enum.Values(), setFirst)
 }
 
 // FindItem finds an item on list of items and returns its index

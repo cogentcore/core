@@ -1078,7 +1078,7 @@ func (vv *EnumValue) ConfigWidget(w gi.Widget) {
 	ch.Tooltip = vv.Doc()
 
 	ev := vv.EnumValue()
-	ch.SetEnum(ev, false, 50)
+	ch.SetEnum(ev, false)
 	ch.Config()
 	ch.OnFinal(events.Change, func(e events.Event) {
 		vv.SetValue(ch.CurVal)

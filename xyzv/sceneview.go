@@ -166,7 +166,7 @@ func (sv *SceneView) ConfigToolbar(tb *gi.Toolbar) {
 	}
 	gi.NewSeparator(tb)
 
-	sm := gi.NewChooser(tb, "selmode").SetEnum(sw.SelMode, false, 0)
+	sm := gi.NewChooser(tb, "selmode").SetEnum(sw.SelMode, false)
 	sm.OnChange(func(e events.Event) {
 		sw.SelMode = sm.CurVal.(SelModes)
 	})
