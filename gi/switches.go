@@ -6,7 +6,6 @@ package gi
 
 import (
 	"fmt"
-	"slices"
 
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
@@ -34,12 +33,6 @@ type Switches struct { //core:embedder
 
 	// whether to make the items mutually exclusive (checking one turns off all the others)
 	Mutex bool
-}
-
-func (sw *Switches) CopyFieldsFrom(frm any) {
-	fr := frm.(*Switches)
-	sw.Frame.CopyFieldsFrom(&fr.Frame)
-	sw.Items = slices.Clone(fr.Items)
 }
 
 func (sw *Switches) OnInit() {

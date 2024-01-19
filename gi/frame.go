@@ -5,8 +5,6 @@
 package gi
 
 import (
-	"log"
-
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -17,18 +15,8 @@ import (
 type Frame struct {
 	Layout
 
-	// options for striped backgrounds -- rendered as darker bands relative to background color
+	// options for striped backgrounds, which are rendered as darker bands relative to background color
 	Stripes Stripes
-}
-
-func (fr *Frame) CopyFieldsFrom(frm any) {
-	cp, ok := frm.(*Frame)
-	if !ok {
-		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier Frame one\n", fr.KiType().Name)
-		return
-	}
-	fr.Layout.CopyFieldsFrom(&cp.Layout)
-	fr.Stripes = cp.Stripes
 }
 
 func (fr *Frame) OnInit() {

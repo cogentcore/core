@@ -28,14 +28,7 @@ type Icon struct {
 	Filename string `set:"-"`
 
 	// SVG drawing of the icon
-	SVG svg.SVG `set:"-"`
-}
-
-func (ic *Icon) CopyFieldsFrom(frm any) {
-	fr := frm.(*Icon)
-	ic.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	ic.Icon = fr.Icon
-	ic.Filename = fr.Filename
+	SVG svg.SVG `set:"-" copier:"-"`
 }
 
 func (ic *Icon) OnInit() {

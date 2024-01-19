@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"fmt"
 	"image"
-	"log"
 	"log/slog"
 	"slices"
 	"strings"
@@ -113,7 +112,7 @@ type TreeView struct {
 	gi.WidgetBase
 
 	// If non-nil, the Ki Node that this widget is viewing in the tree (the source)
-	SyncNode ki.Ki `set:"-" copy:"-" json:"-" xml:"-"`
+	SyncNode ki.Ki `set:"-" copier:"-" json:"-" xml:"-"`
 
 	// The text to display for the tree view item label, which automatically
 	// defaults to the [ki.Node.Name] of the tree view node. It has no effect
@@ -124,11 +123,11 @@ type TreeView struct {
 	Icon icons.Icon
 
 	// amount to indent children relative to this node
-	Indent units.Value `copy:"-" json:"-" xml:"-"`
+	Indent units.Value `copier:"-" json:"-" xml:"-"`
 
 	// depth for nodes be initialized as open (default 4).
 	// Nodes beyond this depth will be initialized as closed.
-	OpenDepth int `copy:"-" json:"-" xml:"-"`
+	OpenDepth int `copier:"-" json:"-" xml:"-"`
 
 	/////////////////////////////////////////
 	// All fields below are computed
@@ -136,19 +135,19 @@ type TreeView struct {
 	// linear index of this node within the entire tree.
 	// updated on full rebuilds and may sometimes be off,
 	// but close enough for expected uses
-	ViewIdx int `copy:"-" json:"-" xml:"-" edit:"-"`
+	ViewIdx int `copier:"-" json:"-" xml:"-" edit:"-"`
 
 	// size of just this node widget.
 	// our alloc includes all of our children, but we only draw us.
-	WidgetSize mat32.Vec2 `copy:"-" json:"-" xml:"-" edit:"-"`
+	WidgetSize mat32.Vec2 `copier:"-" json:"-" xml:"-" edit:"-"`
 
 	// The cached root of the view. It is automatically set and does not need to be
 	// set by the end user.
-	RootView *TreeView `copy:"-" json:"-" xml:"-" edit:"-"`
+	RootView *TreeView `copier:"-" json:"-" xml:"-" edit:"-"`
 
 	// SelectedNodes holds the currently-selected nodes, on the
 	// RootView node only.
-	SelectedNodes []TreeViewer `copy:"-" json:"-" xml:"-" edit:"-"`
+	SelectedNodes []TreeViewer `copier:"-" json:"-" xml:"-" edit:"-"`
 
 	// actStateLayer is the actual state layer of the tree view, which
 	// should be used when rendering it and its parts (but not its children).
@@ -160,16 +159,6 @@ type TreeView struct {
 
 func (tv *TreeView) FlagType() enums.BitFlagSetter {
 	return (*TreeViewFlags)(&tv.Flags)
-}
-
-func (tv *TreeView) CopyFieldsFrom(frm any) {
-	fr, ok := frm.(*TreeView)
-	if !ok {
-		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier one\n", tv.KiType().Name)
-		return
-	}
-	tv.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	// note: can't actually copy anything here
 }
 
 // AsTreeView satisfies the [TreeViewEmbedder] interface

@@ -25,13 +25,6 @@ func (g *Line) OnInit() {
 	g.End.Set(1, 1)
 }
 
-func (g *Line) CopyFieldsFrom(frm any) {
-	fr := frm.(*Line)
-	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
-	g.Start = fr.Start
-	g.End = fr.End
-}
-
 func (g *Line) SetPos(pos mat32.Vec2) {
 	g.Start = pos
 }

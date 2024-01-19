@@ -8,7 +8,6 @@ package gi
 
 import (
 	"image"
-	"log/slog"
 	"sync"
 
 	"cogentcore.org/core/abilities"
@@ -220,66 +219,66 @@ type WidgetBase struct {
 	// Parts are a separate tree of sub-widgets that implement discrete parts
 	// of a widget.  Positions are relative to the parent widget.
 	// These are fully managed by the parent widget
-	Parts *Layout `copy:"-" json:"-" xml:"-" set:"-"`
+	Parts *Layout `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// Geom has the full layout geometry for size and position of this Widget
-	Geom GeomState `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	Geom GeomState `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// If true, Override the computed styles and allow directly editing Style
-	OverrideStyle bool `copy:"-" json:"-" xml:"-" set:"-"`
+	OverrideStyle bool `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// Styles are styling settings for this widget.
 	// These are set in SetApplyStyle which should be called after any Config
 	// change (e.g., as done by the Update method).  See Stylers for functions
 	// that set all of the styles, ordered from initial base defaults to later
 	// added overrides.
-	Styles styles.Style `copy:"-" json:"-" xml:"-" set:"-"`
+	Styles styles.Style `json:"-" xml:"-" set:"-"`
 
 	// Stylers are a slice of functions that are called in sequential
 	// ascending order (so the last added styler is called last and
 	// thus overrides all other functions) to style the element.
 	// These should be set using Style function. FirstStylers and
 	// FinalStylers are called before and after these stylers, respectively.
-	Stylers []func(s *styles.Style) `copy:"-" json:"-" xml:"-" set:"-"`
+	Stylers []func(s *styles.Style) `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// FirstStylers are a slice of functions that are called in sequential
 	// ascending order (so the last added styler is called last and
 	// thus overrides all other functions) to style the element.
 	// These should be set using StyleFirst function. These stylers
 	// are called before Stylers and FinalStylers.
-	FirstStylers []func(s *styles.Style) `copy:"-" json:"-" xml:"-" set:"-"`
+	FirstStylers []func(s *styles.Style) `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// FinalStylers are a slice of functions that are called in sequential
 	// ascending order (so the last added styler is called last and
 	// thus overrides all other functions) to style the element.
 	// These should be set using StyleFinal function. These stylers
 	// are called after FirstStylers and Stylers.
-	FinalStylers []func(s *styles.Style) `copy:"-" json:"-" xml:"-" set:"-"`
+	FinalStylers []func(s *styles.Style) `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// Listeners are event listener functions for processing events on this widget.
 	// They are called in sequential descending order (so the last added listener
 	// is called first). They should be added using the On function. FirstListeners
 	// and FinalListeners are called before and after these listeners, respectively.
-	Listeners events.Listeners `copy:"-" json:"-" xml:"-" set:"-"`
+	Listeners events.Listeners `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// FirstListeners are event listener functions for processing events on this widget.
 	// They are called in sequential descending order (so the last added listener
 	// is called first). They should be added using the OnFirst function. These listeners
 	// are called before Listeners and FinalListeners.
-	FirstListeners events.Listeners `copy:"-" json:"-" xml:"-" set:"-"`
+	FirstListeners events.Listeners `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// FinalListeners are event listener functions for processing events on this widget.
 	// They are called in sequential descending order (so the last added listener
 	// is called first). They should be added using the OnFinal function. These listeners
 	// are called after FirstListeners and Listeners.
-	FinalListeners events.Listeners `copy:"-" json:"-" xml:"-" set:"-"`
+	FinalListeners events.Listeners `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// A slice of functions to call on all widgets that are added as children
 	// to this widget or its children.  These functions are called in sequential
 	// ascending order, so the last added one is called last and thus can
 	// override anything set by the other ones. These should be set using
 	// OnWidgetAdded, which can be called by both end-user and internal code.
-	OnWidgetAdders []func(w Widget) `copy:"-" json:"-" xml:"-" set:"-"`
+	OnWidgetAdders []func(w Widget) `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// ContextMenus is a slice of menu functions to call to construct
 	// the widget's context menu on an [events.ContextMenu]. The
@@ -293,13 +292,13 @@ type WidgetBase struct {
 	// by widgets whenever they are added to another widget parent.
 	// It is passed to most Config, Layout, and Render functions as
 	// a convenience.
-	Sc *Scene `copy:"-" json:"-" xml:"-" set:"-"`
+	Sc *Scene `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// mutex protecting the Style field
-	StyMu sync.RWMutex `copy:"-" view:"-" json:"-" xml:"-" set:"-"`
+	StyMu sync.RWMutex `copier:"-" view:"-" json:"-" xml:"-" set:"-"`
 
 	// mutex protecting the BBox fields
-	BBoxMu sync.RWMutex `copy:"-" view:"-" json:"-" xml:"-" set:"-"`
+	BBoxMu sync.RWMutex `copier:"-" view:"-" json:"-" xml:"-" set:"-"`
 }
 
 func (wb *WidgetBase) FlagType() enums.BitFlagSetter {
@@ -375,23 +374,19 @@ func AsWidgetBase(k ki.Ki) *WidgetBase {
 	return wb
 }
 
-func (wb *WidgetBase) CopyFieldsFrom(frm any) {
-	fr, ok := frm.(*WidgetBase)
-	if !ok {
-		slog.Error("widget needs a CopyFieldsFrom method defined", "type", wb.This().(Widget).KiType())
-		return
-	}
-	wb.Tooltip = fr.Tooltip
-	wb.Styles.CopyFrom(&fr.Styles)
+func (wb *WidgetBase) CopyFieldsFrom(from ki.Ki) {
+	wb.Node.CopyFieldsFrom(from)
+	_, frm := AsWidget(from)
+
 	n := len(wb.Stylers)
-	if len(fr.Stylers) > n {
-		wb.Stylers = append(wb.Stylers, fr.Stylers[n:]...)
+	if len(frm.Stylers) > n {
+		wb.Stylers = append(wb.Stylers, frm.Stylers[n:]...)
 	}
-	wb.Listeners.CopyFromExtra(fr.Listeners)
 	n = len(wb.ContextMenus)
-	if len(fr.ContextMenus) > n {
-		wb.ContextMenus = append(wb.ContextMenus, fr.ContextMenus[n:]...)
+	if len(frm.ContextMenus) > n {
+		wb.ContextMenus = append(wb.ContextMenus, frm.ContextMenus[n:]...)
 	}
+	wb.Listeners.CopyFromExtra(frm.Listeners)
 }
 
 func (wb *WidgetBase) Destroy() {

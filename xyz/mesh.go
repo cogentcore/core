@@ -90,7 +90,7 @@ type MeshBase struct { //gti:add -setters
 	BBox BBox `set:"-"`
 
 	// mutex on bbox access
-	BBoxMu sync.RWMutex `view:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	BBoxMu sync.RWMutex `view:"-" copier:"-" json:"-" xml:"-" set:"-"`
 }
 
 func (ms *MeshBase) Name() string                           { return ms.Nm }

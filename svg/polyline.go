@@ -18,13 +18,6 @@ type Polyline struct {
 
 func (g *Polyline) SVGName() string { return "polyline" }
 
-func (g *Polyline) CopyFieldsFrom(frm any) {
-	fr := frm.(*Polyline)
-	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
-	g.Points = make([]mat32.Vec2, len(fr.Points))
-	copy(g.Points, fr.Points)
-}
-
 func (g *Polyline) SetPos(pos mat32.Vec2) {
 	// todo: set offset relative to bbox
 }

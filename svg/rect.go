@@ -31,14 +31,6 @@ func (g *Rect) OnInit() {
 	g.Size.Set(1, 1)
 }
 
-func (g *Rect) CopyFieldsFrom(frm any) {
-	fr := frm.(*Rect)
-	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
-	g.Pos = fr.Pos
-	g.Size = fr.Size
-	g.Radius = fr.Radius
-}
-
 func (g *Rect) LocalBBox() mat32.Box2 {
 	bb := mat32.Box2{}
 	hlw := 0.5 * g.LocalLineWidth()

@@ -57,19 +57,6 @@ type Spinner struct { //core:embedder
 	Format string
 }
 
-func (sp *Spinner) CopyFieldsFrom(frm any) {
-	fr := frm.(*Spinner)
-	sp.TextField.CopyFieldsFrom(&fr.TextField)
-	sp.Value = fr.Value
-	sp.HasMin = fr.HasMin
-	sp.Min = fr.Min
-	sp.HasMax = fr.HasMax
-	sp.Max = fr.Max
-	sp.Step = fr.Step
-	sp.PageStep = fr.PageStep
-	sp.Prec = fr.Prec
-}
-
 func (sp *Spinner) OnInit() {
 	sp.WidgetBase.OnInit()
 	sp.HandleEvents()

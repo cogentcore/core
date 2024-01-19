@@ -35,19 +35,13 @@ type Scene struct {
 	SelMode SelModes
 
 	// currently selected node
-	CurSel xyz.Node `copy:"-" json:"-" xml:"-" view:"-"`
+	CurSel xyz.Node `copier:"-" json:"-" xml:"-" view:"-"`
 
 	// currently selected manipulation control point
-	CurManipPt *ManipPt `copy:"-" json:"-" xml:"-" view:"-"`
+	CurManipPt *ManipPt `copier:"-" json:"-" xml:"-" view:"-"`
 
 	// parameters for selection / manipulation box
 	SelParams SelParams `view:"inline"`
-}
-
-func (sw *Scene) CopyFieldsFrom(frm any) {
-	fr := frm.(*Scene)
-	sw.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	sw.Scene.CopyFrom(fr.Scene)
 }
 
 func (sw *Scene) OnInit() {

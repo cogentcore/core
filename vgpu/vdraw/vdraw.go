@@ -36,7 +36,7 @@ type Drawer struct {
 	Impl DrawerImpl
 
 	// mutex on updating
-	UpdtMu sync.Mutex `view:"-" copy:"-" json:"-" xml:"-"`
+	UpdtMu sync.Mutex `view:"-" copier:"-" json:"-" xml:"-"`
 }
 
 // ConfigSurface configures the Drawer to use given surface as a render target.

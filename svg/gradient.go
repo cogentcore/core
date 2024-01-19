@@ -28,13 +28,6 @@ type Gradient struct {
 	StopsName string
 }
 
-func (gr *Gradient) CopyFieldsFrom(frm any) {
-	fr := frm.(*Gradient)
-	gr.NodeBase.CopyFieldsFrom(&fr.NodeBase)
-	gradient.CopyFrom(gr.Grad, fr.Grad)
-	gr.StopsName = fr.StopsName
-}
-
 // GradientTypeName returns the SVG-style type name of gradient: linearGradient or radialGradient
 func (gr *Gradient) GradientTypeName() string {
 	if _, ok := gr.Grad.(*gradient.Radial); ok {

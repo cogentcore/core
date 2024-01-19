@@ -30,14 +30,6 @@ type Path struct {
 
 func (g *Path) SVGName() string { return "path" }
 
-func (g *Path) CopyFieldsFrom(frm any) {
-	fr := frm.(*Path)
-	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
-	g.Data = make([]PathData, len(fr.Data))
-	copy(g.Data, fr.Data)
-	g.DataStr = fr.DataStr
-}
-
 func (g *Path) SetPos(pos mat32.Vec2) {
 	// todo: set first point
 }

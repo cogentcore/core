@@ -34,7 +34,7 @@ type VCSLogView struct {
 	Since string
 
 	// version control system repository
-	Repo vci.Repo `json:"-" xml:"-" copy:"-"`
+	Repo vci.Repo `json:"-" xml:"-" copier:"-"`
 
 	// revision A -- defaults to HEAD
 	RevA string `set:"-"`

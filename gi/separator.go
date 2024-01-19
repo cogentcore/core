@@ -20,6 +20,8 @@ var MenuTextSeparator = "-------------"
 type Separator struct {
 	Box
 
+	// TODO(kai): remove Dim
+
 	// Dim is the dimension the separator goes along (X means it goes longer horizontally, etc)
 	Dim mat32.Dims
 }
@@ -45,10 +47,4 @@ func (sp *Separator) SetStyles() {
 			s.Margin.SetVert(units.Dp(6))
 		}
 	})
-}
-
-func (sp *Separator) CopyFieldsFrom(frm any) {
-	fr := frm.(*Separator)
-	sp.Box.CopyFieldsFrom(&fr.Box)
-	sp.Dim = fr.Dim
 }

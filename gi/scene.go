@@ -79,19 +79,19 @@ type Scene struct {
 	SceneGeom mat32.Geom2DInt `edit:"-" set:"-"`
 
 	// paint context for rendering
-	PaintContext paint.Context `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
+	PaintContext paint.Context `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 
 	// live pixels that we render into
-	Pixels *image.RGBA `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
+	Pixels *image.RGBA `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 
 	// event manager for this scene
-	EventMgr EventMgr `copy:"-" json:"-" xml:"-" set:"-"`
+	EventMgr EventMgr `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// current stage in which this Scene is set
-	Stage *Stage `copy:"-" json:"-" xml:"-" set:"-"`
+	Stage *Stage `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// RenderBBoxHue is current hue for rendering bounding box in ScRenderBBoxes mode
-	RenderBBoxHue float32 `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
+	RenderBBoxHue float32 `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 
 	// the currently selected widget through the inspect editor selection mode
 	SelectedWidget Widget
@@ -105,11 +105,11 @@ type Scene struct {
 	LastRender RenderParams `edit:"-" set:"-"`
 
 	// StyleMu is RW mutex protecting access to Style-related global vars
-	StyleMu sync.RWMutex `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
+	StyleMu sync.RWMutex `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 
 	// ShowIter counts up at start of showing a Scene
 	// to trigger Show event and other steps at start of first show
-	ShowIter int `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
+	ShowIter int `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 
 	// ReRender items are re-rendered after the current pass
 	ReRender []Widget

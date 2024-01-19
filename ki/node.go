@@ -19,6 +19,7 @@ import (
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/glop/elide"
 	"cogentcore.org/core/gti"
+	"github.com/jinzhu/copier"
 )
 
 // StringElideMax is the Max width for String() path printout of Ki nodes.
@@ -35,31 +36,31 @@ var StringElideMax = 38
 type Node struct {
 
 	// Ki.Name() user-supplied name of this node -- can be empty or non-unique
-	Nm string `copy:"-" set:"-" label:"Name"`
+	Nm string `copier:"-" set:"-" label:"Name"`
 
 	// bit flags for internal node state -- can extend this using enums package
-	Flags Flags `tableview:"-" copy:"-" json:"-" xml:"-" set:"-" max-width:"80" height:"3"`
+	Flags Flags `tableview:"-" copier:"-" json:"-" xml:"-" set:"-" max-width:"80" height:"3"`
 
 	// Ki.Properties() property map for arbitrary extensible properties, including style properties
-	Props Props `tableview:"-" xml:"-" copy:"-" set:"-" label:"Properties"`
+	Props Props `tableview:"-" xml:"-" copier:"-" set:"-" label:"Properties"`
 
 	// Ki.Parent() parent of this node -- set automatically when this node is added as a child of parent
-	Par Ki `tableview:"-" copy:"-" json:"-" xml:"-" view:"-" set:"-" label:"Parent"`
+	Par Ki `tableview:"-" copier:"-" json:"-" xml:"-" view:"-" set:"-" label:"Parent"`
 
 	// Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use Ki Node methods to Add / Delete to ensure proper usage
-	Kids Slice `tableview:"-" copy:"-" set:"-" label:"Children"`
+	Kids Slice `tableview:"-" copier:"-" set:"-" label:"Children"`
 
 	// we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary.  This is set to nil when deleted.  Typically use This() convenience accessor which protects against concurrent access.
-	Ths Ki `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
+	Ths Ki `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 
 	// the number of children that have ever been added to this node, which is used for unique naming
-	NumLifetimeKids uint64 `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
+	NumLifetimeKids uint64 `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 
 	// last value of our index -- used as a starting point for finding us in our parent next time -- is not guaranteed to be accurate!  use IndexInParent() method
-	index int `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
+	index int `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 
 	// optional depth parameter of this node -- only valid during specific contexts, not generally -- e.g., used in WalkBreadth function
-	depth int `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
+	depth int `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 }
 
 // check implementation of [Ki] interface
@@ -1169,11 +1170,11 @@ func (n *Node) UpdateEnd(updt bool) {
 // copy from a source to a target that only differ minimally will be
 // minimally destructive.  Only copies to same types are supported.
 // Signal connections are NOT copied.  No other Ki pointers are copied,
-// and the field tag copy:"-" can be added for any other fields that
+// and the field tag copier:"-" can be added for any other fields that
 // should not be copied (unexported, lower-case fields are not copyable).
 func (n *Node) CopyFrom(frm Ki) error {
 	if frm == nil {
-		err := fmt.Errorf("ki.Node CopyFrom into %v -- null 'from' source", n.Path())
+		err := fmt.Errorf("ki.Node CopyFrom into %v: nil 'from' source", n)
 		log.Println(err)
 		return err
 	}
@@ -1216,8 +1217,14 @@ func CopyFromRaw(kn, frm Ki) error {
 	return nil
 }
 
-// CopyFieldsFrom copies from primary fields of source object,
-// recursively following anonymous embedded structs
-func (n *Node) CopyFieldsFrom(frm any) {
-
+// CopyFieldsFrom is the base implementation of [Ki.CopyFieldsFrom] that copies the fields
+// of the [Node.This] from the fields of the given [Ki.This], recursively following anonymous
+// embedded structs. It uses [copier.Copy] for this. It ignores any fields with a `copier:"-"`
+// struct tag. Other implementations of [Ki.CopyFieldsFrom] should call this method first and
+// then only do manual handling of specific fields that can not be automatically copied.
+func (n *Node) CopyFieldsFrom(from Ki) {
+	err := copier.CopyWithOption(n.This(), from.This(), copier.Option{CaseSensitive: true, DeepCopy: true})
+	if err != nil {
+		slog.Error("ki.Node.CopyFieldsFrom", "err", err)
+	}
 }

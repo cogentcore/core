@@ -77,7 +77,7 @@ type Chooser struct {
 	// ItemsFunc, if non-nil, is a function to call before showing the items
 	// of the chooser, which is typically used to configure them (eg: if they
 	// are based on dynamic data)
-	ItemsFunc func()
+	ItemsFunc func() `copier:"-"`
 
 	// CurLabel is the string label for the current value
 	CurLabel string `set:"-"`
@@ -87,16 +87,6 @@ type Chooser struct {
 
 	// current index in list of possible items
 	CurIndex int `json:"-" xml:"-" set:"-"`
-}
-
-func (ch *Chooser) CopyFieldsFrom(frm any) {
-	fr := frm.(*Chooser)
-	ch.Box.CopyFieldsFrom(&fr.Box)
-	ch.Editable = fr.Editable
-	ch.CurVal = fr.CurVal
-	ch.CurIndex = fr.CurIndex
-	ch.Items = fr.Items
-	ch.MaxLength = fr.MaxLength
 }
 
 // ChooserTypes is an enum containing the

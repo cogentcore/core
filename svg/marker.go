@@ -49,21 +49,6 @@ func (g *Marker) SVGName() string { return "marker" }
 
 func (g *Marker) EnforceSVGName() bool { return false }
 
-func (g *Marker) CopyFieldsFrom(frm any) {
-	fr := frm.(*Marker)
-	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
-	g.RefPos = fr.RefPos
-	g.Size = fr.Size
-	g.Units = fr.Units
-	g.ViewBox = fr.ViewBox
-	g.Orient = fr.Orient
-	g.VertexPos = fr.VertexPos
-	g.VertexAngle = fr.VertexAngle
-	g.StrokeWidth = fr.StrokeWidth
-	g.Transform = fr.Transform
-	g.EffSize = fr.EffSize
-}
-
 // MarkerUnits specifies units to use for svg marker elements
 type MarkerUnits int32 //enum: enum
 

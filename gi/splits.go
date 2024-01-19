@@ -35,13 +35,6 @@ type Splits struct { //core:embedder
 	SavedSplits []float32 `set:"-"`
 }
 
-func (sl *Splits) CopyFieldsFrom(frm any) {
-	fr := frm.(*Splits)
-	sl.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	mat32.CopyFloat32s(&sl.Splits, fr.Splits)
-	mat32.CopyFloat32s(&sl.SavedSplits, fr.SavedSplits)
-}
-
 func (sl *Splits) OnInit() {
 	sl.WidgetBase.OnInit()
 	sl.HandleEvents()

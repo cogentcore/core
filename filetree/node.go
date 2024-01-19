@@ -40,23 +40,23 @@ type Node struct { //core:embedder
 	giv.TreeView
 
 	// full path to this file
-	FPath gi.Filename `edit:"-" set:"-" json:"-" xml:"-" copy:"-"`
+	FPath gi.Filename `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
 	// full standard file info about this file
-	Info fi.FileInfo `edit:"-" set:"-" json:"-" xml:"-" copy:"-"`
+	Info fi.FileInfo `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
 	// file buffer for editing this file
-	Buf *texteditor.Buf `edit:"-" set:"-" json:"-" xml:"-" copy:"-"`
+	Buf *texteditor.Buf `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
 	// root of the tree -- has global state
-	FRoot *Tree `edit:"-" set:"-" json:"-" xml:"-" copy:"-"`
+	FRoot *Tree `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
 	// version control system repository for this directory,
 	// only non-nil if this is the highest-level directory in the tree under vcs control
-	DirRepo vci.Repo `edit:"-" set:"-" json:"-" xml:"-" copy:"-"`
+	DirRepo vci.Repo `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
 	// version control system repository file status -- only valid during ReadDir
-	RepoFiles vci.Files `edit:"-" set:"-" json:"-" xml:"-" copy:"-"`
+	RepoFiles vci.Files `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 }
 
 func (fn *Node) FlagType() enums.BitFlagSetter {

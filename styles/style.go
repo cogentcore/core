@@ -306,12 +306,6 @@ func (s *Style) SetAbilities(on bool, able ...abilities.Abilities) {
 	s.Abilities.SetFlag(on, bfs...)
 }
 
-// CopyFrom copies from another style, while preserving relevant local state
-func (s *Style) CopyFrom(cp *Style) {
-	*s = *cp
-	s.Background = cp.Background
-}
-
 // InheritFields from parent: Manual inheriting of values is much faster than
 // automatic version!
 func (s *Style) InheritFields(par *Style) {

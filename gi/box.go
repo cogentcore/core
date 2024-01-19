@@ -9,11 +9,6 @@ type Box struct {
 	WidgetBase
 }
 
-func (bx *Box) CopyFieldsFrom(frm any) {
-	fr := frm.(*Box)
-	bx.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-}
-
 // RenderBox does the standard box model rendering
 func (bx *Box) RenderBox() {
 	_, st := bx.RenderLock()

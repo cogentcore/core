@@ -118,27 +118,27 @@ type NodeBase struct {
 	Pose Pose `set:"-"`
 
 	// Sc is the cached Scene
-	Sc *Scene `set:"-"`
+	Sc *Scene `copier:"-" set:"-"`
 
 	// mutex on pose access -- needed for parallel updating
-	PoseMu sync.RWMutex `view:"-" copy:"-" json:"-" xml:"-"  set:"-"`
+	PoseMu sync.RWMutex `view:"-" copier:"-" json:"-" xml:"-"  set:"-"`
 
 	// mesh-based local bounding box (aggregated for groups)
-	MeshBBox BBox `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	MeshBBox BBox `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// world coordinates bounding box
-	WorldBBox BBox `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	WorldBBox BBox `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// normalized display coordinates bounding box, used for frustrum clipping
-	NDCBBox mat32.Box3 `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	NDCBBox mat32.Box3 `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// raw original bounding box for the widget within its parent Scene.
 	// This is prior to intersecting with Frame bounds.
-	BBox image.Rectangle `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	BBox image.Rectangle `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// 2D bounding box for region occupied within Scene Frame that we render onto.
 	// This is BBox intersected with Frame bounds.
-	ScBBox image.Rectangle `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	ScBBox image.Rectangle `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 }
 
 // NodeFlags extend ki.Flags to hold 3D node state
@@ -171,16 +171,6 @@ func AsNode(k ki.Ki) (Node, *NodeBase) {
 // least of this type, not-nil, etc
 func AsNodeBase(k ki.Ki) *NodeBase {
 	return k.(Node).AsNode()
-}
-
-func (nb *NodeBase) CopyFieldsFrom(frm any) {
-	fr := frm.(*NodeBase)
-	nb.Pose = fr.Pose
-	nb.MeshBBox = fr.MeshBBox
-	nb.WorldBBox = fr.WorldBBox
-	nb.NDCBBox = fr.NDCBBox
-	nb.BBox = fr.BBox
-	nb.ScBBox = fr.ScBBox
 }
 
 // AsNode returns a generic NodeBase for our node -- gives generic

@@ -34,13 +34,7 @@ type Label struct { //core:embedder
 	Type LabelTypes
 
 	// render data for text label
-	TextRender paint.Text `copy:"-" xml:"-" json:"-" set:"-"`
-}
-
-func (lb *Label) CopyFieldsFrom(frm any) {
-	fr := frm.(*Label)
-	lb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	lb.Text = fr.Text
+	TextRender paint.Text `copier:"-" xml:"-" json:"-" set:"-"`
 }
 
 // LabelTypes is an enum containing the different

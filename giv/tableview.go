@@ -39,10 +39,10 @@ type TableView struct {
 	SliceViewBase
 
 	// optional styling function
-	StyleFunc TableViewStyleFunc `copy:"-" view:"-" json:"-" xml:"-"`
+	StyleFunc TableViewStyleFunc `copier:"-" view:"-" json:"-" xml:"-"`
 
 	// current selection field -- initially select value in this field
-	SelField string `copy:"-" view:"-" json:"-" xml:"-"`
+	SelField string `copier:"-" view:"-" json:"-" xml:"-"`
 
 	// current sort index
 	SortIdx int
@@ -51,16 +51,16 @@ type TableView struct {
 	SortDesc bool
 
 	// struct type for each row
-	StruType reflect.Type `copy:"-" view:"-" json:"-" xml:"-"`
+	StruType reflect.Type `copier:"-" view:"-" json:"-" xml:"-"`
 
 	// the visible fields
-	VisFields []reflect.StructField `copy:"-" view:"-" json:"-" xml:"-"`
+	VisFields []reflect.StructField `copier:"-" view:"-" json:"-" xml:"-"`
 
 	// number of visible fields
-	NVisFields int `copy:"-" view:"-" json:"-" xml:"-"`
+	NVisFields int `copier:"-" view:"-" json:"-" xml:"-"`
 
 	// HeaderWidths has number of characters in each header, per visfields
-	HeaderWidths []int `copy:"-" view:"-" json:"-" xml:"-"`
+	HeaderWidths []int `copier:"-" view:"-" json:"-" xml:"-"`
 }
 
 // check for interface impl

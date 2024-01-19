@@ -11,9 +11,3 @@ type Flow struct {
 }
 
 func (g *Flow) SVGName() string { return "flow" }
-
-func (g *Flow) CopyFieldsFrom(frm any) {
-	fr := frm.(*Flow)
-	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
-	g.FlowType = fr.FlowType
-}
