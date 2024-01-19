@@ -259,7 +259,7 @@ func (sp *Spinner) HandleEvents() {
 		se.SetHandled()
 		sp.IncrValue(float32(se.Delta.Y))
 	})
-	sp.OnChange(func(e events.Event) {
+	sp.OnFirst(events.Change, func(e events.Event) {
 		text := sp.Text()
 		val, err := sp.StringToVal(text)
 		if err != nil {
@@ -269,10 +269,6 @@ func (sp *Spinner) HandleEvents() {
 		}
 		sp.SetValue(val)
 	})
-	sp.HandleKeys()
-}
-
-func (sp *Spinner) HandleKeys() {
 	sp.OnKeyChord(func(e events.Event) {
 		if sp.IsReadOnly() {
 			return
