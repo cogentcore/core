@@ -3,6 +3,12 @@
 package icons
 
 const (
+	// DownCircleOutlined is https://github.com/cogentcore/core/blob/main/icons/svg/DownCircleOutlined.svg
+	DownCircleOutlined Icon = "DownCircleOutlined"
+
+	// RightCircleOutlined is https://github.com/cogentcore/core/blob/main/icons/svg/RightCircleOutlined.svg
+	RightCircleOutlined Icon = "RightCircleOutlined"
+
 	// Abc is https://github.com/cogentcore/core/blob/main/icons/svg/abc.svg
 	Abc Icon = "abc"
 
