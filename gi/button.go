@@ -64,18 +64,6 @@ type Button struct { //core:embedder
 	Data any `json:"-" xml:"-" view:"-"`
 }
 
-func (bt *Button) CopyFieldsFrom(frm any) {
-	fr := frm.(*Button)
-	bt.Box.CopyFieldsFrom(&fr.Box)
-	bt.Type = fr.Type
-	bt.Text = fr.Text
-	bt.Icon = fr.Icon
-	bt.Indicator = fr.Indicator
-	bt.Shortcut = fr.Shortcut
-	bt.Menu = fr.Menu
-	bt.Data = fr.Data
-}
-
 // ButtonTypes is an enum containing the
 // different possible types of buttons
 type ButtonTypes int32 //enums:enum -trimprefix Button

@@ -6,7 +6,6 @@ package gi
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"time"
 	"unicode"
@@ -94,16 +93,6 @@ type Layout struct {
 
 func (ly *Layout) FlagType() enums.BitFlagSetter {
 	return (*LayoutFlags)(&ly.Flags)
-}
-
-func (ly *Layout) CopyFieldsFrom(frm any) {
-	fr, ok := frm.(*Layout)
-	if !ok {
-		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier Layout one\n", ly.KiType().Name)
-		return
-	}
-	ly.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	ly.StackTop = fr.StackTop
 }
 
 func (ly *Layout) OnInit() {
