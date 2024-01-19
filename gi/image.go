@@ -13,9 +13,7 @@ import (
 	"os"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/events"
 	"cogentcore.org/core/grows/images"
-	"cogentcore.org/core/icons"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/styles"
 	"github.com/anthonynsimon/bild/clone"
@@ -24,8 +22,10 @@ import (
 
 // Image is a Widget that renders a static bitmap image.
 // See [Styles.ObjectFits] for how to control the image rendering within
-// the allocated size.  The minimum requested size is the pixel size in
-// Dp units (1/160th of an inch).
+// the allocated size.  The default minimum requested size is the pixel
+// size in [units.Dp] units (1/160th of an inch). See [giv.ConfigImageToolbar]
+// for a toolbar with I/O buttons.
+
 type Image struct {
 	WidgetBase
 
@@ -144,14 +144,6 @@ func (im *Image) Render() {
 		im.RenderChildren()
 		im.PopBounds()
 	}
-}
-
-// ConfigToolbar can be used to configure a toolbar for image
-func (im *Image) ConfigToolbar(tb *Toolbar) {
-	NewButton(tb).SetText("OpenImage").SetIcon(icons.Open).
-		OnClick(func(e events.Event) {
-			CallFunc(im, im.OpenImage)
-		})
 }
 
 //////////////////////////////////////////////////////////////////////////////////

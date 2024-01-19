@@ -6,13 +6,11 @@ package gi
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"io/fs"
 
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/svg"
 	"cogentcore.org/core/units"
@@ -22,6 +20,7 @@ import (
 // SVG is a Widget that renders an [svg.SVG] object.
 // If it is not [states.ReadOnly], the user can pan and zoom the display.
 // SVGs do not render a background or border independent of their SVG object.
+// See [giv.ConfigSVGToolbar] for a toolbar with panning, selecting, and I/O buttons.
 type SVG struct {
 	WidgetBase
 
@@ -43,32 +42,6 @@ func (sv *SVG) SetStyles() {
 		s.SetAbilities(!ro, abilities.Slideable, abilities.Pressable, abilities.LongHoverable, abilities.Scrollable)
 		s.Grow.Set(1, 1)
 		s.Min.Set(units.Dp(sv.SVG.Root.ViewBox.Size.X), units.Dp(sv.SVG.Root.ViewBox.Size.Y))
-	})
-}
-
-func (sv *SVG) ConfigToolbar(tb *Toolbar) {
-	NewButton(tb).SetIcon(icons.PanTool).
-		SetTooltip("toggle the ability to zoom and pan the view").OnClick(func(e events.Event) {
-		sv.SetReadOnly(!sv.IsReadOnly())
-		sv.ApplyStyleUpdate()
-	})
-	NewButton(tb).SetIcon(icons.ArrowForward).
-		SetTooltip("turn on select mode for selecting SVG elements").
-		OnClick(func(e events.Event) {
-			fmt.Println("this will select select mode")
-		})
-	NewSeparator(tb)
-	NewButton(tb).SetText("Open SVG").SetIcon(icons.Open).
-		SetTooltip("Open from SVG file").OnClick(func(e events.Event) {
-		CallFunc(sv, sv.OpenSVG)
-	})
-	NewButton(tb).SetText("Save SVG").SetIcon(icons.Save).
-		SetTooltip("Save to SVG file").OnClick(func(e events.Event) {
-		CallFunc(sv, sv.SaveSVG)
-	})
-	NewButton(tb).SetText("Save PNG").SetIcon(icons.Save).
-		SetTooltip("Save to PNG file").OnClick(func(e events.Event) {
-		CallFunc(sv, sv.SavePNG)
 	})
 }
 

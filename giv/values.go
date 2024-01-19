@@ -33,7 +33,6 @@ import (
 // values contains all the Values for basic builtin types
 
 func init() {
-	gi.CallFunc = CallFunc
 	gi.SettingsWindow = SettingsWindow
 	gi.InspectorWindow = InspectorWindow
 
