@@ -15,7 +15,6 @@ import (
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/laser"
-	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 )
@@ -32,9 +31,6 @@ func (cmn ColorMapName) Value() Value {
 // It represents a [ColorMapName] value.
 type ColorMapValue struct {
 	ValueBase
-
-	// Dim is the dimension on which to display the color map spectrum
-	Dim mat32.Dims
 }
 
 func (vv *ColorMapValue) WidgetType() *gti.Type {
