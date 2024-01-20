@@ -160,7 +160,7 @@ func (bd *Body) Close() {
 // It is automatically called in [Body.NewDialog].
 func (bd *Body) DialogStyles() {
 	bd.Scene.BarsInherit.Top = true
-	bd.Style(func(s *styles.Style) {
+	bd.Scene.Style(func(s *styles.Style) {
 		// s.Border.Radius = styles.BorderRadiusExtraLarge
 		s.Direction = styles.Column
 		s.Color = colors.Scheme.OnSurface
