@@ -22,6 +22,12 @@ body:
       label: Example code
       description: If applicable, provide code that can be used reproduce the bug. This will be automatically formatted into code, so no need for backticks.
       render: go
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: If applicable, copy and paste any relevant log output / panic messages / stack traces. This will be automatically formatted into code, so no need for backticks.
+      render: shell
   - type: dropdown
     id: platform
     attributes:
@@ -36,9 +42,4 @@ body:
         - Web
     validations:
       required: true
-  - type: textarea
-    id: logs
-    attributes:
-      label: Relevant log output
-      description: Please copy and paste any relevant log output / panic messages / stack trace. This will be automatically formatted into code, so no need for backticks.
-      render: shell
+
