@@ -1,0 +1,6 @@
+contact_links:
+  - name: Contact us
+    url: contact@cogentcore.org
+    about: Contact us here for private inquiries
+
+blank_issues_enabled: false
