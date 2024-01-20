@@ -180,8 +180,6 @@ func (em *EventMgr) HandleFocusEvent(e events.Event) {
 			}
 			em.SetFocusEvent(em.PrevFocus)
 			em.PrevFocus = nil
-		default:
-			em.FocusFirst()
 		}
 	}
 	if !e.IsHandled() && em.Focus != nil {
@@ -1073,6 +1071,14 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 	kf := keyfun.Of(cs)
 	// fmt.Println(kf, cs)
 	switch kf {
+	case keyfun.FocusNext: // tab
+		if em.FocusNext() {
+			e.SetHandled()
+		}
+	case keyfun.FocusPrev: // shift-tab
+		if em.FocusPrev() {
+			e.SetHandled()
+		}
 	case keyfun.Inspector:
 		if InspectorWindow != nil {
 			InspectorWindow(em.Scene)

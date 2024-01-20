@@ -311,20 +311,6 @@ func (ly *Layout) HandleKeys() {
 		if em == nil {
 			return
 		}
-		switch kf {
-		case keyfun.FocusNext: // tab
-			if em.FocusNext() {
-				// fmt.Println("foc next", ly, ly.EventMgr().Focus)
-				e.SetHandled()
-			}
-			return
-		case keyfun.FocusPrev: // shift-tab
-			if em.FocusPrev() {
-				// fmt.Println("foc prev", ly, ly.EventMgr().Focus)
-				e.SetHandled()
-			}
-			return
-		}
 		grid := ly.Styles.Display == styles.Grid
 		if ly.Styles.Direction == styles.Row || grid {
 			switch kf {
