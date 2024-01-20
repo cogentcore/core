@@ -46,6 +46,7 @@ func (ed *Editor) HandleClose() {
 func (ed *Editor) HandleFocus() {
 	ed.OnFocusLost(func(e events.Event) {
 		if ed.IsReadOnly() {
+			ed.ClearCursor()
 			return
 		}
 		if ed.AbilityIs(abilities.Focusable) {

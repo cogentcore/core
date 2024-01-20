@@ -56,9 +56,6 @@ func (ed *Editor) StartCursor() {
 
 // ClearCursor turns off cursor and stops it from blinking
 func (ed *Editor) ClearCursor() {
-	// if tf.IsReadOnly() {
-	// 	return
-	// }
 	ed.StopCursor()
 	ed.RenderCursor(false)
 }
