@@ -129,7 +129,7 @@ type TreeView struct {
 	IconOff icons.Icon `view:"show-name"`
 
 	// icon to use for the indeterminate (unknown) state
-	IconUnk icons.Icon `view:"show-name"`
+	IconIndeterminate icons.Icon `view:"show-name"`
 
 	// amount to indent children relative to this node
 	Indent units.Value `copier:"-" json:"-" xml:"-"`
@@ -217,7 +217,7 @@ func (tv *TreeView) OnAdd() {
 func (tv *TreeView) SetStyles() {
 	tv.IconOn = icons.KeyboardArrowDown
 	tv.IconOff = icons.KeyboardArrowRight
-	tv.IconUnk = icons.Blank
+	tv.IconIndeterminate = icons.Blank
 
 	tvi := tv.This().(TreeViewer)
 	tv.Style(func(s *styles.Style) {
@@ -362,7 +362,7 @@ func (tv *TreeView) SetStyles() {
 		case "parts/branch":
 			sw := w.(*gi.Switch)
 			sw.Type = gi.SwitchCheckbox
-			sw.SetIcons(tv.IconOn, tv.IconOff, tv.IconUnk)
+			sw.SetIcons(tv.IconOn, tv.IconOff, tv.IconIndeterminate)
 			sw.Style(func(s *styles.Style) {
 				// parent will handle our cursor
 				s.Cursor = cursors.None
