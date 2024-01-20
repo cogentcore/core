@@ -12,11 +12,11 @@ import (
 	"cogentcore.org/core/enums"
 )
 
-var _StatesValues = []States{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22}
+var _StatesValues = []States{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21}
 
 // StatesN is the highest valid value
 // for type States, plus one.
-const StatesN States = 23
+const StatesN States = 22
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -31,20 +31,19 @@ func _StatesNoOp() {
 	_ = x[Sliding-(6)]
 	_ = x[Scrolling-(7)]
 	_ = x[Focused-(8)]
-	_ = x[FocusedWithin-(9)]
-	_ = x[Checked-(10)]
-	_ = x[Indeterminate-(11)]
-	_ = x[Hovered-(12)]
-	_ = x[LongHovered-(13)]
-	_ = x[LongPressed-(14)]
-	_ = x[DragHovered-(15)]
-	_ = x[DropOK-(16)]
-	_ = x[Invalid-(17)]
-	_ = x[Required-(18)]
-	_ = x[Blank-(19)]
-	_ = x[Link-(20)]
-	_ = x[Visited-(21)]
-	_ = x[AnyLink-(22)]
+	_ = x[Checked-(9)]
+	_ = x[Indeterminate-(10)]
+	_ = x[Hovered-(11)]
+	_ = x[LongHovered-(12)]
+	_ = x[LongPressed-(13)]
+	_ = x[DragHovered-(14)]
+	_ = x[DropOK-(15)]
+	_ = x[Invalid-(16)]
+	_ = x[Required-(17)]
+	_ = x[Blank-(18)]
+	_ = x[Link-(19)]
+	_ = x[Visited-(20)]
+	_ = x[AnyLink-(21)]
 }
 
 var _StatesNameToValueMap = map[string]States{
@@ -57,20 +56,19 @@ var _StatesNameToValueMap = map[string]States{
 	`Sliding`:       6,
 	`Scrolling`:     7,
 	`Focused`:       8,
-	`FocusedWithin`: 9,
-	`Checked`:       10,
-	`Indeterminate`: 11,
-	`Hovered`:       12,
-	`LongHovered`:   13,
-	`LongPressed`:   14,
-	`DragHovered`:   15,
-	`DropOK`:        16,
-	`Invalid`:       17,
-	`Required`:      18,
-	`Blank`:         19,
-	`Link`:          20,
-	`Visited`:       21,
-	`AnyLink`:       22,
+	`Checked`:       9,
+	`Indeterminate`: 10,
+	`Hovered`:       11,
+	`LongHovered`:   12,
+	`LongPressed`:   13,
+	`DragHovered`:   14,
+	`DropOK`:        15,
+	`Invalid`:       16,
+	`Required`:      17,
+	`Blank`:         18,
+	`Link`:          19,
+	`Visited`:       20,
+	`AnyLink`:       21,
 }
 
 var _StatesDescMap = map[States]string{
@@ -83,20 +81,19 @@ var _StatesDescMap = map[States]string{
 	6:  `Sliding means this element is currently being manipulated via mouse to change the slider state, which will continue until the mouse is released, even if it goes off the element. It should also still be Active.`,
 	7:  `Scrolling means this element is currently being scrolled.`,
 	8:  `Focused elements receive keyboard input.`,
-	9:  `FocusedWithin elements have a Focused element within them, including self.`,
-	10: `Checked is for check boxes or radio buttons or other similar state.`,
-	11: `Indeterminate indicates that the true state of an item is unknown. For example, [Checked] state items may be in an uncertain state if they represent other checked items, some of which are checked and some of which are not.`,
-	12: `Hovered indicates that a mouse pointer has entered the space over an element, but it is not Active (nor DragHovered).`,
-	13: `LongHovered indicates a Hover event that persists without significant movement for a minimum period of time (e.g., 500 msec), which typically triggers a tooltip popup.`,
-	14: `LongPressed indicates a MouseDown event that persists without significant movement for a minimum period of time (e.g., 500 msec), which typically triggers a tooltip and/or context menu popup.`,
-	15: `DragHovered indicates that a mouse pointer has entered the space over an element, during a drag-n-drop sequence. This makes it a candidate for a potential drop target. See DropOK for state in relation to that.`,
-	16: `DropOK indicates that a DragHovered element is OK to receive a Drop from the current Dragged item, subject also to the Droppable ability.`,
-	17: `Invalid indicates that the element has invalid input and needs to be corrected by the user`,
-	18: `Required indicates that the element must be set by the user`,
-	19: `Blank indicates that the element has yet to be set by user`,
-	20: `Link indicates a URL link that has not been visited yet`,
-	21: `Visited indicates a URL link that has been visited`,
-	22: `AnyLink is either Link or Visited`,
+	9:  `Checked is for check boxes or radio buttons or other similar state.`,
+	10: `Indeterminate indicates that the true state of an item is unknown. For example, [Checked] state items may be in an uncertain state if they represent other checked items, some of which are checked and some of which are not.`,
+	11: `Hovered indicates that a mouse pointer has entered the space over an element, but it is not Active (nor DragHovered).`,
+	12: `LongHovered indicates a Hover event that persists without significant movement for a minimum period of time (e.g., 500 msec), which typically triggers a tooltip popup.`,
+	13: `LongPressed indicates a MouseDown event that persists without significant movement for a minimum period of time (e.g., 500 msec), which typically triggers a tooltip and/or context menu popup.`,
+	14: `DragHovered indicates that a mouse pointer has entered the space over an element, during a drag-n-drop sequence. This makes it a candidate for a potential drop target. See DropOK for state in relation to that.`,
+	15: `DropOK indicates that a DragHovered element is OK to receive a Drop from the current Dragged item, subject also to the Droppable ability.`,
+	16: `Invalid indicates that the element has invalid input and needs to be corrected by the user`,
+	17: `Required indicates that the element must be set by the user`,
+	18: `Blank indicates that the element has yet to be set by user`,
+	19: `Link indicates a URL link that has not been visited yet`,
+	20: `Visited indicates a URL link that has been visited`,
+	21: `AnyLink is either Link or Visited`,
 }
 
 var _StatesMap = map[States]string{
@@ -109,20 +106,19 @@ var _StatesMap = map[States]string{
 	6:  `Sliding`,
 	7:  `Scrolling`,
 	8:  `Focused`,
-	9:  `FocusedWithin`,
-	10: `Checked`,
-	11: `Indeterminate`,
-	12: `Hovered`,
-	13: `LongHovered`,
-	14: `LongPressed`,
-	15: `DragHovered`,
-	16: `DropOK`,
-	17: `Invalid`,
-	18: `Required`,
-	19: `Blank`,
-	20: `Link`,
-	21: `Visited`,
-	22: `AnyLink`,
+	9:  `Checked`,
+	10: `Indeterminate`,
+	11: `Hovered`,
+	12: `LongHovered`,
+	13: `LongPressed`,
+	14: `DragHovered`,
+	15: `DropOK`,
+	16: `Invalid`,
+	17: `Required`,
+	18: `Blank`,
+	19: `Link`,
+	20: `Visited`,
+	21: `AnyLink`,
 }
 
 // String returns the string representation

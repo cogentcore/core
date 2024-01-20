@@ -60,10 +60,6 @@ const (
 	// Focused elements receive keyboard input.
 	Focused
 
-	// FocusedWithin elements have a Focused element within them,
-	// including self.
-	FocusedWithin
-
 	// Checked is for check boxes or radio buttons or other similar state.
 	Checked
 
