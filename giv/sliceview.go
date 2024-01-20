@@ -90,7 +90,7 @@ type SliceViewFlags gi.WidgetFlags //enums:bitflag -trim-prefix SliceView
 
 const (
 	// SliceViewConfiged indicates that the widgets have been configured and
-	SliceViewConfiged = SliceViewFlags(gi.WidgetFlagsN) + iota
+	SliceViewConfiged SliceViewFlags = SliceViewFlags(gi.WidgetFlagsN) + iota
 
 	// SliceViewNoAdd if true, user cannot add elements to the slice
 	SliceViewNoAdd

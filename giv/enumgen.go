@@ -49,16 +49,16 @@ var _SliceViewFlagsNameToValueMap = map[string]SliceViewFlags{
 }
 
 var _SliceViewFlagsDescMap = map[SliceViewFlags]string{
-	8:  `indicates that the widgets have been configured and`,
-	9:  `if true, user cannot add elements to the slice`,
-	10: `if true, user cannot delete elements from the slice`,
-	11: `whether the slice is actually an array -- no modifications -- set by SetSlice`,
-	12: `whether to show index or not`,
-	13: `support key navigation when ReadOnly (default true). uses a capture of up / down events to manipulate selection, not focus.`,
-	14: `editing-mode select rows mode`,
-	15: `if view is ReadOnly, default selection mode is to choose one row only -- if this is true, standard multiple selection logic with modifier keys is instead supported`,
-	16: `guard for recursive focus grabbing`,
-	17: `guard for recursive rebuild`,
+	8:  `SliceViewConfiged indicates that the widgets have been configured and`,
+	9:  `SliceViewNoAdd if true, user cannot add elements to the slice`,
+	10: `SliceViewNoDelete if true, user cannot delete elements from the slice`,
+	11: `SliceViewIsArray whether the slice is actually an array -- no modifications -- set by SetSlice`,
+	12: `SliceViewShowIndex whether to show index or not`,
+	13: `SliceViewReadOnlyKeyNav support key navigation when ReadOnly (default true). uses a capture of up / down events to manipulate selection, not focus.`,
+	14: `SliceViewSelectMode editing-mode select rows mode`,
+	15: `SliceViewReadOnlyMultiSel if view is ReadOnly, default selection mode is to choose one row only -- if this is true, standard multiple selection logic with modifier keys is instead supported`,
+	16: `SliceViewInFocusGrab guard for recursive focus grabbing`,
+	17: `SliceViewInFullRebuild guard for recursive rebuild`,
 }
 
 var _SliceViewFlagsMap = map[SliceViewFlags]string{
@@ -256,8 +256,8 @@ var _TreeViewFlagsNameToValueMap = map[string]TreeViewFlags{
 
 var _TreeViewFlagsDescMap = map[TreeViewFlags]string{
 	8:  `TreeViewFlagClosed means node is toggled closed (children not visible) Otherwise Open.`,
-	9:  `When set on the Root node determines whether keyboard movements update selection or not.`,
-	10: `Set in the [Open] method to prevent recursive opening for lazy-open nodes`,
+	9:  `TreeViewFlagSelectMode When set on the Root node determines whether keyboard movements update selection or not.`,
+	10: `TreeViewInOpen Set in the [Open] method to prevent recursive opening for lazy-open nodes`,
 }
 
 var _TreeViewFlagsMap = map[TreeViewFlags]string{
