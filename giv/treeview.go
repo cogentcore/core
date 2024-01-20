@@ -122,14 +122,14 @@ type TreeView struct {
 	// optional icon, displayed to the the left of the text label
 	Icon icons.Icon
 
-	// icon to use for the on, checked state of the switch
-	IconOn icons.Icon `view:"show-name"`
+	// icon to use for an open (expanded) branch; defaults to [icons.KeyboardArrowDown]
+	IconOpen icons.Icon `view:"show-name"`
 
-	// icon to use for the off, unchecked state of the switch
-	IconOff icons.Icon `view:"show-name"`
+	// icon to use for a closed (collapsed) branch; defaults to [icons.KeyboardArrowRight]
+	IconClosed icons.Icon `view:"show-name"`
 
-	// icon to use for the indeterminate (unknown) state
-	IconIndeterminate icons.Icon `view:"show-name"`
+	// icon to use for a terminal node branch that has no children; defaults to [icons.Blank]
+	IconLeaf icons.Icon `view:"show-name"`
 
 	// amount to indent children relative to this node
 	Indent units.Value `copier:"-" json:"-" xml:"-"`
@@ -215,9 +215,9 @@ func (tv *TreeView) OnAdd() {
 }
 
 func (tv *TreeView) SetStyles() {
-	tv.IconOn = icons.KeyboardArrowDown
-	tv.IconOff = icons.KeyboardArrowRight
-	tv.IconIndeterminate = icons.Blank
+	tv.IconOpen = icons.KeyboardArrowDown
+	tv.IconClosed = icons.KeyboardArrowRight
+	tv.IconLeaf = icons.Blank
 
 	tvi := tv.This().(TreeViewer)
 	tv.Style(func(s *styles.Style) {
@@ -362,7 +362,7 @@ func (tv *TreeView) SetStyles() {
 		case "parts/branch":
 			sw := w.(*gi.Switch)
 			sw.Type = gi.SwitchCheckbox
-			sw.SetIcons(tv.IconOn, tv.IconOff, tv.IconIndeterminate)
+			sw.SetIcons(tv.IconOpen, tv.IconClosed, tv.IconLeaf)
 			sw.Style(func(s *styles.Style) {
 				// parent will handle our cursor
 				s.Cursor = cursors.None
