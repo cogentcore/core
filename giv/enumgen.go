@@ -23,7 +23,7 @@ const SliceViewFlagsN SliceViewFlags = 18
 // Re-run the enumgen command to generate them again.
 func _SliceViewFlagsNoOp() {
 	var x [1]struct{}
-	_ = x[SliceViewConfiged-(8)]
+	_ = x[SliceViewConfigured-(8)]
 	_ = x[SliceViewNoAdd-(9)]
 	_ = x[SliceViewNoDelete-(10)]
 	_ = x[SliceViewIsArray-(11)]
@@ -36,7 +36,7 @@ func _SliceViewFlagsNoOp() {
 }
 
 var _SliceViewFlagsNameToValueMap = map[string]SliceViewFlags{
-	`Configed`:         8,
+	`Configured`:       8,
 	`NoAdd`:            9,
 	`NoDelete`:         10,
 	`IsArray`:          11,
@@ -49,20 +49,20 @@ var _SliceViewFlagsNameToValueMap = map[string]SliceViewFlags{
 }
 
 var _SliceViewFlagsDescMap = map[SliceViewFlags]string{
-	8:  `SliceViewConfiged indicates that the widgets have been configured and`,
-	9:  `SliceViewNoAdd if true, user cannot add elements to the slice`,
-	10: `SliceViewNoDelete if true, user cannot delete elements from the slice`,
-	11: `SliceViewIsArray whether the slice is actually an array -- no modifications -- set by SetSlice`,
-	12: `SliceViewShowIndex whether to show index or not`,
-	13: `SliceViewReadOnlyKeyNav support key navigation when ReadOnly (default true). uses a capture of up / down events to manipulate selection, not focus.`,
-	14: `SliceViewSelectMode editing-mode select rows mode`,
-	15: `SliceViewReadOnlyMultiSel if view is ReadOnly, default selection mode is to choose one row only -- if this is true, standard multiple selection logic with modifier keys is instead supported`,
-	16: `SliceViewInFocusGrab guard for recursive focus grabbing`,
-	17: `SliceViewInFullRebuild guard for recursive rebuild`,
+	8:  `SliceViewConfigured indicates that the widgets have been configured`,
+	9:  `SliceViewNoAdd indicates whether the user cannot add elements to the slice`,
+	10: `SliceViewNoDelete indicates whether the user cannot delete elements from the slice`,
+	11: `SliceViewIsArray is whether the slice is actually an array -- no modifications -- set by SetSlice`,
+	12: `SliceViewShowIndex is whether to show index or not`,
+	13: `SliceViewReadOnlyKeyNav is whether support key navigation when ReadOnly (default true). uses a capture of up / down events to manipulate selection, not focus.`,
+	14: `SliceViewSelectMode is whether to be in select rows mode or editing mode`,
+	15: `SliceViewReadOnlyMultiSel: if view is ReadOnly, default selection mode is to choose one row only. If this is true, standard multiple selection logic with modifier keys is instead supported`,
+	16: `SliceViewInFocusGrab is a guard for recursive focus grabbing`,
+	17: `SliceViewInFullRebuild is a guard for recursive rebuild`,
 }
 
 var _SliceViewFlagsMap = map[SliceViewFlags]string{
-	8:  `Configed`,
+	8:  `Configured`,
 	9:  `NoAdd`,
 	10: `NoDelete`,
 	11: `IsArray`,
@@ -256,8 +256,8 @@ var _TreeViewFlagsNameToValueMap = map[string]TreeViewFlags{
 
 var _TreeViewFlagsDescMap = map[TreeViewFlags]string{
 	8:  `TreeViewFlagClosed means node is toggled closed (children not visible) Otherwise Open.`,
-	9:  `TreeViewFlagSelectMode When set on the Root node determines whether keyboard movements update selection or not.`,
-	10: `TreeViewInOpen Set in the [Open] method to prevent recursive opening for lazy-open nodes`,
+	9:  `TreeViewFlagSelectMode, when set on the Root node, determines whether keyboard movements update selection or not.`,
+	10: `TreeViewInOpen is set in the Open method to prevent recursive opening for lazy-open nodes`,
 }
 
 var _TreeViewFlagsMap = map[TreeViewFlags]string{

@@ -5,7 +5,6 @@
 package giv
 
 import (
-	"errors"
 	"log/slog"
 	"strconv"
 	"time"
@@ -384,7 +383,7 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget) {
 	dt.SetReadOnly(vv.IsReadOnly())
 	dt.OnChange(func(e events.Event) {
 		d, err := time.Parse("01/02/2006", dt.Text())
-		if !errors.Is(err, err) {
+		if err != nil {
 			// TODO(kai/snack)
 			slog.Error(err.Error())
 			return
@@ -416,7 +415,7 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget) {
 	tm.SetReadOnly(vv.IsReadOnly())
 	tm.OnChange(func(e events.Event) {
 		t, err := time.Parse(gi.SystemSettings.TimeFormat(), tm.Text())
-		if !errors.Is(err, err) {
+		if err != nil {
 			// TODO(kai/snack)
 			slog.Error(err.Error())
 			return

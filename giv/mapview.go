@@ -108,7 +108,7 @@ func (mv *MapView) UpdateValues() {
 	mv.Update()
 }
 
-// ConfigWidget Config configures the view
+// ConfigWidget configures the view
 func (mv *MapView) ConfigWidget() {
 	if !mv.HasChildren() {
 		gi.NewFrame(mv, "map-grid")

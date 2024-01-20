@@ -61,7 +61,7 @@ type TreeViewer interface {
 	// when everything should be configured, prior to rendering.
 	UpdateBranchIcons()
 
-	// DeleteNode Following are all tree editing functions:
+	// Following are all tree editing functions:
 	DeleteNode()
 	Duplicate()
 	AddChildNode()
@@ -441,11 +441,11 @@ const (
 	// (children not visible)  Otherwise Open.
 	TreeViewFlagClosed TreeViewFlags = TreeViewFlags(gi.WidgetFlagsN) + iota
 
-	// TreeViewFlagSelectMode When set on the Root node determines whether keyboard movements
+	// TreeViewFlagSelectMode, when set on the Root node, determines whether keyboard movements
 	// update selection or not.
 	TreeViewFlagSelectMode
 
-	// TreeViewInOpen Set in the [Open] method to prevent recursive opening for lazy-open nodes
+	// TreeViewInOpen is set in the Open method to prevent recursive opening for lazy-open nodes
 	TreeViewInOpen
 )
 
@@ -1427,7 +1427,7 @@ func (tv *TreeView) Copy(reset bool) { //gti:add
 	nitms := max(1, len(sels))
 	md := make(mimedata.Mimes, 0, 2*nitms)
 	tv.This().(TreeViewer).MimeData(&md) // source is always first..
-	if nitms > 1 {                       //todo  Condition 'nitms > 1' is always 'false'
+	if nitms > 1 {
 		for _, sn := range sels {
 			if sn.This() != tv.This() {
 				sn.MimeData(&md)
@@ -1547,7 +1547,7 @@ func (tv *TreeView) PasteAfter(md mimedata.Mimes, mod events.DropMods) {
 	tv.PasteAt(md, mod, 1, "Paste After")
 }
 
-// TreeViewTempMovedTag This is a kind of hack to prevent moved items from being deleted, using DND
+// TreeViewTempMovedTag is a kind of hack to prevent moved items from being deleted, using DND
 const TreeViewTempMovedTag = `_\&MOVED\&`
 
 // todo: these methods require an interface to work for descended
@@ -1643,7 +1643,7 @@ func (tv *TreeView) DragStart(e events.Event) {
 	nitms := max(1, len(sels))
 	md := make(mimedata.Mimes, 0, 2*nitms)
 	tv.This().(TreeViewer).MimeData(&md) // source is always first..
-	if nitms > 1 {                       //todo Condition 'nitms > 1' is always 'false'
+	if nitms > 1 {
 		for _, sn := range sels {
 			if sn.This() != tv.This() {
 				sn.MimeData(&md)

@@ -89,35 +89,36 @@ func (sv *SliceView) StyleRow(w gi.Widget, idx, fidx int) {
 type SliceViewFlags gi.WidgetFlags //enums:bitflag -trim-prefix SliceView
 
 const (
-	// SliceViewConfiged indicates that the widgets have been configured and
-	SliceViewConfiged SliceViewFlags = SliceViewFlags(gi.WidgetFlagsN) + iota
+	// SliceViewConfigured indicates that the widgets have been configured
+	SliceViewConfigured SliceViewFlags = SliceViewFlags(gi.WidgetFlagsN) + iota
 
-	// SliceViewNoAdd if true, user cannot add elements to the slice
+	// SliceViewNoAdd indicates whether the user cannot add elements to the slice
 	SliceViewNoAdd
 
-	// SliceViewNoDelete if true, user cannot delete elements from the slice
+	// SliceViewNoDelete indicates whether the user cannot delete elements from the slice
 	SliceViewNoDelete
 
-	// SliceViewIsArray whether the slice is actually an array -- no modifications -- set by SetSlice
+	// SliceViewIsArray is whether the slice is actually an array -- no modifications -- set by SetSlice
 	SliceViewIsArray
 
-	// SliceViewShowIndex whether to show index or not
+	// SliceViewShowIndex is whether to show index or not
 	SliceViewShowIndex
 
-	// SliceViewReadOnlyKeyNav support key navigation when ReadOnly (default true).
+	// SliceViewReadOnlyKeyNav is whether support key navigation when ReadOnly (default true).
 	// uses a capture of up / down events to manipulate selection, not focus.
 	SliceViewReadOnlyKeyNav
 
-	// SliceViewSelectMode editing-mode select rows mode
+	// SliceViewSelectMode is whether to be in select rows mode or editing mode
 	SliceViewSelectMode
 
-	// SliceViewReadOnlyMultiSel if view is ReadOnly, default selection mode is to choose one row only -- if this is true, standard multiple selection logic with modifier keys is instead supported
+	// SliceViewReadOnlyMultiSel: if view is ReadOnly, default selection mode is to choose one row only.
+	// If this is true, standard multiple selection logic with modifier keys is instead supported
 	SliceViewReadOnlyMultiSel
 
-	// SliceViewInFocusGrab guard for recursive focus grabbing
+	// SliceViewInFocusGrab is a guard for recursive focus grabbing
 	SliceViewInFocusGrab
 
-	// SliceViewInFullRebuild guard for recursive rebuild
+	// SliceViewInFullRebuild is a guard for recursive rebuild
 	SliceViewInFullRebuild
 )
 
@@ -402,7 +403,7 @@ func (sv *SliceViewBase) SetSlice(sl any) *SliceViewBase {
 	} else {
 		newslc = sv.Slice != sl
 	}
-	if !newslc && sv.Is(SliceViewConfiged) {
+	if !newslc && sv.Is(SliceViewConfigured) {
 		sv.ConfigIter = 0
 		sv.Update()
 		return sv
@@ -410,7 +411,7 @@ func (sv *SliceViewBase) SetSlice(sl any) *SliceViewBase {
 	updt := sv.UpdateStart()
 	defer sv.UpdateEndLayout(updt)
 
-	sv.SetFlag(false, SliceViewConfiged)
+	sv.SetFlag(false, SliceViewConfigured)
 	sv.StartIdx = 0
 	sv.VisRows = sv.MinRows
 	sv.Slice = sl
@@ -453,7 +454,7 @@ func (sv *SliceViewBase) BindSelectDialog(val *int) *SliceViewBase {
 	return sv
 }
 
-// ConfigWidget Config configures a standard setup of the overall Frame
+// ConfigWidget configures a standard setup of the overall Frame
 func (sv *SliceViewBase) ConfigWidget() {
 	sv.ConfigSliceView()
 }
@@ -461,7 +462,7 @@ func (sv *SliceViewBase) ConfigWidget() {
 // ConfigSliceView handles entire config.
 // ReConfig calls this, followed by ApplyStyleTree so we don't need to call that.
 func (sv *SliceViewBase) ConfigSliceView() {
-	if sv.Is(SliceViewConfiged) {
+	if sv.Is(SliceViewConfigured) {
 		sv.This().(SliceViewer).UpdateWidgets()
 		return
 	}
@@ -558,7 +559,7 @@ func (sv *SliceViewBase) ConfigRows() {
 	if sg == nil {
 		return
 	}
-	sv.SetFlag(true, SliceViewConfiged)
+	sv.SetFlag(true, SliceViewConfigured)
 	sg.SetFlag(true, gi.LayoutNoKeys)
 
 	sv.ViewMuLock()

@@ -66,7 +66,7 @@ func (av *ArgView) SetStyles() {
 	})
 }
 
-// ConfigWidget Config configures the view
+// ConfigWidget configures the view
 func (av *ArgView) ConfigWidget() {
 	config := ki.Config{}
 	config.Add(gi.LabelType, "title")
@@ -78,13 +78,13 @@ func (av *ArgView) ConfigWidget() {
 	}
 }
 
-// TitleWidget Title returns the title label widget, and its index, within frame
+// TitleWidget returns the title label widget
 func (av *ArgView) TitleWidget() *gi.Label {
 	return av.ChildByName("title", 0).(*gi.Label)
 }
 
 // ArgsGrid returns the grid layout widget, which contains all the fields
-// and values, and its index, within frame
+// and values
 func (av *ArgView) ArgsGrid() *gi.Frame {
 	return av.ChildByName("args-grid", 0).(*gi.Frame)
 }
