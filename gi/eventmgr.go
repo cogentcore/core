@@ -900,7 +900,7 @@ func (em *EventMgr) FocusNextFrom(from Widget) bool {
 				return true
 			}
 		}
-		wi, wb = wb.WidgetNextVisible()
+		wi, wb = wb.WidgetNextEnabled()
 		if wi == nil {
 			break
 		}
@@ -968,7 +968,7 @@ func (em *EventMgr) FocusPrevFrom(from Widget) bool {
 	wb := wi.AsWidget()
 
 	for wi != nil {
-		wi, wb = wb.WidgetPrevVisible()
+		wi, wb = wb.WidgetPrevEnabled()
 		if wi == nil {
 			break
 		}

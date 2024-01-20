@@ -191,7 +191,7 @@ func (wb *WidgetBase) SetNeedsRender(updt bool) {
 		return p.Is(ki.Field)
 	})
 	if fi != nil && fi.Parent() != nil && fi.Parent().This() != nil {
-		fi.Parent().This().SetFlag(true, NeedsRender)
+		fi.Parent().(Widget).AsWidget().SetNeedsRender(true)
 	}
 }
 

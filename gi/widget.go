@@ -558,6 +558,26 @@ func (wb *WidgetBase) WidgetPrevVisible() (Widget, *WidgetBase) {
 	return nwi, nwb
 }
 
+// WidgetNextEnabled returns the next visible and enabled node in the tree as a Widget,
+// nil if no more.
+func (wb *WidgetBase) WidgetNextEnabled() (Widget, *WidgetBase) {
+	nwi, nwb := AsWidget(ki.Next(wb.This()))
+	for nwb != nil && (!nwb.IsVisible() || nwb.StateIs(states.Disabled)) {
+		nwi, nwb = AsWidget(ki.Next(nwb.This()))
+	}
+	return nwi, nwb
+}
+
+// WidgetPrevEnabled returns the previous visible and enabled node in the tree as a Widget,
+// nil if no more.
+func (wb *WidgetBase) WidgetPrevEnabled() (Widget, *WidgetBase) {
+	nwi, nwb := AsWidget(ki.Prev(wb.This()))
+	for nwb != nil && (!nwb.IsVisible() || nwb.StateIs(states.Disabled)) {
+		nwi, nwb = AsWidget(ki.Prev(nwb.This()))
+	}
+	return nwi, nwb
+}
+
 // WidgetTooltip is the base implementation of [Widget.WidgetTooltip],
 // which just returns [WidgetBase.Tooltip].
 func (wb *WidgetBase) WidgetTooltip() string {
