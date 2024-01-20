@@ -26,43 +26,29 @@ func NonNilContext(ctx Widget) Widget {
 // NewDialog returns a new PopupWindow dialog [Stage] in the context
 // of the given widget, optionally with the given name.
 // See [NewFullDialog] for a full-window dialog.
-func (sc *Scene) NewDialog(ctx Widget, name ...string) *Stage {
-	ctx = NonNilContext(ctx)
-	sc.DialogStyles()
-	sc.Stage = NewMainStage(DialogStage, sc)
-	sc.Stage.SetModal(true)
-	sc.Stage.SetContext(ctx)
-	sc.Stage.Pos = ctx.ContextMenuPos(nil)
-	return sc.Stage
-}
-
-// NewFullDialog returns a new FullWindow dialog [Stage] in the context
-// of the given widget, optionally with the given name.
-// See [NewDialog] for a popup-window dialog.
-func (sc *Scene) NewFullDialog(ctx Widget, name ...string) *Stage {
-	sc.DialogStyles()
-	sc.Stage = NewMainStage(DialogStage, sc)
-	sc.Stage.SetModal(true)
-	sc.Stage.SetContext(ctx)
-	sc.Stage.SetFullWindow(true)
-	if ctx != nil {
-		sc.InheritBarsWidget(ctx)
-	}
-	return sc.Stage
-}
-
-// NewDialog returns a new PopupWindow dialog [Stage] in the context
-// of the given widget, optionally with the given name.
-// See [NewFullDialog] for a full-window dialog.
 func (bd *Body) NewDialog(ctx Widget, name ...string) *Stage {
-	return bd.Scene.NewDialog(ctx, name...)
+	ctx = NonNilContext(ctx)
+	bd.DialogStyles()
+	bd.Scene.Stage = NewMainStage(DialogStage, bd.Scene)
+	bd.Scene.Stage.SetModal(true)
+	bd.Scene.Stage.SetContext(ctx)
+	bd.Scene.Stage.Pos = ctx.ContextMenuPos(nil)
+	return bd.Scene.Stage
 }
 
 // NewFullDialog returns a new FullWindow dialog [Stage] in the context
 // of the given widget, optionally with the given name.
 // See [NewDialog] for a popup-window dialog.
 func (bd *Body) NewFullDialog(ctx Widget, name ...string) *Stage {
-	return bd.Scene.NewFullDialog(ctx, name...)
+	bd.DialogStyles()
+	bd.Scene.Stage = NewMainStage(DialogStage, bd.Scene)
+	bd.Scene.Stage.SetModal(true)
+	bd.Scene.Stage.SetContext(ctx)
+	bd.Scene.Stage.SetFullWindow(true)
+	if ctx != nil {
+		bd.Scene.InheritBarsWidget(ctx)
+	}
+	return bd.Scene.Stage
 }
 
 // RecycleDialog looks for a dialog with the given data. If it
@@ -109,7 +95,7 @@ func ErrorDialog(ctx Widget, err error, title ...string) {
 // Should add an OnClick listener to this button to perform additional
 // specific actions needed beyond Close.
 // Name should be passed when there are multiple effective OK buttons.
-func (sc *Scene) AddOk(pw Widget, name ...string) *Button {
+func (bd *Body) AddOk(pw Widget, name ...string) *Button {
 	nm := "ok"
 	if len(name) > 0 {
 		nm = name[0]
@@ -117,68 +103,23 @@ func (sc *Scene) AddOk(pw Widget, name ...string) *Button {
 	bt := NewButton(pw, nm).SetText("OK")
 	bt.OnClick(func(e events.Event) {
 		e.SetHandled() // otherwise propagates to dead elements
-		sc.Close()
+		bd.Close()
 	})
-	sc.OnFirst(events.KeyChord, func(e events.Event) {
+	bd.OnFirst(events.KeyChord, func(e events.Event) {
 		kf := keyfun.Of(e.KeyChord())
 		if kf == keyfun.Accept {
 			bt.Send(events.Click, e)
 			e.SetHandled()
-			sc.Close()
+			bd.Close()
 		}
 	})
 	return bt
-}
-
-// AddOkOnly just adds an OK button in the BottomBar
-// for simple popup dialogs that just need that one button
-func (sc *Scene) AddOkOnly() *Scene {
-	sc.Bars.Bottom.Add(func(pw Widget) { sc.AddOk(pw) })
-	return sc
-}
-
-// AddCancel adds Cancel button to given parent Widget
-// (typically in Bottom Bar function),
-// connecting to Close method and the Esc keychord event.
-// Close sends a Change event to the Scene for listeners there.
-// Should add an OnClick listener to this button to perform additional
-// specific actions needed beyond Close.
-// Name should be passed when there are multiple effective Cancel buttons (rare).
-func (sc *Scene) AddCancel(pw Widget, name ...string) *Button {
-	nm := "cancel"
-	if len(name) > 0 {
-		nm = name[0]
-	}
-	bt := NewButton(pw, nm).SetType(ButtonOutlined).SetText("Cancel")
-	bt.OnClick(func(e events.Event) {
-		e.SetHandled() // otherwise propagates to dead elements
-		sc.Close()
-	})
-	sc.OnFirst(events.KeyChord, func(e events.Event) {
-		kf := keyfun.Of(e.KeyChord())
-		if kf == keyfun.Abort {
-			e.SetHandled()
-			bt.Send(events.Click, e)
-			sc.Close()
-		}
-	})
-	return bt
-}
-
-// AddOk adds an OK button to given parent Widget (typically in Bottom
-// Bar function), connecting to Close method the Ctrl+Enter keychord event.
-// Close sends a Change event to the Scene for listeners there.
-// Should add an OnClick listener to this button to perform additional
-// specific actions needed beyond Close.
-// Name should be passed when there are multiple effective OK buttons.
-func (bd *Body) AddOk(pw Widget, name ...string) *Button {
-	return bd.Scene.AddOk(pw, name...)
 }
 
 // AddOkOnly just adds an OK button in the BottomBar
 // for simple popup dialogs that just need that one button
 func (bd *Body) AddOkOnly() *Body {
-	bd.Scene.AddOkOnly()
+	bd.Scene.Bars.Bottom.Add(func(pw Widget) { bd.AddOk(pw) })
 	return bd
 }
 
@@ -190,22 +131,40 @@ func (bd *Body) AddOkOnly() *Body {
 // specific actions needed beyond Close.
 // Name should be passed when there are multiple effective Cancel buttons (rare).
 func (bd *Body) AddCancel(pw Widget, name ...string) *Button {
-	return bd.Scene.AddCancel(pw, name...)
+	nm := "cancel"
+	if len(name) > 0 {
+		nm = name[0]
+	}
+	bt := NewButton(pw, nm).SetType(ButtonOutlined).SetText("Cancel")
+	bt.OnClick(func(e events.Event) {
+		e.SetHandled() // otherwise propagates to dead elements
+		bd.Close()
+	})
+	bd.OnFirst(events.KeyChord, func(e events.Event) {
+		kf := keyfun.Of(e.KeyChord())
+		if kf == keyfun.Abort {
+			e.SetHandled()
+			bt.Send(events.Click, e)
+			bd.Close()
+		}
+	})
+	return bt
 }
 
-// Close closes the stage associated with this Scene (typically for Dialog)
+// Close closes the stage associated with this Body (typically for dialogs)
 func (bd *Body) Close() {
 	bd.Scene.Close()
 }
 
-// DialogStyles sets default style functions for dialog Scenes
-func (sc *Scene) DialogStyles() {
-	sc.BarsInherit.Top = true
-	sc.Style(func(s *styles.Style) {
+// DialogStyles sets default stylers for dialog bodies.
+// It is automatically called in [Body.NewDialog].
+func (bd *Body) DialogStyles() {
+	bd.Scene.BarsInherit.Top = true
+	bd.Style(func(s *styles.Style) {
 		// s.Border.Radius = styles.BorderRadiusExtraLarge
 		s.Direction = styles.Column
 		s.Color = colors.Scheme.OnSurface
-		if !sc.Stage.NewWindow && !sc.Stage.FullWindow {
+		if !bd.Scene.Stage.NewWindow && !bd.Scene.Stage.FullWindow {
 			s.Padding.Set(units.Dp(24))
 			// s.Justify.Content = styles.Center // vert
 			// s.Align.Content = styles.Center // horiz
