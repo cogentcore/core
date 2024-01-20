@@ -54,6 +54,15 @@ func (ed *Editor) StartCursor() {
 	EditorBlinker.SetWidget(ed.This().(gi.Widget))
 }
 
+// ClearCursor turns off cursor and stops it from blinking
+func (ed *Editor) ClearCursor() {
+	// if tf.IsReadOnly() {
+	// 	return
+	// }
+	ed.StopCursor()
+	ed.RenderCursor(false)
+}
+
 // StopCursor stops the cursor from blinking
 func (ed *Editor) StopCursor() {
 	if ed == nil || ed.This() == nil {
