@@ -899,7 +899,7 @@ func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
 		nm = "circle"
 		XMLAddAttr(&se.Attr, "cx", fmt.Sprintf("%g", nd.Pos.X))
 		XMLAddAttr(&se.Attr, "cy", fmt.Sprintf("%g", nd.Pos.Y))
-		XMLAddAttr(&se.Attr, "radius", fmt.Sprintf("%g", nd.Radius))
+		XMLAddAttr(&se.Attr, "r", fmt.Sprintf("%g", nd.Radius))
 	case *Ellipse:
 		nm = "ellipse"
 		XMLAddAttr(&se.Attr, "cx", fmt.Sprintf("%g", nd.Pos.X))
