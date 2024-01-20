@@ -168,7 +168,6 @@ func (sr *Slider) SetStyles() {
 		// sr.ThumbColor = s.StateBackgroundColor(sr.ThumbColor)
 		s.Color = colors.Scheme.OnSurface
 
-		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusFull
 		if !sr.IsReadOnly() {
 			s.Cursor = cursors.Grab
