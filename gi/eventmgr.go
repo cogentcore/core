@@ -946,7 +946,6 @@ func (em *EventMgr) FocusOnOrPrev(foc Widget) bool {
 		em.SetFocusEvent(foc)
 		return true
 	}
-	em.Focus = foc
 	fmt.Println("on or prev:", foc)
 	return em.FocusPrevFrom(foc)
 }

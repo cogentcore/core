@@ -73,6 +73,7 @@ func (sw *Switch) IsChecked() bool {
 // SetChecked sets the checked state and updates the icon accordingly
 func (sw *Switch) SetChecked(on bool) *Switch {
 	sw.SetState(on, states.Checked)
+	sw.SetState(false, states.Indeterminate)
 	sw.SetIconFromState()
 	return sw
 }

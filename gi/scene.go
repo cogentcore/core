@@ -269,20 +269,6 @@ func (sc *Scene) ScIsVisible() bool {
 	return sc.RenderCtx().HasFlag(RenderVisible)
 }
 
-// todo: remove
-
-// ScUploadRegion uploads node region of our scene image
-// func (vp *Scene) ScUploadRegion(vpBBox, winBBox image.Rectangle) {
-// 	if !vp.This().(Scene).ScIsVisible() {
-// 		return
-// 	}
-// 	vpin := vpBBox.Intersect(vp.Pixels.Bounds())
-// 	if vpin.Empty() {
-// 		return
-// 	}
-// 	vp.Win.UploadScRegion(vp, vpin, winBBox)
-// }
-
 // Close closes the stage associated with this Scene (typically for Dialog)
 func (sc *Scene) Close() {
 	sc.Send(events.Close, nil)

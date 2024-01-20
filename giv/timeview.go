@@ -88,6 +88,7 @@ func (tv *TimeView) ConfigWidget() {
 		if tv.TmpSave != nil {
 			tv.TmpSave.SetValue(tv.Time)
 		}
+		tv.SendChange()
 	})
 
 	gi.NewLabel(tv, "colon").SetType(gi.LabelDisplayLarge).SetText(":").
@@ -114,6 +115,7 @@ func (tv *TimeView) ConfigWidget() {
 		if tv.TmpSave != nil {
 			tv.TmpSave.SetValue(tv.Time)
 		}
+		tv.SendChange()
 	})
 
 	if !gi.SystemSettings.Clock24 {

@@ -420,19 +420,6 @@ func (tf *TextField) EditDone() {
 	goosi.TheApp.HideVirtualKeyboard()
 }
 
-// EditDeFocused completes editing and copies the active edited text to the text --
-// called when field is made inactive due to interactions elsewhere.
-func (tf *TextField) EditDeFocused() {
-	if tf.Edited {
-		tf.Edited = false
-		tf.Txt = string(tf.EditTxt)
-		// todo: focus lost?
-		// tf.TextFieldSig.Emit(tf.This(), int64(TextFieldDeFocused), tf.Txt)
-	}
-	tf.ClearSelected()
-	tf.ClearCursor()
-}
-
 // Revert aborts editing and reverts to last saved text
 func (tf *TextField) Revert() {
 	updt := tf.UpdateStart()
@@ -1588,43 +1575,6 @@ func (tf *TextField) HandleKeys() {
 		}
 	})
 }
-
-/*
-func (tf *TextField) FocusChanged(change FocusChanges) {
-	switch change {
-	case FocusLost:
-		tf.SetState(false, states.Focused)
-		tf.EditDone()
-		tf.ApplyStyleUpdate(tf.Sc)
-	case FocusGot:
-		tf.SetState(true, states.Focused)
-		tf.ScrollToMe()
-		// tf.CursorEnd()
-		// tf.EmitFocusedSignal()
-		tf.ApplyStyleUpdate(tf.Sc)
-		if _, ok := tf.Parent().Parent().(*Spinner); ok {
-			goosi.TheApp.ShowVirtualKeyboard(goosi.NumberKeyboard)
-		} else {
-			goosi.TheApp.ShowVirtualKeyboard(goosi.SingleLineKeyboard)
-		}
-	case FocusInactive:
-		tf.SetState(false, states.Focused)
-		tf.EditDeFocused()
-		tf.ApplyStyleUpdate(tf.Sc)
-		goosi.TheApp.HideVirtualKeyboard()
-	case FocusActive:
-		tf.SetState(true, states.Focused)
-		tf.ScrollToMe()
-		tf.ApplyStyleUpdate(tf.Sc)
-		if _, ok := tf.Parent().Parent().(*Spinner); ok {
-			goosi.TheApp.ShowVirtualKeyboard(goosi.NumberKeyboard)
-		} else {
-			goosi.TheApp.ShowVirtualKeyboard(goosi.SingleLineKeyboard)
-		}
-		// todo: see about cursor
-	}
-}
-*/
 
 func (tf *TextField) HandleStateFromFocus() {
 	tf.OnFocus(func(e events.Event) {
