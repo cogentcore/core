@@ -170,7 +170,7 @@ func (tv *TableView) SetStyles() {
 		if w.Parent().PathFrom(tv) == "header" {
 			w.Style(func(s *styles.Style) {
 				if hdr, ok := w.(*gi.Button); ok {
-					fli := hdr.Data.(int)
+					fli := hdr.Prop("field-index").(int)
 					if fli == tv.SortIdx {
 						if tv.SortDesc {
 							hdr.SetIcon(icons.KeyboardArrowDown)
@@ -359,7 +359,7 @@ func (tv *TableView) ConfigHeader() {
 		}
 		hdr.SetText(htxt)
 		tv.HeaderWidths[fli] = len(htxt)
-		hdr.Data = fli
+		hdr.SetProp("field-index", fli)
 		if fli == tv.SortIdx {
 			if tv.SortDesc {
 				hdr.SetIcon(icons.KeyboardArrowDown)

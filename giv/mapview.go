@@ -80,7 +80,7 @@ func (mv *MapView) SetStyles() {
 			if strings.HasPrefix(w.Name(), "del-") {
 				delbt := w.(*gi.Button)
 				delbt.OnClick(func(e events.Event) {
-					mv.MapDelete(delbt.Data.(Value).Val())
+					mv.MapDelete(delbt.Prop("value").(Value).Val())
 				})
 				delbt.Style(func(s *styles.Style) {
 					delbt.SetType(gi.ButtonAction)
@@ -249,7 +249,7 @@ func (mv *MapView) ConfigMapGrid() {
 		delbt.SetType(gi.ButtonAction)
 		delbt.SetIcon(icons.Delete)
 		delbt.Tooltip = "delete item"
-		delbt.Data = kv
+		delbt.SetProp("value", kv)
 	}
 	sg.UpdateEnd(updt)
 }
