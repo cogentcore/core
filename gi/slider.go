@@ -539,27 +539,35 @@ func (sr *Slider) RenderSlider() {
 			tpos.SetAddDim(od, 0.5*(osz-origsz))
 			vabg := sr.Styles.ComputeActualBackgroundFor(sr.ValueColor, pabg)
 			pc.FillStyle.Color = vabg
-			sr.RenderBoxImpl(tpos, tsz, st.Border) // thumb
+			sr.RenderBoxImpl(tpos, tsz, styles.Border{Radius: st.Border.Radius}) // thumb
 		}
 		sr.RenderUnlock()
 	} else {
-		pc.FillStyle.Color = pabg
+		prevbg := st.Background
+		prevsl := st.StateLayer
+		// use surrounding background with no state layer for surrounding box
+		st.Background = pabg
+		st.StateLayer = 0
+		st.ComputeActualBackground(pabg)
 		// surrounding box (needed to prevent it from rendering over itself)
-		sr.RenderBoxImpl(pos, sz, st.Border)
+		sr.RenderStdBox(st)
+		st.Background = prevbg
+		st.StateLayer = prevsl
+		st.ComputeActualBackground(pabg)
 
 		trsz := sz.Dim(od) * sr.TrackSize
 		bsz := sz
 		bsz.SetDim(od, trsz)
 		bpos := pos
 		bpos.SetAddDim(od, .5*(sz.Dim(od)-trsz))
-		pc.FillStyle.Color = sr.Styles.ActualBackground
-		sr.RenderBoxImpl(bpos, bsz, st.Border) // track
+		pc.FillStyle.Color = st.ActualBackground
+		sr.RenderBoxImpl(bpos, bsz, styles.Border{Radius: st.Border.Radius}) // track
 
 		if sr.ValueColor != nil {
 			bsz.SetDim(dim, sr.Pos)
 			vabg := sr.Styles.ComputeActualBackgroundFor(sr.ValueColor, pabg)
 			pc.FillStyle.Color = vabg
-			sr.RenderBoxImpl(bpos, bsz, st.Border)
+			sr.RenderBoxImpl(bpos, bsz, styles.Border{Radius: st.Border.Radius})
 		}
 
 		thsz := sr.ThumbSizeDots()
@@ -581,7 +589,7 @@ func (sr *Slider) RenderSlider() {
 			tabg := sr.Styles.ComputeActualBackgroundFor(sr.ThumbColor, pabg)
 			pc.FillStyle.Color = tabg
 			tpos.SetSub(thsz.MulScalar(0.5))
-			sr.RenderBoxImpl(tpos, thsz, st.Border)
+			sr.RenderBoxImpl(tpos, thsz, styles.Border{Radius: st.Border.Radius})
 			sr.RenderUnlock()
 		}
 	}
