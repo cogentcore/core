@@ -560,6 +560,7 @@ type Tab struct { //core:no-new
 
 func (tb *Tab) OnInit() {
 	tb.Box.OnInit()
+	tb.HandleClickOnEnterSpace()
 	tb.SetStyles()
 }
 
