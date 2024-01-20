@@ -128,6 +128,9 @@ type TreeView struct {
 	// icon to use for the off, unchecked state of the switch
 	IconOff icons.Icon `view:"show-name"`
 
+	// icon to use for the indeterminate (unknown) state
+	IconUnk icons.Icon `view:"show-name"`
+
 	// amount to indent children relative to this node
 	Indent units.Value `copier:"-" json:"-" xml:"-"`
 
@@ -195,6 +198,7 @@ func (tv *TreeView) RootSetViewIdx() int {
 }
 
 func (tv *TreeView) OnInit() {
+	//sw.SetIcons(tv.IconOn, tv.IconOff, tv.IconUnk)
 	tv.WidgetBase.OnInit()
 	tv.HandleEvents()
 	tv.SetStyles()
@@ -356,9 +360,6 @@ func (tv *TreeView) SetStyles() {
 			sw := w.(*gi.Switch)
 			sw.Type = gi.SwitchCheckbox
 			sw.SetIcons(icons.KeyboardArrowDown, icons.KeyboardArrowRight, icons.Blank)
-			if tv.IconOn != "" && tv.IconOff != "" {
-				sw.SetIcons(tv.IconOn, tv.IconOff, icons.Blank)
-			}
 			sw.Style(func(s *styles.Style) {
 				// parent will handle our cursor
 				s.Cursor = cursors.None
