@@ -291,7 +291,7 @@ func (fv *FileView) ConfigPathBar() {
 			gi.SavedPaths = make(gi.FilePaths, 1, gi.SystemSettings.Behavior.SavedPathsMax)
 			gi.SavedPaths[0] = fv.DirPath
 			pf.SetStrings(([]string)(gi.SavedPaths), true)
-			gi.StringsAddExtras((*[]string)(&gi.SavedPaths), gi.SavedPathsExtras)
+			gi.SavedPaths = append(gi.SavedPaths, gi.SavedPathsExtras...)
 			fv.UpdateFiles()
 		} else if sp == gi.FileViewEditPaths {
 			fv.EditPaths()
@@ -903,7 +903,7 @@ func (fv *FileView) EditPaths() {
 			gi.SavedPaths = nil
 			gi.SavedPaths = append(gi.SavedPaths, tmp...)
 			// add back the reset/edit menu items
-			gi.StringsAddExtras((*[]string)(&gi.SavedPaths), gi.SavedPathsExtras)
+			gi.SavedPaths = append(gi.SavedPaths, gi.SavedPathsExtras...)
 			gi.SavePaths()
 			fv.UpdateFiles()
 		})

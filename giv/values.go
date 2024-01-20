@@ -1165,7 +1165,6 @@ func (vv *TypeValue) UpdateWidget() {
 	}
 	sb := vv.Widget.(*gi.Chooser)
 	npv := laser.OnePtrValue(vv.Value)
-	fmt.Println(npv.Type().String())
 	typ, ok := npv.Interface().(*gti.Type)
 	if ok {
 		sb.SetCurVal(typ)
@@ -1184,14 +1183,6 @@ func (vv *TypeValue) ConfigWidget(w gi.Widget) {
 
 	// typEmbeds := ki.NodeType
 	typEmbeds := gi.WidgetBaseType
-	// if kiv, ok := vv.Owner.(ki.Ki); ok {
-	// 	if tep, ok := kiv.PropInherit("type-embeds", ki.Inherit, ki.TypeProps); ok {
-	// 		// todo:
-	// 		// if te, ok := tep.(reflect.Type); ok {
-	// 		// 	typEmbeds = te
-	// 		// }
-	// 	}
-	// }
 	if tetag, ok := vv.Tag("type-embeds"); ok {
 		typ := gti.TypeByName(tetag)
 		if typ != nil {

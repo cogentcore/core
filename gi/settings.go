@@ -671,17 +671,19 @@ func (fp *FilePaths) AddPath(path string, max int) {
 	StringsInsertFirstUnique((*[]string)(fp), path, max)
 }
 
-// SavedPathsFilename is the name of the saved file paths file in GoGi prefs directory
-var SavedPathsFilename = "saved-paths.json"
+var (
+	// SavedPathsFilename is the name of the saved file paths file in GoGi prefs directory
+	SavedPathsFilename = "saved-paths.json"
 
-// FileViewResetPaths defines a string that is added as an item to the recents menu
-var FileViewResetPaths = "<i>Reset Paths</i>"
+	// FileViewResetPaths defines a string that is added as an item to the recents menu
+	FileViewResetPaths = "<i>Reset Paths</i>"
 
-// FileViewEditPaths defines a string that is added as an item to the recents menu
-var FileViewEditPaths = "<i>Edit Paths...</i>"
+	// FileViewEditPaths defines a string that is added as an item to the recents menu
+	FileViewEditPaths = "<i>Edit Paths...</i>"
 
-// SavedPathsExtras are the reset and edit items we add to the recents menu
-var SavedPathsExtras = []string{MenuTextSeparator, FileViewResetPaths, FileViewEditPaths}
+	// SavedPathsExtras are the reset and edit items we add to the recents menu
+	SavedPathsExtras = []string{FileViewResetPaths, FileViewEditPaths}
+)
 
 // SavePaths saves the active SavedPaths to prefs dir
 func SavePaths() {
@@ -690,7 +692,7 @@ func SavePaths() {
 	pnm := filepath.Join(pdir, SavedPathsFilename)
 	SavedPaths.Save(pnm)
 	// add back after save
-	StringsAddExtras((*[]string)(&SavedPaths), SavedPathsExtras)
+	SavedPaths = append(SavedPaths, SavedPathsExtras...)
 }
 
 // OpenPaths loads the active SavedPaths from prefs dir
@@ -701,7 +703,7 @@ func OpenPaths() {
 	pnm := filepath.Join(pdir, SavedPathsFilename)
 	SavedPaths.Open(pnm)
 	// add back after save
-	StringsAddExtras((*[]string)(&SavedPaths), SavedPathsExtras)
+	SavedPaths = append(SavedPaths, SavedPathsExtras...)
 }
 
 //////////////////////////////////////////////////////////////////

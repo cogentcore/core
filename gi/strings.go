@@ -63,16 +63,6 @@ func StringsInsertFirstUnique(strs *[]string, str string, max int) {
 	}
 }
 
-// StringsDelete deletes item from strings list
-func StringsDelete(strs *[]string, str string) {
-	for i, s := range *strs {
-		if s == str {
-			*strs = append((*strs)[:i], (*strs)[i+1:]...)
-			return
-		}
-	}
-}
-
 // StringsAppendIfUnique append str to strs if not already in slice
 func StringsAppendIfUnique(strs *[]string, str string, max int) {
 	if strs == nil {
@@ -84,11 +74,6 @@ func StringsAppendIfUnique(strs *[]string, str string, max int) {
 		}
 	}
 	*strs = append(*strs, str)
-}
-
-// StringsAddExtras is a generic function for appending a slice to a slice used to add items to menus
-func StringsAddExtras(items *[]string, extras []string) {
-	*items = append(*items, extras...)
 }
 
 // StringsRemoveExtras is a generic function for removing items of a slice from another slice

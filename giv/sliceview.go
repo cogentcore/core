@@ -812,7 +812,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 				d := gi.NewBody().AddTitle("Slice New").AddText("Number and Type of Items to Insert:")
 				nd := &gi.NewItemsData{}
 				w := NewValue(d, nd).AsWidget()
-				ki.ChildByType[*gi.Chooser](w, true).SetTypes(gti.AllEmbeddersOf(ownki.BaseType()), true, true)
+				ki.ChildByType[*gi.Chooser](w, ki.Embeds).SetTypes(gti.AllEmbeddersOf(ownki.BaseType()), true, true)
 				d.AddBottomBar(func(pw gi.Widget) {
 					d.AddCancel(pw)
 					d.AddOk(pw).OnClick(func(e events.Event) {

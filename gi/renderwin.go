@@ -10,6 +10,7 @@ import (
 	"log"
 	"log/slog"
 	"runtime"
+	"slices"
 	"sync"
 	"time"
 
@@ -445,7 +446,9 @@ func (w *RenderWin) Closed() {
 	MainRenderWins.Delete(w)
 	DialogRenderWins.Delete(w)
 	RenderWinGlobalMu.Lock()
-	StringsDelete(&FocusRenderWins, w.Name)
+	FocusRenderWins = slices.DeleteFunc(FocusRenderWins, func(s string) bool {
+		return s == w.Name
+	})
 	RenderWinGlobalMu.Unlock()
 	WinNewCloseStamp()
 	if DebugSettings.WinEventTrace {
