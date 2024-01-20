@@ -288,7 +288,7 @@ func (fv *FileView) ConfigPathBar() {
 	pf.OnChange(func(e events.Event) {
 		sp := pf.CurVal.(string)
 		if sp == gi.FileViewResetPaths {
-			gi.SavedPaths = make(gi.FilePaths, 1, gi.SystemSettings.Behavior.SavedPathsMax)
+			gi.SavedPaths = make(gi.FilePaths, 1, gi.SystemSettings.SavedPathsMax)
 			gi.SavedPaths[0] = fv.DirPath
 			pf.SetStrings(([]string)(gi.SavedPaths), true)
 			gi.SavedPaths = append(gi.SavedPaths, gi.SavedPathsExtras...)
@@ -572,7 +572,7 @@ func (fv *FileView) UpdateFiles() {
 	if len(gi.SavedPaths) == 0 {
 		gi.OpenPaths()
 	}
-	gi.SavedPaths.AddPath(fv.DirPath, gi.SystemSettings.Behavior.SavedPathsMax)
+	gi.SavedPaths.AddPath(fv.DirPath, gi.SystemSettings.SavedPathsMax)
 	gi.SavePaths()
 	sp := []string(gi.SavedPaths)
 	pf.SetStrings(sp, true)

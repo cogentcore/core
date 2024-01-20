@@ -661,7 +661,7 @@ func (tb *Tab) SetStyles() {
 				}
 				idx := ts.TabIndexByLabel(tb.Text)
 				// if OnlyCloseActiveTab is on, only process delete when already selected
-				if SystemSettings.Behavior.OnlyCloseActiveTab && !tb.StateIs(states.Selected) {
+				if SystemSettings.OnlyCloseActiveTab && !tb.StateIs(states.Selected) {
 					ts.SelectTabIndex(idx)
 				} else {
 					ts.DeleteTabIndex(idx, true)

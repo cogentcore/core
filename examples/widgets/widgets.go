@@ -23,7 +23,7 @@ func main() {
 	b.App().About = `This is a demo of the main widgets and general functionality of the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Cogent Core on GitHub</a>. <p>The <a href="https://cogentcore.org/core/gi/v2/blob/master/examples/widgets/README.md">README</a> page for this example app has lots of further info.</p>`
 
 	b.AddAppBar(func(tb *gi.Toolbar) { // put first in top app bar
-		gi.NewButton(tb).SetText("Button 1").SetData(1).
+		gi.NewButton(tb).SetText("Button 1").
 			OnClick(func(e events.Event) {
 				fmt.Println("AppBar Button 1")
 				gi.NewSnackbar(tb).AddSnackbarText("Something went wrong!").
@@ -34,7 +34,7 @@ func main() {
 						fmt.Println("got snackbar close icon event")
 					}).Stage.Run()
 			})
-		gi.NewButton(tb).SetText("Button 2").SetData(2).
+		gi.NewButton(tb).SetText("Button 2").
 			OnClick(func(e events.Event) {
 				fmt.Println("AppBar Button 2")
 			})
@@ -109,17 +109,17 @@ func main() {
 	mb.SetTooltip("Press this button to pull up a nested menu of buttons")
 
 	mb.Menu = func(m *gi.Scene) {
-		m1 := gi.NewButton(m).SetText("Menu Item 1").SetIcon(icons.Save).SetShortcut("Shift+Control+1").SetData(1).
+		m1 := gi.NewButton(m).SetText("Menu Item 1").SetIcon(icons.Save).SetShortcut("Shift+Control+1").
 			SetTooltip("A standard menu item with an icon")
 		m1.OnClick(func(e events.Event) {
 			fmt.Println("Clicked on menu item 1")
 		})
 
-		m2 := gi.NewButton(m).SetText("Menu Item 2").SetIcon(icons.Open).SetData(2).
+		m2 := gi.NewButton(m).SetText("Menu Item 2").SetIcon(icons.Open).
 			SetTooltip("A menu item with an icon and a sub menu")
 
 		m2.Menu = func(m *gi.Scene) {
-			sm2 := gi.NewButton(m).SetText("Sub Menu Item 2").SetIcon(icons.InstallDesktop).SetData(2.1).
+			sm2 := gi.NewButton(m).SetText("Sub Menu Item 2").SetIcon(icons.InstallDesktop).
 				SetTooltip("A sub menu item with an icon")
 			sm2.OnClick(func(e events.Event) {
 				fmt.Println("Clicked on sub menu item 2")
@@ -128,7 +128,7 @@ func main() {
 
 		gi.NewSeparator(m)
 
-		m3 := gi.NewButton(m).SetText("Menu Item 3").SetIcon(icons.Favorite).SetShortcut("Control+3").SetData(3).
+		m3 := gi.NewButton(m).SetText("Menu Item 3").SetIcon(icons.Favorite).SetShortcut("Control+3").
 			SetTooltip("A standard menu item with an icon, below a separator")
 		m3.OnClick(func(e events.Event) {
 			fmt.Println("Clicked on menu item 3")

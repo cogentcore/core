@@ -435,14 +435,28 @@ var SystemSettings = &SystemSettingsData{
 type SystemSettingsData struct { //gti:add
 	SettingsBase
 
-	// settings controlling app behavior
-	Behavior BehaviorSettings
-
 	// text editor settings
 	Editor EditorSettings
 
 	// whether to use a 24-hour clock (instead of AM and PM)
 	Clock24 bool `label:"24-hour clock"`
+
+	// SnackbarTimeout is the default amount of time until snackbars
+	// disappear (snackbars show short updates about app processes
+	// at the bottom of the screen)
+	SnackbarTimeout time.Duration `default:"7s"`
+
+	// only support closing the currently selected active tab; if this is set to true, pressing the close button on other tabs will take you to that tab, from which you can close it
+	OnlyCloseActiveTab bool `default:"false"`
+
+	// the amount that alternating rows and columns are highlighted when showing tabular data (set to 0 to disable zebra striping)
+	ZebraStripeWeight float32 `default:"0" min:"0" max:"100" step:"1"`
+
+	// the limit of file size, above which user will be prompted before opening / copying, etc.
+	BigFileSize int `default:"10000000"`
+
+	// maximum number of saved paths to save in FileView
+	SavedPathsMax int `default:"50"`
 
 	// extra font paths, beyond system defaults -- searched first
 	FontPaths []string
@@ -541,21 +555,6 @@ func (ss *SystemSettingsData) UpdateUser() {
 	if err == nil {
 		ss.User.User = *usr
 	}
-}
-
-// BehaviorSettings contains misc parameters controlling GUI behavior.
-type BehaviorSettings struct { //gti:add
-	// only support closing the currently selected active tab; if this is set to true, pressing the close button on other tabs will take you to that tab, from which you can close it
-	OnlyCloseActiveTab bool `default:"false"`
-
-	// the amount that alternating rows and columns are highlighted when showing tabular data (set to 0 to disable zebra striping)
-	ZebraStripeWeight float32 `default:"0" min:"0" max:"100" step:"1"`
-
-	// the limit of file size, above which user will be prompted before opening / copying, etc.
-	BigFileSize int `default:"10000000"`
-
-	// maximum number of saved paths to save in FileView
-	SavedPathsMax int `default:"50"`
 }
 
 // User basic user information that might be needed for different apps

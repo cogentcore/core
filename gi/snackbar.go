@@ -5,19 +5,12 @@
 package gi
 
 import (
-	"time"
-
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
-)
-
-var (
-	// SnackbarTimeout is the default timeout for [SnackbarStage]s
-	SnackbarTimeout = 7 * time.Second // todo: put in prefs
 )
 
 // NewSnackbar returns a new [Snackbar] Scene in the context of the
@@ -32,7 +25,7 @@ func NewSnackbar(ctx Widget, name ...string) *Scene {
 	sc := NewScene(nm)
 	sc.SetSnackbarStyles()
 
-	sc.Stage = NewPopupStage(SnackbarStage, sc, ctx).SetTimeout(SnackbarTimeout)
+	sc.Stage = NewPopupStage(SnackbarStage, sc, ctx).SetTimeout(SystemSettings.SnackbarTimeout)
 	return sc
 }
 
