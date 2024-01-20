@@ -55,10 +55,15 @@ const (
 	// Scrollable means it can be Scrolled
 	Scrollable
 
-	// Focusable means it can be Focused
+	// Focusable means it can be Focused: capable of receiving and processing key events directly
+	// and typically changing the style when focused to indicate this property to the user.
 	Focusable
 
-	// FocusWithinable means it can be FocusedWithin
+	// FocusWithinable means that this container element can process key events
+	// without being in the Focused state, and it does not grab focus or
+	// take away focus from other elements, and does not change its style.
+	// These key events are processed _after_ the Focused item.
+	// Typically they are navigation keys that individual elements do not process.
 	FocusWithinable
 
 	// Hoverable means it can be Hovered
