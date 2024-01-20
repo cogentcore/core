@@ -1186,8 +1186,8 @@ func (n *Node) CopyFrom(frm Ki) error {
 	// }
 	updt := n.This().UpdateStart()
 	defer n.This().UpdateEnd(updt)
-	err := CopyFromRaw(n.This(), frm)
-	return err
+	CopyFromRaw(n.This(), frm)
+	return nil
 }
 
 // Clone creates and returns a deep copy of the tree from this node down.
@@ -1202,7 +1202,7 @@ func (n *Node) Clone() Ki {
 
 // CopyFromRaw performs a raw copy that just does the deep copy of the
 // bits and doesn't do anything with pointers.
-func CopyFromRaw(kn, frm Ki) error {
+func CopyFromRaw(kn, frm Ki) {
 	kn.Children().ConfigCopy(kn.This(), *frm.Children())
 	n := kn.AsKi()
 	fmp := *frm.Properties()
@@ -1214,7 +1214,6 @@ func CopyFromRaw(kn, frm Ki) error {
 		fmk := frm.Child(i)
 		CopyFromRaw(kid, fmk)
 	}
-	return nil
 }
 
 // CopyFieldsFrom is the base implementation of [Ki.CopyFieldsFrom] that copies the fields

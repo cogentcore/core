@@ -286,7 +286,7 @@ type WidgetBase struct {
 	// added in the last function are the first in the menu.
 	// Context menus should be added through [Widget.AddContextMenu].
 	// Separators will be added between each context menu function.
-	ContextMenus []func(m *Scene) `json:"-" xml:"-" set:"-"`
+	ContextMenus []func(m *Scene) `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// Scene is the overall Scene to which we belong. It is automatically
 	// by widgets whenever they are added to another widget parent.
@@ -387,6 +387,13 @@ func (wb *WidgetBase) CopyFieldsFrom(from ki.Ki) {
 	wb.Listeners.CopyFromExtra(frm.Listeners)
 	wb.FirstListeners.CopyFromExtra(frm.FirstListeners)
 	wb.FinalListeners.CopyFromExtra(frm.FinalListeners)
+
+	// if frm.Parts != nil {
+	// 	if wb.Parts == nil {
+	// 		wb.NewParts()
+	// 	}
+	// 	ki.CopyFromRaw(wb.Parts, frm.Parts)
+	// }
 }
 
 func (wb *WidgetBase) Destroy() {
@@ -405,8 +412,7 @@ func (wb *WidgetBase) BaseType() *gti.Type {
 	return WidgetBaseType
 }
 
-// NewParts makes the Parts layout if not already there,
-// with given layout orientation
+// NewParts makes the Parts layout if not already there.
 func (wb *WidgetBase) NewParts() *Layout {
 	if wb.Parts != nil {
 		return wb.Parts
