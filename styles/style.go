@@ -484,27 +484,27 @@ func (s *Style) ComputeActualBackgroundFor(bg, pabg image.Image) image.Image {
 	*/
 }
 
-func (st *Style) IsFlexWrap() bool {
-	return st.Wrap && st.Display == Flex
+func (s *Style) IsFlexWrap() bool {
+	return s.Wrap && s.Display == Flex
 }
 
 // SetTextWrap sets the Text.WhiteSpace and GrowWrap properties in
 // a coordinated manner.  If wrap == true, then WhiteSpaceNormal
 // and GrowWrap = true; else WhiteSpaceNowrap and GrowWrap = false, which
 // are typically the two desired stylings.
-func (st *Style) SetTextWrap(wrap bool) {
+func (s *Style) SetTextWrap(wrap bool) {
 	if wrap {
-		st.Text.WhiteSpace = WhiteSpaceNormal
-		st.GrowWrap = true
+		s.Text.WhiteSpace = WhiteSpaceNormal
+		s.GrowWrap = true
 	} else {
-		st.Text.WhiteSpace = WhiteSpaceNowrap
-		st.GrowWrap = false
+		s.Text.WhiteSpace = WhiteSpaceNowrap
+		s.GrowWrap = false
 	}
 }
 
 // SetNonSelectable turns off the Selectable and DoubleClicable
 // abilities and sets the Cursor to None.
-func (st *Style) SetNonSelectable() {
-	st.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
-	st.Cursor = cursors.None
+func (s *Style) SetNonSelectable() {
+	s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
+	s.Cursor = cursors.None
 }

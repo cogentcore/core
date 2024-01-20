@@ -191,14 +191,14 @@ func (tv *TableView) SetSlice(sl any) *TableView {
 		tv.Slice = nil
 		return tv
 	}
-	if tv.Slice == sl && tv.Is(SliceViewConfiged) {
+	if tv.Slice == sl && tv.Is(SliceViewConfigured) {
 		tv.Update()
 		return tv
 	}
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndLayout(updt)
 
-	tv.SetFlag(false, SliceViewConfiged)
+	tv.SetFlag(false, SliceViewConfigured)
 	tv.StartIdx = 0
 	tv.VisRows = tv.MinRows
 	slpTyp := reflect.TypeOf(sl)
@@ -295,13 +295,13 @@ func (tv *TableView) CacheVisFields() {
 	tv.NVisFields = len(tv.VisFields)
 }
 
-// Config configures the view
+// ConfigWidget configures the view
 func (tv *TableView) ConfigWidget() {
 	tv.ConfigTableView()
 }
 
 func (tv *TableView) ConfigTableView() {
-	if tv.Is(SliceViewConfiged) {
+	if tv.Is(SliceViewConfigured) {
 		tv.This().(SliceViewer).UpdateWidgets()
 		return
 	}
@@ -318,7 +318,7 @@ func (tv *TableView) ConfigFrame() {
 	if tv.HasChildren() {
 		return
 	}
-	tv.SetFlag(true, SliceViewConfiged)
+	tv.SetFlag(true, SliceViewConfigured)
 	gi.NewFrame(tv, "header")
 	NewSliceViewGrid(tv, "grid")
 	tv.ConfigHeader()
@@ -430,7 +430,7 @@ func (tv *TableView) ConfigRows() {
 	if sg == nil {
 		return
 	}
-	tv.SetFlag(true, SliceViewConfiged)
+	tv.SetFlag(true, SliceViewConfigured)
 	sg.SetFlag(true, gi.LayoutNoKeys)
 
 	tv.ViewMuLock()
@@ -776,7 +776,7 @@ func (tv *TableView) SortFieldName() string {
 	return ""
 }
 
-// SetSortField sets sorting to happen on given field and direction -- see
+// SetSortFieldName sets sorting to happen on given field and direction -- see
 // SortFieldName for details
 func (tv *TableView) SetSortFieldName(nm string) {
 	if nm == "" {

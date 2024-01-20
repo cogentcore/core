@@ -103,14 +103,14 @@ func (tv *TimeView) ConfigWidget() {
 		s.Min.X.Dp(96)
 	})
 	minute.OnChange(func(e events.Event) {
-		min, err := strconv.Atoi(minute.Text())
+		minute, err := strconv.Atoi(minute.Text())
 		// TODO(kai/snack)
 		if err != nil {
 			slog.Error(err.Error())
 		}
 		// we set our minute and keep everything else
 		tt := tv.Time
-		tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tt.Hour(), min, tt.Second(), tt.Nanosecond(), tt.Location())
+		tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tt.Hour(), minute, tt.Second(), tt.Nanosecond(), tt.Location())
 		if tv.TmpSave != nil {
 			tv.TmpSave.SetValue(tv.Time)
 		}
@@ -212,7 +212,7 @@ func (dv *DateView) ConfigWidget() {
 	})
 
 	yr := dv.Time.Year()
-	yrs := []any{}
+	var yrs []any
 	// we go 100 in each direction from the current year
 	for i := yr - 100; i <= yr+100; i++ {
 		yrs = append(yrs, i)
@@ -383,7 +383,7 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget) {
 	dt.SetReadOnly(vv.IsReadOnly())
 	dt.OnChange(func(e events.Event) {
 		d, err := time.Parse("01/02/2006", dt.Text())
-		if err != err {
+		if err != nil {
 			// TODO(kai/snack)
 			slog.Error(err.Error())
 			return
@@ -415,7 +415,7 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget) {
 	tm.SetReadOnly(vv.IsReadOnly())
 	tm.OnChange(func(e events.Event) {
 		t, err := time.Parse(gi.SystemSettings.TimeFormat(), tm.Text())
-		if err != err {
+		if err != nil {
 			// TODO(kai/snack)
 			slog.Error(err.Error())
 			return
@@ -516,7 +516,7 @@ func (vv *DurationValue) ConfigWidget(w gi.Widget) {
 	})
 	sp.Config()
 
-	units := []any{}
+	var units []any
 	for _, u := range durationUnits {
 		units = append(units, u)
 	}

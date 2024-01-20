@@ -111,7 +111,7 @@ func (sv *SliceViewInline) SetSlice(sl any) *SliceViewInline {
 	if reflect.TypeOf(sl).Kind() != reflect.Pointer { // prevent crash on non-comparable
 		newslc = true
 	} else {
-		newslc = (sv.Slice != sl)
+		newslc = sv.Slice != sl
 	}
 	if newslc {
 		sv.Slice = sl

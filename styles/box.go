@@ -45,13 +45,13 @@ const (
 
 // ResizeImage resizes the given image according to [Style.ObjectFit]
 // in an object of the given size.
-func (st *Style) ResizeImage(img image.Image, size mat32.Vec2) image.Image {
+func (s *Style) ResizeImage(img image.Image, size mat32.Vec2) image.Image {
 	sz := img.Bounds().Size()
 	szx, szy := float32(sz.X), float32(sz.Y)
 	// image and box aspect ratio
 	iar := szx / szy
 	bar := size.X / size.Y
-	switch st.ObjectFit {
+	switch s.ObjectFit {
 	case FitFill:
 		return transform.Resize(img, int(size.X), int(size.Y), transform.Linear)
 	case FitContain, FitScaleDown:
@@ -69,7 +69,7 @@ func (st *Style) ResizeImage(img image.Image, size mat32.Vec2) image.Image {
 		}
 		// in FitScaleDown, if containing results in a larger image, we use
 		// the original image instead
-		if st.ObjectFit == FitScaleDown && x >= szx {
+		if s.ObjectFit == FitScaleDown && x >= szx {
 			return img
 		}
 		return transform.Resize(img, int(x), int(y), transform.Linear)

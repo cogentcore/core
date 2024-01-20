@@ -76,7 +76,7 @@ func (tv *TreeView) SyncToSrc(tvIdx *int, init bool, depth int) {
 	nm := "tv_" + sk.Name()
 	tv.SetName(nm)
 	tv.ViewIdx = *tvIdx
-	(*tvIdx)++
+	*tvIdx++
 	// tvPar := tv.TreeViewParent()
 	// if tvPar != nil {
 	// 	if init && depth >= tv.RootView.OpenDepth {
@@ -466,7 +466,7 @@ func (tv *TreeView) PasteAssignSync(md mimedata.Mimes) {
 	tv.SendChangeEvent(nil)
 }
 
-// PasteAt inserts object(s) from mime data at rel position to this node.
+// PasteAtSync inserts object(s) from mime data at rel position to this node.
 // If another item with the same name already exists, it will
 // append _Copy on the name of the inserted objects
 func (tv *TreeView) PasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int, actNm string) {
