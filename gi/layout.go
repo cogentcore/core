@@ -111,7 +111,7 @@ func (ly *Layout) ConfigWidget() {
 
 func (ly *Layout) SetStyles() {
 	ly.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.FocusWithinable)
+		s.SetAbilities(true, abilities.OuterFocusable)
 		// we never want borders on layouts
 		s.MaxBorder = styles.Border{}
 		switch {

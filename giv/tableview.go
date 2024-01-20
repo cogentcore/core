@@ -88,7 +88,7 @@ func (tv *TableView) SetStyles() {
 	tv.SetFlag(true, SliceViewReadOnlyKeyNav)
 
 	tv.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.FocusWithinable, abilities.DoubleClickable)
+		s.SetAbilities(true, abilities.OuterFocusable, abilities.DoubleClickable)
 		s.Direction = styles.Column
 		// absorb horizontal here, vertical in view
 		s.Overflow.X = styles.OverflowAuto

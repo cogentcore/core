@@ -34,7 +34,7 @@ func _AbilitiesNoOp() {
 	_ = x[Checkable-(9)]
 	_ = x[Scrollable-(10)]
 	_ = x[Focusable-(11)]
-	_ = x[FocusWithinable-(12)]
+	_ = x[OuterFocusable-(12)]
 	_ = x[Hoverable-(13)]
 	_ = x[LongHoverable-(14)]
 }
@@ -52,7 +52,7 @@ var _AbilitiesNameToValueMap = map[string]Abilities{
 	`Checkable`:       9,
 	`Scrollable`:      10,
 	`Focusable`:       11,
-	`FocusWithinable`: 12,
+	`OuterFocusable`:  12,
 	`Hoverable`:       13,
 	`LongHoverable`:   14,
 }
@@ -69,8 +69,8 @@ var _AbilitiesDescMap = map[Abilities]string{
 	8:  `Slideable means it has a slider element that can be dragged to change value. Cannot be both Draggable and Slideable.`,
 	9:  `Checkable means it can be Checked`,
 	10: `Scrollable means it can be Scrolled`,
-	11: `Focusable means it can be Focused`,
-	12: `FocusWithinable means it can be FocusedWithin`,
+	11: `Focusable means it can be Focused: capable of receiving and processing key events directly and typically changing the style when focused to indicate this property to the user.`,
+	12: `OuterFocusable means that this container element can process key events without being in the Focused state, and it does not grab focus or take away focus from other elements, and does not change its style. These key events are processed _after_ the Focused item. Typically they are navigation keys that individual elements do not process.`,
 	13: `Hoverable means it can be Hovered`,
 	14: `LongHoverable means it can be LongHovered`,
 }
@@ -88,7 +88,7 @@ var _AbilitiesMap = map[Abilities]string{
 	9:  `Checkable`,
 	10: `Scrollable`,
 	11: `Focusable`,
-	12: `FocusWithinable`,
+	12: `OuterFocusable`,
 	13: `Hoverable`,
 	14: `LongHoverable`,
 }

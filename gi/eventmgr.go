@@ -870,7 +870,7 @@ func (em *EventMgr) FocusWithins() bool {
 		if !wb.IsVisible() {
 			return ki.Break
 		}
-		if wb.AbilityIs(abilities.FocusWithinable) {
+		if wb.AbilityIs(abilities.OuterFocusable) {
 			em.FocusWithinStack = append(em.FocusWithinStack, wi)
 		}
 		return ki.Continue
