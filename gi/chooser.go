@@ -598,7 +598,6 @@ func (ch *Chooser) MakeItemsMenu(m *Scene) {
 		if len(ch.Tooltips) > i {
 			bt.SetTooltip(ch.Tooltips[i])
 		}
-		bt.Data = i // index is the data
 		bt.SetSelected(i == ch.CurIndex)
 		idx := i
 		bt.OnClick(func(e events.Event) {

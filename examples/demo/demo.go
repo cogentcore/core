@@ -108,7 +108,7 @@ func buttons(ts *gi.Tabs) {
 		m1 := gi.NewButton(m).SetText("Menu Item 1").SetIcon(icons.Save).SetShortcut("Shift+Control+1").SetData(1).
 			SetTooltip("A standard menu item with an icon")
 		m1.OnClick(func(e events.Event) {
-			fmt.Println("Received menu action with data", m1.Data)
+			fmt.Println("Clicked on menu item 1")
 		})
 
 		m2 := gi.NewButton(m).SetText("Menu Item 2").SetIcon(icons.Open).SetData(2).
@@ -118,7 +118,7 @@ func buttons(ts *gi.Tabs) {
 			sm2 := gi.NewButton(m).SetText("Sub Menu Item 2").SetIcon(icons.InstallDesktop).SetData(2.1).
 				SetTooltip("A sub menu item with an icon")
 			sm2.OnClick(func(e events.Event) {
-				fmt.Println("Received menu action with data", sm2.Data)
+				fmt.Println("Clicked on sub menu item 2")
 			})
 		}
 
@@ -127,7 +127,7 @@ func buttons(ts *gi.Tabs) {
 		m3 := gi.NewButton(m).SetText("Menu Item 3").SetIcon(icons.Favorite).SetShortcut("Control+3").SetData(3).
 			SetTooltip("A standard menu item with an icon, below a separator")
 		m3.OnClick(func(e events.Event) {
-			fmt.Println("Received menu action with data", m3.Data)
+			fmt.Println("Clicked on menu item 3")
 		})
 	}
 

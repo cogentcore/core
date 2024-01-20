@@ -57,11 +57,6 @@ type Button struct { //core:embedder
 	// if it is nil. The constructor function should add buttons
 	// to the Scene that it is passed.
 	Menu func(m *Scene) `json:"-" xml:"-"`
-
-	// TODO(kai): remove data
-
-	// Data is optional data that can be used for event handling
-	Data any `json:"-" xml:"-" view:"-"`
 }
 
 // ButtonTypes is an enum containing the

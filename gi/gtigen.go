@@ -139,7 +139,7 @@ func (t *Box) New() ki.Ki { return &Box{} }
 func (t *Box) SetTooltip(v string) *Box { t.Tooltip = v; return t }
 
 // ButtonType is the [gti.Type] for [Button]
-var ButtonType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Button", IDName: "button", Doc: "Button is a pressable button with text, an icon, an indicator, a shortcut,\nand/or a menu. The standard behavior is to register a click event with OnClick(...).", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "Box"}}, Fields: []gti.Field{{Name: "Type", Doc: "the type of button"}, {Name: "Text", Doc: "Text is the label text for the button.\nIf it is blank, no label is shown."}, {Name: "Icon", Doc: "Icon is the icon for the button.\nIf it is \"\" or [icons.None], no icon is shown."}, {Name: "Indicator", Doc: "Indicator is the menu indicator icon to present.\nIf it is \"\" or [icons.None],, no indicator is shown.\nIt is automatically set to [icons.KeyboardArrowDown]\nwhen there is a Menu elements present unless it is\nset to [icons.None]."}, {Name: "Shortcut", Doc: "Shortcut is an optional shortcut keyboard chord to trigger this button,\nactive in window-wide scope. Avoid conflicts with other shortcuts\n(a log message will be emitted if so). Shortcuts are processed after\nall other processing of keyboard input. Use Command for\nControl / Meta (Mac Command key) per platform."}, {Name: "Menu", Doc: "Menu is a menu constructor function used to build and display\na menu whenever the button is clicked. There will be no menu\nif it is nil. The constructor function should add buttons\nto the Scene that it is passed."}, {Name: "Data", Doc: "Data is optional data that can be used for event handling"}}, Instance: &Button{}})
+var ButtonType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Button", IDName: "button", Doc: "Button is a pressable button with text, an icon, an indicator, a shortcut,\nand/or a menu. The standard behavior is to register a click event with OnClick(...).", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "Box"}}, Fields: []gti.Field{{Name: "Type", Doc: "the type of button"}, {Name: "Text", Doc: "Text is the label text for the button.\nIf it is blank, no label is shown."}, {Name: "Icon", Doc: "Icon is the icon for the button.\nIf it is \"\" or [icons.None], no icon is shown."}, {Name: "Indicator", Doc: "Indicator is the menu indicator icon to present.\nIf it is \"\" or [icons.None],, no indicator is shown.\nIt is automatically set to [icons.KeyboardArrowDown]\nwhen there is a Menu elements present unless it is\nset to [icons.None]."}, {Name: "Shortcut", Doc: "Shortcut is an optional shortcut keyboard chord to trigger this button,\nactive in window-wide scope. Avoid conflicts with other shortcuts\n(a log message will be emitted if so). Shortcuts are processed after\nall other processing of keyboard input. Use Command for\nControl / Meta (Mac Command key) per platform."}, {Name: "Menu", Doc: "Menu is a menu constructor function used to build and display\na menu whenever the button is clicked. There will be no menu\nif it is nil. The constructor function should add buttons\nto the Scene that it is passed."}}, Instance: &Button{}})
 
 // NewButton adds a new [Button] with the given name to the given parent:
 // Button is a pressable button with text, an icon, an indicator, a shortcut,
@@ -205,10 +205,6 @@ func (t *Button) SetShortcut(v key.Chord) *Button { t.Shortcut = v; return t }
 // if it is nil. The constructor function should add buttons
 // to the Scene that it is passed.
 func (t *Button) SetMenu(v func(m *Scene)) *Button { t.Menu = v; return t }
-
-// SetData sets the [Button.Data]:
-// Data is optional data that can be used for event handling
-func (t *Button) SetData(v any) *Button { t.Data = v; return t }
 
 // SetTooltip sets the [Button.Tooltip]
 func (t *Button) SetTooltip(v string) *Button { t.Tooltip = v; return t }

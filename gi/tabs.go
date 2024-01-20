@@ -457,7 +457,6 @@ func (ts *Tabs) ConfigNewTabButton() bool {
 			return false
 		}
 		tab := tb.InsertNewChild(ButtonType, ntb, "new-tab").(*Button)
-		tab.Data = -1
 		tab.SetIcon(icons.Add).SetType(ButtonAction)
 		tab.OnClick(func(e events.Event) {
 			ts.NewTab("New Tab")
