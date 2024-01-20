@@ -198,7 +198,6 @@ func (tv *TreeView) RootSetViewIdx() int {
 }
 
 func (tv *TreeView) OnInit() {
-	//sw.SetIcons(tv.IconOn, tv.IconOff, tv.IconUnk)
 	tv.WidgetBase.OnInit()
 	tv.HandleEvents()
 	tv.SetStyles()
@@ -216,6 +215,10 @@ func (tv *TreeView) OnAdd() {
 }
 
 func (tv *TreeView) SetStyles() {
+	tv.IconOn = icons.KeyboardArrowDown
+	tv.IconOff = icons.KeyboardArrowRight
+	tv.IconUnk = icons.Blank
+
 	tvi := tv.This().(TreeViewer)
 	tv.Style(func(s *styles.Style) {
 		// our parts are draggable and droppable, not us ourself
@@ -359,7 +362,7 @@ func (tv *TreeView) SetStyles() {
 		case "parts/branch":
 			sw := w.(*gi.Switch)
 			sw.Type = gi.SwitchCheckbox
-			sw.SetIcons(icons.KeyboardArrowDown, icons.KeyboardArrowRight, icons.Blank)
+			sw.SetIcons(tv.IconOn, tv.IconOff, tv.IconUnk)
 			sw.Style(func(s *styles.Style) {
 				// parent will handle our cursor
 				s.Cursor = cursors.None
@@ -369,9 +372,14 @@ func (tv *TreeView) SetStyles() {
 				s.Min.X.Em(0.8)
 				s.Min.Y.Em(0.8)
 				s.Align.Self = styles.Center
-				// we amplify any state layer we receiver so that it is clear
-				// we are receiving it, not just our parent
-				s.StateLayer *= 3
+				if !sw.StateIs(states.Indeterminate) {
+					// we amplify any state layer we receiver so that it is clear
+					// we are receiving it, not just our parent
+					s.StateLayer *= 3
+				} else {
+					// no state layer for indeterminate because they are not interactive
+					s.StateLayer = 0
+				}
 			})
 			sw.OnClick(func(e events.Event) {
 				if tv.This() == nil || tv.Is(ki.Deleted) {
