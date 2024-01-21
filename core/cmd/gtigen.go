@@ -26,8 +26,6 @@ var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/core/cmd.Release", Doc:
 
 var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/core/cmd.Run", Doc: "Run builds and runs the config package. It also displays the logs generated\nby the app. It uses the same config info as build.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/core/cmd.Setup", Doc: "Setup does platform-specific setup that ensures that development can be done\nfor the config platform, mostly by installing necessary tools.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
-
 var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/core/cmd.GetVersion", Doc: "GetVersion prints the version of the project.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
 
 var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/core/cmd.SetVersion", Doc: "SetVersion updates the config and version file of the config project based\non the config version and commits and pushes the changes.\nAfter it, release or similar should be called to push the git tags.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
