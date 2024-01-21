@@ -13,8 +13,6 @@ import (
 	"cogentcore.org/core/laser"
 )
 
-// TODO: use glop/dirs and grows for these things
-
 // OpenWithIncludes reads the config struct from the given config file
 // using the given options, looking on [Options.IncludePaths] for the file.
 // It opens any Includes specified in the given config file in the natural
@@ -22,7 +20,11 @@ import (
 // Is equivalent to Open if there are no Includes. It returns an error if
 // any of the include files cannot be found on [Options.IncludePaths].
 func OpenWithIncludes(opts *Options, cfg any, file string) error {
-	err := tomls.OpenFiles(cfg, dirs.FindFilesOnPaths(opts.IncludePaths, file))
+	files := dirs.FindFilesOnPaths(opts.IncludePaths, file)
+	if len(files) == 0 {
+		return fmt.Errorf("OpenWithIncludes: no files found for %q", file)
+	}
+	err := tomls.OpenFiles(cfg, files)
 	if err != nil {
 		return err
 	}

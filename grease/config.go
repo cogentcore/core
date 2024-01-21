@@ -194,19 +194,22 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 	}
 
 	if opts.NeedConfigFile && len(cfgFiles) == 0 {
-		err = errors.New("grease.Config: no config file or default files specified")
-		return "", err
+		return "", errors.New("grease.Config: no config file or default files specified")
 	}
 
 	slices.Reverse(opts.IncludePaths)
 
 	// TODO(kai): this is not necessarily accurate given IncludePaths
 	ConfigFiles = cfgFiles
+	gotAny := false
 	for _, fn := range cfgFiles {
 		err = OpenWithIncludes(opts, cfg, fn)
-		if err != nil {
-			errs = append(errs, err)
+		if err == nil {
+			gotAny = true
 		}
+	}
+	if !gotAny && opts.NeedConfigFile {
+		return "", errors.New("grease.Config: no config files found")
 	}
 
 	cmd, err = SetFromArgs(cfg, args, ErrNotFound, cmds...)
