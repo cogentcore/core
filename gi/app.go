@@ -195,7 +195,7 @@ func StdAppBarConfig(pw Widget) {
 }
 
 // StdAppBarStart adds standard items to start of an AppBar:
-// [StdAppBarBack] and [StdAppChooser]
+// [StdAppBarBack] and [StdAppBarChooser]
 func StdAppBarStart(tb *Toolbar) {
 	StdAppBarBack(tb)
 	StdAppBarChooser(tb)
