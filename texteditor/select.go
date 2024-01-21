@@ -5,6 +5,8 @@
 package texteditor
 
 import (
+	"fmt"
+
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fi"
 	"cogentcore.org/core/gi"
@@ -517,7 +519,8 @@ func (ed *Editor) ReCaseSelection(c textbuf.Cases) string {
 
 // ShowContextMenu displays the context menu with options dependent on situation
 func (ed *Editor) ShowContextMenu(e events.Event) {
-	if !ed.HasSelection() && ed.Buf.IsSpellEnabled(ed.CursorPos) {
+	if ed.Buf.Spell != nil && !ed.HasSelection() && ed.Buf.IsSpellEnabled(ed.CursorPos) {
+		fmt.Println("in spell menu")
 		if ed.Buf.Spell != nil {
 			if ed.OfferCorrect() {
 				return

@@ -30,6 +30,7 @@ func (ed *Editor) HandleEvents() {
 	ed.HandleMouse()
 	ed.HandleLinkCursor()
 	ed.HandleFocus()
+	ed.AddContextMenu(ed.ContextMenu)
 }
 
 func (ed *Editor) OnAdd() {
@@ -586,7 +587,6 @@ func (ed *Editor) HandleMouse() {
 			}
 			// case events.Right:
 			// 	ed.SetCursorFromMouse(pt, newPos, e.SelectMode())
-			// 	ed.Send(events.ContextMenu, e)
 		}
 	})
 	ed.OnDoubleClick(func(e events.Event) {
