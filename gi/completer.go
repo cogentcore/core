@@ -178,7 +178,7 @@ func (c *Complete) ShowNow(ctx Widget, pos image.Point, text string, force bool)
 			text = cmp.Label
 		}
 		icon := cmp.Icon
-		NewButton(sc, text).SetText(text).SetIcon(icons.Icon(icon)).SetTooltip(cmp.Desc).
+		mi := NewButton(sc, text).SetText(text).SetIcon(icons.Icon(icon)).SetTooltip(cmp.Desc).
 			OnClick(func(e events.Event) {
 				c.Complete(cmp.Text)
 			}).
@@ -192,6 +192,9 @@ func (c *Complete) ShowNow(ctx Widget, pos image.Point, text string, force bool)
 					c.Complete(cmp.Text)
 				}
 			})
+		if i == 0 {
+			sc.EventMgr.SetStartFocus(mi)
+		}
 	}
 	c.Stage.RunPopup()
 }
