@@ -108,7 +108,7 @@ func (bd *Body) AddOk(pw Widget, name ...string) *Button {
 		e.SetHandled() // otherwise propagates to dead elements
 		bd.Close()
 	})
-	bd.OnFirst(events.KeyChord, func(e events.Event) {
+	bd.Scene.OnFirst(events.KeyChord, func(e events.Event) {
 		kf := keyfun.Of(e.KeyChord())
 		if kf == keyfun.Accept {
 			e.SetHandled()

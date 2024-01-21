@@ -224,15 +224,19 @@ func (wb *WidgetBase) HandleEvent(ev events.Event) {
 	if wb.This() == nil || wb.Is(ki.Deleted) {
 		return
 	}
-	wb.Listeners.Call(ev)
-	// widget can be killed after event
-	if wb.This() == nil || wb.Is(ki.Deleted) {
-		return
-	}
-	wb.FinalListeners.Call(ev)
-	// widget can be killed after event
-	if wb.This() == nil || wb.Is(ki.Deleted) {
-		return
+	if !ev.IsHandled() {
+		wb.Listeners.Call(ev)
+		// widget can be killed after event
+		if ev.IsHandled() || wb.This() == nil || wb.Is(ki.Deleted) {
+			return
+		}
+		if !ev.IsHandled() {
+			wb.FinalListeners.Call(ev)
+			// widget can be killed after event
+			if wb.This() == nil || wb.Is(ki.Deleted) {
+				return
+			}
+		}
 	}
 	if s.State != state {
 		wb.ApplyStyleUpdate()
