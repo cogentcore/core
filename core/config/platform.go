@@ -75,7 +75,7 @@ var ArchsForOS = map[string][]string{
 	"windows": {"386", "amd64", "arm", "arm64"},
 	"linux":   {"386", "amd64", "arm", "arm64"},
 	"android": {"386", "amd64", "arm", "arm64"},
-	"ios":     {"amd64", "arm64"},
+	"ios":     {"arm64"},
 }
 
 // SupportedOS is a map containing all operating systems and whether they are supported by Cogent Core.
