@@ -5,7 +5,12 @@
 package svg
 
 import (
+	"errors"
+	"fmt"
+	"strings"
+
 	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/styles"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -24,42 +29,47 @@ type ViewBox struct {
 	PreserveAspectRatio ViewBoxPreserveAspectRatio
 }
 
-// todo: need to implement the viewbox preserve aspect ratio logic!
-
 // Defaults returns viewbox to defaults
 func (vb *ViewBox) Defaults() {
 	vb.Min = mat32.Vec2{}
-	vb.Size = mat32.Vec2{}
-	vb.PreserveAspectRatio.Align = NoAlign
+	vb.Size = mat32.V2(100, 100)
+	vb.PreserveAspectRatio.Align.Set(AlignMid)
 	vb.PreserveAspectRatio.MeetOrSlice = Meet
 }
 
-// todo: these should be regular ints and use bitflag etc.
+func (vb *ViewBox) String() string {
+	return vb.PreserveAspectRatio.String()
+}
 
 // ViewBoxAlign defines values for the PreserveAspectRatio alignment factor
-type ViewBoxAlign int32
+type ViewBoxAligns int32 //enums:enum -trim-prefix Align -transform lower
 
 const (
-	NoAlign ViewBoxAlign = 1 << iota          // do not preserve uniform scaling
-	XMin                                      // align ViewBox.Min with smallest values of Viewport
-	XMid                                      // align ViewBox.Min with midpoint values of Viewport
-	XMax                                      // align ViewBox.Min+Size with maximum values of Viewport
-	XMask   ViewBoxAlign = XMin + XMid + XMax // mask for X values -- clear all X before setting new one
-	YMin    ViewBoxAlign = 1 << iota          // align ViewBox.Min with smallest values of Viewport
-	YMid                                      // align ViewBox.Min with midpoint values of Viewport
-	YMax                                      // align ViewBox.Min+Size with maximum values of Viewport
-	YMask   ViewBoxAlign = YMin + YMid + YMax // mask for Y values -- clear all Y before setting new one
+	// align ViewBox.Min with midpoint of Viewport (default)
+	AlignMid ViewBoxAligns = iota
+
+	// do not preserve uniform scaling (if either X or Y is None, both are treated as such).
+	// In this case, the Meet / Slice value is ignored
+	AlignNone
+
+	// align ViewBox.Min with top / left of Viewport
+	AlignMin
+
+	// align ViewBox.Min+Size with bottom / right of Viewport
+	AlignMax
 )
 
 // ViewBoxMeetOrSlice defines values for the PreserveAspectRatio meet or slice factor
-type ViewBoxMeetOrSlice int32 //enums:enum
+type ViewBoxMeetOrSlice int32 //enums:enum -transform lower
 
 const (
-	// Meet means the entire ViewBox is visible within Viewport, and it is
-	// scaled up as much as possible to meet the align constraints
+	// Meet only applies if Align != None (i.e., only for uniform scaling),
+	// and means the entire ViewBox is visible within Viewport,
+	// and it is scaled up as much as possible to meet the align constraints.
 	Meet ViewBoxMeetOrSlice = iota
 
-	// Slice means the entire ViewBox is covered by the ViewBox, and the
+	// Slice only applies if Align != None (i.e., only for uniform scaling),
+	// and means the entire ViewBox is covered by the ViewBox, and the
 	// ViewBox is scaled down as much as possible, while still meeting the
 	// align constraints
 	Slice
@@ -68,9 +78,76 @@ const (
 // ViewBoxPreserveAspectRatio determines how to scale the view box within parent Viewport2D
 type ViewBoxPreserveAspectRatio struct {
 
-	// how to align x,y coordinates within viewbox
-	Align ViewBoxAlign `svg:"align"`
+	// how to align X, Y coordinates within viewbox
+	Align styles.XY[ViewBoxAligns] `xml:"align"`
 
 	// how to scale the view box relative to the viewport
-	MeetOrSlice ViewBoxMeetOrSlice `svg:"meetOrSlice"`
+	MeetOrSlice ViewBoxMeetOrSlice `xml:"meetOrSlice"`
+}
+
+func (pa *ViewBoxPreserveAspectRatio) String() string {
+	if pa.Align.X == AlignNone {
+		return "none"
+	}
+	xs := "xM" + pa.Align.X.String()[1:]
+	ys := "YM" + pa.Align.Y.String()[1:]
+	s := xs + ys
+	if pa.MeetOrSlice != Meet {
+		s += " slice"
+	}
+	return s
+}
+
+// SetString sets from a standard svg-formatted string,
+// consisting of:
+// none | x[Min, Mid, Max]Y[Min, Mid, Max] [ meet | slice]
+// e.g., "xMidYMid meet" (default)
+// It does not make sense to specify "meet | slice" for "none"
+// as they do not apply in that case.
+func (pa *ViewBoxPreserveAspectRatio) SetString(s string) error {
+	s = strings.TrimSpace(s)
+	if len(s) == 0 {
+		pa.Align.Set(AlignMid, AlignMid)
+		pa.MeetOrSlice = Meet
+		return nil
+	}
+	sl := strings.ToLower(s)
+	f := strings.Fields(sl)
+	if strings.HasPrefix(f[0], "none") {
+		pa.Align.Set(AlignNone)
+		pa.MeetOrSlice = Meet
+		return nil
+	}
+	var errs []error
+	if len(f) > 1 {
+		switch f[1] {
+		case "slice":
+			pa.MeetOrSlice = Slice
+		case "meet":
+			pa.MeetOrSlice = Meet
+		default:
+			errs = append(errs, fmt.Errorf("ViewBoxPreserveAspectRatio: 2nd value must be meet or slice, not %q", f[1]))
+		}
+	}
+
+	yi := strings.Index(f[0], "y")
+	if yi < 0 {
+		return fmt.Errorf("ViewBoxPreserveAspectRatio: string %q must contain a 'y'", s)
+	}
+	xs := f[0][1:yi]
+	ys := f[0][yi+1:]
+
+	err := pa.Align.X.SetString(xs)
+	if err != nil {
+		errs = append(errs, fmt.Errorf("ViewBoxPreserveAspectRatio: X align be min, mid, or max, not %q", xs))
+	}
+
+	err = pa.Align.Y.SetString(ys)
+	if err != nil {
+		errs = append(errs, fmt.Errorf("ViewBoxPreserveAspectRatio: Y align be min, mid, or max, not %q", ys))
+	}
+	if len(errs) == 0 {
+		return nil
+	}
+	return errors.Join(errs...)
 }

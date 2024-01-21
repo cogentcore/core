@@ -197,6 +197,117 @@ func (i *NodeFlags) UnmarshalText(text []byte) error {
 	return nil
 }
 
+var _ViewBoxAlignsValues = []ViewBoxAligns{0, 1, 2, 3}
+
+// ViewBoxAlignsN is the highest valid value
+// for type ViewBoxAligns, plus one.
+const ViewBoxAlignsN ViewBoxAligns = 4
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _ViewBoxAlignsNoOp() {
+	var x [1]struct{}
+	_ = x[AlignMid-(0)]
+	_ = x[AlignNone-(1)]
+	_ = x[AlignMin-(2)]
+	_ = x[AlignMax-(3)]
+}
+
+var _ViewBoxAlignsNameToValueMap = map[string]ViewBoxAligns{
+	`mid`:  0,
+	`none`: 1,
+	`min`:  2,
+	`max`:  3,
+}
+
+var _ViewBoxAlignsDescMap = map[ViewBoxAligns]string{
+	0: `align ViewBox.Min with midpoint of Viewport (default)`,
+	1: `do not preserve uniform scaling (if either X or Y is None, both are treated as such). In this case, the Meet / Slice value is ignored`,
+	2: `align ViewBox.Min with top / left of Viewport`,
+	3: `align ViewBox.Min+Size with bottom / right of Viewport`,
+}
+
+var _ViewBoxAlignsMap = map[ViewBoxAligns]string{
+	0: `mid`,
+	1: `none`,
+	2: `min`,
+	3: `max`,
+}
+
+// String returns the string representation
+// of this ViewBoxAligns value.
+func (i ViewBoxAligns) String() string {
+	if str, ok := _ViewBoxAlignsMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
+}
+
+// SetString sets the ViewBoxAligns value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *ViewBoxAligns) SetString(s string) error {
+	if val, ok := _ViewBoxAlignsNameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+	return errors.New(s + " is not a valid value for type ViewBoxAligns")
+}
+
+// Int64 returns the ViewBoxAligns value as an int64.
+func (i ViewBoxAligns) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the ViewBoxAligns value from an int64.
+func (i *ViewBoxAligns) SetInt64(in int64) {
+	*i = ViewBoxAligns(in)
+}
+
+// Desc returns the description of the ViewBoxAligns value.
+func (i ViewBoxAligns) Desc() string {
+	if str, ok := _ViewBoxAlignsDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// ViewBoxAlignsValues returns all possible values
+// for the type ViewBoxAligns.
+func ViewBoxAlignsValues() []ViewBoxAligns {
+	return _ViewBoxAlignsValues
+}
+
+// Values returns all possible values
+// for the type ViewBoxAligns.
+func (i ViewBoxAligns) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_ViewBoxAlignsValues))
+	for i, d := range _ViewBoxAlignsValues {
+		res[i] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type ViewBoxAligns.
+func (i ViewBoxAligns) IsValid() bool {
+	_, ok := _ViewBoxAlignsMap[i]
+	return ok
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i ViewBoxAligns) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *ViewBoxAligns) UnmarshalText(text []byte) error {
+	if err := i.SetString(string(text)); err != nil {
+		log.Println("ViewBoxAligns.UnmarshalText:", err)
+	}
+	return nil
+}
+
 var _ViewBoxMeetOrSliceValues = []ViewBoxMeetOrSlice{0, 1}
 
 // ViewBoxMeetOrSliceN is the highest valid value
@@ -212,18 +323,18 @@ func _ViewBoxMeetOrSliceNoOp() {
 }
 
 var _ViewBoxMeetOrSliceNameToValueMap = map[string]ViewBoxMeetOrSlice{
-	`Meet`:  0,
-	`Slice`: 1,
+	`meet`:  0,
+	`slice`: 1,
 }
 
 var _ViewBoxMeetOrSliceDescMap = map[ViewBoxMeetOrSlice]string{
-	0: `Meet means the entire ViewBox is visible within Viewport, and it is scaled up as much as possible to meet the align constraints`,
-	1: `Slice means the entire ViewBox is covered by the ViewBox, and the ViewBox is scaled down as much as possible, while still meeting the align constraints`,
+	0: `Meet only applies if Align != None (i.e., only for uniform scaling), and means the entire ViewBox is visible within Viewport, and it is scaled up as much as possible to meet the align constraints.`,
+	1: `Slice only applies if Align != None (i.e., only for uniform scaling), and means the entire ViewBox is covered by the ViewBox, and the ViewBox is scaled down as much as possible, while still meeting the align constraints`,
 }
 
 var _ViewBoxMeetOrSliceMap = map[ViewBoxMeetOrSlice]string{
-	0: `Meet`,
-	1: `Slice`,
+	0: `meet`,
+	1: `slice`,
 }
 
 // String returns the string representation

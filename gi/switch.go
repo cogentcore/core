@@ -112,6 +112,8 @@ func (sw *Switch) HandleEvents() {
 		sw.SendChange(e)
 		if sw.Type == SwitchChip {
 			sw.SetNeedsLayout(true)
+		} else {
+			sw.SetNeedsRender(true)
 		}
 	})
 }

@@ -131,6 +131,12 @@ type Style struct { //gti:add
 	// in which the replaced object should be fit into the element.
 	ObjectFit ObjectFits
 
+	// If this object is a replaced object (image, video, etc)
+	// or has a background image, ObjectPosition specifies the
+	// X,Y position of the object within the space allocated for
+	// the object (see ObjectFit).
+	ObjectPosition units.XY
+
 	// Border is a line border around the box element
 	Border Border
 
