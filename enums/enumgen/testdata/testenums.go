@@ -1,7 +1,7 @@
 package testdata
 
 // Fruits is an enum containing fruits
-type Fruits uint8 //enums:enum
+type Fruits uint8 //enums:enum -accept-lower
 
 const (
 	Apple Fruits = iota

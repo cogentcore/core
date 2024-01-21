@@ -185,13 +185,9 @@ func _FoodsNoOp() {
 
 var _FoodsNameToValueMap = map[string]Foods{
 	`Bread`:   7,
-	`bread`:   7,
 	`Lettuce`: 8,
-	`lettuce`: 8,
 	`Cheese`:  9,
-	`cheese`:  9,
 	`Meat`:    10,
-	`meat`:    10,
 }
 
 var _FoodsDescMap = map[Foods]string{
@@ -222,10 +218,6 @@ func (i Foods) String() string {
 // error if the string is invalid.
 func (i *Foods) SetString(s string) error {
 	if val, ok := _FoodsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _FoodsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -549,8 +541,6 @@ func (i *States) SetStringOr(s string) error {
 	for _, flg := range flgs {
 		if val, ok := _StatesNameToValueMap[flg]; ok {
 			i.SetFlag(true, &val)
-		} else if val, ok := _StatesNameToValueMap[strings.ToLower(flg)]; ok {
-			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue
 		} else {
@@ -694,31 +684,18 @@ func _LanguagesNoOp() {
 
 var _LanguagesNameToValueMap = map[string]Languages{
 	`Go`:         6,
-	`go`:         6,
 	`Python`:     10,
-	`python`:     10,
 	`JavaScript`: 14,
-	`javascript`: 14,
 	`Dart`:       18,
-	`dart`:       18,
 	`Rust`:       22,
-	`rust`:       22,
 	`Ruby`:       26,
-	`ruby`:       26,
 	`C`:          30,
-	`c`:          30,
 	`CPP`:        34,
-	`cpp`:        34,
 	`ObjectiveC`: 38,
-	`objectivec`: 38,
 	`Java`:       42,
-	`java`:       42,
 	`TypeScript`: 46,
-	`typescript`: 46,
 	`Kotlin`:     50,
-	`kotlin`:     50,
 	`Swift`:      54,
-	`swift`:      54,
 }
 
 var _LanguagesDescMap = map[Languages]string{
@@ -798,8 +775,6 @@ func (i *Languages) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _LanguagesNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _LanguagesNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue
