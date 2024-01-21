@@ -36,7 +36,7 @@ func HandleRecover(r any) {
 	b.AddBottomBar(func(pw Widget) {
 		NewButton(pw).SetText("Details").SetType(ButtonOutlined).OnClick(func(e events.Event) {
 			clpath := filepath.Join(CogentCoreDataDir(), "crash-logs", goosi.TheApp.Name())
-			txt := fmt.Sprintf("Crash log saved in %s\npanic: %v\n\n%s", clpath, r, stack)
+			txt := fmt.Sprintf("Crash log saved in %s\n\npanic: %v\n\n%s", clpath, r, stack)
 			d := NewBody("crash-details").AddTitle("Crash details")
 			NewLabel(d).SetText(txt).Style(func(s *styles.Style) {
 				s.Font.Family = string(AppearanceSettings.MonoFont)
