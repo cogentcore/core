@@ -44,10 +44,10 @@ func (sw *Switches) SetStyles() {
 	sw.Style(func(s *styles.Style) {
 		s.Padding.Set(units.Dp(2))
 		s.Margin.Set(units.Dp(2))
+		s.Grow.Set(1, 0)
 		if sw.Type == SwitchSegmentedButton {
 			s.Gap.Zero()
 		} else {
-			s.Grow.Set(1, 0)
 			s.Wrap = true
 		}
 	})
