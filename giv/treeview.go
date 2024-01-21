@@ -209,6 +209,9 @@ func (tv *TreeView) OnAdd() {
 	tv.Text = tv.Nm
 	if ptv := AsTreeView(tv.Parent()); ptv != nil {
 		tv.RootView = ptv.RootView
+		tv.IconOpen = ptv.IconOpen
+		tv.IconClosed = ptv.IconClosed
+		tv.IconLeaf = ptv.IconLeaf
 	} else {
 		tv.RootView = tv
 	}
