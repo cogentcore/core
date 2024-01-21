@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/grease"
 	"cogentcore.org/core/svg"
 )
@@ -27,6 +28,10 @@ type Config struct {
 	// Output is the filename of the output file.
 	// Defaults to input with the extension changed to the output format.
 	Output string `flag:"o,output"`
+
+	// Fill, if specified, indicates to fill the background of
+	// the svg with the specified color in CSS format.
+	Fill string
 
 	Render RenderConfig `cmd:"render"`
 }
@@ -50,7 +55,11 @@ func Render(c *Config) error {
 	}
 	sv := svg.NewSVG(c.Render.Width, c.Render.Height)
 	sv.Norm = true
-	err := sv.OpenXML(c.Input)
+	err := ApplyFill(c, sv)
+	if err != nil {
+		return err
+	}
+	err = sv.OpenXML(c.Input)
 	if err != nil {
 		return err
 	}
@@ -65,8 +74,12 @@ func Render(c *Config) error {
 func EmbedImage(c *Config) error {
 	sv := svg.NewSVG(0, 0)
 	sv.Norm = true
+	err := ApplyFill(c, sv)
+	if err != nil {
+		return err
+	}
 	img := svg.NewImage(&sv.Root)
-	err := img.OpenImage(c.Input, 0, 0)
+	err = img.OpenImage(c.Input, 0, 0)
 	if err != nil {
 		return err
 	}
@@ -75,4 +88,18 @@ func EmbedImage(c *Config) error {
 		c.Output = strings.TrimSuffix(c.Input, filepath.Ext(c.Input)) + ".svg"
 	}
 	return sv.SaveXML(c.Output)
+}
+
+// ApplyFill applies [Config.Fill] to the given [svg.SVG].
+func ApplyFill(c *Config, sv *svg.SVG) error { //gti:skip
+	if c.Fill == "" {
+		return nil
+	}
+	sv.Fill = true
+	bg, err := gradient.FromString(c.Fill)
+	if err != nil {
+		return err
+	}
+	sv.Background = bg
+	return nil
 }

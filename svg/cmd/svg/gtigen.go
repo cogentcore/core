@@ -6,7 +6,7 @@ import (
 	"cogentcore.org/core/gti"
 )
 
-var _ = gti.AddType(&gti.Type{Name: "main.Config", IDName: "config", Fields: []gti.Field{{Name: "Input", Doc: "Input is the filename of the input file"}, {Name: "Output", Doc: "Output is the filename of the output file.\nDefaults to input with the extension changed to the output format."}, {Name: "Render"}}})
+var _ = gti.AddType(&gti.Type{Name: "main.Config", IDName: "config", Fields: []gti.Field{{Name: "Input", Doc: "Input is the filename of the input file"}, {Name: "Output", Doc: "Output is the filename of the output file.\nDefaults to input with the extension changed to the output format."}, {Name: "Fill", Doc: "Fill, if specified, indicates to fill the background of\nthe svg with the specified color in CSS format."}, {Name: "Render"}}})
 
 var _ = gti.AddType(&gti.Type{Name: "main.RenderConfig", IDName: "render-config", Fields: []gti.Field{{Name: "Width", Doc: "Width is the width of the rendered image"}, {Name: "Height", Doc: "Height is the height of the rendered image.\nDefaults to width."}}})
 
