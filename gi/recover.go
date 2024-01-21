@@ -6,6 +6,7 @@ package gi
 
 import (
 	"fmt"
+	"path/filepath"
 	"runtime/debug"
 
 	"cogentcore.org/core/events"
@@ -34,7 +35,8 @@ func HandleRecover(r any) {
 		AddText("There was an unexpected error and " + goosi.TheApp.Name() + " stopped running.")
 	b.AddBottomBar(func(pw Widget) {
 		NewButton(pw).SetText("Details").SetType(ButtonOutlined).OnClick(func(e events.Event) {
-			txt := fmt.Sprintf("panic: %v\n\n%s", r, stack)
+			clpath := filepath.Join(CogentCoreDataDir(), "crash-logs", goosi.TheApp.Name())
+			txt := fmt.Sprintf("Crash log saved in %s\npanic: %v\n\n%s", clpath, r, stack)
 			d := NewBody("crash-details").AddTitle("Crash details")
 			NewLabel(d).SetText(txt).Style(func(s *styles.Style) {
 				s.Font.Family = string(AppearanceSettings.MonoFont)
