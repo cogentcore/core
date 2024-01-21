@@ -185,6 +185,16 @@ func ParseArgs[T any](cfg T, args []string, flags map[string]string, cmds ...*Cm
 		return newCmd, allFlags, err
 	}
 
+	// if the command is blank, then it is the root command
+	if newCmd == "" {
+		for _, c := range cmds {
+			if c.Root {
+				newCmd = c.Name
+				break
+			}
+		}
+	}
+
 	allFields := &Fields{}
 	AddMetaConfigFields(allFields)
 	AddFields(cfg, allFields, newCmd)
