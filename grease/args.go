@@ -188,7 +188,7 @@ func ParseArgs[T any](cfg T, args []string, flags map[string]string, cmds ...*Cm
 	// if the command is blank, then it is the root command
 	if newCmd == "" {
 		for _, c := range cmds {
-			if c.Root {
+			if c.Root && c.Name != "help" {
 				newCmd = c.Name
 				break
 			}
