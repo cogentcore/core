@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"go/parser"
 	"go/token"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -27,7 +28,7 @@ func TestParse(t *testing.T) {
 	pr := lp.Lang.Parser()
 	pr.ReportErrs = true
 
-	fs := pi.NewFileStates("testdata/textview.go", "", fi.Go)
+	fs := pi.NewFileStates(filepath.Join("testdata", "treeview.go"), "", fi.Go)
 	txt, err := lex.OpenFileBytes(fs.Filename) // and other stuff
 	if err != nil {
 		t.Error(err)
@@ -36,7 +37,7 @@ func TestParse(t *testing.T) {
 	prof.Profiling = true
 	stt := time.Now()
 	lp.Lang.ParseFile(fs, txt)
-	prdur := time.Now().Sub(stt)
+	prdur := time.Since(stt)
 	fmt.Printf("pi parse: %v\n", prdur)
 
 	prof.Report(time.Millisecond)
@@ -50,11 +51,11 @@ func TestGoParse(t *testing.T) {
 	// t.Skip("todo: reenable soon")
 	stt := time.Now()
 	fset := token.NewFileSet()
-	_, err := parser.ParseFile(fset, "testdata/textview.go", nil, parser.ParseComments)
+	_, err := parser.ParseFile(fset, filepath.Join("testdata", "treeview.go"), nil, parser.ParseComments)
 	if err != nil {
 		t.Error(err)
 	}
-	prdur := time.Now().Sub(stt)
+	prdur := time.Since(stt)
 	fmt.Printf("go parse: %v\n", prdur)
 
 	// fmt.Println("Functions:")
