@@ -72,6 +72,16 @@ func BuildImpl(c *config.Config) (*packages.Package, error) {
 	}
 	defer cleanup()
 
+	for _, platform := range c.Build.Target {
+		if platform.Arch == "*" {
+			archs := config.ArchsForOS[platform.OS]
+			c.Build.Target = make([]config.Platform, len(archs))
+			for i, arch := range archs {
+				c.Build.Target[i] = config.Platform{OS: platform.OS, Arch: arch}
+			}
+		}
+	}
+
 	// Special case to add iossimulator if we don't already have it and we have ios
 	hasIOSSimulator := slices.ContainsFunc(c.Build.Target,
 		func(p config.Platform) bool { return p.OS == "iossimulator" })

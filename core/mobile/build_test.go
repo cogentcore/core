@@ -264,11 +264,11 @@ func TestBuildWithGoModules(t *testing.T) {
 				t.Run(tc.Name, func(t *testing.T) {
 					c := &config.Config{}
 					laser.SetFromDefaultTags(c)
+					c.ID = "org.golang.todo"
 					c.Build.Target = make([]config.Platform, 1)
 					grr.Test(t, c.Build.Target[0].SetString(target))
 					pdir, err := os.Getwd()
 					grr.Test(t, err)
-					grr.Test(t, os.Chdir(filepath.Join("..", "..", "goosi", "examples", "drawtri")))
 					grr.Test(t, os.Chdir(tc.Path))
 					grr.Test(t, Build(c))
 					grr.Test(t, os.Chdir(pdir))
