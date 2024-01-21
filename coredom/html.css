@@ -1,0 +1,38 @@
+body {
+    margin: 8px;
+}
+
+center {
+    justify-self: center;
+}
+
+html, body, p, div, article, aside, footer, header, hgroup, main, nav, section, address, blockquote, figcaption, figure, center, hr,
+h1, h2, h3, h4, h5, h6, ul, ol, li, menu, dir, dd, dl, dt, form, legend, fieldset, pre, xmp, plaintext, listing, frameset, frame, details, summary {
+    display: block;
+}
+
+marquee, meter, progress {
+    display: inline-block;
+}
+
+datalist, param, noframes, template {
+    display: none
+}
+
+body, main, div, section, nav, footer, header {
+    flex-direction: column;
+}
+
+area {
+    cursor: pointer;
+}
+
+ruby > rt {
+    display: block;
+    font-size: 50%;
+    text-align: start;
+}
+
+ruby > rp {
+    display: none;
+}
