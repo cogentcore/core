@@ -10,7 +10,6 @@ import (
 	"io"
 	"sync"
 
-	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
@@ -164,7 +163,6 @@ func (sc *Scene) OnInit() {
 
 func (sc *Scene) SetStyles() {
 	sc.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.OuterFocusable)
 		s.Cursor = cursors.Arrow
 		s.Background = colors.C(colors.Scheme.Background)
 		s.Color = colors.Scheme.OnBackground

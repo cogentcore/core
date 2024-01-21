@@ -220,7 +220,15 @@ func (wb *WidgetBase) HandleEvent(ev events.Event) {
 	s := &wb.Styles
 	state := s.State
 	wb.FirstListeners.Call(ev)
+	// widget can be killed after event
+	if wb.This() == nil || wb.Is(ki.Deleted) {
+		return
+	}
 	wb.Listeners.Call(ev)
+	// widget can be killed after event
+	if wb.This() == nil || wb.Is(ki.Deleted) {
+		return
+	}
 	wb.FinalListeners.Call(ev)
 	// widget can be killed after event
 	if wb.This() == nil || wb.Is(ki.Deleted) {
@@ -230,6 +238,34 @@ func (wb *WidgetBase) HandleEvent(ev events.Event) {
 		wb.ApplyStyleUpdate()
 		// wb.Transition(&s.StateLayer, s.State.StateLayer(), 500*time.Millisecond, LinearTransition)
 	}
+}
+
+// FirstHandleEvent sends the given event to the FirstListeners for that event type.
+// Does NOT do any state updating.
+func (wb *WidgetBase) FirstHandleEvent(ev events.Event) {
+	if DebugSettings.EventTrace {
+		if ev.Type() != events.MouseMove {
+			fmt.Println(ev, "first to", wb)
+		}
+	}
+	if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) {
+		return
+	}
+	wb.FirstListeners.Call(ev)
+}
+
+// FinalHandleEvent sends the given event to the FinalListeners for that event type.
+// Does NOT do any state updating.
+func (wb *WidgetBase) FinalHandleEvent(ev events.Event) {
+	if DebugSettings.EventTrace {
+		if ev.Type() != events.MouseMove {
+			fmt.Println(ev, "final to", wb)
+		}
+	}
+	if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) {
+		return
+	}
+	wb.FinalListeners.Call(ev)
 }
 
 // HandleEvents sets the default WidgetBase event handlers

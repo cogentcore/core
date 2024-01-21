@@ -12,11 +12,11 @@ import (
 	"cogentcore.org/core/enums"
 )
 
-var _AbilitiesValues = []Abilities{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}
+var _AbilitiesValues = []Abilities{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}
 
 // AbilitiesN is the highest valid value
 // for type Abilities, plus one.
-const AbilitiesN Abilities = 15
+const AbilitiesN Abilities = 14
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -34,9 +34,8 @@ func _AbilitiesNoOp() {
 	_ = x[Checkable-(9)]
 	_ = x[Scrollable-(10)]
 	_ = x[Focusable-(11)]
-	_ = x[OuterFocusable-(12)]
-	_ = x[Hoverable-(13)]
-	_ = x[LongHoverable-(14)]
+	_ = x[Hoverable-(12)]
+	_ = x[LongHoverable-(13)]
 }
 
 var _AbilitiesNameToValueMap = map[string]Abilities{
@@ -52,9 +51,8 @@ var _AbilitiesNameToValueMap = map[string]Abilities{
 	`Checkable`:       9,
 	`Scrollable`:      10,
 	`Focusable`:       11,
-	`OuterFocusable`:  12,
-	`Hoverable`:       13,
-	`LongHoverable`:   14,
+	`Hoverable`:       12,
+	`LongHoverable`:   13,
 }
 
 var _AbilitiesDescMap = map[Abilities]string{
@@ -70,9 +68,8 @@ var _AbilitiesDescMap = map[Abilities]string{
 	9:  `Checkable means it can be Checked`,
 	10: `Scrollable means it can be Scrolled`,
 	11: `Focusable means it can be Focused: capable of receiving and processing key events directly and typically changing the style when focused to indicate this property to the user.`,
-	12: `OuterFocusable means that this container element can process key events without being in the Focused state, and it does not grab focus or take away focus from other elements, and does not change its style. These key events are processed _after_ the Focused item. Typically they are navigation keys that individual elements do not process.`,
-	13: `Hoverable means it can be Hovered`,
-	14: `LongHoverable means it can be LongHovered`,
+	12: `Hoverable means it can be Hovered`,
+	13: `LongHoverable means it can be LongHovered`,
 }
 
 var _AbilitiesMap = map[Abilities]string{
@@ -88,9 +85,8 @@ var _AbilitiesMap = map[Abilities]string{
 	9:  `Checkable`,
 	10: `Scrollable`,
 	11: `Focusable`,
-	12: `OuterFocusable`,
-	13: `Hoverable`,
-	14: `LongHoverable`,
+	12: `Hoverable`,
+	13: `LongHoverable`,
 }
 
 // String returns the string representation

@@ -291,7 +291,7 @@ func (sv *SliceViewBase) SetStyles() {
 	svi := sv.This().(SliceViewer)
 
 	sv.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.OuterFocusable, abilities.DoubleClickable)
+		s.SetAbilities(true, abilities.DoubleClickable)
 		s.Direction = styles.Column
 		// absorb horizontal here, vertical in view
 		s.Overflow.X = styles.OverflowAuto
@@ -1891,7 +1891,7 @@ func (sv *SliceViewBase) KeyInputReadOnly(kt events.Event) {
 }
 
 func (sv *SliceViewBase) HandleEvents() {
-	sv.OnKeyChord(func(e events.Event) {
+	sv.OnFinal(events.KeyChord, func(e events.Event) {
 		if sv.IsReadOnly() {
 			if sv.Is(SliceViewReadOnlyKeyNav) {
 				sv.KeyInputReadOnly(e)

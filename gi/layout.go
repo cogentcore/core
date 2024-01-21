@@ -111,7 +111,6 @@ func (ly *Layout) ConfigWidget() {
 
 func (ly *Layout) SetStyles() {
 	ly.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.OuterFocusable)
 		// we never want borders on layouts
 		s.MaxBorder = styles.Border{}
 		switch {
@@ -293,7 +292,7 @@ func (ly *Layout) HandleEvents() {
 // Typically this is done by the parent Scene level layout, but can be
 // done by default if FocusWithinable Ability is set.
 func (ly *Layout) HandleKeys() {
-	ly.OnKeyChord(func(e events.Event) {
+	ly.OnFinal(events.KeyChord, func(e events.Event) {
 		if ly.Is(LayoutNoKeys) {
 			return
 		}

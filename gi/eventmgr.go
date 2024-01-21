@@ -111,9 +111,6 @@ type EventMgr struct {
 	// previously-focused widget -- what was in Focus when FocusClear is called
 	PrevFocus Widget
 
-	// stack of focus within elements
-	FocusWithinStack []Widget
-
 	// Last Select Mode from most recent Mouse, Keyboard events
 	LastSelMode events.SelectModes
 
@@ -182,18 +179,27 @@ func (em *EventMgr) HandleFocusEvent(e events.Event) {
 			em.PrevFocus = nil
 		}
 	}
-	if !e.IsHandled() && em.Focus != nil {
-		em.Focus.HandleEvent(e)
-	}
-	if !e.IsHandled() && em.FocusWithins() {
-		for _, fw := range em.FocusWithinStack {
-			fw.HandleEvent(e)
-			if e.IsHandled() {
-				if DebugSettings.FocusTrace {
-					fmt.Println(em.Scene, "FocusWithin Handled:", fw)
-				}
-				break
+	if em.Focus != nil {
+		em.Focus.WalkUpParent(func(k ki.Ki) bool {
+			_, wb := AsWidget(k)
+			if !wb.IsVisible() {
+				return ki.Break
 			}
+			wb.FirstHandleEvent(e)
+			return !e.IsHandled()
+		})
+		if !e.IsHandled() {
+			em.Focus.HandleEvent(e)
+		}
+		if !e.IsHandled() {
+			em.Focus.WalkUpParent(func(k ki.Ki) bool {
+				_, wb := AsWidget(k)
+				if !wb.IsVisible() {
+					return ki.Break
+				}
+				wb.FinalHandleEvent(e)
+				return !e.IsHandled()
+			})
 		}
 	}
 	em.ManagerKeyChordEvents(e)
@@ -854,25 +860,6 @@ func (em *EventMgr) SetFocusImpl(w Widget, sendEvent bool) bool {
 	if sendEvent && w != nil {
 		w.Send(events.Focus)
 	}
-	return true
-}
-
-// FocusWithins gets the FocusWithin containers of the current Focus event
-func (em *EventMgr) FocusWithins() bool {
-	em.FocusWithinStack = nil
-	if em.Focus == nil {
-		return false
-	}
-	em.Focus.WalkUpParent(func(k ki.Ki) bool {
-		wi, wb := AsWidget(k)
-		if !wb.IsVisible() {
-			return ki.Break
-		}
-		if wb.AbilityIs(abilities.OuterFocusable) {
-			em.FocusWithinStack = append(em.FocusWithinStack, wi)
-		}
-		return ki.Continue
-	})
 	return true
 }
 

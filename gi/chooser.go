@@ -110,7 +110,7 @@ func (ch *Chooser) SetStyles() {
 	ch.Icon = icons.None
 	ch.Indicator = icons.KeyboardArrowDown
 	ch.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Activatable, abilities.OuterFocusable, abilities.Hoverable, abilities.LongHoverable)
+		s.SetAbilities(true, abilities.Activatable, abilities.Hoverable, abilities.LongHoverable)
 		if !ch.Editable {
 			s.SetAbilities(true, abilities.Focusable)
 		}
@@ -635,7 +635,7 @@ func (ch *Chooser) OpenMenu(e events.Event) bool {
 }
 
 func (ch *Chooser) HandleKeys() {
-	ch.OnKeyChord(func(e events.Event) {
+	ch.OnFinal(events.KeyChord, func(e events.Event) {
 		if DebugSettings.KeyEventTrace {
 			fmt.Printf("Chooser KeyChordEvent: %v\n", ch.Path())
 		}
