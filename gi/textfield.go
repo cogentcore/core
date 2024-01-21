@@ -54,16 +54,22 @@ type TextField struct { //core:embedder
 	// replace displayed characters with bullets to conceal text
 	NoEcho bool
 
-	// if specified, a button will be added at the start of the text field with this icon
+	// if specified, a button will be added at the start of
+	// the text field with this icon
 	LeadingIcon icons.Icon `set:"-"`
 
-	// if LeadingIcon is specified, the function to call when the leading icon is clicked
+	// if LeadingIcon is specified, the function to call when
+	// the leading icon is clicked; if this is nil, the leading
+	// icon will not be interactive.
 	LeadingIconOnClick func(e events.Event)
 
-	// if specified, a button will be added at the end of the text field with this icon
+	// if specified, a button will be added at the end of
+	// the text field with this icon
 	TrailingIcon icons.Icon `set:"-"`
 
-	// if TrailingIcon is specified, the function to call when the trailing icon is clicked
+	// if TrailingIcon is specified, the function to call when
+	// the trailing icon is clicked; if this is nil, the trailing
+	// icon will not be interactive.
 	TrailingIconOnClick func(e events.Event)
 
 	// width of cursor -- set from cursor-width property (inherited)
@@ -235,6 +241,10 @@ func (tf *TextField) SetStyles() {
 				s.Min.Y.Em(1)
 				s.Color = colors.Scheme.OnSurfaceVariant
 				s.Margin.SetRight(units.Dp(8))
+				if tf.LeadingIconOnClick == nil {
+					s.SetAbilities(false, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
+					s.Cursor = cursors.None
+				}
 				// If we are responsible for a positive (non-disabled) state layer
 				// (instead of our parent), then we amplify it so that it is clear
 				// that we ourself are receiving a state layer amplifying event.
@@ -261,6 +271,10 @@ func (tf *TextField) SetStyles() {
 				s.Min.Y.Em(1)
 				s.Color = colors.Scheme.OnSurfaceVariant
 				s.Margin.SetLeft(units.Dp(8))
+				if tf.TrailingIconOnClick == nil {
+					s.SetAbilities(false, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
+					s.Cursor = cursors.None
+				}
 				// same reasoning as for leading icon
 				if s.Is(states.Hovered) || s.Is(states.Focused) || s.Is(states.Active) {
 					s.StateLayer *= 3
