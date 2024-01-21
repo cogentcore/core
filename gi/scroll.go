@@ -287,7 +287,7 @@ func (ly *Layout) ScrollToItem(wi Widget) bool {
 
 // AutoScrollDim auto-scrolls along one dimension
 func (ly *Layout) AutoScrollDim(d mat32.Dims, sti, posi int) bool {
-	if !ly.HasScroll[d] {
+	if !ly.HasScroll[d] || ly.Scrolls[d] == nil {
 		return false
 	}
 	sb := ly.Scrolls[d]
@@ -347,7 +347,7 @@ func (ly *Layout) AutoScroll(pos image.Point) bool {
 // ScrollToBoxDim scrolls to ensure that given target [min..max] range
 // along one dimension is in view. Returns true if scrolling was needed
 func (ly *Layout) ScrollToBoxDim(d mat32.Dims, tmini, tmaxi int) bool {
-	if !ly.HasScroll[d] {
+	if !ly.HasScroll[d] || ly.Scrolls[d] == nil {
 		return false
 	}
 	sb := ly.Scrolls[d]
@@ -417,7 +417,7 @@ func (ly *Layout) ScrollDimToStart(d mat32.Dims, posi int) bool {
 // bottom / right of a view box) at the end (bottom / right) of our scroll
 // area, to the extent possible. Returns true if scrolling was needed.
 func (ly *Layout) ScrollDimToEnd(d mat32.Dims, posi int) bool {
-	if !ly.HasScroll[d] {
+	if !ly.HasScroll[d] || ly.Scrolls[d] == nil {
 		return false
 	}
 	pos := float32(posi)
@@ -435,7 +435,7 @@ func (ly *Layout) ScrollDimToEnd(d mat32.Dims, posi int) bool {
 // middle of a view box) at the center of our scroll area, to the extent
 // possible. Returns true if scrolling was needed.
 func (ly *Layout) ScrollDimToCenter(d mat32.Dims, posi int) bool {
-	if !ly.HasScroll[d] {
+	if !ly.HasScroll[d] || ly.Scrolls[d] == nil {
 		return false
 	}
 	pos := float32(posi)
