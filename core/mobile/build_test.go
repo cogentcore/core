@@ -17,6 +17,8 @@ import (
 
 	"cogentcore.org/core/core/config"
 	"cogentcore.org/core/core/mobile/sdkpath"
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/laser"
 	"cogentcore.org/core/xe"
 )
 
@@ -81,6 +83,7 @@ func TestAndroidBuild(t *testing.T) {
 
 	xe.SetMajor(xe.Major().SetStdout(buf).SetStderr(buf))
 	c := &config.Config{}
+	laser.SetFromDefaultTags(c)
 	defer func() {
 		xe.SetMajor(nil)
 	}()
@@ -89,11 +92,16 @@ func TestAndroidBuild(t *testing.T) {
 	if GOOS == "windows" {
 		os.Setenv("HOMEDRIVE", "C:")
 	}
-	err := Build(c)
+	c.ID = "org.golang.todo"
+	pdir, err := os.Getwd()
+	grr.Test(t, err)
+	grr.Test(t, os.Chdir(filepath.Join("..", "..", "goosi", "examples", "drawtri")))
+	err = Build(c)
 	if err != nil {
 		t.Log(buf.String())
 		t.Fatal(err)
 	}
+	grr.Test(t, os.Chdir(pdir))
 
 	diff, err := diffOutput(buf.String(), androidBuildTmpl)
 	if err != nil {
@@ -241,44 +249,29 @@ func TestBuildWithGoModules(t *testing.T) {
 				}
 			}
 
-			var out string
-			switch target {
-			case "android":
-				out = filepath.Join(dir, "basic.apk")
-			case "ios":
-				out = filepath.Join(dir, "Basic.app")
-			}
-
 			tests := []struct {
 				Name string
 				Path string
-				Dir  string
 			}{
 				{
-					Name: "Absolute Path",
-					Path: "cogentcore.org/core/goosi/examples/drawtri",
-				},
-				{
 					Name: "Relative Path",
-					Path: "./example/basic",
-					Dir:  filepath.Join("..", ".."),
+					Path: filepath.Join("..", "..", "goosi", "examples", "drawtri"),
 				},
 			}
 
 			for _, tc := range tests {
 				tc := tc
 				t.Run(tc.Name, func(t *testing.T) {
-					args := []string{"build", "-target=" + target, "-o=" + out}
-					if target == "ios" {
-						args = append(args, "-bundleid=org.golang.gomobiletest")
-					}
-					args = append(args, tc.Path)
-					cmd := exec.Command(filepath.Join(dir, "gomobile"), args...)
-					cmd.Env = append(os.Environ(), "PATH="+path, "GO111MODULE=on")
-					cmd.Dir = tc.Dir
-					if out, err := cmd.CombinedOutput(); err != nil {
-						t.Errorf("gomobile build failed: %v\n%s", err, string(out))
-					}
+					c := &config.Config{}
+					laser.SetFromDefaultTags(c)
+					c.Build.Target = make([]config.Platform, 1)
+					grr.Test(t, c.Build.Target[0].SetString(target))
+					pdir, err := os.Getwd()
+					grr.Test(t, err)
+					grr.Test(t, os.Chdir(filepath.Join("..", "..", "goosi", "examples", "drawtri")))
+					grr.Test(t, os.Chdir(tc.Path))
+					grr.Test(t, Build(c))
+					grr.Test(t, os.Chdir(pdir))
 				})
 			}
 		})
