@@ -10,6 +10,8 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/styles"
 )
 
@@ -32,12 +34,20 @@ func HandleRecover(r any) {
 		AddText("There was an unexpected error and " + goosi.TheApp.Name() + " stopped running.")
 	b.AddBottomBar(func(pw Widget) {
 		NewButton(pw).SetText("Details").SetType(ButtonOutlined).OnClick(func(e events.Event) {
+			txt := fmt.Sprintf("panic: %v\n\n%s", r, stack)
 			d := NewBody("crash-details").AddTitle("Crash details")
-			NewLabel(d).SetText(fmt.Sprintf("panic: %v\n\n%s", r, stack)).Style(func(s *styles.Style) {
+			NewLabel(d).SetText(txt).Style(func(s *styles.Style) {
 				s.Font.Family = string(AppearanceSettings.MonoFont)
 				s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 			})
-			d.AddOkOnly().NewFullDialog(b).Run()
+			d.AddBottomBar(func(pw Widget) {
+				NewButton(pw).SetText("Copy").SetIcon(icons.Copy).SetType(ButtonOutlined).
+					OnClick(func(e events.Event) {
+						d.Clipboard().Write(mimedata.NewText(txt))
+					})
+				d.AddOk(pw)
+			})
+			d.NewFullDialog(b).Run()
 		})
 		NewButton(pw).SetText("Quit").OnClick(func(e events.Event) {
 			quit <- struct{}{}
