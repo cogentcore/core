@@ -12,10 +12,18 @@ import (
 	"cogentcore.org/core/grr"
 )
 
+func TestInlineContainer(t *testing.T) {
+	b := gi.NewBody()
+	grr.Test(t, ReadHTMLString(NewContext(), b, `<button>Test</button>`))
+	if !strings.Contains(b.Child(0).Child(0).Name(), "inline") {
+		t.Errorf("expected inline container for h1 but got %v", b.Child(0))
+	}
+}
+
 func TestNoInlineContainer(t *testing.T) {
 	b := gi.NewBody()
 	grr.Test(t, ReadHTMLString(NewContext(), b, `<h1>Test</h1>`))
-	if strings.Contains(b.Child(0).Name(), "inline") {
+	if strings.Contains(b.Child(0).Child(0).Name(), "inline") {
 		t.Errorf("expected no inline container for h1 but got %v", b.Child(0))
 	}
 }
