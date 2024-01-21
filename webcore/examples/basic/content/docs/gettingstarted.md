@@ -1,6 +1,6 @@
-# Getting started with WebKi
+# Getting started with Webcore
 
-To get started with WebKi, make a new Go file with this code:
+To get started with Webcore, make a new Go file with this code:
 
 ```go
 package main
@@ -9,18 +9,20 @@ import (
 	"embed"
 	"io/fs"
 
-	"goki.dev/gi/v2/gi"
-	"goki.dev/grr"
-	"goki.dev/webki"
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/webcore"
 )
 
-//go:embed content/*
+//go:embed content
 var content embed.FS
 
 func main() {
-	sc := gi.NewScene("webki-basic")
-	grr.Log0(webki.NewPage(sc).SetSource(grr.Log(fs.Sub(content, "content"))).OpenURL(""))
-	gi.NewWindow(sc).Run().Wait()
+	b := gi.NewAppBody("Webcore Basic Example")
+	pg := webcore.NewPage(b).SetSource(grr.Log1(fs.Sub(content, "content")))
+	b.AddAppBar(pg.AppBar)
+	w := b.NewWindow().Run()
+	pg.OpenURL("", true)
+	w.Wait()
 }
-
 ```

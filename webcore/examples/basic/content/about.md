@@ -1,6 +1,6 @@
 # About my website
 
-My website is built using WebKi, the Ki to unlocking the power of the web! Here's how to get started with WebKi:
+My website is built using Webcore, a framework designed for easily building content-focused sites. Here's how to get started with Webcore:
 
 * Read the [docs](docs)
-* Learn more on [GitHub](https://github.com/goki/webki)
+* Learn more on [GitHub](https://github.com/cogentcore/core/tree/main/webcore)
