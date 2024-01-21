@@ -386,6 +386,16 @@ func (ac *AppChooser) OnInit() {
 			s.Border.Color.Zero()
 		}
 	})
+	ac.OnWidgetAdded(func(w Widget) {
+		if w.PathFrom(ac) == "parts/text" {
+			w.Style(func(s *styles.Style) {
+				s.Min.X.SetCustom(func(uc *units.Context) float32 {
+					return uc.Vw(25)
+				})
+				s.Max.X = s.Min.X
+			})
+		}
+	})
 }
 
 func (ac *AppChooser) OnAdd() {
