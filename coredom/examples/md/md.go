@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/grr"
 )
 
-//go:embed gireadme.md
+//go:embed example.md
 var content string
 
 func main() {
