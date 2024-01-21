@@ -10,46 +10,25 @@ import (
 
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/grr"
-	"cogentcore.org/core/ki"
 )
 
-func TestRenderHTML(t *testing.T) {
-	b := gi.NewBody("test-render-html")
-	s := `
-		<h1>Coredom</h1>
-		<p>This is a demonstration of the various features of coredom</p>
-		<button>Hello, world!</button>
-		`
-	grr.Test(t, ReadHTMLString(NewContext(), b, s))
-	b.AssertRender(t, "test-render-html")
-}
-
-func TestHTMLElements(t *testing.T) {
-	tests := []string{
-		`<h1>Test</h1>`,
-		`<h2>Test</h2>`,
-		`<h3>Test</h3>`,
-		`<h4>Test</h4>`,
-		`<h5>Test</h5>`,
-		`<h6>Test</h6>`,
-		`<p>Test</p>`,
-		`<button>Test</button>`,
-		`<input value="Test">`,
+func TestHTML(t *testing.T) {
+	tests := map[string]string{
+		"h1":     `<h1>Test</h1>`,
+		"h2":     `<h2>Test</h2>`,
+		"h3":     `<h3>Test</h3>`,
+		"h4":     `<h4>Test</h4>`,
+		"h5":     `<h5>Test</h5>`,
+		"h6":     `<h6>Test</h6>`,
+		"p":      `<p>Test</p>`,
+		"button": `<button>Test</button>`,
+		"input":  `<input value="Test">`,
 	}
-	for _, s := range tests {
-		b := gi.NewBody()
-		grr.Test(t, ReadHTMLString(NewContext(), b, s))
-
-		// find the tag of the element
-		tag := ""
-		b.WalkPre(func(k ki.Ki) bool {
-			if tp := k.Prop("tag"); tp != nil && tp != "body" {
-				tag = tp.(string)
-				return ki.Break
-			}
-			return ki.Continue
+	for nm, s := range tests {
+		t.Run(nm, func(t *testing.T) {
+			b := gi.NewBody()
+			grr.Test(t, ReadHTMLString(NewContext(), b, s))
+			b.AssertRender(t, filepath.Join("html", nm))
 		})
-
-		b.AssertRender(t, filepath.Join("html", "elements", tag))
 	}
 }
