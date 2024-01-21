@@ -390,7 +390,7 @@ func (ac *AppChooser) OnInit() {
 		if w.PathFrom(ac) == "parts/text" {
 			w.Style(func(s *styles.Style) {
 				s.Min.X.SetCustom(func(uc *units.Context) float32 {
-					return uc.Vw(25)
+					return min(uc.Vw(25), uc.Ch(40))
 				})
 				s.Max.X = s.Min.X
 			})
