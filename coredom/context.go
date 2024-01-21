@@ -19,91 +19,55 @@ import (
 	"golang.org/x/net/html"
 )
 
-// Context contains context information about the current state of a coreodm
-// reader and its surrounding context.
-type Context interface {
-	// Node returns the node that is currently being read.
-	Node() *html.Node
+// Context contains context information about the current state of a coredom
+// reader and its surrounding context. It should be created with [NewContext].
+type Context struct {
+	// Node is the node that is currently being read.
+	Node *html.Node
 
-	// SetNode sets the node that is currently being read.
-	SetNode(node *html.Node)
+	// Styles are the CSS styling rules for each node.
+	Styles map[*html.Node][]*css.Rule
 
-	// Parent returns the current parent widget that a widget
-	// associated with the current node should be added to.
-	// It may make changes to the widget tree, so the widget
-	// must be added to the resulting parent immediately.
-	Parent() gi.Widget
+	// Widgets are the gi widgets for each node.
+	Widgets map[*html.Node]gi.Widget
 
-	// Config configures the given widget. It needs to be called
-	// on all widgets that are not configured through the [New]
-	// pathway.
-	Config(w gi.Widget)
-
-	// NewParent returns the current parent widget that children of
+	// NewParent is the current parent widget that children of
 	// the previously read element should be added to, if any.
-	NewParent() gi.Widget
+	NewParent gi.Widget
 
-	// SetNewParent sets the current parent widget that children of
-	// the previous read element should be added to, if any.
-	SetNewParent(pw gi.Widget)
-
-	// BlockParent returns the current parent widget that non-inline elements
+	// BlockParent is the current parent widget that non-inline elements
 	// should be added to.
-	BlockParent() gi.Widget
+	BlockParent gi.Widget
 
-	// SetBlockParent sets the current parent widget that non-inline elements
-	// should be added to.
-	SetBlockParent(pw gi.Widget)
+	// InlinePw is the current parent widget that inline
+	// elements should be added to; it must be got through
+	// [Context.InlineParent], as it may need to be constructed
+	// on the fly. However, it can be set directly.
+	InlinePw gi.Widget
 
-	// InlineParent returns the current parent widget that inline
-	// elements should be added to.
-	InlineParent() gi.Widget
+	// PageURL, if not "", is the URL of the current page.
+	// Otherwise, there is no current page.
+	PageURL string
 
-	// SetInlineParent sets the current parent widget that inline elements
-	// should be added to.
-	SetInlineParent(pw gi.Widget)
-
-	// PageURL returns the URL of the current page, and "" if there
-	// is no current page.
-	PageURL() string
-
-	// OpenURL opens the given URL.
-	OpenURL(url string)
-
-	// Style returns the styling rules for the node that is currently being read.
-	Style() []*css.Rule
-
-	// AddStyle adds the given CSS style string to the page's compiled styles.
-	AddStyle(style string)
+	// OpenURL is the function used to open URLs.
+	OpenURL func(url string)
 }
 
-// BaseContext returns a [Context] with basic implementations of all functions.
-func BaseContext() Context {
-	return &ContextBase{}
+// NewContext returns a new [Context] with basic defaults.
+func NewContext() *Context {
+	return &Context{
+		Styles:  map[*html.Node][]*css.Rule{},
+		Widgets: map[*html.Node]gi.Widget{},
+		OpenURL: goosi.TheApp.OpenURL,
+	}
 }
 
-// ContextBase contains basic implementations of all [Context] functions.
-type ContextBase struct {
-	Nd *html.Node
-
-	Rules map[*html.Node][]*css.Rule
-
-	WidgetsForNodes map[*html.Node]gi.Widget
-	BlockPw         gi.Widget
-	InlinePw        gi.Widget
-	NewPw           gi.Widget
-}
-
-func (cb *ContextBase) Node() *html.Node {
-	return cb.Nd
-}
-
-func (cb *ContextBase) SetNode(node *html.Node) {
-	cb.Nd = node
-}
-
-func (cb *ContextBase) Parent() gi.Widget {
-	rules := cb.Style()
+// Parent returns the current parent widget that a widget
+// associated with the current node should be added to.
+// It may make changes to the widget tree, so the widget
+// must be added to the resulting parent immediately.
+func (c *Context) Parent() gi.Widget {
+	rules := c.Styles[c.Node]
 	display := ""
 	for _, rule := range rules {
 		for _, decl := range rule.Declarations {
@@ -115,17 +79,20 @@ func (cb *ContextBase) Parent() gi.Widget {
 	var par gi.Widget
 	switch display {
 	case "inline", "inline-block", "":
-		par = cb.InlineParent()
+		par = c.InlineParent()
 	default:
-		par = cb.BlockParent()
-		cb.SetInlineParent(nil)
+		par = c.BlockParent
+		c.InlinePw = nil
 	}
 	return par
 }
 
-func (cb *ContextBase) Config(w gi.Widget) {
+// Config configures the given widget. It needs to be called
+// on all widgets that are not configured through the [New]
+// pathway.
+func (c *Context) Config(w gi.Widget) {
 	wb := w.AsWidget()
-	for _, attr := range cb.Node().Attr {
+	for _, attr := range c.Node.Attr {
 		switch attr.Key {
 		case "id":
 			wb.SetName(attr.Val)
@@ -142,16 +109,16 @@ func (cb *ContextBase) Config(w gi.Widget) {
 				continue
 			}
 			rule := &css.Rule{Declarations: decls}
-			if cb.Rules == nil {
-				cb.Rules = map[*html.Node][]*css.Rule{}
+			if c.Styles == nil {
+				c.Styles = map[*html.Node][]*css.Rule{}
 			}
-			cb.Rules[cb.Node()] = append(cb.Rules[cb.Node()], rule)
+			c.Styles[c.Node] = append(c.Styles[c.Node], rule)
 		default:
 			wb.SetProp(attr.Key, attr.Val)
 		}
 	}
-	wb.SetProp("tag", cb.Node().Data)
-	rules := cb.Style()
+	wb.SetProp("tag", c.Node.Data)
+	rules := c.Styles[c.Node]
 	w.Style(func(s *styles.Style) {
 		for _, rule := range rules {
 			for _, decl := range rule.Declarations {
@@ -162,61 +129,27 @@ func (cb *ContextBase) Config(w gi.Widget) {
 	})
 }
 
-func (cb *ContextBase) NewParent() gi.Widget {
-	return cb.NewPw
-}
-
-func (cb *ContextBase) SetNewParent(pw gi.Widget) {
-	cb.NewPw = pw
-}
-
-func (cb *ContextBase) BlockParent() gi.Widget {
-	return cb.BlockPw
-}
-
-func (cb *ContextBase) SetBlockParent(pw gi.Widget) {
-	cb.BlockPw = pw
-}
-
-func (cb *ContextBase) InlineParent() gi.Widget {
-	if cb.InlinePw != nil {
-		return cb.InlinePw
+// InlineParent returns the current parent widget that inline
+// elements should be added to.
+func (c *Context) InlineParent() gi.Widget {
+	if c.InlinePw != nil {
+		return c.InlinePw
 	}
-	cb.InlinePw = gi.NewLayout(cb.BlockPw, fmt.Sprintf("inline-container-%d", cb.BlockPw.NumLifetimeChildren()))
-	cb.InlinePw.Style(func(s *styles.Style) {
+	c.InlinePw = gi.NewLayout(c.BlockParent, fmt.Sprintf("inline-container-%d", c.BlockParent.NumLifetimeChildren()))
+	c.InlinePw.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 	})
-	return cb.InlinePw
+	return c.InlinePw
 }
 
-func (cb *ContextBase) SetInlineParent(pw gi.Widget) {
-	cb.InlinePw = pw
-}
-
-func (cb *ContextBase) PageURL() string { return "" }
-
-func (cb *ContextBase) OpenURL(url string) {
-	goosi.TheApp.OpenURL(url)
-}
-
-func (cb *ContextBase) Style() []*css.Rule {
-	if cb.Rules == nil {
-		return nil
-	}
-	return cb.Rules[cb.Node()]
-}
-
-func (cb *ContextBase) AddStyle(style string) {
+// AddStyle adds the given CSS style string to the page's compiled styles.
+func (c *Context) AddStyle(style string) {
 	ss, err := parser.Parse(style)
 	if grr.Log(err) != nil {
 		return
 	}
 
-	if cb.Rules == nil {
-		cb.Rules = map[*html.Node][]*css.Rule{}
-	}
-
-	root := RootNode(cb.Node())
+	root := RootNode(c.Node)
 
 	for _, rule := range ss.Rules {
 		var sel *selcss.Selector
@@ -232,7 +165,7 @@ func (cb *ContextBase) AddStyle(style string) {
 
 		matches := sel.Select(root)
 		for _, match := range matches {
-			cb.Rules[match] = append(cb.Rules[match], rule)
+			c.Styles[match] = append(c.Styles[match], rule)
 		}
 	}
 }

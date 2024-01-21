@@ -119,7 +119,7 @@ type Slider struct { //core:embedder
 }
 
 // SliderTypes are the different types of sliders
-type SliderTypes int32 //enums:enum -trimprefix Slider
+type SliderTypes int32 //enums:enum -trim-prefix Slider
 
 const (
 	// SliderSlider indicates a standard, user-controllable slider

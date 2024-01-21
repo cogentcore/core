@@ -5,7 +5,7 @@
 package gi
 
 // Themes are the different possible themes that a user can select in their preferences.
-type Themes int32 //enums:enum -trimprefix Theme
+type Themes int32 //enums:enum -trim-prefix Theme
 
 const (
 	// ThemeAuto indicates to use the theme specified by the operating system

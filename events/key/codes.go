@@ -15,7 +15,7 @@
 package key
 
 // Codes is the identity of a key relative to a notional "standard" keyboard.
-type Codes uint32 //enums:enum -trimprefix Code
+type Codes uint32 //enums:enum -trim-prefix Code
 
 // Physical key codes.
 //

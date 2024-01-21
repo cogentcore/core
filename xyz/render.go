@@ -417,7 +417,7 @@ func (sc *Scene) Render() bool {
 // 	RenderImpl
 
 // RenderClasses define the different classes of rendering
-type RenderClasses int32 //enums:enum -trimprefix RClass
+type RenderClasses int32 //enums:enum -trim-prefix RClass
 
 const (
 	RClassNone          RenderClasses = iota

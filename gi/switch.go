@@ -38,7 +38,7 @@ type Switch struct {
 }
 
 // SwitchTypes contains the different types of [Switch]es
-type SwitchTypes int32 //enums:enum -trimprefix Switch
+type SwitchTypes int32 //enums:enum -trim-prefix Switch
 
 const (
 	// SwitchSwitch indicates to display a switch as a switch (toggle slider)

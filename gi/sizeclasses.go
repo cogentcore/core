@@ -5,7 +5,7 @@
 package gi
 
 // SizeClasses are the different size classes that a window can have.
-type SizeClasses int32 //enums:enum -trimprefix Size
+type SizeClasses int32 //enums:enum -trim-prefix Size
 
 const (
 	// SizeCompact is the size class for windows with a width less than

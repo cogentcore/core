@@ -61,7 +61,7 @@ type Button struct { //core:embedder
 
 // ButtonTypes is an enum containing the
 // different possible types of buttons
-type ButtonTypes int32 //enums:enum -trimprefix Button
+type ButtonTypes int32 //enums:enum -trim-prefix Button
 
 const (
 	// ButtonFilled is a filled button with a
