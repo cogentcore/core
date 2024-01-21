@@ -12,6 +12,7 @@ import (
 
 	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/grr"
+	"cogentcore.org/core/mergefs"
 	_ "github.com/iancoleman/strcase" // needed so that it gets included in the mod (the generator uses it)
 )
 
@@ -19,10 +20,10 @@ import (
 
 // Icons contains all of the embedded svg icons. It is initialized
 // to contain of the default icons located in the svg directory
-// (https://github.com/goki/icons/tree/main/svg), but it can be extended
-// by any packages by using a merged fs package. All icons should be stored
-// in the root directory of the fs, which can be accomplished using [fs.Sub]
-// if you have icons in a subdirectory.
+// (https://github.com/cogentcore/core/tree/main/icons/svg), but it can
+// be extended using [AddFS]. All icons should be stored in the root directory
+// of the fs, which can be accomplished using [fs.Sub] if you have icons in a
+// subdirectory.
 var Icons = grr.Log1(fs.Sub(defaults, "svg"))
 
 // defaults contains the default icons.
@@ -42,6 +43,13 @@ const (
 	// whereas [None] indicates to not render one at all.
 	Blank Icon = "blank"
 )
+
+// AddFS adds the given [fs.FS] of icons to the global [Icons] library.
+// All icons should be stored in the root directory of the fs, which can be
+// accomplished using [fs.Sub] if you have icons in a subdirectory.
+func AddFS(fs fs.FS) {
+	Icons = mergefs.Merge(Icons, fs)
+}
 
 // Icon contains the name of an icon
 type Icon string
