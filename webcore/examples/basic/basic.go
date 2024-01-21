@@ -17,7 +17,7 @@ import (
 var content embed.FS
 
 func main() {
-	b := gi.NewAppBody("Webcore Basic Example")
+	b := gi.NewAppBody("Webcore Example")
 	pg := webcore.NewPage(b).SetSource(grr.Log1(fs.Sub(content, "content")))
 	b.AddAppBar(pg.AppBar)
 	w := b.NewWindow().Run()
