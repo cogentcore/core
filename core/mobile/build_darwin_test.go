@@ -23,19 +23,10 @@ func TestAppleBuild(t *testing.T) {
 	grease.SetFromDefaults(c)
 	defer func() {
 		xe.SetMajor(nil)
-		c.Build.PrintOnly = false
-		c.Build.Print = false
 	}()
-	c.Build.PrintOnly = true
-	c.Build.Print = true
 	c.Build.Target = []config.Platform{{OS: "ios", Arch: "arm64"}}
 	c.ID = "org.golang.todo"
 	gopath = filepath.SplitList(GoEnv("GOPATH"))[0]
-	oldTags := c.Build.Tags
-	c.Build.Tags = []string{"tag1"}
-	defer func() {
-		c.Build.Tags = oldTags
-	}()
 	tests := []struct {
 		pkg  string
 		main bool
@@ -47,13 +38,10 @@ func TestAppleBuild(t *testing.T) {
 		xe.SetMajor(xe.Major().SetStdout(buf).SetStderr(buf))
 		var tmpl *template.Template
 		if test.main {
-			c.Build.Output = "basic.app"
 			tmpl = appleMainBuildTmpl
 		} else {
-			c.Build.Output = ""
 			tmpl = appleOtherBuildTmpl
 		}
-		c.Build.Package = test.pkg
 		err := Build(c)
 		if err != nil {
 			t.Log(buf.String())
@@ -75,13 +63,11 @@ func TestAppleBuild(t *testing.T) {
 			TeamID string
 			Pkg    string
 			Main   bool
-			BuildO string
 		}{
 			outputData: output,
 			TeamID:     teamID,
 			Pkg:        test.pkg,
 			Main:       test.main,
-			BuildO:     c.Build.Output,
 		}
 
 		got := filepath.ToSlash(buf.String())
