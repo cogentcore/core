@@ -23,10 +23,10 @@ body:
       description: If applicable, provide code that can be used reproduce the bug. This will be automatically formatted into code, so no need for backticks.
       render: go
   - type: textarea
-    id: logs
+    id: output
     attributes:
-      label: Relevant log output
-      description: If applicable, copy and paste any relevant log output / panic messages / stack traces. This will be automatically formatted into code, so no need for backticks.
+      label: Relevant output
+      description: If applicable, copy and paste any relevant program output / panic messages / stack traces. This will be automatically formatted into code, so no need for backticks.
       render: shell
   - type: dropdown
     id: platform
