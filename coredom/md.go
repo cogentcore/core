@@ -16,7 +16,7 @@ import (
 
 // ReadMD reads MD (markdown) from the given bytes and adds corresponding
 // Cogent Core widgets to the given [gi.Widget], using the given context.
-func ReadMD(ctx Context, par gi.Widget, b []byte) error {
+func ReadMD(ctx *Context, par gi.Widget, b []byte) error {
 	md := goldmark.New(
 		goldmark.WithExtensions(extension.GFM),
 		goldmark.WithRendererOptions(
@@ -33,6 +33,6 @@ func ReadMD(ctx Context, par gi.Widget, b []byte) error {
 
 // ReadMDString reads MD (markdown) from the given string and adds
 // corresponding Cogent Core widgets to the given [gi.Widget], using the given context.
-func ReadMDString(ctx Context, par gi.Widget, s string) error {
+func ReadMDString(ctx *Context, par gi.Widget, s string) error {
 	return ReadMD(ctx, par, []byte(s))
 }

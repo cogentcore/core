@@ -17,7 +17,7 @@ func TestRenderHTML(t *testing.T) {
 		<p>This is a demonstration of the various features of coredom</p>
 		<button>Hello, world!</button>
 		`
-	err := ReadHTMLString(BaseContext(), b, s)
+	err := ReadHTMLString(NewContext(), b, s)
 	if err != nil {
 		t.Error(err)
 	}

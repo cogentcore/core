@@ -32,11 +32,11 @@ import (
 // type (eg: "button", "input", "p"). It is empty by default, but can be
 // used by anyone in need of behavior different than the default behavior
 // defined in [HandleElement] (for example, for custom elements).
-var ElementHandlers = map[string]func(ctx Context){}
+var ElementHandlers = map[string]func(ctx *Context){}
 
 // New adds a new widget of the given type to the context parent.
 // It automatically calls [Context.Config] on the resulting widget.
-func New[T gi.Widget](ctx Context) T {
+func New[T gi.Widget](ctx *Context) T {
 	par := ctx.Parent()
 	w := ki.New[T](par)
 	ctx.Config(w)
@@ -46,7 +46,7 @@ func New[T gi.Widget](ctx Context) T {
 // NewValue adds a new [giv.Value] with the given value to the
 // context parent. It automatically calls [Context.Config] on
 // the resulting value widget.
-func NewValue(ctx Context, val any) giv.Value {
+func NewValue(ctx *Context, val any) giv.Value {
 	par := ctx.Parent()
 	v := giv.NewValue(par, val)
 	ctx.Config(v.AsWidget())
@@ -56,8 +56,8 @@ func NewValue(ctx Context, val any) giv.Value {
 // HandleELement calls the handler in [ElementHandlers] associated with the current node
 // using the given context. If there is no handler associated with it, it uses default
 // hardcoded configuration code.
-func HandleElement(ctx Context) {
-	tag := ctx.Node().Data
+func HandleElement(ctx *Context) {
+	tag := ctx.Node.Data
 	h, ok := ElementHandlers[tag]
 	if ok {
 		h(ctx)
@@ -73,7 +73,7 @@ func HandleElement(ctx Context) {
 	case "script", "title", "meta":
 		// we don't render anything
 	case "link":
-		rel := GetAttr(ctx.Node(), "rel")
+		rel := GetAttr(ctx.Node, "rel")
 		// TODO(kai/coredom): maybe handle preload
 		if rel == "preload" {
 			return
@@ -82,7 +82,7 @@ func HandleElement(ctx Context) {
 		if rel != "stylesheet" {
 			return
 		}
-		resp, err := Get(ctx, GetAttr(ctx.Node(), "href"))
+		resp, err := Get(ctx, GetAttr(ctx.Node, "href"))
 		if grr.Log(err) != nil {
 			return
 		}
@@ -96,7 +96,7 @@ func HandleElement(ctx Context) {
 		ctx.AddStyle(ExtractText(ctx))
 	case "body", "main", "div", "section", "nav", "footer", "header":
 		f := New[*gi.Frame](ctx)
-		ctx.SetNewParent(f)
+		ctx.NewParent = f
 	case "button":
 		New[*gi.Button](ctx).SetText(ExtractText(ctx))
 	case "h1":
@@ -123,11 +123,11 @@ func HandleElement(ctx Context) {
 		// of nested list items and prevents the created of duplicated tree view items.
 		if ptv, ok := ctx.Parent().(*giv.TreeView); ok {
 			w := ki.LastChild(ptv).(gi.Widget)
-			ctx.SetNewParent(w)
+			ctx.NewParent = w
 			return
 		}
 		tv := New[*giv.TreeView](ctx).SetText("").SetIcon(icons.None)
-		ctx.SetNewParent(tv)
+		ctx.NewParent = tv
 		return
 	case "li":
 		ntv := New[*giv.TreeView](ctx)
@@ -144,10 +144,10 @@ func HandleElement(ctx Context) {
 		// if we have a p as our first or second child, which is typical
 		// for markdown-generated HTML, we use it directly for data extraction
 		// to prevent double elements and unnecessary line breaks.
-		if ctx.Node().FirstChild != nil && ctx.Node().FirstChild.Data == "p" {
-			ctx.SetNode(ctx.Node().FirstChild)
-		} else if ctx.Node().FirstChild != nil && ctx.Node().FirstChild.NextSibling != nil && ctx.Node().FirstChild.NextSibling.Data == "p" {
-			ctx.SetNode(ctx.Node().FirstChild.NextSibling)
+		if ctx.Node.FirstChild != nil && ctx.Node.FirstChild.Data == "p" {
+			ctx.Node = ctx.Node.FirstChild
+		} else if ctx.Node.FirstChild != nil && ctx.Node.FirstChild.NextSibling != nil && ctx.Node.FirstChild.NextSibling.Data == "p" {
+			ctx.Node = ctx.Node.FirstChild.NextSibling
 		}
 
 		etxt := ExtractText(ctx)
@@ -164,7 +164,7 @@ func HandleElement(ctx Context) {
 		})
 	case "img":
 		img := New[*gi.Image](ctx)
-		n := ctx.Node()
+		n := ctx.Node
 		go func() {
 			src := GetAttr(n, "src")
 			resp, err := Get(ctx, src)
@@ -186,18 +186,18 @@ func HandleElement(ctx Context) {
 			}
 		}()
 	case "input":
-		ityp := GetAttr(ctx.Node(), "type")
-		val := GetAttr(ctx.Node(), "value")
+		ityp := GetAttr(ctx.Node, "type")
+		val := GetAttr(ctx.Node, "value")
 		switch ityp {
 		case "number":
 			fval := float32(grr.Log1(strconv.ParseFloat(val, 32)))
 			New[*gi.Spinner](ctx).SetValue(fval)
 		case "checkbox":
 			New[*gi.Switch](ctx).SetType(gi.SwitchCheckbox).
-				SetState(HasAttr(ctx.Node(), "checked"), states.Checked)
+				SetState(HasAttr(ctx.Node, "checked"), states.Checked)
 		case "radio":
 			New[*gi.Switch](ctx).SetType(gi.SwitchRadioButton).
-				SetState(HasAttr(ctx.Node(), "checked"), states.Checked)
+				SetState(HasAttr(ctx.Node, "checked"), states.Checked)
 		case "range":
 			fval := float32(grr.Log1(strconv.ParseFloat(val, 32)))
 			New[*gi.Slider](ctx).SetValue(fval)
@@ -217,13 +217,13 @@ func HandleElement(ctx Context) {
 		buf.SetText([]byte(ExtractText(ctx)))
 		New[*texteditor.Editor](ctx).SetBuf(buf)
 	default:
-		ctx.SetNewParent(ctx.Parent())
+		ctx.NewParent = ctx.Parent()
 	}
 }
 
 // HandleLabel creates a new label from the given information, setting the text and
 // the label click function so that URLs are opened according to [Context.OpenURL].
-func HandleLabel(ctx Context) *gi.Label {
+func HandleLabel(ctx *Context) *gi.Label {
 	lb := New[*gi.Label](ctx).SetText(ExtractText(ctx))
 	lb.HandleLabelClick(func(tl *paint.TextLink) {
 		ctx.OpenURL(tl.URL)
@@ -236,8 +236,8 @@ func HandleLabel(ctx Context) *gi.Label {
 // it wraps the label text with the [NodeString] of the given node, meaning that it
 // should be used for standalone elements that are meant to only exist in labels
 // (eg: a, span, b, code, etc).
-func HandleLabelTag(ctx Context) *gi.Label {
-	start, end := NodeString(ctx.Node())
+func HandleLabelTag(ctx *Context) *gi.Label {
+	start, end := NodeString(ctx.Node)
 	str := start + ExtractText(ctx) + end
 	lb := New[*gi.Label](ctx).SetText(str)
 	lb.HandleLabelClick(func(tl *paint.TextLink) {
@@ -270,8 +270,8 @@ func HasAttr(n *html.Node, attr string) bool {
 // code of the response and closes the response body and returns an error if
 // it is not [http.StatusOK]. If the error is nil, then the response body is
 // not closed and must be closed by the caller.
-func Get(ctx Context, url string) (*http.Response, error) {
-	u, err := ParseRelativeURL(url, ctx.PageURL())
+func Get(ctx *Context, url string) (*http.Response, error) {
+	u, err := ParseRelativeURL(url, ctx.PageURL)
 	if err != nil {
 		return nil, err
 	}

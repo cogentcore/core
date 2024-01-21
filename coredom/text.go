@@ -17,14 +17,14 @@ import (
 // for that, you can directly access the [html.Node.Data] field. It uses
 // the given page URL for context when resolving URLs, but it can be
 // omitted if not available.
-func ExtractText(ctx Context) string {
+func ExtractText(ctx *Context) string {
 	if ctx.Node().FirstChild == nil {
 		return ""
 	}
 	return extractTextImpl(ctx, ctx.Node().FirstChild)
 }
 
-func extractTextImpl(ctx Context, n *html.Node) string {
+func extractTextImpl(ctx *Context, n *html.Node) string {
 	str := ""
 	if n.Type == html.TextNode {
 		str += n.Data
