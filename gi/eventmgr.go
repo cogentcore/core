@@ -949,28 +949,9 @@ func (em *EventMgr) FocusPrev() bool {
 // FocusPrevFrom sets the focus on the previous item before the given item
 // (can be nil).
 func (em *EventMgr) FocusPrevFrom(from Widget) bool {
-	var prev Widget
-	wi := from
-	wb := wi.AsWidget()
-	fmt.Println("prev start:", from)
-
-	for wi != nil {
-		wi, wb = wb.WidgetPrevEnabled()
-		fmt.Println("prev:", wi)
-		if wi == nil {
-			break
-		}
-		if wb.AbilityIs(abilities.Focusable) {
-			fmt.Println("got:", wi)
-			prev = wi
-			break
-		}
-		if wb.Parts != nil {
-			if em.FocusLastFrom(wb.Parts) {
-				return true
-			}
-		}
-	}
+	prev := WidgetPrevFunc(from, func(w Widget) bool {
+		return w.IsVisible() && !w.StateIs(states.Disabled) && w.AbilityIs(abilities.Focusable)
+	})
 	em.SetFocusEvent(prev)
 	return prev != nil
 }

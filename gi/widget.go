@@ -8,6 +8,7 @@ package gi
 
 import (
 	"image"
+	"log/slog"
 	"sync"
 
 	"cogentcore.org/core/abilities"
@@ -568,14 +569,77 @@ func (wb *WidgetBase) WidgetNextEnabled() (Widget, *WidgetBase) {
 	return nwi, nwb
 }
 
-// WidgetPrevEnabled returns the previous visible and enabled node in the tree as a Widget,
+// WidgetPrev returns the previous widget in the tree,
+// including Parts, which are considered to come after children.
 // nil if no more.
-func (wb *WidgetBase) WidgetPrevEnabled() (Widget, *WidgetBase) {
-	nwi, nwb := AsWidget(ki.Prev(wb.This()))
-	for nwb != nil && (!nwb.IsVisible() || nwb.StateIs(states.Disabled)) {
-		nwi, nwb = AsWidget(ki.Prev(nwb.This()))
+func WidgetPrev(wi Widget) Widget {
+	if wi.Parent() == nil {
+		return nil
 	}
-	return nwi, nwb
+	par := wi.Parent().(Widget)
+	myidx := wi.IndexInParent()
+	if myidx > 0 {
+		nn := par.Child(myidx - 1).(Widget)
+		return LastWidgetChildParts(nn) // go to parts
+	}
+	if par.Is(ki.Field) { // we are parts, go into children
+		par = par.Parent().(Widget)
+		return LastWidgetChild(par) // go to children
+	}
+	// we were children, done
+	return par
+}
+
+// LastWidgetChildParts returns the last child under given node, or node itself if no children
+// starts with Parts,
+func LastWidgetChildParts(wi Widget) Widget {
+	wb := wi.AsWidget()
+	if wb.Parts != nil {
+		ew, err := wb.Parts.Children().ElemFromEndTry(0)
+		if err == nil {
+			return LastWidgetChildParts(ew.(Widget))
+		}
+	}
+	if wi.HasChildren() {
+		ew, err := wi.Children().ElemFromEndTry(0)
+		if err == nil {
+			return LastWidgetChildParts(ew.(Widget))
+		}
+	}
+	return wi
+}
+
+// LastWidgetChild returns the last child under given node, or node itself if no children
+// starts with Children, not Parts
+func LastWidgetChild(wi Widget) Widget {
+	if wi.HasChildren() {
+		ew, err := wi.Children().ElemFromEndTry(0)
+		if err == nil {
+			return LastWidgetChildParts(ew.(Widget))
+		}
+	}
+	return wi
+}
+
+// WidgetPrevFunc returns the previous widget in the tree,
+// including Parts, which are considered to come after children,
+// continuing until the given function returns true.
+// nil if no more.
+func WidgetPrevFunc(wi Widget, fun func(w Widget) bool) Widget {
+	for {
+		pw := WidgetPrev(wi)
+		if pw == nil || pw.This() == nil {
+			return nil
+		}
+		if fun(pw) {
+			return pw
+		}
+		if pw == wi {
+			slog.Error("WidgetPrevFunc", "start", wi, "pw == wi", pw)
+			return nil
+		}
+		wi = pw
+	}
 }
 
 // WidgetTooltip is the base implementation of [Widget.WidgetTooltip],
