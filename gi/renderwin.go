@@ -392,9 +392,7 @@ func (w *RenderWin) Resized() {
 	if DebugSettings.WinEventTrace {
 		fmt.Printf("Win: %v Resized from: %v to: %v\n", w.Name, curRg, rg)
 	}
-	if curRg == (mat32.Geom2DInt{}) { // first open
-		StringsInsertFirstUnique(&FocusRenderWins, w.Name, 10)
-	}
+	StringsInsertFirstUnique(&FocusRenderWins, w.Name, 10)
 	rctx.Geom = rg
 	rctx.SetFlag(true, RenderVisible)
 	rctx.LogicalDPI = w.LogicalDPI()
