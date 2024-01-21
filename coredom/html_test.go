@@ -29,6 +29,12 @@ func TestHTMLElements(t *testing.T) {
 		`<h1>Test</h1>`,
 		`<h2>Test</h2>`,
 		`<h3>Test</h3>`,
+		`<h4>Test</h4>`,
+		`<h5>Test</h5>`,
+		`<h6>Test</h6>`,
+		`<p>Test</p>`,
+		`<button>Test</button>`,
+		`<input value="Test">`,
 	}
 	for _, s := range tests {
 		b := gi.NewBody()
