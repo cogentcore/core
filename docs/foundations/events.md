@@ -43,7 +43,7 @@ There are three levels of event handlers (see [[event.Listener]]): `First`, regu
 
 ### Key events
 
-Key events ([[events.KeyChord]) have special logic for priority ordering, so that outer containers can have a chance to process navigation and other such events, without being the Focus widget.  Specifically, the progressively higher Parent widgets above the current Focus widget with a [[events.KeyChord]] First or Final handler gets called before (First) and after (Final) the standard Focus event handler.
+Key events ([[events.KeyChord]]) have special logic for priority ordering, so that outer containers can have a chance to process navigation and other such events, without being the Focus widget.  Specifically, the progressively higher Parent widgets above the current Focus widget with a [[events.KeyChord]] First or Final handler gets called before (First) and after (Final) the standard Focus event handler.
 
 Thus, if you need to intercept key events that might otherwise be processed by the Focus Widget, add a First KeyChord event handler function.  If you only want to handle any events not otherwise processed by the Focus Widget (low priority), add a Final KeyChord event.  Generally, these container Widgets should not have the [[abilities.Focusable]] flag set, and they should not get standard Focus events.
 

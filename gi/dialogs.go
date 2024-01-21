@@ -101,16 +101,18 @@ func (bd *Body) AddOk(pw Widget, name ...string) *Button {
 		nm = name[0]
 	}
 	bt := NewButton(pw, nm).SetText("OK")
-	bt.OnClick(func(e events.Event) {
+	bt.OnFirst(events.Click, func(e events.Event) { // first de-focus any active editors
+		bt.FocusClear()
+	})
+	bt.OnFinal(events.Click, func(e events.Event) { // then close
 		e.SetHandled() // otherwise propagates to dead elements
 		bd.Close()
 	})
 	bd.OnFirst(events.KeyChord, func(e events.Event) {
 		kf := keyfun.Of(e.KeyChord())
 		if kf == keyfun.Accept {
-			bt.Send(events.Click, e)
 			e.SetHandled()
-			bd.Close()
+			bt.Send(events.Click, e)
 		}
 	})
 	return bt
