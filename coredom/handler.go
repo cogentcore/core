@@ -70,7 +70,7 @@ func HandleElement(ctx *Context) {
 	}
 
 	switch tag {
-	case "script", "title", "meta", "head":
+	case "script", "title", "meta":
 		// we don't render anything
 	case "link":
 		rel := GetAttr(ctx.Node, "rel")
