@@ -944,7 +944,7 @@ func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
 		XMLAddAttr(&se.Attr, "height", fmt.Sprintf("%g", nd.Size.Y))
 		XMLAddAttr(&se.Attr, "preserveAspectRatio", fmt.Sprintf("%v", nd.PreserveAspectRatio))
 		ib, fmt := images.ToBase64PNG(nd.Pixels)
-		XMLAddAttr(&se.Attr, "xlink:href", "data:"+fmt+";base64,"+string(images.Base64SplitLines(ib)))
+		XMLAddAttr(&se.Attr, "href", "data:"+fmt+";base64,"+string(images.Base64SplitLines(ib)))
 	case *MetaData:
 		if strings.HasPrefix(nd.Nm, "namedview") {
 			nm = "sodipodi:namedview"
@@ -1033,7 +1033,7 @@ func SVGNodeXMLGrad(nd *Gradient, name string, enc *XMLEncoder) {
 	}
 
 	if nd.StopsName != "" {
-		XMLAddAttr(&me.Attr, "xlink:href", "#"+nd.StopsName)
+		XMLAddAttr(&me.Attr, "href", "#"+nd.StopsName)
 	}
 
 	enc.EncodeToken(me)
@@ -1082,7 +1082,6 @@ func (sv *SVG) MarshalXMLx(enc *XMLEncoder, se xml.StartElement) error {
 	XMLAddAttr(&me.Attr, "viewBox", fmt.Sprintf("%g %g %g %g", sv.Root.ViewBox.Min.X, sv.Root.ViewBox.Min.Y, sv.Root.ViewBox.Size.X, sv.Root.ViewBox.Size.Y))
 	XMLAddAttr(&me.Attr, "xmlns:inkscape", "http://www.inkscape.org/namespaces/inkscape")
 	XMLAddAttr(&me.Attr, "xmlns:sodipodi", "http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd")
-	XMLAddAttr(&me.Attr, "xmlns:xlink", "http://www.w3.org/1999/xlink")
 	XMLAddAttr(&me.Attr, "xmlns", "http://www.w3.org/2000/svg")
 	enc.EncodeToken(me)
 

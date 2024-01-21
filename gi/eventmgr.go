@@ -952,13 +952,16 @@ func (em *EventMgr) FocusPrevFrom(from Widget) bool {
 	var prev Widget
 	wi := from
 	wb := wi.AsWidget()
+	fmt.Println("prev start:", from)
 
 	for wi != nil {
 		wi, wb = wb.WidgetPrevEnabled()
+		fmt.Println("prev:", wi)
 		if wi == nil {
 			break
 		}
 		if wb.AbilityIs(abilities.Focusable) {
+			fmt.Println("got:", wi)
 			prev = wi
 			break
 		}
@@ -988,6 +991,7 @@ func (em *EventMgr) FocusLast() bool {
 // returns true if a focusable item was found.
 func (em *EventMgr) FocusLastFrom(from Widget) bool {
 	last := ki.Last(from.This()).(Widget)
+	fmt.Println("last:", last, "from:", from)
 	return em.FocusOnOrPrev(last)
 }
 
