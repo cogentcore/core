@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"strconv"
 
+	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
@@ -81,6 +82,16 @@ func (sp *Spinner) SetStyles() {
 		} else {
 			s.Min.X.Ch(14)
 			s.Max.X.Ch(18)
+		}
+	})
+	sp.OnWidgetAdded(func(w Widget) {
+		switch w.PathFrom(sp) {
+		case "parts/lead-icon", "parts/trail-icon":
+			w.Style(func(s *styles.Style) {
+				// icons do not get separate focus, as people can
+				// use the arrow keys to get the same effect
+				s.SetAbilities(false, abilities.Focusable)
+			})
 		}
 	})
 }
