@@ -7,7 +7,7 @@ SVG implements the Scalable Vector Graphics standard, rendering onto a Go standa
 Cogent Core provides a helpful command line tool for rendering and creating svg files. To install it, run:
 
 ```sh
-go install cogentcore.org/core/svg/cmd/svg@latest
+go install cogentcore.org/core/svg/cmd/svg@main
 ```
 
 Example usage:
