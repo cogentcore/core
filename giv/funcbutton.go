@@ -334,7 +334,7 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 				}
 			}
 		}
-		gi.NewSnackbar(ctx).AddSnackbarText(txt).Stage.Run()
+		gi.NewBody().AddSnackbarText(txt).NewSnackbar(ctx).Run()
 		return
 	}
 	if len(fb.Returns) == 1 && fb.Returns[0].HasDialog() { // go direct to dialog

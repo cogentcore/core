@@ -26,13 +26,13 @@ func main() {
 		gi.NewButton(tb).SetText("Button 1").
 			OnClick(func(e events.Event) {
 				fmt.Println("AppBar Button 1")
-				gi.NewSnackbar(tb).AddSnackbarText("Something went wrong!").
+				gi.NewBody().AddSnackbarText("Something went wrong!").
 					AddSnackbarButton("Try again", func(e events.Event) {
 						fmt.Println("got snackbar try again event")
 					}).
 					AddSnackbarIcon(icons.Close, func(e events.Event) {
 						fmt.Println("got snackbar close icon event")
-					}).Stage.Run()
+					}).NewSnackbar(tb).Run()
 			})
 		gi.NewButton(tb).SetText("Button 2").
 			OnClick(func(e events.Event) {

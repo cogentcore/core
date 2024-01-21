@@ -111,7 +111,7 @@ func (is *Inspector) Open(filename gi.Filename) { //gti:add
 func (is *Inspector) ToggleSelectionMode() { //gti:add
 	sc := gi.AsScene(is.KiRoot)
 	if sc == nil {
-		gi.NewSnackbar(is).AddSnackbarText("SelectionMode is only available on Scene objects").Stage.Run()
+		gi.NewBody().AddSnackbarText("SelectionMode is only available on Scene objects").NewSnackbar(is).Run()
 		return
 	}
 	updt := sc.UpdateStart()
@@ -146,7 +146,7 @@ func (is *Inspector) SelectionMonitor() {
 		}
 		tv := is.TreeView().FindSyncNode(sw.This())
 		if tv == nil {
-			gi.NewSnackbar(is).AddSnackbarText(fmt.Sprintf("Inspector: tree view node missing: %v", sw)).Stage.Run()
+			gi.NewBody().AddSnackbarText(fmt.Sprintf("Inspector: tree view node missing: %v", sw)).NewSnackbar(is).Run()
 		} else {
 			updt := is.UpdateStartAsync() // coming from other tree
 			tv.OpenParents()

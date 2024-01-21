@@ -23,10 +23,10 @@ func NonNilContext(ctx Widget) Widget {
 	return CurRenderWin.MainStageMgr.Top().Scene
 }
 
-// NewDialog returns a new PopupWindow dialog [Stage] in the context
-// of the given widget, optionally with the given name.
-// See [NewFullDialog] for a full-window dialog.
-func (bd *Body) NewDialog(ctx Widget, name ...string) *Stage {
+// NewDialog returns a new [DialogStage] that does not take up the
+// full window it is created in, in the context of the given widget.
+// See [Body.NewFullDialog] for a full-window dialog.
+func (bd *Body) NewDialog(ctx Widget) *Stage {
 	ctx = NonNilContext(ctx)
 	bd.DialogStyles()
 	bd.Scene.Stage = NewMainStage(DialogStage, bd.Scene)
@@ -36,10 +36,10 @@ func (bd *Body) NewDialog(ctx Widget, name ...string) *Stage {
 	return bd.Scene.Stage
 }
 
-// NewFullDialog returns a new FullWindow dialog [Stage] in the context
-// of the given widget, optionally with the given name.
-// See [NewDialog] for a popup-window dialog.
-func (bd *Body) NewFullDialog(ctx Widget, name ...string) *Stage {
+// NewFullDialog returns a new [DialogStage] that takes up the full
+// window it is created in, in the context of the given widget, optionally
+// with the given name. See [Body.NewDialog] for a non-full-window dialog.
+func (bd *Body) NewFullDialog(ctx Widget) *Stage {
 	bd.DialogStyles()
 	bd.Scene.Stage = NewMainStage(DialogStage, bd.Scene)
 	bd.Scene.Stage.SetModal(true)
