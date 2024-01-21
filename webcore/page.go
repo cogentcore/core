@@ -52,24 +52,37 @@ type Page struct {
 
 var _ ki.Ki = (*Page)(nil)
 
+func (pg *Page) OnInit() {
+	pg.Frame.OnInit()
+	pg.Context = coredom.NewContext()
+	pg.Context.OpenURL = func(url string) {
+		pg.OpenURL(url, true)
+	}
+	pg.Style(func(s *styles.Style) {
+		s.Direction = styles.Column
+	})
+}
+
 // OpenURL sets the content of the page from the given url. If the given URL
 // has no scheme (eg: "/about"), then it sets the content of the page to the
 // file specified by the URL. This is either the "index.md" file in the
 // corresponding directory (eg: "/about/index.md") or the corresponding
 // md file (eg: "/about.md"). If it has a scheme, (eg: "https://example.com"),
 // then it opens it in the user's default browser.
-func (pg *Page) OpenURL(rawURL string, addToHistory bool) error {
+func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	u, err := url.Parse(rawURL)
 	if err != nil {
-		return err
+		gi.ErrorSnackbar(pg, err, "Invalid URL")
+		return
 	}
 	if u.Scheme != "" {
 		goosi.TheApp.OpenURL(u.String())
-		return nil
+		return
 	}
 
 	if pg.Source == nil {
-		return fmt.Errorf("page source must not be nil")
+		gi.MessageSnackbar(pg, "Programmer error: page source must not be nil")
+		return
 	}
 
 	// if we are not rooted, we go relative to our current fs path
@@ -89,7 +102,8 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) error {
 	fsPath := path.Join(rawURL, "index.md")
 	exists, err := dirs.FileExistsFS(pg.Source, fsPath)
 	if err != nil {
-		return err
+		gi.ErrorSnackbar(pg, err, "Error finding page")
+		return
 	}
 	if !exists {
 		fsPath = path.Clean(rawURL) + ".md"
@@ -99,7 +113,8 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) error {
 
 	b, err := fs.ReadFile(pg.Source, fsPath)
 	if err != nil {
-		return err
+		gi.ErrorSnackbar(pg, err, "Error opening page")
+		return
 	}
 
 	btp := []byte("+++")
@@ -125,11 +140,11 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) error {
 	fr.DeleteChildren(true)
 	err = coredom.ReadMD(pg.Context, fr, b)
 	if err != nil {
-		return err
+		gi.ErrorSnackbar(pg, err, "Error loading page")
+		return
 	}
 	fr.Update()
 	fr.UpdateEndLayout(updt)
-	return nil
 }
 
 func (pg *Page) ConfigWidget() {
@@ -152,7 +167,7 @@ func (pg *Page) ConfigWidget() {
 			// we need a slash so that it doesn't think it's a relative URL
 			url = "/" + sn.PathFrom(nav)
 		}
-		grr.Log(pg.OpenURL(url, true))
+		pg.OpenURL(url, true)
 	})
 	grr.Log(fs.WalkDir(pg.Source, ".", func(fpath string, d fs.DirEntry, err error) error {
 		// already handled
@@ -194,7 +209,7 @@ func (pg *Page) ConfigWidget() {
 
 // AppBar is the default app bar for a [Page]
 func (pg *Page) AppBar(tb *gi.Toolbar) {
-	ch := tb.ChildByName("nav-bar").(*gi.Chooser)
+	ch := tb.ChildByName("app-chooser").(*gi.AppChooser)
 
 	back := tb.ChildByName("back").(*gi.Button)
 	back.OnClick(func(e events.Event) {
@@ -203,7 +218,7 @@ func (pg *Page) AppBar(tb *gi.Toolbar) {
 			// we reverse the order
 			// ch.SelectItem(len(pg.History) - pg.HistoryIndex - 1)
 			// we need a slash so that it doesn't think it's a relative URL
-			grr.Log(pg.OpenURL("/"+pg.History[pg.HistoryIndex], false))
+			pg.OpenURL("/"+pg.History[pg.HistoryIndex], false)
 		}
 	})
 
@@ -217,7 +232,7 @@ func (pg *Page) AppBar(tb *gi.Toolbar) {
 	}
 	ch.OnChange(func(e events.Event) {
 		// we need a slash so that it doesn't think it's a relative URL
-		grr.Log(pg.OpenURL("/"+ch.CurLabel, true))
+		pg.OpenURL("/"+ch.CurLabel, true)
 		e.SetHandled()
 	})
 }

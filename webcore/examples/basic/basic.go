@@ -17,10 +17,10 @@ import (
 var content embed.FS
 
 func main() {
-	b := gi.NewAppBody("webki-basic")
+	b := gi.NewAppBody("Webcore Basic Example")
 	pg := webcore.NewPage(b).SetSource(grr.Log1(fs.Sub(content, "content")))
 	b.AddAppBar(pg.AppBar)
 	w := b.NewWindow().Run()
-	grr.Log(pg.OpenURL("", true))
+	pg.OpenURL("", true)
 	w.Wait()
 }
