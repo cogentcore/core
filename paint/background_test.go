@@ -30,7 +30,7 @@ func TestBackgroundColor(t *testing.T) {
 func TestBackgroundImage(t *testing.T) {
 	img, _, err := images.Open("test.png")
 	grr.Test(t, err)
-	RunTest(t, "background_image", 750, 400, func(pc *Context) {
+	RunTest(t, "background_image", 1260, 200, func(pc *Context) {
 		pabg := colors.C(colors.White)
 		st := styles.NewStyle()
 		st.Background = img
@@ -45,9 +45,34 @@ func TestBackgroundImage(t *testing.T) {
 		}
 
 		test(styles.FitFill, mat32.V2(0, 0))
-		test(styles.FitContain, mat32.V2(0, 120))
-		test(styles.FitCover, mat32.V2(250, 0))
-		test(styles.FitNone, mat32.V2(250, 120))
-		test(styles.FitScaleDown, mat32.V2(500, 0))
+		test(styles.FitContain, mat32.V2(220, 0))
+		test(styles.FitCover, mat32.V2(440, 0))
+		test(styles.FitScaleDown, mat32.V2(660, 0))
+		test(styles.FitNone, mat32.V2(880, 0))
+	})
+}
+
+func TestObjectFit(t *testing.T) {
+	img, _, err := images.Open("test.png")
+	// obj := mat32.V2FromPoint(img.Bounds().Size())
+	grr.Test(t, err)
+	RunTest(t, "object_fit", 1260, 300, func(pc *Context) {
+		st := styles.NewStyle()
+		st.ToDots()
+		box := mat32.V2(200, 100)
+
+		test := func(of styles.ObjectFits, pos mat32.Vec2) {
+			st.ObjectFit = of
+			fitimg := st.ResizeImage(img, box)
+			pc.DrawImage(fitimg, pos.X, pos.Y)
+			// trgsz := styles.ObjectSizeFromFit(of, obj, box)
+			// fmt.Println(of, trgsz)
+		}
+
+		test(styles.FitFill, mat32.V2(0, 0))
+		test(styles.FitContain, mat32.V2(220, 0))
+		test(styles.FitCover, mat32.V2(440, 0))
+		test(styles.FitScaleDown, mat32.V2(660, 0))
+		test(styles.FitNone, mat32.V2(880, 0))
 	})
 }

@@ -37,8 +37,14 @@ func (vb *ViewBox) Defaults() {
 	vb.PreserveAspectRatio.MeetOrSlice = Meet
 }
 
+// BoxString returns the string representation of just the viewbox:
+// "min.X min.Y size.X size.Y"
+func (vb *ViewBox) BoxString() string {
+	return fmt.Sprintf(`viewbox="%g %g %g %g"`, vb.Min.X, vb.Min.Y, vb.Size.X, vb.Size.Y)
+}
+
 func (vb *ViewBox) String() string {
-	return vb.PreserveAspectRatio.String()
+	return vb.BoxString() + ` preserveAspectRatio="` + vb.PreserveAspectRatio.String() + `"`
 }
 
 // ViewBoxAlign defines values for the PreserveAspectRatio alignment factor
@@ -150,4 +156,36 @@ func (pa *ViewBoxPreserveAspectRatio) SetString(s string) error {
 		return nil
 	}
 	return errors.Join(errs...)
+}
+
+// SetFromStyle sets from ObjectFit and Justify (X) and Align (Y) Content
+// in given style.
+func (pa *ViewBoxPreserveAspectRatio) SetFromStyle(s *styles.Style) {
+	switch s.Justify.Content {
+	case styles.Start:
+		pa.Align.X = AlignMin
+	case styles.End:
+		pa.Align.X = AlignMax
+	case styles.Center:
+		pa.Align.X = AlignMid
+	}
+	switch s.Align.Content {
+	case styles.Start:
+		pa.Align.Y = AlignMin
+	case styles.End:
+		pa.Align.Y = AlignMax
+	case styles.Center:
+		pa.Align.Y = AlignMid
+	}
+	// todo: could override with ObjectPosition but maybe not worth it?
+
+	switch s.ObjectFit {
+	case styles.FitFill:
+		pa.Align.Set(AlignNone)
+	case styles.FitContain:
+		pa.MeetOrSlice = Meet
+	case styles.FitCover:
+		pa.MeetOrSlice = Slice
+		// todo: FitScaleDown
+	}
 }

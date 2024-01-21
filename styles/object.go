@@ -40,53 +40,66 @@ const (
 	FitScaleDown
 )
 
+// ObjectSizeFromFit returns the target object size based on the given
+// ObjectFits setting, original object size, and target box size
+// for the object to fit into.
+func ObjectSizeFromFit(fit ObjectFits, obj, box mat32.Vec2) mat32.Vec2 {
+	oar := obj.X / obj.Y
+	bar := box.X / box.Y
+	var sz mat32.Vec2
+	switch fit {
+	case FitFill:
+		return box
+	case FitContain, FitScaleDown:
+		if oar >= bar {
+			// if we have a higher x:y than them, x is our limiting size
+			sz.X = box.X
+			// and we make our y in proportion to that
+			sz.Y = obj.Y * (box.X / obj.X)
+		} else {
+			// if we have a lower x:y than them, y is our limiting size
+			sz.Y = box.Y
+			// and we make our x in proportion to that
+			sz.X = obj.X * (box.Y / obj.Y)
+		}
+	case FitCover:
+		if oar < bar {
+			// if we have a lower x:y than them, x is our limiting size
+			sz.X = box.X
+			// and we make our y in proportion to that
+			sz.Y = obj.Y * (box.X / obj.X)
+		} else {
+			// if we have a lower x:y than them, y is our limiting size
+			sz.Y = box.Y
+			// and we make our x in proportion to that
+			sz.X = obj.X * (box.Y / obj.Y)
+		}
+	}
+	return sz
+}
+
 // ResizeImage resizes the given image according to [Style.ObjectFit]
-// in an object of the given size.
-func (s *Style) ResizeImage(img image.Image, size mat32.Vec2) image.Image {
-	sz := img.Bounds().Size()
-	szx, szy := float32(sz.X), float32(sz.Y)
-	// image and box aspect ratio
-	iar := szx / szy
-	bar := size.X / size.Y
+// in an object of the given box size.
+func (s *Style) ResizeImage(img image.Image, box mat32.Vec2) image.Image {
+	obj := mat32.V2FromPoint(img.Bounds().Size())
+	sz := ObjectSizeFromFit(s.ObjectFit, obj, box)
 	switch s.ObjectFit {
 	case FitFill:
-		return transform.Resize(img, int(size.X), int(size.Y), transform.Linear)
-	case FitContain, FitScaleDown:
-		var x, y float32
-		if iar >= bar {
-			// if we have a higher x:y than them, x is our limiting size
-			x = size.X
-			// and we make our y in proportion to that
-			y = szy * (size.X / szx)
-		} else {
-			// if we have a lower x:y than them, y is our limiting size
-			y = size.Y
-			// and we make our x in proportion to that
-			x = szx * (size.Y / szy)
-		}
+		return transform.Resize(img, int(box.X), int(box.Y), transform.Linear)
+	case FitScaleDown:
 		// in FitScaleDown, if containing results in a larger image, we use
 		// the original image instead
-		if s.ObjectFit == FitScaleDown && x >= szx {
+		if sz.X >= obj.X {
 			return img
 		}
-		return transform.Resize(img, int(x), int(y), transform.Linear)
+		fallthrough
+	case FitContain:
+		return transform.Resize(img, int(sz.X), int(sz.Y), transform.Linear)
 	case FitCover:
-		var x, y float32
-		if iar < bar {
-			// if we have a lower x:y than them, x is our limiting size
-			x = size.X
-			// and we make our y in proportion to that
-			y = szy * (size.X / szx)
-		} else {
-			// if we have a lower x:y than them, y is our limiting size
-			y = size.Y
-			// and we make our x in proportion to that
-			x = szx * (size.Y / szy)
-		}
 		// our source image is the computed size
-		rimg := transform.Resize(img, int(x), int(y), transform.Linear)
+		rimg := transform.Resize(img, int(sz.X), int(sz.Y), transform.Linear)
 		// but we cap the destination size to the size of the containg object
-		drect := image.Rect(0, 0, int(min(x, size.X)), int(min(y, size.Y)))
+		drect := image.Rect(0, 0, int(min(sz.X, box.X)), int(min(sz.Y, box.Y)))
 		dst := image.NewRGBA(drect)
 		draw.Draw(dst, drect, rimg, image.Point{}, draw.Src)
 		return dst
