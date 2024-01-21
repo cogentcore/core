@@ -18,10 +18,10 @@ import (
 // the given page URL for context when resolving URLs, but it can be
 // omitted if not available.
 func ExtractText(ctx *Context) string {
-	if ctx.Node().FirstChild == nil {
+	if ctx.Node.FirstChild == nil {
 		return ""
 	}
-	return extractTextImpl(ctx, ctx.Node().FirstChild)
+	return extractTextImpl(ctx, ctx.Node.FirstChild)
 }
 
 func extractTextImpl(ctx *Context, n *html.Node) string {

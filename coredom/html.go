@@ -37,7 +37,7 @@ func ReadHTMLString(ctx *Context, par gi.Widget, s string) error {
 func ReadHTMLNode(ctx *Context, par gi.Widget, n *html.Node) error {
 	// nil parent means we are root, so we add user agent styles here
 	if n.Parent == nil {
-		ctx.SetNode(n)
+		ctx.Node = n
 		ctx.AddStyle(UserAgentStyles)
 	}
 
@@ -48,17 +48,17 @@ func ReadHTMLNode(ctx *Context, par gi.Widget, n *html.Node) error {
 			New[*gi.Label](ctx).SetText(str)
 		}
 	case html.ElementNode:
-		ctx.SetNode(n)
-		ctx.SetBlockParent(par)
-		ctx.SetNewParent(nil)
+		ctx.Node = n
+		ctx.BlockParent = par
+		ctx.NewParent = nil
 
 		HandleElement(ctx)
 	default:
-		ctx.SetNewParent(par)
+		ctx.NewParent = par
 	}
 
-	if ctx.NewParent() != nil && n.FirstChild != nil {
-		ReadHTMLNode(ctx, ctx.NewParent(), n.FirstChild)
+	if ctx.NewParent != nil && n.FirstChild != nil {
+		ReadHTMLNode(ctx, ctx.NewParent, n.FirstChild)
 	}
 
 	if n.NextSibling != nil {
