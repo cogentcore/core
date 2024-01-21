@@ -7,6 +7,7 @@ package main
 //go:generate core generate -add-types -add-funcs
 
 import (
+	"path/filepath"
 	"strings"
 
 	"cogentcore.org/core/grease"
@@ -15,7 +16,7 @@ import (
 
 func main() { //gti:skip
 	opts := grease.DefaultOptions("svg", "svg", "Command line tools for rendering and creating svg files")
-	grease.Run(opts, &Config{}, Render)
+	grease.Run(opts, &Config{}, Render, EmbedImage)
 }
 
 type Config struct {
@@ -24,7 +25,7 @@ type Config struct {
 	Input string `posarg:"0"`
 
 	// Output is the filename of the output file.
-	// Defaults to input with .png instead of .svg.
+	// Defaults to input with the extension changed to the output format.
 	Output string `flag:"o,output"`
 
 	Render RenderConfig `cmd:"render"`
@@ -40,7 +41,7 @@ type RenderConfig struct {
 	Height int `posarg:"2" required:"-"`
 }
 
-// Render renders the svg file to an image.
+// Render renders the input svg file to the output image file.
 //
 //grease:cmd -root
 func Render(c *Config) error {
@@ -55,7 +56,23 @@ func Render(c *Config) error {
 	}
 	sv.Render()
 	if c.Output == "" {
-		c.Output = strings.TrimSuffix(c.Input, ".svg") + ".png"
+		c.Output = strings.TrimSuffix(c.Input, filepath.Ext(c.Input)) + ".png"
 	}
 	return sv.SavePNG(c.Output)
+}
+
+// EmbedImage embeds the input image file into the output svg file.
+func EmbedImage(c *Config) error {
+	sv := svg.NewSVG(0, 0)
+	sv.Norm = true
+	img := svg.NewImage(&sv.Root)
+	err := img.OpenImage(c.Input, 0, 0)
+	if err != nil {
+		return err
+	}
+	sv.Root.ViewBox.Size.SetPoint(img.Pixels.Bounds().Size())
+	if c.Output == "" {
+		c.Output = strings.TrimSuffix(c.Input, filepath.Ext(c.Input)) + ".svg"
+	}
+	return sv.SaveXML(c.Output)
 }
