@@ -26,7 +26,7 @@ type Body struct { //core:no-new
 // having to access the Scene directly.
 func NewBody(name ...string) *Body {
 	bd := &Body{}
-	nm := ""
+	nm := "body"
 	if len(name) > 0 {
 		nm = name[0]
 	}

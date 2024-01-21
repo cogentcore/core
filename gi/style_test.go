@@ -16,9 +16,9 @@ import (
 )
 
 func TestParentActualBackground(t *testing.T) {
-	make := func() (sc *Scene, fr *Frame) {
-		sc = NewScene()
-		fr = NewFrame(sc)
+	make := func() (b *Body, fr *Frame) {
+		b = NewBody()
+		fr = NewFrame(b)
 		fr.Style(func(s *styles.Style) {
 			s.Min.Set(units.Em(5))
 			s.Align.Content = styles.Center

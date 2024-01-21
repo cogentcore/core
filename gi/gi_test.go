@@ -17,9 +17,9 @@ import (
 )
 
 func TestBasic(t *testing.T) {
-	sc := NewScene()
-	NewLabel(sc).SetText("Test")
-	sc.AssertRender(t, "basic")
+	b := NewBody()
+	NewLabel(b).SetText("Test")
+	b.AssertRender(t, "basic")
 }
 
 var (

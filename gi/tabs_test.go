@@ -19,14 +19,14 @@ func TestTabs(t *testing.T) {
 		NewButton(tb).SetText(tb.Name()).SetIcon(icons.Send)
 	}
 	for _, typ := range TabTypesValues() {
-		sc := NewScene()
-		sc.Style(func(s *styles.Style) {
+		b := NewBody()
+		b.Style(func(s *styles.Style) {
 			s.Min.Set(units.Dp(800))
 		})
-		ts := NewTabs(sc).SetType(typ)
+		ts := NewTabs(b).SetType(typ)
 		configTab(ts.NewTab("Search", icons.Search))
 		configTab(ts.NewTab("Discover", icons.Explore))
 		configTab(ts.NewTab("History", icons.History))
-		sc.AssertRender(t, testName("tabs", typ))
+		b.AssertRender(t, testName("tabs", typ))
 	}
 }

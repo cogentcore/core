@@ -13,10 +13,10 @@ func TestButton(t *testing.T) {
 		for _, str := range testStrings {
 			for _, ic := range testIcons {
 				for _, st := range testStates {
-					sc := NewScene()
-					bt := NewButton(sc).SetType(typ).SetText(str).SetIcon(ic).SetState(true, st...)
+					b := NewBody()
+					bt := NewButton(b).SetType(typ).SetText(str).SetIcon(ic).SetState(true, st...)
 					nm := testName("button", typ, str, ic, bt.Styles.State)
-					sc.AssertRender(t, nm)
+					b.AssertRender(t, nm)
 				}
 			}
 		}

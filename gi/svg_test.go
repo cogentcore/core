@@ -13,9 +13,9 @@ import (
 )
 
 func TestSVG(t *testing.T) {
-	sc := NewScene()
-	sv := NewSVG(sc)
+	b := NewBody()
+	sv := NewSVG(b)
 	sv.SVG.Root.ViewBox.Size.SetScalar(10)
 	svg.NewCircle(&sv.SVG.Root).SetPos(mat32.V2(5, 5)).SetRadius(5)
-	sc.AssertRender(t, filepath.Join("svg", "basic_circle"))
+	b.AssertRender(t, filepath.Join("svg", "basic_circle"))
 }

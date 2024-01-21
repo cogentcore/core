@@ -15,40 +15,40 @@ import (
 	"cogentcore.org/core/units"
 )
 
-var testImagePath = Filename(filepath.Join("..", "logo", "goki_logo.png"))
+var testImagePath = Filename(filepath.Join("..", ".core", "icon.png"))
 
 func TestImageBasic(t *testing.T) {
-	sc := NewScene()
-	fr := NewFrame(sc)
+	b := NewBody()
+	fr := NewFrame(b)
 	img := NewImage(fr)
 	grr.Test(t, img.OpenImage(testImagePath))
-	sc.AssertRender(t, filepath.Join("image", "basic"))
+	b.AssertRender(t, filepath.Join("image", "basic"))
 }
 
 func TestImageCropped(t *testing.T) {
-	sc := NewScene()
-	sc.Style(func(s *styles.Style) {
+	b := NewBody()
+	b.Style(func(s *styles.Style) {
 		s.Max.Set(units.Dp(75))
 	})
-	fr := NewFrame(sc).Style(func(s *styles.Style) {
+	fr := NewFrame(b).Style(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowAuto)
 	})
 	img := NewImage(fr)
 	grr.Test(t, img.OpenImage(testImagePath))
-	sc.AssertRender(t, filepath.Join("image", "cropped"))
+	b.AssertRender(t, filepath.Join("image", "cropped"))
 }
 
 func TestImageScrolled(t *testing.T) {
-	sc := NewScene()
-	sc.Style(func(s *styles.Style) {
+	b := NewBody()
+	b.Style(func(s *styles.Style) {
 		s.Max.Set(units.Dp(75))
 	})
-	fr := NewFrame(sc).Style(func(s *styles.Style) {
+	fr := NewFrame(b).Style(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowAuto)
 	})
 	img := NewImage(fr)
 	grr.Test(t, img.OpenImage(testImagePath))
-	sc.AssertRender(t, filepath.Join("image", "scrolled"), func() {
-		sc.GoosiEventMgr().Scroll(image.Pt(10, 10), mat32.V2(2, 3))
+	b.AssertRender(t, filepath.Join("image", "scrolled"), func() {
+		b.GoosiEventMgr().Scroll(image.Pt(10, 10), mat32.V2(2, 3))
 	})
 }

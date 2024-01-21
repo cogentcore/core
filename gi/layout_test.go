@@ -45,15 +45,15 @@ func TestLayoutFramesAlignItems(t *testing.T) {
 		for _, dir := range dirs {
 			for _, align := range aligns {
 				tnm := fmt.Sprintf("wrap_%v_dir_%v_align_%v", wrap, dir, align)
-				sc := NewScene()
-				sc.Style(func(s *styles.Style) {
+				b := NewBody()
+				b.Style(func(s *styles.Style) {
 					s.Overflow.Set(styles.OverflowVisible)
 					s.Direction = dir
 					s.Wrap = wrap
 					s.Align.Items = align
 				})
-				PlainFrames(sc, mat32.V2(0, 0))
-				sc.AssertRender(t, filepath.Join(tdir, tnm))
+				PlainFrames(b, mat32.V2(0, 0))
+				b.AssertRender(t, filepath.Join(tdir, tnm))
 			}
 		}
 	}
@@ -71,8 +71,8 @@ func TestLayoutFramesAlignContent(t *testing.T) {
 			for _, align := range aligns {
 				align := align
 				tnm := fmt.Sprintf("wrap_%v_dir_%v_align_%v", wrap, dir, align)
-				sc := NewScene()
-				sc.Style(func(s *styles.Style) {
+				b := NewBody()
+				b.Style(func(s *styles.Style) {
 					if dir == styles.Row {
 						s.Min.Y.Px(300)
 					} else {
@@ -83,8 +83,8 @@ func TestLayoutFramesAlignContent(t *testing.T) {
 					s.Wrap = wrap
 					s.Align.Content = align
 				})
-				PlainFrames(sc, mat32.V2(0, 0))
-				sc.AssertRender(t, filepath.Join(tdir, tnm))
+				PlainFrames(b, mat32.V2(0, 0))
+				b.AssertRender(t, filepath.Join(tdir, tnm))
 			}
 		}
 	}
@@ -106,8 +106,8 @@ func TestLayoutFramesJustifyContent(t *testing.T) {
 			for _, align := range aligns {
 				align := align
 				tnm := fmt.Sprintf("wrap_%v_dir_%v_align_%v", wrap, dir, align)
-				sc := NewScene()
-				sc.Style(func(s *styles.Style) {
+				b := NewBody()
+				b.Style(func(s *styles.Style) {
 					if dir == styles.Row {
 						s.Min.X.Px(dsz)
 					} else {
@@ -118,8 +118,8 @@ func TestLayoutFramesJustifyContent(t *testing.T) {
 					s.Wrap = wrap
 					s.Justify.Content = align
 				})
-				PlainFrames(sc, mat32.V2(0, 0))
-				sc.AssertRender(t, filepath.Join(tdir, tnm))
+				PlainFrames(b, mat32.V2(0, 0))
+				b.AssertRender(t, filepath.Join(tdir, tnm))
 			}
 		}
 	}
@@ -132,15 +132,15 @@ func TestLayoutFramesJustifyItems(t *testing.T) {
 	for _, align := range aligns {
 		align := align
 		tnm := fmt.Sprintf("align_%v", align)
-		sc := NewScene()
-		sc.Style(func(s *styles.Style) {
+		b := NewBody()
+		b.Style(func(s *styles.Style) {
 			s.Overflow.Set(styles.OverflowVisible)
 			s.Display = styles.Grid
 			s.Columns = 2
 			s.Justify.Items = align
 		})
-		PlainFrames(sc, mat32.V2(0, 0))
-		sc.AssertRender(t, filepath.Join(tdir, tnm))
+		PlainFrames(b, mat32.V2(0, 0))
+		b.AssertRender(t, filepath.Join(tdir, tnm))
 	}
 }
 
@@ -152,19 +152,19 @@ func TestLayoutFramesJustifySelf(t *testing.T) {
 		ai := ai
 		align := align
 		tnm := fmt.Sprintf("align_%v", align)
-		sc := NewScene()
-		sc.Style(func(s *styles.Style) {
+		b := NewBody()
+		b.Style(func(s *styles.Style) {
 			s.Overflow.Set(styles.OverflowVisible)
 			s.Display = styles.Grid
 			s.Columns = 2
 			s.Justify.Items = align
 		})
-		PlainFrames(sc, mat32.V2(0, 0))
-		_, fr2 := AsWidget(sc.ChildByName("fr2"))
+		PlainFrames(b, mat32.V2(0, 0))
+		_, fr2 := AsWidget(b.ChildByName("fr2"))
 		fr2.Style(func(s *styles.Style) {
 			s.Justify.Self = aligns[(ai+1)%len(aligns)]
 		})
-		sc.AssertRender(t, filepath.Join(tdir, tnm))
+		b.AssertRender(t, filepath.Join(tdir, tnm))
 	}
 }
 
@@ -176,19 +176,19 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 		ai := ai
 		align := align
 		tnm := fmt.Sprintf("align_%v", align)
-		sc := NewScene()
-		sc.Style(func(s *styles.Style) {
+		b := NewBody()
+		b.Style(func(s *styles.Style) {
 			s.Overflow.Set(styles.OverflowVisible)
 			s.Display = styles.Grid
 			s.Columns = 2
 			s.Align.Items = align
 		})
-		PlainFrames(sc, mat32.V2(0, 0))
-		_, fr2 := AsWidget(sc.ChildByName("fr2"))
+		PlainFrames(b, mat32.V2(0, 0))
+		_, fr2 := AsWidget(b.ChildByName("fr2"))
 		fr2.Style(func(s *styles.Style) {
 			s.Align.Self = aligns[(ai+1)%len(aligns)]
 		})
-		sc.AssertRender(t, filepath.Join(tdir, tnm))
+		b.AssertRender(t, filepath.Join(tdir, tnm))
 	}
 }
 
@@ -463,13 +463,13 @@ var (
 
 func TestLayoutScrollLabel(t *testing.T) {
 	// TODO(#808)
-	sc := NewScene()
-	sc.Style(func(s *styles.Style) {
+	b := NewBody()
+	b.Style(func(s *styles.Style) {
 		s.Max.Set(units.Dp(50))
 	})
-	fr := NewFrame(sc).Style(func(s *styles.Style) {
+	fr := NewFrame(b).Style(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowAuto)
 	})
 	NewLabel(fr).SetText(LongText)
-	sc.AssertRender(t, filepath.Join("layout", "scroll", "label"))
+	b.AssertRender(t, filepath.Join("layout", "scroll", "label"))
 }

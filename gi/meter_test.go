@@ -15,11 +15,11 @@ import (
 func TestMeter(t *testing.T) {
 	for _, d := range styles.DirectionsValues() {
 		for v := 0; v <= 100; v += 10 {
-			sc := NewScene()
-			NewMeter(sc).SetMax(100).SetValue(float32(v)).Style(func(s *styles.Style) {
+			b := NewBody()
+			NewMeter(b).SetMax(100).SetValue(float32(v)).Style(func(s *styles.Style) {
 				s.Direction = d
 			})
-			sc.AssertRender(t, filepath.Join("meter", d.String(), strconv.Itoa(v)))
+			b.AssertRender(t, filepath.Join("meter", d.String(), strconv.Itoa(v)))
 		}
 	}
 }
