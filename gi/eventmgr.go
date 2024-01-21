@@ -877,25 +877,9 @@ func (em *EventMgr) FocusNext() bool {
 // that can accept focus after the given item.
 // returns true if a focus item found.
 func (em *EventMgr) FocusNextFrom(from Widget) bool {
-	var next Widget
-	wi := from
-	wb := wi.AsWidget()
-
-	for wi != nil {
-		if wb.Parts != nil {
-			if em.FocusNextFrom(wb.Parts) {
-				return true
-			}
-		}
-		wi, wb = wb.WidgetNextEnabled()
-		if wi == nil {
-			break
-		}
-		if wb.AbilityIs(abilities.Focusable) {
-			next = wi
-			break
-		}
-	}
+	next := WidgetNextFunc(from, func(w Widget) bool {
+		return w.IsVisible() && !w.StateIs(states.Disabled) && w.AbilityIs(abilities.Focusable)
+	})
 	em.SetFocusEvent(next)
 	return next != nil
 }
@@ -933,7 +917,6 @@ func (em *EventMgr) FocusOnOrPrev(foc Widget) bool {
 		em.SetFocusEvent(foc)
 		return true
 	}
-	fmt.Println("on or prev:", foc)
 	return em.FocusPrevFrom(foc)
 }
 

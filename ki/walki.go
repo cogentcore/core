@@ -50,10 +50,7 @@ func Next(nd Ki) Ki {
 	if !nd.HasChildren() {
 		return NextSibling(nd)
 	}
-	if nd.HasChildren() {
-		return nd.Child(0)
-	}
-	return nil
+	return nd.Child(0)
 }
 
 // NextSibling returns next sibling or nil if none

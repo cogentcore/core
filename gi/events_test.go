@@ -39,3 +39,32 @@ func TestWidgetPrev(t *testing.T) {
 		return false
 	})
 }
+
+func TestWidgetNext(t *testing.T) {
+	b := NewBody()
+	ft := NewTextField(b, "tf1").AddClearButton()
+	NewTextField(b, "tf2").SetLeadingIcon(icons.Search)
+	NewTextField(b, "tf3")
+	b.ConfigTree()
+
+	paths := []string{
+		"/body/tf1.parts/trail-icon-str",
+		"/body/tf1.parts/trail-icon",
+		"/body/tf1.parts/trail-icon.parts/icon",
+		"/body/tf2",
+		"/body/tf2.parts/lead-icon",
+		"/body/tf2.parts/lead-icon.parts/icon",
+		"/body/tf3",
+	}
+	i := 0
+	WidgetNextFunc(ft, func(w Widget) bool {
+		// fmt.Println(w)
+		p := w.Path()
+		tp := paths[i]
+		if p != tp {
+			t.Errorf("path != target: path: %s != target: %s\n", p, tp)
+		}
+		i++
+		return false
+	})
+}
