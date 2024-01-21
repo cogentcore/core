@@ -185,12 +185,12 @@ func TestRegexImportGolangXPackage(t *testing.T) {
 		want    string
 		wantLen int
 	}{
-		{"ffffffff t golang.org/x/mobile", "cogentcore.org/core/mobile", 2},
-		{"ffffffff t github.com/example/repo/vendor/golang.org/x/mobile", "cogentcore.org/core/mobile", 2},
+		{"ffffffff t golang.org/x/mobile", "golang.org/x/mobile", 2},
+		{"ffffffff t github.com/example/repo/vendor/golang.org/x/mobile", "golang.org/x/mobile", 2},
 		{"ffffffff t github.com/example/golang.org/x/mobile", "", 0},
 		{"ffffffff t github.com/example/repo", "", 0},
 		{"ffffffff t github.com/example/repo/vendor", "", 0},
-		{"ffffffff t _golang.org/x/mobile/app", "cogentcore.org/core/mobile/app", 2},
+		{"ffffffff t _golang.org/x/mobile/app", "golang.org/x/mobile", 2},
 	}
 
 	for _, tc := range tests {
@@ -220,7 +220,7 @@ func TestBuildWithGoModules(t *testing.T) {
 	}
 	defer os.RemoveAll(dir)
 
-	if out, err := exec.Command("go", "build", "-o="+dir, "cogentcore.org/core/mobile/cmd/gomobile").CombinedOutput(); err != nil {
+	if out, err := exec.Command("go", "build", "-o="+dir, "cogentcore.org/core/goosi/examples/drawtri").CombinedOutput(); err != nil {
 		t.Fatalf("%v: %s", err, string(out))
 	}
 	path := dir
