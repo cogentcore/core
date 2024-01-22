@@ -23,7 +23,7 @@ import (
 // todo: autoRepeat, autoRepeatInterval, autoRepeatDelay
 
 // Button is a pressable button with text, an icon, an indicator, a shortcut,
-// and/or a menu. The standard behavior is to register a click event with OnClick(...).
+// and/or a menu. The standard behavior is to register a click event with OnClick.
 type Button struct { //core:embedder
 	Box
 

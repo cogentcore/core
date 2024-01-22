@@ -8,6 +8,7 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/webcore"
 )
 
@@ -26,6 +27,11 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		gi.NewButton(parent).SetText("Click me").OnClick(func(e events.Event) {
 			fmt.Println("Button clicked at", e.Pos())
 			e.SetHandled() // this event will not be handled by other event handlers now
+		})
+	},
+	"button-basic": func(parent gi.Widget) {
+		gi.NewButton(parent).SetText("Send").SetIcon(icons.Send).OnClick(func(e events.Event) {
+			gi.MessageSnackbar(parent, "Message sent")
 		})
 	},
 }
