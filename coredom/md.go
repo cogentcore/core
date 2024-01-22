@@ -12,13 +12,17 @@ import (
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/renderer/html"
+	"go.abhg.dev/goldmark/wikilink"
 )
 
 // ReadMD reads MD (markdown) from the given bytes and adds corresponding
 // Cogent Core widgets to the given [gi.Widget], using the given context.
 func ReadMD(ctx *Context, par gi.Widget, b []byte) error {
 	md := goldmark.New(
-		goldmark.WithExtensions(extension.GFM),
+		goldmark.WithExtensions(
+			extension.GFM,
+			&wikilink.Extender{WikilinkResolver{}},
+		),
 		goldmark.WithRendererOptions(
 			html.WithUnsafe(),
 		),
@@ -35,4 +39,11 @@ func ReadMD(ctx *Context, par gi.Widget, b []byte) error {
 // corresponding Cogent Core widgets to the given [gi.Widget], using the given context.
 func ReadMDString(ctx *Context, par gi.Widget, s string) error {
 	return ReadMD(ctx, par, []byte(s))
+}
+
+// WikilinkResolver implements [wikilink.Resolver] by using pkg.go.dev.
+type WikilinkResolver struct{}
+
+func (wr WikilinkResolver) ResolveWikilink(n *wikilink.Node) (destination []byte, err error) {
+	return append([]byte("https://pkg.go.dev/cogentcore.org/core/"), n.Target...), nil
 }

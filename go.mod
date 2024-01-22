@@ -10,6 +10,7 @@ require (
 	github.com/anthonynsimon/bild v0.13.0
 	github.com/aymerick/douceur v0.2.0
 	github.com/chewxy/math32 v1.10.1
+	github.com/ericchiang/css v1.3.0
 	github.com/expr-lang/expr v1.15.8
 	github.com/fatih/camelcase v1.0.0
 	github.com/fsnotify/fsnotify v1.7.0
@@ -26,6 +27,8 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/muesli/termenv v0.15.2
 	github.com/pelletier/go-toml/v2 v2.1.1
+	github.com/yuin/goldmark v1.4.13
+	go.abhg.dev/goldmark/wikilink v0.5.0
 	golang.org/x/image v0.15.0
 	golang.org/x/mod v0.14.0
 	golang.org/x/net v0.20.0
