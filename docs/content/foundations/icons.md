@@ -1,6 +1,6 @@
 # Icons
 
-The [[core/icons]] package contains a number of SVG icons selected from [Material Design Symbols](https://fonts.google.com/icons), sourced through [marella/material-symbols](https://github.com/marella/material-symbols).
+The [[icons]] package contains a number of SVG icons selected from [Material Design Symbols](https://fonts.google.com/icons), sourced through [marella/material-symbols](https://github.com/marella/material-symbols).
 
 To specify a standard icon, it is best to refer to it by the named constants defined in the `icons` package, like the `icons.Send` case in the following example:
 
