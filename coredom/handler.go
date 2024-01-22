@@ -115,7 +115,7 @@ func HandleElement(ctx *Context) {
 		HandleLabel(ctx)
 	case "pre":
 		HandleLabel(ctx).Style(func(s *styles.Style) {
-			s.Text.WhiteSpace = styles.WhiteSpacePre
+			s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 		})
 	case "ol", "ul":
 		// if we are already in a treeview, we just return in the last item in it
