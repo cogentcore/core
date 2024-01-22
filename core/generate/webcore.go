@@ -11,7 +11,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"regexp"
+	"strconv"
 
 	"cogentcore.org/core/core/config"
 	"cogentcore.org/core/gengo"
@@ -24,8 +24,6 @@ var (
 	codeStart        = []byte("```go")
 	codeEnd          = []byte("```")
 	newline          = []byte{'\n'}
-
-	idRegex = regexp.MustCompile(`id="(.+)"`)
 )
 
 // Webcore does any necessary generation for webcore.
@@ -59,7 +57,7 @@ func GetWebcoreExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
 		var curExample [][]byte
 		inExample := false
 		inCode := false
-		exampleID := ""
+		numExamples := 0
 		for sc.Scan() {
 			b := sc.Bytes()
 
@@ -69,10 +67,6 @@ func GetWebcoreExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
 					continue
 				}
 				inExample = true
-				exampleID = string(idRegex.FindAllSubmatch(b, -1)[0][1])
-				if exampleID == "" {
-					return fmt.Errorf("missing ID for <core-example> tag in %q", path)
-				}
 				continue
 			}
 			if hasTag {
@@ -95,9 +89,15 @@ func GetWebcoreExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
 			}
 
 			if hasExampleEnd {
-				examples.Add(exampleID, bytes.Join(curExample, newline))
+				rel, err := filepath.Rel(c.Webcore, path)
+				if err != nil {
+					return err
+				}
+				id := rel + "-" + strconv.Itoa(numExamples)
+				examples.Add(id, bytes.Join(curExample, newline))
 				curExample = nil
 				inExample = false
+				numExamples++
 				continue
 			}
 

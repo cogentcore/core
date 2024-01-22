@@ -18,18 +18,18 @@ func init() {
 
 // WebcoreExamples are the compiled webcore examples for this app.
 var WebcoreExamples = map[string]func(parent gi.Widget){
-	"click-basic": func(parent gi.Widget) {
+	"foundations/events.md-0": func(parent gi.Widget) {
 		gi.NewButton(parent).SetText("Click me").OnClick(func(e events.Event) {
 			fmt.Println("Button clicked")
 		})
 	},
-	"click-pos": func(parent gi.Widget) {
+	"foundations/events.md-1": func(parent gi.Widget) {
 		gi.NewButton(parent).SetText("Click me").OnClick(func(e events.Event) {
 			fmt.Println("Button clicked at", e.Pos())
 			e.SetHandled() // this event will not be handled by other event handlers now
 		})
 	},
-	"button-basic": func(parent gi.Widget) {
+	"widgets/button.md-0": func(parent gi.Widget) {
 		gi.NewButton(parent).SetText("Send").SetIcon(icons.Send).OnClick(func(e events.Event) {
 			gi.MessageSnackbar(parent, "Message sent")
 		})
