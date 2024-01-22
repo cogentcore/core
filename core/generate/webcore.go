@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"cogentcore.org/core/core/config"
 	"cogentcore.org/core/gengo"
@@ -93,6 +94,9 @@ func GetWebcoreExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
 				if err != nil {
 					return err
 				}
+				rel = strings.ReplaceAll(rel, `\`, "/")
+				rel = strings.TrimSuffix(rel, filepath.Ext(rel))
+				rel = strings.TrimSuffix(rel, "/index")
 				id := rel + "-" + strconv.Itoa(numExamples)
 				examples.Add(id, bytes.Join(curExample, newline))
 				curExample = nil
