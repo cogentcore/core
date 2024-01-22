@@ -13,10 +13,10 @@ import (
 	"cogentcore.org/core/events/key"
 )
 
-// GoGi event structure was originally derived from go.wde and golang/x/mobile/event
+// Cogent Core event structure was originally derived from go.wde and golang/x/mobile/event
 // but has diverged significantly from there.  Also informed by JavaScript event type.
 //
-// GoGi requires event type enum for widgets to request what events to
+// Cogent Core requires event type enum for widgets to request what events to
 // receive, and we add an overall interface with base support for time and
 // marking events as processed, which is critical for simplifying logic and
 // preventing unintended multiple effects

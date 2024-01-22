@@ -18,7 +18,7 @@ var samplefile gi.Filename = "texteditor.go"
 
 func main() {
 	b := gi.NewAppBody("Cogent Core Text Editor Demo")
-	b.App().About = `This is a demo of the texteditor.Editor in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Cogent Core on GitHub</a>`
+	b.App().About = `This is a demo of the texteditor.Editor in the <b>Cogent Core</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Cogent Core on GitHub</a>`
 
 	splt := gi.NewSplits(b, "split-view")
 	splt.SetSplits(.5, .5)

@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 /*
-Package GiV (GoGi Views) provides a model / view framework to view Go data using reflection
+Package GiV (Cogent Core Views) provides a model / view framework to view Go data using reflection
 
 Views are Widgets that automatically display and interact with standard Go
 data, including structs, maps, slices, and the primitive data elements

@@ -19,7 +19,7 @@ Cogent Core provides a general-purpose tree container type, that can support all
 
 A virtue of using an appropriate data representation is that some important operations can be performed particularly concisely and efficiently when they are naturally supported by the data structure.  For example, matrices and vectors as supported by numpy or MATLAB provide a concise high-level language for expressing many algorithms.
 
-For trees, Cogent Core leverages the tree structure for automatically computing the appropriate extent of a scenegraph that needs to be updated, with an arbitrary sequence of individual operations, by propagating updating flags through the tree, and tracking the "high water mark" (see UpdateStart / End).  This makes the GoGi GUI efficient in terms of what needs to be redrawn, while keeping the code local and simple.
+For trees, Cogent Core leverages the tree structure for automatically computing the appropriate extent of a scenegraph that needs to be updated, with an arbitrary sequence of individual operations, by propagating updating flags through the tree, and tracking the "high water mark" (see UpdateStart / End).  This makes the Cogent Core GUI efficient in terms of what needs to be redrawn, while keeping the code local and simple.
 
 In addition, Cogent Core provides functions that traverse the tree in the usual relevant ways ("natural" me-first depth-first, me-last depth-first, and breadth-first) and take a `func` function argument, so you can easily apply a common operation across the whole tree in a transparent and self-contained manner, like this:
 
@@ -42,15 +42,15 @@ Three core Cogent Core features include:
 
 * `UpdateStart()` and `UpdateEnd()` functions that wrap around code that changes the tree structure or contents -- these automatically and efficiently determine the highest level node that was affected by changes, and only that highest node sends an `Updated` signal.  This allows arbitrarily nested modifications to proceed independently, each wrapped in their own Start / End blocks, with the optimal minimal update signaling automatically computed.
 
-* `ConfigChildren` uses a list of types and names and performs a minimal, efficient update of the children of a node to configure them to match (including no changes if already configured accordingly).  This is used during loading from JSON, and extensively in the `GoGi` GUI system to efficiently re-use existing tree elements.  There is often complex logic to determine what elements need to be present in a Widget, so separating that out from then configuring the elements that actually are present is efficient and simplifies the code.
+* `ConfigChildren` uses a list of types and names and performs a minimal, efficient update of the children of a node to configure them to match (including no changes if already configured accordingly).  This is used during loading from JSON, and extensively in the `Cogent Core` GUI system to efficiently re-use existing tree elements.  There is often complex logic to determine what elements need to be present in a Widget, so separating that out from then configuring the elements that actually are present is efficient and simplifies the code.
 
 In addition, Ki nodes support a general-purpose `Props` property `map`, and the `kit` (Ki Types) package provides a `TypeRegistry` and an `EnumRegistry`, along with various `reflect` utilities, to enable fully-automatic saving / loading of Ki trees from JSON or XML, including converting const int (enum) values to / from strings so those numeric values can change in the code without invalidating existing files.
 
 Ki Nodes can be used as fields in a struct -- they function much like pre-defined Children elements, and all the standard FuncDown* iterators traverse the fields automatically.  The Ki Init function automatically names these structs with their field names, and sets the parent to the parent struct.  This was essential in the Cogent Core framework to support separate Widget Parts independent of the larger scenegraph.
 
-## GoGi Graphical Interface and Gide IDE App
+## Cogent Core Graphical Interface and Gide IDE App
 
-The first and most important application of Cogent Core is the [GoGi](https://github.com/goki/gi) graphical interface system, in the `gi` package, and the [Gide](https://github.com/goki/gide) IDE built on top of GoGi.  The scene graph of Ki elements automatically drives minimal refresh updates, and the signaling framework supports gui event delivery and e.g., the "onclick" event signaling from the `Button` widget, etc.  In short, GoGi provides a complete interactive 2D and 3D GUI environment in native Go, in a compact codebase.  Part of this is the natural elegance of Go, but Cogent Core enhances that by providing the robust natural primitives needed to express all the GUI functionality.  Because GoGi is based around standard CSS styles, SVG rendering, and supports all the major HTML elements, it could even provide a lightweight web browser: [Glide](https://github.com/goki/glide).
+The first and most important application of Cogent Core is the [Cogent Core](https://github.com/goki/gi) graphical interface system, in the `gi` package, and the [Gide](https://github.com/goki/gide) IDE built on top of Cogent Core.  The scene graph of Ki elements automatically drives minimal refresh updates, and the signaling framework supports gui event delivery and e.g., the "onclick" event signaling from the `Button` widget, etc.  In short, Cogent Core provides a complete interactive 2D and 3D GUI environment in native Go, in a compact codebase.  Part of this is the natural elegance of Go, but Cogent Core enhances that by providing the robust natural primitives needed to express all the GUI functionality.  Because Cogent Core is based around standard CSS styles, SVG rendering, and supports all the major HTML elements, it could even provide a lightweight web browser: [Glide](https://github.com/goki/glide).
 
 The [GoPi](https://github.com/goki/pi) interactive parsing framework also leverages Cogent Core trees to represent the AST (abstract syntax tree) of programs in different langauges.  Further, the parser grammar itself is written (in a GUI interactive way) as a tree of parsing elements using Ki nodes.
 
@@ -66,13 +66,13 @@ The [GoPi](https://github.com/goki/pi) interactive parsing framework also levera
 
 * `slice.go` = `ki.Slice []Ki` supports saving / loading of Ki objects in a slice, by recording the size and types of elements in the slice -- requires `kit.Types` type registry to lookup types by name.
 
-* `props.go` = `ki.Props map[string]interface{}` supports saving / loading of property values using actual `struct` types and named const int enums, using the `kit` type registries.  Used for CSS styling in `GoGi`.
+* `props.go` = `ki.Props map[string]interface{}` supports saving / loading of property values using actual `struct` types and named const int enums, using the `kit` type registries.  Used for CSS styling in `Cogent Core`.
 
 * `signal.go` = `Signal` that calls function on a receiver Ki objects that have been previously `Connect`ed to the signal -- also supports signal type so the same signal sender can send different types of signals over the same connection -- used for signaling changes in tree structure, and more general tree updating signals.
 
 # Status
 
-* Feb, 2021: version 1.1.0 reflects major simplification pass to reduce API footprint and remove separate Unique names (names should in general be unique -- add a separate non-unique name where needed).  Now that GoGi etc is complete, could get rid if quite a few things.
+* Feb, 2021: version 1.1.0 reflects major simplification pass to reduce API footprint and remove separate Unique names (names should in general be unique -- add a separate non-unique name where needed).  Now that Cogent Core etc is complete, could get rid if quite a few things.
 
 * April, 2020: version 1.0.0 release -- all stable and well tested.
 

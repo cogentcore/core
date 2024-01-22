@@ -136,11 +136,11 @@ func (an *Anim) Animate() {
 func main() {
 	anim := &Anim{}
 	b := gi.NewAppBody("XYZ Demo")
-	b.App().About = `This is a demo of the 3D graphics aspect of the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Cogent Core on GitHub</a>.
+	b.App().About = `This is a demo of the 3D graphics aspect of the <b>Cogent Core</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Cogent Core on GitHub</a>.
 <p>The <a href="https://github.com/goki/gi/blob/master/examples/xyz/README.md">README</a> page for this example app has further info.</p>`
 
 	gi.NewLabel(b).SetText(`This is a demonstration of <b>XYZ</b>, the
-<a href="https://cogentcore.org/core/gi/v2">GoGi</a> <i>3D</i> Framework<br>
+<a href="https://cogentcore.org/core/gi/v2">Cogent Core</a> <i>3D</i> Framework<br>
 See <a href="https://github.com/goki/gi/blob/master/examples/xyz/README.md">README</a> for detailed info and things to try.`).
 		SetType(gi.LabelHeadlineSmall).
 		Style(func(s *styles.Style) {

@@ -463,7 +463,7 @@ var StdMimes = []MimeType{
 	{"application/vnd.google-earth.kmz", nil, Data, Unknown},
 	{"application/x-sql", []string{".sql"}, Data, Unknown},
 
-	{"application/vnd.gogi", nil, Data, GoGi}, // our own special unregistered type..
+	{"application/vnd.cogentcore", nil, Data, CogentCore}, // our own special unregistered type..
 
 	// Text
 	{"text/plain", []string{".asc", ".txt", ".text", ".pot", ".brf", ".srt"}, Text, PlainText},

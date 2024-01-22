@@ -256,7 +256,7 @@ func _KnownNoOp() {
 	_ = x[Tsv-(74)]
 	_ = x[Uri-(75)]
 	_ = x[Color-(76)]
-	_ = x[GoGi-(77)]
+	_ = x[CogentCore-(77)]
 	_ = x[Yaml-(78)]
 	_ = x[AnyText-(79)]
 	_ = x[PlainText-(80)]
@@ -384,7 +384,7 @@ var _KnownNameToValueMap = map[string]Known{
 	`Tsv`:          74,
 	`Uri`:          75,
 	`Color`:        76,
-	`GoGi`:         77,
+	`CogentCore`:   77,
 	`Yaml`:         78,
 	`AnyText`:      79,
 	`PlainText`:    80,
@@ -640,7 +640,7 @@ var _KnownMap = map[Known]string{
 	74:  `Tsv`,
 	75:  `Uri`,
 	76:  `Color`,
-	77:  `GoGi`,
+	77:  `CogentCore`,
 	78:  `Yaml`,
 	79:  `AnyText`,
 	80:  `PlainText`,

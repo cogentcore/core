@@ -1,4 +1,4 @@
-# GoPi = Interactive Parser in Cogent Core / GoGi Framework
+# GoPi = Interactive Parser in Cogent Core / Cogent Core Framework
 
 * **bold at start** is not a problem now
 
@@ -18,7 +18,7 @@ if a + b * 2 / 7 - 42 > c * d + e / 72 {
 }
 ```
 
-The `pi` *package* __allows__ regular **users** to **create** things __parsers *and nested* __ using _the_ GoGi graphical interface system.  [link tag](and addresses) are parsed as expected.  Including plain [tags] without any addresses.  https://wikipedia.com should work too once we plug in url recognizer.
+The `pi` *package* __allows__ regular **users** to **create** things __parsers *and nested* __ using _the_ Cogent Core graphical interface system.  [link tag](and addresses) are parsed as expected.  Including plain [tags] without any addresses.  https://wikipedia.com should work too once we plug in url recognizer.
 
 This is not a # heading
 
@@ -39,7 +39,7 @@ This is not a # heading
 This is a quoted item -- we will grab the language and switch parsers!
 ```
 
-We call it `Pi` (or `GoPi`) because Ip is not as easy to pronounce, and also because it makes parsing as easy as pi!  You can think of it as a French acronym, which are typically the reverse of English ones -- "parseur interactif".  Also, it matches Cogent Core and GoGi. 
+We call it `Pi` (or `GoPi`) because Ip is not as easy to pronounce, and also because it makes parsing as easy as pi!  You can think of it as a French acronym, which are typically the reverse of English ones -- "parseur interactif".  Also, it matches Cogent Core and Cogent Core. 
 
 Pi uses a robust, top-down __Recursive Descent (RD)__ parsing technique (see [WikiPedia](https://en.wikipedia.org/wiki/Recursive_descent_parser)), which is the approach used by most hand-coded parsers, which are by far the most widely used in practice (e.g., for **gcc**, **clang**, and **Go**) for [various reasons](http://blog.reverberate.org/2013/09/ll-and-lr-in-context-why-parsing-tools.html) -- see this [stack overflow](https://stackoverflow.com/questions/6319086/are-gcc-and-clang-parsers-really-handwritten) thread too.  As far as we can tell (e.g., from this list on [WikiPedia](https://en.wikipedia.org/wiki/Comparison_of_parser_generators) ) there are not many recursive-descent *parser generators*, and none that use the same robust, fast techniques that we employ in GoPi.
 

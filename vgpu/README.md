@@ -109,7 +109,7 @@ void main() {
 
 See https://developer.nvidia.com/vulkan-shader-resource-binding for a clear description of DescriptorSets etc.
 
-Here's a widely-used rendering logic, supported by the GoGi Scene (and tbd std Pipeline), and how you should organize the Uniform data into different sets at each level, to optimize the binding overhead:
+Here's a widely-used rendering logic, supported by the Cogent Core Scene (and tbd std Pipeline), and how you should organize the Uniform data into different sets at each level, to optimize the binding overhead:
 
 ```
 for each view {

@@ -40,7 +40,7 @@ type WinGeomPrefsMgr struct {
 	// temporary cached geometries -- saved to Geoms after SaveDelay
 	Cache WinGeomPrefs
 
-	// base name of the settings file in GoGi prefs directory
+	// base name of the settings file in Cogent Core prefs directory
 	Filename string
 
 	// when prefs were last saved -- if we weren't the last to save, then we need to re-open before modifying
@@ -155,7 +155,7 @@ func (mgr *WinGeomPrefsMgr) SaveLastSave() {
 	os.WriteFile(pnm, b, 0644)
 }
 
-// Open RenderWin Geom settings from GoGi standard prefs directory
+// Open RenderWin Geom settings from Cogent Core standard prefs directory
 // called under mutex or at start
 func (mgr *WinGeomPrefsMgr) Open() error {
 	mgr.Init()
@@ -188,7 +188,7 @@ func (mgr *WinGeomPrefsMgr) Open() error {
 	return err
 }
 
-// Save RenderWin Geom Settings to GoGi standard prefs directory
+// Save RenderWin Geom Settings to Cogent Core standard prefs directory
 // assumed to be under mutex and lock still
 func (mgr *WinGeomPrefsMgr) Save() error {
 	if mgr.Geoms == nil {

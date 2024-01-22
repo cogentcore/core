@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package mimedata defines MIME data support used in clipboard and
-// drag-and-drop functions in the GoGi GUI.  mimedata.Data struct contains
+// drag-and-drop functions in the Cogent Core GUI.  mimedata.Data struct contains
 // format and []byte data, and multiple representations of the same data are
 // encoded in mimedata.Mimes which is just a []mimedata.Data slice -- it can
 // be encoded / decoded from mime multipart.

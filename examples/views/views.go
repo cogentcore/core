@@ -127,9 +127,9 @@ func main() {
 	stru.Things = make([]*TableStruct, 2)
 	stru.Stuff = make([]float32, 3)
 
-	b := gi.NewAppBody("views").SetTitle("GoGi Views Test")
+	b := gi.NewAppBody("views").SetTitle("Cogent Core Views Test")
 
-	b.App().About = `This is a demo of the MapView and SliceView views in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Cogent Core on GitHub</a>`
+	b.App().About = `This is a demo of the MapView and SliceView views in the <b>Cogent Core</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Cogent Core on GitHub</a>`
 
 	b.AddAppBar(func(tb *gi.Toolbar) {
 		gi.NewButton(tb, "slice-test").SetText("SliceDialog").

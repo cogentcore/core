@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 /*
-Package Gi (GoGi) provides a Graphical Interface based on Cogent Core Tree Node structs
+Package Gi (Cogent Core) provides a Graphical Interface based on Cogent Core Tree Node structs
 
 2D and 3D (in gi3d) scenegraphs supported, each rendering to respective
 Scene or Scene.  Scene is a 2D element that embeds the 3D scene, and

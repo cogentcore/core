@@ -1035,7 +1035,7 @@ func main() {
 
 func mainrun() {
 	oswin.TheApp.SetName("pie")
-	oswin.TheApp.SetAbout(`<code>Pie</code> is the interactive parser (pi) editor written in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://cogentcore.org/core/pi">Gide on GitHub</a> and <a href="https://cogentcore.org/core/pi/wiki">Gide wiki</a> for documentation.<br>
+	oswin.TheApp.SetAbout(`<code>Pie</code> is the interactive parser (pi) editor written in the <b>Cogent Core</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://cogentcore.org/core/pi">Gide on GitHub</a> and <a href="https://cogentcore.org/core/pi/wiki">Gide wiki</a> for documentation.<br>
 <br>
 Version: ` + pi.VersionInfo())
 	if peas++; this > that {

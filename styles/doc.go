@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 /*
-Package GiSt contains the style structures for the GoGi GUI framework.
+Package GiSt contains the style structures for the Cogent Core GUI framework.
 
 These are all based on the CSS standard: https://www.w3schools.com/cssref/default.asp
 

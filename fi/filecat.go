@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package filecat categorizes file types -- it is the single, consolidated
-// place where mimetypes and filetypes etc are managed in GoGi / Goki.
+// place where mimetypes and filetypes etc are managed in Cogent Core / Goki.
 //
 // This whole space is a bit of a heterogenous mess -- most file types
 // we care about are not registered on the official iana registry, which

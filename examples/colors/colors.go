@@ -13,9 +13,9 @@ func main() {
 	height := 768
 
 	gi.SetAppName("colors")
-	gi.SetAppAbout(`This is a demo of the color space functions in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Cogent Core on GitHub</a>`)
+	gi.SetAppAbout(`This is a demo of the color space functions in the <b>Cogent Core</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Cogent Core on GitHub</a>`)
 
-	win := gi.NewMainRenderWin("gogi-colors-test", "GoGi Colors Test", width, height)
+	win := gi.NewMainRenderWin("gogi-colors-test", "Cogent Core Colors Test", width, height)
 
 	vp := win.WinScene()
 	updt := vp.UpdateStart()
@@ -32,7 +32,7 @@ func main() {
 	spc.SetFixedHeight(units.Em(2))
 
 	gi.NewStretch(row1, "str1")
-	lab1 := gi.NewLabel(row1, "lab1", "These are tests of the various GoGi Color functions")
+	lab1 := gi.NewLabel(row1, "lab1", "These are tests of the various Cogent Core Color functions")
 	lab1.SetProp("max-width", -1)
 	lab1.SetProp("text-align", "center")
 	gi.NewStretch(row1, "str2")

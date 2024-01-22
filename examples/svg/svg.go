@@ -52,10 +52,10 @@ func main() {
 	height := 1200
 
 	gi.SetAppName("svg")
-	gi.SetAppAbout(`This is a demo of the SVG rendering (and start on editing) in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Cogent Core on GitHub</a>
+	gi.SetAppAbout(`This is a demo of the SVG rendering (and start on editing) in the <b>Cogent Core</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Cogent Core on GitHub</a>
 <p>You can drag the image around and use the scroll wheel to zoom.</p>`)
 
-	win := gi.NewMainRenderWin("gogi-svg-viewer", "GoGi SVG Viewer", width, height)
+	win := gi.NewMainRenderWin("gogi-svg-viewer", "Cogent Core SVG Viewer", width, height)
 
 	vp := win.WinScene()
 	updt := vp.UpdateStart()

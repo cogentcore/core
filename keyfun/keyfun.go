@@ -301,7 +301,7 @@ func (km *Maps) MapByName(name MapName) (*Map, int, bool) {
 	return nil, -1, false
 }
 
-// PrefsMapsFilename is the name of the preferences file in GoGi prefs
+// PrefsMapsFilename is the name of the preferences file in Cogent Core prefs
 // directory for saving / loading the default AvailMaps key maps list
 var PrefsMapsFilename = "key_maps_prefs.json"
 
@@ -318,7 +318,7 @@ func (km *Maps) Save(filename string) error { //gti:add
 	return grr.Log(jsons.Save(km, filename))
 }
 
-// OpenSettings opens KeyMaps from GoGi standard prefs directory, in file key_maps_prefs.json.
+// OpenSettings opens KeyMaps from Cogent Core standard prefs directory, in file key_maps_prefs.json.
 // This is called automatically, so calling it manually should not be necessary in most cases.
 func (km *Maps) OpenSettings() error { //gti:add
 	pdir := goosi.TheApp.CogentCoreDataDir()
@@ -327,7 +327,7 @@ func (km *Maps) OpenSettings() error { //gti:add
 	return km.Open(pnm)
 }
 
-// SavePrefs saves KeyMaps to GoGi standard prefs directory, in file key_maps_prefs.json,
+// SavePrefs saves KeyMaps to Cogent Core standard prefs directory, in file key_maps_prefs.json,
 // which will be loaded automatically at startup if prefs SaveKeyMaps is checked
 // (should be if you're using custom keymaps)
 func (km *Maps) SavePrefs() error { //gti:add

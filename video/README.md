@@ -1,2 +1,2 @@
 # video
-A video player component for the GoGi GUI framework
+A video player component for the Cogent Core GUI framework

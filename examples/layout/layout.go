@@ -103,7 +103,7 @@ func BoxFrame(par gi.Widget, nm ...string) *gi.Frame {
 
 func main() {
 	b := gi.NewAppBody("Cogent Core Layout Demo")
-	b.App().About = `This is a demo of the layout functions in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Cogent Core on GitHub</a>`
+	b.App().About = `This is a demo of the layout functions in the <b>Cogent Core</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Cogent Core on GitHub</a>`
 
 	ctrl := &Control{}
 	ctrl.Grow.Set(1, 1)

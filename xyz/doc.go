@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 /*
-Package xyz provides a 3D scenegraph for the GoGi GUI framework.
+Package xyz provides a 3D scenegraph for the Cogent Core GUI framework.
 
 The scenegraph is rooted at a xyz.Scene node which is like gi.Viewport2D,
 where the scene is rendered, similar to the svg.SVG node for SVG drawings.
@@ -68,7 +68,7 @@ Any change to the Mesh after first initialization (Config) must be activated
 by calling Scene.InitMesh(nm) or Scene.InitMeshes() to redo all.  The Update
 method on the Scene does Config and re-renders.
 
-Mouse events are handled by the standard GoGi Window event dispatching
+Mouse events are handled by the standard Cogent Core Window event dispatching
 methods, based on bounding boxes which are always updated -- this greatly
 simplifies gui interactions.  There is default support for selection and
 Pose manipulation handling -- see manip.go code and NodeBase's

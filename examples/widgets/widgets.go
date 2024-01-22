@@ -20,7 +20,7 @@ import (
 func main() {
 	b := gi.NewAppBody("Cogent Core Widgets Demo")
 
-	b.App().About = `This is a demo of the main widgets and general functionality of the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Cogent Core on GitHub</a>. <p>The <a href="https://cogentcore.org/core/gi/v2/blob/master/examples/widgets/README.md">README</a> page for this example app has lots of further info.</p>`
+	b.App().About = `This is a demo of the main widgets and general functionality of the <b>Cogent Core</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Cogent Core on GitHub</a>. <p>The <a href="https://cogentcore.org/core/gi/v2/blob/master/examples/widgets/README.md">README</a> page for this example app has lots of further info.</p>`
 
 	b.AddAppBar(func(tb *gi.Toolbar) { // put first in top app bar
 		gi.NewButton(tb).SetText("Button 1").
@@ -51,7 +51,7 @@ func main() {
 
 	gi.NewLabel(trow, "title").SetText(
 		`This is a <b>demonstration</b> of the
-		<span style="color:red">various</span> <a href="https://cogentcore.org/core/gi">GoGi</a> <i>Widgets</i><br>
+		<span style="color:red">various</span> <a href="https://cogentcore.org/core/gi">Cogent Core</a> <i>Widgets</i><br>
 		<small>Shortcuts: <kbd>` + string(prsc) + `</kbd> = Preferences,
 		<kbd>` + string(giedsc) + `</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</small><br>
 		See <a href="https://cogentcore.org/core/gi/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.`).
@@ -86,7 +86,7 @@ func main() {
 	})
 
 	button2 := gi.NewButton(brow).SetText("Open Inspector").
-		SetTooltip("This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things")
+		SetTooltip("This button will open the Cogent Core GUI editor where you can edit this very GUI and see it update dynamically as you change things")
 	button2.OnClick(func(e events.Event) {
 		txt := ""
 		d := gi.NewBody().AddTitle("What is it?").AddText("Please enter your response:")

@@ -68,7 +68,7 @@ func PrefsDetView(pf *gi.PrefsDetailed) {
 		return
 	}
 
-	d := gi.NewBody("gogi-prefs-det").SetTitle("GoGi Detailed Preferences")
+	d := gi.NewBody("gogi-prefs-det").SetTitle("Cogent Core Detailed Preferences")
 
 	sv := NewStructView(d, "sv")
 	sv.SetStruct(pf)
@@ -95,7 +95,7 @@ func PrefsDbgView(pf *gi.DebugSettingsData) {
 		return
 	}
 	d := gi.NewBody("gogi-prefs-dbg")
-	d.Title = "GoGi Debugging Preferences"
+	d.Title = "Cogent Core Debugging Preferences"
 
 	sv := NewStructView(d, "sv")
 	sv.SetStruct(pf)

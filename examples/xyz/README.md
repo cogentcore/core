@@ -1,6 +1,6 @@
-# GoGi 3D Demo
+# Cogent Core 3D Demo
 
-This demo shows the basic functionality of the 3D rendering framework in GoGi.  
+This demo shows the basic functionality of the 3D rendering framework in Cogent Core.  
 
 The gopher object that is imported is borrowed from: https://github.com/g3n/engine, which also served as the source / reference for a lot of the 3D code, including especially the mat32 math library, the file importing code, and the opengl shader programs.
 
@@ -18,7 +18,7 @@ The updating signaling is robust to multiple sources of update signals, so you c
 
 ## Camera Navigation
 
-The default camera navigation controls allow you to move around the scene.  To get the keyboard versions to work, you need to set the focus on the 3D scene, which can be done by clicking into it or tabbing or using the arrow keys as usual in GoGi.  These are the different modes of movement:
+The default camera navigation controls allow you to move around the scene.  To get the keyboard versions to work, you need to set the focus on the 3D scene, which can be done by clicking into it or tabbing or using the arrow keys as usual in Cogent Core.  These are the different modes of movement:
 
 * **Orbit** moves the camera around in a sphere, with it always pointing at the same **Target** location (the origin by default).
 
@@ -51,13 +51,13 @@ In `Manipulable` mode, you can change the Pose of objects by dragging on the dif
 * `Ctrl` = scale -- scales along the relevant dimensions.
 * `Alt` = rotate -- rotates in current "depth" plane (again move camera to rotate in other planes).
 
-The code for all of this is in `xyz/manip.go` -- it is relatively straightforward, leveraging the GoGi event system, based on bounding boxes for directing events, and having builtin support for dragging etc.  The `ManipPt` manipulation points receive mouse events directly and translate movements into the respective transformations.
+The code for all of this is in `xyz/manip.go` -- it is relatively straightforward, leveraging the Cogent Core event system, based on bounding boxes for directing events, and having builtin support for dragging etc.  The `ManipPt` manipulation points receive mouse events directly and translate movements into the respective transformations.
 
 You can generate Go code for the Pose produced by manipulating, by clicking on the Pose field in the Edit dialog of a Node, and then clicking on the `Go Code` button in the toolbar.
 
 ## Inspect and Edit the Scene
 
-You can also use the standard GoGi `Ctrl+Alt+I` shortcut to invoke the `GoGi Editor` and you can click on the `scene` and other elements of the scenegraph and edit / inspect them.  Toolbar actions have been enabled on everything to call useful methods, so you can pretty much configure the entire scene dynamically on the fly.
+You can also use the standard Cogent Core `Ctrl+Alt+I` shortcut to invoke the `Cogent Core Editor` and you can click on the `scene` and other elements of the scenegraph and edit / inspect them.  Toolbar actions have been enabled on everything to call useful methods, so you can pretty much configure the entire scene dynamically on the fly.
 
 For example, you can click on `Meshes`, and edit the parameters of any of the various mesh objects, cutting the sphere into a sliver, experimenting with different numbers of segments which determines how smooth the curved shapes are, etc.
 

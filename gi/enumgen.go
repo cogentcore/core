@@ -1127,7 +1127,7 @@ var _WinFlagsDescMap = map[WinFlags]string{
 	4: `WinSentShow have we sent the show event yet? Only ever sent ONCE`,
 	5: `WinGoLoop true if we are running from GoStartEventLoop -- requires a WinWait.Done at end`,
 	6: `WinStopEventLoop is set when event loop stop is requested`,
-	7: `WinSelectionMode indicates that the window is in GoGi inspect editor edit mode`,
+	7: `WinSelectionMode indicates that the window is in Cogent Core inspect editor edit mode`,
 }
 
 var _WinFlagsMap = map[WinFlags]string{

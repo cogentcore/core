@@ -29,7 +29,7 @@ var StringElideMax = 38
 // for the Cogent Core tree -- use the Node as an embedded struct or as a struct
 // field -- the embedded version supports full JSON save / load.
 //
-// The desc: key for fields is used by the GoGi GUI viewer for help / tooltip
+// The desc: key for fields is used by the Cogent Core GUI viewer for help / tooltip
 // info -- add these to all your derived struct's fields.  See relevant docs
 // for other such tags controlling a wide range of GUI and other functionality
 // -- Ki makes extensive use of such tags.
@@ -713,7 +713,7 @@ func (n *Node) FlagType() enums.BitFlagSetter {
 //////////////////////////////////////////////////////////////////////////
 //  Property interface with inheritance -- nodes can inherit props from parents
 
-// Properties (Node.Props) tell the GoGi GUI or other frameworks operating
+// Properties (Node.Props) tell the Cogent Core GUI or other frameworks operating
 // on Trees about special features of each node -- functions below support
 // inheritance up Tree.
 func (n *Node) Properties() *Props {
@@ -774,7 +774,7 @@ func (n *Node) DeleteProp(key string) {
 
 // PropTag returns the name to look for in type properties, for types
 // that are valid options for values that can be set in Props.  For example
-// in GoGi, it is "style-props" which is then set for all types that can
+// in Cogent Core, it is "style-props" which is then set for all types that can
 // be used in a style (colors, enum options, etc)
 func (n *Node) PropTag() string {
 	return ""

@@ -35,7 +35,7 @@ import (
 //
 // Each Scene and Widget tree contains state specific to its particular usage
 // within a given Stage and overall rendering context, representing the unit
-// of rendering in the GoGi framework.
+// of rendering in the Cogent Core framework.
 //
 //core:no-new
 //core:embedder

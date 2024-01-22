@@ -671,7 +671,7 @@ func (fp *FilePaths) AddPath(path string, max int) {
 }
 
 var (
-	// SavedPathsFilename is the name of the saved file paths file in GoGi prefs directory
+	// SavedPathsFilename is the name of the saved file paths file in Cogent Core prefs directory
 	SavedPathsFilename = "saved-paths.json"
 
 	// FileViewResetPaths defines a string that is added as an item to the recents menu

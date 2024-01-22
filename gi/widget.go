@@ -20,7 +20,7 @@ import (
 	"cogentcore.org/core/styles"
 )
 
-// Widget is the interface for all GoGi Widget Nodes
+// Widget is the interface for all Cogent Core Widget Nodes
 type Widget interface {
 	ki.Ki
 

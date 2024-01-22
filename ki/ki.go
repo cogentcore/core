@@ -334,7 +334,7 @@ type Ki interface {
 	//////////////////////////////////////////////////////////////////////////
 	//  Property interface with inheritance -- nodes can inherit props from parents
 
-	// Properties (Node.Props) tell the GoGi GUI or other frameworks operating
+	// Properties (Node.Props) tell the Cogent Core GUI or other frameworks operating
 	// on Trees about special features of each node -- functions below support
 	// inheritance up Tree -- see kit convert.go for robust convenience
 	// methods for converting interface{} values to standard types.
@@ -358,7 +358,7 @@ type Ki interface {
 
 	// PropTag returns the name to look for in type properties, for types
 	// that are valid options for values that can be set in Props.  For example
-	// in GoGi, it is "style-props" which is then set for all types that can
+	// in Cogent Core, it is "style-props" which is then set for all types that can
 	// be used in a style (colors, enum options, etc)
 	PropTag() string
 

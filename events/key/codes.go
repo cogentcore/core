@@ -8,7 +8,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package key defines an event for physical keyboard keys, for the GoGi GUI
+// Package key defines an event for physical keyboard keys, for the Cogent Core GUI
 // system.
 //
 // On-screen software keyboards do not send key events.

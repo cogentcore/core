@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 /*
-Package Paint is the paint package for the GoGi render library.
+Package Paint is the paint package for the Cogent Core render library.
 Renders to an image.RGBA using styles defined in GiSt styles.
 
 Original rendering borrows heavily from: https://github.com/fogleman/gg

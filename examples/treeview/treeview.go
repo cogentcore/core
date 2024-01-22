@@ -33,7 +33,7 @@ func MakeTree(tv *giv.TreeView, iter, maxIter, maxKids int) {
 
 func main() {
 	b := gi.NewAppBody("Cogent Core Tree View Demo")
-	b.App().About = `This is a demo of the treeview in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Cogent Core on GitHub</a>
+	b.App().About = `This is a demo of the treeview in the <b>Cogent Core</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Cogent Core on GitHub</a>
 <p>Full Drag-and-Drop, Copy / Cut / Paste, and Keyboard Navigation is supported.</p>`
 
 	splits := gi.NewSplits(b)

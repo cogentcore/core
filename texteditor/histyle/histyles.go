@@ -111,7 +111,7 @@ var PrefsStylesFilename = "hi_styles.json"
 // StylesChanged is used for gui updating while editing
 var StylesChanged = false
 
-// OpenPrefs opens Styles from GoGi standard prefs directory, using PrefsStylesFilename
+// OpenPrefs opens Styles from Cogent Core standard prefs directory, using PrefsStylesFilename
 func (hs *Styles) OpenPrefs() error {
 	pdir := gi.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, PrefsStylesFilename)
@@ -119,7 +119,7 @@ func (hs *Styles) OpenPrefs() error {
 	return hs.OpenJSON(gi.Filename(pnm))
 }
 
-// SavePrefs saves Styles to GoGi standard prefs directory, using PrefsStylesFilename
+// SavePrefs saves Styles to Cogent Core standard prefs directory, using PrefsStylesFilename
 func (hs *Styles) SavePrefs() error {
 	pdir := gi.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, PrefsStylesFilename)

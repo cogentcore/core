@@ -1,4 +1,4 @@
-# GoGi 3D Viewer
+# Cogent Core 3D Viewer
 
 This viewer allows you to open and view 3D objects, using the supported object file formats.
 
@@ -12,7 +12,7 @@ The usual Go install procedure will work -- see [Install](https://cogentcore.org
 
 ## Camera Navigation
 
-The default camera navigation controls allow you to move around the scene.  To get the keyboard versions to work, you need to set the focus on the 3D scene, which can be done by clicking into it or tabbing or using the arrow keys as usual in GoGi.  These are the different modes of movement:
+The default camera navigation controls allow you to move around the scene.  To get the keyboard versions to work, you need to set the focus on the 3D scene, which can be done by clicking into it or tabbing or using the arrow keys as usual in Cogent Core.  These are the different modes of movement:
 
 * **Orbit** moves the camera around in a sphere, with it always pointing at the same **Target** location (the origin by default).
 
@@ -34,7 +34,7 @@ Here are the default bindings (you can see the `xyz.Scene NavEvents` method in `
 
 ## Inspect and Edit the Scene
 
-Use the standard GoGi `Ctrl+Alt+I` shortcut to invoke the `GoGi Editor` and you can click on the scene and other elements of the scenegraph and edit / inspect them.  Toolbar actions have been enabled on everything to call useful methods, so you can pretty much configure the entire scene dynamically on the fly.
+Use the standard Cogent Core `Ctrl+Alt+I` shortcut to invoke the `Cogent Core Editor` and you can click on the scene and other elements of the scenegraph and edit / inspect them.  Toolbar actions have been enabled on everything to call useful methods, so you can pretty much configure the entire scene dynamically on the fly.
 
 ## Scenegraph Structure
 

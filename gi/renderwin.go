@@ -137,7 +137,7 @@ const (
 	// WinStopEventLoop is set when event loop stop is requested
 	WinStopEventLoop
 
-	// WinSelectionMode indicates that the window is in GoGi inspect editor edit mode
+	// WinSelectionMode indicates that the window is in Cogent Core inspect editor edit mode
 	WinSelectionMode
 )
 
@@ -169,7 +169,7 @@ func NewRenderWin(name, title string, opts *goosi.NewWindowOptions) *RenderWin {
 	var err error
 	win.GoosiWin, err = goosi.TheApp.NewWindow(opts)
 	if err != nil {
-		fmt.Printf("GoGi NewRenderWin error: %v \n", err)
+		fmt.Printf("Cogent Core NewRenderWin error: %v \n", err)
 		return nil
 	}
 	win.GoosiWin.SetName(title)

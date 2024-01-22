@@ -37,7 +37,7 @@ type App interface {
 	// application-specific preferences directory, etc
 	Name() string
 
-	// SetName sets the application name -- defaults to GoGi if not otherwise set
+	// SetName sets the application name -- defaults to Cogent Core if not otherwise set
 	SetName(name string)
 
 	// GetScreens gets the current list of screens

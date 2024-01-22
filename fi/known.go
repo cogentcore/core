@@ -227,7 +227,7 @@ const (
 	Tsv
 	Uri
 	Color
-	GoGi
+	CogentCore
 	Yaml
 
 	// Text is some other kind of text file

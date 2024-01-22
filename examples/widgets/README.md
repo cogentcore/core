@@ -1,12 +1,12 @@
-# GoGi Widgets Demo
+# Cogent Core Widgets Demo
 
-This demo shows all the main widgets in GoGi.  You can try each of the widgets.  The most advanced features are available when you do `Control+Alt+I` or hit the button with the `Open GoGiEditor` on it.  Also try changing the Preferences using the option in the `widgets` "app" menu).
+This demo shows all the main widgets in Cogent Core.  You can try each of the widgets.  The most advanced features are available when you do `Control+Alt+I` or hit the button with the `Open Cogent CoreEditor` on it.  Also try changing the Preferences using the option in the `widgets` "app" menu).
 
 ## Installation
 
 The usual Go install procedure will work -- see [Install](https://cogentcore.org/core/gi/v2/wiki/Install) for details.
 
-## GoGi Editor
+## Cogent Core Editor
 
 This editor allows you to interactively build new GUI designs, and save / load them from JSON files.
 
@@ -16,7 +16,7 @@ This editor demonstrates the `Value` framework that manages the mapping of arbit
 
 Here are some fun things to try:
 
-* The `WinVp` node defines some `CSS` style properties.  you can edit the colors directly, or click on the various `Map: ki.Props` buttons to pull up editor dialogs, including a color configuration dialog using sliders (click on the colored "pencil" edit button after each set of RGB values).  Hit the `Update` button in the GoGi Editor for the changes to take effect in the original Widgets demo window.
+* The `WinVp` node defines some `CSS` style properties.  you can edit the colors directly, or click on the various `Map: ki.Props` buttons to pull up editor dialogs, including a color configuration dialog using sliders (click on the colored "pencil" edit button after each set of RGB values).  Hit the `Update` button in the Cogent Core Editor for the changes to take effect in the original Widgets demo window.
 
 * You can define all manner of different types of style settings -- try adding some new ones, and changing the type from `string` to some of the other appropriate types -- using specific types gives you a better editing experience -- e.g., by providing choosers for "enum" constant values.  These are all parsed directly from the Go code and made available through the `fmt.Stringer` kinds of mechanisms, augmented with the `kit.Enums` enum registry.
 
@@ -34,7 +34,7 @@ Here are some fun things to try:
 
 ## Preferences
 
-The `GoGi Preferences` menu item has may settings that you can change, including Key maps, color schemes, etc.  Hit the `Update` button to have changes apply to any open windows.
+The `Cogent Core Preferences` menu item has may settings that you can change, including Key maps, color schemes, etc.  Hit the `Update` button to have changes apply to any open windows.
 
 * Try `Colors/Open Colors` and choose one of the `ColorPrefs_*` files, then hit `Update` to see the different schemes.  
 
