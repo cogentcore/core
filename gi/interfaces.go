@@ -69,3 +69,8 @@ type SliceLabeler interface {
 	// ElemLabel returns a GUI-appropriate label for slice element at given index
 	ElemLabel(idx int) string
 }
+
+// Toolbarer interface is for ConfigToolbar function access for those that define it
+type Toolbarer interface {
+	ConfigToolbar(tb *Toolbar)
+}

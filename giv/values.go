@@ -403,6 +403,9 @@ func (vv *StructValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	vpath := vv.ViewPath + "/" + laser.NonPtrType(opv.Type()).String()
 	NewStructView(d).SetStruct(stru).SetViewPath(vpath).SetTmpSave(vv.TmpSave).
 		SetReadOnly(vv.IsReadOnly())
+	if tb, ok := stru.(gi.Toolbarer); ok {
+		d.AddAppBar(tb.ConfigToolbar)
+	}
 	return true, nil
 }
 
