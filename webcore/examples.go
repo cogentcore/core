@@ -21,5 +21,5 @@ func init() {
 // CoreExampleHandler is the coredom handler for <core-example> HTML elements.
 func CoreExampleHandler(ctx *coredom.Context) {
 	fr := coredom.New[*gi.Frame](ctx)
-	Examples["0"](fr)
+	Examples[coredom.GetAttr(ctx.Node, "id")](fr)
 }

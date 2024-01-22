@@ -11,9 +11,11 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"regexp"
 
 	"cogentcore.org/core/core/config"
 	"cogentcore.org/core/gengo"
+	"cogentcore.org/core/ordmap"
 )
 
 var (
@@ -22,6 +24,9 @@ var (
 	codeStart        = []byte("```go")
 	codeEnd          = []byte("```")
 	newline          = []byte{'\n'}
+
+	idRegex        = regexp.MustCompile(`id="(.+)"`)
+	idRegexReplace = []byte("$1")
 )
 
 // Webcore does any necessary generation for webcore.
@@ -37,8 +42,8 @@ func Webcore(c *config.Config) error {
 }
 
 // GetWebcoreExamples collects and returns all of the webcore examples.
-func GetWebcoreExamples(c *config.Config) ([][]byte, error) {
-	var examples [][]byte
+func GetWebcoreExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
+	var examples ordmap.Map[string, []byte]
 	err := filepath.WalkDir(c.Webcore, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -55,6 +60,7 @@ func GetWebcoreExamples(c *config.Config) ([][]byte, error) {
 		var curExample [][]byte
 		inExample := false
 		inCode := false
+		exampleID := ""
 		for sc.Scan() {
 			b := sc.Bytes()
 
@@ -64,6 +70,10 @@ func GetWebcoreExamples(c *config.Config) ([][]byte, error) {
 					continue
 				}
 				inExample = true
+				exampleID = string(idRegex.ReplaceAll(b, idRegexReplace))
+				if exampleID == "" {
+					return fmt.Errorf("missing ID for <core-example> tag in %q", path)
+				}
 				continue
 			}
 			if hasTag {
@@ -86,7 +96,7 @@ func GetWebcoreExamples(c *config.Config) ([][]byte, error) {
 			}
 
 			if hasExampleEnd {
-				examples = append(examples, bytes.Join(curExample, newline))
+				examples.Add(exampleID, bytes.Join(curExample, newline))
 				curExample = nil
 				inExample = false
 				continue
@@ -96,14 +106,11 @@ func GetWebcoreExamples(c *config.Config) ([][]byte, error) {
 		}
 		return nil
 	})
-	if err != nil {
-		return nil, err
-	}
-	return examples, nil
+	return examples, err
 }
 
 // WriteWebcoregen constructs the webcoregen.go file from the given examples.
-func WriteWebcoregen(c *config.Config, examples [][]byte) error {
+func WriteWebcoregen(c *config.Config, examples ordmap.Map[string, []byte]) error {
 	b := &bytes.Buffer{}
 	gengo.PrintHeader(b, "main")
 	b.WriteString(`func init() {
@@ -112,9 +119,9 @@ func WriteWebcoregen(c *config.Config, examples [][]byte) error {
 
 // WebcoreExamples are the compiled webcore examples for this app.
 var WebcoreExamples = map[string]func(parent gi.Widget){`)
-	for i, example := range examples {
+	for _, kv := range examples.Order {
 		fmt.Fprintf(b, `
-	"%d": func(parent gi.Widget){%s},`, i, example)
+	%q: func(parent gi.Widget){%s},`, kv.Key, kv.Val)
 	}
 	b.WriteString("\n}")
 
