@@ -153,6 +153,16 @@ func (sv *SVG) FindNamedElement(name string) Node {
 	if def != nil {
 		return def
 	}
+	sv.Root.WalkPre(func(k ki.Ki) bool {
+		if k.Name() == name {
+			def = k.This().(Node)
+			return ki.Break
+		}
+		return ki.Continue
+	})
+	if def != nil {
+		return def
+	}
 	log.Printf("SVG FindNamedElement: could not find name: %v\n", name)
 	return nil
 }
