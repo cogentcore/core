@@ -173,6 +173,8 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					case "height":
 						sv.PhysHeight.SetString(attr.Value)
 						sv.PhysHeight.ToDots(&curSvg.Paint.UnContext)
+					case "preserveAspectRatio":
+						curSvg.ViewBox.PreserveAspectRatio.SetString(attr.Value)
 					default:
 						curPar.SetProp(attr.Name.Local, attr.Value)
 					}
