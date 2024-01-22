@@ -4422,6 +4422,9 @@ const (
 	// RequestQuote is https://github.com/cogentcore/core/blob/main/icons/svg/request_quote.svg
 	RequestQuote Icon = "request_quote"
 
+	// Reset is https://github.com/cogentcore/core/blob/main/icons/svg/reset.svg
+	Reset Icon = "reset"
+
 	// ResetImage is https://github.com/cogentcore/core/blob/main/icons/svg/reset_image.svg
 	ResetImage Icon = "reset_image"
 
@@ -4431,8 +4434,8 @@ const (
 	// Resize is https://github.com/cogentcore/core/blob/main/icons/svg/resize.svg
 	Resize Icon = "resize"
 
-	// RestartAlt is https://github.com/cogentcore/core/blob/main/icons/svg/restart_alt.svg
-	RestartAlt Icon = "restart_alt"
+	// Restart is https://github.com/cogentcore/core/blob/main/icons/svg/restart.svg
+	Restart Icon = "restart"
 
 	// RestoreFromTrash is https://github.com/cogentcore/core/blob/main/icons/svg/restore_from_trash.svg
 	RestoreFromTrash Icon = "restore_from_trash"
