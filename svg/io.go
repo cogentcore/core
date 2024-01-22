@@ -433,14 +433,19 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					inTxt = true
 					curTxt = txt
 				} else {
-					if inTxt && curTxt != nil {
+					if (inTxt && curTxt != nil) || curPar == nil {
 						txt = NewText(curTxt, fmt.Sprintf("tspan%d", curTxt.NumLifetimeChildren()))
 						txt.Pos = curTxt.Pos
 					} else {
-						txt = NewText(curPar, fmt.Sprintf("tspan%d", curTxt.NumLifetimeChildren()))
+						if curPar != nil && curTxt != nil {
+							txt = NewText(curPar, fmt.Sprintf("tspan%d", curTxt.NumLifetimeChildren()))
+						}
 					}
 					inTspn = true
 					curTspn = txt
+				}
+				if txt == nil {
+					break
 				}
 				for _, attr := range se.Attr {
 					if SetStdXMLAttr(txt, attr.Name.Local, attr.Value) {
