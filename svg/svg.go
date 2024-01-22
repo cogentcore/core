@@ -192,6 +192,7 @@ func (sv *SVG) Style() {
 			return ki.Break
 		}
 		ni.SetFlag(true, IsDef)
+		ni.Style(sv)
 		return ki.Continue
 	})
 
