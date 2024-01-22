@@ -30,7 +30,6 @@ type SVG struct {
 
 func (sv *SVG) OnInit() {
 	sv.SVG = svg.NewSVG(10, 10)
-	sv.SVG.Norm = true
 	sv.WidgetBase.OnInit()
 	sv.SetStyles()
 	sv.HandleEvents()
@@ -42,6 +41,9 @@ func (sv *SVG) SetStyles() {
 		s.SetAbilities(!ro, abilities.Slideable, abilities.Pressable, abilities.LongHoverable, abilities.Scrollable)
 		s.Grow.Set(1, 1)
 		s.Min.Set(units.Dp(sv.SVG.Root.ViewBox.Size.X), units.Dp(sv.SVG.Root.ViewBox.Size.Y))
+	})
+	sv.StyleFinal(func(s *styles.Style) {
+		sv.SVG.Root.ViewBox.PreserveAspectRatio.SetFromStyle(s)
 	})
 }
 

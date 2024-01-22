@@ -71,6 +71,7 @@ func (vb *ViewBox) Transform(box mat32.Vec2) (size, trans, scale mat32.Vec2) {
 	if extra.Y > 0 {
 		trans.Y = extra.Y * vb.PreserveAspectRatio.Align.Y.AlignFactor()
 	}
+	trans.SetDiv(scale)
 	return
 }
 

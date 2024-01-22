@@ -257,7 +257,7 @@ func (sv *SVG) SetRootTransform() {
 	trans.SetAdd(sv.Translate)
 	scale.SetMulScalar(sv.Scale)
 	pc := &sv.Root.Paint
-	pc.Transform = pc.Transform.Translate(trans.X, trans.Y).Scale(scale.X, scale.Y)
+	pc.Transform = pc.Transform.Scale(scale.X, scale.Y).Translate(trans.X, trans.Y)
 	if sv.InvertY {
 		pc.Transform.Y0 = -pc.Transform.Y0
 	}

@@ -79,7 +79,6 @@ func (a *App) SetIconSVG(r io.Reader) *App {
 
 	sv := svg.NewSVG(16, 16)
 	sv.Color = colors.C(colors.FromRGB(66, 133, 244)) // Google Blue (#4285f4)
-	sv.Norm = true
 	err := sv.ReadXML(r)
 	if grr.Log(err) != nil {
 		return a
