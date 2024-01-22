@@ -26,7 +26,6 @@ func Render(size int) (*image.RGBA, error) {
 	paint.FontLibrary.InitFontPaths(paint.FontPaths...)
 
 	sv := svg.NewSVG(size, size)
-	sv.Norm = true
 	sv.Color = colors.C(colors.FromRGB(66, 133, 244)) // Google Blue (#4285f4)
 
 	spath := filepath.Join(".core", "icon.svg")

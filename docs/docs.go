@@ -4,6 +4,8 @@
 
 package main
 
+//go:generate core generate -webcore content
+
 import (
 	"embed"
 	"io/fs"

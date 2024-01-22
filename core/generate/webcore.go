@@ -113,7 +113,10 @@ func WriteWebcoregen(c *config.Config, examples [][]byte) error {
 // WebcoreExamples are the compiled webcore examples for this app.
 var WebcoreExamples = map[string]func(parent gi.Widget){`)
 	for i, example := range examples {
-		fmt.Fprintf(b, `	"%d": %q,\n`, i, example)
+		fmt.Fprintf(b, `"%d": %q`, i, example)
+		if i != len(examples)-1 {
+			b.WriteString(", ")
+		}
 	}
 	b.WriteString("}")
 
