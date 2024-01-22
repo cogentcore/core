@@ -25,8 +25,7 @@ var (
 	codeEnd          = []byte("```")
 	newline          = []byte{'\n'}
 
-	idRegex        = regexp.MustCompile(`id="(.+)"`)
-	idRegexReplace = []byte("$1")
+	idRegex = regexp.MustCompile(`id="(.+)"`)
 )
 
 // Webcore does any necessary generation for webcore.
@@ -70,8 +69,7 @@ func GetWebcoreExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
 					continue
 				}
 				inExample = true
-				exampleID = string(idRegex.ReplaceAll(b, idRegexReplace))
-				fmt.Println(exampleID)
+				exampleID = string(idRegex.FindAllSubmatch(b, -1)[0][1])
 				if exampleID == "" {
 					return fmt.Errorf("missing ID for <core-example> tag in %q", path)
 				}
