@@ -5,6 +5,8 @@
 package webcore
 
 import (
+	"log/slog"
+
 	"cogentcore.org/core/coredom"
 	"cogentcore.org/core/gi"
 )
@@ -20,6 +22,16 @@ func init() {
 
 // CoreExampleHandler is the coredom handler for <core-example> HTML elements.
 func CoreExampleHandler(ctx *coredom.Context) {
-	fr := coredom.New[*gi.Frame](ctx)
-	Examples[coredom.GetAttr(ctx.Node, "id")](fr)
+	sp := coredom.New[*gi.Splits](ctx)
+	fr := gi.NewFrame(sp)
+
+	id := coredom.GetAttr(ctx.Node, "id")
+	fn := Examples[id]
+	if fn == nil {
+		slog.Error("programmer error: <core-example> not found in webcore.Examples (you probably need to run go generate again)", "id", id)
+	} else {
+		fn(fr)
+	}
+
+	ctx.NewParent = sp
 }
