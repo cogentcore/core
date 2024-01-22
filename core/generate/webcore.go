@@ -105,7 +105,7 @@ func GetWebcoreExamples(c *config.Config) ([][]byte, error) {
 // WriteWebcoregen constructs the webcoregen.go file from the given examples.
 func WriteWebcoregen(c *config.Config, examples [][]byte) error {
 	b := &bytes.Buffer{}
-	gengo.PrintHeader(b, c.Release.Package)
+	gengo.PrintHeader(b, "main")
 	b.WriteString(`func init() {
 	maps.Copy(webcore.Examples, WebcoreExamples)
 }
@@ -120,5 +120,5 @@ var WebcoreExamples = map[string]func(parent gi.Widget){`)
 	}
 	b.WriteString("}")
 
-	return os.WriteFile("webcoregen.go", b.Bytes(), 0666)
+	return gengo.Write("webcoregen.go", b.Bytes(), nil)
 }
