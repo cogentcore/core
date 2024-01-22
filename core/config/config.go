@@ -41,10 +41,15 @@ type Config struct { //gti:add
 	// the version of the project
 	Version string `cmd:"set-version" posarg:"0" default:"v0.0.0"`
 
-	// TODO: add def TypeApp for type once fix SetString
+	// the type of the project (App/Library)
+	Type Types `def:"App"`
 
-	// the type of the project (app/library)
-	Type Types
+	// Webcore, if specified, indicates that the app has webcore
+	// pages located at this directory. If so, <core-example> HTML
+	// elements will be collected and stored at webcoregen.go, and
+	// a directory tree will be made for all of the pages when building
+	// for platform web.
+	Webcore string
 
 	// the configuration options for the build, install, run, and pack commands
 	Build Build `cmd:"build,install,run,pack" view:"add-fields"`
