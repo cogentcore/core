@@ -19,7 +19,7 @@ import (
 )
 
 var (
-	coreExampleStart = []byte("<core-example>")
+	coreExampleStart = []byte("<core-example")
 	coreExampleEnd   = []byte("</core-example>")
 	codeStart        = []byte("```go")
 	codeEnd          = []byte("```")
@@ -71,6 +71,7 @@ func GetWebcoreExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
 				}
 				inExample = true
 				exampleID = string(idRegex.ReplaceAll(b, idRegexReplace))
+				fmt.Println(exampleID)
 				if exampleID == "" {
 					return fmt.Errorf("missing ID for <core-example> tag in %q", path)
 				}

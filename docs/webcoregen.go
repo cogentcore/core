@@ -3,8 +3,10 @@
 package main
 
 import (
+	"fmt"
 	"maps"
 
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/webcore"
 )
@@ -14,4 +16,16 @@ func init() {
 }
 
 // WebcoreExamples are the compiled webcore examples for this app.
-var WebcoreExamples = map[string]func(parent gi.Widget){}
+var WebcoreExamples = map[string]func(parent gi.Widget){
+	"<core-example click-basic>": func(parent gi.Widget) {
+		gi.NewButton(parent).SetText("Click me").OnClick(func(e events.Event) {
+			fmt.Println("Button clicked")
+		})
+	},
+	"<core-example click-pos>": func(parent gi.Widget) {
+		gi.NewButton(parent).SetText("Click me").OnClick(func(e events.Event) {
+			fmt.Println("Button clicked at", e.Pos())
+			e.SetHandled() // this event will not be handled by other event handlers now
+		})
+	},
+}
