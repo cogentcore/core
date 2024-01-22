@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 
 	"cogentcore.org/core/core/config"
+	"cogentcore.org/core/gengo"
 )
 
 var (
@@ -28,6 +29,15 @@ func Webcore(c *config.Config) error {
 	if c.Webcore == "" {
 		return nil
 	}
+	examples, err := GetWebcoreExamples(c)
+	if err != nil {
+		return err
+	}
+	return WriteWebcoregen(c, examples)
+}
+
+// GetWebcoreExamples collects and returns all of the webcore examples.
+func GetWebcoreExamples(c *config.Config) ([][]byte, error) {
 	var examples [][]byte
 	err := filepath.WalkDir(c.Webcore, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -87,11 +97,25 @@ func Webcore(c *config.Config) error {
 		return nil
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
+	return examples, nil
+}
 
-	for _, e := range examples {
-		fmt.Println(string(e))
+// WriteWebcoregen constructs the webcoregen.go file from the given examples.
+func WriteWebcoregen(c *config.Config, examples [][]byte) error {
+	b := &bytes.Buffer{}
+	gengo.PrintHeader(b, c.Release.Package)
+	b.WriteString(`func init() {
+	maps.Copy(webcore.Examples, WebcoreExamples)
+}
+
+// WebcoreExamples are the compiled webcore examples for this app.
+var WebcoreExamples = map[string]func(parent gi.Widget){`)
+	for i, example := range examples {
+		fmt.Fprintf(b, `	"%d": %q,\n`, i, example)
 	}
-	return nil
+	b.WriteString("}")
+
+	return os.WriteFile("webcoregen.go", b.Bytes(), 0666)
 }
