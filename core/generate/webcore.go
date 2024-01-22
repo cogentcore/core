@@ -47,6 +47,7 @@ func Webcore(c *config.Config) error {
 		inCode := false
 		for sc.Scan() {
 			b := sc.Bytes()
+
 			hasTag := bytes.Contains(b, coreExampleStart)
 			if !inExample {
 				if !hasTag {
@@ -60,7 +61,8 @@ func Webcore(c *config.Config) error {
 			}
 
 			hasCodeStart := bytes.Contains(b, codeStart)
-			if !inCode {
+			hasExampleEnd := bytes.Contains(b, coreExampleEnd)
+			if !inCode && !hasExampleEnd {
 				if !hasCodeStart {
 					continue
 				}
@@ -69,12 +71,14 @@ func Webcore(c *config.Config) error {
 			}
 
 			if bytes.Contains(b, codeEnd) {
+				inCode = false
 				continue
 			}
 
-			if bytes.Contains(b, coreExampleEnd) {
+			if hasExampleEnd {
 				examples = append(examples, bytes.Join(curExample, newline))
 				curExample = nil
+				inExample = false
 				continue
 			}
 
