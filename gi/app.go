@@ -130,6 +130,13 @@ func Platform() goosi.Platforms {
 	return goosi.TheApp.Platform()
 }
 
+// SystemPlatform returns the current underlying platform / operating system the
+// app is running on. On platforms other than [goosi.Web], this is the same as
+// [Platform]. On [goosi.Web], it returns the underlying operating system.
+func SystemPlatform() goosi.Platforms {
+	return goosi.TheApp.SystemPlatform()
+}
+
 // todo: deal with this stuff too:
 
 // SetQuitReqFunc sets the function that is called whenever there is a

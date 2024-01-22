@@ -404,7 +404,7 @@ func (bt *Button) ConfigWidget() {
 	}
 
 	sci := -1
-	if bt.Type == ButtonMenu {
+	if bt.Type == ButtonMenu && !SystemPlatform().IsMobile() {
 		if indi < 0 && bt.Shortcut != "" {
 			config.Add(StretchType, "sc-stretch")
 			sci = len(config)
