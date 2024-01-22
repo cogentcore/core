@@ -47,6 +47,12 @@ In a `main.go`, anonymously import the icons to trigger the init function:
 	_ "cogentcore.org/cogent/code/icons"
 ```
 
+In either case, you can just use the string name, _without the .svg extension_, as an argument to any place where an icon is specified:
+
+```go
+    gi.NewButton(b).SetIcon("my_icon_name")
+```    
+
 ## Using bitmap files instead of SVG
 
 Although only SVG files are supported for icons, you can easily embed a bitmap image file in an SVG.  The `svg` tool can do this for you, as follows:
