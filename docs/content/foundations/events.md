@@ -33,7 +33,7 @@ Mouse events are generally processed in a _depth first_ manner, with the most de
 
 ### Basic vs. Processed events
 
-Basic mouse events, which begin with `Mouse` (e.g., [[events.MouseButton]], [[events.MouseMove]] are generally sent to all Widgets, but are generally not handled.  They are available if you need to do some kind of custom event processing.
+Basic mouse events, which begin with `Mouse` (e.g., [[events.MouseDown]], [[events.MouseUp]] [[events.MouseMove]] are generally sent to all Widgets, but are generally not handled.  They are available if you need to do some kind of custom event processing.
 
 Processed events such as [[events.Click]] are generated from basic events (e.g., a Click is a Down and Up on the same Widget), and are the main target of event handlers.
 
