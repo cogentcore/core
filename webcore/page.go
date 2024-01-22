@@ -135,6 +135,9 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 		}
 	}
 
+	// need to reset
+	NumExamples[pg.Context.PageURL] = 0
+
 	fr := pg.FindPath("splits/body").(*gi.Frame)
 	updt := fr.UpdateStart()
 	fr.DeleteChildren(true)
