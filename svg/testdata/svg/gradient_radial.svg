@@ -1,0 +1,56 @@
+<svg
+  width="1280px"
+  height="720px"
+  viewBox="0 0 1280 720"
+  xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+  xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns="http://www.w3.org/2000/svg">
+  <defs
+    id="Defs">
+    <linearGradient
+      id="linearGradient769"
+      x1="0"
+      y1="0"
+      x2="0"
+      y2="0"
+      gradientUnits="objectBoundingBox">
+      <stop
+        style="stop-color:#FFFFFF;stop-opacity:1;"
+        offset="0" />
+      <stop
+        style="stop-color:#0000FF;stop-opacity:1;"
+        offset="1" />
+    </linearGradient>
+    <radialGradient
+      id="radialGradient970"
+      cx="508.5"
+      cy="373.5"
+      fx="508.5"
+      fy="373.5"
+      r="292.625"
+      gradientUnits="userSpaceOnUse"
+      xlink:href="#linearGradient769" />
+  </defs>
+  <sodipodi:namedview
+    id="namedview761"
+    inkscape:current-layer=""
+    inkscape:cx="0"
+    inkscape:cy="0"
+    inkscape:zoom="1"
+    inkscape:document-units="px">
+    <inkscape:grid
+      id="grid94"
+      units="px"
+      spacingx="12"
+      spacingy="12"
+      type="xygrid" />
+  </sodipodi:namedview>
+  <ellipse
+    id="ellipse555"
+    style="stroke-opacity:1;stroke-width:1px;fill:url(#radialGradient970);fill-opacity:1;stroke:#000000;"
+    cx="508.5"
+    cy="373.5"
+    rx="292.125"
+    ry="285.5357" />
+</svg>

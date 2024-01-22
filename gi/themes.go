@@ -4,7 +4,7 @@
 
 package gi
 
-// Themes are the different possible themes that a user can select in their preferences.
+// Themes are the different possible themes that a user can select in their settings.
 type Themes int32 //enums:enum -trim-prefix Theme
 
 const (

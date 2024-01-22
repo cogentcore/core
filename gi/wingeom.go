@@ -20,7 +20,7 @@ import (
 )
 
 var (
-	// WinGeomMgr is the manager of window geometry preferences
+	// WinGeomMgr is the manager of window geometry settings
 	WinGeomMgr = WinGeomPrefsMgr{}
 
 	ErrWinGeomNoLock = errors.New("WinGeom could not lock lock file")
@@ -30,7 +30,7 @@ var (
 // by window name, screen name.
 type WinGeomPrefs map[string]map[string]RenderWinGeom
 
-// WinGeomPrefsMgr is the manager of window geometry preferences.
+// WinGeomPrefsMgr is the manager of window geometry settings.
 // Records window geometry in a persistent file, used when opening new windows.
 type WinGeomPrefsMgr struct {
 
@@ -40,7 +40,7 @@ type WinGeomPrefsMgr struct {
 	// temporary cached geometries -- saved to Geoms after SaveDelay
 	Cache WinGeomPrefs
 
-	// base name of the preferences file in GoGi prefs directory
+	// base name of the settings file in GoGi prefs directory
 	Filename string
 
 	// when prefs were last saved -- if we weren't the last to save, then we need to re-open before modifying
@@ -155,7 +155,7 @@ func (mgr *WinGeomPrefsMgr) SaveLastSave() {
 	os.WriteFile(pnm, b, 0644)
 }
 
-// Open RenderWin Geom preferences from GoGi standard prefs directory
+// Open RenderWin Geom settings from GoGi standard prefs directory
 // called under mutex or at start
 func (mgr *WinGeomPrefsMgr) Open() error {
 	mgr.Init()
@@ -188,7 +188,7 @@ func (mgr *WinGeomPrefsMgr) Open() error {
 	return err
 }
 
-// Save RenderWin Geom Preferences to GoGi standard prefs directory
+// Save RenderWin Geom Settings to GoGi standard prefs directory
 // assumed to be under mutex and lock still
 func (mgr *WinGeomPrefsMgr) Save() error {
 	if mgr.Geoms == nil {
@@ -211,7 +211,7 @@ func (mgr *WinGeomPrefsMgr) Save() error {
 }
 
 // WinName returns window name before first colon, if exists.
-// This is the part of the name used to record preferences
+// This is the part of the name used to record settings
 func (mgr *WinGeomPrefsMgr) WinName(winName string) string {
 	if ci := strings.Index(winName, ":"); ci > 0 {
 		return winName[:ci]
@@ -220,7 +220,7 @@ func (mgr *WinGeomPrefsMgr) WinName(winName string) string {
 }
 
 // SettingStart turns on SettingNoSave to prevent subsequent redundant calls to
-// save a geometry that was being set from already-saved preferences.
+// save a geometry that was being set from already-saved settings.
 // Must call SettingEnd to turn off (safe to call even if Start not called).
 func (mgr *WinGeomPrefsMgr) SettingStart() {
 	mgr.Mu.Lock()

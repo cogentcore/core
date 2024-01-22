@@ -111,7 +111,7 @@ func (a *App) Config() {
 
 // DataDir returns the application-specific data directory:
 // [goosi.DataDir] + [App.Name]. It ensures that the directory exists first.
-// Use this directory to store all app-specific data including preferences.
+// Use this directory to store all app-specific data including settings.
 // DataDir is: Mac: ~/Library, Linux: ~/.config, Windows: ~/AppData/Roaming
 func (a *App) DataDir() string {
 	pdir := filepath.Join(goosi.TheApp.DataDir(), a.Name)

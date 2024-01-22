@@ -46,13 +46,13 @@ and rows as the elements in the struct.  You can sort by the column headers
 and it supports full editing with drag-n-drop etc.  If set to ReadOnly, then it
 serves as a chooser, as in the FileView.
 
-# MethodView
+# FuncButton
 
-This is actually a collection of methods that provide a complete GUI for calling
-methods.  Property lists defined on the kit Type registry are used for specifying
-the methods to call and their properties.  Much of your toolbar and menu level
-GUI can be implemented in this system.  See gi/prefs.go and giv/prefsview.go for
-how the GoGi Prefs dialog is implemented, and see the gide project for a more
+Provides GUI for calling methods, prompting the user for any args, using the Value system.
+The gti tool can capture comment data to provide tooltips for users: specify //gti:add for
+types and methods that are called.  Much of your toolbar and menu level
+GUI can be implemented in this system.  See gi/settings.go and giv/settingsview.go for
+how the Cogent Core Prefs dialog is implemented, and see the Cogent Code project for a more
 complex case.
 */
 package giv

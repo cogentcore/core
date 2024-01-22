@@ -226,7 +226,7 @@ type AppearanceSettingsData struct { //gti:add
 	// of the default font size (higher numbers lead to larger text)
 	FontSize float32 `default:"100" min:"10" max:"500" step:"10" format:"%g%%"`
 
-	// screen-specific preferences, which will override overall defaults if set
+	// screen-specific settings, which will override overall defaults if set
 	Screens map[string]ScreenSettings
 
 	// text highlighting style / theme
@@ -294,7 +294,7 @@ func (as *AppearanceSettingsData) Apply() { //gti:add
 }
 
 // ApplyDPI updates the screen LogicalDPI values according to current
-// preferences and zoom factor, and then updates all open windows as well.
+// settings and zoom factor, and then updates all open windows as well.
 func (as *AppearanceSettingsData) ApplyDPI() {
 	// zoom is percentage, but LogicalDPIScale is multiplier
 	goosi.LogicalDPIScale = as.Zoom / 100
@@ -414,9 +414,9 @@ func (ds *DeviceSettingsData) Apply() {
 	events.ScrollWheelSpeed = ds.ScrollWheelSpeed
 }
 
-// ScreenSettings are the per-screen preferences -- see [goosi.App.Screen] for
+// ScreenSettings are the per-screen settings -- see [goosi.App.Screen] for
 // info on the different screens -- these prefs are indexed by the Screen.Name
-// -- settings here override those in the global preferences.
+// -- settings here override those in the global settings.
 type ScreenSettings struct { //gti:add
 
 	// overall zoom factor as a percentage of the default zoom
@@ -512,7 +512,7 @@ func (ss *SystemSettingsData) Defaults() {
 	ss.UpdateUser()
 }
 
-// Apply detailed preferences to all the relevant settings.
+// Apply detailed settings to all the relevant settings.
 func (ss *SystemSettingsData) Apply() { //gti:add
 	if ss.FontPaths != nil {
 		paths := append(ss.FontPaths, paint.FontPaths...)
