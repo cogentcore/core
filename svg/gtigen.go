@@ -209,7 +209,7 @@ func (t *Group) New() ki.Ki { return &Group{} }
 func (t *Group) SetClass(v string) *Group { t.Class = v; return t }
 
 // ImageType is the [gti.Type] for [Image]
-var ImageType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Image", IDName: "image", Doc: "Image is an SVG image (bitmap)", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Pos", Doc: "position of the top-left of the image"}, {Name: "Size", Doc: "rendered size of the image (imposes a scaling on image when it is rendered)"}, {Name: "PreserveAspectRatio", Doc: "directs resize operations to preserve aspect ratio"}, {Name: "Filename", Doc: "file name of image loaded -- set by OpenImage"}, {Name: "Pixels", Doc: "the image pixels"}}, Instance: &Image{}})
+var ImageType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Image", IDName: "image", Doc: "Image is an SVG image (bitmap)", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Pos", Doc: "position of the top-left of the image"}, {Name: "Size", Doc: "rendered size of the image (imposes a scaling on image when it is rendered)"}, {Name: "Filename", Doc: "file name of image loaded -- set by OpenImage"}, {Name: "ViewBox", Doc: "how to scale and align the image"}, {Name: "Pixels", Doc: "the image pixels"}}, Instance: &Image{}})
 
 // NewImage adds a new [Image] with the given name to the given parent:
 // Image is an SVG image (bitmap)
@@ -231,13 +231,13 @@ func (t *Image) SetPos(v mat32.Vec2) *Image { t.Pos = v; return t }
 // rendered size of the image (imposes a scaling on image when it is rendered)
 func (t *Image) SetSize(v mat32.Vec2) *Image { t.Size = v; return t }
 
-// SetPreserveAspectRatio sets the [Image.PreserveAspectRatio]:
-// directs resize operations to preserve aspect ratio
-func (t *Image) SetPreserveAspectRatio(v bool) *Image { t.PreserveAspectRatio = v; return t }
-
 // SetFilename sets the [Image.Filename]:
 // file name of image loaded -- set by OpenImage
 func (t *Image) SetFilename(v string) *Image { t.Filename = v; return t }
+
+// SetViewBox sets the [Image.ViewBox]:
+// how to scale and align the image
+func (t *Image) SetViewBox(v ViewBox) *Image { t.ViewBox = v; return t }
 
 // SetPixels sets the [Image.Pixels]:
 // the image pixels
@@ -445,7 +445,7 @@ func (t *Rect) SetRadius(v mat32.Vec2) *Rect { t.Radius = v; return t }
 func (t *Rect) SetClass(v string) *Rect { t.Class = v; return t }
 
 // SVGNodeType is the [gti.Type] for [SVGNode]
-var SVGNodeType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.SVGNode", IDName: "svg-node", Doc: "SVGNode represents the root of an SVG tree", Embeds: []gti.Field{{Name: "Group"}}, Fields: []gti.Field{{Name: "ViewBox", Doc: "viewbox defines the coordinate system for the drawing -- these units are mapped into the screen space allocated for the SVG during rendering"}}, Instance: &SVGNode{}})
+var SVGNodeType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.SVGNode", IDName: "svg-node", Doc: "SVGNode represents the root of an SVG tree", Embeds: []gti.Field{{Name: "Group"}}, Fields: []gti.Field{{Name: "ViewBox", Doc: "viewbox defines the coordinate system for the drawing.\nThese units are mapped into the screen space allocated\nfor the SVG during rendering"}}, Instance: &SVGNode{}})
 
 // NewSVGNode adds a new [SVGNode] with the given name to the given parent:
 // SVGNode represents the root of an SVG tree
@@ -460,7 +460,9 @@ func (t *SVGNode) KiType() *gti.Type { return SVGNodeType }
 func (t *SVGNode) New() ki.Ki { return &SVGNode{} }
 
 // SetViewBox sets the [SVGNode.ViewBox]:
-// viewbox defines the coordinate system for the drawing -- these units are mapped into the screen space allocated for the SVG during rendering
+// viewbox defines the coordinate system for the drawing.
+// These units are mapped into the screen space allocated
+// for the SVG during rendering
 func (t *SVGNode) SetViewBox(v ViewBox) *SVGNode { t.ViewBox = v; return t }
 
 // SetClass sets the [SVGNode.Class]

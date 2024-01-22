@@ -26,11 +26,11 @@ type Image struct {
 	// rendered size of the image (imposes a scaling on image when it is rendered)
 	Size mat32.Vec2 `xml:"{width,height}"`
 
-	// directs resize operations to preserve aspect ratio
-	PreserveAspectRatio bool `xml:"preserveAspectRatio"`
-
 	// file name of image loaded -- set by OpenImage
 	Filename string
+
+	// how to scale and align the image
+	ViewBox ViewBox `xml:"viewbox"`
 
 	// the image pixels
 	Pixels *image.RGBA `xml:"-" json:"-" view:"-"`

@@ -222,7 +222,7 @@ var _ViewBoxAlignsNameToValueMap = map[string]ViewBoxAligns{
 
 var _ViewBoxAlignsDescMap = map[ViewBoxAligns]string{
 	0: `align ViewBox.Min with midpoint of Viewport (default)`,
-	1: `do not preserve uniform scaling (if either X or Y is None, both are treated as such). In this case, the Meet / Slice value is ignored`,
+	1: `do not preserve uniform scaling (if either X or Y is None, both are treated as such). In this case, the Meet / Slice value is ignored. This is the same as FitFill from styles.ObjectFits`,
 	2: `align ViewBox.Min with top / left of Viewport`,
 	3: `align ViewBox.Min+Size with bottom / right of Viewport`,
 }
@@ -328,8 +328,8 @@ var _ViewBoxMeetOrSliceNameToValueMap = map[string]ViewBoxMeetOrSlice{
 }
 
 var _ViewBoxMeetOrSliceDescMap = map[ViewBoxMeetOrSlice]string{
-	0: `Meet only applies if Align != None (i.e., only for uniform scaling), and means the entire ViewBox is visible within Viewport, and it is scaled up as much as possible to meet the align constraints.`,
-	1: `Slice only applies if Align != None (i.e., only for uniform scaling), and means the entire ViewBox is covered by the ViewBox, and the ViewBox is scaled down as much as possible, while still meeting the align constraints`,
+	0: `Meet only applies if Align != None (i.e., only for uniform scaling), and means the entire ViewBox is visible within Viewport, and it is scaled up as much as possible to meet the align constraints. This is the same as FitContain from styles.ObjectFits`,
+	1: `Slice only applies if Align != None (i.e., only for uniform scaling), and means the entire ViewBox is covered by the ViewBox, and the ViewBox is scaled down as much as possible, while still meeting the align constraints. This is the same as FitCover from styles.ObjectFits`,
 }
 
 var _ViewBoxMeetOrSliceMap = map[ViewBoxMeetOrSlice]string{

@@ -379,7 +379,6 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case nm == "image":
 				img := NewImage(curPar)
 				var x, y, w, h float32
-				b := false
 				for _, attr := range se.Attr {
 					if SetStdXMLAttr(img, attr.Name.Local, attr.Value) {
 						continue
@@ -394,8 +393,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					case "height":
 						h, err = mat32.ParseFloat32(attr.Value)
 					case "preserveAspectRatio":
-						b, _ = laser.ToBool(attr.Value)
-						img.PreserveAspectRatio = b
+						img.ViewBox.PreserveAspectRatio.SetString(attr.Value)
 					case "href":
 						if len(attr.Value) > 11 && attr.Value[:11] == "data:image/" {
 							es := attr.Value[11:]
@@ -942,7 +940,7 @@ func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
 		XMLAddAttr(&se.Attr, "y", fmt.Sprintf("%g", nd.Pos.Y))
 		XMLAddAttr(&se.Attr, "width", fmt.Sprintf("%g", nd.Size.X))
 		XMLAddAttr(&se.Attr, "height", fmt.Sprintf("%g", nd.Size.Y))
-		XMLAddAttr(&se.Attr, "preserveAspectRatio", fmt.Sprintf("%v", nd.PreserveAspectRatio))
+		XMLAddAttr(&se.Attr, "preserveAspectRatio", nd.ViewBox.PreserveAspectRatio.String())
 		ib, fmt := images.ToBase64PNG(nd.Pixels)
 		XMLAddAttr(&se.Attr, "href", "data:"+fmt+";base64,"+string(images.Base64SplitLines(ib)))
 	case *MetaData:

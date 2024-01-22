@@ -47,6 +47,33 @@ func (vb *ViewBox) String() string {
 	return vb.BoxString() + ` preserveAspectRatio="` + vb.PreserveAspectRatio.String() + `"`
 }
 
+// Transform returns the transform based on viewbox size relative to given box
+// (viewport) size that it will be rendered into
+func (vb *ViewBox) Transform(box mat32.Vec2) (size, trans, scale mat32.Vec2) {
+	of := styles.FitFill
+	switch {
+	case vb.PreserveAspectRatio.Align.X == AlignNone:
+		of = styles.FitFill
+	case vb.PreserveAspectRatio.MeetOrSlice == Meet:
+		of = styles.FitContain
+	case vb.PreserveAspectRatio.MeetOrSlice == Slice:
+		of = styles.FitCover
+	}
+	if vb.Size.X == 0 || vb.Size.Y == 0 {
+		vb.Size = mat32.V2(100, 100)
+	}
+	size = styles.ObjectSizeFromFit(of, vb.Size, box)
+	scale = size.Div(vb.Size)
+	extra := box.Sub(size)
+	if extra.X > 0 {
+		trans.X = extra.X * vb.PreserveAspectRatio.Align.X.AlignFactor()
+	}
+	if extra.Y > 0 {
+		trans.Y = extra.Y * vb.PreserveAspectRatio.Align.Y.AlignFactor()
+	}
+	return
+}
+
 // ViewBoxAlign defines values for the PreserveAspectRatio alignment factor
 type ViewBoxAligns int32 //enums:enum -trim-prefix Align -transform lower
 
@@ -55,7 +82,8 @@ const (
 	AlignMid ViewBoxAligns = iota
 
 	// do not preserve uniform scaling (if either X or Y is None, both are treated as such).
-	// In this case, the Meet / Slice value is ignored
+	// In this case, the Meet / Slice value is ignored.
+	// This is the same as FitFill from styles.ObjectFits
 	AlignNone
 
 	// align ViewBox.Min with top / left of Viewport
@@ -65,6 +93,37 @@ const (
 	AlignMax
 )
 
+// Aligns returns the styles.Aligns version of ViewBoxAligns
+func (va ViewBoxAligns) Aligns() styles.Aligns {
+	switch va {
+	case AlignNone:
+		return styles.Start
+	case AlignMin:
+		return styles.Start
+	case AlignMax:
+		return styles.End
+	default:
+		return styles.Center
+	}
+}
+
+// SetFromAligns sets alignment from the styles.Aligns version of ViewBoxAligns
+func (va *ViewBoxAligns) SetFromAligns(a styles.Aligns) {
+	switch a {
+	case styles.Start:
+		*va = AlignMin
+	case styles.End:
+		*va = AlignMax
+	case styles.Center:
+		*va = AlignMid
+	}
+}
+
+// AlignFactor returns the alignment factor for proportion offset
+func (va ViewBoxAligns) AlignFactor() float32 {
+	return styles.AlignFactor(va.Aligns())
+}
+
 // ViewBoxMeetOrSlice defines values for the PreserveAspectRatio meet or slice factor
 type ViewBoxMeetOrSlice int32 //enums:enum -transform lower
 
@@ -72,12 +131,14 @@ const (
 	// Meet only applies if Align != None (i.e., only for uniform scaling),
 	// and means the entire ViewBox is visible within Viewport,
 	// and it is scaled up as much as possible to meet the align constraints.
+	// This is the same as FitContain from styles.ObjectFits
 	Meet ViewBoxMeetOrSlice = iota
 
 	// Slice only applies if Align != None (i.e., only for uniform scaling),
 	// and means the entire ViewBox is covered by the ViewBox, and the
 	// ViewBox is scaled down as much as possible, while still meeting the
-	// align constraints
+	// align constraints.
+	// This is the same as FitCover from styles.ObjectFits
 	Slice
 )
 
@@ -161,22 +222,9 @@ func (pa *ViewBoxPreserveAspectRatio) SetString(s string) error {
 // SetFromStyle sets from ObjectFit and Justify (X) and Align (Y) Content
 // in given style.
 func (pa *ViewBoxPreserveAspectRatio) SetFromStyle(s *styles.Style) {
-	switch s.Justify.Content {
-	case styles.Start:
-		pa.Align.X = AlignMin
-	case styles.End:
-		pa.Align.X = AlignMax
-	case styles.Center:
-		pa.Align.X = AlignMid
-	}
-	switch s.Align.Content {
-	case styles.Start:
-		pa.Align.Y = AlignMin
-	case styles.End:
-		pa.Align.Y = AlignMax
-	case styles.Center:
-		pa.Align.Y = AlignMid
-	}
+	pa.Align.X.SetFromAligns(s.Justify.Content)
+	pa.Align.Y.SetFromAligns(s.Align.Content)
+
 	// todo: could override with ObjectPosition but maybe not worth it?
 
 	switch s.ObjectFit {
@@ -184,8 +232,7 @@ func (pa *ViewBoxPreserveAspectRatio) SetFromStyle(s *styles.Style) {
 		pa.Align.Set(AlignNone)
 	case styles.FitContain:
 		pa.MeetOrSlice = Meet
-	case styles.FitCover:
+	case styles.FitCover, styles.FitScaleDown: // note: FitScaleDown not handled
 		pa.MeetOrSlice = Slice
-		// todo: FitScaleDown
 	}
 }

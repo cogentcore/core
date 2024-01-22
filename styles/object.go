@@ -83,26 +83,17 @@ func ObjectSizeFromFit(fit ObjectFits, obj, box mat32.Vec2) mat32.Vec2 {
 func (s *Style) ResizeImage(img image.Image, box mat32.Vec2) image.Image {
 	obj := mat32.V2FromPoint(img.Bounds().Size())
 	sz := ObjectSizeFromFit(s.ObjectFit, obj, box)
-	switch s.ObjectFit {
-	case FitFill:
-		return transform.Resize(img, int(box.X), int(box.Y), transform.Linear)
-	case FitScaleDown:
-		// in FitScaleDown, if containing results in a larger image, we use
-		// the original image instead
-		if sz.X >= obj.X {
-			return img
-		}
-		fallthrough
-	case FitContain:
-		return transform.Resize(img, int(sz.X), int(sz.Y), transform.Linear)
-	case FitCover:
-		// our source image is the computed size
-		rimg := transform.Resize(img, int(sz.X), int(sz.Y), transform.Linear)
-		// but we cap the destination size to the size of the containg object
-		drect := image.Rect(0, 0, int(min(sz.X, box.X)), int(min(sz.Y, box.Y)))
-		dst := image.NewRGBA(drect)
-		draw.Draw(dst, drect, rimg, image.Point{}, draw.Src)
-		return dst
+
+	if s.ObjectFit == FitScaleDown && sz.X >= obj.X {
+		return img
 	}
-	return img
+	rimg := transform.Resize(img, int(sz.X), int(sz.Y), transform.Linear)
+	if s.ObjectFit != FitCover {
+		return rimg
+	}
+	// but we cap the destination size to the size of the containg object
+	drect := image.Rect(0, 0, int(min(sz.X, box.X)), int(min(sz.Y, box.Y)))
+	dst := image.NewRGBA(drect)
+	draw.Draw(dst, drect, rimg, image.Point{}, draw.Src)
+	return dst
 }

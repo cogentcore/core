@@ -27,6 +27,35 @@ type TestingT interface {
 // and it should only be set once and then turned back off.
 var UpdateTestImages = updateTestImages
 
+// CompareUint8 returns true if two numbers are more different than tol
+func CompareUint8(cc, ic uint8, tol int) bool {
+	d := int(cc) - int(ic)
+	if d < -tol {
+		return false
+	}
+	if d > tol {
+		return false
+	}
+	return true
+}
+
+// CompareColors returns true if two colors are more different than tol
+func CompareColors(cc, ic color.RGBA, tol int) bool {
+	if !CompareUint8(cc.R, ic.R, tol) {
+		return false
+	}
+	if !CompareUint8(cc.G, ic.G, tol) {
+		return false
+	}
+	if !CompareUint8(cc.B, ic.B, tol) {
+		return false
+	}
+	if !CompareUint8(cc.A, ic.A, tol) {
+		return false
+	}
+	return true
+}
+
 // Assert asserts that the given image is equivalent
 // to the image stored at the given filename in the testdata directory,
 // with ".png" added to the filename if there is no extension
@@ -86,7 +115,7 @@ func Assert(t TestingT, img image.Image, filename string) {
 			for x := ibounds.Min.X; x < ibounds.Max.X; x++ {
 				cc := color.RGBAModel.Convert(img.At(x, y)).(color.RGBA)
 				ic := color.RGBAModel.Convert(fimg.At(x, y)).(color.RGBA)
-				if cc != ic {
+				if !CompareColors(cc, ic, 1) {
 					t.Errorf("AssertImage: image for %s is not the same as expected; see %s; expected color %v at (%d, %d), but got %v", filename, failFilename, ic, x, y, cc)
 					failed = true
 					break

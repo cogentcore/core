@@ -51,21 +51,17 @@ type SVG struct {
 	// physical height of the drawing, e.g., when printed -- does not affect rendering -- metadata
 	PhysHeight units.Value
 
-	// Norm installs a transform that renormalizes so that the specified
-	// ViewBox exactly fits within the allocated SVG size.
-	Norm bool
-
-	// InvertY, when doing Norm transform, also flip the Y axis so that
+	// InvertY, when applying the ViewBox transform, also flip the Y axis so that
 	// the smallest Y value is at the bottom of the SVG box,
 	// instead of being at the top as it is by default.
 	InvertY bool
 
 	// Translate specifies a translation to apply beyond what is specified in the SVG,
-	// and in addition to the effects of Norm if active.
+	// and its ViewBox transform.
 	Translate mat32.Vec2
 
 	// Scale specifies a zoom scale factor to apply beyond what is specified in the SVG,
-	// and in addition to the effects of Norm if active.
+	// and its ViewBox transform.
 	Scale float32
 
 	// render state for rendering
@@ -103,6 +99,7 @@ func (sv *SVG) Config(width, height int) {
 	sz := image.Point{width, height}
 	sv.Geom.Size = sz
 	sv.Scale = 1
+	sv.Background = colors.C(colors.White)
 	sv.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
 	sv.RenderState.Init(width, height, sv.Pixels)
 	sv.Root.InitName(&sv.Root, "svg")
@@ -139,7 +136,6 @@ func (sv *SVG) CopyFrom(fr *SVG) {
 	sv.Fill = fr.Fill
 	sv.Background = fr.Background
 	sv.Geom = fr.Geom
-	sv.Norm = fr.Norm
 	sv.InvertY = fr.InvertY
 	sv.Defs.CopyFrom(&fr.Defs)
 	sv.Root.CopyFrom(&fr.Root)
@@ -242,32 +238,26 @@ func (sv *SVG) FillViewport() {
 	pc.Unlock()
 }
 
-// SetRootTransform sets the Root node transform based on Norm, Translate, Scale
+// SetRootTransform sets the Root node transform based on ViewBox, Translate, Scale
 // parameters set on the SVG object.
 func (sv *SVG) SetRootTransform() {
-	sc := mat32.V2(1, 1)
-	tr := mat32.Vec2{}
-	if sv.Norm {
-		vb := &sv.Root.ViewBox
-		if vb.Size != (mat32.Vec2{}) {
-			sc.X = float32(sv.Geom.Size.X) / vb.Size.X
-			sc.Y = float32(sv.Geom.Size.Y) / vb.Size.Y
-			if sv.InvertY {
-				sc.Y *= -1
-			}
-			tr = vb.Min.MulScalar(-1)
-		} else {
-			sz := sv.Root.LocalBBox().Size()
-			if sz != (mat32.Vec2{}) {
-				sc.X = float32(sv.Geom.Size.X) / sz.X
-				sc.Y = float32(sv.Geom.Size.Y) / sz.Y
-			}
-		}
+	vb := &sv.Root.ViewBox
+	box := mat32.V2FromPoint(sv.Geom.Size)
+	if vb.Size.X == 0 {
+		vb.Size.X = sv.PhysWidth.Dots
 	}
-	tr.SetAdd(sv.Translate)
-	sc.SetMulScalar(sv.Scale)
+	if vb.Size.Y == 0 {
+		vb.Size.Y = sv.PhysHeight.Dots
+	}
+	_, trans, scale := vb.Transform(box)
+	if sv.InvertY {
+		scale.Y *= -1
+	}
+	trans.SetSub(vb.Min)
+	trans.SetAdd(sv.Translate)
+	scale.SetMulScalar(sv.Scale)
 	pc := &sv.Root.Paint
-	pc.Transform = pc.Transform.Scale(sc.X, sc.Y).Translate(tr.X, tr.Y)
+	pc.Transform = pc.Transform.Translate(trans.X, trans.Y).Scale(scale.X, scale.Y)
 	if sv.InvertY {
 		pc.Transform.Y0 = -pc.Transform.Y0
 	}
@@ -294,7 +284,9 @@ func (sv *SVG) SavePNG(fname string) error {
 type SVGNode struct {
 	Group
 
-	// viewbox defines the coordinate system for the drawing -- these units are mapped into the screen space allocated for the SVG during rendering
+	// viewbox defines the coordinate system for the drawing.
+	// These units are mapped into the screen space allocated
+	// for the SVG during rendering
 	ViewBox ViewBox
 }
 
