@@ -29,6 +29,11 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 			e.SetHandled() // this event will not be handled by other event handlers now
 		})
 	},
+	"foundations/icons-0": func(parent gi.Widget) {
+		gi.NewButton(parent).SetText("Send").SetIcon(icons.Send).OnClick(func(e events.Event) {
+			gi.MessageSnackbar(parent, "Message sent")
+		})
+	},
 	"widgets/button-0": func(parent gi.Widget) {
 		gi.NewButton(parent).SetText("Send").SetIcon(icons.Send).OnClick(func(e events.Event) {
 			gi.MessageSnackbar(parent, "Message sent")
