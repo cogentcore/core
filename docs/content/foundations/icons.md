@@ -4,7 +4,7 @@ The [[core/icons]] package contains a number of SVG icons selected from [Materia
 
 To specify a standard icon, it is best to refer to it by the named constants defined in the `icons` package, like the `icons.Send` case in the following example:
 
-<core-example id="icon-button">
+<core-example>
 
 ```go
 gi.NewButton(parent).SetText("Send").SetIcon(icons.Send).OnClick(func(e events.Event) {
