@@ -45,5 +45,7 @@ func ReadMDString(ctx *Context, par gi.Widget, s string) error {
 type WikilinkResolver struct{}
 
 func (wr WikilinkResolver) ResolveWikilink(n *wikilink.Node) (destination []byte, err error) {
-	return append([]byte("https://pkg.go.dev/cogentcore.org/core/"), n.Target...), nil
+	// pkg.go.dev uses fragments within packages
+	t := bytes.ReplaceAll(n.Target, []byte{'.'}, []byte{'#'})
+	return append([]byte("https://pkg.go.dev/cogentcore.org/core/"), t...), nil
 }

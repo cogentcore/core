@@ -39,13 +39,13 @@ Processed events such as [[events.Click]] are generated from basic events (e.g.,
 
 ## Key events and Focus
 
-The [[events.KeyChord] is the main key event, because it provides the full set of modifiers in a string-formatted form, whereas the more basic [[events.Key]] event records each specific key down and up event using standardized key codes.
+The [[events.KeyChord]] is the main key event, because it provides the full set of modifiers in a string-formatted form, whereas the more basic [[events.Key]] event records each specific key down and up event using standardized key codes.
 
 Key events are mainly sent to the single _current focus_ Widget, which is determined by focus-changing events and typically has a style indicating that it is in focus.  However, see the next section for other ways to get key events based on priority ordering.
 
 ## Priority Ordering (First, Final)
 
-There are three levels of event handlers (see [[event.Listener]]): `First`, regular, and `Final`, which are processed in that order (and last added, first processed within each Listener).  This allows a default event handler to get first crack at handling a given event, even though it is added last, for example, by adding it to First.
+There are three levels of event handlers (see [[events.Listener]]): `First`, regular, and `Final`, which are processed in that order (and last added, first processed within each Listener).  This allows a default event handler to get first crack at handling a given event, even though it is added last, for example, by adding it to First.
 
 ### Key events
 
