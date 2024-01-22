@@ -101,10 +101,10 @@ func HasNoNewDirective(typ *gtigen.Type) bool {
 // that does all of the generation according to the
 // given config info. It overrides the
 // [config.Config.Generate.Gtigen.InterfaceConfigs] info.
-func Generate(cfg *config.Config) error { //gti:add
-	cfg.Generate.Gtigen.InterfaceConfigs = &ordmap.Map[string, *gtigen.Config]{}
+func Generate(c *config.Config) error { //gti:add
+	c.Generate.Gtigen.InterfaceConfigs = &ordmap.Map[string, *gtigen.Config]{}
 
-	cfg.Generate.Gtigen.InterfaceConfigs.Add("cogentcore.org/core/ki.Ki", &gtigen.Config{
+	c.Generate.Gtigen.InterfaceConfigs.Add("cogentcore.org/core/ki.Ki", &gtigen.Config{
 		AddTypes:  true,
 		Instance:  true,
 		TypeVar:   true,
@@ -112,18 +112,22 @@ func Generate(cfg *config.Config) error { //gti:add
 		Templates: []*template.Template{KiMethodsTmpl},
 	})
 
-	pkgs, err := ParsePackages(cfg)
+	pkgs, err := ParsePackages(c)
 	if err != nil {
 		return fmt.Errorf("Generate: error parsing package: %w", err)
 	}
 
-	err = enumgen.GeneratePkgs(&cfg.Generate.Enumgen, pkgs)
+	err = enumgen.GeneratePkgs(&c.Generate.Enumgen, pkgs)
 	if err != nil {
 		return fmt.Errorf("error running enumgen: %w", err)
 	}
-	err = gtigen.GeneratePkgs(&cfg.Generate.Gtigen, pkgs)
+	err = gtigen.GeneratePkgs(&c.Generate.Gtigen, pkgs)
 	if err != nil {
 		return fmt.Errorf("error running gtigen: %w", err)
+	}
+	err = Webcore(c)
+	if err != nil {
+		return fmt.Errorf("error running webcoregen: %w", err)
 	}
 	return nil
 }
