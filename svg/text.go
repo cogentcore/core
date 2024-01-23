@@ -296,7 +296,7 @@ func (g *Text) Render(sv *SVG) {
 func (g *Text) ApplyTransform(sv *SVG, xf mat32.Mat2) {
 	rot := xf.ExtractRot()
 	if rot != 0 || !g.Paint.Transform.IsIdentity() {
-		g.Paint.Transform = g.Paint.Transform.Mul(xf)
+		g.Paint.Transform.SetMul(xf)
 		g.SetProp("transform", g.Paint.Transform.String())
 	} else {
 		if g.IsParText() {
@@ -322,8 +322,7 @@ func (g *Text) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, 
 	crot := g.Paint.Transform.ExtractRot()
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
-		mat := g.Paint.Transform.MulCtr(xf, lpt)
-		g.Paint.Transform = mat
+		g.Paint.Transform.SetMulCtr(xf, lpt)
 		g.SetProp("transform", g.Paint.Transform.String())
 	} else {
 		if g.IsParText() {
@@ -333,8 +332,7 @@ func (g *Text) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, 
 			xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false)
 			xf.X0 = 0 // negate translation effects
 			xf.Y0 = 0
-			mat := g.Paint.Transform.MulCtr(xf, lpt)
-			g.Paint.Transform = mat
+			g.Paint.Transform.SetMulCtr(xf, lpt)
 			g.SetProp("transform", g.Paint.Transform.String())
 
 			g.Pos = xft.MulVec2AsPtCtr(g.Pos, lptt)

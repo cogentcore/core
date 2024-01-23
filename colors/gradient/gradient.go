@@ -26,9 +26,12 @@ type Gradient interface {
 	// AsBase returns the [Base] of the gradient
 	AsBase() *Base
 
-	// Update updates the computed fields of the gradient. It must be
-	// called before rendering the gradient, and it should only be called then.
-	Update()
+	// Update updates the computed fields of the gradient, using
+	// the given current bounding box, and additional
+	// object-level transform (i.e., the current painting transform),
+	// which is applied in addition to the gradient's own Transform.
+	// This must be called before rendering the gradient, and it should only be called then.
+	Update(box mat32.Box2, objTransform mat32.Mat2)
 }
 
 // Base contains the data and logic common to all gradient types.
@@ -50,12 +53,13 @@ type Base struct { //gti:add -setters
 	// gradients with [Units] of [ObjectBoundingBox].
 	Box mat32.Box2
 
-	// Transform is the transformation matrix applied to the gradient's points.
+	// Transform is the gradient's own transformation matrix applied to the gradient's points.
+	// This is a property of the Gradient itself.
 	Transform mat32.Mat2
 
-	// objectMatrix is the computed effective object transformation matrix
-	// for a gradient with [Units] of [ObjectBoundingBox].
-	objectMatrix mat32.Mat2 `set:"-"`
+	// boxTransform is the Transform applied to the bounding Box,
+	// only for [Units] == [ObjectBoundingBox].
+	boxTransform mat32.Mat2 `set:"-"`
 }
 
 // Stop represents a single stop in a gradient
@@ -172,12 +176,12 @@ func (b *Base) UpdateBase() {
 
 // ComputeObjectMatrix computes the effective object transformation
 // matrix for a gradient with [Units] of [ObjectBoundingBox], setting
-// [Base.objectMatrix].
+// [Base.boxTransform].
 func (b *Base) ComputeObjectMatrix() {
 	w, h := b.Box.Size().X, b.Box.Size().Y
 	oriX, oriY := b.Box.Min.X, b.Box.Min.Y
-	b.objectMatrix = mat32.Identity2().Translate(oriX, oriY).Scale(w, h).
-		Mul(b.Transform).Scale(1/w, 1/h).Translate(-oriX, -oriY).Inverse()
+	b.boxTransform = mat32.Identity2().Translate(oriX, oriY).Scale(w, h).Mul(b.Transform).
+		Scale(1/w, 1/h).Translate(-oriX, -oriY).Inverse()
 }
 
 // GetColor returns the color at the given normalized position along the

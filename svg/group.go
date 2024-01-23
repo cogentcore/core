@@ -58,7 +58,7 @@ func (g *Group) Render(sv *SVG) {
 // ApplyTransform applies the given 2D transform to the geometry of this node
 // each node must define this for itself
 func (g *Group) ApplyTransform(sv *SVG, xf mat32.Mat2) {
-	g.Paint.Transform = xf.Mul(g.Paint.Transform)
+	g.Paint.Transform.SetMul(xf)
 	g.SetProp("transform", g.Paint.Transform.String())
 }
 
@@ -69,8 +69,7 @@ func (g *Group) ApplyTransform(sv *SVG, xf mat32.Mat2) {
 // and for rotation it is the center point around which to rotate
 func (g *Group) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
 	xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // group does NOT include self
-	mat := g.Paint.Transform.MulCtr(xf, lpt)
-	g.Paint.Transform = mat
+	g.Paint.Transform.SetMulCtr(xf, lpt)
 	g.SetProp("transform", g.Paint.Transform.String())
 }
 

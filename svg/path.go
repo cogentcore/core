@@ -877,7 +877,7 @@ func PathDataString(data []PathData) string {
 // each node must define this for itself
 func (g *Path) ApplyTransform(sv *SVG, xf mat32.Mat2) {
 	// path may have horiz, vert elements -- only gen soln is to transform
-	g.Paint.Transform = g.Paint.Transform.Mul(xf)
+	g.Paint.Transform.SetMul(xf)
 	g.SetProp("transform", g.Paint.Transform.String())
 }
 
@@ -909,7 +909,7 @@ func (g *Path) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, 
 	crot := g.Paint.Transform.ExtractRot()
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
-		g.Paint.Transform = g.Paint.Transform.MulCtr(xf, lpt)
+		g.Paint.Transform.SetMulCtr(xf, lpt)
 		g.SetProp("transform", g.Paint.Transform.String())
 	} else {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self

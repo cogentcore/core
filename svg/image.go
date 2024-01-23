@@ -128,7 +128,7 @@ func (g *Image) Render(sv *SVG) {
 func (g *Image) ApplyTransform(sv *SVG, xf mat32.Mat2) {
 	rot := xf.ExtractRot()
 	if rot != 0 || !g.Paint.Transform.IsIdentity() {
-		g.Paint.Transform = g.Paint.Transform.Mul(xf)
+		g.Paint.Transform.SetMul(xf)
 		g.SetProp("transform", g.Paint.Transform.String())
 	} else {
 		g.Pos = xf.MulVec2AsPt(g.Pos)
@@ -145,8 +145,7 @@ func (g *Image) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2,
 	crot := g.Paint.Transform.ExtractRot()
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
-		mat := g.Paint.Transform.MulCtr(xf, lpt)
-		g.Paint.Transform = mat
+		g.Paint.Transform.SetMulCtr(xf, lpt)
 		g.SetProp("transform", g.Paint.Transform.String())
 	} else {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self
@@ -176,36 +175,6 @@ func (g *Image) ReadGeom(sv *SVG, dat []float32) {
 	g.Size.Y = dat[3]
 	g.ReadTransform(dat, 4)
 }
-
-/*
-// ImageProps define the Toolbar for images
-var ImageProps = ki.Props{
-	"Toolbar": ki.PropSlice{
-		{"OpenImage", ki.Props{
-			"desc": "Open image file for this image node, rescaling to given size -- use 0, 0 to use native image size.",
-			"icon": icons.Open,
-			"Args": ki.PropSlice{
-				{"File Name", ki.Props{
-					"default-field": "Filename",
-					"ext":           ".png,.jpg,.jpeg",
-				}},
-				{"Width", ki.Props{}},
-				{"Height", ki.Props{}},
-			},
-		}},
-		{"SaveImage", ki.Props{
-			"desc": "Save image to a file.",
-			"icon": icons.SaveAs,
-			"Args": ki.PropSlice{
-				{"File Name", ki.Props{
-					"default-field": "Filename",
-					"ext":           ".png,.jpg,.jpeg",
-				}},
-			},
-		}},
-	},
-}
-*/
 
 // OpenImage opens an image for the bitmap, and resizes to the size of the image
 // or the specified size -- pass 0 for width and/or height to use the actual image size

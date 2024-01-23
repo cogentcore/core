@@ -26,6 +26,15 @@ type Radial struct { //gti:add -setters
 
 	// the radius of the gradient (rx and ry in SVG)
 	Radius mat32.Vec2
+
+	// current render version -- transformed by object matrix
+	rCenter mat32.Vec2
+
+	// current render version -- transformed by object matrix
+	rFocal mat32.Vec2
+
+	// current render version -- transformed by object matrix
+	rRadius mat32.Vec2
 }
 
 var _ Gradient = &Radial{}
@@ -47,10 +56,43 @@ func (r *Radial) AddStop(color color.RGBA, pos float32) *Radial {
 	return r
 }
 
-// Update updates the computed fields of the gradient. It must be
-// called before rendering the gradient, and it should only be called then.
-func (r *Radial) Update() {
+// Update updates the computed fields of the gradient, using
+// the given current bounding box, and additional
+// object-level transform (i.e., the current painting transform),
+// which is applied in addition to the gradient's own Transform.
+// This must be called before rendering the gradient, and it should only be called then.
+func (r *Radial) Update(box mat32.Box2, objTransform mat32.Mat2) {
+	r.Box = box
 	r.UpdateBase()
+
+	c, f, rs := r.Center, r.Focal, r.Radius
+	sz := r.Box.Size()
+	if r.Units == ObjectBoundingBox {
+		c = r.Box.Min.Add(sz.Mul(c))
+		f = r.Box.Min.Add(sz.Mul(f))
+		rs.SetMul(sz)
+	} else {
+		c = r.Transform.MulVec2AsPt(c)
+		f = r.Transform.MulVec2AsPt(f)
+		rs = r.Transform.MulVec2AsVec(rs)
+		c = objTransform.MulVec2AsPt(c)
+		f = objTransform.MulVec2AsPt(f)
+		rs = objTransform.MulVec2AsVec(rs)
+	}
+	if c != f {
+		f.SetDiv(rs)
+		c.SetDiv(rs)
+		df := f.Sub(c)
+		if df.X*df.X+df.Y*df.Y > 1 { // Focus outside of circle; use intersection
+			// point of line from center to focus and circle as per SVG specs.
+			nf, intersects := RayCircleIntersectionF(f, c, c, 1-epsilonF)
+			f = nf
+			if !intersects {
+				f.Set(0, 0)
+			}
+		}
+	}
+	r.rCenter, r.rFocal, r.rRadius = c, f, rs
 }
 
 const epsilonF = 1e-5
@@ -64,57 +106,35 @@ func (r *Radial) At(x, y int) color.Color {
 		return r.Stops[0].Color
 	}
 
-	c, f, rs := r.Center, r.Focal, r.Radius
-	if r.Units == ObjectBoundingBox {
-		c = r.Box.Min.Add(r.Box.Size().Mul(c))
-		f = r.Box.Min.Add(r.Box.Size().Mul(f))
-		rs.SetMul(r.Box.Size())
-	} else {
-		c = r.Transform.MulVec2AsPt(c)
-		f = r.Transform.MulVec2AsPt(f)
-		rs = r.Transform.MulVec2AsVec(rs)
-	}
-
-	if r.Center == r.Focal {
+	if r.rCenter == r.rFocal {
 		// When the center and focal are the same things are much simpler;
 		// pos is just distance from center scaled by radius
 		pt := mat32.V2(float32(x)+0.5, float32(y)+0.5)
 		if r.Units == ObjectBoundingBox {
-			pt = r.objectMatrix.MulVec2AsPt(pt)
+			pt = r.boxTransform.MulVec2AsPt(pt)
 		}
-		d := pt.Sub(c)
-		pos := mat32.Sqrt(d.X*d.X/(rs.X*rs.X) + (d.Y*d.Y)/(rs.Y*rs.Y))
-		return r.GetColor(pos)
+		d := pt.Sub(r.rCenter)
+		pos := mat32.Sqrt(d.X*d.X/(r.rRadius.X*r.rRadius.X) + (d.Y*d.Y)/(r.rRadius.Y*r.rRadius.Y))
+		return r.GetColor(pos) // todo: need opacity in here -- not sure it works to stuff only in at end.. -- interacts with native opacity of gradient itself, right?
 	}
-
-	f.SetDiv(rs)
-	c.SetDiv(rs)
-
-	df := f.Sub(c)
-
-	if df.X*df.X+df.Y*df.Y > 1 { // Focus outside of circle; use intersection
-		// point of line from center to focus and circle as per SVG specs.
-		nf, intersects := RayCircleIntersectionF(f, c, c, 1-epsilonF)
-		f = nf
-		if !intersects {
-			return color.RGBA{} // should not happen
-		}
+	if r.rFocal == mat32.V2(0, 0) {
+		return color.RGBA{} // should not happen
 	}
 
 	pt := mat32.V2(float32(x)+0.5, float32(y)+0.5)
 	if r.Units == ObjectBoundingBox {
-		pt = r.objectMatrix.MulVec2AsPt(pt)
+		pt = r.boxTransform.MulVec2AsPt(pt)
 	}
-	e := pt.Div(rs)
+	e := pt.Div(r.rRadius)
 
-	t1, intersects := RayCircleIntersectionF(e, f, c, 1)
+	t1, intersects := RayCircleIntersectionF(e, r.rFocal, r.rCenter, 1)
 	if !intersects { // In this case, use the last stop color
 		s := r.Stops[len(r.Stops)-1]
 		return s.Color
 	}
 
-	td := t1.Sub(f)
-	d := e.Sub(f)
+	td := t1.Sub(r.rFocal)
+	d := e.Sub(r.rFocal)
 	if td.X*td.X+td.Y*td.Y < epsilonF {
 		s := r.Stops[len(r.Stops)-1]
 		return s.Color

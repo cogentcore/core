@@ -98,7 +98,7 @@ func (rs *State) PushTransform(xf mat32.Mat2) {
 		rs.TransformStack = make([]mat32.Mat2, 0)
 	}
 	rs.TransformStack = append(rs.TransformStack, rs.CurTransform)
-	rs.CurTransform = xf.Mul(rs.CurTransform)
+	rs.CurTransform.SetMul(xf)
 }
 
 // PushTransformLock pushes current transform onto stack and apply new transform on top of it

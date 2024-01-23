@@ -315,10 +315,7 @@ func (pc *Context) StrokePreserve() {
 	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
 	if g, ok := pc.StrokeStyle.Color.(gradient.Gradient); ok {
-		gb := g.AsBase()
-		gb.Box = mat32.B2FromRect(pc.LastRenderBBox)
-		gb.Transform = pc.CurTransform
-		g.Update()
+		g.Update(mat32.B2FromRect(pc.LastRenderBBox), pc.CurTransform)
 	}
 	pc.Raster.SetColor(gradient.ApplyOpacity(pc.StrokeStyle.Color, pc.StrokeStyle.Opacity))
 	pc.Raster.Draw()
@@ -351,10 +348,7 @@ func (pc *Context) FillPreserve() {
 	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
 	if g, ok := pc.FillStyle.Color.(gradient.Gradient); ok {
-		gb := g.AsBase()
-		gb.Box = mat32.B2FromRect(pc.LastRenderBBox)
-		gb.Transform = pc.CurTransform
-		g.Update()
+		g.Update(mat32.B2FromRect(pc.LastRenderBBox), pc.CurTransform)
 	}
 	rf.SetColor(gradient.ApplyOpacity(pc.FillStyle.Color, pc.FillStyle.Opacity))
 	rf.Draw()

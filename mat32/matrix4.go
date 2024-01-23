@@ -116,7 +116,7 @@ func (m *Mat4) SetBasis(xAxis, yAxis, zAxis Vec3) {
 	)
 }
 
-// MulMatrices sets this matrix as matrix multiplication a by b (i.e. b*a).
+// MulMatrices sets this matrix as matrix multiplication a by b (i.e. a*b).
 func (m *Mat4) MulMatrices(a, b *Mat4) {
 	a11 := a[0]
 	a12 := a[4]

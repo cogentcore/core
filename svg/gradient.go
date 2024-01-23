@@ -61,7 +61,7 @@ func (g *NodeBase) GradientApplyTransform(sv *SVG, xf mat32.Mat2) {
 	if gnm != "" {
 		gr := sv.GradientByName(gi, gnm)
 		if gr != nil {
-			gr.Grad.AsBase().Transform.SetMul(xf)
+			gr.Grad.AsBase().Transform.SetMul(xf) // todo: do the Ctr, unscale version?
 		}
 	}
 	gnm = NodePropURL(gi, "stroke")
@@ -82,7 +82,7 @@ func (g *NodeBase) GradientApplyTransformPt(sv *SVG, xf mat32.Mat2, pt mat32.Vec
 	if gnm != "" {
 		gr := sv.GradientByName(gi, gnm)
 		if gr != nil {
-			gr.Grad.AsBase().Transform.SetMulCtr(xf, pt)
+			gr.Grad.AsBase().Transform.SetMulCtr(xf, pt) // todo: ctr off?
 		}
 	}
 	gnm = NodePropURL(gi, "stroke")

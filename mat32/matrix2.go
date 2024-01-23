@@ -106,12 +106,12 @@ func Skew2D(x, y float32) Mat2 {
 // Mul returns a*b
 func (a Mat2) Mul(b Mat2) Mat2 {
 	return Mat2{
-		a.XX*b.XX + a.YX*b.XY,
-		a.XX*b.YX + a.YX*b.YY,
-		a.XY*b.XX + a.YY*b.XY,
-		a.XY*b.YX + a.YY*b.YY,
-		a.X0*b.XX + a.Y0*b.XY + b.X0,
-		a.X0*b.YX + a.Y0*b.YY + b.Y0,
+		XX: a.XX*b.XX + a.XY*b.YX,
+		YX: a.YX*b.XX + a.YY*b.YX,
+		XY: a.XX*b.XY + a.XY*b.YY,
+		YY: a.YX*b.XY + a.YY*b.YY,
+		X0: a.XX*b.X0 + a.XY*b.Y0 + a.X0,
+		Y0: a.YX*b.X0 + a.YY*b.Y0 + a.Y0,
 	}
 }
 
@@ -168,23 +168,23 @@ func (a Mat2) MulFixedAsPt(fp fixed.Point26_6) fixed.Point26_6 {
 }
 
 func (a Mat2) Translate(x, y float32) Mat2 {
-	return Translate2D(x, y).Mul(a)
+	return a.Mul(Translate2D(x, y))
 }
 
 func (a Mat2) Scale(x, y float32) Mat2 {
-	return Scale2D(x, y).Mul(a)
+	return a.Mul(Scale2D(x, y))
 }
 
 func (a Mat2) Rotate(angle float32) Mat2 {
-	return Rotate2D(angle).Mul(a)
+	return a.Mul(Rotate2D(angle))
 }
 
 func (a Mat2) Shear(x, y float32) Mat2 {
-	return Shear2D(x, y).Mul(a)
+	return a.Mul(Shear2D(x, y))
 }
 
 func (a Mat2) Skew(x, y float32) Mat2 {
-	return Skew2D(x, y).Mul(a)
+	return a.Mul(Skew2D(x, y))
 }
 
 // ExtractRot extracts the rotation component from a given matrix

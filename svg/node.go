@@ -158,10 +158,10 @@ func (g *NodeBase) ParTransform(self bool) mat32.Mat2 {
 	}
 	for i := np - 2; i >= 0; i-- {
 		n := pars[i]
-		xf = n.PaintStyle().Transform.Mul(xf)
+		xf.SetMul(n.PaintStyle().Transform)
 	}
 	if self {
-		xf = g.Paint.Transform.Mul(xf)
+		xf.SetMul(g.Paint.Transform)
 	}
 	return xf
 }

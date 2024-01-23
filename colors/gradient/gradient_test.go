@@ -5,6 +5,7 @@
 package gradient
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -13,6 +14,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/grows/images"
 	"cogentcore.org/core/mat32"
+	"github.com/srwiley/rasterx"
 )
 
 func ExampleLinear() {
@@ -118,4 +120,34 @@ func TestRenderRadial(t *testing.T) {
 	g.Update()
 	draw.Draw(img, img.Bounds(), g, image.Point{}, draw.Src)
 	images.Assert(t, img, "radial")
+}
+
+func matToRasterx(mat *mat32.Mat2) rasterx.Matrix2D {
+	// A = XX
+	// B = YX
+	// C = XY
+	// D = YY
+	// E = X0
+	// F = Y0
+	return rasterx.Matrix2D{float64(mat.XX), float64(mat.YX), float64(mat.XY), float64(mat.YY), float64(mat.X0), float64(mat.Y0)}
+}
+
+func TestTransform(t *testing.T) {
+	sz := image.Point{512, 512}
+	szf := mat32.V2FromPoint(sz)
+	g := CopyOf(radialTransformTest)
+	gb := g.AsBase()
+	gb.Box.Max = szf
+	fmt.Println(gb.Transform)
+	g.Update()
+	fmt.Println(gb.objectMatrix)
+	w := float64(szf.X)
+	h := float64(szf.Y)
+	oriX := float64(0)
+	oriY := float64(0)
+	fmt.Println(gb.Transform)
+	mtx := matToRasterx(&gb.Transform)
+	gradT := rasterx.Identity.Translate(oriX, oriY).Scale(w, h).Mult(mtx).
+		Scale(1/w, 1/h).Translate(-oriX, -oriY).Invert()
+	fmt.Println(gradT)
 }

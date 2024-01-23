@@ -24,11 +24,11 @@ type Linear struct { //gti:add -setters
 	// the ending point of the gradient (x2 and y2 in SVG)
 	End mat32.Vec2
 
-	// effStart is the computed effective transformed starting point of the gradient.
-	effStart mat32.Vec2 `set:"-"`
+	// current render version -- transformed by object matrix
+	rStart mat32.Vec2 `set:"-"`
 
-	// effEnd is the computed effective transformed ending point of the gradient.
-	effEnd mat32.Vec2 `set:"-"`
+	// current render version -- transformed by object matrix
+	rEnd mat32.Vec2 `set:"-"`
 }
 
 var _ Gradient = &Linear{}
@@ -48,17 +48,24 @@ func (l *Linear) AddStop(color color.RGBA, pos float32) *Linear {
 	return l
 }
 
-// Update updates the computed fields of the gradient. It must be
-// called before rendering the gradient, and it should only be called then.
-func (l *Linear) Update() {
+// Update updates the computed fields of the gradient, using
+// the given current bounding box, and additional
+// object-level transform (i.e., the current painting transform),
+// which is applied in addition to the gradient's own Transform.
+// This must be called before rendering the gradient, and it should only be called then.
+func (l *Linear) Update(box mat32.Box2, objTransform mat32.Mat2) {
+	l.Box = box
 	l.UpdateBase()
 
 	if l.Units == ObjectBoundingBox {
-		l.effStart = l.Box.Min.Add(l.Box.Size().Mul(l.Start))
-		l.effEnd = l.Box.Min.Add(l.Box.Size().Mul(l.End))
+		sz := l.Box.Size()
+		l.rStart = l.Box.Min.Add(sz.Mul(l.Start))
+		l.rEnd = l.Box.Min.Add(sz.Mul(l.End))
 	} else {
-		l.effStart = l.Transform.MulVec2AsPt(l.Start)
-		l.effEnd = l.Transform.MulVec2AsPt(l.End)
+		l.rStart = l.Transform.MulVec2AsPt(l.Start)
+		l.rEnd = l.Transform.MulVec2AsPt(l.End)
+		l.rStart = objTransform.MulVec2AsPt(l.rStart)
+		l.rEnd = objTransform.MulVec2AsPt(l.rEnd)
 	}
 }
 
@@ -71,14 +78,14 @@ func (l *Linear) At(x, y int) color.Color {
 		return l.Stops[0].Color
 	}
 
-	d := l.effEnd.Sub(l.effStart)
+	d := l.rEnd.Sub(l.rStart)
 	dd := d.X*d.X + d.Y*d.Y // self inner prod
 
 	pt := mat32.V2(float32(x)+0.5, float32(y)+0.5)
 	if l.Units == ObjectBoundingBox {
-		pt = l.objectMatrix.MulVec2AsPt(pt)
+		pt = l.boxTransform.MulVec2AsPt(pt)
 	}
-	df := pt.Sub(l.effStart)
+	df := pt.Sub(l.rStart)
 	pos := (d.X*df.X + d.Y*df.Y) / dd
-	return l.GetColor(pos)
+	return l.GetColor(pos) // todo: opacity?
 }
