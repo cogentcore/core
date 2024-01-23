@@ -7,6 +7,7 @@ package giv
 import (
 	"reflect"
 
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/ki"
@@ -36,9 +37,6 @@ type StructViewInline struct {
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string
-
-	// if true, some fields have default values -- update labels when values change
-	HasDefs bool `json:"-" xml:"-" edit:"-"`
 
 	// if true, some fields have viewif conditional view tags -- update after..
 	HasViewIfs bool `json:"-" xml:"-" edit:"-"`
@@ -113,7 +111,6 @@ func (sv *StructViewInline) ConfigStruct() bool {
 	if !mods {
 		updt = sv.UpdateStart()
 	}
-	sv.HasDefs = false
 	for i, vv := range sv.FieldViews {
 		lbl := sv.Child(i * 2).(*gi.Label)
 		lbl.Style(func(s *styles.Style) {
@@ -126,7 +123,13 @@ func (sv *StructViewInline) ConfigStruct() bool {
 		w, wb := gi.AsWidget(sv.Child((i * 2) + 1))
 		hasDef, readOnlyTag := StructViewFieldTags(vv, lbl, w, sv.IsReadOnly()) // in structview.go
 		if hasDef {
-			sv.HasDefs = true
+			lbl.Style(func(s *styles.Style) {
+				dtag, _ := vv.Tag("default")
+				isDef, _ := StructFieldIsDef(dtag, vv.Val().Interface(), laser.NonPtrValue(vv.Val()).Kind())
+				if !isDef {
+					s.Background = colors.C(colors.Scheme.Warn.Container)
+				}
+			})
 		}
 		if wb.Prop("configured") == nil {
 			wb.SetProp("configured", true)
