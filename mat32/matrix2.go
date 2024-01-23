@@ -204,11 +204,6 @@ func (a Mat2) ExtractScale() (scx, scy float32) {
 
 // Inverse returns inverse of matrix, for inverting transforms
 func (a Mat2) Inverse() Mat2 {
-	m3 := Mat3{}
-	m3.Set(a.XX, a.YX, a.X0, a.XY, a.YY, a.Y0, 0, 0, 1)
-	mi, _ := m3.Inverse()
-	return Mat2{XX: mi[0], YX: mi[3], X0: mi[6], XY: mi[1], YY: mi[4], Y0: mi[7]}
-
 	// homogenous rep, rc indexes, mapping into Mat3 code
 	// XX YX X0   n11 n12 n13    a b x
 	// XY YY Y0   n21 n22 n23    c d y
@@ -225,8 +220,8 @@ func (a Mat2) Inverse() Mat2 {
 	b.XY = -a.XY * detInv // c = -c
 	b.YX = -a.YX * detInv // b = -b
 	b.YY = a.XX * detInv  // d = a
-	b.X0 = (a.Y0*a.YX - a.YY*a.X0) * detInv
-	b.Y0 = (a.X0*a.XY - a.XX*a.Y0) * detInv
+	b.X0 = (a.Y0*a.XY - a.YY*a.X0) * detInv
+	b.Y0 = (a.X0*a.YX - a.XX*a.Y0) * detInv
 	return b
 }
 
