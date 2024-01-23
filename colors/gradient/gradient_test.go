@@ -14,7 +14,6 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/grows/images"
 	"cogentcore.org/core/mat32"
-	"github.com/srwiley/rasterx"
 )
 
 func ExampleLinear() {
@@ -128,32 +127,46 @@ func TestRenderRadial(t *testing.T) {
 	images.Assert(t, img, "radial")
 }
 
-func matToRasterx(mat *mat32.Mat2) rasterx.Matrix2D {
-	// A = XX
-	// B = YX
-	// C = XY
-	// D = YY
-	// E = X0
-	// F = Y0
-	return rasterx.Matrix2D{float64(mat.XX), float64(mat.YX), float64(mat.XY), float64(mat.YY), float64(mat.X0), float64(mat.Y0)}
+// func matToRasterx(mat *mat32.Mat2) rasterx.Matrix2D {
+// 	// A = XX
+// 	// B = YX
+// 	// C = XY
+// 	// D = YY
+// 	// E = X0
+// 	// F = Y0
+// 	return rasterx.Matrix2D{float64(mat.XX), float64(mat.YX), float64(mat.XY), float64(mat.YY), float64(mat.X0), float64(mat.Y0)}
+// }
+
+func compareTol(t *testing.T, a, c float32) {
+	if mat32.Abs(a-c) > 1.0e-5 {
+		t.Errorf("value not in tolerance. actual: %g  correct: %g\n", a, c)
+	}
 }
 
 func TestTransform(t *testing.T) {
 	r := image.Rect(20, 20, 140, 140)
 	b := mat32.B2FromRect(r)
-	szf := mat32.V2FromPoint(r.Size())
 	g := CopyOf(linearTransformTest)
 	gb := g.AsBase()
 	gb.Transform = mat32.Rotate2D(mat32.DegToRad(25))
-	fmt.Println(gb.Transform)
+	// fmt.Println(gb.Transform)
 	g.Update(b, mat32.Identity2())
 	fmt.Println(gb.boxTransform)
-	w := float64(szf.X)
-	h := float64(szf.Y)
-	oriX := float64(r.Min.X)
-	oriY := float64(r.Min.Y)
-	mtx := matToRasterx(&gb.Transform)
-	gradT := rasterx.Identity.Translate(oriX, oriY).Scale(w, h).Mult(mtx).
-		Scale(1/w, 1/h).Translate(-oriX, -oriY).Invert()
-	fmt.Println(gradT)
+	btcorrect := mat32.Mat2{XX: 0.9063079, YX: -0.42261833, XY: 0.42261833, YY: 0.9063079, X0: -6.5785227, Y0: 10.326212}
+	compareTol(t, gb.boxTransform.XX, btcorrect.XX)
+	compareTol(t, gb.boxTransform.YX, btcorrect.YX)
+	compareTol(t, gb.boxTransform.XY, btcorrect.XY)
+	compareTol(t, gb.boxTransform.YY, btcorrect.YY)
+	compareTol(t, gb.boxTransform.X0, btcorrect.X0)
+	compareTol(t, gb.boxTransform.Y0, btcorrect.Y0)
+
+	// szf := mat32.V2FromPoint(r.Size())
+	// w := float64(szf.X)
+	// h := float64(szf.Y)
+	// oriX := float64(r.Min.X)
+	// oriY := float64(r.Min.Y)
+	// mtx := matToRasterx(&gb.Transform)
+	// gradT := rasterx.Identity.Translate(oriX, oriY).Scale(w, h).Mult(mtx).
+	// 	Scale(1/w, 1/h).Translate(-oriX, -oriY).Invert()
+	// fmt.Println(gradT)
 }

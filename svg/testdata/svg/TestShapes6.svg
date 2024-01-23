@@ -22,7 +22,7 @@ spreadMethod="repeat" >
 <stop offset="100%" stop-color="orange" />
 </radialGradient>
 
-<linearGradient id="lg" x1="0%" y1="0%" x2="0%" y2="100%" spreadMethod="pad" gradientTransform="rotate(10)">
+<linearGradient id="lg" x1="0%" y1="0%" x2="0%" y2="100%" spreadMethod="pad" gradientTransform="rotate(25) ">
 <stop offset="0%" stop-color="green" stop-opacity="1.00"/>
 <stop offset="50%" stop-color="red" stop-opacity="1.00"/>
 <stop offset="100%" stop-color="blue" stop-opacity="1.00"/>
