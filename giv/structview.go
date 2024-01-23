@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/glop/bools"
@@ -283,6 +284,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 	}
 	sv.HasDefs = false
 	for i, vv := range sv.FieldViews {
+		vv := vv
 		lbl := sg.Child(i * 2).(*gi.Label)
 		lbl.Style(func(s *styles.Style) {
 			s.SetTextWrap(false)
@@ -292,7 +294,13 @@ func (sv *StructView) ConfigStructGrid() bool {
 		w, wb := gi.AsWidget(sg.Child((i * 2) + 1))
 		hasDef, readOnlyTag := StructViewFieldTags(vv, lbl, w, sv.IsReadOnly())
 		if hasDef {
-			sv.HasDefs = true
+			lbl.Style(func(s *styles.Style) {
+				dtag, _ := vv.Tag("default")
+				isDef, _ := StructFieldIsDef(dtag, vv.Val().Interface(), laser.NonPtrValue(vv.Val()).Kind())
+				if !isDef {
+					s.Background = colors.C(colors.Scheme.Warn.Container)
+				}
+			})
 		}
 		if w.KiType() != vv.WidgetType() {
 			slog.Error("StructView: Widget Type is not the proper type.  This usually means there are duplicate field names (including across embedded types", "field:", lbl.Text, "is:", w.KiType().Name, "should be:", vv.WidgetType().Name)
@@ -333,14 +341,6 @@ func (sv *StructView) UpdateFieldAction() {
 	if sv.HasViewIfs {
 		sv.Update()
 		sv.SetNeedsLayout(true)
-	} else if sv.HasDefs {
-		sg := sv.StructGrid()
-		updt := sg.UpdateStart()
-		for i, vv := range sv.FieldViews {
-			lbl := sg.Child(i * 2).(*gi.Label)
-			StructViewFieldDefTag(vv, lbl)
-		}
-		sg.UpdateEndRender(updt)
 	}
 }
 
@@ -361,27 +361,10 @@ func StructViewFieldTags(vv Value, lbl *gi.Label, w gi.Widget, isReadOnly bool) 
 			vv.SetTag("edit", "-")
 		}
 	}
-	defStr := ""
-	hasDef, _, defStr = StructViewFieldDefTag(vv, lbl)
-	lbl.Tooltip = defStr + vv.Doc()
-	return
-}
-
-// StructViewFieldDefTag processes the "default" tag for default values -- can be
-// called multiple times for updating as values change.
-// returns true if value is default, and string to add to tooltip for default vals
-func StructViewFieldDefTag(vv Value, lbl *gi.Label) (hasDef bool, isDef bool, defStr string) {
-	// todo
-	// if dtag, has := vv.Tag("default"); has {
-	// 	hasDef = true
-	// 	isDef, defStr = StructFieldIsDef(dtag, vv.Val().Interface(), laser.NonPtrValue(vv.Val()).Kind())
-	// 	if isDef {
-	// 		lbl.CurBackgroundColor = gi.Prefs.Colors.Background
-	// 	} else {
-	// 		lbl.CurBackgroundColor = gi.Prefs.Colors.Highlight
-	// 	}
-	// 	return
-	// }
+	defStr, hasDef := vv.Tag("default")
+	if hasDef {
+		lbl.Tooltip = "[Default: " + defStr + "] " + vv.Doc()
+	}
 	return
 }
 
@@ -393,7 +376,6 @@ func StructViewFieldDefTag(vv Value, lbl *gi.Label) (hasDef bool, isDef bool, de
 // Uses JSON format for composite types (struct, slice, map), replacing " with '
 // so it is easier to use in def tag.
 func StructFieldIsDef(defs string, valPtr any, kind reflect.Kind) (bool, string) {
-	defStr := "[Default: " + defs + "] "
 	def := false
 	switch {
 	case kind == reflect.Struct || kind == reflect.Slice || kind == reflect.Map:
@@ -447,7 +429,7 @@ func StructFieldIsDef(defs string, valPtr any, kind reflect.Kind) (bool, string)
 			}
 		}
 	}
-	return def, defStr
+	return def
 }
 
 type viewifPatcher struct{}

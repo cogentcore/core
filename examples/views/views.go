@@ -23,7 +23,7 @@ type TableStruct struct { //gti:add
 	Icon icons.Icon
 
 	// an integer field
-	IntField int
+	IntField int `default:"2"`
 
 	// a float field
 	FloatField float32
@@ -76,7 +76,7 @@ type Struct struct { //gti:add
 	Inline ILStruct `view:"inline"`
 
 	// a conditional
-	Cond int
+	Cond int `default:"1"`
 
 	// if Cond=0
 	Cond1 string `viewif:"Cond==0"`

@@ -164,12 +164,5 @@ func (sv *StructViewInline) UpdateFieldAction() {
 	if sv.HasViewIfs {
 		sv.Update()
 		sv.SetNeedsLayout(true)
-	} else if sv.HasDefs {
-		updt := sv.UpdateStart()
-		for i, vv := range sv.FieldViews {
-			lbl := sv.Child(i * 2).(*gi.Label)
-			StructViewFieldDefTag(vv, lbl)
-		}
-		sv.UpdateEndRender(updt)
 	}
 }
