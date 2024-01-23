@@ -28,22 +28,24 @@ func NewMainStage(typ StageTypes, sc *Scene) *Stage {
 	return st
 }
 
-// NewWindow returns a new Window stage with given scene contents.
-// Make further configuration choices using Set* methods, which
-// can be chained directly after the New call.
-// Use an appropriate Run call at the end to start the Stage running.
-func (sc *Scene) NewWindow() *Stage {
-	ms := NewMainStage(WindowStage, sc)
-	ms.SetNewWindow(true)
-	return ms
+// StartMainWindow creates a new main window from the body,
+// runs it, starts the app's main loop, and waits for all windows
+// to close. It should typically be called once by every app at
+// the end of their main function. It can not be called more than
+// once for one app. For more specific configuration and for
+// secondary windows, see [Body.NewWindow].
+func (bd *Body) StartMainWindow() {
+	bd.NewWindow().Run().Wait()
 }
 
-// NewWindow returns a new Window stage with given scene contents.
+// NewWindow returns a new Window stage with the body contents.
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the New call.
 // Use an appropriate Run call at the end to start the Stage running.
 func (bd *Body) NewWindow() *Stage {
-	return bd.Scene.NewWindow()
+	ms := NewMainStage(WindowStage, bd.Scene)
+	ms.SetNewWindow(true)
+	return ms
 }
 
 // NewDialog in dialogs.go

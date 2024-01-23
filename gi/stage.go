@@ -312,9 +312,8 @@ func (st *Stage) RunImpl() *Stage {
 
 // Wait waits for all windows to close and runs the main app loop.
 // This should be put at the end of the main function.
-func (st *Stage) Wait() *Stage {
+func (st *Stage) Wait() {
 	Wait()
-	return st
 }
 
 // DoUpdate calls DoUpdate on our Scene and UpdateAll on our Popups for Main types.

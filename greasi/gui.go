@@ -41,5 +41,5 @@ func GUI[T any](opts *grease.Options, cfg T, cmds ...*grease.Cmd[T]) {
 	sv := giv.NewStructView(b)
 	sv.SetStruct(cfg)
 
-	b.NewWindow().Run().Wait()
+	b.StartMainWindow()
 }

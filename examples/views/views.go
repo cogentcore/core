@@ -175,5 +175,5 @@ func main() {
 	// tv.SetState(true, states.ReadOnly)
 	tv.SetSlice(&tsttable)
 
-	b.NewWindow().Run().Wait()
+	b.StartMainWindow()
 }

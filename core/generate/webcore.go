@@ -67,8 +67,8 @@ func GetWebcoreExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
 				continue
 			}
 
-			// NewWindow().Run().Wait() counts as a quasi-end so that full examples work
-			if string(b) == "```" || bytes.Contains(b, []byte("NewWindow().Run().Wait()")) {
+			// StartMainWindow() counts as a quasi-end so that full examples work
+			if string(b) == "```" || bytes.Contains(b, []byte("StartMainWindow()")) {
 				if curExample == nil {
 					continue
 				}

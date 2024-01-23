@@ -41,7 +41,7 @@ func main() {
 	values(ts)
 	other(ts)
 
-	b.NewWindow().Run().Wait()
+	b.StartMainWindow()
 }
 
 func home(ts *gi.Tabs) {

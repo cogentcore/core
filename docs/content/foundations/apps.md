@@ -16,6 +16,6 @@ import "cogentcore.org/core/gi"
 func main() {
 	b := gi.NewAppBody("App Name")
 	// add app content
-	b.NewWindow().Run().Wait()
+	b.StartMainWindow()
 }
 ```

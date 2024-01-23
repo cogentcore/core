@@ -18,5 +18,5 @@ var content string
 func main() {
 	b := gi.NewAppBody("Coredom HTML")
 	grr.Log(coredom.ReadHTMLString(coredom.NewContext(), b, content))
-	b.NewWindow().Run().Wait()
+	b.StartMainWindow()
 }

@@ -25,5 +25,5 @@ func main() {
 		err = os.WriteFile(dir+"\\{{.Name}}.exe", exe, 0666)
 		gi.ErrorDialog(bt, err, "Error installing {{.Name}}")
 	})
-	b.NewWindow().Run().Wait()
+	b.StartMainWindow()
 }

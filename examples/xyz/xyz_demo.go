@@ -335,5 +335,5 @@ See <a href="https://github.com/goki/gi/blob/master/examples/xyz/README.md">READ
 		})
 	*/
 
-	b.NewWindow().Run().Wait()
+	b.StartMainWindow()
 }

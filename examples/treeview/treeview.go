@@ -77,5 +77,5 @@ func main() {
 		}
 	})
 
-	b.NewWindow().Run().Wait()
+	b.StartMainWindow()
 }
