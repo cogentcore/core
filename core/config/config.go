@@ -45,8 +45,9 @@ type Config struct { //gti:add
 	Type Types `def:"App"`
 
 	// Webcore, if specified, indicates that the app has webcore
-	// pages located at this directory. If so, <core-example> HTML
-	// elements will be collected and stored at webcoregen.go, and
+	// pages located at this directory. If so, markdown code blocks with
+	// language Go (must be uppercase, as that indicates that is an
+	// "exported" example) will be collected and stored at webcoregen.go, and
 	// a directory tree will be made for all of the pages when building
 	// for platform web.
 	Webcore string

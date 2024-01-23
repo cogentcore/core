@@ -4,14 +4,11 @@ The [[icons]] package contains a number of SVG icons selected from [Material Des
 
 To specify a standard icon, it is best to refer to it by the named constants defined in the `icons` package, like the `icons.Send` case in the following example:
 
-<core-example>
-
-```go
+```Go
 gi.NewButton(parent).SetText("Send").SetIcon(icons.Send).OnClick(func(e events.Event) {
     gi.MessageSnackbar(parent, "Message sent")
 })
 ```
-</core-example>
 
 ## Adding app-specific icons
 

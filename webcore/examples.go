@@ -15,9 +15,11 @@ import (
 	"cogentcore.org/core/styles"
 )
 
-// Examples are the different <core-example> elements that exist,
-// as compiled Go code that can be run in webcore. The map is keyed
-// by ID. Generated webcoregen.go files add to this.
+// Examples are the different core examples that exist as compiled
+// Go code that can be run in webcore. The map is keyed
+// by ID. Generated webcoregen.go files add to this by finding
+// all code blocks with language Go (must be uppercase, as that
+// indicates that is an "exported" example).
 var Examples = map[string]func(parent gi.Widget){}
 
 func init() {
@@ -29,7 +31,8 @@ var NumExamples = map[string]int{}
 
 // ExamplePreHandler is the coredom handler for <pre> HTML elements
 // that handles examples. It falls back on [coredom.HandleElement]
-// for <pre> elements that do not have a <code> with class="language-Go".
+// for <pre> elements that do not have a <code> with class="language-Go"
+// (must be uppercase, as that indicates that is an "exported" example).
 func ExamplePreHandler(ctx *coredom.Context) bool {
 	if ctx.Node.FirstChild == nil || ctx.Node.FirstChild.Data != "code" {
 		return false
