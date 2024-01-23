@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/coredom"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/styles"
@@ -42,6 +43,12 @@ func ExamplePreHandler(ctx *coredom.Context) bool {
 		s.Direction = styles.Column
 	})
 
+	gi.NewLabel(fr).SetText(coredom.ExtractText(ctx)).Style(func(s *styles.Style) {
+		s.Text.WhiteSpace = styles.WhiteSpacePreWrap
+		s.Background = colors.C(colors.Scheme.SurfaceContainer)
+		s.Border.Radius = styles.BorderRadiusMedium
+	})
+
 	id := ctx.PageURL + "-" + strconv.Itoa(NumExamples[ctx.PageURL])
 	NumExamples[ctx.PageURL]++
 	fn := Examples[id]
@@ -51,6 +58,5 @@ func ExamplePreHandler(ctx *coredom.Context) bool {
 		fn(fr)
 	}
 
-	ctx.NewParent = fr
 	return true
 }
