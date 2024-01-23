@@ -34,6 +34,9 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 			gi.MessageSnackbar(parent, "Message sent")
 		})
 	},
+	"foundations/widgets-0": func(parent gi.Widget) {
+		gi.NewButton(parent).SetText("Click me!").SetIcon(icons.Add)
+	},
 	"gettingstarted/helloworld-0": func(parent gi.Widget) {
 		b := parent
 		gi.NewLabel(b).SetText("Hello, World!")
