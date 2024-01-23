@@ -53,9 +53,9 @@ type Base struct { //gti:add -setters
 	// Transform is the transformation matrix applied to the gradient's points.
 	Transform mat32.Mat2
 
-	// ObjectMatrix is the computed effective object transformation matrix for a gradient
-	// with [Units] of [ObjectBoundingBox]. It should not be set by end users.
-	ObjectMatrix mat32.Mat2 `set:"-"`
+	// objectMatrix is the computed effective object transformation matrix
+	// for a gradient with [Units] of [ObjectBoundingBox].
+	objectMatrix mat32.Mat2 `set:"-"`
 }
 
 // Stop represents a single stop in a gradient
@@ -170,12 +170,13 @@ func (b *Base) UpdateBase() {
 	b.ComputeObjectMatrix()
 }
 
-// ComputeObjectMatrix computes the effective object transformation matrix for a gradient
-// with [Units] of [ObjectBoundingBox], setting [Base.ObjectMatrix].
+// ComputeObjectMatrix computes the effective object transformation
+// matrix for a gradient with [Units] of [ObjectBoundingBox], setting
+// [Base.objectMatrix].
 func (b *Base) ComputeObjectMatrix() {
 	w, h := b.Box.Size().X, b.Box.Size().Y
 	oriX, oriY := b.Box.Min.X, b.Box.Min.Y
-	b.ObjectMatrix = mat32.Identity2().Translate(oriX, oriY).Scale(w, h).
+	b.objectMatrix = mat32.Identity2().Translate(oriX, oriY).Scale(w, h).
 		Mul(b.Transform).Scale(1/w, 1/h).Translate(-oriX, -oriY).Inverse()
 }
 

@@ -76,7 +76,7 @@ func (l *Linear) At(x, y int) color.Color {
 
 	pt := mat32.V2(float32(x)+0.5, float32(y)+0.5)
 	if l.Units == ObjectBoundingBox {
-		pt = l.ObjectMatrix.MulVec2AsPt(pt)
+		pt = l.objectMatrix.MulVec2AsPt(pt)
 	}
 	df := pt.Sub(l.effStart)
 	pos := (d.X*df.X + d.Y*df.Y) / dd

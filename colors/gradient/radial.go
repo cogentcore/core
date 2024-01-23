@@ -80,7 +80,7 @@ func (r *Radial) At(x, y int) color.Color {
 		// pos is just distance from center scaled by radius
 		pt := mat32.V2(float32(x)+0.5, float32(y)+0.5)
 		if r.Units == ObjectBoundingBox {
-			pt = r.ObjectMatrix.MulVec2AsPt(pt)
+			pt = r.objectMatrix.MulVec2AsPt(pt)
 		}
 		d := pt.Sub(c)
 		pos := mat32.Sqrt(d.X*d.X/(rs.X*rs.X) + (d.Y*d.Y)/(rs.Y*rs.Y))
@@ -103,7 +103,7 @@ func (r *Radial) At(x, y int) color.Color {
 
 	pt := mat32.V2(float32(x)+0.5, float32(y)+0.5)
 	if r.Units == ObjectBoundingBox {
-		pt = r.ObjectMatrix.MulVec2AsPt(pt)
+		pt = r.objectMatrix.MulVec2AsPt(pt)
 	}
 	e := pt.Div(rs)
 
