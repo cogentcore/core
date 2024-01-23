@@ -45,7 +45,7 @@ Key events are mainly sent to the single _current focus_ Widget, which is determ
 
 ## Priority Ordering (First, Final)
 
-There are three levels of event handlers (see [[events.Listener]]): `First`, regular, and `Final`, which are processed in that order (and last added, first processed within each Listener).  This allows a default event handler to get first crack at handling a given event, even though it is added last, for example, by adding it to First.
+There are three levels of event handlers (see [[events.Listeners]]): `First`, regular, and `Final`, which are processed in that order (and last added, first processed within each Listener).  This allows a default event handler to get first crack at handling a given event, even though it is added last, for example, by adding it to First.
 
 ### Key events
 
