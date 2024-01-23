@@ -514,7 +514,11 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 							if hrg, ok := hr.(*Gradient); ok {
 								grad.StopsName = nm
 								grad.Grad = gradient.CopyOf(hrg.Grad)
-								// fmt.Printf("successful href: %v\n", nm)
+								if _, ok := grad.Grad.(*gradient.Linear); !ok {
+									cp := grad.Grad
+									grad.Grad = gradient.NewLinear()
+									*grad.Grad.AsBase() = *cp.AsBase()
+								}
 							}
 						}
 					}
@@ -538,7 +542,11 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 							if hrg, ok := hr.(*Gradient); ok {
 								grad.StopsName = nm
 								grad.Grad = gradient.CopyOf(hrg.Grad)
-								// fmt.Printf("successful href: %v\n", nm)
+								if _, ok := grad.Grad.(*gradient.Radial); !ok {
+									cp := grad.Grad
+									grad.Grad = gradient.NewRadial()
+									*grad.Grad.AsBase() = *cp.AsBase()
+								}
 							}
 						}
 					}
