@@ -39,7 +39,7 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 	},
 	"gettingstarted/helloworld-0": func(parent gi.Widget) {
 		b := parent
-		gi.NewLabel(b).SetText("Hello, World!")
+		gi.NewButton(b).SetText("Hello, World!")
 	},
 	"widgets/button-0": func(parent gi.Widget) {
 		gi.NewButton(parent).SetText("Send").SetIcon(icons.Send).OnClick(func(e events.Event) {
