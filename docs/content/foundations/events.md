@@ -12,7 +12,7 @@ The `events.Event` object passed to the function can be used for various things 
 
 ```Go
 gi.NewButton(parent).SetText("Click me!").OnClick(func(e events.Event) {
-    gi.MessageSnackbar(parent, fmt.Sprint("Button clicked at", e.Pos()))
+    gi.MessageSnackbar(parent, fmt.Sprint("Button clicked at ", e.Pos()))
     e.SetHandled() // this event will not be handled by other event handlers now
 })
 ```

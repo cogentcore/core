@@ -11,3 +11,11 @@ Here is an example of using `New` and `Set` functions to construct and configure
 ```Go
 gi.NewButton(parent).SetText("Click me!").SetIcon(icons.Add)
 ```
+
+You can always assign a widget to a variable and then get information from it or make further calls on it at any point. For example:
+
+```Go
+sw := gi.NewSwitch(parent).SetText("Switch me!")
+// Later...
+gi.MessageSnackbar(parent, sw.Text)
+```
