@@ -24,13 +24,11 @@ type Linear struct { //gti:add -setters
 	// the ending point of the gradient (x2 and y2 in SVG)
 	End mat32.Vec2
 
-	// EffStart is the computed effective transformed starting point of the gradient.
-	// It should not be set by end users.
-	EffStart mat32.Vec2 `set:"-"`
+	// effStart is the computed effective transformed starting point of the gradient.
+	effStart mat32.Vec2 `set:"-"`
 
-	// EffEnd is the computed effective transformed ending point of the gradient.
-	// It should not be set by end users.
-	EffEnd mat32.Vec2 `set:"-"`
+	// effEnd is the computed effective transformed ending point of the gradient.
+	effEnd mat32.Vec2 `set:"-"`
 }
 
 var _ Gradient = &Linear{}
@@ -56,11 +54,11 @@ func (l *Linear) Update() {
 	l.UpdateBase()
 
 	if l.Units == ObjectBoundingBox {
-		l.EffStart = l.Box.Min.Add(l.Box.Size().Mul(l.Start))
-		l.EffEnd = l.Box.Min.Add(l.Box.Size().Mul(l.End))
+		l.effStart = l.Box.Min.Add(l.Box.Size().Mul(l.Start))
+		l.effEnd = l.Box.Min.Add(l.Box.Size().Mul(l.End))
 	} else {
-		l.EffStart = l.Transform.MulVec2AsPt(l.Start)
-		l.EffEnd = l.Transform.MulVec2AsPt(l.End)
+		l.effStart = l.Transform.MulVec2AsPt(l.Start)
+		l.effEnd = l.Transform.MulVec2AsPt(l.End)
 	}
 }
 
@@ -73,14 +71,14 @@ func (l *Linear) At(x, y int) color.Color {
 		return l.Stops[0].Color
 	}
 
-	d := l.EffEnd.Sub(l.EffStart)
+	d := l.effEnd.Sub(l.effStart)
 	dd := d.X*d.X + d.Y*d.Y // self inner prod
 
 	pt := mat32.V2(float32(x)+0.5, float32(y)+0.5)
 	if l.Units == ObjectBoundingBox {
 		pt = l.ObjectMatrix.MulVec2AsPt(pt)
 	}
-	df := pt.Sub(l.EffStart)
+	df := pt.Sub(l.effStart)
 	pos := (d.X*df.X + d.Y*df.Y) / dd
 	return l.GetColor(pos)
 }
