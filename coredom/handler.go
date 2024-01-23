@@ -32,7 +32,9 @@ import (
 // type (eg: "button", "input", "p"). It is empty by default, but can be
 // used by anyone in need of behavior different than the default behavior
 // defined in [HandleElement] (for example, for custom elements).
-var ElementHandlers = map[string]func(ctx *Context){}
+// If the handler for an element returns false, then the default behavior
+// for an element is used.
+var ElementHandlers = map[string]func(ctx *Context) bool{}
 
 // New adds a new widget of the given type to the context parent.
 // It automatically calls [Context.Config] on the resulting widget.
@@ -53,15 +55,16 @@ func NewValue(ctx *Context, val any) giv.Value {
 	return v
 }
 
-// HandleELement calls the handler in [ElementHandlers] associated with the current node
+// HandleElement calls the handler in [ElementHandlers] associated with the current node
 // using the given context. If there is no handler associated with it, it uses default
 // hardcoded configuration code.
 func HandleElement(ctx *Context) {
 	tag := ctx.Node.Data
 	h, ok := ElementHandlers[tag]
 	if ok {
-		h(ctx)
-		return
+		if h(ctx) {
+			return
+		}
 	}
 
 	if slices.Contains(TextTags, tag) {
