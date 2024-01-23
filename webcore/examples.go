@@ -10,6 +10,7 @@ import (
 
 	"cogentcore.org/core/coredom"
 	"cogentcore.org/core/gi"
+	"cogentcore.org/core/styles"
 )
 
 // Examples are the different <core-example> elements that exist,
@@ -27,6 +28,9 @@ var NumExamples = map[string]int{}
 // CoreExampleHandler is the coredom handler for <core-example> HTML elements.
 func CoreExampleHandler(ctx *coredom.Context) {
 	sp := coredom.New[*gi.Splits](ctx)
+	sp.Style(func(s *styles.Style) {
+		s.Direction = styles.Column
+	})
 	fr := gi.NewFrame(sp)
 
 	id := ctx.PageURL + "-" + strconv.Itoa(NumExamples[ctx.PageURL])
