@@ -40,7 +40,6 @@ func TestSVG(t *testing.T) {
 }
 
 func TestViewBox(t *testing.T) {
-	t.Skip("bail")
 	paint.FontLibrary.InitFontPaths(paint.FontPaths...)
 
 	dir := filepath.Join("testdata", "svg")
@@ -66,7 +65,6 @@ func TestViewBox(t *testing.T) {
 }
 
 func TestViewBoxParse(t *testing.T) {
-	t.Skip("bail")
 	tests := []string{"none", "xMinYMin", "xMidYMin", "xMaxYMin", "xMinYMax", "xMaxYMax slice"}
 	var vb ViewBox
 	for _, ts := range tests {
