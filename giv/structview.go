@@ -49,9 +49,6 @@ type StructView struct {
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string
 
-	// if true, some fields have default values -- update labels when values change
-	HasDefs bool `set:"-" json:"-" xml:"-" edit:"-"`
-
 	// if true, some fields have viewif conditional view tags -- update after..
 	HasViewIfs bool `set:"-" json:"-" xml:"-" edit:"-"`
 
@@ -282,7 +279,6 @@ func (sv *StructView) ConfigStructGrid() bool {
 	if !mods {
 		updt = sg.UpdateStart()
 	}
-	sv.HasDefs = false
 	for i, vv := range sv.FieldViews {
 		vv := vv
 		lbl := sg.Child(i * 2).(*gi.Label)
@@ -376,6 +372,7 @@ func StructViewFieldTags(vv Value, lbl *gi.Label, w gi.Widget, isReadOnly bool) 
 // Uses JSON format for composite types (struct, slice, map), replacing " with '
 // so it is easier to use in def tag.
 func StructFieldIsDef(defs string, valPtr any, kind reflect.Kind) (bool, string) {
+	defStr := "[Default: " + defs + "]"
 	def := false
 	switch {
 	case kind == reflect.Struct || kind == reflect.Slice || kind == reflect.Map:
@@ -429,7 +426,7 @@ func StructFieldIsDef(defs string, valPtr any, kind reflect.Kind) (bool, string)
 			}
 		}
 	}
-	return def
+	return def, defStr
 }
 
 type viewifPatcher struct{}
