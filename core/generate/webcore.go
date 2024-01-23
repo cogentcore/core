@@ -60,7 +60,7 @@ func GetWebcoreExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
 				continue
 			}
 
-			if bytes.HasPrefix(b, []byte("```")) {
+			if string(b) == "```" {
 				rel, err := filepath.Rel(c.Webcore, path)
 				if err != nil {
 					return err
@@ -73,6 +73,11 @@ func GetWebcoreExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
 				curExample = nil
 				inExample = false
 				numExamples++
+				continue
+			}
+
+			if bytes.Contains(b, []byte("gi.NewAppBody(")) {
+				curExample = nil
 				continue
 			}
 
@@ -95,7 +100,7 @@ func WriteWebcoregen(c *config.Config, examples ordmap.Map[string, []byte]) erro
 var WebcoreExamples = map[string]func(parent gi.Widget){`)
 	for _, kv := range examples.Order {
 		fmt.Fprintf(b, `
-	%q: func(parent gi.Widget){%s},`, kv.Key, kv.Val)
+	%q: func(parent gi.Widget){%s%s},`, kv.Key, "\n", kv.Val)
 	}
 	b.WriteString("\n}")
 

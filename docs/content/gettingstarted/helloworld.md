@@ -6,7 +6,7 @@ Create a simple Hello World example app with Goki.
 2. Open `main.go` using an editor of your choice
 3. Add the following code to your editor:
 
-```go
+```Go
 package main
 
 import "cogentcore.org/core/gi"
