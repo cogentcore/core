@@ -23,7 +23,6 @@ import (
 	"cogentcore.org/core/styles"
 	"github.com/expr-lang/expr"
 	"github.com/expr-lang/expr/ast"
-	"goki.dev/giv"
 )
 
 // StructView represents a struct, creating a property editor of the fields --
@@ -616,7 +615,7 @@ func StructNonDefFieldsStr(structPtr any, path string) string {
 // for viewing / editing the given struct object, in the context of given ctx widget
 func StructViewDialog(ctx gi.Widget, stru any, title string, sepWindow bool) {
 	d := gi.NewBody().AddTitle(title)
-	giv.NewStructView(d).SetStruct(stru)
+	NewStructView(d).SetStruct(stru)
 	if tb, ok := stru.(gi.Toolbarer); ok {
 		d.AddAppBar(tb.ConfigToolbar)
 	}
