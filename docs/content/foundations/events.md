@@ -4,7 +4,7 @@ Cogent Core provides a robust and easy-to-use event handling system that allows 
 
 <core-example>
 
-```go
+```Go
 gi.NewButton(parent).SetText("Click me").OnClick(func(e events.Event) {
     fmt.Println("Button clicked")
 })

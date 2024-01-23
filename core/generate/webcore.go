@@ -19,14 +19,6 @@ import (
 	"cogentcore.org/core/ordmap"
 )
 
-var (
-	coreExampleStart = []byte("<core-example")
-	coreExampleEnd   = []byte("</core-example>")
-	codeStart        = []byte("```go")
-	codeEnd          = []byte("```")
-	newline          = []byte{'\n'}
-)
-
 // Webcore does any necessary generation for webcore.
 func Webcore(c *config.Config) error {
 	if c.Webcore == "" {
@@ -57,39 +49,18 @@ func GetWebcoreExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
 		sc := bufio.NewScanner(f)
 		var curExample [][]byte
 		inExample := false
-		inCode := false
 		numExamples := 0
 		for sc.Scan() {
 			b := sc.Bytes()
 
-			hasTag := bytes.Contains(b, coreExampleStart)
 			if !inExample {
-				if !hasTag {
-					continue
+				if bytes.HasPrefix(b, []byte("```Go")) {
+					inExample = true
 				}
-				inExample = true
-				continue
-			}
-			if hasTag {
-				return fmt.Errorf("got two <core-example> tags without a closing tag in %q", path)
-			}
-
-			hasCodeStart := bytes.Contains(b, codeStart)
-			hasExampleEnd := bytes.Contains(b, coreExampleEnd)
-			if !inCode && !hasExampleEnd {
-				if !hasCodeStart {
-					continue
-				}
-				inCode = true
 				continue
 			}
 
-			if bytes.Contains(b, codeEnd) {
-				inCode = false
-				continue
-			}
-
-			if hasExampleEnd {
+			if bytes.HasPrefix(b, []byte("```")) {
 				rel, err := filepath.Rel(c.Webcore, path)
 				if err != nil {
 					return err
@@ -98,7 +69,7 @@ func GetWebcoreExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
 				rel = strings.TrimSuffix(rel, filepath.Ext(rel))
 				rel = strings.TrimSuffix(rel, "/index")
 				id := rel + "-" + strconv.Itoa(numExamples)
-				examples.Add(id, bytes.Join(curExample, newline))
+				examples.Add(id, bytes.Join(curExample, []byte{'\n'}))
 				curExample = nil
 				inExample = false
 				numExamples++
