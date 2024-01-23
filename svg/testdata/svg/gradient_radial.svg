@@ -4,7 +4,6 @@
   viewBox="0 0 1280 720"
   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-  xmlns:xlink="http://www.w3.org/1999/xlink"
   xmlns="http://www.w3.org/2000/svg">
   <defs
     id="Defs">
@@ -30,7 +29,7 @@
       fy="373.5"
       r="292.625"
       gradientUnits="userSpaceOnUse"
-      xlink:href="#linearGradient769" />
+      href="#linearGradient769" />
   </defs>
   <sodipodi:namedview
     id="namedview761"

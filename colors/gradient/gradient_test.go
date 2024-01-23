@@ -7,9 +7,11 @@ package gradient
 import (
 	"image"
 	"image/color"
+	"image/draw"
 	"testing"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/grows/images"
 	"cogentcore.org/core/mat32"
 )
 
@@ -96,4 +98,24 @@ func TestColorAt(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestRenderLinear(t *testing.T) {
+	sz := image.Point{512, 512}
+	img := image.NewRGBA(image.Rectangle{Max: sz})
+	g := CopyOf(linearTransformTest)
+	g.AsBase().Box.Max = mat32.V2FromPoint(sz)
+	g.Update()
+	draw.Draw(img, img.Bounds(), g, image.Point{}, draw.Src)
+	images.Assert(t, img, "linear")
+}
+
+func TestRenderRadial(t *testing.T) {
+	sz := image.Point{512, 512}
+	img := image.NewRGBA(image.Rectangle{Max: sz})
+	g := CopyOf(radialTransformTest)
+	g.AsBase().Box.Max = mat32.V2FromPoint(sz)
+	g.Update()
+	draw.Draw(img, img.Bounds(), g, image.Point{}, draw.Src)
+	images.Assert(t, img, "radial")
 }
