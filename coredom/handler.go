@@ -114,8 +114,13 @@ func HandleElement(ctx *Context) {
 	case "p":
 		HandleLabel(ctx)
 	case "pre":
+		hasCode := ctx.Node.FirstChild != nil && ctx.Node.FirstChild.Data == "code"
 		HandleLabel(ctx).Style(func(s *styles.Style) {
 			s.Text.WhiteSpace = styles.WhiteSpacePreWrap
+			if hasCode {
+				s.Background = colors.C(colors.Scheme.SurfaceContainer)
+				s.Border.Radius = styles.BorderRadiusMedium
+			}
 		})
 	case "ol", "ul":
 		// if we are already in a treeview, we just return in the last item in it
