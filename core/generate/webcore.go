@@ -60,7 +60,18 @@ func GetWebcoreExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
 				continue
 			}
 
-			if string(b) == "```" {
+			// gi.NewAppBody counts as a new start so that full examples work
+			if bytes.Contains(b, []byte("gi.NewAppBody(")) {
+				curExample = nil
+				curExample = append(curExample, []byte("b := parent"))
+				continue
+			}
+
+			// NewWindow().Run().Wait() counts as a quasi-end so that full examples work
+			if string(b) == "```" || bytes.Contains(b, []byte("NewWindow().Run().Wait()")) {
+				if curExample == nil {
+					continue
+				}
 				rel, err := filepath.Rel(c.Webcore, path)
 				if err != nil {
 					return err
@@ -73,11 +84,6 @@ func GetWebcoreExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
 				curExample = nil
 				inExample = false
 				numExamples++
-				continue
-			}
-
-			if bytes.Contains(b, []byte("gi.NewAppBody(")) {
-				curExample = nil
 				continue
 			}
 
