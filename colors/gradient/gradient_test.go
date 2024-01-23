@@ -71,7 +71,8 @@ func TestColorAt(t *testing.T) {
 			}},
 	}
 	for i, test := range tests {
-		test.gr.Update()
+		gb := test.gr.AsBase()
+		test.gr.Update(gb.Box, mat32.Identity2())
 		for j, v := range test.want {
 			have := test.gr.At(v.x, v.y)
 			if have != v.want {
@@ -90,8 +91,9 @@ func TestColorAt(t *testing.T) {
 			ugr.Focal.SetMul(ugr.Box.Size())
 			ugr.Radius.SetMul(ugr.Box.Size())
 		}
-		ugr.AsBase().SetUnits(UserSpaceOnUse)
-		ugr.Update()
+		ugb := ugr.AsBase()
+		ugb.SetUnits(UserSpaceOnUse)
+		ugr.Update(ugb.Box, mat32.Identity2())
 
 		for j, v := range test.want {
 			have := ugr.At(v.x, v.y)
@@ -103,21 +105,25 @@ func TestColorAt(t *testing.T) {
 }
 
 func TestRenderLinear(t *testing.T) {
-	sz := image.Point{512, 512}
-	img := image.NewRGBA(image.Rectangle{Max: sz})
+	r := image.Rectangle{Max: image.Point{128, 128}}
+	b := mat32.B2FromRect(r)
+	img := image.NewRGBA(r)
 	g := CopyOf(linearTransformTest)
-	g.AsBase().Box.Max = mat32.V2FromPoint(sz)
-	g.Update()
+	// gb := g.AsBase()
+	// gb.Transform = mat32.Rotate2D(mat32.DegToRad(25))
+	g.Update(b, mat32.Rotate2D(mat32.DegToRad(45)))
 	draw.Draw(img, img.Bounds(), g, image.Point{}, draw.Src)
 	images.Assert(t, img, "linear")
 }
 
 func TestRenderRadial(t *testing.T) {
-	sz := image.Point{512, 512}
-	img := image.NewRGBA(image.Rectangle{Max: sz})
+	r := image.Rectangle{Max: image.Point{128, 128}}
+	b := mat32.B2FromRect(r)
+	img := image.NewRGBA(r)
 	g := CopyOf(radialTransformTest)
-	g.AsBase().Box.Max = mat32.V2FromPoint(sz)
-	g.Update()
+	// gb := g.AsBase()
+	// gb.Transform = mat32
+	g.Update(b, mat32.Identity2())
 	draw.Draw(img, img.Bounds(), g, image.Point{}, draw.Src)
 	images.Assert(t, img, "radial")
 }
@@ -133,19 +139,19 @@ func matToRasterx(mat *mat32.Mat2) rasterx.Matrix2D {
 }
 
 func TestTransform(t *testing.T) {
-	sz := image.Point{512, 512}
-	szf := mat32.V2FromPoint(sz)
-	g := CopyOf(radialTransformTest)
+	r := image.Rect(20, 20, 140, 140)
+	b := mat32.B2FromRect(r)
+	szf := mat32.V2FromPoint(r.Size())
+	g := CopyOf(linearTransformTest)
 	gb := g.AsBase()
-	gb.Box.Max = szf
+	gb.Transform = mat32.Rotate2D(mat32.DegToRad(25))
 	fmt.Println(gb.Transform)
-	g.Update()
-	fmt.Println(gb.objectMatrix)
+	g.Update(b, mat32.Identity2())
+	fmt.Println(gb.boxTransform)
 	w := float64(szf.X)
 	h := float64(szf.Y)
-	oriX := float64(0)
-	oriY := float64(0)
-	fmt.Println(gb.Transform)
+	oriX := float64(r.Min.X)
+	oriY := float64(r.Min.Y)
 	mtx := matToRasterx(&gb.Transform)
 	gradT := rasterx.Identity.Translate(oriX, oriY).Scale(w, h).Mult(mtx).
 		Scale(1/w, 1/h).Translate(-oriX, -oriY).Invert()

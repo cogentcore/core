@@ -204,6 +204,11 @@ func (a Mat2) ExtractScale() (scx, scy float32) {
 
 // Inverse returns inverse of matrix, for inverting transforms
 func (a Mat2) Inverse() Mat2 {
+	m3 := Mat3{}
+	m3.Set(a.XX, a.YX, a.X0, a.XY, a.YY, a.Y0, 0, 0, 1)
+	mi, _ := m3.Inverse()
+	return Mat2{XX: mi[0], YX: mi[3], X0: mi[6], XY: mi[1], YY: mi[4], Y0: mi[7]}
+
 	// homogenous rep, rc indexes, mapping into Mat3 code
 	// XX YX X0   n11 n12 n13    a b x
 	// XY YY Y0   n21 n22 n23    c d y
@@ -257,7 +262,7 @@ func ParseAngle32(pstr string) (float32, error) {
 	}
 	switch units {
 	case "deg":
-		return float32(r) * Pi / 180, nil
+		return DegToRad(float32(r)), nil
 	case "grad":
 		return float32(r) * Pi / 200, nil
 	case "rad":
@@ -387,7 +392,7 @@ func (a *Mat2) SetString(str string) error {
 			}
 			*a = a.Scale(1, pts[0])
 		case "rotate":
-			ang := pts[0] * Pi / 180 // always in degrees in this form
+			ang := DegToRad(pts[0]) // always in degrees in this form
 			if len(pts) == 3 {
 				*a = a.Translate(pts[1], pts[2]).Rotate(ang).Translate(-pts[1], -pts[2])
 			} else if len(pts) == 1 {
