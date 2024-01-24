@@ -193,7 +193,7 @@ func (is *Inspector) ConfigWidget() {
 	config.Add(gi.LabelType, "title")
 	config.Add(gi.SplitsType, "splits")
 	mods, updt := is.ConfigChildren(config)
-	is.SetTitle(fmt.Sprintf("Inspector of Ki Node Tree: %v", is.KiRoot.Name()))
+	is.SetTitle(fmt.Sprintf("Inspector of %v", is.KiRoot.Name()))
 	is.ConfigSplits()
 	if mods {
 		is.UpdateEnd(updt)
