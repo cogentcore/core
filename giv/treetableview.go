@@ -1,13 +1,18 @@
+// Copyright (c) 2024, Cogent Core. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package giv
 
 import (
+	"math/rand"
+	"reflect"
+
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/styles"
-	"math/rand"
-	"reflect"
 )
 
 // TreeTable todo set struct or dynamic creat node

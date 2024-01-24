@@ -5,7 +5,6 @@
 package main
 
 import (
-	"cogentcore.org/core/icons"
 	"fmt"
 	"math/rand"
 
@@ -58,9 +57,6 @@ func main() {
 	})
 
 	tv := giv.NewTreeView(tvfr)
-	tv.IconOpen = icons.ExpandCircleDown
-	tv.IconClosed = icons.ExpandCircleRight
-	//tv.IconLeaf = icons.Blank
 
 	depth := 3 // 1 = small tree for testing
 	// depth := 10 // big tree
