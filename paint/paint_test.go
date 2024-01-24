@@ -144,10 +144,6 @@ func TestPaintFill(t *testing.T) {
 			AddStop(colors.ApplyOpacity(colors.Purple, 0.3), 1)
 		pc.FillBox(mat32.V2(10, 100), mat32.V2(200, 100), g)
 	})
-	test("fill_box_transparent_gradient", func(pc *Context) {
-		g := gradient.NewLinear().AddStop(colors.Blue, 0).AddStop(colors.ApplyOpacityNRGBA(colors.Blue, 0), 1)
-		pc.FillBox(mat32.V2(10, 100), mat32.V2(200, 100), g)
-	})
 	test("blur_box", func(pc *Context) {
 		pc.FillBoxColor(mat32.V2(10, 100), mat32.V2(200, 100), colors.Green)
 		pc.BlurBox(mat32.V2(0, 50), mat32.V2(300, 200), 10)

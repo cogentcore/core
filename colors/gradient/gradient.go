@@ -104,7 +104,7 @@ const (
 )
 
 // AddStop adds a new stop with the given color and position to the gradient.
-func (b *Base) AddStop(color color.Color, pos float32) {
+func (b *Base) AddStop(color color.RGBA, pos float32) {
 	b.Stops = append(b.Stops, Stop{color, pos})
 }
 
