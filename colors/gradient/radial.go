@@ -61,8 +61,9 @@ func (r *Radial) AddStop(color color.RGBA, pos float32) *Radial {
 // object-level transform (i.e., the current painting transform),
 // which is applied in addition to the gradient's own Transform.
 // This must be called before rendering the gradient, and it should only be called then.
-func (r *Radial) Update(box mat32.Box2, objTransform mat32.Mat2) {
+func (r *Radial) Update(opacity float32, box mat32.Box2, objTransform mat32.Mat2) {
 	r.Box = box
+	r.Opacity = opacity
 	r.UpdateBase()
 
 	c, f, rs := r.Center, r.Focal, r.Radius
@@ -115,7 +116,7 @@ func (r *Radial) At(x, y int) color.Color {
 		}
 		d := pt.Sub(r.rCenter)
 		pos := mat32.Sqrt(d.X*d.X/(r.rRadius.X*r.rRadius.X) + (d.Y*d.Y)/(r.rRadius.Y*r.rRadius.Y))
-		return r.GetColor(pos) // todo: need opacity in here -- not sure it works to stuff only in at end.. -- interacts with native opacity of gradient itself, right?
+		return r.GetColor(pos)
 	}
 	if r.rFocal == mat32.V2(0, 0) {
 		return color.RGBA{} // should not happen

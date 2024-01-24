@@ -71,7 +71,7 @@ func TestColorAt(t *testing.T) {
 	}
 	for i, test := range tests {
 		gb := test.gr.AsBase()
-		test.gr.Update(gb.Box, mat32.Identity2())
+		test.gr.Update(1, gb.Box, mat32.Identity2())
 		for j, v := range test.want {
 			have := test.gr.At(v.x, v.y)
 			if have != v.want {
@@ -92,7 +92,7 @@ func TestColorAt(t *testing.T) {
 		}
 		ugb := ugr.AsBase()
 		ugb.SetUnits(UserSpaceOnUse)
-		ugr.Update(ugb.Box, mat32.Identity2())
+		ugr.Update(1, ugb.Box, mat32.Identity2())
 
 		for j, v := range test.want {
 			have := ugr.At(v.x, v.y)
@@ -110,7 +110,7 @@ func TestRenderLinear(t *testing.T) {
 	g := CopyOf(linearTransformTest)
 	// gb := g.AsBase()
 	// gb.Transform = mat32.Rotate2D(mat32.DegToRad(25))
-	g.Update(b, mat32.Rotate2D(mat32.DegToRad(45)))
+	g.Update(1, b, mat32.Rotate2D(mat32.DegToRad(45)))
 	draw.Draw(img, img.Bounds(), g, image.Point{}, draw.Src)
 	images.Assert(t, img, "linear")
 }
@@ -122,7 +122,7 @@ func TestRenderRadial(t *testing.T) {
 	g := CopyOf(radialTransformTest)
 	// gb := g.AsBase()
 	// gb.Transform = mat32
-	g.Update(b, mat32.Identity2())
+	g.Update(1, b, mat32.Identity2())
 	draw.Draw(img, img.Bounds(), g, image.Point{}, draw.Src)
 	images.Assert(t, img, "radial")
 }
@@ -150,7 +150,7 @@ func TestTransform(t *testing.T) {
 	gb := g.AsBase()
 	gb.Transform = mat32.Rotate2D(mat32.DegToRad(25))
 	// fmt.Println(gb.Transform)
-	g.Update(b, mat32.Identity2())
+	g.Update(1, b, mat32.Identity2())
 	fmt.Println(gb.boxTransform)
 	btcorrect := mat32.Mat2{XX: 0.9063079, YX: -0.42261833, XY: 0.42261833, YY: 0.9063079, X0: -6.5785227, Y0: 10.326212}
 	compareTol(t, gb.boxTransform.XX, btcorrect.XX)

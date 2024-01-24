@@ -27,11 +27,11 @@ type Gradient interface {
 	AsBase() *Base
 
 	// Update updates the computed fields of the gradient, using
-	// the given current bounding box, and additional
+	// the given object opacity, current bounding box, and additional
 	// object-level transform (i.e., the current painting transform),
 	// which is applied in addition to the gradient's own Transform.
 	// This must be called before rendering the gradient, and it should only be called then.
-	Update(box mat32.Box2, objTransform mat32.Mat2)
+	Update(opacity float32, box mat32.Box2, objTransform mat32.Mat2)
 }
 
 // Base contains the data and logic common to all gradient types.
@@ -57,6 +57,10 @@ type Base struct { //gti:add -setters
 	// This is a property of the Gradient itself.
 	Transform mat32.Mat2
 
+	// Opacity is the overall object opacity multiplier, applied in conjunction with the
+	// stop-level opacity blending.
+	Opacity float32
+
 	// boxTransform is the Transform applied to the bounding Box,
 	// only for [Units] == [ObjectBoundingBox].
 	boxTransform mat32.Mat2 `set:"-"`
@@ -65,11 +69,21 @@ type Base struct { //gti:add -setters
 // Stop represents a single stop in a gradient
 type Stop struct {
 
-	// the color of the stop
+	// the color of the stop. these should be fully opaque,
+	// with opacity specified separately, for best results, as is done in SVG etc.
 	Color color.Color
+
+	// Opacity is the 0-1 level of opacity for this stop
+	Opacity float32
 
 	// the position of the stop between 0 and 1
 	Pos float32
+}
+
+// OpacityColor returns the stop color with its opacity applied,
+// along with a global opacity multiplier
+func (st *Stop) OpacityColor(opacity float32) color.Color {
+	return colors.ApplyOpacity(st.Color, st.Opacity*opacity)
 }
 
 // Spreads are the spread methods used when a gradient reaches
@@ -104,8 +118,12 @@ const (
 )
 
 // AddStop adds a new stop with the given color and position to the gradient.
-func (b *Base) AddStop(color color.RGBA, pos float32) {
-	b.Stops = append(b.Stops, Stop{color, pos})
+func (b *Base) AddStop(color color.RGBA, pos float32, opacity ...float32) {
+	op := float32(1)
+	if len(opacity) > 0 {
+		op = opacity[0]
+	}
+	b.Stops = append(b.Stops, Stop{color, op, pos})
 }
 
 // AsBase returns the [Base] of the gradient
@@ -192,10 +210,10 @@ func (b *Base) GetColor(pos float32) color.Color {
 	// These cases can be taken care of early on
 	if b.Spread == Pad {
 		if pos >= 1 {
-			return b.Stops[d-1].Color
+			return b.Stops[d-1].OpacityColor(b.Opacity)
 		}
 		if pos <= 0 {
-			return b.Stops[0].Color
+			return b.Stops[0].OpacityColor(b.Opacity)
 		}
 	}
 
@@ -225,7 +243,7 @@ func (b *Base) GetColor(pos float32) color.Color {
 	case Reflect:
 		switch place {
 		case 0:
-			return b.Stops[0].Color
+			return b.Stops[0].OpacityColor(b.Opacity)
 		case d:
 			// Advance to place where mod-1 is greater than the stop indicated by place in reverse of the stop slice.
 			// Since this is the reflect b.Spread mode, the mod interval is two, allowing the stop list to be
@@ -235,9 +253,9 @@ func (b *Base) GetColor(pos float32) color.Color {
 			}
 			switch place {
 			case d:
-				return b.Stops[d-1].Color
+				return b.Stops[d-1].OpacityColor(b.Opacity)
 			case d * 2:
-				return b.Stops[0].Color
+				return b.Stops[0].OpacityColor(b.Opacity)
 			default:
 				return b.BlendStops(mod-1, b.Stops[d*2-place], b.Stops[d*2-place-1], true)
 			}
@@ -247,9 +265,9 @@ func (b *Base) GetColor(pos float32) color.Color {
 	default: // PadSpread
 		switch place {
 		case 0:
-			return b.Stops[0].Color
+			return b.Stops[0].OpacityColor(b.Opacity)
 		case d:
-			return b.Stops[d-1].Color
+			return b.Stops[d-1].OpacityColor(b.Opacity)
 		default:
 			return b.BlendStops(mod, b.Stops[place-1], b.Stops[place], false)
 		}
@@ -267,12 +285,13 @@ func (b *Base) BlendStops(pos float32, s1, s2 Stop, flip bool) color.Color {
 		}
 	}
 	if s2.Pos == s1off {
-		return s2.Color
+		return s2.OpacityColor(b.Opacity)
 	}
 	if flip {
 		pos = 1 - pos
 	}
 	tp := (pos - s1off) / (s2.Pos - s1off)
 
-	return colors.Blend(b.Blend, 100*(1-tp), s1.Color, s2.Color)
+	opacity := (s1.Opacity*(1-tp) + s2.Opacity*tp) * b.Opacity
+	return colors.ApplyOpacity(colors.Blend(b.Blend, 100*(1-tp), s1.Color, s2.Color), opacity)
 }

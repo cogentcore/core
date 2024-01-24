@@ -294,19 +294,6 @@ func ParseColorStop(stop *Stop, prev color.Color, par string) error {
 		}
 		stop.Pos = off
 	}
-	// TODO(kai): do we need this?
-	/*
-		// color blending doesn't work well in pre-multiplied alpha RGB space!
-		if colors.IsNil(prevColor) && strings.HasPrefix(cnm, "clearer-") {
-			pcts := strings.TrimPrefix(cnm, "clearer-")
-			pct, _ := laser.ToFloat(pcts)
-			stop.Opacity = (100.0 - float32(pct)) / 100.0
-			stop.Color = prevColor
-		} else if colors.IsNil(prevColor) && cnm == "transparent" {
-			stop.Opacity = 0
-			stop.Color = prevColor
-		} else {
-	*/
 	clr, err := colors.FromString(cnm, prev)
 	if err != nil {
 		return fmt.Errorf("got invalid color string %q: %w", cnm, err)
@@ -437,7 +424,7 @@ func UnmarshalXML(g *Gradient, decoder *xml.Decoder, se xml.StartElement) error 
 					r.Focal.Y = r.Center.Y
 				}
 			case "stop":
-				stop := Stop{Color: colors.Black}
+				stop := Stop{Color: colors.Black, Opacity: 1}
 				ats := se.Attr
 				sty := XMLAttr("style", ats)
 				if sty != "" {
@@ -454,7 +441,6 @@ func UnmarshalXML(g *Gradient, decoder *xml.Decoder, se xml.StartElement) error 
 						ats = append(ats, a)
 					}
 				}
-				opacity := float32(1)
 				for _, attr := range ats {
 					switch attr.Name.Local {
 					case "offset":
@@ -469,13 +455,13 @@ func UnmarshalXML(g *Gradient, decoder *xml.Decoder, se xml.StartElement) error 
 						}
 						stop.Color = clr
 					case "stop-opacity":
-						opacity, err = ReadFraction(attr.Value)
+						opacity, err := ReadFraction(attr.Value)
 						if err != nil {
-							return err
+							return fmt.Errorf("invalid stop opacity: %w", err)
 						}
+						stop.Opacity = opacity
 					}
 				}
-				stop.Color = colors.ApplyOpacityNRGBA(stop.Color, opacity)
 				if g == nil {
 					return fmt.Errorf("got stop outside of gradient: %v", stop)
 				} else {

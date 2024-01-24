@@ -23,9 +23,9 @@ func TestSVG(t *testing.T) {
 	files := dirs.ExtFilenames(dir, []string{".svg"})
 
 	for _, fn := range files {
-		if fn != "fig_vm_as_tug_of_war.svg" {
-			continue
-		}
+		// if fn != "test2.svg" {
+		// 	continue
+		// }
 		sv := NewSVG(640, 480)
 		svfn := filepath.Join(dir, fn)
 		err := sv.OpenXML(svfn)

@@ -315,9 +315,11 @@ func (pc *Context) StrokePreserve() {
 	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
 	if g, ok := pc.StrokeStyle.Color.(gradient.Gradient); ok {
-		g.Update(mat32.B2FromRect(pc.LastRenderBBox), pc.CurTransform)
+		g.Update(pc.StrokeStyle.Opacity, mat32.B2FromRect(pc.LastRenderBBox), pc.CurTransform)
+		pc.Raster.SetColor(pc.StrokeStyle.Color)
+	} else {
+		pc.Raster.SetColor(colors.ApplyOpacityImage(pc.StrokeStyle.Color, pc.StrokeStyle.Opacity))
 	}
-	pc.Raster.SetColor(gradient.ApplyOpacity(pc.StrokeStyle.Color, pc.StrokeStyle.Opacity))
 	pc.Raster.Draw()
 	pc.Raster.Clear()
 }
@@ -348,9 +350,11 @@ func (pc *Context) FillPreserve() {
 	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
 	if g, ok := pc.FillStyle.Color.(gradient.Gradient); ok {
-		g.Update(mat32.B2FromRect(pc.LastRenderBBox), pc.CurTransform)
+		g.Update(pc.FillStyle.Opacity, mat32.B2FromRect(pc.LastRenderBBox), pc.CurTransform)
+		rf.SetColor(pc.FillStyle.Color)
+	} else {
+		rf.SetColor(colors.ApplyOpacityImage(pc.FillStyle.Color, pc.FillStyle.Opacity))
 	}
-	rf.SetColor(gradient.ApplyOpacity(pc.FillStyle.Color, pc.FillStyle.Opacity))
 	rf.Draw()
 	rf.Clear()
 }
