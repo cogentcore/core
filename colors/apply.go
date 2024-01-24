@@ -22,7 +22,10 @@ func NewApplier(img image.Image, fun func(c color.Color) color.Color) *Applier {
 }
 
 func (ap *Applier) At(x, y int) color.Color {
-	return ap.ApplyFunc(ap.Image.At(x, y))
+	c := ap.Image.At(x, y)
+	ac := ap.ApplyFunc(c)
+	// fmt.Println(c, ac)
+	return ac
 }
 
 // Apply returns a copy of the given image with the given color function
@@ -33,9 +36,9 @@ func Apply(img image.Image, f func(c color.Color) color.Color) image.Image {
 	if img == nil {
 		return nil
 	}
-	switch img := img.(type) {
+	switch im := img.(type) {
 	case *image.Uniform:
-		return image.NewUniform(f(AsRGBA(img)))
+		return image.NewUniform(f(AsRGBA(im)))
 	default:
 		return NewApplier(img, f)
 	}
