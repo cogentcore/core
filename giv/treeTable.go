@@ -9,6 +9,7 @@ import (
 	"math/rand"
 )
 
+// TreeTable todo set struct or dynamic creat node
 func TreeTable(b *gi.Body) {
 	hSplits := NewHSplits(b)
 	treeFrame := gi.NewFrame(hSplits)  //left
