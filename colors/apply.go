@@ -25,6 +25,22 @@ func (ap *Applier) At(x, y int) color.Color {
 	return ap.ApplyFunc(ap.Image.At(x, y))
 }
 
+// Apply returns a copy of the given image with the given color function
+// applied to each pixel of the image. It handles [image.Uniform]
+// as a special case, only calling the function for the uniform color.
+// drawing routines optimize for image.Uniform so it is essential to preserve.
+func Apply(img image.Image, f func(c color.Color) color.Color) image.Image {
+	if img == nil {
+		return nil
+	}
+	switch img := img.(type) {
+	case *image.Uniform:
+		return image.NewUniform(f(AsRGBA(img)))
+	default:
+		return NewApplier(img, f)
+	}
+}
+
 // ApplyOpacityImage applies the given opacity to the given image,
 // handling [image.Uniform] as a special case, and using
 // an Applier for the general case.  Gradients should get the
