@@ -70,5 +70,5 @@ func main() {
 	})
 
 	sc.SetNeedsConfig()
-	b.StartMainWindow()
+	b.RunMainWindow()
 }

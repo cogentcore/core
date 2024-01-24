@@ -47,5 +47,5 @@ func main() {
 		})
 	}
 
-	b.StartMainWindow()
+	b.RunMainWindow()
 }

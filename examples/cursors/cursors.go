@@ -12,5 +12,5 @@ import (
 func main() {
 	b := gi.NewBody().SetTitle("Cogent Core Cursors")
 	gi.NewLabel(b).SetText("The Cogent Core Standard Cursors").SetType(gi.LabelHeadlineSmall)
-	b.StartMainWindow()
+	b.RunMainWindow()
 }

@@ -205,5 +205,5 @@ func main() {
 		fmt.Printf("Chooser selected index: %d data: %v\n", ch.CurIndex, ch.CurVal)
 	})
 
-	b.StartMainWindow()
+	b.RunMainWindow()
 }

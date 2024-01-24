@@ -50,5 +50,5 @@ func main() {
 	// pr := txbuf.Hi.PiLang.Parser()
 	// giv.InspectorDialog(&pr.Lexer)
 
-	b.StartMainWindow()
+	b.RunMainWindow()
 }

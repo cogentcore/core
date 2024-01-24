@@ -4,7 +4,7 @@ The first call in every Cogent Core app is [[gi.NewAppBody]]. This creates a new
 
 After calling [[gi.NewAppBody]], you add content to the [[gi.Body]] that was returned, which is typically given the local variable name `b` for body.
 
-Then, after adding content to your body, you can create and start a window from it using [[gi.Body.StartMainWindow]].
+Then, after adding content to your body, you can create and start a window from it using [[gi.Body.RunMainWindow]].
 
 Therefore, the standard structure of a Cogent Core app looks like this:
 
@@ -16,6 +16,6 @@ import "cogentcore.org/core/gi"
 func main() {
 	b := gi.NewAppBody("App Name")
 	// Add app content here
-	b.StartMainWindow()
+	b.RunMainWindow()
 }
 ```

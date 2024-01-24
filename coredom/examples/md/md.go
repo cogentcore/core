@@ -18,5 +18,5 @@ var content string
 func main() {
 	b := gi.NewAppBody("Coredom MD")
 	grr.Log(coredom.ReadMDString(coredom.NewContext(), b, content))
-	b.StartMainWindow()
+	b.RunMainWindow()
 }

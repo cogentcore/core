@@ -28,13 +28,13 @@ func NewMainStage(typ StageTypes, sc *Scene) *Stage {
 	return st
 }
 
-// StartMainWindow creates a new main window from the body,
+// RunMainWindow creates a new main window from the body,
 // runs it, starts the app's main loop, and waits for all windows
 // to close. It should typically be called once by every app at
 // the end of their main function. It can not be called more than
 // once for one app. For more specific configuration and for
 // secondary windows, see [Body.NewWindow].
-func (bd *Body) StartMainWindow() {
+func (bd *Body) RunMainWindow() {
 	bd.NewWindow().Run().Wait()
 }
 

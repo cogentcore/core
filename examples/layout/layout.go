@@ -137,5 +137,5 @@ func main() {
 		fr.Update()
 	})
 
-	b.StartMainWindow()
+	b.RunMainWindow()
 }
