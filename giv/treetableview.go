@@ -16,7 +16,7 @@ import (
 )
 
 // TreeTable todo set struct or dynamic creat node
-func TreeTable(b *gi.Body) {
+func TreeTable(b *gi.Body, nodes []any) {
 	hSplits := NewHSplits(b)
 	treeFrame := gi.NewFrame(hSplits)  //left
 	tableFrame := gi.NewFrame(hSplits) //right
@@ -42,32 +42,6 @@ func TreeTable(b *gi.Body) {
 	treeView.IconLeaf = icons.Blank
 
 	//todo merge struct field
-	//mock
-	nodes := make([]*Node, 0)
-	for i := 0; i < 10; i++ {
-		nodes = append(nodes, &Node{
-			Column1: "Column1",
-			Column2: "Column2",
-			Column3: "Column3",
-			Column4: "Column4",
-			Nested: &Node{
-				Column1: "Column1",
-				Column2: "Column2",
-				Column3: "Column3",
-				Column4: "Column4",
-				Nested:  nil,
-				Nested2: nil,
-			},
-			Nested2: &Node{
-				Column1: "Column1",
-				Column2: "Column2",
-				Column3: "Column3",
-				Column4: "Column4",
-				Nested:  nil,
-				Nested2: nil,
-			},
-		})
-	}
 	for _, node := range nodes {
 		fields := reflect.VisibleFields(reflect.TypeOf(node))
 		for _, field := range fields {
@@ -87,16 +61,6 @@ func TreeTable(b *gi.Body) {
 
 	tableView.SetReadOnly(true)
 	tableView.SetSlice(&nodes)
-}
-
-// Node todo move to input arg
-type Node struct {
-	Column1 string
-	Column2 string
-	Column3 string
-	Column4 string
-	Nested  *Node
-	Nested2 *Node
 }
 
 // MakeTree todo remove
