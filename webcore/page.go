@@ -197,6 +197,11 @@ func (pg *Page) ConfigWidget() {
 		nm := strings.TrimSuffix(base, ext)
 		txt := sentence.Case(strcase.ToCamel(nm))
 		tv := giv.NewTreeView(par, nm).SetText(txt)
+
+		// need index.md for page path
+		if d.IsDir() {
+			fpath += "/index.md"
+		}
 		pg.URLToPagePath[tv.PathFrom(nav)] = fpath
 		return nil
 	}))
