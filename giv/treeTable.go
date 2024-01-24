@@ -7,6 +7,7 @@ import (
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/styles"
 	"math/rand"
+	"reflect"
 )
 
 // TreeTable todo set struct or dynamic creat node
@@ -36,9 +37,6 @@ func TreeTable(b *gi.Body) {
 	treeView.IconLeaf = icons.Blank
 
 	//todo merge struct field
-	MakeTree(treeView, 0, 3, 5)
-	tableView := NewTableView(tableFrame)
-
 	//mock
 	nodes := make([]*Node, 0)
 	for i := 0; i < 10; i++ {
@@ -65,6 +63,23 @@ func TreeTable(b *gi.Body) {
 			},
 		})
 	}
+	for _, node := range nodes {
+		fields := reflect.VisibleFields(reflect.TypeOf(node))
+		for _, field := range fields {
+			switch field.Type.Kind() {
+			case reflect.Struct: //render tree
+			case reflect.Pointer:
+				reflect.Indirect(reflect.ValueOf(field)) //todo
+			case reflect.Slice: //render indent and elem to table fow
+			case reflect.Array: //render indent and elem to table fow
+
+			}
+		}
+	}
+
+	MakeTree(treeView, 0, 3, 5)
+	tableView := NewTableView(tableFrame)
+
 	tableView.SetReadOnly(true)
 	tableView.SetSlice(&nodes)
 }
