@@ -23,6 +23,6 @@ func main() {
 	pg := webcore.NewPage(b).SetSource(grr.Log1(fs.Sub(content, "content")))
 	b.AddAppBar(pg.AppBar)
 	w := b.NewWindow().Run()
-	pg.OpenURL("", true)
+	pg.OpenURL("/", true)
 	w.Wait()
 }

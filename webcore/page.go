@@ -148,9 +148,6 @@ func (pg *Page) ConfigWidget() {
 	if pg.HasChildren() {
 		return
 	}
-
-	pg.URLToPagePath = map[string]string{}
-
 	updt := pg.UpdateStart()
 	sp := gi.NewSplits(pg, "splits")
 
@@ -168,6 +165,9 @@ func (pg *Page) ConfigWidget() {
 		}
 		pg.OpenURL(url, true)
 	})
+
+	pg.URLToPagePath = map[string]string{"": "index.md"}
+
 	grr.Log(fs.WalkDir(pg.Source, ".", func(fpath string, d fs.DirEntry, err error) error {
 		// already handled
 		if fpath == "" || fpath == "." {
