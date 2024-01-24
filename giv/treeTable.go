@@ -68,6 +68,7 @@ func TreeTable(b *gi.Body) {
 	tableView.SetSlice(&nodes)
 }
 
+// Node todo move to input arg
 type Node struct {
 	Column1 string
 	Column2 string
@@ -77,6 +78,7 @@ type Node struct {
 	Nested2 *Node
 }
 
+// MakeTree todo remove
 func MakeTree(tv *TreeView, iter, maxIter, maxKids int) {
 	if iter > maxIter {
 		return
