@@ -34,7 +34,7 @@ func Apply(img image.Image, f func(c color.Color) color.Color) image.Image {
 	}
 	switch img := img.(type) {
 	case *image.Uniform:
-		return image.NewUniform(f(colors.AsRGBA(img)))
+		return image.NewUniform(f(img))
 	case Gradient:
 		res := CopyOf(img)
 		gb := res.AsBase()

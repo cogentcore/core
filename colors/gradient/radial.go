@@ -51,7 +51,7 @@ func NewRadial() *Radial {
 }
 
 // AddStop adds a new stop with the given color and position to the radial gradient.
-func (r *Radial) AddStop(color color.RGBA, pos float32) *Radial {
+func (r *Radial) AddStop(color color.Color, pos float32) *Radial {
 	r.Base.AddStop(color, pos)
 	return r
 }
