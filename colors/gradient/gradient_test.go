@@ -5,7 +5,6 @@
 package gradient
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -151,7 +150,7 @@ func TestTransform(t *testing.T) {
 	gb.Transform = mat32.Rotate2D(mat32.DegToRad(25))
 	// fmt.Println(gb.Transform)
 	g.Update(1, b, mat32.Identity2())
-	fmt.Println(gb.boxTransform)
+	// fmt.Println(gb.boxTransform)
 	btcorrect := mat32.Mat2{XX: 0.9063079, YX: -0.42261833, XY: 0.42261833, YY: 0.9063079, X0: -6.5785227, Y0: 10.326212}
 	compareTol(t, gb.boxTransform.XX, btcorrect.XX)
 	compareTol(t, gb.boxTransform.YX, btcorrect.YX)
