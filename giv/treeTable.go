@@ -70,8 +70,8 @@ func TreeTable(b *gi.Body) {
 			case reflect.Struct: //render tree
 			case reflect.Pointer:
 				reflect.Indirect(reflect.ValueOf(field)) //todo
-			case reflect.Slice: //render indent and elem to table fow
-			case reflect.Array: //render indent and elem to table fow
+			case reflect.Slice: //render indent and elem to table row
+			case reflect.Array: //render indent and elem to table row
 
 			}
 		}
