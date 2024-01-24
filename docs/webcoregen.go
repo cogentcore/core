@@ -18,26 +18,26 @@ func init() {
 
 // WebcoreExamples are the compiled webcore examples for this app.
 var WebcoreExamples = map[string]func(parent gi.Widget){
-	"foundations/events-0": func(parent gi.Widget) {
+	"basics/events-0": func(parent gi.Widget) {
 		gi.NewButton(parent).SetText("Click me!").OnClick(func(e events.Event) {
 			gi.MessageSnackbar(parent, "Button clicked")
 		})
 	},
-	"foundations/events-1": func(parent gi.Widget) {
+	"basics/events-1": func(parent gi.Widget) {
 		gi.NewButton(parent).SetText("Click me!").OnClick(func(e events.Event) {
 			gi.MessageSnackbar(parent, fmt.Sprint("Button clicked at ", e.Pos()))
 			e.SetHandled() // this event will not be handled by other event handlers now
 		})
 	},
-	"foundations/icons-0": func(parent gi.Widget) {
+	"basics/icons-0": func(parent gi.Widget) {
 		gi.NewButton(parent).SetText("Send").SetIcon(icons.Send).OnClick(func(e events.Event) {
 			gi.MessageSnackbar(parent, "Message sent")
 		})
 	},
-	"foundations/widgets-0": func(parent gi.Widget) {
+	"basics/widgets-0": func(parent gi.Widget) {
 		gi.NewButton(parent).SetText("Click me!").SetIcon(icons.Add)
 	},
-	"foundations/widgets-1": func(parent gi.Widget) {
+	"basics/widgets-1": func(parent gi.Widget) {
 		sw := gi.NewSwitch(parent).SetText("Switch me!")
 		// Later...
 		gi.MessageSnackbar(parent, sw.Text)

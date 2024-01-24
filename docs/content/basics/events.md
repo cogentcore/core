@@ -1,4 +1,4 @@
-# Event handling in Cogent Core
+# Event handling
 
 Cogent Core provides a robust and easy-to-use event handling system that allows you to handle various events on widgets. To handle an event, simply call the `On{EventType}` method on any widget. For example:
 
