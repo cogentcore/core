@@ -336,6 +336,21 @@ func ApplyOpacity(c color.Color, opacity float32) color.RGBA {
 	return WithA(c, uint8(float32(a)*opacity))
 }
 
+// ApplyOpacityNRGBA applies the given opacity (0-1) to the given color
+// and returns the result. It is different from [WithAF32] in that it
+// sets the transparency (A) value of the color to the current value
+// times the given value instead of just directly overriding it.
+// It is the [color.NRGBA] version of [ApplyOpacity].
+func ApplyOpacityNRGBA(c color.Color, opacity float32) color.NRGBA {
+	r := color.NRGBAModel.Convert(c).(color.NRGBA)
+	if opacity >= 1 {
+		return r
+	}
+	a := r.A
+	// new A is current A times opacity
+	return color.NRGBA{r.R, r.G, r.B, uint8(float32(a) * opacity)}
+}
+
 // Clearer returns a color that is the given amount
 // more transparent (lower alpha value) in terms of
 // RGBA absolute alpha from 0 to 100, with the color

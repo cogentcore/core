@@ -66,7 +66,7 @@ type Base struct { //gti:add -setters
 type Stop struct {
 
 	// the color of the stop
-	Color color.RGBA
+	Color color.Color
 
 	// the position of the stop between 0 and 1
 	Pos float32

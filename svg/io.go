@@ -1056,7 +1056,7 @@ func SVGNodeXMLGrad(nd *Gradient, name string, enc *XMLEncoder) {
 			se.Name.Local = "stop"
 			clr := gs.Color
 			hs := colors.AsHex(clr)[:7] // get rid of transparency
-			XMLAddAttr(&se.Attr, "style", fmt.Sprintf("stop-color:%s;stop-opacity:%g;", hs, float32(clr.A)/255))
+			XMLAddAttr(&se.Attr, "style", fmt.Sprintf("stop-color:%s;stop-opacity:%g;", hs, float32(colors.AsRGBA(clr).A)/255))
 			XMLAddAttr(&se.Attr, "offset", fmt.Sprintf("%g", gs.Pos))
 			enc.EncodeToken(se)
 			enc.WriteEnd(se.Name.Local)

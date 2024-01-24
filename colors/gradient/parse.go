@@ -159,7 +159,7 @@ var GradientDegToSides = map[string]string{
 func (l *Linear) SetString(str string) error {
 	// TODO(kai): not fully following spec yet
 	plist := strings.Split(str, ", ")
-	var prevColor color.RGBA
+	var prevColor color.Color
 	stopIdx := 0
 outer:
 	for pidx := 0; pidx < len(plist); pidx++ {
@@ -227,7 +227,7 @@ outer:
 func (r *Radial) SetString(str string) error {
 	// TODO(kai): not fully following spec yet
 	plist := strings.Split(str, ", ")
-	var prevColor color.RGBA
+	var prevColor color.Color
 	stopIdx := 0
 outer:
 	for pidx := 0; pidx < len(plist); pidx++ {
@@ -283,7 +283,7 @@ outer:
 
 // ParseColorStop parses the given color stop based on the given previous color
 // and parent gradient string.
-func ParseColorStop(stop *Stop, prev color.RGBA, par string) error {
+func ParseColorStop(stop *Stop, prev color.Color, par string) error {
 	cnm := par
 	if spcidx := strings.Index(par, " "); spcidx > 0 {
 		cnm = par[:spcidx]
@@ -475,7 +475,7 @@ func UnmarshalXML(g *Gradient, decoder *xml.Decoder, se xml.StartElement) error 
 						}
 					}
 				}
-				stop.Color = colors.ApplyOpacity(stop.Color, opacity)
+				stop.Color = colors.ApplyOpacityNRGBA(stop.Color, opacity)
 				if g == nil {
 					return fmt.Errorf("got stop outside of gradient: %v", stop)
 				} else {

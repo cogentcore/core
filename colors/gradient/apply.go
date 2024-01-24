@@ -39,7 +39,7 @@ func Apply(img image.Image, f func(c color.RGBA) color.RGBA) image.Image {
 		res := CopyOf(img)
 		gb := res.AsBase()
 		for i, s := range gb.Stops {
-			s.Color = f(s.Color)
+			s.Color = f(colors.AsRGBA(s.Color))
 			gb.Stops[i] = s
 		}
 		return res
