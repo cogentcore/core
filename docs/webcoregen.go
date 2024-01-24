@@ -18,6 +18,18 @@ func init() {
 
 // WebcoreExamples are the compiled webcore examples for this app.
 var WebcoreExamples = map[string]func(parent gi.Widget){
+	"0-gettingstarted/helloworld-0": func(parent gi.Widget) {
+		b := parent
+		gi.NewButton(b).SetText("Hello, World!")
+	},
+	"basics/1-widgets-0": func(parent gi.Widget) {
+		gi.NewButton(parent).SetText("Click me!").SetIcon(icons.Add)
+	},
+	"basics/1-widgets-1": func(parent gi.Widget) {
+		sw := gi.NewSwitch(parent).SetText("Switch me!")
+		// Later...
+		gi.MessageSnackbar(parent, sw.Text)
+	},
 	"basics/events-0": func(parent gi.Widget) {
 		gi.NewButton(parent).SetText("Click me!").OnClick(func(e events.Event) {
 			gi.MessageSnackbar(parent, "Button clicked")
@@ -33,18 +45,6 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		gi.NewButton(parent).SetText("Send").SetIcon(icons.Send).OnClick(func(e events.Event) {
 			gi.MessageSnackbar(parent, "Message sent")
 		})
-	},
-	"basics/widgets-0": func(parent gi.Widget) {
-		gi.NewButton(parent).SetText("Click me!").SetIcon(icons.Add)
-	},
-	"basics/widgets-1": func(parent gi.Widget) {
-		sw := gi.NewSwitch(parent).SetText("Switch me!")
-		// Later...
-		gi.MessageSnackbar(parent, sw.Text)
-	},
-	"gettingstarted/helloworld-0": func(parent gi.Widget) {
-		b := parent
-		gi.NewButton(b).SetText("Hello, World!")
 	},
 	"widgets/button-0": func(parent gi.Widget) {
 		gi.NewButton(parent).SetText("Send").SetIcon(icons.Send).OnClick(func(e events.Event) {
