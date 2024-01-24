@@ -299,7 +299,6 @@ func ParseColorStop(stop *Stop, prev color.Color, par string) error {
 		return fmt.Errorf("got invalid color string %q: %w", cnm, err)
 	}
 	stop.Color = clr
-	// }
 	return nil
 }
 

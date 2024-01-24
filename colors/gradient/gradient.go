@@ -73,11 +73,11 @@ type Stop struct {
 	// with opacity specified separately, for best results, as is done in SVG etc.
 	Color color.Color
 
-	// Opacity is the 0-1 level of opacity for this stop
-	Opacity float32
-
 	// the position of the stop between 0 and 1
 	Pos float32
+
+	// Opacity is the 0-1 level of opacity for this stop
+	Opacity float32
 }
 
 // OpacityColor returns the stop color with its opacity applied,
@@ -124,7 +124,7 @@ func (b *Base) AddStop(color color.RGBA, pos float32, opacity ...float32) {
 	if len(opacity) > 0 {
 		op = opacity[0]
 	}
-	b.Stops = append(b.Stops, Stop{color, op, pos})
+	b.Stops = append(b.Stops, Stop{Color: color, Pos: pos, Opacity: op})
 }
 
 // AsBase returns the [Base] of the gradient
