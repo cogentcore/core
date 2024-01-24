@@ -34,8 +34,9 @@ func TreeTable(b *gi.Body) {
 	treeView.IconOpen = icons.ExpandCircleDown
 	treeView.IconClosed = icons.ExpandCircleRight
 	treeView.IconLeaf = icons.Blank
-	MakeTree(treeView, 0, 3, 5)
 
+	//todo merge struct field
+	MakeTree(treeView, 0, 3, 5)
 	tableView := NewTableView(tableFrame)
 
 	//mock
