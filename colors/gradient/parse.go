@@ -262,7 +262,7 @@ outer:
 			if len(r.Stops) > stopIdx {
 				stop = &r.Stops[stopIdx]
 			} else {
-				stop = &Stop{}
+				stop = &Stop{Opacity: 1}
 			}
 			err := ParseColorStop(stop, prevColor, par)
 			if err != nil {
