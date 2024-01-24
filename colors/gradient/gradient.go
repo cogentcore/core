@@ -117,7 +117,8 @@ const (
 	UserSpaceOnUse
 )
 
-// AddStop adds a new stop with the given color and position to the gradient.
+// AddStop adds a new stop with the given color, position, and
+// optional opacity to the gradient.
 func (b *Base) AddStop(color color.RGBA, pos float32, opacity ...float32) {
 	op := float32(1)
 	if len(opacity) > 0 {

@@ -42,9 +42,10 @@ func NewLinear() *Linear {
 	}
 }
 
-// AddStop adds a new stop with the given color and position to the linear gradient.
-func (l *Linear) AddStop(color color.RGBA, pos float32) *Linear {
-	l.Base.AddStop(color, pos)
+// AddStop adds a new stop with the given color, position, and
+// optional opacity to the gradient.
+func (l *Linear) AddStop(color color.RGBA, pos float32, opacity ...float32) *Linear {
+	l.Base.AddStop(color, pos, opacity...)
 	return l
 }
 
