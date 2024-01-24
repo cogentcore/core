@@ -100,6 +100,9 @@ func (st *Stage) ConfigMainStage() {
 		st.NewWindow = false
 	}
 	sc := st.Scene
+	if sc.App != nil && sc.App.SceneConfig != nil {
+		sc.App.SceneConfig(sc)
+	}
 	st.AddWindowDecor() // sensitive to cases
 	sc.ConfigSceneBars()
 	sc.ConfigSceneWidgets()

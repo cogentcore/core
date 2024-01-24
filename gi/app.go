@@ -49,6 +49,12 @@ type App struct { //gti:add -setters
 	// functionality, and set this accordingly.
 	// If this is nil, then no TopAppBar will be created by default.
 	AppBarConfig func(pw Widget)
+
+	// SceneConfig is the function called on every newly created [gi.Scene]
+	// to configure it, if it is non-nil. This can be used to set global
+	// configuration and styling for all widgets using the OnWidgetAdded
+	// method.
+	SceneConfig func(sc *Scene)
 }
 
 // NewApp returns a new App initialized with the given name.
