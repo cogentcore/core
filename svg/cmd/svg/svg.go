@@ -54,7 +54,6 @@ func Render(c *Config) error {
 		c.Render.Height = c.Render.Width
 	}
 	sv := svg.NewSVG(c.Render.Width, c.Render.Height)
-	sv.Norm = true
 	err := ApplyFill(c, sv)
 	if err != nil {
 		return err
@@ -73,7 +72,6 @@ func Render(c *Config) error {
 // EmbedImage embeds the input image file into the output svg file.
 func EmbedImage(c *Config) error {
 	sv := svg.NewSVG(0, 0)
-	sv.Norm = true
 	err := ApplyFill(c, sv)
 	if err != nil {
 		return err

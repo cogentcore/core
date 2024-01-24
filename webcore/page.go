@@ -20,13 +20,13 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/giv"
-	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/glop/sentence"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/grows/tomls"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/webcore/wpath"
 	"github.com/iancoleman/strcase"
 )
 
@@ -48,6 +48,10 @@ type Page struct {
 
 	// PagePath is the fs path of the current page in [Page.Source]
 	PagePath string
+
+	// URLToPagePath is a map between user-facing page URLs and underlying
+	// FS page paths.
+	URLToPagePath map[string]string
 }
 
 var _ ki.Ki = (*Page)(nil)
@@ -99,19 +103,9 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 		pg.History = append(pg.History, pg.Context.PageURL)
 	}
 
-	fsPath := path.Join(rawURL, "index.md")
-	exists, err := dirs.FileExistsFS(pg.Source, fsPath)
-	if err != nil {
-		gi.ErrorSnackbar(pg, err, "Error finding page")
-		return
-	}
-	if !exists {
-		fsPath = path.Clean(rawURL) + ".md"
-	}
+	pg.PagePath = pg.URLToPagePath[pg.Context.PageURL]
 
-	pg.PagePath = fsPath
-
-	b, err := fs.ReadFile(pg.Source, fsPath)
+	b, err := fs.ReadFile(pg.Source, pg.PagePath)
 	if err != nil {
 		gi.ErrorSnackbar(pg, err, "Error opening page")
 		return
@@ -154,7 +148,6 @@ func (pg *Page) ConfigWidget() {
 	if pg.HasChildren() {
 		return
 	}
-
 	updt := pg.UpdateStart()
 	sp := gi.NewSplits(pg, "splits")
 
@@ -172,14 +165,19 @@ func (pg *Page) ConfigWidget() {
 		}
 		pg.OpenURL(url, true)
 	})
+
+	pg.URLToPagePath = map[string]string{"": "index.md"}
+
 	grr.Log(fs.WalkDir(pg.Source, ".", func(fpath string, d fs.DirEntry, err error) error {
 		// already handled
 		if fpath == "" || fpath == "." {
 			return nil
 		}
 
-		pdir := path.Dir(fpath)
-		base := path.Base(fpath)
+		p := wpath.Format(fpath)
+
+		pdir := path.Dir(p)
+		base := path.Base(p)
 
 		// already handled
 		if base == "index.md" {
@@ -198,7 +196,13 @@ func (pg *Page) ConfigWidget() {
 
 		nm := strings.TrimSuffix(base, ext)
 		txt := sentence.Case(strcase.ToCamel(nm))
-		giv.NewTreeView(par, nm).SetText(txt)
+		tv := giv.NewTreeView(par, nm).SetText(txt)
+
+		// need index.md for page path
+		if d.IsDir() {
+			fpath += "/index.md"
+		}
+		pg.URLToPagePath[tv.PathFrom(nav)] = fpath
 		return nil
 	}))
 

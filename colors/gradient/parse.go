@@ -202,7 +202,7 @@ outer:
 			if len(l.Stops) > stopIdx {
 				stop = &(l.Stops[stopIdx])
 			} else {
-				stop = &Stop{}
+				stop = &Stop{Opacity: 1}
 			}
 			err := ParseColorStop(stop, prevColor, par)
 			if err != nil {
@@ -262,7 +262,7 @@ outer:
 			if len(r.Stops) > stopIdx {
 				stop = &r.Stops[stopIdx]
 			} else {
-				stop = &Stop{}
+				stop = &Stop{Opacity: 1}
 			}
 			err := ParseColorStop(stop, prevColor, par)
 			if err != nil {
@@ -299,7 +299,6 @@ func ParseColorStop(stop *Stop, prev color.Color, par string) error {
 		return fmt.Errorf("got invalid color string %q: %w", cnm, err)
 	}
 	stop.Color = clr
-	// }
 	return nil
 }
 

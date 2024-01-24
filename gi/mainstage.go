@@ -100,6 +100,13 @@ func (st *Stage) ConfigMainStage() {
 		st.NewWindow = false
 	}
 	sc := st.Scene
+	if sc.App != nil && sc.App.SceneConfig != nil {
+		sc.App.SceneConfig(sc)
+	}
+	if CurRenderWin != nil && !st.NewWindow {
+		title := CurRenderWin.Title + " | " + st.Title
+		CurRenderWin.GoosiWin.SetTitle(title)
+	}
 	st.AddWindowDecor() // sensitive to cases
 	sc.ConfigSceneBars()
 	sc.ConfigSceneWidgets()

@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/core/config"
 	"cogentcore.org/core/gengo"
 	"cogentcore.org/core/ordmap"
+	"cogentcore.org/core/webcore/wpath"
 )
 
 // Webcore does any necessary generation for webcore.
@@ -79,6 +80,7 @@ func GetWebcoreExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
 				rel = strings.ReplaceAll(rel, `\`, "/")
 				rel = strings.TrimSuffix(rel, filepath.Ext(rel))
 				rel = strings.TrimSuffix(rel, "/index")
+				rel = wpath.Format(rel)
 				id := rel + "-" + strconv.Itoa(numExamples)
 				examples.Add(id, bytes.Join(curExample, []byte{'\n'}))
 				curExample = nil

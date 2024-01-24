@@ -92,7 +92,7 @@ func TestReadXML(t *testing.T) {
 			<stop offset="90%" stop-color="red" />
 		  </radialGradient>`, NewRadial().
 			AddStop(colors.Blue, 0.1).
-			AddStop(colors.ApplyOpacity(colors.Purple, 0.33), 0.35).
+			AddStop(colors.Purple, 0.35, 0.33).
 			AddStop(colors.Red, 0.9)},
 
 		{`<radialGradient id="h3ll0_wor1d!" gradientTransform="translate(0.1, 0.1) scale(0.5, 1.75)">
