@@ -44,6 +44,7 @@ func TestSnackbarTime(t *testing.T) {
 
 		b.AssertScreenRender(t, filepath.Join("snackbar", tm.String()+"-two"), func() {
 			MessageSnackbar(b, "Test One")
+			time.Sleep(tm / 2)
 			MessageSnackbar(b, "Test Two")
 			time.Sleep(tm)
 		})
