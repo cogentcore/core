@@ -22,10 +22,7 @@ func NewApplier(img image.Image, fun func(c color.Color) color.Color) *Applier {
 }
 
 func (ap *Applier) At(x, y int) color.Color {
-	c := ap.Image.At(x, y)
-	ac := ap.ApplyFunc(c)
-	// fmt.Println(c, ac)
-	return ac
+	return ap.ApplyFunc(ap.Image.At(x, y))
 }
 
 // Apply returns a copy of the given image with the given color function
