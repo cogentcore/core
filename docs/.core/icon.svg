@@ -1,0 +1,56 @@
+<svg
+  width="720px"
+  height="720px"
+  viewBox="0 0 720 720"
+  xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+  xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns="http://www.w3.org/2000/svg">
+  <defs
+    id="Defs">
+    <linearGradient
+      id="linearGradient343"
+      x1="0"
+      y1="0"
+      x2="0"
+      y2="0"
+      gradientUnits="objectBoundingBox">
+      <stop
+        style="stop-color:#FFFFFF;stop-opacity:1;"
+        offset="0" />
+      <stop
+        style="stop-color:#0000FF;stop-opacity:1;"
+        offset="1" />
+    </linearGradient>
+  </defs>
+  <sodipodi:namedview
+    id="namedview34"
+    inkscape:cx="154.67693"
+    inkscape:cy="448.06906"
+    inkscape:zoom="1.3156455"
+    inkscape:current-layer="svg142"
+    inkscape:document-units="px">
+    <inkscape:grid
+      id="grid333"
+      spacingx="12"
+      spacingy="12"
+      type="xygrid"
+      units="px" />
+  </sodipodi:namedview>
+  <path
+    id="path354"
+    style="cy:360.98102;end:5.9345923;fill:#330080;start:0.35334767;fill-rule:evenodd;arc-type:slice;cx:359.23996;type:arc;ry:333.0325;rx:333.0325;"
+    transform="translate(11.100208,-1.3059169)"
+    d="M 671.6976,476.2238 A 333.0325,333.0325 0 0 1 300.31778,688.75964 333.0325,333.0325 0 0 1 26.2084,360.1893 333.0325,333.0325 0 0 1 301.87692,32.92595 333.0325,333.0325 0 0 1 672.24194,247.22517 L 359.23996,360.98102 Z " />
+  <path
+    id="path403"
+    style="fill-rule:evenodd;cx:357.94495;cy:360.32806;fill:#7f2aff;end:5.9389567;ry:224.83276;start:0.35594916;type:arc;stroke-width:0.675108;arc-type:slice;rx:224.83276;"
+    transform="translate(11.100208,-1.3059169)"
+    d="M 568.6843,438.67783 A 224.83276,224.83276 0 0 1 317.49313,581.4918 224.83276,224.83276 0 0 1 133.11604,359.0105 224.83276,224.83276 0 0 1 320.088,138.70535 224.83276,224.83276 0 0 1 569.58813,284.4536 l -211.64317,75.87445 z " />
+  <circle
+    id="circle405"
+    style="stroke:none;fill-rule:evenodd;stroke-width:1.0713;fill:#ffcc00;"
+    cx="371.42514"
+    cy="358.3692"
+    r="115" />
+</svg>
