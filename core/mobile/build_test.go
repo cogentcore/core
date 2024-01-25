@@ -76,7 +76,7 @@ func TestAndroidPkgName(t *testing.T) {
 }
 
 func TestAndroidBuild(t *testing.T) {
-	t.Skip("not working and not worth it")
+	t.Skip("TODO: not working and not worth it")
 	if runtime.GOOS == "android" || runtime.GOOS == "ios" {
 		t.Skipf("not available on %s", runtime.GOOS)
 	}
