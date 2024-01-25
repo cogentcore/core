@@ -7,10 +7,14 @@ package gi
 import (
 	"path/filepath"
 	"testing"
+
+	"cogentcore.org/core/goosi"
 )
 
 func TestSnackbar(t *testing.T) {
 	b := NewBody()
+	NewLabel(b).SetText("Hello")
 	MessageSnackbar(b, "Test")
-	b.AssertRender(t, filepath.Join("snackbar", "basic"))
+	b.NewWindow().Run()
+	goosi.AssertCapture(t, filepath.Join("snackbar", "basic"))
 }
