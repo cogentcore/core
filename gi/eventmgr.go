@@ -361,7 +361,6 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 				}
 				dcInTime := time.Since(em.LastClickTime) < DeviceSettings.DoubleClickInterval
 				em.LastClickTime = time.Now()
-				em.LastClickWidget = up
 				sentMulti := false
 				switch {
 				case em.LastDoubleClickWidget == up && dcInTime:
@@ -394,6 +393,7 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 				}
 				if !sentMulti {
 					em.LastDoubleClickWidget = nil
+					em.LastClickWidget = up
 					up.Send(events.Click, e)
 				}
 			case events.Right: // note: automatically gets Control+Left
