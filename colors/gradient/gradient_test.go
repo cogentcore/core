@@ -127,6 +127,15 @@ func TestRenderRadial(t *testing.T) {
 	g.Update(1, b, mat32.Identity2())
 	draw.Draw(img, img.Bounds(), g, image.Point{}, draw.Src)
 	images.Assert(t, img, "radial")
+
+	ug := CopyOf(g).(*Radial)
+	ug.SetUnits(UserSpaceOnUse)
+	ug.Center.SetMul(ug.Box.Size())
+	ug.Focal.SetMul(ug.Box.Size())
+	ug.Radius.SetMul(ug.Box.Size())
+	ug.Update(1, b, mat32.Identity2())
+	draw.Draw(img, img.Bounds(), ug, image.Point{}, draw.Src)
+	images.Assert(t, img, "radial-user-space")
 }
 
 // func matToRasterx(mat *mat32.Mat2) rasterx.Matrix2D {
