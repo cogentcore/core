@@ -103,6 +103,7 @@ func Must3[T1, T2, T3 any](v1 T1, v2 T2, v3 T3, err error) (T1, T2, T3) {
 // TestingT is an interface wrapper around [*testing.T]
 type TestingT interface {
 	Error(args ...any)
+	Fatal(args ...any)
 
 	// Helper marks the calling function as a test helper function.
 	Helper()
@@ -116,6 +117,18 @@ func Test(t TestingT, err error) error {
 	t.Helper()
 	if err != nil {
 		t.Error(err)
+	}
+	return err
+}
+
+// TestFatal takes the given error and fatally errors the test it if it is non-nil.
+// The intended usage is:
+//
+//	grr.TestFatal(t, MyFunc(v))
+func TestFatal(t TestingT, err error) error {
+	t.Helper()
+	if err != nil {
+		t.Fatal(err)
 	}
 	return err
 }

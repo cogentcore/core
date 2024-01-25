@@ -11,6 +11,7 @@ import (
 
 	"cogentcore.org/core/cam/hct"
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
@@ -187,7 +188,7 @@ func (ed *Editor) RenderDepthBg(stln, edln int) {
 				} else {
 					vdc = ViewDepthColors[lx.Tok.Depth%nclrs]
 				}
-				bg := colors.Apply(sty.Background, func(c color.Color) color.Color {
+				bg := gradient.Apply(sty.Background, func(c color.Color) color.Color {
 					if isDark { // reverse order too
 						return colors.Add(c, vdc)
 					}

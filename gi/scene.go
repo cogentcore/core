@@ -159,6 +159,11 @@ func (sc *Scene) OnInit() {
 	sc.WidgetBase.OnInit()
 	sc.SetStyles()
 	sc.Layout.HandleEvents()
+	if CurRenderWin != nil {
+		if app := CurRenderWin.MainScene().App; app != nil && app.SceneConfig != nil {
+			app.SceneConfig(sc)
+		}
+	}
 }
 
 func (sc *Scene) SetStyles() {

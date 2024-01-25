@@ -149,23 +149,27 @@ var IndexHTMLTmpl = template.Must(template.New("index.html").Parse(IndexHTML))
 
 // IndexHTMLData is the data passed to [IndexHTMLTmpl]
 type IndexHTMLData struct {
-	Author     string
-	Desc       string
-	Keywords   []string
-	ThemeColor string
-	Title      string
-	Image      string
+	Author                 string
+	Desc                   string
+	Keywords               []string
+	ThemeColor             string
+	Title                  string
+	Image                  string
+	VanityURL              string
+	GithubVanityRepository string
 }
 
 // MakeIndexHTML exectues [IndexHTMLTmpl] based on the given configuration information.
 func MakeIndexHTML(c *config.Config) ([]byte, error) {
 	d := IndexHTMLData{
-		Author:     c.Web.Author,
-		Desc:       c.Desc,
-		Keywords:   c.Web.Keywords,
-		ThemeColor: c.Web.ThemeColor,
-		Title:      c.Name,
-		Image:      c.Web.Image,
+		Author:                 c.Web.Author,
+		Desc:                   c.Desc,
+		Keywords:               c.Web.Keywords,
+		ThemeColor:             c.Web.ThemeColor,
+		Title:                  c.Name,
+		Image:                  c.Web.Image,
+		VanityURL:              c.Web.VanityURL,
+		GithubVanityRepository: c.Web.GithubVanityRepository,
 	}
 
 	b := &bytes.Buffer{}

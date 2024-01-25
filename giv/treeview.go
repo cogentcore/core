@@ -242,6 +242,8 @@ func (tv *TreeView) SetStyles() {
 		if s.Is(states.Selected) {
 			// render handles manually, similar to with actStateLayer
 			s.Background = nil
+		} else {
+			s.Color = colors.Scheme.OnSurface
 		}
 	})
 	tv.OnWidgetAdded(func(w gi.Widget) {
@@ -419,10 +421,8 @@ func (tv *TreeView) SetStyles() {
 			})
 		case "parts/label":
 			w.Style(func(s *styles.Style) {
-				// todo: (Kai) need to change these for clickable links in glide
+				// TODO(kai): need to change these for clickable links in glide
 				s.SetNonSelectable()
-				s.Font = tv.Styles.Font // get our overall font settings
-				s.Color = tv.Styles.Color
 				s.SetTextWrap(false)
 				s.Margin.Zero()
 				s.Padding.Zero()

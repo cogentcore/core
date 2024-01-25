@@ -335,6 +335,10 @@ func (st *Stage) DoUpdate() (stageMods, sceneMods bool) {
 }
 
 func (st *Stage) Delete() {
+	if st.Type.IsMain() {
+		// need to reset title after we added our context to it
+		CurRenderWin.GoosiWin.SetTitle(CurRenderWin.Title)
+	}
 	if st.Type.IsMain() && st.PopupMgr != nil {
 		st.PopupMgr.DeleteAll()
 		st.Sprites.Reset()

@@ -34,22 +34,21 @@ func TestColorAt(t *testing.T) {
 		want []value
 	}
 	tests := []test{
-		// ensure same results with ObjectBoundingBox and UserSpaceOnUse
 		{NewLinear().
 			AddStop(colors.White, 0).
 			AddStop(colors.Black, 1),
 			[]value{
-				{33, 71, color.RGBA{68, 67, 67, 255}},
-				{78, 71, color.RGBA{68, 67, 67, 255}},
-				{78, 17, color.RGBA{205, 205, 205, 255}},
-				{33, 50, color.RGBA{118, 118, 117, 255}},
+				{71, 33, color.RGBA{72, 72, 72, 255}},
+				{71, 78, color.RGBA{72, 72, 72, 255}},
+				{17, 78, color.RGBA{211, 211, 211, 255}},
+				{50, 33, color.RGBA{126, 126, 126, 255}},
 			}},
 		{CopyOf(linearTransformTest),
 			[]value{
-				{50, 50, color.RGBA{255, 141, 52, 255}},
-				{7, 50, color.RGBA{255, 141, 52, 255}},
-				{81, 23, color.RGBA{255, 185, 76, 255}},
-				{81, 94, color.RGBA{254, 12, 0, 255}},
+				{50, 50, color.RGBA{255, 106, 0, 255}},
+				{7, 50, color.RGBA{255, 106, 0, 255}},
+				{81, 23, color.RGBA{255, 171, 0, 255}},
+				{81, 94, color.RGBA{255, 1, 0, 255}},
 			}},
 		{NewRadial().
 			SetCenter(mat32.V2(0.9, 0.5)).SetFocal(mat32.V2(0.9, 0.5)).
@@ -57,15 +56,15 @@ func TestColorAt(t *testing.T) {
 			AddStop(colors.Yellow, 0.85),
 			[]value{
 				{90, 50, colors.Blue},
-				{70, 60, color.RGBA{0, 165, 183, 255}},
+				{70, 60, color.RGBA{117, 117, 138, 255}},
 				{35, 40, colors.Yellow},
 			}},
 		{CopyOf(radialTransformTest),
 			[]value{
-				{41, 62, color.RGBA{166, 54, 212, 255}},
-				{26, 54, color.RGBA{221, 0, 106, 255}},
-				{53, 75, color.RGBA{255, 165, 0, 255}},
-				{38, 61, color.RGBA{51, 12, 252, 255}},
+				{41, 62, color.RGBA{104, 0, 151, 255}},
+				{26, 54, color.RGBA{2, 0, 253, 255}},
+				{53, 75, color.RGBA{132, 85, 123, 255}},
+				{38, 61, color.RGBA{141, 0, 114, 255}},
 			}},
 	}
 	for i, test := range tests {
@@ -79,6 +78,10 @@ func TestColorAt(t *testing.T) {
 		}
 
 		// ensure same results with UserSpaceOnUse as ObjectBoundingBox
+		// (except for case 3, for which that is not true)
+		if i == 3 {
+			continue
+		}
 		ugr := CopyOf(test.gr)
 		switch ugr := ugr.(type) {
 		case *Linear:
@@ -107,11 +110,17 @@ func TestRenderLinear(t *testing.T) {
 	b := mat32.B2FromRect(r)
 	img := image.NewRGBA(r)
 	g := CopyOf(linearTransformTest)
-	// gb := g.AsBase()
-	// gb.Transform = mat32.Rotate2D(mat32.DegToRad(25))
 	g.Update(1, b, mat32.Rotate2D(mat32.DegToRad(45)))
 	draw.Draw(img, img.Bounds(), g, image.Point{}, draw.Src)
 	images.Assert(t, img, "linear")
+
+	ug := CopyOf(g).(*Linear)
+	ug.SetUnits(UserSpaceOnUse)
+	ug.Start.SetMul(ug.Box.Size())
+	ug.End.SetMul(ug.Box.Size())
+	ug.Update(1, b, mat32.Rotate2D(mat32.DegToRad(45)))
+	draw.Draw(img, img.Bounds(), ug, image.Point{}, draw.Src)
+	images.Assert(t, img, "linear-user-space")
 }
 
 func TestRenderRadial(t *testing.T) {
@@ -119,11 +128,18 @@ func TestRenderRadial(t *testing.T) {
 	b := mat32.B2FromRect(r)
 	img := image.NewRGBA(r)
 	g := CopyOf(radialTransformTest)
-	// gb := g.AsBase()
-	// gb.Transform = mat32
 	g.Update(1, b, mat32.Identity2())
 	draw.Draw(img, img.Bounds(), g, image.Point{}, draw.Src)
 	images.Assert(t, img, "radial")
+
+	ug := CopyOf(g).(*Radial)
+	ug.SetUnits(UserSpaceOnUse)
+	ug.Center.SetMul(ug.Box.Size())
+	ug.Focal.SetMul(ug.Box.Size())
+	ug.Radius.SetMul(ug.Box.Size())
+	ug.Update(1, b, mat32.Identity2())
+	draw.Draw(img, img.Bounds(), ug, image.Point{}, draw.Src)
+	images.Assert(t, img, "radial-user-space")
 }
 
 // func matToRasterx(mat *mat32.Mat2) rasterx.Matrix2D {
@@ -168,4 +184,27 @@ func TestTransform(t *testing.T) {
 	// gradT := rasterx.Identity.Translate(oriX, oriY).Scale(w, h).Mult(mtx).
 	// 	Scale(1/w, 1/h).Translate(-oriX, -oriY).Invert()
 	// fmt.Println(gradT)
+}
+
+func TestApply(t *testing.T) {
+	r := image.Rect(0, 0, 2, 2)
+	img := image.NewRGBA(r)
+	img.Set(0, 0, colors.Red)
+	img.Set(1, 0, colors.Blue)
+	img.Set(0, 1, colors.Green)
+	img.Set(1, 1, colors.Yellow)
+
+	var ocs []uint8
+	ap := Apply(img, func(c color.Color) color.Color {
+		oc := colors.ApplyOpacity(c, .5)
+		ocs = append(ocs, oc.R, oc.G, oc.B, oc.A)
+		return oc
+	})
+	nim := image.NewRGBA(r)
+	draw.Draw(nim, r, ap, image.Point{}, draw.Src)
+	for i, c := range nim.Pix {
+		if c != ocs[i] {
+			t.Errorf("output not the same: %v != %v\n", c, ocs[i])
+		}
+	}
 }

@@ -191,8 +191,7 @@ func (bt *Button) SetStyles() {
 			})
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
-				s.Min.X.Dp(18)
-				s.Min.Y.Dp(18)
+				s.Min.Set(units.Dp(18))
 				s.Margin.Zero()
 				s.Padding.Zero()
 				if bt.Text != "" {

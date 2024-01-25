@@ -448,20 +448,24 @@ func (sc *Scene) DoUpdate() bool {
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)
 	case sc.LastRender.NeedsRestyle(rc):
+		// fmt.Println("restyle")
 		sc.ApplyStyleScene()
 		sc.LayoutRenderScene()
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)
 		sc.LastRender.SaveRender(rc)
 	case sc.Is(ScNeedsLayout):
+		// fmt.Println("layout")
 		sc.LayoutRenderScene()
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)
 	case sc.Is(ScNeedsRender):
+		// fmt.Println("render")
 		sc.DoNeedsRender()
 		sc.SetFlag(false, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)
 	case len(sc.ReRender) > 0:
+		// fmt.Println("re-render")
 		for _, w := range sc.ReRender {
 			w.SetFlag(true, ScNeedsRender)
 		}

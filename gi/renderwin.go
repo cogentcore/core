@@ -469,6 +469,9 @@ func (w *RenderWin) Closed() {
 				fmt.Printf("Win: %v getting restored focus after: %v closed\n", pfw.Name, w.Name)
 			}
 			pfw.GoosiWin.Raise()
+			if CurRenderWin == w {
+				CurRenderWin = pfw
+			}
 		} else {
 			if DebugSettings.WinEventTrace {
 				fmt.Printf("Win: %v not found to restored focus: %v closed\n", pf, w.Name)
