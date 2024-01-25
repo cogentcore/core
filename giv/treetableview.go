@@ -5,51 +5,17 @@
 package giv
 
 import (
-	"cogentcore.org/core/gti"
-	"math/rand"
-	"reflect"
-	"sync"
-
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/styles"
+	"math/rand"
+	"reflect"
 )
 
 type (
 	TableRowData interface {
-		KiType() *gti.Type
-		New() ki.Ki
-		SetStyleFunc(v TableViewStyleFunc) *TableView
-		SetSelField(v string) *TableView
-		SetSortIdx(v int) *TableView
-		SetSortDesc(v bool) *TableView
-		SetStruType(v reflect.Type) *TableView
-		SetVisFields(v ...reflect.StructField) *TableView
-		SetNvisFields(v int) *TableView
-		SetHeaderWidths(v ...int) *TableView
-		SetTooltip(v string) *TableView
-		SetStackTop(v int) *TableView
-		SetStripes(v gi.Stripes) *TableView
-		SetMinRows(v int) *TableView
-		SetViewMu(v *sync.Mutex) *TableView
-		SetSliceNpval(v reflect.Value) *TableView
-		SetSliceValView(v Value) *TableView
-		SetValues(v ...Value) *TableView
-		SetSelVal(v any) *TableView
-		SetSelIdx(v int) *TableView
-		SetSelIdxs(v map[int]struct{}) *TableView
-		SetInitSelIdx(v int) *TableView
-		SetDraggedIdxs(v ...int) *TableView
-		SetViewPath(v string) *TableView
-		SetTmpSave(v Value) *TableView
-		SetVisRows(v int) *TableView
-		SetStartIdx(v int) *TableView
-		SetSliceSize(v int) *TableView
-		SetConfigIter(v int) *TableView
-		SetTmpIdx(v int) *TableView
-		SetElVal(v reflect.Value) *TableView
 		OnInit()
 		SetStyles()
 		SetSlice(sl any) *TableView
@@ -79,193 +45,43 @@ type (
 		ContextMenu(m *gi.Scene)
 		SizeFinal()
 	}
-	TreeTableView struct {
-		SliceViewBase
-
-		// optional styling function
-		StyleFunc TableViewStyleFunc `copier:"-" view:"-" json:"-" xml:"-"`
-
-		// current selection field -- initially select value in this field
-		SelField string `copier:"-" view:"-" json:"-" xml:"-"`
-
-		// current sort index
-		SortIdx int
-
-		// whether current sort order is descending
-		SortDesc bool
-
-		// struct type for each row
-		StruType reflect.Type `copier:"-" view:"-" json:"-" xml:"-"`
-
-		// the visible fields
-		VisFields []reflect.StructField `copier:"-" view:"-" json:"-" xml:"-"`
-
-		// number of visible fields
-		NVisFields int `copier:"-" view:"-" json:"-" xml:"-"`
-
-		// HeaderWidths has number of characters in each header, per visfields
-		HeaderWidths []int `copier:"-" view:"-" json:"-" xml:"-"`
-	}
 )
 
-func NewTreeTableView() TableRowData {
-	return &TreeTableView{}
+type TreeTableView struct { //gti:add
+
+	TreeHeaderFrame *gi.Frame
+	TreeView        *TreeView
+
+	SliceViewBase
+
+	// optional styling function
+	StyleFunc TableViewStyleFunc `copier:"-" view:"-" json:"-" xml:"-"`
+
+	// current selection field -- initially select value in this field
+	SelField string `copier:"-" view:"-" json:"-" xml:"-"`
+
+	// current sort index
+	SortIdx int
+
+	// whether current sort order is descending
+	SortDesc bool
+
+	// struct type for each row
+	StruType reflect.Type `copier:"-" view:"-" json:"-" xml:"-"`
+
+	// the visible fields
+	VisFields []reflect.StructField `copier:"-" view:"-" json:"-" xml:"-"`
+
+	// number of visible fields
+	NVisFields int `copier:"-" view:"-" json:"-" xml:"-"`
+
+	// HeaderWidths has number of characters in each header, per visfields
+	HeaderWidths []int `copier:"-" view:"-" json:"-" xml:"-"`
 }
 
-func (t *TreeTableView) KiType() *gti.Type {
-	//TODO implement me
-	panic("implement me")
-}
+//go:generate core generate
 
-func (t *TreeTableView) New() ki.Ki {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetStyleFunc(v TableViewStyleFunc) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetSelField(v string) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetSortIdx(v int) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetSortDesc(v bool) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetStruType(v reflect.Type) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetVisFields(v ...reflect.StructField) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetNvisFields(v int) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetHeaderWidths(v ...int) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetTooltip(v string) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetStackTop(v int) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetStripes(v gi.Stripes) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetMinRows(v int) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetViewMu(v *sync.Mutex) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetSliceNpval(v reflect.Value) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetSliceValView(v Value) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetValues(v ...Value) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetSelVal(v any) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetSelIdx(v int) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetSelIdxs(v map[int]struct{}) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetInitSelIdx(v int) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetDraggedIdxs(v ...int) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetViewPath(v string) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetTmpSave(v Value) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetVisRows(v int) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetStartIdx(v int) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetSliceSize(v int) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetConfigIter(v int) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetTmpIdx(v int) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *TreeTableView) SetElVal(v reflect.Value) *TableView {
-	//TODO implement me
-	panic("implement me")
-}
+var _ SliceViewer = (*TreeTableView)(nil)
 
 func (t *TreeTableView) OnInit() {
 	//TODO implement me
@@ -293,8 +109,29 @@ func (t *TreeTableView) CacheVisFields() {
 }
 
 func (t *TreeTableView) ConfigWidget() {
-	//TODO implement me
-	panic("implement me")
+	hSplits := NewHSplits(t)
+	treeFrame := gi.NewFrame(hSplits)  //left
+	tableFrame := gi.NewFrame(hSplits) //right
+	hSplits.SetSplits(.2, .8)
+
+	treeFrame.Style(func(s *styles.Style) {
+		s.Direction = styles.Column
+	})
+
+	treeHeaderFrame := gi.NewFrame(treeFrame) //treeHeader for align table header
+	treeHeaderFrame.Style(func(s *styles.Style) {
+		s.Direction = styles.Row
+	})
+	gi.NewTextField(treeHeaderFrame).SetPlaceholder("filter content")
+	gi.NewButton(treeHeaderFrame).SetIcon("hierarchy")
+	gi.NewButton(treeHeaderFrame).SetIcon("circled_add")
+	gi.NewButton(treeHeaderFrame).SetIcon("trash")
+	gi.NewButton(treeHeaderFrame).SetIcon("star")
+
+	treeView := NewTreeView(treeFrame)
+	treeView.IconOpen = icons.ExpandCircleDown
+	treeView.IconClosed = icons.ExpandCircleRight
+	treeView.IconLeaf = icons.Blank
 }
 
 func (t *TreeTableView) ConfigTableView() {
@@ -442,8 +279,9 @@ func TreeTable(b *gi.Body, nodes []any) {
 			case reflect.Pointer:
 				reflect.Indirect(reflect.ValueOf(field)) //todo
 			case reflect.Slice: //render indent and elem to table row
+				//gi.NewSpace(field) //row 是水平布局全部cell
 			case reflect.Array: //render indent and elem to table row
-
+				//gi.NewSpace(field)
 			}
 		}
 	}

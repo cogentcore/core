@@ -892,6 +892,127 @@ func (t *DateView) SetStackTop(v int) *DateView { t.StackTop = v; return t }
 // SetStripes sets the [DateView.Stripes]
 func (t *DateView) SetStripes(v gi.Stripes) *DateView { t.Stripes = v; return t }
 
+// TreeTableViewType is the [gti.Type] for [TreeTableView]
+var TreeTableViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.TreeTableView", IDName: "tree-table-view", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Embeds: []gti.Field{{Name: "SliceViewBase"}}, Fields: []gti.Field{{Name: "TreeHeaderFrame"}, {Name: "TreeView"}, {Name: "StyleFunc", Doc: "optional styling function"}, {Name: "SelField", Doc: "current selection field -- initially select value in this field"}, {Name: "SortIdx", Doc: "current sort index"}, {Name: "SortDesc", Doc: "whether current sort order is descending"}, {Name: "StruType", Doc: "struct type for each row"}, {Name: "VisFields", Doc: "the visible fields"}, {Name: "NVisFields", Doc: "number of visible fields"}, {Name: "HeaderWidths", Doc: "HeaderWidths has number of characters in each header, per visfields"}}, Instance: &TreeTableView{}})
+
+// NewTreeTableView adds a new [TreeTableView] with the given name to the given parent:
+func NewTreeTableView(par ki.Ki, name ...string) *TreeTableView {
+	return par.NewChild(TreeTableViewType, name...).(*TreeTableView)
+}
+
+// KiType returns the [*gti.Type] of [TreeTableView]
+func (t *TreeTableView) KiType() *gti.Type { return TreeTableViewType }
+
+// New returns a new [*TreeTableView] value
+func (t *TreeTableView) New() ki.Ki { return &TreeTableView{} }
+
+// SetTreeHeaderFrame sets the [TreeTableView.TreeHeaderFrame]
+func (t *TreeTableView) SetTreeHeaderFrame(v *gi.Frame) *TreeTableView {
+	t.TreeHeaderFrame = v
+	return t
+}
+
+// SetTreeView sets the [TreeTableView.TreeView]
+func (t *TreeTableView) SetTreeView(v *TreeView) *TreeTableView { t.TreeView = v; return t }
+
+// SetStyleFunc sets the [TreeTableView.StyleFunc]:
+// optional styling function
+func (t *TreeTableView) SetStyleFunc(v TableViewStyleFunc) *TreeTableView { t.StyleFunc = v; return t }
+
+// SetSelField sets the [TreeTableView.SelField]:
+// current selection field -- initially select value in this field
+func (t *TreeTableView) SetSelField(v string) *TreeTableView { t.SelField = v; return t }
+
+// SetSortIdx sets the [TreeTableView.SortIdx]:
+// current sort index
+func (t *TreeTableView) SetSortIdx(v int) *TreeTableView { t.SortIdx = v; return t }
+
+// SetSortDesc sets the [TreeTableView.SortDesc]:
+// whether current sort order is descending
+func (t *TreeTableView) SetSortDesc(v bool) *TreeTableView { t.SortDesc = v; return t }
+
+// SetStruType sets the [TreeTableView.StruType]:
+// struct type for each row
+func (t *TreeTableView) SetStruType(v reflect.Type) *TreeTableView { t.StruType = v; return t }
+
+// SetVisFields sets the [TreeTableView.VisFields]:
+// the visible fields
+func (t *TreeTableView) SetVisFields(v ...reflect.StructField) *TreeTableView {
+	t.VisFields = v
+	return t
+}
+
+// SetNvisFields sets the [TreeTableView.NVisFields]:
+// number of visible fields
+func (t *TreeTableView) SetNvisFields(v int) *TreeTableView { t.NVisFields = v; return t }
+
+// SetHeaderWidths sets the [TreeTableView.HeaderWidths]:
+// HeaderWidths has number of characters in each header, per visfields
+func (t *TreeTableView) SetHeaderWidths(v ...int) *TreeTableView { t.HeaderWidths = v; return t }
+
+// SetTooltip sets the [TreeTableView.Tooltip]
+func (t *TreeTableView) SetTooltip(v string) *TreeTableView { t.Tooltip = v; return t }
+
+// SetStackTop sets the [TreeTableView.StackTop]
+func (t *TreeTableView) SetStackTop(v int) *TreeTableView { t.StackTop = v; return t }
+
+// SetStripes sets the [TreeTableView.Stripes]
+func (t *TreeTableView) SetStripes(v gi.Stripes) *TreeTableView { t.Stripes = v; return t }
+
+// SetMinRows sets the [TreeTableView.MinRows]
+func (t *TreeTableView) SetMinRows(v int) *TreeTableView { t.MinRows = v; return t }
+
+// SetViewMu sets the [TreeTableView.ViewMu]
+func (t *TreeTableView) SetViewMu(v *sync.Mutex) *TreeTableView { t.ViewMu = v; return t }
+
+// SetSliceNpval sets the [TreeTableView.SliceNPVal]
+func (t *TreeTableView) SetSliceNpval(v reflect.Value) *TreeTableView { t.SliceNPVal = v; return t }
+
+// SetSliceValView sets the [TreeTableView.SliceValView]
+func (t *TreeTableView) SetSliceValView(v Value) *TreeTableView { t.SliceValView = v; return t }
+
+// SetValues sets the [TreeTableView.Values]
+func (t *TreeTableView) SetValues(v ...Value) *TreeTableView { t.Values = v; return t }
+
+// SetSelVal sets the [TreeTableView.SelVal]
+func (t *TreeTableView) SetSelVal(v any) *TreeTableView { t.SelVal = v; return t }
+
+// SetSelIdx sets the [TreeTableView.SelIdx]
+func (t *TreeTableView) SetSelIdx(v int) *TreeTableView { t.SelIdx = v; return t }
+
+// SetSelIdxs sets the [TreeTableView.SelIdxs]
+func (t *TreeTableView) SetSelIdxs(v map[int]struct{}) *TreeTableView { t.SelIdxs = v; return t }
+
+// SetInitSelIdx sets the [TreeTableView.InitSelIdx]
+func (t *TreeTableView) SetInitSelIdx(v int) *TreeTableView { t.InitSelIdx = v; return t }
+
+// SetDraggedIdxs sets the [TreeTableView.DraggedIdxs]
+func (t *TreeTableView) SetDraggedIdxs(v ...int) *TreeTableView { t.DraggedIdxs = v; return t }
+
+// SetViewPath sets the [TreeTableView.ViewPath]
+func (t *TreeTableView) SetViewPath(v string) *TreeTableView { t.ViewPath = v; return t }
+
+// SetTmpSave sets the [TreeTableView.TmpSave]
+func (t *TreeTableView) SetTmpSave(v Value) *TreeTableView { t.TmpSave = v; return t }
+
+// SetVisRows sets the [TreeTableView.VisRows]
+func (t *TreeTableView) SetVisRows(v int) *TreeTableView { t.VisRows = v; return t }
+
+// SetStartIdx sets the [TreeTableView.StartIdx]
+func (t *TreeTableView) SetStartIdx(v int) *TreeTableView { t.StartIdx = v; return t }
+
+// SetSliceSize sets the [TreeTableView.SliceSize]
+func (t *TreeTableView) SetSliceSize(v int) *TreeTableView { t.SliceSize = v; return t }
+
+// SetConfigIter sets the [TreeTableView.ConfigIter]
+func (t *TreeTableView) SetConfigIter(v int) *TreeTableView { t.ConfigIter = v; return t }
+
+// SetTmpIdx sets the [TreeTableView.TmpIdx]
+func (t *TreeTableView) SetTmpIdx(v int) *TreeTableView { t.TmpIdx = v; return t }
+
+// SetElVal sets the [TreeTableView.ElVal]
+func (t *TreeTableView) SetElVal(v reflect.Value) *TreeTableView { t.ElVal = v; return t }
+
 // TreeViewType is the [gti.Type] for [TreeView]
 var TreeViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.TreeView", IDName: "tree-view", Doc: "TreeView provides a graphical representation of a tree tructure\nproviding full navigation and manipulation abilities.\n\nIf the SyncNode field is non-nil, typically via\nSyncRootNode method, then the TreeView mirrors another\nKi tree structure, and tree editing functions apply to\nthe source tree first, and then to the TreeView by sync.\n\nOtherwise, data can be directly encoded in a TreeView\nderived type, to represent any kind of tree structure\nand associated data.\n\nStandard events.Event are sent to any listeners, including\nSelect, Change, and DoubleClick.  The selected nodes\nare in the root SelectedNodes list.", Methods: []gti.Method{{Name: "InsertAfter", Doc: "InsertAfter inserts a new node in the tree\nafter this node, at the same (sibling) level,\nprompting for the type of node to insert.\nIf SyncNode is set, operates on Sync Tree.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "InsertBefore", Doc: "InsertBefore inserts a new node in the tree\nbefore this node, at the same (sibling) level,\nprompting for the type of node to insert\nIf SyncNode is set, operates on Sync Tree.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "AddChildNode", Doc: "AddChildNode adds a new child node to this one in the tree,\nprompting the user for the type of node to add\nIf SyncNode is set, operates on Sync Tree.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "DeleteNode", Doc: "DeleteNode deletes the tree node or sync node corresponding\nto this view node in the sync tree.\nIf SyncNode is set, operates on Sync Tree.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "Duplicate", Doc: "Duplicate duplicates the sync node corresponding to this view node in\nthe tree, and inserts the duplicate after this node (as a new sibling).\nIf SyncNode is set, operates on Sync Tree.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "EditNode", Doc: "EditNode pulls up a StructViewDialog window on the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "InspectNode", Doc: "InspectNode pulls up a new Inspector window on the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "OpenAll", Doc: "OpenAll opens the given node and all of its sub-nodes", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "CloseAll", Doc: "CloseAll closes the given node and all of its sub-nodes.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "Copy", Doc: "Copy copies to goosi.Clipboard, optionally resetting the selection.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"reset"}}, {Name: "Cut", Doc: "Cut copies to goosi.Clipboard and deletes selected items.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "Paste", Doc: "Paste pastes clipboard at given node.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}}, Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "SyncNode", Doc: "If non-nil, the Ki Node that this widget is viewing in the tree (the source)"}, {Name: "Text", Doc: "The text to display for the tree view item label, which automatically\ndefaults to the [ki.Node.Name] of the tree view node. It has no effect\nif [TreeView.SyncNode] is non-nil."}, {Name: "Icon", Doc: "optional icon, displayed to the the left of the text label"}, {Name: "IconOpen", Doc: "icon to use for an open (expanded) branch; defaults to [icons.KeyboardArrowDown]"}, {Name: "IconClosed", Doc: "icon to use for a closed (collapsed) branch; defaults to [icons.KeyboardArrowRight]"}, {Name: "IconLeaf", Doc: "icon to use for a terminal node branch that has no children; defaults to [icons.Blank]"}, {Name: "Indent", Doc: "amount to indent children relative to this node"}, {Name: "OpenDepth", Doc: "depth for nodes be initialized as open (default 4).\nNodes beyond this depth will be initialized as closed."}, {Name: "ViewIdx", Doc: "linear index of this node within the entire tree.\nupdated on full rebuilds and may sometimes be off,\nbut close enough for expected uses"}, {Name: "WidgetSize", Doc: "size of just this node widget.\nour alloc includes all of our children, but we only draw us."}, {Name: "RootView", Doc: "The cached root of the view. It is automatically set and does not need to be\nset by the end user."}, {Name: "SelectedNodes", Doc: "SelectedNodes holds the currently-selected nodes, on the\nRootView node only."}, {Name: "actStateLayer", Doc: "actStateLayer is the actual state layer of the tree view, which\nshould be used when rendering it and its parts (but not its children).\nthe reason that it exists is so that the children of the tree view\n(other tree views) do not inherit its stateful background color, as\nthat does not look good."}}, Instance: &TreeView{}})
 
