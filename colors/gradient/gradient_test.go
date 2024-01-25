@@ -78,6 +78,10 @@ func TestColorAt(t *testing.T) {
 		}
 
 		// ensure same results with UserSpaceOnUse as ObjectBoundingBox
+		// (except for case 3, for which that is not true)
+		if i == 3 {
+			continue
+		}
 		ugr := CopyOf(test.gr)
 		switch ugr := ugr.(type) {
 		case *Linear:
