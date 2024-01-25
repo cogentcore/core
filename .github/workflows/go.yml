@@ -32,5 +32,5 @@ jobs:
     - name: Update coverage report
       uses: ncruces/go-coverage-report@v0
       with:
-        report: true
+        coverage-file: cover.out
         amend: true
