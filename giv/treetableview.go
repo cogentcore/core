@@ -34,7 +34,7 @@ type (
 		StructType() reflect.Type
 		CacheVisFields()
 		ConfigWidget()
-		ConfigTableView()
+		ConfigTreeTableView()
 		ConfigFrame()
 		ConfigHeader()
 		SliceGrid() *SliceViewGrid
@@ -95,30 +95,30 @@ type TreeTableView struct { //gti:add
 
 var _ SliceViewer = (*TreeTableView)(nil)
 
-func (tv *TreeTableView) OnInit() {
-	tv.Frame.OnInit()
-	tv.SliceViewBase.HandleEvents()
-	tv.SetStyles()
-	tv.AddContextMenu(tv.SliceViewBase.ContextMenu)
-	tv.AddContextMenu(tv.ContextMenu)
+func (t *TreeTableView) OnInit() {
+	t.Frame.OnInit()
+	t.SliceViewBase.HandleEvents()
+	t.SetStyles()
+	t.AddContextMenu(t.SliceViewBase.ContextMenu)
+	t.AddContextMenu(t.ContextMenu)
 }
 
-func (tv *TreeTableView) SetStyles() {
-	tv.SortIdx = -1
-	tv.MinRows = 4
-	tv.SetFlag(false, SliceViewSelectMode)
-	tv.SetFlag(true, SliceViewShowIndex)
-	tv.SetFlag(true, SliceViewReadOnlyKeyNav)
+func (t *TreeTableView) SetStyles() {
+	t.SortIdx = -1
+	t.MinRows = 4
+	t.SetFlag(false, SliceViewSelectMode)
+	t.SetFlag(true, SliceViewShowIndex)
+	t.SetFlag(true, SliceViewReadOnlyKeyNav)
 
-	tv.Style(func(s *styles.Style) {
+	t.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.DoubleClickable)
 		s.Direction = styles.Column
 		// absorb horizontal here, vertical in view
 		s.Overflow.X = styles.OverflowAuto
 		s.Grow.Set(1, 1)
 	})
-	tv.OnWidgetAdded(func(w gi.Widget) {
-		switch w.PathFrom(tv) {
+	t.OnWidgetAdded(func(w gi.Widget) {
+		switch w.PathFrom(t) {
 		case "header": // slice header
 			sh := w.(*gi.Frame)
 			gi.ToolbarStyles(sh)
@@ -136,9 +136,9 @@ func (tv *TreeTableView) SetStyles() {
 			sg := w.(*SliceViewGrid)
 			sg.Stripes = gi.RowStripes
 			sg.Style(func(s *styles.Style) {
-				sg.MinRows = tv.MinRows
+				sg.MinRows = t.MinRows
 				s.Display = styles.Grid
-				nWidgPerRow, _ := tv.RowWidgetNs()
+				nWidgPerRow, _ := t.RowWidgetNs()
 				s.Columns = nWidgPerRow
 				s.Grow.Set(1, 1)
 				s.Overflow.Y = styles.OverflowAuto
@@ -148,7 +148,7 @@ func (tv *TreeTableView) SetStyles() {
 				s.Min.Y.Em(6)
 			})
 		}
-		if w.Parent().PathFrom(tv) == "grid" {
+		if w.Parent().PathFrom(t) == "grid" {
 			switch {
 			case strings.HasPrefix(w.Name(), "index-"):
 				w.Style(func(s *styles.Style) {
@@ -176,26 +176,26 @@ func (tv *TreeTableView) SetStyles() {
 					fstr = fstr[:dp]    // field idx is -X.
 					idx := grr.Log1(strconv.Atoi(istr))
 					fli := grr.Log1(strconv.Atoi(fstr))
-					hw := float32(tv.HeaderWidths[fli])
-					if fli == tv.SortIdx {
+					hw := float32(t.HeaderWidths[fli])
+					if fli == t.SortIdx {
 						hw += 6
 					}
 					hv := units.Ch(hw)
 					s.Min.X.Val = max(s.Min.X.Val, hv.Convert(s.Min.X.Un, &s.UnContext).Val)
 					s.Max.X.Val = max(s.Max.X.Val, hv.Convert(s.Max.X.Un, &s.UnContext).Val)
-					si := tv.StartIdx + idx
-					if si < tv.SliceSize {
-						tv.This().(SliceViewer).StyleRow(w, si, fli)
+					si := t.StartIdx + idx
+					if si < t.SliceSize {
+						t.This().(SliceViewer).StyleRow(w, si, fli)
 					}
 				})
 			}
 		}
-		if w.Parent().PathFrom(tv) == "header" {
+		if w.Parent().PathFrom(t) == "header" {
 			w.Style(func(s *styles.Style) {
 				if hdr, ok := w.(*gi.Button); ok {
 					fli := hdr.Prop("field-index").(int)
-					if fli == tv.SortIdx {
-						if tv.SortDesc {
+					if fli == t.SortIdx {
+						if t.SortDesc {
 							hdr.SetIcon(icons.KeyboardArrowDown)
 						} else {
 							hdr.SetIcon(icons.KeyboardArrowUp)
@@ -208,57 +208,57 @@ func (tv *TreeTableView) SetStyles() {
 
 }
 
-func (tv *TreeTableView) SetSlice(sl any) *TreeTableView {
+func (t *TreeTableView) SetSlice(sl any) *TreeTableView {
 	if laser.AnyIsNil(sl) {
-		tv.Slice = nil
-		return tv
+		t.Slice = nil
+		return t
 	}
-	if tv.Slice == sl && tv.Is(SliceViewConfigured) {
-		tv.Update()
-		return tv
+	if t.Slice == sl && t.Is(SliceViewConfigured) {
+		t.Update()
+		return t
 	}
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndLayout(updt)
+	updt := t.UpdateStart()
+	defer t.UpdateEndLayout(updt)
 
-	tv.SetFlag(false, SliceViewConfigured)
-	tv.StartIdx = 0
-	tv.VisRows = tv.MinRows
+	t.SetFlag(false, SliceViewConfigured)
+	t.StartIdx = 0
+	t.VisRows = t.MinRows
 	slpTyp := reflect.TypeOf(sl)
 	if slpTyp.Kind() != reflect.Ptr {
 		slog.Error("TableView requires that you pass a pointer to a slice of struct elements, but type is not a Ptr", "type", slpTyp)
-		return tv
+		return t
 	}
 	if slpTyp.Elem().Kind() != reflect.Slice {
 		slog.Error("TableView requires that you pass a pointer to a slice of struct elements, but ptr doesn't point to a slice", "type", slpTyp.Elem())
-		return tv
+		return t
 	}
-	tv.Slice = sl
-	tv.SliceNPVal = laser.NonPtrValue(reflect.ValueOf(tv.Slice))
-	struTyp := tv.StructType()
+	t.Slice = sl
+	t.SliceNPVal = laser.NonPtrValue(reflect.ValueOf(t.Slice))
+	struTyp := t.StructType()
 	if struTyp.Kind() != reflect.Struct {
 		slog.Error("TableView requires that you pass a slice of struct elements, but type is not a Struct", "type", struTyp.String())
-		return tv
+		return t
 	}
-	tv.ElVal = laser.OnePtrValue(laser.SliceElValue(sl))
-	tv.CacheVisFields()
-	if !tv.IsReadOnly() {
-		tv.SelIdx = -1
+	t.ElVal = laser.OnePtrValue(laser.SliceElValue(sl))
+	t.CacheVisFields()
+	if !t.IsReadOnly() {
+		t.SelIdx = -1
 	}
-	tv.ResetSelectedIdxs()
-	tv.SetFlag(false, SliceViewSelectMode)
-	tv.ConfigIter = 0
-	tv.Update()
-	return tv
+	t.ResetSelectedIdxs()
+	t.SetFlag(false, SliceViewSelectMode)
+	t.ConfigIter = 0
+	t.Update()
+	return t
 }
 
-func (tv *TreeTableView) StructType() reflect.Type {
-	tv.StruType = laser.NonPtrType(laser.SliceElType(tv.Slice))
-	return tv.StruType
+func (t *TreeTableView) StructType() reflect.Type {
+	t.StruType = laser.NonPtrType(laser.SliceElType(t.Slice))
+	return t.StruType
 }
 
-func (tv *TreeTableView) CacheVisFields() {
-	styp := tv.StructType()
-	tv.VisFields = make([]reflect.StructField, 0)
+func (t *TreeTableView) CacheVisFields() {
+	styp := t.StructType()
+	t.VisFields = make([]reflect.StructField, 0)
 	laser.FlatFieldsTypeFuncIf(styp,
 		func(typ reflect.Type, fld reflect.StructField) bool {
 			if !fld.IsExported() {
@@ -268,9 +268,9 @@ func (tv *TreeTableView) CacheVisFields() {
 			if tvtag != "" {
 				if tvtag == "-" {
 					return false
-				} else if tvtag == "-select" && tv.IsReadOnly() {
+				} else if tvtag == "-select" && t.IsReadOnly() {
 					return false
-				} else if tvtag == "-edit" && !tv.IsReadOnly() {
+				} else if tvtag == "-edit" && !t.IsReadOnly() {
 					return false
 				}
 			}
@@ -286,9 +286,9 @@ func (tv *TreeTableView) CacheVisFields() {
 			if tvtag != "" {
 				if tvtag == "-" {
 					add = false
-				} else if tvtag == "-select" && tv.IsReadOnly() {
+				} else if tvtag == "-select" && t.IsReadOnly() {
 					add = false
-				} else if tvtag == "-edit" && !tv.IsReadOnly() {
+				} else if tvtag == "-edit" && !t.IsReadOnly() {
 					add = false
 				}
 			}
@@ -300,34 +300,34 @@ func (tv *TreeTableView) CacheVisFields() {
 				if typ != styp {
 					rfld, has := styp.FieldByName(fld.Name)
 					if has {
-						tv.VisFields = append(tv.VisFields, rfld)
+						t.VisFields = append(t.VisFields, rfld)
 					} else {
 						fmt.Printf("TableView: Field name: %v is ambiguous from base struct type: %v, cannot be used in view!\n", fld.Name, styp.String())
 					}
 				} else {
-					tv.VisFields = append(tv.VisFields, fld)
+					t.VisFields = append(t.VisFields, fld)
 				}
 			}
 			return true
 		})
-	tv.NVisFields = len(tv.VisFields)
+	t.NVisFields = len(t.VisFields)
 }
 
-func (tv *TreeTableView) ConfigWidget() { tv.ConfigTableView() }
-func (tv *TreeTableView) ConfigTableView() {
-	if tv.Is(SliceViewConfigured) {
-		tv.This().(SliceViewer).UpdateWidgets()
+func (t *TreeTableView) ConfigWidget() { t.ConfigTreeTableView() }
+func (t *TreeTableView) ConfigTreeTableView() {
+	if t.Is(SliceViewConfigured) {
+		t.This().(SliceViewer).UpdateWidgets()
 		return
 	}
-	updt := tv.UpdateStart()
-	tv.SortSlice()
-	tv.ConfigFrame()
-	tv.This().(SliceViewer).ConfigRows()
-	tv.This().(SliceViewer).UpdateWidgets()
-	tv.ApplyStyleTree()
-	tv.UpdateEndLayout(updt)
+	updt := t.UpdateStart()
+	t.SortSlice()
+	t.ConfigFrame()
+	t.This().(SliceViewer).ConfigRows()
+	t.This().(SliceViewer).UpdateWidgets()
+	t.ApplyStyleTree()
+	t.UpdateEndLayout(updt)
 
-	hSplits := NewHSplits(tv)         //todo
+	hSplits := NewHSplits(t)          //todo
 	treeFrame := gi.NewFrame(hSplits) //left
 	//tableFrame := gi.NewFrame(hSplits) //right
 	hSplits.SetSplits(.2, .8)
@@ -369,41 +369,41 @@ func newSplits(parent ki.Ki, isHorizontal bool) *gi.Splits { // Horizontal and v
 	return splits
 }
 
-func (tv *TreeTableView) ConfigFrame() {
-	if tv.HasChildren() {
+func (t *TreeTableView) ConfigFrame() {
+	if t.HasChildren() {
 		return
 	}
-	tv.SetFlag(true, SliceViewConfigured)
-	gi.NewFrame(tv, "header")
-	NewSliceViewGrid(tv, "grid")
-	tv.ConfigHeader()
+	t.SetFlag(true, SliceViewConfigured)
+	gi.NewFrame(t, "header")
+	NewSliceViewGrid(t, "grid")
+	t.ConfigHeader()
 }
 
-func (tv *TreeTableView) ConfigHeader() {
-	sgh := tv.SliceHeader()
-	if sgh.HasChildren() || tv.NVisFields == 0 {
+func (t *TreeTableView) ConfigHeader() {
+	sgh := t.SliceHeader()
+	if sgh.HasChildren() || t.NVisFields == 0 {
 		return
 	}
 	hcfg := ki.Config{}
-	if tv.Is(SliceViewShowIndex) {
+	if t.Is(SliceViewShowIndex) {
 		hcfg.Add(gi.LabelType, "head-idx")
 	}
-	tv.HeaderWidths = make([]int, tv.NVisFields)
-	for fli := 0; fli < tv.NVisFields; fli++ {
-		fld := tv.VisFields[fli]
+	t.HeaderWidths = make([]int, t.NVisFields)
+	for fli := 0; fli < t.NVisFields; fli++ {
+		fld := t.VisFields[fli]
 		labnm := "head-" + fld.Name
 		hcfg.Add(gi.ButtonType, labnm)
 	}
-	if !tv.IsReadOnly() {
+	if !t.IsReadOnly() {
 		hcfg.Add(gi.LabelType, "head-add")
 		hcfg.Add(gi.LabelType, "head-del")
 	}
 	sgh.ConfigChildren(hcfg) // headers SHOULD be unique, but with labels..
-	_, idxOff := tv.RowWidgetNs()
-	nfld := tv.NVisFields
+	_, idxOff := t.RowWidgetNs()
+	nfld := t.NVisFields
 	for fli := 0; fli < nfld; fli++ {
 		fli := fli
-		field := tv.VisFields[fli]
+		field := t.VisFields[fli]
 		hdr := sgh.Child(idxOff + fli).(*gi.Button)
 		hdr.SetType(gi.ButtonMenu)
 		htxt := ""
@@ -413,33 +413,33 @@ func (tv *TreeTableView) ConfigHeader() {
 			htxt = sentence.Case(field.Name)
 		}
 		hdr.SetText(htxt)
-		tv.HeaderWidths[fli] = len(htxt)
+		t.HeaderWidths[fli] = len(htxt)
 		hdr.SetProp("field-index", fli)
-		if fli == tv.SortIdx {
-			if tv.SortDesc {
+		if fli == t.SortIdx {
+			if t.SortDesc {
 				hdr.SetIcon(icons.KeyboardArrowDown)
 			} else {
 				hdr.SetIcon(icons.KeyboardArrowUp)
 			}
 		}
 		hdr.Tooltip = hdr.Text + " (tap to sort by)"
-		doc, ok := gti.GetDoc(reflect.Value{}, tv.ElVal, &field, hdr.Text)
+		doc, ok := gti.GetDoc(reflect.Value{}, t.ElVal, &field, hdr.Text)
 		if ok && doc != "" {
 			hdr.Tooltip += ": " + doc
 		}
 		hdr.OnClick(func(e events.Event) {
-			tv.SortSliceAction(fli)
+			t.SortSliceAction(fli)
 		})
 	}
-	if !tv.IsReadOnly() {
-		cidx := tv.NVisFields + idxOff
-		if !tv.Is(SliceViewNoAdd) {
+	if !t.IsReadOnly() {
+		cidx := t.NVisFields + idxOff
+		if !t.Is(SliceViewNoAdd) {
 			lbl := sgh.Child(cidx).(*gi.Label)
 			lbl.Text = "+"
 			lbl.Tooltip = "insert row"
 			cidx++
 		}
-		if !tv.Is(SliceViewNoDelete) {
+		if !t.Is(SliceViewNoDelete) {
 			lbl := sgh.Child(cidx).(*gi.Label)
 			lbl.Text = "-"
 			lbl.Tooltip = "delete row"
@@ -447,67 +447,67 @@ func (tv *TreeTableView) ConfigHeader() {
 	}
 }
 
-func (tv *TreeTableView) SliceGrid() *SliceViewGrid { return tv.Child(1).(*SliceViewGrid) }
+func (t *TreeTableView) SliceGrid() *SliceViewGrid { return t.Child(1).(*SliceViewGrid) }
 
-func (tv *TreeTableView) SliceHeader() *gi.Frame { return tv.Child(0).(*gi.Frame) }
+func (t *TreeTableView) SliceHeader() *gi.Frame { return t.Child(0).(*gi.Frame) }
 
-func (tv *TreeTableView) RowWidgetNs() (nWidgPerRow int, idxOff int) {
-	nWidgPerRow = 1 + tv.NVisFields
-	if !tv.IsReadOnly() {
-		if !tv.Is(SliceViewNoAdd) {
+func (t *TreeTableView) RowWidgetNs() (nWidgPerRow int, idxOff int) {
+	nWidgPerRow = 1 + t.NVisFields
+	if !t.IsReadOnly() {
+		if !t.Is(SliceViewNoAdd) {
 			nWidgPerRow += 1
 		}
-		if !tv.Is(SliceViewNoDelete) {
+		if !t.Is(SliceViewNoDelete) {
 			nWidgPerRow += 1
 		}
 	}
 	idxOff = 1
-	if !tv.Is(SliceViewShowIndex) {
+	if !t.Is(SliceViewShowIndex) {
 		nWidgPerRow -= 1
 		idxOff = 0
 	}
 	return
 }
 
-func (tv *TreeTableView) ConfigRows() {
-	sg := tv.This().(SliceViewer).SliceGrid()
+func (t *TreeTableView) ConfigRows() {
+	sg := t.This().(SliceViewer).SliceGrid()
 	if sg == nil {
 		return
 	}
-	tv.SetFlag(true, SliceViewConfigured)
+	t.SetFlag(true, SliceViewConfigured)
 	sg.SetFlag(true, gi.LayoutNoKeys)
 
-	tv.ViewMuLock()
-	defer tv.ViewMuUnlock()
+	t.ViewMuLock()
+	defer t.ViewMuUnlock()
 
 	sg.DeleteChildren(ki.DestroyKids)
-	tv.Values = nil
+	t.Values = nil
 
-	tv.This().(SliceViewer).UpdtSliceSize()
+	t.This().(SliceViewer).UpdtSliceSize()
 
-	if tv.IsNil() {
+	if t.IsNil() {
 		return
 	}
 
-	nWidgPerRow, idxOff := tv.RowWidgetNs()
-	nWidg := nWidgPerRow * tv.VisRows
+	nWidgPerRow, idxOff := t.RowWidgetNs()
+	nWidg := nWidgPerRow * t.VisRows
 	sg.Styles.Columns = nWidgPerRow
 
-	tv.Values = make([]Value, tv.NVisFields*tv.VisRows)
+	t.Values = make([]Value, t.NVisFields*t.VisRows)
 	sg.Kids = make(ki.Slice, nWidg)
 
-	for i := 0; i < tv.VisRows; i++ {
+	for i := 0; i < t.VisRows; i++ {
 		i := i
 		si := i
 		ridx := i * nWidgPerRow
 		var val reflect.Value
-		if si < tv.SliceSize {
-			val = laser.OnePtrUnderlyingValue(tv.SliceNPVal.Index(si)) // deal with pointer lists
+		if si < t.SliceSize {
+			val = laser.OnePtrUnderlyingValue(t.SliceNPVal.Index(si)) // deal with pointer lists
 		} else {
-			val = tv.ElVal
+			val = t.ElVal
 		}
 		if val.IsZero() {
-			val = tv.ElVal
+			val = t.ElVal
 		}
 		stru := val.Interface()
 
@@ -515,31 +515,31 @@ func (tv *TreeTableView) ConfigRows() {
 		itxt := strconv.Itoa(i)
 		sitxt := strconv.Itoa(si)
 		labnm := "index-" + itxt
-		if tv.Is(SliceViewShowIndex) {
+		if t.Is(SliceViewShowIndex) {
 			idxlab = &gi.Label{}
 			sg.SetChild(idxlab, ridx, labnm)
 			idxlab.OnSelect(func(e events.Event) {
 				e.SetHandled()
-				tv.UpdateSelectRow(i)
+				t.UpdateSelectRow(i)
 			})
 			idxlab.SetText(sitxt)
-			idxlab.ContextMenus = tv.ContextMenus
+			idxlab.ContextMenus = t.ContextMenus
 		}
 
-		vpath := tv.ViewPath + "[" + sitxt + "]"
-		for fli := 0; fli < tv.NVisFields; fli++ {
+		vpath := t.ViewPath + "[" + sitxt + "]"
+		for fli := 0; fli < t.NVisFields; fli++ {
 			fli := fli
-			field := tv.VisFields[fli]
+			field := t.VisFields[fli]
 			fval := val.Elem().FieldByIndex(field.Index)
-			vvi := i*tv.NVisFields + fli
+			vvi := i*t.NVisFields + fli
 			tags := ""
 			if fval.Kind() == reflect.Slice || fval.Kind() == reflect.Map {
 				tags = `view:"no-inline"`
 			}
 			vv := ToValue(fval.Interface(), tags)
-			tv.Values[vvi] = vv
-			vv.SetStructValue(fval.Addr(), stru, &field, tv.TmpSave, vpath)
-			vv.SetReadOnly(tv.IsReadOnly())
+			t.Values[vvi] = vv
+			vv.SetStructValue(fval.Addr(), stru, &field, t.TmpSave, vpath)
+			vv.SetReadOnly(t.IsReadOnly())
 
 			vtyp := vv.WidgetType()
 			valnm := fmt.Sprintf("value-%v.%v", fli, itxt)
@@ -550,135 +550,135 @@ func (tv *TreeTableView) ConfigRows() {
 			wb := w.AsWidget()
 			wb.OnSelect(func(e events.Event) {
 				e.SetHandled()
-				tv.UpdateSelectRow(i)
+				t.UpdateSelectRow(i)
 			})
-			wb.ContextMenus = tv.ContextMenus
+			wb.ContextMenus = t.ContextMenus
 
-			if tv.IsReadOnly() {
+			if t.IsReadOnly() {
 				w.AsWidget().SetReadOnly(true)
 			} else {
 				vvb := vv.AsValueBase()
 				vvb.OnChange(func(e events.Event) {
-					tv.SetChanged()
+					t.SetChanged()
 				})
 			}
 		}
 
-		if !tv.IsReadOnly() {
-			cidx := ridx + tv.NVisFields + idxOff
-			if !tv.Is(SliceViewNoAdd) {
+		if !t.IsReadOnly() {
+			cidx := ridx + t.NVisFields + idxOff
+			if !t.Is(SliceViewNoAdd) {
 				addnm := fmt.Sprintf("add-%v", itxt)
 				addact := gi.Button{}
 				sg.SetChild(&addact, cidx, addnm)
 				addact.SetType(gi.ButtonAction).SetIcon(icons.Add).
 					SetTooltip("insert a new element at this index").OnClick(func(e events.Event) {
-					tv.SliceNewAtRow(i + 1)
+					t.SliceNewAtRow(i + 1)
 				})
 				cidx++
 			}
-			if !tv.Is(SliceViewNoDelete) {
+			if !t.Is(SliceViewNoDelete) {
 				delnm := fmt.Sprintf("del-%v", itxt)
 				delact := gi.Button{}
 				sg.SetChild(&delact, cidx, delnm)
 				delact.SetType(gi.ButtonAction).SetIcon(icons.Delete).
 					SetTooltip("delete this element").OnClick(func(e events.Event) {
-					tv.SliceDeleteAtRow(i)
+					t.SliceDeleteAtRow(i)
 				})
 				cidx++
 			}
 		}
 	}
-	tv.ConfigTree()
-	tv.ApplyStyleTree()
+	t.ConfigTree()
+	t.ApplyStyleTree()
 }
 
-func (tv *TreeTableView) UpdateWidgets() {
-	sg := tv.This().(SliceViewer).SliceGrid()
-	if sg == nil || tv.VisRows == 0 || sg.VisRows == 0 || !sg.HasChildren() {
+func (t *TreeTableView) UpdateWidgets() {
+	sg := t.This().(SliceViewer).SliceGrid()
+	if sg == nil || t.VisRows == 0 || sg.VisRows == 0 || !sg.HasChildren() {
 		return
 	}
-	// sc := tv.Sc
+	// sc := t.Sc
 
 	updt := sg.UpdateStart()
 	defer sg.UpdateEndRender(updt)
 
-	tv.ViewMuLock()
-	defer tv.ViewMuUnlock()
+	t.ViewMuLock()
+	defer t.ViewMuUnlock()
 
-	tv.This().(SliceViewer).UpdtSliceSize()
+	t.This().(SliceViewer).UpdtSliceSize()
 
-	nWidgPerRow, idxOff := tv.RowWidgetNs()
+	nWidgPerRow, idxOff := t.RowWidgetNs()
 
-	tv.UpdateStartIdx()
-	for i := 0; i < tv.VisRows; i++ {
+	t.UpdateStartIdx()
+	for i := 0; i < t.VisRows; i++ {
 		i := i
 		ridx := i * nWidgPerRow
-		si := tv.StartIdx + i // slice idx
-		invis := si >= tv.SliceSize
+		si := t.StartIdx + i // slice idx
+		invis := si >= t.SliceSize
 
 		var idxlab *gi.Label
-		if tv.Is(SliceViewShowIndex) {
+		if t.Is(SliceViewShowIndex) {
 			idxlab = sg.Kids[ridx].(*gi.Label)
 			idxlab.SetTextUpdate(strconv.Itoa(si))
 			idxlab.SetState(invis, states.Invisible)
 		}
 
 		sitxt := strconv.Itoa(si)
-		vpath := tv.ViewPath + "[" + sitxt + "]"
-		if si < tv.SliceSize {
-			if lblr, ok := tv.Slice.(gi.SliceLabeler); ok {
+		vpath := t.ViewPath + "[" + sitxt + "]"
+		if si < t.SliceSize {
+			if lblr, ok := t.Slice.(gi.SliceLabeler); ok {
 				slbl := lblr.ElemLabel(si)
 				if slbl != "" {
-					vpath = tv.ViewPath + "[" + slbl + "]"
+					vpath = t.ViewPath + "[" + slbl + "]"
 				}
 			}
 		}
-		for fli := 0; fli < tv.NVisFields; fli++ {
+		for fli := 0; fli < t.NVisFields; fli++ {
 			fli := fli
-			field := tv.VisFields[fli]
+			field := t.VisFields[fli]
 			cidx := ridx + idxOff + fli
 			w := sg.Kids[cidx].(gi.Widget)
 			wb := w.AsWidget()
 
 			var val reflect.Value
-			if si < tv.SliceSize {
-				val = laser.OnePtrUnderlyingValue(tv.SliceNPVal.Index(si)) // deal with pointer lists
+			if si < t.SliceSize {
+				val = laser.OnePtrUnderlyingValue(t.SliceNPVal.Index(si)) // deal with pointer lists
 				if val.IsZero() {
-					val = tv.ElVal
+					val = t.ElVal
 				}
 			} else {
-				val = tv.ElVal
+				val = t.ElVal
 			}
 			stru := val.Interface()
 			fval := val.Elem().FieldByIndex(field.Index)
-			vvi := i*tv.NVisFields + fli
-			vv := tv.Values[vvi]
-			vv.SetStructValue(fval.Addr(), stru, &field, tv.TmpSave, vpath)
-			vv.SetReadOnly(tv.IsReadOnly())
+			vvi := i*t.NVisFields + fli
+			vv := t.Values[vvi]
+			vv.SetStructValue(fval.Addr(), stru, &field, t.TmpSave, vpath)
+			vv.SetReadOnly(t.IsReadOnly())
 			vv.UpdateWidget()
 
 			w.SetState(invis, states.Invisible)
 			if !invis {
-				issel := tv.IdxIsSelected(si)
-				if tv.IsReadOnly() {
+				issel := t.IdxIsSelected(si)
+				if t.IsReadOnly() {
 					wb.SetReadOnly(true)
 				}
 				wb.SetSelected(issel)
 			} else {
 				wb.SetSelected(false)
-				if tv.Is(SliceViewShowIndex) {
+				if t.Is(SliceViewShowIndex) {
 					idxlab.SetSelected(false)
 				}
 			}
 		}
-		if !tv.IsReadOnly() {
-			cidx := ridx + tv.NVisFields + idxOff
-			if !tv.Is(SliceViewNoAdd) {
+		if !t.IsReadOnly() {
+			cidx := ridx + t.NVisFields + idxOff
+			if !t.Is(SliceViewNoAdd) {
 				addact := sg.Kids[cidx].(*gi.Button)
 				addact.SetState(invis, states.Invisible)
 				cidx++
 			}
-			if !tv.Is(SliceViewNoDelete) {
+			if !t.Is(SliceViewNoDelete) {
 				delact := sg.Kids[cidx].(*gi.Button)
 				delact.SetState(invis, states.Invisible)
 				cidx++
@@ -686,98 +686,98 @@ func (tv *TreeTableView) UpdateWidgets() {
 		}
 	}
 
-	if tv.SelField != "" && tv.SelVal != nil {
-		tv.SelIdx, _ = StructSliceIdxByValue(tv.Slice, tv.SelField, tv.SelVal)
-		tv.SelField = ""
-		tv.SelVal = nil
-		tv.ScrollToIdx(tv.SelIdx)
-		// tv.SetFocusEvent() // todo:
-	} else if tv.InitSelIdx >= 0 {
-		tv.SelIdx = tv.InitSelIdx
-		tv.InitSelIdx = -1
-		tv.ScrollToIdx(tv.SelIdx)
-		// tv.SetFocusEvent()
+	if t.SelField != "" && t.SelVal != nil {
+		t.SelIdx, _ = StructSliceIdxByValue(t.Slice, t.SelField, t.SelVal)
+		t.SelField = ""
+		t.SelVal = nil
+		t.ScrollToIdx(t.SelIdx)
+		// t.SetFocusEvent() // todo:
+	} else if t.InitSelIdx >= 0 {
+		t.SelIdx = t.InitSelIdx
+		t.InitSelIdx = -1
+		t.ScrollToIdx(t.SelIdx)
+		// t.SetFocusEvent()
 	}
 
-	if tv.IsReadOnly() && tv.SelIdx >= 0 {
-		tv.SelectIdx(tv.SelIdx)
-	}
-}
-
-func (tv *TreeTableView) StyleRow(w gi.Widget, idx, fidx int) {
-	if tv.StyleFunc != nil {
-		tv.StyleFunc(w, &w.AsWidget().Styles, idx, fidx)
+	if t.IsReadOnly() && t.SelIdx >= 0 {
+		t.SelectIdx(t.SelIdx)
 	}
 }
 
-func (tv *TreeTableView) SliceNewAt(idx int) {
-	tv.ViewMuLock()
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndLayout(updt)
+func (t *TreeTableView) StyleRow(w gi.Widget, idx, fidx int) {
+	if t.StyleFunc != nil {
+		t.StyleFunc(w, &w.AsWidget().Styles, idx, fidx)
+	}
+}
 
-	tv.SliceNewAtSel(idx)
-	laser.SliceNewAt(tv.Slice, idx)
+func (t *TreeTableView) SliceNewAt(idx int) {
+	t.ViewMuLock()
+	updt := t.UpdateStart()
+	defer t.UpdateEndLayout(updt)
+
+	t.SliceNewAtSel(idx)
+	laser.SliceNewAt(t.Slice, idx)
 	if idx < 0 {
-		idx = tv.SliceSize
+		idx = t.SliceSize
 	}
 
-	tv.This().(SliceViewer).UpdtSliceSize()
-	if tv.TmpSave != nil {
-		tv.TmpSave.SaveTmp()
+	t.This().(SliceViewer).UpdtSliceSize()
+	if t.TmpSave != nil {
+		t.TmpSave.SaveTmp()
 	}
-	tv.ViewMuUnlock()
-	tv.SetChanged()
-	tv.This().(SliceViewer).UpdateWidgets()
+	t.ViewMuUnlock()
+	t.SetChanged()
+	t.This().(SliceViewer).UpdateWidgets()
 }
 
-func (tv *TreeTableView) SliceDeleteAt(idx int) {
-	if idx < 0 || idx >= tv.SliceSize {
+func (t *TreeTableView) SliceDeleteAt(idx int) {
+	if idx < 0 || idx >= t.SliceSize {
 		return
 	}
-	tv.ViewMuLock()
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndLayout(updt)
+	t.ViewMuLock()
+	updt := t.UpdateStart()
+	defer t.UpdateEndLayout(updt)
 
-	tv.SliceDeleteAtSel(idx)
+	t.SliceDeleteAtSel(idx)
 
-	laser.SliceDeleteAt(tv.Slice, idx)
+	laser.SliceDeleteAt(t.Slice, idx)
 
-	tv.This().(SliceViewer).UpdtSliceSize()
+	t.This().(SliceViewer).UpdtSliceSize()
 
-	if tv.TmpSave != nil {
-		tv.TmpSave.SaveTmp()
+	if t.TmpSave != nil {
+		t.TmpSave.SaveTmp()
 	}
-	tv.ViewMuUnlock()
-	tv.SetChanged()
-	tv.This().(SliceViewer).UpdateWidgets()
+	t.ViewMuUnlock()
+	t.SetChanged()
+	t.This().(SliceViewer).UpdateWidgets()
 }
 
-func (tv *TreeTableView) SortSlice() {
-	if tv.SortIdx < 0 || tv.SortIdx >= len(tv.VisFields) {
+func (t *TreeTableView) SortSlice() {
+	if t.SortIdx < 0 || t.SortIdx >= len(t.VisFields) {
 		return
 	}
-	rawIdx := tv.VisFields[tv.SortIdx].Index
-	laser.StructSliceSort(tv.Slice, rawIdx, !tv.SortDesc)
+	rawIdx := t.VisFields[t.SortIdx].Index
+	laser.StructSliceSort(t.Slice, rawIdx, !t.SortDesc)
 }
 
-func (tv *TreeTableView) SortSliceAction(fldIdx int) {
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndLayout(updt)
+func (t *TreeTableView) SortSliceAction(fldIdx int) {
+	updt := t.UpdateStart()
+	defer t.UpdateEndLayout(updt)
 
-	sgh := tv.SliceHeader()
-	_, idxOff := tv.RowWidgetNs()
+	sgh := t.SliceHeader()
+	_, idxOff := t.RowWidgetNs()
 
 	ascending := true
 
-	for fli := 0; fli < tv.NVisFields; fli++ {
+	for fli := 0; fli < t.NVisFields; fli++ {
 		hdr := sgh.Child(idxOff + fli).(*gi.Button)
 		hdr.SetType(gi.ButtonAction)
 		if fli == fldIdx {
-			if tv.SortIdx == fli {
-				tv.SortDesc = !tv.SortDesc
-				ascending = !tv.SortDesc
+			if t.SortIdx == fli {
+				t.SortDesc = !t.SortDesc
+				ascending = !t.SortDesc
 			} else {
-				tv.SortDesc = false
+				t.SortDesc = false
 			}
 			if ascending {
 				hdr.SetIcon(icons.KeyboardArrowUp)
@@ -789,16 +789,16 @@ func (tv *TreeTableView) SortSliceAction(fldIdx int) {
 		}
 	}
 
-	tv.SortIdx = fldIdx
-	tv.SortSlice()
+	t.SortIdx = fldIdx
+	t.SortSlice()
 	sgh.Update() // requires full update due to sort button icon
-	tv.UpdateWidgets()
+	t.UpdateWidgets()
 }
 
-func (tv *TreeTableView) SortFieldName() string {
-	if tv.SortIdx >= 0 && tv.SortIdx < tv.NVisFields {
-		nm := tv.VisFields[tv.SortIdx].Name
-		if tv.SortDesc {
+func (t *TreeTableView) SortFieldName() string {
+	if t.SortIdx >= 0 && t.SortIdx < t.NVisFields {
+		nm := t.VisFields[t.SortIdx].Name
+		if t.SortDesc {
 			nm += ":down"
 		} else {
 			nm += ":up"
@@ -808,44 +808,44 @@ func (tv *TreeTableView) SortFieldName() string {
 	return ""
 }
 
-func (tv *TreeTableView) SetSortFieldName(nm string) {
+func (t *TreeTableView) SetSortFieldName(nm string) {
 	if nm == "" {
 		return
 	}
 	spnm := strings.Split(nm, ":")
 	got := false
-	for fli := 0; fli < tv.NVisFields; fli++ {
-		fld := tv.VisFields[fli]
+	for fli := 0; fli < t.NVisFields; fli++ {
+		fld := t.VisFields[fli]
 		if fld.Name == spnm[0] {
 			got = true
 			// fmt.Println("sorting on:", fld.Name, fli, "from:", nm)
-			tv.SortIdx = fli
+			t.SortIdx = fli
 		}
 	}
 	if len(spnm) == 2 {
 		if spnm[1] == "down" {
-			tv.SortDesc = true
+			t.SortDesc = true
 		} else {
-			tv.SortDesc = false
+			t.SortDesc = false
 		}
 	}
 	if got {
-		tv.SortSlice()
+		t.SortSlice()
 	}
 }
 
-func (tv *TreeTableView) RowFirstVisWidget(row int) (*gi.WidgetBase, bool) {
-	if !tv.IsRowInBounds(row) {
+func (t *TreeTableView) RowFirstVisWidget(row int) (*gi.WidgetBase, bool) {
+	if !t.IsRowInBounds(row) {
 		return nil, false
 	}
-	nWidgPerRow, idxOff := tv.RowWidgetNs()
-	sg := tv.SliceGrid()
+	nWidgPerRow, idxOff := t.RowWidgetNs()
+	sg := t.SliceGrid()
 	w := sg.Kids[row*nWidgPerRow].(gi.Widget).AsWidget()
 	if w.Geom.TotalBBox != (image.Rectangle{}) {
 		return w, true
 	}
 	ridx := nWidgPerRow * row
-	for fli := 0; fli < tv.NVisFields; fli++ {
+	for fli := 0; fli < t.NVisFields; fli++ {
 		w := sg.Child(ridx + idxOff + fli).(gi.Widget).AsWidget()
 		if w.Geom.TotalBBox != (image.Rectangle{}) {
 			return w, true
@@ -854,23 +854,23 @@ func (tv *TreeTableView) RowFirstVisWidget(row int) (*gi.WidgetBase, bool) {
 	return nil, false
 }
 
-func (tv *TreeTableView) RowGrabFocus(row int) *gi.WidgetBase {
-	if !tv.IsRowInBounds(row) || tv.Is(SliceViewInFocusGrab) { // range check
+func (t *TreeTableView) RowGrabFocus(row int) *gi.WidgetBase {
+	if !t.IsRowInBounds(row) || t.Is(SliceViewInFocusGrab) { // range check
 		return nil
 	}
-	nWidgPerRow, idxOff := tv.RowWidgetNs()
+	nWidgPerRow, idxOff := t.RowWidgetNs()
 	ridx := nWidgPerRow * row
-	sg := tv.SliceGrid()
+	sg := t.SliceGrid()
 	// first check if we already have focus
-	for fli := 0; fli < tv.NVisFields; fli++ {
+	for fli := 0; fli < t.NVisFields; fli++ {
 		w := sg.Child(ridx + idxOff + fli).(gi.Widget).AsWidget()
 		if w.StateIs(states.Focused) || w.ContainsFocus() {
 			return w
 		}
 	}
-	tv.SetFlag(true, SliceViewInFocusGrab)
-	defer func() { tv.SetFlag(false, SliceViewInFocusGrab) }()
-	for fli := 0; fli < tv.NVisFields; fli++ {
+	t.SetFlag(true, SliceViewInFocusGrab)
+	defer func() { t.SetFlag(false, SliceViewInFocusGrab) }()
+	for fli := 0; fli < t.NVisFields; fli++ {
 		w := sg.Child(ridx + idxOff + fli).(gi.Widget).AsWidget()
 		if w.CanFocus() {
 			w.SetFocusEvent()
@@ -880,24 +880,24 @@ func (tv *TreeTableView) RowGrabFocus(row int) *gi.WidgetBase {
 	return nil
 }
 
-func (tv *TreeTableView) SelectRowWidgets(row int, sel bool) {
+func (t *TreeTableView) SelectRowWidgets(row int, sel bool) {
 	if row < 0 {
 		return
 	}
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndRender(updt)
+	updt := t.UpdateStart()
+	defer t.UpdateEndRender(updt)
 
-	sg := tv.SliceGrid()
-	nWidgPerRow, idxOff := tv.RowWidgetNs()
+	sg := t.SliceGrid()
+	nWidgPerRow, idxOff := t.RowWidgetNs()
 	ridx := row * nWidgPerRow
-	for fli := 0; fli < tv.NVisFields; fli++ {
+	for fli := 0; fli < t.NVisFields; fli++ {
 		seldx := ridx + idxOff + fli
 		if sg.Kids.IsValidIndex(seldx) == nil {
 			w := sg.Child(seldx).(gi.Widget).AsWidget()
 			w.SetSelected(sel)
 		}
 	}
-	if tv.Is(SliceViewShowIndex) {
+	if t.Is(SliceViewShowIndex) {
 		if sg.Kids.IsValidIndex(ridx) == nil {
 			w := sg.Child(ridx).(gi.Widget).AsWidget()
 			w.SetSelected(sel)
@@ -905,14 +905,14 @@ func (tv *TreeTableView) SelectRowWidgets(row int, sel bool) {
 	}
 }
 
-func (tv *TreeTableView) SelectFieldVal(fld, val string) bool {
-	tv.SelField = fld
-	tv.SelVal = val
-	if tv.SelField != "" && tv.SelVal != nil {
-		idx, _ := StructSliceIdxByValue(tv.Slice, tv.SelField, tv.SelVal)
+func (t *TreeTableView) SelectFieldVal(fld, val string) bool {
+	t.SelField = fld
+	t.SelVal = val
+	if t.SelField != "" && t.SelVal != nil {
+		idx, _ := StructSliceIdxByValue(t.Slice, t.SelField, t.SelVal)
 		if idx >= 0 {
-			tv.ScrollToIdx(idx)
-			tv.UpdateSelectIdx(idx, true)
+			t.ScrollToIdx(idx)
+			t.UpdateSelectIdx(idx, true)
 			return true
 		}
 	}
@@ -943,8 +943,8 @@ func (tv *TreeTableView) SelectFieldVal(fld, val string) bool {
 //	return -1, nil
 //}
 
-func (tv *TreeTableView) EditIdx(idx int) {
-	val := laser.OnePtrUnderlyingValue(tv.SliceNPVal.Index(idx))
+func (t *TreeTableView) EditIdx(idx int) {
+	val := laser.OnePtrUnderlyingValue(t.SliceNPVal.Index(idx))
 	stru := val.Interface()
 	tynm := laser.NonPtrType(val.Type()).Name()
 	lbl := gi.ToLabel(stru)
@@ -957,23 +957,23 @@ func (tv *TreeTableView) EditIdx(idx int) {
 		d.AddCancel(pw)
 		d.AddOk(pw)
 	})
-	d.NewFullDialog(tv).Run()
+	d.NewFullDialog(t).Run()
 }
 
-func (tv *TreeTableView) ContextMenu(m *gi.Scene) {
-	if !tv.Is(SliceViewIsArray) {
+func (t *TreeTableView) ContextMenu(m *gi.Scene) {
+	if !t.Is(SliceViewIsArray) {
 		gi.NewButton(m).SetText("Edit").SetIcon(icons.Edit).
 			OnClick(func(e events.Event) {
-				tv.EditIdx(tv.SelIdx)
+				t.EditIdx(t.SelIdx)
 			})
 		gi.NewSeparator(m)
 	}
 }
 
-func (tv *TreeTableView) SizeFinal() {
-	tv.SliceViewBase.SizeFinal()
-	sg := tv.This().(SliceViewer).SliceGrid()
-	sh := tv.SliceHeader()
+func (t *TreeTableView) SizeFinal() {
+	t.SliceViewBase.SizeFinal()
+	sg := t.This().(SliceViewer).SliceGrid()
+	sh := t.SliceHeader()
 	sh.WidgetKidsIter(func(i int, kwi gi.Widget, kwb *gi.WidgetBase) bool {
 		_, sgb := gi.AsWidget(sg.Child(i))
 		gsz := &sgb.Geom.Size
