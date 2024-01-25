@@ -66,6 +66,15 @@ type Web struct { //gti:add
 	// Default is 10 seconds.
 	AutoUpdateInterval time.Duration `default:"10s"`
 
+	// If specified, make this page a Go import vanity URL with this
+	// module URL, pointing to the GitHub repository specified by GithubVanityURL
+	// (eg: cogentcore.org/core).
+	VanityURL string
+
+	// If VanityURL is specified, the underlying GitHub repository for the vanity URL
+	// (eg: cogentcore/core).
+	GithubVanityRepository string
+
 	// The environment variables that are passed to the progressive web app.
 	//
 	// Reserved keys:

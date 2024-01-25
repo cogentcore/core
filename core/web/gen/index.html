@@ -15,6 +15,11 @@
     <meta property="og:type" content="website">
     <meta property="og:image" content="{{.Image}}">
     <title>{{.Title}}</title>
+    {{- if .VanityURL -}}
+    <meta name="go-import" content="{{.VanityURL}} git https://github.com/{{.GithubVanityRepository}}">
+    <meta name="go-source"
+        content="{{.VanityURL}} https://github.com/{{.GithubVanityRepository}} https://github.com/{{.GithubVanityRepository}}/tree/master{/dir} https://github.com/{{.GithubVanityRepository}}/blob/master{/dir}/{file}#L{line}">
+    {{- end -}}
     <link type="text/css" rel="preload" href="app.css" as="style">
     <link rel="icon" href="icons/svg.svg">
     <link rel="apple-touch-icon" href="icons/192.png">
