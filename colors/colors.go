@@ -112,7 +112,7 @@ func FromName(name string) (color.RGBA, error) {
 //   - saturate-VAL or desaturate-VAL: manipulates the chroma level in HCT by VAL
 //   - spin-VAL: manipulates the hue level in HCT by VAL
 //   - clearer-VAL or opaquer-VAL: manipulates the alpha level by VAL
-//   - blend-VAL-color: blends given percent of given color relative to base
+//   - blend-VAL-color: blends given percent of given color relative to base in RGB space
 func FromString(str string, base ...color.Color) (color.RGBA, error) {
 	if len(str) == 0 { // consider it null
 		return color.RGBA{}, nil
