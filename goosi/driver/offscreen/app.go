@@ -63,10 +63,10 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 }
 
 func (a *App) GetScreens() {
-	if a.Scrn.PixSize.X < 50 {
+	if a.Scrn.PixSize.X == 0 {
 		a.Scrn.PixSize.X = 800
 	}
-	if a.Scrn.PixSize.Y < 50 {
+	if a.Scrn.PixSize.Y == 0 {
 		a.Scrn.PixSize.Y = 600
 	}
 
