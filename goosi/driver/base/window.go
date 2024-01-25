@@ -211,11 +211,6 @@ func (w *Window[A]) Close() {
 	w.App.RemoveWindow(w.This)
 }
 
-func (w *Window[A]) MainMenu() goosi.MainMenu {
-	// nil by default
-	return nil
-}
-
 func (w *Window[A]) SetCursorEnabled(enabled, raw bool) {
 	w.CursorEnabled = enabled
 }

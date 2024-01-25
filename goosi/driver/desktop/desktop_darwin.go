@@ -26,16 +26,6 @@ void popCursor();
 void setCursor(int);
 void hideCursor();
 void showCursor();
-uintptr_t doNewMainMenu(uintptr_t viewID);
-uintptr_t mainMenuFromDelegate(uintptr_t delID);
-void doSetMainMenu(uintptr_t viewID, uintptr_t menID);
-void doMenuReset(uintptr_t menuID);
-uintptr_t doAddSubMenu(uintptr_t menuID, char* mnm);
-uintptr_t doAddMenuItem(uintptr_t viewID, uintptr_t submID, uintptr_t delID, char* itmnm, char* sc, bool scShift, bool scCommand, bool scAlt, bool scCtrl, int tag, bool active);
-void doAddSeparator(uintptr_t menuID);
-uintptr_t doMenuItemByTitle(uintptr_t menuID, char* mnm);
-uintptr_t doMenuItemByTag(uintptr_t menuID, int tag);
-void doSetMenuItemActive(uintptr_t mitmID, bool active);
 */
 import "C"
 
@@ -81,20 +71,6 @@ func (a *App) DataDir() string {
 	}
 	return filepath.Join(usr.HomeDir, "Library")
 }
-
-/*
-// this is the main call to create the main menu if not exist
-func (w *Window) MainMenu() goosi.MainMenu {
-	if w.mainMenu == nil {
-		mm := &mainMenuImpl{win: w}
-		w.mainMenu = mm
-		vid := uintptr(mm.win.glw.GetCocoaWindow())
-		mm.delID = uintptr(C.doNewMainMenu(C.uintptr_t(vid)))
-		mm.menID = uintptr(C.mainMenuFromDelegate(C.uintptr_t(mm.delID)))
-	}
-	return w.mainMenu.(*mainMenuImpl)
-}
-*/
 
 func (w *Window) Handle() any {
 	return uintptr(w.Glw.GetCocoaWindow())
@@ -203,149 +179,7 @@ func addMimeData(ctyp *C.char, typlen C.int, cdata *C.char, datalen C.int) {
 	*CurMimeData = append(*CurMimeData, &mimedata.Data{typ, data})
 }
 
-// TODO(kai): figure out what to do with MacOS main menu
-
-/*
-///////////////////////////////////////////////////////
-//  MainMenu
-
-type mainMenuImpl struct {
-	win      *windowImpl
-	menID    uintptr // mainmenu id
-	delID    uintptr // delegate id
-	callback func(win goosi.Window, title string, tag int)
-	mu       sync.Mutex
-}
-
-func (mm *mainMenuImpl) Window() goosi.Window {
-	return mm.win
-}
-
-func (mm *mainMenuImpl) SetWindow(win goosi.Window) {
-	mm.win = win.(*windowImpl)
-}
-
-func (mm *mainMenuImpl) SetFunc(fun func(win goosi.Window, title string, tag int)) {
-	mm.callback = fun
-}
-
-func (mm *mainMenuImpl) Triggered(win goosi.Window, title string, tag int) {
-	if mm.callback == nil {
-		return
-	}
-	fw := theApp.WindowInFocus()
-	if win != fw {
-		if fw == nil {
-			fmt.Printf("vkos main menu event focus window is nil!  window: %v\n", win.Name())
-		} else {
-			fmt.Printf("vkos main menu event window: %v != focus window: %v\n", win.Name(), fw.Name())
-			// win = fw // this doesn't work because focus window doesn't have menu most of time
-		}
-	}
-	mm.callback(win, title, tag)
-}
-
-func (mm *mainMenuImpl) Menu() goosi.Menu {
-	return goosi.Menu(mm.menID)
-}
-
-func (mm *mainMenuImpl) SetMenu() {
-	mm.mu.Lock()
-	vid := uintptr(mm.win.glw.GetCocoaWindow())
-	C.doSetMainMenu(C.uintptr_t(vid), C.uintptr_t(mm.menID))
-	mm.mu.Unlock()
-}
-
-func (mm *mainMenuImpl) StartUpdate() goosi.Menu {
-	mm.mu.Lock()
-	return goosi.Menu(mm.menID)
-}
-
-func (mm *mainMenuImpl) EndUpdate(men goosi.Menu) {
-	mm.mu.Unlock()
-}
-
-// Reset must be called within StartUpdate window
-func (mm *mainMenuImpl) Reset(men goosi.Menu) {
-	C.doMenuReset(C.uintptr_t(men))
-}
-
-func (mm *mainMenuImpl) AddSubMenu(men goosi.Menu, titles string) goosi.Menu {
-	title := C.CString(titles)
-	defer C.free(unsafe.Pointer(title))
-
-	subid := C.doAddSubMenu(C.uintptr_t(men), title)
-	return goosi.Menu(subid)
-}
-
-func (mm *mainMenuImpl) AddItem(men goosi.Menu, titles string, shortcut string, tag int, active bool) goosi.MenuItem {
-	title := C.CString(titles)
-	defer C.free(unsafe.Pointer(title))
-
-	sc := ""
-	scShift := false
-	scControl := false
-	scAlt := false
-	scCommand := false
-	// don't register shortcuts on main menu -- just causes problems!
-	if false {
-		r, _, mods, err := key.Chord(shortcut).Decode()
-		if err == nil {
-			sc = strings.ToLower(string(r))
-		}
-		scShift = mods.HasFlag(key.Shift)
-		scControl = mods.HasFlag(key.Control)
-		scAlt = mods.HasFlag(key.Alt)
-		scCommand = mods.HasFlag(key.Meta)
-	}
-
-	scs := C.CString(sc)
-	defer C.free(unsafe.Pointer(scs))
-
-	vid := uintptr(mm.win.glw.GetCocoaWindow())
-	mid := C.doAddMenuItem(C.uintptr_t(vid), C.uintptr_t(men), C.uintptr_t(mm.delID), title, scs, C.bool(scShift), C.bool(scCommand), C.bool(scAlt), C.bool(scControl), C.int(tag), C.bool(active))
-	return goosi.MenuItem(mid)
-}
-
-func (mm *mainMenuImpl) AddSeparator(men goosi.Menu) {
-	C.doAddSeparator(C.uintptr_t(men))
-}
-
-func (mm *mainMenuImpl) ItemByTitle(men goosi.Menu, titles string) goosi.MenuItem {
-	title := C.CString(titles)
-	defer C.free(unsafe.Pointer(title))
-	mid := C.doMenuItemByTitle(C.uintptr_t(men), title)
-	return goosi.MenuItem(mid)
-}
-
-func (mm *mainMenuImpl) ItemByTag(men goosi.Menu, tag int) goosi.MenuItem {
-	mid := C.doMenuItemByTag(C.uintptr_t(men), C.int(tag))
-	return goosi.MenuItem(mid)
-}
-
-func (mm *mainMenuImpl) SetItemActive(mitm goosi.MenuItem, active bool) {
-	C.doSetMenuItemActive(C.uintptr_t(mitm), C.bool(active))
-}
-*/
-
-//export menuFired
-func menuFired(id uintptr, title *C.char, tilen C.int, tag C.int) {
-	/*
-		theApp.mu.Lock()
-		w, ok := theApp.oswindows[id]
-		theApp.mu.Unlock()
-		if !ok || w == nil {
-			return
-		}
-
-		tit := C.GoStringN(title, tilen)
-		osmm := w.MainMenu()
-		if osmm == nil {
-			return
-		}
-		go osmm.Triggered(w, tit, int(tag))
-	*/
-}
+// TODO(kai): macOpenFile
 
 //export macOpenFile
 func macOpenFile(fname *C.char, flen C.int) {

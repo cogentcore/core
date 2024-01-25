@@ -382,17 +382,8 @@ func (w *Window) OnCloseReq(gw *glfw.Window) {
 
 func (w *Window) Focused(gw *glfw.Window, focused bool) {
 	if focused {
-		// fmt.Printf("foc win: %v, foc: %v\n", w.Nm, bitflag.HasAtomic(&w.Flag, int(goosi.Focus)))
-		// TODO(kai): main menu
-		// if w.mainMenu != nil {
-		// 	w.mainMenu.SetMenu()
-		// }
-		// bitflag.ClearAtomic(&w.Flag, int(goosi.Minimized))
-		// bitflag.SetAtomic(&w.Flag, int(goosi.Focus))
 		w.EvMgr.Window(events.WinFocus)
 	} else {
-		// fmt.Printf("unfoc win: %v, foc: %v\n", w.Nm, bitflag.HasAtomic(&w.Flag, int(goosi.Focus)))
-		// bitflag.ClearAtomic(&w.Flag, int(goosi.Focus))
 		w.EvMgr.Last.MousePos = image.Point{-1, -1} // key for preventing random click to same location
 		w.EvMgr.Window(events.WinFocusLost)
 	}
