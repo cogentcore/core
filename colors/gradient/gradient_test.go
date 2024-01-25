@@ -185,3 +185,26 @@ func TestTransform(t *testing.T) {
 	// 	Scale(1/w, 1/h).Translate(-oriX, -oriY).Invert()
 	// fmt.Println(gradT)
 }
+
+func TestApply(t *testing.T) {
+	r := image.Rect(0, 0, 2, 2)
+	img := image.NewRGBA(r)
+	img.Set(0, 0, colors.Red)
+	img.Set(1, 0, colors.Blue)
+	img.Set(0, 1, colors.Green)
+	img.Set(1, 1, colors.Yellow)
+
+	var ocs []uint8
+	ap := Apply(img, func(c color.Color) color.Color {
+		oc := colors.ApplyOpacity(c, .5)
+		ocs = append(ocs, oc.R, oc.G, oc.B, oc.A)
+		return oc
+	})
+	nim := image.NewRGBA(r)
+	draw.Draw(nim, r, ap, image.Point{}, draw.Src)
+	for i, c := range nim.Pix {
+		if c != ocs[i] {
+			t.Errorf("output not the same: %v != %v\n", c, ocs[i])
+		}
+	}
+}

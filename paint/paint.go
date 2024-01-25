@@ -318,7 +318,11 @@ func (pc *Context) StrokePreserve() {
 		g.Update(pc.StrokeStyle.Opacity, mat32.B2FromRect(pc.LastRenderBBox), pc.CurTransform)
 		pc.Raster.SetColor(pc.StrokeStyle.Color)
 	} else {
-		pc.Raster.SetColor(colors.ApplyOpacityImage(pc.StrokeStyle.Color, pc.StrokeStyle.Opacity))
+		if pc.StrokeStyle.Opacity < 1 {
+			pc.Raster.SetColor(gradient.ApplyOpacityImage(pc.StrokeStyle.Color, pc.StrokeStyle.Opacity))
+		} else {
+			pc.Raster.SetColor(pc.StrokeStyle.Color)
+		}
 	}
 	pc.Raster.Draw()
 	pc.Raster.Clear()
@@ -353,7 +357,11 @@ func (pc *Context) FillPreserve() {
 		g.Update(pc.FillStyle.Opacity, mat32.B2FromRect(pc.LastRenderBBox), pc.CurTransform)
 		rf.SetColor(pc.FillStyle.Color)
 	} else {
-		rf.SetColor(colors.ApplyOpacityImage(pc.FillStyle.Color, pc.FillStyle.Opacity))
+		if pc.FillStyle.Opacity < 1 {
+			rf.SetColor(gradient.ApplyOpacityImage(pc.FillStyle.Color, pc.FillStyle.Opacity))
+		} else {
+			rf.SetColor(pc.FillStyle.Color)
+		}
 	}
 	rf.Draw()
 	rf.Clear()

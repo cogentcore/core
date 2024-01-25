@@ -77,7 +77,7 @@ func (l *Linear) At(x, y int) color.Color {
 	case 0:
 		return color.RGBA{}
 	case 1:
-		return l.Stops[0].OpacityColor(l.Opacity)
+		return l.Stops[0].OpacityColor(l.Opacity, l.ApplyFuncs)
 	}
 
 	d := l.rEnd.Sub(l.rStart)

@@ -14,6 +14,7 @@ import (
 
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/ki"
@@ -420,7 +421,7 @@ func (s *Style) ComputeActualBackgroundFor(bg, pabg image.Image) image.Image {
 	upabg := colors.ToUniform(pabg)
 
 	if s.Opacity < 1 {
-		bg = colors.Apply(bg, func(c color.Color) color.Color {
+		bg = gradient.Apply(bg, func(c color.Color) color.Color {
 			// we take our opacity-applied background color and then overlay it onto our surrounding color
 			obg := colors.ApplyOpacity(c, s.Opacity)
 			return colors.AlphaBlend(upabg, obg)
@@ -431,7 +432,7 @@ func (s *Style) ComputeActualBackgroundFor(bg, pabg image.Image) image.Image {
 		if !colors.IsNil(s.StateColor) {
 			sc = s.StateColor
 		}
-		bg = colors.Apply(bg, func(c color.Color) color.Color {
+		bg = gradient.Apply(bg, func(c color.Color) color.Color {
 			// we take our state-layer-applied state color and then overlay it onto our background color
 			sclr := colors.WithAF32(sc, s.StateLayer)
 			return colors.AlphaBlend(c, sclr)

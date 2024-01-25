@@ -85,8 +85,6 @@ func (cv *ColorView) ConfigWidget() {
 		s.Min.X.Em(1)
 		s.Max.X.Em(40)
 		s.Grow.Set(1, 0)
-		// we don't want any state layer interfering with the way the color looks
-		s.StateLayer = 0
 	}
 
 	hue := gi.NewSlider(cv, "hue").SetMin(0).SetMax(360).SetValue(cv.Color.Hue).
