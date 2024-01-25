@@ -79,10 +79,38 @@ type (
 		ContextMenu(m *gi.Scene)
 		SizeFinal()
 	}
-
 	TreeTableView struct {
+		SliceViewBase
+
+		// optional styling function
+		StyleFunc TableViewStyleFunc `copier:"-" view:"-" json:"-" xml:"-"`
+
+		// current selection field -- initially select value in this field
+		SelField string `copier:"-" view:"-" json:"-" xml:"-"`
+
+		// current sort index
+		SortIdx int
+
+		// whether current sort order is descending
+		SortDesc bool
+
+		// struct type for each row
+		StruType reflect.Type `copier:"-" view:"-" json:"-" xml:"-"`
+
+		// the visible fields
+		VisFields []reflect.StructField `copier:"-" view:"-" json:"-" xml:"-"`
+
+		// number of visible fields
+		NVisFields int `copier:"-" view:"-" json:"-" xml:"-"`
+
+		// HeaderWidths has number of characters in each header, per visfields
+		HeaderWidths []int `copier:"-" view:"-" json:"-" xml:"-"`
 	}
 )
+
+func NewTreeTableView() TableRowData {
+	return &TreeTableView{}
+}
 
 func (t *TreeTableView) KiType() *gti.Type {
 	//TODO implement me
@@ -379,10 +407,6 @@ func (t *TreeTableView) SizeFinal() {
 	panic("implement me")
 }
 
-func NewTreeTableView() TableRowData {
-	return &TreeTableView{}
-}
-
 // TreeTable todo set struct or dynamic creat node
 func TreeTable(b *gi.Body, nodes []any) {
 	hSplits := NewHSplits(b)
@@ -450,8 +474,8 @@ func MakeTree(tv *TreeView, iter, maxIter, maxKids int) {
 }
 
 // util
-func NewHSplits(par ki.Ki) *gi.Splits { return newSplits(par, true) }
-func NewVSplits(par ki.Ki) *gi.Splits { return newSplits(par, false) }
+func NewHSplits(parent ki.Ki) *gi.Splits { return newSplits(parent, true) }
+func NewVSplits(parent ki.Ki) *gi.Splits { return newSplits(parent, false) }
 
 func newSplits(parent ki.Ki, isHorizontal bool) *gi.Splits { // Horizontal and vertical
 	splits := gi.NewSplits(parent)
