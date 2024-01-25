@@ -140,7 +140,25 @@ func (st *Stage) RunWindow() *Stage {
 		sz = sc.PrefSize(sz)
 		// on offscreen, we don't want any extra space, as we want the smallest
 		// possible representation of the content
-		if Platform() != goosi.Offscreen {
+		// also, on offscreen, if the new size is bigger than the current size,
+		// we need to resize the window
+		if Platform() == goosi.Offscreen {
+			if CurRenderWin != nil {
+				csz := CurRenderWin.GoosiWin.Size()
+				nsz := csz
+				if sz.X > csz.X {
+					nsz.X = sz.X
+				}
+				if sz.Y > csz.Y {
+					nsz.Y = sz.Y
+				}
+				if nsz != csz {
+					CurRenderWin.GoosiWin.SetSize(nsz)
+					goosi.TheApp.GetScreens()
+				}
+			}
+		} else {
+			// on other platforms, we want extra space and a minimum window size
 			sz = sz.Add(image.Pt(20, 20))
 			if st.NewWindow {
 				// we require the window to be at least half of the screen size
