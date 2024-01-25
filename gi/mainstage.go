@@ -160,9 +160,7 @@ func (st *Stage) RunWindow() *Stage {
 	if st.NewWindow || CurRenderWin == nil {
 		sc.Resize(mat32.Geom2DInt{st.RenderCtx.Geom.Pos, sz})
 		win := st.NewRenderWin()
-		if CurRenderWin == nil {
-			CurRenderWin = win
-		}
+		CurRenderWin = win
 		win.GoStartEventLoop()
 		return st
 	}
@@ -231,6 +229,7 @@ func (st *Stage) RunDialog() *Stage {
 		sc.SceneGeom.Pos = image.Point{} // ignore pos
 		win := st.NewRenderWin()
 		DialogRenderWins.Add(win)
+		CurRenderWin = win
 		win.GoStartEventLoop()
 		return st
 	}

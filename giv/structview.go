@@ -294,7 +294,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 				dtag, _ := vv.Tag("default")
 				isDef, _ := StructFieldIsDef(dtag, vv.Val().Interface(), laser.NonPtrValue(vv.Val()).Kind())
 				if !isDef {
-					s.Background = colors.C(colors.Scheme.Warn.Container)
+					s.Color = colors.Scheme.Primary.Base
 				}
 			})
 		}
