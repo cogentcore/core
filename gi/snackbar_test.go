@@ -7,11 +7,17 @@ package gi
 import (
 	"path/filepath"
 	"testing"
+
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 func TestSnackbar(t *testing.T) {
 	b := NewBody()
-	NewLabel(b).SetText("Hello")
-	MessageSnackbar(b, "Test")
-	b.AssertScreenRender(t, filepath.Join("snackbar", "basic"))
+	b.Style(func(s *styles.Style) {
+		s.Min.Set(units.Dp(300))
+	})
+	b.AssertScreenRender(t, filepath.Join("snackbar", "basic"), func() {
+		MessageSnackbar(b, "Test")
+	})
 }
