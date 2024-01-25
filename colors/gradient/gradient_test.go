@@ -38,17 +38,17 @@ func TestColorAt(t *testing.T) {
 			AddStop(colors.White, 0).
 			AddStop(colors.Black, 1),
 			[]value{
-				{33, 71, color.RGBA{68, 67, 67, 255}},
-				{78, 71, color.RGBA{68, 67, 67, 255}},
-				{78, 17, color.RGBA{205, 205, 205, 255}},
-				{33, 50, color.RGBA{118, 118, 117, 255}},
+				{71, 33, color.RGBA{72, 72, 72, 255}},
+				{71, 78, color.RGBA{72, 72, 72, 255}},
+				{17, 78, color.RGBA{211, 211, 211, 255}},
+				{50, 33, color.RGBA{126, 126, 126, 255}},
 			}},
 		{CopyOf(linearTransformTest),
 			[]value{
-				{50, 50, color.RGBA{255, 141, 52, 255}},
-				{7, 50, color.RGBA{255, 141, 52, 255}},
-				{81, 23, color.RGBA{255, 185, 76, 255}},
-				{81, 94, color.RGBA{254, 12, 0, 255}},
+				{50, 50, color.RGBA{255, 106, 0, 255}},
+				{7, 50, color.RGBA{255, 106, 0, 255}},
+				{81, 23, color.RGBA{255, 171, 0, 255}},
+				{81, 94, color.RGBA{255, 1, 0, 255}},
 			}},
 		{NewRadial().
 			SetCenter(mat32.V2(0.9, 0.5)).SetFocal(mat32.V2(0.9, 0.5)).
@@ -56,15 +56,15 @@ func TestColorAt(t *testing.T) {
 			AddStop(colors.Yellow, 0.85),
 			[]value{
 				{90, 50, colors.Blue},
-				{70, 60, color.RGBA{0, 165, 183, 255}},
+				{70, 60, color.RGBA{117, 117, 138, 255}},
 				{35, 40, colors.Yellow},
 			}},
 		{CopyOf(radialTransformTest),
 			[]value{
-				{41, 62, color.RGBA{166, 54, 212, 255}},
-				{26, 54, color.RGBA{221, 0, 106, 255}},
-				{53, 75, color.RGBA{255, 165, 0, 255}},
-				{38, 61, color.RGBA{51, 12, 252, 255}},
+				{41, 62, color.RGBA{104, 0, 151, 255}},
+				{26, 54, color.RGBA{2, 0, 253, 255}},
+				{53, 75, color.RGBA{132, 85, 123, 255}},
+				{38, 61, color.RGBA{141, 0, 114, 255}},
 			}},
 	}
 	for i, test := range tests {
