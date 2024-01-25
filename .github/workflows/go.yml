@@ -27,7 +27,7 @@ jobs:
       run: go build -v ./...
 
     - name: Test
-      run: go test -v ./... -coverprofile cover.out -coverpkg=./...
+      run: go test -v ./... -coverprofile cover.out
 
     - name: Update coverage report
       uses: ncruces/go-coverage-report@v0
