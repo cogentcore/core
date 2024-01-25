@@ -25,8 +25,26 @@ func TestSnackbarTime(t *testing.T) {
 		b.Style(func(s *styles.Style) {
 			s.Min.Set(units.Dp(300))
 		})
+		NewLabel(b).SetText(tm.String())
+
 		b.AssertScreenRender(t, filepath.Join("snackbar", tm.String()), func() {
 			MessageSnackbar(b, "Test")
+			time.Sleep(tm)
+		})
+	}
+
+	// test making two
+	for _, tm := range times {
+		tm := tm
+		b := NewBody()
+		b.Style(func(s *styles.Style) {
+			s.Min.Set(units.Dp(300))
+		})
+		NewLabel(b).SetText(tm.String() + "-two")
+
+		b.AssertScreenRender(t, filepath.Join("snackbar", tm.String()+"-two"), func() {
+			MessageSnackbar(b, "Test One")
+			MessageSnackbar(b, "Test Two")
 			time.Sleep(tm)
 		})
 	}
