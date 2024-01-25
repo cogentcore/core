@@ -27,5 +27,5 @@ func (dw *Drawer) EndDraw() {
 		return
 	}
 	goosi.NeedsCapture = false
-	goosi.CaptureImage <- dw.Image
+	goosi.CaptureImage = dw.Image
 }

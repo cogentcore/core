@@ -18,7 +18,7 @@ func TestSnackbarTime(t *testing.T) {
 	defer func() {
 		SystemSettings.SnackbarTimeout = 7 * time.Second
 	}()
-	times := []time.Duration{0, 25 * time.Millisecond, 25 * time.Millisecond}
+	times := []time.Duration{0, 25 * time.Millisecond, 75 * time.Millisecond}
 	for _, tm := range times {
 		tm := tm
 		b := NewBody()

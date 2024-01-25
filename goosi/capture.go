@@ -13,10 +13,11 @@ import (
 
 // Capture tells the app drawer to capture its next frame as an image.
 // Once it gets that image, it returns it. It is currently only supported
-// with the offscreen build tag.
+// on platform [Offscreen].
 func Capture() *image.RGBA {
 	NeedsCapture = true
-	return <-CaptureImage
+	TheApp.Window(0).Drawer().EndDraw() // triggers capture
+	return CaptureImage
 }
 
 // CaptureAs is a helper function that saves the result of [Capture] to the given filename.
@@ -29,8 +30,7 @@ var (
 	// NeedsCapture is whether the app drawer needs to capture its next
 	// frame. End-user code should just use [Capture].
 	NeedsCapture bool
-	// CaptureImage is a channel that sends the image captured after
-	// setting [NeedsCapture] to true. End-user code should just use
-	// [Capture].
-	CaptureImage = make(chan *image.RGBA)
+	// CaptureImage is the variable that stores the image captured in
+	// [Capture]. End-user code should just use [Capture].
+	CaptureImage *image.RGBA
 )
