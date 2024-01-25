@@ -44,6 +44,7 @@ func ExamplePreHandler(ctx *coredom.Context) bool {
 	fr := coredom.New[*gi.Frame](ctx)
 	fr.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
+		s.Grow.Set(1, 0)
 	})
 
 	gi.NewLabel(fr).SetText(coredom.ExtractText(ctx)).Style(func(s *styles.Style) {
