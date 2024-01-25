@@ -34,7 +34,6 @@ func TestColorAt(t *testing.T) {
 		want []value
 	}
 	tests := []test{
-		// ensure same results with ObjectBoundingBox and UserSpaceOnUse
 		{NewLinear().
 			AddStop(colors.White, 0).
 			AddStop(colors.Black, 1),
