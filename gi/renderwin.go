@@ -443,6 +443,9 @@ func (w *RenderWin) Closed() {
 	AllRenderWins.Delete(w)
 	MainRenderWins.Delete(w)
 	DialogRenderWins.Delete(w)
+	if CurRenderWin == w && len(AllRenderWins) > 0 {
+		CurRenderWin = AllRenderWins[0]
+	}
 	RenderWinGlobalMu.Lock()
 	FocusRenderWins = slices.DeleteFunc(FocusRenderWins, func(s string) bool {
 		return s == w.Name
