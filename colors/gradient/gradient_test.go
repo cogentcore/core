@@ -106,11 +106,17 @@ func TestRenderLinear(t *testing.T) {
 	b := mat32.B2FromRect(r)
 	img := image.NewRGBA(r)
 	g := CopyOf(linearTransformTest)
-	// gb := g.AsBase()
-	// gb.Transform = mat32.Rotate2D(mat32.DegToRad(25))
 	g.Update(1, b, mat32.Rotate2D(mat32.DegToRad(45)))
 	draw.Draw(img, img.Bounds(), g, image.Point{}, draw.Src)
 	images.Assert(t, img, "linear")
+
+	ug := CopyOf(g).(*Linear)
+	ug.SetUnits(UserSpaceOnUse)
+	ug.Start.SetMul(ug.Box.Size())
+	ug.End.SetMul(ug.Box.Size())
+	ug.Update(1, b, mat32.Rotate2D(mat32.DegToRad(45)))
+	draw.Draw(img, img.Bounds(), ug, image.Point{}, draw.Src)
+	images.Assert(t, img, "linear-user-space")
 }
 
 func TestRenderRadial(t *testing.T) {
@@ -118,8 +124,6 @@ func TestRenderRadial(t *testing.T) {
 	b := mat32.B2FromRect(r)
 	img := image.NewRGBA(r)
 	g := CopyOf(radialTransformTest)
-	// gb := g.AsBase()
-	// gb.Transform = mat32
 	g.Update(1, b, mat32.Identity2())
 	draw.Draw(img, img.Bounds(), g, image.Point{}, draw.Src)
 	images.Assert(t, img, "radial")
