@@ -1,4 +1,4 @@
-name: Deploy Cogent Core Docs App to GitHub Pages
+name: Deploy Cogent Core docs and demo to GitHub Pages
 
 on:
   # Runs on pushes targeting the default branch
@@ -40,10 +40,13 @@ jobs:
           go-version: '1.21.4'
 
       - name: Install Core
-        run: go install cogentcore.org/core/core@main
+        run: go install ./core
 
-      - name: Build App
+      - name: Build Docs
         run: cd docs && core build web && cp -a .core/bin/web ../static && cd ..
+
+      - name: Build Demo
+        run: cd examples/demo && core build web && cp -a .core/bin/web ../../static/demo && cd ../..
 
       - name: Setup Pages
         id: pages
