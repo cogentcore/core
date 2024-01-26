@@ -10,9 +10,57 @@ import (
 	"testing"
 	"time"
 
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 )
+
+func newBodyForSnackbar() *Body {
+	b := NewBody()
+	b.Style(func(s *styles.Style) {
+		s.Min.Set(units.Dp(300))
+	})
+	return b
+}
+
+func TestCustomSnackbar(t *testing.T) {
+	b := newBodyForSnackbar()
+	b.AssertScreenRender(t, filepath.Join("snackbar", "text"), func() {
+		NewBody().AddSnackbarText("Files updated").NewSnackbar(b).Run()
+	})
+
+	b = newBodyForSnackbar()
+	b.AssertScreenRender(t, filepath.Join("snackbar", "button"), func() {
+		NewBody().AddSnackbarText("Files updated").AddSnackbarButton("Refresh").NewSnackbar(b).Run()
+	})
+
+	b = newBodyForSnackbar()
+	b.AssertScreenRender(t, filepath.Join("snackbar", "icon"), func() {
+		NewBody().AddSnackbarText("Files updated").AddSnackbarIcon(icons.Close).NewSnackbar(b).Run()
+	})
+
+	b = newBodyForSnackbar()
+	b.AssertScreenRender(t, filepath.Join("snackbar", "button-icon"), func() {
+		NewBody().AddSnackbarText("Files updated").AddSnackbarButton("Refresh").AddSnackbarIcon(icons.Close).NewSnackbar(b).Run()
+	})
+}
+
+func TestErrorSnackbar(t *testing.T) {
+	b := newBodyForSnackbar()
+	b.AssertScreenRender(t, filepath.Join("snackbar", "no-error"), func() {
+		ErrorSnackbar(b, nil)
+	})
+
+	b = newBodyForSnackbar()
+	b.AssertScreenRender(t, filepath.Join("snackbar", "error"), func() {
+		ErrorSnackbar(b, errors.New("file not found"))
+	})
+
+	b = newBodyForSnackbar()
+	b.AssertScreenRender(t, filepath.Join("snackbar", "error-label"), func() {
+		ErrorSnackbar(b, errors.New("file not found"), "Error loading page")
+	})
+}
 
 func TestSnackbarTime(t *testing.T) {
 	SystemSettings.SnackbarTimeout = 50 * time.Millisecond
@@ -37,10 +85,7 @@ func TestSnackbarTime(t *testing.T) {
 	// test making two
 	for _, tm := range times {
 		tm := tm
-		b := NewBody()
-		b.Style(func(s *styles.Style) {
-			s.Min.Set(units.Dp(300))
-		})
+		b := newBodyForSnackbar()
 		NewLabel(b).SetText(tm.String() + "-two")
 
 		b.AssertScreenRender(t, filepath.Join("snackbar", tm.String()+"-two"), func() {
@@ -50,29 +95,4 @@ func TestSnackbarTime(t *testing.T) {
 			time.Sleep(tm)
 		})
 	}
-}
-
-func TestErrorSnackbar(t *testing.T) {
-	nb := func() *Body {
-		b := NewBody()
-		b.Style(func(s *styles.Style) {
-			s.Min.Set(units.Dp(300))
-		})
-		return b
-	}
-
-	b := nb()
-	b.AssertScreenRender(t, filepath.Join("snackbar", "no-error"), func() {
-		ErrorSnackbar(b, nil)
-	})
-
-	b = nb()
-	b.AssertScreenRender(t, filepath.Join("snackbar", "error"), func() {
-		ErrorSnackbar(b, errors.New("file not found"))
-	})
-
-	b = nb()
-	b.AssertScreenRender(t, filepath.Join("snackbar", "error-label"), func() {
-		ErrorSnackbar(b, errors.New("file not found"), "Error loading page")
-	})
 }
