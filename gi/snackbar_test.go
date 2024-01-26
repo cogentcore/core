@@ -70,9 +70,10 @@ func TestSnackbarError(t *testing.T) {
 }
 
 func TestSnackbarTime(t *testing.T) {
+	ptimeout := SystemSettings.SnackbarTimeout
 	SystemSettings.SnackbarTimeout = 50 * time.Millisecond
 	defer func() {
-		SystemSettings.SnackbarTimeout = 7 * time.Second
+		SystemSettings.SnackbarTimeout = ptimeout
 	}()
 	times := []time.Duration{0, 25 * time.Millisecond, 75 * time.Millisecond}
 	for _, tm := range times {

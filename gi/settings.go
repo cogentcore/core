@@ -444,7 +444,7 @@ type SystemSettingsData struct { //gti:add
 	// SnackbarTimeout is the default amount of time until snackbars
 	// disappear (snackbars show short updates about app processes
 	// at the bottom of the screen)
-	SnackbarTimeout time.Duration `default:"7s"`
+	SnackbarTimeout time.Duration `default:"5s"`
 
 	// only support closing the currently selected active tab; if this is set to true, pressing the close button on other tabs will take you to that tab, from which you can close it
 	OnlyCloseActiveTab bool `default:"false"`
