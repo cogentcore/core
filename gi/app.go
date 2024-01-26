@@ -10,8 +10,6 @@ import (
 	"fmt"
 	"image"
 	"io"
-	"os"
-	"path/filepath"
 	"strings"
 
 	"cogentcore.org/core/colors"
@@ -27,16 +25,13 @@ import (
 	"cogentcore.org/core/units"
 )
 
+// TheApp is the current [App]; only one is ever in effect.
+var TheApp = &App{App: goosi.TheApp}
+
 // App encapsulates various properties of the overall application,
 // including managing an AppBar and associated elements.
 type App struct { //gti:add -setters
-	// Name can be used in relevant window titles and prompts,
-	// and specifies the default application-specific data directory
-	Name string
-
-	// About sets the 'about' info for the app, which appears as a menu option
-	// in the default app menu.
-	About string
+	goosi.App `set:"-"`
 
 	// Icon specifies the app icon, which is passed to [goosi.Window.SetIcon].
 	// It should typically be set using [App.SetIconSVG].
@@ -55,27 +50,6 @@ type App struct { //gti:add -setters
 	// configuration and styling for all widgets using the OnWidgetAdded
 	// method.
 	SceneConfig func(sc *Scene)
-}
-
-// NewApp returns a new App initialized with the given name.
-func NewApp(name string) *App {
-	// we load the settings in NewApp so that people can
-	// add their own settings to AllSettings first
-	grr.Log(LoadAllSettings())
-
-	app := &App{}
-	app.Name = name
-	app.AppBarConfig = StdAppBarConfig
-	app.Config()
-	return app
-}
-
-// NewAppBody returns a new Body with a new App initialized with
-// the given name.
-func NewAppBody(name string) *Body {
-	b := NewBody(name)
-	b.SetApp(NewApp(name))
-	return b
 }
 
 // SetIconSVG sets the icon of the app to the given SVG icon.
@@ -109,84 +83,11 @@ func (a *App) SetIconBytes(b []byte) *App {
 	return a.SetIconSVG(bytes.NewReader(b))
 }
 
-// Config performs one-time configuration steps after setting
-// properties on the App.
-func (a *App) Config() {
-	goosi.TheApp.SetName(a.Name)
-}
-
-// DataDir returns the application-specific data directory:
-// [goosi.DataDir] + [App.Name]. It ensures that the directory exists first.
-// Use this directory to store all app-specific data including settings.
-// DataDir is: Mac: ~/Library, Linux: ~/.config, Windows: ~/AppData/Roaming
-func (a *App) DataDir() string {
-	pdir := filepath.Join(goosi.TheApp.DataDir(), a.Name)
-	os.MkdirAll(pdir, 0755)
-	return pdir
-}
-
-// App returns the [App] this widget is contained in
-func (wb *WidgetBase) App() *App {
-	return wb.Scene.App
-}
-
-// Platform returns the current platform / operating system the app is running on.
-func Platform() goosi.Platforms {
-	return goosi.TheApp.Platform()
-}
-
-// SystemPlatform returns the current underlying platform / operating system the
-// app is running on. On platforms other than [goosi.Web], this is the same as
-// [Platform]. On [goosi.Web], it returns the underlying operating system.
-func SystemPlatform() goosi.Platforms {
-	return goosi.TheApp.SystemPlatform()
-}
-
-// todo: deal with this stuff too:
-
-// SetQuitReqFunc sets the function that is called whenever there is a
-// request to quit the app (via a OS or a call to QuitReq() method).  That
-// function can then adjudicate whether and when to actually call Quit.
-func SetQuitReqFunc(fun func()) {
-	goosi.TheApp.SetQuitReqFunc(fun)
-}
-
-// AddQuitCleanFunc adds the given function to a list that is called whenever
-// app is actually about to quit (irrevocably). Can do any necessary
-// last-minute cleanup here.
-func AddQuitCleanFunc(fun func()) {
-	goosi.TheApp.AddQuitCleanFunc(fun)
-}
-
 // Quit closes all windows and exits the program.
 func Quit() {
 	if !goosi.TheApp.IsQuitting() {
 		goosi.TheApp.Quit()
 	}
-}
-
-// QuitReq requests to Quit -- calls QuitReqFunc if present
-func QuitReq() {
-	goosi.TheApp.QuitReq()
-}
-
-// OpenURL opens the given URL in the user's default browser.  On Linux
-// this requires that xdg-utils package has been installed -- uses
-// xdg-open command.
-func OpenURL(url string) {
-	goosi.TheApp.OpenURL(url)
-}
-
-// CogentCoreDataDir returns the Cogent Core data directory: [DataDir] + "CogentCoreDataDir".
-// It ensures that the directory exists first.
-func CogentCoreDataDir() string {
-	return goosi.TheApp.CogentCoreDataDir()
-}
-
-// DataDir returns the OS-specific data directory: Mac: ~/Library,
-// Linux: ~/.config, Windows: ~/AppData/Roaming
-func DataDir() string {
-	return goosi.TheApp.DataDir()
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -271,7 +172,7 @@ func (tb *Toolbar) StdOverflowMenu(m *Scene) { //gti:add
 	})
 
 	// no window menu on single-window platforms
-	if Platform().IsMobile() {
+	if TheApp.Platform().IsMobile() {
 		return
 	}
 	NewButton(m).SetText("Window").SetMenu(func(m *Scene) {
@@ -296,7 +197,7 @@ func (tb *Toolbar) StdOverflowMenu(m *Scene) { //gti:add
 			})
 		NewButton(m).SetText("Quit").SetIcon(icons.Close).SetShortcut("Command+Q").
 			OnClick(func(e events.Event) {
-				QuitReq()
+				TheApp.QuitReq()
 			})
 		NewSeparator(m)
 		for _, w := range MainRenderWins {

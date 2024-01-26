@@ -29,6 +29,9 @@ func NewBody(name ...string) *Body {
 	nm := "body"
 	if len(name) > 0 {
 		nm = name[0]
+		if TheApp.Name() == "" {
+			TheApp.SetName(nm)
+		}
 	}
 	bd.InitName(bd, nm)
 	bd.Title = nm

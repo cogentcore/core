@@ -125,6 +125,12 @@ func (a *App) OpenFiles() []string {
 	return a.OpenFls
 }
 
+func (a *App) AppDataDir() string {
+	pdir := filepath.Join(goosi.TheApp.DataDir(), a.Name())
+	os.MkdirAll(pdir, 0755)
+	return pdir
+}
+
 func (a *App) CogentCoreDataDir() string {
 	pdir := filepath.Join(a.This.DataDir(), "CogentCore")
 	os.MkdirAll(pdir, 0755)
