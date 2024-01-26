@@ -312,9 +312,9 @@ func layouts(ts *gi.Tabs) {
 func dialogs(ts *gi.Tabs) {
 	tab := ts.NewTab("Dialogs")
 
-	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Dialogs, windows, and snackbars")
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Dialogs, snackbars, and windows")
 	gi.NewLabel(tab).SetText(
-		`Cogent Core provides completely customizable dialogs, windows, and snackbars that allow you to easily display and obtain information.`)
+		`Cogent Core provides completely customizable dialogs, snackbars, and windows that allow you to easily display, obtain, and organize information.`)
 
 	makeRow := func() gi.Widget {
 		return gi.NewLayout(tab).Style(func(s *styles.Style) {
@@ -376,8 +376,7 @@ func dialogs(ts *gi.Tabs) {
 
 	nd := gi.NewButton(drow).SetText("New window")
 	nd.OnClick(func(e events.Event) {
-		d := gi.NewBody().AddTitle("New window dialog").AddText("This dialog opens in a new window on multi-window platforms")
-		d.NewDialog(nd).SetNewWindow(true).Run()
+		gi.NewBody().AddTitle("New window dialog").AddText("This dialog opens in a new window on multi-window platforms").NewDialog(nd).SetNewWindow(true).Run()
 	})
 
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineSmall).SetText("Snackbars")
@@ -399,6 +398,19 @@ func dialogs(ts *gi.Tabs) {
 			AddSnackbarButton("Refresh", func(e events.Event) {
 				fmt.Println("Refreshed files")
 			}).AddSnackbarIcon(icons.Close).NewSnackbar(cs).Run()
+	})
+
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineSmall).SetText("Windows")
+	wrow := makeRow()
+
+	nw := gi.NewButton(wrow).SetText("New window")
+	nw.OnClick(func(e events.Event) {
+		gi.NewBody().AddTitle("New window").AddText("A standalone window that opens in a new window on multi-window platforms").NewWindow().Run()
+	})
+
+	fw := gi.NewButton(wrow).SetText("Full window")
+	fw.OnClick(func(e events.Event) {
+		gi.NewBody().AddTitle("Full window").AddText("A standalone window that opens in the same system window").NewWindow().SetNewWindow(false).Run()
 	})
 }
 
