@@ -78,7 +78,7 @@ type SettingsBase struct {
 	// Name is the name of the settings.
 	Name string `view:"-" save:"-"`
 
-	// File is the filename/filepath at which the settings are stored relative to [DataDir].
+	// File is the full filename/filepath at which the settings are stored.
 	File string `view:"-" save:"-"`
 }
 
@@ -89,7 +89,7 @@ func (sb *SettingsBase) Label() string {
 
 // Filename returns the full filename/filepath at which the settings are stored.
 func (sb *SettingsBase) Filename() string {
-	return filepath.Join(DataDir(), sb.File)
+	return filepath.Join(TheApp.DataDir(), sb.File)
 }
 
 // Defaults does nothing by default and can be extended by other settings data types.
@@ -684,21 +684,21 @@ var (
 	SavedPathsExtras = []string{FileViewResetPaths, FileViewEditPaths}
 )
 
-// SavePaths saves the active SavedPaths to prefs dir
+// SavePaths saves the active SavedPaths to data dir
 func SavePaths() {
 	StringsRemoveExtras((*[]string)(&SavedPaths), SavedPathsExtras)
-	pdir := CogentCoreDataDir()
+	pdir := TheApp.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, SavedPathsFilename)
 	SavedPaths.Save(pnm)
 	// add back after save
 	SavedPaths = append(SavedPaths, SavedPathsExtras...)
 }
 
-// OpenPaths loads the active SavedPaths from prefs dir
+// OpenPaths loads the active SavedPaths from data dir
 func OpenPaths() {
 	// remove to be sure we don't have duplicate extras
 	StringsRemoveExtras((*[]string)(&SavedPaths), SavedPathsExtras)
-	pdir := CogentCoreDataDir()
+	pdir := TheApp.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, SavedPathsFilename)
 	SavedPaths.Open(pnm)
 	// add back after save

@@ -229,7 +229,7 @@ func (sc *Scene) FitInWindow(winGeom mat32.Geom2DInt) {
 	geom := sc.SceneGeom
 	// full offscreen windows ignore any window geometry constraints
 	// because they must be unbounded by any previous window sizes
-	if Platform() != goosi.Offscreen || !sc.Stage.FullWindow {
+	if TheApp.Platform() != goosi.Offscreen || !sc.Stage.FullWindow {
 		geom = geom.FitInWindow(winGeom)
 	}
 	sc.Resize(geom)
@@ -279,7 +279,7 @@ func (sc *Scene) Close() {
 	if mm == nil {
 		return // todo: needed, but not sure why
 	}
-	if sc.Stage.NewWindow && !Platform().IsMobile() {
+	if sc.Stage.NewWindow && !TheApp.Platform().IsMobile() {
 		mm.RenderWin.CloseReq()
 		return
 	}

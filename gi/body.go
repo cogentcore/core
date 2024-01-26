@@ -23,7 +23,8 @@ type Body struct { //core:no-new
 // It will create its own parent Scene at this point, and has wrapper
 // functions to transparently manage everything that the Scene
 // typically manages during configuration, so you can usually avoid
-// having to access the Scene directly.
+// having to access the Scene directly. If a name is given and
+// the name of [TheApp] is unset, it sets it to the given name.
 func NewBody(name ...string) *Body {
 	bd := &Body{}
 	nm := "body"
@@ -68,14 +69,6 @@ func (bd *Body) AddText(text string) *Body {
 		SetType(LabelBodyMedium).Style(func(s *styles.Style) {
 		s.Color = colors.Scheme.OnSurfaceVariant
 	})
-	return bd
-}
-
-// SetApp sets the App of the Body's Scene
-func (bd *Body) SetApp(app *App) *Body {
-	bd.Scene.App = app
-	bd.Nm = app.Name
-	bd.Title = app.Name
 	return bd
 }
 

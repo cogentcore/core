@@ -35,7 +35,7 @@ func HandleRecover(r any) {
 		AddText("There was an unexpected error and " + goosi.TheApp.Name() + " stopped running.")
 	b.AddBottomBar(func(pw Widget) {
 		NewButton(pw).SetText("Details").SetType(ButtonOutlined).OnClick(func(e events.Event) {
-			clpath := filepath.Join(CogentCoreDataDir(), "crash-logs", goosi.TheApp.Name())
+			clpath := filepath.Join(TheApp.AppDataDir(), "crash-logs")
 			txt := fmt.Sprintf("Crash log saved in %s\n\npanic: %v\n\n%s", clpath, r, stack)
 			d := NewBody("crash-details").AddTitle("Crash details")
 			NewLabel(d).SetText(txt).Style(func(s *styles.Style) {

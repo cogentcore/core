@@ -96,7 +96,7 @@ func (st *Stage) ConfigMainStage() {
 		st.FullWindow = true
 	}
 	// if we are on mobile, we can never have new windows
-	if Platform().IsMobile() {
+	if TheApp.Platform().IsMobile() {
 		st.NewWindow = false
 	}
 	sc := st.Scene
@@ -134,15 +134,15 @@ func (st *Stage) RunWindow() *Stage {
 	// non-offscreen mobile windows must take up the whole window
 	// and thus don't consider pref size
 	// desktop new windows and non-full windows can pref size
-	if Platform() == goosi.Offscreen ||
-		(!Platform().IsMobile() &&
+	if TheApp.Platform() == goosi.Offscreen ||
+		(!TheApp.Platform().IsMobile() &&
 			(st.NewWindow || !st.FullWindow || CurRenderWin == nil)) {
 		sz = sc.PrefSize(sz)
 		// on offscreen, we don't want any extra space, as we want the smallest
 		// possible representation of the content
 		// also, on offscreen, if the new size is bigger than the current size,
 		// we need to resize the window
-		if Platform() == goosi.Offscreen {
+		if TheApp.Platform() == goosi.Offscreen {
 			if CurRenderWin != nil {
 				csz := CurRenderWin.GoosiWin.Size()
 				nsz := csz
@@ -280,7 +280,7 @@ func (st *Stage) NewRenderWin() *RenderWin {
 		opts.Icon = st.Scene.App.Icon
 	}
 	wgp := WinGeomMgr.Pref(title, nil)
-	if Platform() != goosi.Offscreen && wgp != nil {
+	if TheApp.Platform() != goosi.Offscreen && wgp != nil {
 		WinGeomMgr.SettingStart()
 		opts.Size = wgp.Size()
 		opts.Pos = wgp.Pos()

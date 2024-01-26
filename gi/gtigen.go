@@ -19,17 +19,7 @@ import (
 	"cogentcore.org/core/units"
 )
 
-var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.App", IDName: "app", Doc: "App encapsulates various properties of the overall application,\nincluding managing an AppBar and associated elements.", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Fields: []gti.Field{{Name: "Name", Doc: "Name can be used in relevant window titles and prompts,\nand specifies the default application-specific data directory"}, {Name: "About", Doc: "About sets the 'about' info for the app, which appears as a menu option\nin the default app menu."}, {Name: "Icon", Doc: "Icon specifies the app icon, which is passed to [goosi.Window.SetIcon].\nIt should typically be set using [App.SetIconSVG]."}, {Name: "AppBarConfig", Doc: "AppBarConfig is the function that configures the AppBar,\ntypically put in the [Scene.Bars.Top] (i.e., a TopAppBar).\nSet to StdAppBarConfig by default, which makes the standard AppBar behavior.\nMost apps will define their own version to add App-specific\nfunctionality, and set this accordingly.\nIf this is nil, then no TopAppBar will be created by default."}, {Name: "SceneConfig", Doc: "BodyConfig is the function called on every newly created [gi.Scene]\nto configure it, if it is non-nil. This can be used to set global\nconfiguration and styling for all widgets using the OnWidgetAdded\nmethod."}}})
-
-// SetName sets the [App.Name]:
-// Name can be used in relevant window titles and prompts,
-// and specifies the default application-specific data directory
-func (t *App) SetName(v string) *App { t.Name = v; return t }
-
-// SetAbout sets the [App.About]:
-// About sets the 'about' info for the app, which appears as a menu option
-// in the default app menu.
-func (t *App) SetAbout(v string) *App { t.About = v; return t }
+var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.App", IDName: "app", Doc: "App represents a Cogent Core app. It extends [goosi.App] to provide both system-level\nand high-level data and functions to do with the currently running application. The\nsingle instance of it is [TheApp], which embeds [goosi.TheApp].", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Embeds: []gti.Field{{Name: "App"}}, Fields: []gti.Field{{Name: "Icon", Doc: "Icon specifies the app icon, which is passed to [goosi.Window.SetIcon].\nIt should typically be set using [App.SetIconSVG]."}, {Name: "AppBarConfig", Doc: "AppBarConfig is the function that configures the AppBar,\ntypically put in the [Scene.Bars.Top] (i.e., a TopAppBar).\nSet to StdAppBarConfig by default, which makes the standard AppBar behavior.\nMost apps will define their own version to add App-specific\nfunctionality, and set this accordingly.\nIf this is nil, then no TopAppBar will be created by default."}, {Name: "SceneConfig", Doc: "SceneConfig is the function called on every newly created [gi.Scene]\nto configure it, if it is non-nil. This can be used to set global\nconfiguration and styling for all widgets using the OnWidgetAdded\nmethod."}}})
 
 // SetIcon sets the [App.Icon]:
 // Icon specifies the app icon, which is passed to [goosi.Window.SetIcon].
@@ -46,7 +36,7 @@ func (t *App) SetIcon(v ...image.Image) *App { t.Icon = v; return t }
 func (t *App) SetAppBarConfig(v func(pw Widget)) *App { t.AppBarConfig = v; return t }
 
 // SetSceneConfig sets the [App.SceneConfig]:
-// BodyConfig is the function called on every newly created [gi.Scene]
+// SceneConfig is the function called on every newly created [gi.Scene]
 // to configure it, if it is non-nil. This can be used to set global
 // configuration and styling for all widgets using the OnWidgetAdded
 // method.

@@ -28,8 +28,9 @@ import (
 // TheApp is the current [App]; only one is ever in effect.
 var TheApp = &App{App: goosi.TheApp}
 
-// App encapsulates various properties of the overall application,
-// including managing an AppBar and associated elements.
+// App represents a Cogent Core app. It extends [goosi.App] to provide both system-level
+// and high-level data and functions to do with the currently running application. The
+// single instance of it is [TheApp], which embeds [goosi.TheApp].
 type App struct { //gti:add -setters
 	goosi.App `set:"-"`
 
