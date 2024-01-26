@@ -89,7 +89,7 @@ func (sb *SettingsBase) Label() string {
 
 // Filename returns the full filename/filepath at which the settings are stored.
 func (sb *SettingsBase) Filename() string {
-	return filepath.Join(TheApp.DataDir(), sb.File)
+	return sb.File
 }
 
 // Defaults does nothing by default and can be extended by other settings data types.
