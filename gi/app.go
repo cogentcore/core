@@ -40,10 +40,9 @@ type App struct { //gti:add -setters
 
 	// AppBarConfig is the function that configures the AppBar,
 	// typically put in the [Scene.Bars.Top] (i.e., a TopAppBar).
-	// Set to StdAppBarConfig by default, which makes the standard AppBar behavior.
-	// Most apps will define their own version to add App-specific
-	// functionality, and set this accordingly.
-	// If this is nil, then no TopAppBar will be created by default.
+	// It is set to StdAppBarConfig by default, which makes the
+	// standard AppBar behavior. If this is nil, then no AppBar
+	// will be created by default.
 	AppBarConfig func(pw Widget)
 
 	// SceneConfig is the function called on every newly created [gi.Scene]

@@ -6,6 +6,7 @@ package gi
 
 import (
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/grr"
 	"cogentcore.org/core/styles"
 )
 
@@ -33,6 +34,11 @@ func NewBody(name ...string) *Body {
 		if TheApp.Name() == "" {
 			TheApp.SetName(nm)
 		}
+	}
+	if AppearanceSettings.Zoom == 0 {
+		// we load the settings in NewBody so that people can
+		// add their own settings to AllSettings first
+		grr.Log(LoadAllSettings())
 	}
 	bd.InitName(bd, nm)
 	bd.Title = nm
