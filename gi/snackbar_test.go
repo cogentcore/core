@@ -23,7 +23,7 @@ func newBodyForSnackbar() *Body {
 	return b
 }
 
-func TestCustomSnackbar(t *testing.T) {
+func TestSnackbarCustom(t *testing.T) {
 	b := newBodyForSnackbar()
 	b.AssertScreenRender(t, filepath.Join("snackbar", "text"), func() {
 		NewBody().AddSnackbarText("Files updated").NewSnackbar(b).Run()
@@ -45,7 +45,14 @@ func TestCustomSnackbar(t *testing.T) {
 	})
 }
 
-func TestErrorSnackbar(t *testing.T) {
+func TestSnackbarMessage(t *testing.T) {
+	b := newBodyForSnackbar()
+	b.AssertScreenRender(t, filepath.Join("snackbar", "message"), func() {
+		MessageSnackbar(b, "New messages loaded")
+	})
+}
+
+func TestSnackbarError(t *testing.T) {
 	b := newBodyForSnackbar()
 	b.AssertScreenRender(t, filepath.Join("snackbar", "no-error"), func() {
 		ErrorSnackbar(b, nil)
