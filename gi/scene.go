@@ -42,11 +42,6 @@ import (
 type Scene struct {
 	Frame
 
-	// App is the pointer to the application to which this scene belongs.
-	// The first Main Window Scene must set this, and others will automatically
-	// grab from there.
-	App *App
-
 	// Bars contains functions for constructing the control bars for this Scene,
 	// attached to different sides of a Scene (e.g., TopAppBar at Top,
 	// NavBar at Bottom, etc).  Functions are called in forward order
@@ -159,10 +154,8 @@ func (sc *Scene) OnInit() {
 	sc.WidgetBase.OnInit()
 	sc.SetStyles()
 	sc.Layout.HandleEvents()
-	if CurRenderWin != nil {
-		if app := CurRenderWin.MainScene().App; app != nil && app.SceneConfig != nil {
-			app.SceneConfig(sc)
-		}
+	if TheApp.SceneConfig != nil {
+		TheApp.SceneConfig(sc)
 	}
 }
 

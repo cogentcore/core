@@ -201,7 +201,7 @@ func UpdateAll() { //gti:add
 var AppearanceSettings = &AppearanceSettingsData{
 	SettingsBase: SettingsBase{
 		Name: "Appearance",
-		File: filepath.Join("CogentCore", "appearance-settings.toml"),
+		File: filepath.Join(TheApp.CogentCoreDataDir(), "appearance-settings.toml"),
 	},
 }
 
@@ -352,7 +352,7 @@ func (as *AppearanceSettingsData) DeleteSavedWindowGeoms() { //gti:add
 var DeviceSettings = &DeviceSettingsData{
 	SettingsBase: SettingsBase{
 		Name: "Device",
-		File: filepath.Join("CogentCore", "device-settings.toml"),
+		File: filepath.Join(TheApp.CogentCoreDataDir(), "device-settings.toml"),
 	},
 }
 
@@ -427,7 +427,7 @@ type ScreenSettings struct { //gti:add
 var SystemSettings = &SystemSettingsData{
 	SettingsBase: SettingsBase{
 		Name: "System",
-		File: filepath.Join("CogentCore", "system-settings.toml"),
+		File: filepath.Join(TheApp.CogentCoreDataDir(), "system-settings.toml"),
 	},
 }
 
@@ -712,7 +712,7 @@ func OpenPaths() {
 var DebugSettings = &DebugSettingsData{
 	SettingsBase: SettingsBase{
 		Name: "Debug",
-		File: filepath.Join("CogentCore", "debug-settings.toml"),
+		File: filepath.Join(TheApp.CogentCoreDataDir(), "debug-settings.toml"),
 	},
 }
 
