@@ -113,7 +113,7 @@ func (st *Stage) RunPopup() *Stage {
 			if st.Main == nil {
 				return
 			}
-			st.PopupMgr.PopDeleteType(st.Type)
+			st.PopupMgr.DeleteStage(st)
 		})
 	}
 
