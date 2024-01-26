@@ -16,7 +16,7 @@ import (
 var content string
 
 func main() {
-	b := gi.NewAppBody("Coredom HTML")
+	b := gi.NewBody("Coredom HTML")
 	grr.Log(coredom.ReadHTMLString(coredom.NewContext(), b, content))
 	b.RunMainWindow()
 }

@@ -113,7 +113,7 @@ var StylesChanged = false
 
 // OpenPrefs opens Styles from Cogent Core standard prefs directory, using PrefsStylesFilename
 func (hs *Styles) OpenPrefs() error {
-	pdir := gi.CogentCoreDataDir()
+	pdir := gi.TheApp.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, PrefsStylesFilename)
 	StylesChanged = false
 	return hs.OpenJSON(gi.Filename(pnm))
@@ -121,7 +121,7 @@ func (hs *Styles) OpenPrefs() error {
 
 // SavePrefs saves Styles to Cogent Core standard prefs directory, using PrefsStylesFilename
 func (hs *Styles) SavePrefs() error {
-	pdir := gi.CogentCoreDataDir()
+	pdir := gi.TheApp.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, PrefsStylesFilename)
 	StylesChanged = false
 	MergeAvailStyles()

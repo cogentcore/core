@@ -42,7 +42,7 @@ func Run[T any, C grease.CmdOrFunc[T]](opts *grease.Options, cfg T, cmds ...C) e
 			return nil
 		},
 		Name: "gui",
-		Doc:  "gui runs the GUI version of the " + opts.AppTitle + " tool",
+		Doc:  "gui runs the GUI version of the " + opts.AppName + " tool",
 		Root: true, // if root isn't already taken, we take it
 	})
 	return grease.Run(opts, cfg, cs...)

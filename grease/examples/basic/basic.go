@@ -113,6 +113,6 @@ func ModTidyRemoteSetURL(c *Config) error {
 
 //gti:skip
 func main() {
-	opts := grease.DefaultOptions("basic", "Basic", "Basic is a basic example application made with Grease.")
+	opts := grease.DefaultOptions("Basic", "Basic is a basic example application made with Grease.")
 	grease.Run(opts, &Config{}, Build, Run, Mod, ModTidy, ModTidyRemote, ModTidyRemoteSetURL)
 }

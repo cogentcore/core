@@ -20,8 +20,7 @@ import (
 )
 
 func main() {
-	b := gi.NewAppBody("XYZ Object Viewer")
-	b.App().About = `This is a viewer for the 3D graphics aspect of the <b>Cogent Core</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Cogent Core on GitHub</a>. <p>The <a href="https://cogentcore.org/core/gi/v2/blob/master/examples/xyzviewer/README.md">README</a> page for this example app has further info.</p>`
+	b := gi.NewBody("XYZ Object Viewer")
 
 	sv := xyzv.NewSceneView(b)
 	sv.Config()
