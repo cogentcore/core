@@ -28,16 +28,17 @@ import (
 var icon []byte
 
 func main() {
-	gi.TheApp.SetIconBytes(icon).SetSceneConfig(func(sc *gi.Scene) {
-		sc.OnWidgetAdded(func(w gi.Widget) {
-			switch w := w.(type) {
-			case *gi.Button, *giv.FuncButton:
-				w.Style(func(s *styles.Style) {
-					s.Border.Radius = styles.BorderRadiusSmall
-				})
-			}
-		})
-	})
+	gi.TheApp.SetIconBytes(icon)
+	// .SetSceneConfig(func(sc *gi.Scene) {
+	// 	sc.OnWidgetAdded(func(w gi.Widget) {
+	// 		switch w := w.(type) {
+	// 		case *gi.Button, *giv.FuncButton:
+	// 			w.Style(func(s *styles.Style) {
+	// 				s.Border.Radius = styles.BorderRadiusSmall
+	// 			})
+	// 		}
+	// 	})
+	// })
 
 	b := gi.NewBody("Cogent Core Demo")
 	ts := gi.NewTabs(b)
@@ -345,7 +346,21 @@ func dialogs(ts *gi.Tabs) {
 	gi.NewLabel(tab).SetText(
 		`Cogent Core provides customizable dialogs and snackbars that allow you to easily display and obtain information.`)
 
-	gi.NewLabel(tab)
+	makeRow := func() gi.Widget {
+		return gi.NewLayout(tab).Style(func(s *styles.Style) {
+			s.Wrap = true
+			s.Align.Items = styles.Center
+		})
+	}
+
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineSmall).SetText("Dialogs")
+	drow := makeRow()
+
+	info := gi.NewButton(drow).SetText("Info")
+	info.OnClick(func(e events.Event) {
+		gi.NewBody().AddTitle("Info").AddText("Something happened").
+			AddOkOnly().NewDialog(info).Run()
+	})
 }
 
 func other(ts *gi.Tabs) {
