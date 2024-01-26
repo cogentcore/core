@@ -11,6 +11,8 @@ package token
 
 import (
 	"fmt"
+
+	"cogentcore.org/core/icons"
 )
 
 // Tokens is a complete set of lexical tokens that encompasses all programming and text
@@ -244,17 +246,17 @@ func (kl KeyTokenList) Match(okt KeyToken) bool {
 func (tk Tokens) IconName() string {
 	switch {
 	case tk.SubCat() == NameVar:
-		return "var"
+		return string(icons.Variable)
 	case tk == NameConstant || tk == NameEnum || tk == NameEnumMember:
-		return "const"
+		return string(icons.Constant)
 	case tk == NameField:
-		return "field"
+		return string(icons.Field)
 	case tk.SubCat() == NameType:
-		return "type"
+		return string(icons.Type)
 	case tk == NameMethod:
-		return "method"
+		return string(icons.Method)
 	case tk.SubCat() == NameFunction:
-		return "function"
+		return string(icons.Function)
 	}
 	return ""
 }
