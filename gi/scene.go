@@ -42,11 +42,6 @@ import (
 type Scene struct {
 	Frame
 
-	// App is the pointer to the application to which this scene belongs.
-	// The first Main Window Scene must set this, and others will automatically
-	// grab from there.
-	App *App
-
 	// Bars contains functions for constructing the control bars for this Scene,
 	// attached to different sides of a Scene (e.g., TopAppBar at Top,
 	// NavBar at Bottom, etc).  Functions are called in forward order
@@ -143,26 +138,13 @@ func NewScene(name ...string) *Scene {
 	return sc
 }
 
-// TODO: what should we do about sub scenes?
-
-// NewSubScene creates a new [Scene] that will serve as a sub-scene of another [Scene].
-// Scenes can also be added as the content of a [Stage] (without a parent) through the
-// [NewScene] function. If no name is provided, it defaults to "scene".
-// func NewSubScene(par ki.Ki, name ...string) *Scene {
-// 	sc := par.NewChild(SceneType, name...).(*Scene)
-// 	sc.EventMgr.Scene = sc
-// 	return sc
-// }
-
 func (sc *Scene) OnInit() {
 	sc.Scene = sc
 	sc.WidgetBase.OnInit()
 	sc.SetStyles()
 	sc.Layout.HandleEvents()
-	if CurRenderWin != nil {
-		if app := CurRenderWin.MainScene().App; app != nil && app.SceneConfig != nil {
-			app.SceneConfig(sc)
-		}
+	if TheApp.SceneConfig != nil {
+		TheApp.SceneConfig(sc)
 	}
 }
 
@@ -229,7 +211,7 @@ func (sc *Scene) FitInWindow(winGeom mat32.Geom2DInt) {
 	geom := sc.SceneGeom
 	// full offscreen windows ignore any window geometry constraints
 	// because they must be unbounded by any previous window sizes
-	if Platform() != goosi.Offscreen || !sc.Stage.FullWindow {
+	if TheApp.Platform() != goosi.Offscreen || !sc.Stage.FullWindow {
 		geom = geom.FitInWindow(winGeom)
 	}
 	sc.Resize(geom)
@@ -279,7 +261,7 @@ func (sc *Scene) Close() {
 	if mm == nil {
 		return // todo: needed, but not sure why
 	}
-	if sc.Stage.NewWindow && !Platform().IsMobile() {
+	if sc.Stage.NewWindow && !TheApp.Platform().IsMobile() {
 		mm.RenderWin.CloseReq()
 		return
 	}

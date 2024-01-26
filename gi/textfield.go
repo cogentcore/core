@@ -1092,7 +1092,7 @@ var (
 )
 
 func init() {
-	AddQuitCleanFunc(TextFieldBlinker.QuitClean)
+	TheApp.AddQuitCleanFunc(TextFieldBlinker.QuitClean)
 }
 
 // StartCursor starts the cursor blinking and renders it

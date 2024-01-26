@@ -22,7 +22,7 @@ import (
 // OSOpenCommand returns the generic file 'open' command to open file with default app
 // open on Mac, xdg-open on Linux, and start on Windows
 func OSOpenCommand() string {
-	switch gi.Platform() {
+	switch gi.TheApp.Platform() {
 	case goosi.MacOS:
 		return "open"
 	case goosi.Linux:

@@ -16,7 +16,7 @@ import (
 var content string
 
 func main() {
-	b := gi.NewAppBody("Coredom MD")
+	b := gi.NewBody("Coredom MD")
 	grr.Log(coredom.ReadMDString(coredom.NewContext(), b, content))
 	b.RunMainWindow()
 }

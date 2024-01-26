@@ -243,7 +243,7 @@ func (st *Stage) SetType(typ StageTypes) *Stage {
 	st.Type = typ
 	switch st.Type {
 	case WindowStage:
-		if !Platform().IsMobile() {
+		if !TheApp.Platform().IsMobile() {
 			st.NewWindow = true
 		}
 		st.FullWindow = true

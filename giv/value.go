@@ -898,7 +898,7 @@ func ConfigDialogWidget(vv Value, w gi.Widget, allowReadOnly bool) {
 	doc := vv.Doc()
 	tip := ""
 	// windows are never new on mobile
-	if !gi.Platform().IsMobile() {
+	if !gi.TheApp.Platform().IsMobile() {
 		tip += "[Shift: new window]"
 		if doc != "" {
 			tip += " "
