@@ -36,6 +36,16 @@ func (st *Stage) RunPopup() *Stage {
 	sc := st.Scene
 
 	ctx := st.Context.AsWidget()
+
+	// if our context stage is nil, we wait until
+	// our context is shown and then try again
+	if ctx.Scene.Stage == nil {
+		ctx.OnShow(func(e events.Event) {
+			st.RunPopup()
+		})
+		return st
+	}
+
 	ms := ctx.Scene.Stage.Main
 	msc := ms.Scene
 

@@ -51,7 +51,7 @@ func (bd *Body) SnackbarStyles() {
 		s.Direction = styles.Row
 		s.Overflow.Set(styles.OverflowVisible) // key for avoiding sizing errors when re-rendering with small pref size
 		s.Border.Radius = styles.BorderRadiusExtraSmall
-		s.Padding.SetHoriz(units.Dp(8))
+		s.Padding.SetHoriz(units.Dp(16))
 		s.Background = colors.C(colors.Scheme.InverseSurface)
 		s.Color = colors.Scheme.InverseOnSurface
 		s.Align.Content = styles.Center
@@ -59,6 +59,9 @@ func (bd *Body) SnackbarStyles() {
 		s.Gap.X.Dp(12)
 		s.Grow.Set(1, 0)
 		s.Min.Y.Dp(48)
+		s.Min.X.SetCustom(func(uc *units.Context) float32 {
+			return min(uc.Em(15), uc.Vw(80))
+		})
 	})
 	bd.Scene.Style(func(s *styles.Style) {
 		s.Background = nil

@@ -140,7 +140,25 @@ func (st *Stage) RunWindow() *Stage {
 		sz = sc.PrefSize(sz)
 		// on offscreen, we don't want any extra space, as we want the smallest
 		// possible representation of the content
-		if Platform() != goosi.Offscreen {
+		// also, on offscreen, if the new size is bigger than the current size,
+		// we need to resize the window
+		if Platform() == goosi.Offscreen {
+			if CurRenderWin != nil {
+				csz := CurRenderWin.GoosiWin.Size()
+				nsz := csz
+				if sz.X > csz.X {
+					nsz.X = sz.X
+				}
+				if sz.Y > csz.Y {
+					nsz.Y = sz.Y
+				}
+				if nsz != csz {
+					CurRenderWin.GoosiWin.SetSize(nsz)
+					goosi.TheApp.GetScreens()
+				}
+			}
+		} else {
+			// on other platforms, we want extra space and a minimum window size
 			sz = sz.Add(image.Pt(20, 20))
 			if st.NewWindow {
 				// we require the window to be at least half of the screen size
@@ -324,53 +342,3 @@ func (sm *StageMgr) MainHandleEvent(e events.Event) {
 		}
 	}
 }
-
-/*
-todo: main menu on full win
-
-// ConfigVLay creates and configures the vertical layout as first child of
-// Scene, and installs MainMenu as first element of layout.
-func (w *RenderWin) ConfigVLay() {
-	sc := w.Scene
-	updt := sc.UpdateStart()
-	defer sc.UpdateEnd(updt)
-	if !sc.HasChildren() {
-		sc.NewChild(LayoutType, "main-vlay")
-	}
-	w.Scene.Frame = sc.Child(0).Embed(LayoutType).(*Layout)
-	if !w.Scene.Frame.HasChildren() {
-		w.Scene.Frame.NewChild(TypeMenuBar, "main-menu")
-	}
-	w.MainMenu = w.Scene.Frame.Child(0).(*MenuBar)
-	w.MainMenu.MainMenu = true
-	w.MainMenu.SetStretchMaxWidth()
-}
-
-// AddMainMenu installs MainMenu as first element of main layout
-// used for dialogs that don't always have a main menu -- returns
-// menubar -- safe to call even if there is a menubar
-func (w *RenderWin) AddMainMenu() *MenuBar {
-	sc := w.Scene
-	updt := sc.UpdateStart()
-	defer sc.UpdateEnd(updt)
-	if !sc.HasChildren() {
-		sc.NewChild(LayoutType, "main-vlay")
-	}
-	w.Scene.Frame = sc.Child(0).Embed(LayoutType).(*Layout)
-	if !w.Scene.Frame.HasChildren() {
-		w.MainMenu = w.Scene.Frame.NewChild(TypeMenuBar, "main-menu").(*MenuBar)
-	} else {
-		mmi := w.Scene.Frame.ChildByName("main-menu", 0)
-		if mmi != nil {
-			mm := mmi.(*MenuBar)
-			w.MainMenu = mm
-			return mm
-		}
-	}
-	w.MainMenu = w.Scene.Frame.InsertNewChild(TypeMenuBar, 0, "main-menu").(*MenuBar)
-	w.MainMenu.MainMenu = true
-	w.MainMenu.SetStretchMaxWidth()
-	return w.MainMenu
-}
-
-*/

@@ -121,10 +121,6 @@ type Window interface {
 	// information about its properties.
 	Screen() *Screen
 
-	// MainMenu returns the OS-level main menu for this window -- this is
-	// currently for MacOS only -- returns nil for others.
-	MainMenu() MainMenu
-
 	// Flags returns the bit flags for this window's properties set according
 	// to WindowFlags bits.
 	Flags() WindowFlags

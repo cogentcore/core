@@ -668,11 +668,6 @@ func (w *RenderWin) HandleWindowEvents(e events.Event) {
 			if DebugSettings.WinEventTrace {
 				fmt.Printf("Win: %v got show event\n", w.Name)
 			}
-			// todo: remove?
-			// if w.NeedWinMenuUpdate() {
-			// 	w.MainMenuUpdateRenderWins()
-			// }
-			// w.SendShowEvent() // happens AFTER full render
 		case events.WinMove:
 			e.SetHandled()
 			// fmt.Printf("win move: %v\n", w.GoosiWin.Position())
@@ -688,9 +683,6 @@ func (w *RenderWin) HandleWindowEvents(e events.Event) {
 				if DebugSettings.WinEventTrace {
 					fmt.Printf("Win: %v got focus\n", w.Name)
 				}
-				// if w.NeedWinMenuUpdate() {
-				// 	w.MainMenuUpdateRenderWins()
-				// }
 			} else {
 				if DebugSettings.WinEventTrace {
 					fmt.Printf("Win: %v got extra focus\n", w.Name)
