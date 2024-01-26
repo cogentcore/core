@@ -326,9 +326,14 @@ func dialogs(ts *gi.Tabs) {
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineSmall).SetText("Dialogs")
 	drow := makeRow()
 
-	id := gi.NewButton(drow).SetText("Info")
-	id.OnClick(func(e events.Event) {
-		gi.NewBody().AddTitle("Info").AddText("Something happened").AddOkOnly().NewDialog(id).Run()
+	md := gi.NewButton(drow).SetText("Message")
+	md.OnClick(func(e events.Event) {
+		gi.MessageDialog(md, "Something happened", "Message")
+	})
+
+	ed := gi.NewButton(drow).SetText("Error")
+	ed.OnClick(func(e events.Event) {
+		gi.ErrorDialog(ed, errors.New("invalid encoding format"), "Error loading file")
 	})
 
 	cd := gi.NewButton(drow).SetText("Confirm")
