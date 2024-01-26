@@ -50,6 +50,7 @@ func GetWebcoreExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
 		sc := bufio.NewScanner(f)
 		var curExample [][]byte
 		inExample := false
+		gotNewBody := false
 		numExamples := 0
 		for sc.Scan() {
 			b := sc.Bytes()
@@ -61,8 +62,9 @@ func GetWebcoreExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
 				continue
 			}
 
-			// gi.NewAppBody counts as a new start so that full examples work
-			if bytes.Contains(b, []byte("gi.NewAppBody(")) {
+			// gi.NewBody counts as a new start so that full examples work
+			if !gotNewBody && bytes.Contains(b, []byte("gi.NewBody(")) {
+				gotNewBody = true
 				curExample = nil
 				curExample = append(curExample, []byte("b := parent"))
 				continue
@@ -85,6 +87,7 @@ func GetWebcoreExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
 				examples.Add(id, bytes.Join(curExample, []byte{'\n'}))
 				curExample = nil
 				inExample = false
+				gotNewBody = false
 				numExamples++
 				continue
 			}

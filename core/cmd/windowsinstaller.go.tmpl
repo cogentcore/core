@@ -15,7 +15,7 @@ var exe []byte
 var icon []byte
 
 func main() {
-	b := gi.NewAppBody("{{.Name}} Installer")
+	b := gi.NewBody("{{.Name}} Installer")
 	b.App().SetAppBarConfig(nil).SetIconBytes(icon)
 	bt := gi.NewButton(b).SetText("Install {{.Name}}")
 	bt.OnClick(func(e events.Event) {
