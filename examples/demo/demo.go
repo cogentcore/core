@@ -49,8 +49,8 @@ func main() {
 	buttons(ts)
 	inputs(ts)
 	layouts(ts)
-	values(ts)
 	dialogs(ts)
+	values(ts)
 	other(ts)
 
 	b.RunMainWindow()
@@ -309,37 +309,6 @@ func layouts(ts *gi.Tabs) {
 	gi.NewLabel(right).SetType(gi.LabelHeadlineMedium).SetText("Right")
 }
 
-func values(ts *gi.Tabs) {
-	tab := ts.NewTab("Values")
-
-	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Values")
-	gi.NewLabel(tab).SetText(
-		`Cogent Core provides the giv value system, which allows you to instantly turn Go values and functions into type-specific widgets bound to the original values. This powerful system means that you can automatically turn backend data structures into GUI apps with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.`)
-
-	gi.NewButton(tab).SetText("Inspector").OnClick(func(e events.Event) {
-		giv.InspectorWindow(ts.Scene)
-	})
-
-	giv.NewValue(tab, colors.Orange)
-	giv.NewValue(tab, time.Now())
-	giv.NewValue(tab, 5*time.Minute)
-	giv.NewValue(tab, gi.Filename("demo.go"))
-	giv.NewValue(tab, giv.ColorMapName("ColdHot"))
-	giv.NewFuncButton(tab, hello).SetShowReturn(true)
-}
-
-// Hello displays a greeting message and an age in weeks based on the given information.
-func hello(firstName string, lastName string, age int, likesGo bool) (greeting string, weeksOld int) { //gti:add
-	weeksOld = age * 52
-	greeting = "Hello, " + firstName + " " + lastName + "! "
-	if likesGo {
-		greeting += "I'm glad to here that you like the best programming language!"
-	} else {
-		greeting += "You should reconsider what programming languages you like."
-	}
-	return
-}
-
 func dialogs(ts *gi.Tabs) {
 	tab := ts.NewTab("Dialogs")
 
@@ -390,9 +359,20 @@ func dialogs(ts *gi.Tabs) {
 	})
 
 	fd := gi.NewButton(drow).SetText("Full window")
+	u := &gi.User{}
 	fd.OnClick(func(e events.Event) {
 		d := gi.NewBody().AddTitle("Full window dialog").AddText("Edit your information")
+		giv.NewStructView(d).SetStruct(u)
+		d.OnClose(func(e events.Event) {
+			fmt.Println("Your information is:", u)
+		})
 		d.NewFullDialog(td).Run()
+	})
+
+	nd := gi.NewButton(drow).SetText("New window")
+	nd.OnClick(func(e events.Event) {
+		d := gi.NewBody().AddTitle("New window dialog").AddText("This dialog opens in a new window on multi-window platforms")
+		d.NewDialog(nd).SetNewWindow(true).Run()
 	})
 
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineSmall).SetText("Snackbars")
@@ -415,6 +395,37 @@ func dialogs(ts *gi.Tabs) {
 				fmt.Println("Refreshed files")
 			}).AddSnackbarIcon(icons.Close).NewSnackbar(cs).Run()
 	})
+}
+
+func values(ts *gi.Tabs) {
+	tab := ts.NewTab("Values")
+
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Values")
+	gi.NewLabel(tab).SetText(
+		`Cogent Core provides the giv value system, which allows you to instantly turn Go values and functions into type-specific widgets bound to the original values. This powerful system means that you can automatically turn backend data structures into GUI apps with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.`)
+
+	gi.NewButton(tab).SetText("Inspector").OnClick(func(e events.Event) {
+		giv.InspectorWindow(ts.Scene)
+	})
+
+	giv.NewValue(tab, colors.Orange)
+	giv.NewValue(tab, time.Now())
+	giv.NewValue(tab, 5*time.Minute)
+	giv.NewValue(tab, gi.Filename("demo.go"))
+	giv.NewValue(tab, giv.ColorMapName("ColdHot"))
+	giv.NewFuncButton(tab, hello).SetShowReturn(true)
+}
+
+// Hello displays a greeting message and an age in weeks based on the given information.
+func hello(firstName string, lastName string, age int, likesGo bool) (greeting string, weeksOld int) { //gti:add
+	weeksOld = age * 52
+	greeting = "Hello, " + firstName + " " + lastName + "! "
+	if likesGo {
+		greeting += "I'm glad to here that you like the best programming language!"
+	} else {
+		greeting += "You should reconsider what programming languages you like."
+	}
+	return
 }
 
 func other(ts *gi.Tabs) {
