@@ -48,6 +48,7 @@ func main() {
 	inputs(ts)
 	layouts(ts)
 	values(ts)
+	dialogs(ts)
 	other(ts)
 
 	b.RunMainWindow()
@@ -193,8 +194,7 @@ func inputs(ts *gi.Tabs) {
 	tab := ts.NewTab("Inputs")
 
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Inputs")
-
-	gi.NewLabel(tab).SetType(gi.LabelBodyLarge).SetText(
+	gi.NewLabel(tab).SetText(
 		`Cogent Core provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.`)
 
 	gi.NewTextField(tab).SetPlaceholder("Filled")
@@ -278,8 +278,7 @@ func layouts(ts *gi.Tabs) {
 	tab := ts.NewTab("Layouts")
 
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Layout")
-
-	gi.NewLabel(tab).SetType(gi.LabelBodyLarge).SetText(
+	gi.NewLabel(tab).SetText(
 		`Cogent Core provides various adaptable layout types that allow you to easily organize content so that it is easy to use, customize, and understand.`)
 
 	// vw := gi.NewLabel(layouts, "vw", "50vw")
@@ -312,8 +311,7 @@ func values(ts *gi.Tabs) {
 	tab := ts.NewTab("Values")
 
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Values")
-
-	gi.NewLabel(tab).SetType(gi.LabelBodyLarge).SetText(
+	gi.NewLabel(tab).SetText(
 		`Cogent Core provides the giv value system, which allows you to instantly turn Go values and functions into type-specific widgets bound to the original values. This powerful system means that you can automatically turn backend data structures into GUI apps with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.`)
 
 	gi.NewButton(tab).SetText("Inspector").OnClick(func(e events.Event) {
@@ -340,12 +338,21 @@ func hello(firstName string, lastName string, age int, likesGo bool) (greeting s
 	return
 }
 
+func dialogs(ts *gi.Tabs) {
+	tab := ts.NewTab("Dialogs")
+
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Dialogs and snackbars")
+	gi.NewLabel(tab).SetText(
+		`Cogent Core provides customizable dialogs and snackbars that allow you to easily display and obtain information.`)
+
+	gi.NewLabel(tab)
+}
+
 func other(ts *gi.Tabs) {
 	tab := ts.NewTab("Other")
 
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Other")
-
-	gi.NewLabel(tab).SetType(gi.LabelBodyLarge).SetText(`Other features of the Cogent Core framework`)
+	gi.NewLabel(tab).SetText(`Other features of the Cogent Core framework`)
 
 	gi.NewMeter(tab).SetValue(0.5)
 }
