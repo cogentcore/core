@@ -8,6 +8,7 @@ package main
 
 import (
 	_ "embed"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -358,8 +359,7 @@ func dialogs(ts *gi.Tabs) {
 
 	ib := gi.NewButton(drow).SetText("Info")
 	ib.OnClick(func(e events.Event) {
-		gi.NewBody().AddTitle("Info").AddText("Something happened").
-			AddOkOnly().NewDialog(ib).Run()
+		gi.NewBody().AddTitle("Info").AddText("Something happened").AddOkOnly().NewDialog(ib).Run()
 	})
 
 	cb := gi.NewButton(drow).SetText("Confirm")
@@ -389,6 +389,26 @@ func dialogs(ts *gi.Tabs) {
 		d.NewDialog(tb).Run()
 	})
 
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineSmall).SetText("Snackbars")
+	srow := makeRow()
+
+	ms := gi.NewButton(srow).SetText("Message")
+	ms.OnClick(func(e events.Event) {
+		gi.MessageSnackbar(ms, "New messages loaded")
+	})
+
+	es := gi.NewButton(srow).SetText("Error")
+	es.OnClick(func(e events.Event) {
+		gi.ErrorSnackbar(es, errors.New("file not found"), "Error loading page")
+	})
+
+	cs := gi.NewButton(srow).SetText("Custom")
+	cs.OnClick(func(e events.Event) {
+		gi.NewBody().AddSnackbarText("Files updated").
+			AddSnackbarButton("Refresh", func(e events.Event) {
+				fmt.Println("Refreshed files")
+			}).AddSnackbarIcon(icons.Close).NewSnackbar(cs).Run()
+	})
 }
 
 func other(ts *gi.Tabs) {
