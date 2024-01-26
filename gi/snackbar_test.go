@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"errors"
 	"path/filepath"
 	"testing"
 	"time"
@@ -49,4 +50,29 @@ func TestSnackbarTime(t *testing.T) {
 			time.Sleep(tm)
 		})
 	}
+}
+
+func TestErrorSnackbar(t *testing.T) {
+	nb := func() *Body {
+		b := NewBody()
+		b.Style(func(s *styles.Style) {
+			s.Min.Set(units.Dp(300))
+		})
+		return b
+	}
+
+	b := nb()
+	b.AssertScreenRender(t, filepath.Join("snackbar", "no-error"), func() {
+		ErrorSnackbar(b, nil)
+	})
+
+	b = nb()
+	b.AssertScreenRender(t, filepath.Join("snackbar", "error"), func() {
+		ErrorSnackbar(b, errors.New("file not found"))
+	})
+
+	b = nb()
+	b.AssertScreenRender(t, filepath.Join("snackbar", "error-label"), func() {
+		ErrorSnackbar(b, errors.New("file not found"), "Error loading page")
+	})
 }
