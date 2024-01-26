@@ -60,7 +60,7 @@ func (bd *Body) SnackbarStyles() {
 		s.Grow.Set(1, 0)
 		s.Min.Y.Dp(48)
 		s.Min.X.SetCustom(func(uc *units.Context) float32 {
-			return min(uc.Em(15), uc.Vw(80))
+			return min(uc.Em(20), uc.Vw(70))
 		})
 	})
 	bd.Scene.Style(func(s *styles.Style) {
