@@ -54,13 +54,15 @@ func (bd *Body) SnackbarStyles() {
 		s.Padding.SetHoriz(units.Dp(16))
 		s.Background = colors.C(colors.Scheme.InverseSurface)
 		s.Color = colors.Scheme.InverseOnSurface
+		// we go on top of things so we want no margin background
+		s.FillMargin = false
 		s.Align.Content = styles.Center
 		s.Align.Items = styles.Center
 		s.Gap.X.Dp(12)
 		s.Grow.Set(1, 0)
 		s.Min.Y.Dp(48)
 		s.Min.X.SetCustom(func(uc *units.Context) float32 {
-			return min(uc.Em(15), uc.Vw(80))
+			return min(uc.Em(20), uc.Vw(70))
 		})
 	})
 	bd.Scene.Style(func(s *styles.Style) {

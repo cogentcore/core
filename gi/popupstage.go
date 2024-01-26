@@ -29,14 +29,7 @@ func NewPopupStage(typ StageTypes, sc *Scene, ctx Widget) *Stage {
 
 // RunPopup runs a popup-style Stage in context widget's popups.
 func (st *Stage) RunPopup() *Stage {
-	if st.Type == SnackbarStage {
-		st.Scene.ConfigSceneBars()
-	}
-	st.Scene.ConfigSceneWidgets()
-	sc := st.Scene
-
 	ctx := st.Context.AsWidget()
-
 	// if our context stage is nil, we wait until
 	// our context is shown and then try again
 	if ctx.Scene.Stage == nil {
@@ -45,6 +38,12 @@ func (st *Stage) RunPopup() *Stage {
 		})
 		return st
 	}
+
+	if st.Type == SnackbarStage {
+		st.Scene.ConfigSceneBars()
+	}
+	st.Scene.ConfigSceneWidgets()
+	sc := st.Scene
 
 	ms := ctx.Scene.Stage.Main
 	msc := ms.Scene
