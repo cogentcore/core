@@ -356,11 +356,39 @@ func dialogs(ts *gi.Tabs) {
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineSmall).SetText("Dialogs")
 	drow := makeRow()
 
-	info := gi.NewButton(drow).SetText("Info")
-	info.OnClick(func(e events.Event) {
+	ib := gi.NewButton(drow).SetText("Info")
+	ib.OnClick(func(e events.Event) {
 		gi.NewBody().AddTitle("Info").AddText("Something happened").
-			AddOkOnly().NewDialog(info).Run()
+			AddOkOnly().NewDialog(ib).Run()
 	})
+
+	cb := gi.NewButton(drow).SetText("Confirm")
+	cb.OnClick(func(e events.Event) {
+		d := gi.NewBody().AddTitle("Confirm").AddText("Send message?")
+		d.AddBottomBar(func(pw gi.Widget) {
+			d.AddCancel(pw).OnClick(func(e events.Event) {
+				fmt.Println("Dialog canceled")
+			})
+			d.AddOk(pw).OnClick(func(e events.Event) {
+				fmt.Println("Dialog accepted")
+			})
+		})
+		d.NewDialog(cb).Run()
+	})
+
+	tb := gi.NewButton(drow).SetText("Input")
+	tb.OnClick(func(e events.Event) {
+		d := gi.NewBody().AddTitle("Input").AddText("What is your name?")
+		tf := gi.NewTextField(d)
+		d.AddBottomBar(func(pw gi.Widget) {
+			d.AddCancel(pw)
+			d.AddOk(pw).OnClick(func(e events.Event) {
+				fmt.Println("Your name is", tf.Text())
+			})
+		})
+		d.NewDialog(tb).Run()
+	})
+
 }
 
 func other(ts *gi.Tabs) {
