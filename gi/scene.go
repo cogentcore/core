@@ -138,17 +138,6 @@ func NewScene(name ...string) *Scene {
 	return sc
 }
 
-// TODO: what should we do about sub scenes?
-
-// NewSubScene creates a new [Scene] that will serve as a sub-scene of another [Scene].
-// Scenes can also be added as the content of a [Stage] (without a parent) through the
-// [NewScene] function. If no name is provided, it defaults to "scene".
-// func NewSubScene(par ki.Ki, name ...string) *Scene {
-// 	sc := par.NewChild(SceneType, name...).(*Scene)
-// 	sc.EventMgr.Scene = sc
-// 	return sc
-// }
-
 func (sc *Scene) OnInit() {
 	sc.Scene = sc
 	sc.WidgetBase.OnInit()
