@@ -59,7 +59,7 @@ func HandleRecoverBase(r any) {
 
 	print(os.Stderr)
 
-	dnm := filepath.Join(TheApp.CogentCoreDataDir(), "crash-logs", TheApp.Name())
+	dnm := filepath.Join(TheApp.AppDataDir(), "crash-logs")
 	err := os.MkdirAll(dnm, 0755)
 	if grr.Log(err) != nil {
 		return

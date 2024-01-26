@@ -401,9 +401,8 @@ func (fb *FileBrowse) FileNodeOpened(fn *filetree.Node) {
 // path, returning the window and the path
 func NewFileBrowser(path string) (*FileBrowse, *gi.Stage) {
 	_, projnm, _, _ := ProjPathParse(path)
-	nm := "browser-" + projnm
 
-	b := gi.NewAppBody(nm).SetTitle("Browser: " + projnm)
+	b := gi.NewBody("Browser: " + projnm)
 	fb := NewFileBrowse(b, "browser")
 	b.AddAppBar(fb.ConfigToolbar)
 	fb.OpenPath(gi.Filename(path))

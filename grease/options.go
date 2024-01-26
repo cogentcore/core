@@ -4,18 +4,15 @@
 
 package grease
 
+import "github.com/iancoleman/strcase"
+
 // Options contains the options passed to Grease
 // that control its behavior.
 type Options struct {
-	// AppName is the internal name of the Grease app
-	// (typically in kebab-case) (see also [AppTitle])
+	// AppName is the name of the Grease app.
 	AppName string
 
-	// AppTitle is the user-visible name of the Grease app
-	// (typically in Title Case) (see also [AppName])
-	AppTitle string
-
-	// AppAbout is the description of the Grease app
+	// AppAbout is the description of the Grease app.
 	AppAbout string
 
 	// Fatal is whether to, if there is an error in [Run],
@@ -57,16 +54,19 @@ type Options struct {
 
 // DefaultOptions returns a new [Options] value
 // with standard default values, based on the given
-// app name, app title, and app about.
-func DefaultOptions(appName, appTitle, appAbout string) *Options {
+// app name and optional app about info.
+func DefaultOptions(name string, about ...string) *Options {
+	abt := ""
+	if len(about) > 0 {
+		abt = about[0]
+	}
 	return &Options{
-		AppName:         appName,
-		AppTitle:        appTitle,
-		AppAbout:        appAbout,
+		AppName:         name,
+		AppAbout:        abt,
 		Fatal:           true,
 		PrintSuccess:    true,
 		DefaultEncoding: "toml",
-		DefaultFiles:    []string{appName + ".toml"},
+		DefaultFiles:    []string{strcase.ToKebab(name) + ".toml"},
 		IncludePaths:    []string{".", "configs"},
 	}
 }

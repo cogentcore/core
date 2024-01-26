@@ -339,7 +339,7 @@ func (fv *FileView) ConfigFilesRow() {
 		gi.NewButton(m).SetText("Open").SetIcon(icons.Open).
 			SetTooltip("Open the selected file using the default app").
 			OnClick(func(e events.Event) {
-				gi.OpenURL(fv.SelectedFile())
+				gi.TheApp.OpenURL(fv.SelectedFile())
 			})
 		gi.NewSeparator(m)
 		gi.NewButton(m).SetText("Duplicate").SetIcon(icons.FileCopy).
@@ -602,7 +602,7 @@ func (fv *FileView) UpdateFiles() {
 	}
 
 	if fv.PrevPath != fv.DirPath {
-		if gi.Platform() != goosi.MacOS {
+		if gi.TheApp.Platform() != goosi.MacOS {
 			// mac is not supported in a high-capacity fashion at this point
 			if fv.PrevPath == "" {
 				fv.ConfigWatcher()

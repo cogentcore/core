@@ -19,7 +19,7 @@ import (
 var content embed.FS
 
 func main() {
-	b := gi.NewAppBody("Cogent Core Docs")
+	b := gi.NewBody("Cogent Core Docs")
 	pg := webcore.NewPage(b).SetSource(grr.Log1(fs.Sub(content, "content")))
 	b.AddAppBar(pg.AppBar)
 	pg.OpenURL("/", true)

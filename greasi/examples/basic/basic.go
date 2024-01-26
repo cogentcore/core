@@ -42,6 +42,6 @@ func Run(c *Config) error {
 
 //gti:skip
 func main() {
-	opts := grease.DefaultOptions("basic", "Basic", "Basic is a basic example application made with Greasi.")
+	opts := grease.DefaultOptions("Basic", "Basic is a basic example application made with Greasi.")
 	greasi.Run(opts, &Config{}, Build, Run)
 }

@@ -123,7 +123,7 @@ func TestRun(t *testing.T) {
 		gpu        bool
 		sparseness float32
 	)
-	err := Run(DefaultOptions("myapp", "My App", "My App is an awesome app"), cfg, &Cmd[*TestConfig]{
+	err := Run(DefaultOptions("My App", "My App is an awesome app"), cfg, &Cmd[*TestConfig]{
 		Func: func(tc *TestConfig) error {
 			inCmd = true
 			strSlice = tc.StrSlice
@@ -151,7 +151,7 @@ func TestRun(t *testing.T) {
 func TestConfigFunc(t *testing.T) {
 	cfg := &TestConfig{}
 	os.Args = []string{"myapp", "-no-net-data", "build", "-gpu", "../main", "-Note", "Hello, World", "-v", "-PAT_PARAMS_SPARSENESS=4"}
-	cmd, err := Config(DefaultOptions("myapp", "My App", "My App is an awesome app"), cfg, &Cmd[*TestConfig]{
+	cmd, err := Config(DefaultOptions("My App", "My App is an awesome app"), cfg, &Cmd[*TestConfig]{
 		Func: func(tc *TestConfig) error { return nil },
 		Name: "build",
 		Doc:  "build builds stuff",
@@ -305,7 +305,7 @@ func TestNoErrNotFound(t *testing.T) {
 }
 
 func TestOpen(t *testing.T) {
-	opts := DefaultOptions("test", "Test", "")
+	opts := DefaultOptions("Test")
 	opts.IncludePaths = []string{".", "testdata"}
 	cfg := &TestConfig{}
 	err := OpenWithIncludes(opts, cfg, "testcfg.toml")
@@ -348,13 +348,13 @@ func TestOpen(t *testing.T) {
 func TestUsage(t *testing.T) {
 	t.Skip("prints usage string")
 	cfg := &TestConfig{}
-	us := Usage(DefaultOptions("test", "Test", ""), cfg, "")
+	us := Usage(DefaultOptions("Test"), cfg, "")
 	fmt.Println(us)
 }
 
 func TestSave(t *testing.T) {
 	// t.Skip("prints usage string")
-	opts := DefaultOptions("test", "Test", "")
+	opts := DefaultOptions("Test")
 	opts.IncludePaths = []string{".", "testdata"}
 	cfg := &TestConfig{}
 	OpenWithIncludes(opts, cfg, "testcfg.toml")
@@ -363,7 +363,7 @@ func TestSave(t *testing.T) {
 
 func TestConfigOpen(t *testing.T) {
 	// t.Skip("prints usage string")
-	opts := DefaultOptions("test", "Test", "")
+	opts := DefaultOptions("Test")
 	opts.IncludePaths = []string{".", "testdata"}
 	opts.NeedConfigFile = true
 	cfg := &TestConfig{}

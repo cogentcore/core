@@ -28,9 +28,7 @@ import (
 var icon []byte
 
 func main() {
-	b := gi.NewAppBody("Cogent Core Demo")
-	b.App().SetIconBytes(icon).SetAbout("The Cogent Core Demo demonstrates the various features of the Cogent Core 2D and 3D Go GUI framework.")
-	b.App().SetSceneConfig(func(sc *gi.Scene) {
+	gi.TheApp.SetIconBytes(icon).SetSceneConfig(func(sc *gi.Scene) {
 		sc.OnWidgetAdded(func(w gi.Widget) {
 			switch w := w.(type) {
 			case *gi.Button, *giv.FuncButton:
@@ -41,6 +39,7 @@ func main() {
 		})
 	})
 
+	b := gi.NewBody("Cogent Core Demo")
 	ts := gi.NewTabs(b)
 
 	home(ts)

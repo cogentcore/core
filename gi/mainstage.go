@@ -96,7 +96,7 @@ func (st *Stage) ConfigMainStage() {
 		st.FullWindow = true
 	}
 	// if we are on mobile, we can never have new windows
-	if Platform().IsMobile() {
+	if TheApp.Platform().IsMobile() {
 		st.NewWindow = false
 	}
 	sc := st.Scene
@@ -117,14 +117,7 @@ func (st *Stage) RunWindow() *Stage {
 		// and we need a *temporary* MainMgr to get initial pref size
 		st.SetMainMgr(st.FirstWinManager())
 	} else {
-		top := CurRenderWin.MainStageMgr.TopOfType(WindowStage)
-		if sc.App == nil && top != nil && top.Scene != nil { // inherit apps
-			sc.App = top.Scene.App
-		}
 		st.SetMainMgr(&CurRenderWin.MainStageMgr)
-	}
-	if sc.App == nil {
-		slog.Warn("Scene is missing App", "scene", sc)
 	}
 	st.ConfigMainStage()
 
@@ -134,15 +127,15 @@ func (st *Stage) RunWindow() *Stage {
 	// non-offscreen mobile windows must take up the whole window
 	// and thus don't consider pref size
 	// desktop new windows and non-full windows can pref size
-	if Platform() == goosi.Offscreen ||
-		(!Platform().IsMobile() &&
+	if TheApp.Platform() == goosi.Offscreen ||
+		(!TheApp.Platform().IsMobile() &&
 			(st.NewWindow || !st.FullWindow || CurRenderWin == nil)) {
 		sz = sc.PrefSize(sz)
 		// on offscreen, we don't want any extra space, as we want the smallest
 		// possible representation of the content
 		// also, on offscreen, if the new size is bigger than the current size,
 		// we need to resize the window
-		if Platform() == goosi.Offscreen {
+		if TheApp.Platform() == goosi.Offscreen {
 			if CurRenderWin != nil {
 				csz := CurRenderWin.GoosiWin.Size()
 				nsz := csz
@@ -218,9 +211,6 @@ func (st *Stage) RunDialog() *Stage {
 	}
 
 	sc := st.Scene
-	if st.FullWindow {
-		sc.App = ctx.Scene.App
-	}
 	st.ConfigMainStage()
 	sc.SceneGeom.Pos = st.Pos
 
@@ -228,7 +218,6 @@ func (st *Stage) RunDialog() *Stage {
 
 	sz := ms.RenderCtx.Geom.Size
 	if !st.FullWindow || st.NewWindow {
-		sc.App = ctx.Scene.App // just for reference
 		sz = sc.PrefSize(sz)
 		sz = sz.Add(image.Point{50, 50})
 		sc.EventMgr.StartFocusFirst = true // popup dialogs always need focus
@@ -273,14 +262,12 @@ func (st *Stage) NewRenderWin() *RenderWin {
 	title := st.Title
 	opts := &goosi.NewWindowOptions{
 		Title:     title,
+		Icon:      TheApp.Icon,
 		Size:      st.Scene.SceneGeom.Size,
 		StdPixels: false,
 	}
-	if st.Scene.App != nil && st.Scene.App.Icon != nil {
-		opts.Icon = st.Scene.App.Icon
-	}
 	wgp := WinGeomMgr.Pref(title, nil)
-	if Platform() != goosi.Offscreen && wgp != nil {
+	if TheApp.Platform() != goosi.Offscreen && wgp != nil {
 		WinGeomMgr.SettingStart()
 		opts.Size = wgp.Size()
 		opts.Pos = wgp.Pos()

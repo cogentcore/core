@@ -54,9 +54,9 @@ func (sc *Scene) AddAppBar(fun func(tb *Toolbar)) {
 // ConfigSceneBars configures the side control bars, for main scenes
 func (sc *Scene) ConfigSceneBars() {
 	// at last possible moment, add app-specific app bar config
-	if sc.App != nil && sc.App.AppBarConfig != nil {
+	if TheApp.AppBarConfig != nil && sc.Stage.Type.IsMain() {
 		if sc.Bars.Top.IsEmpty() {
-			sc.Bars.Top.Add(sc.App.AppBarConfig) // put in the top by default
+			sc.Bars.Top.Add(TheApp.AppBarConfig) // put in the top by default
 		}
 	}
 	if !sc.Bars.Top.IsEmpty() {

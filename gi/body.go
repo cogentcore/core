@@ -6,6 +6,7 @@ package gi
 
 import (
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/grr"
 	"cogentcore.org/core/styles"
 )
 
@@ -23,12 +24,21 @@ type Body struct { //core:no-new
 // It will create its own parent Scene at this point, and has wrapper
 // functions to transparently manage everything that the Scene
 // typically manages during configuration, so you can usually avoid
-// having to access the Scene directly.
+// having to access the Scene directly. If a name is given and
+// the name of [TheApp] is unset, it sets it to the given name.
 func NewBody(name ...string) *Body {
 	bd := &Body{}
 	nm := "body"
 	if len(name) > 0 {
 		nm = name[0]
+		if TheApp.Name() == "" {
+			TheApp.SetName(nm)
+		}
+	}
+	if AppearanceSettings.Zoom == 0 {
+		// we load the settings in NewBody so that people can
+		// add their own settings to AllSettings first
+		grr.Log(LoadAllSettings())
 	}
 	bd.InitName(bd, nm)
 	bd.Title = nm
@@ -65,14 +75,6 @@ func (bd *Body) AddText(text string) *Body {
 		SetType(LabelBodyMedium).Style(func(s *styles.Style) {
 		s.Color = colors.Scheme.OnSurfaceVariant
 	})
-	return bd
-}
-
-// SetApp sets the App of the Body's Scene
-func (bd *Body) SetApp(app *App) *Body {
-	bd.Scene.App = app
-	bd.Nm = app.Name
-	bd.Title = app.Name
 	return bd
 }
 

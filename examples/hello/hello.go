@@ -3,7 +3,7 @@ package main
 import "cogentcore.org/core/gi"
 
 func main() {
-	b := gi.NewAppBody("Hello")
+	b := gi.NewBody("Hello")
 	gi.NewButton(b).SetText("Hello, World!")
 	b.RunMainWindow()
 }

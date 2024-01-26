@@ -17,8 +17,7 @@ import (
 // GUI starts the GUI for the given Grease app, which must be passed as
 // a pointer. It should typically not be called by end-user code; see [Run].
 func GUI[T any](opts *grease.Options, cfg T, cmds ...*grease.Cmd[T]) {
-	b := gi.NewAppBody(opts.AppName).SetTitle(opts.AppTitle)
-	b.App().About = opts.AppAbout
+	b := gi.NewBody(opts.AppName)
 
 	b.AddAppBar(func(tb *gi.Toolbar) {
 		for _, cmd := range cmds {

@@ -16,7 +16,7 @@ import (
 )
 
 func init() {
-	gi.AddQuitCleanFunc(EditorBlinker.QuitClean)
+	gi.TheApp.AddQuitCleanFunc(EditorBlinker.QuitClean)
 }
 
 var (
