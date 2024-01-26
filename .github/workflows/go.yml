@@ -33,3 +33,4 @@ jobs:
       uses: ncruces/go-coverage-report@v0
       with:
         coverage-file: cover.out
+      if: github.event_name == 'push'
