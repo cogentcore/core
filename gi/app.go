@@ -229,8 +229,13 @@ func (tb *Toolbar) StdOverflowMenu(m *Scene) { //gti:add
 // your cases in your OnChange and call [events.SetHandled] only for
 // the cases you handle).
 func ConfigAppChooser(ch *Chooser) *Chooser {
-	ch.SetEditable(true).SetType(ChooserOutlined).SetIcon(icons.Search).
-		SetPlaceholder(fmt.Sprintf("Search (%s)", keyfun.ChordFor(keyfun.Menu)))
+	ch.SetEditable(true).SetType(ChooserOutlined).SetIcon(icons.Search)
+	if TheApp.SystemPlatform().IsMobile() {
+		ch.SetPlaceholder("Search")
+	} else {
+		ch.SetPlaceholder(fmt.Sprintf("Search (%s)", keyfun.ChordFor(keyfun.Menu)))
+	}
+
 	ch.OnWidgetAdded(func(w Widget) {
 		if w.PathFrom(ch) == "parts/text" {
 			w.Style(func(s *styles.Style) {
