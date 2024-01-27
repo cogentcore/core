@@ -229,7 +229,7 @@ func (fv *FileView) SelectedFileInfo() (*fi.FileInfo, bool) {
 // if a directory it opens the directory and returns false.
 // if a file it selects the file and returns true.
 // if no selection, returns false.
-func (fv *FileView) SelectFile() (ok bool) {
+func (fv *FileView) SelectFile() (b bool) {
 	if fi, ok := fv.SelectedFileInfo(); ok {
 		if fi.IsDir() {
 			fv.DirPath = filepath.Join(fv.DirPath, fi.Name)

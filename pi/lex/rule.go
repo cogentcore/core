@@ -325,7 +325,7 @@ func (lr *Rule) Lex(ls *State) *Rule {
 }
 
 // IsMatch tests if the rule matches for current input state, returns true if so, false if not
-func (lr *Rule) IsMatch(ls *State) (ok bool) {
+func (lr *Rule) IsMatch(ls *State) (b bool) {
 	if !lr.IsMatchPos(ls) {
 		return
 	}
