@@ -721,7 +721,7 @@ func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 	})
 	tf.OnFocus(func(e events.Event) {
 		ch.CallItemsFuncs()
-		tf.CursorStart()
+		tf.OfferComplete(dontForce)
 	})
 	tf.OnClick(func(e events.Event) {
 		if ch.IsReadOnly() {

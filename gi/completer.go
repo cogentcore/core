@@ -124,10 +124,6 @@ func (c *Complete) Show(ctx Widget, pos image.Point, text string, force bool) {
 	if c.DelayTimer != nil {
 		c.DelayTimer.Stop()
 	}
-	if text == "" {
-		c.DelayMu.Unlock()
-		return
-	}
 
 	c.DelayTimer = time.AfterFunc(wait,
 		func() {

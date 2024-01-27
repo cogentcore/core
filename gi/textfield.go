@@ -996,7 +996,7 @@ func (tf *TextField) OfferComplete(forceComplete bool) {
 	s := string(tf.EditTxt[0:tf.CursorPos])
 	cpos := tf.CharStartPos(tf.CursorPos, true).ToPoint()
 	cpos.X += 5
-	cpos.Y += 10
+	cpos.Y = tf.Geom.TotalBBox.Max.Y
 	tf.Complete.SrcLn = 0
 	tf.Complete.SrcCh = tf.CursorPos
 	tf.Complete.Show(tf, cpos, s, forceComplete)
@@ -1393,12 +1393,6 @@ func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode events.SelectMod
 
 func (tf *TextField) HandleEvents() {
 	tf.HandleSelectToggle()
-	tf.HandleMouse()
-	tf.HandleStateFromFocus()
-	tf.HandleKeys()
-}
-
-func (tf *TextField) HandleMouse() {
 	tf.On(events.MouseDown, func(e events.Event) {
 		if !tf.StateIs(states.Focused) {
 			tf.SetFocusEvent() // always grab, even if read only..
@@ -1456,9 +1450,6 @@ func (tf *TextField) HandleMouse() {
 		pt := tf.PointToRelPos(e.Pos())
 		tf.SetCursorFromPixel(float32(pt.X), events.SelectOne)
 	})
-}
-
-func (tf *TextField) HandleKeys() {
 	tf.OnKeyChord(func(e events.Event) {
 		if DebugSettings.KeyEventTrace {
 			fmt.Printf("TextField KeyInput: %v\n", tf.Path())
@@ -1588,9 +1579,6 @@ func (tf *TextField) HandleKeys() {
 			}
 		}
 	})
-}
-
-func (tf *TextField) HandleStateFromFocus() {
 	tf.OnFocus(func(e events.Event) {
 		if tf.IsReadOnly() {
 			return
