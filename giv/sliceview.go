@@ -1276,6 +1276,8 @@ func (sv *SliceViewBase) UpdateSelectIdx(idx int, sel bool) {
 
 // IdxIsSelected returns the selected status of given slice index
 func (sv *SliceViewBase) IdxIsSelected(idx int) bool {
+	sv.ViewMu.Lock()
+	defer sv.ViewMu.Unlock()
 	_, ok := sv.SelIdxs[idx]
 	return ok
 }
