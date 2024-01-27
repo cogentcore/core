@@ -355,12 +355,22 @@ func (ch *Chooser) MakeItems(reset bool, capacity int) {
 func (ch *Chooser) SortItems(ascending bool) *Chooser {
 	sort.Slice(ch.Items, func(i, j int) bool {
 		if ascending {
-			return ToLabel(ch.Items[i]) < ToLabel(ch.Items[j])
+			return ch.LabelFor(i, ch.Items[i]) < ch.LabelFor(j, ch.Items[j])
 		} else {
-			return ToLabel(ch.Items[i]) > ToLabel(ch.Items[j])
+			return ch.LabelFor(i, ch.Items[i]) > ch.LabelFor(j, ch.Items[j])
 		}
 	})
 	return ch
+}
+
+// LabelFor converts the given item at the given index into
+// a user-facing label. It first tries [Chooser.Labels] and
+// falls back on [ToLabel].
+func (ch *Chooser) LabelFor(i int, item any) string {
+	if len(ch.Labels) > i {
+		return ch.Labels[i]
+	}
+	return ToLabel(item)
 }
 
 // SetTypes sets the Items list from a list of types, e.g., from gti.AllEmbedersOf.
@@ -489,11 +499,7 @@ func (ch *Chooser) SetCurVal(it any) int {
 		ch.CurIndex = len(ch.Items)
 		ch.Items = append(ch.Items, it)
 	}
-	if len(ch.Labels) > ch.CurIndex {
-		ch.ShowCurVal(ch.Labels[ch.CurIndex])
-	} else {
-		ch.ShowCurVal(ToLabel(ch.CurVal))
-	}
+	ch.ShowCurVal(ch.LabelFor(ch.CurIndex, ch.CurVal))
 	return ch.CurIndex
 }
 
@@ -508,11 +514,7 @@ func (ch *Chooser) SetCurIndex(idx int) any {
 		ch.ShowCurVal(fmt.Sprintf("idx %v > len", idx))
 	} else {
 		ch.CurVal = ch.Items[idx]
-		if len(ch.Labels) > ch.CurIndex {
-			ch.ShowCurVal(ch.Labels[ch.CurIndex])
-		} else {
-			ch.ShowCurVal(ToLabel(ch.CurVal))
-		}
+		ch.ShowCurVal(ch.LabelFor(ch.CurIndex, ch.CurVal))
 	}
 	return ch.CurVal
 }
@@ -542,9 +544,9 @@ func (ch *Chooser) SetCurTextAction(text string) any {
 // SetCurText is for Editable choosers only: sets the current index (CurIndex)
 // and the corresponding CurVal based on given text string
 func (ch *Chooser) SetCurText(text string) any {
-	for idx, item := range ch.Items {
-		if text == ToLabel(item) {
-			ch.SetCurIndex(idx)
+	for i, item := range ch.Items {
+		if text == ch.LabelFor(i, item) {
+			ch.SetCurIndex(i)
 			return ch.CurVal
 		}
 	}
@@ -617,11 +619,7 @@ func (ch *Chooser) MakeItemsMenu(m *Scene) {
 	for i, it := range ch.Items {
 		nm := "item-" + strconv.Itoa(i)
 		bt := NewButton(m, nm).SetType(ButtonMenu)
-		if len(ch.Labels) > i {
-			bt.SetText(ch.Labels[i])
-		} else {
-			bt.SetText(ToLabel(it))
-		}
+		bt.SetText(ch.LabelFor(i, it))
 		if len(ch.Icons) > i {
 			bt.SetIcon(ch.Icons[i])
 		}
@@ -765,14 +763,8 @@ func (ch *Chooser) CompleteMatch(data any, text string, posLn, posCh int) (md co
 		if len(ch.Tooltips) > i {
 			tooltip = ch.Tooltips[i]
 		}
-		lbl := ""
-		if len(ch.Labels) > i {
-			lbl = ch.Labels[i]
-		} else {
-			lbl = ToLabel(item)
-		}
 		comps[i] = complete.Completion{
-			Text: lbl,
+			Text: ch.LabelFor(i, item),
 			Desc: tooltip,
 		}
 		if u, ok := item.(uri.URI); ok {
