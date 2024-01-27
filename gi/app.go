@@ -114,16 +114,22 @@ func StdAppBarStart(tb *Toolbar) {
 
 // StdAppBarBack adds a back button
 func StdAppBarBack(tb *Toolbar) *Button {
-	bt := NewButton(tb, "back").SetIcon(icons.ArrowBack)
+	bt := NewButton(tb, "back").SetIcon(icons.ArrowBack).SetTooltip("Back")
+	// bt.StyleFirst(func(s *styles.Style) {
+	// 	if tb.Scene.Stage.MainMgr == nil {
+	// 		return
+	// 	}
+	// 	s.SetState(tb.Scene.Stage.MainMgr.Stack.Len() <= 1 && len(AllRenderWins) <= 1, states.Disabled)
+	// })
 	bt.OnClick(func(e events.Event) {
-		stg := tb.Scene.Stage.Main
-		mm := stg.MainMgr
-		// if we are down to the last window, we don't
-		// let people close it with the back button
-		if mm.Stack.Len() <= 1 {
+		if tb.Scene.Stage.MainMgr.Stack.Len() > 1 {
+			tb.Scene.Close()
 			return
 		}
-		tb.Scene.Close()
+		if len(AllRenderWins) > 1 {
+			CurRenderWin.CloseReq()
+			AllRenderWins[0].Raise()
+		}
 	})
 	return bt
 }

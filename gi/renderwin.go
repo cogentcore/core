@@ -690,6 +690,7 @@ func (w *RenderWin) HandleWindowEvents(e events.Event) {
 					fmt.Printf("Win: %v got extra focus\n", w.Name)
 				}
 			}
+			CurRenderWin = w
 		case events.WinFocusLost:
 			if DebugSettings.WinEventTrace {
 				fmt.Printf("Win: %v lost focus\n", w.Name)
