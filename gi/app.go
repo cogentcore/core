@@ -254,34 +254,35 @@ func ConfigAppChooser(ch *Chooser) *Chooser {
 	// we must never have a chooser label so that it
 	// always displays the search placeholder
 	ch.OnFirst(events.Change, func(e events.Event) {
+		ch.CurIndex = 0
 		ch.ShowCurVal("")
 	})
 
 	ch.AddItemsFunc(func() {
-		stg := ch.Scene.Stage.Main
-		mm := stg.MainMgr
-
-		for _, kv := range mm.Stack.Order {
-			st := kv.Val
-			lbl := ""
-			if st.Scene.Body != nil && st.Scene.Body.Title != "" {
-				lbl = st.Scene.Body.Title
-			} else {
-				lbl = st.Scene.Name()
-				// -scene is frequently placed at the end of scene names, so we remove it
-				lbl = strings.TrimSuffix(lbl, "-scene")
+		for _, rw := range AllRenderWins {
+			for _, kv := range rw.MainStageMgr.Stack.Order {
+				st := kv.Val
+				lbl := ""
+				if st.Scene.Body != nil && st.Scene.Body.Title != "" {
+					lbl = st.Scene.Body.Title
+				} else {
+					lbl = st.Scene.Name()
+					// -scene is frequently placed at the end of scene names, so we remove it
+					lbl = strings.TrimSuffix(lbl, "-scene")
+				}
+				ch.Items = append(ch.Items, st)
+				ch.Labels = append(ch.Labels, lbl)
+				ch.Icons = append(ch.Icons, icons.Toolbar)
 			}
-			ch.Items = append(ch.Items, st)
-			ch.Labels = append(ch.Labels, lbl)
-			ch.Icons = append(ch.Icons, icons.Toolbar)
 		}
 	})
 	ch.OnChange(func(e events.Event) {
-		stg := ch.Scene.Stage.Main
-		mm := stg.MainMgr
 		switch cv := ch.CurVal.(type) {
 		case *Stage:
-			mm.MoveToTop(cv)
+			if cv.MainMgr.RenderWin != CurRenderWin {
+				cv.MainMgr.RenderWin.Raise()
+			}
+			cv.MainMgr.MoveToTop(cv)
 		}
 	})
 	return ch
