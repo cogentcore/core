@@ -1274,10 +1274,14 @@ func (sv *SliceViewBase) UpdateSelectIdx(idx int, sel bool) {
 	}
 }
 
+var m sync.RWMutex
+
 // IdxIsSelected returns the selected status of given slice index
 func (sv *SliceViewBase) IdxIsSelected(idx int) bool {
-	sv.ViewMu.Lock()
-	defer sv.ViewMu.Unlock()
+	//sv.ViewMu.Lock() //bug todo
+	//defer sv.ViewMu.Unlock()
+	m.Lock()
+	defer m.Unlock()
 	_, ok := sv.SelIdxs[idx]
 	return ok
 }
