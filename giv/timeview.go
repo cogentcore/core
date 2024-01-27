@@ -490,6 +490,9 @@ func (vv *DurationValue) UpdateWidget() {
 
 	ly := vv.Widget.(*gi.Layout)
 	ly.ChildByName("value").(*gi.Spinner).SetValue(adur)
+	if ly.ChildByName("unit") == nil {
+		return
+	}
 	ly.ChildByName("unit").(*gi.Chooser).SetCurVal(un)
 }
 
