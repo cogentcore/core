@@ -29,16 +29,7 @@ import (
 var icon []byte
 
 func main() {
-	gi.TheApp.SetIconBytes(icon).SetSceneConfig(func(sc *gi.Scene) {
-		sc.OnWidgetAdded(func(w gi.Widget) {
-			switch w := w.(type) {
-			case *gi.Button, *giv.FuncButton:
-				w.Style(func(s *styles.Style) {
-					s.Border.Radius = styles.BorderRadiusSmall
-				})
-			}
-		})
-	})
+	gi.TheApp.SetIconBytes(icon)
 
 	b := gi.NewBody("Cogent Core Demo")
 	ts := gi.NewTabs(b)
