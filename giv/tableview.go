@@ -597,6 +597,9 @@ func (tv *TableView) UpdateWidgets() {
 			fli := fli
 			field := tv.VisFields[fli]
 			cidx := ridx + idxOff + fli
+			if len(sg.Kids) < cidx {
+				break
+			}
 			w := sg.Kids[cidx].(gi.Widget)
 			wb := w.AsWidget()
 
