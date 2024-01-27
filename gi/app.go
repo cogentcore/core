@@ -6,14 +6,12 @@ package gi
 
 import (
 	"bytes"
-	"errors"
 	"image"
 	"io"
 	"strings"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/fi/uri"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
@@ -275,24 +273,13 @@ func ConfigAppChooser(ch *Chooser) *Chooser {
 	ch.OnChange(func(e events.Event) {
 		stg := ch.Scene.Stage.Main
 		mm := stg.MainMgr
-		cv, ok := ch.CurVal.(uri.URI)
-		if !ok {
-			return
+		switch cv := ch.CurVal.(type) {
+		case *Stage:
+			ok := mm.MoveToTop(cv)
+			if !ok {
+				MessageSnackbar(ch, "Error: could not find stage "+ch.CurLabel)
+			}
 		}
-		if cv.HasScheme("scene") {
-			e.SetHandled()
-			// TODO: optimize this?
-			kv := mm.Stack.Order[ch.CurIndex] // todo: bad to rely on index!
-			mm.Stack.DeleteIdx(ch.CurIndex, ch.CurIndex+1)
-			mm.Stack.InsertAtIdx(mm.Stack.Len(), kv.Key, kv.Val)
-			return
-		}
-		if cv.Func != nil {
-			e.SetHandled()
-			cv.Func()
-			return
-		}
-		ErrorSnackbar(ch, errors.New("unable to process resource: "+cv.String()))
 	})
 	return ch
 }
