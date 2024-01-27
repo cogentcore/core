@@ -15,7 +15,6 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/fi/uri"
 	"cogentcore.org/core/glop/sentence"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
@@ -751,12 +750,14 @@ func (ch *Chooser) CompleteMatch(data any, text string, posLn, posCh int) (md co
 		if len(ch.Tooltips) > i {
 			tooltip = ch.Tooltips[i]
 		}
+		icon := ""
+		if len(ch.Icons) > i {
+			icon = string(ch.Icons[i])
+		}
 		comps[i] = complete.Completion{
 			Text: ch.LabelFor(i, item),
 			Desc: tooltip,
-		}
-		if u, ok := item.(uri.URI); ok {
-			comps[i].Icon = string(u.Icon)
+			Icon: icon,
 		}
 	}
 	md.Matches = complete.MatchSeedCompletion(comps, md.Seed)
