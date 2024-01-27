@@ -613,6 +613,7 @@ func (ch *Chooser) SelectItemAction(idx int) {
 // MakeItemsMenu constructs a menu of all the items.
 // It is automatically set as the [Button.Menu] for the Chooser.
 func (ch *Chooser) MakeItemsMenu(m *Scene) {
+	ch.CallItemsFuncs()
 	for i, it := range ch.Items {
 		nm := "item-" + strconv.Itoa(i)
 		bt := NewButton(m, nm).SetType(ButtonMenu)
