@@ -231,20 +231,14 @@ func (tb *Toolbar) StdOverflowMenu(m *Scene) { //gti:add
 func ConfigAppChooser(ch *Chooser) *Chooser {
 	ch.SetEditable(true).SetType(ChooserOutlined).SetIcon(icons.Search).
 		SetPlaceholder(fmt.Sprintf("Search (%s)", keyfun.ChordFor(keyfun.Menu)))
-	ch.Style(func(s *styles.Style) {
-		s.Border.Radius = styles.BorderRadiusFull
-		s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
-		if s.Is(states.Focused) {
-			s.Border.Width.Set(units.Dp(2))
-			s.Border.Color.Set(colors.Scheme.Primary.Base)
-		} else {
-			s.Border.Width.Zero()
-			s.Border.Color.Zero()
-		}
-	})
 	ch.OnWidgetAdded(func(w Widget) {
 		if w.PathFrom(ch) == "parts/text" {
 			w.Style(func(s *styles.Style) {
+				s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
+				if !s.Is(states.Focused) {
+					s.Border = styles.Border{}
+				}
+				s.Border.Radius = styles.BorderRadiusFull
 				s.Min.X.SetCustom(func(uc *units.Context) float32 {
 					return min(uc.Vw(25), uc.Ch(40))
 				})

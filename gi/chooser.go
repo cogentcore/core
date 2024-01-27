@@ -127,26 +127,22 @@ func (ch *Chooser) SetStyles() {
 		case ChooserFilled:
 			s.Background = colors.C(colors.Scheme.Secondary.Container)
 			s.Color = colors.Scheme.Secondary.OnContainer
-			if ch.Editable {
-				s.Border.Style.Set(styles.BorderNone).SetBottom(styles.BorderSolid)
-				s.Border.Width.Zero().SetBottom(units.Dp(1))
-				s.Border.Color.Zero().SetBottom(colors.Scheme.OnSurfaceVariant)
-				s.Border.Radius = styles.BorderRadiusExtraSmallTop
-				if s.Is(states.Focused) {
-					s.Border.Width.Bottom = units.Dp(2)
-					s.Border.Color.Bottom = colors.Scheme.Primary.Base
-				}
-			}
 		case ChooserOutlined:
 			s.Border.Style.Set(styles.BorderSolid)
 			s.Border.Width.Set(units.Dp(1))
 			s.Border.Color.Set(colors.Scheme.OnSurfaceVariant)
-			if ch.Editable {
+		}
+		// textfield handles everything
+		if ch.Editable {
+			s.Border = styles.Border{}
+			s.MaxBorder = s.Border
+			s.Background = nil
+			s.StateLayer = 0
+			s.Padding.Zero()
+			if ch.Type == ChooserFilled {
+				s.Border.Radius = styles.BorderRadiusExtraSmallTop
+			} else {
 				s.Border.Radius = styles.BorderRadiusExtraSmall
-				if s.Is(states.Focused) {
-					s.Border.Width.Set(units.Dp(2))
-					s.Border.Color.Set(colors.Scheme.Primary.Base)
-				}
 			}
 		}
 	})
@@ -185,21 +181,6 @@ func (ch *Chooser) SetStyles() {
 			ch.HandleChooserTextFieldEvents(text)
 			text.Style(func(s *styles.Style) {
 				s.Grow = ch.Styles.Grow // we grow like our parent
-				// parent handles everything
-				s.Min.Y.Em(1.2) // note: this is essential
-				// TODO(kai): figure out what to do with MaxLength
-				// if ch.MaxLength > 0 {
-				// 	s.Min.X.Ch(float32(ch.MaxLength))
-				// }
-				s.Padding.Zero()
-				s.Border.Style.Set(styles.BorderNone)
-				s.Border.Width.Zero()
-				// allow parent to dictate state layer
-				s.StateLayer = 0
-				s.Background = nil
-				// if ch.MaxLength > 0 {
-				// 	s.Min.X.Ch(float32(ch.MaxLength))
-				// }
 			})
 		case "parts/indicator":
 			w.Style(func(s *styles.Style) {
