@@ -6,6 +6,7 @@ package gi
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 	"io"
 	"strings"
@@ -228,7 +229,8 @@ func (tb *Toolbar) StdOverflowMenu(m *Scene) { //gti:add
 // your cases in your OnChange and call [events.SetHandled] only for
 // the cases you handle).
 func ConfigAppChooser(ch *Chooser) *Chooser {
-	ch.SetEditable(true).SetType(ChooserOutlined).SetIcon(icons.Search).SetPlaceholder("Search")
+	ch.SetEditable(true).SetType(ChooserOutlined).SetIcon(icons.Search).
+		SetPlaceholder(fmt.Sprintf("Search (%s)", keyfun.ChordFor(keyfun.Menu)))
 	ch.Style(func(s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusFull
 		s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
@@ -249,6 +251,11 @@ func ConfigAppChooser(ch *Chooser) *Chooser {
 				s.Max.X = s.Min.X
 			})
 		}
+	})
+	// we must never have a chooser label so that it
+	// always displays the search placeholder
+	ch.OnFirst(events.Change, func(e events.Event) {
+		ch.CurLabel = ""
 	})
 
 	ch.AddItemsFunc(func() {
@@ -275,10 +282,7 @@ func ConfigAppChooser(ch *Chooser) *Chooser {
 		mm := stg.MainMgr
 		switch cv := ch.CurVal.(type) {
 		case *Stage:
-			ok := mm.MoveToTop(cv)
-			if !ok {
-				MessageSnackbar(ch, "Error: could not find stage "+ch.CurLabel)
-			}
+			mm.MoveToTop(cv)
 		}
 	})
 	return ch

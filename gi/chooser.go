@@ -760,17 +760,23 @@ func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 func (ch *Chooser) CompleteMatch(data any, text string, posLn, posCh int) (md complete.Matches) {
 	md.Seed = text
 	comps := make(complete.Completions, len(ch.Items))
-	for idx, item := range ch.Items {
+	for i, item := range ch.Items {
 		tooltip := ""
-		if len(ch.Tooltips) > idx {
-			tooltip = ch.Tooltips[idx]
+		if len(ch.Tooltips) > i {
+			tooltip = ch.Tooltips[i]
 		}
-		comps[idx] = complete.Completion{
-			Text: ToLabel(item),
+		lbl := ""
+		if len(ch.Labels) > i {
+			lbl = ch.Labels[i]
+		} else {
+			lbl = ToLabel(item)
+		}
+		comps[i] = complete.Completion{
+			Text: lbl,
 			Desc: tooltip,
 		}
 		if u, ok := item.(uri.URI); ok {
-			comps[idx].Icon = string(u.Icon)
+			comps[i].Icon = string(u.Icon)
 		}
 	}
 	md.Matches = complete.MatchSeedCompletion(comps, md.Seed)
