@@ -216,7 +216,7 @@ func (pg *Page) ConfigWidget() {
 
 // AppBar is the default app bar for a [Page]
 func (pg *Page) AppBar(tb *gi.Toolbar) {
-	ch := tb.ChildByName("app-chooser").(*gi.AppChooser)
+	ch := tb.ChildByName("app-chooser").(*gi.Chooser)
 
 	back := tb.ChildByName("back").(*gi.Button)
 	back.OnClick(func(e events.Event) {
