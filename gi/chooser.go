@@ -70,10 +70,13 @@ type Chooser struct {
 	// if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner
 	Placeholder string `set:"-"`
 
-	// ItemsFunc, if non-nil, is a function to call before showing the items
-	// of the chooser, which is typically used to configure them (eg: if they
-	// are based on dynamic data)
-	ItemsFunc func() `copier:"-"`
+	// ItemFuncs is a slice of functions to call before showing the items
+	// of the chooser, which is typically used to configure them
+	// (eg: if they are based on dynamic data). The functions are called
+	// in ascending order such that the items added in the first function
+	// will appear before those added in the last function. Use
+	// [AddItemsFunc] to add a new items function.
+	ItemFuncs []func() `copier:"-" set:"-"`
 
 	// CurLabel is the string label for the current value
 	CurLabel string `set:"-"`
@@ -309,6 +312,17 @@ func (ch *Chooser) TextField() (*TextField, bool) {
 		return nil, false
 	}
 	return tf.(*TextField), true
+}
+
+// AddItemsFunc adds the given function to [Chooser.ItemFuncs].
+// These functions are called before showing the items of the chooser,
+// and they are typically used to configure them (eg: if they are based
+// on dynamic data). The functions are called in ascending order such
+// that the items added in the first function will appear before those
+// added in the last function.
+func (ch *Chooser) AddItemsFunc(f func()) *Chooser {
+	ch.ItemFuncs = append(ch.ItemFuncs, f)
+	return ch
 }
 
 // MakeItems makes sure the Items list is made, and if not, or reset is true,
@@ -581,8 +595,8 @@ func (ch *Chooser) SelectItemAction(idx int) {
 // MakeItemsMenu constructs a menu of all the items.
 // It is automatically set as the [Button.Menu] for the Chooser.
 func (ch *Chooser) MakeItemsMenu(m *Scene) {
-	if ch.ItemsFunc != nil {
-		ch.ItemsFunc()
+	for _, f := range ch.ItemFuncs {
+		f()
 	}
 	for i, it := range ch.Items {
 		nm := "item-" + strconv.Itoa(i)
@@ -705,11 +719,11 @@ func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 		ch.SendChange(e)
 	})
 	tf.OnFocus(func(e events.Event) {
-		if ch.ItemsFunc != nil {
-			ch.ItemsFunc()
-			if ch.CurIndex <= 0 {
-				ch.SetCurIndex(0)
-			}
+		for _, f := range ch.ItemFuncs {
+			f()
+		}
+		if ch.CurIndex <= 0 {
+			ch.SetCurIndex(0)
 		}
 		tf.CursorStart()
 	})
