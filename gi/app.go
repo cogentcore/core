@@ -131,8 +131,8 @@ func StdAppBarBack(tb *Toolbar) *Button {
 }
 
 // StdAppBarChooser adds an AppChooser
-func StdAppBarChooser(tb *Toolbar) *AppChooser {
-	return NewAppChooser(tb, "app-chooser")
+func StdAppBarChooser(tb *Toolbar) *Chooser {
+	return ConfigAppChooser(NewChooser(tb, "app-chooser"))
 }
 
 // todo: use CurrentMainScene instead?
@@ -223,26 +223,19 @@ func (tb *Toolbar) StdOverflowMenu(m *Scene) { //gti:add
 //////////////////////////////////////////////////////////////////////////////
 //		AppChooser
 
-// AppChooser is an editable chooser element, typically placed at the start
-// of the TopAppBar, that provides direct access to all manner of app resources.
-type AppChooser struct {
-	Chooser
-
-	// Resources are generators for resources accessible by the AppChooser
-	Resources uri.Resources
-}
-
-func (ac *AppChooser) OnInit() {
-	ac.Chooser.OnInit()
-	ac.SetEditable(true).SetType(ChooserOutlined).SetIcon(icons.Search)
-	ac.SetItemsFunc(func() {
-		stg := ac.Scene.Stage.Main
+// ConfigAppChooser configures the given [Chooser] to give access
+// to all app resources, such as open scenes and available app bar
+// buttons. This chooser is typically placed at the start of the AppBar.
+func ConfigAppChooser(ch *Chooser) *Chooser {
+	ch.SetEditable(true).SetType(ChooserOutlined).SetIcon(icons.Search)
+	ch.AddItemsFunc(func() {
+		stg := ch.Scene.Stage.Main
 		mm := stg.MainMgr
-		urs := ac.Resources.Generate()
+		urs := ch.Resources.Generate()
 		iln := mm.Stack.Len() + len(urs)
-		ac.Items = make([]any, iln)
-		ac.Icons = make([]icons.Icon, iln)
-		ac.Tooltips = make([]string, iln)
+		ch.Items = make([]any, iln)
+		ch.Icons = make([]icons.Icon, iln)
+		ch.Tooltips = make([]string, iln)
 		for i, kv := range mm.Stack.Order {
 			nm := ""
 			if kv.Val.Scene.Body != nil && kv.Val.Scene.Body.Title != "" {
@@ -254,29 +247,29 @@ func (ac *AppChooser) OnInit() {
 			}
 			u := uri.URI{Label: nm, Icon: icons.Toolbar}
 			u.SetURL("scene", nm, fmt.Sprintf("%d", i))
-			ac.Items[i] = u
-			ac.Icons[i] = u.Icon
-			ac.Tooltips[i] = u.URL
+			ch.Items[i] = u
+			ch.Icons[i] = u.Icon
+			ch.Tooltips[i] = u.URL
 		}
 		st := len(mm.Stack.Order)
 		for i, u := range urs {
-			ac.Items[st+i] = u
-			ac.Icons[st+i] = u.Icon
-			ac.Tooltips[st+i] = u.URL
+			ch.Items[st+i] = u
+			ch.Icons[st+i] = u.Icon
+			ch.Tooltips[st+i] = u.URL
 		}
 	})
-	ac.OnChange(func(e events.Event) {
-		stg := ac.Scene.Stage.Main
+	ch.OnChange(func(e events.Event) {
+		stg := ch.Scene.Stage.Main
 		mm := stg.MainMgr
-		cv, ok := ac.CurVal.(uri.URI)
+		cv, ok := ch.CurVal.(uri.URI)
 		if !ok {
 			return
 		}
 		if cv.HasScheme("scene") {
 			e.SetHandled()
 			// TODO: optimize this?
-			kv := mm.Stack.Order[ac.CurIndex] // todo: bad to rely on index!
-			mm.Stack.DeleteIdx(ac.CurIndex, ac.CurIndex+1)
+			kv := mm.Stack.Order[ch.CurIndex] // todo: bad to rely on index!
+			mm.Stack.DeleteIdx(ch.CurIndex, ch.CurIndex+1)
 			mm.Stack.InsertAtIdx(mm.Stack.Len(), kv.Key, kv.Val)
 			return
 		}
@@ -285,9 +278,9 @@ func (ac *AppChooser) OnInit() {
 			cv.Func()
 			return
 		}
-		ErrorSnackbar(ac, errors.New("unable to process resource: "+cv.String()))
+		ErrorSnackbar(ch, errors.New("unable to process resource: "+cv.String()))
 	})
-	ac.Style(func(s *styles.Style) {
+	ch.Style(func(s *styles.Style) {
 		// s.GrowWrap = true // note: this won't work because contents not placed until end
 		s.Border.Radius = styles.BorderRadiusFull
 		s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
@@ -299,8 +292,8 @@ func (ac *AppChooser) OnInit() {
 			s.Border.Color.Zero()
 		}
 	})
-	ac.OnWidgetAdded(func(w Widget) {
-		if w.PathFrom(ac) == "parts/text" {
+	ch.OnWidgetAdded(func(w Widget) {
+		if w.PathFrom(ch) == "parts/text" {
 			w.Style(func(s *styles.Style) {
 				s.Min.X.SetCustom(func(uc *units.Context) float32 {
 					return min(uc.Vw(25), uc.Ch(40))
@@ -309,14 +302,5 @@ func (ac *AppChooser) OnInit() {
 			})
 		}
 	})
-}
-
-func (ac *AppChooser) OnAdd() {
-	ac.WidgetBase.OnAdd()
-	ac.OnShow(func(e events.Event) {
-		ac.ItemsFunc()
-		// our current scene is always the first item,
-		// so we select it on show
-		ac.SetCurIndex(0)
-	})
+	return ch
 }
