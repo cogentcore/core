@@ -603,6 +603,9 @@ func (tv *TableView) UpdateWidgets() {
 			if len(sg.Kids) < cidx {
 				break
 			}
+			if sg.Kids[cidx] == nil {
+				return
+			}
 			w := sg.Kids[cidx].(gi.Widget)
 			wb := w.AsWidget()
 
