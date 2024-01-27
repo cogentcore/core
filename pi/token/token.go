@@ -98,10 +98,7 @@ func (tk Tokens) Match(otk Tokens) bool {
 	if tk.IsCat() && otk.Cat() == tk {
 		return true
 	}
-	if tk.IsSubCat() && otk.SubCat() == tk {
-		return true
-	}
-	return false
+	return tk.IsSubCat() && otk.SubCat() == tk
 }
 
 // IsPunctGpLeft returns true if token is a PunctGpL token -- left paren, brace, bracket

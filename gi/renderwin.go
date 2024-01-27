@@ -736,10 +736,7 @@ type RenderParams struct {
 // NeedsRestyle returns true if the current render context
 // params differ from those used in last render.
 func (rp *RenderParams) NeedsRestyle(rc *RenderContext) bool {
-	if rp.LogicalDPI != rc.LogicalDPI || rp.Geom != rc.Geom {
-		return true
-	}
-	return false
+	return rp.LogicalDPI != rc.LogicalDPI || rp.Geom != rc.Geom
 }
 
 // SaveRender grabs current render context params

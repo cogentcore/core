@@ -125,12 +125,9 @@ func (b Box3) ContainsPoint(point Vec3) bool {
 
 // ContainsBox returns if this bounding box contains other box.
 func (b Box3) ContainsBox(box Box3) bool {
-	if (b.Min.X <= box.Max.X) && (box.Max.X <= b.Max.X) &&
+	return (b.Min.X <= box.Max.X) && (box.Max.X <= b.Max.X) &&
 		(b.Min.Y <= box.Min.Y) && (box.Max.Y <= b.Max.Y) &&
-		(b.Min.Z <= box.Min.Z) && (box.Max.Z <= b.Max.Z) {
-		return true
-	}
-	return false
+		(b.Min.Z <= box.Min.Z) && (box.Max.Z <= b.Max.Z)
 }
 
 // IntersectsBox returns if other box intersects this one.

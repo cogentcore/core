@@ -229,18 +229,18 @@ func (fv *FileView) SelectedFileInfo() (*fi.FileInfo, bool) {
 // if a directory it opens the directory and returns false.
 // if a file it selects the file and returns true.
 // if no selection, returns false.
-func (fv *FileView) SelectFile() bool {
+func (fv *FileView) SelectFile() (ok bool) {
 	if fi, ok := fv.SelectedFileInfo(); ok {
 		if fi.IsDir() {
 			fv.DirPath = filepath.Join(fv.DirPath, fi.Name)
 			fv.SelFile = ""
 			fv.SelectedIdx = -1
 			fv.UpdateFilesAction()
-			return false
+			return
 		}
 		return true
 	}
-	return false
+	return
 }
 
 // STYTODO: get rid of this or make it use actual color values

@@ -148,27 +148,14 @@ func (fn *Node) IsOpen() bool {
 }
 
 // IsChanged returns true if the file is open and has been changed (edited) since last EditDone
-func (fn *Node) IsChanged() bool {
-	if fn.Buf != nil && fn.Buf.IsChanged() {
-		return true
-	}
-	return false
-}
+func (fn *Node) IsChanged() bool { return fn.Buf != nil && fn.Buf.IsChanged() }
 
 // IsNotSaved returns true if the file is open and has been changed (edited) since last Save
-func (fn *Node) IsNotSaved() bool {
-	if fn.Buf != nil && fn.Buf.IsNotSaved() {
-		return true
-	}
-	return false
-}
+func (fn *Node) IsNotSaved() bool { return fn.Buf != nil && fn.Buf.IsNotSaved() }
 
 // IsAutoSave returns true if file is an auto-save file (starts and ends with #)
 func (fn *Node) IsAutoSave() bool {
-	if strings.HasPrefix(fn.Info.Name, "#") && strings.HasSuffix(fn.Info.Name, "#") {
-		return true
-	}
-	return false
+	return strings.HasPrefix(fn.Info.Name, "#") && strings.HasSuffix(fn.Info.Name, "#")
 }
 
 // MyRelPath returns the relative path from root for this node

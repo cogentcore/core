@@ -88,13 +88,13 @@ func OpenFontFace(bytes []byte, name, path string, size int, strokeWidth int) (*
 
 // FontStyleCSS looks for "tag" name props in cssAgg props, and applies those to
 // style if found, and returns true -- false if no such tag found
-func FontStyleCSS(fs *styles.FontRender, tag string, cssAgg map[string]any, unit *units.Context, ctxt colors.Context) bool {
+func FontStyleCSS(fs *styles.FontRender, tag string, cssAgg map[string]any, unit *units.Context, ctxt colors.Context) (ok bool) {
 	if cssAgg == nil {
-		return false
+		return
 	}
 	tp, ok := cssAgg[tag]
 	if !ok {
-		return false
+		return
 	}
 	pmap, ok := tp.(map[string]any) // must be a props map
 	if ok {
@@ -108,5 +108,5 @@ func FontStyleCSS(fs *styles.FontRender, tag string, cssAgg map[string]any, unit
 		OpenFont(fs, unit)
 		return true
 	}
-	return false
+	return
 }

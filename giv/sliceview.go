@@ -1047,22 +1047,23 @@ func (sv *SliceViewBase) IdxFromPos(posY int) (int, bool) {
 // by scrolling display as needed.
 // This version does not update the slicegrid.
 // Just computes the StartIdx and updates the scrollbar
-func (sv *SliceViewBase) ScrollToIdxNoUpdt(idx int) bool {
+func (sv *SliceViewBase) ScrollToIdxNoUpdt(idx int) (ok bool) {
 	if sv.VisRows == 0 {
-		return false
+		return
 	}
 	if idx < sv.StartIdx {
 		sv.StartIdx = idx
 		sv.StartIdx = max(0, sv.StartIdx)
 		sv.UpdateScroll()
 		return true
-	} else if idx >= sv.StartIdx+sv.VisRows {
+	}
+	if idx >= sv.StartIdx+sv.VisRows {
 		sv.StartIdx = idx - (sv.VisRows - 1)
 		sv.StartIdx = max(0, sv.StartIdx)
 		sv.UpdateScroll()
 		return true
 	}
-	return false
+	return
 }
 
 // ScrollToIdx ensures that given slice idx is visible
@@ -1275,10 +1276,8 @@ func (sv *SliceViewBase) UpdateSelectIdx(idx int, sel bool) {
 
 // IdxIsSelected returns the selected status of given slice index
 func (sv *SliceViewBase) IdxIsSelected(idx int) bool {
-	if _, ok := sv.SelIdxs[idx]; ok {
-		return true
-	}
-	return false
+	_, ok := sv.SelIdxs[idx]
+	return ok
 }
 
 func (sv *SliceViewBase) ResetSelectedIdxs() {

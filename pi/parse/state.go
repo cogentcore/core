@@ -138,10 +138,7 @@ func (ps *State) AtEof() bool {
 		return true
 	}
 	_, ok := ps.Src.ValidTokenPos(ps.Pos)
-	if !ok {
-		return true
-	}
-	return false
+	return ok
 }
 
 // AtEofNext returns true if current OR NEXT position is at end of file -- this includes
@@ -150,10 +147,7 @@ func (ps *State) AtEofNext() bool {
 	if ps.AtEof() {
 		return true
 	}
-	if ps.Pos.Ln == ps.Src.NLines()-1 {
-		return true
-	}
-	return false
+	return ps.Pos.Ln == ps.Src.NLines()-1
 }
 
 // GotoEof sets current position at EOF

@@ -155,12 +155,7 @@ func ChildByType[T Ki](k Ki, embeds bool, startIdx ...int) T {
 }
 
 // IsRoot tests if this node is the root node -- checks Parent = nil.
-func IsRoot(k Ki) bool {
-	if k.This() == nil || k.Parent() == nil || k.Parent().This() == nil {
-		return true
-	}
-	return false
-}
+func IsRoot(k Ki) bool { return k.This() == nil || k.Parent() == nil || k.Parent().This() == nil }
 
 // Root returns the root node of given ki node in tree (the node with a nil parent).
 func Root(k Ki) Ki {

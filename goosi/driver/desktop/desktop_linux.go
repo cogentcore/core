@@ -64,13 +64,7 @@ var TheClip = &Clip{}
 // Clip is the [goosi.Clipboard] implementation for Linux
 type Clip struct{}
 
-func (cl *Clip) IsEmpty() bool {
-	str := glfw.GetClipboardString()
-	if len(str) == 0 {
-		return true
-	}
-	return false
-}
+func (cl *Clip) IsEmpty() bool { return len(glfw.GetClipboardString()) == 0 }
 
 func (cl *Clip) Read(types []string) mimedata.Mimes {
 	str := glfw.GetClipboardString()

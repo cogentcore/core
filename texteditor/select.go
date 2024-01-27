@@ -59,12 +59,7 @@ func (ed *Editor) ClearSelected() {
 }
 
 // HasSelection returns whether there is a selected region of text
-func (ed *Editor) HasSelection() bool {
-	if ed.SelectReg.Start.IsLess(ed.SelectReg.End) {
-		return true
-	}
-	return false
-}
+func (ed *Editor) HasSelection() bool { return ed.SelectReg.Start.IsLess(ed.SelectReg.End) }
 
 // Selection returns the currently selected text as a textbuf.Edit, which
 // captures start, end, and full lines in between -- nil if no selection
@@ -140,10 +135,7 @@ func (ed *Editor) IsWordStart(tp lex.Pos) bool {
 	}
 	r1 := txt[tp.Ch-1]
 	r2 := txt[tp.Ch]
-	if lex.IsWordBreak(r1, rune(-1)) && !lex.IsWordBreak(r2, rune(-1)) {
-		return true
-	}
-	return false
+	return lex.IsWordBreak(r1, rune(-1)) && !lex.IsWordBreak(r2, rune(-1))
 }
 
 // IsWordEnd returns true if the cursor is just past the last letter of a word
@@ -170,10 +162,7 @@ func (ed *Editor) IsWordEnd(tp lex.Pos) bool {
 	}
 	r1 := txt[tp.Ch-1]
 	r2 := txt[tp.Ch]
-	if !lex.IsWordBreak(r1, rune(-1)) && lex.IsWordBreak(r2, rune(-1)) {
-		return true
-	}
-	return false
+	return !lex.IsWordBreak(r1, rune(-1)) && lex.IsWordBreak(r2, rune(-1))
 }
 
 // IsWordMiddle - returns true if the cursor is anywhere inside a word,
@@ -193,10 +182,7 @@ func (ed *Editor) IsWordMiddle(tp lex.Pos) bool {
 	}
 	r1 := txt[tp.Ch-1]
 	r2 := txt[tp.Ch]
-	if !lex.IsWordBreak(r1, rune(-1)) && !lex.IsWordBreak(r2, rune(-1)) {
-		return true
-	}
-	return false
+	return !lex.IsWordBreak(r1, rune(-1)) && !lex.IsWordBreak(r2, rune(-1))
 }
 
 // SelectWord selects the word (whitespace, punctuation delimited) that the cursor is on

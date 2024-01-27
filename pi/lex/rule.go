@@ -325,9 +325,9 @@ func (lr *Rule) Lex(ls *State) *Rule {
 }
 
 // IsMatch tests if the rule matches for current input state, returns true if so, false if not
-func (lr *Rule) IsMatch(ls *State) bool {
+func (lr *Rule) IsMatch(ls *State) (ok bool) {
 	if !lr.IsMatchPos(ls) {
-		return false
+		return
 	}
 
 	switch lr.Match {
@@ -335,58 +335,55 @@ func (lr *Rule) IsMatch(ls *State) bool {
 		sz := len(lr.String)
 		str, ok := ls.String(lr.Offset, sz)
 		if !ok {
-			return false
+			return
 		}
 		if str != lr.String {
-			return false
+			return
 		}
 		return true
 	case StrName:
 		nm := ls.ReadNameTmp(lr.Offset)
 		if nm != lr.String {
-			return false
+			return
 		}
 		return true
 	case Letter:
 		rn, ok := ls.Rune(lr.Offset)
 		if !ok {
-			return false
+			return
 		}
 		if IsLetter(rn) {
 			return true
 		}
-		return false
+		return
 	case Digit:
 		rn, ok := ls.Rune(lr.Offset)
 		if !ok {
-			return false
+			return
 		}
 		if IsDigit(rn) {
 			return true
 		}
-		return false
+		return
 	case WhiteSpace:
 		rn, ok := ls.Rune(lr.Offset)
 		if !ok {
-			return false
+			return
 		}
 		if IsWhiteSpace(rn) {
 			return true
 		}
-		return false
+		return
 	case CurState:
 		if ls.MatchState(lr.String) {
 			return true
 		}
-		return false
+		return
 	case AnyRune:
 		_, ok := ls.Rune(lr.Offset)
-		if !ok {
-			return false
-		}
-		return true
+		return ok
 	}
-	return false
+	return
 }
 
 // IsMatchPos tests if the rule matches position
