@@ -290,8 +290,8 @@ func (ch *Chooser) SetIconUpdate(ic icons.Icon) *Chooser {
 
 	ch.Icon = ic
 	if ch.Editable {
-		tf, ok := ch.TextField()
-		if ok {
+		tf := ch.TextField()
+		if tf != nil {
 			tf.SetLeadingIconUpdate(ic)
 		}
 	} else {
@@ -305,15 +305,15 @@ func (ch *Chooser) SetIconUpdate(ic icons.Icon) *Chooser {
 
 // TextField returns the text field of an editable Chooser
 // if present
-func (ch *Chooser) TextField() (*TextField, bool) {
+func (ch *Chooser) TextField() *TextField {
 	if ch.Parts == nil {
-		return nil, false
+		return nil
 	}
 	tf := ch.Parts.ChildByName("text", 2)
 	if tf == nil {
-		return nil, false
+		return nil
 	}
-	return tf.(*TextField), true
+	return tf.(*TextField)
 }
 
 // AddItemsFunc adds the given function to [Chooser.ItemsFuncs].
@@ -523,8 +523,8 @@ func (ch *Chooser) SetCurIndex(idx int) any {
 // and the corresponding CurVal based on current user-entered Text value,
 // and triggers a Change event
 func (ch *Chooser) GetCurTextAction() any {
-	tf, ok := ch.TextField()
-	if !ok {
+	tf := ch.TextField()
+	if tf == nil {
 		slog.Error("gi.Chooser: GetCurTextAction only available for Editable Chooser")
 		return ch.CurVal
 	}
@@ -568,8 +568,8 @@ func (ch *Chooser) ShowCurVal(label string) {
 
 	ch.CurLabel = label
 	if ch.Editable {
-		tf, ok := ch.TextField()
-		if ok {
+		tf := ch.TextField()
+		if tf != nil {
 			tf.SetTextUpdate(ch.CurLabel)
 		}
 	} else {
@@ -716,8 +716,8 @@ func (ch *Chooser) HandleKeys() {
 			ch.Send(events.Click, e)
 		// }
 		default:
-			tf, ok := ch.TextField()
-			if !ok {
+			tf := ch.TextField()
+			if tf == nil {
 				break
 			}
 			// if we don't have anything special to do,

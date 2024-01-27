@@ -277,8 +277,8 @@ func (fv *FileView) ConfigPathBar() {
 		SetTooltip("Path to look for files in: can select from list of recent paths, or edit a value directly")
 	pf := gi.NewChooser(pr, "path").SetEditable(true)
 	pf.ConfigWidget()
-	pft, found := pf.TextField()
-	if found {
+	pft := pf.TextField()
+	if pft != nil {
 		pft.SetCompleter(fv, fv.PathComplete, fv.PathCompleteEdit)
 		pft.OnChange(func(e events.Event) {
 			fv.DirPath = pft.Text()
