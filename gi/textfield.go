@@ -1417,7 +1417,6 @@ func (tf *TextField) HandleEvents() {
 			return
 		}
 		tf.SetFocusEvent()
-		tf.Send(events.Focus, e) // sets focused flag
 	})
 	tf.On(events.DoubleClick, func(e events.Event) {
 		if tf.IsReadOnly() {

@@ -719,17 +719,13 @@ func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 		ch.SetCurText(tf.Text())
 		ch.SendChange(e)
 	})
-	tf.OnFocus(func(e events.Event) {
-		ch.CallItemsFuncs()
-		tf.OfferComplete(dontForce)
-	})
 	tf.OnClick(func(e events.Event) {
 		if ch.IsReadOnly() {
 			return
 		}
-		tf.FocusClear()
 		ch.SetFocusEvent()
-		ch.Send(events.Focus, e)
+		ch.CallItemsFuncs()
+		tf.OfferComplete(dontForce)
 	})
 	// Chooser gives its textfield focus styling but not actual focus
 	ch.OnFocus(func(e events.Event) {
