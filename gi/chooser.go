@@ -218,6 +218,7 @@ func (ch *Chooser) ConfigWidget() {
 
 	ici := -1
 	var lbi, txi, indi int
+	// editable handles through textfield
 	if ch.Icon.IsSet() && !ch.Editable {
 		config.Add(IconType, "icon")
 		ici = 0
@@ -234,8 +235,11 @@ func (ch *Chooser) ConfigWidget() {
 	if !ch.Indicator.IsSet() {
 		ch.Indicator = icons.KeyboardArrowRight
 	}
-	indi = len(config)
-	config.Add(IconType, "indicator")
+	// editable handles through textfield
+	if !ch.Editable {
+		indi = len(config)
+		config.Add(IconType, "indicator")
+	}
 
 	ch.ConfigParts(config, func() {
 		if ici >= 0 {
@@ -246,16 +250,19 @@ func (ch *Chooser) ConfigWidget() {
 			tx := ch.Parts.Child(txi).(*TextField)
 			tx.SetText(ch.CurLabel)
 			tx.SetLeadingIcon(ch.Icon)
+			tx.SetTrailingIcon(ch.Indicator, func(e events.Event) {
+				ch.OpenMenu(e)
+			})
 			tx.Config() // this is essential
 			tx.SetCompleter(tx, ch.CompleteMatch, ch.CompleteEdit)
 		} else {
 			lbl := ch.Parts.Child(lbi).(*Label)
 			lbl.SetText(ch.CurLabel)
 			lbl.Config() // this is essential
-		}
 
-		ic := ch.Parts.Child(indi).(*Icon)
-		ic.SetIcon(ch.Indicator)
+			ic := ch.Parts.Child(indi).(*Icon)
+			ic.SetIcon(ch.Indicator)
+		}
 	})
 }
 
@@ -645,7 +652,7 @@ func (ch *Chooser) HandleEvents() {
 	})
 }
 
-// OpenMenu will open any menu associated with this element.
+// OpenMenu will open any menu associated with this chooser.
 // Returns true if menu opened, false if not.
 func (ch *Chooser) OpenMenu(e events.Event) bool {
 	pos := ch.ContextMenuPos(e)
