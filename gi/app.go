@@ -7,7 +7,6 @@ package gi
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"image"
 	"io"
 	"strings"
@@ -226,36 +225,51 @@ func (tb *Toolbar) StdOverflowMenu(m *Scene) { //gti:add
 // ConfigAppChooser configures the given [Chooser] to give access
 // to all app resources, such as open scenes and available app bar
 // buttons. This chooser is typically placed at the start of the AppBar.
+// You can extend the resources available for access in the app chooser
+// using [Chooser.AddItemsFunc] and [Chooser.OnChange] (you can handle
+// your cases in your OnChange and call [events.SetHandled] only for
+// the cases you handle).
 func ConfigAppChooser(ch *Chooser) *Chooser {
-	ch.SetEditable(true).SetType(ChooserOutlined).SetIcon(icons.Search)
+	ch.SetEditable(true).SetType(ChooserOutlined).SetIcon(icons.Search).SetPlaceholder("Search")
+	ch.Style(func(s *styles.Style) {
+		s.Border.Radius = styles.BorderRadiusFull
+		s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
+		if s.Is(states.Focused) {
+			s.Border.Width.Set(units.Dp(2))
+			s.Border.Color.Set(colors.Scheme.Primary.Base)
+		} else {
+			s.Border.Width.Zero()
+			s.Border.Color.Zero()
+		}
+	})
+	ch.OnWidgetAdded(func(w Widget) {
+		if w.PathFrom(ch) == "parts/text" {
+			w.Style(func(s *styles.Style) {
+				s.Min.X.SetCustom(func(uc *units.Context) float32 {
+					return min(uc.Vw(25), uc.Ch(40))
+				})
+				s.Max.X = s.Min.X
+			})
+		}
+	})
+
 	ch.AddItemsFunc(func() {
 		stg := ch.Scene.Stage.Main
 		mm := stg.MainMgr
-		urs := ch.Resources.Generate()
-		iln := mm.Stack.Len() + len(urs)
-		ch.Items = make([]any, iln)
-		ch.Icons = make([]icons.Icon, iln)
-		ch.Tooltips = make([]string, iln)
-		for i, kv := range mm.Stack.Order {
-			nm := ""
-			if kv.Val.Scene.Body != nil && kv.Val.Scene.Body.Title != "" {
-				nm = kv.Val.Scene.Body.Title
+
+		for _, kv := range mm.Stack.Order {
+			st := kv.Val
+			lbl := ""
+			if st.Scene.Body != nil && st.Scene.Body.Title != "" {
+				lbl = st.Scene.Body.Title
 			} else {
-				nm = kv.Val.Scene.Name()
+				lbl = st.Scene.Name()
 				// -scene is frequently placed at the end of scene names, so we remove it
-				nm = strings.TrimSuffix(nm, "-scene")
+				lbl = strings.TrimSuffix(lbl, "-scene")
 			}
-			u := uri.URI{Label: nm, Icon: icons.Toolbar}
-			u.SetURL("scene", nm, fmt.Sprintf("%d", i))
-			ch.Items[i] = u
-			ch.Icons[i] = u.Icon
-			ch.Tooltips[i] = u.URL
-		}
-		st := len(mm.Stack.Order)
-		for i, u := range urs {
-			ch.Items[st+i] = u
-			ch.Icons[st+i] = u.Icon
-			ch.Tooltips[st+i] = u.URL
+			ch.Items = append(ch.Items, st)
+			ch.Labels = append(ch.Labels, lbl)
+			ch.Icons = append(ch.Icons, icons.Toolbar)
 		}
 	})
 	ch.OnChange(func(e events.Event) {
@@ -279,28 +293,6 @@ func ConfigAppChooser(ch *Chooser) *Chooser {
 			return
 		}
 		ErrorSnackbar(ch, errors.New("unable to process resource: "+cv.String()))
-	})
-	ch.Style(func(s *styles.Style) {
-		// s.GrowWrap = true // note: this won't work because contents not placed until end
-		s.Border.Radius = styles.BorderRadiusFull
-		s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
-		if s.Is(states.Focused) {
-			s.Border.Width.Set(units.Dp(2))
-			s.Border.Color.Set(colors.Scheme.Primary.Base)
-		} else {
-			s.Border.Width.Zero()
-			s.Border.Color.Zero()
-		}
-	})
-	ch.OnWidgetAdded(func(w Widget) {
-		if w.PathFrom(ch) == "parts/text" {
-			w.Style(func(s *styles.Style) {
-				s.Min.X.SetCustom(func(uc *units.Context) float32 {
-					return min(uc.Vw(25), uc.Ch(40))
-				})
-				s.Max.X = s.Min.X
-			})
-		}
 	})
 	return ch
 }

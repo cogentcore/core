@@ -75,7 +75,9 @@ type Chooser struct {
 	// (eg: if they are based on dynamic data). The functions are called
 	// in ascending order such that the items added in the first function
 	// will appear before those added in the last function. Use
-	// [Chooser.AddItemsFunc] to add a new items function.
+	// [Chooser.AddItemsFunc] to add a new items function. If at least
+	// one ItemsFunc is specified, the items, labels, icons, and tooltips
+	// of the chooser will be cleared before calling the functions.
 	ItemsFuncs []func() `copier:"-" set:"-"`
 
 	// CurLabel is the string label for the current value
@@ -319,10 +321,26 @@ func (ch *Chooser) TextField() (*TextField, bool) {
 // and they are typically used to configure them (eg: if they are based
 // on dynamic data). The functions are called in ascending order such
 // that the items added in the first function will appear before those
-// added in the last function.
+// added in the last function. If at least one ItemsFunc is specified,
+// the items, labels, icons, and tooltips of the chooser will be cleared
+// before calling the functions.
 func (ch *Chooser) AddItemsFunc(f func()) *Chooser {
 	ch.ItemsFuncs = append(ch.ItemsFuncs, f)
 	return ch
+}
+
+// CallItemsFuncs calls [Chooser.ItemsFuncs].
+func (ch *Chooser) CallItemsFuncs() {
+	if len(ch.ItemsFuncs) == 0 {
+		return
+	}
+	ch.Items = nil
+	ch.Labels = nil
+	ch.Icons = nil
+	ch.Tooltips = nil
+	for _, f := range ch.ItemsFuncs {
+		f()
+	}
 }
 
 // MakeItems makes sure the Items list is made, and if not, or reset is true,
@@ -595,9 +613,6 @@ func (ch *Chooser) SelectItemAction(idx int) {
 // MakeItemsMenu constructs a menu of all the items.
 // It is automatically set as the [Button.Menu] for the Chooser.
 func (ch *Chooser) MakeItemsMenu(m *Scene) {
-	for _, f := range ch.ItemsFuncs {
-		f()
-	}
 	for i, it := range ch.Items {
 		nm := "item-" + strconv.Itoa(i)
 		bt := NewButton(m, nm).SetType(ButtonMenu)
@@ -719,12 +734,7 @@ func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 		ch.SendChange(e)
 	})
 	tf.OnFocus(func(e events.Event) {
-		for _, f := range ch.ItemsFuncs {
-			f()
-		}
-		if ch.CurIndex <= 0 {
-			ch.SetCurIndex(0)
-		}
+		ch.CallItemsFuncs()
 		tf.CursorStart()
 	})
 	tf.OnClick(func(e events.Event) {
