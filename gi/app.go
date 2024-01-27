@@ -254,8 +254,8 @@ func ConfigAppChooser(ch *Chooser) *Chooser {
 	})
 	// we must never have a chooser label so that it
 	// always displays the search placeholder
-	ch.OnFirst(events.Change, func(e events.Event) {
-		ch.CurLabel = ""
+	ch.OnFinal(events.Change, func(e events.Event) {
+		ch.ShowCurVal("")
 	})
 
 	ch.AddItemsFunc(func() {
