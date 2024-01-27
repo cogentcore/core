@@ -8,6 +8,7 @@ package main
 
 import (
 	_ "embed"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -28,16 +29,17 @@ import (
 var icon []byte
 
 func main() {
-	gi.TheApp.SetIconBytes(icon).SetSceneConfig(func(sc *gi.Scene) {
-		sc.OnWidgetAdded(func(w gi.Widget) {
-			switch w := w.(type) {
-			case *gi.Button, *giv.FuncButton:
-				w.Style(func(s *styles.Style) {
-					s.Border.Radius = styles.BorderRadiusSmall
-				})
-			}
-		})
-	})
+	gi.TheApp.SetIconBytes(icon)
+	// .SetSceneConfig(func(sc *gi.Scene) {
+	// 	sc.OnWidgetAdded(func(w gi.Widget) {
+	// 		switch w := w.(type) {
+	// 		case *gi.Button, *giv.FuncButton:
+	// 			w.Style(func(s *styles.Style) {
+	// 				s.Border.Radius = styles.BorderRadiusSmall
+	// 			})
+	// 		}
+	// 	})
+	// })
 
 	b := gi.NewBody("Cogent Core Demo")
 	ts := gi.NewTabs(b)
@@ -47,6 +49,7 @@ func main() {
 	buttons(ts)
 	inputs(ts)
 	layouts(ts)
+	dialogs(ts)
 	values(ts)
 	other(ts)
 
@@ -193,8 +196,7 @@ func inputs(ts *gi.Tabs) {
 	tab := ts.NewTab("Inputs")
 
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Inputs")
-
-	gi.NewLabel(tab).SetType(gi.LabelBodyLarge).SetText(
+	gi.NewLabel(tab).SetText(
 		`Cogent Core provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.`)
 
 	gi.NewTextField(tab).SetPlaceholder("Filled")
@@ -278,8 +280,7 @@ func layouts(ts *gi.Tabs) {
 	tab := ts.NewTab("Layouts")
 
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Layout")
-
-	gi.NewLabel(tab).SetType(gi.LabelBodyLarge).SetText(
+	gi.NewLabel(tab).SetText(
 		`Cogent Core provides various adaptable layout types that allow you to easily organize content so that it is easy to use, customize, and understand.`)
 
 	// vw := gi.NewLabel(layouts, "vw", "50vw")
@@ -308,12 +309,116 @@ func layouts(ts *gi.Tabs) {
 	gi.NewLabel(right).SetType(gi.LabelHeadlineMedium).SetText("Right")
 }
 
+func dialogs(ts *gi.Tabs) {
+	tab := ts.NewTab("Dialogs")
+
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Dialogs, snackbars, and windows")
+	gi.NewLabel(tab).SetText(
+		`Cogent Core provides completely customizable dialogs, snackbars, and windows that allow you to easily display, obtain, and organize information.`)
+
+	makeRow := func() gi.Widget {
+		return gi.NewLayout(tab).Style(func(s *styles.Style) {
+			s.Wrap = true
+			s.Align.Items = styles.Center
+		})
+	}
+
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineSmall).SetText("Dialogs")
+	drow := makeRow()
+
+	md := gi.NewButton(drow).SetText("Message")
+	md.OnClick(func(e events.Event) {
+		gi.MessageDialog(md, "Something happened", "Message")
+	})
+
+	ed := gi.NewButton(drow).SetText("Error")
+	ed.OnClick(func(e events.Event) {
+		gi.ErrorDialog(ed, errors.New("invalid encoding format"), "Error loading file")
+	})
+
+	cd := gi.NewButton(drow).SetText("Confirm")
+	cd.OnClick(func(e events.Event) {
+		d := gi.NewBody().AddTitle("Confirm").AddText("Send message?")
+		d.AddBottomBar(func(pw gi.Widget) {
+			d.AddCancel(pw).OnClick(func(e events.Event) {
+				fmt.Println("Dialog canceled")
+			})
+			d.AddOk(pw).OnClick(func(e events.Event) {
+				fmt.Println("Dialog accepted")
+			})
+		})
+		d.NewDialog(cd).Run()
+	})
+
+	td := gi.NewButton(drow).SetText("Input")
+	td.OnClick(func(e events.Event) {
+		d := gi.NewBody().AddTitle("Input").AddText("What is your name?")
+		tf := gi.NewTextField(d)
+		d.AddBottomBar(func(pw gi.Widget) {
+			d.AddCancel(pw)
+			d.AddOk(pw).OnClick(func(e events.Event) {
+				fmt.Println("Your name is", tf.Text())
+			})
+		})
+		d.NewDialog(td).Run()
+	})
+
+	fd := gi.NewButton(drow).SetText("Full window")
+	u := &gi.User{}
+	fd.OnClick(func(e events.Event) {
+		d := gi.NewBody().AddTitle("Full window dialog").AddText("Edit your information")
+		giv.NewStructView(d).SetStruct(u)
+		d.OnClose(func(e events.Event) {
+			fmt.Println("Your information is:", u)
+		})
+		d.NewFullDialog(td).Run()
+	})
+
+	nd := gi.NewButton(drow).SetText("New window")
+	nd.OnClick(func(e events.Event) {
+		gi.NewBody().AddTitle("New window dialog").AddText("This dialog opens in a new window on multi-window platforms").NewDialog(nd).SetNewWindow(true).Run()
+	})
+
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineSmall).SetText("Snackbars")
+	srow := makeRow()
+
+	ms := gi.NewButton(srow).SetText("Message")
+	ms.OnClick(func(e events.Event) {
+		gi.MessageSnackbar(ms, "New messages loaded")
+	})
+
+	es := gi.NewButton(srow).SetText("Error")
+	es.OnClick(func(e events.Event) {
+		gi.ErrorSnackbar(es, errors.New("file not found"), "Error loading page")
+	})
+
+	cs := gi.NewButton(srow).SetText("Custom")
+	cs.OnClick(func(e events.Event) {
+		gi.NewBody().AddSnackbarText("Files updated").
+			AddSnackbarButton("Refresh", func(e events.Event) {
+				fmt.Println("Refreshed files")
+			}).AddSnackbarIcon(icons.Close).NewSnackbar(cs).Run()
+	})
+
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineSmall).SetText("Windows")
+	wrow := makeRow()
+
+	nw := gi.NewButton(wrow).SetText("New window")
+	nw.OnClick(func(e events.Event) {
+		gi.NewBody().AddTitle("New window").AddText("A standalone window that opens in a new window on multi-window platforms").NewWindow().Run()
+	})
+
+	fw := gi.NewButton(wrow).SetText("Full window")
+	fw.OnClick(func(e events.Event) {
+		gi.NewBody().AddTitle("Full window").AddText("A standalone window that opens in the same system window").NewWindow().SetNewWindow(false).Run()
+	})
+}
+
 func values(ts *gi.Tabs) {
 	tab := ts.NewTab("Values")
 
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Values")
-
-	gi.NewLabel(tab).SetType(gi.LabelBodyLarge).SetText(
+	gi.NewLabel(tab).SetText(
 		`Cogent Core provides the giv value system, which allows you to instantly turn Go values and functions into type-specific widgets bound to the original values. This powerful system means that you can automatically turn backend data structures into GUI apps with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.`)
 
 	gi.NewButton(tab).SetText("Inspector").OnClick(func(e events.Event) {
@@ -344,8 +449,7 @@ func other(ts *gi.Tabs) {
 	tab := ts.NewTab("Other")
 
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Other")
-
-	gi.NewLabel(tab).SetType(gi.LabelBodyLarge).SetText(`Other features of the Cogent Core framework`)
+	gi.NewLabel(tab).SetText(`Other features of the Cogent Core framework`)
 
 	gi.NewMeter(tab).SetValue(0.5)
 }

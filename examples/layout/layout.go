@@ -59,23 +59,13 @@ type Control struct {
 	Grow mat32.Vec2
 }
 
-var (
-	ShortText = "This is a test of layout."
-
-	LongText = "This is a test of the layout logic, which is pretty complex and requires some experimenting to understand how it all works.  The styling and behavior is the same as the CSS / HTML Flex model, except we only support Grow, not Shrink. "
-
-	VeryLongText = LongText + LongText + LongText
-
-	AlignText = "This is text to test for text align<br>This line is short<br>This is text to test for text align, this one is longer"
-
-	FrameSizes = [5]mat32.Vec2{
-		{20, 100},
-		{80, 20},
-		{60, 80},
-		{40, 120},
-		{150, 100},
-	}
-)
+var FrameSizes = [5]mat32.Vec2{
+	{20, 100},
+	{80, 20},
+	{60, 80},
+	{40, 120},
+	{150, 100},
+}
 
 func PlainFrames(par gi.Widget, grow mat32.Vec2) {
 	for i, sz := range FrameSizes {
@@ -95,8 +85,7 @@ func PlainFrames(par gi.Widget, grow mat32.Vec2) {
 func BoxFrame(par gi.Widget, nm ...string) *gi.Frame {
 	fr := gi.NewFrame(par, nm...)
 	fr.Style(func(s *styles.Style) {
-		s.Border.Color.Set(colors.Scheme.Outline)
-		s.Border.Width.Set(units.Dp(2))
+		s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
 	})
 	return fr
 }
@@ -113,7 +102,7 @@ func main() {
 	})
 	sv := giv.NewStructView(svfr).SetStruct(ctrl)
 
-	fr := BoxFrame(splt)
+	fr := gi.NewFrame(splt)
 	PlainFrames(fr, mat32.V2(0, 0))
 	fr.Style(func(s *styles.Style) {
 		s.Display = ctrl.Display

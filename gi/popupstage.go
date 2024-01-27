@@ -53,6 +53,11 @@ func (st *Stage) RunPopup() *Stage {
 	ms.RenderCtx.Mu.RLock()
 	defer ms.RenderCtx.Mu.RUnlock()
 
+	if st.Type == SnackbarStage {
+		// only one snackbar can exist
+		ms.PopupMgr.PopDeleteType(SnackbarStage)
+	}
+
 	ms.PopupMgr.Push(st)
 	st.SetPopupMgr(ms) // sets all pointers
 
@@ -113,7 +118,7 @@ func (st *Stage) RunPopup() *Stage {
 			if st.Main == nil {
 				return
 			}
-			st.PopupMgr.PopDeleteType(st.Type)
+			st.PopupMgr.DeleteStage(st)
 		})
 	}
 

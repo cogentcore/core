@@ -611,17 +611,17 @@ func StructNonDefFieldsStr(structPtr any, path string) string {
 	return str
 }
 
-// StructViewDialog opens a dialog (optionally in a separate window)
+// StructViewDialog opens a dialog (optionally in a new, separate window)
 // for viewing / editing the given struct object, in the context of given ctx widget
-func StructViewDialog(ctx gi.Widget, stru any, title string, sepWindow bool) {
+func StructViewDialog(ctx gi.Widget, stru any, title string, newWindow bool) {
 	d := gi.NewBody().AddTitle(title)
 	NewStructView(d).SetStruct(stru)
 	if tb, ok := stru.(gi.Toolbarer); ok {
 		d.AddAppBar(tb.ConfigToolbar)
 	}
 	ds := d.NewFullDialog(ctx)
-	if sepWindow {
-		ds.SetFullWindow(true)
+	if newWindow {
+		ds.SetNewWindow(true)
 	}
 	ds.Run()
 }

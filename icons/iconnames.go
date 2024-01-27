@@ -5634,6 +5634,9 @@ const (
 	// Token is https://github.com/cogentcore/core/blob/main/icons/svg/token.svg
 	Token Icon = "token"
 
+	// Toml is https://github.com/cogentcore/core/blob/main/icons/svg/toml.svg
+	Toml Icon = "toml"
+
 	// Tonality is https://github.com/cogentcore/core/blob/main/icons/svg/tonality.svg
 	Tonality Icon = "tonality"
 
@@ -5741,6 +5744,9 @@ const (
 
 	// TvSignin is https://github.com/cogentcore/core/blob/main/icons/svg/tv_signin.svg
 	TvSignin Icon = "tv_signin"
+
+	// Type is https://github.com/cogentcore/core/blob/main/icons/svg/type.svg
+	Type Icon = "type"
 
 	// Unarchive is https://github.com/cogentcore/core/blob/main/icons/svg/unarchive.svg
 	Unarchive Icon = "unarchive"
