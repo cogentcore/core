@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"image"
 	"io"
-	"strings"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
@@ -271,24 +270,17 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 				if st == tb.Scene.Stage {
 					continue
 				}
-				lbl := ""
-				if st.Scene.Body != nil && st.Scene.Body.Title != "" {
-					lbl = st.Scene.Body.Title
-				} else {
-					lbl = st.Scene.Name()
-					// -scene is frequently placed at the end of scene names, so we remove it
-					lbl = strings.TrimSuffix(lbl, "-scene")
-				}
 				ch.Items = append(ch.Items, st)
-				ch.Labels = append(ch.Labels, lbl)
+				ch.Labels = append(ch.Labels, st.Title)
 				ch.Icons = append(ch.Icons, icons.Toolbar)
+				ch.Tooltips = append(ch.Tooltips, "Show "+st.Title)
 			}
 		}
 	})
 	ch.AddItemsFunc(func() {
 		for _, kid := range tb.Kids {
 			bt := AsButton(kid)
-			if bt == nil || bt.IsDisabled() {
+			if bt == nil || bt.IsDisabled() || bt.Name() == "back" || bt.Name() == "overflow-menu" {
 				continue
 			}
 			ch.Items = append(ch.Items, bt)
