@@ -16,7 +16,7 @@ require (
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gabriel-vasile/mimetype v1.4.3
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240118000515-a250818d05e3
-	github.com/goki/freetype v1.0.2
+	github.com/goki/freetype v1.0.4
 	github.com/goki/vulkan v1.0.7
 	github.com/h2non/filetype v1.1.3
 	github.com/hack-pad/hackpadfs v0.2.1
