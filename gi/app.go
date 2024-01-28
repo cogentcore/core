@@ -288,7 +288,7 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 	ch.AddItemsFunc(func() {
 		for _, kid := range tb.Kids {
 			bt := AsButton(kid)
-			if bt == nil {
+			if bt == nil || bt.IsDisabled() {
 				continue
 			}
 			ch.Items = append(ch.Items, bt)
@@ -304,6 +304,8 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 				cv.MainMgr.RenderWin.Raise()
 			}
 			cv.MainMgr.MoveToTop(cv)
+		case ButtonEmbedder:
+			cv.AsButton().Send(events.Click, e)
 		}
 	})
 	return ch
