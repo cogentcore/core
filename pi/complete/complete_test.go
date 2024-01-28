@@ -46,6 +46,7 @@ func TestMatchSeedString(t *testing.T) {
 		"pi":         {"Peach Ice Cream"},
 		"ci":         {"core init"},
 		"gboc":       {"gi.Button.OnClick()"},
+		"gb":         {"Go: Build", "gi.Button.OnClick()"},
 		"git commit": {"Git: Commit"},
 		"Commit":     {"Git: Commit"},
 		"Git: ":      {"Git: Commit", "Git: Push", "Git: Pull"},
