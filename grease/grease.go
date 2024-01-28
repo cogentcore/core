@@ -48,7 +48,7 @@ func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
 			fmt.Println(grog.CmdColor(cmdString(opts, cmd)) + grog.ErrorColor(" failed: "+err.Error()))
 			os.Exit(1)
 		}
-		return fmt.Errorf("%s failed: %w", opts.AppName+" "+cmd, err)
+		return fmt.Errorf("%s failed: %w", os.Args[0]+" "+cmd, err)
 	}
 	// if the user sets level to error (via -q), we don't show the success message
 	if opts.PrintSuccess && grog.UserLevel <= slog.LevelWarn {
@@ -82,7 +82,7 @@ func RunCmd[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) error {
 // to form a string representing the complete command being run.
 func cmdString(opts *Options, cmd string) string {
 	if cmd == "" {
-		return opts.AppName
+		return os.Args[0]
 	}
-	return opts.AppName + " " + cmd
+	return os.Args[0] + " " + cmd
 }
