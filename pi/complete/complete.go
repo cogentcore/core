@@ -18,10 +18,10 @@ import (
 // Completion holds one potential completion
 type Completion struct {
 
-	// completion text -- what will actually be inserted if selected
+	// completion text: what will actually be inserted if selected
 	Text string
 
-	// label to show the user -- only used for menu display if non-empty -- otherwise Text is used
+	// label to show the user; only used for menu display if non-empty; otherwise Text is used
 	Label string
 
 	// icon name
