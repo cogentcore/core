@@ -119,7 +119,7 @@ func (sc *Scene) FlagType() enums.BitFlagSetter {
 // side, with the given Body as the central content.
 func NewBodyScene(body *Body, name ...string) *Scene {
 	sc := &Scene{}
-	nm := body.Nm + "-scene"
+	nm := body.Nm + " scene"
 	if len(name) > 0 {
 		nm = name[0]
 	}
