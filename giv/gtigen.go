@@ -393,7 +393,7 @@ func (t *SliceView) SetStripes(v gi.Stripes) *SliceView { t.Stripes = v; return 
 func (t *SliceView) SetMinRows(v int) *SliceView { t.MinRows = v; return t }
 
 // SetViewMu sets the [SliceView.ViewMu]
-func (t *SliceView) SetViewMu(v sync.Mutex) *SliceView { t.ViewMu = v; return t }
+func (t *SliceView) SetViewMu(v *sync.Mutex) *SliceView { t.ViewMu = v; return t }
 
 // SetSliceNpval sets the [SliceView.SliceNPVal]
 func (t *SliceView) SetSliceNpval(v reflect.Value) *SliceView { t.SliceNPVal = v; return t }
@@ -473,7 +473,7 @@ func (t *SliceViewBase) SetMinRows(v int) *SliceViewBase { t.MinRows = v; return
 // read / modify the underlying Slice data.
 // Can be used to protect against random updating if your code has specific
 // update points that can be likewise protected with this same mutex.
-func (t *SliceViewBase) SetViewMu(v sync.Mutex) *SliceViewBase { t.ViewMu = v; return t }
+func (t *SliceViewBase) SetViewMu(v *sync.Mutex) *SliceViewBase { t.ViewMu = v; return t }
 
 // SetSliceNpval sets the [SliceViewBase.SliceNPVal]:
 // non-ptr reflect.Value of the slice
@@ -775,7 +775,7 @@ func (t *TableView) SetStripes(v gi.Stripes) *TableView { t.Stripes = v; return 
 func (t *TableView) SetMinRows(v int) *TableView { t.MinRows = v; return t }
 
 // SetViewMu sets the [TableView.ViewMu]
-func (t *TableView) SetViewMu(v sync.Mutex) *TableView { t.ViewMu = v; return t }
+func (t *TableView) SetViewMu(v *sync.Mutex) *TableView { t.ViewMu = v; return t }
 
 // SetSliceNpval sets the [TableView.SliceNPVal]
 func (t *TableView) SetSliceNpval(v reflect.Value) *TableView { t.SliceNPVal = v; return t }

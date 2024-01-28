@@ -215,7 +215,7 @@ type SliceViewBase struct {
 	// read / modify the underlying Slice data.
 	// Can be used to protect against random updating if your code has specific
 	// update points that can be likewise protected with this same mutex.
-	ViewMu sync.Mutex `copier:"-" view:"-" json:"-" xml:"-"`
+	ViewMu *sync.Mutex `copier:"-" view:"-" json:"-" xml:"-"`
 
 	// Changed indicates whether the underlying slice
 	// has been edited in any way
@@ -517,11 +517,17 @@ func (sv *SliceViewBase) UpdtSliceSize() int {
 
 // ViewMuLock locks the ViewMu if non-nil
 func (sv *SliceViewBase) ViewMuLock() {
+	if sv.ViewMu == nil {
+		return
+	}
 	sv.ViewMu.Lock()
 }
 
 // ViewMuUnlock Unlocks the ViewMu if non-nil
 func (sv *SliceViewBase) ViewMuUnlock() {
+	if sv.ViewMu == nil {
+		return
+	}
 	sv.ViewMu.Unlock()
 }
 
@@ -1270,8 +1276,8 @@ func (sv *SliceViewBase) UpdateSelectIdx(idx int, sel bool) {
 
 // IdxIsSelected returns the selected status of given slice index
 func (sv *SliceViewBase) IdxIsSelected(idx int) bool {
-	sv.ViewMu.Lock()
-	defer sv.ViewMu.Unlock()
+	sv.ViewMuLock()
+	defer sv.ViewMuUnlock()
 	_, ok := sv.SelIdxs[idx]
 	return ok
 }
