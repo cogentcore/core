@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/pi/syms"
 	"cogentcore.org/core/pi/token"
 	"github.com/akutz/sortfold"
+	"github.com/iancoleman/strcase"
 )
 
 // Completion holds one potential completion
@@ -98,56 +99,49 @@ type LookupFunc func(data any, text string, posLn, posCh int) Lookup
 // Allows for other editing, e.g. adding "()" or adding "/", etc.
 type EditFunc func(data any, text string, cursorPos int, comp Completion, seed string) Edit
 
-// MatchSeed returns a list of matches given a list of string possibilities and a seed.
-// The seed is basically a prefix.
-func MatchSeedString(completions []string, seed string) (matches []string) {
-
-	matches = completions[0:0]
-	start := -1
-	end := -1
-
-	// fast case insensitive sort from Andrew Kutz
-	less := func(i, j int) bool {
-		return sortfold.CompareFold(completions[i], completions[j]) < 0
-	}
-	sort.Slice(completions, less)
-
+// MatchSeed returns a list of matches given a list of string
+// possibilities and a seed. It checks whether different
+// transformations of each possible completion contain a lowercase
+// version of the seed. It returns nil if there are no matches.
+func MatchSeedString(completions []string, seed string) []string {
 	if len(seed) == 0 {
-		matches = completions
-		return matches
+		// everything matches
+		return completions
 	}
 
-	for i, s := range completions {
-		if end > -1 {
-			break
-		}
-		var noCase = true
-		if lex.HasUpperCase(seed) {
-			noCase = false
-		}
-		text := s
-		if noCase {
-			text = strings.ToLower(s)
-		}
-		if start == -1 {
-			if strings.HasPrefix(text, seed) {
-				start = i // first match in sorted list
-			}
+	var matches []string
+	lseed := strings.ToLower(seed)
+
+	for _, c := range completions {
+		lc := strings.ToLower(c)
+		if strings.Contains(lc, lseed) {
+			matches = append(matches, c)
 			continue
 		}
-		if start > -1 {
-			if !strings.HasPrefix(text, seed) {
-				end = i
-			}
-		}
-	}
-	if start > -1 && end == -1 { // everything possible was a match!
-		end = len(completions)
-	}
 
-	// fmt.Printf("match start: %d, end: %d", start, end)
-	if start > -1 && end > -1 {
-		matches = completions[start:end]
+		// stripped version of completion
+		// (space delimeted with no punctuation)
+		cs := strings.Map(func(r rune) rune {
+			if unicode.IsPunct(r) {
+				return -1
+			}
+			return r
+		}, c)
+		cs = strcase.ToDelimited(cs, ' ')
+		if strings.Contains(cs, lseed) {
+			matches = append(matches, c)
+			continue
+		}
+
+		// the initials (first letters) of every field
+		ci := ""
+		csdf := strings.Fields(cs)
+		for _, f := range csdf {
+			ci += string(f[0])
+		}
+		if strings.Contains(ci, lseed) {
+			matches = append(matches, c)
+		}
 	}
 	return matches
 }
