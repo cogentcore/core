@@ -170,9 +170,9 @@ func (tb *Toolbar) StdOverflowMenu(m *Scene) { //gti:add
 	}
 	NewButton(m).SetText("Edit").SetMenu(func(m *Scene) {
 		// todo: these need to actually do something -- currently just show keyboard shortcut
-		NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy)
-		NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keyfun.Cut)
-		NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keyfun.Paste)
+		NewButton(m).SetText("Copy").SetIcon(icons.Copy).SetKey(keyfun.Copy)
+		NewButton(m).SetText("Cut").SetIcon(icons.Cut).SetKey(keyfun.Cut)
+		NewButton(m).SetText("Paste").SetIcon(icons.Paste).SetKey(keyfun.Paste)
 	})
 
 	// no window menu on single-window platforms
