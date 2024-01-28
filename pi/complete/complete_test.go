@@ -9,8 +9,8 @@ import (
 	"testing"
 )
 
-func TestMatchSeedString(t *testing.T) {
-	completions := []string{
+var (
+	completions = []string{
 		"Settings",
 		"Inspect",
 		"Git: Commit",
@@ -30,8 +30,9 @@ func TestMatchSeedString(t *testing.T) {
 		"func main() {}",
 		"core init",
 	}
+
 	// seeds to matches
-	seeds := map[string][]string{
+	seeds = map[string][]string{
 		"":           completions,
 		"s":          {"Settings", "Inspect", "Git: Push", "Go: Install", "tb.Kids", "func (e events.Event)"},
 		"gi":         {"Git: Commit", "Git: Push", "Git: Pull", "Go: Install", "gi.Button.OnClick()"},
@@ -51,8 +52,28 @@ func TestMatchSeedString(t *testing.T) {
 		"Commit":     {"Git: Commit"},
 		"Git: ":      {"Git: Commit", "Git: Push", "Git: Pull"},
 	}
+)
+
+func TestMatchSeedString(t *testing.T) {
 	for seed, want := range seeds {
 		have := MatchSeedString(completions, seed)
+		if !reflect.DeepEqual(have, want) {
+			t.Errorf("expected\n%#v\n\tbut got\n%#v", want, have)
+		}
+	}
+}
+
+func TestMatchSeedCompletion(t *testing.T) {
+	for seed, want := range seeds {
+		cs := make([]Completion, len(completions))
+		for i, c := range completions {
+			cs[i].Text = c
+		}
+		ms := MatchSeedCompletion(cs, seed)
+		have := make([]string, len(ms))
+		for i, m := range ms {
+			have[i] = m.Text
+		}
 		if !reflect.DeepEqual(have, want) {
 			t.Errorf("expected\n%#v\n\tbut got\n%#v", want, have)
 		}
