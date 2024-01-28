@@ -21,7 +21,6 @@ import (
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/pi/complete"
-	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 )
@@ -692,11 +691,6 @@ func (ch *Chooser) HandleKeys() {
 				}
 				ch.SelectItemAction(idx)
 			}
-		case kf == keyfun.Menu:
-			if len(ch.Items) > 0 {
-				e.SetHandled()
-				ch.OpenMenu(e)
-			}
 		case kf == keyfun.Enter || (!ch.Editable && e.KeyRune() == ' '):
 			// if !(kt.Rune == ' ' && chb.Sc.Type == ScCompleter) {
 			e.SetHandled()
@@ -719,20 +713,12 @@ func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 		ch.SetCurText(tf.Text())
 		ch.SendChange(e)
 	})
-	tf.OnClick(func(e events.Event) {
+	tf.OnFocus(func(e events.Event) {
 		if ch.IsReadOnly() {
 			return
 		}
-		ch.SetFocusEvent()
 		ch.CallItemsFuncs()
 		tf.OfferComplete(dontForce)
-	})
-	// Chooser gives its textfield focus styling but not actual focus
-	ch.OnFocus(func(e events.Event) {
-		tf.SetState(true, states.Focused)
-	})
-	ch.OnFocusLost(func(e events.Event) {
-		tf.SetState(false, states.Focused)
 	})
 }
 
