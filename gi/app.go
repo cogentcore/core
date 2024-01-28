@@ -285,7 +285,7 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 			if bt == nil || bt.IsDisabled() || bt.Name() == "back" {
 				continue
 			}
-			if bt.Name() == "overflow-menu" {
+			if bt.HasMenu() {
 				tmpms := NewScene()
 				bt.Menu(tmpms)
 				addButtonItems(tmpms)
