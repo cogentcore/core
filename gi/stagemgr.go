@@ -146,6 +146,26 @@ func (sm *StageMgr) DeleteStage(st *Stage) bool {
 	return false
 }
 
+// MoveToTop moves the given stage to the top of the stack,
+// returning true if found. It runs under Write lock.
+func (sm *StageMgr) MoveToTop(st *Stage) bool {
+	sm.Mu.Lock()
+	defer sm.Mu.Unlock()
+
+	l := sm.Stack.Len()
+	for i := l - 1; i >= 0; i-- {
+		s := sm.Stack.ValByIdx(i)
+		if st == s {
+			k := sm.Stack.KeyByIdx(i)
+			sm.Modified = true
+			sm.Stack.DeleteIdx(i, i+1)
+			sm.Stack.InsertAtIdx(sm.Stack.Len(), k, s)
+			return true
+		}
+	}
+	return false
+}
+
 // PopType pops the top-most Stage of the given type of the stack,
 // returning it or nil if none. It runs under Write lock.
 func (sm *StageMgr) PopType(typ StageTypes) *Stage {

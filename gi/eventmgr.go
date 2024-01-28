@@ -1048,10 +1048,8 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 		e.SetHandled()
 	case keyfun.Menu:
 		if tb := sc.GetTopAppBar(); tb != nil {
-			chi := tb.ChildByType(ChooserType, ki.Embeds)
-			if chi != nil {
-				_, ch := AsWidget(chi)
-				ch.Update()
+			ch := ki.ChildByType[*Chooser](tb, true)
+			if ch != nil {
 				ch.SetFocusEvent()
 			} else {
 				tb.SetFocusEvent()

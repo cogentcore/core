@@ -126,6 +126,10 @@ func NewBodyScene(body *Body, name ...string) *Scene {
 	sc.InitName(sc, nm)
 	sc.EventMgr.Scene = sc
 	sc.Body = body
+	// need to set parent immediately so that SceneConfig works,
+	// but can not add it yet because it may go elsewhere due
+	// to app bars
+	ki.SetParent(body, sc)
 	return sc
 }
 

@@ -15,14 +15,12 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/fi/uri"
 	"cogentcore.org/core/glop/sentence"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/pi/complete"
-	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 )
@@ -70,10 +68,15 @@ type Chooser struct {
 	// if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner
 	Placeholder string `set:"-"`
 
-	// ItemsFunc, if non-nil, is a function to call before showing the items
-	// of the chooser, which is typically used to configure them (eg: if they
-	// are based on dynamic data)
-	ItemsFunc func() `copier:"-"`
+	// ItemsFuncs is a slice of functions to call before showing the items
+	// of the chooser, which is typically used to configure them
+	// (eg: if they are based on dynamic data). The functions are called
+	// in ascending order such that the items added in the first function
+	// will appear before those added in the last function. Use
+	// [Chooser.AddItemsFunc] to add a new items function. If at least
+	// one ItemsFunc is specified, the items, labels, icons, and tooltips
+	// of the chooser will be cleared before calling the functions.
+	ItemsFuncs []func() `copier:"-" set:"-"`
 
 	// CurLabel is the string label for the current value
 	CurLabel string `set:"-"`
@@ -122,26 +125,22 @@ func (ch *Chooser) SetStyles() {
 		case ChooserFilled:
 			s.Background = colors.C(colors.Scheme.Secondary.Container)
 			s.Color = colors.Scheme.Secondary.OnContainer
-			if ch.Editable {
-				s.Border.Style.Set(styles.BorderNone).SetBottom(styles.BorderSolid)
-				s.Border.Width.Zero().SetBottom(units.Dp(1))
-				s.Border.Color.Zero().SetBottom(colors.Scheme.OnSurfaceVariant)
-				s.Border.Radius = styles.BorderRadiusExtraSmallTop
-				if s.Is(states.Focused) {
-					s.Border.Width.Bottom = units.Dp(2)
-					s.Border.Color.Bottom = colors.Scheme.Primary.Base
-				}
-			}
 		case ChooserOutlined:
 			s.Border.Style.Set(styles.BorderSolid)
 			s.Border.Width.Set(units.Dp(1))
 			s.Border.Color.Set(colors.Scheme.OnSurfaceVariant)
-			if ch.Editable {
+		}
+		// textfield handles everything
+		if ch.Editable {
+			s.Border = styles.Border{}
+			s.MaxBorder = s.Border
+			s.Background = nil
+			s.StateLayer = 0
+			s.Padding.Zero()
+			if ch.Type == ChooserFilled {
+				s.Border.Radius = styles.BorderRadiusExtraSmallTop
+			} else {
 				s.Border.Radius = styles.BorderRadiusExtraSmall
-				if s.Is(states.Focused) {
-					s.Border.Width.Set(units.Dp(2))
-					s.Border.Color.Set(colors.Scheme.Primary.Base)
-				}
 			}
 		}
 	})
@@ -180,21 +179,6 @@ func (ch *Chooser) SetStyles() {
 			ch.HandleChooserTextFieldEvents(text)
 			text.Style(func(s *styles.Style) {
 				s.Grow = ch.Styles.Grow // we grow like our parent
-				// parent handles everything
-				s.Min.Y.Em(1.2) // note: this is essential
-				// TODO(kai): figure out what to do with MaxLength
-				// if ch.MaxLength > 0 {
-				// 	s.Min.X.Ch(float32(ch.MaxLength))
-				// }
-				s.Padding.Zero()
-				s.Border.Style.Set(styles.BorderNone)
-				s.Border.Width.Zero()
-				// allow parent to dictate state layer
-				s.StateLayer = 0
-				s.Background = nil
-				// if ch.MaxLength > 0 {
-				// 	s.Min.X.Ch(float32(ch.MaxLength))
-				// }
 			})
 		case "parts/indicator":
 			w.Style(func(s *styles.Style) {
@@ -213,6 +197,7 @@ func (ch *Chooser) ConfigWidget() {
 
 	ici := -1
 	var lbi, txi, indi int
+	// editable handles through textfield
 	if ch.Icon.IsSet() && !ch.Editable {
 		config.Add(IconType, "icon")
 		ici = 0
@@ -229,8 +214,11 @@ func (ch *Chooser) ConfigWidget() {
 	if !ch.Indicator.IsSet() {
 		ch.Indicator = icons.KeyboardArrowRight
 	}
-	indi = len(config)
-	config.Add(IconType, "indicator")
+	// editable handles through textfield
+	if !ch.Editable {
+		indi = len(config)
+		config.Add(IconType, "indicator")
+	}
 
 	ch.ConfigParts(config, func() {
 		if ici >= 0 {
@@ -241,16 +229,19 @@ func (ch *Chooser) ConfigWidget() {
 			tx := ch.Parts.Child(txi).(*TextField)
 			tx.SetText(ch.CurLabel)
 			tx.SetLeadingIcon(ch.Icon)
+			tx.SetTrailingIcon(ch.Indicator, func(e events.Event) {
+				ch.OpenMenu(e)
+			})
 			tx.Config() // this is essential
 			tx.SetCompleter(tx, ch.CompleteMatch, ch.CompleteEdit)
 		} else {
 			lbl := ch.Parts.Child(lbi).(*Label)
 			lbl.SetText(ch.CurLabel)
 			lbl.Config() // this is essential
-		}
 
-		ic := ch.Parts.Child(indi).(*Icon)
-		ic.SetIcon(ch.Indicator)
+			ic := ch.Parts.Child(indi).(*Icon)
+			ic.SetIcon(ch.Indicator)
+		}
 	})
 }
 
@@ -285,8 +276,8 @@ func (ch *Chooser) SetIconUpdate(ic icons.Icon) *Chooser {
 
 	ch.Icon = ic
 	if ch.Editable {
-		tf, ok := ch.TextField()
-		if ok {
+		tf := ch.TextField()
+		if tf != nil {
 			tf.SetLeadingIconUpdate(ic)
 		}
 	} else {
@@ -300,15 +291,42 @@ func (ch *Chooser) SetIconUpdate(ic icons.Icon) *Chooser {
 
 // TextField returns the text field of an editable Chooser
 // if present
-func (ch *Chooser) TextField() (*TextField, bool) {
+func (ch *Chooser) TextField() *TextField {
 	if ch.Parts == nil {
-		return nil, false
+		return nil
 	}
 	tf := ch.Parts.ChildByName("text", 2)
 	if tf == nil {
-		return nil, false
+		return nil
 	}
-	return tf.(*TextField), true
+	return tf.(*TextField)
+}
+
+// AddItemsFunc adds the given function to [Chooser.ItemsFuncs].
+// These functions are called before showing the items of the chooser,
+// and they are typically used to configure them (eg: if they are based
+// on dynamic data). The functions are called in ascending order such
+// that the items added in the first function will appear before those
+// added in the last function. If at least one ItemsFunc is specified,
+// the items, labels, icons, and tooltips of the chooser will be cleared
+// before calling the functions.
+func (ch *Chooser) AddItemsFunc(f func()) *Chooser {
+	ch.ItemsFuncs = append(ch.ItemsFuncs, f)
+	return ch
+}
+
+// CallItemsFuncs calls [Chooser.ItemsFuncs].
+func (ch *Chooser) CallItemsFuncs() {
+	if len(ch.ItemsFuncs) == 0 {
+		return
+	}
+	ch.Items = nil
+	ch.Labels = nil
+	ch.Icons = nil
+	ch.Tooltips = nil
+	for _, f := range ch.ItemsFuncs {
+		f()
+	}
 }
 
 // MakeItems makes sure the Items list is made, and if not, or reset is true,
@@ -323,12 +341,22 @@ func (ch *Chooser) MakeItems(reset bool, capacity int) {
 func (ch *Chooser) SortItems(ascending bool) *Chooser {
 	sort.Slice(ch.Items, func(i, j int) bool {
 		if ascending {
-			return ToLabel(ch.Items[i]) < ToLabel(ch.Items[j])
+			return ch.LabelFor(i, ch.Items[i]) < ch.LabelFor(j, ch.Items[j])
 		} else {
-			return ToLabel(ch.Items[i]) > ToLabel(ch.Items[j])
+			return ch.LabelFor(i, ch.Items[i]) > ch.LabelFor(j, ch.Items[j])
 		}
 	})
 	return ch
+}
+
+// LabelFor converts the given item at the given index into
+// a user-facing label. It first tries [Chooser.Labels] and
+// falls back on [ToLabel].
+func (ch *Chooser) LabelFor(i int, item any) string {
+	if len(ch.Labels) > i {
+		return ch.Labels[i]
+	}
+	return ToLabel(item)
 }
 
 // SetTypes sets the Items list from a list of types, e.g., from gti.AllEmbedersOf.
@@ -457,11 +485,7 @@ func (ch *Chooser) SetCurVal(it any) int {
 		ch.CurIndex = len(ch.Items)
 		ch.Items = append(ch.Items, it)
 	}
-	if len(ch.Labels) > ch.CurIndex {
-		ch.ShowCurVal(ch.Labels[ch.CurIndex])
-	} else {
-		ch.ShowCurVal(ToLabel(ch.CurVal))
-	}
+	ch.ShowCurVal(ch.LabelFor(ch.CurIndex, ch.CurVal))
 	return ch.CurIndex
 }
 
@@ -476,11 +500,7 @@ func (ch *Chooser) SetCurIndex(idx int) any {
 		ch.ShowCurVal(fmt.Sprintf("idx %v > len", idx))
 	} else {
 		ch.CurVal = ch.Items[idx]
-		if len(ch.Labels) > ch.CurIndex {
-			ch.ShowCurVal(ch.Labels[ch.CurIndex])
-		} else {
-			ch.ShowCurVal(ToLabel(ch.CurVal))
-		}
+		ch.ShowCurVal(ch.LabelFor(ch.CurIndex, ch.CurVal))
 	}
 	return ch.CurVal
 }
@@ -489,8 +509,8 @@ func (ch *Chooser) SetCurIndex(idx int) any {
 // and the corresponding CurVal based on current user-entered Text value,
 // and triggers a Change event
 func (ch *Chooser) GetCurTextAction() any {
-	tf, ok := ch.TextField()
-	if !ok {
+	tf := ch.TextField()
+	if tf == nil {
 		slog.Error("gi.Chooser: GetCurTextAction only available for Editable Chooser")
 		return ch.CurVal
 	}
@@ -510,9 +530,9 @@ func (ch *Chooser) SetCurTextAction(text string) any {
 // SetCurText is for Editable choosers only: sets the current index (CurIndex)
 // and the corresponding CurVal based on given text string
 func (ch *Chooser) SetCurText(text string) any {
-	for idx, item := range ch.Items {
-		if text == ToLabel(item) {
-			ch.SetCurIndex(idx)
+	for i, item := range ch.Items {
+		if text == ch.LabelFor(i, item) {
+			ch.SetCurIndex(i)
 			return ch.CurVal
 		}
 	}
@@ -534,8 +554,8 @@ func (ch *Chooser) ShowCurVal(label string) {
 
 	ch.CurLabel = label
 	if ch.Editable {
-		tf, ok := ch.TextField()
-		if ok {
+		tf := ch.TextField()
+		if tf != nil {
 			tf.SetTextUpdate(ch.CurLabel)
 		}
 	} else {
@@ -581,17 +601,11 @@ func (ch *Chooser) SelectItemAction(idx int) {
 // MakeItemsMenu constructs a menu of all the items.
 // It is automatically set as the [Button.Menu] for the Chooser.
 func (ch *Chooser) MakeItemsMenu(m *Scene) {
-	if ch.ItemsFunc != nil {
-		ch.ItemsFunc()
-	}
+	ch.CallItemsFuncs()
 	for i, it := range ch.Items {
 		nm := "item-" + strconv.Itoa(i)
 		bt := NewButton(m, nm).SetType(ButtonMenu)
-		if len(ch.Labels) > i {
-			bt.SetText(ch.Labels[i])
-		} else {
-			bt.SetText(ToLabel(it))
-		}
+		bt.SetText(ch.LabelFor(i, it))
 		if len(ch.Icons) > i {
 			bt.SetIcon(ch.Icons[i])
 		}
@@ -617,7 +631,7 @@ func (ch *Chooser) HandleEvents() {
 	})
 }
 
-// OpenMenu will open any menu associated with this element.
+// OpenMenu will open any menu associated with this chooser.
 // Returns true if menu opened, false if not.
 func (ch *Chooser) OpenMenu(e events.Event) bool {
 	pos := ch.ContextMenuPos(e)
@@ -677,19 +691,14 @@ func (ch *Chooser) HandleKeys() {
 				}
 				ch.SelectItemAction(idx)
 			}
-		case kf == keyfun.Menu:
-			if len(ch.Items) > 0 {
-				e.SetHandled()
-				ch.OpenMenu(e)
-			}
 		case kf == keyfun.Enter || (!ch.Editable && e.KeyRune() == ' '):
 			// if !(kt.Rune == ' ' && chb.Sc.Type == ScCompleter) {
 			e.SetHandled()
 			ch.Send(events.Click, e)
 		// }
 		default:
-			tf, ok := ch.TextField()
-			if !ok {
+			tf := ch.TextField()
+			if tf == nil {
 				break
 			}
 			// if we don't have anything special to do,
@@ -705,28 +714,11 @@ func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 		ch.SendChange(e)
 	})
 	tf.OnFocus(func(e events.Event) {
-		if ch.ItemsFunc != nil {
-			ch.ItemsFunc()
-			if ch.CurIndex <= 0 {
-				ch.SetCurIndex(0)
-			}
-		}
-		tf.CursorStart()
-	})
-	tf.OnClick(func(e events.Event) {
 		if ch.IsReadOnly() {
 			return
 		}
-		tf.FocusClear()
-		ch.SetFocusEvent()
-		ch.Send(events.Focus, e)
-	})
-	// Chooser gives its textfield focus styling but not actual focus
-	ch.OnFocus(func(e events.Event) {
-		tf.SetState(true, states.Focused)
-	})
-	ch.OnFocusLost(func(e events.Event) {
-		tf.SetState(false, states.Focused)
+		ch.CallItemsFuncs()
+		tf.OfferComplete(dontForce)
 	})
 }
 
@@ -735,17 +727,19 @@ func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 func (ch *Chooser) CompleteMatch(data any, text string, posLn, posCh int) (md complete.Matches) {
 	md.Seed = text
 	comps := make(complete.Completions, len(ch.Items))
-	for idx, item := range ch.Items {
+	for i, item := range ch.Items {
 		tooltip := ""
-		if len(ch.Tooltips) > idx {
-			tooltip = ch.Tooltips[idx]
+		if len(ch.Tooltips) > i {
+			tooltip = ch.Tooltips[i]
 		}
-		comps[idx] = complete.Completion{
-			Text: ToLabel(item),
+		icon := ""
+		if len(ch.Icons) > i {
+			icon = string(ch.Icons[i])
+		}
+		comps[i] = complete.Completion{
+			Text: ch.LabelFor(i, item),
 			Desc: tooltip,
-		}
-		if u, ok := item.(uri.URI); ok {
-			comps[idx].Icon = string(u.Icon)
+			Icon: icon,
 		}
 	}
 	md.Matches = complete.MatchSeedCompletion(comps, md.Seed)

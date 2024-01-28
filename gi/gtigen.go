@@ -9,7 +9,6 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/fi/uri"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/ki"
@@ -19,7 +18,7 @@ import (
 	"cogentcore.org/core/units"
 )
 
-var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.App", IDName: "app", Doc: "App represents a Cogent Core app. It extends [goosi.App] to provide both system-level\nand high-level data and functions to do with the currently running application. The\nsingle instance of it is [TheApp], which embeds [goosi.TheApp].", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Embeds: []gti.Field{{Name: "App"}}, Fields: []gti.Field{{Name: "Icon", Doc: "Icon specifies the app icon, which is passed to [goosi.Window.SetIcon].\nIt should typically be set using [App.SetIconSVG]."}, {Name: "AppBarConfig", Doc: "AppBarConfig is the function that configures the AppBar,\ntypically put in the [Scene.Bars.Top] (i.e., a TopAppBar).\nSet to StdAppBarConfig by default, which makes the standard AppBar behavior.\nMost apps will define their own version to add App-specific\nfunctionality, and set this accordingly.\nIf this is nil, then no TopAppBar will be created by default."}, {Name: "SceneConfig", Doc: "SceneConfig is the function called on every newly created [gi.Scene]\nto configure it, if it is non-nil. This can be used to set global\nconfiguration and styling for all widgets using the OnWidgetAdded\nmethod."}}})
+var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.App", IDName: "app", Doc: "App represents a Cogent Core app. It extends [goosi.App] to provide both system-level\nand high-level data and functions to do with the currently running application. The\nsingle instance of it is [TheApp], which embeds [goosi.TheApp].", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Embeds: []gti.Field{{Name: "App"}}, Fields: []gti.Field{{Name: "Icon", Doc: "Icon specifies the app icon, which is passed to [goosi.Window.SetIcon].\nIt should typically be set using [App.SetIconSVG]."}, {Name: "AppBarConfig", Doc: "AppBarConfig is the function that configures the AppBar,\ntypically put in the [Scene.Bars.Top] (i.e., a TopAppBar).\nIt is set to StdAppBarConfig by default, which makes the\nstandard AppBar behavior. If this is nil, then no AppBar\nwill be created by default."}, {Name: "SceneConfig", Doc: "SceneConfig is the function called on every newly created [gi.Scene]\nto configure it, if it is non-nil. This can be used to set global\nconfiguration and styling for all widgets using the OnWidgetAdded\nmethod."}}})
 
 // SetIcon sets the [App.Icon]:
 // Icon specifies the app icon, which is passed to [goosi.Window.SetIcon].
@@ -29,10 +28,9 @@ func (t *App) SetIcon(v ...image.Image) *App { t.Icon = v; return t }
 // SetAppBarConfig sets the [App.AppBarConfig]:
 // AppBarConfig is the function that configures the AppBar,
 // typically put in the [Scene.Bars.Top] (i.e., a TopAppBar).
-// Set to StdAppBarConfig by default, which makes the standard AppBar behavior.
-// Most apps will define their own version to add App-specific
-// functionality, and set this accordingly.
-// If this is nil, then no TopAppBar will be created by default.
+// It is set to StdAppBarConfig by default, which makes the
+// standard AppBar behavior. If this is nil, then no AppBar
+// will be created by default.
 func (t *App) SetAppBarConfig(v func(pw Widget)) *App { t.AppBarConfig = v; return t }
 
 // SetSceneConfig sets the [App.SceneConfig]:
@@ -41,59 +39,6 @@ func (t *App) SetAppBarConfig(v func(pw Widget)) *App { t.AppBarConfig = v; retu
 // configuration and styling for all widgets using the OnWidgetAdded
 // method.
 func (t *App) SetSceneConfig(v func(sc *Scene)) *App { t.SceneConfig = v; return t }
-
-// AppChooserType is the [gti.Type] for [AppChooser]
-var AppChooserType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.AppChooser", IDName: "app-chooser", Doc: "AppChooser is an editable chooser element, typically placed at the start\nof the TopAppBar, that provides direct access to all manner of app resources.", Embeds: []gti.Field{{Name: "Chooser"}}, Fields: []gti.Field{{Name: "Resources", Doc: "Resources are generators for resources accessible by the AppChooser"}}, Instance: &AppChooser{}})
-
-// NewAppChooser adds a new [AppChooser] with the given name to the given parent:
-// AppChooser is an editable chooser element, typically placed at the start
-// of the TopAppBar, that provides direct access to all manner of app resources.
-func NewAppChooser(par ki.Ki, name ...string) *AppChooser {
-	return par.NewChild(AppChooserType, name...).(*AppChooser)
-}
-
-// KiType returns the [*gti.Type] of [AppChooser]
-func (t *AppChooser) KiType() *gti.Type { return AppChooserType }
-
-// New returns a new [*AppChooser] value
-func (t *AppChooser) New() ki.Ki { return &AppChooser{} }
-
-// SetResources sets the [AppChooser.Resources]:
-// Resources are generators for resources accessible by the AppChooser
-func (t *AppChooser) SetResources(v uri.Resources) *AppChooser { t.Resources = v; return t }
-
-// SetTooltip sets the [AppChooser.Tooltip]
-func (t *AppChooser) SetTooltip(v string) *AppChooser { t.Tooltip = v; return t }
-
-// SetType sets the [AppChooser.Type]
-func (t *AppChooser) SetType(v ChooserTypes) *AppChooser { t.Type = v; return t }
-
-// SetIcon sets the [AppChooser.Icon]
-func (t *AppChooser) SetIcon(v icons.Icon) *AppChooser { t.Icon = v; return t }
-
-// SetIndicator sets the [AppChooser.Indicator]
-func (t *AppChooser) SetIndicator(v icons.Icon) *AppChooser { t.Indicator = v; return t }
-
-// SetEditable sets the [AppChooser.Editable]
-func (t *AppChooser) SetEditable(v bool) *AppChooser { t.Editable = v; return t }
-
-// SetAllowNew sets the [AppChooser.AllowNew]
-func (t *AppChooser) SetAllowNew(v bool) *AppChooser { t.AllowNew = v; return t }
-
-// SetItems sets the [AppChooser.Items]
-func (t *AppChooser) SetItems(v ...any) *AppChooser { t.Items = v; return t }
-
-// SetLabels sets the [AppChooser.Labels]
-func (t *AppChooser) SetLabels(v ...string) *AppChooser { t.Labels = v; return t }
-
-// SetIcons sets the [AppChooser.Icons]
-func (t *AppChooser) SetIcons(v ...icons.Icon) *AppChooser { t.Icons = v; return t }
-
-// SetTooltips sets the [AppChooser.Tooltips]
-func (t *AppChooser) SetTooltips(v ...string) *AppChooser { t.Tooltips = v; return t }
-
-// SetItemsFunc sets the [AppChooser.ItemsFunc]
-func (t *AppChooser) SetItemsFunc(v func()) *AppChooser { t.ItemsFunc = v; return t }
 
 // BodyType is the [gti.Type] for [Body]
 var BodyType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Body", IDName: "body", Doc: "Body holds the primary content of a Scene", Directives: []gti.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Title", Doc: "title of the Body, also used for window title where relevant"}}, Instance: &Body{}})
@@ -226,7 +171,7 @@ func (t *Canvas) New() ki.Ki { return &Canvas{} }
 func (t *Canvas) SetTooltip(v string) *Canvas { t.Tooltip = v; return t }
 
 // ChooserType is the [gti.Type] for [Chooser]
-var ChooserType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Chooser", IDName: "chooser", Doc: "Chooser is for selecting items from a dropdown list, with an optional\nedit TextField for typing directly.\nThe items can be of any type, including enum values -- they are converted\nto strings for the display.  If the items are of type [icons.Icon], then they\nare displayed using icons instead.", Embeds: []gti.Field{{Name: "Box"}}, Fields: []gti.Field{{Name: "Type", Doc: "the type of combo box"}, {Name: "Icon", Doc: "optional icon"}, {Name: "Indicator", Doc: "name of the indicator icon to present."}, {Name: "Editable", Doc: "provide a text field for editing the value, or just a button for selecting items?  Set the editable property"}, {Name: "AllowNew", Doc: "whether to allow the user to add new items to the combo box through the editable textfield (if Editable is set to true) and a button at the end of the combo box menu"}, {Name: "Items", Doc: "items available for selection"}, {Name: "Labels", Doc: "an optional list of labels displayed for Chooser items;\nthe indices for the labels correspond to those for the items"}, {Name: "Icons", Doc: "an optional list of icons displayed for Chooser items;\nthe indices for the icons correspond to those for the items"}, {Name: "Tooltips", Doc: "an optional list of tooltips displayed on hover for Chooser items;\nthe indices for the tooltips correspond to those for the items"}, {Name: "Placeholder", Doc: "if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner"}, {Name: "ItemsFunc", Doc: "ItemsFunc, if non-nil, is a function to call before showing the items\nof the chooser, which is typically used to configure them (eg: if they\nare based on dynamic data)"}, {Name: "CurLabel", Doc: "CurLabel is the string label for the current value"}, {Name: "CurVal", Doc: "current selected value"}, {Name: "CurIndex", Doc: "current index in list of possible items"}}, Instance: &Chooser{}})
+var ChooserType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Chooser", IDName: "chooser", Doc: "Chooser is for selecting items from a dropdown list, with an optional\nedit TextField for typing directly.\nThe items can be of any type, including enum values -- they are converted\nto strings for the display.  If the items are of type [icons.Icon], then they\nare displayed using icons instead.", Embeds: []gti.Field{{Name: "Box"}}, Fields: []gti.Field{{Name: "Type", Doc: "the type of combo box"}, {Name: "Icon", Doc: "optional icon"}, {Name: "Indicator", Doc: "name of the indicator icon to present."}, {Name: "Editable", Doc: "provide a text field for editing the value, or just a button for selecting items?  Set the editable property"}, {Name: "AllowNew", Doc: "whether to allow the user to add new items to the combo box through the editable textfield (if Editable is set to true) and a button at the end of the combo box menu"}, {Name: "Items", Doc: "items available for selection"}, {Name: "Labels", Doc: "an optional list of labels displayed for Chooser items;\nthe indices for the labels correspond to those for the items"}, {Name: "Icons", Doc: "an optional list of icons displayed for Chooser items;\nthe indices for the icons correspond to those for the items"}, {Name: "Tooltips", Doc: "an optional list of tooltips displayed on hover for Chooser items;\nthe indices for the tooltips correspond to those for the items"}, {Name: "Placeholder", Doc: "if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner"}, {Name: "ItemsFuncs", Doc: "ItemsFuncs is a slice of functions to call before showing the items\nof the chooser, which is typically used to configure them\n(eg: if they are based on dynamic data). The functions are called\nin ascending order such that the items added in the first function\nwill appear before those added in the last function. Use\n[Chooser.AddItemsFunc] to add a new items function."}, {Name: "CurLabel", Doc: "CurLabel is the string label for the current value"}, {Name: "CurVal", Doc: "current selected value"}, {Name: "CurIndex", Doc: "current index in list of possible items"}}, Instance: &Chooser{}})
 
 // NewChooser adds a new [Chooser] with the given name to the given parent:
 // Chooser is for selecting items from a dropdown list, with an optional
@@ -282,12 +227,6 @@ func (t *Chooser) SetIcons(v ...icons.Icon) *Chooser { t.Icons = v; return t }
 // an optional list of tooltips displayed on hover for Chooser items;
 // the indices for the tooltips correspond to those for the items
 func (t *Chooser) SetTooltips(v ...string) *Chooser { t.Tooltips = v; return t }
-
-// SetItemsFunc sets the [Chooser.ItemsFunc]:
-// ItemsFunc, if non-nil, is a function to call before showing the items
-// of the chooser, which is typically used to configure them (eg: if they
-// are based on dynamic data)
-func (t *Chooser) SetItemsFunc(v func()) *Chooser { t.ItemsFunc = v; return t }
 
 // SetTooltip sets the [Chooser.Tooltip]
 func (t *Chooser) SetTooltip(v string) *Chooser { t.Tooltip = v; return t }

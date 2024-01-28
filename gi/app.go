@@ -6,19 +6,17 @@ package gi
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"image"
 	"io"
-	"strings"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/fi/uri"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/ki"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/svg"
@@ -116,23 +114,29 @@ func StdAppBarStart(tb *Toolbar) {
 
 // StdAppBarBack adds a back button
 func StdAppBarBack(tb *Toolbar) *Button {
-	bt := NewButton(tb, "back").SetIcon(icons.ArrowBack)
+	bt := NewButton(tb, "back").SetIcon(icons.ArrowBack).SetTooltip("Back")
+	// bt.StyleFirst(func(s *styles.Style) {
+	// 	if tb.Scene.Stage.MainMgr == nil {
+	// 		return
+	// 	}
+	// 	s.SetState(tb.Scene.Stage.MainMgr.Stack.Len() <= 1 && len(AllRenderWins) <= 1, states.Disabled)
+	// })
 	bt.OnClick(func(e events.Event) {
-		stg := tb.Scene.Stage.Main
-		mm := stg.MainMgr
-		// if we are down to the last window, we don't
-		// let people close it with the back button
-		if mm.Stack.Len() <= 1 {
+		if tb.Scene.Stage.MainMgr.Stack.Len() > 1 {
+			tb.Scene.Close()
 			return
 		}
-		tb.Scene.Close()
+		if len(AllRenderWins) > 1 {
+			CurRenderWin.CloseReq()
+			AllRenderWins[0].Raise()
+		}
 	})
 	return bt
 }
 
 // StdAppBarChooser adds an AppChooser
-func StdAppBarChooser(tb *Toolbar) *AppChooser {
-	return NewAppChooser(tb, "app-chooser")
+func StdAppBarChooser(tb *Toolbar) *Chooser {
+	return ConfigAppChooser(NewChooser(tb, "app-chooser"), tb)
 }
 
 // todo: use CurrentMainScene instead?
@@ -166,9 +170,9 @@ func (tb *Toolbar) StdOverflowMenu(m *Scene) { //gti:add
 	}
 	NewButton(m).SetText("Edit").SetMenu(func(m *Scene) {
 		// todo: these need to actually do something -- currently just show keyboard shortcut
-		NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy)
-		NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keyfun.Cut)
-		NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keyfun.Paste)
+		NewButton(m).SetText("Copy").SetIcon(icons.Copy).SetKey(keyfun.Copy)
+		NewButton(m).SetText("Cut").SetIcon(icons.Cut).SetKey(keyfun.Cut)
+		NewButton(m).SetText("Paste").SetIcon(icons.Paste).SetKey(keyfun.Paste)
 	})
 
 	// no window menu on single-window platforms
@@ -195,7 +199,7 @@ func (tb *Toolbar) StdOverflowMenu(m *Scene) { //gti:add
 					win.CloseReq()
 				}
 			})
-		NewButton(m).SetText("Quit").SetIcon(icons.Close).SetShortcut("Command+Q").
+		NewButton(m, "quit-app").SetText("Quit").SetIcon(icons.Close).SetShortcut("Command+Q").
 			OnClick(func(e events.Event) {
 				TheApp.QuitReq()
 			})
@@ -223,85 +227,28 @@ func (tb *Toolbar) StdOverflowMenu(m *Scene) { //gti:add
 //////////////////////////////////////////////////////////////////////////////
 //		AppChooser
 
-// AppChooser is an editable chooser element, typically placed at the start
-// of the TopAppBar, that provides direct access to all manner of app resources.
-type AppChooser struct {
-	Chooser
+// ConfigAppChooser configures the given [Chooser] to give access
+// to all app resources, such as open scenes and buttons in the
+// given toolbar. This chooser is typically placed at the start
+// of the AppBar. You can extend the resources available for access
+// in the app chooser using [Chooser.AddItemsFunc] and [Chooser.OnChange]
+// (you can handle your cases in your OnChange).
+func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
+	ch.SetEditable(true).SetType(ChooserOutlined).SetIcon(icons.Search)
+	if TheApp.SystemPlatform().IsMobile() {
+		ch.SetPlaceholder("Search")
+	} else {
+		ch.SetPlaceholder(fmt.Sprintf("Search (%s)", keyfun.ChordFor(keyfun.Menu)))
+	}
 
-	// Resources are generators for resources accessible by the AppChooser
-	Resources uri.Resources
-}
-
-func (ac *AppChooser) OnInit() {
-	ac.Chooser.OnInit()
-	ac.SetEditable(true).SetType(ChooserOutlined).SetIcon(icons.Search)
-	ac.SetItemsFunc(func() {
-		stg := ac.Scene.Stage.Main
-		mm := stg.MainMgr
-		urs := ac.Resources.Generate()
-		iln := mm.Stack.Len() + len(urs)
-		ac.Items = make([]any, iln)
-		ac.Icons = make([]icons.Icon, iln)
-		ac.Tooltips = make([]string, iln)
-		for i, kv := range mm.Stack.Order {
-			nm := ""
-			if kv.Val.Scene.Body != nil && kv.Val.Scene.Body.Title != "" {
-				nm = kv.Val.Scene.Body.Title
-			} else {
-				nm = kv.Val.Scene.Name()
-				// -scene is frequently placed at the end of scene names, so we remove it
-				nm = strings.TrimSuffix(nm, "-scene")
-			}
-			u := uri.URI{Label: nm, Icon: icons.Toolbar}
-			u.SetURL("scene", nm, fmt.Sprintf("%d", i))
-			ac.Items[i] = u
-			ac.Icons[i] = u.Icon
-			ac.Tooltips[i] = u.URL
-		}
-		st := len(mm.Stack.Order)
-		for i, u := range urs {
-			ac.Items[st+i] = u
-			ac.Icons[st+i] = u.Icon
-			ac.Tooltips[st+i] = u.URL
-		}
-	})
-	ac.OnChange(func(e events.Event) {
-		stg := ac.Scene.Stage.Main
-		mm := stg.MainMgr
-		cv, ok := ac.CurVal.(uri.URI)
-		if !ok {
-			return
-		}
-		if cv.HasScheme("scene") {
-			e.SetHandled()
-			// TODO: optimize this?
-			kv := mm.Stack.Order[ac.CurIndex] // todo: bad to rely on index!
-			mm.Stack.DeleteIdx(ac.CurIndex, ac.CurIndex+1)
-			mm.Stack.InsertAtIdx(mm.Stack.Len(), kv.Key, kv.Val)
-			return
-		}
-		if cv.Func != nil {
-			e.SetHandled()
-			cv.Func()
-			return
-		}
-		ErrorSnackbar(ac, errors.New("unable to process resource: "+cv.String()))
-	})
-	ac.Style(func(s *styles.Style) {
-		// s.GrowWrap = true // note: this won't work because contents not placed until end
-		s.Border.Radius = styles.BorderRadiusFull
-		s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
-		if s.Is(states.Focused) {
-			s.Border.Width.Set(units.Dp(2))
-			s.Border.Color.Set(colors.Scheme.Primary.Base)
-		} else {
-			s.Border.Width.Zero()
-			s.Border.Color.Zero()
-		}
-	})
-	ac.OnWidgetAdded(func(w Widget) {
-		if w.PathFrom(ac) == "parts/text" {
+	ch.OnWidgetAdded(func(w Widget) {
+		if w.PathFrom(ch) == "parts/text" {
 			w.Style(func(s *styles.Style) {
+				s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
+				if !s.Is(states.Focused) {
+					s.Border = styles.Border{}
+				}
+				s.Border.Radius = styles.BorderRadiusFull
 				s.Min.X.SetCustom(func(uc *units.Context) float32 {
 					return min(uc.Vw(25), uc.Ch(40))
 				})
@@ -309,14 +256,66 @@ func (ac *AppChooser) OnInit() {
 			})
 		}
 	})
-}
-
-func (ac *AppChooser) OnAdd() {
-	ac.WidgetBase.OnAdd()
-	ac.OnShow(func(e events.Event) {
-		ac.ItemsFunc()
-		// our current scene is always the first item,
-		// so we select it on show
-		ac.SetCurIndex(0)
+	// we must never have a chooser label so that it
+	// always displays the search placeholder
+	ch.OnFirst(events.Change, func(e events.Event) {
+		ch.CurIndex = 0
+		ch.ShowCurVal("")
 	})
+
+	ch.AddItemsFunc(func() {
+		for _, rw := range AllRenderWins {
+			for _, kv := range rw.MainStageMgr.Stack.Order {
+				st := kv.Val
+				// we do not include ourself
+				if st == tb.Scene.Stage {
+					continue
+				}
+				ch.Items = append(ch.Items, st)
+				ch.Labels = append(ch.Labels, st.Title)
+				ch.Icons = append(ch.Icons, icons.Toolbar)
+				ch.Tooltips = append(ch.Tooltips, "Show "+st.Title)
+			}
+		}
+	})
+	var addButtonItems func(par ki.Ki)
+	addButtonItems = func(par ki.Ki) {
+		for _, kid := range *par.Children() {
+			bt := AsButton(kid)
+			if bt == nil || bt.IsDisabled() || bt.Name() == "back" {
+				continue
+			}
+			if bt.HasMenu() {
+				tmpms := NewScene()
+				bt.Menu(tmpms)
+				addButtonItems(tmpms)
+				continue
+			}
+			ch.Items = append(ch.Items, bt)
+			ch.Labels = append(ch.Labels, bt.Text)
+			ch.Icons = append(ch.Icons, bt.Icon)
+			ch.Tooltips = append(ch.Tooltips, bt.Tooltip)
+			// after the quit button, there are the render wins,
+			// which we do not want to show here as we are already
+			// showing the stages
+			if bt.Name() == "quit-app" {
+				break
+			}
+		}
+	}
+	ch.AddItemsFunc(func() {
+		addButtonItems(tb)
+	})
+	ch.OnChange(func(e events.Event) {
+		switch cv := ch.CurVal.(type) {
+		case *Stage:
+			if cv.MainMgr.RenderWin != CurRenderWin {
+				cv.MainMgr.RenderWin.Raise()
+			}
+			cv.MainMgr.MoveToTop(cv)
+		case ButtonEmbedder:
+			cv.AsButton().Send(events.Click, e)
+		}
+	})
+	return ch
 }

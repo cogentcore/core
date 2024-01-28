@@ -216,7 +216,7 @@ func (pg *Page) ConfigWidget() {
 
 // AppBar is the default app bar for a [Page]
 func (pg *Page) AppBar(tb *gi.Toolbar) {
-	ch := tb.ChildByName("app-chooser").(*gi.AppChooser)
+	ch := tb.ChildByName("app-chooser").(*gi.Chooser)
 
 	back := tb.ChildByName("back").(*gi.Button)
 	back.OnClick(func(e events.Event) {
@@ -230,13 +230,13 @@ func (pg *Page) AppBar(tb *gi.Toolbar) {
 	})
 
 	ch.AllowNew = true
-	ch.ItemsFunc = func() {
+	ch.AddItemsFunc(func() {
 		ch.Items = make([]any, len(pg.History))
 		for i, u := range pg.History {
 			// we reverse the order
 			ch.Items[len(pg.History)-i-1] = u
 		}
-	}
+	})
 	ch.OnChange(func(e events.Event) {
 		// we need a slash so that it doesn't think it's a relative URL
 		pg.OpenURL("/"+ch.CurLabel, true)

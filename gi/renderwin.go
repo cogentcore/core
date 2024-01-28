@@ -406,9 +406,11 @@ func (w *RenderWin) Resized() {
 
 // Raise requests that the window be at the top of the stack of windows,
 // and receive focus.  If it is iconified, it will be de-iconified.  This
-// is the only supported mechanism for de-iconifying.
+// is the only supported mechanism for de-iconifying. This also sets
+// CurRenderWin to the window.
 func (w *RenderWin) Raise() {
 	w.GoosiWin.Raise()
+	CurRenderWin = w
 }
 
 // Minimize requests that the window be iconified, making it no longer
@@ -688,6 +690,7 @@ func (w *RenderWin) HandleWindowEvents(e events.Event) {
 					fmt.Printf("Win: %v got extra focus\n", w.Name)
 				}
 			}
+			CurRenderWin = w
 		case events.WinFocusLost:
 			if DebugSettings.WinEventTrace {
 				fmt.Printf("Win: %v lost focus\n", w.Name)
