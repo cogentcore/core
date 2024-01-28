@@ -335,24 +335,46 @@ func (sf *Surface) Destroy() {
 // It triggers the ImageAcquired semaphore when image actually acquired.
 // Must call SubmitRender with command to launch command contingent
 // on that semaphore.
+//func (sf *Surface) AcquireNextImage() uint32 {
+//	dev := sf.Device.Device
+//	vk.WaitForFences(dev, 1, []vk.Fence{sf.RenderFence}, vk.True, vk.MaxUint64)
+//	vk.ResetFences(dev, 1, []vk.Fence{sf.RenderFence})
+//	var idx uint32
+//	ret := vk.AcquireNextImage(dev, sf.Swapchain, vk.MaxUint64, sf.ImageAcquired, vk.NullFence, &idx)
+//	switch ret {
+//	case vk.ErrorOutOfDate, vk.Suboptimal:
+//		sf.ReConfigSwapchain()
+//		if Debug {
+//			fmt.Printf("vgpu.Surface:AcquireNextImage, new format: %#v\n", sf.Format)
+//		}
+//		return sf.AcquireNextImage() // try again
+//	case vk.Success:
+//	default:
+//		IfPanic(NewError(ret))
+//	}
+//	return idx
+//}
+
 func (sf *Surface) AcquireNextImage() uint32 {
 	dev := sf.Device.Device
-	vk.WaitForFences(dev, 1, []vk.Fence{sf.RenderFence}, vk.True, vk.MaxUint64)
-	vk.ResetFences(dev, 1, []vk.Fence{sf.RenderFence})
-	var idx uint32
-	ret := vk.AcquireNextImage(dev, sf.Swapchain, vk.MaxUint64, sf.ImageAcquired, vk.NullFence, &idx)
-	switch ret {
-	case vk.ErrorOutOfDate, vk.Suboptimal:
-		sf.ReConfigSwapchain()
-		if Debug {
-			fmt.Printf("vgpu.Surface:AcquireNextImage, new format: %#v\n", sf.Format)
+	for {
+		vk.WaitForFences(dev, 1, []vk.Fence{sf.RenderFence}, vk.True, vk.MaxUint64)
+		vk.ResetFences(dev, 1, []vk.Fence{sf.RenderFence})
+		var idx uint32
+		ret := vk.AcquireNextImage(dev, sf.Swapchain, vk.MaxUint64, sf.ImageAcquired, vk.NullFence, &idx)
+		switch ret {
+		case vk.ErrorOutOfDate, vk.Suboptimal:
+			sf.ReConfigSwapchain()
+			if Debug {
+				fmt.Printf("vgpu.Surface:AcquireNextImage, new format: %#v\n", sf.Format)
+			}
+			continue // try again
+		case vk.Success:
+			return idx
+		default:
+			IfPanic(NewError(ret))
 		}
-		return sf.AcquireNextImage() // try again
-	case vk.Success:
-	default:
-		IfPanic(NewError(ret))
 	}
-	return idx
 }
 
 // SubmitRender submits a rendering command that must have been added

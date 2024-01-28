@@ -772,10 +772,7 @@ func (tf *TextField) SelectAll() {
 
 // IsWordBreak defines what counts as a word break for the purposes of selecting words
 func (tf *TextField) IsWordBreak(r rune) bool {
-	if unicode.IsSpace(r) || unicode.IsSymbol(r) || unicode.IsPunct(r) {
-		return true
-	}
-	return false
+	return unicode.IsSpace(r) || unicode.IsSymbol(r) || unicode.IsPunct(r)
 }
 
 // SelectWord selects the word (whitespace delimited) that the cursor is on
@@ -1749,6 +1746,9 @@ func (tf *TextField) RenderTextField() {
 	st := &tf.Styles
 	st.Font = paint.OpenFont(st.FontRender(), &st.UnContext)
 	tf.RenderStdBox(st)
+	if len(tf.EditTxt) == 0 {
+		return
+	}
 	cur := tf.EditTxt[tf.StartPos:tf.EndPos]
 	tf.RenderSelect()
 	pos := tf.EffPos

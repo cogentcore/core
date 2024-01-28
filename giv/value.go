@@ -54,10 +54,10 @@ func NewSoloValue(val any) Value {
 type ValueFlags int64 //enums:bitflag -trim-prefix Value
 
 const (
-	// flagged after first configuration
+	// ValueReadOnly flagged after first configuration
 	ValueReadOnly ValueFlags = iota
 
-	// for OwnKind = Map, this value represents the Key -- otherwise the Value
+	// ValueMapKey for OwnKind = Map, this value represents the Key -- otherwise the Value
 	ValueMapKey
 
 	// ValueHasSavedLabel is whether the value has a saved version of its
@@ -451,7 +451,7 @@ func SetSoloValueIface(vv *ValueBase, val any) {
 	vv.Value = reflect.ValueOf(val)
 }
 
-// we have this one accessor b/c it is more useful for outside consumers vs. internal usage
+// OwnerKind we have this one accessor b/c it is more useful for outside consumers vs. internal usage
 func (vv *ValueBase) OwnerKind() reflect.Kind {
 	return vv.OwnKind
 }

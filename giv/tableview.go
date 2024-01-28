@@ -578,6 +578,9 @@ func (tv *TableView) UpdateWidgets() {
 
 		var idxlab *gi.Label
 		if tv.Is(SliceViewShowIndex) {
+			if len(sg.Kids) == 0 {
+				break
+			}
 			idxlab = sg.Kids[ridx].(*gi.Label)
 			idxlab.SetTextUpdate(strconv.Itoa(si))
 			idxlab.SetState(invis, states.Invisible)
@@ -597,6 +600,12 @@ func (tv *TableView) UpdateWidgets() {
 			fli := fli
 			field := tv.VisFields[fli]
 			cidx := ridx + idxOff + fli
+			if len(sg.Kids) < cidx {
+				break
+			}
+			if sg.Kids[cidx] == nil {
+				return
+			}
 			w := sg.Kids[cidx].(gi.Widget)
 			wb := w.AsWidget()
 

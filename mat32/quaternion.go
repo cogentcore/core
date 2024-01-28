@@ -73,18 +73,12 @@ func (q *Quat) SetIdentity() {
 
 // IsIdentity returns if this is an identity quaternion.
 func (q *Quat) IsIdentity() bool {
-	if q.X == 0 && q.Y == 0 && q.Z == 0 && q.W == 1 {
-		return true
-	}
-	return false
+	return q.X == 0 && q.Y == 0 && q.Z == 0 && q.W == 1
 }
 
 // IsNil returns true if all values are 0 (uninitialized).
 func (q *Quat) IsNil() bool {
-	if q.X == 0 && q.Y == 0 && q.Z == 0 && q.W == 0 {
-		return true
-	}
-	return false
+	return q.X == 0 && q.Y == 0 && q.Z == 0 && q.W == 0
 }
 
 func (q Quat) String() string {

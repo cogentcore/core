@@ -381,10 +381,7 @@ func (lr *Rule) IsMatch(ls *State) bool {
 		return false
 	case AnyRune:
 		_, ok := ls.Rune(lr.Offset)
-		if !ok {
-			return false
-		}
-		return true
+		return ok
 	}
 	return false
 }

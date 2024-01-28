@@ -1056,7 +1056,8 @@ func (sv *SliceViewBase) ScrollToIdxNoUpdt(idx int) bool {
 		sv.StartIdx = max(0, sv.StartIdx)
 		sv.UpdateScroll()
 		return true
-	} else if idx >= sv.StartIdx+sv.VisRows {
+	}
+	if idx >= sv.StartIdx+sv.VisRows {
 		sv.StartIdx = idx - (sv.VisRows - 1)
 		sv.StartIdx = max(0, sv.StartIdx)
 		sv.UpdateScroll()
@@ -1275,10 +1276,10 @@ func (sv *SliceViewBase) UpdateSelectIdx(idx int, sel bool) {
 
 // IdxIsSelected returns the selected status of given slice index
 func (sv *SliceViewBase) IdxIsSelected(idx int) bool {
-	if _, ok := sv.SelIdxs[idx]; ok {
-		return true
-	}
-	return false
+	sv.ViewMuLock()
+	defer sv.ViewMuUnlock()
+	_, ok := sv.SelIdxs[idx]
+	return ok
 }
 
 func (sv *SliceViewBase) ResetSelectedIdxs() {

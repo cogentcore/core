@@ -2357,10 +2357,7 @@ func (tb *Buf) LineCommented(ln int) bool {
 	if len(tags) == 0 {
 		return false
 	}
-	if tags[0].Tok.Tok.InCat(token.Comment) {
-		return true
-	}
-	return false
+	return tags[0].Tok.Tok.InCat(token.Comment)
 }
 
 // CommentRegion inserts comment marker on given lines -- end is *exclusive*

@@ -549,10 +549,7 @@ func (v Vec2) IsEqual(other Vec2) bool {
 
 // AlmostEqual returns whether the vector is almost equal to another vector within the specified tolerance.
 func (v Vec2) AlmostEqual(other Vec2, tol float32) bool {
-	if (Abs(v.X-other.X) < tol) && (Abs(v.Y-other.Y) < tol) {
-		return true
-	}
-	return false
+	return (Abs(v.X-other.X) < tol) && (Abs(v.Y-other.Y) < tol)
 }
 
 // Dot returns the dot product of this vector with other.

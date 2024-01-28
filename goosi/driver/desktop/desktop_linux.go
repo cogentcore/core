@@ -65,11 +65,7 @@ var TheClip = &Clip{}
 type Clip struct{}
 
 func (cl *Clip) IsEmpty() bool {
-	str := glfw.GetClipboardString()
-	if len(str) == 0 {
-		return true
-	}
-	return false
+	return len(glfw.GetClipboardString()) == 0
 }
 
 func (cl *Clip) Read(types []string) mimedata.Mimes {

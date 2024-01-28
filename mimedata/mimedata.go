@@ -64,10 +64,7 @@ func IsText(typ string) bool {
 	if strings.HasPrefix(typ, "text/") {
 		return true
 	}
-	if typ == fi.DataJson || typ == fi.DataXml {
-		return true
-	}
-	return false
+	return typ == fi.DataJson || typ == fi.DataXml
 }
 
 ////////////////////////////////////////////////////////////////////////////////

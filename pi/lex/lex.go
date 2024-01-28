@@ -63,10 +63,7 @@ func (lx *Lex) OverlapsReg(or Lex) bool {
 		return true
 	}
 	// end overlaps
-	if (lx.Ed > or.St && lx.Ed <= or.Ed) || (or.Ed > lx.St && or.Ed <= lx.Ed) {
-		return true
-	}
-	return false
+	return (lx.Ed > or.St && lx.Ed <= or.Ed) || (or.Ed > lx.St && or.Ed <= lx.Ed)
 }
 
 // Region returns the region for this lexical element, at given line

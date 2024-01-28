@@ -451,8 +451,8 @@ var _ValueFlagsNameToValueMap = map[string]ValueFlags{
 }
 
 var _ValueFlagsDescMap = map[ValueFlags]string{
-	0: `flagged after first configuration`,
-	1: `for OwnKind = Map, this value represents the Key -- otherwise the Value`,
+	0: `ValueReadOnly flagged after first configuration`,
+	1: `ValueMapKey for OwnKind = Map, this value represents the Key -- otherwise the Value`,
 	2: `ValueHasSavedLabel is whether the value has a saved version of its label, which can be set either automatically or explicitly`,
 	3: `ValueHasSavedDoc is whether the value has a saved version of its documentation, which can be set either automatically or explicitly`,
 	4: `ValueDialogNewWindow indicates that the dialog should be opened with in a new window, instead of a typical FullWindow in same current window. this is triggered by holding down any modifier key while clicking on a button that opens the window.`,

@@ -560,10 +560,7 @@ func IsKi(typ reflect.Type) bool {
 	if typ.Implements(KiType) {
 		return true
 	}
-	if reflect.PtrTo(typ).Implements(KiType) { // typically need the pointer type to impl
-		return true
-	}
-	return false
+	return reflect.PtrTo(typ).Implements(KiType) // typically need the pointer type to impl
 }
 
 // AsKi returns the Ki interface and Node base type for

@@ -45,13 +45,10 @@ func (s *Style) LayoutHasParSizing() bool {
 		slog.Error("styling error: cannot use Ew or Eh for Min size -- that is self-referential!")
 	}
 
-	if s.Min.X.Un == units.UnitPw || s.Min.X.Un == units.UnitPh ||
+	return s.Min.X.Un == units.UnitPw || s.Min.X.Un == units.UnitPh ||
 		s.Min.Y.Un == units.UnitPw || s.Min.Y.Un == units.UnitPh ||
 		s.Max.X.Un == units.UnitPw || s.Max.X.Un == units.UnitPh ||
-		s.Max.Y.Un == units.UnitPw || s.Max.Y.Un == units.UnitPh {
-		return true
-	}
-	return false
+		s.Max.Y.Un == units.UnitPw || s.Max.Y.Un == units.UnitPh
 }
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels
