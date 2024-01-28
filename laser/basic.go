@@ -44,7 +44,9 @@ func AnyIsNil(it any) bool {
 
 // KindIsBasic returns true if the reflect.Kind is a basic, elemental
 // type such as Int, Float, etc
-func KindIsBasic(vk reflect.Kind) bool { return vk >= reflect.Bool && vk <= reflect.Complex128 }
+func KindIsBasic(vk reflect.Kind) bool {
+	return vk >= reflect.Bool && vk <= reflect.Complex128
+}
 
 // ToBool robustly converts to a bool any basic elemental type
 // (including pointers to such) using a big type switch organized

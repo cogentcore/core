@@ -183,16 +183,16 @@ func (sp *Spinner) WrapAround(val float32) float32 {
 }
 
 // FormatIsInt returns true if the format string requires an integer value
-func (sp *Spinner) FormatIsInt() (ok bool) {
+func (sp *Spinner) FormatIsInt() bool {
 	if sp.Format == "" {
-		return
+		return false
 	}
 	fc := sp.Format[len(sp.Format)-1]
 	switch fc {
 	case 'd', 'b', 'c', 'o', 'O', 'q', 'x', 'X', 'U':
 		return true
 	}
-	return
+	return false
 }
 
 // ValToString converts the value to the string representation thereof

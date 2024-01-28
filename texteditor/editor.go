@@ -289,10 +289,14 @@ func (ed *Editor) ReMarkup() {
 }
 
 // IsChanged returns true if buffer was changed (edited) since last EditDone
-func (ed *Editor) IsChanged() bool { return ed.Buf != nil && ed.Buf.IsChanged() }
+func (ed *Editor) IsChanged() bool {
+	return ed.Buf != nil && ed.Buf.IsChanged()
+}
 
 // IsNotSaved returns true if buffer was changed (edited) since last Save
-func (ed *Editor) IsNotSaved() bool { return ed.Buf != nil && ed.Buf.IsNotSaved() }
+func (ed *Editor) IsNotSaved() bool {
+	return ed.Buf != nil && ed.Buf.IsNotSaved()
+}
 
 // HasLineNos returns true if view is showing line numbers (per textbuf option, cached here)
 func (ed *Editor) HasLineNos() bool {

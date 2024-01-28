@@ -480,13 +480,13 @@ func (tb *Buf) ConfigKnown() bool {
 // FileModCheck checks if the underlying file has been modified since last
 // Stat (open, save) -- if haven't yet prompted, user is prompted to ensure
 // that this is OK.  returns true if file was modified
-func (tb *Buf) FileModCheck() (ok bool) {
+func (tb *Buf) FileModCheck() bool {
 	if tb.Is(BufFileModOk) {
-		return
+		return false
 	}
 	info, err := os.Stat(string(tb.Filename))
 	if err != nil {
-		return
+		return false
 	}
 	if info.ModTime() != time.Time(tb.Info.ModTime) {
 		sc := tb.SceneFromView()
@@ -509,7 +509,7 @@ func (tb *Buf) FileModCheck() (ok bool) {
 		d.NewDialog(sc).Run()
 		return true
 	}
-	return
+	return false
 }
 
 // Open loads text from a file into the buffer

@@ -44,7 +44,9 @@ func (tr *Region) IsSameLine() bool {
 }
 
 // Contains returns true if line is within region
-func (tr *Region) Contains(ln int) bool { return tr.Start.Ln >= ln && ln <= tr.End.Ln }
+func (tr *Region) Contains(ln int) bool {
+	return tr.Start.Ln >= ln && ln <= tr.End.Ln
+}
 
 // TimeNow grabs the current time as the edit time
 func (tr *Region) TimeNow() {

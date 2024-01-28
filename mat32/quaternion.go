@@ -72,10 +72,14 @@ func (q *Quat) SetIdentity() {
 }
 
 // IsIdentity returns if this is an identity quaternion.
-func (q *Quat) IsIdentity() bool { return q.X == 0 && q.Y == 0 && q.Z == 0 && q.W == 1 }
+func (q *Quat) IsIdentity() bool {
+	return q.X == 0 && q.Y == 0 && q.Z == 0 && q.W == 1
+}
 
 // IsNil returns true if all values are 0 (uninitialized).
-func (q *Quat) IsNil() bool { return q.X == 0 && q.Y == 0 && q.Z == 0 && q.W == 0 }
+func (q *Quat) IsNil() bool {
+	return q.X == 0 && q.Y == 0 && q.Z == 0 && q.W == 0
+}
 
 func (q Quat) String() string {
 	return fmt.Sprintf("(%v, %v, %v, %v)", q.X, q.Y, q.Z, q.W)

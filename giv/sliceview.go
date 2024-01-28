@@ -1047,9 +1047,9 @@ func (sv *SliceViewBase) IdxFromPos(posY int) (int, bool) {
 // by scrolling display as needed.
 // This version does not update the slicegrid.
 // Just computes the StartIdx and updates the scrollbar
-func (sv *SliceViewBase) ScrollToIdxNoUpdt(idx int) (ok bool) {
+func (sv *SliceViewBase) ScrollToIdxNoUpdt(idx int) bool {
 	if sv.VisRows == 0 {
-		return
+		return false
 	}
 	if idx < sv.StartIdx {
 		sv.StartIdx = idx
@@ -1063,7 +1063,7 @@ func (sv *SliceViewBase) ScrollToIdxNoUpdt(idx int) (ok bool) {
 		sv.UpdateScroll()
 		return true
 	}
-	return
+	return false
 }
 
 // ScrollToIdx ensures that given slice idx is visible

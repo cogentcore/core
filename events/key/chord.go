@@ -55,7 +55,9 @@ func (ch Chord) OSShortcut() Chord {
 }
 
 // CodeIsModifier returns true if given code is a modifier key
-func CodeIsModifier(c Codes) bool { return c >= CodeLeftControl && c <= CodeRightMeta }
+func CodeIsModifier(c Codes) bool {
+	return c >= CodeLeftControl && c <= CodeRightMeta
+}
 
 // Decode decodes a chord string into rune and modifiers (set as bit flags)
 func (ch Chord) Decode() (r rune, code Codes, mods Modifiers, err error) {

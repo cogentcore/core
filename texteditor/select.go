@@ -59,7 +59,9 @@ func (ed *Editor) ClearSelected() {
 }
 
 // HasSelection returns whether there is a selected region of text
-func (ed *Editor) HasSelection() bool { return ed.SelectReg.Start.IsLess(ed.SelectReg.End) }
+func (ed *Editor) HasSelection() bool {
+	return ed.SelectReg.Start.IsLess(ed.SelectReg.End)
+}
 
 // Selection returns the currently selected text as a textbuf.Edit, which
 // captures start, end, and full lines in between -- nil if no selection

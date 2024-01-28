@@ -13,4 +13,6 @@ func ToString(b bool) string {
 }
 
 // FromString converts string to a bool, "true" = true, else false
-func FromString(v string) bool { return v == "true" }
+func FromString(v string) bool {
+	return v == "true"
+}
