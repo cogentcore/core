@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/ki"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/svg"
@@ -277,10 +278,17 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 			}
 		}
 	})
-	ch.AddItemsFunc(func() {
-		for _, kid := range tb.Kids {
+	var addButtonItems func(par ki.Ki)
+	addButtonItems = func(par ki.Ki) {
+		for _, kid := range *par.Children() {
 			bt := AsButton(kid)
-			if bt == nil || bt.IsDisabled() || bt.Name() == "back" || bt.Name() == "overflow-menu" {
+			if bt == nil || bt.IsDisabled() || bt.Name() == "back" {
+				continue
+			}
+			if bt.Name() == "overflow-menu" {
+				tmpms := NewScene()
+				bt.Menu(tmpms)
+				addButtonItems(tmpms)
 				continue
 			}
 			ch.Items = append(ch.Items, bt)
@@ -288,6 +296,9 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 			ch.Icons = append(ch.Icons, bt.Icon)
 			ch.Tooltips = append(ch.Tooltips, bt.Tooltip)
 		}
+	}
+	ch.AddItemsFunc(func() {
+		addButtonItems(tb)
 	})
 	ch.OnChange(func(e events.Event) {
 		switch cv := ch.CurVal.(type) {
