@@ -136,7 +136,7 @@ func StdAppBarBack(tb *Toolbar) *Button {
 
 // StdAppBarChooser adds an AppChooser
 func StdAppBarChooser(tb *Toolbar) *Chooser {
-	return ConfigAppChooser(NewChooser(tb, "app-chooser"))
+	return ConfigAppChooser(NewChooser(tb, "app-chooser"), tb)
 }
 
 // todo: use CurrentMainScene instead?
@@ -228,13 +228,12 @@ func (tb *Toolbar) StdOverflowMenu(m *Scene) { //gti:add
 //		AppChooser
 
 // ConfigAppChooser configures the given [Chooser] to give access
-// to all app resources, such as open scenes and available app bar
-// buttons. This chooser is typically placed at the start of the AppBar.
-// You can extend the resources available for access in the app chooser
-// using [Chooser.AddItemsFunc] and [Chooser.OnChange] (you can handle
-// your cases in your OnChange and call [events.SetHandled] only for
-// the cases you handle).
-func ConfigAppChooser(ch *Chooser) *Chooser {
+// to all app resources, such as open scenes and buttons in the
+// given toolbar. This chooser is typically placed at the start
+// of the AppBar. You can extend the resources available for access
+// in the app chooser using [Chooser.AddItemsFunc] and [Chooser.OnChange]
+// (you can handle your cases in your OnChange).
+func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 	ch.SetEditable(true).SetType(ChooserOutlined).SetIcon(icons.Search)
 	if TheApp.SystemPlatform().IsMobile() {
 		ch.SetPlaceholder("Search")
@@ -268,6 +267,10 @@ func ConfigAppChooser(ch *Chooser) *Chooser {
 		for _, rw := range AllRenderWins {
 			for _, kv := range rw.MainStageMgr.Stack.Order {
 				st := kv.Val
+				// we do not include ourself
+				if st == tb.Scene.Stage {
+					continue
+				}
 				lbl := ""
 				if st.Scene.Body != nil && st.Scene.Body.Title != "" {
 					lbl = st.Scene.Body.Title
@@ -280,6 +283,18 @@ func ConfigAppChooser(ch *Chooser) *Chooser {
 				ch.Labels = append(ch.Labels, lbl)
 				ch.Icons = append(ch.Icons, icons.Toolbar)
 			}
+		}
+	})
+	ch.AddItemsFunc(func() {
+		for _, kid := range tb.Kids {
+			bt := AsButton(kid)
+			if bt == nil {
+				continue
+			}
+			ch.Items = append(ch.Items, bt)
+			ch.Labels = append(ch.Labels, bt.Text)
+			ch.Icons = append(ch.Icons, bt.Icon)
+			ch.Tooltips = append(ch.Tooltips, bt.Tooltip)
 		}
 	})
 	ch.OnChange(func(e events.Event) {
