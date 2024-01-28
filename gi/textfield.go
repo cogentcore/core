@@ -1759,7 +1759,7 @@ func (tf *TextField) RenderTextField() {
 	st := &tf.Styles
 	st.Font = paint.OpenFont(st.FontRender(), &st.UnContext)
 	tf.RenderStdBox(st)
-	if len(tf.EditTxt) == 0 { //please test it
+	if len(tf.EditTxt) == 0 {
 		return
 	}
 	cur := tf.EditTxt[tf.StartPos:tf.EndPos]
