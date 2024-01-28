@@ -199,7 +199,7 @@ func (tb *Toolbar) StdOverflowMenu(m *Scene) { //gti:add
 					win.CloseReq()
 				}
 			})
-		NewButton(m).SetText("Quit").SetIcon(icons.Close).SetShortcut("Command+Q").
+		NewButton(m, "quit-app").SetText("Quit").SetIcon(icons.Close).SetShortcut("Command+Q").
 			OnClick(func(e events.Event) {
 				TheApp.QuitReq()
 			})
@@ -295,6 +295,12 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 			ch.Labels = append(ch.Labels, bt.Text)
 			ch.Icons = append(ch.Icons, bt.Icon)
 			ch.Tooltips = append(ch.Tooltips, bt.Tooltip)
+			// after the quit button, there are the render wins,
+			// which we do not want to show here as we are already
+			// showing the stages
+			if bt.Name() == "quit-app" {
+				break
+			}
 		}
 	}
 	ch.AddItemsFunc(func() {
