@@ -387,25 +387,19 @@ func (ch *Chooser) SetIconItems(is []icons.Icon, setFirst bool) *Chooser {
 	return ch
 }
 
-// SetEnums sets the [Chooser.Items] the given enums.
-// If setFirst then set current item to the first item in the list.
-func (ch *Chooser) SetEnums(el []enums.Enum, setFirst bool) *Chooser {
-	n := len(el)
-	if n == 0 {
-		return ch
-	}
-	ch.Items = make([]any, n)
-	ch.Labels = make([]string, n)
-	ch.Tooltips = make([]string, n)
-	for i, enum := range el {
-		ch.Items[i] = enum
+// SetEnums sets the [Chooser.Items] from the given enums.
+// If setFirst is true, it sets the current item to the first item
+// in the list.
+func (ch *Chooser) SetEnums(es []enums.Enum, setFirst bool) *Chooser {
+	ch.Items = make([]ChooserItem, len(es))
+	for i, enum := range es {
 		str := enum.String()
 		lbl := sentence.Case(str)
-		ch.Labels[i] = lbl
 		// TODO(kai): this desc is not always correct because we
 		// don't have the name of the enum value pre-generator-transformation
 		// (same as with Switches) (#774)
-		ch.Tooltips[i] = sentence.Doc(enum.Desc(), str, lbl)
+		tip := sentence.Doc(enum.Desc(), str, lbl)
+		ch.Items[i] = ChooserItem{Value: enum, Label: lbl, Tooltip: tip}
 	}
 	if setFirst {
 		ch.SetCurIndex(0)
@@ -413,19 +407,17 @@ func (ch *Chooser) SetEnums(el []enums.Enum, setFirst bool) *Chooser {
 	return ch
 }
 
-// SetEnum sets the Items list from given enums.Enum Values().
-// If setFirst then set current item to the first item in the list.
+// SetEnum sets the [Chooser.Items] from [enums.Enum.Values] of the given enum.
+// If setFirst is true, it sets the current item to the first item
+// in the list.
 func (ch *Chooser) SetEnum(enum enums.Enum, setFirst bool) *Chooser {
 	return ch.SetEnums(enum.Values(), setFirst)
 }
 
-// FindItem finds an item on list of items and returns its index
+// FindItem finds the given item value on the list of items and returns its index
 func (ch *Chooser) FindItem(it any) int {
-	if ch.Items == nil {
-		return -1
-	}
 	for i, v := range ch.Items {
-		if v == it {
+		if it == v.Value {
 			return i
 		}
 	}
@@ -433,7 +425,7 @@ func (ch *Chooser) FindItem(it any) int {
 }
 
 // SetPlaceholder sets the given placeholder text and
-// CurIndex = -1, indicating that nothing has not been selected.
+// indicates that nothing has been selected.
 func (ch *Chooser) SetPlaceholder(text string) *Chooser {
 	ch.Placeholder = text
 	if !ch.Editable {
@@ -443,11 +435,10 @@ func (ch *Chooser) SetPlaceholder(text string) *Chooser {
 	return ch
 }
 
-// SetCurVal sets the current value (CurVal) and the corresponding CurIndex
-// for that item on the current Items list (adds to items list if not found)
-// -- returns that index -- and sets the text to the string value of that
-// value (using standard Stringer string conversion)
-func (ch *Chooser) SetCurVal(it any) int {
+// SetCurVal sets the current item and index to those associated with the given value.
+// If the given item is not found, it adds it to the items list. It also sets the text
+// of the chooser to the label of the item.
+func (ch *Chooser) SetCurVal(it any) {
 	ch.CurrentItem = it
 	ch.CurrentIndex = ch.FindItem(it)
 	if ch.CurrentIndex < 0 { // add to list if not found..
