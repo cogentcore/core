@@ -147,6 +147,16 @@ func (sc *Scene) OnInit() {
 	sc.WidgetBase.OnInit()
 	sc.SetStyles()
 	sc.Layout.HandleEvents()
+	sc.OnShow(func(e events.Event) {
+		if sc.Stage.Title == CurRenderWin.Title {
+			return
+		}
+		title := sc.Stage.Title + " | " + CurRenderWin.Title
+		CurRenderWin.GoosiWin.SetTitle(title)
+	})
+	sc.OnClose(func(e events.Event) {
+		CurRenderWin.GoosiWin.SetTitle(CurRenderWin.Title)
+	})
 	if TheApp.SceneConfig != nil {
 		TheApp.SceneConfig(sc)
 	}
