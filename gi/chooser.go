@@ -92,6 +92,26 @@ type Chooser struct {
 	CurIndex int `json:"-" xml:"-" set:"-"`
 }
 
+// ChooserItem is an item that can be used in a [Chooser].
+type ChooserItem struct {
+
+	// Value is the underlying value of the chooser item.
+	Value any
+
+	// Func, if non-nil, is a function to call whenever this
+	// item is selected as the current value of the chooser.
+	Func func()
+
+	// Label is the label displayed to the user for this item.
+	Label string
+
+	// Icon is the icon displayed to the user for this item.
+	Icon icons.Icon
+
+	// Tooltip is the tooltip displayed to the user for this item.
+	Tooltip string
+}
+
 // ChooserTypes is an enum containing the
 // different possible types of combo boxes
 type ChooserTypes int32 //enums:enum -trim-prefix Chooser
