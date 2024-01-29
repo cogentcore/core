@@ -718,6 +718,8 @@ func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 			return
 		}
 		ch.CallItemsFuncs()
+	})
+	tf.OnClick(func(e events.Event) {
 		tf.OfferComplete(dontForce)
 	})
 }
