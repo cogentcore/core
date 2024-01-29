@@ -110,33 +110,7 @@ func MatchSeedString(completions []string, seed string) []string {
 	lseed := strings.ToLower(seed)
 
 	for _, c := range completions {
-		lc := strings.ToLower(c)
-		if strings.Contains(lc, lseed) {
-			matches = append(matches, c)
-			continue
-		}
-
-		// stripped version of completion
-		// (space delimeted with no punctuation)
-		cs := strings.Map(func(r rune) rune {
-			if unicode.IsPunct(r) {
-				return -1
-			}
-			return r
-		}, c)
-		cs = strcase.ToDelimited(cs, ' ')
-		if strings.Contains(cs, lseed) {
-			matches = append(matches, c)
-			continue
-		}
-
-		// the initials (first letters) of every field
-		ci := ""
-		csdf := strings.Fields(cs)
-		for _, f := range csdf {
-			ci += string(f[0])
-		}
-		if strings.Contains(ci, lseed) {
+		if IsSeedMatching(lseed, c) {
 			matches = append(matches, c)
 		}
 	}
@@ -157,37 +131,41 @@ func MatchSeedCompletion(completions []Completion, seed string) []Completion {
 	lseed := strings.ToLower(seed)
 
 	for _, c := range completions {
-		lc := strings.ToLower(c.Text)
-		if strings.Contains(lc, lseed) {
-			matches = append(matches, c)
-			continue
-		}
-
-		// stripped version of completion
-		// (space delimeted with no punctuation)
-		cs := strings.Map(func(r rune) rune {
-			if unicode.IsPunct(r) {
-				return -1
-			}
-			return r
-		}, c.Text)
-		cs = strcase.ToDelimited(cs, ' ')
-		if strings.Contains(cs, lseed) {
-			matches = append(matches, c)
-			continue
-		}
-
-		// the initials (first letters) of every field
-		ci := ""
-		csdf := strings.Fields(cs)
-		for _, f := range csdf {
-			ci += string(f[0])
-		}
-		if strings.Contains(ci, lseed) {
+		if IsSeedMatching(lseed, c.Text) {
 			matches = append(matches, c)
 		}
 	}
 	return matches
+}
+
+// IsSeedMatching returns whether the given lowercase seed matches
+// the given completion string.
+func IsSeedMatching(lseed string, completion string) bool {
+	lc := strings.ToLower(completion)
+	if strings.Contains(lc, lseed) {
+		return true
+	}
+
+	// stripped version of completion
+	// (space delimeted with no punctuation)
+	cs := strings.Map(func(r rune) rune {
+		if unicode.IsPunct(r) {
+			return -1
+		}
+		return r
+	}, completion)
+	cs = strcase.ToDelimited(cs, ' ')
+	if strings.Contains(cs, lseed) {
+		return true
+	}
+
+	// the initials (first letters) of every field
+	ci := ""
+	csdf := strings.Fields(cs)
+	for _, f := range csdf {
+		ci += string(f[0])
+	}
+	return strings.Contains(ci, lseed)
 }
 
 // ExtendSeed tries to extend the current seed checking possible completions for a longer common seed
