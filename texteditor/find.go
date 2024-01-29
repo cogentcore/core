@@ -321,10 +321,10 @@ func (ed *Editor) QReplaceAddText() {
 			fc.GetCurTextAction()
 			rc.GetCurTextAction()
 			var find, repl string
-			if s, ok := fc.CurVal.(string); ok {
+			if s, ok := fc.CurrentItem.(string); ok {
 				find = s
 			}
-			if s, ok := rc.CurVal.(string); ok {
+			if s, ok := rc.CurrentItem.(string); ok {
 				repl = s
 			}
 			lexItems := lxi.IsChecked()

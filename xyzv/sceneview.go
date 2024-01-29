@@ -168,7 +168,7 @@ func (sv *SceneView) ConfigToolbar(tb *gi.Toolbar) {
 
 	sm := gi.NewChooser(tb, "selmode").SetEnum(sw.SelMode, false)
 	sm.OnChange(func(e events.Event) {
-		sw.SelMode = sm.CurVal.(SelModes)
+		sw.SelMode = sm.CurrentItem.(SelModes)
 	})
 	sm.SetCurVal(sw.SelMode)
 

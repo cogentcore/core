@@ -1084,7 +1084,7 @@ func (vv *EnumValue) ConfigWidget(w gi.Widget) {
 	ch.SetEnum(ev, false)
 	ch.Config()
 	ch.OnFinal(events.Change, func(e events.Event) {
-		vv.SetValue(ch.CurVal)
+		vv.SetValue(ch.CurrentItem)
 	})
 	vv.UpdateWidget()
 }
@@ -1197,7 +1197,7 @@ func (vv *TypeValue) ConfigWidget(w gi.Widget) {
 	cb.SetTypes(tl, false, true)
 	cb.Config()
 	cb.OnFinal(events.Change, func(e events.Event) {
-		tval := cb.CurVal.(*gti.Type)
+		tval := cb.CurrentItem.(*gti.Type)
 		vv.SetValue(tval)
 	})
 	vv.UpdateWidget()

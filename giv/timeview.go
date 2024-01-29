@@ -210,7 +210,7 @@ func (dv *DateView) ConfigWidget() {
 	month.SetCurIndex(int(dv.Time.Month() - 1))
 	month.OnChange(func(e events.Event) {
 		// set our month
-		dv.SetTime(dv.Time.AddDate(0, month.CurIndex+1-int(dv.Time.Month()), 0))
+		dv.SetTime(dv.Time.AddDate(0, month.CurrentIndex+1-int(dv.Time.Month()), 0))
 	})
 
 	yr := dv.Time.Year()
@@ -223,7 +223,7 @@ func (dv *DateView) ConfigWidget() {
 	year.SetCurVal(yr)
 	year.OnChange(func(e events.Event) {
 		// we are centered at current year with 100 in each direction
-		nyr := year.CurIndex + yr - 100
+		nyr := year.CurrentIndex + yr - 100
 		// set our year
 		dv.SetTime(dv.Time.AddDate(nyr-dv.Time.Year(), 0, 0))
 	})
@@ -517,7 +517,7 @@ func (vv *DurationValue) ConfigWidget(w gi.Widget) {
 
 	sp := gi.NewSpinner(ly, "value").SetTooltip("The value of time").SetStep(1).SetPageStep(10)
 	sp.OnChange(func(e events.Event) {
-		vv.SetValue(sp.Value * float32(durationUnitsMap[ch.CurLabel]))
+		vv.SetValue(sp.Value * float32(durationUnitsMap[ch.CurrentLabel]))
 	})
 	sp.Config()
 
@@ -531,7 +531,7 @@ func (vv *DurationValue) ConfigWidget(w gi.Widget) {
 		// we update the value to fit the unit
 		npv := laser.NonPtrValue(vv.Value)
 		dur := npv.Interface().(time.Duration)
-		sp.SetValue(float32(dur) / float32(durationUnitsMap[ch.CurLabel]))
+		sp.SetValue(float32(dur) / float32(durationUnitsMap[ch.CurrentLabel]))
 	})
 
 	vv.UpdateWidget()

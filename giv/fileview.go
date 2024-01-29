@@ -286,7 +286,7 @@ func (fv *FileView) ConfigPathBar() {
 		})
 	}
 	pf.OnChange(func(e events.Event) {
-		sp := pf.CurVal.(string)
+		sp := pf.CurrentItem.(string)
 		if sp == gi.FileViewResetPaths {
 			gi.SavedPaths = make(gi.FilePaths, 1, gi.SystemSettings.SavedPathsMax)
 			gi.SavedPaths[0] = fv.DirPath

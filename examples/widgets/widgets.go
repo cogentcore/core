@@ -200,7 +200,7 @@ func main() {
 		SetTypes(gti.AllEmbeddersOf(gi.WidgetBaseType), true, true)
 	// ItemsFromEnum(gi.ButtonTypesN, true, 50)
 	ch.OnChange(func(e events.Event) {
-		fmt.Printf("Chooser selected index: %d data: %v\n", ch.CurIndex, ch.CurVal)
+		fmt.Printf("Chooser selected index: %d data: %v\n", ch.CurrentIndex, ch.CurrentItem)
 	})
 
 	b.RunMainWindow()

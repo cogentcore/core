@@ -259,7 +259,7 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 	// we must never have a chooser label so that it
 	// always displays the search placeholder
 	ch.OnFirst(events.Change, func(e events.Event) {
-		ch.CurIndex = 0
+		ch.CurrentIndex = 0
 		ch.ShowCurVal("")
 	})
 
@@ -307,7 +307,7 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 		addButtonItems(tb)
 	})
 	ch.OnChange(func(e events.Event) {
-		switch cv := ch.CurVal.(type) {
+		switch cv := ch.CurrentItem.(type) {
 		case *Stage:
 			if cv.MainMgr.RenderWin != CurRenderWin {
 				cv.MainMgr.RenderWin.Raise()

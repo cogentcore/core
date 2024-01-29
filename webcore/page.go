@@ -239,7 +239,7 @@ func (pg *Page) AppBar(tb *gi.Toolbar) {
 	})
 	ch.OnChange(func(e events.Event) {
 		// we need a slash so that it doesn't think it's a relative URL
-		pg.OpenURL("/"+ch.CurLabel, true)
+		pg.OpenURL("/"+ch.CurrentLabel, true)
 		e.SetHandled()
 	})
 }
