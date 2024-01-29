@@ -7,7 +7,6 @@ package gi
 import (
 	"fmt"
 	"log/slog"
-	"sort"
 	"strconv"
 
 	"cogentcore.org/core/abilities"
@@ -346,42 +345,13 @@ func (ch *Chooser) CallItemsFuncs() {
 	}
 }
 
-// SortItems sorts the items according to their labels
-func (ch *Chooser) SortItems(ascending bool) *Chooser {
-	sort.Slice(ch.Items, func(i, j int) bool {
-		if ascending {
-			return ch.LabelFor(i, ch.Items[i]) < ch.LabelFor(j, ch.Items[j])
-		} else {
-			return ch.LabelFor(i, ch.Items[i]) > ch.LabelFor(j, ch.Items[j])
-		}
-	})
-	return ch
-}
-
-// LabelFor converts the given item at the given index into
-// a user-facing label. It first tries [Chooser.Labels] and
-// falls back on [ToLabel].
-func (ch *Chooser) LabelFor(i int, item any) string {
-	if len(ch.Labels) > i {
-		return ch.Labels[i]
-	}
-	return ToLabel(item)
-}
-
-// SetTypes sets the Items list from a list of types, e.g., from gti.AllEmbedersOf.
-// If setFirst then set current item to the first item in the list, and if sort
-// then sort the list items in ascending order according to their labels.
-func (ch *Chooser) SetTypes(tl []*gti.Type, setFirst, sort bool) *Chooser {
-	n := len(tl)
-	if n == 0 {
-		return ch
-	}
-	ch.Items = make([]any, n)
-	for i, typ := range tl {
-		ch.Items[i] = typ
-	}
-	if sort {
-		ch.SortItems(true)
+// SetTypes sets the [Chooser.Items] from the given types.
+// If setFirst is true, it sets the current item to the first item
+// in the list.
+func (ch *Chooser) SetTypes(ts []*gti.Type, setFirst bool) *Chooser {
+	ch.Items = make([]ChooserItem, len(ts))
+	for i, typ := range ts {
+		ch.Items[i] = ChooserItem{Value: typ}
 	}
 	if setFirst {
 		ch.SetCurIndex(0)
@@ -389,16 +359,13 @@ func (ch *Chooser) SetTypes(tl []*gti.Type, setFirst, sort bool) *Chooser {
 	return ch
 }
 
-// SetStrings sets the Items list from a list of string values.
-// If setFirst then set current item to the first item in the list.
-func (ch *Chooser) SetStrings(el []string, setFirst bool) *Chooser {
-	n := len(el)
-	if n == 0 {
-		return ch
-	}
-	ch.Items = make([]any, n)
-	for i, str := range el {
-		ch.Items[i] = str
+// SetStrings sets the [Chooser.Items] from the given strings.
+// If setFirst is true, it sets the current item to the first item
+// in the list.
+func (ch *Chooser) SetStrings(ss []string, setFirst bool) *Chooser {
+	ch.Items = make([]ChooserItem, len(ss))
+	for i, s := range ss {
+		ch.Items[i] = ChooserItem{Value: s}
 	}
 	if setFirst {
 		ch.SetCurIndex(0)
