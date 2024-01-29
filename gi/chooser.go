@@ -33,21 +33,25 @@ import (
 type Chooser struct {
 	Box
 
-	// the type of combo box
+	// Type is the styling type of the chooser.
 	Type ChooserTypes
 
-	// optional icon
+	// Icon is an optional icon displayed on the left side of the chooser.
 	Icon icons.Icon `view:"show-name"`
 
-	// name of the indicator icon to present.
+	// Indicator is the icon to use for the indicator displayed on the
+	// right side of the chooser.
 	Indicator icons.Icon `view:"show-name"`
 
-	// provide a text field for editing the value, or just a button for selecting items?  Set the editable property
+	// Editable is whether provide a text field for editing the value,
+	// or just a button for selecting items.
 	Editable bool
 
 	// TODO(kai): implement AllowNew button
 
-	// whether to allow the user to add new items to the combo box through the editable textfield (if Editable is set to true) and a button at the end of the combo box menu
+	// AllowNew is whether to allow the user to add new items to the
+	// chooser through the editable textfield (if Editable is set to
+	// true) and a button at the end of the chooser menu.
 	AllowNew bool
 
 	// items available for selection
