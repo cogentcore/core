@@ -373,20 +373,13 @@ func (ch *Chooser) SetStrings(ss []string, setFirst bool) *Chooser {
 	return ch
 }
 
-// SetIconItems sets the Items list from a list of icons.Icon values.
-// If setFirst then set current item to the first item in the list.
-func (ch *Chooser) SetIconItems(el []icons.Icon, setFirst bool) *Chooser {
-	n := len(el)
-	if n == 0 {
-		return ch
-	}
-	ch.Items = make([]any, n)
-	ch.Labels = make([]string, n)
-	ch.Icons = make([]icons.Icon, n)
-	for i, ic := range el {
-		ch.Items[i] = ic
-		ch.Labels[i] = sentence.Case(string(ic))
-		ch.Icons[i] = ic
+// SetIconItems sets the [Chooser.Items] from the given icons.
+// If setFirst is true, it sets the current item to the first item
+// in the list.
+func (ch *Chooser) SetIconItems(is []icons.Icon, setFirst bool) *Chooser {
+	ch.Items = make([]ChooserItem, len(is))
+	for i, ic := range is {
+		ch.Items[i] = ChooserItem{Value: ic, Label: sentence.Case(string(ic)), Icon: ic}
 	}
 	if setFirst {
 		ch.SetCurIndex(0)
@@ -394,7 +387,7 @@ func (ch *Chooser) SetIconItems(el []icons.Icon, setFirst bool) *Chooser {
 	return ch
 }
 
-// SetEnums sets the Items list from a list of enums.Enum values.
+// SetEnums sets the [Chooser.Items] the given enums.
 // If setFirst then set current item to the first item in the list.
 func (ch *Chooser) SetEnums(el []enums.Enum, setFirst bool) *Chooser {
 	n := len(el)
