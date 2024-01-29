@@ -1017,6 +1017,7 @@ func (tf *TextField) CompleteText(s string) {
 	tf.CursorPos = st
 	tf.CursorDelete(ed.ForwardDelete)
 	tf.InsertAtCursor(ed.NewText)
+	tf.FocusClear()
 }
 
 // CompleteExtend inserts the extended seed at the current cursor position
