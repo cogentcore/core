@@ -42,103 +42,111 @@ const dontForce = false
 type TextField struct { //core:embedder
 	WidgetBase
 
-	// the last saved value of the text string being edited
-	Txt string `json:"-" xml:"text" set:"-"`
-
-	// text that is displayed when the field is empty, in a lower-contrast manner
-	Placeholder string `json:"-" xml:"placeholder"`
-
-	// functions and data for textfield completion
-	Complete *Complete `copier:"-" json:"-" xml:"-"`
-
-	// replace displayed characters with bullets to conceal text
-	NoEcho bool
-
-	// if specified, a button will be added at the start of
-	// the text field with this icon
-	LeadingIcon icons.Icon `set:"-"`
-
-	// if LeadingIcon is specified, the function to call when
-	// the leading icon is clicked; if this is nil, the leading
-	// icon will not be interactive.
-	LeadingIconOnClick func(e events.Event)
-
-	// if specified, a button will be added at the end of
-	// the text field with this icon
-	TrailingIcon icons.Icon `set:"-"`
-
-	// if TrailingIcon is specified, the function to call when
-	// the trailing icon is clicked; if this is nil, the trailing
-	// icon will not be interactive.
-	TrailingIconOnClick func(e events.Event)
-
-	// width of cursor -- set from cursor-width property (inherited)
-	CursorWidth units.Value `xml:"cursor-width"`
-
-	// the type of the text field
+	// Type is the styling type of the text field.
 	Type TextFieldTypes
 
-	// the color used for the placeholder text; this should be set in Stylers like all other style properties; it is typically a highlighted version of the normal text color
-	PlaceholderColor color.RGBA
+	// Placeholder is the text that is displayed when the text field is empty.
+	Placeholder string
 
-	// the color used for the text selection background color on active text fields; this should be set in Stylers like all other style properties
-	SelectColor image.Image
+	// LeadingIcon, if specified, indicates to add a button
+	// at the start of the text field with this icon.
+	LeadingIcon icons.Icon `set:"-"`
 
-	// the color used for the text field cursor (caret); this should be set in Stylers like all other style properties
+	// LeadingIconOnClick, if specified, is the function to call when
+	// the LeadingIcon is clicked. If this is nil, the leading icon
+	// will not be interactive.
+	LeadingIconOnClick func(e events.Event)
+
+	// TrailingIcon, if specified, indicates to add a button
+	// at the end of the text field with this icon.
+	TrailingIcon icons.Icon `set:"-"`
+
+	// TrailingIconOnClick, if specified, is the function to call when
+	// the TrailingIcon is clicked. If this is nil, the trailing icon
+	// will not be interactive.
+	TrailingIconOnClick func(e events.Event)
+
+	// NoEcho is whether replace displayed characters with bullets to conceal text
+	// (for example, for a password input).
+	NoEcho bool
+
+	// CursorWidth is the width of the text field cursor.
+	// It should be set in Style like all other style properties.
+	// By default, it is 1dp.
+	CursorWidth units.Value
+
+	// CursorColor is the color used for the text field cursor (caret).
+	// It should be set in Style like all other style properties.
+	// By default, it is [colors.Scheme.Primary.Base].
 	CursorColor image.Image
 
-	// true if the text has been edited relative to the original
+	// PlaceholderColor is the color used for the Placeholder text.
+	// It should be set in Style like all other style properties.
+	// By default, it is [colors.Scheme.OnSurfaceVariant].
+	PlaceholderColor color.RGBA
+
+	// SelectColor is the color used for the text selection background color.
+	// It should be set in Style like all other style properties.
+	// By default, it is [colors.Scheme.Select.Container]
+	SelectColor image.Image
+
+	// Complete contains functions and data for text field completion.
+	// It must be set using [TextField.SetCompleter].
+	Complete *Complete `copier:"-" json:"-" xml:"-" set:"-"`
+
+	// Txt is the last saved value of the text string being edited.
+	Txt string `json:"-" xml:"-" set:"-"`
+
+	// Edited is whether the text has been edited relative to the original.
 	Edited bool `json:"-" xml:"-" set:"-"`
 
-	// the live text string being edited, with latest modifications -- encoded as runes
+	// EditTxt is the live text string being edited, with the latest modifications.
 	EditTxt []rune `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// maximum width that field will request, in characters, during GetSize process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override
-	MaxWidthReq int
-
-	// effective position with any leading icon space added
+	// EffPos is the effective position with any leading icon space added.
 	EffPos mat32.Vec2 `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// effective size, subtracting any leading and trailing icon space
+	// EffSize is the effective size, subtracting any leading and trailing icon space.
 	EffSize mat32.Vec2 `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// starting display position in the string
+	// StartPos is the starting display position in the string.
 	StartPos int `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// ending display position in the string
+	// EndPos is the ending display position in the string.
 	EndPos int `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// current cursor position
+	// CursorPos is the current cursor position.
 	CursorPos int `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// approximate number of chars that can be displayed at any time -- computed from font size etc
+	// CharWidth is the approximate number of chars that can be
+	// displayed at any time, which is computed from the font size.
 	CharWidth int `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// starting position of selection in the string
+	// SelectStart is the starting position of selection in the string.
 	SelectStart int `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// ending position of selection in the string
+	// SelectEnd is the ending position of selection in the string.
 	SelectEnd int `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// initial selection position -- where it started
+	// SelectInit is the initial selection position (where it started).
 	SelectInit int `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// if true, select text as cursor moves
+	// SelectMode is whether to select text as the cursor moves.
 	SelectMode bool `copier:"-" json:"-" xml:"-"`
 
-	// render version of entire text, for sizing
+	// RenderAll is the render version of entire text, for sizing.
 	RenderAll paint.Text `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// render version of just visible text
+	// RenderVis is the render version of just the visible text.
 	RenderVis paint.Text `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// font height, cached during styling
+	// FontHeight is the font height cached during styling.
 	FontHeight float32 `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// oscillates between on and off for blinking
+	// BlinkOn oscillates between on and off for blinking.
 	BlinkOn bool `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// mutex for updating cursor between blinker and field
+	// CursorMu is the mutex for updating the cursor between blinker and field.
 	CursorMu sync.Mutex `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 }
 
@@ -1672,11 +1680,7 @@ func (tf *TextField) SizeUp() {
 	}
 	tf.Edited = false
 	tf.StartPos = 0
-	maxlen := tf.MaxWidthReq
-	if maxlen <= 0 {
-		maxlen = 50
-	}
-	tf.EndPos = min(len(tf.EditTxt), maxlen)
+	tf.EndPos = len(tf.EditTxt)
 	tf.UpdateRenderAll()
 	tf.FontHeight = tf.RenderAll.Size.Y
 	w := tf.TextWidth(tf.StartPos, tf.EndPos)

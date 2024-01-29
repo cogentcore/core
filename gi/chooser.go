@@ -54,20 +54,8 @@ type Chooser struct {
 	// true) and a button at the end of the chooser menu.
 	AllowNew bool
 
-	// items available for selection
-	Items []any `json:"-" xml:"-"`
-
-	// an optional list of labels displayed for Chooser items;
-	// the indices for the labels correspond to those for the items
-	Labels []string `json:"-" xml:"-"`
-
-	// an optional list of icons displayed for Chooser items;
-	// the indices for the icons correspond to those for the items
-	Icons []icons.Icon `json:"-" xml:"-"`
-
-	// an optional list of tooltips displayed on hover for Chooser items;
-	// the indices for the tooltips correspond to those for the items
-	Tooltips []string `json:"-" xml:"-"`
+	// Items are the chooser items available for selection.
+	Items []ChooserItem
 
 	// if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner
 	Placeholder string `set:"-"`
