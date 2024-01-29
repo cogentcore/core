@@ -139,7 +139,9 @@ func MatchSeedCompletion(completions []Completion, seed string) []Completion {
 }
 
 // IsSeedMatching returns whether the given lowercase seed matches
-// the given completion string.
+// the given completion string. It checks whether different
+// transformations of the completion contain the lowercase
+// version of the seed.
 func IsSeedMatching(lseed string, completion string) bool {
 	lc := strings.ToLower(completion)
 	if strings.Contains(lc, lseed) {
