@@ -22,17 +22,11 @@ import (
 	"github.com/jinzhu/copier"
 )
 
-// StringElideMax is the Max width for String() path printout of Ki nodes.
-var StringElideMax = 38
-
-// The Node implements the Ki interface and provides the core functionality
-// for the Cogent Core tree -- use the Node as an embedded struct or as a struct
-// field -- the embedded version supports full JSON save / load.
-//
-// The desc: key for fields is used by the Cogent Core GUI viewer for help / tooltip
-// info -- add these to all your derived struct's fields.  See relevant docs
-// for other such tags controlling a wide range of GUI and other functionality
-// -- Ki makes extensive use of such tags.
+// The Node struct implements the [Ki] interface and provides the core functionality
+// for the Cogent Core tree system. You can use the Node as an embedded struct or as a struct
+// field; the embedded version supports full JSON saving and loading. All types that
+// implement the [Ki] interface will automatically be added to gti in `core generate`, which
+// is required for various pieces of core functionality.
 type Node struct {
 
 	// Nm is the user-supplied name of this node, which can be empty and/or non-unique.
@@ -72,6 +66,9 @@ type Node struct {
 
 // check implementation of [Ki] interface
 var _ = Ki(&Node{})
+
+// StringElideMax is the Max width for [Node.String] path printout of Ki nodes.
+var StringElideMax = 38
 
 //////////////////////////////////////////////////////////////////////////
 //  fmt.Stringer
