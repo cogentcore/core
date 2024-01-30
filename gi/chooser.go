@@ -80,14 +80,10 @@ type Chooser struct {
 }
 
 // ChooserItem is an item that can be used in a [Chooser].
-type ChooserItem struct {
+type ChooserItem struct { //gti:add
 
 	// Value is the underlying value of the chooser item.
 	Value any
-
-	// Func, if non-nil, is a function to call whenever this
-	// item is selected as the current value of the chooser.
-	Func func()
 
 	// Label is the label displayed to the user for this item.
 	// If it is empty, then [ToLabel] of [ChooserItem.Value] is
@@ -99,6 +95,10 @@ type ChooserItem struct {
 
 	// Tooltip is the tooltip displayed to the user for this item.
 	Tooltip string
+
+	// Func, if non-nil, is a function to call whenever this
+	// item is selected as the current value of the chooser.
+	Func func()
 }
 
 // GetLabel returns the effective label of this chooser item.
@@ -553,6 +553,11 @@ func (ch *Chooser) HandleEvents() {
 	ch.OnClick(func(e events.Event) {
 		if ch.OpenMenu(e) {
 			e.SetHandled()
+		}
+	})
+	ch.OnChange(func(e events.Event) {
+		if ch.CurrentItem.Func != nil {
+			ch.CurrentItem.Func()
 		}
 	})
 	ch.OnFinal(events.KeyChord, func(e events.Event) {

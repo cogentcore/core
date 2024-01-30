@@ -256,13 +256,6 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 			})
 		}
 	})
-	// we must never have a chooser label so that it
-	// always displays the search placeholder
-	ch.OnFirst(events.Change, func(e events.Event) {
-		ch.CurrentIndex = 0
-		ch.CurrentItem.Label = ""
-		ch.ShowCurVal()
-	})
 
 	ch.AddItemsFunc(func() {
 		for _, rw := range AllRenderWins {
@@ -273,10 +266,15 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 					continue
 				}
 				ch.Items = append(ch.Items, ChooserItem{
-					Value:   st,
 					Label:   st.Title,
 					Icon:    icons.Toolbar,
 					Tooltip: "Show " + st.Title,
+					Func: func() {
+						if st.MainMgr.RenderWin != CurRenderWin {
+							st.MainMgr.RenderWin.Raise()
+						}
+						st.MainMgr.MoveToTop(st)
+					},
 				})
 			}
 		}
@@ -295,10 +293,12 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 				continue
 			}
 			ch.Items = append(ch.Items, ChooserItem{
-				Value:   bt,
 				Label:   bt.Text,
 				Icon:    bt.Icon,
 				Tooltip: bt.Tooltip,
+				Func: func() {
+					bt.Send(events.Click)
+				},
 			})
 			// after the quit button, there are the render wins,
 			// which we do not want to show here as we are already
@@ -311,16 +311,12 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 	ch.AddItemsFunc(func() {
 		addButtonItems(tb)
 	})
-	ch.OnChange(func(e events.Event) {
-		switch cv := ch.CurrentItem.Value.(type) {
-		case *Stage:
-			if cv.MainMgr.RenderWin != CurRenderWin {
-				cv.MainMgr.RenderWin.Raise()
-			}
-			cv.MainMgr.MoveToTop(cv)
-		case ButtonEmbedder:
-			cv.AsButton().Send(events.Click, e)
-		}
+	ch.OnFinal(events.Change, func(e events.Event) {
+		// we must never have a chooser label so that it
+		// always displays the search placeholder
+		ch.CurrentIndex = -1
+		ch.CurrentItem = ChooserItem{}
+		ch.ShowCurVal()
 	})
 	return ch
 }
