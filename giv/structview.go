@@ -359,7 +359,9 @@ func StructViewFieldTags(vv Value, lbl *gi.Label, w gi.Widget, isReadOnly bool) 
 	}
 	defStr, hasDef := vv.Tag("default")
 	if hasDef {
-		lbl.Tooltip = "[Default: " + defStr + "] " + vv.Doc()
+		lbl.Tooltip = "(Default: " + defStr + ") " + vv.Doc()
+	} else {
+		lbl.Tooltip = vv.Doc()
 	}
 	return
 }
