@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"strings"
 	"sync"
 	"unicode"
 
@@ -631,10 +630,6 @@ func (tf *TextField) CursorEnd() {
 	}
 }
 
-// todo: ctrl+backspace = delete word
-// shift+arrow = select
-// uparrow = start / down = end
-
 // CursorBackspace deletes character(s) immediately before cursor
 func (tf *TextField) CursorBackspace(steps int) {
 	if tf.HasSelection() {
@@ -968,9 +963,6 @@ func (tf *TextField) ContextMenu(m *Scene) {
 // automatically be offered as the user types
 func (tf *TextField) SetCompleter(data any, matchFun complete.MatchFunc, editFun complete.EditFunc) {
 	if matchFun == nil || editFun == nil {
-		if tf.Complete != nil {
-			// tf.Complete.Destroy()
-		}
 		tf.Complete = nil
 		return
 	}
@@ -978,17 +970,6 @@ func (tf *TextField) SetCompleter(data any, matchFun complete.MatchFunc, editFun
 	tf.Complete.OnSelect(func(e events.Event) {
 		tf.CompleteText(tf.Complete.Completion)
 	})
-	// TODO(kai/complete): clean this up and figure out what to do about Extend and only connecting once
-	// note: only need to connect once..
-	// todo:
-	// tf.Complete.CompleteSig.ConnectOnly(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	tff := AsTextField(recv)
-	// 	if sig == int64(CompleteSelect) {
-	// 		tff.CompleteText(data.(string)) // always use data
-	// 	} else if sig == int64(CompleteExtend) {
-	// 		tff.CompleteExtend(data.(string)) // always use data
-	// 	}
-	// })
 }
 
 // OfferComplete pops up a menu of possible completions
@@ -1024,16 +1005,6 @@ func (tf *TextField) CompleteText(s string) {
 	tf.CursorDelete(ed.ForwardDelete)
 	tf.InsertAtCursor(ed.NewText)
 	tf.FocusClear()
-}
-
-// CompleteExtend inserts the extended seed at the current cursor position
-func (tf *TextField) CompleteExtend(s string) {
-	if s == "" {
-		return
-	}
-	addon := strings.TrimPrefix(s, tf.Complete.Seed)
-	tf.InsertAtCursor(addon)
-	tf.OfferComplete(dontForce)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
