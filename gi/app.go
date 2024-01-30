@@ -128,7 +128,7 @@ func StdAppBarBack(tb *Toolbar) *Button {
 		}
 		if len(AllRenderWins) > 1 {
 			CurRenderWin.CloseReq()
-			AllRenderWins[0].Raise()
+			AllRenderWins[len(AllRenderWins)-1].Raise()
 		}
 	})
 	return bt
