@@ -23,7 +23,7 @@ func TestBasic(t *testing.T) {
 }
 
 var (
-	testStrings = []string{"", "test", "Hello, world!", "123.456", "This is a really long test sentence with a lot of words in it."}
+	testStrings = []string{"", "Test", "Hello, world!", "123.456", "This is a really long test sentence with a lot of words in it."}
 	testIcons   = []icons.Icon{"", icons.Search}
 	testStates  = [][]states.States{
 		{},
