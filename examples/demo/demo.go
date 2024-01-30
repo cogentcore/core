@@ -205,20 +205,19 @@ func inputs(ts *gi.Tabs) {
 
 	choosers := gi.NewLayout(tab, "choosers")
 
-	fruits := []any{"Apple", "Apricot", "Blueberry", "Blackberry", "Peach", "Strawberry"}
-	fruitDescs := []string{
-		"A round`, edible fruit that typically has red skin",
-		"A stonefruit with a yellow or orange color",
-		"A small blue or purple berry",
-		"A small, edible, dark fruit",
-		"A fruit with yellow or white flesh and a large seed",
-		"A widely consumed small, red fruit",
+	fruits := []gi.ChooserItem{
+		{Value: "Apple", Tooltip: "A round, edible fruit that typically has red skin"},
+		{Value: "Apricot", Tooltip: "A stonefruit with a yellow or orange color"},
+		{Value: "Blueberry", Tooltip: "A small blue or purple berry"},
+		{Value: "Blackberry", Tooltip: "A small, edible, dark fruit"},
+		{Value: "Peach", Tooltip: "A fruit with yellow or white flesh and a large seed"},
+		{Value: "Strawberry", Tooltip: "A widely consumed small, red fruit"},
 	}
 
-	gi.NewChooser(choosers).SetPlaceholder("Select a fruit").SetItems(fruits...).SetTooltips(fruitDescs...)
-	gi.NewChooser(choosers).SetPlaceholder("Select a fruit").SetItems(fruits...).SetTooltips(fruitDescs...).SetType(gi.ChooserOutlined)
-	gi.NewChooser(tab).SetEditable(true).SetPlaceholder("Select or type a fruit").SetItems(fruits...).SetTooltips(fruitDescs...)
-	gi.NewChooser(tab).SetEditable(true).SetPlaceholder("Select or type a fruit").SetItems(fruits...).SetTooltips(fruitDescs...).SetType(gi.ChooserOutlined)
+	gi.NewChooser(choosers).SetPlaceholder("Select a fruit").SetItems(fruits...)
+	gi.NewChooser(choosers).SetPlaceholder("Select a fruit").SetItems(fruits...).SetType(gi.ChooserOutlined)
+	gi.NewChooser(tab).SetEditable(true).SetPlaceholder("Select or type a fruit").SetItems(fruits...)
+	gi.NewChooser(tab).SetEditable(true).SetPlaceholder("Select or type a fruit").SetItems(fruits...).SetType(gi.ChooserOutlined)
 
 	gi.NewSwitch(tab).SetText("Toggle")
 
