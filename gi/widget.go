@@ -421,6 +421,9 @@ func (wb *WidgetBase) NewParts() *Layout {
 	parts := ki.NewRoot[*Layout]("parts")
 	ki.SetParent(parts, wb.This())
 	parts.SetFlag(true, ki.Field)
+	parts.Style(func(s *styles.Style) {
+		s.Grow.Set(1, 1)
+	})
 	wb.Parts = parts
 	return parts
 }

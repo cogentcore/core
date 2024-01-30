@@ -189,21 +189,21 @@ type WhiteSpaces int32 //enums:enum -trim-prefix WhiteSpace
 const (
 	// WhiteSpaceNormal means that all white space is collapsed to a single
 	// space, and text wraps when necessary.  To get full word wrapping to
-	// expand to all available space, you also need to set Grow.X = 1.
+	// expand to all available space, you also need to set GrowWrap = 1.
 	// Use the SetTextWrap convenience method to set both.
 	WhiteSpaceNormal WhiteSpaces = iota
 
 	// WhiteSpaceNowrap means that sequences of whitespace will collapse into
 	// a single whitespace. Text will never wrap to the next line except
 	// if there is an explicit line break via a <br> tag.  In general you
-	// also don't want simple non-wrapping text labels to Grow (Grow.X = 0).
+	// also don't want simple non-wrapping text labels to Grow (GrowWrap = 0).
 	// Use the SetTextWrap method to set both.
 	WhiteSpaceNowrap
 
 	// WhiteSpacePre means that whitespace is preserved. Text
 	// will only wrap on line breaks. Acts like the <pre> tag in HTML.  This
-	// invokes a different hand-written parser because the default golang
-	// parser automatically throws away whitespace
+	// invokes a different hand-written parser because the default Go
+	// parser automatically throws away whitespace.
 	WhiteSpacePre
 
 	// WhiteSpacePreLine means that sequences of whitespace will collapse

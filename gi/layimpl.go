@@ -162,7 +162,7 @@ func (t *Layout) AsLayout() *Layout {
 //  GeomSize
 
 // GeomCT has core layout elements: Content and Total
-type GeomCT struct {
+type GeomCT struct { //gti:add
 	// Content is for the contents (children, parts) of the widget,
 	// excluding the Space (margin, padding, scrollbars).
 	// This content includes the InnerSpace factor (Gaps in Layout)
@@ -178,7 +178,7 @@ func (ct GeomCT) String() string {
 }
 
 // GeomSize has all of the relevant Layout sizes
-type GeomSize struct {
+type GeomSize struct { //gti:add
 	// Actual is the actual size for the purposes of rendering, representing
 	// the "external" demands of the widget for space from its parent.
 	// This is initially the bottom-up constraint computed by SizeUp,
@@ -254,7 +254,7 @@ func (ls *GeomSize) SetContentFromTotal(ct *GeomCT) {
 
 // GeomState contains the the layout geometry state for each widget.
 // Set by the parent Layout during the Layout process.
-type GeomState struct {
+type GeomState struct { //gti:add
 	// Size has sizing data for the widget: use Actual for rendering.
 	// Alloc shows the potentially larger space top-down allocated.
 	Size GeomSize `view:"add-fields"`
