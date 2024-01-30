@@ -18,22 +18,22 @@ func TestWidgetPrev(t *testing.T) {
 	b.ConfigTree()
 
 	paths := []string{
-		"/body/tf2.parts/lead-icon.parts/icon",
-		"/body/tf2.parts/lead-icon",
-		"/body/tf2",
-		"/body/tf1.parts/trail-icon.parts/icon",
-		"/body/tf1.parts/trail-icon",
-		"/body/tf1.parts/trail-icon-str",
-		"/body/tf1",
-		"/body",
+		"/body scene/body/tf2.parts/lead-icon.parts/icon",
+		"/body scene/body/tf2.parts/lead-icon",
+		"/body scene/body/tf2",
+		"/body scene/body/tf1.parts/trail-icon.parts/icon",
+		"/body scene/body/tf1.parts/trail-icon",
+		"/body scene/body/tf1.parts/trail-icon-str",
+		"/body scene/body/tf1",
+		"/body scene/body",
+		"/body scene",
 	}
 	i := 0
 	WidgetPrevFunc(lt, func(w Widget) bool {
-		// fmt.Println(w)
-		p := w.Path()
-		tp := paths[i]
-		if p != tp {
-			t.Errorf("path != target: path: %s != target: %s\n", p, tp)
+		have := w.Path()
+		want := paths[i]
+		if have != want {
+			t.Errorf("expected\n%s\n\tbut got\n%s", want, have)
 		}
 		i++
 		return false
@@ -48,21 +48,20 @@ func TestWidgetNext(t *testing.T) {
 	b.ConfigTree()
 
 	paths := []string{
-		"/body/tf1.parts/trail-icon-str",
-		"/body/tf1.parts/trail-icon",
-		"/body/tf1.parts/trail-icon.parts/icon",
-		"/body/tf2",
-		"/body/tf2.parts/lead-icon",
-		"/body/tf2.parts/lead-icon.parts/icon",
-		"/body/tf3",
+		"/body scene/body/tf1.parts/trail-icon-str",
+		"/body scene/body/tf1.parts/trail-icon",
+		"/body scene/body/tf1.parts/trail-icon.parts/icon",
+		"/body scene/body/tf2",
+		"/body scene/body/tf2.parts/lead-icon",
+		"/body scene/body/tf2.parts/lead-icon.parts/icon",
+		"/body scene/body/tf3",
 	}
 	i := 0
 	WidgetNextFunc(ft, func(w Widget) bool {
-		// fmt.Println(w)
-		p := w.Path()
-		tp := paths[i]
-		if p != tp {
-			t.Errorf("path != target: path: %s != target: %s\n", p, tp)
+		have := w.Path()
+		want := paths[i]
+		if have != want {
+			t.Errorf("expected\n%s\n\tbut got\n%s", want, have)
 		}
 		i++
 		return false
