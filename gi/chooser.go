@@ -376,20 +376,6 @@ func (ch *Chooser) SetStrings(ss []string, setFirst bool) *Chooser {
 	return ch
 }
 
-// SetIconItems sets the [Chooser.Items] from the given icons.
-// If setFirst is true, it sets the current item to the first item
-// in the list.
-func (ch *Chooser) SetIconItems(is []icons.Icon, setFirst bool) *Chooser {
-	ch.Items = make([]ChooserItem, len(is))
-	for i, ic := range is {
-		ch.Items[i] = ChooserItem{Value: ic, Label: sentence.Case(string(ic)), Icon: ic}
-	}
-	if setFirst {
-		ch.SetCurIndex(0)
-	}
-	return ch
-}
-
 // SetEnums sets the [Chooser.Items] from the given enums.
 // If setFirst is true, it sets the current item to the first item
 // in the list.
