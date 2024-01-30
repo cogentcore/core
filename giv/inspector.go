@@ -164,7 +164,7 @@ func (is *Inspector) SelectionMonitor() {
 
 // InspectApp displays the underlying operating system app
 func (is *Inspector) InspectApp() { //gti:add
-	d := gi.NewBody()
+	d := gi.NewBody("Inspect app")
 	NewStructView(d).SetStruct(goosi.TheApp).SetReadOnly(true)
 	d.NewFullDialog(is).Run()
 }

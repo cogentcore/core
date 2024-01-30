@@ -266,13 +266,22 @@ func (w *RenderWin) SetName(name string) {
 	}
 }
 
-// SetTitle sets title of this window and also the RenderWin
-func (w *RenderWin) SetTitle(name string) {
-	w.Title = name
+// SetTitle sets title of this window and its underlying GoosiWin.
+func (w *RenderWin) SetTitle(title string) {
+	w.Title = title
 	if w.GoosiWin != nil {
-		w.GoosiWin.SetTitle(name)
+		w.GoosiWin.SetTitle(title)
 	}
 	WinNewCloseStamp()
+}
+
+// SetStageTitle sets the title of the underlying GoosiWin to the given stage title
+// combined with the RenderWin title.
+func (w *RenderWin) SetStageTitle(title string) {
+	if title != w.Title {
+		title = title + " • " + w.Title
+	}
+	w.GoosiWin.SetTitle(title)
 }
 
 // LogicalDPI returns the current logical dots-per-inch resolution of the

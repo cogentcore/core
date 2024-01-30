@@ -146,17 +146,7 @@ func (sc *Scene) OnInit() {
 	sc.Scene = sc
 	sc.WidgetBase.OnInit()
 	sc.SetStyles()
-	sc.Layout.HandleEvents()
-	sc.OnShow(func(e events.Event) {
-		if sc.Stage.Title == CurRenderWin.Title {
-			return
-		}
-		title := sc.Stage.Title + " - " + CurRenderWin.Title
-		CurRenderWin.GoosiWin.SetTitle(title)
-	})
-	sc.OnClose(func(e events.Event) {
-		CurRenderWin.GoosiWin.SetTitle(CurRenderWin.Title)
-	})
+	sc.HandleEvents()
 	if TheApp.SceneConfig != nil {
 		TheApp.SceneConfig(sc)
 	}
@@ -181,6 +171,25 @@ func (sc *Scene) SetStyles() {
 		}
 
 		s.Padding.Set(units.Dp(8))
+	})
+}
+
+func (sc *Scene) HandleEvents() {
+	sc.Frame.HandleEvents()
+	sc.OnShow(func(e events.Event) {
+		CurRenderWin.SetStageTitle(sc.Stage.Title)
+	})
+	sc.OnClose(func(e events.Event) {
+		sm := sc.MainStageMgr()
+		sm.Mu.RLock()
+		defer sm.Mu.RUnlock()
+
+		if sm.Stack.Len() < 2 {
+			return
+		}
+		// the stage that will be visible next
+		st := sm.Stack.ValByIdx(sm.Stack.Len() - 2)
+		CurRenderWin.SetStageTitle(st.Title)
 	})
 }
 
