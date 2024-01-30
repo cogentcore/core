@@ -170,34 +170,6 @@ func IsSeedMatching(lseed string, completion string) bool {
 	return strings.Contains(ci, lseed)
 }
 
-// ExtendSeed tries to extend the current seed checking possible completions for a longer common seed
-// e.g. if the current seed is "ab" and the completions are "abcde" and "abcdf" then Extend returns "cd"
-// but if the possible completions are "abcde" and "abz" then Extend returns ""
-func ExtendSeed(matches Completions, seed string) string {
-	keep_looking := true
-	new_seed := seed
-	potential_seed := new_seed
-	first_match := matches[0]
-	for keep_looking {
-		if len(first_match.Text) <= len(new_seed) {
-			keep_looking = false // ran out of chars
-			break
-		}
-
-		potential_seed = first_match.Text[0 : len(new_seed)+1]
-		for _, s := range matches {
-			if !strings.HasPrefix(s.Text, potential_seed) {
-				keep_looking = false
-				break
-			}
-		}
-		if keep_looking {
-			new_seed = potential_seed
-		}
-	}
-	return new_seed
-}
-
 // SeedWhiteSpace returns the text after the last whitespace
 func SeedWhiteSpace(text string) string {
 	seedStart := 0
