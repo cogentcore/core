@@ -99,6 +99,10 @@ type ChooserItem struct { //gti:add
 	// Func, if non-nil, is a function to call whenever this
 	// item is selected as the current value of the chooser.
 	Func func()
+
+	// SeparatorBefore is whether to add a separator before
+	// this item in the chooser menu.
+	SeparatorBefore bool
 }
 
 // GetLabel returns the effective label of this chooser item.
@@ -475,6 +479,9 @@ func (ch *Chooser) MakeItemsMenu(m *Scene) {
 	for i, it := range ch.Items {
 		i := i
 		nm := "item-" + strconv.Itoa(i)
+		if it.SeparatorBefore {
+			NewSeparator(m, "separator-"+nm)
+		}
 		bt := NewButton(m, nm)
 		bt.SetText(it.GetLabel()).SetIcon(it.Icon).SetTooltip(it.Tooltip)
 		bt.SetSelected(i == ch.CurrentIndex)

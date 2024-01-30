@@ -10,11 +10,6 @@ import (
 	"cogentcore.org/core/units"
 )
 
-// TODO(kai): this seems bad
-
-// Separator defines a string to indicate a menu separator item
-var MenuTextSeparator = "-------------"
-
 // Separator draws a separator line. It goes in the direction
 // specified by [style.Style.Direction].
 type Separator struct {

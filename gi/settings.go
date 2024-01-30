@@ -678,7 +678,7 @@ var (
 	FileViewResetPaths = "<i>Reset Paths</i>"
 
 	// FileViewEditPaths defines a string that is added as an item to the recents menu
-	FileViewEditPaths = "<i>Edit Paths...</i>"
+	FileViewEditPaths = "<i>Edit Paths</i>"
 
 	// SavedPathsExtras are the reset and edit items we add to the recents menu
 	SavedPathsExtras = []string{FileViewResetPaths, FileViewEditPaths}

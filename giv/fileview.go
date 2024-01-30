@@ -576,6 +576,7 @@ func (fv *FileView) UpdateFiles() {
 	gi.SavePaths()
 	sp := []string(gi.SavedPaths)
 	pf.SetStrings(sp).SetCurrentIndex(0)
+	pf.Items[len(pf.Items)-2].SeparatorBefore = true
 	pf.CurrentItem.Label = fv.DirPath
 	pf.ShowCurrentItem()
 	sf := fv.SelField()
