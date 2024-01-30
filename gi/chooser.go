@@ -317,37 +317,25 @@ func (ch *Chooser) CallItemsFuncs() {
 }
 
 // SetTypes sets the [Chooser.Items] from the given types.
-// If setFirst is true, it sets the current item to the first item
-// in the list.
-func (ch *Chooser) SetTypes(ts []*gti.Type, setFirst bool) *Chooser {
+func (ch *Chooser) SetTypes(ts []*gti.Type) *Chooser {
 	ch.Items = make([]ChooserItem, len(ts))
 	for i, typ := range ts {
 		ch.Items[i] = ChooserItem{Value: typ}
-	}
-	if setFirst {
-		ch.SetCurrentIndex(0)
 	}
 	return ch
 }
 
 // SetStrings sets the [Chooser.Items] from the given strings.
-// If setFirst is true, it sets the current item to the first item
-// in the list.
-func (ch *Chooser) SetStrings(ss []string, setFirst bool) *Chooser {
+func (ch *Chooser) SetStrings(ss []string) *Chooser {
 	ch.Items = make([]ChooserItem, len(ss))
 	for i, s := range ss {
 		ch.Items[i] = ChooserItem{Value: s}
-	}
-	if setFirst {
-		ch.SetCurrentIndex(0)
 	}
 	return ch
 }
 
 // SetEnums sets the [Chooser.Items] from the given enums.
-// If setFirst is true, it sets the current item to the first item
-// in the list.
-func (ch *Chooser) SetEnums(es []enums.Enum, setFirst bool) *Chooser {
+func (ch *Chooser) SetEnums(es []enums.Enum) *Chooser {
 	ch.Items = make([]ChooserItem, len(es))
 	for i, enum := range es {
 		str := enum.String()
@@ -358,17 +346,12 @@ func (ch *Chooser) SetEnums(es []enums.Enum, setFirst bool) *Chooser {
 		tip := sentence.Doc(enum.Desc(), str, lbl)
 		ch.Items[i] = ChooserItem{Value: enum, Label: lbl, Tooltip: tip}
 	}
-	if setFirst {
-		ch.SetCurrentIndex(0)
-	}
 	return ch
 }
 
 // SetEnum sets the [Chooser.Items] from [enums.Enum.Values] of the given enum.
-// If setFirst is true, it sets the current item to the first item
-// in the list.
-func (ch *Chooser) SetEnum(enum enums.Enum, setFirst bool) *Chooser {
-	return ch.SetEnums(enum.Values(), setFirst)
+func (ch *Chooser) SetEnum(enum enums.Enum) *Chooser {
+	return ch.SetEnums(enum.Values())
 }
 
 // FindItem finds the given item value on the list of items and returns its index

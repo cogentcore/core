@@ -1081,7 +1081,7 @@ func (vv *EnumValue) ConfigWidget(w gi.Widget) {
 	ch.Tooltip = vv.Doc()
 
 	ev := vv.EnumValue()
-	ch.SetEnum(ev, false)
+	ch.SetEnum(ev)
 	ch.Config()
 	ch.OnFinal(events.Change, func(e events.Event) {
 		vv.SetValue(ch.CurrentItem)
@@ -1194,7 +1194,7 @@ func (vv *TypeValue) ConfigWidget(w gi.Widget) {
 	}
 
 	tl := gti.AllEmbeddersOf(typEmbeds)
-	cb.SetTypes(tl, false)
+	cb.SetTypes(tl)
 	cb.Config()
 	cb.OnFinal(events.Change, func(e events.Event) {
 		tval := cb.CurrentItem.Value.(*gti.Type)

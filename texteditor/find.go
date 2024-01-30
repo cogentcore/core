@@ -299,7 +299,7 @@ func (ed *Editor) QReplaceAddText() {
 		s.Grow.Set(1, 0)
 		s.Min.X.Ch(60)
 	})
-	fc.SetStrings(PrevQReplaceFinds, true)
+	fc.SetStrings(PrevQReplaceFinds).SetCurrentIndex(0)
 	if find != "" {
 		fc.SetCurrentValue(find)
 	}
@@ -309,7 +309,7 @@ func (ed *Editor) QReplaceAddText() {
 		s.Grow.Set(1, 0)
 		s.Min.X.Ch(60)
 	})
-	rc.SetStrings(PrevQReplaceRepls, true)
+	rc.SetStrings(PrevQReplaceRepls).SetCurrentIndex(0)
 
 	lexitems := ed.QReplace.LexItems
 	lxi := gi.NewSwitch(d, "lexb").SetText("Lexical Items").SetChecked(lexitems)

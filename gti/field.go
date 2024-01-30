@@ -29,6 +29,9 @@ func (f Field) GoString() string { return StructGoString(f) }
 // it directly in the struct.
 func GetField(val reflect.Value, field string) *Field {
 	val = laser.NonPtrValue(val)
+	if !val.IsValid() {
+		return nil
+	}
 	typ := TypeByName(TypeName(val.Type()))
 	// if we are not in the gti registry, there is nothing that we can do
 	if typ == nil {
