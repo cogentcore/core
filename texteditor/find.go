@@ -301,7 +301,7 @@ func (ed *Editor) QReplaceAddText() {
 	})
 	fc.SetStrings(PrevQReplaceFinds, true)
 	if find != "" {
-		fc.SetCurVal(find)
+		fc.SetCurrentValue(find)
 	}
 
 	rc := gi.NewChooser(d, "repl").SetEditable(true).SetAllowNew(true)
@@ -318,8 +318,8 @@ func (ed *Editor) QReplaceAddText() {
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
 		d.AddOk(pw).SetText("Query-Replace").OnClick(func(e events.Event) {
-			fc.SetCurText(fc.TextField().Text()).SendChange()
-			rc.SetCurText(rc.TextField().Text()).SendChange()
+			fc.SetCurrentText(fc.TextField().Text()).SendChange()
+			rc.SetCurrentText(rc.TextField().Text()).SendChange()
 			var find, repl string
 			if s, ok := fc.CurrentItem.Value.(string); ok {
 				find = s

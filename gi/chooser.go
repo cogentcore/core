@@ -267,7 +267,7 @@ func (ch *Chooser) ConfigWidget() {
 	})
 }
 
-// LabelWidget returns the label widget if present
+// LabelWidget returns the label widget if present.
 func (ch *Chooser) LabelWidget() *Label {
 	if ch.Parts == nil {
 		return nil
@@ -279,40 +279,8 @@ func (ch *Chooser) LabelWidget() *Label {
 	return lbi.(*Label)
 }
 
-// IconWidget returns the icon widget if present
-func (ch *Chooser) IconWidget() *Icon {
-	if ch.Parts == nil {
-		return nil
-	}
-	ici := ch.Parts.ChildByName("icon")
-	if ici == nil {
-		return nil
-	}
-	return ici.(*Icon)
-}
-
-// SetIconUpdate sets the icon and drives an update, for the already-displayed case.
-func (ch *Chooser) SetIconUpdate(ic icons.Icon) *Chooser {
-	updt := ch.UpdateStart()
-	defer ch.UpdateEndRender(updt)
-
-	ch.Icon = ic
-	if ch.Editable {
-		tf := ch.TextField()
-		if tf != nil {
-			tf.SetLeadingIconUpdate(ic)
-		}
-	} else {
-		iw := ch.IconWidget()
-		if iw != nil {
-			iw.SetIconUpdate(ic)
-		}
-	}
-	return ch
-}
-
 // TextField returns the text field of an editable Chooser
-// if present
+// if present.
 func (ch *Chooser) TextField() *TextField {
 	if ch.Parts == nil {
 		return nil
@@ -357,7 +325,7 @@ func (ch *Chooser) SetTypes(ts []*gti.Type, setFirst bool) *Chooser {
 		ch.Items[i] = ChooserItem{Value: typ}
 	}
 	if setFirst {
-		ch.SetCurIndex(0)
+		ch.SetCurrentIndex(0)
 	}
 	return ch
 }
@@ -371,7 +339,7 @@ func (ch *Chooser) SetStrings(ss []string, setFirst bool) *Chooser {
 		ch.Items[i] = ChooserItem{Value: s}
 	}
 	if setFirst {
-		ch.SetCurIndex(0)
+		ch.SetCurrentIndex(0)
 	}
 	return ch
 }
@@ -391,7 +359,7 @@ func (ch *Chooser) SetEnums(es []enums.Enum, setFirst bool) *Chooser {
 		ch.Items[i] = ChooserItem{Value: enum, Label: lbl, Tooltip: tip}
 	}
 	if setFirst {
-		ch.SetCurIndex(0)
+		ch.SetCurrentIndex(0)
 	}
 	return ch
 }
@@ -419,40 +387,40 @@ func (ch *Chooser) SetPlaceholder(text string) *Chooser {
 	ch.Placeholder = text
 	if !ch.Editable {
 		ch.CurrentItem.Label = text
-		ch.ShowCurVal()
+		ch.ShowCurrentItem()
 	}
 	ch.CurrentIndex = -1
 	return ch
 }
 
-// SetCurVal sets the current item and index to those associated with the given value.
+// SetCurrentValue sets the current item and index to those associated with the given value.
 // If the given item is not found, it adds it to the items list. It also sets the text
 // of the chooser to the label of the item.
-func (ch *Chooser) SetCurVal(it any) *Chooser {
-	ch.CurrentIndex = ch.FindItem(it)
+func (ch *Chooser) SetCurrentValue(v any) *Chooser {
+	ch.CurrentIndex = ch.FindItem(v)
 	if ch.CurrentIndex < 0 { // add to list if not found
 		ch.CurrentIndex = len(ch.Items)
-		ch.Items = append(ch.Items, ChooserItem{Value: it})
+		ch.Items = append(ch.Items, ChooserItem{Value: v})
 	}
 	ch.CurrentItem = ch.Items[ch.CurrentIndex]
-	ch.ShowCurVal()
+	ch.ShowCurrentItem()
 	return ch
 }
 
-// SetCurIndex sets the current index and the item associated with it.
-func (ch *Chooser) SetCurIndex(idx int) *Chooser {
+// SetCurrentIndex sets the current index and the item associated with it.
+func (ch *Chooser) SetCurrentIndex(idx int) *Chooser {
 	ch.CurrentIndex = idx
 	ch.CurrentItem = ch.Items[idx]
-	ch.ShowCurVal()
+	ch.ShowCurrentItem()
 	return ch
 }
 
-// SetCurText sets the current index and item based on the given text string.
+// SetCurrentText sets the current index and item based on the given text string.
 // It can only be used for editable choosers.
-func (ch *Chooser) SetCurText(text string) *Chooser {
+func (ch *Chooser) SetCurrentText(text string) *Chooser {
 	for i, item := range ch.Items {
 		if text == item.GetLabel() {
-			ch.SetCurIndex(i)
+			ch.SetCurrentIndex(i)
 			return ch
 		}
 	}
@@ -462,12 +430,12 @@ func (ch *Chooser) SetCurText(text string) *Chooser {
 		return ch
 	}
 	ch.Items = append(ch.Items, ChooserItem{Value: text})
-	ch.SetCurIndex(len(ch.Items) - 1)
+	ch.SetCurrentIndex(len(ch.Items) - 1)
 	return ch
 }
 
-// ShowCurVal updates the display to present the current item.
-func (ch *Chooser) ShowCurVal() *Chooser {
+// ShowCurrentItem updates the display to present the current item.
+func (ch *Chooser) ShowCurrentItem() *Chooser {
 	updt := ch.UpdateStart()
 	defer ch.UpdateEndRender(updt)
 
@@ -502,7 +470,7 @@ func (ch *Chooser) SelectItem(idx int) *Chooser {
 		return ch
 	}
 	updt := ch.UpdateStart()
-	ch.SetCurIndex(idx)
+	ch.SetCurrentIndex(idx)
 	ch.UpdateEndLayout(updt)
 	return ch
 }
@@ -624,7 +592,7 @@ func (ch *Chooser) OpenMenu(e events.Event) bool {
 
 func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 	tf.OnChange(func(e events.Event) {
-		ch.SetCurText(tf.Text())
+		ch.SetCurrentText(tf.Text())
 		ch.SendChange(e)
 	})
 	tf.OnFocus(func(e events.Event) {

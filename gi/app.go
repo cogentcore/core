@@ -316,7 +316,7 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 		// always displays the search placeholder
 		ch.CurrentIndex = -1
 		ch.CurrentItem = ChooserItem{}
-		ch.ShowCurVal()
+		ch.ShowCurrentItem()
 	})
 	return ch
 }

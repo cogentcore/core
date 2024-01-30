@@ -207,7 +207,7 @@ func (dv *DateView) ConfigWidget() {
 		sms[i] = gi.ChooserItem{Value: sm}
 	}
 	month := gi.NewChooser(trow, "month").SetItems(sms...)
-	month.SetCurIndex(int(dv.Time.Month() - 1))
+	month.SetCurrentIndex(int(dv.Time.Month() - 1))
 	month.OnChange(func(e events.Event) {
 		// set our month
 		dv.SetTime(dv.Time.AddDate(0, month.CurrentIndex+1-int(dv.Time.Month()), 0))
@@ -220,7 +220,7 @@ func (dv *DateView) ConfigWidget() {
 		yrs = append(yrs, gi.ChooserItem{Value: i})
 	}
 	year := gi.NewChooser(trow, "year").SetItems(yrs...)
-	year.SetCurVal(yr)
+	year.SetCurrentValue(yr)
 	year.OnChange(func(e events.Event) {
 		// we are centered at current year with 100 in each direction
 		nyr := year.CurrentIndex + yr - 100
@@ -493,7 +493,7 @@ func (vv *DurationValue) UpdateWidget() {
 	if ly.ChildByName("unit") == nil {
 		return
 	}
-	ly.ChildByName("unit").(*gi.Chooser).SetCurVal(un)
+	ly.ChildByName("unit").(*gi.Chooser).SetCurrentValue(un)
 }
 
 func (vv *DurationValue) ConfigWidget(w gi.Widget) {

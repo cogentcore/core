@@ -237,7 +237,7 @@ func (mv *MapView) ConfigMapGrid() {
 			if vtyp == nil {
 				vtyp = strtyp // default to string
 			}
-			typw.SetCurVal(vtyp)
+			typw.SetCurrentValue(vtyp)
 			// typw.SetProp("mapview-index", i)
 			// typw.OnChange(func(e events.Event) {
 			// 	typ := typw.CurVal.(reflect.Type)

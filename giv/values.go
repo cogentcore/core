@@ -1060,7 +1060,7 @@ func (vv *EnumValue) UpdateWidget() {
 	}
 	ch := vv.Widget.(*gi.Chooser)
 	npv := laser.NonPtrValue(vv.Value)
-	ch.SetCurVal(npv.Interface())
+	ch.SetCurrentValue(npv.Interface())
 
 	// iv, err := laser.ToInt(npv.Interface())
 	// if err == nil {
@@ -1170,7 +1170,7 @@ func (vv *TypeValue) UpdateWidget() {
 	npv := laser.OnePtrValue(vv.Value)
 	typ, ok := npv.Interface().(*gti.Type)
 	if ok {
-		sb.SetCurVal(typ)
+		sb.SetCurrentValue(typ)
 	}
 }
 
