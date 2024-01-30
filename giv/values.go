@@ -1084,7 +1084,7 @@ func (vv *EnumValue) ConfigWidget(w gi.Widget) {
 	ch.SetEnum(ev)
 	ch.Config()
 	ch.OnFinal(events.Change, func(e events.Event) {
-		vv.SetValue(ch.CurrentItem)
+		vv.SetValue(ch.CurrentItem.Value)
 	})
 	vv.UpdateWidget()
 }
