@@ -438,72 +438,42 @@ func (ch *Chooser) SetPlaceholder(text string) *Chooser {
 // SetCurVal sets the current item and index to those associated with the given value.
 // If the given item is not found, it adds it to the items list. It also sets the text
 // of the chooser to the label of the item.
-func (ch *Chooser) SetCurVal(it any) {
-	ch.CurrentItem = it
+func (ch *Chooser) SetCurVal(it any) *Chooser {
 	ch.CurrentIndex = ch.FindItem(it)
-	if ch.CurrentIndex < 0 { // add to list if not found..
+	if ch.CurrentIndex < 0 { // add to list if not found
 		ch.CurrentIndex = len(ch.Items)
-		ch.Items = append(ch.Items, it)
+		ch.Items = append(ch.Items, ChooserItem{Value: it})
 	}
-	ch.ShowCurVal(ch.LabelFor(ch.CurrentIndex, ch.CurrentItem))
-	return ch.CurrentIndex
+	ch.CurrentItem = ch.Items[ch.CurrentIndex]
+	ch.ShowCurVal(ch.CurrentItem.GetLabel())
+	return ch
 }
 
-// SetCurIndex sets the current index (CurIndex) and the corresponding CurVal
-// for that item on the current Items list (-1 if not found) -- returns value
-// -- and sets the text to the string value of that value (using standard
-// Stringer string conversion)
-func (ch *Chooser) SetCurIndex(idx int) any {
+// SetCurIndex sets the current index and the item associated with it.
+func (ch *Chooser) SetCurIndex(idx int) *Chooser {
 	ch.CurrentIndex = idx
-	if idx < 0 || idx >= len(ch.Items) {
-		ch.CurrentItem = nil
-		ch.ShowCurVal(fmt.Sprintf("idx %v > len", idx))
-	} else {
-		ch.CurrentItem = ch.Items[idx]
-		ch.ShowCurVal(ch.LabelFor(ch.CurrentIndex, ch.CurrentItem))
-	}
-	return ch.CurrentItem
+	ch.CurrentItem = ch.Items[idx]
+	ch.ShowCurVal(ch.CurrentItem.GetLabel())
+	return ch
 }
 
-// GetCurTextAction is for Editable choosers only: sets the current index (CurIndex)
-// and the corresponding CurVal based on current user-entered Text value,
-// and triggers a Change event
-func (ch *Chooser) GetCurTextAction() any {
-	tf := ch.TextField()
-	if tf == nil {
-		slog.Error("gi.Chooser: GetCurTextAction only available for Editable Chooser")
-		return ch.CurrentItem
-	}
-	ch.SetCurTextAction(tf.Text())
-	return ch.CurrentItem
-}
-
-// SetCurTextAction is for Editable choosers only: sets the current index (CurIndex)
-// and the corresponding CurVal based on given text string,
-// and triggers a Change event
-func (ch *Chooser) SetCurTextAction(text string) any {
-	ch.SetCurText(text)
-	ch.SendChange(nil)
-	return ch.CurrentItem
-}
-
-// SetCurText is for Editable choosers only: sets the current index (CurIndex)
-// and the corresponding CurVal based on given text string
-func (ch *Chooser) SetCurText(text string) any {
+// SetCurText sets the current index and item based on the given text string.
+// It can only be used for editable choosers.
+func (ch *Chooser) SetCurText(text string) *Chooser {
 	for i, item := range ch.Items {
-		if text == ch.LabelFor(i, item) {
+		if text == item.GetLabel() {
 			ch.SetCurIndex(i)
-			return ch.CurrentItem
+			return ch
 		}
 	}
 	if !ch.AllowNew {
 		// TODO: use validation
 		slog.Error("invalid Chooser value", "value", text)
-		return ch.CurrentItem
+		return ch
 	}
-	ch.Items = append(ch.Items, text)
+	ch.Items = append(ch.Items, ChooserItem{Value: text})
 	ch.SetCurIndex(len(ch.Items) - 1)
-	return ch.CurrentItem
+	return ch
 }
 
 // ShowCurVal updates the display to present the

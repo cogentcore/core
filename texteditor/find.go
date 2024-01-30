@@ -318,13 +318,13 @@ func (ed *Editor) QReplaceAddText() {
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
 		d.AddOk(pw).SetText("Query-Replace").OnClick(func(e events.Event) {
-			fc.GetCurTextAction()
-			rc.GetCurTextAction()
+			fc.SetCurText(fc.TextField().Text()).SendChange()
+			rc.SetCurText(rc.TextField().Text()).SendChange()
 			var find, repl string
-			if s, ok := fc.CurrentItem.(string); ok {
+			if s, ok := fc.CurrentItem.Value.(string); ok {
 				find = s
 			}
-			if s, ok := rc.CurrentItem.(string); ok {
+			if s, ok := rc.CurrentItem.Value.(string); ok {
 				repl = s
 			}
 			lexItems := lxi.IsChecked()
