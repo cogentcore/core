@@ -429,7 +429,8 @@ func (ch *Chooser) FindItem(it any) int {
 func (ch *Chooser) SetPlaceholder(text string) *Chooser {
 	ch.Placeholder = text
 	if !ch.Editable {
-		ch.ShowCurVal(text)
+		ch.CurrentItem.Label = text
+		ch.ShowCurVal()
 	}
 	ch.CurrentIndex = -1
 	return ch
@@ -445,7 +446,7 @@ func (ch *Chooser) SetCurVal(it any) *Chooser {
 		ch.Items = append(ch.Items, ChooserItem{Value: it})
 	}
 	ch.CurrentItem = ch.Items[ch.CurrentIndex]
-	ch.ShowCurVal(ch.CurrentItem.GetLabel())
+	ch.ShowCurVal()
 	return ch
 }
 
@@ -453,7 +454,7 @@ func (ch *Chooser) SetCurVal(it any) *Chooser {
 func (ch *Chooser) SetCurIndex(idx int) *Chooser {
 	ch.CurrentIndex = idx
 	ch.CurrentItem = ch.Items[idx]
-	ch.ShowCurVal(ch.CurrentItem.GetLabel())
+	ch.ShowCurVal()
 	return ch
 }
 
@@ -476,38 +477,37 @@ func (ch *Chooser) SetCurText(text string) *Chooser {
 	return ch
 }
 
-// ShowCurVal updates the display to present the
-// currently-selected value (CurVal)
-func (ch *Chooser) ShowCurVal(label string) {
+// ShowCurVal updates the display to present the current item.
+func (ch *Chooser) ShowCurVal() *Chooser {
 	updt := ch.UpdateStart()
 	defer ch.UpdateEndRender(updt)
 
-	ch.CurrentLabel = label
 	if ch.Editable {
 		tf := ch.TextField()
 		if tf != nil {
-			tf.SetTextUpdate(ch.CurrentLabel)
+			tf.SetTextUpdate(ch.CurrentItem.GetLabel())
 		}
 	} else {
 		lbl := ch.LabelWidget()
 		if lbl != nil {
-			lbl.SetTextUpdate(ch.CurrentLabel)
+			lbl.SetTextUpdate(ch.CurrentItem.GetLabel())
 		}
 	}
-	if ch.CurrentIndex < len(ch.Icons) {
+	if ch.CurrentItem.Icon.IsSet() {
 		picon := ch.Icon
-		ch.SetIcon(ch.Icons[ch.CurrentIndex])
+		ch.SetIcon(ch.CurrentItem.Icon)
 		if ch.Icon != picon {
 			ch.Update()
 			ch.SetNeedsLayout(true)
 		}
 	}
-	if ch.CurrentIndex < len(ch.Tooltips) {
-		ch.SetTooltip(ch.Tooltips[ch.CurrentIndex])
+	if ch.CurrentItem.Tooltip != "" {
+		ch.SetTooltip(ch.CurrentItem.Tooltip)
 	}
+	return ch
 }
 
-// SelectItem selects a given item and updates the display to it
+// SelectItem selects the item at the given index and updates the chooser to display it.
 func (ch *Chooser) SelectItem(idx int) *Chooser {
 	if ch.This() == nil {
 		return ch
@@ -518,67 +518,40 @@ func (ch *Chooser) SelectItem(idx int) *Chooser {
 	return ch
 }
 
-// SelectItemAction selects a given item and updates the display to it
-// and sends a Changed event to indicate that the value has changed.
-func (ch *Chooser) SelectItemAction(idx int) {
+// SelectItemAction selects the item at the given index and updates the chooser to display it.
+// It also sends an [events.Change] event to indicate that the value has changed.
+func (ch *Chooser) SelectItemAction(idx int) *Chooser {
 	if ch.This() == nil {
-		return
+		return ch
 	}
 	ch.SelectItem(idx)
 	ch.SendChange()
+	return ch
 }
 
-// MakeItemsMenu constructs a menu of all the items.
-// It is automatically set as the [Button.Menu] for the Chooser.
+// MakeItemsMenu constructs a menu of all the items. It is used when the chooser is clicked.
 func (ch *Chooser) MakeItemsMenu(m *Scene) {
 	ch.CallItemsFuncs()
 	for i, it := range ch.Items {
+		i := i
 		nm := "item-" + strconv.Itoa(i)
-		bt := NewButton(m, nm).SetType(ButtonMenu)
-		bt.SetText(ch.LabelFor(i, it))
-		if len(ch.Icons) > i {
-			bt.SetIcon(ch.Icons[i])
-		}
-		if len(ch.Tooltips) > i {
-			bt.SetTooltip(ch.Tooltips[i])
-		}
+		bt := NewButton(m, nm)
+		bt.SetText(it.GetLabel()).SetIcon(it.Icon).SetTooltip(it.Tooltip)
 		bt.SetSelected(i == ch.CurrentIndex)
-		idx := i
 		bt.OnClick(func(e events.Event) {
-			ch.SelectItemAction(idx)
+			ch.SelectItemAction(i)
 		})
 	}
 }
 
 func (ch *Chooser) HandleEvents() {
 	ch.HandleSelectToggle()
-	ch.HandleKeys()
 
 	ch.OnClick(func(e events.Event) {
 		if ch.OpenMenu(e) {
 			e.SetHandled()
 		}
 	})
-}
-
-// OpenMenu will open any menu associated with this chooser.
-// Returns true if menu opened, false if not.
-func (ch *Chooser) OpenMenu(e events.Event) bool {
-	pos := ch.ContextMenuPos(e)
-	if ch.Parts != nil {
-		if indic := ch.Parts.ChildByName("indicator", 3); indic != nil {
-			pos = indic.(Widget).ContextMenuPos(nil) // use the pos
-		}
-	}
-	m := NewMenu(ch.MakeItemsMenu, ch.This().(Widget), pos)
-	if m == nil {
-		return false
-	}
-	m.Run()
-	return true
-}
-
-func (ch *Chooser) HandleKeys() {
 	ch.OnFinal(events.KeyChord, func(e events.Event) {
 		if DebugSettings.KeyEventTrace {
 			fmt.Printf("Chooser KeyChordEvent: %v\n", ch.Path())
@@ -638,6 +611,23 @@ func (ch *Chooser) HandleKeys() {
 	})
 }
 
+// OpenMenu opens the chooser menu that displays all of the items.
+// It returns false if there are no items.
+func (ch *Chooser) OpenMenu(e events.Event) bool {
+	pos := ch.ContextMenuPos(e)
+	if ch.Parts != nil {
+		if indic := ch.Parts.ChildByName("indicator", 3); indic != nil {
+			pos = indic.(Widget).ContextMenuPos(nil) // use the pos
+		}
+	}
+	m := NewMenu(ch.MakeItemsMenu, ch.This().(Widget), pos)
+	if m == nil {
+		return false
+	}
+	m.Run()
+	return true
+}
+
 func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 	tf.OnChange(func(e events.Event) {
 		ch.SetCurText(tf.Text())
@@ -655,23 +645,15 @@ func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 }
 
 // CompleteMatch is the [complete.MatchFunc] used for the
-// editable textfield part of the Chooser (if it exists).
+// editable text field part of the Chooser (if it exists).
 func (ch *Chooser) CompleteMatch(data any, text string, posLn, posCh int) (md complete.Matches) {
 	md.Seed = text
 	comps := make(complete.Completions, len(ch.Items))
 	for i, item := range ch.Items {
-		tooltip := ""
-		if len(ch.Tooltips) > i {
-			tooltip = ch.Tooltips[i]
-		}
-		icon := ""
-		if len(ch.Icons) > i {
-			icon = string(ch.Icons[i])
-		}
 		comps[i] = complete.Completion{
-			Text: ch.LabelFor(i, item),
-			Desc: tooltip,
-			Icon: icon,
+			Text: item.GetLabel(),
+			Desc: item.Tooltip,
+			Icon: string(item.Icon),
 		}
 	}
 	md.Matches = complete.MatchSeedCompletion(comps, md.Seed)
