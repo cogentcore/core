@@ -35,31 +35,38 @@ var StringElideMax = 38
 // -- Ki makes extensive use of such tags.
 type Node struct {
 
-	// Ki.Name() user-supplied name of this node -- can be empty or non-unique
+	// Nm is the user-supplied name of this node, which can be empty and/or non-unique.
 	Nm string `copier:"-" set:"-" label:"Name"`
 
-	// bit flags for internal node state -- can extend this using enums package
+	// Flags are bit flags for internal node state, which can be extended using the enums package.
 	Flags Flags `tableview:"-" copier:"-" json:"-" xml:"-" set:"-" max-width:"80" height:"3"`
 
-	// Ki.Properties() property map for arbitrary extensible properties, including style properties
+	// Props is a property map for arbitrary extensible properties.
 	Props Props `tableview:"-" xml:"-" copier:"-" set:"-" label:"Properties"`
 
-	// Ki.Parent() parent of this node -- set automatically when this node is added as a child of parent
+	// Par is the parent of this node, which is set automatically when this node is added as a child of a parent.
 	Par Ki `tableview:"-" copier:"-" json:"-" xml:"-" view:"-" set:"-" label:"Parent"`
 
-	// Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use Ki Node methods to Add / Delete to ensure proper usage
+	// Kids is the list of children of this node. All of them are set to have this node
+	// as their parent. They can be reordered, but you should generally use Ki Node methods
+	// to Add / Delete to ensure proper usage.
 	Kids Slice `tableview:"-" copier:"-" set:"-" label:"Children"`
 
-	// we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary.  This is set to nil when deleted.  Typically use This() convenience accessor which protects against concurrent access.
+	// Ths is a pointer to ourselves as a Ki. It can always be used to extract the true underlying type
+	// of an object when [Node] is embedded in other structs; function receivers do not have this ability
+	// so this is necessary. This is set to nil when deleted. Typically use [Ki.This] convenience accessor
+	// which protects against concurrent access.
 	Ths Ki `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 
-	// the number of children that have ever been added to this node, which is used for unique naming
+	// NumLifetimeKids is the number of children that have ever been added to this node, which is used for automatic unique naming.
 	NumLifetimeKids uint64 `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 
-	// last value of our index -- used as a starting point for finding us in our parent next time -- is not guaranteed to be accurate!  use IndexInParent() method
+	// index is the last value of our index, which is used as a starting point for finding us in our parent next time.
+	// It is not guaranteed to be accurate; use the [Ki.IndexInParent] method.
 	index int `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 
-	// optional depth parameter of this node -- only valid during specific contexts, not generally -- e.g., used in WalkBreadth function
+	// depth is an optional depth parameter of this node, which is only valid during specific contexts, not generally.
+	// For example, it is used in the WalkBreadth function
 	depth int `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 }
 
