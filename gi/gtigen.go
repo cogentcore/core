@@ -171,7 +171,7 @@ func (t *Canvas) New() ki.Ki { return &Canvas{} }
 func (t *Canvas) SetTooltip(v string) *Canvas { t.Tooltip = v; return t }
 
 // ChooserType is the [gti.Type] for [Chooser]
-var ChooserType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Chooser", IDName: "chooser", Doc: "Chooser is for selecting items from a dropdown list, with an optional\nedit TextField for typing directly.\nThe items can be of any type, including enum values -- they are converted\nto strings for the display.  If the items are of type [icons.Icon], then they\nare displayed using icons instead.", Embeds: []gti.Field{{Name: "Box"}}, Fields: []gti.Field{{Name: "Type", Doc: "the type of combo box"}, {Name: "Icon", Doc: "optional icon"}, {Name: "Indicator", Doc: "name of the indicator icon to present."}, {Name: "Editable", Doc: "provide a text field for editing the value, or just a button for selecting items?  Set the editable property"}, {Name: "AllowNew", Doc: "whether to allow the user to add new items to the combo box through the editable textfield (if Editable is set to true) and a button at the end of the combo box menu"}, {Name: "Items", Doc: "items available for selection"}, {Name: "Labels", Doc: "an optional list of labels displayed for Chooser items;\nthe indices for the labels correspond to those for the items"}, {Name: "Icons", Doc: "an optional list of icons displayed for Chooser items;\nthe indices for the icons correspond to those for the items"}, {Name: "Tooltips", Doc: "an optional list of tooltips displayed on hover for Chooser items;\nthe indices for the tooltips correspond to those for the items"}, {Name: "Placeholder", Doc: "if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner"}, {Name: "ItemsFuncs", Doc: "ItemsFuncs is a slice of functions to call before showing the items\nof the chooser, which is typically used to configure them\n(eg: if they are based on dynamic data). The functions are called\nin ascending order such that the items added in the first function\nwill appear before those added in the last function. Use\n[Chooser.AddItemsFunc] to add a new items function."}, {Name: "CurLabel", Doc: "CurLabel is the string label for the current value"}, {Name: "CurVal", Doc: "current selected value"}, {Name: "CurIndex", Doc: "current index in list of possible items"}}, Instance: &Chooser{}})
+var ChooserType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Chooser", IDName: "chooser", Doc: "Chooser is for selecting items from a dropdown list, with an optional\nedit TextField for typing directly.\nThe items can be of any type, including enum values -- they are converted\nto strings for the display.  If the items are of type [icons.Icon], then they\nare displayed using icons instead.", Embeds: []gti.Field{{Name: "Box"}}, Fields: []gti.Field{{Name: "Type", Doc: "Type is the styling type of the chooser."}, {Name: "Items", Doc: "Items are the chooser items available for selection."}, {Name: "Icon", Doc: "Icon is an optional icon displayed on the left side of the chooser."}, {Name: "Indicator", Doc: "Indicator is the icon to use for the indicator displayed on the\nright side of the chooser."}, {Name: "Editable", Doc: "Editable is whether provide a text field for editing the value,\nor just a button for selecting items."}, {Name: "AllowNew", Doc: "AllowNew is whether to allow the user to add new items to the\nchooser through the editable textfield (if Editable is set to\ntrue) and a button at the end of the chooser menu."}, {Name: "Placeholder", Doc: "Placeholder, if Editable is set to true, is the text that is\ndisplayed in the text field when it is empty. It must be set\nusing [Chooser.SetPlaceholder]."}, {Name: "ItemsFuncs", Doc: "ItemsFuncs is a slice of functions to call before showing the items\nof the chooser, which is typically used to configure them\n(eg: if they are based on dynamic data). The functions are called\nin ascending order such that the items added in the first function\nwill appear before those added in the last function. Use\n[Chooser.AddItemsFunc] to add a new items function. If at least\none ItemsFunc is specified, the items of the chooser will be\ncleared before calling the functions."}, {Name: "CurrentItem", Doc: "CurrentItem is the currently selected item."}, {Name: "CurrentIndex", Doc: "CurrentIndex is the index of the currently selected item\nin [Chooser.Items]."}}, Instance: &Chooser{}})
 
 // NewChooser adds a new [Chooser] with the given name to the given parent:
 // Chooser is for selecting items from a dropdown list, with an optional
@@ -190,46 +190,37 @@ func (t *Chooser) KiType() *gti.Type { return ChooserType }
 func (t *Chooser) New() ki.Ki { return &Chooser{} }
 
 // SetType sets the [Chooser.Type]:
-// the type of combo box
+// Type is the styling type of the chooser.
 func (t *Chooser) SetType(v ChooserTypes) *Chooser { t.Type = v; return t }
 
+// SetItems sets the [Chooser.Items]:
+// Items are the chooser items available for selection.
+func (t *Chooser) SetItems(v ...ChooserItem) *Chooser { t.Items = v; return t }
+
 // SetIcon sets the [Chooser.Icon]:
-// optional icon
+// Icon is an optional icon displayed on the left side of the chooser.
 func (t *Chooser) SetIcon(v icons.Icon) *Chooser { t.Icon = v; return t }
 
 // SetIndicator sets the [Chooser.Indicator]:
-// name of the indicator icon to present.
+// Indicator is the icon to use for the indicator displayed on the
+// right side of the chooser.
 func (t *Chooser) SetIndicator(v icons.Icon) *Chooser { t.Indicator = v; return t }
 
 // SetEditable sets the [Chooser.Editable]:
-// provide a text field for editing the value, or just a button for selecting items?  Set the editable property
+// Editable is whether provide a text field for editing the value,
+// or just a button for selecting items.
 func (t *Chooser) SetEditable(v bool) *Chooser { t.Editable = v; return t }
 
 // SetAllowNew sets the [Chooser.AllowNew]:
-// whether to allow the user to add new items to the combo box through the editable textfield (if Editable is set to true) and a button at the end of the combo box menu
+// AllowNew is whether to allow the user to add new items to the
+// chooser through the editable textfield (if Editable is set to
+// true) and a button at the end of the chooser menu.
 func (t *Chooser) SetAllowNew(v bool) *Chooser { t.AllowNew = v; return t }
-
-// SetItems sets the [Chooser.Items]:
-// items available for selection
-func (t *Chooser) SetItems(v ...any) *Chooser { t.Items = v; return t }
-
-// SetLabels sets the [Chooser.Labels]:
-// an optional list of labels displayed for Chooser items;
-// the indices for the labels correspond to those for the items
-func (t *Chooser) SetLabels(v ...string) *Chooser { t.Labels = v; return t }
-
-// SetIcons sets the [Chooser.Icons]:
-// an optional list of icons displayed for Chooser items;
-// the indices for the icons correspond to those for the items
-func (t *Chooser) SetIcons(v ...icons.Icon) *Chooser { t.Icons = v; return t }
-
-// SetTooltips sets the [Chooser.Tooltips]:
-// an optional list of tooltips displayed on hover for Chooser items;
-// the indices for the tooltips correspond to those for the items
-func (t *Chooser) SetTooltips(v ...string) *Chooser { t.Tooltips = v; return t }
 
 // SetTooltip sets the [Chooser.Tooltip]
 func (t *Chooser) SetTooltip(v string) *Chooser { t.Tooltip = v; return t }
+
+var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.ChooserItem", IDName: "chooser-item", Doc: "ChooserItem is an item that can be used in a [Chooser].", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Fields: []gti.Field{{Name: "Value", Doc: "Value is the underlying value of the chooser item."}, {Name: "Label", Doc: "Label is the label displayed to the user for this item.\nIf it is empty, then [ToLabel] of [ChooserItem.Value] is\nused instead."}, {Name: "Icon", Doc: "Icon is the icon displayed to the user for this item."}, {Name: "Tooltip", Doc: "Tooltip is the tooltip displayed to the user for this item."}, {Name: "Func", Doc: "Func, if non-nil, is a function to call whenever this\nitem is selected as the current value of the chooser."}}})
 
 var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Complete", IDName: "complete", Doc: "Complete holds the current completion data and functions to call for building\nthe list of possible completions and for editing text after a completion is selected.\nIt also holds the [PopupStage] associated with it.", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Fields: []gti.Field{{Name: "MatchFunc", Doc: "function to get the list of possible completions"}, {Name: "LookupFunc", Doc: "function to get the text to show for lookup"}, {Name: "EditFunc", Doc: "function to edit text using the selected completion"}, {Name: "Context", Doc: "the object that implements complete.Func"}, {Name: "SrcLn", Doc: "line number in source that completion is operating on, if relevant"}, {Name: "SrcCh", Doc: "character position in source that completion is operating on"}, {Name: "Completions", Doc: "the list of potential completions"}, {Name: "Seed", Doc: "current completion seed"}, {Name: "Completion", Doc: "the user's completion selection"}, {Name: "Listeners", Doc: "the event listeners for the completer (it sends Select events)"}, {Name: "Stage", Doc: "Stage is the [PopupStage] associated with the [Complete]"}, {Name: "DelayTimer"}, {Name: "DelayMu"}, {Name: "ShowMu"}}})
 
@@ -848,14 +839,11 @@ func (t *Spinner) SetFormat(v string) *Spinner { t.Format = v; return t }
 // SetTooltip sets the [Spinner.Tooltip]
 func (t *Spinner) SetTooltip(v string) *Spinner { t.Tooltip = v; return t }
 
+// SetType sets the [Spinner.Type]
+func (t *Spinner) SetType(v TextFieldTypes) *Spinner { t.Type = v; return t }
+
 // SetPlaceholder sets the [Spinner.Placeholder]
 func (t *Spinner) SetPlaceholder(v string) *Spinner { t.Placeholder = v; return t }
-
-// SetComplete sets the [Spinner.Complete]
-func (t *Spinner) SetComplete(v *Complete) *Spinner { t.Complete = v; return t }
-
-// SetNoEcho sets the [Spinner.NoEcho]
-func (t *Spinner) SetNoEcho(v bool) *Spinner { t.NoEcho = v; return t }
 
 // SetLeadingIconOnClick sets the [Spinner.LeadingIconOnClick]
 func (t *Spinner) SetLeadingIconOnClick(v func(e events.Event)) *Spinner {
@@ -869,23 +857,20 @@ func (t *Spinner) SetTrailingIconOnClick(v func(e events.Event)) *Spinner {
 	return t
 }
 
+// SetNoEcho sets the [Spinner.NoEcho]
+func (t *Spinner) SetNoEcho(v bool) *Spinner { t.NoEcho = v; return t }
+
 // SetCursorWidth sets the [Spinner.CursorWidth]
 func (t *Spinner) SetCursorWidth(v units.Value) *Spinner { t.CursorWidth = v; return t }
 
-// SetType sets the [Spinner.Type]
-func (t *Spinner) SetType(v TextFieldTypes) *Spinner { t.Type = v; return t }
+// SetCursorColor sets the [Spinner.CursorColor]
+func (t *Spinner) SetCursorColor(v image.Image) *Spinner { t.CursorColor = v; return t }
 
 // SetPlaceholderColor sets the [Spinner.PlaceholderColor]
 func (t *Spinner) SetPlaceholderColor(v color.RGBA) *Spinner { t.PlaceholderColor = v; return t }
 
 // SetSelectColor sets the [Spinner.SelectColor]
 func (t *Spinner) SetSelectColor(v image.Image) *Spinner { t.SelectColor = v; return t }
-
-// SetCursorColor sets the [Spinner.CursorColor]
-func (t *Spinner) SetCursorColor(v image.Image) *Spinner { t.CursorColor = v; return t }
-
-// SetMaxWidthReq sets the [Spinner.MaxWidthReq]
-func (t *Spinner) SetMaxWidthReq(v int) *Spinner { t.MaxWidthReq = v; return t }
 
 // SetSelectMode sets the [Spinner.SelectMode]
 func (t *Spinner) SetSelectMode(v bool) *Spinner { t.SelectMode = v; return t }
@@ -1258,7 +1243,7 @@ func (t *Tab) SetMaxChars(v int) *Tab { t.MaxChars = v; return t }
 func (t *Tab) SetTooltip(v string) *Tab { t.Tooltip = v; return t }
 
 // TextFieldType is the [gti.Type] for [TextField]
-var TextFieldType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.TextField", IDName: "text-field", Doc: "TextField is a widget for editing a line of text", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Txt", Doc: "the last saved value of the text string being edited"}, {Name: "Placeholder", Doc: "text that is displayed when the field is empty, in a lower-contrast manner"}, {Name: "Complete", Doc: "functions and data for textfield completion"}, {Name: "NoEcho", Doc: "replace displayed characters with bullets to conceal text"}, {Name: "LeadingIcon", Doc: "if specified, a button will be added at the start of\nthe text field with this icon"}, {Name: "LeadingIconOnClick", Doc: "if LeadingIcon is specified, the function to call when\nthe leading icon is clicked; if this is nil, the leading\nicon will not be interactive."}, {Name: "TrailingIcon", Doc: "if specified, a button will be added at the end of\nthe text field with this icon"}, {Name: "TrailingIconOnClick", Doc: "if TrailingIcon is specified, the function to call when\nthe trailing icon is clicked; if this is nil, the trailing\nicon will not be interactive."}, {Name: "CursorWidth", Doc: "width of cursor -- set from cursor-width property (inherited)"}, {Name: "Type", Doc: "the type of the text field"}, {Name: "PlaceholderColor", Doc: "the color used for the placeholder text; this should be set in Stylers like all other style properties; it is typically a highlighted version of the normal text color"}, {Name: "SelectColor", Doc: "the color used for the text selection background color on active text fields; this should be set in Stylers like all other style properties"}, {Name: "CursorColor", Doc: "the color used for the text field cursor (caret); this should be set in Stylers like all other style properties"}, {Name: "Edited", Doc: "true if the text has been edited relative to the original"}, {Name: "EditTxt", Doc: "the live text string being edited, with latest modifications -- encoded as runes"}, {Name: "MaxWidthReq", Doc: "maximum width that field will request, in characters, during GetSize process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"}, {Name: "EffPos", Doc: "effective position with any leading icon space added"}, {Name: "EffSize", Doc: "effective size, subtracting any leading and trailing icon space"}, {Name: "StartPos", Doc: "starting display position in the string"}, {Name: "EndPos", Doc: "ending display position in the string"}, {Name: "CursorPos", Doc: "current cursor position"}, {Name: "CharWidth", Doc: "approximate number of chars that can be displayed at any time -- computed from font size etc"}, {Name: "SelectStart", Doc: "starting position of selection in the string"}, {Name: "SelectEnd", Doc: "ending position of selection in the string"}, {Name: "SelectInit", Doc: "initial selection position -- where it started"}, {Name: "SelectMode", Doc: "if true, select text as cursor moves"}, {Name: "RenderAll", Doc: "render version of entire text, for sizing"}, {Name: "RenderVis", Doc: "render version of just visible text"}, {Name: "FontHeight", Doc: "font height, cached during styling"}, {Name: "BlinkOn", Doc: "oscillates between on and off for blinking"}, {Name: "CursorMu", Doc: "mutex for updating cursor between blinker and field"}}, Instance: &TextField{}})
+var TextFieldType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.TextField", IDName: "text-field", Doc: "TextField is a widget for editing a line of text", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Type", Doc: "Type is the styling type of the text field."}, {Name: "Placeholder", Doc: "Placeholder is the text that is displayed when the text field is empty."}, {Name: "LeadingIcon", Doc: "LeadingIcon, if specified, indicates to add a button\nat the start of the text field with this icon."}, {Name: "LeadingIconOnClick", Doc: "LeadingIconOnClick, if specified, is the function to call when\nthe LeadingIcon is clicked. If this is nil, the leading icon\nwill not be interactive."}, {Name: "TrailingIcon", Doc: "TrailingIcon, if specified, indicates to add a button\nat the end of the text field with this icon."}, {Name: "TrailingIconOnClick", Doc: "TrailingIconOnClick, if specified, is the function to call when\nthe TrailingIcon is clicked. If this is nil, the trailing icon\nwill not be interactive."}, {Name: "NoEcho", Doc: "NoEcho is whether replace displayed characters with bullets to conceal text\n(for example, for a password input)."}, {Name: "CursorWidth", Doc: "CursorWidth is the width of the text field cursor.\nIt should be set in Style like all other style properties.\nBy default, it is 1dp."}, {Name: "CursorColor", Doc: "CursorColor is the color used for the text field cursor (caret).\nIt should be set in Style like all other style properties.\nBy default, it is [colors.Scheme.Primary.Base]."}, {Name: "PlaceholderColor", Doc: "PlaceholderColor is the color used for the Placeholder text.\nIt should be set in Style like all other style properties.\nBy default, it is [colors.Scheme.OnSurfaceVariant]."}, {Name: "SelectColor", Doc: "SelectColor is the color used for the text selection background color.\nIt should be set in Style like all other style properties.\nBy default, it is [colors.Scheme.Select.Container]"}, {Name: "Complete", Doc: "Complete contains functions and data for text field completion.\nIt must be set using [TextField.SetCompleter]."}, {Name: "Txt", Doc: "Txt is the last saved value of the text string being edited."}, {Name: "Edited", Doc: "Edited is whether the text has been edited relative to the original."}, {Name: "EditTxt", Doc: "EditTxt is the live text string being edited, with the latest modifications."}, {Name: "EffPos", Doc: "EffPos is the effective position with any leading icon space added."}, {Name: "EffSize", Doc: "EffSize is the effective size, subtracting any leading and trailing icon space."}, {Name: "StartPos", Doc: "StartPos is the starting display position in the string."}, {Name: "EndPos", Doc: "EndPos is the ending display position in the string."}, {Name: "CursorPos", Doc: "CursorPos is the current cursor position."}, {Name: "CharWidth", Doc: "CharWidth is the approximate number of chars that can be\ndisplayed at any time, which is computed from the font size."}, {Name: "SelectStart", Doc: "SelectStart is the starting position of selection in the string."}, {Name: "SelectEnd", Doc: "SelectEnd is the ending position of selection in the string."}, {Name: "SelectInit", Doc: "SelectInit is the initial selection position (where it started)."}, {Name: "SelectMode", Doc: "SelectMode is whether to select text as the cursor moves."}, {Name: "RenderAll", Doc: "RenderAll is the render version of entire text, for sizing."}, {Name: "RenderVis", Doc: "RenderVis is the render version of just the visible text."}, {Name: "FontHeight", Doc: "FontHeight is the font height cached during styling."}, {Name: "BlinkOn", Doc: "BlinkOn oscillates between on and off for blinking."}, {Name: "CursorMu", Doc: "CursorMu is the mutex for updating the cursor between blinker and field."}}, Instance: &TextField{}})
 
 // NewTextField adds a new [TextField] with the given name to the given parent:
 // TextField is a widget for editing a line of text
@@ -1292,62 +1277,63 @@ func AsTextField(k ki.Ki) *TextField {
 // AsTextField satisfies the [TextFieldEmbedder] interface
 func (t *TextField) AsTextField() *TextField { return t }
 
+// SetType sets the [TextField.Type]:
+// Type is the styling type of the text field.
+func (t *TextField) SetType(v TextFieldTypes) *TextField { t.Type = v; return t }
+
 // SetPlaceholder sets the [TextField.Placeholder]:
-// text that is displayed when the field is empty, in a lower-contrast manner
+// Placeholder is the text that is displayed when the text field is empty.
 func (t *TextField) SetPlaceholder(v string) *TextField { t.Placeholder = v; return t }
 
-// SetComplete sets the [TextField.Complete]:
-// functions and data for textfield completion
-func (t *TextField) SetComplete(v *Complete) *TextField { t.Complete = v; return t }
-
-// SetNoEcho sets the [TextField.NoEcho]:
-// replace displayed characters with bullets to conceal text
-func (t *TextField) SetNoEcho(v bool) *TextField { t.NoEcho = v; return t }
-
 // SetLeadingIconOnClick sets the [TextField.LeadingIconOnClick]:
-// if LeadingIcon is specified, the function to call when
-// the leading icon is clicked; if this is nil, the leading
-// icon will not be interactive.
+// LeadingIconOnClick, if specified, is the function to call when
+// the LeadingIcon is clicked. If this is nil, the leading icon
+// will not be interactive.
 func (t *TextField) SetLeadingIconOnClick(v func(e events.Event)) *TextField {
 	t.LeadingIconOnClick = v
 	return t
 }
 
 // SetTrailingIconOnClick sets the [TextField.TrailingIconOnClick]:
-// if TrailingIcon is specified, the function to call when
-// the trailing icon is clicked; if this is nil, the trailing
-// icon will not be interactive.
+// TrailingIconOnClick, if specified, is the function to call when
+// the TrailingIcon is clicked. If this is nil, the trailing icon
+// will not be interactive.
 func (t *TextField) SetTrailingIconOnClick(v func(e events.Event)) *TextField {
 	t.TrailingIconOnClick = v
 	return t
 }
 
+// SetNoEcho sets the [TextField.NoEcho]:
+// NoEcho is whether replace displayed characters with bullets to conceal text
+// (for example, for a password input).
+func (t *TextField) SetNoEcho(v bool) *TextField { t.NoEcho = v; return t }
+
 // SetCursorWidth sets the [TextField.CursorWidth]:
-// width of cursor -- set from cursor-width property (inherited)
+// CursorWidth is the width of the text field cursor.
+// It should be set in Style like all other style properties.
+// By default, it is 1dp.
 func (t *TextField) SetCursorWidth(v units.Value) *TextField { t.CursorWidth = v; return t }
 
-// SetType sets the [TextField.Type]:
-// the type of the text field
-func (t *TextField) SetType(v TextFieldTypes) *TextField { t.Type = v; return t }
+// SetCursorColor sets the [TextField.CursorColor]:
+// CursorColor is the color used for the text field cursor (caret).
+// It should be set in Style like all other style properties.
+// By default, it is [colors.Scheme.Primary.Base].
+func (t *TextField) SetCursorColor(v image.Image) *TextField { t.CursorColor = v; return t }
 
 // SetPlaceholderColor sets the [TextField.PlaceholderColor]:
-// the color used for the placeholder text; this should be set in Stylers like all other style properties; it is typically a highlighted version of the normal text color
+// PlaceholderColor is the color used for the Placeholder text.
+// It should be set in Style like all other style properties.
+// By default, it is [colors.Scheme.OnSurfaceVariant].
 func (t *TextField) SetPlaceholderColor(v color.RGBA) *TextField { t.PlaceholderColor = v; return t }
 
 // SetSelectColor sets the [TextField.SelectColor]:
-// the color used for the text selection background color on active text fields; this should be set in Stylers like all other style properties
+// SelectColor is the color used for the text selection background color.
+// It should be set in Style like all other style properties.
+// By default, it is [colors.Scheme.Select.Container]
 func (t *TextField) SetSelectColor(v image.Image) *TextField { t.SelectColor = v; return t }
 
-// SetCursorColor sets the [TextField.CursorColor]:
-// the color used for the text field cursor (caret); this should be set in Stylers like all other style properties
-func (t *TextField) SetCursorColor(v image.Image) *TextField { t.CursorColor = v; return t }
-
-// SetMaxWidthReq sets the [TextField.MaxWidthReq]:
-// maximum width that field will request, in characters, during GetSize process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override
-func (t *TextField) SetMaxWidthReq(v int) *TextField { t.MaxWidthReq = v; return t }
-
 // SetSelectMode sets the [TextField.SelectMode]:
-// if true, select text as cursor moves
+// SelectMode is whether to select text as the cursor moves.
 func (t *TextField) SetSelectMode(v bool) *TextField { t.SelectMode = v; return t }
 
 // SetTooltip sets the [TextField.Tooltip]

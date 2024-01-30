@@ -54,10 +54,6 @@ func AddFS(fs fs.FS) {
 // Icon contains the name of an icon
 type Icon string
 
-func (i Icon) String() string {
-	return string(i)
-}
-
 // Fill returns the icon as a filled icon.
 // It returns the icon unchanged if it is already filled.
 func (i Icon) Fill() Icon {

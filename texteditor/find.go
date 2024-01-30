@@ -299,9 +299,9 @@ func (ed *Editor) QReplaceAddText() {
 		s.Grow.Set(1, 0)
 		s.Min.X.Ch(60)
 	})
-	fc.SetStrings(PrevQReplaceFinds, true)
+	fc.SetStrings(PrevQReplaceFinds).SetCurrentIndex(0)
 	if find != "" {
-		fc.SetCurVal(find)
+		fc.SetCurrentValue(find)
 	}
 
 	rc := gi.NewChooser(d, "repl").SetEditable(true).SetAllowNew(true)
@@ -309,7 +309,7 @@ func (ed *Editor) QReplaceAddText() {
 		s.Grow.Set(1, 0)
 		s.Min.X.Ch(60)
 	})
-	rc.SetStrings(PrevQReplaceRepls, true)
+	rc.SetStrings(PrevQReplaceRepls).SetCurrentIndex(0)
 
 	lexitems := ed.QReplace.LexItems
 	lxi := gi.NewSwitch(d, "lexb").SetText("Lexical Items").SetChecked(lexitems)
@@ -318,13 +318,13 @@ func (ed *Editor) QReplaceAddText() {
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
 		d.AddOk(pw).SetText("Query-Replace").OnClick(func(e events.Event) {
-			fc.GetCurTextAction()
-			rc.GetCurTextAction()
+			fc.SetCurrentText(fc.TextField().Text()).SendChange()
+			rc.SetCurrentText(rc.TextField().Text()).SendChange()
 			var find, repl string
-			if s, ok := fc.CurVal.(string); ok {
+			if s, ok := fc.CurrentItem.Value.(string); ok {
 				find = s
 			}
-			if s, ok := rc.CurVal.(string); ok {
+			if s, ok := rc.CurrentItem.Value.(string); ok {
 				repl = s
 			}
 			lexItems := lxi.IsChecked()

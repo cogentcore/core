@@ -286,16 +286,16 @@ func (fv *FileView) ConfigPathBar() {
 		})
 	}
 	pf.OnChange(func(e events.Event) {
-		sp := pf.CurVal.(string)
+		sp := pf.CurrentItem.Value.(string)
 		if sp == gi.FileViewResetPaths {
 			gi.SavedPaths = make(gi.FilePaths, 1, gi.SystemSettings.SavedPathsMax)
 			gi.SavedPaths[0] = fv.DirPath
-			pf.SetStrings(([]string)(gi.SavedPaths), true)
+			pf.SetStrings(([]string)(gi.SavedPaths)).SetCurrentIndex(0)
 			gi.SavedPaths = append(gi.SavedPaths, gi.SavedPathsExtras...)
 			fv.UpdateFiles()
 		} else if sp == gi.FileViewEditPaths {
 			fv.EditPaths()
-			pf.SetStrings(([]string)(gi.SavedPaths), true)
+			pf.SetStrings(([]string)(gi.SavedPaths)).SetCurrentIndex(0)
 		} else {
 			fv.DirPath = sp
 			fv.UpdateFilesAction()
@@ -575,8 +575,9 @@ func (fv *FileView) UpdateFiles() {
 	gi.SavedPaths.AddPath(fv.DirPath, gi.SystemSettings.SavedPathsMax)
 	gi.SavePaths()
 	sp := []string(gi.SavedPaths)
-	pf.SetStrings(sp, true)
-	pf.ShowCurVal(fv.DirPath)
+	pf.SetStrings(sp).SetCurrentIndex(0)
+	pf.CurrentItem.Label = fv.DirPath
+	pf.ShowCurrentItem()
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
 

@@ -1060,7 +1060,7 @@ func (vv *EnumValue) UpdateWidget() {
 	}
 	ch := vv.Widget.(*gi.Chooser)
 	npv := laser.NonPtrValue(vv.Value)
-	ch.SetCurVal(npv.Interface())
+	ch.SetCurrentValue(npv.Interface())
 
 	// iv, err := laser.ToInt(npv.Interface())
 	// if err == nil {
@@ -1081,10 +1081,10 @@ func (vv *EnumValue) ConfigWidget(w gi.Widget) {
 	ch.Tooltip = vv.Doc()
 
 	ev := vv.EnumValue()
-	ch.SetEnum(ev, false)
+	ch.SetEnum(ev)
 	ch.Config()
 	ch.OnFinal(events.Change, func(e events.Event) {
-		vv.SetValue(ch.CurVal)
+		vv.SetValue(ch.CurrentItem)
 	})
 	vv.UpdateWidget()
 }
@@ -1170,7 +1170,7 @@ func (vv *TypeValue) UpdateWidget() {
 	npv := laser.OnePtrValue(vv.Value)
 	typ, ok := npv.Interface().(*gti.Type)
 	if ok {
-		sb.SetCurVal(typ)
+		sb.SetCurrentValue(typ)
 	}
 }
 
@@ -1194,10 +1194,10 @@ func (vv *TypeValue) ConfigWidget(w gi.Widget) {
 	}
 
 	tl := gti.AllEmbeddersOf(typEmbeds)
-	cb.SetTypes(tl, false, true)
+	cb.SetTypes(tl)
 	cb.Config()
 	cb.OnFinal(events.Change, func(e events.Event) {
-		tval := cb.CurVal.(*gti.Type)
+		tval := cb.CurrentItem.Value.(*gti.Type)
 		vv.SetValue(tval)
 	})
 	vv.UpdateWidget()

@@ -7,7 +7,6 @@ package gi
 import (
 	"fmt"
 	"log/slog"
-	"sort"
 	"strconv"
 
 	"cogentcore.org/core/abilities"
@@ -36,6 +35,9 @@ type Chooser struct {
 	// Type is the styling type of the chooser.
 	Type ChooserTypes
 
+	// Items are the chooser items available for selection.
+	Items []ChooserItem
+
 	// Icon is an optional icon displayed on the left side of the chooser.
 	Icon icons.Icon `view:"show-name"`
 
@@ -54,22 +56,9 @@ type Chooser struct {
 	// true) and a button at the end of the chooser menu.
 	AllowNew bool
 
-	// items available for selection
-	Items []any `json:"-" xml:"-"`
-
-	// an optional list of labels displayed for Chooser items;
-	// the indices for the labels correspond to those for the items
-	Labels []string `json:"-" xml:"-"`
-
-	// an optional list of icons displayed for Chooser items;
-	// the indices for the icons correspond to those for the items
-	Icons []icons.Icon `json:"-" xml:"-"`
-
-	// an optional list of tooltips displayed on hover for Chooser items;
-	// the indices for the tooltips correspond to those for the items
-	Tooltips []string `json:"-" xml:"-"`
-
-	// if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner
+	// Placeholder, if Editable is set to true, is the text that is
+	// displayed in the text field when it is empty. It must be set
+	// using [Chooser.SetPlaceholder].
 	Placeholder string `set:"-"`
 
 	// ItemsFuncs is a slice of functions to call before showing the items
@@ -78,18 +67,51 @@ type Chooser struct {
 	// in ascending order such that the items added in the first function
 	// will appear before those added in the last function. Use
 	// [Chooser.AddItemsFunc] to add a new items function. If at least
-	// one ItemsFunc is specified, the items, labels, icons, and tooltips
-	// of the chooser will be cleared before calling the functions.
+	// one ItemsFunc is specified, the items of the chooser will be
+	// cleared before calling the functions.
 	ItemsFuncs []func() `copier:"-" set:"-"`
 
-	// CurLabel is the string label for the current value
-	CurLabel string `set:"-"`
+	// CurrentItem is the currently selected item.
+	CurrentItem ChooserItem `json:"-" xml:"-" set:"-"`
 
-	// current selected value
-	CurVal any `json:"-" xml:"-" set:"-"`
+	// CurrentIndex is the index of the currently selected item
+	// in [Chooser.Items].
+	CurrentIndex int `json:"-" xml:"-" set:"-"`
+}
 
-	// current index in list of possible items
-	CurIndex int `json:"-" xml:"-" set:"-"`
+// ChooserItem is an item that can be used in a [Chooser].
+type ChooserItem struct { //gti:add
+
+	// Value is the underlying value of the chooser item.
+	Value any
+
+	// Label is the label displayed to the user for this item.
+	// If it is empty, then [ToLabel] of [ChooserItem.Value] is
+	// used instead.
+	Label string
+
+	// Icon is the icon displayed to the user for this item.
+	Icon icons.Icon
+
+	// Tooltip is the tooltip displayed to the user for this item.
+	Tooltip string
+
+	// Func, if non-nil, is a function to call whenever this
+	// item is selected as the current value of the chooser.
+	Func func()
+}
+
+// GetLabel returns the effective label of this chooser item.
+// If [ChooserItem.Label] is set, it returns that. Otherwise,
+// it uses [ToLabel] of [ChooserItem.Value]
+func (ci *ChooserItem) GetLabel() string {
+	if ci.Label != "" {
+		return ci.Label
+	}
+	if ci.Value == nil {
+		return ""
+	}
+	return ToLabel(ci.Value)
 }
 
 // ChooserTypes is an enum containing the
@@ -167,10 +189,6 @@ func (ch *Chooser) SetStyles() {
 				s.SetTextWrap(false)
 				s.Margin.Zero()
 				s.Padding.Zero()
-				// TODO(kai): figure out what to do with MaxLength
-				// if ch.MaxLength > 0 {
-				// 	s.Min.X.Ch(float32(ch.MaxLength))
-				// }
 			})
 		case "parts/text":
 			text := w.(*TextField)
@@ -231,7 +249,7 @@ func (ch *Chooser) ConfigWidget() {
 		}
 		if ch.Editable {
 			tx := ch.Parts.Child(txi).(*TextField)
-			tx.SetText(ch.CurLabel)
+			tx.SetText(ch.CurrentItem.GetLabel())
 			tx.SetLeadingIcon(ch.Icon)
 			tx.SetTrailingIcon(ch.Indicator, func(e events.Event) {
 				ch.OpenMenu(e)
@@ -240,7 +258,7 @@ func (ch *Chooser) ConfigWidget() {
 			tx.SetCompleter(tx, ch.CompleteMatch, ch.CompleteEdit)
 		} else {
 			lbl := ch.Parts.Child(lbi).(*Label)
-			lbl.SetText(ch.CurLabel)
+			lbl.SetText(ch.CurrentItem.GetLabel())
 			lbl.Config() // this is essential
 
 			ic := ch.Parts.Child(indi).(*Icon)
@@ -249,7 +267,7 @@ func (ch *Chooser) ConfigWidget() {
 	})
 }
 
-// LabelWidget returns the label widget if present
+// LabelWidget returns the label widget if present.
 func (ch *Chooser) LabelWidget() *Label {
 	if ch.Parts == nil {
 		return nil
@@ -261,40 +279,8 @@ func (ch *Chooser) LabelWidget() *Label {
 	return lbi.(*Label)
 }
 
-// IconWidget returns the icon widget if present
-func (ch *Chooser) IconWidget() *Icon {
-	if ch.Parts == nil {
-		return nil
-	}
-	ici := ch.Parts.ChildByName("icon")
-	if ici == nil {
-		return nil
-	}
-	return ici.(*Icon)
-}
-
-// SetIconUpdate sets the icon and drives an update, for the already-displayed case.
-func (ch *Chooser) SetIconUpdate(ic icons.Icon) *Chooser {
-	updt := ch.UpdateStart()
-	defer ch.UpdateEndRender(updt)
-
-	ch.Icon = ic
-	if ch.Editable {
-		tf := ch.TextField()
-		if tf != nil {
-			tf.SetLeadingIconUpdate(ic)
-		}
-	} else {
-		iw := ch.IconWidget()
-		if iw != nil {
-			iw.SetIconUpdate(ic)
-		}
-	}
-	return ch
-}
-
 // TextField returns the text field of an editable Chooser
-// if present
+// if present.
 func (ch *Chooser) TextField() *TextField {
 	if ch.Parts == nil {
 		return nil
@@ -325,142 +311,53 @@ func (ch *Chooser) CallItemsFuncs() {
 		return
 	}
 	ch.Items = nil
-	ch.Labels = nil
-	ch.Icons = nil
-	ch.Tooltips = nil
 	for _, f := range ch.ItemsFuncs {
 		f()
 	}
 }
 
-// MakeItems makes sure the Items list is made, and if not, or reset is true,
-// creates one with the given capacity
-func (ch *Chooser) MakeItems(reset bool, capacity int) {
-	if ch.Items == nil || reset {
-		ch.Items = make([]any, 0, capacity)
-	}
-}
-
-// SortItems sorts the items according to their labels
-func (ch *Chooser) SortItems(ascending bool) *Chooser {
-	sort.Slice(ch.Items, func(i, j int) bool {
-		if ascending {
-			return ch.LabelFor(i, ch.Items[i]) < ch.LabelFor(j, ch.Items[j])
-		} else {
-			return ch.LabelFor(i, ch.Items[i]) > ch.LabelFor(j, ch.Items[j])
-		}
-	})
-	return ch
-}
-
-// LabelFor converts the given item at the given index into
-// a user-facing label. It first tries [Chooser.Labels] and
-// falls back on [ToLabel].
-func (ch *Chooser) LabelFor(i int, item any) string {
-	if len(ch.Labels) > i {
-		return ch.Labels[i]
-	}
-	return ToLabel(item)
-}
-
-// SetTypes sets the Items list from a list of types, e.g., from gti.AllEmbedersOf.
-// If setFirst then set current item to the first item in the list, and if sort
-// then sort the list items in ascending order according to their labels.
-func (ch *Chooser) SetTypes(tl []*gti.Type, setFirst, sort bool) *Chooser {
-	n := len(tl)
-	if n == 0 {
-		return ch
-	}
-	ch.Items = make([]any, n)
-	for i, typ := range tl {
-		ch.Items[i] = typ
-	}
-	if sort {
-		ch.SortItems(true)
-	}
-	if setFirst {
-		ch.SetCurIndex(0)
+// SetTypes sets the [Chooser.Items] from the given types.
+func (ch *Chooser) SetTypes(ts []*gti.Type) *Chooser {
+	ch.Items = make([]ChooserItem, len(ts))
+	for i, typ := range ts {
+		ch.Items[i] = ChooserItem{Value: typ}
 	}
 	return ch
 }
 
-// SetStrings sets the Items list from a list of string values.
-// If setFirst then set current item to the first item in the list.
-func (ch *Chooser) SetStrings(el []string, setFirst bool) *Chooser {
-	n := len(el)
-	if n == 0 {
-		return ch
-	}
-	ch.Items = make([]any, n)
-	for i, str := range el {
-		ch.Items[i] = str
-	}
-	if setFirst {
-		ch.SetCurIndex(0)
+// SetStrings sets the [Chooser.Items] from the given strings.
+func (ch *Chooser) SetStrings(ss []string) *Chooser {
+	ch.Items = make([]ChooserItem, len(ss))
+	for i, s := range ss {
+		ch.Items[i] = ChooserItem{Value: s}
 	}
 	return ch
 }
 
-// SetIconItems sets the Items list from a list of icons.Icon values.
-// If setFirst then set current item to the first item in the list.
-func (ch *Chooser) SetIconItems(el []icons.Icon, setFirst bool) *Chooser {
-	n := len(el)
-	if n == 0 {
-		return ch
-	}
-	ch.Items = make([]any, n)
-	ch.Labels = make([]string, n)
-	ch.Icons = make([]icons.Icon, n)
-	for i, ic := range el {
-		ch.Items[i] = ic
-		ch.Labels[i] = sentence.Case(string(ic))
-		ch.Icons[i] = ic
-	}
-	if setFirst {
-		ch.SetCurIndex(0)
-	}
-	return ch
-}
-
-// SetEnums sets the Items list from a list of enums.Enum values.
-// If setFirst then set current item to the first item in the list.
-func (ch *Chooser) SetEnums(el []enums.Enum, setFirst bool) *Chooser {
-	n := len(el)
-	if n == 0 {
-		return ch
-	}
-	ch.Items = make([]any, n)
-	ch.Labels = make([]string, n)
-	ch.Tooltips = make([]string, n)
-	for i, enum := range el {
-		ch.Items[i] = enum
+// SetEnums sets the [Chooser.Items] from the given enums.
+func (ch *Chooser) SetEnums(es []enums.Enum) *Chooser {
+	ch.Items = make([]ChooserItem, len(es))
+	for i, enum := range es {
 		str := enum.String()
 		lbl := sentence.Case(str)
-		ch.Labels[i] = lbl
 		// TODO(kai): this desc is not always correct because we
 		// don't have the name of the enum value pre-generator-transformation
 		// (same as with Switches) (#774)
-		ch.Tooltips[i] = sentence.Doc(enum.Desc(), str, lbl)
-	}
-	if setFirst {
-		ch.SetCurIndex(0)
+		tip := sentence.Doc(enum.Desc(), str, lbl)
+		ch.Items[i] = ChooserItem{Value: enum, Label: lbl, Tooltip: tip}
 	}
 	return ch
 }
 
-// SetEnum sets the Items list from given enums.Enum Values().
-// If setFirst then set current item to the first item in the list.
-func (ch *Chooser) SetEnum(enum enums.Enum, setFirst bool) *Chooser {
-	return ch.SetEnums(enum.Values(), setFirst)
+// SetEnum sets the [Chooser.Items] from [enums.Enum.Values] of the given enum.
+func (ch *Chooser) SetEnum(enum enums.Enum) *Chooser {
+	return ch.SetEnums(enum.Values())
 }
 
-// FindItem finds an item on list of items and returns its index
+// FindItem finds the given item value on the list of items and returns its index
 func (ch *Chooser) FindItem(it any) int {
-	if ch.Items == nil {
-		return -1
-	}
 	for i, v := range ch.Items {
-		if v == it {
+		if it == v.Value {
 			return i
 		}
 	}
@@ -468,191 +365,138 @@ func (ch *Chooser) FindItem(it any) int {
 }
 
 // SetPlaceholder sets the given placeholder text and
-// CurIndex = -1, indicating that nothing has not been selected.
+// indicates that nothing has been selected.
 func (ch *Chooser) SetPlaceholder(text string) *Chooser {
 	ch.Placeholder = text
 	if !ch.Editable {
-		ch.ShowCurVal(text)
+		ch.CurrentItem.Label = text
+		ch.ShowCurrentItem()
 	}
-	ch.CurIndex = -1
+	ch.CurrentIndex = -1
 	return ch
 }
 
-// SetCurVal sets the current value (CurVal) and the corresponding CurIndex
-// for that item on the current Items list (adds to items list if not found)
-// -- returns that index -- and sets the text to the string value of that
-// value (using standard Stringer string conversion)
-func (ch *Chooser) SetCurVal(it any) int {
-	ch.CurVal = it
-	ch.CurIndex = ch.FindItem(it)
-	if ch.CurIndex < 0 { // add to list if not found..
-		ch.CurIndex = len(ch.Items)
-		ch.Items = append(ch.Items, it)
+// SetCurrentValue sets the current item and index to those associated with the given value.
+// If the given item is not found, it adds it to the items list. It also sets the text
+// of the chooser to the label of the item.
+func (ch *Chooser) SetCurrentValue(v any) *Chooser {
+	ch.CurrentIndex = ch.FindItem(v)
+	if ch.CurrentIndex < 0 { // add to list if not found
+		ch.CurrentIndex = len(ch.Items)
+		ch.Items = append(ch.Items, ChooserItem{Value: v})
 	}
-	ch.ShowCurVal(ch.LabelFor(ch.CurIndex, ch.CurVal))
-	return ch.CurIndex
+	ch.CurrentItem = ch.Items[ch.CurrentIndex]
+	ch.ShowCurrentItem()
+	return ch
 }
 
-// SetCurIndex sets the current index (CurIndex) and the corresponding CurVal
-// for that item on the current Items list (-1 if not found) -- returns value
-// -- and sets the text to the string value of that value (using standard
-// Stringer string conversion)
-func (ch *Chooser) SetCurIndex(idx int) any {
-	ch.CurIndex = idx
-	if idx < 0 || idx >= len(ch.Items) {
-		ch.CurVal = nil
-		ch.ShowCurVal(fmt.Sprintf("idx %v > len", idx))
-	} else {
-		ch.CurVal = ch.Items[idx]
-		ch.ShowCurVal(ch.LabelFor(ch.CurIndex, ch.CurVal))
-	}
-	return ch.CurVal
+// SetCurrentIndex sets the current index and the item associated with it.
+func (ch *Chooser) SetCurrentIndex(idx int) *Chooser {
+	ch.CurrentIndex = idx
+	ch.CurrentItem = ch.Items[idx]
+	ch.ShowCurrentItem()
+	return ch
 }
 
-// GetCurTextAction is for Editable choosers only: sets the current index (CurIndex)
-// and the corresponding CurVal based on current user-entered Text value,
-// and triggers a Change event
-func (ch *Chooser) GetCurTextAction() any {
-	tf := ch.TextField()
-	if tf == nil {
-		slog.Error("gi.Chooser: GetCurTextAction only available for Editable Chooser")
-		return ch.CurVal
-	}
-	ch.SetCurTextAction(tf.Text())
-	return ch.CurVal
-}
-
-// SetCurTextAction is for Editable choosers only: sets the current index (CurIndex)
-// and the corresponding CurVal based on given text string,
-// and triggers a Change event
-func (ch *Chooser) SetCurTextAction(text string) any {
-	ch.SetCurText(text)
-	ch.SendChange(nil)
-	return ch.CurVal
-}
-
-// SetCurText is for Editable choosers only: sets the current index (CurIndex)
-// and the corresponding CurVal based on given text string
-func (ch *Chooser) SetCurText(text string) any {
+// SetCurrentText sets the current index and item based on the given text string.
+// It can only be used for editable choosers.
+func (ch *Chooser) SetCurrentText(text string) *Chooser {
 	for i, item := range ch.Items {
-		if text == ch.LabelFor(i, item) {
-			ch.SetCurIndex(i)
-			return ch.CurVal
+		if text == item.GetLabel() {
+			ch.SetCurrentIndex(i)
+			return ch
 		}
 	}
 	if !ch.AllowNew {
 		// TODO: use validation
 		slog.Error("invalid Chooser value", "value", text)
-		return ch.CurVal
+		return ch
 	}
-	ch.Items = append(ch.Items, text)
-	ch.SetCurIndex(len(ch.Items) - 1)
-	return ch.CurVal
+	ch.Items = append(ch.Items, ChooserItem{Value: text})
+	ch.SetCurrentIndex(len(ch.Items) - 1)
+	return ch
 }
 
-// ShowCurVal updates the display to present the
-// currently-selected value (CurVal)
-func (ch *Chooser) ShowCurVal(label string) {
+// ShowCurrentItem updates the display to present the current item.
+func (ch *Chooser) ShowCurrentItem() *Chooser {
 	updt := ch.UpdateStart()
 	defer ch.UpdateEndRender(updt)
 
-	ch.CurLabel = label
 	if ch.Editable {
 		tf := ch.TextField()
 		if tf != nil {
-			tf.SetTextUpdate(ch.CurLabel)
+			tf.SetTextUpdate(ch.CurrentItem.GetLabel())
 		}
 	} else {
 		lbl := ch.LabelWidget()
 		if lbl != nil {
-			lbl.SetTextUpdate(ch.CurLabel)
+			lbl.SetTextUpdate(ch.CurrentItem.GetLabel())
 		}
 	}
-	if ch.CurIndex < len(ch.Icons) {
+	if ch.CurrentItem.Icon.IsSet() {
 		picon := ch.Icon
-		ch.SetIcon(ch.Icons[ch.CurIndex])
+		ch.SetIcon(ch.CurrentItem.Icon)
 		if ch.Icon != picon {
 			ch.Update()
 			ch.SetNeedsLayout(true)
 		}
 	}
-	if ch.CurIndex < len(ch.Tooltips) {
-		ch.SetTooltip(ch.Tooltips[ch.CurIndex])
+	if ch.CurrentItem.Tooltip != "" {
+		ch.SetTooltip(ch.CurrentItem.Tooltip)
 	}
+	return ch
 }
 
-// SelectItem selects a given item and updates the display to it
+// SelectItem selects the item at the given index and updates the chooser to display it.
 func (ch *Chooser) SelectItem(idx int) *Chooser {
 	if ch.This() == nil {
 		return ch
 	}
 	updt := ch.UpdateStart()
-	ch.SetCurIndex(idx)
+	ch.SetCurrentIndex(idx)
 	ch.UpdateEndLayout(updt)
 	return ch
 }
 
-// SelectItemAction selects a given item and updates the display to it
-// and sends a Changed event to indicate that the value has changed.
-func (ch *Chooser) SelectItemAction(idx int) {
+// SelectItemAction selects the item at the given index and updates the chooser to display it.
+// It also sends an [events.Change] event to indicate that the value has changed.
+func (ch *Chooser) SelectItemAction(idx int) *Chooser {
 	if ch.This() == nil {
-		return
+		return ch
 	}
 	ch.SelectItem(idx)
 	ch.SendChange()
+	return ch
 }
 
-// MakeItemsMenu constructs a menu of all the items.
-// It is automatically set as the [Button.Menu] for the Chooser.
+// MakeItemsMenu constructs a menu of all the items. It is used when the chooser is clicked.
 func (ch *Chooser) MakeItemsMenu(m *Scene) {
 	ch.CallItemsFuncs()
 	for i, it := range ch.Items {
+		i := i
 		nm := "item-" + strconv.Itoa(i)
-		bt := NewButton(m, nm).SetType(ButtonMenu)
-		bt.SetText(ch.LabelFor(i, it))
-		if len(ch.Icons) > i {
-			bt.SetIcon(ch.Icons[i])
-		}
-		if len(ch.Tooltips) > i {
-			bt.SetTooltip(ch.Tooltips[i])
-		}
-		bt.SetSelected(i == ch.CurIndex)
-		idx := i
+		bt := NewButton(m, nm)
+		bt.SetText(it.GetLabel()).SetIcon(it.Icon).SetTooltip(it.Tooltip)
+		bt.SetSelected(i == ch.CurrentIndex)
 		bt.OnClick(func(e events.Event) {
-			ch.SelectItemAction(idx)
+			ch.SelectItemAction(i)
 		})
 	}
 }
 
 func (ch *Chooser) HandleEvents() {
 	ch.HandleSelectToggle()
-	ch.HandleKeys()
 
 	ch.OnClick(func(e events.Event) {
 		if ch.OpenMenu(e) {
 			e.SetHandled()
 		}
 	})
-}
-
-// OpenMenu will open any menu associated with this chooser.
-// Returns true if menu opened, false if not.
-func (ch *Chooser) OpenMenu(e events.Event) bool {
-	pos := ch.ContextMenuPos(e)
-	if ch.Parts != nil {
-		if indic := ch.Parts.ChildByName("indicator", 3); indic != nil {
-			pos = indic.(Widget).ContextMenuPos(nil) // use the pos
+	ch.OnChange(func(e events.Event) {
+		if ch.CurrentItem.Func != nil {
+			ch.CurrentItem.Func()
 		}
-	}
-	m := NewMenu(ch.MakeItemsMenu, ch.This().(Widget), pos)
-	if m == nil {
-		return false
-	}
-	m.Run()
-	return true
-}
-
-func (ch *Chooser) HandleKeys() {
+	})
 	ch.OnFinal(events.KeyChord, func(e events.Event) {
 		if DebugSettings.KeyEventTrace {
 			fmt.Printf("Chooser KeyChordEvent: %v\n", ch.Path())
@@ -662,7 +506,7 @@ func (ch *Chooser) HandleKeys() {
 		case kf == keyfun.MoveUp:
 			e.SetHandled()
 			if len(ch.Items) > 0 {
-				idx := ch.CurIndex - 1
+				idx := ch.CurrentIndex - 1
 				if idx < 0 {
 					idx += len(ch.Items)
 				}
@@ -671,7 +515,7 @@ func (ch *Chooser) HandleKeys() {
 		case kf == keyfun.MoveDown:
 			e.SetHandled()
 			if len(ch.Items) > 0 {
-				idx := ch.CurIndex + 1
+				idx := ch.CurrentIndex + 1
 				if idx >= len(ch.Items) {
 					idx -= len(ch.Items)
 				}
@@ -680,7 +524,7 @@ func (ch *Chooser) HandleKeys() {
 		case kf == keyfun.PageUp:
 			e.SetHandled()
 			if len(ch.Items) > 10 {
-				idx := ch.CurIndex - 10
+				idx := ch.CurrentIndex - 10
 				for idx < 0 {
 					idx += len(ch.Items)
 				}
@@ -689,7 +533,7 @@ func (ch *Chooser) HandleKeys() {
 		case kf == keyfun.PageDown:
 			e.SetHandled()
 			if len(ch.Items) > 10 {
-				idx := ch.CurIndex + 10
+				idx := ch.CurrentIndex + 10
 				for idx >= len(ch.Items) {
 					idx -= len(ch.Items)
 				}
@@ -712,9 +556,26 @@ func (ch *Chooser) HandleKeys() {
 	})
 }
 
+// OpenMenu opens the chooser menu that displays all of the items.
+// It returns false if there are no items.
+func (ch *Chooser) OpenMenu(e events.Event) bool {
+	pos := ch.ContextMenuPos(e)
+	if ch.Parts != nil {
+		if indic := ch.Parts.ChildByName("indicator", 3); indic != nil {
+			pos = indic.(Widget).ContextMenuPos(nil) // use the pos
+		}
+	}
+	m := NewMenu(ch.MakeItemsMenu, ch.This().(Widget), pos)
+	if m == nil {
+		return false
+	}
+	m.Run()
+	return true
+}
+
 func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 	tf.OnChange(func(e events.Event) {
-		ch.SetCurText(tf.Text())
+		ch.SetCurrentText(tf.Text())
 		ch.SendChange(e)
 	})
 	tf.OnFocus(func(e events.Event) {
@@ -729,23 +590,15 @@ func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 }
 
 // CompleteMatch is the [complete.MatchFunc] used for the
-// editable textfield part of the Chooser (if it exists).
+// editable text field part of the Chooser (if it exists).
 func (ch *Chooser) CompleteMatch(data any, text string, posLn, posCh int) (md complete.Matches) {
 	md.Seed = text
 	comps := make(complete.Completions, len(ch.Items))
 	for i, item := range ch.Items {
-		tooltip := ""
-		if len(ch.Tooltips) > i {
-			tooltip = ch.Tooltips[i]
-		}
-		icon := ""
-		if len(ch.Icons) > i {
-			icon = string(ch.Icons[i])
-		}
 		comps[i] = complete.Completion{
-			Text: ch.LabelFor(i, item),
-			Desc: tooltip,
-			Icon: icon,
+			Text: item.GetLabel(),
+			Desc: item.Tooltip,
+			Icon: string(item.Icon),
 		}
 	}
 	md.Matches = complete.MatchSeedCompletion(comps, md.Seed)

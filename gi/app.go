@@ -256,12 +256,6 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 			})
 		}
 	})
-	// we must never have a chooser label so that it
-	// always displays the search placeholder
-	ch.OnFirst(events.Change, func(e events.Event) {
-		ch.CurIndex = 0
-		ch.ShowCurVal("")
-	})
 
 	ch.AddItemsFunc(func() {
 		for _, rw := range AllRenderWins {
@@ -271,10 +265,17 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 				if st == tb.Scene.Stage {
 					continue
 				}
-				ch.Items = append(ch.Items, st)
-				ch.Labels = append(ch.Labels, st.Title)
-				ch.Icons = append(ch.Icons, icons.Toolbar)
-				ch.Tooltips = append(ch.Tooltips, "Show "+st.Title)
+				ch.Items = append(ch.Items, ChooserItem{
+					Label:   st.Title,
+					Icon:    icons.Toolbar,
+					Tooltip: "Show " + st.Title,
+					Func: func() {
+						if st.MainMgr.RenderWin != CurRenderWin {
+							st.MainMgr.RenderWin.Raise()
+						}
+						st.MainMgr.MoveToTop(st)
+					},
+				})
 			}
 		}
 	})
@@ -291,10 +292,14 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 				addButtonItems(tmpms)
 				continue
 			}
-			ch.Items = append(ch.Items, bt)
-			ch.Labels = append(ch.Labels, bt.Text)
-			ch.Icons = append(ch.Icons, bt.Icon)
-			ch.Tooltips = append(ch.Tooltips, bt.Tooltip)
+			ch.Items = append(ch.Items, ChooserItem{
+				Label:   bt.Text,
+				Icon:    bt.Icon,
+				Tooltip: bt.Tooltip,
+				Func: func() {
+					bt.Send(events.Click)
+				},
+			})
 			// after the quit button, there are the render wins,
 			// which we do not want to show here as we are already
 			// showing the stages
@@ -306,16 +311,12 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 	ch.AddItemsFunc(func() {
 		addButtonItems(tb)
 	})
-	ch.OnChange(func(e events.Event) {
-		switch cv := ch.CurVal.(type) {
-		case *Stage:
-			if cv.MainMgr.RenderWin != CurRenderWin {
-				cv.MainMgr.RenderWin.Raise()
-			}
-			cv.MainMgr.MoveToTop(cv)
-		case ButtonEmbedder:
-			cv.AsButton().Send(events.Click, e)
-		}
+	ch.OnFinal(events.Change, func(e events.Event) {
+		// we must never have a chooser label so that it
+		// always displays the search placeholder
+		ch.CurrentIndex = -1
+		ch.CurrentItem = ChooserItem{}
+		ch.ShowCurrentItem()
 	})
 	return ch
 }

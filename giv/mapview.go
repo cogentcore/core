@@ -232,12 +232,12 @@ func (mv *MapView) ConfigMapGrid() {
 		vv.ConfigWidget(w)
 		if ifaceType {
 			typw := sg.Child(i*ncol + 2).(*gi.Chooser)
-			typw.SetTypes(valtypes, false, true)
+			typw.SetTypes(valtypes)
 			vtyp := laser.NonPtrType(reflect.TypeOf(vv.Val().Interface()))
 			if vtyp == nil {
 				vtyp = strtyp // default to string
 			}
-			typw.SetCurVal(vtyp)
+			typw.SetCurrentValue(vtyp)
 			// typw.SetProp("mapview-index", i)
 			// typw.OnChange(func(e events.Event) {
 			// 	typ := typw.CurVal.(reflect.Type)
