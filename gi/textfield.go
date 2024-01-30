@@ -246,7 +246,6 @@ func (tf *TextField) SetStyles() {
 			lead.Type = ButtonAction
 			lead.Style(func(s *styles.Style) {
 				s.Padding.Zero()
-				s.Min.Y.Em(1)
 				s.Color = colors.Scheme.OnSurfaceVariant
 				s.Margin.SetRight(units.Dp(8))
 				if tf.LeadingIconOnClick == nil {
@@ -276,7 +275,6 @@ func (tf *TextField) SetStyles() {
 			trail.Type = ButtonAction
 			trail.Style(func(s *styles.Style) {
 				s.Padding.Zero()
-				s.Min.Y.Em(1)
 				s.Color = colors.Scheme.OnSurfaceVariant
 				s.Margin.SetLeft(units.Dp(8))
 				if tf.TrailingIconOnClick == nil {
