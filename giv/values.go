@@ -1194,10 +1194,10 @@ func (vv *TypeValue) ConfigWidget(w gi.Widget) {
 	}
 
 	tl := gti.AllEmbeddersOf(typEmbeds)
-	cb.SetTypes(tl, false, true)
+	cb.SetTypes(tl, false)
 	cb.Config()
 	cb.OnFinal(events.Change, func(e events.Event) {
-		tval := cb.CurrentItem.(*gti.Type)
+		tval := cb.CurrentItem.Value.(*gti.Type)
 		vv.SetValue(tval)
 	})
 	vv.UpdateWidget()

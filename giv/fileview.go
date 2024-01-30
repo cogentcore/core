@@ -286,7 +286,7 @@ func (fv *FileView) ConfigPathBar() {
 		})
 	}
 	pf.OnChange(func(e events.Event) {
-		sp := pf.CurrentItem.(string)
+		sp := pf.CurrentItem.Value.(string)
 		if sp == gi.FileViewResetPaths {
 			gi.SavedPaths = make(gi.FilePaths, 1, gi.SystemSettings.SavedPathsMax)
 			gi.SavedPaths[0] = fv.DirPath
@@ -576,7 +576,8 @@ func (fv *FileView) UpdateFiles() {
 	gi.SavePaths()
 	sp := []string(gi.SavedPaths)
 	pf.SetStrings(sp, true)
-	pf.ShowCurVal(fv.DirPath)
+	pf.CurrentItem.Label = fv.DirPath
+	pf.ShowCurVal()
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
 

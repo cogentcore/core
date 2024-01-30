@@ -202,9 +202,9 @@ func (dv *DateView) ConfigWidget() {
 
 	trow := gi.NewLayout(dv)
 
-	sms := make([]any, len(shortMonths))
+	sms := make([]gi.ChooserItem, len(shortMonths))
 	for i, sm := range shortMonths {
-		sms[i] = sm
+		sms[i] = gi.ChooserItem{Value: sm}
 	}
 	month := gi.NewChooser(trow, "month").SetItems(sms...)
 	month.SetCurIndex(int(dv.Time.Month() - 1))
@@ -214,10 +214,10 @@ func (dv *DateView) ConfigWidget() {
 	})
 
 	yr := dv.Time.Year()
-	var yrs []any
+	var yrs []gi.ChooserItem
 	// we go 100 in each direction from the current year
 	for i := yr - 100; i <= yr+100; i++ {
-		yrs = append(yrs, i)
+		yrs = append(yrs, gi.ChooserItem{Value: i})
 	}
 	year := gi.NewChooser(trow, "year").SetItems(yrs...)
 	year.SetCurVal(yr)
@@ -517,13 +517,13 @@ func (vv *DurationValue) ConfigWidget(w gi.Widget) {
 
 	sp := gi.NewSpinner(ly, "value").SetTooltip("The value of time").SetStep(1).SetPageStep(10)
 	sp.OnChange(func(e events.Event) {
-		vv.SetValue(sp.Value * float32(durationUnitsMap[ch.CurrentLabel]))
+		vv.SetValue(sp.Value * float32(durationUnitsMap[ch.CurrentItem.Label]))
 	})
 	sp.Config()
 
-	var units []any
-	for _, u := range durationUnits {
-		units = append(units, u)
+	units := make([]gi.ChooserItem, len(durationUnits))
+	for i, u := range durationUnits {
+		units[i] = gi.ChooserItem{Value: u}
 	}
 
 	ch = gi.NewChooser(ly, "unit").SetTooltip("The unit of time").SetItems(units...)
@@ -531,7 +531,7 @@ func (vv *DurationValue) ConfigWidget(w gi.Widget) {
 		// we update the value to fit the unit
 		npv := laser.NonPtrValue(vv.Value)
 		dur := npv.Interface().(time.Duration)
-		sp.SetValue(float32(dur) / float32(durationUnitsMap[ch.CurrentLabel]))
+		sp.SetValue(float32(dur) / float32(durationUnitsMap[ch.CurrentItem.Label]))
 	})
 
 	vv.UpdateWidget()
