@@ -260,7 +260,8 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 	// always displays the search placeholder
 	ch.OnFirst(events.Change, func(e events.Event) {
 		ch.CurrentIndex = 0
-		ch.ShowCurVal("")
+		ch.CurrentItem.Label = ""
+		ch.ShowCurVal()
 	})
 
 	ch.AddItemsFunc(func() {
@@ -271,10 +272,12 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 				if st == tb.Scene.Stage {
 					continue
 				}
-				ch.Items = append(ch.Items, st)
-				ch.Labels = append(ch.Labels, st.Title)
-				ch.Icons = append(ch.Icons, icons.Toolbar)
-				ch.Tooltips = append(ch.Tooltips, "Show "+st.Title)
+				ch.Items = append(ch.Items, ChooserItem{
+					Value:   st,
+					Label:   st.Title,
+					Icon:    icons.Toolbar,
+					Tooltip: "Show " + st.Title,
+				})
 			}
 		}
 	})
@@ -291,10 +294,12 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 				addButtonItems(tmpms)
 				continue
 			}
-			ch.Items = append(ch.Items, bt)
-			ch.Labels = append(ch.Labels, bt.Text)
-			ch.Icons = append(ch.Icons, bt.Icon)
-			ch.Tooltips = append(ch.Tooltips, bt.Tooltip)
+			ch.Items = append(ch.Items, ChooserItem{
+				Value:   bt,
+				Label:   bt.Text,
+				Icon:    bt.Icon,
+				Tooltip: bt.Tooltip,
+			})
 			// after the quit button, there are the render wins,
 			// which we do not want to show here as we are already
 			// showing the stages
@@ -307,7 +312,7 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 		addButtonItems(tb)
 	})
 	ch.OnChange(func(e events.Event) {
-		switch cv := ch.CurrentItem.(type) {
+		switch cv := ch.CurrentItem.Value.(type) {
 		case *Stage:
 			if cv.MainMgr.RenderWin != CurRenderWin {
 				cv.MainMgr.RenderWin.Raise()
