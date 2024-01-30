@@ -231,8 +231,7 @@ func (tb *Toolbar) StdOverflowMenu(m *Scene) { //gti:add
 // to all app resources, such as open scenes and buttons in the
 // given toolbar. This chooser is typically placed at the start
 // of the AppBar. You can extend the resources available for access
-// in the app chooser using [Chooser.AddItemsFunc] and [Chooser.OnChange]
-// (you can handle your cases in your OnChange).
+// in the app chooser using [Chooser.AddItemsFunc] and [ChooserItem.Func].
 func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 	ch.SetEditable(true).SetType(ChooserOutlined).SetIcon(icons.Search)
 	if TheApp.SystemPlatform().IsMobile() {
