@@ -108,6 +108,9 @@ func (ci *ChooserItem) GetLabel() string {
 	if ci.Label != "" {
 		return ci.Label
 	}
+	if ci.Value == nil {
+		return ""
+	}
 	return ToLabel(ci.Value)
 }
 
