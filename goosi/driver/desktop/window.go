@@ -33,6 +33,10 @@ type Window struct { //gti:add
 	ScreenWindow string
 }
 
+func (w *Window) IsVisible() bool {
+	return w.WindowMulti.IsVisible() && w.Glw != nil
+}
+
 // Activate() sets this window as the current render target for gpu rendering
 // functions, and the current context for gpu state (equivalent to
 // MakeCurrentContext on OpenGL).
