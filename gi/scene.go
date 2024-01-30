@@ -151,7 +151,7 @@ func (sc *Scene) OnInit() {
 		if sc.Stage.Title == CurRenderWin.Title {
 			return
 		}
-		title := sc.Stage.Title + " | " + CurRenderWin.Title
+		title := sc.Stage.Title + " - " + CurRenderWin.Title
 		CurRenderWin.GoosiWin.SetTitle(title)
 	})
 	sc.OnClose(func(e events.Event) {

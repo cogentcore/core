@@ -255,10 +255,6 @@ func (is *Inspector) ConfigSplits() {
 	sv.SetStruct(is.KiRoot)
 }
 
-func (is *Inspector) SetChanged() {
-	is.Changed = true
-}
-
 func (is *Inspector) ConfigToolbar(tb *gi.Toolbar) {
 	NewFuncButton(tb, is.UpdateItems).SetIcon(icons.Refresh)
 	// StyleFirst(func(s *styles.Style) { s.SetEnabled(is.Changed) })
@@ -297,7 +293,7 @@ func InspectorView(b *gi.Body, k ki.Ki) {
 	b.SetTitle("Inspector").SetName("inspector")
 	if k != nil {
 		b.Nm += "-" + k.Name()
-		b.Title += ": " + k.Name()
+		b.Title += " of " + k.Name()
 	}
 	is := NewInspector(b, "inspector")
 	is.SetRoot(k)
