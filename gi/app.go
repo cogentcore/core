@@ -237,7 +237,7 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 	if TheApp.SystemPlatform().IsMobile() {
 		ch.SetPlaceholder("Search")
 	} else {
-		ch.SetPlaceholder(fmt.Sprintf("Search (%s)", keyfun.ChordFor(keyfun.Menu)))
+		ch.SetPlaceholder(fmt.Sprintf("Search (%s)", keyfun.ChordFor(keyfun.Menu).Shortcut()))
 	}
 
 	ch.OnWidgetAdded(func(w Widget) {
@@ -282,7 +282,7 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 	addButtonItems = func(par ki.Ki) {
 		for _, kid := range *par.Children() {
 			bt := AsButton(kid)
-			if bt == nil || bt.IsDisabled() || bt.Name() == "back" {
+			if bt == nil || bt.IsDisabled() {
 				continue
 			}
 			if bt.HasMenu() {
@@ -291,8 +291,12 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 				addButtonItems(tmpms)
 				continue
 			}
+			lbl := bt.Text
+			if lbl == "" {
+				lbl = bt.Tooltip
+			}
 			ch.Items = append(ch.Items, ChooserItem{
-				Label:   bt.Text,
+				Label:   lbl,
 				Icon:    bt.Icon,
 				Tooltip: bt.Tooltip,
 				Func: func() {
