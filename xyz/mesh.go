@@ -145,7 +145,7 @@ func (sc *Scene) AddMeshUnique(ms Mesh) {
 
 // MeshByName looks for mesh by name -- returns nil if not found
 func (sc *Scene) MeshByName(nm string) Mesh {
-	ms, ok := sc.Meshes.ValByKeyTry(nm)
+	ms, ok := sc.Meshes.ValueByKeyTry(nm)
 	if ok {
 		return ms
 	}
@@ -154,7 +154,7 @@ func (sc *Scene) MeshByName(nm string) Mesh {
 
 // MeshByNameTry looks for mesh by name -- returns error if not found
 func (sc *Scene) MeshByNameTry(nm string) (Mesh, error) {
-	ms, ok := sc.Meshes.ValByKeyTry(nm)
+	ms, ok := sc.Meshes.ValueByKeyTry(nm)
 	if ok {
 		return ms, nil
 	}
@@ -199,7 +199,7 @@ func (sc *Scene) ConfigMeshes() {
 	ph.UpdtMu.Lock()
 	ph.ResetMeshes()
 	for _, kv := range sc.Meshes.Order {
-		ms := kv.Val
+		ms := kv.Value
 		nVtx, nIdx, hasColor := ms.Sizes()
 		ph.AddMesh(kv.Key, nVtx, nIdx, hasColor)
 	}
@@ -212,7 +212,7 @@ func (sc *Scene) SetMeshes() {
 	ph := &sc.Phong
 	ph.UpdtMu.Lock()
 	for _, kv := range sc.Meshes.Order {
-		ms := kv.Val
+		ms := kv.Value
 		vtxAry, normAry, texAry, clrAry, idxAry := ph.MeshFloatsByName(kv.Key)
 		ms.Set(sc, vtxAry, normAry, texAry, clrAry, idxAry)
 		ph.ModMeshByName(kv.Key)
@@ -227,7 +227,7 @@ func (sc *Scene) UpdateMeshes() {
 	ph := &sc.Phong
 	ph.UpdtMu.Lock()
 	for _, kv := range sc.Meshes.Order {
-		ms := kv.Val
+		ms := kv.Value
 		vtxAry, normAry, texAry, clrAry, idxAry := ph.MeshFloatsByName(kv.Key)
 		ms.Update(sc, vtxAry, normAry, texAry, clrAry, idxAry)
 	}

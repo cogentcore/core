@@ -146,7 +146,7 @@ func (ss *Sprites) AllocSizes() {
 	szs := make([]image.Point, ns)
 	idx := 0
 	for _, kv := range ss.Names.Order {
-		sp := kv.Val
+		sp := kv.Value
 		if sp.Geom.Size == (image.Point{}) {
 			continue
 		}
@@ -186,7 +186,7 @@ func (ss *Sprites) HasSizeChanged() bool {
 		return true
 	}
 	for i, kv := range ss.Names.Order {
-		sp := kv.Val
+		sp := kv.Value
 		ssz := ss.SzAlloc.ItemSizes[i]
 		if sp.Geom.Size != ssz {
 			ss.Modified = true
@@ -198,7 +198,7 @@ func (ss *Sprites) HasSizeChanged() bool {
 
 // SpriteByName returns the sprite by name
 func (ss *Sprites) SpriteByName(name string) (*Sprite, bool) {
-	return ss.Names.ValByKeyTry(name)
+	return ss.Names.ValueByKeyTry(name)
 }
 
 // Reset removes all sprites
@@ -234,8 +234,8 @@ func (ss *Sprites) InactivateSprite(name string) {
 // InactivateAllSprites inactivates all sprites, setting Modified if wasn't before
 func (ss *Sprites) InactivateAllSprites() {
 	for _, sp := range ss.Names.Order {
-		if sp.Val.On {
-			sp.Val.On = false
+		if sp.Value.On {
+			sp.Value.On = false
 			ss.Modified = true
 		}
 	}
@@ -252,11 +252,11 @@ func (ss *Sprites) ConfigSprites(drw goosi.Drawer) {
 		imgidx := SpriteStart + gpi
 		drw.ConfigImageDefaultFormat(imgidx, gsz.X, gsz.Y, len(ga))
 		for ii, spi := range ga {
-			if err := ss.Names.IdxIsValid(spi); err != nil {
+			if err := ss.Names.IndexIsValid(spi); err != nil {
 				fmt.Println(err)
 				continue
 			}
-			sp := ss.Names.ValByIdx(spi)
+			sp := ss.Names.ValueByIndex(spi)
 			drw.SetGoImage(imgidx, ii, sp.Pixels, goosi.NoFlipY)
 		}
 	}
@@ -270,10 +270,10 @@ func (ss *Sprites) DrawSprites(drw goosi.Drawer) {
 	for gpi, ga := range sa.GpAllocs {
 		imgidx := SpriteStart + gpi
 		for ii, spi := range ga {
-			if ss.Names.IdxIsValid(spi) != nil {
+			if ss.Names.IndexIsValid(spi) != nil {
 				continue
 			}
-			sp := ss.Names.ValByIdx(spi)
+			sp := ss.Names.ValueByIndex(spi)
 			if !sp.On {
 				continue
 			}

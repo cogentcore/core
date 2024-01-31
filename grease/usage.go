@@ -61,7 +61,7 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 	posArgStrs := []string{}
 
 	for _, kv := range fields.Order {
-		v := kv.Val
+		v := kv.Value
 		f := v.Field
 
 		posArgTag, ok := f.Tag.Lookup("posarg")
@@ -178,7 +178,7 @@ outer:
 // should use [Usage] instead.
 func FlagUsage(fields *Fields, b *strings.Builder) {
 	for _, kv := range fields.Order {
-		f := kv.Val
+		f := kv.Value
 		b.WriteString(Indent)
 		for i, name := range f.Names {
 			b.WriteString(grog.CmdColor("-" + strcase.ToKebab(name)))

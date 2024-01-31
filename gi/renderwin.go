@@ -381,7 +381,7 @@ func (w *RenderWin) Resized() {
 		}
 		// still need to apply style even if size is same
 		for _, kv := range w.MainStageMgr.Stack.Order {
-			sc := kv.Val.Scene
+			sc := kv.Value.Scene
 			sc.ApplyStyleScene()
 		}
 		return
@@ -1094,7 +1094,7 @@ func (w *RenderWin) GatherScenes() bool {
 	// first, find the top-level window:
 	winIdx := 0
 	for i := n - 1; i >= 0; i-- {
-		st := sm.Stack.ValByIdx(i)
+		st := sm.Stack.ValueByIndex(i)
 		if st.Type == WindowStage {
 			if DebugSettings.WinRenderTrace {
 				fmt.Println("GatherScenes: main Window:", st.String())
@@ -1107,7 +1107,7 @@ func (w *RenderWin) GatherScenes() bool {
 
 	// then add everyone above that
 	for i := winIdx + 1; i < n; i++ {
-		st := sm.Stack.ValByIdx(i)
+		st := sm.Stack.ValueByIndex(i)
 		rs.Add(st.Scene, scIdx)
 		if DebugSettings.WinRenderTrace {
 			fmt.Println("GatherScenes: overlay Stage:", st.String())
@@ -1119,7 +1119,7 @@ func (w *RenderWin) GatherScenes() bool {
 
 	// then add the popups for the top main stage
 	for _, kv := range top.PopupMgr.Stack.Order {
-		st := kv.Val
+		st := kv.Value
 		rs.Add(st.Scene, scIdx)
 		if DebugSettings.WinRenderTrace {
 			fmt.Println("GatherScenes: popup:", st.String())

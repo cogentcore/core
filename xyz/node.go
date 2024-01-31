@@ -389,7 +389,7 @@ func (nb *NodeBase) TrackCamera() {
 func (nb *NodeBase) TrackLight(lightName string) error {
 	nb.PoseMu.Lock()
 	defer nb.PoseMu.Unlock()
-	lt, ok := nb.Sc.Lights.ValByKeyTry(lightName)
+	lt, ok := nb.Sc.Lights.ValueByKeyTry(lightName)
 	if !ok {
 		return fmt.Errorf("xyz Node: %v TrackLight named: %v not found", nb.Path(), lightName)
 	}

@@ -48,24 +48,24 @@ func (ph *Phong) AddColor(name string, clr *Colors) {
 
 // UseColorIdx selects color by index for current render step
 func (ph *Phong) UseColorIdx(idx int) error {
-	if err := ph.Colors.IdxIsValid(idx); err != nil {
+	if err := ph.Colors.IndexIsValid(idx); err != nil {
 		log.Println(err)
 		return err
 	}
-	clr := ph.Colors.ValByIdx(idx)
+	clr := ph.Colors.ValueByIndex(idx)
 	ph.Cur.Color = *clr
 	return nil
 }
 
 // UseColorName selects color by name for current render step
 func (ph *Phong) UseColorName(name string) error {
-	idx, ok := ph.Colors.IdxByKeyTry(name)
+	idx, ok := ph.Colors.IndexByKeyTry(name)
 	if !ok {
 		err := fmt.Errorf("vphong:UseColorName -- name not found: %s", name)
 		log.Println(err)
 		return err
 	}
-	clr := ph.Colors.ValByIdx(idx)
+	clr := ph.Colors.ValueByIndex(idx)
 	ph.Cur.Color = *clr
 	return nil
 }

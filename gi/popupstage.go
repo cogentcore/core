@@ -176,7 +176,7 @@ func (pm *StageMgr) PopupHandleEvent(e events.Event) {
 	if top.IgnoreEvents {
 		var ntop *Stage
 		for i := pm.Stack.Len() - 1; i >= 0; i-- {
-			s := pm.Stack.ValByIdx(i)
+			s := pm.Stack.ValueByIndex(i)
 			if !s.IgnoreEvents {
 				ntop = s
 				break
@@ -207,7 +207,7 @@ func (pm *StageMgr) PopupHandleEvent(e events.Event) {
 		// otherwise not Handled, so pass on to first lower stage
 		// that accepts events and is in bounds
 		for i := pm.Stack.Len() - 1; i >= 0; i-- {
-			s := pm.Stack.ValByIdx(i)
+			s := pm.Stack.ValueByIndex(i)
 			ss := s.Scene
 			if !s.IgnoreEvents && pos.In(ss.SceneGeom.Bounds()) {
 				s.PopupHandleEvent(e)

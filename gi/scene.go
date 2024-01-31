@@ -188,7 +188,7 @@ func (sc *Scene) HandleEvents() {
 			return
 		}
 		// the stage that will be visible next
-		st := sm.Stack.ValByIdx(sm.Stack.Len() - 2)
+		st := sm.Stack.ValueByIndex(sm.Stack.Len() - 2)
 		CurRenderWin.SetStageTitle(st.Title)
 	})
 }

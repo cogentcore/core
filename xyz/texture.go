@@ -157,7 +157,7 @@ func (sc *Scene) AddTexture(tx Texture) {
 
 // TextureByName looks for texture by name -- returns nil if not found
 func (sc *Scene) TextureByName(nm string) Texture {
-	tx, ok := sc.Textures.ValByKeyTry(nm)
+	tx, ok := sc.Textures.ValueByKeyTry(nm)
 	if ok {
 		return tx
 	}
@@ -166,7 +166,7 @@ func (sc *Scene) TextureByName(nm string) Texture {
 
 // TextureByNameTry looks for texture by name -- returns error if not found
 func (sc *Scene) TextureByNameTry(nm string) (Texture, error) {
-	tx, ok := sc.Textures.ValByKeyTry(nm)
+	tx, ok := sc.Textures.ValueByKeyTry(nm)
 	if ok {
 		return tx, nil
 	}
@@ -196,7 +196,7 @@ func (sc *Scene) ConfigTextures() {
 	ph := &sc.Phong
 	ph.ResetTextures()
 	for _, kv := range sc.Textures.Order {
-		tx := kv.Val
+		tx := kv.Value
 		// todo: remove repeat from texture, move to color.
 		ph.AddTexture(kv.Key, vphong.NewTexture(tx.Image()))
 	}

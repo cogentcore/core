@@ -318,7 +318,7 @@ func (st *Stage) MainHandleEvent(e events.Event) {
 func (sm *StageMgr) MainHandleEvent(e events.Event) {
 	n := sm.Stack.Len()
 	for i := n - 1; i >= 0; i-- {
-		st := sm.Stack.ValByIdx(i)
+		st := sm.Stack.ValueByIndex(i)
 		st.MainHandleEvent(e)
 		if e.IsHandled() || st.Modal || st.Type == WindowStage || st.FullWindow {
 			break

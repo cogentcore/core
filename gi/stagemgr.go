@@ -51,7 +51,7 @@ func (sm *StageMgr) Top() *Stage {
 	if sz == 0 {
 		return nil
 	}
-	return sm.Stack.ValByIdx(sz - 1)
+	return sm.Stack.ValueByIndex(sz - 1)
 }
 
 // TopOfType returns the top-most Stage in the Stack
@@ -62,7 +62,7 @@ func (sm *StageMgr) TopOfType(typ StageTypes) *Stage {
 
 	l := sm.Stack.Len()
 	for i := l - 1; i >= 0; i-- {
-		st := sm.Stack.ValByIdx(i)
+		st := sm.Stack.ValueByIndex(i)
 		if st.Type == typ {
 			return st
 		}
@@ -78,7 +78,7 @@ func (sm *StageMgr) TopNotType(typ StageTypes) *Stage {
 
 	l := sm.Stack.Len()
 	for i := l - 1; i >= 0; i-- {
-		st := sm.Stack.ValByIdx(i)
+		st := sm.Stack.ValueByIndex(i)
 		if st.Type != typ {
 			return st
 		}
@@ -121,8 +121,8 @@ func (sm *StageMgr) Pop() *Stage {
 	}
 
 	sm.Modified = true
-	st := sm.Stack.ValByIdx(sz - 1)
-	sm.Stack.DeleteIdx(sz-1, sz)
+	st := sm.Stack.ValueByIndex(sz - 1)
+	sm.Stack.DeleteIndex(sz-1, sz)
 	return st
 }
 
@@ -135,10 +135,10 @@ func (sm *StageMgr) DeleteStage(st *Stage) bool {
 
 	l := sm.Stack.Len()
 	for i := l - 1; i >= 0; i-- {
-		s := sm.Stack.ValByIdx(i)
+		s := sm.Stack.ValueByIndex(i)
 		if st == s {
 			sm.Modified = true
-			sm.Stack.DeleteIdx(i, i+1)
+			sm.Stack.DeleteIndex(i, i+1)
 			st.Delete()
 			return true
 		}
@@ -154,12 +154,12 @@ func (sm *StageMgr) MoveToTop(st *Stage) bool {
 
 	l := sm.Stack.Len()
 	for i := l - 1; i >= 0; i-- {
-		s := sm.Stack.ValByIdx(i)
+		s := sm.Stack.ValueByIndex(i)
 		if st == s {
-			k := sm.Stack.KeyByIdx(i)
+			k := sm.Stack.KeyByIndex(i)
 			sm.Modified = true
-			sm.Stack.DeleteIdx(i, i+1)
-			sm.Stack.InsertAtIdx(sm.Stack.Len(), k, s)
+			sm.Stack.DeleteIndex(i, i+1)
+			sm.Stack.InsertAtIndex(sm.Stack.Len(), k, s)
 			return true
 		}
 	}
@@ -174,10 +174,10 @@ func (sm *StageMgr) PopType(typ StageTypes) *Stage {
 
 	l := sm.Stack.Len()
 	for i := l - 1; i >= 0; i-- {
-		st := sm.Stack.ValByIdx(i)
+		st := sm.Stack.ValueByIndex(i)
 		if st.Type == typ {
 			sm.Modified = true
-			sm.Stack.DeleteIdx(i, i+1)
+			sm.Stack.DeleteIndex(i, i+1)
 			return st
 		}
 	}
@@ -214,9 +214,9 @@ func (sm *StageMgr) DeleteAll() {
 	}
 	sm.Modified = true
 	for i := sz - 1; i >= 0; i-- {
-		st := sm.Stack.ValByIdx(i)
+		st := sm.Stack.ValueByIndex(i)
 		st.Delete()
-		sm.Stack.DeleteIdx(i, i+1)
+		sm.Stack.DeleteIndex(i, i+1)
 	}
 }
 
@@ -224,7 +224,7 @@ func (sm *StageMgr) DeleteAll() {
 // window render geom.
 func (sm *StageMgr) Resize(rg mat32.Geom2DInt) {
 	for _, kv := range sm.Stack.Order {
-		st := kv.Val
+		st := kv.Value
 		if st.Type == WindowStage || (st.Type == DialogStage && st.FullWindow) {
 			st.Scene.Resize(rg)
 		} else {
@@ -254,7 +254,7 @@ func (sm *StageMgr) UpdateAll() (stageMods, sceneMods bool) {
 		return
 	}
 	for _, kv := range sm.Stack.Order {
-		st := kv.Val
+		st := kv.Value
 		stMod, scMod := st.DoUpdate()
 		stageMods = stageMods || stMod
 		sceneMods = sceneMods || scMod
@@ -264,7 +264,7 @@ func (sm *StageMgr) UpdateAll() (stageMods, sceneMods bool) {
 
 func (sm *StageMgr) SendShowEvents() {
 	for _, kv := range sm.Stack.Order {
-		st := kv.Val
+		st := kv.Value
 		if st.Scene == nil {
 			continue
 		}

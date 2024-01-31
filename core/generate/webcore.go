@@ -111,7 +111,7 @@ func WriteWebcoregen(c *config.Config, examples ordmap.Map[string, []byte]) erro
 var WebcoreExamples = map[string]func(parent gi.Widget){`)
 	for _, kv := range examples.Order {
 		fmt.Fprintf(b, `
-	%q: func(parent gi.Widget){%s%s},`, kv.Key, "\n", kv.Val)
+	%q: func(parent gi.Widget){%s%s},`, kv.Key, "\n", kv.Value)
 	}
 	b.WriteString("\n}")
 

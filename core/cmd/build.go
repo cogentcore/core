@@ -75,7 +75,7 @@ func BuildDesktop(c *config.Config, platform config.Platform) error {
 	output := filepath.Join(".core", "bin", platform.OS, c.Name)
 	if platform.OS == "windows" {
 		output += ".exe"
-		// TODO(kai)
+		// TODO(kai): windows gui
 		// see https://stackoverflow.com/questions/23250505/how-do-i-create-an-executable-from-golang-that-doesnt-open-a-console-window-whe
 		// tags = append(tags, "-ldflags", "-H=windowsgui")
 	}

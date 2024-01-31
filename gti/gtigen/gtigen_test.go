@@ -19,7 +19,7 @@ func TestGenerate(t *testing.T) {
 	c := &Config{
 		AddMethods: true,
 		AddFuncs:   true,
-		InterfaceConfigs: ordmap.Make([]ordmap.KeyVal[string, *Config]{{
+		InterfaceConfigs: ordmap.Make([]ordmap.KeyValue[string, *Config]{{
 			"fmt.Stringer", &Config{
 				AddTypes: true,
 				TypeVar:  true,

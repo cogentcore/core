@@ -95,7 +95,7 @@ func (g *Generator) GetInterfaces() error {
 	}
 	for _, typ := range g.Pkg.TypesInfo.Types {
 		nm := typ.Type.String()
-		if _, ok := g.Config.InterfaceConfigs.ValByKeyTry(nm); ok {
+		if _, ok := g.Config.InterfaceConfigs.ValueByKeyTry(nm); ok {
 			utyp := typ.Type.Underlying()
 			iface, ok := utyp.(*types.Interface)
 			if !ok {
@@ -147,8 +147,8 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 			if !types.IsInterface(typ) {
 				for _, kv := range cfg.InterfaceConfigs.Order {
 					in := kv.Key
-					ic := kv.Val
-					iface := g.Interfaces.ValByKey(in)
+					ic := kv.Value
+					iface := g.Interfaces.ValueByKey(in)
 					if iface == nil {
 						slog.Info("missing interface object", "interface", in)
 						continue
@@ -321,7 +321,7 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 		// get rid of any pointer receiver
 		tnm := strings.TrimPrefix(types.ExprString(typ), "*")
 		typnm := FullName(g.Pkg, tnm)
-		g.Methods.Add(typnm, append(g.Methods.ValByKey(typnm), method))
+		g.Methods.Add(typnm, append(g.Methods.ValueByKey(typnm), method))
 	}
 
 	return true, nil
@@ -491,7 +491,7 @@ func (g *Generator) Generate() (bool, error) {
 		return false, nil
 	}
 	for _, typ := range g.Types {
-		typ.Methods = append(typ.Methods, g.Methods.ValByKey(typ.Name)...)
+		typ.Methods = append(typ.Methods, g.Methods.ValueByKey(typ.Name)...)
 		g.ExecTmpl(TypeTmpl, typ)
 		for _, tmpl := range typ.Config.Templates {
 			g.ExecTmpl(tmpl, typ)
@@ -501,7 +501,7 @@ func (g *Generator) Generate() (bool, error) {
 		}
 	}
 	for _, fun := range g.Funcs.Order {
-		g.ExecTmpl(FuncTmpl, fun.Val)
+		g.ExecTmpl(FuncTmpl, fun.Value)
 	}
 	return true, nil
 }

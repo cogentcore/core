@@ -259,7 +259,7 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 	ch.AddItemsFunc(func() {
 		for _, rw := range AllRenderWins {
 			for _, kv := range rw.MainStageMgr.Stack.Order {
-				st := kv.Val
+				st := kv.Value
 				// we do not include ourself
 				if st == tb.Scene.Stage {
 					continue

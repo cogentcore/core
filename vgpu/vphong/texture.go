@@ -70,11 +70,11 @@ func (ph *Phong) ConfigTextures() {
 			slog.Error("vgpu.Phong ConfigTextures: txset Image is nil", "Image", i)
 			continue
 		}
-		if kv.Val.Image == nil {
+		if kv.Value.Image == nil {
 			slog.Error("vgpu.Phong ConfigTextures: Image is nil", "Image", i)
 			continue
 		}
-		img.Texture.ConfigGoImage(kv.Val.Image.Bounds().Size(), 1)
+		img.Texture.ConfigGoImage(kv.Value.Image.Bounds().Size(), 1)
 	}
 	ivar := txset.VarMap["Tex"]
 	ivar.Vals.AllocTexBySize(ph.Sys.GPU, ivar) // organize images by size so all fit
@@ -89,7 +89,7 @@ func (ph *Phong) AllocTextures() {
 		txset := vars.SetMap[int(TexSet)]
 		ivar := txset.VarMap["Tex"]
 		for i, kv := range ph.Textures.Order {
-			ivar.Vals.SetGoImage(i, kv.Val.Image, vgpu.FlipY)
+			ivar.Vals.SetGoImage(i, kv.Value.Image, vgpu.FlipY)
 		}
 	}
 	vars.BindAllTextureVars(int(TexSet)) // gets images
@@ -120,7 +120,7 @@ func (ph *Phong) UseTextureIdx(idx int) error {
 
 // UseTextureName selects texture by name for current render step
 func (ph *Phong) UseTextureName(name string) error {
-	idx, ok := ph.Textures.IdxByKeyTry(name)
+	idx, ok := ph.Textures.IndexByKeyTry(name)
 	if !ok {
 		err := fmt.Errorf("vphong:UseTextureName -- name not found: %s", name)
 		if vgpu.Debug {
@@ -139,7 +139,7 @@ func (ph *Phong) UpdateTextureIdx(idx int) error {
 	if idx >= ph.Textures.Len() {
 		return nil
 	}
-	tx := ph.Textures.Order[idx].Val
+	tx := ph.Textures.Order[idx].Value
 	vars := ph.Sys.Vars()
 	txset := vars.SetMap[int(TexSet)]
 	ivar := txset.VarMap["Tex"]
@@ -149,7 +149,7 @@ func (ph *Phong) UpdateTextureIdx(idx int) error {
 
 // UpdateTextureName updates texture by name
 func (ph *Phong) UpdateTextureName(name string) error {
-	idx, ok := ph.Textures.IdxByKeyTry(name)
+	idx, ok := ph.Textures.IndexByKeyTry(name)
 	if !ok {
 		err := fmt.Errorf("vphong:UpdateTextureName -- name not found: %s", name)
 		if vgpu.Debug {

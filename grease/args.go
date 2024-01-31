@@ -77,7 +77,7 @@ func BoolFlags(obj any) map[string]bool {
 	res := map[string]bool{}
 
 	for _, kv := range fields.Order {
-		f := kv.Val
+		f := kv.Value
 
 		if f.Field.Type.Kind() != reflect.Bool { // we only care about bools here
 			continue
@@ -303,7 +303,7 @@ func ParseFlags(flags map[string]string, allFlags *Fields, errNotFound bool) err
 // ParseFlag is designed for use in [ParseFlags] and should typically
 // not be used by end-user code.
 func ParseFlag(name string, value string, allFlags *Fields, errNotFound bool) error {
-	f, exists := allFlags.ValByKeyTry(name)
+	f, exists := allFlags.ValueByKeyTry(name)
 	if !exists {
 		if errNotFound {
 			return fmt.Errorf("flag name %q not recognized", name)
@@ -321,7 +321,7 @@ func ParseFlag(name string, value string, allFlags *Fields, errNotFound bool) er
 			if lcnm[:3] == "no_" || lcnm[:3] == "no-" {
 				negate = true
 			} else if lcnm[:2] == "no" {
-				if _, has := allFlags.ValByKeyTry(lcnm[2:]); has { // e.g., nogui and gui is on list
+				if _, has := allFlags.ValueByKeyTry(lcnm[2:]); has { // e.g., nogui and gui is on list
 					negate = true
 				}
 			}
@@ -417,7 +417,7 @@ func AllCases(nm string) []string {
 func AddFlags(allFields *Fields, allFlags *Fields, args []string, flags map[string]string) ([]string, error) {
 	consumed := map[int]bool{} // which args we have consumed via pos args
 	for _, kv := range allFields.Order {
-		v := kv.Val
+		v := kv.Value
 		f := v.Field
 
 		for _, name := range v.Names {
