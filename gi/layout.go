@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/pi/complete"
 	"cogentcore.org/core/styles"
 )
 
@@ -415,12 +416,12 @@ func (ly *Layout) FocusOnName(e events.Event) bool {
 	return false
 }
 
-// ChildByLabelStartsCanFocus uses breadth-first search to find first element
-// within layout whose Label (from Labeler interface) starts with given string
-// (case insensitive) and can focus.  If after is non-nil, only finds after
-// given element.
+// ChildByLabelStartsCanFocus uses breadth-first search to find
+// the first focusable element within the layout whose Label (using
+// [ToLabel]) matches the given name using [complete.IsSeedMatching].
+// If after is non-nil, it only finds after that element.
 func ChildByLabelStartsCanFocus(ly *Layout, name string, after ki.Ki) (ki.Ki, bool) {
-	lcnm := strings.ToLower(name)
+	lseed := strings.ToLower(name)
 	var rki ki.Ki
 	gotAfter := false
 	ly.WalkBreadth(func(k ki.Ki) bool {
@@ -437,8 +438,8 @@ func ChildByLabelStartsCanFocus(ly *Layout, name string, after ki.Ki) (ki.Ki, bo
 			}
 			return ki.Continue // skip to next
 		}
-		kn := strings.ToLower(ToLabel(k))
-		if rki == nil && strings.HasPrefix(kn, lcnm) {
+		kl := ToLabel(k)
+		if rki == nil && complete.IsSeedMatching(lseed, kl) {
 			rki = k
 			return ki.Break
 		}
