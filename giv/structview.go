@@ -285,6 +285,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 		lbl.Style(func(s *styles.Style) {
 			s.SetTextWrap(false)
 		})
+		lbl.Tooltip = vv.Doc()
 		vvb := vv.AsValueBase()
 		vvb.ViewPath = sv.ViewPath
 		w, wb := gi.AsWidget(sg.Child((i * 2) + 1))
