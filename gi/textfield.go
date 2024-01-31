@@ -47,6 +47,9 @@ type TextField struct { //core:embedder
 	// Placeholder is the text that is displayed when the text field is empty.
 	Placeholder string
 
+	// Error, if specified, is the error text displayed for the text field.
+	Error string
+
 	// LeadingIcon, if specified, indicates to add a button
 	// at the start of the text field with this icon.
 	LeadingIcon icons.Icon `set:"-"`
@@ -291,6 +294,10 @@ func (tf *TextField) SetStyles() {
 				if tf.TrailingIconOnClick != nil {
 					tf.TrailingIconOnClick(e)
 				}
+			})
+		case "parts/error":
+			w.Style(func(s *styles.Style) {
+				s.Color = colors.Scheme.Error.Base
 			})
 		}
 	})
@@ -1584,20 +1591,20 @@ func (tf *TextField) ConfigWidget() {
 	tf.EditTxt = []rune(tf.Txt)
 	tf.Edited = false
 
-	lii, tii := -1, -1
+	lii, tii, ei := -1, -1, -1
 	if !tf.IsReadOnly() {
 		if tf.LeadingIcon.IsSet() {
+			lii = len(config)
 			config.Add(ButtonType, "lead-icon")
-			lii = 0
 		}
 		if tf.TrailingIcon.IsSet() {
 			config.Add(StretchType, "trail-icon-str")
+			tii = len(config)
 			config.Add(ButtonType, "trail-icon")
-			if lii == -1 {
-				tii = 1
-			} else {
-				tii = 2
-			}
+		}
+		if tf.Error != "" {
+			ei = len(config)
+			config.Add(LabelType, "error")
 		}
 	}
 	tf.ConfigParts(config, func() {
@@ -1605,9 +1612,13 @@ func (tf *TextField) ConfigWidget() {
 			li := tf.Parts.Child(lii).(*Button)
 			li.SetIcon(tf.LeadingIcon)
 		}
-		if tii != -1 {
+		if tii >= 0 {
 			ti := tf.Parts.Child(tii).(*Button)
 			ti.SetIcon(tf.TrailingIcon)
+		}
+		if ei >= 0 {
+			e := tf.Parts.Child(ei).(*Label)
+			e.SetText(tf.Error)
 		}
 	})
 }

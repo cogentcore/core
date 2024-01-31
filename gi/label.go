@@ -109,15 +109,9 @@ func (lb *Label) SetStyles() {
 		if !lb.IsReadOnly() {
 			s.Cursor = cursors.Text
 		}
-		s.Min.Y.Em(1)
-		s.Min.X.Ch(3)
-		s.Text.WhiteSpace = styles.WhiteSpaceNormal
-		// s.Align.Y = styles.Center
-		s.Grow.Set(0, 0)
 		s.GrowWrap = true
 
 		// Label styles based on https://m3.material.io/styles/typography/type-scale-tokens
-		// TODO: maybe support brand and plain global fonts with larger labels defaulting to brand and smaller to plain
 		switch lb.Type {
 		case LabelLabelLarge:
 			s.Text.LineHeight.Dp(20)
