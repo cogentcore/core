@@ -41,6 +41,8 @@ func (t *Person) SetB(v uint8) *Person { t.B = v; return t }
 // SetA sets the [Person.A]
 func (t *Person) SetA(v uint8) *Person { t.A = v; return t }
 
+var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gti/gtigen/testdata.BlockType", IDName: "block-type", Doc: "BlockType is a type declared in a type block.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}})
+
 var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/gti/gtigen/testdata.Alert", Doc: "Alert prints an alert with the given message", Args: []string{"msg"}})
 
 var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/gti/gtigen/testdata.TypeOmittedArgs0", Args: []string{"x", "y"}})

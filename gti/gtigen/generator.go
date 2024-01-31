@@ -161,7 +161,20 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 			}
 		}
 
-		dirs, hasAdd, hasSkip, err := g.LoadFromNodeComments(cfg, gd)
+		// By default, we use the comments on the GenDecl, as that
+		// is where they are normally stored. However, when there
+		// are comments on the type spec itself, that means we are
+		// probably in a type block, and thus we must use the comments
+		// on the type spec itself.
+		commentNode := ast.Node(gd)
+		if ts.Doc != nil || ts.Comment != nil {
+			commentNode = ts
+		}
+		if ts.Doc != nil {
+			doc = strings.TrimSuffix(ts.Doc.Text(), "\n")
+		}
+
+		dirs, hasAdd, hasSkip, err := g.LoadFromNodeComments(cfg, commentNode)
 		if err != nil {
 			return false, err
 		}

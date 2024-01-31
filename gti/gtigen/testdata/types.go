@@ -49,6 +49,11 @@ func Alert(msg string) {
 	fmt.Println("Alert:", msg)
 }
 
+type (
+	// BlockType is a type declared in a type block.
+	BlockType struct{} //gti:add
+)
+
 // we test various type omitted arg combinations
 
 func TypeOmittedArgs0(x, y float32)                {}
