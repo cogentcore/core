@@ -137,7 +137,7 @@ func (v *Value) SetString(str string) error {
 	}
 
 	var numstr string
-	var un Units = UnitPx // default to pixels
+	un := UnitPx // default to pixels
 	for _, u := range UnitsValues() {
 		nm := u.String()
 		unsz := len(nm)

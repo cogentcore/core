@@ -57,11 +57,13 @@ const (
 	// UnitPh represents percentage of parent height, which is equivalent to CSS % in some contexts.
 	UnitPh
 
-	// UnitEm represents the font size of the element.
-	UnitEm
+	// NOTE: rem must go before em for parsing order to work
 
 	// UnitRem represents the font size of the root element, which is always 16dp.
 	UnitRem
+
+	// UnitEm represents the font size of the element.
+	UnitEm
 
 	// UnitEx represents x-height of the element's font (size of 'x' glyph).
 	// It falls back to a default of 0.5em.

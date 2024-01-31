@@ -26,8 +26,8 @@ func _UnitsNoOp() {
 	_ = x[UnitEh-(3)]
 	_ = x[UnitPw-(4)]
 	_ = x[UnitPh-(5)]
-	_ = x[UnitEm-(6)]
-	_ = x[UnitRem-(7)]
+	_ = x[UnitRem-(6)]
+	_ = x[UnitEm-(7)]
 	_ = x[UnitEx-(8)]
 	_ = x[UnitCh-(9)]
 	_ = x[UnitVw-(10)]
@@ -50,8 +50,8 @@ var _UnitsNameToValueMap = map[string]Units{
 	`eh`:   3,
 	`pw`:   4,
 	`ph`:   5,
-	`em`:   6,
-	`rem`:  7,
+	`rem`:  6,
+	`em`:   7,
 	`ex`:   8,
 	`ch`:   9,
 	`vw`:   10,
@@ -74,8 +74,8 @@ var _UnitsDescMap = map[Units]string{
 	3:  `UnitEh represents percentage of element height, which is equivalent to CSS % in some contexts.`,
 	4:  `UnitPw represents percentage of parent width, which is equivalent to CSS % in some contexts.`,
 	5:  `UnitPh represents percentage of parent height, which is equivalent to CSS % in some contexts.`,
-	6:  `UnitEm represents the font size of the element.`,
-	7:  `UnitRem represents the font size of the root element, which is always 16dp.`,
+	6:  `UnitRem represents the font size of the root element, which is always 16dp.`,
+	7:  `UnitEm represents the font size of the element.`,
 	8:  `UnitEx represents x-height of the element&#39;s font (size of &#39;x&#39; glyph). It falls back to a default of 0.5em.`,
 	9:  `UnitCh represents width of the &#39;0&#39; glyph in the element&#39;s font. It falls back to a default of 0.5em.`,
 	10: `UnitVw represents percentage of viewport (Scene) width.`,
@@ -98,8 +98,8 @@ var _UnitsMap = map[Units]string{
 	3:  `eh`,
 	4:  `pw`,
 	5:  `ph`,
-	6:  `em`,
-	7:  `rem`,
+	6:  `rem`,
+	7:  `em`,
 	8:  `ex`,
 	9:  `ch`,
 	10: `vw`,

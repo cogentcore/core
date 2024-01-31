@@ -120,25 +120,6 @@ func (uc *Context) Ph(val float32) float32 {
 	return uc.ToDots(val, UnitPh)
 }
 
-// Em returns a new em value.
-// Em is the font size of the element.
-func Em(val float32) Value {
-	return Value{Val: val, Un: UnitEm}
-}
-
-// Em sets the value in terms of em.
-// Em is the font size of the element.
-func (v *Value) Em(val float32) {
-	v.Val = val
-	v.Un = UnitEm
-}
-
-// Em converts the given em value to dots.
-// Em is the font size of the element.
-func (uc *Context) Em(val float32) float32 {
-	return uc.ToDots(val, UnitEm)
-}
-
 // Rem returns a new rem value.
 // Rem is the font size of the root element, which is always 16dp.
 func Rem(val float32) Value {
@@ -156,6 +137,25 @@ func (v *Value) Rem(val float32) {
 // Rem is the font size of the root element, which is always 16dp.
 func (uc *Context) Rem(val float32) float32 {
 	return uc.ToDots(val, UnitRem)
+}
+
+// Em returns a new em value.
+// Em is the font size of the element.
+func Em(val float32) Value {
+	return Value{Val: val, Un: UnitEm}
+}
+
+// Em sets the value in terms of em.
+// Em is the font size of the element.
+func (v *Value) Em(val float32) {
+	v.Val = val
+	v.Un = UnitEm
+}
+
+// Em converts the given em value to dots.
+// Em is the font size of the element.
+func (uc *Context) Em(val float32) float32 {
+	return uc.ToDots(val, UnitEm)
 }
 
 // Ex returns a new ex value.
