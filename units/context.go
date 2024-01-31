@@ -59,12 +59,6 @@ func (uc *Context) Defaults() {
 	uc.Pah = uc.Vph
 }
 
-// Set sets the context values to the given values
-func (uc *Context) Set(em, ex, ch, rem, vw, vh, ew, eh, pw, ph float32) {
-	uc.SetSizes(vw, vh, ew, eh, pw, ph)
-	uc.SetFont(em, ex, ch, rem)
-}
-
 func (uc *Context) String() string {
 	return laser.StringJSON(uc)
 }

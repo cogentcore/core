@@ -26,8 +26,8 @@ func _UnitsNoOp() {
 	_ = x[UnitEh-(3)]
 	_ = x[UnitPw-(4)]
 	_ = x[UnitPh-(5)]
-	_ = x[UnitRem-(6)]
-	_ = x[UnitEm-(7)]
+	_ = x[UnitEm-(6)]
+	_ = x[UnitRem-(7)]
 	_ = x[UnitEx-(8)]
 	_ = x[UnitCh-(9)]
 	_ = x[UnitVw-(10)]
@@ -50,8 +50,8 @@ var _UnitsNameToValueMap = map[string]Units{
 	`eh`:   3,
 	`pw`:   4,
 	`ph`:   5,
-	`rem`:  6,
-	`em`:   7,
+	`em`:   6,
+	`rem`:  7,
 	`ex`:   8,
 	`ch`:   9,
 	`vw`:   10,
@@ -68,27 +68,27 @@ var _UnitsNameToValueMap = map[string]Units{
 }
 
 var _UnitsDescMap = map[Units]string{
-	0:  `UnitDp = density-independent pixels; 1dp = 1/160th of 1in`,
-	1:  `UnitPx = pixels; 1px = 1/96th of 1in; these are NOT raw display pixels`,
-	2:  `UnitEw = percentage of element width (equivalent to CSS % in some contexts)`,
-	3:  `UnitEh = percentage of element height (equivalent to CSS % in some contexts)`,
-	4:  `UnitPw = percentage of parent width (equivalent to CSS % in some contexts)`,
-	5:  `UnitPh = percentage of parent height (equivalent to CSS % in some contexts)`,
-	6:  `UnitRem = font size of the root element -- defaults to 12pt scaled by DPI factor`,
-	7:  `UnitEm = font size of the element -- fallback to 12pt by default`,
-	8:  `UnitEx = x-height of the element&#39;s font (size of &#39;x&#39; glyph) -- fallback to 0.5em by default`,
-	9:  `UnitCh = width of the &#39;0&#39; glyph in the element&#39;s font -- fallback to 0.5em by default`,
-	10: `UnitVw = 1% of the viewport&#39;s width`,
-	11: `UnitVh = 1% of the viewport&#39;s height`,
-	12: `UnitVmin = 1% of the viewport&#39;s smaller dimension`,
-	13: `UnitVmax = 1% of the viewport&#39;s larger dimension`,
-	14: `UnitCm = centimeters -- 1cm = 96px/2.54`,
-	15: `UnitMm = millimeters -- 1mm = 1/10th of cm`,
-	16: `UnitQ = quarter-millimeters -- 1q = 1/40th of cm`,
-	17: `UnitIn = inches -- 1in = 2.54cm = 96px`,
-	18: `UnitPc = picas -- 1pc = 1/6th of 1in`,
-	19: `UnitPt = points -- 1pt = 1/72th of 1in`,
-	20: `UnitDot = actual real display pixels, which are generally only used internally`,
+	0:  `UnitDp represents density-independent pixels. 1dp is 1/160 in.`,
+	1:  `UnitPx represents logical pixels. 1px is 1/96 in. These are not raw display pixels, for which you should use dots.`,
+	2:  `UnitEw represents percentage of element width, which is equivalent to CSS % in some contexts.`,
+	3:  `UnitEh represents percentage of element height, which is equivalent to CSS % in some contexts.`,
+	4:  `UnitPw represents percentage of parent width, which is equivalent to CSS % in some contexts.`,
+	5:  `UnitPh represents percentage of parent height, which is equivalent to CSS % in some contexts.`,
+	6:  `UnitEm represents the font size of the element.`,
+	7:  `UnitRem represents the font size of the root element, which is always 16dp.`,
+	8:  `UnitEx represents x-height of the element&#39;s font (size of &#39;x&#39; glyph). It falls back to a default of 0.5em.`,
+	9:  `UnitCh represents width of the &#39;0&#39; glyph in the element&#39;s font. It falls back to a default of 0.5em.`,
+	10: `UnitVw represents percentage of viewport (Scene) width.`,
+	11: `UnitVh represents percentage of viewport (Scene) height.`,
+	12: `UnitVmin represents percentage of the smaller dimension of the viewport (Scene).`,
+	13: `UnitVmax represents percentage of the larger dimension of the viewport (Scene).`,
+	14: `UnitCm represents centimeters. 1cm is 1/2.54 in.`,
+	15: `UnitMm represents millimeters. 1mm is 1/10 cm.`,
+	16: `UnitQ represents quarter-millimeters. 1q is 1/40 cm.`,
+	17: `UnitIn represents inches. 1in is 2.54cm or 96px.`,
+	18: `UnitPc represents picas. 1pc is 1/6 in.`,
+	19: `UnitPt represents points. 1pt is 1/72 in.`,
+	20: `UnitDot represents real display pixels. They are generally only used internally.`,
 }
 
 var _UnitsMap = map[Units]string{
@@ -98,8 +98,8 @@ var _UnitsMap = map[Units]string{
 	3:  `eh`,
 	4:  `pw`,
 	5:  `ph`,
-	6:  `rem`,
-	7:  `em`,
+	6:  `em`,
+	7:  `rem`,
 	8:  `ex`,
 	9:  `ch`,
 	10: `vw`,

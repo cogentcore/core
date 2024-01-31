@@ -40,8 +40,8 @@ package units
 			Lower: s,
 			Camel: strcase.ToCamel(s),
 		}
-		// actual desc after =
-		_, d.Desc, _ = strings.Cut(v.Desc(), " = ")
+		// actual desc after "represents"
+		_, d.Desc, _ = strings.Cut(v.Desc(), " represents ")
 		d.Desc = html.UnescapeString(d.Desc)
 		grr.Must(funcs.Execute(buf, d))
 	}
@@ -57,20 +57,20 @@ type data struct {
 var funcs = template.Must(template.New("funcs").Parse(
 	`
 // {{.Camel}} returns a new {{.Lower}} value.
-// {{.Camel}} is {{.Desc}}.
+// {{.Camel}} is {{.Desc}}
 func {{.Camel}}(val float32) Value {
 	return Value{Val: val, Un: Unit{{.Camel}}}
 }
 
 // {{.Camel}} sets the value in terms of {{.Lower}}.
-// {{.Camel}} is {{.Desc}}.
+// {{.Camel}} is {{.Desc}}
 func (v *Value) {{.Camel}}(val float32) {
 	v.Val = val
 	v.Un = Unit{{.Camel}}
 }
 
 // {{.Camel}} converts the given {{.Lower}} value to dots.
-// {{.Camel}} is {{.Desc}}.
+// {{.Camel}} is {{.Desc}}
 func (uc *Context) {{.Camel}}(val float32) float32 {
 	return uc.ToDots(val, Unit{{.Camel}})
 }
