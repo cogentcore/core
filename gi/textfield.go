@@ -360,22 +360,6 @@ func (tf *TextField) SetLeadingIcon(icon icons.Icon, onClick ...func(e events.Ev
 	return tf
 }
 
-// SetLeadingIconUpdate sets the leading icon of the text field to the given icon,
-// and ensures that it will render with new icon, for already displayed case.
-// If an on click function is specified, it also sets the leading icon on click
-// function to that function. If no function is specified, it does not
-// override any already set function.
-func (tf *TextField) SetLeadingIconUpdate(icon icons.Icon, onClick ...func(e events.Event)) *TextField {
-	updt := tf.UpdateStart()
-	defer tf.UpdateEndRender(updt)
-
-	tf.SetLeadingIcon(icon, onClick...)
-	if lead, ok := tf.LeadingIconButton(); ok {
-		lead.SetIconUpdate(icon)
-	}
-	return tf
-}
-
 // SetTrailingIcon sets the trailing icon of the text field to the given icon.
 // If an on click function is specified, it also sets the trailing icon on click
 // function to that function. If no function is specified, it does not
@@ -384,22 +368,6 @@ func (tf *TextField) SetTrailingIcon(icon icons.Icon, onClick ...func(e events.E
 	tf.TrailingIcon = icon
 	if len(onClick) > 0 {
 		tf.TrailingIconOnClick = onClick[0]
-	}
-	return tf
-}
-
-// SetTrailingIconUpdate sets the trailing icon of the text field to the given icon,
-// and ensures that it will render with new icon, for already displayed case.
-// If an on click function is specified, it also sets the leading icon on click
-// function to that function. If no function is specified, it does not
-// override any already set function.
-func (tf *TextField) SetTrailingIconUpdate(icon icons.Icon, onClick ...func(e events.Event)) *TextField {
-	updt := tf.UpdateStart()
-	defer tf.UpdateEndRender(updt)
-
-	tf.SetTrailingIcon(icon, onClick...)
-	if trail, ok := tf.TrailingIconButton(); ok {
-		trail.SetIconUpdate(icon)
 	}
 	return tf
 }
@@ -423,8 +391,8 @@ func (tf *TextField) SetTypePassword() *TextField {
 			} else {
 				tf.TrailingIcon = icons.VisibilityOff
 			}
-			if icon, ok := tf.Parts.ChildByName("trail-icon", 1).(*Button); ok {
-				icon.SetIcon(tf.TrailingIcon)
+			if icon := tf.TrailingIconButton(); icon != nil {
+				icon.SetIconUpdate(tf.TrailingIcon)
 			}
 		})
 }
@@ -1677,28 +1645,28 @@ func (tf *TextField) ScenePos() {
 	tf.SetEffPosAndSize()
 }
 
-// LeadingIconButton returns the [LeadingIcon] [Button] if present, else false
-func (tf *TextField) LeadingIconButton() (*Button, bool) {
+// LeadingIconButton returns the [LeadingIcon] [Button] if present.
+func (tf *TextField) LeadingIconButton() *Button {
 	if tf.Parts == nil {
-		return nil, false
+		return nil
 	}
 	bi := tf.Parts.ChildByName("lead-icon", 0)
 	if bi == nil {
-		return nil, false
+		return nil
 	}
-	return bi.(*Button), true
+	return bi.(*Button)
 }
 
-// TrailingIconButton returns the [TrailingIcon] [Button] if present, else false
-func (tf *TextField) TrailingIconButton() (*Button, bool) {
+// TrailingIconButton returns the [TrailingIcon] [Button] if present.
+func (tf *TextField) TrailingIconButton() *Button {
 	if tf.Parts == nil {
-		return nil, false
+		return nil
 	}
 	bi := tf.Parts.ChildByName("trail-icon", 1)
 	if bi == nil {
-		return nil, false
+		return nil
 	}
-	return bi.(*Button), true
+	return bi.(*Button)
 }
 
 // SetEffPosAndSize sets the effective position and size of
@@ -1711,11 +1679,11 @@ func (tf *TextField) SetEffPosAndSize() {
 	// }
 	sz := tf.Geom.Size.Actual.Content
 	pos := tf.Geom.Pos.Content
-	if lead, ok := tf.LeadingIconButton(); ok {
+	if lead := tf.LeadingIconButton(); lead != nil {
 		pos.X += lead.Geom.Size.Actual.Total.X
 		sz.X -= lead.Geom.Size.Actual.Total.X
 	}
-	if trail, ok := tf.TrailingIconButton(); ok {
+	if trail := tf.TrailingIconButton(); trail != nil {
 		sz.X -= trail.Geom.Size.Actual.Total.X
 	}
 	pos.Y += 0.5 * (sz.Y - tf.FontHeight) // center
