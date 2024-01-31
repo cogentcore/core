@@ -39,7 +39,7 @@ func NewTooltipText(w Widget, tooltip string) *Stage {
 }
 
 // NewTooltipTextAt returns a new tooltip stage displaying the given tooltip text
-// for the given widget at the given position with the given size.
+// for the given widget at the given window-level position with the given size.
 func NewTooltipTextAt(w Widget, tooltip string, pos, sz image.Point) *Stage {
 	return NewTooltipFromScene(NewTooltipScene(w, tooltip, pos, sz), w)
 }
