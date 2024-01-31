@@ -16,6 +16,7 @@ import (
 	"github.com/aymerick/douceur/css"
 	"github.com/aymerick/douceur/parser"
 	selcss "github.com/ericchiang/css"
+	"go.abhg.dev/goldmark/wikilink"
 	"golang.org/x/net/html"
 )
 
@@ -51,6 +52,9 @@ type Context struct {
 
 	// OpenURL is the function used to open URLs.
 	OpenURL func(url string)
+
+	// WikilinkResolver, if specified, is the function used to convert wikilinks into full URLs.
+	WikilinkResolver func(w *wikilink.Node) (destination []byte, err error)
 }
 
 // NewContext returns a new [Context] with basic defaults.

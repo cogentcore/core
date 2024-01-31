@@ -10,6 +10,7 @@ import (
 	"embed"
 	"io/fs"
 
+	"cogentcore.org/core/coredom"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/webcore"
@@ -21,6 +22,7 @@ var content embed.FS
 func main() {
 	b := gi.NewBody("Cogent Core Docs")
 	pg := webcore.NewPage(b).SetSource(grr.Log1(fs.Sub(content, "content")))
+	pg.Context.WikilinkResolver = coredom.PkgGoDevWikilink("cogentcore.org/core")
 	b.AddAppBar(pg.AppBar)
 	pg.OpenURL("/", true)
 	b.RunMainWindow()

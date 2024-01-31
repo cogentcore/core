@@ -21,7 +21,7 @@ func ReadMD(ctx *Context, par gi.Widget, b []byte) error {
 	md := goldmark.New(
 		goldmark.WithExtensions(
 			extension.GFM,
-			&wikilink.Extender{WikilinkResolver{}},
+			&wikilink.Extender{ctx},
 		),
 		goldmark.WithRendererOptions(
 			html.WithUnsafe(),
@@ -39,13 +39,4 @@ func ReadMD(ctx *Context, par gi.Widget, b []byte) error {
 // corresponding Cogent Core widgets to the given [gi.Widget], using the given context.
 func ReadMDString(ctx *Context, par gi.Widget, s string) error {
 	return ReadMD(ctx, par, []byte(s))
-}
-
-// WikilinkResolver implements [wikilink.Resolver] by using pkg.go.dev.
-type WikilinkResolver struct{}
-
-func (wr WikilinkResolver) ResolveWikilink(n *wikilink.Node) (destination []byte, err error) {
-	// pkg.go.dev uses fragments for first dot within package
-	t := bytes.Replace(n.Target, []byte{'.'}, []byte{'#'}, 1)
-	return append([]byte("https://pkg.go.dev/cogentcore.org/core/"), t...), nil
 }
