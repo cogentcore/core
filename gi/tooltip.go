@@ -8,7 +8,6 @@ import (
 	"image"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 )
@@ -55,6 +54,7 @@ func NewTooltipScene(w Widget, tooltip string, pos, sz image.Point) *Scene {
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.Grow.Set(1, 1)
 		s.Max.X.Em(20)
+		s.Overflow.Set(styles.OverflowVisible) // key for avoiding sizing errors when re-rendering with small pref size
 		s.Padding.Set(units.Dp(8))
 		s.Background = colors.C(colors.Scheme.InverseSurface)
 		s.Color = colors.Scheme.InverseOnSurface
@@ -63,9 +63,6 @@ func NewTooltipScene(w Widget, tooltip string, pos, sz image.Point) *Scene {
 	NewLabel(sc, "text").SetType(LabelBodyMedium).SetText(tooltip).
 		Style(func(s *styles.Style) {
 			s.SetTextWrap(true)
-			if s.Is(states.Selected) {
-				s.Color = colors.Scheme.Select.OnContainer
-			}
 		})
 	return sc
 }
