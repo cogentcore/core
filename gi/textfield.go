@@ -183,7 +183,9 @@ func (tf *TextField) SetStyles() {
 		s.Min.X.Ch(20)
 		s.Max.X.Ch(60)
 		s.Padding.Set(units.Dp(8), units.Dp(8))
-		s.Margin.Bottom.Dp(12)
+		if tf.Error != "" {
+			s.Margin.Bottom.Dp(12)
+		}
 		if tf.LeadingIcon.IsSet() {
 			s.Padding.Left.Dp(12)
 		}
