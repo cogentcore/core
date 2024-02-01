@@ -194,9 +194,6 @@ func (bt *Button) SetStyles() {
 				s.Min.Set(units.Dp(18))
 				s.Margin.Zero()
 				s.Padding.Zero()
-				if bt.Text != "" {
-					s.Margin.Right.Ch(1)
-				}
 			})
 		case "parts/label":
 			label := w.(*Label)
@@ -390,6 +387,9 @@ func (bt *Button) ConfigWidget() {
 	if bt.Icon.IsSet() {
 		ici = len(config)
 		config.Add(IconType, "icon")
+		if bt.Text != "" {
+			config.Add(SpaceType, "space")
+		}
 	}
 	if bt.Text != "" {
 		lbi = len(config)
