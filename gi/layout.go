@@ -452,11 +452,11 @@ func ChildByLabelStartsCanFocus(ly *Layout, name string, after ki.Ki) (ki.Ki, bo
 }
 
 ///////////////////////////////////////////////////////////
-//    Stretch and Space -- dummy elements for layouts
+//    Stretch and Space: spacing elements for layouts
 
-// Stretch adds an infinitely stretchy element for spacing out layouts
-// (max-size = -1) set the width / height property to determine how much it
-// takes relative to other stretchy elements
+// Stretch adds a stretchy element that grows to fill all
+// available space. You can set [styles.Style.Grow] to change
+// how much it grows relative to other growing elements.
 type Stretch struct {
 	WidgetBase
 }
@@ -471,8 +471,9 @@ func (st *Stretch) OnInit() {
 	})
 }
 
-// Space adds a fixed sized (1 ch x 1 em by default) blank space to a layout.
-// Set width / height property to change.
+// Space is a fixed size blank space, with
+// a default width of 1ch and a height of 1em.
+// You can set [styles.Style.Min] to change its size.
 type Space struct {
 	WidgetBase
 }
