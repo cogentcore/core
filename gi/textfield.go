@@ -1684,11 +1684,10 @@ func (tf *TextField) SetEffPosAndSize() {
 }
 
 func (tf *TextField) RenderTextField() {
-	pc, _ := tf.RenderLock()
+	pc, st := tf.RenderLock()
 	defer tf.RenderUnlock()
 
 	tf.AutoScroll() // inits paint with our style
-	st := &tf.Styles
 	st.Font = paint.OpenFont(st.FontRender(), &st.UnContext)
 	tf.RenderStdBox(st)
 	if tf.StartPos < 0 || tf.EndPos > len(tf.EditTxt) {
@@ -1709,6 +1708,21 @@ func (tf *TextField) RenderTextField() {
 		}
 		tf.RenderVis.SetRunes(cur, st.FontRender(), &st.UnContext, &st.Text, true, 0, 0)
 		tf.RenderVis.RenderTopPos(pc, pos)
+	}
+
+	if tf.Error != "" {
+		ts := &styles.Text{}
+		ts.Defaults()
+		fs := &styles.FontRender{}
+		fs.Defaults()
+		fs.Color = colors.Scheme.Error.Base
+
+		txt := &paint.Text{}
+		txt.SetHTML(tf.Error, fs, ts, &st.UnContext, nil)
+
+		txt.LayoutStdLR(ts, fs, &st.UnContext, tf.Geom.Size.Actual.Total)
+
+		txt.Render(pc, tf.Geom.Pos.Content.AddDim(mat32.Y, tf.Geom.Size.Actual.Content.Y))
 	}
 }
 
