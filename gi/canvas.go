@@ -8,6 +8,8 @@ import (
 	"image"
 
 	"cogentcore.org/core/paint"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 	"golang.org/x/image/draw"
 )
 
@@ -16,12 +18,25 @@ type Canvas struct {
 	WidgetBase
 
 	// Context is the paint context that we use for drawing.
-	Context paint.Context `set:"-"`
+	Context *paint.Context `set:"-"`
+}
+
+func (c *Canvas) OnInit() {
+	c.Context = paint.NewContext(100, 100)
+	c.SetStyles()
+}
+
+func (c *Canvas) SetStyles() {
+	c.Style(func(s *styles.Style) {
+		s.Min.Set(units.Dp(float32(c.Context.Image.Bounds().Dx())), units.Dp(float32(c.Context.Image.Bounds().Dy())))
+	})
 }
 
 // Draw draws to the canvas by calling the given function with its paint context.
 func (c *Canvas) Draw(f func(pc *paint.Context)) {
-	f(&c.Context)
+	c.Context.Lock()
+	f(c.Context)
+	c.Context.Unlock()
 	c.SetNeedsRender(true)
 }
 
