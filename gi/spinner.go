@@ -6,12 +6,10 @@ package gi
 
 import (
 	"fmt"
-	"log/slog"
 	"strconv"
 
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/mat32"
@@ -208,19 +206,18 @@ func (sp *Spinner) ValToString(val float32) string {
 
 // StringToVal converts the string field back to float value
 func (sp *Spinner) StringToVal(str string) (float32, error) {
-	// TODO(kai/snack)
 	if sp.Format == "" {
 		f64, err := strconv.ParseFloat(str, 32)
-		return float32(f64), grr.Log(err)
+		return float32(f64), err
 	}
 	if sp.FormatIsInt() {
 		var ival int
 		_, err := fmt.Sscanf(str, sp.Format, &ival)
-		return float32(ival), grr.Log(err)
+		return float32(ival), err
 	}
 	var fval float32
 	_, err := fmt.Sscanf(str, sp.Format, &fval)
-	return fval, grr.Log(err)
+	return fval, err
 }
 
 func (sp *Spinner) WidgetTooltip() string {
@@ -261,8 +258,7 @@ func (sp *Spinner) HandleEvents() {
 		text := sp.Text()
 		val, err := sp.StringToVal(text)
 		if err != nil {
-			// TODO: use validation
-			slog.Error("invalid Spinner value", "value", text, "err", err)
+			sp.TextField.ErrorText = err.Error()
 			return
 		}
 		sp.SetValue(val)
