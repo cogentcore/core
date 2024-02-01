@@ -1559,7 +1559,7 @@ func (tf *TextField) ConfigWidget() {
 	tf.EditTxt = []rune(tf.Txt)
 	tf.Edited = false
 
-	lii, tii, ei := -1, -1, -1
+	lii, tii := -1, -1
 	if !tf.IsReadOnly() {
 		if tf.LeadingIcon.IsSet() {
 			lii = len(config)
@@ -1570,10 +1570,6 @@ func (tf *TextField) ConfigWidget() {
 			tii = len(config)
 			config.Add(ButtonType, "trail-icon")
 		}
-		if tf.Error != "" {
-			ei = len(config)
-			config.Add(LabelType, "error")
-		}
 	}
 	tf.ConfigParts(config, func() {
 		if lii >= 0 {
@@ -1583,10 +1579,6 @@ func (tf *TextField) ConfigWidget() {
 		if tii >= 0 {
 			ti := tf.Parts.Child(tii).(*Button)
 			ti.SetIcon(tf.TrailingIcon)
-		}
-		if ei >= 0 {
-			e := tf.Parts.Child(ei).(*Label)
-			e.SetText(tf.Error)
 		}
 	})
 }
