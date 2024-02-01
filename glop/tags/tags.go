@@ -46,9 +46,18 @@ func Lookup(v any, field string, tag string) (any, bool) {
 		return res, true
 	}
 usingReflect:
-	sf, ok := reflect.TypeOf(v).FieldByName(field)
+	rt := reflect.TypeOf(v)
+	// must be non-pointer, and we can't use laser.NonPtrType due to import cycle
+	for rt.Kind() == reflect.Pointer {
+		rt = rt.Elem()
+	}
+	sf, ok := rt.FieldByName(field)
 	if !ok {
 		return nil, false
 	}
-	return sf.Tag.Lookup(tag)
+	res, ok := sf.Tag.Lookup(tag)
+	if !ok {
+		return nil, false
+	}
+	return res, true
 }
