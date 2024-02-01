@@ -183,6 +183,7 @@ func (tf *TextField) SetStyles() {
 		s.Min.X.Ch(20)
 		s.Max.X.Ch(60)
 		s.Padding.Set(units.Dp(8), units.Dp(8))
+		s.Margin.Bottom.Dp(12)
 		if tf.LeadingIcon.IsSet() {
 			s.Padding.Left.Dp(12)
 		}
@@ -1716,13 +1717,14 @@ func (tf *TextField) RenderTextField() {
 		fs := &styles.FontRender{}
 		fs.Defaults()
 		fs.Color = colors.Scheme.Error.Base
+		fs.Size.Dp(12)
 
 		txt := &paint.Text{}
 		txt.SetHTML(tf.Error, fs, ts, &st.UnContext, nil)
 
 		txt.LayoutStdLR(ts, fs, &st.UnContext, tf.Geom.Size.Actual.Total)
 
-		txt.Render(pc, tf.Geom.Pos.Content.AddDim(mat32.Y, tf.Geom.Size.Actual.Content.Y))
+		txt.Render(pc, tf.Geom.Pos.Content.AddDim(mat32.Y, tf.Geom.Size.Actual.Content.Y+st.Padding.Top.Dots))
 	}
 }
 
