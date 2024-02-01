@@ -1730,7 +1730,7 @@ func (tf *TextField) RenderTextField() {
 		fs := &styles.FontRender{}
 		fs.Defaults()
 		if tf.ErrorText == "" {
-			fs.Color = colors.Scheme.OnSurface
+			fs.Color = colors.Scheme.OnSurfaceVariant
 		} else {
 			fs.Color = colors.Scheme.Error.Base
 		}
@@ -1741,7 +1741,7 @@ func (tf *TextField) RenderTextField() {
 
 		txt.LayoutStdLR(ts, fs, &st.UnContext, tf.Geom.Size.Actual.Total)
 
-		txt.Render(pc, tf.Geom.Pos.Content.AddDim(mat32.Y, tf.Geom.Size.Actual.Content.Y+st.Padding.Top.Dots))
+		txt.Render(pc, tf.Geom.Pos.Content.AddDim(mat32.Y, tf.Geom.Size.Actual.Content.Y+st.Padding.Bottom.Dots+st.MaxBorder.Width.Bottom.Dots))
 	}
 }
 
