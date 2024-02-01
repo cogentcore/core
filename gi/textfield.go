@@ -1739,7 +1739,7 @@ func (tf *TextField) RenderTextField() {
 		txt := &paint.Text{}
 		txt.SetHTML(stxt, fs, ts, &st.UnContext, nil)
 
-		txt.LayoutStdLR(ts, fs, &st.UnContext, tf.Geom.Size.Actual.Total)
+		txt.LayoutStdLR(ts, fs, &st.UnContext, tf.Geom.Size.Actual.Content)
 
 		txt.Render(pc, tf.Geom.Pos.Content.AddDim(mat32.Y, tf.Geom.Size.Actual.Content.Y+st.Padding.Bottom.Dots+st.MaxBorder.Width.Bottom.Dots))
 	}
