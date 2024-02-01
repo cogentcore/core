@@ -621,9 +621,6 @@ func (tb *Tab) SetStyles() {
 				s.Min.Y.Dp(18)
 				s.Margin.Zero()
 				s.Padding.Zero()
-				if tb.Text != "" {
-					s.Margin.Right.Ch(1)
-				}
 			})
 		case "parts/label":
 			label := w.(*Label)
@@ -638,10 +635,9 @@ func (tb *Tab) SetStyles() {
 				s.Margin.Zero()
 				s.Padding.Zero()
 			})
-		case "parts/close-stretch":
+		case "parts/close-space":
 			w.Style(func(s *styles.Style) {
-				s.Min.X.Ch(1)
-				s.Grow.Set(1, 0)
+				s.Min.X.Em(1)
 			})
 		case "parts/close.parts/icon":
 			w.Style(func(s *styles.Style) {
@@ -651,7 +647,6 @@ func (tb *Tab) SetStyles() {
 		case "parts/close":
 			w.Style(func(s *styles.Style) {
 				s.Padding.Zero()
-				s.Margin.Left.Dp(16)
 				s.Border.Radius = styles.BorderRadiusFull
 			})
 			w.OnClick(func(e events.Event) {
@@ -666,16 +661,6 @@ func (tb *Tab) SetStyles() {
 				} else {
 					ts.DeleteTabIndex(idx, true)
 				}
-			})
-		case "parts/sc-stretch":
-			w.Style(func(s *styles.Style) {
-				s.Min.X.Ch(2)
-				s.Grow.Set(1, 0)
-			})
-		case "parts/shortcut":
-			w.Style(func(s *styles.Style) {
-				s.Margin.Zero()
-				s.Padding.Zero()
 			})
 		}
 	})
@@ -701,12 +686,16 @@ func (tb *Tab) ConfigWidget() {
 	if tb.Icon.IsSet() {
 		ici = len(config)
 		config.Add(IconType, "icon")
+		if tb.Text != "" {
+			config.Add(SpaceType, "space")
+		}
 	}
 	if tb.Text != "" {
 		lbi = len(config)
 		config.Add(LabelType, "label")
 	}
 	if tb.Type.Effective(tb) == FunctionalTabs && tb.CloseIcon.IsSet() {
+		config.Add(SpaceType, "close-space")
 		clsi = len(config)
 		config.Add(ButtonType, "close")
 	}
