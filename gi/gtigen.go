@@ -458,12 +458,12 @@ func (t *Layout) SetStackTop(v int) *Layout { t.StackTop = v; return t }
 func (t *Layout) SetTooltip(v string) *Layout { t.Tooltip = v; return t }
 
 // StretchType is the [gti.Type] for [Stretch]
-var StretchType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Stretch", IDName: "stretch", Doc: "Stretch adds an infinitely stretchy element for spacing out layouts\n(max-size = -1) set the width / height property to determine how much it\ntakes relative to other stretchy elements", Embeds: []gti.Field{{Name: "WidgetBase"}}, Instance: &Stretch{}})
+var StretchType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Stretch", IDName: "stretch", Doc: "Stretch adds a stretchy element that grows to fill all\navailable space. You can set [styles.Style.Grow] to change\nhow much it grows relative to other growing elements.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Instance: &Stretch{}})
 
 // NewStretch adds a new [Stretch] with the given name to the given parent:
-// Stretch adds an infinitely stretchy element for spacing out layouts
-// (max-size = -1) set the width / height property to determine how much it
-// takes relative to other stretchy elements
+// Stretch adds a stretchy element that grows to fill all
+// available space. You can set [styles.Style.Grow] to change
+// how much it grows relative to other growing elements.
 func NewStretch(par ki.Ki, name ...string) *Stretch {
 	return par.NewChild(StretchType, name...).(*Stretch)
 }
@@ -478,11 +478,12 @@ func (t *Stretch) New() ki.Ki { return &Stretch{} }
 func (t *Stretch) SetTooltip(v string) *Stretch { t.Tooltip = v; return t }
 
 // SpaceType is the [gti.Type] for [Space]
-var SpaceType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Space", IDName: "space", Doc: "Space adds a fixed sized (1 ch x 1 em by default) blank space to a layout.\nSet width / height property to change.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Instance: &Space{}})
+var SpaceType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Space", IDName: "space", Doc: "Space is a fixed size blank space, with\na default width of 1ch and a height of 1em.\nYou can set [styles.Style.Min] to change its size.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Instance: &Space{}})
 
 // NewSpace adds a new [Space] with the given name to the given parent:
-// Space adds a fixed sized (1 ch x 1 em by default) blank space to a layout.
-// Set width / height property to change.
+// Space is a fixed size blank space, with
+// a default width of 1ch and a height of 1em.
+// You can set [styles.Style.Min] to change its size.
 func NewSpace(par ki.Ki, name ...string) *Space {
 	return par.NewChild(SpaceType, name...).(*Space)
 }
@@ -851,8 +852,11 @@ func (t *Spinner) SetType(v TextFieldTypes) *Spinner { t.Type = v; return t }
 // SetPlaceholder sets the [Spinner.Placeholder]
 func (t *Spinner) SetPlaceholder(v string) *Spinner { t.Placeholder = v; return t }
 
-// SetError sets the [Spinner.Error]
-func (t *Spinner) SetError(v string) *Spinner { t.Error = v; return t }
+// SetSupportingText sets the [Spinner.SupportingText]
+func (t *Spinner) SetSupportingText(v string) *Spinner { t.SupportingText = v; return t }
+
+// SetErrorText sets the [Spinner.ErrorText]
+func (t *Spinner) SetErrorText(v string) *Spinner { t.ErrorText = v; return t }
 
 // SetLeadingIconOnClick sets the [Spinner.LeadingIconOnClick]
 func (t *Spinner) SetLeadingIconOnClick(v func(e events.Event)) *Spinner {
@@ -1252,7 +1256,7 @@ func (t *Tab) SetMaxChars(v int) *Tab { t.MaxChars = v; return t }
 func (t *Tab) SetTooltip(v string) *Tab { t.Tooltip = v; return t }
 
 // TextFieldType is the [gti.Type] for [TextField]
-var TextFieldType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.TextField", IDName: "text-field", Doc: "TextField is a widget for editing a line of text", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Type", Doc: "Type is the styling type of the text field."}, {Name: "Placeholder", Doc: "Placeholder is the text that is displayed when the text field is empty."}, {Name: "Error", Doc: "Error, if specified, is the error text displayed for the text field."}, {Name: "LeadingIcon", Doc: "LeadingIcon, if specified, indicates to add a button\nat the start of the text field with this icon."}, {Name: "LeadingIconOnClick", Doc: "LeadingIconOnClick, if specified, is the function to call when\nthe LeadingIcon is clicked. If this is nil, the leading icon\nwill not be interactive."}, {Name: "TrailingIcon", Doc: "TrailingIcon, if specified, indicates to add a button\nat the end of the text field with this icon."}, {Name: "TrailingIconOnClick", Doc: "TrailingIconOnClick, if specified, is the function to call when\nthe TrailingIcon is clicked. If this is nil, the trailing icon\nwill not be interactive."}, {Name: "NoEcho", Doc: "NoEcho is whether replace displayed characters with bullets to conceal text\n(for example, for a password input)."}, {Name: "CursorWidth", Doc: "CursorWidth is the width of the text field cursor.\nIt should be set in Style like all other style properties.\nBy default, it is 1dp."}, {Name: "CursorColor", Doc: "CursorColor is the color used for the text field cursor (caret).\nIt should be set in Style like all other style properties.\nBy default, it is [colors.Scheme.Primary.Base]."}, {Name: "PlaceholderColor", Doc: "PlaceholderColor is the color used for the Placeholder text.\nIt should be set in Style like all other style properties.\nBy default, it is [colors.Scheme.OnSurfaceVariant]."}, {Name: "SelectColor", Doc: "SelectColor is the color used for the text selection background color.\nIt should be set in Style like all other style properties.\nBy default, it is [colors.Scheme.Select.Container]"}, {Name: "Complete", Doc: "Complete contains functions and data for text field completion.\nIt must be set using [TextField.SetCompleter]."}, {Name: "Txt", Doc: "Txt is the last saved value of the text string being edited."}, {Name: "Edited", Doc: "Edited is whether the text has been edited relative to the original."}, {Name: "EditTxt", Doc: "EditTxt is the live text string being edited, with the latest modifications."}, {Name: "EffPos", Doc: "EffPos is the effective position with any leading icon space added."}, {Name: "EffSize", Doc: "EffSize is the effective size, subtracting any leading and trailing icon space."}, {Name: "StartPos", Doc: "StartPos is the starting display position in the string."}, {Name: "EndPos", Doc: "EndPos is the ending display position in the string."}, {Name: "CursorPos", Doc: "CursorPos is the current cursor position."}, {Name: "CharWidth", Doc: "CharWidth is the approximate number of chars that can be\ndisplayed at any time, which is computed from the font size."}, {Name: "SelectStart", Doc: "SelectStart is the starting position of selection in the string."}, {Name: "SelectEnd", Doc: "SelectEnd is the ending position of selection in the string."}, {Name: "SelectInit", Doc: "SelectInit is the initial selection position (where it started)."}, {Name: "SelectMode", Doc: "SelectMode is whether to select text as the cursor moves."}, {Name: "RenderAll", Doc: "RenderAll is the render version of entire text, for sizing."}, {Name: "RenderVis", Doc: "RenderVis is the render version of just the visible text."}, {Name: "FontHeight", Doc: "FontHeight is the font height cached during styling."}, {Name: "BlinkOn", Doc: "BlinkOn oscillates between on and off for blinking."}, {Name: "CursorMu", Doc: "CursorMu is the mutex for updating the cursor between blinker and field."}}, Instance: &TextField{}})
+var TextFieldType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.TextField", IDName: "text-field", Doc: "TextField is a widget for editing a line of text", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Type", Doc: "Type is the styling type of the text field."}, {Name: "Placeholder", Doc: "Placeholder is the text that is displayed when the text field is empty."}, {Name: "SupportingText", Doc: "SupportingText, if specified, is the supporting text displayed\nbelow the text field. ErrorText will be displayed instead of\nthis if it is specified."}, {Name: "ErrorText", Doc: "ErrorText, if specified, is the error text displayed below\nthe text field. It will be displayed instead of SupportingText\nif it is specified."}, {Name: "LeadingIcon", Doc: "LeadingIcon, if specified, indicates to add a button\nat the start of the text field with this icon."}, {Name: "LeadingIconOnClick", Doc: "LeadingIconOnClick, if specified, is the function to call when\nthe LeadingIcon is clicked. If this is nil, the leading icon\nwill not be interactive."}, {Name: "TrailingIcon", Doc: "TrailingIcon, if specified, indicates to add a button\nat the end of the text field with this icon."}, {Name: "TrailingIconOnClick", Doc: "TrailingIconOnClick, if specified, is the function to call when\nthe TrailingIcon is clicked. If this is nil, the trailing icon\nwill not be interactive."}, {Name: "NoEcho", Doc: "NoEcho is whether replace displayed characters with bullets to conceal text\n(for example, for a password input)."}, {Name: "CursorWidth", Doc: "CursorWidth is the width of the text field cursor.\nIt should be set in Style like all other style properties.\nBy default, it is 1dp."}, {Name: "CursorColor", Doc: "CursorColor is the color used for the text field cursor (caret).\nIt should be set in Style like all other style properties.\nBy default, it is [colors.Scheme.Primary.Base]."}, {Name: "PlaceholderColor", Doc: "PlaceholderColor is the color used for the Placeholder text.\nIt should be set in Style like all other style properties.\nBy default, it is [colors.Scheme.OnSurfaceVariant]."}, {Name: "SelectColor", Doc: "SelectColor is the color used for the text selection background color.\nIt should be set in Style like all other style properties.\nBy default, it is [colors.Scheme.Select.Container]"}, {Name: "Complete", Doc: "Complete contains functions and data for text field completion.\nIt must be set using [TextField.SetCompleter]."}, {Name: "Txt", Doc: "Txt is the last saved value of the text string being edited."}, {Name: "Edited", Doc: "Edited is whether the text has been edited relative to the original."}, {Name: "EditTxt", Doc: "EditTxt is the live text string being edited, with the latest modifications."}, {Name: "EffPos", Doc: "EffPos is the effective position with any leading icon space added."}, {Name: "EffSize", Doc: "EffSize is the effective size, subtracting any leading and trailing icon space."}, {Name: "StartPos", Doc: "StartPos is the starting display position in the string."}, {Name: "EndPos", Doc: "EndPos is the ending display position in the string."}, {Name: "CursorPos", Doc: "CursorPos is the current cursor position."}, {Name: "CharWidth", Doc: "CharWidth is the approximate number of chars that can be\ndisplayed at any time, which is computed from the font size."}, {Name: "SelectStart", Doc: "SelectStart is the starting position of selection in the string."}, {Name: "SelectEnd", Doc: "SelectEnd is the ending position of selection in the string."}, {Name: "SelectInit", Doc: "SelectInit is the initial selection position (where it started)."}, {Name: "SelectMode", Doc: "SelectMode is whether to select text as the cursor moves."}, {Name: "RenderAll", Doc: "RenderAll is the render version of entire text, for sizing."}, {Name: "RenderVis", Doc: "RenderVis is the render version of just the visible text."}, {Name: "FontHeight", Doc: "FontHeight is the font height cached during styling."}, {Name: "BlinkOn", Doc: "BlinkOn oscillates between on and off for blinking."}, {Name: "CursorMu", Doc: "CursorMu is the mutex for updating the cursor between blinker and field."}}, Instance: &TextField{}})
 
 // NewTextField adds a new [TextField] with the given name to the given parent:
 // TextField is a widget for editing a line of text
@@ -1294,9 +1298,17 @@ func (t *TextField) SetType(v TextFieldTypes) *TextField { t.Type = v; return t 
 // Placeholder is the text that is displayed when the text field is empty.
 func (t *TextField) SetPlaceholder(v string) *TextField { t.Placeholder = v; return t }
 
-// SetError sets the [TextField.Error]:
-// Error, if specified, is the error text displayed for the text field.
-func (t *TextField) SetError(v string) *TextField { t.Error = v; return t }
+// SetSupportingText sets the [TextField.SupportingText]:
+// SupportingText, if specified, is the supporting text displayed
+// below the text field. ErrorText will be displayed instead of
+// this if it is specified.
+func (t *TextField) SetSupportingText(v string) *TextField { t.SupportingText = v; return t }
+
+// SetErrorText sets the [TextField.ErrorText]:
+// ErrorText, if specified, is the error text displayed below
+// the text field. It will be displayed instead of SupportingText
+// if it is specified.
+func (t *TextField) SetErrorText(v string) *TextField { t.ErrorText = v; return t }
 
 // SetLeadingIconOnClick sets the [TextField.LeadingIconOnClick]:
 // LeadingIconOnClick, if specified, is the function to call when
