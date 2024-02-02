@@ -11,6 +11,8 @@ import (
 	"log"
 	"log/slog"
 	"reflect"
+	"slices"
+	"strings"
 
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
@@ -328,13 +330,29 @@ func (vv *ValueBase) Label() string {
 
 	lbl := ""
 	lbltag, has := vv.Tag("label")
+
+	// whether to sentence case
+	sc := true
+	if vv.Owner != nil && len(NoSentenceCaseFor) > 0 {
+		tnm := gti.TypeNameObj(vv.Owner)
+		sc = !slices.ContainsFunc(NoSentenceCaseFor, func(s string) bool {
+			return strings.Contains(tnm, s)
+		})
+	}
+
 	switch {
 	case has:
 		lbl = lbltag
 	case vv.Field != nil:
-		lbl = sentence.Case(vv.Field.Name)
+		lbl = vv.Field.Name
+		if sc {
+			lbl = sentence.Case(lbl)
+		}
 	default:
-		lbl = sentence.Case(vv.Nm)
+		lbl = vv.Nm
+		if sc {
+			lbl = sentence.Case(lbl)
+		}
 	}
 
 	vv.SavedLabel = lbl

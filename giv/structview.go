@@ -25,6 +25,15 @@ import (
 	"github.com/expr-lang/expr/ast"
 )
 
+// NoSentenceCaseFor indicates to not transform field names in
+// [StructView]s into "Sentence case" for types whose full,
+// package-path-qualified name contains any of these strings.
+// For example, this can be used to disable sentence casing
+// for types with scientific abbreviations in field names,
+// which are more readable when not sentence cased. However,
+// this should not be needed in most circumstances.
+var NoSentenceCaseFor []string
+
 // StructView represents a struct, creating a property editor of the fields --
 // constructs Children widgets to show the field names and editor fields for
 // each field, within an overall frame.
@@ -418,9 +427,7 @@ func StructFieldIsDef(defs string, valPtr any, kind reflect.Kind) (bool, string)
 		}
 	default:
 		val := laser.ToStringPrec(valPtr, 6)
-		if strings.HasPrefix(val, "&") {
-			val = val[1:]
-		}
+		val = strings.TrimPrefix(val, "&")
 		dtags := strings.Split(defs, ",")
 		for _, dv := range dtags {
 			if dv == strings.TrimSpace(val) {
