@@ -108,6 +108,9 @@ type TextField struct { //core:embedder
 	// EditTxt is the live text string being edited, with the latest modifications.
 	EditTxt []rune `copier:"-" json:"-" xml:"-" set:"-"`
 
+	// HasError is whether the text field currently has a validation error.
+	HasError bool `json:"-" xml:"-" set:"-"`
+
 	// EffPos is the effective position with any leading icon space added.
 	EffPos mat32.Vec2 `copier:"-" json:"-" xml:"-" set:"-"`
 
@@ -206,11 +209,15 @@ func (tf *TextField) SetStyles() {
 			s.MaxBorder = s.Border
 			s.MaxBorder.Width.Bottom = units.Dp(2)
 			s.MaxBorder.Color.Bottom = colors.Scheme.Primary.Base
+
 			if !tf.IsReadOnly() && s.Is(states.Focused) {
 				s.Border = s.MaxBorder
 			} else {
 				s.Border.Width.Bottom = units.Dp(1)
 				s.Border.Color.Bottom = colors.Scheme.OnSurfaceVariant
+			}
+			if tf.HasError {
+				s.Border.Color.Bottom = colors.Scheme.Error.Base
 			}
 		case TextFieldOutlined:
 			s.Border.Style.Set(styles.BorderSolid)
@@ -224,6 +231,9 @@ func (tf *TextField) SetStyles() {
 			} else {
 				s.Border.Width.Set(units.Dp(1))
 				s.Border.Color.Set(colors.Scheme.Outline)
+			}
+			if tf.HasError {
+				s.Border.Color.Set(colors.Scheme.Error.Base)
 			}
 		}
 		if tf.IsReadOnly() {
@@ -448,8 +458,13 @@ func (tf *TextField) Validate() {
 	}
 	err := tf.Validator()
 	if err == nil {
+		if !tf.HasError {
+			return
+		}
+		tf.HasError = false
 		return
 	}
+	tf.HasError = true
 	NewTooltipText(tf, err.Error()).Run()
 }
 
