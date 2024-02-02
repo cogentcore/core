@@ -369,6 +369,12 @@ func (fv *FileView) ConfigFilesRow() {
 				NewStructView(d).SetStruct(&fn).SetReadOnly(true)
 				d.AddOkOnly().NewDialog(fsv).Run()
 			})
+		gi.NewSeparator(m)
+		gi.NewButton(m).SetText("New folder").SetIcon(icons.CreateNewFolder).
+			SetTooltip("Create a new folder in the current directory").
+			OnClick(func(e events.Event) {
+				fv.NewFolder()
+			})
 	})
 	fv.ReadFiles()
 	fsv.SetReadOnly(true)

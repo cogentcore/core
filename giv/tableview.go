@@ -956,7 +956,6 @@ func (tv *TableView) ContextMenu(m *gi.Scene) {
 			OnClick(func(e events.Event) {
 				tv.EditIdx(tv.SelIdx)
 			})
-		gi.NewSeparator(m)
 	}
 }
 

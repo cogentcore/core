@@ -104,14 +104,14 @@ func (fn *Node) VCSContextMenu(m *gi.Scene) {
 }
 
 func (fn *Node) ContextMenu(m *gi.Scene) {
-	gi.NewButton(m).SetText("File info").SetIcon(icons.Info).
+	gi.NewButton(m).SetText("Info").SetIcon(icons.Info).
 		Style(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection(), states.Disabled)
 		}).OnClick(func(e events.Event) {
 		fn.This().(Filer).ShowFileInfo()
 	})
 
-	gi.NewButton(m).SetText("Open (w/default app)").SetIcon(icons.Open).
+	gi.NewButton(m).SetText("Open").SetIcon(icons.Open).
 		Style(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection(), states.Disabled)
 		}).OnClick(func(e events.Event) {
@@ -139,7 +139,7 @@ func (fn *Node) ContextMenu(m *gi.Scene) {
 	})
 	gi.NewSeparator(m)
 
-	giv.NewFuncButton(m, fn.OpenAll).SetText("Open All").SetIcon(icons.KeyboardArrowDown).
+	giv.NewFuncButton(m, fn.OpenAll).SetText("Open all").SetIcon(icons.KeyboardArrowDown).
 		Style(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || !fn.IsDir(), states.Disabled)
 		})
