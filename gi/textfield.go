@@ -44,8 +44,14 @@ type TextField struct { //core:embedder
 	// Type is the styling type of the text field.
 	Type TextFieldTypes
 
-	// Placeholder is the text that is displayed when the text field is empty.
+	// Placeholder is the text that is displayed
+	// when the text field is empty.
 	Placeholder string
+
+	// Validator is a function used to validate the input
+	// of the text field. If it returns a non-nil error,
+	// then an error color, icon, and tooltip will be displayed.
+	Validator func() error
 
 	// LeadingIcon, if specified, indicates to add a button
 	// at the start of the text field with this icon.
@@ -432,6 +438,19 @@ func (tf *TextField) Clear() {
 	tf.EndPos = 0
 	tf.SelectReset()
 	tf.SetFocusEvent() // this is essential for ensuring that the clear applies after focus is lost..
+}
+
+// Validate runs [TextField.Validator] and takes any necessary actions
+// as a result of that.
+func (tf *TextField) Validate() {
+	if tf.Validator == nil {
+		return
+	}
+	err := tf.Validator()
+	if err == nil {
+		return
+	}
+	NewTooltipText(tf, err.Error()).Run()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1340,6 +1359,9 @@ func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode events.SelectMod
 
 func (tf *TextField) HandleEvents() {
 	tf.HandleSelectToggle()
+	tf.OnChange(func(e events.Event) {
+		tf.Validate()
+	})
 	tf.On(events.MouseDown, func(e events.Event) {
 		if !tf.StateIs(states.Focused) {
 			tf.SetFocusEvent() // always grab, even if read only..

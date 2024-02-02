@@ -254,14 +254,14 @@ func (sp *Spinner) HandleEvents() {
 		se.SetHandled()
 		sp.IncrValue(float32(se.Delta.Y))
 	})
-	sp.OnFirst(events.Change, func(e events.Event) {
+	sp.SetValidator(func() error {
 		text := sp.Text()
 		val, err := sp.StringToVal(text)
 		if err != nil {
-			ErrorSnackbar(sp, err, "Invalid spinner value")
-			return
+			return err
 		}
 		sp.SetValue(val)
+		return nil
 	})
 	sp.OnKeyChord(func(e events.Event) {
 		if sp.IsReadOnly() {
