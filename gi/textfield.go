@@ -108,8 +108,8 @@ type TextField struct { //core:embedder
 	// EditTxt is the live text string being edited, with the latest modifications.
 	EditTxt []rune `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// HasError is whether the text field currently has a validation error.
-	HasError bool `json:"-" xml:"-" set:"-"`
+	// Error is the current validation error of the text field.
+	Error error `json:"-" xml:"-" set:"-"`
 
 	// EffPos is the effective position with any leading icon space added.
 	EffPos mat32.Vec2 `copier:"-" json:"-" xml:"-" set:"-"`
@@ -216,7 +216,7 @@ func (tf *TextField) SetStyles() {
 				s.Border.Width.Bottom = units.Dp(1)
 				s.Border.Color.Bottom = colors.Scheme.OnSurfaceVariant
 			}
-			if tf.HasError {
+			if tf.Error != nil {
 				s.Border.Color.Bottom = colors.Scheme.Error.Base
 			}
 		case TextFieldOutlined:
@@ -232,7 +232,7 @@ func (tf *TextField) SetStyles() {
 				s.Border.Width.Set(units.Dp(1))
 				s.Border.Color.Set(colors.Scheme.Outline)
 			}
-			if tf.HasError {
+			if tf.Error != nil {
 				s.Border.Color.Set(colors.Scheme.Error.Base)
 			}
 		}
@@ -291,11 +291,11 @@ func (tf *TextField) SetStyles() {
 			trail.Style(func(s *styles.Style) {
 				s.Padding.Zero()
 				s.Color = colors.Scheme.OnSurfaceVariant
-				if tf.HasError {
+				if tf.Error != nil {
 					s.Color = colors.Scheme.Error.Base
 				}
 				s.Margin.SetLeft(units.Dp(8))
-				if tf.TrailingIconOnClick == nil || tf.HasError {
+				if tf.TrailingIconOnClick == nil || tf.Error != nil {
 					s.SetAbilities(false, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
 					s.Cursor = cursors.None
 					// need to clear state in case it was set when there
@@ -464,16 +464,24 @@ func (tf *TextField) Validate() {
 	}
 	err := tf.Validator()
 	if err == nil {
-		if !tf.HasError {
+		if tf.Error == nil {
 			return
 		}
-		tf.HasError = false
+		tf.Error = nil
 		tf.TrailingIconButton().SetIconUpdate(tf.TrailingIcon)
 		return
 	}
-	tf.HasError = true
+	tf.Error = err
 	tf.TrailingIconButton().SetIconUpdate(icons.Error)
-	NewTooltipText(tf, err.Error()).Run()
+	// show the error tooltip immediately
+	tf.Send(events.LongHoverStart)
+}
+
+func (tf *TextField) WidgetTooltip() string {
+	if tf.Error == nil {
+		return tf.Tooltip
+	}
+	return tf.Error.Error()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

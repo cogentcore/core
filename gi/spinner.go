@@ -221,7 +221,10 @@ func (sp *Spinner) StringToVal(str string) (float32, error) {
 }
 
 func (sp *Spinner) WidgetTooltip() string {
-	res := sp.Tooltip
+	res := sp.TextField.WidgetTooltip()
+	if sp.Error != nil {
+		return res
+	}
 	if sp.HasMin {
 		if res != "" {
 			res += " "
