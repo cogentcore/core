@@ -123,6 +123,12 @@ func (wb *WidgetBase) AddContextMenu(menu func(m *Scene)) *WidgetBase {
 func (wb *WidgetBase) ApplyContextMenus(m *Scene) {
 	for i := len(wb.ContextMenus) - 1; i >= 0; i-- {
 		wb.ContextMenus[i](m)
+
+		nc := m.NumChildren()
+		// we delete any extra separator
+		if nc > 0 && m.Child(nc-1).KiType() == SeparatorType {
+			m.DeleteChildAtIndex(nc-1, true)
+		}
 		if i != 0 {
 			NewSeparator(m)
 		}
