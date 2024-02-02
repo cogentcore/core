@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"log/slog"
 	"strconv"
+	"strings"
+	"unicode"
 
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/colors"
@@ -344,10 +346,15 @@ func (ch *Chooser) SetEnums(es []enums.Enum) *Chooser {
 	for i, enum := range es {
 		str := enum.String()
 		lbl := sentence.Case(str)
-		// TODO(kai): this desc is not always correct because we
-		// don't have the name of the enum value pre-generator-transformation
-		// (same as with Switches) (#774)
-		tip := sentence.Doc(enum.Desc(), str, lbl)
+		desc := enum.Desc()
+		// If the documentation does not start with the transformed name, but it does
+		// start with an uppercase letter, then we assume that the first word of the
+		// documentation is the correct untransformed name. This fixes
+		// https://github.com/cogentcore/core/issues/774 (also for Switches).
+		if !strings.HasPrefix(desc, str) && len(desc) > 0 && unicode.IsUpper(rune(desc[0])) {
+			str, _, _ = strings.Cut(desc, " ")
+		}
+		tip := sentence.Doc(desc, str, lbl)
 		ch.Items[i] = ChooserItem{Value: enum, Label: lbl, Tooltip: tip}
 	}
 	return ch

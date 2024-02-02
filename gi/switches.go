@@ -6,6 +6,8 @@ package gi
 
 import (
 	"fmt"
+	"strings"
+	"unicode"
 
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
@@ -189,10 +191,15 @@ func (sw *Switches) SetEnums(el []enums.Enum) *Switches {
 		}
 		lbl := sentence.Case(str)
 		sw.Items[i] = lbl
-		// TODO(kai): this desc is not always correct because we
-		// don't have the name of the enum value pre-generator-transformation
-		// (same as with Chooser) (#774)
-		sw.Tooltips[i] = sentence.Doc(enum.Desc(), str, lbl)
+		desc := enum.Desc()
+		// If the documentation does not start with the transformed name, but it does
+		// start with an uppercase letter, then we assume that the first word of the
+		// documentation is the correct untransformed name. This fixes
+		// https://github.com/cogentcore/core/issues/774 (also for Chooser).
+		if !strings.HasPrefix(desc, str) && len(desc) > 0 && unicode.IsUpper(rune(desc[0])) {
+			str, _, _ = strings.Cut(desc, " ")
+		}
+		sw.Tooltips[i] = sentence.Doc(desc, str, lbl)
 	}
 	return sw
 }
