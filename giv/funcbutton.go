@@ -33,9 +33,8 @@ func CallFunc(ctx gi.Widget, fun any) {
 // NewSoloFuncButton returns a standalone FuncButton with the given context
 // for popping up any dialog elements.
 func NewSoloFuncButton(ctx gi.Widget, fun any) *FuncButton {
-	w := &gi.WidgetBase{}
-	w.InitName(w, "solofunc")
-	fb := NewFuncButton(w, fun)
+	pw := ki.NewRoot[*gi.WidgetBase]("solo-func-button-parent")
+	fb := NewFuncButton(pw, fun)
 	fb.SetContext(ctx)
 	return fb
 }
