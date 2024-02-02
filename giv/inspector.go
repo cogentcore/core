@@ -12,7 +12,6 @@ import (
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/grows/jsons"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/ki"
@@ -72,37 +71,49 @@ func (is *Inspector) UpdateItems() { //gti:add
 }
 
 // Save saves tree to current filename, in a standard JSON-formatted file
-func (is *Inspector) Save() { //gti:add
+func (is *Inspector) Save() error { //gti:add
 	if is.KiRoot == nil {
-		return
+		return nil
 	}
 	if is.Filename == "" {
-		return
+		return nil
 	}
 
-	grr.Log(jsons.Save(is.KiRoot, string(is.Filename)))
+	err := jsons.Save(is.KiRoot, string(is.Filename))
+	if err != nil {
+		return err
+	}
 	is.Changed = false
+	return nil
 }
 
 // SaveAs saves tree to given filename, in a standard JSON-formatted file
-func (is *Inspector) SaveAs(filename gi.Filename) { //gti:add
+func (is *Inspector) SaveAs(filename gi.Filename) error { //gti:add
 	if is.KiRoot == nil {
-		return
+		return nil
 	}
-	grr.Log(jsons.Save(is.KiRoot, string(filename)))
+	err := jsons.Save(is.KiRoot, string(filename))
+	if err != nil {
+		return err
+	}
 	is.Changed = false
 	is.Filename = filename
 	is.SetNeedsRender(true) // notify our editor
+	return nil
 }
 
 // Open opens tree from given filename, in a standard JSON-formatted file
-func (is *Inspector) Open(filename gi.Filename) { //gti:add
+func (is *Inspector) Open(filename gi.Filename) error { //gti:add
 	if is.KiRoot == nil {
-		return
+		return nil
 	}
-	grr.Log(jsons.Open(is.KiRoot, string(filename)))
+	err := jsons.Open(is.KiRoot, string(filename))
+	if err != nil {
+		return err
+	}
 	is.Filename = filename
 	is.SetNeedsRender(true) // notify our editor
+	return nil
 }
 
 // ToggleSelectionMode toggles the editor between selection mode or not.

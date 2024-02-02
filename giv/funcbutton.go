@@ -83,9 +83,9 @@ type FuncButton struct { //core:no-new
 	// ShowReturn is whether to display the return values of
 	// the function (and a success message if there are none).
 	// The way that the return values are shown is determined
-	// by ShowReturnAsDialog. ShowReturn is on by default, unless
-	// the function has no return values.
-	ShowReturn bool `default:"true"`
+	// by ShowReturnAsDialog. Non-nil error return values will
+	// always be shown, even if ShowReturn is set to false.
+	ShowReturn bool
 
 	// ShowReturnAsDialog, if and only if ShowReturn is true,
 	// indicates to show the return values of the function in
@@ -310,6 +310,12 @@ func (fb *FuncButton) SetMethodImpl(gmet *gti.Method, rmet reflect.Value) *FuncB
 // nothing if [FuncButton.ShowReturn] is dialog
 func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 	if !fb.ShowReturn {
+		for _, ret := range rets {
+			if err, ok := ret.Interface().(error); ok && err != nil {
+				gi.ErrorSnackbar(fb, err, fb.Text+" failed")
+				return
+			}
+		}
 		return
 	}
 	ctx := fb.GoodContext()
@@ -317,7 +323,6 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 		return
 	}
 	fb.SetReturnValues(rets)
-	// TODO: handle error return values
 	main := "Result of " + fb.Text
 	if len(rets) == 0 {
 		main = fb.Text + " succeeded"
