@@ -16,9 +16,7 @@ import (
 // For https://github.com/cogentcore/core/issues/614
 func TestRenderOneSideBorder(t *testing.T) {
 	b := NewBody()
-	NewButton(b).SetText("Test")
-	ly := NewLayout(b)
-	NewBox(ly).Style(func(s *styles.Style) {
+	NewBox(b).Style(func(s *styles.Style) {
 		s.Min.Set(units.Dp(100))
 		s.Border.Width.Bottom.Dp(10)
 		s.Border.Color.Bottom = colors.Scheme.Outline
