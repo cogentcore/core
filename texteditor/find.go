@@ -318,8 +318,6 @@ func (ed *Editor) QReplaceAddText() {
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
 		d.AddOk(pw).SetText("Query-Replace").OnClick(func(e events.Event) {
-			fc.SetCurrentText(fc.TextField().Text()).SendChange()
-			rc.SetCurrentText(rc.TextField().Text()).SendChange()
 			var find, repl string
 			if s, ok := fc.CurrentItem.Value.(string); ok {
 				find = s

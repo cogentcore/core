@@ -5,8 +5,8 @@
 package gi
 
 import (
+	"errors"
 	"fmt"
-	"log/slog"
 	"strconv"
 	"strings"
 	"unicode"
@@ -411,21 +411,19 @@ func (ch *Chooser) SetCurrentIndex(idx int) *Chooser {
 
 // SetCurrentText sets the current index and item based on the given text string.
 // It can only be used for editable choosers.
-func (ch *Chooser) SetCurrentText(text string) *Chooser {
+func (ch *Chooser) SetCurrentText(text string) error {
 	for i, item := range ch.Items {
 		if text == item.GetLabel() {
 			ch.SetCurrentIndex(i)
-			return ch
+			return nil
 		}
 	}
 	if !ch.AllowNew {
-		// TODO: use validation
-		slog.Error("invalid Chooser value", "value", text)
-		return ch
+		return errors.New("Unknown value")
 	}
 	ch.Items = append(ch.Items, ChooserItem{Value: text})
 	ch.SetCurrentIndex(len(ch.Items) - 1)
-	return ch
+	return nil
 }
 
 // ShowCurrentItem updates the display to present the current item.
@@ -588,9 +586,12 @@ func (ch *Chooser) OpenMenu(e events.Event) bool {
 }
 
 func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
-	tf.OnChange(func(e events.Event) {
-		ch.SetCurrentText(tf.Text())
-		ch.SendChange(e)
+	tf.SetValidator(func() error {
+		err := ch.SetCurrentText(tf.Text())
+		if err == nil {
+			ch.SendChange()
+		}
+		return err
 	})
 	tf.OnFocus(func(e events.Event) {
 		if ch.IsReadOnly() {
