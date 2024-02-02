@@ -1950,9 +1950,7 @@ func (sg *SliceViewGrid) SizeFromChildren(iter int, pass gi.LayoutPasses) mat32.
 	}
 	sg.VisRows = max(sg.VisRows, sg.MinRows)
 	minHt := sg.RowHeight * float32(sg.MinRows)
-	visHt := sg.RowHeight * float32(sg.VisRows)
-	// fmt.Println("rowht:", sg.RowHeight, "allocht:", allocHt, "visrows:", sg.VisRows)
-	_ = visHt
+	// visHt := sg.RowHeight * float32(sg.VisRows)
 	csz.Y = minHt
 	return csz
 }
@@ -2004,7 +2002,7 @@ func (sg *SliceViewGrid) ScrollValues(d mat32.Dims) (maxSize, visSize, visPct fl
 	if sv == nil {
 		return
 	}
-	maxSize = float32(max(sv.SliceSize, 1)) // + 0.01 // bit of extra to ensure last line always shows up
+	maxSize = float32(max(sv.SliceSize, 1))
 	visSize = float32(sg.VisRows)
 	visPct = visSize / maxSize
 	return
@@ -2022,7 +2020,6 @@ func (sv *SliceViewBase) SizeFinal() {
 	sg := sv.This().(SliceViewer).SliceGrid()
 	localIter := 0
 	for (sv.ConfigIter < 2 || sv.VisRows != sg.VisRows) && localIter < 2 {
-		// fmt.Println("sv:", sv.VisRows, "sg:", sg.VisRows)
 		sv.VisRows = sg.VisRows
 		sv.This().(SliceViewer).ConfigRows()
 		sg.SizeFinalUpdateChildrenSizes()
