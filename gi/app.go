@@ -242,9 +242,10 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 
 	ch.OnWidgetAdded(func(w Widget) {
 		if w.PathFrom(ch) == "parts/text" {
+			tf := w.(*TextField)
 			w.Style(func(s *styles.Style) {
 				s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
-				if !s.Is(states.Focused) {
+				if !s.Is(states.Focused) && tf.Error == nil {
 					s.Border = styles.Border{}
 				}
 				s.Border.Radius = styles.BorderRadiusFull
