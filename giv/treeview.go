@@ -369,6 +369,7 @@ func (tv *TreeView) SetStyles() {
 			sw.Type = gi.SwitchCheckbox
 			sw.SetIcons(tv.IconOpen, tv.IconClosed, tv.IconLeaf)
 			sw.Style(func(s *styles.Style) {
+				s.SetAbilities(false, abilities.Focusable)
 				// parent will handle our cursor
 				s.Cursor = cursors.None
 				s.Color = colors.Scheme.Primary.Base
