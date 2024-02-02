@@ -258,7 +258,7 @@ func (sp *Spinner) HandleEvents() {
 		text := sp.Text()
 		val, err := sp.StringToVal(text)
 		if err != nil {
-			sp.TextField.ErrorText = err.Error()
+			ErrorSnackbar(sp, err, "Invalid spinner value")
 			return
 		}
 		sp.SetValue(val)

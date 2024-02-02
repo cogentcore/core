@@ -47,16 +47,6 @@ type TextField struct { //core:embedder
 	// Placeholder is the text that is displayed when the text field is empty.
 	Placeholder string
 
-	// SupportingText, if specified, is the supporting text displayed
-	// below the text field. ErrorText will be displayed instead of
-	// this if it is specified.
-	SupportingText string
-
-	// ErrorText, if specified, is the error text displayed below
-	// the text field. It will be displayed instead of SupportingText
-	// if it is specified.
-	ErrorText string
-
 	// LeadingIcon, if specified, indicates to add a button
 	// at the start of the text field with this icon.
 	LeadingIcon icons.Icon `set:"-"`
@@ -190,9 +180,6 @@ func (tf *TextField) SetStyles() {
 		s.Min.X.Ch(20)
 		s.Max.X.Ch(60)
 		s.Padding.Set(units.Dp(8), units.Dp(8))
-		if tf.SupportingText != "" || tf.ErrorText != "" {
-			s.Margin.Bottom.Dp(12)
-		}
 		if tf.LeadingIcon.IsSet() {
 			s.Padding.Left.Dp(12)
 		}
@@ -1718,30 +1705,6 @@ func (tf *TextField) RenderTextField() {
 		}
 		tf.RenderVis.SetRunes(cur, st.FontRender(), &st.UnContext, &st.Text, true, 0, 0)
 		tf.RenderVis.RenderTopPos(pc, pos)
-	}
-
-	stxt := tf.SupportingText
-	if tf.ErrorText != "" {
-		stxt = tf.ErrorText
-	}
-	if stxt != "" {
-		ts := &styles.Text{}
-		ts.Defaults()
-		fs := &styles.FontRender{}
-		fs.Defaults()
-		if tf.ErrorText == "" {
-			fs.Color = colors.Scheme.OnSurfaceVariant
-		} else {
-			fs.Color = colors.Scheme.Error.Base
-		}
-		fs.Size.Dp(12)
-
-		txt := &paint.Text{}
-		txt.SetHTML(stxt, fs, ts, &st.UnContext, nil)
-
-		txt.LayoutStdLR(ts, fs, &st.UnContext, tf.Geom.Size.Actual.Content)
-
-		txt.Render(pc, tf.Geom.Pos.Content.AddDim(mat32.Y, tf.Geom.Size.Actual.Content.Y+st.Padding.Bottom.Dots+st.MaxBorder.Width.Bottom.Dots))
 	}
 }
 
