@@ -291,10 +291,16 @@ func (tf *TextField) SetStyles() {
 			trail.Style(func(s *styles.Style) {
 				s.Padding.Zero()
 				s.Color = colors.Scheme.OnSurfaceVariant
+				if tf.HasError {
+					s.Color = colors.Scheme.Error.Base
+				}
 				s.Margin.SetLeft(units.Dp(8))
-				if tf.TrailingIconOnClick == nil {
+				if tf.TrailingIconOnClick == nil || tf.HasError {
 					s.SetAbilities(false, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
 					s.Cursor = cursors.None
+					// need to clear state in case it was set when there
+					// was no error
+					s.State = 0
 				}
 				// same reasoning as for leading icon
 				if s.Is(states.Hovered) || s.Is(states.Focused) || s.Is(states.Active) {
@@ -462,9 +468,11 @@ func (tf *TextField) Validate() {
 			return
 		}
 		tf.HasError = false
+		tf.TrailingIconButton().SetIconUpdate(tf.TrailingIcon)
 		return
 	}
 	tf.HasError = true
+	tf.TrailingIconButton().SetIconUpdate(icons.Error)
 	NewTooltipText(tf, err.Error()).Run()
 }
 
