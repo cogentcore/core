@@ -74,3 +74,24 @@ type SliceLabeler interface {
 type Toolbarer interface {
 	ConfigToolbar(tb *Toolbar)
 }
+
+// Validator is an interface for types to provide a Validate method
+// that is used in giv to validate string Values using [TextField.Validator].
+type Validator interface {
+	// Validate returns an error if the value is invalid.
+	Validate() error
+}
+
+// FieldValidator is an interface for types to provide a ValidateField method
+// that is used in giv to validate string field Values using [TextField.Validator].
+type FieldValidator interface {
+	// ValidateField returns an error if the value of the given named field is invalid.
+	ValidateField(field string) error
+}
+
+// ShouldShower is an interface determining when you should take a shower.
+// Actually, it returns whether the given named field should be displayed
+// (e.g., in giv.StructView and giv.StructViewInline).
+type ShouldShower interface {
+	ShouldShow(field string) bool
+}
