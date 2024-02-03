@@ -36,8 +36,9 @@ import (
 // this should not be needed in most circumstances.
 var NoSentenceCaseFor []string
 
-// NoSentenceCaseForType returns true if the given full
-// package-path-qualified name is on the NoSentenceCaseFor list
+// NoSentenceCaseForType returns whether the given fully
+// package-path-qualified name contains anything in the
+// [NoSentenceCaseFor] list.
 func NoSentenceCaseForType(tnm string) bool {
 	return slices.ContainsFunc(NoSentenceCaseFor, func(s string) bool {
 		return strings.Contains(tnm, s)
@@ -267,7 +268,6 @@ func (sv *StructView) ConfigStructGrid() bool {
 						} else {
 							dupeFields[fnm] = true
 						}
-						// TODO(kai): how should we format this label?
 						if sc {
 							svv.SetLabel(sentence.Case(fnm))
 						} else {
