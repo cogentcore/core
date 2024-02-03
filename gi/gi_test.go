@@ -25,6 +25,7 @@ func TestBasic(t *testing.T) {
 var (
 	testStrings = []string{"", "Test", "Hello, world!", "123.456", "This is a really long test sentence with a lot of words in it."}
 	testIcons   = []icons.Icon{"", icons.Search}
+	testIcons1  = []icons.Icon{"", icons.Close}
 	testStates  = [][]states.States{
 		{},
 		{states.Disabled},

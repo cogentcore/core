@@ -2434,8 +2434,8 @@ func _TextFieldTypesNoOp() {
 }
 
 var _TextFieldTypesNameToValueMap = map[string]TextFieldTypes{
-	`TextFieldFilled`:   0,
-	`TextFieldOutlined`: 1,
+	`Filled`:   0,
+	`Outlined`: 1,
 }
 
 var _TextFieldTypesDescMap = map[TextFieldTypes]string{
@@ -2444,8 +2444,8 @@ var _TextFieldTypesDescMap = map[TextFieldTypes]string{
 }
 
 var _TextFieldTypesMap = map[TextFieldTypes]string{
-	0: `TextFieldFilled`,
-	1: `TextFieldOutlined`,
+	0: `Filled`,
+	1: `Outlined`,
 }
 
 // String returns the string representation

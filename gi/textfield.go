@@ -158,6 +158,21 @@ type TextField struct { //core:embedder
 	CursorMu sync.Mutex `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 }
 
+// TextFieldTypes is an enum containing the
+// different possible types of text fields
+type TextFieldTypes int32 //enums:enum -trim-prefix TextField
+
+const (
+	// TextFieldFilled represents a filled
+	// TextField with a background color
+	// and a bottom border
+	TextFieldFilled TextFieldTypes = iota
+	// TextFieldOutlined represents an outlined
+	// TextField with a border on all sides
+	// and no background color
+	TextFieldOutlined
+)
+
 func (tf *TextField) OnInit() {
 	tf.WidgetBase.OnInit()
 	tf.HandleEvents()
@@ -326,21 +341,6 @@ func (tf *TextField) Destroy() {
 	tf.StopCursor()
 	tf.WidgetBase.Destroy()
 }
-
-// TextFieldTypes is an enum containing the
-// different possible types of text fields
-type TextFieldTypes int32 //enums:enum
-
-const (
-	// TextFieldFilled represents a filled
-	// TextField with a background color
-	// and a bottom border
-	TextFieldFilled TextFieldTypes = iota
-	// TextFieldOutlined represents an outlined
-	// TextField with a border on all sides
-	// and no background color
-	TextFieldOutlined
-)
 
 // Text returns the current text -- applies any unapplied changes first, and
 // sends a signal if so -- this is the end-user method to get the current
