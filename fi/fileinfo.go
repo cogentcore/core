@@ -46,10 +46,10 @@ type FileInfo struct { //gti:add
 	Known Known `tableview:"-"`
 
 	// file mode bits
-	Mode os.FileMode
+	Mode os.FileMode `tableview:"-"`
 
 	// time that contents (only) were last modified
-	ModTime FileTime
+	ModTime FileTime `label:"Last modified"`
 
 	// version control system status, when enabled
 	Vcs vci.FileStatus `tableview:"-"`
