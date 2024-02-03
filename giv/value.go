@@ -11,8 +11,6 @@ import (
 	"log"
 	"log/slog"
 	"reflect"
-	"slices"
-	"strings"
 
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
@@ -334,10 +332,7 @@ func (vv *ValueBase) Label() string {
 	// whether to sentence case
 	sc := true
 	if vv.Owner != nil && len(NoSentenceCaseFor) > 0 {
-		tnm := gti.TypeNameObj(vv.Owner)
-		sc = !slices.ContainsFunc(NoSentenceCaseFor, func(s string) bool {
-			return strings.Contains(tnm, s)
-		})
+		sc = !NoSentenceCaseForType(gti.TypeNameObj(vv.Owner))
 	}
 
 	switch {

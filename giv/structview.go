@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"reflect"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -18,6 +19,7 @@ import (
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/glop/bools"
 	"cogentcore.org/core/glop/sentence"
+	"cogentcore.org/core/gti"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
@@ -33,6 +35,14 @@ import (
 // which are more readable when not sentence cased. However,
 // this should not be needed in most circumstances.
 var NoSentenceCaseFor []string
+
+// NoSentenceCaseForType returns true if the given full
+// package-path-qualified name is on the NoSentenceCaseFor list
+func NoSentenceCaseForType(tnm string) bool {
+	return slices.ContainsFunc(NoSentenceCaseFor, func(s string) bool {
+		return strings.Contains(tnm, s)
+	})
+}
 
 // StructView represents a struct, creating a property editor of the fields --
 // constructs Children widgets to show the field names and editor fields for
@@ -173,6 +183,10 @@ func (sv *StructView) ConfigStructGrid() bool {
 	if laser.AnyIsNil(sv.Struct) {
 		return false
 	}
+	sc := true
+	if len(NoSentenceCaseFor) > 0 {
+		sc = !NoSentenceCaseForType(gti.TypeNameObj(sv.Struct))
+	}
 	sg := sv.StructGrid()
 	// note: widget re-use does not work due to all the closures
 	sg.DeleteChildren(ki.DestroyKids)
@@ -254,7 +268,11 @@ func (sv *StructView) ConfigStructGrid() bool {
 							dupeFields[fnm] = true
 						}
 						// TODO(kai): how should we format this label?
-						svv.SetLabel(sentence.Case(fnm))
+						if sc {
+							svv.SetLabel(sentence.Case(fnm))
+						} else {
+							svv.SetLabel(fnm)
+						}
 						labnm := fmt.Sprintf("label-%v", fnm)
 						valnm := fmt.Sprintf("value-%v", fnm)
 						config.Add(gi.LabelType, labnm)
