@@ -34,6 +34,7 @@ func FileViewDialog(ctx gi.Widget, filename, exts, title string, fun func(selfil
 		d.SetTitle(title)
 	}
 	fv := NewFileView(d).SetFilename(filename, exts)
+	d.AddAppBar(fv.ConfigToolbar)
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
 		d.AddOk(pw).OnClick(func(e events.Event) {
@@ -257,55 +258,50 @@ func (fv *FileView) ConfigFileView() {
 	if fv.HasChildren() {
 		return
 	}
-	gi.NewFrame(fv, "path-tbar")
 	gi.NewLayout(fv, "files-row")
 	gi.NewLayout(fv, "sel-row")
 
-	fv.ConfigPathBar()
 	fv.ConfigFilesRow()
 	fv.ConfigSelRow()
 	fv.UpdateFiles()
 }
 
-func (fv *FileView) ConfigPathBar() {
-	pr := fv.ChildByName("path-tbar", 0).(*gi.Frame)
-	if pr.HasChildren() {
-		return
-	}
+// ConfigToolbar configures the given toolbar to have file view
+// actions and completions.
+func (fv *FileView) ConfigToolbar(tb *gi.Toolbar) {
+	ch := tb.ChildByName("app-chooser").(*gi.Chooser)
+	ch.ConfigWidget()
 
-	gi.NewLabel(pr, "path-lbl").SetText("Path:").
-		SetTooltip("Path to look for files in: can select from list of recent paths, or edit a value directly")
-	pf := gi.NewChooser(pr, "path").SetEditable(true)
-	pf.ConfigWidget()
-	pft := pf.TextField()
-	if pft != nil {
-		pft.SetCompleter(fv, fv.PathComplete, fv.PathCompleteEdit)
-		pft.OnChange(func(e events.Event) {
-			fv.DirPath = pft.Text()
-			fv.UpdateFilesAction()
-		})
-	}
-	pf.OnChange(func(e events.Event) {
-		sp := pf.CurrentItem.Value.(string)
-		if sp == gi.FileViewResetPaths {
-			gi.SavedPaths = make(gi.FilePaths, 1, gi.SystemSettings.SavedPathsMax)
-			gi.SavedPaths[0] = fv.DirPath
-			pf.SetStrings(([]string)(gi.SavedPaths)).SetCurrentIndex(0)
-			gi.SavedPaths = append(gi.SavedPaths, gi.SavedPathsExtras...)
-			fv.UpdateFiles()
-		} else if sp == gi.FileViewEditPaths {
-			fv.EditPaths()
-			pf.SetStrings(([]string)(gi.SavedPaths)).SetCurrentIndex(0)
-		} else {
-			fv.DirPath = sp
-			fv.UpdateFilesAction()
-		}
+	ch.AddItemsFunc(func() {
+
 	})
 
-	NewFuncButton(pr, fv.DirPathUp).SetIcon(icons.ArrowUpward).SetKey(keyfun.Jump).SetText("Up")
-	NewFuncButton(pr, fv.UpdateFilesAction).SetIcon(icons.Refresh).SetText("Update")
-	NewFuncButton(pr, fv.AddPathToFavs).SetIcon(icons.Favorite).SetText("Favorite")
-	NewFuncButton(pr, fv.NewFolder).SetIcon(icons.CreateNewFolder)
+	// ch.TextField().SetCompleter(fv, fv.PathComplete, fv.PathCompleteEdit)
+	// pft.OnChange(func(e events.Event) {
+	// 	fv.DirPath = pft.Text()
+	// 	fv.UpdateFilesAction()
+	// })
+	// pf.OnChange(func(e events.Event) {
+	// 	sp := pf.CurrentItem.Value.(string)
+	// 	if sp == gi.FileViewResetPaths {
+	// 		gi.SavedPaths = make(gi.FilePaths, 1, gi.SystemSettings.SavedPathsMax)
+	// 		gi.SavedPaths[0] = fv.DirPath
+	// 		pf.SetStrings(([]string)(gi.SavedPaths)).SetCurrentIndex(0)
+	// 		gi.SavedPaths = append(gi.SavedPaths, gi.SavedPathsExtras...)
+	// 		fv.UpdateFiles()
+	// 	} else if sp == gi.FileViewEditPaths {
+	// 		fv.EditPaths()
+	// 		pf.SetStrings(([]string)(gi.SavedPaths)).SetCurrentIndex(0)
+	// 	} else {
+	// 		fv.DirPath = sp
+	// 		fv.UpdateFilesAction()
+	// 	}
+	// })
+
+	NewFuncButton(tb, fv.DirPathUp).SetIcon(icons.ArrowUpward).SetKey(keyfun.Jump).SetText("Up")
+	NewFuncButton(tb, fv.AddPathToFavs).SetIcon(icons.Favorite).SetText("Favorite")
+	NewFuncButton(tb, fv.UpdateFilesAction).SetIcon(icons.Refresh).SetText("Update")
+	NewFuncButton(tb, fv.NewFolder).SetIcon(icons.CreateNewFolder)
 }
 
 func (fv *FileView) ConfigFilesRow() {
@@ -454,12 +450,6 @@ func (fv *FileView) WatchWatcher() {
 	}()
 }
 
-// PathField returns the chooser of the path
-func (fv *FileView) PathField() *gi.Chooser {
-	pr := fv.ChildByName("path-tbar", 0).(*gi.Frame)
-	return pr.ChildByName("path", 1).(*gi.Chooser)
-}
-
 func (fv *FileView) FilesRow() *gi.Layout {
 	return fv.ChildByName("files-row", 2).(*gi.Layout)
 }
@@ -554,17 +544,17 @@ func (fv *FileView) UpdateFiles() {
 	defer fv.UpdateEndLayout(updt)
 
 	fv.UpdatePath()
-	pf := fv.PathField()
-	if len(gi.SavedPaths) == 0 {
-		gi.OpenPaths()
-	}
-	gi.SavedPaths.AddPath(fv.DirPath, gi.SystemSettings.SavedPathsMax)
-	gi.SavePaths()
-	sp := []string(gi.SavedPaths)
-	pf.SetStrings(sp).SetCurrentIndex(0)
-	pf.Items[len(pf.Items)-2].SeparatorBefore = true
-	pf.CurrentItem.Label = fv.DirPath
-	pf.ShowCurrentItem()
+	// pf := fv.PathField()
+	// if len(gi.SavedPaths) == 0 {
+	// 	gi.OpenPaths()
+	// }
+	// gi.SavedPaths.AddPath(fv.DirPath, gi.SystemSettings.SavedPathsMax)
+	// gi.SavePaths()
+	// sp := []string(gi.SavedPaths)
+	// pf.SetStrings(sp).SetCurrentIndex(0)
+	// pf.Items[len(pf.Items)-2].SeparatorBefore = true
+	// pf.CurrentItem.Label = fv.DirPath
+	// pf.ShowCurrentItem()
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
 
@@ -651,14 +641,15 @@ func (fv *FileView) DirPathUp() { //gti:add
 
 // PathFieldHistPrev goes to the previous path in history
 func (fv *FileView) PathFieldHistPrev() {
-	pf := fv.PathField()
-	pf.SelectItemAction(1) // todo: this doesn't quite work more than once, as history will update.
+	// TODO(kai)
+	// pf := fv.PathField()
+	// pf.SelectItemAction(1) // todo: this doesn't quite work more than once, as history will update.
 }
 
 // PathFieldHistNext goes to the next path in history
 func (fv *FileView) PathFieldHistNext() {
-	pf := fv.PathField()
-	pf.SelectItemAction(1) // todo: this doesn't work at all..
+	// pf := fv.PathField()
+	// pf.SelectItemAction(1) // todo: this doesn't work at all..
 }
 
 // NewFolder creates a new folder with the given name in the current directory.

@@ -1516,6 +1516,7 @@ func (vv *FileValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	cur := laser.ToString(vv.Value.Interface())
 	ext, _ := vv.Tag("ext")
 	fv := NewFileView(d).SetFilename(cur, ext)
+	d.AddAppBar(fv.ConfigToolbar)
 	return true, func() {
 		cur = fv.SelectedFile()
 		vv.SetValue(cur)
