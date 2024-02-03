@@ -273,7 +273,12 @@ func (fv *FileView) ConfigToolbar(tb *gi.Toolbar) {
 	ch.ConfigWidget()
 
 	ch.AddItemsFunc(func() {
-
+		for _, sp := range gi.SavedPaths {
+			ch.Items = append(ch.Items, gi.ChooserItem{
+				Value: sp,
+				Icon:  icons.File,
+			})
+		}
 	})
 
 	// ch.TextField().SetCompleter(fv, fv.PathComplete, fv.PathCompleteEdit)
