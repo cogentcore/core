@@ -210,14 +210,30 @@ func (sp *Spinner) StringToVal(str string) (float32, error) {
 		f64, err := strconv.ParseFloat(str, 32)
 		return float32(f64), err
 	}
+
+	var err error
 	if sp.FormatIsInt() {
 		var ival int
-		_, err := fmt.Sscanf(str, sp.Format, &ival)
-		return float32(ival), err
+		_, err = fmt.Sscanf(str, sp.Format, &ival)
+		if err == nil {
+			return float32(ival), nil
+		}
+	} else {
+		var fval float32
+		_, err = fmt.Sscanf(str, sp.Format, &fval)
+		if err == nil {
+			return fval, nil
+		}
 	}
-	var fval float32
-	_, err := fmt.Sscanf(str, sp.Format, &fval)
-	return fval, err
+	// if we have an error using the formatted version,
+	// we try using a pure parse
+	f64, ferr := strconv.ParseFloat(str, 32)
+	if ferr == nil {
+		return float32(f64), nil
+	}
+	// if everything fails, we return the error for the
+	// formatted version
+	return 0, err
 }
 
 func (sp *Spinner) WidgetTooltip() string {
