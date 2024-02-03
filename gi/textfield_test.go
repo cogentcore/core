@@ -4,7 +4,11 @@
 
 package gi
 
-import "testing"
+import (
+	"errors"
+	"path/filepath"
+	"testing"
+)
 
 func TestTextField(t *testing.T) {
 	for _, typ := range TextFieldTypesValues() {
@@ -19,4 +23,32 @@ func TestTextField(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestTextFieldValidatorValid(t *testing.T) {
+	b := NewBody()
+	tf := NewTextField(b).SetText("my secure password")
+	tf.SetValidator(func() error {
+		if len(tf.Text()) < 12 {
+			return errors.New("password must be at least 12 characters")
+		}
+		return nil
+	})
+	b.AssertRender(t, filepath.Join("textfield", "validator_valid"), func() {
+		tf.SendChange() // trigger validation
+	})
+}
+
+func TestTextFieldValidatorInvalid(t *testing.T) {
+	b := NewBody()
+	tf := NewTextField(b).SetText("my password")
+	tf.SetValidator(func() error {
+		if len(tf.Text()) < 12 {
+			return errors.New("password must be at least 12 characters")
+		}
+		return nil
+	})
+	b.AssertRender(t, filepath.Join("textfield", "validator_invalid"), func() {
+		tf.SendChange() // trigger validation
+	})
 }
