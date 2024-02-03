@@ -472,6 +472,12 @@ func (tf *TextField) Validate() {
 		return
 	}
 	tf.Error = err
+	if tf.TrailingIconButton() == nil {
+		updt := tf.UpdateStart()
+		tf.SetTrailingIcon(icons.Blank)
+		tf.Update()
+		tf.UpdateEndLayout(updt)
+	}
 	tf.TrailingIconButton().SetIconUpdate(icons.Error)
 	// show the error tooltip immediately
 	tf.Send(events.LongHoverStart)
