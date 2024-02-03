@@ -270,7 +270,6 @@ func (fv *FileView) ConfigFileView() {
 // actions and completions.
 func (fv *FileView) ConfigToolbar(tb *gi.Toolbar) {
 	ch := tb.ChildByName("app-chooser").(*gi.Chooser)
-	ch.ConfigWidget()
 
 	ch.AddItemsFunc(func() {
 		for _, sp := range gi.SavedPaths {
