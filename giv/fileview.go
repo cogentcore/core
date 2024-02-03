@@ -498,7 +498,7 @@ func (fv *FileView) UpdatePath() {
 }
 
 // UpdateFilesAction updates the list of files and other views for the current path.
-func (fv *FileView) UpdateFilesAction() { ///gti:add
+func (fv *FileView) UpdateFilesAction() { //gti:add
 	fv.UpdateFiles()
 	sf := fv.SelField()
 	sf.SetFocusEvent()
