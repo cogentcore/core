@@ -187,6 +187,11 @@ type Widget interface {
 	// This call recursively calls the parent, which is typically a short path.
 	IsVisible() bool
 
+	// ChildBackground returns the background color (Image) for given child Widget.
+	// By default, this is just our [Styles.Actualbackground] but it can be computed
+	// specifically for the child (e.g., for zebra stripes in giv.SliceViewGrid)
+	ChildBackground(child Widget) image.Image
+
 	// todo: revisit this -- in general anything with a largish image (including svg,
 	// SubScene, but not Icon) should get put on a list so the RenderWin Drawer just
 	// directly uploads its image.

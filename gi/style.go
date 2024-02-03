@@ -257,6 +257,13 @@ func SetUnitContext(st *styles.Style, sc *Scene, el, par mat32.Vec2) {
 	st.ToDots()
 }
 
+// ChildBackground returns the background color (Image) for given child Widget.
+// By default, this is just our [Styles.Actualbackground] but it can be computed
+// specifically for the child (e.g., for zebra stripes in giv.SliceViewGrid)
+func (wb *WidgetBase) ChildBackground(child Widget) image.Image {
+	return wb.Styles.ActualBackground
+}
+
 // ParentActualBackground returns the actual background of
 // the parent of the widget. If it has no parent, it returns nil.
 func (wb *WidgetBase) ParentActualBackground() image.Image {
@@ -264,7 +271,7 @@ func (wb *WidgetBase) ParentActualBackground() image.Image {
 	if pwb == nil {
 		return nil
 	}
-	return pwb.Styles.ActualBackground
+	return pwb.This().(Widget).ChildBackground(wb.This().(Widget))
 }
 
 // IsNthChild returns whether the node is nth-child of its parent
