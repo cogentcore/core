@@ -22,7 +22,6 @@ import (
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/units"
 )
 
 // NewValue makes and returns a new [Value] from the given value and creates
@@ -820,7 +819,6 @@ func (vv *ValueBase) ConfigWidget(w gi.Widget) {
 	tf.Style(func(s *styles.Style) {
 		s.Min.X.Ch(16)
 		s.Min.Y.Em(1.4)
-		s.Padding.Set(units.Dp(10)) // match typical element size so alignment works better
 	})
 	vv.StdConfigWidget(w)
 	if completetag, ok := vv.Tag("complete"); ok {
@@ -836,6 +834,15 @@ func (vv *ValueBase) ConfigWidget(w gi.Widget) {
 	}
 	if vtag, _ := vv.Tag("view"); vtag == "password" {
 		tf.SetTypePassword()
+	}
+
+	if vl, ok := vv.Value.Interface().(gi.Validator); ok {
+		tf.SetValidator(vl.Validate)
+	}
+	if fv, ok := vv.Owner.(gi.FieldValidator); ok {
+		tf.SetValidator(func() error {
+			return fv.ValidateField(vv.Field.Name)
+		})
 	}
 
 	tf.Config()
