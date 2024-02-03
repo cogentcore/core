@@ -11,7 +11,17 @@ import (
 	"testing"
 
 	"cogentcore.org/core/gi"
+	"cogentcore.org/core/ki"
 )
+
+type validator string
+
+func (v *validator) Validate() error {
+	if !strings.Contains(string(*v), "@") {
+		return errors.New("must have an @")
+	}
+	return nil
+}
 
 func TestValidatorValid(t *testing.T) {
 	b := gi.NewBody()
@@ -29,11 +39,43 @@ func TestValidatorInvalid(t *testing.T) {
 	})
 }
 
-type validator string
+type fieldValidator struct {
+	Name  string
+	Email string
+}
 
-func (v *validator) Validate() error {
-	if !strings.Contains(string(*v), "@") {
-		return errors.New("must have an @")
+func (v *fieldValidator) ValidateField(field string) error {
+	switch field {
+	case "Name":
+		if !strings.Contains(v.Name, " ") {
+			return errors.New("need full name")
+		}
+	case "Email":
+		if !strings.Contains(v.Email, "@") || !strings.Contains(v.Email, ".") {
+			return errors.New("must have a . and @")
+		}
 	}
 	return nil
+}
+
+func TestFieldValidatorValid(t *testing.T) {
+	b := gi.NewBody()
+	v := NewStructView(b).SetStruct(&fieldValidator{Name: "Go Gopher", Email: "me@example.com"})
+	b.AssertRender(t, filepath.Join("text", "field_validator_valid"), func() {
+		v.WidgetWalkPre(func(kwi gi.Widget, kwb *gi.WidgetBase) bool {
+			kwb.SendChange() // trigger validation
+			return ki.Continue
+		})
+	})
+}
+
+func TestFieldValidatorInvalid(t *testing.T) {
+	b := gi.NewBody()
+	v := NewStructView(b).SetStruct(&fieldValidator{Name: "Go Gopher", Email: "me@example"})
+	b.AssertRender(t, filepath.Join("text", "field_validator_invalid"), func() {
+		v.WidgetWalkPre(func(kwi gi.Widget, kwb *gi.WidgetBase) bool {
+			kwb.SendChange() // trigger validation
+			return ki.Continue
+		})
+	})
 }
