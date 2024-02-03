@@ -302,25 +302,10 @@ func (fv *FileView) ConfigPathBar() {
 		}
 	})
 
-	gi.NewButton(pr, "path-up").SetIcon(icons.ArrowUpward).SetKey(keyfun.Jump).SetTooltip("go up one level into the parent folder").
-		OnClick(func(e events.Event) {
-			fv.DirPathUp()
-		})
-
-	gi.NewButton(pr, "path-ref").SetIcon(icons.Refresh).SetTooltip("Update directory view -- in case files might have changed").
-		OnClick(func(e events.Event) {
-			fv.UpdateFilesAction()
-		})
-
-	gi.NewButton(pr, "path-fav").SetIcon(icons.Favorite).SetTooltip("save this path to the favorites list -- saves current Prefs").
-		OnClick(func(e events.Event) {
-			fv.AddPathToFavs()
-		})
-
-	gi.NewButton(pr, "new-folder").SetIcon(icons.CreateNewFolder).SetTooltip("Create a new folder in this folder").
-		OnClick(func(e events.Event) {
-			fv.NewFolder()
-		})
+	NewFuncButton(pr, fv.DirPathUp).SetIcon(icons.ArrowUpward).SetKey(keyfun.Jump).SetText("Up")
+	NewFuncButton(pr, fv.UpdateFilesAction).SetIcon(icons.Refresh).SetText("Update")
+	NewFuncButton(pr, fv.AddPathToFavs).SetIcon(icons.Favorite).SetText("Favorite")
+	NewFuncButton(pr, fv.NewFolder).SetIcon(icons.CreateNewFolder)
 }
 
 func (fv *FileView) ConfigFilesRow() {
@@ -370,11 +355,7 @@ func (fv *FileView) ConfigFilesRow() {
 				d.AddOkOnly().NewFullDialog(fsv).Run()
 			})
 		gi.NewSeparator(m)
-		gi.NewButton(m).SetText("New folder").SetIcon(icons.CreateNewFolder).
-			SetTooltip("Create a new folder in the current directory").
-			OnClick(func(e events.Event) {
-				fv.NewFolder()
-			})
+		NewFuncButton(m, fv.NewFolder).SetIcon(icons.CreateNewFolder)
 	})
 	fv.ReadFiles()
 	fsv.SetReadOnly(true)
@@ -516,9 +497,8 @@ func (fv *FileView) UpdatePath() {
 	fv.DirPath, _ = filepath.Abs(fv.DirPath)
 }
 
-// UpdateFilesAction updates list of files and other views for current path,
-// emitting FileSig signals around it -- this is for gui-generated actions only.
-func (fv *FileView) UpdateFilesAction() {
+// UpdateFilesAction updates the list of files and other views for the current path.
+func (fv *FileView) UpdateFilesAction() { ///gti:add
 	fv.UpdateFiles()
 	sf := fv.SelField()
 	sf.SetFocusEvent()
@@ -633,7 +613,7 @@ func (fv *FileView) UpdateFavs() {
 }
 
 // AddPathToFavs adds the current path to favorites
-func (fv *FileView) AddPathToFavs() {
+func (fv *FileView) AddPathToFavs() { //gti:add
 	dp := fv.DirPath
 	if dp == "" {
 		return
@@ -660,7 +640,7 @@ func (fv *FileView) AddPathToFavs() {
 }
 
 // DirPathUp moves up one directory in the path
-func (fv *FileView) DirPathUp() {
+func (fv *FileView) DirPathUp() { //gti:add
 	pdr, _ := filepath.Split(fv.DirPath)
 	if pdr == "" {
 		return
@@ -681,20 +661,19 @@ func (fv *FileView) PathFieldHistNext() {
 	pf.SelectItemAction(1) // todo: this doesn't work at all..
 }
 
-// NewFolder creates a new folder in current directory
-func (fv *FileView) NewFolder() {
+// NewFolder creates a new folder with the given name in the current directory.
+func (fv *FileView) NewFolder(name string) error { //gti:add
 	dp := fv.DirPath
 	if dp == "" {
-		return
+		return nil
 	}
-	np := filepath.Join(dp, "NewFolder")
+	np := filepath.Join(dp, name)
 	err := os.MkdirAll(np, 0775)
 	if err != nil {
-		// TODO(kai/snack)
-		// emsg := fmt.Sprintf("NewFolder at: %q: Error: %v", fv.DirPath, err)
-		// gi.PromptDialog(fv, gi.DlgOpts{Title: "FileView Error", Prompt: emsg, Ok: true, Cancel: false}, nil)
+		return err
 	}
 	fv.UpdateFilesAction()
+	return nil
 }
 
 // SetSelFileAction sets the currently selected file to given name, and sends
