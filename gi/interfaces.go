@@ -7,6 +7,7 @@ package gi
 import (
 	"reflect"
 
+	"cogentcore.org/core/gti"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
 )
@@ -90,8 +91,12 @@ type FieldValidator interface {
 }
 
 // ShouldShower is an interface determining when you should take a shower.
-// Actually, it returns whether the given named field should be displayed
+// Actually, it determines whether a named field should be displayed
 // (e.g., in giv.StructView and giv.StructViewInline).
 type ShouldShower interface {
-	ShouldShow(field string) bool
+	// ShouldShow returns whether the given named field should be
+	// displayed in the context of the given type of view
+	// (giv.StructViewType, giv.StructViewInlineType, or
+	// giv.TableViewType).
+	ShouldShow(field string, typ *gti.Type) bool
 }
