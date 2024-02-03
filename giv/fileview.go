@@ -335,6 +335,7 @@ func (fv *FileView) ConfigFilesRow() {
 		fv.FavSelect(sv.SelIdx)
 	})
 
+	fsv.ContextMenus = nil
 	fsv.AddContextMenu(func(m *gi.Scene) {
 		gi.NewButton(m).SetText("Open").SetIcon(icons.Open).
 			SetTooltip("Open the selected file using the default app").
@@ -360,14 +361,13 @@ func (fv *FileView) ConfigFilesRow() {
 				fn := fv.Files[fsv.SelIdx]
 				CallFunc(fsv, fn.Rename)
 			})
-		gi.NewSeparator(m)
 		gi.NewButton(m).SetText("Info").SetIcon(icons.Info).
 			SetTooltip("View information about the selected file").
 			OnClick(func(e events.Event) {
 				fn := fv.Files[fsv.SelIdx]
 				d := gi.NewBody().AddTitle("Info: " + fn.Name)
 				NewStructView(d).SetStruct(&fn).SetReadOnly(true)
-				d.AddOkOnly().NewDialog(fsv).Run()
+				d.AddOkOnly().NewFullDialog(fsv).Run()
 			})
 		gi.NewSeparator(m)
 		gi.NewButton(m).SetText("New folder").SetIcon(icons.CreateNewFolder).
