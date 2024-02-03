@@ -207,6 +207,11 @@ func (ch *Chooser) SetStyles() {
 			text.Style(func(s *styles.Style) {
 				s.Grow = ch.Styles.Grow // we grow like our parent
 			})
+		case "parts/text.parts/trail-icon":
+			w.Style(func(s *styles.Style) {
+				// indicator does not need to be focused
+				s.SetAbilities(false, abilities.Focusable)
+			})
 		case "parts/indicator":
 			w.Style(func(s *styles.Style) {
 				s.Font.Size.Dp(16)
