@@ -106,15 +106,14 @@ func (sw *Switch) SetIconFromState() {
 func (sw *Switch) HandleEvents() {
 	sw.HandleSelectToggle() // on widgetbase
 	sw.HandleClickOnEnterSpace()
-	sw.OnClick(func(e events.Event) {
-		e.SetHandled()
-		sw.SetChecked(!sw.IsChecked())
-		sw.SendChange(e)
+	sw.OnFinal(events.Click, func(e events.Event) {
+		sw.SetChecked(sw.IsChecked())
 		if sw.Type == SwitchChip {
 			sw.SetNeedsLayout(true)
 		} else {
 			sw.SetNeedsRender(true)
 		}
+		sw.SendChange(e)
 	})
 }
 

@@ -201,7 +201,7 @@ func inputs(ts *gi.Tabs) {
 	spinners := gi.NewLayout(tab, "spinners")
 
 	gi.NewSpinner(spinners).SetStep(5).SetMin(-50).SetMax(100).SetValue(15)
-	gi.NewSpinner(spinners).SetFormat("%#X").SetStep(1).SetMax(255).SetValue(44)
+	gi.NewSpinner(spinners).SetFormat("%X").SetStep(1).SetMax(255).SetValue(44)
 
 	choosers := gi.NewLayout(tab, "choosers")
 
