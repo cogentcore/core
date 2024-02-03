@@ -628,8 +628,8 @@ func (vv *ColorValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	}
 	NewColorView(d).SetColor(dclr).SetTmpSave(vv.TmpSave)
 	return true, func() {
-		cclr := laser.OnePtrValue(vv.TmpSave.Val()).Interface().(*color.RGBA)
-		vv.SetColor(*cclr)
+		cclr := laser.NonPtrValue(vv.TmpSave.Val()).Interface().(color.Color)
+		vv.SetColor(colors.AsRGBA(cclr))
 		vv.UpdateWidget()
 	}
 }
