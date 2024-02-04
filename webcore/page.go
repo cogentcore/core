@@ -38,20 +38,20 @@ type Page struct {
 	Source fs.FS
 
 	// Context is the page's [coredom.Context].
-	Context *coredom.Context
+	Context *coredom.Context `set:"-"`
 
 	// The history of URLs that have been visited. The oldest page is first.
-	History []string
+	History []string `set:"-"`
 
 	// HistoryIndex is the current place we are at in the History
-	HistoryIndex int
+	HistoryIndex int `set:"-"`
 
 	// PagePath is the fs path of the current page in [Page.Source]
-	PagePath string
+	PagePath string `set:"-"`
 
 	// URLToPagePath is a map between user-facing page URLs and underlying
 	// FS page paths.
-	URLToPagePath map[string]string
+	URLToPagePath map[string]string `set:"-"`
 }
 
 var _ ki.Ki = (*Page)(nil)
