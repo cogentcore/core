@@ -291,7 +291,7 @@ func (sv *SliceViewBase) SetStyles() {
 	svi := sv.This().(SliceViewer)
 
 	sv.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.DoubleClickable)
+		s.SetAbilities(true, abilities.Pressable, abilities.DoubleClickable)
 		s.Direction = styles.Column
 		// absorb horizontal here, vertical in view
 		s.Overflow.X = styles.OverflowAuto
@@ -1858,8 +1858,10 @@ func (sv *SliceViewBase) HandleEvents() {
 	})
 	sv.OnClick(func(e events.Event) {
 		sv.SetFocusEvent()
-		// sg := sv.This().(SliceViewer).SliceGrid()
-
+		sg := sv.This().(SliceViewer).SliceGrid()
+		row, col := sg.IndexFromPixel(e.Pos())
+		fmt.Println("clicked on:", row, col)
+		sv.UpdateSelectRow(row + sv.StartIdx)
 	})
 }
 
