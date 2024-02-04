@@ -670,39 +670,22 @@ func (fp *FilePaths) AddPath(path string, max int) {
 	StringsInsertFirstUnique((*[]string)(fp), path, max)
 }
 
-var (
-	// SavedPathsFilename is the name of the saved file paths file in Cogent Core prefs directory
-	SavedPathsFilename = "saved-paths.json"
-
-	// FileViewResetPaths defines a string that is added as an item to the recents menu
-	FileViewResetPaths = "<i>Reset Paths</i>"
-
-	// FileViewEditPaths defines a string that is added as an item to the recents menu
-	FileViewEditPaths = "<i>Edit Paths</i>"
-
-	// SavedPathsExtras are the reset and edit items we add to the recents menu
-	SavedPathsExtras = []string{FileViewResetPaths, FileViewEditPaths}
-)
+// SavedPathsFilename is the name of the saved file paths file in
+// the Cogent Core data directory.
+var SavedPathsFilename = "saved-paths.json"
 
 // SavePaths saves the active SavedPaths to data dir
 func SavePaths() {
-	StringsRemoveExtras((*[]string)(&SavedPaths), SavedPathsExtras)
 	pdir := TheApp.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, SavedPathsFilename)
 	SavedPaths.Save(pnm)
-	// add back after save
-	SavedPaths = append(SavedPaths, SavedPathsExtras...)
 }
 
 // OpenPaths loads the active SavedPaths from data dir
 func OpenPaths() {
-	// remove to be sure we don't have duplicate extras
-	StringsRemoveExtras((*[]string)(&SavedPaths), SavedPathsExtras)
 	pdir := TheApp.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, SavedPathsFilename)
 	SavedPaths.Open(pnm)
-	// add back after save
-	SavedPaths = append(SavedPaths, SavedPathsExtras...)
 }
 
 //////////////////////////////////////////////////////////////////

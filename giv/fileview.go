@@ -273,42 +273,34 @@ func (fv *FileView) ConfigToolbar(tb *gi.Toolbar) {
 
 	ch.AddItemsFunc(func() {
 		for _, sp := range gi.SavedPaths {
-			item := gi.ChooserItem{
+			sp := sp
+			ch.Items = append(ch.Items, gi.ChooserItem{
 				Value: sp,
 				Icon:  icons.Folder,
-			}
-			if sp == gi.SavedPathsExtras[0] {
-				item.SeparatorBefore = true
-				item.Icon = icons.Refresh
-			}
-			if sp == gi.SavedPathsExtras[1] {
-				item.Icon = icons.Edit
-			}
-			ch.Items = append(ch.Items, item)
+				Func: func() {
+					fv.DirPath = sp
+					fv.UpdateFilesAction()
+				},
+			})
 		}
+		ch.Items = append(ch.Items, gi.ChooserItem{
+			Value:           "Reset saved paths",
+			Icon:            icons.Refresh,
+			SeparatorBefore: true,
+			Func: func() {
+				gi.SavedPaths = make(gi.FilePaths, 1, gi.SystemSettings.SavedPathsMax)
+				gi.SavedPaths[0] = fv.DirPath
+				fv.UpdateFiles()
+			},
+		})
+		ch.Items = append(ch.Items, gi.ChooserItem{
+			Value: "Edit saved paths",
+			Icon:  icons.Edit,
+			Func: func() {
+				fv.EditPaths()
+			},
+		})
 	})
-
-	// ch.TextField().SetCompleter(fv, fv.PathComplete, fv.PathCompleteEdit)
-	// pft.OnChange(func(e events.Event) {
-	// 	fv.DirPath = pft.Text()
-	// 	fv.UpdateFilesAction()
-	// })
-	// pf.OnChange(func(e events.Event) {
-	// 	sp := pf.CurrentItem.Value.(string)
-	// 	if sp == gi.FileViewResetPaths {
-	// 		gi.SavedPaths = make(gi.FilePaths, 1, gi.SystemSettings.SavedPathsMax)
-	// 		gi.SavedPaths[0] = fv.DirPath
-	// 		pf.SetStrings(([]string)(gi.SavedPaths)).SetCurrentIndex(0)
-	// 		gi.SavedPaths = append(gi.SavedPaths, gi.SavedPathsExtras...)
-	// 		fv.UpdateFiles()
-	// 	} else if sp == gi.FileViewEditPaths {
-	// 		fv.EditPaths()
-	// 		pf.SetStrings(([]string)(gi.SavedPaths)).SetCurrentIndex(0)
-	// 	} else {
-	// 		fv.DirPath = sp
-	// 		fv.UpdateFilesAction()
-	// 	}
-	// })
 
 	NewFuncButton(tb, fv.DirPathUp).SetIcon(icons.ArrowUpward).SetKey(keyfun.Jump).SetText("Up")
 	NewFuncButton(tb, fv.AddPathToFavs).SetIcon(icons.Favorite).SetText("Favorite")
@@ -641,19 +633,6 @@ func (fv *FileView) DirPathUp() { //gti:add
 	fv.UpdateFilesAction()
 }
 
-// PathFieldHistPrev goes to the previous path in history
-func (fv *FileView) PathFieldHistPrev() {
-	// TODO(kai)
-	// pf := fv.PathField()
-	// pf.SelectItemAction(1) // todo: this doesn't quite work more than once, as history will update.
-}
-
-// PathFieldHistNext goes to the next path in history
-func (fv *FileView) PathFieldHistNext() {
-	// pf := fv.PathField()
-	// pf.SelectItemAction(1) // todo: this doesn't work at all..
-}
-
 // NewFolder creates a new folder with the given name in the current directory.
 func (fv *FileView) NewFolder(name string) error { //gti:add
 	dp := fv.DirPath
@@ -779,12 +758,6 @@ func (fv *FileView) KeyInput(kt events.Event) {
 	case keyfun.Jump, keyfun.WordLeft:
 		kt.SetHandled()
 		fv.DirPathUp()
-	case keyfun.HistPrev:
-		kt.SetHandled()
-		fv.PathFieldHistPrev()
-	case keyfun.HistNext:
-		kt.SetHandled()
-		fv.PathFieldHistNext()
 	case keyfun.Insert, keyfun.InsertAfter, keyfun.Open, keyfun.SelectMode:
 		kt.SetHandled()
 		if fv.SelectFile() {
@@ -872,18 +845,11 @@ func (fv *FileView) FileCompleteEdit(data any, text string, cursorPos int, c com
 
 // EditPaths displays a dialog allowing user to delete paths from the path list
 func (fv *FileView) EditPaths() {
-	tmp := make([]string, len(gi.SavedPaths))
-	copy(tmp, gi.SavedPaths)
-	gi.StringsRemoveExtras((*[]string)(&tmp), gi.SavedPathsExtras)
-	d := gi.NewBody().AddTitle("Recent file paths").AddText("Delete paths you no longer use")
-	NewSliceView(d).SetSlice(&tmp)
+	d := gi.NewBody().AddTitle("Recent file paths").AddText("You can delete paths you no longer use")
+	NewSliceView(d).SetSlice(&gi.SavedPaths)
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
 		d.AddOk(pw).OnClick(func(e events.Event) {
-			gi.SavedPaths = nil
-			gi.SavedPaths = append(gi.SavedPaths, tmp...)
-			// add back the reset/edit menu items
-			gi.SavedPaths = append(gi.SavedPaths, gi.SavedPathsExtras...)
 			gi.SavePaths()
 			fv.UpdateFiles()
 		})
