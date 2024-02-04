@@ -66,8 +66,9 @@ func TestRenderFrameAlignment(t *testing.T) {
 		s.Background = colors.C(colors.Orange)
 		s.Min.Set(units.Dp(30))
 	})
-	NewFrame(outer).Style(func(s *styles.Style) {
+	NewBox(outer).Style(func(s *styles.Style) {
 		s.Background = colors.C(colors.Blue)
+		s.Grow.Set(1, 1)
 	})
 	b.AssertRender(t, filepath.Join("render", "frame-alignment"))
 }
@@ -83,10 +84,9 @@ func TestRenderFrameAlignmentCenter(t *testing.T) {
 		s.Align.Content = styles.Center
 		s.Align.Items = styles.Center
 	})
-	NewFrame(outer).Style(func(s *styles.Style) {
+	NewBox(outer).Style(func(s *styles.Style) {
 		s.Background = colors.C(colors.Blue)
 		s.Min.Set(units.Dp(15))
-		s.Grow.Set(0, 0)
 	})
 	b.AssertRender(t, filepath.Join("render", "frame-alignment-center"))
 }
