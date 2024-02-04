@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/giv"
+	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/states"
@@ -43,44 +44,59 @@ type ILStruct struct { //gti:add
 	On bool
 
 	// can u see me?
-	ShowMe string `viewif:"On"`
+	ShowMe string
 
 	// a conditional
-	Cond int `viewif:"On"`
+	Cond int
 
-	// On and Cond=0 -- note that slbool as bool cannot be used directly..
-	Cond1 string `viewif:"On&&Cond==0"`
+	// On and Cond=0
+	Cond1 string
 
 	// if Cond=0
-	Cond2 TableStruct `viewif:"On&&Cond<=1"`
+	Cond2 TableStruct
 
 	// a value
 	Val float32
 }
 
+func (il *ILStruct) ShouldShow(field string, typ *gti.Type) bool {
+	switch field {
+	case "ShowMe", "Cond":
+		return il.On
+	case "Cond1":
+		return il.On && il.Cond == 0
+	case "Cond2":
+		return il.On && il.Cond <= 1
+	}
+	return true
+}
+
 // Struct is a testing struct for struct view
 type Struct struct { //gti:add
 
+	// An enum value
+	Enum gi.ButtonTypes
+
 	// a string
-	Name string `viewif:"!(Stripes==[RowStripes,ColStripes])"`
+	Name string
 
 	// click to show next
 	ShowNext bool
 
 	// can u see me?
-	ShowMe string `viewif:"ShowNext"`
+	ShowMe string
 
 	// how about that
-	Inline ILStruct `view:"inline"`
+	Inline ILStruct
 
 	// a conditional
-	Cond int `default:"1"`
+	Cond int
 
 	// if Cond=0
-	Cond1 string `viewif:"Cond==0"`
+	Cond1 string
 
-	// if Cond=0
-	Cond2 TableStruct `viewif:"Cond>=0"`
+	// if Cond>=0
+	Cond2 TableStruct
 
 	// a value
 	Val float32
@@ -90,6 +106,20 @@ type Struct struct { //gti:add
 	Things []*TableStruct
 
 	Stuff []float32
+}
+
+func (st *Struct) ShouldShow(field string, typ *gti.Type) bool {
+	switch field {
+	case "Name":
+		return st.Enum <= gi.ButtonElevated
+	case "ShowMe":
+		return st.ShowNext
+	case "Cond1":
+		return st.Cond == 0
+	case "Cond2":
+		return st.Cond >= 0
+	}
+	return true
 }
 
 func main() {
