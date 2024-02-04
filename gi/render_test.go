@@ -63,17 +63,30 @@ func TestRenderButtonAlignment(t *testing.T) {
 func TestRenderFrameAlignment(t *testing.T) {
 	b := NewBody()
 	outer := NewFrame(b).Style(func(s *styles.Style) {
-		s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
-		s.Min.Set(units.Dp(100))
-		// s.Justify.Content = styles.Center
-		// s.Justify.Items = styles.Center
-		// s.Align.Content = styles.Center
-		// s.Align.Items = styles.Center
+		s.Background = colors.C(colors.Orange)
+		s.Min.Set(units.Dp(30))
 	})
 	NewFrame(outer).Style(func(s *styles.Style) {
-		s.Background = colors.C(colors.Scheme.Outline)
-		s.Min.Set(units.Dp(50))
-		// s.Grow.Set(0, 0)
+		s.Background = colors.C(colors.Blue)
 	})
 	b.AssertRender(t, filepath.Join("render", "frame-alignment"))
+}
+
+// For https://github.com/cogentcore/core/issues/810
+func TestRenderFrameAlignmentCenter(t *testing.T) {
+	b := NewBody()
+	outer := NewFrame(b).Style(func(s *styles.Style) {
+		s.Background = colors.C(colors.Orange)
+		s.Min.Set(units.Dp(30))
+		s.Justify.Content = styles.Center
+		s.Justify.Items = styles.Center
+		s.Align.Content = styles.Center
+		s.Align.Items = styles.Center
+	})
+	NewFrame(outer).Style(func(s *styles.Style) {
+		s.Background = colors.C(colors.Blue)
+		s.Min.Set(units.Dp(15))
+		s.Grow.Set(0, 0)
+	})
+	b.AssertRender(t, filepath.Join("render", "frame-alignment-center"))
 }
