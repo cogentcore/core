@@ -259,17 +259,18 @@ func (tv *TableView) CacheVisFields() {
 			return false
 		}
 		tvtag := fld.Tag.Get("tableview")
-		if tvtag != "" {
-			if tvtag == "-" {
-				return false
-			} else if tvtag == "-select" && tv.IsReadOnly() {
-				return false
-			} else if tvtag == "-edit" && !tv.IsReadOnly() {
-				return false
-			}
+		switch {
+		case tvtag == "+":
+			return true
+		case tvtag == "-":
+			return false
+		case tvtag == "-select" && tv.IsReadOnly():
+			return false
+		case tvtag == "-edit" && !tv.IsReadOnly():
+			return false
+		default:
+			return fld.Tag.Get("view") != "-"
 		}
-		vtag := fld.Tag.Get("view")
-		return vtag != "-"
 	}
 	laser.FlatFieldsTypeFuncIf(styp,
 		func(typ reflect.Type, fld reflect.StructField) bool {
