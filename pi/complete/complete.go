@@ -5,6 +5,8 @@
 package complete
 
 import (
+	"cmp"
+	"slices"
 	"strings"
 	"unicode"
 
@@ -114,6 +116,9 @@ func MatchSeedString(completions []string, seed string) []string {
 			matches = append(matches, c)
 		}
 	}
+	slices.SortStableFunc(matches, func(a, b string) int {
+		return cmp.Compare(MatchPrecedence(lseed, a), MatchPrecedence(lseed, b))
+	})
 	return matches
 }
 
@@ -135,6 +140,9 @@ func MatchSeedCompletion(completions []Completion, seed string) []Completion {
 			matches = append(matches, c)
 		}
 	}
+	slices.SortStableFunc(matches, func(a, b Completion) int {
+		return cmp.Compare(MatchPrecedence(lseed, a.Text), MatchPrecedence(lseed, b.Text))
+	})
 	return matches
 }
 
@@ -168,6 +176,18 @@ func IsSeedMatching(lseed string, completion string) bool {
 		ci += string(f[0])
 	}
 	return strings.Contains(ci, lseed)
+}
+
+// MatchPrecedence returns the sorting precedence of the given
+// completion relative to the given lowercase seed. The completion
+// is assumed to already match the seed by [IsSeedMatching]. A
+// lower precedence indicates a high precedence.
+func MatchPrecedence(lseed string, completion string) int {
+	lc := strings.ToLower(completion)
+	if strings.HasPrefix(lc, lseed) {
+		return 0
+	}
+	return 1
 }
 
 // SeedWhiteSpace returns the text after the last whitespace
