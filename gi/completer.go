@@ -150,14 +150,11 @@ func (c *Complete) ShowNow(ctx Widget, pos image.Point, text string, force bool)
 	md := c.MatchFunc(c.Context, text, c.SrcLn, c.SrcCh)
 	c.Completions = md.Matches
 	c.Seed = md.Seed
-	count := len(c.Completions)
-	if count == 0 {
+	if len(c.Completions) == 0 {
 		return
 	}
-	if !force {
-		if count > SystemSettings.CompleteMaxItems || (count == 1 && c.Completions[0].Text == c.Seed) {
-			return
-		}
+	if len(c.Completions) > SystemSettings.CompleteMaxItems {
+		c.Completions = c.Completions[0:SystemSettings.CompleteMaxItems]
 	}
 
 	sc := NewScene(ctx.Name() + "-complete")
@@ -167,7 +164,7 @@ func (c *Complete) ShowNow(ctx Widget, pos image.Point, text string, force bool)
 	// so that you can keep typing while in a completer
 	// sc.OnKeyChord(ctx.HandleEvent)
 
-	for i := 0; i < count; i++ {
+	for i := 0; i < len(c.Completions); i++ {
 		cmp := &c.Completions[i]
 		text := cmp.Text
 		if cmp.Label != "" {
