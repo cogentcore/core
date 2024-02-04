@@ -82,10 +82,9 @@ func (sv *StructViewInline) ConfigStruct() bool {
 		if vwtag == "-" {
 			return true
 		}
-		viewif := field.Tag.Get("viewif")
-		if viewif != "" {
+		if ss, ok := sv.Struct.(gi.ShouldShower); ok {
 			sv.HasViewIfs = true
-			if !StructViewIf(viewif, field, sv.Struct) {
+			if !ss.ShouldShow(field.Name, StructViewInlineType) {
 				return true
 			}
 		}

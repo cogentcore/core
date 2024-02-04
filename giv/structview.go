@@ -201,10 +201,9 @@ func (sv *StructView) ConfigStructGrid() bool {
 			if vwtag == "-" {
 				return false
 			}
-			viewif := field.Tag.Get("viewif")
-			if viewif != "" {
+			if ss, ok := sv.Struct.(gi.ShouldShower); ok {
 				sv.HasViewIfs = true
-				if !StructViewIf(viewif, field, sv.Struct) {
+				if !ss.ShouldShow(field.Name, StructViewType) {
 					return false
 				}
 			}
@@ -217,10 +216,9 @@ func (sv *StructView) ConfigStructGrid() bool {
 			if vwtag == "-" {
 				return true
 			}
-			viewif := field.Tag.Get("viewif")
-			if viewif != "" {
+			if ss, ok := sv.Struct.(gi.ShouldShower); ok {
 				sv.HasViewIfs = true
-				if !StructViewIf(viewif, field, sv.Struct) {
+				if !ss.ShouldShow(field.Name, StructViewType) {
 					return true
 				}
 			}
@@ -232,10 +230,9 @@ func (sv *StructView) ConfigStructGrid() bool {
 						if svwtag == "-" {
 							return false
 						}
-						viewif := sfield.Tag.Get("viewif")
-						if viewif != "" {
+						if ss, ok := fvalp.(gi.ShouldShower); ok {
 							sv.HasViewIfs = true
-							if !StructViewIf(viewif, sfield, fvalp) {
+							if !ss.ShouldShow(sfield.Name, StructViewType) {
 								return false
 							}
 						}
@@ -246,10 +243,9 @@ func (sv *StructView) ConfigStructGrid() bool {
 						if svwtag == "-" {
 							return true
 						}
-						viewif := sfield.Tag.Get("viewif")
-						if viewif != "" {
+						if ss, ok := fvalp.(gi.ShouldShower); ok {
 							sv.HasViewIfs = true
-							if !StructViewIf(viewif, sfield, fvalp) {
+							if !ss.ShouldShow(sfield.Name, StructViewType) {
 								return true
 							}
 						}
