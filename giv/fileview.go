@@ -560,7 +560,7 @@ func (fv *FileView) UpdateFiles() {
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
 
-	fv.Scene.UpdateTitle(fv.DirPath)
+	fv.Scene.UpdateTitle("Files: " + fv.DirPath)
 
 	fv.ReadFiles()
 
