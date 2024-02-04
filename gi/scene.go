@@ -305,6 +305,23 @@ func (sc *Scene) DeleteImpl() {
 	sc.DeleteChildren(ki.DestroyKids)
 }
 
+// UpdateTitle updates the title of the Scene's associated [Stage],
+// [RenderWin], and [Body], if applicable.
+func (sc *Scene) UpdateTitle(title string) {
+	if sc.Scene != nil {
+		sc.Stage.Title = title
+	}
+	if rw := sc.RenderWin(); rw != nil {
+		rw.SetTitle(title)
+	}
+	if sc.Body != nil {
+		sc.Body.Title = title
+		if tw, ok := sc.Body.ChildByName("title").(*Label); ok {
+			tw.SetText(title)
+		}
+	}
+}
+
 //////////////////////////////////////////////////////////////////
 //  Image utilities
 

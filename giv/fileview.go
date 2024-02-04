@@ -271,8 +271,15 @@ func (fv *FileView) ConfigFileView() {
 // ConfigToolbar configures the given toolbar to have file view
 // actions and completions.
 func (fv *FileView) ConfigToolbar(tb *gi.Toolbar) {
-	ch := tb.ChildByName("app-chooser").(*gi.Chooser)
+	NewFuncButton(tb, fv.DirPathUp).SetIcon(icons.ArrowUpward).SetKey(keyfun.Jump).SetText("Up")
+	NewFuncButton(tb, fv.AddPathToFavs).SetIcon(icons.Favorite).SetText("Favorite")
+	NewFuncButton(tb, fv.UpdateFilesAction).SetIcon(icons.Refresh).SetText("Update")
+	NewFuncButton(tb, fv.NewFolder).SetIcon(icons.CreateNewFolder)
 
+	ch, ok := tb.ChildByName("app-chooser").(*gi.Chooser)
+	if !ok {
+		return
+	}
 	ch.ItemsFuncs = slices.Insert(ch.ItemsFuncs, 0, func() {
 		for _, sp := range gi.RecentPaths {
 			sp := sp
@@ -303,11 +310,6 @@ func (fv *FileView) ConfigToolbar(tb *gi.Toolbar) {
 			},
 		})
 	})
-
-	NewFuncButton(tb, fv.DirPathUp).SetIcon(icons.ArrowUpward).SetKey(keyfun.Jump).SetText("Up")
-	NewFuncButton(tb, fv.AddPathToFavs).SetIcon(icons.Favorite).SetText("Favorite")
-	NewFuncButton(tb, fv.UpdateFilesAction).SetIcon(icons.Refresh).SetText("Update")
-	NewFuncButton(tb, fv.NewFolder).SetIcon(icons.CreateNewFolder)
 }
 
 func (fv *FileView) ConfigFilesRow() {
@@ -557,6 +559,8 @@ func (fv *FileView) UpdateFiles() {
 	gi.SaveRecentPaths()
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
+
+	fv.Scene.UpdateTitle(fv.DirPath)
 
 	fv.ReadFiles()
 
