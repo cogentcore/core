@@ -408,6 +408,9 @@ func (ch *Chooser) SetCurrentValue(v any) *Chooser {
 
 // SetCurrentIndex sets the current index and the item associated with it.
 func (ch *Chooser) SetCurrentIndex(idx int) *Chooser {
+	if idx < 0 || idx >= len(ch.Items) {
+		return ch
+	}
 	ch.CurrentIndex = idx
 	ch.CurrentItem = ch.Items[idx]
 	ch.ShowCurrentItem()
@@ -424,7 +427,7 @@ func (ch *Chooser) SetCurrentText(text string) error {
 		}
 	}
 	if !ch.AllowNew {
-		return errors.New("Unknown value")
+		return errors.New("unknown value")
 	}
 	ch.Items = append(ch.Items, ChooserItem{Value: text})
 	ch.SetCurrentIndex(len(ch.Items) - 1)
