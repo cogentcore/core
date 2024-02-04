@@ -48,6 +48,8 @@ func TestRenderButtonAlignment(t *testing.T) {
 	b := NewBody()
 	bt := NewButton(b).SetType(ButtonAction).SetIcon(icons.Square).Style(func(s *styles.Style) {
 		s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
+		s.Border = styles.Border{}
+		s.MaxBorder = styles.Border{}
 	})
 	b.AssertRender(t, filepath.Join("render", "button-alignment"), func() {
 		bt.WidgetWalkPre(func(kwi Widget, kwb *WidgetBase) bool {
