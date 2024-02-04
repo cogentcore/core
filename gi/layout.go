@@ -444,7 +444,9 @@ func ChildByLabelStartsCanFocus(ly *Layout, name string, after ki.Ki) (ki.Ki, bo
 	})
 	matches := complete.MatchSeedCompletion(completions, name)
 	if len(matches) > 0 {
-		return ly.FindPath(matches[0].Desc), true
+		if res := ly.FindPath(matches[0].Desc); res != nil {
+			return res, true
+		}
 	}
 	return nil, false
 }
