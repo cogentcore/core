@@ -13,65 +13,57 @@ import (
 	"cogentcore.org/core/gi"
 )
 
-var _SliceViewFlagsValues = []SliceViewFlags{8, 9, 10, 11, 12, 13, 14, 15, 16, 17}
+var _SliceViewFlagsValues = []SliceViewFlags{8, 9, 10, 11, 12, 13, 14, 15}
 
 // SliceViewFlagsN is the highest valid value
 // for type SliceViewFlags, plus one.
-const SliceViewFlagsN SliceViewFlags = 18
+const SliceViewFlagsN SliceViewFlags = 16
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _SliceViewFlagsNoOp() {
 	var x [1]struct{}
 	_ = x[SliceViewConfigured-(8)]
-	_ = x[SliceViewNoAdd-(9)]
-	_ = x[SliceViewNoDelete-(10)]
-	_ = x[SliceViewIsArray-(11)]
-	_ = x[SliceViewShowIndex-(12)]
-	_ = x[SliceViewReadOnlyKeyNav-(13)]
-	_ = x[SliceViewSelectMode-(14)]
-	_ = x[SliceViewReadOnlyMultiSel-(15)]
-	_ = x[SliceViewInFocusGrab-(16)]
-	_ = x[SliceViewInFullRebuild-(17)]
+	_ = x[SliceViewIsArray-(9)]
+	_ = x[SliceViewShowIndex-(10)]
+	_ = x[SliceViewReadOnlyKeyNav-(11)]
+	_ = x[SliceViewSelectMode-(12)]
+	_ = x[SliceViewReadOnlyMultiSel-(13)]
+	_ = x[SliceViewInFocusGrab-(14)]
+	_ = x[SliceViewInFullRebuild-(15)]
 }
 
 var _SliceViewFlagsNameToValueMap = map[string]SliceViewFlags{
 	`Configured`:       8,
-	`NoAdd`:            9,
-	`NoDelete`:         10,
-	`IsArray`:          11,
-	`ShowIndex`:        12,
-	`ReadOnlyKeyNav`:   13,
-	`SelectMode`:       14,
-	`ReadOnlyMultiSel`: 15,
-	`InFocusGrab`:      16,
-	`InFullRebuild`:    17,
+	`IsArray`:          9,
+	`ShowIndex`:        10,
+	`ReadOnlyKeyNav`:   11,
+	`SelectMode`:       12,
+	`ReadOnlyMultiSel`: 13,
+	`InFocusGrab`:      14,
+	`InFullRebuild`:    15,
 }
 
 var _SliceViewFlagsDescMap = map[SliceViewFlags]string{
 	8:  `SliceViewConfigured indicates that the widgets have been configured`,
-	9:  `SliceViewNoAdd indicates whether the user cannot add elements to the slice`,
-	10: `SliceViewNoDelete indicates whether the user cannot delete elements from the slice`,
-	11: `SliceViewIsArray is whether the slice is actually an array -- no modifications -- set by SetSlice`,
-	12: `SliceViewShowIndex is whether to show index or not`,
-	13: `SliceViewReadOnlyKeyNav is whether support key navigation when ReadOnly (default true). uses a capture of up / down events to manipulate selection, not focus.`,
-	14: `SliceViewSelectMode is whether to be in select rows mode or editing mode`,
-	15: `SliceViewReadOnlyMultiSel: if view is ReadOnly, default selection mode is to choose one row only. If this is true, standard multiple selection logic with modifier keys is instead supported`,
-	16: `SliceViewInFocusGrab is a guard for recursive focus grabbing`,
-	17: `SliceViewInFullRebuild is a guard for recursive rebuild`,
+	9:  `SliceViewIsArray is whether the slice is actually an array -- no modifications -- set by SetSlice`,
+	10: `SliceViewShowIndex is whether to show index or not`,
+	11: `SliceViewReadOnlyKeyNav is whether support key navigation when ReadOnly (default true). uses a capture of up / down events to manipulate selection, not focus.`,
+	12: `SliceViewSelectMode is whether to be in select rows mode or editing mode`,
+	13: `SliceViewReadOnlyMultiSel: if view is ReadOnly, default selection mode is to choose one row only. If this is true, standard multiple selection logic with modifier keys is instead supported`,
+	14: `SliceViewInFocusGrab is a guard for recursive focus grabbing`,
+	15: `SliceViewInFullRebuild is a guard for recursive rebuild`,
 }
 
 var _SliceViewFlagsMap = map[SliceViewFlags]string{
 	8:  `Configured`,
-	9:  `NoAdd`,
-	10: `NoDelete`,
-	11: `IsArray`,
-	12: `ShowIndex`,
-	13: `ReadOnlyKeyNav`,
-	14: `SelectMode`,
-	15: `ReadOnlyMultiSel`,
-	16: `InFocusGrab`,
-	17: `InFullRebuild`,
+	9:  `IsArray`,
+	10: `ShowIndex`,
+	11: `ReadOnlyKeyNav`,
+	12: `SelectMode`,
+	13: `ReadOnlyMultiSel`,
+	14: `InFocusGrab`,
+	15: `InFullRebuild`,
 }
 
 // String returns the string representation

@@ -14,7 +14,6 @@ import (
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/mat32"
-	"cogentcore.org/core/states"
 )
 
 // TableStruct is a testing struct for table view
@@ -193,11 +192,11 @@ func main() {
 	mv.SetMap(&tstmap)
 
 	sv := giv.NewSliceView(tsl, "sv")
-	sv.SetState(true, states.ReadOnly)
+	// sv.SetState(true, states.ReadOnly)
 	sv.SetSlice(&tstslice)
 
 	tv := giv.NewTableView(ttv, "tv")
-	tv.SetState(true, states.ReadOnly)
+	// tv.SetState(true, states.ReadOnly)
 	tv.SetSlice(&tsttable)
 
 	b.RunMainWindow()

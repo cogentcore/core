@@ -94,12 +94,6 @@ const (
 	// SliceViewConfigured indicates that the widgets have been configured
 	SliceViewConfigured SliceViewFlags = SliceViewFlags(gi.WidgetFlagsN) + iota
 
-	// SliceViewNoAdd indicates whether the user cannot add elements to the slice
-	SliceViewNoAdd
-
-	// SliceViewNoDelete indicates whether the user cannot delete elements from the slice
-	SliceViewNoDelete
-
 	// SliceViewIsArray is whether the slice is actually an array -- no modifications -- set by SetSlice
 	SliceViewIsArray
 
@@ -495,14 +489,6 @@ func (sv *SliceViewBase) SliceGrid() *SliceViewGrid {
 // RowWidgetNs returns number of widgets per row and offset for index label
 func (sv *SliceViewBase) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	nWidgPerRow = 2
-	if !sv.IsReadOnly() && !sv.Is(SliceViewIsArray) {
-		if !sv.Is(SliceViewNoAdd) {
-			nWidgPerRow += 1
-		}
-		if !sv.Is(SliceViewNoDelete) {
-			nWidgPerRow += 1
-		}
-	}
 	idxOff = 1
 	if !sv.Is(SliceViewShowIndex) {
 		nWidgPerRow -= 1
@@ -648,30 +634,6 @@ func (sv *SliceViewBase) ConfigRows() {
 			vvb.OnChange(func(e events.Event) {
 				sv.SendChange()
 			})
-			if !sv.Is(SliceViewIsArray) {
-				cidx := ridx + idxOff
-				if !sv.Is(SliceViewNoAdd) {
-					cidx++
-					addnm := fmt.Sprintf("add-%v", itxt)
-					addact := gi.Button{}
-					sg.SetChild(&addact, cidx, addnm)
-					addact.SetType(gi.ButtonAction).SetIcon(icons.Add).
-						SetTooltip("insert a new element at this index").OnClick(func(e events.Event) {
-						sv.SliceNewAtRow(i + 1)
-					})
-				}
-
-				if !sv.Is(SliceViewNoDelete) {
-					cidx++
-					delnm := fmt.Sprintf("del-%v", itxt)
-					delact := gi.Button{}
-					sg.SetChild(&delact, cidx, delnm)
-					delact.SetType(gi.ButtonAction).SetIcon(icons.Delete).
-						SetTooltip("delete this element").OnClick(func(e events.Event) {
-						sv.SliceDeleteAtRow(i)
-					})
-				}
-			}
 		}
 	}
 	sv.ConfigTree()
@@ -735,38 +697,12 @@ func (sv *SliceViewBase) UpdateWidgets() {
 			if sv.Is(SliceViewShowIndex) {
 				idxlab.SetSelected(issel)
 			}
-			if !sv.IsReadOnly() && !sv.Is(SliceViewIsArray) {
-				cidx := ridx + idxOff
-				if !sv.Is(SliceViewNoAdd) {
-					cidx++
-					addact := sg.Kids[cidx].(*gi.Button)
-					addact.SetState(invis, states.Invisible)
-				}
-				if !sv.Is(SliceViewNoDelete) {
-					cidx++
-					delact := sg.Kids[cidx].(*gi.Button)
-					delact.SetState(invis, states.Invisible)
-				}
-			}
 		} else {
 			vv.SetSliceValue(sv.ElVal, sv.Slice, 0, sv.TmpSave, sv.ViewPath)
 			vv.UpdateWidget()
 			w.AsWidget().SetSelected(false)
 			if sv.Is(SliceViewShowIndex) {
 				idxlab.SetSelected(false)
-			}
-			if !sv.IsReadOnly() && !sv.Is(SliceViewIsArray) {
-				cidx := ridx + idxOff
-				if !sv.Is(SliceViewNoAdd) {
-					cidx++
-					addact := sg.Kids[cidx].(*gi.Button)
-					addact.SetState(invis, states.Invisible)
-				}
-				if !sv.Is(SliceViewNoDelete) {
-					cidx++
-					delact := sg.Kids[cidx].(*gi.Button)
-					delact.SetState(invis, states.Invisible)
-				}
 			}
 		}
 	}
@@ -943,7 +879,7 @@ func (sv *SliceViewBase) ConfigToolbar(tb *gi.Toolbar) {
 	if laser.AnyIsNil(sv.Slice) {
 		return
 	}
-	if sv.Is(SliceViewIsArray) || sv.IsReadOnly() || sv.Is(SliceViewNoAdd) {
+	if sv.Is(SliceViewIsArray) || sv.IsReadOnly() {
 		return
 	}
 	gi.NewButton(tb, "slice-add").SetText("Add").SetIcon(icons.Add).SetTooltip("add a new element to the slice").
@@ -1767,16 +1703,23 @@ func (sv *SliceViewBase) ContextMenu(m *gi.Scene) {
 	if sv.IsReadOnly() || sv.Is(SliceViewIsArray) {
 		return
 	}
-	gi.NewButton(m).SetText("Copy").OnClick(func(e events.Event) {
+	gi.NewButton(m).SetText("Add row").SetIcon(icons.Add).OnClick(func(e events.Event) {
+		sv.SliceNewAtRow(sv.SelIdx + 1)
+	})
+	gi.NewButton(m).SetText("Delete row").SetIcon(icons.Delete).OnClick(func(e events.Event) {
+		sv.SliceDeleteAtRow(sv.SelIdx)
+	})
+	gi.NewSeparator(m)
+	gi.NewButton(m).SetText("Copy").SetIcon(icons.Copy).OnClick(func(e events.Event) {
 		sv.CopyIdxs(true)
 	})
-	gi.NewButton(m).SetText("Cut").OnClick(func(e events.Event) {
+	gi.NewButton(m).SetText("Cut").SetIcon(icons.Cut).OnClick(func(e events.Event) {
 		sv.CutIdxs()
 	})
-	gi.NewButton(m).SetText("Paste").OnClick(func(e events.Event) {
+	gi.NewButton(m).SetText("Paste").SetIcon(icons.Paste).OnClick(func(e events.Event) {
 		sv.PasteIdx(sv.SelIdx)
 	})
-	gi.NewButton(m).SetText("Duplicate").OnClick(func(e events.Event) {
+	gi.NewButton(m).SetText("Duplicate").SetIcon(icons.Copy).OnClick(func(e events.Event) {
 		sv.Duplicate()
 	})
 }

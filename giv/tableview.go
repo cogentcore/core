@@ -376,20 +376,6 @@ func (tv *TableView) ConfigHeader() {
 			tv.SortSliceAction(fli)
 		})
 	}
-	if !tv.IsReadOnly() {
-		cidx := tv.NVisFields + idxOff
-		if !tv.Is(SliceViewNoAdd) {
-			lbl := sgh.Child(cidx).(*gi.Label)
-			lbl.Text = "+"
-			lbl.Tooltip = "insert row"
-			cidx++
-		}
-		if !tv.Is(SliceViewNoDelete) {
-			lbl := sgh.Child(cidx).(*gi.Label)
-			lbl.Text = "-"
-			lbl.Tooltip = "delete row"
-		}
-	}
 }
 
 // SliceGrid returns the SliceGrid grid frame widget, which contains all the
@@ -406,14 +392,6 @@ func (tv *TableView) SliceHeader() *gi.Frame {
 // RowWidgetNs returns number of widgets per row and offset for index label
 func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	nWidgPerRow = 1 + tv.NVisFields
-	if !tv.IsReadOnly() {
-		if !tv.Is(SliceViewNoAdd) {
-			nWidgPerRow += 1
-		}
-		if !tv.Is(SliceViewNoDelete) {
-			nWidgPerRow += 1
-		}
-	}
 	idxOff = 1
 	if !tv.Is(SliceViewShowIndex) {
 		nWidgPerRow -= 1
@@ -519,30 +497,6 @@ func (tv *TableView) ConfigRows() {
 				})
 			}
 		}
-
-		if !tv.IsReadOnly() {
-			cidx := ridx + tv.NVisFields + idxOff
-			if !tv.Is(SliceViewNoAdd) {
-				addnm := fmt.Sprintf("add-%v", itxt)
-				addact := gi.Button{}
-				sg.SetChild(&addact, cidx, addnm)
-				addact.SetType(gi.ButtonAction).SetIcon(icons.Add).
-					SetTooltip("insert a new element at this index").OnClick(func(e events.Event) {
-					tv.SliceNewAtRow(i + 1)
-				})
-				cidx++
-			}
-			if !tv.Is(SliceViewNoDelete) {
-				delnm := fmt.Sprintf("del-%v", itxt)
-				delact := gi.Button{}
-				sg.SetChild(&delact, cidx, delnm)
-				delact.SetType(gi.ButtonAction).SetIcon(icons.Delete).
-					SetTooltip("delete this element").OnClick(func(e events.Event) {
-					tv.SliceDeleteAtRow(i)
-				})
-				cidx++
-			}
-		}
 	}
 	tv.ConfigTree()
 	tv.ApplyStyleTree()
@@ -641,19 +595,6 @@ func (tv *TableView) UpdateWidgets() {
 				if tv.Is(SliceViewShowIndex) {
 					idxlab.SetSelected(false)
 				}
-			}
-		}
-		if !tv.IsReadOnly() {
-			cidx := ridx + tv.NVisFields + idxOff
-			if !tv.Is(SliceViewNoAdd) {
-				addact := sg.Kids[cidx].(*gi.Button)
-				addact.SetState(invis, states.Invisible)
-				cidx++
-			}
-			if !tv.Is(SliceViewNoDelete) {
-				delact := sg.Kids[cidx].(*gi.Button)
-				delact.SetState(invis, states.Invisible)
-				cidx++
 			}
 		}
 	}

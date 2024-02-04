@@ -3,6 +3,7 @@
 package giv
 
 import (
+	"image"
 	"reflect"
 	"sync"
 
@@ -529,7 +530,7 @@ func (t *SliceViewBase) SetTooltip(v string) *SliceViewBase { t.Tooltip = v; ret
 func (t *SliceViewBase) SetStackTop(v int) *SliceViewBase { t.StackTop = v; return t }
 
 // SliceViewGridType is the [gti.Type] for [SliceViewGrid]
-var SliceViewGridType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.SliceViewGrid", IDName: "slice-view-grid", Doc: "SliceViewGrid handles the resizing logic for SliceView, TableView.", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "MinRows", Doc: "MinRows is set from parent SV"}, {Name: "RowHeight", Doc: "height of a single row, computed during layout"}, {Name: "VisRows", Doc: "total number of rows visible in allocated display size"}}, Instance: &SliceViewGrid{}})
+var SliceViewGridType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.SliceViewGrid", IDName: "slice-view-grid", Doc: "SliceViewGrid handles the resizing logic for SliceView, TableView.", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "MinRows", Doc: "MinRows is set from parent SV"}, {Name: "RowHeight", Doc: "height of a single row, computed during layout"}, {Name: "VisRows", Doc: "total number of rows visible in allocated display size"}, {Name: "StripeBackground", Doc: "Stripe background color"}, {Name: "LastBackground"}}, Instance: &SliceViewGrid{}})
 
 // NewSliceViewGrid adds a new [SliceViewGrid] with the given name to the given parent:
 // SliceViewGrid handles the resizing logic for SliceView, TableView.
@@ -554,6 +555,19 @@ func (t *SliceViewGrid) SetRowHeight(v float32) *SliceViewGrid { t.RowHeight = v
 // SetVisRows sets the [SliceViewGrid.VisRows]:
 // total number of rows visible in allocated display size
 func (t *SliceViewGrid) SetVisRows(v int) *SliceViewGrid { t.VisRows = v; return t }
+
+// SetStripeBackground sets the [SliceViewGrid.StripeBackground]:
+// Stripe background color
+func (t *SliceViewGrid) SetStripeBackground(v image.Image) *SliceViewGrid {
+	t.StripeBackground = v
+	return t
+}
+
+// SetLastBackground sets the [SliceViewGrid.LastBackground]
+func (t *SliceViewGrid) SetLastBackground(v image.Image) *SliceViewGrid {
+	t.LastBackground = v
+	return t
+}
 
 // SetTooltip sets the [SliceViewGrid.Tooltip]
 func (t *SliceViewGrid) SetTooltip(v string) *SliceViewGrid { t.Tooltip = v; return t }
