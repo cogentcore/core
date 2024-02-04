@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gabriel-vasile/mimetype"
 	"github.com/h2non/filetype"
 )
 
@@ -68,14 +67,8 @@ func MimeFromFile(fname string) (mtype, ext string, err error) {
 		if strings.HasPrefix(mtyp, "text/plain") {
 			isplain = true
 			ptyp = mtyp
-		} else if mtyp == "application/zip" {
-			mime, err := mimetype.DetectFile(fn) // can detect zipped types
-			if err == nil && mime.String() != "" {
-				return mime.String(), mime.Extension(), err
-			}
+		} else {
 			return mtyp, ext, nil
-		} else if mtyp != "" {
-			return mtyp, ext, err
 		}
 	}
 	mtyp := mime.TypeByExtension(ext)

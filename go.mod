@@ -12,7 +12,6 @@ require (
 	github.com/ericchiang/css v1.3.0
 	github.com/fatih/camelcase v1.0.0
 	github.com/fsnotify/fsnotify v1.7.0
-	github.com/gabriel-vasile/mimetype v1.4.3
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240118000515-a250818d05e3
 	github.com/goki/freetype v1.0.4
 	github.com/goki/vulkan v1.0.7
