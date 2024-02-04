@@ -65,8 +65,9 @@ type StructView struct {
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string
 
-	// if true, some fields have viewif conditional view tags -- update after..
-	HasViewIfs bool `set:"-" json:"-" xml:"-" edit:"-"`
+	// IsShouldShower is whether the struct implements [gi.ShouldShower], which results
+	// in additional updating being done at certain points.
+	IsShouldShower bool `set:"-" json:"-" xml:"-" edit:"-"`
 
 	// extra tags by field name -- from type properties
 	TypeFieldTags map[string]string `set:"-" json:"-" xml:"-" edit:"-"`
@@ -196,7 +197,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 			return false
 		}
 		if ss, ok := stru.(gi.ShouldShower); ok {
-			sv.HasViewIfs = true
+			sv.IsShouldShower = true
 			if !ss.ShouldShow(field.Name) {
 				return false
 			}
@@ -334,7 +335,7 @@ func (sv *StructView) UpdateFieldAction() {
 	if !sv.IsConfiged() {
 		return
 	}
-	if sv.HasViewIfs {
+	if sv.IsShouldShower {
 		sv.Update()
 		sv.SetNeedsLayout(true)
 	}

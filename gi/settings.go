@@ -650,9 +650,11 @@ var DefaultPaths = FavPaths{
 //////////////////////////////////////////////////////////////////
 //  FilePaths
 
+// FilePaths represents a set of file paths.
 type FilePaths []string
 
-var SavedPaths FilePaths
+// RecentPaths are the recently opened paths in the file view.
+var RecentPaths FilePaths
 
 // Open file paths from a json-formatted file.
 func (fp *FilePaths) Open(filename string) error { //gti:add
@@ -674,18 +676,18 @@ func (fp *FilePaths) AddPath(path string, max int) {
 // the Cogent Core data directory.
 var SavedPathsFilename = "saved-paths.json"
 
-// SavePaths saves the active SavedPaths to data dir
-func SavePaths() {
+// SaveRecentPaths saves the active RecentPaths to data dir
+func SaveRecentPaths() {
 	pdir := TheApp.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, SavedPathsFilename)
-	SavedPaths.Save(pnm)
+	grr.Log(RecentPaths.Save(pnm))
 }
 
-// OpenPaths loads the active SavedPaths from data dir
-func OpenPaths() {
+// OpenRecentPaths loads the active RecentPaths from data dir
+func OpenRecentPaths() {
 	pdir := TheApp.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, SavedPathsFilename)
-	SavedPaths.Open(pnm)
+	grr.Log(RecentPaths.Open(pnm))
 }
 
 //////////////////////////////////////////////////////////////////

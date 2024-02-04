@@ -273,7 +273,7 @@ func (fv *FileView) ConfigToolbar(tb *gi.Toolbar) {
 	ch := tb.ChildByName("app-chooser").(*gi.Chooser)
 
 	ch.ItemsFuncs = slices.Insert(ch.ItemsFuncs, 0, func() {
-		for _, sp := range gi.SavedPaths {
+		for _, sp := range gi.RecentPaths {
 			sp := sp
 			ch.Items = append(ch.Items, gi.ChooserItem{
 				Value: sp,
@@ -285,20 +285,20 @@ func (fv *FileView) ConfigToolbar(tb *gi.Toolbar) {
 			})
 		}
 		ch.Items = append(ch.Items, gi.ChooserItem{
-			Value:           "Reset saved paths",
+			Value:           "Reset recent paths",
 			Icon:            icons.Refresh,
 			SeparatorBefore: true,
 			Func: func() {
-				gi.SavedPaths = make(gi.FilePaths, 1, gi.SystemSettings.SavedPathsMax)
-				gi.SavedPaths[0] = fv.DirPath
+				gi.RecentPaths = make(gi.FilePaths, 1, gi.SystemSettings.SavedPathsMax)
+				gi.RecentPaths[0] = fv.DirPath
 				fv.UpdateFiles()
 			},
 		})
 		ch.Items = append(ch.Items, gi.ChooserItem{
-			Value: "Edit saved paths",
+			Value: "Edit recent paths",
 			Icon:  icons.Edit,
 			Func: func() {
-				fv.EditPaths()
+				fv.EditRecentPaths()
 			},
 		})
 	})
@@ -549,11 +549,11 @@ func (fv *FileView) UpdateFiles() {
 	defer fv.UpdateEndLayout(updt)
 
 	fv.UpdatePath()
-	if len(gi.SavedPaths) == 0 {
-		gi.OpenPaths()
+	if len(gi.RecentPaths) == 0 {
+		gi.OpenRecentPaths()
 	}
-	gi.SavedPaths.AddPath(fv.DirPath, gi.SystemSettings.SavedPathsMax)
-	gi.SavePaths()
+	gi.RecentPaths.AddPath(fv.DirPath, gi.SystemSettings.SavedPathsMax)
+	gi.SaveRecentPaths()
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
 
@@ -844,14 +844,15 @@ func (fv *FileView) FileCompleteEdit(data any, text string, cursorPos int, c com
 	return ed
 }
 
-// EditPaths displays a dialog allowing user to delete paths from the path list
-func (fv *FileView) EditPaths() {
+// EditRecentPaths displays a dialog allowing the user to
+// edit the recent paths list.
+func (fv *FileView) EditRecentPaths() {
 	d := gi.NewBody().AddTitle("Recent file paths").AddText("You can delete paths you no longer use")
-	NewSliceView(d).SetSlice(&gi.SavedPaths)
+	NewSliceView(d).SetSlice(&gi.RecentPaths)
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
 		d.AddOk(pw).OnClick(func(e events.Event) {
-			gi.SavePaths()
+			gi.SaveRecentPaths()
 			fv.UpdateFiles()
 		})
 	})
