@@ -646,6 +646,9 @@ func (tv *TableView) UpdateWidgets() {
 					wb.SetReadOnly(true)
 				}
 				wb.SetSelected(issel)
+				if tv.Is(SliceViewShowIndex) {
+					idxlab.SetSelected(issel)
+				}
 			} else {
 				wb.SetSelected(false)
 				if tv.Is(SliceViewShowIndex) {
