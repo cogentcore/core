@@ -91,7 +91,7 @@ type FieldValidator interface {
 
 // ShouldShower is an interface determining when you should take a shower.
 // Actually, it determines whether a named field should be displayed
-// (in giv.StructView, giv.StructViewInline, and giv.TableView).
+// (in giv.StructView and giv.StructViewInline).
 type ShouldShower interface {
 	// ShouldShow returns whether the given named field should be displayed.
 	ShouldShow(field string) bool
