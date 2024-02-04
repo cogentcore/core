@@ -29,6 +29,7 @@ import (
 	"github.com/mitchellh/go-homedir"
 )
 
+// FileViewDialog opens a dialog for selecting a file.
 func FileViewDialog(ctx gi.Widget, filename, exts, title string, fun func(selfile string)) {
 	d := gi.NewBody()
 	if title != "" {
