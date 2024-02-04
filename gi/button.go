@@ -185,6 +185,8 @@ func (bt *Button) SetStyles() {
 		case "parts":
 			w.Style(func(s *styles.Style) {
 				s.Gap.Zero()
+				s.Justify.Content = styles.Center
+				s.Justify.Items = styles.Center
 				s.Align.Content = styles.Center
 				s.Align.Items = styles.Center
 				s.Text.AlignV = styles.Center
