@@ -13,7 +13,6 @@ import (
 	"strings"
 
 	"cogentcore.org/core/abilities"
-	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/glop/sentence"
@@ -22,6 +21,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
+	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -61,6 +61,9 @@ type TableView struct {
 
 	// HeaderWidths has number of characters in each header, per visfields
 	HeaderWidths []int `copier:"-" view:"-" json:"-" xml:"-"`
+
+	// ColMaxWidths records maximum width in chars of string type fields
+	ColMaxWidths []int `copier:"-" view:"-" json:"-" xml:"-"`
 }
 
 // check for interface impl
@@ -134,22 +137,16 @@ func (tv *TableView) SetStyles() {
 					s.Min.Y.Em(1)
 					s.GrowWrap = false
 				})
-			case strings.HasPrefix(w.Name(), "add-"):
-				w.Style(func(s *styles.Style) {
-					w.(*gi.Button).SetType(gi.ButtonAction)
-					s.Color = colors.Scheme.Success.Base
-				})
-			case strings.HasPrefix(w.Name(), "del-"):
-				w.Style(func(s *styles.Style) {
-					w.(*gi.Button).SetType(gi.ButtonAction)
-					s.Color = colors.Scheme.Error.Base
-				})
 			case strings.HasPrefix(w.Name(), "value-"):
-				w.Style(func(s *styles.Style) {
+				wb := w.AsWidget()
+				wb.StyleFinal(func(s *styles.Style) {
 					row, col := tv.This().(SliceViewer).WidgetIndex(w)
 					hw := float32(tv.HeaderWidths[col])
 					if col == tv.SortIdx {
 						hw += 6
+					}
+					if len(tv.ColMaxWidths) > col {
+						hw = max(float32(tv.ColMaxWidths[col]), hw)
 					}
 					hv := units.Ch(hw)
 					s.Min.X.Val = max(s.Min.X.Val, hv.Convert(s.Min.X.Un, &s.UnContext).Val)
@@ -334,14 +331,11 @@ func (tv *TableView) ConfigHeader() {
 		hcfg.Add(gi.LabelType, "head-idx")
 	}
 	tv.HeaderWidths = make([]int, tv.NVisFields)
+	tv.ColMaxWidths = make([]int, tv.NVisFields)
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		fld := tv.VisFields[fli]
 		labnm := "head-" + fld.Name
 		hcfg.Add(gi.ButtonType, labnm)
-	}
-	if !tv.IsReadOnly() {
-		hcfg.Add(gi.LabelType, "head-add")
-		hcfg.Add(gi.LabelType, "head-del")
 	}
 	sgh.ConfigChildren(hcfg) // headers SHOULD be unique, but with labels..
 	_, idxOff := tv.RowWidgetNs()
@@ -458,6 +452,10 @@ func (tv *TableView) ConfigRows() {
 			})
 			idxlab.SetText(sitxt)
 			idxlab.ContextMenus = tv.ContextMenus
+			idxlab.Style(func(s *styles.Style) {
+				nd := mat32.Log10(float32(tv.SliceSize))
+				s.Min.X.Ch(nd + 2)
+			})
 		}
 
 		vpath := tv.ViewPath + "[" + sitxt + "]"
@@ -495,6 +493,18 @@ func (tv *TableView) ConfigRows() {
 				vvb.OnChange(func(e events.Event) {
 					tv.SetChanged()
 				})
+			}
+			tv.ColMaxWidths[fli] = 0
+			_, isbase := vv.(*ValueBase)
+			if isbase && tv.SliceSize > 0 && fval.Kind() == reflect.String {
+				mxw := 0
+				for rw := 0; rw < tv.SliceSize; rw++ {
+					sval := laser.OnePtrUnderlyingValue(tv.SliceNPVal.Index(rw))
+					fval := sval.Elem().FieldByIndex(field.Index)
+					str := fval.String()
+					mxw = max(mxw, len(str))
+				}
+				tv.ColMaxWidths[fli] = mxw
 			}
 		}
 	}

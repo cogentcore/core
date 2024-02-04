@@ -140,6 +140,8 @@ func main() {
 		tsttable[i] = ts
 	}
 
+	tsttable[0].StrField = "this is a particularly long field"
+
 	var stru Struct
 	stru.Name = "happy"
 	stru.Cond = 2

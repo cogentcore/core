@@ -360,16 +360,6 @@ func (sv *SliceViewBase) SetStyles() {
 					}
 					svi.DropDeleteSource(e)
 				})
-			case strings.HasPrefix(w.Name(), "add-"):
-				w.Style(func(s *styles.Style) {
-					w.(*gi.Button).SetType(gi.ButtonAction)
-					s.Color = colors.Scheme.Success.Base
-				})
-			case strings.HasPrefix(w.Name(), "del-"):
-				w.Style(func(s *styles.Style) {
-					w.(*gi.Button).SetType(gi.ButtonAction)
-					s.Color = colors.Scheme.Error.Base
-				})
 			case strings.HasPrefix(w.Name(), "value-"):
 				w.Style(func(s *styles.Style) {
 					row, col := sv.This().(SliceViewer).WidgetIndex(w)
@@ -615,6 +605,10 @@ func (sv *SliceViewBase) ConfigRows() {
 			})
 			idxlab.SetText(sitxt)
 			idxlab.ContextMenus = sv.ContextMenus
+			idxlab.Style(func(s *styles.Style) {
+				nd := mat32.Log10(float32(sv.SliceSize))
+				s.Min.X.Ch(nd + 2)
+			})
 		}
 
 		w := ki.NewOfType(vtyp).(gi.Widget)
@@ -1871,8 +1865,12 @@ func (sv *SliceViewBase) SizeFinal() {
 	sg := sv.This().(SliceViewer).SliceGrid()
 	localIter := 0
 	for (sv.ConfigIter < 2 || sv.VisRows != sg.VisRows) && localIter < 2 {
-		sv.VisRows = sg.VisRows
-		sv.This().(SliceViewer).ConfigRows()
+		if sv.VisRows != sg.VisRows {
+			sv.VisRows = sg.VisRows
+			sv.This().(SliceViewer).ConfigRows()
+		} else {
+			sg.ApplyStyleTree()
+		}
 		sg.SizeFinalUpdateChildrenSizes()
 		sv.ConfigIter++
 		localIter++

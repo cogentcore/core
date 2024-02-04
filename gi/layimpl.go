@@ -561,7 +561,7 @@ func (ls *LayImplState) ColWidth(row, col int) (float32, error) {
 		if col >= n {
 			return 0, fmt.Errorf("Layout.ColWidth: col: %d > number of columns: %d", col, n)
 		}
-		return ls.Cell(mat32.X, 0, col).Size.X, nil
+		return ls.Cell(mat32.X, col, 0).Size.X, nil
 	}
 	nw := len(ls.Wraps)
 	if ls.MainAxis == mat32.X {
@@ -572,7 +572,7 @@ func (ls *LayImplState) ColWidth(row, col int) (float32, error) {
 		if col >= wn {
 			return 0, fmt.Errorf("Layout.ColWidth: col: %d > number of columns: %d", col, wn)
 		}
-		return ls.Cell(mat32.X, row, col).Size.X, nil
+		return ls.Cell(mat32.X, col, row).Size.X, nil
 	}
 	if col >= nw {
 		return 0, fmt.Errorf("Layout.ColWidth: col: %d > number of columns: %d", col, nw)
