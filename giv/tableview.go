@@ -111,7 +111,6 @@ func (tv *TableView) SetStyles() {
 			})
 		case "grid": // slice grid
 			sg := w.(*SliceViewGrid)
-			sg.Stripes = gi.RowStripes
 			sg.Style(func(s *styles.Style) {
 				sg.MinRows = tv.MinRows
 				s.Display = styles.Grid
@@ -147,22 +146,16 @@ func (tv *TableView) SetStyles() {
 				})
 			case strings.HasPrefix(w.Name(), "value-"):
 				w.Style(func(s *styles.Style) {
-					fstr := strings.TrimPrefix(w.Name(), "value-")
-					dp := strings.Index(fstr, ".")
-					istr := fstr[dp+1:] // index is after .
-					fstr = fstr[:dp]    // field idx is -X.
-					idx := grr.Log1(strconv.Atoi(istr))
-					fli := grr.Log1(strconv.Atoi(fstr))
-					hw := float32(tv.HeaderWidths[fli])
-					if fli == tv.SortIdx {
+					row, col := tv.This().(SliceViewer).WidgetIndex(w)
+					hw := float32(tv.HeaderWidths[col])
+					if col == tv.SortIdx {
 						hw += 6
 					}
 					hv := units.Ch(hw)
 					s.Min.X.Val = max(s.Min.X.Val, hv.Convert(s.Min.X.Un, &s.UnContext).Val)
 					s.Max.X.Val = max(s.Max.X.Val, hv.Convert(s.Max.X.Un, &s.UnContext).Val)
-					si := tv.StartIdx + idx
-					if si < tv.SliceSize {
-						tv.This().(SliceViewer).StyleRow(w, si, fli)
+					if row < tv.SliceSize {
+						tv.This().(SliceViewer).StyleRow(w, row, col)
 					}
 				})
 			}
@@ -234,6 +227,26 @@ func (tv *TableView) SetSlice(sl any) *TableView {
 func (tv *TableView) StructType() reflect.Type {
 	tv.StruType = laser.NonPtrType(laser.SliceElType(tv.Slice))
 	return tv.StruType
+}
+
+// WidgetIndex returns the row and column indexes for given widget.
+// Typically this is decoded from the name of the widget.
+func (tv *TableView) WidgetIndex(w gi.Widget) (row, col int) {
+	nm := w.Name()
+	if strings.Contains(nm, "value-") {
+		fstr := strings.TrimPrefix(nm, "value-")
+		dp := strings.Index(fstr, ".")
+		istr := fstr[dp+1:] // index is after .
+		fstr = fstr[:dp]    // field idx is -X.
+		idx := grr.Log1(strconv.Atoi(istr))
+		fli := grr.Log1(strconv.Atoi(fstr))
+		row = tv.StartIdx + idx
+		col = fli
+	} else if strings.Contains(nm, "index-") {
+		idx := grr.Log1(strconv.Atoi(strings.TrimPrefix(nm, "index-")))
+		row = tv.StartIdx + idx
+	}
+	return
 }
 
 // CacheVisFields computes the number of visible fields in nVisFields and

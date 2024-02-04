@@ -17,6 +17,7 @@ import (
 
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fi"
@@ -174,6 +175,10 @@ type SliceViewer interface {
 	// if updt is true, then update the grid after
 	SliceDeleteAt(idx int)
 
+	// WidgetIndex returns the row and column indexes for given widget.
+	// Typically this is decoded from the name of the widget.
+	WidgetIndex(w gi.Widget) (row, col int)
+
 	// MimeDataType returns the data type for mime clipboard
 	// (copy / paste) data e.g., fi.DataJson
 	MimeDataType() string
@@ -301,7 +306,6 @@ func (sv *SliceViewBase) SetStyles() {
 		switch w.PathFrom(sv) {
 		case "grid": // slice grid
 			sg := w.(*SliceViewGrid)
-			sg.Stripes = gi.RowStripes
 			sg.Style(func(s *styles.Style) {
 				sg.MinRows = sv.MinRows
 				s.Display = styles.Grid
@@ -373,10 +377,9 @@ func (sv *SliceViewBase) SetStyles() {
 				})
 			case strings.HasPrefix(w.Name(), "value-"):
 				w.Style(func(s *styles.Style) {
-					idx := grr.Log1(strconv.Atoi(strings.TrimPrefix(w.Name(), "value-")))
-					si := sv.StartIdx + idx
-					if si < sv.SliceSize {
-						sv.This().(SliceViewer).StyleRow(w, si, 0)
+					row, col := sv.This().(SliceViewer).WidgetIndex(w)
+					if row < sv.SliceSize {
+						sv.This().(SliceViewer).StyleRow(w, row, col)
 					}
 				})
 			}
@@ -513,6 +516,20 @@ func (sv *SliceViewBase) UpdtSliceSize() int {
 	sz := sv.SliceNPVal.Len()
 	sv.SliceSize = sz
 	return sz
+}
+
+// WidgetIndex returns the row and column indexes for given widget.
+// Typically this is decoded from the name of the widget.
+func (sv *SliceViewBase) WidgetIndex(w gi.Widget) (row, col int) {
+	nm := w.Name()
+	if strings.Contains(nm, "value-") {
+		idx := grr.Log1(strconv.Atoi(strings.TrimPrefix(nm, "value-")))
+		row = sv.StartIdx + idx
+	} else if strings.Contains(nm, "index-") {
+		idx := grr.Log1(strconv.Atoi(strings.TrimPrefix(nm, "index-")))
+		row = sv.StartIdx + idx
+	}
+	return
 }
 
 // ViewMuLock locks the ViewMu if non-nil
@@ -1906,6 +1923,19 @@ func (sv *SliceViewBase) HandleEvents() {
 	})
 }
 
+func (sv *SliceViewBase) SizeFinal() {
+	sg := sv.This().(SliceViewer).SliceGrid()
+	localIter := 0
+	for (sv.ConfigIter < 2 || sv.VisRows != sg.VisRows) && localIter < 2 {
+		sv.VisRows = sg.VisRows
+		sv.This().(SliceViewer).ConfigRows()
+		sg.SizeFinalUpdateChildrenSizes()
+		sv.ConfigIter++
+		localIter++
+	}
+	sv.Frame.SizeFinal()
+}
+
 //////////////////////////////////////////////////////
 // 	SliceViewGrid and Layout
 
@@ -1921,6 +1951,11 @@ type SliceViewGrid struct {
 
 	// total number of rows visible in allocated display size
 	VisRows int `edit:"-" copier:"-" json:"-" xml:"-"`
+
+	// Stripe background color
+	StripeBackground image.Image
+
+	LastBackground image.Image
 }
 
 func (sg *SliceViewGrid) OnInit() {
@@ -2016,15 +2051,72 @@ func (sg *SliceViewGrid) UpdateScroll(idx int) {
 	sb.SetValue(float32(idx))
 }
 
-func (sv *SliceViewBase) SizeFinal() {
-	sg := sv.This().(SliceViewer).SliceGrid()
-	localIter := 0
-	for (sv.ConfigIter < 2 || sv.VisRows != sg.VisRows) && localIter < 2 {
-		sv.VisRows = sg.VisRows
-		sv.This().(SliceViewer).ConfigRows()
-		sg.SizeFinalUpdateChildrenSizes()
-		sv.ConfigIter++
-		localIter++
+func (sg *SliceViewGrid) UpdateBackgrounds() {
+	bg := sg.Styles.ActualBackground
+	if sg.LastBackground == bg {
+		return
 	}
-	sv.Frame.SizeFinal()
+	sg.StripeBackground = gradient.ApplyOpacityImage(bg, 0.98)
+	sg.LastBackground = bg
+}
+
+func (sg *SliceViewGrid) ChildBackground(child gi.Widget) image.Image {
+	bg := sg.Styles.ActualBackground
+	_, sv := sg.SliceView()
+	if sv == nil {
+		return bg
+	}
+	sg.UpdateBackgrounds()
+	row, _ := sv.This().(SliceViewer).WidgetIndex(child)
+	if sv.IdxIsSelected(row) {
+		return colors.C(colors.Scheme.Select.Container)
+	} else if row%2 == 1 {
+		return sg.StripeBackground
+	}
+	return bg
+}
+
+func (sg *SliceViewGrid) RenderStripes() {
+	pos := sg.Geom.Pos.Content
+	sz := sg.Geom.Size.Actual.Content
+	if sg.VisRows == 0 || sz.Y == 0 {
+		return
+	}
+	sg.UpdateBackgrounds()
+
+	bg := sg.Styles.ActualBackground
+	pc := &sg.Scene.PaintContext
+	rows := sg.LayImpl.Shape.Y
+	st := pos
+	offset := 0
+	_, sv := sg.SliceView()
+	startIdx := 0
+	if sv != nil {
+		startIdx = sv.StartIdx
+		offset = startIdx % 2
+	}
+	for r := 0; r < rows; r++ {
+		si := r + startIdx
+		ht, _ := sg.LayImpl.RowHeight(r, 0)
+		ssz := sz
+		ssz.Y = ht
+		stripe := (r+offset)%2 == 1
+		sbg := bg
+		if sv.IdxIsSelected(si) {
+			sbg = colors.C(colors.Scheme.Select.Container)
+		} else if stripe {
+			sbg = sg.StripeBackground
+		}
+		pc.BlitBox(st, ssz, sbg)
+		st.Y += ht + sg.LayImpl.Gap.Y
+	}
+}
+
+func (sg *SliceViewGrid) Render() {
+	if sg.PushBounds() {
+		sg.RenderStripes()
+		sg.RenderChildren()
+		sg.RenderScrolls()
+		sg.PopBounds()
+	}
 }

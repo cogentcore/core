@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/states"
 )
 
 // TableStruct is a testing struct for table view
@@ -59,9 +60,6 @@ type ILStruct struct { //gti:add
 
 // Struct is a testing struct for struct view
 type Struct struct { //gti:add
-
-	// an enum
-	Stripes gi.Stripes
 
 	// a string
 	Name string `viewif:"!(Stripes==[RowStripes,ColStripes])"`
@@ -166,11 +164,11 @@ func main() {
 	mv.SetMap(&tstmap)
 
 	sv := giv.NewSliceView(tsl, "sv")
-	// sv.SetState(true, states.ReadOnly)
+	sv.SetState(true, states.ReadOnly)
 	sv.SetSlice(&tstslice)
 
 	tv := giv.NewTableView(ttv, "tv")
-	// tv.SetState(true, states.ReadOnly)
+	tv.SetState(true, states.ReadOnly)
 	tv.SetSlice(&tsttable)
 
 	b.RunMainWindow()

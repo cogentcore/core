@@ -86,8 +86,6 @@ func (sv *StructView) SetStyles() {
 		pfrom := w.PathFrom(sv)
 		switch {
 		case pfrom == "struct-grid":
-			sg := w.(*gi.Frame)
-			sg.Stripes = gi.RowStripes
 			w.Style(func(s *styles.Style) {
 				s.Display = styles.Grid
 				s.Grow.Set(0, 0)

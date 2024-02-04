@@ -59,9 +59,6 @@ func (t *Body) SetTooltip(v string) *Body { t.Tooltip = v; return t }
 // SetStackTop sets the [Body.StackTop]
 func (t *Body) SetStackTop(v int) *Body { t.StackTop = v; return t }
 
-// SetStripes sets the [Body.Stripes]
-func (t *Body) SetStripes(v Stripes) *Body { t.Stripes = v; return t }
-
 // BoxType is the [gti.Type] for [Box]
 var BoxType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Box", IDName: "box", Doc: "Box is a simple base [Widget] that renders the Std Box model", Embeds: []gti.Field{{Name: "WidgetBase"}}, Instance: &Box{}})
 
@@ -265,7 +262,7 @@ func (t *Complete) SetCompletion(v string) *Complete { t.Completion = v; return 
 func (t *Complete) SetStage(v *Stage) *Complete { t.Stage = v; return t }
 
 // FrameType is the [gti.Type] for [Frame]
-var FrameType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Frame", IDName: "frame", Doc: "Frame is a Layout that renders a background according to the\nbackground-color style setting, and optional striping for grid layouts", Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Stripes", Doc: "options for striped backgrounds, which are rendered as darker bands relative to background color"}}, Instance: &Frame{}})
+var FrameType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Frame", IDName: "frame", Doc: "Frame is a Layout that renders a background according to the\nbackground-color style setting, and optional striping for grid layouts", Embeds: []gti.Field{{Name: "Layout"}}, Instance: &Frame{}})
 
 // NewFrame adds a new [Frame] with the given name to the given parent:
 // Frame is a Layout that renders a background according to the
@@ -279,10 +276,6 @@ func (t *Frame) KiType() *gti.Type { return FrameType }
 
 // New returns a new [*Frame] value
 func (t *Frame) New() ki.Ki { return &Frame{} }
-
-// SetStripes sets the [Frame.Stripes]:
-// options for striped backgrounds, which are rendered as darker bands relative to background color
-func (t *Frame) SetStripes(v Stripes) *Frame { t.Stripes = v; return t }
 
 // SetTooltip sets the [Frame.Tooltip]
 func (t *Frame) SetTooltip(v string) *Frame { t.Tooltip = v; return t }
@@ -614,9 +607,6 @@ func (t *Scene) SetTooltip(v string) *Scene { t.Tooltip = v; return t }
 
 // SetStackTop sets the [Scene.StackTop]
 func (t *Scene) SetStackTop(v int) *Scene { t.StackTop = v; return t }
-
-// SetStripes sets the [Scene.Stripes]
-func (t *Scene) SetStripes(v Stripes) *Scene { t.Stripes = v; return t }
 
 // SeparatorType is the [gti.Type] for [Separator]
 var SeparatorType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Separator", IDName: "separator", Doc: "Separator draws a separator line. It goes in the direction\nspecified by [style.Style.Direction].", Embeds: []gti.Field{{Name: "Box"}}, Instance: &Separator{}})
@@ -1138,9 +1128,6 @@ func (t *Switches) SetTooltip(v string) *Switches { t.Tooltip = v; return t }
 // SetStackTop sets the [Switches.StackTop]
 func (t *Switches) SetStackTop(v int) *Switches { t.StackTop = v; return t }
 
-// SetStripes sets the [Switches.Stripes]
-func (t *Switches) SetStripes(v Stripes) *Switches { t.Stripes = v; return t }
-
 // TabsType is the [gti.Type] for [Tabs]
 var TabsType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Tabs", IDName: "tabs", Doc: "Tabs switches among child widgets via tabs.  The selected widget gets\nthe full allocated space avail after the tabs are accounted for.  The\nTabs is just a Vertical layout that manages two child widgets: a\nHorizFlow Layout for the tabs (which can flow across multiple rows as\nneeded) and a Stacked Frame that actually contains all the children, and\nprovides scrollbars as needed to any content within.  Typically should have\nmax stretch and a set preferred size, so it expands.", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Type", Doc: "Type is the styling type of the tabs. If it is changed after\nthe tabs are first configured, Update needs to be called on\nthe tabs."}, {Name: "MaxChars", Doc: "Maximum number of characters to include in tab label.\nElides labels that are longer than that"}, {Name: "NewTabButton", Doc: "show a new tab button at right of list of tabs"}, {Name: "CloseIcon", Doc: "CloseIcon is the icon used for tab close buttons.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed."}, {Name: "PrevEffectiveType", Doc: "PrevEffectiveType is the previous effective type of the tabs\nas computed by [TabTypes.Effective]."}, {Name: "Mu", Doc: "Mu is a mutex protecting updates to tabs. Tabs can be driven\nprogrammatically and via user input so need extra protection."}}, Instance: &Tabs{}})
 
@@ -1414,9 +1401,6 @@ func (t *Toolbar) SetTooltip(v string) *Toolbar { t.Tooltip = v; return t }
 // SetStackTop sets the [Toolbar.StackTop]
 func (t *Toolbar) SetStackTop(v int) *Toolbar { t.StackTop = v; return t }
 
-// SetStripes sets the [Toolbar.Stripes]
-func (t *Toolbar) SetStripes(v Stripes) *Toolbar { t.Stripes = v; return t }
-
 // BasicBarType is the [gti.Type] for [BasicBar]
 var BasicBarType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.BasicBar", IDName: "basic-bar", Doc: "BasicBar is just a styled Frame layout for holding buttons\nand other widgets.  Use this when the more advanced features\nof the Toolbar are not needed.", Embeds: []gti.Field{{Name: "Frame"}}, Instance: &BasicBar{}})
 
@@ -1439,9 +1423,6 @@ func (t *BasicBar) SetTooltip(v string) *BasicBar { t.Tooltip = v; return t }
 
 // SetStackTop sets the [BasicBar.StackTop]
 func (t *BasicBar) SetStackTop(v int) *BasicBar { t.StackTop = v; return t }
-
-// SetStripes sets the [BasicBar.Stripes]
-func (t *BasicBar) SetStripes(v Stripes) *BasicBar { t.Stripes = v; return t }
 
 // WidgetBaseType is the [gti.Type] for [WidgetBase]
 var WidgetBaseType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.WidgetBase", IDName: "widget-base", Doc: "WidgetBase is the base type for all Widget Widget elements, which are\nmanaged by a containing Layout, and use all 5 rendering passes.  All\nelemental widgets must support the ReadOnly and Selected states in a\nreasonable way (Selected only essential when also ReadOnly), so they can\nfunction appropriately in a chooser (e.g., SliceView or TableView) -- this\nincludes toggling selection on left mouse press.", Methods: []gti.Method{{Name: "Update", Doc: "Update calls Config and then ApplyStyle\non every Widget in the tree from me.\nThis should be used after any structural changes\nto currently-displayed widgets.\nIt wraps everything in UpdateStart / UpdateEndRender\nso node will render on next pass.\nCall SetNeedsLayout to also trigger a layout where needed.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}}, Embeds: []gti.Field{{Name: "Node"}}, Fields: []gti.Field{{Name: "Tooltip", Doc: "Tooltip is the text for the tooltip for this widget,\nwhich can use HTML formatting."}, {Name: "Parts", Doc: "Parts are a separate tree of sub-widgets that implement discrete parts\nof a widget.  Positions are relative to the parent widget.\nThese are fully managed by the parent widget"}, {Name: "Geom", Doc: "Geom has the full layout geometry for size and position of this Widget"}, {Name: "OverrideStyle", Doc: "If true, Override the computed styles and allow directly editing Style"}, {Name: "Styles", Doc: "Styles are styling settings for this widget.\nThese are set in SetApplyStyle which should be called after any Config\nchange (e.g., as done by the Update method).  See Stylers for functions\nthat set all of the styles, ordered from initial base defaults to later\nadded overrides."}, {Name: "Stylers", Doc: "Stylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using Style function. FirstStylers and\nFinalStylers are called before and after these stylers, respectively."}, {Name: "FirstStylers", Doc: "FirstStylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using StyleFirst function. These stylers\nare called before Stylers and FinalStylers."}, {Name: "FinalStylers", Doc: "FinalStylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using StyleFinal function. These stylers\nare called after FirstStylers and Stylers."}, {Name: "Listeners", Doc: "Listeners are event listener functions for processing events on this widget.\nThey are called in sequential descending order (so the last added listener\nis called first). They should be added using the On function. FirstListeners\nand FinalListeners are called before and after these listeners, respectively."}, {Name: "FirstListeners", Doc: "FirstListeners are event listener functions for processing events on this widget.\nThey are called in sequential descending order (so the last added listener\nis called first). They should be added using the OnFirst function. These listeners\nare called before Listeners and FinalListeners."}, {Name: "FinalListeners", Doc: "FinalListeners are event listener functions for processing events on this widget.\nThey are called in sequential descending order (so the last added listener\nis called first). They should be added using the OnFinal function. These listeners\nare called after FirstListeners and Listeners."}, {Name: "OnWidgetAdders", Doc: "A slice of functions to call on all widgets that are added as children\nto this widget or its children.  These functions are called in sequential\nascending order, so the last added one is called last and thus can\noverride anything set by the other ones. These should be set using\nOnWidgetAdded, which can be called by both end-user and internal code."}, {Name: "ContextMenus", Doc: "ContextMenus is a slice of menu functions to call to construct\nthe widget's context menu on an [events.ContextMenu]. The\nfunctions are called in reverse order such that the elements\nadded in the last function are the first in the menu.\nContext menus should be added through [Widget.AddContextMenu].\nSeparators will be added between each context menu function."}, {Name: "Scene", Doc: "Scene is the overall Scene to which we belong. It is automatically\nby widgets whenever they are added to another widget parent."}, {Name: "StyMu", Doc: "mutex protecting the Style field"}, {Name: "BBoxMu", Doc: "mutex protecting the BBox fields"}}, Instance: &WidgetBase{}})

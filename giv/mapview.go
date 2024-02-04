@@ -65,8 +65,6 @@ func (mv *MapView) SetStyles() {
 	mv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(mv) {
 		case "map-grid":
-			mg := w.(*gi.Frame)
-			mg.Stripes = gi.RowStripes
 			w.Style(func(s *styles.Style) {
 				s.Display = styles.Grid
 				s.Columns = mv.NCols

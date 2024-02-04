@@ -106,7 +106,6 @@ func (av *ArgView) ConfigArgsGrid() {
 		return
 	}
 	sg := av.ArgsGrid()
-	sg.Stripes = gi.RowStripes
 	config := ki.Config{}
 	argnms := make(map[string]bool)
 	for i := range av.Args {
