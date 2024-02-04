@@ -5,7 +5,6 @@ package texteditor
 import (
 	"image"
 
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/paint"
@@ -54,9 +53,6 @@ func (t *DiffView) SetTooltip(v string) *DiffView { t.Tooltip = v; return t }
 
 // SetStackTop sets the [DiffView.StackTop]
 func (t *DiffView) SetStackTop(v int) *DiffView { t.StackTop = v; return t }
-
-// SetStripes sets the [DiffView.Stripes]
-func (t *DiffView) SetStripes(v gi.Stripes) *DiffView { t.Stripes = v; return t }
 
 // DiffTextEditorType is the [gti.Type] for [DiffTextEditor]
 var DiffTextEditorType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/texteditor.DiffTextEditor", IDName: "diff-text-editor", Doc: "DiffTextEditor supports double-click based application of edits from one\nbuffer to the other.", Embeds: []gti.Field{{Name: "Editor"}}, Instance: &DiffTextEditor{}})

@@ -55,6 +55,3 @@ func (t *FileBrowse) SetTooltip(v string) *FileBrowse { t.Tooltip = v; return t 
 
 // SetStackTop sets the [FileBrowse.StackTop]
 func (t *FileBrowse) SetStackTop(v int) *FileBrowse { t.StackTop = v; return t }
-
-// SetStripes sets the [FileBrowse.Stripes]
-func (t *FileBrowse) SetStripes(v gi.Stripes) *FileBrowse { t.Stripes = v; return t }
