@@ -138,7 +138,7 @@ func (ps *State) AtEof() bool {
 		return true
 	}
 	_, ok := ps.Src.ValidTokenPos(ps.Pos)
-	return ok
+	return !ok
 }
 
 // AtEofNext returns true if current OR NEXT position is at end of file -- this includes
