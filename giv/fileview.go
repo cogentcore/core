@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 
@@ -271,7 +272,7 @@ func (fv *FileView) ConfigFileView() {
 func (fv *FileView) ConfigToolbar(tb *gi.Toolbar) {
 	ch := tb.ChildByName("app-chooser").(*gi.Chooser)
 
-	ch.AddItemsFunc(func() {
+	ch.ItemsFuncs = slices.Insert(ch.ItemsFuncs, 0, func() {
 		for _, sp := range gi.SavedPaths {
 			sp := sp
 			ch.Items = append(ch.Items, gi.ChooserItem{
