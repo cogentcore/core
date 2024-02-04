@@ -371,9 +371,7 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 						if !wb.StateIs(states.Disabled) && wb.AbilityIs(abilities.DoubleClickable) {
 							sentMulti = true
 							w.HandleEvent(tce)
-							if tce.IsHandled() {
-								break
-							}
+							break
 						}
 					}
 				case em.LastClickWidget == up && dcInTime:
@@ -385,9 +383,7 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 							em.LastDoubleClickWidget = up // not actually who gets the event
 							sentMulti = true
 							w.HandleEvent(dce)
-							if dce.IsHandled() {
-								break
-							}
+							break
 						}
 					}
 				}

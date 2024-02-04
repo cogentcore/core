@@ -614,6 +614,9 @@ func (sv *SliceViewBase) ConfigRows() {
 				e.SetHandled()
 				sv.UpdateSelectRow(i)
 			})
+			idxlab.OnDoubleClick(func(e events.Event) {
+				sv.Send(events.DoubleClick, e)
+			})
 			idxlab.SetText(sitxt)
 			idxlab.ContextMenus = sv.ContextMenus
 			idxlab.Style(func(s *styles.Style) {
@@ -629,6 +632,9 @@ func (sv *SliceViewBase) ConfigRows() {
 		wb.OnSelect(func(e events.Event) {
 			e.SetHandled()
 			sv.UpdateSelectRow(i)
+		})
+		wb.OnDoubleClick(func(e events.Event) {
+			sv.Send(events.DoubleClick, e)
 		})
 		wb.ContextMenus = sv.ContextMenus
 

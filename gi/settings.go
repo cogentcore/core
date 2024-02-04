@@ -560,7 +560,7 @@ func (ss *SystemSettingsData) UpdateUser() {
 // ZebraStripesWeight returns a 0 - 0.2 alpha opacity factor to use in computing
 // a zebra stripe color, using colors.WithAF32 function.
 func (ss *SystemSettingsData) ZebraStripesWeight() float32 {
-	return ss.ZebraStripes * 0.2
+	return ss.ZebraStripes * 0.002
 }
 
 // User basic user information that might be needed for different apps

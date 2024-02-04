@@ -123,7 +123,7 @@ func (bt *Button) OnInit() {
 
 func (bt *Button) SetStyles() {
 	bt.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
+		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.DoubleClickable)
 		if !bt.IsDisabled() {
 			s.Cursor = cursors.Pointer
 		}
@@ -358,6 +358,12 @@ func (bt *Button) HandleEvents() {
 		if bt.OpenMenu(e) {
 			e.SetHandled()
 		}
+	})
+	bt.OnDoubleClick(func(e events.Event) {
+		bt.Send(events.Click, e)
+	})
+	bt.On(events.TripleClick, func(e events.Event) {
+		bt.Send(events.Click, e)
 	})
 }
 

@@ -455,6 +455,9 @@ func (tv *TableView) ConfigRows() {
 				e.SetHandled()
 				tv.UpdateSelectRow(i)
 			})
+			idxlab.OnDoubleClick(func(e events.Event) {
+				tv.Send(events.DoubleClick, e)
+			})
 			idxlab.SetText(sitxt)
 			idxlab.ContextMenus = tv.ContextMenus
 			idxlab.Style(func(s *styles.Style) {
@@ -488,6 +491,9 @@ func (tv *TableView) ConfigRows() {
 			wb.OnSelect(func(e events.Event) {
 				e.SetHandled()
 				tv.UpdateSelectRow(i)
+			})
+			wb.OnDoubleClick(func(e events.Event) {
+				tv.Send(events.DoubleClick, e)
 			})
 			wb.ContextMenus = tv.ContextMenus
 
