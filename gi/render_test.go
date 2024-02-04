@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 )
@@ -38,4 +39,11 @@ func TestRenderParentBorderRadius(t *testing.T) {
 		s.Min.Set(units.Dp(80))
 	})
 	b.AssertRender(t, filepath.Join("render", "parent-border-radius"))
+}
+
+// For https://github.com/cogentcore/core/issues/810
+func TestRenderButtonAlignment(t *testing.T) {
+	b := NewBody()
+	NewButton(b).SetIcon(icons.Square)
+	b.AssertRender(t, filepath.Join("render", "button-alignment"))
 }
