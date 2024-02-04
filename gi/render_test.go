@@ -46,10 +46,12 @@ func TestRenderParentBorderRadius(t *testing.T) {
 // For https://github.com/cogentcore/core/issues/810
 func TestRenderButtonAlignment(t *testing.T) {
 	b := NewBody()
-	bt := NewButton(b).SetIcon(icons.Square)
+	bt := NewButton(b).SetType(ButtonAction).SetIcon(icons.Square).Style(func(s *styles.Style) {
+		s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
+	})
 	b.AssertRender(t, filepath.Join("render", "button-alignment"), func() {
 		bt.WidgetWalkPre(func(kwi Widget, kwb *WidgetBase) bool {
-			fmt.Printf("%v: %#v\n\n", kwb, kwb.Geom)
+			fmt.Printf("%v: %#v %#v\n\n", kwb, kwb.Styles.BoxSpace(), kwb.Geom)
 			return ki.Continue
 		})
 	})
