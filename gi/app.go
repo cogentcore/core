@@ -279,41 +279,8 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 			}
 		}
 	})
-	var addButtonItems func(par ki.Ki)
-	addButtonItems = func(par ki.Ki) {
-		for _, kid := range *par.Children() {
-			bt := AsButton(kid)
-			if bt == nil || bt.IsDisabled() {
-				continue
-			}
-			if bt.HasMenu() {
-				tmpms := NewScene()
-				bt.Menu(tmpms)
-				addButtonItems(tmpms)
-				continue
-			}
-			lbl := bt.Text
-			if lbl == "" {
-				lbl = bt.Tooltip
-			}
-			ch.Items = append(ch.Items, ChooserItem{
-				Label:   lbl,
-				Icon:    bt.Icon,
-				Tooltip: bt.Tooltip,
-				Func: func() {
-					bt.Send(events.Click)
-				},
-			})
-			// after the quit button, there are the render wins,
-			// which we do not want to show here as we are already
-			// showing the stages
-			if bt.Name() == "quit-app" {
-				break
-			}
-		}
-	}
 	ch.AddItemsFunc(func() {
-		addButtonItems(tb)
+		AddButtonItems(&ch.Items, tb, "")
 	})
 	ch.OnFinal(events.Change, func(e events.Event) {
 		// we must never have a chooser label so that it
@@ -323,4 +290,52 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 		ch.ShowCurrentItem()
 	})
 	return ch
+}
+
+// AddButtonItems adds to the given items all of the buttons under
+// the given parent. It navigates through button menus to find other
+// buttons using a recursive approach that updates path with context
+// about the original button menu. Consumers of this function should
+// typically set path to "".
+func AddButtonItems(items *[]ChooserItem, par ki.Ki, path string) {
+	for _, kid := range *par.Children() {
+		bt := AsButton(kid)
+		if bt == nil || bt.IsDisabled() {
+			continue
+		}
+		lbl := bt.Text
+		if lbl == "" {
+			lbl = bt.Tooltip
+		}
+		if bt.HasMenu() {
+			tmpms := NewScene()
+			bt.Menu(tmpms)
+			npath := path
+			if npath != "" {
+				npath += " > "
+			}
+			if bt.Name() != "overflow-menu" {
+				npath += lbl
+			}
+			AddButtonItems(items, tmpms, npath)
+			continue
+		}
+		if path != "" {
+			lbl = path + " > " + lbl
+		}
+		*items = append(*items, ChooserItem{
+			Label:   lbl,
+			Icon:    bt.Icon,
+			Tooltip: bt.Tooltip,
+			Func: func() {
+				bt.Send(events.Click)
+			},
+		})
+		// after the quit button, there are the render wins,
+		// which we do not want to show here as we are already
+		// showing the stages
+		if bt.Name() == "quit-app" {
+			break
+		}
+	}
 }
