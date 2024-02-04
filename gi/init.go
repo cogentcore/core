@@ -9,7 +9,6 @@ import (
 
 	"cogentcore.org/core/goosi"
 	_ "cogentcore.org/core/goosi/driver"
-	_ "cogentcore.org/core/grog"
 )
 
 func init() {
