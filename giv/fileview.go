@@ -384,13 +384,7 @@ func (fv *FileView) ConfigFilesRow() {
 	fsv.OnSelect(func(e events.Event) {
 		fv.FileSelectAction(fsv.SelIdx)
 	})
-	fsv.OnDoubleClick(func(e events.Event) {
-		if !fv.SelectFile() {
-			e.SetHandled() // don't pass along; keep dialog open
-		} else {
-			fv.Scene.SendKeyFun(keyfun.Accept, e) // activates Ok button code
-		}
-	})
+	fsv.BindSelect(&fv.SelectedIdx)
 }
 
 func (fv *FileView) ConfigSelRow() {

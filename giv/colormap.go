@@ -95,7 +95,7 @@ func (vv *ColorMapValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	sl := colormap.AvailMapsList()
 	cur := laser.ToString(vv.Value.Interface())
 	si := 0
-	NewSliceView(d).SetSlice(&sl).SetSelVal(cur).BindSelectDialog(&si)
+	NewSliceView(d).SetSlice(&sl).SetSelVal(cur).BindSelect(&si)
 	return true, func() {
 		if si >= 0 {
 			vv.SetValue(sl[si])

@@ -433,9 +433,9 @@ func (sv *SliceViewBase) IsNil() bool {
 	return laser.AnyIsNil(sv.Slice)
 }
 
-// BindSelectDialog makes the slice view a read-only selection slice view and then
+// BindSelect makes the slice view a read-only selection slice view and then
 // binds its events to its scene and its current selection index to the given value.
-func (sv *SliceViewBase) BindSelectDialog(val *int) *SliceViewBase {
+func (sv *SliceViewBase) BindSelect(val *int) *SliceViewBase {
 	sv.SetReadOnly(true)
 	sv.OnSelect(func(e events.Event) {
 		*val = sv.SelIdx
