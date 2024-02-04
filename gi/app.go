@@ -114,7 +114,7 @@ func StdAppBarStart(tb *Toolbar) {
 
 // StdAppBarBack adds a back button
 func StdAppBarBack(tb *Toolbar) *Button {
-	bt := NewButton(tb, "back").SetIcon(icons.ArrowBack).SetTooltip("Back")
+	bt := NewButton(tb, "back").SetIcon(icons.ArrowBack).SetTooltip("Back").SetKey(keyfun.HistPrev)
 	// bt.StyleFirst(func(s *styles.Style) {
 	// 	if tb.Scene.Stage.MainMgr == nil {
 	// 		return

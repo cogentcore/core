@@ -273,10 +273,18 @@ func (fv *FileView) ConfigToolbar(tb *gi.Toolbar) {
 
 	ch.AddItemsFunc(func() {
 		for _, sp := range gi.SavedPaths {
-			ch.Items = append(ch.Items, gi.ChooserItem{
+			item := gi.ChooserItem{
 				Value: sp,
-				Icon:  icons.File,
-			})
+				Icon:  icons.Folder,
+			}
+			if sp == gi.SavedPathsExtras[0] {
+				item.SeparatorBefore = true
+				item.Icon = icons.Refresh
+			}
+			if sp == gi.SavedPathsExtras[1] {
+				item.Icon = icons.Edit
+			}
+			ch.Items = append(ch.Items, item)
 		}
 	})
 
@@ -548,23 +556,13 @@ func (fv *FileView) UpdateFiles() {
 	defer fv.UpdateEndLayout(updt)
 
 	fv.UpdatePath()
-	// pf := fv.PathField()
-	// if len(gi.SavedPaths) == 0 {
-	// 	gi.OpenPaths()
-	// }
-	// gi.SavedPaths.AddPath(fv.DirPath, gi.SystemSettings.SavedPathsMax)
-	// gi.SavePaths()
-	// sp := []string(gi.SavedPaths)
-	// pf.SetStrings(sp).SetCurrentIndex(0)
-	// pf.Items[len(pf.Items)-2].SeparatorBefore = true
-	// pf.CurrentItem.Label = fv.DirPath
-	// pf.ShowCurrentItem()
+	if len(gi.SavedPaths) == 0 {
+		gi.OpenPaths()
+	}
+	gi.SavedPaths.AddPath(fv.DirPath, gi.SystemSettings.SavedPathsMax)
+	gi.SavePaths()
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
-
-	// todo: wait cursor
-	// goosi.TheApp.Cursor(owin).Push(cursor.Wait)
-	// defer goosi.TheApp.Cursor(owin).Pop()
 
 	fv.ReadFiles()
 
