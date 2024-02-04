@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"log/slog"
 	"reflect"
-	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -17,14 +16,11 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
-	"cogentcore.org/core/glop/bools"
 	"cogentcore.org/core/glop/sentence"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
-	"github.com/expr-lang/expr"
-	"github.com/expr-lang/expr/ast"
 )
 
 // NoSentenceCaseFor indicates to not transform field names in
@@ -451,109 +447,6 @@ func StructFieldIsDef(defs string, valPtr any, kind reflect.Kind) (bool, string)
 		}
 	}
 	return def, defStr
-}
-
-type viewifPatcher struct{}
-
-var (
-	replaceEqualsRegexp = regexp.MustCompile(`([^\!\=\<\>])(=)([^\!\=\<\>])`)
-	stringer            = reflect.TypeOf((*fmt.Stringer)(nil)).Elem()
-	booler              = reflect.TypeOf((*bools.Booler)(nil)).Elem()
-	// slboolv             = reflect.TypeOf((*slbool.Bool)(nil)).Elem()
-)
-
-func (p *viewifPatcher) Visit(node *ast.Node) {
-	switch x := (*node).(type) {
-	case *ast.IdentifierNode:
-		lt := x.Type()
-		if lt == nil {
-			return
-		}
-		if lt.Implements(booler) {
-			ast.Patch(node, &ast.CallNode{
-				Callee: &ast.MemberNode{
-					Node:     *node,
-					Property: &ast.StringNode{Value: "Bool"},
-				},
-			})
-		}
-	case *ast.BinaryNode:
-		lid, lok := x.Left.(*ast.IdentifierNode)
-		rid, rok := x.Right.(*ast.IdentifierNode)
-		rars, rrok := x.Right.(*ast.ArrayNode)
-		switch {
-		case lok && rok && (x.Operator == "==" || x.Operator == "!="):
-			lt := lid.Type()
-			if lt == nil {
-				return
-			}
-			switch {
-			case lt.Implements(stringer):
-				ast.Patch(node, &ast.BinaryNode{
-					Operator: x.Operator,
-					Left: &ast.CallNode{
-						Callee: &ast.MemberNode{
-							Node:     x.Left,
-							Property: &ast.StringNode{Value: "String"},
-						},
-					},
-					Right: &ast.StringNode{
-						Value: rid.Value,
-					},
-				})
-			}
-		case lok && rrok && (x.Operator == "=="):
-			var strs []ast.Node
-			for _, on := range rars.Nodes {
-				strs = append(strs, &ast.StringNode{Value: on.(*ast.IdentifierNode).Value})
-			}
-			ast.Patch(node, &ast.BinaryNode{
-				Operator: "in",
-				Left: &ast.CallNode{
-					Callee: &ast.MemberNode{
-						Node:     x.Left,
-						Property: &ast.StringNode{Value: "String"},
-					},
-				},
-				Right: &ast.ArrayNode{
-					Nodes: strs,
-				},
-			})
-		}
-	}
-}
-
-// StructViewIf parses given `viewif:"expr"` expression and returns
-// true if should be visible, false if not.
-// Prints an error if the expression is not parsed properly
-// or does not evaluate to a boolean.
-func StructViewIf(viewif string, field reflect.StructField, stru any) bool {
-	// replace = -> == without screwing up existing ==, !=, >=, <=
-	viewif = replaceEqualsRegexp.ReplaceAllString(viewif, "$1==$3")
-
-	program, err := expr.Compile(viewif, expr.Env(stru), expr.Patch(&viewifPatcher{}), expr.AllowUndefinedVariables())
-	if err != nil {
-		fmt.Printf("giv.StructView viewif tag on field %s: syntax error: `%s`: %s\n", field.Name, viewif, err)
-		return true
-	}
-	val, err := expr.Run(program, stru)
-	if err != nil {
-		fmt.Printf("giv.StructView viewif tag on field %s: run error: `%s`: %s\n", field.Name, viewif, err)
-		return true
-	}
-	if err != nil {
-		fmt.Printf("giv.StructView viewif tag on field %s: syntax error: `%s`: %s\n", field.Name, viewif, err)
-		return true // visible by default
-	}
-	// fmt.Printf("fld: %s  viewif: %s  val: %t  %+v\n", field.Name, viewif, val, val)
-	switch x := val.(type) {
-	case bool:
-		return x
-	case *bool:
-		return *x
-	}
-	fmt.Printf("giv.StructView viewif tag on field %s: didn't evaluate to a boolean: `%s`: type: %t val: %+v\n", field.Name, viewif, val, val)
-	return true
 }
 
 // StructFieldVals represents field values in a struct, at multiple

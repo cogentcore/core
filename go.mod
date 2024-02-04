@@ -10,7 +10,6 @@ require (
 	github.com/aymerick/douceur v0.2.0
 	github.com/chewxy/math32 v1.10.1
 	github.com/ericchiang/css v1.3.0
-	github.com/expr-lang/expr v1.16.0
 	github.com/fatih/camelcase v1.0.0
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gabriel-vasile/mimetype v1.4.3
