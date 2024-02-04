@@ -181,6 +181,9 @@ func (sc *Scene) HandleEvents() {
 	})
 	sc.OnClose(func(e events.Event) {
 		sm := sc.MainStageMgr()
+		if sm == nil {
+			return
+		}
 		sm.Mu.RLock()
 		defer sm.Mu.RUnlock()
 

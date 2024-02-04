@@ -58,7 +58,7 @@ func (vv *ColorMapValue) ConfigWidget(w gi.Widget) {
 	fr.HandleClickOnEnterSpace()
 	ConfigDialogWidget(vv, fr, false)
 	fr.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Hoverable, abilities.Pressable, abilities.Focusable)
+		s.SetAbilities(true, abilities.Hoverable, abilities.Clickable, abilities.Focusable)
 		s.Cursor = cursors.Pointer
 		s.Border.Radius = styles.BorderRadiusMedium
 

@@ -25,9 +25,9 @@ func _AbilitiesNoOp() {
 	_ = x[Editable-(0)]
 	_ = x[Selectable-(1)]
 	_ = x[Activatable-(2)]
-	_ = x[Pressable-(3)]
-	_ = x[LongPressable-(4)]
-	_ = x[DoubleClickable-(5)]
+	_ = x[Clickable-(3)]
+	_ = x[DoubleClickable-(4)]
+	_ = x[LongPressable-(5)]
 	_ = x[Draggable-(6)]
 	_ = x[Droppable-(7)]
 	_ = x[Slideable-(8)]
@@ -42,9 +42,9 @@ var _AbilitiesNameToValueMap = map[string]Abilities{
 	`Editable`:        0,
 	`Selectable`:      1,
 	`Activatable`:     2,
-	`Pressable`:       3,
-	`LongPressable`:   4,
-	`DoubleClickable`: 5,
+	`Clickable`:       3,
+	`DoubleClickable`: 4,
+	`LongPressable`:   5,
 	`Draggable`:       6,
 	`Droppable`:       7,
 	`Slideable`:       8,
@@ -59,9 +59,9 @@ var _AbilitiesDescMap = map[Abilities]string{
 	0:  `Editable means the element can be edited. Otherwise, it remains in ReadOnly mode.`,
 	1:  `Selectable means it can be Selected`,
 	2:  `Activatable means it can be made Active`,
-	3:  `Pressable means it can be pressed but is not Activatable. Pressed items receive Click events, but do not get the automatic Active state otherwise associated with Activatable items.`,
-	4:  `LongPressable indicates that an element can be LongPressed`,
-	5:  `DoubleClickable indicates that an element does something different when it is clicked on twice in a row. If this is not set, DoubleClick events are processed in the same way as Click events.`,
+	3:  `Clickable means it can be Clicked, receiving Click events when the user executes a mouse down and up event on the same element. Does not automatically imply Acitvatable.`,
+	4:  `DoubleClickable indicates that an element does something different when it is clicked on twice in a row. If this is not set, DoubleClick events are processed in the same way as Click events.`,
+	5:  `LongPressable indicates that an element can be LongPressed`,
 	6:  `Draggable means it can be Dragged`,
 	7:  `Droppable means it can receive DragEnter, DragLeave, and Drop events (not specific to current Drag item, just generally)`,
 	8:  `Slideable means it has a slider element that can be dragged to change value. Cannot be both Draggable and Slideable.`,
@@ -76,9 +76,9 @@ var _AbilitiesMap = map[Abilities]string{
 	0:  `Editable`,
 	1:  `Selectable`,
 	2:  `Activatable`,
-	3:  `Pressable`,
-	4:  `LongPressable`,
-	5:  `DoubleClickable`,
+	3:  `Clickable`,
+	4:  `DoubleClickable`,
+	5:  `LongPressable`,
 	6:  `Draggable`,
 	7:  `Droppable`,
 	8:  `Slideable`,

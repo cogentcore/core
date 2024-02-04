@@ -291,7 +291,7 @@ func (sv *SliceViewBase) SetStyles() {
 	svi := sv.This().(SliceViewer)
 
 	sv.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Pressable, abilities.DoubleClickable)
+		s.SetAbilities(true, abilities.Clickable, abilities.DoubleClickable)
 		s.Direction = styles.Column
 		// absorb horizontal here, vertical in view
 		s.Overflow.X = styles.OverflowAuto
@@ -436,6 +436,13 @@ func (sv *SliceViewBase) BindSelectDialog(val *int) *SliceViewBase {
 		*val = sv.SelIdx
 	})
 	sv.OnDoubleClick(func(e events.Event) {
+		sg := sv.This().(SliceViewer).SliceGrid()
+		row, col := sg.IndexFromPixel(e.Pos())
+		fmt.Println("double clicked on:", row, col)
+		if row+sv.StartIdx > sv.SliceSize {
+			e.SetHandled()
+			return
+		}
 		*val = sv.SelIdx
 		sv.Scene.SendKeyFun(keyfun.Accept, e) // activates Ok button code
 	})
@@ -1856,7 +1863,7 @@ func (sv *SliceViewBase) HandleEvents() {
 			sv.KeyInputEditable(e)
 		}
 	})
-	sv.OnClick(func(e events.Event) {
+	sv.OnFirst(events.Click, func(e events.Event) {
 		sv.SetFocusEvent()
 		sg := sv.This().(SliceViewer).SliceGrid()
 		row, col := sg.IndexFromPixel(e.Pos())
@@ -1907,6 +1914,9 @@ type SliceViewGrid struct {
 func (sg *SliceViewGrid) OnInit() {
 	sg.Frame.OnInit()
 	sg.Styles.Display = styles.Grid
+	sg.StyleFinal(func(s *styles.Style) {
+		s.Abilities.SetFlag(false, abilities.Clickable)
+	})
 }
 
 func (sg *SliceViewGrid) SizeFromChildren(iter int, pass gi.LayoutPasses) mat32.Vec2 {

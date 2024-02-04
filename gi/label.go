@@ -104,7 +104,7 @@ func (lb *Label) SetStyles() {
 	lb.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Selectable, abilities.DoubleClickable)
 		if len(lb.TextRender.Links) > 0 {
-			s.SetAbilities(true, abilities.Pressable, abilities.LongHoverable, abilities.LongPressable)
+			s.SetAbilities(true, abilities.Clickable, abilities.LongHoverable, abilities.LongPressable)
 		}
 		if !lb.IsReadOnly() {
 			s.Cursor = cursors.Text

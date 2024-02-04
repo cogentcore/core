@@ -22,21 +22,27 @@ const (
 	// Selectable means it can be Selected
 	Selectable
 
-	// Activatable means it can be made Active
+	// Activatable means it can be made Active by pressing down on it,
+	// which gives it a visible state layer color change.
+	// This also implies Clickable, receiving Click events when
+	// the user executes a mouse down and up event on the same element.
 	Activatable
 
-	// Pressable means it can be pressed but is not Activatable.
-	// Pressed items receive Click events, but do not get the automatic
-	// Active state otherwise associated with Activatable items.
-	Pressable
-
-	// LongPressable indicates that an element can be LongPressed
-	LongPressable
+	// Clickable means it can be Clicked, receiving Click events when
+	// the user executes a mouse down and up event on the same element,
+	// but otherwise does not change its rendering when pressed
+	// (as Activatable does).  Use this for items that are more passively
+	// clickable, such as frames or tables, whereas e.g., a Button is
+	// Activatable.
+	Clickable
 
 	// DoubleClickable indicates that an element does something different
 	// when it is clicked on twice in a row. If this is not set, DoubleClick
 	// events are processed in the same way as Click events.
 	DoubleClickable
+
+	// LongPressable indicates that an element can be LongPressed
+	LongPressable
 
 	// Draggable means it can be Dragged
 	Draggable
@@ -74,7 +80,7 @@ func (ab *Abilities) Is(flag enums.BitFlag) bool {
 // IsPressable returns true when an element is Selectable, Activatable,
 // DoubleClickable, Draggable, Slideable, or Checkable
 func (ab *Abilities) IsPressable() bool {
-	return ab.Is(Selectable) || ab.Is(Activatable) || ab.Is(DoubleClickable) || ab.Is(Draggable) || ab.Is(Slideable) || ab.Is(Checkable) || ab.Is(Pressable)
+	return ab.Is(Selectable) || ab.Is(Activatable) || ab.Is(DoubleClickable) || ab.Is(Draggable) || ab.Is(Slideable) || ab.Is(Checkable) || ab.Is(Clickable)
 }
 
 // IsHoverable is true for both Hoverable and LongHoverable

@@ -38,7 +38,7 @@ func (sv *SVG) OnInit() {
 func (sv *SVG) SetStyles() {
 	sv.Style(func(s *styles.Style) {
 		ro := sv.IsReadOnly()
-		s.SetAbilities(!ro, abilities.Slideable, abilities.Pressable, abilities.LongHoverable, abilities.Scrollable)
+		s.SetAbilities(!ro, abilities.Slideable, abilities.Clickable, abilities.LongHoverable, abilities.Scrollable)
 		s.Grow.Set(1, 1)
 		s.Min.Set(units.Dp(sv.SVG.Root.ViewBox.Size.X), units.Dp(sv.SVG.Root.ViewBox.Size.Y))
 	})

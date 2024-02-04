@@ -39,7 +39,7 @@ func (hl *Handle) OnInit() {
 
 func (hl *Handle) SetStyles() {
 	hl.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Pressable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
+		s.SetAbilities(true, abilities.Clickable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
 
 		s.Border.Radius = styles.BorderRadiusFull
 		s.Background = colors.C(colors.Scheme.OutlineVariant)
