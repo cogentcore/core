@@ -12,7 +12,6 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/giv"
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/states"
@@ -59,7 +58,7 @@ type ILStruct struct { //gti:add
 	Val float32
 }
 
-func (il *ILStruct) ShouldShow(field string, typ *gti.Type) bool {
+func (il *ILStruct) ShouldShow(field string) bool {
 	switch field {
 	case "ShowMe", "Cond":
 		return il.On
@@ -108,7 +107,7 @@ type Struct struct { //gti:add
 	Stuff []float32
 }
 
-func (st *Struct) ShouldShow(field string, typ *gti.Type) bool {
+func (st *Struct) ShouldShow(field string) bool {
 	switch field {
 	case "Name":
 		return st.Enum <= gi.ButtonElevated

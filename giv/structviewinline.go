@@ -84,7 +84,7 @@ func (sv *StructViewInline) ConfigStruct() bool {
 		}
 		if ss, ok := sv.Struct.(gi.ShouldShower); ok {
 			sv.HasViewIfs = true
-			if !ss.ShouldShow(field.Name, StructViewInlineType) {
+			if !ss.ShouldShow(field.Name) {
 				return true
 			}
 		}

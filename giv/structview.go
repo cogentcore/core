@@ -197,7 +197,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 			}
 			if ss, ok := sv.Struct.(gi.ShouldShower); ok {
 				sv.HasViewIfs = true
-				if !ss.ShouldShow(field.Name, StructViewType) {
+				if !ss.ShouldShow(field.Name) {
 					return false
 				}
 			}
@@ -212,7 +212,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 			}
 			if ss, ok := sv.Struct.(gi.ShouldShower); ok {
 				sv.HasViewIfs = true
-				if !ss.ShouldShow(field.Name, StructViewType) {
+				if !ss.ShouldShow(field.Name) {
 					return true
 				}
 			}
@@ -226,7 +226,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 						}
 						if ss, ok := fvalp.(gi.ShouldShower); ok {
 							sv.HasViewIfs = true
-							if !ss.ShouldShow(sfield.Name, StructViewType) {
+							if !ss.ShouldShow(sfield.Name) {
 								return false
 							}
 						}
@@ -239,7 +239,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 						}
 						if ss, ok := fvalp.(gi.ShouldShower); ok {
 							sv.HasViewIfs = true
-							if !ss.ShouldShow(sfield.Name, StructViewType) {
+							if !ss.ShouldShow(sfield.Name) {
 								return true
 							}
 						}
