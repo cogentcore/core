@@ -84,6 +84,7 @@ func (tv *TableView) OnInit() {
 }
 
 func (tv *TableView) SetStyles() {
+	tv.InitSelIdx = -1
 	tv.SortIdx = -1
 	tv.MinRows = 4
 	tv.SetFlag(false, SliceViewSelectMode)
@@ -532,7 +533,6 @@ func (tv *TableView) UpdateWidgets() {
 	if sg == nil || tv.VisRows == 0 || sg.VisRows == 0 || !sg.HasChildren() {
 		return
 	}
-	// sc := tv.Sc
 
 	updt := sg.UpdateStart()
 	defer sg.UpdateEndRender(updt)
@@ -543,6 +543,19 @@ func (tv *TableView) UpdateWidgets() {
 	tv.This().(SliceViewer).UpdtSliceSize()
 
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
+
+	scrollTo := -1
+	if tv.SelField != "" && tv.SelVal != nil {
+		tv.SelIdx, _ = StructSliceIdxByValue(tv.Slice, tv.SelField, tv.SelVal)
+		tv.SelField = ""
+		tv.SelVal = nil
+		tv.InitSelIdx = -1
+		scrollTo = tv.SelIdx
+	} else if tv.InitSelIdx >= 0 {
+		tv.SelIdx = tv.InitSelIdx
+		tv.InitSelIdx = -1
+		scrollTo = tv.SelIdx
+	}
 
 	tv.UpdateStartIdx()
 	for i := 0; i < tv.VisRows; i++ {
@@ -620,21 +633,8 @@ func (tv *TableView) UpdateWidgets() {
 		}
 	}
 
-	if tv.SelField != "" && tv.SelVal != nil {
-		tv.SelIdx, _ = StructSliceIdxByValue(tv.Slice, tv.SelField, tv.SelVal)
-		tv.SelField = ""
-		tv.SelVal = nil
-		tv.ScrollToIdx(tv.SelIdx)
-		// tv.SetFocusEvent() // todo:
-	} else if tv.InitSelIdx >= 0 {
-		tv.SelIdx = tv.InitSelIdx
-		tv.InitSelIdx = -1
-		tv.ScrollToIdx(tv.SelIdx)
-		// tv.SetFocusEvent()
-	}
-
-	if tv.IsReadOnly() && tv.SelIdx >= 0 {
-		tv.SelectIdx(tv.SelIdx)
+	if scrollTo >= 0 {
+		tv.ScrollToIdx(scrollTo)
 	}
 }
 

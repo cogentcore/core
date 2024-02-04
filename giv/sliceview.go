@@ -670,12 +670,20 @@ func (sv *SliceViewBase) UpdateWidgets() {
 	sv.This().(SliceViewer).UpdtSliceSize()
 
 	nWidgPerRow, idxOff := sv.RowWidgetNs()
-	// sc := sv.Sc
 
-	if sv.InitSelIdx >= 0 {
-		sv.SelectIdxAction(sv.InitSelIdx, events.SelectOne)
-		fmt.Println("selected init:", sv.InitSelIdx)
+	scrollTo := -1
+	if sv.SelVal != nil {
+		idx, ok := SliceIdxByValue(sv.Slice, sv.SelVal)
+		if ok {
+			sv.SelIdx = idx
+			scrollTo = sv.SelIdx
+		}
+		sv.SelVal = nil
 		sv.InitSelIdx = -1
+	} else if sv.InitSelIdx >= 0 {
+		sv.SelIdx = sv.InitSelIdx
+		sv.InitSelIdx = -1
+		scrollTo = sv.SelIdx
 	}
 
 	sv.UpdateStartIdx()
@@ -717,19 +725,8 @@ func (sv *SliceViewBase) UpdateWidgets() {
 			}
 		}
 	}
-	if sv.SelVal != nil {
-		sv.SelIdx, _ = SliceIdxByValue(sv.Slice, sv.SelVal)
-		sv.SelVal = nil
-		sv.ScrollToIdx(sv.SelIdx)
-		// sv.SetFocusEvent() // todo: doesn't work -- probably need priority events or something?
-	} else if sv.InitSelIdx >= 0 {
-		sv.SelIdx = sv.InitSelIdx
-		sv.InitSelIdx = -1
-		sv.ScrollToIdx(sv.SelIdx)
-		// sv.SetFocusEvent()
-	}
-	if sv.IsReadOnly() && sv.SelIdx >= 0 {
-		sv.SelectIdx(sv.SelIdx)
+	if scrollTo >= 0 {
+		sv.ScrollToIdx(scrollTo)
 	}
 }
 
@@ -1023,7 +1020,7 @@ func (sv *SliceViewBase) ScrollToIdxNoUpdt(idx int) bool {
 		return true
 	}
 	if idx >= sv.StartIdx+sv.VisRows {
-		sv.StartIdx = idx - (sv.VisRows - 1)
+		sv.StartIdx = idx - (sv.VisRows - 4)
 		sv.StartIdx = max(0, sv.StartIdx)
 		sv.UpdateScroll()
 		return true
@@ -1246,6 +1243,9 @@ func (sv *SliceViewBase) UpdateSelectIdx(idx int, sel bool) {
 func (sv *SliceViewBase) IdxIsSelected(idx int) bool {
 	sv.ViewMuLock()
 	defer sv.ViewMuUnlock()
+	if sv.IsReadOnly() {
+		return idx == sv.SelIdx
+	}
 	_, ok := sv.SelIdxs[idx]
 	return ok
 }

@@ -455,7 +455,7 @@ func (ch *Chooser) ShowCurrentItem() *Chooser {
 		ch.SetIcon(ch.CurrentItem.Icon)
 		if ch.Icon != picon {
 			ch.Update()
-			ch.SetNeedsLayout(true)
+			// ch.SetNeedsLayout(true)
 		}
 	}
 	if ch.CurrentItem.Tooltip != "" {

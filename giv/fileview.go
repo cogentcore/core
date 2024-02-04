@@ -387,7 +387,7 @@ func (fv *FileView) ConfigFilesRow() {
 	fsv.OnDoubleClick(func(e events.Event) {
 		sg := sv.This().(SliceViewer).SliceGrid()
 		row, _ := sg.IndexFromPixel(e.Pos())
-		if row+sv.StartIdx >= sv.SliceSize {
+		if row+fsv.StartIdx >= fsv.SliceSize {
 			e.SetHandled()
 			return
 		}

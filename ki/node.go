@@ -350,6 +350,9 @@ func (n *Node) PathFrom(par Ki) string {
 
 // find the child on the path
 func findPathChild(k Ki, child string) (int, bool) {
+	if len(child) == 0 {
+		return 0, false
+	}
 	if child[0] == '[' && child[len(child)-1] == ']' {
 		idx, err := strconv.Atoi(child[1 : len(child)-1])
 		if err != nil {
