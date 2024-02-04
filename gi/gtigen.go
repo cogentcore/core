@@ -776,7 +776,7 @@ func (t *Spell) SetSuggest(v ...string) *Spell { t.Suggest = v; return t }
 func (t *Spell) SetStage(v *Stage) *Spell { t.Stage = v; return t }
 
 // SpinnerType is the [gti.Type] for [Spinner]
-var SpinnerType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Spinner", IDName: "spinner", Doc: "Spinner combines a TextField with up / down buttons for incrementing /\ndecrementing values -- all configured within the Parts of the widget", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "TextField"}}, Fields: []gti.Field{{Name: "Value", Doc: "Value is the current value"}, {Name: "HasMin", Doc: "HasMin is whether there is a minimum value to enforce"}, {Name: "Min", Doc: "If HasMin is true, Min is the the minimum value in range"}, {Name: "HasMax", Doc: "HaxMax is whether there is a maximum value to enforce"}, {Name: "Max", Doc: "If HasMax is true, Max is the maximum value in range"}, {Name: "Step", Doc: "Step is the smallest step size to increment"}, {Name: "PageStep", Doc: "PageStep is a larger step size used for PageUp and PageDown"}, {Name: "Prec", Doc: "Prec specifies the precision of decimal places\n(total, not after the decimal point) to use in\nrepresenting the number. This helps to truncate\nsmall weird floating point values."}, {Name: "Format", Doc: "Format is the format string to use for printing the value.\nIf it unset, %g is used. If it is decimal based\n(ends in d, b, c, o, O, q, x, X, or U) then the value is\nconverted to decimal prior to printing."}}, Instance: &Spinner{}})
+var SpinnerType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Spinner", IDName: "spinner", Doc: "Spinner combines a TextField with up / down buttons for incrementing /\ndecrementing values -- all configured within the Parts of the widget", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "TextField"}}, Fields: []gti.Field{{Name: "Value", Doc: "Value is the current value."}, {Name: "HasMin", Doc: "HasMin is whether there is a minimum value to enforce."}, {Name: "Min", Doc: "Min, if HasMin is true, is the the minimum value in range."}, {Name: "HasMax", Doc: "HaxMax is whether there is a maximum value to enforce."}, {Name: "Max", Doc: "Max, if HasMax is true, is the maximum value in range."}, {Name: "Step", Doc: "Step is the smallest step size to increment when using the\nup and down buttons and arrow keys."}, {Name: "EnforceStep", Doc: "EnforceStep is whether to ensure that the value of the spinner\nis always a multiple of [Spinner.Step]."}, {Name: "PageStep", Doc: "PageStep is a larger step size used for PageUp and PageDown events."}, {Name: "Prec", Doc: "Prec specifies the precision of decimal places\n(total, not after the decimal point) to use in\nrepresenting the number. This helps to truncate\nsmall weird floating point values."}, {Name: "Format", Doc: "Format is the format string to use for printing the value.\nIf it unset, %g is used. If it is decimal based\n(ends in d, b, c, o, O, q, x, X, or U) then the value is\nconverted to decimal prior to printing."}}, Instance: &Spinner{}})
 
 // NewSpinner adds a new [Spinner] with the given name to the given parent:
 // Spinner combines a TextField with up / down buttons for incrementing /
@@ -812,11 +812,17 @@ func AsSpinner(k ki.Ki) *Spinner {
 func (t *Spinner) AsSpinner() *Spinner { return t }
 
 // SetStep sets the [Spinner.Step]:
-// Step is the smallest step size to increment
+// Step is the smallest step size to increment when using the
+// up and down buttons and arrow keys.
 func (t *Spinner) SetStep(v float32) *Spinner { t.Step = v; return t }
 
+// SetEnforceStep sets the [Spinner.EnforceStep]:
+// EnforceStep is whether to ensure that the value of the spinner
+// is always a multiple of [Spinner.Step].
+func (t *Spinner) SetEnforceStep(v bool) *Spinner { t.EnforceStep = v; return t }
+
 // SetPageStep sets the [Spinner.PageStep]:
-// PageStep is a larger step size used for PageUp and PageDown
+// PageStep is a larger step size used for PageUp and PageDown events.
 func (t *Spinner) SetPageStep(v float32) *Spinner { t.PageStep = v; return t }
 
 // SetPrec sets the [Spinner.Prec]:

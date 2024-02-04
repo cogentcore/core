@@ -22,25 +22,30 @@ import (
 type Spinner struct { //core:embedder
 	TextField
 
-	// Value is the current value
+	// Value is the current value.
 	Value float32 `set:"-"`
 
-	// HasMin is whether there is a minimum value to enforce
+	// HasMin is whether there is a minimum value to enforce.
 	HasMin bool `set:"-"`
 
-	// If HasMin is true, Min is the the minimum value in range
+	// Min, if HasMin is true, is the the minimum value in range.
 	Min float32 `set:"-"`
 
-	// HaxMax is whether there is a maximum value to enforce
+	// HaxMax is whether there is a maximum value to enforce.
 	HasMax bool `set:"-"`
 
-	// If HasMax is true, Max is the maximum value in range
+	// Max, if HasMax is true, is the maximum value in range.
 	Max float32 `set:"-"`
 
-	// Step is the smallest step size to increment
+	// Step is the smallest step size to increment when using the
+	// up and down buttons and arrow keys.
 	Step float32
 
-	// PageStep is a larger step size used for PageUp and PageDown
+	// EnforceStep is whether to ensure that the value of the spinner
+	// is always a multiple of [Spinner.Step].
+	EnforceStep bool
+
+	// PageStep is a larger step size used for PageUp and PageDown events.
 	PageStep float32
 
 	// Prec specifies the precision of decimal places
@@ -128,6 +133,9 @@ func (sp *Spinner) SetValue(val float32) *Spinner {
 		sp.Value = sp.Min
 	}
 	sp.Value = mat32.Truncate(sp.Value, sp.Prec)
+	if sp.EnforceStep {
+		sp.Value -= mat32.Mod(sp.Value, sp.Step)
+	}
 	sp.SetTextToValue()
 	return sp
 }
