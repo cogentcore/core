@@ -312,6 +312,11 @@ func (sv *SliceViewBase) SetStyles() {
 				s.Min.X.Ch(20)
 				s.Min.Y.Em(6)
 			})
+			sg.OnClick(func(e events.Event) {
+				sv.SetFocusEvent()
+				row, _ := sg.IndexFromPixel(e.Pos())
+				sv.UpdateSelectRow(row)
+			})
 		}
 		if w.Parent().PathFrom(sv) == "grid" {
 			switch {
@@ -437,9 +442,8 @@ func (sv *SliceViewBase) BindSelectDialog(val *int) *SliceViewBase {
 	})
 	sv.OnDoubleClick(func(e events.Event) {
 		sg := sv.This().(SliceViewer).SliceGrid()
-		row, col := sg.IndexFromPixel(e.Pos())
-		fmt.Println("double clicked on:", row, col)
-		if row+sv.StartIdx > sv.SliceSize {
+		row, _ := sg.IndexFromPixel(e.Pos())
+		if row+sv.StartIdx >= sv.SliceSize {
 			e.SetHandled()
 			return
 		}
@@ -1201,6 +1205,9 @@ func (sv *SliceViewBase) SelectIdxWidgets(idx int, sel bool) bool {
 // callback from widgetsig select
 func (sv *SliceViewBase) UpdateSelectRow(row int) {
 	idx := row + sv.StartIdx
+	if idx >= sv.SliceSize {
+		return
+	}
 	sel := !sv.IdxIsSelected(idx)
 	sv.UpdateSelectIdx(idx, sel)
 }
@@ -1862,13 +1869,6 @@ func (sv *SliceViewBase) HandleEvents() {
 		} else {
 			sv.KeyInputEditable(e)
 		}
-	})
-	sv.OnFirst(events.Click, func(e events.Event) {
-		sv.SetFocusEvent()
-		sg := sv.This().(SliceViewer).SliceGrid()
-		row, col := sg.IndexFromPixel(e.Pos())
-		fmt.Println("clicked on:", row, col)
-		sv.UpdateSelectRow(row + sv.StartIdx)
 	})
 }
 

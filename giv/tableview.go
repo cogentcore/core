@@ -126,6 +126,11 @@ func (tv *TableView) SetStyles() {
 				s.Min.X.Ch(20)
 				s.Min.Y.Em(6)
 			})
+			sg.OnClick(func(e events.Event) {
+				tv.SetFocusEvent()
+				row, _ := sg.IndexFromPixel(e.Pos())
+				tv.UpdateSelectRow(row)
+			})
 		}
 		if w.Parent().PathFrom(tv) == "grid" {
 			switch {
