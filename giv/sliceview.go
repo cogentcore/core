@@ -1858,6 +1858,8 @@ func (sv *SliceViewBase) HandleEvents() {
 	})
 	sv.OnClick(func(e events.Event) {
 		sv.SetFocusEvent()
+		// sg := sv.This().(SliceViewer).SliceGrid()
+
 	})
 }
 

@@ -8,6 +8,7 @@ import (
 	"strings"
 	"unsafe"
 
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/pi"
 	"cogentcore.org/core/pi/complete"
 	"cogentcore.org/core/pi/syms"
@@ -30,32 +31,32 @@ func InstallBuiltinTypes() {
 func (gl *GoLang) CompleteBuiltins(fs *pi.FileState, seed string, md *complete.Matches) {
 	for _, tk := range BuiltinTypeKind {
 		if strings.HasPrefix(tk.Name, seed) {
-			c := complete.Completion{Text: tk.Name, Label: tk.Name, Icon: "type"}
+			c := complete.Completion{Text: tk.Name, Label: tk.Name, Icon: string(icons.Type)}
 			md.Matches = append(md.Matches, c)
 		}
 	}
 	for _, bs := range BuiltinMisc {
 		if strings.HasPrefix(bs, seed) {
-			c := complete.Completion{Text: bs, Label: bs, Icon: "var"}
+			c := complete.Completion{Text: bs, Label: bs, Icon: string(icons.Variable)}
 			md.Matches = append(md.Matches, c)
 		}
 	}
 	for _, bs := range BuiltinFuncs {
 		if strings.HasPrefix(bs, seed) {
 			bs = bs + "()"
-			c := complete.Completion{Text: bs, Label: bs, Icon: "function"}
+			c := complete.Completion{Text: bs, Label: bs, Icon: string(icons.Function)}
 			md.Matches = append(md.Matches, c)
 		}
 	}
 	for _, bs := range BuiltinPackages {
 		if strings.HasPrefix(bs, seed) {
-			c := complete.Completion{Text: bs, Label: bs, Icon: "types"}
+			c := complete.Completion{Text: bs, Label: bs, Icon: string(icons.Type)} // todo: was types
 			md.Matches = append(md.Matches, c)
 		}
 	}
 	for _, bs := range BuiltinKeywords {
 		if strings.HasPrefix(bs, seed) {
-			c := complete.Completion{Text: bs, Label: bs, Icon: "const"}
+			c := complete.Completion{Text: bs, Label: bs, Icon: string(icons.Constant)}
 			md.Matches = append(md.Matches, c)
 		}
 	}

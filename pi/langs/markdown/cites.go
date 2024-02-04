@@ -8,6 +8,7 @@ import (
 	"log"
 	"strings"
 
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/pi"
 	"cogentcore.org/core/pi/complete"
 	"cogentcore.org/core/pi/langs/bibtex"
@@ -27,7 +28,7 @@ func (ml *MarkdownLang) CompleteCite(fss *pi.FileStates, origStr, str string, po
 	md.Seed = str
 	for _, be := range bf.BibTex.Entries {
 		if strings.HasPrefix(be.CiteName, str) {
-			c := complete.Completion{Text: be.CiteName, Label: be.CiteName, Icon: "field"}
+			c := complete.Completion{Text: be.CiteName, Label: be.CiteName, Icon: string(icons.Field)}
 			md.Matches = append(md.Matches, c)
 		}
 	}

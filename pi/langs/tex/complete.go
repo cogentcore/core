@@ -8,6 +8,7 @@ import (
 	"strings"
 	"unicode"
 
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/pi"
 	"cogentcore.org/core/pi/complete"
 	"cogentcore.org/core/pi/lex"
@@ -29,7 +30,7 @@ func (tl *TexLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md
 	}
 	for _, ls := range LaTeXCmdsAll {
 		if strings.HasPrefix(ls, str) {
-			c := complete.Completion{Text: ls, Label: ls, Icon: "function"}
+			c := complete.Completion{Text: ls, Label: ls, Icon: string(icons.Function)}
 			md.Matches = append(md.Matches, c)
 		}
 	}

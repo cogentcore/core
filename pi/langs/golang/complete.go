@@ -11,6 +11,7 @@ import (
 	"strings"
 	"unicode"
 
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/pi"
 	"cogentcore.org/core/pi/complete"
@@ -289,7 +290,7 @@ func (gl *GoLang) CompleteTypeName(fs *pi.FileState, pkg *syms.Symbol, seed stri
 	md.Seed = seed
 	for _, tk := range BuiltinTypeKind {
 		if strings.HasPrefix(tk.Name, seed) {
-			c := complete.Completion{Text: tk.Name, Label: tk.Name, Icon: "type"}
+			c := complete.Completion{Text: tk.Name, Label: tk.Name, Icon: string(icons.Type)}
 			md.Matches = append(md.Matches, c)
 		}
 	}
@@ -299,7 +300,7 @@ func (gl *GoLang) CompleteTypeName(fs *pi.FileState, pkg *syms.Symbol, seed stri
 			continue
 		}
 		if strings.HasPrefix(tk.Name, seed) {
-			c := complete.Completion{Text: tk.Name, Label: tk.Name, Icon: "type"}
+			c := complete.Completion{Text: tk.Name, Label: tk.Name, Icon: string(icons.Type)}
 			md.Matches = append(md.Matches, c)
 		}
 	}
