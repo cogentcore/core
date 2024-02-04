@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"image"
+	"image/color"
 	"log"
 	"reflect"
 	"sort"
@@ -2056,8 +2057,12 @@ func (sg *SliceViewGrid) UpdateBackgrounds() {
 	if sg.LastBackground == bg {
 		return
 	}
-	sg.StripeBackground = gradient.ApplyOpacityImage(bg, 0.98)
 	sg.LastBackground = bg
+	sg.StripeBackground = gradient.Apply(bg, func(c color.Color) color.Color {
+		// we take our zebra intensity applied foreground color and then overlay it onto our background color
+		sclr := colors.WithAF32(sg.Styles.Color, 0.05)
+		return colors.AlphaBlend(c, sclr)
+	})
 }
 
 func (sg *SliceViewGrid) ChildBackground(child gi.Widget) image.Image {

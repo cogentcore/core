@@ -7,6 +7,7 @@ package paint
 import (
 	"errors"
 	"fmt"
+	"image"
 	"image/color"
 	"sync"
 	"unicode"
@@ -87,6 +88,20 @@ func (sr *Span) SizeHV() mat32.Vec2 {
 	return sz
 }
 
+// SetBackground sets the BackgroundColor of the Runes to given value,
+// if was not previously nil.
+func (sr *Span) SetBackground(bg image.Image) {
+	if len(sr.Render) == 0 {
+		return
+	}
+	for i := range sr.Render {
+		rr := &sr.Render[i]
+		if rr.BackgroundColor != nil {
+			rr.BackgroundColor = bg
+		}
+	}
+}
+
 // RuneRelPos returns the relative (starting) position of the given rune index
 // (adds Span RelPos and rune RelPos) -- this is typically the baseline
 // position where rendering will start, not the upper left corner. if index >
@@ -111,7 +126,7 @@ func (sr *Span) RuneEndPos(idx int) mat32.Vec2 {
 }
 
 // AppendRune adds one rune and associated formatting info
-func (sr *Span) HasDecoUpdate(bg color.Color, deco styles.TextDecorations) {
+func (sr *Span) HasDecoUpdate(bg image.Image, deco styles.TextDecorations) {
 	sr.HasDeco |= deco
 	if bg != nil {
 		sr.HasDeco.SetFlag(true, styles.DecoBackgroundColor)
@@ -134,7 +149,7 @@ func (sr *Span) SetNewPara() {
 }
 
 // AppendRune adds one rune and associated formatting info
-func (sr *Span) AppendRune(r rune, face font.Face, clr, bg color.Color, deco styles.TextDecorations) {
+func (sr *Span) AppendRune(r rune, face font.Face, clr color.Color, bg image.Image, deco styles.TextDecorations) {
 	sr.Text = append(sr.Text, r)
 	rr := Rune{Face: face, Color: clr, BackgroundColor: bg, Deco: deco}
 	sr.Render = append(sr.Render, rr)
@@ -143,7 +158,7 @@ func (sr *Span) AppendRune(r rune, face font.Face, clr, bg color.Color, deco sty
 
 // AppendString adds string and associated formatting info, optimized with
 // only first rune having non-nil face and color settings
-func (sr *Span) AppendString(str string, face font.Face, clr, bg color.Color, deco styles.TextDecorations, sty *styles.FontRender, ctxt *units.Context) {
+func (sr *Span) AppendString(str string, face font.Face, clr color.Color, bg image.Image, deco styles.TextDecorations, sty *styles.FontRender, ctxt *units.Context) {
 	if len(str) == 0 {
 		return
 	}
@@ -199,10 +214,7 @@ func (sr *Span) SetRenders(sty *styles.FontRender, ctxt *units.Context, noBG boo
 		return
 	}
 
-	bgc := colors.ToUniform(sty.Background)
-	if noBG {
-		bgc = color.RGBA{}
-	}
+	bgc := sty.Background
 
 	ucfont := &styles.FontRender{}
 	ucfont.Family = "Arial Unicode"
@@ -220,7 +232,7 @@ func (sr *Span) SetRenders(sty *styles.FontRender, ctxt *units.Context, noBG boo
 	sr.Render[0].BackgroundColor = bgc
 	sr.Render[0].RotRad = rot
 	sr.Render[0].ScaleX = scalex
-	if !colors.IsNil(bgc) {
+	if bgc != nil {
 		for i := range sr.Text {
 			sr.Render[i].BackgroundColor = bgc
 		}
@@ -689,7 +701,7 @@ func (sr *Span) RenderBg(pc *Context, tpos mat32.Vec2) {
 			didLast = false
 			continue
 		}
-		pc.FillStyle.Color = colors.C(rr.BackgroundColor)
+		pc.FillStyle.Color = rr.BackgroundColor
 		szt := mat32.V2(rr.Size.X, -rr.Size.Y)
 		sp := rp.Add(tx.MulVec2AsVec(mat32.V2(0, dsc32)))
 		ul := sp.Add(tx.MulVec2AsVec(mat32.V2(0, szt.Y)))

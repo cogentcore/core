@@ -6,6 +6,7 @@ package paint
 
 import (
 	"errors"
+	"image"
 	"image/color"
 
 	"cogentcore.org/core/mat32"
@@ -20,27 +21,32 @@ import (
 // transforming points
 type Rune struct {
 
-	// fully-specified font rendering info, includes fully computed font size -- this is exactly what will be drawn -- no further transforms
+	// fully-specified font rendering info, includes fully computed font size.
+	// This is exactly what will be drawn, with no further transforms.
 	Face font.Face `json:"-"`
 
 	// color to draw characters in
 	Color color.Color `json:"-"`
 
-	// TODO(kai/imageColor)
+	// background color to fill background of color, for highlighting,
+	// <mark> tag, etc.  Unlike Face, Color, this must be non-nil for every case
+	// that uses it, as nil is also used for default transparent background.
+	BackgroundColor image.Image `json:"-"`
 
-	// background color to fill background of color -- for highlighting, <mark> tag, etc -- unlike Face, Color, this must be non-nil for every case that uses it, as nil is also used for default transparent background
-	BackgroundColor color.Color `json:"-"`
-
-	// additional decoration to apply -- underline, strike-through, etc -- also used for encoding a few special layout hints to pass info from styling tags to separate layout algorithms (e.g., &lt;P&gt; vs &lt;BR&gt;)
+	// dditional decoration to apply: underline, strike-through, etc.
+	// Also used for encoding a few special layout hints to pass info
+	// from styling tags to separate layout algorithms (e.g., &lt;P&gt; vs &lt;BR&gt;)
 	Deco styles.TextDecorations
 
-	// relative position from start of Text for the lower-left baseline rendering position of the font character
+	// relative position from start of Text for the lower-left baseline
+	// rendering position of the font character
 	RelPos mat32.Vec2
 
 	// size of the rune itself, exclusive of spacing that might surround it
 	Size mat32.Vec2
 
-	// rotation in radians for this character, relative to its lower-left baseline rendering position
+	// rotation in radians for this character, relative to its lower-left
+	// baseline rendering position
 	RotRad float32
 
 	// scaling of the X dimension, in case of non-uniform scaling, 0 = no separate scaling
