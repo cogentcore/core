@@ -384,7 +384,19 @@ func (fv *FileView) ConfigFilesRow() {
 	fsv.OnSelect(func(e events.Event) {
 		fv.FileSelectAction(fsv.SelIdx)
 	})
-	fsv.BindSelect(&fv.SelectedIdx)
+	fsv.OnDoubleClick(func(e events.Event) {
+		sg := sv.This().(SliceViewer).SliceGrid()
+		row, _ := sg.IndexFromPixel(e.Pos())
+		if row+sv.StartIdx >= sv.SliceSize {
+			e.SetHandled()
+			return
+		}
+		if !fv.SelectFile() {
+			e.SetHandled() // don't pass along; keep dialog open
+		} else {
+			fv.Scene.SendKeyFun(keyfun.Accept, e) // activates Ok button code
+		}
+	})
 }
 
 func (fv *FileView) ConfigSelRow() {
