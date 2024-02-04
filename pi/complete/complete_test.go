@@ -35,7 +35,7 @@ var (
 	seeds = map[string][]string{
 		"":           completions,
 		"s":          {"Settings", "Inspect", "Git: Push", "Go: Install", "tb.Kids", "func (e events.Event)"},
-		"gi":         {"Git: Commit", "Git: Push", "Git: Pull", "Go: Install", "gi.Button.OnClick()"},
+		"gi":         {"Git: Commit", "Git: Push", "Git: Pull", "gi.Button.OnClick()", "Go: Install"},
 		"uild":       {"Core: Build", "Go: Build"},
 		"spect":      {"Inspect"},
 		"PAC":        {"package main", "package complete"},
@@ -58,7 +58,7 @@ func TestMatchSeedString(t *testing.T) {
 	for seed, want := range seeds {
 		have := MatchSeedString(completions, seed)
 		if !reflect.DeepEqual(have, want) {
-			t.Errorf("expected\n%#v\n\tbut got\n%#v", want, have)
+			t.Errorf("expected for %q\n%#v\n\tbut got\n%#v", seed, want, have)
 		}
 	}
 }
@@ -75,7 +75,7 @@ func TestMatchSeedCompletion(t *testing.T) {
 			have[i] = m.Text
 		}
 		if !reflect.DeepEqual(have, want) {
-			t.Errorf("expected\n%#v\n\tbut got\n%#v", want, have)
+			t.Errorf("expected for %q\n%#v\n\tbut got\n%#v", seed, want, have)
 		}
 	}
 }
