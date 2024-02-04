@@ -2001,7 +2001,7 @@ func (sg *SliceViewGrid) UpdateBackgrounds() {
 	sg.LastBackground = bg
 	sg.StripeBackground = gradient.Apply(bg, func(c color.Color) color.Color {
 		// we take our zebra intensity applied foreground color and then overlay it onto our background color
-		sclr := colors.WithAF32(sg.Styles.Color, 0.05)
+		sclr := colors.WithAF32(sg.Styles.Color, gi.SystemSettings.ZebraStripesWeight())
 		return colors.AlphaBlend(c, sclr)
 	})
 }
@@ -2056,6 +2056,29 @@ func (sg *SliceViewGrid) RenderStripes() {
 		pc.BlitBox(st, ssz, sbg)
 		st.Y += ht + sg.LayImpl.Gap.Y
 	}
+}
+
+// IndexFromPixel returns the row, column indexes of given pixel point within grid.
+// Takes a scene-level position.
+func (sg *SliceViewGrid) IndexFromPixel(pt image.Point) (row, col int) {
+	ptf := mat32.V2FromPoint(sg.PointToRelPos(pt))
+	sz := sg.Geom.Size.Actual.Content
+	if sg.VisRows == 0 || sz.Y == 0 {
+		return
+	}
+	rows := sg.LayImpl.Shape.Y
+	st := mat32.Vec2{}
+	for r := 0; r < rows; r++ {
+		ht, _ := sg.LayImpl.RowHeight(r, 0)
+		ssz := sz
+		ssz.Y = ht
+		if ptf.Y >= st.Y && ptf.Y < st.Y+ssz.Y {
+			row = r
+			// todo: col
+		}
+		st.Y += ht + sg.LayImpl.Gap.Y
+	}
+	return
 }
 
 func (sg *SliceViewGrid) Render() {

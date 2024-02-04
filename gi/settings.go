@@ -450,7 +450,7 @@ type SystemSettingsData struct { //gti:add
 	OnlyCloseActiveTab bool `default:"false"`
 
 	// the amount that alternating rows and columns are highlighted when showing tabular data (set to 0 to disable zebra striping)
-	ZebraStripeWeight float32 `default:"0" min:"0" max:"100" step:"1"`
+	ZebraStripes float32 `default:"0" min:"0" max:"100" step:"10"`
 
 	// the limit of file size, above which user will be prompted before opening / copying, etc.
 	BigFileSize int `default:"10000000"`
@@ -555,6 +555,12 @@ func (ss *SystemSettingsData) UpdateUser() {
 	if err == nil {
 		ss.User.User = *usr
 	}
+}
+
+// ZebraStripesWeight returns a 0 - 0.2 alpha opacity factor to use in computing
+// a zebra stripe color, using colors.WithAF32 function.
+func (ss *SystemSettingsData) ZebraStripesWeight() float32 {
+	return ss.ZebraStripes * 0.2
 }
 
 // User basic user information that might be needed for different apps
