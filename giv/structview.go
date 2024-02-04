@@ -188,60 +188,42 @@ func (sv *StructView) ConfigStructGrid() bool {
 	config := ki.Config{}
 	dupeFields := map[string]bool{}
 	sv.FieldViews = make([]Value, 0)
-	laser.FlatFieldsValueFuncIf(sv.Struct,
-		func(stru any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
-			ftags := sv.FieldTags(field)
-			vwtag := ftags.Get("view")
-			if vwtag == "-" {
+
+	shouldShow := func(field reflect.StructField, stru any) bool {
+		ftags := sv.FieldTags(field)
+		vwtag := ftags.Get("view")
+		if vwtag == "-" {
+			return false
+		}
+		if ss, ok := stru.(gi.ShouldShower); ok {
+			sv.HasViewIfs = true
+			if !ss.ShouldShow(field.Name) {
 				return false
 			}
-			if ss, ok := sv.Struct.(gi.ShouldShower); ok {
-				sv.HasViewIfs = true
-				if !ss.ShouldShow(field.Name) {
-					return false
-				}
-			}
-			return true
+		}
+		return true
+	}
+
+	laser.FlatFieldsValueFuncIf(sv.Struct,
+		func(stru any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+			return shouldShow(field, sv.Struct)
 		},
 		func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 			// todo: check tags, skip various etc
 			ftags := sv.FieldTags(field)
 			vwtag := ftags.Get("view")
-			if vwtag == "-" {
+			if !shouldShow(field, sv.Struct) {
 				return true
-			}
-			if ss, ok := sv.Struct.(gi.ShouldShower); ok {
-				sv.HasViewIfs = true
-				if !ss.ShouldShow(field.Name) {
-					return true
-				}
 			}
 			if vwtag == "add-fields" && field.Type.Kind() == reflect.Struct {
 				fvalp := fieldVal.Addr().Interface()
 				laser.FlatFieldsValueFuncIf(fvalp,
 					func(stru any, typ reflect.Type, sfield reflect.StructField, fieldVal reflect.Value) bool {
-						svwtag := sfield.Tag.Get("view")
-						if svwtag == "-" {
-							return false
-						}
-						if ss, ok := fvalp.(gi.ShouldShower); ok {
-							sv.HasViewIfs = true
-							if !ss.ShouldShow(sfield.Name) {
-								return false
-							}
-						}
-						return true
+						return shouldShow(sfield, fvalp)
 					},
 					func(sfval any, styp reflect.Type, sfield reflect.StructField, sfieldVal reflect.Value) bool {
-						svwtag := sfield.Tag.Get("view")
-						if svwtag == "-" {
+						if !shouldShow(sfield, fvalp) {
 							return true
-						}
-						if ss, ok := fvalp.(gi.ShouldShower); ok {
-							sv.HasViewIfs = true
-							if !ss.ShouldShow(sfield.Name) {
-								return true
-							}
 						}
 						svv := FieldToValue(fvalp, sfield.Name, sfval)
 						if svv == nil { // shouldn't happen
