@@ -6,7 +6,6 @@ package gi
 
 import (
 	"fmt"
-	"strings"
 	"time"
 	"unicode"
 
@@ -421,9 +420,8 @@ func (ly *Layout) FocusOnName(e events.Event) bool {
 // [ToLabel]) matches the given name using [complete.IsSeedMatching].
 // If after is non-nil, it only finds after that element.
 func ChildByLabelStartsCanFocus(ly *Layout, name string, after ki.Ki) (ki.Ki, bool) {
-	lseed := strings.ToLower(name)
-	var rki ki.Ki
 	gotAfter := false
+	completions := []complete.Completion{}
 	ly.WalkBreadth(func(k ki.Ki) bool {
 		if k == ly.This() { // skip us
 			return ki.Continue
@@ -438,15 +436,15 @@ func ChildByLabelStartsCanFocus(ly *Layout, name string, after ki.Ki) (ki.Ki, bo
 			}
 			return ki.Continue // skip to next
 		}
-		kl := ToLabel(k)
-		if rki == nil && complete.IsSeedMatching(lseed, kl) {
-			rki = k
-			return ki.Break
-		}
-		return rki == nil // only continue if haven't found yet
+		completions = append(completions, complete.Completion{
+			Text: ToLabel(k),
+			Desc: k.PathFrom(ly),
+		})
+		return ki.Continue
 	})
-	if rki != nil {
-		return rki, true
+	matches := complete.MatchSeedCompletion(completions, name)
+	if len(matches) > 0 {
+		return ly.FindPath(matches[0].Desc), true
 	}
 	return nil, false
 }
