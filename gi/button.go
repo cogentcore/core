@@ -204,6 +204,7 @@ func (bt *Button) SetStyles() {
 			w.Style(func(s *styles.Style) {
 				s.SetNonSelectable()
 				s.SetTextWrap(false)
+				s.Grow.Set(1, 0)
 				s.Margin.Zero()
 				s.Padding.Zero()
 				s.Max.X.Zero()

@@ -430,8 +430,8 @@ func (tv *TableView) ConfigRows() {
 			}
 			if i == 0 {
 				tv.ColMaxWidths[fli] = 0
-				_, isbase := vv.(*ValueBase)
-				if isbase && tv.SliceSize > 0 && fval.Kind() == reflect.String {
+				_, isicon := vv.(*IconValue)
+				if !isicon && tv.SliceSize > 0 && fval.Kind() == reflect.String {
 					mxw := 0
 					for rw := 0; rw < tv.SliceSize; rw++ {
 						sval := laser.OnePtrUnderlyingValue(tv.SliceNPVal.Index(rw))

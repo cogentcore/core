@@ -1504,6 +1504,9 @@ func (vv *FileValue) ConfigWidget(w gi.Widget) {
 	vv.StdConfigWidget(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
+	bt.Style(func(s *styles.Style) {
+		s.Min.X.Ch(25)
+	})
 	ConfigDialogWidget(vv, bt, false)
 	vv.UpdateWidget()
 }

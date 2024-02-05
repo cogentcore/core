@@ -104,6 +104,9 @@ type Struct struct { //gti:add
 	Things []*TableStruct
 
 	Stuff []float32
+
+	// a file
+	File gi.Filename
 }
 
 func (st *Struct) ShouldShow(field string) bool {
