@@ -617,13 +617,8 @@ func (tv *TableView) UpdateWidgets() {
 
 			w.SetState(invis, states.Invisible)
 			if !invis {
-				issel := tv.IdxIsSelected(si)
 				if tv.IsReadOnly() {
 					wb.SetReadOnly(true)
-				}
-				wb.SetSelected(issel)
-				if tv.Is(SliceViewShowIndex) {
-					idxlab.SetSelected(issel)
 				}
 			} else {
 				wb.SetSelected(false)
@@ -828,32 +823,6 @@ func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
 		}
 	}
 	return nil
-}
-
-// SelectRowWidgets sets the selection state of given row of widgets
-func (tv *TableView) SelectRowWidgets(row int, sel bool) {
-	if row < 0 {
-		return
-	}
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndRender(updt)
-
-	sg := tv.SliceGrid()
-	nWidgPerRow, idxOff := tv.RowWidgetNs()
-	ridx := row * nWidgPerRow
-	for fli := 0; fli < tv.NVisFields; fli++ {
-		seldx := ridx + idxOff + fli
-		if sg.Kids.IsValidIndex(seldx) == nil {
-			w := sg.Child(seldx).(gi.Widget).AsWidget()
-			w.SetSelected(sel)
-		}
-	}
-	if tv.Is(SliceViewShowIndex) {
-		if sg.Kids.IsValidIndex(ridx) == nil {
-			w := sg.Child(ridx).(gi.Widget).AsWidget()
-			w.SetSelected(sel)
-		}
-	}
 }
 
 // SelectFieldVal sets SelField and SelVal and attempts to find corresponding

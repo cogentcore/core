@@ -160,9 +160,6 @@ type SliceViewer interface {
 	// note: grid must have already rendered for focus to be grabbed!
 	RowGrabFocus(row int) *gi.WidgetBase
 
-	// SelectRowWidgets sets the selection state of given row of widgets
-	SelectRowWidgets(row int, sel bool)
-
 	// SliceNewAt inserts a new blank element at given
 	// index in the slice. -1 means the end.
 	SliceNewAt(idx int)
@@ -756,11 +753,6 @@ func (sv *SliceViewBase) UpdateWidgets() {
 			if sv.IsReadOnly() {
 				w.AsWidget().SetReadOnly(true)
 			}
-			issel := sv.IdxIsSelected(si)
-			w.AsWidget().SetSelected(issel)
-			if sv.Is(SliceViewShowIndex) {
-				idxlab.SetSelected(issel)
-			}
 		} else {
 			vv.SetSliceValue(sv.ElVal, sv.Slice, 0, sv.TmpSave, sv.ViewPath)
 			vv.UpdateWidget()
@@ -1226,17 +1218,14 @@ func (sv *SliceViewBase) RowWidgetsFunc(row int, fun func(w gi.Widget)) {
 	defer sv.UpdateEndRender(updt)
 
 	sg := sv.This().(SliceViewer).SliceGrid()
-	nWidgPerRow, idxOff := sv.This().(SliceViewer).RowWidgetNs()
+	nWidgPerRow, _ := sv.This().(SliceViewer).RowWidgetNs()
 	rowidx := row * nWidgPerRow
-	if sv.Is(SliceViewShowIndex) {
-		if sg.Kids.IsValidIndex(rowidx) == nil {
+	for col := 0; col < nWidgPerRow; col++ {
+		kidx := rowidx + col
+		if sg.Kids.IsValidIndex(kidx) == nil {
 			w := sg.Child(rowidx).(gi.Widget)
 			fun(w)
 		}
-	}
-	if sg.Kids.IsValidIndex(rowidx+idxOff) == nil {
-		w := sg.Child(rowidx + idxOff).(gi.Widget)
-		fun(w)
 	}
 }
 
@@ -1278,7 +1267,7 @@ func (sv *SliceViewBase) SelectIdxWidgets(idx int, sel bool) bool {
 	if !sv.IsIdxVisible(idx) {
 		return false
 	}
-	sv.This().(SliceViewer).SelectRowWidgets(idx-sv.StartIdx, sel)
+	sv.SelectRowWidgets(idx-sv.StartIdx, sel)
 	return true
 }
 
@@ -1362,7 +1351,7 @@ func (sv *SliceViewBase) SelectedIdxsList(descendingSort bool) []int {
 // status of index label
 func (sv *SliceViewBase) SelectIdx(idx int) {
 	sv.SelIdxs[idx] = struct{}{}
-	sv.SelectIdxWidgets(idx, true)
+	// sv.SelectIdxWidgets(idx, true)
 }
 
 // UnselectIdx unselects given idx (if selected)
@@ -1370,14 +1359,14 @@ func (sv *SliceViewBase) UnselectIdx(idx int) {
 	if sv.IdxIsSelected(idx) {
 		delete(sv.SelIdxs, idx)
 	}
-	sv.SelectIdxWidgets(idx, false)
+	// sv.SelectIdxWidgets(idx, false)
 }
 
 // UnselectAllIdxs unselects all selected idxs
 func (sv *SliceViewBase) UnselectAllIdxs() {
-	for r := range sv.SelIdxs {
-		sv.SelectIdxWidgets(r, false)
-	}
+	// for r := range sv.SelIdxs {
+	// 	sv.SelectIdxWidgets(r, false)
+	// }
 	sv.ResetSelectedIdxs()
 }
 
@@ -1390,7 +1379,7 @@ func (sv *SliceViewBase) SelectAllIdxs() {
 	sv.SelIdxs = make(map[int]struct{}, sv.SliceSize)
 	for idx := 0; idx < sv.SliceSize; idx++ {
 		sv.SelIdxs[idx] = struct{}{}
-		sv.SelectIdxWidgets(idx, true)
+		// sv.SelectIdxWidgets(idx, true)
 	}
 }
 
