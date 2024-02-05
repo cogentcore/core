@@ -185,8 +185,6 @@ func (bt *Button) SetStyles() {
 		case "parts":
 			w.Style(func(s *styles.Style) {
 				s.Gap.Zero()
-				s.Justify.Content = styles.Center
-				s.Justify.Items = styles.Center
 				s.Align.Content = styles.Center
 				s.Align.Items = styles.Center
 				s.Text.AlignV = styles.Center
@@ -222,7 +220,6 @@ func (bt *Button) SetStyles() {
 				s.Min.Y.Dp(18)
 				s.Margin.Zero()
 				s.Padding.Zero()
-				s.Align.Self = styles.End
 			})
 		case "parts/shortcut":
 			sc := w.(*Label)
