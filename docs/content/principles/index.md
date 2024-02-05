@@ -10,7 +10,7 @@ The eventual result of this trend is that people end up stuffing entire programm
 
 The solution to this is simple—whenever possible, everything should be written in real code, preferably in one language. Therefore, Cogent Core takes this approach: everything, from trees to widgets to styling to enums, is written in real, pure Go code. The only non-Go functional files in a Cogent Core package or app should be TOML files, which are only used for very simple configuration options to commands, and not for any actual code.
 
-## Go is the only good programming language (for GUIs)
+# Go is the only good programming language (for GUIs)
 
 There are many programming languages. However, almost all of them lack at least one of several fundamental characteristics required to make a good programming language for GUIs, making Go the only good programming language, and thus the basis for the Cogent Core framework.
 
@@ -26,9 +26,15 @@ Code must be *simple* to write. Humans must read and write code, and it is much 
 
 Programs must be quick to write, compile, and run. Most compiled languages fail the first and second conditions, and most interpreted languages fail the last. Go can be written extremely quickly due to its simple and elegant syntax, it compiles in seconds even for complex GUIs, and there is no runtime performance deficit significant enough to impact GUIs.
 
+### Cross compilation
+
+
+
 ### Rationality and consistency
 
-Languages must be rational and consistent both internally and with other programming languages. If other programming languages use `object.Method(args)` to call a method, and you use `function(args)` to call a function, then maybe you should not use `[object Method:args]` to call methods (Objective-C). `SCREAMING_SNAKE_CASE` may help you vent frustration at the terrible programming language you are using, but it is not good for clean and readable code.
+Languages must be rational and consistent both internally and with other programming languages. If other programming languages use `object.Method(args)` to call a method, and you use `function(args)` to call a function, then maybe you should not use `[object method:args]` to call methods (Objective-C). `SCREAMING_SNAKE_CASE` may help you vent frustration at the terrible programming language you are using, but it is not good for clean and readable code. If `10+"1"` is `"101"`, then maybe `10-"1"` shouldn't be `9` (JavaScript). Two of the most core operations in a programming language, `var` and `==`, should not be semantically incorrect and require the use of alternative operators instead, `let` and `===` (also JavaScript).
+
+The fundamental problem of programming is that people are stuck using irrational, inconsistent, and poorly written programming languages that have not been fixed due to backward compatibility (or, when they are fixed, it destroys backward compatibility and creates an ongoing migration nightmare, like with Python 3). People pile layers of garbage on top of each other to patch problems, leading to an ongoing mess of new features on a shaky foundation of inelegant and unreadable code. The solution to this is simple: a new, well-designed, readable, and elegant programming language that allows people to move forward instead of being permanently stuck using programming languages from the 1900s. That language is Go, but its principle failure has been the lack of a good GUI framework. GUIs are one of the most important forms of programming, as they bridge the gap between code and end users. GUIs generate excitement around a programming language, as they motivate new programmers with an approachable way to make immediately rewarding coding projects. What would you be more excited to make as a first time programmer, a helpful app or a hidden microservice? There is a reason that web development is so popular: it gives an easy way to build apps that target all users. Cogent Core aims to provide the same reach as web development, except with an elegant language, significantly more features, and support for native apps.
 
 # Struct fields are better than maps for things like configuration and styling
 
