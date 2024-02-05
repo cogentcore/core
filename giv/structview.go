@@ -5,7 +5,6 @@
 package giv
 
 import (
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"reflect"
@@ -375,59 +374,36 @@ func StructViewFieldTags(vv Value, lbl *gi.Label, w gi.Widget, isReadOnly bool) 
 // Uses JSON format for composite types (struct, slice, map), replacing " with '
 // so it is easier to use in def tag.
 func StructFieldIsDef(defs string, valPtr any, kind reflect.Kind) (bool, string) {
-	defStr := "[Default: " + defs + "]"
-	def := false
-	switch {
-	case kind == reflect.Struct || kind == reflect.Slice || kind == reflect.Map:
-		jb, _ := json.Marshal(valPtr)
-		jstr := string(jb)
-		// fmt.Println(jstr, defs)
-		if defs == jstr {
-			def = true
-		} else {
-			jstr = strings.ReplaceAll(jstr, `"`, `'`)
-			if defs == jstr {
-				def = true
-			}
-		}
-	case strings.Contains(defs, ":"):
+	defStr := "(Default: " + defs + ")"
+	if kind >= reflect.Int && kind <= reflect.Complex128 && strings.Contains(defs, ":") {
 		dtags := strings.Split(defs, ":")
 		lo, _ := strconv.ParseFloat(dtags[0], 64)
 		hi, _ := strconv.ParseFloat(dtags[1], 64)
-		switch fv := valPtr.(type) {
-		case *float32:
-			if lo <= float64(*fv) && float64(*fv) <= hi {
-				def = true
-			}
-		case *float64:
-			if lo <= *fv && *fv <= hi {
-				def = true
-			}
-		case *int32:
-			if lo <= float64(*fv) && float64(*fv) <= hi {
-				def = true
-			}
-		case *int64:
-			if lo <= float64(*fv) && float64(*fv) <= hi {
-				def = true
-			}
-		case *int:
-			if lo <= float64(*fv) && float64(*fv) <= hi {
-				def = true
-			}
+		vf, err := laser.ToFloat(valPtr)
+		if err != nil {
+			slog.Error("giv.StructFieldIsDef: error parsing struct field numerical range def tag", "type", laser.NonPtrType(reflect.TypeOf(valPtr)), "def", defs, "err", err)
+			return true, defStr
 		}
-	default:
-		val := laser.ToStringPrec(valPtr, 6)
-		val = strings.TrimPrefix(val, "&")
-		dtags := strings.Split(defs, ",")
-		for _, dv := range dtags {
-			if dv == strings.TrimSpace(val) {
-				def = true
-				break
-			}
+		return lo <= vf && vf <= hi, defStr
+	}
+	v := laser.NonPtrValue(reflect.ValueOf(valPtr))
+	dtags := strings.Split(defs, ",")
+	for _, def := range dtags {
+		def = laser.FormatDefault(def)
+		if def == "" {
+			return v.IsZero(), defStr
+		}
+		dv := reflect.New(v.Type())
+		err := laser.SetRobust(dv.Interface(), def)
+		if err != nil {
+			slog.Error("giv.StructFieldIsDef: error parsing struct field def tag", "type", v.Type(), "def", def, "err", err)
+			return true, defStr
+		}
+		if reflect.DeepEqual(v.Interface(), dv.Elem().Interface()) {
+			return true, defStr
 		}
 	}
-	return def, defStr
+	return false, defStr
 }
 
 // StructFieldVals represents field values in a struct, at multiple
