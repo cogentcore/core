@@ -100,7 +100,7 @@ func OnePtrValue(v reflect.Value) reflect.Value {
 func OnePtrUnderlyingValue(v reflect.Value) reflect.Value {
 	npv := NonPtrValue(v)
 	if npv.IsZero() {
-		return npv
+		return OnePtrValue(npv)
 	}
 	for npv.Type().Kind() == reflect.Interface || npv.Type().Kind() == reflect.Pointer {
 		npv = npv.Elem()
