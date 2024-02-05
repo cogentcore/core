@@ -10,9 +10,25 @@ The eventual result of this trend is that people end up stuffing entire programm
 
 The solution to this is simple—whenever possible, everything should be written in real code, preferably in one language. Therefore, Cogent Core takes this approach: everything, from trees to widgets to styling to enums, is written in real, pure Go code. The only non-Go functional files in a Cogent Core package or app should be TOML files, which are only used for very simple configuration options to commands, and not for any actual code.
 
-## Go is the only good programming language
+## Go is the only good programming language (for GUIs)
 
-There are many programming languages. However, almost all of them lack at least one of several fundamental characteristics required to make a good programming language.
+There are many programming languages. However, almost all of them lack at least one of several fundamental characteristics required to make a good programming language for GUIs, making Go the only good programming language, and thus the basis for the Cogent Core framework.
+
+### Type safety and compilation
+
+One of the most important features of a programming language is type safety. Type safety and compilation give helpful compile-time errors, code completion, and syntax highlighting that make code safe and readable. This requirement eliminates many popular languages like JavaScript and Python.
+
+### Simplicity and elegance
+
+Code must be *simple* to write. Humans must read and write code, and it is much easier to read and write code with simple, semantic, and consistent operations, not symbol soup like that found in Regex, SCSS, and Rust macros (what does `($($($([` do?). Humans should not have to waste time writing semicolons and parentheses around their `if` conditions. Humans should not have to repeat the type of something a million times (`Something something = Something{};`). Type safety should make code safe, not intricate and verbose. This condition eliminates many compiled languages like Rust and C++ (note: Rust and C++ are useful for certain things like operating system kernels and graphics drivers, but this is about end-user GUI development).
+
+### Speed
+
+Programs must be quick to write, compile, and run. Most compiled languages fail the first and second conditions, and most interpreted languages fail the last. Go can be written extremely quickly due to its simple and elegant syntax, it compiles in seconds even for complex GUIs, and there is no runtime performance deficit significant enough to impact GUIs.
+
+### Rationality and consistency
+
+Languages must be rational and consistent both internally and with other programming languages. If other programming languages use `object.Method(args)` to call a method, and you use `function(args)` to call a function, then maybe you should not use `[object Method:args]` to call methods (Objective-C). `SCREAMING_SNAKE_CASE` may help you vent frustration at the terrible programming language you are using, but it is not good for clean and readable code.
 
 # Struct fields are better than maps for things like configuration and styling
 
