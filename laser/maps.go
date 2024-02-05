@@ -185,7 +185,7 @@ func MapStructElsN(mp any) int {
 		n++
 		return true
 	})
-	if falseErr == false {
+	if !falseErr {
 		return 0
 	}
 	return n
