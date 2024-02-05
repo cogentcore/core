@@ -287,6 +287,11 @@ func (dv *DateView) ConfigDateGrid() {
 		})
 		bt.OnWidgetAdded(func(w gi.Widget) {
 			switch w.PathFrom(bt) {
+			case "parts":
+				w.Style(func(s *styles.Style) {
+					s.Justify.Content = styles.Center
+					s.Justify.Items = styles.Center
+				})
 			case "parts/label":
 				lb := w.(*gi.Label)
 				lb.Type = gi.LabelBodyLarge
