@@ -147,6 +147,9 @@ func (tv *TableView) SetStyles() {
 			case strings.HasPrefix(w.Name(), "value-"):
 				wb := w.AsWidget()
 				wb.StyleFinal(func(s *styles.Style) {
+					if tv.IsReadOnly() {
+						s.SetAbilities(false, abilities.Hoverable, abilities.Focusable)
+					}
 					row, col := tv.This().(SliceViewer).WidgetIndex(w)
 					hw := float32(tv.HeaderWidths[col])
 					if col == tv.SortIdx {

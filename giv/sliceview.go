@@ -370,6 +370,9 @@ func (sv *SliceViewBase) SetStyles() {
 				})
 			case strings.HasPrefix(w.Name(), "value-"):
 				w.Style(func(s *styles.Style) {
+					if sv.IsReadOnly() {
+						s.SetAbilities(false, abilities.Hoverable, abilities.Focusable)
+					}
 					row, col := sv.This().(SliceViewer).WidgetIndex(w)
 					if row < sv.SliceSize {
 						sv.This().(SliceViewer).StyleRow(w, row, col)
@@ -647,12 +650,6 @@ func (sv *SliceViewBase) ConfigRows() {
 			idxlab.OnDoubleClick(func(e events.Event) {
 				sv.Send(events.DoubleClick, e)
 			})
-			idxlab.On(events.MouseEnter, func(e events.Event) {
-				sv.Send(events.MouseEnter, e)
-			})
-			idxlab.On(events.MouseLeave, func(e events.Event) {
-				sv.Send(events.MouseLeave, e)
-			})
 			idxlab.SetText(sitxt)
 			idxlab.ContextMenus = sv.ContextMenus
 			idxlab.Style(func(s *styles.Style) {
@@ -671,12 +668,6 @@ func (sv *SliceViewBase) ConfigRows() {
 		})
 		wb.OnDoubleClick(func(e events.Event) {
 			sv.Send(events.DoubleClick, e)
-		})
-		wb.On(events.MouseEnter, func(e events.Event) {
-			sv.Send(events.MouseEnter, e)
-		})
-		wb.On(events.MouseLeave, func(e events.Event) {
-			sv.Send(events.MouseLeave, e)
 		})
 		wb.ContextMenus = sv.ContextMenus
 
@@ -1942,18 +1933,6 @@ func (sv *SliceViewBase) HandleEvents() {
 		} else {
 			sv.KeyInputEditable(e)
 		}
-	})
-	sv.On(events.MouseEnter, func(e events.Event) {
-		row, ok := sv.SetRowWidgetsStateEvent(e, abilities.Hoverable, true, states.Hovered)
-		if ok {
-			sv.HoverRow = row
-		} else {
-			sv.HoverRow = -1
-		}
-	})
-	sv.On(events.MouseLeave, func(e events.Event) {
-		sv.HoverRow = -1
-		sv.SetRowWidgetsStateEvent(e, abilities.Hoverable, false, states.Hovered)
 	})
 	sv.On(events.MouseMove, func(e events.Event) {
 		row, _, isValid := sv.RowFromEventPos(e)
