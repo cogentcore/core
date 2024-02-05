@@ -218,7 +218,6 @@ func (ch *Chooser) SetStyles() {
 				s.Min.X.Em(1)
 				s.Min.Y.Em(1)
 				s.Justify.Self = styles.End
-				s.Align.Self = styles.Center
 			})
 		}
 	})
