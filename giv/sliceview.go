@@ -243,6 +243,9 @@ type SliceViewBase struct {
 	// index of row to select at start
 	InitSelIdx int `copier:"-" json:"-" xml:"-"`
 
+	// currently-hovered row
+	HoverRow int `copier:"-" json:"-" xml:"-"`
+
 	// list of currently-dragged indexes
 	DraggedIdxs []int `copier:"-"`
 
@@ -285,6 +288,7 @@ func (sv *SliceViewBase) OnInit() {
 
 func (sv *SliceViewBase) SetStyles() {
 	sv.InitSelIdx = -1
+	sv.HoverRow = -1
 	sv.MinRows = 4
 	sv.SetFlag(false, SliceViewSelectMode)
 	sv.SetFlag(true, SliceViewShowIndex)
@@ -434,21 +438,32 @@ func (sv *SliceViewBase) IsNil() bool {
 	return laser.AnyIsNil(sv.Slice)
 }
 
+// RowFromEventPos returns the widget row, slice index, and
+// whether the index is in slice range, for given event position.
+func (sv *SliceViewBase) RowFromEventPos(e events.Event) (row, idx int, isValid bool) {
+	sg := sv.This().(SliceViewer).SliceGrid()
+	row, _ = sg.IndexFromPixel(e.Pos())
+	idx = row + sv.StartIdx
+	isValid = true
+	if idx >= sv.SliceSize {
+		isValid = false
+	}
+	return
+}
+
 // ClickSelectEvent is a helper for processing selection events
 // based on a mouse click, which could be a double or triple
 // in addition to a regular click.
 // Returns false if no further processing should occur,
 // because the user clicked outside the range of active rows.
 func (sv *SliceViewBase) ClickSelectEvent(e events.Event) bool {
-	sg := sv.This().(SliceViewer).SliceGrid()
-	row, _ := sg.IndexFromPixel(e.Pos())
-	si := row + sv.StartIdx
-	if si >= sv.SliceSize {
+	row, _, isValid := sv.RowFromEventPos(e)
+	if !isValid {
 		e.SetHandled()
-		return false
+	} else {
+		sv.UpdateSelectRow(row)
 	}
-	sv.UpdateSelectRow(si)
-	return true
+	return isValid
 }
 
 // BindSelect makes the slice view a read-only selection slice view and then
@@ -634,6 +649,12 @@ func (sv *SliceViewBase) ConfigRows() {
 			idxlab.OnDoubleClick(func(e events.Event) {
 				sv.Send(events.DoubleClick, e)
 			})
+			idxlab.On(events.MouseEnter, func(e events.Event) {
+				sv.Send(events.MouseEnter, e)
+			})
+			idxlab.On(events.MouseLeave, func(e events.Event) {
+				sv.Send(events.MouseLeave, e)
+			})
 			idxlab.SetText(sitxt)
 			idxlab.ContextMenus = sv.ContextMenus
 			idxlab.Style(func(s *styles.Style) {
@@ -652,6 +673,12 @@ func (sv *SliceViewBase) ConfigRows() {
 		})
 		wb.OnDoubleClick(func(e events.Event) {
 			sv.Send(events.DoubleClick, e)
+		})
+		wb.On(events.MouseEnter, func(e events.Event) {
+			sv.Send(events.MouseEnter, e)
+		})
+		wb.On(events.MouseLeave, func(e events.Event) {
+			sv.Send(events.MouseLeave, e)
 		})
 		wb.ContextMenus = sv.ContextMenus
 
@@ -1188,8 +1215,9 @@ func (sv *SliceViewBase) MovePageUpAction(selMode events.SelectModes) int {
 //////////////////////////////////////////////////////////
 //    Selection: user operates on the index labels
 
-// SelectRowWidgets sets the selection state of given row of widgets
-func (sv *SliceViewBase) SelectRowWidgets(row int, sel bool) {
+// RowWidgetsFunc calls function on each widget in given row
+// (row, not index), with an UpdateStart / EndRender wrapper
+func (sv *SliceViewBase) RowWidgetsFunc(row int, fun func(w gi.Widget)) {
 	if row < 0 {
 		return
 	}
@@ -1201,14 +1229,46 @@ func (sv *SliceViewBase) SelectRowWidgets(row int, sel bool) {
 	rowidx := row * nWidgPerRow
 	if sv.Is(SliceViewShowIndex) {
 		if sg.Kids.IsValidIndex(rowidx) == nil {
-			w := sg.Child(rowidx).(gi.Widget).AsWidget()
-			w.SetSelected(sel)
+			w := sg.Child(rowidx).(gi.Widget)
+			fun(w)
 		}
 	}
 	if sg.Kids.IsValidIndex(rowidx+idxOff) == nil {
-		w := sg.Child(rowidx + idxOff).(gi.Widget).AsWidget()
-		w.SetSelected(sel)
+		w := sg.Child(rowidx + idxOff).(gi.Widget)
+		fun(w)
 	}
+}
+
+// SetRowWidgetsStateEvent sets given state conditional on given
+// ability for widget, for given event.
+// returns the row and whether it represents an valid slice idex
+func (sv *SliceViewBase) SetRowWidgetsStateEvent(e events.Event, ability abilities.Abilities, on bool, state states.States) (int, bool) {
+	row, _, isValid := sv.RowFromEventPos(e)
+	if isValid {
+		sv.SetRowWidgetsState(row, ability, on, state)
+	}
+	return row, isValid
+}
+
+// SetRowWidgetsState sets given state conditional on given
+// ability for widget
+func (sv *SliceViewBase) SetRowWidgetsState(row int, ability abilities.Abilities, on bool, state states.States) {
+	sv.RowWidgetsFunc(row, func(w gi.Widget) {
+		wb := w.AsWidget()
+		if wb.AbilityIs(ability) {
+			wb.SetState(on, state)
+		}
+	})
+}
+
+// SelectRowWidgets sets the selection state of given row of widgets
+func (sv *SliceViewBase) SelectRowWidgets(row int, sel bool) {
+	if row < 0 {
+		return
+	}
+	sv.RowWidgetsFunc(row, func(w gi.Widget) {
+		w.AsWidget().SetSelected(sel)
+	})
 }
 
 // SelectIdxWidgets sets the selection state of given slice index
@@ -1893,6 +1953,29 @@ func (sv *SliceViewBase) HandleEvents() {
 			sv.KeyInputEditable(e)
 		}
 	})
+	sv.On(events.MouseEnter, func(e events.Event) {
+		row, ok := sv.SetRowWidgetsStateEvent(e, abilities.Hoverable, true, states.Hovered)
+		if ok {
+			sv.HoverRow = row
+		} else {
+			sv.HoverRow = -1
+		}
+	})
+	sv.On(events.MouseLeave, func(e events.Event) {
+		sv.HoverRow = -1
+		sv.SetRowWidgetsStateEvent(e, abilities.Hoverable, false, states.Hovered)
+	})
+	sv.On(events.MouseMove, func(e events.Event) {
+		row, _, isValid := sv.RowFromEventPos(e)
+		if !isValid {
+			sv.HoverRow = -1
+		} else {
+			if row != sv.HoverRow {
+				sv.HoverRow = row
+			}
+		}
+		sv.SetNeedsRender(true)
+	})
 }
 
 func (sv *SliceViewBase) SizeFinal() {
@@ -1920,17 +2003,19 @@ type SliceViewGrid struct {
 	gi.Frame // note: must be a frame to support stripes!
 
 	// MinRows is set from parent SV
-	MinRows int `edit:"-"`
+	MinRows int `set:"-" edit:"-"`
 
 	// height of a single row, computed during layout
-	RowHeight float32 `edit:"-" copier:"-" json:"-" xml:"-"`
+	RowHeight float32 `set:"-" edit:"-" copier:"-" json:"-" xml:"-"`
 
 	// total number of rows visible in allocated display size
-	VisRows int `edit:"-" copier:"-" json:"-" xml:"-"`
+	VisRows int `set:"-" edit:"-" copier:"-" json:"-" xml:"-"`
 
-	// Stripe background color
-	StripeBackground image.Image
+	// Various computed backgrounds
+	BgStripe, BgSelect, BgSelectStripe, BgHover, BgHoverStripe, BgHoverSelect, BgHoverSelectStripe image.Image `set:"-" edit:"-" copier:"-" json:"-" xml:"-"`
 
+	// LastBackground is the background for which modified
+	// backgrounds were computed -- don't update if same
 	LastBackground image.Image
 }
 
@@ -2036,27 +2121,65 @@ func (sg *SliceViewGrid) UpdateBackgrounds() {
 		return
 	}
 	sg.LastBackground = bg
-	sg.StripeBackground = gradient.Apply(bg, func(c color.Color) color.Color {
-		// we take our zebra intensity applied foreground color and then overlay it onto our background color
-		sclr := colors.WithAF32(sg.Styles.Color, gi.SystemSettings.ZebraStripesWeight())
-		return colors.AlphaBlend(c, sclr)
+
+	// we take our zebra intensity applied foreground color and then overlay it onto our background color
+
+	zclr := colors.WithAF32(sg.Styles.Color, gi.SystemSettings.ZebraStripesWeight())
+	sg.BgStripe = gradient.Apply(bg, func(c color.Color) color.Color {
+		return colors.AlphaBlend(c, zclr)
 	})
+
+	hclr := colors.WithAF32(sg.Styles.Color, 0.08)
+	sg.BgHover = gradient.Apply(bg, func(c color.Color) color.Color {
+		return colors.AlphaBlend(c, hclr)
+	})
+
+	zhclr := colors.WithAF32(sg.Styles.Color, gi.SystemSettings.ZebraStripesWeight()+0.08)
+	sg.BgHoverStripe = gradient.Apply(bg, func(c color.Color) color.Color {
+		return colors.AlphaBlend(c, zhclr)
+	})
+
+	sg.BgSelect = colors.C(colors.Scheme.Select.Container)
+
+	sg.BgSelectStripe = colors.C(colors.AlphaBlend(colors.Scheme.Select.Container, zclr))
+
+	sg.BgHoverSelect = colors.C(colors.AlphaBlend(colors.Scheme.Select.Container, hclr))
+
+	sg.BgHoverSelectStripe = colors.C(colors.AlphaBlend(colors.Scheme.Select.Container, zhclr))
+
+}
+
+func (sg *SliceViewGrid) RowBackground(sel, stripe, hover bool) image.Image {
+	switch {
+	case sel && stripe && hover:
+		return sg.BgHoverSelectStripe
+	case sel && stripe:
+		return sg.BgSelectStripe
+	case sel && hover:
+		return sg.BgHoverSelect
+	case sel:
+		return sg.BgSelect
+	case stripe && hover:
+		return sg.BgHoverStripe
+	case stripe:
+		return sg.BgStripe
+	case hover:
+		return sg.BgHover
+	default:
+		return sg.Styles.ActualBackground
+	}
 }
 
 func (sg *SliceViewGrid) ChildBackground(child gi.Widget) image.Image {
 	bg := sg.Styles.ActualBackground
-	_, sv := sg.SliceView()
+	svi, sv := sg.SliceView()
 	if sv == nil {
 		return bg
 	}
 	sg.UpdateBackgrounds()
-	row, _ := sv.This().(SliceViewer).WidgetIndex(child)
-	if sv.IdxIsSelected(row) {
-		return colors.C(colors.Scheme.Select.Container)
-	} else if row%2 == 1 {
-		return sg.StripeBackground
-	}
-	return bg
+	si, _ := svi.WidgetIndex(child)
+	row := si - sv.StartIdx
+	return sg.RowBackground(sv.IdxIsSelected(si), si%2 == 1, row == sv.HoverRow)
 }
 
 func (sg *SliceViewGrid) RenderStripes() {
@@ -2067,7 +2190,6 @@ func (sg *SliceViewGrid) RenderStripes() {
 	}
 	sg.UpdateBackgrounds()
 
-	bg := sg.Styles.ActualBackground
 	pc := &sg.Scene.PaintContext
 	rows := sg.LayImpl.Shape.Y
 	st := pos
@@ -2084,12 +2206,7 @@ func (sg *SliceViewGrid) RenderStripes() {
 		ssz := sz
 		ssz.Y = ht
 		stripe := (r+offset)%2 == 1
-		sbg := bg
-		if sv.IdxIsSelected(si) {
-			sbg = colors.C(colors.Scheme.Select.Container)
-		} else if stripe {
-			sbg = sg.StripeBackground
-		}
+		sbg := sg.RowBackground(sv.IdxIsSelected(si), stripe, r == sv.HoverRow)
 		pc.BlitBox(st, ssz, sbg)
 		st.Y += ht + sg.LayImpl.Gap.Y
 	}
