@@ -130,7 +130,7 @@ func (tv *TableView) SetStyles() {
 			sg.OnClick(func(e events.Event) {
 				tv.SetFocusEvent()
 				row, _ := sg.IndexFromPixel(e.Pos())
-				tv.UpdateSelectRow(row)
+				tv.UpdateSelectRow(row, e.SelectMode())
 			})
 			sg.ContextMenus = tv.ContextMenus
 		}
@@ -458,7 +458,7 @@ func (tv *TableView) ConfigRows() {
 			sg.SetChild(idxlab, ridx, labnm)
 			idxlab.OnSelect(func(e events.Event) {
 				e.SetHandled()
-				tv.UpdateSelectRow(i)
+				tv.UpdateSelectRow(i, e.SelectMode())
 			})
 			idxlab.OnDoubleClick(func(e events.Event) {
 				tv.Send(events.DoubleClick, e)
@@ -495,7 +495,7 @@ func (tv *TableView) ConfigRows() {
 			wb := w.AsWidget()
 			wb.OnSelect(func(e events.Event) {
 				e.SetHandled()
-				tv.UpdateSelectRow(i)
+				tv.UpdateSelectRow(i, e.SelectMode())
 			})
 			wb.OnDoubleClick(func(e events.Event) {
 				tv.Send(events.DoubleClick, e)
@@ -838,7 +838,7 @@ func (tv *TableView) SelectFieldVal(fld, val string) bool {
 		idx, _ := StructSliceIdxByValue(tv.Slice, tv.SelField, tv.SelVal)
 		if idx >= 0 {
 			tv.ScrollToIdx(idx)
-			tv.UpdateSelectIdx(idx, true)
+			tv.UpdateSelectIdx(idx, true, events.SelectOne)
 			return true
 		}
 	}

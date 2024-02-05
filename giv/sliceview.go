@@ -317,7 +317,7 @@ func (sv *SliceViewBase) SetStyles() {
 			sg.OnClick(func(e events.Event) {
 				sv.SetFocusEvent()
 				row, _ := sg.IndexFromPixel(e.Pos())
-				sv.UpdateSelectRow(row)
+				sv.UpdateSelectRow(row, e.SelectMode())
 			})
 			sg.AddContextMenu(sv.ContextMenu)
 		}
@@ -462,7 +462,7 @@ func (sv *SliceViewBase) ClickSelectEvent(e events.Event) bool {
 	if !isValid {
 		e.SetHandled()
 	} else {
-		sv.UpdateSelectRow(row)
+		sv.UpdateSelectRow(row, e.SelectMode())
 	}
 	return isValid
 }
@@ -645,7 +645,7 @@ func (sv *SliceViewBase) ConfigRows() {
 			sg.SetChild(idxlab, ridx, labnm)
 			idxlab.OnSelect(func(e events.Event) {
 				e.SetHandled()
-				sv.UpdateSelectRow(i)
+				sv.UpdateSelectRow(i, e.SelectMode())
 			})
 			idxlab.OnDoubleClick(func(e events.Event) {
 				sv.Send(events.DoubleClick, e)
@@ -664,7 +664,7 @@ func (sv *SliceViewBase) ConfigRows() {
 		wb := w.AsWidget()
 		wb.OnSelect(func(e events.Event) {
 			e.SetHandled()
-			sv.UpdateSelectRow(i)
+			sv.UpdateSelectRow(i, e.SelectMode())
 		})
 		wb.OnDoubleClick(func(e events.Event) {
 			sv.Send(events.DoubleClick, e)
@@ -1076,7 +1076,7 @@ func (sv *SliceViewBase) SelectVal(val string) bool {
 		idx, _ := SliceIdxByValue(sv.Slice, sv.SelVal)
 		sv.ViewMuUnlock()
 		if idx >= 0 {
-			sv.UpdateSelectIdx(idx, true)
+			sv.UpdateSelectIdx(idx, true, events.SelectOne)
 			sv.ScrollToIdx(idx)
 			return true
 		}
@@ -1263,18 +1263,17 @@ func (sv *SliceViewBase) SelectIdxWidgets(idx int, sel bool) bool {
 }
 
 // UpdateSelectRow updates the selection for the given row
-// callback from widgetsig select
-func (sv *SliceViewBase) UpdateSelectRow(row int) {
+func (sv *SliceViewBase) UpdateSelectRow(row int, selMode events.SelectModes) {
 	idx := row + sv.StartIdx
 	if idx >= sv.SliceSize {
 		return
 	}
 	sel := !sv.IdxIsSelected(idx)
-	sv.UpdateSelectIdx(idx, sel)
+	sv.UpdateSelectIdx(idx, sel, selMode)
 }
 
 // UpdateSelectIdx updates the selection for the given index
-func (sv *SliceViewBase) UpdateSelectIdx(idx int, sel bool) {
+func (sv *SliceViewBase) UpdateSelectIdx(idx int, sel bool, selMode events.SelectModes) {
 	if sv.IsReadOnly() && !sv.Is(SliceViewReadOnlyMultiSel) {
 		updt := sv.UpdateStart()
 		defer sv.UpdateEndRender(updt)
@@ -1288,11 +1287,6 @@ func (sv *SliceViewBase) UpdateSelectIdx(idx int, sel bool) {
 		sv.This().(SliceViewer).UpdateWidgets()
 		sv.Send(events.Select)
 	} else {
-		selMode := events.SelectOne
-		em := sv.EventMgr()
-		if em != nil {
-			selMode = em.LastSelMode
-		}
 		sv.SelectIdxAction(idx, selMode)
 	}
 }
@@ -1891,6 +1885,10 @@ func (sv *SliceViewBase) KeyInputReadOnly(kt events.Event) {
 			return
 		}
 	}
+	selMode := kt.SelectMode()
+	if sv.Is(SliceViewSelectMode) {
+		selMode = events.ExtendOne
+	}
 	kf := keyfun.Of(kt.KeyChord())
 	idx := sv.SelIdx
 	switch {
@@ -1898,25 +1896,25 @@ func (sv *SliceViewBase) KeyInputReadOnly(kt events.Event) {
 		ni := idx + 1
 		if ni < sv.SliceSize {
 			sv.ScrollToIdx(ni)
-			sv.UpdateSelectIdx(ni, true)
+			sv.UpdateSelectIdx(ni, true, selMode)
 			kt.SetHandled()
 		}
 	case kf == keyfun.MoveUp:
 		ni := idx - 1
 		if ni >= 0 {
 			sv.ScrollToIdx(ni)
-			sv.UpdateSelectIdx(ni, true)
+			sv.UpdateSelectIdx(ni, true, selMode)
 			kt.SetHandled()
 		}
 	case kf == keyfun.PageDown:
 		ni := min(idx+sv.VisRows-1, sv.SliceSize-1)
 		sv.ScrollToIdx(ni)
-		sv.UpdateSelectIdx(ni, true)
+		sv.UpdateSelectIdx(ni, true, selMode)
 		kt.SetHandled()
 	case kf == keyfun.PageUp:
 		ni := max(idx-(sv.VisRows-1), 0)
 		sv.ScrollToIdx(ni)
-		sv.UpdateSelectIdx(ni, true)
+		sv.UpdateSelectIdx(ni, true, selMode)
 		kt.SetHandled()
 	case kf == keyfun.Enter || kf == keyfun.Accept || kt.KeyRune() == ' ':
 		sv.Send(events.DoubleClick, kt)
