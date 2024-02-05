@@ -5,13 +5,11 @@
 package gi
 
 import (
-	"fmt"
 	"path/filepath"
 	"testing"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 )
@@ -46,17 +44,12 @@ func TestRenderParentBorderRadius(t *testing.T) {
 // For https://github.com/cogentcore/core/issues/810
 func TestRenderButtonAlignment(t *testing.T) {
 	b := NewBody()
-	bt := NewButton(b).SetType(ButtonAction).SetIcon(icons.Square).Style(func(s *styles.Style) {
+	NewButton(b).SetType(ButtonAction).SetIcon(icons.Square).Style(func(s *styles.Style) {
 		s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
 		s.Border = styles.Border{}
 		s.MaxBorder = styles.Border{}
 	})
-	b.AssertRender(t, filepath.Join("render", "button-alignment"), func() {
-		bt.WidgetWalkPre(func(kwi Widget, kwb *WidgetBase) bool {
-			fmt.Printf("%v: %#v %#v\n\n", kwb, kwb.Styles.BoxSpace(), kwb.Geom)
-			return ki.Continue
-		})
-	})
+	b.AssertRender(t, filepath.Join("render", "button-alignment"))
 }
 
 // For https://github.com/cogentcore/core/issues/810
