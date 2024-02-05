@@ -322,6 +322,7 @@ func (sv *SliceViewBase) SetStyles() {
 				row, _ := sg.IndexFromPixel(e.Pos())
 				sv.UpdateSelectRow(row)
 			})
+			sg.AddContextMenu(sv.ContextMenu)
 		}
 		if w.Parent().PathFrom(sv) == "grid" {
 			switch {

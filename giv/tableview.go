@@ -132,6 +132,7 @@ func (tv *TableView) SetStyles() {
 				row, _ := sg.IndexFromPixel(e.Pos())
 				tv.UpdateSelectRow(row)
 			})
+			sg.ContextMenus = tv.ContextMenus
 		}
 		if w.Parent().PathFrom(tv) == "grid" {
 			switch {
