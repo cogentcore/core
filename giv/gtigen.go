@@ -4,7 +4,6 @@ package giv
 
 import (
 	"image"
-	"reflect"
 	"sync"
 
 	"cogentcore.org/core/events/key"
@@ -375,17 +374,11 @@ func (t *SliceView) SetStackTop(v int) *SliceView { t.StackTop = v; return t }
 // SetMinRows sets the [SliceView.MinRows]
 func (t *SliceView) SetMinRows(v int) *SliceView { t.MinRows = v; return t }
 
+// SetViewPath sets the [SliceView.ViewPath]
+func (t *SliceView) SetViewPath(v string) *SliceView { t.ViewPath = v; return t }
+
 // SetViewMu sets the [SliceView.ViewMu]
 func (t *SliceView) SetViewMu(v *sync.Mutex) *SliceView { t.ViewMu = v; return t }
-
-// SetSliceNpval sets the [SliceView.SliceNPVal]
-func (t *SliceView) SetSliceNpval(v reflect.Value) *SliceView { t.SliceNPVal = v; return t }
-
-// SetSliceValView sets the [SliceView.SliceValView]
-func (t *SliceView) SetSliceValView(v Value) *SliceView { t.SliceValView = v; return t }
-
-// SetValues sets the [SliceView.Values]
-func (t *SliceView) SetValues(v ...Value) *SliceView { t.Values = v; return t }
 
 // SetSelVal sets the [SliceView.SelVal]
 func (t *SliceView) SetSelVal(v any) *SliceView { t.SelVal = v; return t }
@@ -393,44 +386,14 @@ func (t *SliceView) SetSelVal(v any) *SliceView { t.SelVal = v; return t }
 // SetSelIdx sets the [SliceView.SelIdx]
 func (t *SliceView) SetSelIdx(v int) *SliceView { t.SelIdx = v; return t }
 
-// SetSelIdxs sets the [SliceView.SelIdxs]
-func (t *SliceView) SetSelIdxs(v map[int]struct{}) *SliceView { t.SelIdxs = v; return t }
-
 // SetInitSelIdx sets the [SliceView.InitSelIdx]
 func (t *SliceView) SetInitSelIdx(v int) *SliceView { t.InitSelIdx = v; return t }
-
-// SetHoverRow sets the [SliceView.HoverRow]
-func (t *SliceView) SetHoverRow(v int) *SliceView { t.HoverRow = v; return t }
-
-// SetDraggedIdxs sets the [SliceView.DraggedIdxs]
-func (t *SliceView) SetDraggedIdxs(v ...int) *SliceView { t.DraggedIdxs = v; return t }
-
-// SetViewPath sets the [SliceView.ViewPath]
-func (t *SliceView) SetViewPath(v string) *SliceView { t.ViewPath = v; return t }
 
 // SetTmpSave sets the [SliceView.TmpSave]
 func (t *SliceView) SetTmpSave(v Value) *SliceView { t.TmpSave = v; return t }
 
-// SetVisRows sets the [SliceView.VisRows]
-func (t *SliceView) SetVisRows(v int) *SliceView { t.VisRows = v; return t }
-
-// SetStartIdx sets the [SliceView.StartIdx]
-func (t *SliceView) SetStartIdx(v int) *SliceView { t.StartIdx = v; return t }
-
-// SetSliceSize sets the [SliceView.SliceSize]
-func (t *SliceView) SetSliceSize(v int) *SliceView { t.SliceSize = v; return t }
-
-// SetConfigIter sets the [SliceView.ConfigIter]
-func (t *SliceView) SetConfigIter(v int) *SliceView { t.ConfigIter = v; return t }
-
-// SetTmpIdx sets the [SliceView.TmpIdx]
-func (t *SliceView) SetTmpIdx(v int) *SliceView { t.TmpIdx = v; return t }
-
-// SetElVal sets the [SliceView.ElVal]
-func (t *SliceView) SetElVal(v reflect.Value) *SliceView { t.ElVal = v; return t }
-
 // SliceViewBaseType is the [gti.Type] for [SliceViewBase]
-var SliceViewBaseType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.SliceViewBase", IDName: "slice-view-base", Doc: "SliceViewBase is the base for SliceView and TableView and any other viewers\nof array-like data.  It automatically computes the number of rows that fit\nwithin its allocated space, and manages the offset view window into the full\nlist of items, and supports row selection, copy / paste, Drag-n-Drop, etc.\nSet to ReadOnly for select-only mode, which emits WidgetSig WidgetSelected\nsignals when selection is updated.", Methods: []gti.Method{{Name: "CopyIdxs", Doc: "CopyIdxs copies selected idxs to goosi.Clipboard, optionally resetting the selection", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"reset"}}, {Name: "DeleteIdxs", Doc: "DeleteIdxs deletes all selected indexes", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "CutIdxs", Doc: "CutIdxs copies selected indexes to goosi.Clipboard and deletes selected indexes", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "PasteIdx", Doc: "PasteIdx pastes clipboard at given idx", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"idx"}}, {Name: "Duplicate", Doc: "Duplicate copies selected items and inserts them after current selection --\nreturn idx of start of duplicates if successful, else -1", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Returns: []string{"int"}}}, Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Slice", Doc: "the slice that we are a view onto -- must be a pointer to that slice"}, {Name: "MinRows", Doc: "MinRows specifies the minimum number of rows to display, to ensure\nat least this amount is displayed."}, {Name: "ViewMu", Doc: "optional mutex that, if non-nil, will be used around any updates that\nread / modify the underlying Slice data.\nCan be used to protect against random updating if your code has specific\nupdate points that can be likewise protected with this same mutex."}, {Name: "Changed", Doc: "Changed indicates whether the underlying slice\nhas been edited in any way"}, {Name: "SliceNPVal", Doc: "non-ptr reflect.Value of the slice"}, {Name: "SliceValView", Doc: "Value for the slice itself, if this was created within value view framework -- otherwise nil"}, {Name: "Values", Doc: "Value representations of the slice values"}, {Name: "SelVal", Doc: "current selection value -- initially select this value if set"}, {Name: "SelIdx", Doc: "index of currently-selected item, in ReadOnly mode only"}, {Name: "SelIdxs", Doc: "list of currently-selected slice indexes"}, {Name: "InitSelIdx", Doc: "index of row to select at start"}, {Name: "HoverRow", Doc: "currently-hovered row"}, {Name: "DraggedIdxs", Doc: "list of currently-dragged indexes"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}, {Name: "TmpSave", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"}, {Name: "VisRows", Doc: "total number of rows visible in allocated display size"}, {Name: "StartIdx", Doc: "starting slice index of visible rows"}, {Name: "SliceSize", Doc: "size of slice"}, {Name: "ConfigIter", Doc: "iteration through the configuration process, reset when a new slice type is set"}, {Name: "TmpIdx", Doc: "temp idx state for e.g., dnd"}, {Name: "ElVal", Doc: "ElVal is a Value representation of the underlying element type\nwhich is used whenever there are no slice elements available"}}, Instance: &SliceViewBase{}})
+var SliceViewBaseType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.SliceViewBase", IDName: "slice-view-base", Doc: "SliceViewBase is the base for SliceView and TableView and any other viewers\nof array-like data.  It automatically computes the number of rows that fit\nwithin its allocated space, and manages the offset view window into the full\nlist of items, and supports row selection, copy / paste, Drag-n-Drop, etc.\nSet to ReadOnly for select-only mode, which emits WidgetSig WidgetSelected\nsignals when selection is updated.", Methods: []gti.Method{{Name: "CopyIdxs", Doc: "CopyIdxs copies selected idxs to goosi.Clipboard, optionally resetting the selection", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"reset"}}, {Name: "DeleteIdxs", Doc: "DeleteIdxs deletes all selected indexes", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "CutIdxs", Doc: "CutIdxs copies selected indexes to goosi.Clipboard and deletes selected indexes", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "PasteIdx", Doc: "PasteIdx pastes clipboard at given idx", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"idx"}}, {Name: "Duplicate", Doc: "Duplicate copies selected items and inserts them after current selection --\nreturn idx of start of duplicates if successful, else -1", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Returns: []string{"int"}}}, Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Slice", Doc: "the slice that we are a view onto -- must be a pointer to that slice"}, {Name: "MinRows", Doc: "MinRows specifies the minimum number of rows to display, to ensure\nat least this amount is displayed."}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}, {Name: "ViewMu", Doc: "optional mutex that, if non-nil, will be used around any updates that\nread / modify the underlying Slice data.\nCan be used to protect against random updating if your code has specific\nupdate points that can be likewise protected with this same mutex."}, {Name: "Changed", Doc: "Changed indicates whether the underlying slice\nhas been edited in any way"}, {Name: "SelVal", Doc: "current selection value -- initially select this value if set"}, {Name: "SelIdx", Doc: "index of currently-selected item, in ReadOnly mode only"}, {Name: "InitSelIdx", Doc: "index of row to select at start"}, {Name: "SelIdxs", Doc: "list of currently-selected slice indexes"}, {Name: "SliceNPVal", Doc: "non-ptr reflect.Value of the slice"}, {Name: "SliceValView", Doc: "Value for the slice itself, if this was created within value view framework -- otherwise nil"}, {Name: "Values", Doc: "Value representations of the slice values"}, {Name: "HoverRow", Doc: "currently-hovered row"}, {Name: "DraggedIdxs", Doc: "list of currently-dragged indexes"}, {Name: "TmpSave", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"}, {Name: "VisRows", Doc: "total number of rows visible in allocated display size"}, {Name: "StartIdx", Doc: "starting slice index of visible rows"}, {Name: "SliceSize", Doc: "size of slice"}, {Name: "ConfigIter", Doc: "iteration through the configuration process, reset when a new slice type is set"}, {Name: "TmpIdx", Doc: "temp idx state for e.g., dnd"}, {Name: "ElVal", Doc: "ElVal is a Value representation of the underlying element type\nwhich is used whenever there are no slice elements available"}, {Name: "MaxWidth", Doc: "maximum width of value column in chars, if string"}}, Instance: &SliceViewBase{}})
 
 // NewSliceViewBase adds a new [SliceViewBase] with the given name to the given parent:
 // SliceViewBase is the base for SliceView and TableView and any other viewers
@@ -454,24 +417,16 @@ func (t *SliceViewBase) New() ki.Ki { return &SliceViewBase{} }
 // at least this amount is displayed.
 func (t *SliceViewBase) SetMinRows(v int) *SliceViewBase { t.MinRows = v; return t }
 
+// SetViewPath sets the [SliceViewBase.ViewPath]:
+// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+func (t *SliceViewBase) SetViewPath(v string) *SliceViewBase { t.ViewPath = v; return t }
+
 // SetViewMu sets the [SliceViewBase.ViewMu]:
 // optional mutex that, if non-nil, will be used around any updates that
 // read / modify the underlying Slice data.
 // Can be used to protect against random updating if your code has specific
 // update points that can be likewise protected with this same mutex.
 func (t *SliceViewBase) SetViewMu(v *sync.Mutex) *SliceViewBase { t.ViewMu = v; return t }
-
-// SetSliceNpval sets the [SliceViewBase.SliceNPVal]:
-// non-ptr reflect.Value of the slice
-func (t *SliceViewBase) SetSliceNpval(v reflect.Value) *SliceViewBase { t.SliceNPVal = v; return t }
-
-// SetSliceValView sets the [SliceViewBase.SliceValView]:
-// Value for the slice itself, if this was created within value view framework -- otherwise nil
-func (t *SliceViewBase) SetSliceValView(v Value) *SliceViewBase { t.SliceValView = v; return t }
-
-// SetValues sets the [SliceViewBase.Values]:
-// Value representations of the slice values
-func (t *SliceViewBase) SetValues(v ...Value) *SliceViewBase { t.Values = v; return t }
 
 // SetSelVal sets the [SliceViewBase.SelVal]:
 // current selection value -- initially select this value if set
@@ -481,54 +436,13 @@ func (t *SliceViewBase) SetSelVal(v any) *SliceViewBase { t.SelVal = v; return t
 // index of currently-selected item, in ReadOnly mode only
 func (t *SliceViewBase) SetSelIdx(v int) *SliceViewBase { t.SelIdx = v; return t }
 
-// SetSelIdxs sets the [SliceViewBase.SelIdxs]:
-// list of currently-selected slice indexes
-func (t *SliceViewBase) SetSelIdxs(v map[int]struct{}) *SliceViewBase { t.SelIdxs = v; return t }
-
 // SetInitSelIdx sets the [SliceViewBase.InitSelIdx]:
 // index of row to select at start
 func (t *SliceViewBase) SetInitSelIdx(v int) *SliceViewBase { t.InitSelIdx = v; return t }
 
-// SetHoverRow sets the [SliceViewBase.HoverRow]:
-// currently-hovered row
-func (t *SliceViewBase) SetHoverRow(v int) *SliceViewBase { t.HoverRow = v; return t }
-
-// SetDraggedIdxs sets the [SliceViewBase.DraggedIdxs]:
-// list of currently-dragged indexes
-func (t *SliceViewBase) SetDraggedIdxs(v ...int) *SliceViewBase { t.DraggedIdxs = v; return t }
-
-// SetViewPath sets the [SliceViewBase.ViewPath]:
-// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
-func (t *SliceViewBase) SetViewPath(v string) *SliceViewBase { t.ViewPath = v; return t }
-
 // SetTmpSave sets the [SliceViewBase.TmpSave]:
 // value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 func (t *SliceViewBase) SetTmpSave(v Value) *SliceViewBase { t.TmpSave = v; return t }
-
-// SetVisRows sets the [SliceViewBase.VisRows]:
-// total number of rows visible in allocated display size
-func (t *SliceViewBase) SetVisRows(v int) *SliceViewBase { t.VisRows = v; return t }
-
-// SetStartIdx sets the [SliceViewBase.StartIdx]:
-// starting slice index of visible rows
-func (t *SliceViewBase) SetStartIdx(v int) *SliceViewBase { t.StartIdx = v; return t }
-
-// SetSliceSize sets the [SliceViewBase.SliceSize]:
-// size of slice
-func (t *SliceViewBase) SetSliceSize(v int) *SliceViewBase { t.SliceSize = v; return t }
-
-// SetConfigIter sets the [SliceViewBase.ConfigIter]:
-// iteration through the configuration process, reset when a new slice type is set
-func (t *SliceViewBase) SetConfigIter(v int) *SliceViewBase { t.ConfigIter = v; return t }
-
-// SetTmpIdx sets the [SliceViewBase.TmpIdx]:
-// temp idx state for e.g., dnd
-func (t *SliceViewBase) SetTmpIdx(v int) *SliceViewBase { t.TmpIdx = v; return t }
-
-// SetElVal sets the [SliceViewBase.ElVal]:
-// ElVal is a Value representation of the underlying element type
-// which is used whenever there are no slice elements available
-func (t *SliceViewBase) SetElVal(v reflect.Value) *SliceViewBase { t.ElVal = v; return t }
 
 // SetTooltip sets the [SliceViewBase.Tooltip]
 func (t *SliceViewBase) SetTooltip(v string) *SliceViewBase { t.Tooltip = v; return t }
@@ -550,40 +464,6 @@ func (t *SliceViewGrid) KiType() *gti.Type { return SliceViewGridType }
 
 // New returns a new [*SliceViewGrid] value
 func (t *SliceViewGrid) New() ki.Ki { return &SliceViewGrid{} }
-
-// SetBgStripe sets the [SliceViewGrid.BgStripe]:
-// Various computed backgrounds
-func (t *SliceViewGrid) SetBgStripe(v image.Image) *SliceViewGrid { t.BgStripe = v; return t }
-
-// SetBgSelect sets the [SliceViewGrid.BgSelect]:
-// Various computed backgrounds
-func (t *SliceViewGrid) SetBgSelect(v image.Image) *SliceViewGrid { t.BgSelect = v; return t }
-
-// SetBgSelectStripe sets the [SliceViewGrid.BgSelectStripe]:
-// Various computed backgrounds
-func (t *SliceViewGrid) SetBgSelectStripe(v image.Image) *SliceViewGrid {
-	t.BgSelectStripe = v
-	return t
-}
-
-// SetBgHover sets the [SliceViewGrid.BgHover]:
-// Various computed backgrounds
-func (t *SliceViewGrid) SetBgHover(v image.Image) *SliceViewGrid { t.BgHover = v; return t }
-
-// SetBgHoverStripe sets the [SliceViewGrid.BgHoverStripe]:
-// Various computed backgrounds
-func (t *SliceViewGrid) SetBgHoverStripe(v image.Image) *SliceViewGrid { t.BgHoverStripe = v; return t }
-
-// SetBgHoverSelect sets the [SliceViewGrid.BgHoverSelect]:
-// Various computed backgrounds
-func (t *SliceViewGrid) SetBgHoverSelect(v image.Image) *SliceViewGrid { t.BgHoverSelect = v; return t }
-
-// SetBgHoverSelectStripe sets the [SliceViewGrid.BgHoverSelectStripe]:
-// Various computed backgrounds
-func (t *SliceViewGrid) SetBgHoverSelectStripe(v image.Image) *SliceViewGrid {
-	t.BgHoverSelectStripe = v
-	return t
-}
 
 // SetLastBackground sets the [SliceViewGrid.LastBackground]:
 // LastBackground is the background for which modified
@@ -759,26 +639,6 @@ func (t *TableView) SetSortIdx(v int) *TableView { t.SortIdx = v; return t }
 // whether current sort order is descending
 func (t *TableView) SetSortDesc(v bool) *TableView { t.SortDesc = v; return t }
 
-// SetStruType sets the [TableView.StruType]:
-// struct type for each row
-func (t *TableView) SetStruType(v reflect.Type) *TableView { t.StruType = v; return t }
-
-// SetVisFields sets the [TableView.VisFields]:
-// the visible fields
-func (t *TableView) SetVisFields(v ...reflect.StructField) *TableView { t.VisFields = v; return t }
-
-// SetNvisFields sets the [TableView.NVisFields]:
-// number of visible fields
-func (t *TableView) SetNvisFields(v int) *TableView { t.NVisFields = v; return t }
-
-// SetHeaderWidths sets the [TableView.HeaderWidths]:
-// HeaderWidths has number of characters in each header, per visfields
-func (t *TableView) SetHeaderWidths(v ...int) *TableView { t.HeaderWidths = v; return t }
-
-// SetColMaxWidths sets the [TableView.ColMaxWidths]:
-// ColMaxWidths records maximum width in chars of string type fields
-func (t *TableView) SetColMaxWidths(v ...int) *TableView { t.ColMaxWidths = v; return t }
-
 // SetTooltip sets the [TableView.Tooltip]
 func (t *TableView) SetTooltip(v string) *TableView { t.Tooltip = v; return t }
 
@@ -788,17 +648,11 @@ func (t *TableView) SetStackTop(v int) *TableView { t.StackTop = v; return t }
 // SetMinRows sets the [TableView.MinRows]
 func (t *TableView) SetMinRows(v int) *TableView { t.MinRows = v; return t }
 
+// SetViewPath sets the [TableView.ViewPath]
+func (t *TableView) SetViewPath(v string) *TableView { t.ViewPath = v; return t }
+
 // SetViewMu sets the [TableView.ViewMu]
 func (t *TableView) SetViewMu(v *sync.Mutex) *TableView { t.ViewMu = v; return t }
-
-// SetSliceNpval sets the [TableView.SliceNPVal]
-func (t *TableView) SetSliceNpval(v reflect.Value) *TableView { t.SliceNPVal = v; return t }
-
-// SetSliceValView sets the [TableView.SliceValView]
-func (t *TableView) SetSliceValView(v Value) *TableView { t.SliceValView = v; return t }
-
-// SetValues sets the [TableView.Values]
-func (t *TableView) SetValues(v ...Value) *TableView { t.Values = v; return t }
 
 // SetSelVal sets the [TableView.SelVal]
 func (t *TableView) SetSelVal(v any) *TableView { t.SelVal = v; return t }
@@ -806,41 +660,11 @@ func (t *TableView) SetSelVal(v any) *TableView { t.SelVal = v; return t }
 // SetSelIdx sets the [TableView.SelIdx]
 func (t *TableView) SetSelIdx(v int) *TableView { t.SelIdx = v; return t }
 
-// SetSelIdxs sets the [TableView.SelIdxs]
-func (t *TableView) SetSelIdxs(v map[int]struct{}) *TableView { t.SelIdxs = v; return t }
-
 // SetInitSelIdx sets the [TableView.InitSelIdx]
 func (t *TableView) SetInitSelIdx(v int) *TableView { t.InitSelIdx = v; return t }
 
-// SetHoverRow sets the [TableView.HoverRow]
-func (t *TableView) SetHoverRow(v int) *TableView { t.HoverRow = v; return t }
-
-// SetDraggedIdxs sets the [TableView.DraggedIdxs]
-func (t *TableView) SetDraggedIdxs(v ...int) *TableView { t.DraggedIdxs = v; return t }
-
-// SetViewPath sets the [TableView.ViewPath]
-func (t *TableView) SetViewPath(v string) *TableView { t.ViewPath = v; return t }
-
 // SetTmpSave sets the [TableView.TmpSave]
 func (t *TableView) SetTmpSave(v Value) *TableView { t.TmpSave = v; return t }
-
-// SetVisRows sets the [TableView.VisRows]
-func (t *TableView) SetVisRows(v int) *TableView { t.VisRows = v; return t }
-
-// SetStartIdx sets the [TableView.StartIdx]
-func (t *TableView) SetStartIdx(v int) *TableView { t.StartIdx = v; return t }
-
-// SetSliceSize sets the [TableView.SliceSize]
-func (t *TableView) SetSliceSize(v int) *TableView { t.SliceSize = v; return t }
-
-// SetConfigIter sets the [TableView.ConfigIter]
-func (t *TableView) SetConfigIter(v int) *TableView { t.ConfigIter = v; return t }
-
-// SetTmpIdx sets the [TableView.TmpIdx]
-func (t *TableView) SetTmpIdx(v int) *TableView { t.TmpIdx = v; return t }
-
-// SetElVal sets the [TableView.ElVal]
-func (t *TableView) SetElVal(v reflect.Value) *TableView { t.ElVal = v; return t }
 
 // TimeViewType is the [gti.Type] for [TimeView]
 var TimeViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.TimeView", IDName: "time-view", Doc: "TimeView is a view for selecting a time", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Time", Doc: "the time that we are viewing"}, {Name: "TmpSave", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}, {Name: "Hour", Doc: "the raw input hour"}, {Name: "PM", Doc: "whether we are in PM mode (so we have to add 12h to everything)"}}, Instance: &TimeView{}})

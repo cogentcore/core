@@ -12,7 +12,6 @@ import (
 	"strconv"
 	"strings"
 
-	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/glop/sentence"
@@ -21,7 +20,6 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
-	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -51,19 +49,19 @@ type TableView struct {
 	SortDesc bool
 
 	// struct type for each row
-	StruType reflect.Type `copier:"-" view:"-" json:"-" xml:"-"`
+	StruType reflect.Type `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
 
 	// the visible fields
-	VisFields []reflect.StructField `copier:"-" view:"-" json:"-" xml:"-"`
+	VisFields []reflect.StructField `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
 
 	// number of visible fields
-	NVisFields int `copier:"-" view:"-" json:"-" xml:"-"`
+	NVisFields int `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
 
 	// HeaderWidths has number of characters in each header, per visfields
-	HeaderWidths []int `copier:"-" view:"-" json:"-" xml:"-"`
+	HeaderWidths []int `set:"-" copier:"-" json:"-" xml:"-"`
 
 	// ColMaxWidths records maximum width in chars of string type fields
-	ColMaxWidths []int `copier:"-" view:"-" json:"-" xml:"-"`
+	ColMaxWidths []int `set:"-" copier:"-" json:"-" xml:"-"`
 }
 
 // check for interface impl
@@ -84,20 +82,10 @@ func (tv *TableView) OnInit() {
 }
 
 func (tv *TableView) SetStyles() {
-	tv.InitSelIdx = -1
+	tv.SliceViewBase.SetStyles() // handles all the basics
 	tv.SortIdx = -1
-	tv.MinRows = 4
-	tv.SetFlag(false, SliceViewSelectMode)
-	tv.SetFlag(true, SliceViewShowIndex)
-	tv.SetFlag(true, SliceViewReadOnlyKeyNav)
 
-	tv.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.DoubleClickable)
-		s.Direction = styles.Column
-		// absorb horizontal here, vertical in view
-		s.Overflow.X = styles.OverflowAuto
-		s.Grow.Set(1, 1)
-	})
+	// we only have to handle the header
 	tv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(tv) {
 		case "header": // slice header
@@ -113,59 +101,6 @@ func (tv *TableView) SetStyles() {
 			w.Style(func(s *styles.Style) {
 				s.Align.Self = styles.Center
 			})
-		case "grid": // slice grid
-			sg := w.(*SliceViewGrid)
-			sg.Style(func(s *styles.Style) {
-				sg.MinRows = tv.MinRows
-				s.Display = styles.Grid
-				nWidgPerRow, _ := tv.RowWidgetNs()
-				s.Columns = nWidgPerRow
-				s.Grow.Set(1, 1)
-				s.Overflow.Y = styles.OverflowAuto
-				s.Gap.Set(units.Em(0.5)) // note: match header
-				// baseline mins:
-				s.Min.X.Ch(20)
-				s.Min.Y.Em(6)
-			})
-			sg.OnClick(func(e events.Event) {
-				tv.SetFocusEvent()
-				row, _ := sg.IndexFromPixel(e.Pos())
-				tv.UpdateSelectRow(row, e.SelectMode())
-			})
-			sg.ContextMenus = tv.ContextMenus
-		}
-		if w.Parent().PathFrom(tv) == "grid" {
-			switch {
-			case strings.HasPrefix(w.Name(), "index-"):
-				w.Style(func(s *styles.Style) {
-					s.Min.X.Ch(5)
-					s.Padding.Right.Dp(4)
-					s.Text.Align = styles.End
-					s.Min.Y.Em(1)
-					s.GrowWrap = false
-				})
-			case strings.HasPrefix(w.Name(), "value-"):
-				wb := w.AsWidget()
-				wb.StyleFinal(func(s *styles.Style) {
-					if tv.IsReadOnly() {
-						s.SetAbilities(false, abilities.Hoverable, abilities.Focusable)
-					}
-					row, col := tv.This().(SliceViewer).WidgetIndex(w)
-					hw := float32(tv.HeaderWidths[col])
-					if col == tv.SortIdx {
-						hw += 6
-					}
-					if len(tv.ColMaxWidths) > col {
-						hw = max(float32(tv.ColMaxWidths[col]), hw)
-					}
-					hv := units.Ch(hw)
-					s.Min.X.Val = max(s.Min.X.Val, hv.Convert(s.Min.X.Un, &s.UnContext).Val)
-					s.Max.X.Val = max(s.Max.X.Val, hv.Convert(s.Max.X.Un, &s.UnContext).Val)
-					if row < tv.SliceSize {
-						tv.This().(SliceViewer).StyleRow(w, row, col)
-					}
-				})
-			}
 		}
 		if w.Parent().PathFrom(tv) == "header" {
 			w.Style(func(s *styles.Style) {
@@ -184,6 +119,20 @@ func (tv *TableView) SetStyles() {
 	})
 }
 
+// StyleValueWidget performs additional value widget styling
+func (tv *TableView) StyleValueWidget(w gi.Widget, s *styles.Style, row, col int) {
+	hw := float32(tv.HeaderWidths[col])
+	if col == tv.SortIdx {
+		hw += 6
+	}
+	if len(tv.ColMaxWidths) > col {
+		hw = max(float32(tv.ColMaxWidths[col]), hw)
+	}
+	hv := units.Ch(hw)
+	s.Min.X.Val = max(s.Min.X.Val, hv.Convert(s.Min.X.Un, &s.UnContext).Val)
+	s.Max.X.Val = max(s.Max.X.Val, hv.Convert(s.Max.X.Un, &s.UnContext).Val)
+}
+
 // SetSlice sets the source slice that we are viewing -- rebuilds the children
 // to represent this slice (does Update if already viewing).
 func (tv *TableView) SetSlice(sl any) *TableView {
@@ -195,12 +144,7 @@ func (tv *TableView) SetSlice(sl any) *TableView {
 		tv.Update()
 		return tv
 	}
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndLayout(updt)
 
-	tv.SetFlag(false, SliceViewConfigured)
-	tv.StartIdx = 0
-	tv.VisRows = tv.MinRows
 	slpTyp := reflect.TypeOf(sl)
 	if slpTyp.Kind() != reflect.Ptr {
 		slog.Error("TableView requires that you pass a pointer to a slice of struct elements, but type is not a Ptr", "type", slpTyp)
@@ -210,21 +154,20 @@ func (tv *TableView) SetSlice(sl any) *TableView {
 		slog.Error("TableView requires that you pass a pointer to a slice of struct elements, but ptr doesn't point to a slice", "type", slpTyp.Elem())
 		return tv
 	}
-	tv.Slice = sl
-	tv.SliceNPVal = laser.NonPtrValue(reflect.ValueOf(tv.Slice))
-	struTyp := tv.StructType()
-	if struTyp.Kind() != reflect.Struct {
-		slog.Error("TableView requires that you pass a slice of struct elements, but type is not a Struct", "type", struTyp.String())
+	eltyp := laser.NonPtrType(laser.SliceElType(sl))
+	if eltyp.Kind() != reflect.Struct {
+		slog.Error("TableView requires that you pass a slice of struct elements, but type is not a Struct", "type", eltyp.String())
 		return tv
 	}
+
+	updt := tv.UpdateStart()
+	defer tv.UpdateEndLayout(updt)
+
+	tv.SetSliceBase()
+	tv.Slice = sl
+	tv.SliceNPVal = laser.NonPtrValue(reflect.ValueOf(tv.Slice))
 	tv.ElVal = laser.OnePtrValue(laser.SliceElValue(sl))
 	tv.CacheVisFields()
-	if !tv.IsReadOnly() {
-		tv.SelIdx = -1
-	}
-	tv.ResetSelectedIdxs()
-	tv.SetFlag(false, SliceViewSelectMode)
-	tv.ConfigIter = 0
 	tv.Update()
 	return tv
 }
@@ -382,12 +325,6 @@ func (tv *TableView) ConfigHeader() {
 	}
 }
 
-// SliceGrid returns the SliceGrid grid frame widget, which contains all the
-// fields and values, within SliceFrame
-func (tv *TableView) SliceGrid() *SliceViewGrid {
-	return tv.Child(1).(*SliceViewGrid)
-}
-
 // SliceHeader returns the Frame header for slice grid
 func (tv *TableView) SliceHeader() *gi.Frame {
 	return tv.Child(0).(*gi.Frame)
@@ -456,18 +393,10 @@ func (tv *TableView) ConfigRows() {
 		if tv.Is(SliceViewShowIndex) {
 			idxlab = &gi.Label{}
 			sg.SetChild(idxlab, ridx, labnm)
+			idxlab.SetText(sitxt)
 			idxlab.OnSelect(func(e events.Event) {
 				e.SetHandled()
 				tv.UpdateSelectRow(i, e.SelectMode())
-			})
-			idxlab.OnDoubleClick(func(e events.Event) {
-				tv.Send(events.DoubleClick, e)
-			})
-			idxlab.SetText(sitxt)
-			idxlab.ContextMenus = tv.ContextMenus
-			idxlab.Style(func(s *styles.Style) {
-				nd := mat32.Log10(float32(tv.SliceSize))
-				s.Min.X.Ch(nd + 2)
 			})
 		}
 
@@ -492,35 +421,26 @@ func (tv *TableView) ConfigRows() {
 			w := ki.NewOfType(vtyp).(gi.Widget)
 			sg.SetChild(w, cidx, valnm)
 			vv.ConfigWidget(w)
-			wb := w.AsWidget()
-			wb.OnSelect(func(e events.Event) {
-				e.SetHandled()
-				tv.UpdateSelectRow(i, e.SelectMode())
-			})
-			wb.OnDoubleClick(func(e events.Event) {
-				tv.Send(events.DoubleClick, e)
-			})
-			wb.ContextMenus = tv.ContextMenus
 
-			if tv.IsReadOnly() {
-				w.AsWidget().SetReadOnly(true)
-			} else {
+			if !tv.IsReadOnly() {
 				vvb := vv.AsValueBase()
 				vvb.OnChange(func(e events.Event) {
 					tv.SetChanged()
 				})
 			}
-			tv.ColMaxWidths[fli] = 0
-			_, isbase := vv.(*ValueBase)
-			if isbase && tv.SliceSize > 0 && fval.Kind() == reflect.String {
-				mxw := 0
-				for rw := 0; rw < tv.SliceSize; rw++ {
-					sval := laser.OnePtrUnderlyingValue(tv.SliceNPVal.Index(rw))
-					fval := sval.Elem().FieldByIndex(field.Index)
-					str := fval.String()
-					mxw = max(mxw, len(str))
+			if i == 0 {
+				tv.ColMaxWidths[fli] = 0
+				_, isbase := vv.(*ValueBase)
+				if isbase && tv.SliceSize > 0 && fval.Kind() == reflect.String {
+					mxw := 0
+					for rw := 0; rw < tv.SliceSize; rw++ {
+						sval := laser.OnePtrUnderlyingValue(tv.SliceNPVal.Index(rw))
+						fval := sval.Elem().FieldByIndex(field.Index)
+						str := fval.String()
+						mxw = max(mxw, len(str))
+					}
+					tv.ColMaxWidths[fli] = mxw
 				}
-				tv.ColMaxWidths[fli] = mxw
 			}
 		}
 	}

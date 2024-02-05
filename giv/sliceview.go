@@ -34,6 +34,7 @@ import (
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 ////////////////////////////////////////////////////////
@@ -137,6 +138,9 @@ type SliceViewer interface {
 	// and sets SliceSize if changed.
 	UpdtSliceSize() int
 
+	// StyleValueWidget performs additional value widget styling
+	StyleValueWidget(w gi.Widget, s *styles.Style, row, col int)
+
 	// ConfigRows configures VisRows worth of widgets
 	// to display slice data.
 	ConfigRows()
@@ -209,6 +213,9 @@ type SliceViewBase struct {
 	// at least this amount is displayed.
 	MinRows int `default:"4"`
 
+	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+	ViewPath string
+
 	// optional mutex that, if non-nil, will be used around any updates that
 	// read / modify the underlying Slice data.
 	// Can be used to protect against random updating if your code has specific
@@ -219,57 +226,57 @@ type SliceViewBase struct {
 	// has been edited in any way
 	Changed bool `set:"-"`
 
-	// non-ptr reflect.Value of the slice
-	SliceNPVal reflect.Value `copier:"-" view:"-" json:"-" xml:"-"`
-
-	// Value for the slice itself, if this was created within value view framework -- otherwise nil
-	SliceValView Value `copier:"-" view:"-" json:"-" xml:"-"`
-
-	// Value representations of the slice values
-	Values []Value `copier:"-" view:"-" json:"-" xml:"-"`
-
 	// current selection value -- initially select this value if set
 	SelVal any `copier:"-" view:"-" json:"-" xml:"-"`
 
 	// index of currently-selected item, in ReadOnly mode only
 	SelIdx int `copier:"-" json:"-" xml:"-"`
 
-	// list of currently-selected slice indexes
-	SelIdxs map[int]struct{} `copier:"-"`
-
 	// index of row to select at start
 	InitSelIdx int `copier:"-" json:"-" xml:"-"`
 
+	// list of currently-selected slice indexes
+	SelIdxs map[int]struct{} `set:"-" copier:"-"`
+
+	// non-ptr reflect.Value of the slice
+	SliceNPVal reflect.Value `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
+
+	// Value for the slice itself, if this was created within value view framework -- otherwise nil
+	SliceValView Value `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
+
+	// Value representations of the slice values
+	Values []Value `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
+
 	// currently-hovered row
-	HoverRow int `copier:"-" json:"-" xml:"-"`
+	HoverRow int `set:"-" view:"-" copier:"-" json:"-" xml:"-"`
 
 	// list of currently-dragged indexes
-	DraggedIdxs []int `copier:"-"`
-
-	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
-	ViewPath string
+	DraggedIdxs []int `set:"-" view:"-" copier:"-" json:"-" xml:"-"`
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
-	TmpSave Value `copier:"-" json:"-" xml:"-"`
+	TmpSave Value `view:"-" copier:"-" json:"-" xml:"-"`
 
 	// total number of rows visible in allocated display size
-	VisRows int `edit:"-" copier:"-" json:"-" xml:"-"`
+	VisRows int `set:"-" edit:"-" copier:"-" json:"-" xml:"-"`
 
 	// starting slice index of visible rows
-	StartIdx int `edit:"-" copier:"-" json:"-" xml:"-"`
+	StartIdx int `set:"-" edit:"-" copier:"-" json:"-" xml:"-"`
 
 	// size of slice
-	SliceSize int `edit:"-" copier:"-" json:"-" xml:"-"`
+	SliceSize int `set:"-" edit:"-" copier:"-" json:"-" xml:"-"`
 
 	// iteration through the configuration process, reset when a new slice type is set
-	ConfigIter int `edit:"-" copier:"-" json:"-" xml:"-"`
+	ConfigIter int `set:"-" edit:"-" copier:"-" json:"-" xml:"-"`
 
 	// temp idx state for e.g., dnd
-	TmpIdx int `copier:"-" view:"-" json:"-" xml:"-"`
+	TmpIdx int `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
 
 	// ElVal is a Value representation of the underlying element type
 	// which is used whenever there are no slice elements available
-	ElVal reflect.Value `copier:"-" view:"-" json:"-" xml:"-"`
+	ElVal reflect.Value `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
+
+	// maximum width of value column in chars, if string
+	MaxWidth int `set:"-" copier:"-" json:"-" xml:"-"`
 }
 
 func (sv *SliceViewBase) FlagType() enums.BitFlagSetter {
@@ -306,10 +313,11 @@ func (sv *SliceViewBase) SetStyles() {
 			sg.Style(func(s *styles.Style) {
 				sg.MinRows = sv.MinRows
 				s.Display = styles.Grid
-				nWidgPerRow, _ := sv.RowWidgetNs()
+				nWidgPerRow, _ := svi.RowWidgetNs()
 				s.Columns = nWidgPerRow
 				s.Grow.Set(1, 1)
-				s.Overflow.Set(styles.OverflowAuto)
+				s.Overflow.Y = styles.OverflowAuto
+				s.Gap.Set(units.Em(0.5)) // note: match header
 				// baseline mins:
 				s.Min.X.Ch(20)
 				s.Min.Y.Em(6)
@@ -319,18 +327,25 @@ func (sv *SliceViewBase) SetStyles() {
 				row, _ := sg.IndexFromPixel(e.Pos())
 				sv.UpdateSelectRow(row, e.SelectMode())
 			})
-			sg.AddContextMenu(sv.ContextMenu)
+			sg.ContextMenus = sv.ContextMenus
 		}
 		if w.Parent().PathFrom(sv) == "grid" {
 			switch {
 			case strings.HasPrefix(w.Name(), "index-"):
+				wb := w.AsWidget()
 				w.Style(func(s *styles.Style) {
 					s.SetAbilities(true, abilities.Activatable, abilities.Selectable, abilities.Draggable, abilities.Droppable)
-					s.Min.X.Em(1.5)
+					nd := mat32.Log10(float32(sv.SliceSize))
+					nd = max(nd, 3)
+					s.Min.X.Ch(nd + 2)
 					s.Padding.Right.Dp(4)
 					s.Text.Align = styles.End
 					s.Min.Y.Em(1)
 					s.GrowWrap = false
+				})
+				wb.ContextMenus = sv.ContextMenus
+				wb.OnDoubleClick(func(e events.Event) {
+					sv.Send(events.DoubleClick, e)
 				})
 				w.On(events.DragStart, func(e events.Event) {
 					if sv.This() == nil || sv.Is(ki.Deleted) {
@@ -369,22 +384,54 @@ func (sv *SliceViewBase) SetStyles() {
 					svi.DropDeleteSource(e)
 				})
 			case strings.HasPrefix(w.Name(), "value-"):
+				wb := w.AsWidget()
 				w.Style(func(s *styles.Style) {
 					if sv.IsReadOnly() {
 						s.SetAbilities(false, abilities.Hoverable, abilities.Focusable)
+						wb.SetReadOnly(true)
 					}
 					row, col := sv.This().(SliceViewer).WidgetIndex(w)
+					sv.This().(SliceViewer).StyleValueWidget(w, s, row, col)
 					if row < sv.SliceSize {
 						sv.This().(SliceViewer).StyleRow(w, row, col)
 					}
 				})
+				wb.OnSelect(func(e events.Event) {
+					e.SetHandled()
+					row, _ := sv.This().(SliceViewer).WidgetIndex(w)
+					sv.UpdateSelectRow(row, e.SelectMode())
+				})
+				wb.OnDoubleClick(func(e events.Event) {
+					sv.Send(events.DoubleClick, e)
+				})
+				wb.ContextMenus = sv.ContextMenus
 			}
 		}
 	})
 }
 
+// StyleValueWidget performs additional value widget styling
+func (sv *SliceViewBase) StyleValueWidget(w gi.Widget, s *styles.Style, row, col int) {
+	if sv.MaxWidth > 0 {
+		hv := units.Ch(float32(sv.MaxWidth))
+		s.Min.X.Val = max(s.Min.X.Val, hv.Convert(s.Min.X.Un, &s.UnContext).Val)
+		s.Max.X.Val = max(s.Max.X.Val, hv.Convert(s.Max.X.Un, &s.UnContext).Val)
+	}
+}
+
 func (sv *SliceViewBase) AsSliceViewBase() *SliceViewBase {
 	return sv
+}
+
+func (sv *SliceViewBase) SetSliceBase() {
+	sv.SetFlag(false, SliceViewConfigured, SliceViewSelectMode)
+	sv.ConfigIter = 0
+	sv.StartIdx = 0
+	sv.VisRows = sv.MinRows
+	if !sv.IsReadOnly() {
+		sv.SelIdx = -1
+	}
+	sv.ResetSelectedIdxs()
 }
 
 // SetSlice sets the source slice that we are viewing.
@@ -410,9 +457,7 @@ func (sv *SliceViewBase) SetSlice(sl any) *SliceViewBase {
 	updt := sv.UpdateStart()
 	defer sv.UpdateEndLayout(updt)
 
-	sv.SetFlag(false, SliceViewConfigured)
-	sv.StartIdx = 0
-	sv.VisRows = sv.MinRows
+	sv.SetSliceBase()
 	sv.Slice = sl
 	sv.SliceNPVal = laser.NonPtrValue(reflect.ValueOf(sv.Slice))
 	isArray := laser.NonPtrType(reflect.TypeOf(sl)).Kind() == reflect.Array
@@ -426,10 +471,6 @@ func (sv *SliceViewBase) SetSlice(sl any) *SliceViewBase {
 		}
 	}
 	sv.ElVal = laser.SliceElValue(sl)
-	if !sv.IsReadOnly() {
-		sv.SelIdx = -1
-	}
-	sv.ResetSelectedIdxs()
 	sv.Update()
 	return sv
 }
@@ -643,43 +684,39 @@ func (sv *SliceViewBase) ConfigRows() {
 		if sv.Is(SliceViewShowIndex) {
 			idxlab := &gi.Label{}
 			sg.SetChild(idxlab, ridx, labnm)
+			idxlab.SetText(sitxt)
 			idxlab.OnSelect(func(e events.Event) {
 				e.SetHandled()
 				sv.UpdateSelectRow(i, e.SelectMode())
-			})
-			idxlab.OnDoubleClick(func(e events.Event) {
-				sv.Send(events.DoubleClick, e)
-			})
-			idxlab.SetText(sitxt)
-			idxlab.ContextMenus = sv.ContextMenus
-			idxlab.Style(func(s *styles.Style) {
-				nd := mat32.Log10(float32(sv.SliceSize))
-				s.Min.X.Ch(nd + 2)
 			})
 		}
 
 		w := ki.NewOfType(vtyp).(gi.Widget)
 		sg.SetChild(w, ridx+idxOff, valnm)
 		vv.ConfigWidget(w)
-		wb := w.AsWidget()
-		wb.OnSelect(func(e events.Event) {
-			e.SetHandled()
-			sv.UpdateSelectRow(i, e.SelectMode())
-		})
-		wb.OnDoubleClick(func(e events.Event) {
-			sv.Send(events.DoubleClick, e)
-		})
-		wb.ContextMenus = sv.ContextMenus
 
-		if sv.IsReadOnly() {
-			w.AsWidget().SetReadOnly(true)
-		} else {
+		if !sv.IsReadOnly() {
 			vvb := vv.AsValueBase()
 			vvb.OnChange(func(e events.Event) {
 				sv.SendChange()
 			})
 		}
+		if i == 0 {
+			sv.MaxWidth = 0
+			_, isbase := vv.(*ValueBase)
+			npv := laser.NonPtrValue(val)
+			if isbase && sv.SliceSize > 0 && npv.Kind() == reflect.String {
+				mxw := 0
+				for rw := 0; rw < sv.SliceSize; rw++ {
+					val := laser.OnePtrUnderlyingValue(sv.SliceNPVal.Index(rw)).Elem()
+					str := val.String()
+					mxw = max(mxw, len(str))
+				}
+				sv.MaxWidth = mxw
+			}
+		}
 	}
+
 	sv.ConfigTree()
 	sv.ApplyStyleTree()
 }
@@ -695,7 +732,6 @@ func (sv *SliceViewBase) UpdateWidgets() {
 	}
 	updt := sg.UpdateStart()
 	defer sg.UpdateEndRender(updt)
-	// fmt.Println("updtw:", updt)
 
 	sv.ViewMuLock()
 	defer sv.ViewMuUnlock()

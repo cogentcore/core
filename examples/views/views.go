@@ -126,6 +126,7 @@ func main() {
 	for i := 0; i < len(tstslice); i++ {
 		tstslice[i] = fmt.Sprintf("el: %v", i)
 	}
+	tstslice[10] = "this is a particularly long slice value"
 
 	tstmap := make(map[string]string)
 
