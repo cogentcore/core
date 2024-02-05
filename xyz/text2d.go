@@ -109,8 +109,8 @@ func (txt *Text2D) RenderText() {
 	}
 	marg := txt.Styles.TotalMargin()
 	sz.SetAdd(marg.Size())
-	txt.TxtPos = marg.Pos()
-	szpt := sz.ToPoint()
+	txt.TxtPos = marg.Pos().Round()
+	szpt := sz.ToPointRound()
 	if szpt == (image.Point{}) {
 		szpt = image.Point{10, 10}
 	}
