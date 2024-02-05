@@ -25,8 +25,10 @@ type SliceViewInline struct {
 	// the slice that we are a view onto
 	Slice any `set:"-"`
 
-	// Value for the slice itself, if this was created within value view framework -- otherwise nil
-	SliceValView Value
+	// SliceValue is the Value for the slice itself
+	// if this was created within the Value framework.
+	// Otherwise, it is nil.
+	SliceValue Value
 
 	// whether the slice is actually an array -- no modifications
 	IsArray bool
@@ -73,10 +75,10 @@ func (sv *SliceViewInline) SetStyles() {
 			w.OnClick(func(e events.Event) {
 				vpath := sv.ViewPath
 				title := ""
-				if sv.SliceValView != nil {
+				if sv.SliceValue != nil {
 					newPath := ""
 					isZero := false
-					title, newPath, isZero = sv.SliceValView.AsValueBase().GetTitle()
+					title, newPath, isZero = sv.SliceValue.AsValueBase().GetTitle()
 					if isZero {
 						return
 					}
@@ -90,9 +92,7 @@ func (sv *SliceViewInline) SetStyles() {
 				d.AddBottomBar(func(pw gi.Widget) {
 					d.AddCancel(pw)
 					d.AddOk(pw).OnClick(func(e events.Event) {
-						if sv.SliceValView != nil { // todo: this is not updating
-							sv.SliceValView.UpdateWidget()
-						}
+						sv.SendChange()
 					})
 				})
 				d.NewFullDialog(sv).Run()
@@ -117,8 +117,8 @@ func (sv *SliceViewInline) SetSlice(sl any) *SliceViewInline {
 		sv.Slice = sl
 		sv.IsArray = laser.NonPtrType(reflect.TypeOf(sl)).Kind() == reflect.Array
 		sv.IsFixedLen = false
-		if sv.SliceValView != nil {
-			_, sv.IsFixedLen = sv.SliceValView.Tag("fixed-len")
+		if sv.SliceValue != nil {
+			_, sv.IsFixedLen = sv.SliceValue.Tag("fixed-len")
 		}
 		sv.Update()
 	}
@@ -167,8 +167,8 @@ func (sv *SliceViewInline) ConfigSlice() bool {
 		vvb := vv.AsValueBase()
 		vvb.OnChange(func(e events.Event) { sv.SetChanged() })
 		w := sv.Child(i).(gi.Widget)
-		if sv.SliceValView != nil {
-			vv.SetTags(sv.SliceValView.AllTags())
+		if sv.SliceValue != nil {
+			vv.SetTags(sv.SliceValue.AllTags())
 		}
 		vv.ConfigWidget(w)
 		if sv.IsReadOnly() {
@@ -189,7 +189,7 @@ func (sv *SliceViewInline) ConfigSlice() bool {
 		edbt := edbti.(*gi.Button)
 		edbt.SetType(gi.ButtonTonal)
 		edbt.SetIcon(icons.Edit)
-		edbt.Tooltip = "edit slice in a dialog window"
+		edbt.Tooltip = "edit in a dialog"
 	}
 	sv.UpdateEndLayout(updt)
 	return updt

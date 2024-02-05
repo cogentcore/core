@@ -582,7 +582,7 @@ func (vv *SliceInlineValue) ConfigWidget(w gi.Widget) {
 	vv.StdConfigWidget(w)
 	sv := vv.Widget.(*SliceViewInline)
 	sv.Tooltip = vv.Doc()
-	sv.SliceValView = vv
+	sv.SliceValue = vv
 	sv.ViewPath = vv.ViewPath
 	sv.TmpSave = vv.TmpSave
 	// npv := vv.Value.Elem()

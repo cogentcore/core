@@ -593,7 +593,7 @@ func (t *SliceViewInline) New() ki.Ki { return &SliceViewInline{} }
 
 // SetSliceValView sets the [SliceViewInline.SliceValView]:
 // Value for the slice itself, if this was created within value view framework -- otherwise nil
-func (t *SliceViewInline) SetSliceValView(v Value) *SliceViewInline { t.SliceValView = v; return t }
+func (t *SliceViewInline) SetSliceValView(v Value) *SliceViewInline { t.SliceValue = v; return t }
 
 // SetIsArray sets the [SliceViewInline.IsArray]:
 // whether the slice is actually an array -- no modifications
