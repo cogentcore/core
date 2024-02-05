@@ -8,7 +8,11 @@ A common approach to programming, especially for the web, is to reduce the amoun
 
 The eventual result of this trend is that people end up stuffing entire programming languages into these supposedly simple formats to cover their requirements (for example, SCSS, JSX, and templates). The resulting languages are neither simple, clear, nor extensible, creating massive amounts of unreadable and inefficient code. This means that everyone has to learn these languages and their magic syntaxes, struggle to read their complicated code, reach constant limits in functionality, and suffer runtime errors and bad performance due to the typically duck-typed, interpreted nature of these languages. Unless there are very limited uses for something, avoiding real code will always cause many problems and no benefits. 
 
-The solution to this is simple—whenever possible, everything should be written in real code, preferably in one language. Therefore, Goki takes this approach: everything, from trees to widgets to styling to enums, is written in real, pure Go code. The only non-Go functional files in a Goki package or app should be TOML files, which are only used for very simple configuration options to commands, and not for any actual code.
+The solution to this is simple—whenever possible, everything should be written in real code, preferably in one language. Therefore, Cogent Core takes this approach: everything, from trees to widgets to styling to enums, is written in real, pure Go code. The only non-Go functional files in a Cogent Core package or app should be TOML files, which are only used for very simple configuration options to commands, and not for any actual code.
+
+## Go is the only good programming language
+
+There are many programming languages. However, almost all of them lack at least one of several fundamental characteristics required to make a good programming language.
 
 # Struct fields are better than maps for things like configuration and styling
 
