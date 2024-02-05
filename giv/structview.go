@@ -388,10 +388,16 @@ func StructFieldIsDef(defs string, valPtr any, kind reflect.Kind) (bool, string)
 	}
 	v := laser.NonPtrValue(reflect.ValueOf(valPtr))
 	dtags := strings.Split(defs, ",")
+	if strings.ContainsAny(defs, "{[") { // complex type, no split on commas
+		dtags = []string{defs}
+	}
 	for _, def := range dtags {
 		def = laser.FormatDefault(def)
 		if def == "" {
-			return v.IsZero(), defStr
+			if v.IsZero() {
+				return true, defStr
+			}
+			continue
 		}
 		dv := reflect.New(v.Type())
 		err := laser.SetRobust(dv.Interface(), def)
