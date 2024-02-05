@@ -19,6 +19,7 @@ import (
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
+	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fi"
@@ -454,6 +455,9 @@ func (sv *SliceViewBase) ClickSelectEvent(e events.Event) bool {
 // binds its events to its scene and its current selection index to the given value.
 func (sv *SliceViewBase) BindSelect(val *int) *SliceViewBase {
 	sv.SetReadOnly(true)
+	sv.Style(func(s *styles.Style) {
+		s.Cursor = cursors.Pointer
+	})
 	sv.OnSelect(func(e events.Event) {
 		*val = sv.SelIdx
 	})

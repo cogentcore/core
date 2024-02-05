@@ -16,6 +16,7 @@ import (
 	"unicode"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fi"
 	"cogentcore.org/core/gi"
@@ -381,6 +382,9 @@ func (fv *FileView) ConfigFilesRow() {
 	if gi.SystemSettings.FileViewSort != "" {
 		fsv.SetSortFieldName(gi.SystemSettings.FileViewSort)
 	}
+	fsv.Style(func(s *styles.Style) {
+		s.Cursor = cursors.Pointer
+	})
 	fsv.OnSelect(func(e events.Event) {
 		fv.FileSelectAction(fsv.SelIdx)
 	})
