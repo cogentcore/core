@@ -269,13 +269,9 @@ func (dv *DateView) ConfigDateGrid() {
 			dv.SetTime(dt)
 		})
 		bt.Style(func(s *styles.Style) {
-			s.Min.X.Dp(32) // 30 is key for centering
+			s.Min.X.Dp(32)
 			s.Min.Y.Dp(32)
-			s.Padding.Set(units.Dp(6)) // 4 min, can go higher
-			s.Align.Content = styles.Center
-			s.Align.Items = styles.Center
-			s.Justify.Content = styles.Center
-			s.Justify.Items = styles.Center
+			s.Padding.Set(units.Dp(6))
 			if dt.Month() != som.Month() {
 				s.Color = colors.Scheme.OnSurfaceVariant
 			}
@@ -291,21 +287,9 @@ func (dv *DateView) ConfigDateGrid() {
 		})
 		bt.OnWidgetAdded(func(w gi.Widget) {
 			switch w.PathFrom(bt) {
-			case "parts":
-				w.Style(func(s *styles.Style) {
-					s.Align.Content = styles.Center
-					s.Align.Items = styles.Center
-					s.Justify.Content = styles.Center
-					s.Justify.Items = styles.Center
-				})
 			case "parts/label":
 				lb := w.(*gi.Label)
 				lb.Type = gi.LabelBodyLarge
-				w.Style(func(s *styles.Style) {
-					s.Border.Radius = styles.BorderRadiusFull
-					s.Text.Align = styles.Center
-					s.Text.AlignV = styles.Center
-				})
 			}
 		})
 	}
