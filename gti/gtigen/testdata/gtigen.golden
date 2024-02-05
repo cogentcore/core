@@ -43,6 +43,14 @@ func (t *Person) SetA(v uint8) *Person { t.A = v; return t }
 
 var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gti/gtigen/testdata.BlockType", IDName: "block-type", Doc: "BlockType is a type declared in a type block.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}})
 
+var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gti/gtigen/testdata.CommaFieldType", IDName: "comma-field-type", Doc: "CommaFieldType is a type with inline comma fields.", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Fields: []gti.Field{{Name: "A"}, {Name: "B"}}})
+
+// SetA sets the [CommaFieldType.A]
+func (t *CommaFieldType) SetA(v int) *CommaFieldType { t.A = v; return t }
+
+// SetB sets the [CommaFieldType.B]
+func (t *CommaFieldType) SetB(v int) *CommaFieldType { t.B = v; return t }
+
 var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/gti/gtigen/testdata.Alert", Doc: "Alert prints an alert with the given message", Args: []string{"msg"}})
 
 var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/gti/gtigen/testdata.TypeOmittedArgs0", Args: []string{"x", "y"}})

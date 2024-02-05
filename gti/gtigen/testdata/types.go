@@ -52,6 +52,11 @@ func Alert(msg string) {
 type (
 	// BlockType is a type declared in a type block.
 	BlockType struct{} //gti:add
+
+	// CommaFieldType is a type with inline comma fields.
+	CommaFieldType struct { //gti:add -setters
+		A, B int
+	}
 )
 
 // we test various type omitted arg combinations

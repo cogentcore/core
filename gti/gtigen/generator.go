@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/types"
+	"maps"
 	"os"
 	"slices"
 	"strings"
@@ -399,6 +400,8 @@ func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (Fields, error) 
 					return res, err
 				}
 				res.Fields = append(res.Fields, nfields.Fields...)
+				maps.Copy(res.LocalTypes, nfields.LocalTypes)
+				maps.Copy(res.Tags, nfields.Tags)
 			}
 			continue
 		}
