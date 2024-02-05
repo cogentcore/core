@@ -336,9 +336,10 @@ func (s *Style) ToDots() {
 	s.ToDotsImpl(&s.UnContext)
 }
 
-// BoxSpace returns extra space around the central content in the box model, in dots
+// BoxSpace returns the extra space around the central content in the box model in dots.
+// It rounds all of the sides first.
 func (s *Style) BoxSpace() SideFloats {
-	return s.TotalMargin().Add(s.Padding.Dots())
+	return s.TotalMargin().Add(s.Padding.Dots()).Round()
 }
 
 // TotalMargin returns the total effective margin of the element

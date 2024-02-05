@@ -306,6 +306,17 @@ func (sf SideFloats) Max(other SideFloats) SideFloats {
 	)
 }
 
+// Round returns a new side floats with each side value
+// rounded to the nearest whole number.
+func (sf SideFloats) Round() SideFloats {
+	return NewSideFloats(
+		mat32.Round(sf.Top),
+		mat32.Round(sf.Right),
+		mat32.Round(sf.Bottom),
+		mat32.Round(sf.Left),
+	)
+}
+
 // Pos returns the position offset casued by the side/corner values (Left, Top)
 func (sf SideFloats) Pos() mat32.Vec2 {
 	return mat32.V2(sf.Left, sf.Top)
