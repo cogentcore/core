@@ -433,6 +433,23 @@ func (sv *SliceViewBase) IsNil() bool {
 	return laser.AnyIsNil(sv.Slice)
 }
 
+// ClickSelectEvent is a helper for processing selection events
+// based on a mouse click, which could be a double or triple
+// in addition to a regular click.
+// Returns false if no further processing should occur,
+// because the user clicked outside the range of active rows.
+func (sv *SliceViewBase) ClickSelectEvent(e events.Event) bool {
+	sg := sv.This().(SliceViewer).SliceGrid()
+	row, _ := sg.IndexFromPixel(e.Pos())
+	si := row + sv.StartIdx
+	if si >= sv.SliceSize {
+		e.SetHandled()
+		return false
+	}
+	sv.UpdateSelectRow(si)
+	return true
+}
+
 // BindSelect makes the slice view a read-only selection slice view and then
 // binds its events to its scene and its current selection index to the given value.
 func (sv *SliceViewBase) BindSelect(val *int) *SliceViewBase {
@@ -441,14 +458,10 @@ func (sv *SliceViewBase) BindSelect(val *int) *SliceViewBase {
 		*val = sv.SelIdx
 	})
 	sv.OnDoubleClick(func(e events.Event) {
-		sg := sv.This().(SliceViewer).SliceGrid()
-		row, _ := sg.IndexFromPixel(e.Pos())
-		if row+sv.StartIdx >= sv.SliceSize {
-			e.SetHandled()
-			return
+		if sv.ClickSelectEvent(e) {
+			*val = sv.SelIdx
+			sv.Scene.SendKeyFun(keyfun.Accept, e) // activates Ok button code
 		}
-		*val = sv.SelIdx
-		sv.Scene.SendKeyFun(keyfun.Accept, e) // activates Ok button code
 	})
 	return sv
 }
@@ -2090,13 +2103,14 @@ func (sg *SliceViewGrid) IndexFromPixel(pt image.Point) (row, col int) {
 	st := mat32.Vec2{}
 	for r := 0; r < rows; r++ {
 		ht, _ := sg.LayImpl.RowHeight(r, 0)
+		ht += sg.LayImpl.Gap.Y
 		ssz := sz
 		ssz.Y = ht
 		if ptf.Y >= st.Y && ptf.Y < st.Y+ssz.Y {
 			row = r
 			// todo: col
 		}
-		st.Y += ht + sg.LayImpl.Gap.Y
+		st.Y += ht
 	}
 	return
 }
