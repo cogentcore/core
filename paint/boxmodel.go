@@ -16,8 +16,9 @@ import (
 // position, size, and parent actual background. This is used for rendering
 // widgets such as buttons, textfields, etc in a GUI.
 func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, pabg image.Image) {
-	mpos := pos.Add(st.TotalMargin().Pos())
-	msz := sz.Sub(st.TotalMargin().Size())
+	tm := st.TotalMargin().Round()
+	mpos := pos.Add(tm.Pos())
+	msz := sz.Sub(tm.Size())
 	rad := st.Border.Radius.Dots()
 
 	if st.ActualBackground == nil {
