@@ -572,15 +572,6 @@ func (tb *Tab) SetStyles() {
 		if !tb.IsReadOnly() {
 			s.Cursor = cursors.Pointer
 		}
-		s.Max.X.Ch(float32(tb.MaxChars))
-		// s.Min.Y.Ch(6)
-
-		// s.Border.Style.Right = styles.BorderSolid
-		// s.Border.Color.Right = colors.Scheme.OutlineVariant
-		// s.Border.Width.Right.Dp(1)
-
-		s.Text.Align = styles.Center
-		s.Margin.Zero()
 
 		if tb.Type.Effective(tb).IsColumn() {
 			s.Grow.X = 1
@@ -599,13 +590,6 @@ func (tb *Tab) SetStyles() {
 				s.Background = colors.C(colors.Scheme.SurfaceContainer)
 			}
 		}
-
-		// s.Border.Style.Set(styles.BorderNone)
-		// if tb.StateIs(states.Selected) {
-		// 	s.Border.Style.Bottom = styles.BorderSolid
-		// 	s.Border.Width.Bottom.SetDp(2)
-		// 	s.Border.Color.Bottom = colors.Scheme.Primary
-		// }
 	})
 	tb.OnWidgetAdded(func(w Widget) {
 		switch w.PathFrom(tb) {
