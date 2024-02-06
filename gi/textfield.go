@@ -453,7 +453,7 @@ func (tf *TextField) Clear() {
 	tf.StartPos = 0
 	tf.EndPos = 0
 	tf.SelectReset()
-	tf.SetFocusEvent() // this is essential for ensuring that the clear applies after focus is lost..
+	// tf.SetFocusEvent() // this is essential for ensuring that the clear applies after focus is lost..
 }
 
 // Validate runs [TextField.Validator] and takes any necessary actions

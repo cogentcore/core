@@ -2215,6 +2215,7 @@ func (sg *SliceViewGrid) RenderStripes() {
 
 	pc := &sg.Scene.PaintContext
 	rows := sg.LayImpl.Shape.Y
+	cols := sg.LayImpl.Shape.X
 	st := pos
 	offset := 0
 	_, sv := sg.SliceView()
@@ -2226,6 +2227,15 @@ func (sg *SliceViewGrid) RenderStripes() {
 	for r := 0; r < rows; r++ {
 		si := r + startIdx
 		ht, _ := sg.LayImpl.RowHeight(r, 0)
+		miny := st.Y
+		for c := 0; c < cols; c++ {
+			kw := sg.Child(r*cols + c).(gi.Widget).AsWidget()
+			pyi := mat32.Floor(kw.Geom.Pos.Total.Y)
+			if pyi < miny {
+				miny = pyi
+			}
+		}
+		st.Y = miny
 		ssz := sz
 		ssz.Y = ht
 		stripe := (r+offset)%2 == 1
