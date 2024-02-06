@@ -343,7 +343,8 @@ func (sv *SliceViewBase) SetStyles() {
 			case strings.HasPrefix(w.Name(), "index-"):
 				wb := w.AsWidget()
 				w.Style(func(s *styles.Style) {
-					s.SetAbilities(true, abilities.Activatable, abilities.Selectable, abilities.Draggable, abilities.Droppable, abilities.DoubleClickable)
+					s.SetAbilities(true, abilities.Draggable, abilities.Droppable, abilities.DoubleClickable)
+					s.Cursor = cursors.None
 					nd := mat32.Log10(float32(sv.SliceSize))
 					nd = max(nd, 3)
 					s.Min.X.Ch(nd + 2)
@@ -699,6 +700,7 @@ func (sv *SliceViewBase) ConfigRows() {
 			idxlab.OnSelect(func(e events.Event) {
 				e.SetHandled()
 				sv.UpdateSelectRow(i, e.SelectMode())
+				sv.LastClick = i + sv.StartIdx
 			})
 		}
 
