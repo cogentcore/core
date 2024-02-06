@@ -2026,9 +2026,8 @@ type SliceViewGrid struct {
 
 func (sg *SliceViewGrid) OnInit() {
 	sg.Frame.OnInit()
-	sg.Styles.Display = styles.Grid
-	sg.StyleFinal(func(s *styles.Style) {
-		s.Abilities.SetFlag(false, abilities.Clickable)
+	sg.Style(func(s *styles.Style) {
+		s.Display = styles.Grid
 	})
 }
 
