@@ -35,6 +35,10 @@ type Label struct { //core:embedder
 
 	// render data for text label
 	TextRender paint.Text `copier:"-" xml:"-" json:"-" set:"-"`
+
+	// NormalCursor is the cached cursor to display when there
+	// is no link being hovered.
+	NormalCursor cursors.Cursor `copier:"-" xml:"-" json:"-" set:"-"`
 }
 
 // LabelTypes is an enum containing the different
@@ -190,6 +194,9 @@ func (lb *Label) SetStyles() {
 			s.Font.Weight = styles.WeightNormal
 		}
 	})
+	lb.StyleFinal(func(s *styles.Style) {
+		lb.NormalCursor = s.Cursor
+	})
 }
 
 // SetTextUpdate sets the text and updates the underlying render
@@ -204,7 +211,6 @@ func (lb *Label) SetTextUpdate(text string) *Label {
 }
 
 func (lb *Label) HandleEvents() {
-	// lb.HandleLabelLongHover()
 	lb.HandleLabelClick(func(tl *paint.TextLink) {
 		goosi.TheApp.OpenURL(tl.URL)
 	})
@@ -240,30 +246,11 @@ func (lb *Label) HandleEvents() {
 		}
 		if inLink {
 			lb.Styles.Cursor = cursors.Pointer
-		} else if lb.AbilityIs(abilities.Selectable) {
-			lb.Styles.Cursor = cursors.Text
 		} else {
-			lb.Styles.Cursor = cursors.None
+			lb.Styles.Cursor = lb.NormalCursor
 		}
 	})
 }
-
-// func (lb *Label) HandleLabelLongHover() {
-// 	lb.On(events.LongHoverStart, func(e events.Event) {
-// 		fmt.Println("lb lhs")
-// 		pos := lb.Geom.Pos.Content
-// 		for _, tl := range lb.TextRender.Links {
-// 			tlb := tl.Bounds(&lb.TextRender, pos)
-// 			fmt.Println(pos, tlb, e.LocalPos(), e.Pos())
-// 			if e.LocalPos().In(tlb) {
-// 				fmt.Println("ntt")
-// 				NewTooltipText(lb, tl.URL, tlb.Min).Run()
-// 				e.SetHandled()
-// 				return
-// 			}
-// 		}
-// 	})
-// }
 
 // HandleLabelClick handles click events such that the given function will be called
 // on any links that are clicked on.
