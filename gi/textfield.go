@@ -1032,7 +1032,7 @@ func (tf *TextField) CompleteText(s string) {
 	tf.CursorPos = st
 	tf.CursorDelete(ed.ForwardDelete)
 	tf.InsertAtCursor(ed.NewText)
-	tf.FocusClear()
+	tf.EditDone()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
