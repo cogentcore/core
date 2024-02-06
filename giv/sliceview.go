@@ -229,7 +229,7 @@ type SliceViewBase struct {
 	// current selection value -- initially select this value if set
 	SelVal any `copier:"-" view:"-" json:"-" xml:"-"`
 
-	// index of currently-selected item, in ReadOnly mode only
+	// index of currently selected item
 	SelIdx int `copier:"-" json:"-" xml:"-"`
 
 	// index of row to select at start
@@ -237,6 +237,12 @@ type SliceViewBase struct {
 
 	// list of currently-selected slice indexes
 	SelIdxs map[int]struct{} `set:"-" copier:"-"`
+
+	// LastClick is the last row that has been clicked on.
+	// This is used to prevent erroneous double click events
+	// from being sent when the user clicks on multiple different
+	// rows in quick succession.
+	LastClick int `set:"-" copier:"-" json:"-" xml:"-"`
 
 	// non-ptr reflect.Value of the slice
 	SliceNPVal reflect.Value `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
@@ -328,6 +334,7 @@ func (sv *SliceViewBase) SetStyles() {
 				sv.SetFocusEvent()
 				row, _ := sg.IndexFromPixel(e.Pos())
 				sv.UpdateSelectRow(row, e.SelectMode())
+				sv.LastClick = row + sv.StartIdx
 			})
 			sg.ContextMenus = sv.ContextMenus
 		}
@@ -1981,6 +1988,18 @@ func (sv *SliceViewBase) HandleEvents() {
 		}
 		sv.SetNeedsRender(true)
 	})
+	handleMultiClick := func(e events.Event) {
+		row, _, isValid := sv.RowFromEventPos(e)
+		if !isValid {
+			return
+		}
+		if sv.LastClick != row+sv.StartIdx {
+			sv.This().(SliceViewer).SliceGrid().Send(events.Click, e)
+			e.SetHandled()
+		}
+	}
+	sv.OnFirst(events.DoubleClick, handleMultiClick)
+	sv.OnFirst(events.TripleClick, handleMultiClick)
 }
 
 func (sv *SliceViewBase) SizeFinal() {
