@@ -619,10 +619,6 @@ func (tb *Tab) SetStyles() {
 				s.Margin.Zero()
 				s.Padding.Zero()
 			})
-		case "parts/close-space":
-			w.Style(func(s *styles.Style) {
-				s.Min.X.Em(1)
-			})
 		case "parts/close.parts/icon":
 			w.Style(func(s *styles.Style) {
 				s.Max.X.Dp(16)
