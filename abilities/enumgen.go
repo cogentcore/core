@@ -12,11 +12,11 @@ import (
 	"cogentcore.org/core/enums"
 )
 
-var _AbilitiesValues = []Abilities{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}
+var _AbilitiesValues = []Abilities{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}
 
 // AbilitiesN is the highest valid value
 // for type Abilities, plus one.
-const AbilitiesN Abilities = 14
+const AbilitiesN Abilities = 15
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -27,15 +27,16 @@ func _AbilitiesNoOp() {
 	_ = x[Activatable-(2)]
 	_ = x[Clickable-(3)]
 	_ = x[DoubleClickable-(4)]
-	_ = x[LongPressable-(5)]
-	_ = x[Draggable-(6)]
-	_ = x[Droppable-(7)]
-	_ = x[Slideable-(8)]
-	_ = x[Checkable-(9)]
-	_ = x[Scrollable-(10)]
-	_ = x[Focusable-(11)]
-	_ = x[Hoverable-(12)]
-	_ = x[LongHoverable-(13)]
+	_ = x[TripleClickable-(5)]
+	_ = x[LongPressable-(6)]
+	_ = x[Draggable-(7)]
+	_ = x[Droppable-(8)]
+	_ = x[Slideable-(9)]
+	_ = x[Checkable-(10)]
+	_ = x[Scrollable-(11)]
+	_ = x[Focusable-(12)]
+	_ = x[Hoverable-(13)]
+	_ = x[LongHoverable-(14)]
 }
 
 var _AbilitiesNameToValueMap = map[string]Abilities{
@@ -44,32 +45,34 @@ var _AbilitiesNameToValueMap = map[string]Abilities{
 	`Activatable`:     2,
 	`Clickable`:       3,
 	`DoubleClickable`: 4,
-	`LongPressable`:   5,
-	`Draggable`:       6,
-	`Droppable`:       7,
-	`Slideable`:       8,
-	`Checkable`:       9,
-	`Scrollable`:      10,
-	`Focusable`:       11,
-	`Hoverable`:       12,
-	`LongHoverable`:   13,
+	`TripleClickable`: 5,
+	`LongPressable`:   6,
+	`Draggable`:       7,
+	`Droppable`:       8,
+	`Slideable`:       9,
+	`Checkable`:       10,
+	`Scrollable`:      11,
+	`Focusable`:       12,
+	`Hoverable`:       13,
+	`LongHoverable`:   14,
 }
 
 var _AbilitiesDescMap = map[Abilities]string{
 	0:  `Editable means the element can be edited. Otherwise, it remains in ReadOnly mode.`,
 	1:  `Selectable means it can be Selected`,
-	2:  `Activatable means it can be made Active`,
-	3:  `Clickable means it can be Clicked, receiving Click events when the user executes a mouse down and up event on the same element. Does not automatically imply Acitvatable.`,
-	4:  `DoubleClickable indicates that an element does something different when it is clicked on twice in a row. If this is not set, DoubleClick events are processed in the same way as Click events.`,
-	5:  `LongPressable indicates that an element can be LongPressed`,
-	6:  `Draggable means it can be Dragged`,
-	7:  `Droppable means it can receive DragEnter, DragLeave, and Drop events (not specific to current Drag item, just generally)`,
-	8:  `Slideable means it has a slider element that can be dragged to change value. Cannot be both Draggable and Slideable.`,
-	9:  `Checkable means it can be Checked`,
-	10: `Scrollable means it can be Scrolled`,
-	11: `Focusable means it can be Focused: capable of receiving and processing key events directly and typically changing the style when focused to indicate this property to the user.`,
-	12: `Hoverable means it can be Hovered`,
-	13: `LongHoverable means it can be LongHovered`,
+	2:  `Activatable means it can be made Active by pressing down on it, which gives it a visible state layer color change. This also implies Clickable, receiving Click events when the user executes a mouse down and up event on the same element.`,
+	3:  `Clickable means it can be Clicked, receiving Click events when the user executes a mouse down and up event on the same element, but otherwise does not change its rendering when pressed (as Activatable does). Use this for items that are more passively clickable, such as frames or tables, whereas e.g., a Button is Activatable.`,
+	4:  `DoubleClickable indicates that an element does something different when it is clicked on twice in a row.`,
+	5:  `TripleClickable indicates that an element does something different when it is clicked on three times in a row.`,
+	6:  `LongPressable indicates that an element can be LongPressed`,
+	7:  `Draggable means it can be Dragged`,
+	8:  `Droppable means it can receive DragEnter, DragLeave, and Drop events (not specific to current Drag item, just generally)`,
+	9:  `Slideable means it has a slider element that can be dragged to change value. Cannot be both Draggable and Slideable.`,
+	10: `Checkable means it can be Checked`,
+	11: `Scrollable means it can be Scrolled`,
+	12: `Focusable means it can be Focused: capable of receiving and processing key events directly and typically changing the style when focused to indicate this property to the user.`,
+	13: `Hoverable means it can be Hovered`,
+	14: `LongHoverable means it can be LongHovered`,
 }
 
 var _AbilitiesMap = map[Abilities]string{
@@ -78,15 +81,16 @@ var _AbilitiesMap = map[Abilities]string{
 	2:  `Activatable`,
 	3:  `Clickable`,
 	4:  `DoubleClickable`,
-	5:  `LongPressable`,
-	6:  `Draggable`,
-	7:  `Droppable`,
-	8:  `Slideable`,
-	9:  `Checkable`,
-	10: `Scrollable`,
-	11: `Focusable`,
-	12: `Hoverable`,
-	13: `LongHoverable`,
+	5:  `TripleClickable`,
+	6:  `LongPressable`,
+	7:  `Draggable`,
+	8:  `Droppable`,
+	9:  `Slideable`,
+	10: `Checkable`,
+	11: `Scrollable`,
+	12: `Focusable`,
+	13: `Hoverable`,
+	14: `LongHoverable`,
 }
 
 // String returns the string representation

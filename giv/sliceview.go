@@ -396,7 +396,7 @@ func (sv *SliceViewBase) SetStyles() {
 				wb := w.AsWidget()
 				w.Style(func(s *styles.Style) {
 					if sv.IsReadOnly() {
-						s.SetAbilities(false, abilities.Hoverable, abilities.Focusable, abilities.Activatable)
+						s.SetAbilities(false, abilities.Hoverable, abilities.Focusable, abilities.Activatable, abilities.TripleClickable)
 						wb.SetReadOnly(true)
 					}
 					row, col := sv.This().(SliceViewer).WidgetIndex(w)
@@ -1988,7 +1988,7 @@ func (sv *SliceViewBase) HandleEvents() {
 		}
 		sv.SetNeedsRender(true)
 	})
-	handleMultiClick := func(e events.Event) {
+	sv.OnFirst(events.DoubleClick, func(e events.Event) {
 		row, _, isValid := sv.RowFromEventPos(e)
 		if !isValid {
 			return
@@ -1997,9 +1997,7 @@ func (sv *SliceViewBase) HandleEvents() {
 			sv.This().(SliceViewer).SliceGrid().Send(events.Click, e)
 			e.SetHandled()
 		}
-	}
-	sv.OnFirst(events.DoubleClick, handleMultiClick)
-	sv.OnFirst(events.TripleClick, handleMultiClick)
+	})
 }
 
 func (sv *SliceViewBase) SizeFinal() {

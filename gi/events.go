@@ -342,13 +342,6 @@ func (wb *WidgetBase) HandleWidgetStateFromMouse() {
 			wb.SetState(false, states.Active)
 		}
 	})
-	wb.On(events.DoubleClick, func(e events.Event) {
-		// if we are not double clickable, we just treat
-		// it as a click event (as long as we are pressable)
-		if !wb.AbilityIs(abilities.DoubleClickable) && wb.Styles.Abilities.IsPressable() {
-			wb.Send(events.Click, e)
-		}
-	})
 	wb.On(events.LongPressStart, func(e events.Event) {
 		if wb.AbilityIs(abilities.LongPressable) {
 			wb.SetState(true, states.LongPressed)

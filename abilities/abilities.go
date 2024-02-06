@@ -37,9 +37,12 @@ const (
 	Clickable
 
 	// DoubleClickable indicates that an element does something different
-	// when it is clicked on twice in a row. If this is not set, DoubleClick
-	// events are processed in the same way as Click events.
+	// when it is clicked on twice in a row.
 	DoubleClickable
+
+	// TripleClickable indicates that an element does something different
+	// when it is clicked on three times in a row.
+	TripleClickable
 
 	// LongPressable indicates that an element can be LongPressed
 	LongPressable
@@ -80,7 +83,7 @@ func (ab *Abilities) Is(flag enums.BitFlag) bool {
 // IsPressable returns true when an element is Selectable, Activatable,
 // DoubleClickable, Draggable, Slideable, or Checkable
 func (ab *Abilities) IsPressable() bool {
-	return ab.Is(Selectable) || ab.Is(Activatable) || ab.Is(DoubleClickable) || ab.Is(Draggable) || ab.Is(Slideable) || ab.Is(Checkable) || ab.Is(Clickable)
+	return ab.Is(Selectable) || ab.Is(Activatable) || ab.Is(DoubleClickable) || ab.Is(TripleClickable) || ab.Is(Draggable) || ab.Is(Slideable) || ab.Is(Checkable) || ab.Is(Clickable)
 }
 
 // IsHoverable is true for both Hoverable and LongHoverable

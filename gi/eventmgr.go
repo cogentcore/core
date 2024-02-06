@@ -368,7 +368,7 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 					for i := n - 1; i >= 0; i-- {
 						w := em.MouseInBBox[i]
 						wb := w.AsWidget()
-						if !wb.StateIs(states.Disabled) && wb.AbilityIs(abilities.DoubleClickable) {
+						if !wb.StateIs(states.Disabled) && wb.AbilityIs(abilities.TripleClickable) {
 							sentMulti = true
 							w.HandleEvent(tce)
 							break
