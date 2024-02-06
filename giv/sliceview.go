@@ -496,7 +496,7 @@ func (sv *SliceViewBase) RowFromEventPos(e events.Event) (row, idx int, isValid 
 	row, _ = sg.IndexFromPixel(e.Pos())
 	idx = row + sv.StartIdx
 	isValid = true
-	if idx >= sv.SliceSize {
+	if row < 0 || idx >= sv.SliceSize {
 		isValid = false
 	}
 	return
@@ -1310,7 +1310,7 @@ func (sv *SliceViewBase) SelectIdxWidgets(idx int, sel bool) bool {
 // UpdateSelectRow updates the selection for the given row
 func (sv *SliceViewBase) UpdateSelectRow(row int, selMode events.SelectModes) {
 	idx := row + sv.StartIdx
-	if idx >= sv.SliceSize {
+	if row < 0 || idx >= sv.SliceSize {
 		return
 	}
 	sel := !sv.IdxIsSelected(idx)
@@ -2251,18 +2251,39 @@ func (sg *SliceViewGrid) IndexFromPixel(pt image.Point) (row, col int) {
 	if sg.VisRows == 0 || sz.Y == 0 {
 		return
 	}
+	if ptf.Y < 0 || ptf.Y >= sz.Y {
+		return -1, 0
+	}
 	rows := sg.LayImpl.Shape.Y
+	cols := sg.LayImpl.Shape.X
 	st := mat32.Vec2{}
+	got := false
 	for r := 0; r < rows; r++ {
 		ht, _ := sg.LayImpl.RowHeight(r, 0)
 		ht += sg.LayImpl.Gap.Y
+		miny := st.Y
+		if r > 0 {
+			for c := 0; c < cols; c++ {
+				kw := sg.Child(r*cols + c).(gi.Widget).AsWidget()
+				pyi := mat32.Floor(kw.Geom.Pos.Total.Y)
+				if pyi < miny {
+					miny = pyi
+				}
+			}
+		}
+		st.Y = miny
 		ssz := sz
 		ssz.Y = ht
 		if ptf.Y >= st.Y && ptf.Y < st.Y+ssz.Y {
 			row = r
+			got = true
+			break
 			// todo: col
 		}
 		st.Y += ht
+	}
+	if !got {
+		row = rows - 1
 	}
 	return
 }
