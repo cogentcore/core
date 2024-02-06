@@ -244,6 +244,10 @@ type SliceViewBase struct {
 	// rows in quick succession.
 	LastClick int `set:"-" copier:"-" json:"-" xml:"-"`
 
+	// NormalCursor is the cached cursor to display when there
+	// is no row being hovered.
+	NormalCursor cursors.Cursor `copier:"-" xml:"-" json:"-" set:"-"`
+
 	// non-ptr reflect.Value of the slice
 	SliceNPVal reflect.Value `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
 
@@ -311,6 +315,9 @@ func (sv *SliceViewBase) SetStyles() {
 		// absorb horizontal here, vertical in view
 		s.Overflow.X = styles.OverflowAuto
 		s.Grow.Set(1, 1)
+	})
+	sv.StyleFinal(func(s *styles.Style) {
+		sv.NormalCursor = s.Cursor
 	})
 	sv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(sv) {
@@ -524,9 +531,6 @@ func (sv *SliceViewBase) ClickSelectEvent(e events.Event) bool {
 // binds its events to its scene and its current selection index to the given value.
 func (sv *SliceViewBase) BindSelect(val *int) *SliceViewBase {
 	sv.SetReadOnly(true)
-	sv.Style(func(s *styles.Style) {
-		s.Cursor = cursors.Pointer
-	})
 	sv.OnSelect(func(e events.Event) {
 		*val = sv.SelIdx
 	})
@@ -1985,10 +1989,12 @@ func (sv *SliceViewBase) HandleEvents() {
 		row, _, isValid := sv.RowFromEventPos(e)
 		if !isValid {
 			sv.HoverRow = -1
+			sv.Styles.Cursor = sv.NormalCursor
 		} else {
 			if row != sv.HoverRow {
 				sv.HoverRow = row
 			}
+			sv.Styles.Cursor = cursors.Pointer
 		}
 		sv.SetNeedsRender(true)
 	})
