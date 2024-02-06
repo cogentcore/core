@@ -396,7 +396,7 @@ func (sv *SliceViewBase) SetStyles() {
 				wb := w.AsWidget()
 				w.Style(func(s *styles.Style) {
 					if sv.IsReadOnly() {
-						s.SetAbilities(false, abilities.Hoverable, abilities.Focusable)
+						s.SetAbilities(false, abilities.Hoverable, abilities.Focusable, abilities.Activatable)
 						wb.SetReadOnly(true)
 					}
 					row, col := sv.This().(SliceViewer).WidgetIndex(w)
