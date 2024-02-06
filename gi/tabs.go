@@ -259,7 +259,7 @@ func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int, icon ...ico
 		tab.SetIcon(icon[0])
 	}
 	tab.OnClick(func(e events.Event) {
-		ts.SelectTabByLabel(tab.Nm)
+		ts.SelectTabByName(tab.Nm)
 	})
 	fr := ts.Frame()
 	if len(fr.Kids) == 1 {
@@ -325,23 +325,26 @@ func (ts *Tabs) SelectTabIndex(idx int) (*Frame, bool) {
 	return frame, true
 }
 
-// TabByLabel returns tab with given label (nil if not found)
-func (ts *Tabs) TabByLabel(label string) *Frame {
+// TabByName returns tab Frame with given widget name
+// (nil if not found)
+// The widget name is the original full tab label, prior to any eliding.
+func (ts *Tabs) TabByName(name string) *Frame {
 	ts.Mu.Lock()
 	defer ts.Mu.Unlock()
 	fr := ts.Frame()
-	frame, _ := fr.ChildByName(label).(*Frame)
+	frame, _ := fr.ChildByName(name).(*Frame)
 	return frame
 }
 
-// TabIndexByLabel returns the tab index for the given tab label
+// TabIndexByName returns the tab index for the given tab widget name
 // and -1 if it can not be found.
-func (ts *Tabs) TabIndexByLabel(label string) int {
+// The widget name is the original full tab label, prior to any eliding.
+func (ts *Tabs) TabIndexByName(name string) int {
 	ts.Mu.Lock()
 	defer ts.Mu.Unlock()
 
 	tb := ts.Tabs()
-	tab := tb.ChildByName(label)
+	tab := tb.ChildByName(name)
 	if tab == nil {
 		return -1
 	}
@@ -361,9 +364,10 @@ func (ts *Tabs) TabLabel(idx int) string {
 	return tbut.Name()
 }
 
-// SelectTabByLabel selects tab by label, returning it.
-func (ts *Tabs) SelectTabByLabel(label string) *Frame {
-	idx := ts.TabIndexByLabel(label)
+// SelectTabByName selects tab by widget name, returning it.
+// The widget name is the original full tab label, prior to any eliding.
+func (ts *Tabs) SelectTabByName(name string) *Frame {
+	idx := ts.TabIndexByName(name)
 	if idx < 0 {
 		return nil
 	}
@@ -372,30 +376,30 @@ func (ts *Tabs) SelectTabByLabel(label string) *Frame {
 	return fr.Child(idx).(*Frame)
 }
 
-// RecycleTab returns a tab with given label, first by looking for an existing one,
+// RecycleTab returns a tab with given name, first by looking for an existing one,
 // and if not found, making a new one. If sel, then select it. It returns the
 // frame for the tab.
-func (ts *Tabs) RecycleTab(label string, sel bool) *Frame {
-	frame := ts.TabByLabel(label)
+func (ts *Tabs) RecycleTab(name string, sel bool) *Frame {
+	frame := ts.TabByName(name)
 	if frame != nil {
 		if sel {
-			ts.SelectTabByLabel(label)
+			ts.SelectTabByName(name)
 		}
 		return frame
 	}
-	frame = ts.NewTab(label)
+	frame = ts.NewTab(name)
 	if sel {
-		ts.SelectTabByLabel(label)
+		ts.SelectTabByName(name)
 	}
 	return frame
 }
 
 // RecycleTabWidget returns a tab with given widget type in the tab frame,
-// first by looking for an existing one, with given label, and if not found,
+// first by looking for an existing one, with given name, and if not found,
 // making and configuring a new one.
 // If sel, then select it. It returns the Widget item for the tab.
-func (ts *Tabs) RecycleTabWidget(label string, sel bool, typ *gti.Type) Widget {
-	fr := ts.RecycleTab(label, sel)
+func (ts *Tabs) RecycleTabWidget(name string, sel bool, typ *gti.Type) Widget {
+	fr := ts.RecycleTab(name, sel)
 	if fr.HasChildren() {
 		wi, _ := AsWidget(fr.Child(0))
 		return wi
@@ -634,7 +638,7 @@ func (tb *Tab) SetStyles() {
 				if ts == nil {
 					return
 				}
-				idx := ts.TabIndexByLabel(tb.Text)
+				idx := ts.TabIndexByName(tb.Nm)
 				// if OnlyCloseActiveTab is on, only process delete when already selected
 				if SystemSettings.OnlyCloseActiveTab && !tb.StateIs(states.Selected) {
 					ts.SelectTabIndex(idx)
