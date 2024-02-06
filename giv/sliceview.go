@@ -343,7 +343,7 @@ func (sv *SliceViewBase) SetStyles() {
 			case strings.HasPrefix(w.Name(), "index-"):
 				wb := w.AsWidget()
 				w.Style(func(s *styles.Style) {
-					s.SetAbilities(true, abilities.Activatable, abilities.Selectable, abilities.Draggable, abilities.Droppable, abilities.DoubleClickable, abilities.TripleClickable)
+					s.SetAbilities(true, abilities.Activatable, abilities.Selectable, abilities.Draggable, abilities.Droppable, abilities.DoubleClickable)
 					nd := mat32.Log10(float32(sv.SliceSize))
 					nd = max(nd, 3)
 					s.Min.X.Ch(nd + 2)
@@ -355,9 +355,6 @@ func (sv *SliceViewBase) SetStyles() {
 				wb.ContextMenus = sv.ContextMenus
 				wb.OnDoubleClick(func(e events.Event) {
 					sv.Send(events.DoubleClick, e)
-				})
-				wb.On(events.TripleClick, func(e events.Event) {
-					sv.Send(events.TripleClick, e)
 				})
 				w.On(events.DragStart, func(e events.Event) {
 					if sv.This() == nil || sv.Is(ki.Deleted) {
@@ -399,8 +396,8 @@ func (sv *SliceViewBase) SetStyles() {
 				wb := w.AsWidget()
 				w.Style(func(s *styles.Style) {
 					if sv.IsReadOnly() {
-						s.SetAbilities(true, abilities.DoubleClickable, abilities.TripleClickable)
-						s.SetAbilities(false, abilities.Hoverable, abilities.Focusable, abilities.Activatable)
+						s.SetAbilities(true, abilities.DoubleClickable)
+						s.SetAbilities(false, abilities.Hoverable, abilities.Focusable, abilities.Activatable, abilities.TripleClickable)
 						wb.SetReadOnly(true)
 					}
 					row, col := sv.This().(SliceViewer).WidgetIndex(w)
@@ -413,12 +410,10 @@ func (sv *SliceViewBase) SetStyles() {
 					e.SetHandled()
 					row, _ := sv.This().(SliceViewer).WidgetIndex(w)
 					sv.UpdateSelectRow(row, e.SelectMode())
+					sv.LastClick = row + sv.StartIdx
 				})
 				wb.OnDoubleClick(func(e events.Event) {
 					sv.Send(events.DoubleClick, e)
-				})
-				wb.On(events.TripleClick, func(e events.Event) {
-					sv.Send(events.TripleClick, e)
 				})
 				wb.ContextMenus = sv.ContextMenus
 			}
