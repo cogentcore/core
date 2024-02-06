@@ -123,7 +123,7 @@ func (bt *Button) OnInit() {
 
 func (bt *Button) SetStyles() {
 	bt.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.DoubleClickable)
+		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.DoubleClickable, abilities.TripleClickable)
 		if !bt.IsDisabled() {
 			s.Cursor = cursors.Pointer
 		}
