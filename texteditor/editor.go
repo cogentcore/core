@@ -205,7 +205,7 @@ func (ed *Editor) OnInit() {
 
 func (ed *Editor) SetStyles() {
 	ed.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable)
+		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
 		ed.CursorWidth.Dp(2)
 		ed.LineNumberColor = colors.C(colors.Scheme.SurfaceContainer)
 		ed.SelectColor = colors.C(colors.Scheme.Select.Container)
