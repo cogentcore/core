@@ -332,7 +332,6 @@ func (sv *SliceViewBase) SetStyles() {
 				s.Overflow.Y = styles.OverflowAuto
 				s.Gap.Set(units.Em(0.5)) // note: match header
 				s.Align.Items = styles.Center
-				s.Justify.Items = styles.Center
 				// baseline mins:
 				s.Min.X.Ch(20)
 				s.Min.Y.Em(6)
