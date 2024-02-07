@@ -215,7 +215,7 @@ func inputs(ts *gi.Tabs) {
 	}
 
 	gi.NewChooser(choosers).SetPlaceholder("Select a fruit").SetItems(fruits...)
-	gi.NewChooser(choosers).SetPlaceholder("Select a fruit").SetItems(fruits...).SetType(gi.ChooserOutlined)
+	gi.NewChooser(choosers).SetPlaceholder("Select a fruit").SetItems(fruits...).SetType(gi.ChooserOutlined).SetAllowNew(true)
 	gi.NewChooser(tab).SetEditable(true).SetPlaceholder("Select or type a fruit").SetItems(fruits...)
 	gi.NewChooser(tab).SetEditable(true).SetPlaceholder("Select or type a fruit").SetItems(fruits...).SetType(gi.ChooserOutlined)
 

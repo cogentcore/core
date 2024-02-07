@@ -51,8 +51,6 @@ type Chooser struct {
 	// or just a button for selecting items.
 	Editable bool
 
-	// TODO(kai): implement AllowNew button
-
 	// AllowNew is whether to allow the user to add new items to the
 	// chooser through the editable textfield (if Editable is set to
 	// true) and a button at the end of the chooser menu.
@@ -500,6 +498,23 @@ func (ch *Chooser) MakeItemsMenu(m *Scene) {
 		bt.OnClick(func(e events.Event) {
 			ch.SelectItemAction(i)
 		})
+	}
+	if ch.AllowNew {
+		NewSeparator(m)
+		NewButton(m).SetText("New item").SetIcon(icons.Add).
+			SetTooltip("Add a new item to the chooser").
+			OnClick(func(e events.Event) {
+				d := NewBody().AddTitle("New item").AddText("Add a new item to the chooser")
+				tf := NewTextField(d)
+				d.AddBottomBar(func(pw Widget) {
+					d.AddCancel(pw)
+					d.AddOk(pw).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
+						ch.Items = append(ch.Items, ChooserItem{Value: tf.Text()})
+						ch.SelectItemAction(len(ch.Items) - 1)
+					})
+				})
+				d.NewDialog(ch).Run()
+			})
 	}
 }
 
