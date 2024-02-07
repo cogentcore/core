@@ -34,6 +34,11 @@ type Text struct { //gti:add
 	// For RTL start is right, not left, and start is top for TB
 	Anchor TextAnchors
 
+	// Overflow specifies the way in which overflowing text is handled.
+	// If it is "", overflowing text is directly clipped. Otherwise,
+	// overflowing text is terminated with this string (eg: …).
+	Overflow string
+
 	// spacing between characters and lines
 	LetterSpacing units.Value
 
@@ -44,7 +49,7 @@ type Text struct { //gti:add
 	// the standard way to specify line height is in terms of em
 	LineHeight units.Value
 
-	// prop: white-space (*not* inherited) specifies how white space is processed,
+	// WhiteSpace (not inherited) specifies how white space is processed,
 	// and how lines are wrapped.  If set to WhiteSpaceNormal (default) lines are wrapped.
 	// See info about interactions with Grow.X setting for this and the NoWrap case.
 	WhiteSpace WhiteSpaces
