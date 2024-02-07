@@ -7,6 +7,7 @@ package gi
 import (
 	"errors"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 	"unicode"
@@ -639,6 +640,16 @@ func (ch *Chooser) CompleteMatch(data any, text string, posLn, posCh int) (md co
 		}
 	}
 	md.Matches = complete.MatchSeedCompletion(comps, md.Seed)
+	if ch.AllowNew && text != "" && !slices.ContainsFunc(md.Matches, func(c complete.Completion) bool {
+		return c.Text == text
+	}) {
+		md.Matches = append(md.Matches, complete.Completion{
+			Text:  text,
+			Label: "Add " + text,
+			Icon:  string(icons.Add),
+			Desc:  fmt.Sprintf("Add %q to the chooser", text),
+		})
+	}
 	return md
 }
 

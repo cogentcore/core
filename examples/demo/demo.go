@@ -214,9 +214,9 @@ func inputs(ts *gi.Tabs) {
 		{Value: "Strawberry", Tooltip: "A widely consumed small, red fruit"},
 	}
 
-	gi.NewChooser(choosers).SetPlaceholder("Select a fruit").SetItems(fruits...)
-	gi.NewChooser(choosers).SetPlaceholder("Select a fruit").SetItems(fruits...).SetType(gi.ChooserOutlined).SetAllowNew(true)
-	gi.NewChooser(tab).SetEditable(true).SetPlaceholder("Select or type a fruit").SetItems(fruits...)
+	gi.NewChooser(choosers).SetPlaceholder("Select a fruit").SetItems(fruits...).SetAllowNew(true)
+	gi.NewChooser(choosers).SetPlaceholder("Select a fruit").SetItems(fruits...).SetType(gi.ChooserOutlined)
+	gi.NewChooser(tab).SetEditable(true).SetPlaceholder("Select or type a fruit").SetItems(fruits...).SetAllowNew(true)
 	gi.NewChooser(tab).SetEditable(true).SetPlaceholder("Select or type a fruit").SetItems(fruits...).SetType(gi.ChooserOutlined)
 
 	gi.NewSwitch(tab).SetText("Toggle")
