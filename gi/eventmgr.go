@@ -358,6 +358,7 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 			case events.Left:
 				if sc.SelectedWidgetChan != nil {
 					sc.SelectedWidgetChan <- up
+					return
 				}
 				dcInTime := time.Since(em.LastClickTime) < DeviceSettings.DoubleClickInterval
 				em.LastClickTime = time.Now()

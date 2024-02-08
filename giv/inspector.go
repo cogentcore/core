@@ -157,19 +157,31 @@ func (is *Inspector) SelectionMonitor() {
 		}
 		tv := is.TreeView().FindSyncNode(sw.This())
 		if tv == nil {
-			gi.NewBody().AddSnackbarText(fmt.Sprintf("Inspector: tree view node missing: %v", sw)).NewSnackbar(is).Run()
-		} else {
-			updt := is.UpdateStartAsync() // coming from other tree
-			tv.OpenParents()
-			tv.ScrollToMe()
-			tv.SelectAction(events.SelectOne)
-			is.UpdateEndAsyncLayout(updt)
-
-			updt = sc.UpdateStartAsync()
-			sc.SelectedWidget = sw
-			sw.AsWidget().SetNeedsRender(updt)
-			sc.UpdateEndAsyncRender(updt)
+			// if we can't be found, we are probably a part,
+			// so we keep going up until we find somebody in
+			// the tree
+			sw.WalkUpParent(func(k ki.Ki) bool {
+				tv = is.TreeView().FindSyncNode(k)
+				if tv != nil {
+					return ki.Break
+				}
+				return ki.Continue
+			})
+			if tv == nil {
+				gi.NewBody().AddSnackbarText(fmt.Sprintf("Inspector: tree view node missing: %v", sw)).NewSnackbar(is).Run()
+				return
+			}
 		}
+		updt := is.UpdateStartAsync() // coming from other tree
+		tv.OpenParents()
+		tv.ScrollToMe()
+		tv.SelectAction(events.SelectOne)
+		is.UpdateEndAsyncLayout(updt)
+
+		updt = sc.UpdateStartAsync()
+		sc.SelectedWidget = sw
+		sw.AsWidget().SetNeedsRender(updt)
+		sc.UpdateEndAsyncRender(updt)
 	}
 }
 
