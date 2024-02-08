@@ -334,6 +334,15 @@ func (st *Stage) DoUpdate() (stageMods, sceneMods bool) {
 	return
 }
 
+// Raise moves the Stage to the top of its main [StageMgr]
+// and raises the [RenderWin] it is in if necessary.
+func (st *Stage) Raise() {
+	if st.MainMgr.RenderWin != CurRenderWin {
+		st.MainMgr.RenderWin.Raise()
+	}
+	st.MainMgr.MoveToTop(st)
+}
+
 func (st *Stage) Delete() {
 	if st.Type.IsMain() && st.PopupMgr != nil {
 		st.PopupMgr.DeleteAll()

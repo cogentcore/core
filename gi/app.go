@@ -269,12 +269,7 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 					Label:   st.Title,
 					Icon:    icons.Toolbar,
 					Tooltip: "Show " + st.Title,
-					Func: func() {
-						if st.MainMgr.RenderWin != CurRenderWin {
-							st.MainMgr.RenderWin.Raise()
-						}
-						st.MainMgr.MoveToTop(st)
-					},
+					Func:    st.Raise,
 				})
 			}
 		}
