@@ -587,6 +587,13 @@ func (vv *ValueBase) OnChange(fun func(e events.Event)) {
 	vv.On(events.Change, fun)
 }
 
+// OnInput registers given listener function for Input events on Value.
+// This is a secondary notification event for some Value elements that
+// triggers before changes are saved.
+func (vv *ValueBase) OnInput(fun func(e events.Event)) {
+	vv.On(events.Input, fun)
+}
+
 // On adds an event listener function for the given event type
 func (vv *ValueBase) On(etype events.Types, fun func(e events.Event)) {
 	vv.Listeners.Add(etype, fun)

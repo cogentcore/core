@@ -316,13 +316,13 @@ func (sv *StructView) ConfigStructGrid() bool {
 				sv.Changed = true
 				if !laser.KindIsBasic(laser.NonPtrValue(vvb.Value).Kind()) {
 					if updtr, ok := sv.Struct.(gi.Updater); ok {
-						// fmt.Printf("updating: %v kind: %v\n", updtr, vvv.Value.Kind())
 						updtr.Update()
 					}
 				}
 				sv.SendChange(e)
-				// vvv, _ := send.Embed(TypeValueBase).(*ValueBase)
-				// fmt.Printf("sview got edit from vv %v field: %v\n", vvv.Nm, vvv.Field.Name)
+			})
+			vvb.AsWidgetBase().OnInput(func(e events.Event) {
+				sv.Send(events.Input, e)
 			})
 		}
 	}
