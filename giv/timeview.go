@@ -201,6 +201,18 @@ func (dv *DateView) ConfigWidget() {
 	}
 
 	trow := gi.NewLayout(dv)
+	trow.Style(func(s *styles.Style) {
+		s.Gap.Zero()
+	})
+
+	arrowStyle := func(s *styles.Style) {
+		s.Padding.SetHoriz(units.Dp(12))
+		s.Color = colors.Scheme.OnSurfaceVariant
+	}
+
+	gi.NewButton(trow).SetType(gi.ButtonAction).SetIcon(icons.NavigateBefore).OnClick(func(e events.Event) {
+		dv.SetTime(dv.Time.AddDate(0, -1, 0))
+	}).Style(arrowStyle)
 
 	sms := make([]gi.ChooserItem, len(shortMonths))
 	for i, sm := range shortMonths {
@@ -212,6 +224,14 @@ func (dv *DateView) ConfigWidget() {
 		// set our month
 		dv.SetTime(dv.Time.AddDate(0, month.CurrentIndex+1-int(dv.Time.Month()), 0))
 	})
+
+	gi.NewButton(trow).SetType(gi.ButtonAction).SetIcon(icons.NavigateNext).OnClick(func(e events.Event) {
+		dv.SetTime(dv.Time.AddDate(0, 1, 0))
+	}).Style(arrowStyle)
+
+	gi.NewButton(trow).SetType(gi.ButtonAction).SetIcon(icons.NavigateBefore).OnClick(func(e events.Event) {
+		dv.SetTime(dv.Time.AddDate(-1, 0, 0))
+	}).Style(arrowStyle)
 
 	yr := dv.Time.Year()
 	var yrs []gi.ChooserItem
@@ -227,6 +247,10 @@ func (dv *DateView) ConfigWidget() {
 		// set our year
 		dv.SetTime(dv.Time.AddDate(nyr-dv.Time.Year(), 0, 0))
 	})
+
+	gi.NewButton(trow).SetType(gi.ButtonAction).SetIcon(icons.NavigateNext).OnClick(func(e events.Event) {
+		dv.SetTime(dv.Time.AddDate(1, 0, 0))
+	}).Style(arrowStyle)
 
 	dv.ConfigDateGrid()
 	dv.UpdateEndLayout(updt)
@@ -263,7 +287,6 @@ func (dv *DateView) ConfigDateGrid() {
 		// actual time of this date
 		dt := somw.AddDate(0, 0, yd-somwyd)
 		ds := strconv.Itoa(dt.Day())
-		// fmt.Println(ds)
 		bt := gi.NewButton(grid, "day-"+yds).SetType(gi.ButtonAction).SetText(ds)
 		bt.OnClick(func(e events.Event) {
 			dv.SetTime(dt)
