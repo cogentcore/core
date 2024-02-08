@@ -140,49 +140,49 @@ func (is *Inspector) ToggleSelectionMode() { //gti:add
 	sc.UpdateEndLayout(updt)
 }
 
-// SelectionMonitor monitors the selected widget
+// SelectionMonitor monitors for the selected widget
 func (is *Inspector) SelectionMonitor() {
-	for {
-		sc := gi.AsScene(is.KiRoot)
-		if sc == nil {
-			break
-		}
-		if sc.SelectedWidgetChan == nil {
-			sc.SelectedWidget = nil
-			break
-		}
-		sw := <-sc.SelectedWidgetChan
-		if sw == nil {
-			break
-		}
-		tv := is.TreeView().FindSyncNode(sw.This())
-		if tv == nil {
-			// if we can't be found, we are probably a part,
-			// so we keep going up until we find somebody in
-			// the tree
-			sw.WalkUpParent(func(k ki.Ki) bool {
-				tv = is.TreeView().FindSyncNode(k)
-				if tv != nil {
-					return ki.Break
-				}
-				return ki.Continue
-			})
-			if tv == nil {
-				gi.NewBody().AddSnackbarText(fmt.Sprintf("Inspector: tree view node missing: %v", sw)).NewSnackbar(is).Run()
-				return
-			}
-		}
-		updt := is.UpdateStartAsync() // coming from other tree
-		tv.OpenParents()
-		tv.ScrollToMe()
-		tv.SelectAction(events.SelectOne)
-		is.UpdateEndAsyncLayout(updt)
-
-		updt = sc.UpdateStartAsync()
-		sc.SelectedWidget = sw
-		sw.AsWidget().SetNeedsRender(updt)
-		sc.UpdateEndAsyncRender(updt)
+	sc := gi.AsScene(is.KiRoot)
+	if sc == nil {
+		return
 	}
+	sc.Stage.Raise()
+	sw, ok := <-sc.SelectedWidgetChan
+	if !ok || sw == nil {
+		return
+	}
+	tv := is.TreeView().FindSyncNode(sw.This())
+	if tv == nil {
+		// if we can't be found, we are probably a part,
+		// so we keep going up until we find somebody in
+		// the tree
+		sw.WalkUpParent(func(k ki.Ki) bool {
+			tv = is.TreeView().FindSyncNode(k)
+			if tv != nil {
+				return ki.Break
+			}
+			return ki.Continue
+		})
+		if tv == nil {
+			gi.NewBody().AddSnackbarText(fmt.Sprintf("Inspector: tree view node missing: %v", sw)).NewSnackbar(is).Run()
+			return
+		}
+	}
+	updt := is.UpdateStartAsync() // coming from other tree
+	tv.OpenParents()
+	tv.ScrollToMe()
+	tv.SelectAction(events.SelectOne)
+	is.UpdateEndAsyncLayout(updt)
+	is.Scene.Stage.Raise()
+
+	updt = sc.UpdateStartAsync()
+	sc.SelectedWidget = sw
+	sc.SetFlag(false, gi.ScRenderBBoxes)
+	if sc.SelectedWidgetChan != nil {
+		close(sc.SelectedWidgetChan)
+	}
+	sc.SelectedWidgetChan = nil
+	sc.UpdateEndAsyncRender(updt)
 }
 
 // InspectApp displays the underlying operating system app
