@@ -1542,30 +1542,37 @@ func (tf *TextField) HandleEvents() {
 			e.SetHandled()
 			tf.CursorBackspace(1)
 			tf.OfferComplete(dontForce)
+			tf.Send(events.Input, e)
 		case keyfun.Kill:
 			e.SetHandled()
 			tf.CancelComplete()
 			tf.CursorKill()
+			tf.Send(events.Input, e)
 		case keyfun.Delete:
 			e.SetHandled()
 			tf.CursorDelete(1)
 			tf.OfferComplete(dontForce)
+			tf.Send(events.Input, e)
 		case keyfun.BackspaceWord:
 			e.SetHandled()
 			tf.CursorBackspaceWord(1)
 			tf.OfferComplete(dontForce)
+			tf.Send(events.Input, e)
 		case keyfun.DeleteWord:
 			e.SetHandled()
 			tf.CursorDeleteWord(1)
 			tf.OfferComplete(dontForce)
+			tf.Send(events.Input, e)
 		case keyfun.Cut:
 			e.SetHandled()
 			tf.CancelComplete()
 			tf.Cut()
+			tf.Send(events.Input, e)
 		case keyfun.Paste:
 			e.SetHandled()
 			tf.CancelComplete()
 			tf.Paste()
+			tf.Send(events.Input, e)
 		case keyfun.Complete:
 			e.SetHandled()
 			tf.OfferComplete(force)
@@ -1579,7 +1586,7 @@ func (tf *TextField) HandleEvents() {
 					} else {
 						tf.OfferComplete(dontForce)
 					}
-					tf.Send(events.Input)
+					tf.Send(events.Input, e)
 				}
 			}
 		}
