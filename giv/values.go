@@ -1521,6 +1521,7 @@ func (vv *FileValue) ConfigDialog(d *gi.Body) (bool, func()) {
 		cur = fv.SelectedFile()
 		vv.SetValue(cur)
 		vv.UpdateWidget()
+		vv.AsWidgetBase().SetNeedsLayout(true)
 	}
 }
 
