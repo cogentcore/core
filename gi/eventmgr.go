@@ -311,6 +311,9 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 			}
 		}
 		em.Hovers = em.UpdateHovers(hovs, em.Hovers, e, events.MouseEnter, events.MouseLeave)
+		if sc.SelectedWidgetChan != nil && len(em.Hovers) != 0 {
+			sc.SelectedWidget = em.Hovers[0]
+		}
 		em.HandleLongHover(e)
 	case events.MouseDrag:
 		if em.Drag != nil {

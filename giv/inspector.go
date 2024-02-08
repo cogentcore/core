@@ -126,7 +126,6 @@ func (is *Inspector) ToggleSelectionMode() { //gti:add
 		return
 	}
 	updt := sc.UpdateStart()
-	sc.SelectedWidget = nil
 	sc.SetFlag(!sc.Is(gi.ScRenderBBoxes), gi.ScRenderBBoxes)
 	if sc.Is(gi.ScRenderBBoxes) {
 		sc.SelectedWidgetChan = make(chan gi.Widget)
@@ -176,7 +175,6 @@ func (is *Inspector) SelectionMonitor() {
 	is.Scene.Stage.Raise()
 
 	updt = sc.UpdateStartAsync()
-	sc.SelectedWidget = sw
 	sc.SetFlag(false, gi.ScRenderBBoxes)
 	if sc.SelectedWidgetChan != nil {
 		close(sc.SelectedWidgetChan)
