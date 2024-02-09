@@ -56,18 +56,16 @@ func (is *Inspector) SetStyles() {
 				s.Grow.Set(1, 0)
 				s.Align.Self = styles.Center
 			})
+		case "splits/sv", "splits/tvfr/tv":
+			w.AsWidget().OnChange(func(e events.Event) {
+				sc := gi.AsScene(is.KiRoot)
+				if sc == nil {
+					return
+				}
+				sc.RenderCtx().SetFlag(true, gi.RenderRebuild) // trigger full rebuild
+			})
 		}
 	})
-}
-
-// UpdateItems updates the objects being edited (e.g., updating display changes)
-func (is *Inspector) UpdateItems() { //gti:add
-	if is.KiRoot == nil {
-		return
-	}
-	if w, ok := is.KiRoot.(gi.Widget); ok {
-		w.AsWidget().SetNeedsRender(true)
-	}
 }
 
 // Save saves tree to current filename, in a standard JSON-formatted file
@@ -185,7 +183,7 @@ func (is *Inspector) SelectionMonitor() {
 
 // InspectApp displays the underlying operating system app
 func (is *Inspector) InspectApp() { //gti:add
-	d := gi.NewBody("Inspect app")
+	d := gi.NewBody().AddTitle("Inspect app")
 	NewStructView(d).SetStruct(goosi.TheApp).SetReadOnly(true)
 	d.NewFullDialog(is).Run()
 }
@@ -277,8 +275,6 @@ func (is *Inspector) ConfigSplits() {
 }
 
 func (is *Inspector) ConfigToolbar(tb *gi.Toolbar) {
-	NewFuncButton(tb, is.UpdateItems).SetIcon(icons.Refresh)
-	// StyleFirst(func(s *styles.Style) { s.SetEnabled(is.Changed) })
 	NewFuncButton(tb, is.ToggleSelectionMode).SetText("Select element").SetIcon(icons.ArrowSelectorTool).
 		StyleFirst(func(s *styles.Style) {
 			_, ok := is.KiRoot.(*gi.Scene)
