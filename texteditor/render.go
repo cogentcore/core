@@ -124,11 +124,12 @@ func (ed *Editor) CharEndPos(pos lex.Pos) mat32.Vec2 {
 	}
 	spos.Y += ed.Offs[pos.Ln] + ed.FontDescent
 	spos.X += ed.LineNoOff
-	if len(ed.Renders[pos.Ln].Spans) > 0 {
+	r := ed.Renders[pos.Ln]
+	if len(r.Spans) > 0 {
 		// note: Y from rune pos is baseline
-		rrp, _, _, _ := ed.Renders[pos.Ln].RuneEndPos(pos.Ch)
+		rrp, _, _, _ := r.RuneEndPos(pos.Ch)
 		spos.X += rrp.X
-		spos.Y += rrp.Y - ed.Renders[pos.Ln].Spans[0].RelPos.Y // relative
+		spos.Y += rrp.Y - r.Spans[0].RelPos.Y // relative
 	}
 	spos.Y += ed.LineHeight // end of that line
 	return spos
@@ -347,7 +348,7 @@ func (ed *Editor) RenderAllLines() {
 	if ed.HasLineNos() {
 		ed.RenderLineNosBoxAll()
 		for ln := stln; ln <= edln; ln++ {
-			ed.RenderLineNo(ln, false, false) // don't re-render std fill boxes, no separate vp upload
+			ed.RenderLineNo(ln, false) // don't re-render std fill boxes
 		}
 	}
 
@@ -410,9 +411,7 @@ func (ed *Editor) RenderLineNosBox(st, end int) {
 
 // RenderLineNo renders given line number -- called within context of other render
 // if defFill is true, it fills box color for default background color (use false for batch mode)
-// and if vpUpload is true it uploads the rendered region to scene directly
-// (only if totally separate from other updates)
-func (ed *Editor) RenderLineNo(ln int, defFill bool, vpUpload bool) {
+func (ed *Editor) RenderLineNo(ln int, defFill bool) {
 	if !ed.HasLineNos() || ed.Buf == nil {
 		return
 	}
