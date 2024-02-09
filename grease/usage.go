@@ -44,7 +44,7 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 			}
 		}
 		if !gotCmd {
-			fmt.Println(grog.CmdColor(os.Args[0]+" help") + grog.ErrorColor(fmt.Sprintf(" failed: command %q not found", cmd)))
+			fmt.Println(grog.CmdColor(CmdName()+" help") + grog.ErrorColor(fmt.Sprintf(" failed: command %q not found", cmd)))
 			os.Exit(1)
 		}
 	}
@@ -52,7 +52,7 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 	fields := &Fields{}
 	AddFields(cfg, fields, cmd)
 
-	cmdName := os.Args[0]
+	cmdName := CmdName()
 	if cmd != "" {
 		cmdName += " " + cmd
 	}

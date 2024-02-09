@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"cogentcore.org/core/grog"
 )
@@ -48,7 +50,7 @@ func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
 			fmt.Println(grog.CmdColor(cmdString(opts, cmd)) + grog.ErrorColor(" failed: "+err.Error()))
 			os.Exit(1)
 		}
-		return fmt.Errorf("%s failed: %w", os.Args[0]+" "+cmd, err)
+		return fmt.Errorf("%s failed: %w", CmdName()+" "+cmd, err)
 	}
 	// if the user sets level to error (via -q), we don't show the success message
 	if opts.PrintSuccess && grog.UserLevel <= slog.LevelWarn {
@@ -77,12 +79,18 @@ func RunCmd[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) error {
 	return fmt.Errorf("command %q not found", cmd)
 }
 
+// CmdName returns the name of the command currently being run.
+func CmdName() string {
+	base := filepath.Base(os.Args[0])
+	return strings.TrimSuffix(base, filepath.Ext(base))
+}
+
 // cmdString is a simple helper function that returns a string
-// with [Options.AppName] and the given command name string combined
+// with [CmdName] and the given command name string combined
 // to form a string representing the complete command being run.
 func cmdString(opts *Options, cmd string) string {
 	if cmd == "" {
-		return os.Args[0]
+		return CmdName()
 	}
-	return os.Args[0] + " " + cmd
+	return CmdName() + " " + cmd
 }
