@@ -173,6 +173,8 @@ func (mv *MapViewInline) ConfigMap() bool {
 		if wb.Prop("configured") == nil {
 			vv.ConfigWidget(w)
 			kv.ConfigWidget(kw)
+			vvb.AsWidgetBase().OnInput(mv.HandleEvent)
+			kvb.AsWidgetBase().OnInput(mv.HandleEvent)
 		} else {
 			wb.SetProp("configured", true)
 			kwb.SetProp("configured", true)

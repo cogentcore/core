@@ -228,6 +228,8 @@ func (mv *MapView) ConfigMapGrid() {
 		w := sg.Child(i*ncol + 1).(gi.Widget)
 		kv.ConfigWidget(keyw)
 		vv.ConfigWidget(w)
+		vvb.AsWidgetBase().OnInput(mv.HandleEvent)
+		kvb.AsWidgetBase().OnInput(mv.HandleEvent)
 		if ifaceType {
 			typw := sg.Child(i*ncol + 2).(*gi.Chooser)
 			typw.SetTypes(valtypes)

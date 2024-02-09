@@ -171,6 +171,7 @@ func (sv *SliceViewInline) ConfigSlice() bool {
 			vv.SetTags(sv.SliceValue.AllTags())
 		}
 		vv.ConfigWidget(w)
+		vvb.AsWidgetBase().OnInput(sv.HandleEvent)
 		if sv.IsReadOnly() {
 			w.AsWidget().SetReadOnly(true)
 		}

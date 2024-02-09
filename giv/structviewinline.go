@@ -136,6 +136,7 @@ func (sv *StructViewInline) ConfigStruct() bool {
 		if wb.Prop("configured") == nil {
 			wb.SetProp("configured", true)
 			vv.ConfigWidget(w)
+			vvb.AsWidgetBase().OnInput(sv.HandleEvent)
 		} else {
 			vvb.Widget = w
 			vv.UpdateWidget()

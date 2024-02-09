@@ -427,6 +427,7 @@ func (tv *TableView) ConfigRows() {
 				vvb.OnChange(func(e events.Event) {
 					tv.SetChanged()
 				})
+				vvb.AsWidgetBase().OnInput(tv.HandleEvent)
 			}
 			if i == 0 && tv.SliceSize > 0 {
 				tv.ColMaxWidths[fli] = 0

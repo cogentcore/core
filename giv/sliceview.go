@@ -716,6 +716,7 @@ func (sv *SliceViewBase) ConfigRows() {
 			vvb.OnChange(func(e events.Event) {
 				sv.SendChange()
 			})
+			vvb.AsWidgetBase().OnInput(sv.HandleEvent)
 		}
 		if i == 0 {
 			sv.MaxWidth = 0
