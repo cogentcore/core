@@ -54,8 +54,7 @@ func home(ts *gi.Tabs) {
 		s.Text.Align = styles.Center
 	})
 
-	sv := gi.NewSVG(tab)
-	grr.Log(sv.ReadBytes(icon))
+	grr.Log(gi.NewSVG(tab).ReadBytes(icon))
 
 	gi.NewLabel(tab).SetType(gi.LabelDisplayLarge).SetText("The Cogent Core Demo")
 
