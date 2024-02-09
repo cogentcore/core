@@ -26,7 +26,7 @@ import (
 // size in [units.Dp] units (1/160th of an inch). See [giv.ConfigImageToolbar]
 // for a toolbar with I/O buttons.
 type Image struct {
-	WidgetBase
+	Box
 
 	// file name of image loaded -- set by OpenImage
 	Filename Filename `set:"-"`
@@ -139,6 +139,7 @@ func (im *Image) DrawIntoScene() {
 
 func (im *Image) Render() {
 	if im.PushBounds() {
+		im.RenderBox()
 		im.DrawIntoScene()
 		im.RenderChildren()
 		im.PopBounds()
