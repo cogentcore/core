@@ -312,10 +312,19 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 			}
 		}
 		if sc.Is(ScRenderBBoxes) {
+			pselw := sc.SelectedWidget
 			if len(em.Hovers) > 0 {
 				sc.SelectedWidget = em.Hovers[len(em.Hovers)-1]
 			} else {
 				sc.SelectedWidget = nil
+			}
+			if sc.SelectedWidget != pselw {
+				if pselw != nil {
+					pselw.AsWidget().SetNeedsRender(true)
+				}
+				if sc.SelectedWidget != nil {
+					sc.SelectedWidget.AsWidget().SetNeedsRender(true)
+				}
 			}
 		}
 		em.Hovers = em.UpdateHovers(hovs, em.Hovers, e, events.MouseEnter, events.MouseLeave)
