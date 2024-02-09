@@ -91,9 +91,23 @@ func TestRenderFrameAlignmentCenter(t *testing.T) {
 // For https://github.com/cogentcore/core/issues/615
 func TestRenderNestedScroll(t *testing.T) {
 	b := NewBody()
-	outer := NewFrame(b).Style(func(s *styles.Style) {
-		s.Max.Set(units.Dp(30))
+	b.Style(func(s *styles.Style) {
+		s.Max.Set(units.Dp(100))
 	})
-	NewLabel(outer).SetText(testStrings[len(testStrings)-1])
+	f0 := NewFrame(b).Style(func(s *styles.Style) {
+		s.Background = colors.C(colors.Orange)
+		s.Overflow.Set(styles.OverflowAuto)
+		s.Padding.Set(units.Dp(10))
+	})
+	f1 := NewFrame(f0).Style(func(s *styles.Style) {
+		s.Background = colors.C(colors.Blue)
+		s.Overflow.Set(styles.OverflowAuto)
+		s.Padding.Set(units.Dp(10))
+		s.Min.Set(units.Dp(200))
+	})
+	NewFrame(f1).Style(func(s *styles.Style) {
+		s.Background = colors.C(colors.Green)
+		s.Min.Set(units.Dp(400))
+	})
 	b.AssertRender(t, filepath.Join("render", "nested-scroll"))
 }
