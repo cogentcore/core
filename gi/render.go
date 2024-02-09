@@ -578,7 +578,8 @@ func (wb *WidgetBase) PopBounds() {
 	}
 	pc := &wb.Scene.PaintContext
 
-	if wb.Scene.Is(ScRenderBBoxes) {
+	isSelw := wb.Scene.SelectedWidget == wb.This()
+	if wb.Scene.Is(ScRenderBBoxes) || isSelw {
 		pos := mat32.V2FromPoint(wb.Geom.TotalBBox.Min)
 		sz := mat32.V2FromPoint(wb.Geom.TotalBBox.Size())
 		// node: we won't necc. get a push prior to next update, so saving these.
@@ -589,7 +590,7 @@ func (wb *WidgetBase) PopBounds() {
 		pc.StrokeStyle.Width.Dot(1)
 		pc.StrokeStyle.Color = colors.C(hct.New(wb.Scene.RenderBBoxHue, 100, 50))
 		pc.FillStyle.Color = nil
-		if wb.Scene.SelectedWidget == wb.This() {
+		if isSelw {
 			fc := pc.StrokeStyle.Color
 			pc.FillStyle.Color = fc
 			pc.FillStyle.Opacity = 0.2

@@ -264,8 +264,13 @@ func (is *Inspector) ConfigSplits() {
 			if sc == nil {
 				return
 			}
-			if w, _ := gi.AsWidget(sn); w != nil {
+			if w, wb := gi.AsWidget(sn); w != nil {
+				pselw := sc.SelectedWidget
 				sc.SelectedWidget = w
+				wb.SetNeedsRender(true)
+				if pselw != nil {
+					pselw.AsWidget().SetNeedsRender(true)
+				}
 			}
 		})
 		renderRebuild := func() {
