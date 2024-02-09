@@ -56,7 +56,7 @@ func home(ts *gi.Tabs) {
 	})
 
 	sv := gi.NewSVG(tab)
-	sv.SetReadOnly(true)
+	// sv.SetReadOnly(true)
 	grr.Log(sv.ReadBytes(icon))
 	sv.Style(func(s *styles.Style) {
 		s.Grow.Set(0, 0)

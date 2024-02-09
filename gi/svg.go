@@ -6,6 +6,7 @@ package gi
 
 import (
 	"bytes"
+	"image"
 	"io"
 	"io/fs"
 
@@ -22,7 +23,7 @@ import (
 // SVGs do not render a background or border independent of their SVG object.
 // See [giv.ConfigSVGToolbar] for a toolbar with panning, selecting, and I/O buttons.
 type SVG struct {
-	WidgetBase
+	Box
 
 	// SVG is the SVG object associated with the element.
 	SVG *svg.SVG `set:"-"`
@@ -38,7 +39,7 @@ func (sv *SVG) OnInit() {
 func (sv *SVG) SetStyles() {
 	sv.Style(func(s *styles.Style) {
 		ro := sv.IsReadOnly()
-		s.SetAbilities(!ro, abilities.Slideable, abilities.Clickable, abilities.LongHoverable, abilities.Scrollable)
+		s.SetAbilities(!ro, abilities.Slideable, abilities.Clickable, abilities.Scrollable)
 		s.Grow.Set(1, 1)
 		s.Min.Set(units.Dp(sv.SVG.Root.ViewBox.Size.X), units.Dp(sv.SVG.Root.ViewBox.Size.Y))
 	})
@@ -123,7 +124,13 @@ func (sv *SVG) DrawIntoScene() {
 	if sv.SVG == nil {
 		return
 	}
+	// need to make the image again to prevent it from
+	// rendering over itself
+	sv.SVG.Pixels = image.NewRGBA(sv.SVG.Pixels.Rect)
+	sv.SVG.RenderState.Init(sv.SVG.Pixels.Rect.Dx(), sv.SVG.Pixels.Rect.Dy(), sv.SVG.Pixels)
+
 	sv.SVG.Render()
+
 	r := sv.Geom.ContentBBox
 	sp := sv.Geom.ScrollOffset()
 	draw.Draw(sv.Scene.Pixels, r, sv.SVG.Pixels, sp, draw.Over)
@@ -131,6 +138,7 @@ func (sv *SVG) DrawIntoScene() {
 
 func (sv *SVG) Render() {
 	if sv.PushBounds() {
+		sv.RenderBox()
 		sv.DrawIntoScene()
 		sv.RenderChildren()
 		sv.PopBounds()
