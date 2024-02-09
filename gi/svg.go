@@ -20,8 +20,8 @@ import (
 
 // SVG is a Widget that renders an [svg.SVG] object.
 // If it is not [states.ReadOnly], the user can pan and zoom the display.
-// SVGs do not render a background or border independent of their SVG object.
-// See [giv.ConfigSVGToolbar] for a toolbar with panning, selecting, and I/O buttons.
+// By default, it is [states.ReadOnly]. See [giv.ConfigSVGToolbar] for a
+// toolbar with panning, selecting, and I/O buttons.
 type SVG struct {
 	Box
 
@@ -37,11 +37,11 @@ func (sv *SVG) OnInit() {
 }
 
 func (sv *SVG) SetStyles() {
+	sv.SetReadOnly(true)
 	sv.Style(func(s *styles.Style) {
 		ro := sv.IsReadOnly()
 		s.SetAbilities(!ro, abilities.Slideable, abilities.Clickable, abilities.Scrollable)
-		s.Grow.Set(1, 1)
-		s.Min.Set(units.Dp(sv.SVG.Root.ViewBox.Size.X), units.Dp(sv.SVG.Root.ViewBox.Size.Y))
+		s.Min.Set(units.Dp(256))
 	})
 	sv.StyleFinal(func(s *styles.Style) {
 		sv.SVG.Root.ViewBox.PreserveAspectRatio.SetFromStyle(s)

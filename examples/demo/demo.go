@@ -22,7 +22,6 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/units"
 )
 
 //go:embed .core/icon.svg
@@ -56,12 +55,7 @@ func home(ts *gi.Tabs) {
 	})
 
 	sv := gi.NewSVG(tab)
-	// sv.SetReadOnly(true)
 	grr.Log(sv.ReadBytes(icon))
-	sv.Style(func(s *styles.Style) {
-		s.Grow.Set(0, 0)
-		s.Min.Set(units.Dp(256))
-	})
 
 	gi.NewLabel(tab).SetType(gi.LabelDisplayLarge).SetText("The Cogent Core Demo")
 
