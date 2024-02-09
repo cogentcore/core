@@ -254,8 +254,18 @@ func (is *Inspector) ConfigSplits() {
 		tv := NewTreeView(tvfr, "tv")
 		sv := NewStructView(split, "sv")
 		tv.OnSelect(func(e events.Event) {
-			if len(tv.SelectedNodes) > 0 {
-				sv.SetStruct(tv.SelectedNodes[0].AsTreeView().SyncNode)
+			if len(tv.SelectedNodes) == 0 {
+				return
+			}
+			sn := tv.SelectedNodes[0].AsTreeView().SyncNode
+			sv.SetStruct(sn)
+
+			sc := gi.AsScene(is.KiRoot)
+			if sc == nil {
+				return
+			}
+			if w, _ := gi.AsWidget(sn); w != nil {
+				sc.SelectedWidget = w
 			}
 		})
 		renderRebuild := func() {
