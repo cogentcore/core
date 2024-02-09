@@ -162,34 +162,26 @@ func main() {
 	b := gi.NewBody("Cogent Core Views Demo")
 
 	b.AddAppBar(func(tb *gi.Toolbar) {
-		gi.NewButton(tb, "slice-test").SetText("SliceDialog").
-			SetTooltip("open a SliceViewDialog slice view with a lot of elments, for performance testing").
+		gi.NewButton(tb).SetText("Slice dialog").
 			OnClick(func(e events.Event) {
 				sl := make([]float32, 2880)
-				d := gi.NewBody().AddTitle("SliceView Test").AddText("It should open quickly.")
+				d := gi.NewBody().AddTitle("Slice view test")
 				giv.NewSliceView(d).SetSlice(&sl)
 				d.NewFullDialog(tb).Run()
 			})
-		gi.NewButton(tb, "table-test").SetText("TableDialog").
-			SetTooltip("open a TableViewDialog view").
+		gi.NewButton(tb).SetText("Table dialog").
 			OnClick(func(e events.Event) {
-				d := gi.NewBody().AddTitle("TableView Test").AddText("how does it resize.")
+				d := gi.NewBody().AddTitle("Table view test")
 				giv.NewTableView(d).SetSlice(&tsttable)
 				d.NewFullDialog(tb).Run()
 			})
 	})
 
-	// split := gi.NewSplits(b, "split")
-	// split.Dim = mat32.X
-	// split.SetSplits(.3, .2, .2, .3)
-	// split.SetSplits(.5, .5)
-
 	ts := gi.NewTabs(b)
-	tst := ts.NewTab("StructView")
-	tmv := ts.NewTab("MapView")
-	tsl := ts.NewTab("SliceView")
-	ttv := ts.NewTab("TableView")
-	_, _, _, _ = tst, tmv, tsl, ttv
+	tst := ts.NewTab("Struct view")
+	tmv := ts.NewTab("Map view")
+	tsl := ts.NewTab("Slice view")
+	ttv := ts.NewTab("Table view")
 
 	strv := giv.NewStructView(tst, "strv")
 	strv.SetStruct(&stru)
@@ -198,11 +190,9 @@ func main() {
 	mv.SetMap(&tstmap)
 
 	sv := giv.NewSliceView(tsl, "sv")
-	// sv.SetState(true, states.ReadOnly)
 	sv.SetSlice(&tstslice)
 
 	tv := giv.NewTableView(ttv, "tv")
-	// tv.SetState(true, states.ReadOnly)
 	tv.SetSlice(&tsttable)
 
 	b.RunMainWindow()
