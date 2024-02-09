@@ -498,6 +498,15 @@ func (vv *ValueBase) Val() reflect.Value {
 }
 
 func (vv *ValueBase) SetValue(val any) bool {
+	res := vv.SetValueNoEvent(val)
+	if vv.Widget != nil {
+		vv.SendChange()
+	}
+	return res
+}
+
+// SetValueNoEvent sets the value without sending an event.
+func (vv *ValueBase) SetValueNoEvent(val any) bool {
 	if vv.IsReadOnly() {
 		return false
 	}
@@ -514,7 +523,6 @@ func (vv *ValueBase) SetValue(val any) bool {
 			err = laser.SetRobust(laser.PtrValue(vv.Value).Interface(), val)
 		}
 		if updtr, ok := vv.Owner.(gi.Updater); ok {
-			// fmt.Printf("updating: %v\n", updtr)
 			updtr.Update()
 		}
 	} else {
@@ -523,10 +531,6 @@ func (vv *ValueBase) SetValue(val any) bool {
 	}
 	if wasSet {
 		vv.SaveTmp()
-	}
-	// fmt.Printf("value view: %T sending for setting val %v\n", vv.This(), val)
-	if vv.Widget != nil {
-		vv.SendChange()
 	}
 	if err != nil {
 		// todo: snackbar for error?
@@ -852,7 +856,7 @@ func (vv *ValueBase) ConfigWidget(w gi.Widget) {
 
 	tf.Config()
 	tf.OnChange(func(e events.Event) {
-		if vv.SetValue(tf.Text()) {
+		if vv.SetValueNoEvent(tf.Text()) {
 			vv.UpdateWidget() // always update after setting value..
 		}
 	})
