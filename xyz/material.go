@@ -57,7 +57,7 @@ type Material struct { //gti:add -setters
 	Texture TexName `set:"-"`
 
 	// texture tiling parameters -- repeat and offset
-	Tiling Tiling `view:"inline" viewif:"Texture!=''"`
+	Tiling Tiling `view:"inline"`
 
 	// prop: cull-back = cull the back-facing surfaces
 	CullBack bool
@@ -78,6 +78,14 @@ func (mt *Material) Defaults() {
 	mt.Bright = 1
 	mt.Tiling.Defaults()
 	mt.CullBack = true
+}
+
+func (mt *Material) ShowShow(field string) bool {
+	switch field {
+	case "Tiling":
+		return mt.Texture != ""
+	}
+	return true
 }
 
 // Disconnect resets pointers etc

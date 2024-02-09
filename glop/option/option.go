@@ -9,7 +9,7 @@ package option
 // represents Value. Otherwise, it represents a null/unset/invalid value.
 type Option[T any] struct {
 	Valid bool `label:"Set"`
-	Value T    `viewif:"Valid"`
+	Value T
 }
 
 // Set sets the value to the given value.
@@ -32,4 +32,12 @@ func (o *Option[T]) Or(or T) T {
 		return o.Value
 	}
 	return or
+}
+
+func (o *Option[T]) ShouldShow(field string) bool {
+	switch field {
+	case "Value":
+		return o.Valid
+	}
+	return true
 }

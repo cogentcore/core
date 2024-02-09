@@ -38,8 +38,9 @@ type StructViewInline struct {
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string
 
-	// if true, some fields have viewif conditional view tags -- update after..
-	HasViewIfs bool `json:"-" xml:"-" edit:"-"`
+	// IsShouldShower is whether the struct implements [gi.ShouldShower], which results
+	// in additional updating being done at certain points.
+	IsShouldShower bool `set:"-" json:"-" xml:"-" edit:"-"`
 }
 
 func (sv *StructViewInline) OnInit() {
@@ -83,7 +84,7 @@ func (sv *StructViewInline) ConfigStruct() bool {
 			return true
 		}
 		if ss, ok := sv.Struct.(gi.ShouldShower); ok {
-			sv.HasViewIfs = true
+			sv.IsShouldShower = true
 			if !ss.ShouldShow(field.Name) {
 				return true
 			}
@@ -165,7 +166,7 @@ func (sv *StructViewInline) UpdateFields() {
 }
 
 func (sv *StructViewInline) UpdateFieldAction() {
-	if sv.HasViewIfs {
+	if sv.IsShouldShower {
 		sv.Update()
 		sv.SetNeedsLayout(true)
 	}
