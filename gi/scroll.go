@@ -74,6 +74,7 @@ func (ly *Layout) ConfigScroll(d mat32.Dims) {
 		s.Margin.Zero()
 		s.MaxBorder.Width.Zero()
 		s.Border.Width.Zero()
+		s.FillMargin = false
 	})
 	sb.StyleFinal(func(s *styles.Style) {
 		od := d.Other()
