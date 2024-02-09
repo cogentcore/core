@@ -78,7 +78,7 @@ func (ed *Editor) CharStartPos(pos lex.Pos) mat32.Vec2 {
 			return spos
 		}
 	} else {
-		spos.Y += ed.Offs[pos.Ln] + ed.FontDescent
+		spos.Y += ed.Offs[pos.Ln]
 	}
 	if pos.Ln >= len(ed.Renders) {
 		return spos
@@ -122,7 +122,7 @@ func (ed *Editor) CharEndPos(pos lex.Pos) mat32.Vec2 {
 		spos.X += ed.LineNoOff
 		return spos
 	}
-	spos.Y += ed.Offs[pos.Ln] + ed.FontDescent
+	spos.Y += ed.Offs[pos.Ln]
 	spos.X += ed.LineNoOff
 	r := ed.Renders[pos.Ln]
 	if len(r.Spans) > 0 {
@@ -464,10 +464,10 @@ func (ed *Editor) RenderLineNo(ln int, defFill bool) {
 		fst.Color = hct.ContrastColor(actClr, hct.ContrastAA)
 	}
 	ed.LineNoRender.SetString(lnstr, fst, &sty.UnContext, &sty.Text, true, 0, 0)
-	pos := mat32.Vec2{}
-	lst := ed.CharStartPos(lex.Pos{Ln: ln}).Y // note: charstart pos includes descent
-	pos.Y = lst + ed.FontAscent - ed.FontDescent
-	pos.X = float32(bb.Min.X) // + spc.Pos().X
+	pos := mat32.Vec2{
+		X: float32(bb.Min.X), // + spc.Pos().X
+		Y: ed.CharEndPos(lex.Pos{Ln: ln}).Y - ed.FontDescent,
+	}
 
 	ed.LineNoRender.Render(pc, pos)
 	// todo: need an SvgRender interface that just takes an svg file or object
