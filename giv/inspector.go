@@ -56,14 +56,6 @@ func (is *Inspector) SetStyles() {
 				s.Grow.Set(1, 0)
 				s.Align.Self = styles.Center
 			})
-		case "splits/sv", "splits/tvfr/tv":
-			w.AsWidget().OnChange(func(e events.Event) {
-				sc := gi.AsScene(is.KiRoot)
-				if sc == nil {
-					return
-				}
-				sc.RenderCtx().SetFlag(true, gi.RenderRebuild) // trigger full rebuild
-			})
 		}
 	})
 }
@@ -265,6 +257,19 @@ func (is *Inspector) ConfigSplits() {
 			if len(tv.SelectedNodes) > 0 {
 				sv.SetStruct(tv.SelectedNodes[0].AsTreeView().SyncNode)
 			}
+		})
+		renderRebuild := func() {
+			sc := gi.AsScene(is.KiRoot)
+			if sc == nil {
+				return
+			}
+			sc.RenderCtx().SetFlag(true, gi.RenderRebuild) // trigger full rebuild
+		}
+		tv.OnChange(func(e events.Event) {
+			renderRebuild()
+		})
+		sv.OnChange(func(e events.Event) {
+			renderRebuild()
 		})
 		split.SetSplits(.3, .7)
 	}
