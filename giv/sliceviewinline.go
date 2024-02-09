@@ -165,12 +165,12 @@ func (sv *SliceViewInline) ConfigSlice() bool {
 	}
 	for i, vv := range sv.Values {
 		vvb := vv.AsValueBase()
+		vvb.OnChange(func(e events.Event) { sv.SetChanged() })
 		w := sv.Child(i).(gi.Widget)
 		if sv.SliceValue != nil {
 			vv.SetTags(sv.SliceValue.AllTags())
 		}
 		vv.ConfigWidget(w)
-		vvb.OnChange(func(e events.Event) { sv.SetChanged() })
 		if sv.IsReadOnly() {
 			w.AsWidget().SetReadOnly(true)
 		}

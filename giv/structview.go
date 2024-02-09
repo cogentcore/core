@@ -310,7 +310,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 			vv.UpdateWidget()
 		}
 		if !sv.IsReadOnly() && !readOnlyTag {
-			vvb.AsWidgetBase().OnFinal(events.Change, func(e events.Event) {
+			vvb.OnChange(func(e events.Event) {
 				sv.UpdateFieldAction()
 				// note: updating vv here is redundant -- relevant field will have already updated
 				sv.Changed = true

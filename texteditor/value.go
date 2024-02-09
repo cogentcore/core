@@ -5,6 +5,8 @@
 package texteditor
 
 import (
+	"fmt"
+
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/giv"
@@ -43,7 +45,9 @@ func (vv *Value) ConfigWidget(w gi.Widget) {
 	tb := NewBuf()
 	grr.Log(tb.Stat())
 	tb.OnChange(func(e events.Event) {
-		vv.SetValueNoEvent(string(tb.Txt))
+		// fmt.Println(tb.Txt)
+		vv.SetValue(string(tb.Txt))
+		fmt.Println(laser.OnePtrUnderlyingValue(vv.Value).Interface())
 	})
 
 	te := w.(*Editor)

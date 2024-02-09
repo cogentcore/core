@@ -292,6 +292,10 @@ type ValueBase struct {
 	// the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget
 	Widget gi.Widget `set:"-" edit:"-"`
 
+	// Listeners are event listener functions for processing events on this widget.
+	// type specific Listeners are added in OnInit when the widget is initialized.
+	Listeners events.Listeners `set:"-" view:"-"`
+
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 	TmpSave Value `set:"-" view:"-"`
 }
@@ -498,15 +502,6 @@ func (vv *ValueBase) Val() reflect.Value {
 }
 
 func (vv *ValueBase) SetValue(val any) bool {
-	res := vv.SetValueNoEvent(val)
-	if vv.Widget != nil {
-		vv.SendChange()
-	}
-	return res
-}
-
-// SetValueNoEvent sets the value without sending an event.
-func (vv *ValueBase) SetValueNoEvent(val any) bool {
 	if vv.IsReadOnly() {
 		return false
 	}
@@ -523,6 +518,7 @@ func (vv *ValueBase) SetValueNoEvent(val any) bool {
 			err = laser.SetRobust(laser.PtrValue(vv.Value).Interface(), val)
 		}
 		if updtr, ok := vv.Owner.(gi.Updater); ok {
+			// fmt.Printf("updating: %v\n", updtr)
 			updtr.Update()
 		}
 	} else {
@@ -532,6 +528,8 @@ func (vv *ValueBase) SetValueNoEvent(val any) bool {
 	if wasSet {
 		vv.SaveTmp()
 	}
+	// fmt.Printf("value view: %T sending for setting val %v\n", vv.This(), val)
+	vv.SendChange()
 	if err != nil {
 		// todo: snackbar for error?
 		slog.Error("giv.SetValue error", "type", vv.Value.Type(), "err", err)
@@ -583,11 +581,6 @@ func (vv *ValueBase) SetValueMap(val any) (bool, error) {
 	return wasSet, err
 }
 
-// On adds an event listener function for the given event type
-func (vv *ValueBase) On(etype events.Types, fun func(e events.Event)) {
-	vv.Widget.On(etype, fun)
-}
-
 // OnChange registers given listener function for Change events on Value.
 // This is the primary notification event for all Value elements.
 func (vv *ValueBase) OnChange(fun func(e events.Event)) {
@@ -599,6 +592,11 @@ func (vv *ValueBase) OnChange(fun func(e events.Event)) {
 // triggers before changes are saved.
 func (vv *ValueBase) OnInput(fun func(e events.Event)) {
 	vv.On(events.Input, fun)
+}
+
+// On adds an event listener function for the given event type
+func (vv *ValueBase) On(etype events.Types, fun func(e events.Event)) {
+	vv.Listeners.Add(etype, fun)
 }
 
 // SendChange sends events.Change event to all listeners registered on this view.
@@ -629,11 +627,11 @@ func (vv *ValueBase) Send(typ events.Types, orig ...events.Event) {
 // It also checks if the State has changed and calls ApplyStyle if so.
 // If more significant Config level changes are needed due to an event,
 // the event handler must do this itself.
-func (vv *ValueBase) HandleEvent(e events.Event) {
+func (vv *ValueBase) HandleEvent(ev events.Event) {
 	if gi.DebugSettings.EventTrace {
-		fmt.Println("Event to Value:", vv.String(), e.String())
+		fmt.Println("Event to Value:", vv.String(), ev.String())
 	}
-	vv.Widget.HandleEvent(e)
+	vv.Listeners.Call(ev)
 }
 
 func (vv *ValueBase) SaveTmp() {
@@ -856,7 +854,7 @@ func (vv *ValueBase) ConfigWidget(w gi.Widget) {
 
 	tf.Config()
 	tf.OnChange(func(e events.Event) {
-		if vv.SetValueNoEvent(tf.Text()) {
+		if vv.SetValue(tf.Text()) {
 			vv.UpdateWidget() // always update after setting value..
 		}
 	})

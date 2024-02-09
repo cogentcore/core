@@ -161,6 +161,11 @@ func (mv *MapViewInline) ConfigMap() bool {
 		kv := mv.Keys[i]
 		vvb := vv.AsValueBase()
 		kvb := kv.AsValueBase()
+		vvb.OnChange(func(e events.Event) { mv.SendChange() })
+		kvb.OnChange(func(e events.Event) {
+			mv.SendChange()
+			mv.Update()
+		})
 		// note: values are always new, but widgets persist!
 		w, wb := gi.AsWidget(mv.Child((i * 2) + 1))
 		kw, kwb := gi.AsWidget(mv.Child(i * 2))
@@ -176,11 +181,6 @@ func (mv *MapViewInline) ConfigMap() bool {
 			vv.UpdateWidget()
 			kv.UpdateWidget()
 		}
-		vvb.OnChange(func(e events.Event) { mv.SendChange() })
-		kvb.OnChange(func(e events.Event) {
-			mv.SendChange()
-			mv.Update()
-		})
 		if mv.IsReadOnly() {
 			wb.SetReadOnly(true)
 			kwb.SetReadOnly(true)

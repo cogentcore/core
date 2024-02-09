@@ -446,6 +446,9 @@ func (vv *StructInlineValue) ConfigWidget(w gi.Widget) {
 	sv.TmpSave = vv.TmpSave
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	sv.SetStruct(vv.Value.Interface())
+	sv.OnFinal(events.Change, func(e events.Event) {
+		vv.SendChange()
+	})
 	vv.UpdateWidget()
 }
 
@@ -584,6 +587,9 @@ func (vv *SliceInlineValue) ConfigWidget(w gi.Widget) {
 	sv.TmpSave = vv.TmpSave
 	// npv := vv.Value.Elem()
 	sv.SetSlice(vv.Value.Interface())
+	sv.OnFinal(events.Change, func(e events.Event) {
+		vv.SendChange()
+	})
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -677,13 +683,16 @@ func (vv *MapInlineValue) ConfigWidget(w gi.Widget) {
 	}
 	vv.Widget = w
 	vv.StdConfigWidget(w)
-	mv := vv.Widget.(*MapViewInline)
-	mv.Tooltip = vv.Doc()
-	mv.MapValView = vv
-	mv.ViewPath = vv.ViewPath
-	mv.TmpSave = vv.TmpSave
+	sv := vv.Widget.(*MapViewInline)
+	sv.Tooltip = vv.Doc()
+	sv.MapValView = vv
+	sv.ViewPath = vv.ViewPath
+	sv.TmpSave = vv.TmpSave
 	// npv := vv.Value.Elem()
-	mv.SetMap(vv.Value.Interface())
+	sv.SetMap(vv.Value.Interface())
+	sv.OnFinal(events.Change, func(e events.Event) {
+		vv.SendChange()
+	})
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -786,10 +795,11 @@ func (vv *BoolValue) ConfigWidget(w gi.Widget) {
 	}
 	vv.Widget = w
 	vv.StdConfigWidget(w)
-	sw := vv.Widget.(*gi.Switch)
-	sw.Tooltip = vv.Doc()
-	sw.OnChange(func(e events.Event) {
-		vv.SetValueNoEvent(sw.IsChecked())
+	cb := vv.Widget.(*gi.Switch)
+	cb.Tooltip = vv.Doc()
+	cb.Config()
+	cb.OnFinal(events.Change, func(e events.Event) {
+		vv.SetValue(cb.IsChecked())
 	})
 	vv.UpdateWidget()
 }
@@ -828,22 +838,22 @@ func (vv *IntValue) ConfigWidget(w gi.Widget) {
 	}
 	vv.Widget = w
 	vv.StdConfigWidget(w)
-	sp := vv.Widget.(*gi.Spinner)
-	sp.Tooltip = vv.Doc()
-	sp.Step = 1.0
-	sp.PageStep = 10.0
+	sb := vv.Widget.(*gi.Spinner)
+	sb.Tooltip = vv.Doc()
+	sb.Step = 1.0
+	sb.PageStep = 10.0
 	// STYTODO: figure out what to do about this
 	// sb.Parts.AddChildStyler("textfield", 0, gi.StylerParent(vv), func(tf *gi.WidgetBase) {
 	// 	s.Min.X.SetCh(5)
 	// })
 	vk := vv.Value.Kind()
 	if vk >= reflect.Uint && vk <= reflect.Uint64 {
-		sp.SetMin(0)
+		sb.SetMin(0)
 	}
 	if mintag, ok := vv.Tag("min"); ok {
 		minv, err := laser.ToFloat32(mintag)
 		if err == nil {
-			sp.SetMin(minv)
+			sb.SetMin(minv)
 		} else {
 			slog.Error("Int Min Value:", "error:", err)
 		}
@@ -851,7 +861,7 @@ func (vv *IntValue) ConfigWidget(w gi.Widget) {
 	if maxtag, ok := vv.Tag("max"); ok {
 		maxv, err := laser.ToFloat32(maxtag)
 		if err == nil {
-			sp.SetMax(maxv)
+			sb.SetMax(maxv)
 		} else {
 			slog.Error("Int Max Value:", "error:", err)
 		}
@@ -859,16 +869,17 @@ func (vv *IntValue) ConfigWidget(w gi.Widget) {
 	if steptag, ok := vv.Tag("step"); ok {
 		step, err := laser.ToFloat32(steptag)
 		if err == nil {
-			sp.Step = step
+			sb.Step = step
 		} else {
 			slog.Error("Int Step Value:", "error:", err)
 		}
 	}
 	if fmttag, ok := vv.Tag("format"); ok {
-		sp.Format = fmttag
+		sb.Format = fmttag
 	}
-	sp.OnChange(func(e events.Event) {
-		vv.SetValueNoEvent(sp.Value)
+	sb.Config()
+	sb.OnFinal(events.Change, func(e events.Event) {
+		vv.SetValue(sb.Value)
 	})
 	vv.UpdateWidget()
 }
@@ -907,14 +918,14 @@ func (vv *FloatValue) ConfigWidget(w gi.Widget) {
 	}
 	vv.Widget = w
 	vv.StdConfigWidget(w)
-	sp := vv.Widget.(*gi.Spinner)
-	sp.Tooltip = vv.Doc()
-	sp.PageStep = 10.0
+	sb := vv.Widget.(*gi.Spinner)
+	sb.Tooltip = vv.Doc()
+	sb.PageStep = 10.0
 	if mintag, ok := vv.Tag("min"); ok {
 		minv, err := laser.ToFloat32(mintag)
 		if err == nil {
-			sp.HasMin = true
-			sp.Min = minv
+			sb.HasMin = true
+			sb.Min = minv
 		} else {
 			slog.Error("Invalid float min value", "value", mintag, "err", err)
 		}
@@ -922,27 +933,27 @@ func (vv *FloatValue) ConfigWidget(w gi.Widget) {
 	if maxtag, ok := vv.Tag("max"); ok {
 		maxv, err := laser.ToFloat32(maxtag)
 		if err == nil {
-			sp.HasMax = true
-			sp.Max = maxv
+			sb.HasMax = true
+			sb.Max = maxv
 		} else {
 			slog.Error("Invalid float max value", "value", maxtag, "err", err)
 		}
 	}
-	sp.Step = .1 // smaller default
+	sb.Step = .1 // smaller default
 	if steptag, ok := vv.Tag("step"); ok {
 		step, err := laser.ToFloat32(steptag)
 		if err == nil {
-			sp.Step = step
+			sb.Step = step
 		} else {
 			slog.Error("Invalid float step value", "value", steptag, "err", err)
 		}
 	}
 	if fmttag, ok := vv.Tag("format"); ok {
-		sp.Format = fmttag
+		sb.Format = fmttag
 	}
-	sp.Config()
-	sp.OnChange(func(e events.Event) {
-		vv.SetValueNoEvent(sp.Value)
+	sb.Config()
+	sb.OnFinal(events.Change, func(e events.Event) {
+		vv.SetValue(sb.Value)
 	})
 	vv.UpdateWidget()
 }
@@ -1008,8 +1019,9 @@ func (vv *SliderValue) ConfigWidget(w gi.Widget) {
 			slog.Error("Float Step Value:", "error:", err)
 		}
 	}
-	sl.OnChange(func(e events.Event) {
-		vv.SetValueNoEvent(sl.Value)
+	sl.Config()
+	sl.OnFinal(events.Change, func(e events.Event) {
+		vv.SetValue(sl.Value)
 	})
 	vv.UpdateWidget()
 }
@@ -1071,8 +1083,8 @@ func (vv *EnumValue) ConfigWidget(w gi.Widget) {
 	ev := vv.EnumValue()
 	ch.SetEnum(ev)
 	ch.Config()
-	ch.OnChange(func(e events.Event) {
-		vv.SetValueNoEvent(ch.CurrentItem.Value)
+	ch.OnFinal(events.Change, func(e events.Event) {
+		vv.SetValue(ch.CurrentItem.Value)
 	})
 	vv.UpdateWidget()
 }
@@ -1184,9 +1196,9 @@ func (vv *TypeValue) ConfigWidget(w gi.Widget) {
 	tl := gti.AllEmbeddersOf(typEmbeds)
 	cb.SetTypes(tl)
 	cb.Config()
-	cb.OnChange(func(e events.Event) {
+	cb.OnFinal(events.Change, func(e events.Event) {
 		tval := cb.CurrentItem.Value.(*gti.Type)
-		vv.SetValueNoEvent(tval)
+		vv.SetValue(tval)
 	})
 	vv.UpdateWidget()
 }
@@ -1229,9 +1241,10 @@ func (vv *ByteSliceValue) ConfigWidget(w gi.Widget) {
 		s.Min.X.Ch(16)
 	})
 	vv.StdConfigWidget(w)
+	tf.Config()
 
-	tf.OnChange(func(e events.Event) {
-		vv.SetValueNoEvent(tf.Text())
+	tf.OnFinal(events.Change, func(e events.Event) {
+		vv.SetValue(tf.Text())
 	})
 	vv.UpdateWidget()
 }
@@ -1273,9 +1286,10 @@ func (vv *RuneSliceValue) ConfigWidget(w gi.Widget) {
 		s.Min.X.Ch(16)
 	})
 	vv.StdConfigWidget(w)
+	tf.Config()
 
-	tf.OnChange(func(e events.Event) {
-		vv.SetValueNoEvent(tf.Text())
+	tf.OnFinal(events.Change, func(e events.Event) {
+		vv.SetValue(tf.Text())
 	})
 	vv.UpdateWidget()
 }
