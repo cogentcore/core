@@ -446,9 +446,6 @@ func (vv *StructInlineValue) ConfigWidget(w gi.Widget) {
 	sv.TmpSave = vv.TmpSave
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	sv.SetStruct(vv.Value.Interface())
-	sv.OnFinal(events.Change, func(e events.Event) {
-		vv.SendChange()
-	})
 	vv.UpdateWidget()
 }
 
@@ -587,9 +584,6 @@ func (vv *SliceInlineValue) ConfigWidget(w gi.Widget) {
 	sv.TmpSave = vv.TmpSave
 	// npv := vv.Value.Elem()
 	sv.SetSlice(vv.Value.Interface())
-	sv.OnFinal(events.Change, func(e events.Event) {
-		vv.SendChange()
-	})
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -683,16 +677,13 @@ func (vv *MapInlineValue) ConfigWidget(w gi.Widget) {
 	}
 	vv.Widget = w
 	vv.StdConfigWidget(w)
-	sv := vv.Widget.(*MapViewInline)
-	sv.Tooltip = vv.Doc()
-	sv.MapValView = vv
-	sv.ViewPath = vv.ViewPath
-	sv.TmpSave = vv.TmpSave
+	mv := vv.Widget.(*MapViewInline)
+	mv.Tooltip = vv.Doc()
+	mv.MapValView = vv
+	mv.ViewPath = vv.ViewPath
+	mv.TmpSave = vv.TmpSave
 	// npv := vv.Value.Elem()
-	sv.SetMap(vv.Value.Interface())
-	sv.OnFinal(events.Change, func(e events.Event) {
-		vv.SendChange()
-	})
+	mv.SetMap(vv.Value.Interface())
 }
 
 //////////////////////////////////////////////////////////////////////////////

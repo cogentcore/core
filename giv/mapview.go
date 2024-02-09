@@ -219,15 +219,15 @@ func (mv *MapView) ConfigMapGrid() {
 		kv := mv.Keys[i]
 		vvb := vv.AsValueBase()
 		kvb := kv.AsValueBase()
+		keyw := sg.Child(i * ncol).(gi.Widget)
+		w := sg.Child(i*ncol + 1).(gi.Widget)
+		kv.ConfigWidget(keyw)
+		vv.ConfigWidget(w)
 		vvb.OnChange(func(e events.Event) { mv.SendChange() })
 		kvb.OnChange(func(e events.Event) {
 			mv.SendChange()
 			mv.Update()
 		})
-		keyw := sg.Child(i * ncol).(gi.Widget)
-		w := sg.Child(i*ncol + 1).(gi.Widget)
-		kv.ConfigWidget(keyw)
-		vv.ConfigWidget(w)
 		if ifaceType {
 			typw := sg.Child(i*ncol + 2).(*gi.Chooser)
 			typw.SetTypes(valtypes)
