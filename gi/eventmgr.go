@@ -306,14 +306,19 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 		hovs := make([]Widget, 0, len(em.MouseInBBox))
 		for _, w := range em.MouseInBBox { // requires forward iter through em.MouseInBBox
 			wb := w.AsWidget()
-			if wb.Styles.Abilities.IsHoverable() {
+			// in RenderBBoxes, everyone is effectively hoverable
+			if wb.Styles.Abilities.IsHoverable() || sc.Is(ScRenderBBoxes) {
 				hovs = append(hovs, w)
 			}
 		}
-		em.Hovers = em.UpdateHovers(hovs, em.Hovers, e, events.MouseEnter, events.MouseLeave)
-		if sc.SelectedWidgetChan != nil && len(em.Hovers) != 0 {
-			sc.SelectedWidget = em.Hovers[0]
+		if sc.Is(ScRenderBBoxes) {
+			if len(em.Hovers) > 0 {
+				sc.SelectedWidget = em.Hovers[len(em.Hovers)-1]
+			} else {
+				sc.SelectedWidget = nil
+			}
 		}
+		em.Hovers = em.UpdateHovers(hovs, em.Hovers, e, events.MouseEnter, events.MouseLeave)
 		em.HandleLongHover(e)
 	case events.MouseDrag:
 		if em.Drag != nil {
