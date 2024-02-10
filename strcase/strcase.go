@@ -8,7 +8,9 @@
 // Package strcase provides functions for manipulating the case of strings
 // (CamelCase, kebab-case, snake_case, Sentence case, etc). It is based on
 // https://github.com/ettle/strcase, which is Copyright (c) 2020 Liyan David
-// Chang under the MIT License.
+// Chang under the MIT License. Its principle difference from other strcase
+// packages is that it preserves acronyms in input text for CamelCase and
+// lowerCamelCase.
 package strcase
 
 // ToSnake returns words in snake_case (lower case words with underscores).
@@ -34,14 +36,19 @@ func ToKEBAB(s string) string {
 	return To(s, UpperCase, '-')
 }
 
-// ToPascal returns words in PascalCase (capitalized words concatenated together).
-// Also known as UpperPascalCase.
-func ToPascal(s string) string {
+// ToCamel returns words in CamelCase (capitalized words concatenated together).
+// Also known as UpperCamelCase.
+func ToCamel(s string) string {
 	return To(s, TitleCase, 0)
 }
 
-// ToCamel returns words in camelCase (capitalized words concatenated together, with first word lower case).
-// Also known as lowerCamelCase or mixedCase.
-func ToCamel(s string) string {
+// ToLowerCamel returns words in lowerCamelCase (capitalized words concatenated together,
+// with first word lower case). Also known as camelCase or mixedCase.
+func ToLowerCamel(s string) string {
 	return To(s, CamelCase, 0)
+}
+
+// ToTitle returns words in Title Case (capitalized words with spaces).
+func ToTitle(s string) string {
+	return To(s, TitleCase, ' ')
 }
