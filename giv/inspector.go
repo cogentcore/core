@@ -6,6 +6,7 @@ package giv
 
 import (
 	"fmt"
+	"reflect"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
@@ -15,6 +16,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/ki"
+	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 )
@@ -213,7 +215,7 @@ func (is *Inspector) ConfigWidget() {
 
 // SetTitle sets the title to correspond to the given node.
 func (is *Inspector) SetTitle(k ki.Ki) {
-	is.TitleWidget().SetText(fmt.Sprintf("Inspector of %s (%T)", k.Name(), k))
+	is.TitleWidget().SetText(fmt.Sprintf("Inspector of %s (%s)", k.Name(), laser.ShortTypeName(reflect.TypeOf(k))))
 }
 
 // TitleWidget returns the title label widget
