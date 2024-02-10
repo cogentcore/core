@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/states"
+	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/texteditor/textbuf"
 )
 
@@ -490,12 +491,12 @@ func (ed *Editor) PasteRect() {
 
 // ReCaseSelection changes the case of the currently-selected text.
 // Returns the new text -- empty if nothing selected.
-func (ed *Editor) ReCaseSelection(c textbuf.Cases) string {
+func (ed *Editor) ReCaseSelection(c strcase.Cases) string {
 	if !ed.HasSelection() {
 		return ""
 	}
 	sel := ed.Selection()
-	nstr := textbuf.ReCaseString(string(sel.ToBytes()), c)
+	nstr := strcase.To(string(sel.ToBytes()), c)
 	ed.Buf.ReplaceText(sel.Reg.Start, sel.Reg.End, sel.Reg.Start, nstr, EditSignal, ReplaceNoMatchCase)
 	return nstr
 }

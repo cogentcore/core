@@ -10,25 +10,160 @@ import (
 	"cogentcore.org/core/enums"
 )
 
-var _WordCaseValues = []WordCase{0, 1, 2, 3, 4, 5}
+var _CasesValues = []Cases{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
 
-// WordCaseN is the highest valid value
-// for type WordCase, plus one.
-const WordCaseN WordCase = 6
+// CasesN is the highest valid value
+// for type Cases, plus one.
+const CasesN Cases = 10
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
-func _WordCaseNoOp() {
+func _CasesNoOp() {
 	var x [1]struct{}
-	_ = x[Original-(0)]
-	_ = x[LowerCase-(1)]
-	_ = x[UpperCase-(2)]
-	_ = x[TitleCase-(3)]
-	_ = x[CamelCase-(4)]
-	_ = x[SentenceCase-(5)]
+	_ = x[LowerCase-(0)]
+	_ = x[UpperCase-(1)]
+	_ = x[SnakeCase-(2)]
+	_ = x[SNAKECase-(3)]
+	_ = x[KebabCase-(4)]
+	_ = x[KEBABCase-(5)]
+	_ = x[CamelCase-(6)]
+	_ = x[LowerCamelCase-(7)]
+	_ = x[TitleCase-(8)]
+	_ = x[SentenceCase-(9)]
 }
 
-var _WordCaseNameToValueMap = map[string]WordCase{
+var _CasesNameToValueMap = map[string]Cases{
+	`LowerCase`:      0,
+	`UpperCase`:      1,
+	`SnakeCase`:      2,
+	`SNAKECase`:      3,
+	`KebabCase`:      4,
+	`KEBABCase`:      5,
+	`CamelCase`:      6,
+	`LowerCamelCase`: 7,
+	`TitleCase`:      8,
+	`SentenceCase`:   9,
+}
+
+var _CasesDescMap = map[Cases]string{
+	0: `LowerCase is all lower case`,
+	1: `UpperCase is all UPPER CASE`,
+	2: `SnakeCase is lower_case_words_with_underscores`,
+	3: `SNAKECase is UPPER_CASE_WORDS_WITH_UNDERSCORES`,
+	4: `KebabCase is lower-case-words-with-dashes`,
+	5: `KEBABCase is UPPER-CASE-WORDS-WITH-DASHES`,
+	6: `CamelCase is CapitalizedWordsConcatenatedTogether`,
+	7: `LowerCamelCase is capitalizedWordsConcatenatedTogether, with the first word lower case`,
+	8: `TitleCase is Captitalized Words With Spaces`,
+	9: `SentenceCase is Lower case words with spaces, with the first word capitalized`,
+}
+
+var _CasesMap = map[Cases]string{
+	0: `LowerCase`,
+	1: `UpperCase`,
+	2: `SnakeCase`,
+	3: `SNAKECase`,
+	4: `KebabCase`,
+	5: `KEBABCase`,
+	6: `CamelCase`,
+	7: `LowerCamelCase`,
+	8: `TitleCase`,
+	9: `SentenceCase`,
+}
+
+// String returns the string representation
+// of this Cases value.
+func (i Cases) String() string {
+	if str, ok := _CasesMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
+}
+
+// SetString sets the Cases value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *Cases) SetString(s string) error {
+	if val, ok := _CasesNameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+	return errors.New(s + " is not a valid value for type Cases")
+}
+
+// Int64 returns the Cases value as an int64.
+func (i Cases) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the Cases value from an int64.
+func (i *Cases) SetInt64(in int64) {
+	*i = Cases(in)
+}
+
+// Desc returns the description of the Cases value.
+func (i Cases) Desc() string {
+	if str, ok := _CasesDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// CasesValues returns all possible values
+// for the type Cases.
+func CasesValues() []Cases {
+	return _CasesValues
+}
+
+// Values returns all possible values
+// for the type Cases.
+func (i Cases) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_CasesValues))
+	for i, d := range _CasesValues {
+		res[i] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type Cases.
+func (i Cases) IsValid() bool {
+	_, ok := _CasesMap[i]
+	return ok
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i Cases) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *Cases) UnmarshalText(text []byte) error {
+	if err := i.SetString(string(text)); err != nil {
+		log.Println("Cases.UnmarshalText:", err)
+	}
+	return nil
+}
+
+var _WordCasesValues = []WordCases{0, 1, 2, 3, 4, 5}
+
+// WordCasesN is the highest valid value
+// for type WordCases, plus one.
+const WordCasesN WordCases = 6
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _WordCasesNoOp() {
+	var x [1]struct{}
+	_ = x[WordOriginal-(0)]
+	_ = x[WordLowerCase-(1)]
+	_ = x[WordUpperCase-(2)]
+	_ = x[WordTitleCase-(3)]
+	_ = x[WordCamelCase-(4)]
+	_ = x[WordSentenceCase-(5)]
+}
+
+var _WordCasesNameToValueMap = map[string]WordCases{
 	`Original`:     0,
 	`LowerCase`:    1,
 	`UpperCase`:    2,
@@ -37,16 +172,16 @@ var _WordCaseNameToValueMap = map[string]WordCase{
 	`SentenceCase`: 5,
 }
 
-var _WordCaseDescMap = map[WordCase]string{
-	0: `Original indicates to preserve the original input case.`,
-	1: `LowerCase indicates to make all letters lower case (example).`,
-	2: `UpperCase indicates to make all letters upper case (EXAMPLE).`,
-	3: `TitleCase indicates to make only the first letter upper case (Example).`,
-	4: `CamelCase indicates to make only the first letter upper case, except in the first word, in which all letters are lower case (exampleText).`,
-	5: `SentenceCase indicates to make only the first letter upper case, and only for the first word (all other words have fully lower case letters).`,
+var _WordCasesDescMap = map[WordCases]string{
+	0: `WordOriginal indicates to preserve the original input case.`,
+	1: `WordLowerCase indicates to make all letters lower case (example).`,
+	2: `WordUpperCase indicates to make all letters upper case (EXAMPLE).`,
+	3: `WordTitleCase indicates to make only the first letter upper case (Example).`,
+	4: `WordCamelCase indicates to make only the first letter upper case, except in the first word, in which all letters are lower case (exampleText).`,
+	5: `WordSentenceCase indicates to make only the first letter upper case, and only for the first word (all other words have fully lower case letters).`,
 }
 
-var _WordCaseMap = map[WordCase]string{
+var _WordCasesMap = map[WordCases]string{
 	0: `Original`,
 	1: `LowerCase`,
 	2: `UpperCase`,
@@ -56,75 +191,75 @@ var _WordCaseMap = map[WordCase]string{
 }
 
 // String returns the string representation
-// of this WordCase value.
-func (i WordCase) String() string {
-	if str, ok := _WordCaseMap[i]; ok {
+// of this WordCases value.
+func (i WordCases) String() string {
+	if str, ok := _WordCasesMap[i]; ok {
 		return str
 	}
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the WordCase value from its
+// SetString sets the WordCases value from its
 // string representation, and returns an
 // error if the string is invalid.
-func (i *WordCase) SetString(s string) error {
-	if val, ok := _WordCaseNameToValueMap[s]; ok {
+func (i *WordCases) SetString(s string) error {
+	if val, ok := _WordCasesNameToValueMap[s]; ok {
 		*i = val
 		return nil
 	}
-	return errors.New(s + " is not a valid value for type WordCase")
+	return errors.New(s + " is not a valid value for type WordCases")
 }
 
-// Int64 returns the WordCase value as an int64.
-func (i WordCase) Int64() int64 {
+// Int64 returns the WordCases value as an int64.
+func (i WordCases) Int64() int64 {
 	return int64(i)
 }
 
-// SetInt64 sets the WordCase value from an int64.
-func (i *WordCase) SetInt64(in int64) {
-	*i = WordCase(in)
+// SetInt64 sets the WordCases value from an int64.
+func (i *WordCases) SetInt64(in int64) {
+	*i = WordCases(in)
 }
 
-// Desc returns the description of the WordCase value.
-func (i WordCase) Desc() string {
-	if str, ok := _WordCaseDescMap[i]; ok {
+// Desc returns the description of the WordCases value.
+func (i WordCases) Desc() string {
+	if str, ok := _WordCasesDescMap[i]; ok {
 		return str
 	}
 	return i.String()
 }
 
-// WordCaseValues returns all possible values
-// for the type WordCase.
-func WordCaseValues() []WordCase {
-	return _WordCaseValues
+// WordCasesValues returns all possible values
+// for the type WordCases.
+func WordCasesValues() []WordCases {
+	return _WordCasesValues
 }
 
 // Values returns all possible values
-// for the type WordCase.
-func (i WordCase) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_WordCaseValues))
-	for i, d := range _WordCaseValues {
+// for the type WordCases.
+func (i WordCases) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_WordCasesValues))
+	for i, d := range _WordCasesValues {
 		res[i] = d
 	}
 	return res
 }
 
 // IsValid returns whether the value is a
-// valid option for type WordCase.
-func (i WordCase) IsValid() bool {
-	_, ok := _WordCaseMap[i]
+// valid option for type WordCases.
+func (i WordCases) IsValid() bool {
+	_, ok := _WordCasesMap[i]
 	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i WordCase) MarshalText() ([]byte, error) {
+func (i WordCases) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *WordCase) UnmarshalText(text []byte) error {
+func (i *WordCases) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println("WordCase.UnmarshalText:", err)
+		log.Println("WordCases.UnmarshalText:", err)
 	}
 	return nil
 }

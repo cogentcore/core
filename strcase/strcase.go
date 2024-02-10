@@ -16,45 +16,45 @@ package strcase
 
 // ToSnake returns words in snake_case (lower case words with underscores).
 func ToSnake(s string) string {
-	return To(s, LowerCase, '_')
+	return ToWordCase(s, WordLowerCase, '_')
 }
 
 // ToSNAKE returns words in SNAKE_CASE (upper case words with underscores).
 // Also known as SCREAMING_SNAKE_CASE or UPPER_CASE.
 func ToSNAKE(s string) string {
-	return To(s, UpperCase, '_')
+	return ToWordCase(s, WordUpperCase, '_')
 }
 
 // ToKebab returns words in kebab-case (lower case words with dashes).
 // Also known as dash-case.
 func ToKebab(s string) string {
-	return To(s, LowerCase, '-')
+	return ToWordCase(s, WordLowerCase, '-')
 }
 
 // ToKEBAB returns words in KEBAB-CASE (upper case words with dashes).
 // Also known as SCREAMING-KEBAB-CASE or SCREAMING-DASH-CASE.
 func ToKEBAB(s string) string {
-	return To(s, UpperCase, '-')
+	return ToWordCase(s, WordUpperCase, '-')
 }
 
 // ToCamel returns words in CamelCase (capitalized words concatenated together).
 // Also known as UpperCamelCase.
 func ToCamel(s string) string {
-	return To(s, TitleCase, 0)
+	return ToWordCase(s, WordTitleCase, 0)
 }
 
 // ToLowerCamel returns words in lowerCamelCase (capitalized words concatenated together,
 // with first word lower case). Also known as camelCase or mixedCase.
 func ToLowerCamel(s string) string {
-	return To(s, CamelCase, 0)
+	return ToWordCase(s, WordCamelCase, 0)
 }
 
 // ToTitle returns words in Title Case (capitalized words with spaces).
 func ToTitle(s string) string {
-	return To(s, TitleCase, ' ')
+	return ToWordCase(s, WordTitleCase, ' ')
 }
 
 // ToSentence returns words in Sentence case (lower case words with spaces, with the first word capitalized).
 func ToSentence(s string) string {
-	return To(s, SentenceCase, ' ')
+	return ToWordCase(s, WordSentenceCase, ' ')
 }

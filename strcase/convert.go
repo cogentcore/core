@@ -12,36 +12,36 @@ import (
 	"unicode"
 )
 
-// WordCase is an enumeration of the ways to format a word.
-type WordCase int32 //enums:enum
+// WordCases is an enumeration of the ways to format a word.
+type WordCases int32 //enums:enum -trim-prefix Word
 
 const (
-	// Original indicates to preserve the original input case.
-	Original WordCase = iota
+	// WordOriginal indicates to preserve the original input case.
+	WordOriginal WordCases = iota
 
-	// LowerCase indicates to make all letters lower case (example).
-	LowerCase
+	// WordLowerCase indicates to make all letters lower case (example).
+	WordLowerCase
 
-	// UpperCase indicates to make all letters upper case (EXAMPLE).
-	UpperCase
+	// WordUpperCase indicates to make all letters upper case (EXAMPLE).
+	WordUpperCase
 
-	// TitleCase indicates to make only the first letter upper case (Example).
-	TitleCase
+	// WordTitleCase indicates to make only the first letter upper case (Example).
+	WordTitleCase
 
-	// CamelCase indicates to make only the first letter upper case, except
+	// WordCamelCase indicates to make only the first letter upper case, except
 	// in the first word, in which all letters are lower case (exampleText).
-	CamelCase
+	WordCamelCase
 
-	// SentenceCase indicates to make only the first letter upper case, and
+	// WordSentenceCase indicates to make only the first letter upper case, and
 	// only for the first word (all other words have fully lower case letters).
-	SentenceCase
+	WordSentenceCase
 )
 
-// To converts the given input string to the given case with the given delimiter.
+// ToWordCase converts the given input string to the given word case with the given delimiter.
 // Pass 0 for delimeter to use no delimiter.
 //
 //nolint:gocyclo
-func To(input string, wordCase WordCase, delimiter rune) string {
+func ToWordCase(input string, wordCase WordCases, delimiter rune) string {
 	input = strings.TrimSpace(input)
 	runes := []rune(input)
 	if len(runes) == 0 {
@@ -69,7 +69,7 @@ func To(input string, wordCase WordCase, delimiter rune) string {
 		// Check to see if the entire word is an initialism for preserving initialism.
 		// Note we don't support preserving initialisms if they are followed
 		// by a number and we're not spliting before numbers.
-		if wordCase == TitleCase || wordCase == SentenceCase || (wordCase == CamelCase && !firstWord) {
+		if wordCase == WordTitleCase || wordCase == WordSentenceCase || (wordCase == WordCamelCase && !firstWord) {
 			allCaps := true
 			for i := start; i < end; i++ {
 				allCaps = allCaps && (isUpper(runes[i]) || !unicode.IsLetter(runes[i]))
@@ -89,23 +89,23 @@ func To(input string, wordCase WordCase, delimiter rune) string {
 			}
 			r := runes[i]
 			switch wordCase {
-			case UpperCase:
+			case WordUpperCase:
 				b.WriteRune(toUpper(r))
-			case LowerCase:
+			case WordLowerCase:
 				b.WriteRune(toLower(r))
-			case TitleCase:
+			case WordTitleCase:
 				if i == start {
 					b.WriteRune(toUpper(r))
 				} else {
 					b.WriteRune(toLower(r))
 				}
-			case CamelCase:
+			case WordCamelCase:
 				if !firstWord && i == start {
 					b.WriteRune(toUpper(r))
 				} else {
 					b.WriteRune(toLower(r))
 				}
-			case SentenceCase:
+			case WordSentenceCase:
 				if firstWord && i == start {
 					b.WriteRune(toUpper(r))
 				} else {

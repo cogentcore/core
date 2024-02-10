@@ -15,25 +15,25 @@ import (
 )
 
 func TestOrignal(t *testing.T) {
-	assertEqual(t, "nativeOrgURL", To("NativeOrgURL", CamelCase, 0))
-	assertEqual(t, "nativeOrgUrl", To("NativeOrgUrl", CamelCase, 0))
+	assertEqual(t, "nativeOrgURL", ToWordCase("NativeOrgURL", WordCamelCase, 0))
+	assertEqual(t, "nativeOrgUrl", ToWordCase("NativeOrgUrl", WordCamelCase, 0))
 
-	assertEqual(t, "native-org-url", To("NativeOrgURL", LowerCase, '-'))
-	assertEqual(t, "json-string", To("JSONString", LowerCase, '-'))
+	assertEqual(t, "native-org-url", ToWordCase("NativeOrgURL", WordLowerCase, '-'))
+	assertEqual(t, "json-string", ToWordCase("JSONString", WordLowerCase, '-'))
 
-	assertEqual(t, "jsonString", To("JSONString", CamelCase, 0))
-	assertEqual(t, "JSONString", To("JSONString", TitleCase, 0))
-	assertEqual(t, "JsonString", To("JsonString", TitleCase, 0))
+	assertEqual(t, "jsonString", ToWordCase("JSONString", WordCamelCase, 0))
+	assertEqual(t, "JSONString", ToWordCase("JSONString", WordTitleCase, 0))
+	assertEqual(t, "JsonString", ToWordCase("JsonString", WordTitleCase, 0))
 
-	assertEqual(t, "nasa-rocket", To("NASARocket", LowerCase, '-'))
-	assertEqual(t, "nasa-Rocket", To("NASARocket", CamelCase, '-'))
-	assertEqual(t, "NASA-Rocket", To("NASARocket", TitleCase, '-'))
+	assertEqual(t, "nasa-rocket", ToWordCase("NASARocket", WordLowerCase, '-'))
+	assertEqual(t, "nasa-Rocket", ToWordCase("NASARocket", WordCamelCase, '-'))
+	assertEqual(t, "NASA-Rocket", ToWordCase("NASARocket", WordTitleCase, '-'))
 
-	assertEqual(t, "Ps4", To("ps4", TitleCase, '-'))
-	assertEqual(t, "PS4", To("PS4", TitleCase, '-'))
+	assertEqual(t, "Ps4", ToWordCase("ps4", WordTitleCase, '-'))
+	assertEqual(t, "PS4", ToWordCase("PS4", WordTitleCase, '-'))
 
 	// Not great if you're coming from an all-caps case (you should do strings.ToLower first)
-	assertEqual(t, "SCREAMINGCASE", To("SCREAMING_CASE", TitleCase, 0))
+	assertEqual(t, "SCREAMINGCASE", ToWordCase("SCREAMING_CASE", WordTitleCase, 0))
 }
 
 func TestAll(t *testing.T) {
