@@ -17,7 +17,6 @@ import (
 	"unicode/utf8"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -857,7 +856,7 @@ func (tr *Text) LayoutStdLR(txtSty *styles.Text, fontSty *styles.FontRender, ctx
 	si := 0
 	for si < len(tr.Spans) {
 		sr := &(tr.Spans[si])
-		if err := sr.IsValid(); grr.Log(err) != nil {
+		if err := sr.IsValid(); err != nil {
 			si++
 			continue
 		}
