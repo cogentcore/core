@@ -104,7 +104,7 @@ func (bd *Body) AddSnackbarButton(text string, onClick ...func(e events.Event)) 
 }
 
 // AddSnackbarIcon adds a snackbar icon button with the given icon and optional
-// OnClick event handler.Only the first of the given event handlers is used, and the
+// OnClick event handler. Only the first of the given event handlers is used, and the
 // snackbar is automatically closed when the button is clicked regardless of whether
 // there is an event handler passed.
 func (bd *Body) AddSnackbarIcon(icon icons.Icon, onClick ...func(e events.Event)) *Body {

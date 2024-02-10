@@ -19,6 +19,7 @@ import (
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/mat32"
 	"golang.org/x/image/draw"
@@ -299,49 +300,32 @@ func (w *RenderWin) LogicalDPI() float32 {
 	return w.GoosiWin.LogicalDPI()
 }
 
-// ZoomDPI -- positive steps increase logical DPI, negative steps decrease it,
-// in increments of 6 dots to keep fonts rendering clearly.
-func (w *RenderWin) ZoomDPI(steps int) {
-	rctx := w.RenderCtx()
-	rctx.Mu.RLock()
+// StepZoom calls [SetZoom] with the current zoom plus 10 times the given number of steps.
+func (w *RenderWin) StepZoom(steps float32) {
+	w.SetZoom(AppearanceSettings.Zoom + 10*steps)
+}
 
-	// w.InactivateAllSprites()
-	sc := w.GoosiWin.Screen()
-	if sc == nil {
-		sc = goosi.TheApp.Screen(0)
-	}
-	// ldpi = pdpi * zoom * ldpi
-	cldpinet := sc.LogicalDPI
-	cldpi := cldpinet / goosi.ZoomFactor
-	nldpinet := cldpinet + float32(6*steps)
-	if nldpinet < 6 {
-		nldpinet = 6
-	}
-	// oldzoom := goosi.ZoomFactor
-	goosi.ZoomFactor = nldpinet / cldpi
-	AppearanceSettings.ApplyDPI()
+// SetZoom sets [AppearanceSettingsData.Zoom] to the given value and then triggers
+// necessary updating and makes a snackbar.
+func (w *RenderWin) SetZoom(zoom float32) {
+	AppearanceSettings.Zoom = zoom
+	AppearanceSettings.Apply()
+	UpdateAll()
+	grr.Log(SaveSettings(AppearanceSettings))
 
-	b := NewBody().AddSnackbarText(fmt.Sprintf("%.f%%", goosi.ZoomFactor*100))
+	b := NewBody().AddSnackbarText(fmt.Sprintf("%.f%%", AppearanceSettings.Zoom))
 	NewStretch(b)
 	b.AddSnackbarIcon(icons.Remove, func(e events.Event) {
-		w.ZoomDPI(-1)
+		w.StepZoom(-1)
 	})
 	b.AddSnackbarIcon(icons.Add, func(e events.Event) {
-		w.ZoomDPI(1)
+		w.StepZoom(1)
 	})
 	b.AddSnackbarButton("Reset", func(e events.Event) {
-
+		w.SetZoom(100)
 	})
 	b.DeleteChildByName("stretch", true)
 	b.NewSnackbar(w.MainScene()).Run()
-
-	// actually resize window in proportion:
-	// zr := goosi.ZoomFactor / oldzoom
-	// curSz := rctx.Size
-	// nsz := mat32.NewVec2FmPoint(curSz).MulScalar(zr).ToPointCeil()
-	rctx.Mu.RUnlock()
-	UpdateAll()
-	// w.GoosiWin.SetSize(nsz)
 }
 
 // SetWinSize requests that the window be resized to the given size

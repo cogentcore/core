@@ -1081,10 +1081,10 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 		fmt.Printf("Saved RenderWin Image to: %s\n", fnm)
 		e.SetHandled()
 	case keyfun.ZoomIn:
-		win.ZoomDPI(1)
+		win.StepZoom(1)
 		e.SetHandled()
 	case keyfun.ZoomOut:
-		win.ZoomDPI(-1)
+		win.StepZoom(-1)
 		e.SetHandled()
 	case keyfun.Refresh:
 		e.SetHandled()
