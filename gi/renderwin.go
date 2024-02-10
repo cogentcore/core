@@ -19,6 +19,7 @@ import (
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/mat32"
 	"golang.org/x/image/draw"
 )
@@ -319,7 +320,20 @@ func (w *RenderWin) ZoomDPI(steps int) {
 	// oldzoom := goosi.ZoomFactor
 	goosi.ZoomFactor = nldpinet / cldpi
 	AppearanceSettings.ApplyDPI()
-	MessageSnackbar(w.MainScene(), fmt.Sprintf("Zoom level: %.f%%", goosi.ZoomFactor*100))
+
+	b := NewBody().AddSnackbarText(fmt.Sprintf("%.f%%", goosi.ZoomFactor*100))
+	NewStretch(b)
+	b.AddSnackbarIcon(icons.Remove, func(e events.Event) {
+		w.ZoomDPI(-1)
+	})
+	b.AddSnackbarIcon(icons.Add, func(e events.Event) {
+		w.ZoomDPI(1)
+	})
+	b.AddSnackbarButton("Reset", func(e events.Event) {
+
+	})
+	b.DeleteChildByName("stretch", true)
+	b.NewSnackbar(w.MainScene()).Run()
 
 	// actually resize window in proportion:
 	// zr := goosi.ZoomFactor / oldzoom
