@@ -13,29 +13,31 @@ import (
 )
 
 // WordCase is an enumeration of the ways to format a word.
-type WordCase int
+type WordCase int32 //enums:enum
 
 const (
-	// Original - Preserve the original input strcase
+	// Original indicates to preserve the original input case.
 	Original WordCase = iota
-	// LowerCase - All letters lower cased (example)
+
+	// LowerCase indicates to make all letters lower case (example).
 	LowerCase
-	// UpperCase - All letters upper cased (EXAMPLE)
+
+	// UpperCase indicates to make all letters upper case (EXAMPLE).
 	UpperCase
-	// TitleCase - Only first letter upper cased (Example)
+
+	// TitleCase indicates to make only the first letter upper case (Example).
 	TitleCase
-	// CamelCase - TitleCase except lower case first word (exampleText)
-	// Notably, even if the first word is an initialism, it will be lower
-	// cased. This is important for code generators where capital letters
-	// mean exported functions. i.e. jsonString(), not JSONString()
+
+	// CamelCase indicates to make only the first letter upper case, except
+	// in the first word, in which all letters are lower case (exampleText).
 	CamelCase
 )
 
-// convert changes a input string to a certain case with a delimiter,
-// respecting arbitrary initialisms and skip characters
+// To converts the given input string to the given case with the given delimiter.
+// Pass 0 for delimeter to use no delimiter.
 //
 //nolint:gocyclo
-func convert(input string, delimiter rune, wordCase WordCase) string {
+func To(input string, wordCase WordCase, delimiter rune) string {
 	input = strings.TrimSpace(input)
 	runes := []rune(input)
 	if len(runes) == 0 {
