@@ -216,7 +216,6 @@ func (lb *Label) HandleEvents() {
 	})
 	lb.OnKeyChord(func(e events.Event) {
 		// TODO(kai): get label copying working
-		fmt.Println("kc", e)
 		if !lb.StateIs(states.Selected) {
 			return
 		}

@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"fmt"
 	"log"
-	"log/slog"
 	"strings"
 
 	"cogentcore.org/core/events"
@@ -428,7 +427,7 @@ func (tv *TreeView) MimeDataSync(md *mimedata.Mimes) {
 	if err == nil {
 		*md = append(*md, &mimedata.Data{Type: fi.DataJson, Data: buf.Bytes()})
 	} else {
-		slog.Error("giv.TreeView MimeData Write JSON error", "err", err)
+		gi.ErrorSnackbar(tv, err, "Error encoding node")
 	}
 }
 
@@ -445,7 +444,7 @@ func (tv *TreeView) SyncNodesFromMimeData(md mimedata.Mimes) (ki.Slice, []string
 			if err == nil {
 				sl = append(sl, nki)
 			} else {
-				slog.Error("giv.TreeView SyncNodesFromMimeData: JSON load error:", err)
+				gi.ErrorSnackbar(tv, err, "Error loading node")
 			}
 		} else if d.Type == fi.TextPlain { // paths
 			pl = append(pl, string(d.Data))

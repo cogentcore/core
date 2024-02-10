@@ -1378,7 +1378,7 @@ func (tv *TreeView) MimeData(md *mimedata.Mimes) {
 	if err == nil {
 		*md = append(*md, &mimedata.Data{Type: fi.DataJson, Data: buf.Bytes()})
 	} else {
-		slog.Error("giv.TreeView MimeData Write JSON error", "err", err)
+		gi.ErrorSnackbar(tv, err, "Error encoding node")
 	}
 }
 
@@ -1394,7 +1394,7 @@ func (tv *TreeView) NodesFromMimeData(md mimedata.Mimes) (ki.Slice, []string) {
 			if err == nil {
 				sl = append(sl, nki)
 			} else {
-				slog.Error("giv.TreeView NodesFromMimeData: JSON load error:", err)
+				gi.ErrorSnackbar(tv, err, "Error loading node")
 			}
 		} else if d.Type == fi.TextPlain { // paths
 			pl = append(pl, string(d.Data))
