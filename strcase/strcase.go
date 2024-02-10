@@ -5,13 +5,14 @@
 // Based on https://github.com/ettle/strcase
 // Copyright (c) 2020 Liyan David Chang under the MIT License
 
-// Package strcase provides functions for manipulating the case of strings
-// (CamelCase, kebab-case, snake_case, Sentence case, etc). It is based on
-// https://github.com/ettle/strcase, which is Copyright (c) 2020 Liyan David
-// Chang under the MIT License. Its principle difference from other strcase
-// packages is that it preserves acronyms in input text for CamelCase and
-// lowerCamelCase.
+// Package strcase provides functions for manipulating the case of strings (CamelCase, kebab-case,
+// snake_case, Sentence case, etc). It is based on https://github.com/ettle/strcase, which is Copyright
+// (c) 2020 Liyan David Chang under the MIT License. Its principle difference from other strcase packages
+// is that it preserves acronyms in input text for CamelCase. Therefore, you must call [strings.ToLower]
+// on any SCREAMING_INPUT_STRINGS before passing them to [ToCamel], [ToLowerCamel], [ToTitle], and [ToSentence].
 package strcase
+
+//go:generate core generate
 
 // ToSnake returns words in snake_case (lower case words with underscores).
 func ToSnake(s string) string {
@@ -51,4 +52,9 @@ func ToLowerCamel(s string) string {
 // ToTitle returns words in Title Case (capitalized words with spaces).
 func ToTitle(s string) string {
 	return To(s, TitleCase, ' ')
+}
+
+// ToSentence returns words in Sentence case (first word capitalized, with spaces).
+func ToSentence(s string) string {
+	return To(s, SentenceCase, ' ')
 }

@@ -31,6 +31,10 @@ const (
 	// CamelCase indicates to make only the first letter upper case, except
 	// in the first word, in which all letters are lower case (exampleText).
 	CamelCase
+
+	// SentenceCase indicates to make only the first letter upper case, and
+	// only for the first word (all other words have fully lower case letters).
+	SentenceCase
 )
 
 // To converts the given input string to the given case with the given delimiter.
@@ -65,7 +69,7 @@ func To(input string, wordCase WordCase, delimiter rune) string {
 		// Check to see if the entire word is an initialism for preserving initialism.
 		// Note we don't support preserving initialisms if they are followed
 		// by a number and we're not spliting before numbers.
-		if wordCase == TitleCase || (wordCase == CamelCase && !firstWord) {
+		if wordCase == TitleCase || wordCase == SentenceCase || (wordCase == CamelCase && !firstWord) {
 			allCaps := true
 			for i := start; i < end; i++ {
 				allCaps = allCaps && (isUpper(runes[i]) || !unicode.IsLetter(runes[i]))
@@ -97,6 +101,12 @@ func To(input string, wordCase WordCase, delimiter rune) string {
 				}
 			case CamelCase:
 				if !firstWord && i == start {
+					b.WriteRune(toUpper(r))
+				} else {
+					b.WriteRune(toLower(r))
+				}
+			case SentenceCase:
+				if firstWord && i == start {
 					b.WriteRune(toUpper(r))
 				} else {
 					b.WriteRune(toLower(r))
