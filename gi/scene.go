@@ -46,7 +46,7 @@ type Scene struct {
 	// attached to different sides of a Scene (e.g., TopAppBar at Top,
 	// NavBar at Bottom, etc).  Functions are called in forward order
 	// so first added are called first.
-	Bars styles.Sides[BarFuncs]
+	Bars styles.Sides[BarFuncs] `json:"-" xml:"-"`
 
 	// BarsInherit determines which of the Bars side functions are inherited
 	// from the context widget, for FullWindow Dialogs
@@ -56,7 +56,7 @@ type Scene struct {
 	// (e.g., TopAppBar) for elements contained within this Scene,
 	// that should be represented in any app-level toolbar constructed
 	// for this Scene.
-	AppBars ToolbarFuncs
+	AppBars ToolbarFuncs `json:"-" xml:"-"`
 
 	// Body provides the main contents of scenes that use control Bars
 	// to allow the main window contents to be specified separately
@@ -93,7 +93,7 @@ type Scene struct {
 
 	// the channel on which the selected widget through the inspect editor
 	// selection mode is transmitted to the inspect editor after the user is done selecting
-	SelectedWidgetChan chan Widget
+	SelectedWidgetChan chan Widget `json:"-" xml:"-"`
 
 	// LastRender captures key params from last render.
 	// If different then a new ApplyStyleScene is needed.

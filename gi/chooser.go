@@ -70,7 +70,7 @@ type Chooser struct {
 	// [Chooser.AddItemsFunc] to add a new items function. If at least
 	// one ItemsFunc is specified, the items of the chooser will be
 	// cleared before calling the functions.
-	ItemsFuncs []func() `copier:"-" set:"-"`
+	ItemsFuncs []func() `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// CurrentItem is the currently selected item.
 	CurrentItem ChooserItem `json:"-" xml:"-" set:"-"`
@@ -99,7 +99,7 @@ type ChooserItem struct { //gti:add
 
 	// Func, if non-nil, is a function to call whenever this
 	// item is selected as the current value of the chooser.
-	Func func()
+	Func func() `json:"-" xml:"-"`
 
 	// SeparatorBefore is whether to add a separator before
 	// this item in the chooser menu.

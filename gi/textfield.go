@@ -51,7 +51,7 @@ type TextField struct { //core:embedder
 	// Validator is a function used to validate the input
 	// of the text field. If it returns a non-nil error,
 	// then an error color, icon, and tooltip will be displayed.
-	Validator func() error
+	Validator func() error `json:"-" xml:"-"`
 
 	// LeadingIcon, if specified, indicates to add a button
 	// at the start of the text field with this icon.
@@ -60,7 +60,7 @@ type TextField struct { //core:embedder
 	// LeadingIconOnClick, if specified, is the function to call when
 	// the LeadingIcon is clicked. If this is nil, the leading icon
 	// will not be interactive.
-	LeadingIconOnClick func(e events.Event)
+	LeadingIconOnClick func(e events.Event) `json:"-" xml:"-"`
 
 	// TrailingIcon, if specified, indicates to add a button
 	// at the end of the text field with this icon.
@@ -69,7 +69,7 @@ type TextField struct { //core:embedder
 	// TrailingIconOnClick, if specified, is the function to call when
 	// the TrailingIcon is clicked. If this is nil, the trailing icon
 	// will not be interactive.
-	TrailingIconOnClick func(e events.Event)
+	TrailingIconOnClick func(e events.Event) `json:"-" xml:"-"`
 
 	// NoEcho is whether replace displayed characters with bullets to conceal text
 	// (for example, for a password input).

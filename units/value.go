@@ -33,7 +33,7 @@ type Value struct { //gti:add
 	// custom function that returns the dots of the value;
 	// if non-nil, it overrides all other fields;
 	// if nil, standard ToDots with the other fields is used
-	Custom func(uc *Context) float32 `view:"-"`
+	Custom func(uc *Context) float32 `view:"-" json:"-" xml:"-"`
 }
 
 // New creates a new value with the given unit type
