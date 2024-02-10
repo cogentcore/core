@@ -16,8 +16,10 @@ import (
 // filename, saving the image to that filename if it does not already exist,
 // and then closes the window. It does not return until all of those steps
 // are completed. If a function is passed for the final argument, it is called
-// after the scene is shown. See [Body.AssertScreenRender] for a version that
-// asserts the rendered image of the entire screen, not just this body.
+// after the scene is shown. A testdata directory and png file extension are
+// automatically added to the the filename, and forward slashes are automatically
+// replaced with backslashes on Windows. See [Body.AssertScreenRender] for a version
+// that asserts the rendered image of the entire screen, not just this body.
 func (b *Body) AssertRender(t images.TestingT, filename string, fun ...func()) {
 	b.RunAndShowNewWindow()
 	if len(fun) > 0 {
@@ -70,7 +72,8 @@ func (b *Body) WaitNoEvents() {
 // AssertPixels asserts that [Scene.Pixels] is equivalent
 // to the image stored at the given filename in the testdata directory,
 // with ".png" added to the filename if there is no extension
-// (eg: "button" becomes "testdata/button.png").
+// (eg: "button" becomes "testdata/button.png"). Forward slashes are
+// automatically replaced with backslashes on Windows.
 // If it is not, it fails the test with an error, but continues its
 // execution. If there is no image at the given filename in the testdata
 // directory, it creates the image.

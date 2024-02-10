@@ -59,7 +59,8 @@ func CompareColors(cc, ic color.RGBA, tol int) bool {
 // Assert asserts that the given image is equivalent
 // to the image stored at the given filename in the testdata directory,
 // with ".png" added to the filename if there is no extension
-// (eg: "button" becomes "testdata/button.png").
+// (eg: "button" becomes "testdata/button.png"). Forward slashes are
+// automatically replaced with backslashes on Windows.
 // If it is not, it fails the test with an error, but continues its
 // execution. If there is no image at the given filename in the testdata
 // directory, it creates the image.

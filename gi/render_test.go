@@ -23,7 +23,7 @@ func TestRenderOneSideBorder(t *testing.T) {
 		s.Border.Color.Bottom = colors.Scheme.Outline
 		s.Background = colors.C(colors.Scheme.SurfaceContainerHigh)
 	})
-	b.AssertRender(t, filepath.Join("render", "one-side-border"))
+	b.AssertRender(t, "render/one-side-border")
 }
 
 // For https://github.com/cogentcore/core/issues/660
