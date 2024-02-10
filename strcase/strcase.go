@@ -54,7 +54,7 @@ func ToTitle(s string) string {
 	return To(s, TitleCase, ' ')
 }
 
-// ToSentence returns words in Sentence case (first word capitalized, with spaces).
+// ToSentence returns words in Sentence case (lower case words with spaces, with the first word capitalized).
 func ToSentence(s string) string {
 	return To(s, SentenceCase, ' ')
 }

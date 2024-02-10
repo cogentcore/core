@@ -12,27 +12,39 @@ import (
 	"github.com/iancoleman/strcase"
 )
 
-// Cases are different cases -- Lower, Upper, Camel, etc
+// Cases are different string cases: Lower, Upper, Camel, etc
 type Cases int32 //enums:enum
 
 const (
+	// LowerCase is all lower case
 	LowerCase Cases = iota
+
+	// UpperCase is all UPPER CASE
 	UpperCase
 
-	// CamelCase is init-caps
+	// CamelCase is CapitalizedWordsConcatenatedTogether
 	CamelCase
 
-	// LowerCamelCase has first letter lower-case
+	// LowerCamelCase is capitalizedWordsConcatenatedTogether, with the first word lower case
 	LowerCamelCase
 
-	// SnakeCase is snake_case -- lower with underbars
+	// SnakeCase is lower_case_words_with_underscores
 	SnakeCase
 
-	// UpperSnakeCase is SNAKE_CASE -- upper with underbars
-	UpperSnakeCase
+	// SNAKECase is UPPER_CASE_WORDS_WITH_UNDERSCORES
+	SNAKECase
 
-	// KebabCase is kebab-case -- lower with -'s
+	// KebabCase is lower-case-words-with-dashes
 	KebabCase
+
+	// KEBABCase is UPPER-CASE-WORDS-WITH-DASHES
+	KEBABCase
+
+	// TitleCase is Captitalized Words With Spaces
+	TitleCase
+
+	// SentenceCase is Lower case words with spaces, with the first word capitalized
+	SentenceCase
 )
 
 // ReCaseString changes the case of the string according to the given case type.
@@ -48,7 +60,7 @@ func ReCaseString(str string, c Cases) string {
 		return strcase.ToLowerCamel(str)
 	case SnakeCase:
 		return strcase.ToSnake(str)
-	case UpperSnakeCase:
+	case SNAKECase:
 		return strcase.ToScreamingSnake(str)
 	case KebabCase:
 		return strcase.ToKebab(str)

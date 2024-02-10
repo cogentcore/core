@@ -25,7 +25,7 @@ func _CasesNoOp() {
 	_ = x[CamelCase-(2)]
 	_ = x[LowerCamelCase-(3)]
 	_ = x[SnakeCase-(4)]
-	_ = x[UpperSnakeCase-(5)]
+	_ = x[SNAKECase-(5)]
 	_ = x[KebabCase-(6)]
 }
 
