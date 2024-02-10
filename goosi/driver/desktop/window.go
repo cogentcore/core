@@ -286,6 +286,9 @@ func (w *Window) Minimize() {
 }
 
 func (w *Window) Close() {
+	if w == nil {
+		return
+	}
 	w.Window.Close()
 
 	w.Mu.Lock()
