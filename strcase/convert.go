@@ -93,6 +93,21 @@ func convertWithoutInitialisms(input string, delimiter rune, wordCase WordCase) 
 			next = runes[i+1]
 		}
 
+		// Check to see if the entire word is an initialism to preserve it.
+		// Note we don't support preserving initialisms if they are followed
+		// by a number and we're not spliting before numbers
+		if !firstWord || wordCase&wordCaseMask != CamelCase {
+			allCaps := true
+			for i := start; i < end; i++ {
+				allCaps = allCaps && (isUpper(runes[i]) || !unicode.IsLetter(runes[i]))
+			}
+			if allCaps {
+				b.WriteString(string(runes[start:end]))
+				firstWord = false
+				continue
+			}
+		}
+
 		switch defaultSplitFn(prev, curr, next) {
 		case SkipSplit:
 			if inWord && delimiter != 0 {
