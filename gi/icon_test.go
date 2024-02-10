@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"path/filepath"
 	"testing"
 
 	"cogentcore.org/core/icons"
@@ -14,5 +13,5 @@ import (
 func TestIconBasic(t *testing.T) {
 	b := NewBody()
 	NewIcon(b).SetIcon(icons.Close)
-	b.AssertRender(t, filepath.Join("icon", "basic"))
+	b.AssertRender(t, "icon/basic")
 }

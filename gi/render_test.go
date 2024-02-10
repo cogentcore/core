@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"path/filepath"
 	"testing"
 
 	"cogentcore.org/core/colors"
@@ -38,7 +37,7 @@ func TestRenderParentBorderRadius(t *testing.T) {
 		s.Background = colors.C(colors.Red)
 		s.Min.Set(units.Dp(80))
 	})
-	b.AssertRender(t, filepath.Join("render", "parent-border-radius"))
+	b.AssertRender(t, "render/parent-border-radius")
 }
 
 // For https://github.com/cogentcore/core/issues/810
@@ -49,7 +48,7 @@ func TestRenderButtonAlignment(t *testing.T) {
 		s.Border = styles.Border{}
 		s.MaxBorder = styles.Border{}
 	})
-	b.AssertRender(t, filepath.Join("render", "button-alignment"))
+	b.AssertRender(t, "render/button-alignment")
 }
 
 // For https://github.com/cogentcore/core/issues/810
@@ -65,7 +64,7 @@ func TestRenderFrameAlignment(t *testing.T) {
 		s.Background = colors.C(colors.Blue)
 		s.Grow.Set(1, 1)
 	})
-	b.AssertRender(t, filepath.Join("render", "frame-alignment"))
+	b.AssertRender(t, "render/frame-alignment")
 }
 
 // For https://github.com/cogentcore/core/issues/810
@@ -85,7 +84,7 @@ func TestRenderFrameAlignmentCenter(t *testing.T) {
 		s.Background = colors.C(colors.Blue)
 		s.Min.Set(units.Dp(15))
 	})
-	b.AssertRender(t, filepath.Join("render", "frame-alignment-center"))
+	b.AssertRender(t, "render/frame-alignment-center")
 }
 
 // For https://github.com/cogentcore/core/issues/615
@@ -116,5 +115,5 @@ func TestRenderNestedScroll(t *testing.T) {
 		s.Background = colors.C(colors.Purple)
 		s.Min.Set(units.Dp(200))
 	})
-	b.AssertRender(t, filepath.Join("render", "nested-scroll"))
+	b.AssertRender(t, "render/nested-scroll")
 }

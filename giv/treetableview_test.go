@@ -5,7 +5,6 @@
 package giv
 
 import (
-	"path/filepath"
 	"testing"
 
 	"cogentcore.org/core/gi"
@@ -14,5 +13,5 @@ import (
 func TestTreeTableView(t *testing.T) {
 	b := gi.NewBody()
 	NewTreeTableView(b)
-	b.AssertRender(t, filepath.Join("treetable", "basic"))
+	b.AssertRender(t, "treetable/basic")
 }

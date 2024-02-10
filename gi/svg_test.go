@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"path/filepath"
 	"testing"
 
 	"cogentcore.org/core/mat32"
@@ -19,7 +18,7 @@ func TestSVG(t *testing.T) {
 	sv := NewSVG(b)
 	sv.SVG.Root.ViewBox.Size.SetScalar(10)
 	svg.NewCircle(&sv.SVG.Root).SetPos(mat32.V2(5, 5)).SetRadius(5)
-	b.AssertRender(t, filepath.Join("svg", "basic-circle"))
+	b.AssertRender(t, "svg/basic-circle")
 }
 
 // For https://github.com/cogentcore/core/issues/729
@@ -32,5 +31,5 @@ func TestSVGZoom(t *testing.T) {
 	sv.SVG.Root.ViewBox.Size.SetScalar(1000)
 	sv.SVG.Scale = 100
 	svg.NewText(&sv.SVG.Root).SetText("Hello, world!").SetPos(mat32.V2(0, 10))
-	b.AssertRender(t, filepath.Join("svg", "zoom"))
+	b.AssertRender(t, "svg/zoom")
 }

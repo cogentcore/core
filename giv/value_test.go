@@ -6,7 +6,6 @@ package giv
 
 import (
 	"errors"
-	"path/filepath"
 	"strings"
 	"testing"
 
@@ -26,7 +25,7 @@ func (v *validator) Validate() error {
 func TestValidatorValid(t *testing.T) {
 	b := gi.NewBody()
 	v := NewValue(b, validator("my@string"))
-	b.AssertRender(t, filepath.Join("text", "validator_valid"), func() {
+	b.AssertRender(t, "text/validator-valid", func() {
 		v.AsWidgetBase().SendChange() // trigger validation
 	})
 }
@@ -34,7 +33,7 @@ func TestValidatorValid(t *testing.T) {
 func TestValidatorInvalid(t *testing.T) {
 	b := gi.NewBody()
 	v := NewValue(b, validator("my string"))
-	b.AssertRender(t, filepath.Join("text", "validator_invalid"), func() {
+	b.AssertRender(t, "text/validator-invalid", func() {
 		v.AsWidgetBase().SendChange() // trigger validation
 	})
 }
@@ -61,7 +60,7 @@ func (v *fieldValidator) ValidateField(field string) error {
 func TestFieldValidatorValid(t *testing.T) {
 	b := gi.NewBody()
 	v := NewStructView(b).SetStruct(&fieldValidator{Name: "Go Gopher", Email: "me@example.com"})
-	b.AssertRender(t, filepath.Join("text", "field_validator_valid"), func() {
+	b.AssertRender(t, "text/field-validator-valid", func() {
 		v.WidgetWalkPre(func(kwi gi.Widget, kwb *gi.WidgetBase) bool {
 			kwb.SendChange() // trigger validation
 			return ki.Continue
@@ -72,7 +71,7 @@ func TestFieldValidatorValid(t *testing.T) {
 func TestFieldValidatorInvalid(t *testing.T) {
 	b := gi.NewBody()
 	v := NewStructView(b).SetStruct(&fieldValidator{Name: "Go Gopher", Email: "me@example"})
-	b.AssertRender(t, filepath.Join("text", "field_validator_invalid"), func() {
+	b.AssertRender(t, "text/field-validator-invalid", func() {
 		v.WidgetWalkPre(func(kwi gi.Widget, kwb *gi.WidgetBase) bool {
 			kwb.SendChange() // trigger validation
 			return ki.Continue

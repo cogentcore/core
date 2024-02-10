@@ -53,7 +53,7 @@ func TestLayoutFramesAlignItems(t *testing.T) {
 					s.Align.Items = align
 				})
 				PlainFrames(b, mat32.V2(0, 0))
-				b.AssertRender(t, filepath.Join(tdir, tnm))
+				b.AssertRender(t, tdir+tnm)
 			}
 		}
 	}
@@ -70,7 +70,7 @@ func TestLayoutFramesAlignContent(t *testing.T) {
 			dir := dir
 			for _, align := range aligns {
 				align := align
-				tnm := fmt.Sprintf("wrap_%v_dir_%v_align_%v", wrap, dir, align)
+				tnm := fmt.Sprintf("wrap-%v-dir-%v-align-%v", wrap, dir, align)
 				b := NewBody()
 				b.Style(func(s *styles.Style) {
 					if dir == styles.Row {
@@ -84,7 +84,7 @@ func TestLayoutFramesAlignContent(t *testing.T) {
 					s.Align.Content = align
 				})
 				PlainFrames(b, mat32.V2(0, 0))
-				b.AssertRender(t, filepath.Join(tdir, tnm))
+				b.AssertRender(t, tdir+tnm)
 			}
 		}
 	}
@@ -119,7 +119,7 @@ func TestLayoutFramesJustifyContent(t *testing.T) {
 					s.Justify.Content = align
 				})
 				PlainFrames(b, mat32.V2(0, 0))
-				b.AssertRender(t, filepath.Join(tdir, tnm))
+				b.AssertRender(t, tdir+tnm)
 			}
 		}
 	}
@@ -140,7 +140,7 @@ func TestLayoutFramesJustifyItems(t *testing.T) {
 			s.Justify.Items = align
 		})
 		PlainFrames(b, mat32.V2(0, 0))
-		b.AssertRender(t, filepath.Join(tdir, tnm))
+		b.AssertRender(t, tdir+tnm)
 	}
 }
 
@@ -164,7 +164,7 @@ func TestLayoutFramesJustifySelf(t *testing.T) {
 		fr2.Style(func(s *styles.Style) {
 			s.Justify.Self = aligns[(ai+1)%len(aligns)]
 		})
-		b.AssertRender(t, filepath.Join(tdir, tnm))
+		b.AssertRender(t, tdir+tnm)
 	}
 }
 
@@ -188,7 +188,7 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 		fr2.Style(func(s *styles.Style) {
 			s.Align.Self = aligns[(ai+1)%len(aligns)]
 		})
-		b.AssertRender(t, filepath.Join(tdir, tnm))
+		b.AssertRender(t, tdir+tnm)
 	}
 }
 
@@ -471,5 +471,5 @@ func TestLayoutScrollLabel(t *testing.T) {
 		s.Overflow.Set(styles.OverflowAuto)
 	})
 	NewLabel(fr).SetText(LongText)
-	b.AssertRender(t, filepath.Join("layout", "scroll", "label"))
+	b.AssertRender(t, "layout/scroll/label")
 }

@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"path/filepath"
 	"testing"
 
 	"cogentcore.org/core/styles"
@@ -27,5 +26,5 @@ func TestSceneConfig(t *testing.T) {
 	}()
 	b := NewBody()
 	NewButton(b).SetText("Test")
-	b.AssertRender(t, filepath.Join("app", "scene-config"))
+	b.AssertRender(t, "app/scene-config")
 }

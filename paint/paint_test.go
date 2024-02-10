@@ -89,25 +89,25 @@ func TestPaintPath(t *testing.T) {
 			pc.FillStrokeClear()
 		})
 	}
-	test("line_to", func(pc *Context) {
+	test("line-to", func(pc *Context) {
 		pc.MoveTo(100, 200)
 		pc.LineTo(200, 100)
 	})
-	test("quadratic_to", func(pc *Context) {
+	test("quadratic-to", func(pc *Context) {
 		pc.MoveTo(100, 200)
 		pc.QuadraticTo(120, 140, 200, 100)
 	})
-	test("cubic_to", func(pc *Context) {
+	test("cubic-to", func(pc *Context) {
 		pc.MoveTo(100, 200)
 		pc.CubicTo(130, 110, 160, 180, 200, 100)
 	})
-	test("close_path", func(pc *Context) {
+	test("close-path", func(pc *Context) {
 		pc.MoveTo(100, 200)
 		pc.LineTo(200, 100)
 		pc.LineTo(250, 150)
 		pc.ClosePath()
 	})
-	test("clear_path", func(pc *Context) {
+	test("clear-path", func(pc *Context) {
 		pc.MoveTo(100, 200)
 		pc.MoveTo(200, 100)
 		pc.ClearPath()
@@ -120,30 +120,30 @@ func TestPaintFill(t *testing.T) {
 			f(pc)
 		})
 	}
-	test("fill_box_color", func(pc *Context) {
+	test("fill-box-color", func(pc *Context) {
 		pc.FillBoxColor(mat32.V2(10, 100), mat32.V2(200, 100), colors.Green)
 	})
-	test("fill_box_solid", func(pc *Context) {
+	test("fill-box-solid", func(pc *Context) {
 		pc.FillBox(mat32.V2(10, 100), mat32.V2(200, 100), colors.C(colors.Blue))
 	})
-	test("fill_box_linear_gradient_black_white", func(pc *Context) {
+	test("fill-box-linear-gradient-black-white", func(pc *Context) {
 		g := gradient.NewLinear().AddStop(colors.Black, 0).AddStop(colors.White, 1)
 		pc.FillBox(mat32.V2(10, 100), mat32.V2(200, 100), g)
 	})
-	test("fill_box_linear_gradient_red_green", func(pc *Context) {
+	test("fill-box-linear-gradient-red-green", func(pc *Context) {
 		g := gradient.NewLinear().AddStop(colors.Red, 0).AddStop(colors.Limegreen, 1)
 		pc.FillBox(mat32.V2(10, 100), mat32.V2(200, 100), g)
 	})
-	test("fill_box_linear_gradient_red_yellow_green", func(pc *Context) {
+	test("fill-box-linear-gradient-red-yellow-green", func(pc *Context) {
 		g := gradient.NewLinear().AddStop(colors.Red, 0).AddStop(colors.Yellow, 0.3).AddStop(colors.Green, 1)
 		pc.FillBox(mat32.V2(10, 100), mat32.V2(200, 100), g)
 	})
-	test("fill_box_radial_gradient", func(pc *Context) {
+	test("fill-box-radial-gradient", func(pc *Context) {
 		g := gradient.NewRadial().AddStop(colors.ApplyOpacity(colors.Green, 0.5), 0).AddStop(colors.Blue, 0.6).
 			AddStop(colors.ApplyOpacity(colors.Purple, 0.3), 1)
 		pc.FillBox(mat32.V2(10, 100), mat32.V2(200, 100), g)
 	})
-	test("blur_box", func(pc *Context) {
+	test("blur-box", func(pc *Context) {
 		pc.FillBoxColor(mat32.V2(10, 100), mat32.V2(200, 100), colors.Green)
 		pc.BlurBox(mat32.V2(0, 50), mat32.V2(300, 200), 10)
 	})
@@ -162,13 +162,13 @@ func TestPaintFill(t *testing.T) {
 	})
 
 	// testing whether nil values turn off stroking/filling with FillStrokeClear
-	test("fill_stroke_clear_fill", func(pc *Context) {
+	test("fill-stroke-clear-fill", func(pc *Context) {
 		pc.FillStyle.Color = colors.C(colors.Purple)
 		pc.StrokeStyle.Color = nil
 		pc.DrawRectangle(50, 25, 150, 200)
 		pc.FillStrokeClear()
 	})
-	test("fill_stroke_clear_stroke", func(pc *Context) {
+	test("fill-stroke-clear-stroke", func(pc *Context) {
 		pc.FillStyle.Color = nil
 		pc.StrokeStyle.Color = colors.C(colors.Orange)
 		pc.DrawRectangle(50, 25, 150, 200)

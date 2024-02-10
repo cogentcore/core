@@ -48,7 +48,7 @@ func testName(elems ...any) string {
 		})
 		if len(fields) > 0 {
 			f := strcase.ToSnake(fields[0])
-			f = strings.ReplaceAll(f, "|", "_")
+			f = strings.ReplaceAll(f, "|", "-")
 			strs = append(strs, f)
 		} else {
 			strs = append(strs, "none")

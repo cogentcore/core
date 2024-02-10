@@ -6,7 +6,6 @@ package gi
 
 import (
 	"errors"
-	"path/filepath"
 	"testing"
 )
 
@@ -34,7 +33,7 @@ func TestTextFieldValidatorValid(t *testing.T) {
 		}
 		return nil
 	})
-	b.AssertRender(t, filepath.Join("textfield", "validator_valid"), func() {
+	b.AssertRender(t, "textfield/validator-valid", func() {
 		tf.SendChange() // trigger validation
 	})
 }
@@ -48,7 +47,7 @@ func TestTextFieldValidatorInvalid(t *testing.T) {
 		}
 		return nil
 	})
-	b.AssertRender(t, filepath.Join("textfield", "validator_invalid"), func() {
+	b.AssertRender(t, "textfield/validator-invalid", func() {
 		tf.SendChange() // trigger validation
 	})
 }

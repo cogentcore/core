@@ -5,7 +5,6 @@
 package coredom
 
 import (
-	"path/filepath"
 	"testing"
 
 	"cogentcore.org/core/gi"
@@ -28,7 +27,7 @@ func TestHTML(t *testing.T) {
 		t.Run(nm, func(t *testing.T) {
 			b := gi.NewBody()
 			grr.Test(t, ReadHTMLString(NewContext(), b, s))
-			b.AssertRender(t, filepath.Join("html", nm))
+			b.AssertRender(t, "html/"+nm)
 		})
 	}
 }

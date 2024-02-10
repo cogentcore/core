@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"path/filepath"
 	"strconv"
 	"testing"
 
@@ -19,7 +18,7 @@ func TestMeter(t *testing.T) {
 			NewMeter(b).SetMax(100).SetValue(float32(v)).Style(func(s *styles.Style) {
 				s.Direction = d
 			})
-			b.AssertRender(t, filepath.Join("meter", d.String(), strconv.Itoa(v)))
+			b.AssertRender(t, "meter/"+d.String()+"/"+strconv.Itoa(v))
 		}
 	}
 }

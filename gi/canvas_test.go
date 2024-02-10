@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"path/filepath"
 	"testing"
 
 	"cogentcore.org/core/colors"
@@ -21,5 +20,5 @@ func TestCanvas(t *testing.T) {
 		pc.StrokeStyle.Color = colors.C(colors.Blue)
 		pc.Stroke()
 	})
-	b.AssertRender(t, filepath.Join("canvas", "basic"))
+	b.AssertRender(t, "canvas/basic")
 }

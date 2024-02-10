@@ -15,7 +15,7 @@ import (
 )
 
 func TestBackgroundColor(t *testing.T) {
-	RunTest(t, "background_color", 300, 300, func(pc *Context) {
+	RunTest(t, "background-color", 300, 300, func(pc *Context) {
 		pabg := colors.C(colors.White)
 		st := styles.NewStyle()
 		st.Background = colors.C(colors.Blue)
@@ -30,7 +30,7 @@ func TestBackgroundColor(t *testing.T) {
 func TestBackgroundImage(t *testing.T) {
 	img, _, err := images.Open("test.png")
 	grr.Test(t, err)
-	RunTest(t, "background_image", 1260, 200, func(pc *Context) {
+	RunTest(t, "background-image", 1260, 200, func(pc *Context) {
 		pabg := colors.C(colors.White)
 		st := styles.NewStyle()
 		st.Background = img
@@ -56,7 +56,7 @@ func TestObjectFit(t *testing.T) {
 	img, _, err := images.Open("test.png")
 	// obj := mat32.V2FromPoint(img.Bounds().Size())
 	grr.Test(t, err)
-	RunTest(t, "object_fit", 1260, 300, func(pc *Context) {
+	RunTest(t, "object-fit", 1260, 300, func(pc *Context) {
 		st := styles.NewStyle()
 		st.ToDots()
 		box := mat32.V2(200, 100)
