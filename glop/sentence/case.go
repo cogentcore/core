@@ -9,8 +9,8 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/ettle/strcase"
 	"github.com/fatih/camelcase"
-	"github.com/iancoleman/strcase"
 )
 
 // ProperNouns is a set-style map that contains all of the proper
@@ -38,10 +38,9 @@ func AddProperNouns(nouns ...string) {
 //
 //	This is a string in sentence case that I wrote in the USA with the help of Google
 func Case(s string) string {
-	// if we are not already in camel case, we convert to it
-	if strings.ContainsAny(s, "-_.\t ") {
-		s = strcase.ToCamel(s)
-	}
+	caser := strcase.NewCaser(false, nil, nil)
+	s = caser.ToCase(s, strcase.TitleCase|strcase.PreserveInitialism, 0)
+
 	words := camelcase.Split(s)
 	for i, word := range words {
 		// "I" is always capitalized

@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestSentenceCase(t *testing.T) {
+func TestCase(t *testing.T) {
 	AddProperNouns("Google")
 	src := "thisIsAStringInSentenceCaseThatIWroteInTheUSAWithTheHelpOfGoogle"
 	want := "This is a string in sentence case that I wrote in the USA with the help of Google"
