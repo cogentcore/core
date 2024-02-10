@@ -308,7 +308,7 @@ func (w *RenderWin) StepZoom(steps float32) {
 // SetZoom sets [AppearanceSettingsData.Zoom] to the given value and then triggers
 // necessary updating and makes a snackbar.
 func (w *RenderWin) SetZoom(zoom float32) {
-	AppearanceSettings.Zoom = zoom
+	AppearanceSettings.Zoom = mat32.Clamp(zoom, 10, 500)
 	AppearanceSettings.Apply()
 	UpdateAll()
 	grr.Log(SaveSettings(AppearanceSettings))
