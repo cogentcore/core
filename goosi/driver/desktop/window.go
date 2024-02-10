@@ -334,16 +334,22 @@ func (w *Window) SetCursorEnabled(enabled, raw bool) {
 
 func (w *Window) Moved(gw *glfw.Window, x, y int) {
 	w.Mu.Lock()
-	w.Pos = image.Point{x, y}
+	w.Pos = image.Pt(x, y)
 	w.Mu.Unlock()
 	// w.app.GetScreens() // this can crash here on win disconnect..
 	w.Screen() // gets parameters
+	w.UpdateFullscreen()
 	w.EvMgr.Window(events.WinMove)
 }
 
 func (w *Window) WinResized(gw *glfw.Window, width, height int) {
 	// w.app.GetScreens()  // this can crash here on win disconnect..
+	w.UpdateFullscreen()
 	w.UpdateGeom()
+}
+
+func (w *Window) UpdateFullscreen() {
+	w.Flgs.SetFlag(w.Glw.GetAttrib(glfw.Maximized) == glfw.True, goosi.Fullscreen)
 }
 
 func (w *Window) UpdateGeom() {
