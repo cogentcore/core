@@ -85,7 +85,7 @@ type Struct struct { //gti:add
 	ShowMe string
 
 	// how about that
-	Inline ILStruct
+	Inline ILStruct `view:"inline"`
 
 	// a conditional
 	Cond int

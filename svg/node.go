@@ -78,16 +78,24 @@ type Node interface {
 type NodeBase struct {
 	ki.Node
 
-	// user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard
+	// user-defined class name(s) used primarily for attaching
+	// CSS styles to different display elements.
+	// Multiple class names can be used to combine properties:
+	// use spaces to separate per css standard.
 	Class string
 
-	// cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type
+	// cascading style sheet at this level.
+	// These styles apply here and to everything below, until superceded.
+	// Use .class and #name Props elements to apply entire styles
+	// to given elements, and type for element type.
 	CSS ki.Props `xml:"css" set:"-"`
 
 	// aggregated css properties from all higher nodes down to me
 	CSSAgg ki.Props `copier:"-" json:"-" xml:"-" set:"-" view:"no-inline"`
 
-	// bounding box for the node within the SVG Pixels image -- this one can be outside the visible range of the SVG image -- VpBBox is intersected and only shows visible portion.
+	// bounding box for the node within the SVG Pixels image.
+	// This one can be outside the visible range of the SVG image.
+	// VisBBox is intersected and only shows visible portion.
 	BBox image.Rectangle `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// visible bounding box for the node intersected with the SVG image geometry
@@ -260,11 +268,29 @@ func SVGWalkPre(n Node, fun func(kni Node, knb *NodeBase) bool) {
 	})
 }
 
+// SVGWalkPreNoDefs does ki WalkPre on given node using given walk function
+// with SVG Node parameters.  Automatically filters
+// nil or deleted items, and Defs nodes (IsDef) and MetaData,
+// i.e., it only processes concrete graphical nodes.
+// Return ki.Continue (true) to continue, and ki.Break (false) to terminate.
+func SVGWalkPreNoDefs(n Node, fun func(kni Node, knb *NodeBase) bool) {
+	n.WalkPre(func(k ki.Ki) bool {
+		kni := k.(Node)
+		if kni == nil || kni.This() == nil || kni.Is(ki.Deleted) {
+			return ki.Break
+		}
+		if kni.Is(IsDef) || kni.KiType() == MetaDataType {
+			return ki.Break
+		}
+		return fun(kni, kni.AsNodeBase())
+	})
+}
+
 // FirstNonGroupNode returns the first item that is not a group
 // recursing into groups until a non-group item is found.
 func FirstNonGroupNode(n Node) Node {
 	var ngn Node
-	SVGWalkPre(n, func(kni Node, knb *NodeBase) bool {
+	SVGWalkPreNoDefs(n, func(kni Node, knb *NodeBase) bool {
 		if _, isgp := kni.This().(*Group); isgp {
 			return ki.Continue
 		}

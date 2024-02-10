@@ -1492,7 +1492,11 @@ func (vv *FileValue) UpdateWidget() {
 	if txt == "" {
 		txt = "(click to open file chooser)"
 	}
+	prev := bt.Text
 	bt.SetTextUpdate(txt)
+	if txt != prev {
+		bt.SetNeedsLayout(true)
+	}
 }
 
 func (vv *FileValue) ConfigWidget(w gi.Widget) {
@@ -1521,7 +1525,6 @@ func (vv *FileValue) ConfigDialog(d *gi.Body) (bool, func()) {
 		cur = fv.SelectedFile()
 		vv.SetValue(cur)
 		vv.UpdateWidget()
-		vv.AsWidgetBase().SetNeedsLayout(true)
 	}
 }
 
