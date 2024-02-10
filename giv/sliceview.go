@@ -2160,7 +2160,7 @@ func (sg *SliceViewGrid) UpdateBackgrounds() {
 
 	// we take our zebra intensity applied foreground color and then overlay it onto our background color
 
-	zclr := colors.WithAF32(sg.Styles.Color, gi.SystemSettings.ZebraStripesWeight())
+	zclr := colors.WithAF32(sg.Styles.Color, gi.AppearanceSettings.ZebraStripesWeight())
 	sg.BgStripe = gradient.Apply(bg, func(c color.Color) color.Color {
 		return colors.AlphaBlend(c, zclr)
 	})
@@ -2170,7 +2170,7 @@ func (sg *SliceViewGrid) UpdateBackgrounds() {
 		return colors.AlphaBlend(c, hclr)
 	})
 
-	zhclr := colors.WithAF32(sg.Styles.Color, gi.SystemSettings.ZebraStripesWeight()+0.08)
+	zhclr := colors.WithAF32(sg.Styles.Color, gi.AppearanceSettings.ZebraStripesWeight()+0.08)
 	sg.BgHoverStripe = gradient.Apply(bg, func(c color.Color) color.Color {
 		return colors.AlphaBlend(c, zhclr)
 	})

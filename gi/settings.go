@@ -226,6 +226,9 @@ type AppearanceSettingsData struct { //gti:add
 	// of the default font size (higher numbers lead to larger text)
 	FontSize float32 `default:"100" min:"10" max:"500" step:"10" format:"%g%%"`
 
+	// the amount that alternating rows are highlighted when showing tabular data (set to 0 to disable zebra striping)
+	ZebraStripes float32 `default:"0" min:"0" max:"100" step:"10" format:"%g%%"`
+
 	// screen-specific settings, which will override overall defaults if set
 	Screens map[string]ScreenSettings
 
@@ -348,6 +351,12 @@ func (as *AppearanceSettingsData) DeleteSavedWindowGeoms() { //gti:add
 	WinGeomMgr.DeleteAll()
 }
 
+// ZebraStripesWeight returns a 0 to 0.2 alpha opacity factor to use in computing
+// a zebra stripe color.
+func (as *AppearanceSettingsData) ZebraStripesWeight() float32 {
+	return as.ZebraStripes * 0.002
+}
+
 // DeviceSettings are the global device settings.
 var DeviceSettings = &DeviceSettingsData{
 	SettingsBase: SettingsBase{
@@ -448,9 +457,6 @@ type SystemSettingsData struct { //gti:add
 
 	// only support closing the currently selected active tab; if this is set to true, pressing the close button on other tabs will take you to that tab, from which you can close it
 	OnlyCloseActiveTab bool `default:"false"`
-
-	// the amount that alternating rows and columns are highlighted when showing tabular data (set to 0 to disable zebra striping)
-	ZebraStripes float32 `default:"0" min:"0" max:"100" step:"10"`
 
 	// the limit of file size, above which user will be prompted before opening / copying, etc.
 	BigFileSize int `default:"10000000"`
@@ -555,12 +561,6 @@ func (ss *SystemSettingsData) UpdateUser() {
 	if err == nil {
 		ss.User.User = *usr
 	}
-}
-
-// ZebraStripesWeight returns a 0 - 0.2 alpha opacity factor to use in computing
-// a zebra stripe color, using colors.WithAF32 function.
-func (ss *SystemSettingsData) ZebraStripesWeight() float32 {
-	return ss.ZebraStripes * 0.002
 }
 
 // User basic user information that might be needed for different apps
