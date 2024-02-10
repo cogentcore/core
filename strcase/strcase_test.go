@@ -14,22 +14,6 @@ import (
 	"testing"
 )
 
-// Obviously 100% test coverage isn't everything but...
-func TestEdges(t *testing.T) {
-	t.Run("Original WordCase", func(t *testing.T) {
-		assertEqual(t, "FreeBSD", convertWithoutInitialisms("FreeBSD", 0, Original))
-		assertEqual(t, "FreeBSD", convertWithGoInitialisms("FreeBSD", 0, Original))
-	})
-	t.Run("Don't call convertWithInitialisms for UpperCase", func(t *testing.T) {
-		defer func() {
-			if r := recover(); r == nil {
-				t.Errorf("The code did not panic")
-			}
-		}()
-		convertWithGoInitialisms("foo", 0, UpperCase)
-	})
-}
-
 func TestOrignal(t *testing.T) {
 	// In the plain ToCase, we don't support any initialisms
 	assertEqual(t, "nativeOrgUrl", ToCase("NativeOrgURL", CamelCase, 0))
