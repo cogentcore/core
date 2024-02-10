@@ -25,7 +25,6 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/laser"
-	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/paint"
 )
 
@@ -319,28 +318,6 @@ func (as *AppearanceSettingsData) ApplyDPI() {
 		// this isn't DPI-related, but this is the most efficient place to do it
 		w.GoosiWin.SetTitleBarIsDark(matcolor.SchemeIsDark)
 	}
-}
-
-// SaveZoom saves the current LogicalDPI scaling, either as the overall
-// default or specific to the current screen. If for current screen is true,
-// it saves only for the current screen.
-func (as *AppearanceSettingsData) SaveZoom(forCurrentScreen bool) { //gti:add
-	goosi.ZoomFactor = 1 // reset -- otherwise has 2x effect
-	sc := goosi.TheApp.Screen(0)
-	if forCurrentScreen {
-		sp, ok := as.Screens[sc.Name]
-		if !ok {
-			sp = ScreenSettings{}
-		}
-		sp.Zoom = mat32.Truncate(100*sc.LogicalDPI/sc.PhysicalDPI, 2)
-		if as.Screens == nil {
-			as.Screens = make(map[string]ScreenSettings)
-		}
-		as.Screens[sc.Name] = sp
-	} else {
-		as.Zoom = mat32.Truncate(100*sc.LogicalDPI/sc.PhysicalDPI, 2)
-	}
-	grr.Log(SaveSettings(as))
 }
 
 // DeleteSavedWindowGeoms deletes the file that saves the position and size of

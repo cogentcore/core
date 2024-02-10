@@ -15,13 +15,10 @@ import (
 )
 
 var (
-	// ZoomFactor is a multiplier on screen LogicalDPI
-	ZoomFactor = float32(1.0)
-
 	// LogicalDPIScale is the default scaling factor for Logical DPI
 	// as a multiplier on Physical DPI.
 	// Smaller numbers produce smaller font sizes etc.
-	LogicalDPIScale = float32(1.0)
+	LogicalDPIScale = float32(1)
 
 	// LogicalDPIScales are per-screen name versions of LogicalDPIScale
 	// these can be set from preferences (as in gi/prefs) on a per-screen
@@ -142,7 +139,7 @@ func (sc *Screen) UpdateLogicalDPI() {
 			dpisc = dsc
 		}
 	}
-	sc.LogicalDPI = LogicalFmPhysicalDPI(ZoomFactor*dpisc, sc.PhysicalDPI)
+	sc.LogicalDPI = LogicalFmPhysicalDPI(dpisc, sc.PhysicalDPI)
 	// fmt.Println("log dpi:", sc.LogicalDPI, "zoom:", ZoomFactor, "dpisc:", dpisc)
 }
 

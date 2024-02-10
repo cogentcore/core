@@ -16,9 +16,6 @@ func init() {
 
 func SettingsConfigToolbar(tb *gi.Toolbar) {
 	as := gi.AppearanceSettings
-	NewFuncButton(tb, as.SaveZoom).SetIcon(icons.ZoomIn)
-	// NewFuncButton(tb, pf.EditKeyMaps).SetIcon(icons.Keyboard)
-	// NewFuncButton(tb, pf.EditHiStyles).SetIcon(icons.InkHighlighter)
 	tb.AddOverflowMenu(func(m *gi.Scene) {
 		NewFuncButton(m, as.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
 		gi.NewSeparator(tb)
@@ -61,6 +58,7 @@ func SettingsView(b *gi.Body) {
 	}
 }
 
+// TODO(kai)
 /*
 // PrefsDetView opens a view of user detailed preferences
 func PrefsDetView(pf *gi.PrefsDetailed) {
