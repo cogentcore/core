@@ -204,17 +204,16 @@ func (is *Inspector) ConfigWidget() {
 	config.Add(gi.LabelType, "title")
 	config.Add(gi.SplitsType, "splits")
 	mods, updt := is.ConfigChildren(config)
-	is.SetTitle(fmt.Sprintf("Inspector of %v", is.KiRoot.Name()))
+	is.SetTitle(is.KiRoot)
 	is.ConfigSplits()
 	if mods {
 		is.UpdateEnd(updt)
 	}
 }
 
-// SetTitle sets the optional title and updates the Title label
-func (is *Inspector) SetTitle(title string) {
-	lab := is.TitleWidget()
-	lab.Text = title
+// SetTitle sets the title to correspond to the given node.
+func (is *Inspector) SetTitle(k ki.Ki) {
+	is.TitleWidget().SetText(fmt.Sprintf("Inspector of %s (%T)", k.Name(), k))
 }
 
 // TitleWidget returns the title label widget
@@ -259,6 +258,8 @@ func (is *Inspector) ConfigSplits() {
 			}
 			sn := tv.SelectedNodes[0].AsTreeView().SyncNode
 			sv.SetStruct(sn)
+
+			is.SetTitle(sn)
 
 			sc := gi.AsScene(is.KiRoot)
 			if sc == nil {

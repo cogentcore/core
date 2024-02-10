@@ -87,7 +87,8 @@ type Scene struct {
 	// RenderBBoxHue is current hue for rendering bounding box in ScRenderBBoxes mode
 	RenderBBoxHue float32 `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 
-	// the currently selected widget through the inspect editor selection mode
+	// the currently selected/hovered widget through the inspect editor selection mode
+	// that should be highlighted with a background color
 	SelectedWidget Widget
 
 	// the channel on which the selected widget through the inspect editor
