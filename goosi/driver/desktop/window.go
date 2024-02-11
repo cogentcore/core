@@ -89,7 +89,11 @@ func NewGlfwWindow(opts *goosi.NewWindowOptions, sc *goosi.Screen) (*glfw.Window
 	}
 	// glfw.WindowHint(glfw.TransparentFramebuffer, glfw.True)
 	// todo: glfw.Floating for always-on-top -- could set for modal
-	sz := sc.WinSizeFmPix(opts.Size) // note: this is in physical device units
+	sz := opts.Size
+	if TheApp.Platform() == goosi.MacOS {
+		// on macOS, the size we pass to glfw must be in dots
+		sz = sc.WinSizeFromPix(opts.Size)
+	}
 	win, err := glfw.CreateWindow(sz.X, sz.Y, opts.GetTitle(), nil, nil)
 	if err != nil {
 		return win, err
@@ -231,7 +235,7 @@ func (w *Window) SetGeom(pos image.Point, sz image.Point) {
 		return
 	}
 	sc := w.Screen()
-	sz = sc.WinSizeFmPix(sz)
+	sz = sc.WinSizeFromPix(sz)
 	// note: anything run on main only doesn't need lock -- implicit lock
 	w.App.RunOnMain(func() {
 		if w.Glw == nil { // by time we got to main, could be diff

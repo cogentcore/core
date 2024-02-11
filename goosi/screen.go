@@ -159,10 +159,10 @@ func (sc *Screen) WinSizeToPix(sz image.Point) image.Point {
 	return psz
 }
 
-// WinSizeFmPix returns window manager size units
+// WinSizeFromPix returns window manager size units
 // (where DevicePixelRatio is ignored) converted from pixel units --
 // i.e., divide by DevicePixelRatio
-func (sc *Screen) WinSizeFmPix(sz image.Point) image.Point {
+func (sc *Screen) WinSizeFromPix(sz image.Point) image.Point {
 	var wsz image.Point
 	wsz.X = int(float32(sz.X) / sc.DevicePixelRatio)
 	wsz.Y = int(float32(sz.Y) / sc.DevicePixelRatio)
@@ -175,7 +175,7 @@ func (sc *Screen) ConstrainWinGeom(sz, pos image.Point) (csz, cpos image.Point) 
 	scsz := sc.Geometry.Size() // in window coords size
 
 	// options size are in pixel sizes, logic below works in window sizes
-	csz = sc.WinSizeFmPix(sz)
+	csz = sc.WinSizeFromPix(sz)
 	cpos = pos
 
 	// fmt.Printf("sz: %v  csz: %v  scsz: %v\n", sz, csz, scsz)

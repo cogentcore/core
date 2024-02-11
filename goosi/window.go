@@ -355,7 +355,7 @@ func (o *NewWindowOptions) Fixup() {
 
 	o.Size, o.Pos = sc.ConstrainWinGeom(o.Size, o.Pos)
 	if o.Pos.X == 0 && o.Pos.Y == 0 {
-		wsz := sc.WinSizeFmPix(o.Size)
+		wsz := sc.WinSizeFromPix(o.Size)
 		dialog, modal, _, _ := WindowFlagsToBool(o.Flags)
 		nw := TheApp.NWindows()
 		if nw > 0 {
