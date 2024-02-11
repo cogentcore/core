@@ -11,12 +11,14 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
 	"cogentcore.org/core/glop/datasize"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/vci"
+	"github.com/Bios-Marcel/wastebasket"
 )
 
 // FileInfo represents the information about a given file / directory,
@@ -172,29 +174,13 @@ func (fi *FileInfo) Duplicate() (string, error) { //gti:add
 	return dst, CopyFile(dst, fi.Path, fi.Mode)
 }
 
-// Delete deletes the file or if a directory the directory and all files and subdirectories
+// Delete moves the file to the trash / recycling bin.
+// On mobile and web, it deletes it directly.
 func (fi *FileInfo) Delete() error { //gti:add
-	if fi.IsDir() {
-		path := fi.Path
-		d, err := os.Open(path)
-		if err != nil {
-			return err
-		}
-		defer d.Close()
-		names, err := d.Readdirnames(-1)
-		if err != nil {
-			return err
-		}
-		for _, name := range names {
-			err = os.RemoveAll(filepath.Join(path, name))
-			if err != nil {
-				return err
-			}
-		}
+	if runtime.GOOS == "darwin" || runtime.GOOS == "windows" || runtime.GOOS == "linux" {
+		return wastebasket.Trash(fi.Path)
 	}
-	// remove file or directory
-	return os.Remove(fi.Path)
-	// note: we should be deleted now!
+	return os.RemoveAll(fi.Path)
 }
 
 // Filenames recursively adds fullpath filenames within the starting directory to the "names" slice.

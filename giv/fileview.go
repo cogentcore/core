@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"strings"
 	"sync"
@@ -334,16 +335,20 @@ func (fv *FileView) ConfigFilesRow() {
 			})
 		gi.NewSeparator(m)
 		gi.NewButton(m).SetText("Duplicate").SetIcon(icons.FileCopy).
-			SetTooltip("Makes a copy of the selected file").
+			SetTooltip("Make a copy of the selected file").
 			OnClick(func(e events.Event) {
 				fn := fv.Files[fsv.SelIdx]
 				fn.Duplicate()
 			})
+		tip := "Delete deletes the selected file"
+		if runtime.GOOS == "darwin" || runtime.GOOS == "windows" || runtime.GOOS == "linux" {
+			tip = "Delete moves the selected file to the trash / recycling bin"
+		}
 		gi.NewButton(m).SetText("Delete").SetIcon(icons.Delete).
-			SetTooltip("Delete the selected file").
+			SetTooltip(tip).
 			OnClick(func(e events.Event) {
 				fn := fv.Files[fsv.SelIdx]
-				NewFuncButton(fsv, fn.Delete).SetConfirm(true).CallFunc()
+				NewSoloFuncButton(fsv, fn.Delete).SetTooltip(tip).SetConfirm(true).CallFunc()
 			})
 		gi.NewButton(m).SetText("Rename").SetIcon(icons.EditNote).
 			SetTooltip("Rename the selected file").
