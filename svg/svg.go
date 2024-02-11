@@ -45,10 +45,12 @@ type SVG struct {
 	// Node bounding boxes are based on 0 Pos offset within Pixels image
 	Geom mat32.Geom2DInt
 
-	// physical width of the drawing, e.g., when printed -- does not affect rendering -- metadata
+	// physical width of the drawing, e.g., when printed.
+	// Does not affect rendering, metadata.
 	PhysWidth units.Value
 
-	// physical height of the drawing, e.g., when printed -- does not affect rendering -- metadata
+	// physical height of the drawing, e.g., when printed.
+	// Does not affect rendering, metadata.
 	PhysHeight units.Value
 
 	// InvertY, when applying the ViewBox transform, also flip the Y axis so that
@@ -73,14 +75,20 @@ type SVG struct {
 	// all defs defined elements go here (gradients, symbols, etc)
 	Defs Group
 
-	// root of the svg tree -- top-level viewbox and paint style here
+	// root of the svg tree.  top-level viewbox and paint style here
 	Root SVGNode
 
-	// map of def names to index -- uses starting index to find element -- always updated after each search
+	// map of def names to index. uses starting index to find element.
+	// always updated after each search.
 	DefIdxs map[string]int `view:"-" json:"-" xml:"-"`
 
-	// map of unique numeric ids for all elements -- used for allocating new unique id numbers, appended to end of elements -- see NewUniqueId, GatherIds
+	// map of unique numeric ids for all elements.
+	// Used for allocating new unique id numbers, appended to end of elements.
+	// See NewUniqueId, GatherIds
 	UniqueIds map[int]struct{} `view:"-" json:"-" xml:"-"`
+
+	// flag is set when the SVG is rendering
+	IsRendering bool
 
 	// mutex for protecting rendering
 	RenderMu sync.Mutex `view:"-" json:"-" xml:"-"`
@@ -217,10 +225,9 @@ func (sv *SVG) Style() {
 
 func (sv *SVG) Render() {
 	sv.RenderMu.Lock()
-	defer sv.RenderMu.Unlock()
+	sv.IsRendering = true
 
 	sv.Style()
-
 	sv.SetRootTransform()
 
 	rs := &sv.RenderState
@@ -230,6 +237,8 @@ func (sv *SVG) Render() {
 	}
 	sv.Root.Render(sv)
 	rs.PopBounds()
+	sv.RenderMu.Unlock()
+	sv.IsRendering = false
 }
 
 func (sv *SVG) FillViewport() {
