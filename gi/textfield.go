@@ -935,12 +935,12 @@ func (tf *TextField) Copy(reset bool) {
 // cursor is within a current selection, that selection is replaced.
 // Satisfies Clipper interface -- can be extended in subtypes.
 func (tf *TextField) Paste() {
-	data := tf.Clipboard().Read([]string{"text/plain"})
+	data := tf.Clipboard().Read([]string{mimedata.TextPlain})
 	if data != nil {
 		if tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
 			tf.DeleteSelection()
 		}
-		tf.InsertAtCursor(data.Text("text/plain"))
+		tf.InsertAtCursor(data.Text(mimedata.TextPlain))
 	}
 }
 

@@ -36,7 +36,6 @@ import (
 	"path/filepath"
 	"unsafe"
 
-	"cogentcore.org/core/fi"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/mimedata"
@@ -159,11 +158,11 @@ func (cl *Clip) Clear() {
 func addMimeText(cdata *C.char, datalen C.int) {
 	if *CurMimeData == nil {
 		*CurMimeData = make(mimedata.Mimes, 1)
-		(*CurMimeData)[0] = &mimedata.Data{Type: fi.TextPlain}
+		(*CurMimeData)[0] = &mimedata.Data{Type: mimedata.TextPlain}
 	}
 	md := (*CurMimeData)[0]
 	if len(md.Type) == 0 {
-		md.Type = fi.TextPlain
+		md.Type = mimedata.TextPlain
 	}
 	data := C.GoBytes(unsafe.Pointer(cdata), datalen)
 	md.Data = append(md.Data, data...)

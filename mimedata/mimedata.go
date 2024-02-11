@@ -21,14 +21,16 @@ import (
 	"mime/multipart"
 	"net/textproto"
 	"strings"
-
-	"cogentcore.org/core/fi"
 )
 
 const (
 	MIMEVersion1            = "MIME-Version: 1.0"
 	ContentType             = "Content-Type"
 	ContentTransferEncoding = "Content-Transfer-Encoding"
+
+	TextPlain = "text/plain"
+	DataJson  = "application/json"
+	DataXml   = "application/xml"
 )
 
 var (
@@ -50,12 +52,12 @@ type Data struct {
 // always have a text/plain representation of everything on clipboard /
 // drag-n-drop
 func NewTextData(text string) *Data {
-	return &Data{fi.TextPlain, []byte(text)}
+	return &Data{TextPlain, []byte(text)}
 }
 
 // NewTextDataBytes returns a Data representation of the bytes string
 func NewTextDataBytes(text []byte) *Data {
-	return &Data{fi.TextPlain, text}
+	return &Data{TextPlain, text}
 }
 
 // IsText returns true if type is any of the text/ types (literally looks for that
@@ -64,7 +66,7 @@ func IsText(typ string) bool {
 	if strings.HasPrefix(typ, "text/") {
 		return true
 	}
-	return typ == fi.DataJson || typ == fi.DataXml
+	return typ == DataJson || typ == DataXml
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -247,7 +249,6 @@ func FromMultipart(body []byte, boundary string) Mimes {
 		d.Data = b
 		mi = append(mi, &d)
 	}
-	return mi
 }
 
 // todo: image, etc extractors
