@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package sentence
+package strcase
 
 import "testing"
 
-func TestList(t *testing.T) {
+func TestFormatList(t *testing.T) {
 	type test struct {
 		items []string
 		want  string
@@ -19,7 +19,7 @@ func TestList(t *testing.T) {
 		{[]string{"Go", "Python", "JavaScript", "C"}, "Go, Python, JavaScript, and C"},
 	}
 	for _, test := range tests {
-		have := List(test.items...)
+		have := FormatList(test.items...)
 		if have != test.want {
 			t.Errorf("expected %q but got %q for %v", test.want, have, test.items)
 		}

@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package sentence
+package strcase
 
-// List returns a formatted version of the given list of items following these rules:
+// FormatList returns a formatted version of the given list of items following these rules:
 //   - nil => ""
 //   - "Go" => "Go"
 //   - "Go", "Python" => "Go and Python"
 //   - "Go", "Python", "JavaScript" => "Go, Python, and JavaScript"
 //   - "Go", "Python", "JavaScript", "C" => "Go, Python, JavaScript, and C"
-func List(items ...string) string {
+func FormatList(items ...string) string {
 	switch len(items) {
 	case 0:
 		return ""
