@@ -403,12 +403,11 @@ func (w *Window) Focused(gw *glfw.Window, focused bool) {
 }
 
 func (w *Window) Iconify(gw *glfw.Window, iconified bool) {
+	w.Flgs.SetFlag(iconified, goosi.Minimized)
+	w.Flgs.SetFlag(!iconified, goosi.Focused)
 	if iconified {
-		// bitflag.SetAtomic(&w.Flag, int(goosi.Minimized))
-		// bitflag.ClearAtomic(&w.Flag, int(goosi.Focus))
 		w.EvMgr.Window(events.WinMinimize)
 	} else {
-		// bitflag.ClearAtomic(&w.Flag, int(goosi.Minimized))
 		w.Screen() // gets parameters
 		w.EvMgr.Window(events.WinMinimize)
 	}

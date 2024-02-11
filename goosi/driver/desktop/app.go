@@ -142,7 +142,7 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 		w.Draw.ConfigSurface(sf, vgpu.MaxTexturesPerSet) // note: can expand
 	})
 
-	// bitflag.SetAtomic(&w.Flag, int(goosi.Focus)) // starts out focused
+	w.Flgs.SetFlag(true, goosi.Focused) // starts out focused
 
 	a.Mu.Lock()
 	a.Windows = append(a.Windows, w)
