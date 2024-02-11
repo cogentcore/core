@@ -17,7 +17,6 @@ import (
 	"strings"
 	"syscall/js"
 
-	"cogentcore.org/core/cursor"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/goosi"
@@ -173,7 +172,7 @@ func (a *App) Clipboard(win goosi.Window) goosi.Clipboard {
 	return TheClip
 }
 
-func (a *App) Cursor(win goosi.Window) cursor.Cursor {
+func (a *App) Cursor(win goosi.Window) goosi.Cursor {
 	return TheCursor
 }
 

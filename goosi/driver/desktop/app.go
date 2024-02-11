@@ -15,7 +15,6 @@ import (
 	"log"
 	"runtime"
 
-	"cogentcore.org/core/cursor"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/goosi/driver/base"
 	"cogentcore.org/core/grr"
@@ -181,7 +180,7 @@ func (a *App) Clipboard(win goosi.Window) goosi.Clipboard {
 	return TheClip
 }
 
-func (a *App) Cursor(win goosi.Window) cursor.Cursor {
+func (a *App) Cursor(win goosi.Window) goosi.Cursor {
 	a.Mu.Lock()
 	a.CtxWindow = win.(*Window)
 	a.Mu.Unlock()
