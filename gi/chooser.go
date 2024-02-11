@@ -17,7 +17,6 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/glop/sentence"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
@@ -358,7 +357,7 @@ func (ch *Chooser) SetEnums(es []enums.Enum) *Chooser {
 		if !strings.HasPrefix(desc, str) && len(desc) > 0 && unicode.IsUpper(rune(desc[0])) {
 			str, _, _ = strings.Cut(desc, " ")
 		}
-		tip := sentence.Doc(desc, str, lbl)
+		tip := gti.FormatDoc(desc, str, lbl)
 		ch.Items[i] = ChooserItem{Value: enum, Label: lbl, Tooltip: tip}
 	}
 	return ch

@@ -11,7 +11,7 @@ import (
 
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/glop/sentence"
+	"cogentcore.org/core/gti"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
@@ -200,7 +200,7 @@ func (sw *Switches) SetEnums(el []enums.Enum) *Switches {
 		if !strings.HasPrefix(desc, str) && len(desc) > 0 && unicode.IsUpper(rune(desc[0])) {
 			str, _, _ = strings.Cut(desc, " ")
 		}
-		sw.Tooltips[i] = sentence.Doc(desc, str, lbl)
+		sw.Tooltips[i] = gti.FormatDoc(desc, str, lbl)
 	}
 	return sw
 }

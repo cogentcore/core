@@ -13,7 +13,6 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
-	"cogentcore.org/core/glop/sentence"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
@@ -126,7 +125,7 @@ func (fb *FuncButton) SetText(v string) *FuncButton {
 	ptext := fb.Text
 	fb.Text = v
 	if fb.Func != nil && fb.Text != ptext && ptext != "" {
-		fb.Func.Doc = sentence.Doc(fb.Func.Doc, ptext, fb.Text)
+		fb.Func.Doc = gti.FormatDoc(fb.Func.Doc, ptext, fb.Text)
 		fb.SetTooltip(fb.Func.Doc)
 	}
 	return fb
@@ -211,7 +210,7 @@ func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButto
 	fb.SetName(snm + "-" + strconv.FormatUint(fb.Parent().NumLifetimeChildren()-1, 10))
 	txt := strcase.ToSentence(snm)
 	fb.SetText(txt)
-	fb.Func.Doc = sentence.Doc(fb.Func.Doc, snm, txt)
+	fb.Func.Doc = gti.FormatDoc(fb.Func.Doc, snm, txt)
 	fb.SetTooltip(fb.Func.Doc)
 	// we default to the icon with the same name as
 	// the function, if it exists

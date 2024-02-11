@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"strings"
 
-	"cogentcore.org/core/glop/sentence"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/strcase"
 )
@@ -75,7 +74,7 @@ func CmdFromFunc[T any](fun func(T) error) (*Cmd[T], error) {
 			}
 		}
 		// we format the doc after the directives so that we have the up-to-date documentation and name
-		cmd.Doc = sentence.Doc(cmd.Doc, cfn, strcase.ToSentence(cmd.Name))
+		cmd.Doc = gti.FormatDoc(cmd.Doc, cfn, strcase.ToSentence(cmd.Name))
 	}
 	return cmd, nil
 }

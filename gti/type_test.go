@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package sentence
+package gti
 
 import "testing"
 
-func TestDoc(t *testing.T) {
+func TestFormatDoc(t *testing.T) {
 	type test struct {
 		doc   string
 		name  string
@@ -18,7 +18,7 @@ func TestDoc(t *testing.T) {
 		{"ToggleSelectionMode toggles the editor between selection mode or not.", "ToggleSelectionMode", "Select element", "Select element toggles the editor between selection mode or not"},
 	}
 	for _, test := range tests {
-		have := Doc(test.doc, test.name, test.label)
+		have := FormatDoc(test.doc, test.name, test.label)
 		if have != test.want {
 			t.Errorf("expected %q but got %q for (%q, %q, %q)", test.want, have, test.doc, test.name, test.label)
 		}

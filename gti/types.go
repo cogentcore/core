@@ -9,9 +9,9 @@ import (
 	"log/slog"
 	"reflect"
 	"sort"
+	"strings"
 	"sync/atomic"
 
-	"cogentcore.org/core/glop/sentence"
 	"cogentcore.org/core/laser"
 )
 
@@ -111,7 +111,7 @@ func AllEmbeddersOf(typ *Type) []*Type {
 // The value, owner value, and field may be nil/invalid. The owner value, if valid, is the value that
 // contains the value (the parent struct, map, slice, or array). The field, if non-nil,
 // is the struct field that the value represents. GetDoc uses the given label to format
-// the documentation with [sentence.Doc] before returning it.
+// the documentation with [FormatDoc] before returning it.
 func GetDoc(val, owner reflect.Value, field *reflect.StructField, label string) (string, bool) {
 	// if we are not part of a struct, we just get the documentation for our type
 	if field == nil || !owner.IsValid() {
@@ -123,18 +123,31 @@ func GetDoc(val, owner reflect.Value, field *reflect.StructField, label string) 
 		if typ == nil {
 			return "", false
 		}
-		return sentence.Doc(typ.Doc, rtyp.Name(), label), true
+		return FormatDoc(typ.Doc, rtyp.Name(), label), true
 	}
 
 	// otherwise, we get our field documentation in our parent
 	f := GetField(owner, field.Name)
 	if f != nil {
-		return sentence.Doc(f.Doc, field.Name, label), true
+		return FormatDoc(f.Doc, field.Name, label), true
 	}
 	// if we aren't in gti, we fall back on struct tag
 	desc, ok := field.Tag.Lookup("desc")
 	if !ok {
 		return "", false
 	}
-	return sentence.Doc(desc, field.Name, label), true
+	return FormatDoc(desc, field.Name, label), true
+}
+
+// FormatDoc formats the given Go documentation string for an identifier with the given
+// CamelCase name and intended label. It replaces the name with the label and cleans
+// up trailing punctuation.
+func FormatDoc(doc, name, label string) string {
+	doc = strings.ReplaceAll(doc, name, label)
+
+	// if we only have one period, get rid of it if it is at the end
+	if strings.Count(doc, ".") == 1 {
+		doc = strings.TrimSuffix(doc, ".")
+	}
+	return doc
 }
