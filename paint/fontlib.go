@@ -18,7 +18,6 @@ import (
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
-	"github.com/fatih/camelcase"
 )
 
 // loadFontMu protects the font loading calls, which are not concurrent-safe
@@ -283,8 +282,7 @@ func (fl *FontLib) FontsAvailFromFS(fsys fs.FS, root string) error {
 			}
 			fn = afn + sfx
 		} else {
-			strs := camelcase.Split(strcase.ToCamel(fn))
-			fn = strings.Join(strs, " ")
+			fn = strcase.ToTitle(fn)
 			for sc, rp := range shortFontMods {
 				if strings.HasSuffix(fn, sc) {
 					fn = strings.TrimSuffix(fn, sc)
@@ -405,7 +403,7 @@ func addUniqueFontRobust(fns *[]string, fn string) bool {
 	if FontLibrary.FontAvail(camel) {
 		return addUniqueFont(fns, camel)
 	}
-	spc := strings.Join(camelcase.Split(camel), " ")
+	spc := strcase.ToTitle(fn)
 	if FontLibrary.FontAvail(spc) {
 		return addUniqueFont(fns, spc)
 	}
