@@ -156,10 +156,6 @@ func (wb *WidgetBase) ResetStyleWidget() {
 // this, to update state flags.
 func (wb *WidgetBase) SetStyles() {
 	wb.Style(func(s *styles.Style) {
-		fsz := AppearanceSettings.FontSize / 100
-		s.Font.Size.Val *= fsz
-		s.Text.LineHeight.Val *= fsz
-
 		s.MaxBorder.Style.Set(styles.BorderSolid)
 		s.MaxBorder.Color.Set(colors.Scheme.Primary.Base)
 		s.MaxBorder.Width.Set(units.Dp(1))
@@ -255,6 +251,16 @@ func SetUnitContext(st *styles.Style, sc *Scene, el, par mat32.Vec2) {
 		st.Font = paint.OpenFont(st.FontRender(), &st.UnContext) // calls SetUnContext after updating metrics
 	}
 	st.ToDots()
+	ApplyStyleSettingsDots(st)
+}
+
+// ApplyStyleSettingsDots applies the font size settings to the
+// dots of the style object. It must always be called after
+// [styles.Style.ToDots].
+func ApplyStyleSettingsDots(st *styles.Style) {
+	fsz := AppearanceSettings.FontSize / 100
+	st.Font.Size.Dots *= fsz
+	st.Text.LineHeight.Dots *= fsz
 }
 
 // ChildBackground returns the background color (Image) for given child Widget.

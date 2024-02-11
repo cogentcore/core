@@ -605,8 +605,7 @@ func (tb *Tab) SetStyles() {
 			})
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
-				s.Min.X.Dp(18)
-				s.Min.Y.Dp(18)
+				s.Font.Size.Dp(18)
 				s.Margin.Zero()
 				s.Padding.Zero()
 			})
@@ -625,8 +624,7 @@ func (tb *Tab) SetStyles() {
 			})
 		case "parts/close.parts/icon":
 			w.Style(func(s *styles.Style) {
-				s.Max.X.Dp(16)
-				s.Max.Y.Dp(16)
+				s.Font.Size.Dp(16)
 			})
 		case "parts/close":
 			w.Style(func(s *styles.Style) {

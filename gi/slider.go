@@ -199,8 +199,7 @@ func (sr *Slider) SetStyles() {
 		switch w.PathFrom(sr) {
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
-				s.Min.X.Em(1.5)
-				s.Min.Y.Em(1.5)
+				s.Font.Size.Dp(24)
 				s.Margin.Zero()
 				s.Padding.Zero()
 			})

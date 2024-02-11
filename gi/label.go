@@ -279,6 +279,13 @@ func (lb *Label) Copy(reset bool) {
 	}
 }
 
+func (lb *Label) Label() string {
+	if lb.Text != "" {
+		return lb.Text
+	}
+	return lb.Nm
+}
+
 func (lb *Label) ConfigWidget() {
 	lb.ConfigLabel()
 }
