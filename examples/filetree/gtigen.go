@@ -42,9 +42,9 @@ func (t *FileBrowse) SetChanged(v bool) *FileBrowse { t.Changed = v; return t }
 // all the files in the project directory and subdirectories
 func (t *FileBrowse) SetFiles(v *filetree.Tree) *FileBrowse { t.Files = v; return t }
 
-// SetNtextEditors sets the [FileBrowse.NTextEditors]:
+// SetNTextEditors sets the [FileBrowse.NTextEditors]:
 // number of texteditors available for editing files (default 2) -- configurable with n-text-views property
-func (t *FileBrowse) SetNtextEditors(v int) *FileBrowse { t.NTextEditors = v; return t }
+func (t *FileBrowse) SetNTextEditors(v int) *FileBrowse { t.NTextEditors = v; return t }
 
 // SetActiveTextEditorIdx sets the [FileBrowse.ActiveTextEditorIdx]:
 // index of the currently-active texteditor -- new files will be viewed in other views if available

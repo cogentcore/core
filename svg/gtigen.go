@@ -331,7 +331,7 @@ func (t *Marker) SetEffSize(v mat32.Vec2) *Marker { t.EffSize = v; return t }
 func (t *Marker) SetClass(v string) *Marker { t.Class = v; return t }
 
 // NodeBaseType is the [gti.Type] for [NodeBase]
-var NodeBaseType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.NodeBase", IDName: "node-base", Doc: "svg.NodeBase is the base type for elements within the SVG scenegraph", Embeds: []gti.Field{{Name: "Node"}}, Fields: []gti.Field{{Name: "Class", Doc: "user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard"}, {Name: "CSS", Doc: "cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type"}, {Name: "CSSAgg", Doc: "aggregated css properties from all higher nodes down to me"}, {Name: "BBox", Doc: "bounding box for the node within the SVG Pixels image -- this one can be outside the visible range of the SVG image -- VpBBox is intersected and only shows visible portion."}, {Name: "VisBBox", Doc: "visible bounding box for the node intersected with the SVG image geometry"}, {Name: "Paint", Doc: "paint style information for this node"}}, Instance: &NodeBase{}})
+var NodeBaseType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.NodeBase", IDName: "node-base", Doc: "svg.NodeBase is the base type for elements within the SVG scenegraph", Embeds: []gti.Field{{Name: "Node"}}, Fields: []gti.Field{{Name: "Class", Doc: "user-defined class name(s) used primarily for attaching\nCSS styles to different display elements.\nMultiple class names can be used to combine properties:\nuse spaces to separate per css standard."}, {Name: "CSS", Doc: "cascading style sheet at this level.\nThese styles apply here and to everything below, until superceded.\nUse .class and #name Props elements to apply entire styles\nto given elements, and type for element type."}, {Name: "CSSAgg", Doc: "aggregated css properties from all higher nodes down to me"}, {Name: "BBox", Doc: "bounding box for the node within the SVG Pixels image.\nThis one can be outside the visible range of the SVG image.\nVisBBox is intersected and only shows visible portion."}, {Name: "VisBBox", Doc: "visible bounding box for the node intersected with the SVG image geometry"}, {Name: "Paint", Doc: "paint style information for this node"}}, Instance: &NodeBase{}})
 
 // NewNodeBase adds a new [NodeBase] with the given name to the given parent:
 // svg.NodeBase is the base type for elements within the SVG scenegraph
@@ -346,7 +346,10 @@ func (t *NodeBase) KiType() *gti.Type { return NodeBaseType }
 func (t *NodeBase) New() ki.Ki { return &NodeBase{} }
 
 // SetClass sets the [NodeBase.Class]:
-// user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard
+// user-defined class name(s) used primarily for attaching
+// CSS styles to different display elements.
+// Multiple class names can be used to combine properties:
+// use spaces to separate per css standard.
 func (t *NodeBase) SetClass(v string) *NodeBase { t.Class = v; return t }
 
 // PathType is the [gti.Type] for [Path]
@@ -504,13 +507,13 @@ func (t *Text) SetCharPosX(v ...float32) *Text { t.CharPosX = v; return t }
 // character positions along Y axis, if specified
 func (t *Text) SetCharPosY(v ...float32) *Text { t.CharPosY = v; return t }
 
-// SetCharPosDx sets the [Text.CharPosDX]:
+// SetCharPosDX sets the [Text.CharPosDX]:
 // character delta-positions along X axis, if specified
-func (t *Text) SetCharPosDx(v ...float32) *Text { t.CharPosDX = v; return t }
+func (t *Text) SetCharPosDX(v ...float32) *Text { t.CharPosDX = v; return t }
 
-// SetCharPosDy sets the [Text.CharPosDY]:
+// SetCharPosDY sets the [Text.CharPosDY]:
 // character delta-positions along Y axis, if specified
-func (t *Text) SetCharPosDy(v ...float32) *Text { t.CharPosDY = v; return t }
+func (t *Text) SetCharPosDY(v ...float32) *Text { t.CharPosDY = v; return t }
 
 // SetCharRots sets the [Text.CharRots]:
 // character rotations, if specified
@@ -528,9 +531,9 @@ func (t *Text) SetAdjustGlyphs(v bool) *Text { t.AdjustGlyphs = v; return t }
 // last text render position -- lower-left baseline of start
 func (t *Text) SetLastPos(v mat32.Vec2) *Text { t.LastPos = v; return t }
 
-// SetLastBbox sets the [Text.LastBBox]:
+// SetLastBBox sets the [Text.LastBBox]:
 // last actual bounding box in display units (dots)
-func (t *Text) SetLastBbox(v mat32.Box2) *Text { t.LastBBox = v; return t }
+func (t *Text) SetLastBBox(v mat32.Box2) *Text { t.LastBBox = v; return t }
 
 // SetClass sets the [Text.Class]
 func (t *Text) SetClass(v string) *Text { t.Class = v; return t }

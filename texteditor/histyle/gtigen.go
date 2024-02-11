@@ -6,7 +6,7 @@ import (
 	"cogentcore.org/core/gti"
 )
 
-var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/texteditor/histyle.Trilean", IDName: "trilean", Doc: "Trilean value for StyleEntry value inheritance.", Directives: []gti.Directive{{Tool: "enums", Directive: "enum"}}})
+var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/texteditor/histyle.Trilean", IDName: "trilean", Doc: "Trilean value for StyleEntry value inheritance."})
 
 var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/texteditor/histyle.StyleEntry", IDName: "style-entry", Doc: "StyleEntry is one value in the map of highlight style values", Fields: []gti.Field{{Name: "Color", Doc: "text color"}, {Name: "Background", Doc: "background color"}, {Name: "Border", Doc: "border color? not sure what this is -- not really used"}, {Name: "Bold", Doc: "bold font"}, {Name: "Italic", Doc: "italic font"}, {Name: "Underline", Doc: "underline"}, {Name: "NoInherit", Doc: "don't inherit these settings from sub-category or category levels -- otherwise everything with a Pass is inherited"}}})
 

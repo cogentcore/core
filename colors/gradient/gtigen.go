@@ -8,7 +8,7 @@ import (
 	"cogentcore.org/core/mat32"
 )
 
-var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/colors/gradient.Base", IDName: "base", Doc: "Base contains the data and logic common to all gradient types.", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Fields: []gti.Field{{Name: "Stops", Doc: "the stops for the gradient; use AddStop to add stops"}, {Name: "Spread", Doc: "the spread method used for the gradient if it stops before the end"}, {Name: "Blend", Doc: "the colorspace algorithm to use for blending colors"}, {Name: "Units", Doc: "the units to use for the gradient"}, {Name: "Box", Doc: "the bounding box of the object with the gradient; this is used when rendering\ngradients with [Units] of [ObjectBoundingBox]."}, {Name: "Transform", Doc: "Transform is the transformation matrix applied to the gradient's points."}, {Name: "objectMatrix", Doc: "objectMatrix is the computed effective object transformation matrix\nfor a gradient with [Units] of [ObjectBoundingBox]."}}})
+var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/colors/gradient.Base", IDName: "base", Doc: "Base contains the data and logic common to all gradient types.", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Fields: []gti.Field{{Name: "Stops", Doc: "the stops for the gradient; use AddStop to add stops"}, {Name: "Spread", Doc: "the spread method used for the gradient if it stops before the end"}, {Name: "Blend", Doc: "the colorspace algorithm to use for blending colors"}, {Name: "Units", Doc: "the units to use for the gradient"}, {Name: "Box", Doc: "the bounding box of the object with the gradient; this is used when rendering\ngradients with [Units] of [ObjectBoundingBox]."}, {Name: "Transform", Doc: "Transform is the gradient's own transformation matrix applied to the gradient's points.\nThis is a property of the Gradient itself."}, {Name: "Opacity", Doc: "Opacity is the overall object opacity multiplier, applied in conjunction with the\nstop-level opacity blending."}, {Name: "ApplyFuncs", Doc: "functions that are applied to the color after gradient color is generated.\nThis allows for efficient StateLayer and other post-processing effects\nto be applied.  The Applier handles other cases, but gradients always\nmust have the Update function called at render time, so they must\nremain Gradient types."}, {Name: "boxTransform", Doc: "boxTransform is the Transform applied to the bounding Box,\nonly for [Units] == [ObjectBoundingBox]."}}})
 
 // SetSpread sets the [Base.Spread]:
 // the spread method used for the gradient if it stops before the end
@@ -28,10 +28,16 @@ func (t *Base) SetUnits(v Units) *Base { t.Units = v; return t }
 func (t *Base) SetBox(v mat32.Box2) *Base { t.Box = v; return t }
 
 // SetTransform sets the [Base.Transform]:
-// Transform is the transformation matrix applied to the gradient's points.
+// Transform is the gradient's own transformation matrix applied to the gradient's points.
+// This is a property of the Gradient itself.
 func (t *Base) SetTransform(v mat32.Mat2) *Base { t.Transform = v; return t }
 
-var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/colors/gradient.Linear", IDName: "linear", Doc: "Linear represents a linear gradient. It implements the [image.Image] interface.", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Embeds: []gti.Field{{Name: "Base"}}, Fields: []gti.Field{{Name: "Start", Doc: "the starting point of the gradient (x1 and y1 in SVG)"}, {Name: "End", Doc: "the ending point of the gradient (x2 and y2 in SVG)"}, {Name: "effStart", Doc: "effStart is the computed effective transformed starting point of the gradient."}, {Name: "effEnd", Doc: "effEnd is the computed effective transformed ending point of the gradient."}}})
+// SetOpacity sets the [Base.Opacity]:
+// Opacity is the overall object opacity multiplier, applied in conjunction with the
+// stop-level opacity blending.
+func (t *Base) SetOpacity(v float32) *Base { t.Opacity = v; return t }
+
+var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/colors/gradient.Linear", IDName: "linear", Doc: "Linear represents a linear gradient. It implements the [image.Image] interface.", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Embeds: []gti.Field{{Name: "Base"}}, Fields: []gti.Field{{Name: "Start", Doc: "the starting point of the gradient (x1 and y1 in SVG)"}, {Name: "End", Doc: "the ending point of the gradient (x2 and y2 in SVG)"}, {Name: "rStart", Doc: "current render version -- transformed by object matrix"}, {Name: "rEnd", Doc: "current render version -- transformed by object matrix"}}})
 
 // SetStart sets the [Linear.Start]:
 // the starting point of the gradient (x1 and y1 in SVG)
@@ -56,7 +62,10 @@ func (t *Linear) SetBox(v mat32.Box2) *Linear { t.Box = v; return t }
 // SetTransform sets the [Linear.Transform]
 func (t *Linear) SetTransform(v mat32.Mat2) *Linear { t.Transform = v; return t }
 
-var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/colors/gradient.Radial", IDName: "radial", Doc: "Radial represents a radial gradient. It implements the [image.Image] interface.", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Embeds: []gti.Field{{Name: "Base"}}, Fields: []gti.Field{{Name: "Center", Doc: "the center point of the gradient (cx and cy in SVG)"}, {Name: "Focal", Doc: "the focal point of the gradient (fx and fy in SVG)"}, {Name: "Radius", Doc: "the radius of the gradient (rx and ry in SVG)"}}})
+// SetOpacity sets the [Linear.Opacity]
+func (t *Linear) SetOpacity(v float32) *Linear { t.Opacity = v; return t }
+
+var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/colors/gradient.Radial", IDName: "radial", Doc: "Radial represents a radial gradient. It implements the [image.Image] interface.", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Embeds: []gti.Field{{Name: "Base"}}, Fields: []gti.Field{{Name: "Center", Doc: "the center point of the gradient (cx and cy in SVG)"}, {Name: "Focal", Doc: "the focal point of the gradient (fx and fy in SVG)"}, {Name: "Radius", Doc: "the radius of the gradient (rx and ry in SVG)"}, {Name: "rCenter", Doc: "current render version -- transformed by object matrix"}, {Name: "rFocal", Doc: "current render version -- transformed by object matrix"}, {Name: "rRadius", Doc: "current render version -- transformed by object matrix"}}})
 
 // SetCenter sets the [Radial.Center]:
 // the center point of the gradient (cx and cy in SVG)
@@ -84,3 +93,6 @@ func (t *Radial) SetBox(v mat32.Box2) *Radial { t.Box = v; return t }
 
 // SetTransform sets the [Radial.Transform]
 func (t *Radial) SetTransform(v mat32.Mat2) *Radial { t.Transform = v; return t }
+
+// SetOpacity sets the [Radial.Opacity]
+func (t *Radial) SetOpacity(v float32) *Radial { t.Opacity = v; return t }

@@ -28,13 +28,13 @@ type Radial struct { //gti:add -setters
 	Radius mat32.Vec2
 
 	// current render version -- transformed by object matrix
-	rCenter mat32.Vec2
+	rCenter mat32.Vec2 `set:"-"`
 
 	// current render version -- transformed by object matrix
-	rFocal mat32.Vec2
+	rFocal mat32.Vec2 `set:"-"`
 
 	// current render version -- transformed by object matrix
-	rRadius mat32.Vec2
+	rRadius mat32.Vec2 `set:"-"`
 }
 
 var _ Gradient = &Radial{}

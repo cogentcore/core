@@ -2553,14 +2553,14 @@ const (
 	// GraphicEq is https://github.com/cogentcore/core/blob/main/icons/svg/graphic_eq.svg
 	GraphicEq Icon = "graphic_eq"
 
-	// Grid3X3 is https://github.com/cogentcore/core/blob/main/icons/svg/grid_3x3.svg
-	Grid3X3 Icon = "grid_3x3"
+	// Grid3x3 is https://github.com/cogentcore/core/blob/main/icons/svg/grid_3x3.svg
+	Grid3x3 Icon = "grid_3x3"
 
-	// Grid3X3Off is https://github.com/cogentcore/core/blob/main/icons/svg/grid_3x3_off.svg
-	Grid3X3Off Icon = "grid_3x3_off"
+	// Grid3x3Off is https://github.com/cogentcore/core/blob/main/icons/svg/grid_3x3_off.svg
+	Grid3x3Off Icon = "grid_3x3_off"
 
-	// Grid4X4 is https://github.com/cogentcore/core/blob/main/icons/svg/grid_4x4.svg
-	Grid4X4 Icon = "grid_4x4"
+	// Grid4x4 is https://github.com/cogentcore/core/blob/main/icons/svg/grid_4x4.svg
+	Grid4x4 Icon = "grid_4x4"
 
 	// GridGoldenratio is https://github.com/cogentcore/core/blob/main/icons/svg/grid_goldenratio.svg
 	GridGoldenratio Icon = "grid_goldenratio"

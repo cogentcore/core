@@ -59,6 +59,15 @@ func (t *Node) SetText(v string) *Node { t.Text = v; return t }
 // SetIcon sets the [Node.Icon]
 func (t *Node) SetIcon(v icons.Icon) *Node { t.Icon = v; return t }
 
+// SetIconOpen sets the [Node.IconOpen]
+func (t *Node) SetIconOpen(v icons.Icon) *Node { t.IconOpen = v; return t }
+
+// SetIconClosed sets the [Node.IconClosed]
+func (t *Node) SetIconClosed(v icons.Icon) *Node { t.IconClosed = v; return t }
+
+// SetIconLeaf sets the [Node.IconLeaf]
+func (t *Node) SetIconLeaf(v icons.Icon) *Node { t.IconLeaf = v; return t }
+
 // SetIndent sets the [Node.Indent]
 func (t *Node) SetIndent(v units.Value) *Node { t.Indent = v; return t }
 
@@ -117,6 +126,15 @@ func (t *Tree) SetText(v string) *Tree { t.Text = v; return t }
 
 // SetIcon sets the [Tree.Icon]
 func (t *Tree) SetIcon(v icons.Icon) *Tree { t.Icon = v; return t }
+
+// SetIconOpen sets the [Tree.IconOpen]
+func (t *Tree) SetIconOpen(v icons.Icon) *Tree { t.IconOpen = v; return t }
+
+// SetIconClosed sets the [Tree.IconClosed]
+func (t *Tree) SetIconClosed(v icons.Icon) *Tree { t.IconClosed = v; return t }
+
+// SetIconLeaf sets the [Tree.IconLeaf]
+func (t *Tree) SetIconLeaf(v icons.Icon) *Tree { t.IconLeaf = v; return t }
 
 // SetIndent sets the [Tree.Indent]
 func (t *Tree) SetIndent(v units.Value) *Tree { t.Indent = v; return t }

@@ -67,7 +67,7 @@ func (t *NodeField) SetMbr1(v string) *NodeField { t.Mbr1 = v; return t }
 func (t *NodeField) SetMbr2(v int) *NodeField { t.Mbr2 = v; return t }
 
 // NodeField2Type is the [gti.Type] for [NodeField2]
-var NodeField2Type = gti.AddType(&gti.Type{Name: "cogentcore.org/core/ki/testdata.NodeField2", IDName: "node-field-2", Embeds: []gti.Field{{Name: "NodeField"}}, Fields: []gti.Field{{Name: "Field2"}}, Instance: &NodeField2{}})
+var NodeField2Type = gti.AddType(&gti.Type{Name: "cogentcore.org/core/ki/testdata.NodeField2", IDName: "node-field2", Embeds: []gti.Field{{Name: "NodeField"}}, Fields: []gti.Field{{Name: "Field2"}}, Instance: &NodeField2{}})
 
 // NewNodeField2 adds a new [NodeField2] with the given name to the given parent:
 func NewNodeField2(par ki.Ki, name ...string) *NodeField2 {

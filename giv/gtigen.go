@@ -282,9 +282,9 @@ func (t *MapView) SetValues(v ...Value) *MapView { t.Values = v; return t }
 // sort by values instead of keys
 func (t *MapView) SetSortVals(v bool) *MapView { t.SortVals = v; return t }
 
-// SetNcols sets the [MapView.NCols]:
+// SetNCols sets the [MapView.NCols]:
 // the number of columns in the map; do not set externally; generally only access internally
-func (t *MapView) SetNcols(v int) *MapView { t.NCols = v; return t }
+func (t *MapView) SetNCols(v int) *MapView { t.NCols = v; return t }
 
 // SetTmpSave sets the [MapView.TmpSave]:
 // value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent

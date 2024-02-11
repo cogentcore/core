@@ -13,121 +13,6 @@ import (
 	"cogentcore.org/core/enums"
 )
 
-var _ObjectFitsValues = []ObjectFits{0, 1, 2, 3, 4}
-
-// ObjectFitsN is the highest valid value
-// for type ObjectFits, plus one.
-const ObjectFitsN ObjectFits = 5
-
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _ObjectFitsNoOp() {
-	var x [1]struct{}
-	_ = x[FitFill-(0)]
-	_ = x[FitContain-(1)]
-	_ = x[FitCover-(2)]
-	_ = x[FitNone-(3)]
-	_ = x[FitScaleDown-(4)]
-}
-
-var _ObjectFitsNameToValueMap = map[string]ObjectFits{
-	`fill`:       0,
-	`contain`:    1,
-	`cover`:      2,
-	`none`:       3,
-	`scale-down`: 4,
-}
-
-var _ObjectFitsDescMap = map[ObjectFits]string{
-	0: `FitFill indicates that the replaced object will fill the element&#39;s entire content box, stretching if necessary.`,
-	1: `FitContain indicates that the replaced object will resize as large as possible while fully fitting within the element&#39;s content box and maintaining its aspect ratio. Therefore, it may not fill the entire element.`,
-	2: `FitCover indicates that the replaced object will fill the element&#39;s entire content box, clipping if necessary.`,
-	3: `FitNone indicates that the replaced object will not resize.`,
-	4: `FitScaleDown indicates that the replaced object will size as if [FitNone] or [FitContain] was specified, using whichever will result in a smaller final size.`,
-}
-
-var _ObjectFitsMap = map[ObjectFits]string{
-	0: `fill`,
-	1: `contain`,
-	2: `cover`,
-	3: `none`,
-	4: `scale-down`,
-}
-
-// String returns the string representation
-// of this ObjectFits value.
-func (i ObjectFits) String() string {
-	if str, ok := _ObjectFitsMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
-
-// SetString sets the ObjectFits value from its
-// string representation, and returns an
-// error if the string is invalid.
-func (i *ObjectFits) SetString(s string) error {
-	if val, ok := _ObjectFitsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type ObjectFits")
-}
-
-// Int64 returns the ObjectFits value as an int64.
-func (i ObjectFits) Int64() int64 {
-	return int64(i)
-}
-
-// SetInt64 sets the ObjectFits value from an int64.
-func (i *ObjectFits) SetInt64(in int64) {
-	*i = ObjectFits(in)
-}
-
-// Desc returns the description of the ObjectFits value.
-func (i ObjectFits) Desc() string {
-	if str, ok := _ObjectFitsDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
-
-// ObjectFitsValues returns all possible values
-// for the type ObjectFits.
-func ObjectFitsValues() []ObjectFits {
-	return _ObjectFitsValues
-}
-
-// Values returns all possible values
-// for the type ObjectFits.
-func (i ObjectFits) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_ObjectFitsValues))
-	for i, d := range _ObjectFitsValues {
-		res[i] = d
-	}
-	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type ObjectFits.
-func (i ObjectFits) IsValid() bool {
-	_, ok := _ObjectFitsMap[i]
-	return ok
-}
-
-// MarshalText implements the [encoding.TextMarshaler] interface.
-func (i ObjectFits) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
-
-// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *ObjectFits) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("ObjectFits.UnmarshalText:", err)
-	}
-	return nil
-}
-
 var _BorderStylesValues = []BorderStyles{0, 1, 2, 3, 4, 5, 6, 7, 8}
 
 // BorderStylesN is the highest valid value
@@ -1539,6 +1424,121 @@ func (i *Overflows) UnmarshalText(text []byte) error {
 	return nil
 }
 
+var _ObjectFitsValues = []ObjectFits{0, 1, 2, 3, 4}
+
+// ObjectFitsN is the highest valid value
+// for type ObjectFits, plus one.
+const ObjectFitsN ObjectFits = 5
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _ObjectFitsNoOp() {
+	var x [1]struct{}
+	_ = x[FitFill-(0)]
+	_ = x[FitContain-(1)]
+	_ = x[FitCover-(2)]
+	_ = x[FitNone-(3)]
+	_ = x[FitScaleDown-(4)]
+}
+
+var _ObjectFitsNameToValueMap = map[string]ObjectFits{
+	`fill`:       0,
+	`contain`:    1,
+	`cover`:      2,
+	`none`:       3,
+	`scale-down`: 4,
+}
+
+var _ObjectFitsDescMap = map[ObjectFits]string{
+	0: `FitFill indicates that the replaced object will fill the element&#39;s entire content box, stretching if necessary.`,
+	1: `FitContain indicates that the replaced object will resize as large as possible while fully fitting within the element&#39;s content box and maintaining its aspect ratio. Therefore, it may not fill the entire element.`,
+	2: `FitCover indicates that the replaced object will fill the element&#39;s entire content box, clipping if necessary.`,
+	3: `FitNone indicates that the replaced object will not resize.`,
+	4: `FitScaleDown indicates that the replaced object will size as if [FitNone] or [FitContain] was specified, using whichever will result in a smaller final size.`,
+}
+
+var _ObjectFitsMap = map[ObjectFits]string{
+	0: `fill`,
+	1: `contain`,
+	2: `cover`,
+	3: `none`,
+	4: `scale-down`,
+}
+
+// String returns the string representation
+// of this ObjectFits value.
+func (i ObjectFits) String() string {
+	if str, ok := _ObjectFitsMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
+}
+
+// SetString sets the ObjectFits value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *ObjectFits) SetString(s string) error {
+	if val, ok := _ObjectFitsNameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+	return errors.New(s + " is not a valid value for type ObjectFits")
+}
+
+// Int64 returns the ObjectFits value as an int64.
+func (i ObjectFits) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the ObjectFits value from an int64.
+func (i *ObjectFits) SetInt64(in int64) {
+	*i = ObjectFits(in)
+}
+
+// Desc returns the description of the ObjectFits value.
+func (i ObjectFits) Desc() string {
+	if str, ok := _ObjectFitsDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// ObjectFitsValues returns all possible values
+// for the type ObjectFits.
+func ObjectFitsValues() []ObjectFits {
+	return _ObjectFitsValues
+}
+
+// Values returns all possible values
+// for the type ObjectFits.
+func (i ObjectFits) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_ObjectFitsValues))
+	for i, d := range _ObjectFitsValues {
+		res[i] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type ObjectFits.
+func (i ObjectFits) IsValid() bool {
+	_, ok := _ObjectFitsMap[i]
+	return ok
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i ObjectFits) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *ObjectFits) UnmarshalText(text []byte) error {
+	if err := i.SetString(string(text)); err != nil {
+		log.Println("ObjectFits.UnmarshalText:", err)
+	}
+	return nil
+}
+
 var _FillRulesValues = []FillRules{0, 1}
 
 // FillRulesN is the highest valid value
@@ -2457,9 +2457,9 @@ var _WhiteSpacesNameToValueMap = map[string]WhiteSpaces{
 }
 
 var _WhiteSpacesDescMap = map[WhiteSpaces]string{
-	0: `WhiteSpaceNormal means that all white space is collapsed to a single space, and text wraps when necessary. To get full word wrapping to expand to all available space, you also need to set Grow.X = 1. Use the SetTextWrap convenience method to set both.`,
-	1: `WhiteSpaceNowrap means that sequences of whitespace will collapse into a single whitespace. Text will never wrap to the next line except if there is an explicit line break via a &lt;br&gt; tag. In general you also don&#39;t want simple non-wrapping text labels to Grow (Grow.X = 0). Use the SetTextWrap method to set both.`,
-	2: `WhiteSpacePre means that whitespace is preserved. Text will only wrap on line breaks. Acts like the &lt;pre&gt; tag in HTML. This invokes a different hand-written parser because the default golang parser automatically throws away whitespace`,
+	0: `WhiteSpaceNormal means that all white space is collapsed to a single space, and text wraps when necessary. To get full word wrapping to expand to all available space, you also need to set GrowWrap = 1. Use the SetTextWrap convenience method to set both.`,
+	1: `WhiteSpaceNowrap means that sequences of whitespace will collapse into a single whitespace. Text will never wrap to the next line except if there is an explicit line break via a &lt;br&gt; tag. In general you also don&#39;t want simple non-wrapping text labels to Grow (GrowWrap = 0). Use the SetTextWrap method to set both.`,
+	2: `WhiteSpacePre means that whitespace is preserved. Text will only wrap on line breaks. Acts like the &lt;pre&gt; tag in HTML. This invokes a different hand-written parser because the default Go parser automatically throws away whitespace.`,
 	3: `WhiteSpacePreLine means that sequences of whitespace will collapse into a single whitespace. Text will wrap when necessary, and on line breaks`,
 	4: `WhiteSpacePreWrap means that whitespace is preserved. Text will wrap when necessary, and on line breaks`,
 }
