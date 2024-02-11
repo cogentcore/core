@@ -14,13 +14,13 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
-	"cogentcore.org/core/glop/sentence"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/states"
+	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 )
@@ -302,7 +302,7 @@ func (tv *TableView) ConfigHeader() {
 		if lbl, ok := field.Tag.Lookup("label"); ok {
 			htxt = lbl
 		} else {
-			htxt = sentence.Case(field.Name)
+			htxt = strcase.ToSentence(field.Name)
 		}
 		hdr.SetText(htxt)
 		tv.HeaderWidths[fli] = len(htxt)

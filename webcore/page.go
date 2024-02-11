@@ -20,7 +20,6 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/giv"
-	"cogentcore.org/core/glop/sentence"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/grows/tomls"
 	"cogentcore.org/core/grr"
@@ -195,7 +194,7 @@ func (pg *Page) ConfigWidget() {
 		}
 
 		nm := strings.TrimSuffix(base, ext)
-		txt := sentence.Case(strcase.ToCamel(nm))
+		txt := strcase.ToSentence(nm)
 		tv := giv.NewTreeView(par, nm).SetText(txt)
 
 		// need index.md for page path

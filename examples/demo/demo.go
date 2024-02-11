@@ -17,10 +17,10 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/giv"
-	"cogentcore.org/core/glop/sentence"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/states"
+	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 )
 
@@ -69,7 +69,7 @@ func text(ts *gi.Tabs) {
 		`Cogent Core provides fully customizable text elements that can be styled in any way you want. Also, there are pre-configured style types for text that allow you to easily create common text types.`)
 
 	for _, typ := range gi.LabelTypesValues() {
-		s := sentence.Case(typ.String())
+		s := strcase.ToSentence(typ.String())
 		gi.NewLabel(tab, "label"+typ.String()).SetType(typ).SetText(s)
 	}
 }

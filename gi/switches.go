@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/glop/sentence"
 	"cogentcore.org/core/ki"
+	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 )
@@ -189,7 +190,7 @@ func (sw *Switches) SetEnums(el []enums.Enum) *Switches {
 		} else {
 			str = enum.String()
 		}
-		lbl := sentence.Case(str)
+		lbl := strcase.ToSentence(str)
 		sw.Items[i] = lbl
 		desc := enum.Desc()
 		// If the documentation does not start with the transformed name, but it does

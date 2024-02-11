@@ -16,11 +16,11 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/gi"
-	"cogentcore.org/core/glop/sentence"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/states"
+	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 )
 
@@ -340,12 +340,12 @@ func (vv *ValueBase) Label() string {
 	case vv.Field != nil:
 		lbl = vv.Field.Name
 		if sc {
-			lbl = sentence.Case(lbl)
+			lbl = strcase.ToSentence(lbl)
 		}
 	default:
 		lbl = vv.Nm
 		if sc {
-			lbl = sentence.Case(lbl)
+			lbl = strcase.ToSentence(lbl)
 		}
 	}
 

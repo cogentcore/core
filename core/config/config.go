@@ -17,8 +17,8 @@ import (
 	"unicode"
 
 	"cogentcore.org/core/enums/enumgen"
-	"cogentcore.org/core/glop/sentence"
 	"cogentcore.org/core/gti/gtigen"
+	"cogentcore.org/core/strcase"
 )
 
 // TODO: make all of the target fields enums
@@ -148,7 +148,7 @@ func (c *Config) OnConfig(cmd string) error {
 		}
 		base := filepath.Base(cdir)
 		if c.Name == "" {
-			c.Name = sentence.Case(base)
+			c.Name = strcase.ToSentence(base)
 		}
 
 		if c.ID == "" {

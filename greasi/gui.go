@@ -8,7 +8,6 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/giv"
-	"cogentcore.org/core/glop/sentence"
 	"cogentcore.org/core/grease"
 	"cogentcore.org/core/grog"
 	"cogentcore.org/core/strcase"
@@ -25,8 +24,7 @@ func GUI[T any](opts *grease.Options, cfg T, cmds ...*grease.Cmd[T]) {
 			if cmd.Name == "gui" { // we are already in GUI so that command is irrelevant
 				continue
 			}
-			// need to go to camel first (it is mostly in kebab)
-			gi.NewButton(tb, cmd.Name).SetText(sentence.Case(strcase.ToCamel(cmd.Name))).SetTooltip(cmd.Doc).
+			gi.NewButton(tb, cmd.Name).SetText(strcase.ToSentence(cmd.Name)).SetTooltip(cmd.Doc).
 				OnClick(func(e events.Event) {
 					err := cmd.Func(cfg)
 					if err != nil {

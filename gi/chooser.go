@@ -23,6 +23,7 @@ import (
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/pi/complete"
+	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 )
@@ -348,7 +349,7 @@ func (ch *Chooser) SetEnums(es []enums.Enum) *Chooser {
 	ch.Items = make([]ChooserItem, len(es))
 	for i, enum := range es {
 		str := enum.String()
-		lbl := sentence.Case(str)
+		lbl := strcase.ToSentence(str)
 		desc := enum.Desc()
 		// If the documentation does not start with the transformed name, but it does
 		// start with an uppercase letter, then we assume that the first word of the

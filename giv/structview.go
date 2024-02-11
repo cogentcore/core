@@ -15,10 +15,10 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
-	"cogentcore.org/core/glop/sentence"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
+	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 )
 
@@ -241,7 +241,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 							dupeFields[fnm] = true
 						}
 						if sc {
-							svv.SetLabel(sentence.Case(fnm))
+							svv.SetLabel(strcase.ToSentence(fnm))
 						} else {
 							svv.SetLabel(fnm)
 						}

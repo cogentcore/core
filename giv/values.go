@@ -17,7 +17,6 @@ import (
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/fi"
 	"cogentcore.org/core/gi"
-	"cogentcore.org/core/glop/sentence"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
@@ -483,7 +482,7 @@ func (vv *SliceValue) UpdateWidget() {
 			// txt = sentencecase.Of(fmt.Sprintf("%d %ss", npv.Len(), laser.FriendlyTypeName(vv.ElType)))
 			// note: above crashes with:
 			// panic: reflect: call of reflect.Value.Len on interface Value
-			txt = sentence.Case(fmt.Sprintf("%ss", laser.FriendlyTypeName(vv.ElType)))
+			txt = strcase.ToSentence(fmt.Sprintf("%ss", laser.FriendlyTypeName(vv.ElType)))
 		} else {
 			txt = "None"
 		}
@@ -616,7 +615,7 @@ func (vv *MapValue) UpdateWidget() {
 	if !npv.IsValid() || npv.IsNil() {
 		txt = "None"
 	} else {
-		txt = sentence.Case(fmt.Sprintf("%d %ss", npv.Len(), laser.FriendlyTypeName(laser.MapValueType(mpi))))
+		txt = strcase.ToSentence(fmt.Sprintf("%d %ss", npv.Len(), laser.FriendlyTypeName(laser.MapValueType(mpi))))
 	}
 	bt.SetTextUpdate(txt)
 }
@@ -1358,7 +1357,7 @@ func (vv *IconValue) UpdateWidget() {
 			if txt == "" {
 				txt = "None"
 			}
-			bt.SetTextUpdate(sentence.Case(txt))
+			bt.SetTextUpdate(strcase.ToSentence(txt))
 		}
 	}
 }
@@ -1386,7 +1385,7 @@ func (vv *IconValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	ics := icons.All()
 	cur := icons.Icon(laser.ToString(vv.Value.Interface()))
 	NewSliceView(d).SetStyleFunc(func(w gi.Widget, s *styles.Style, row int) {
-		w.(*gi.Button).SetText(sentence.Case(strcase.ToCamel(string(ics[row]))))
+		w.(*gi.Button).SetText(strcase.ToSentence(string(ics[row])))
 	}).SetSlice(&ics).SetSelVal(cur).BindSelect(&si)
 	return true, func() {
 		if si >= 0 {

@@ -75,7 +75,7 @@ func CmdFromFunc[T any](fun func(T) error) (*Cmd[T], error) {
 			}
 		}
 		// we format the doc after the directives so that we have the up-to-date documentation and name
-		cmd.Doc = sentence.Doc(cmd.Doc, cfn, sentence.Case(cmd.Name))
+		cmd.Doc = sentence.Doc(cmd.Doc, cfn, strcase.ToSentence(cmd.Name))
 	}
 	return cmd, nil
 }

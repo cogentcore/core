@@ -209,7 +209,7 @@ func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButto
 	}
 	// func name is not guaranteed to make it unique so we ensure it is (-1 because [ki.New] adds 1 first)
 	fb.SetName(snm + "-" + strconv.FormatUint(fb.Parent().NumLifetimeChildren()-1, 10))
-	txt := sentence.Case(snm)
+	txt := strcase.ToSentence(snm)
 	fb.SetText(txt)
 	fb.Func.Doc = sentence.Doc(fb.Func.Doc, snm, txt)
 	fb.SetTooltip(fb.Func.Doc)
@@ -372,7 +372,7 @@ func (fb *FuncButton) SetArgs() {
 			name = laser.NonPtrType(atyp).Name()
 		}
 
-		label := sentence.Case(name)
+		label := strcase.ToSentence(name)
 		val := reflect.New(atyp)
 
 		view := ToValue(val.Interface(), "")
@@ -409,7 +409,7 @@ func (fb *FuncButton) SetReturns() {
 			name = laser.NonPtrType(rtyp).Name()
 		}
 
-		label := sentence.Case(name)
+		label := strcase.ToSentence(name)
 		val := reflect.New(rtyp)
 
 		view := ToValue(val.Interface(), "")
