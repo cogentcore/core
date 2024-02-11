@@ -105,7 +105,7 @@ func (dm *DirFlagMap) SetMark(path string) {
 	dm.Init()
 	defer dm.Mu.Unlock()
 	df := dm.Map[path]
-	// bitflag.Set32((*int32)(&df), int(DirMark))
+	df.SetFlag(true, DirMark)
 	dm.Map[path] = df
 }
 
@@ -115,7 +115,7 @@ func (dm *DirFlagMap) ClearMarks() {
 	dm.Init()
 	defer dm.Mu.Unlock()
 	for key, df := range dm.Map {
-		// bitflag.Clear32((*int32)(&df), int(DirMark))
+		df.SetFlag(false, DirMark)
 		dm.Map[key] = df
 	}
 }
