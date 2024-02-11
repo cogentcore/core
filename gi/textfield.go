@@ -16,7 +16,6 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/fi"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
@@ -936,12 +935,12 @@ func (tf *TextField) Copy(reset bool) {
 // cursor is within a current selection, that selection is replaced.
 // Satisfies Clipper interface -- can be extended in subtypes.
 func (tf *TextField) Paste() {
-	data := tf.Clipboard().Read([]string{fi.TextPlain})
+	data := tf.Clipboard().Read([]string{"text/plain"})
 	if data != nil {
 		if tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
 			tf.DeleteSelection()
 		}
-		tf.InsertAtCursor(data.Text(fi.TextPlain))
+		tf.InsertAtCursor(data.Text("text/plain"))
 	}
 }
 
