@@ -164,7 +164,7 @@ func IsSeedMatching(lseed string, completion string) bool {
 		}
 		return r
 	}, completion)
-	cs = strcase.ToWordCase(cs, strcase.WordOriginal, ' ')
+	cs = strcase.ToWordCase(cs, strcase.WordLowerCase, ' ')
 	if strings.Contains(cs, lseed) {
 		return true
 	}
