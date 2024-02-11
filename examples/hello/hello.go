@@ -1,9 +1,21 @@
 package main
 
-import "cogentcore.org/core/gi"
+import (
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/styles"
+)
 
 func main() {
 	b := gi.NewBody("Hello")
 	gi.NewButton(b).SetText("Hello, World!")
+
+	gi.NewTextField(b).SetText("One line textfield with a relatively long initial text")
+	gi.NewTextField(b).AddClearButton().SetLeadingIcon(icons.Search)
+	gi.NewTextField(b).SetText("Multiline textfield with a relatively long initial text").
+		Style(func(s *styles.Style) {
+			s.SetTextWrap(true)
+			s.Max.X.Em(10)
+		})
 	b.RunMainWindow()
 }

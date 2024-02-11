@@ -554,6 +554,7 @@ func (ed *Editor) PixelToCursor(pt image.Point) lex.Pos {
 	bb := ed.Geom.ContentBBox
 	sty := &ed.Styles
 	yoff := float32(bb.Min.Y)
+	xoff := float32(bb.Min.X)
 	stln := ed.FirstVisibleLine(0)
 	cln := stln
 	fls := ed.CharStartPos(lex.Pos{Ln: stln}).Y - yoff
@@ -578,95 +579,30 @@ func (ed *Editor) PixelToCursor(pt image.Point) lex.Pos {
 		}
 	}
 	// fmt.Printf("cln: %v  pt: %v\n", cln, pt)
-	lnsz := ed.Buf.LineLen(cln)
-	if lnsz == 0 {
+	if cln >= len(ed.Renders) {
 		return lex.Pos{Ln: cln, Ch: 0}
 	}
-	xoff := float32(bb.Min.X)
+	lnsz := ed.Buf.LineLen(cln)
+	if lnsz == 0 || sty.Font.Face == nil {
+		return lex.Pos{Ln: cln, Ch: 0}
+	}
 	scrl := ed.Geom.Scroll.Y
 	nolno := float32(pt.X - int(ed.LineNoOff))
-	if sty.Font.Face == nil {
-		return lex.Pos{Ln: cln, Ch: 0}
-	}
 	sc := int((nolno + scrl) / sty.Font.Face.Metrics.Ch)
 	sc -= sc / 4
 	sc = max(0, sc)
 	cch := sc
 
-	si := 0
-	spoff := 0
-	if cln >= len(ed.Renders) {
-		return lex.Pos{Ln: cln, Ch: 0}
-	}
-	nspan := len(ed.Renders[cln].Spans)
-	lstY := ed.CharStartPos(lex.Pos{Ln: cln}).Y - yoff
-	if nspan > 1 {
-		si = int((float32(pt.Y) - lstY) / ed.LineHeight)
-		si = min(si, nspan-1)
-		si = max(si, 0)
-		for i := 0; i < si; i++ {
-			spoff += len(ed.Renders[cln].Spans[i].Text)
-		}
-		// fmt.Printf("si: %v  spoff: %v\n", si, spoff)
+	lnst := ed.CharStartPos(lex.Pos{Ln: cln})
+	lnst.Y -= yoff
+	lnst.X -= xoff
+	rpt := mat32.V2FromPoint(pt).Sub(lnst)
+
+	si, ri, ok := ed.Renders[cln].PosToRune(rpt)
+	if ok {
+		cch, _ := ed.Renders[cln].SpanPosToRuneIdx(si, ri)
+		return lex.Pos{Ln: cln, Ch: cch}
 	}
 
-	ri := sc
-	if si >= nspan {
-		return lex.Pos{Ln: cln, Ch: spoff}
-	}
-	rsz := len(ed.Renders[cln].Spans[si].Text)
-	if rsz == 0 {
-		return lex.Pos{Ln: cln, Ch: spoff}
-	}
-	// fmt.Printf("sc: %v  rsz: %v\n", sc, rsz)
-
-	c, _ := ed.Renders[cln].SpanPosToRuneIdx(si, rsz-1) // end
-	rsp := mat32.Floor(ed.CharStartPos(lex.Pos{Ln: cln, Ch: c}).X - xoff)
-	rep := mat32.Ceil(ed.CharEndPos(lex.Pos{Ln: cln, Ch: c}).X - xoff)
-	if int(rep) < pt.X { // end of line
-		if si == nspan-1 {
-			c++
-		}
-		return lex.Pos{Ln: cln, Ch: c}
-	}
-
-	tooBig := false
-	got := false
-	if ri < rsz {
-		for rii := ri; rii < rsz; rii++ {
-			c, _ := ed.Renders[cln].SpanPosToRuneIdx(si, rii)
-			rsp = mat32.Floor(ed.CharStartPos(lex.Pos{Ln: cln, Ch: c}).X - xoff)
-			rep = mat32.Ceil(ed.CharEndPos(lex.Pos{Ln: cln, Ch: c}).X - xoff)
-			// fmt.Printf("trying c: %v for pt: %v xoff: %v rsp: %v, rep: %v\n", c, pt, xoff, rsp, rep)
-			if pt.X >= int(rsp) && pt.X < int(rep) {
-				cch = c
-				got = true
-				// fmt.Printf("got cch: %v for pt: %v rsp: %v, rep: %v\n", cch, pt, rsp, rep)
-				break
-			} else if int(rep) > pt.X {
-				cch = c
-				tooBig = true
-				break
-			}
-		}
-	} else {
-		tooBig = true
-	}
-	if !got && tooBig {
-		ri = rsz - 1
-		// fmt.Printf("too big: %v\n", ri)
-		for rii := ri; rii >= 0; rii-- {
-			c, _ := ed.Renders[cln].SpanPosToRuneIdx(si, rii)
-			rsp := mat32.Floor(ed.CharStartPos(lex.Pos{Ln: cln, Ch: c}).X - xoff)
-			rep := mat32.Ceil(ed.CharEndPos(lex.Pos{Ln: cln, Ch: c}).X - xoff)
-			// fmt.Printf("too big: trying c: %v for pt: %v rsp: %v, rep: %v\n", c, pt, rsp, rep)
-			if pt.X >= int(rsp) && pt.X < int(rep) {
-				got = true
-				cch = c
-				// fmt.Printf("got cch: %v for pt: %v rsp: %v, rep: %v\n", cch, pt, rsp, rep)
-				break
-			}
-		}
-	}
 	return lex.Pos{Ln: cln, Ch: cch}
 }

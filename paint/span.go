@@ -39,10 +39,15 @@ type Span struct {
 	// render info for each rune in one-to-one correspondence
 	Render []Rune
 
-	// position for start of text relative to an absolute coordinate that is provided at the time of rendering -- this typically includes the baseline offset to align all rune rendering there -- individual rune RelPos are added to this plus the render-time offset to get the final position
+	// position for start of text relative to an absolute coordinate that is provided at the time of rendering.
+	// This typically includes the baseline offset to align all rune rendering there.
+	// Individual rune RelPos are added to this plus the render-time offset to get the final position.
 	RelPos mat32.Vec2
 
-	// rune position for further edge of last rune -- for standard flat strings this is the overall length of the string -- used for size / layout computations -- you do not add RelPos to this -- it is in same Text relative coordinates
+	// rune position for further edge of last rune.
+	// For standard flat strings this is the overall length of the string.
+	// Used for size / layout computations: you do not add RelPos to this,
+	// as it is in same Text relative coordinates
 	LastPos mat32.Vec2
 
 	// where relevant, this is the (default, dominant) text direction for the span
