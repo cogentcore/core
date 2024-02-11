@@ -114,7 +114,7 @@ func (wb *WidgetBase) ApplyStyleWidget() {
 		wb.Styles.InheritFields(&pwb.Styles)
 	}
 	wb.RunStylers()
-	wb.ApplyStylePrefs()
+	wb.ApplyStyleSettings()
 
 	// note: this does not un-set the Invisible if not None, because all kinds of things
 	// can turn invisible to off.
@@ -198,9 +198,9 @@ func (wb *WidgetBase) RunStylers() {
 	}
 }
 
-// ApplyStylePrefs applies [Prefs.Spacing] and [Prefs.FontSize]
-// to the style values for the widget.
-func (wb *WidgetBase) ApplyStylePrefs() {
+// ApplyStyleSettings applies [AppearanceSettingsData.Spacing]
+// and [AppearanceSettings.FontSize] to the style values for the widget.
+func (wb *WidgetBase) ApplyStyleSettings() {
 	s := &wb.Styles
 
 	spc := AppearanceSettings.Spacing / 100
