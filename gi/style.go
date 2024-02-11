@@ -10,6 +10,7 @@ import (
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
+	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/states"
@@ -113,6 +114,8 @@ func (wb *WidgetBase) ApplyStyleWidget() {
 	if pwb != nil {
 		wb.Styles.InheritFields(&pwb.Styles)
 	}
+
+	wb.ResetStyleSettings()
 	wb.RunStylers()
 	wb.ApplyStyleSettings()
 
@@ -194,6 +197,21 @@ func (wb *WidgetBase) RunStylers() {
 	}
 }
 
+// ResetStyleSettings reverses the effects of [ApplyStyleSettings]
+// for the widget's font size so that it does not create cascading
+// inhereted font size values. It only does this for non-root elements,
+// as the root element must receive the larger font size so that
+// all other widgets inherit it. It must be called before
+// [WidgetBase.RunStylers] and [WidgetBase.ApplyStyleSettings].
+func (wb *WidgetBase) ResetStyleSettings() {
+	if ki.IsRoot(wb) {
+		return
+	}
+	fsz := AppearanceSettings.FontSize / 100
+	wb.Styles.Font.Size.Val /= fsz
+	wb.Styles.Text.LineHeight.Val /= fsz
+}
+
 // ApplyStyleSettings applies [AppearanceSettingsData.Spacing]
 // and [AppearanceSettings.FontSize] to the style values for the widget.
 func (wb *WidgetBase) ApplyStyleSettings() {
@@ -210,6 +228,10 @@ func (wb *WidgetBase) ApplyStyleSettings() {
 	s.Padding.Left.Val *= spc
 	s.Gap.X.Val *= spc
 	s.Gap.Y.Val *= spc
+
+	fsz := AppearanceSettings.FontSize / 100
+	s.Font.Size.Val *= fsz
+	s.Text.LineHeight.Val *= fsz
 }
 
 // ApplyStyleUpdate calls ApplyStyleTree within an UpdateRender block.
@@ -251,16 +273,6 @@ func SetUnitContext(st *styles.Style, sc *Scene, el, par mat32.Vec2) {
 		st.Font = paint.OpenFont(st.FontRender(), &st.UnContext) // calls SetUnContext after updating metrics
 	}
 	st.ToDots()
-	ApplyStyleSettingsDots(st)
-}
-
-// ApplyStyleSettingsDots applies the font size settings to the
-// dots of the style object. It must always be called after
-// [styles.Style.ToDots].
-func ApplyStyleSettingsDots(st *styles.Style) {
-	fsz := AppearanceSettings.FontSize / 100
-	st.Font.Size.Dots *= fsz
-	st.Text.LineHeight.Dots *= fsz
 }
 
 // ChildBackground returns the background color (Image) for given child Widget.

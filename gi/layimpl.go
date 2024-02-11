@@ -1580,7 +1580,6 @@ func (wb *WidgetBase) StyleSizeUpdate() bool {
 	chg := wb.Styles.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, par.X, par.Y)
 	if chg {
 		wb.Styles.ToDots()
-		ApplyStyleSettingsDots(&wb.Styles)
 	}
 	return chg
 }
