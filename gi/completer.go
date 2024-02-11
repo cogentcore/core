@@ -13,7 +13,6 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/pi/complete"
-	"cogentcore.org/core/spell"
 )
 
 // Completer interface supports the SetCompleter method for setting completer parameters
@@ -255,11 +254,6 @@ func (c *Complete) GetCompletion(s string) complete.Completion {
 		}
 	}
 	return complete.Completion{}
-}
-
-// CompleteText is the function for completing text files
-func CompleteText(s string) []string {
-	return spell.Complete(s)
 }
 
 // CompleteEditText is a chance to modify the completion selection before it is inserted
