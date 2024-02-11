@@ -15,8 +15,8 @@ import (
 	"cogentcore.org/core/core/config"
 	"cogentcore.org/core/core/rendericon"
 	"cogentcore.org/core/grows/images"
+	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/xe"
-	"github.com/iancoleman/strcase"
 	"github.com/jackmordaunt/icns/v2"
 )
 

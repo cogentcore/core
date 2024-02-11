@@ -4,7 +4,7 @@
 
 package grease
 
-import "github.com/iancoleman/strcase"
+import "cogentcore.org/core/strcase"
 
 // Options contains the options passed to Grease
 // that control its behavior.

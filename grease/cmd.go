@@ -10,7 +10,7 @@ import (
 
 	"cogentcore.org/core/glop/sentence"
 	"cogentcore.org/core/gti"
-	"github.com/iancoleman/strcase"
+	"cogentcore.org/core/strcase"
 )
 
 // Cmd represents a runnable command with configuration options.

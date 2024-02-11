@@ -16,9 +16,9 @@ import (
 	"sync"
 
 	"cogentcore.org/core/grr"
+	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"github.com/fatih/camelcase"
-	"github.com/iancoleman/strcase"
 )
 
 // loadFontMu protects the font loading calls, which are not concurrent-safe

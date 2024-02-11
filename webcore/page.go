@@ -25,9 +25,9 @@ import (
 	"cogentcore.org/core/grows/tomls"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/ki"
+	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/webcore/wpath"
-	"github.com/iancoleman/strcase"
 )
 
 // Page represents one site page

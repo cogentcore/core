@@ -13,7 +13,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/states"
-	"github.com/iancoleman/strcase"
+	"cogentcore.org/core/strcase"
 )
 
 func TestBasic(t *testing.T) {

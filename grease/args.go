@@ -17,7 +17,7 @@ import (
 	"maps"
 
 	"cogentcore.org/core/laser"
-	"github.com/iancoleman/strcase"
+	"cogentcore.org/core/strcase"
 )
 
 const (
@@ -406,7 +406,7 @@ func AddAllCases(nm string, field *Field, allFlags *Fields) {
 // AllCases returns all of the string cases (kebab-case,
 // snake_case, etc) of the given name.
 func AllCases(nm string) []string {
-	return []string{nm, strings.ToLower(nm), strcase.ToKebab(nm), strcase.ToSnake(nm), strcase.ToScreamingSnake(nm)}
+	return []string{nm, strings.ToLower(nm), strcase.ToKebab(nm), strcase.ToSnake(nm), strcase.ToSNAKE(nm)}
 }
 
 // AddFlags adds to given the given ordered flags map all of the different ways

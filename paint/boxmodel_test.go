@@ -10,9 +10,9 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
-	"github.com/iancoleman/strcase"
 )
 
 func TestBoxModel(t *testing.T) {

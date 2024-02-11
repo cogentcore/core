@@ -12,7 +12,7 @@ import (
 
 	"cogentcore.org/core/grease"
 	"cogentcore.org/core/ordmap"
-	"github.com/iancoleman/strcase"
+	"cogentcore.org/core/strcase"
 )
 
 func TestGenerate(t *testing.T) {

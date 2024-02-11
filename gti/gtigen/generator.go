@@ -21,7 +21,7 @@ import (
 	"cogentcore.org/core/grease"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/ordmap"
-	"github.com/iancoleman/strcase"
+	"cogentcore.org/core/strcase"
 	"golang.org/x/tools/go/packages"
 )
 

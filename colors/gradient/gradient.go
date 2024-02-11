@@ -111,7 +111,7 @@ const (
 )
 
 // Units are the types of units used for gradient coordinate values
-type Units int32 //enums:enum -transform camel-lower
+type Units int32 //enums:enum -transform lower-camel
 
 const (
 	// ObjectBoundingBox indicates that coordinate values are scaled

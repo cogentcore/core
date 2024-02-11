@@ -10,7 +10,7 @@ import (
 	"text/template"
 
 	"cogentcore.org/core/gti"
-	"github.com/iancoleman/strcase"
+	"cogentcore.org/core/strcase"
 )
 
 // TypeTmpl is the template for [gti.Type] declarations.

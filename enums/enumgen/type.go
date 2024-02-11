@@ -16,10 +16,9 @@ import (
 	"go/ast"
 	"sort"
 	"strings"
-	"unicode"
 	"unicode/utf8"
 
-	"github.com/iancoleman/strcase"
+	"cogentcore.org/core/strcase"
 )
 
 // Type represents a parsed enum type.
@@ -104,24 +103,20 @@ func (g *Generator) TransformValueNames(values []Value, c *Config) error {
 		fn = strings.ToLower
 	case "snake":
 		fn = strcase.ToSnake
-	case "snake-upper":
-		fn = strcase.ToScreamingSnake
+	case "SNAKE":
+		fn = strcase.ToSNAKE
 	case "kebab":
 		fn = strcase.ToKebab
-	case "kebab-upper":
-		fn = strcase.ToScreamingKebab
+	case "KEBAB":
+		fn = strcase.ToKEBAB
 	case "camel":
 		fn = strcase.ToCamel
-	case "camel-lower":
+	case "lower-camel":
 		fn = strcase.ToLowerCamel
 	case "title":
-		fn = strings.Title
-	case "title-lower":
-		fn = func(s string) string {
-			title := []rune(strings.Title(s))
-			title[0] = unicode.ToLower(title[0])
-			return string(title)
-		}
+		fn = strcase.ToTitle
+	case "sentence":
+		fn = strcase.ToSentence
 	case "first":
 		fn = func(s string) string {
 			r, _ := utf8.DecodeRuneInString(s)
@@ -136,10 +131,6 @@ func (g *Generator) TransformValueNames(values []Value, c *Config) error {
 		fn = func(s string) string {
 			r, _ := utf8.DecodeRuneInString(s)
 			return strings.ToLower(string(r))
-		}
-	case "whitespace":
-		fn = func(s string) string {
-			return strcase.ToDelimited(s, ' ')
 		}
 	case "":
 		return nil

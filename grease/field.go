@@ -14,7 +14,7 @@ import (
 
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/ordmap"
-	"github.com/iancoleman/strcase"
+	"cogentcore.org/core/strcase"
 )
 
 // Field represents a struct field in a configuration struct.

@@ -10,8 +10,8 @@ import (
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
+	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
-	"github.com/iancoleman/strcase"
 )
 
 // ArgView represents a slice of reflect.Value's and associated names, for the

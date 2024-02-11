@@ -14,8 +14,8 @@ import (
 	"text/template"
 
 	"cogentcore.org/core/grr"
+	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/units"
-	"github.com/iancoleman/strcase"
 )
 
 func main() {

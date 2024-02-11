@@ -13,7 +13,6 @@ import (
 	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/mergefs"
-	_ "github.com/iancoleman/strcase" // needed so that it gets included in the mod (the generator uses it)
 )
 
 //go:generate go run gen.go

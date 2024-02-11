@@ -19,7 +19,7 @@ import (
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
-	"github.com/iancoleman/strcase"
+	"cogentcore.org/core/strcase"
 )
 
 // CallFunc calls the given function in the context of the given widget,

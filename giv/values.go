@@ -25,9 +25,9 @@ import (
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/states"
+	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
-	"github.com/iancoleman/strcase"
 )
 
 // values contains all the Values for basic builtin types

@@ -18,7 +18,6 @@ require (
 	github.com/goki/vulkan v1.0.7
 	github.com/h2non/filetype v1.1.3
 	github.com/hack-pad/hackpadfs v0.2.1
-	github.com/iancoleman/strcase v0.3.0
 	github.com/jackmordaunt/icns/v2 v2.2.7
 	github.com/jinzhu/copier v0.4.0
 	github.com/mattn/go-shellwords v1.0.12

@@ -14,7 +14,7 @@ import (
 
 	"cogentcore.org/core/grog"
 	"cogentcore.org/core/gti"
-	"github.com/iancoleman/strcase"
+	"cogentcore.org/core/strcase"
 )
 
 // Indent is the value used for indentation in [Usage].

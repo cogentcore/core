@@ -11,7 +11,7 @@ import (
 	"cogentcore.org/core/glop/sentence"
 	"cogentcore.org/core/grease"
 	"cogentcore.org/core/grog"
-	"github.com/iancoleman/strcase"
+	"cogentcore.org/core/strcase"
 )
 
 // GUI starts the GUI for the given Grease app, which must be passed as

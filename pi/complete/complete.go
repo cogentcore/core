@@ -12,7 +12,7 @@ import (
 
 	"cogentcore.org/core/pi/syms"
 	"cogentcore.org/core/pi/token"
-	"github.com/iancoleman/strcase"
+	"cogentcore.org/core/strcase"
 )
 
 // Completion holds one potential completion
@@ -164,7 +164,7 @@ func IsSeedMatching(lseed string, completion string) bool {
 		}
 		return r
 	}, completion)
-	cs = strcase.ToDelimited(cs, ' ')
+	cs = strcase.ToWordCase(cs, strcase.WordOriginal, ' ')
 	if strings.Contains(cs, lseed) {
 		return true
 	}
