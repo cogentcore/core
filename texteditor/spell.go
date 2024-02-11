@@ -10,6 +10,7 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fi"
+	"cogentcore.org/core/gi"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/pi/token"
@@ -158,7 +159,7 @@ func (ed *Editor) ISpellKeyInput(kt events.Event) {
 		} else {
 			r = txt[tp.Ch]
 		}
-		if atend || lex.IsWordBreak(r, rune(-1)) {
+		if atend || gi.IsWordBreak(r, rune(-1)) {
 			tp.Ch-- // we are one past the end of word
 			reg := ed.WordBefore(tp)
 			ed.SpellCheck(reg)

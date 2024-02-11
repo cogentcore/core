@@ -226,7 +226,7 @@ func (ed *Editor) CursorForwardWord(steps int) {
 				if ch < sz-1 {
 					r2 = txt[ch+1]
 				}
-				if lex.IsWordBreak(r1, r2) {
+				if gi.IsWordBreak(r1, r2) {
 					ch++
 				} else {
 					done = true
@@ -239,7 +239,7 @@ func (ed *Editor) CursorForwardWord(steps int) {
 				if ch < sz-1 {
 					r2 = txt[ch+1]
 				}
-				if !lex.IsWordBreak(r1, r2) {
+				if !gi.IsWordBreak(r1, r2) {
 					ch++
 				} else {
 					done = true
@@ -367,7 +367,7 @@ func (ed *Editor) CursorBackwardWord(steps int) {
 				if ch > 0 {
 					r2 = txt[ch-1]
 				}
-				if lex.IsWordBreak(r1, r2) {
+				if gi.IsWordBreak(r1, r2) {
 					ch--
 					if ch == -1 {
 						done = true
@@ -383,7 +383,7 @@ func (ed *Editor) CursorBackwardWord(steps int) {
 				if ch > 0 {
 					r2 = txt[ch-1]
 				}
-				if !lex.IsWordBreak(r1, r2) {
+				if !gi.IsWordBreak(r1, r2) {
 					ch--
 				} else {
 					done = true

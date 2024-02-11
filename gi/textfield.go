@@ -24,7 +24,6 @@ import (
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/pi/complete"
-	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -524,7 +523,7 @@ func (tf *TextField) CursorForwardWord(steps int) {
 				if ch < sz-1 {
 					r2 = tf.EditTxt[ch+1]
 				}
-				if lex.IsWordBreak(r1, r2) {
+				if IsWordBreak(r1, r2) {
 					ch++
 				} else {
 					done = true
@@ -537,7 +536,7 @@ func (tf *TextField) CursorForwardWord(steps int) {
 				if ch < sz-1 {
 					r2 = tf.EditTxt[ch+1]
 				}
-				if !lex.IsWordBreak(r1, r2) {
+				if !IsWordBreak(r1, r2) {
 					ch++
 				} else {
 					done = true
@@ -592,7 +591,7 @@ func (tf *TextField) CursorBackwardWord(steps int) {
 				if ch > 0 {
 					r2 = tf.EditTxt[ch-1]
 				}
-				if lex.IsWordBreak(r1, r2) {
+				if IsWordBreak(r1, r2) {
 					ch--
 					if ch == -1 {
 						done = true
@@ -608,7 +607,7 @@ func (tf *TextField) CursorBackwardWord(steps int) {
 				if ch > 0 {
 					r2 = tf.EditTxt[ch-1]
 				}
-				if !lex.IsWordBreak(r1, r2) {
+				if !IsWordBreak(r1, r2) {
 					ch--
 				} else {
 					done = true
@@ -1791,6 +1790,31 @@ func (tf *TextField) Render() {
 		tf.RenderChildren()
 		tf.PopBounds()
 	}
+}
+
+// IsWordBreak defines what counts as a word break for the purposes of selecting words.
+// r1 is the rune in question, r2 is the rune past r1 in the direction you are moving.
+// Pass -1 for r2 if there is no rune past r1.
+func IsWordBreak(r1, r2 rune) bool {
+	if r2 == -1 {
+		if unicode.IsSpace(r1) || unicode.IsSymbol(r1) || unicode.IsPunct(r1) {
+			return true
+		}
+		return false
+	}
+	if unicode.IsSpace(r1) || unicode.IsSymbol(r1) {
+		return true
+	}
+	if unicode.IsPunct(r1) && r1 != rune('\'') {
+		return true
+	}
+	if unicode.IsPunct(r1) && r1 == rune('\'') {
+		if unicode.IsSpace(r2) || unicode.IsSymbol(r2) || unicode.IsPunct(r2) {
+			return true
+		}
+		return false
+	}
+	return false
 }
 
 // concealDots creates an n-length []rune of bullet characters.
