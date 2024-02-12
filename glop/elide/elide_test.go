@@ -5,20 +5,20 @@
 package elide
 
 import (
-	"fmt"
 	"testing"
 )
 
 func TestElide(t *testing.T) {
 	s := "string for testing purposes"
-	e := End(s, 7)
-	fmt.Println(len(e), e)
-	if len(e) > 7 {
-		t.Error("len should not be more than 7", len(e))
+	have := End(s, 7)
+	want := ""
+	if have != want {
+		t.Errorf("expected %q got %q", want, have)
 	}
-	m := Middle(s, 7)
-	fmt.Println(len(m), m)
-	if len(m) > 7 {
-		t.Error("len should not be more than 7", len(m))
+
+	have = Middle(s, 7)
+	want = ""
+	if have != want {
+		t.Errorf("expected %q got %q", want, have)
 	}
 }
