@@ -79,6 +79,7 @@ func (sp *Spinner) SetStyles() {
 	})
 	sp.TextField.SetStyles()
 	sp.Style(func(s *styles.Style) {
+		s.Grow.Set(0, 0) // TODO: remove
 		if sp.IsReadOnly() {
 			s.Min.X.Ch(4)
 			s.Max.X.Ch(8)

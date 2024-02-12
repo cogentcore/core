@@ -193,7 +193,6 @@ func inputs(ts *gi.Tabs) {
 	gi.NewTextField(tab).SetText("Multiline textfield with a relatively long initial text").
 		Style(func(s *styles.Style) {
 			s.SetTextWrap(true)
-			s.Max.X.Em(10)
 		})
 
 	spinners := gi.NewLayout(tab, "spinners")

@@ -208,12 +208,11 @@ func (tf *TextField) SetStyles() {
 		if !tf.IsReadOnly() {
 			s.Cursor = cursors.Text
 		}
-		s.GrowWrap = false
-		s.Text.WhiteSpace = styles.WhiteSpaceNowrap
-		s.Grow.Set(0, 0)
+		s.GrowWrap = true
+		s.Grow.Set(1, 0)
 		s.Min.Y.Em(1.1)
 		s.Min.X.Ch(20)
-		s.Max.X.Ch(60)
+		s.Max.X.Ch(40)
 		s.Padding.Set(units.Dp(8), units.Dp(8))
 		if tf.LeadingIcon.IsSet() {
 			s.Padding.Left.Dp(12)
