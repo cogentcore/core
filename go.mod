@@ -3,7 +3,7 @@ module cogentcore.org/core
 go 1.21
 
 require (
-	github.com/Bios-Marcel/wastebasket v0.0.3
+	github.com/Bios-Marcel/wastebasket v0.0.4-0.20240212192448-32913f867644
 	github.com/Masterminds/semver/v3 v3.2.1
 	github.com/Masterminds/vcs v1.13.3
 	github.com/alecthomas/chroma/v2 v2.12.0
