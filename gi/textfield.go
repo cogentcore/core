@@ -1784,7 +1784,6 @@ func (tf *TextField) TrailingIconButton() *Button {
 // and its icons or lack thereof
 func (tf *TextField) SetEffPosAndSize() {
 	// if tf.Parts == nil {
-	// 	fmt.Println("nil parts sepas")
 	// 	tf.ConfigParts(tf.Sc)
 	// }
 	sz := tf.Geom.Size.Actual.Content
@@ -1799,7 +1798,6 @@ func (tf *TextField) SetEffPosAndSize() {
 	pos.Y += 0.5 * (sz.Y - tf.FontHeight) // center
 	tf.EffSize = sz.Ceil()
 	tf.EffPos = pos.Ceil()
-	fmt.Println(tf, tf.EffPos)
 }
 
 func (tf *TextField) RenderTextField() {
