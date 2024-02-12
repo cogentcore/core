@@ -16,7 +16,6 @@ import (
 
 	"cogentcore.org/core/core/config"
 	"cogentcore.org/core/core/rendericon"
-	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/xe"
 	"github.com/jackmordaunt/icns/v2"
 	"golang.org/x/tools/go/packages"
@@ -172,11 +171,9 @@ func SetupMoltenFramework() error {
 		return fmt.Errorf("error getting user home directory: %w", err)
 	}
 	gdir := filepath.Join(hdir, "Library", "CogentCore")
-	exists, err := dirs.FileExists(filepath.Join(gdir, "MoltenVK.framework"))
-	if err != nil {
-		return err
-	}
-	if exists {
+	_, err = os.Stat(filepath.Join(gdir, "MoltenVK.framework"))
+	if err == nil {
+		// it already exists
 		return nil
 	}
 
