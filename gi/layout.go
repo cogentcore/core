@@ -283,7 +283,7 @@ func (ly *Layout) HandleEvents() {
 	// we treat slide events on layouts as scroll events
 	// we must reverse the delta for "natural" scrolling behavior
 	ly.On(events.SlideMove, func(e events.Event) {
-		del := mat32.V2FromPoint(e.PrevDelta()).MulScalar(-0.2)
+		del := mat32.V2FromPoint(e.PrevDelta()).MulScalar(-0.1)
 		ly.ScrollDelta(events.NewScroll(e.WindowPos(), del, e.Modifiers()))
 	})
 }

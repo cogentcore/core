@@ -313,19 +313,21 @@ func (w *RenderWin) SetZoom(zoom float32) {
 	UpdateAll()
 	grr.Log(SaveSettings(AppearanceSettings))
 
-	b := NewBody().AddSnackbarText(fmt.Sprintf("%.f%%", AppearanceSettings.Zoom))
-	NewStretch(b)
-	b.AddSnackbarIcon(icons.Remove, func(e events.Event) {
-		w.StepZoom(-1)
-	})
-	b.AddSnackbarIcon(icons.Add, func(e events.Event) {
-		w.StepZoom(1)
-	})
-	b.AddSnackbarButton("Reset", func(e events.Event) {
-		w.SetZoom(100)
-	})
-	b.DeleteChildByName("stretch", true)
-	b.NewSnackbar(w.MainScene()).Run()
+	if ms := w.MainScene(); ms != nil {
+		b := NewBody().AddSnackbarText(fmt.Sprintf("%.f%%", AppearanceSettings.Zoom))
+		NewStretch(b)
+		b.AddSnackbarIcon(icons.Remove, func(e events.Event) {
+			w.StepZoom(-1)
+		})
+		b.AddSnackbarIcon(icons.Add, func(e events.Event) {
+			w.StepZoom(1)
+		})
+		b.AddSnackbarButton("Reset", func(e events.Event) {
+			w.SetZoom(100)
+		})
+		b.DeleteChildByName("stretch", true)
+		b.NewSnackbar(ms).Run()
+	}
 }
 
 // SetWinSize requests that the window be resized to the given size

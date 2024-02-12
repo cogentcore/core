@@ -62,7 +62,6 @@ type TouchMagnify struct {
 func NewMagnify(scaleFactor float32, where image.Point) *TouchMagnify {
 	ev := &TouchMagnify{}
 	ev.Typ = Magnify
-	ev.SetUnique()
 	ev.ScaleFactor = scaleFactor
 	ev.Where = where
 	return ev
