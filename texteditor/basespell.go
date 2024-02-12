@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi
+package texteditor
+
+// TODO: consider moving back to gi or somewhere else based on the
+// result of https://github.com/cogentcore/core/issues/711
 
 import (
 	"image"
@@ -14,6 +17,7 @@ import (
 	"sync"
 
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/gi"
 	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/spell"
 )
@@ -36,7 +40,7 @@ func InitSpell() error {
 
 // OpenSpellModel loads a saved spelling model
 func OpenSpellModel() error {
-	pdir := TheApp.CogentCoreDataDir()
+	pdir := gi.TheApp.CogentCoreDataDir()
 	openpath := filepath.Join(pdir, "spell_en_us.json")
 	err := spell.Open(openpath)
 	if err != nil {
@@ -58,7 +62,7 @@ func NewSpellModelFromText() error {
 	if err != nil {
 		// TODO(kai/snack)
 		slog.Error("Could not open corpus file. This file is used to create the spelling model", "file", bigdatafile, "err", err)
-		ErrorDialog(nil, err)
+		gi.ErrorDialog(nil, err)
 		// nil).AddTitle("Corpus File Not Found").AddText("You can build a spelling model to check against by clicking the \"Train\" button and selecting text files to train on.").Ok().Run()
 		return err
 	}
@@ -93,7 +97,7 @@ func AddToSpellModel(filepath string) error {
 
 // SaveSpellModel saves the spelling model which includes the data and parameters
 func SaveSpellModel() error {
-	pdir := TheApp.CogentCoreDataDir()
+	pdir := gi.TheApp.CogentCoreDataDir()
 	path := filepath.Join(pdir, "spell_en_us.json")
 	err := spell.Save(path)
 	if err != nil {
@@ -129,7 +133,7 @@ type Spell struct { //gti:add -setters
 	Listeners events.Listeners `set:"-" view:"-"`
 
 	// Stage is the [PopupStage] associated with the [Spell]
-	Stage *Stage
+	Stage *gi.Stage
 
 	ShowMu sync.Mutex `set:"-"`
 
@@ -172,7 +176,7 @@ func (sp *Spell) SetWord(word string, sugs []string, srcLn, srcCh int) *Spell {
 // Calls ShowNow which builds the correction popup menu
 // Similar to completion.Show but does not use a timer
 // Displays popup immediately for any unknown word
-func (sp *Spell) Show(text string, ctx Widget, pos image.Point) {
+func (sp *Spell) Show(text string, ctx gi.Widget, pos image.Point) {
 	if sp.Stage != nil {
 		sp.Cancel()
 	}
@@ -180,19 +184,19 @@ func (sp *Spell) Show(text string, ctx Widget, pos image.Point) {
 }
 
 // ShowNow actually builds the correction popup menu
-func (sp *Spell) ShowNow(word string, ctx Widget, pos image.Point) {
+func (sp *Spell) ShowNow(word string, ctx gi.Widget, pos image.Point) {
 	if sp.Stage != nil {
 		sp.Cancel()
 	}
 	sp.ShowMu.Lock()
 	defer sp.ShowMu.Unlock()
 
-	sc := NewScene(ctx.Name() + "-spell")
-	MenuSceneConfigStyles(sc)
-	sp.Stage = NewPopupStage(CompleterStage, sc, ctx).SetPos(pos)
+	sc := gi.NewScene(ctx.Name() + "-spell")
+	gi.MenuSceneConfigStyles(sc)
+	sp.Stage = gi.NewPopupStage(gi.CompleterStage, sc, ctx).SetPos(pos)
 
 	if sp.IsLastLearned(word) {
-		NewButton(sc).SetText("unlearn").SetTooltip("unlearn the last learned word").
+		gi.NewButton(sc).SetText("unlearn").SetTooltip("unlearn the last learned word").
 			OnClick(func(e events.Event) {
 				sp.UnLearnLast()
 			})
@@ -202,20 +206,20 @@ func (sp *Spell) ShowNow(word string, ctx Widget, pos image.Point) {
 			return
 		}
 		if count == 0 {
-			NewButton(sc).SetText("no suggestion")
+			gi.NewButton(sc).SetText("no suggestion")
 		} else {
 			for i := 0; i < count; i++ {
 				text := sp.Suggest[i]
-				NewButton(sc).SetText(text).OnClick(func(e events.Event) {
+				gi.NewButton(sc).SetText(text).OnClick(func(e events.Event) {
 					sp.Spell(text)
 				})
 			}
 		}
-		NewSeparator(sc)
-		NewButton(sc).SetText("learn").OnClick(func(e events.Event) {
+		gi.NewSeparator(sc)
+		gi.NewButton(sc).SetText("learn").OnClick(func(e events.Event) {
 			sp.LearnWord()
 		})
-		NewButton(sc).SetText("ignore").OnClick(func(e events.Event) {
+		gi.NewButton(sc).SetText("ignore").OnClick(func(e events.Event) {
 			sp.IgnoreWord()
 		})
 	}

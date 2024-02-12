@@ -5,12 +5,31 @@ package texteditor
 import (
 	"image"
 
+	"cogentcore.org/core/gi"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/texteditor/textbuf"
 	"cogentcore.org/core/units"
 )
+
+var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/texteditor.Spell", IDName: "spell", Doc: "Spell", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Fields: []gti.Field{{Name: "SrcLn", Doc: "line number in source that spelling is operating on, if relevant"}, {Name: "SrcCh", Doc: "character position in source that spelling is operating on (start of word to be corrected)"}, {Name: "Suggest", Doc: "list of suggested corrections"}, {Name: "Word", Doc: "word being checked"}, {Name: "LastLearned", Doc: "last word learned -- can be undone -- stored in lowercase format"}, {Name: "Correction", Doc: "the user's correction selection"}, {Name: "Listeners", Doc: "the event listeners for the spell (it sends Select events)"}, {Name: "Stage", Doc: "Stage is the [PopupStage] associated with the [Spell]"}, {Name: "ShowMu"}}})
+
+// SetSrcLn sets the [Spell.SrcLn]:
+// line number in source that spelling is operating on, if relevant
+func (t *Spell) SetSrcLn(v int) *Spell { t.SrcLn = v; return t }
+
+// SetSrcCh sets the [Spell.SrcCh]:
+// character position in source that spelling is operating on (start of word to be corrected)
+func (t *Spell) SetSrcCh(v int) *Spell { t.SrcCh = v; return t }
+
+// SetSuggest sets the [Spell.Suggest]:
+// list of suggested corrections
+func (t *Spell) SetSuggest(v ...string) *Spell { t.Suggest = v; return t }
+
+// SetStage sets the [Spell.Stage]:
+// Stage is the [PopupStage] associated with the [Spell]
+func (t *Spell) SetStage(v *gi.Stage) *Spell { t.Stage = v; return t }
 
 // DiffViewType is the [gti.Type] for [DiffView]
 var DiffViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/texteditor.DiffView", IDName: "diff-view", Doc: "DiffView presents two side-by-side TextEditor windows showing the differences\nbetween two files (represented as lines of strings).", Methods: []gti.Method{{Name: "SaveFileA", Doc: "SaveFileA saves the current state of file A to given filename", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"fname"}}, {Name: "SaveFileB", Doc: "SaveFileB saves the current state of file B to given filename", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"fname"}}}, Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "FileA", Doc: "first file name being compared"}, {Name: "FileB", Doc: "second file name being compared"}, {Name: "RevA", Doc: "revision for first file, if relevant"}, {Name: "RevB", Doc: "revision for second file, if relevant"}, {Name: "BufA", Doc: "textbuf for A showing the aligned edit view"}, {Name: "BufB", Doc: "textbuf for B showing the aligned edit view"}, {Name: "AlignD", Doc: "aligned diffs records diff for aligned lines"}, {Name: "Diffs", Doc: "Diffs applied"}}, Instance: &DiffView{}})
