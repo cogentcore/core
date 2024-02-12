@@ -18,7 +18,6 @@ import (
 	"path/filepath"
 	"sync"
 
-	"cogentcore.org/core/cursor"
 	"cogentcore.org/core/goosi"
 )
 
@@ -185,9 +184,9 @@ func (a *App) Clipboard(win goosi.Window) goosi.Clipboard {
 	return &goosi.ClipboardBase{}
 }
 
-func (a *App) Cursor(win goosi.Window) cursor.Cursor {
+func (a *App) Cursor(win goosi.Window) goosi.Cursor {
 	// no-op by default
-	return &cursor.CursorBase{}
+	return &goosi.CursorBase{}
 }
 
 func (a *App) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {

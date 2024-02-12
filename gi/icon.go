@@ -12,12 +12,14 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/svg"
+	"cogentcore.org/core/units"
 	"golang.org/x/image/draw"
 )
 
 // Icon contains a svg.SVG element.
 // The rendered version is cached for a given size.
 // Icons do not render a background or border independent of their SVG object.
+// The size of on Icon is determined by the [styles.Font.Size] property.
 type Icon struct {
 	WidgetBase
 
@@ -39,8 +41,7 @@ func (ic *Icon) OnInit() {
 func (ic *Icon) SetStyles() {
 	ic.SVG.Scale = 1
 	ic.Style(func(s *styles.Style) {
-		s.Min.X.Dp(16)
-		s.Min.Y.Dp(16)
+		s.Min.Set(units.Em(1))
 	})
 	ic.StyleFinal(func(s *styles.Style) {
 		ic.SVG.Root.ViewBox.PreserveAspectRatio.SetFromStyle(s)

@@ -7,18 +7,18 @@ package desktop
 import (
 	"sync"
 
-	"cogentcore.org/core/cursor"
 	"cogentcore.org/core/cursors/cursorimg"
 	"cogentcore.org/core/enums"
+	"cogentcore.org/core/goosi"
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
 // TheCursor is the single [goosi.Cursor] for the desktop platform
-var TheCursor = &Cursor{CursorBase: cursor.CursorBase{Vis: true, Size: 32}, Cursors: map[enums.Enum]map[int]*glfw.Cursor{}}
+var TheCursor = &Cursor{CursorBase: goosi.CursorBase{Vis: true, Size: 32}, Cursors: map[enums.Enum]map[int]*glfw.Cursor{}}
 
 // Cursor is the [cursor.Cursor] implementation for the desktop platform
 type Cursor struct {
-	cursor.CursorBase
+	goosi.CursorBase
 
 	// Cursors are the cached glfw cursors
 	Cursors map[enums.Enum]map[int]*glfw.Cursor

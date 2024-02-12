@@ -95,7 +95,7 @@ func StyleFuncUnits[T any](initVal units.Value, getField func(obj *T) *units.Val
 			}
 			return
 		}
-		fp.SetIFace(val, key)
+		fp.SetAny(val, key)
 	}
 }
 
@@ -343,10 +343,10 @@ var StyleFontFuncs = map[string]StyleFunc{
 			if psz, ok := FontSizePoints[vt]; ok {
 				fs.Size = units.Pt(psz)
 			} else {
-				fs.Size.SetIFace(val, key) // also processes string
+				fs.Size.SetAny(val, key) // also processes string
 			}
 		default:
-			fs.Size.SetIFace(val, key)
+			fs.Size.SetAny(val, key)
 		}
 	},
 	"font-family": func(obj any, key string, val any, par any, ctxt colors.Context) {

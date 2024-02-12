@@ -12,7 +12,8 @@ import (
 
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/grows/images"
+	"cogentcore.org/core/grr"
+	"cogentcore.org/core/svg"
 )
 
 // Cursor represents a cached rendered cursor, with the [image.Image]
@@ -43,42 +44,21 @@ func Get(cursor enums.Enum, size int) (*Cursor, error) {
 	}
 
 	name := cursor.String()
-	// TODO: maybe support more sizes
-	dir := ""
-	switch size {
-	case 32:
-		dir = "32"
-	case 64:
-		dir = "64"
-	default:
-		return nil, fmt.Errorf("invalid cursor size %d; expected 32 or 64", size)
-	}
-	img, _, err := images.OpenFS(cursors.Cursors, "png/"+dir+"/"+name+".png")
-	if err != nil {
-		return nil, fmt.Errorf("error opening image file for cursor %q: %w", name, err)
-	}
 	hot, ok := cursors.Hotspots[cursor]
 	if !ok {
-		// slog.Info("programmer error: missing cursor hotspot", "cursor", cursor)
 		hot = image.Pt(128, 128)
 	}
+
+	sv := svg.NewSVG(size, size)
+	err := sv.OpenFS(cursors.Cursors, "svg/"+name+".svg")
+	if err != nil {
+		err := fmt.Errorf("error opening SVG file for cursor %q: %w", name, err)
+		return nil, grr.Log(err)
+	}
+	sv.Render()
 	return &Cursor{
-		Image:   img,
+		Image:   sv.Pixels,
 		Size:    size,
 		Hotspot: hot.Mul(size).Div(256),
 	}, nil
-
-	// TODO: render from SVG at some point
-	// sv := svg.NewSVG(size, size)
-	// err := sv.OpenFS(cursors.Cursors, "svg/"+name+".svg") // TODO: support custom cursors
-	// if err != nil {
-	// 	err := fmt.Errorf("error opening SVG file for cursor %q: %w", name, err)
-	// 	slog.Error(err.Error())
-	// 	return nil, err
-	// }
-	// sv.SetNormTransform()
-	// sv.Render()
-	// return &Cursor{
-	// 	Image: sv.Pixels,
-	// }, nil
 }

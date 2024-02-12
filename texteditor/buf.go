@@ -133,7 +133,7 @@ type Buf struct {
 	Complete *gi.Complete `json:"-" xml:"-"`
 
 	// functions and data for spelling correction
-	Spell *gi.Spell `json:"-" xml:"-"`
+	Spell *Spell `json:"-" xml:"-"`
 
 	// current text editor -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always
 	CurView *Editor `json:"-" xml:"-"`
@@ -2654,8 +2654,8 @@ func (tb *Buf) SetSpell() {
 	if tb.Spell != nil {
 		return
 	}
-	gi.InitSpell()
-	tb.Spell = gi.NewSpell()
+	InitSpell()
+	tb.Spell = NewSpell()
 	tb.Spell.OnSelect(func(e events.Event) {
 		tb.CorrectText(tb.Spell.Correction)
 	})

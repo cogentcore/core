@@ -319,12 +319,13 @@ func (t *Handle) SetPos(v float32) *Handle { t.Pos = v; return t }
 func (t *Handle) SetTooltip(v string) *Handle { t.Tooltip = v; return t }
 
 // IconType is the [gti.Type] for [Icon]
-var IconType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Icon", IDName: "icon", Doc: "Icon contains a svg.SVG element.\nThe rendered version is cached for a given size.\nIcons do not render a background or border independent of their SVG object.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Icon", Doc: "icon name that has been set."}, {Name: "Filename", Doc: "file name for the loaded icon, if loaded"}, {Name: "SVG", Doc: "SVG drawing of the icon"}}, Instance: &Icon{}})
+var IconType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Icon", IDName: "icon", Doc: "Icon contains a svg.SVG element.\nThe rendered version is cached for a given size.\nIcons do not render a background or border independent of their SVG object.\nThe size of on Icon is determined by the [styles.Font.Size] property.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Icon", Doc: "icon name that has been set."}, {Name: "Filename", Doc: "file name for the loaded icon, if loaded"}, {Name: "SVG", Doc: "SVG drawing of the icon"}}, Instance: &Icon{}})
 
 // NewIcon adds a new [Icon] with the given name to the given parent:
 // Icon contains a svg.SVG element.
 // The rendered version is cached for a given size.
 // Icons do not render a background or border independent of their SVG object.
+// The size of on Icon is determined by the [styles.Font.Size] property.
 func NewIcon(par ki.Ki, name ...string) *Icon {
 	return par.NewChild(IconType, name...).(*Icon)
 }
@@ -757,24 +758,6 @@ func (t *Slider) SetStayInView(v bool) *Slider { t.StayInView = v; return t }
 
 // SetTooltip sets the [Slider.Tooltip]
 func (t *Slider) SetTooltip(v string) *Slider { t.Tooltip = v; return t }
-
-var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Spell", IDName: "spell", Doc: "Spell", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Fields: []gti.Field{{Name: "SrcLn", Doc: "line number in source that spelling is operating on, if relevant"}, {Name: "SrcCh", Doc: "character position in source that spelling is operating on (start of word to be corrected)"}, {Name: "Suggest", Doc: "list of suggested corrections"}, {Name: "Word", Doc: "word being checked"}, {Name: "LastLearned", Doc: "last word learned -- can be undone -- stored in lowercase format"}, {Name: "Correction", Doc: "the user's correction selection"}, {Name: "Listeners", Doc: "the event listeners for the spell (it sends Select events)"}, {Name: "Stage", Doc: "Stage is the [PopupStage] associated with the [Spell]"}, {Name: "ShowMu"}}})
-
-// SetSrcLn sets the [Spell.SrcLn]:
-// line number in source that spelling is operating on, if relevant
-func (t *Spell) SetSrcLn(v int) *Spell { t.SrcLn = v; return t }
-
-// SetSrcCh sets the [Spell.SrcCh]:
-// character position in source that spelling is operating on (start of word to be corrected)
-func (t *Spell) SetSrcCh(v int) *Spell { t.SrcCh = v; return t }
-
-// SetSuggest sets the [Spell.Suggest]:
-// list of suggested corrections
-func (t *Spell) SetSuggest(v ...string) *Spell { t.Suggest = v; return t }
-
-// SetStage sets the [Spell.Stage]:
-// Stage is the [PopupStage] associated with the [Spell]
-func (t *Spell) SetStage(v *Stage) *Spell { t.Stage = v; return t }
 
 // SpinnerType is the [gti.Type] for [Spinner]
 var SpinnerType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Spinner", IDName: "spinner", Doc: "Spinner combines a TextField with up / down buttons for incrementing /\ndecrementing values -- all configured within the Parts of the widget", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "TextField"}}, Fields: []gti.Field{{Name: "Value", Doc: "Value is the current value."}, {Name: "HasMin", Doc: "HasMin is whether there is a minimum value to enforce."}, {Name: "Min", Doc: "Min, if HasMin is true, is the the minimum value in range."}, {Name: "HasMax", Doc: "HaxMax is whether there is a maximum value to enforce."}, {Name: "Max", Doc: "Max, if HasMax is true, is the maximum value in range."}, {Name: "Step", Doc: "Step is the smallest step size to increment when using the\nup and down buttons and arrow keys."}, {Name: "EnforceStep", Doc: "EnforceStep is whether to ensure that the value of the spinner\nis always a multiple of [Spinner.Step]."}, {Name: "PageStep", Doc: "PageStep is a larger step size used for PageUp and PageDown events."}, {Name: "Prec", Doc: "Prec specifies the precision of decimal places\n(total, not after the decimal point) to use in\nrepresenting the number. This helps to truncate\nsmall weird floating point values."}, {Name: "Format", Doc: "Format is the format string to use for printing the value.\nIf it unset, %g is used. If it is decimal based\n(ends in d, b, c, o, O, q, x, X, or U) then the value is\nconverted to decimal prior to printing."}}, Instance: &Spinner{}})

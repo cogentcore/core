@@ -16,6 +16,11 @@ import (
 	"cogentcore.org/core/styles"
 )
 
+// timesCrashed is the number of times that the program has
+// crashed. It is used to prevent an infinite crash loop
+// when rendering the crash window.
+var timesCrashed int
+
 // HandleRecover is the gi value of [goosi.HandleRecover]. If r is not nil,
 // it makes a window displaying information about the panic. [goosi.HandleRecover]
 // is initialized to this in init.
@@ -23,7 +28,11 @@ func HandleRecover(r any) {
 	if r == nil {
 		return
 	}
+	timesCrashed++
 	goosi.HandleRecoverBase(r)
+	if timesCrashed > 1 {
+		return
+	}
 
 	stack := string(debug.Stack())
 

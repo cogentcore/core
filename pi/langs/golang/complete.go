@@ -200,7 +200,7 @@ func (gl *GoLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md 
 			return
 		}
 		if len(scopes) > 0 {
-			complete.AddSymsPrefix(scopes, "", seed, &md)
+			syms.AddCompleteSymsPrefix(scopes, "", seed, &md)
 		}
 		gl.CompletePkgSyms(fs, pkg, seed, &md)
 		gl.CompleteBuiltins(fs, seed, &md)
@@ -214,7 +214,7 @@ func (gl *GoLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md 
 	}
 	if got {
 		// fmt.Printf("got completion type: %v, last str: %v\n", typ.String(), lststr)
-		complete.AddTypeNames(typ, typ.Name, lststr, &md)
+		syms.AddCompleteTypeNames(typ, typ.Name, lststr, &md)
 	} else {
 		// see if it starts with a package name..
 		// todo: move this to a function as in lookup
@@ -227,10 +227,10 @@ func (gl *GoLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md 
 				if lststr != "" && lststr != ststr {
 					var matches syms.SymMap
 					psym.Children.FindNamePrefixScoped(lststr, &matches)
-					complete.AddSyms(matches, ststr, &md)
+					syms.AddCompleteSyms(matches, ststr, &md)
 					md.Seed = lststr
 				} else {
-					complete.AddSyms(psym.Children, ststr, &md)
+					syms.AddCompleteSyms(psym.Children, ststr, &md)
 				}
 				return
 			}
@@ -282,7 +282,7 @@ func (gl *GoLang) CompletePkgSyms(fs *pi.FileState, pkg *syms.Symbol, seed strin
 	md.Seed = seed
 	var matches syms.SymMap
 	pkg.Children.FindNamePrefixScoped(seed, &matches)
-	complete.AddSyms(matches, "", md)
+	syms.AddCompleteSyms(matches, "", md)
 }
 
 // CompleteTypeName matches builtin and package type names to seed

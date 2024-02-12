@@ -10,6 +10,7 @@ import (
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
+	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/states"
@@ -113,8 +114,10 @@ func (wb *WidgetBase) ApplyStyleWidget() {
 	if pwb != nil {
 		wb.Styles.InheritFields(&pwb.Styles)
 	}
+
+	wb.ResetStyleSettings()
 	wb.RunStylers()
-	wb.ApplyStylePrefs()
+	wb.ApplyStyleSettings()
 
 	// note: this does not un-set the Invisible if not None, because all kinds of things
 	// can turn invisible to off.
@@ -156,10 +159,6 @@ func (wb *WidgetBase) ResetStyleWidget() {
 // this, to update state flags.
 func (wb *WidgetBase) SetStyles() {
 	wb.Style(func(s *styles.Style) {
-		fsz := AppearanceSettings.FontSize / 100
-		s.Font.Size.Val *= fsz
-		s.Text.LineHeight.Val *= fsz
-
 		s.MaxBorder.Style.Set(styles.BorderSolid)
 		s.MaxBorder.Color.Set(colors.Scheme.Primary.Base)
 		s.MaxBorder.Width.Set(units.Dp(1))
@@ -198,9 +197,24 @@ func (wb *WidgetBase) RunStylers() {
 	}
 }
 
-// ApplyStylePrefs applies [Prefs.Spacing] and [Prefs.FontSize]
-// to the style values for the widget.
-func (wb *WidgetBase) ApplyStylePrefs() {
+// ResetStyleSettings reverses the effects of [ApplyStyleSettings]
+// for the widget's font size so that it does not create cascading
+// inhereted font size values. It only does this for non-root elements,
+// as the root element must receive the larger font size so that
+// all other widgets inherit it. It must be called before
+// [WidgetBase.RunStylers] and [WidgetBase.ApplyStyleSettings].
+func (wb *WidgetBase) ResetStyleSettings() {
+	if ki.IsRoot(wb) {
+		return
+	}
+	fsz := AppearanceSettings.FontSize / 100
+	wb.Styles.Font.Size.Val /= fsz
+	wb.Styles.Text.LineHeight.Val /= fsz
+}
+
+// ApplyStyleSettings applies [AppearanceSettingsData.Spacing]
+// and [AppearanceSettings.FontSize] to the style values for the widget.
+func (wb *WidgetBase) ApplyStyleSettings() {
 	s := &wb.Styles
 
 	spc := AppearanceSettings.Spacing / 100
@@ -214,6 +228,10 @@ func (wb *WidgetBase) ApplyStylePrefs() {
 	s.Padding.Left.Val *= spc
 	s.Gap.X.Val *= spc
 	s.Gap.Y.Val *= spc
+
+	fsz := AppearanceSettings.FontSize / 100
+	s.Font.Size.Val *= fsz
+	s.Text.LineHeight.Val *= fsz
 }
 
 // ApplyStyleUpdate calls ApplyStyleTree within an UpdateRender block.

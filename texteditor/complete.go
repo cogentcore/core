@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/pi/complete"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/pi/parse"
+	"cogentcore.org/core/spell"
 	"cogentcore.org/core/texteditor/textbuf"
 )
 
@@ -100,7 +101,7 @@ func LookupPi(data any, text string, posLn, posCh int) (ld complete.Lookup) {
 
 // CompleteText does completion for text files
 func CompleteText(data any, text string, posLn, posCh int) (md complete.Matches) {
-	err := gi.InitSpell() // text completion uses the spell code to generate completions and suggestions
+	err := InitSpell() // text completion uses the spell code to generate completions and suggestions
 	if err != nil {
 		fmt.Printf("Could not initialize spelling model: Spelling model needed for text completion: %v", err)
 		return md
@@ -110,7 +111,7 @@ func CompleteText(data any, text string, posLn, posCh int) (md complete.Matches)
 	if md.Seed == "" {
 		return md
 	}
-	result := gi.CompleteText(md.Seed)
+	result := spell.Complete(md.Seed)
 	possibles := complete.MatchSeedString(result, md.Seed)
 	for _, p := range possibles {
 		m := complete.Completion{Text: p, Icon: ""}

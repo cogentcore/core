@@ -71,31 +71,6 @@ func FirstWordApostrophe(str string) string {
 	return rstr
 }
 
-// IsWordBreak defines what counts as a word break for the purposes of selecting words.
-// r1 is the rune in question, r2 is the rune past r1 in the direction you are moving.
-// Pass rune(-1) for r2 if there is no rune past r1.
-func IsWordBreak(r1, r2 rune) bool {
-	if r2 == rune(-1) {
-		if unicode.IsSpace(r1) || unicode.IsSymbol(r1) || unicode.IsPunct(r1) {
-			return true
-		}
-		return false
-	}
-	if unicode.IsSpace(r1) || unicode.IsSymbol(r1) {
-		return true
-	}
-	if unicode.IsPunct(r1) && r1 != rune('\'') {
-		return true
-	}
-	if unicode.IsPunct(r1) && r1 == rune('\'') {
-		if unicode.IsSpace(r2) || unicode.IsSymbol(r2) || unicode.IsPunct(r2) {
-			return true
-		}
-		return false
-	}
-	return false
-}
-
 // TrimLeftToAlpha returns string without any leading non-alpha runes
 func TrimLeftToAlpha(nm string) string {
 	return strings.TrimLeftFunc(nm, func(r rune) bool {

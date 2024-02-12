@@ -27,11 +27,9 @@ import (
 // The font size is always rounded to nearest integer, to produce
 // better-looking results (presumably).  The current metrics and given
 // unit.Context are updated based on the properties of the font.
-func OpenFont(fs *styles.FontRender, ctxt *units.Context) styles.Font {
+func OpenFont(fs *styles.FontRender, uc *units.Context) styles.Font {
+	fs.Size.ToDots(uc)
 	facenm := FontFaceName(fs.Family, fs.Stretch, fs.Weight, fs.Style)
-	if fs.Size.Dots == 0 {
-		fs.Size.ToDots(ctxt)
-	}
 	intDots := int(math.Round(float64(fs.Size.Dots)))
 	if intDots == 0 {
 		// fmt.Printf("FontStyle Error: bad font size: %v or units context: %v\n", fs.Size, *ctxt)
@@ -47,7 +45,7 @@ func OpenFont(fs *styles.FontRender, ctxt *units.Context) styles.Font {
 	} else {
 		fs.Face = face
 	}
-	fs.SetUnitContext(ctxt)
+	fs.SetUnitContext(uc)
 	return fs.Font
 }
 

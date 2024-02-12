@@ -11,6 +11,7 @@ import (
 	"strings"
 	"unicode"
 
+	"cogentcore.org/core/grr"
 	"golang.org/x/image/math/fixed"
 )
 
@@ -313,7 +314,7 @@ func PointsCheckN(pts []float32, n int, errmsg string) error {
 
 // SetString processes the standard SVG-style transform strings
 func (a *Mat2) SetString(str string) error {
-	errmsg := "gi.Mat2 SetString"
+	errmsg := "mat32.Mat2.SetString:"
 	str = strings.ToLower(strings.TrimSpace(str))
 	*a = Identity2()
 	if str == "none" {
@@ -324,9 +325,8 @@ func (a *Mat2) SetString(str string) error {
 	for {
 		pidx := strings.IndexByte(str, '(')
 		if pidx < 0 {
-			err := fmt.Errorf("gi.Mat2 SetString: no params for transform: %v", str)
-			log.Println(err)
-			return err
+			err := fmt.Errorf("%s no params for transform: %v", errmsg, str)
+			return grr.Log(err)
 		}
 		cmd := str[:pidx]
 		vals := str[pidx+1:]
@@ -343,26 +343,22 @@ func (a *Mat2) SetString(str string) error {
 		switch cmd {
 		case "matrix":
 			if err := PointsCheckN(pts, 6, errmsg); err != nil {
-				log.Println(err)
-				return err
+				return grr.Log(err)
 			}
 			*a = Mat2{pts[0], pts[1], pts[2], pts[3], pts[4], pts[5]}
 		case "translate":
 			if err := PointsCheckN(pts, 2, errmsg); err != nil {
-				log.Println(err)
-				return err
+				return grr.Log(err)
 			}
 			*a = a.Translate(pts[0], pts[1])
 		case "translatex":
 			if err := PointsCheckN(pts, 1, errmsg); err != nil {
-				log.Println(err)
-				return err
+				return grr.Log(err)
 			}
 			*a = a.Translate(pts[0], 0)
 		case "translatey":
 			if err := PointsCheckN(pts, 1, errmsg); err != nil {
-				log.Println(err)
-				return err
+				return grr.Log(err)
 			}
 			*a = a.Translate(0, pts[0])
 		case "scale":
@@ -372,18 +368,16 @@ func (a *Mat2) SetString(str string) error {
 				*a = a.Scale(pts[0], pts[1])
 			} else {
 				err := fmt.Errorf("%v incorrect number of points: 2 != %v", errmsg, len(pts))
-				log.Println(err)
+				grr.Log(err)
 			}
 		case "scalex":
 			if err := PointsCheckN(pts, 1, errmsg); err != nil {
-				log.Println(err)
-				return err
+				return grr.Log(err)
 			}
 			*a = a.Scale(pts[0], 1)
 		case "scaley":
 			if err := PointsCheckN(pts, 1, errmsg); err != nil {
-				log.Println(err)
-				return err
+				return grr.Log(err)
 			}
 			*a = a.Scale(1, pts[0])
 		case "rotate":
@@ -397,20 +391,17 @@ func (a *Mat2) SetString(str string) error {
 			}
 		case "skew":
 			if err := PointsCheckN(pts, 2, errmsg); err != nil {
-				log.Println(err)
-				return err
+				return grr.Log(err)
 			}
 			*a = a.Skew(pts[0], pts[1])
 		case "skewx":
 			if err := PointsCheckN(pts, 1, errmsg); err != nil {
-				log.Println(err)
-				return err
+				return grr.Log(err)
 			}
 			*a = a.Skew(pts[0], 0)
 		case "skewy":
 			if err := PointsCheckN(pts, 1, errmsg); err != nil {
-				log.Println(err)
-				return err
+				return grr.Log(err)
 			}
 			*a = a.Skew(0, pts[0])
 		}

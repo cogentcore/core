@@ -359,8 +359,7 @@ func (tv *TreeView) SetStyles() {
 			})
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
-				s.Min.X.Em(1)
-				s.Min.Y.Em(1)
+				s.Font.Size.Dp(16)
 				s.Margin.Zero()
 				s.Padding.Zero()
 			})

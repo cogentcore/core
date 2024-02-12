@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package cursor defines the oswin cursor interface and standard system
-// cursors that are supported across platforms
-package cursor
+package goosi
 
 //go:generate core generate
 
@@ -12,9 +10,7 @@ import (
 	"cogentcore.org/core/enums"
 )
 
-// Cursor manages the mouse cursor / pointer appearance.  Currently only a
-// fixed set of standard cursors are supported, but in the future it will be
-// possible to set the cursor from an image / svg.
+// Cursor manages the mouse cursor / pointer appearance.
 type Cursor interface {
 
 	// Current returns the current cursor as an enum, which is a

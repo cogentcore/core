@@ -398,6 +398,7 @@ func (w *Window) OnCloseReq(gw *glfw.Window) {
 }
 
 func (w *Window) Focused(gw *glfw.Window, focused bool) {
+	w.Flgs.SetFlag(focused, goosi.Focused)
 	if focused {
 		w.EvMgr.Window(events.WinFocus)
 	} else {
@@ -408,7 +409,6 @@ func (w *Window) Focused(gw *glfw.Window, focused bool) {
 
 func (w *Window) Iconify(gw *glfw.Window, iconified bool) {
 	w.Flgs.SetFlag(iconified, goosi.Minimized)
-	w.Flgs.SetFlag(!iconified, goosi.Focused)
 	if iconified {
 		w.EvMgr.Window(events.WinMinimize)
 	} else {

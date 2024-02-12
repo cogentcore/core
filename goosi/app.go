@@ -11,10 +11,6 @@ package goosi
 
 //go:generate core generate
 
-import (
-	"cogentcore.org/core/cursor"
-)
-
 // TheApp is the current [App]; only one is ever in effect.
 var TheApp App
 
@@ -87,8 +83,9 @@ type App interface {
 	// but can provide useful context on some systems.
 	Clipboard(win Window) Clipboard
 
-	// Cursor returns the cursor.Cursor handler for the system, in context of given window.
-	Cursor(win Window) cursor.Cursor
+	// Cursor returns the [Cursor] handler for the system, in the context
+	// of the given window.
+	Cursor(win Window) Cursor
 
 	// DataDir returns the OS-specific data directory: Mac: ~/Library,
 	// Linux: ~/.config, Windows: ~/AppData/Roaming

@@ -16,7 +16,6 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/fi"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
@@ -25,7 +24,6 @@ import (
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/pi/complete"
-	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -536,7 +534,7 @@ func (tf *TextField) CursorForwardWord(steps int) {
 				if ch < sz-1 {
 					r2 = tf.EditTxt[ch+1]
 				}
-				if lex.IsWordBreak(r1, r2) {
+				if IsWordBreak(r1, r2) {
 					ch++
 				} else {
 					done = true
@@ -549,7 +547,7 @@ func (tf *TextField) CursorForwardWord(steps int) {
 				if ch < sz-1 {
 					r2 = tf.EditTxt[ch+1]
 				}
-				if !lex.IsWordBreak(r1, r2) {
+				if !IsWordBreak(r1, r2) {
 					ch++
 				} else {
 					done = true
@@ -604,7 +602,7 @@ func (tf *TextField) CursorBackwardWord(steps int) {
 				if ch > 0 {
 					r2 = tf.EditTxt[ch-1]
 				}
-				if lex.IsWordBreak(r1, r2) {
+				if IsWordBreak(r1, r2) {
 					ch--
 					if ch == -1 {
 						done = true
@@ -620,7 +618,7 @@ func (tf *TextField) CursorBackwardWord(steps int) {
 				if ch > 0 {
 					r2 = tf.EditTxt[ch-1]
 				}
-				if !lex.IsWordBreak(r1, r2) {
+				if !IsWordBreak(r1, r2) {
 					ch--
 				} else {
 					done = true
@@ -947,12 +945,12 @@ func (tf *TextField) Copy(reset bool) {
 // cursor is within a current selection, that selection is replaced.
 // Satisfies Clipper interface -- can be extended in subtypes.
 func (tf *TextField) Paste() {
-	data := tf.Clipboard().Read([]string{fi.TextPlain})
+	data := tf.Clipboard().Read([]string{mimedata.TextPlain})
 	if data != nil {
 		if tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
 			tf.DeleteSelection()
 		}
-		tf.InsertAtCursor(data.Text(fi.TextPlain))
+		tf.InsertAtCursor(data.Text(mimedata.TextPlain))
 	}
 }
 
@@ -1880,6 +1878,31 @@ func (tf *TextField) Render() {
 		tf.RenderChildren()
 		tf.PopBounds()
 	}
+}
+
+// IsWordBreak defines what counts as a word break for the purposes of selecting words.
+// r1 is the rune in question, r2 is the rune past r1 in the direction you are moving.
+// Pass -1 for r2 if there is no rune past r1.
+func IsWordBreak(r1, r2 rune) bool {
+	if r2 == -1 {
+		if unicode.IsSpace(r1) || unicode.IsSymbol(r1) || unicode.IsPunct(r1) {
+			return true
+		}
+		return false
+	}
+	if unicode.IsSpace(r1) || unicode.IsSymbol(r1) {
+		return true
+	}
+	if unicode.IsPunct(r1) && r1 != rune('\'') {
+		return true
+	}
+	if unicode.IsPunct(r1) && r1 == rune('\'') {
+		if unicode.IsSpace(r2) || unicode.IsSymbol(r2) || unicode.IsPunct(r2) {
+			return true
+		}
+		return false
+	}
+	return false
 }
 
 // ConcealDots creates an n-length []rune of bullet characters.

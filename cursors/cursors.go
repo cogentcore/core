@@ -16,7 +16,7 @@ import (
 
 // Cursors contains all of the default embedded svg cursors
 //
-//go:embed png/*/*.png
+//go:embed svg/*.svg
 var Cursors embed.FS
 
 // Cursor represents a cursor

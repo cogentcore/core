@@ -170,9 +170,9 @@ func StringToValue(str string) Value {
 	return v
 }
 
-// SetIFace sets value from an interface value representation as from map[string]any
+// SetAny sets value from an interface value representation as from map[string]any
 // key is optional property key for error message -- always logs the error
-func (v *Value) SetIFace(iface any, key string) error {
+func (v *Value) SetAny(iface any, key string) error {
 	switch val := iface.(type) {
 	case string:
 		v.SetString(val)
@@ -203,7 +203,7 @@ func (v *Value) SetFmProp(key string, props map[string]any) (bool, error) {
 	if !ok {
 		return false, nil
 	}
-	return true, v.SetIFace(pv, key)
+	return true, v.SetAny(pv, key)
 }
 
 // SetFmInheritProp sets value from property of given key name in inherited or
@@ -214,6 +214,6 @@ func (v *Value) SetFmInheritProp(key string, k ki.Ki, inherit, typ bool) (bool, 
 	if !ok {
 		return false, nil
 	}
-	return true, v.SetIFace(pv, key)
+	return true, v.SetAny(pv, key)
 }
 */

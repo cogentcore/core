@@ -9,6 +9,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
@@ -30,6 +31,17 @@ func MenuSceneConfigStyles(msc *Scene) {
 	msc.OnWidgetAdded(func(w Widget) {
 		if bt := AsButton(w); bt != nil {
 			bt.Type = ButtonMenu
+			bt.OnKeyChord(func(e events.Event) {
+				kf := keyfun.Of(e.KeyChord())
+				switch kf {
+				case keyfun.MoveRight:
+					bt.OpenMenu(e)
+					e.SetHandled()
+				case keyfun.MoveLeft:
+					msc.Stage.ClosePopup()
+					e.SetHandled()
+				}
+			})
 			return
 		}
 		if sp, ok := w.(*Separator); ok {
