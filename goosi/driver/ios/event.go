@@ -89,7 +89,10 @@ func keyboardDelete() {
 //export scaled
 func scaled(scaleFactor, posX, posY C.float) {
 	where := image.Pt(int(posX), int(posY))
-	TheApp.EvMgr.Magnify(float32(scaleFactor), where)
+	sf := float32(scaleFactor)
+	// reduce the effective scale factor by a factor of 10
+	sf = 1 + (sf-1)/10
+	TheApp.EvMgr.Magnify(sf, where)
 }
 
 // CodeFromRune is a map from rune to goosi key code
