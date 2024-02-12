@@ -1058,6 +1058,7 @@ func (tf *TextField) CharPos(idx int) mat32.Vec2 {
 		return mat32.Vec2{}
 	}
 	pos, _, _, _ := tf.RenderAll.RuneRelPos(idx)
+	pos.Y -= tf.RenderAll.Spans[0].RelPos.Y
 	return pos
 }
 
