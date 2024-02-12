@@ -311,7 +311,7 @@ func (lb *Label) ConfigLabelSize(sz mat32.Vec2) {
 	fs := lb.Styles.FontRender()
 	txs := &lb.Styles.Text
 	lb.TextRender.SetHTML(lb.Text, fs, txs, &lb.Styles.UnContext, nil)
-	lb.TextRender.LayoutStdLR(txs, fs, &lb.Styles.UnContext, sz)
+	lb.TextRender.Layout(txs, fs, &lb.Styles.UnContext, sz)
 }
 
 // ConfigLabelAlloc is used for determining how much space the label
@@ -329,23 +329,22 @@ func (lb *Label) ConfigLabelAlloc(sz mat32.Vec2) mat32.Vec2 {
 	align, alignV := txs.Align, txs.AlignV
 	txs.Align, txs.AlignV = styles.Start, styles.Start
 	lb.TextRender.SetHTML(lb.Text, fs, txs, &lb.Styles.UnContext, nil)
-	lb.TextRender.LayoutStdLR(txs, fs, &lb.Styles.UnContext, sz)
+	lb.TextRender.Layout(txs, fs, &lb.Styles.UnContext, sz)
 	rsz := lb.TextRender.Size.Ceil()
 	txs.Align, txs.AlignV = align, alignV
-	lb.TextRender.LayoutStdLR(txs, fs, &lb.Styles.UnContext, rsz)
+	lb.TextRender.Layout(txs, fs, &lb.Styles.UnContext, rsz)
 	return rsz
 }
 
-// SizeUpWrapSize is the size to use for layout during the SizeUp pass,
-// for word wrap case, where the sizing actually matters.
-// this is based on the existing styled Actual.Content aspect ratio and
-// very rough estimate of total rendered size.
-func (lb *Label) SizeUpWrapSize() mat32.Vec2 {
-	csz := lb.Geom.Size.Actual.Content
-	chars := float32(len(lb.Text))
+// TextWrapSizeEstimate is the size to use for layout during the SizeUp pass,
+// for word wrap case, where the sizing actually matters,
+// based on trying to fit the given number of characters into the given content size
+// with given font height.
+func TextWrapSizeEstimate(csz mat32.Vec2, nChars int, fs *styles.Font) mat32.Vec2 {
+	chars := float32(nChars)
 	fht := float32(16)
-	if lb.Styles.Font.Face != nil {
-		fht = lb.Styles.Font.Face.Metrics.Height
+	if fs.Face != nil {
+		fht = fs.Face.Metrics.Height
 	}
 	area := chars * fht * fht
 	ratio := float32(1.618) // default to golden
@@ -365,7 +364,7 @@ func (lb *Label) SizeUpWrapSize() mat32.Vec2 {
 	}
 	sz := mat32.V2(w, h)
 	if DebugSettings.LayoutTrace {
-		fmt.Println(lb, "SizeUpWrapSize chars:", chars, "area:", area, "sz:", sz)
+		fmt.Println("TextWrapSizeEstimate chars:", chars, "area:", area, "sz:", sz)
 	}
 	return sz
 }
@@ -374,7 +373,7 @@ func (lb *Label) SizeUp() {
 	lb.WidgetBase.SizeUp() // sets Actual size based on styles
 	sz := &lb.Geom.Size
 	if lb.Styles.Text.HasWordWrap() {
-		lb.ConfigLabelSize(lb.SizeUpWrapSize())
+		lb.ConfigLabelSize(TextWrapSizeEstimate(lb.Geom.Size.Actual.Content, len(lb.Text), &lb.Styles.Font))
 	} else {
 		lb.ConfigLabelSize(sz.Actual.Content)
 	}
