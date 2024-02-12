@@ -209,7 +209,7 @@ func (tf *TextField) SetStyles() {
 			s.Cursor = cursors.Text
 		}
 		s.GrowWrap = true
-		s.Grow.Set(1, 0)
+		s.Grow.Set(0, 0)
 		s.Min.Y.Em(1.1)
 		s.Min.X.Ch(20)
 		s.Max.X.Ch(40)
@@ -1308,11 +1308,14 @@ func (tf *TextField) RenderSelect() {
 
 // AutoScroll scrolls the starting position to keep the cursor visible
 func (tf *TextField) AutoScroll() {
-	tf.ConfigTextSize(tf.Geom.Size.Actual.Content)
-	sz := len(tf.EditTxt)
+	sz := &tf.Geom.Size
+	icsz := tf.IconsSize()
+	availSz := sz.Actual.Content.Sub(icsz)
+	tf.ConfigTextSize(availSz)
+	n := len(tf.EditTxt)
 	if tf.HasWordWrap() { // does not scroll
 		tf.StartPos = 0
-		tf.EndPos = sz
+		tf.EndPos = n
 		if len(tf.RenderAll.Spans) != tf.NLines {
 			tf.SetNeedsLayout(true)
 		}
@@ -1320,7 +1323,7 @@ func (tf *TextField) AutoScroll() {
 	}
 	st := &tf.Styles
 
-	if sz == 0 || tf.Geom.Size.Actual.Content.X <= 0 {
+	if n == 0 || tf.Geom.Size.Actual.Content.X <= 0 {
 		tf.CursorPos = 0
 		tf.EndPos = 0
 		tf.StartPos = 0
@@ -1336,13 +1339,13 @@ func (tf *TextField) AutoScroll() {
 	}
 
 	// first rationalize all the values
-	if tf.EndPos == 0 || tf.EndPos > sz { // not init
-		tf.EndPos = sz
+	if tf.EndPos == 0 || tf.EndPos > n { // not init
+		tf.EndPos = n
 	}
 	if tf.StartPos >= tf.EndPos {
 		tf.StartPos = max(0, tf.EndPos-tf.CharWidth)
 	}
-	tf.CursorPos = mat32.ClampInt(tf.CursorPos, 0, sz)
+	tf.CursorPos = mat32.ClampInt(tf.CursorPos, 0, n)
 
 	inc := int(mat32.Ceil(.1 * float32(tf.CharWidth)))
 	inc = max(4, inc)
@@ -1353,10 +1356,10 @@ func (tf *TextField) AutoScroll() {
 		tf.StartPos -= inc
 		tf.StartPos = max(tf.StartPos, 0)
 		tf.EndPos = tf.StartPos + tf.CharWidth
-		tf.EndPos = min(sz, tf.EndPos)
+		tf.EndPos = min(n, tf.EndPos)
 	} else if tf.CursorPos > (tf.EndPos - inc) {
 		tf.EndPos += inc
-		tf.EndPos = min(tf.EndPos, sz)
+		tf.EndPos = min(tf.EndPos, n)
 		tf.StartPos = tf.EndPos - tf.CharWidth
 		tf.StartPos = max(0, tf.StartPos)
 		startIsAnchor = false
@@ -1371,7 +1374,7 @@ func (tf *TextField) AutoScroll() {
 		for {
 			w := tf.CharPos(tf.EndPos).X - spos
 			if w < maxw {
-				if tf.EndPos == sz {
+				if tf.EndPos == n {
 					break
 				}
 				nw := tf.CharPos(tf.EndPos+1).X - spos
@@ -1428,9 +1431,9 @@ func (tf *TextField) PixelToCursor(pt image.Point) int {
 
 	px := float32(pr.X)
 	st := &tf.Styles
-	sz := len(tf.EditTxt)
+	n := len(tf.EditTxt)
 	c := tf.StartPos + int(float64(px/st.UnContext.Dots(units.UnitCh)))
-	c = min(c, sz)
+	c = min(c, n)
 
 	w := tf.RelCharPos(tf.StartPos, c).X
 	if w > px {
@@ -1775,10 +1778,21 @@ func (tf *TextField) ConfigTextSize(sz mat32.Vec2) mat32.Vec2 {
 		txt = ConcealDots(len(tf.EditTxt))
 	}
 	txs.Align, txs.AlignV = styles.Start, styles.Start // only works with this
-	tf.RenderAll.SetRunes(txt, fs, &st.UnContext, &st.Text, true, 0, 0)
+	tf.RenderAll.SetRunes(txt, fs, &st.UnContext, txs, true, 0, 0)
 	tf.RenderAll.Layout(txs, fs, &st.UnContext, sz)
 	rsz := tf.RenderAll.Size.Ceil()
 	return rsz
+}
+
+func (tf *TextField) IconsSize() mat32.Vec2 {
+	var sz mat32.Vec2
+	if lead := tf.LeadingIconButton(); lead != nil {
+		sz.X += lead.Geom.Size.Actual.Total.X
+	}
+	if trail := tf.TrailingIconButton(); trail != nil {
+		sz.X += trail.Geom.Size.Actual.Total.X
+	}
+	return sz
 }
 
 func (tf *TextField) SizeUp() {
@@ -1794,18 +1808,17 @@ func (tf *TextField) SizeUp() {
 	tf.EndPos = len(tf.EditTxt)
 
 	sz := &tf.Geom.Size
+	icsz := tf.IconsSize()
+	availSz := sz.Actual.Content.Sub(icsz)
+
 	var rsz mat32.Vec2
 	if tf.HasWordWrap() {
-		rsz = tf.ConfigTextSize(TextWrapSizeEstimate(tf.Geom.Size.Actual.Content, len(tf.EditTxt), &tf.Styles.Font))
+		rsz = tf.ConfigTextSize(TextWrapSizeEstimate(availSz, len(tf.EditTxt), &tf.Styles.Font))
 	} else {
-		rsz = tf.ConfigTextSize(sz.Actual.Content)
+		rsz = tf.ConfigTextSize(availSz)
 	}
-	if lead := tf.LeadingIconButton(); lead != nil {
-		rsz.X += lead.Geom.Size.Actual.Total.X
-	}
-	if trail := tf.TrailingIconButton(); trail != nil {
-		rsz.X += trail.Geom.Size.Actual.Total.X
-	}
+	// fmt.Println(sz, icsz, availSz, rsz)
+	rsz.SetAdd(icsz)
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.SetTotalFromContent(&sz.Actual)
 	tf.FontHeight = tf.Styles.Font.Face.Metrics.Height
@@ -1820,7 +1833,10 @@ func (tf *TextField) SizeDown(iter int) bool {
 		return tf.SizeDownParts(iter)
 	}
 	sz := &tf.Geom.Size
-	rsz := tf.ConfigTextSize(sz.Actual.Content)
+	icsz := tf.IconsSize()
+	availSz := sz.Actual.Content.Sub(icsz)
+	rsz := tf.ConfigTextSize(availSz)
+	rsz.SetAdd(icsz)
 	prevContent := sz.Actual.Content
 	// start over so we don't reflect hysteresis of prior guess
 	sz.SetInitContentMin(tf.Styles.Min.Dots().Ceil())
@@ -1905,8 +1921,11 @@ func (tf *TextField) RenderTextField() {
 	} else if tf.NoEcho {
 		cur = ConcealDots(len(cur))
 	}
+	sz := &tf.Geom.Size
+	icsz := tf.IconsSize()
+	availSz := sz.Actual.Content.Sub(icsz)
 	tf.RenderVis.SetRunes(cur, fs, &st.UnContext, &st.Text, true, 0, 0)
-	tf.RenderVis.Layout(txs, fs, &st.UnContext, tf.Geom.Size.Actual.Content)
+	tf.RenderVis.Layout(txs, fs, &st.UnContext, availSz)
 	if tf.HasWordWrap() {
 		tf.RenderVis.Render(pc, pos)
 	} else {
