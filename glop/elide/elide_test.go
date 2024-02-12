@@ -11,13 +11,13 @@ import (
 func TestElide(t *testing.T) {
 	s := "string for testing purposes"
 	have := End(s, 7)
-	want := ""
+	want := "string…"
 	if have != want {
 		t.Errorf("expected %q got %q", want, have)
 	}
 
 	have = Middle(s, 7)
-	want = ""
+	want = "str…ses"
 	if have != want {
 		t.Errorf("expected %q got %q", want, have)
 	}
