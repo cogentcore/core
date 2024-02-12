@@ -129,6 +129,9 @@ type TextField struct { //core:embedder
 	// CursorPos is the current cursor position.
 	CursorPos int `copier:"-" json:"-" xml:"-" set:"-"`
 
+	// CursorLine is the current cursor line position.
+	CursorLine int `copier:"-" json:"-" xml:"-" set:"-"`
+
 	// CharWidth is the approximate number of chars that can be
 	// displayed at any time, which is computed from the font size.
 	CharWidth int `copier:"-" json:"-" xml:"-" set:"-"`
@@ -514,6 +517,7 @@ func (tf *TextField) CursorForward(steps int) {
 		inc := tf.CursorPos - tf.EndPos
 		tf.EndPos += inc
 	}
+	tf.CursorLine, _, _ = tf.RenderAll.RuneSpanPos(tf.CursorPos)
 	if tf.SelectMode {
 		tf.SelectRegUpdate(tf.CursorPos)
 	}
@@ -565,6 +569,7 @@ func (tf *TextField) CursorForwardWord(steps int) {
 		inc := tf.CursorPos - tf.EndPos
 		tf.EndPos += inc
 	}
+	tf.CursorLine, _, _ = tf.RenderAll.RuneSpanPos(tf.CursorPos)
 	if tf.SelectMode {
 		tf.SelectRegUpdate(tf.CursorPos)
 	}
@@ -582,6 +587,7 @@ func (tf *TextField) CursorBackward(steps int) {
 		dec := min(tf.StartPos, 8)
 		tf.StartPos -= dec
 	}
+	tf.CursorLine, _, _ = tf.RenderAll.RuneSpanPos(tf.CursorPos)
 	if tf.SelectMode {
 		tf.SelectRegUpdate(tf.CursorPos)
 	}
@@ -636,6 +642,45 @@ func (tf *TextField) CursorBackwardWord(steps int) {
 		dec := min(tf.StartPos, 8)
 		tf.StartPos -= dec
 	}
+	tf.CursorLine, _, _ = tf.RenderAll.RuneSpanPos(tf.CursorPos)
+	if tf.SelectMode {
+		tf.SelectRegUpdate(tf.CursorPos)
+	}
+}
+
+// CursorDown moves the cursor down
+func (tf *TextField) CursorDown(steps int) {
+	if tf.NLines <= 1 {
+		return
+	}
+	if tf.CursorLine >= tf.NLines-1 {
+		return
+	}
+	updt := tf.UpdateStart()
+	defer tf.UpdateEndRender(updt)
+
+	_, ri, _ := tf.RenderAll.RuneSpanPos(tf.CursorPos)
+	tf.CursorLine = min(tf.CursorLine+steps, tf.NLines-1)
+	tf.CursorPos, _ = tf.RenderAll.SpanPosToRuneIdx(tf.CursorLine, ri)
+	if tf.SelectMode {
+		tf.SelectRegUpdate(tf.CursorPos)
+	}
+}
+
+// CursorUp moves the cursor up
+func (tf *TextField) CursorUp(steps int) {
+	if tf.NLines <= 1 {
+		return
+	}
+	if tf.CursorLine <= 0 {
+		return
+	}
+	updt := tf.UpdateStart()
+	defer tf.UpdateEndRender(updt)
+
+	_, ri, _ := tf.RenderAll.RuneSpanPos(tf.CursorPos)
+	tf.CursorLine = max(tf.CursorLine-steps, 0)
+	tf.CursorPos, _ = tf.RenderAll.SpanPosToRuneIdx(tf.CursorLine, ri)
 	if tf.SelectMode {
 		tf.SelectRegUpdate(tf.CursorPos)
 	}
@@ -1441,6 +1486,7 @@ func (tf *TextField) SetCursorFromPixel(pt image.Point, selMode events.SelectMod
 //    Event handling
 
 func (tf *TextField) HandleEvents() {
+	tf.HandleKeyEvents()
 	tf.HandleSelectToggle()
 	tf.OnChange(func(e events.Event) {
 		tf.Validate()
@@ -1498,6 +1544,9 @@ func (tf *TextField) HandleEvents() {
 		}
 		tf.SetCursorFromPixel(e.Pos(), events.SelectOne)
 	})
+}
+
+func (tf *TextField) HandleKeyEvents() {
 	tf.OnKeyChord(func(e events.Event) {
 		if DebugSettings.KeyEventTrace {
 			fmt.Printf("TextField KeyInput: %v\n", tf.Path())
@@ -1529,6 +1578,18 @@ func (tf *TextField) HandleEvents() {
 			tf.ShiftSelect(e)
 			tf.CursorBackwardWord(1)
 			tf.OfferComplete(dontForce)
+		case keyfun.MoveDown:
+			if tf.NLines > 1 {
+				e.SetHandled()
+				tf.ShiftSelect(e)
+				tf.CursorDown(1)
+			}
+		case keyfun.MoveUp:
+			if tf.NLines > 1 {
+				e.SetHandled()
+				tf.ShiftSelect(e)
+				tf.CursorUp(1)
+			}
 		case keyfun.Home:
 			e.SetHandled()
 			tf.ShiftSelect(e)
