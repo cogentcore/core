@@ -153,6 +153,9 @@ type TextField struct { //core:embedder
 	// RenderVis is the render version of just the visible text.
 	RenderVis paint.Text `copier:"-" json:"-" xml:"-" set:"-"`
 
+	// number of lines from last render update, for word-wrap version
+	NLines int `copier:"-" json:"-" xml:"-" set:"-"`
+
 	// FontHeight is the font height cached during styling.
 	FontHeight float32 `copier:"-" json:"-" xml:"-" set:"-"`
 
@@ -438,6 +441,7 @@ func (tf *TextField) EditDone() {
 	tf.ClearSelected()
 	tf.ClearCursor()
 	goosi.TheApp.HideVirtualKeyboard()
+	tf.SetNeedsLayout(true)
 }
 
 // Revert aborts editing and reverts to last saved text
@@ -1234,22 +1238,45 @@ func (tf *TextField) RenderSelect() {
 
 	spos := tf.CharRenderPos(effst, false)
 
-	if !tf.HasWordWrap() {
-		pc := &tf.Scene.PaintContext
-		tsz := tf.RelCharPos(effst, effed).X
-		pc.FillBox(spos, mat32.V2(tsz, tf.FontHeight), tf.SelectColor)
+	pc := &tf.Scene.PaintContext
+	tsz := tf.RelCharPos(effst, effed)
+	if !tf.HasWordWrap() || tsz.Y == 0 {
+		pc.FillBox(spos, mat32.V2(tsz.X, tf.FontHeight), tf.SelectColor)
+		return
+	}
+	ex := float32(tf.Geom.ContentBBox.Max.X)
+	sx := float32(tf.Geom.ContentBBox.Min.X)
+	ssi, _, _ := tf.RenderAll.RuneSpanPos(effst)
+	esi, _, _ := tf.RenderAll.RuneSpanPos(effed)
+	ep := tf.CharRenderPos(effed, false)
+
+	pc.FillBox(spos, mat32.V2(ex-spos.X, tf.FontHeight), tf.SelectColor)
+
+	spos.X = sx
+	spos.Y += tf.RenderAll.Spans[ssi+1].RelPos.Y - tf.RenderAll.Spans[ssi].RelPos.Y
+	for si := ssi + 1; si <= esi; si++ {
+		if si < esi {
+			pc.FillBox(spos, mat32.V2(ex-spos.X, tf.FontHeight), tf.SelectColor)
+		} else {
+			pc.FillBox(spos, mat32.V2(ep.X-spos.X, tf.FontHeight), tf.SelectColor)
+		}
+		spos.Y += tf.RenderAll.Spans[si].RelPos.Y - tf.RenderAll.Spans[si-1].RelPos.Y
 	}
 }
 
 // AutoScroll scrolls the starting position to keep the cursor visible
 func (tf *TextField) AutoScroll() {
+	tf.ConfigTextSize(tf.Geom.Size.Actual.Content)
+	sz := len(tf.EditTxt)
 	if tf.HasWordWrap() { // does not scroll
+		tf.StartPos = 0
+		tf.EndPos = sz
+		if len(tf.RenderAll.Spans) != tf.NLines {
+			tf.SetNeedsLayout(true)
+		}
 		return
 	}
 	st := &tf.Styles
-	tf.ConfigTextSize(tf.Geom.Size.Actual.Content)
-
-	sz := len(tf.EditTxt)
 
 	if sz == 0 || tf.Geom.Size.Actual.Content.X <= 0 {
 		tf.CursorPos = 0
@@ -1715,6 +1742,12 @@ func (tf *TextField) SizeUp() {
 	} else {
 		rsz = tf.ConfigTextSize(sz.Actual.Content)
 	}
+	if lead := tf.LeadingIconButton(); lead != nil {
+		rsz.X += lead.Geom.Size.Actual.Total.X
+	}
+	if trail := tf.TrailingIconButton(); trail != nil {
+		rsz.X += trail.Geom.Size.Actual.Total.X
+	}
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.SetTotalFromContent(&sz.Actual)
 	tf.FontHeight = tf.Styles.Font.Face.Metrics.Height
@@ -1722,12 +1755,6 @@ func (tf *TextField) SizeUp() {
 	if DebugSettings.LayoutTrace {
 		fmt.Println(tf, "TextField SizeUp:", rsz, "Actual:", sz.Actual.Content)
 	}
-
-	// tf.UpdateRenderAll()
-	// w := tf.RelCharPos(tf.StartPos, tf.EndPos)
-	// // w += 2.0 // give some extra buffer
-	// nsz := mat32.V2(w, tf.FontHeight)
-	// sz := &tf.Geom.Size
 }
 
 func (tf *TextField) SizeDown(iter int) bool {
@@ -1784,9 +1811,6 @@ func (tf *TextField) TrailingIconButton() *Button {
 // the textfield based on its base position and size
 // and its icons or lack thereof
 func (tf *TextField) SetEffPosAndSize() {
-	// if tf.Parts == nil {
-	// 	tf.ConfigParts(tf.Sc)
-	// }
 	sz := tf.Geom.Size.Actual.Content
 	pos := tf.Geom.Pos.Content
 	if lead := tf.LeadingIconButton(); lead != nil {
@@ -1796,9 +1820,14 @@ func (tf *TextField) SetEffPosAndSize() {
 	if trail := tf.TrailingIconButton(); trail != nil {
 		sz.X -= trail.Geom.Size.Actual.Total.X
 	}
-	pos.Y += 0.5 * (sz.Y - tf.FontHeight) // center
+	if tf.HasWordWrap() {
+		pos.Y += tf.Styles.BoxSpace().Top
+	} else {
+		pos.Y += 0.5 * (sz.Y - tf.FontHeight) // center
+	}
 	tf.EffSize = sz.Ceil()
 	tf.EffPos = pos.Ceil()
+	tf.NLines = len(tf.RenderAll.Spans)
 }
 
 func (tf *TextField) RenderTextField() {
@@ -1825,7 +1854,11 @@ func (tf *TextField) RenderTextField() {
 	}
 	tf.RenderVis.SetRunes(cur, fs, &st.UnContext, &st.Text, true, 0, 0)
 	tf.RenderVis.Layout(txs, fs, &st.UnContext, tf.Geom.Size.Actual.Content)
-	tf.RenderVis.Render(pc, pos)
+	if tf.HasWordWrap() {
+		tf.RenderVis.Render(pc, pos)
+	} else {
+		tf.RenderVis.Render(pc, pos)
+	}
 	st.Color = prevColor
 }
 
