@@ -9,7 +9,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"runtime"
 	"slices"
 	"strings"
 	"sync"
@@ -340,9 +339,9 @@ func (fv *FileView) ConfigFilesRow() {
 				fn := fv.Files[fsv.SelIdx]
 				fn.Duplicate()
 			})
-		tip := "Delete deletes the selected file"
-		if runtime.GOOS == "darwin" || runtime.GOOS == "windows" || runtime.GOOS == "linux" {
-			tip = "Delete moves the selected file to the trash / recycling bin"
+		tip := "Delete moves the selected file to the trash / recycling bin"
+		if gi.TheApp.Platform().IsMobile() {
+			tip = "Delete deletes the selected file"
 		}
 		gi.NewButton(m).SetText("Delete").SetIcon(icons.Delete).
 			SetTooltip(tip).

@@ -11,7 +11,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"time"
 
@@ -177,10 +176,11 @@ func (fi *FileInfo) Duplicate() (string, error) { //gti:add
 // Delete moves the file to the trash / recycling bin.
 // On mobile and web, it deletes it directly.
 func (fi *FileInfo) Delete() error { //gti:add
-	if runtime.GOOS == "darwin" || runtime.GOOS == "windows" || runtime.GOOS == "linux" {
-		return wastebasket.Trash(fi.Path)
+	err := wastebasket.Trash(fi.Path)
+	if errors.Is(err, wastebasket.ErrPlatformNotSupported) {
+		return os.RemoveAll(fi.Path)
 	}
-	return os.RemoveAll(fi.Path)
+	return err
 }
 
 // Filenames recursively adds fullpath filenames within the starting directory to the "names" slice.
