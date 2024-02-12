@@ -1732,7 +1732,7 @@ func (tf *TextField) SizeUp() {
 
 func (tf *TextField) SizeDown(iter int) bool {
 	if !tf.HasWordWrap() || iter > 1 {
-		return false
+		return tf.SizeDownParts(iter)
 	}
 	sz := &tf.Geom.Size
 	rsz := tf.ConfigTextSize(sz.Actual.Content)
@@ -1747,7 +1747,8 @@ func (tf *TextField) SizeDown(iter int) bool {
 			fmt.Println(tf, "TextField Size Changed:", sz.Actual.Content, "was:", prevContent)
 		}
 	}
-	return chg
+	sdp := tf.SizeDownParts(iter)
+	return chg || sdp
 }
 
 func (tf *TextField) ScenePos() {
