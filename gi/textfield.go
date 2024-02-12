@@ -1818,11 +1818,6 @@ func (tf *TextField) SetEffPosAndSize() {
 	if trail := tf.TrailingIconButton(); trail != nil {
 		sz.X -= trail.Geom.Size.Actual.Total.X
 	}
-	if tf.HasWordWrap() {
-		pos.Y += tf.Styles.BoxSpace().Top
-	} else {
-		pos.Y += 0.5 * (sz.Y - tf.FontHeight) // center
-	}
 	tf.EffSize = sz.Ceil()
 	tf.EffPos = pos.Ceil()
 	tf.NLines = len(tf.RenderAll.Spans)
