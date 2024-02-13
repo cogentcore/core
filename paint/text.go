@@ -164,24 +164,27 @@ func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 			ll := rp.Add(tx.MulVec2AsVec(mat32.V2(0, dsc32)))
 			ur := ll.Add(tx.MulVec2AsVec(mat32.V2(rr.Size.X, -rr.Size.Y)))
 
+			if int(mat32.Ceil(ur.X)) < pc.Bounds.Min.X || int(mat32.Ceil(ll.Y)) < pc.Bounds.Min.Y {
+				continue
+			}
+
 			doingOverflow := false
 			if tr.HasOverflow {
 				cmid := ll.Add(mat32.V2(0.5*rr.Size.X, -0.5*rr.Size.Y))
 				if overBox.ContainsPoint(cmid) {
-					rendOverflow = true
 					doingOverflow = true
-					hadOverflow = true
 					r = elipses
 				}
 			}
 
-			if int(mat32.Floor(ll.X)) > pc.Bounds.Max.X || int(mat32.Floor(ur.Y)) > pc.Bounds.Max.Y {
+			if int(mat32.Floor(ll.X)) > pc.Bounds.Max.X+1 || int(mat32.Floor(ur.Y)) > pc.Bounds.Max.Y+1 {
 				hadOverflow = true
 				if !doingOverflow {
-					break
+					continue
 				}
 			}
-			if int(mat32.Ceil(ur.X)) < pc.Bounds.Min.X || int(mat32.Ceil(ll.Y)) < pc.Bounds.Min.Y {
+
+			if rendOverflow { // once you've rendered, no more rendering
 				continue
 			}
 
@@ -218,7 +221,7 @@ func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 				})
 			}
 			if doingOverflow {
-				break
+				rendOverflow = true
 			}
 		}
 		if sr.HasDeco.HasFlag(styles.LineThrough) {
