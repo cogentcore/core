@@ -87,6 +87,7 @@ func (sp *Spinner) SetStyles() {
 			s.Min.X.Ch(14)
 			s.Max.X.Ch(18)
 		}
+		s.Text.Align = styles.End
 	})
 	sp.OnWidgetAdded(func(w Widget) {
 		switch w.PathFrom(sp) {
@@ -95,7 +96,6 @@ func (sp *Spinner) SetStyles() {
 				// icons do not get separate focus, as people can
 				// use the arrow keys to get the same effect
 				s.SetAbilities(false, abilities.Focusable)
-				w.(*Button).SetType(ButtonTonal)
 			})
 		}
 	})

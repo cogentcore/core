@@ -1778,9 +1778,11 @@ func (tf *TextField) ConfigTextSize(sz mat32.Vec2) mat32.Vec2 {
 	if tf.NoEcho {
 		txt = ConcealDots(len(tf.EditTxt))
 	}
+	align, alignV := txs.Align, txs.AlignV
 	txs.Align, txs.AlignV = styles.Start, styles.Start // only works with this
 	tf.RenderAll.SetRunes(txt, fs, &st.UnContext, txs, true, 0, 0)
 	tf.RenderAll.Layout(txs, fs, &st.UnContext, sz)
+	txs.Align, txs.AlignV = align, alignV
 	rsz := tf.RenderAll.Size.Ceil()
 	return rsz
 }
