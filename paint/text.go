@@ -136,11 +136,11 @@ func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 			// fmt.Println("rendering background color for span", rs)
 			sr.RenderBg(pc, tpos)
 		}
-		if sr.HasDeco.HasFlag(styles.DecoUnderline) || sr.HasDeco.HasFlag(styles.DecoDottedUnderline) {
+		if sr.HasDeco.HasFlag(styles.Underline) || sr.HasDeco.HasFlag(styles.DecoDottedUnderline) {
 			sr.RenderUnderline(pc, tpos)
 		}
-		if sr.HasDeco.HasFlag(styles.DecoOverline) {
-			sr.RenderLine(pc, tpos, styles.DecoOverline, 1.1)
+		if sr.HasDeco.HasFlag(styles.Overline) {
+			sr.RenderLine(pc, tpos, styles.Overline, 1.1)
 		}
 
 		for i, r := range sr.Text {
@@ -221,8 +221,8 @@ func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 				break
 			}
 		}
-		if sr.HasDeco.HasFlag(styles.DecoLineThrough) {
-			sr.RenderLine(pc, tpos, styles.DecoLineThrough, 0.25)
+		if sr.HasDeco.HasFlag(styles.LineThrough) {
+			sr.RenderLine(pc, tpos, styles.LineThrough, 0.25)
 		}
 	}
 	tr.HasOverflow = hadOverflow
@@ -331,19 +331,19 @@ func SetHTMLSimpleTag(tag string, fs *styles.FontRender, ctxt *units.Context, cs
 		fs.Font = OpenFont(fs, ctxt)
 		did = true
 	case "i", "em", "var", "cite":
-		fs.Style = styles.FontItalic
+		fs.Style = styles.Italic
 		fs.Font = OpenFont(fs, ctxt)
 		did = true
 	case "ins":
 		fallthrough
 	case "u":
-		fs.SetDeco(styles.DecoUnderline)
+		fs.SetDecoration(styles.Underline)
 		did = true
 	case "s", "del", "strike":
-		fs.SetDeco(styles.DecoLineThrough)
+		fs.SetDecoration(styles.LineThrough)
 		did = true
 	case "sup":
-		fs.SetDeco(styles.DecoSuper)
+		fs.SetDecoration(styles.DecoSuper)
 		curpts := math.Round(float64(fs.Size.Convert(units.UnitPt, ctxt).Val))
 		curpts -= 2
 		fs.Size = units.Pt(float32(curpts))
@@ -351,7 +351,7 @@ func SetHTMLSimpleTag(tag string, fs *styles.FontRender, ctxt *units.Context, cs
 		fs.Font = OpenFont(fs, ctxt)
 		did = true
 	case "sub":
-		fs.SetDeco(styles.DecoSub)
+		fs.SetDecoration(styles.DecoSub)
 		fallthrough
 	case "small":
 		curpts := math.Round(float64(fs.Size.Convert(units.UnitPt, ctxt).Val))
@@ -376,7 +376,7 @@ func SetHTMLSimpleTag(tag string, fs *styles.FontRender, ctxt *units.Context, cs
 		fs.Background = colors.C(colors.Scheme.Warn.Container)
 		did = true
 	case "abbr", "acronym":
-		fs.SetDeco(styles.DecoDottedUnderline)
+		fs.SetDecoration(styles.DecoDottedUnderline)
 		did = true
 	case "tt", "kbd", "samp", "code":
 		fs.Family = "monospace"
@@ -465,7 +465,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles
 				switch nm {
 				case "a":
 					fs.Color = colors.Scheme.Primary.Base
-					fs.SetDeco(styles.DecoUnderline)
+					fs.SetDecoration(styles.Underline)
 					curLinkIdx = len(tr.Links)
 					tl := &TextLink{StartSpan: len(tr.Spans) - 1, StartIdx: len(curSp.Text)}
 					sprop := make(map[string]any, len(se.Attr))
@@ -482,7 +482,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles
 				case "q":
 					curf := fstack[len(fstack)-1]
 					atStart := len(curSp.Text) == 0
-					curSp.AppendRune('“', curf.Face.Face, curf.Color, curf.Background, curf.Deco)
+					curSp.AppendRune('“', curf.Face.Face, curf.Color, curf.Background, curf.Decoration)
 					if nextIsParaStart && atStart {
 						curSp.SetNewPara()
 					}
@@ -539,7 +539,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles
 				curSp = &(tr.Spans[len(tr.Spans)-1])
 			case "q":
 				curf := fstack[len(fstack)-1]
-				curSp.AppendRune('”', curf.Face.Face, curf.Color, curf.Background, curf.Deco)
+				curSp.AppendRune('”', curf.Face.Face, curf.Color, curf.Background, curf.Decoration)
 			case "a":
 				if curLinkIdx >= 0 {
 					tl := &tr.Links[curLinkIdx]
@@ -560,7 +560,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles
 					return unicode.IsSpace(r)
 				})
 			}
-			curSp.AppendString(sstr, curf.Face.Face, curf.Color, curf.Background, curf.Deco, font, ctxt)
+			curSp.AppendString(sstr, curf.Face.Face, curf.Color, curf.Background, curf.Decoration, font, ctxt)
 			if nextIsParaStart && atStart {
 				curSp.SetNewPara()
 			}
@@ -619,7 +619,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 				bidx += eidx + 2
 			} else { // get past <
 				curf := fstack[len(fstack)-1]
-				curSp.AppendString(string(str[bidx:bidx+1]), curf.Face.Face, curf.Color, curf.Background, curf.Deco, font, ctxt)
+				curSp.AppendString(string(str[bidx:bidx+1]), curf.Face.Face, curf.Color, curf.Background, curf.Decoration, font, ctxt)
 				bidx++
 			}
 		}
@@ -643,7 +643,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 				// 	curSp = &(tr.Spans[len(tr.Spans)-1])
 				case "q":
 					curf := fstack[len(fstack)-1]
-					curSp.AppendRune('”', curf.Face.Face, curf.Color, curf.Background, curf.Deco)
+					curSp.AppendRune('”', curf.Face.Face, curf.Color, curf.Background, curf.Decoration)
 				case "a":
 					if curLinkIdx >= 0 {
 						tl := &tr.Links[curLinkIdx]
@@ -677,7 +677,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 					switch stag {
 					case "a":
 						fs.Color = colors.Scheme.Primary.Base
-						fs.SetDeco(styles.DecoUnderline)
+						fs.SetDecoration(styles.Underline)
 						curLinkIdx = len(tr.Links)
 						tl := &TextLink{StartSpan: len(tr.Spans) - 1, StartIdx: len(curSp.Text)}
 						if nattr > 0 {
@@ -698,7 +698,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 					case "q":
 						curf := fstack[len(fstack)-1]
 						atStart := len(curSp.Text) == 0
-						curSp.AppendRune('“', curf.Face.Face, curf.Color, curf.Background, curf.Deco)
+						curSp.AppendRune('“', curf.Face.Face, curf.Color, curf.Background, curf.Decoration)
 						if nextIsParaStart && atStart {
 							curSp.SetNewPara()
 						}
@@ -774,7 +774,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 					}
 				case '\n': // todo absorb other line endings
 					unestr := html.UnescapeString(string(tmpbuf))
-					curSp.AppendString(unestr, curf.Face.Face, curf.Color, curf.Background, curf.Deco, font, ctxt)
+					curSp.AppendString(unestr, curf.Face.Face, curf.Color, curf.Background, curf.Decoration, font, ctxt)
 					tmpbuf = tmpbuf[0:0]
 					tr.Spans = append(tr.Spans, Span{})
 					curSp = &(tr.Spans[len(tr.Spans)-1])
@@ -787,7 +787,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 			if !didNl {
 				unestr := html.UnescapeString(string(tmpbuf))
 				// fmt.Printf("%v added: %v\n", bidx, unestr)
-				curSp.AppendString(unestr, curf.Face.Face, curf.Color, curf.Background, curf.Deco, font, ctxt)
+				curSp.AppendString(unestr, curf.Face.Face, curf.Color, curf.Background, curf.Decoration, font, ctxt)
 				if curLinkIdx >= 0 {
 					tl := &tr.Links[curLinkIdx]
 					tl.Label = unestr

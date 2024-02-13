@@ -181,10 +181,10 @@ func (se StyleEntry) ToProps() ki.Props {
 		pr["font-weight"] = styles.WeightBold
 	}
 	if se.Italic == Yes {
-		pr["font-style"] = styles.FontItalic
+		pr["font-style"] = styles.Italic
 	}
 	if se.Underline == Yes {
-		pr["text-decoration"] = 1 << uint32(styles.DecoUnderline)
+		pr["text-decoration"] = 1 << uint32(styles.Underline)
 	}
 	return pr
 }

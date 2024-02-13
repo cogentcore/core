@@ -38,7 +38,7 @@ func (fn *Node) SetStyles() {
 			s.Font.Weight = styles.WeightBold // todo: somehow not working
 		}
 		if fn.Buf != nil {
-			s.Font.Style = styles.FontItalic
+			s.Font.Style = styles.Italic
 		}
 		switch {
 		case vcs == vci.Untracked:

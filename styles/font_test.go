@@ -18,15 +18,15 @@ type testFontSpec struct {
 
 var testFontNames = []testFontSpec{
 	{"NotoSansBlack", "NotoSans Black", FontStrNormal, WeightBlack, FontNormal},
-	{"NotoSansBlackItalic", "NotoSans Black Italic", FontStrNormal, WeightBlack, FontItalic},
+	{"NotoSansBlackItalic", "NotoSans Black Italic", FontStrNormal, WeightBlack, Italic},
 	{"NotoSansBold", "NotoSans Bold", FontStrNormal, WeightBold, FontNormal},
 	{"NotoSansCondensed", "NotoSans Condensed", FontStrCondensed, WeightNormal, FontNormal},
 	{"NotoSansCondensedBlack", "NotoSans Condensed Black", FontStrCondensed, WeightBlack, FontNormal},
-	{"NotoSansCondensedBlackItalic", "NotoSans Condensed Black Italic", FontStrCondensed, WeightBlack, FontItalic},
+	{"NotoSansCondensedBlackItalic", "NotoSans Condensed Black Italic", FontStrCondensed, WeightBlack, Italic},
 	{"NotoSansCondensedExtraBold", "NotoSans Condensed ExtraBold", FontStrCondensed, WeightExtraBold, FontNormal},
-	{"NotoSansCondensedExtraBoldItalic", "NotoSans Condensed ExtraBold Italic", FontStrCondensed, WeightExtraBold, FontItalic},
+	{"NotoSansCondensedExtraBoldItalic", "NotoSans Condensed ExtraBold Italic", FontStrCondensed, WeightExtraBold, Italic},
 	{"NotoSansExtraBold", "NotoSans ExtraBold", FontStrNormal, WeightExtraBold, FontNormal},
-	{"NotoSansExtraBoldItalic", "NotoSans ExtraBold Italic", FontStrNormal, WeightExtraBold, FontItalic},
+	{"NotoSansExtraBoldItalic", "NotoSans ExtraBold Italic", FontStrNormal, WeightExtraBold, Italic},
 	{"NotoSansRegular", "NotoSans", FontStrNormal, WeightNormal, FontNormal},
 	{"NotoSansNormal", "NotoSans", FontStrNormal, WeightNormal, FontNormal},
 }

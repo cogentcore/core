@@ -47,7 +47,7 @@ func testName(elems ...any) string {
 			return !(unicode.IsLetter(r) || unicode.IsDigit(r) || r == '|')
 		})
 		if len(fields) > 0 {
-			f := strcase.ToSnake(fields[0])
+			f := strcase.ToKebab(fields[0])
 			f = strings.ReplaceAll(f, "|", "-")
 			strs = append(strs, f)
 		} else {

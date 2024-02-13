@@ -33,7 +33,7 @@ func TestFontAlts(t *testing.T) {
 
 var testStrs = []styles.FontStretch{styles.FontStrNormal, styles.FontStrCondensed, styles.FontStrExpanded}
 var testWts = []styles.FontWeights{styles.WeightNormal, styles.WeightLight, styles.WeightBold, styles.WeightBlack}
-var testStys = []styles.FontStyles{styles.FontNormal, styles.FontItalic, styles.FontOblique}
+var testStys = []styles.FontStyles{styles.FontNormal, styles.Italic, styles.Oblique}
 var testNms = []string{"serif", "sans-serif", "monospace", "courier", "cursive", "fantasy"}
 
 func TestFontFaceName(t *testing.T) {

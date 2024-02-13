@@ -375,25 +375,25 @@ var StyleFontFuncs = map[string]StyleFunc{
 		fs := obj.(*Font)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				fs.Deco = par.(*Font).Deco
+				fs.Decoration = par.(*Font).Decoration
 			} else if init {
-				fs.Deco = DecoNone
+				fs.Decoration = DecoNone
 			}
 			return
 		}
 		switch vt := val.(type) {
 		case string:
 			if vt == "none" {
-				fs.Deco = DecoNone
+				fs.Decoration = DecoNone
 			} else {
-				fs.Deco.SetString(vt)
+				fs.Decoration.SetString(vt)
 			}
 		case TextDecorations:
-			fs.Deco = vt
+			fs.Decoration = vt
 		default:
 			iv, err := laser.ToInt(val)
 			if err == nil {
-				fs.Deco = TextDecorations(iv)
+				fs.Decoration = TextDecorations(iv)
 			} else {
 				StyleSetError(key, val, err)
 			}

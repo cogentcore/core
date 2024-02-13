@@ -226,7 +226,7 @@ func (sr *Span) SetRenders(sty *styles.FontRender, ctxt *units.Context, noBG boo
 	ucfont.Size = sty.Size
 	ucfont.Font = OpenFont(ucfont, ctxt)
 
-	sr.HasDecoUpdate(bgc, sty.Deco)
+	sr.HasDecoUpdate(bgc, sty.Decoration)
 	sr.Render = make([]Rune, sz)
 	if sty.Face == nil {
 		sr.Render[0].Face = ucfont.Face.Face
@@ -248,9 +248,9 @@ func (sr *Span) SetRenders(sty *styles.FontRender, ctxt *units.Context, noBG boo
 			sr.Render[i].ScaleX = scalex
 		}
 	}
-	if sty.Deco != styles.DecoNone {
+	if sty.Decoration != styles.DecoNone {
 		for i := range sr.Text {
-			sr.Render[i].Deco = sty.Deco
+			sr.Render[i].Deco = sty.Decoration
 		}
 	}
 	// use unicode font for all non-ascii symbols
@@ -730,7 +730,7 @@ func (sr *Span) RenderUnderline(pc *Context, tpos mat32.Vec2) {
 			continue
 		}
 		rr := &(sr.Render[i])
-		if !(rr.Deco.HasFlag(styles.DecoUnderline) || rr.Deco.HasFlag(styles.DecoDottedUnderline)) {
+		if !(rr.Deco.HasFlag(styles.Underline) || rr.Deco.HasFlag(styles.DecoDottedUnderline)) {
 			if didLast {
 				pc.Stroke()
 			}

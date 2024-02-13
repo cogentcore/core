@@ -81,19 +81,19 @@ iterloop:
 			}
 			continue
 		}
-		if sty == styles.FontItalic { // italic is more common, but maybe oblique exists
+		if sty == styles.Italic { // italic is more common, but maybe oblique exists
 			didItalic = true
 			if !didOblique {
-				sty = styles.FontOblique
+				sty = styles.Oblique
 				continue
 			}
 			sty = styles.FontNormal
 			continue
 		}
-		if sty == styles.FontOblique { // by now we've tried both, try nothing
+		if sty == styles.Oblique { // by now we've tried both, try nothing
 			didOblique = true
 			if !didItalic {
-				sty = styles.FontItalic
+				sty = styles.Italic
 				continue
 			}
 			sty = styles.FontNormal

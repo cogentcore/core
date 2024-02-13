@@ -29,3 +29,18 @@ func TestLabel(t *testing.T) {
 		b.AssertRender(t, testName("label", str, "rem"))
 	}
 }
+
+func TestLabelTextDecoration(t *testing.T) {
+	for d := styles.Underline; d <= styles.LineThrough; d++ {
+		for st := styles.FontNormal; st <= styles.Italic; st++ {
+			d := d
+			st := st
+			b := NewBody()
+			NewLabel(b).SetText("Test").Style(func(s *styles.Style) {
+				s.Font.SetDecoration(d)
+				s.Font.Style = st
+			})
+			b.AssertRender(t, "label/text-decoration/"+d.BitIndexString()+"-"+st.String())
+		}
+	}
+}

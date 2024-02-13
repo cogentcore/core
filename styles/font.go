@@ -41,7 +41,7 @@ type Font struct { //gti:add
 	Variant FontVariants
 
 	// underline, line-through, etc (not inherited)
-	Deco TextDecorations
+	Decoration TextDecorations
 
 	// super / sub script (not inherited)
 	Shift BaselineShifts
@@ -77,9 +77,12 @@ func (fs *Font) ToDots(uc *units.Context) {
 	fs.Size.ToDots(uc)
 }
 
-// SetDeco sets decoration (underline, etc), which uses bitflag to allow multiple combinations
-func (fs *Font) SetDeco(deco TextDecorations) {
-	fs.Deco.SetFlag(true, deco)
+// SetDecoration sets text decoration (underline, etc),
+// which uses bitflags to allow multiple combinations.
+func (fs *Font) SetDecoration(deco ...TextDecorations) {
+	for _, d := range deco {
+		fs.Decoration.SetFlag(true, d)
+	}
 }
 
 // SetUnitContext sets the font-specific information in the given
@@ -178,8 +181,12 @@ type FontStyles int32 //enums:enum -trim-prefix Font -transform kebab
 
 const (
 	FontNormal FontStyles = iota
-	FontItalic
-	FontOblique
+
+	// Italic indicates to make font italic
+	Italic
+
+	// Oblique indicates to make font slanted
+	Oblique
 )
 
 // FontStyleNames contains the uppercase names of all the valid font styles
@@ -282,9 +289,16 @@ type TextDecorations int64 //enums:bitflag -trim-prefix Deco -transform kebab
 
 const (
 	DecoNone TextDecorations = iota
-	DecoUnderline
-	DecoOverline
-	DecoLineThrough
+
+	// Underline indicates to place a line below text
+	Underline
+
+	// Overline indicates to place a line above text
+	Overline
+
+	// LineThrough indicates to place a line through text
+	LineThrough
+
 	// Blink is not currently supported (and probably a bad idea generally ;)
 	DecoBlink
 

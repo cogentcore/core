@@ -155,8 +155,8 @@ const FontStylesN FontStyles = 3
 func _FontStylesNoOp() {
 	var x [1]struct{}
 	_ = x[FontNormal-(0)]
-	_ = x[FontItalic-(1)]
-	_ = x[FontOblique-(2)]
+	_ = x[Italic-(1)]
+	_ = x[Oblique-(2)]
 }
 
 var _FontStylesNameToValueMap = map[string]FontStyles{
@@ -576,9 +576,9 @@ const TextDecorationsN TextDecorations = 10
 func _TextDecorationsNoOp() {
 	var x [1]struct{}
 	_ = x[DecoNone-(0)]
-	_ = x[DecoUnderline-(1)]
-	_ = x[DecoOverline-(2)]
-	_ = x[DecoLineThrough-(3)]
+	_ = x[Underline-(1)]
+	_ = x[Overline-(2)]
+	_ = x[LineThrough-(3)]
 	_ = x[DecoBlink-(4)]
 	_ = x[DecoDottedUnderline-(5)]
 	_ = x[DecoParaStart-(6)]
