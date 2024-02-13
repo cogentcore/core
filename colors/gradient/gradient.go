@@ -231,6 +231,7 @@ func (b *Base) ApplyOpacityToStops(opacity float32) {
 // to avoid people accidentally calling it instead of [Gradient.Update].
 func (b *Base) UpdateBase() {
 	b.ComputeObjectMatrix()
+	b.UpdateRGBStops()
 }
 
 // ComputeObjectMatrix computes the effective object transformation
@@ -246,8 +247,6 @@ func (b *Base) ComputeObjectMatrix() {
 // GetColor returns the color at the given normalized position along the
 // gradient's stops using its spread method and blend algorithm.
 func (b *Base) GetColor(pos float32) color.Color {
-	b.UpdateRGBStops()
-
 	if b.Blend == colors.RGB {
 		return b.GetColorImpl(pos, b.Stops)
 	}
