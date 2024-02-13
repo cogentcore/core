@@ -216,6 +216,7 @@ func (lb *Label) HandleEvents() {
 	})
 	lb.OnDoubleClick(func(e events.Event) {
 		lb.SetSelected(!lb.StateIs(states.Selected))
+		lb.SetFocus()
 	})
 	lb.OnKeyChord(func(e events.Event) {
 		// TODO(kai): get label copying working
