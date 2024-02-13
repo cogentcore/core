@@ -146,6 +146,37 @@ func (sm *StageMgr) DeleteStage(st *Stage) bool {
 	return false
 }
 
+// DeleteStageAndBelow deletes given stage (removing from stack,
+// calling Delete on Stage), returning true if found.
+// And also deletes all stages of the same type immediately below it.
+// It runs under Write lock.
+func (sm *StageMgr) DeleteStageAndBelow(st *Stage) bool {
+	sm.Mu.Lock()
+	defer sm.Mu.Unlock()
+
+	styp := st.Type
+
+	l := sm.Stack.Len()
+	got := false
+	for i := l - 1; i >= 0; i-- {
+		s := sm.Stack.ValueByIndex(i)
+		if !got {
+			if st == s {
+				sm.Modified = true
+				sm.Stack.DeleteIndex(i, i+1)
+				st.Delete()
+				got = true
+			}
+		} else {
+			if s.Type == styp {
+				sm.Stack.DeleteIndex(i, i+1)
+				st.Delete()
+			}
+		}
+	}
+	return got
+}
+
 // MoveToTop moves the given stage to the top of the stack,
 // returning true if found. It runs under Write lock.
 func (sm *StageMgr) MoveToTop(st *Stage) bool {

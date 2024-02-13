@@ -274,6 +274,18 @@ func (ly *Layout) ClosePopup() bool {
 	return true
 }
 
+// ClosePopupAndBelow closes the parent Stage as a PopupStage,
+// and any other popups immediately below it of the same type.
+// Returns false if not a popup.
+func (ly *Layout) ClosePopupAndBelow() bool {
+	ps := ly.Scene.Stage
+	if ps == nil {
+		return false
+	}
+	ps.ClosePopupAndBelow()
+	return true
+}
+
 func (ly *Layout) HandleEvents() {
 	ly.WidgetBase.HandleEvents()
 	ly.HandleKeys()
@@ -301,7 +313,7 @@ func (ly *Layout) HandleKeys() {
 		}
 		kf := keyfun.Of(e.KeyChord())
 		if kf == keyfun.Abort {
-			if ly.ClosePopup() {
+			if ly.ClosePopupAndBelow() {
 				e.SetHandled()
 			}
 			return

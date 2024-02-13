@@ -139,6 +139,21 @@ func (st *Stage) ClosePopup() {
 	st.PopupMgr.DeleteStage(st)
 }
 
+// ClosePopupAndBelow closes this stage as a popup,
+// and all those immediately below it of the same type.
+func (st *Stage) ClosePopupAndBelow() {
+	// note: this is critical for Completer to not crash due to async closing:
+	if st.Main == nil || st.PopupMgr == nil || st.MainMgr == nil {
+		// fmt.Println("popup already gone")
+		return
+	}
+	// note: essential to lock here for async popups like completer
+	st.MainMgr.RenderCtx.Mu.RLock()
+	defer st.MainMgr.RenderCtx.Mu.RUnlock()
+
+	st.PopupMgr.DeleteStageAndBelow(st)
+}
+
 func (st *Stage) PopupHandleEvent(e events.Event) {
 	if st.Scene == nil {
 		return
