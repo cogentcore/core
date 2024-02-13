@@ -71,6 +71,12 @@ type Base struct { //gti:add -setters
 	// boxTransform is the Transform applied to the bounding Box,
 	// only for [Units] == [ObjectBoundingBox].
 	boxTransform mat32.Mat2 `set:"-"`
+
+	// computed RGB stops for blend types other than RGB
+	StopsRGB []Stop `set:"-"`
+
+	// source Stops when StopsRGB were last computed
+	StopsRGBSrc []Stop `set:"-"`
 }
 
 // Stop represents a single stop in a gradient
@@ -145,6 +151,7 @@ func NewBase() Base {
 	return Base{
 		Blend:     colors.RGB, // TODO(kai): figure out a better solution to this
 		Box:       mat32.B2(0, 0, 100, 100),
+		Opacity:   1,
 		Transform: mat32.Identity2(),
 	}
 }
@@ -194,11 +201,27 @@ func CopyOf(g Gradient) Gradient {
 func (b *Base) CopyStopsFrom(cp *Base) {
 	b.Stops = make([]Stop, len(cp.Stops))
 	copy(b.Stops, cp.Stops)
+
+	if cp.StopsRGB == nil {
+		b.StopsRGB = nil
+		b.StopsRGBSrc = nil
+	} else {
+		b.StopsRGB = make([]Stop, len(cp.StopsRGB))
+		copy(b.StopsRGB, cp.StopsRGB)
+		b.StopsRGBSrc = make([]Stop, len(cp.StopsRGBSrc))
+		copy(b.StopsRGBSrc, cp.StopsRGBSrc)
+	}
 }
 
 // ApplyOpacityToStops multiplies all stop opacities by given opacity
 func (b *Base) ApplyOpacityToStops(opacity float32) {
 	for _, s := range b.Stops {
+		s.Opacity *= opacity
+	}
+	for _, s := range b.StopsRGB {
+		s.Opacity *= opacity
+	}
+	for _, s := range b.StopsRGBSrc {
 		s.Opacity *= opacity
 	}
 }
@@ -223,15 +246,24 @@ func (b *Base) ComputeObjectMatrix() {
 // GetColor returns the color at the given normalized position along the
 // gradient's stops using its spread method and blend algorithm.
 func (b *Base) GetColor(pos float32) color.Color {
-	d := len(b.Stops)
+	b.UpdateRGBStops()
 
+	if b.Blend == colors.RGB {
+		return b.GetColorImpl(pos, b.Stops)
+	}
+	return b.GetColorImpl(pos, b.StopsRGB)
+}
+
+// GetColorImpl implements GetColor with given stops
+func (b *Base) GetColorImpl(pos float32, stops []Stop) color.Color {
+	d := len(stops)
 	// These cases can be taken care of early on
 	if b.Spread == Pad {
 		if pos >= 1 {
-			return b.Stops[d-1].OpacityColor(b.Opacity, b.ApplyFuncs)
+			return stops[d-1].OpacityColor(b.Opacity, b.ApplyFuncs)
 		}
 		if pos <= 0 {
-			return b.Stops[0].OpacityColor(b.Opacity, b.ApplyFuncs)
+			return stops[0].OpacityColor(b.Opacity, b.ApplyFuncs)
 		}
 	}
 
@@ -245,7 +277,7 @@ func (b *Base) GetColor(pos float32) color.Color {
 	}
 
 	place := 0 // Advance to place where mod is greater than the indicated stop
-	for place != len(b.Stops) && mod > b.Stops[place].Pos {
+	for place != len(stops) && mod > stops[place].Pos {
 		place++
 	}
 	switch b.Spread {
@@ -253,41 +285,41 @@ func (b *Base) GetColor(pos float32) color.Color {
 		var s1, s2 Stop
 		switch place {
 		case 0, d:
-			s1, s2 = b.Stops[d-1], b.Stops[0]
+			s1, s2 = stops[d-1], stops[0]
 		default:
-			s1, s2 = b.Stops[place-1], b.Stops[place]
+			s1, s2 = stops[place-1], stops[place]
 		}
 		return b.BlendStops(mod, s1, s2, false)
 	case Reflect:
 		switch place {
 		case 0:
-			return b.Stops[0].OpacityColor(b.Opacity, b.ApplyFuncs)
+			return stops[0].OpacityColor(b.Opacity, b.ApplyFuncs)
 		case d:
 			// Advance to place where mod-1 is greater than the stop indicated by place in reverse of the stop slice.
 			// Since this is the reflect b.Spread mode, the mod interval is two, allowing the stop list to be
 			// iterated in reverse before repeating the sequence.
-			for place != d*2 && mod-1 > (1-b.Stops[d*2-place-1].Pos) {
+			for place != d*2 && mod-1 > (1-stops[d*2-place-1].Pos) {
 				place++
 			}
 			switch place {
 			case d:
-				return b.Stops[d-1].OpacityColor(b.Opacity, b.ApplyFuncs)
+				return stops[d-1].OpacityColor(b.Opacity, b.ApplyFuncs)
 			case d * 2:
-				return b.Stops[0].OpacityColor(b.Opacity, b.ApplyFuncs)
+				return stops[0].OpacityColor(b.Opacity, b.ApplyFuncs)
 			default:
-				return b.BlendStops(mod-1, b.Stops[d*2-place], b.Stops[d*2-place-1], true)
+				return b.BlendStops(mod-1, stops[d*2-place], stops[d*2-place-1], true)
 			}
 		default:
-			return b.BlendStops(mod, b.Stops[place-1], b.Stops[place], false)
+			return b.BlendStops(mod, stops[place-1], stops[place], false)
 		}
 	default: // PadSpread
 		switch place {
 		case 0:
-			return b.Stops[0].OpacityColor(b.Opacity, b.ApplyFuncs)
+			return stops[0].OpacityColor(b.Opacity, b.ApplyFuncs)
 		case d:
-			return b.Stops[d-1].OpacityColor(b.Opacity, b.ApplyFuncs)
+			return stops[d-1].OpacityColor(b.Opacity, b.ApplyFuncs)
 		default:
-			return b.BlendStops(mod, b.Stops[place-1], b.Stops[place], false)
+			return b.BlendStops(mod, stops[place-1], stops[place], false)
 		}
 	}
 }
@@ -312,4 +344,58 @@ func (b *Base) BlendStops(pos float32, s1, s2 Stop, flip bool) color.Color {
 
 	opacity := (s1.Opacity*(1-tp) + s2.Opacity*tp) * b.Opacity
 	return b.ApplyFuncs.Apply(colors.ApplyOpacity(colors.Blend(b.Blend, 100*(1-tp), s1.Color, s2.Color), opacity))
+}
+
+// UpdateRGBStops updates StopsRGB from original Stops, for other blend types
+func (b *Base) UpdateRGBStops() {
+	if b.Blend == colors.RGB || len(b.Stops) == 0 {
+		b.StopsRGB = nil
+		b.StopsRGBSrc = nil
+		return
+	}
+	n := len(b.Stops)
+	lenEq := false
+	if len(b.StopsRGBSrc) == n {
+		lenEq = true
+		equal := true
+		for i := range b.Stops {
+			if b.Stops[i] != b.StopsRGBSrc[i] {
+				equal = false
+				break
+			}
+		}
+		if equal {
+			return
+		}
+	}
+
+	if !lenEq {
+		b.StopsRGBSrc = make([]Stop, n)
+	}
+	copy(b.StopsRGBSrc, b.Stops)
+
+	b.StopsRGB = make([]Stop, 0, n*4)
+
+	tdp := float32(0.05)
+	b.StopsRGB = append(b.StopsRGB, b.Stops[0])
+	for i := 0; i < n-1; i++ {
+		sp := b.Stops[i]
+		s := b.Stops[i+1]
+		dp := s.Pos - sp.Pos
+		np := int(mat32.Ceil(dp / tdp))
+		if np == 1 {
+			b.StopsRGB = append(b.StopsRGB, s)
+			continue
+		}
+		pct := float32(1) / float32(np)
+		dopa := s.Opacity - sp.Opacity
+		for j := 0; j < np; j++ {
+			p := pct * float32(j)
+			c := colors.Blend(colors.RGB, 100*p, s.Color, sp.Color)
+			pos := sp.Pos + p*dp
+			opa := sp.Opacity + p*dopa
+			b.StopsRGB = append(b.StopsRGB, Stop{Color: c, Pos: pos, Opacity: opa})
+		}
+		b.StopsRGB = append(b.StopsRGB, s)
+	}
 }

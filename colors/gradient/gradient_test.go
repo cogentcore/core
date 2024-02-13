@@ -15,12 +15,12 @@ import (
 	"cogentcore.org/core/mat32"
 )
 
-func ExampleLinear() {
-	NewLinear().AddStop(colors.White, 0).AddStop(colors.Black, 1)
+func ExampleLinear() *Linear {
+	return NewLinear().AddStop(colors.White, 0).AddStop(colors.Black, 1)
 }
 
-func ExampleRadial() {
-	NewRadial().AddStop(colors.Green, 0).AddStop(colors.Yellow, 0.5).AddStop(colors.Red, 1)
+func ExampleRadial() *Radial {
+	return NewRadial().AddStop(colors.Green, 0).AddStop(colors.Yellow, 0.5).AddStop(colors.Red, 1)
 }
 
 func TestColorAt(t *testing.T) {
@@ -110,6 +110,7 @@ func TestRenderLinear(t *testing.T) {
 	b := mat32.B2FromRect(r)
 	img := image.NewRGBA(r)
 	g := CopyOf(linearTransformTest)
+	// g.AsBase().Blend = colors.HCT
 	g.Update(1, b, mat32.Rotate2D(mat32.DegToRad(45)))
 	draw.Draw(img, img.Bounds(), g, image.Point{}, draw.Src)
 	images.Assert(t, img, "linear")
@@ -128,6 +129,7 @@ func TestRenderRadial(t *testing.T) {
 	b := mat32.B2FromRect(r)
 	img := image.NewRGBA(r)
 	g := CopyOf(radialTransformTest)
+	// g.AsBase().Blend = colors.HCT
 	g.Update(1, b, mat32.Identity2())
 	draw.Draw(img, img.Bounds(), g, image.Point{}, draw.Src)
 	images.Assert(t, img, "radial")
@@ -207,4 +209,38 @@ func TestApply(t *testing.T) {
 			t.Errorf("output not the same: %v != %v\n", c, ocs[i])
 		}
 	}
+}
+
+func TestHCT(t *testing.T) {
+	t.Skip("for reference")
+	orig := []color.RGBA{
+		{255, 255, 255, 255},
+		{226, 226, 226, 255},
+		{199, 198, 198, 255},
+		{171, 171, 171, 255},
+		{145, 144, 144, 255},
+		{119, 119, 119, 255},
+		{95, 94, 94, 255},
+		{71, 71, 70, 255},
+		{49, 48, 48, 255},
+		{28, 27, 27, 255},
+		{0, 0, 0, 255},
+	}
+
+	// lin := ExampleLinear()
+	// fmt.Println(lin.Stops)
+	hct := ExampleLinear()
+	hct.Blend = colors.HCT
+	idx := 0
+	for pct := float32(0); pct <= 1.01; pct += 0.1 {
+		// lc := lin.GetColor(pct)
+		hc := hct.GetColor(pct)
+		oc := orig[idx]
+		if oc != hc {
+			t.Errorf("original: %#v != %#v\n", oc, hc)
+		}
+		// fmt.Println(pct, hc)
+		idx++
+	}
+	// fmt.Printf("\n%#v\n", hct)
 }
