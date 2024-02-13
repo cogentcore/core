@@ -214,6 +214,9 @@ func (lb *Label) HandleEvents() {
 	lb.HandleLabelClick(func(tl *paint.TextLink) {
 		goosi.TheApp.OpenURL(tl.URL)
 	})
+	lb.OnDoubleClick(func(e events.Event) {
+		lb.SetSelected(!lb.Is(states.Selected))
+	})
 	lb.OnKeyChord(func(e events.Event) {
 		// TODO(kai): get label copying working
 		if !lb.StateIs(states.Selected) {
