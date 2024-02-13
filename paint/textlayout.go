@@ -149,21 +149,18 @@ func (tx *Text) PosToRune(pos mat32.Vec2) (si, ri int, ok bool) {
 
 // Layout does basic standard layout of text using Text style parameters, assigning
 // relative positions to spans and runes according to given styles, and given
-// size overall box (nonzero values used to constrain). Returns total
-// resulting size box for text.  Font face in styles.Font is used for
-// determining line spacing here -- other versions can do more expensive
-// calculations of variable line spacing as needed.
+// size overall box.  Nonzero values used to constrain, with the width used as a
+// hard constraint to drive word wrapping (if a word wrap style is present).
+// Returns total resulting size box for text, which can be larger than the given
+// size, if the text requires more size to fit everything.
+// Font face in styles.Font is used for determining line spacing here.
+// Other versions can do more expensive calculations of variable line spacing as needed.
 func (tr *Text) Layout(txtSty *styles.Text, fontSty *styles.FontRender, ctxt *units.Context, size mat32.Vec2) mat32.Vec2 {
 	// todo: switch on layout types once others are supported
 	return tr.LayoutStdLR(txtSty, fontSty, ctxt, size)
 }
 
-// LayoutStdLR does basic standard layout of text in LR direction, assigning
-// relative positions to spans and runes according to given styles, and given
-// size overall box (nonzero values used to constrain). Returns total
-// resulting size box for text.  Font face in styles.Font is used for
-// determining line spacing here -- other versions can do more expensive
-// calculations of variable line spacing as needed.
+// LayoutStdLR does basic standard layout of text in LR direction.
 func (tr *Text) LayoutStdLR(txtSty *styles.Text, fontSty *styles.FontRender, ctxt *units.Context, size mat32.Vec2) mat32.Vec2 {
 	if len(tr.Spans) == 0 {
 		return mat32.Vec2{}

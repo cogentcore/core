@@ -50,7 +50,14 @@ func (is *Inspector) SetStyles() {
 		s.Margin.Set(units.Dp(8))
 	})
 	is.OnWidgetAdded(func(w gi.Widget) {
-		switch w.PathFrom(is) {
+		if tw, ok := w.(*TreeView); ok {
+			tw.Style(func(s *styles.Style) {
+				s.Max.X.Em(20)
+			})
+			return
+		}
+		path := w.PathFrom(is)
+		switch path {
 		case "title":
 			title := w.(*gi.Label)
 			title.Type = gi.LabelHeadlineSmall

@@ -5,6 +5,7 @@
 package paint
 
 import (
+	"image"
 	"testing"
 
 	"cogentcore.org/core/colors"
@@ -13,8 +14,10 @@ import (
 )
 
 func TestText(t *testing.T) {
-	RunTest(t, "text", 300, 300, func(pc *Context) {
-		pc.BlitBoxColor(mat32.Vec2{}, mat32.V2(300, 300), colors.White)
+	size := image.Point{100, 40}
+	sizef := mat32.V2FromPoint(size)
+	RunTest(t, "text", size.X, size.Y, func(pc *Context) {
+		pc.BlitBoxColor(mat32.Vec2{}, sizef, colors.White)
 		tsty := &styles.Text{}
 		tsty.Defaults()
 		fsty := &styles.FontRender{}
@@ -24,12 +27,12 @@ func TestText(t *testing.T) {
 		txt := &Text{}
 		txt.SetHTML("This is <a>HTML</a> <b>formatted</b> <i>text</i>", fsty, tsty, &pc.UnContext, nil)
 
-		tsz := txt.Layout(tsty, fsty, &pc.UnContext, mat32.V2(100, 40))
+		tsz := txt.Layout(tsty, fsty, &pc.UnContext, sizef)
 		_ = tsz
 		// if tsz.X != 100 || tsz.Y != 40 {
 		// 	t.Errorf("unexpected text size: %v", tsz)
 		// }
-
-		txt.Render(pc, mat32.V2(85, 80))
+		txt.HasOverflow = true
+		txt.Render(pc, mat32.Vec2{})
 	})
 }

@@ -9,6 +9,7 @@ import (
 	"encoding/xml"
 	"html"
 	"image"
+	"image/color"
 	"io"
 	"math"
 	"strings"
@@ -51,6 +52,9 @@ type Text struct {
 	// lineheight computed in last Layout
 	LineHeight float32
 
+	// whether has had overflow in rendering
+	HasOverflow bool
+
 	// where relevant, this is the (default, dominant) text direction for the span
 	Dir styles.TextDirections
 
@@ -76,7 +80,7 @@ func (tr *Text) InsertSpan(at int, ns *Span) {
 // must be applied in advance in computing the relative positions of the
 // runes, and the overall font size, etc.  todo: does not currently support
 // stroking, only filling of text -- probably need to grab path from font and
-// use paint rendering for stroking
+// use paint rendering for stroking.
 func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 	// pr := prof.Start("RenderText")
 	// defer pr.End()
@@ -91,14 +95,35 @@ func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 	TextFontRenderMu.Lock()
 	defer TextFontRenderMu.Unlock()
 
+	elipses := '…'
+	hadOverflow := false
+	rendOverflow := false
+	overBoxSet := false
+	var overStart mat32.Vec2
+	var overBox mat32.Box2
+	var overFace font.Face
+	var overColor color.Color
+
 	for _, sr := range tr.Spans {
 		if sr.IsValid() != nil {
 			continue
 		}
+
 		curFace := sr.Render[0].Face
 		curColor := sr.Render[0].Color
 		curColor = colors.ApplyOpacity(curColor, pc.FontStyle.Opacity)
 		tpos := pos.Add(sr.RelPos)
+
+		if !overBoxSet {
+			overWd, _ := curFace.GlyphAdvance(elipses)
+			overWd32 := mat32.FromFixed(overWd)
+			overEnd := mat32.V2FromPoint(pc.Bounds.Max)
+			overStart = overEnd.Sub(mat32.V2(overWd32, 0.1*tr.FontHeight))
+			overBox = mat32.Box2{Min: mat32.V2(overStart.X, overEnd.Y-tr.FontHeight), Max: overEnd}
+			overFace = curFace
+			overColor = curColor
+			overBoxSet = true
+		}
 
 		d := &font.Drawer{
 			Dst:  pc.Image,
@@ -138,10 +163,28 @@ func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 			tx := mat32.Scale2D(scx, 1).Rotate(rr.RotRad)
 			ll := rp.Add(tx.MulVec2AsVec(mat32.V2(0, dsc32)))
 			ur := ll.Add(tx.MulVec2AsVec(mat32.V2(rr.Size.X, -rr.Size.Y)))
-			if int(mat32.Floor(ll.X)) > pc.Bounds.Max.X || int(mat32.Floor(ur.Y)) > pc.Bounds.Max.Y ||
-				int(mat32.Ceil(ur.X)) < pc.Bounds.Min.X || int(mat32.Ceil(ll.Y)) < pc.Bounds.Min.Y {
+
+			doingOverflow := false
+			if tr.HasOverflow {
+				cmid := ll.Add(mat32.V2(0.5*rr.Size.X, -0.5*rr.Size.Y))
+				if overBox.ContainsPoint(cmid) {
+					rendOverflow = true
+					doingOverflow = true
+					hadOverflow = true
+					r = elipses
+				}
+			}
+
+			if int(mat32.Floor(ll.X)) > pc.Bounds.Max.X || int(mat32.Floor(ur.Y)) > pc.Bounds.Max.Y {
+				hadOverflow = true
+				if !doingOverflow {
+					break
+				}
+			}
+			if int(mat32.Ceil(ur.X)) < pc.Bounds.Min.X || int(mat32.Ceil(ll.Y)) < pc.Bounds.Min.Y {
 				continue
 			}
+
 			d.Face = curFace
 			d.Dot = rp.Fixed()
 			dr, mask, maskp, _, ok := d.Face.Glyph(d.Dot, r)
@@ -174,10 +217,27 @@ func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 					SrcMaskP: maskp,
 				})
 			}
+			if doingOverflow {
+				break
+			}
 		}
 		if sr.HasDeco.HasFlag(styles.DecoLineThrough) {
 			sr.RenderLine(pc, tpos, styles.DecoLineThrough, 0.25)
 		}
+	}
+	tr.HasOverflow = hadOverflow
+
+	if hadOverflow && !rendOverflow && overBoxSet {
+		d := &font.Drawer{
+			Dst:  pc.Image,
+			Src:  image.NewUniform(overColor),
+			Face: overFace,
+			Dot:  overStart.Fixed(),
+		}
+		dr, mask, maskp, _, _ := d.Face.Glyph(d.Dot, elipses)
+		idr := dr.Intersect(pc.Bounds)
+		soff := image.Point{}
+		draw.DrawMask(d.Dst, idr, d.Src, soff, mask, maskp, draw.Over)
 	}
 
 	pc.Paint.CopyStyleFrom(&ppaint)

@@ -34,11 +34,6 @@ type Text struct { //gti:add
 	// For RTL start is right, not left, and start is top for TB
 	Anchor TextAnchors
 
-	// Overflow specifies the way in which overflowing text is handled.
-	// If it is "", overflowing text is directly clipped. Otherwise,
-	// overflowing text is terminated with this string (eg: …).
-	Overflow string
-
 	// spacing between characters and lines
 	LetterSpacing units.Value
 
