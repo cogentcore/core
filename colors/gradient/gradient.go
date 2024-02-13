@@ -343,7 +343,7 @@ func (b *Base) BlendStops(pos float32, s1, s2 Stop, flip bool) color.Color {
 	tp := (pos - s1off) / (s2.Pos - s1off)
 
 	opacity := (s1.Opacity*(1-tp) + s2.Opacity*tp) * b.Opacity
-	return b.ApplyFuncs.Apply(colors.ApplyOpacity(colors.Blend(b.Blend, 100*(1-tp), s1.Color, s2.Color), opacity))
+	return b.ApplyFuncs.Apply(colors.ApplyOpacity(colors.Blend(colors.RGB, 100*(1-tp), s1.Color, s2.Color), opacity))
 }
 
 // UpdateRGBStops updates StopsRGB from original Stops, for other blend types
