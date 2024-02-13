@@ -61,7 +61,7 @@ type Base struct { //gti:add -setters
 	// stop-level opacity blending.
 	Opacity float32
 
-	// functions that are applied to the color after gradient color is generated.
+	// ApplyFuncs contains functions that are applied to the color after gradient color is generated.
 	// This allows for efficient StateLayer and other post-processing effects
 	// to be applied.  The Applier handles other cases, but gradients always
 	// must have the Update function called at render time, so they must
@@ -72,11 +72,11 @@ type Base struct { //gti:add -setters
 	// only for [Units] == [ObjectBoundingBox].
 	boxTransform mat32.Mat2 `set:"-"`
 
-	// computed RGB stops for blend types other than RGB
-	StopsRGB []Stop `set:"-"`
+	// stopsRGB are the computed RGB stops for blend types other than RGB
+	stopsRGB []Stop `set:"-"`
 
-	// source Stops when StopsRGB were last computed
-	StopsRGBSrc []Stop `set:"-"`
+	// stopsRGBSrc are the source Stops when StopsRGB were last computed
+	stopsRGBSrc []Stop `set:"-"`
 }
 
 // Stop represents a single stop in a gradient
@@ -202,14 +202,14 @@ func (b *Base) CopyStopsFrom(cp *Base) {
 	b.Stops = make([]Stop, len(cp.Stops))
 	copy(b.Stops, cp.Stops)
 
-	if cp.StopsRGB == nil {
-		b.StopsRGB = nil
-		b.StopsRGBSrc = nil
+	if cp.stopsRGB == nil {
+		b.stopsRGB = nil
+		b.stopsRGBSrc = nil
 	} else {
-		b.StopsRGB = make([]Stop, len(cp.StopsRGB))
-		copy(b.StopsRGB, cp.StopsRGB)
-		b.StopsRGBSrc = make([]Stop, len(cp.StopsRGBSrc))
-		copy(b.StopsRGBSrc, cp.StopsRGBSrc)
+		b.stopsRGB = make([]Stop, len(cp.stopsRGB))
+		copy(b.stopsRGB, cp.stopsRGB)
+		b.stopsRGBSrc = make([]Stop, len(cp.stopsRGBSrc))
+		copy(b.stopsRGBSrc, cp.stopsRGBSrc)
 	}
 }
 
@@ -218,10 +218,10 @@ func (b *Base) ApplyOpacityToStops(opacity float32) {
 	for _, s := range b.Stops {
 		s.Opacity *= opacity
 	}
-	for _, s := range b.StopsRGB {
+	for _, s := range b.stopsRGB {
 		s.Opacity *= opacity
 	}
-	for _, s := range b.StopsRGBSrc {
+	for _, s := range b.stopsRGBSrc {
 		s.Opacity *= opacity
 	}
 }
@@ -251,7 +251,7 @@ func (b *Base) GetColor(pos float32) color.Color {
 	if b.Blend == colors.RGB {
 		return b.GetColorImpl(pos, b.Stops)
 	}
-	return b.GetColorImpl(pos, b.StopsRGB)
+	return b.GetColorImpl(pos, b.stopsRGB)
 }
 
 // GetColorImpl implements GetColor with given stops
@@ -349,17 +349,17 @@ func (b *Base) BlendStops(pos float32, s1, s2 Stop, flip bool) color.Color {
 // UpdateRGBStops updates StopsRGB from original Stops, for other blend types
 func (b *Base) UpdateRGBStops() {
 	if b.Blend == colors.RGB || len(b.Stops) == 0 {
-		b.StopsRGB = nil
-		b.StopsRGBSrc = nil
+		b.stopsRGB = nil
+		b.stopsRGBSrc = nil
 		return
 	}
 	n := len(b.Stops)
 	lenEq := false
-	if len(b.StopsRGBSrc) == n {
+	if len(b.stopsRGBSrc) == n {
 		lenEq = true
 		equal := true
 		for i := range b.Stops {
-			if b.Stops[i] != b.StopsRGBSrc[i] {
+			if b.Stops[i] != b.stopsRGBSrc[i] {
 				equal = false
 				break
 			}
@@ -370,21 +370,21 @@ func (b *Base) UpdateRGBStops() {
 	}
 
 	if !lenEq {
-		b.StopsRGBSrc = make([]Stop, n)
+		b.stopsRGBSrc = make([]Stop, n)
 	}
-	copy(b.StopsRGBSrc, b.Stops)
+	copy(b.stopsRGBSrc, b.Stops)
 
-	b.StopsRGB = make([]Stop, 0, n*4)
+	b.stopsRGB = make([]Stop, 0, n*4)
 
 	tdp := float32(0.05)
-	b.StopsRGB = append(b.StopsRGB, b.Stops[0])
+	b.stopsRGB = append(b.stopsRGB, b.Stops[0])
 	for i := 0; i < n-1; i++ {
 		sp := b.Stops[i]
 		s := b.Stops[i+1]
 		dp := s.Pos - sp.Pos
 		np := int(mat32.Ceil(dp / tdp))
 		if np == 1 {
-			b.StopsRGB = append(b.StopsRGB, s)
+			b.stopsRGB = append(b.stopsRGB, s)
 			continue
 		}
 		pct := float32(1) / float32(np)
@@ -394,8 +394,8 @@ func (b *Base) UpdateRGBStops() {
 			c := colors.Blend(colors.RGB, 100*p, s.Color, sp.Color)
 			pos := sp.Pos + p*dp
 			opa := sp.Opacity + p*dopa
-			b.StopsRGB = append(b.StopsRGB, Stop{Color: c, Pos: pos, Opacity: opa})
+			b.stopsRGB = append(b.stopsRGB, Stop{Color: c, Pos: pos, Opacity: opa})
 		}
-		b.StopsRGB = append(b.StopsRGB, s)
+		b.stopsRGB = append(b.stopsRGB, s)
 	}
 }

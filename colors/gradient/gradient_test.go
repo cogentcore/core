@@ -15,12 +15,12 @@ import (
 	"cogentcore.org/core/mat32"
 )
 
-func ExampleLinear() *Linear {
-	return NewLinear().AddStop(colors.White, 0).AddStop(colors.Black, 1)
+func ExampleLinear() {
+	NewLinear().AddStop(colors.White, 0).AddStop(colors.Black, 1)
 }
 
-func ExampleRadial() *Radial {
-	return NewRadial().AddStop(colors.Green, 0).AddStop(colors.Yellow, 0.5).AddStop(colors.Red, 1)
+func ExampleRadial() {
+	NewRadial().AddStop(colors.Green, 0).AddStop(colors.Yellow, 0.5).AddStop(colors.Red, 1)
 }
 
 func TestColorAt(t *testing.T) {
@@ -227,9 +227,7 @@ func TestHCT(t *testing.T) {
 		{0, 0, 0, 255},
 	}
 
-	// lin := ExampleLinear()
-	// fmt.Println(lin.Stops)
-	hct := ExampleLinear()
+	hct := NewLinear().AddStop(colors.White, 0).AddStop(colors.Black, 1)
 	hct.Blend = colors.HCT
 	idx := 0
 	for pct := float32(0); pct <= 1.01; pct += 0.1 {
