@@ -398,7 +398,7 @@ func (w *Window) OnCloseReq(gw *glfw.Window) {
 }
 
 func (w *Window) Focused(gw *glfw.Window, focused bool) {
-	w.Flgs.SetFlag(focused, goosi.Focused)
+	// w.Flgs.SetFlag(focused, goosi.Focused)
 	if focused {
 		w.EvMgr.Window(events.WinFocus)
 	} else {
