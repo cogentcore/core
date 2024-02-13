@@ -435,6 +435,7 @@ func (sv *SliceViewBase) StyleValueWidget(w gi.Widget, s *styles.Style, row, col
 		s.Min.X.Val = max(s.Min.X.Val, hv.Convert(s.Min.X.Un, &s.UnContext).Val)
 		s.Max.X.Val = max(s.Max.X.Val, hv.Convert(s.Max.X.Un, &s.UnContext).Val)
 	}
+	s.SetTextWrap(false)
 }
 
 func (sv *SliceViewBase) AsSliceViewBase() *SliceViewBase {
