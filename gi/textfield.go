@@ -36,9 +36,10 @@ const force = true
 const dontForce = false
 
 // TextField is a widget for editing a line of text.
-// By default, the Text style is set to WhiteSpaceNowrap, so everything
-// is rendered on a single line.  Use Styles.SetTextWrap(true) to
-// change to WhiteSpaceNormal and GrowWrap = true.
+// With the default WhiteSpaceNormal style setting,
+// text will wrap onto multiple lines as needed.
+// Set to WhiteSpaceNowrap (e.g., Styles.SetTextWrap(false)) to
+// force everything to be on a single line.
 // With multi-line wrapped text, the text is still treated as a contiguous
 // wrapped text.
 type TextField struct { //core:embedder
@@ -208,8 +209,8 @@ func (tf *TextField) SetStyles() {
 		if !tf.IsReadOnly() {
 			s.Cursor = cursors.Text
 		}
-		s.GrowWrap = true
-		s.Grow.Set(0, 0)
+		s.GrowWrap = false // note: doesn't work with Grow
+		s.Grow.Set(1, 0)
 		s.Min.Y.Em(1.1)
 		s.Min.X.Ch(20)
 		s.Max.X.Ch(40)
@@ -1813,11 +1814,10 @@ func (tf *TextField) SizeUp() {
 
 	var rsz mat32.Vec2
 	if tf.HasWordWrap() {
-		rsz = tf.ConfigTextSize(TextWrapSizeEstimate(availSz, len(tf.EditTxt), &tf.Styles.Font))
+		rsz = tf.ConfigTextSize(availSz) // TextWrapSizeEstimate(availSz, len(tf.EditTxt), &tf.Styles.Font))
 	} else {
 		rsz = tf.ConfigTextSize(availSz)
 	}
-	// fmt.Println(sz, icsz, availSz, rsz)
 	rsz.SetAdd(icsz)
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.SetTotalFromContent(&sz.Actual)
@@ -1829,15 +1829,16 @@ func (tf *TextField) SizeUp() {
 }
 
 func (tf *TextField) SizeDown(iter int) bool {
-	if !tf.HasWordWrap() || iter > 1 {
+	if !tf.HasWordWrap() {
 		return tf.SizeDownParts(iter)
 	}
 	sz := &tf.Geom.Size
+	pgrow, _ := tf.GrowToAllocSize(sz.Actual.Content, sz.Alloc.Content) // key to grow
 	icsz := tf.IconsSize()
-	availSz := sz.Actual.Content.Sub(icsz)
+	prevContent := sz.Actual.Content
+	availSz := pgrow.Sub(icsz)
 	rsz := tf.ConfigTextSize(availSz)
 	rsz.SetAdd(icsz)
-	prevContent := sz.Actual.Content
 	// start over so we don't reflect hysteresis of prior guess
 	sz.SetInitContentMin(tf.Styles.Min.Dots().Ceil())
 	sz.FitSizeMax(&sz.Actual.Content, rsz)

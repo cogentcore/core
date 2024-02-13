@@ -800,6 +800,15 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 //////////////////////////////////////////////////////////////////////////////////
 //  Utilities
 
+func (tx *Text) String() string {
+	s := ""
+	for i := range tx.Spans {
+		sr := &tx.Spans[i]
+		s += string(sr.Text) + "\n"
+	}
+	return s
+}
+
 // SetBackground sets the BackgroundColor of the first Render in each Span
 // to given value, if was not nil.
 func (tx *Text) SetBackground(bg image.Image) {
