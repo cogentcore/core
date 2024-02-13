@@ -95,6 +95,7 @@ func (sp *Spinner) SetStyles() {
 				// icons do not get separate focus, as people can
 				// use the arrow keys to get the same effect
 				s.SetAbilities(false, abilities.Focusable)
+				w.(*Button).SetType(ButtonTonal)
 			})
 		}
 	})
