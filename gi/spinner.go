@@ -87,7 +87,7 @@ func (sp *Spinner) SetStyles() {
 			s.Min.X.Ch(14)
 			s.Max.X.Ch(18)
 		}
-		s.Text.Align = styles.End
+		// s.Text.Align = styles.End // this doesn't work
 	})
 	sp.OnWidgetAdded(func(w Widget) {
 		switch w.PathFrom(sp) {
