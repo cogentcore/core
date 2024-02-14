@@ -9,6 +9,7 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
+	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/icons"
 )
 
@@ -21,7 +22,7 @@ func SettingsConfigToolbar(tb *gi.Toolbar) {
 	tb.AddOverflowMenu(func(m *gi.Scene) {
 		bt := gi.NewButton(m).SetText("App version").SetIcon(icons.Info)
 		bt.OnClick(func(e events.Event) {
-			d := gi.NewBody().AddTitle("App version").AddText(fmt.Sprintf("App version: %s\nCore version: %s", gi.AppVersion, gi.CoreVersion))
+			d := gi.NewBody().AddTitle("App version").AddText(fmt.Sprintf("App version: %s\nCore version: %s", goosi.AppVersion, goosi.CoreVersion))
 			d.AddOkOnly().NewDialog(bt).Run()
 		})
 

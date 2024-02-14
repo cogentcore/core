@@ -23,18 +23,8 @@ import (
 	"cogentcore.org/core/units"
 )
 
-var (
-	// TheApp is the current [App]; only one is ever in effect.
-	TheApp = &App{App: goosi.TheApp}
-
-	// AppVersion is the version of the current app.
-	// It is set by a linker flag in the core command line tool.
-	AppVersion = "dev"
-
-	// CoreVersion is the version of Cogent Core that the current app is using.
-	// It is set by a linker flag in the core command line tool.
-	CoreVersion = "dev"
-)
+// TheApp is the current [App]; only one is ever in effect.
+var TheApp = &App{App: goosi.TheApp}
 
 // App represents a Cogent Core app. It extends [goosi.App] to provide both system-level
 // and high-level data and functions to do with the currently running application. The

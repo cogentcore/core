@@ -6,7 +6,6 @@ package goosi
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -49,15 +48,11 @@ func HandleRecoverBase(r any) {
 
 	stack := string(debug.Stack())
 
-	print := func(w io.Writer) {
-		fmt.Fprintln(w, "panic:", r)
-		fmt.Fprintln(w, "")
-		fmt.Fprintln(w, "----- START OF STACK TRACE: -----")
-		fmt.Fprintln(w, stack)
-		fmt.Fprintln(w, "----- END OF STACK TRACE -----")
-	}
-
-	print(os.Stderr)
+	log.Println("panic:", r)
+	log.Println("")
+	log.Println("----- START OF STACK TRACE: -----")
+	log.Println(stack)
+	log.Println("----- END OF STACK TRACE -----")
 
 	dnm := filepath.Join(TheApp.AppDataDir(), "crash-logs")
 	err := os.MkdirAll(dnm, 0755)
@@ -65,12 +60,10 @@ func HandleRecoverBase(r any) {
 		return
 	}
 	cfnm := filepath.Join(dnm, "crash_"+time.Now().Format("2006-01-02_15-04-05"))
-	cf, err := os.Create(cfnm)
+	err = os.WriteFile(cfnm, []byte(CrashLogText(r, stack)), 0666)
 	if grr.Log(err) != nil {
 		return
 	}
-	print(cf)
-	cf.Close()
 	log.Println("SAVED CRASH LOG TO", cfnm)
 }
 
@@ -84,4 +77,9 @@ func HandleRecoverPanic(r any) {
 	if !TheApp.Platform().IsMobile() || TheApp.Platform() == Web {
 		panic(r)
 	}
+}
+
+// CrashLogText returns an appropriate crash log string for the given recover value and stack trace.
+func CrashLogText(r any, stack string) string {
+	return fmt.Sprintf("Platform: %v\nSystem platform: %v\nApp version: %s\nCore version: %s\nTime: %s\n\npanic: %v\n\n%s", TheApp.Platform(), TheApp.SystemPlatform(), AppVersion, CoreVersion, time.Now().Format(time.DateTime), r, stack)
 }

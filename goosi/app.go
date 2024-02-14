@@ -11,8 +11,18 @@ package goosi
 
 //go:generate core generate
 
-// TheApp is the current [App]; only one is ever in effect.
-var TheApp App
+var (
+	// TheApp is the current [App]; only one is ever in effect.
+	TheApp App
+
+	// AppVersion is the version of the current app.
+	// It is set by a linker flag in the core command line tool.
+	AppVersion = "dev"
+
+	// CoreVersion is the version of Cogent Core that the current app is using.
+	// It is set by a linker flag in the core command line tool.
+	CoreVersion = "dev"
+)
 
 // App represents the overall OS GUI hardware, and creates Images, Textures
 // and Windows, appropriate for that hardware / OS, and maintains data about
