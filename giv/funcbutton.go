@@ -202,7 +202,8 @@ func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButto
 	snm := fb.Func.Name
 	// get name without package
 	li := strings.LastIndex(snm, ".")
-	if isAnonymousFunction(snm) {
+	isAnonymous := isAnonymousFunction(snm)
+	if isAnonymous {
 		snm = strings.TrimRightFunc(snm, func(r rune) bool {
 			return unicode.IsDigit(r) || r == '.'
 		})
@@ -224,7 +225,10 @@ func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButto
 	fb.SetName(snm + "-" + strconv.FormatUint(fb.Parent().NumLifetimeChildren()-1, 10))
 	txt := strcase.ToSentence(snm)
 	fb.SetText(txt)
-	fb.Func.Doc = gti.FormatDoc(fb.Func.Doc, snm, txt)
+	// doc formatting interferes with anonymous functions
+	if !isAnonymous {
+		fb.Func.Doc = gti.FormatDoc(fb.Func.Doc, snm, txt)
+	}
 	fb.SetTooltip(fb.Func.Doc)
 	// we default to the icon with the same name as
 	// the function, if it exists
