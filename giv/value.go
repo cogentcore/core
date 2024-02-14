@@ -767,15 +767,15 @@ func (vv *ValueBase) GetTitle() (label, newPath string, isZero bool) {
 		opv := laser.OnePtrUnderlyingValue(vv.Value)
 		npt = laser.NonPtrType(opv.Type())
 	}
-	label += npt.String()
-	newPath = npt.String()
-	olbl := vv.OwnerLabel()
-	if olbl != "" {
-		label += ": " + olbl
-	}
-	if vv.ViewPath != "" {
-		label += " [" + vv.ViewPath + "]"
-	}
+	newPath = laser.FriendlyTypeName(npt)
+	label += newPath
+	// olbl := vv.OwnerLabel()
+	// if olbl != "" {
+	// 	label += " (" + olbl + ")"
+	// }
+	// if vv.ViewPath != "" {
+	// 	label += " [" + vv.ViewPath + "]"
+	// }
 	return
 }
 
