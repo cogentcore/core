@@ -535,6 +535,7 @@ func (ch *Chooser) HandleEvents() {
 		}
 	})
 	ch.OnFinal(events.KeyChord, func(e events.Event) {
+		tf := ch.TextField()
 		kf := keyfun.Of(e.KeyChord())
 		if DebugSettings.KeyEventTrace {
 			slog.Info("Chooser KeyChordEvent", "widget", ch, "keyfun", kf)
@@ -582,7 +583,6 @@ func (ch *Chooser) HandleEvents() {
 			ch.Send(events.Click, e)
 		// }
 		default:
-			tf := ch.TextField()
 			if tf == nil {
 				break
 			}
@@ -625,7 +625,17 @@ func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 		ch.CallItemsFuncs()
 	})
 	tf.OnClick(func(e events.Event) {
+		ch.CallItemsFuncs()
 		tf.OfferComplete(dontForce)
+	})
+	tf.OnKeyChord(func(e events.Event) {
+		kf := keyfun.Of(e.KeyChord())
+		if kf == keyfun.Abort {
+			if tf.Error != nil {
+				tf.Clear()
+				e.SetHandled()
+			}
+		}
 	})
 }
 

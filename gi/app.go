@@ -284,6 +284,13 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 		ch.CurrentItem = ChooserItem{}
 		ch.ShowCurrentItem()
 	})
+	ch.OnFirst(events.KeyChord, func(e events.Event) {
+		kf := keyfun.Of(e.KeyChord())
+		if kf == keyfun.Menu {
+			e.SetHandled()
+			ch.Send(events.Click, e)
+		}
+	})
 	return ch
 }
 
