@@ -35,11 +35,15 @@ func MenuSceneConfigStyles(msc *Scene) {
 				kf := keyfun.Of(e.KeyChord())
 				switch kf {
 				case keyfun.MoveRight:
-					bt.OpenMenu(e)
-					e.SetHandled()
+					if bt.OpenMenu(e) {
+						e.SetHandled()
+					}
 				case keyfun.MoveLeft:
-					msc.Stage.ClosePopup()
-					e.SetHandled()
+					// need to be able to use arrow keys to navigate in completer
+					if msc.Stage.Type != CompleterStage {
+						msc.Stage.ClosePopup()
+						e.SetHandled()
+					}
 				}
 			})
 			return
