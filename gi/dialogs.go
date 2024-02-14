@@ -151,6 +151,14 @@ func (bd *Body) AddCancel(pw Widget, name ...string) *Button {
 			bd.Close()
 		}
 	})
+	bt.OnFirst(events.KeyChord, func(e events.Event) {
+		kf := keyfun.Of(e.KeyChord())
+		if kf == keyfun.Abort {
+			e.SetHandled()
+			bt.Send(events.Click, e)
+			bd.Close()
+		}
+	})
 	return bt
 }
 
