@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"runtime/debug"
+	"time"
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/goosi"
@@ -45,7 +46,7 @@ func HandleRecover(r any) {
 	b.AddBottomBar(func(pw Widget) {
 		NewButton(pw).SetText("Details").SetType(ButtonOutlined).OnClick(func(e events.Event) {
 			clpath := filepath.Join(TheApp.AppDataDir(), "crash-logs")
-			txt := fmt.Sprintf("Crash log saved in %s\n\npanic: %v\n\n%s", clpath, r, stack)
+			txt := fmt.Sprintf("Crash log saved in %s\n\nPlatform: %v\nSystem platform: %v\nApp version: %s\nCore version: %s\nTime: %s\n\npanic: %v\n\n%s", clpath, TheApp.Platform(), TheApp.SystemPlatform(), AppVersion, CoreVersion, time.Now().Format(time.DateTime), r, stack)
 			d := NewBody("crash-details").AddTitle("Crash details")
 			NewLabel(d).SetText(txt).Style(func(s *styles.Style) {
 				s.Font.Family = string(AppearanceSettings.MonoFont)
