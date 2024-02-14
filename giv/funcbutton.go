@@ -179,6 +179,18 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 			return unicode.IsDigit(r) || r == '.'
 		})
 		fnm = strings.TrimSuffix(fnm, ".func")
+		// we replace the last period with a space so that
+		// the containing function name is included in the label
+		li := strings.LastIndex(fnm, ".")
+		if li >= 0 {
+			fnm = fnm[:li] + " " + fnm[li+1:]
+		}
+		fnm = strings.Map(func(r rune) rune {
+			if r == '(' || r == ')' || r == '*' {
+				return -1
+			}
+			return r
+		}, fnm)
 		f := &gti.Func{Name: fnm, Doc: "Anonymous function defined in " + fnm}
 		return fb.SetFuncImpl(f, reflect.ValueOf(fun))
 	}
