@@ -215,8 +215,11 @@ func (lb *Label) HandleEvents() {
 		goosi.TheApp.OpenURL(tl.URL)
 	})
 	lb.OnDoubleClick(func(e events.Event) {
-		lb.SetSelected(!lb.StateIs(states.Selected))
+		lb.SetSelected(true)
 		lb.SetFocus()
+	})
+	lb.OnFocusLost(func(e events.Event) {
+		lb.SetSelected(false)
 	})
 	lb.OnKeyChord(func(e events.Event) {
 		// TODO(kai): get label copying working
