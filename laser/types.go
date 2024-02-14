@@ -7,6 +7,7 @@ package laser
 import (
 	"path"
 	"reflect"
+	"strings"
 
 	"cogentcore.org/core/strcase"
 )
@@ -61,7 +62,14 @@ func FriendlyTypeName(typ reflect.Type) string {
 	// otherwise, we fall back on Kind
 	switch nptyp.Kind() {
 	case reflect.Slice, reflect.Array, reflect.Map:
-		return FriendlyTypeName(nptyp.Elem()) + "s"
+		bnm := FriendlyTypeName(nptyp.Elem())
+		if strings.HasSuffix(bnm, "s") {
+			return "List of " + bnm
+		} else if strings.Contains(bnm, "function ") {
+			return strings.Replace(bnm, "function ", "functions ", 1)
+		} else {
+			return bnm + "s"
+		}
 	case reflect.Func:
 		str := "Function of"
 		ni := nptyp.NumIn()
@@ -81,13 +89,6 @@ func FriendlyTypeName(typ reflect.Type) string {
 		return "Value"
 	}
 	return nptyp.String()
-}
-
-// TypeFor returns the [reflect.Type] that represents the type argument T.
-// It is a copy of [reflect.TypeFor], which will likely be added in Go 1.22
-// (see https://github.com/golang/go/issues/60088)
-func TypeFor[T any]() reflect.Type {
-	return reflect.TypeOf((*T)(nil)).Elem()
 }
 
 // CloneToType creates a new object of given type, and uses SetRobust to copy

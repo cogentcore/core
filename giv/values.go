@@ -615,7 +615,12 @@ func (vv *MapValue) UpdateWidget() {
 	if !npv.IsValid() || npv.IsNil() {
 		txt = "None"
 	} else {
-		txt = strcase.ToSentence(fmt.Sprintf("%d %ss", npv.Len(), laser.FriendlyTypeName(laser.MapValueType(mpi))))
+		bnm := laser.FriendlyTypeName(laser.MapValueType(mpi))
+		if strings.HasSuffix(bnm, "s") {
+			txt = strcase.ToSentence(fmt.Sprintf("List of %d %s", npv.Len(), bnm))
+		} else {
+			txt = strcase.ToSentence(fmt.Sprintf("%d %ss", npv.Len(), bnm))
+		}
 	}
 	bt.SetTextUpdate(txt)
 }
