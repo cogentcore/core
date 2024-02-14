@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"log/slog"
 	"sync"
 	"unicode"
 
@@ -1553,7 +1554,7 @@ func (tf *TextField) HandleKeyEvents() {
 	tf.OnKeyChord(func(e events.Event) {
 		kf := keyfun.Of(e.KeyChord())
 		if DebugSettings.KeyEventTrace {
-			fmt.Printf("TextField KeyInput", "widget", tf, "keyfun", kf)
+			slog.Info("TextField KeyInput", "widget", tf, "keyfun", kf)
 		}
 		if !tf.StateIs(states.Focused) && kf == keyfun.Abort {
 			return
