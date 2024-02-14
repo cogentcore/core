@@ -172,26 +172,8 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 		return fb.SetMethodImpl(met, reflect.ValueOf(fun))
 	}
 
-	rs := []rune(fnm)
-	// FuncName.funcN indicates that a function was defined anonymously
-	if len(rs) > 0 && unicode.IsDigit(rs[len(rs)-1]) && strings.Contains(fnm, ".func") {
-		fnm = strings.TrimRightFunc(fnm, func(r rune) bool {
-			return unicode.IsDigit(r) || r == '.'
-		})
-		fnm = strings.TrimSuffix(fnm, ".func")
-		// we replace the last period with a space so that
-		// the containing function name is included in the label
-		li := strings.LastIndex(fnm, ".")
-		if li >= 0 {
-			fnm = fnm[:li] + " " + fnm[li+1:]
-		}
-		fnm = strings.Map(func(r rune) rune {
-			if r == '(' || r == ')' || r == '*' {
-				return -1
-			}
-			return r
-		}, fnm)
-		f := &gti.Func{Name: fnm, Doc: "Anonymous function defined in " + fnm}
+	if isAnonymousFunction(fnm) {
+		f := &gti.Func{Name: fnm, Doc: "Anonymous function " + fnm}
 		return fb.SetFuncImpl(f, reflect.ValueOf(fun))
 	}
 
@@ -205,6 +187,11 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 	return fb.SetFuncImpl(f, reflect.ValueOf(fun))
 }
 
+func isAnonymousFunction(fnm string) bool {
+	// FuncName.funcN indicates that a function was defined anonymously
+	return len(fnm) > 0 && unicode.IsDigit(rune(fnm[len(fnm)-1])) && strings.Contains(fnm, ".func")
+}
+
 // SetFuncImpl is the underlying implementation of [FuncButton.SetFunc].
 // It should typically not be used by end-user code.
 func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButton {
@@ -212,12 +199,27 @@ func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButto
 	fb.ReflectFunc = rfun
 	fb.SetArgs()
 	fb.SetReturns()
-	// get name without package
 	snm := fb.Func.Name
+	// get name without package
 	li := strings.LastIndex(snm, ".")
+	if isAnonymousFunction(snm) {
+		snm = strings.TrimRightFunc(snm, func(r rune) bool {
+			return unicode.IsDigit(r) || r == '.'
+		})
+		snm = strings.TrimSuffix(snm, ".func")
+		// we cut at the second to last period (we want to keep the
+		// receiver / package for anonymous functions)
+		li = strings.LastIndex(snm[:strings.LastIndex(snm, ".")], ".")
+	}
 	if li >= 0 {
 		snm = snm[li+1:] // must also get rid of "."
 	}
+	snm = strings.Map(func(r rune) rune {
+		if r == '(' || r == ')' || r == '*' {
+			return -1
+		}
+		return r
+	}, snm)
 	// func name is not guaranteed to make it unique so we ensure it is (-1 because [ki.New] adds 1 first)
 	fb.SetName(snm + "-" + strconv.FormatUint(fb.Parent().NumLifetimeChildren()-1, 10))
 	txt := strcase.ToSentence(snm)
