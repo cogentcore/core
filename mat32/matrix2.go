@@ -343,24 +343,30 @@ func (a *Mat2) SetString(str string) error {
 		switch cmd {
 		case "matrix":
 			if err := PointsCheckN(pts, 6, errmsg); err != nil {
-				return grr.Log(err)
+				grr.Log(err)
+			} else {
+				*a = Mat2{pts[0], pts[1], pts[2], pts[3], pts[4], pts[5]}
 			}
-			*a = Mat2{pts[0], pts[1], pts[2], pts[3], pts[4], pts[5]}
 		case "translate":
-			if err := PointsCheckN(pts, 2, errmsg); err != nil {
-				return grr.Log(err)
+			if len(pts) == 1 {
+				*a = a.Translate(pts[0], 0)
+			} else if len(pts) == 2 {
+				*a = a.Translate(pts[0], pts[1])
+			} else {
+				grr.Log(PointsCheckN(pts, 2, errmsg))
 			}
-			*a = a.Translate(pts[0], pts[1])
 		case "translatex":
 			if err := PointsCheckN(pts, 1, errmsg); err != nil {
-				return grr.Log(err)
+				grr.Log(err)
+			} else {
+				*a = a.Translate(pts[0], 0)
 			}
-			*a = a.Translate(pts[0], 0)
 		case "translatey":
 			if err := PointsCheckN(pts, 1, errmsg); err != nil {
-				return grr.Log(err)
+				grr.Log(err)
+			} else {
+				*a = a.Translate(0, pts[0])
 			}
-			*a = a.Translate(0, pts[0])
 		case "scale":
 			if len(pts) == 1 {
 				*a = a.Scale(pts[0], pts[0])
@@ -372,14 +378,16 @@ func (a *Mat2) SetString(str string) error {
 			}
 		case "scalex":
 			if err := PointsCheckN(pts, 1, errmsg); err != nil {
-				return grr.Log(err)
+				grr.Log(err)
+			} else {
+				*a = a.Scale(pts[0], 1)
 			}
-			*a = a.Scale(pts[0], 1)
 		case "scaley":
 			if err := PointsCheckN(pts, 1, errmsg); err != nil {
-				return grr.Log(err)
+				grr.Log(err)
+			} else {
+				*a = a.Scale(1, pts[0])
 			}
-			*a = a.Scale(1, pts[0])
 		case "rotate":
 			ang := DegToRad(pts[0]) // always in degrees in this form
 			if len(pts) == 3 {
@@ -387,23 +395,26 @@ func (a *Mat2) SetString(str string) error {
 			} else if len(pts) == 1 {
 				*a = a.Rotate(ang)
 			} else {
-				return PointsCheckN(pts, 1, errmsg)
+				grr.Log(PointsCheckN(pts, 1, errmsg))
 			}
 		case "skew":
 			if err := PointsCheckN(pts, 2, errmsg); err != nil {
-				return grr.Log(err)
+				grr.Log(err)
+			} else {
+				*a = a.Skew(pts[0], pts[1])
 			}
-			*a = a.Skew(pts[0], pts[1])
 		case "skewx":
 			if err := PointsCheckN(pts, 1, errmsg); err != nil {
-				return grr.Log(err)
+				grr.Log(err)
+			} else {
+				*a = a.Skew(pts[0], 0)
 			}
-			*a = a.Skew(pts[0], 0)
 		case "skewy":
 			if err := PointsCheckN(pts, 1, errmsg); err != nil {
-				return grr.Log(err)
+				grr.Log(err)
+			} else {
+				*a = a.Skew(0, pts[0])
 			}
-			*a = a.Skew(0, pts[0])
 		}
 		if nxt == "" {
 			break
