@@ -296,6 +296,19 @@ func (is *Inspector) ConfigSplits() {
 		sv.OnChange(func(e events.Event) {
 			renderRebuild()
 		})
+		sv.OnClose(func(e events.Event) { // todo: Kai please fixme
+			sc := gi.AsScene(is.KiRoot)
+			fmt.Println("in close, pre sc")
+			if sc == nil {
+				return
+			}
+			fmt.Println("in close, post sc")
+			pselw := sc.SelectedWidget
+			sc.SelectedWidget = nil
+			if pselw != nil {
+				pselw.AsWidget().SetNeedsRender(true)
+			}
+		})
 		split.SetSplits(.3, .7)
 	}
 	tv := is.TreeView()
