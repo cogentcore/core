@@ -7,6 +7,7 @@ package giv
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"slices"
@@ -766,10 +767,10 @@ func (fv *FileView) HandleEvents() {
 }
 
 func (fv *FileView) KeyInput(kt events.Event) {
-	if gi.DebugSettings.KeyEventTrace {
-		fmt.Printf("FileView KeyInput: %v\n", fv.Path())
-	}
 	kf := keyfun.Of(kt.KeyChord())
+	if gi.DebugSettings.KeyEventTrace {
+		slog.Info("FileView KeyInput", "widget", fv, "keyfun", kf)
+	}
 	switch kf {
 	case keyfun.Jump, keyfun.WordLeft:
 		kt.SetHandled()

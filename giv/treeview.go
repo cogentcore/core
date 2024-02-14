@@ -1739,11 +1739,11 @@ func (tv *TreeView) HandleEvents() {
 
 func (tv *TreeView) HandleKeys() {
 	tv.On(events.KeyChord, func(e events.Event) {
-		if gi.DebugSettings.KeyEventTrace {
-			fmt.Printf("TreeView KeyInput: %v\n", tv.Path())
-		}
 		kf := keyfun.Of(e.KeyChord())
 		selMode := events.SelectModeBits(e.Modifiers())
+		if gi.DebugSettings.KeyEventTrace {
+			slog.Info("TreeView KeyInput", "widget", tv, "keyfun", kf, "selMode", selMode)
+		}
 
 		if selMode == events.SelectOne {
 			if tv.SelectMode() {

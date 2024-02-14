@@ -10,6 +10,7 @@ import (
 	"image"
 	"image/color"
 	"log"
+	"log/slog"
 	"reflect"
 	"sort"
 	"strconv"
@@ -1881,15 +1882,15 @@ func (sv *SliceViewBase) KeyInputNav(kt events.Event) {
 }
 
 func (sv *SliceViewBase) KeyInputEditable(kt events.Event) {
-	if gi.DebugSettings.KeyEventTrace {
-		fmt.Printf("SliceViewBase KeyInput: %v\n", sv.Path())
-	}
 	sv.KeyInputNav(kt)
 	if kt.IsHandled() {
 		return
 	}
 	idx := sv.SelIdx
 	kf := keyfun.Of(kt.KeyChord())
+	if gi.DebugSettings.KeyEventTrace {
+		slog.Info("SliceViewBase KeyInput", "widget", sv, "keyfun", kf)
+	}
 	switch kf {
 	// case keyfun.Delete: // too dangerous
 	// 	sv.This().(SliceViewer).SliceDeleteAt(sv.SelectedIdx)
@@ -1930,9 +1931,6 @@ func (sv *SliceViewBase) KeyInputEditable(kt events.Event) {
 }
 
 func (sv *SliceViewBase) KeyInputReadOnly(kt events.Event) {
-	if gi.DebugSettings.KeyEventTrace {
-		fmt.Printf("SliceViewBase ReadOnly KeyInput: %v\n", sv.Path())
-	}
 	if sv.Is(SliceViewReadOnlyMultiSel) {
 		sv.KeyInputNav(kt)
 		if kt.IsHandled() {
@@ -1944,6 +1942,9 @@ func (sv *SliceViewBase) KeyInputReadOnly(kt events.Event) {
 		selMode = events.ExtendOne
 	}
 	kf := keyfun.Of(kt.KeyChord())
+	if gi.DebugSettings.KeyEventTrace {
+		slog.Info("SliceViewBase ReadOnly KeyInput", "widget", sv, "keyfun", kf)
+	}
 	idx := sv.SelIdx
 	switch {
 	case kf == keyfun.MoveDown:

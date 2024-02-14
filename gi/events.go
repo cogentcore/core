@@ -463,11 +463,13 @@ func (wb *WidgetBase) HandleWidgetMagnify() {
 // but is added in Button and Switch Widgets for example.
 func (wb *WidgetBase) HandleClickOnEnterSpace() {
 	wb.OnKeyChord(func(e events.Event) {
-		if DebugSettings.KeyEventTrace {
-			slog.Info("WidgetBase KeyChordEvent", "widget", wb)
-		}
 		kf := keyfun.Of(e.KeyChord())
-		if kf == keyfun.Enter || e.KeyRune() == ' ' {
+		if DebugSettings.KeyEventTrace {
+			slog.Info("WidgetBase HandleClickOnEnterSpace", "widget", wb, "keyfun", kf)
+		}
+		if kf == keyfun.Accept {
+			wb.Send(events.Click, e) // don't handle
+		} else if kf == keyfun.Enter || e.KeyRune() == ' ' {
 			e.SetHandled()
 			wb.Send(events.Click, e)
 		}

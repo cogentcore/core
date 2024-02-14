@@ -1551,10 +1551,10 @@ func (tf *TextField) HandleEvents() {
 
 func (tf *TextField) HandleKeyEvents() {
 	tf.OnKeyChord(func(e events.Event) {
-		if DebugSettings.KeyEventTrace {
-			fmt.Printf("TextField KeyInput: %v\n", tf.Path())
-		}
 		kf := keyfun.Of(e.KeyChord())
+		if DebugSettings.KeyEventTrace {
+			fmt.Printf("TextField KeyInput", "widget", tf, "keyfun", kf)
+		}
 		if !tf.StateIs(states.Focused) && kf == keyfun.Abort {
 			return
 		}

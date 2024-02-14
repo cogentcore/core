@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"image"
+	"log/slog"
 
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/colors"
@@ -446,10 +447,10 @@ func (sr *Slider) HandleMouse() {
 
 func (sr *Slider) HandleKeys() {
 	sr.OnKeyChord(func(e events.Event) {
-		if DebugSettings.KeyEventTrace {
-			fmt.Printf("SliderBase KeyInput: %v\n", sr.Path())
-		}
 		kf := keyfun.Of(e.KeyChord())
+		if DebugSettings.KeyEventTrace {
+			slog.Info("SliderBase KeyInput", "widget", sr, "keyfun", kf)
+		}
 		switch kf {
 		case keyfun.MoveUp:
 			sr.SetValueAction(sr.Value - sr.Step)

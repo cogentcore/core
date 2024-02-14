@@ -7,6 +7,7 @@ package gi
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"slices"
 	"strconv"
 	"strings"
@@ -534,10 +535,10 @@ func (ch *Chooser) HandleEvents() {
 		}
 	})
 	ch.OnFinal(events.KeyChord, func(e events.Event) {
-		if DebugSettings.KeyEventTrace {
-			fmt.Printf("Chooser KeyChordEvent: %v\n", ch.Path())
-		}
 		kf := keyfun.Of(e.KeyChord())
+		if DebugSettings.KeyEventTrace {
+			slog.Info("Chooser KeyChordEvent", "widget", ch, "keyfun", kf)
+		}
 		switch {
 		case kf == keyfun.MoveUp:
 			e.SetHandled()

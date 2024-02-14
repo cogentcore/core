@@ -6,6 +6,7 @@ package gi
 
 import (
 	"fmt"
+	"log/slog"
 	"time"
 	"unicode"
 
@@ -308,10 +309,10 @@ func (ly *Layout) HandleKeys() {
 		if ly.Is(LayoutNoKeys) {
 			return
 		}
-		if DebugSettings.KeyEventTrace {
-			fmt.Println("Layout KeyInput:", ly)
-		}
 		kf := keyfun.Of(e.KeyChord())
+		if DebugSettings.KeyEventTrace {
+			slog.Info("Layout KeyInput", "widget", ly, "keyfun", kf)
+		}
 		if kf == keyfun.Abort {
 			if ly.ClosePopupAndBelow() {
 				e.SetHandled()
@@ -381,10 +382,10 @@ func (ly *Layout) HandleKeys() {
 
 // FocusOnName processes key events to look for an element starting with given name
 func (ly *Layout) FocusOnName(e events.Event) bool {
-	if DebugSettings.KeyEventTrace {
-		fmt.Printf("Layout FocusOnName: %v\n", ly.Path())
-	}
 	kf := keyfun.Of(e.KeyChord())
+	if DebugSettings.KeyEventTrace {
+		slog.Info("Layout FocusOnName", "widget", ly, "keyfun", kf)
+	}
 	delay := e.Time().Sub(ly.FocusNameTime)
 	ly.FocusNameTime = e.Time()
 	if kf == keyfun.FocusNext { // tab means go to next match -- don't worry about time

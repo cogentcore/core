@@ -6,6 +6,7 @@ package gi
 
 import (
 	"fmt"
+	"log/slog"
 	"strconv"
 
 	"cogentcore.org/core/abilities"
@@ -296,10 +297,10 @@ func (sp *Spinner) HandleEvents() {
 		if sp.IsReadOnly() {
 			return
 		}
-		if DebugSettings.KeyEventTrace {
-			fmt.Printf("Spinner KeyChordEvent: %v\n", sp.Path())
-		}
 		kf := keyfun.Of(e.KeyChord())
+		if DebugSettings.KeyEventTrace {
+			slog.Info("Spinner KeyChordEvent", "widget", sp, "keyfun", kf)
+		}
 		switch {
 		case kf == keyfun.MoveUp:
 			e.SetHandled()
