@@ -473,16 +473,18 @@ func (vv *SliceValue) UpdateWidget() {
 	}
 	vv.GetTypeInfo()
 	ac := vv.Widget.(*gi.Button)
-	npv := laser.NonPtrValue(vv.Value)
+	npv := laser.OnePtrUnderlyingValue(vv.Value).Elem()
 	txt := ""
 	if !npv.IsValid() {
 		txt = "None"
 	} else {
 		if npv.Kind() == reflect.Array || !npv.IsNil() {
-			// txt = sentencecase.Of(fmt.Sprintf("%d %ss", npv.Len(), laser.FriendlyTypeName(vv.ElType)))
-			// note: above crashes with:
-			// panic: reflect: call of reflect.Value.Len on interface Value
-			txt = strcase.ToSentence(fmt.Sprintf("%ss", laser.FriendlyTypeName(vv.ElType)))
+			bnm := laser.FriendlyTypeName(vv.ElType)
+			if strings.HasSuffix(bnm, "s") {
+				txt = strcase.ToSentence(fmt.Sprintf("%d lists of %s", npv.Len(), bnm))
+			} else {
+				txt = strcase.ToSentence(fmt.Sprintf("%d %ss", npv.Len(), bnm))
+			}
 		} else {
 			txt = "None"
 		}
