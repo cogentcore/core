@@ -5,13 +5,10 @@
 package giv
 
 import (
-	"fmt"
-
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/styles"
 )
 
 func init() {
@@ -22,10 +19,9 @@ func SettingsConfigToolbar(tb *gi.Toolbar) {
 	as := gi.AppearanceSettings
 	tb.AddOverflowMenu(func(m *gi.Scene) {
 		gi.NewButton(m).SetText("App version").SetIcon(icons.Info).OnClick(func(e events.Event) {
-			d := gi.NewBody().AddTitle("App version").AddText(fmt.Sprintf("App version: %s\nCore version: %s", goosi.AppVersion, goosi.CoreVersion))
-			d.ChildByName("text").(gi.Widget).Style(func(s *styles.Style) {
-				s.Text.WhiteSpace = styles.WhiteSpacePreWrap
-			})
+			d := gi.NewBody().AddTitle("App version")
+			gi.NewLabel(d).SetText("App version: " + goosi.AppVersion)
+			gi.NewLabel(d).SetText("Core version: " + goosi.CoreVersion)
 			d.AddOkOnly().NewDialog(tb).Run()
 		})
 
