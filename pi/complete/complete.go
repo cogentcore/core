@@ -179,13 +179,16 @@ func IsSeedMatching(lseed string, completion string) bool {
 // MatchPrecedence returns the sorting precedence of the given
 // completion relative to the given lowercase seed. The completion
 // is assumed to already match the seed by [IsSeedMatching]. A
-// lower precedence indicates a high precedence.
+// lower return value indicates a higher precedence.
 func MatchPrecedence(lseed string, completion string) int {
 	lc := strings.ToLower(completion)
 	if strings.HasPrefix(lc, lseed) {
 		return 0
 	}
-	return 1
+	if len(lseed) > 0 && strings.HasPrefix(lc, lseed[:1]) {
+		return 1
+	}
+	return 2
 }
 
 // SeedWhiteSpace returns the text after the last whitespace
