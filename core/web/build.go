@@ -26,7 +26,7 @@ func Build(c *config.Config) error {
 	if c.Web.Gzip {
 		opath += ".orig"
 	}
-	err := xe.Major().SetEnv("GOOS", "js").SetEnv("GOARCH", "wasm").Run("go", "build", "-o", opath)
+	err := xe.Major().SetEnv("GOOS", "js").SetEnv("GOARCH", "wasm").Run("go", "build", "-o", opath, "-ldflags", config.VersionLinkerFlags())
 	if err != nil {
 		return err
 	}

@@ -90,7 +90,7 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 		path := filepath.Join(TmpDir, t.OS, t.Arch)
 
 		// Disable DWARF; see golang.org/issues/25148.
-		if err := GoBuild(c, src, AppleEnv[t.String()], "-ldflags=-w", "-o="+path); err != nil {
+		if err := GoBuild(c, src, AppleEnv[t.String()], "-ldflags", "-w "+config.VersionLinkerFlags(), "-o="+path); err != nil {
 			return nil, err
 		}
 		if nmpkgs == nil {

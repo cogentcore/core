@@ -177,22 +177,21 @@ func (c *Config) OnConfig(cmd string) error {
 }
 
 // VersionLinkerFlags returns the ld linker flags that specify the app and core version.
-func VersionLinkerFlags() (string, error) {
-	av, err := xe.Minor().Output("git", "describe", "--tags")
-	if err != nil {
-		return "", err
+func VersionLinkerFlags() string {
+	res := ""
+	av, err := xe.Silent().Output("git", "describe", "--tags")
+	if err == nil {
+		res += "-X cogentcore.org/core/goosi.AppVersion=" + av
 	}
-	res := "-X cogentcore.org/core/goosi.AppVersion=" + av
 
 	// workspaces can interfere with getting the right version
-	cv, err := xe.Minor().SetEnv("GOWORK", "off").Output("go", "list", "-m", "-f", "{{.Version}}", "cogentcore.org/core")
-	if err != nil {
-		return "", err
+	cv, err := xe.Silent().SetEnv("GOWORK", "off").Output("go", "list", "-m", "-f", "{{.Version}}", "cogentcore.org/core")
+	if err == nil {
+		// we must be in core itself if it is blank
+		if cv == "" {
+			cv = av
+		}
+		res += " -X cogentcore.org/core/goosi.CoreVersion=" + cv
 	}
-	// we must be in core itself if it is blank
-	if cv == "" {
-		cv = av
-	}
-	res += " -X cogentcore.org/core/goosi.CoreVersion=" + cv
-	return res, nil
+	return res
 }
