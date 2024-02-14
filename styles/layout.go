@@ -60,6 +60,14 @@ func (s *Style) LayoutToDots(uc *units.Context) {
 	s.Margin.ToDots(uc)
 	s.Gap.ToDots(uc)
 	s.ScrollBarWidth.ToDots(uc)
+
+	// max must be at least as much as min
+	if s.Max.X.Dots > 0 {
+		s.Max.X.Dots = max(s.Max.X.Dots, s.Min.X.Dots)
+	}
+	if s.Max.Y.Dots > 0 {
+		s.Max.Y.Dots = max(s.Max.Y.Dots, s.Min.Y.Dots)
+	}
 }
 
 // AlignPos returns the position offset based on Align.X,Y settings
