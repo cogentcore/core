@@ -617,7 +617,7 @@ func (vv *MapValue) UpdateWidget() {
 	} else {
 		bnm := laser.FriendlyTypeName(laser.MapValueType(mpi))
 		if strings.HasSuffix(bnm, "s") {
-			txt = strcase.ToSentence(fmt.Sprintf("List of %d %s", npv.Len(), bnm))
+			txt = strcase.ToSentence(fmt.Sprintf("%d lists of %s", npv.Len(), bnm))
 		} else {
 			txt = strcase.ToSentence(fmt.Sprintf("%d %ss", npv.Len(), bnm))
 		}

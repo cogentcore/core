@@ -65,22 +65,25 @@ func FriendlyTypeName(typ reflect.Type) string {
 		bnm := FriendlyTypeName(nptyp.Elem())
 		if strings.HasSuffix(bnm, "s") {
 			return "List of " + bnm
-		} else if strings.Contains(bnm, "function ") {
-			return strings.Replace(bnm, "function ", "functions ", 1)
+		} else if strings.Contains(bnm, "Function of") {
+			return strings.ReplaceAll(bnm, "Function of", "Functions of") + "s"
 		} else {
 			return bnm + "s"
 		}
 	case reflect.Func:
-		str := "Function of"
+		str := "Function"
 		ni := nptyp.NumIn()
+		if ni > 0 {
+			str += " of"
+		}
 		for i := 0; i < ni; i++ {
-			str += FriendlyTypeName(nptyp.In(i))
+			str += " " + FriendlyTypeName(nptyp.In(i))
 			if ni == 2 && i == 0 {
-				str += " and "
+				str += " and"
 			} else if i == ni-2 {
-				str += ", and "
+				str += ", and"
 			} else if i < ni-1 {
-				str += ", "
+				str += ","
 			}
 		}
 		return str
