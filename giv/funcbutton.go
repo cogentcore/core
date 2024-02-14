@@ -176,7 +176,7 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 	// FuncName.funcN indicates that a function was defined anonymously
 	if len(rs) > 0 && unicode.IsDigit(rs[len(rs)-1]) && strings.Contains(fnm, ".func") {
 		fnm = strings.TrimRightFunc(fnm, func(r rune) bool {
-			return unicode.IsDigit(r)
+			return unicode.IsDigit(r) || r == '.'
 		})
 		fnm = strings.TrimSuffix(fnm, ".func")
 		f := &gti.Func{Name: fnm, Doc: "Anonymous function defined in " + fnm}
