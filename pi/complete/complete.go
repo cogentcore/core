@@ -155,9 +155,9 @@ func IsSeedMatching(lseed string, completion string) bool {
 	}
 
 	// stripped version of completion
-	// (space delimeted with no punctuation)
+	// (space delimeted with no punctuation and symbols)
 	cs := strings.Map(func(r rune) rune {
-		if unicode.IsPunct(r) {
+		if unicode.IsPunct(r) || unicode.IsSymbol(r) {
 			return -1
 		}
 		return r
