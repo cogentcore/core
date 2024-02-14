@@ -11,6 +11,7 @@ import (
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/styles"
 )
 
 func init() {
@@ -23,6 +24,9 @@ func SettingsConfigToolbar(tb *gi.Toolbar) {
 		bt := gi.NewButton(m).SetText("App version").SetIcon(icons.Info)
 		bt.OnClick(func(e events.Event) {
 			d := gi.NewBody().AddTitle("App version").AddText(fmt.Sprintf("App version: %s\nCore version: %s", goosi.AppVersion, goosi.CoreVersion))
+			d.ChildByName("text").(gi.Widget).Style(func(s *styles.Style) {
+				s.Text.WhiteSpace = styles.WhiteSpacePreWrap
+			})
 			d.AddOkOnly().NewDialog(bt).Run()
 		})
 
