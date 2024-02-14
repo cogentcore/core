@@ -19,9 +19,8 @@ import (
 	"cogentcore.org/core/enums/enumgen"
 	"cogentcore.org/core/gti/gtigen"
 	"cogentcore.org/core/strcase"
+	"cogentcore.org/core/xe"
 )
-
-// TODO: make all of the target fields enums
 
 // Config is the main config struct
 // that contains all of the configuration
@@ -175,4 +174,25 @@ func (c *Config) OnConfig(cmd string) error {
 		c.Build.Target = []Platform{{OS: runtime.GOOS, Arch: runtime.GOARCH}}
 	}
 	return nil
+}
+
+// VersionLinkerFlags returns the ld linker flags that specify the app and core version.
+func VersionLinkerFlags() (string, error) {
+	av, err := xe.Minor().Output("git", "describe", "--tags")
+	if err != nil {
+		return "", err
+	}
+	res := "-X cogentcore.org/core/goosi.AppVersion=" + av
+
+	// workspaces can interfere with getting the right version
+	cv, err := xe.Minor().SetEnv("GOWORK", "off").Output("go", "list", "-m", "-f", "{{.Version}}", "cogentcore.org/core")
+	if err != nil {
+		return "", err
+	}
+	// we must be in core itself if it is blank
+	if cv == "" {
+		cv = av
+	}
+	res += " -X cogentcore.org/core/goosi.CoreVersion=" + cv
+	return res, nil
 }

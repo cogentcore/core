@@ -79,11 +79,11 @@ func BuildDesktop(c *config.Config, platform config.Platform) error {
 		// see https://stackoverflow.com/questions/23250505/how-do-i-create-an-executable-from-golang-that-doesnt-open-a-console-window-whe
 		// tags = append(tags, "-ldflags", "-H=windowsgui")
 	}
-	v, err := xe.Output("git", "describe", "--tags")
+	vlf, err := config.VersionLinkerFlags()
 	if err != nil {
 		return err
 	}
-	ldflags += " -X cogentcore.org/core/goosi.AppVersion=" + v
+	ldflags += " " + vlf
 	tags = append(tags, "-ldflags", ldflags, "-o", output)
 
 	err = xc.Run("go", tags...)

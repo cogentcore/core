@@ -21,13 +21,12 @@ func init() {
 func SettingsConfigToolbar(tb *gi.Toolbar) {
 	as := gi.AppearanceSettings
 	tb.AddOverflowMenu(func(m *gi.Scene) {
-		bt := gi.NewButton(m).SetText("App version").SetIcon(icons.Info)
-		bt.OnClick(func(e events.Event) {
+		gi.NewButton(m).SetText("App version").SetIcon(icons.Info).OnClick(func(e events.Event) {
 			d := gi.NewBody().AddTitle("App version").AddText(fmt.Sprintf("App version: %s\nCore version: %s", goosi.AppVersion, goosi.CoreVersion))
 			d.ChildByName("text").(gi.Widget).Style(func(s *styles.Style) {
 				s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 			})
-			d.AddOkOnly().NewDialog(bt).Run()
+			d.AddOkOnly().NewDialog(tb).Run()
 		})
 
 		NewFuncButton(m, as.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
