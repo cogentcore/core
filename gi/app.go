@@ -181,9 +181,9 @@ func (tb *Toolbar) StdOverflowMenu(m *Scene) { //gti:add
 	}
 	NewButton(m).SetText("Window").SetMenu(func(m *Scene) {
 		NewButton(m).SetText("Focus next").SetIcon(icons.CenterFocusStrong).
-			OnClick(func(e events.Event) {
-				AllRenderWins.FocusNext()
-			})
+			SetKey(keyfun.WinFocusNext).OnClick(func(e events.Event) {
+			AllRenderWins.FocusNext()
+		})
 		NewButton(m).SetText("Minimize").SetIcon(icons.Minimize).
 			OnClick(func(e events.Event) {
 				win := tb.Scene.RenderWin()
