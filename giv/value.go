@@ -11,6 +11,7 @@ import (
 	"log"
 	"log/slog"
 	"reflect"
+	"strconv"
 
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
@@ -721,9 +722,9 @@ func (vv *ValueBase) OwnerLabel() string {
 	switch vv.OwnKind {
 	case reflect.Struct:
 		if olbl != "" {
-			return olbl + "." + vv.Field.Name
+			return strcase.ToSentence(olbl + " " + vv.Field.Name)
 		}
-		return vv.Field.Name
+		return strcase.ToSentence(vv.Field.Name)
 	case reflect.Map:
 		kystr := ""
 		if vv.Is(ValueMapKey) {
@@ -738,17 +739,26 @@ func (vv *ValueBase) OwnerLabel() string {
 			}
 		}
 		if kystr != "" {
-			return olbl + "[" + kystr + "]"
+			if olbl != "" {
+				return olbl + ": " + kystr
+			}
+			return kystr
 		}
 		return olbl
 	case reflect.Slice:
 		if lblr, ok := vv.Owner.(gi.SliceLabeler); ok {
 			slbl := lblr.ElemLabel(vv.Idx)
 			if slbl != "" {
-				return fmt.Sprintf("%s[%s]", olbl, slbl)
+				if olbl != "" {
+					return olbl + ": " + slbl
+				}
+				return slbl
 			}
 		}
-		return fmt.Sprintf("%s[%d]", olbl, vv.Idx)
+		if olbl != "" {
+			return fmt.Sprintf("%s: %d", olbl, vv.Idx)
+		}
+		return strconv.Itoa(vv.Idx)
 	}
 	return olbl
 }
@@ -768,14 +778,15 @@ func (vv *ValueBase) GetTitle() (label, newPath string, isZero bool) {
 		npt = laser.NonPtrType(opv.Type())
 	}
 	newPath = laser.FriendlyTypeName(npt)
-	label += newPath
-	// olbl := vv.OwnerLabel()
-	// if olbl != "" {
-	// 	label += " (" + olbl + ")"
-	// }
-	// if vv.ViewPath != "" {
-	// 	label += " [" + vv.ViewPath + "]"
-	// }
+	olbl := vv.OwnerLabel()
+	if olbl != "" && olbl != newPath {
+		label = olbl + " (" + newPath + ")"
+	} else {
+		label = newPath
+	}
+	if vv.ViewPath != "" {
+		label += " (" + vv.ViewPath + ")"
+	}
 	return
 }
 
