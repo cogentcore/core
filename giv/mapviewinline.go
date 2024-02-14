@@ -175,6 +175,14 @@ func (mv *MapViewInline) ConfigMap() bool {
 			kv.ConfigWidget(kw)
 			vvb.AsWidgetBase().OnInput(mv.HandleEvent)
 			kvb.AsWidgetBase().OnInput(mv.HandleEvent)
+			w.Style(func(s *styles.Style) {
+				s.Grow.Set(0, 0)
+				s.SetTextWrap(false)
+			})
+			kw.Style(func(s *styles.Style) {
+				s.Grow.Set(0, 0)
+				s.SetTextWrap(false)
+			})
 		} else {
 			wb.SetProp("configured", true)
 			kwb.SetProp("configured", true)
