@@ -18,11 +18,12 @@ import (
 type BlendTypes int32 //enums:enum
 
 const (
-	// HCT uses hue, chroma, tone space and generally produces the best results
+	// HCT uses the hue, chroma, and tone space and generally produces the best results,
+	// but at a slight performance cost.
 	HCT BlendTypes = iota
 
-	// RGB uses raw RGB space and was used in v1 and is used in most other
-	// software, so to reproduce existing results, select this option.
+	// RGB uses raw RGB space, which is the standard space that most other programs use.
+	// It produces decent results with maximum performance.
 	RGB
 
 	// CAM16 is an alternative colorspace, similar to HCT, but not quite as good.

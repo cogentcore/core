@@ -32,8 +32,8 @@ var _BlendTypesNameToValueMap = map[string]BlendTypes{
 }
 
 var _BlendTypesDescMap = map[BlendTypes]string{
-	0: `HCT uses hue, chroma, tone space and generally produces the best results`,
-	1: `RGB uses raw RGB space and was used in v1 and is used in most other software, so to reproduce existing results, select this option.`,
+	0: `HCT uses the hue, chroma, and tone space and generally produces the best results, but at a slight performance cost.`,
+	1: `RGB uses raw RGB space, which is the standard space that most other programs use. It produces decent results with maximum performance.`,
 	2: `CAM16 is an alternative colorspace, similar to HCT, but not quite as good.`,
 }
 
