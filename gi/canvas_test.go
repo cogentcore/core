@@ -8,17 +8,19 @@ import (
 	"testing"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/paint"
 )
 
 func TestCanvas(t *testing.T) {
 	b := NewBody()
-	c := NewCanvas(b)
-	c.Draw(func(pc *paint.Context) {
+	NewCanvas(b).SetDraw(func(pc *paint.Context) {
 		pc.MoveTo(20, 50)
 		pc.LineTo(50, 20)
 		pc.StrokeStyle.Color = colors.C(colors.Blue)
 		pc.Stroke()
+		pc.FillStyle.Opacity = 1
+		pc.BlitBoxColor(mat32.V2(16, 58), mat32.V2(50, 112), colors.Scheme.Success.Container)
 	})
 	b.AssertRender(t, "canvas/basic")
 }

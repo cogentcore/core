@@ -13,34 +13,39 @@ import (
 	"golang.org/x/image/draw"
 )
 
-// Canvas is a widget that can be arbitrarily drawn to.
+// Canvas is a widget that can be arbitrarily drawn to by setting
+// its Draw function using [Canvas.SetDraw].
 type Canvas struct {
 	WidgetBase
 
 	// Context is the paint context that we use for drawing.
 	Context *paint.Context `set:"-"`
+
+	// Draw is the function used to draw the content of the
+	// canvas every time that it is rendered. It renders directly
+	// to an image the size of the widget in real pixels (dots).
+	// The image is 256dp by 256dp by default. You can access the
+	// size of it in pixels by reading the bounds of pc.Image.
+	Draw func(pc *paint.Context)
 }
 
 func (c *Canvas) OnInit() {
-	c.Context = paint.NewContext(100, 100)
+	c.WidgetBase.OnInit()
 	c.SetStyles()
 }
 
 func (c *Canvas) SetStyles() {
 	c.Style(func(s *styles.Style) {
-		s.Min.Set(units.Dp(float32(c.Context.Image.Bounds().Dx())), units.Dp(float32(c.Context.Image.Bounds().Dy())))
+		s.Min.Set(units.Dp(256))
 	})
 }
 
-// Draw draws to the canvas by calling the given function with its paint context.
-func (c *Canvas) Draw(f func(pc *paint.Context)) {
-	c.Context.Lock()
-	f(c.Context)
-	c.Context.Unlock()
-	c.SetNeedsRender(true)
-}
-
 func (c *Canvas) DrawIntoScene() {
+	c.Context = paint.NewContext(c.Geom.ContentBBox.Dx(), c.Geom.ContentBBox.Dy())
+	c.Context.Lock()
+	c.Draw(c.Context)
+	c.Context.Unlock()
+
 	draw.Draw(c.Scene.Pixels, c.Geom.ContentBBox, c.Context.Image, image.Point{}, draw.Over)
 }
 

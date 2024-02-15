@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/paint"
 	"cogentcore.org/core/pi/complete"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -150,7 +151,7 @@ func (t *Button) SetMenu(v func(m *Scene)) *Button { t.Menu = v; return t }
 func (t *Button) SetTooltip(v string) *Button { t.Tooltip = v; return t }
 
 // CanvasType is the [gti.Type] for [Canvas]
-var CanvasType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Canvas", IDName: "canvas", Doc: "Canvas is a widget that can be arbitrarily drawn to.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Context", Doc: "Context is the paint context that we use for drawing."}}, Instance: &Canvas{}})
+var CanvasType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Canvas", IDName: "canvas", Doc: "Canvas is a widget that can be arbitrarily drawn to.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Context", Doc: "Context is the paint context that we use for drawing."}, {Name: "Draw", Doc: "Draw is the function used to draw the content of the\ncanvas every time that it is rendered."}}, Instance: &Canvas{}})
 
 // NewCanvas adds a new [Canvas] with the given name to the given parent:
 // Canvas is a widget that can be arbitrarily drawn to.
@@ -163,6 +164,11 @@ func (t *Canvas) KiType() *gti.Type { return CanvasType }
 
 // New returns a new [*Canvas] value
 func (t *Canvas) New() ki.Ki { return &Canvas{} }
+
+// SetDraw sets the [Canvas.Draw]:
+// Draw is the function used to draw the content of the
+// canvas every time that it is rendered.
+func (t *Canvas) SetDraw(v func(pc *paint.Context)) *Canvas { t.Draw = v; return t }
 
 // SetTooltip sets the [Canvas.Tooltip]
 func (t *Canvas) SetTooltip(v string) *Canvas { t.Tooltip = v; return t }
