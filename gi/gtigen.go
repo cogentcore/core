@@ -151,10 +151,11 @@ func (t *Button) SetMenu(v func(m *Scene)) *Button { t.Menu = v; return t }
 func (t *Button) SetTooltip(v string) *Button { t.Tooltip = v; return t }
 
 // CanvasType is the [gti.Type] for [Canvas]
-var CanvasType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Canvas", IDName: "canvas", Doc: "Canvas is a widget that can be arbitrarily drawn to.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Context", Doc: "Context is the paint context that we use for drawing."}, {Name: "Draw", Doc: "Draw is the function used to draw the content of the\ncanvas every time that it is rendered."}}, Instance: &Canvas{}})
+var CanvasType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Canvas", IDName: "canvas", Doc: "Canvas is a widget that can be arbitrarily drawn to by setting\nits Draw function using [Canvas.SetDraw].", Embeds: []gti.Field{{Name: "Box"}}, Fields: []gti.Field{{Name: "Draw", Doc: "Draw is the function used to draw the content of the\ncanvas every time that it is rendered. It renders directly\nto an image the size of the widget in real pixels (dots).\nThe image is 256dp by 256dp by default. You can access the\nsize of it in pixels by reading the bounds of pc.Image."}, {Name: "Context", Doc: "Context is the paint context that we use for drawing."}}, Instance: &Canvas{}})
 
 // NewCanvas adds a new [Canvas] with the given name to the given parent:
-// Canvas is a widget that can be arbitrarily drawn to.
+// Canvas is a widget that can be arbitrarily drawn to by setting
+// its Draw function using [Canvas.SetDraw].
 func NewCanvas(par ki.Ki, name ...string) *Canvas {
 	return par.NewChild(CanvasType, name...).(*Canvas)
 }
@@ -167,7 +168,10 @@ func (t *Canvas) New() ki.Ki { return &Canvas{} }
 
 // SetDraw sets the [Canvas.Draw]:
 // Draw is the function used to draw the content of the
-// canvas every time that it is rendered.
+// canvas every time that it is rendered. It renders directly
+// to an image the size of the widget in real pixels (dots).
+// The image is 256dp by 256dp by default. You can access the
+// size of it in pixels by reading the bounds of pc.Image.
 func (t *Canvas) SetDraw(v func(pc *paint.Context)) *Canvas { t.Draw = v; return t }
 
 // SetTooltip sets the [Canvas.Tooltip]

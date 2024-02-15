@@ -16,10 +16,7 @@ import (
 // Canvas is a widget that can be arbitrarily drawn to by setting
 // its Draw function using [Canvas.SetDraw].
 type Canvas struct {
-	WidgetBase
-
-	// Context is the paint context that we use for drawing.
-	Context *paint.Context `set:"-"`
+	Box
 
 	// Draw is the function used to draw the content of the
 	// canvas every time that it is rendered. It renders directly
@@ -27,10 +24,13 @@ type Canvas struct {
 	// The image is 256dp by 256dp by default. You can access the
 	// size of it in pixels by reading the bounds of pc.Image.
 	Draw func(pc *paint.Context)
+
+	// Context is the paint context that we use for drawing.
+	Context *paint.Context `set:"-"`
 }
 
 func (c *Canvas) OnInit() {
-	c.WidgetBase.OnInit()
+	c.Box.OnInit()
 	c.SetStyles()
 }
 
@@ -51,6 +51,7 @@ func (c *Canvas) DrawIntoScene() {
 
 func (c *Canvas) Render() {
 	if c.PushBounds() {
+		c.RenderBox()
 		c.DrawIntoScene()
 		c.RenderChildren()
 		c.PopBounds()
