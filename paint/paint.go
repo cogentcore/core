@@ -64,6 +64,7 @@ func NewContext(width, height int) *Context {
 	sz := image.Pt(width, height)
 	img := image.NewRGBA(image.Rectangle{Max: sz})
 	pc.Init(width, height, img)
+	pc.Bounds = img.Rect
 
 	pc.Defaults()
 	pc.SetUnitContextExt(sz)
