@@ -1447,6 +1447,6 @@ func (t *WidgetBase) SetTooltip(v string) *WidgetBase { t.Tooltip = v; return t 
 
 var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/gi.ProfileToggle", Doc: "ProfileToggle turns profiling on or off, which does both\ntargeted and global CPU and Memory profiling.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/gi.ResetSettings", Doc: "ResetSettings resets the given settings to their default values.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"se"}, Returns: []string{"error"}})
+var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/gi.ResetAllSettings", Doc: "ResetAllSettings resets all of the settings to their default values.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Returns: []string{"error"}})
 
 var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/gi.UpdateAll", Doc: "UpdateAll updates all windows and triggers a full render rebuild.\nIt is typically called when user settings are changed.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}})

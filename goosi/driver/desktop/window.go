@@ -205,7 +205,7 @@ func (w *Window) SetIcon(images []image.Image) {
 }
 
 func (w *Window) SetWinSize(sz image.Point) {
-	if w.IsClosed() {
+	if w.IsClosed() || w.Is(goosi.Fullscreen) {
 		return
 	}
 	// note: anything run on main only doesn't need lock -- implicit lock
@@ -241,7 +241,9 @@ func (w *Window) SetGeom(pos image.Point, sz image.Point) {
 		if w.Glw == nil { // by time we got to main, could be diff
 			return
 		}
-		w.Glw.SetSize(sz.X, sz.Y)
+		if !w.Is(goosi.Fullscreen) {
+			w.Glw.SetSize(sz.X, sz.Y)
+		}
 		w.Glw.SetPos(pos.X, pos.Y)
 	})
 }

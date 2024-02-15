@@ -136,14 +136,26 @@ func SaveSettings(se Settings) error {
 }
 
 // ResetSettings resets the given settings to their default values.
-func ResetSettings(se Settings) error { //gti:add
-	err := os.Remove(se.Filename())
+func ResetSettings(se Settings) error {
+	err := os.RemoveAll(se.Filename())
 	if err != nil {
 		return err
 	}
 	npv := laser.NonPtrValue(reflect.ValueOf(se))
 	npv.Set(reflect.Zero(npv.Type()))
 	return LoadSettings(se)
+}
+
+// ResetAllSettings resets all of the settings to their default values.
+func ResetAllSettings() error { //gti:add
+	for _, se := range AllSettings {
+		err := ResetSettings(se)
+		if err != nil {
+			return err
+		}
+	}
+	UpdateAll()
+	return nil
 }
 
 // LoadSettings sets the defaults of, opens, and applies the given settings.

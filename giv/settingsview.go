@@ -14,6 +14,7 @@ import (
 // SettingsViewToolbarBase is the base toolbar configuration function used in [SettingsView].
 func SettingsViewToolbarBase(tb *gi.Toolbar) {
 	tb.AddOverflowMenu(func(m *gi.Scene) {
+		NewFuncButton(m, gi.ResetAllSettings).SetText("Reset settings").SetIcon(icons.Reset).SetConfirm(true)
 		gi.NewButton(m).SetText("App version").SetIcon(icons.Info).OnClick(func(e events.Event) {
 			d := gi.NewBody().AddTitle("App version")
 			gi.NewLabel(d).SetText("App version: " + goosi.AppVersion)
