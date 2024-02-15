@@ -49,7 +49,9 @@ type Settings interface {
 	// Apply does anything necessary to apply the settings to the app.
 	Apply()
 
-	// ConfigToolbar is optional method to configure the settings view toolbar with setting-related actions to perform
+	// ConfigToolbar is an optional method that settings objects can implement in order to
+	// configure the settings view toolbar with settings-related actions that the user can
+	// perform.
 	ConfigToolbar(tb *Toolbar)
 }
 
@@ -239,9 +241,6 @@ type AppearanceSettingsData struct { //gti:add
 
 	// default mono-spaced font family
 	MonoFont FontName `default:"Roboto Mono"`
-
-	// toolbar configuration function -- set in giv -- allows use of FuncButton
-	TBConfig func(tb *Toolbar) `set:"-" view:"-" save:"-"`
 }
 
 // OverrideSettingsColor is whether to override the color specified in [Prefs.Color]
@@ -259,12 +258,6 @@ type AppearanceSettingsData struct { //gti:add
 // own custom scheme but not OverrideSettingsColor, giving you brand colors unless
 // your user explicitly states a preference for a specific color.
 var OverrideSettingsColor = false
-
-func (as *AppearanceSettingsData) ConfigToolbar(tb *Toolbar) {
-	if as.TBConfig != nil {
-		as.TBConfig(tb)
-	}
-}
 
 func (as *AppearanceSettingsData) Apply() { //gti:add
 	// Google Blue (#4285f4) is the default value and thus indicates no user preference,

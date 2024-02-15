@@ -11,12 +11,8 @@ import (
 	"cogentcore.org/core/icons"
 )
 
-func init() {
-	gi.AppearanceSettings.TBConfig = SettingsConfigToolbar
-}
-
-func SettingsConfigToolbar(tb *gi.Toolbar) {
-	as := gi.AppearanceSettings
+// SettingsViewToolbarBase is the base toolbar configuration function used in [SettingsView].
+func SettingsViewToolbarBase(tb *gi.Toolbar) {
 	tb.AddOverflowMenu(func(m *gi.Scene) {
 		gi.NewButton(m).SetText("App version").SetIcon(icons.Info).OnClick(func(e events.Event) {
 			d := gi.NewBody().AddTitle("App version")
@@ -25,8 +21,9 @@ func SettingsConfigToolbar(tb *gi.Toolbar) {
 			d.AddOkOnly().NewDialog(tb).Run()
 		})
 
-		NewFuncButton(m, as.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
-		gi.NewSeparator(tb)
+		NewFuncButton(m, gi.AppearanceSettings.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
+		NewFuncButton(m, gi.ProfileToggle).SetText("Profile performance").SetIcon(icons.Analytics)
+		gi.NewSeparator(m)
 	})
 }
 
@@ -43,8 +40,8 @@ func SettingsWindow() {
 // SettingsView adds to the given body a view of user settings
 func SettingsView(b *gi.Body) {
 	b.AddAppBar(func(tb *gi.Toolbar) {
+		SettingsViewToolbarBase(tb)
 		for _, se := range gi.AllSettings {
-			se := se
 			se.ConfigToolbar(tb)
 		}
 	})
@@ -65,53 +62,3 @@ func SettingsView(b *gi.Body) {
 		})
 	}
 }
-
-// TODO(kai)
-/*
-// PrefsDetView opens a view of user detailed preferences
-func PrefsDetView(pf *gi.PrefsDetailed) {
-	if gi.ActivateExistingMainWindow(pf) {
-		return
-	}
-
-	d := gi.NewBody("gogi-prefs-det").SetTitle("Cogent Core Detailed Preferences")
-
-	sv := NewStructView(d, "sv")
-	sv.SetStruct(pf)
-
-	d.Sc.Data = pf
-
-	d.AddAppBar(func(tb *gi.Toolbar) {
-		NewFuncButton(tb, pf.Apply).SetIcon(icons.Refresh)
-		gi.NewSeparator(tb)
-		NewFuncButton(tb, pf.Save).SetKey(keyfun.Save).
-			StyleFirst(func(s *styles.Style) { s.SetEnabled(pf.Changed) })
-		tb.AddOverflowMenu(func(m *gi.Scene) {
-			NewFuncButton(m, pf.Open).SetKey(keyfun.Open)
-			gi.NewSeparator(tb)
-		})
-	})
-
-	d.NewWindow().Run()
-}
-
-// PrefsDbgView opens a view of user debugging preferences
-func PrefsDbgView(pf *gi.DebugSettingsData) {
-	if gi.ActivateExistingMainWindow(pf) {
-		return
-	}
-	d := gi.NewBody("gogi-prefs-dbg")
-	d.Title = "Cogent Core Debugging Preferences"
-
-	sv := NewStructView(d, "sv")
-	sv.SetStruct(pf)
-
-	d.Sc.Data = pf
-
-	d.AddAppBar(func(tb *gi.Toolbar) {
-		NewFuncButton(tb, pf.Profile).SetIcon(icons.LabProfile)
-	})
-
-	d.NewWindow().Run()
-}
-*/

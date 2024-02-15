@@ -728,7 +728,7 @@ func (wb *WidgetBase) WinPos(x, y float32) image.Point {
 
 // ProfileToggle turns profiling on or off, which does both
 // targeted and global CPU and Memory profiling.
-func ProfileToggle() {
+func ProfileToggle() { //gti:add
 	if prof.Profiling {
 		EndTargProfile()
 		EndCPUMemProfile()
