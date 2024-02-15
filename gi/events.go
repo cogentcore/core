@@ -42,12 +42,7 @@ func (wb *WidgetBase) Clipboard() goosi.Clipboard {
 // OnFinal, which add event handlers that are called before and after those added
 // by this function, respectively.
 func (wb *WidgetBase) On(etype events.Types, fun func(e events.Event)) *WidgetBase {
-	wb.Listeners.Add(etype, func(e events.Event) {
-		if wb.This() == nil || wb.Is(ki.Deleted) {
-			return
-		}
-		fun(e)
-	})
+	wb.Listeners.Add(etype, fun)
 	return wb
 }
 
@@ -57,12 +52,7 @@ func (wb *WidgetBase) On(etype events.Types, fun func(e events.Event)) *WidgetBa
 // and internal code to add an event handler to a widget, in addition to On and OnFinal,
 // which add event handlers that are called after those added by this function.
 func (wb *WidgetBase) OnFirst(etype events.Types, fun func(e events.Event)) Widget {
-	wb.FirstListeners.Add(etype, func(e events.Event) {
-		if wb.This() == nil || wb.Is(ki.Deleted) {
-			return
-		}
-		fun(e)
-	})
+	wb.FirstListeners.Add(etype, fun)
 	return wb.This().(Widget)
 }
 
@@ -72,12 +62,7 @@ func (wb *WidgetBase) OnFirst(etype events.Types, fun func(e events.Event)) Widg
 // and internal code to add an event handler to a widget, in addition to OnFirst and On,
 // which add event handlers that are called before those added by this function.
 func (wb *WidgetBase) OnFinal(etype events.Types, fun func(e events.Event)) Widget {
-	wb.FinalListeners.Add(etype, func(e events.Event) {
-		if wb.This() == nil || wb.Is(ki.Deleted) {
-			return
-		}
-		fun(e)
-	})
+	wb.FinalListeners.Add(etype, fun)
 	return wb.This().(Widget)
 }
 
@@ -219,28 +204,16 @@ func (wb *WidgetBase) HandleEvent(ev events.Event) {
 	}
 	s := &wb.Styles
 	state := s.State
-	wb.FirstListeners.Call(ev)
-	// widget can be killed after event
-	if wb.This() == nil || wb.Is(ki.Deleted) {
-		return
+
+	shouldContinue := func() bool {
+		return wb.This() != nil && !wb.Is(ki.Deleted)
 	}
-	if !ev.IsHandled() {
-		wb.Listeners.Call(ev)
-		// widget can be killed after event
-		if ev.IsHandled() || wb.This() == nil || wb.Is(ki.Deleted) {
-			return
-		}
-		if !ev.IsHandled() {
-			wb.FinalListeners.Call(ev)
-			// widget can be killed after event
-			if wb.This() == nil || wb.Is(ki.Deleted) {
-				return
-			}
-		}
-	}
+	wb.FirstListeners.Call(ev, shouldContinue)
+	wb.Listeners.Call(ev, shouldContinue)
+	wb.FinalListeners.Call(ev, shouldContinue)
+
 	if s.State != state {
 		wb.ApplyStyleUpdate()
-		// wb.Transition(&s.StateLayer, s.State.StateLayer(), 500*time.Millisecond, LinearTransition)
 	}
 }
 
@@ -252,10 +225,9 @@ func (wb *WidgetBase) FirstHandleEvent(ev events.Event) {
 			fmt.Println(ev, "first to", wb)
 		}
 	}
-	if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) {
-		return
-	}
-	wb.FirstListeners.Call(ev)
+	wb.FirstListeners.Call(ev, func() bool {
+		return wb.This() != nil && !wb.Is(ki.Deleted)
+	})
 }
 
 // FinalHandleEvent sends the given event to the FinalListeners for that event type.
@@ -266,10 +238,9 @@ func (wb *WidgetBase) FinalHandleEvent(ev events.Event) {
 			fmt.Println(ev, "final to", wb)
 		}
 	}
-	if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) {
-		return
-	}
-	wb.FinalListeners.Call(ev)
+	wb.FinalListeners.Call(ev, func() bool {
+		return wb.This() != nil && !wb.Is(ki.Deleted)
+	})
 }
 
 // HandleEvents sets the default WidgetBase event handlers

@@ -31,11 +31,13 @@ func (ls *Listeners) Add(typ Types, fun func(e Event)) {
 }
 
 // Call calls all functions for given event.
-// It goes in _reverse_ order to the last functions added are the first called
+// It goes in _reverse_ order so the last functions added are the first called
 // and it stops when the event is marked as Handled.  This allows for a natural
 // and optional override behavior, as compared to requiring more complex
-// priority-based mechanisms.
-func (ls *Listeners) Call(ev Event) {
+// priority-based mechanisms. Also, it takes an optional function that
+// it calls before each event handler is run, returning if it returns
+// false.
+func (ls *Listeners) Call(ev Event, shouldContinue ...func() bool) {
 	if ev.IsHandled() {
 		return
 	}
@@ -43,6 +45,9 @@ func (ls *Listeners) Call(ev Event) {
 	ets := (*ls)[typ]
 	n := len(ets)
 	for i := n - 1; i >= 0; i-- {
+		if len(shouldContinue) > 0 && !shouldContinue[0]() {
+			break
+		}
 		fun := ets[i]
 		fun(ev)
 		if ev.IsHandled() {
