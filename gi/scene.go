@@ -281,9 +281,16 @@ func (sc *Scene) ScIsVisible() bool {
 	return sc.RenderCtx().HasFlag(RenderVisible)
 }
 
-// Close closes the stage associated with this Scene (typically for Dialog)
+// Close closes the Stage associated with this Scene.
+// This only works for main stages (windows and dialogs).
 func (sc *Scene) Close() {
-	sc.Send(events.Close)
+	e := &events.Base{Typ: events.Close}
+	e.Init()
+	sc.HandleEvent(e)
+	// if they set the event as handled, we do not close the scene
+	if e.IsHandled() {
+		return
+	}
 	mm := sc.Stage.MainMgr
 	if mm == nil {
 		return // todo: needed, but not sure why
