@@ -142,7 +142,13 @@ func ResetSettings(se Settings) error {
 		return err
 	}
 	npv := laser.NonPtrValue(reflect.ValueOf(se))
-	npv.Set(reflect.Zero(npv.Type()))
+	// we only reset the non-default fields to avoid removing the base
+	// information (name, filename, etc)
+	ndf := laser.NonDefaultFields(se)
+	for f := range ndf {
+		rf := npv.FieldByName(f)
+		rf.Set(reflect.Zero(rf.Type()))
+	}
 	return LoadSettings(se)
 }
 
