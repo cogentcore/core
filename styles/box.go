@@ -38,20 +38,30 @@ const (
 	// BorderSolid indicates to render a solid border.
 	BorderSolid BorderStyles = iota
 
-	// BorderDotted indicates to render a dotted border
+	// BorderDotted indicates to render a dotted border.
 	BorderDotted
 
-	// BorderDashed indicates to render a dashed border
+	// BorderDashed indicates to render a dashed border.
 	BorderDashed
 
-	// TODO(kai): implement these
+	// TODO(kai): maybe implement these
+
+	// BorderDouble is not currently supported.
 	BorderDouble
+
+	// BorderGroove is not currently supported.
 	BorderGroove
+
+	// BorderRidge is not currently supported.
 	BorderRidge
+
+	// BorderInset is not currently supported.
 	BorderInset
+
+	// BorderOutset is not currently supported.
 	BorderOutset
 
-	// BorderNone indicates to render no border
+	// BorderNone indicates to render no border.
 	BorderNone
 )
 
@@ -87,37 +97,47 @@ var (
 	// BorderRadiusNone indicates to use no border radius,
 	// which creates a fully rectangular element
 	BorderRadiusNone = NewSideValues(units.Zero())
+
 	// BorderRadiusExtraSmall indicates to use extra small
 	// 4dp rounded corners
 	BorderRadiusExtraSmall = NewSideValues(units.Dp(4))
+
 	// BorderRadiusExtraSmallTop indicates to use extra small
 	// 4dp rounded corners on the top of the element and no
 	// border radius on the bottom of the element
 	BorderRadiusExtraSmallTop = NewSideValues(units.Dp(4), units.Dp(4), units.Zero(), units.Zero())
+
 	// BorderRadiusSmall indicates to use small
 	// 8dp rounded corners
 	BorderRadiusSmall = NewSideValues(units.Dp(8))
+
 	// BorderRadiusMedium indicates to use medium
 	// 12dp rounded corners
 	BorderRadiusMedium = NewSideValues(units.Dp(12))
+
 	// BorderRadiusLarge indicates to use large
 	// 16dp rounded corners
 	BorderRadiusLarge = NewSideValues(units.Dp(16))
+
 	// BorderRadiusLargeEnd indicates to use large
 	// 16dp rounded corners on the end (right side)
 	// of the element and no border radius elsewhere
 	BorderRadiusLargeEnd = NewSideValues(units.Zero(), units.Dp(16), units.Dp(16), units.Zero())
+
 	// BorderRadiusLargeTop indicates to use large
 	// 16dp rounded corners on the top of the element
 	// and no border radius on the bottom of the element
 	BorderRadiusLargeTop = NewSideValues(units.Dp(16), units.Dp(16), units.Zero(), units.Zero())
+
 	// BorderRadiusExtraLarge indicates to use extra large
 	// 28dp rounded corners
 	BorderRadiusExtraLarge = NewSideValues(units.Dp(28))
+
 	// BorderRadiusExtraLargeTop indicates to use extra large
 	// 28dp rounded corners on the top of the element
 	// and no border radius on the bottom of the element
 	BorderRadiusExtraLargeTop = NewSideValues(units.Dp(28), units.Dp(28), units.Zero(), units.Zero())
+
 	// BorderRadiusFull indicates to use a full border radius,
 	// which creates a circular/pill-shaped object.
 	// It is defined to be a value that the width/height of an object
