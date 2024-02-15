@@ -96,6 +96,8 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 	// above, we can draw the border
 	mpos.SetAdd(st.Border.Width.Dots().Pos().MulScalar(0.5))
 	msz.SetSub(st.Border.Width.Dots().Size().MulScalar(0.5))
+	mpos.SetSub(st.Border.Offset.Dots().Pos())
+	msz.SetAdd(st.Border.Offset.Dots().Size())
 	pc.FillStyle.Color = nil
 	pc.DrawBorder(mpos.X, mpos.Y, msz.X, msz.Y, st.Border)
 }

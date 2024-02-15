@@ -141,9 +141,7 @@ func (bt *Button) SetStyles() {
 		case ButtonFilled:
 			s.Background = colors.C(colors.Scheme.Primary.Base)
 			s.Color = colors.Scheme.Primary.On
-			if s.Is(states.Focused) {
-				s.Border.Color.Set(colors.Scheme.OnSurface) // primary is too hard to see
-			}
+			s.Border.Offset.Set(units.Dp(2))
 		case ButtonTonal:
 			s.Background = colors.C(colors.Scheme.Secondary.Container)
 			s.Color = colors.Scheme.Secondary.OnContainer

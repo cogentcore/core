@@ -81,7 +81,9 @@ type Border struct { //gti:add
 	Radius SideValues `view:"inline"`
 
 	// Offset specifies how much, if any, the border is offset
-	// from its element.
+	// from its element. It is only applicable in the standard
+	// box model, which is used by [paint.Context.DrawStdBox] and
+	// all standard GUI elements.
 	Offset SideValues `view:"inline"`
 
 	// TODO(kai/imageColor)
