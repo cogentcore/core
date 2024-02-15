@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"reflect"
 	"time"
 
 	"cogentcore.org/core/colors"
@@ -135,16 +136,14 @@ func SaveSettings(se Settings) error {
 }
 
 // ResetSettings resets the given settings to their default values.
-// It process their `default:` struct tags in addition to calling their
-// [Settings.Default] method.
-func ResetSettings(se Settings) error {
+func ResetSettings(se Settings) error { //gti:add
 	err := os.Remove(se.Filename())
 	if err != nil {
 		return err
 	}
-	grr.Log(laser.SetFromDefaultTags(se))
-	se.Defaults()
-	return nil
+	npv := laser.NonPtrValue(reflect.ValueOf(se))
+	npv.Set(reflect.Zero(npv.Type()))
+	return LoadSettings(se)
 }
 
 // LoadSettings sets the defaults of, opens, and applies the given settings.
