@@ -72,7 +72,7 @@ func (sc *Scene) MouseScrollEvent(e *events.MouseScroll) {
 	if sc.NoNav {
 		return
 	}
-	pt := e.Pos() // e.Where.Sub(sc.ScBBox.Min)
+	pt := e.Pos()
 	sz := sc.Geom.Size
 	cdist := mat32.Max(sc.Camera.DistTo(sc.Camera.Target), 1.0)
 	zoom := float32(e.Delta.Y) // float32(e.ScrollNonZeroDelta(false))
