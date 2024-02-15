@@ -99,7 +99,9 @@ func NewGlfwWindow(opts *goosi.NewWindowOptions, sc *goosi.Screen) (*glfw.Window
 		return win, err
 	}
 
-	win.SetPos(opts.Pos.X, opts.Pos.Y)
+	if !fullscreen {
+		win.SetPos(opts.Pos.X, opts.Pos.Y)
+	}
 	if opts.Icon != nil {
 		win.SetIcon(opts.Icon)
 	}
@@ -218,7 +220,7 @@ func (w *Window) SetWinSize(sz image.Point) {
 }
 
 func (w *Window) SetPos(pos image.Point) {
-	if w.IsClosed() {
+	if w.IsClosed() || w.Is(goosi.Fullscreen) {
 		return
 	}
 	// note: anything run on main only doesn't need lock -- implicit lock
@@ -231,7 +233,7 @@ func (w *Window) SetPos(pos image.Point) {
 }
 
 func (w *Window) SetGeom(pos image.Point, sz image.Point) {
-	if w.IsClosed() {
+	if w.IsClosed() || w.Is(goosi.Fullscreen) {
 		return
 	}
 	sc := w.Screen()
@@ -241,9 +243,7 @@ func (w *Window) SetGeom(pos image.Point, sz image.Point) {
 		if w.Glw == nil { // by time we got to main, could be diff
 			return
 		}
-		if !w.Is(goosi.Fullscreen) {
-			w.Glw.SetSize(sz.X, sz.Y)
-		}
+		w.Glw.SetSize(sz.X, sz.Y)
 		w.Glw.SetPos(pos.X, pos.Y)
 	})
 }
