@@ -295,7 +295,7 @@ func (sc *Scene) Close() {
 	if mm == nil {
 		return // todo: needed, but not sure why
 	}
-	if sc.Stage.NewWindow && !TheApp.Platform().IsMobile() {
+	if sc.Stage.NewWindow && !TheApp.Platform().IsMobile() && !mm.RenderWin.Is(WinStopEventLoop) {
 		mm.RenderWin.CloseReq()
 		return
 	}
