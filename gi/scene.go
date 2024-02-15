@@ -283,7 +283,7 @@ func (sc *Scene) ScIsVisible() bool {
 
 // Close closes the stage associated with this Scene (typically for Dialog)
 func (sc *Scene) Close() {
-	sc.Send(events.Close, nil)
+	sc.Send(events.Close)
 	mm := sc.Stage.MainMgr
 	if mm == nil {
 		return // todo: needed, but not sure why

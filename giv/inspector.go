@@ -296,13 +296,11 @@ func (is *Inspector) ConfigSplits() {
 		sv.OnChange(func(e events.Event) {
 			renderRebuild()
 		})
-		sv.OnClose(func(e events.Event) { // todo: Kai please fixme
+		sv.OnClose(func(e events.Event) {
 			sc := gi.AsScene(is.KiRoot)
-			fmt.Println("in close, pre sc")
 			if sc == nil {
 				return
 			}
-			fmt.Println("in close, post sc")
 			pselw := sc.SelectedWidget
 			sc.SelectedWidget = nil
 			if pselw != nil {

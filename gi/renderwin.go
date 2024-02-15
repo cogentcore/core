@@ -450,6 +450,11 @@ func (w *RenderWin) Closed() {
 	w.RenderCtx().WriteLock()
 	defer w.RenderCtx().WriteUnlock()
 
+	// ensure that everyone is closed first
+	for _, kv := range w.MainStageMgr.Stack.Order {
+		kv.Value.Scene.Close()
+	}
+
 	AllRenderWins.Delete(w)
 	MainRenderWins.Delete(w)
 	DialogRenderWins.Delete(w)
