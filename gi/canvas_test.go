@@ -21,6 +21,10 @@ func TestCanvas(t *testing.T) {
 		pc.Stroke()
 
 		pc.FillBoxColor(mat32.V2(164, 58), mat32.V2(50, 112), colors.Scheme.Success.Container)
+
+		pc.FillStyle.Color = colors.C(colors.Orange)
+		pc.DrawCircle(80, 110, 40)
+		pc.Fill()
 	})
 	b.AssertRender(t, "canvas/basic")
 }
