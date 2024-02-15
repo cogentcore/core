@@ -137,7 +137,7 @@ type Style struct { //gti:add
 	// the object (see ObjectFit).
 	ObjectPosition units.XY
 
-	// Border is a line border around the box element
+	// Border is a rendered border around the element.
 	Border Border
 
 	// MaxBorder is the largest border that will ever be rendered
@@ -353,6 +353,11 @@ func (s *Style) TotalMargin() SideFloats {
 	if SidesAreZero(mbw.Sides) {
 		mbw = s.Border.Width.Dots()
 	}
+	mbo := s.MaxBorder.Offset.Dots()
+	if SidesAreZero(mbo.Sides) {
+		mbo = s.Border.Offset.Dots()
+	}
+	mbw = mbw.Add(mbo)
 
 	if s.Border.Style.Top == BorderNone {
 		mbw.Top = 0

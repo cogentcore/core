@@ -44,7 +44,8 @@ const (
 	// BorderDashed indicates to render a dashed border.
 	BorderDashed
 
-	// TODO(kai): maybe implement these
+	// TODO(kai): maybe implement these at some point if there
+	// is ever an actual use case for them
 
 	// BorderDouble is not currently supported.
 	BorderDouble
@@ -70,18 +71,22 @@ const (
 // Border contains style parameters for borders
 type Border struct { //gti:add
 
-	// how to draw the border
+	// Style specifies how to draw the border
 	Style Sides[BorderStyles]
 
-	// width of the border
+	// Width specifies the width of the border
 	Width SideValues `view:"inline"`
 
-	// radius (rounding) of the corners
+	// Radius specifies the radius (rounding) of the corners
 	Radius SideValues `view:"inline"`
+
+	// Offset specifies how much, if any, the border is offset
+	// from its element.
+	Offset SideValues `view:"inline"`
 
 	// TODO(kai/imageColor)
 
-	// color of the border
+	// Color specifies the color of the border
 	Color SideColors `view:"inline"`
 }
 
@@ -89,6 +94,7 @@ type Border struct { //gti:add
 func (bs *Border) ToDots(uc *units.Context) {
 	bs.Width.ToDots(uc)
 	bs.Radius.ToDots(uc)
+	bs.Offset.ToDots(uc)
 }
 
 // Pre-configured border radius values, based on
