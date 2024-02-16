@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"fmt"
 	"image/color"
-	"io"
+	"io/fs"
 	"log"
 	"log/slog"
 	"os"
@@ -512,15 +512,11 @@ func (tb *Buf) FileModCheck() bool {
 	return false
 }
 
-// Open loads text from a file into the buffer
+// Open loads the given file into the buffer.
 func (tb *Buf) Open(filename gi.Filename) error {
 	err := tb.OpenFile(filename)
 	if err != nil {
-		// vp := tb.SceneFromView()
-		// TODO(kai/snack)
-		// gi.PromptDialog(nil, gi.DlgOpts{Title: "File could not be Opened", Prompt: err.Error(), Ok: true, Cancel: false}, nil)
-		slog.Error(err.Error())
-		return err
+		return grr.Log(err)
 	}
 	tb.InitialMarkup()
 	tb.SignalViews(BufNew, nil)
@@ -528,15 +524,30 @@ func (tb *Buf) Open(filename gi.Filename) error {
 	return nil
 }
 
-// OpenFile just loads a file into the buffer -- doesn't do any markup or
-// notification -- for temp bufs
+// OpenFS loads the given file in the given filesystem into the buffer.
+func (tb *Buf) OpenFS(fsys fs.FS, filename string) error {
+	txt, err := fs.ReadFile(fsys, filename)
+	if err != nil {
+		return grr.Log(err)
+	}
+	tb.Txt = txt
+	tb.SetFilename(filename)
+	tb.BytesToLines()
+	tb.InitialMarkup()
+	tb.SignalViews(BufNew, nil)
+	tb.ReMarkup()
+	return nil
+}
+
+// OpenFile just loads the given file into the buffer, without doing
+// any markup or signaling. It is typically used in other functions or
+// for temporary buffers.
 func (tb *Buf) OpenFile(filename gi.Filename) error {
-	fp, err := os.Open(string(filename))
+	txt, err := os.ReadFile(string(filename))
 	if err != nil {
 		return err
 	}
-	tb.Txt, err = io.ReadAll(fp)
-	fp.Close()
+	tb.Txt = txt
 	tb.SetFilename(string(filename))
 	tb.BytesToLines()
 	return nil

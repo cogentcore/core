@@ -5,16 +5,15 @@
 package main
 
 import (
+	"embed"
+
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor"
 )
 
-var samplefile gi.Filename = "texteditor.go"
-
-// var samplefile gi.Filename = "../../Makefile"
-
-// var samplefile gi.Filename = "../../README.md"
+//go:embed texteditor.go
+var samplefile embed.FS
 
 func main() {
 	b := gi.NewBody("Cogent Core Text Editor Demo")
@@ -43,11 +42,8 @@ func main() {
 	te1.SetBuf(tb)
 	te2.SetBuf(tb)
 
-	// txbuf.Hi.Lang = "Markdown" // "Makefile" // "Go" // "Markdown"
 	tb.Hi.Lang = "Go"
-	tb.Open(samplefile)
-	// pr := txbuf.Hi.PiLang.Parser()
-	// giv.InspectorDialog(&pr.Lexer)
+	tb.OpenFS(samplefile, "texteditor.go")
 
 	b.RunMainWindow()
 }
