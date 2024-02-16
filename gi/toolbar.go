@@ -53,6 +53,14 @@ func (tb *Toolbar) IsVisible() bool {
 	return tb.WidgetBase.IsVisible() && len(tb.Kids) > 0
 }
 
+// AppChooser returns the app [Chooser] used for searching for
+// items. It will only be non-nil if this toolbar has been configured
+// with an app chooser, which typically only happens for app bars.
+func (tb *Toolbar) AppChooser() *Chooser {
+	ch, _ := tb.ChildByName("app-chooser").(*Chooser)
+	return ch
+}
+
 func (tb *Toolbar) ConfigWidget() {
 	if len(tb.Kids) == 0 {
 		if len(tb.ToolbarFuncs) > 0 {
