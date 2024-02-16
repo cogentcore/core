@@ -283,23 +283,24 @@ func (sc *Scene) ScIsVisible() bool {
 
 // Close closes the Stage associated with this Scene.
 // This only works for main stages (windows and dialogs).
-func (sc *Scene) Close() {
+// It returns whether the Stage was successfully closed.
+func (sc *Scene) Close() bool {
 	e := &events.Base{Typ: events.Close}
 	e.Init()
 	sc.HandleEvent(e)
 	// if they set the event as handled, we do not close the scene
 	if e.IsHandled() {
-		return
+		return false
 	}
 	mm := sc.Stage.MainMgr
 	if mm == nil {
-		return // todo: needed, but not sure why
-	}
-	if sc.Stage.NewWindow && !TheApp.Platform().IsMobile() && !mm.RenderWin.Is(WinStopEventLoop) {
-		mm.RenderWin.CloseReq()
-		return
+		return false // todo: needed, but not sure why
 	}
 	mm.DeleteStage(sc.Stage)
+	if sc.Stage.NewWindow && !TheApp.Platform().IsMobile() && !mm.RenderWin.Is(WinStopEventLoop) {
+		mm.RenderWin.CloseReq()
+	}
+	return true
 }
 
 // Delete this Scene if not Flagged for preservation.

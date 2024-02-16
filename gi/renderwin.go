@@ -165,21 +165,30 @@ func (w *RenderWin) SetFlag(on bool, flag ...enums.BitFlag) {
 // display name, and options.  This is called by Stage.NewRenderWin
 // which handles setting the opts and other infrastructure.
 func NewRenderWin(name, title string, opts *goosi.NewWindowOptions) *RenderWin {
-	win := &RenderWin{}
-	win.Name = name
-	win.Title = title
+	w := &RenderWin{}
+	w.Name = name
+	w.Title = title
 	var err error
-	win.GoosiWin, err = goosi.TheApp.NewWindow(opts)
+	w.GoosiWin, err = goosi.TheApp.NewWindow(opts)
 	if err != nil {
 		fmt.Printf("Cogent Core NewRenderWin error: %v \n", err)
 		return nil
 	}
-	win.GoosiWin.SetName(title)
-	win.GoosiWin.SetTitleBarIsDark(matcolor.SchemeIsDark)
+	w.GoosiWin.SetName(title)
+	w.GoosiWin.SetTitleBarIsDark(matcolor.SchemeIsDark)
+	w.GoosiWin.SetCloseReqFunc(func(win goosi.Window) {
+		// ensure that everyone is closed first
+		for _, kv := range w.MainStageMgr.Stack.Order {
+			if !kv.Value.Scene.Close() {
+				return
+			}
+		}
+		win.Close()
+	})
 
-	drw := win.GoosiWin.Drawer()
-	drw.SetMaxTextures(goosi.MaxTexturesPerSet * 3)       // use 3 sets
-	win.RenderScenes.MaxIdx = goosi.MaxTexturesPerSet * 2 // reserve last for sprites
+	drw := w.GoosiWin.Drawer()
+	drw.SetMaxTextures(goosi.MaxTexturesPerSet * 3)     // use 3 sets
+	w.RenderScenes.MaxIdx = goosi.MaxTexturesPerSet * 2 // reserve last for sprites
 
 	// win.GoosiWin.SetDestroyGPUResourcesFunc(func() {
 	// 	for _, ph := range win.Phongs {
@@ -189,7 +198,7 @@ func NewRenderWin(name, title string, opts *goosi.NewWindowOptions) *RenderWin {
 	// 		fr.Destroy()
 	// 	}
 	// })
-	return win
+	return w
 }
 
 // MainScene returns the current MainStageMgr Top Scene,
@@ -449,11 +458,6 @@ func (w *RenderWin) CloseReq() {
 func (w *RenderWin) Closed() {
 	w.RenderCtx().WriteLock()
 	defer w.RenderCtx().WriteUnlock()
-
-	// ensure that everyone is closed first
-	for _, kv := range w.MainStageMgr.Stack.Order {
-		kv.Value.Scene.Close()
-	}
 
 	AllRenderWins.Delete(w)
 	MainRenderWins.Delete(w)

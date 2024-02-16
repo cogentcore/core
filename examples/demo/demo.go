@@ -42,6 +42,25 @@ func main() {
 	values(ts)
 	other(ts)
 
+	inClose := false
+	b.OnClose(func(e events.Event) {
+		if inClose {
+			return
+		}
+		e.SetHandled()
+		inClose = true
+		d := gi.NewBody().AddTitle("Are you sure?").AddText("Are you sure you want to close the Cogent Core Demo?")
+		d.AddBottomBar(func(pw gi.Widget) {
+			d.AddCancel(pw).OnClick(func(e events.Event) {
+				inClose = false
+			})
+			d.AddOk(pw).SetText("Close").OnClick(func(e events.Event) {
+				b.Scene.Close()
+			})
+		})
+		d.NewDialog(b).Run()
+	})
+
 	b.RunMainWindow()
 }
 
