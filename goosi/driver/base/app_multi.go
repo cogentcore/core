@@ -120,7 +120,7 @@ func (a *AppMulti[W]) QuitClean() bool {
 	nwin := len(a.Windows)
 	for i := nwin - 1; i >= 0; i-- {
 		win := a.Windows[i]
-		win.Close()
+		win.CloseReq()
 	}
 	return len(a.Windows) == 0
 }
