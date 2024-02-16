@@ -42,27 +42,9 @@ func main() {
 	values(ts)
 	other(ts)
 
-	var inClose, closed bool
-	b.OnClose(func(e events.Event) {
-		if closed {
-			return
-		}
-		e.SetHandled()
-		if inClose {
-			return
-		}
-		inClose = true
-		d := gi.NewBody().AddTitle("Are you sure?").AddText("Are you sure you want to close the Cogent Core Demo?")
-		d.AddBottomBar(func(pw gi.Widget) {
-			d.AddCancel(pw).OnClick(func(e events.Event) {
-				inClose = false
-			})
-			d.AddOk(pw).SetText("Close").OnClick(func(e events.Event) {
-				closed = true
-				b.Scene.Close()
-			})
-		})
-		d.NewDialog(b).Run()
+	b.AddCloseDialog(func(d *gi.Body) bool {
+		d.AddTitle("Are you sure?").AddText("Are you sure you want to close the Cogent Core Demo?")
+		return true
 	})
 
 	b.RunMainWindow()

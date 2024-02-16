@@ -139,8 +139,9 @@ type App interface {
 	IsQuitting() bool
 
 	// QuitClean calls the function setup in SetQuitCleanFunc and does other
-	// app cleanup -- called on way to quitting.
-	QuitClean()
+	// app cleanup -- called on way to quitting. If it returns false, then
+	// the app should not quit.
+	QuitClean() bool
 
 	// Quit closes all windows and exits the program.
 	Quit()

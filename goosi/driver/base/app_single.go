@@ -149,12 +149,13 @@ func (a *AppSingle[D, W]) RemoveWindow(w goosi.Window) {
 	// no-op
 }
 
-func (a *AppSingle[D, W]) QuitClean() {
+func (a *AppSingle[D, W]) QuitClean() bool {
 	a.Quitting = true
 	for _, qf := range a.QuitCleanFuncs {
 		qf()
 	}
 	a.Mu.Lock()
+	defer a.Mu.Unlock()
 	a.Win.Close()
-	a.Mu.Unlock()
+	return a.Win.IsClosed()
 }

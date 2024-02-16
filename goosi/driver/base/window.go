@@ -51,7 +51,7 @@ type Window[A goosi.App] struct { //gti:add
 	Titl string `label:"Title"`
 
 	// Flgs contains the flags associated with the window
-	Flgs goosi.WindowFlags `label:"Flags"`
+	Flgs goosi.WindowFlags `label:"Flags" tableview:"-"`
 
 	// FPS is the FPS (frames per second) for rendering the window
 	FPS int
@@ -181,9 +181,6 @@ func (w *Window[A]) SetCloseCleanFunc(fun func(win goosi.Window)) {
 }
 
 func (w *Window[A]) CloseReq() {
-	if w.App.IsQuitting() {
-		w.This.Close()
-	}
 	if w.CloseReqFunc != nil {
 		w.CloseReqFunc(w.This)
 	} else {
