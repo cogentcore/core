@@ -5,8 +5,6 @@
 package gi
 
 import (
-	"image"
-
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -46,7 +44,7 @@ func (c *Canvas) DrawIntoScene() {
 	c.Draw(c.Context)
 	c.Context.Unlock()
 
-	draw.Draw(c.Scene.Pixels, c.Geom.ContentBBox, c.Context.Image, image.Point{}, draw.Over)
+	draw.Draw(c.Scene.Pixels, c.Geom.ContentBBox, c.Context.Image, c.Geom.ScrollOffset(), draw.Over)
 }
 
 func (c *Canvas) Render() {
