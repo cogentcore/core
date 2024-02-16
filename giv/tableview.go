@@ -795,6 +795,9 @@ func StructSliceIdxByValue(struSlice any, fldName string, fldVal any) (int, erro
 }
 
 func (tv *TableView) EditIdx(idx int) {
+	if idx == 0 {
+		return
+	}
 	val := laser.OnePtrUnderlyingValue(tv.SliceNPVal.Index(idx))
 	stru := val.Interface()
 	tynm := laser.NonPtrType(val.Type()).Name()
