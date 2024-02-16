@@ -177,9 +177,11 @@ func NewRenderWin(name, title string, opts *goosi.NewWindowOptions) *RenderWin {
 	w.GoosiWin.SetName(title)
 	w.GoosiWin.SetTitleBarIsDark(matcolor.SchemeIsDark)
 	w.GoosiWin.SetCloseReqFunc(func(win goosi.Window) {
+		w.SetFlag(true, WinClosing)
 		// ensure that everyone is closed first
 		for _, kv := range w.MainStageMgr.Stack.Order {
 			if !kv.Value.Scene.Close() {
+				w.SetFlag(false, WinClosing)
 				return
 			}
 		}
@@ -436,19 +438,6 @@ func (w *RenderWin) Minimize() {
 	w.GoosiWin.Minimize()
 }
 
-// Close closes the window -- this is not a request -- it means:
-// definitely close it -- flags window as such -- check Is(WinClosing)
-func (w *RenderWin) Close() {
-	if w.Is(WinClosing) {
-		return
-	}
-	// this causes hangs etc: not good
-	// w.RenderCtx().Mu.Lock() // allow other stuff to finish
-	w.SetFlag(true, WinClosing)
-	// w.RenderCtx().Mu.Unlock()
-	w.GoosiWin.Close()
-}
-
 // CloseReq requests that the window be closed -- could be rejected
 func (w *RenderWin) CloseReq() {
 	w.GoosiWin.CloseReq()
@@ -670,7 +659,7 @@ func (w *RenderWin) HandleWindowEvents(e events.Event) {
 		case events.WinClose:
 			// fmt.Printf("got close event for window %v \n", w.Name)
 			e.SetHandled()
-			w.SetFlag(true, WinStopEventLoop)
+			w.StopEventLoop()
 			w.RenderCtx().ReadUnlock() // one case where we need to break lock
 			w.Closed()
 			w.RenderCtx().ReadLock()
