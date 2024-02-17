@@ -137,8 +137,8 @@ func SetCone(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtxO
 // pos is an arbitrary offset (for composing shapes).
 func SetCylinderSector(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtxOff, idxOff int, height, topRad, botRad float32, radialSegs, heightSegs int, angStart, angLen float32, top, bottom bool, pos mat32.Vec3) mat32.Box3 {
 	hHt := height / 2
-	vtxs := [][]int{}
-	uvsOrig := [][]mat32.Vec2{}
+	var vtxs [][]int
+	var uvsOrig [][]mat32.Vec2
 
 	angStRad := mat32.DegToRad(angStart)
 	angLenRad := mat32.DegToRad(angLen)
@@ -152,8 +152,8 @@ func SetCylinderSector(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.Arra
 
 	var pt mat32.Vec3
 	for y := 0; y <= heightSegs; y++ {
-		var vtxsRow = []int{}
-		var uvsRow = []mat32.Vec2{}
+		var vtxsRow []int
+		var uvsRow []mat32.Vec2
 		v := float32(y) / float32(heightSegs)
 		radius := v*(botRad-topRad) + topRad
 		for x := 0; x <= radialSegs; x++ {
@@ -229,7 +229,7 @@ func SetCylinderSector(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.Arra
 	// Top cap
 	if top && topRad > 0 {
 		// Array of vertex indicesOrig to build used to build the faces.
-		idxsOrig := []uint32{}
+		var idxsOrig []uint32
 
 		// Appends top segments vtxs and builds array of its idxsOrig
 		var uv1, uv2, uv3 mat32.Vec2
@@ -288,7 +288,7 @@ func SetCylinderSector(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.Arra
 	// Bottom cap
 	if bottom && botRad > 0 {
 		// Array of vertex idxsOrig to build used to build the faces.
-		idxsOrig := []uint32{}
+		var idxsOrig []uint32
 
 		// Appends top segments vtxs and builds array of its idxsOrig
 		var uv1, uv2, uv3 mat32.Vec2

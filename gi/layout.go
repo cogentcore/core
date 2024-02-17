@@ -434,7 +434,7 @@ func (l *Layout) FocusOnName(e events.Event) bool {
 // If after is non-nil, it only finds after that element.
 func ChildByLabelStartsCanFocus(ly *Layout, name string, after ki.Ki) (ki.Ki, bool) {
 	gotAfter := false
-	completions := []complete.Completion{}
+	var completions []complete.Completion
 	ly.WalkBreadth(func(k ki.Ki) bool {
 		if k == ly.This() { // skip us
 			return ki.Continue

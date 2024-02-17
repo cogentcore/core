@@ -219,7 +219,7 @@ func (bib *BibTex) PrettyString() string {
 		fmt.Fprintf(&buf, "@%s{%s,\n", entry.Type, entry.CiteName)
 
 		// Determine key order.
-		keys := []string{}
+		var keys []string
 		for key := range entry.Fields {
 			keys = append(keys, key)
 		}

@@ -22,7 +22,7 @@ import (
 // that have been changed and need to be updated in Git.
 func Changed(c *config.Config) error { //gti:add
 	wg := sync.WaitGroup{}
-	errs := []error{}
+	var errs []error
 	fs.WalkDir(os.DirFS("."), ".", func(path string, d fs.DirEntry, err error) error {
 		wg.Add(1)
 		go func() {

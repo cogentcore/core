@@ -322,7 +322,7 @@ func CompatibleNDKRoots(c *config.Config, ndkForest string, targets []config.Pla
 	if err != nil {
 		return nil, err
 	}
-	compatibleNDKRoots := []string{}
+	var compatibleNDKRoots []string
 	var lastErr error
 	for _, dirent := range ndkDirs {
 		ndkRoot := filepath.Join(ndkForest, dirent.Name())

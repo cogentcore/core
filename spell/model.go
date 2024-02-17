@@ -478,12 +478,12 @@ func (md *Model) EditsMulti(term string, depth int) []string {
 // Edits1 creates a set of terms that are 1 char delete from the input term
 func Edits1(word string) []string {
 
-	splits := []Pair{}
+	var splits []Pair
 	for i := 0; i <= len(word); i++ {
 		splits = append(splits, Pair{word[:i], word[i:]})
 	}
 
-	total_set := []string{}
+	var total_set []string
 	for _, elem := range splits {
 
 		//deletion

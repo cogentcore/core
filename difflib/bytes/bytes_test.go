@@ -86,11 +86,11 @@ i a[6:6], () b[5:6] (f)
 }
 
 func TestGroupedOpCodes(t *testing.T) {
-	a := [][]byte{}
+	var a [][]byte
 	for i := 0; i != 39; i++ {
 		a = append(a, []byte(fmt.Sprintf("%02d", i)))
 	}
-	b := [][]byte{}
+	var b [][]byte
 	b = append(b, a[:8]...)
 	b = append(b, []byte(" i"))
 	b = append(b, a[8:19]...)
@@ -239,7 +239,7 @@ func rep(s string, count int) string {
 }
 
 func getall(b2j *B2J, lt lineType) [][]byte {
-	result := []int{}
+	var result []int
 	for _, slots := range b2j.store {
 		for _, slot := range slots {
 			slt := lineNORMAL

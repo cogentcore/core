@@ -229,7 +229,7 @@ func (g *Generator) GenDecl(node ast.Node, file *ast.File, typ *Type) ([]Value, 
 		// We only care about const declarations.
 		return nil, true, nil
 	}
-	vals := []Value{}
+	var vals []Value
 	// The name of the type of the constants we are declaring.
 	// Can change if this is a multi-element declaration.
 	typName := ""

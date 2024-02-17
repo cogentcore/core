@@ -127,7 +127,7 @@ func (tp *Type) CompileEmbeds() {
 func StructGoString(str any) string {
 	s := reflect.ValueOf(str)
 	typ := s.Type()
-	strs := []string{}
+	var strs []string
 	for i := 0; i < s.NumField(); i++ {
 		f := s.Field(i)
 		if f.IsZero() {

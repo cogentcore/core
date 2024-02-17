@@ -427,7 +427,7 @@ func (st *VarSet) BindStatVar(vs *Vars, vr *Var) {
 		wd.PBufferInfo = bis
 		wd.DescriptorCount = uint32(nvals)
 	} else {
-		imgs := []vk.DescriptorImageInfo{}
+		var imgs []vk.DescriptorImageInfo
 		nvals := len(vals)
 		if nvals > MaxTexturesPerSet {
 			sti := vs.BindDescIdx * MaxTexturesPerSet

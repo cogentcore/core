@@ -69,11 +69,11 @@ i a[6:6], () b[5:6] (f)
 }
 
 func TestGroupedOpCodes(t *testing.T) {
-	a := []string{}
+	var a []string
 	for i := 0; i != 39; i++ {
 		a = append(a, fmt.Sprintf("%02d", i))
 	}
-	b := []string{}
+	var b []string
 	b = append(b, a[:8]...)
 	b = append(b, " i")
 	b = append(b, a[8:19]...)

@@ -79,7 +79,7 @@ func (fb *Framebuffer) DestroyFrame() {
 // destroying any existing
 func (fb *Framebuffer) Config() {
 	fb.DestroyFrame()
-	ivs := []vk.ImageView{}
+	var ivs []vk.ImageView
 	if fb.Render.HasMulti {
 		ivs = append(ivs, fb.Render.Multi.View)
 	} else {

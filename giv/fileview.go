@@ -802,7 +802,7 @@ func (fv *FileView) FileComplete(data any, text string, posLn, posCh int) (md co
 	}
 	md.Seed = text[seedStart:]
 
-	var files = []string{}
+	var files []string
 	for _, f := range fv.Files {
 		files = append(files, f.Name)
 	}
@@ -827,7 +827,7 @@ func (fv *FileView) PathComplete(data any, path string, posLn, posCh int) (md co
 	if err != nil {
 		return md
 	}
-	var dirs = []string{}
+	var dirs []string
 	for _, f := range files {
 		if f.IsDir() && !strings.HasPrefix(f.Name(), ".") {
 			dirs = append(dirs, f.Name())

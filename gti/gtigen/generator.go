@@ -429,7 +429,7 @@ func (g *Generator) LoadFromNodeComments(cfg *Config, n ast.Node) (dirs []gti.Di
 	cs := g.Cmap.Filter(n).Comments()
 	tf := g.Pkg.Fset.File(g.File.FileStart)
 	np := tf.Line(n.Pos())
-	keep := []*ast.CommentGroup{}
+	var keep []*ast.CommentGroup
 	for _, c := range cs {
 		// if the comment's line is after ours, we ignore it, as it is likely associated with something else
 		if tf.Line(c.Pos()) > np {

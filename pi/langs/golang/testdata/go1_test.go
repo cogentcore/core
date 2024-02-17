@@ -312,11 +312,11 @@ func aaaa() {
 
 var MultSlice = p[2]*Rule // todo: not working
 
-var SliceAr1 = []Rule{}
+var SliceAr1 []Rule
 
 var SliceAry = [25]*Rule{}
 
-var SliceAry = []*Rule{} // todo: ? not excluding here
+var SliceAry []*Rule // todo: ? not excluding here
 
 var RuleMap map[string]*Rule // looks like binary *
 

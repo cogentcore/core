@@ -69,7 +69,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 		}
 	}
 
-	libFiles := []string{}
+	var libFiles []string
 	nmpkgs := make(map[string]map[string]bool) // map: arch -> extractPkgs' output
 
 	for _, t := range targets {

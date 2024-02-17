@@ -216,7 +216,7 @@ func TestMoreLanguagesSetString(t *testing.T) {
 func TestMoreLanguagesValuesGlobal(t *testing.T) {
 	// need to use loop to get slice of enums.Enum without typing in constant name for everything
 	wantl := []testdata.MoreLanguages{6, 10, 14, 18, 22, 26, 30, 34, 38, 42, 46, 50, 54, 55}
-	want := []enums.Enum{}
+	var want []enums.Enum
 	for _, i := range wantl {
 		want = append(want, i)
 	}

@@ -149,7 +149,7 @@ func (s StyleEntry) String() string {
 
 // ToCSS converts StyleEntry to CSS attributes.
 func (s StyleEntry) ToCSS() string {
-	styles := []string{}
+	var styles []string
 	if !colors.IsNil(s.Color) {
 		styles = append(styles, "color: "+colors.AsString(s.Color))
 	}

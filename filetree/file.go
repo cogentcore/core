@@ -193,7 +193,7 @@ func (fn *Node) DeleteFilesImpl() {
 			fn.DeleteFile()
 			continue
 		}
-		openList := []string{}
+		var openList []string
 		var fns []string
 		fn.Info.Filenames(&fns)
 		ft := fn.FRoot

@@ -58,7 +58,7 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 	}
 	b.WriteString(grog.TitleColor("Usage:\n") + Indent + grog.CmdColor(cmdName+" "))
 
-	posArgStrs := []string{}
+	var posArgStrs []string
 
 	for _, kv := range fields.Order {
 		v := kv.Value
@@ -119,7 +119,7 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 // generate usage for "mod init", "mod tidy", and "mod edit". This ensures
 // that only relevant commands are shown in the usage.
 func CommandUsage[T any](b *strings.Builder, cmdName string, cmd string, cmds ...*Cmd[T]) {
-	acmds := []*Cmd[T]{}           // actual commands we care about
+	var acmds []*Cmd[T]            // actual commands we care about
 	var rcmd *Cmd[T]               // root command
 	cmdstrs := strings.Fields(cmd) // subcommand strings in passed command
 

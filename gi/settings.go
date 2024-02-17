@@ -182,7 +182,7 @@ func LoadSettings(se Settings) error {
 
 // LoadAllSettings sets the defaults of, opens, and applies [AllSettings].
 func LoadAllSettings() error {
-	errs := []error{}
+	var errs []error
 	for _, se := range AllSettings {
 		err := LoadSettings(se)
 		if err != nil {
@@ -194,7 +194,7 @@ func LoadAllSettings() error {
 
 // SaveAllSettings saves [AllSettings].
 func SaveAllSettings() error {
-	errs := []error{}
+	var errs []error
 	for _, se := range AllSettings {
 		err := SaveSettings(se)
 		if err != nil {

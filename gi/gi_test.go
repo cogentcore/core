@@ -40,7 +40,7 @@ var (
 )
 
 func testName(elems ...any) string {
-	strs := []string{}
+	var strs []string
 	for _, elem := range elems {
 		str := laser.ToString(elem)
 		fields := strings.FieldsFunc(str, func(r rune) bool {
