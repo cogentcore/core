@@ -416,7 +416,7 @@ func (tb *Buf) SetFilename(fn string) *Buf {
 // todo: use https://github.com/andybalholm/crlf to deal with cr/lf etc --
 // internally just use lf = \n
 
-// New initializes a new buffer with n blank lines
+// NewBuf initializes a new buffer with n blank lines
 func (tb *Buf) NewBuf(nlines int) {
 	nlines = max(nlines, 1)
 	tb.LinesMu.Lock()

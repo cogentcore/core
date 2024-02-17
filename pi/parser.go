@@ -288,6 +288,76 @@ func (pr *Parser) ParseString(str string, fname string, sup fi.Known) *FileState
 
 // ReadJSON opens lexer and parser rules from Bytes, in a standard JSON-formatted file
 func (pr *Parser) ReadJSON(b []byte) error {
+	_ = Parser{ //for watch nil point field
+		Lexer: lex.Rule{
+			Node: ki.Node{
+				Nm:              "",
+				Flags:           0,
+				Props:           ki.NewProps(),
+				Par:             nil,
+				Kids:            nil,
+				Ths:             nil,
+				NumLifetimeKids: 0,
+			},
+			Off:       false,
+			Desc:      "",
+			Token:     0,
+			Match:     0,
+			Pos:       0,
+			String:    "",
+			Offset:    0,
+			SizeAdj:   0,
+			Acts:      nil,
+			Until:     "",
+			PushState: "",
+			NameMap:   false,
+			MatchLen:  0,
+			NmMap:     nil,
+		},
+		PassTwo: lex.PassTwo{
+			DoEos:     false,
+			Eol:       false,
+			Semi:      false,
+			Backslash: false,
+			RBraceEos: false,
+			EolToks:   nil,
+		},
+		Parser: parse.Rule{
+			Node: ki.Node{
+				Nm:              "",
+				Flags:           0,
+				Props:           ki.NewProps(),
+				Par:             nil,
+				Kids:            nil,
+				Ths:             nil,
+				NumLifetimeKids: 0,
+			},
+			Off:          false,
+			Desc:         "",
+			Rule:         "",
+			StackMatch:   "",
+			Ast:          0,
+			Acts:         nil,
+			OptTokMap:    false,
+			FirstTokMap:  false,
+			Rules:        nil,
+			Order:        nil,
+			FiTokMap:     nil,
+			FiTokElseIdx: 0,
+			ExclKeyIdx:   0,
+			ExclFwd:      nil, //need NewProps ?
+			ExclRev:      nil, //need NewProps ?
+		},
+		Filename:   "",
+		ReportErrs: false,
+		ModTime:    time.Time{},
+	}
+	if pr.Parser.Props == nil {
+		pr.Parser.Props = ki.NewProps() //todo test
+	}
+	if pr.Lexer.Props == nil {
+		pr.Lexer.Props = ki.NewProps() //todo test
+	}
 	err := json.Unmarshal(b, pr)
 	ki.UnmarshalPost(pr.Lexer.This())
 	ki.UnmarshalPost(pr.Parser.This())

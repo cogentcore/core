@@ -108,8 +108,7 @@ var StdLangProps = map[fi.Known]*LangProps{
 // e.g., looking up lexers and parsers by name.
 // Also implements the lex.LangLexer interface to provide access to other
 // Guest Lexers
-type LangSupporter struct {
-}
+type LangSupporter struct{}
 
 // LangSupport is the main language support hub for accessing GoPi
 // support interfaces for each supported language
