@@ -11,6 +11,7 @@
 package lex
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"path/filepath"
@@ -20,7 +21,7 @@ import (
 	"cogentcore.org/core/laser"
 )
 
-// In an ErrorList, an error is represented by an *Error.
+// Error In an ErrorList, an error is represented by an *Error.
 // The position Pos, if valid, points to the beginning of
 // the offending token, and the error condition is described
 // by Msg.
@@ -96,7 +97,7 @@ func (p *ErrorList) Add(pos Pos, fname, msg string, srcln string, rule ki.Ki) *E
 // Reset resets an ErrorList to no errors.
 func (p *ErrorList) Reset() { *p = (*p)[0:0] }
 
-// ErrorList implements the sort Interface.
+// Len Swap Less implements the sort Interface.
 func (p ErrorList) Len() int      { return len(p) }
 func (p ErrorList) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
 
@@ -136,7 +137,7 @@ func (p *ErrorList) RemoveMultiples() {
 			i++
 		}
 	}
-	(*p) = (*p)[0:i]
+	*p = (*p)[0:i]
 }
 
 // An ErrorList implements the error interface.
@@ -199,11 +200,10 @@ func (p ErrorList) Report(maxN int, basepath string, showSrc, showRule bool) str
 // one error per line, if the err parameter is an ErrorList. Otherwise
 // it prints the err string.
 func PrintError(w io.Writer, err error) {
-	if list, ok := err.(ErrorList); ok {
+	var list ErrorList
+	if errors.As(err, &list) {
 		for _, e := range list {
 			fmt.Fprintf(w, "%s\n", e)
 		}
-	} else if err != nil {
-		fmt.Fprintf(w, "%s\n", err)
 	}
 }

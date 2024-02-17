@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/pi/token"
 )
 
-// parse.State is the state maintained for parsing
+// State is the state maintained for parsing
 type State struct {
 
 	// source and lexed version of source we're parsing
@@ -359,7 +359,7 @@ func (ps *State) RuleString(full bool) string {
 			for ch := 0; ch < sz; ch++ {
 				rs := ps.Matches[ln][ch]
 				sd := len(rs)
-				txt += ` "` + string(ps.Src.TokenSrc(lex.Pos{ln, ch})) + `"`
+				txt += ` "` + string(ps.Src.TokenSrc(lex.Pos{Ln: ln, Ch: ch})) + `"`
 				if sd == 0 {
 					txt += "-"
 				} else {

@@ -52,7 +52,7 @@ type TraceOpts struct {
 	OutRead *os.File `view:"-" json:"-" xml:"-"`
 }
 
-// Init intializes tracer after any changes -- opens pipe if not already open
+// Init initializes tracer after any changes -- opens pipe if not already open
 func (pt *TraceOpts) Init() {
 	if pt.Rules == "" {
 		pt.RulesList = nil

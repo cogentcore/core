@@ -24,7 +24,7 @@ import (
 	"cogentcore.org/core/pi/token"
 )
 
-// Set GuiActive to true if the gui (piview) is active -- ensures that the
+// GuiActive Set GuiActive to true if the gui (piview) is active -- ensures that the
 // Ast tree is updated when nodes are swapped in reverse mode, and maybe
 // other things
 var GuiActive = false
@@ -50,7 +50,7 @@ var DepthLimit = 10000
 // ordering of the children.  These have empty "Rule" string and Rules.
 // 2. Explicit rules specified in the Rule string.
 
-// The first step is matching which searches in order for matches within the
+// Rule The first step is matching which searches in order for matches within the
 // children of parent nodes, and for explicit rule nodes, it looks first
 // through all the explicit tokens in the rule.  If there are no explicit tokens
 // then matching defers to ONLY the first node listed by default -- you can
@@ -112,7 +112,7 @@ type RuleFlags ki.Flags //enums:bitflag
 
 const (
 	// SetsScope means that this rule sets its own scope, because it ends with EOS
-	SetsScope RuleFlags = RuleFlags(ki.FlagsN) + iota
+	SetsScope = RuleFlags(ki.FlagsN) + iota
 
 	// Reverse means that this rule runs in reverse (starts with - sign) -- for arithmetic
 	// binary expressions only: this is needed to produce proper associativity result for
@@ -887,7 +887,7 @@ func (pr *Rule) MatchOnlyToks(ps *State, parAst *Ast, scope lex.Reg, depth int, 
 			if mpos == nil {
 				mpos = make(Matches, nr) // make on demand -- cuts out a lot of allocations!
 			}
-			mpos[nr-1] = lex.Reg{scope.Ed, scope.Ed}
+			mpos[nr-1] = lex.Reg{St: scope.Ed, Ed: scope.Ed}
 		}
 		kt.Depth += scstDepth // always use starting scope depth
 		match, tpos := pr.MatchToken(ps, rr, ri, kt, &creg, mpos, parAst, scope, depth, optMap)
@@ -905,7 +905,7 @@ func (pr *Rule) MatchOnlyToks(ps *State, parAst *Ast, scope lex.Reg, depth int, 
 		if mpos == nil {
 			mpos = make(Matches, nr) // make on demand -- cuts out a lot of allocations!
 		}
-		mpos[ri] = lex.Reg{tpos, tpos}
+		mpos[ri] = lex.Reg{St: tpos, Ed: tpos}
 		if ps.Trace.On {
 			ps.Trace.Out(ps, pr, SubMatch, creg.St, creg, parAst, fmt.Sprintf("%v token: %v", ri, kt.String()))
 		}
@@ -1009,7 +1009,7 @@ func (pr *Rule) MatchMixed(ps *State, parAst *Ast, scope lex.Reg, depth int, opt
 				if mpos == nil {
 					mpos = make(Matches, nr) // make on demand -- cuts out a lot of allocations!
 				}
-				mpos[nr-1] = lex.Reg{scope.Ed, scope.Ed}
+				mpos[nr-1] = lex.Reg{St: scope.Ed, Ed: scope.Ed}
 			}
 			kt.Depth += scstDepth // always use starting scope depth
 			match, tpos := pr.MatchToken(ps, rr, ri, kt, &creg, mpos, parAst, scope, depth, optMap)
@@ -1027,7 +1027,7 @@ func (pr *Rule) MatchMixed(ps *State, parAst *Ast, scope lex.Reg, depth int, opt
 			if mpos == nil {
 				mpos = make(Matches, nr) // make on demand -- cuts out a lot of allocations!
 			}
-			mpos[ri] = lex.Reg{tpos, tpos}
+			mpos[ri] = lex.Reg{St: tpos, Ed: tpos}
 			if ps.Trace.On {
 				ps.Trace.Out(ps, pr, SubMatch, creg.St, creg, parAst, fmt.Sprintf("%v token: %v", ri, kt.String()))
 			}
@@ -1272,7 +1272,7 @@ func (pr *Rule) MatchExclude(ps *State, scope lex.Reg, ktpos lex.Reg, depth int,
 func (pr *Rule) DoRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, mpos Matches, optMap lex.TokenMap, depth int) bool {
 	trcAst := parAst
 	var ourAst *Ast
-	anchorFirst := (pr.Ast == AnchorFirstAst && parAst.Nm != pr.Nm)
+	anchorFirst := pr.Ast == AnchorFirstAst && parAst.Nm != pr.Nm
 
 	if pr.Ast != NoAst {
 		// prf := prof.Start("AddAst")

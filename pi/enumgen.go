@@ -49,40 +49,40 @@ var _LangFlagsMap = map[LangFlags]string{
 
 // String returns the string representation
 // of this LangFlags value.
-func (i LangFlags) String() string {
-	if str, ok := _LangFlagsMap[i]; ok {
+func (f LangFlags) String() string {
+	if str, ok := _LangFlagsMap[f]; ok {
 		return str
 	}
-	return strconv.FormatInt(int64(i), 10)
+	return strconv.FormatInt(int64(f), 10)
 }
 
 // SetString sets the LangFlags value from its
 // string representation, and returns an
 // error if the string is invalid.
-func (i *LangFlags) SetString(s string) error {
+func (f *LangFlags) SetString(s string) error {
 	if val, ok := _LangFlagsNameToValueMap[s]; ok {
-		*i = val
+		*f = val
 		return nil
 	}
 	return errors.New(s + " is not a valid value for type LangFlags")
 }
 
 // Int64 returns the LangFlags value as an int64.
-func (i LangFlags) Int64() int64 {
-	return int64(i)
+func (f LangFlags) Int64() int64 {
+	return int64(f)
 }
 
 // SetInt64 sets the LangFlags value from an int64.
-func (i *LangFlags) SetInt64(in int64) {
-	*i = LangFlags(in)
+func (f *LangFlags) SetInt64(in int64) {
+	*f = LangFlags(in)
 }
 
 // Desc returns the description of the LangFlags value.
-func (i LangFlags) Desc() string {
-	if str, ok := _LangFlagsDescMap[i]; ok {
+func (f LangFlags) Desc() string {
+	if str, ok := _LangFlagsDescMap[f]; ok {
 		return str
 	}
-	return i.String()
+	return f.String()
 }
 
 // LangFlagsValues returns all possible values
@@ -93,7 +93,7 @@ func LangFlagsValues() []LangFlags {
 
 // Values returns all possible values
 // for the type LangFlags.
-func (i LangFlags) Values() []enums.Enum {
+func (f LangFlags) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_LangFlagsValues))
 	for i, d := range _LangFlagsValues {
 		res[i] = d
@@ -103,19 +103,19 @@ func (i LangFlags) Values() []enums.Enum {
 
 // IsValid returns whether the value is a
 // valid option for type LangFlags.
-func (i LangFlags) IsValid() bool {
-	_, ok := _LangFlagsMap[i]
+func (f LangFlags) IsValid() bool {
+	_, ok := _LangFlagsMap[f]
 	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i LangFlags) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
+func (f LangFlags) MarshalText() ([]byte, error) {
+	return []byte(f.String()), nil
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *LangFlags) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
+func (f *LangFlags) UnmarshalText(text []byte) error {
+	if err := f.SetString(string(text)); err != nil {
 		log.Println("LangFlags.UnmarshalText:", err)
 	}
 	return nil
