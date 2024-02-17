@@ -124,18 +124,17 @@ func (wb *WidgetBase) OnClose(fun func(e events.Event)) *WidgetBase {
 	return wb.Scene.On(events.Close, fun)
 }
 
-// AddCloseDialog adds a dialog that confirms that the user wants
-// to close the Scene associated with this widget when they try
-// to close it. It calls the given config function to configure
-// the dialog. For example, in this function, you can add a title
-// and OK button to the dialog. If this function returns false, it
-// does not make the dialog. This can be used to make the dialog
-// conditional on other things, like whether something is saved.
+// AddCloseDialog adds a dialog that confirms that the user wants to close the Scene
+// associated with this widget when they try to close it. It calls the given config
+// function to configure the dialog. It is the responsibility of this config function
+// to add the title and close button to the dialog, which is necessary so that the close
+// dialog can be fully customized. If this function returns false, it does not make the dialog.
+// This can be used to make the dialog conditional on other things, like whether something is saved.
 func (wb *WidgetBase) AddCloseDialog(config func(d *Body) bool) *WidgetBase {
-	var inClose, closed bool
+	var inClose, canClose bool
 	wb.OnClose(func(e events.Event) {
-		if closed {
-			return
+		if canClose {
+			return // let it close
 		}
 		if inClose {
 			e.SetHandled()
@@ -143,19 +142,24 @@ func (wb *WidgetBase) AddCloseDialog(config func(d *Body) bool) *WidgetBase {
 		}
 		inClose = true
 		d := NewBody()
+		d.AddBottomBar(func(pw Widget) {
+			d.AddCancel(pw).OnClick(func(e events.Event) {
+				inClose = false
+				canClose = false
+			})
+			pw.OnWidgetAdded(func(w Widget) {
+				if bt := AsButton(w); bt != nil {
+					bt.OnFirst(events.Click, func(e events.Event) {
+						// any button click gives us permission to close
+						canClose = true
+					})
+				}
+			})
+		})
 		if !config(d) {
 			return
 		}
 		e.SetHandled()
-		d.AddBottomBar(func(pw Widget) {
-			d.AddCancel(pw).OnClick(func(e events.Event) {
-				inClose = false
-			})
-			d.AddOk(pw).SetText("Close").OnClick(func(e events.Event) {
-				closed = true
-				wb.Scene.Close()
-			})
-		})
 		d.NewDialog(wb).Run()
 	})
 	return wb
