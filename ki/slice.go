@@ -213,7 +213,7 @@ func SliceInsert(sl *[]Ki, k Ki, index int) {
 	//if index > kl { // last position allowed for insert
 	//	index = kl
 	//}
-	//slices.Insert(*sl, index, k)
+	//slices.Insert(*sl, index, k)  // this will found some  nil point
 	//return
 	if index < 0 {
 		index = kl + index
