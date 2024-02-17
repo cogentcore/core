@@ -172,34 +172,34 @@ func (sc *Scene) InheritBars(osc *Scene) {
 
 // AddTopBar adds the given function for configuring a control bar
 // at the top of the window
-func (bd *Body) AddTopBar(fun func(pw Widget)) {
-	bd.Scene.Bars.Top.Add(fun)
+func (b *Body) AddTopBar(fun func(pw Widget)) {
+	b.Scene.Bars.Top.Add(fun)
 }
 
 // AddLeftBar adds the given function for configuring a control bar
 // on the left of the window
-func (bd *Body) AddLeftBar(fun func(pw Widget)) {
-	bd.Scene.Bars.Left.Add(fun)
+func (b *Body) AddLeftBar(fun func(pw Widget)) {
+	b.Scene.Bars.Left.Add(fun)
 }
 
 // AddRightBar adds the given function for configuring a control bar
 // on the right of the window
-func (bd *Body) AddRightBar(fun func(pw Widget)) {
-	bd.Scene.Bars.Right.Add(fun)
+func (b *Body) AddRightBar(fun func(pw Widget)) {
+	b.Scene.Bars.Right.Add(fun)
 }
 
 // AddBottomBar adds the given function for configuring a control bar
 // at the bottom of the window
-func (bd *Body) AddBottomBar(fun func(pw Widget)) {
-	bd.Scene.Bars.Bottom.Add(fun)
+func (b *Body) AddBottomBar(fun func(pw Widget)) {
+	b.Scene.Bars.Bottom.Add(fun)
 }
 
 // AddAppBar adds an AppBar function for an element within the scene
-func (bd *Body) AddAppBar(fun func(tb *Toolbar)) {
-	bd.Scene.AddAppBar(fun)
+func (b *Body) AddAppBar(fun func(tb *Toolbar)) {
+	b.Scene.AddAppBar(fun)
 }
 
 // GetTopAppBar returns the TopAppBar Toolbar if it exists, nil otherwise.
-func (bd *Body) GetTopAppBar() *Toolbar {
-	return bd.Scene.GetTopAppBar()
+func (b *Body) GetTopAppBar() *Toolbar {
+	return b.Scene.GetTopAppBar()
 }

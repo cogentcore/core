@@ -26,29 +26,29 @@ func NonNilContext(ctx Widget) Widget {
 // NewDialog returns a new [DialogStage] that does not take up the
 // full window it is created in, in the context of the given widget.
 // See [Body.NewFullDialog] for a full-window dialog.
-func (bd *Body) NewDialog(ctx Widget) *Stage {
+func (b *Body) NewDialog(ctx Widget) *Stage {
 	ctx = NonNilContext(ctx)
-	bd.DialogStyles()
-	bd.Scene.Stage = NewMainStage(DialogStage, bd.Scene)
-	bd.Scene.Stage.SetModal(true)
-	bd.Scene.Stage.SetContext(ctx)
-	bd.Scene.Stage.Pos = ctx.ContextMenuPos(nil)
-	return bd.Scene.Stage
+	b.DialogStyles()
+	b.Scene.Stage = NewMainStage(DialogStage, b.Scene)
+	b.Scene.Stage.SetModal(true)
+	b.Scene.Stage.SetContext(ctx)
+	b.Scene.Stage.Pos = ctx.ContextMenuPos(nil)
+	return b.Scene.Stage
 }
 
 // NewFullDialog returns a new [DialogStage] that takes up the full
 // window it is created in, in the context of the given widget, optionally
 // with the given name. See [Body.NewDialog] for a non-full-window dialog.
-func (bd *Body) NewFullDialog(ctx Widget) *Stage {
-	bd.DialogStyles()
-	bd.Scene.Stage = NewMainStage(DialogStage, bd.Scene)
-	bd.Scene.Stage.SetModal(true)
-	bd.Scene.Stage.SetContext(ctx)
-	bd.Scene.Stage.SetFullWindow(true)
+func (b *Body) NewFullDialog(ctx Widget) *Stage {
+	b.DialogStyles()
+	b.Scene.Stage = NewMainStage(DialogStage, b.Scene)
+	b.Scene.Stage.SetModal(true)
+	b.Scene.Stage.SetContext(ctx)
+	b.Scene.Stage.SetFullWindow(true)
 	if ctx != nil {
-		bd.Scene.InheritBarsWidget(ctx)
+		b.Scene.InheritBarsWidget(ctx)
 	}
-	return bd.Scene.Stage
+	return b.Scene.Stage
 }
 
 // RecycleDialog looks for a dialog with the given data. If it
@@ -96,7 +96,7 @@ func ErrorDialog(ctx Widget, err error, title ...string) {
 // Should add an OnClick listener to this button to perform additional
 // specific actions needed beyond Close.
 // Name should be passed when there are multiple effective OK buttons.
-func (bd *Body) AddOk(pw Widget, name ...string) *Button {
+func (b *Body) AddOk(pw Widget, name ...string) *Button {
 	nm := "ok"
 	if len(name) > 0 {
 		nm = name[0]
@@ -107,9 +107,9 @@ func (bd *Body) AddOk(pw Widget, name ...string) *Button {
 	})
 	bt.OnFinal(events.Click, func(e events.Event) { // then close
 		e.SetHandled() // otherwise propagates to dead elements
-		bd.Close()
+		b.Close()
 	})
-	bd.Scene.OnFirst(events.KeyChord, func(e events.Event) {
+	b.Scene.OnFirst(events.KeyChord, func(e events.Event) {
 		kf := keyfun.Of(e.KeyChord())
 		if kf == keyfun.Accept {
 			e.SetHandled()
@@ -121,9 +121,9 @@ func (bd *Body) AddOk(pw Widget, name ...string) *Button {
 
 // AddOkOnly just adds an OK button in the BottomBar
 // for simple popup dialogs that just need that one button
-func (bd *Body) AddOkOnly() *Body {
-	bd.Scene.Bars.Bottom.Add(func(pw Widget) { bd.AddOk(pw) })
-	return bd
+func (b *Body) AddOkOnly() *Body {
+	b.Scene.Bars.Bottom.Add(func(pw Widget) { b.AddOk(pw) })
+	return b
 }
 
 // AddCancel adds Cancel button to given parent Widget
@@ -133,7 +133,7 @@ func (bd *Body) AddOkOnly() *Body {
 // Should add an OnClick listener to this button to perform additional
 // specific actions needed beyond Close.
 // Name should be passed when there are multiple effective Cancel buttons (rare).
-func (bd *Body) AddCancel(pw Widget, name ...string) *Button {
+func (b *Body) AddCancel(pw Widget, name ...string) *Button {
 	nm := "cancel"
 	if len(name) > 0 {
 		nm = name[0]
@@ -141,14 +141,14 @@ func (bd *Body) AddCancel(pw Widget, name ...string) *Button {
 	bt := NewButton(pw, nm).SetType(ButtonOutlined).SetText("Cancel")
 	bt.OnClick(func(e events.Event) {
 		e.SetHandled() // otherwise propagates to dead elements
-		bd.Close()
+		b.Close()
 	})
-	bd.OnFirst(events.KeyChord, func(e events.Event) {
+	b.OnFirst(events.KeyChord, func(e events.Event) {
 		kf := keyfun.Of(e.KeyChord())
 		if kf == keyfun.Abort {
 			e.SetHandled()
 			bt.Send(events.Click, e)
-			bd.Close()
+			b.Close()
 		}
 	})
 	bt.OnFirst(events.KeyChord, func(e events.Event) {
@@ -156,26 +156,26 @@ func (bd *Body) AddCancel(pw Widget, name ...string) *Button {
 		if kf == keyfun.Abort {
 			e.SetHandled()
 			bt.Send(events.Click, e)
-			bd.Close()
+			b.Close()
 		}
 	})
 	return bt
 }
 
 // Close closes the stage associated with this Body (typically for dialogs)
-func (bd *Body) Close() {
-	bd.Scene.Close()
+func (b *Body) Close() {
+	b.Scene.Close()
 }
 
 // DialogStyles sets default stylers for dialog bodies.
 // It is automatically called in [Body.NewDialog].
-func (bd *Body) DialogStyles() {
-	bd.Scene.BarsInherit.Top = true
-	bd.Scene.Style(func(s *styles.Style) {
+func (b *Body) DialogStyles() {
+	b.Scene.BarsInherit.Top = true
+	b.Scene.Style(func(s *styles.Style) {
 		// s.Border.Radius = styles.BorderRadiusExtraLarge
 		s.Direction = styles.Column
 		s.Color = colors.Scheme.OnSurface
-		if !bd.Scene.Stage.NewWindow && !bd.Scene.Stage.FullWindow {
+		if !b.Scene.Stage.NewWindow && !b.Scene.Stage.FullWindow {
 			s.Padding.Set(units.Dp(24))
 			// s.Justify.Content = styles.Center // vert
 			// s.Align.Content = styles.Center // horiz

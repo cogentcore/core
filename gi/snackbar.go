@@ -15,12 +15,12 @@ import (
 
 // NewSnackbar returns a new [SnackbarStage] in the context
 // of the given widget.
-func (bd *Body) NewSnackbar(ctx Widget) *Stage {
+func (b *Body) NewSnackbar(ctx Widget) *Stage {
 	ctx = NonNilContext(ctx)
-	bd.SnackbarStyles()
-	bd.Scene.Stage = NewPopupStage(SnackbarStage, bd.Scene, ctx).
+	b.SnackbarStyles()
+	b.Scene.Stage = NewPopupStage(SnackbarStage, b.Scene, ctx).
 		SetTimeout(SystemSettings.SnackbarTimeout)
-	return bd.Scene.Stage
+	return b.Scene.Stage
 }
 
 // MessageSnackbar opens a [Snackbar] displaying the given message
@@ -46,8 +46,8 @@ func ErrorSnackbar(ctx Widget, err error, label ...string) {
 
 // SnackbarStyles sets default stylers for snackbar bodies.
 // It is automatically called in [Body.NewSnackbar].
-func (bd *Body) SnackbarStyles() {
-	bd.Style(func(s *styles.Style) {
+func (b *Body) SnackbarStyles() {
+	b.Style(func(s *styles.Style) {
 		s.Direction = styles.Row
 		s.Overflow.Set(styles.OverflowVisible) // key for avoiding sizing errors when re-rendering with small pref size
 		s.Border.Radius = styles.BorderRadiusExtraSmall
@@ -65,7 +65,7 @@ func (bd *Body) SnackbarStyles() {
 			return min(uc.Em(20), uc.Vw(70))
 		})
 	})
-	bd.Scene.Style(func(s *styles.Style) {
+	b.Scene.Style(func(s *styles.Style) {
 		s.Background = nil
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.BoxShadow = styles.BoxShadow3()
@@ -73,24 +73,24 @@ func (bd *Body) SnackbarStyles() {
 }
 
 // AddSnackbarText adds a snackbar label with the given text
-func (bd *Body) AddSnackbarText(text string) *Body {
-	NewLabel(bd, "text").SetText(text).SetType(LabelBodyMedium).
+func (b *Body) AddSnackbarText(text string) *Body {
+	NewLabel(b, "text").SetText(text).SetType(LabelBodyMedium).
 		Style(func(s *styles.Style) {
 			s.SetTextWrap(false)
 			if s.Is(states.Selected) {
 				s.Color = colors.Scheme.Select.OnContainer
 			}
 		})
-	return bd
+	return b
 }
 
 // AddSnackbarButton adds a snackbar button with the given text and optional OnClick
 // event handler. Only the first of the given event handlers is used, and the
 // snackbar is automatically closed when the button is clicked regardless of
 // whether there is an event handler passed.
-func (bd *Body) AddSnackbarButton(text string, onClick ...func(e events.Event)) *Body {
-	NewStretch(bd, "stretch")
-	bt := NewButton(bd, "button").SetType(ButtonText).SetText(text)
+func (b *Body) AddSnackbarButton(text string, onClick ...func(e events.Event)) *Body {
+	NewStretch(b, "stretch")
+	bt := NewButton(b, "button").SetType(ButtonText).SetText(text)
 	bt.Style(func(s *styles.Style) {
 		s.Color = colors.Scheme.InversePrimary
 	})
@@ -98,17 +98,17 @@ func (bd *Body) AddSnackbarButton(text string, onClick ...func(e events.Event)) 
 		if len(onClick) > 0 {
 			onClick[0](e)
 		}
-		bd.Close()
+		b.Close()
 	})
-	return bd
+	return b
 }
 
 // AddSnackbarIcon adds a snackbar icon button with the given icon and optional
 // OnClick event handler. Only the first of the given event handlers is used, and the
 // snackbar is automatically closed when the button is clicked regardless of whether
 // there is an event handler passed.
-func (bd *Body) AddSnackbarIcon(icon icons.Icon, onClick ...func(e events.Event)) *Body {
-	ic := NewButton(bd, "icon").SetType(ButtonAction).SetIcon(icon)
+func (b *Body) AddSnackbarIcon(icon icons.Icon, onClick ...func(e events.Event)) *Body {
+	ic := NewButton(b, "icon").SetType(ButtonAction).SetIcon(icon)
 	ic.Style(func(s *styles.Style) {
 		s.Color = colors.Scheme.InverseOnSurface
 	})
@@ -116,7 +116,7 @@ func (bd *Body) AddSnackbarIcon(icon icons.Icon, onClick ...func(e events.Event)
 		if len(onClick) > 0 {
 			onClick[0](e)
 		}
-		bd.Close()
+		b.Close()
 	})
-	return bd
+	return b
 }

@@ -34,16 +34,16 @@ func NewMainStage(typ StageTypes, sc *Scene) *Stage {
 // the end of their main function. It can not be called more than
 // once for one app. For more specific configuration and for
 // secondary windows, see [Body.NewWindow].
-func (bd *Body) RunMainWindow() {
-	bd.NewWindow().Run().Wait()
+func (b *Body) RunMainWindow() {
+	b.NewWindow().Run().Wait()
 }
 
 // NewWindow returns a new Window stage with the body contents.
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the New call.
 // Use an appropriate Run call at the end to start the Stage running.
-func (bd *Body) NewWindow() *Stage {
-	ms := NewMainStage(WindowStage, bd.Scene)
+func (b *Body) NewWindow() *Stage {
+	ms := NewMainStage(WindowStage, b.Scene)
 	ms.SetNewWindow(true)
 	return ms
 }

@@ -45,20 +45,20 @@ func (t *App) SetSceneConfig(v func(sc *Scene)) *App { t.SceneConfig = v; return
 var BodyType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Body", IDName: "body", Doc: "Body holds the primary content of a Scene", Directives: []gti.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Title", Doc: "title of the Body, also used for window title where relevant"}}, Instance: &Body{}})
 
 // KiType returns the [*gti.Type] of [Body]
-func (t *Body) KiType() *gti.Type { return BodyType }
+func (b *Body) KiType() *gti.Type { return BodyType }
 
 // New returns a new [*Body] value
-func (t *Body) New() ki.Ki { return &Body{} }
+func (b *Body) New() ki.Ki { return &Body{} }
 
 // SetTitle sets the [Body.Title]:
 // title of the Body, also used for window title where relevant
-func (t *Body) SetTitle(v string) *Body { t.Title = v; return t }
+func (b *Body) SetTitle(v string) *Body { b.Title = v; return b }
 
 // SetTooltip sets the [Body.Tooltip]
-func (t *Body) SetTooltip(v string) *Body { t.Tooltip = v; return t }
+func (b *Body) SetTooltip(v string) *Body { b.Tooltip = v; return b }
 
 // SetStackTop sets the [Body.StackTop]
-func (t *Body) SetStackTop(v int) *Body { t.StackTop = v; return t }
+func (b *Body) SetStackTop(v int) *Body { b.StackTop = v; return b }
 
 // BoxType is the [gti.Type] for [Box]
 var BoxType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Box", IDName: "box", Doc: "Box is a simple base [Widget] that renders the Std Box model", Embeds: []gti.Field{{Name: "WidgetBase"}}, Instance: &Box{}})

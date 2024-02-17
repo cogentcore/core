@@ -46,13 +46,13 @@ func NewBody(name ...string) *Body {
 	return bd
 }
 
-func (bd *Body) OnInit() {
-	bd.Frame.OnInit()
-	bd.SetStyles()
+func (b *Body) OnInit() {
+	b.Frame.OnInit()
+	b.SetStyles()
 }
 
-func (bd *Body) SetStyles() {
-	bd.Style(func(s *styles.Style) {
+func (b *Body) SetStyles() {
+	b.Style(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowAuto)
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
@@ -61,25 +61,25 @@ func (bd *Body) SetStyles() {
 
 // AddTitle adds a Label with given title, and sets the Title text
 // which will be used by the Scene etc.
-func (bd *Body) AddTitle(title string) *Body {
-	bd.Title = title
-	bd.Scene.Nm = title
-	NewLabel(bd, "title").SetText(title).SetType(LabelHeadlineSmall)
-	return bd
+func (b *Body) AddTitle(title string) *Body {
+	b.Title = title
+	b.Scene.Nm = title
+	NewLabel(b, "title").SetText(title).SetType(LabelHeadlineSmall)
+	return b
 }
 
 // AddText adds the given supporting text Label, typically added
 // after a title.
-func (bd *Body) AddText(text string) *Body {
-	NewLabel(bd, "text").SetText(text).
+func (b *Body) AddText(text string) *Body {
+	NewLabel(b, "text").SetText(text).
 		SetType(LabelBodyMedium).Style(func(s *styles.Style) {
 		s.Color = colors.Scheme.OnSurfaceVariant
 	})
-	return bd
+	return b
 }
 
 // SetData sets the Body's [Scene.Data].
-func (bd *Body) SetData(data any) *Body {
-	bd.Scene.SetData(data)
-	return bd
+func (b *Body) SetData(data any) *Body {
+	b.Scene.SetData(data)
+	return b
 }
