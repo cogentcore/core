@@ -2,8 +2,6 @@
 package main
 
 import (
-	"time"
-
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/giv"
@@ -31,16 +29,13 @@ func main() {
 		go func() {
 			for i := 0; i < rows; i++ {
 				updt := tv.UpdateStartAsync()
-				if !updt {
-					return
-				}
 				table = append(table, &tableStruct{IntField: i, FloatField: float32(i) / 10.0})
 				tv.UpdateWidgets()
 				if len(table) > 0 {
 					tv.ScrollToIdx(len(table) - 1)
 				}
 				tv.UpdateEndAsyncLayout(updt)
-				time.Sleep(100 * time.Millisecond)
+				// time.Sleep(1 * time.Millisecond)
 			}
 		}()
 	})

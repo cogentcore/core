@@ -124,30 +124,39 @@ func (wb *WidgetBase) UpdateEnd(updt bool) {
 // that happens outside of the usual user event-driven, same-thread
 // updates, or other updates that can happen during standard layout / rendering.
 // It waits for any current Render update to finish, via RenderCtx().ReadLock().
+// If the parent Scene has been deleted, or it is already updating, it will
+// just block indefinitely.
 // It must be paired with an UpdateEndAsync.
 // These calls CANNOT be triggered during a standard render update,
 // (whereas UpdateStart / End can be, and typically are)
 // because it will cause a hang on the Read Lock which
 // was already write locked at the start of the render.
 func (wb *WidgetBase) UpdateStartAsync() bool {
-	if wb.Scene == nil || wb.Scene.RenderCtx() == nil {
-		return false
+	rc := wb.Scene.RenderCtx()
+	if rc == nil {
+		select {}
 	}
-	wb.Scene.RenderCtx().ReadLock()
+	rc.ReadLock()
+	updt := wb.UpdateStart()
+	if !updt {
+		rc.ReadUnlock()
+		select {}
+	}
 	wb.Scene.SetFlag(true, ScUpdating)
-	return wb.UpdateStart()
+	return updt
 }
 
 // UpdateEndAsync must be called after [UpdateStartAsync] for any
 // asynchronous update that happens outside of the usual user event-driven,
 // same-thread updates.
 func (wb *WidgetBase) UpdateEndAsync(updt bool) {
-	if wb.Scene == nil || wb.Scene.RenderCtx() == nil {
+	rc := wb.Scene.RenderCtx()
+	if rc == nil {
 		return
 	}
 	wb.Scene.SetFlag(false, ScUpdating)
-	wb.Scene.RenderCtx().ReadUnlock()
 	wb.UpdateEnd(updt)
+	rc.ReadUnlock()
 }
 
 // UpdateEndAsyncLayout should be called instead of [UpdateEndAsync]
