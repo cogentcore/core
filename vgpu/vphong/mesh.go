@@ -87,15 +87,15 @@ func (ph *Phong) UseMeshName(name string) error {
 // UseMeshIdx selects mesh by index for current render step.
 // If mesh has per-vertex colors, these are selected for rendering,
 // and texture is turned off.  UseTexture* after this to override.
-func (ph *Phong) UseMeshIdx(idx int) error {
-	mesh := ph.Meshes.ValueByIndex(idx)
+func (ph *Phong) UseMeshIdx(index int) error {
+	mesh := ph.Meshes.ValueByIndex(index)
 	vars := ph.Sys.Vars()
-	vars.BindVertexValIdx("Pos", idx)
-	vars.BindVertexValIdx("Norm", idx)
-	vars.BindVertexValIdx("Tex", idx)
-	vars.BindVertexValIdx("Index", idx)
+	vars.BindVertexValIdx("Pos", index)
+	vars.BindVertexValIdx("Norm", index)
+	vars.BindVertexValIdx("Tex", index)
+	vars.BindVertexValIdx("Index", index)
 	if mesh.HasColor {
-		vars.BindVertexValIdx("Color", idx)
+		vars.BindVertexValIdx("Color", index)
 		ph.Cur.UseVtxColor = true
 		ph.Cur.UseTexture = false
 	}

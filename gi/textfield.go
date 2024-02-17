@@ -1101,11 +1101,11 @@ func (tf *TextField) HasWordWrap() bool {
 // CharPos returns the relative starting position of the given rune,
 // in the overall RenderAll of all the text.
 // These positions can be out of visible range: see CharRenderPos
-func (tf *TextField) CharPos(idx int) mat32.Vec2 {
-	if idx <= 0 || len(tf.RenderAll.Spans) == 0 {
+func (tf *TextField) CharPos(index int) mat32.Vec2 {
+	if index <= 0 || len(tf.RenderAll.Spans) == 0 {
 		return mat32.Vec2{}
 	}
-	pos, _, _, _ := tf.RenderAll.RuneRelPos(idx)
+	pos, _, _, _ := tf.RenderAll.RuneRelPos(index)
 	pos.Y -= tf.RenderAll.Spans[0].RelPos.Y
 	return pos
 }

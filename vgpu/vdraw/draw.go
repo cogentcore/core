@@ -38,8 +38,8 @@ func (dw *Drawer) SetGoImage(idx, layer int, img image.Image, flipY bool) {
 }
 
 // GetImageVal returns vgpu Val value of Image for given index
-func (dw *Drawer) GetImageVal(idx int) *vgpu.Val {
-	_, tx, _ := dw.Sys.Vars().ValByIdxTry(0, "Tex", idx)
+func (dw *Drawer) GetImageVal(index int) *vgpu.Val {
+	_, tx, _ := dw.Sys.Vars().ValByIdxTry(0, "Tex", index)
 	return tx
 }
 

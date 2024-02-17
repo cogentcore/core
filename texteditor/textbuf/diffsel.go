@@ -136,15 +136,15 @@ func (ds *DiffSelected) SetStringLines(astr, bstr []string) {
 }
 
 // AtoB applies given diff index from A to B
-func (ds *DiffSelected) AtoB(idx int) {
-	op := DiffOpReverse(ds.Diffs[idx])
+func (ds *DiffSelected) AtoB(index int) {
+	op := DiffOpReverse(ds.Diffs[index])
 	ds.B.SaveUndo(op)
 	ApplyOneDiff(op, &ds.B.Edit, ds.A.Orig, ds.B.LineMap)
 }
 
 // BtoA applies given diff index from B to A
-func (ds *DiffSelected) BtoA(idx int) {
-	op := ds.Diffs[idx]
+func (ds *DiffSelected) BtoA(index int) {
+	op := ds.Diffs[index]
 	ds.A.SaveUndo(op)
 	ApplyOneDiff(op, &ds.A.Edit, ds.B.Orig, ds.A.LineMap)
 }

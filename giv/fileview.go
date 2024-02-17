@@ -689,13 +689,13 @@ func (fv *FileView) SetSelFileAction(sel string) {
 
 // FileSelectAction updates selection with given selected file and emits
 // selected signal on WidgetSig with full name of selected item
-func (fv *FileView) FileSelectAction(idx int) {
-	if idx < 0 {
+func (fv *FileView) FileSelectAction(index int) {
+	if index < 0 {
 		return
 	}
 	fv.SaveSortPrefs()
-	fi := fv.Files[idx]
-	fv.SelectedIdx = idx
+	fi := fv.Files[index]
+	fv.SelectedIdx = index
 	fv.SelFile = fi.Name
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
@@ -734,11 +734,11 @@ func (fv *FileView) SetExtAction(ext string) *FileView {
 }
 
 // FavSelect selects a favorite path and goes there
-func (fv *FileView) FavSelect(idx int) {
-	if idx < 0 || idx >= len(gi.SystemSettings.FavPaths) {
+func (fv *FileView) FavSelect(index int) {
+	if index < 0 || index >= len(gi.SystemSettings.FavPaths) {
 		return
 	}
-	fi := gi.SystemSettings.FavPaths[idx]
+	fi := gi.SystemSettings.FavPaths[index]
 	fv.DirPath, _ = homedir.Expand(fi.Path)
 	fv.UpdateFilesAction()
 }

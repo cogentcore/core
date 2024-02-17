@@ -193,10 +193,10 @@ func (sl *Splits) RestoreChild(idxs ...int) {
 }
 
 // IsCollapsed returns true if given split number is collapsed
-func (sl *Splits) IsCollapsed(idx int) bool {
+func (sl *Splits) IsCollapsed(index int) bool {
 	sz := len(sl.Kids)
-	if idx >= 0 && idx < sz {
-		return sl.Splits[idx] < 0.01
+	if index >= 0 && index < sz {
+		return sl.Splits[index] < 0.01
 	}
 	return false
 }

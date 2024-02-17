@@ -109,8 +109,8 @@ func (ph *Phong) UseNoTexture() {
 }
 
 // UseTextureIdx selects texture by index for current render step
-func (ph *Phong) UseTextureIdx(idx int) error {
-	ph.Cur.TexIdx = idx // todo: range check
+func (ph *Phong) UseTextureIdx(index int) error {
+	ph.Cur.TexIdx = index // todo: range check
 	ph.Cur.UseTexture = true
 	// sy := &ph.Sys
 	// cmd := sy.CmdPool.Buff
@@ -133,17 +133,17 @@ func (ph *Phong) UseTextureName(name string) error {
 // UpdateTextureIdx updates texture by index -- call this when
 // the underlying image changes.  Assumes the size remains the same.
 // Must Sync for the changes to take effect.
-func (ph *Phong) UpdateTextureIdx(idx int) error {
+func (ph *Phong) UpdateTextureIdx(index int) error {
 	ph.UpdtMu.Lock()
 	defer ph.UpdtMu.Unlock()
-	if idx >= ph.Textures.Len() {
+	if index >= ph.Textures.Len() {
 		return nil
 	}
-	tx := ph.Textures.Order[idx].Value
+	tx := ph.Textures.Order[index].Value
 	vars := ph.Sys.Vars()
 	txset := vars.SetMap[int(TexSet)]
 	ivar := txset.VarMap["Tex"]
-	ivar.Vals.SetGoImage(idx, tx.Image, vgpu.FlipY)
+	ivar.Vals.SetGoImage(index, tx.Image, vgpu.FlipY)
 	return nil
 }
 

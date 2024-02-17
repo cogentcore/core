@@ -83,10 +83,10 @@ type Mgr struct {
 
 // RecState returns the state for given index, reconstructing from diffs
 // as needed.  Must be called under lock.
-func (um *Mgr) RecState(idx int) []string {
+func (um *Mgr) RecState(index int) []string {
 	stidx := 0
 	var cdt []string
-	for i := idx; i >= 0; i-- {
+	for i := index; i >= 0; i-- {
 		r := um.Recs[i]
 		if r.Raw != nil {
 			stidx = i
@@ -94,7 +94,7 @@ func (um *Mgr) RecState(idx int) []string {
 			break
 		}
 	}
-	for i := stidx + 1; i <= idx; i++ {
+	for i := stidx + 1; i <= index; i++ {
 		r := um.Recs[i]
 		if r.Patch != nil {
 			cdt = r.Patch.Apply(cdt)
@@ -224,17 +224,17 @@ func (um *Mgr) Undo() (action, data string, state []string) {
 // UndoTo returns the action, action data, and state at the given index
 // and decrements the index to the previous record.
 // If idx is out of range then returns empty everything
-func (um *Mgr) UndoTo(idx int) (action, data string, state []string) {
+func (um *Mgr) UndoTo(index int) (action, data string, state []string) {
 	um.Mu.Lock()
-	if idx < 0 || idx >= len(um.Recs) {
+	if index < 0 || index >= len(um.Recs) {
 		um.Mu.Unlock()
 		return
 	}
-	rec := um.Recs[idx]
+	rec := um.Recs[index]
 	action = rec.Action
 	data = rec.Data
-	state = um.RecState(idx)
-	um.Idx = idx - 1
+	state = um.RecState(index)
+	um.Idx = index - 1
 	um.Mu.Unlock()
 	return
 }
@@ -259,17 +259,17 @@ func (um *Mgr) Redo() (action, data string, state []string) {
 
 // RedoTo returns the action, action data, and state at the given index,
 // returning nil if already at end of saved records.
-func (um *Mgr) RedoTo(idx int) (action, data string, state []string) {
+func (um *Mgr) RedoTo(index int) (action, data string, state []string) {
 	um.Mu.Lock()
-	if idx >= len(um.Recs)-1 || idx <= 0 {
+	if index >= len(um.Recs)-1 || index <= 0 {
 		um.Mu.Unlock()
 		return
 	}
-	um.Idx = idx
-	rec := um.Recs[idx]
+	um.Idx = index
+	rec := um.Recs[index]
 	action = rec.Action
 	data = rec.Data
-	state = um.RecState(idx + 1)
+	state = um.RecState(index + 1)
 	um.Mu.Unlock()
 	return
 }

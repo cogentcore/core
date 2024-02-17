@@ -110,20 +110,20 @@ func main() {
 
 	drw.SyncImages()
 
-	rendImgs := func(idx int) {
+	rendImgs := func(index int) {
 		descIdx := 0
-		if idx+stoff >= vgpu.MaxTexturesPerSet {
+		if index+stoff >= vgpu.MaxTexturesPerSet {
 			descIdx = 1
 		}
 		drw.StartDraw(descIdx) // specifically starting with correct descIdx is key..
-		drw.Scale(idx+stoff, 0, sf.Format.Bounds(), image.ZR, vdraw.Src, vgpu.NoFlipY)
+		drw.Scale(index+stoff, 0, sf.Format.Bounds(), image.ZR, vdraw.Src, vgpu.NoFlipY)
 		for i := range imgFiles {
 			// dp := image.Point{rand.Intn(500), rand.Intn(500)}
-			dp := image.Point{i * 50, i * 50}
+			dp := image.Point{X: i * 50, Y: i * 50}
 			drw.Copy(i+stoff, 0, dp, image.ZR, vdraw.Src, vgpu.NoFlipY)
 		}
 		for i := range iconFiles {
-			dp := image.Point{rand.Intn(500), rand.Intn(500)}
+			dp := image.Point{X: rand.Intn(500), Y: rand.Intn(500)}
 			drw.Copy(iconIdx, i, dp, image.ZR, vdraw.Over, vgpu.NoFlipY)
 		}
 		drw.EndDraw()
@@ -131,9 +131,9 @@ func main() {
 
 	_ = rendImgs
 
-	red := color.RGBA{255, 0, 0, 255}
-	green := color.RGBA{0, 255, 0, 255}
-	blue := color.RGBA{0, 0, 255, 255}
+	red := color.RGBA{R: 255, A: 255}
+	green := color.RGBA{G: 255, A: 255}
+	blue := color.RGBA{B: 255, A: 255}
 
 	colors := []color.Color{color.White, color.Black, red, green, blue}
 
@@ -141,8 +141,8 @@ func main() {
 		nclr := len(colors)
 		drw.StartFill()
 		for i := 0; i < 5; i++ {
-			sp := image.Point{rand.Intn(500), rand.Intn(500)}
-			sz := image.Point{rand.Intn(500), rand.Intn(500)}
+			sp := image.Point{X: rand.Intn(500), Y: rand.Intn(500)}
+			sz := image.Point{X: rand.Intn(500), Y: rand.Intn(500)}
 			drw.FillRect(colors[i%nclr], image.Rectangle{Min: sp, Max: sp.Add(sz)}, draw.Src)
 		}
 		drw.EndFill()

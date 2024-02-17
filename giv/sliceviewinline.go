@@ -207,14 +207,14 @@ func (sv *SliceViewInline) SetChanged() {
 
 // SliceNewAt inserts a new blank element at given index in the slice -- -1
 // means the end
-func (sv *SliceViewInline) SliceNewAt(idx int) {
+func (sv *SliceViewInline) SliceNewAt(index int) {
 	if sv.IsArray || sv.IsFixedLen {
 		return
 	}
 	updt := sv.UpdateStart()
 	defer sv.UpdateEndLayout(updt)
 
-	laser.SliceNewAt(sv.Slice, idx)
+	laser.SliceNewAt(sv.Slice, index)
 
 	if sv.TmpSave != nil {
 		sv.TmpSave.SaveTmp()

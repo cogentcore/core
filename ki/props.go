@@ -29,8 +29,8 @@ type PropStruct struct {
 type PropSlice []PropStruct
 
 // ElemLabel satisfies the gi.SliceLabeler interface to provide labels for slice elements
-func (ps *PropSlice) ElemLabel(idx int) string {
-	return (*ps)[idx].Name
+func (ps *PropSlice) ElemLabel(index int) string {
+	return (*ps)[index].Name
 }
 
 //backup orig code

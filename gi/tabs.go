@@ -286,40 +286,40 @@ func (ts *Tabs) InsertTab(frame *Frame, label string, idx int, icon ...icons.Ico
 
 // TabAtIndex returns content frame and tab button at given index, false if
 // index out of range (emits log message)
-func (ts *Tabs) TabAtIndex(idx int) (*Frame, *Tab, bool) {
+func (ts *Tabs) TabAtIndex(index int) (*Frame, *Tab, bool) {
 	ts.Mu.Lock()
 	defer ts.Mu.Unlock()
 
 	fr := ts.Frame()
 	tb := ts.Tabs()
 	sz := len(*fr.Children())
-	if idx < 0 || idx >= sz {
-		slog.Error("gi.Tabs: index out of range for number of tabs", "index", idx, "numTabs", sz)
+	if index < 0 || index >= sz {
+		slog.Error("gi.Tabs: index out of range for number of tabs", "index", index, "numTabs", sz)
 		return nil, nil, false
 	}
-	tab := tb.Child(idx).(*Tab)
-	frame := fr.Child(idx).(*Frame)
+	tab := tb.Child(index).(*Tab)
+	frame := fr.Child(index).(*Frame)
 	return frame, tab, true
 }
 
 // SelectTabIndex selects tab at given index, returning it.
 // Returns false if index is invalid.  This is the final
 // tab selection path.
-func (ts *Tabs) SelectTabIndex(idx int) (*Frame, bool) {
-	frame, tab, ok := ts.TabAtIndex(idx)
+func (ts *Tabs) SelectTabIndex(index int) (*Frame, bool) {
+	frame, tab, ok := ts.TabAtIndex(index)
 	if !ok {
 		return nil, false
 	}
 	fr := ts.Frame()
-	if fr.StackTop == idx {
+	if fr.StackTop == index {
 		return frame, true
 	}
 	ts.Mu.Lock()
 	updt := ts.UpdateStart()
 	defer ts.UpdateEndLayout(updt)
-	ts.UnselectOtherTabs(idx)
+	ts.UnselectOtherTabs(index)
 	tab.SetSelected(true)
-	fr.StackTop = idx
+	fr.StackTop = index
 	fr.Update()
 	ts.Mu.Unlock()
 	return frame, true
@@ -352,12 +352,12 @@ func (ts *Tabs) TabIndexByName(name string) int {
 }
 
 // TabLabel returns tab label at given index
-func (ts *Tabs) TabLabel(idx int) string {
+func (ts *Tabs) TabLabel(index int) string {
 	ts.Mu.Lock()
 	defer ts.Mu.Unlock()
 
 	tb := ts.Tabs()
-	tbut := tb.Child(idx)
+	tbut := tb.Child(index)
 	if tbut == nil {
 		return ""
 	}
@@ -512,11 +512,11 @@ func (ts *Tabs) Frame() *Frame {
 }
 
 // UnselectOtherTabs turns off all the tabs except given one
-func (ts *Tabs) UnselectOtherTabs(idx int) {
+func (ts *Tabs) UnselectOtherTabs(index int) {
 	sz := ts.NTabs()
 	tbs := ts.Tabs()
 	for i := 0; i < sz; i++ {
-		if i == idx {
+		if i == index {
 			continue
 		}
 		tb := tbs.Child(i).(*Tab)

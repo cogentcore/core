@@ -501,14 +501,14 @@ func (ls *LayImplState) Cell(d mat32.Dims, dIdx, odIdx int) *LayCell {
 }
 
 // WrapIdxToCoord returns the X,Y coordinates in Wrap case for given sequential idx
-func (ls *LayImplState) WrapIdxToCoord(idx int) image.Point {
+func (ls *LayImplState) WrapIdxToCoord(index int) image.Point {
 	y := 0
 	x := 0
 	sum := 0
 	if ls.MainAxis == mat32.X {
 		for _, nx := range ls.Wraps {
-			if idx >= sum && idx < sum+nx {
-				x = idx - sum
+			if index >= sum && index < sum+nx {
+				x = index - sum
 				break
 			}
 			sum += nx
@@ -516,8 +516,8 @@ func (ls *LayImplState) WrapIdxToCoord(idx int) image.Point {
 		}
 	} else {
 		for _, ny := range ls.Wraps {
-			if idx >= sum && idx < sum+ny {
-				y = idx - sum
+			if index >= sum && index < sum+ny {
+				y = index - sum
 				break
 			}
 			sum += ny

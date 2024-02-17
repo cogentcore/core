@@ -571,15 +571,15 @@ func (tv *TableView) StyleRow(w gi.Widget, idx, fidx int) {
 
 // SliceNewAt inserts a new blank element at given index in the slice -- -1
 // means the end
-func (tv *TableView) SliceNewAt(idx int) {
+func (tv *TableView) SliceNewAt(index int) {
 	tv.ViewMuLock()
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndLayout(updt)
 
-	tv.SliceNewAtSel(idx)
-	laser.SliceNewAt(tv.Slice, idx)
-	if idx < 0 {
-		idx = tv.SliceSize
+	tv.SliceNewAtSel(index)
+	laser.SliceNewAt(tv.Slice, index)
+	if index < 0 {
+		index = tv.SliceSize
 	}
 
 	tv.This().(SliceViewer).UpdtSliceSize()
@@ -592,17 +592,17 @@ func (tv *TableView) SliceNewAt(idx int) {
 }
 
 // SliceDeleteAt deletes element at given index from slice
-func (tv *TableView) SliceDeleteAt(idx int) {
-	if idx < 0 || idx >= tv.SliceSize {
+func (tv *TableView) SliceDeleteAt(index int) {
+	if index < 0 || index >= tv.SliceSize {
 		return
 	}
 	tv.ViewMuLock()
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndLayout(updt)
 
-	tv.SliceDeleteAtSel(idx)
+	tv.SliceDeleteAtSel(index)
 
-	laser.SliceDeleteAt(tv.Slice, idx)
+	laser.SliceDeleteAt(tv.Slice, index)
 
 	tv.This().(SliceViewer).UpdtSliceSize()
 
@@ -797,11 +797,11 @@ func StructSliceIdxByValue(struSlice any, fldName string, fldVal any) (int, erro
 	return -1, nil
 }
 
-func (tv *TableView) EditIdx(idx int) {
-	if idx == 0 {
+func (tv *TableView) EditIdx(index int) {
+	if index == 0 {
 		return
 	}
-	val := laser.OnePtrUnderlyingValue(tv.SliceNPVal.Index(idx))
+	val := laser.OnePtrUnderlyingValue(tv.SliceNPVal.Index(index))
 	stru := val.Interface()
 	tynm := laser.NonPtrType(val.Type()).Name()
 	lbl := gi.ToLabel(stru)

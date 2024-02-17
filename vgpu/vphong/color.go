@@ -47,12 +47,12 @@ func (ph *Phong) AddColor(name string, clr *Colors) {
 }
 
 // UseColorIdx selects color by index for current render step
-func (ph *Phong) UseColorIdx(idx int) error {
-	if err := ph.Colors.IndexIsValid(idx); err != nil {
+func (ph *Phong) UseColorIdx(index int) error {
+	if err := ph.Colors.IndexIsValid(index); err != nil {
 		log.Println(err)
 		return err
 	}
-	clr := ph.Colors.ValueByIndex(idx)
+	clr := ph.Colors.ValueByIndex(index)
 	ph.Cur.Color = *clr
 	return nil
 }

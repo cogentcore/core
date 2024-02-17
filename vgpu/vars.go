@@ -594,12 +594,12 @@ func (vs *Vars) BindVertexValIdx(varNm string, valIdx int) error {
 // (call after all such dynamic bindings are updated.)
 //
 // Do NOT call BindValsStart / End around this.
-func (vs *Vars) BindDynValsAllIdx(idx int) {
+func (vs *Vars) BindDynValsAllIdx(index int) {
 	for si, st := range vs.SetMap {
 		if si < 0 {
 			continue
 		}
-		st.BindDynValsAllIdx(vs, idx)
+		st.BindDynValsAllIdx(vs, index)
 	}
 }
 

@@ -141,9 +141,9 @@ func (om *Map[K, V]) ValueByKeyTry(key K) (V, bool) {
 }
 
 // IndexIsValid returns an error if the given index is invalid
-func (om *Map[K, V]) IndexIsValid(idx int) error {
-	if idx >= len(om.Order) || idx < 0 {
-		return fmt.Errorf("ordmap.Map: IdxIsValid: index %d is out of range of a map of length %d", idx, len(om.Order))
+func (om *Map[K, V]) IndexIsValid(index int) error {
+	if index >= len(om.Order) || index < 0 {
+		return fmt.Errorf("ordmap.Map: IdxIsValid: index %d is out of range of a map of length %d", index, len(om.Order))
 	}
 	return nil
 }
@@ -165,13 +165,13 @@ func (om *Map[K, V]) IndexByKeyTry(key K) (int, bool) {
 }
 
 // ValueByIndex returns the value at the given index in the ordered slice.
-func (om *Map[K, V]) ValueByIndex(idx int) V {
-	return om.Order[idx].Value
+func (om *Map[K, V]) ValueByIndex(index int) V {
+	return om.Order[index].Value
 }
 
 // KeyByIndex returns the key for the given index in the ordered slice.
-func (om *Map[K, V]) KeyByIndex(idx int) K {
-	return om.Order[idx].Key
+func (om *Map[K, V]) KeyByIndex(index int) K {
+	return om.Order[index].Key
 }
 
 // Len returns the number of items in the map.

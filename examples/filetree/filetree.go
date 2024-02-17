@@ -181,12 +181,12 @@ func (fb *FileBrowse) ActiveTextEditor() *texteditor.Editor {
 
 // SetActiveTextEditor sets the given view index as the currently-active
 // TextEditor -- returns that texteditor
-func (fb *FileBrowse) SetActiveTextEditor(idx int) *texteditor.Editor {
-	if idx < 0 || idx >= fb.NTextEditors {
-		log.Printf("FileBrowse SetActiveTextEditor: text view index out of range: %v\n", idx)
+func (fb *FileBrowse) SetActiveTextEditor(index int) *texteditor.Editor {
+	if index < 0 || index >= fb.NTextEditors {
+		log.Printf("FileBrowse SetActiveTextEditor: text view index out of range: %v\n", index)
 		return nil
 	}
-	fb.ActiveTextEditorIdx = idx
+	fb.ActiveTextEditorIdx = index
 	av := fb.ActiveTextEditor()
 	if av.Buf != nil {
 		fb.ActiveFilename = av.Buf.Filename
@@ -303,15 +303,15 @@ func (fb *FileBrowse) Splits() (*gi.Splits, int) {
 }
 
 // TextEditorByIndex returns the TextEditor by index, nil if not found
-func (fb *FileBrowse) TextEditorByIndex(idx int) *texteditor.Editor {
-	if idx < 0 || idx >= fb.NTextEditors {
-		log.Printf("FileBrowse: text view index out of range: %v\n", idx)
+func (fb *FileBrowse) TextEditorByIndex(index int) *texteditor.Editor {
+	if index < 0 || index >= fb.NTextEditors {
+		log.Printf("FileBrowse: text view index out of range: %v\n", index)
 		return nil
 	}
 	split, _ := fb.Splits()
 	stidx := 1 // 0 = file browser -- could be collapsed but always there.
 	if split != nil {
-		svk := split.Child(stidx + idx)
+		svk := split.Child(stidx + index)
 		return svk.(*texteditor.Editor)
 	}
 	return nil

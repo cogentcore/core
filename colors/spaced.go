@@ -14,15 +14,15 @@ import (
 // Spaced returns a maximally widely-spaced sequence of colors
 // for progressive values of the index, using the HCT space.
 // This is useful, for example, for assigning colors in graphs.
-func Spaced(idx int) color.RGBA {
+func Spaced(index int) color.RGBA {
 	if matcolor.SchemeIsDark {
-		return SpacedDark(idx)
+		return SpacedDark(index)
 	}
-	return SpacedLight(idx)
+	return SpacedLight(index)
 }
 
 // SpacedLight is the Light mode version of Spaced
-func SpacedLight(idx int) color.RGBA {
+func SpacedLight(index int) color.RGBA {
 	// red, blue, green, yellow, violet, aqua, orange, blueviolet
 	// hues := []float32{30, 280, 140, 110, 330, 200, 70, 305}
 	hues := []float32{25, 255, 150, 105, 340, 210, 60, 300}
@@ -32,8 +32,8 @@ func SpacedLight(idx int) color.RGBA {
 	chromas := []float32{90, 90, 90, 20, 20}
 	ncats := len(hues)
 	ntc := len(tones)
-	hi := idx % ncats
-	hr := idx / ncats
+	hi := index % ncats
+	hr := index / ncats
 	tci := hr % ntc
 	hue := hues[hi]
 	tone := toffs[hi] + tones[tci]
@@ -42,7 +42,7 @@ func SpacedLight(idx int) color.RGBA {
 }
 
 // SpacedDark is the Dark mode version of Spaced
-func SpacedDark(idx int) color.RGBA {
+func SpacedDark(index int) color.RGBA {
 	// red, blue, green, yellow, violet, aqua, orange, blueviolet
 	// hues := []float32{30, 280, 140, 110, 330, 200, 70, 305}
 	hues := []float32{25, 255, 150, 105, 340, 210, 60, 300}
@@ -52,8 +52,8 @@ func SpacedDark(idx int) color.RGBA {
 	chromas := []float32{90, 90, 90, 20, 20}
 	ncats := len(hues)
 	ntc := len(tones)
-	hi := idx % ncats
-	hr := idx / ncats
+	hi := index % ncats
+	hr := index / ncats
 	tci := hr % ntc
 	hue := hues[hi]
 	tone := toffs[hi] + tones[tci]

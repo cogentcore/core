@@ -13,11 +13,11 @@ import (
 // RuneSpanPos returns the position (span, rune index within span) within a
 // sequence of spans of a given absolute rune index, starting in the first
 // span -- returns false if index is out of range (and returns the last position).
-func (tx *Text) RuneSpanPos(idx int) (si, ri int, ok bool) {
-	if idx < 0 || len(tx.Spans) == 0 {
+func (tx *Text) RuneSpanPos(index int) (si, ri int, ok bool) {
+	if index < 0 || len(tx.Spans) == 0 {
 		return 0, 0, false
 	}
-	ri = idx
+	ri = index
 	for si = range tx.Spans {
 		if ri < 0 {
 			ri = 0
@@ -60,8 +60,8 @@ func (tx *Text) SpanPosToRuneIdx(si, ri int) (idx int, ok bool) {
 // LastPos.  Returns also the index of the span that holds that char (-1 = no
 // spans at all) and the rune index within that span, and false if index is
 // out of range.
-func (tx *Text) RuneRelPos(idx int) (pos mat32.Vec2, si, ri int, ok bool) {
-	si, ri, ok = tx.RuneSpanPos(idx)
+func (tx *Text) RuneRelPos(index int) (pos mat32.Vec2, si, ri int, ok bool) {
+	si, ri, ok = tx.RuneSpanPos(index)
 	if ok {
 		sr := &tx.Spans[si]
 		return sr.RelPos.Add(sr.Render[ri].RelPos), si, ri, true
@@ -80,8 +80,8 @@ func (tx *Text) RuneRelPos(idx int) (pos mat32.Vec2, si, ri int, ok bool) {
 // Returns also the index of the span that holds that char (-1 = no spans at
 // all) and the rune index within that span, and false if index is out of
 // range.
-func (tx *Text) RuneEndPos(idx int) (pos mat32.Vec2, si, ri int, ok bool) {
-	si, ri, ok = tx.RuneSpanPos(idx)
+func (tx *Text) RuneEndPos(index int) (pos mat32.Vec2, si, ri int, ok bool) {
+	si, ri, ok = tx.RuneSpanPos(index)
 	if ok {
 		sr := &tx.Spans[si]
 		spos := sr.RelPos.Add(sr.Render[ri].RelPos)

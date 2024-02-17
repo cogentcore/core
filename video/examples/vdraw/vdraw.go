@@ -282,7 +282,7 @@ func main() {
 
 	stoff := 15 // causes images to wrap around sets, so this tests that..
 
-	update := func(idx int) {
+	update := func(index int) {
 		// Check for incoming errors.
 		select {
 		case err, ok := <-errChan:

@@ -89,8 +89,8 @@ func (ll *Line) Sort() {
 }
 
 // DeleteIdx deletes at given index
-func (ll *Line) DeleteIdx(idx int) {
-	*ll = append((*ll)[:idx], (*ll)[idx+1:]...)
+func (ll *Line) DeleteIdx(index int) {
+	*ll = append((*ll)[:index], (*ll)[index+1:]...)
 }
 
 // DeleteToken deletes a specific token type from list

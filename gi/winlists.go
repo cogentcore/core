@@ -90,13 +90,13 @@ func (wl *RenderWinList) Len() int {
 }
 
 // Win gets window at given index, concurrent-safe
-func (wl *RenderWinList) Win(idx int) *RenderWin {
+func (wl *RenderWinList) Win(index int) *RenderWin {
 	RenderWinGlobalMu.Lock()
 	defer RenderWinGlobalMu.Unlock()
-	if idx >= len(*wl) || idx < 0 {
+	if index >= len(*wl) || index < 0 {
 		return nil
 	}
-	return (*wl)[idx]
+	return (*wl)[index]
 }
 
 // Focused returns the (first) window in this list that has the WinGotFocus flag set

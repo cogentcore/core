@@ -495,8 +495,8 @@ func (vv *VersCtrlValue) HasDialog() bool { return true }
 
 func (vv *VersCtrlValue) OpenDialog(ctx gi.Widget, fun func()) {
 	cur := laser.ToString(vv.Value.Interface())
-	m := gi.NewMenuFromStrings(VersCtrlSystems, cur, func(idx int) {
-		vv.SetValue(VersCtrlSystems[idx])
+	m := gi.NewMenuFromStrings(VersCtrlSystems, cur, func(index int) {
+		vv.SetValue(VersCtrlSystems[index])
 		vv.UpdateWidget()
 	})
 	gi.NewMenuStage(m, ctx, ctx.ContextMenuPos(nil)).Run()

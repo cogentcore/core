@@ -261,11 +261,11 @@ func (n *Node) Children() *Slice {
 
 // Child returns the child at given index and returns nil if
 // the index is out of range.
-func (n *Node) Child(idx int) Ki {
-	if idx >= len(n.Kids) || idx < 0 {
+func (n *Node) Child(index int) Ki {
+	if index >= len(n.Kids) || index < 0 {
 		return nil
 	}
-	return n.Kids[idx]
+	return n.Kids[index]
 }
 
 // ChildByName returns the first element that has given name, and nil

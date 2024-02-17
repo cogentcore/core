@@ -95,15 +95,15 @@ func (sw *Switches) SetStyles() {
 // SelectItem activates a given item but does NOT send a change event.
 // See SelectItemAction for event emitting version.
 // returns error if index is out of range.
-func (sw *Switches) SelectItem(idx int) error {
-	if idx >= sw.NumChildren() || idx < 0 {
-		return fmt.Errorf("gi.Switches: SelectItem, index out of range: %v", idx)
+func (sw *Switches) SelectItem(index int) error {
+	if index >= sw.NumChildren() || index < 0 {
+		return fmt.Errorf("gi.Switches: SelectItem, index out of range: %v", index)
 	}
 	updt := sw.UpdateStart()
 	if sw.Mutex {
-		sw.UnCheckAllBut(idx)
+		sw.UnCheckAllBut(index)
 	}
-	cs := sw.Child(idx).(*Switch)
+	cs := sw.Child(index).(*Switch)
 	cs.SetChecked(true)
 	sw.UpdateEndRender(updt)
 	return nil
@@ -112,11 +112,11 @@ func (sw *Switches) SelectItem(idx int) error {
 // SelectItemAction activates a given item and emits a change event.
 // This is mainly for Mutex use.
 // returns error if index is out of range.
-func (sw *Switches) SelectItemAction(idx int) error {
+func (sw *Switches) SelectItemAction(index int) error {
 	updt := sw.UpdateStart()
 	defer sw.UpdateEnd(updt)
 
-	err := sw.SelectItem(idx)
+	err := sw.SelectItem(index)
 	if err != nil {
 		return err
 	}
@@ -148,10 +148,10 @@ func (sw *Switches) UnCheckAll() {
 }
 
 // UnCheckAllBut unchecks all switches except given one
-func (sw *Switches) UnCheckAllBut(idx int) {
+func (sw *Switches) UnCheckAllBut(index int) {
 	updt := sw.UpdateStart()
 	for i, cbi := range sw.Kids {
-		if i == idx {
+		if i == index {
 			continue
 		}
 		cs := cbi.(*Switch)

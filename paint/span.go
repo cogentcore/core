@@ -111,26 +111,26 @@ func (sr *Span) SetBackground(bg image.Image) {
 // (adds Span RelPos and rune RelPos) -- this is typically the baseline
 // position where rendering will start, not the upper left corner. if index >
 // length, then uses LastPos
-func (sr *Span) RuneRelPos(idx int) mat32.Vec2 {
-	if idx >= len(sr.Render) {
+func (sr *Span) RuneRelPos(index int) mat32.Vec2 {
+	if index >= len(sr.Render) {
 		return sr.LastPos
 	}
-	return sr.RelPos.Add(sr.Render[idx].RelPos)
+	return sr.RelPos.Add(sr.Render[index].RelPos)
 }
 
 // RuneEndPos returns the relative ending position of the given rune index
 // (adds Span RelPos and rune RelPos + rune Size.X for LR writing). If index >
 // length, then uses LastPos
-func (sr *Span) RuneEndPos(idx int) mat32.Vec2 {
-	if idx >= len(sr.Render) {
+func (sr *Span) RuneEndPos(index int) mat32.Vec2 {
+	if index >= len(sr.Render) {
 		return sr.LastPos
 	}
-	spos := sr.RelPos.Add(sr.Render[idx].RelPos)
-	spos.X += sr.Render[idx].Size.X
+	spos := sr.RelPos.Add(sr.Render[index].RelPos)
+	spos.X += sr.Render[index].Size.X
 	return spos
 }
 
-// AppendRune adds one rune and associated formatting info
+// HasDecoUpdate adds one rune and associated formatting info
 func (sr *Span) HasDecoUpdate(bg image.Image, deco styles.TextDecorations) {
 	sr.HasDeco |= deco
 	if bg != nil {
@@ -629,14 +629,14 @@ func (sr *Span) TrimSpaceLR() {
 // SplitAt splits current span at given index, returning a new span with
 // remainder after index -- space is trimmed from both spans and relative
 // positions updated, for LR direction
-func (sr *Span) SplitAtLR(idx int) *Span {
-	if idx <= 0 || idx >= len(sr.Text)-1 { // shouldn't happen
+func (sr *Span) SplitAtLR(index int) *Span {
+	if index <= 0 || index >= len(sr.Text)-1 { // shouldn't happen
 		return nil
 	}
-	nsr := Span{Text: sr.Text[idx:], Render: sr.Render[idx:], Dir: sr.Dir, HasDeco: sr.HasDeco}
-	sr.Text = sr.Text[:idx]
-	sr.Render = sr.Render[:idx]
-	sr.LastPos.X = sr.Render[idx-1].RelPosAfterLR()
+	nsr := Span{Text: sr.Text[index:], Render: sr.Render[index:], Dir: sr.Dir, HasDeco: sr.HasDeco}
+	sr.Text = sr.Text[:index]
+	sr.Render = sr.Render[:index]
+	sr.LastPos.X = sr.Render[index-1].RelPosAfterLR()
 	// sr.TrimSpaceLR()
 	// nsr.TrimSpaceLeftLR() // don't trim right!
 	// go back and find latest face and color -- each sr must start with valid one

@@ -289,15 +289,15 @@ func (vs *Vals) ConfigVals(gp *GPU, dev vk.Device, vr *Var, nvals int) bool {
 }
 
 // ValByIdxTry returns Val at given index with range checking error message.
-func (vs *Vals) ValByIdxTry(idx int) (*Val, error) {
-	if idx >= len(vs.Vals) || idx < 0 {
-		err := fmt.Errorf("vgpu.Vals:ValByIdxTry index %d out of range", idx)
+func (vs *Vals) ValByIdxTry(index int) (*Val, error) {
+	if index >= len(vs.Vals) || index < 0 {
+		err := fmt.Errorf("vgpu.Vals:ValByIdxTry index %d out of range", index)
 		if Debug {
 			log.Println(err)
 		}
 		return nil, err
 	}
-	return vs.Vals[idx], nil
+	return vs.Vals[index], nil
 }
 
 // SetName sets name of given Val, by index, adds name to map, checking

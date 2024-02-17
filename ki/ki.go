@@ -145,7 +145,7 @@ type Ki interface {
 
 	// Child returns the child at given index and returns nil if
 	// the index is out of range.
-	Child(idx int) Ki
+	Child(index int) Ki
 
 	// ChildByName returns the first element that has given name, and nil
 	// if no such element is found. startIdx arg allows for optimized

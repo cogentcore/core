@@ -67,7 +67,7 @@ func ToLabeler(it any) (string, bool) {
 // for a slice item, given an index into the slice.
 type SliceLabeler interface {
 	// ElemLabel returns a GUI-appropriate label for slice element at given index
-	ElemLabel(idx int) string
+	ElemLabel(index int) string
 }
 
 // Toolbarer interface is for ConfigToolbar function access for those that define it

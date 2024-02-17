@@ -181,7 +181,7 @@ func (wb *WidgetBase) ShowContextMenu(e events.Event) {
 // NewMenuFromStrings constructs a new menu from given list of strings,
 // calling the given function with the index of the selected string.
 // if string == sel, that menu item is selected initially.
-func NewMenuFromStrings(strs []string, sel string, fun func(idx int)) *Scene {
+func NewMenuFromStrings(strs []string, sel string, fun func(index int)) *Scene {
 	return NewMenuScene(func(m *Scene) {
 		for i, s := range strs {
 			i := i

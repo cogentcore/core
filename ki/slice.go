@@ -37,36 +37,36 @@ func SliceIsValidIndex(sl *[]Ki, idx int) error {
 
 // IsValidIndex checks whether the given index is a valid index into slice,
 // within range of 0..len-1.  Returns error if not.
-func (sl *Slice) IsValidIndex(idx int) error {
-	if idx >= 0 && idx < len(*sl) {
+func (sl *Slice) IsValidIndex(index int) error {
+	if index >= 0 && index < len(*sl) {
 		return nil
 	}
-	return fmt.Errorf("ki.Slice: invalid index: %v -- len = %v", idx, len(*sl))
+	return fmt.Errorf("ki.Slice: invalid index: %v -- len = %v", index, len(*sl))
 }
 
 // Elem returns element at index -- panics if index is invalid
-func (sl *Slice) Elem(idx int) Ki {
-	return (*sl)[idx]
+func (sl *Slice) Elem(index int) Ki {
+	return (*sl)[index]
 }
 
 // ElemTry returns element at index -- Try version returns error if index is invalid.
-func (sl *Slice) ElemTry(idx int) (Ki, error) {
-	if err := sl.IsValidIndex(idx); err != nil {
+func (sl *Slice) ElemTry(index int) (Ki, error) {
+	if err := sl.IsValidIndex(index); err != nil {
 		return nil, err
 	}
-	return (*sl)[idx], nil
+	return (*sl)[index], nil
 }
 
 // ElemFromEnd returns element at index from end of slice (0 = last element,
 // 1 = 2nd to last, etc).  Panics if invalid index.
-func (sl *Slice) ElemFromEnd(idx int) Ki {
-	return (*sl)[len(*sl)-1-idx]
+func (sl *Slice) ElemFromEnd(index int) Ki {
+	return (*sl)[len(*sl)-1-index]
 }
 
 // ElemFromEndTry returns element at index from end of slice (0 = last element,
 // 1 = 2nd to last, etc). Try version returns error on invalid index.
-func (sl *Slice) ElemFromEndTry(idx int) (Ki, error) {
-	return sl.ElemTry(len(*sl) - 1 - idx)
+func (sl *Slice) ElemFromEndTry(index int) (Ki, error) {
+	return sl.ElemTry(len(*sl) - 1 - index)
 }
 
 // SliceIndexByFunc finds index of item based on match function (which must
@@ -252,8 +252,8 @@ func SliceDeleteAtIndex(sl *[]Ki, idx int) error {
 // DeleteAtIndex deletes item at index; does not do any further management of
 // deleted item. It is an optimized version for avoiding memory leaks. It returns
 // an error if the index is invalid.
-func (sl *Slice) DeleteAtIndex(idx int) error {
-	return SliceDeleteAtIndex((*[]Ki)(sl), idx)
+func (sl *Slice) DeleteAtIndex(index int) error {
+	return SliceDeleteAtIndex((*[]Ki)(sl), index)
 }
 
 // SliceMove moves element from one position to another.  Returns error if

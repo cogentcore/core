@@ -329,8 +329,8 @@ func (ed *Editor) PasteHist() {
 		return
 	}
 	cl := ViewClipHistChooseList()
-	m := gi.NewMenuFromStrings(cl, "", func(idx int) {
-		clip := ViewClipHistory[idx]
+	m := gi.NewMenuFromStrings(cl, "", func(index int) {
+		clip := ViewClipHistory[index]
 		if clip != nil {
 			updt := ed.UpdateStart()
 			defer ed.UpdateEndRender(updt)
