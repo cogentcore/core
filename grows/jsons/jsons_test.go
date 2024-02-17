@@ -5,6 +5,7 @@
 package jsons
 
 import (
+	"github.com/stretchr/testify/assert"
 	"path/filepath"
 	"testing"
 
@@ -23,7 +24,7 @@ func TestJSON(t *testing.T) {
 	s := &testStruct{A: "aaa", B: 3.14}
 	grr.Test(t, Save(s, tpath))
 	b, err := WriteBytes(s)
-	grr.Test(t, err)
+	assert.NoError(t, err)
 
 	a := &testStruct{}
 	grr.Test(t, Open(a, tpath))

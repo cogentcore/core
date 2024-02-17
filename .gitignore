@@ -26,3 +26,5 @@ go.work.sum
 /raster/testdata
 /grease/testdata
 /ki/json_test.json
+/grows/jsons/testdata/
+/grows/tomls/testdata/

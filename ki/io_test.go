@@ -22,7 +22,7 @@ func TestNodeJSON(t *testing.T) {
 			Flags:           0,
 			Props:           ki.NewProps(),
 			Par:             nil,
-			Kids:            nil,
+			Kids:            make(ki.Slice, 0),
 			Ths:             nil,
 			NumLifetimeKids: 0,
 		},
@@ -35,7 +35,7 @@ func TestNodeJSON(t *testing.T) {
 	parent.Mbr2 = 32
 
 	parent.NewChild(typ, "child1") // child1 :=
-	var child2 = parent.NewChild(typ, "child2").(*testdata.NodeEmbed)
+	child2 := parent.NewChild(typ, "child2").(*testdata.NodeEmbed)
 
 	parent.NewChild(typ, "child3") // child3 :=
 	child2.NewChild(typ, "subchild1")
@@ -54,7 +54,7 @@ func TestNodeJSON(t *testing.T) {
 			Flags:           0,
 			Props:           ki.NewProps(),
 			Par:             nil,
-			Kids:            nil,
+			Kids:            make(ki.Slice, 0),
 			Ths:             nil,
 			NumLifetimeKids: 0,
 		},
@@ -69,9 +69,10 @@ func TestNodeJSON(t *testing.T) {
 	assert.NoError(t, jsons.Write(nodeEmbed, &buf2))
 	tstb := buf2.Bytes()
 	fmt.Printf("test loaded json output: %v\n", buf2.String())
-	if !bytes.Equal(tstb, b) {
-		t.Error("original and unmarshal'd json rep are not equivalent")
-	}
+	assert.Equal(t, tstb, b)
+	//if !bytes.Equal(tstb, b) {
+	//	t.Error("original and unmarshal'd json rep are not equivalent")
+	//}
 
 	var bufn bytes.Buffer
 	assert.NoError(t, ki.WriteNewJSON(parent.This(), &bufn))
@@ -79,16 +80,14 @@ func TestNodeJSON(t *testing.T) {
 	readNewJSON, err := ki.ReadNewJSON(bytes.NewReader(b))
 	assert.NoError(t, err)
 	var buf3 bytes.Buffer
-	err = ki.WriteNewJSON(readNewJSON, &buf3)
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NoError(t, ki.WriteNewJSON(readNewJSON, &buf3))
+
 	bb := buf3.Bytes()
 	fmt.Printf("test loaded json output: %v\n", buf3.String())
 	assert.Equal(t, bb, b)
-	if !bytes.Equal(bb, b) {
-		t.Error("original and unmarshal'd json rep are not equivalent")
-	}
+	//if !bytes.Equal(bb, b) {
+	//	t.Error("original and unmarshal'd json rep are not equivalent")
+	//}
 }
 
 func TestNodeXML(t *testing.T) {
