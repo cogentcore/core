@@ -25,13 +25,13 @@ func TestGaussianBlur(t *testing.T) {
 	k := GaussianBlurKernel1D(sigma)
 	fmt.Println(k.Matrix)
 
-	testIn := []uint8{}
+	var testIn []uint8
 	for n := uint8(0); n < 50; n += 2 {
 		testIn = append(testIn, n)
 	}
 	img := image.NewRGBA(image.Rect(0, 0, 5, 5))
 	for i, v := range testIn {
-		img.Set(i%5, i/5, color.RGBA{v, v, v, v})
+		img.Set(i%5, i/5, color.RGBA{R: v, G: v, B: v, A: v})
 	}
 	blr := GaussianBlur(img, sigma)
 	for i := range testIn {
