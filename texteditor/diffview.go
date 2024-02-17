@@ -475,14 +475,14 @@ func (dv *DiffView) UndoDiff(ab int) error {
 	tva, tvb := dv.TextEditors()
 	if ab == 1 {
 		if !dv.Diffs.B.Undo() {
-			err := errors.New("No more edits to undo")
+			err := errors.New("no more edits to undo")
 			gi.ErrorSnackbar(dv, err)
 			return err
 		}
 		tvb.Undo()
 	} else {
 		if !dv.Diffs.A.Undo() {
-			err := errors.New("No more edits to undo")
+			err := errors.New("no more edits to undo")
 			gi.ErrorSnackbar(dv, err)
 			return err
 		}

@@ -107,7 +107,7 @@ func (sf *Surface) Init(gp *GPU, vs vk.Surface) error {
 		}
 	}
 	if !found {
-		err := errors.New("Surface vulkan error: could not found queue with present capabilities")
+		err := errors.New("surface vulkan error: could not found queue with present capabilities")
 		return err
 	}
 

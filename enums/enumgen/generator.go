@@ -176,7 +176,7 @@ func (g *Generator) Generate() (bool, error) {
 				return cont
 			})
 			if terr != nil {
-				return true, fmt.Errorf("Generate: error parsing declaration clauses: %w", terr)
+				return true, fmt.Errorf("generate: error parsing declaration clauses: %w", terr)
 			}
 		}
 

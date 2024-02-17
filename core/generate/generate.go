@@ -114,7 +114,7 @@ func Generate(c *config.Config) error { //gti:add
 
 	pkgs, err := ParsePackages(c)
 	if err != nil {
-		return fmt.Errorf("Generate: error parsing package: %w", err)
+		return fmt.Errorf("generate: error parsing package: %w", err)
 	}
 
 	err = enumgen.GeneratePkgs(&c.Generate.Enumgen, pkgs)

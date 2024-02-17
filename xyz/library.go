@@ -35,7 +35,7 @@ func (sc *Scene) NewInLibrary(nm string) *Group {
 func (sc *Scene) AddFmLibrary(nm string, parent ki.Ki) (*Group, error) {
 	gp, ok := sc.Library[nm]
 	if !ok {
-		return nil, fmt.Errorf("Scene AddFmLibrary: Library item: %s not found", nm)
+		return nil, fmt.Errorf("scene AddFmLibrary: Library item: %s not found", nm)
 	}
 	updt := sc.UpdateStart()
 	nwgp := gp.Clone().(*Group)

@@ -219,7 +219,7 @@ type VarList struct {
 func (vs *VarList) VarByNameTry(name string) (*Var, error) {
 	vr, ok := vs.VarMap[name]
 	if !ok {
-		err := fmt.Errorf("Variable named %s not found", name)
+		err := fmt.Errorf("variable named %s not found", name)
 		if Debug {
 			log.Println(err)
 		}

@@ -92,7 +92,7 @@ func (sl *Slice) UnmarshalJSON(b []byte) error {
 	// todo: if name contains "," this won't work..
 	flds := bytes.Split(b[lb+1:rb], []byte(","))
 	if len(flds) == 0 {
-		return errors.New("Slice UnmarshalJSON: no child data found")
+		return errors.New("slice UnmarshalJSON: no child data found")
 	}
 	// fmt.Printf("flds[0]:\n%v\n", string(flds[0]))
 	ns := bytes.Index(flds[0], []byte("\"n\":"))
@@ -210,7 +210,7 @@ func SaveNewJSON(k Ki, filename string) error {
 // unmarshal, and an error.
 func ReadRootTypeJSON(b []byte) (*gti.Type, []byte, error) {
 	if !bytes.HasPrefix(b, JSONTypePrefix) {
-		return nil, b, fmt.Errorf("ki.ReadRootTypeJSON -- type prefix not found at start of file -- must be there to identify type of root node of tree.")
+		return nil, b, fmt.Errorf("ki.ReadRootTypeJSON -- type prefix not found at start of file -- must be there to identify type of root node of tree")
 	}
 	stidx := len(JSONTypePrefix) + 1
 	eidx := bytes.Index(b, JSONTypeSuffix)

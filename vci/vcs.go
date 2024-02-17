@@ -17,7 +17,7 @@ import (
 
 var (
 	// ErrUnknownVCS is returned when VCS cannot be determined from the vcs Repo
-	ErrUnknownVCS = errors.New("Unknown VCS")
+	ErrUnknownVCS = errors.New("unknown VCS")
 )
 
 // Repo provides an interface extending vcs.Repo
@@ -93,9 +93,9 @@ func NewRepo(remote, local string) (Repo, error) {
 			r.SvnRepo = *(repo.(*vcs.SvnRepo))
 			return r, err
 		case vcs.Hg:
-			err = fmt.Errorf("Hg version control not yet supported")
+			err = fmt.Errorf("hg version control not yet supported")
 		case vcs.Bzr:
-			err = fmt.Errorf("Bzr version control not yet supported")
+			err = fmt.Errorf("bzr version control not yet supported")
 		}
 	}
 	return nil, err

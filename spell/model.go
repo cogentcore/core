@@ -741,10 +741,10 @@ func (md *Model) Autocomplete(input string) ([]string, error) {
 	md.RLock()
 	defer md.RUnlock()
 	if !md.UseAutocomplete {
-		return []string{}, errors.New("Autocomplete is disabled")
+		return []string{}, errors.New("autocomplete is disabled")
 	}
 	if len(input) == 0 {
-		return []string{}, errors.New("Input cannot have length zero")
+		return []string{}, errors.New("input cannot have length zero")
 	}
 	express := "\x00" + input + "[^\x00]*"
 	match, err := regexp.Compile(express)

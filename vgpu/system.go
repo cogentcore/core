@@ -152,7 +152,7 @@ func (sy *System) NewPipeline(name string) *Pipeline {
 func (sy *System) PipelineByNameTry(name string) (*Pipeline, error) {
 	pl, ok := sy.PipelineMap[name]
 	if !ok {
-		err := fmt.Errorf("Pipeline named: %s not found", name)
+		err := fmt.Errorf("pipeline named: %s not found", name)
 		log.Println(err)
 		return nil, err
 	}
@@ -173,7 +173,7 @@ func (sy *System) NewSemaphore(name string) vk.Semaphore {
 func (sy *System) SemaphoreByNameTry(name string) (vk.Semaphore, error) {
 	sp, ok := sy.Semaphores[name]
 	if !ok {
-		err := fmt.Errorf("Semaphore named: %s not found", name)
+		err := fmt.Errorf("semaphore named: %s not found", name)
 		log.Println(err)
 		return vk.NullSemaphore, err
 	}
@@ -194,7 +194,7 @@ func (sy *System) NewEvent(name string) vk.Event {
 func (sy *System) EventByNameTry(name string) (vk.Event, error) {
 	sp, ok := sy.Events[name]
 	if !ok {
-		err := fmt.Errorf("Event named: %s not found", name)
+		err := fmt.Errorf("event named: %s not found", name)
 		log.Println(err)
 		return vk.NullEvent, err
 	}
@@ -215,7 +215,7 @@ func (sy *System) NewFence(name string) vk.Fence {
 func (sy *System) FenceByNameTry(name string) (vk.Fence, error) {
 	sp, ok := sy.Fences[name]
 	if !ok {
-		err := fmt.Errorf("Fence named: %s not found", name)
+		err := fmt.Errorf("fence named: %s not found", name)
 		log.Println(err)
 		return vk.NullFence, err
 	}

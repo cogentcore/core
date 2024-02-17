@@ -426,7 +426,7 @@ func (dec *Decoder) parseObjLine(line string) error {
 // mtllib <name>
 func (dec *Decoder) parseMatlib(fields []string) error {
 	if len(fields) < 1 {
-		return errors.New("Material library (mtllib) with no fields")
+		return errors.New("material library (mtllib) with no fields")
 	}
 	dec.Matlib = fields[0]
 	return nil
@@ -436,7 +436,7 @@ func (dec *Decoder) parseMatlib(fields []string) error {
 // o <name>
 func (dec *Decoder) parseObject(fields []string) error {
 	if len(fields) < 1 {
-		return errors.New("Object line (o) with no fields")
+		return errors.New("object line (o) with no fields")
 	}
 
 	dec.Objects = append(dec.Objects, makeObject(fields[0]))
@@ -457,7 +457,7 @@ func makeObject(name string) Object {
 // v <x> <y> <z> [w]
 func (dec *Decoder) parseVertex(fields []string) error {
 	if len(fields) < 3 {
-		return errors.New("Less than 3 vertices in 'v' line")
+		return errors.New("less than 3 vertices in 'v' line")
 	}
 	for _, f := range fields[:3] {
 		val, err := strconv.ParseFloat(f, 32)
@@ -473,7 +473,7 @@ func (dec *Decoder) parseVertex(fields []string) error {
 // vn <x> <y> <z>
 func (dec *Decoder) parseNormal(fields []string) error {
 	if len(fields) < 3 {
-		return errors.New("Less than 3 normals in 'vn' line")
+		return errors.New("less than 3 normals in 'vn' line")
 	}
 	for _, f := range fields[:3] {
 		val, err := strconv.ParseFloat(f, 32)
@@ -489,7 +489,7 @@ func (dec *Decoder) parseNormal(fields []string) error {
 // vt <u> <v> <w>
 func (dec *Decoder) parseTex(fields []string) error {
 	if len(fields) < 2 {
-		return errors.New("Less than 2 texture coords. in 'vt' line")
+		return errors.New("less than 2 texture coords. in 'vt' line")
 	}
 	for _, f := range fields[:2] {
 		val, err := strconv.ParseFloat(f, 32)
