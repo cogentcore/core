@@ -30,13 +30,13 @@ func main() {
 	b.OnShow(func(e events.Event) {
 		go func() {
 			for i := 0; i < rows; i++ {
-				table = append(table, &tableStruct{IntField: i, FloatField: float32(i) / 10.0})
 				updt := tv.UpdateStartAsync()
+				table = append(table, &tableStruct{IntField: i, FloatField: float32(i) / 10.0})
 				tv.UpdateWidgets()
-				tv.UpdateEndAsyncLayout(updt)
 				if len(table) > 0 {
 					tv.ScrollToIdx(len(table) - 1)
 				}
+				tv.UpdateEndAsyncLayout(updt)
 				time.Sleep(100 * time.Millisecond)
 			}
 		}()

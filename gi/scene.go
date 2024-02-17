@@ -296,6 +296,9 @@ func (sc *Scene) Close() bool {
 	if mm == nil {
 		return false // todo: needed, but not sure why
 	}
+	// we do an unterminated UpdateStart to prevent others from updating
+	// while the Scene is being deleted
+	sc.UpdateStart()
 	mm.DeleteStage(sc.Stage)
 	if sc.Stage.NewWindow && !TheApp.Platform().IsMobile() && !mm.RenderWin.Is(WinClosing) && !mm.RenderWin.Is(WinStopEventLoop) && !TheApp.IsQuitting() {
 		mm.RenderWin.CloseReq()

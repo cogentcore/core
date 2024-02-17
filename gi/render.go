@@ -125,13 +125,14 @@ func (wb *WidgetBase) UpdateEnd(updt bool) {
 // updates, or other updates that can happen during standard layout / rendering.
 // It waits for any current Render update to finish, via RenderCtx().ReadLock().
 // It must be paired with an UpdateEndAsync.
+// If the RenderCtx() is nil, it blocks indefinitely.
 // These calls CANNOT be triggered during a standard render update,
 // (whereas UpdateStart / End can be, and typically are)
 // because it will cause a hang on the Read Lock which
 // was already write locked at the start of the render.
 func (wb *WidgetBase) UpdateStartAsync() bool {
 	if wb.Scene == nil || wb.Scene.RenderCtx() == nil {
-		return wb.Node.UpdateStart()
+		select {}
 	}
 	wb.Scene.RenderCtx().ReadLock()
 	wb.Scene.SetFlag(true, ScUpdating)
@@ -141,10 +142,10 @@ func (wb *WidgetBase) UpdateStartAsync() bool {
 // UpdateEndAsync must be called after [UpdateStartAsync] for any
 // asynchronous update that happens outside of the usual user event-driven,
 // same-thread updates.
+// If the RenderCtx() is nil, it blocks indefinitely.
 func (wb *WidgetBase) UpdateEndAsync(updt bool) {
 	if wb.Scene == nil || wb.Scene.RenderCtx() == nil {
-		wb.Node.UpdateEnd(updt)
-		return
+		select {}
 	}
 	wb.Scene.SetFlag(false, ScUpdating)
 	wb.Scene.RenderCtx().ReadUnlock()
