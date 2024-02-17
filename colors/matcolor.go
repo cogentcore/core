@@ -15,7 +15,7 @@ import (
 // although [Scheme] is a more typical way to access the color
 // scheme values. It defaults to a palette based around a
 // primary color of Google Blue (#4285f4)
-var Palette = matcolor.NewPalette(matcolor.KeyFromPrimary(color.RGBA{66, 133, 244, 255}))
+var Palette = matcolor.NewPalette(matcolor.KeyFromPrimary(color.RGBA{R: 66, G: 133, B: 244, A: 255}))
 
 // Schemes are the main global Material Design 3 color schemes.
 // They should not be used for accessing the current color scheme;

@@ -279,7 +279,7 @@ var OverrideSettingsColor = false
 func (as *AppearanceSettingsData) Apply() { //gti:add
 	// Google Blue (#4285f4) is the default value and thus indicates no user preference,
 	// which means that we will always override the color, even without OverridePrefsColor
-	if !OverrideSettingsColor && as.Color != (color.RGBA{66, 133, 244, 255}) {
+	if !OverrideSettingsColor && as.Color != (color.RGBA{R: 66, G: 133, B: 244, A: 255}) {
 		colors.SetSchemes(as.Color)
 	}
 	// TODO(kai): figure out transparency approach

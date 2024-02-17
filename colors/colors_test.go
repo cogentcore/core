@@ -30,7 +30,7 @@ func ExampleFromNRGBA() {
 }
 
 func ExampleAsRGBA() {
-	fmt.Println(AsRGBA(color.Gray{50}))
+	fmt.Println(AsRGBA(color.Gray{Y: 50}))
 	// Output: {50 50 50 255}
 }
 

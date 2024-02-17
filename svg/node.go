@@ -479,7 +479,7 @@ func (g *NodeBase) PushTransform(sv *SVG) (bool, *paint.Context) {
 	rs := &sv.RenderState
 	rs.PushTransformLock(g.Paint.Transform)
 
-	pc := &paint.Context{rs, &g.Paint}
+	pc := &paint.Context{State: rs, Paint: &g.Paint}
 	return true, pc
 }
 

@@ -154,7 +154,7 @@ func (sa *SzAlloc) UniqSz() {
 // XYSizeFmIdx returns X,Y sizes from X,Y indexes in image.Point
 // into XSizes, YSizes
 func (sa *SzAlloc) XYSizeFmIdx(idx image.Point) image.Point {
-	return image.Point{sa.XSizes[idx.X], sa.YSizes[idx.Y]}
+	return image.Point{X: sa.XSizes[idx.X], Y: sa.YSizes[idx.Y]}
 }
 
 // XYFmGpi returns x, y indexes from gp index
@@ -174,7 +174,7 @@ func (sa *SzAlloc) SizesFmIdxs(xgpi, ygpi []int) []image.Point {
 		for xi, xgi := range xgpi {
 			xsz := sa.XSizes[xgi]
 			gi := yi*len(xgpi) + xi
-			szs[gi] = image.Point{xsz, ysz}
+			szs[gi] = image.Point{X: xsz, Y: ysz}
 		}
 	}
 	return szs

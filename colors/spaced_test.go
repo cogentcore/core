@@ -26,9 +26,9 @@ func TestSpacedLight(t *testing.T) {
 	spY := lnY + ysp
 	lnX := 40
 	spX := lnX + xsp
-	sz := image.Point{spX*nX + 2*xsp, spY*nY + 3*ysp}
+	sz := image.Point{X: spX*nX + 2*xsp, Y: spY*nY + 3*ysp}
 	img := image.NewRGBA(image.Rectangle{Max: sz})
-	draw.Draw(img, img.Bounds(), &image.Uniform{White}, image.Point{}, draw.Src)
+	draw.Draw(img, img.Bounds(), &image.Uniform{C: White}, image.Point{}, draw.Src)
 
 	for idx := 0; idx < mx; idx++ {
 		c := Spaced(idx)
@@ -77,9 +77,9 @@ func TestSpacedDark(t *testing.T) {
 	spY := lnY + ysp
 	lnX := 40
 	spX := lnX + xsp
-	sz := image.Point{spX*nX + 2*xsp, spY*nY + 3*ysp}
+	sz := image.Point{X: spX*nX + 2*xsp, Y: spY*nY + 3*ysp}
 	img := image.NewRGBA(image.Rectangle{Max: sz})
-	draw.Draw(img, img.Bounds(), &image.Uniform{Black}, image.Point{}, draw.Src)
+	draw.Draw(img, img.Bounds(), &image.Uniform{C: Black}, image.Point{}, draw.Src)
 
 	for idx := 0; idx < mx; idx++ {
 		c := Spaced(idx)

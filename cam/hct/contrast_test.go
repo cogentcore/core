@@ -20,8 +20,8 @@ func TestContrastRatio(t *testing.T) {
 	tests := []data{
 		{color.White, color.Black, 21},
 		{color.Black, color.White, 21},
-		{color.RGBA{100, 100, 100, 255}, color.RGBA{100, 100, 100, 255}, 1},
-		{color.RGBA{0, 0, 255, 255}, color.RGBA{255, 255, 255, 255}, 8.59},
+		{color.RGBA{R: 100, G: 100, B: 100, A: 255}, color.RGBA{R: 100, G: 100, B: 100, A: 255}, 1},
+		{color.RGBA{B: 255, A: 255}, color.RGBA{R: 255, G: 255, B: 255, A: 255}, 8.59},
 	}
 	for i, test := range tests {
 		res := ContrastRatio(test.a, test.b)
@@ -58,10 +58,10 @@ func TestContrastColor(t *testing.T) {
 		want  color.Color
 	}
 	tests := []data{
-		{color.RGBA{0, 0, 0, 255}, 21, color.RGBA{255, 255, 255, 255}},
-		{color.RGBA{255, 255, 255, 255}, 21, color.RGBA{0, 0, 0, 255}},
-		{color.RGBA{100, 100, 100, 255}, 1, color.RGBA{100, 100, 100, 255}},
-		{color.RGBA{0, 0, 255, 255}, 8.59, color.RGBA{255, 255, 255, 255}},
+		{color.RGBA{A: 255}, 21, color.RGBA{R: 255, G: 255, B: 255, A: 255}},
+		{color.RGBA{R: 255, G: 255, B: 255, A: 255}, 21, color.RGBA{A: 255}},
+		{color.RGBA{R: 100, G: 100, B: 100, A: 255}, 1, color.RGBA{R: 100, G: 100, B: 100, A: 255}},
+		{color.RGBA{B: 255, A: 255}, 8.59, color.RGBA{R: 255, G: 255, B: 255, A: 255}},
 	}
 	for i, test := range tests {
 		res := ContrastColor(test.color, test.ratio)
@@ -79,10 +79,10 @@ func TestContrastColorTry(t *testing.T) {
 		ok    bool
 	}
 	tests := []data{
-		{color.RGBA{0, 0, 0, 255}, 21, color.RGBA{255, 255, 255, 255}, true},
-		{color.RGBA{150, 200, 255, 255}, 21, color.RGBA{}, false},
-		{color.RGBA{100, 100, 100, 255}, 1, color.RGBA{100, 100, 100, 255}, true},
-		{color.RGBA{0, 0, 255, 255}, 8.59, color.RGBA{255, 255, 255, 255}, true},
+		{color.RGBA{A: 255}, 21, color.RGBA{R: 255, G: 255, B: 255, A: 255}, true},
+		{color.RGBA{R: 150, G: 200, B: 255, A: 255}, 21, color.RGBA{}, false},
+		{color.RGBA{R: 100, G: 100, B: 100, A: 255}, 1, color.RGBA{R: 100, G: 100, B: 100, A: 255}, true},
+		{color.RGBA{B: 255, A: 255}, 8.59, color.RGBA{R: 255, G: 255, B: 255, A: 255}, true},
 	}
 	for i, test := range tests {
 		res, ok := ContrastColorTry(test.color, test.ratio)

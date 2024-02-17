@@ -80,7 +80,7 @@ func main() {
 	sf.Format.SetMultisample(1)
 	drw.ConfigSurface(sf, 10) // 10 = max number of images to choose for rendering
 
-	rf := vgpu.NewRenderFrame(gp, &sf.Device, image.Point{1024, 768})
+	rf := vgpu.NewRenderFrame(gp, &sf.Device, image.Point{X: 1024, Y: 768})
 	sy := gp.NewGraphicsSystem("drawidx", &rf.Device)
 
 	destroy := func() {

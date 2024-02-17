@@ -112,7 +112,7 @@ func (txt *Text2D) RenderText() {
 	txt.TxtPos = marg.Pos().Round()
 	szpt := sz.ToPointRound()
 	if szpt == (image.Point{}) {
-		szpt = image.Point{10, 10}
+		szpt = image.Point{X: 10, Y: 10}
 	}
 	bounds := image.Rectangle{Max: szpt}
 	var img *image.RGBA

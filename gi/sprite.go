@@ -78,7 +78,7 @@ func (sp *Sprite) GrabRenderFrom(wi Widget) {
 		sp.Pixels = img
 		sp.Geom.Size = sp.Pixels.Bounds().Size()
 	} else {
-		sp.SetSize(image.Point{10, 10}) // just a blank something..
+		sp.SetSize(image.Point{X: 10, Y: 10}) // just a blank something..
 	}
 }
 
@@ -156,7 +156,7 @@ func (ss *Sprites) AllocSizes() {
 	if idx != ns {
 		szs = szs[:idx]
 	}
-	ss.SzAlloc.SetSizes(image.Point{4, 4}, goosi.MaxImageLayers, szs)
+	ss.SzAlloc.SetSizes(image.Point{X: 4, Y: 4}, goosi.MaxImageLayers, szs)
 	ss.SzAlloc.Alloc()
 }
 

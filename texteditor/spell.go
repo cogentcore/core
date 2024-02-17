@@ -35,8 +35,8 @@ func (ed *Editor) OfferComplete() {
 
 	ed.Buf.Complete.SrcLn = ed.CursorPos.Ln
 	ed.Buf.Complete.SrcCh = ed.CursorPos.Ch
-	st := lex.Pos{ed.CursorPos.Ln, 0}
-	en := lex.Pos{ed.CursorPos.Ln, ed.CursorPos.Ch}
+	st := lex.Pos{Ln: ed.CursorPos.Ln}
+	en := lex.Pos{Ln: ed.CursorPos.Ln, Ch: ed.CursorPos.Ch}
 	tbe := ed.Buf.Region(st, en)
 	var s string
 	if tbe != nil {
@@ -95,8 +95,8 @@ func (ed *Editor) Lookup() { //gti:add
 	}
 	ed.Buf.Complete.SrcLn = ln
 	ed.Buf.Complete.SrcCh = ch
-	st := lex.Pos{ed.CursorPos.Ln, 0}
-	en := lex.Pos{ed.CursorPos.Ln, ch}
+	st := lex.Pos{Ln: ed.CursorPos.Ln}
+	en := lex.Pos{Ln: ed.CursorPos.Ln, Ch: ch}
 
 	tbe := ed.Buf.Region(st, en)
 	var s string

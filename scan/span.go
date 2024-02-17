@@ -140,17 +140,17 @@ func (x *LinkListSpanner) BlendColor(under color.RGBA, ma uint32) color.RGBA {
 	ama := uint32(x.FgColor.A) * ma
 	if x.Op != draw.Over || under.A == 0 || ama == m*0xFF {
 		return color.RGBA{
-			uint8(rma / q),
-			uint8(gma / q),
-			uint8(bma / q),
-			uint8(ama / q)}
+			R: uint8(rma / q),
+			G: uint8(gma / q),
+			B: uint8(bma / q),
+			A: uint8(ama / q)}
 	}
 	a := m - (ama / (m >> 8))
 	cc := color.RGBA{
-		uint8((uint32(under.R)*a + rma) / q),
-		uint8((uint32(under.G)*a + gma) / q),
-		uint8((uint32(under.B)*a + bma) / q),
-		uint8((uint32(under.A)*a + ama) / q)}
+		R: uint8((uint32(under.R)*a + rma) / q),
+		G: uint8((uint32(under.G)*a + gma) / q),
+		B: uint8((uint32(under.B)*a + bma) / q),
+		A: uint8((uint32(under.A)*a + ama) / q)}
 	return cc
 }
 

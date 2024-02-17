@@ -165,7 +165,7 @@ func (a *Mat2) SetMulCtr(b Mat2, ctr Vec2) {
 func (a Mat2) MulFixedAsPt(fp fixed.Point26_6) fixed.Point26_6 {
 	x := fixed.Int26_6((float32(fp.X)*a.XX + float32(fp.Y)*a.XY) + a.X0*32)
 	y := fixed.Int26_6((float32(fp.X)*a.YX + float32(fp.Y)*a.YY) + a.Y0*32)
-	return fixed.Point26_6{x, y}
+	return fixed.Point26_6{X: x, Y: y}
 }
 
 func (a Mat2) Translate(x, y float32) Mat2 {

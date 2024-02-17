@@ -633,7 +633,7 @@ func (fv *FileView) AddPathToFavs() { //gti:add
 		// gi.PromptDialog(fv, gi.DlgOpts{Title: "Add Path To Favorites", Prompt: fmt.Sprintf("Path is already on the favorites list: %v", dp), Ok: true, Cancel: false}, nil)
 		return
 	}
-	fi := gi.FavPathItem{"folder", fnm, dp}
+	fi := gi.FavPathItem{Ic: "folder", Name: fnm, Path: dp}
 	gi.SystemSettings.FavPaths = append(gi.SystemSettings.FavPaths, fi)
 	gi.ErrorSnackbar(fv, gi.SaveSettings(gi.SystemSettings), "Error saving settings")
 	// fv.FileSig.Emit(fv.This(), int64(FileViewFavAdded), fi)

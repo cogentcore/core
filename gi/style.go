@@ -257,7 +257,7 @@ func (wb *WidgetBase) ApplyStyle() {
 func SetUnitContext(st *styles.Style, sc *Scene, el, par mat32.Vec2) {
 	rebuild := false
 	var rc *RenderContext
-	sz := image.Point{1920, 1280}
+	sz := image.Point{X: 1920, Y: 1280}
 	if sc != nil {
 		rebuild = sc.NeedsRebuild()
 		rc = sc.RenderCtx()

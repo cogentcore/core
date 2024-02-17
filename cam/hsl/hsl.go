@@ -71,7 +71,7 @@ func (h HSL) RGBA() (r, g, b, a uint32) {
 // AsRGBA returns a standard color.RGBA type
 func (h HSL) AsRGBA() color.RGBA {
 	fr, fg, fb := HSLtoRGBf32(h.H, h.S, h.L)
-	return color.RGBA{uint8(fr*h.A*255.0 + 0.5), uint8(fg*h.A*255.0 + 0.5), uint8(fb*h.A*255.0 + 0.5), uint8(h.A*255.0 + 0.5)}
+	return color.RGBA{R: uint8(fr*h.A*255.0 + 0.5), G: uint8(fg*h.A*255.0 + 0.5), B: uint8(fb*h.A*255.0 + 0.5), A: uint8(h.A*255.0 + 0.5)}
 }
 
 // SetUint32 sets components from unsigned 32bit integers (alpha-premultiplied)

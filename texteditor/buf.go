@@ -806,7 +806,7 @@ func (tb *Buf) EndPos() lex.Pos {
 	if tb.NLines == 0 {
 		return lex.PosZero
 	}
-	ed := lex.Pos{tb.NLines - 1, len(tb.Lines[tb.NLines-1])}
+	ed := lex.Pos{Ln: tb.NLines - 1, Ch: len(tb.Lines[tb.NLines-1])}
 	return ed
 }
 
@@ -2599,18 +2599,18 @@ func (tb *Buf) CompleteText(s string) {
 	}
 	// give the completer a chance to edit the completion before insert,
 	// also it return a number of runes past the cursor to delete
-	st := lex.Pos{tb.Complete.SrcLn, 0}
-	en := lex.Pos{tb.Complete.SrcLn, tb.LineLen(tb.Complete.SrcLn)}
+	st := lex.Pos{Ln: tb.Complete.SrcLn}
+	en := lex.Pos{Ln: tb.Complete.SrcLn, Ch: tb.LineLen(tb.Complete.SrcLn)}
 	var tbes string
 	tbe := tb.Region(st, en)
 	if tbe != nil {
 		tbes = string(tbe.ToBytes())
 	}
 	c := tb.Complete.GetCompletion(s)
-	pos := lex.Pos{tb.Complete.SrcLn, tb.Complete.SrcCh}
+	pos := lex.Pos{Ln: tb.Complete.SrcLn, Ch: tb.Complete.SrcCh}
 	ed := tb.Complete.EditFunc(tb.Complete.Context, tbes, tb.Complete.SrcCh, c, tb.Complete.Seed)
 	if ed.ForwardDelete > 0 {
-		delEn := lex.Pos{tb.Complete.SrcLn, tb.Complete.SrcCh + ed.ForwardDelete}
+		delEn := lex.Pos{Ln: tb.Complete.SrcLn, Ch: tb.Complete.SrcCh + ed.ForwardDelete}
 		tb.DeleteText(pos, delEn, EditNoSignal)
 	}
 	// now the normal completion insertion
@@ -2630,7 +2630,7 @@ func (tb *Buf) CompleteExtend(s string) {
 	if s == "" {
 		return
 	}
-	pos := lex.Pos{tb.Complete.SrcLn, tb.Complete.SrcCh}
+	pos := lex.Pos{Ln: tb.Complete.SrcLn, Ch: tb.Complete.SrcCh}
 	st := pos
 	st.Ch -= len(tb.Complete.Seed)
 	tb.ReplaceText(st, pos, st, s, EditSignal, ReplaceNoMatchCase)
@@ -2682,7 +2682,7 @@ func (tb *Buf) DeleteSpell() {
 
 // CorrectText edits the text using the string chosen from the correction menu
 func (tb *Buf) CorrectText(s string) {
-	st := lex.Pos{tb.Spell.SrcLn, tb.Spell.SrcCh} // start of word
+	st := lex.Pos{Ln: tb.Spell.SrcLn, Ch: tb.Spell.SrcCh} // start of word
 	tb.RemoveTag(st, token.TextSpellErr)
 	oend := st
 	oend.Ch += len(tb.Spell.Word)
@@ -2697,7 +2697,7 @@ func (tb *Buf) CorrectText(s string) {
 
 // CorrectClear clears the TextSpellErr tag for given word
 func (tb *Buf) CorrectClear(s string) {
-	st := lex.Pos{tb.Spell.SrcLn, tb.Spell.SrcCh} // start of word
+	st := lex.Pos{Ln: tb.Spell.SrcLn, Ch: tb.Spell.SrcCh} // start of word
 	tb.RemoveTag(st, token.TextSpellErr)
 }
 

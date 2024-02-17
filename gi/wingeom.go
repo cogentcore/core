@@ -423,7 +423,7 @@ type RenderWinGeom struct {
 }
 
 func (wg *RenderWinGeom) Size() image.Point {
-	return image.Point{wg.SX, wg.SY}
+	return image.Point{X: wg.SX, Y: wg.SY}
 }
 
 func (wg *RenderWinGeom) SetSize(sz image.Point) {
@@ -432,7 +432,7 @@ func (wg *RenderWinGeom) SetSize(sz image.Point) {
 }
 
 func (wg *RenderWinGeom) Pos() image.Point {
-	return image.Point{wg.PX, wg.PY}
+	return image.Point{X: wg.PX, Y: wg.PY}
 }
 
 func (wg *RenderWinGeom) SetPos(ps image.Point) {
@@ -442,7 +442,7 @@ func (wg *RenderWinGeom) SetPos(ps image.Point) {
 
 // ConstrainGeom constrains geometry based on screen params
 func (wg *RenderWinGeom) ConstrainGeom(sc *goosi.Screen) {
-	sz, pos := sc.ConstrainWinGeom(image.Point{wg.SX, wg.SY}, image.Point{wg.PX, wg.PY})
+	sz, pos := sc.ConstrainWinGeom(image.Point{X: wg.SX, Y: wg.SY}, image.Point{X: wg.PX, Y: wg.PY})
 	wg.SX = sz.X
 	wg.SY = sz.Y
 	wg.PX = pos.X

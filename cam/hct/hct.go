@@ -91,7 +91,7 @@ func (h HCT) RGBA() (r, g, b, a uint32) {
 // AsRGBA returns a standard color.RGBA type
 func (h HCT) AsRGBA() color.RGBA {
 	r, g, b, a := cie.SRGBFloatToUint8(h.R, h.G, h.B, h.A)
-	return color.RGBA{r, g, b, a}
+	return color.RGBA{R: r, G: g, B: b, A: a}
 }
 
 // SetUint32 sets components from unsigned 32bit integers (alpha-premultiplied)

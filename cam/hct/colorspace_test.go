@@ -31,9 +31,9 @@ func TestColorSpace(t *testing.T) {
 	nX := huePerPage * nTones
 
 	sqSz := 16
-	sz := image.Point{sqSz * nX, sqSz * nY}
+	sz := image.Point{X: sqSz * nX, Y: sqSz * nY}
 	img := image.NewRGBA(image.Rectangle{Max: sz})
-	draw.Draw(img, img.Bounds(), &image.Uniform{color.RGBA{0, 0, 255, 255}}, image.Point{}, draw.Src)
+	draw.Draw(img, img.Bounds(), &image.Uniform{C: color.RGBA{B: 255, A: 255}}, image.Point{}, draw.Src)
 
 	xp := 0
 	yp := 0

@@ -168,7 +168,7 @@ func (dw *DrawerBase) SyncImages() {
 // flipY = flipY axis when drawing this image
 func (dw *DrawerBase) Copy(idx, layer int, dp image.Point, sr image.Rectangle, op draw.Op, flipY bool) error {
 	img := dw.Images[idx][layer]
-	draw.Draw(dw.Image, image.Rectangle{dp, dp.Add(img.Rect.Size())}, img, sr.Min, op)
+	draw.Draw(dw.Image, image.Rectangle{Min: dp, Max: dp.Add(img.Rect.Size())}, img, sr.Min, op)
 	return nil
 }
 

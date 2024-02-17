@@ -13,7 +13,7 @@ import (
 
 func TestBlend(t *testing.T) {
 	// yellow and blue
-	c := Blend(50, color.RGBA{255, 255, 255, 255}, color.RGBA{0, 0, 0, 255})
+	c := Blend(50, color.RGBA{R: 255, G: 255, B: 255, A: 255}, color.RGBA{A: 255})
 	fmt.Println("blend", c)
 }
 

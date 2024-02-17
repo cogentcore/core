@@ -14,7 +14,7 @@ import (
 )
 
 func TestText(t *testing.T) {
-	size := image.Point{100, 40}
+	size := image.Point{X: 100, Y: 40}
 	sizef := mat32.V2FromPoint(size)
 	RunTest(t, "text", size.X, size.Y, func(pc *Context) {
 		pc.BlitBoxColor(mat32.Vec2{}, sizef, colors.White)

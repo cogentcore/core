@@ -162,7 +162,7 @@ func (st *Stage) RunWindow() *Stage {
 	}
 
 	if st.NewWindow || CurRenderWin == nil {
-		sc.Resize(mat32.Geom2DInt{st.RenderCtx.Geom.Pos, sz})
+		sc.Resize(mat32.Geom2DInt{Pos: st.RenderCtx.Geom.Pos, Size: sz})
 		win := st.NewRenderWin()
 		CurRenderWin = win
 		win.GoStartEventLoop()
@@ -215,7 +215,7 @@ func (st *Stage) RunDialog() *Stage {
 	sz := ms.RenderCtx.Geom.Size
 	if !st.FullWindow || st.NewWindow {
 		sz = sc.PrefSize(sz)
-		sz = sz.Add(image.Point{50, 50})
+		sz = sz.Add(image.Point{X: 50, Y: 50})
 		sc.EventMgr.StartFocusFirst = true // popup dialogs always need focus
 	}
 	if DebugSettings.WinRenderTrace {
@@ -224,7 +224,7 @@ func (st *Stage) RunDialog() *Stage {
 
 	if st.NewWindow {
 		st.MainMgr = nil
-		sc.Resize(mat32.Geom2DInt{st.RenderCtx.Geom.Pos, sz})
+		sc.Resize(mat32.Geom2DInt{Pos: st.RenderCtx.Geom.Pos, Size: sz})
 		st.Type = WindowStage            // critical: now is its own window!
 		sc.SceneGeom.Pos = image.Point{} // ignore pos
 		win := st.NewRenderWin()

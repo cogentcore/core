@@ -389,7 +389,7 @@ func (w *Window) UpdateGeom() {
 }
 
 func (w *Window) FbResized(gw *glfw.Window, width, height int) {
-	fbsz := image.Point{width, height}
+	fbsz := image.Point{X: width, Y: height}
 	if w.PixSize != fbsz {
 		w.UpdateGeom()
 	}
@@ -404,7 +404,7 @@ func (w *Window) Focused(gw *glfw.Window, focused bool) {
 	if focused {
 		w.EvMgr.Window(events.WinFocus)
 	} else {
-		w.EvMgr.Last.MousePos = image.Point{-1, -1} // key for preventing random click to same location
+		w.EvMgr.Last.MousePos = image.Point{X: -1, Y: -1} // key for preventing random click to same location
 		w.EvMgr.Window(events.WinFocusLost)
 	}
 }

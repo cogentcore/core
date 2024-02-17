@@ -38,17 +38,17 @@ func TestColorAt(t *testing.T) {
 			AddStop(colors.White, 0).
 			AddStop(colors.Black, 1),
 			[]value{
-				{71, 33, color.RGBA{72, 72, 72, 255}},
-				{71, 78, color.RGBA{72, 72, 72, 255}},
-				{17, 78, color.RGBA{211, 211, 211, 255}},
-				{50, 33, color.RGBA{126, 126, 126, 255}},
+				{71, 33, color.RGBA{R: 72, G: 72, B: 72, A: 255}},
+				{71, 78, color.RGBA{R: 72, G: 72, B: 72, A: 255}},
+				{17, 78, color.RGBA{R: 211, G: 211, B: 211, A: 255}},
+				{50, 33, color.RGBA{R: 126, G: 126, B: 126, A: 255}},
 			}},
 		{CopyOf(linearTransformTest),
 			[]value{
-				{50, 50, color.RGBA{255, 106, 0, 255}},
-				{7, 50, color.RGBA{255, 106, 0, 255}},
-				{81, 23, color.RGBA{255, 171, 0, 255}},
-				{81, 94, color.RGBA{255, 1, 0, 255}},
+				{50, 50, color.RGBA{R: 255, G: 106, A: 255}},
+				{7, 50, color.RGBA{R: 255, G: 106, A: 255}},
+				{81, 23, color.RGBA{R: 255, G: 171, A: 255}},
+				{81, 94, color.RGBA{R: 255, G: 1, A: 255}},
 			}},
 		{NewRadial().
 			SetCenter(mat32.V2(0.9, 0.5)).SetFocal(mat32.V2(0.9, 0.5)).
@@ -56,15 +56,15 @@ func TestColorAt(t *testing.T) {
 			AddStop(colors.Yellow, 0.85),
 			[]value{
 				{90, 50, colors.Blue},
-				{70, 60, color.RGBA{117, 117, 138, 255}},
+				{70, 60, color.RGBA{R: 117, G: 117, B: 138, A: 255}},
 				{35, 40, colors.Yellow},
 			}},
 		{CopyOf(radialTransformTest),
 			[]value{
-				{41, 62, color.RGBA{104, 0, 151, 255}},
-				{26, 54, color.RGBA{2, 0, 253, 255}},
-				{53, 75, color.RGBA{132, 85, 123, 255}},
-				{38, 61, color.RGBA{141, 0, 114, 255}},
+				{41, 62, color.RGBA{R: 104, B: 151, A: 255}},
+				{26, 54, color.RGBA{R: 2, B: 253, A: 255}},
+				{53, 75, color.RGBA{R: 132, G: 85, B: 123, A: 255}},
+				{38, 61, color.RGBA{R: 141, B: 114, A: 255}},
 			}},
 	}
 	for i, test := range tests {
@@ -106,7 +106,7 @@ func TestColorAt(t *testing.T) {
 }
 
 func TestRenderLinear(t *testing.T) {
-	r := image.Rectangle{Max: image.Point{128, 128}}
+	r := image.Rectangle{Max: image.Point{X: 128, Y: 128}}
 	b := mat32.B2FromRect(r)
 	img := image.NewRGBA(r)
 	g := CopyOf(linearTransformTest)
@@ -125,7 +125,7 @@ func TestRenderLinear(t *testing.T) {
 }
 
 func TestRenderRadial(t *testing.T) {
-	r := image.Rectangle{Max: image.Point{128, 128}}
+	r := image.Rectangle{Max: image.Point{X: 128, Y: 128}}
 	b := mat32.B2FromRect(r)
 	img := image.NewRGBA(r)
 	g := CopyOf(radialTransformTest)

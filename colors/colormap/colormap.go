@@ -93,7 +93,7 @@ var StdMaps = map[string]*Map{
 	},
 	"Jet": {
 		Name:    "Jet",
-		NoColor: color.RGBA{200, 200, 200, 255},
+		NoColor: color.RGBA{R: 200, G: 200, B: 200, A: 255},
 		Colors: []color.RGBA{
 			{0, 0, 127, 255},
 			{0, 0, 255, 255},
@@ -108,7 +108,7 @@ var StdMaps = map[string]*Map{
 	},
 	"JetMuted": {
 		Name:    "JetMuted",
-		NoColor: color.RGBA{200, 200, 200, 255},
+		NoColor: color.RGBA{R: 200, G: 200, B: 200, A: 255},
 		Colors: []color.RGBA{
 			{25, 25, 153, 255},
 			{25, 102, 230, 255},
@@ -121,7 +121,7 @@ var StdMaps = map[string]*Map{
 	},
 	"Viridis": {
 		Name:    "Viridis",
-		NoColor: color.RGBA{200, 200, 200, 255},
+		NoColor: color.RGBA{R: 200, G: 200, B: 200, A: 255},
 		Colors: []color.RGBA{
 			{72, 33, 114, 255},
 			{67, 62, 133, 255},
@@ -138,7 +138,7 @@ var StdMaps = map[string]*Map{
 	},
 	"Plasma": {
 		Name:    "Plasma",
-		NoColor: color.RGBA{200, 200, 200, 255},
+		NoColor: color.RGBA{R: 200, G: 200, B: 200, A: 255},
 		Colors: []color.RGBA{
 			{61, 4, 155, 255},
 			{99, 0, 167, 255},
@@ -155,7 +155,7 @@ var StdMaps = map[string]*Map{
 	},
 	"Inferno": {
 		Name:    "Inferno",
-		NoColor: color.RGBA{200, 200, 200, 255},
+		NoColor: color.RGBA{R: 200, G: 200, B: 200, A: 255},
 		Colors: []color.RGBA{
 			{37, 12, 3, 255},
 			{19, 11, 52, 255},
@@ -173,7 +173,7 @@ var StdMaps = map[string]*Map{
 	},
 	"BlueRed": {
 		Name:    "BlueRed",
-		NoColor: color.RGBA{200, 200, 200, 255},
+		NoColor: color.RGBA{R: 200, G: 200, B: 200, A: 255},
 		Colors: []color.RGBA{
 			{0, 0, 255, 255},
 			{255, 0, 0, 255},
@@ -181,7 +181,7 @@ var StdMaps = map[string]*Map{
 	},
 	"BlueBlackRed": {
 		Name:    "BlueBlackRed",
-		NoColor: color.RGBA{200, 200, 200, 255},
+		NoColor: color.RGBA{R: 200, G: 200, B: 200, A: 255},
 		Colors: []color.RGBA{
 			{0, 0, 255, 255},
 			{76, 76, 76, 255},
@@ -190,7 +190,7 @@ var StdMaps = map[string]*Map{
 	},
 	"BlueGreyRed": {
 		Name:    "BlueGreyRed",
-		NoColor: color.RGBA{200, 200, 200, 255},
+		NoColor: color.RGBA{R: 200, G: 200, B: 200, A: 255},
 		Colors: []color.RGBA{
 			{0, 0, 255, 255},
 			{127, 127, 127, 255},
@@ -199,7 +199,7 @@ var StdMaps = map[string]*Map{
 	},
 	"BlueWhiteRed": {
 		Name:    "BlueWhiteRed",
-		NoColor: color.RGBA{200, 200, 200, 255},
+		NoColor: color.RGBA{R: 200, G: 200, B: 200, A: 255},
 		Colors: []color.RGBA{
 			{0, 0, 255, 255},
 			{230, 230, 230, 255},
@@ -208,7 +208,7 @@ var StdMaps = map[string]*Map{
 	},
 	"BlueGreenRed": {
 		Name:    "BlueGreenRed",
-		NoColor: color.RGBA{200, 200, 200, 255},
+		NoColor: color.RGBA{R: 200, G: 200, B: 200, A: 255},
 		Colors: []color.RGBA{
 			{0, 0, 255, 255},
 			{0, 230, 0, 255},
@@ -217,7 +217,7 @@ var StdMaps = map[string]*Map{
 	},
 	"Rainbow": {
 		Name:    "Rainbow",
-		NoColor: color.RGBA{200, 200, 200, 255},
+		NoColor: color.RGBA{R: 200, G: 200, B: 200, A: 255},
 		Colors: []color.RGBA{
 			{255, 0, 255, 255},
 			{0, 0, 255, 255},
@@ -228,7 +228,7 @@ var StdMaps = map[string]*Map{
 	},
 	"ROYGBIV": {
 		Name:    "ROYGBIV",
-		NoColor: color.RGBA{200, 200, 200, 255},
+		NoColor: color.RGBA{R: 200, G: 200, B: 200, A: 255},
 		Colors: []color.RGBA{
 			{255, 0, 255, 255},
 			{0, 0, 127, 255},
@@ -240,7 +240,7 @@ var StdMaps = map[string]*Map{
 	},
 	"DarkLight": {
 		Name:    "DarkLight",
-		NoColor: color.RGBA{200, 200, 200, 255},
+		NoColor: color.RGBA{R: 200, G: 200, B: 200, A: 255},
 		Colors: []color.RGBA{
 			{0, 0, 0, 255},
 			{250, 250, 250, 255},
@@ -248,7 +248,7 @@ var StdMaps = map[string]*Map{
 	},
 	"DarkLightDark": {
 		Name:    "DarkLightDark",
-		NoColor: color.RGBA{200, 200, 200, 255},
+		NoColor: color.RGBA{R: 200, G: 200, B: 200, A: 255},
 		Colors: []color.RGBA{
 			{0, 0, 0, 255},
 			{250, 250, 250, 255},
@@ -257,7 +257,7 @@ var StdMaps = map[string]*Map{
 	},
 	"LightDarkLight": {
 		Name:    "DarkLightDark",
-		NoColor: color.RGBA{200, 200, 200, 255},
+		NoColor: color.RGBA{R: 200, G: 200, B: 200, A: 255},
 		Colors: []color.RGBA{
 			{250, 250, 250, 255},
 			{0, 0, 0, 255},

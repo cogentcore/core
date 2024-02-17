@@ -195,7 +195,7 @@ func main() {
 
 	// alpha = .5 -- note: colors are NOT premultiplied here: will become so when rendered!
 	xyz.NewSolid(rbgp, "green-trans-cube").SetMesh(cbm).
-		SetColor(color.RGBA{0, 255, 0, 128}).SetShiny(20).SetPos(0, 0, 1)
+		SetColor(color.RGBA{G: 255, A: 128}).SetShiny(20).SetPos(0, 0, 1)
 
 	floorp := xyz.NewPlane(sc, "floor-plane", 100, 100)
 	floor := xyz.NewSolid(sc, "floor").SetMesh(floorp).
@@ -207,7 +207,7 @@ func main() {
 	// floor.SetDisabled() // not selectable
 
 	lnsm := xyz.NewLines(sc, "Lines", []mat32.Vec3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, mat32.V2(.2, .1), xyz.CloseLines)
-	lns := xyz.NewSolid(sc, "hi-line").SetMesh(lnsm).SetColor(color.RGBA{255, 255, 0, 128})
+	lns := xyz.NewSolid(sc, "hi-line").SetMesh(lnsm).SetColor(color.RGBA{R: 255, G: 255, A: 128})
 	lns.Pose.Pos.Set(0, 0, 1)
 
 	// this line should go from lower left front of red cube to upper vertex of above hi-line
@@ -259,7 +259,7 @@ func main() {
 	tcg := xyz.NewGroup(sc, xyz.TrackCameraName) // automatically tracks camera -- FPS effect
 	xyz.NewSolid(tcg, "first-person-gun").SetMesh(cbm).
 		SetScale(.1, .1, 1).SetPos(.5, -.5, -2.5). // in front of camera
-		SetColor(color.RGBA{255, 0, 255, 128})
+		SetColor(color.RGBA{R: 255, B: 255, A: 128})
 
 	///////////////////////////////////////////////////
 	//  Animation & Embedded controls

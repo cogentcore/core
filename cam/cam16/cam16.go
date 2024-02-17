@@ -63,7 +63,7 @@ func (cam *CAM) AsRGBA() color.RGBA {
 	x, y, z := cam.XYZ()
 	rf, gf, bf := cie.XYZ100ToSRGB(x, y, z)
 	r, g, b, a := cie.SRGBFloatToUint8(rf, gf, bf, 1)
-	return color.RGBA{r, g, b, a}
+	return color.RGBA{R: r, G: g, B: b, A: a}
 }
 
 // UCS returns the CAM16-UCS components based on the the CAM values

@@ -21,7 +21,7 @@ func ReadMD(ctx *Context, par gi.Widget, b []byte) error {
 	md := goldmark.New(
 		goldmark.WithExtensions(
 			extension.GFM,
-			&wikilink.Extender{ctx},
+			&wikilink.Extender{Resolver: ctx},
 		),
 		goldmark.WithRendererOptions(
 			html.WithUnsafe(),

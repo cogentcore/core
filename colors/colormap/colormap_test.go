@@ -24,9 +24,9 @@ func TestColorMaps(t *testing.T) {
 
 	sqSz := 16
 	sqX := 2
-	sz := image.Point{sqX * nX, sqSz * nY}
+	sz := image.Point{X: sqX * nX, Y: sqSz * nY}
 	img := image.NewRGBA(image.Rectangle{Max: sz})
-	draw.Draw(img, img.Bounds(), &image.Uniform{color.RGBA{127, 127, 127, 255}}, image.Point{}, draw.Src)
+	draw.Draw(img, img.Bounds(), &image.Uniform{C: color.RGBA{R: 127, G: 127, B: 127, A: 255}}, image.Point{}, draw.Src)
 
 	yp := 0
 	idx := 0

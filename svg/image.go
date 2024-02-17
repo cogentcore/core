@@ -90,7 +90,7 @@ func (g *Image) DrawImage(sv *SVG) {
 		return
 	}
 
-	pc := &paint.Context{&sv.RenderState, &g.Paint}
+	pc := &paint.Context{State: &sv.RenderState, Paint: &g.Paint}
 	pc.DrawImageScaled(g.Pixels, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
 }
 
@@ -100,7 +100,7 @@ func (g *Image) NodeBBox(sv *SVG) image.Rectangle {
 	max := rs.CurTransform.MulVec2AsPt(g.Pos.Add(g.Size))
 	posi := pos.ToPointCeil()
 	maxi := max.ToPointCeil()
-	return image.Rectangle{posi, maxi}.Canon()
+	return image.Rectangle{Min: posi, Max: maxi}.Canon()
 }
 
 func (g *Image) LocalBBox() mat32.Box2 {

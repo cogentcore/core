@@ -70,8 +70,8 @@ func (ed *Editor) SetCursor(pos lex.Pos) {
 		if r == '{' || r == '}' || r == '(' || r == ')' || r == '[' || r == ']' {
 			tp, found := ed.Buf.BraceMatch(txt[ch], ed.CursorPos)
 			if found {
-				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(ed.CursorPos, lex.Pos{ed.CursorPos.Ln, ed.CursorPos.Ch + 1}))
-				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(tp, lex.Pos{tp.Ln, tp.Ch + 1}))
+				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(ed.CursorPos, lex.Pos{Ln: ed.CursorPos.Ln, Ch: ed.CursorPos.Ch + 1}))
+				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(tp, lex.Pos{Ln: tp.Ln, Ch: tp.Ch + 1}))
 			}
 		}
 	}

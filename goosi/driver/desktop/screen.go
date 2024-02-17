@@ -97,10 +97,10 @@ func (a *App) GetScreens() {
 				} else { // use plausible defaults.. sheesh
 					sc.ScreenNumber = scNo
 					sc.Name = MacOsBuiltinMonitor
-					sc.Geometry.Max = image.Point{2056, 1329}
+					sc.Geometry.Max = image.Point{X: 2056, Y: 1329}
 					sc.DevicePixelRatio = 2
 					sc.PixSize = sc.Geometry.Max.Mul(2)
-					sc.PhysicalSize = image.Point{344, 222}
+					sc.PhysicalSize = image.Point{X: 344, Y: 222}
 					sc.PhysicalDPI = 25.4 * float32(sc.PixSize.X) / float32(sc.PhysicalSize.X)
 					sc.Depth = 24
 					sc.RefreshRate = 60
@@ -146,12 +146,12 @@ func (a *App) GetScreens() {
 		}
 		sc.Name = mon.GetName()
 		sc.ScreenNumber = scNo
-		sc.Geometry = image.Rectangle{Min: image.Point{x, y}, Max: image.Point{x + vm.Width, y + vm.Height}}
+		sc.Geometry = image.Rectangle{Min: image.Point{X: x, Y: y}, Max: image.Point{X: x + vm.Width, Y: y + vm.Height}}
 		sc.DevicePixelRatio = cscx
-		sc.PixSize = sc.WinSizeToPix(image.Point{vm.Width, vm.Height})
+		sc.PixSize = sc.WinSizeToPix(image.Point{X: vm.Width, Y: vm.Height})
 		depth := vm.RedBits + vm.GreenBits + vm.BlueBits
 		sc.Depth = depth
-		sc.PhysicalSize = image.Point{pw, ph}
+		sc.PhysicalSize = image.Point{X: pw, Y: ph}
 		dpi := 25.4 * float32(sc.PixSize.X) / float32(pw)
 		sc.PhysicalDPI = dpi
 		sc.UpdateLogicalDPI()

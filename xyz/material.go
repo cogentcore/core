@@ -72,7 +72,7 @@ type Material struct { //gti:add -setters
 // Defaults sets default surface parameters
 func (mt *Material) Defaults() {
 	mt.Color = colors.FromRGB(128, 128, 128)
-	mt.Emissive = color.RGBA{0, 0, 0, 0}
+	mt.Emissive = color.RGBA{}
 	mt.Shiny = 30
 	mt.Reflective = 1
 	mt.Bright = 1

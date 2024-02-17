@@ -19,7 +19,7 @@ func TestRandSzAlloc(t *testing.T) {
 	for i := range szs {
 		szs[i] = image.Point{X: rand.Intn(1024), Y: rand.Intn(1024)}
 	}
-	sa.SetSizes(image.Point{4, 4}, 20, szs)
+	sa.SetSizes(image.Point{X: 4, Y: 4}, 20, szs)
 	sa.Alloc()
 	if len(sa.GpAllocs) != 16 {
 		t.Error("failed, N gpallocs != 16\n")
@@ -38,7 +38,7 @@ func TestUniqSzAlloc(t *testing.T) {
 			szs[i] = image.Point{X: rand.Intn(1024), Y: rand.Intn(1024)}
 		}
 	}
-	sa.SetSizes(image.Point{4, 4}, 20, szs)
+	sa.SetSizes(image.Point{X: 4, Y: 4}, 20, szs)
 	sa.Alloc()
 	if len(sa.GpAllocs) != 11 {
 		t.Error("failed, N gpallocs != 11\n")

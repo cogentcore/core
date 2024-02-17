@@ -156,7 +156,7 @@ func (sc *Scene) ConfigFrameFromSurface(surf *vgpu.Surface) {
 func (sc *Scene) ConfigFrame(gpu *vgpu.GPU, dev *vgpu.Device) {
 	sz := sc.Geom.Size
 	if sz == (image.Point{}) {
-		sz = image.Point{480, 320}
+		sz = image.Point{X: 480, Y: 320}
 	}
 	if sc.Frame == nil {
 		sc.Frame = vgpu.NewRenderFrame(gpu, dev, sz)

@@ -74,7 +74,7 @@ func (ed *Editor) CursorBBox(pos lex.Pos) image.Rectangle {
 	cbmin := cpos.SubScalar(ed.CursorWidth.Dots)
 	cbmax := cpos.AddScalar(ed.CursorWidth.Dots)
 	cbmax.Y += ed.FontHeight
-	curBBox := image.Rectangle{cbmin.ToPointFloor(), cbmax.ToPointCeil()}
+	curBBox := image.Rectangle{Min: cbmin.ToPointFloor(), Max: cbmax.ToPointCeil()}
 	return curBBox
 }
 
@@ -132,7 +132,7 @@ func (ed *Editor) CursorSprite(on bool) *gi.Sprite {
 	spnm := ed.CursorSpriteName()
 	sp, ok := ms.Sprites.SpriteByName(spnm)
 	if !ok {
-		bbsz := image.Point{int(mat32.Ceil(ed.CursorWidth.Dots)), int(mat32.Ceil(ed.FontHeight))}
+		bbsz := image.Point{X: int(mat32.Ceil(ed.CursorWidth.Dots)), Y: int(mat32.Ceil(ed.FontHeight))}
 		if bbsz.X < 2 { // at least 2
 			bbsz.X = 2
 		}

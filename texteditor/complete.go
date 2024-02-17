@@ -38,7 +38,7 @@ func CompletePi(data any, text string, posLn, posCh int) (md complete.Matches) {
 	// must set it in pi/parse directly -- so it is changed in the fileparse too
 	parse.GuiActive = true // note: this is key for debugging -- runs slower but makes the tree unique
 
-	md = lp.Lang.CompleteLine(sfs, text, lex.Pos{posLn, posCh})
+	md = lp.Lang.CompleteLine(sfs, text, lex.Pos{Ln: posLn, Ch: posCh})
 	return md
 }
 
@@ -82,7 +82,7 @@ func LookupPi(data any, text string, posLn, posCh int) (ld complete.Lookup) {
 	// must set it in pi/parse directly -- so it is changed in the fileparse too
 	parse.GuiActive = true // note: this is key for debugging -- runs slower but makes the tree unique
 
-	ld = lp.Lang.Lookup(sfs, text, lex.Pos{posLn, posCh})
+	ld = lp.Lang.Lookup(sfs, text, lex.Pos{Ln: posLn, Ch: posCh})
 	if len(ld.Text) > 0 {
 		// TextEditorDialog(nil, DlgOpts{Title: "Lookup: " + text}, ld.Text, nil)
 		return ld

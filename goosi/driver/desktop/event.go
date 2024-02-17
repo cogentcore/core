@@ -74,9 +74,9 @@ func (w *Window) CurMousePosPoint(gw *glfw.Window) image.Point {
 func (w *Window) MousePosToPoint(x, y float64) image.Point {
 	var where image.Point
 	if TheApp.Platform() == goosi.MacOS {
-		where = image.Point{int(w.DevicePixelRatio * float32(x)), int(w.DevicePixelRatio * float32(y))}
+		where = image.Point{X: int(w.DevicePixelRatio * float32(x)), Y: int(w.DevicePixelRatio * float32(y))}
 	} else {
-		where = image.Point{int(x), int(y)}
+		where = image.Point{X: int(x), Y: int(y)}
 	}
 	return where
 }

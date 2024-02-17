@@ -46,7 +46,7 @@ func (ph *Phong) configDummyTexture() {
 	vars := ph.Sys.Vars()
 	txset := vars.SetMap[int(TexSet)]
 	txset.ConfigVals(1)
-	dimg := image.NewRGBA(image.Rectangle{Max: image.Point{2, 2}})
+	dimg := image.NewRGBA(image.Rectangle{Max: image.Point{X: 2, Y: 2}})
 	_, img, _ := txset.ValByIdxTry("Tex", 0)
 	img.Texture.ConfigGoImage(dimg.Bounds().Size(), 0)
 }

@@ -173,7 +173,7 @@ type ImageFormat struct {
 func NewImageFormat(width, height, layers int) *ImageFormat {
 	im := &ImageFormat{}
 	im.Defaults()
-	im.Size = image.Point{width, height}
+	im.Size = image.Point{X: width, Y: height}
 	im.Layers = layers
 	return im
 }

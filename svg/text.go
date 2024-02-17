@@ -169,7 +169,7 @@ func (g *Text) TextBBox() mat32.Box2 {
 
 // RenderText renders the text in full coords
 func (g *Text) RenderText(sv *SVG) {
-	pc := &paint.Context{&sv.RenderState, &g.Paint}
+	pc := &paint.Context{State: &sv.RenderState, Paint: &g.Paint}
 	orgsz := pc.FontStyle.Size
 	pos := pc.CurTransform.MulVec2AsPt(mat32.V2(g.Pos.X, g.Pos.Y))
 	rot := pc.CurTransform.ExtractRot()

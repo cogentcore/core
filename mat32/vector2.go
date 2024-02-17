@@ -263,19 +263,19 @@ func (a Vec2) ToRound() Vec2 {
 }
 
 func (a Vec2) ToPoint() image.Point {
-	return image.Point{int(a.X), int(a.Y)}
+	return image.Point{X: int(a.X), Y: int(a.Y)}
 }
 
 func (a Vec2) ToPointCeil() image.Point {
-	return image.Point{int(Ceil(a.X)), int(Ceil(a.Y))}
+	return image.Point{X: int(Ceil(a.X)), Y: int(Ceil(a.Y))}
 }
 
 func (a Vec2) ToPointFloor() image.Point {
-	return image.Point{int(Floor(a.X)), int(Floor(a.Y))}
+	return image.Point{X: int(Floor(a.X)), Y: int(Floor(a.Y))}
 }
 
 func (a Vec2) ToPointRound() image.Point {
-	return image.Point{int(Round(a.X)), int(Round(a.Y))}
+	return image.Point{X: int(Round(a.X)), Y: int(Round(a.Y))}
 }
 
 // RectFromPosSizeMax returns an image.Rectangle from max dims of pos, size

@@ -1137,7 +1137,7 @@ func (tf *TextField) ScrollLayoutToCursor() bool {
 		return false
 	}
 	cpos := tf.CharRenderPos(tf.CursorPos, false).ToPointFloor()
-	bbsz := image.Point{int(mat32.Ceil(tf.CursorWidth.Dots)), int(mat32.Ceil(tf.FontHeight))}
+	bbsz := image.Point{X: int(mat32.Ceil(tf.CursorWidth.Dots)), Y: int(mat32.Ceil(tf.FontHeight))}
 	bbox := image.Rectangle{Min: cpos, Max: cpos.Add(bbsz)}
 	return ly.ScrollToBox(bbox)
 }
@@ -1245,7 +1245,7 @@ func (tf *TextField) CursorSprite(on bool) *Sprite {
 	sp, ok := ms.Sprites.SpriteByName(spnm)
 	// TODO: figure out how to update caret color on color scheme change
 	if !ok {
-		bbsz := image.Point{int(mat32.Ceil(tf.CursorWidth.Dots)), int(mat32.Ceil(tf.FontHeight))}
+		bbsz := image.Point{X: int(mat32.Ceil(tf.CursorWidth.Dots)), Y: int(mat32.Ceil(tf.FontHeight))}
 		if bbsz.X < 2 { // at least 2
 			bbsz.X = 2
 		}

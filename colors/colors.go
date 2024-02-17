@@ -26,13 +26,13 @@ func IsNil(c color.Color) bool {
 // FromRGB makes a new RGBA color from the given
 // RGB uint8 values, using 255 for A.
 func FromRGB(r, g, b uint8) color.RGBA {
-	return color.RGBA{r, g, b, 255}
+	return color.RGBA{R: r, G: g, B: b, A: 255}
 }
 
 // FromNRGBA makes a new RGBA color from the given
 // non-alpha-premultiplied RGBA uint8 values.
 func FromNRGBA(r, g, b, a uint8) color.RGBA {
-	return AsRGBA(color.NRGBA{r, g, b, a})
+	return AsRGBA(color.NRGBA{R: r, G: g, B: b, A: a})
 }
 
 // AsRGBA returns the given color as an RGBA color
@@ -46,13 +46,13 @@ func AsRGBA(c color.Color) color.RGBA {
 // FromFloat64 makes a new RGBA color from the given 0-1
 // normalized floating point numbers (alpha-premultiplied)
 func FromFloat64(r, g, b, a float64) color.RGBA {
-	return color.RGBA{uint8(r * 255), uint8(g * 255), uint8(b * 255), uint8(a * 255)}
+	return color.RGBA{R: uint8(r * 255), G: uint8(g * 255), B: uint8(b * 255), A: uint8(a * 255)}
 }
 
 // FromFloat32 makes a new RGBA color from the given 0-1
 // normalized floating point numbers (alpha-premultiplied)
 func FromFloat32(r, g, b, a float32) color.RGBA {
-	return color.RGBA{uint8(r * 255), uint8(g * 255), uint8(b * 255), uint8(a * 255)}
+	return color.RGBA{R: uint8(r * 255), G: uint8(g * 255), B: uint8(b * 255), A: uint8(a * 255)}
 }
 
 // ToFloat32 returns 0-1 normalized floating point numbers from given color
@@ -263,7 +263,7 @@ func FromHex(hex string) (color.RGBA, error) {
 	} else {
 		return color.RGBA{}, fmt.Errorf("colors.FromHex: could not process %q", hex)
 	}
-	return color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}, nil
+	return color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}, nil
 }
 
 // AsHex returns the color as a standard
@@ -348,7 +348,7 @@ func ApplyOpacityNRGBA(c color.Color, opacity float32) color.NRGBA {
 	}
 	a := r.A
 	// new A is current A times opacity
-	return color.NRGBA{r.R, r.G, r.B, uint8(float32(a) * opacity)}
+	return color.NRGBA{R: r.R, G: r.G, B: r.B, A: uint8(float32(a) * opacity)}
 }
 
 // Clearer returns a color that is the given amount
@@ -378,7 +378,7 @@ func Opaquer(c color.Color, amount float32) color.RGBA {
 // alpha channel.
 func Inverse(c color.Color) color.RGBA {
 	r := AsRGBA(c)
-	return color.RGBA{255 - r.R, 255 - r.G, 255 - r.B, r.A}
+	return color.RGBA{R: 255 - r.R, G: 255 - r.G, B: 255 - r.B, A: r.A}
 }
 
 // Add adds given color deltas to this color, safely avoiding overflow > 255
@@ -401,7 +401,7 @@ func Add(c, dc color.Color) color.RGBA {
 	if a > 255 {
 		a = 255
 	}
-	return color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
+	return color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
 }
 
 // Sub subtracts given color deltas from this color, safely avoiding underflow < 0
@@ -424,5 +424,5 @@ func Sub(c, dc color.Color) color.RGBA {
 	if a > 255 {
 		a = 0
 	}
-	return color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
+	return color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
 }

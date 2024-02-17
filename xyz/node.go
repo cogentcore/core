@@ -275,7 +275,7 @@ func (nb *NodeBase) UpdateBBox2D(size mat32.Vec2) {
 	Wmin := nb.NDCBBox.Min.NDCToWindow(size, off, 0, 1, true) // true = flipY
 	Wmax := nb.NDCBBox.Max.NDCToWindow(size, off, 0, 1, true) // true = filpY
 	// BBox is always relative to scene
-	nb.BBox = image.Rectangle{Min: image.Point{int(Wmin.X), int(Wmax.Y)}, Max: image.Point{int(Wmax.X), int(Wmin.Y)}}
+	nb.BBox = image.Rectangle{Min: image.Point{X: int(Wmin.X), Y: int(Wmax.Y)}, Max: image.Point{X: int(Wmax.X), Y: int(Wmin.Y)}}
 	// note: BBox is inaccurate for objects extending behind camera
 	if nb.Sc == nil {
 		fmt.Println(nb, "Error: scene is nil")

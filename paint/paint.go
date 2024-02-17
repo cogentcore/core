@@ -313,8 +313,8 @@ func (pc *Context) StrokePreserve() {
 	pc.Scanner.SetClip(pc.Bounds)
 	pc.Path.AddTo(pc.Raster)
 	fbox := pc.Raster.Scanner.GetPathExtent()
-	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
-		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
+	pc.LastRenderBBox = image.Rectangle{Min: image.Point{X: fbox.Min.X.Floor(), Y: fbox.Min.Y.Floor()},
+		Max: image.Point{X: fbox.Max.X.Ceil(), Y: fbox.Max.Y.Ceil()}}
 	if g, ok := pc.StrokeStyle.Color.(gradient.Gradient); ok {
 		g.Update(pc.StrokeStyle.Opacity, mat32.B2FromRect(pc.LastRenderBBox), pc.CurTransform)
 		pc.Raster.SetColor(pc.StrokeStyle.Color)
@@ -352,8 +352,8 @@ func (pc *Context) FillPreserve() {
 	pc.Scanner.SetClip(pc.Bounds)
 	pc.Path.AddTo(rf)
 	fbox := pc.Scanner.GetPathExtent()
-	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
-		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
+	pc.LastRenderBBox = image.Rectangle{Min: image.Point{X: fbox.Min.X.Floor(), Y: fbox.Min.Y.Floor()},
+		Max: image.Point{X: fbox.Max.X.Ceil(), Y: fbox.Max.Y.Ceil()}}
 	if g, ok := pc.FillStyle.Color.(gradient.Gradient); ok {
 		g.Update(pc.FillStyle.Opacity, mat32.B2FromRect(pc.LastRenderBBox), pc.CurTransform)
 		rf.SetColor(pc.FillStyle.Color)
@@ -413,7 +413,7 @@ func (pc *Context) FillBox(pos, size mat32.Vec2, img image.Image) {
 func (pc *Context) FillBoxColor(pos, size mat32.Vec2, clr color.Color) {
 	b := pc.Bounds.Intersect(mat32.RectFromPosSizeMax(pos, size))
 	c := colors.ApplyOpacity(clr, pc.FillStyle.Opacity)
-	draw.Draw(pc.Image, b, &image.Uniform{c}, image.Point{}, draw.Over)
+	draw.Draw(pc.Image, b, &image.Uniform{C: c}, image.Point{}, draw.Over)
 }
 
 // BlitBoxColor performs an optimized overwriting fill
@@ -421,7 +421,7 @@ func (pc *Context) FillBoxColor(pos, size mat32.Vec2, clr color.Color) {
 func (pc *Context) BlitBoxColor(pos, size mat32.Vec2, clr color.Color) {
 	b := pc.Bounds.Intersect(mat32.RectFromPosSizeMax(pos, size))
 	c := colors.ApplyOpacity(clr, pc.FillStyle.Opacity)
-	draw.Draw(pc.Image, b, &image.Uniform{c}, image.Point{}, draw.Src)
+	draw.Draw(pc.Image, b, &image.Uniform{C: c}, image.Point{}, draw.Src)
 }
 
 // BlurBox blurs the given already drawn region with the given blur radius.

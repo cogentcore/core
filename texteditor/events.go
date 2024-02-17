@@ -505,8 +505,8 @@ func (ed *Editor) KeyInputInsertRune(kt events.Event) {
 			np.Ch--
 			tp, found := ed.Buf.BraceMatch(kt.KeyRune(), np)
 			if found {
-				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(tp, lex.Pos{tp.Ln, tp.Ch + 1}))
-				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(np, lex.Pos{cp.Ln, cp.Ch}))
+				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(tp, lex.Pos{Ln: tp.Ln, Ch: tp.Ch + 1}))
+				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(np, lex.Pos{Ln: cp.Ln, Ch: cp.Ch}))
 			}
 		}
 	}

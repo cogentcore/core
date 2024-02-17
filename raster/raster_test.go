@@ -553,7 +553,7 @@ func TestGradient(t *testing.T) {
 		r := (1 + sinx) * 120
 		g := (1 + siny) * 120
 		b := (1 + sinxy) * 120
-		return color.RGBA{uint8(r), uint8(g), uint8(b), 255}
+		return color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 255}
 	}
 
 	scanner.SetColor(colors.Pattern(cf))

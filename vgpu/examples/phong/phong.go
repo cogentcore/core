@@ -153,14 +153,14 @@ func main() {
 	/////////////////////////////
 	// Colors
 
-	dark := color.RGBA{20, 20, 20, 255}
-	blue := color.RGBA{0, 0, 255, 255}
-	blueTr := color.RGBA{0, 0, 200, 200}
-	red := color.RGBA{255, 0, 0, 255}
-	redTr := color.RGBA{200, 0, 0, 200}
-	green := color.RGBA{0, 255, 0, 255}
-	orange := color.RGBA{180, 130, 0, 255}
-	tan := color.RGBA{210, 180, 140, 255}
+	dark := color.RGBA{R: 20, G: 20, B: 20, A: 255}
+	blue := color.RGBA{B: 255, A: 255}
+	blueTr := color.RGBA{B: 200, A: 200}
+	red := color.RGBA{R: 255, A: 255}
+	redTr := color.RGBA{R: 200, A: 200}
+	green := color.RGBA{G: 255, A: 255}
+	orange := color.RGBA{R: 180, G: 130, A: 255}
+	tan := color.RGBA{R: 210, G: 180, B: 140, A: 255}
 	ph.AddColor("blue", vphong.NewColors(blue, color.Black, 30, 1, 1))
 	ph.AddColor("blueTr", vphong.NewColors(blueTr, color.Black, 30, 1, 1))
 	ph.AddColor("red", vphong.NewColors(red, color.Black, 30, 1, 1))

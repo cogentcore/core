@@ -38,7 +38,7 @@ func main() {
 		log.Println(err)
 		return
 	}
-	sc := xyz.NewScene("scene").SetSize(image.Point{1280, 960})
+	sc := xyz.NewScene("scene").SetSize(image.Point{X: 1280, Y: 960})
 	sc.ConfigFrame(gp, dev)
 
 	// options - must be set here
@@ -83,7 +83,7 @@ func main() {
 
 	gcb := xyz.NewSolid(rbgp, "green-trans-cube").SetMesh(cbm)
 	gcb.Pose.Pos.Set(0, 0, 1)
-	gcb.Mat.SetColor(color.RGBA{0, 255, 0, 128}).SetShiny(20) // alpha = .5 -- note: colors are NOT premultiplied here: will become so when rendered!
+	gcb.Mat.SetColor(color.RGBA{G: 255, A: 128}).SetShiny(20) // alpha = .5 -- note: colors are NOT premultiplied here: will become so when rendered!
 
 	floorp := xyz.NewPlane(sc, "floor-plane", 100, 100)
 	floor := xyz.NewSolid(sc, "floor").SetMesh(floorp)
