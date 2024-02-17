@@ -99,5 +99,5 @@ func TestNodeXML(t *testing.T) {
 	var buf2 bytes.Buffer
 	assert.NoError(t, nodeEmbed.WriteXML(&buf2, true))
 	assert.Equal(t, buf2.Bytes(), b)
-	// fmt.Printf("test loaded json output:\n%v\n", string(tstb))
+	//fmt.Printf("test loaded json output:\n%v\n", buf2.String())
 }
