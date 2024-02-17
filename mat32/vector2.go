@@ -126,156 +126,156 @@ func (v *Vec2) SetByName(name string, value float32) {
 	}
 }
 
-func (a Vec2) String() string {
-	return fmt.Sprintf("(%v, %v)", a.X, a.Y)
+func (v Vec2) String() string {
+	return fmt.Sprintf("(%v, %v)", v.X, v.Y)
 }
 
-func (a Vec2) Fixed() fixed.Point26_6 {
-	return ToFixedPoint(a.X, a.Y)
+func (v Vec2) Fixed() fixed.Point26_6 {
+	return ToFixedPoint(v.X, v.Y)
 }
 
-func (a Vec2) AddDim(d Dims, val float32) Vec2 {
+func (v Vec2) AddDim(d Dims, val float32) Vec2 {
 	switch d {
 	case X:
-		a.X += val
+		v.X += val
 	case Y:
-		a.Y += val
+		v.Y += val
 	}
-	return a
+	return v
 }
 
-func (a *Vec2) SetAddDim(d Dims, val float32) {
+func (v *Vec2) SetAddDim(d Dims, val float32) {
 	switch d {
 	case X:
-		a.X += val
+		v.X += val
 	case Y:
-		a.Y += val
-	}
-}
-
-func (a Vec2) SubDim(d Dims, val float32) Vec2 {
-	switch d {
-	case X:
-		a.X -= val
-	case Y:
-		a.Y -= val
-	}
-	return a
-}
-
-func (a *Vec2) SetSubDim(d Dims, val float32) {
-	switch d {
-	case X:
-		a.X -= val
-	case Y:
-		a.Y -= val
+		v.Y += val
 	}
 }
 
-func (a Vec2) MulDim(d Dims, val float32) Vec2 {
+func (v Vec2) SubDim(d Dims, val float32) Vec2 {
 	switch d {
 	case X:
-		a.X *= val
+		v.X -= val
 	case Y:
-		a.Y *= val
+		v.Y -= val
 	}
-	return a
+	return v
 }
 
-func (a *Vec2) SetMulDim(d Dims, val float32) {
+func (v *Vec2) SetSubDim(d Dims, val float32) {
 	switch d {
 	case X:
-		a.X *= val
+		v.X -= val
 	case Y:
-		a.Y *= val
+		v.Y -= val
 	}
 }
 
-func (a Vec2) DivDim(d Dims, val float32) Vec2 {
+func (v Vec2) MulDim(d Dims, val float32) Vec2 {
 	switch d {
 	case X:
-		a.X /= val
+		v.X *= val
 	case Y:
-		a.Y /= val
+		v.Y *= val
 	}
-	return a
+	return v
 }
 
-func (a *Vec2) SetDivDim(d Dims, val float32) {
+func (v *Vec2) SetMulDim(d Dims, val float32) {
 	switch d {
 	case X:
-		a.X /= val
+		v.X *= val
 	case Y:
-		a.Y /= val
+		v.Y *= val
+	}
+}
+
+func (v Vec2) DivDim(d Dims, val float32) Vec2 {
+	switch d {
+	case X:
+		v.X /= val
+	case Y:
+		v.Y /= val
+	}
+	return v
+}
+
+func (v *Vec2) SetDivDim(d Dims, val float32) {
+	switch d {
+	case X:
+		v.X /= val
+	case Y:
+		v.Y /= val
 	}
 }
 
 // set the value along a given dimension to max of current val and new val
-func (a *Vec2) SetMaxDim(d Dims, val float32) {
+func (v *Vec2) SetMaxDim(d Dims, val float32) {
 	switch d {
 	case X:
-		a.X = Max(a.X, val)
+		v.X = Max(v.X, val)
 	case Y:
-		a.Y = Max(a.Y, val)
+		v.Y = Max(v.Y, val)
 	}
 }
 
 // set the value along a given dimension to min of current val and new val
-func (a *Vec2) SetMinDim(d Dims, val float32) {
+func (v *Vec2) SetMinDim(d Dims, val float32) {
 	switch d {
 	case X:
-		a.X = Min(a.X, val)
+		v.X = Min(v.X, val)
 	case Y:
-		a.Y = Min(a.Y, val)
+		v.Y = Min(v.Y, val)
 	}
 }
 
 // set the value along a given dimension to min of current val and new val
-func (a *Vec2) SetMinPosDim(d Dims, val float32) {
+func (v *Vec2) SetMinPosDim(d Dims, val float32) {
 	switch d {
 	case X:
-		a.X = MinPos(val, a.X)
+		v.X = MinPos(val, v.X)
 	case Y:
-		a.Y = MinPos(val, a.Y)
+		v.Y = MinPos(val, v.Y)
 	}
 }
 
-func (a *Vec2) SetPoint(pt image.Point) {
-	a.X = float32(pt.X)
-	a.Y = float32(pt.Y)
+func (v *Vec2) SetPoint(pt image.Point) {
+	v.X = float32(pt.X)
+	v.Y = float32(pt.Y)
 }
 
-func (a *Vec2) SetFixed(pt fixed.Point26_6) {
-	a.X = FromFixed(pt.X)
-	a.Y = FromFixed(pt.Y)
+func (v *Vec2) SetFixed(pt fixed.Point26_6) {
+	v.X = FromFixed(pt.X)
+	v.Y = FromFixed(pt.Y)
 }
 
-func (a Vec2) ToCeil() Vec2 {
-	return V2(Ceil(a.X), Ceil(a.Y))
+func (v Vec2) ToCeil() Vec2 {
+	return V2(Ceil(v.X), Ceil(v.Y))
 }
 
-func (a Vec2) ToFloor() Vec2 {
-	return V2(Floor(a.X), Floor(a.Y))
+func (v Vec2) ToFloor() Vec2 {
+	return V2(Floor(v.X), Floor(v.Y))
 }
 
-func (a Vec2) ToRound() Vec2 {
-	return V2(Round(a.X), Round(a.Y))
+func (v Vec2) ToRound() Vec2 {
+	return V2(Round(v.X), Round(v.Y))
 }
 
-func (a Vec2) ToPoint() image.Point {
-	return image.Point{X: int(a.X), Y: int(a.Y)}
+func (v Vec2) ToPoint() image.Point {
+	return image.Point{X: int(v.X), Y: int(v.Y)}
 }
 
-func (a Vec2) ToPointCeil() image.Point {
-	return image.Point{X: int(Ceil(a.X)), Y: int(Ceil(a.Y))}
+func (v Vec2) ToPointCeil() image.Point {
+	return image.Point{X: int(Ceil(v.X)), Y: int(Ceil(v.Y))}
 }
 
-func (a Vec2) ToPointFloor() image.Point {
-	return image.Point{X: int(Floor(a.X)), Y: int(Floor(a.Y))}
+func (v Vec2) ToPointFloor() image.Point {
+	return image.Point{X: int(Floor(v.X)), Y: int(Floor(v.Y))}
 }
 
-func (a Vec2) ToPointRound() image.Point {
-	return image.Point{X: int(Round(a.X)), Y: int(Round(a.Y))}
+func (v Vec2) ToPointRound() image.Point {
+	return image.Point{X: int(Round(v.X)), Y: int(Round(v.Y))}
 }
 
 // RectFromPosSizeMax returns an image.Rectangle from max dims of pos, size
@@ -440,8 +440,8 @@ func (v *Vec2) SetMax(other Vec2) {
 }
 
 // MinPos returns minimum of all positive (> 0) numbers
-func (a Vec2) MinPos(b Vec2) Vec2 {
-	return V2(MinPos(a.X, b.X), MinPos(a.Y, b.Y))
+func (v Vec2) MinPos(b Vec2) Vec2 {
+	return V2(MinPos(v.X, b.X), MinPos(v.Y, b.Y))
 }
 
 // SetMinPos set to minpos of current vs. other
@@ -451,9 +451,9 @@ func (v *Vec2) SetMinPos(b Vec2) {
 }
 
 // set the value along a given dimension to min of current val and new val
-func (a *Vec2) SetMaxPos(o Vec2) {
-	a.X = MaxPos(o.X, a.X)
-	a.Y = MaxPos(o.Y, a.Y)
+func (v *Vec2) SetMaxPos(o Vec2) {
+	v.X = MaxPos(o.X, v.X)
+	v.Y = MaxPos(o.Y, v.Y)
 }
 
 // SetMaxScalar sets to max of current value and scalar val

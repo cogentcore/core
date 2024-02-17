@@ -54,16 +54,16 @@ func SetThreadPri(p float64) error {
 	return nil
 }
 
-func (a *App) Platform() goosi.Platforms {
+func (app *App) Platform() goosi.Platforms {
 	return goosi.MacOS
 }
 
-func (a *App) OpenURL(url string) {
+func (app *App) OpenURL(url string) {
 	cmd := exec.Command("open", url)
 	grr.Log(cmd.Run())
 }
 
-func (a *App) DataDir() string {
+func (app *App) DataDir() string {
 	usr, err := user.Current()
 	if grr.Log(err) != nil {
 		return "/tmp"

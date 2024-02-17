@@ -180,7 +180,7 @@ func (pf *Fill) Defaults() {
 }
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels
-func (fs *Fill) ToDots(uc *units.Context) {
+func (pf *Fill) ToDots(uc *units.Context) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////

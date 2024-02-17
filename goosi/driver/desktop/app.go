@@ -50,21 +50,21 @@ type App struct { //gti:add
 // SendEmptyEvent sends an empty, blank event to global event processing
 // system, which has the effect of pushing the system along during cases when
 // the event loop needs to be "pinged" to get things moving along..
-func (a *App) SendEmptyEvent() {
+func (app *App) SendEmptyEvent() {
 	glfw.PostEmptyEvent()
 }
 
 // MainLoop starts running event loop on main thread (must be called
 // from the main thread).
-func (a *App) MainLoop() {
-	a.MainQueue = make(chan base.FuncRun)
-	a.MainDone = make(chan struct{})
+func (app *App) MainLoop() {
+	app.MainQueue = make(chan base.FuncRun)
+	app.MainDone = make(chan struct{})
 	for {
 		select {
-		case <-a.MainDone:
+		case <-app.MainDone:
 			glfw.Terminate()
 			return
-		case f := <-a.MainQueue:
+		case f := <-app.MainQueue:
 			f.F()
 			if f.Done != nil {
 				f.Done <- struct{}{}
@@ -76,40 +76,40 @@ func (a *App) MainLoop() {
 }
 
 // InitVk initializes glfw, vulkan, vgpu, and the screens.
-func (a *App) InitVk() {
+func (app *App) InitVk() {
 	if err := glfw.Init(); err != nil {
 		log.Fatalln("goosi/driver/desktop failed to initialize glfw:", err)
 	}
 	vk.SetGetInstanceProcAddr(glfw.GetVulkanGetInstanceProcAddress())
 	vk.Init()
-	glfw.SetMonitorCallback(a.MonitorChange)
+	glfw.SetMonitorCallback(app.MonitorChange)
 	// glfw.DefaultWindowHints()
 	glfw.WindowHint(glfw.ClientAPI, glfw.NoAPI)
 	glfw.WindowHint(glfw.Resizable, glfw.False)
 	glfw.WindowHint(glfw.Visible, glfw.False)
 	var err error
-	a.ShareWin, err = glfw.CreateWindow(16, 16, "Share Window", nil, nil)
+	app.ShareWin, err = glfw.CreateWindow(16, 16, "Share Window", nil, nil)
 	if err != nil {
 		log.Fatalln("goosi.vkos failed to create hidden share window", err)
 	}
 
-	winext := a.ShareWin.GetRequiredInstanceExtensions()
-	a.GPU = vgpu.NewGPU()
-	a.GPU.AddInstanceExt(winext...)
-	a.GPU.Config(a.Name())
+	winext := app.ShareWin.GetRequiredInstanceExtensions()
+	app.GPU = vgpu.NewGPU()
+	app.GPU.AddInstanceExt(winext...)
+	app.GPU.Config(app.Name())
 
-	a.GetScreens()
+	app.GetScreens()
 }
 
-func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
-	if len(a.Windows) == 0 && goosi.InitScreenLogicalDPIFunc != nil {
+func (app *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
+	if len(app.Windows) == 0 && goosi.InitScreenLogicalDPIFunc != nil {
 		if MonitorDebug {
 			log.Println("app first new window calling InitScreenLogicalDPIFunc")
 		}
 		goosi.InitScreenLogicalDPIFunc()
 	}
 
-	sc := a.Screens[0]
+	sc := app.Screens[0]
 
 	if opts == nil {
 		opts = &goosi.NewWindowOptions{}
@@ -119,7 +119,7 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 
 	var glw *glfw.Window
 	var err error
-	a.RunOnMain(func() {
+	app.RunOnMain(func() {
 		glw, err = NewGlfwWindow(opts, sc)
 	})
 	if err != nil {
@@ -127,25 +127,25 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	}
 
 	w := &Window{
-		WindowMulti:  base.NewWindowMulti[*App, *vdraw.Drawer](a, opts),
+		WindowMulti:  base.NewWindowMulti[*App, *vdraw.Drawer](app, opts),
 		Glw:          glw,
 		ScreenWindow: sc.Name,
 	}
 	w.This = w
 	w.Draw = &vdraw.Drawer{}
 
-	a.RunOnMain(func() {
-		surfPtr := grr.Log1(glw.CreateWindowSurface(a.GPU.Instance, nil))
-		sf := vgpu.NewSurface(a.GPU, vk.SurfaceFromPointer(surfPtr))
+	app.RunOnMain(func() {
+		surfPtr := grr.Log1(glw.CreateWindowSurface(app.GPU.Instance, nil))
+		sf := vgpu.NewSurface(app.GPU, vk.SurfaceFromPointer(surfPtr))
 		w.Draw.YIsDown = true
 		w.Draw.ConfigSurface(sf, vgpu.MaxTexturesPerSet) // note: can expand
 	})
 
 	// w.Flgs.SetFlag(true, goosi.Focused) // starts out focused
 
-	a.Mu.Lock()
-	a.Windows = append(a.Windows, w)
-	a.Mu.Unlock()
+	app.Mu.Lock()
+	app.Windows = append(app.Windows, w)
+	app.Mu.Unlock()
 
 	glw.SetPosCallback(w.Moved)
 	glw.SetSizeCallback(w.WinResized)
@@ -164,7 +164,7 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	glw.SetDropCallback(w.DropEvent)
 
 	w.Show()
-	a.RunOnMain(func() {
+	app.RunOnMain(func() {
 		w.UpdateGeom()
 	})
 
@@ -173,16 +173,16 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	return w, nil
 }
 
-func (a *App) Clipboard(win goosi.Window) goosi.Clipboard {
-	a.Mu.Lock()
-	a.CtxWindow = win.(*Window)
-	a.Mu.Unlock()
+func (app *App) Clipboard(win goosi.Window) goosi.Clipboard {
+	app.Mu.Lock()
+	app.CtxWindow = win.(*Window)
+	app.Mu.Unlock()
 	return TheClip
 }
 
-func (a *App) Cursor(win goosi.Window) goosi.Cursor {
-	a.Mu.Lock()
-	a.CtxWindow = win.(*Window)
-	a.Mu.Unlock()
+func (app *App) Cursor(win goosi.Window) goosi.Cursor {
+	app.Mu.Lock()
+	app.CtxWindow = win.(*Window)
+	app.Mu.Unlock()
 	return TheCursor
 }

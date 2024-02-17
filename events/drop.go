@@ -60,11 +60,11 @@ func NewExternalDrop(typ Types, but Buttons, where image.Point, mods key.Modifie
 	return ev
 }
 
-func (ev *DragDrop) String() string {
-	return fmt.Sprintf("%v{Button: %v, Pos: %v, Mods: %v, Time: %v}", ev.Type(), ev.Button, ev.Where, key.ModsString(ev.Mods), ev.Time().Format("04:05"))
+func (d *DragDrop) String() string {
+	return fmt.Sprintf("%v{Button: %v, Pos: %v, Mods: %v, Time: %v}", d.Type(), d.Button, d.Where, key.ModsString(d.Mods), d.Time().Format("04:05"))
 }
 
-func (ev *DragDrop) HasPos() bool {
+func (d *DragDrop) HasPos() bool {
 	return true
 }
 
@@ -110,6 +110,6 @@ func DefaultModBits(mods key.Modifiers) DropMods {
 }
 
 // DefaultMod sets the default DropMod modifier action based on modifier keys
-func (e *DragDrop) DefaultMod() {
-	e.DropMod = DefaultModBits(e.Mods)
+func (d *DragDrop) DefaultMod() {
+	d.DropMod = DefaultModBits(d.Mods)
 }

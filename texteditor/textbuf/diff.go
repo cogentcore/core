@@ -123,9 +123,9 @@ func (pt Patch) NumBlines() int {
 // b strings from which the needed lines of source are copied.
 // ApplyPatch with this on the a strings will result in the b strings.
 // The resulting Patch is independent of bstr slice.
-func (dif Diffs) ToPatch(bstr []string) Patch {
-	pt := make(Patch, len(dif))
-	for pi, op := range dif {
+func (di Diffs) ToPatch(bstr []string) Patch {
+	pt := make(Patch, len(di))
+	for pi, op := range di {
 		pr := &PatchRec{Op: op}
 		if op.Tag == 'r' || op.Tag == 'i' {
 			nl := op.J2 - op.J1

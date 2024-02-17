@@ -21,16 +21,16 @@ import (
 /////////////////////////////////////////////////////////////////
 // OS-specific methods
 
-func (a *App) Platform() goosi.Platforms {
+func (app *App) Platform() goosi.Platforms {
 	return goosi.Windows
 }
 
-func (a *App) OpenURL(url string) {
+func (app *App) OpenURL(url string) {
 	cmd := exec.Command("rundll32", "url.dll,FileProtocolHandler", url)
 	grr.Log(cmd.Run())
 }
 
-func (a *App) DataDir() string {
+func (app *App) DataDir() string {
 	// todo: could use a more official windows protocol to get this stuff..
 	// https://msdn.microsoft.com/en-us/library/bb762188%28VS.85%29.aspx
 	// with FOLDERID_RoamingAppData

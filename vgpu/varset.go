@@ -501,12 +501,12 @@ func (st *VarSet) VkVertexConfig() *vk.PipelineVertexInputStateCreateInfo {
 }
 
 // VkPushConfig returns vulkan push constant ranges
-func (vs *VarSet) VkPushConfig() []vk.PushConstantRange {
+func (st *VarSet) VkPushConfig() []vk.PushConstantRange {
 	alignBytes := 8 // unclear what alignment is
 	var ranges []vk.PushConstantRange
 	offset := 0
 	tsz := 0
-	for _, vr := range vs.Vars {
+	for _, vr := range st.Vars {
 		vr.Offset = offset
 		sz := vr.SizeOf
 		rg := vk.PushConstantRange{

@@ -176,11 +176,11 @@ func (sy *Symbol) AllocScopes() {
 // AddScopesMap adds a given scope element(s) from map to this Symbol.
 // if add is true, add this symbol to those scopes if they are not temporary.
 func (sy *Symbol) AddScopesMap(sm SymMap, add bool) {
-	if len(sm) == 0 {
+	if len(sy) == 0 {
 		return
 	}
 	sy.AllocScopes()
-	for _, s := range sm {
+	for _, s := range sy {
 		sy.Scopes[s.Kind] = s.Name
 		if add {
 			s.AddChild(sy)
@@ -291,10 +291,10 @@ func (sy *Symbol) WriteDoc(out io.Writer, depth int) {
 
 // ClearAst sets the Ast pointers to nil for all symbols in this one.
 // otherwise the Ast memory is never freed and can get quite large.
-func (sm *Symbol) ClearAst() {
-	sm.Ast = nil
-	sm.Children.ClearAst()
-	sm.Types.ClearAst()
+func (sy *Symbol) ClearAst() {
+	sy.Ast = nil
+	sy.Children.ClearAst()
+	sy.Types.ClearAst()
 }
 
 // ClearAst sets the Ast pointers to nil for all symbols.

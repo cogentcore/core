@@ -26,7 +26,7 @@ var MacOsBuiltinMonitor = "Built-in Retina Display"
 
 // MonitorChange is called when a monitor is connected to or
 // disconnected from the system.
-func (a *App) MonitorChange(monitor *glfw.Monitor, event glfw.PeripheralEvent) {
+func (app *App) MonitorChange(monitor *glfw.Monitor, event glfw.PeripheralEvent) {
 	if MonitorDebug {
 		enm := "Unknown"
 		if event == glfw.Connected {
@@ -36,9 +36,9 @@ func (a *App) MonitorChange(monitor *glfw.Monitor, event glfw.PeripheralEvent) {
 		}
 		log.Printf("MonitorDebug: monitorChange: %v event: %v\n", monitor.GetName(), enm)
 	}
-	a.GetScreens()
-	if len(a.Windows) > 0 {
-		fw := a.Windows[0]
+	app.GetScreens()
+	if len(app.Windows) > 0 {
+		fw := app.Windows[0]
 		if MonitorDebug {
 			log.Printf("MonitorDebug: monitorChange: sending screen update\n")
 		}
@@ -50,14 +50,14 @@ func (a *App) MonitorChange(monitor *glfw.Monitor, event glfw.PeripheralEvent) {
 	}
 }
 
-func (a *App) GetScreens() {
-	a.Mu.Lock()
-	defer a.Mu.Unlock()
+func (app *App) GetScreens() {
+	app.Mu.Lock()
+	defer app.Mu.Unlock()
 
 	mons := glfw.GetMonitors()
 	sz := len(mons)
 	if sz == 0 {
-		a.Screens = []*goosi.Screen{}
+		app.Screens = []*goosi.Screen{}
 		if MonitorDebug {
 			log.Printf("MonitorDebug: getScreens: no screens found!\n")
 		}
@@ -67,24 +67,24 @@ func (a *App) GetScreens() {
 		pm := glfw.GetPrimaryMonitor()
 		log.Printf("MonitorDebug: Primary monitor: %s   first monitor: %s\n", pm.GetName(), mons[0].GetName())
 	}
-	a.Screens = make([]*goosi.Screen, 0, sz)
+	app.Screens = make([]*goosi.Screen, 0, sz)
 	scNo := 0
 	for i := 0; i < sz; i++ {
 		mon := mons[i]
 		if MonitorDebug {
 			log.Printf("MonitorDebug: getScreens: mon number: %v name: %v\n", i, mon.GetName())
 		}
-		if len(a.Screens) <= scNo {
-			a.Screens = append(a.Screens, &goosi.Screen{})
+		if len(app.Screens) <= scNo {
+			app.Screens = append(app.Screens, &goosi.Screen{})
 		}
-		sc := a.Screens[scNo]
+		sc := app.Screens[scNo]
 		vm := mon.GetVideoMode()
 		if vm.Width == 0 || vm.Height == 0 {
 			if MonitorDebug {
 				log.Printf("MonitorDebug: getScreens: screen %v has no size!\n", sc.Name)
 			}
-			if a.Platform() == goosi.MacOS {
-				si, has := a.FindScreenInfo(MacOsBuiltinMonitor)
+			if app.Platform() == goosi.MacOS {
+				si, has := app.FindScreenInfo(MacOsBuiltinMonitor)
 				if has {
 					*sc = *si
 					sc.ScreenNumber = scNo
@@ -112,7 +112,7 @@ func (a *App) GetScreens() {
 					continue
 				}
 			}
-			a.Screens = a.Screens[0 : len(a.Screens)-1] // not all there
+			app.Screens = app.Screens[0 : len(app.Screens)-1] // not all there
 			continue
 		}
 		pw, ph := mon.GetPhysicalSize()
@@ -120,7 +120,7 @@ func (a *App) GetScreens() {
 			if MonitorDebug {
 				log.Printf("MonitorDebug: physical size %s returned 0 -- bailing\n", mon.GetName())
 			}
-			a.Screens = a.Screens[0 : len(a.Screens)-1] // not all there
+			app.Screens = app.Screens[0 : len(app.Screens)-1] // not all there
 		}
 		x, y := mon.GetPos()
 		cscx, _ := mon.GetContentScale() // note: requires glfw 3.3
@@ -128,7 +128,7 @@ func (a *App) GetScreens() {
 			if MonitorDebug {
 				log.Printf("MonitorDebug: GetContentScale on %s returned NaN -- trying saved info..\n", mon.GetName())
 			}
-			si, has := a.FindScreenInfo(mon.GetName())
+			si, has := app.FindScreenInfo(mon.GetName())
 			if has {
 				cscx = si.DevicePixelRatio
 				if MonitorDebug {
@@ -159,42 +159,42 @@ func (a *App) GetScreens() {
 		if MonitorDebug {
 			log.Printf("MonitorDebug: screen %d:\n%s\n", scNo, laser.StringJSON(sc))
 		}
-		a.SaveScreenInfo(sc)
+		app.SaveScreenInfo(sc)
 		scNo++
 	}
 
 	// if originally a non-builtin monitor was primary, and now builtin is primary,
 	// then switch builtin and non-builtin.  see https://github.com/glfw/glfw/issues/2160
-	if sz > 1 && a.Platform() == goosi.MacOS && a.Screens[0].Name == MacOsBuiltinMonitor {
-		fss := a.AllScreens[0]
+	if sz > 1 && app.Platform() == goosi.MacOS && app.Screens[0].Name == MacOsBuiltinMonitor {
+		fss := app.AllScreens[0]
 		if fss.Name != MacOsBuiltinMonitor {
 			if MonitorDebug {
-				log.Printf("MonitorDebug: getScreens: MacOs, builtin is currently primary, but was not originally -- restoring primary monitor as: %s\n", a.Screens[1].Name)
+				log.Printf("MonitorDebug: getScreens: MacOs, builtin is currently primary, but was not originally -- restoring primary monitor as: %s\n", app.Screens[1].Name)
 			}
 			// assume 2nd one is good..
-			a.Screens[0], a.Screens[1] = a.Screens[1], a.Screens[0] // swap
-			a.Screens[0].ScreenNumber = 0
-			a.Screens[1].ScreenNumber = 1
+			app.Screens[0], app.Screens[1] = app.Screens[1], app.Screens[0] // swap
+			app.Screens[0].ScreenNumber = 0
+			app.Screens[1].ScreenNumber = 1
 		}
 	}
 }
 
 // SaveScreenInfo saves a copy of given screen info to screensAll list if unique
 // based on name. Returns true if added a new screen.
-func (a *App) SaveScreenInfo(sc *goosi.Screen) bool {
-	_, has := a.FindScreenInfo(sc.Name)
+func (app *App) SaveScreenInfo(sc *goosi.Screen) bool {
+	_, has := app.FindScreenInfo(sc.Name)
 	if has {
 		return false
 	}
 	nsc := &goosi.Screen{}
 	*nsc = *sc
-	a.AllScreens = append(a.AllScreens, nsc)
+	app.AllScreens = append(app.AllScreens, nsc)
 	return true
 }
 
 // FindScreenInfo finds saved screen info based on name
-func (a *App) FindScreenInfo(name string) (*goosi.Screen, bool) {
-	for _, sc := range a.AllScreens {
+func (app *App) FindScreenInfo(name string) (*goosi.Screen, bool) {
+	for _, sc := range app.AllScreens {
 		if sc.Name == name {
 			return sc, true
 		}

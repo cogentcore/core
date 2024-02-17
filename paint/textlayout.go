@@ -13,34 +13,34 @@ import (
 // RuneSpanPos returns the position (span, rune index within span) within a
 // sequence of spans of a given absolute rune index, starting in the first
 // span -- returns false if index is out of range (and returns the last position).
-func (tx *Text) RuneSpanPos(index int) (si, ri int, ok bool) {
-	if index < 0 || len(tx.Spans) == 0 {
+func (tr *Text) RuneSpanPos(index int) (si, ri int, ok bool) {
+	if index < 0 || len(tr.Spans) == 0 {
 		return 0, 0, false
 	}
 	ri = index
-	for si = range tx.Spans {
+	for si = range tr.Spans {
 		if ri < 0 {
 			ri = 0
 		}
-		sr := &tx.Spans[si]
+		sr := &tr.Spans[si]
 		if ri >= len(sr.Render) {
 			ri -= len(sr.Render)
 			continue
 		}
 		return si, ri, true
 	}
-	si = len(tx.Spans) - 1
-	ri = len(tx.Spans[si].Render) - 1
+	si = len(tr.Spans) - 1
+	ri = len(tr.Spans[si].Render) - 1
 	return si, ri, false
 }
 
 // SpanPosToRuneIdx returns the absolute rune index for a given span, rune
 // index position -- i.e., the inverse of RuneSpanPos.  Returns false if given
 // input position is out of range, and returns last valid index in that case.
-func (tx *Text) SpanPosToRuneIdx(si, ri int) (idx int, ok bool) {
+func (tr *Text) SpanPosToRuneIdx(si, ri int) (idx int, ok bool) {
 	idx = 0
-	for i := range tx.Spans {
-		sr := &tx.Spans[i]
+	for i := range tr.Spans {
+		sr := &tr.Spans[i]
 		if si > i {
 			idx += len(sr.Render)
 			continue
@@ -60,15 +60,15 @@ func (tx *Text) SpanPosToRuneIdx(si, ri int) (idx int, ok bool) {
 // LastPos.  Returns also the index of the span that holds that char (-1 = no
 // spans at all) and the rune index within that span, and false if index is
 // out of range.
-func (tx *Text) RuneRelPos(index int) (pos mat32.Vec2, si, ri int, ok bool) {
-	si, ri, ok = tx.RuneSpanPos(index)
+func (tr *Text) RuneRelPos(index int) (pos mat32.Vec2, si, ri int, ok bool) {
+	si, ri, ok = tr.RuneSpanPos(index)
 	if ok {
-		sr := &tx.Spans[si]
+		sr := &tr.Spans[si]
 		return sr.RelPos.Add(sr.Render[ri].RelPos), si, ri, true
 	}
-	nsp := len(tx.Spans)
+	nsp := len(tr.Spans)
 	if nsp > 0 {
-		sr := &tx.Spans[nsp-1]
+		sr := &tr.Spans[nsp-1]
 		return sr.LastPos, nsp - 1, len(sr.Render), false
 	}
 	return mat32.Vec2{}, -1, -1, false
@@ -80,17 +80,17 @@ func (tx *Text) RuneRelPos(index int) (pos mat32.Vec2, si, ri int, ok bool) {
 // Returns also the index of the span that holds that char (-1 = no spans at
 // all) and the rune index within that span, and false if index is out of
 // range.
-func (tx *Text) RuneEndPos(index int) (pos mat32.Vec2, si, ri int, ok bool) {
-	si, ri, ok = tx.RuneSpanPos(index)
+func (tr *Text) RuneEndPos(index int) (pos mat32.Vec2, si, ri int, ok bool) {
+	si, ri, ok = tr.RuneSpanPos(index)
 	if ok {
-		sr := &tx.Spans[si]
+		sr := &tr.Spans[si]
 		spos := sr.RelPos.Add(sr.Render[ri].RelPos)
 		spos.X += sr.Render[ri].Size.X
 		return spos, si, ri, true
 	}
-	nsp := len(tx.Spans)
+	nsp := len(tr.Spans)
 	if nsp > 0 {
-		sr := &tx.Spans[nsp-1]
+		sr := &tr.Spans[nsp-1]
 		return sr.LastPos, nsp - 1, len(sr.Render), false
 	}
 	return mat32.Vec2{}, -1, -1, false
@@ -100,20 +100,20 @@ func (tx *Text) RuneEndPos(index int) (pos mat32.Vec2, si, ri int, ok bool) {
 // pixel position, if the pixel position lies within the given text area.
 // If not, returns false.  It is robust to left-right out-of-range positions,
 // returning the first or last rune index respectively.
-func (tx *Text) PosToRune(pos mat32.Vec2) (si, ri int, ok bool) {
+func (tr *Text) PosToRune(pos mat32.Vec2) (si, ri int, ok bool) {
 	ok = false
-	if pos.X < 0 || pos.X >= tx.Size.X || pos.Y < 0 || pos.Y >= tx.Size.Y {
+	if pos.X < 0 || pos.X >= tr.Size.X || pos.Y < 0 || pos.Y >= tr.Size.Y {
 		return
 	}
-	if len(tx.Spans) == 0 {
+	if len(tr.Spans) == 0 {
 		return
 	}
-	yoff := tx.Spans[0].RelPos.Y // baseline offset applied to everything
-	for li, sr := range tx.Spans {
+	yoff := tr.Spans[0].RelPos.Y // baseline offset applied to everything
+	for li, sr := range tr.Spans {
 		st := sr.RelPos
 		st.Y -= yoff
 		lp := sr.LastPos
-		lp.Y += tx.LineHeight - yoff // todo: only for LR
+		lp.Y += tr.LineHeight - yoff // todo: only for LR
 		b := mat32.Box2{Min: st, Max: lp}
 		nr := len(sr.Render)
 		if !b.ContainsPoint(pos) {
@@ -128,7 +128,7 @@ func (tx *Text) PosToRune(pos mat32.Vec2) (si, ri int, ok bool) {
 		for j := range sr.Render {
 			r := &sr.Render[j]
 			sz := r.Size
-			sz.Y = tx.LineHeight // todo: only LR
+			sz.Y = tr.LineHeight // todo: only LR
 			if j < nr-1 {
 				nxt := &sr.Render[j+1]
 				sz.X = nxt.RelPos.X - r.RelPos.X

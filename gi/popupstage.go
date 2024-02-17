@@ -170,8 +170,8 @@ func (st *Stage) PopupHandleEvent(e events.Event) {
 // 	StageMgr for Popup
 
 // TopIsModal returns true if there is a Top PopupStage and it is Modal.
-func (pm *StageMgr) TopIsModal() bool {
-	top := pm.Top()
+func (sm *StageMgr) TopIsModal() bool {
+	top := sm.Top()
 	if top == nil {
 		return false
 	}
@@ -180,8 +180,8 @@ func (pm *StageMgr) TopIsModal() bool {
 
 // PopupHandleEvent processes Popup events.
 // requires outer RenderContext mutex.
-func (pm *StageMgr) PopupHandleEvent(e events.Event) {
-	top := pm.Top()
+func (sm *StageMgr) PopupHandleEvent(e events.Event) {
+	top := sm.Top()
 	if top == nil {
 		return
 	}
@@ -190,8 +190,8 @@ func (pm *StageMgr) PopupHandleEvent(e events.Event) {
 	// we must get the top stage that does not ignore events
 	if top.IgnoreEvents {
 		var ntop *Stage
-		for i := pm.Stack.Len() - 1; i >= 0; i-- {
-			s := pm.Stack.ValueByIndex(i)
+		for i := sm.Stack.Len() - 1; i >= 0; i-- {
+			s := sm.Stack.ValueByIndex(i)
 			if !s.IgnoreEvents {
 				ntop = s
 				break
@@ -213,7 +213,7 @@ func (pm *StageMgr) PopupHandleEvent(e events.Event) {
 			return
 		}
 		if top.ClickOff && e.Type() == events.MouseUp {
-			pm.PopDelete()
+			sm.PopDelete()
 		}
 		if top.Modal { // absorb any other events!
 			e.SetHandled()
@@ -221,8 +221,8 @@ func (pm *StageMgr) PopupHandleEvent(e events.Event) {
 		}
 		// otherwise not Handled, so pass on to first lower stage
 		// that accepts events and is in bounds
-		for i := pm.Stack.Len() - 1; i >= 0; i-- {
-			s := pm.Stack.ValueByIndex(i)
+		for i := sm.Stack.Len() - 1; i >= 0; i-- {
+			s := sm.Stack.ValueByIndex(i)
 			ss := s.Scene
 			if !s.IgnoreEvents && pos.In(ss.SceneGeom.Bounds()) {
 				s.PopupHandleEvent(e)

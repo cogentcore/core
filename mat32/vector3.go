@@ -92,8 +92,8 @@ func (v Vec3) Dim(dim Dims) float32 {
 	}
 }
 
-func (a Vec3) String() string {
-	return fmt.Sprintf("(%v, %v, %v)", a.X, a.Y, a.Z)
+func (v Vec3) String() string {
+	return fmt.Sprintf("(%v, %v, %v)", v.X, v.Y, v.Z)
 }
 
 // SetByName sets this vector component value by its case insensitive name: "x", "y", or "z".
