@@ -446,13 +446,6 @@ func (w *RenderWin) Closed() {
 	if DebugSettings.WinEventTrace {
 		fmt.Printf("Win: %v Closed\n", w.Name)
 	}
-	if w.IsClosed() {
-		if DebugSettings.WinEventTrace {
-			fmt.Printf("Win: %v Already Closed\n", w.Name)
-		}
-		return
-	}
-	// w.FocusInactivate()
 	if len(AllRenderWins) > 0 {
 		pfw := AllRenderWins[len(AllRenderWins)-1]
 		if DebugSettings.WinEventTrace {
