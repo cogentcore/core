@@ -72,7 +72,7 @@ func TestCopySlice(t *testing.T) {
 	}
 
 	var toc [][]float32
-	fmc := [][]string{[]string{"1", "2"}, []string{"3", "4"}}
+	fmc := [][]string{{"1", "2"}, {"3", "4"}}
 	err = CopySliceRobust(&toc, fmc)
 	if err != nil {
 		t.Errorf("copy [][]float = [][]string: %s\n", err.Error())
