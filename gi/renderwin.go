@@ -584,7 +584,8 @@ func (w *RenderWin) EventLoop() {
 // is redundant in this case, but other non-event-driven updates require
 // the lock protection.
 func (w *RenderWin) HandleEvent(e events.Event) {
-	w.RenderCtx().ReadLock()
+	rc := w.RenderCtx()
+	rc.ReadLock()
 	// we manually handle ReadUnlock's in this function instead of deferring
 	// it to avoid a cryptic "sync: can't unlock an already unlocked RWMutex"
 	// error when panicking in the rendering goroutine. This is critical for
@@ -596,12 +597,12 @@ func (w *RenderWin) HandleEvent(e events.Event) {
 	}
 	if et >= events.Window && et <= events.WindowPaint {
 		w.HandleWindowEvents(e)
-		w.RenderCtx().ReadUnlock()
+		rc.ReadUnlock()
 		return
 	}
 	// fmt.Printf("got event type: %v: %v\n", et.BitIndexString(), evi)
 	w.MainStageMgr.MainHandleEvent(e)
-	w.RenderCtx().ReadUnlock()
+	rc.ReadUnlock()
 }
 
 func (w *RenderWin) HandleWindowEvents(e events.Event) {
@@ -609,9 +610,10 @@ func (w *RenderWin) HandleWindowEvents(e events.Event) {
 	switch et {
 	case events.WindowPaint:
 		e.SetHandled()
-		w.RenderCtx().ReadUnlock() // one case where we need to break lock
+		rc := w.RenderCtx()
+		rc.ReadUnlock() // one case where we need to break lock
 		w.RenderWindow()
-		w.RenderCtx().ReadLock()
+		rc.ReadLock()
 		w.SendShowEvents()
 
 	case events.WindowResize:
@@ -625,9 +627,10 @@ func (w *RenderWin) HandleWindowEvents(e events.Event) {
 			// fmt.Printf("got close event for window %v \n", w.Name)
 			e.SetHandled()
 			w.StopEventLoop()
-			w.RenderCtx().ReadUnlock() // one case where we need to break lock
+			rc := w.RenderCtx()
+			rc.ReadUnlock() // one case where we need to break lock
 			w.Closed()
-			w.RenderCtx().ReadLock()
+			rc.ReadLock()
 		case events.WinMinimize:
 			e.SetHandled()
 			// on mobile platforms, we need to set the size to 0 so that it detects a size difference
@@ -939,12 +942,11 @@ func (w *RenderWin) RenderCtx() *RenderContext {
 func (w *RenderWin) RenderWindow() {
 	rc := w.RenderCtx()
 	rc.WriteLock()
-	rebuild := rc.HasFlag(RenderRebuild)
-
 	defer func() {
-		rc.WriteUnlock()
 		rc.SetFlag(false, RenderRebuild)
+		rc.WriteUnlock()
 	}()
+	rebuild := rc.HasFlag(RenderRebuild)
 
 	stageMods, sceneMods := w.MainStageMgr.UpdateAll() // handles all Scene / Widget updates!
 	top := w.MainStageMgr.Top()

@@ -194,7 +194,7 @@ func (tf *TextField) OnInit() {
 func (tf *TextField) OnAdd() {
 	tf.WidgetBase.OnAdd()
 	tf.OnClose(func(e events.Event) {
-		tf.EditDone()
+		tf.EditDone() // todo: this must be protected against something else, for race detector
 	})
 }
 

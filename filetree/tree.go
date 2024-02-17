@@ -114,7 +114,8 @@ func (ft *Tree) OpenPath(path string) {
 
 // UpdateAll does a full update of the tree -- calls ReadDir on current path
 func (ft *Tree) UpdateAll() {
-	updt := ft.UpdateStartAsync() // note: safe for async updating
+	// updt := ft.UpdateStartAsync() // note: safe for async updating
+	updt := ft.UpdateStart()
 	// fmt.Println(ft, "updt all start")
 	ft.UpdtMu.Lock()
 	ft.Dirs.ClearMarks()
@@ -126,7 +127,8 @@ func (ft *Tree) UpdateAll() {
 	ft.SetNeedsLayout(true)
 	ft.UpdtMu.Unlock()
 	// fmt.Println(ft, "updt all end")
-	ft.UpdateEndAsyncLayout(updt)
+	// ft.UpdateEndAsyncLayout(updt) // todo:
+	ft.UpdateEndLayout(updt)
 }
 
 // UpdatePath updates the tree at the directory level for given path

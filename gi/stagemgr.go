@@ -269,9 +269,7 @@ func (sm *StageMgr) Resize(rg mat32.Geom2DInt) {
 // and sceneMods = true if any Scenes have been modified.
 // Stage calls DoUpdate on its Scene, ensuring everything is updated at the
 // Widget level.  If nothing is needed, nothing is done.
-//
-//	This is called only during RenderWin.RenderWindow,
-//
+// This is called only during RenderWin.RenderWindow,
 // under the global RenderCtx.Mu Write lock so nothing else can happen.
 func (sm *StageMgr) UpdateAll() (stageMods, sceneMods bool) {
 	sm.Mu.Lock()

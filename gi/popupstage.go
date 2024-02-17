@@ -50,8 +50,9 @@ func (st *Stage) RunPopup() *Stage {
 
 	// note: completer and potentially other things drive popup creation asynchronously
 	// so we need to protect here *before* pushing the new guy on the stack, and during closing.
-	ms.RenderCtx.Mu.RLock()
-	defer ms.RenderCtx.Mu.RUnlock()
+	rc := ms.RenderCtx
+	rc.ReadLock()
+	defer rc.ReadUnlock()
 
 	if st.Type == SnackbarStage {
 		// only one snackbar can exist
@@ -133,8 +134,9 @@ func (st *Stage) ClosePopup() {
 		return
 	}
 	// note: essential to lock here for async popups like completer
-	st.MainMgr.RenderCtx.Mu.RLock()
-	defer st.MainMgr.RenderCtx.Mu.RUnlock()
+	rc := st.MainMgr.RenderCtx
+	rc.ReadLock()
+	defer rc.ReadUnlock()
 
 	st.PopupMgr.DeleteStage(st)
 }
@@ -148,8 +150,9 @@ func (st *Stage) ClosePopupAndBelow() {
 		return
 	}
 	// note: essential to lock here for async popups like completer
-	st.MainMgr.RenderCtx.Mu.RLock()
-	defer st.MainMgr.RenderCtx.Mu.RUnlock()
+	rc := st.MainMgr.RenderCtx
+	rc.ReadLock()
+	defer rc.ReadUnlock()
 
 	st.PopupMgr.DeleteStageAndBelow(st)
 }

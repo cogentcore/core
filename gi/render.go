@@ -123,7 +123,8 @@ func (wb *WidgetBase) UpdateEnd(updt bool) {
 // UpdateStartAsync must be called for any asynchronous update
 // that happens outside of the usual user event-driven, same-thread
 // updates, or other updates that can happen during standard layout / rendering.
-// It waits for any current Render update to finish, via RenderCtx().ReadLock().
+// It waits for any current Render or Event update to finish,
+// via RenderCtx().WriteLock().
 // If the parent Scene has been deleted, or it is already updating, it will
 // just block indefinitely.
 // It must be paired with an UpdateEndAsync.
@@ -136,10 +137,10 @@ func (wb *WidgetBase) UpdateStartAsync() bool {
 	if rc == nil {
 		select {}
 	}
-	rc.ReadLock()
+	rc.WriteLock()
 	updt := wb.UpdateStart()
 	if !updt {
-		rc.ReadUnlock()
+		rc.WriteUnlock()
 		select {}
 	}
 	wb.Scene.SetFlag(true, ScUpdating)
@@ -154,9 +155,9 @@ func (wb *WidgetBase) UpdateEndAsync(updt bool) {
 	if rc == nil {
 		return
 	}
+	rc.WriteUnlock()
 	wb.Scene.SetFlag(false, ScUpdating)
 	wb.UpdateEnd(updt)
-	rc.ReadUnlock()
 }
 
 // UpdateEndAsyncLayout should be called instead of [UpdateEndAsync]
