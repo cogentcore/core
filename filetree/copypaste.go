@@ -41,7 +41,7 @@ func (fn *Node) MimeData(md *mimedata.Mimes) {
 			slog.Error(err.Error())
 			return
 		}
-		fd := &mimedata.Data{fn.Info.Mime, b}
+		fd := &mimedata.Data{Type: fn.Info.Mime, Data: b}
 		*md = append(*md, fd)
 	} else {
 		*md = append(*md, mimedata.NewTextData("File exceeds BigFileSize"))
@@ -280,7 +280,7 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 	}
 }
 
-// Dragged is called after target accepts the drop -- we just remove
+// DropDeleteSource is called after target accepts the drop -- we just remove
 // elements that were moved
 // satisfies gi.DragNDropper interface and can be overridden by subtypes
 func (fn *Node) DropDeleteSource(e events.Event) {

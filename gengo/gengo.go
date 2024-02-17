@@ -53,7 +53,7 @@ func PrintHeader(w io.Writer, pkg string, imports ...string) {
 	}
 }
 
-// Inspect goes through all of the files in the given package
+// Inspect goes through all the files in the given package
 // and calls the given function on each node in files that
 // are not generated. The bool return value from the given function
 // indicates whether to continue traversing down the AST tree
