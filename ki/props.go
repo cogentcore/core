@@ -14,7 +14,9 @@ type Props struct {
 	cmap.ConcurrentMap[string, any]
 }
 
-func NewProps() *Props { return &Props{ConcurrentMap: cmap.New[any]()} }
+func NewProps() *Props {
+	return &Props{ConcurrentMap: cmap.New[any]()}
+}
 
 // PropStruct is a struct of Name and Value, for use in a PropSlice to hold
 // properties that require order information (maps do not retain any order)
