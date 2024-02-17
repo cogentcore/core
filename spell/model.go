@@ -174,7 +174,7 @@ func (md *Model) WriteTo(w io.Writer) error {
 	w.Write([]byte(fmt.Sprintf(`"maxcount": %d`, md.Maxcount)))
 	w.Write([]byte(",\n"))
 	w.Write([]byte(`"suggest": {`))
-	w.Write([]byte(nline))
+	w.Write(nline)
 
 	n = len(md.Suggest)
 	keys = make([]string, n)

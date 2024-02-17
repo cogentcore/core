@@ -229,7 +229,7 @@ func (ed *Editor) WordAt() (reg textbuf.Region) {
 		for ech < sz {
 			r2 := rune(-1)
 			if ech < sz-1 {
-				r2 = rune(txt[ech+1])
+				r2 = txt[ech+1]
 			}
 			if gi.IsWordBreak(txt[ech], r2) {
 				break
@@ -248,7 +248,7 @@ func (ed *Editor) WordAt() (reg textbuf.Region) {
 		for ech < sz {
 			r2 := rune(-1)
 			if ech < sz-1 {
-				r2 = rune(txt[ech+1])
+				r2 = txt[ech+1]
 			}
 			if gi.IsWordBreak(txt[ech], r2) {
 				break

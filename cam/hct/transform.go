@@ -86,7 +86,7 @@ func Spin(c color.Color, amount float32) color.RGBA {
 func MinHueDistance(a, b float32) float32 {
 	d1 := b - a
 	d2 := (b + 360) - a
-	d3 := (b - (a + 360))
+	d3 := b - (a + 360)
 	d1a := mat32.Abs(d1)
 	d2a := mat32.Abs(d2)
 	d3a := mat32.Abs(d3)

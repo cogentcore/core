@@ -242,7 +242,7 @@ func ToValue(it any, tags string) Value {
 		if _, ok := it.([]rune); ok {
 			return &RuneSliceValue{}
 		}
-		isstru := (laser.NonPtrType(eltyp).Kind() == reflect.Struct)
+		isstru := laser.NonPtrType(eltyp).Kind() == reflect.Struct
 		if !forceNoInline && (forceInline || (!isstru && sz <= gi.SystemSettings.SliceInlineLength && !ki.IsKi(eltyp))) {
 			return &SliceInlineValue{}
 		} else {
@@ -497,7 +497,7 @@ func (vv *SliceValue) GetTypeInfo() {
 	vv.IsArray = laser.NonPtrType(reflect.TypeOf(slci)).Kind() == reflect.Array
 	if slci != nil && !laser.AnyIsNil(slci) {
 		vv.ElType = laser.SliceElType(slci)
-		vv.ElIsStruct = (laser.NonPtrType(vv.ElType).Kind() == reflect.Struct)
+		vv.ElIsStruct = laser.NonPtrType(vv.ElType).Kind() == reflect.Struct
 	}
 }
 
@@ -565,7 +565,7 @@ func (vv *SliceInlineValue) UpdateWidget() {
 	if reflect.TypeOf(vv.Value).Kind() != reflect.Pointer { // prevent crash on non-comparable
 		newslc = true
 	} else {
-		newslc = (sv.Slice != csl)
+		newslc = sv.Slice != csl
 	}
 	if newslc {
 		sv.SetSlice(csl)

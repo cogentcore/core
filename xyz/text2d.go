@@ -72,7 +72,7 @@ func (txt *Text2D) TextSize() (mat32.Vec2, bool) {
 		return sz, false
 	}
 	tsz := tx.Image().Bounds().Size()
-	fsz := float32(txt.Styles.Font.Size.Dots)
+	fsz := txt.Styles.Font.Size.Dots
 	if fsz == 0 {
 		fsz = 36
 	}

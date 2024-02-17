@@ -280,7 +280,7 @@ func SetCylinderSector(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.Arra
 			i1 := idxsOrig[pos]
 			i2 := idxsOrig[pos+1]
 			i3 := idxsOrig[pos+3]
-			idxAry.Set(ii, uint32(vOff+i1), uint32(vOff+i2), uint32(vOff+i3))
+			idxAry.Set(ii, vOff+i1, vOff+i2, vOff+i3)
 			ii += 3
 		}
 	}
@@ -340,7 +340,7 @@ func SetCylinderSector(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.Arra
 			i1 := idxsOrig[pos]
 			i2 := idxsOrig[pos+3]
 			i3 := idxsOrig[pos+1]
-			idxAry.Set(ii, uint32(vOff+i1), uint32(vOff+i2), uint32(vOff+i3))
+			idxAry.Set(ii, vOff+i1, vOff+i2, vOff+i3)
 			ii += 3
 		}
 	}

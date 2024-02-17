@@ -174,7 +174,7 @@ func AreGoModulesUsed() (bool, error) {
 			AreGoModulesUsedResult.err = err
 			return
 		}
-		outstr := strings.TrimSpace(string(out))
+		outstr := strings.TrimSpace(out)
 		AreGoModulesUsedResult.used = outstr != ""
 	})
 	return AreGoModulesUsedResult.used, AreGoModulesUsedResult.err
@@ -228,5 +228,5 @@ func GoEnv(name string) string {
 	if err != nil {
 		panic(err) // the Go tool was tested to work earlier
 	}
-	return strings.TrimSpace(string(val))
+	return strings.TrimSpace(val)
 }

@@ -17,7 +17,7 @@ type WidgetFlags ki.Flags //enums:bitflag
 
 const (
 	// NeedsRender needs to be rendered on next render iteration
-	NeedsRender WidgetFlags = WidgetFlags(ki.FlagsN) + iota
+	NeedsRender = WidgetFlags(ki.FlagsN) + iota
 )
 
 // StateIs returns whether the widget has the given [states.States] flag set

@@ -50,9 +50,9 @@ func FromNRGBAF32(r, g, b, a float32) color.RGBA {
 
 var (
 	// RGBAF32Model is the model for converting colors to [RGBAF32] colors
-	RGBAF32Model color.Model = color.ModelFunc(rgbaf32Model)
+	RGBAF32Model = color.ModelFunc(rgbaf32Model)
 	// NRGBAF32Model is the model for converting colors to [NRGBAF32] colors
-	NRGBAF32Model color.Model = color.ModelFunc(nrgbaf32Model)
+	NRGBAF32Model = color.ModelFunc(nrgbaf32Model)
 )
 
 func rgbaf32Model(c color.Color) color.Color {

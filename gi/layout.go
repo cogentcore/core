@@ -40,7 +40,7 @@ const (
 	// for stacked layout, only layout the top widget.
 	// this is appropriate for e.g., tab layout, which does a full
 	// redraw on stack changes, but not for e.g., check boxes which don't
-	LayoutStackTopOnly LayoutFlags = LayoutFlags(WidgetFlagsN) + iota
+	LayoutStackTopOnly = LayoutFlags(WidgetFlagsN) + iota
 
 	// true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration
 	LayoutNeedsRedo

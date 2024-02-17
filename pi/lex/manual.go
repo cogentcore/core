@@ -233,23 +233,23 @@ func MarkupPathsAsLinks(flds []string, maxFlds int) (orig, link []byte) {
 			continue
 		}
 		fnflds := strings.Split(ff, ":")
-		fn := string(fnflds[0])
+		fn := fnflds[0]
 		pos := ""
 		col := ""
 		if len(fnflds) > 1 {
-			pos = string(fnflds[1])
+			pos = fnflds[1]
 			col = ""
 			if len(fnflds) > 2 {
-				col = string(fnflds[2])
+				col = fnflds[2]
 			}
 		}
 		lstr := ""
 		if col != "" {
-			lstr = fmt.Sprintf(`<a href="file:///%v#L%vC%v">%v</a>`, fn, pos, col, string(ff))
+			lstr = fmt.Sprintf(`<a href="file:///%v#L%vC%v">%v</a>`, fn, pos, col, ff)
 		} else if pos != "" {
-			lstr = fmt.Sprintf(`<a href="file:///%v#L%v">%v</a>`, fn, pos, string(ff))
+			lstr = fmt.Sprintf(`<a href="file:///%v#L%v">%v</a>`, fn, pos, ff)
 		} else {
-			lstr = fmt.Sprintf(`<a href="file:///%v">%v</a>`, fn, string(ff))
+			lstr = fmt.Sprintf(`<a href="file:///%v">%v</a>`, fn, ff)
 		}
 		orig = []byte(ff)
 		link = []byte(lstr)

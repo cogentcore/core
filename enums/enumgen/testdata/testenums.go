@@ -18,7 +18,7 @@ const (
 type Foods Fruits //enums:enum
 
 const (
-	Bread Foods = Foods(FruitsN) + iota
+	Bread = Foods(FruitsN) + iota
 	Lettuce
 	Cheese
 	Meat
@@ -89,5 +89,5 @@ const (
 type MoreLanguages Languages //enums:bitflag -no-accept-lower
 
 const (
-	Perl MoreLanguages = MoreLanguages(LanguagesN) + iota
+	Perl = MoreLanguages(LanguagesN) + iota
 )

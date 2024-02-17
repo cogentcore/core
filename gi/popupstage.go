@@ -79,7 +79,7 @@ func (st *Stage) RunPopup() *Stage {
 	switch st.Type {
 	case MenuStage:
 		sz.X += scrollWd * 2
-		maxht := int(SystemSettings.MenuMaxHeight * fontHt)
+		maxht := SystemSettings.MenuMaxHeight * fontHt
 		sz.Y = min(maxht, sz.Y)
 	case SnackbarStage:
 		b := msc.SceneGeom.Bounds()

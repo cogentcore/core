@@ -246,13 +246,13 @@ type TypeEls []TypeEl
 
 // Add adds a new type element
 func (te *TypeEls) Add(nm, typ string) {
-	(*te) = append(*te, TypeEl{Name: nm, Type: typ})
+	*te = append(*te, TypeEl{Name: nm, Type: typ})
 }
 
 // CopyFrom copies from another list
 func (te *TypeEls) CopyFrom(cp TypeEls) {
 	for _, t := range cp {
-		(*te) = append(*te, t)
+		*te = append(*te, t)
 	}
 }
 

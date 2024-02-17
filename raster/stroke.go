@@ -358,8 +358,8 @@ func (r *Stroker) StrokeEdge(p C2Point, crossProd fixed.Int26_6) {
 			xt, intersect := RayCircleIntersection(s1.Add(p.TTan), s1, cl, rl)
 			if intersect {
 				ray1, ray2 := xt.Sub(cl), s2.Sub(cl)
-				clockwise := (ray1.X*ray2.Y > ray1.Y*ray2.X) // Sign of xprod
-				if Length(p.P.Sub(xt)) < r.MLimit {          // within miter limit
+				clockwise := ray1.X*ray2.Y > ray1.Y*ray2.X // Sign of xprod
+				if Length(p.P.Sub(xt)) < r.MLimit {        // within miter limit
 					StrokeArc(ra, cl, xt, s2, clockwise, 0, 0, ra.Line)
 					ra.Line(s2)
 					return
@@ -445,7 +445,7 @@ func (r *Stroker) StrokeEdge(p C2Point, crossProd fixed.Int26_6) {
 			xt, intersect := ClosestPortside(s1, s2, xt1, xt2, gIntersect)
 			if intersect {
 				ray1, ray2 := s1.Sub(ct), xt.Sub(ct)
-				clockwiseT := (ray1.X*ray2.Y > ray1.Y*ray2.X)
+				clockwiseT := ray1.X*ray2.Y > ray1.Y*ray2.X
 				ray1, ray2 = xt.Sub(cl), s2.Sub(cl)
 				clockwiseL := ray1.X*ray2.Y > ray1.Y*ray2.X
 
@@ -555,9 +555,9 @@ func DoCalcCurvature(r Raster) bool {
 	case *Filler:
 		return false // never for filler
 	case *Stroker:
-		return (q.JoinMode == Arc || q.JoinMode == ArcClip)
+		return q.JoinMode == Arc || q.JoinMode == ArcClip
 	case *Dasher:
-		return (q.JoinMode == Arc || q.JoinMode == ArcClip)
+		return q.JoinMode == Arc || q.JoinMode == ArcClip
 	default:
 		return true // Better safe than sorry if another raster type is used
 	}

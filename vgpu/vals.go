@@ -158,7 +158,7 @@ func (vl *Val) Bytes() []byte {
 // Set Mod flag when changes have been made.
 func (vl *Val) Floats32() mat32.ArrayF32 {
 	nf := vl.AllocSize / 4
-	return mat32.ArrayF32((*[ByteCopyMemoryLimit]float32)(vl.MemPtr)[:nf])
+	return (*[ByteCopyMemoryLimit]float32)(vl.MemPtr)[:nf]
 }
 
 // UInts32 returns mat32.ArrayU32 of the Val data -- can be written to directly.
@@ -167,7 +167,7 @@ func (vl *Val) Floats32() mat32.ArrayF32 {
 // Set Mod flag when changes have been made.
 func (vl *Val) UInts32() mat32.ArrayU32 {
 	nf := vl.AllocSize / 4
-	return mat32.ArrayU32((*[ByteCopyMemoryLimit]uint32)(vl.MemPtr)[:nf])
+	return (*[ByteCopyMemoryLimit]uint32)(vl.MemPtr)[:nf]
 }
 
 // PaddedArrayCheck checks if this is an array with padding on the elements

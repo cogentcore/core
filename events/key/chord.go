@@ -35,7 +35,7 @@ func NewChord(rn rune, code Codes, mods Modifiers) Chord {
 		if len(modstr) > 0 {
 			return Chord(modstr + string(unicode.ToUpper(rn))) // all modded keys are uppercase!
 		} else {
-			return Chord(string(rn))
+			return Chord(rn)
 		}
 	}
 	// now convert code
@@ -68,13 +68,13 @@ func (ch Chord) Decode() (r rune, code Codes, mods Modifiers, err error) {
 		r = rs[0]
 		return
 	}
-	cstr := string(cs)
+	cstr := cs
 	code.SetString(cstr)
 	if code != CodeUnknown {
 		r = 0
 		return
 	}
-	err = fmt.Errorf("goosi/events/key.DecodeChord got more/less than one rune: %v from remaining chord: %v", rs, string(cs))
+	err = fmt.Errorf("goosi/events/key.DecodeChord got more/less than one rune: %v from remaining chord: %v", rs, cs)
 	return
 }
 

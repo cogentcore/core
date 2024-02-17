@@ -136,12 +136,12 @@ func TestBezierCube(t *testing.T) {
 		}
 		//t.Log("Bez to", len(r1x), "lines")
 		for i, v := range r1x {
-			if mat32.Abs(float32(v-r2x[i])) > epsilon {
+			if mat32.Abs(v-r2x[i]) > epsilon {
 				t.Error("x mismatch", v, "vs", r2x[i], " diff ", v-r2x[i])
 			}
 		}
 		for i, v := range r1y {
-			if mat32.Abs(float32(v-r2y[i])) > epsilon {
+			if mat32.Abs(v-r2y[i]) > epsilon {
 				t.Error("y mismatch", v, "vs", r2y[i], " diff ", v-r2y[i])
 			}
 		}
@@ -177,12 +177,12 @@ func TestBezierQuad(t *testing.T) {
 		}
 		//t.Log("Bez to", len(r1x), "lines")
 		for i, v := range r1x {
-			if mat32.Abs(float32(v-r2x[i])) > epsilon {
+			if mat32.Abs(v-r2x[i]) > epsilon {
 				t.Error("x mismatch", v, "vs", r2x[i], " diff ", v-r2x[i])
 			}
 		}
 		for i, v := range r1y {
-			if mat32.Abs(float32(v-r2y[i])) > epsilon {
+			if mat32.Abs(v-r2y[i]) > epsilon {
 				t.Error("y mismatch", v, "vs", r2y[i], " diff ", v-r2y[i])
 			}
 		}

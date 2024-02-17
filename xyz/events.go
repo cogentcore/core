@@ -75,7 +75,7 @@ func (sc *Scene) MouseScrollEvent(e *events.MouseScroll) {
 	pt := e.Pos()
 	sz := sc.Geom.Size
 	cdist := mat32.Max(sc.Camera.DistTo(sc.Camera.Target), 1.0)
-	zoom := float32(e.Delta.Y) // float32(e.ScrollNonZeroDelta(false))
+	zoom := e.Delta.Y // float32(e.ScrollNonZeroDelta(false))
 	zoomDel := float32(.02) * cdist
 	switch {
 	case e.HasAllModifiers(key.Alt):

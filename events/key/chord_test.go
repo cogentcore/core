@@ -23,10 +23,10 @@ func RunChordDecode(ch Chord, t *testing.T) {
 }
 
 func TestChordDecode(t *testing.T) {
-	RunChordDecode(Chord("a"), t)
-	RunChordDecode(Chord("Control+A"), t)
-	RunChordDecode(Chord("ReturnEnter"), t)
-	RunChordDecode(Chord("KeypadEnter"), t)
-	RunChordDecode(Chord("Backspace"), t)
-	RunChordDecode(Chord("Escape"), t)
+	RunChordDecode("a", t)
+	RunChordDecode("Control+A", t)
+	RunChordDecode("ReturnEnter", t)
+	RunChordDecode("KeypadEnter", t)
+	RunChordDecode("Backspace", t)
+	RunChordDecode("Escape", t)
 }

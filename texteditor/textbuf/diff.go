@@ -128,7 +128,7 @@ func (dif Diffs) ToPatch(bstr []string) Patch {
 	for pi, op := range dif {
 		pr := &PatchRec{Op: op}
 		if op.Tag == 'r' || op.Tag == 'i' {
-			nl := (op.J2 - op.J1)
+			nl := op.J2 - op.J1
 			pr.Blines = make([]string, nl)
 			for i := 0; i < nl; i++ {
 				pr.Blines[i] = bstr[op.J1+i]
@@ -154,14 +154,14 @@ func (pt Patch) Apply(astr []string) []string {
 	for _, pr := range pt {
 		switch pr.Op.Tag {
 		case 'e':
-			nl := (pr.Op.J2 - pr.Op.J1)
+			nl := pr.Op.J2 - pr.Op.J1
 			for i := 0; i < nl; i++ {
 				if pr.Op.I1+i < sz {
 					bstr[pr.Op.J1+i] = astr[pr.Op.I1+i]
 				}
 			}
 		case 'r', 'i':
-			nl := (pr.Op.J2 - pr.Op.J1)
+			nl := pr.Op.J2 - pr.Op.J1
 			for i := 0; i < nl; i++ {
 				bstr[pr.Op.J1+i] = pr.Blines[i]
 			}

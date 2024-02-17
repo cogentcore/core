@@ -79,8 +79,8 @@ func Scale2D(x, y float32) Mat2 {
 }
 
 func Rotate2D(angle float32) Mat2 {
-	c := float32(Cos(angle))
-	s := float32(Sin(angle))
+	c := Cos(angle)
+	s := Sin(angle)
 	return Mat2{
 		c, s,
 		-s, c,

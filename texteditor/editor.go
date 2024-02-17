@@ -244,7 +244,7 @@ type EditorFlags gi.WidgetFlags //enums:bitflag -trim-prefix View
 
 const (
 	// EditorHasLineNos indicates that this editor has line numbers (per Buf option)
-	EditorHasLineNos EditorFlags = EditorFlags(gi.WidgetFlagsN) + iota
+	EditorHasLineNos = EditorFlags(gi.WidgetFlagsN) + iota
 
 	// EditorNeedsLayout is set by SetNeedsLayout: Editor does significant
 	// internal layout in LayoutAllLines, and its layout is simply based
@@ -359,7 +359,7 @@ func (ed *Editor) SetBuf(buf *Buf) *Editor {
 // LinesInserted inserts new lines of text and reformats them
 func (ed *Editor) LinesInserted(tbe *textbuf.Edit) {
 	stln := tbe.Reg.Start.Ln + 1
-	nsz := (tbe.Reg.End.Ln - tbe.Reg.Start.Ln)
+	nsz := tbe.Reg.End.Ln - tbe.Reg.Start.Ln
 	if stln > len(ed.Renders) { // invalid
 		return
 	}

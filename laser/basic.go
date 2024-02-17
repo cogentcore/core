@@ -187,15 +187,15 @@ func ToBool(v any) (bool, error) {
 	vk := npv.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
-		return (npv.Int() != 0), nil
+		return npv.Int() != 0, nil
 	case vk >= reflect.Uint && vk <= reflect.Uint64:
-		return (npv.Uint() != 0), nil
+		return npv.Uint() != 0, nil
 	case vk == reflect.Bool:
 		return npv.Bool(), nil
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
-		return (npv.Float() != 0.0), nil
+		return npv.Float() != 0.0, nil
 	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
-		return (real(npv.Complex()) != 0.0), nil
+		return real(npv.Complex()) != 0.0, nil
 	case vk == reflect.String:
 		r, err := strconv.ParseBool(npv.String())
 		if err != nil {
@@ -778,12 +778,12 @@ func ToString(v any) string {
 		}
 		return strconv.FormatFloat(float64(*vt), 'G', -1, 32)
 	case uintptr:
-		return fmt.Sprintf("%#x", uintptr(vt))
+		return fmt.Sprintf("%#x", vt)
 	case *uintptr:
 		if vt == nil {
 			return nilstr
 		}
-		return fmt.Sprintf("%#x", uintptr(*vt))
+		return fmt.Sprintf("%#x", *vt)
 
 	case int8:
 		return strconv.FormatInt(int64(vt), 10)

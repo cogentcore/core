@@ -75,11 +75,11 @@ func AlphaBlend(dst, src color.Color) color.RGBA {
 
 	dr, dg, db, da := dst.RGBA()
 	sr, sg, sb, sa := src.RGBA()
-	a := (m - sa)
+	a := m - sa
 
-	res.R = uint8((uint32(dr)*a/m + sr) >> 8)
-	res.G = uint8((uint32(dg)*a/m + sg) >> 8)
-	res.B = uint8((uint32(db)*a/m + sb) >> 8)
-	res.A = uint8((uint32(da)*a/m + sa) >> 8)
+	res.R = uint8((dr*a/m + sr) >> 8)
+	res.G = uint8((dg*a/m + sg) >> 8)
+	res.B = uint8((db*a/m + sb) >> 8)
+	res.A = uint8((da*a/m + sa) >> 8)
 	return res
 }

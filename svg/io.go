@@ -787,7 +787,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 
 // SaveXML saves the svg to a XML-encoded file, using WriteXML
 func (sv *SVG) SaveXML(fname string) error {
-	filename := string(fname)
+	filename := fname
 	fp, err := os.Create(filename)
 	if err != nil {
 		log.Println(err)
@@ -985,7 +985,7 @@ func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
 	}
 	enc.EncodeToken(se)
 	if text != "" {
-		cd := xml.CharData([]byte(text))
+		cd := xml.CharData(text)
 		enc.EncodeToken(cd)
 	}
 	return se.Name.Local

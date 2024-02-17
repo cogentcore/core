@@ -43,7 +43,7 @@ func isAlpha(ch rune) bool {
 }
 
 func isDigit(ch rune) bool {
-	return ('0' <= ch && ch <= '9')
+	return '0' <= ch && ch <= '9'
 }
 
 func isAlphanum(ch rune) bool {

@@ -210,8 +210,8 @@ func SetDiskSector(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32
 	// Generate the segments
 	for i := 0; i <= segs; i++ {
 		segment := angStRad + float32(i)/float32(segs)*angLenRad
-		vx := float32(radius * mat32.Cos(segment))
-		vy := float32(radius * mat32.Sin(segment))
+		vx := radius * mat32.Cos(segment)
+		vy := radius * mat32.Sin(segment)
 		pt.Set(vx, vy, 0)
 		pt.SetAdd(pos)
 

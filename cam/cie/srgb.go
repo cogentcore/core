@@ -23,7 +23,7 @@ func SRGBFmLinearComp(lin float32) float32 {
 	if lin <= 0.0031308 {
 		gv = 12.92 * lin
 	} else {
-		gv = (1.055*mat32.Pow(lin, 1.0/2.4) - 0.055)
+		gv = 1.055*mat32.Pow(lin, 1.0/2.4) - 0.055
 	}
 	return mat32.Clamp(gv, 0, 1)
 }

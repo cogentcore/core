@@ -275,7 +275,7 @@ func (mgr *WinGeomPrefsMgr) RecordPref(win *RenderWin) {
 	}
 	mgr.Cache[winName][sc.Name] = wgr
 	if mgr.saveTimer == nil {
-		mgr.saveTimer = time.AfterFunc(time.Duration(mgr.SaveDelay), func() {
+		mgr.saveTimer = time.AfterFunc(mgr.SaveDelay, func() {
 			mgr.Mu.Lock()
 			mgr.SaveCached()
 			mgr.saveTimer = nil

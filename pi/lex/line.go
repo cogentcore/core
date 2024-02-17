@@ -83,7 +83,7 @@ func (ll *Line) AddSort(lx Lex) {
 
 // Sort sorts the lex elements by starting pos, and ending pos *decreasing* if a tie
 func (ll *Line) Sort() {
-	sort.Slice((*ll), func(i, j int) bool {
+	sort.Slice(*ll, func(i, j int) bool {
 		return (*ll)[i].St < (*ll)[j].St || ((*ll)[i].St == (*ll)[j].St && (*ll)[i].Ed > (*ll)[j].Ed)
 	})
 }

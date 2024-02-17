@@ -266,115 +266,115 @@ func (gp *GPU) CheckGPUOpts(feats *vk.PhysicalDeviceFeatures, opts *GPUOpts, rep
 		hasOpt := false
 		switch op {
 		case OptRobustBufferAccess:
-			hasOpt = (feats.RobustBufferAccess == vk.True)
+			hasOpt = feats.RobustBufferAccess == vk.True
 		case OptFullDrawIndexUint32:
-			hasOpt = (feats.FullDrawIndexUint32 == vk.True)
+			hasOpt = feats.FullDrawIndexUint32 == vk.True
 		case OptImageCubeArray:
-			hasOpt = (feats.ImageCubeArray == vk.True)
+			hasOpt = feats.ImageCubeArray == vk.True
 		case OptIndependentBlend:
-			hasOpt = (feats.IndependentBlend == vk.True)
+			hasOpt = feats.IndependentBlend == vk.True
 		case OptGeometryShader:
-			hasOpt = (feats.GeometryShader == vk.True)
+			hasOpt = feats.GeometryShader == vk.True
 		case OptTessellationShader:
-			hasOpt = (feats.TessellationShader == vk.True)
+			hasOpt = feats.TessellationShader == vk.True
 		case OptSampleRateShading:
-			hasOpt = (feats.SampleRateShading == vk.True)
+			hasOpt = feats.SampleRateShading == vk.True
 		case OptDualSrcBlend:
-			hasOpt = (feats.DualSrcBlend == vk.True)
+			hasOpt = feats.DualSrcBlend == vk.True
 		case OptLogicOp:
-			hasOpt = (feats.LogicOp == vk.True)
+			hasOpt = feats.LogicOp == vk.True
 		case OptMultiDrawIndirect:
-			hasOpt = (feats.MultiDrawIndirect == vk.True)
+			hasOpt = feats.MultiDrawIndirect == vk.True
 		case OptDrawIndirectFirstInstance:
-			hasOpt = (feats.DrawIndirectFirstInstance == vk.True)
+			hasOpt = feats.DrawIndirectFirstInstance == vk.True
 		case OptDepthClamp:
-			hasOpt = (feats.DepthClamp == vk.True)
+			hasOpt = feats.DepthClamp == vk.True
 		case OptDepthBiasClamp:
-			hasOpt = (feats.DepthBiasClamp == vk.True)
+			hasOpt = feats.DepthBiasClamp == vk.True
 		case OptFillModeNonSolid:
-			hasOpt = (feats.FillModeNonSolid == vk.True)
+			hasOpt = feats.FillModeNonSolid == vk.True
 		case OptDepthBounds:
-			hasOpt = (feats.DepthBounds == vk.True)
+			hasOpt = feats.DepthBounds == vk.True
 		case OptWideLines:
-			hasOpt = (feats.WideLines == vk.True)
+			hasOpt = feats.WideLines == vk.True
 		case OptLargePoints:
-			hasOpt = (feats.LargePoints == vk.True)
+			hasOpt = feats.LargePoints == vk.True
 		case OptAlphaToOne:
-			hasOpt = (feats.AlphaToOne == vk.True)
+			hasOpt = feats.AlphaToOne == vk.True
 		case OptMultiViewport:
-			hasOpt = (feats.MultiViewport == vk.True)
+			hasOpt = feats.MultiViewport == vk.True
 		case OptSamplerAnisotropy:
-			hasOpt = (feats.SamplerAnisotropy == vk.True)
+			hasOpt = feats.SamplerAnisotropy == vk.True
 		case OptTextureCompressionETC2:
-			hasOpt = (feats.TextureCompressionETC2 == vk.True)
+			hasOpt = feats.TextureCompressionETC2 == vk.True
 		case OptTextureCompressionASTC_LDR:
-			hasOpt = (feats.TextureCompressionASTC_LDR == vk.True)
+			hasOpt = feats.TextureCompressionASTC_LDR == vk.True
 		case OptTextureCompressionBC:
-			hasOpt = (feats.TextureCompressionBC == vk.True)
+			hasOpt = feats.TextureCompressionBC == vk.True
 		case OptOcclusionQueryPrecise:
-			hasOpt = (feats.OcclusionQueryPrecise == vk.True)
+			hasOpt = feats.OcclusionQueryPrecise == vk.True
 		case OptPipelineStatisticsQuery:
-			hasOpt = (feats.PipelineStatisticsQuery == vk.True)
+			hasOpt = feats.PipelineStatisticsQuery == vk.True
 		case OptVertexPipelineStoresAndAtomics:
-			hasOpt = (feats.VertexPipelineStoresAndAtomics == vk.True)
+			hasOpt = feats.VertexPipelineStoresAndAtomics == vk.True
 		case OptFragmentStoresAndAtomics:
-			hasOpt = (feats.FragmentStoresAndAtomics == vk.True)
+			hasOpt = feats.FragmentStoresAndAtomics == vk.True
 		case OptShaderTessellationAndGeometryPointSize:
-			hasOpt = (feats.ShaderTessellationAndGeometryPointSize == vk.True)
+			hasOpt = feats.ShaderTessellationAndGeometryPointSize == vk.True
 		case OptShaderImageGatherExtended:
-			hasOpt = (feats.ShaderImageGatherExtended == vk.True)
+			hasOpt = feats.ShaderImageGatherExtended == vk.True
 		case OptShaderStorageImageExtendedFormats:
-			hasOpt = (feats.ShaderStorageImageExtendedFormats == vk.True)
+			hasOpt = feats.ShaderStorageImageExtendedFormats == vk.True
 		case OptShaderStorageImageMultisample:
-			hasOpt = (feats.ShaderStorageImageMultisample == vk.True)
+			hasOpt = feats.ShaderStorageImageMultisample == vk.True
 		case OptShaderStorageImageReadWithoutFormat:
-			hasOpt = (feats.ShaderStorageImageReadWithoutFormat == vk.True)
+			hasOpt = feats.ShaderStorageImageReadWithoutFormat == vk.True
 		case OptShaderStorageImageWriteWithoutFormat:
-			hasOpt = (feats.ShaderStorageImageWriteWithoutFormat == vk.True)
+			hasOpt = feats.ShaderStorageImageWriteWithoutFormat == vk.True
 		case OptShaderUniformBufferArrayDynamicIndexing:
-			hasOpt = (feats.ShaderUniformBufferArrayDynamicIndexing == vk.True)
+			hasOpt = feats.ShaderUniformBufferArrayDynamicIndexing == vk.True
 		case OptShaderSampledImageArrayDynamicIndexing:
-			hasOpt = (feats.ShaderSampledImageArrayDynamicIndexing == vk.True)
+			hasOpt = feats.ShaderSampledImageArrayDynamicIndexing == vk.True
 		case OptShaderStorageBufferArrayDynamicIndexing:
-			hasOpt = (feats.ShaderStorageBufferArrayDynamicIndexing == vk.True)
+			hasOpt = feats.ShaderStorageBufferArrayDynamicIndexing == vk.True
 		case OptShaderStorageImageArrayDynamicIndexing:
-			hasOpt = (feats.ShaderStorageImageArrayDynamicIndexing == vk.True)
+			hasOpt = feats.ShaderStorageImageArrayDynamicIndexing == vk.True
 		case OptShaderClipDistance:
-			hasOpt = (feats.ShaderClipDistance == vk.True)
+			hasOpt = feats.ShaderClipDistance == vk.True
 		case OptShaderCullDistance:
-			hasOpt = (feats.ShaderCullDistance == vk.True)
+			hasOpt = feats.ShaderCullDistance == vk.True
 		case OptShaderFloat64:
-			hasOpt = (feats.ShaderFloat64 == vk.True)
+			hasOpt = feats.ShaderFloat64 == vk.True
 		case OptShaderInt64:
-			hasOpt = (feats.ShaderInt64 == vk.True)
+			hasOpt = feats.ShaderInt64 == vk.True
 		case OptShaderInt16:
-			hasOpt = (feats.ShaderInt16 == vk.True)
+			hasOpt = feats.ShaderInt16 == vk.True
 		case OptShaderResourceResidency:
-			hasOpt = (feats.ShaderResourceResidency == vk.True)
+			hasOpt = feats.ShaderResourceResidency == vk.True
 		case OptShaderResourceMinLod:
-			hasOpt = (feats.ShaderResourceMinLod == vk.True)
+			hasOpt = feats.ShaderResourceMinLod == vk.True
 		case OptSparseBinding:
-			hasOpt = (feats.SparseBinding == vk.True)
+			hasOpt = feats.SparseBinding == vk.True
 		case OptSparseResidencyBuffer:
-			hasOpt = (feats.SparseResidencyBuffer == vk.True)
+			hasOpt = feats.SparseResidencyBuffer == vk.True
 		case OptSparseResidencyImage2D:
-			hasOpt = (feats.SparseResidencyImage2D == vk.True)
+			hasOpt = feats.SparseResidencyImage2D == vk.True
 		case OptSparseResidencyImage3D:
-			hasOpt = (feats.SparseResidencyImage3D == vk.True)
+			hasOpt = feats.SparseResidencyImage3D == vk.True
 		case OptSparseResidency2Samples:
-			hasOpt = (feats.SparseResidency2Samples == vk.True)
+			hasOpt = feats.SparseResidency2Samples == vk.True
 		case OptSparseResidency4Samples:
-			hasOpt = (feats.SparseResidency4Samples == vk.True)
+			hasOpt = feats.SparseResidency4Samples == vk.True
 		case OptSparseResidency8Samples:
-			hasOpt = (feats.SparseResidency8Samples == vk.True)
+			hasOpt = feats.SparseResidency8Samples == vk.True
 		case OptSparseResidency16Samples:
-			hasOpt = (feats.SparseResidency16Samples == vk.True)
+			hasOpt = feats.SparseResidency16Samples == vk.True
 		case OptSparseResidencyAliased:
-			hasOpt = (feats.SparseResidencyAliased == vk.True)
+			hasOpt = feats.SparseResidencyAliased == vk.True
 		case OptVariableMultisampleRate:
-			hasOpt = (feats.VariableMultisampleRate == vk.True)
+			hasOpt = feats.VariableMultisampleRate == vk.True
 		case OptInheritedQueries:
-			hasOpt = (feats.InheritedQueries == vk.True)
+			hasOpt = feats.InheritedQueries == vk.True
 		}
 		switch st {
 		case Required:

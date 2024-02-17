@@ -113,12 +113,12 @@ func (ed *Editor) CharEndPos(pos lex.Pos) mat32.Vec2 {
 	spos := ed.RenderStartPos()
 	pos.Ln = min(pos.Ln, ed.NLines-1)
 	if pos.Ln < 0 {
-		spos.Y += float32(ed.LinesSize.Y)
+		spos.Y += ed.LinesSize.Y
 		spos.X += ed.LineNoOff
 		return spos
 	}
 	if pos.Ln >= len(ed.Offs) {
-		spos.Y += float32(ed.LinesSize.Y)
+		spos.Y += ed.LinesSize.Y
 		spos.X += ed.LineNoOff
 		return spos
 	}
@@ -503,7 +503,7 @@ func (ed *Editor) RenderLineNo(ln int, defFill bool) {
 func (ed *Editor) FirstVisibleLine(stln int) int {
 	bb := ed.Geom.ContentBBox
 	if stln == 0 {
-		perln := float32(ed.LinesSize.Y) / float32(ed.NLines)
+		perln := ed.LinesSize.Y / float32(ed.NLines)
 		// stln = int(float32(bb.Min.Y-ed.ObjBBox.Min.Y)/perln) - 1 // todo: scroll
 		stln = int(ed.Geom.Scroll.Y/perln) - 1
 		if stln < 0 {

@@ -310,7 +310,7 @@ func (l *Layout) AutoScrollDim(d mat32.Dims, sti, posi int) bool {
 	} else {
 		pct := maxd / ssz
 		if pct < .1 && sb.Value < smax {
-			dst = min(dst, (smax - sb.Value))
+			dst = min(dst, smax - sb.Value)
 			l.ScrollActionDelta(d, dst)
 			return true
 		}
@@ -370,7 +370,7 @@ func (l *Layout) ScrollToBoxDim(d mat32.Dims, tmini, tmaxi int) bool {
 		return true
 	} else {
 		if (tmax - tmin) < sb.ScrollThumbValue() { // only if whole thing fits
-			trg := sb.Value + float32(tmax-cmax) + h
+			trg := sb.Value + (tmax - cmax) + h
 			sb.SetValueAction(trg)
 			return true
 		}

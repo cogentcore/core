@@ -29,7 +29,7 @@ const (
 
 	fnUnmarshalText string = "UnmarshalText"
 	maxUint64       uint64 = (1 << 64) - 1
-	cutoff          uint64 = maxUint64 / 10
+	cutoff                 = maxUint64 / 10
 )
 
 var ErrBits = errors.New("unit with capital unit prefix and lower case unit (b) - bits, not bytes")

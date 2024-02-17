@@ -146,7 +146,7 @@ type NodeFlags ki.Flags //enums:bitflag
 
 const (
 	// WorldMatrixUpdated means that the Pose.WorldMatrix has been updated
-	WorldMatrixUpdated NodeFlags = NodeFlags(ki.FlagsN) + iota
+	WorldMatrixUpdated = NodeFlags(ki.FlagsN) + iota
 
 	// VectorsUpdated means that the rendering vectors information is updated
 	VectorsUpdated

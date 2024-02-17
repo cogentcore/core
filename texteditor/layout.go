@@ -44,9 +44,9 @@ func (ed *Editor) UpdateFromAlloc() {
 		ed.NLinesChars.Y = 40
 		ed.NLinesChars.X = 80
 	} else {
-		ed.NLinesChars.Y = int(mat32.Floor(float32(asz.Y) / ed.LineHeight))
+		ed.NLinesChars.Y = int(mat32.Floor(asz.Y / ed.LineHeight))
 		if sty.Font.Face != nil {
-			ed.NLinesChars.X = int(mat32.Floor(float32(asz.X) / sty.Font.Face.Metrics.Ch))
+			ed.NLinesChars.X = int(mat32.Floor(asz.X / sty.Font.Face.Metrics.Ch))
 		}
 	}
 	ed.LineLayoutSize.X -= ed.LineNoOff
@@ -179,7 +179,7 @@ func (ed *Editor) LayoutLine(ln int) bool {
 	sty := &ed.Styles
 	fst := sty.FontRender()
 	fst.Background = nil
-	mxwd := float32(ed.LinesSize.X)
+	mxwd := ed.LinesSize.X
 	needLay := false
 
 	ed.Buf.MarkupMu.RLock()

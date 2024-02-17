@@ -53,7 +53,7 @@ func TestNewAt(t *testing.T) {
 
 	// fmt.Printf("Fld: %v Typ: %v vf: %v vfi: %v vfT: %v vfp: %v canaddr: %v canset: %v caninterface: %v\n", fld.Name, vf.Type().String(), vf.String(), vf.Interface(), vf.Interface(), vf.Interface(), vf.CanAddr(), vf.CanSet(), vf.CanInterface())
 
-	vf.Elem().Set(reflect.ValueOf(int(10)))
+	vf.Elem().Set(reflect.ValueOf(10))
 
 	if pt.Mbr2 != 10 {
 		t.Errorf("Mbr2 should be 10, is: %v\n", pt.Mbr2)

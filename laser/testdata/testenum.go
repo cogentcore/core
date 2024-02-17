@@ -20,7 +20,7 @@ const (
 type Foods Fruits //enums:enum
 
 const (
-	Bread Foods = Foods(FruitsN) + iota
+	Bread = Foods(FruitsN) + iota
 	Lettuce
 	Cheese
 	Meat

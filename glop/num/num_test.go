@@ -7,7 +7,7 @@ package num
 import "testing"
 
 func TestConvert(t *testing.T) {
-	f32 := Convert[float32](int(2))
+	f32 := Convert[float32](2)
 	if f32 != 2 {
 		t.Errorf("failed: %g != 2", f32)
 	}

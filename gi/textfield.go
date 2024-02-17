@@ -1434,7 +1434,7 @@ func (tf *TextField) PixelToCursor(pt image.Point) int {
 	px := float32(pr.X)
 	st := &tf.Styles
 	n := len(tf.EditTxt)
-	c := tf.StartPos + int(float64(px/st.UnContext.Dots(units.UnitCh)))
+	c := tf.StartPos + int(px/st.UnContext.Dots(units.UnitCh))
 	c = min(c, n)
 
 	w := tf.RelCharPos(tf.StartPos, c).X
@@ -1974,10 +1974,10 @@ func IsWordBreak(r1, r2 rune) bool {
 	if unicode.IsSpace(r1) || unicode.IsSymbol(r1) {
 		return true
 	}
-	if unicode.IsPunct(r1) && r1 != rune('\'') {
+	if unicode.IsPunct(r1) && r1 != '\'' {
 		return true
 	}
-	if unicode.IsPunct(r1) && r1 == rune('\'') {
+	if unicode.IsPunct(r1) && r1 == '\'' {
 		if unicode.IsSpace(r2) || unicode.IsSymbol(r2) || unicode.IsPunct(r2) {
 			return true
 		}

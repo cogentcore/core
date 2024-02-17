@@ -120,7 +120,7 @@ func StyleFuncEnum[T any](initVal enums.Enum, getField func(obj *T) enums.EnumSe
 			return
 		}
 		iv, _ := laser.ToInt(val)
-		fp.SetInt64(int64(iv))
+		fp.SetInt64(iv)
 	}
 }
 
@@ -307,17 +307,17 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 	// TODO(kai/styprops): mutli-dim overflow
 	"overflow": StyleFuncEnum(OverflowAuto,
 		func(obj *Style) enums.EnumSetter { return &obj.Overflow.X }),
-	"columns": StyleFuncInt(int(0),
+	"columns": StyleFuncInt(0,
 		func(obj *Style) *int { return &obj.Columns }),
-	"row": StyleFuncInt(int(0),
+	"row": StyleFuncInt(0,
 		func(obj *Style) *int { return &obj.Row }),
-	"col": StyleFuncInt(int(0),
+	"col": StyleFuncInt(0,
 		func(obj *Style) *int { return &obj.Col }),
-	"row-span": StyleFuncInt(int(0),
+	"row-span": StyleFuncInt(0,
 		func(obj *Style) *int { return &obj.RowSpan }),
-	"col-span": StyleFuncInt(int(0),
+	"col-span": StyleFuncInt(0,
 		func(obj *Style) *int { return &obj.ColSpan }),
-	"z-index": StyleFuncInt(int(0),
+	"z-index": StyleFuncInt(0,
 		func(obj *Style) *int { return &obj.ZIndex }),
 	"scrollbar-width": StyleFuncUnits(units.Value{},
 		func(obj *Style) *units.Value { return &obj.ScrollBarWidth }),
@@ -469,7 +469,7 @@ var StyleTextFuncs = map[string]StyleFunc{
 		func(obj *Text) *units.Value { return &obj.Indent }),
 	"para-spacing": StyleFuncUnits(units.Value{},
 		func(obj *Text) *units.Value { return &obj.ParaSpacing }),
-	"tab-size": StyleFuncInt(int(4),
+	"tab-size": StyleFuncInt(4,
 		func(obj *Text) *int { return &obj.TabSize }),
 }
 

@@ -355,7 +355,7 @@ const (
 	// ScUpdating means scene is in the process of updating:
 	// set for any kind of tree-level update.
 	// skip any further update passes until it goes off.
-	ScUpdating ScFlags = ScFlags(WidgetFlagsN) + iota
+	ScUpdating = ScFlags(WidgetFlagsN) + iota
 
 	// ScNeedsRender means nodes have flagged that they need a Render
 	// update.

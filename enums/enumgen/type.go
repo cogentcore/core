@@ -162,7 +162,7 @@ func (b ByValue) Len() int      { return len(b) }
 func (b ByValue) Swap(i, j int) { b[i], b[j] = b[j], b[i] }
 func (b ByValue) Less(i, j int) bool {
 	if b[i].Signed {
-		return int64(b[i].Value) < int64(b[j].Value)
+		return b[i].Value < b[j].Value
 	}
 	return b[i].Value < b[j].Value
 }

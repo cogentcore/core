@@ -65,7 +65,7 @@ func (gl *GoLang) CompleteBuiltins(fs *pi.FileState, seed string, md *complete.M
 // BuiltinTypeKind are the type names and kinds for builtin Go primitive types
 // (i.e., those with names)
 var BuiltinTypeKind = []syms.TypeKindSize{
-	{"int", syms.Int, int(unsafe.Sizeof(int(0)))},
+	{"int", syms.Int, int(unsafe.Sizeof(0))},
 	{"int8", syms.Int8, 1},
 	{"int16", syms.Int16, 2},
 	{"int32", syms.Int32, 4},

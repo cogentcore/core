@@ -77,7 +77,7 @@ const (
 	// NodeOpen means file is open. For directories, this means that
 	// sub-files should be / have been loaded. For files, means that they
 	// have been opened e.g., for editing.
-	NodeOpen NodeFlags = NodeFlags(giv.TreeViewFlagsN) + iota
+	NodeOpen = NodeFlags(giv.TreeViewFlagsN) + iota
 
 	// NodeSymLink indicates that file is a symbolic link.
 	// File info is all for the target of the symlink.

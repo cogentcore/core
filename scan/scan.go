@@ -277,14 +277,14 @@ func (s *Scanner) Line(b fixed.Point26_6) {
 		x0fTimes2 := (int(x0) - (64 * x0i)) * 2
 		// Do the first pixel.
 		dcover := int(edge1 - y0f)
-		darea := int(x0fTimes2 * dcover)
+		darea := x0fTimes2 * dcover
 		s.Area += darea
 		s.Cover += dcover
 		yi += yiDelta
 		s.SetCell(x0i, yi)
 		// Do all the intermediate pixels.
 		dcover = int(edge1 - edge0)
-		darea = int(x0fTimes2 * dcover)
+		darea = x0fTimes2 * dcover
 		for yi != y1i {
 			s.Area += darea
 			s.Cover += dcover
@@ -293,7 +293,7 @@ func (s *Scanner) Line(b fixed.Point26_6) {
 		}
 		// Do the last pixel.
 		dcover = int(y1f - edge0)
-		darea = int(x0fTimes2 * dcover)
+		darea = x0fTimes2 * dcover
 		s.Area += darea
 		s.Cover += dcover
 

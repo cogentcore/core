@@ -509,5 +509,5 @@ const (
 	// Rendering means that the SVG is currently redrawing
 	// Can be useful to check for animations etc to decide whether to
 	// drive another update
-	IsDef NodeFlags = NodeFlags(ki.FlagsN) + iota
+	IsDef = NodeFlags(ki.FlagsN) + iota
 )

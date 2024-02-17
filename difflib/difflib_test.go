@@ -342,7 +342,7 @@ func TestOutputFormatTabDelimiter(t *testing.T) {
 		"--- Original\t2005-01-26 23:30:50\n",
 		"+++ Current\t2010-04-12 10:20:52\n",
 	})
-	cd, err := GetContextDiffString(ContextDiff(diff))
+	cd, err := GetContextDiffString(diff)
 	assertEqual(t, err, nil)
 	assertEqual(t, SplitLines(cd)[:2], []string{
 		"*** Original\t2005-01-26 23:30:50\n",
@@ -362,7 +362,7 @@ func TestOutputFormatNoTrailingTabOnEmptyFiledate(t *testing.T) {
 	assertEqual(t, err, nil)
 	assertEqual(t, SplitLines(ud)[:2], []string{"--- Original\n", "+++ Current\n"})
 
-	cd, err := GetContextDiffString(ContextDiff(diff))
+	cd, err := GetContextDiffString(diff)
 	assertEqual(t, err, nil)
 	assertEqual(t, SplitLines(cd)[:2], []string{"*** Original\n", "--- Current\n"})
 }
@@ -385,7 +385,7 @@ func TestOmitFilenames(t *testing.T) {
 		"\n",
 	})
 
-	cd, err := GetContextDiffString(ContextDiff(diff))
+	cd, err := GetContextDiffString(diff)
 	assertEqual(t, err, nil)
 	assertEqual(t, SplitLines(cd), []string{
 		"***************\n",

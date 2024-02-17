@@ -193,7 +193,7 @@ const (
 	// ScUpdating means scene is in the process of updating:
 	// set for any kind of tree-level update.
 	// skip any further update passes until it goes off.
-	ScUpdating ScFlags = ScFlags(ki.FlagsN) + iota
+	ScUpdating = ScFlags(ki.FlagsN) + iota
 
 	// ScNeedsConfig means that a GPU resource (Lights, Texture, Meshes,
 	// or more complex Nodes that require ConfigNodes) has been changed

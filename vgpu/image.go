@@ -35,7 +35,7 @@ func SRGBFmLinearComp(lin float32) float32 {
 	if lin <= 0.0031308 {
 		return 12.92 * lin
 	}
-	return (1.055*mat32.Pow(lin, 1/2.4) + 0.055)
+	return 1.055*mat32.Pow(lin, 1/2.4) + 0.055
 }
 
 // SRGBToLinear converts set of sRGB components to linear values,

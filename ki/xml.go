@@ -174,7 +174,7 @@ func DecodeXMLCharData(d *xml.Decoder) (val string, err error) {
 		}
 		switch tv := t.(type) {
 		case xml.CharData:
-			val = string([]byte(tv))
+			val = string(tv)
 			return
 		case xml.StartElement:
 			err = fmt.Errorf("ki.DecodeXMLCharData: got unexpected StartElement: %v", tv.Name)
@@ -219,7 +219,7 @@ func (sl *Slice) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 		return err
 	}
 	if name == "N" {
-		n64, err := strconv.ParseInt(string(val), 10, 64)
+		n64, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return err
 		}

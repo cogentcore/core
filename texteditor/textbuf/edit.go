@@ -131,13 +131,13 @@ func (te *Edit) AdjustPos(pos lex.Pos, del AdjustPosDel) lex.Pos {
 		}
 		// this means pos.Ln == te.Reg.End.Ln, Ch >= end
 		if dl == 0 {
-			pos.Ch -= (te.Reg.End.Ch - te.Reg.Start.Ch)
+			pos.Ch -= te.Reg.End.Ch - te.Reg.Start.Ch
 		} else {
 			pos.Ch -= te.Reg.End.Ch
 		}
 	} else {
 		if dl == 0 {
-			pos.Ch += (te.Reg.End.Ch - te.Reg.Start.Ch)
+			pos.Ch += te.Reg.End.Ch - te.Reg.Start.Ch
 		} else {
 			pos.Ln += dl
 		}

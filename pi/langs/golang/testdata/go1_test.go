@@ -947,7 +947,7 @@ const neg = -1
 
 const neg2 = -(2+2)
 
-const Prec1 = ((2-1) * 3)
+const Prec1 = (2-1) * 3
 
 const (
 	parn = 1 + (2 + 3)
@@ -1030,7 +1030,7 @@ func main() {
 	c[3] = 42 * 17
  	bf := a * b + c[32]
 	d += funcall(a, b, c...)
-	fmt.Printf("this is ok", gi.CallMe(a.(tree) + b.(*tree) + int(22) * string(17)))
+	fmt.Printf("this is ok", gi.CallMe(a.(tree) + b.(*tree) + 22* string(17)))
 }
 
 func mainrun() {

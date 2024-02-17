@@ -140,6 +140,6 @@ func (ph *Phong) Push(pl *vgpu.Pipeline, push *PushU) {
 	sy := &ph.Sys
 	cmd := sy.CmdPool.Buff
 	vars := sy.Vars()
-	pvar, _ := vars.VarByNameTry(int(vgpu.PushSet), "PushU")
+	pvar, _ := vars.VarByNameTry(vgpu.PushSet, "PushU")
 	pl.Push(cmd, pvar, unsafe.Pointer(push))
 }

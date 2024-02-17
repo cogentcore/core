@@ -42,7 +42,7 @@ func ToBase64JPG(img image.Image) ([]byte, string) {
 func Base64SplitLines(b []byte) []byte {
 	ll := 76
 	sz := len(b)
-	nl := (sz / ll)
+	nl := sz / ll
 	rb := make([]byte, sz+nl+1)
 	for i := 0; i < nl; i++ {
 		st := ll * i

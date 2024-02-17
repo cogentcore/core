@@ -181,7 +181,7 @@ func (pc PathCmds) EncCmd(n int) PathData {
 // PathDataNext gets the next path data point, incrementing the index
 func PathDataNext(data []PathData, i *int) float32 {
 	pd := data[*i]
-	(*i)++
+	*i++
 	return float32(pd)
 }
 
@@ -189,9 +189,9 @@ func PathDataNext(data []PathData, i *int) float32 {
 func PathDataNextVec(data []PathData, i *int) mat32.Vec2 {
 	v := mat32.Vec2{}
 	v.X = float32(data[*i])
-	(*i)++
+	*i++
 	v.Y = float32(data[*i])
-	(*i)++
+	*i++
 	return v
 }
 
@@ -200,9 +200,9 @@ func PathDataNextVec(data []PathData, i *int) mat32.Vec2 {
 func PathDataNextRel(data []PathData, i *int, cp mat32.Vec2) mat32.Vec2 {
 	v := mat32.Vec2{}
 	v.X = float32(data[*i])
-	(*i)++
+	*i++
 	v.Y = float32(data[*i])
-	(*i)++
+	*i++
 	return v.Add(cp)
 }
 
@@ -210,7 +210,7 @@ func PathDataNextRel(data []PathData, i *int, cp mat32.Vec2) mat32.Vec2 {
 // not an expression so its clunky
 func PathDataNextCmd(data []PathData, i *int) (PathCmds, int) {
 	pd := data[*i]
-	(*i)++
+	*i++
 	return pd.Cmd()
 }
 
@@ -351,8 +351,8 @@ func PathDataRender(data []PathData, pc *paint.Context) {
 			for np := 0; np < n/7; np++ {
 				rad := PathDataNextVec(data, &i)
 				ang := PathDataNext(data, &i)
-				largeArc := (PathDataNext(data, &i) != 0)
-				sweep := (PathDataNext(data, &i) != 0)
+				largeArc := PathDataNext(data, &i) != 0
+				sweep := PathDataNext(data, &i) != 0
 				prv := cp
 				if rel {
 					cp = PathDataNextRel(data, &i, cp)
@@ -546,9 +546,9 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIdx int
 				rad := PathDataNextVec(data, &i)
 				ang := PathDataNext(data, &i)
 				laf := PathDataNext(data, &i)
-				largeArc := (laf != 0)
+				largeArc := laf != 0
 				sf := PathDataNext(data, &i)
-				sweep := (sf != 0)
+				sweep := sf != 0
 
 				prv := cp
 				if rel {
@@ -1049,8 +1049,8 @@ func (g *Path) ApplyTransformImpl(xf mat32.Mat2, lpt mat32.Vec2) {
 			for np := 0; np < n/7; np++ {
 				rad := PathDataTransformRel(data, &i, xf, mat32.Vec2{})
 				ang := PathDataNext(data, &i)
-				largeArc := (PathDataNext(data, &i) != 0)
-				sweep := (PathDataNext(data, &i) != 0)
+				largeArc := PathDataNext(data, &i) != 0
+				sweep := PathDataNext(data, &i) != 0
 				pc := cp
 				if rel {
 					cp = PathDataTransformRel(data, &i, xf, cp)

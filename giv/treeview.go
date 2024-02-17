@@ -442,7 +442,7 @@ type TreeViewFlags gi.WidgetFlags //enums:bitflag -trim-prefix TreeViewFlag
 const (
 	// TreeViewFlagClosed means node is toggled closed
 	// (children not visible)  Otherwise Open.
-	TreeViewFlagClosed TreeViewFlags = TreeViewFlags(gi.WidgetFlagsN) + iota
+	TreeViewFlagClosed = TreeViewFlags(gi.WidgetFlagsN) + iota
 
 	// TreeViewFlagSelectMode, when set on the Root node, determines whether keyboard movements
 	// update selection or not.

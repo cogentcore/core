@@ -150,7 +150,7 @@ func NewBuf() *Buf {
 }
 
 func (tb *Buf) FlagType() enums.BitFlagSetter {
-	return (*BufFlags)(&tb.Flags)
+	return &tb.Flags
 }
 
 // BufSignals are signals that text buffer can send to View
@@ -220,7 +220,7 @@ type BufFlags gi.WidgetFlags //enums:bitflag -trim-prefix Buf
 
 const (
 	// BufAutoSaving is used in atomically safe way to protect autosaving
-	BufAutoSaving BufFlags = BufFlags(gi.WidgetFlagsN) + iota
+	BufAutoSaving = BufFlags(gi.WidgetFlagsN) + iota
 
 	// BufMarkingUp indicates current markup operation in progress -- don't redo
 	BufMarkingUp
@@ -1372,7 +1372,7 @@ func (tb *Buf) InsertTextRectImpl(tbe *textbuf.Edit) *textbuf.Edit {
 		ie.Reg.End.Ln = ed.Ln
 		tb.LinesInserted(ie)
 	}
-	nch := (ed.Ch - st.Ch)
+	nch := ed.Ch - st.Ch
 	for i := 0; i < nlns; i++ {
 		ln := st.Ln + i
 		lr := tb.Lines[ln]
@@ -1487,7 +1487,7 @@ func (tb *Buf) RegionRectImpl(st, ed lex.Pos) *textbuf.Edit {
 	tbe.Rect = true
 	// first get chars on start and end
 	nlns := (ed.Ln - st.Ln) + 1
-	nch := (ed.Ch - st.Ch)
+	nch := ed.Ch - st.Ch
 	tbe.Text = make([][]rune, nlns)
 	for i := 0; i < nlns; i++ {
 		ln := st.Ln + i
@@ -1565,7 +1565,7 @@ func (tb *Buf) LinesEdited(tbe *textbuf.Edit) {
 // must be called under lines mutex
 func (tb *Buf) LinesInserted(tbe *textbuf.Edit) {
 	stln := tbe.Reg.Start.Ln + 1
-	nsz := (tbe.Reg.End.Ln - tbe.Reg.Start.Ln)
+	nsz := tbe.Reg.End.Ln - tbe.Reg.Start.Ln
 
 	tb.MarkupMu.Lock()
 	tb.MarkupEdits = append(tb.MarkupEdits, tbe)
@@ -1813,7 +1813,7 @@ func (tb *Buf) MarkupAllLines(maxLines int) {
 				pfs.Src.LinesDeleted(stln, edln)
 			} else {
 				stln := tbe.Reg.Start.Ln + 1
-				nlns := (tbe.Reg.End.Ln - tbe.Reg.Start.Ln)
+				nlns := tbe.Reg.End.Ln - tbe.Reg.Start.Ln
 				pfs.Src.LinesInserted(stln, nlns)
 			}
 		}
@@ -1833,7 +1833,7 @@ func (tb *Buf) MarkupAllLines(maxLines int) {
 				mtags = append(mtags[:stln], mtags[edln:]...)
 			} else {
 				stln := tbe.Reg.Start.Ln + 1
-				nlns := (tbe.Reg.End.Ln - tbe.Reg.Start.Ln)
+				nlns := tbe.Reg.End.Ln - tbe.Reg.Start.Ln
 				tmpht := make([]lex.Line, nlns)
 				nht := append(mtags, tmpht...)
 				copy(nht[stln+nlns:], nht[stln:])

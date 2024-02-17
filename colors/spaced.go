@@ -38,7 +38,7 @@ func SpacedLight(index int) color.RGBA {
 	hue := hues[hi]
 	tone := toffs[hi] + tones[tci]
 	chroma := chromas[tci]
-	return hct.New(hue, float32(chroma), tone).AsRGBA()
+	return hct.New(hue, chroma, tone).AsRGBA()
 }
 
 // SpacedDark is the Dark mode version of Spaced
@@ -58,5 +58,5 @@ func SpacedDark(index int) color.RGBA {
 	hue := hues[hi]
 	tone := toffs[hi] + tones[tci]
 	chroma := chromas[tci]
-	return hct.New(hue, float32(chroma), tone).AsRGBA()
+	return hct.New(hue, chroma, tone).AsRGBA()
 }

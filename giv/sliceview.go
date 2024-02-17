@@ -95,7 +95,7 @@ type SliceViewFlags gi.WidgetFlags //enums:bitflag -trim-prefix SliceView
 
 const (
 	// SliceViewConfigured indicates that the widgets have been configured
-	SliceViewConfigured SliceViewFlags = SliceViewFlags(gi.WidgetFlagsN) + iota
+	SliceViewConfigured = SliceViewFlags(gi.WidgetFlagsN) + iota
 
 	// SliceViewIsArray is whether the slice is actually an array -- no modifications -- set by SetSlice
 	SliceViewIsArray

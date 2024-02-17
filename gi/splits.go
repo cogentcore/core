@@ -276,7 +276,7 @@ func (sl *Splits) HandleEvents() {
 		if err != nil {
 			return
 		}
-		kn := int(knc)
+		kn := knc
 		// fmt.Printf("kc: %v kns: %v kn: %v\n", kc, kns, kn)
 		if kn == 0 {
 			e.SetHandled()

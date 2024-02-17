@@ -670,10 +670,10 @@ func (ed *Editor) CursorKill() {
 		if si == wln-1 {
 			llen--
 		}
-		atEnd = (ri == llen)
+		atEnd = ri == llen
 	} else {
 		llen := ed.Buf.LineLen(pos.Ln)
-		atEnd = (ed.CursorPos.Ch == llen)
+		atEnd = ed.CursorPos.Ch == llen
 	}
 	if atEnd {
 		ed.CursorForward(1)

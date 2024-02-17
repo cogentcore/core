@@ -581,7 +581,7 @@ func TestTableMarshal(t *testing.T) {
 			}
 			// Config size can differ after serialization due to the loss of extended fields
 			// during reserialization, but the fixed portions of the Type header must not change.
-			if uint32(typ.headerByteSize)-typ.config.size != uint32(xtyp.headerByteSize)-uint32(xtyp.config.size) {
+			if uint32(typ.headerByteSize)-typ.config.size != uint32(xtyp.headerByteSize)-xtyp.config.size {
 				t.Fatal("fixed size header portions don't match")
 			}
 			if len(typ.indices) != len(xtyp.indices) {

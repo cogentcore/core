@@ -282,7 +282,7 @@ func (sp *Spinner) HandleEvents() {
 		}
 		se := e.(*events.MouseScroll)
 		se.SetHandled()
-		sp.IncrValue(float32(se.Delta.Y))
+		sp.IncrValue(se.Delta.Y)
 	})
 	sp.SetValidator(func() error {
 		text := sp.Text()

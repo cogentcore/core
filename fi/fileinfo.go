@@ -258,7 +258,7 @@ func (fi *FileInfo) Rename(path string) (newpath string, err error) { //gti:add
 	if err != nil {
 		return
 	}
-	err = os.Rename(string(orgpath), newpath)
+	err = os.Rename(orgpath, newpath)
 	if err == nil {
 		fi.Path = newpath
 		_, fi.Name = filepath.Split(newpath)

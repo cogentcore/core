@@ -117,9 +117,9 @@ func (vw *View) Update() {
 	f := 0.8 + (vw.Surround / 10)
 	// "Exponential non-linearity"
 	if f >= 0.9 {
-		vw.C = mat32.Lerp(0.59, 0.69, ((f - 0.9) * 10))
+		vw.C = mat32.Lerp(0.59, 0.69, (f - 0.9) * 10)
 	} else {
-		vw.C = mat32.Lerp(0.525, 0.59, ((f - 0.8) * 10))
+		vw.C = mat32.Lerp(0.525, 0.59, (f - 0.8) * 10)
 	}
 	// Calculate degree of adaptation to illuminant
 	d := float32(1)
