@@ -31,6 +31,9 @@ func main() {
 		go func() {
 			for i := 0; i < rows; i++ {
 				updt := tv.UpdateStartAsync()
+				if !updt {
+					return
+				}
 				table = append(table, &tableStruct{IntField: i, FloatField: float32(i) / 10.0})
 				tv.UpdateWidgets()
 				if len(table) > 0 {
