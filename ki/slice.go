@@ -249,7 +249,7 @@ func SliceDeleteAtIndex(sl *[]Ki, idx int) error {
 	sz := len(*sl)
 	copy((*sl)[idx:], (*sl)[idx+1:])
 	(*sl)[sz-1] = nil
-	(*sl) = (*sl)[:sz-1]
+	*sl = (*sl)[:sz-1]
 	return nil
 }
 
