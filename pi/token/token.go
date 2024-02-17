@@ -63,7 +63,7 @@ func (tk Tokens) InCat(other Tokens) bool {
 	return tk.Cat() == other.Cat()
 }
 
-// InCat returns true if this is in same sub-category as given token
+// InSubCat returns true if this is in same sub-category as given token
 func (tk Tokens) InSubCat(other Tokens) bool {
 	return tk.SubCat() == other.SubCat()
 }
@@ -103,12 +103,12 @@ func (tk Tokens) Match(otk Tokens) bool {
 
 // IsPunctGpLeft returns true if token is a PunctGpL token -- left paren, brace, bracket
 func (tk Tokens) IsPunctGpLeft() bool {
-	return (tk == PunctGpLParen || tk == PunctGpLBrack || tk == PunctGpLBrace)
+	return tk == PunctGpLParen || tk == PunctGpLBrack || tk == PunctGpLBrace
 }
 
 // IsPunctGpRight returns true if token is a PunctGpR token -- right paren, brace, bracket
 func (tk Tokens) IsPunctGpRight() bool {
-	return (tk == PunctGpRParen || tk == PunctGpRBrack || tk == PunctGpRBrace)
+	return tk == PunctGpRParen || tk == PunctGpRBrack || tk == PunctGpRBrace
 }
 
 // PunctGpMatch returns the matching token for given PunctGp token
@@ -134,21 +134,21 @@ func (tk Tokens) PunctGpMatch() Tokens {
 // a Unary or Binary operator -- need special matching for this.
 // includes * and & which are used for address operations in C-like languages
 func (tk Tokens) IsAmbigUnaryOp() bool {
-	return (tk == OpMathSub || tk == OpMathMul || tk == OpBitAnd || tk == OpMathAdd || tk == OpBitXor)
+	return tk == OpMathSub || tk == OpMathMul || tk == OpBitAnd || tk == OpMathAdd || tk == OpBitXor
 }
 
 // IsUnaryOp returns true if this token is an operator that is typically used as
 // a Unary operator: - + & * ! ^ ! <-
 func (tk Tokens) IsUnaryOp() bool {
-	return (tk == OpMathSub || tk == OpMathMul || tk == OpBitAnd || tk == OpMathAdd ||
-		tk == OpBitXor || tk == OpLogNot || tk == OpAsgnArrow)
+	return tk == OpMathSub || tk == OpMathMul || tk == OpBitAnd || tk == OpMathAdd ||
+		tk == OpBitXor || tk == OpLogNot || tk == OpAsgnArrow
 }
 
 // CombineRepeats are token types where repeated tokens of the same type should
 // be combined together -- literals, comments, text
 func (tk Tokens) CombineRepeats() bool {
 	cat := tk.Cat()
-	return (cat == Literal || cat == Comment || cat == Text || cat == Name)
+	return cat == Literal || cat == Comment || cat == Text || cat == Name
 }
 
 // StyleName returns the abbreviated 2-3 letter style name of the tag

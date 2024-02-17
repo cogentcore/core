@@ -123,7 +123,7 @@ func (ll *LangSupporter) OpenStd() error {
 		if err != nil {
 			continue
 		}
-		pr := NewParser()
+		pr := NewParser() //todo all Props must be init
 		err = pr.ReadJSON(pib)
 		if err != nil {
 			log.Println(err)
