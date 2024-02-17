@@ -103,88 +103,88 @@ type StyleEntry struct {
 
 // Norm normalizes the colors of the style entry such that they have consistent
 // chromas and tones that guarantee sufficient text contrast.
-func (se *StyleEntry) Norm() {
-	hc := hct.FromColor(se.Color)
+func (s *StyleEntry) Norm() {
+	hc := hct.FromColor(s.Color)
 	ctone := float32(40)
 	if matcolor.SchemeIsDark {
 		ctone = 80
 	}
-	se.Color = hc.WithChroma(max(hc.Chroma, 48)).WithTone(ctone).AsRGBA()
+	s.Color = hc.WithChroma(max(hc.Chroma, 48)).WithTone(ctone).AsRGBA()
 
-	if !colors.IsNil(se.Background) {
-		hb := hct.FromColor(se.Background)
+	if !colors.IsNil(s.Background) {
+		hb := hct.FromColor(s.Background)
 		btone := max(hb.Tone, 94)
 		if matcolor.SchemeIsDark {
 			btone = min(hb.Tone, 17)
 		}
-		se.Background = hb.WithChroma(max(hb.Chroma, 6)).WithTone(btone).AsRGBA()
+		s.Background = hb.WithChroma(max(hb.Chroma, 6)).WithTone(btone).AsRGBA()
 	}
 }
 
-func (se StyleEntry) String() string {
+func (s StyleEntry) String() string {
 	out := []string{}
-	if se.Bold != Pass {
-		out = append(out, se.Bold.Prefix("bold"))
+	if s.Bold != Pass {
+		out = append(out, s.Bold.Prefix("bold"))
 	}
-	if se.Italic != Pass {
-		out = append(out, se.Italic.Prefix("italic"))
+	if s.Italic != Pass {
+		out = append(out, s.Italic.Prefix("italic"))
 	}
-	if se.Underline != Pass {
-		out = append(out, se.Underline.Prefix("underline"))
+	if s.Underline != Pass {
+		out = append(out, s.Underline.Prefix("underline"))
 	}
-	if se.NoInherit {
+	if s.NoInherit {
 		out = append(out, "noinherit")
 	}
-	if !colors.IsNil(se.Color) {
-		out = append(out, colors.AsString(se.Color))
+	if !colors.IsNil(s.Color) {
+		out = append(out, colors.AsString(s.Color))
 	}
-	if !colors.IsNil(se.Background) {
-		out = append(out, "bg:"+colors.AsString(se.Background))
+	if !colors.IsNil(s.Background) {
+		out = append(out, "bg:"+colors.AsString(s.Background))
 	}
-	if !colors.IsNil(se.Border) {
-		out = append(out, "border:"+colors.AsString(se.Border))
+	if !colors.IsNil(s.Border) {
+		out = append(out, "border:"+colors.AsString(s.Border))
 	}
 	return strings.Join(out, " ")
 }
 
 // ToCSS converts StyleEntry to CSS attributes.
-func (se StyleEntry) ToCSS() string {
+func (s StyleEntry) ToCSS() string {
 	styles := []string{}
-	if !colors.IsNil(se.Color) {
-		styles = append(styles, "color: "+colors.AsString(se.Color))
+	if !colors.IsNil(s.Color) {
+		styles = append(styles, "color: "+colors.AsString(s.Color))
 	}
-	if !colors.IsNil(se.Background) {
-		styles = append(styles, "background-color: "+colors.AsString(se.Background))
+	if !colors.IsNil(s.Background) {
+		styles = append(styles, "background-color: "+colors.AsString(s.Background))
 	}
-	if se.Bold == Yes {
+	if s.Bold == Yes {
 		styles = append(styles, "font-weight: bold")
 	}
-	if se.Italic == Yes {
+	if s.Italic == Yes {
 		styles = append(styles, "font-style: italic")
 	}
-	if se.Underline == Yes {
+	if s.Underline == Yes {
 		styles = append(styles, "text-decoration: underline")
 	}
 	return strings.Join(styles, "; ")
 }
 
 // ToProps converts StyleEntry to ki.Props attributes.
-func (se StyleEntry) ToProps() ki.Props {
+func (s StyleEntry) ToProps() ki.Props {
 	pr := ki.Props{}
-	if !colors.IsNil(se.Color) {
-		pr["color"] = se.Color
+	if !colors.IsNil(s.Color) {
+		pr.Set("color", s.Color)
 	}
-	if !colors.IsNil(se.Background) {
-		pr["background-color"] = se.Background
+	if !colors.IsNil(s.Background) {
+		pr.Set("background-color", s.Background)
 	}
-	if se.Bold == Yes {
-		pr["font-weight"] = styles.WeightBold
+	if s.Bold == Yes {
+		pr.Set("font-weight", styles.WeightBold)
 	}
-	if se.Italic == Yes {
-		pr["font-style"] = styles.Italic
+	if s.Italic == Yes {
+		pr.Set("font-style", styles.Italic)
 	}
-	if se.Underline == Yes {
-		pr["text-decoration"] = 1 << uint32(styles.Underline)
+	if s.Underline == Yes {
+		pr.Set("text-decoration", 1<<uint32(styles.Underline))
 	}
 	return pr
 }
@@ -304,22 +304,22 @@ func (hs Style) ToCSS() map[token.Tokens]string {
 }
 
 // ToProps generates list of ki.Props for this style
-func (hs Style) ToProps() ki.Props {
-	pr := ki.Props{}
+func (hs *Style) ToProps() *ki.Props {
+	pr := ki.NewProps()
 	for ht, nm := range token.Names {
 		entry := hs.Tag(ht)
 		if entry.IsZero() {
 			if tp, ok := Props[ht]; ok {
-				pr["."+nm] = tp
+				pr.Set("."+nm, tp)
 			}
 			continue
 		}
-		pr["."+nm] = entry.ToProps()
+		pr.Set("."+nm, entry.ToProps())
 	}
 	return pr
 }
 
-// Open hi style from a JSON-formatted file.
+// OpenJSON hi style from a JSON-formatted file.
 func (hs Style) OpenJSON(filename gi.Filename) error {
 	b, err := os.ReadFile(string(filename))
 	if err != nil {
@@ -330,7 +330,7 @@ func (hs Style) OpenJSON(filename gi.Filename) error {
 	return json.Unmarshal(b, &hs)
 }
 
-// Save hi style to a JSON-formatted file.
+// SaveJSON hi style to a JSON-formatted file.
 func (hs Style) SaveJSON(filename gi.Filename) error {
 	b, err := json.MarshalIndent(hs, "", "  ")
 	if err != nil {
@@ -347,7 +347,7 @@ func (hs Style) SaveJSON(filename gi.Filename) error {
 
 // TagsProps are default properties for custom tags (tokens) -- if set in style then used
 // there but otherwise we use these as a fallback -- typically not overridden
-var Props = map[token.Tokens]ki.Props{
+var Props = map[token.Tokens]map[string]any{
 	token.TextSpellErr: {
 		"text-decoration": 1 << uint32(styles.DecoDottedUnderline), // bitflag!
 	},

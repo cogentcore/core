@@ -1222,7 +1222,10 @@ func (n *Node) Clone() Ki {
 func CopyFromRaw(kn, frm Ki) {
 	kn.Children().ConfigCopy(kn.This(), *frm.Children())
 	n := kn.AsKi()
-	fmp := *frm.Properties()
+	fmp := frm.Properties()
+	if fmp == nil {
+		return // xyz check
+	}
 	n.Props = NewProps()
 	fmp.IterCb(func(key string, v any) {
 		n.Props.Set(key, v)

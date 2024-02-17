@@ -58,7 +58,7 @@ func (ed *Editor) Render() {
 }
 
 // TextStyleProps returns the styling properties for text based on HiStyle Markup
-func (ed *Editor) TextStyleProps() ki.Props {
+func (ed *Editor) TextStyleProps() *ki.Props {
 	if ed.Buf == nil || !ed.Buf.Hi.HasHi() {
 		return nil
 	}

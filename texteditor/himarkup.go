@@ -42,7 +42,7 @@ type HiMarkup struct {
 	TabSize int
 
 	// Commpiled CSS properties for given highlighting style
-	CSSProps ki.Props `json:"-" xml:"-"`
+	CSSProps *ki.Props `json:"-" xml:"-"`
 
 	// pi parser state info
 	PiState *pi.FileStates
