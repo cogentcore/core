@@ -22,14 +22,16 @@ require (
 	github.com/mattn/go-shellwords v1.0.12
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/muesli/termenv v0.15.2
+	github.com/orcaman/concurrent-map/v2 v2.0.1
 	github.com/pelletier/go-toml/v2 v2.1.1
-	github.com/yuin/goldmark v1.6.0
+	github.com/stretchr/testify v1.8.4
+	github.com/yuin/goldmark v1.7.0
 	go.abhg.dev/goldmark/wikilink v0.5.0
 	golang.org/x/image v0.15.0
-	golang.org/x/mod v0.14.0
-	golang.org/x/net v0.20.0
-	golang.org/x/sys v0.16.0
-	golang.org/x/tools v0.17.0
+	golang.org/x/mod v0.15.0
+	golang.org/x/net v0.21.0
+	golang.org/x/sys v0.17.0
+	golang.org/x/tools v0.18.0
 	gopkg.in/fsnotify.v1 v1.4.7
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -48,7 +50,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/rivo/uniseg v0.4.4 // indirect
+	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
