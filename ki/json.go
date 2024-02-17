@@ -133,7 +133,9 @@ func (sl *Slice) UnmarshalJSON(b []byte) error {
 	nwk := make([]Ki, n) // allocate new slice containing *pointers* to kids
 
 	for i, kid := range *sl {
-		//todo bug: kid.Props must be init
+		if kid.Properties() == nil {
+			continue
+		}
 		nwk[i] = kid
 	}
 

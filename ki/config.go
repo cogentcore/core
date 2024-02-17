@@ -18,11 +18,11 @@ type TypeAndName struct {
 	Name string
 }
 
-// list of type-and-names -- can be created from a string spec
+// Config list of type-and-names -- can be created from a string spec
 type Config []TypeAndName
 
 func (t *Config) Add(typ *gti.Type, nm string) {
-	(*t) = append(*t, TypeAndName{typ, nm})
+	*t = append(*t, TypeAndName{typ, nm})
 }
 
 func (t Config) GoString() string {

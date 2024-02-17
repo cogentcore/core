@@ -50,70 +50,7 @@ func (pr *Parser) Init() {
 
 // NewParser returns a new initialized parser
 func NewParser() *Parser {
-	pr := &Parser{ //todo all Props must be init
-		Lexer: lex.Rule{
-			Node: ki.Node{
-				Nm:              "",
-				Flags:           0,
-				Props:           ki.NewProps(),
-				Par:             nil,
-				Kids:            nil,
-				Ths:             nil,
-				NumLifetimeKids: 0,
-			},
-			Off:       false,
-			Desc:      "",
-			Token:     0,
-			Match:     0,
-			Pos:       0,
-			String:    "",
-			Offset:    0,
-			SizeAdj:   0,
-			Acts:      nil,
-			Until:     "",
-			PushState: "",
-			NameMap:   false,
-			MatchLen:  0,
-			NmMap:     nil,
-		},
-		PassTwo: lex.PassTwo{
-			DoEos:     false,
-			Eol:       false,
-			Semi:      false,
-			Backslash: false,
-			RBraceEos: false,
-			EolToks:   nil,
-		},
-		Parser: parse.Rule{
-			Node: ki.Node{
-				Nm:              "",
-				Flags:           0,
-				Props:           ki.NewProps(),
-				Par:             nil,
-				Kids:            nil,
-				Ths:             nil,
-				NumLifetimeKids: 0,
-			},
-			Off:          false,
-			Desc:         "",
-			Rule:         "",
-			StackMatch:   "",
-			Ast:          0,
-			Acts:         nil,
-			OptTokMap:    false,
-			FirstTokMap:  false,
-			Rules:        nil,
-			Order:        nil,
-			FiTokMap:     nil,
-			FiTokElseIdx: 0,
-			ExclKeyIdx:   0,
-			ExclFwd:      nil, //need NewProps ?
-			ExclRev:      nil, //need NewProps ?
-		},
-		Filename:   "",
-		ReportErrs: false,
-		ModTime:    time.Time{},
-	}
+	pr := &Parser{}
 	pr.Init()
 	return pr
 }

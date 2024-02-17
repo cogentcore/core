@@ -122,7 +122,7 @@ func (s *StyleEntry) Norm() {
 }
 
 func (s StyleEntry) String() string {
-	out := []string{}
+	var out []string
 	if s.Bold != Pass {
 		out = append(out, s.Bold.Prefix("bold"))
 	}
@@ -169,8 +169,8 @@ func (s StyleEntry) ToCSS() string {
 }
 
 // ToProps converts StyleEntry to ki.Props attributes.
-func (s StyleEntry) ToProps() ki.Props {
-	pr := ki.Props{}
+func (s *StyleEntry) ToProps() *ki.Props {
+	pr := ki.NewProps()
 	if !colors.IsNil(s.Color) {
 		pr.Set("color", s.Color)
 	}
