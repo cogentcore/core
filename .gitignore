@@ -17,4 +17,7 @@ go.work.sum
 .idea
 
 gi/testdata
-/core/svg/testdata/
+core/svg/testdata/
+core/paint/testdata/
+core/giv/testdata/
+core/cursors/testdata/
