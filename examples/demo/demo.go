@@ -42,10 +42,10 @@ func main() {
 	values(ts)
 	other(ts)
 
-	// b.AddCloseDialog(func(d *gi.Body) bool {
-	// 	d.AddTitle("Are you sure?").AddText("Are you sure you want to close the Cogent Core Demo?")
-	// 	return true
-	// })
+	b.AddCloseDialog(func(d *gi.Body) bool {
+		d.AddTitle("Are you sure?").AddText("Are you sure you want to close the Cogent Core Demo?")
+		return true
+	})
 
 	b.RunMainWindow()
 }

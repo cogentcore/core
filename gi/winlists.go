@@ -161,9 +161,3 @@ var DialogRenderWins RenderWinList
 // MainRenderWins is the list of main windows (non-dialogs) that have been
 // created.
 var MainRenderWins RenderWinList
-
-// FocusRenderWins is a "recents" stack of window names that have focus
-// when a window gets focus, it pops to the top of this list
-// when a window is closed, it is removed from the list, and the top item
-// on the list gets focused.
-var FocusRenderWins []string
