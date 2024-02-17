@@ -154,8 +154,8 @@ func AsLayout(k ki.Ki) *Layout {
 }
 
 // AsLayout satisfies the [LayoutEmbedder] interface
-func (t *Layout) AsLayout() *Layout {
-	return t
+func (l *Layout) AsLayout() *Layout {
+	return l
 }
 
 //////////////////////////////////////////////////////////////
@@ -629,8 +629,8 @@ func (ls *LayImplState) String() string {
 }
 
 // StackTopWidget returns the StackTop element as a widget
-func (ly *Layout) StackTopWidget() (Widget, *WidgetBase) {
-	sn := ly.Child(ly.StackTop)
+func (l *Layout) StackTopWidget() (Widget, *WidgetBase) {
+	sn := l.Child(l.StackTop)
 	return AsWidget(sn)
 }
 
@@ -639,19 +639,19 @@ func (ly *Layout) StackTopWidget() (Widget, *WidgetBase) {
 // expand Actual and remain at their current styled actual values,
 // absorbing the extra content size within their own scrolling zone
 // (full size recorded in Internal).
-func (ly *Layout) LaySetContentFitOverflow(nsz mat32.Vec2, pass LayoutPasses) {
+func (l *Layout) LaySetContentFitOverflow(nsz mat32.Vec2, pass LayoutPasses) {
 	// todo: potentially the diff between Visible & Hidden is
 	// that Hidden also does Not expand beyond Alloc?
 	// can expt with that.
-	sz := &ly.Geom.Size
+	sz := &l.Geom.Size
 	asz := &sz.Actual.Content
 	isz := &sz.Internal
 	sz.SetInitContentMin(sz.Min) // start from style
 	*isz = nsz                   // internal is always accurate!
-	oflow := &ly.Styles.Overflow
-	nosz := pass == SizeUpPass && ly.Styles.IsFlexWrap()
+	oflow := &l.Styles.Overflow
+	nosz := pass == SizeUpPass && l.Styles.IsFlexWrap()
 	for d := mat32.X; d <= mat32.Y; d++ {
-		if (nosz || (!(ly.Scene != nil && ly.Scene.Is(ScPrefSizing)) && oflow.Dim(d) >= styles.OverflowAuto)) && ly.Par != nil {
+		if (nosz || (!(l.Scene != nil && l.Scene.Is(ScPrefSizing)) && oflow.Dim(d) >= styles.OverflowAuto)) && l.Par != nil {
 			continue
 		}
 		asz.SetDim(d, styles.ClampMin(asz.Dim(d), nsz.Dim(d)))
@@ -715,32 +715,32 @@ func (wb *WidgetBase) SizeUpParts() {
 
 /////////////// Layout
 
-func (ly *Layout) SizeUp() {
-	ly.SizeUpLay()
+func (l *Layout) SizeUp() {
+	l.SizeUpLay()
 }
 
 // SizeUpLay is the Layout standard SizeUp pass
-func (ly *Layout) SizeUpLay() {
-	if !ly.HasChildren() {
-		ly.SizeUpWidget() // behave like a widget
+func (l *Layout) SizeUpLay() {
+	if !l.HasChildren() {
+		l.SizeUpWidget() // behave like a widget
 		return
 	}
-	ly.SizeFromStyle()
-	ly.LayImpl.ScrollSize.SetZero() // we don't know yet
-	ly.LaySetInitCells()
-	ly.This().(Layouter).LayoutSpace()
-	ly.SizeUpChildren() // kids do their own thing
-	ly.SizeFromChildrenFit(0, SizeUpPass)
-	if ly.Parts != nil {
-		ly.Parts.SizeUp() // just to get sizes -- no std role in layout
+	l.SizeFromStyle()
+	l.LayImpl.ScrollSize.SetZero() // we don't know yet
+	l.LaySetInitCells()
+	l.This().(Layouter).LayoutSpace()
+	l.SizeUpChildren() // kids do their own thing
+	l.SizeFromChildrenFit(0, SizeUpPass)
+	if l.Parts != nil {
+		l.Parts.SizeUp() // just to get sizes -- no std role in layout
 	}
 }
 
 // LayoutSpace sets our Space based on Styles and Scroll.
 // Other layout types can change this if they want to.
-func (ly *Layout) LayoutSpace() {
-	ly.SpaceFromStyle()
-	ly.Geom.Size.Space.SetAdd(ly.LayImpl.ScrollSize)
+func (l *Layout) LayoutSpace() {
+	l.SpaceFromStyle()
+	l.Geom.Size.Space.SetAdd(l.LayImpl.ScrollSize)
 }
 
 // SizeUpChildren calls SizeUp on all the children of this node
@@ -752,15 +752,15 @@ func (wb *WidgetBase) SizeUpChildren() {
 }
 
 // SizeUpChildren calls SizeUp on all the children of this node
-func (ly *Layout) SizeUpChildren() {
-	if ly.Styles.Display == styles.Stacked && !ly.Is(LayoutStackTopOnly) {
-		ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+func (l *Layout) SizeUpChildren() {
+	if l.Styles.Display == styles.Stacked && !l.Is(LayoutStackTopOnly) {
+		l.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			kwi.SizeUp()
 			return ki.Continue
 		})
 		return
 	}
-	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	l.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwi.SizeUp()
 		return ki.Continue
 	})
@@ -768,43 +768,43 @@ func (ly *Layout) SizeUpChildren() {
 
 // SetInitCells sets the initial default assignment of cell indexes
 // to each widget, based on layout type.
-func (ly *Layout) LaySetInitCells() {
+func (l *Layout) LaySetInitCells() {
 	switch {
-	case ly.Styles.Display == styles.Flex:
-		if ly.Styles.Wrap {
-			ly.LaySetInitCellsWrap()
+	case l.Styles.Display == styles.Flex:
+		if l.Styles.Wrap {
+			l.LaySetInitCellsWrap()
 		} else {
-			ly.LaySetInitCellsFlex()
+			l.LaySetInitCellsFlex()
 		}
-	case ly.Styles.Display == styles.Stacked:
-		ly.LaySetInitCellsStacked()
-	case ly.Styles.Display == styles.Grid:
-		ly.LaySetInitCellsGrid()
+	case l.Styles.Display == styles.Stacked:
+		l.LaySetInitCellsStacked()
+	case l.Styles.Display == styles.Grid:
+		l.LaySetInitCellsGrid()
 	default:
-		ly.LaySetInitCellsStacked() // whatever
+		l.LaySetInitCellsStacked() // whatever
 	}
-	ly.LayImpl.InitCells()
-	ly.LaySetGapSizeFromCells()
-	ly.LayImpl.ShapeCheck(ly, "SizeUp")
-	// fmt.Println(ly, "SzUp Init", ly.LayImpl.Shape)
+	l.LayImpl.InitCells()
+	l.LaySetGapSizeFromCells()
+	l.LayImpl.ShapeCheck(l, "SizeUp")
+	// fmt.Println(l, "SzUp Init", l.LayImpl.Shape)
 }
 
-func (ly *Layout) LaySetGapSizeFromCells() {
-	li := &ly.LayImpl
-	li.Gap = ly.Styles.Gap.Dots().Floor()
+func (l *Layout) LaySetGapSizeFromCells() {
+	li := &l.LayImpl
+	li.Gap = l.Styles.Gap.Dots().Floor()
 	// note: this is not accurate for flex
 	li.GapSize.X = max(float32(li.Shape.X-1)*li.Gap.X, 0)
 	li.GapSize.Y = max(float32(li.Shape.Y-1)*li.Gap.Y, 0)
-	ly.Geom.Size.InnerSpace = li.GapSize
+	l.Geom.Size.InnerSpace = li.GapSize
 }
 
-func (ly *Layout) LaySetInitCellsFlex() {
-	li := &ly.LayImpl
-	li.MainAxis = mat32.Dims(ly.Styles.Direction)
+func (l *Layout) LaySetInitCellsFlex() {
+	li := &l.LayImpl
+	li.MainAxis = mat32.Dims(l.Styles.Direction)
 	ca := li.MainAxis.Other()
 	li.Wraps = nil
 	idx := 0
-	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	l.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		mat32.SetPointDim(&kwb.Geom.Cell, li.MainAxis, idx)
 		mat32.SetPointDim(&kwb.Geom.Cell, ca, 0)
 		idx++
@@ -812,18 +812,18 @@ func (ly *Layout) LaySetInitCellsFlex() {
 	})
 	if idx == 0 {
 		if DebugSettings.LayoutTrace {
-			fmt.Println(ly, "no items:", idx)
+			fmt.Println(l, "no items:", idx)
 		}
 	}
 	mat32.SetPointDim(&li.Shape, li.MainAxis, max(idx, 1)) // must be at least 1
 	mat32.SetPointDim(&li.Shape, ca, 1)
 }
 
-func (ly *Layout) LaySetInitCellsWrap() {
-	li := &ly.LayImpl
-	li.MainAxis = mat32.Dims(ly.Styles.Direction)
+func (l *Layout) LaySetInitCellsWrap() {
+	li := &l.LayImpl
+	li.MainAxis = mat32.Dims(l.Styles.Direction)
 	ni := 0
-	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	l.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		ni++
 		return ki.Continue
 	})
@@ -831,9 +831,9 @@ func (ly *Layout) LaySetInitCellsWrap() {
 		li.Shape = image.Point{1, 1}
 		li.Wraps = nil
 		li.GapSize.SetZero()
-		ly.Geom.Size.InnerSpace.SetZero()
+		l.Geom.Size.InnerSpace.SetZero()
 		if DebugSettings.LayoutTrace {
-			fmt.Println(ly, "no items:", ni)
+			fmt.Println(l, "no items:", ni)
 		}
 		return
 	}
@@ -849,15 +849,15 @@ func (ly *Layout) LaySetInitCellsWrap() {
 		li.Wraps[i] = n
 		sum += n
 	}
-	ly.LaySetWrapIdxs()
+	l.LaySetWrapIdxs()
 }
 
 // LaySetWrapIdxs sets indexes for Wrap case
-func (ly *Layout) LaySetWrapIdxs() {
-	li := &ly.LayImpl
+func (l *Layout) LaySetWrapIdxs() {
+	li := &l.LayImpl
 	idx := 0
 	var maxc image.Point
-	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	l.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		ic := li.WrapIdxToCoord(idx)
 		kwb.Geom.Cell = ic
 		if ic.X > maxc.X {
@@ -876,22 +876,22 @@ func (ly *Layout) LaySetWrapIdxs() {
 
 // UpdateStackedVisbility updates the visibility for Stacked layouts
 // so the StackTop widget is visible, and others are Invisible.
-func (ly *Layout) UpdateStackedVisibility() {
-	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		kwb.SetState(i != ly.StackTop, states.Invisible)
+func (l *Layout) UpdateStackedVisibility() {
+	l.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		kwb.SetState(i != l.StackTop, states.Invisible)
 		kwb.Geom.Cell = image.Point{0, 0}
 		return ki.Continue
 	})
 }
 
-func (ly *Layout) LaySetInitCellsStacked() {
-	ly.UpdateStackedVisibility()
-	ly.LayImpl.Shape = image.Point{1, 1}
+func (l *Layout) LaySetInitCellsStacked() {
+	l.UpdateStackedVisibility()
+	l.LayImpl.Shape = image.Point{1, 1}
 }
 
-func (ly *Layout) LaySetInitCellsGrid() {
-	n := len(*ly.Children())
-	cols := ly.Styles.Columns
+func (l *Layout) LaySetInitCellsGrid() {
+	n := len(*l.Children())
+	cols := l.Styles.Columns
 	if cols == 0 {
 		cols = int(mat32.Sqrt(float32(n)))
 	}
@@ -900,12 +900,12 @@ func (ly *Layout) LaySetInitCellsGrid() {
 		rows++
 	}
 	if rows == 0 || cols == 0 {
-		fmt.Println(ly, "no rows or cols:", rows, cols)
+		fmt.Println(l, "no rows or cols:", rows, cols)
 	}
-	ly.LayImpl.Shape = image.Point{max(cols, 1), max(rows, 1)}
+	l.LayImpl.Shape = image.Point{max(cols, 1), max(rows, 1)}
 	ci := 0
 	ri := 0
-	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	l.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwb.Geom.Cell = image.Point{ci, ri}
 		ci++
 		cs := kwb.Styles.ColSpan
@@ -925,12 +925,12 @@ func (ly *Layout) LaySetInitCellsGrid() {
 
 // SizeFromChildrenFit gathers Actual size from kids, and calls LaySetContentFitOverflow
 // to update Actual and Internal size based on this.
-func (ly *Layout) SizeFromChildrenFit(iter int, pass LayoutPasses) {
-	ksz := ly.This().(Layouter).SizeFromChildren(iter, SizeDownPass)
-	ly.LaySetContentFitOverflow(ksz, pass)
+func (l *Layout) SizeFromChildrenFit(iter int, pass LayoutPasses) {
+	ksz := l.This().(Layouter).SizeFromChildren(iter, SizeDownPass)
+	l.LaySetContentFitOverflow(ksz, pass)
 	if DebugSettings.LayoutTrace {
-		sz := &ly.Geom.Size
-		fmt.Println(ly, pass, "FromChildren:", ksz, "Content:", sz.Actual.Content, "Internal:", sz.Internal)
+		sz := &l.Geom.Size
+		fmt.Println(l, pass, "FromChildren:", ksz, "Content:", sz.Actual.Content, "Internal:", sz.Internal)
 	}
 }
 
@@ -938,27 +938,27 @@ func (ly *Layout) SizeFromChildrenFit(iter int, pass LayoutPasses) {
 // Different Layout types can alter this to present different Content
 // sizes for the layout process, e.g., if Content is sized to fit allocation,
 // as in the TopAppBar and Sliceview types.
-func (ly *Layout) SizeFromChildren(iter int, pass LayoutPasses) mat32.Vec2 {
+func (l *Layout) SizeFromChildren(iter int, pass LayoutPasses) mat32.Vec2 {
 	var ksz mat32.Vec2
-	if ly.Styles.Display == styles.Stacked {
-		ksz = ly.SizeFromChildrenStacked()
+	if l.Styles.Display == styles.Stacked {
+		ksz = l.SizeFromChildrenStacked()
 	} else {
-		ksz = ly.SizeFromChildrenCells(iter, pass)
+		ksz = l.SizeFromChildrenCells(iter, pass)
 	}
 	return ksz
 }
 
 // SizeFromChildrenCells for Flex, Grid
-func (ly *Layout) SizeFromChildrenCells(iter int, pass LayoutPasses) mat32.Vec2 {
+func (l *Layout) SizeFromChildrenCells(iter int, pass LayoutPasses) mat32.Vec2 {
 	// r   0   1   col X = max(X over rows), Y = sum(Y over rows)
 	//   +--+--+
 	// 0 |  |  |   row X = sum(X over cols), Y = max(Y over cols)
 	//   +--+--+
 	// 1 |  |  |
 	//   +--+--+
-	li := &ly.LayImpl
+	li := &l.LayImpl
 	li.InitCells()
-	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	l.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		cidx := kwb.Geom.Cell
 		sz := kwb.Geom.Size.Actual.Total
 		grw := kwb.Styles.Grow
@@ -996,7 +996,7 @@ func (ly *Layout) SizeFromChildrenCells(iter int, pass LayoutPasses) mat32.Vec2 
 		return ki.Continue
 	})
 	if DebugSettings.LayoutTraceDetail {
-		fmt.Println(ly, "SizeFromChildren")
+		fmt.Println(l, "SizeFromChildren")
 		fmt.Println(li.String())
 	}
 	ksz := li.CellsSize()
@@ -1004,10 +1004,10 @@ func (ly *Layout) SizeFromChildrenCells(iter int, pass LayoutPasses) mat32.Vec2 
 }
 
 // SizeFromChildrenStacked for stacked case
-func (ly *Layout) SizeFromChildrenStacked() mat32.Vec2 {
-	ly.LayImpl.InitCells()
-	_, kwb := ly.StackTopWidget()
-	li := &ly.LayImpl
+func (l *Layout) SizeFromChildrenStacked() mat32.Vec2 {
+	l.LayImpl.InitCells()
+	_, kwb := l.StackTopWidget()
+	li := &l.LayImpl
 	var ksz mat32.Vec2
 	if kwb != nil {
 		ksz = kwb.Geom.Size.Actual.Total
@@ -1081,19 +1081,19 @@ func (wb *WidgetBase) SizeDownChildren(iter int) bool {
 // The kids must have their Size.Alloc set prior to this, which
 // is what Layout type does.  Other special widget types can
 // do custom layout and call this too.
-func (ly *Layout) SizeDownChildren(iter int) bool {
-	if ly.Styles.Display == styles.Stacked && !ly.Is(LayoutStackTopOnly) {
+func (l *Layout) SizeDownChildren(iter int) bool {
+	if l.Styles.Display == styles.Stacked && !l.Is(LayoutStackTopOnly) {
 		redo := false
-		ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		l.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			re := kwi.SizeDown(iter)
-			if i == ly.StackTop {
+			if i == l.StackTop {
 				redo = redo || re
 			}
 			return ki.Continue
 		})
 		return redo
 	}
-	return ly.WidgetBase.SizeDownChildren(iter)
+	return l.WidgetBase.SizeDownChildren(iter)
 }
 
 // GrowToAllocSize returns the potential size that widget could grow,
@@ -1122,10 +1122,10 @@ func (wb *WidgetBase) GrowToAllocSize(act, alloc mat32.Vec2) (mat32.Vec2, bool) 
 
 /////////////// Layout
 
-func (ly *Layout) SizeDown(iter int) bool {
-	redo := ly.SizeDownLay(iter)
+func (l *Layout) SizeDown(iter int) bool {
+	redo := l.SizeDownLay(iter)
 	if redo && DebugSettings.LayoutTrace {
-		fmt.Println(ly, "SizeDown redo")
+		fmt.Println(l, "SizeDown redo")
 	}
 	return redo
 }
@@ -1133,30 +1133,30 @@ func (ly *Layout) SizeDown(iter int) bool {
 // SizeDownLay is the Layout standard SizeDown pass, returning true if another
 // iteration is required.  It allocates sizes to fit given parent-allocated
 // total size.
-func (ly *Layout) SizeDownLay(iter int) bool {
-	if !ly.HasChildren() || !ly.LayImpl.ShapeCheck(ly, "SizeDown") {
-		return ly.SizeDownWidget(iter) // behave like a widget
+func (l *Layout) SizeDownLay(iter int) bool {
+	if !l.HasChildren() || !l.LayImpl.ShapeCheck(l, "SizeDown") {
+		return l.SizeDownWidget(iter) // behave like a widget
 	}
-	sz := &ly.Geom.Size
+	sz := &l.Geom.Size
 	styles.SetClampMaxVec(&sz.Alloc.Content, sz.Max) // can't be more than max..
 	sz.SetTotalFromContent(&sz.Alloc)
 	if DebugSettings.LayoutTrace {
-		fmt.Println(ly, "Managing Alloc:", sz.Alloc.Content)
+		fmt.Println(l, "Managing Alloc:", sz.Alloc.Content)
 	}
-	chg := ly.This().(Layouter).ManageOverflow(iter, true) // this must go first.
+	chg := l.This().(Layouter).ManageOverflow(iter, true) // this must go first.
 	wrapped := false
-	if iter <= 1 && ly.Styles.IsFlexWrap() {
-		wrapped = ly.SizeDownWrap(iter) // first recompute wrap
+	if iter <= 1 && l.Styles.IsFlexWrap() {
+		wrapped = l.SizeDownWrap(iter) // first recompute wrap
 		if iter == 0 {
 			wrapped = true // always update
 		}
 	}
-	ly.This().(Layouter).SizeDownSetAllocs(iter)
-	redo := ly.SizeDownChildren(iter)
+	l.This().(Layouter).SizeDownSetAllocs(iter)
+	redo := l.SizeDownChildren(iter)
 	if redo || wrapped {
-		ly.SizeFromChildrenFit(iter, SizeDownPass)
+		l.SizeFromChildrenFit(iter, SizeDownPass)
 	}
-	ly.SizeDownParts(iter) // no std role, just get sizes
+	l.SizeDownParts(iter) // no std role, just get sizes
 	return chg || wrapped || redo
 }
 
@@ -1164,16 +1164,16 @@ func (ly *Layout) SizeDownLay(iter int) bool {
 // in the children, based on our allocation.  In the default implementation
 // this calls SizeDownGrow if there is extra space to grow, or
 // SizeDownAllocActual to set the allocations as they currrently are.
-func (ly *Layout) SizeDownSetAllocs(iter int) {
-	sz := &ly.Geom.Size
+func (l *Layout) SizeDownSetAllocs(iter int) {
+	sz := &l.Geom.Size
 	extra := sz.Alloc.Content.Sub(sz.Internal) // note: critical to use internal to be accurate
 	if extra.X > 0 || extra.Y > 0 {
 		if DebugSettings.LayoutTrace {
-			fmt.Println(ly, "SizeDown extra:", extra, "Internal:", sz.Internal, "Alloc:", sz.Alloc.Content)
+			fmt.Println(l, "SizeDown extra:", extra, "Internal:", sz.Internal, "Alloc:", sz.Alloc.Content)
 		}
-		ly.SizeDownGrow(iter, extra)
+		l.SizeDownGrow(iter, extra)
 	} else {
-		ly.SizeDownAllocActual(iter) // set allocations as is
+		l.SizeDownAllocActual(iter) // set allocations as is
 	}
 }
 
@@ -1182,84 +1182,84 @@ func (ly *Layout) SizeDownSetAllocs(iter int) {
 // If updtSize is false, then the Actual and Alloc sizes are NOT
 // updated as a result of change from adding scrollbars
 // (generally should be true, but some cases not)
-func (ly *Layout) ManageOverflow(iter int, updtSize bool) bool {
-	sz := &ly.Geom.Size
-	sbw := mat32.Ceil(ly.Styles.ScrollBarWidth.Dots)
+func (l *Layout) ManageOverflow(iter int, updtSize bool) bool {
+	sz := &l.Geom.Size
+	sbw := mat32.Ceil(l.Styles.ScrollBarWidth.Dots)
 	change := false
 	if iter == 0 {
-		ly.LayImpl.ScrollSize.SetZero()
-		ly.SetScrollsOff()
+		l.LayImpl.ScrollSize.SetZero()
+		l.SetScrollsOff()
 		for d := mat32.X; d <= mat32.Y; d++ {
-			if ly.Styles.Overflow.Dim(d) == styles.OverflowScroll {
-				if !ly.HasScroll[d] {
+			if l.Styles.Overflow.Dim(d) == styles.OverflowScroll {
+				if !l.HasScroll[d] {
 					change = true
 				}
-				ly.HasScroll[d] = true
-				ly.LayImpl.ScrollSize.SetDim(d.Other(), sbw)
+				l.HasScroll[d] = true
+				l.LayImpl.ScrollSize.SetDim(d.Other(), sbw)
 			}
 		}
 	}
 	for d := mat32.X; d <= mat32.Y; d++ {
-		maxSize, visSize, _ := ly.This().(Layouter).ScrollValues(d)
+		maxSize, visSize, _ := l.This().(Layouter).ScrollValues(d)
 		ofd := maxSize - visSize
-		switch ly.Styles.Overflow.Dim(d) {
+		switch l.Styles.Overflow.Dim(d) {
 		// case styles.OverflowVisible:
 		// note: this shouldn't happen -- just have this in here for monitoring
-		// fmt.Println(ly, "OverflowVisible ERROR -- shouldn't have overflow:", d, ofd)
+		// fmt.Println(l, "OverflowVisible ERROR -- shouldn't have overflow:", d, ofd)
 		case styles.OverflowAuto:
 			if ofd <= 1 {
-				if ly.HasScroll[d] {
+				if l.HasScroll[d] {
 					if DebugSettings.LayoutTrace {
-						fmt.Println(ly, "turned off scroll", d)
+						fmt.Println(l, "turned off scroll", d)
 					}
 					change = true
-					ly.HasScroll[d] = false
-					ly.LayImpl.ScrollSize.SetDim(d.Other(), 0)
+					l.HasScroll[d] = false
+					l.LayImpl.ScrollSize.SetDim(d.Other(), 0)
 				}
 				continue
 			}
-			if !ly.HasScroll[d] {
+			if !l.HasScroll[d] {
 				change = true
 			}
-			ly.HasScroll[d] = true
-			ly.LayImpl.ScrollSize.SetDim(d.Other(), sbw)
+			l.HasScroll[d] = true
+			l.LayImpl.ScrollSize.SetDim(d.Other(), sbw)
 			if change && DebugSettings.LayoutTrace {
-				fmt.Println(ly, "OverflowAuto enabling scrollbars for dim for overflow:", d, ofd, "alloc:", sz.Alloc.Content.Dim(d), "internal:", sz.Internal.Dim(d))
+				fmt.Println(l, "OverflowAuto enabling scrollbars for dim for overflow:", d, ofd, "alloc:", sz.Alloc.Content.Dim(d), "internal:", sz.Internal.Dim(d))
 			}
 		}
 	}
-	ly.This().(Layouter).LayoutSpace() // adds the scroll space
+	l.This().(Layouter).LayoutSpace() // adds the scroll space
 	if updtSize {
 		sz.SetTotalFromContent(&sz.Actual)
 		sz.SetContentFromTotal(&sz.Alloc) // alloc is *decreased* from any increase in space
 	}
 	if change && DebugSettings.LayoutTrace {
-		fmt.Println(ly, "ManageOverflow changed")
+		fmt.Println(l, "ManageOverflow changed")
 	}
 	return change
 }
 
 // SizeDownGrow grows the element sizes based on total extra and Grow
-func (ly *Layout) SizeDownGrow(iter int, extra mat32.Vec2) bool {
+func (l *Layout) SizeDownGrow(iter int, extra mat32.Vec2) bool {
 	redo := false
-	if ly.Styles.Display == styles.Stacked {
-		redo = ly.SizeDownGrowStacked(iter, extra)
+	if l.Styles.Display == styles.Stacked {
+		redo = l.SizeDownGrowStacked(iter, extra)
 	} else {
-		redo = ly.SizeDownGrowCells(iter, extra)
+		redo = l.SizeDownGrowCells(iter, extra)
 	}
 	return redo
 }
 
-func (ly *Layout) SizeDownGrowCells(iter int, extra mat32.Vec2) bool {
+func (l *Layout) SizeDownGrowCells(iter int, extra mat32.Vec2) bool {
 	redo := false
-	sz := &ly.Geom.Size
+	sz := &l.Geom.Size
 	alloc := sz.Alloc.Content.Sub(sz.InnerSpace) // inner is fixed
 	// todo: use max growth values instead of individual ones to ensure consistency!
-	li := &ly.LayImpl
+	li := &l.LayImpl
 	if len(li.Cells) == 0 {
-		panic(fmt.Sprintf("%v Has not been initialized -- UpdateStart / End error!", ly.String()))
+		panic(fmt.Sprintf("%v Has not been initialized -- UpdateStart / End error!", l.String()))
 	}
-	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	l.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		cidx := kwb.Geom.Cell
 		ksz := &kwb.Geom.Size
 		grw := kwb.Styles.Grow
@@ -1288,16 +1288,16 @@ func (ly *Layout) SizeDownGrowCells(iter int, extra mat32.Vec2) bool {
 			gsum := cd.Grow.Dim(ma)
 			if gsum > 0 && exd > 0 {
 				if gr > gsum {
-					fmt.Println(ly, "SizeDownGrowCells error: grow > grow sum:", gr, gsum)
+					fmt.Println(l, "SizeDownGrowCells error: grow > grow sum:", gr, gsum)
 					gr = gsum
 				}
 				redo = true
 				asz = mat32.Round(mx + exd*(gr/gsum))  // todo: could use Floor
 				if asz > mat32.Ceil(alloc.Dim(ma))+1 { // bug!
-					fmt.Println(ly, "SizeDownGrowCells error: sub alloc > total to alloc:", asz, alloc.Dim(ma))
+					fmt.Println(l, "SizeDownGrowCells error: sub alloc > total to alloc:", asz, alloc.Dim(ma))
 					fmt.Println("ma:", ma, "mi:", mi, "ci:", ci, "mx:", mx, "gsum:", gsum, "gr:", gr, "ex:", exd, "par act:", sz.Actual.Content.Dim(ma))
-					fmt.Println(ly.LayImpl.String())
-					fmt.Println(ly.LayImpl.CellsSize())
+					fmt.Println(l.LayImpl.String())
+					fmt.Println(l.LayImpl.CellsSize())
 				}
 			}
 			if DebugSettings.LayoutTraceDetail {
@@ -1311,22 +1311,22 @@ func (ly *Layout) SizeDownGrowCells(iter int, extra mat32.Vec2) bool {
 	return redo
 }
 
-func (ly *Layout) SizeDownWrap(iter int) bool {
+func (l *Layout) SizeDownWrap(iter int) bool {
 	wrapped := false
-	li := &ly.LayImpl
-	sz := &ly.Geom.Size
+	li := &l.LayImpl
+	sz := &l.Geom.Size
 	d := li.MainAxis
 	alloc := sz.Alloc.Content
 	gap := li.Gap.Dim(d)
 	fit := alloc.Dim(d)
 	if DebugSettings.LayoutTrace {
-		fmt.Println(ly, "SizeDownWrap fitting into:", d, fit)
+		fmt.Println(l, "SizeDownWrap fitting into:", d, fit)
 	}
 	first := true
 	var sum float32
 	var n int
 	var wraps []int
-	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	l.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		ksz := kwb.Geom.Size.Actual.Total
 		if first {
 			n = 1
@@ -1336,7 +1336,7 @@ func (ly *Layout) SizeDownWrap(iter int) bool {
 		}
 		if sum+ksz.Dim(d)+gap >= fit {
 			if DebugSettings.LayoutTraceDetail {
-				fmt.Println(ly, "wrapped:", i, sum, ksz.Dim(d), fit)
+				fmt.Println(l, "wrapped:", i, sum, ksz.Dim(d), fit)
 			}
 			wraps = append(wraps, n)
 			sum = ksz.Dim(d)
@@ -1365,23 +1365,23 @@ func (ly *Layout) SizeDownWrap(iter int) bool {
 		return false
 	}
 	if DebugSettings.LayoutTrace {
-		fmt.Println(ly, "wrapped:", wraps)
+		fmt.Println(l, "wrapped:", wraps)
 	}
 	li.Wraps = wraps
-	ly.LaySetWrapIdxs()
+	l.LaySetWrapIdxs()
 	li.InitCells()
-	ly.LaySetGapSizeFromCells()
-	ly.SizeFromChildrenCells(iter, SizeDownPass)
+	l.LaySetGapSizeFromCells()
+	l.SizeFromChildrenCells(iter, SizeDownPass)
 	return wrapped
 }
 
-func (ly *Layout) SizeDownGrowStacked(iter int, extra mat32.Vec2) bool {
+func (l *Layout) SizeDownGrowStacked(iter int, extra mat32.Vec2) bool {
 	// stack just gets everything from us
 	chg := false
-	asz := ly.Geom.Size.Alloc.Content
+	asz := l.Geom.Size.Alloc.Content
 	// todo: could actually use the grow factors to decide if growing here?
-	if ly.Is(LayoutStackTopOnly) {
-		_, kwb := ly.StackTopWidget()
+	if l.Is(LayoutStackTopOnly) {
+		_, kwb := l.StackTopWidget()
 		if kwb != nil {
 			ksz := &kwb.Geom.Size
 			if ksz.Alloc.Total != asz {
@@ -1394,7 +1394,7 @@ func (ly *Layout) SizeDownGrowStacked(iter int, extra mat32.Vec2) bool {
 	}
 	// note: allocate everyone in case they are flipped to top
 	// need a new layout if size is actually different
-	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	l.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		ksz := &kwb.Geom.Size
 		if ksz.Alloc.Total != asz {
 			chg = true
@@ -1407,27 +1407,27 @@ func (ly *Layout) SizeDownGrowStacked(iter int, extra mat32.Vec2) bool {
 }
 
 // SizeDownAllocActual sets Alloc to Actual for no-extra case.
-func (ly *Layout) SizeDownAllocActual(iter int) {
-	if ly.Styles.Display == styles.Stacked {
-		ly.SizeDownAllocActualStacked(iter)
+func (l *Layout) SizeDownAllocActual(iter int) {
+	if l.Styles.Display == styles.Stacked {
+		l.SizeDownAllocActualStacked(iter)
 		return
 	}
 	// todo: wrap needs special case
-	ly.SizeDownAllocActualCells(iter)
+	l.SizeDownAllocActualCells(iter)
 }
 
 // SizeDownAllocActualCells sets Alloc to Actual for no-extra case.
 // Note however that due to max sizing for row / column,
 // this size can actually be different than original actual.
-func (ly *Layout) SizeDownAllocActualCells(iter int) {
-	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+func (l *Layout) SizeDownAllocActualCells(iter int) {
+	l.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		ksz := &kwb.Geom.Size
 		cidx := kwb.Geom.Cell
 		for ma := mat32.X; ma <= mat32.Y; ma++ { // main axis = X then Y
-			ca := ma.Other()                  // cross axis = Y then X
-			mi := mat32.PointDim(cidx, ma)    // X, Y
-			ci := mat32.PointDim(cidx, ca)    // Y, X
-			md := ly.LayImpl.Cell(ma, mi, ci) // X, Y
+			ca := ma.Other()                 // cross axis = Y then X
+			mi := mat32.PointDim(cidx, ma)   // X, Y
+			ci := mat32.PointDim(cidx, ca)   // Y, X
+			md := l.LayImpl.Cell(ma, mi, ci) // X, Y
 			asz := md.Size.Dim(ma)
 			ksz.Alloc.Total.SetDim(ma, asz)
 		}
@@ -1436,12 +1436,12 @@ func (ly *Layout) SizeDownAllocActualCells(iter int) {
 	})
 }
 
-func (ly *Layout) SizeDownAllocActualStacked(iter int) {
+func (l *Layout) SizeDownAllocActualStacked(iter int) {
 	// stack just gets everything from us
-	asz := ly.Geom.Size.Actual.Content
+	asz := l.Geom.Size.Actual.Content
 	// todo: could actually use the grow factors to decide if growing here?
-	if ly.Is(LayoutStackTopOnly) {
-		_, kwb := ly.StackTopWidget()
+	if l.Is(LayoutStackTopOnly) {
+		_, kwb := l.StackTopWidget()
 		if kwb != nil {
 			ksz := &kwb.Geom.Size
 			ksz.Alloc.Total = asz
@@ -1451,7 +1451,7 @@ func (ly *Layout) SizeDownAllocActualStacked(iter int) {
 	}
 	// note: allocate everyone in case they are flipped to top
 	// need a new layout if size is actually different
-	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	l.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		ksz := &kwb.Geom.Size
 		ksz.Alloc.Total = asz
 		ksz.SetContentFromTotal(&ksz.Alloc)
@@ -1465,12 +1465,12 @@ func (ly *Layout) SizeDownAllocActualStacked(iter int) {
 // SizeFinalUpdateChildrenSizes can optionally be called for layouts
 // that dynamically create child elements based on final layout size.
 // It ensures that the children are properly sized.
-func (ly *Layout) SizeFinalUpdateChildrenSizes() {
-	ly.SizeUpLay()
+func (l *Layout) SizeFinalUpdateChildrenSizes() {
+	l.SizeUpLay()
 	iter := 3 // late stage..
-	ly.This().(Layouter).SizeDownSetAllocs(iter)
-	ly.SizeDownChildren(iter)
-	ly.SizeDownParts(iter) // no std role, just get sizes
+	l.This().(Layouter).SizeDownSetAllocs(iter)
+	l.SizeDownChildren(iter)
+	l.SizeDownParts(iter) // no std role, just get sizes
 }
 
 // SizeFinal: (bottom-up) similar to SizeUp but done at the end of the
@@ -1530,21 +1530,21 @@ func (wb *WidgetBase) SizeFinalParts() {
 
 /////////////// Layout
 
-func (ly *Layout) SizeFinal() {
-	ly.SizeFinalLay()
+func (l *Layout) SizeFinal() {
+	l.SizeFinalLay()
 }
 
 // SizeFinalLay is the Layout standard SizeFinal pass
-func (ly *Layout) SizeFinalLay() {
-	if !ly.HasChildren() || !ly.LayImpl.ShapeCheck(ly, "SizeFinal") {
-		ly.SizeFinalWidget() // behave like a widget
+func (l *Layout) SizeFinalLay() {
+	if !l.HasChildren() || !l.LayImpl.ShapeCheck(l, "SizeFinal") {
+		l.SizeFinalWidget() // behave like a widget
 		return
 	}
-	ly.Geom.RelPos.SetZero()
-	ly.SizeFinalChildren() // kids do their own thing
-	ly.SizeFromChildrenFit(0, SizeFinalPass)
-	ly.GrowToAlloc()
-	ly.StyleSizeUpdate() // now that sizes are stable, ensure styling based on size is updated
+	l.Geom.RelPos.SetZero()
+	l.SizeFinalChildren() // kids do their own thing
+	l.SizeFromChildrenFit(0, SizeFinalPass)
+	l.GrowToAlloc()
+	l.StyleSizeUpdate() // now that sizes are stable, ensure styling based on size is updated
 }
 
 // SizeFinalChildren calls SizeFinal on all the children of this node
@@ -1556,15 +1556,15 @@ func (wb *WidgetBase) SizeFinalChildren() {
 }
 
 // SizeFinalChildren calls SizeFinal on all the children of this node
-func (ly *Layout) SizeFinalChildren() {
-	if ly.Styles.Display == styles.Stacked && !ly.Is(LayoutStackTopOnly) {
-		ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+func (l *Layout) SizeFinalChildren() {
+	if l.Styles.Display == styles.Stacked && !l.Is(LayoutStackTopOnly) {
+		l.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			kwi.SizeFinal()
 			return ki.Continue
 		})
 		return
 	}
-	ly.WidgetBase.SizeFinalChildren()
+	l.WidgetBase.SizeFinalChildren()
 }
 
 // StyleSizeUpdate updates styling size values for widget and its parent,
@@ -1641,56 +1641,56 @@ func (wb *WidgetBase) PositionChildren() {
 
 // Position: uses the final sizes to position everything within layouts
 // according to alignment settings.
-func (ly *Layout) Position() {
-	ly.PositionLay()
+func (l *Layout) Position() {
+	l.PositionLay()
 }
 
-func (ly *Layout) PositionLay() {
-	if !ly.HasChildren() || !ly.LayImpl.ShapeCheck(ly, "Position") {
-		ly.PositionWidget() // behave like a widget
+func (l *Layout) PositionLay() {
+	if !l.HasChildren() || !l.LayImpl.ShapeCheck(l, "Position") {
+		l.PositionWidget() // behave like a widget
 		return
 	}
-	if ly.Par == nil {
-		ly.PositionWithinAllocMainY(mat32.Vec2{}, ly.Styles.Justify.Items, ly.Styles.Align.Items)
+	if l.Par == nil {
+		l.PositionWithinAllocMainY(mat32.Vec2{}, l.Styles.Justify.Items, l.Styles.Align.Items)
 	}
-	ly.ConfigScrolls() // and configure the scrolls
-	if ly.Styles.Display == styles.Stacked {
-		ly.PositionStacked()
+	l.ConfigScrolls() // and configure the scrolls
+	if l.Styles.Display == styles.Stacked {
+		l.PositionStacked()
 	} else {
-		ly.PositionCells()
-		ly.PositionChildren()
+		l.PositionCells()
+		l.PositionChildren()
 	}
 }
 
-func (ly *Layout) PositionCells() {
-	if ly.Styles.Display == styles.Flex && ly.Styles.Direction == styles.Column {
-		ly.PositionCellsMainY()
+func (l *Layout) PositionCells() {
+	if l.Styles.Display == styles.Flex && l.Styles.Direction == styles.Column {
+		l.PositionCellsMainY()
 		return
 	}
-	ly.PositionCellsMainX()
+	l.PositionCellsMainX()
 }
 
 // Main axis = X
-func (ly *Layout) PositionCellsMainX() {
+func (l *Layout) PositionCellsMainX() {
 	// todo: can break apart further into Flex rows
-	gap := ly.LayImpl.Gap
-	sz := &ly.Geom.Size
+	gap := l.LayImpl.Gap
+	sz := &l.Geom.Size
 	if DebugSettings.LayoutTraceDetail {
-		fmt.Println(ly, "PositionCells Main X, alloc:", sz.Alloc.Content, "internal:", sz.Internal)
+		fmt.Println(l, "PositionCells Main X, alloc:", sz.Alloc.Content, "internal:", sz.Internal)
 	}
 	var stPos mat32.Vec2
-	stPos.X = styles.AlignPos(ly.Styles.Justify.Content, sz.Internal.X, sz.Alloc.Content.X)
-	stPos.Y = styles.AlignPos(ly.Styles.Align.Content, sz.Internal.Y, sz.Alloc.Content.Y)
+	stPos.X = styles.AlignPos(l.Styles.Justify.Content, sz.Internal.X, sz.Alloc.Content.X)
+	stPos.Y = styles.AlignPos(l.Styles.Align.Content, sz.Internal.Y, sz.Alloc.Content.Y)
 	pos := stPos
 	var lastSz mat32.Vec2
 	idx := 0
-	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	l.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		cidx := kwb.Geom.Cell
 		if cidx.X == 0 && idx > 0 {
 			pos.X = stPos.X
 			pos.Y += lastSz.Y + gap.Y
 		}
-		kwb.PositionWithinAllocMainX(pos, ly.Styles.Justify.Items, ly.Styles.Align.Items)
+		kwb.PositionWithinAllocMainX(pos, l.Styles.Justify.Items, l.Styles.Align.Items)
 		alloc := kwb.Geom.Size.Alloc.Total
 		pos.X += alloc.X + gap.X
 		lastSz = alloc
@@ -1700,25 +1700,25 @@ func (ly *Layout) PositionCellsMainX() {
 }
 
 // Main axis = Y
-func (ly *Layout) PositionCellsMainY() {
-	gap := ly.LayImpl.Gap
-	sz := &ly.Geom.Size
+func (l *Layout) PositionCellsMainY() {
+	gap := l.LayImpl.Gap
+	sz := &l.Geom.Size
 	if DebugSettings.LayoutTraceDetail {
-		fmt.Println(ly, "PositionCells, alloc:", sz.Alloc.Content, "internal:", sz.Internal)
+		fmt.Println(l, "PositionCells, alloc:", sz.Alloc.Content, "internal:", sz.Internal)
 	}
 	var lastSz mat32.Vec2
 	var stPos mat32.Vec2
-	stPos.Y = styles.AlignPos(ly.Styles.Justify.Content, sz.Internal.Y, sz.Alloc.Content.Y)
-	stPos.X = styles.AlignPos(ly.Styles.Align.Content, sz.Internal.X, sz.Alloc.Content.X)
+	stPos.Y = styles.AlignPos(l.Styles.Justify.Content, sz.Internal.Y, sz.Alloc.Content.Y)
+	stPos.X = styles.AlignPos(l.Styles.Align.Content, sz.Internal.X, sz.Alloc.Content.X)
 	pos := stPos
 	idx := 0
-	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	l.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		cidx := kwb.Geom.Cell
 		if cidx.Y == 0 && idx > 0 {
 			pos.Y = stPos.Y
 			pos.X += lastSz.X + gap.X
 		}
-		kwb.PositionWithinAllocMainY(pos, ly.Styles.Justify.Items, ly.Styles.Align.Items)
+		kwb.PositionWithinAllocMainY(pos, l.Styles.Justify.Items, l.Styles.Align.Items)
 		alloc := kwb.Geom.Size.Alloc.Total
 		pos.Y += alloc.Y + gap.Y
 		lastSz = alloc
@@ -1727,13 +1727,13 @@ func (ly *Layout) PositionCellsMainY() {
 	})
 }
 
-func (ly *Layout) PositionWrap() {
+func (l *Layout) PositionWrap() {
 }
 
-func (ly *Layout) PositionStacked() {
-	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+func (l *Layout) PositionStacked() {
+	l.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwb.Geom.RelPos.SetZero()
-		if !ly.Is(LayoutStackTopOnly) || i == ly.StackTop {
+		if !l.Is(LayoutStackTopOnly) || i == l.StackTop {
 			kwi.Position()
 		}
 		return ki.Continue
@@ -1829,39 +1829,39 @@ func (wb *WidgetBase) ScenePosChildren() {
 }
 
 // ScenePosChildren runs ScenePos on the children
-func (ly *Layout) ScenePosChildren() {
-	if ly.Styles.Display == styles.Stacked && !ly.Is(LayoutStackTopOnly) {
-		ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+func (l *Layout) ScenePosChildren() {
+	if l.Styles.Display == styles.Stacked && !l.Is(LayoutStackTopOnly) {
+		l.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			kwi.ScenePos()
 			return ki.Continue
 		})
 		return
 	}
-	ly.WidgetBase.ScenePosChildren()
+	l.WidgetBase.ScenePosChildren()
 }
 
 // ScenePos: scene-based position and final BBox is computed based on
 // parents accumulated position and scrollbar position.
 // This step can be performed when scrolling after updating Scroll.
-func (ly *Layout) ScenePos() {
-	ly.ScenePosLay()
+func (l *Layout) ScenePos() {
+	l.ScenePosLay()
 }
 
-func (ly *Layout) ScenePosLay() {
-	if !ly.HasChildren() || !ly.LayImpl.ShapeCheck(ly, "ScenePos") {
-		ly.ScenePosWidget() // behave like a widget
+func (l *Layout) ScenePosLay() {
+	if !l.HasChildren() || !l.LayImpl.ShapeCheck(l, "ScenePos") {
+		l.ScenePosWidget() // behave like a widget
 		return
 	}
-	// note: ly.Geom.Scroll has the X, Y scrolling offsets, set by Layouter.ScrollChanged function
-	if !ly.HasScroll[mat32.X] {
-		ly.Geom.Scroll.X = 0
+	// note: l.Geom.Scroll has the X, Y scrolling offsets, set by Layouter.ScrollChanged function
+	if !l.HasScroll[mat32.X] {
+		l.Geom.Scroll.X = 0
 	}
-	if !ly.HasScroll[mat32.Y] {
-		ly.Geom.Scroll.Y = 0
+	if !l.HasScroll[mat32.Y] {
+		l.Geom.Scroll.Y = 0
 	}
-	ly.ScenePosWidget()
-	ly.ScenePosChildren()
-	ly.PositionScrolls()
-	ly.ScenePosParts() // in case they fit inside parent
+	l.ScenePosWidget()
+	l.ScenePosChildren()
+	l.PositionScrolls()
+	l.ScenePosParts() // in case they fit inside parent
 	// otherwise handle separately like scrolls on layout
 }

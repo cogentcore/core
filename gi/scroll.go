@@ -19,19 +19,19 @@ import (
 )
 
 // HasAnyScroll returns true if layout has
-func (ly *Layout) HasAnyScroll() bool {
-	return ly.HasScroll[mat32.X] || ly.HasScroll[mat32.Y]
+func (l *Layout) HasAnyScroll() bool {
+	return l.HasScroll[mat32.X] || l.HasScroll[mat32.Y]
 }
 
 // ScrollGeom returns the target position and size for scrollbars
-func (ly *Layout) ScrollGeom(d mat32.Dims) (pos, sz mat32.Vec2) {
-	sbw := mat32.Ceil(ly.Styles.ScrollBarWidth.Dots)
+func (l *Layout) ScrollGeom(d mat32.Dims) (pos, sz mat32.Vec2) {
+	sbw := mat32.Ceil(l.Styles.ScrollBarWidth.Dots)
 	od := d.Other()
-	bbmin := mat32.V2FromPoint(ly.Geom.ContentBBox.Min)
-	bbmax := mat32.V2FromPoint(ly.Geom.ContentBBox.Max)
-	if ly.This() != ly.Scene.This() { // if not the scene, keep inside the scene
-		bbmin.SetMax(mat32.V2FromPoint(ly.Scene.Geom.ContentBBox.Min))
-		bbmax.SetMin(mat32.V2FromPoint(ly.Scene.Geom.ContentBBox.Max).SubScalar(sbw))
+	bbmin := mat32.V2FromPoint(l.Geom.ContentBBox.Min)
+	bbmax := mat32.V2FromPoint(l.Geom.ContentBBox.Max)
+	if l.This() != l.Scene.This() { // if not the scene, keep inside the scene
+		bbmin.SetMax(mat32.V2FromPoint(l.Scene.Geom.ContentBBox.Min))
+		bbmax.SetMin(mat32.V2FromPoint(l.Scene.Geom.ContentBBox.Max).SubScalar(sbw))
 	}
 	pos.SetDim(d, bbmin.Dim(d))
 	pos.SetDim(od, bbmax.Dim(od))
@@ -47,23 +47,23 @@ func (ly *Layout) ScrollGeom(d mat32.Dims) (pos, sz mat32.Vec2) {
 // the sizing and need for scrollbars has been established.
 // The final position of the scrollbars is set during ScenePos in
 // PositionScrolls.  Scrolls are kept around in general.
-func (ly *Layout) ConfigScrolls() {
+func (l *Layout) ConfigScrolls() {
 	for d := mat32.X; d <= mat32.Y; d++ {
-		if ly.HasScroll[d] {
-			ly.ConfigScroll(d)
+		if l.HasScroll[d] {
+			l.ConfigScroll(d)
 		}
 	}
 }
 
 // ConfigScroll configures scroll for given dimension
-func (ly *Layout) ConfigScroll(d mat32.Dims) {
-	if ly.Scrolls[d] != nil {
+func (l *Layout) ConfigScroll(d mat32.Dims) {
+	if l.Scrolls[d] != nil {
 		return
 	}
-	ly.Scrolls[d] = &Slider{}
-	sb := ly.Scrolls[d]
+	l.Scrolls[d] = &Slider{}
+	sb := l.Scrolls[d]
 	sb.InitName(sb, fmt.Sprintf("scroll%v", d))
-	ki.SetParent(sb, ly.This())
+	ki.SetParent(sb, l.This())
 	// sr.SetFlag(true, ki.Field) // note: do not turn on -- breaks pos
 	sb.SetType(SliderScrollbar)
 	sb.InputThreshold = 1
@@ -78,7 +78,7 @@ func (ly *Layout) ConfigScroll(d mat32.Dims) {
 	})
 	sb.StyleFinal(func(s *styles.Style) {
 		od := d.Other()
-		_, sz := ly.This().(Layouter).ScrollGeom(d)
+		_, sz := l.This().(Layouter).ScrollGeom(d)
 		if sz.X > 0 && sz.Y > 0 {
 			s.SetState(false, states.Invisible)
 			s.Min.SetDim(d, units.Dot(sz.Dim(d)))
@@ -90,7 +90,7 @@ func (ly *Layout) ConfigScroll(d mat32.Dims) {
 	})
 	sb.OnInput(func(e events.Event) {
 		e.SetHandled()
-		ly.This().(Layouter).ScrollChanged(d, sb)
+		l.This().(Layouter).ScrollChanged(d, sb)
 	})
 	sb.Update()
 }
@@ -98,11 +98,11 @@ func (ly *Layout) ConfigScroll(d mat32.Dims) {
 // ScrollChanged is called in the OnInput event handler for updating,
 // when the scrollbar value has changed, for given dimension.
 // This is part of the Layouter interface.
-func (ly *Layout) ScrollChanged(d mat32.Dims, sb *Slider) {
-	updt := ly.UpdateStart()
-	ly.Geom.Scroll.SetDim(d, -sb.Value)
-	ly.This().(Layouter).ScenePos() // computes updated positions
-	ly.UpdateEndRender(updt)
+func (l *Layout) ScrollChanged(d mat32.Dims, sb *Slider) {
+	updt := l.UpdateStart()
+	l.Geom.Scroll.SetDim(d, -sb.Value)
+	l.This().(Layouter).ScenePos() // computes updated positions
+	l.UpdateEndRender(updt)
 }
 
 // ScrollValues returns the maximum size that could be scrolled,
@@ -110,8 +110,8 @@ func (ly *Layout) ScrollChanged(d mat32.Dims, sb *Slider) {
 // case no scrollbar is needed), and visSize / maxSize as the VisiblePct.
 // This is used in updating the scrollbar and determining whether one is
 // needed in the first place
-func (ly *Layout) ScrollValues(d mat32.Dims) (maxSize, visSize, visPct float32) {
-	sz := &ly.Geom.Size
+func (l *Layout) ScrollValues(d mat32.Dims) (maxSize, visSize, visPct float32) {
+	sz := &l.Geom.Size
 	maxSize = sz.Internal.Dim(d)
 	visSize = sz.Alloc.Content.Dim(d)
 	visPct = visSize / maxSize
@@ -121,24 +121,24 @@ func (ly *Layout) ScrollValues(d mat32.Dims) (maxSize, visSize, visPct float32) 
 // SetScrollParams sets scrollbar parameters.  Must set Step and PageStep,
 // but can also set others as needed.
 // Max and VisiblePct are automatically set based on ScrollValues maxSize, visPct.
-func (ly *Layout) SetScrollParams(d mat32.Dims, sb *Slider) {
-	sb.Step = ly.Styles.Font.Size.Dots // step by lines
-	sb.PageStep = 10.0 * sb.Step       // todo: more dynamic
+func (l *Layout) SetScrollParams(d mat32.Dims, sb *Slider) {
+	sb.Step = l.Styles.Font.Size.Dots // step by lines
+	sb.PageStep = 10.0 * sb.Step      // todo: more dynamic
 }
 
 // PositionScrolls arranges scrollbars
-func (ly *Layout) PositionScrolls() {
+func (l *Layout) PositionScrolls() {
 	for d := mat32.X; d <= mat32.Y; d++ {
-		if ly.HasScroll[d] && ly.Scrolls[d] != nil {
-			ly.PositionScroll(d)
+		if l.HasScroll[d] && l.Scrolls[d] != nil {
+			l.PositionScroll(d)
 		}
 	}
 }
 
-func (ly *Layout) PositionScroll(d mat32.Dims) {
-	sb := ly.Scrolls[d]
-	pos, ssz := ly.This().(Layouter).ScrollGeom(d)
-	maxSize, _, visPct := ly.This().(Layouter).ScrollValues(d)
+func (l *Layout) PositionScroll(d mat32.Dims) {
+	sb := l.Scrolls[d]
+	pos, ssz := l.This().(Layouter).ScrollGeom(d)
+	maxSize, _, visPct := l.This().(Layouter).ScrollValues(d)
 	if sb.Geom.Pos.Total == pos && sb.Geom.Size.Actual.Content == ssz && sb.VisiblePct == visPct {
 		return
 	}
@@ -149,13 +149,13 @@ func (ly *Layout) PositionScroll(d mat32.Dims) {
 	sb.SetState(false, states.Invisible)
 	sb.Max = maxSize
 	sb.SetVisiblePct(visPct)
-	// fmt.Println(ly, d, "vis pct:", asz/csz)
+	// fmt.Println(l, d, "vis pct:", asz/csz)
 	sb.SetValue(sb.Value) // keep in range
-	ly.This().(Layouter).SetScrollParams(d, sb)
+	l.This().(Layouter).SetScrollParams(d, sb)
 
 	sb.Update() // applies style
 	sb.SizeUp()
-	sb.Geom.Size.Alloc = ly.Geom.Size.Actual
+	sb.Geom.Size.Alloc = l.Geom.Size.Actual
 	sb.SizeDown(0)
 
 	sb.Geom.Pos.Total = pos
@@ -166,49 +166,49 @@ func (ly *Layout) PositionScroll(d mat32.Dims) {
 }
 
 // RenderScrolls draws the scrollbars
-func (ly *Layout) RenderScrolls() {
+func (l *Layout) RenderScrolls() {
 	for d := mat32.X; d <= mat32.Y; d++ {
-		if ly.HasScroll[d] && ly.Scrolls[d] != nil {
-			ly.Scrolls[d].Render()
+		if l.HasScroll[d] && l.Scrolls[d] != nil {
+			l.Scrolls[d].Render()
 		}
 	}
 }
 
 // SetScrollsOff turns off the scrollbars
-func (ly *Layout) SetScrollsOff() {
+func (l *Layout) SetScrollsOff() {
 	for d := mat32.X; d <= mat32.Y; d++ {
-		ly.HasScroll[d] = false
+		l.HasScroll[d] = false
 	}
 }
 
 // ScrollActionDelta moves the scrollbar in given dimension by given delta
 // and emits a ScrollSig signal.
-func (ly *Layout) ScrollActionDelta(d mat32.Dims, delta float32) {
-	if ly.HasScroll[d] && ly.Scrolls[d] != nil {
-		sb := ly.Scrolls[d]
+func (l *Layout) ScrollActionDelta(d mat32.Dims, delta float32) {
+	if l.HasScroll[d] && l.Scrolls[d] != nil {
+		sb := l.Scrolls[d]
 		nval := sb.Value + sb.ScrollScale(delta)
 		sb.SetValueAction(nval)
-		ly.SetNeedsRender(true) // only render needed -- scroll updates pos
+		l.SetNeedsRender(true) // only render needed -- scroll updates pos
 	}
 }
 
 // ScrollActionPos moves the scrollbar in given dimension to given
 // position and emits a ScrollSig signal.
-func (ly *Layout) ScrollActionPos(d mat32.Dims, pos float32) {
-	if ly.HasScroll[d] && ly.Scrolls[d] != nil {
-		sb := ly.Scrolls[d]
+func (l *Layout) ScrollActionPos(d mat32.Dims, pos float32) {
+	if l.HasScroll[d] && l.Scrolls[d] != nil {
+		sb := l.Scrolls[d]
 		sb.SetValueAction(pos)
-		ly.SetNeedsRender(true)
+		l.SetNeedsRender(true)
 	}
 }
 
 // ScrollToPos moves the scrollbar in given dimension to given
 // position and DOES NOT emit a ScrollSig signal.
-func (ly *Layout) ScrollToPos(d mat32.Dims, pos float32) {
-	if ly.HasScroll[d] && ly.Scrolls[d] != nil {
-		sb := ly.Scrolls[d]
+func (l *Layout) ScrollToPos(d mat32.Dims, pos float32) {
+	if l.HasScroll[d] && l.Scrolls[d] != nil {
+		sb := l.Scrolls[d]
 		sb.SetValueAction(pos)
-		ly.SetNeedsRender(true)
+		l.SetNeedsRender(true)
 	}
 }
 
@@ -216,30 +216,30 @@ func (ly *Layout) ScrollToPos(d mat32.Dims, pos float32) {
 // and there is a non-zero in other, then the consumed dimension is reset to 0
 // and the event is left unprocessed, so a higher level can consume the
 // remainder.
-func (ly *Layout) ScrollDelta(e events.Event) {
+func (l *Layout) ScrollDelta(e events.Event) {
 	se := e.(*events.MouseScroll)
 	fdel := se.Delta
 
 	hasShift := e.HasAnyModifier(key.Shift, key.Alt) // shift or alt indicates to scroll horizontally
 	if hasShift {
-		if !ly.HasScroll[mat32.X] { // if we have shift, we can only horizontal scroll
+		if !l.HasScroll[mat32.X] { // if we have shift, we can only horizontal scroll
 			return
 		}
-		ly.ScrollActionDelta(mat32.X, fdel.Y)
+		l.ScrollActionDelta(mat32.X, fdel.Y)
 		return
 	}
 
-	if ly.HasScroll[mat32.Y] && ly.HasScroll[mat32.X] {
-		ly.ScrollActionDelta(mat32.Y, fdel.Y)
-		ly.ScrollActionDelta(mat32.X, fdel.X)
-	} else if ly.HasScroll[mat32.Y] {
-		ly.ScrollActionDelta(mat32.Y, fdel.Y)
+	if l.HasScroll[mat32.Y] && l.HasScroll[mat32.X] {
+		l.ScrollActionDelta(mat32.Y, fdel.Y)
+		l.ScrollActionDelta(mat32.X, fdel.X)
+	} else if l.HasScroll[mat32.Y] {
+		l.ScrollActionDelta(mat32.Y, fdel.Y)
 		if se.Delta.X != 0 {
 			se.Delta.Y = 0
 		}
-	} else if ly.HasScroll[mat32.X] {
+	} else if l.HasScroll[mat32.X] {
 		if se.Delta.X != 0 {
-			ly.ScrollActionDelta(mat32.X, fdel.X)
+			l.ScrollActionDelta(mat32.X, fdel.X)
 			if se.Delta.Y != 0 {
 				se.Delta.X = 0
 			}
@@ -281,20 +281,20 @@ func (wb *WidgetBase) ScrollToMe() bool {
 
 // ScrollToItem scrolls the layout to ensure that given item is in view.
 // Returns true if scrolling was needed
-func (ly *Layout) ScrollToItem(wi Widget) bool {
+func (l *Layout) ScrollToItem(wi Widget) bool {
 	// note: critical to NOT use BBox b/c it is zero for invisible items!
-	return ly.ScrollToBox(wi.AsWidget().Geom.TotalRect())
+	return l.ScrollToBox(wi.AsWidget().Geom.TotalRect())
 }
 
 // AutoScrollDim auto-scrolls along one dimension
-func (ly *Layout) AutoScrollDim(d mat32.Dims, sti, posi int) bool {
-	if !ly.HasScroll[d] || ly.Scrolls[d] == nil {
+func (l *Layout) AutoScrollDim(d mat32.Dims, sti, posi int) bool {
+	if !l.HasScroll[d] || l.Scrolls[d] == nil {
 		return false
 	}
-	sb := ly.Scrolls[d]
+	sb := l.Scrolls[d]
 	smax := sb.EffectiveMax()
 	ssz := sb.ScrollThumbValue()
-	dst := ly.Styles.Font.Size.Dots * AutoScrollRate
+	dst := l.Styles.Font.Size.Dots * AutoScrollRate
 
 	st, pos := float32(sti), float32(posi)
 	mind := max(0, pos-st)
@@ -311,7 +311,7 @@ func (ly *Layout) AutoScrollDim(d mat32.Dims, sti, posi int) bool {
 		pct := maxd / ssz
 		if pct < .1 && sb.Value < smax {
 			dst = min(dst, (smax - sb.Value))
-			ly.ScrollActionDelta(d, dst)
+			l.ScrollActionDelta(d, dst)
 			return true
 		}
 	}
@@ -321,23 +321,23 @@ func (ly *Layout) AutoScrollDim(d mat32.Dims, sti, posi int) bool {
 var LayoutLastAutoScroll time.Time
 
 // AutoScroll scrolls the layout based on mouse position, when appropriate (DND, menus)
-func (ly *Layout) AutoScroll(pos image.Point) bool {
+func (l *Layout) AutoScroll(pos image.Point) bool {
 	now := time.Now()
 	lag := now.Sub(LayoutLastAutoScroll)
 	if lag < SystemSettings.LayoutAutoScrollDelay {
 		return false
 	}
-	ly.BBoxMu.RLock()
-	wbb := ly.Geom.ContentBBox
-	ly.BBoxMu.RUnlock()
+	l.BBoxMu.RLock()
+	wbb := l.Geom.ContentBBox
+	l.BBoxMu.RUnlock()
 	did := false
-	if ly.HasScroll[mat32.Y] && ly.HasScroll[mat32.X] {
-		did = ly.AutoScrollDim(mat32.Y, wbb.Min.Y, pos.Y)
-		did = did || ly.AutoScrollDim(mat32.X, wbb.Min.X, pos.X)
-	} else if ly.HasScroll[mat32.Y] {
-		did = ly.AutoScrollDim(mat32.Y, wbb.Min.Y, pos.Y)
-	} else if ly.HasScroll[mat32.X] {
-		did = ly.AutoScrollDim(mat32.X, wbb.Min.X, pos.X)
+	if l.HasScroll[mat32.Y] && l.HasScroll[mat32.X] {
+		did = l.AutoScrollDim(mat32.Y, wbb.Min.Y, pos.Y)
+		did = did || l.AutoScrollDim(mat32.X, wbb.Min.X, pos.X)
+	} else if l.HasScroll[mat32.Y] {
+		did = l.AutoScrollDim(mat32.Y, wbb.Min.Y, pos.Y)
+	} else if l.HasScroll[mat32.X] {
+		did = l.AutoScrollDim(mat32.X, wbb.Min.X, pos.X)
 	}
 	if did {
 		LayoutLastAutoScroll = time.Now()
@@ -347,20 +347,20 @@ func (ly *Layout) AutoScroll(pos image.Point) bool {
 
 // ScrollToBoxDim scrolls to ensure that given target [min..max] range
 // along one dimension is in view. Returns true if scrolling was needed
-func (ly *Layout) ScrollToBoxDim(d mat32.Dims, tmini, tmaxi int) bool {
-	if !ly.HasScroll[d] || ly.Scrolls[d] == nil {
+func (l *Layout) ScrollToBoxDim(d mat32.Dims, tmini, tmaxi int) bool {
+	if !l.HasScroll[d] || l.Scrolls[d] == nil {
 		return false
 	}
-	sb := ly.Scrolls[d]
+	sb := l.Scrolls[d]
 	if sb == nil || sb.This() == nil {
 		return false
 	}
 	tmin, tmax := float32(tmini), float32(tmaxi)
-	cmin, cmax := ly.Geom.ContentRangeDim(d)
+	cmin, cmax := l.Geom.ContentRangeDim(d)
 	if tmin >= cmin && tmax <= cmax {
 		return false
 	}
-	h := ly.Styles.Font.Size.Dots
+	h := l.Styles.Font.Size.Dots
 	if tmin < cmin { // favors scrolling to start
 		trg := sb.Value + tmin - cmin - h
 		if trg < 0 {
@@ -380,18 +380,18 @@ func (ly *Layout) ScrollToBoxDim(d mat32.Dims, tmini, tmaxi int) bool {
 
 // ScrollToBox scrolls the layout to ensure that given rect box is in view.
 // Returns true if scrolling was needed
-func (ly *Layout) ScrollToBox(box image.Rectangle) bool {
+func (l *Layout) ScrollToBox(box image.Rectangle) bool {
 	did := false
-	if ly.HasScroll[mat32.Y] && ly.HasScroll[mat32.X] {
-		did = ly.ScrollToBoxDim(mat32.Y, box.Min.Y, box.Max.Y)
-		did = did || ly.ScrollToBoxDim(mat32.X, box.Min.X, box.Max.X)
-	} else if ly.HasScroll[mat32.Y] {
-		did = ly.ScrollToBoxDim(mat32.Y, box.Min.Y, box.Max.Y)
-	} else if ly.HasScroll[mat32.X] {
-		did = ly.ScrollToBoxDim(mat32.X, box.Min.X, box.Max.X)
+	if l.HasScroll[mat32.Y] && l.HasScroll[mat32.X] {
+		did = l.ScrollToBoxDim(mat32.Y, box.Min.Y, box.Max.Y)
+		did = did || l.ScrollToBoxDim(mat32.X, box.Min.X, box.Max.X)
+	} else if l.HasScroll[mat32.Y] {
+		did = l.ScrollToBoxDim(mat32.Y, box.Min.Y, box.Max.Y)
+	} else if l.HasScroll[mat32.X] {
+		did = l.ScrollToBoxDim(mat32.X, box.Min.X, box.Max.X)
 	}
 	if did {
-		ly.SetNeedsRender(true)
+		l.SetNeedsRender(true)
 	}
 	return did
 }
@@ -399,16 +399,16 @@ func (ly *Layout) ScrollToBox(box image.Rectangle) bool {
 // ScrollDimToStart scrolls to put the given child coordinate position (eg.,
 // top / left of a view box) at the start (top / left) of our scroll area, to
 // the extent possible. Returns true if scrolling was needed.
-func (ly *Layout) ScrollDimToStart(d mat32.Dims, posi int) bool {
-	if !ly.HasScroll[d] {
+func (l *Layout) ScrollDimToStart(d mat32.Dims, posi int) bool {
+	if !l.HasScroll[d] {
 		return false
 	}
 	pos := float32(posi)
-	cmin, _ := ly.Geom.ContentRangeDim(d)
+	cmin, _ := l.Geom.ContentRangeDim(d)
 	if pos == cmin {
 		return false
 	}
-	sb := ly.Scrolls[d]
+	sb := l.Scrolls[d]
 	trg := mat32.Clamp(sb.Value+(pos-cmin), 0, sb.EffectiveMax())
 	sb.SetValueAction(trg)
 	return true
@@ -417,16 +417,16 @@ func (ly *Layout) ScrollDimToStart(d mat32.Dims, posi int) bool {
 // ScrollDimToEnd scrolls to put the given child coordinate position (eg.,
 // bottom / right of a view box) at the end (bottom / right) of our scroll
 // area, to the extent possible. Returns true if scrolling was needed.
-func (ly *Layout) ScrollDimToEnd(d mat32.Dims, posi int) bool {
-	if !ly.HasScroll[d] || ly.Scrolls[d] == nil {
+func (l *Layout) ScrollDimToEnd(d mat32.Dims, posi int) bool {
+	if !l.HasScroll[d] || l.Scrolls[d] == nil {
 		return false
 	}
 	pos := float32(posi)
-	_, cmax := ly.Geom.ContentRangeDim(d)
+	_, cmax := l.Geom.ContentRangeDim(d)
 	if pos == cmax {
 		return false
 	}
-	sb := ly.Scrolls[d]
+	sb := l.Scrolls[d]
 	trg := mat32.Clamp(sb.Value+(pos-cmax), 0, sb.EffectiveMax())
 	sb.SetValueAction(trg)
 	return true
@@ -435,17 +435,17 @@ func (ly *Layout) ScrollDimToEnd(d mat32.Dims, posi int) bool {
 // ScrollDimToCenter scrolls to put the given child coordinate position (eg.,
 // middle of a view box) at the center of our scroll area, to the extent
 // possible. Returns true if scrolling was needed.
-func (ly *Layout) ScrollDimToCenter(d mat32.Dims, posi int) bool {
-	if !ly.HasScroll[d] || ly.Scrolls[d] == nil {
+func (l *Layout) ScrollDimToCenter(d mat32.Dims, posi int) bool {
+	if !l.HasScroll[d] || l.Scrolls[d] == nil {
 		return false
 	}
 	pos := float32(posi)
-	cmin, cmax := ly.Geom.ContentRangeDim(d)
+	cmin, cmax := l.Geom.ContentRangeDim(d)
 	mid := 0.5 * (cmin + cmax)
 	if pos == mid {
 		return false
 	}
-	sb := ly.Scrolls[d]
+	sb := l.Scrolls[d]
 	trg := mat32.Clamp(sb.Value+(pos-mid), 0, sb.EffectiveMax())
 	sb.SetValueAction(trg)
 	return true

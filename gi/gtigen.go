@@ -448,18 +448,18 @@ func NewLayout(par ki.Ki, name ...string) *Layout {
 }
 
 // KiType returns the [*gti.Type] of [Layout]
-func (t *Layout) KiType() *gti.Type { return LayoutType }
+func (l *Layout) KiType() *gti.Type { return LayoutType }
 
 // New returns a new [*Layout] value
-func (t *Layout) New() ki.Ki { return &Layout{} }
+func (l *Layout) New() ki.Ki { return &Layout{} }
 
 // SetStackTop sets the [Layout.StackTop]:
 // for Stacked layout, index of node to use as the top of the stack.
 // Only the node at this index is rendered -- if not a valid index, nothing is rendered.
-func (t *Layout) SetStackTop(v int) *Layout { t.StackTop = v; return t }
+func (l *Layout) SetStackTop(v int) *Layout { l.StackTop = v; return l }
 
 // SetTooltip sets the [Layout.Tooltip]
-func (t *Layout) SetTooltip(v string) *Layout { t.Tooltip = v; return t }
+func (l *Layout) SetTooltip(v string) *Layout { l.Tooltip = v; return l }
 
 // StretchType is the [gti.Type] for [Stretch]
 var StretchType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Stretch", IDName: "stretch", Doc: "Stretch adds a stretchy element that grows to fill all\navailable space. You can set [styles.Style.Grow] to change\nhow much it grows relative to other growing elements.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Instance: &Stretch{}})
