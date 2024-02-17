@@ -6,6 +6,7 @@ package ki_test
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
 
@@ -15,63 +16,78 @@ import (
 )
 
 func TestNodeJSON(t *testing.T) {
-	parent := testdata.NodeEmbed{}
+	parent := testdata.NodeEmbed{
+		Node: ki.Node{
+			Nm:              "",
+			Flags:           0,
+			Props:           ki.NewProps(),
+			Par:             nil,
+			Kids:            nil,
+			Ths:             nil,
+			NumLifetimeKids: 0,
+		},
+		Mbr1: "",
+		Mbr2: 0,
+	}
 	parent.InitName(&parent, "par1")
 	typ := parent.KiType()
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
-	// child1 :=
-	parent.NewChild(typ, "child1")
+
+	parent.NewChild(typ, "child1") // child1 :=
 	var child2 = parent.NewChild(typ, "child2").(*testdata.NodeEmbed)
-	// child3 :=
-	parent.NewChild(typ, "child3")
+
+	parent.NewChild(typ, "child3") // child3 :=
 	child2.NewChild(typ, "subchild1")
 
 	var buf bytes.Buffer
-	err := jsons.Write(&parent, &buf)
-	if err != nil {
-		t.Error(err)
-	} else {
-		// jsons.SaveIndent(&parent, "json_test.json")
-		// fmt.Printf("json output:\n%v\n", string(buf.Bytes()))
-	}
+	assert.NoError(t, jsons.Write(&parent, &buf))
+
+	jsons.SaveIndent(&parent, "json_test.json")
+	fmt.Printf("json output:\n%v\n", buf.String())
+
 	b := buf.Bytes()
 
-	tstload := testdata.NodeEmbed{}
-	tstload.InitName(&tstload, "")
-	err = jsons.Read(&tstload, bytes.NewReader(b))
-	if err != nil {
-		t.Error(err)
-	} else {
-		var buf2 bytes.Buffer
-		err = jsons.Write(tstload, &buf2)
-		if err != nil {
-			t.Error(err)
-		}
-		tstb := buf2.Bytes()
-		// fmt.Printf("test loaded json output: %v\n", string(tstb))
-		if !bytes.Equal(tstb, b) {
-			t.Error("original and unmarshal'd json rep are not equivalent")
-		}
+	nodeEmbed := testdata.NodeEmbed{
+		Node: ki.Node{
+			Nm:              "",
+			Flags:           0,
+			Props:           ki.NewProps(),
+			Par:             nil,
+			Kids:            nil,
+			Ths:             nil,
+			NumLifetimeKids: 0,
+		},
+		Mbr1: "",
+		Mbr2: 0,
+	}
+	nodeEmbed.InitName(&nodeEmbed, "")
+
+	assert.NoError(t, jsons.Read(&nodeEmbed, bytes.NewReader(b)))
+
+	var buf2 bytes.Buffer
+	assert.NoError(t, jsons.Write(nodeEmbed, &buf2))
+	tstb := buf2.Bytes()
+	fmt.Printf("test loaded json output: %v\n", buf2.String())
+	if !bytes.Equal(tstb, b) {
+		t.Error("original and unmarshal'd json rep are not equivalent")
 	}
 
 	var bufn bytes.Buffer
-	err = ki.WriteNewJSON(parent.This(), &bufn)
+	assert.NoError(t, ki.WriteNewJSON(parent.This(), &bufn))
 	b = bufn.Bytes()
-	nwnd, err := ki.ReadNewJSON(bytes.NewReader(b))
+	readNewJSON, err := ki.ReadNewJSON(bytes.NewReader(b))
+	assert.NoError(t, err)
+	var buf3 bytes.Buffer
+	err = ki.WriteNewJSON(readNewJSON, &buf3)
 	if err != nil {
 		t.Error(err)
-	} else {
-		var buf2 bytes.Buffer
-		err = ki.WriteNewJSON(nwnd, &buf2)
-		if err != nil {
-			t.Error(err)
-		}
-		tstb := buf2.Bytes()
-		// fmt.Printf("test loaded json output: %v\n", string(tstb))
-		if !bytes.Equal(tstb, b) {
-			t.Error("original and unmarshal'd json rep are not equivalent")
-		}
+	}
+	bb := buf3.Bytes()
+	fmt.Printf("test loaded json output: %v\n", buf3.String())
+	assert.Equal(t, bb, b)
+	if !bytes.Equal(bb, b) {
+		t.Error("original and unmarshal'd json rep are not equivalent")
 	}
 }
 
@@ -85,7 +101,7 @@ func TestNodeXML(t *testing.T) {
 	parent.NewChild(typ, "child1") // child1 :=
 	child2 := parent.NewChild(typ, "child1").(*testdata.NodeEmbed)
 
-	parent.NewChild(typ, "child1") // child3 :=
+	parent.NewChild(typ, "child3") // child3 :=
 	child2.NewChild(typ, "subchild1")
 
 	var buf bytes.Buffer
