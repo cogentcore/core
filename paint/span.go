@@ -314,6 +314,9 @@ func (sr *Span) SetRunePosLR(letterSpace, wordSpace, chsz float32, tabSize int) 
 	TextFontRenderMu.Lock()
 	defer TextFontRenderMu.Unlock()
 	for i, r := range sr.Text {
+		if len(sr.Render) == 0 {
+			continue
+		}
 		rr := &(sr.Render[i])
 		curFace = rr.CurFace(curFace)
 
