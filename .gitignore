@@ -16,8 +16,13 @@ go.work.sum
 .vscode
 .idea
 
-gi/testdata
-core/svg/testdata/
-core/paint/testdata/
-core/giv/testdata/
-core/cursors/testdata/
+/gi/testdata
+/svg/testdata
+/colors/testdata
+/giv/testdata
+/paint/testdata
+/cursors/cursorimg/testdata
+/coredom/testdata
+/raster/testdata
+/grease/testdata
+/ki/json_test.json
