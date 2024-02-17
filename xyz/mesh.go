@@ -130,7 +130,7 @@ func (sc *Scene) AddMesh(ms Mesh) {
 	sc.SetFlag(true, ScNeedsConfig)
 }
 
-// AddMeshUniqe adds given mesh to mesh collection, ensuring that it has
+// AddMeshUnique adds given mesh to mesh collection, ensuring that it has
 // a unique name if one already exists.
 func (sc *Scene) AddMeshUnique(ms Mesh) {
 	nm := ms.Name()

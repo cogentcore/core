@@ -137,7 +137,7 @@ func (pl *PointLight) ViewPos(viewMat *mat32.Mat4) mat32.Vec3 {
 	return pl.Pos.MulMat4AsVec4(viewMat, 1)
 }
 
-// Spotlight is a light with a position and direction and associated decay factors and angles.
+// SpotLight is a light with a position and direction and associated decay factors and angles.
 // which divide the light intensity as a function of linear and quadratic distance.
 // The quadratic factor dominates at longer distances.
 type SpotLight struct {

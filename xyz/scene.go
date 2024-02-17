@@ -20,7 +20,7 @@ import (
 	"cogentcore.org/core/vgpu/vphong"
 )
 
-// Set Update3DTrace to true to get a trace of 3D updating
+// Update3DTrace set it to true for get a trace of 3D updating
 var Update3DTrace = false
 
 // Scene is the overall scenegraph containing nodes as children.

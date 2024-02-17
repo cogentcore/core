@@ -6,7 +6,7 @@ package filetree
 
 import "sync"
 
-// DirFlags are flags on directories: Open, SortBy etc
+// DirFlags are flags on directories: Open, SortBy etc.
 // These flags are stored in the DirFlagMap for persistence.
 type DirFlags int64 //enums:bitflag -trim-prefix Dir
 
@@ -56,7 +56,7 @@ func (dm *DirFlagMap) IsOpen(path string) bool {
 	return false
 }
 
-// SetOpenState sets the given directory's open flag
+// SetOpen sets the given directory's open flag
 func (dm *DirFlagMap) SetOpen(path string, open bool) {
 	dm.Init()
 	defer dm.Mu.Unlock()

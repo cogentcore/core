@@ -22,7 +22,7 @@ type Node interface {
 	// IsSolid returns true if this is an Solid node (else a Group)
 	IsSolid() bool
 
-	// AsNode3D returns a generic NodeBase for our node -- gives generic
+	// AsNode returns a generic NodeBase for our node -- gives generic
 	// access to all the base-level data structures without requiring
 	// interface methods.
 	AsNode() *NodeBase

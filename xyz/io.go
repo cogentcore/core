@@ -24,7 +24,7 @@ type Decoder interface {
 	// Desc returns the description of this decoder
 	Desc() string
 
-	// SetFile sets the file name being used for decoding, or error if not found.
+	// SetFileFS sets the file name being used for decoding, or error if not found.
 	// Returns a list of files that should be loaded along with the main one, if needed.
 	// For example, .obj decoder adds a corresponding .mtl file.  In addition,
 	// decoded files may specify further files (textures, etc) that must be located
