@@ -10,7 +10,7 @@ import (
 	"fmt"
 )
 
-// fi.Known is an enumerated list of known file types, for which
+// Known is an enumerated list of known file types, for which
 // appropriate actions can be taken etc.
 type Known int32 //enums:enum
 
@@ -138,10 +138,10 @@ const (
 	// file type is OK (excludes Unknown) -- see Any and Any options for each category
 	AnyKnown
 
-	// Folder is a folder / directory
+	// AnyFolder is a folder / directory
 	AnyFolder
 
-	// Archive is a collection of files, e.g., zip tar
+	// AnyArchive is a collection of files, e.g., zip tar
 	AnyArchive
 	Multipart
 	Tar
@@ -153,11 +153,11 @@ const (
 	Dmg
 	Shar
 
-	// Backup files
+	// AnyBackup files
 	AnyBackup
 	Trash
 
-	// Code is a programming language file
+	// AnyCode is a programming language file
 	AnyCode
 	Ada
 	Bash
@@ -193,7 +193,7 @@ const (
 	Scala
 	Tcl
 
-	// Doc is an editable word processing file including latex, markdown, html, css, etc
+	// AnyDoc is an editable word processing file including latex, markdown, html, css, etc
 	AnyDoc
 	BibTeX
 	TeX
@@ -212,12 +212,12 @@ const (
 	EBook
 	EPub
 
-	// Sheet is a spreadsheet file (.xls etc)
+	// AnySheet is a spreadsheet file (.xls etc)
 	AnySheet
 	MSExcel
 	OpenSheet
 
-	// Data is some kind of data format (csv, json, database, etc)
+	// AnyData is some kind of data format (csv, json, database, etc)
 	AnyData
 	Csv
 	Json
@@ -230,14 +230,14 @@ const (
 	CogentCore
 	Yaml
 
-	// Text is some other kind of text file
+	// AnyText is some other kind of text file
 	AnyText
 	PlainText // text/plain mimetype -- used for clipboard
 	ICal
 	VCal
 	VCard
 
-	// Image is an image (jpeg, png, svg, etc) *including* PDF
+	// AnyImage is an image (jpeg, png, svg, etc) *including* PDF
 	AnyImage
 	Pdf
 	Postscript
@@ -258,12 +258,12 @@ const (
 	Heic
 	Heif
 
-	// Model is a 3D model
+	// AnyModel is a 3D model
 	AnyModel
 	Vrml
 	X3d
 
-	// Audio is an audio file
+	// AnyAudio is an audio file
 	AnyAudio
 	Aac
 	Flac
@@ -272,7 +272,7 @@ const (
 	Midi
 	Wav
 
-	// Video is a video file
+	// AnyVideo is a video file
 	AnyVideo
 	Mpeg
 	Mp4
@@ -281,14 +281,14 @@ const (
 	Wmv
 	Avi
 
-	// Font is a font file
+	// AnyFont is a font file
 	AnyFont
 	TrueType
 	WebOpenFont
 
-	// Exe is a binary executable file
+	// AnyExe is a binary executable file
 	AnyExe
 
-	// Bin is some other unrecognized binary type
+	// AnyBin is some other unrecognized binary type
 	AnyBin
 )

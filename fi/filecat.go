@@ -21,7 +21,7 @@
 // github.com/h2non/filetype
 package fi
 
-// fi.Cat is a functional category for files -- a broad functional
+// Cat is a functional category for files -- a broad functional
 // categorization that can help decide what to do with the file.
 //
 // It is computed in part from the mime type, but some types require
@@ -82,7 +82,7 @@ const (
 	Bin
 )
 
-// fi.CatFromMime returns the file category based on the mime type -- not all
+// CatFromMime returns the file category based on the mime type -- not all
 // Cats can be inferred from file types
 func CatFromMime(mime string) Cat {
 	if mime == "" {

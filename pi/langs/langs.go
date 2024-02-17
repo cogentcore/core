@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/fi"
 )
 
-var ParserBytes map[fi.Known][]byte = make(map[fi.Known][]byte)
+var ParserBytes = make(map[fi.Known][]byte)
 
 func OpenParser(sl fi.Known) ([]byte, error) {
 	parserBytes, ok := ParserBytes[sl]

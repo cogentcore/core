@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package prof provides very basic but effective profiling of targeted
+// Package prof provides very basic but effective profiling of targeted
 // functions or code sections, which can often be more informative than
 // generic cpu profiling
 //
@@ -177,5 +177,5 @@ func (p *Profiler) Report(units time.Duration) {
 }
 
 func (p *Profiler) Reset() {
-	p.Profs = make(map[string]*Profile, 0)
+	p.Profs = make(map[string]*Profile)
 }

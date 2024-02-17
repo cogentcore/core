@@ -23,7 +23,7 @@ func init() {
 }
 
 func TestParse(t *testing.T) {
-	// t.Skip("todo: reenable soon")
+	// t.Skip("todo: readable soon")
 	lp, _ := pi.LangSupport.Props(fi.Go)
 	pr := lp.Lang.Parser()
 	pr.ReportErrs = true
