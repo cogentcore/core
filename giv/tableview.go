@@ -456,6 +456,9 @@ func (tv *TableView) ConfigRows() {
 // including which range of data is being displayed.
 // This is called for scrolling, navigation etc.
 func (tv *TableView) UpdateWidgets() {
+	if tv.This() == nil {
+		return //?
+	}
 	sg := tv.This().(SliceViewer).SliceGrid()
 	if sg == nil || tv.VisRows == 0 || sg.VisRows == 0 || !sg.HasChildren() {
 		return

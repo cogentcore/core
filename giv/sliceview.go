@@ -575,7 +575,10 @@ func (sv *SliceViewBase) ConfigFrame() {
 // SliceGrid returns the SliceGrid grid frame widget, which contains all the
 // fields and values
 func (sv *SliceViewBase) SliceGrid() *SliceViewGrid {
-	return sv.ChildByName("grid", 0).(*SliceViewGrid)
+	if sv.ChildByName("grid", 0) == nil {
+		return nil //??
+	}
+	return sv.ChildByName("grid", 0).(*SliceViewGrid) //need check ?
 }
 
 // RowWidgetNs returns number of widgets per row and offset for index label
@@ -641,6 +644,9 @@ func (sv *SliceViewBase) UpdateStartIdx() {
 
 // UpdateScroll updates the scroll value
 func (sv *SliceViewBase) UpdateScroll() {
+	if sv.This() == nil {
+		return
+	}
 	sg := sv.This().(SliceViewer).SliceGrid()
 	if sg == nil {
 		return
@@ -1116,6 +1122,9 @@ func (sv *SliceViewBase) ScrollToIdxNoUpdt(idx int) bool {
 func (sv *SliceViewBase) ScrollToIdx(idx int) bool {
 	updt := sv.ScrollToIdxNoUpdt(idx)
 	if updt {
+		if sv.This() == nil {
+			return false //???
+		}
 		sv.This().(SliceViewer).UpdateWidgets()
 	}
 	return updt
