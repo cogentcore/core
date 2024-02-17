@@ -840,7 +840,7 @@ func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
 		return ""
 	}
 	se := xml.StartElement{}
-	var props *ki.Props
+	props := ki.NewProps()
 	if itm.Properties() != nil {
 		props = itm.Properties()
 	}
