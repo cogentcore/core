@@ -649,6 +649,12 @@ func (w *RenderWin) HandleWindowEvents(e events.Event) {
 			}
 			WinGeomMgr.RecordPref(w)
 		case events.WinFocus:
+			// if we are not already the last in AllRenderWins, we go there,
+			// as this allows focus to be restored to us in the future
+			if len(AllRenderWins) > 0 && AllRenderWins[len(AllRenderWins)-1] != w {
+				AllRenderWins.Delete(w)
+				AllRenderWins.Add(w)
+			}
 			if !w.HasFlag(WinGotFocus) {
 				w.SetFlag(true, WinGotFocus)
 				w.SendWinFocusEvent(events.WinFocus)
