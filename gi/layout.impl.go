@@ -154,9 +154,7 @@ func AsLayout(k ki.Ki) *Layout {
 }
 
 // AsLayout satisfies the [LayoutEmbedder] interface
-func (l *Layout) AsLayout() *Layout {
-	return l
-}
+func (l *Layout) AsLayout() *Layout { return l }
 
 //////////////////////////////////////////////////////////////
 //  GeomSize
@@ -524,7 +522,7 @@ func (ls *LayImplState) WrapIdxToCoord(index int) image.Point {
 			x++
 		}
 	}
-	return image.Point{x, y}
+	return image.Point{X: x, Y: y}
 }
 
 // CellsSize returns the total Size represented by the current Cells,
@@ -766,7 +764,7 @@ func (l *Layout) SizeUpChildren() {
 	})
 }
 
-// SetInitCells sets the initial default assignment of cell indexes
+// LaySetInitCells sets the initial default assignment of cell indexes
 // to each widget, based on layout type.
 func (l *Layout) LaySetInitCells() {
 	switch {
@@ -803,19 +801,19 @@ func (l *Layout) LaySetInitCellsFlex() {
 	li.MainAxis = mat32.Dims(l.Styles.Direction)
 	ca := li.MainAxis.Other()
 	li.Wraps = nil
-	idx := 0
+	index := 0
 	l.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		mat32.SetPointDim(&kwb.Geom.Cell, li.MainAxis, idx)
+		mat32.SetPointDim(&kwb.Geom.Cell, li.MainAxis, index)
 		mat32.SetPointDim(&kwb.Geom.Cell, ca, 0)
-		idx++
+		index++
 		return ki.Continue
 	})
-	if idx == 0 {
+	if index == 0 {
 		if DebugSettings.LayoutTrace {
-			fmt.Println(l, "no items:", idx)
+			fmt.Println(l, "no items:", index)
 		}
 	}
-	mat32.SetPointDim(&li.Shape, li.MainAxis, max(idx, 1)) // must be at least 1
+	mat32.SetPointDim(&li.Shape, li.MainAxis, max(index, 1)) // must be at least 1
 	mat32.SetPointDim(&li.Shape, ca, 1)
 }
 
@@ -828,7 +826,7 @@ func (l *Layout) LaySetInitCellsWrap() {
 		return ki.Continue
 	})
 	if ni == 0 {
-		li.Shape = image.Point{1, 1}
+		li.Shape = image.Point{X: 1, Y: 1}
 		li.Wraps = nil
 		li.GapSize.SetZero()
 		l.Geom.Size.InnerSpace.SetZero()
@@ -849,11 +847,11 @@ func (l *Layout) LaySetInitCellsWrap() {
 		li.Wraps[i] = n
 		sum += n
 	}
-	l.LaySetWrapIdxs()
+	l.LaySetWrapIndexs()
 }
 
-// LaySetWrapIdxs sets indexes for Wrap case
-func (l *Layout) LaySetWrapIdxs() {
+// LaySetWrapIndexs sets indexes for Wrap case
+func (l *Layout) LaySetWrapIndexs() {
 	li := &l.LayImpl
 	idx := 0
 	var maxc image.Point
@@ -874,19 +872,19 @@ func (l *Layout) LaySetWrapIdxs() {
 	li.Shape = maxc
 }
 
-// UpdateStackedVisbility updates the visibility for Stacked layouts
+// UpdateStackedVisibility updates the visibility for Stacked layouts
 // so the StackTop widget is visible, and others are Invisible.
 func (l *Layout) UpdateStackedVisibility() {
 	l.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwb.SetState(i != l.StackTop, states.Invisible)
-		kwb.Geom.Cell = image.Point{0, 0}
+		kwb.Geom.Cell = image.Point{}
 		return ki.Continue
 	})
 }
 
 func (l *Layout) LaySetInitCellsStacked() {
 	l.UpdateStackedVisibility()
-	l.LayImpl.Shape = image.Point{1, 1}
+	l.LayImpl.Shape = image.Point{X: 1, Y: 1}
 }
 
 func (l *Layout) LaySetInitCellsGrid() {
@@ -902,11 +900,11 @@ func (l *Layout) LaySetInitCellsGrid() {
 	if rows == 0 || cols == 0 {
 		fmt.Println(l, "no rows or cols:", rows, cols)
 	}
-	l.LayImpl.Shape = image.Point{max(cols, 1), max(rows, 1)}
+	l.LayImpl.Shape = image.Point{X: max(cols, 1), Y: max(rows, 1)}
 	ci := 0
 	ri := 0
 	l.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		kwb.Geom.Cell = image.Point{ci, ri}
+		kwb.Geom.Cell = image.Point{X: ci, Y: ri}
 		ci++
 		cs := kwb.Styles.ColSpan
 		if cs > 1 {
@@ -1368,7 +1366,7 @@ func (l *Layout) SizeDownWrap(iter int) bool {
 		fmt.Println(l, "wrapped:", wraps)
 	}
 	li.Wraps = wraps
-	l.LaySetWrapIdxs()
+	l.LaySetWrapIndexs()
 	li.InitCells()
 	l.LaySetGapSizeFromCells()
 	l.SizeFromChildrenCells(iter, SizeDownPass)
@@ -1473,7 +1471,7 @@ func (l *Layout) SizeFinalUpdateChildrenSizes() {
 	l.SizeDownParts(iter) // no std role, just get sizes
 }
 
-// SizeFinal: (bottom-up) similar to SizeUp but done at the end of the
+// SizeFinal (bottom-up) similar to SizeUp but done at the end of the
 // Sizing phase: first grows widget Actual sizes based on their Grow
 // factors, up to their Alloc sizes.  Then gathers this updated final
 // actual Size information for layouts to register their actual sizes
@@ -1639,7 +1637,7 @@ func (wb *WidgetBase) PositionChildren() {
 	})
 }
 
-// Position: uses the final sizes to position everything within layouts
+// Position uses the final sizes to position everything within layouts
 // according to alignment settings.
 func (l *Layout) Position() {
 	l.PositionLay()
@@ -1670,7 +1668,7 @@ func (l *Layout) PositionCells() {
 	l.PositionCellsMainX()
 }
 
-// Main axis = X
+// PositionCellsMainX Main axis = X
 func (l *Layout) PositionCellsMainX() {
 	// todo: can break apart further into Flex rows
 	gap := l.LayImpl.Gap
@@ -1699,7 +1697,7 @@ func (l *Layout) PositionCellsMainX() {
 	})
 }
 
-// Main axis = Y
+// PositionCellsMainY  Main axis = Y
 func (l *Layout) PositionCellsMainY() {
 	gap := l.LayImpl.Gap
 	sz := &l.Geom.Size
@@ -1840,7 +1838,7 @@ func (l *Layout) ScenePosChildren() {
 	l.WidgetBase.ScenePosChildren()
 }
 
-// ScenePos: scene-based position and final BBox is computed based on
+// ScenePos scene-based position and final BBox is computed based on
 // parents accumulated position and scrollbar position.
 // This step can be performed when scrolling after updating Scroll.
 func (l *Layout) ScenePos() {
