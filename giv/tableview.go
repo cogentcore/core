@@ -298,6 +298,9 @@ func (tv *TableView) ConfigHeader() {
 	for fli := 0; fli < nfld; fli++ {
 		fli := fli
 		field := tv.VisFields[fli]
+		if sgh.Child(idxOff+fli) == nil {
+			continue
+		}
 		hdr := sgh.Child(idxOff + fli).(*gi.Button)
 		hdr.SetType(gi.ButtonMenu)
 		htxt := ""

@@ -418,10 +418,16 @@ func (bt *Button) ConfigWidget() {
 
 	bt.ConfigParts(config, func() {
 		if ici >= 0 {
+			if bt.Parts.Child(ici) == nil {
+				return
+			}
 			ic := bt.Parts.Child(ici).(*Icon)
 			ic.SetIcon(bt.Icon)
 		}
 		if lbi >= 0 {
+			if bt.Parts.Child(lbi) == nil {
+				return
+			}
 			lbl := bt.Parts.Child(lbi).(*Label)
 			if lbl.Text != bt.Text {
 				lbl.SetTextUpdate(bt.Text)
@@ -429,6 +435,9 @@ func (bt *Button) ConfigWidget() {
 		}
 
 		if indi >= 0 {
+			if bt.Parts.Child(indi) == nil {
+				return
+			}
 			ic := bt.Parts.Child(indi).(*Icon)
 			ic.SetIcon(bt.Indicator)
 		}

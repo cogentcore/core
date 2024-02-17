@@ -259,6 +259,9 @@ func (ch *Chooser) ConfigWidget() {
 			ic.SetIcon(ch.Icon)
 		}
 		if ch.Editable {
+			if ch.Parts.Child(txi) == nil {
+				return
+			}
 			tx := ch.Parts.Child(txi).(*TextField)
 			tx.SetText(ch.CurrentItem.GetLabel())
 			tx.SetLeadingIcon(ch.Icon)

@@ -5,9 +5,8 @@
 package ki
 
 import (
-	"fmt"
-
 	"cogentcore.org/core/gti"
+	"fmt"
 )
 
 // Slice is just a slice of ki elements: []Ki, providing methods for accessing
@@ -209,23 +208,28 @@ func (sl *Slice) ElemByTypeTry(t *gti.Type, embeds bool, startIdx ...int) (Ki, e
 
 // SliceInsert item at index; does not do any parent updating etc;
 // use the [Ki] or [Node] method unless you know what you are doing.
-func SliceInsert(sl *[]Ki, k Ki, idx int) {
+func SliceInsert(sl *[]Ki, k Ki, index int) {
 	kl := len(*sl)
-	if idx < 0 {
-		idx = kl + idx
+	//if index > kl { // last position allowed for insert
+	//	index = kl
+	//}
+	//slices.Insert(*sl, index, k)
+	//return
+	if index < 0 {
+		index = kl + index
 	}
-	if idx < 0 { // still?
-		idx = 0
+	if index < 0 { // still?
+		index = 0
 	}
-	if idx > kl { // last position allowed for insert
-		idx = kl
+	if index > kl { // last position allowed for insert
+		index = kl
 	}
 	// this avoids extra garbage collection
 	*sl = append(*sl, nil)
-	if idx < kl {
-		copy((*sl)[idx+1:], (*sl)[idx:kl])
+	if index < kl {
+		copy((*sl)[index+1:], (*sl)[index:kl])
 	}
-	(*sl)[idx] = k
+	(*sl)[index] = k
 }
 
 // Insert item at index; does not do any parent updating etc; use
