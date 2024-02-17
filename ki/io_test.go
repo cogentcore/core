@@ -6,6 +6,7 @@ package ki_test
 
 import (
 	"bytes"
+	"github.com/stretchr/testify/assert"
 	"testing"
 
 	"cogentcore.org/core/grows/jsons"
@@ -88,32 +89,15 @@ func TestNodeXML(t *testing.T) {
 	child2.NewChild(typ, "subchild1")
 
 	var buf bytes.Buffer
-	err := parent.WriteXML(&buf, true)
-	if err != nil {
-		t.Error(err)
-		// } else {
-		// 	fmt.Printf("xml output:\n%v\n", string(buf.Bytes()))
-	}
-	b := buf.Bytes()
+	assert.NoError(t, parent.WriteXML(&buf, true))
 
+	b := buf.Bytes()
 	tstload := testdata.NodeEmbed{}
 	tstload.InitName(&tstload, "")
-	err = tstload.ReadXML(bytes.NewReader(b))
-	if err != nil {
-		t.Error(err)
-	} else {
-		var buf2 bytes.Buffer
-		if err != nil {
-			t.Error(err)
-		}
-		err := tstload.WriteXML(&buf2, true)
-		if err != nil {
-			t.Error(err)
-		}
-		tstb := buf2.Bytes()
-		// fmt.Printf("test loaded json output:\n%v\n", string(tstb))
-		if !bytes.Equal(tstb, b) {
-			t.Error("original and unmarshal'd XML rep are not equivalent")
-		}
-	}
+	assert.NoError(t, tstload.ReadXML(bytes.NewReader(b)))
+
+	var buf2 bytes.Buffer
+	assert.NoError(t, tstload.WriteXML(&buf2, true))
+	assert.Equal(t, buf2.Bytes(), b)
+	// fmt.Printf("test loaded json output:\n%v\n", string(tstb))
 }
