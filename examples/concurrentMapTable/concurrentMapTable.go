@@ -25,7 +25,7 @@ func main() {
 				if len(table) > 0 {
 					tv.ScrollToIdx(len(table) - 1)
 				}
-				time.Sleep(300 * time.Millisecond)
+				time.Sleep(100 * time.Millisecond)
 			}
 		}()
 	})
