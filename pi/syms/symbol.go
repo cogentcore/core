@@ -176,11 +176,11 @@ func (sy *Symbol) AllocScopes() {
 // AddScopesMap adds a given scope element(s) from map to this Symbol.
 // if add is true, add this symbol to those scopes if they are not temporary.
 func (sy *Symbol) AddScopesMap(sm SymMap, add bool) {
-	if len(sy) == 0 {
+	if len(sm) == 0 {
 		return
 	}
 	sy.AllocScopes()
-	for _, s := range sy {
+	for _, s := range sm {
 		sy.Scopes[s.Kind] = s.Name
 		if add {
 			s.AddChild(sy)
