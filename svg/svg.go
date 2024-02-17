@@ -104,7 +104,7 @@ func NewSVG(width, height int) *SVG {
 // Config configures the SVG, setting image to given size
 // and initializing all relevant fields.
 func (sv *SVG) Config(width, height int) {
-	sz := image.Point{width, height}
+	sz := image.Point{X: width, Y: height}
 	sv.Geom.Size = sz
 	sv.Scale = 1
 	sv.Background = colors.C(colors.White)
@@ -242,7 +242,7 @@ func (sv *SVG) Render() {
 }
 
 func (sv *SVG) FillViewport() {
-	pc := &paint.Context{&sv.RenderState, &sv.Root.Paint}
+	pc := &paint.Context{State: &sv.RenderState, Paint: &sv.Root.Paint}
 	pc.Lock()
 	pc.FillBox(mat32.Vec2{}, mat32.V2FromPoint(sv.Geom.Size), sv.Background)
 	pc.Unlock()

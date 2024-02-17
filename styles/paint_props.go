@@ -5,6 +5,7 @@
 package styles
 
 import (
+	"cogentcore.org/core/ki"
 	"log"
 	"strconv"
 	"strings"
@@ -22,9 +23,9 @@ import (
 //   Styling functions for setting from properties
 //     see style_props.go for master version
 
-// StyleFromProps sets style field values based on map[string]any properties
-func (pc *Paint) StyleFromProps(par *Paint, props map[string]any, ctxt colors.Context) {
-	for key, val := range props {
+// StyleFromProps sets style field values based on   *ki.Props properties
+func (pc *Paint) StyleFromProps(par *Paint, props *ki.Props, ctxt colors.Context) {
+	for key, val := range props.Items() {
 		if len(key) == 0 {
 			continue
 		}
@@ -102,7 +103,7 @@ func (pc *Paint) StyleFromProps(par *Paint, props map[string]any, ctxt colors.Co
 //  Stroke
 
 // StyleStrokeFuncs are functions for styling the Stroke object
-var StyleStrokeFuncs = map[string]StyleFunc{
+var StyleStrokeFuncs = map[string]StyleFunc{ //todo use cmap
 	"stroke": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		fs := obj.(*Stroke)
 		if inh, init := StyleInhInit(val, par); inh || init {

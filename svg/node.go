@@ -88,10 +88,10 @@ type NodeBase struct {
 	// These styles apply here and to everything below, until superceded.
 	// Use .class and #name Props elements to apply entire styles
 	// to given elements, and type for element type.
-	CSS ki.Props `xml:"css" set:"-"`
+	CSS *ki.Props `xml:"css" set:"-"`
 
 	// aggregated css properties from all higher nodes down to me
-	CSSAgg ki.Props `copier:"-" json:"-" xml:"-" set:"-" view:"no-inline"`
+	CSSAgg *ki.Props `copier:"-" json:"-" xml:"-" set:"-" view:"no-inline"`
 
 	// bounding box for the node within the SVG Pixels image.
 	// This one can be outside the visible range of the SVG image.
@@ -330,6 +330,8 @@ func NodesContainingPoint(n Node, pt image.Point, leavesOnly bool) []Node {
 
 // Init does any needed initialization
 func (g *NodeBase) Init() {
+	g.CSS = ki.NewProps()
+	g.CSSAgg = ki.NewProps()
 }
 
 // Style styles the Paint values directly from node properties
@@ -339,24 +341,24 @@ func (g *NodeBase) Style(sv *SVG) {
 	ctxt := colors.Context(sv)
 	pc.StyleSet = false // this is always first call, restart
 
-	var parCSSAgg ki.Props
+	parCSSAgg := ki.NewProps()
 	if g.Par != nil { // && g.Par != sv.Root.This()
 		pn := g.Par.(Node)
 		parCSSAgg = pn.AsNodeBase().CSSAgg
 		pp := pn.PaintStyle()
 		pc.CopyStyleFrom(pp)
-		pc.SetStyleProps(pp, *g.Properties(), ctxt)
+		pc.SetStyleProps(pp, g.Properties(), ctxt)
 	} else {
-		pc.SetStyleProps(nil, *g.Properties(), ctxt)
+		pc.SetStyleProps(nil, g.Properties(), ctxt)
 	}
 	pc.ToDotsImpl(&pc.UnContext) // we always inherit parent's unit context -- SVG sets it once-and-for-all
 
 	if parCSSAgg != nil {
-		AggCSS(&g.CSSAgg, parCSSAgg)
+		AggCSS(g.CSSAgg, parCSSAgg)
 	} else {
 		g.CSSAgg = nil
 	}
-	AggCSS(&g.CSSAgg, g.CSS)
+	AggCSS(g.CSSAgg, g.CSS)
 	g.StyleCSS(sv, g.CSSAgg)
 
 	pc.StrokeStyle.Opacity *= pc.FontStyle.Opacity // applies to all
@@ -366,23 +368,29 @@ func (g *NodeBase) Style(sv *SVG) {
 }
 
 // AggCSS aggregates css properties
-func AggCSS(agg *ki.Props, css ki.Props) {
-	if *agg == nil {
-		*agg = make(ki.Props, len(css))
+func AggCSS(agg *ki.Props, css *ki.Props) {
+	if agg == nil {
+		agg = ki.NewProps()
 	}
-	for key, val := range css {
-		(*agg)[key] = val
+	if css == nil {
+		css = ki.NewProps()
+	}
+	for key, val := range css.Items() {
+		agg.Set(key, val)
 	}
 }
 
 // ApplyCSS applies css styles to given node,
 // using key to select sub-props from overall properties list
-func (g *NodeBase) ApplyCSS(sv *SVG, key string, css ki.Props) bool {
-	pp, got := css[key]
+func (g *NodeBase) ApplyCSS(sv *SVG, key string, css *ki.Props) bool {
+	if css == nil {
+		css = ki.NewProps() //todo delete
+	}
+	pp, got := css.Get(key)
 	if !got {
 		return false
 	}
-	pmap, ok := pp.(ki.Props) // must be a props map
+	pmap, ok := pp.(*ki.Props) // must be a props map
 	if !ok {
 		return false
 	}
@@ -399,7 +407,7 @@ func (g *NodeBase) ApplyCSS(sv *SVG, key string, css ki.Props) bool {
 
 // StyleCSS applies css style properties to given SVG node
 // parsing out type, .class, and #name selectors
-func (g *NodeBase) StyleCSS(sv *SVG, css ki.Props) {
+func (g *NodeBase) StyleCSS(sv *SVG, css *ki.Props) {
 	tyn := strings.ToLower(g.KiType().Name) // type is most general, first
 	g.ApplyCSS(sv, tyn, css)
 	cln := "." + strings.ToLower(g.Class) // then class

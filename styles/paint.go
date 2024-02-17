@@ -5,6 +5,7 @@
 package styles
 
 import (
+	"cogentcore.org/core/ki"
 	"image"
 	"image/color"
 
@@ -84,13 +85,16 @@ func (pc *Paint) InheritFields(par *Paint) {
 // SetStyleProps sets paint values based on given property map (name: value
 // pairs), inheriting elements as appropriate from parent, and also having a
 // default style for the "initial" setting
-func (pc *Paint) SetStyleProps(par *Paint, props map[string]any, ctxt colors.Context) {
+func (pc *Paint) SetStyleProps(par *Paint, props *ki.Props, ctxt colors.Context) {
+	if props == nil {
+		props = ki.NewProps() //todo
+	}
 	if !pc.StyleSet && par != nil { // first time
 		pc.InheritFields(par)
 	}
 	pc.StyleFromProps(par, props, ctxt)
 
-	pc.PropsNil = (len(props) == 0)
+	pc.PropsNil = props.IsEmpty()
 	pc.StyleSet = true
 }
 

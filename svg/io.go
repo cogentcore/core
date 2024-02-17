@@ -840,9 +840,9 @@ func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
 		return ""
 	}
 	se := xml.StartElement{}
-	var props ki.Props
+	var props *ki.Props
 	if itm.Properties() != nil {
-		props = *itm.Properties()
+		props = itm.Properties()
 	}
 	if itm.Name() != "" {
 		XMLAddAttr(&se.Attr, "id", itm.Name())
@@ -857,11 +857,11 @@ func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
 			if sp != "" {
 				XMLAddAttr(&se.Attr, "style", sp)
 			}
-			if txp, has := props["transform"]; has {
+			if txp, has := props.Get("transform"); has {
 				XMLAddAttr(&se.Attr, "transform", laser.ToString(txp))
 			}
 		} else {
-			for k, v := range props {
+			for k, v := range props.Items() {
 				sv := laser.ToString(v)
 				if _, has := InkscapeProps[k]; has {
 					k = "inkscape:" + k
@@ -884,14 +884,14 @@ func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
 		nm = "g"
 		if strings.HasPrefix(strings.ToLower(itm.Name()), "layer") {
 		}
-		for k, v := range props {
+		for k, v := range props.Items() {
 			sv := laser.ToString(v)
 			switch k {
 			case "opacity", "transform":
 				XMLAddAttr(&se.Attr, k, sv)
 			case "groupmode":
 				XMLAddAttr(&se.Attr, "inkscape:groupmode", sv)
-				if st, has := props["style"]; has {
+				if st, has := props.Get("style"); has {
 					XMLAddAttr(&se.Attr, "style", laser.ToString(st))
 				} else {
 					XMLAddAttr(&se.Attr, "style", "display:inline")
@@ -1130,7 +1130,7 @@ func SetStdXMLAttr(ni Node, name, val string) bool {
 		nb.Class = val
 		return true
 	case "style":
-		styles.SetStylePropsXML(val, (*map[string]any)(&nb.Props))
+		styles.SetStylePropsXML(val, nb.Props)
 		return true
 	}
 	return false

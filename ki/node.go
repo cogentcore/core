@@ -36,7 +36,7 @@ type Node struct {
 	Flags Flags `tableview:"-" copier:"-" json:"-" xml:"-" set:"-" max-width:"80" height:"3"`
 
 	// Props is a property map for arbitrary extensible properties.
-	Props Props `tableview:"-" xml:"-" copier:"-" set:"-" label:"Properties"`
+	Props *Props `tableview:"-" xml:"-" copier:"-" set:"-" label:"Properties"`
 
 	// Par is the parent of this node, which is set automatically when this node is added as a child of a parent.
 	Par Ki `tableview:"-" copier:"-" json:"-" xml:"-" view:"-" set:"-" label:"Parent"`
@@ -724,32 +724,39 @@ func (n *Node) FlagType() enums.BitFlagSetter {
 // on Trees about special features of each node -- functions below support
 // inheritance up Tree.
 func (n *Node) Properties() *Props {
-	return &n.Props
+	return n.Props
 }
 
 // SetProp sets given property key to value val.
 // initializes property map if nil.
 func (n *Node) SetProp(key string, val any) {
 	if n.Props == nil {
-		n.Props = make(Props)
+		n.Props = NewProps()
 	}
-	n.Props[key] = val
+	n.Props.Set(key, val)
 }
 
 // SetProps sets a whole set of properties
 func (n *Node) SetProps(props Props) {
 	if n.Props == nil {
-		n.Props = make(Props, len(props))
+		n.Props = NewProps()
 	}
-	for key, val := range props {
-		n.Props[key] = val
-	}
+	props.IterCb(func(key string, v any) {
+		n.Props.Set(key, v)
+	})
 }
 
 // Prop returns the property value for the given key.
 // It returns nil if it doesn't exist.
 func (n *Node) Prop(key string) any {
-	return n.Props[key]
+	if n.Props == nil {
+		n.Props = NewProps() //todo delete
+	}
+	get, b := n.Props.Get(key)
+	if !b {
+		return nil
+	}
+	return get
 }
 
 // PropInherit gets property value from key with options for inheriting
@@ -758,7 +765,10 @@ func (n *Node) Prop(key string) any {
 func (n *Node) PropInherit(key string, inherit bool) (any, bool) {
 	// pr := prof.Start("PropInherit")
 	// defer pr.End()
-	v, ok := n.Props[key]
+	if n.Props == nil {
+		n.Props = NewProps()
+	}
+	v, ok := n.Props.Get(key)
 	if ok {
 		return v, ok
 	}
@@ -776,7 +786,7 @@ func (n *Node) DeleteProp(key string) {
 	if n.Props == nil {
 		return
 	}
-	delete(n.Props, key)
+	n.Props.Remove(key)
 }
 
 // PropTag returns the name to look for in type properties, for types
@@ -1213,8 +1223,11 @@ func CopyFromRaw(kn, frm Ki) {
 	kn.Children().ConfigCopy(kn.This(), *frm.Children())
 	n := kn.AsKi()
 	fmp := *frm.Properties()
-	n.Props = make(Props, len(fmp))
-	n.Props.CopyFrom(fmp, DeepCopy)
+	n.Props = NewProps()
+	fmp.IterCb(func(key string, v any) {
+		n.Props.Set(key, v)
+	})
+	//n.Props.CopyFrom(fmp, DeepCopy)
 
 	kn.This().CopyFieldsFrom(frm)
 	for i, kid := range *kn.Children() {

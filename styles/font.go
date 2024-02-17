@@ -5,6 +5,7 @@
 package styles
 
 import (
+	"cogentcore.org/core/ki"
 	"image"
 	"image/color"
 	"log/slog"
@@ -93,8 +94,8 @@ func (fs *Font) SetUnitContext(uc *units.Context) {
 	}
 }
 
-func (fs *Font) StyleFromProps(par *Font, props map[string]any, ctxt colors.Context) {
-	for key, val := range props {
+func (fs *Font) StyleFromProps(par *Font, props *ki.Props, ctxt colors.Context) {
+	for key, val := range props.Items() {
 		if len(key) == 0 {
 			continue
 		}
@@ -110,7 +111,7 @@ func (fs *Font) StyleFromProps(par *Font, props map[string]any, ctxt colors.Cont
 // SetStyleProps sets font style values based on given property map (name:
 // value pairs), inheriting elements as appropriate from parent, and also
 // having a default style for the "initial" setting.
-func (fs *Font) SetStyleProps(parent *Font, props map[string]any, ctxt colors.Context) {
+func (fs *Font) SetStyleProps(parent *Font, props *ki.Props, ctxt colors.Context) {
 	// direct font styling is used only for special cases -- don't do this:
 	// if !fs.StyleSet && parent != nil { // first time
 	// 	fs.InheritFields(parent)
@@ -299,10 +300,10 @@ const (
 	// LineThrough indicates to place a line through text
 	LineThrough
 
-	// Blink is not currently supported (and probably a bad idea generally ;)
+	// DecoBlink is not currently supported (and probably a bad idea generally ;)
 	DecoBlink
 
-	// DottedUnderline is used for abbr tag -- otherwise not a standard text-decoration option afaik
+	// DecoDottedUnderline is used for abbr tag -- otherwise not a standard text-decoration option afaik
 	DecoDottedUnderline
 
 	// following are special case layout hints in RuneRender, to pass
@@ -459,33 +460,33 @@ func (s *Style) FontRender() *FontRender {
 	}
 }
 
-func (fr *FontRender) Defaults() {
-	fr.Color = colors.Black
-	fr.Opacity = 1
-	fr.Font.Defaults()
+func (r *FontRender) Defaults() {
+	r.Color = colors.Black
+	r.Opacity = 1
+	r.Font.Defaults()
 }
 
 // InheritFields from parent
-func (fr *FontRender) InheritFields(par *FontRender) {
-	fr.Color = par.Color
-	fr.Opacity = par.Opacity
-	fr.Font.InheritFields(&par.Font)
+func (r *FontRender) InheritFields(par *FontRender) {
+	r.Color = par.Color
+	r.Opacity = par.Opacity
+	r.Font.InheritFields(&par.Font)
 }
 
 // SetStyleProps sets font style values based on given property map (name:
 // value pairs), inheriting elements as appropriate from parent, and also
 // having a default style for the "initial" setting.
-func (fr *FontRender) SetStyleProps(parent *FontRender, props map[string]any, ctxt colors.Context) {
+func (r *FontRender) SetStyleProps(parent *FontRender, props *ki.Props, ctxt colors.Context) {
 	var pfont *Font
 	if parent != nil {
 		pfont = &parent.Font
 	}
-	fr.Font.StyleFromProps(pfont, props, ctxt)
-	fr.StyleRenderFromProps(parent, props, ctxt)
+	r.Font.StyleFromProps(pfont, props, ctxt)
+	r.StyleRenderFromProps(parent, props, ctxt)
 }
 
-func (fs *FontRender) StyleRenderFromProps(par *FontRender, props map[string]any, ctxt colors.Context) {
-	for key, val := range props {
+func (r *FontRender) StyleRenderFromProps(par *FontRender, props *ki.Props, ctxt colors.Context) {
+	for key, val := range props.Items() {
 		if len(key) == 0 {
 			continue
 		}
@@ -493,7 +494,7 @@ func (fs *FontRender) StyleRenderFromProps(par *FontRender, props map[string]any
 			continue
 		}
 		if sfunc, ok := StyleFontRenderFuncs[key]; ok {
-			sfunc(fs, key, val, par, ctxt)
+			sfunc(r, key, val, par, ctxt)
 		}
 	}
 }

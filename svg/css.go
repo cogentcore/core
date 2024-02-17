@@ -40,7 +40,7 @@ func (ss *StyleSheet) ParseString(str string) error {
 
 // CSSProps returns the properties for each of the rules in this style sheet,
 // suitable for setting the CSS value of a node -- returns nil if empty sheet
-func (ss *StyleSheet) CSSProps() ki.Props {
+func (ss *StyleSheet) CSSProps() *ki.Props {
 	if ss.Sheet == nil {
 		return nil
 	}
@@ -48,7 +48,7 @@ func (ss *StyleSheet) CSSProps() ki.Props {
 	if sz == 0 {
 		return nil
 	}
-	pr := make(ki.Props, sz)
+	pr := ki.NewProps()
 	for _, r := range ss.Sheet.Rules {
 		if r.Kind == css.AtRule {
 			continue // not supported
@@ -58,11 +58,11 @@ func (ss *StyleSheet) CSSProps() ki.Props {
 			continue
 		}
 		for _, sel := range r.Selectors {
-			sp := make(ki.Props, nd)
+			sp := ki.NewProps()
 			for _, de := range r.Declarations {
-				sp[de.Property] = de.Value
+				sp.Set(de.Property, de.Value)
 			}
-			pr[sel] = sp
+			pr.Set(sel, sp)
 		}
 	}
 	return pr

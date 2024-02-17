@@ -88,7 +88,10 @@ func (ty *Type) Clone() *Type {
 	nty.Meths = ty.Meths.Clone()
 	nty.Size = slices.Clone(ty.Size)
 	nty.Scopes = ty.Scopes.Clone()
-	nty.Props.CopyFrom(ty.Props, true)
+	ty.Props.IterCb(func(key string, v any) {
+		nty.Props.Set(key, v)
+	})
+	//nty.Props.CopyFrom(ty.Props, true)
 	return nty
 }
 

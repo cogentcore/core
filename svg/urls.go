@@ -241,7 +241,7 @@ func (sv *SVG) RemoveOrphanedDefs() bool {
 	}
 	sv.Root.WalkPre(func(k ki.Ki) bool {
 		pr := k.Properties()
-		for _, v := range *pr {
+		for _, v := range pr.Items() {
 			ps := laser.ToString(v)
 			if !strings.HasPrefix(ps, "url(#") {
 				continue

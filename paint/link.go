@@ -5,6 +5,7 @@
 package paint
 
 import (
+	"cogentcore.org/core/ki"
 	"image"
 
 	"cogentcore.org/core/mat32"
@@ -24,7 +25,7 @@ type TextLink struct {
 	Style styles.FontRender
 
 	// additional properties defined for the link, from the parsed HTML attributes
-	Props map[string]any
+	Props *ki.Props
 
 	// span index where link starts
 	StartSpan int

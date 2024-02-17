@@ -114,18 +114,18 @@ func (ast *Ast) WriteTree(out io.Writer, depth int) {
 	}
 }
 
-var AstProps = ki.Props{
-	"StructViewFields": ki.Props{ // hide in view
-		"Flag":  `view:"-"`,
-		"Props": `view:"-"`,
-	},
-	// "CallMethods": ki.PropSlice{
-	// 	{"SaveAs", ki.Props{
-	// 		"Args": ki.PropSlice{
-	// 			{"File Name", ki.Props{
-	// 				"default-field": "Filename",
-	// 			}},
-	// 		},
-	// 	}},
-	// },
-}
+//var AstProps = ki.Props{
+//	"StructViewFields": ki.Props{ // hide in view
+//		"Flag":  `view:"-"`,
+//		"Props": `view:"-"`,
+//	},
+//	// "CallMethods": ki.PropSlice{
+//	// 	{"SaveAs", ki.Props{
+//	// 		"Args": ki.PropSlice{
+//	// 			{"File Name", ki.Props{
+//	// 				"default-field": "Filename",
+//	// 			}},
+//	// 		},
+//	// 	}},
+//	// },
+//}

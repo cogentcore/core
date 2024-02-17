@@ -6,6 +6,7 @@ package paint
 
 import (
 	"bytes"
+	"cogentcore.org/core/ki"
 	"encoding/xml"
 	"html"
 	"image"
@@ -326,7 +327,7 @@ func (tr *Text) SetRunes(str []rune, fontSty *styles.FontRender, ctxt *units.Con
 // SetHTMLSimpleTag sets the styling parameters for simple html style tags
 // that only require updating the given font spec values -- returns true if handled
 // https://www.w3schools.com/cssref/css_default_values.asp
-func SetHTMLSimpleTag(tag string, fs *styles.FontRender, ctxt *units.Context, cssAgg map[string]any) bool {
+func SetHTMLSimpleTag(tag string, fs *styles.FontRender, ctxt *units.Context, cssAgg *ki.Props) bool {
 	did := false
 	switch tag {
 	case "b", "strong":
@@ -400,7 +401,7 @@ func SetHTMLSimpleTag(tag string, fs *styles.FontRender, ctxt *units.Context, cs
 // -- result can then be processed by different layout algorithms as needed.
 // cssAgg, if non-nil, should contain CSSAgg properties -- will be tested for
 // special css styling of each element.
-func (tr *Text) SetHTML(str string, font *styles.FontRender, txtSty *styles.Text, ctxt *units.Context, cssAgg map[string]any) {
+func (tr *Text) SetHTML(str string, font *styles.FontRender, txtSty *styles.Text, ctxt *units.Context, cssAgg *ki.Props) {
 	if txtSty.HasPre() {
 		tr.SetHTMLPre([]byte(str), font, txtSty, ctxt, cssAgg)
 	} else {
@@ -410,7 +411,7 @@ func (tr *Text) SetHTML(str string, font *styles.FontRender, txtSty *styles.Text
 
 // SetHTMLBytes does SetHTML with bytes as input -- more efficient -- use this
 // if already in bytes
-func (tr *Text) SetHTMLBytes(str []byte, font *styles.FontRender, txtSty *styles.Text, ctxt *units.Context, cssAgg map[string]any) {
+func (tr *Text) SetHTMLBytes(str []byte, font *styles.FontRender, txtSty *styles.Text, ctxt *units.Context, cssAgg *ki.Props) {
 	if txtSty.HasPre() {
 		tr.SetHTMLPre(str, font, txtSty, ctxt, cssAgg)
 	} else {
@@ -420,7 +421,7 @@ func (tr *Text) SetHTMLBytes(str []byte, font *styles.FontRender, txtSty *styles
 
 // This is the No-Pre parser that uses the golang XML decoder system, which
 // strips all whitespace and is thus unsuitable for any Pre case
-func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles.Text, ctxt *units.Context, cssAgg map[string]any) {
+func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles.Text, ctxt *units.Context, cssAgg *ki.Props) {
 	//	errstr := "gi.Text SetHTML"
 	sz := len(str)
 	if sz == 0 {
@@ -471,13 +472,13 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles
 					fs.SetDecoration(styles.Underline)
 					curLinkIdx = len(tr.Links)
 					tl := &TextLink{StartSpan: len(tr.Spans) - 1, StartIdx: len(curSp.Text)}
-					sprop := make(map[string]any, len(se.Attr))
+					sprop := ki.NewProps()
 					tl.Props = sprop
 					for _, attr := range se.Attr {
 						if attr.Name.Local == "href" {
 							tl.URL = attr.Value
 						}
-						sprop[attr.Name.Local] = attr.Value
+						sprop.Set(attr.Name.Local, attr.Value)
 					}
 					tr.Links = append(tr.Links, *tl)
 				case "span":
@@ -507,11 +508,11 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles
 				}
 			}
 			if len(se.Attr) > 0 {
-				sprop := make(map[string]any, len(se.Attr))
+				sprop := ki.NewProps()
 				for _, attr := range se.Attr {
 					switch attr.Name.Local {
 					case "style":
-						styles.SetStylePropsXML(attr.Value, &sprop)
+						styles.SetStylePropsXML(attr.Value, sprop)
 					case "class":
 						if cssAgg != nil {
 							clnm := "." + attr.Value
@@ -521,7 +522,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles
 							}
 						}
 					default:
-						sprop[attr.Name.Local] = attr.Value
+						sprop.Set(attr.Name.Local, attr.Value)
 					}
 				}
 				fs.SetStyleProps(nil, sprop, nil)
@@ -585,7 +586,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles
 // Only basic styling tags, including <span> elements with style parameters
 // (including class names) are decoded.  Whitespace is decoded as-is,
 // including LF \n etc, except in WhiteSpacePreLine case which only preserves LF's
-func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.Text, ctxt *units.Context, cssAgg map[string]any) {
+func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.Text, ctxt *units.Context, cssAgg *ki.Props) {
 	// errstr := "gi.Text SetHTMLPre"
 
 	sz := len(str)
@@ -684,7 +685,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 						curLinkIdx = len(tr.Links)
 						tl := &TextLink{StartSpan: len(tr.Spans) - 1, StartIdx: len(curSp.Text)}
 						if nattr > 0 {
-							sprop := make(map[string]any, len(parts)-1)
+							sprop := ki.NewProps()
 							tl.Props = sprop
 							for ai := 0; ai < nattr; ai++ {
 								nm := strings.TrimSpace(attr[ai*2])
@@ -692,7 +693,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 								if nm == "href" {
 									tl.URL = vl
 								}
-								sprop[nm] = vl
+								sprop.Set(nm, vl)
 							}
 						}
 						tr.Links = append(tr.Links, *tl)
@@ -727,14 +728,14 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 					}
 				}
 				if nattr > 0 { // attr
-					sprop := make(map[string]any, nattr)
+					sprop := ki.NewProps()
 					for ai := 0; ai < nattr; ai++ {
 						nm := strings.TrimSpace(attr[ai*2])
 						vl := strings.TrimSuffix(strings.TrimPrefix(strings.TrimSpace(attr[ai*2+1]), `"`), `"`)
 						// fmt.Printf("nm: %v  val: %v\n", nm, vl)
 						switch nm {
 						case "style":
-							styles.SetStylePropsXML(vl, &sprop)
+							styles.SetStylePropsXML(vl, sprop)
 						case "class":
 							if cssAgg != nil {
 								clnm := "." + vl
@@ -744,7 +745,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 								}
 							}
 						default:
-							sprop[nm] = vl
+							sprop.Set(nm, vl)
 						}
 					}
 					fs.SetStyleProps(nil, sprop, nil)

@@ -28,7 +28,7 @@ import (
 // list of inherited: https://stackoverflow.com/questions/5612302/which-css-properties-are-inherited
 
 // styling strategy:
-//	- either direct Go code based styling functions or ki.Props style map[string]any settings.
+//	- either direct Go code based styling functions or ki.Props style   *ki.Props settings.
 //	- we process those properties dynamically when rendering (first pass only) into state
 //   on objects that can be directly used during rendering
 //	- good for basic rendering -- lots of additional things that could be extended later..
@@ -241,26 +241,26 @@ func (s *Style) Defaults() {
 
 // SetStylePropsXML sets style props from XML style string, which contains ';'
 // separated name: value pairs
-func SetStylePropsXML(style string, props *map[string]any) {
+func SetStylePropsXML(style string, props *ki.Props) {
 	st := strings.Split(style, ";")
 	for _, s := range st {
 		kv := strings.Split(s, ":")
 		if len(kv) >= 2 {
 			k := strings.TrimSpace(strings.ToLower(kv[0]))
 			v := strings.TrimSpace(kv[1])
-			if *props == nil {
-				*props = make(map[string]any)
+			if props == nil {
+				props = ki.NewProps()
 			}
-			(*props)[k] = v
+			props.Set(k, v)
 		}
 	}
 }
 
 // StylePropsXML returns style props for XML style string, which contains ';'
 // separated name: value pairs
-func StylePropsXML(props map[string]any) string {
+func StylePropsXML(props *ki.Props) string {
 	var sb strings.Builder
-	for k, v := range props {
+	for k, v := range props.Items() {
 		if k == "transform" {
 			continue
 		}
@@ -382,16 +382,16 @@ func (s *Style) TotalMargin() SideFloats {
 // SubProps returns a sub-property map from given prop map for a given styling
 // selector (property name) -- e.g., :normal :active :hover etc -- returns
 // false if not found
-func SubProps(prp map[string]any, selector string) (map[string]any, bool) {
-	sp, ok := prp[selector]
+func SubProps(prp *ki.Props, selector string) (*ki.Props, bool) {
+	sp, ok := prp.Get(selector)
 	if !ok {
 		return nil, false
 	}
-	spm, ok := sp.(map[string]any)
+	spm, ok := sp.(*ki.Props)
 	if ok {
 		return spm, true
 	}
-	kpm, ok := sp.(ki.Props)
+	kpm, ok := sp.(*ki.Props)
 	if ok {
 		return kpm, true
 	}
