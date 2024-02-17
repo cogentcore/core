@@ -278,8 +278,8 @@ func (fv *FileView) ConfigToolbar(tb *gi.Toolbar) {
 	NewFuncButton(tb, fv.UpdateFilesAction).SetIcon(icons.Refresh).SetText("Update")
 	NewFuncButton(tb, fv.NewFolder).SetIcon(icons.CreateNewFolder)
 
-	ch, ok := tb.ChildByName("app-chooser").(*gi.Chooser)
-	if !ok {
+	ch := tb.AppChooser()
+	if ch == nil {
 		return
 	}
 	ch.ItemsFuncs = slices.Insert(ch.ItemsFuncs, 0, func() {

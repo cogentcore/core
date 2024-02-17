@@ -124,6 +124,43 @@ func (wb *WidgetBase) OnClose(fun func(e events.Event)) *WidgetBase {
 	return wb.Scene.On(events.Close, fun)
 }
 
+// AddCloseDialog adds a dialog that confirms that the user wants
+// to close the Scene associated with this widget when they try
+// to close it. It calls the given config function to configure
+// the dialog. For example, in this function, you can add a title
+// and OK button to the dialog. If this function returns false, it
+// does not make the dialog. This can be used to make the dialog
+// conditional on other things, like whether something is saved.
+func (wb *WidgetBase) AddCloseDialog(config func(d *Body) bool) *WidgetBase {
+	var inClose, closed bool
+	wb.OnClose(func(e events.Event) {
+		if closed {
+			return
+		}
+		if inClose {
+			e.SetHandled()
+			return
+		}
+		inClose = true
+		d := NewBody()
+		if !config(d) {
+			return
+		}
+		e.SetHandled()
+		d.AddBottomBar(func(pw Widget) {
+			d.AddCancel(pw).OnClick(func(e events.Event) {
+				inClose = false
+			})
+			d.AddOk(pw).SetText("Close").OnClick(func(e events.Event) {
+				closed = true
+				wb.Scene.Close()
+			})
+		})
+		d.NewDialog(wb).Run()
+	})
+	return wb
+}
+
 // Send sends an NEW event of given type to this widget,
 // optionally starting from values in the given original event
 // (recommended to include where possible).

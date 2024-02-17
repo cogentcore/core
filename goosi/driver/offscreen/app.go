@@ -87,11 +87,11 @@ func (a *App) GetScreens() {
 	a.Draw.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixSize})
 }
 
-func (a *App) QuitClean() {
+func (a *App) QuitClean() bool {
 	if a.TempDataDir != "" {
 		grr.Log(os.RemoveAll(a.TempDataDir))
 	}
-	a.AppSingle.QuitClean()
+	return a.AppSingle.QuitClean()
 }
 
 func (a *App) DataDir() string {

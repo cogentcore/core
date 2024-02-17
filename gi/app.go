@@ -192,7 +192,7 @@ func (tb *Toolbar) StdOverflowMenu(m *Scene) { //gti:add
 				}
 			})
 		NewSeparator(m)
-		NewButton(m).SetText("Close Window").SetIcon(icons.Close).SetKey(keyfun.WinClose).
+		NewButton(m).SetText("Close window").SetIcon(icons.Close).SetKey(keyfun.WinClose).
 			OnClick(func(e events.Event) {
 				win := tb.Scene.RenderWin()
 				if win != nil {

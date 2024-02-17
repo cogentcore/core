@@ -163,8 +163,12 @@ func (a *App) Quit() {
 	if a.Quitting {
 		return
 	}
-	a.This.QuitClean()
-	a.StopMain()
+	a.Quitting = true
+	if a.This.QuitClean() {
+		a.StopMain()
+	} else {
+		a.Quitting = false
+	}
 }
 
 func (a *App) IsDark() bool {

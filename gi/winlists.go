@@ -6,6 +6,7 @@ package gi
 
 import (
 	"reflect"
+	"slices"
 
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/laser"
@@ -21,23 +22,13 @@ func (wl *RenderWinList) Add(w *RenderWin) {
 	RenderWinGlobalMu.Unlock()
 }
 
-// Delete removes a window from the list -- returns true if deleted.
-func (wl *RenderWinList) Delete(w *RenderWin) bool {
+// Delete removes a window from the list.
+func (wl *RenderWinList) Delete(w *RenderWin) {
 	RenderWinGlobalMu.Lock()
 	defer RenderWinGlobalMu.Unlock()
-	sz := len(*wl)
-	got := false
-	for i := sz - 1; i >= 0; i-- {
-		wi := (*wl)[i]
-		if wi == w {
-			copy((*wl)[i:], (*wl)[i+1:])
-			(*wl)[sz-1] = nil
-			(*wl) = (*wl)[:sz-1]
-			sz = len(*wl)
-			got = true
-		}
-	}
-	return got
+	*wl = slices.DeleteFunc(*wl, func(rw *RenderWin) bool {
+		return rw == w
+	})
 }
 
 // FindName finds window with given name on list (case sensitive) -- returns
@@ -161,9 +152,3 @@ var DialogRenderWins RenderWinList
 // MainRenderWins is the list of main windows (non-dialogs) that have been
 // created.
 var MainRenderWins RenderWinList
-
-// FocusRenderWins is a "recents" stack of window names that have focus
-// when a window gets focus, it pops to the top of this list
-// when a window is closed, it is removed from the list, and the top item
-// on the list gets focused.
-var FocusRenderWins []string

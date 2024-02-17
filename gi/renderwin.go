@@ -10,7 +10,6 @@ import (
 	"log"
 	"log/slog"
 	"runtime"
-	"slices"
 	"sync"
 	"time"
 
@@ -177,9 +176,11 @@ func NewRenderWin(name, title string, opts *goosi.NewWindowOptions) *RenderWin {
 	w.GoosiWin.SetName(title)
 	w.GoosiWin.SetTitleBarIsDark(matcolor.SchemeIsDark)
 	w.GoosiWin.SetCloseReqFunc(func(win goosi.Window) {
+		w.SetFlag(true, WinClosing)
 		// ensure that everyone is closed first
 		for _, kv := range w.MainStageMgr.Stack.Order {
 			if !kv.Value.Scene.Close() {
+				w.SetFlag(false, WinClosing)
 				return
 			}
 		}
@@ -253,13 +254,6 @@ func (w *RenderWin) SetName(name string) {
 	w.Name = name
 	if w.GoosiWin != nil {
 		w.GoosiWin.SetName(name)
-	}
-	if isdif {
-		for i, fw := range FocusRenderWins { // rename focus windows so we get focus later..
-			if fw == curnm {
-				FocusRenderWins[i] = name
-			}
-		}
 	}
 	if isdif && w.GoosiWin != nil {
 		wgp := WinGeomMgr.Pref(w.Title, w.GoosiWin.Screen())
@@ -409,7 +403,6 @@ func (w *RenderWin) Resized() {
 	if DebugSettings.WinEventTrace {
 		fmt.Printf("Win: %v Resized from: %v to: %v\n", w.Name, curRg, rg)
 	}
-	StringsInsertFirstUnique(&FocusRenderWins, w.Name, 10)
 	rctx.Geom = rg
 	rctx.SetFlag(true, RenderVisible)
 	rctx.LogicalDPI = w.LogicalDPI()
@@ -436,19 +429,6 @@ func (w *RenderWin) Minimize() {
 	w.GoosiWin.Minimize()
 }
 
-// Close closes the window -- this is not a request -- it means:
-// definitely close it -- flags window as such -- check Is(WinClosing)
-func (w *RenderWin) Close() {
-	if w.Is(WinClosing) {
-		return
-	}
-	// this causes hangs etc: not good
-	// w.RenderCtx().Mu.Lock() // allow other stuff to finish
-	w.SetFlag(true, WinClosing)
-	// w.RenderCtx().Mu.Unlock()
-	w.GoosiWin.Close()
-}
-
 // CloseReq requests that the window be closed -- could be rejected
 func (w *RenderWin) CloseReq() {
 	w.GoosiWin.CloseReq()
@@ -462,42 +442,16 @@ func (w *RenderWin) Closed() {
 	AllRenderWins.Delete(w)
 	MainRenderWins.Delete(w)
 	DialogRenderWins.Delete(w)
-	RenderWinGlobalMu.Lock()
-	FocusRenderWins = slices.DeleteFunc(FocusRenderWins, func(s string) bool {
-		return s == w.Name
-	})
-	RenderWinGlobalMu.Unlock()
 	WinNewCloseStamp()
 	if DebugSettings.WinEventTrace {
 		fmt.Printf("Win: %v Closed\n", w.Name)
 	}
-	if w.IsClosed() {
+	if len(AllRenderWins) > 0 {
+		pfw := AllRenderWins[len(AllRenderWins)-1]
 		if DebugSettings.WinEventTrace {
-			fmt.Printf("Win: %v Already Closed\n", w.Name)
+			fmt.Printf("Win: %v getting restored focus after: %v closed\n", pfw.Name, w.Name)
 		}
-		return
-	}
-	// w.FocusInactivate()
-	RenderWinGlobalMu.Lock()
-	if len(FocusRenderWins) > 0 {
-		pf := FocusRenderWins[0]
-		RenderWinGlobalMu.Unlock()
-		pfw, has := AllRenderWins.FindName(pf)
-		if has {
-			if DebugSettings.WinEventTrace {
-				fmt.Printf("Win: %v getting restored focus after: %v closed\n", pfw.Name, w.Name)
-			}
-			pfw.GoosiWin.Raise()
-			if CurRenderWin == w {
-				CurRenderWin = pfw
-			}
-		} else {
-			if DebugSettings.WinEventTrace {
-				fmt.Printf("Win: %v not found to restored focus: %v closed\n", pf, w.Name)
-			}
-		}
-	} else {
-		RenderWinGlobalMu.Unlock()
+		pfw.Raise()
 	}
 	// these are managed by the window itself
 	// w.Sprites.Reset()
@@ -670,7 +624,7 @@ func (w *RenderWin) HandleWindowEvents(e events.Event) {
 		case events.WinClose:
 			// fmt.Printf("got close event for window %v \n", w.Name)
 			e.SetHandled()
-			w.SetFlag(true, WinStopEventLoop)
+			w.StopEventLoop()
 			w.RenderCtx().ReadUnlock() // one case where we need to break lock
 			w.Closed()
 			w.RenderCtx().ReadLock()
@@ -695,7 +649,12 @@ func (w *RenderWin) HandleWindowEvents(e events.Event) {
 			}
 			WinGeomMgr.RecordPref(w)
 		case events.WinFocus:
-			StringsInsertFirstUnique(&FocusRenderWins, w.Name, 10)
+			// if we are not already the last in AllRenderWins, we go there,
+			// as this allows focus to be restored to us in the future
+			if len(AllRenderWins) > 0 && AllRenderWins[len(AllRenderWins)-1] != w {
+				AllRenderWins.Delete(w)
+				AllRenderWins.Add(w)
+			}
 			if !w.HasFlag(WinGotFocus) {
 				w.SetFlag(true, WinGotFocus)
 				w.SendWinFocusEvent(events.WinFocus)

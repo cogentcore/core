@@ -133,6 +133,11 @@ type Event interface {
 	// the same effect as PreventDefault function in JavaScript.
 	SetHandled()
 
+	// ClearHandled marks the event as no longer having been processed,
+	// meaning that it will be processed by future event handlers.
+	// This reverses the effects of [Event.SetHandled].
+	ClearHandled()
+
 	// Init sets the time to now, and any other initialization.
 	// Done just prior to event Send.
 	Init()

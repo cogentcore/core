@@ -108,24 +108,19 @@ func (a *AppMulti[W]) ContextWindow() goosi.Window {
 // RemoveWindow removes the given Window from the app's list of windows.
 // It does not actually close it; see [Window.Close] for that.
 func (a *AppMulti[W]) RemoveWindow(w goosi.Window) {
-	slices.DeleteFunc(a.Windows, func(ew W) bool {
+	a.Windows = slices.DeleteFunc(a.Windows, func(ew W) bool {
 		return goosi.Window(ew) == w
 	})
 }
 
-func (a *AppMulti[W]) QuitClean() {
-	a.Quitting = true
+func (a *AppMulti[W]) QuitClean() bool {
 	for _, qf := range a.QuitCleanFuncs {
 		qf()
 	}
-	a.Mu.Lock()
 	nwin := len(a.Windows)
 	for i := nwin - 1; i >= 0; i-- {
 		win := a.Windows[i]
-		go win.Close()
+		win.CloseReq()
 	}
-	a.Mu.Unlock()
-	// for i := 0; i < nwin; i++ {
-	// 	<-app.QuitCloseCnt
-	// }
+	return len(a.Windows) == 0
 }
