@@ -8,11 +8,10 @@
 package vgpu
 
 import (
+	vk "github.com/goki/vulkan"
 	"log"
 	"os"
 	"unsafe"
-
-	vk "github.com/goki/vulkan"
 )
 
 // Shader manages a single Shader program
@@ -68,7 +67,7 @@ func (sh *Shader) Free(dev vk.Device) {
 // https://stackoverflow.com/questions/11924196/convert-between-slices-of-different-types
 
 func SliceUint32(data []byte) []uint32 {
-	return (*[ByteCopyMemoryLimit / 4]uint32)((&(data[0])))[:len(data)/4]
+	return (*[ByteCopyMemoryLimit / 4]uint32)(unsafe.Pointer(&(data[0])))[:len(data)/4]
 }
 
 // ShaderTypes is a list of GPU shader types
