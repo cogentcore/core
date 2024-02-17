@@ -4,34 +4,27 @@
 
 package ki
 
-//var PropsTest = Props{
-//	"intprop":    -17,
-//	"floatprop":  3.1415,
-//	"stringprop": "type string",
-//	"#subprops": Props{
-//		"sp1": "#FFE",
-//		"sp2": 42.2,
-//	},
-//}
-//
-//func TestPropsJSonSave(t *testing.T) {
-//	b, err := json.MarshalIndent(PropsTest, "", "  ")
-//	if err != nil {
-//		t.Error(err)
-//		// } else {
-//		// 	fmt.Printf("props json output:\n%v\n", string(b))
-//	}
-//
-//	tstload := make(Props)
-//	err = json.Unmarshal(b, &tstload)
-//	if err != nil {
-//		t.Error(err)
-//		// } else {
-//		// 	// tstb, _ := json.MarshalIndent(tstload, "", "  ")
-//		// fmt.Printf("props test loaded json output:\n%v\n", string(tstb))
-//		// because of the map randomization, this is not testable, do it manually..
-//		// if !bytes.Equal(tstb, b) {
-//		// 	t.Error("props original and unmarshal'd json rep are not equivalent")
-//		// }
-//	}
-//}
+import (
+	"github.com/stretchr/testify/assert"
+	"testing"
+)
+
+var PropsTest = map[string]any{
+	"intprop":    -17,
+	"floatprop":  3.1415,
+	"stringprop": "type string",
+	"#subprops": map[string]any{
+		"sp1": "#FFE",
+		"sp2": 42.2,
+	},
+}
+
+func TestPropsJSonSave(t *testing.T) {
+	props := NewProps()
+	props.MSet(PropsTest)
+	b, err := props.MarshalJSON()
+	assert.NoError(t, err)
+	newProps := NewProps()
+	assert.NoError(t, newProps.UnmarshalJSON(b))
+	//todo add more test
+}
