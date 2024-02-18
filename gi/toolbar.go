@@ -310,6 +310,7 @@ func ToolbarStyles(ly Layouter) {
 		s.Background = colors.C(colors.Scheme.SurfaceContainer)
 		s.Padding.SetHoriz(units.Dp(16))
 		s.Gap.Zero()
+		s.Align.Items = styles.Center
 	})
 	ly.OnWidgetAdded(func(w Widget) {
 		if bt := AsButton(w); bt != nil {
