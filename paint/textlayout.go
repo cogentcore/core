@@ -105,13 +105,14 @@ func (tx *Text) PosToRune(pos mat32.Vec2) (si, ri int, ok bool) {
 	if pos.X < 0 || pos.Y < 0 { // note: don't bail on X yet
 		return
 	}
-	if len(tx.Spans) == 0 {
-		return
-	}
 	if pos.Y >= tx.Size.Y {
 		si = len(tx.Spans) - 1
 		sr := tx.Spans[si]
 		ri = len(sr.Render)
+		ok = true
+		return
+	}
+	if len(tx.Spans) == 0 {
 		ok = true
 		return
 	}
