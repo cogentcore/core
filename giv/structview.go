@@ -18,6 +18,7 @@ import (
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
+	"cogentcore.org/core/states"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 )
@@ -116,6 +117,12 @@ func (sv *StructView) SetStruct(st any) *StructView {
 func (sv *StructView) UpdateFields() {
 	updt := sv.UpdateStart()
 	for _, vv := range sv.FieldViews {
+		// we do not update focused elements to prevent panics
+		if wb := vv.AsWidgetBase(); wb != nil {
+			if wb.StateIs(states.Focused) {
+				continue
+			}
+		}
 		vv.UpdateWidget()
 	}
 	sv.UpdateEndRender(updt)
