@@ -40,7 +40,7 @@ func NextRelease(c *config.Config) error { //gti:add
 // NextVersion returns the version of the project
 // incremented by one patch version.
 func NextVersion(c *config.Config) (string, error) {
-	cur, err := xe.Output("git", "describe", "--tags")
+	cur, err := xe.Output("git", "describe", "--tags", "--abbrev=0")
 	if err != nil {
 		return "", err
 	}
