@@ -176,7 +176,7 @@ func NewRenderWin(name, title string, opts *goosi.NewWindowOptions) *RenderWin {
 	w.GoosiWin.SetName(title)
 	w.GoosiWin.SetTitleBarIsDark(matcolor.SchemeIsDark)
 	w.GoosiWin.SetCloseReqFunc(func(win goosi.Window) {
-		rc := w.RenderCtx()
+		rc := w.RenderContext()
 		rc.Lock()
 		defer rc.Unlock()
 		w.SetFlag(true, WinClosing)
@@ -367,7 +367,7 @@ func StackAll() []byte {
 
 // Resized updates internal buffers after a window has been resized.
 func (w *RenderWin) Resized() {
-	rc := w.RenderCtx()
+	rc := w.RenderContext()
 	if !w.IsVisible() {
 		rc.SetFlag(false, RenderVisible)
 		return
@@ -435,7 +435,7 @@ func (w *RenderWin) Minimize() {
 // If this is called asynchronously outside of the main event loop,
 // [RenderWin.GoosWin.CloseReq] should be called directly instead.
 func (w *RenderWin) CloseReq() {
-	rc := w.RenderCtx()
+	rc := w.RenderContext()
 	rc.Unlock()
 	w.GoosiWin.CloseReq()
 	rc.Lock()
@@ -582,13 +582,13 @@ func (w *RenderWin) EventLoop() {
 }
 
 // HandleEvent processes given events.Event.
-// All event processing operates under a RenderCtx.Lock
+// All event processing operates under a RenderContext.Lock
 // so that no rendering update can occur during event-driven updates.
 // Because rendering itself is event driven, this extra level of safety
 // is redundant in this case, but other non-event-driven updates require
 // the lock protection.
 func (w *RenderWin) HandleEvent(e events.Event) {
-	rc := w.RenderCtx()
+	rc := w.RenderContext()
 	rc.Lock()
 	// we manually handle Unlock's in this function instead of deferring
 	// it to avoid a cryptic "sync: can't unlock an already unlocked Mutex"
@@ -614,7 +614,7 @@ func (w *RenderWin) HandleWindowEvents(e events.Event) {
 	switch et {
 	case events.WindowPaint:
 		e.SetHandled()
-		rc := w.RenderCtx()
+		rc := w.RenderContext()
 		rc.Unlock() // one case where we need to break lock
 		w.RenderWindow()
 		rc.Lock()
@@ -916,16 +916,16 @@ func (rs *RenderScenes) DrawAll(drw goosi.Drawer) {
 //////////////////////////////////////////////////////////////////////
 //  RenderWin methods
 
-func (w *RenderWin) RenderCtx() *RenderContext {
-	return w.MainStageMgr.RenderCtx
+func (w *RenderWin) RenderContext() *RenderContext {
+	return w.MainStageMgr.RenderContext
 }
 
 // RenderWindow performs all rendering based on current StageMgr config.
-// It sets the Write lock on RenderCtx Mutex, so nothing else can update
+// It sets the Write lock on RenderContext Mutex, so nothing else can update
 // during this time.  All other updates are done with a Read lock so they
 // won't interfere with each other.
 func (w *RenderWin) RenderWindow() {
-	rc := w.RenderCtx()
+	rc := w.RenderContext()
 	rc.Lock()
 	defer func() {
 		rc.SetFlag(false, RenderRebuild)

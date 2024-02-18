@@ -613,7 +613,7 @@ func (em *EventMgr) HandleLong(e events.Event, deep Widget, w *Widget, pos *imag
 		if win == nil {
 			return
 		}
-		rc := win.RenderCtx()
+		rc := win.RenderContext()
 		rc.Lock()
 		defer rc.Unlock()
 		if *w == nil {

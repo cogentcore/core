@@ -25,10 +25,10 @@ type StageMgr struct { //gti:add
 	// rendering context provides key rendering information and locking
 	// for the RenderWin in which the stages are running.
 	// the MainStageMgr within the RenderWin
-	RenderCtx *RenderContext
+	RenderContext *RenderContext
 
 	// render window to which we are rendering.
-	// rely on the RenderCtx wherever possible.
+	// rely on the RenderContext wherever possible.
 	RenderWin *RenderWin
 
 	// growing stack of viewing history of all stages.
@@ -270,7 +270,7 @@ func (sm *StageMgr) Resize(rg mat32.Geom2DInt) {
 // Stage calls DoUpdate on its Scene, ensuring everything is updated at the
 // Widget level.  If nothing is needed, nothing is done.
 // This is called only during RenderWin.RenderWindow,
-// under the global RenderCtx.Mu Write lock so nothing else can happen.
+// under the global RenderContext.Mu Write lock so nothing else can happen.
 func (sm *StageMgr) UpdateAll() (stageMods, sceneMods bool) {
 	sm.Mu.Lock()
 	defer sm.Mu.Unlock()

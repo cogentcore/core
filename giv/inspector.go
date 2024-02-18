@@ -288,7 +288,7 @@ func (is *Inspector) ConfigSplits() {
 			if sc == nil {
 				return
 			}
-			sc.RenderCtx().SetFlag(true, gi.RenderRebuild) // trigger full rebuild
+			sc.RenderContext().SetFlag(true, gi.RenderRebuild) // trigger full rebuild
 		}
 		tv.OnChange(func(e events.Event) {
 			renderRebuild()

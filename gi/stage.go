@@ -170,7 +170,7 @@ type Stage struct { //gti:add -setters
 	// This should be used instead of the RenderWin itself for all relevant
 	// rendering information.  This is only available once a Stage is Run,
 	// and must always be checked for nil.
-	RenderCtx *RenderContext
+	RenderContext *RenderContext
 
 	// sprites are named images that are rendered last overlaying everything else.
 	Sprites Sprites `json:"-" xml:"-"`
@@ -187,7 +187,7 @@ func (st *Stage) String() string {
 	if st.Scene != nil {
 		str += "  Scene: " + st.Scene.Name()
 	}
-	rc := st.RenderCtx
+	rc := st.RenderContext
 	if rc != nil {
 		str += "  Rc: " + rc.String()
 	}
@@ -221,10 +221,10 @@ func (st *Stage) SetScene(sc *Scene) *Stage {
 }
 
 // SetMainMgr sets the MainMgr to given Main StageMgr (on RenderWin)
-// and also sets the RenderCtx from that.
+// and also sets the RenderContext from that.
 func (st *Stage) SetMainMgr(sm *StageMgr) *Stage {
 	st.MainMgr = sm
-	st.RenderCtx = sm.RenderCtx
+	st.RenderContext = sm.RenderContext
 	return st
 }
 
@@ -234,7 +234,7 @@ func (st *Stage) SetPopupMgr(mainSt *Stage) *Stage {
 	st.Main = mainSt
 	st.MainMgr = mainSt.MainMgr
 	st.PopupMgr = mainSt.PopupMgr
-	st.RenderCtx = st.MainMgr.RenderCtx
+	st.RenderContext = st.MainMgr.RenderContext
 	return st
 }
 
@@ -355,5 +355,5 @@ func (st *Stage) Delete() {
 	st.Main = nil
 	st.PopupMgr = nil
 	st.MainMgr = nil
-	st.RenderCtx = nil
+	st.RenderContext = nil
 }

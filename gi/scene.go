@@ -197,9 +197,9 @@ func (sc *Scene) HandleEvents() {
 	})
 }
 
-// RenderCtx returns the current render context.
+// RenderContext returns the current render context.
 // This will be nil prior to actual rendering.
-func (sc *Scene) RenderCtx() *RenderContext {
+func (sc *Scene) RenderContext() *RenderContext {
 	if sc.Stage == nil {
 		return nil
 	}
@@ -207,11 +207,11 @@ func (sc *Scene) RenderCtx() *RenderContext {
 	if sm == nil {
 		return nil
 	}
-	return sm.RenderCtx
+	return sm.RenderContext
 }
 
 // RenderWin returns the current render window for this scene.
-// In general it is best to go through RenderCtx instead of the window.
+// In general it is best to go through RenderContext instead of the window.
 // This will be nil prior to actual rendering.
 func (sc *Scene) RenderWin() *RenderWin {
 	if sc.Stage == nil {
@@ -275,10 +275,10 @@ func (sc *Scene) Resize(geom mat32.Geom2DInt) {
 }
 
 func (sc *Scene) ScIsVisible() bool {
-	if sc.RenderCtx() == nil || sc.Pixels == nil {
+	if sc.RenderContext() == nil || sc.Pixels == nil {
 		return false
 	}
-	return sc.RenderCtx().HasFlag(RenderVisible)
+	return sc.RenderContext().HasFlag(RenderVisible)
 }
 
 // Close closes the Stage associated with this Scene.

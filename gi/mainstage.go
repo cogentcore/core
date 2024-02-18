@@ -83,10 +83,10 @@ func (st *Stage) InheritBars() {
 
 // FirstWinManager creates a temporary Main StageMgr for the first window
 // to be able to get sizing information prior to having a RenderWin,
-// based on the goosi App Screen Size. Only adds a RenderCtx.
+// based on the goosi App Screen Size. Only adds a RenderContext.
 func (st *Stage) FirstWinManager() *StageMgr {
 	ms := &StageMgr{}
-	ms.RenderCtx = NewRenderContext()
+	ms.RenderContext = NewRenderContext()
 	return ms
 }
 
@@ -117,7 +117,7 @@ func (st *Stage) RunWindow() *Stage {
 	}
 	st.ConfigMainStage()
 
-	sz := st.RenderCtx.Geom.Size
+	sz := st.RenderContext.Geom.Size
 	// offscreen windows always consider pref size because
 	// they must be unbounded by any previous window sizes
 	// non-offscreen mobile windows must take up the whole window
@@ -162,7 +162,7 @@ func (st *Stage) RunWindow() *Stage {
 	}
 
 	if st.NewWindow || CurRenderWin == nil {
-		sc.Resize(mat32.Geom2DInt{st.RenderCtx.Geom.Pos, sz})
+		sc.Resize(mat32.Geom2DInt{st.RenderContext.Geom.Pos, sz})
 		win := st.NewRenderWin()
 		CurRenderWin = win
 		win.GoStartEventLoop()
@@ -212,7 +212,7 @@ func (st *Stage) RunDialog() *Stage {
 
 	st.SetMainMgr(ms) // temporary for prefs
 
-	sz := ms.RenderCtx.Geom.Size
+	sz := ms.RenderContext.Geom.Size
 	if !st.FullWindow || st.NewWindow {
 		sz = sc.PrefSize(sz)
 		sz = sz.Add(image.Point{50, 50})
@@ -224,7 +224,7 @@ func (st *Stage) RunDialog() *Stage {
 
 	if st.NewWindow {
 		st.MainMgr = nil
-		sc.Resize(mat32.Geom2DInt{st.RenderCtx.Geom.Pos, sz})
+		sc.Resize(mat32.Geom2DInt{st.RenderContext.Geom.Pos, sz})
 		st.Type = WindowStage            // critical: now is its own window!
 		sc.SceneGeom.Pos = image.Point{} // ignore pos
 		win := st.NewRenderWin()
@@ -235,7 +235,7 @@ func (st *Stage) RunDialog() *Stage {
 	}
 	sc.SceneGeom.Size = sz
 	// fmt.Println("dlg:", sc.SceneGeom, "win:", winGeom)
-	sc.FitInWindow(st.RenderCtx.Geom) // does resize
+	sc.FitInWindow(st.RenderContext.Geom) // does resize
 	ms.Push(st)
 	// st.SetMainMgr(ms) // already set
 	return st
@@ -290,7 +290,7 @@ func (st *Stage) NewRenderWin() *RenderWin {
 	WinNewCloseStamp()
 	// initialize MainStageMgr
 	win.MainStageMgr.RenderWin = win
-	win.MainStageMgr.RenderCtx = NewRenderContext() // sets defaults according to Screen
+	win.MainStageMgr.RenderContext = NewRenderContext() // sets defaults according to Screen
 	// note: win is not yet created by the OS and we don't yet know its actual size
 	// or dpi.
 	win.MainStageMgr.Push(st)

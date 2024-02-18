@@ -260,7 +260,7 @@ func SetUnitContext(st *styles.Style, sc *Scene, el, par mat32.Vec2) {
 	sz := image.Point{1920, 1280}
 	if sc != nil {
 		rebuild = sc.NeedsRebuild()
-		rc = sc.RenderCtx()
+		rc = sc.RenderContext()
 		sz = sc.SceneGeom.Size
 	}
 	if rc != nil {

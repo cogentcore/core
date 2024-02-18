@@ -124,7 +124,7 @@ func (wb *WidgetBase) UpdateEnd(updt bool) {
 // that happens outside of the usual user event-driven, same-thread
 // updates, or other updates that can happen during standard layout / rendering.
 // It waits for any current Render or Event update to finish,
-// via RenderCtx().Lock().
+// via RenderContext().Lock().
 // If the parent Scene has been deleted, or it is already updating, it will
 // just block indefinitely.
 // It must be paired with an UpdateEndAsync.
@@ -133,7 +133,7 @@ func (wb *WidgetBase) UpdateEnd(updt bool) {
 // because it will cause a hang on the Read Lock which
 // was already write locked at the start of the render.
 func (wb *WidgetBase) UpdateStartAsync() bool {
-	rc := wb.Scene.RenderCtx()
+	rc := wb.Scene.RenderContext()
 	if rc == nil {
 		select {}
 	}
@@ -151,7 +151,7 @@ func (wb *WidgetBase) UpdateStartAsync() bool {
 // asynchronous update that happens outside of the usual user event-driven,
 // same-thread updates.
 func (wb *WidgetBase) UpdateEndAsync(updt bool) {
-	rc := wb.Scene.RenderCtx()
+	rc := wb.Scene.RenderContext()
 	if rc == nil {
 		return
 	}
@@ -256,7 +256,7 @@ func (wb *WidgetBase) NeedsRebuild() bool {
 	if wb.This() == nil || wb.Scene == nil || wb.Scene.Stage == nil {
 		return false
 	}
-	rc := wb.Scene.RenderCtx()
+	rc := wb.Scene.RenderContext()
 	if rc == nil {
 		return false
 	}
@@ -441,7 +441,7 @@ func (sc *Scene) DoUpdate() bool {
 	sc.SetFlag(true, ScUpdating) // prevent rendering
 	defer sc.SetFlag(false, ScUpdating)
 
-	rc := sc.RenderCtx()
+	rc := sc.RenderContext()
 
 	if sc.ShowIter < SceneShowIters {
 		if sc.ShowIter == 0 { // first time

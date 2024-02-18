@@ -50,7 +50,7 @@ func (st *Stage) RunPopup() *Stage {
 
 	// note: completer and potentially other things drive popup creation asynchronously
 	// so we need to protect here *before* pushing the new guy on the stack, and during closing.
-	// rc := ms.RenderCtx
+	// rc := ms.RenderContext
 	// rc.Lock()
 	// defer rc.Unlock()
 
@@ -134,7 +134,7 @@ func (st *Stage) ClosePopup() {
 		return
 	}
 	// note: essential to lock here for async popups like completer
-	// rc := st.MainMgr.RenderCtx
+	// rc := st.MainMgr.RenderContext
 	// rc.Lock()
 	// defer rc.Unlock()
 
@@ -150,7 +150,7 @@ func (st *Stage) ClosePopupAndBelow() {
 		return
 	}
 	// note: essential to lock here for async popups like completer
-	// rc := st.MainMgr.RenderCtx
+	// rc := st.MainMgr.RenderContext
 	// rc.Lock()
 	// defer rc.Unlock()
 

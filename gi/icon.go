@@ -103,7 +103,7 @@ func (ic *Icon) DrawIntoScene() {
 
 // RenderSVG renders the SVG to Pixels if needs update
 func (ic *Icon) RenderSVG() {
-	rc := ic.Scene.RenderCtx()
+	rc := ic.Scene.RenderContext()
 	sv := &ic.SVG
 	sz := ic.Geom.Size.Actual.Content.ToPoint()
 	clr := colors.ApplyOpacity(ic.Styles.Color, ic.Styles.Opacity)
