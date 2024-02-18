@@ -124,7 +124,7 @@ func (wb *WidgetBase) UpdateEnd(updt bool) {
 // that happens outside of the usual user event-driven, same-thread
 // updates, or other updates that can happen during standard layout / rendering.
 // It waits for any current Render or Event update to finish,
-// via RenderCtx().WriteLock().
+// via RenderCtx().Lock().
 // If the parent Scene has been deleted, or it is already updating, it will
 // just block indefinitely.
 // It must be paired with an UpdateEndAsync.
@@ -137,10 +137,10 @@ func (wb *WidgetBase) UpdateStartAsync() bool {
 	if rc == nil {
 		select {}
 	}
-	rc.WriteLock()
+	rc.Lock()
 	updt := wb.UpdateStart()
 	if !updt {
-		rc.WriteUnlock()
+		rc.Unlock()
 		select {}
 	}
 	wb.Scene.SetFlag(true, ScUpdating)
@@ -155,7 +155,7 @@ func (wb *WidgetBase) UpdateEndAsync(updt bool) {
 	if rc == nil {
 		return
 	}
-	rc.WriteUnlock()
+	rc.Unlock()
 	wb.Scene.SetFlag(false, ScUpdating)
 	wb.UpdateEnd(updt)
 }

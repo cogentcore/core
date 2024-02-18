@@ -364,19 +364,17 @@ func StackAll() []byte {
 
 // Resized updates internal buffers after a window has been resized.
 func (w *RenderWin) Resized() {
-	rctx := w.RenderCtx()
+	rc := w.RenderCtx()
 	if !w.IsVisible() {
-		rctx.SetFlag(false, RenderVisible)
+		rc.SetFlag(false, RenderVisible)
 		return
 	}
-	rctx.Mu.RLock()
-	defer rctx.Mu.RUnlock()
 
 	drw := w.GoosiWin.Drawer()
 
 	rg := w.GoosiWin.RenderGeom()
 
-	curRg := rctx.Geom
+	curRg := rc.Geom
 	if curRg == rg {
 		if DebugSettings.WinEventTrace {
 			fmt.Printf("Win: %v skipped same-size Resized: %v\n", w.Name, curRg)
@@ -394,7 +392,7 @@ func (w *RenderWin) Resized() {
 	// w.FocusInactivate()
 	// w.InactivateAllSprites()
 	if !w.IsVisible() {
-		rctx.SetFlag(false, RenderVisible)
+		rc.SetFlag(false, RenderVisible)
 		if DebugSettings.WinEventTrace {
 			fmt.Printf("Win: %v Resized already closed\n", w.Name)
 		}
@@ -403,9 +401,9 @@ func (w *RenderWin) Resized() {
 	if DebugSettings.WinEventTrace {
 		fmt.Printf("Win: %v Resized from: %v to: %v\n", w.Name, curRg, rg)
 	}
-	rctx.Geom = rg
-	rctx.SetFlag(true, RenderVisible)
-	rctx.LogicalDPI = w.LogicalDPI()
+	rc.Geom = rg
+	rc.SetFlag(true, RenderVisible)
+	rc.LogicalDPI = w.LogicalDPI()
 	// fmt.Printf("resize dpi: %v\n", w.LogicalDPI())
 	w.MainStageMgr.Resize(rg)
 	if DebugSettings.WinGeomTrace {
@@ -436,8 +434,8 @@ func (w *RenderWin) CloseReq() {
 
 // Closed frees any resources after the window has been closed.
 func (w *RenderWin) Closed() {
-	w.RenderCtx().WriteLock()
-	defer w.RenderCtx().WriteUnlock()
+	w.RenderCtx().Lock()
+	defer w.RenderCtx().Unlock()
 
 	AllRenderWins.Delete(w)
 	MainRenderWins.Delete(w)
@@ -578,15 +576,15 @@ func (w *RenderWin) EventLoop() {
 }
 
 // HandleEvent processes given events.Event.
-// All event processing operates under a RenderCtx.ReadLock
+// All event processing operates under a RenderCtx.Lock
 // so that no rendering update can occur during event-driven updates.
 // Because rendering itself is event driven, this extra level of safety
 // is redundant in this case, but other non-event-driven updates require
 // the lock protection.
 func (w *RenderWin) HandleEvent(e events.Event) {
 	rc := w.RenderCtx()
-	rc.ReadLock()
-	// we manually handle ReadUnlock's in this function instead of deferring
+	rc.Lock()
+	// we manually handle Unlock's in this function instead of deferring
 	// it to avoid a cryptic "sync: can't unlock an already unlocked RWMutex"
 	// error when panicking in the rendering goroutine. This is critical for
 	// debugging on Android. TODO: maybe figure out a more sustainable approach to this.
@@ -597,12 +595,12 @@ func (w *RenderWin) HandleEvent(e events.Event) {
 	}
 	if et >= events.Window && et <= events.WindowPaint {
 		w.HandleWindowEvents(e)
-		rc.ReadUnlock()
+		rc.Unlock()
 		return
 	}
 	// fmt.Printf("got event type: %v: %v\n", et.BitIndexString(), evi)
 	w.MainStageMgr.MainHandleEvent(e)
-	rc.ReadUnlock()
+	rc.Unlock()
 }
 
 func (w *RenderWin) HandleWindowEvents(e events.Event) {
@@ -611,9 +609,9 @@ func (w *RenderWin) HandleWindowEvents(e events.Event) {
 	case events.WindowPaint:
 		e.SetHandled()
 		rc := w.RenderCtx()
-		rc.ReadUnlock() // one case where we need to break lock
+		rc.Unlock() // one case where we need to break lock
 		w.RenderWindow()
-		rc.ReadLock()
+		rc.Lock()
 		w.SendShowEvents()
 
 	case events.WindowResize:
@@ -628,9 +626,9 @@ func (w *RenderWin) HandleWindowEvents(e events.Event) {
 			e.SetHandled()
 			w.StopEventLoop()
 			rc := w.RenderCtx()
-			rc.ReadUnlock() // one case where we need to break lock
+			rc.Unlock() // one case where we need to break lock
 			w.Closed()
-			rc.ReadLock()
+			rc.Lock()
 		case events.WinMinimize:
 			e.SetHandled()
 			// on mobile platforms, we need to set the size to 0 so that it detects a size difference
@@ -754,10 +752,11 @@ type RenderContext struct {
 	Geom mat32.Geom2DInt
 
 	// Mu is mutex for locking out rendering and any destructive updates.
-	// it is Write locked during rendering to provide exclusive blocking
-	// of any other updates, which are Read locked so that you don't
-	// get caught in deadlocks among all the different Read locks.
-	Mu sync.RWMutex
+	// It is locked at the RenderWin level during rendering and
+	// event processing to provide exclusive blocking of external updates.
+	// Use UpdateStartAsync from any outside routine to grab the lock before
+	// doing modifications.
+	Mu sync.Mutex
 }
 
 // NewRenderContext returns a new RenderContext initialized according to
@@ -778,15 +777,16 @@ func NewRenderContext() *RenderContext {
 	return rc
 }
 
-// WriteLock is only called by RenderWin during RenderWindow function
-// when updating all widgets and rendering the screen.  All others should
-// call ReadLock.  Always call corresponding Unlock in defer!
-func (rc *RenderContext) WriteLock() {
+// Lock is called by RenderWin during RenderWindow and HandleEvent
+// when updating all widgets and rendering the screen.
+// Any outside access to window contents / scene must acquire this
+// lock first.  In general, use UpdateStartAsync to do this.
+func (rc *RenderContext) Lock() {
 	rc.Mu.Lock()
 }
 
-// WriteUnlock must be called for each WriteLock, when done.
-func (rc *RenderContext) WriteUnlock() {
+// Unlock must be called for each Lock, when done.
+func (rc *RenderContext) Unlock() {
 	rc.Mu.Unlock()
 }
 
@@ -798,24 +798,6 @@ func (rc *RenderContext) HasFlag(flag enums.BitFlag) bool {
 // SetFlag sets given flag(s) on or off
 func (rc *RenderContext) SetFlag(on bool, flag ...enums.BitFlag) {
 	rc.Flags.SetFlag(on, flag...)
-}
-
-// ReadLock should be called whenever modifying anything in the entire
-// RenderWin context.  Because it is a Read lock, it does _not_ block
-// any other updates happening at the same time -- it only prevents
-// the full Render from happening until these updates finish.
-// Other direct resources must have their own separate Write locks to protect them.
-// It is automatically called at the start of HandleEvents, so all
-// standard Event-driven updates are automatically covered.
-// Other update entry points, such as animations, need to call this.
-// Always call corresponding Unlock in defer!
-func (rc *RenderContext) ReadLock() {
-	rc.Mu.RLock()
-}
-
-// ReadUnlock must be called for each ReadLock, when done.
-func (rc *RenderContext) ReadUnlock() {
-	rc.Mu.RUnlock()
 }
 
 func (rc *RenderContext) String() string {
@@ -941,10 +923,10 @@ func (w *RenderWin) RenderCtx() *RenderContext {
 // won't interfere with each other.
 func (w *RenderWin) RenderWindow() {
 	rc := w.RenderCtx()
-	rc.WriteLock()
+	rc.Lock()
 	defer func() {
 		rc.SetFlag(false, RenderRebuild)
-		rc.WriteUnlock()
+		rc.Unlock()
 	}()
 	rebuild := rc.HasFlag(RenderRebuild)
 
