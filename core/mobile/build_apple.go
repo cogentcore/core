@@ -140,11 +140,11 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 	}
 
 	// TODO(jbd): Fallback to copying if renaming fails.
-	err = os.MkdirAll(filepath.Join(".core", "bin", "ios"), 0777)
+	err = os.MkdirAll(filepath.Join("bin", "ios"), 0777)
 	if err != nil {
 		return nil, err
 	}
-	output := filepath.Join(".core", "bin", "ios", c.Name+".app")
+	output := filepath.Join("bin", "ios", c.Name+".app")
 	xe.PrintCmd(fmt.Sprintf("mv %s %s", TmpDir+"/build/Release-iphoneos/main.app", output), nil)
 	// if output already exists, remove.
 	if err := xe.RemoveAll(output); err != nil {

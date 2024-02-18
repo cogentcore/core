@@ -53,7 +53,7 @@ func Install(c *config.Config) error { //gti:add
 			if err != nil {
 				return err
 			}
-			return xe.Run("cp", "-a", filepath.Join(".core", "bin", "darwin", c.Name+".app"), "/Applications")
+			return xe.Run("cp", "-a", filepath.Join("bin", "darwin", c.Name+".app"), "/Applications")
 		default:
 			return xe.Major().SetEnv("GOOS", p.OS).SetEnv("GOARCH", runtime.GOARCH).Run("go", "install")
 		}

@@ -43,10 +43,10 @@ jobs:
         run: go install ./core
 
       - name: Build Docs
-        run: cd docs && core build web -vanity-url cogentcore.org/core -github-vanity-repository cogentcore/core && cp -a .core/bin/web ../static && cd ..
+        run: cd docs && core build web -vanity-url cogentcore.org/core -github-vanity-repository cogentcore/core && cp -a bin/web ../static && cd ..
 
       - name: Build Demo
-        run: cd examples/demo && core build web && cp -a .core/bin/web ../../static/demo && cd ../..
+        run: cd examples/demo && core build web && cp -a bin/web ../../static/demo && cd ../..
 
       - name: Setup Pages
         id: pages

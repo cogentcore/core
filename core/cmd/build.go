@@ -41,7 +41,7 @@ func Build(c *config.Config) error { //gti:add
 			return mobile.Build(c)
 		}
 		if platform.OS == "web" {
-			err := os.MkdirAll(filepath.Join(".core", "bin", "web"), 0777)
+			err := os.MkdirAll(filepath.Join("bin", "web"), 0777)
 			if err != nil {
 				return err
 			}
@@ -62,17 +62,13 @@ func BuildDesktop(c *config.Config, platform config.Platform) error {
 	xc.Env["GOOS"] = platform.OS
 	xc.Env["GOARCH"] = platform.Arch
 
-	err := os.MkdirAll(filepath.Join(".core", "bin", platform.OS), 0777)
-	if err != nil {
-		return err
-	}
 	tags := []string{"build"}
 	if c.Build.Debug {
 		tags = append(tags, "-tags", "debug")
 	}
 	// see https://stackoverflow.com/questions/30005878/avoid-debugging-information-on-golang
 	ldflags := "-s -w"
-	output := filepath.Join(".core", "bin", platform.OS, c.Name)
+	output := c.Name
 	if platform.OS == "windows" {
 		output += ".exe"
 		// TODO(kai): windows gui
@@ -82,7 +78,7 @@ func BuildDesktop(c *config.Config, platform config.Platform) error {
 	ldflags += " " + config.VersionLinkerFlags()
 	tags = append(tags, "-ldflags", ldflags, "-o", output)
 
-	err = xc.Run("go", tags...)
+	err := xc.Run("go", tags...)
 	if err != nil {
 		return fmt.Errorf("error building for platform %s/%s: %w", platform.OS, platform.Arch, err)
 	}

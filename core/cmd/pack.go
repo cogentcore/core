@@ -59,7 +59,7 @@ func PackLinux(c *config.Config) error {
 	vnm := strings.TrimPrefix(c.Version, "v")
 	avnm := anm + "_" + vnm
 
-	bpath := filepath.Join(".core", "bin", "linux")
+	bpath := filepath.Join("bin", "linux")
 	apath := filepath.Join(bpath, avnm)
 	ulbpath := filepath.Join(apath, "usr", "local", "bin")
 	usipath := filepath.Join(apath, "usr", "share", "icons", "hicolor")
@@ -70,7 +70,7 @@ func PackLinux(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	err = xe.Run("cp", "-p", filepath.Join(bpath, c.Name), filepath.Join(ulbpath, anm))
+	err = xe.Run("cp", "-p", c.Name, filepath.Join(ulbpath, anm))
 	if err != nil {
 		return err
 	}
@@ -95,7 +95,7 @@ func PackLinux(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	err = xe.Run("cp", filepath.Join(".core", "icon.svg"), filepath.Join(iscpath, anm+".svg"))
+	err = xe.Run("cp", "icon.svg", filepath.Join(iscpath, anm+".svg"))
 	if err != nil {
 		return err
 	}
@@ -192,7 +192,7 @@ func PackDarwin(c *config.Config) error {
 
 	anm := c.Name + ".app"
 
-	bpath := filepath.Join(".core", "bin", "darwin")
+	bpath := filepath.Join("bin", "darwin")
 	apath := filepath.Join(bpath, anm)
 	cpath := filepath.Join(apath, "Contents")
 	mpath := filepath.Join(cpath, "MacOS")
@@ -207,7 +207,7 @@ func PackDarwin(c *config.Config) error {
 		return err
 	}
 
-	err = xe.Run("cp", "-p", filepath.Join(bpath, c.Name), filepath.Join(mpath, anm))
+	err = xe.Run("cp", "-p", c.Name, filepath.Join(mpath, anm))
 	if err != nil {
 		return err
 	}
@@ -342,7 +342,7 @@ background = "builtin-arrow"
 
 // PackWindows packages the app for Windows by generating a .msi file.
 func PackWindows(c *config.Config) error {
-	opath := filepath.Join(".core", "bin", "windows")
+	opath := filepath.Join("bin", "windows")
 	ipath := filepath.Join(opath, "tempWindowsInstaller")
 	gpath := filepath.Join(ipath, "installer.go")
 	epath := filepath.Join(opath, c.Name+" Installer.exe")
@@ -366,11 +366,11 @@ func PackWindows(c *config.Config) error {
 		return err
 	}
 
-	err = xe.Run("cp", filepath.Join(".core", "bin", "windows", c.Name+".exe"), filepath.Join(ipath, "app.exe"))
+	err = xe.Run("cp", c.Name+".exe", filepath.Join(ipath, "app.exe"))
 	if err != nil {
 		return err
 	}
-	err = xe.Run("cp", filepath.Join(".core", "icon.svg"), filepath.Join(ipath, "icon.svg"))
+	err = xe.Run("cp", "icon.svg", filepath.Join(ipath, "icon.svg"))
 	if err != nil {
 		return err
 	}

@@ -11,7 +11,6 @@ import (
 	"image"
 	"io/fs"
 	"os"
-	"path/filepath"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/icons"
@@ -19,7 +18,7 @@ import (
 	"cogentcore.org/core/svg"
 )
 
-// Render renders the icon located at .core/icon.svg at the given size.
+// Render renders the icon located at icon.svg at the given size.
 // If no such icon exists, it sets it to a placeholder icon, a blue version of
 // [icons.Toolbar].
 func Render(size int) (*image.RGBA, error) {
@@ -28,7 +27,7 @@ func Render(size int) (*image.RGBA, error) {
 	sv := svg.NewSVG(size, size)
 	sv.Color = colors.C(colors.FromRGB(66, 133, 244)) // Google Blue (#4285f4)
 
-	spath := filepath.Join(".core", "icon.svg")
+	spath := "icon.svg"
 	err := sv.OpenXML(spath)
 	if err != nil {
 		if !errors.Is(err, fs.ErrNotExist) {

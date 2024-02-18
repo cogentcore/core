@@ -53,9 +53,9 @@ func Run(c *config.Config) error { //gti:add
 	}
 	switch t.OS {
 	case "darwin", "windows", "linux":
-		return xe.Verbose().SetBuffer(false).Run(filepath.Join(".core", "bin", t.OS, c.Name))
+		return xe.Verbose().SetBuffer(false).Run("." + string(filepath.Separator) + c.Name)
 	case "android":
-		err := xe.Run("adb", "install", "-r", filepath.Join(".core", "bin", "android", c.Name+".apk"))
+		err := xe.Run("adb", "install", "-r", filepath.Join("bin", "android", c.Name+".apk"))
 		if err != nil {
 			return fmt.Errorf("error installing app: %w", err)
 		}
@@ -77,7 +77,7 @@ func Run(c *config.Config) error { //gti:add
 		if !c.Build.Debug {
 			return mobile.Install(c)
 		}
-		return xe.Verbose().SetBuffer(false).Run("ios-deploy", "-b", filepath.Join(".core", "bin", "ios", c.Name+".app"), "-d")
+		return xe.Verbose().SetBuffer(false).Run("ios-deploy", "-b", filepath.Join("bin", "ios", c.Name+".app"), "-d")
 	case "web":
 		return web.Serve(c)
 	}

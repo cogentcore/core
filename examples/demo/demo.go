@@ -24,7 +24,7 @@ import (
 	"cogentcore.org/core/styles"
 )
 
-//go:embed .core/icon.svg
+//go:embed icon.svg
 var icon []byte
 
 func main() {

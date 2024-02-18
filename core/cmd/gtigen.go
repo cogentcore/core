@@ -10,8 +10,6 @@ var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/core/cmd.Build", Doc: "
 
 var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/core/cmd.Changed", Doc: "Changed concurrently prints all of the repositories within this directory\nthat have been changed and need to be updated in Git.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/core/cmd.Init", Doc: "Init initializes the \".core\" directory\nand a \"config.toml\" file inside it.\nThe \"config.toml\" file has the given\nconfig info. Init also sets the config name\nto the current directory if it is unset.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
-
 var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/core/cmd.Install", Doc: "Install installs the package on the local system.\nIt uses the same config info as build.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
 
 var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/core/cmd.Log", Doc: "Log prints the logs from your app running on Android to the terminal.\nAndroid is the only supported platform for log; use the -debug flag on\nrun for other platforms.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})

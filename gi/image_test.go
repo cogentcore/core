@@ -15,7 +15,7 @@ import (
 	"cogentcore.org/core/units"
 )
 
-var testImagePath = Filename(filepath.Join("..", ".core", "icon.png"))
+var testImagePath = Filename(filepath.Join("..", "icon.png"))
 
 func TestImageBasic(t *testing.T) {
 	b := NewBody()

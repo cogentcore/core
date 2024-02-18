@@ -21,7 +21,7 @@ import (
 
 // Build builds an app for web using the given configuration information.
 func Build(c *config.Config) error {
-	output := filepath.Join(".core", "bin", "web", "app.wasm")
+	output := filepath.Join("bin", "web", "app.wasm")
 	opath := output
 	if c.Web.Gzip {
 		opath += ".orig"
@@ -49,7 +49,7 @@ func Build(c *config.Config) error {
 
 // MakeFiles makes the necessary static web files based on the given configuration information.
 func MakeFiles(c *config.Config) error {
-	odir := filepath.Join(".core", "bin", "web")
+	odir := filepath.Join("bin", "web")
 
 	if c.Web.RandomVersion {
 		t := time.Now().UTC().String()
@@ -124,7 +124,7 @@ func MakeFiles(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	err = xe.Run("cp", filepath.Join(".core", "icon.svg"), filepath.Join(odir, "icons", "svg.svg"))
+	err = xe.Run("cp", "icon.svg", filepath.Join(odir, "icons", "svg.svg"))
 	if err != nil {
 		return err
 	}
