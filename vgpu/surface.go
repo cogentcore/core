@@ -118,7 +118,8 @@ func (sf *Surface) Init(gp *GPU, vs vk.Surface) error {
 
 // ConfigSwapchain configures the swapchain for surface.
 // This assumes that all existing items have been destroyed.
-func (sf *Surface) ConfigSwapchain() {
+// It returns false if the swapchain size is zero.
+func (sf *Surface) ConfigSwapchain() bool {
 	dev := sf.Device.Device
 
 	// Read sf.Surface capabilities
@@ -182,6 +183,10 @@ func (sf *Surface) ConfigSwapchain() {
 		swapchainSize.Height = h
 	} else {
 		swapchainSize = surfaceCapabilities.CurrentExtent
+	}
+
+	if swapchainSize.Width == 0 || swapchainSize.Height == 0 {
+		return false
 	}
 
 	// The FIFO present mode is guaranteed by the spec to be supported
@@ -276,6 +281,7 @@ func (sf *Surface) ConfigSwapchain() {
 		fr.ConfigSurfaceImage(sf.GPU, dev, sf.Format, swapchainImages[i])
 		sf.Frames[i] = fr
 	}
+	return true
 }
 
 // FreeSwapchain frees any existing swawpchain (for ReInit or Destroy)
@@ -299,7 +305,9 @@ func (sf *Surface) FreeSwapchain() {
 // This must be called when the window is resized.
 func (sf *Surface) ReConfigSwapchain() {
 	sf.FreeSwapchain()
-	sf.ConfigSwapchain()
+	if !sf.ConfigSwapchain() {
+		return
+	}
 	sf.Render.SetSize(sf.Format.Size)
 	sf.ReConfigFrames()
 }
