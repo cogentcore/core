@@ -176,6 +176,9 @@ func NewRenderWin(name, title string, opts *goosi.NewWindowOptions) *RenderWin {
 	w.GoosiWin.SetName(title)
 	w.GoosiWin.SetTitleBarIsDark(matcolor.SchemeIsDark)
 	w.GoosiWin.SetCloseReqFunc(func(win goosi.Window) {
+		rc := w.RenderCtx()
+		rc.Lock()
+		defer rc.Unlock()
 		w.SetFlag(true, WinClosing)
 		// ensure that everyone is closed first
 		for _, kv := range w.MainStageMgr.Stack.Order {
@@ -427,9 +430,15 @@ func (w *RenderWin) Minimize() {
 	w.GoosiWin.Minimize()
 }
 
-// CloseReq requests that the window be closed -- could be rejected
+// CloseReq requests that the window be closed, which could be rejected.
+// It firsts unlocks and then locks the [RenderContext] to prevent deadlocks.
+// If this is called asynchronously outside of the main event loop,
+// [RenderWin.GoosWin.CloseReq] should be called directly instead.
 func (w *RenderWin) CloseReq() {
+	rc := w.RenderCtx()
+	rc.Unlock()
 	w.GoosiWin.CloseReq()
+	rc.Lock()
 }
 
 // Closed frees any resources after the window has been closed.
