@@ -190,13 +190,10 @@ func (tv *TableView) WidgetIndex(w gi.Widget) (row, col int) {
 		dp := strings.Index(fstr, ".")
 		istr := fstr[dp+1:] // index is after .
 		fstr = fstr[:dp]    // field idx is -X.
-		idx := grr.Log1(strconv.Atoi(istr))
-		fli := grr.Log1(strconv.Atoi(fstr))
-		row = tv.StartIdx + idx
-		col = fli
+		row = grr.Log1(strconv.Atoi(istr))
+		col = grr.Log1(strconv.Atoi(fstr))
 	} else if strings.Contains(nm, "index-") {
-		idx := grr.Log1(strconv.Atoi(strings.TrimPrefix(nm, "index-")))
-		row = tv.StartIdx + idx
+		row = grr.Log1(strconv.Atoi(strings.TrimPrefix(nm, "index-")))
 	}
 	return
 }

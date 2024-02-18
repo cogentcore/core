@@ -285,6 +285,9 @@ func (sc *Scene) ScIsVisible() bool {
 // This only works for main stages (windows and dialogs).
 // It returns whether the Stage was successfully closed.
 func (sc *Scene) Close() bool {
+	if sc == nil {
+		return true
+	}
 	e := &events.Base{Typ: events.Close}
 	e.Init()
 	sc.HandleEvent(e)

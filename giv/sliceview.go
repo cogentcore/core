@@ -412,6 +412,7 @@ func (sv *SliceViewBase) SetStyles() {
 						wb.SetReadOnly(true)
 					}
 					row, col := sv.This().(SliceViewer).WidgetIndex(w)
+					row += sv.StartIdx
 					sv.This().(SliceViewer).StyleValueWidget(w, s, row, col)
 					if row < sv.SliceSize {
 						sv.This().(SliceViewer).StyleRow(w, row, col)
@@ -604,11 +605,9 @@ func (sv *SliceViewBase) UpdtSliceSize() int {
 func (sv *SliceViewBase) WidgetIndex(w gi.Widget) (row, col int) {
 	nm := w.Name()
 	if strings.Contains(nm, "value-") {
-		idx := grr.Log1(strconv.Atoi(strings.TrimPrefix(nm, "value-")))
-		row = sv.StartIdx + idx
+		row = grr.Log1(strconv.Atoi(strings.TrimPrefix(nm, "value-")))
 	} else if strings.Contains(nm, "index-") {
-		idx := grr.Log1(strconv.Atoi(strings.TrimPrefix(nm, "index-")))
-		row = sv.StartIdx + idx
+		row = grr.Log1(strconv.Atoi(strings.TrimPrefix(nm, "index-")))
 	}
 	return
 }
@@ -2222,8 +2221,8 @@ func (sg *SliceViewGrid) ChildBackground(child gi.Widget) image.Image {
 		return bg
 	}
 	sg.UpdateBackgrounds()
-	si, _ := svi.WidgetIndex(child)
-	row := si - sv.StartIdx
+	row, _ := svi.WidgetIndex(child)
+	si := row + sv.StartIdx
 	return sg.RowBackground(sv.IdxIsSelected(si), si%2 == 1, row == sv.HoverRow)
 }
 

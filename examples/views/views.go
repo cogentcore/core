@@ -178,22 +178,11 @@ func main() {
 	})
 
 	ts := gi.NewTabs(b)
-	tst := ts.NewTab("Struct view")
-	tmv := ts.NewTab("Map view")
-	tsl := ts.NewTab("Slice view")
-	ttv := ts.NewTab("Table view")
 
-	strv := giv.NewStructView(tst, "strv")
-	strv.SetStruct(&stru)
-
-	mv := giv.NewMapView(tmv, "mv")
-	mv.SetMap(&tstmap)
-
-	sv := giv.NewSliceView(tsl, "sv")
-	sv.SetSlice(&tstslice)
-
-	tv := giv.NewTableView(ttv, "tv")
-	tv.SetSlice(&tsttable)
+	giv.NewStructView(ts.NewTab("Struct view")).SetStruct(&stru)
+	giv.NewMapView(ts.NewTab("Map view")).SetMap(&tstmap)
+	giv.NewSliceView(ts.NewTab("Slice view")).SetSlice(&tstslice)
+	giv.NewTableView(ts.NewTab("Table view")).SetSlice(&tsttable)
 
 	b.RunMainWindow()
 }
