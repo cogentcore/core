@@ -67,10 +67,8 @@ type TableView struct {
 // check for interface impl
 var _ SliceViewer = (*TableView)(nil)
 
-// TableViewStyleFunc is a styling function for custom styling /
-// configuration of elements in the view.  If style properties are set
-// then you must call w.AsNode2dD().SetFullReRender() to trigger
-// re-styling during re-render
+// TableViewStyleFunc is a styling function for custom styling and
+// configuration of elements in the table view.
 type TableViewStyleFunc func(w gi.Widget, s *styles.Style, row, col int)
 
 func (tv *TableView) OnInit() {
@@ -551,10 +549,16 @@ func (tv *TableView) UpdateWidgets() {
 			}
 		}
 	}
-
 	if scrollTo >= 0 {
 		tv.ScrollToIdx(scrollTo)
 	}
+	if tv.This().(SliceViewer).HasStyleFunc() {
+		tv.ApplyStyleTree()
+	}
+}
+
+func (tv *TableView) HasStyleFunc() bool {
+	return tv.StyleFunc != nil
 }
 
 func (tv *TableView) StyleRow(w gi.Widget, idx, fidx int) {

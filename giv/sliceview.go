@@ -56,11 +56,13 @@ type SliceView struct {
 // check for interface impl
 var _ SliceViewer = (*SliceView)(nil)
 
-// SliceViewStyleFunc is a styling function for custom styling /
-// configuration of elements in the view.  If style properties are set
-// then you must call w.AsNode2dD().SetFullReRender() to trigger
-// re-styling during re-render
+// SliceViewStyleFunc is a styling function for custom styling and
+// configuration of elements in the slice view.
 type SliceViewStyleFunc func(w gi.Widget, s *styles.Style, row int)
+
+func (sv *SliceView) HasStyleFunc() bool {
+	return sv.StyleFunc != nil
+}
 
 func (sv *SliceView) StyleRow(w gi.Widget, idx, fidx int) {
 	if sv.StyleFunc != nil {
@@ -151,6 +153,9 @@ type SliceViewer interface {
 	// including which range of data is being displayed.
 	// This is called for scrolling, navigation etc.
 	UpdateWidgets()
+
+	// HasStyleFunc returns whether there is a custom style function.
+	HasStyleFunc() bool
 
 	// StyleRow calls a custom style function on given row (and field)
 	StyleRow(w gi.Widget, idx, fidx int)
@@ -811,6 +816,9 @@ func (sv *SliceViewBase) UpdateWidgets() {
 	}
 	if scrollTo >= 0 {
 		sv.ScrollToIdx(scrollTo)
+	}
+	if sv.This().(SliceViewer).HasStyleFunc() {
+		sv.ApplyStyleTree()
 	}
 }
 
