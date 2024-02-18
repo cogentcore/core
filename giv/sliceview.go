@@ -337,12 +337,16 @@ func (sv *SliceViewBase) SetStyles() {
 				s.Min.X.Ch(20)
 				s.Min.Y.Em(6)
 			})
-			sg.OnClick(func(e events.Event) {
+			oc := func(e events.Event) {
 				sv.SetFocusEvent()
 				row, _ := sg.IndexFromPixel(e.Pos())
 				sv.UpdateSelectRow(row, e.SelectMode())
 				sv.LastClick = row + sv.StartIdx
-			})
+			}
+			sg.OnClick(oc)
+			// we must select the row on right click so that the context menu
+			// corresponds to the right row
+			sg.On(events.ContextMenu, oc)
 			sg.ContextMenus = sv.ContextMenus
 		}
 		if w.Parent().PathFrom(sv) == "grid" {
@@ -361,9 +365,8 @@ func (sv *SliceViewBase) SetStyles() {
 					s.GrowWrap = false
 				})
 				wb.ContextMenus = sv.ContextMenus
-				wb.OnDoubleClick(func(e events.Event) {
-					sv.Send(events.DoubleClick, e)
-				})
+				wb.OnDoubleClick(sv.HandleEvent)
+				wb.On(events.ContextMenu, sv.HandleEvent)
 				w.On(events.DragStart, func(e events.Event) {
 					if sv.This() == nil || sv.Is(ki.Deleted) {
 						return
@@ -420,9 +423,8 @@ func (sv *SliceViewBase) SetStyles() {
 					sv.UpdateSelectRow(row, e.SelectMode())
 					sv.LastClick = row + sv.StartIdx
 				})
-				wb.OnDoubleClick(func(e events.Event) {
-					sv.Send(events.DoubleClick, e)
-				})
+				wb.OnDoubleClick(sv.HandleEvent)
+				wb.On(events.ContextMenu, sv.HandleEvent)
 				wb.ContextMenus = sv.ContextMenus
 			}
 		}
@@ -2014,6 +2016,11 @@ func (sv *SliceViewBase) HandleEvents() {
 	// events for rapid cross-row double clicking to work correctly
 	sv.OnFirst(events.TripleClick, func(e events.Event) {
 		sv.Send(events.DoubleClick, e)
+	})
+	// it is the slice grid's responsibility to handle context menu events
+	sv.On(events.ContextMenu, func(e events.Event) {
+		sv.This().(SliceViewer).SliceGrid().Send(events.ContextMenu, e)
+		e.SetHandled()
 	})
 }
 
