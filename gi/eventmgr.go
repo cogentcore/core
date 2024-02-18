@@ -609,20 +609,20 @@ func (em *EventMgr) HandleLong(e events.Event, deep Widget, w *Widget, pos *imag
 	*t = time.AfterFunc(stime, func() {
 		em.TimerMu.Lock()
 		defer em.TimerMu.Unlock()
-		if *w == nil {
-			return
-		}
 		win := em.RenderWin()
 		if win == nil {
 			return
 		}
 		rc := win.RenderCtx()
 		rc.Lock()
+		defer rc.Unlock()
+		if *w == nil {
+			return
+		}
 		(*w).Send(styp, e)
 		// we are done with the timer, and this indicates that
 		// we have sent a start event
 		*t = nil
-		rc.Unlock()
 	})
 }
 
@@ -1068,10 +1068,7 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 			e.SetHandled()
 		}
 	case keyfun.WinClose:
-		rc := win.RenderCtx()
-		rc.Unlock()
 		win.CloseReq()
-		rc.Lock()
 		e.SetHandled()
 	case keyfun.Menu:
 		if tb := sc.GetTopAppBar(); tb != nil {

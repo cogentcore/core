@@ -4,7 +4,7 @@ package main
 import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
-	_ "cogentcore.org/core/giv"
+	"cogentcore.org/core/giv"
 	"cogentcore.org/core/icons"
 )
 
@@ -21,19 +21,19 @@ const rows = 100000
 func main() {
 	table := make([]*tableStruct, 0, rows)
 	b := gi.NewBody("Async Updating")
-	// tv := giv.NewTableView(b)
-	// tv.SetReadOnly(true)
-	// tv.SetSlice(&table)
+	tv := giv.NewTableView(b)
+	tv.SetReadOnly(true)
+	tv.SetSlice(&table)
 
 	b.OnShow(func(e events.Event) {
 		go func() {
 			for i := 0; i < rows; i++ {
 				updt := b.UpdateStartAsync()
-				// table = append(table, &tableStruct{IntField: i, FloatField: float32(i) / 10.0})
-				// tv.UpdateWidgets()
-				// if len(table) > 0 {
-				// 	tv.ScrollToIdx(len(table) - 1)
-				// }
+				table = append(table, &tableStruct{IntField: i, FloatField: float32(i) / 10.0})
+				tv.UpdateWidgets()
+				if len(table) > 0 {
+					tv.ScrollToIdx(len(table) - 1)
+				}
 				b.UpdateEndAsyncLayout(updt)
 				// time.Sleep(1 * time.Millisecond)
 			}

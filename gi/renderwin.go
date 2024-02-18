@@ -434,9 +434,6 @@ func (w *RenderWin) CloseReq() {
 
 // Closed frees any resources after the window has been closed.
 func (w *RenderWin) Closed() {
-	w.RenderCtx().Lock()
-	defer w.RenderCtx().Unlock()
-
 	AllRenderWins.Delete(w)
 	MainRenderWins.Delete(w)
 	DialogRenderWins.Delete(w)
@@ -585,7 +582,7 @@ func (w *RenderWin) HandleEvent(e events.Event) {
 	rc := w.RenderCtx()
 	rc.Lock()
 	// we manually handle Unlock's in this function instead of deferring
-	// it to avoid a cryptic "sync: can't unlock an already unlocked RWMutex"
+	// it to avoid a cryptic "sync: can't unlock an already unlocked Mutex"
 	// error when panicking in the rendering goroutine. This is critical for
 	// debugging on Android. TODO: maybe figure out a more sustainable approach to this.
 
@@ -625,10 +622,7 @@ func (w *RenderWin) HandleWindowEvents(e events.Event) {
 			// fmt.Printf("got close event for window %v \n", w.Name)
 			e.SetHandled()
 			w.StopEventLoop()
-			rc := w.RenderCtx()
-			rc.Unlock() // one case where we need to break lock
 			w.Closed()
-			rc.Lock()
 		case events.WinMinimize:
 			e.SetHandled()
 			// on mobile platforms, we need to set the size to 0 so that it detects a size difference
