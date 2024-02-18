@@ -353,7 +353,9 @@ func dialogs(ts *gi.Tabs) {
 	u := &gi.User{}
 	fd.OnClick(func(e events.Event) {
 		d := gi.NewBody().AddTitle("Full window dialog").AddText("Edit your information")
-		giv.NewStructView(d).SetStruct(u)
+		giv.NewStructView(d).SetStruct(u).OnInput(func(e events.Event) {
+			fmt.Println("Got input event")
+		})
 		d.OnClose(func(e events.Event) {
 			fmt.Println("Your information is:", u)
 		})
