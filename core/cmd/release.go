@@ -6,47 +6,15 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"cogentcore.org/core/core/config"
 	"cogentcore.org/core/xe"
+	"github.com/Masterminds/semver/v3"
 )
 
-// VersionRelease calls update-version and then release. It is the standard release path.
-func VersionRelease(c *config.Config) error { //gti:add
-	err := UpdateVersion(c)
-	if err != nil {
-		return err
-	}
-	return Release(c)
-}
-
-// Release releases the project as a git tag. It should be called after update-version or similar.
+// Release releases the project with the specified git version tag.
 func Release(c *config.Config) error { //gti:add
-	if c.Type == config.TypeApp {
-		return ReleaseApp(c)
-	}
-	return ReleaseLibrary(c)
-}
-
-// ReleaseApp releases the config app.
-func ReleaseApp(c *config.Config) error {
-	// TODO: actually implement instead of just calling ReleaseLibrary
-	return ReleaseLibrary(c)
-}
-
-// ReleaseLibrary releases the config library.
-func ReleaseLibrary(c *config.Config) error {
-	err := PushGitRelease(c)
-	if err != nil {
-		return fmt.Errorf("error pushing Git release: %w", err)
-	}
-	return nil
-}
-
-// PushGitRelease commits a release commit using Git,
-// adds a version tag, and pushes the code and tags
-// based on the given config info.
-func PushGitRelease(c *config.Config) error {
 	err := xe.Run("git", "tag", "-a", c.Version, "-m", c.Version+" release")
 	if err != nil {
 		return fmt.Errorf("error tagging release: %w", err)
@@ -56,4 +24,46 @@ func PushGitRelease(c *config.Config) error {
 		return fmt.Errorf("error pushing tags: %w", err)
 	}
 	return nil
+}
+
+// NextRelease releases the project with the current git version
+// tag incremented by one patch version.
+func NextRelease(c *config.Config) error { //gti:add
+	ver, err := NextVersion(c)
+	if err != nil {
+		return err
+	}
+	c.Version = ver
+	return Release(c)
+}
+
+// NextVersion returns the version of the project
+// incremented by one patch version.
+func NextVersion(c *config.Config) (string, error) {
+	cur, err := xe.Output("git", "describe", "--tags")
+	if err != nil {
+		return "", err
+	}
+	ver, err := semver.NewVersion(cur)
+	if err != nil {
+		return "", fmt.Errorf("error getting semver version from version %q: %w", c.Version, err)
+	}
+
+	if !strings.HasPrefix(ver.Prerelease(), "dev") { // if no dev pre-release, we can just do standard increment
+		*ver = ver.IncPatch()
+	} else { // otherwise, we have to increment pre-release version instead
+		pvn := strings.TrimPrefix(ver.Prerelease(), "dev")
+		pver, err := semver.NewVersion(pvn)
+		if err != nil {
+			return "", fmt.Errorf("error parsing dev version %q from version %q: %w", pvn, c.Version, err)
+		}
+		*pver = pver.IncPatch()
+		// apply incremented pre-release version to main version
+		nv, err := ver.SetPrerelease("dev" + pver.String())
+		if err != nil {
+			return "", fmt.Errorf("error setting pre-release of new version to %q from repository version %q: %w", "dev"+pver.String(), c.Version, err)
+		}
+		*ver = nv
+	}
+	return "v" + ver.String(), nil
 }

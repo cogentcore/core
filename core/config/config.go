@@ -37,8 +37,8 @@ type Config struct { //gti:add
 	// the description of the project
 	Desc string
 
-	// the version of the project
-	Version string `cmd:"set-version" posarg:"0" default:"v0.0.0"`
+	// the version of the project to release
+	Version string `cmd:"release" posarg:"0" save:"-"`
 
 	// the type of the project (App/Library)
 	Type Types `def:"App"`

@@ -20,14 +20,8 @@ var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/core/cmd.Pack", Doc: "P
 
 var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/core/cmd.Pull", Doc: "Pull concurrently pulls all of the Git repositories within the current directory.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/core/cmd.VersionRelease", Doc: "VersionRelease calls update-version and then release. It is the standard release path.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
+var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/core/cmd.Release", Doc: "Release releases the project with the specified git version tag.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/core/cmd.Release", Doc: "Release releases the project as a git tag. It should be called after update-version or similar.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
+var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/core/cmd.NextRelease", Doc: "NextRelease releases the project with the current git version\ntag incremented by one patch version.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
 
 var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/core/cmd.Run", Doc: "Run builds and runs the config package. It also displays the logs generated\nby the app. It uses the same config info as build.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
-
-var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/core/cmd.GetVersion", Doc: "GetVersion prints the version of the project.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
-
-var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/core/cmd.SetVersion", Doc: "SetVersion updates the config and version file of the config project based\non the config version and commits and pushes the changes.\nAfter it, release or similar should be called to push the git tags.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
-
-var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/core/cmd.UpdateVersion", Doc: "UpdateVersion updates the version of the project by one patch version.\nAfter it, release or similar should be called to push the git tags.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
