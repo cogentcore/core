@@ -20,15 +20,13 @@ import (
 	"cogentcore.org/core/units"
 )
 
-// todo: autoRepeat, autoRepeatInterval, autoRepeatDelay
-
 // Button is an interactive button with text, an icon, an indicator, a shortcut,
 // and/or a menu. The standard behavior is to register a click event handler with
 // OnClick.
 type Button struct { //core:embedder
 	Box
 
-	// the type of button
+	// Type is the type of button.
 	Type ButtonTypes
 
 	// Text is the label text for the button.
@@ -61,7 +59,7 @@ type Button struct { //core:embedder
 }
 
 // ButtonTypes is an enum containing the
-// different possible types of buttons
+// different possible types of buttons.
 type ButtonTypes int32 //enums:enum -trim-prefix Button
 
 const (
@@ -243,7 +241,8 @@ func (bt *Button) SetKey(kf keyfun.Funs) *Button {
 // can define its own SetText method that updates the tooltip
 
 // SetText sets the [Button.Text]:
-// label for the button -- if blank then no label is presented
+// Text is the label text for the button.
+// If it is blank, no label is shown.
 func (bt *Button) SetText(v string) *Button {
 	bt.Text = v
 	return bt
