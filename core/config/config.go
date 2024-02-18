@@ -66,9 +66,6 @@ type Config struct { //gti:add
 	// the configuration options for the log command
 	Log Log `cmd:"log" view:"add-fields"`
 
-	// the configuration options for the release command
-	Release Release `cmd:"release" view:"add-fields"`
-
 	// the configuration options for the generate command
 	Generate Generate `cmd:"generate" view:"add-fields"`
 }
@@ -116,15 +113,6 @@ type Log struct { //gti:add
 
 	// messages not generated from your app equal to or above this log level will be shown
 	All string `default:"F"`
-}
-
-type Release struct { //gti:add
-
-	// the Go file to store version information in
-	VersionFile string `default:"version.go"`
-
-	// the Go package in which the version file will be stored
-	Package string `default:"main"`
 }
 
 type Generate struct { //gti:add

@@ -1,6 +1,2 @@
 ID = 'com.cogentcore.core'
 Name = 'Cogent Core'
-Version = 'v0.0.4'
-
-[Release]
-  Package = 'core'
