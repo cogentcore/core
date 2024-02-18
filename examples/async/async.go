@@ -2,6 +2,8 @@
 package main
 
 import (
+	"time"
+
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/giv"
@@ -35,7 +37,7 @@ func main() {
 					tv.ScrollToIdx(len(table) - 1)
 				}
 				b.UpdateEndAsyncLayout(updt)
-				// time.Sleep(1 * time.Millisecond)
+				time.Sleep(1 * time.Millisecond)
 			}
 		}()
 	})
