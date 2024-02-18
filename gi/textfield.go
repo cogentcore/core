@@ -1420,10 +1420,12 @@ func (tf *TextField) PixelToCursor(pt image.Point) int {
 	if rpt.X <= 0 || rpt.Y < 0 {
 		return tf.StartPos
 	}
+	n := len(tf.EditTxt)
 	if tf.HasWordWrap() {
 		si, ri, ok := tf.RenderAll.PosToRune(rpt)
 		if ok {
 			ix, _ := tf.RenderAll.SpanPosToRuneIdx(si, ri)
+			ix = min(ix, n)
 			return ix
 		}
 		return tf.StartPos
@@ -1432,7 +1434,6 @@ func (tf *TextField) PixelToCursor(pt image.Point) int {
 
 	px := float32(pr.X)
 	st := &tf.Styles
-	n := len(tf.EditTxt)
 	c := tf.StartPos + int(float64(px/st.UnContext.Dots(units.UnitCh)))
 	c = min(c, n)
 

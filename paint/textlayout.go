@@ -48,7 +48,7 @@ func (tx *Text) SpanPosToRuneIdx(si, ri int) (idx int, ok bool) {
 		if ri < len(sr.Render) {
 			return idx + ri, true
 		}
-		return idx + (len(sr.Render) - 1), false
+		return idx + (len(sr.Render)), false
 	}
 	return 0, false
 }
@@ -102,10 +102,17 @@ func (tx *Text) RuneEndPos(idx int) (pos mat32.Vec2, si, ri int, ok bool) {
 // returning the first or last rune index respectively.
 func (tx *Text) PosToRune(pos mat32.Vec2) (si, ri int, ok bool) {
 	ok = false
-	if pos.X < 0 || pos.X >= tx.Size.X || pos.Y < 0 || pos.Y >= tx.Size.Y {
+	if pos.X < 0 || pos.Y < 0 { // note: don't bail on X yet
 		return
 	}
 	if len(tx.Spans) == 0 {
+		return
+	}
+	if pos.Y >= tx.Size.Y {
+		si = len(tx.Spans) - 1
+		sr := tx.Spans[si]
+		ri = len(sr.Render)
+		ok = true
 		return
 	}
 	yoff := tx.Spans[0].RelPos.Y // baseline offset applied to everything
@@ -121,7 +128,7 @@ func (tx *Text) PosToRune(pos mat32.Vec2) (si, ri int, ok bool) {
 				if pos.X < st.X {
 					return li, 0, true
 				}
-				return li, max(0, nr-1), true
+				return li, nr + 1, true
 			}
 			continue
 		}
