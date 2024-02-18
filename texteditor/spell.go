@@ -55,8 +55,8 @@ func (ed *Editor) OfferComplete() {
 	ed.Buf.Complete.Show(ed, cpos, s, ed.ForceComplete)
 }
 
-// CancelComplete cancels any pending completion -- call this when new events
-// have moved beyond any prior completion scenario
+// CancelComplete cancels any pending completion.
+// Call this when new events have moved beyond any prior completion scenario.
 func (ed *Editor) CancelComplete() {
 	ed.ForceComplete = false
 	if ed.Buf == nil {
@@ -71,7 +71,7 @@ func (ed *Editor) CancelComplete() {
 }
 
 // Lookup attempts to lookup symbol at current location, popping up a window
-// if something is found
+// if something is found.
 func (ed *Editor) Lookup() { //gti:add
 	if ed.Buf.Complete == nil || ed.ISearch.On || ed.QReplace.On || ed.IsDisabled() {
 		return
@@ -227,7 +227,7 @@ func (ed *Editor) SpellCheck(reg *textbuf.Edit) bool {
 }
 
 // OfferCorrect pops up a menu of possible spelling corrections for word at
-// current CursorPos -- if no misspelling there or not in spellcorrect mode
+// current CursorPos. If no misspelling there or not in spellcorrect mode
 // returns false
 func (ed *Editor) OfferCorrect() bool {
 	if ed.Buf.Spell == nil || ed.ISearch.On || ed.QReplace.On || ed.IsDisabled() {
@@ -263,8 +263,8 @@ func (ed *Editor) OfferCorrect() bool {
 	return true
 }
 
-// CancelCorrect cancels any pending spell correction -- call this when new events
-// have moved beyond any prior correction scenario
+// CancelCorrect cancels any pending spell correction.
+// Call this when new events have moved beyond any prior correction scenario.
 func (ed *Editor) CancelCorrect() {
 	if ed.Buf.Spell == nil || ed.ISearch.On || ed.QReplace.On {
 		return

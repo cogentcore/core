@@ -141,7 +141,7 @@ func (c *Complete) ShowNow(ctx Widget, pos image.Point, text string, force bool)
 		return
 	}
 	if c.Stage != nil {
-		c.Cancel()
+		c.CancelAsync()
 	}
 	c.ShowMu.Lock()
 	defer c.ShowMu.Unlock()
@@ -188,7 +188,7 @@ func (c *Complete) ShowNow(ctx Widget, pos image.Point, text string, force bool)
 			sc.EventMgr.SetStartFocus(mi)
 		}
 	}
-	c.Stage.RunPopup()
+	c.Stage.RunPopupAsync()
 }
 
 // Cancel cancels any existing *or* pending completion.
@@ -200,7 +200,21 @@ func (c *Complete) Cancel() bool {
 	}
 	st := c.Stage
 	c.Stage = nil
-	st.ClosePopup()
+	st.ClosePopup() // todo async
+	return true
+}
+
+// CancelAsync cancels any existing *or* pending completion,
+// inside a delayed callback function (Async)
+// Call when new events nullify prior completions.
+// Returns true if canceled.
+func (c *Complete) CancelAsync() bool {
+	if c.Stage == nil {
+		return false
+	}
+	st := c.Stage
+	c.Stage = nil
+	st.ClosePopupAsync()
 	return true
 }
 
@@ -229,7 +243,8 @@ func (c *Complete) Lookup(text string, posLn, posCh int, sc *Scene, pt image.Poi
 }
 
 // Complete sends Select event to listeners, indicating that the user has made a
-// selection from the list of possible completions
+// selection from the list of possible completions.
+// This is called inside the main event loop.
 func (c *Complete) Complete(s string) {
 	c.Cancel()
 	c.Completion = s

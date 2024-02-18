@@ -27,6 +27,21 @@ func NewPopupStage(typ StageTypes, sc *Scene, ctx Widget) *Stage {
 	return st
 }
 
+// RunPopupAsync runs a popup-style Stage in context widget's popups.
+// This version is for Asynchronous usage outside the main event loop,
+// for example in a delayed callback AfterFunc etc.
+func (st *Stage) RunPopupAsync() *Stage {
+	ctx := st.Context.AsWidget()
+	if ctx.Scene.Stage == nil {
+		return st.RunPopup()
+	}
+	ms := ctx.Scene.Stage.Main
+	rc := ms.RenderCtx
+	rc.Lock()
+	defer rc.Unlock()
+	return st.RunPopup()
+}
+
 // RunPopup runs a popup-style Stage in context widget's popups.
 func (st *Stage) RunPopup() *Stage {
 	ctx := st.Context.AsWidget()
@@ -126,6 +141,16 @@ func (st *Stage) RunPopup() *Stage {
 	return st
 }
 
+// ClosePopupAsync closes this stage as a popup.
+// This version is for Asynchronous usage outside the main event loop,
+// for example in a delayed callback AfterFunc etc.
+func (st *Stage) ClosePopupAsync() {
+	rc := st.MainMgr.RenderCtx
+	rc.Lock()
+	defer rc.Unlock()
+	st.ClosePopup()
+}
+
 // ClosePopup closes this stage as a popup
 func (st *Stage) ClosePopup() {
 	// note: this is critical for Completer to not crash due to async closing:
@@ -141,6 +166,17 @@ func (st *Stage) ClosePopup() {
 	st.PopupMgr.DeleteStage(st)
 }
 
+// ClosePopupAndBelowAsync closes this stage as a popup,
+// and all those immediately below it of the same type.
+// This version is for Asynchronous usage outside the main event loop,
+// for example in a delayed callback AfterFunc etc.
+func (st *Stage) ClosePopupAndBelowAsync() {
+	rc := st.MainMgr.RenderCtx
+	rc.Lock()
+	defer rc.Unlock()
+	st.ClosePopupAndBelow()
+}
+
 // ClosePopupAndBelow closes this stage as a popup,
 // and all those immediately below it of the same type.
 func (st *Stage) ClosePopupAndBelow() {
@@ -149,11 +185,6 @@ func (st *Stage) ClosePopupAndBelow() {
 		// fmt.Println("popup already gone")
 		return
 	}
-	// note: essential to lock here for async popups like completer
-	// rc := st.MainMgr.RenderContext
-	// rc.Lock()
-	// defer rc.Unlock()
-
 	st.PopupMgr.DeleteStageAndBelow(st)
 }
 
