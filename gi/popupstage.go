@@ -36,7 +36,7 @@ func (st *Stage) RunPopupAsync() *Stage {
 		return st.RunPopup()
 	}
 	ms := ctx.Scene.Stage.Main
-	rc := ms.RenderCtx
+	rc := ms.RenderContext
 	rc.Lock()
 	defer rc.Unlock()
 	return st.RunPopup()
@@ -62,12 +62,6 @@ func (st *Stage) RunPopup() *Stage {
 
 	ms := ctx.Scene.Stage.Main
 	msc := ms.Scene
-
-	// note: completer and potentially other things drive popup creation asynchronously
-	// so we need to protect here *before* pushing the new guy on the stack, and during closing.
-	// rc := ms.RenderContext
-	// rc.Lock()
-	// defer rc.Unlock()
 
 	if st.Type == SnackbarStage {
 		// only one snackbar can exist
@@ -145,7 +139,7 @@ func (st *Stage) RunPopup() *Stage {
 // This version is for Asynchronous usage outside the main event loop,
 // for example in a delayed callback AfterFunc etc.
 func (st *Stage) ClosePopupAsync() {
-	rc := st.MainMgr.RenderCtx
+	rc := st.MainMgr.RenderContext
 	rc.Lock()
 	defer rc.Unlock()
 	st.ClosePopup()
@@ -158,11 +152,6 @@ func (st *Stage) ClosePopup() {
 		// fmt.Println("popup already gone")
 		return
 	}
-	// note: essential to lock here for async popups like completer
-	// rc := st.MainMgr.RenderContext
-	// rc.Lock()
-	// defer rc.Unlock()
-
 	st.PopupMgr.DeleteStage(st)
 }
 
@@ -171,7 +160,7 @@ func (st *Stage) ClosePopup() {
 // This version is for Asynchronous usage outside the main event loop,
 // for example in a delayed callback AfterFunc etc.
 func (st *Stage) ClosePopupAndBelowAsync() {
-	rc := st.MainMgr.RenderCtx
+	rc := st.MainMgr.RenderContext
 	rc.Lock()
 	defer rc.Unlock()
 	st.ClosePopupAndBelow()
