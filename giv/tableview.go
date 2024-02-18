@@ -478,8 +478,11 @@ func (tv *TableView) UpdateWidgets() {
 		tv.InitSelIdx = -1
 		scrollTo = tv.SelIdx
 	}
-
+	if scrollTo >= 0 {
+		tv.ScrollToIdx(scrollTo)
+	}
 	tv.UpdateStartIdx()
+
 	for i := 0; i < tv.VisRows; i++ {
 		i := i
 		ridx := i * nWidgPerRow
@@ -520,7 +523,7 @@ func (tv *TableView) UpdateWidgets() {
 			wb := w.AsWidget()
 
 			var val reflect.Value
-			if si < tv.SliceSize {
+			if !invis {
 				val = laser.OnePtrUnderlyingValue(tv.SliceNPVal.Index(si)) // deal with pointer lists
 				if val.IsZero() {
 					val = tv.ElVal
@@ -535,7 +538,6 @@ func (tv *TableView) UpdateWidgets() {
 			vv.SetStructValue(fval.Addr(), stru, &field, tv.TmpSave, vpath)
 			vv.SetReadOnly(tv.IsReadOnly())
 			vv.UpdateWidget()
-
 			w.SetState(invis, states.Invisible)
 			if !invis {
 				if tv.IsReadOnly() {
@@ -547,13 +549,10 @@ func (tv *TableView) UpdateWidgets() {
 					idxlab.SetSelected(false)
 				}
 			}
+			if tv.This().(SliceViewer).HasStyleFunc() {
+				w.ApplyStyle()
+			}
 		}
-	}
-	if scrollTo >= 0 {
-		tv.ScrollToIdx(scrollTo)
-	}
-	if tv.This().(SliceViewer).HasStyleFunc() {
-		tv.ApplyStyleTree()
 	}
 }
 

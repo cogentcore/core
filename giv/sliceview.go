@@ -779,8 +779,11 @@ func (sv *SliceViewBase) UpdateWidgets() {
 		sv.InitSelIdx = -1
 		scrollTo = sv.SelIdx
 	}
-
+	if scrollTo >= 0 {
+		sv.ScrollToIdx(scrollTo)
+	}
 	sv.UpdateStartIdx()
+
 	for i := 0; i < sv.VisRows; i++ {
 		i := i
 		ridx := i * nWidgPerRow
@@ -813,12 +816,9 @@ func (sv *SliceViewBase) UpdateWidgets() {
 				idxlab.SetSelected(false)
 			}
 		}
-	}
-	if scrollTo >= 0 {
-		sv.ScrollToIdx(scrollTo)
-	}
-	if sv.This().(SliceViewer).HasStyleFunc() {
-		sv.ApplyStyleTree()
+		if sv.This().(SliceViewer).HasStyleFunc() {
+			w.ApplyStyle()
+		}
 	}
 }
 
