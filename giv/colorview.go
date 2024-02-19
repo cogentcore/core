@@ -611,7 +611,6 @@ func (vv *ColorValue) ConfigWidget(w gi.Widget) {
 		s.Background = colors.C(dclr)
 		s.Color = colors.C(hct.ContrastColor(dclr, hct.ContrastAAA))
 	})
-	bt.Config()
 	vv.UpdateWidget()
 }
 

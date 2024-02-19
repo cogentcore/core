@@ -6,8 +6,10 @@ package giv
 
 import (
 	"reflect"
+	"strings"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/ki"
@@ -128,8 +130,28 @@ func (sv *StructViewInline) ConfigStruct() bool {
 			lbl.Style(func(s *styles.Style) {
 				dtag, _ := vv.Tag("default")
 				isDef, _ := StructFieldIsDef(dtag, vv.Val().Interface(), laser.NonPtrValue(vv.Val()).Kind())
+				dcr := "(Double click to reset to default) "
 				if !isDef {
 					s.Color = colors.C(colors.Scheme.Primary.Base)
+					s.Cursor = cursors.Poof
+					if !strings.HasPrefix(lbl.Tooltip, dcr) {
+						lbl.Tooltip = dcr + lbl.Tooltip
+					}
+				} else {
+					lbl.Tooltip = strings.TrimPrefix(lbl.Tooltip, dcr)
+				}
+			})
+			lbl.OnDoubleClick(func(e events.Event) {
+				dtag, _ := vv.Tag("default")
+				isDef, _ := StructFieldIsDef(dtag, vv.Val().Interface(), laser.NonPtrValue(vv.Val()).Kind())
+				if isDef {
+					return
+				}
+				err := laser.SetFromDefaultTag(vv.Val(), dtag)
+				if err != nil {
+					gi.ErrorSnackbar(lbl, err, "Error setting default value")
+				} else {
+					vv.SendChange(e)
 				}
 			})
 		}

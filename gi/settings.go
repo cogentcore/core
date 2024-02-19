@@ -260,8 +260,9 @@ type AppearanceSettingsData struct { //gti:add
 	MonoFont FontName `default:"Roboto Mono"`
 }
 
-// OverrideSettingsColor is whether to override the color specified in [Prefs.Color]
-// with whatever the developer specifies, typically through [colors.SetSchemes].
+// OverrideSettingsColor is whether to override the color specified in
+// [AppearanceSettings.Color] with whatever the developer specifies,
+// typically through [colors.SetSchemes].
 // The intended usage is:
 //
 //	gi.OverrideSettingsColor = true
@@ -271,7 +272,7 @@ type AppearanceSettingsData struct { //gti:add
 // their experience, but you can if you wish to enforce brand colors.
 //
 // The user preference color will always be overridden if it is the default value
-// of Google Blue (#4285f4), so a more recommended option would be to set your
+// of Google Blue (#4285\\f4), so a more recommended option would be to set your
 // own custom scheme but not OverrideSettingsColor, giving you brand colors unless
 // your user explicitly states a preference for a specific color.
 var OverrideSettingsColor = false
@@ -282,9 +283,6 @@ func (as *AppearanceSettingsData) Apply() { //gti:add
 	if !OverrideSettingsColor && as.Color != (color.RGBA{66, 133, 244, 255}) {
 		colors.SetSchemes(as.Color)
 	}
-	// TODO(kai): figure out transparency approach
-	// colors.Schemes.Dark.Background.A = 250
-	// colors.Schemes.Light.Background.A = 250
 	switch as.Theme {
 	case ThemeLight:
 		colors.SetScheme(false)
