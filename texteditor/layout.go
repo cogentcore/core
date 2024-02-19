@@ -162,7 +162,7 @@ func (ed *Editor) ReLayoutAllLines() {
 		if ln >= len(ed.Renders) || ln >= len(buf.Markup) {
 			break
 		}
-		ed.Renders[ln].Layout(&sty.Text, sty.FontRender(), &sty.UnContext, sz)
+		ed.Renders[ln].Layout(&sty.Text, sty.FontRender(), &sty.UnitContext, sz)
 		ed.Offs[ln] = off
 		lsz := mat32.Max(ed.Renders[ln].Size.Y, ed.LineHeight)
 		off += lsz
