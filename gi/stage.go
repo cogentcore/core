@@ -99,50 +99,66 @@ type Stage struct { //gti:add -setters
 	// type of Stage: determines behavior and Styling
 	Type StageTypes `set:"-"`
 
-	// Scene contents of this Stage -- what it displays
+	// Scene contents of this Stage (what it displays).
 	Scene *Scene `set:"-"`
 
 	// widget in another scene that requested this stage to be created
 	// and provides context (stage)
 	Context Widget
 
-	// name of the Stage -- generally auto-set based on Scene Name
+	// Name is the name of the Stage, which is generally auto-set
+	// based on the Scene Name.
 	Name string
 
-	// Title of the Stage -- generally auto-set based on Scene Title.
-	// Used for title of Window and Dialog types.
+	// Title is the title of the Stage, which is generally auto-set
+	// based on the Scene Title. Used for title of WindowStage and
+	// DialogStage types.
 	Title string
 
-	// if true, blocks input to all other stages.
+	// Modal, if true, blocks input to all other stages.
 	Modal bool
 
-	// if true, places a darkening scrim over other stages, if not a full window
+	// Scrim, if true, places a darkening scrim over other stages,
+	// if not a full window.
 	Scrim bool
 
-	// if true dismisses the Stage if user clicks anywhere off the Stage
+	// ClickOff, if true, dismisses the Stage if user clicks anywhere
+	// off the Stage.
 	ClickOff bool
 
-	// whether to send no events to the stage and just pass them down to lower stages
+	// IgnoreEvents is whether to send no events to the stage and
+	// just pass them down to lower stages.
 	IgnoreEvents bool
 
-	// NewWindow: if true, opens a Window or Dialog in its own separate operating
-	// system window (RenderWin).  This is by default true for Window on Desktop, otherwise false.
+	// NewWindow, if true, opens a WindowStage or DialogStage in its own
+	// separate operating system window (RenderWin).  This is true by
+	// default for WindowStage on non-mobile platforms, otherwise false.
 	NewWindow bool
 
-	// if NewWindow is false, then this makes Dialogs and Windows take up
-	// the entire window they are created in.
+	// FullWindow, if NewWindow is false, makes DialogStages and
+	// WindowStages take up the entire window they are created in.
 	FullWindow bool
 
-	// for Dialogs: if true includes a close button for closing
+	// CloseOnBack is whether to close the stage when the back button
+	// is pressed in the app bar. Otherwise, it goes back to the next
+	// stage but keeps this one open. This is on by default for
+	// DialogStages and off for WindowStages.
+	CloseOnBack bool
+
+	// Closeable, if true, includes a close button for closing dialogs.
 	Closeable bool
 
-	// for Dialogs: adds a handle titlebar Decor for moving
+	// Movable, if true, adds a handle titlebar Decor for moving dialogs.
 	Movable bool
 
-	// for Dialogs: adds a resize handle Decor for resizing
+	// Resizable, if true, adds a resize handle Decor for resizing dialogs.
 	Resizable bool
 
-	// Target position for Scene to be placed within RenderWin
+	// Timeout, if greater than 0, results in a popup stages disappearing
+	// after a timeout duration.
+	Timeout time.Duration
+
+	// Pos is the target position for Scene to be placed within RenderWin.
 	Pos image.Point
 
 	// Side for Stages that can operate on different sides, e.g.,
@@ -177,9 +193,6 @@ type Stage struct { //gti:add -setters
 
 	// name of sprite that is being dragged -- sprite event function is responsible for setting this.
 	SpriteDragging string `json:"-" xml:"-"`
-
-	// if > 0, disappears after a timeout duration
-	Timeout time.Duration
 }
 
 func (st *Stage) String() string {
@@ -252,6 +265,7 @@ func (st *Stage) SetType(typ StageTypes) *Stage {
 		st.Modal = true
 		st.Scrim = true
 		st.ClickOff = true
+		st.CloseOnBack = true
 	case SheetStage:
 		st.Modal = true
 		st.Scrim = true

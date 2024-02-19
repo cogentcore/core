@@ -918,7 +918,7 @@ func (t *Splits) SetTooltip(v string) *Splits { t.Tooltip = v; return t }
 // SetStackTop sets the [Splits.StackTop]
 func (t *Splits) SetStackTop(v int) *Splits { t.StackTop = v; return t }
 
-var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Stage", IDName: "stage", Doc: "Stage is a container and manager for displaying a Scene\nin different functional ways, defined by StageTypes, in two categories:\nMain types (Window, Dialog, Sheet) and Popup types\n(Menu, Tooltip, Snackbar, Chooser).", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Fields: []gti.Field{{Name: "Type", Doc: "type of Stage: determines behavior and Styling"}, {Name: "Scene", Doc: "Scene contents of this Stage -- what it displays"}, {Name: "Context", Doc: "widget in another scene that requested this stage to be created\nand provides context (stage)"}, {Name: "Name", Doc: "name of the Stage -- generally auto-set based on Scene Name"}, {Name: "Title", Doc: "Title of the Stage -- generally auto-set based on Scene Title.\nUsed for title of Window and Dialog types."}, {Name: "Modal", Doc: "if true, blocks input to all other stages."}, {Name: "Scrim", Doc: "if true, places a darkening scrim over other stages, if not a full window"}, {Name: "ClickOff", Doc: "if true dismisses the Stage if user clicks anywhere off the Stage"}, {Name: "IgnoreEvents", Doc: "whether to send no events to the stage and just pass them down to lower stages"}, {Name: "NewWindow", Doc: "NewWindow: if true, opens a Window or Dialog in its own separate operating\nsystem window (RenderWin).  This is by default true for Window on Desktop, otherwise false."}, {Name: "FullWindow", Doc: "if NewWindow is false, then this makes Dialogs and Windows take up\nthe entire window they are created in."}, {Name: "Closeable", Doc: "for Dialogs: if true includes a close button for closing"}, {Name: "Movable", Doc: "for Dialogs: adds a handle titlebar Decor for moving"}, {Name: "Resizable", Doc: "for Dialogs: adds a resize handle Decor for resizing"}, {Name: "Pos", Doc: "Target position for Scene to be placed within RenderWin"}, {Name: "Side", Doc: "Side for Stages that can operate on different sides, e.g.,\nfor Sheets: which side does the sheet come out from"}, {Name: "Data", Doc: "Data is item represented by this main stage -- used for recycling windows"}, {Name: "Main", Doc: "If a Popup Stage, this is the Main Stage that owns it (via its PopupMgr)\nIf a Main Stage, it points to itself."}, {Name: "PopupMgr", Doc: "For Main stages, this is the manager for the popups within it (created\nspecifically for the main stage).\nFor Popups, this is the pointer to the PopupMgr within the\nMain Stage managing it."}, {Name: "MainMgr", Doc: "For all stages, this is the Main stage manager that lives in a RenderWin\nand manages the Main Scenes."}, {Name: "RenderContext", Doc: "rendering context which has info about the RenderWin onto which we render.\nThis should be used instead of the RenderWin itself for all relevant\nrendering information.  This is only available once a Stage is Run,\nand must always be checked for nil."}, {Name: "Sprites", Doc: "sprites are named images that are rendered last overlaying everything else."}, {Name: "SpriteDragging", Doc: "name of sprite that is being dragged -- sprite event function is responsible for setting this."}, {Name: "Timeout", Doc: "if > 0, disappears after a timeout duration"}}})
+var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Stage", IDName: "stage", Doc: "Stage is a container and manager for displaying a Scene\nin different functional ways, defined by StageTypes, in two categories:\nMain types (Window, Dialog, Sheet) and Popup types\n(Menu, Tooltip, Snackbar, Chooser).", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Fields: []gti.Field{{Name: "Type", Doc: "type of Stage: determines behavior and Styling"}, {Name: "Scene", Doc: "Scene contents of this Stage (what it displays)."}, {Name: "Context", Doc: "widget in another scene that requested this stage to be created\nand provides context (stage)"}, {Name: "Name", Doc: "Name is the name of the Stage, which is generally auto-set\nbased on the Scene Name."}, {Name: "Title", Doc: "Title is the title of the Stage, which is generally auto-set\nbased on the Scene Title. Used for title of WindowStage and\nDialogStage types."}, {Name: "Modal", Doc: "Modal, if true, blocks input to all other stages."}, {Name: "Scrim", Doc: "Scrim, if true, places a darkening scrim over other stages,\nif not a full window."}, {Name: "ClickOff", Doc: "ClickOff, if true, dismisses the Stage if user clicks anywhere\noff the Stage."}, {Name: "IgnoreEvents", Doc: "IgnoreEvents is whether to send no events to the stage and\njust pass them down to lower stages."}, {Name: "NewWindow", Doc: "NewWindow, if true, opens a WindowStage or DialogStage in its own\nseparate operating system window (RenderWin).  This is true by\ndefault for WindowStage on non-mobile platforms, otherwise false."}, {Name: "FullWindow", Doc: "FullWindow, if NewWindow is false, makes DialogStages and\nWindowStages take up the entire window they are created in."}, {Name: "CloseOnBack", Doc: "CloseOnBack is whether to close the stage when the back button\nis pressed in the app bar. Otherwise, it goes back to the next\nstage but keeps this one open. This is on by default for\nDialogStages and off for WindowStages."}, {Name: "Closeable", Doc: "Closeable, if true, includes a close button for closing dialogs."}, {Name: "Movable", Doc: "Movable, if true, adds a handle titlebar Decor for moving dialogs."}, {Name: "Resizable", Doc: "Resizable, if true, adds a resize handle Decor for resizing dialogs."}, {Name: "Timeout", Doc: "Timeout, if greater than 0, results in a popup stages disappearing\nafter a timeout duration."}, {Name: "Pos", Doc: "Pos is the target position for Scene to be placed within RenderWin."}, {Name: "Side", Doc: "Side for Stages that can operate on different sides, e.g.,\nfor Sheets: which side does the sheet come out from"}, {Name: "Data", Doc: "Data is item represented by this main stage -- used for recycling windows"}, {Name: "Main", Doc: "If a Popup Stage, this is the Main Stage that owns it (via its PopupMgr)\nIf a Main Stage, it points to itself."}, {Name: "PopupMgr", Doc: "For Main stages, this is the manager for the popups within it (created\nspecifically for the main stage).\nFor Popups, this is the pointer to the PopupMgr within the\nMain Stage managing it."}, {Name: "MainMgr", Doc: "For all stages, this is the Main stage manager that lives in a RenderWin\nand manages the Main Scenes."}, {Name: "RenderContext", Doc: "rendering context which has info about the RenderWin onto which we render.\nThis should be used instead of the RenderWin itself for all relevant\nrendering information.  This is only available once a Stage is Run,\nand must always be checked for nil."}, {Name: "Sprites", Doc: "sprites are named images that are rendered last overlaying everything else."}, {Name: "SpriteDragging", Doc: "name of sprite that is being dragged -- sprite event function is responsible for setting this."}}})
 
 // SetContext sets the [Stage.Context]:
 // widget in another scene that requested this stage to be created
@@ -926,54 +926,72 @@ var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Stage", IDName: "sta
 func (t *Stage) SetContext(v Widget) *Stage { t.Context = v; return t }
 
 // SetName sets the [Stage.Name]:
-// name of the Stage -- generally auto-set based on Scene Name
+// Name is the name of the Stage, which is generally auto-set
+// based on the Scene Name.
 func (t *Stage) SetName(v string) *Stage { t.Name = v; return t }
 
 // SetTitle sets the [Stage.Title]:
-// Title of the Stage -- generally auto-set based on Scene Title.
-// Used for title of Window and Dialog types.
+// Title is the title of the Stage, which is generally auto-set
+// based on the Scene Title. Used for title of WindowStage and
+// DialogStage types.
 func (t *Stage) SetTitle(v string) *Stage { t.Title = v; return t }
 
 // SetModal sets the [Stage.Modal]:
-// if true, blocks input to all other stages.
+// Modal, if true, blocks input to all other stages.
 func (t *Stage) SetModal(v bool) *Stage { t.Modal = v; return t }
 
 // SetScrim sets the [Stage.Scrim]:
-// if true, places a darkening scrim over other stages, if not a full window
+// Scrim, if true, places a darkening scrim over other stages,
+// if not a full window.
 func (t *Stage) SetScrim(v bool) *Stage { t.Scrim = v; return t }
 
 // SetClickOff sets the [Stage.ClickOff]:
-// if true dismisses the Stage if user clicks anywhere off the Stage
+// ClickOff, if true, dismisses the Stage if user clicks anywhere
+// off the Stage.
 func (t *Stage) SetClickOff(v bool) *Stage { t.ClickOff = v; return t }
 
 // SetIgnoreEvents sets the [Stage.IgnoreEvents]:
-// whether to send no events to the stage and just pass them down to lower stages
+// IgnoreEvents is whether to send no events to the stage and
+// just pass them down to lower stages.
 func (t *Stage) SetIgnoreEvents(v bool) *Stage { t.IgnoreEvents = v; return t }
 
 // SetNewWindow sets the [Stage.NewWindow]:
-// NewWindow: if true, opens a Window or Dialog in its own separate operating
-// system window (RenderWin).  This is by default true for Window on Desktop, otherwise false.
+// NewWindow, if true, opens a WindowStage or DialogStage in its own
+// separate operating system window (RenderWin).  This is true by
+// default for WindowStage on non-mobile platforms, otherwise false.
 func (t *Stage) SetNewWindow(v bool) *Stage { t.NewWindow = v; return t }
 
 // SetFullWindow sets the [Stage.FullWindow]:
-// if NewWindow is false, then this makes Dialogs and Windows take up
-// the entire window they are created in.
+// FullWindow, if NewWindow is false, makes DialogStages and
+// WindowStages take up the entire window they are created in.
 func (t *Stage) SetFullWindow(v bool) *Stage { t.FullWindow = v; return t }
 
+// SetCloseOnBack sets the [Stage.CloseOnBack]:
+// CloseOnBack is whether to close the stage when the back button
+// is pressed in the app bar. Otherwise, it goes back to the next
+// stage but keeps this one open. This is on by default for
+// DialogStages and off for WindowStages.
+func (t *Stage) SetCloseOnBack(v bool) *Stage { t.CloseOnBack = v; return t }
+
 // SetCloseable sets the [Stage.Closeable]:
-// for Dialogs: if true includes a close button for closing
+// Closeable, if true, includes a close button for closing dialogs.
 func (t *Stage) SetCloseable(v bool) *Stage { t.Closeable = v; return t }
 
 // SetMovable sets the [Stage.Movable]:
-// for Dialogs: adds a handle titlebar Decor for moving
+// Movable, if true, adds a handle titlebar Decor for moving dialogs.
 func (t *Stage) SetMovable(v bool) *Stage { t.Movable = v; return t }
 
 // SetResizable sets the [Stage.Resizable]:
-// for Dialogs: adds a resize handle Decor for resizing
+// Resizable, if true, adds a resize handle Decor for resizing dialogs.
 func (t *Stage) SetResizable(v bool) *Stage { t.Resizable = v; return t }
 
+// SetTimeout sets the [Stage.Timeout]:
+// Timeout, if greater than 0, results in a popup stages disappearing
+// after a timeout duration.
+func (t *Stage) SetTimeout(v time.Duration) *Stage { t.Timeout = v; return t }
+
 // SetPos sets the [Stage.Pos]:
-// Target position for Scene to be placed within RenderWin
+// Pos is the target position for Scene to be placed within RenderWin.
 func (t *Stage) SetPos(v image.Point) *Stage { t.Pos = v; return t }
 
 // SetSide sets the [Stage.Side]:
@@ -1004,10 +1022,6 @@ func (t *Stage) SetSprites(v Sprites) *Stage { t.Sprites = v; return t }
 // SetSpriteDragging sets the [Stage.SpriteDragging]:
 // name of sprite that is being dragged -- sprite event function is responsible for setting this.
 func (t *Stage) SetSpriteDragging(v string) *Stage { t.SpriteDragging = v; return t }
-
-// SetTimeout sets the [Stage.Timeout]:
-// if > 0, disappears after a timeout duration
-func (t *Stage) SetTimeout(v time.Duration) *Stage { t.Timeout = v; return t }
 
 var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.StageMgr", IDName: "stage-mgr", Doc: "StageMgr manages a stack of Stage elements", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Fields: []gti.Field{{Name: "Stack", Doc: "stack of stages managed by this stage manager."}, {Name: "Modified", Doc: "Modified is set to true whenever the stack has been modified.\nThis is cleared by the RenderWin each render cycle."}, {Name: "RenderContext", Doc: "rendering context provides key rendering information and locking\nfor the RenderWin in which the stages are running.\nthe MainStageMgr within the RenderWin"}, {Name: "RenderWin", Doc: "render window to which we are rendering.\nrely on the RenderContext wherever possible."}, {Name: "History", Doc: "growing stack of viewing history of all stages."}, {Name: "Main", Doc: "Main is the Main Stage that owns this StageMgr, only set for Popup stages"}, {Name: "Mu", Doc: "mutex protecting reading / updating of the Stack.\nDestructive stack updating gets a Write lock, else Read."}}})
 
