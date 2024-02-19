@@ -384,6 +384,8 @@ func (sv *SliceViewBase) SetStyles() {
 					svi.DragStart(e)
 				})
 				w.On(events.DragEnter, func(e events.Event) {
+					e.SetHandled()
+					return
 					if sv.This() == nil || sv.Is(ki.Deleted) {
 						return
 					}
@@ -393,6 +395,8 @@ func (sv *SliceViewBase) SetStyles() {
 					e.SetHandled()
 				})
 				w.On(events.DragLeave, func(e events.Event) {
+					e.SetHandled()
+					return
 					if sv.This() == nil || sv.Is(ki.Deleted) {
 						return
 					}
@@ -1756,13 +1760,16 @@ func (sv *SliceViewBase) Duplicate() int { //gti:add
 func (sv *SliceViewBase) DragStart(e events.Event) {
 	nitms := len(sv.SelIdxs)
 	if nitms == 0 {
-		return
+		row, _ := sv.SliceGrid().IndexFromPixel(e.Pos())
+		sv.UpdateSelectRow(row, e.SelectMode())
 	}
 	md := sv.This().(SliceViewer).CopySelToMime()
 	ixs := sv.SelectedIdxsList(false) // ascending
-	w, ok := sv.This().(SliceViewer).RowFirstWidget(ixs[0])
+	w, ok := sv.This().(SliceViewer).RowFirstWidget(ixs[0] - sv.StartIdx)
 	if ok {
 		sv.Scene.EventMgr.DragStart(w, md, e)
+	} else {
+		fmt.Println("SliceView DND programmer error")
 	}
 }
 
