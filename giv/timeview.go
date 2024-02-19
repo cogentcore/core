@@ -392,7 +392,7 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget) {
 		})
 	dt.Style(func(s *styles.Style) {
 		s.Min.X.Em(8)
-		s.Max.X.Em(12)
+		s.Max.X.Em(10)
 	})
 	dt.SetReadOnly(vv.IsReadOnly())
 	dt.OnChange(func(e events.Event) {
@@ -424,7 +424,7 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget) {
 		})
 	tm.Style(func(s *styles.Style) {
 		s.Min.X.Em(8)
-		// s.Max.X.Em(12)
+		s.Max.X.Em(10)
 	})
 	tm.SetReadOnly(vv.IsReadOnly())
 	tm.OnChange(func(e events.Event) {
