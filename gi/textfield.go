@@ -1912,6 +1912,7 @@ func (tf *TextField) RenderTextField() {
 	prevColor := st.Color
 	if len(tf.EditTxt) == 0 && len(tf.Placeholder) > 0 {
 		st.Color = tf.PlaceholderColor
+		fs = st.FontRender() // need to update
 		cur = []rune(tf.Placeholder)
 	} else if tf.NoEcho {
 		cur = ConcealDots(len(cur))
@@ -1921,11 +1922,7 @@ func (tf *TextField) RenderTextField() {
 	availSz := sz.Actual.Content.Sub(icsz)
 	tf.RenderVis.SetRunes(cur, fs, &st.UnitContext, &st.Text, true, 0, 0)
 	tf.RenderVis.Layout(txs, fs, &st.UnitContext, availSz)
-	if tf.HasWordWrap() {
-		tf.RenderVis.Render(pc, pos)
-	} else {
-		tf.RenderVis.Render(pc, pos)
-	}
+	tf.RenderVis.Render(pc, pos)
 	st.Color = prevColor
 }
 
