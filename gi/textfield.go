@@ -205,7 +205,7 @@ func (tf *TextField) SetStyles() {
 		tf.PlaceholderColor = colors.Scheme.OnSurfaceVariant
 		tf.CursorColor = colors.C(colors.Scheme.Primary.Base)
 
-		s.VirtualKeyboard = styles.SingleLineKeyboard
+		s.VirtualKeyboard = styles.KeyboardSingleLine
 		if !tf.IsReadOnly() {
 			s.Cursor = cursors.Text
 		}

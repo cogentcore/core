@@ -454,7 +454,7 @@ func (wb *WidgetBase) HandleWidgetStateFromFocus() {
 		if wb.AbilityIs(abilities.Focusable) {
 			wb.ScrollToMe()
 			wb.SetState(true, states.Focused)
-			if wb.Styles.VirtualKeyboard != styles.NoKeyboard {
+			if wb.Styles.VirtualKeyboard != styles.KeyboardNone {
 				TheApp.ShowVirtualKeyboard(wb.Styles.VirtualKeyboard)
 			}
 		}
@@ -462,7 +462,7 @@ func (wb *WidgetBase) HandleWidgetStateFromFocus() {
 	wb.OnFocusLost(func(e events.Event) {
 		if wb.AbilityIs(abilities.Focusable) {
 			wb.SetState(false, states.Focused)
-			if wb.Styles.VirtualKeyboard != styles.NoKeyboard {
+			if wb.Styles.VirtualKeyboard != styles.KeyboardNone {
 				TheApp.HideVirtualKeyboard()
 			}
 		}

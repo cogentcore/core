@@ -229,25 +229,35 @@ func (s *Style) Defaults() {
 
 // VirtualKeyboards are all of the supported virtual keyboard types
 // to display on mobile platforms.
-type VirtualKeyboards int32 //enums:enum
-
-// TOOD(kai): support more of these (see https://developer.android.com/reference/android/view/inputmethod/EditorInfo), implement type on web
+type VirtualKeyboards int32 //enums:enum -trim-prefix Keyboard -transform kebab
 
 const (
-	// NoKeyboard indicates to display no virtual keyboard.
-	NoKeyboard VirtualKeyboards = iota
+	// KeyboardNone indicates to display no virtual keyboard.
+	KeyboardNone VirtualKeyboards = iota
 
-	// MultiLineKeyboard indicates to display a virtual keyboard
+	// KeyboardMultiLine indicates to display a virtual keyboard
 	// with a default input style and a "Return" return key.
-	MultiLineKeyboard
+	KeyboardMultiLine
 
-	// SingleLineKeyboard indicates to display a virtual keyboard
+	// KeyboardSingleLine indicates to display a virtual keyboard
 	// with a default input style and a "Done" return key.
-	SingleLineKeyboard
+	KeyboardSingleLine
 
-	// NumberKeyboard indicates to display a virtual keyboard
-	// with a number input style and a "Done" return key.
-	NumberKeyboard
+	// KeyboardNumber indicates to display a virtual keyboard
+	// for inputting a number.
+	KeyboardNumber
+
+	// KeyboardEmail indicates to display a virtual keyboard
+	// for inputting an email address.
+	KeyboardEmail
+
+	// KeyboardPhone indicates to display a virtual keyboard
+	// for inputting a phone number.
+	KeyboardPhone
+
+	// KeyboardURL indicates to display a virtual keyboard for
+	// inputting a URL / URI / web address.
+	KeyboardURL
 )
 
 // todo: Animation

@@ -2090,41 +2090,53 @@ func (i *SideIndexes) UnmarshalText(text []byte) error {
 	return nil
 }
 
-var _VirtualKeyboardsValues = []VirtualKeyboards{0, 1, 2, 3}
+var _VirtualKeyboardsValues = []VirtualKeyboards{0, 1, 2, 3, 4, 5, 6}
 
 // VirtualKeyboardsN is the highest valid value
 // for type VirtualKeyboards, plus one.
-const VirtualKeyboardsN VirtualKeyboards = 4
+const VirtualKeyboardsN VirtualKeyboards = 7
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _VirtualKeyboardsNoOp() {
 	var x [1]struct{}
-	_ = x[NoKeyboard-(0)]
-	_ = x[MultiLineKeyboard-(1)]
-	_ = x[SingleLineKeyboard-(2)]
-	_ = x[NumberKeyboard-(3)]
+	_ = x[KeyboardNone-(0)]
+	_ = x[KeyboardMultiLine-(1)]
+	_ = x[KeyboardSingleLine-(2)]
+	_ = x[KeyboardNumber-(3)]
+	_ = x[KeyboardEmail-(4)]
+	_ = x[KeyboardPhone-(5)]
+	_ = x[KeyboardURL-(6)]
 }
 
 var _VirtualKeyboardsNameToValueMap = map[string]VirtualKeyboards{
-	`NoKeyboard`:         0,
-	`DefaultKeyboard`:    1,
-	`SingleLineKeyboard`: 2,
-	`NumberKeyboard`:     3,
+	`none`:        0,
+	`multi-line`:  1,
+	`single-line`: 2,
+	`number`:      3,
+	`email`:       4,
+	`phone`:       5,
+	`url`:         6,
 }
 
 var _VirtualKeyboardsDescMap = map[VirtualKeyboards]string{
-	0: `NoKeyboard indicates to display no virtual keyboard.`,
-	1: `DefaultKeyboard indicates to display a virtual keyboard with a default input style and a &#34;Return&#34; return key.`,
-	2: `SingleLineKeyboard indicates to display a virtual keyboard with a default input style and a &#34;Done&#34; return key.`,
-	3: `NumberKeyboard indicates to display a virtual keyboard with a number input style and a &#34;Done&#34; return key.`,
+	0: `KeyboardNone indicates to display no virtual keyboard.`,
+	1: `KeyboardMultiLine indicates to display a virtual keyboard with a default input style and a &#34;Return&#34; return key.`,
+	2: `KeyboardSingleLine indicates to display a virtual keyboard with a default input style and a &#34;Done&#34; return key.`,
+	3: `KeyboardNumber indicates to display a virtual keyboard for inputting a number.`,
+	4: `KeyboardEmail indicates to display a virtual keyboard for inputting an email address.`,
+	5: `KeyboardPhone indicates to display a virtual keyboard for inputting a phone number.`,
+	6: `KeyboardURL indicates to display a virtual keyboard for inputting a URL / URI / web address.`,
 }
 
 var _VirtualKeyboardsMap = map[VirtualKeyboards]string{
-	0: `NoKeyboard`,
-	1: `DefaultKeyboard`,
-	2: `SingleLineKeyboard`,
-	3: `NumberKeyboard`,
+	0: `none`,
+	1: `multi-line`,
+	2: `single-line`,
+	3: `number`,
+	4: `email`,
+	5: `phone`,
+	6: `url`,
 }
 
 // String returns the string representation

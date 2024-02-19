@@ -80,7 +80,7 @@ func (sp *Spinner) SetStyles() {
 	})
 	sp.TextField.SetStyles()
 	sp.Style(func(s *styles.Style) {
-		s.VirtualKeyboard = styles.NumberKeyboard
+		s.VirtualKeyboard = styles.KeyboardNumber
 		s.Grow.Set(0, 0) // TODO: remove
 		if sp.IsReadOnly() {
 			s.Min.X.Ch(4)
