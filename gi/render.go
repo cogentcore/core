@@ -655,7 +655,7 @@ func (wb *WidgetBase) RenderChildren() {
 // This should be called at start of widget-level rendering, and should always
 // be associated with a corresponding [WidgetBase.RenderUnlock].
 func (wb *WidgetBase) RenderLock() (*paint.Context, *styles.Style) {
-	wb.StyMu.RLock()
+	// wb.StyMu.RLock()
 	pc := &wb.Scene.PaintContext
 	pc.Lock()
 	return pc, &wb.Styles
@@ -666,7 +666,7 @@ func (wb *WidgetBase) RenderLock() (*paint.Context, *styles.Style) {
 // be associated with a corresponding [WidgetBase.RenderLock].
 func (wb *WidgetBase) RenderUnlock() {
 	wb.Scene.PaintContext.Unlock()
-	wb.StyMu.RUnlock()
+	// wb.StyMu.RUnlock()
 }
 
 // RenderBoxImpl implements the standard box model rendering -- assumes all
@@ -679,8 +679,8 @@ func (wb *WidgetBase) RenderBoxImpl(pos mat32.Vec2, sz mat32.Vec2, bs styles.Bor
 // RenderStdBox draws standard box using given style.
 // paint.State and Style must already be locked at this point (RenderLock)
 func (wb *WidgetBase) RenderStdBox(st *styles.Style) {
-	wb.StyMu.RLock()
-	defer wb.StyMu.RUnlock()
+	// wb.StyMu.RLock()
+	// defer wb.StyMu.RUnlock()
 
 	pc := &wb.Scene.PaintContext
 
@@ -705,8 +705,8 @@ func (wb *WidgetBase) HasSc() bool {
 // PointToRelPos translates a point in Scene pixel coords
 // into relative position within node, based on the Content BBox
 func (wb *WidgetBase) PointToRelPos(pt image.Point) image.Point {
-	wb.BBoxMu.RLock()
-	defer wb.BBoxMu.RUnlock()
+	// wb.BBoxMu.RLock()
+	// defer wb.BBoxMu.RUnlock()
 	return pt.Sub(wb.Geom.ContentBBox.Min)
 }
 

@@ -1750,11 +1750,11 @@ func (tf *TextField) ConfigWidget() {
 
 // StyleTextField does text field styling -- sets StyMu Lock
 func (tf *TextField) StyleTextField() {
-	tf.StyMu.Lock()
+	// tf.StyMu.Lock()
 	tf.SetAbilities(!tf.IsReadOnly(), abilities.Focusable)
 	tf.ApplyStyleWidget()
 	tf.CursorWidth.ToDots(&tf.Styles.UnitContext)
-	tf.StyMu.Unlock()
+	// tf.StyMu.Unlock()
 }
 
 func (tf *TextField) ApplyStyle() {

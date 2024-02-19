@@ -550,8 +550,8 @@ func (tv *TreeView) StyleTreeView() {
 }
 
 func (tv *TreeView) ApplyStyle() {
-	tv.StyMu.Lock() // todo: needed??  maybe not.
-	defer tv.StyMu.Unlock()
+	// tv.StyMu.Lock() // todo: needed??  maybe not.
+	// defer tv.StyMu.Unlock()
 
 	tv.StyleTreeView()
 }

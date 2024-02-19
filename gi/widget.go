@@ -9,7 +9,6 @@ package gi
 import (
 	"image"
 	"log/slog"
-	"sync"
 
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/enums"
@@ -299,10 +298,10 @@ type WidgetBase struct {
 	Scene *Scene `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// mutex protecting the Style field
-	StyMu sync.RWMutex `copier:"-" view:"-" json:"-" xml:"-" set:"-"`
+	// StyMu sync.RWMutex `copier:"-" view:"-" json:"-" xml:"-" set:"-"`
 
 	// mutex protecting the BBox fields
-	BBoxMu sync.RWMutex `copier:"-" view:"-" json:"-" xml:"-" set:"-"`
+	// BBoxMu sync.RWMutex `copier:"-" view:"-" json:"-" xml:"-" set:"-"`
 }
 
 func (wb *WidgetBase) FlagType() enums.BitFlagSetter {

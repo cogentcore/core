@@ -311,8 +311,8 @@ func (lb *Label) ConfigLabel() {
 // ConfigLabel does the HTML and Layout in TextRender for label text,
 // using given size to constrain layout.
 func (lb *Label) ConfigLabelSize(sz mat32.Vec2) {
-	lb.StyMu.RLock()
-	defer lb.StyMu.RUnlock()
+	// lb.StyMu.RLock()
+	// defer lb.StyMu.RUnlock()
 
 	// todo: last arg is CSSAgg.  Can synthesize that some other way?
 	fs := lb.Styles.FontRender()
@@ -327,8 +327,8 @@ func (lb *Label) ConfigLabelSize(sz mat32.Vec2) {
 // because they otherwise can absorb much more space, which should
 // instead be controlled by the base Align X,Y factors.
 func (lb *Label) ConfigLabelAlloc(sz mat32.Vec2) mat32.Vec2 {
-	lb.StyMu.RLock()
-	defer lb.StyMu.RUnlock()
+	// lb.StyMu.RLock()
+	// defer lb.StyMu.RUnlock()
 
 	// todo: last arg is CSSAgg.  Can synthesize that some other way?
 	fs := lb.Styles.FontRender()

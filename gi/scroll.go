@@ -329,9 +329,9 @@ func (ly *Layout) AutoScroll(pos image.Point) bool {
 	if lag < SystemSettings.LayoutAutoScrollDelay {
 		return false
 	}
-	ly.BBoxMu.RLock()
+	// ly.BBoxMu.RLock()
 	wbb := ly.Geom.ContentBBox
-	ly.BBoxMu.RUnlock()
+	// ly.BBoxMu.RUnlock()
 	did := false
 	if ly.HasScroll[mat32.Y] && ly.HasScroll[mat32.X] {
 		did = ly.AutoScrollDim(mat32.Y, wbb.Min.Y, pos.Y)

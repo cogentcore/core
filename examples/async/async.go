@@ -37,7 +37,7 @@ func main() {
 					tv.ScrollToIdx(len(table) - 1)
 				}
 				b.UpdateEndAsyncLayout(updt)
-				time.Sleep(1 * time.Millisecond)
+				time.Sleep(1000 * time.Millisecond)
 			}
 		}()
 	})

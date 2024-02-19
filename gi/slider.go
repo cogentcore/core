@@ -393,8 +393,8 @@ func (sr *Slider) HandleEvents() {
 // PointToRelPos translates a point in scene local pixel coords into relative
 // position within the slider content range
 func (sr *Slider) PointToRelPos(pt image.Point) float32 {
-	sr.BBoxMu.RLock()
-	defer sr.BBoxMu.RUnlock()
+	// sr.BBoxMu.RLock()
+	// defer sr.BBoxMu.RUnlock()
 	ptf := mat32.V2FromPoint(pt).Dim(sr.Styles.Direction.Dim())
 	return ptf - sr.Geom.Pos.Content.Dim(sr.Styles.Direction.Dim())
 }
