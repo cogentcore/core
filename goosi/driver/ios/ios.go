@@ -186,7 +186,7 @@ func lifecycleFocused() {
 
 // ShowVirtualKeyboard requests the driver to show a virtual keyboard for text input
 func (a *App) ShowVirtualKeyboard(typ styles.VirtualKeyboards) {
-	C.showKeyboard(C.int(int32(typ - 1)))
+	C.showKeyboard(C.int(int32(typ)))
 }
 
 // HideVirtualKeyboard requests the driver to hide any visible virtual keyboard

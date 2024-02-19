@@ -257,10 +257,6 @@ bool isDark() {
     return rootVC.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark;
 }
 
-#define DEFAULT_KEYBOARD_CODE 0
-#define SINGLELINE_KEYBOARD_CODE 1
-#define NUMBER_KEYBOARD_CODE 2
-
 void showKeyboard(int keyboardType) {
     GoAppAppDelegate *appDelegate = (GoAppAppDelegate *)[[UIApplication sharedApplication] delegate];
     GoInputView *view = appDelegate.controller.inputView;
@@ -268,16 +264,32 @@ void showKeyboard(int keyboardType) {
     dispatch_async(dispatch_get_main_queue(), ^{
         switch (keyboardType)
         {
-            case DEFAULT_KEYBOARD_CODE:
-                [view setKeyboardType:UIKeyboardTypeDefault];
-                [view setReturnKeyType:UIReturnKeyDefault];
-                break;
-            case SINGLELINE_KEYBOARD_CODE:
+			case 1:
                 [view setKeyboardType:UIKeyboardTypeDefault];
                 [view setReturnKeyType:UIReturnKeyDone];
                 break;
-            case NUMBER_KEYBOARD_CODE:
-                [view setKeyboardType:UIKeyboardTypeNumberPad];
+            case 2:
+                [view setKeyboardType:UIKeyboardTypeDefault];
+                [view setReturnKeyType:UIReturnKeyDefault];
+                break;
+            case 3:
+                [view setKeyboardType:UIKeyboardTypeDecimalPad];
+                [view setReturnKeyType:UIReturnKeyDone];
+                break;
+			case 4:
+                [view setKeyboardType:UIKeyboardTypeDefault];
+                [view setReturnKeyType:UIReturnKeyDone];
+                break;
+			case 5:
+                [view setKeyboardType:UIKeyboardTypeEmailAddress];
+                [view setReturnKeyType:UIReturnKeyDone];
+                break;
+			case 6:
+                [view setKeyboardType:UIKeyboardTypePhonePad];
+                [view setReturnKeyType:UIReturnKeyDone];
+                break;
+			case 7:
+                [view setKeyboardType:UIKeyboardTypeURL];
                 [view setReturnKeyType:UIReturnKeyDone];
                 break;
             default:
