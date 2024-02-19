@@ -1661,6 +1661,14 @@ func (tv *TreeView) DropExternal(md mimedata.Mimes, mod events.DropMods) {
 	// todo: not yet implemented
 }
 
+// DragClearStates clears the drag-drop related states for this widget
+func (tv *TreeView) DragClearStates() {
+	tv.SetState(false, states.Active, states.Selected, states.Hovered, states.DragHovered)
+	tv.Parts.SetState(false, states.Active, states.Selected, states.Hovered, states.DragHovered)
+	tv.ApplyStyle()
+	tv.SetNeedsRender(true)
+}
+
 // DragDrop handles drag drop event
 func (tv *TreeView) DragDrop(e events.Event) {
 	// todo: some kind of validation for source
@@ -1669,10 +1677,7 @@ func (tv *TreeView) DragDrop(e events.Event) {
 	de := e.(*events.DragDrop)
 	stv := AsTreeView(de.Source.(gi.Widget).Parent()) // note: source is actually .parts!
 	if stv != nil {
-		stv.SetState(false, states.Active, states.Selected, states.Hovered, states.DragHovered)
-		stv.Parts.SetState(false, states.Active, states.Selected, states.Hovered, states.DragHovered)
-		stv.ApplyStyleTree()
-		stv.SetNeedsRender(true)
+		stv.DragClearStates()
 	}
 	md := de.Data.(mimedata.Mimes)
 	mf := func(m *gi.Scene) {
@@ -1689,6 +1694,7 @@ func (tv *TreeView) DragDrop(e events.Event) {
 // Only relevant for DropMod == DropMove.
 func (tv *TreeView) DropFinalize(de *events.DragDrop) {
 	tv.UnselectAll()
+	tv.DragClearStates()
 	tv.Scene.EventMgr.DropFinalize(de) // sends DropDeleteSource to Source
 }
 
