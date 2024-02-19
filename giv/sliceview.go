@@ -254,6 +254,10 @@ type SliceViewBase struct {
 	// is no row being hovered.
 	NormalCursor cursors.Cursor `copier:"-" xml:"-" json:"-" set:"-"`
 
+	// CurrentCursor is the cached cursor that should currently be
+	// displayed.
+	CurrentCursor cursors.Cursor `copier:"-" xml:"-" json:"-" set:"-"`
+
 	// non-ptr reflect.Value of the slice
 	SliceNPVal reflect.Value `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
 
@@ -317,6 +321,7 @@ func (sv *SliceViewBase) SetStyles() {
 
 	sv.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Clickable, abilities.DoubleClickable, abilities.TripleClickable)
+		s.Cursor = sv.CurrentCursor
 		s.Direction = styles.Column
 		// absorb horizontal here, vertical in view
 		s.Overflow.X = styles.OverflowAuto
@@ -1997,6 +2002,7 @@ func (sv *SliceViewBase) HandleEvents() {
 	})
 	sv.On(events.MouseMove, func(e events.Event) {
 		row, _, isValid := sv.RowFromEventPos(e)
+		prevHoverRow := sv.HoverRow
 		if !isValid {
 			sv.HoverRow = -1
 			sv.Styles.Cursor = sv.NormalCursor
@@ -2006,7 +2012,10 @@ func (sv *SliceViewBase) HandleEvents() {
 			}
 			sv.Styles.Cursor = cursors.Pointer
 		}
-		sv.SetNeedsRender(true)
+		sv.CurrentCursor = sv.Styles.Cursor
+		if sv.HoverRow != prevHoverRow {
+			sv.SetNeedsRender(true)
+		}
 	})
 	sv.OnFirst(events.DoubleClick, func(e events.Event) {
 		row, _, isValid := sv.RowFromEventPos(e)
