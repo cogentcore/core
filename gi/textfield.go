@@ -1333,7 +1333,7 @@ func (tf *TextField) AutoScroll() {
 	if maxw < 0 {
 		return
 	}
-	tf.CharWidth = int(maxw / st.UnContext.Dots(units.UnitCh)) // rough guess in chars
+	tf.CharWidth = int(maxw / st.UnitContext.Dots(units.UnitCh)) // rough guess in chars
 	if tf.CharWidth < 1 {
 		tf.CharWidth = 1
 	}
@@ -1433,7 +1433,7 @@ func (tf *TextField) PixelToCursor(pt image.Point) int {
 
 	px := float32(pr.X)
 	st := &tf.Styles
-	c := tf.StartPos + int(float64(px/st.UnContext.Dots(units.UnitCh)))
+	c := tf.StartPos + int(float64(px/st.UnitContext.Dots(units.UnitCh)))
 	c = min(c, n)
 
 	w := tf.RelCharPos(tf.StartPos, c).X
@@ -1750,7 +1750,7 @@ func (tf *TextField) StyleTextField() {
 	tf.StyMu.Lock()
 	tf.SetAbilities(!tf.IsReadOnly(), abilities.Focusable)
 	tf.ApplyStyleWidget()
-	tf.CursorWidth.ToDots(&tf.Styles.UnContext)
+	tf.CursorWidth.ToDots(&tf.Styles.UnitContext)
 	tf.StyMu.Unlock()
 }
 
@@ -1762,15 +1762,15 @@ func (tf *TextField) ConfigTextSize(sz mat32.Vec2) mat32.Vec2 {
 	st := &tf.Styles
 	txs := &st.Text
 	fs := st.FontRender()
-	st.Font = paint.OpenFont(fs, &st.UnContext)
+	st.Font = paint.OpenFont(fs, &st.UnitContext)
 	txt := tf.EditTxt
 	if tf.NoEcho {
 		txt = ConcealDots(len(tf.EditTxt))
 	}
 	align, alignV := txs.Align, txs.AlignV
 	txs.Align, txs.AlignV = styles.Start, styles.Start // only works with this
-	tf.RenderAll.SetRunes(txt, fs, &st.UnContext, txs, true, 0, 0)
-	tf.RenderAll.Layout(txs, fs, &st.UnContext, sz)
+	tf.RenderAll.SetRunes(txt, fs, &st.UnitContext, txs, true, 0, 0)
+	tf.RenderAll.Layout(txs, fs, &st.UnitContext, sz)
 	txs.Align, txs.AlignV = align, alignV
 	rsz := tf.RenderAll.Size.Ceil()
 	return rsz
@@ -1901,7 +1901,7 @@ func (tf *TextField) RenderTextField() {
 	tf.AutoScroll() // inits paint with our style
 	fs := st.FontRender()
 	txs := &st.Text
-	st.Font = paint.OpenFont(fs, &st.UnContext)
+	st.Font = paint.OpenFont(fs, &st.UnitContext)
 	tf.RenderStdBox(st)
 	if tf.StartPos < 0 || tf.EndPos > len(tf.EditTxt) {
 		return
@@ -1919,8 +1919,8 @@ func (tf *TextField) RenderTextField() {
 	sz := &tf.Geom.Size
 	icsz := tf.IconsSize()
 	availSz := sz.Actual.Content.Sub(icsz)
-	tf.RenderVis.SetRunes(cur, fs, &st.UnContext, &st.Text, true, 0, 0)
-	tf.RenderVis.Layout(txs, fs, &st.UnContext, availSz)
+	tf.RenderVis.SetRunes(cur, fs, &st.UnitContext, &st.Text, true, 0, 0)
+	tf.RenderVis.Layout(txs, fs, &st.UnitContext, availSz)
 	if tf.HasWordWrap() {
 		tf.RenderVis.Render(pc, pos)
 	} else {

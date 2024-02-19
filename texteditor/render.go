@@ -463,7 +463,7 @@ func (ed *Editor) RenderLineNo(ln int, defFill bool) {
 	if hct.ContrastRatio(actClr, fst.Color) < hct.ContrastAA {
 		fst.Color = hct.ContrastColor(actClr, hct.ContrastAA)
 	}
-	ed.LineNoRender.SetString(lnstr, fst, &sty.UnContext, &sty.Text, true, 0, 0)
+	ed.LineNoRender.SetString(lnstr, fst, &sty.UnitContext, &sty.Text, true, 0, 0)
 	pos := mat32.Vec2{
 		X: float32(bb.Min.X), // + spc.Pos().X
 		Y: ed.CharEndPos(lex.Pos{Ln: ln}).Y - ed.FontDescent,

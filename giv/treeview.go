@@ -545,7 +545,7 @@ func (tv *TreeView) StyleTreeView() {
 	if !tv.HasChildren() {
 		tv.SetClosed(true)
 	}
-	tv.Indent.ToDots(&tv.Styles.UnContext)
+	tv.Indent.ToDots(&tv.Styles.UnitContext)
 	tv.ApplyStyleWidget()
 }
 

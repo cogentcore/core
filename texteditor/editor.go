@@ -509,7 +509,7 @@ func (ed *Editor) StyleView() {
 		}
 	}
 	ed.ApplyStyleWidget()
-	ed.CursorWidth.ToDots(&ed.Styles.UnContext)
+	ed.CursorWidth.ToDots(&ed.Styles.UnitContext)
 }
 
 // ApplyStyle calls StyleView and sets the style

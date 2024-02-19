@@ -317,8 +317,8 @@ func (lb *Label) ConfigLabelSize(sz mat32.Vec2) {
 	// todo: last arg is CSSAgg.  Can synthesize that some other way?
 	fs := lb.Styles.FontRender()
 	txs := &lb.Styles.Text
-	lb.TextRender.SetHTML(lb.Text, fs, txs, &lb.Styles.UnContext, nil)
-	lb.TextRender.Layout(txs, fs, &lb.Styles.UnContext, sz)
+	lb.TextRender.SetHTML(lb.Text, fs, txs, &lb.Styles.UnitContext, nil)
+	lb.TextRender.Layout(txs, fs, &lb.Styles.UnitContext, sz)
 }
 
 // ConfigLabelAlloc is used for determining how much space the label
@@ -335,11 +335,11 @@ func (lb *Label) ConfigLabelAlloc(sz mat32.Vec2) mat32.Vec2 {
 	txs := &lb.Styles.Text
 	align, alignV := txs.Align, txs.AlignV
 	txs.Align, txs.AlignV = styles.Start, styles.Start
-	lb.TextRender.SetHTML(lb.Text, fs, txs, &lb.Styles.UnContext, nil)
-	lb.TextRender.Layout(txs, fs, &lb.Styles.UnContext, sz)
+	lb.TextRender.SetHTML(lb.Text, fs, txs, &lb.Styles.UnitContext, nil)
+	lb.TextRender.Layout(txs, fs, &lb.Styles.UnitContext, sz)
 	rsz := lb.TextRender.Size.Ceil()
 	txs.Align, txs.AlignV = align, alignV
-	lb.TextRender.Layout(txs, fs, &lb.Styles.UnContext, rsz)
+	lb.TextRender.Layout(txs, fs, &lb.Styles.UnitContext, rsz)
 	return rsz
 }
 

@@ -1577,7 +1577,7 @@ func (wb *WidgetBase) StyleSizeUpdate() bool {
 		par = pwb.Geom.Size.Actual.Content
 	}
 	sz := wb.Scene.SceneGeom.Size
-	chg := wb.Styles.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, par.X, par.Y)
+	chg := wb.Styles.UnitContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, par.X, par.Y)
 	if chg {
 		wb.Styles.ToDots()
 	}

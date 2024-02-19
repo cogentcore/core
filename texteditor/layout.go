@@ -13,7 +13,7 @@ import (
 func (ed *Editor) StyleSizes() {
 	sty := &ed.Styles
 	spc := sty.BoxSpace()
-	sty.Font = paint.OpenFont(sty.FontRender(), &sty.UnContext)
+	sty.Font = paint.OpenFont(sty.FontRender(), &sty.UnitContext)
 	ed.FontHeight = sty.Font.Face.Metrics.Height
 	ed.LineHeight = sty.Text.EffLineHeight(ed.FontHeight)
 	ed.FontDescent = mat32.FromFixed(ed.Styles.Font.Face.Face.Metrics().Descent)
@@ -144,8 +144,8 @@ func (ed *Editor) LayoutAllLines() {
 		if ln >= len(ed.Renders) || ln >= len(buf.Markup) {
 			break
 		}
-		ed.Renders[ln].SetHTMLPre(buf.Markup[ln], fst, &sty.Text, &sty.UnContext, ed.TextStyleProps())
-		ed.Renders[ln].Layout(&sty.Text, sty.FontRender(), &sty.UnContext, sz)
+		ed.Renders[ln].SetHTMLPre(buf.Markup[ln], fst, &sty.Text, &sty.UnitContext, ed.TextStyleProps())
+		ed.Renders[ln].Layout(&sty.Text, sty.FontRender(), &sty.UnitContext, sz)
 		if !ed.HasLinks && len(ed.Renders[ln].Links) > 0 {
 			ed.HasLinks = true
 		}
@@ -184,8 +184,8 @@ func (ed *Editor) LayoutLine(ln int) bool {
 
 	ed.Buf.MarkupMu.RLock()
 	curspans := len(ed.Renders[ln].Spans)
-	ed.Renders[ln].SetHTMLPre(ed.Buf.Markup[ln], fst, &sty.Text, &sty.UnContext, ed.TextStyleProps())
-	ed.Renders[ln].Layout(&sty.Text, sty.FontRender(), &sty.UnContext, ed.LineLayoutSize)
+	ed.Renders[ln].SetHTMLPre(ed.Buf.Markup[ln], fst, &sty.Text, &sty.UnitContext, ed.TextStyleProps())
+	ed.Renders[ln].Layout(&sty.Text, sty.FontRender(), &sty.UnitContext, ed.LineLayoutSize)
 	if !ed.HasLinks && len(ed.Renders[ln].Links) > 0 {
 		ed.HasLinks = true
 	}

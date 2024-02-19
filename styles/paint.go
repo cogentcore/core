@@ -95,7 +95,7 @@ func (pc *Paint) SetStyleProps(par *Paint, props map[string]any, ctxt colors.Con
 }
 
 func (pc *Paint) FromStyle(st *Style) {
-	pc.UnContext = st.UnContext
+	pc.UnContext = st.UnitContext
 	pc.FontStyle = *st.FontRender()
 	pc.TextStyle = st.Text
 }

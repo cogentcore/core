@@ -206,19 +206,19 @@ type Style struct { //gti:add
 	// width of a layout scrollbar
 	ScrollBarWidth units.Value
 
-	// font parameters -- no xml prefix -- also has color, background-color
+	// font styling parameters
 	Font Font
 
-	// text parameters -- no xml prefix
+	// text styling parameters
 	Text Text
 
-	// units context -- parameters necessary for anchoring relative units
-	UnContext units.Context
+	// unit context: parameters necessary for anchoring relative units
+	UnitContext units.Context
 }
 
 func (s *Style) Defaults() {
 	// mostly all the defaults are 0 initial values, except these..
-	s.UnContext.Defaults()
+	s.UnitContext.Defaults()
 	s.LayoutDefaults()
 	s.Color = colors.Scheme.OnSurface
 	s.Opacity = 1
@@ -360,7 +360,7 @@ func (s *Style) ToDotsImpl(uc *units.Context) {
 // ToDots caches all style elements in terms of raw pixel
 // dots for rendering.
 func (s *Style) ToDots() {
-	s.ToDotsImpl(&s.UnContext)
+	s.ToDotsImpl(&s.UnitContext)
 }
 
 // BoxSpace returns the extra space around the central content in the box model in dots.

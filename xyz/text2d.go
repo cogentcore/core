@@ -93,16 +93,16 @@ func (txt *Text2D) RenderText() {
 	st := &txt.Styles
 	fr := st.FontRender()
 	if st.Font.Face == nil {
-		st.Font = paint.OpenFont(fr, &st.UnContext)
+		st.Font = paint.OpenFont(fr, &st.UnitContext)
 	}
 	st.ToDots()
 
-	txt.TxtRender.SetHTML(txt.Text, fr, &txt.Styles.Text, &txt.Styles.UnContext, nil)
+	txt.TxtRender.SetHTML(txt.Text, fr, &txt.Styles.Text, &txt.Styles.UnitContext, nil)
 	sz := txt.TxtRender.Size
-	txt.TxtRender.LayoutStdLR(&txt.Styles.Text, fr, &txt.Styles.UnContext, sz)
+	txt.TxtRender.LayoutStdLR(&txt.Styles.Text, fr, &txt.Styles.UnitContext, sz)
 	if txt.TxtRender.Size != sz {
 		sz = txt.TxtRender.Size
-		txt.TxtRender.LayoutStdLR(&txt.Styles.Text, fr, &txt.Styles.UnContext, sz)
+		txt.TxtRender.LayoutStdLR(&txt.Styles.Text, fr, &txt.Styles.UnitContext, sz)
 		if txt.TxtRender.Size != sz {
 			sz = txt.TxtRender.Size
 		}

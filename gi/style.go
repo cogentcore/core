@@ -264,13 +264,13 @@ func SetUnitContext(st *styles.Style, sc *Scene, el, par mat32.Vec2) {
 		sz = sc.SceneGeom.Size
 	}
 	if rc != nil {
-		st.UnContext.DPI = rc.LogicalDPI
+		st.UnitContext.DPI = rc.LogicalDPI
 	} else {
-		st.UnContext.DPI = 160
+		st.UnitContext.DPI = 160
 	}
-	st.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, par.X, par.Y)
+	st.UnitContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, par.X, par.Y)
 	if st.Font.Face == nil || rebuild {
-		st.Font = paint.OpenFont(st.FontRender(), &st.UnContext) // calls SetUnContext after updating metrics
+		st.Font = paint.OpenFont(st.FontRender(), &st.UnitContext) // calls SetUnContext after updating metrics
 	}
 	st.ToDots()
 }

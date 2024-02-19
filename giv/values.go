@@ -1451,7 +1451,7 @@ var FontChooserSize = units.Pt(18)
 func (vv *FontValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	si := 0
 	wb := vv.Widget.AsWidget()
-	FontChooserSize.ToDots(&wb.Styles.UnContext)
+	FontChooserSize.ToDots(&wb.Styles.UnitContext)
 	paint.FontLibrary.OpenAllFonts(int(FontChooserSize.Dots))
 	fi := paint.FontLibrary.FontInfo
 	cur := gi.FontName(laser.ToString(vv.Value.Interface()))
