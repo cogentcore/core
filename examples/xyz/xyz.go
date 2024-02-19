@@ -160,7 +160,7 @@ func main() {
 	// sc.NoNav = true
 
 	// first, add lights, set camera
-	sc.BackgroundColor = colors.FromRGB(230, 230, 255) // sky blue-ish
+	sc.BackgroundColor = colors.Scheme.Select.Container
 	xyz.NewAmbientLight(sc, "ambient", 0.3, xyz.DirectSun)
 
 	dir := xyz.NewDirLight(sc, "dir", 1, xyz.DirectSun)
