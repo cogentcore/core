@@ -260,27 +260,30 @@ type AppearanceSettingsData struct { //gti:add
 	MonoFont FontName `default:"Roboto Mono"`
 }
 
-// OverrideSettingsColor is whether to override the color specified in
-// [AppearanceSettings.Color] with whatever the developer specifies,
-// typically through [colors.SetSchemes].
-// The intended usage is:
-//
-//	gi.OverrideSettingsColor = true
-//	colors.SetSchemes(colors.Green)
-//
-// It is recommended that you do not set this to give the user more control over
-// their experience, but you can if you wish to enforce brand colors.
-//
-// The user preference color will always be overridden if it is the default value
-// of Google Blue (#4285\\f4), so a more recommended option would be to set your
-// own custom scheme but not OverrideSettingsColor, giving you brand colors unless
-// your user explicitly states a preference for a specific color.
-var OverrideSettingsColor = false
+func (as *AppearanceSettingsData) ShouldShow(field string) bool {
+	switch field {
+	case "Color":
+		return !ForceAppColor
+	}
+	return true
+}
+
+// AppColor is the default primary color used to generate the color
+// scheme. The user can still change the primary color used to generate
+// the color scheme through [AppearanceSettingsData.Color] unless
+// [ForceAppColor] is set to true, but this value will always take
+// effect if the settings color is the default value. It defaults to
+// Google Blue (#4285f4).
+var AppColor = color.RGBA{66, 133, 244, 255}
+
+// ForceAppColor is whether to prevent the user from changing the color
+// scheme and make it always based on [AppColor].
+var ForceAppColor bool
 
 func (as *AppearanceSettingsData) Apply() { //gti:add
-	// Google Blue (#4285f4) is the default value and thus indicates no user preference,
-	// which means that we will always override the color, even without OverridePrefsColor
-	if !OverrideSettingsColor && as.Color != (color.RGBA{66, 133, 244, 255}) {
+	if ForceAppColor || (as.Color == color.RGBA{66, 133, 244, 255}) {
+		colors.SetSchemes(AppColor)
+	} else {
 		colors.SetSchemes(as.Color)
 	}
 	switch as.Theme {
