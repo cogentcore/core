@@ -154,8 +154,6 @@ type Style struct { //gti:add
 	MaxBoxShadow []Shadow
 
 	// Color specifies the text / content color, and it is inherited.
-	// Currently, only uniform colors are supported, but more complicated
-	// colors may be supported in the future.
 	Color image.Image
 
 	// Background specifies the background of the element. It is not inherited,
@@ -171,8 +169,6 @@ type Style struct { //gti:add
 
 	// StateColor, if not nil, is the color to use for the StateLayer instead of Color. If you want to disable state layers
 	// for an element, do not use this; instead, set StateLayer to 0.
-	// Currently, only uniform colors are supported, but more complicated
-	// colors may be supported in the future.
 	StateColor image.Image
 
 	// ActualBackground is the computed actual background rendered for the element,
@@ -465,7 +461,8 @@ func (s *Style) ComputeActualBackgroundFor(bg, pabg image.Image) image.Image {
 		return bg
 	}
 
-	// TODO(kai): maybe improve this function to handle all use cases correctly
+	// TODO(kai): maybe improve this function to handle all
+	// use cases correctly (image parents, image state colors, etc)
 
 	upabg := colors.ToUniform(pabg)
 

@@ -7,7 +7,6 @@ package paint
 import (
 	"errors"
 	"image"
-	"image/color"
 
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/styles"
@@ -25,8 +24,8 @@ type Rune struct {
 	// This is exactly what will be drawn, with no further transforms.
 	Face font.Face `json:"-"`
 
-	// color to draw characters in
-	Color color.Color `json:"-"`
+	// Color is the color to draw characters in
+	Color image.Image `json:"-"`
 
 	// background color to fill background of color, for highlighting,
 	// <mark> tag, etc.  Unlike Face, Color, this must be non-nil for every case
@@ -75,7 +74,7 @@ func (rr *Rune) CurFace(curFace font.Face) font.Face {
 }
 
 // CurColor is convenience for updating current color if non-nil
-func (rr *Rune) CurColor(curColor color.Color) color.Color {
+func (rr *Rune) CurColor(curColor image.Image) image.Image {
 	if rr.Color != nil {
 		return rr.Color
 	}

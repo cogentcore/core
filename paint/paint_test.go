@@ -38,7 +38,7 @@ func RunTest(t *testing.T, nm string, width int, height int, f func(pc *Context)
 func TestRender(t *testing.T) {
 	RunTest(t, "render", 300, 300, func(pc *Context) {
 		bs := styles.Border{}
-		bs.Color.Set(colors.Red, colors.Blue, colors.Green, colors.Orange)
+		bs.Color.Set(colors.C(colors.Red), colors.C(colors.Blue), colors.C(colors.Green), colors.C(colors.Orange))
 		bs.Width.Set(units.Dot(20), units.Dot(30), units.Dot(40), units.Dot(50))
 		bs.ToDots(&pc.UnContext)
 
@@ -50,7 +50,7 @@ func TestRender(t *testing.T) {
 		pc.FillStrokeClear() // actually render path that has been setup
 
 		// next draw a rounded rectangle
-		bs.Color.Set(colors.Purple, colors.Green, colors.Red, colors.Blue)
+		bs.Color.Set(colors.C(colors.Purple), colors.C(colors.Green), colors.C(colors.Red), colors.C(colors.Blue))
 		// bs.Width.Set(units.NewDot(10))
 		bs.Radius.Set(units.Dot(0), units.Dot(30), units.Dot(10))
 		pc.FillStyle.Color = colors.C(colors.Lightblue)

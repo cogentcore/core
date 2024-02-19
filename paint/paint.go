@@ -558,11 +558,11 @@ func (pc *Context) DrawPolygonPxToDots(points []mat32.Vec2) {
 // an potentially rounded border box with the given position, size, and border styles.
 func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 	r := bs.Radius.Dots()
-	if styles.SidesAreSame(bs.Style) && styles.SidesAreSame(bs.Color.Sides) && styles.SidesAreSame(bs.Width.Dots().Sides) {
+	if styles.SidesAreSame(bs.Style) && styles.SidesAreSame(bs.Color) && styles.SidesAreSame(bs.Width.Dots().Sides) {
 		// set the color if it is not nil and the stroke style
 		// is not set to the correct color
-		if !colors.IsNil(bs.Color.Top) && bs.Color.Top != colors.ToUniform(pc.StrokeStyle.Color) {
-			pc.StrokeStyle.Color = colors.C(bs.Color.Top)
+		if bs.Color.Top != nil && bs.Color.Top != pc.StrokeStyle.Color {
+			pc.StrokeStyle.Color = bs.Color.Top
 		}
 		pc.StrokeStyle.Width = bs.Width.Top
 		pc.StrokeStyle.ApplyBorderStyle(bs.Style.Top)
@@ -608,8 +608,8 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 	pc.MoveTo(xtli, ytl)
 
 	// set the color if it is not the same as the already set color
-	if colors.C(bs.Color.Top) != pc.StrokeStyle.Color {
-		pc.StrokeStyle.Color = colors.C(bs.Color.Top)
+	if bs.Color.Top != pc.StrokeStyle.Color {
+		pc.StrokeStyle.Color = bs.Color.Top
 	}
 	pc.StrokeStyle.Width = bs.Width.Top
 	pc.LineTo(xtri, ytr)
@@ -623,8 +623,8 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 		pc.MoveTo(xtr, ytri)
 	}
 
-	if colors.C(bs.Color.Right) != pc.StrokeStyle.Color {
-		pc.StrokeStyle.Color = colors.C(bs.Color.Right)
+	if bs.Color.Right != pc.StrokeStyle.Color {
+		pc.StrokeStyle.Color = bs.Color.Right
 	}
 	pc.StrokeStyle.Width = bs.Width.Right
 	pc.LineTo(xbr, ybri)
@@ -637,8 +637,8 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 		pc.MoveTo(xbri, ybr)
 	}
 
-	if colors.C(bs.Color.Bottom) != pc.StrokeStyle.Color {
-		pc.StrokeStyle.Color = colors.C(bs.Color.Bottom)
+	if bs.Color.Bottom != pc.StrokeStyle.Color {
+		pc.StrokeStyle.Color = bs.Color.Bottom
 	}
 	pc.StrokeStyle.Width = bs.Width.Bottom
 	pc.LineTo(xbli, ybl)
@@ -651,8 +651,8 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 		pc.MoveTo(xbl, ybli)
 	}
 
-	if colors.C(bs.Color.Left) != pc.StrokeStyle.Color {
-		pc.StrokeStyle.Color = colors.C(bs.Color.Left)
+	if bs.Color.Left != pc.StrokeStyle.Color {
+		pc.StrokeStyle.Color = bs.Color.Left
 	}
 	pc.StrokeStyle.Width = bs.Width.Left
 	pc.LineTo(xtl, ytli)

@@ -9,7 +9,6 @@ import (
 	"encoding/xml"
 	"html"
 	"image"
-	"image/color"
 	"io"
 	"math"
 	"strings"
@@ -18,6 +17,7 @@ import (
 	"unicode"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -102,7 +102,7 @@ func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 	var overStart mat32.Vec2
 	var overBox mat32.Box2
 	var overFace font.Face
-	var overColor color.Color
+	var overColor image.Image
 
 	for _, sr := range tr.Spans {
 		if sr.IsValid() != nil {
@@ -111,7 +111,7 @@ func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 
 		curFace := sr.Render[0].Face
 		curColor := sr.Render[0].Color
-		curColor = colors.ApplyOpacity(curColor, pc.FontStyle.Opacity)
+		curColor = gradient.ApplyOpacityImage(curColor, pc.FontStyle.Opacity)
 		tpos := pos.Add(sr.RelPos)
 
 		if !overBoxSet {
@@ -127,7 +127,7 @@ func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 
 		d := &font.Drawer{
 			Dst:  pc.Image,
-			Src:  image.NewUniform(curColor),
+			Src:  curColor,
 			Face: curFace,
 		}
 
@@ -147,8 +147,8 @@ func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 			rr := &(sr.Render[i])
 			if rr.Color != nil {
 				curColor := rr.Color
-				curColor = colors.ApplyOpacity(curColor, pc.FontStyle.Opacity)
-				d.Src = image.NewUniform(curColor)
+				curColor = gradient.ApplyOpacityImage(curColor, pc.FontStyle.Opacity)
+				d.Src = curColor
 			}
 			curFace = rr.CurFace(curFace)
 			if !unicode.IsPrint(r) {
@@ -233,7 +233,7 @@ func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 	if hadOverflow && !rendOverflow && overBoxSet {
 		d := &font.Drawer{
 			Dst:  pc.Image,
-			Src:  image.NewUniform(overColor),
+			Src:  overColor,
 			Face: overFace,
 			Dot:  overStart.Fixed(),
 		}
@@ -467,7 +467,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles
 			if !SetHTMLSimpleTag(nm, &fs, ctxt, cssAgg) {
 				switch nm {
 				case "a":
-					fs.Color = colors.Scheme.Primary.Base
+					fs.Color = colors.C(colors.Scheme.Primary.Base)
 					fs.SetDecoration(styles.Underline)
 					curLinkIdx = len(tr.Links)
 					tl := &TextLink{StartSpan: len(tr.Spans) - 1, StartIdx: len(curSp.Text)}
@@ -679,7 +679,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 				if !SetHTMLSimpleTag(stag, &fs, ctxt, cssAgg) {
 					switch stag {
 					case "a":
-						fs.Color = colors.Scheme.Primary.Base
+						fs.Color = colors.C(colors.Scheme.Primary.Base)
 						fs.SetDecoration(styles.Underline)
 						curLinkIdx = len(tr.Links)
 						tl := &TextLink{StartSpan: len(tr.Spans) - 1, StartIdx: len(curSp.Text)}

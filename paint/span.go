@@ -8,11 +8,9 @@ import (
 	"errors"
 	"fmt"
 	"image"
-	"image/color"
 	"sync"
 	"unicode"
 
-	"cogentcore.org/core/colors"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -154,7 +152,7 @@ func (sr *Span) SetNewPara() {
 }
 
 // AppendRune adds one rune and associated formatting info
-func (sr *Span) AppendRune(r rune, face font.Face, clr color.Color, bg image.Image, deco styles.TextDecorations) {
+func (sr *Span) AppendRune(r rune, face font.Face, clr image.Image, bg image.Image, deco styles.TextDecorations) {
 	sr.Text = append(sr.Text, r)
 	rr := Rune{Face: face, Color: clr, BackgroundColor: bg, Deco: deco}
 	sr.Render = append(sr.Render, rr)
@@ -163,7 +161,7 @@ func (sr *Span) AppendRune(r rune, face font.Face, clr color.Color, bg image.Ima
 
 // AppendString adds string and associated formatting info, optimized with
 // only first rune having non-nil face and color settings
-func (sr *Span) AppendString(str string, face font.Face, clr color.Color, bg image.Image, deco styles.TextDecorations, sty *styles.FontRender, ctxt *units.Context) {
+func (sr *Span) AppendString(str string, face font.Face, clr image.Image, bg image.Image, deco styles.TextDecorations, sty *styles.FontRender, ctxt *units.Context) {
 	if len(str) == 0 {
 		return
 	}
@@ -213,7 +211,7 @@ func (sr *Span) AppendString(str string, face font.Face, clr color.Color, bg ima
 }
 
 // SetRenders sets rendering parameters based on style
-func (sr *Span) SetRenders(sty *styles.FontRender, ctxt *units.Context, noBG bool, rot, scalex float32) {
+func (sr *Span) SetRenders(sty *styles.FontRender, uc *units.Context, noBG bool, rot, scalex float32) {
 	sz := len(sr.Text)
 	if sz == 0 {
 		return
@@ -224,7 +222,7 @@ func (sr *Span) SetRenders(sty *styles.FontRender, ctxt *units.Context, noBG boo
 	ucfont := &styles.FontRender{}
 	ucfont.Family = "Arial Unicode"
 	ucfont.Size = sty.Size
-	ucfont.Font = OpenFont(ucfont, ctxt)
+	ucfont.Font = OpenFont(ucfont, uc)
 
 	sr.HasDecoUpdate(bgc, sty.Decoration)
 	sr.Render = make([]Rune, sz)
@@ -654,7 +652,7 @@ func (sr *Span) SplitAtLR(idx int) *Span {
 }
 
 // LastFont finds the last font and color from given span
-func (sr *Span) LastFont() (face font.Face, color color.Color) {
+func (sr *Span) LastFont() (face font.Face, color image.Image) {
 	for i := len(sr.Render) - 1; i >= 0; i-- {
 		srr := sr.Render[i]
 		if face == nil && srr.Face != nil {
@@ -760,7 +758,7 @@ func (sr *Span) RenderUnderline(pc *Context, tpos mat32.Vec2) {
 		dw := .05 * rr.Size.Y
 		if !didLast {
 			pc.StrokeStyle.Width.Dots = dw
-			pc.StrokeStyle.Color = colors.C(curColor)
+			pc.StrokeStyle.Color = curColor
 		}
 		if rr.Deco.HasFlag(styles.DecoDottedUnderline) {
 			pc.StrokeStyle.Dashes = []float32{2, 2}
@@ -825,7 +823,7 @@ func (sr *Span) RenderLine(pc *Context, tpos mat32.Vec2, deco styles.TextDecorat
 		dw := 0.05 * rr.Size.Y
 		if !didLast {
 			pc.StrokeStyle.Width.Dots = dw
-			pc.StrokeStyle.Color = colors.C(curColor)
+			pc.StrokeStyle.Color = curColor
 		}
 		yo := ascPct * asc32
 		sp := rp.Add(tx.MulVec2AsVec(mat32.V2(0, -yo)))
