@@ -111,7 +111,11 @@ func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 
 		curFace := sr.Render[0].Face
 		curColor := sr.Render[0].Color
-		curColor = gradient.ApplyOpacityImage(curColor, pc.FontStyle.Opacity)
+		if g, ok := curColor.(gradient.Gradient); ok {
+			g.Update(pc.FontStyle.Opacity, mat32.B2FromRect(pc.LastRenderBBox), pc.CurTransform)
+		} else {
+			curColor = gradient.ApplyOpacityImage(curColor, pc.FontStyle.Opacity)
+		}
 		tpos := pos.Add(sr.RelPos)
 
 		if !overBoxSet {

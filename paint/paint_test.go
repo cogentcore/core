@@ -45,7 +45,7 @@ func TestRender(t *testing.T) {
 		imgs := []image.Image{
 			colors.C(colors.Blue),
 			gradient.NewLinear().AddStop(colors.Orange, 0).AddStop(colors.Red, 1).SetTransform(mat32.Rotate2D(90)),
-			gradient.NewRadial().AddStop(colors.Green, 0.2).AddStop(colors.Blue, 0.6, 0.4).AddStop(colors.Purple, 0.9, 0.8),
+			gradient.NewRadial().AddStop(colors.Green, 0).AddStop(colors.Blue, 0.6, 0.4).AddStop(colors.Purple, 0.9, 0.8),
 			testimg,
 		}
 
@@ -76,7 +76,8 @@ func TestRender(t *testing.T) {
 		tsty.Defaults()
 		fsty := &styles.FontRender{}
 		fsty.Defaults()
-		fsty.Color = imgs[2]
+		fsty.Color = imgs[1]
+		fsty.Background = imgs[2]
 
 		tsty.Align = styles.Center
 
