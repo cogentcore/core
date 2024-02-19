@@ -205,6 +205,7 @@ func (tf *TextField) SetStyles() {
 		tf.PlaceholderColor = colors.Scheme.OnSurfaceVariant
 		tf.CursorColor = colors.C(colors.Scheme.Primary.Base)
 
+		s.VirtualKeyboard = styles.SingleLineKeyboard
 		if !tf.IsReadOnly() {
 			s.Cursor = cursors.Text
 		}
@@ -1699,21 +1700,15 @@ func (tf *TextField) HandleKeyEvents() {
 	})
 	tf.OnFocus(func(e events.Event) {
 		if tf.IsReadOnly() {
-			return
-		}
-		if tf.AbilityIs(abilities.Focusable) {
-			tf.ScrollToMe()
-			tf.SetState(true, states.Focused)
+			e.SetHandled()
 		}
 	})
 	tf.OnFocusLost(func(e events.Event) {
 		if tf.IsReadOnly() {
+			e.SetHandled()
 			return
 		}
-		if tf.AbilityIs(abilities.Focusable) {
-			tf.EditDone()
-			tf.SetState(false, states.Focused)
-		}
+		tf.EditDone()
 	})
 }
 

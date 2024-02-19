@@ -166,6 +166,7 @@ type App interface {
 
 	// ShowVirtualKeyboard shows a virtual keyboard of the given type.
 	// ShowVirtualKeyboard only has an effect on mobile platforms (iOS, Android, and Web).
+	// It should not be called with [styles.NoKeyboard].
 	ShowVirtualKeyboard(typ styles.VirtualKeyboards)
 
 	// HideVirtualKeyboard hides the virtual keyboard.

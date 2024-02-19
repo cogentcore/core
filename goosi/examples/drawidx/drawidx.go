@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/goosi"
 	_ "cogentcore.org/core/goosi/driver"
 	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/vgpu"
 )
 
@@ -200,7 +201,7 @@ func main() {
 				if haveKeyboard {
 					goosi.TheApp.HideVirtualKeyboard()
 				} else {
-					goosi.TheApp.ShowVirtualKeyboard(goosi.DefaultKeyboard)
+					goosi.TheApp.ShowVirtualKeyboard(styles.DefaultKeyboard)
 				}
 				haveKeyboard = !haveKeyboard
 			}

@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/states"
+	"cogentcore.org/core/styles"
 )
 
 // EventMgr returns the higher-level gi event manager
@@ -453,11 +454,17 @@ func (wb *WidgetBase) HandleWidgetStateFromFocus() {
 		if wb.AbilityIs(abilities.Focusable) {
 			wb.ScrollToMe()
 			wb.SetState(true, states.Focused)
+			if wb.Styles.VirtualKeyboard != styles.NoKeyboard {
+				TheApp.ShowVirtualKeyboard(wb.Styles.VirtualKeyboard)
+			}
 		}
 	})
 	wb.OnFocusLost(func(e events.Event) {
 		if wb.AbilityIs(abilities.Focusable) {
 			wb.SetState(false, states.Focused)
+			if wb.Styles.VirtualKeyboard != styles.NoKeyboard {
+				TheApp.HideVirtualKeyboard()
+			}
 		}
 	})
 }
