@@ -101,31 +101,26 @@ func TestOverflowAutoDefinedMax(t *testing.T) {
 
 // For https://github.com/cogentcore/core/issues/615
 func TestRenderNestedScroll(t *testing.T) {
-	// TODO(#808)
 	b := NewBody()
 	b.Style(func(s *styles.Style) {
 		s.Max.Set(units.Dp(300))
-	})
-	f0 := NewFrame(b).Style(func(s *styles.Style) {
 		s.Background = colors.C(colors.Orange)
 		s.Overflow.Set(styles.OverflowAuto)
+		s.Direction = styles.Row
 	})
-	f1 := NewFrame(f0).Style(func(s *styles.Style) {
+	fr := NewFrame(b).Style(func(s *styles.Style) {
 		s.Background = colors.C(colors.Blue)
 		s.Min.Set(units.Dp(200))
 		s.Max.Set(units.Dp(200))
-	})
-	f2 := NewFrame(f1).Style(func(s *styles.Style) {
-		s.Background = colors.C(colors.Green)
 		s.Overflow.Set(styles.OverflowAuto)
 	})
-	NewFrame(f2).Style(func(s *styles.Style) {
+	NewFrame(fr).Style(func(s *styles.Style) {
 		s.Background = colors.C(colors.Red)
 		s.Min.Set(units.Dp(400))
 	})
-	NewFrame(f0).Style(func(s *styles.Style) {
+	NewFrame(b).Style(func(s *styles.Style) {
 		s.Background = colors.C(colors.Purple)
-		s.Min.Set(units.Dp(200))
+		s.Min.Set(units.Dp(300))
 	})
 	b.AssertRender(t, "render/nested-scroll")
 }
