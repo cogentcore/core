@@ -123,13 +123,19 @@ func StdAppBarBack(tb *Toolbar) *Button {
 	// 	s.SetState(tb.Scene.Stage.MainMgr.Stack.Len() <= 1 && len(AllRenderWins) <= 1, states.Disabled)
 	// })
 	bt.OnClick(func(e events.Event) {
-		if tb.Scene.Stage.MainMgr.Stack.Len() > 1 {
-			tb.Scene.Close()
+		if slen := tb.Scene.Stage.MainMgr.Stack.Len(); slen > 1 {
+			if tb.Scene.Stage.CloseOnBack {
+				tb.Scene.Close()
+			} else {
+				tb.Scene.Stage.MainMgr.Stack.ValueByIndex(slen - 2).Raise()
+			}
 			return
 		}
-		if len(AllRenderWins) > 1 {
-			CurRenderWin.CloseReq()
-			AllRenderWins[len(AllRenderWins)-1].Raise()
+		if wlen := len(AllRenderWins); wlen > 1 {
+			if tb.Scene.Stage.CloseOnBack {
+				CurRenderWin.CloseReq()
+			}
+			AllRenderWins[wlen-2].Raise()
 		}
 	})
 	return bt
