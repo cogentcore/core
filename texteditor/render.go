@@ -462,8 +462,8 @@ func (ed *Editor) RenderLineNo(ln int, defFill bool) {
 	lnstr := fmt.Sprintf(lfmt, ln+1)
 
 	uActClr := colors.ToUniform(actClr)
-	if hct.ContrastRatio(uActClr, fst.Color) < hct.ContrastAA {
-		fst.Color = hct.ContrastColor(uActClr, hct.ContrastAA)
+	if hct.ContrastRatio(uActClr, colors.ToUniform(fst.Color)) < hct.ContrastAA {
+		fst.Color = colors.C(hct.ContrastColor(uActClr, hct.ContrastAA))
 	}
 	ed.LineNoRender.SetString(lnstr, fst, &sty.UnitContext, &sty.Text, true, 0, 0)
 	pos := mat32.Vec2{

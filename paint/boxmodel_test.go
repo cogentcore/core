@@ -19,11 +19,11 @@ func TestBoxModel(t *testing.T) {
 	RunTest(t, "boxmodel", 300, 300, func(pc *Context) {
 		pabg := colors.C(colors.White)
 		s := styles.NewStyle()
-		s.Color = colors.Black
+		s.Color = colors.C(colors.Black)
 		s.Background = colors.C(colors.Lightblue)
 		s.Border.Style.Set(styles.BorderSolid)
 		s.Border.Width.Set(units.Dp(5))
-		s.Border.Color.Set(colors.Red)
+		s.Border.Color.Set(colors.C(colors.Red))
 		s.Border.Radius = styles.BorderRadiusFull
 		s.ComputeActualBackground(pabg)
 		s.ToDots()
@@ -37,11 +37,11 @@ func TestBoxShadow(t *testing.T) {
 	RunTest(t, "boxshadow", 300, 300, func(pc *Context) {
 		pabg := colors.C(colors.White)
 		s := styles.NewStyle()
-		s.Color = colors.Black
+		s.Color = colors.C(colors.Black)
 		s.Background = colors.C(colors.Lightblue)
 		s.Border.Style.Set(styles.BorderSolid)
 		s.Border.Width.Set(units.Dp(0))
-		s.Border.Color.Set(colors.Red)
+		s.Border.Color.Set(colors.C(colors.Red))
 		s.Border.Radius = styles.BorderRadiusFull
 		s.BoxShadow = styles.BoxShadow1()
 		s.ComputeActualBackground(pabg)
@@ -89,7 +89,7 @@ func TestBorderStyle(t *testing.T) {
 			s.Background = colors.C(colors.Lightgray)
 			s.Border.Style.Set(typ)
 			s.Border.Width.Set(units.Dp(10))
-			s.Border.Color.Set(colors.Blue)
+			s.Border.Color.Set(colors.C(colors.Blue))
 			s.Border.Radius.Set(units.Dp(50))
 			s.ToDots()
 

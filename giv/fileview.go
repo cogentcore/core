@@ -17,6 +17,7 @@ import (
 	"unicode"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fi"
@@ -372,15 +373,15 @@ func (fv *FileView) ConfigFilesRow() {
 	fsv.SetSlice(&fv.Files)
 	fsv.StyleFunc = func(w gi.Widget, s *styles.Style, row, col int) {
 		if clr, got := FileViewKindColorMap[fv.Files[row].Kind]; got {
-			s.Color = grr.Log1(colors.FromName(clr))
+			s.Color = grr.Log1(gradient.FromString(clr))
 			return
 		}
 		fn := fv.Files[row].Name
 		ext := strings.ToLower(filepath.Ext(fn))
 		if _, has := fv.ExtMap[ext]; has {
-			s.Color = colors.Scheme.Primary.Base
+			s.Color = colors.C(colors.Scheme.Primary.Base)
 		} else {
-			s.Color = colors.Scheme.OnSurface
+			s.Color = colors.C(colors.Scheme.OnSurface)
 		}
 	}
 

@@ -74,7 +74,7 @@ func TestEdgeBlurFactors(t *testing.T) {
 func RunShadowBlur(t *testing.T, imgName string, shadow styles.Shadow) {
 	RunTest(t, imgName, 300, 300, func(pc *Context) {
 		st := styles.NewStyle()
-		st.Color = colors.Black
+		st.Color = colors.C(colors.Black)
 		st.Border.Width.Set(units.Dp(0))
 		st.Border.Radius = styles.BorderRadiusFull
 		st.BoxShadow = []styles.Shadow{shadow}
@@ -90,40 +90,40 @@ func TestShadowBlur(t *testing.T) {
 
 	// fmt.Println("0.12", cie.SRGBToLinearComp(0.12)) // 0.013 -- too low
 
-	RunShadowBlur(t, "shadow5big_op1", styles.Shadow{
+	RunShadowBlur(t, "shadow5big-op1", styles.Shadow{
 		OffsetX: units.Zero(),
 		OffsetY: units.Dp(6),
 		Blur:    units.Dp(30),
 		Spread:  units.Dp(5),
-		Color:   colors.WithAF32(colors.Scheme.Shadow, 1), // opacity 1 to see clearly
+		Color:   colors.C(colors.WithAF32(colors.Scheme.Shadow, 1)), // opacity 1 to see clearly
 	})
-	RunShadowBlur(t, "shadow5big_op12", styles.Shadow{
+	RunShadowBlur(t, "shadow5big-op12", styles.Shadow{
 		OffsetX: units.Zero(),
 		OffsetY: units.Dp(6),
 		Blur:    units.Dp(30),
 		Spread:  units.Dp(5),
-		Color:   colors.WithAF32(colors.Scheme.Shadow, 0.12), // actual
+		Color:   colors.C(colors.WithAF32(colors.Scheme.Shadow, 0.12)), // actual
 	})
-	RunShadowBlur(t, "shadow5big_op1off36", styles.Shadow{
+	RunShadowBlur(t, "shadow5big-op1off36", styles.Shadow{
 		OffsetX: units.Zero(),
 		OffsetY: units.Dp(36),
 		Blur:    units.Dp(30),
 		Spread:  units.Dp(5),
-		Color:   colors.WithAF32(colors.Scheme.Shadow, 1), // opacity 1 to see clearly
+		Color:   colors.C(colors.WithAF32(colors.Scheme.Shadow, 1)), // opacity 1 to see clearly
 	})
 
-	RunShadowBlur(t, "shadow1sm_op1", styles.Shadow{
+	RunShadowBlur(t, "shadow1sm-op1", styles.Shadow{
 		OffsetX: units.Zero(),
 		OffsetY: units.Dp(3),
 		Blur:    units.Dp(1),
 		Spread:  units.Dp(-2),
-		Color:   colors.WithAF32(colors.Scheme.Shadow, 1),
+		Color:   colors.C(colors.WithAF32(colors.Scheme.Shadow, 1)),
 	})
-	RunShadowBlur(t, "shadow1sm_op12", styles.Shadow{
+	RunShadowBlur(t, "shadow1sm-op12", styles.Shadow{
 		OffsetX: units.Zero(),
 		OffsetY: units.Dp(3),
 		Blur:    units.Dp(1),
 		Spread:  units.Dp(-2),
-		Color:   colors.WithAF32(colors.Scheme.Shadow, 0.12),
+		Color:   colors.C(colors.WithAF32(colors.Scheme.Shadow, 0.12)),
 	})
 }

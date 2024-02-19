@@ -7,7 +7,6 @@ package svg
 import (
 	"image"
 
-	"cogentcore.org/core/colors"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
@@ -180,7 +179,7 @@ func (g *Text) RenderText(sv *SVG) {
 	}
 	pc.FontStyle.Font = paint.OpenFont(&pc.FontStyle, &pc.UnContext) // use original size font
 	if pc.FillStyle.Color != nil {
-		pc.FontStyle.Color = colors.ToUniform(pc.FillStyle.Color)
+		pc.FontStyle.Color = pc.FillStyle.Color
 	}
 	g.TextRender.SetString(g.Text, &pc.FontStyle, &pc.UnContext, &pc.TextStyle, true, rot, scalex)
 	pc.FontStyle.Size = units.Value{Val: orgsz.Val * scy, Un: orgsz.Un, Dots: orgsz.Dots * scy} // rescale by y

@@ -7,7 +7,7 @@ package paint
 import (
 	"image"
 
-	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/styles"
 )
@@ -55,12 +55,9 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 		for i := len(st.BoxShadow) - 1; i >= 0; i-- {
 			shadow := st.BoxShadow[i]
 			pc.StrokeStyle.Color = nil
-			// note: diving by 2 here does a reasonable job of matching
+			// note: applying 0.5 here does a reasonable job of matching
 			// material design shadows, at their specified alpha levels.
-			// This does not modify the value of the original shadow
-			// because it is not a pointer.
-			shadow.Color.A /= 2
-			pc.FillStyle.Color = colors.C(shadow.Color)
+			pc.FillStyle.Color = gradient.ApplyOpacityImage(shadow.Color, 0.5)
 			spos := shadow.BasePos(mpos)
 			ssz := shadow.BaseSize(msz)
 

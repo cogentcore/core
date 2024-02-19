@@ -77,12 +77,12 @@ func (mv *MapView) SetStyles() {
 		if w.Parent().Name() == "map-grid" {
 			if strings.HasPrefix(w.Name(), "del-") {
 				delbt := w.(*gi.Button)
+				delbt.SetType(gi.ButtonAction)
 				delbt.OnClick(func(e events.Event) {
 					mv.MapDelete(delbt.Prop("value").(Value).Val())
 				})
 				delbt.Style(func(s *styles.Style) {
-					delbt.SetType(gi.ButtonAction)
-					s.Color = colors.Scheme.Error.Base
+					s.Color = colors.C(colors.Scheme.Error.Base)
 				})
 			}
 		}

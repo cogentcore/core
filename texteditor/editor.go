@@ -234,7 +234,7 @@ func (ed *Editor) SetStyles() {
 		s.Align.Items = styles.Start
 		s.Text.Align = styles.Start
 		s.Text.TabSize = gi.SystemSettings.Editor.TabSize
-		s.Color = colors.Scheme.OnSurface
+		s.Color = colors.C(colors.Scheme.OnSurface)
 
 		if s.State.Is(states.Focused) {
 			s.Background = colors.C(colors.Scheme.Surface)

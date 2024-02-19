@@ -207,7 +207,7 @@ func (dv *DateView) ConfigWidget() {
 
 	arrowStyle := func(s *styles.Style) {
 		s.Padding.SetHoriz(units.Dp(12))
-		s.Color = colors.Scheme.OnSurfaceVariant
+		s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 	}
 
 	gi.NewButton(trow).SetType(gi.ButtonAction).SetIcon(icons.NavigateBefore).OnClick(func(e events.Event) {
@@ -296,16 +296,16 @@ func (dv *DateView) ConfigDateGrid() {
 			s.Min.Y.Dp(32)
 			s.Padding.Set(units.Dp(6))
 			if dt.Month() != som.Month() {
-				s.Color = colors.Scheme.OnSurfaceVariant
+				s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 			}
 			if dt.Year() == time.Now().Year() && dt.YearDay() == time.Now().YearDay() {
 				s.Border.Width.Set(units.Dp(1))
-				s.Border.Color.Set(colors.Scheme.Primary.Base)
-				s.Color = colors.Scheme.Primary.Base
+				s.Border.Color.Set(colors.C(colors.Scheme.Primary.Base))
+				s.Color = colors.C(colors.Scheme.Primary.Base)
 			}
 			if dt.Year() == dv.Time.Year() && dt.YearDay() == dv.Time.YearDay() {
 				s.Background = colors.C(colors.Scheme.Primary.Base)
-				s.Color = colors.Scheme.Primary.On
+				s.Color = colors.C(colors.Scheme.Primary.On)
 			}
 		})
 		bt.OnWidgetAdded(func(w gi.Widget) {

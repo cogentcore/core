@@ -105,7 +105,6 @@ func (sv *SVG) Config(width, height int) {
 	sz := image.Point{width, height}
 	sv.Geom.Size = sz
 	sv.Scale = 1
-	sv.Background = colors.C(colors.White)
 	sv.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
 	sv.RenderState.Init(width, height, sv.Pixels)
 	sv.Root.InitName(&sv.Root, "svg")

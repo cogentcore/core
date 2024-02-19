@@ -609,7 +609,7 @@ func (vv *ColorValue) ConfigWidget(w gi.Widget) {
 		// so that it can be seen
 		dclr := colors.WithAF32(clr, 1)
 		s.Background = colors.C(dclr)
-		s.Color = colors.AsRGBA(hct.ContrastColor(dclr, hct.ContrastAAA))
+		s.Color = colors.C(hct.ContrastColor(dclr, hct.ContrastAAA))
 	})
 	bt.Config()
 	vv.UpdateWidget()

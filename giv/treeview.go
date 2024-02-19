@@ -243,7 +243,7 @@ func (tv *TreeView) SetStyles() {
 			// render handles manually, similar to with actStateLayer
 			s.Background = nil
 		} else {
-			s.Color = colors.Scheme.OnSurface
+			s.Color = colors.C(colors.Scheme.OnSurface)
 		}
 	})
 	tv.OnWidgetAdded(func(w gi.Widget) {
@@ -371,7 +371,7 @@ func (tv *TreeView) SetStyles() {
 				s.SetAbilities(false, abilities.Focusable)
 				// parent will handle our cursor
 				s.Cursor = cursors.None
-				s.Color = colors.Scheme.Primary.Base
+				s.Color = colors.C(colors.Scheme.Primary.Base)
 				s.Margin.Zero()
 				s.Padding.Zero()
 				s.Min.X.Em(0.8)

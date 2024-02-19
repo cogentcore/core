@@ -45,7 +45,7 @@ func (is *Inspector) OnInit() {
 
 func (is *Inspector) SetStyles() {
 	is.Style(func(s *styles.Style) {
-		s.Color = colors.Scheme.OnBackground
+		s.Color = colors.C(colors.Scheme.OnBackground)
 		s.Grow.Set(1, 1)
 		s.Margin.Set(units.Dp(8))
 	})
