@@ -413,16 +413,21 @@ func SetFromDefaultTags(obj any) error {
 			SetFromDefaultTags(PtrValue(fv).Interface())
 			continue
 		}
-		def = FormatDefault(def)
-		if def == "" {
-			continue
-		}
-		err := SetRobust(PtrValue(fv).Interface(), def) // overkill but whatever
+		err := SetFromDefaultTag(fv, def)
 		if err != nil {
 			return fmt.Errorf("laser.SetFromDefaultTags: error setting field %q in object of type %q from val %q: %w", f.Name, typ.Name(), def, err)
 		}
 	}
 	return nil
+}
+
+// SetFromDefaultTag sets the given value from the given default tag.
+func SetFromDefaultTag(v reflect.Value, def string) error {
+	def = FormatDefault(def)
+	if def == "" {
+		return nil
+	}
+	return SetRobust(PtrValue(v).Interface(), def)
 }
 
 // NonDefaultFields returns a map representing all of the fields of the given
