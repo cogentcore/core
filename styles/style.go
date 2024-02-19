@@ -235,17 +235,21 @@ const (
 	// KeyboardNone indicates to display no virtual keyboard.
 	KeyboardNone VirtualKeyboards = iota
 
-	// KeyboardMultiLine indicates to display a virtual keyboard
-	// with a default input style and a "Return" return key.
-	KeyboardMultiLine
-
 	// KeyboardSingleLine indicates to display a virtual keyboard
 	// with a default input style and a "Done" return key.
 	KeyboardSingleLine
 
+	// KeyboardMultiLine indicates to display a virtual keyboard
+	// with a default input style and a "Return" return key.
+	KeyboardMultiLine
+
 	// KeyboardNumber indicates to display a virtual keyboard
 	// for inputting a number.
 	KeyboardNumber
+
+	// KeyboardPassword indicates to display a virtual keyboard
+	// for inputting a password.
+	KeyboardPassword
 
 	// KeyboardEmail indicates to display a virtual keyboard
 	// for inputting an email address.

@@ -310,7 +310,7 @@ func (a *App) MainLoop() {
 func (a *App) ShowVirtualKeyboard(typ styles.VirtualKeyboards) {
 	err := mobileinit.RunOnJVM(func(vm, jniEnv, ctx uintptr) error {
 		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
-		C.showKeyboard(env, C.int(int32(typ-1)))
+		C.showKeyboard(env, C.int(int32(typ)))
 		return nil
 	})
 	if err != nil {

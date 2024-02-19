@@ -411,20 +411,23 @@ func (tf *TextField) AddClearButton() *TextField {
 }
 
 // SetTypePassword enables [TextField.NoEcho] and adds a trailing
-// icon button at the end of the textfield that toggles [TextField.NoEcho]
+// icon button at the end of the textfield that toggles [TextField.NoEcho].
+// It also sets [styles.Style.VirtualKeyboard] to [styles.KeyboardPassword].
 func (tf *TextField) SetTypePassword() *TextField {
-	return tf.SetNoEcho(true).
-		SetTrailingIcon(icons.Visibility, func(e events.Event) {
-			tf.NoEcho = !tf.NoEcho
-			if tf.NoEcho {
-				tf.TrailingIcon = icons.Visibility
-			} else {
-				tf.TrailingIcon = icons.VisibilityOff
-			}
-			if icon := tf.TrailingIconButton(); icon != nil {
-				icon.SetIconUpdate(tf.TrailingIcon)
-			}
-		})
+	tf.SetNoEcho(true).SetTrailingIcon(icons.Visibility, func(e events.Event) {
+		tf.NoEcho = !tf.NoEcho
+		if tf.NoEcho {
+			tf.TrailingIcon = icons.Visibility
+		} else {
+			tf.TrailingIcon = icons.VisibilityOff
+		}
+		if icon := tf.TrailingIconButton(); icon != nil {
+			icon.SetIconUpdate(tf.TrailingIcon)
+		}
+	}).Style(func(s *styles.Style) {
+		s.VirtualKeyboard = styles.KeyboardPassword
+	})
+	return tf
 }
 
 // EditDone completes editing and copies the active edited text to the text --

@@ -8,8 +8,8 @@
 // license that can be found in the LICENSE file.
 
 // VERY IMPORTANT: after making any changes to this file, you need
-// to run gsm gendex in your base goki directory, or run go generate
-// in github.com/cogentcore/core/mobile and reinstall the goki tool.
+// to run go generate in github.com/cogentcore/core/mobile and reinstall
+// the core tool.
 
 package org.golang.app;
 
@@ -45,15 +45,8 @@ import android.widget.TextView.OnEditorActionListener;
 
 public class GoNativeActivity extends NativeActivity {
 	private static GoNativeActivity goNativeActivity;
-	private static final int FILE_OPEN_CODE = 1;
-	private static final int FILE_SAVE_CODE = 2;
 
 	private static final int DEFAULT_INPUT_TYPE = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
-
-	private static final int DEFAULT_KEYBOARD_CODE = 0;
-	private static final int SINGLELINE_KEYBOARD_CODE = 1;
-	private static final int NUMBER_KEYBOARD_CODE = 2;
-	private static final int PASSWORD_KEYBOARD_CODE = 3;
 
 	private native void insetsChanged(int top, int bottom, int left, int right);
 
@@ -104,22 +97,29 @@ public class GoNativeActivity extends NativeActivity {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				int imeOptions = EditorInfo.IME_FLAG_NO_ENTER_ACTION;
+				int imeOptions = EditorInfo.IME_ACTION_DONE;
 				int inputType = DEFAULT_INPUT_TYPE;
 				switch (keyboardType) {
-					case DEFAULT_KEYBOARD_CODE:
+					case 1:
+						break;
+					case 2:
 						imeOptions = EditorInfo.IME_FLAG_NO_ENTER_ACTION;
 						break;
-					case SINGLELINE_KEYBOARD_CODE:
-						imeOptions = EditorInfo.IME_ACTION_DONE;
-						break;
-					case NUMBER_KEYBOARD_CODE:
-						imeOptions = EditorInfo.IME_ACTION_DONE;
+					case 3:
 						inputType |= InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_NORMAL;
 						break;
-					case PASSWORD_KEYBOARD_CODE:
-						imeOptions = EditorInfo.IME_ACTION_DONE;
+					case 4:
 						inputType |= InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD;
+						break;
+					case 5:
+						inputType |= InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS;
+						break;
+					case 6:
+						inputType |= InputType.TYPE_CLASS_PHONE;
+						break;
+					case 7:
+						inputType |= InputType.TYPE_TEXT_VARIATION_URI;
+						break;
 					default:
 						Log.e("Go", "unknown keyboard type, use default");
 				}

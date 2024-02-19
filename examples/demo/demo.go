@@ -193,8 +193,6 @@ func inputs(ts *gi.Tabs) {
 		s.VirtualKeyboard = styles.KeyboardURL
 	})
 	gi.NewTextField(tab).AddClearButton().SetLeadingIcon(icons.Search)
-	gi.NewTextField(tab).SetType(gi.TextFieldOutlined).AddClearButton().SetLeadingIcon(icons.Search)
-	gi.NewTextField(tab).SetTypePassword().SetPlaceholder("Password")
 	gi.NewTextField(tab).SetType(gi.TextFieldOutlined).SetTypePassword().SetPlaceholder("Password")
 	gi.NewTextField(tab).SetText("Multiline textfield with a relatively long initial text").
 		Style(func(s *styles.Style) {
