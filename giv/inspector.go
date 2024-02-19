@@ -348,7 +348,7 @@ func InspectorWindow(k ki.Ki) {
 // InspectorView configures the given body to have an interactive inspector
 // of the given Ki tree.
 func InspectorView(b *gi.Body, k ki.Ki) {
-	b.SetTitle("Inspector").SetName("inspector")
+	b.SetTitle("Inspector").SetData(k).SetName("inspector")
 	if k != nil {
 		b.Nm += "-" + k.Name()
 		b.Title += " of " + k.Name()

@@ -30,10 +30,10 @@ func SettingsViewToolbarBase(tb *gi.Toolbar) {
 
 // SettingsWindow makes and runs a new window for viewing user settings.
 func SettingsWindow() {
-	if gi.ActivateExistingMainWindow(gi.AllSettings) {
+	if gi.ActivateExistingMainWindow(&gi.AllSettings) {
 		return
 	}
-	d := gi.NewBody("settings").SetTitle("Settings").SetData(gi.AllSettings)
+	d := gi.NewBody("settings").SetTitle("Settings").SetData(&gi.AllSettings)
 	SettingsView(d)
 	d.NewWindow().Run()
 }

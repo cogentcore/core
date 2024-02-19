@@ -75,14 +75,13 @@ func View(st *Styles) {
 		return
 	}
 
-	d := gi.NewBody("hi-styles")
+	d := gi.NewBody("hi-styles").SetData(st)
 	d.AddTitle("Highlighting Styles: use ViewStd to see builtin ones -- can add and customize -- save ones from standard and load into custom to modify standards.")
 	mv := giv.NewMapView(d).SetMap(st)
 	StylesChanged = false
 	mv.OnChange(func(e events.Event) {
 		StylesChanged = true
 	})
-	d.Scene.Data = st // todo: still needed?
 	d.AddAppBar(func(tb *gi.Toolbar) {
 		oj := giv.NewFuncButton(tb, st.OpenJSON).SetText("Open from file").SetIcon(icons.Open)
 		oj.Args[0].SetTag(".ext", ".histy")

@@ -19,7 +19,7 @@ func KeyMapsView(km *keyfun.Maps) {
 	if gi.ActivateExistingMainWindow(km) {
 		return
 	}
-	d := gi.NewBody("gogi-key-maps")
+	d := gi.NewBody("gogi-key-maps").SetData(km)
 	d.AddTitle("Available Key Maps: Duplicate an existing map (using Ctxt Menu) as starting point for creating a custom map")
 	tv := NewTableView(d).SetSlice(km)
 	keyfun.AvailMapsChanged = false
