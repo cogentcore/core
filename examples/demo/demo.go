@@ -182,10 +182,16 @@ func inputs(ts *gi.Tabs) {
 	gi.NewLabel(tab).SetText(
 		`Cogent Core provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.`)
 
-	gi.NewTextField(tab).SetPlaceholder("Filled")
-	gi.NewTextField(tab).SetType(gi.TextFieldOutlined).SetPlaceholder("Outlined")
-	gi.NewTextField(tab).AddClearButton()
-	gi.NewTextField(tab).SetType(gi.TextFieldOutlined).AddClearButton()
+	gi.NewTextField(tab).SetPlaceholder("Text field")
+	gi.NewTextField(tab).SetPlaceholder("Email").SetType(gi.TextFieldOutlined).Style(func(s *styles.Style) {
+		s.VirtualKeyboard = styles.KeyboardEmail
+	})
+	gi.NewTextField(tab).SetPlaceholder("Phone number").AddClearButton().Style(func(s *styles.Style) {
+		s.VirtualKeyboard = styles.KeyboardPhone
+	})
+	gi.NewTextField(tab).SetPlaceholder("URL").SetType(gi.TextFieldOutlined).AddClearButton().Style(func(s *styles.Style) {
+		s.VirtualKeyboard = styles.KeyboardURL
+	})
 	gi.NewTextField(tab).AddClearButton().SetLeadingIcon(icons.Search)
 	gi.NewTextField(tab).SetType(gi.TextFieldOutlined).AddClearButton().SetLeadingIcon(icons.Search)
 	gi.NewTextField(tab).SetTypePassword().SetPlaceholder("Password")
