@@ -30,7 +30,7 @@ type Rune struct {
 	// background color to fill background of color, for highlighting,
 	// <mark> tag, etc.  Unlike Face, Color, this must be non-nil for every case
 	// that uses it, as nil is also used for default transparent background.
-	BackgroundColor image.Image `json:"-"`
+	Background image.Image `json:"-"`
 
 	// dditional decoration to apply: underline, strike-through, etc.
 	// Also used for encoding a few special layout hints to pass info

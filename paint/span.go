@@ -99,8 +99,8 @@ func (sr *Span) SetBackground(bg image.Image) {
 	}
 	for i := range sr.Render {
 		rr := &sr.Render[i]
-		if rr.BackgroundColor != nil {
-			rr.BackgroundColor = bg
+		if rr.Background != nil {
+			rr.Background = bg
 		}
 	}
 }
@@ -154,7 +154,7 @@ func (sr *Span) SetNewPara() {
 // AppendRune adds one rune and associated formatting info
 func (sr *Span) AppendRune(r rune, face font.Face, clr image.Image, bg image.Image, deco styles.TextDecorations) {
 	sr.Text = append(sr.Text, r)
-	rr := Rune{Face: face, Color: clr, BackgroundColor: bg, Deco: deco}
+	rr := Rune{Face: face, Color: clr, Background: bg, Deco: deco}
 	sr.Render = append(sr.Render, rr)
 	sr.HasDecoUpdate(bg, deco)
 }
@@ -181,7 +181,7 @@ func (sr *Span) AppendString(str string, face font.Face, clr image.Image, bg ima
 	nwr := []rune(str)
 	sz := len(nwr)
 	sr.Text = append(sr.Text, nwr...)
-	rr := Rune{Face: face, Color: clr, BackgroundColor: bg, Deco: deco}
+	rr := Rune{Face: face, Color: clr, Background: bg, Deco: deco}
 	r := nwr[0]
 	lastUc := false
 	if _, ok := face.GlyphAdvance(r); !ok {
@@ -191,7 +191,7 @@ func (sr *Span) AppendString(str string, face font.Face, clr image.Image, bg ima
 	sr.HasDecoUpdate(bg, deco)
 	sr.Render = append(sr.Render, rr)
 	for i := 1; i < sz; i++ { // optimize by setting rest to nil for same
-		rp := Rune{Deco: deco, BackgroundColor: bg}
+		rp := Rune{Deco: deco, Background: bg}
 		r := nwr[i]
 		// if oswin.TheApp != nil && oswin.TheApp.Platform() == oswin.MacOS {
 		if _, ok := face.GlyphAdvance(r); !ok {
@@ -232,12 +232,12 @@ func (sr *Span) SetRenders(sty *styles.FontRender, uc *units.Context, noBG bool,
 		sr.Render[0].Face = sty.Face.Face
 	}
 	sr.Render[0].Color = sty.Color
-	sr.Render[0].BackgroundColor = bgc
+	sr.Render[0].Background = bgc
 	sr.Render[0].RotRad = rot
 	sr.Render[0].ScaleX = scalex
 	if bgc != nil {
 		for i := range sr.Text {
-			sr.Render[i].BackgroundColor = bgc
+			sr.Render[i].Background = bgc
 		}
 	}
 	if rot != 0 || scalex != 0 {
@@ -679,7 +679,7 @@ func (sr *Span) RenderBg(pc *Context, tpos mat32.Vec2) {
 
 	for i := range sr.Text {
 		rr := &(sr.Render[i])
-		if rr.BackgroundColor == nil {
+		if rr.Background == nil {
 			if didLast {
 				pc.Fill()
 			}
@@ -704,7 +704,7 @@ func (sr *Span) RenderBg(pc *Context, tpos mat32.Vec2) {
 			didLast = false
 			continue
 		}
-		pc.FillStyle.Color = rr.BackgroundColor
+		pc.FillStyle.Color = rr.Background
 		szt := mat32.V2(rr.Size.X, -rr.Size.Y)
 		sp := rp.Add(tx.MulVec2AsVec(mat32.V2(0, dsc32)))
 		ul := sp.Add(tx.MulVec2AsVec(mat32.V2(0, szt.Y)))
