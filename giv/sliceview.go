@@ -25,7 +25,6 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fi"
 	"cogentcore.org/core/gi"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
@@ -123,6 +122,11 @@ const (
 	SliceViewInFullRebuild
 )
 
+const (
+	SliceViewRowProp = "sv-row"
+	SliceViewColProp = "sv-col"
+)
+
 // SliceViewer is the interface used by SliceViewBase to
 // support any abstractions needed for different types of slice views.
 type SliceViewer interface {
@@ -177,10 +181,6 @@ type SliceViewer interface {
 	// SliceDeleteAt deletes element at given index from slice
 	// if updt is true, then update the grid after
 	SliceDeleteAt(idx int)
-
-	// WidgetIndex returns the row and column indexes for given widget.
-	// Typically this is decoded from the name of the widget.
-	WidgetIndex(w gi.Widget) (row, col int)
 
 	// MimeDataType returns the data type for mime clipboard
 	// (copy / paste) data e.g., fi.DataJson
@@ -320,31 +320,34 @@ func (sv *SliceViewBase) SetStyles() {
 	svi := sv.This().(SliceViewer)
 
 	sv.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Draggable, abilities.Droppable, abilities.Clickable, abilities.DoubleClickable, abilities.TripleClickable)
+		s.SetAbilities(true, abilities.Clickable, abilities.DoubleClickable, abilities.TripleClickable)
+		s.SetAbilities(!sv.IsReadOnly(), abilities.Draggable, abilities.Droppable)
 		s.Cursor = sv.CurrentCursor
 		s.Direction = styles.Column
 		// absorb horizontal here, vertical in view
 		s.Overflow.X = styles.OverflowAuto
 		s.Grow.Set(1, 1)
 	})
-	sv.On(events.DragStart, func(e events.Event) {
-		e.SetHandled()
-		svi.DragStart(e)
-	})
-	sv.On(events.DragEnter, func(e events.Event) {
-		e.SetHandled()
-		return
-	})
-	sv.On(events.DragLeave, func(e events.Event) {
-		e.SetHandled()
-		return
-	})
-	sv.On(events.Drop, func(e events.Event) {
-		svi.DragDrop(e)
-	})
-	sv.On(events.DropDeleteSource, func(e events.Event) {
-		svi.DropDeleteSource(e)
-	})
+	if !sv.IsReadOnly() {
+		sv.On(events.DragStart, func(e events.Event) {
+			e.SetHandled()
+			svi.DragStart(e)
+		})
+		sv.On(events.DragEnter, func(e events.Event) {
+			e.SetHandled()
+			return
+		})
+		sv.On(events.DragLeave, func(e events.Event) {
+			e.SetHandled()
+			return
+		})
+		sv.On(events.Drop, func(e events.Event) {
+			svi.DragDrop(e)
+		})
+		sv.On(events.DropDeleteSource, func(e events.Event) {
+			svi.DropDeleteSource(e)
+		})
+	}
 	sv.StyleFinal(func(s *styles.Style) {
 		sv.NormalCursor = s.Cursor
 	})
@@ -382,7 +385,8 @@ func (sv *SliceViewBase) SetStyles() {
 			case strings.HasPrefix(w.Name(), "index-"):
 				wb := w.AsWidget()
 				w.Style(func(s *styles.Style) {
-					s.SetAbilities(true, abilities.Draggable, abilities.Droppable, abilities.DoubleClickable)
+					s.SetAbilities(true, abilities.DoubleClickable)
+					s.SetAbilities(!sv.IsReadOnly(), abilities.Draggable, abilities.Droppable)
 					s.Cursor = cursors.None
 					nd := mat32.Log10(float32(sv.SliceSize))
 					nd = max(nd, 3)
@@ -395,24 +399,26 @@ func (sv *SliceViewBase) SetStyles() {
 				wb.ContextMenus = sv.ContextMenus
 				wb.OnDoubleClick(sv.HandleEvent)
 				wb.On(events.ContextMenu, sv.HandleEvent)
-				w.On(events.DragStart, func(e events.Event) {
-					e.SetHandled()
-					svi.DragStart(e)
-				})
-				w.On(events.DragEnter, func(e events.Event) {
-					e.SetHandled()
-					return
-				})
-				w.On(events.DragLeave, func(e events.Event) {
-					e.SetHandled()
-					return
-				})
-				w.On(events.Drop, func(e events.Event) {
-					svi.DragDrop(e)
-				})
-				w.On(events.DropDeleteSource, func(e events.Event) {
-					svi.DropDeleteSource(e)
-				})
+				if !sv.IsReadOnly() {
+					w.On(events.DragStart, func(e events.Event) {
+						e.SetHandled()
+						svi.DragStart(e)
+					})
+					w.On(events.DragEnter, func(e events.Event) {
+						e.SetHandled()
+						return
+					})
+					w.On(events.DragLeave, func(e events.Event) {
+						e.SetHandled()
+						return
+					})
+					w.On(events.Drop, func(e events.Event) {
+						svi.DragDrop(e)
+					})
+					w.On(events.DropDeleteSource, func(e events.Event) {
+						svi.DropDeleteSource(e)
+					})
+				}
 			case strings.HasPrefix(w.Name(), "value-"):
 				wb := w.AsWidget()
 				w.Style(func(s *styles.Style) {
@@ -421,7 +427,7 @@ func (sv *SliceViewBase) SetStyles() {
 						s.SetAbilities(false, abilities.Hoverable, abilities.Focusable, abilities.Activatable, abilities.TripleClickable)
 						wb.SetReadOnly(true)
 					}
-					row, col := sv.This().(SliceViewer).WidgetIndex(w)
+					row, col := sv.WidgetIndex(w)
 					row += sv.StartIdx
 					sv.This().(SliceViewer).StyleValueWidget(w, s, row, col)
 					if row < sv.SliceSize {
@@ -430,7 +436,7 @@ func (sv *SliceViewBase) SetStyles() {
 				})
 				wb.OnSelect(func(e events.Event) {
 					e.SetHandled()
-					row, _ := sv.This().(SliceViewer).WidgetIndex(w)
+					row, _ := sv.WidgetIndex(w)
 					sv.UpdateSelectRow(row, e.SelectMode())
 					sv.LastClick = row + sv.StartIdx
 				})
@@ -609,14 +615,14 @@ func (sv *SliceViewBase) UpdtSliceSize() int {
 	return sz
 }
 
-// WidgetIndex returns the row and column indexes for given widget.
-// Typically this is decoded from the name of the widget.
+// WidgetIndex returns the row and column indexes for given widget,
+// from the props set during construction.
 func (sv *SliceViewBase) WidgetIndex(w gi.Widget) (row, col int) {
-	nm := w.Name()
-	if strings.Contains(nm, "value-") {
-		row = grr.Log1(strconv.Atoi(strings.TrimPrefix(nm, "value-")))
-	} else if strings.Contains(nm, "index-") {
-		row = grr.Log1(strconv.Atoi(strings.TrimPrefix(nm, "index-")))
+	if rwi := w.Prop(SliceViewRowProp); rwi != nil {
+		row = rwi.(int)
+	}
+	if cli := w.Prop(SliceViewColProp); cli != nil {
+		col = cli.(int)
 	}
 	return
 }
@@ -717,11 +723,13 @@ func (sv *SliceViewBase) ConfigRows() {
 				sv.UpdateSelectRow(i, e.SelectMode())
 				sv.LastClick = i + sv.StartIdx
 			})
+			idxlab.SetProp(SliceViewRowProp, i)
 		}
 
 		w := ki.NewOfType(vtyp).(gi.Widget)
 		sg.SetChild(w, ridx+idxOff, valnm)
 		vv.ConfigWidget(w)
+		w.SetProp(SliceViewRowProp, i)
 
 		if !sv.IsReadOnly() {
 			vvb := vv.AsValueBase()
@@ -2250,12 +2258,12 @@ func (sg *SliceViewGrid) RowBackground(sel, stripe, hover bool) image.Image {
 
 func (sg *SliceViewGrid) ChildBackground(child gi.Widget) image.Image {
 	bg := sg.Styles.ActualBackground
-	svi, sv := sg.SliceView()
+	_, sv := sg.SliceView()
 	if sv == nil {
 		return bg
 	}
 	sg.UpdateBackgrounds()
-	row, _ := svi.WidgetIndex(child)
+	row, _ := sv.WidgetIndex(child)
 	si := row + sv.StartIdx
 	return sg.RowBackground(sv.IdxIsSelected(si), si%2 == 1, row == sv.HoverRow)
 }

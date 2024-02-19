@@ -14,7 +14,6 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/ki"
@@ -175,23 +174,6 @@ func (tv *TableView) SetSlice(sl any) *TableView {
 func (tv *TableView) StructType() reflect.Type {
 	tv.StruType = laser.NonPtrType(laser.SliceElType(tv.Slice))
 	return tv.StruType
-}
-
-// WidgetIndex returns the row and column indexes for given widget.
-// Typically this is decoded from the name of the widget.
-func (tv *TableView) WidgetIndex(w gi.Widget) (row, col int) {
-	nm := w.Name()
-	if strings.Contains(nm, "value-") {
-		fstr := strings.TrimPrefix(nm, "value-")
-		dp := strings.Index(fstr, ".")
-		istr := fstr[dp+1:] // index is after .
-		fstr = fstr[:dp]    // field idx is -X.
-		row = grr.Log1(strconv.Atoi(istr))
-		col = grr.Log1(strconv.Atoi(fstr))
-	} else if strings.Contains(nm, "index-") {
-		row = grr.Log1(strconv.Atoi(strings.TrimPrefix(nm, "index-")))
-	}
-	return
 }
 
 // CacheVisFields computes the number of visible fields in nVisFields and
@@ -393,6 +375,7 @@ func (tv *TableView) ConfigRows() {
 				e.SetHandled()
 				tv.UpdateSelectRow(i, e.SelectMode())
 			})
+			idxlab.SetProp(SliceViewRowProp, i)
 		}
 
 		vpath := tv.ViewPath + "[" + sitxt + "]"
@@ -416,6 +399,8 @@ func (tv *TableView) ConfigRows() {
 			w := ki.NewOfType(vtyp).(gi.Widget)
 			sg.SetChild(w, cidx, valnm)
 			vv.ConfigWidget(w)
+			w.SetProp(SliceViewRowProp, i)
+			w.SetProp(SliceViewColProp, fli)
 
 			if !tv.IsReadOnly() {
 				vvb := vv.AsValueBase()
