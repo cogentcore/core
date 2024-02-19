@@ -109,16 +109,16 @@ public class GoNativeActivity extends NativeActivity {
 						inputType |= InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_NORMAL;
 						break;
 					case 4:
-						inputType |= InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD;
+						inputType |= InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD;
 						break;
 					case 5:
-						inputType |= InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS;
+						inputType |= InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS;
 						break;
 					case 6:
 						inputType |= InputType.TYPE_CLASS_PHONE;
 						break;
 					case 7:
-						inputType |= InputType.TYPE_TEXT_VARIATION_URI;
+						inputType |= InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI;
 						break;
 					default:
 						Log.e("Go", "unknown keyboard type, use default");
