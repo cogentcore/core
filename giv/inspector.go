@@ -222,7 +222,7 @@ func (is *Inspector) ConfigWidget() {
 
 // SetTitle sets the title to correspond to the given node.
 func (is *Inspector) SetTitle(k ki.Ki) {
-	is.TitleWidget().SetText(fmt.Sprintf("Inspector of %s (%s)", k.Name(), laser.ShortTypeName(reflect.TypeOf(k))))
+	is.TitleWidget().SetText(fmt.Sprintf("Inspector of %s (%s)", k.Name(), laser.FriendlyTypeName(reflect.TypeOf(k))))
 }
 
 // TitleWidget returns the title label widget
