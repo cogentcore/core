@@ -183,7 +183,14 @@ func (a *App) IsDark() bool {
 }
 
 func (a *App) ShowVirtualKeyboard(typ styles.VirtualKeyboards) {
-	js.Global().Get("document").Call("getElementById", "text-field").Call("focus")
+	tf := js.Global().Get("document").Call("getElementById", "text-field")
+	switch typ {
+	case styles.KeyboardNumber:
+		tf.Set("type", "number")
+	default:
+		tf.Set("type", "text")
+	}
+	tf.Call("focus")
 }
 
 func (a *App) HideVirtualKeyboard() {
