@@ -2101,7 +2101,7 @@ const VirtualKeyboardsN VirtualKeyboards = 4
 func _VirtualKeyboardsNoOp() {
 	var x [1]struct{}
 	_ = x[NoKeyboard-(0)]
-	_ = x[DefaultKeyboard-(1)]
+	_ = x[MultiLineKeyboard-(1)]
 	_ = x[SingleLineKeyboard-(2)]
 	_ = x[NumberKeyboard-(3)]
 }

@@ -212,7 +212,7 @@ func (ed *Editor) SetStyles() {
 		ed.HighlightColor = colors.C(colors.Scheme.Warn.Container)
 		ed.CursorColor = colors.C(colors.Scheme.Primary.Base)
 
-		s.VirtualKeyboard = styles.DefaultKeyboard
+		s.VirtualKeyboard = styles.MultiLineKeyboard
 		s.Cursor = cursors.Text
 		if gi.SystemSettings.Editor.WordWrap {
 			s.Text.WhiteSpace = styles.WhiteSpacePreWrap

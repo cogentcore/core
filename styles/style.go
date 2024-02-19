@@ -237,9 +237,9 @@ const (
 	// NoKeyboard indicates to display no virtual keyboard.
 	NoKeyboard VirtualKeyboards = iota
 
-	// DefaultKeyboard indicates to display a virtual keyboard
+	// MultiLineKeyboard indicates to display a virtual keyboard
 	// with a default input style and a "Return" return key.
-	DefaultKeyboard
+	MultiLineKeyboard
 
 	// SingleLineKeyboard indicates to display a virtual keyboard
 	// with a default input style and a "Done" return key.

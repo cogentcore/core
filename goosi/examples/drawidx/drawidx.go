@@ -201,7 +201,7 @@ func main() {
 				if haveKeyboard {
 					goosi.TheApp.HideVirtualKeyboard()
 				} else {
-					goosi.TheApp.ShowVirtualKeyboard(styles.DefaultKeyboard)
+					goosi.TheApp.ShowVirtualKeyboard(styles.MultiLineKeyboard)
 				}
 				haveKeyboard = !haveKeyboard
 			}
