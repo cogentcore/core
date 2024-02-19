@@ -608,9 +608,13 @@ func (ed *Editor) HandleMouse() {
 		}
 		updt := ed.UpdateStart()
 		e.SetHandled()
-		sz := ed.Buf.LineLen(ed.SelectReg.Start.Ln)
-		ed.SelectReg.Start.Ch = 0
-		ed.SelectReg.End.Ch = sz
+		sz := ed.Buf.LineLen(ed.CursorPos.Ln)
+		if sz > 0 {
+			ed.SelectReg.Start.Ln = ed.CursorPos.Ln
+			ed.SelectReg.Start.Ch = 0
+			ed.SelectReg.End.Ln = ed.CursorPos.Ln
+			ed.SelectReg.End.Ch = sz
+		}
 		ed.UpdateEndRender(updt)
 	})
 	ed.On(events.SlideMove, func(e events.Event) {

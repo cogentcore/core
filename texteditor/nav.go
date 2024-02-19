@@ -5,6 +5,7 @@
 package texteditor
 
 import (
+	"fmt"
 	"image"
 
 	"cogentcore.org/core/events"
@@ -168,6 +169,7 @@ func (ed *Editor) CursorToHistNext() bool {
 // SelectRegUpdate updates current select region based on given cursor position
 // relative to SelectStart position
 func (ed *Editor) SelectRegUpdate(pos lex.Pos) {
+	fmt.Println(ed.SelectReg.Start)
 	if pos.IsLess(ed.SelectStart) {
 		ed.SelectReg.Start = pos
 		ed.SelectReg.End = ed.SelectStart
@@ -175,6 +177,7 @@ func (ed *Editor) SelectRegUpdate(pos lex.Pos) {
 		ed.SelectReg.Start = ed.SelectStart
 		ed.SelectReg.End = pos
 	}
+	fmt.Println(ed.SelectReg.Start)
 }
 
 // CursorSelect updates selection based on cursor movements, given starting
