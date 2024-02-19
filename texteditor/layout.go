@@ -25,7 +25,6 @@ func (ed *Editor) StyleSizes() {
 	}
 	if lno {
 		ed.SetFlag(true, EditorHasLineNos)
-		// SidesTODO: this is sketchy
 		ed.LineNoOff = float32(ed.LineNoDigs+3)*sty.Font.Face.Metrics.Ch + spc.Left // space for icon
 	} else {
 		ed.SetFlag(false, EditorHasLineNos)
@@ -39,9 +38,9 @@ func (ed *Editor) UpdateFromAlloc() {
 	sty := &ed.Styles
 	asz := ed.Geom.Size.Alloc.Content
 	sbw := mat32.Ceil(ed.Styles.ScrollBarWidth.Dots)
-	if ed.HasScroll[mat32.Y] {
-		asz.X -= sbw
-	}
+	// if ed.HasScroll[mat32.Y] {
+	asz.X -= sbw
+	// }
 	if ed.HasScroll[mat32.X] {
 		asz.Y -= sbw
 	}

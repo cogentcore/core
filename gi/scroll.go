@@ -131,6 +131,8 @@ func (ly *Layout) PositionScrolls() {
 	for d := mat32.X; d <= mat32.Y; d++ {
 		if ly.HasScroll[d] && ly.Scrolls[d] != nil {
 			ly.PositionScroll(d)
+		} else {
+			ly.Geom.Scroll.SetDim(d, 0)
 		}
 	}
 }

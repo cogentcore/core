@@ -1847,17 +1847,21 @@ func (ly *Layout) ScenePos() {
 	ly.ScenePosLay()
 }
 
+// ScrollResetIfNone resets the scroll offsets if there are no scrollbars
+func (ly *Layout) ScrollResetIfNone() {
+	for d := mat32.X; d <= mat32.Y; d++ {
+		if !ly.HasScroll[d] {
+			ly.Geom.Scroll.SetDim(d, 0)
+		}
+	}
+}
+
 func (ly *Layout) ScenePosLay() {
+	ly.ScrollResetIfNone()
+	// note: ly.Geom.Scroll has the X, Y scrolling offsets, set by Layouter.ScrollChanged function
 	if !ly.HasChildren() || !ly.LayImpl.ShapeCheck(ly, "ScenePos") {
 		ly.ScenePosWidget() // behave like a widget
 		return
-	}
-	// note: ly.Geom.Scroll has the X, Y scrolling offsets, set by Layouter.ScrollChanged function
-	if !ly.HasScroll[mat32.X] {
-		ly.Geom.Scroll.X = 0
-	}
-	if !ly.HasScroll[mat32.Y] {
-		ly.Geom.Scroll.Y = 0
 	}
 	ly.ScenePosWidget()
 	ly.ScenePosChildren()

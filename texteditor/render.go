@@ -35,6 +35,7 @@ func (ed *Editor) Render() {
 	if ed.PushBounds() {
 		ed.ApplyStyle()
 		if ed.Is(EditorNeedsLayout) {
+			ed.ManageOverflow(3, true)
 			ed.LayoutAllLines()
 			ed.ConfigScrolls()
 			ed.SetFlag(false, EditorNeedsLayout)
