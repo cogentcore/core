@@ -7,7 +7,6 @@ package gi
 import (
 	"fmt"
 	"image"
-	"image/color"
 	"log/slog"
 	"sync"
 	"unicode"
@@ -92,7 +91,7 @@ type TextField struct { //core:embedder
 	// PlaceholderColor is the color used for the Placeholder text.
 	// It should be set in Style like all other style properties.
 	// By default, it is [colors.Scheme.OnSurfaceVariant].
-	PlaceholderColor color.RGBA
+	PlaceholderColor image.Image
 
 	// SelectColor is the color used for the text selection background color.
 	// It should be set in Style like all other style properties.
@@ -202,7 +201,7 @@ func (tf *TextField) SetStyles() {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
 		tf.CursorWidth.Dp(1)
 		tf.SelectColor = colors.C(colors.Scheme.Select.Container)
-		tf.PlaceholderColor = colors.Scheme.OnSurfaceVariant
+		tf.PlaceholderColor = colors.C(colors.Scheme.OnSurfaceVariant)
 		tf.CursorColor = colors.C(colors.Scheme.Primary.Base)
 
 		s.VirtualKeyboard = styles.KeyboardSingleLine
@@ -222,7 +221,7 @@ func (tf *TextField) SetStyles() {
 			s.Padding.Right.Dp(12)
 		}
 		s.Text.Align = styles.Start
-		s.Color = colors.Scheme.OnSurface
+		s.Color = colors.C(colors.Scheme.OnSurface)
 		switch tf.Type {
 		case TextFieldFilled:
 			s.Border.Style.Set(styles.BorderNone)
@@ -234,16 +233,16 @@ func (tf *TextField) SetStyles() {
 
 			s.MaxBorder = s.Border
 			s.MaxBorder.Width.Bottom = units.Dp(2)
-			s.MaxBorder.Color.Bottom = colors.Scheme.Primary.Base
+			s.MaxBorder.Color.Bottom = colors.C(colors.Scheme.Primary.Base)
 
 			if !tf.IsReadOnly() && s.Is(states.Focused) {
 				s.Border = s.MaxBorder
 			} else {
 				s.Border.Width.Bottom = units.Dp(1)
-				s.Border.Color.Bottom = colors.Scheme.OnSurfaceVariant
+				s.Border.Color.Bottom = colors.C(colors.Scheme.OnSurfaceVariant)
 			}
 			if tf.Error != nil {
-				s.Border.Color.Bottom = colors.Scheme.Error.Base
+				s.Border.Color.Bottom = colors.C(colors.Scheme.Error.Base)
 			}
 		case TextFieldOutlined:
 			s.Border.Style.Set(styles.BorderSolid)
@@ -251,15 +250,15 @@ func (tf *TextField) SetStyles() {
 
 			s.MaxBorder = s.Border
 			s.MaxBorder.Width.Set(units.Dp(2))
-			s.MaxBorder.Color.Set(colors.Scheme.Primary.Base)
+			s.MaxBorder.Color.Set(colors.C(colors.Scheme.Primary.Base))
 			if !tf.IsReadOnly() && s.Is(states.Focused) {
 				s.Border = s.MaxBorder
 			} else {
 				s.Border.Width.Set(units.Dp(1))
-				s.Border.Color.Set(colors.Scheme.Outline)
+				s.Border.Color.Set(colors.C(colors.Scheme.Outline))
 			}
 			if tf.Error != nil {
-				s.Border.Color.Set(colors.Scheme.Error.Base)
+				s.Border.Color.Set(colors.C(colors.Scheme.Error.Base))
 			}
 		}
 		if tf.IsReadOnly() {
@@ -287,7 +286,7 @@ func (tf *TextField) SetStyles() {
 			lead.Type = ButtonAction
 			lead.Style(func(s *styles.Style) {
 				s.Padding.Zero()
-				s.Color = colors.Scheme.OnSurfaceVariant
+				s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 				s.Margin.SetRight(units.Dp(8))
 				if tf.LeadingIconOnClick == nil {
 					s.SetAbilities(false, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
@@ -316,9 +315,9 @@ func (tf *TextField) SetStyles() {
 			trail.Type = ButtonAction
 			trail.Style(func(s *styles.Style) {
 				s.Padding.Zero()
-				s.Color = colors.Scheme.OnSurfaceVariant
+				s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 				if tf.Error != nil {
-					s.Color = colors.Scheme.Error.Base
+					s.Color = colors.C(colors.Scheme.Error.Base)
 				}
 				s.Margin.SetLeft(units.Dp(8))
 				if tf.TrailingIconOnClick == nil || tf.Error != nil {
@@ -342,7 +341,7 @@ func (tf *TextField) SetStyles() {
 			})
 		case "parts/error":
 			w.Style(func(s *styles.Style) {
-				s.Color = colors.Scheme.Error.Base
+				s.Color = colors.C(colors.Scheme.Error.Base)
 			})
 		}
 	})

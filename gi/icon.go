@@ -8,7 +8,7 @@ import (
 	"image"
 	"log/slog"
 
-	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/svg"
@@ -106,11 +106,11 @@ func (ic *Icon) RenderSVG() {
 	rc := ic.Scene.RenderContext()
 	sv := &ic.SVG
 	sz := ic.Geom.Size.Actual.Content.ToPoint()
-	clr := colors.ApplyOpacity(ic.Styles.Color, ic.Styles.Opacity)
+	clr := gradient.ApplyOpacityImage(ic.Styles.Color, ic.Styles.Opacity)
 	if !rc.HasFlag(RenderRebuild) && sv.Pixels != nil { // if rebuilding rebuild..
 		isz := sv.Pixels.Bounds().Size()
 		// if nothing has changed, we don't need to re-render
-		if isz == sz && sv.Name == string(ic.Icon) && colors.ToUniform(sv.Color) == clr {
+		if isz == sz && sv.Name == string(ic.Icon) && sv.Color == clr {
 			return
 		}
 	}
@@ -127,8 +127,7 @@ func (ic *Icon) RenderSVG() {
 
 	sv.Resize(sz) // does Config if needed
 
-	// TODO(kai): what about gradient icons?
-	sv.Color = colors.C(clr)
+	sv.Color = clr
 
 	sv.Scale = 1
 	sv.Render()

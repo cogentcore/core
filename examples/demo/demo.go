@@ -277,14 +277,14 @@ func layouts(ts *gi.Tabs) {
 	// vw.Style(func(s *styles.Style) {
 	// 	s.Min.X.Vw(50)
 	// 	s.BackgroundColor.SetSolid(colors.Scheme.Primary.Base)
-	// 	s.Color = colors.Scheme.Primary.On
+	// 	s.Color = colors.C(colors.Scheme.Primary.On)
 	// })
 
 	// pw := gi.NewLabel(layouts, "pw", "50pw")
 	// pw.Style(func(s *styles.Style) {
 	// 	s.Min.X.Pw(50)
 	// 	s.BackgroundColor.SetSolid(colors.Scheme.Primary.Container)
-	// 	s.Color = colors.Scheme.Primary.OnContainer
+	// 	s.Color = colors.C(colors.Scheme.Primary.OnContainer)
 	// })
 
 	sv := gi.NewSplits(tab)

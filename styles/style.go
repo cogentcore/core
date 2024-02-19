@@ -169,9 +169,9 @@ type Style struct { //gti:add
 	// color Color (or StateColor if it defined). It is automatically set based on State, but can be overridden in stylers.
 	StateLayer float32
 
-	// StateColor, if not the zero color, is the color to use for the StateLayer instead of Color. If you want to disable state layers
+	// StateColor, if not nil, is the color to use for the StateLayer instead of Color. If you want to disable state layers
 	// for an element, do not use this; instead, set StateLayer to 0.
-	StateColor color.RGBA
+	StateColor image.Image
 
 	// ActualBackground is the computed actual background rendered for the element,
 	// taking into account its Background, Opacity, StateLayer, and parent

@@ -57,7 +57,7 @@ func NewTooltipScene(w Widget, tooltip string, pos, sz image.Point) *Scene {
 		s.Overflow.Set(styles.OverflowVisible) // key for avoiding sizing errors when re-rendering with small pref size
 		s.Padding.Set(units.Dp(8))
 		s.Background = colors.C(colors.Scheme.InverseSurface)
-		s.Color = colors.Scheme.InverseOnSurface
+		s.Color = colors.C(colors.Scheme.InverseOnSurface)
 		s.BoxShadow = styles.BoxShadow1()
 	})
 	NewLabel(sc, "text").SetType(LabelBodyMedium).SetText(tooltip).

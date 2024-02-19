@@ -19,7 +19,7 @@ func TestRenderOneSideBorder(t *testing.T) {
 	NewBox(b).Style(func(s *styles.Style) {
 		s.Min.Set(units.Dp(100))
 		s.Border.Width.Bottom.Dp(10)
-		s.Border.Color.Bottom = colors.Scheme.Outline
+		s.Border.Color.Bottom = colors.C(colors.Scheme.Outline)
 		s.Background = colors.C(colors.Scheme.SurfaceContainerHigh)
 	})
 	b.AssertRender(t, "render/one-side-border")

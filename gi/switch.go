@@ -131,20 +131,20 @@ func (sw *Switch) SetStyles() {
 		if sw.Type == SwitchChip {
 			if s.Is(states.Checked) {
 				s.Background = colors.C(colors.Scheme.SurfaceVariant)
-				s.Color = colors.Scheme.OnSurfaceVariant
+				s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 			} else if !s.Is(states.Focused) {
-				s.Border.Color.Set(colors.Scheme.Outline)
+				s.Border.Color.Set(colors.C(colors.Scheme.Outline))
 				s.Border.Width.Set(units.Dp(1))
 			}
 		}
 		if sw.Type == SwitchSegmentedButton {
 			if !s.Is(states.Focused) {
-				s.Border.Color.Set(colors.Scheme.Outline)
+				s.Border.Color.Set(colors.C(colors.Scheme.Outline))
 				s.Border.Width.Set(units.Dp(1))
 			}
 			if s.Is(states.Checked) {
 				s.Background = colors.C(colors.Scheme.SurfaceVariant)
-				s.Color = colors.Scheme.OnSurfaceVariant
+				s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 			}
 		}
 
@@ -170,9 +170,9 @@ func (sw *Switch) SetStyles() {
 		case "parts/stack/icon0": // on
 			w.Style(func(s *styles.Style) {
 				if sw.Type == SwitchChip {
-					s.Color = colors.Scheme.OnSurfaceVariant
+					s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 				} else {
-					s.Color = colors.Scheme.Primary.Base
+					s.Color = colors.C(colors.Scheme.Primary.Base)
 				}
 				// switches need to be bigger
 				if sw.Type == SwitchSwitch {

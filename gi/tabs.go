@@ -126,12 +126,7 @@ func (ts *Tabs) SetStyles() {
 	ts.MaxChars = 16
 	ts.CloseIcon = icons.Close
 	ts.Style(func(s *styles.Style) {
-		// need border for separators (see RenderTabSeps)
-		// TODO: maybe better solution for tab sep styles?
-		s.Border.Style.Set(styles.BorderSolid)
-		s.Border.Width.Set(units.Dp(1))
-		s.Border.Color.Set(colors.Scheme.OutlineVariant)
-		s.Color = colors.Scheme.OnBackground
+		s.Color = colors.C(colors.Scheme.OnBackground)
 		s.Grow.Set(1, 1)
 		if ts.Type.Effective(ts).IsColumn() {
 			s.Direction = styles.Row
@@ -587,9 +582,9 @@ func (tb *Tab) SetStyles() {
 		}
 
 		if tb.StateIs(states.Selected) {
-			s.Color = colors.Scheme.Select.OnContainer
+			s.Color = colors.C(colors.Scheme.Select.OnContainer)
 		} else {
-			s.Color = colors.Scheme.OnSurfaceVariant
+			s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 			if tb.Type.Effective(tb) == FunctionalTabs {
 				s.Background = colors.C(colors.Scheme.SurfaceContainer)
 			}

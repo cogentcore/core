@@ -174,7 +174,7 @@ func (bd *Body) DialogStyles() {
 	bd.Scene.Style(func(s *styles.Style) {
 		// s.Border.Radius = styles.BorderRadiusExtraLarge
 		s.Direction = styles.Column
-		s.Color = colors.Scheme.OnSurface
+		s.Color = colors.C(colors.Scheme.OnSurface)
 		if !bd.Scene.Stage.NewWindow && !bd.Scene.Stage.FullWindow {
 			s.Padding.Set(units.Dp(24))
 			// s.Justify.Content = styles.Center // vert

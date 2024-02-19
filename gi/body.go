@@ -73,7 +73,7 @@ func (bd *Body) AddTitle(title string) *Body {
 func (bd *Body) AddText(text string) *Body {
 	NewLabel(bd, "text").SetText(text).
 		SetType(LabelBodyMedium).Style(func(s *styles.Style) {
-		s.Color = colors.Scheme.OnSurfaceVariant
+		s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 	})
 	return bd
 }

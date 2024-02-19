@@ -6,6 +6,7 @@ package filetree
 
 import (
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/grr"
@@ -42,19 +43,19 @@ func (fn *Node) SetStyles() {
 		}
 		switch {
 		case vcs == vci.Untracked:
-			s.Color = grr.Must1(colors.FromHex("#808080"))
+			s.Color = grr.Must1(gradient.FromString("#808080"))
 		case vcs == vci.Modified:
-			s.Color = grr.Must1(colors.FromHex("#4b7fd1"))
+			s.Color = grr.Must1(gradient.FromString("#4b7fd1"))
 		case vcs == vci.Added:
-			s.Color = grr.Must1(colors.FromHex("#008800"))
+			s.Color = grr.Must1(gradient.FromString("#008800"))
 		case vcs == vci.Deleted:
-			s.Color = grr.Must1(colors.FromHex("#ff4252"))
+			s.Color = grr.Must1(gradient.FromString("#ff4252"))
 		case vcs == vci.Conflicted:
-			s.Color = grr.Must1(colors.FromHex("#ce8020"))
+			s.Color = grr.Must1(gradient.FromString("#ce8020"))
 		case vcs == vci.Updated:
-			s.Color = grr.Must1(colors.FromHex("#008060"))
+			s.Color = grr.Must1(gradient.FromString("#008060"))
 		case vcs == vci.Stored:
-			s.Color = colors.Scheme.OnSurface
+			s.Color = colors.C(colors.Scheme.OnSurface)
 		}
 	})
 	fn.OnWidgetAdded(func(w gi.Widget) {

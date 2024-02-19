@@ -160,7 +160,7 @@ func (wb *WidgetBase) ResetStyleWidget() {
 func (wb *WidgetBase) SetStyles() {
 	wb.Style(func(s *styles.Style) {
 		s.MaxBorder.Style.Set(styles.BorderSolid)
-		s.MaxBorder.Color.Set(colors.Scheme.Primary.Base)
+		s.MaxBorder.Color.Set(colors.C(colors.Scheme.Primary.Base))
 		s.MaxBorder.Width.Set(units.Dp(1))
 
 		// if we are disabled, we do not react to any state changes,
@@ -178,7 +178,7 @@ func (wb *WidgetBase) SetStyles() {
 		}
 		if s.Is(states.Selected) {
 			s.Background = colors.C(colors.Scheme.Select.Container)
-			s.Color = colors.Scheme.Select.OnContainer
+			s.Color = colors.C(colors.Scheme.Select.OnContainer)
 		}
 	})
 }
