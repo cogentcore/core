@@ -16,7 +16,6 @@ func C(c color.Color) image.Image {
 
 // ToUniform converts the given image to a uniform color.
 func ToUniform(img image.Image) color.RGBA {
-	// TODO(kai/imageColor): we probably shouldn't need this anymore once everyone is an image
 	if img == nil {
 		return color.RGBA{}
 	}

@@ -618,10 +618,10 @@ var StyleOutlineFuncs = map[string]StyleFunc{
 
 // StyleShadowFuncs are functions for styling the Shadow object
 var StyleShadowFuncs = map[string]StyleFunc{
-	"box-shadow.h-offset": StyleFuncUnits(units.Value{},
-		func(obj *Shadow) *units.Value { return &obj.HOffset }),
-	"box-shadow.v-offset": StyleFuncUnits(units.Value{},
-		func(obj *Shadow) *units.Value { return &obj.VOffset }),
+	"box-shadow.offset-x": StyleFuncUnits(units.Value{},
+		func(obj *Shadow) *units.Value { return &obj.OffsetX }),
+	"box-shadow.offset-y": StyleFuncUnits(units.Value{},
+		func(obj *Shadow) *units.Value { return &obj.OffsetY }),
 	"box-shadow.blur": StyleFuncUnits(units.Value{},
 		func(obj *Shadow) *units.Value { return &obj.Blur }),
 	"box-shadow.spread": StyleFuncUnits(units.Value{},

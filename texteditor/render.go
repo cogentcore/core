@@ -441,18 +441,18 @@ func (ed *Editor) RenderLineNo(ln int, defFill bool) {
 		if hasLClr { // split the diff!
 			bszhlf := bsz
 			bszhlf.X /= 2
-			pc.FillBoxColor(sbox, bszhlf, lclr)
+			pc.FillBox(sbox, bszhlf, lclr)
 			nsp := sbox
 			nsp.X += bszhlf.X
 			pc.FillBox(nsp, bszhlf, ed.SelectColor)
 		} else {
-			actClr = colors.ToUniform(ed.SelectColor)
+			actClr = ed.SelectColor
 			pc.FillBox(sbox, bsz, ed.SelectColor)
 		}
 	} else if hasLClr {
-		pc.FillBoxColor(sbox, bsz, lclr)
+		pc.FillBox(sbox, bsz, lclr)
 	} else if defFill {
-		actClr = colors.ToUniform(ed.LineNumberColor)
+		actClr = ed.LineNumberColor
 		pc.FillBox(sbox, bsz, ed.LineNumberColor)
 	}
 
@@ -461,8 +461,9 @@ func (ed *Editor) RenderLineNo(ln int, defFill bool) {
 	lfmt = "%" + lfmt + "d"
 	lnstr := fmt.Sprintf(lfmt, ln+1)
 
-	if hct.ContrastRatio(actClr, fst.Color) < hct.ContrastAA {
-		fst.Color = hct.ContrastColor(actClr, hct.ContrastAA)
+	uActClr := colors.ToUniform(actClr)
+	if hct.ContrastRatio(uActClr, fst.Color) < hct.ContrastAA {
+		fst.Color = hct.ContrastColor(uActClr, hct.ContrastAA)
 	}
 	ed.LineNoRender.SetString(lnstr, fst, &sty.UnitContext, &sty.Text, true, 0, 0)
 	pos := mat32.Vec2{

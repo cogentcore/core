@@ -153,10 +153,10 @@ type Style struct { //gti:add
 	// effective margin to allocate for the element.
 	MaxBoxShadow []Shadow
 
-	// TODO(kai/imageColor)
-
 	// Color specifies the text / content color, and it is inherited.
-	Color color.RGBA
+	// Currently, only uniform colors are supported, but more complicated
+	// colors may be supported in the future.
+	Color image.Image
 
 	// Background specifies the background of the element. It is not inherited,
 	// and it is nil (transparent) by default.

@@ -32,10 +32,8 @@ type SVG struct {
 	// the description of the svg
 	Desc string `xml:"desc"`
 
-	// fill the viewport with Background
-	Fill bool
-
-	// image/color to fill background with if Fill is on
+	// Background is the image/color to fill the background with,
+	// if any.
 	Background image.Image
 
 	// Color can be set to provide a default Fill and Stroke Color value
@@ -138,18 +136,6 @@ func (sv *SVG) Resize(nwsz image.Point) {
 	sv.Geom.Size = nwsz // make sure
 }
 
-func (sv *SVG) CopyFrom(fr *SVG) {
-	sv.Title = fr.Title
-	sv.Desc = fr.Desc
-	sv.Fill = fr.Fill
-	sv.Background = fr.Background
-	sv.Geom = fr.Geom
-	sv.InvertY = fr.InvertY
-	sv.Defs.CopyFrom(&fr.Defs)
-	sv.Root.CopyFrom(&fr.Root)
-	sv.UniqueIds = nil
-}
-
 // DeleteAll deletes any existing elements in this svg
 func (sv *SVG) DeleteAll() {
 	if sv.Root.This() == nil {
@@ -206,7 +192,7 @@ func (sv *SVG) Style() {
 
 	sv.Root.Paint.Defaults()
 	if sv.Color != nil {
-		// TODO(kai/imageColor): handle non-uniform colors here
+		// TODO(kai): consider handling non-uniform colors here
 		c := colors.ToUniform(sv.Color)
 		sv.Root.SetColorProps("stroke", colors.AsHex(c))
 		sv.Root.SetColorProps("fill", colors.AsHex(c))
@@ -232,7 +218,7 @@ func (sv *SVG) Render() {
 
 	rs := &sv.RenderState
 	rs.PushBounds(sv.Pixels.Bounds())
-	if sv.Fill {
+	if sv.Background != nil {
 		sv.FillViewport()
 	}
 	sv.Root.Render(sv)

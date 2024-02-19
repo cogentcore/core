@@ -93,7 +93,6 @@ func ApplyFill(c *Config, sv *svg.SVG) error { //gti:skip
 	if c.Fill == "" {
 		return nil
 	}
-	sv.Fill = true
 	bg, err := gradient.FromString(c.Fill)
 	if err != nil {
 		return err

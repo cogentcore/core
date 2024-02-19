@@ -48,7 +48,6 @@ func TestViewBox(t *testing.T) {
 
 	tests := []string{"none", "xMinYMin", "xMidYMid", "xMaxYMax", "xMaxYMax slice"}
 	sv := NewSVG(640, 480)
-	sv.Fill = true
 	err := sv.OpenXML(file)
 	if err != nil {
 		t.Error("error opening xml:", err)

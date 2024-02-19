@@ -7,7 +7,7 @@ package texteditor
 import (
 	"bytes"
 	"fmt"
-	"image/color"
+	"image"
 	"io/fs"
 	"log"
 	"log/slog"
@@ -80,10 +80,9 @@ type Buf struct {
 	// icons for given lines -- use SetLineIcon and DeleteLineIcon
 	LineIcons map[int]icons.Icon
 
-	// TODO(kai/imageColor) (and also add line number text color)
-
-	// special line number colors given lines -- use SetLineColor and DeleteLineColor
-	LineColors map[int]color.RGBA
+	// LineColors are special line number background colors
+	// for certain lines; use SetLineColor and DeleteLineColor.
+	LineColors map[int]image.Image
 
 	// icons for each LineIcons being used
 	Icons map[icons.Icon]*gi.Icon `json:"-" xml:"-"`
@@ -2227,11 +2226,11 @@ func (tb *Buf) DeleteLineIcon(ln int) {
 }
 
 // SetLineColor sets given color at given line (0 starting)
-func (tb *Buf) SetLineColor(ln int, clr color.RGBA) {
+func (tb *Buf) SetLineColor(ln int, clr image.Image) {
 	tb.LinesMu.Lock()
 	defer tb.LinesMu.Unlock()
 	if tb.LineColors == nil {
-		tb.LineColors = make(map[int]color.RGBA)
+		tb.LineColors = make(map[int]image.Image)
 	}
 	tb.LineColors[ln] = clr
 }

@@ -5,7 +5,7 @@
 package styles
 
 import (
-	"image/color"
+	"image"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/mat32"
@@ -86,10 +86,8 @@ type Border struct { //gti:add
 	// all standard GUI elements.
 	Offset SideValues `view:"inline"`
 
-	// TODO(kai/imageColor)
-
 	// Color specifies the color of the border
-	Color SideColors `view:"inline"`
+	Color Sides[image.Image] `view:"inline"`
 }
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels
@@ -158,36 +156,40 @@ var (
 // style parameters for shadows
 type Shadow struct { //gti:add
 
-	// horizontal offset of shadow; positive = right side, negative = left side
-	HOffset units.Value
+	// OffsetX is th horizontal offset of the shadow.
+	// Positive moves it right, negative moves it left.
+	OffsetX units.Value
 
-	// vertical offset of shadow; positive = below, negative = above
-	VOffset units.Value
+	// OffsetY is the vertical offset of the shadow.
+	// Positive moves it down, negative moves it up.
+	OffsetY units.Value
 
-	// blur radius; higher numbers = more blurry
+	// Blur specifies the blur radius of the shadow.
+	// Higher numbers make it more blurry.
 	Blur units.Value
 
-	// spread radius; positive number increases size of shadow, negative decreases size
+	// Spread specifies the spread radius of the shadow.
+	// Positive numbers increase the size of the shadow,
+	// and negative numbers decrease the size.
 	Spread units.Value
 
-	// TODO(kai/imageColor)
+	// Color specifies the color of the shadow.
+	Color image.Image
 
-	// color of the shadow
-	Color color.RGBA
-
-	// if true, shadow is inset within box instead of outset outside of box;
-	// TODO: implement
+	// Inset specifies whether the shadow is inset within the
+	// box instead of outset outside of the box.
+	// TODO: implement.
 	Inset bool
 }
 
 func (s *Shadow) HasShadow() bool {
-	return s.HOffset.Dots != 0 || s.VOffset.Dots != 0 || s.Blur.Dots != 0 || s.Spread.Dots != 0
+	return s.OffsetX.Dots != 0 || s.OffsetY.Dots != 0 || s.Blur.Dots != 0 || s.Spread.Dots != 0
 }
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels
 func (s *Shadow) ToDots(uc *units.Context) {
-	s.HOffset.ToDots(uc)
-	s.VOffset.ToDots(uc)
+	s.OffsetX.ToDots(uc)
+	s.OffsetY.ToDots(uc)
 	s.Blur.ToDots(uc)
 	s.Spread.ToDots(uc)
 }
@@ -199,7 +201,7 @@ func (s *Shadow) BasePos(startPos mat32.Vec2) mat32.Vec2 {
 	// Offset directly affects position.
 	// We need to subtract spread
 	// to compensate for size changes and stay centered.
-	return startPos.Add(mat32.V2(s.HOffset.Dots, s.VOffset.Dots)).SubScalar(s.Spread.Dots)
+	return startPos.Add(mat32.V2(s.OffsetX.Dots, s.OffsetY.Dots)).SubScalar(s.Spread.Dots)
 }
 
 // BaseSize returns the total size the base box shadow
@@ -254,10 +256,10 @@ func (s *Shadow) Margin() SideFloats {
 	}
 
 	return NewSideFloats(
-		mat32.Max(s.Spread.Dots-s.VOffset.Dots+sdots, 0),
-		mat32.Max(s.Spread.Dots+s.HOffset.Dots+sdots, 0),
-		mat32.Max(s.Spread.Dots+s.VOffset.Dots+sdots, 0),
-		mat32.Max(s.Spread.Dots-s.HOffset.Dots+sdots, 0),
+		mat32.Max(s.Spread.Dots-s.OffsetY.Dots+sdots, 0),
+		mat32.Max(s.Spread.Dots+s.OffsetX.Dots+sdots, 0),
+		mat32.Max(s.Spread.Dots+s.OffsetY.Dots+sdots, 0),
+		mat32.Max(s.Spread.Dots-s.OffsetX.Dots+sdots, 0),
 	)
 }
 
@@ -329,22 +331,22 @@ func BoxShadow0() []Shadow {
 func BoxShadow1() []Shadow {
 	return []Shadow{
 		{
-			HOffset: units.Zero(),
-			VOffset: units.Dp(3),
+			OffsetX: units.Zero(),
+			OffsetY: units.Dp(3),
 			Blur:    units.Dp(1),
 			Spread:  units.Dp(-2),
 			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.2),
 		},
 		{
-			HOffset: units.Zero(),
-			VOffset: units.Dp(2),
+			OffsetX: units.Zero(),
+			OffsetY: units.Dp(2),
 			Blur:    units.Dp(2),
 			Spread:  units.Zero(),
 			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.14),
 		},
 		{
-			HOffset: units.Zero(),
-			VOffset: units.Dp(1),
+			OffsetX: units.Zero(),
+			OffsetY: units.Dp(1),
 			Blur:    units.Dp(5),
 			Spread:  units.Zero(),
 			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.12),
@@ -357,22 +359,22 @@ func BoxShadow1() []Shadow {
 func BoxShadow2() []Shadow {
 	return []Shadow{
 		{
-			HOffset: units.Zero(),
-			VOffset: units.Dp(2),
+			OffsetX: units.Zero(),
+			OffsetY: units.Dp(2),
 			Blur:    units.Dp(4),
 			Spread:  units.Dp(-1),
 			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.2),
 		},
 		{
-			HOffset: units.Zero(),
-			VOffset: units.Dp(4),
+			OffsetX: units.Zero(),
+			OffsetY: units.Dp(4),
 			Blur:    units.Dp(5),
 			Spread:  units.Zero(),
 			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.14),
 		},
 		{
-			HOffset: units.Zero(),
-			VOffset: units.Dp(1),
+			OffsetX: units.Zero(),
+			OffsetY: units.Dp(1),
 			Blur:    units.Dp(10),
 			Spread:  units.Zero(),
 			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.12),
@@ -387,22 +389,22 @@ func BoxShadow2() []Shadow {
 func BoxShadow3() []Shadow {
 	return []Shadow{
 		{
-			HOffset: units.Zero(),
-			VOffset: units.Dp(5),
+			OffsetX: units.Zero(),
+			OffsetY: units.Dp(5),
 			Blur:    units.Dp(5),
 			Spread:  units.Dp(-3),
 			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.2),
 		},
 		{
-			HOffset: units.Zero(),
-			VOffset: units.Dp(8),
+			OffsetX: units.Zero(),
+			OffsetY: units.Dp(8),
 			Blur:    units.Dp(10),
 			Spread:  units.Dp(1),
 			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.14),
 		},
 		{
-			HOffset: units.Zero(),
-			VOffset: units.Dp(3),
+			OffsetX: units.Zero(),
+			OffsetY: units.Dp(3),
 			Blur:    units.Dp(14),
 			Spread:  units.Dp(2),
 			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.12),
@@ -415,22 +417,22 @@ func BoxShadow3() []Shadow {
 func BoxShadow4() []Shadow {
 	return []Shadow{
 		{
-			HOffset: units.Zero(),
-			VOffset: units.Dp(5),
+			OffsetX: units.Zero(),
+			OffsetY: units.Dp(5),
 			Blur:    units.Dp(5),
 			Spread:  units.Dp(-3),
 			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.2),
 		},
 		{
-			HOffset: units.Zero(),
-			VOffset: units.Dp(8),
+			OffsetX: units.Zero(),
+			OffsetY: units.Dp(8),
 			Blur:    units.Dp(10),
 			Spread:  units.Dp(1),
 			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.14),
 		},
 		{
-			HOffset: units.Zero(),
-			VOffset: units.Dp(3),
+			OffsetX: units.Zero(),
+			OffsetY: units.Dp(3),
 			Blur:    units.Dp(14),
 			Spread:  units.Dp(2),
 			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.12),
@@ -443,22 +445,22 @@ func BoxShadow4() []Shadow {
 func BoxShadow5() []Shadow {
 	return []Shadow{
 		{
-			HOffset: units.Zero(),
-			VOffset: units.Dp(8),
+			OffsetX: units.Zero(),
+			OffsetY: units.Dp(8),
 			Blur:    units.Dp(10),
 			Spread:  units.Dp(-6),
 			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.2),
 		},
 		{
-			HOffset: units.Zero(),
-			VOffset: units.Dp(16),
+			OffsetX: units.Zero(),
+			OffsetY: units.Dp(16),
 			Blur:    units.Dp(24),
 			Spread:  units.Dp(2),
 			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.14),
 		},
 		{
-			HOffset: units.Zero(),
-			VOffset: units.Dp(6),
+			OffsetX: units.Zero(),
+			OffsetY: units.Dp(6),
 			Blur:    units.Dp(30),
 			Spread:  units.Dp(5),
 			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.12),
