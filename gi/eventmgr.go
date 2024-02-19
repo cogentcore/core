@@ -607,15 +607,16 @@ func (em *EventMgr) HandleLong(e events.Event, deep Widget, w *Widget, pos *imag
 	// fmt.Println("setting new:", deep)
 	*pos = e.WindowPos()
 	*t = time.AfterFunc(stime, func() {
-		em.TimerMu.Lock()
-		defer em.TimerMu.Unlock()
 		win := em.RenderWin()
 		if win == nil {
 			return
 		}
-		rc := win.RenderContext()
+		rc := win.RenderContext() // have to get this one first
 		rc.Lock()
 		defer rc.Unlock()
+
+		em.TimerMu.Lock() // then can get this
+		defer em.TimerMu.Unlock()
 		if *w == nil {
 			return
 		}

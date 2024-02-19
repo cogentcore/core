@@ -206,6 +206,7 @@ func (ch *Chooser) SetStyles() {
 			ch.HandleChooserTextFieldEvents(text)
 			text.Style(func(s *styles.Style) {
 				s.Grow = ch.Styles.Grow // we grow like our parent
+				s.Max.X.Zero()          // constrained by parent
 				s.SetTextWrap(false)
 			})
 		case "parts/text.parts/trail-icon":
