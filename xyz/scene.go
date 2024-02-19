@@ -56,9 +56,7 @@ type Scene struct {
 	// camera determines view onto scene
 	Camera Camera `set:"-"`
 
-	// TODO(kai/imageColor)
-
-	// background color
+	// background color, which is used directly as an RGB color in vulkan
 	BackgroundColor color.RGBA
 
 	// all lights used in the scene

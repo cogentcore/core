@@ -193,7 +193,6 @@ func (txt *Text2D) UpdateWorldMatrix(parWorld *mat32.Mat4) {
 }
 
 func (txt *Text2D) IsTransparent() bool {
-	// TODO(kai/imageColor)
 	return colors.ToUniform(txt.Styles.Background).A < 255
 }
 
