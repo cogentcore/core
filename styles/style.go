@@ -171,6 +171,8 @@ type Style struct { //gti:add
 
 	// StateColor, if not nil, is the color to use for the StateLayer instead of Color. If you want to disable state layers
 	// for an element, do not use this; instead, set StateLayer to 0.
+	// Currently, only uniform colors are supported, but more complicated
+	// colors may be supported in the future.
 	StateColor image.Image
 
 	// ActualBackground is the computed actual background rendered for the element,
@@ -220,7 +222,7 @@ func (s *Style) Defaults() {
 	// mostly all the defaults are 0 initial values, except these..
 	s.UnitContext.Defaults()
 	s.LayoutDefaults()
-	s.Color = colors.Scheme.OnSurface
+	s.Color = colors.C(colors.Scheme.OnSurface)
 	s.Opacity = 1
 	s.FillMargin = true
 	s.Font.Defaults()
@@ -476,11 +478,11 @@ func (s *Style) ComputeActualBackgroundFor(bg, pabg image.Image) image.Image {
 	}
 	if s.StateLayer > 0 {
 		sc := s.Color
-		if !colors.IsNil(s.StateColor) {
+		if s.StateColor != nil {
 			sc = s.StateColor
 		}
 		// we take our state-layer-applied state color and then overlay it onto our background color
-		sclr := colors.WithAF32(sc, s.StateLayer)
+		sclr := colors.WithAF32(colors.ToUniform(sc), s.StateLayer)
 		bg = gradient.Apply(bg, func(c color.Color) color.Color {
 			return colors.AlphaBlend(c, sclr)
 		})

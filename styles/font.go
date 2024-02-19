@@ -6,7 +6,6 @@ package styles
 
 import (
 	"image"
-	"image/color"
 	"log/slog"
 	"strings"
 
@@ -438,7 +437,7 @@ type FontRender struct { //gti:add
 	Font
 
 	// text color (inhereted)
-	Color color.RGBA
+	Color image.Image
 
 	// background color (not inherited, transparent by default)
 	Background image.Image
@@ -460,7 +459,7 @@ func (s *Style) FontRender() *FontRender {
 }
 
 func (fr *FontRender) Defaults() {
-	fr.Color = colors.Black
+	fr.Color = colors.C(colors.Scheme.OnSurface)
 	fr.Opacity = 1
 	fr.Font.Defaults()
 }
