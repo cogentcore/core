@@ -231,11 +231,9 @@ func (mv *MapView) ConfigMapGrid() {
 		vvb.AsWidgetBase().OnInput(mv.HandleEvent)
 		kvb.AsWidgetBase().OnInput(mv.HandleEvent)
 		w.Style(func(s *styles.Style) {
-			s.Grow.Set(0, 0)
 			s.SetTextWrap(false)
 		})
 		keyw.Style(func(s *styles.Style) {
-			s.Grow.Set(0, 0)
 			s.SetTextWrap(false)
 		})
 		if ifaceType {

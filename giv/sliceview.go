@@ -442,7 +442,6 @@ func (sv *SliceViewBase) StyleValueWidget(w gi.Widget, s *styles.Style, row, col
 	if sv.MaxWidth > 0 {
 		hv := units.Ch(float32(sv.MaxWidth))
 		s.Min.X.Val = max(s.Min.X.Val, hv.Convert(s.Min.X.Un, &s.UnitContext).Val)
-		// s.Max.X.Val = max(s.Max.X.Val, hv.Convert(s.Max.X.Un, &s.UnContext).Val)
 	}
 	s.SetTextWrap(false)
 }
