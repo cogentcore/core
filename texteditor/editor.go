@@ -158,13 +158,17 @@ type Editor struct { //core:embedder
 	// total size of all lines as rendered
 	LinesSize mat32.Vec2 `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// TotalSize = LinesSize plus extra space and line numbers etc
+	// the LinesSize plus extra space and line numbers etc
 	TotalSize mat32.Vec2 `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// LineLayoutSize is Geom.Size.Actual.Total subtracting
+	// the Geom.Size.Actual.Total subtracting
 	// extra space and line numbers -- this is what
 	// LayoutStdLR sees for laying out each line
 	LineLayoutSize mat32.Vec2 `set:"-" edit:"-" json:"-" xml:"-"`
+
+	// the last LineLayoutSize used in laying out lines.
+	// Used to trigger a new layout only when needed.
+	lastlineLayoutSize mat32.Vec2 `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// oscillates between on and off for blinking
 	BlinkOn bool `set:"-" edit:"-" json:"-" xml:"-"`

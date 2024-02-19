@@ -332,6 +332,9 @@ func (sl *Splits) Position() {
 }
 
 func (sl *Splits) PositionSplits() {
+	if sl.NumChildren() <= 1 {
+		return
+	}
 	if sl.Parts != nil {
 		sl.Parts.Geom.Size = sl.Geom.Size // inherit: allows bbox to include handle
 	}

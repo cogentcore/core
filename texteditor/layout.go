@@ -37,11 +37,18 @@ func (ed *Editor) StyleSizes() {
 // NLinesChars, LineNoOff, LineLayoutSize
 func (ed *Editor) UpdateFromAlloc() {
 	sty := &ed.Styles
-	asz := ed.Geom.Size.Actual.Content
+	asz := ed.Geom.Size.Alloc.Content
+	sbw := mat32.Ceil(ed.Styles.ScrollBarWidth.Dots)
+	if ed.HasScroll[mat32.Y] {
+		asz.X -= sbw
+	}
+	if ed.HasScroll[mat32.X] {
+		asz.Y -= sbw
+	}
 	ed.LineLayoutSize = asz
 	nv := mat32.Vec2{}
 	if asz == nv {
-		ed.NLinesChars.Y = 40
+		ed.NLinesChars.Y = 20
 		ed.NLinesChars.X = 80
 	} else {
 		ed.NLinesChars.Y = int(mat32.Floor(float32(asz.Y) / ed.LineHeight))
@@ -52,54 +59,21 @@ func (ed *Editor) UpdateFromAlloc() {
 	ed.LineLayoutSize.X -= ed.LineNoOff
 }
 
-// note: Layout reverts to basic Widget behavior for layout if no kids, like us..
-
-func (ed *Editor) SizeFinal() {
-	sz := &ed.Geom.Size
-	ed.ManageOverflow(0, true)
-	ed.Layout.SizeFinal()
-	sbw := mat32.Ceil(ed.Styles.ScrollBarWidth.Dots)
-	sz.Actual.Content.X -= sbw // anticipate scroll
-	ed.LayoutAll()
-}
-
-// LayoutAll does LayoutAllLines and ManageOverflow to update scrolls
-func (ed *Editor) LayoutAll() {
-	sz := &ed.Geom.Size
-	sbw := mat32.Ceil(ed.Styles.ScrollBarWidth.Dots)
-	ed.UpdateFromAlloc()
-	ed.LayoutAllLines()
-	// fmt.Println(ed, "final pre manage, actual:", sz.Actual, "space:", sz.Space, "alloc:", sz.Alloc)
-	if ed.ManageOverflow(3, true) {
-		sz.Actual.Total = sz.Alloc.Total
-		if ed.HasScroll[mat32.X] {
-			sz.Actual.Total.Y -= sbw
-		}
-		if ed.HasScroll[mat32.Y] {
-			sz.Actual.Total.X -= sbw
-		}
-		sz.SetContentFromTotal(&sz.Actual) // reduce content
-		// fmt.Println("adding scrolls, actual:", sz.Actual, "space:", sz.Space)
-		ed.UpdateFromAlloc()
-		ed.LayoutAllLines()
-	}
-}
-
-func (ed *Editor) Position() {
-	ed.Layout.Position()
-	ed.ConfigScrolls()
-}
-
-func (ed *Editor) ScenePos() {
-	ed.Layout.ScenePos()
-	ed.PositionScrolls()
+func (ed *Editor) InternalSizeFromLines() {
+	sty := &ed.Styles
+	spc := sty.BoxSpace()
+	ed.TotalSize = ed.LinesSize.Add(spc.Size())
+	ed.TotalSize.X += ed.LineNoOff
+	ed.Geom.Size.Internal = ed.TotalSize
+	ed.Geom.Size.Internal.Y += ed.LineHeight
 }
 
 // LayoutAllLines generates TextRenders of lines
 // from the Markup version of the source in Buf.
 // It computes the total LinesSize and TotalSize.
 func (ed *Editor) LayoutAllLines() {
-	if ed.LineLayoutSize == (mat32.Vec2{}) || ed.Styles.Font.Size.Val == 0 {
+	ed.UpdateFromAlloc()
+	if ed.LineLayoutSize.Y == 0 || ed.Styles.Font.Size.Val == 0 {
 		return
 	}
 	if ed.Buf == nil || ed.Buf.NumLines() == 0 {
@@ -109,8 +83,6 @@ func (ed *Editor) LayoutAllLines() {
 	ed.lastFilename = ed.Buf.Filename
 
 	ed.Buf.Hi.TabSize = ed.Styles.Text.TabSize
-	// fmt.Printf("layout all: %v\n", ed.Nm)
-
 	ed.NLines = ed.Buf.NumLines()
 	buf := ed.Buf
 	buf.MarkupMu.RLock()
@@ -131,7 +103,6 @@ func (ed *Editor) LayoutAllLines() {
 	}
 
 	sz := ed.LineLayoutSize
-	// fmt.Println("LineLayoutSize:", sz)
 
 	sty := &ed.Styles
 	fst := sty.FontRender()
@@ -155,17 +126,83 @@ func (ed *Editor) LayoutAllLines() {
 		mxwd = mat32.Max(mxwd, ed.Renders[ln].Size.X)
 	}
 	buf.MarkupMu.RUnlock()
+	ed.LinesSize = mat32.V2(mxwd, off)
+	ed.lastlineLayoutSize = ed.LineLayoutSize
+	ed.InternalSizeFromLines()
+}
+
+// ReLayoutAllLines updates the Renders Layout given current size, if changed
+func (ed *Editor) ReLayoutAllLines() {
+	ed.UpdateFromAlloc()
+	if ed.LineLayoutSize.Y == 0 || ed.Styles.Font.Size.Val == 0 {
+		return
+	}
+	if ed.Buf == nil || ed.Buf.NumLines() == 0 {
+		return
+	}
+	if ed.lastlineLayoutSize == ed.LineLayoutSize {
+		ed.InternalSizeFromLines()
+		return
+	}
+	buf := ed.Buf
+	buf.MarkupMu.RLock()
+
+	nln := ed.NLines
+	if nln >= len(buf.Markup) {
+		nln = len(buf.Markup)
+	}
+	sz := ed.LineLayoutSize
+
+	sty := &ed.Styles
+	fst := sty.FontRender()
+	fst.Background = nil
+	off := float32(0)
+	mxwd := sz.X // always start with our render size
+
+	for ln := 0; ln < nln; ln++ {
+		if ln >= len(ed.Renders) || ln >= len(buf.Markup) {
+			break
+		}
+		ed.Renders[ln].Layout(&sty.Text, sty.FontRender(), &sty.UnContext, sz)
+		ed.Offs[ln] = off
+		lsz := mat32.Max(ed.Renders[ln].Size.Y, ed.LineHeight)
+		off += lsz
+		mxwd = mat32.Max(mxwd, ed.Renders[ln].Size.X)
+	}
+	buf.MarkupMu.RUnlock()
 
 	ed.LinesSize = mat32.V2(mxwd, off)
+	ed.lastlineLayoutSize = ed.LineLayoutSize
+	ed.InternalSizeFromLines()
+}
 
-	spc := sty.BoxSpace()
-	ed.TotalSize = ed.LinesSize.Add(spc.Size())
-	ed.TotalSize.X += ed.LineNoOff
-	ed.Geom.Size.Internal = ed.TotalSize
-	ed.Geom.Size.Internal.Y += ed.LineHeight
-	// fmt.Println(ed, "internal:", ed.TotalSize)
-	// extraHalf := ed.LineHeight * 0.5 * float32(ed.NLinesChars.Y)
-	// todo: add extra half to bottom of size?
+// note: Layout reverts to basic Widget behavior for layout if no kids, like us..
+
+func (ed *Editor) SizeUp() {
+	ed.Layout.SizeUp()
+	ed.LayoutAllLines() // initial
+}
+
+func (ed *Editor) SizeDown(iter int) bool {
+	redo := ed.Layout.SizeDown(iter)
+	chg := ed.ManageOverflow(iter, true) // this must go first.
+	ed.ReLayoutAllLines()
+	return redo || chg
+}
+
+func (ed *Editor) SizeFinal() {
+	ed.Layout.SizeFinal()
+	ed.ReLayoutAllLines()
+}
+
+func (ed *Editor) Position() {
+	ed.Layout.Position()
+	ed.ConfigScrolls()
+}
+
+func (ed *Editor) ScenePos() {
+	ed.Layout.ScenePos()
+	ed.PositionScrolls()
 }
 
 // LayoutLine generates render of given line (including highlighting).
