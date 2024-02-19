@@ -342,7 +342,7 @@ func InspectorWindow(k ki.Ki) {
 	}
 	d := gi.NewBody("inspector")
 	InspectorView(d, k)
-	d.NewWindow().Run()
+	d.NewWindow().SetCloseOnBack(true).Run()
 }
 
 // InspectorView configures the given body to have an interactive inspector

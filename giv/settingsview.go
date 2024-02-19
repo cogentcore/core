@@ -35,7 +35,7 @@ func SettingsWindow() {
 	}
 	d := gi.NewBody("settings").SetTitle("Settings").SetData(&gi.AllSettings)
 	SettingsView(d)
-	d.NewWindow().Run()
+	d.NewWindow().SetCloseOnBack(true).Run()
 }
 
 // SettingsView adds to the given body a view of user settings
