@@ -87,6 +87,18 @@ func TestRenderFrameAlignmentCenter(t *testing.T) {
 	b.AssertRender(t, "render/frame-alignment-center")
 }
 
+// For https://github.com/cogentcore/core/issues/808
+func TestOverflowAutoDefinedMax(t *testing.T) {
+	b := NewBody()
+	fr := NewFrame(b)
+	fr.Style(func(s *styles.Style) {
+		s.Max.Set(units.Dp(100))
+		s.Overflow.Set(styles.OverflowAuto)
+	})
+	NewLabel(fr).SetText("This is a long label that I have written for the purpose of demonstrating an issue with overflow auto on elements with a defined max")
+	b.AssertRender(t, "render/overflow-auto-defined-max")
+}
+
 // For https://github.com/cogentcore/core/issues/615
 func TestRenderNestedScroll(t *testing.T) {
 	// TODO(#808)
