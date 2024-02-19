@@ -9,6 +9,8 @@
 
 package goosi
 
+import "cogentcore.org/core/styles"
+
 //go:generate core generate
 
 var (
@@ -163,11 +165,11 @@ type App interface {
 	SendEmptyEvent()
 
 	// ShowVirtualKeyboard shows a virtual keyboard of the given type.
-	// ShowVirtualKeyboard only has an effect on mobile platforms (iOS and Android).
-	ShowVirtualKeyboard(typ VirtualKeyboardTypes)
+	// ShowVirtualKeyboard only has an effect on mobile platforms (iOS, Android, and Web).
+	ShowVirtualKeyboard(typ styles.VirtualKeyboards)
 
 	// HideVirtualKeyboard hides the virtual keyboard.
-	// HideVirtualKeyboard only has an effect on mobile platforms (iOS and Android).
+	// HideVirtualKeyboard only has an effect on mobile platforms (iOS, Android, and Web).
 	HideVirtualKeyboard()
 
 	// IsDark returns whether the system color theme is dark (as oppposed to light)
@@ -215,17 +217,3 @@ const (
 func (p Platforms) IsMobile() bool {
 	return p == IOS || p == Android || p == Web || p == Offscreen
 }
-
-// VirtualKeyboardTypes are all of the supported virtual keyboard types for mobile platforms
-type VirtualKeyboardTypes int32 //enums:enum
-
-// TOOD(kai): support more of these (see https://developer.android.com/reference/android/view/inputmethod/EditorInfo)
-
-const (
-	// DefaultKeyboard is the keyboard with default input style and "return" return key
-	DefaultKeyboard VirtualKeyboardTypes = iota
-	// SingleLineKeyboard is the keyboard with default input style and "Done" return key
-	SingleLineKeyboard
-	// NumberKeyboard is the keyboard with number input style and "Done" return key
-	NumberKeyboard
-)

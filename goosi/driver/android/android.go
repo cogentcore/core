@@ -59,6 +59,7 @@ import (
 	"cogentcore.org/core/goosi/driver/base"
 	"cogentcore.org/core/goosi/driver/mobile/callfn"
 	"cogentcore.org/core/goosi/driver/mobile/mobileinit"
+	"cogentcore.org/core/styles"
 )
 
 // mimeMap contains standard mime entries that are missing on Android
@@ -306,10 +307,10 @@ func (a *App) MainLoop() {
 }
 
 // ShowVirtualKeyboard requests the driver to show a virtual keyboard for text input
-func (a *App) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
+func (a *App) ShowVirtualKeyboard(typ styles.VirtualKeyboards) {
 	err := mobileinit.RunOnJVM(func(vm, jniEnv, ctx uintptr) error {
 		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
-		C.showKeyboard(env, C.int(int32(typ)))
+		C.showKeyboard(env, C.int(int32(typ-1)))
 		return nil
 	})
 	if err != nil {

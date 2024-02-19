@@ -23,6 +23,7 @@ import (
 	"cogentcore.org/core/goosi/driver/base"
 	"cogentcore.org/core/jsfs"
 	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/styles"
 )
 
 func Init() {
@@ -181,7 +182,7 @@ func (a *App) IsDark() bool {
 		js.Global().Call("matchMedia", "(prefers-color-scheme: dark)").Get("matches").Truthy()
 }
 
-func (a *App) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
+func (a *App) ShowVirtualKeyboard(typ styles.VirtualKeyboards) {
 	js.Global().Get("document").Call("getElementById", "text-field").Call("focus")
 }
 

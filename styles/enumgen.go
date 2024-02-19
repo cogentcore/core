@@ -48,14 +48,14 @@ var _BorderStylesNameToValueMap = map[string]BorderStyles{
 
 var _BorderStylesDescMap = map[BorderStyles]string{
 	0: `BorderSolid indicates to render a solid border.`,
-	1: `BorderDotted indicates to render a dotted border`,
-	2: `BorderDashed indicates to render a dashed border`,
-	3: `TODO(kai): implement these`,
-	4: ``,
-	5: ``,
-	6: ``,
-	7: ``,
-	8: `BorderNone indicates to render no border`,
+	1: `BorderDotted indicates to render a dotted border.`,
+	2: `BorderDashed indicates to render a dashed border.`,
+	3: `BorderDouble is not currently supported.`,
+	4: `BorderGroove is not currently supported.`,
+	5: `BorderRidge is not currently supported.`,
+	6: `BorderInset is not currently supported.`,
+	7: `BorderOutset is not currently supported.`,
+	8: `BorderNone indicates to render no border.`,
 }
 
 var _BorderStylesMap = map[BorderStyles]string{
@@ -167,8 +167,8 @@ var _FontStylesNameToValueMap = map[string]FontStyles{
 
 var _FontStylesDescMap = map[FontStyles]string{
 	0: ``,
-	1: ``,
-	2: ``,
+	1: `Italic indicates to make font italic`,
+	2: `Oblique indicates to make font slanted`,
 }
 
 var _FontStylesMap = map[FontStyles]string{
@@ -602,9 +602,9 @@ var _TextDecorationsNameToValueMap = map[string]TextDecorations{
 
 var _TextDecorationsDescMap = map[TextDecorations]string{
 	0: ``,
-	1: ``,
-	2: ``,
-	3: ``,
+	1: `Underline indicates to place a line below text`,
+	2: `Overline indicates to place a line above text`,
+	3: `LineThrough indicates to place a line through text`,
 	4: `Blink is not currently supported (and probably a bad idea generally ;)`,
 	5: `DottedUnderline is used for abbr tag -- otherwise not a standard text-decoration option afaik`,
 	6: `DecoParaStart at start of a SpanRender indicates that it should be styled as the start of a new paragraph and not just the start of a new line`,
@@ -2086,6 +2086,117 @@ func (i SideIndexes) MarshalText() ([]byte, error) {
 func (i *SideIndexes) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
 		log.Println("SideIndexes.UnmarshalText:", err)
+	}
+	return nil
+}
+
+var _VirtualKeyboardsValues = []VirtualKeyboards{0, 1, 2, 3}
+
+// VirtualKeyboardsN is the highest valid value
+// for type VirtualKeyboards, plus one.
+const VirtualKeyboardsN VirtualKeyboards = 4
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _VirtualKeyboardsNoOp() {
+	var x [1]struct{}
+	_ = x[NoKeyboard-(0)]
+	_ = x[DefaultKeyboard-(1)]
+	_ = x[SingleLineKeyboard-(2)]
+	_ = x[NumberKeyboard-(3)]
+}
+
+var _VirtualKeyboardsNameToValueMap = map[string]VirtualKeyboards{
+	`NoKeyboard`:         0,
+	`DefaultKeyboard`:    1,
+	`SingleLineKeyboard`: 2,
+	`NumberKeyboard`:     3,
+}
+
+var _VirtualKeyboardsDescMap = map[VirtualKeyboards]string{
+	0: `NoKeyboard indicates to display no virtual keyboard.`,
+	1: `DefaultKeyboard indicates to display a virtual keyboard with a default input style and a &#34;Return&#34; return key.`,
+	2: `SingleLineKeyboard indicates to display a virtual keyboard with a default input style and a &#34;Done&#34; return key.`,
+	3: `NumberKeyboard indicates to display a virtual keyboard with a number input style and a &#34;Done&#34; return key.`,
+}
+
+var _VirtualKeyboardsMap = map[VirtualKeyboards]string{
+	0: `NoKeyboard`,
+	1: `DefaultKeyboard`,
+	2: `SingleLineKeyboard`,
+	3: `NumberKeyboard`,
+}
+
+// String returns the string representation
+// of this VirtualKeyboards value.
+func (i VirtualKeyboards) String() string {
+	if str, ok := _VirtualKeyboardsMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
+}
+
+// SetString sets the VirtualKeyboards value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *VirtualKeyboards) SetString(s string) error {
+	if val, ok := _VirtualKeyboardsNameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+	return errors.New(s + " is not a valid value for type VirtualKeyboards")
+}
+
+// Int64 returns the VirtualKeyboards value as an int64.
+func (i VirtualKeyboards) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the VirtualKeyboards value from an int64.
+func (i *VirtualKeyboards) SetInt64(in int64) {
+	*i = VirtualKeyboards(in)
+}
+
+// Desc returns the description of the VirtualKeyboards value.
+func (i VirtualKeyboards) Desc() string {
+	if str, ok := _VirtualKeyboardsDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// VirtualKeyboardsValues returns all possible values
+// for the type VirtualKeyboards.
+func VirtualKeyboardsValues() []VirtualKeyboards {
+	return _VirtualKeyboardsValues
+}
+
+// Values returns all possible values
+// for the type VirtualKeyboards.
+func (i VirtualKeyboards) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_VirtualKeyboardsValues))
+	for i, d := range _VirtualKeyboardsValues {
+		res[i] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type VirtualKeyboards.
+func (i VirtualKeyboards) IsValid() bool {
+	_, ok := _VirtualKeyboardsMap[i]
+	return ok
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i VirtualKeyboards) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *VirtualKeyboards) UnmarshalText(text []byte) error {
+	if err := i.SetString(string(text)); err != nil {
+		log.Println("VirtualKeyboards.UnmarshalText:", err)
 	}
 	return nil
 }

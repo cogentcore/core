@@ -17,7 +17,6 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/ki"
@@ -441,7 +440,6 @@ func (tf *TextField) EditDone() {
 	}
 	tf.ClearSelected()
 	tf.ClearCursor()
-	goosi.TheApp.HideVirtualKeyboard()
 	tf.SetNeedsLayout(true)
 }
 
@@ -1705,11 +1703,6 @@ func (tf *TextField) HandleKeyEvents() {
 		}
 		if tf.AbilityIs(abilities.Focusable) {
 			tf.ScrollToMe()
-			if _, ok := tf.Parent().Parent().(*Spinner); ok {
-				goosi.TheApp.ShowVirtualKeyboard(goosi.NumberKeyboard)
-			} else {
-				goosi.TheApp.ShowVirtualKeyboard(goosi.SingleLineKeyboard)
-			}
 			tf.SetState(true, states.Focused)
 		}
 	})

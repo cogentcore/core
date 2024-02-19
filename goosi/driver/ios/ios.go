@@ -42,6 +42,7 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/styles"
 )
 
 // MainLoop is the main app loop.
@@ -184,8 +185,8 @@ func lifecycleFocused() {
 }
 
 // ShowVirtualKeyboard requests the driver to show a virtual keyboard for text input
-func (a *App) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
-	C.showKeyboard(C.int(int32(typ)))
+func (a *App) ShowVirtualKeyboard(typ styles.VirtualKeyboards) {
+	C.showKeyboard(C.int(int32(typ - 1)))
 }
 
 // HideVirtualKeyboard requests the driver to hide any visible virtual keyboard

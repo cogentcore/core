@@ -19,6 +19,7 @@ import (
 	"sync"
 
 	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/styles"
 )
 
 // App contains the data and logic common to all implementations of [goosi.App].
@@ -193,7 +194,7 @@ func (a *App) Cursor(win goosi.Window) goosi.Cursor {
 	return &goosi.CursorBase{}
 }
 
-func (a *App) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
+func (a *App) ShowVirtualKeyboard(typ styles.VirtualKeyboards) {
 	// no-op by default
 }
 

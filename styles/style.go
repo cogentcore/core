@@ -178,6 +178,10 @@ type Style struct { //gti:add
 	// ActualBackground. It is automatically computed and should not be set manually.
 	ActualBackground image.Image
 
+	// VirtualKeyboard is the virtual keyboard to display, if any,
+	// on mobile platforms when this element is focused.
+	VirtualKeyboard VirtualKeyboards
+
 	// position is only used for Layout = Nil cases
 	Pos units.XY `view:"inline"`
 
@@ -222,6 +226,29 @@ func (s *Style) Defaults() {
 	s.Font.Defaults()
 	s.Text.Defaults()
 }
+
+// VirtualKeyboards are all of the supported virtual keyboard types
+// to display on mobile platforms.
+type VirtualKeyboards int32 //enums:enum
+
+// TOOD(kai): support more of these (see https://developer.android.com/reference/android/view/inputmethod/EditorInfo), implement type on web
+
+const (
+	// NoKeyboard indicates to display no virtual keyboard.
+	NoKeyboard VirtualKeyboards = iota
+
+	// DefaultKeyboard indicates to display a virtual keyboard
+	// with a default input style and a "Return" return key.
+	DefaultKeyboard
+
+	// SingleLineKeyboard indicates to display a virtual keyboard
+	// with a default input style and a "Done" return key.
+	SingleLineKeyboard
+
+	// NumberKeyboard indicates to display a virtual keyboard
+	// with a number input style and a "Done" return key.
+	NumberKeyboard
+)
 
 // todo: Animation
 

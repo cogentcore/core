@@ -4,8 +4,6 @@
 
 package goosi
 
-//go:generate core generate
-
 import (
 	"cogentcore.org/core/enums"
 )
