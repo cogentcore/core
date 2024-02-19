@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/ki"
+	"cogentcore.org/core/states"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -74,17 +75,26 @@ func (sw *Switches) SetStyles() {
 				}
 			} else if ip == sw.NumChildren()-1 {
 				if ps.Direction == styles.Row {
-					s.Border.Width.SetLeft(units.Zero())
+					if !s.Is(states.Focused) {
+						s.Border.Width.SetLeft(units.Zero())
+						s.MaxBorder.Width = s.Border.Width
+					}
 					s.Border.Radius.Set(units.Zero(), brf, brf, units.Zero())
 				} else {
-					s.Border.Width.SetTop(units.Zero())
+					if !s.Is(states.Focused) {
+						s.Border.Width.SetTop(units.Zero())
+						s.MaxBorder.Width = s.Border.Width
+					}
 					s.Border.Radius.Set(units.Zero(), units.Zero(), brf, brf)
 				}
 			} else {
-				if ps.Direction == styles.Row {
-					s.Border.Width.SetLeft(units.Zero())
-				} else {
-					s.Border.Width.SetTop(units.Zero())
+				if !s.Is(states.Focused) {
+					if ps.Direction == styles.Row {
+						s.Border.Width.SetLeft(units.Zero())
+					} else {
+						s.Border.Width.SetTop(units.Zero())
+					}
+					s.MaxBorder.Width = s.Border.Width
 				}
 				s.Border.Radius.Zero()
 			}

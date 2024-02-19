@@ -23,6 +23,7 @@ import (
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/pi/complete"
+	"cogentcore.org/core/states"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -158,9 +159,11 @@ func (ch *Chooser) SetStyles() {
 			s.Background = colors.C(colors.Scheme.Secondary.Container)
 			s.Color = colors.C(colors.Scheme.Secondary.OnContainer)
 		case ChooserOutlined:
-			s.Border.Style.Set(styles.BorderSolid)
-			s.Border.Width.Set(units.Dp(1))
-			s.Border.Color.Set(colors.C(colors.Scheme.OnSurfaceVariant))
+			if !s.Is(states.Focused) {
+				s.Border.Style.Set(styles.BorderSolid)
+				s.Border.Width.Set(units.Dp(1))
+				s.Border.Color.Set(colors.C(colors.Scheme.OnSurfaceVariant))
+			}
 		}
 		// textfield handles everything
 		if ch.Editable {
