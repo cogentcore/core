@@ -5,12 +5,15 @@
 package paint
 
 import (
+	"image"
 	"os"
+	"slices"
 	"testing"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/grows/images"
+	"cogentcore.org/core/grr"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -37,8 +40,17 @@ func RunTest(t *testing.T, nm string, width int, height int, f func(pc *Context)
 
 func TestRender(t *testing.T) {
 	RunTest(t, "render", 300, 300, func(pc *Context) {
+		testimg, _, err := images.Open("test.png")
+		grr.Test(t, err)
+		imgs := []image.Image{
+			colors.C(colors.Blue),
+			gradient.NewLinear().AddStop(colors.Orange, 0).AddStop(colors.Red, 1).SetTransform(mat32.Rotate2D(90)),
+			gradient.NewRadial().AddStop(colors.Green, 0.2).AddStop(colors.Blue, 0.6, 0.4).AddStop(colors.Purple, 0.9, 0.8),
+			testimg,
+		}
+
 		bs := styles.Border{}
-		bs.Color.Set(colors.C(colors.Red), colors.C(colors.Blue), colors.C(colors.Green), colors.C(colors.Orange))
+		bs.Color.Set(imgs...)
 		bs.Width.Set(units.Dot(20), units.Dot(30), units.Dot(40), units.Dot(50))
 		bs.ToDots(&pc.UnContext)
 
@@ -49,8 +61,9 @@ func TestRender(t *testing.T) {
 		pc.DrawBorder(0, 0, 300, 300, bs)
 		pc.FillStrokeClear() // actually render path that has been setup
 
+		slices.Reverse(imgs)
 		// next draw a rounded rectangle
-		bs.Color.Set(colors.C(colors.Purple), colors.C(colors.Green), colors.C(colors.Red), colors.C(colors.Blue))
+		bs.Color.Set(imgs...)
 		// bs.Width.Set(units.NewDot(10))
 		bs.Radius.Set(units.Dot(0), units.Dot(30), units.Dot(10))
 		pc.FillStyle.Color = colors.C(colors.Lightblue)
@@ -63,6 +76,7 @@ func TestRender(t *testing.T) {
 		tsty.Defaults()
 		fsty := &styles.FontRender{}
 		fsty.Defaults()
+		fsty.Color = imgs[2]
 
 		tsty.Align = styles.Center
 
