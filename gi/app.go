@@ -251,7 +251,7 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 				}
 				s.Border.Radius = styles.BorderRadiusFull
 				s.Min.X.SetCustom(func(uc *units.Context) float32 {
-					return mat32.Clamp(uc.Ch(40), uc.Vw(20), uc.Vw(80))
+					return min(mat32.Clamp(uc.Ch(40), uc.Vw(20), uc.Vw(80)), uc.Ch(80))
 				})
 			})
 		}

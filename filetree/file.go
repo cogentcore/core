@@ -389,7 +389,11 @@ func (fn *Node) CopyFileToDir(filename string, perm os.FileMode) {
 	if ok && ofn.Info.Vcs >= vci.Stored {
 		nfn, ok := fn.FRoot.FindFile(tpath)
 		if ok && nfn.This() != fn.FRoot.This() {
-			nfn.AddToVCS()
+			if string(nfn.FPath) != tpath {
+				fmt.Printf("error: nfn.FPath != tpath; %q != %q, see bug #453\n", nfn.FPath, tpath)
+			} else {
+				nfn.AddToVCS() // todo: this sometimes is not just tpath!  See bug #453
+			}
 			nfn.UpdateNode()
 		}
 	}
