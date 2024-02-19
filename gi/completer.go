@@ -126,8 +126,8 @@ func (c *Complete) Show(ctx Widget, pos image.Point, text string, force bool) {
 
 	c.DelayTimer = time.AfterFunc(wait,
 		func() {
-			c.DelayMu.Lock()
 			c.ShowNow(ctx, pos, text, force)
+			c.DelayMu.Lock()
 			c.DelayTimer = nil
 			c.DelayMu.Unlock()
 		})

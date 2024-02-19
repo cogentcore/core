@@ -876,13 +876,6 @@ func (ed *Editor) ScrollCursorInView() bool {
 	return false
 }
 
-// TODO: do we need something like this? this stack overflows
-// // AutoScroll tells any parent scroll layout to scroll to do its autoscroll
-// // based on given location -- for dragging
-// func (ed *View) AutoScroll(pos image.Point) bool {
-// 	return ed.AutoScroll(pos)
-// }
-
 // ScrollCursorToCenterIfHidden checks if the cursor is not visible, and if
 // so, scrolls to the center, along both dimensions.
 func (ed *Editor) ScrollCursorToCenterIfHidden() bool {

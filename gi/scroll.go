@@ -288,19 +288,19 @@ func (ly *Layout) ScrollToItem(wi Widget) bool {
 	return ly.ScrollToBox(wi.AsWidget().Geom.TotalRect())
 }
 
-// AutoScrollDim auto-scrolls along one dimension
-func (ly *Layout) AutoScrollDim(d mat32.Dims, sti, posi int) bool {
+// AutoScrollDim auto-scrolls along one dimension, based on the current
+// position value, which is in the current scroll value range.
+func (ly *Layout) AutoScrollDim(d mat32.Dims, pos float32) bool {
 	if !ly.HasScroll[d] || ly.Scrolls[d] == nil {
 		return false
 	}
 	sb := ly.Scrolls[d]
 	smax := sb.EffectiveMax()
 	ssz := sb.ScrollThumbValue()
-	dst := ly.Styles.Font.Size.Dots * AutoScrollRate
+	dst := sb.Step * AutoScrollRate
 
-	st, pos := float32(sti), float32(posi)
-	mind := max(0, pos-st)
-	maxd := max(0, (st+ssz)-pos)
+	mind := max(0, (pos - sb.Value))
+	maxd := max(0, (sb.Value+ssz)-pos)
 
 	if mind <= maxd {
 		pct := mind / ssz
@@ -313,7 +313,7 @@ func (ly *Layout) AutoScrollDim(d mat32.Dims, sti, posi int) bool {
 		pct := maxd / ssz
 		if pct < .1 && sb.Value < smax {
 			dst = min(dst, (smax - sb.Value))
-			ly.ScrollActionDelta(d, dst)
+			sb.SetValueAction(sb.Value + dst)
 			return true
 		}
 	}
@@ -322,24 +322,22 @@ func (ly *Layout) AutoScrollDim(d mat32.Dims, sti, posi int) bool {
 
 var LayoutLastAutoScroll time.Time
 
-// AutoScroll scrolls the layout based on mouse position, when appropriate (DND, menus)
-func (ly *Layout) AutoScroll(pos image.Point) bool {
+// AutoScroll scrolls the layout based on given position in scroll
+// coordinates (i.e., already subtracing the BBox Min for a mouse event).
+func (ly *Layout) AutoScroll(pos mat32.Vec2) bool {
 	now := time.Now()
 	lag := now.Sub(LayoutLastAutoScroll)
 	if lag < SystemSettings.LayoutAutoScrollDelay {
 		return false
 	}
-	// ly.BBoxMu.RLock()
-	wbb := ly.Geom.ContentBBox
-	// ly.BBoxMu.RUnlock()
 	did := false
 	if ly.HasScroll[mat32.Y] && ly.HasScroll[mat32.X] {
-		did = ly.AutoScrollDim(mat32.Y, wbb.Min.Y, pos.Y)
-		did = did || ly.AutoScrollDim(mat32.X, wbb.Min.X, pos.X)
+		did = ly.AutoScrollDim(mat32.Y, pos.Y)
+		did = did || ly.AutoScrollDim(mat32.X, pos.X)
 	} else if ly.HasScroll[mat32.Y] {
-		did = ly.AutoScrollDim(mat32.Y, wbb.Min.Y, pos.Y)
+		did = ly.AutoScrollDim(mat32.Y, pos.Y)
 	} else if ly.HasScroll[mat32.X] {
-		did = ly.AutoScrollDim(mat32.X, wbb.Min.X, pos.X)
+		did = ly.AutoScrollDim(mat32.X, pos.X)
 	}
 	if did {
 		LayoutLastAutoScroll = time.Now()

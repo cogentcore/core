@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/glop/indent"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/pi"
 	"cogentcore.org/core/pi/lex"
@@ -696,7 +697,7 @@ func (ed *Editor) SetCursorFromMouse(pt image.Point, newPos lex.Pos, selMode eve
 			ed.SelectRegUpdate(ed.CursorPos)
 		}
 		if ed.StateIs(states.Sliding) {
-			ed.AutoScroll(pt.Add(ed.Geom.TotalBBox.Min))
+			ed.AutoScroll(mat32.V2FromPoint(pt).Sub(ed.Geom.Scroll))
 		} else {
 			ed.ScrollCursorToCenterIfHidden()
 		}

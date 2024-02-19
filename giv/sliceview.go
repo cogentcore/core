@@ -320,12 +320,30 @@ func (sv *SliceViewBase) SetStyles() {
 	svi := sv.This().(SliceViewer)
 
 	sv.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Clickable, abilities.DoubleClickable, abilities.TripleClickable)
+		s.SetAbilities(true, abilities.Draggable, abilities.Droppable, abilities.Clickable, abilities.DoubleClickable, abilities.TripleClickable)
 		s.Cursor = sv.CurrentCursor
 		s.Direction = styles.Column
 		// absorb horizontal here, vertical in view
 		s.Overflow.X = styles.OverflowAuto
 		s.Grow.Set(1, 1)
+	})
+	sv.On(events.DragStart, func(e events.Event) {
+		e.SetHandled()
+		svi.DragStart(e)
+	})
+	sv.On(events.DragEnter, func(e events.Event) {
+		e.SetHandled()
+		return
+	})
+	sv.On(events.DragLeave, func(e events.Event) {
+		e.SetHandled()
+		return
+	})
+	sv.On(events.Drop, func(e events.Event) {
+		svi.DragDrop(e)
+	})
+	sv.On(events.DropDeleteSource, func(e events.Event) {
+		svi.DropDeleteSource(e)
 	})
 	sv.StyleFinal(func(s *styles.Style) {
 		sv.NormalCursor = s.Cursor
@@ -378,43 +396,21 @@ func (sv *SliceViewBase) SetStyles() {
 				wb.OnDoubleClick(sv.HandleEvent)
 				wb.On(events.ContextMenu, sv.HandleEvent)
 				w.On(events.DragStart, func(e events.Event) {
-					if sv.This() == nil || sv.Is(ki.Deleted) {
-						return
-					}
+					e.SetHandled()
 					svi.DragStart(e)
 				})
 				w.On(events.DragEnter, func(e events.Event) {
 					e.SetHandled()
 					return
-					if sv.This() == nil || sv.Is(ki.Deleted) {
-						return
-					}
-					sv.SetState(true, states.DragHovered)
-					sv.ApplyStyle()
-					sv.SetNeedsRender(true)
-					e.SetHandled()
 				})
 				w.On(events.DragLeave, func(e events.Event) {
 					e.SetHandled()
 					return
-					if sv.This() == nil || sv.Is(ki.Deleted) {
-						return
-					}
-					sv.SetState(false, states.DragHovered)
-					sv.ApplyStyle()
-					sv.SetNeedsRender(true)
-					e.SetHandled()
 				})
 				w.On(events.Drop, func(e events.Event) {
-					if sv.This() == nil || sv.Is(ki.Deleted) {
-						return
-					}
 					svi.DragDrop(e)
 				})
 				w.On(events.DropDeleteSource, func(e events.Event) {
-					if sv.This() == nil || sv.Is(ki.Deleted) {
-						return
-					}
 					svi.DropDeleteSource(e)
 				})
 			case strings.HasPrefix(w.Name(), "value-"):
@@ -1760,7 +1756,7 @@ func (sv *SliceViewBase) Duplicate() int { //gti:add
 func (sv *SliceViewBase) DragStart(e events.Event) {
 	nitms := len(sv.SelIdxs)
 	if nitms == 0 {
-		row, _ := sv.SliceGrid().IndexFromPixel(e.Pos())
+		row, _ := sv.This().(SliceViewer).SliceGrid().IndexFromPixel(e.Pos())
 		sv.UpdateSelectRow(row, e.SelectMode())
 	}
 	md := sv.This().(SliceViewer).CopySelToMime()
@@ -1797,6 +1793,7 @@ func (sv *SliceViewBase) DragDrop(e events.Event) {
 // DropFinalize is called to finalize Drop actions on the Source node.
 // Only relevant for DropMod == DropMove.
 func (sv *SliceViewBase) DropFinalize(de *events.DragDrop) {
+	sv.SetNeedsLayout(true)
 	sv.UnselectAllIdxs()
 	sv.Scene.EventMgr.DropFinalize(de) // sends DropDeleteSource to Source
 }
@@ -2014,9 +2011,23 @@ func (sv *SliceViewBase) HandleEvents() {
 			sv.HoverRow = -1
 			sv.Styles.Cursor = sv.NormalCursor
 		} else {
-			if row != sv.HoverRow {
-				sv.HoverRow = row
-			}
+			sv.HoverRow = row
+			sv.Styles.Cursor = cursors.Pointer
+		}
+		sv.CurrentCursor = sv.Styles.Cursor
+		if sv.HoverRow != prevHoverRow {
+			sv.SetNeedsRender(true)
+		}
+	})
+	sv.On(events.MouseDrag, func(e events.Event) {
+		row, idx, isValid := sv.RowFromEventPos(e)
+		sv.This().(SliceViewer).SliceGrid().AutoScroll(mat32.V2(0, float32(idx)))
+		prevHoverRow := sv.HoverRow
+		if !isValid {
+			sv.HoverRow = -1
+			sv.Styles.Cursor = sv.NormalCursor
+		} else {
+			sv.HoverRow = row
 			sv.Styles.Cursor = cursors.Pointer
 		}
 		sv.CurrentCursor = sv.Styles.Cursor

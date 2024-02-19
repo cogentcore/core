@@ -506,7 +506,6 @@ func (ed *Editor) FirstVisibleLine(stln int) int {
 	bb := ed.Geom.ContentBBox
 	if stln == 0 {
 		perln := float32(ed.LinesSize.Y) / float32(ed.NLines)
-		// stln = int(float32(bb.Min.Y-ed.ObjBBox.Min.Y)/perln) - 1 // todo: scroll
 		stln = int(ed.Geom.Scroll.Y/perln) - 1
 		if stln < 0 {
 			stln = 0
