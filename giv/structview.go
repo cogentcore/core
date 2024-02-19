@@ -312,7 +312,13 @@ func (sv *StructView) ConfigStructGrid() bool {
 		if wb.Prop("configured") == nil {
 			wb.SetProp("configured", true)
 			vv.ConfigWidget(w)
-			vvb.AsWidgetBase().OnInput(sv.HandleEvent)
+			vvb.AsWidgetBase().OnInput(func(e events.Event) {
+				if tag, _ := vv.Tag("immediate"); tag == "+" {
+					wb.SendChange(e)
+					sv.SendChange(e)
+				}
+				sv.Send(events.Input, e)
+			})
 		} else {
 			vvb.Widget = w
 			vv.UpdateWidget()

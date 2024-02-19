@@ -171,7 +171,13 @@ func (sv *SliceViewInline) ConfigSlice() bool {
 			vv.SetTags(sv.SliceValue.AllTags())
 		}
 		vv.ConfigWidget(w)
-		vvb.AsWidgetBase().OnInput(sv.HandleEvent)
+		vvb.AsWidgetBase().OnInput(func(e events.Event) {
+			if tag, _ := vv.Tag("immediate"); tag == "+" {
+				w.AsWidget().SendChange(e)
+				sv.SendChange(e)
+			}
+			sv.Send(events.Input, e)
+		})
 		if sv.IsReadOnly() {
 			w.AsWidget().SetReadOnly(true)
 		}
