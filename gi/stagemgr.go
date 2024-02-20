@@ -300,7 +300,10 @@ func (sm *StageMgr) SendShowEvents() {
 		sc := st.Scene
 		if sc.ShowIter == SceneShowIters+1 {
 			sc.ShowIter++
-			sc.Send(events.Show)
+			if !sc.hasShown {
+				sc.hasShown = true
+				sc.Send(events.Show)
+			}
 		}
 	}
 }

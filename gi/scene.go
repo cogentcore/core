@@ -108,6 +108,10 @@ type Scene struct {
 
 	// ReRender items are re-rendered after the current pass
 	ReRender []Widget
+
+	// hasShown is whether this scene has already been shown.
+	// This is used to ensure that [events.Show] is only sent once.
+	hasShown bool
 }
 
 func (sc *Scene) FlagType() enums.BitFlagSetter {
