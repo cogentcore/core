@@ -6,9 +6,7 @@ package giv
 
 import (
 	"reflect"
-	"strings"
 
-	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/gti"
@@ -27,7 +25,7 @@ type MapView struct {
 	// the map that we are a view onto
 	Map any `set:"-"`
 
-	// Value for the map itself, if this was created within value view framework -- otherwise nil
+	// Value for the map itself, if this was created within value view framework; otherwise nil
 	MapValView Value
 
 	// has the map been edited?
@@ -42,13 +40,17 @@ type MapView struct {
 	// sort by values instead of keys
 	SortVals bool
 
-	// the number of columns in the map; do not set externally; generally only access internally
+	// the number of columns in the map; do not set externally;
+	// generally only access internally
 	NCols int
 
-	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
+	// value view that needs to have SaveTmp called on it whenever a change
+	// is made to one of the underlying values.
+	// Pass this down to any sub-views created from a parent
 	TmpSave Value `json:"-" xml:"-"`
 
-	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+	// a record of parent View names that have led up to this view.
+	// Displayed as extra contextual information in view dialog windows.
 	ViewPath string
 }
 
@@ -74,18 +76,8 @@ func (mv *MapView) SetStyles() {
 				s.Min.Y.Em(10)
 			})
 		}
-		if w.Parent().Name() == "map-grid" {
-			if strings.HasPrefix(w.Name(), "del-") {
-				delbt := w.(*gi.Button)
-				delbt.SetType(gi.ButtonAction)
-				delbt.OnClick(func(e events.Event) {
-					mv.MapDelete(delbt.Prop("value").(Value).Val())
-				})
-				delbt.Style(func(s *styles.Style) {
-					s.Color = colors.C(colors.Scheme.Error.Base)
-				})
-			}
-		}
+		// if w.Parent().Name() == "map-grid" {
+		// }
 	})
 }
 
@@ -141,6 +133,18 @@ func (mv *MapView) KiPropTag() string {
 	return ""
 }
 
+func (mv *MapView) KeyContextMenu(m *gi.Scene, keyv reflect.Value) {
+	if mv.IsReadOnly() {
+		return
+	}
+	gi.NewButton(m).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
+		mv.MapAdd()
+	})
+	gi.NewButton(m).SetText("Delete").SetIcon(icons.Delete).OnClick(func(e events.Event) {
+		mv.MapDelete(keyv)
+	})
+}
+
 // ConfigMapGrid configures the MapGrid for the current map
 func (mv *MapView) ConfigMapGrid() {
 	if laser.AnyIsNil(mv.Map) {
@@ -151,18 +155,19 @@ func (mv *MapView) ConfigMapGrid() {
 	// always start fresh!
 	mv.Keys = make([]Value, 0)
 	mv.Values = make([]Value, 0)
+	sg.DeleteChildren(ki.DestroyKids)
 
 	mpv := reflect.ValueOf(mv.Map)
 	mpvnp := laser.NonPtrValue(mpv)
 
 	valtyp := laser.NonPtrType(reflect.TypeOf(mv.Map)).Elem()
-	ncol := 3
+	ncol := 2
 	ifaceType := false
 	typeTag := ""
 	strtyp := reflect.TypeOf(typeTag)
 	if valtyp.Kind() == reflect.Interface && valtyp.String() == "interface {}" {
 		ifaceType = true
-		ncol = 4
+		ncol = 3
 		typeTag = mv.KiPropTag()
 		// todo: need some way of setting & getting
 		// this for given domain mapview could have a structview parent and
@@ -197,7 +202,6 @@ func (mv *MapView) ConfigMapGrid() {
 		keytxt := laser.ToString(key.Interface())
 		keynm := "key-" + keytxt
 		valnm := "value-" + keytxt
-		delnm := "del-" + keytxt
 
 		config.Add(kv.WidgetType(), keynm)
 		config.Add(vv.WidgetType(), valnm)
@@ -205,7 +209,6 @@ func (mv *MapView) ConfigMapGrid() {
 			typnm := "type-" + keytxt
 			config.Add(gi.ChooserType, typnm)
 		}
-		config.Add(gi.ButtonType, delnm)
 		mv.Keys = append(mv.Keys, kv)
 		mv.Values = append(mv.Values, vv)
 	}
@@ -236,6 +239,9 @@ func (mv *MapView) ConfigMapGrid() {
 		keyw.Style(func(s *styles.Style) {
 			s.SetTextWrap(false)
 		})
+		keyw.AddContextMenu(func(m *gi.Scene) {
+			mv.KeyContextMenu(m, kvb.Value)
+		})
 		if ifaceType {
 			typw := sg.Child(i*ncol + 2).(*gi.Chooser)
 			typw.SetTypes(valtypes)
@@ -251,11 +257,6 @@ func (mv *MapView) ConfigMapGrid() {
 			// 	mv.SendChange()
 			// })
 		}
-		delbt := sg.Child(i*ncol + ncol - 1).(*gi.Button)
-		delbt.SetType(gi.ButtonAction)
-		delbt.SetIcon(icons.Delete)
-		delbt.Tooltip = "delete item"
-		delbt.SetProp("value", kv)
 	}
 	sg.UpdateEnd(updt)
 }
