@@ -297,7 +297,7 @@ func (ed *Editor) QReplaceAddText() {
 	fc := gi.NewChooser(d, "find").SetEditable(true).SetAllowNew(true)
 	fc.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
-		s.Min.X.Ch(60)
+		s.Min.X.Ch(80)
 	})
 	fc.SetStrings(PrevQReplaceFinds).SetCurrentIndex(0)
 	if find != "" {
@@ -307,7 +307,7 @@ func (ed *Editor) QReplaceAddText() {
 	rc := gi.NewChooser(d, "repl").SetEditable(true).SetAllowNew(true)
 	rc.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
-		s.Min.X.Ch(60)
+		s.Min.X.Ch(80)
 	})
 	rc.SetStrings(PrevQReplaceRepls).SetCurrentIndex(0)
 

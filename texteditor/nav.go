@@ -871,6 +871,8 @@ func (ed *Editor) ScrollCursorInView() bool {
 	}
 	if ed.This().(gi.Widget).IsVisible() {
 		curBBox := ed.CursorBBox(ed.CursorPos)
+		// fmt.Println("scrolling to:", curBBox, ed.CursorPos)
+		ed.SetCursorTarget(ed.CursorPos)
 		return ed.ScrollInView(curBBox)
 	}
 	return false
@@ -945,6 +947,7 @@ func (ed *Editor) ScrollCursorToVertCenter() bool {
 }
 
 func (ed *Editor) ScrollCursorToTarget() {
+	// fmt.Println(ed, "to target:", ed.CursorTarg)
 	ed.CursorPos = ed.CursorTarg
 	ed.ScrollCursorToVertCenter()
 	ed.SetFlag(false, EditorTargetSet)

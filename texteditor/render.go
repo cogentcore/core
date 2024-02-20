@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/colors/matcolor"
+	"cogentcore.org/core/gi"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/pi/lex"
@@ -31,20 +32,27 @@ func (ed *Editor) SetNeedsLayout(updt bool) {
 	}
 }
 
+func (ed *Editor) RenderLayout() {
+	chg := ed.ManageOverflow(3, true)
+	ed.LayoutAllLines()
+	ed.ConfigScrolls()
+	if chg {
+		ed.SetNeedsLayout(true) // required to actually update scrollbar vs not
+		ed.Scene.AddReRender(ed.This().(gi.Widget))
+	}
+}
+
 func (ed *Editor) Render() {
 	if ed.PushBounds() {
 		ed.ApplyStyle()
 		if ed.Is(EditorNeedsLayout) {
-			ed.ManageOverflow(3, true)
-			ed.LayoutAllLines()
-			ed.ConfigScrolls()
+			ed.RenderLayout()
 			ed.SetFlag(false, EditorNeedsLayout)
+		} else if ed.Is(EditorTargetSet) {
+			ed.ScrollCursorToTarget()
 		}
 		ed.PositionScrolls()
 		ed.RenderAllLines()
-		if ed.Is(EditorTargetSet) {
-			ed.ScrollCursorToTarget()
-		}
 		if ed.StateIs(states.Focused) {
 			ed.StartCursor()
 		} else {
