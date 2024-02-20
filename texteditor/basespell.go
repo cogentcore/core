@@ -223,6 +223,9 @@ func (sp *Spell) ShowNow(word string, ctx gi.Widget, pos image.Point) {
 			sp.IgnoreWord()
 		})
 	}
+	if sc.NumChildren() > 0 {
+		sc.EventMgr.SetStartFocus(sc.Child(0).(gi.Widget))
+	}
 	sp.Stage.RunPopup()
 }
 

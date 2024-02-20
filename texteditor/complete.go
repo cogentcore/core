@@ -97,7 +97,7 @@ func LookupPi(data any, text string, posLn, posCh int) (ld complete.Lookup) {
 	return ld
 }
 
-// CompleteText does completion for text files
+// CompleteText does completion for text files.
 func CompleteText(data any, text string, posLn, posCh int) (md complete.Matches) {
 	err := InitSpell() // text completion uses the spell code to generate completions and suggestions
 	if err != nil {
