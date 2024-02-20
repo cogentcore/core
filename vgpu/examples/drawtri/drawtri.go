@@ -73,7 +73,10 @@ func main() {
 	renderFrame := func() {
 		// fmt.Printf("frame: %d\n", frameCount)
 		// rt := time.Now()
-		idx := sf.AcquireNextImage()
+		idx, ok := sf.AcquireNextImage()
+		if !ok {
+			return
+		}
 		// fmt.Printf("\nacq: %v\n", time.Now().Sub(rt))
 		descIdx := 0 // if running multiple frames in parallel, need diff sets
 		cmd := sy.CmdPool.Buff

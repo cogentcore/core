@@ -212,7 +212,10 @@ func main() {
 
 		imgIdx := int32(frameCount % len(imgs))
 
-		idx := sf.AcquireNextImage()
+		idx, ok := sf.AcquireNextImage()
+		if !ok {
+			return
+		}
 
 		cmd := sy.CmdPool.Buff
 		descIdx := 0 // if running multiple frames in parallel, need diff sets

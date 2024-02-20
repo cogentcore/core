@@ -84,7 +84,8 @@ type Drawer interface {
 	// No images can be added or set after this point.
 	// descIdx is the descriptor set to use -- choose this based on the bank of 16
 	// texture values if number of textures > MaxTexturesPerSet.
-	StartDraw(descIdx int)
+	// It returns false if rendering can not proceed.
+	StartDraw(descIdx int) bool
 
 	// EndDraw ends image drawing rendering process on render target
 	EndDraw()
@@ -98,7 +99,8 @@ type Drawer interface {
 	Fill(clr color.Color, src2dst mat32.Mat3, reg image.Rectangle, op draw.Op) error
 
 	// StartFill starts color fill drawing rendering process on render target
-	StartFill()
+	// It returns false if rendering can not proceed.
+	StartFill() bool
 
 	// EndFill ends color filling rendering process on render target
 	EndFill()
@@ -187,8 +189,10 @@ func (dw *DrawerBase) UseTextureSet(descIdx int) {
 // EndDraw, everything is delayed by one render because Scale and Copy are
 // called after StartDraw but before EndDraw, and we need them to be called
 // before actually rendering the image to the capture channel.
-func (dw *DrawerBase) StartDraw(descIdx int) {
+// It returns false if rendering can not proceed.
+func (dw *DrawerBase) StartDraw(descIdx int) bool {
 	// no-op
+	return true
 }
 
 // Fill fills given color to to render target.
@@ -202,9 +206,11 @@ func (dw *DrawerBase) Fill(clr color.Color, src2dst mat32.Mat3, reg image.Rectan
 	return nil
 }
 
-// StartFill starts color fill drawing rendering process on render target
-func (dw *DrawerBase) StartFill() {
+// StartFill starts color fill drawing rendering process on render target.
+// It returns false if rendering can not proceed.
+func (dw *DrawerBase) StartFill() bool {
 	// no-op
+	return true
 }
 
 // EndFill ends color filling rendering process on render target

@@ -303,13 +303,15 @@ func (sf *Surface) FreeSwapchain() {
 
 // ReConfigSwapchain does a re-initialize of swapchain, freeing existing.
 // This must be called when the window is resized.
-func (sf *Surface) ReConfigSwapchain() {
+// It returns false if the swapchain size is zero.
+func (sf *Surface) ReConfigSwapchain() bool {
 	sf.FreeSwapchain()
 	if !sf.ConfigSwapchain() {
-		return
+		return false
 	}
 	sf.Render.SetSize(sf.Format.Size)
 	sf.ReConfigFrames()
+	return true
 }
 
 // SetRender sets the Render and updates frames accordingly
@@ -342,8 +344,8 @@ func (sf *Surface) Destroy() {
 // It automatically handles any issues with out-of-date swapchain.
 // It triggers the ImageAcquired semaphore when image actually acquired.
 // Must call SubmitRender with command to launch command contingent
-// on that semaphore.
-func (sf *Surface) AcquireNextImage() uint32 {
+// on that semaphore. It returns false if the swapchain size is zero.
+func (sf *Surface) AcquireNextImage() (uint32, bool) {
 	dev := sf.Device.Device
 	for {
 		vk.WaitForFences(dev, 1, []vk.Fence{sf.RenderFence}, vk.True, vk.MaxUint64)
@@ -352,16 +354,21 @@ func (sf *Surface) AcquireNextImage() uint32 {
 		ret := vk.AcquireNextImage(dev, sf.Swapchain, vk.MaxUint64, sf.ImageAcquired, vk.NullFence, &idx)
 		switch ret {
 		case vk.ErrorOutOfDate, vk.Suboptimal:
-			sf.ReConfigSwapchain()
+			if !sf.ReConfigSwapchain() {
+				if Debug {
+					fmt.Println("vgpu.Surface.AcquireNextImage: bailing on zero swapchain size")
+				}
+				return idx, false
+			}
 			if Debug {
-				fmt.Printf("vgpu.Surface.AcquireNextImage, new format: %#v\n", sf.Format)
+				fmt.Printf("vgpu.Surface.AcquireNextImage: new format: %#v\n", sf.Format)
 			}
 			continue // try again
 		case vk.Success:
-			return idx
+			return idx, true
 		default:
 			IfPanic(NewError(ret))
-			return idx
+			return idx, true
 		}
 	}
 }

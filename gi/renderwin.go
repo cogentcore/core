@@ -990,7 +990,9 @@ func (w *RenderWin) DrawScenes() {
 
 	drw.SyncImages()
 	w.FillInsets()
-	drw.StartDraw(0)
+	if !drw.StartDraw(0) {
+		return
+	}
 	drw.UseTextureSet(0)
 	rs.DrawAll(drw)
 
@@ -1015,7 +1017,9 @@ func (w *RenderWin) FillInsets() {
 	}
 
 	drw := w.GoosiWin.Drawer()
-	drw.StartFill()
+	if !drw.StartFill() {
+		return
+	}
 
 	fill := func(x0, y0, x1, y1 int) {
 		r := image.Rect(x0, y0, x1, y1)

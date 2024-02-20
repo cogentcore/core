@@ -313,7 +313,10 @@ func main() {
 	stTime := time.Now()
 
 	renderFrame := func() {
-		idx := sf.AcquireNextImage()
+		idx, ok := sf.AcquireNextImage()
+		if !ok {
+			return
+		}
 		cmd := sy.CmdPool.Buff
 		descIdx := 0 // if running multiple frames in parallel, need diff sets
 		sy.ResetBeginRenderPass(cmd, sf.Frames[idx], descIdx)

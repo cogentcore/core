@@ -45,18 +45,24 @@ func (dw *Drawer) Fill(clr color.Color, src2dst mat32.Mat3, reg image.Rectangle,
 	return nil
 }
 
-// StartFill starts color fill drawing rendering process on render target
-func (dw *Drawer) StartFill() {
+// StartFill starts color fill drawing rendering process on render target.
+// It returns false if rendering can not proceed.
+func (dw *Drawer) StartFill() bool {
 	sy := &dw.Sys
 	fpl := sy.PipelineMap["fill"]
 	cmd := sy.CmdPool.Buff
 	if dw.Surf != nil {
-		dw.Impl.SurfIdx = dw.Surf.AcquireNextImage()
+		idx, ok := dw.Surf.AcquireNextImage()
+		if !ok {
+			return false
+		}
+		dw.Impl.SurfIdx = idx
 		sy.ResetBeginRenderPassNoClear(cmd, dw.Surf.Frames[dw.Impl.SurfIdx], 0)
 	} else {
 		sy.ResetBeginRenderPassNoClear(cmd, dw.Frame.Frames[0], 0)
 	}
 	fpl.BindPipeline(cmd)
+	return true
 }
 
 // EndFill ends color filling rendering process on render target

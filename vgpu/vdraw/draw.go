@@ -226,12 +226,18 @@ func (dw *Drawer) UseTextureSet(descIdx int) {
 // No images can be added or set after this point.
 // descIdx is the descriptor set to use -- choose this based on the bank of 16
 // texture values if number of textures > MaxTexturesPerSet.
-func (dw *Drawer) StartDraw(descIdx int) {
+// It returns false if rendering can not proceed.
+func (dw *Drawer) StartDraw(descIdx int) bool {
 	dw.UpdtMu.Lock()
+	defer dw.UpdtMu.Unlock()
 	sy := &dw.Sys
 	cmd := sy.CmdPool.Buff
 	if dw.Surf != nil {
-		dw.Impl.SurfIdx = dw.Surf.AcquireNextImage()
+		idx, ok := dw.Surf.AcquireNextImage()
+		if !ok {
+			return false
+		}
+		dw.Impl.SurfIdx = idx
 		sy.ResetBeginRenderPassNoClear(cmd, dw.Surf.Frames[dw.Impl.SurfIdx], descIdx)
 	} else {
 		sy.ResetBeginRenderPassNoClear(cmd, dw.Frame.Frames[0], descIdx)
@@ -239,7 +245,7 @@ func (dw *Drawer) StartDraw(descIdx int) {
 	dw.Impl.LastOp = draw.Src
 	dpl := sy.PipelineMap["draw_src"]
 	dpl.BindPipeline(cmd)
-	dw.UpdtMu.Unlock()
+	return true
 }
 
 // SelectPipeline selects the pipeline based on draw op

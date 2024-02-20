@@ -149,7 +149,10 @@ func main() {
 		cam.CopyFromBytes(unsafe.Pointer(&camo)) // sets mod
 		sy.Mem.SyncToGPU()
 
-		idx := sf.AcquireNextImage()
+		idx, ok := sf.AcquireNextImage()
+		if !ok {
+			return
+		}
 		// fmt.Printf("\nacq: %v\n", time.Now().Sub(rt))
 		descIdx := 0 // if running multiple frames in parallel, need diff sets
 		cmd := sy.CmdPool.Buff
