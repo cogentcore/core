@@ -37,7 +37,7 @@ func (ed *Editor) RenderLayout() {
 	ed.LayoutAllLines()
 	ed.ConfigScrolls()
 	if chg {
-		ed.SetNeedsLayout(true) // required to actually update scrollbar vs not
+		ed.Layout.SetNeedsLayout(true) // required to actually update scrollbar vs not
 		ed.Scene.AddReRender(ed.This().(gi.Widget))
 	}
 }
