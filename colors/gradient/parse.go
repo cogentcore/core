@@ -43,11 +43,11 @@ var Cache map[string]image.Image
 // See [UnmarshalXML] for an XML-based version. If no Context is
 // provied, FromString uses [BaseContext] with [Transparent].
 func FromString(str string, ctx ...colors.Context) (image.Image, error) {
-	var ct colors.Context
-	if len(ctx) > 0 {
-		ct = ctx[0]
+	var cc colors.Context
+	if len(ctx) > 0 && ctx[0] != nil {
+		cc = ctx[0]
 	} else {
-		ct = colors.BaseContext(colors.Transparent)
+		cc = colors.BaseContext(colors.Transparent)
 	}
 
 	if Cache == nil {
@@ -61,7 +61,7 @@ func FromString(str string, ctx ...colors.Context) (image.Image, error) {
 
 	str = strings.TrimSpace(str)
 	if strings.HasPrefix(str, "url(") {
-		img := ct.ImageByURL(str)
+		img := cc.ImageByURL(str)
 		if img == nil {
 			return nil, fmt.Errorf("unable to find url %q", str)
 		}
@@ -72,7 +72,7 @@ func FromString(str string, ctx ...colors.Context) (image.Image, error) {
 
 	gidx := strings.Index(str, grad)
 	if gidx <= 0 {
-		s, err := colors.FromString(str, ct.Base())
+		s, err := colors.FromString(str, cc.Base())
 		if err != nil {
 			return nil, err
 		}

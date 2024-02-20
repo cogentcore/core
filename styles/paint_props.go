@@ -23,7 +23,7 @@ import (
 //     see style_props.go for master version
 
 // StyleFromProps sets style field values based on map[string]any properties
-func (pc *Paint) StyleFromProps(par *Paint, props map[string]any, ctxt colors.Context) {
+func (pc *Paint) StyleFromProps(par *Paint, props map[string]any, cc colors.Context) {
 	for key, val := range props {
 		if len(key) == 0 {
 			continue
@@ -53,46 +53,46 @@ func (pc *Paint) StyleFromProps(par *Paint, props map[string]any, ctxt colors.Co
 		}
 		if sfunc, ok := StyleStrokeFuncs[key]; ok {
 			if par != nil {
-				sfunc(&pc.StrokeStyle, key, val, &par.StrokeStyle, ctxt)
+				sfunc(&pc.StrokeStyle, key, val, &par.StrokeStyle, cc)
 			} else {
-				sfunc(&pc.StrokeStyle, key, val, nil, ctxt)
+				sfunc(&pc.StrokeStyle, key, val, nil, cc)
 			}
 			continue
 		}
 		if sfunc, ok := StyleFillFuncs[key]; ok {
 			if par != nil {
-				sfunc(&pc.FillStyle, key, val, &par.FillStyle, ctxt)
+				sfunc(&pc.FillStyle, key, val, &par.FillStyle, cc)
 			} else {
-				sfunc(&pc.FillStyle, key, val, nil, ctxt)
+				sfunc(&pc.FillStyle, key, val, nil, cc)
 			}
 			continue
 		}
 		if sfunc, ok := StyleFontFuncs[key]; ok {
 			if par != nil {
-				sfunc(&pc.FontStyle.Font, key, val, &par.FontStyle.Font, ctxt)
+				sfunc(&pc.FontStyle.Font, key, val, &par.FontStyle.Font, cc)
 			} else {
-				sfunc(&pc.FontStyle.Font, key, val, nil, ctxt)
+				sfunc(&pc.FontStyle.Font, key, val, nil, cc)
 			}
 			continue
 		}
 		if sfunc, ok := StyleFontRenderFuncs[key]; ok {
 			if par != nil {
-				sfunc(&pc.FontStyle, key, val, &par.FontStyle, ctxt)
+				sfunc(&pc.FontStyle, key, val, &par.FontStyle, cc)
 			} else {
-				sfunc(&pc.FontStyle, key, val, nil, ctxt)
+				sfunc(&pc.FontStyle, key, val, nil, cc)
 			}
 			continue
 		}
 		if sfunc, ok := StyleTextFuncs[key]; ok {
 			if par != nil {
-				sfunc(&pc.TextStyle, key, val, &par.TextStyle, ctxt)
+				sfunc(&pc.TextStyle, key, val, &par.TextStyle, cc)
 			} else {
-				sfunc(&pc.TextStyle, key, val, nil, ctxt)
+				sfunc(&pc.TextStyle, key, val, nil, cc)
 			}
 			continue
 		}
 		if sfunc, ok := StylePaintFuncs[key]; ok {
-			sfunc(pc, key, val, par, ctxt)
+			sfunc(pc, key, val, par, cc)
 			continue
 		}
 	}
@@ -103,7 +103,7 @@ func (pc *Paint) StyleFromProps(par *Paint, props map[string]any, ctxt colors.Co
 
 // StyleStrokeFuncs are functions for styling the Stroke object
 var StyleStrokeFuncs = map[string]StyleFunc{
-	"stroke": func(obj any, key string, val any, par any, ctxt colors.Context) {
+	"stroke": func(obj any, key string, val any, par any, cc colors.Context) {
 		fs := obj.(*Stroke)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -113,7 +113,7 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		fs.Color = grr.Log1(gradient.FromAny(val, ctxt))
+		fs.Color = grr.Log1(gradient.FromAny(val, cc))
 	},
 	"stroke-opacity": StyleFuncFloat(float32(1),
 		func(obj *Stroke) *float32 { return &(obj.Opacity) }),
@@ -121,7 +121,7 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 		func(obj *Stroke) *units.Value { return &(obj.Width) }),
 	"stroke-min-width": StyleFuncUnits(units.Dp(1),
 		func(obj *Stroke) *units.Value { return &(obj.MinWidth) }),
-	"stroke-dasharray": func(obj any, key string, val any, par any, ctxt colors.Context) {
+	"stroke-dasharray": func(obj any, key string, val any, par any, cc colors.Context) {
 		fs := obj.(*Stroke)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -153,7 +153,7 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 
 // StyleFillFuncs are functions for styling the Fill object
 var StyleFillFuncs = map[string]StyleFunc{
-	"fill": func(obj any, key string, val any, par any, ctxt colors.Context) {
+	"fill": func(obj any, key string, val any, par any, cc colors.Context) {
 		fs := obj.(*Fill)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -163,7 +163,7 @@ var StyleFillFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		fs.Color = grr.Log1(gradient.FromAny(val, ctxt))
+		fs.Color = grr.Log1(gradient.FromAny(val, cc))
 	},
 	"fill-opacity": StyleFuncFloat(float32(1),
 		func(obj *Fill) *float32 { return &(obj.Opacity) }),
@@ -178,7 +178,7 @@ var StyleFillFuncs = map[string]StyleFunc{
 var StylePaintFuncs = map[string]StyleFunc{
 	"vector-effect": StyleFuncEnum(VecEffNone,
 		func(obj *Paint) enums.EnumSetter { return &(obj.VecEff) }),
-	"transform": func(obj any, key string, val any, par any, ctxt colors.Context) {
+	"transform": func(obj any, key string, val any, par any, cc colors.Context) {
 		pc := obj.(*Paint)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
