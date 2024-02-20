@@ -133,7 +133,7 @@ func (mv *MapView) KiPropTag() string {
 	return ""
 }
 
-func (mv *MapView) KeyContextMenu(m *gi.Scene, keyv reflect.Value) {
+func (mv *MapView) ContextMenu(m *gi.Scene, keyv reflect.Value) {
 	if mv.IsReadOnly() {
 		return
 	}
@@ -236,11 +236,14 @@ func (mv *MapView) ConfigMapGrid() {
 		w.Style(func(s *styles.Style) {
 			s.SetTextWrap(false)
 		})
+		w.AddContextMenu(func(m *gi.Scene) {
+			mv.ContextMenu(m, kvb.Value)
+		})
 		keyw.Style(func(s *styles.Style) {
 			s.SetTextWrap(false)
 		})
 		keyw.AddContextMenu(func(m *gi.Scene) {
-			mv.KeyContextMenu(m, kvb.Value)
+			mv.ContextMenu(m, kvb.Value)
 		})
 		if ifaceType {
 			typw := sg.Child(i*ncol + 2).(*gi.Chooser)
