@@ -235,7 +235,8 @@ type Stroke struct {
 	// minimum line width used for rendering -- if width is > 0, then this is the smallest line width -- this value is NOT subject to transforms so is in absolute dot values, and is ignored if vector-effects non-scaling-stroke is used -- this is an extension of the SVG / CSS standard
 	MinWidth units.Value
 
-	// 4 pixels on, 4 pixels off.  Currently only supporting raw pixel numbers, but in principle should support units.
+	// Dashes are the dashes of the stroke. Each pair of values specifies
+	// the amount to paint and then the amount to skip.
 	Dashes []float32
 
 	// how to draw the end cap of lines
@@ -272,7 +273,7 @@ func (ss *Stroke) ApplyBorderStyle(bs BorderStyles) {
 	case BorderNone:
 		ss.Color = nil
 	case BorderDotted:
-		ss.Dashes = []float32{1, 12}
+		ss.Dashes = []float32{0, 12}
 		ss.Cap = LineCapRound
 	case BorderDashed:
 		ss.Dashes = []float32{8, 6}

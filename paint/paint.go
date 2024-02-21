@@ -292,16 +292,8 @@ func (pc *Context) StrokePreserve() {
 	if dash != nil {
 		scx, scy := pc.CurTransform.ExtractScale()
 		sc := 0.5 * (mat32.Abs(scx) + mat32.Abs(scy))
-		hasZero := false
 		for i := range dash {
 			dash[i] *= sc
-			if dash[i] < 1 {
-				hasZero = true
-				break
-			}
-		}
-		if hasZero {
-			dash = nil
 		}
 	}
 
