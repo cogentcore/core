@@ -335,11 +335,9 @@ func (sv *SliceViewBase) SetStyles() {
 		})
 		sv.On(events.DragEnter, func(e events.Event) {
 			e.SetHandled()
-			return
 		})
 		sv.On(events.DragLeave, func(e events.Event) {
 			e.SetHandled()
-			return
 		})
 		sv.On(events.Drop, func(e events.Event) {
 			svi.DragDrop(e)
@@ -375,10 +373,12 @@ func (sv *SliceViewBase) SetStyles() {
 				sv.LastClick = row + sv.StartIdx
 			}
 			sg.OnClick(oc)
-			// we must select the row on right click so that the context menu
-			// corresponds to the right row
-			sg.On(events.ContextMenu, oc)
-			sg.ContextMenus = sv.ContextMenus
+			sg.On(events.ContextMenu, func(e events.Event) {
+				// we must select the row on right click so that the context menu
+				// corresponds to the right row
+				oc(e)
+				sv.HandleEvent(e)
+			})
 		}
 		if w.Parent().PathFrom(sv) == "grid" {
 			switch {
@@ -396,7 +396,6 @@ func (sv *SliceViewBase) SetStyles() {
 					s.Min.Y.Em(1)
 					s.GrowWrap = false
 				})
-				wb.ContextMenus = sv.ContextMenus
 				wb.OnDoubleClick(sv.HandleEvent)
 				wb.On(events.ContextMenu, sv.HandleEvent)
 				if !sv.IsReadOnly() {
@@ -406,11 +405,9 @@ func (sv *SliceViewBase) SetStyles() {
 					})
 					w.On(events.DragEnter, func(e events.Event) {
 						e.SetHandled()
-						return
 					})
 					w.On(events.DragLeave, func(e events.Event) {
 						e.SetHandled()
-						return
 					})
 					w.On(events.Drop, func(e events.Event) {
 						svi.DragDrop(e)
@@ -442,7 +439,6 @@ func (sv *SliceViewBase) SetStyles() {
 				})
 				wb.OnDoubleClick(sv.HandleEvent)
 				wb.On(events.ContextMenu, sv.HandleEvent)
-				wb.ContextMenus = sv.ContextMenus
 			}
 		}
 	})
@@ -2057,11 +2053,6 @@ func (sv *SliceViewBase) HandleEvents() {
 	// events for rapid cross-row double clicking to work correctly
 	sv.OnFirst(events.TripleClick, func(e events.Event) {
 		sv.Send(events.DoubleClick, e)
-	})
-	// it is the slice grid's responsibility to handle context menu events
-	sv.On(events.ContextMenu, func(e events.Event) {
-		sv.This().(SliceViewer).SliceGrid().Send(events.ContextMenu, e)
-		e.SetHandled()
 	})
 }
 
