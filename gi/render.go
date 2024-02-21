@@ -445,7 +445,7 @@ func (sc *Scene) DoUpdate() bool {
 
 	if sc.ShowIter < SceneShowIters {
 		if sc.ShowIter == 0 { // first time
-			sc.EventMgr.GetPriorityWidgets()
+			sc.EventMgr.GetShortcuts()
 		}
 		sc.SetFlag(true, ScNeedsLayout)
 		sc.ShowIter++

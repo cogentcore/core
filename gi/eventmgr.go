@@ -1127,14 +1127,28 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 /////////////////////////////////////////////////////////////////////////////////
 // Shortcuts
 
-// GetPriorityWidgets gathers all Widgets with Shortcuts
-func (em *EventMgr) GetPriorityWidgets() {
+// GetShortcuts gathers all [Button]s in the Scene with a shortcut specified.
+// It recursively navigates [Button.Menu]s.
+func (em *EventMgr) GetShortcuts() {
 	em.Shortcuts = nil
-	em.Scene.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
-		if bt := AsButton(wi.This()); bt != nil {
-			if bt.Shortcut != "" {
-				em.AddShortcut(bt.Shortcut, bt)
-			}
+	em.GetShortcutsIn(em.Scene)
+}
+
+// GetShortcutsIn gathers all [Button]s in the given parent widget with
+// a shortcut specified. It recursively navigates [Button.Menu]s.
+func (em *EventMgr) GetShortcutsIn(pw Widget) {
+	pw.AsWidget().WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
+		bt := AsButton(wi.This())
+		if bt == nil {
+			return ki.Continue
+		}
+		if bt.Shortcut != "" {
+			em.AddShortcut(bt.Shortcut, bt)
+		}
+		if bt.HasMenu() {
+			tmps := NewScene()
+			bt.Menu(tmps)
+			em.GetShortcutsIn(tmps)
 		}
 		return ki.Continue
 	})

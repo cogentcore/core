@@ -316,8 +316,8 @@ func AddButtonItems(items *[]ChooserItem, par ki.Ki, path string) {
 			lbl = bt.Tooltip
 		}
 		if bt.HasMenu() {
-			tmpms := NewScene()
-			bt.Menu(tmpms)
+			tmps := NewScene()
+			bt.Menu(tmps)
 			npath := path
 			if npath != "" {
 				npath += " > "
@@ -325,7 +325,7 @@ func AddButtonItems(items *[]ChooserItem, par ki.Ki, path string) {
 			if bt.Name() != "overflow-menu" {
 				npath += lbl
 			}
-			AddButtonItems(items, tmpms, npath)
+			AddButtonItems(items, tmps, npath)
 			continue
 		}
 		if path != "" {
