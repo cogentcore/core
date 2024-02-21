@@ -1058,19 +1058,6 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 		if em.FocusPrev() {
 			e.SetHandled()
 		}
-	case keyfun.Inspector:
-		if InspectorWindow != nil {
-			InspectorWindow(em.Scene)
-			e.SetHandled()
-		}
-	case keyfun.Prefs:
-		if SettingsWindow != nil {
-			SettingsWindow()
-			e.SetHandled()
-		}
-	case keyfun.WinClose:
-		win.CloseReq()
-		e.SetHandled()
 	case keyfun.Menu:
 		if tb := sc.GetTopAppBar(); tb != nil {
 			ch := ki.ChildByType[*Chooser](tb, true)

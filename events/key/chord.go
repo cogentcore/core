@@ -80,8 +80,6 @@ func (ch Chord) Decode() (r rune, code Codes, mods Modifiers, err error) {
 
 // Shortcut transforms chord string into short form suitable for display to users
 func (ch Chord) Shortcut() string {
-	// TODO: is this smart stuff actually helpful, or would it be much easier for
-	// the user if they could just read the shortcuts in English?
 	cs := strings.ReplaceAll(string(ch), "Control", "Ctrl")
 	switch runtime.GOOS {
 	case "darwin":
