@@ -53,7 +53,7 @@ func ReadBytes(v any, data []byte) error {
 
 // NewEncoder returns a new [grows.Encoder]
 func NewEncoder(w io.Writer) grows.Encoder {
-	return toml.NewEncoder(w).SetIndentTables(true)
+	return toml.NewEncoder(w).SetIndentTables(true).SetArraysMultiline(true)
 }
 
 // Save writes the given object to the given filename using TOML encoding
