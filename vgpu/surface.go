@@ -54,6 +54,11 @@ type Surface struct {
 
 	// fence for rendering command running
 	RenderFence vk.Fence `view:"-"`
+
+	// NeedsConfig is whether the surface needs to be configured again without freeing the swapchain.
+	// This is set internally to allow for correct recovery from sudden minimization events that are
+	// only detected at the point of swapchain reconfiguration.
+	NeedsConfig bool
 }
 
 // NewSurface returns a new surface initialized for given GPU and vulkan
@@ -351,6 +356,19 @@ func (sf *Surface) AcquireNextImage() (uint32, bool) {
 		vk.WaitForFences(dev, 1, []vk.Fence{sf.RenderFence}, vk.True, vk.MaxUint64)
 		vk.ResetFences(dev, 1, []vk.Fence{sf.RenderFence})
 		var idx uint32
+		if sf.NeedsConfig {
+			// we must skip FreeSwapchain for NeedsConfig
+			if !sf.ConfigSwapchain() {
+				if Debug {
+					fmt.Println("vgpu.Surface.AcquireNextImage: bailing on ConfigSwapchain caused by NeedsConfig (somewhat unexpected)")
+				}
+				return idx, false
+			}
+			sf.Render.SetSize(sf.Format.Size)
+			sf.ReConfigFrames()
+			sf.NeedsConfig = false
+			continue
+		}
 		ret := vk.AcquireNextImage(dev, sf.Swapchain, vk.MaxUint64, sf.ImageAcquired, vk.NullFence, &idx)
 		switch ret {
 		case vk.ErrorOutOfDate, vk.Suboptimal:
@@ -358,6 +376,7 @@ func (sf *Surface) AcquireNextImage() (uint32, bool) {
 				if Debug {
 					fmt.Println("vgpu.Surface.AcquireNextImage: bailing on zero swapchain size")
 				}
+				sf.NeedsConfig = true
 				return idx, false
 			}
 			if Debug {
