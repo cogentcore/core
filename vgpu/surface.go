@@ -367,6 +367,9 @@ func (sf *Surface) AcquireNextImage() (uint32, bool) {
 			sf.Render.SetSize(sf.Format.Size)
 			sf.ReConfigFrames()
 			sf.NeedsConfig = false
+			if Debug {
+				fmt.Println("vgpu.Surface.AcquireNextImage: did NeedsConfig update")
+			}
 			continue
 		}
 		ret := vk.AcquireNextImage(dev, sf.Swapchain, vk.MaxUint64, sf.ImageAcquired, vk.NullFence, &idx)
@@ -436,9 +439,9 @@ func (sf *Surface) PresentImage(frameIdx uint32) error {
 		}
 		sf.ReConfigSwapchain()
 		if Debug {
-			fmt.Printf("vgpu.Surface:PresentImage, new format: %#v\n", sf.Format)
+			fmt.Printf("vgpu.Surface.PresentImage, new format: %#v\n", sf.Format)
 		}
-		return fmt.Errorf("vgpu.Surface:PresentImage: swapchain was out of date, reinitialized -- not rendered")
+		return fmt.Errorf("vgpu.Surface.PresentImage: swapchain was out of date, reinitialized; not rendered")
 	case vk.Success:
 		return nil
 	default:
