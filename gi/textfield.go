@@ -272,6 +272,9 @@ func (tf *TextField) SetStyles() {
 			s.Background = colors.C(colors.Scheme.Select.Container)
 		}
 	})
+	tf.StyleFinal(func(s *styles.Style) {
+		tf.SetAbilities(!tf.IsReadOnly(), abilities.Focusable)
+	})
 	tf.OnWidgetAdded(func(w Widget) {
 		switch w.PathFrom(tf) {
 		case "parts":
@@ -1748,7 +1751,6 @@ func (tf *TextField) ConfigWidget() {
 //  Widget Interface
 
 func (tf *TextField) ApplyStyle() {
-	tf.SetAbilities(!tf.IsReadOnly(), abilities.Focusable)
 	tf.ApplyStyleWidget()
 	tf.CursorWidth.ToDots(&tf.Styles.UnitContext)
 }

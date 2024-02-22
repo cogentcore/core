@@ -34,6 +34,10 @@ type Meter struct {
 	// ValueColor is the image color that will be used to
 	// render the filled value bar. It should be set in Style.
 	ValueColor image.Image
+
+	// Width, for [MeterCircle] and [MeterSemicircle], is the
+	// width of the circle/semicircle. It should be set in Style.
+	Width units.Value
 }
 
 // MeterTypes are the different styling types of [Meter]s.
@@ -45,9 +49,11 @@ const (
 	// [styles.Style.Direction].
 	MeterLinear MeterTypes = iota
 
-	// MeterConic indicates to render a meter shaped in a conic/circular
-	// way, like a semicircle.
-	MeterConic
+	// MeterCircle indicates to render the meter as a circle.
+	MeterCircle
+
+	// MeterSemicircle indicates to render the meter as a semicircle.
+	MeterSemicircle
 )
 
 func (m *Meter) OnInit() {
@@ -63,16 +69,26 @@ func (m *Meter) SetStyles() {
 		s.Border.Radius = styles.BorderRadiusFull
 	})
 	m.StyleFinal(func(s *styles.Style) {
-		if m.Type == MeterLinear {
+		switch m.Type {
+		case MeterLinear:
 			if s.Direction == styles.Row {
 				s.Min.Set(units.Em(20), units.Em(0.5))
 			} else {
 				s.Min.Set(units.Em(0.5), units.Em(20))
 			}
-		} else {
+		case MeterCircle:
+			s.Min.Set(units.Em(8))
+			m.Width.Em(0.5)
+		case MeterSemicircle:
 			s.Min.Set(units.Em(9), units.Em(4))
+			m.Width.Em(1)
 		}
 	})
+}
+
+func (m *Meter) ApplyStyle() {
+	m.ApplyStyleWidget()
+	m.Width.ToDots(&m.Styles.UnitContext)
 }
 
 func (m *Meter) WidgetTooltip() string {
@@ -108,22 +124,24 @@ func (m *Meter) RenderMeter() {
 		return
 	}
 
-	pc.StrokeStyle.Width = units.Dp(20)
-	pc.StrokeStyle.Width.ToDots(&st.UnitContext)
-
-	sw := pc.StrokeWidth() / 2
-	pos := m.Geom.Pos.Content.AddScalar(sw)
+	pc.StrokeStyle.Width = m.Width
+	sw := pc.StrokeWidth()
+	pos := m.Geom.Pos.Content.AddScalar(sw / 2)
 	size := m.Geom.Size.Actual.Content.SubScalar(sw)
 
-	cx := (pos.X + size.X) / 2
-	cy := pos.Y + size.Y
-	rx := cx - pos.X
+	if m.Type == MeterCircle {
+		r := size.DivScalar(2)
+		c := pos.Add(r)
 
-	pc.DrawEllipticalArc(cx, cy, rx, size.Y, mat32.Pi, 2*mat32.Pi)
-	pc.StrokeStyle.Color = st.Background
-	pc.Stroke()
+		pc.DrawEllipticalArc(c.X, c.Y, r.X, r.Y, 0, 2*mat32.Pi)
+		pc.StrokeStyle.Color = st.Background
+		pc.Stroke()
 
-	pc.DrawEllipticalArc(cx, cy, rx, size.Y, mat32.Pi, (1+prop)*mat32.Pi)
-	pc.StrokeStyle.Color = m.ValueColor
-	pc.Stroke()
+		if m.ValueColor != nil {
+			pc.DrawEllipticalArc(c.X, c.Y, r.X, r.Y, -mat32.Pi/2, prop*2*mat32.Pi-mat32.Pi/2)
+			pc.StrokeStyle.Color = m.ValueColor
+			pc.Stroke()
+		}
+		return
+	}
 }

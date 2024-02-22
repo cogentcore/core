@@ -992,7 +992,7 @@ const MeterTypesN MeterTypes = 2
 func _MeterTypesNoOp() {
 	var x [1]struct{}
 	_ = x[MeterLinear-(0)]
-	_ = x[MeterConic-(1)]
+	_ = x[MeterCircle-(1)]
 }
 
 var _MeterTypesNameToValueMap = map[string]MeterTypes{
