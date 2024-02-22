@@ -981,11 +981,11 @@ func (i *LayoutFlags) UnmarshalText(text []byte) error {
 	return nil
 }
 
-var _MeterTypesValues = []MeterTypes{0, 1}
+var _MeterTypesValues = []MeterTypes{0, 1, 2}
 
 // MeterTypesN is the highest valid value
 // for type MeterTypes, plus one.
-const MeterTypesN MeterTypes = 2
+const MeterTypesN MeterTypes = 3
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -993,21 +993,25 @@ func _MeterTypesNoOp() {
 	var x [1]struct{}
 	_ = x[MeterLinear-(0)]
 	_ = x[MeterCircle-(1)]
+	_ = x[MeterSemicircle-(2)]
 }
 
 var _MeterTypesNameToValueMap = map[string]MeterTypes{
-	`MeterLinear`: 0,
-	`MeterConic`:  1,
+	`Linear`:     0,
+	`Circle`:     1,
+	`Semicircle`: 2,
 }
 
 var _MeterTypesDescMap = map[MeterTypes]string{
-	0: `MeterLinear indicates to render a meter that goes in a straight, linear direction, either horizontal or vertical.`,
-	1: `MeterConic indicates to render a meter shaped in a conic/circular way, like a semicircle.`,
+	0: `MeterLinear indicates to render a meter that goes in a straight, linear direction, either horizontal or vertical, as specified by [styles.Style.Direction].`,
+	1: `MeterCircle indicates to render the meter as a circle.`,
+	2: `MeterSemicircle indicates to render the meter as a semicircle.`,
 }
 
 var _MeterTypesMap = map[MeterTypes]string{
-	0: `MeterLinear`,
-	1: `MeterConic`,
+	0: `Linear`,
+	1: `Circle`,
+	2: `Semicircle`,
 }
 
 // String returns the string representation

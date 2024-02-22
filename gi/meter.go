@@ -80,7 +80,7 @@ func (m *Meter) SetStyles() {
 			s.Min.Set(units.Em(8))
 			m.Width.Em(0.5)
 		case MeterSemicircle:
-			s.Min.Set(units.Em(8), units.Em(4))
+			s.Min.Set(units.Em(7), units.Em(4))
 			m.Width.Em(1)
 		}
 	})

@@ -5,20 +5,22 @@
 package gi
 
 import (
-	"strconv"
 	"testing"
 
 	"cogentcore.org/core/styles"
 )
 
 func TestMeter(t *testing.T) {
-	for _, d := range styles.DirectionsValues() {
-		for v := 0; v <= 100; v += 10 {
+	for v := float32(0); v <= 100; v += 10 {
+		for _, typ := range MeterTypesValues() {
 			b := NewBody()
-			NewMeter(b).SetMax(100).SetValue(float32(v)).Style(func(s *styles.Style) {
-				s.Direction = d
-			})
-			b.AssertRender(t, "meter/"+d.String()+"/"+strconv.Itoa(v))
+			NewMeter(b).SetMax(100).SetType(typ).SetValue(v)
+			b.AssertRender(t, testName("meter", typ, v))
 		}
+		b := NewBody()
+		NewMeter(b).SetMax(100).SetValue(v).Style(func(s *styles.Style) {
+			s.Direction = styles.Column
+		})
+		b.AssertRender(t, testName("meter", "column", v))
 	}
 }

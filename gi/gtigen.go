@@ -501,14 +501,11 @@ func (t *Space) New() ki.Ki { return &Space{} }
 func (t *Space) SetTooltip(v string) *Space { t.Tooltip = v; return t }
 
 // MeterType is the [gti.Type] for [Meter]
-var MeterType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Meter", IDName: "meter", Doc: "Meter is a widget that renders a current value on as a filled\nbar/semicircle relative to a minimum and maximum potential value.\nThe [Meter.Type] determines the shape of the meter, and the\n[styles.Style.Direction] determines the direction in which the\nmeter goes.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Type", Doc: "Type is the styling type of the meter"}, {Name: "Value", Doc: "Value is the current value of the meter"}, {Name: "Min", Doc: "Min is the minimum possible value of the meter"}, {Name: "Max", Doc: "Max is the maximum possible value of the meter"}, {Name: "ValueColor", Doc: "ValueColor is the image color that will be used to\nrender the filled value bar. It should be set in Style."}}, Instance: &Meter{}})
+var MeterType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Meter", IDName: "meter", Doc: "Meter is a widget that renders a current value on as a filled\nbar/semicircle relative to a minimum and maximum potential value.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Type", Doc: "Type is the styling type of the meter"}, {Name: "Value", Doc: "Value is the current value of the meter"}, {Name: "Min", Doc: "Min is the minimum possible value of the meter"}, {Name: "Max", Doc: "Max is the maximum possible value of the meter"}, {Name: "ValueColor", Doc: "ValueColor is the image color that will be used to\nrender the filled value bar. It should be set in Style."}, {Name: "Width", Doc: "Width, for [MeterCircle] and [MeterSemicircle], is the\nwidth of the circle/semicircle. It should be set in Style."}}, Instance: &Meter{}})
 
 // NewMeter adds a new [Meter] with the given name to the given parent:
 // Meter is a widget that renders a current value on as a filled
 // bar/semicircle relative to a minimum and maximum potential value.
-// The [Meter.Type] determines the shape of the meter, and the
-// [styles.Style.Direction] determines the direction in which the
-// meter goes.
 func NewMeter(par ki.Ki, name ...string) *Meter {
 	return par.NewChild(MeterType, name...).(*Meter)
 }
@@ -539,6 +536,11 @@ func (t *Meter) SetMax(v float32) *Meter { t.Max = v; return t }
 // ValueColor is the image color that will be used to
 // render the filled value bar. It should be set in Style.
 func (t *Meter) SetValueColor(v image.Image) *Meter { t.ValueColor = v; return t }
+
+// SetWidth sets the [Meter.Width]:
+// Width, for [MeterCircle] and [MeterSemicircle], is the
+// width of the circle/semicircle. It should be set in Style.
+func (t *Meter) SetWidth(v units.Value) *Meter { t.Width = v; return t }
 
 // SetTooltip sets the [Meter.Tooltip]
 func (t *Meter) SetTooltip(v string) *Meter { t.Tooltip = v; return t }
