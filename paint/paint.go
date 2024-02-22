@@ -509,7 +509,7 @@ func (pc *Context) DrawPolyline(points []mat32.Vec2) {
 }
 
 func (pc *Context) DrawPolylinePxToDots(points []mat32.Vec2) {
-	pu := &pc.UnContext
+	pu := &pc.UnitContext
 	sz := len(points)
 	if sz < 2 {
 		return

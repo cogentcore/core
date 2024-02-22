@@ -169,10 +169,10 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						curSvg.ViewBox.Size.Y = pts[3]
 					case "width":
 						sv.PhysWidth.SetString(attr.Value)
-						sv.PhysWidth.ToDots(&curSvg.Paint.UnContext)
+						sv.PhysWidth.ToDots(&curSvg.Paint.UnitContext)
 					case "height":
 						sv.PhysHeight.SetString(attr.Value)
-						sv.PhysHeight.ToDots(&curSvg.Paint.UnContext)
+						sv.PhysHeight.ToDots(&curSvg.Paint.UnitContext)
 					case "preserveAspectRatio":
 						curSvg.ViewBox.PreserveAspectRatio.SetString(attr.Value)
 					default:

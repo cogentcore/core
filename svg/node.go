@@ -349,7 +349,7 @@ func (g *NodeBase) Style(sv *SVG) {
 	} else {
 		pc.SetStyleProps(nil, *g.Properties(), ctxt)
 	}
-	pc.ToDotsImpl(&pc.UnContext) // we always inherit parent's unit context -- SVG sets it once-and-for-all
+	pc.ToDotsImpl(&pc.UnitContext) // we always inherit parent's unit context -- SVG sets it once-and-for-all
 
 	if parCSSAgg != nil {
 		AggCSS(&g.CSSAgg, parCSSAgg)

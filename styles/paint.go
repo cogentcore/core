@@ -40,8 +40,8 @@ type Paint struct { //gti:add
 	// our additions to transform -- pushed to render state
 	Transform mat32.Mat2
 
-	// units context -- parameters necessary for anchoring relative units
-	UnContext units.Context
+	// unit context -- parameters necessary for anchoring relative units
+	UnitContext units.Context
 
 	// have the styles already been set?
 	StyleSet bool
@@ -66,7 +66,7 @@ func (pc *Paint) Defaults() {
 func (pc *Paint) CopyStyleFrom(cp *Paint) {
 	pc.Off = cp.Off
 	pc.Display = cp.Display
-	pc.UnContext = cp.UnContext
+	pc.UnitContext = cp.UnitContext
 	pc.StrokeStyle = cp.StrokeStyle
 	pc.FillStyle = cp.FillStyle
 	pc.FontStyle = cp.FontStyle
@@ -95,7 +95,7 @@ func (pc *Paint) SetStyleProps(par *Paint, props map[string]any, ctxt colors.Con
 }
 
 func (pc *Paint) FromStyle(st *Style) {
-	pc.UnContext = st.UnitContext
+	pc.UnitContext = st.UnitContext
 	pc.FontStyle = *st.FontRender()
 	pc.TextStyle = st.Text
 }
@@ -113,22 +113,22 @@ func (pc *Paint) ToDotsImpl(uc *units.Context) {
 // caches everything out in terms of raw pixel dots for rendering
 // call at start of render.
 func (pc *Paint) SetUnitContextExt(size image.Point) {
-	pc.UnContext.Defaults()
+	pc.UnitContext.Defaults()
 	// paint (SVG) context is always 96 = 1to1
-	pc.UnContext.DPI = 96
+	pc.UnitContext.DPI = 96
 	// TODO: maybe should have different values for these sizes?
-	pc.UnContext.SetSizes(float32(size.X), float32(size.Y), float32(size.X), float32(size.Y), float32(size.X), float32(size.Y))
-	pc.FontStyle.SetUnitContext(&pc.UnContext)
-	pc.ToDotsImpl(&pc.UnContext)
+	pc.UnitContext.SetSizes(float32(size.X), float32(size.Y), float32(size.X), float32(size.Y), float32(size.X), float32(size.Y))
+	pc.FontStyle.SetUnitContext(&pc.UnitContext)
+	pc.ToDotsImpl(&pc.UnitContext)
 	pc.dotsSet = true
 }
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels
 func (pc *Paint) ToDots() {
-	if !(pc.dotsSet && pc.UnContext == pc.lastUnCtxt && pc.PropsNil) {
-		pc.ToDotsImpl(&pc.UnContext)
+	if !(pc.dotsSet && pc.UnitContext == pc.lastUnCtxt && pc.PropsNil) {
+		pc.ToDotsImpl(&pc.UnitContext)
 		pc.dotsSet = true
-		pc.lastUnCtxt = pc.UnContext
+		pc.lastUnCtxt = pc.UnitContext
 	}
 }
 

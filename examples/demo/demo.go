@@ -444,4 +444,5 @@ func other(ts *gi.Tabs) {
 	gi.NewLabel(tab).SetText(`Other features of the Cogent Core framework`)
 
 	gi.NewMeter(tab).SetValue(0.5)
+	gi.NewMeter(tab).SetType(gi.MeterConic).SetValue(0.3)
 }

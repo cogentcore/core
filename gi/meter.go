@@ -10,6 +10,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 // Meter is a widget that renders a current value on as a filled
@@ -64,19 +65,13 @@ func (m *Meter) SetStyles() {
 	})
 	m.StyleFinal(func(s *styles.Style) {
 		if s.Direction == styles.Row {
-			s.Min.X.Em(20)
 			if m.Type == MeterLinear {
-				s.Min.Y.Em(0.5)
+				s.Min.Set(units.Em(20), units.Em(0.5))
 			} else {
-				s.Min.Y.Em(2)
+				s.Min.Set(units.Em(8), units.Em(4))
 			}
 		} else {
-			s.Min.Y.Em(20)
-			if m.Type == MeterLinear {
-				s.Min.X.Em(0.5)
-			} else {
-				s.Min.X.Em(2)
-			}
+			s.Min.Set(units.Em(0.5), units.Em(20))
 		}
 	})
 }
@@ -113,5 +108,16 @@ func (m *Meter) RenderMeter() {
 		return
 	}
 
-	// pc.DrawArc()
+	pc.FillStyle.Color = nil
+	pc.StrokeStyle.Color = st.Background
+	pc.StrokeStyle.Width = units.Dp(20)
+	pc.StrokeStyle.Width.ToDots(&st.UnitContext)
+
+	pos := m.Geom.Pos.Content.AddScalar(pc.StrokeWidth())
+	size := m.Geom.Size.Actual.Content.SubScalar(pc.StrokeWidth())
+
+	cx := (pos.X + size.X) / 2
+	cy := pos.Y + size.Y
+	pc.DrawEllipticalArc(cx, cy, cx-pos.X, size.Y, 0, 180)
+	pc.FillStrokeClear()
 }

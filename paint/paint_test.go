@@ -52,7 +52,7 @@ func TestRender(t *testing.T) {
 		bs := styles.Border{}
 		bs.Color.Set(imgs...)
 		bs.Width.Set(units.Dot(20), units.Dot(30), units.Dot(40), units.Dot(50))
-		bs.ToDots(&pc.UnContext)
+		bs.ToDots(&pc.UnitContext)
 
 		// first, draw a frame around the entire image
 		// pc.StrokeStyle.Color = colors.C(blk)
@@ -68,7 +68,7 @@ func TestRender(t *testing.T) {
 		bs.Radius.Set(units.Dot(0), units.Dot(30), units.Dot(10))
 		pc.FillStyle.Color = colors.C(colors.Lightblue)
 		pc.StrokeStyle.Width.Dot(10)
-		bs.ToDots(&pc.UnContext)
+		bs.ToDots(&pc.UnitContext)
 		pc.DrawBorder(60, 60, 150, 100, bs)
 		pc.FillStrokeClear()
 
@@ -82,9 +82,9 @@ func TestRender(t *testing.T) {
 		tsty.Align = styles.Center
 
 		txt := &Text{}
-		txt.SetHTML("This is <a>HTML</a> <b>formatted</b> <i>text</i>", fsty, tsty, &pc.UnContext, nil)
+		txt.SetHTML("This is <a>HTML</a> <b>formatted</b> <i>text</i>", fsty, tsty, &pc.UnitContext, nil)
 
-		tsz := txt.Layout(tsty, fsty, &pc.UnContext, mat32.V2(100, 40))
+		tsz := txt.Layout(tsty, fsty, &pc.UnitContext, mat32.V2(100, 40))
 		if tsz.X != 100 || tsz.Y != 40 {
 			t.Errorf("unexpected text size: %v", tsz)
 		}

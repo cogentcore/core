@@ -105,8 +105,8 @@ func (g *Text) TextBBox() mat32.Box2 {
 		return mat32.Box2{}
 	}
 	pc := &g.Paint
-	pc.FontStyle.Font = paint.OpenFont(&pc.FontStyle, &pc.UnContext) // use original size font
-	g.TextRender.SetString(g.Text, &pc.FontStyle, &pc.UnContext, &pc.TextStyle, true, 0, 1)
+	pc.FontStyle.Font = paint.OpenFont(&pc.FontStyle, &pc.UnitContext) // use original size font
+	g.TextRender.SetString(g.Text, &pc.FontStyle, &pc.UnitContext, &pc.TextStyle, true, 0, 1)
 	sr := &(g.TextRender.Spans[0])
 	sr.Render[0].Face = pc.FontStyle.Face.Face // upscale
 
@@ -177,13 +177,13 @@ func (g *Text) RenderText(sv *SVG) {
 	if scalex == 1 {
 		scalex = 0
 	}
-	pc.FontStyle.Font = paint.OpenFont(&pc.FontStyle, &pc.UnContext) // use original size font
+	pc.FontStyle.Font = paint.OpenFont(&pc.FontStyle, &pc.UnitContext) // use original size font
 	if pc.FillStyle.Color != nil {
 		pc.FontStyle.Color = pc.FillStyle.Color
 	}
-	g.TextRender.SetString(g.Text, &pc.FontStyle, &pc.UnContext, &pc.TextStyle, true, rot, scalex)
+	g.TextRender.SetString(g.Text, &pc.FontStyle, &pc.UnitContext, &pc.TextStyle, true, rot, scalex)
 	pc.FontStyle.Size = units.Value{Val: orgsz.Val * scy, Un: orgsz.Un, Dots: orgsz.Dots * scy} // rescale by y
-	pc.FontStyle.Font = paint.OpenFont(&pc.FontStyle, &pc.UnContext)
+	pc.FontStyle.Font = paint.OpenFont(&pc.FontStyle, &pc.UnitContext)
 	sr := &(g.TextRender.Spans[0])
 	sr.Render[0].Face = pc.FontStyle.Face.Face // upscale
 	g.TextRender.Size = g.TextRender.Size.Mul(mat32.V2(scx, scy))

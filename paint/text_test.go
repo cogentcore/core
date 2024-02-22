@@ -25,9 +25,9 @@ func TestText(t *testing.T) {
 		fsty.Size.Dp(60)
 
 		txt := &Text{}
-		txt.SetHTML("This is <a>HTML</a> <b>formatted</b> <i>text</i>", fsty, tsty, &pc.UnContext, nil)
+		txt.SetHTML("This is <a>HTML</a> <b>formatted</b> <i>text</i>", fsty, tsty, &pc.UnitContext, nil)
 
-		tsz := txt.Layout(tsty, fsty, &pc.UnContext, sizef)
+		tsz := txt.Layout(tsty, fsty, &pc.UnitContext, sizef)
 		_ = tsz
 		// if tsz.X != 100 || tsz.Y != 40 {
 		// 	t.Errorf("unexpected text size: %v", tsz)
