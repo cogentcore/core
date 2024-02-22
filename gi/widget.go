@@ -127,10 +127,6 @@ type Widget interface {
 	// On adds an event listener function for the given event type
 	On(etype events.Types, fun func(e events.Event)) *WidgetBase
 
-	// Helper functions for common event types
-	// TODO(kai/menu): should we have these in the Widget interface?
-	// we need them for OnWidgetAdded functions
-
 	// OnClick adds an event listener function for [events.Click] events
 	OnClick(fun func(e events.Event)) *WidgetBase
 
