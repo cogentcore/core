@@ -501,12 +501,13 @@ func (t *Space) New() ki.Ki { return &Space{} }
 func (t *Space) SetTooltip(v string) *Space { t.Tooltip = v; return t }
 
 // MeterType is the [gti.Type] for [Meter]
-var MeterType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Meter", IDName: "meter", Doc: "Meter is a widget that renders a current value on as a filled bar\nrelative to a minimum and maximum potential value.\nThe [styles.Style.Direction] determines the direction in which the\nmeter goes.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Value", Doc: "Value is the current value of the meter"}, {Name: "Min", Doc: "Min is the minimum possible value of the meter"}, {Name: "Max", Doc: "Max is the maximum possible value of the meter"}, {Name: "ValueColor", Doc: "ValueColor is the image color that will be used to\nrender the filled value bar. It should be set in Style."}}, Instance: &Meter{}})
+var MeterType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Meter", IDName: "meter", Doc: "Meter is a widget that renders a current value on as a filled\nbar/semicircle relative to a minimum and maximum potential value.\nThe [Meter.Type] determines the shape of the meter, and the\n[styles.Style.Direction] determines the direction in which the\nmeter goes.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Type", Doc: "Type is the styling type of the meter"}, {Name: "Value", Doc: "Value is the current value of the meter"}, {Name: "Min", Doc: "Min is the minimum possible value of the meter"}, {Name: "Max", Doc: "Max is the maximum possible value of the meter"}, {Name: "ValueColor", Doc: "ValueColor is the image color that will be used to\nrender the filled value bar. It should be set in Style."}}, Instance: &Meter{}})
 
 // NewMeter adds a new [Meter] with the given name to the given parent:
-// Meter is a widget that renders a current value on as a filled bar
-// relative to a minimum and maximum potential value.
-// The [styles.Style.Direction] determines the direction in which the
+// Meter is a widget that renders a current value on as a filled
+// bar/semicircle relative to a minimum and maximum potential value.
+// The [Meter.Type] determines the shape of the meter, and the
+// [styles.Style.Direction] determines the direction in which the
 // meter goes.
 func NewMeter(par ki.Ki, name ...string) *Meter {
 	return par.NewChild(MeterType, name...).(*Meter)
@@ -517,6 +518,10 @@ func (t *Meter) KiType() *gti.Type { return MeterType }
 
 // New returns a new [*Meter] value
 func (t *Meter) New() ki.Ki { return &Meter{} }
+
+// SetType sets the [Meter.Type]:
+// Type is the styling type of the meter
+func (t *Meter) SetType(v MeterTypes) *Meter { t.Type = v; return t }
 
 // SetValue sets the [Meter.Value]:
 // Value is the current value of the meter

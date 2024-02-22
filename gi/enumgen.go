@@ -981,6 +981,109 @@ func (i *LayoutFlags) UnmarshalText(text []byte) error {
 	return nil
 }
 
+var _MeterTypesValues = []MeterTypes{0, 1}
+
+// MeterTypesN is the highest valid value
+// for type MeterTypes, plus one.
+const MeterTypesN MeterTypes = 2
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _MeterTypesNoOp() {
+	var x [1]struct{}
+	_ = x[MeterLinear-(0)]
+	_ = x[MeterConic-(1)]
+}
+
+var _MeterTypesNameToValueMap = map[string]MeterTypes{
+	`MeterLinear`: 0,
+	`MeterConic`:  1,
+}
+
+var _MeterTypesDescMap = map[MeterTypes]string{
+	0: `MeterLinear indicates to render a meter that goes in a straight, linear direction, either horizontal or vertical.`,
+	1: `MeterConic indicates to render a meter shaped in a conic/circular way, like a semicircle.`,
+}
+
+var _MeterTypesMap = map[MeterTypes]string{
+	0: `MeterLinear`,
+	1: `MeterConic`,
+}
+
+// String returns the string representation
+// of this MeterTypes value.
+func (i MeterTypes) String() string {
+	if str, ok := _MeterTypesMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
+}
+
+// SetString sets the MeterTypes value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *MeterTypes) SetString(s string) error {
+	if val, ok := _MeterTypesNameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+	return errors.New(s + " is not a valid value for type MeterTypes")
+}
+
+// Int64 returns the MeterTypes value as an int64.
+func (i MeterTypes) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the MeterTypes value from an int64.
+func (i *MeterTypes) SetInt64(in int64) {
+	*i = MeterTypes(in)
+}
+
+// Desc returns the description of the MeterTypes value.
+func (i MeterTypes) Desc() string {
+	if str, ok := _MeterTypesDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// MeterTypesValues returns all possible values
+// for the type MeterTypes.
+func MeterTypesValues() []MeterTypes {
+	return _MeterTypesValues
+}
+
+// Values returns all possible values
+// for the type MeterTypes.
+func (i MeterTypes) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_MeterTypesValues))
+	for i, d := range _MeterTypesValues {
+		res[i] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type MeterTypes.
+func (i MeterTypes) IsValid() bool {
+	_, ok := _MeterTypesMap[i]
+	return ok
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i MeterTypes) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *MeterTypes) UnmarshalText(text []byte) error {
+	if err := i.SetString(string(text)); err != nil {
+		log.Println("MeterTypes.UnmarshalText:", err)
+	}
+	return nil
+}
+
 var _WinFlagsValues = []WinFlags{0, 1, 2, 3, 4, 5, 6, 7}
 
 // WinFlagsN is the highest valid value

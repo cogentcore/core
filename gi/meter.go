@@ -12,12 +12,16 @@ import (
 	"cogentcore.org/core/styles"
 )
 
-// Meter is a widget that renders a current value on as a filled bar
-// relative to a minimum and maximum potential value.
-// The [styles.Style.Direction] determines the direction in which the
+// Meter is a widget that renders a current value on as a filled
+// bar/semicircle relative to a minimum and maximum potential value.
+// The [Meter.Type] determines the shape of the meter, and the
+// [styles.Style.Direction] determines the direction in which the
 // meter goes.
 type Meter struct {
 	WidgetBase
+
+	// Type is the styling type of the meter
+	Type MeterTypes
 
 	// Value is the current value of the meter
 	Value float32
@@ -32,6 +36,19 @@ type Meter struct {
 	// render the filled value bar. It should be set in Style.
 	ValueColor image.Image
 }
+
+// MeterTypes are the different styling types of [Meter]s.
+type MeterTypes int32 //enums:enum
+
+const (
+	// MeterLinear indicates to render a meter that goes in a straight,
+	// linear direction, either horizontal or vertical.
+	MeterLinear MeterTypes = iota
+
+	// MeterConic indicates to render a meter shaped in a conic/circular
+	// way, like a semicircle.
+	MeterConic
+)
 
 func (m *Meter) OnInit() {
 	m.WidgetBase.OnInit()
