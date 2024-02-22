@@ -41,9 +41,8 @@ func (a *App) IsDark() bool {
 	return true
 }
 
-// isDarkMonitor monitors the state of the dark mode in a separate goroutine
-// and calls the given function with the new value whenever it changes.
-func (a *App) isDarkMonitor() {
+// IsDarkMonitor monitors whether the system is in dark mode.
+func (a *App) IsDarkMonitor() {
 	// TODO: do we need to close gracefully here if the app is done?
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -51,35 +50,31 @@ func (a *App) isDarkMonitor() {
 		return
 	}
 
-	go func() {
-		defer watcher.Close()
-		wasDark := a.IsDark() // we need to store this so that we only update when it changes
-		for {
-			select {
-			case event, ok := <-watcher.Events:
-				if !ok {
-					return
-				}
-				if event.Op&fsnotify.Create == fsnotify.Create {
-					isDark := a.IsDark()
-					if isDark != wasDark {
-						a.Dark = isDark
-						wasDark = isDark
-					}
-				}
-			case err, ok := <-watcher.Errors:
-				if !ok {
-					return
-				}
-				slog.Error("system color theme watcher error: " + err.Error())
-			}
-		}
-	}()
-
 	err = watcher.Add(plist)
 	if err != nil {
 		slog.Error("error adding system color theme file watcher: " + err.Error())
 	}
-}
 
-// TODO(kai): implement SetTitleBarIsDark on mac
+	defer watcher.Close()
+	wasDark := a.IsDark() // we need to store this so that we only update when it changes
+	for {
+		select {
+		case event, ok := <-watcher.Events:
+			if !ok {
+				return
+			}
+			if event.Op&fsnotify.Create == fsnotify.Create {
+				isDark := a.IsDark()
+				if isDark != wasDark {
+					a.Dark = isDark
+					wasDark = isDark
+				}
+			}
+		case err, ok := <-watcher.Errors:
+			if !ok {
+				return
+			}
+			slog.Error("system color theme watcher error: " + err.Error())
+		}
+	}
+}
