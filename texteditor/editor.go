@@ -515,42 +515,6 @@ func (ed *Editor) StyleView() {
 
 // ApplyStyle calls StyleView and sets the style
 func (ed *Editor) ApplyStyle() {
-	// ed.SetFlag(true, gi.CanFocus) // always focusable
 	ed.StyleView()
 	ed.StyleSizes()
 }
-
-// todo: virtual keyboard stuff
-
-// FocusChanged appropriate actions for various types of focus changes
-// func (ed *View) FocusChanged(change gi.FocusChanges) {
-// 	switch change {
-// 	case gi.FocusLost:
-// 		ed.SetFlag(false, ViewFocusActive))
-// 		// ed.EditDone()
-// 		ed.StopCursor() // make sure no cursor
-// 		ed.SetNeedsRender()
-// 		goosi.TheApp.HideVirtualKeyboard()
-// 		// fmt.Printf("lost focus: %v\n", ed.Nm)
-// 	case gi.FocusGot:
-// 		ed.SetFlag(true, ViewFocusActive))
-// 		ed.EmitFocusedSignal()
-// 		ed.SetNeedsRender()
-// 		goosi.TheApp.ShowVirtualKeyboard(goosi.DefaultKeyboard)
-// 		// fmt.Printf("got focus: %v\n", ed.Nm)
-// 	case gi.FocusInactive:
-// 		ed.SetFlag(false, ViewFocusActive))
-// 		ed.StopCursor()
-// 		// ed.EditDone()
-// 		// ed.SetNeedsRender()
-// 		goosi.TheApp.HideVirtualKeyboard()
-// 		// fmt.Printf("focus inactive: %v\n", ed.Nm)
-// 	case gi.FocusActive:
-// 		// fmt.Printf("focus active: %v\n", ed.Nm)
-// 		ed.SetFlag(true, ViewFocusActive))
-// 		// ed.SetNeedsRender()
-// 		// todo: see about cursor
-// 		ed.StartCursor()
-// 		goosi.TheApp.ShowVirtualKeyboard(goosi.DefaultKeyboard)
-// 	}
-// }
