@@ -9,15 +9,13 @@ import (
 	"image"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 )
 
 // Meter is a widget that renders a current value on as a filled
 // bar/semicircle relative to a minimum and maximum potential value.
-// The [Meter.Type] determines the shape of the meter, and the
-// [styles.Style.Direction] determines the direction in which the
-// meter goes.
 type Meter struct {
 	WidgetBase
 
@@ -39,11 +37,12 @@ type Meter struct {
 }
 
 // MeterTypes are the different styling types of [Meter]s.
-type MeterTypes int32 //enums:enum
+type MeterTypes int32 //enums:enum -trim-prefix Meter
 
 const (
 	// MeterLinear indicates to render a meter that goes in a straight,
-	// linear direction, either horizontal or vertical.
+	// linear direction, either horizontal or vertical, as specified by
+	// [styles.Style.Direction].
 	MeterLinear MeterTypes = iota
 
 	// MeterConic indicates to render a meter shaped in a conic/circular
@@ -64,14 +63,14 @@ func (m *Meter) SetStyles() {
 		s.Border.Radius = styles.BorderRadiusFull
 	})
 	m.StyleFinal(func(s *styles.Style) {
-		if s.Direction == styles.Row {
-			if m.Type == MeterLinear {
+		if m.Type == MeterLinear {
+			if s.Direction == styles.Row {
 				s.Min.Set(units.Em(20), units.Em(0.5))
 			} else {
-				s.Min.Set(units.Em(8), units.Em(4))
+				s.Min.Set(units.Em(0.5), units.Em(20))
 			}
 		} else {
-			s.Min.Set(units.Em(0.5), units.Em(20))
+			s.Min.Set(units.Em(9), units.Em(4))
 		}
 	})
 }
@@ -96,11 +95,12 @@ func (m *Meter) RenderMeter() {
 	pc, st := m.RenderLock()
 	defer m.RenderUnlock()
 
+	prop := (m.Value - m.Min) / (m.Max - m.Min)
+
 	if m.Type == MeterLinear {
 		m.RenderStdBox(st)
 		if m.ValueColor != nil {
 			dim := m.Styles.Direction.Dim()
-			prop := (m.Value - m.Min) / (m.Max - m.Min)
 			size := m.Geom.Size.Actual.Content.MulDim(dim, prop)
 			pc.FillStyle.Color = m.ValueColor
 			m.RenderBoxImpl(m.Geom.Pos.Content, size, st.Border)
@@ -108,16 +108,22 @@ func (m *Meter) RenderMeter() {
 		return
 	}
 
-	pc.FillStyle.Color = nil
-	pc.StrokeStyle.Color = st.Background
 	pc.StrokeStyle.Width = units.Dp(20)
 	pc.StrokeStyle.Width.ToDots(&st.UnitContext)
 
-	pos := m.Geom.Pos.Content.AddScalar(pc.StrokeWidth())
-	size := m.Geom.Size.Actual.Content.SubScalar(pc.StrokeWidth())
+	sw := pc.StrokeWidth() / 2
+	pos := m.Geom.Pos.Content.AddScalar(sw)
+	size := m.Geom.Size.Actual.Content.SubScalar(sw)
 
 	cx := (pos.X + size.X) / 2
 	cy := pos.Y + size.Y
-	pc.DrawEllipticalArc(cx, cy, cx-pos.X, size.Y, 0, 180)
-	pc.FillStrokeClear()
+	rx := cx - pos.X
+
+	pc.DrawEllipticalArc(cx, cy, rx, size.Y, mat32.Pi, 2*mat32.Pi)
+	pc.StrokeStyle.Color = st.Background
+	pc.Stroke()
+
+	pc.DrawEllipticalArc(cx, cy, rx, size.Y, mat32.Pi, (1+prop)*mat32.Pi)
+	pc.StrokeStyle.Color = m.ValueColor
+	pc.Stroke()
 }

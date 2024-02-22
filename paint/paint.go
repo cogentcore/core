@@ -835,7 +835,8 @@ func (pc *Context) DrawRoundedShadowBlur(blurSigma, radiusFactor, x, y, w, h flo
 	pc.FillStyle = origFill
 }
 
-// DrawEllipticalArc draws arc between angle1 and angle2 along an ellipse,
+// DrawEllipticalArc draws arc between angle1 and angle2 (radians)
+// along an ellipse,
 // using quadratic bezier curves -- centers of ellipse are at cx, cy with
 // radii rx, ry -- see DrawEllipticalArcPath for a version compatible with SVG
 // A/a path drawing, which uses previous position instead of two angles
@@ -996,16 +997,20 @@ func (pc *Context) DrawEllipticalArcPath(cx, cy, ocx, ocy, pcx, pcy, rx, ry, ang
 	return lx, ly
 }
 
+// DrawEllipse draws an ellipse at the given position with the given radii.
 func (pc *Context) DrawEllipse(x, y, rx, ry float32) {
 	pc.NewSubPath()
 	pc.DrawEllipticalArc(x, y, rx, ry, 0, 2*mat32.Pi)
 	pc.ClosePath()
 }
 
+// DrawArc draws an arc at the given position with the given radius
+// and angles in radians.
 func (pc *Context) DrawArc(x, y, r, angle1, angle2 float32) {
 	pc.DrawEllipticalArc(x, y, r, r, angle1, angle2)
 }
 
+// DrawCircle draws a circle at the given position with the given radius.
 func (pc *Context) DrawCircle(x, y, r float32) {
 	pc.NewSubPath()
 	pc.DrawEllipticalArc(x, y, r, r, 0, 2*mat32.Pi)
