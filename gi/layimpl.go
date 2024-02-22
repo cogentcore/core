@@ -110,7 +110,7 @@ type Layouter interface {
 	// SizeDownSetAllocs is the key SizeDown step that sets the allocations
 	// in the children, based on our allocation.  In the default implementation
 	// this calls SizeDownGrow if there is extra space to grow, or
-	// SizeDownAllocActual to set the allocations as they currrently are.
+	// SizeDownAllocActual to set the allocations as they currently are.
 	SizeDownSetAllocs(iter int)
 
 	// ManageOverflow uses overflow settings to determine if scrollbars
