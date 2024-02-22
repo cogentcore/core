@@ -80,7 +80,7 @@ func (m *Meter) SetStyles() {
 			s.Min.Set(units.Em(8))
 			m.Width.Em(0.5)
 		case MeterSemicircle:
-			s.Min.Set(units.Em(9), units.Em(4))
+			s.Min.Set(units.Em(8), units.Em(4))
 			m.Width.Em(1)
 		}
 	})
@@ -143,5 +143,18 @@ func (m *Meter) RenderMeter() {
 			pc.Stroke()
 		}
 		return
+	}
+
+	r := size.Mul(mat32.V2(0.5, 1))
+	c := pos.Add(r)
+
+	pc.DrawEllipticalArc(c.X, c.Y, r.X, r.Y, mat32.Pi, 2*mat32.Pi)
+	pc.StrokeStyle.Color = st.Background
+	pc.Stroke()
+
+	if m.ValueColor != nil {
+		pc.DrawEllipticalArc(c.X, c.Y, r.X, r.Y, mat32.Pi, (1+prop)*mat32.Pi)
+		pc.StrokeStyle.Color = m.ValueColor
+		pc.Stroke()
 	}
 }

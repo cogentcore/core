@@ -445,4 +445,5 @@ func other(ts *gi.Tabs) {
 
 	gi.NewMeter(tab).SetValue(0.7)
 	gi.NewMeter(tab).SetType(gi.MeterCircle).SetValue(0.7)
+	gi.NewMeter(tab).SetType(gi.MeterSemicircle).SetValue(0.7)
 }
