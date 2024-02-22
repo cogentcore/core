@@ -65,10 +65,18 @@ func (m *Meter) SetStyles() {
 	m.StyleFinal(func(s *styles.Style) {
 		if s.Direction == styles.Row {
 			s.Min.X.Em(20)
-			s.Min.Y.Em(0.5)
+			if m.Type == MeterLinear {
+				s.Min.Y.Em(0.5)
+			} else {
+				s.Min.Y.Em(2)
+			}
 		} else {
 			s.Min.Y.Em(20)
-			s.Min.X.Em(0.5)
+			if m.Type == MeterLinear {
+				s.Min.X.Em(0.5)
+			} else {
+				s.Min.X.Em(2)
+			}
 		}
 	})
 }
@@ -92,13 +100,18 @@ func (m *Meter) Render() {
 func (m *Meter) RenderMeter() {
 	pc, st := m.RenderLock()
 	defer m.RenderUnlock()
-	m.RenderStdBox(st)
 
-	if m.ValueColor != nil {
-		dim := m.Styles.Direction.Dim()
-		prop := (m.Value - m.Min) / (m.Max - m.Min)
-		size := m.Geom.Size.Actual.Content.MulDim(dim, prop)
-		pc.FillStyle.Color = m.ValueColor
-		m.RenderBoxImpl(m.Geom.Pos.Content, size, st.Border)
+	if m.Type == MeterLinear {
+		m.RenderStdBox(st)
+		if m.ValueColor != nil {
+			dim := m.Styles.Direction.Dim()
+			prop := (m.Value - m.Min) / (m.Max - m.Min)
+			size := m.Geom.Size.Actual.Content.MulDim(dim, prop)
+			pc.FillStyle.Color = m.ValueColor
+			m.RenderBoxImpl(m.Geom.Pos.Content, size, st.Border)
+		}
+		return
 	}
+
+	// pc.DrawArc()
 }
