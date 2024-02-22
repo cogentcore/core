@@ -66,7 +66,7 @@ var (
 // and is the point of entry for all events coming in from user actions.
 //
 // RenderWin contents are all managed by the StageMgr that
-// handles Main Stage elements such as Window, Dialog, and Sheet, which in
+// handles Main Stage elements such as WindowStage and DialogStage, which in
 // turn manage their own stack of Popup Stage elements such as Menu, Tooltip, etc.
 // The contents of each Stage is provided by a Scene, containing Widgets,
 // and the Stage Pixels image is drawn to the RenderWin in the RenderWindow method.

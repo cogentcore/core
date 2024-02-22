@@ -16,7 +16,7 @@ import (
 
 // StageTypes are the types of Stage containers.
 // There are two main categories: MainStage and PopupStage.
-// MainStage are Window, Dialog, Sheet: large and potentially
+// MainStage are WindowStage and DialogStage: large and potentially
 // complex Scenes that persist until dismissed, and can have
 // Decor widgets that control display.
 // PopupStage are Menu, Tooltip, Snackbar, Chooser that are transitory
@@ -37,12 +37,6 @@ const (
 	// on top of a Window, or in its own RenderWin (on Desktop only).
 	// It can be Modal or not.
 	DialogStage
-
-	// SheetStage is a MainStage that displays Scene as a
-	// partially overlapping panel coming up from the
-	// Bottom or LeftSide of the RenderWin main window.
-	// It can be Modal or not.
-	SheetStage
 
 	// MenuStage is a PopupStage that displays a Scene with Action Widgets
 	// overlaid on a MainStage.
@@ -71,7 +65,7 @@ const (
 // IsMain returns true if this type of Stage is a Main stage that manages
 // its own set of popups
 func (st StageTypes) IsMain() bool {
-	return st <= SheetStage
+	return st <= DialogStage
 }
 
 // IsPopup returns true if this type of Stage is a Popup, managed by another
@@ -80,20 +74,9 @@ func (st StageTypes) IsPopup() bool {
 	return !st.IsMain()
 }
 
-// StageSides are the Sides for Sheet Stages
-type StageSides int32 //enums:enum
-
-const (
-	// BottomSheet anchors Sheet to the bottom of the window, with handle on the top
-	BottomSheet StageSides = iota
-
-	// SideSheet anchors Sheet to the side of the window, with handle on the top
-	SideSheet
-)
-
 // Stage is a container and manager for displaying a Scene
 // in different functional ways, defined by StageTypes, in two categories:
-// Main types (Window, Dialog, Sheet) and Popup types
+// Main types (WindowStage and DialogStage) and Popup types
 // (Menu, Tooltip, Snackbar, Chooser).
 type Stage struct { //gti:add -setters
 	// type of Stage: determines behavior and Styling
@@ -160,10 +143,6 @@ type Stage struct { //gti:add -setters
 
 	// Pos is the target position for Scene to be placed within RenderWin.
 	Pos image.Point
-
-	// Side for Stages that can operate on different sides, e.g.,
-	// for Sheets: which side does the sheet come out from
-	Side StageSides
 
 	// Data is item represented by this main stage -- used for recycling windows
 	Data any
@@ -266,11 +245,6 @@ func (st *Stage) SetType(typ StageTypes) *Stage {
 		st.Scrim = true
 		st.ClickOff = true
 		st.CloseOnBack = true
-	case SheetStage:
-		st.Modal = true
-		st.Scrim = true
-		st.ClickOff = true
-		st.Resizable = true
 	case MenuStage:
 		st.Modal = true
 		st.Scrim = false
@@ -317,8 +291,6 @@ func (st *Stage) RunImpl() *Stage {
 		return st.RunWindow()
 	case DialogStage:
 		return st.RunDialog()
-	case SheetStage:
-		return st.RunSheet()
 	default:
 		return st.RunPopup()
 	}

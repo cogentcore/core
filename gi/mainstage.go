@@ -50,16 +50,6 @@ func (bd *Body) NewWindow() *Stage {
 
 // NewDialog in dialogs.go
 
-// NewSheet returns a new Sheet stage with given scene contents,
-// in connection with given widget (which provides key context).
-// for given side (e.g., Bottom or LeftSide).
-// Make further configuration choices using Set* methods, which
-// can be chained directly after the New call.
-// Use an appropriate Run call at the end to start the Stage running.
-func NewSheet(sc *Scene, side StageSides) *Stage {
-	return NewMainStage(SheetStage, sc).SetSide(side)
-}
-
 /////////////////////////////////////////////////////
 //		Decorate
 
@@ -69,11 +59,6 @@ func (st *Stage) AddWindowDecor() *Stage {
 }
 
 func (st *Stage) AddDialogDecor() *Stage {
-	return st
-}
-
-func (st *Stage) AddSheetDecor() *Stage {
-	// todo: handle based on side
 	return st
 }
 
@@ -238,18 +223,6 @@ func (st *Stage) RunDialog() *Stage {
 	sc.FitInWindow(st.RenderContext.Geom) // does resize
 	ms.Push(st)
 	// st.SetMainMgr(ms) // already set
-	return st
-}
-
-// RunSheet runs a Sheet with current settings.
-// Sheet MUST have context set.
-func (st *Stage) RunSheet() *Stage {
-	ctx := st.Context.AsWidget()
-	ms := ctx.Scene.MainStageMgr()
-
-	st.ConfigMainStage() // should set pos and size for side
-	ms.Push(st)
-	st.SetMainMgr(ms)
 	return st
 }
 

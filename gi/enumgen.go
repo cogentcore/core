@@ -1749,11 +1749,11 @@ func (i *SliderTypes) UnmarshalText(text []byte) error {
 	return nil
 }
 
-var _StageTypesValues = []StageTypes{0, 1, 2, 3, 4, 5, 6}
+var _StageTypesValues = []StageTypes{0, 1, 2, 3, 4, 5}
 
 // StageTypesN is the highest valid value
 // for type StageTypes, plus one.
-const StageTypesN StageTypes = 7
+const StageTypesN StageTypes = 6
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -1761,41 +1761,37 @@ func _StageTypesNoOp() {
 	var x [1]struct{}
 	_ = x[WindowStage-(0)]
 	_ = x[DialogStage-(1)]
-	_ = x[SheetStage-(2)]
-	_ = x[MenuStage-(3)]
-	_ = x[TooltipStage-(4)]
-	_ = x[SnackbarStage-(5)]
-	_ = x[CompleterStage-(6)]
+	_ = x[MenuStage-(2)]
+	_ = x[TooltipStage-(3)]
+	_ = x[SnackbarStage-(4)]
+	_ = x[CompleterStage-(5)]
 }
 
 var _StageTypesNameToValueMap = map[string]StageTypes{
 	`WindowStage`:    0,
 	`DialogStage`:    1,
-	`SheetStage`:     2,
-	`MenuStage`:      3,
-	`TooltipStage`:   4,
-	`SnackbarStage`:  5,
-	`CompleterStage`: 6,
+	`MenuStage`:      2,
+	`TooltipStage`:   3,
+	`SnackbarStage`:  4,
+	`CompleterStage`: 5,
 }
 
 var _StageTypesDescMap = map[StageTypes]string{
 	0: `WindowStage is a MainStage that displays a Scene in a full window. One of these must be created first, as the primary App contents, and it typically persists throughout. It fills the RenderWin window. Additional Windows can be created either within the same RenderWin (Mobile) or in separate RenderWin windows (Desktop, NewWindow).`,
 	1: `DialogStage is a MainStage that displays Scene in a smaller dialog window on top of a Window, or in its own RenderWin (on Desktop only). It can be Modal or not.`,
-	2: `SheetStage is a MainStage that displays Scene as a partially overlapping panel coming up from the Bottom or LeftSide of the RenderWin main window. It can be Modal or not.`,
-	3: `MenuStage is a PopupStage that displays a Scene with Action Widgets overlaid on a MainStage. It is typically Modal and ClickOff, and closes when an Action is selected.`,
-	4: `TooltipStage is a PopupStage that displays a Scene with extra info overlaid on a MainStage. It is typically ClickOff and not Modal.`,
-	5: `SnackbarStage is a PopupStage displays a Scene with info and typically an additional optional Action, usually displayed at the bottom. It is typically not ClickOff or Modal, but has a timeout.`,
-	6: `CompleterStage is a PopupStage that displays a Scene with text completions, spelling corrections, or other such dynamic info. It is typically ClickOff, not Modal, dynamically updating, and closes when something is selected or typing renders it no longer relevant.`,
+	2: `MenuStage is a PopupStage that displays a Scene with Action Widgets overlaid on a MainStage. It is typically Modal and ClickOff, and closes when an Action is selected.`,
+	3: `TooltipStage is a PopupStage that displays a Scene with extra info overlaid on a MainStage. It is typically ClickOff and not Modal.`,
+	4: `SnackbarStage is a PopupStage displays a Scene with info and typically an additional optional Action, usually displayed at the bottom. It is typically not ClickOff or Modal, but has a timeout.`,
+	5: `CompleterStage is a PopupStage that displays a Scene with text completions, spelling corrections, or other such dynamic info. It is typically ClickOff, not Modal, dynamically updating, and closes when something is selected or typing renders it no longer relevant.`,
 }
 
 var _StageTypesMap = map[StageTypes]string{
 	0: `WindowStage`,
 	1: `DialogStage`,
-	2: `SheetStage`,
-	3: `MenuStage`,
-	4: `TooltipStage`,
-	5: `SnackbarStage`,
-	6: `CompleterStage`,
+	2: `MenuStage`,
+	3: `TooltipStage`,
+	4: `SnackbarStage`,
+	5: `CompleterStage`,
 }
 
 // String returns the string representation
@@ -1868,109 +1864,6 @@ func (i StageTypes) MarshalText() ([]byte, error) {
 func (i *StageTypes) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
 		log.Println("StageTypes.UnmarshalText:", err)
-	}
-	return nil
-}
-
-var _StageSidesValues = []StageSides{0, 1}
-
-// StageSidesN is the highest valid value
-// for type StageSides, plus one.
-const StageSidesN StageSides = 2
-
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _StageSidesNoOp() {
-	var x [1]struct{}
-	_ = x[BottomSheet-(0)]
-	_ = x[SideSheet-(1)]
-}
-
-var _StageSidesNameToValueMap = map[string]StageSides{
-	`BottomSheet`: 0,
-	`SideSheet`:   1,
-}
-
-var _StageSidesDescMap = map[StageSides]string{
-	0: `BottomSheet anchors Sheet to the bottom of the window, with handle on the top`,
-	1: `SideSheet anchors Sheet to the side of the window, with handle on the top`,
-}
-
-var _StageSidesMap = map[StageSides]string{
-	0: `BottomSheet`,
-	1: `SideSheet`,
-}
-
-// String returns the string representation
-// of this StageSides value.
-func (i StageSides) String() string {
-	if str, ok := _StageSidesMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
-
-// SetString sets the StageSides value from its
-// string representation, and returns an
-// error if the string is invalid.
-func (i *StageSides) SetString(s string) error {
-	if val, ok := _StageSidesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type StageSides")
-}
-
-// Int64 returns the StageSides value as an int64.
-func (i StageSides) Int64() int64 {
-	return int64(i)
-}
-
-// SetInt64 sets the StageSides value from an int64.
-func (i *StageSides) SetInt64(in int64) {
-	*i = StageSides(in)
-}
-
-// Desc returns the description of the StageSides value.
-func (i StageSides) Desc() string {
-	if str, ok := _StageSidesDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
-
-// StageSidesValues returns all possible values
-// for the type StageSides.
-func StageSidesValues() []StageSides {
-	return _StageSidesValues
-}
-
-// Values returns all possible values
-// for the type StageSides.
-func (i StageSides) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_StageSidesValues))
-	for i, d := range _StageSidesValues {
-		res[i] = d
-	}
-	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type StageSides.
-func (i StageSides) IsValid() bool {
-	_, ok := _StageSidesMap[i]
-	return ok
-}
-
-// MarshalText implements the [encoding.TextMarshaler] interface.
-func (i StageSides) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
-
-// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *StageSides) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("StageSides.UnmarshalText:", err)
 	}
 	return nil
 }

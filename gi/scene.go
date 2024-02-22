@@ -111,7 +111,7 @@ type Scene struct {
 
 	// hasShown is whether this scene has already been shown.
 	// This is used to ensure that [events.Show] is only sent once.
-	hasShown bool
+	hasShown bool `set:"-"`
 }
 
 func (sc *Scene) FlagType() enums.BitFlagSetter {
