@@ -74,21 +74,9 @@ func (wb *WidgetBase) StyleFinal(s func(s *styles.Style)) *WidgetBase {
 	return wb
 }
 
-// StyleRLock does a read-lock for reading the style
-func (wb *WidgetBase) StyleRLock() {
-	// wb.StyMu.RLock()
-}
-
-// StyleRUnlock unlocks the read-lock
-func (wb *WidgetBase) StyleRUnlock() {
-	// wb.StyMu.RUnlock()
-}
-
 // BoxSpace returns the style BoxSpace value under read lock
 func (wb *WidgetBase) BoxSpace() styles.SideFloats {
-	// wb.StyMu.RLock()
 	bs := wb.Styles.BoxSpace()
-	// wb.StyMu.RUnlock()
 	return bs
 }
 
@@ -103,7 +91,6 @@ func (wb *WidgetBase) ApplyStyleParts() {
 
 // ApplyStyleWidget is the primary styling function for all Widgets.
 // Handles inheritance and runs the Styler functions.
-// Must be called under a StyMu Lock
 func (wb *WidgetBase) ApplyStyleWidget() {
 	if wb.OverrideStyle {
 		return
@@ -244,9 +231,6 @@ func (wb *WidgetBase) ApplyStyleUpdate() {
 }
 
 func (wb *WidgetBase) ApplyStyle() {
-	// wb.StyMu.Lock() // todo: needed??  maybe not.
-	// defer wb.StyMu.Unlock()
-
 	wb.ApplyStyleWidget()
 }
 

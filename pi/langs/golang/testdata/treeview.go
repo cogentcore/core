@@ -520,19 +520,12 @@ func (tv *TreeView) ConfigWidget() {
 	}
 }
 
-func (tv *TreeView) StyleTreeView() {
+func (tv *TreeView) ApplyStyle() {
 	if !tv.HasChildren() {
 		tv.SetClosed(true)
 	}
 	tv.Indent.ToDots(&tv.Styles.UnContext)
 	tv.ApplyStyleWidget()
-}
-
-func (tv *TreeView) ApplyStyle() {
-	tv.StyMu.Lock() // todo: needed??  maybe not.
-	defer tv.StyMu.Unlock()
-
-	tv.StyleTreeView()
 }
 
 func (tv *TreeView) UpdateBranchIcons() {

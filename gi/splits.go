@@ -293,12 +293,8 @@ func (sl *Splits) HandleEvents() {
 }
 
 func (sl *Splits) ApplyStyle() {
-	// sl.StyMu.Lock()
-
 	sl.UpdateSplits()
 	sl.ApplyStyleWidget()
-	// sl.StyMu.Unlock()
-
 	sl.ConfigSplitters()
 }
 

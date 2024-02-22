@@ -504,9 +504,6 @@ func (ed *Editor) ConfigWidget() {
 
 // StyleView sets the style of widget
 func (ed *Editor) StyleView() {
-	// ed.StyMu.Lock()
-	// defer ed.StyMu.Unlock()
-
 	if ed.NeedsRebuild() {
 		if ed.Buf != nil {
 			ed.Buf.SetHiStyle(histyle.StyleDefault)

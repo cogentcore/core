@@ -292,12 +292,6 @@ type WidgetBase struct {
 	// Scene is the overall Scene to which we belong. It is automatically
 	// by widgets whenever they are added to another widget parent.
 	Scene *Scene `copier:"-" json:"-" xml:"-" set:"-"`
-
-	// mutex protecting the Style field
-	// StyMu sync.RWMutex `copier:"-" view:"-" json:"-" xml:"-" set:"-"`
-
-	// mutex protecting the BBox fields
-	// BBoxMu sync.RWMutex `copier:"-" view:"-" json:"-" xml:"-" set:"-"`
 }
 
 func (wb *WidgetBase) FlagType() enums.BitFlagSetter {

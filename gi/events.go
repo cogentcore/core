@@ -296,10 +296,8 @@ func (wb *WidgetBase) HandleEvents() {
 }
 
 // PosInScBBox returns true if given position is within
-// this node's scene bbox (under read lock)
+// this node's scene bbox
 func (wb *WidgetBase) PosInScBBox(pos image.Point) bool {
-	// wb.BBoxMu.RLock()
-	// defer wb.BBoxMu.RUnlock()
 	return pos.In(wb.Geom.TotalBBox)
 }
 
