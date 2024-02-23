@@ -202,3 +202,77 @@ void Java_org_golang_app_GoNativeActivity_scaled(JNIEnv *env, jclass clazz, jflo
 {
 	scaled((float)scaleFactor, (float)posX, (float)posY);
 }
+
+// Clipboard (based on fyne at https://github.com/fyne-io/fyne/blob/master/internal/driver/mobile/android.c):
+// Copyright (C) 2018 Fyne.io developers under the BSD 3-Clause License
+
+jobject getClipboard(uintptr_t jni_env, uintptr_t ctx)
+{
+	JNIEnv *env = (JNIEnv *)jni_env;
+	jclass ctxClass = (*env)->GetObjectClass(env, (jobject)ctx);
+	jmethodID getSystemService = find_method(env, ctxClass, "getSystemService", "(Ljava/lang/String;)Ljava/lang/Object;");
+
+	jstring service = (*env)->NewStringUTF(env, "clipboard");
+	jobject ret = (*env)->CallObjectMethod(env, (jobject)ctx, getSystemService, service);
+	jthrowable err = (*env)->ExceptionOccurred(env);
+
+	if (err != NULL)
+	{
+		LOG_FATAL("cannot lookup clipboard");
+		(*env)->ExceptionClear(env);
+		return NULL;
+	}
+	return ret;
+}
+
+const char *getString(uintptr_t jni_env, uintptr_t ctx, jstring str)
+{
+	JNIEnv *env = (JNIEnv *)jni_env;
+
+	const char *chars = (*env)->GetStringUTFChars(env, str, NULL);
+
+	const char *copy = strdup(chars);
+	(*env)->ReleaseStringUTFChars(env, str, chars);
+	return copy;
+}
+
+const char *getClipboardContent(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx)
+{
+	JNIEnv *env = (JNIEnv *)jni_env;
+	jobject mgr = getClipboard(jni_env, ctx);
+	if (mgr == NULL)
+	{
+		return NULL;
+	}
+
+	jclass mgrClass = (*env)->GetObjectClass(env, mgr);
+	jmethodID getText = find_method(env, mgrClass, "getText", "()Ljava/lang/CharSequence;");
+
+	jobject content = (jstring)(*env)->CallObjectMethod(env, mgr, getText);
+	if (content == NULL)
+	{
+		return NULL;
+	}
+
+	jclass clzCharSequence = (*env)->GetObjectClass(env, content);
+	jmethodID toString = (*env)->GetMethodID(env, clzCharSequence, "toString", "()Ljava/lang/String;");
+	jobject s = (*env)->CallObjectMethod(env, content, toString);
+
+	return getString(jni_env, ctx, s);
+}
+
+void setClipboardContent(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *content)
+{
+	JNIEnv *env = (JNIEnv *)jni_env;
+	jobject mgr = getClipboard(jni_env, ctx);
+	if (mgr == NULL)
+	{
+		return;
+	}
+
+	jclass mgrClass = (*env)->GetObjectClass(env, mgr);
+	jmethodID setText = find_method(env, mgrClass, "setText", "(Ljava/lang/CharSequence;)V");
+
+	jstring str = (*env)->NewStringUTF(env, content);
+	(*env)->CallVoidMethod(env, mgr, setText, str);
+}
