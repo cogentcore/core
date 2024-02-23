@@ -31,6 +31,10 @@ type Meter struct {
 	// Max is the maximum possible value of the meter
 	Max float32
 
+	// Text, for [MeterCircle] and [MeterSemicircle], is the
+	// text to render inside of the circle/semicircle.
+	Text string
+
 	// ValueColor is the image color that will be used to
 	// render the filled value bar. It should be set in Style.
 	ValueColor image.Image

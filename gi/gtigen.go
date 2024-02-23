@@ -501,7 +501,7 @@ func (t *Space) New() ki.Ki { return &Space{} }
 func (t *Space) SetTooltip(v string) *Space { t.Tooltip = v; return t }
 
 // MeterType is the [gti.Type] for [Meter]
-var MeterType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Meter", IDName: "meter", Doc: "Meter is a widget that renders a current value on as a filled\nbar/semicircle relative to a minimum and maximum potential value.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Type", Doc: "Type is the styling type of the meter"}, {Name: "Value", Doc: "Value is the current value of the meter"}, {Name: "Min", Doc: "Min is the minimum possible value of the meter"}, {Name: "Max", Doc: "Max is the maximum possible value of the meter"}, {Name: "ValueColor", Doc: "ValueColor is the image color that will be used to\nrender the filled value bar. It should be set in Style."}, {Name: "Width", Doc: "Width, for [MeterCircle] and [MeterSemicircle], is the\nwidth of the circle/semicircle. It should be set in Style."}}, Instance: &Meter{}})
+var MeterType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Meter", IDName: "meter", Doc: "Meter is a widget that renders a current value on as a filled\nbar/semicircle relative to a minimum and maximum potential value.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Type", Doc: "Type is the styling type of the meter"}, {Name: "Value", Doc: "Value is the current value of the meter"}, {Name: "Min", Doc: "Min is the minimum possible value of the meter"}, {Name: "Max", Doc: "Max is the maximum possible value of the meter"}, {Name: "Text", Doc: "Text, for [MeterCircle] and [MeterSemicircle], is the\ntext to render inside of the circle/semicircle."}, {Name: "ValueColor", Doc: "ValueColor is the image color that will be used to\nrender the filled value bar. It should be set in Style."}, {Name: "Width", Doc: "Width, for [MeterCircle] and [MeterSemicircle], is the\nwidth of the circle/semicircle. It should be set in Style."}}, Instance: &Meter{}})
 
 // NewMeter adds a new [Meter] with the given name to the given parent:
 // Meter is a widget that renders a current value on as a filled
@@ -531,6 +531,11 @@ func (t *Meter) SetMin(v float32) *Meter { t.Min = v; return t }
 // SetMax sets the [Meter.Max]:
 // Max is the maximum possible value of the meter
 func (t *Meter) SetMax(v float32) *Meter { t.Max = v; return t }
+
+// SetText sets the [Meter.Text]:
+// Text, for [MeterCircle] and [MeterSemicircle], is the
+// text to render inside of the circle/semicircle.
+func (t *Meter) SetText(v string) *Meter { t.Text = v; return t }
 
 // SetValueColor sets the [Meter.ValueColor]:
 // ValueColor is the image color that will be used to
