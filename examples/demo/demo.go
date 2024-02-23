@@ -443,8 +443,8 @@ func other(ts *gi.Tabs) {
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Other")
 	gi.NewLabel(tab).SetText(`Other features of the Cogent Core framework`)
 
-	gi.NewMeter(tab).SetType(gi.MeterCircle).SetValue(0.7)
-	gi.NewMeter(tab).SetType(gi.MeterSemicircle).SetValue(0.7)
+	gi.NewMeter(tab).SetType(gi.MeterCircle).SetValue(0.7).SetText("70%")
+	gi.NewMeter(tab).SetType(gi.MeterSemicircle).SetValue(0.7).SetText("70%")
 	gi.NewMeter(tab).SetValue(0.7)
 	gi.NewMeter(tab).SetValue(0.7).Style(func(s *styles.Style) {
 		s.Direction = styles.Column

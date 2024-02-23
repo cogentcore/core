@@ -10,6 +10,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 )
@@ -76,16 +77,22 @@ func (m *Meter) SetStyles() {
 		switch m.Type {
 		case MeterLinear:
 			if s.Direction == styles.Row {
-				s.Min.Set(units.Em(20), units.Em(0.5))
+				s.Min.Set(units.Dp(320), units.Dp(8))
 			} else {
-				s.Min.Set(units.Em(0.5), units.Em(20))
+				s.Min.Set(units.Dp(8), units.Dp(320))
 			}
 		case MeterCircle:
-			s.Min.Set(units.Em(8))
-			m.Width.Em(0.5)
+			s.Min.Set(units.Dp(128))
+			m.Width.Dp(8)
+			s.Font.Size.Dp(32)
+			s.Text.LineHeight.Dp(40)
+			s.Text.Align = styles.Center
+			s.Text.AlignV = styles.Center
 		case MeterSemicircle:
-			s.Min.Set(units.Em(7), units.Em(4))
-			m.Width.Em(1)
+			s.Min.Set(units.Dp(112), units.Dp(64))
+			m.Width.Dp(16)
+			s.Text.Align = styles.Center
+			s.Text.AlignV = styles.Center
 		}
 	})
 }
@@ -133,6 +140,15 @@ func (m *Meter) RenderMeter() {
 	pos := m.Geom.Pos.Content.AddScalar(sw / 2)
 	size := m.Geom.Size.Actual.Content.SubScalar(sw)
 
+	var txt *paint.Text
+	var toff mat32.Vec2
+	if m.Text != "" {
+		txt = &paint.Text{}
+		txt.SetHTML(m.Text, st.FontRender(), &st.Text, &st.UnitContext, nil)
+		tsz := txt.Layout(&st.Text, st.FontRender(), &st.UnitContext, size)
+		toff = tsz.DivScalar(2)
+	}
+
 	if m.Type == MeterCircle {
 		r := size.DivScalar(2)
 		c := pos.Add(r)
@@ -145,6 +161,9 @@ func (m *Meter) RenderMeter() {
 			pc.DrawEllipticalArc(c.X, c.Y, r.X, r.Y, -mat32.Pi/2, prop*2*mat32.Pi-mat32.Pi/2)
 			pc.StrokeStyle.Color = m.ValueColor
 			pc.Stroke()
+		}
+		if txt != nil {
+			txt.Render(pc, c.Sub(toff))
 		}
 		return
 	}
@@ -160,5 +179,8 @@ func (m *Meter) RenderMeter() {
 		pc.DrawEllipticalArc(c.X, c.Y, r.X, r.Y, mat32.Pi, (1+prop)*mat32.Pi)
 		pc.StrokeStyle.Color = m.ValueColor
 		pc.Stroke()
+	}
+	if txt != nil {
+		txt.Render(pc, c.Sub(size.Mul(mat32.V2(0, 0.5))).Sub(toff))
 	}
 }
