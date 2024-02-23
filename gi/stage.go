@@ -327,6 +327,7 @@ func (st *Stage) Raise() {
 		st.MainMgr.RenderWin.Raise()
 	}
 	st.MainMgr.MoveToTop(st)
+	CurRenderWin.SetStageTitle(st.Title)
 }
 
 func (st *Stage) Delete() {
