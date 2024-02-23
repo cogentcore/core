@@ -83,7 +83,7 @@ func (ab *Abilities) Is(flag enums.BitFlag) bool {
 // IsPressable returns true when an element is Selectable, Activatable,
 // DoubleClickable, Draggable, Slideable, or Checkable
 func (ab *Abilities) IsPressable() bool {
-	return ab.Is(Selectable) || ab.Is(Activatable) || ab.Is(DoubleClickable) || ab.Is(TripleClickable) || ab.Is(Draggable) || ab.Is(Slideable) || ab.Is(Checkable) || ab.Is(Clickable)
+	return ab.Is(Selectable) || ab.Is(Activatable) || ab.Is(DoubleClickable) || ab.Is(TripleClickable) || ab.Is(Draggable) || ab.Is(Slideable) || ab.Is(Checkable) || ab.Is(Clickable) || ab.Is(LongPressable)
 }
 
 // IsHoverable is true for both Hoverable and LongHoverable
