@@ -420,12 +420,7 @@ func (wb *WidgetBase) HandleLongHoverTooltip() {
 		NewTooltip(wi).Run()
 	})
 	wb.On(events.LongHoverEnd, func(e events.Event) {
-		if wb.Scene != nil && wb.Scene.MainStageMgr() != nil {
-			top := wb.Scene.MainStageMgr().Top()
-			if top != nil {
-				top.PopupMgr.PopDeleteType(TooltipStage)
-			}
-		}
+		wb.Scene.Stage.PopupMgr.PopDeleteType(TooltipStage)
 	})
 
 	wb.On(events.LongPressStart, func(e events.Event) {
@@ -437,12 +432,7 @@ func (wb *WidgetBase) HandleLongHoverTooltip() {
 		NewTooltip(wi).Run()
 	})
 	wb.On(events.LongPressEnd, func(e events.Event) {
-		if wb.Scene != nil && wb.Scene.MainStageMgr() != nil {
-			top := wb.Scene.MainStageMgr().Top()
-			if top != nil {
-				top.PopupMgr.PopDeleteType(TooltipStage)
-			}
-		}
+		wb.Scene.Stage.PopupMgr.PopDeleteType(TooltipStage)
 	})
 }
 
