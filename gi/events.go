@@ -424,6 +424,7 @@ func (wb *WidgetBase) HandleLongHoverTooltip() {
 	})
 
 	wb.On(events.LongPressStart, func(e events.Event) {
+		wb.Send(events.ContextMenu, e)
 		wi := wb.This().(Widget)
 		if wi.WidgetTooltip() == "" {
 			return
