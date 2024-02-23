@@ -98,7 +98,7 @@ func (bd *Body) AddSnackbarButton(text string, onClick ...func(e events.Event)) 
 		if len(onClick) > 0 {
 			onClick[0](e)
 		}
-		bd.ClosePopup()
+		bd.Scene.Stage.ClosePopup()
 	})
 	return bd
 }
@@ -116,7 +116,7 @@ func (bd *Body) AddSnackbarIcon(icon icons.Icon, onClick ...func(e events.Event)
 		if len(onClick) > 0 {
 			onClick[0](e)
 		}
-		bd.ClosePopup()
+		bd.Scene.Stage.ClosePopup()
 	})
 	return bd
 }

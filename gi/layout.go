@@ -264,29 +264,6 @@ func (ly *Layout) FocusPrevChild(updn bool) bool {
 	return true
 }
 
-// ClosePopup closes the parent Stage as a PopupStage.
-// Returns false if not a popup.
-func (ly *Layout) ClosePopup() bool {
-	ps := ly.Scene.Stage
-	if ps == nil {
-		return false
-	}
-	ps.ClosePopup()
-	return true
-}
-
-// ClosePopupAndBelow closes the parent Stage as a PopupStage,
-// and any other popups immediately below it of the same type.
-// Returns false if not a popup.
-func (ly *Layout) ClosePopupAndBelow() bool {
-	ps := ly.Scene.Stage
-	if ps == nil {
-		return false
-	}
-	ps.ClosePopupAndBelow()
-	return true
-}
-
 func (ly *Layout) HandleEvents() {
 	ly.WidgetBase.HandleEvents()
 	ly.HandleKeys()
@@ -314,7 +291,7 @@ func (ly *Layout) HandleKeys() {
 			slog.Info("Layout KeyInput", "widget", ly, "keyfun", kf)
 		}
 		if kf == keyfun.Abort {
-			if ly.ClosePopupAndBelow() {
+			if ly.Scene.Stage.ClosePopupAndBelow() {
 				e.SetHandled()
 			}
 			return

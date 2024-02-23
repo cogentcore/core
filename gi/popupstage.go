@@ -145,36 +145,36 @@ func (st *Stage) ClosePopupAsync() {
 	st.ClosePopup()
 }
 
-// ClosePopup closes this stage as a popup
-func (st *Stage) ClosePopup() {
-	// note: this is critical for Completer to not crash due to async closing:
+// ClosePopup closes this stage as a popup, returning whether it was closed.
+func (st *Stage) ClosePopup() bool {
+	// NOTE: this is critical for Completer to not crash due to async closing
 	if st.Main == nil || st.PopupMgr == nil || st.MainMgr == nil {
-		// fmt.Println("popup already gone")
-		return
+		return false
 	}
-	st.PopupMgr.DeleteStage(st)
+	return st.PopupMgr.DeleteStage(st)
 }
 
 // ClosePopupAndBelowAsync closes this stage as a popup,
 // and all those immediately below it of the same type.
 // This version is for Asynchronous usage outside the main event loop,
 // for example in a delayed callback AfterFunc etc.
-func (st *Stage) ClosePopupAndBelowAsync() {
+// It returns whether it successfully closed popups.
+func (st *Stage) ClosePopupAndBelowAsync() bool {
 	rc := st.MainMgr.RenderContext
 	rc.Lock()
 	defer rc.Unlock()
-	st.ClosePopupAndBelow()
+	return st.ClosePopupAndBelow()
 }
 
 // ClosePopupAndBelow closes this stage as a popup,
 // and all those immediately below it of the same type.
-func (st *Stage) ClosePopupAndBelow() {
-	// note: this is critical for Completer to not crash due to async closing:
+// It returns whether it successfully closed popups.
+func (st *Stage) ClosePopupAndBelow() bool {
+	// NOTE: this is critical for Completer to not crash due to async closing
 	if st.Main == nil || st.PopupMgr == nil || st.MainMgr == nil {
-		// fmt.Println("popup already gone")
-		return
+		return false
 	}
-	st.PopupMgr.DeleteStageAndBelow(st)
+	return st.PopupMgr.DeleteStageAndBelow(st)
 }
 
 func (st *Stage) PopupHandleEvent(e events.Event) {
