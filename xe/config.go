@@ -4,6 +4,8 @@
 
 package xe
 
+//go:generate core generate
+
 import (
 	"io"
 	"os"
@@ -17,7 +19,7 @@ import (
 // controls the behavior of xe. It is passed to most
 // high-level functions, and a default version of it
 // can be easily constructed using [DefaultConfig].
-type Config struct {
+type Config struct { //gti:add -setters
 	// Buffer is whether to buffer the output of Stdout and Stderr,
 	// which is necessary for the correct printing of commands and output
 	// when there is an error with a command, and for correct coloring
@@ -42,7 +44,7 @@ type Config struct {
 	// The current environment variables will also be passed to the
 	// command, but they will be overridden by any variables here
 	// if there are conflicts.
-	Env map[string]string
+	Env map[string]string `set:"-"`
 
 	// Stdout is the writer to write the standard output of called commands to.
 	// It can be set to nil to disable the writing of the standard output.
@@ -257,52 +259,8 @@ func PrintCmd(cmd string, err error) {
 	Major().PrintCmd(cmd, err)
 }
 
-func (c *Config) SetBuffer(buffer bool) *Config {
-	c.Buffer = buffer
-	return c
-}
-
-func (c *Config) SetFatal(fatal bool) *Config {
-	c.Fatal = fatal
-	return c
-}
-
-func (c *Config) SetPrintOnly(printOnly bool) *Config {
-	c.PrintOnly = printOnly
-	return c
-}
-
-func (c *Config) SetDir(dir string) *Config {
-	c.Dir = dir
-	return c
-}
-
+// SetEnv sets the given environment variable.
 func (c *Config) SetEnv(key, val string) *Config {
 	c.Env[key] = val
-	return c
-}
-
-func (c *Config) SetStdout(stdout io.Writer) *Config {
-	c.Stdout = stdout
-	return c
-}
-
-func (c *Config) SetStderr(stderr io.Writer) *Config {
-	c.Stderr = stderr
-	return c
-}
-
-func (c *Config) SetStdin(stdin io.Reader) *Config {
-	c.Stdin = stdin
-	return c
-}
-
-func (c *Config) SetCommands(commands io.Writer) *Config {
-	c.Commands = commands
-	return c
-}
-
-func (c *Config) SetErrors(errors io.Writer) *Config {
-	c.Errors = errors
 	return c
 }
