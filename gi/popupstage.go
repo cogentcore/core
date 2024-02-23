@@ -236,7 +236,7 @@ func (pm *StageMgr) PopupHandleEvent(e events.Event) {
 			return
 		}
 		if top.ClickOff && e.Type() == events.MouseUp {
-			pm.PopDelete()
+			top.ClosePopupAndBelow()
 		}
 		if top.Modal { // absorb any other events!
 			e.SetHandled()
