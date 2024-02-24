@@ -394,13 +394,29 @@ func (vv *ValueBase) SetReadOnly(ro bool) {
 	vv.SetFlag(ro, ValueReadOnly)
 }
 
+// JoinViewPath returns a view path composed of two elements,
+// with a • path separator, handling the cases where either or
+// both can be empty.
+func JoinViewPath(a, b string) string {
+	switch {
+	case a == "" && b == "":
+		return ""
+	case a == "":
+		return b
+	case b == "":
+		return a
+	default:
+		return a + " • " + b
+	}
+}
+
 func (vv *ValueBase) SetStructValue(val reflect.Value, owner any, field *reflect.StructField, tmpSave Value, viewPath string) {
 	vv.OwnKind = reflect.Struct
 	vv.Value = val
 	vv.Owner = owner
 	vv.Field = field
 	vv.TmpSave = tmpSave
-	vv.ViewPath = viewPath + "." + field.Name
+	vv.ViewPath = viewPath
 	vv.SetName(field.Name)
 }
 
@@ -421,7 +437,7 @@ func (vv *ValueBase) SetMapValue(val reflect.Value, owner any, key any, keyView 
 	vv.KeyView = keyView
 	vv.TmpSave = tmpSave
 	keystr := laser.ToString(key)
-	vv.ViewPath = viewPath + "." + keystr
+	vv.ViewPath = JoinViewPath(viewPath, keystr)
 	vv.SetName(keystr)
 }
 
@@ -432,16 +448,16 @@ func (vv *ValueBase) SetSliceValue(val reflect.Value, owner any, idx int, tmpSav
 	vv.Idx = idx
 	vv.TmpSave = tmpSave
 	idxstr := fmt.Sprintf("%v", idx)
-	vpath := "[" + idxstr + "]"
+	vpath := viewPath + "[" + idxstr + "]"
 	if vv.Owner != nil {
 		if lblr, ok := vv.Owner.(gi.SliceLabeler); ok {
 			slbl := lblr.ElemLabel(idx)
 			if slbl != "" {
-				vpath = "[" + slbl + "]"
+				vpath = JoinViewPath(viewPath, slbl)
 			}
 		}
 	}
-	vv.ViewPath = viewPath + vpath
+	vv.ViewPath = vpath
 	vv.SetName(idxstr)
 }
 
@@ -718,12 +734,8 @@ func (vv *ValueBase) OwnerLabel() string {
 	if vv.Owner == nil {
 		return ""
 	}
-	olbl, _ := gi.ToLabeler(vv.Owner)
 	switch vv.OwnKind {
 	case reflect.Struct:
-		if olbl != "" {
-			return strcase.ToSentence(olbl + " " + vv.Field.Name)
-		}
 		return strcase.ToSentence(vv.Field.Name)
 	case reflect.Map:
 		kystr := ""
@@ -739,28 +751,18 @@ func (vv *ValueBase) OwnerLabel() string {
 			}
 		}
 		if kystr != "" {
-			if olbl != "" {
-				return olbl + ": " + kystr
-			}
 			return kystr
 		}
-		return olbl
 	case reflect.Slice:
 		if lblr, ok := vv.Owner.(gi.SliceLabeler); ok {
 			slbl := lblr.ElemLabel(vv.Idx)
 			if slbl != "" {
-				if olbl != "" {
-					return olbl + ": " + slbl
-				}
 				return slbl
 			}
 		}
-		if olbl != "" {
-			return fmt.Sprintf("%s: %d", olbl, vv.Idx)
-		}
 		return strconv.Itoa(vv.Idx)
 	}
-	return olbl
+	return ""
 }
 
 // GetTitle returns a title for this item suitable for a window title etc,

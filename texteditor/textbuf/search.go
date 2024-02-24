@@ -145,11 +145,11 @@ func SearchLexItems(src [][]rune, lexs []lex.Line, find []byte, ignoreCase bool)
 // Returns number of occurrences and specific match position list.
 // Column positions are in runes.
 func Search(reader io.Reader, find []byte, ignoreCase bool) (int, []Match) {
-	fsz := len(find)
+	fr := bytes.Runes(find)
+	fsz := len(fr)
 	if fsz == 0 {
 		return 0, nil
 	}
-	fr := bytes.Runes(find)
 	cnt := 0
 	var matches []Match
 	scan := bufio.NewScanner(reader)

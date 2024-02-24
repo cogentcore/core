@@ -82,7 +82,7 @@ func (sv *SliceViewInline) SetStyles() {
 					if isZero {
 						return
 					}
-					vpath = sv.ViewPath + "/" + newPath
+					vpath = JoinViewPath(sv.ViewPath, newPath)
 				} else {
 					elType := laser.NonPtrType(reflect.TypeOf(sv.Slice).Elem().Elem())
 					title = "Slice of " + laser.NonPtrType(elType).Name()

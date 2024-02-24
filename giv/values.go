@@ -399,8 +399,7 @@ func (vv *StructValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	}
 	opv := laser.OnePtrUnderlyingValue(vv.Value)
 	stru := opv.Interface()
-	vpath := vv.ViewPath + "/" + laser.NonPtrType(opv.Type()).String()
-	NewStructView(d).SetStruct(stru).SetViewPath(vpath).SetTmpSave(vv.TmpSave).
+	NewStructView(d).SetStruct(stru).SetViewPath(vv.ViewPath).SetTmpSave(vv.TmpSave).
 		SetReadOnly(vv.IsReadOnly())
 	if tb, ok := stru.(gi.Toolbarer); ok {
 		d.AddAppBar(tb.ConfigToolbar)
@@ -529,13 +528,12 @@ func (vv *SliceValue) ConfigDialog(d *gi.Body) (bool, func()) {
 		return false, nil
 	}
 	slci := vvp.Interface()
-	vpath := vv.ViewPath + "/" + laser.NonPtrType(vvp.Type()).String()
 	if !vv.IsArray && vv.ElIsStruct {
-		tv := NewTableView(d).SetSlice(slci).SetTmpSave(vv.TmpSave).SetViewPath(vpath)
+		tv := NewTableView(d).SetSlice(slci).SetTmpSave(vv.TmpSave).SetViewPath(vv.ViewPath)
 		tv.SetReadOnly(vv.IsReadOnly())
 		d.AddAppBar(tv.ConfigToolbar)
 	} else {
-		sv := NewSliceView(d).SetSlice(slci).SetTmpSave(vv.TmpSave).SetViewPath(vpath)
+		sv := NewSliceView(d).SetSlice(slci).SetTmpSave(vv.TmpSave).SetViewPath(vv.ViewPath)
 		sv.SetReadOnly(vv.IsReadOnly())
 		d.AddAppBar(sv.ConfigToolbar)
 	}
@@ -649,9 +647,8 @@ func (vv *MapValue) ConfigDialog(d *gi.Body) (bool, func()) {
 		return false, nil
 	}
 	mpi := vv.Value.Interface()
-	vpath := vv.ViewPath + "/" + laser.NonPtrType(vv.Value.Type()).String()
 	mv := NewMapView(d).SetMap(mpi)
-	mv.SetViewPath(vpath).SetTmpSave(vv.TmpSave).SetReadOnly(vv.IsReadOnly())
+	mv.SetViewPath(vv.ViewPath).SetTmpSave(vv.TmpSave).SetReadOnly(vv.IsReadOnly())
 	d.AddAppBar(mv.ConfigToolbar)
 	return true, nil
 }

@@ -488,7 +488,7 @@ func (tv *TableView) UpdateWidgets() {
 			if lblr, ok := tv.Slice.(gi.SliceLabeler); ok {
 				slbl := lblr.ElemLabel(si)
 				if slbl != "" {
-					vpath = tv.ViewPath + "[" + slbl + "]"
+					vpath = JoinViewPath(tv.ViewPath, slbl)
 				}
 			}
 		}

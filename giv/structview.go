@@ -242,7 +242,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 
 						svtyp := svv.WidgetType()
 						// todo: other things with view tag..
-						fnm := field.Name + sfield.Name
+						fnm := field.Name + " • " + sfield.Name
 						if _, exists := dupeFields[fnm]; exists {
 							slog.Error("StructView: duplicate field name:", "name:", fnm)
 						} else {

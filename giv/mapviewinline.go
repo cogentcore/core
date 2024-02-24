@@ -75,13 +75,10 @@ func (mv *MapViewInline) SetStyles() {
 					if isZero {
 						return
 					}
-					vpath = mv.ViewPath + "/" + newPath
+					vpath = JoinViewPath(mv.ViewPath, newPath)
 				} else {
 					tmptyp := laser.NonPtrType(reflect.TypeOf(mv.Map))
 					title = "Map of " + tmptyp.String()
-					// if tynm == "" {
-					// 	tynm = tmptyp.String()
-					// }
 				}
 				d := gi.NewBody().AddTitle(title).AddText(mv.Tooltip)
 				NewMapView(d).SetViewPath(vpath).SetMap(mv.Map).SetTmpSave(mv.TmpSave)
