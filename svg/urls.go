@@ -64,9 +64,9 @@ func NameID(nm string, id int) string {
 	return fmt.Sprintf("%s%d", nm, id)
 }
 
-// GatherIds gathers all the numeric id suffixes currently in use.
+// GatherIDs gathers all the numeric id suffixes currently in use.
 // It automatically renames any that are not unique or empty.
-func (sv *SVG) GatherIds() {
+func (sv *SVG) GatherIDs() {
 	sv.UniqueIds = make(map[int]struct{})
 	sv.Root.WalkPre(func(k ki.Ki) bool {
 		sv.NodeEnsureUniqueId(k.(Node))
@@ -107,7 +107,7 @@ func (sv *SVG) NodeEnsureUniqueId(ni Node) {
 // NewUniqueID returns a new unique numerical id number, for naming an object
 func (sv *SVG) NewUniqueID() int {
 	if sv.UniqueIds == nil {
-		sv.GatherIds()
+		sv.GatherIDs()
 	}
 	sz := len(sv.UniqueIds)
 	var nid int

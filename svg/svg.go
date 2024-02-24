@@ -82,7 +82,7 @@ type SVG struct {
 
 	// map of unique numeric ids for all elements.
 	// Used for allocating new unique id numbers, appended to end of elements.
-	// See NewUniqueID, GatherIds
+	// See NewUniqueID, GatherIDs
 	UniqueIds map[int]struct{} `view:"-" json:"-" xml:"-"`
 
 	// flag is set when the SVG is rendering
