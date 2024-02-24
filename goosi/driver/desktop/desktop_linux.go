@@ -58,17 +58,17 @@ func (w *Window) Handle() any {
 /////////////////////////////////////////////////////////////////
 //   Clipboard
 
-// TheClip is the single [goosi.Clipboard] for Linux
-var TheClip = &Clip{}
+// TheClipboard is the single [goosi.Clipboard] for Linux
+var TheClipboard = &Clipboard{}
 
-// Clip is the [goosi.Clipboard] implementation for Linux
-type Clip struct{}
+// Clipboard is the [goosi.Clipboard] implementation for Linux
+type Clipboard struct{}
 
-func (cl *Clip) IsEmpty() bool {
+func (cl *Clipboard) IsEmpty() bool {
 	return len(glfw.GetClipboardString()) == 0
 }
 
-func (cl *Clip) Read(types []string) mimedata.Mimes {
+func (cl *Clipboard) Read(types []string) mimedata.Mimes {
 	str := glfw.GetClipboardString()
 	if len(str) == 0 {
 		return nil
@@ -93,7 +93,7 @@ func (cl *Clip) Read(types []string) mimedata.Mimes {
 	return nil
 }
 
-func (cl *Clip) Write(data mimedata.Mimes) error {
+func (cl *Clipboard) Write(data mimedata.Mimes) error {
 	if len(data) == 0 {
 		return nil
 	}
@@ -110,6 +110,6 @@ func (cl *Clip) Write(data mimedata.Mimes) error {
 	return nil
 }
 
-func (cl *Clip) Clear() {
+func (cl *Clipboard) Clear() {
 	// nop
 }

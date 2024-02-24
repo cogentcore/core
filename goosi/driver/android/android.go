@@ -40,8 +40,6 @@ package android
 
 void showKeyboard(JNIEnv* env, int keyboardType);
 void hideKeyboard(JNIEnv* env);
-void showFileOpen(JNIEnv* env, char* mimes);
-void showFileSave(JNIEnv* env, char* mimes, char* filename);
 */
 import "C"
 import (

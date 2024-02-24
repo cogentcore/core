@@ -170,7 +170,7 @@ func (a *App) OpenURL(url string) {
 }
 
 func (a *App) Clipboard(win goosi.Window) goosi.Clipboard {
-	return TheClip
+	return TheClipboard
 }
 
 func (a *App) Cursor(win goosi.Window) goosi.Cursor {

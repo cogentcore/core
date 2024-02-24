@@ -231,24 +231,24 @@ func inputs(ts *gi.Tabs) {
 	gi.NewSwitches(tab).SetType(gi.SwitchCheckbox).SetItems("Checkbox 1", "Checkbox 2", "Checkbox 3").
 		SetTooltips("A description for Checkbox 1", "A description for Checkbox 2", "A description for Checkbox 3")
 
-	is := gi.NewSwitches(tab).SetType(gi.SwitchCheckbox).SetItems("Indeterminate 1", "Indeterminate 2", "Indeterminate 3").
-		SetTooltips("A description for Checkbox 1", "A description for Checkbox 2", "A description for Checkbox 3")
-	is.Config()
-	for _, swi := range is.Kids {
-		sw := swi.(*gi.Switch)
-		sw.SetState(true, states.Indeterminate)
-	}
+	gi.NewSwitches(tab).SetType(gi.SwitchCheckbox).SetItems("Indeterminate 1", "Indeterminate 2", "Indeterminate 3").
+		SetTooltips("A description for Checkbox 1", "A description for Checkbox 2", "A description for Checkbox 3").
+		OnWidgetAdded(func(w gi.Widget) {
+			if sw, ok := w.(*gi.Switch); ok {
+				sw.SetState(true, states.Indeterminate)
+			}
+		})
 
 	gi.NewSwitches(tab).SetType(gi.SwitchRadioButton).SetMutex(true).SetItems("Radio Button 1", "Radio Button 2", "Radio Button 3").
 		SetTooltips("A description for Radio Button 1", "A description for Radio Button 2", "A description for Radio Button 3")
 
-	is = gi.NewSwitches(tab).SetType(gi.SwitchRadioButton).SetItems("Indeterminate 1", "Indeterminate 2", "Indeterminate 3").
-		SetTooltips("A description for Radio Button 1", "A description for Radio Button 2", "A description for Radio Button 3")
-	is.Config()
-	for _, swi := range is.Kids {
-		sw := swi.(*gi.Switch)
-		sw.SetState(true, states.Indeterminate)
-	}
+	gi.NewSwitches(tab).SetType(gi.SwitchRadioButton).SetMutex(true).SetItems("Indeterminate 1", "Indeterminate 2", "Indeterminate 3").
+		SetTooltips("A description for Radio Button 1", "A description for Radio Button 2", "A description for Radio Button 3").
+		OnWidgetAdded(func(w gi.Widget) {
+			if sw, ok := w.(*gi.Switch); ok {
+				sw.SetState(true, states.Indeterminate)
+			}
+		})
 
 	gi.NewSwitches(tab).SetType(gi.SwitchSegmentedButton).SetMutex(true).SetItems("Segmented Button 1", "Segmented Button 2", "Segmented Button 3").
 		SetTooltips("A description for Segmented Button 1", "A description for Segmented Button 2", "A description for Segmented Button 3")

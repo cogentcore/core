@@ -14,18 +14,17 @@ import (
 
 // TODO(kai/web): support copying images and other mime formats, etc
 
-// TheClip is the single [goosi.Clipboard] for the offscreen platform
-var TheClip = &Clip{}
+// TheClipboard is the single [goosi.Clipboard] for the web platform
+var TheClipboard = &Clipboard{}
 
-// Clip is the [goosi.Clipboard] implementation for the web platform
-type Clip struct{}
+// Clipboard is the [goosi.Clipboard] implementation for the web platform
+type Clipboard struct{}
 
-func (cl *Clip) IsEmpty() bool {
-	// no-op
-	return false
+func (cl *Clipboard) IsEmpty() bool {
+	return len(cl.Read(nil).Text(mimedata.TextPlain)) == 0
 }
 
-func (cl *Clip) Read(types []string) mimedata.Mimes {
+func (cl *Clipboard) Read(types []string) mimedata.Mimes {
 	str := make(chan string)
 	js.Global().Get("navigator").Get("clipboard").Call("readText").
 		Call("then", js.FuncOf(func(this js.Value, args []js.Value) any {
@@ -35,7 +34,7 @@ func (cl *Clip) Read(types []string) mimedata.Mimes {
 	return mimedata.NewText(<-str)
 }
 
-func (cl *Clip) Write(data mimedata.Mimes) error {
+func (cl *Clipboard) Write(data mimedata.Mimes) error {
 	if len(data) == 0 {
 		return nil
 	}
@@ -53,6 +52,6 @@ func (cl *Clip) Write(data mimedata.Mimes) error {
 	return nil
 }
 
-func (cl *Clip) Clear() {
+func (cl *Clipboard) Clear() {
 	// no-op
 }

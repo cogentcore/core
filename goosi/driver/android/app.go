@@ -141,6 +141,5 @@ func (a *App) OpenURL(url string) {
 }
 
 func (a *App) Clipboard(win goosi.Window) goosi.Clipboard {
-	// TODO(kai): implement clipboard on Android
-	return &goosi.ClipboardBase{}
+	return &Clipboard{}
 }

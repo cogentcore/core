@@ -78,11 +78,11 @@ func (w *Window) Handle() any {
 /////////////////////////////////////////////////////////////////
 // goosi.Clipboard impl
 
-// TheClip is the single [goosi.Clipboard] for MacOS
-var TheClip = &Clip{}
+// TheClipboard is the single [goosi.Clipboard] for MacOS
+var TheClipboard = &Clipboard{}
 
-// Clip is the [goosi.Clipboard] implementation for MacOS
-type Clip struct {
+// Clipboard is the [goosi.Clipboard] implementation for MacOS
+type Clipboard struct {
 	// Data is the current clipboard data
 	Data mimedata.Mimes
 }
@@ -90,12 +90,12 @@ type Clip struct {
 // CurMimeData is the current mime data to write to from cocoa side
 var CurMimeData *mimedata.Mimes
 
-func (cl *Clip) IsEmpty() bool {
+func (cl *Clipboard) IsEmpty() bool {
 	ise := C.clipIsEmpty()
 	return bool(ise)
 }
 
-func (cl *Clip) Read(types []string) mimedata.Mimes {
+func (cl *Clipboard) Read(types []string) mimedata.Mimes {
 	if len(types) == 0 {
 		return nil
 	}
@@ -127,7 +127,7 @@ func (cl *Clip) Read(types []string) mimedata.Mimes {
 	return cl.Data
 }
 
-func (cl *Clip) WriteText(b []byte) {
+func (cl *Clipboard) WriteText(b []byte) {
 	sz := len(b)
 	cdata := C.malloc(C.size_t(sz))
 	copy((*[1 << 30]byte)(cdata)[0:sz], b)
@@ -135,7 +135,7 @@ func (cl *Clip) WriteText(b []byte) {
 	C.free(unsafe.Pointer(cdata))
 }
 
-func (cl *Clip) Write(data mimedata.Mimes) error {
+func (cl *Clipboard) Write(data mimedata.Mimes) error {
 	cl.Clear()
 	if len(data) > 1 { // multipart
 		mpd := data.ToMultipart()
@@ -150,7 +150,7 @@ func (cl *Clip) Write(data mimedata.Mimes) error {
 	return nil
 }
 
-func (cl *Clip) Clear() {
+func (cl *Clipboard) Clear() {
 	C.clipClear()
 }
 

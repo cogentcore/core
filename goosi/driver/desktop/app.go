@@ -177,7 +177,7 @@ func (a *App) Clipboard(win goosi.Window) goosi.Clipboard {
 	a.Mu.Lock()
 	a.CtxWindow = win.(*Window)
 	a.Mu.Unlock()
-	return TheClip
+	return TheClipboard
 }
 
 func (a *App) Cursor(win goosi.Window) goosi.Cursor {
