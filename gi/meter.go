@@ -91,6 +91,8 @@ func (m *Meter) SetStyles() {
 		case MeterSemicircle:
 			s.Min.Set(units.Dp(112), units.Dp(64))
 			m.Width.Dp(16)
+			s.Font.Size.Dp(22)
+			s.Text.LineHeight.Dp(28)
 			s.Text.Align = styles.Center
 			s.Text.AlignV = styles.Center
 		}
@@ -181,6 +183,6 @@ func (m *Meter) RenderMeter() {
 		pc.Stroke()
 	}
 	if txt != nil {
-		txt.Render(pc, c.Sub(size.Mul(mat32.V2(0, 0.5))).Sub(toff))
+		txt.Render(pc, c.Sub(size.Mul(mat32.V2(0, 0.3))).Sub(toff))
 	}
 }

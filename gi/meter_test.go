@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"testing"
 
 	"cogentcore.org/core/styles"
@@ -14,7 +15,7 @@ func TestMeter(t *testing.T) {
 	for v := float32(0); v <= 100; v += 10 {
 		for _, typ := range MeterTypesValues() {
 			b := NewBody()
-			NewMeter(b).SetMax(100).SetType(typ).SetValue(v)
+			NewMeter(b).SetMax(100).SetType(typ).SetValue(v).SetText(fmt.Sprintf("%g%%", v))
 			b.AssertRender(t, testName("meter", typ, v))
 		}
 		b := NewBody()
