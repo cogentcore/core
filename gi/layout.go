@@ -388,8 +388,9 @@ func (ly *Layout) FocusOnName(e events.Event) bool {
 	}
 	// e.SetHandled()
 	// fmt.Printf("searching for: %v  last: %v\n", ly.FocusName, ly.FocusNameLast)
-	focel, found := ChildByLabelStartsCanFocus(ly, ly.FocusName, ly.FocusNameLast)
-	if found {
+	focel := ChildByLabelCanFocus(ly, ly.FocusName, ly.FocusNameLast)
+	if focel != nil {
+		focel = focel.This()
 		em := ly.EventMgr()
 		if em != nil {
 			em.SetFocusEvent(focel.(Widget)) // this will also scroll by default!
@@ -405,11 +406,11 @@ func (ly *Layout) FocusOnName(e events.Event) bool {
 	return false
 }
 
-// ChildByLabelStartsCanFocus uses breadth-first search to find
+// ChildByLabelCanFocus uses breadth-first search to find
 // the first focusable element within the layout whose Label (using
 // [ToLabel]) matches the given name using [complete.IsSeedMatching].
 // If after is non-nil, it only finds after that element.
-func ChildByLabelStartsCanFocus(ly *Layout, name string, after ki.Ki) (ki.Ki, bool) {
+func ChildByLabelCanFocus(ly *Layout, name string, after ki.Ki) ki.Ki {
 	gotAfter := false
 	completions := []complete.Completion{}
 	ly.WalkBreadth(func(k ki.Ki) bool {
@@ -434,11 +435,9 @@ func ChildByLabelStartsCanFocus(ly *Layout, name string, after ki.Ki) (ki.Ki, bo
 	})
 	matches := complete.MatchSeedCompletion(completions, name)
 	if len(matches) > 0 {
-		if res := ly.FindPath(matches[0].Desc); res != nil {
-			return res, true
-		}
+		return ly.FindPath(matches[0].Desc)
 	}
-	return nil, false
+	return nil
 }
 
 ///////////////////////////////////////////////////////////
