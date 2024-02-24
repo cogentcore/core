@@ -330,7 +330,6 @@ func (sv *SliceViewBase) SetStyles() {
 	})
 	if !sv.IsReadOnly() {
 		sv.On(events.DragStart, func(e events.Event) {
-			e.SetHandled()
 			svi.DragStart(e)
 		})
 		sv.On(events.DragEnter, func(e events.Event) {
@@ -368,9 +367,11 @@ func (sv *SliceViewBase) SetStyles() {
 			})
 			oc := func(e events.Event) {
 				sv.SetFocusEvent()
-				row, _ := sg.IndexFromPixel(e.Pos())
-				sv.UpdateSelectRow(row, e.SelectMode())
-				sv.LastClick = row + sv.StartIdx
+				row, _, isValid := sg.IndexFromPixel(e.Pos())
+				if isValid {
+					sv.UpdateSelectRow(row, e.SelectMode())
+					sv.LastClick = row + sv.StartIdx
+				}
 			}
 			sg.OnClick(oc)
 			sg.On(events.ContextMenu, func(e events.Event) {
@@ -400,7 +401,6 @@ func (sv *SliceViewBase) SetStyles() {
 				wb.On(events.ContextMenu, sv.HandleEvent)
 				if !sv.IsReadOnly() {
 					w.On(events.DragStart, func(e events.Event) {
-						e.SetHandled()
 						svi.DragStart(e)
 					})
 					w.On(events.DragEnter, func(e events.Event) {
@@ -518,9 +518,11 @@ func (sv *SliceViewBase) IsNil() bool {
 // whether the index is in slice range, for given event position.
 func (sv *SliceViewBase) RowFromEventPos(e events.Event) (row, idx int, isValid bool) {
 	sg := sv.This().(SliceViewer).SliceGrid()
-	row, _ = sg.IndexFromPixel(e.Pos())
+	row, _, isValid = sg.IndexFromPixel(e.Pos())
+	if !isValid {
+		return
+	}
 	idx = row + sv.StartIdx
-	isValid = true
 	if row < 0 || idx >= sv.SliceSize {
 		isValid = false
 	}
@@ -1757,24 +1759,47 @@ func (sv *SliceViewBase) Duplicate() int { //gti:add
 //////////////////////////////////////////////////////////////////////////////
 //    Drag-n-Drop
 
-func (sv *SliceViewBase) DragStart(e events.Event) {
+// SelectRowIfNone selects the row the mouse is on if there
+// are no currently selected items.  Returns false if no valid mouse row.
+func (sv *SliceViewBase) SelectRowIfNone(e events.Event) bool {
 	nitms := len(sv.SelIdxs)
-	if nitms == 0 {
-		row, _ := sv.This().(SliceViewer).SliceGrid().IndexFromPixel(e.Pos())
-		sv.UpdateSelectRow(row, e.SelectMode())
+	if nitms > 0 {
+		return true
+	}
+	row, _, isValid := sv.This().(SliceViewer).SliceGrid().IndexFromPixel(e.Pos())
+	if !isValid {
+		return false
+	}
+	sv.UpdateSelectRow(row, e.SelectMode())
+	return true
+}
+
+// MousePosInGrid returns true if the event mouse position is
+// located within the slicegrid.
+func (sv *SliceViewBase) MousePosInGrid(e events.Event) bool {
+	return sv.This().(SliceViewer).SliceGrid().MousePosInGrid(e.Pos())
+}
+
+func (sv *SliceViewBase) DragStart(e events.Event) {
+	if !sv.SelectRowIfNone(e) || !sv.MousePosInGrid(e) {
+		return
 	}
 	md := sv.This().(SliceViewer).CopySelToMime()
 	ixs := sv.SelectedIdxsList(false) // ascending
 	w, ok := sv.This().(SliceViewer).RowFirstWidget(ixs[0] - sv.StartIdx)
 	if ok {
 		sv.Scene.EventMgr.DragStart(w, md, e)
-	} else {
-		fmt.Println("SliceView DND programmer error")
+		e.SetHandled()
+		// } else {
+		// 	fmt.Println("SliceView DND programmer error")
 	}
 }
 
 func (sv *SliceViewBase) DragDrop(e events.Event) {
 	de := e.(*events.DragDrop)
+	if de.Data == nil {
+		return
+	}
 	svi := sv.This().(SliceViewer)
 	pos := de.Pos()
 	idx, ok := sv.IdxFromPos(pos.Y)
@@ -2025,6 +2050,9 @@ func (sv *SliceViewBase) HandleEvents() {
 	})
 	sv.On(events.MouseDrag, func(e events.Event) {
 		row, idx, isValid := sv.RowFromEventPos(e)
+		if !isValid {
+			return
+		}
 		sv.This().(SliceViewer).SliceGrid().AutoScroll(mat32.V2(0, float32(idx)))
 		prevHoverRow := sv.HoverRow
 		if !isValid {
@@ -2299,17 +2327,29 @@ func (sg *SliceViewGrid) RenderStripes() {
 	}
 }
 
+// MousePosInGrid returns true if the event mouse position is
+// located within the slicegrid.
+func (sg *SliceViewGrid) MousePosInGrid(pt image.Point) bool {
+	ptrel := sg.PointToRelPos(pt)
+	sz := sg.Geom.ContentBBox.Size()
+	if sg.VisRows == 0 || sz.Y == 0 {
+		return false
+	}
+	if ptrel.Y < 0 || ptrel.Y >= sz.Y || ptrel.X < 0 || ptrel.X >= sz.X-50 { // leave margin on rhs around scroll
+		return false
+	}
+	return true
+}
+
 // IndexFromPixel returns the row, column indexes of given pixel point within grid.
 // Takes a scene-level position.
-func (sg *SliceViewGrid) IndexFromPixel(pt image.Point) (row, col int) {
-	ptf := mat32.V2FromPoint(sg.PointToRelPos(pt))
-	sz := sg.Geom.Size.Actual.Content
-	if sg.VisRows == 0 || sz.Y == 0 {
+func (sg *SliceViewGrid) IndexFromPixel(pt image.Point) (row, col int, isValid bool) {
+	if !sg.MousePosInGrid(pt) {
 		return
 	}
-	if ptf.Y < 0 || ptf.Y >= sz.Y {
-		return -1, 0
-	}
+	ptf := mat32.V2FromPoint(sg.PointToRelPos(pt))
+	sz := mat32.V2FromPoint(sg.Geom.ContentBBox.Size())
+	isValid = true
 	rows := sg.LayImpl.Shape.Y
 	cols := sg.LayImpl.Shape.X
 	st := mat32.Vec2{}

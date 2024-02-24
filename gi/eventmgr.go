@@ -234,10 +234,10 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 	case events.MouseDown:
 		em.ResetOnMouseDown()
 	case events.MouseDrag:
-		// we can not SlideMove if we are dragging
-		if em.Slide != nil && em.Drag == nil {
+		if em.Slide != nil {
 			em.Slide.HandleEvent(e)
 			em.Slide.Send(events.SlideMove, e)
+			return
 		}
 	case events.Scroll:
 		if em.Scroll != nil {
@@ -346,17 +346,11 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 			em.Drag.HandleEvent(e)           // raw drag
 			em.Drag.Send(events.DragMove, e) // usually ignored
 		} else {
-			if em.DragPress != nil {
-				if em.DragStartCheck(e, DeviceSettings.DragStartTime, DeviceSettings.DragStartDistance) {
-					em.Drag = em.DragPress
-					em.Drag.Send(events.DragStart, e)
-				}
-			}
-			if em.SlidePress != nil {
-				if em.DragStartCheck(e, DeviceSettings.DragStartTime, DeviceSettings.DragStartDistance) {
-					em.Slide = em.SlidePress
-					em.Slide.Send(events.SlideStart, e)
-				}
+			if em.DragPress != nil && em.DragStartCheck(e, DeviceSettings.DragStartTime, DeviceSettings.DragStartDistance) {
+				em.DragPress.Send(events.DragStart, e)
+			} else if em.SlidePress != nil && em.DragStartCheck(e, DeviceSettings.SlideStartTime, DeviceSettings.DragStartDistance) {
+				em.Slide = em.SlidePress
+				em.Slide.Send(events.SlideStart, e)
 			}
 		}
 		// if we already have a long press widget, we update it based on our dragging movement
@@ -666,12 +660,14 @@ func (em *EventMgr) DragStartCheck(e events.Event, dur time.Duration, dist int) 
 }
 
 // DragStart starts a drag event, capturing a sprite image of the given widget
-// and storing the data for later use during Drop
+// and storing the data for later use during Drop.
+// A drag does not officially start until this is called.
 func (em *EventMgr) DragStart(w Widget, data any, e events.Event) {
 	ms := em.Scene.Stage.Main
 	if ms == nil {
 		return
 	}
+	em.Drag = w
 	em.DragData = data
 	sp := NewSprite(DragSpriteName, image.Point{}, e.WindowPos())
 	sp.GrabRenderFrom(w) // todo: show number of items?

@@ -374,9 +374,13 @@ type DeviceSettingsData struct { //gti:add
 	// so unfortunately you have to set it here.
 	ScrollWheelSpeed float32 `default:"1" min:"0.01" step:"1"`
 
-	// The amount of time to wait before initiating a slide/drag event
+	// The amount of time to wait before initiating a slide event
 	// (as opposed to a basic press event)
-	DragStartTime time.Duration `default:"50ms" min:"5ms" max:"1s" step:"5ms"`
+	SlideStartTime time.Duration `default:"50ms" min:"5ms" max:"1s" step:"5ms"`
+
+	// The amount of time to wait before initiating a drag (drag and drop) event
+	// (as opposed to a basic press or slide event)
+	DragStartTime time.Duration `default:"250ms" min:"5ms" max:"1s" step:"5ms"`
 
 	// The number of pixels that must be moved before initiating a slide/drag
 	// event (as opposed to a basic press event)
