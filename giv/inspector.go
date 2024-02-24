@@ -351,7 +351,7 @@ func InspectorView(b *gi.Body, k ki.Ki) {
 	b.SetTitle("Inspector").SetData(k).SetName("inspector")
 	if k != nil {
 		b.Nm += "-" + k.Name()
-		b.Title += " of " + k.Name()
+		b.Title += ": " + k.Name()
 	}
 	is := NewInspector(b, "inspector")
 	is.SetRoot(k)
