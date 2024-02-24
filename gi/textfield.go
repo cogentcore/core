@@ -851,10 +851,13 @@ func (tf *TextField) SelectRegUpdate(pos int) {
 // SelectAll selects all the text
 func (tf *TextField) SelectAll() {
 	updt := tf.UpdateStart()
+	defer tf.UpdateEndRender(updt)
 	tf.SelectStart = 0
 	tf.SelectInit = 0
 	tf.SelectEnd = len(tf.EditTxt)
-	tf.UpdateEndRender(updt)
+	if TheApp.SystemPlatform().IsMobile() {
+		tf.Send(events.ContextMenu)
+	}
 }
 
 // IsWordBreak defines what counts as a word break for the purposes of selecting words
@@ -905,6 +908,9 @@ func (tf *TextField) SelectWord() {
 		}
 	}
 	tf.SelectInit = tf.SelectStart
+	if TheApp.SystemPlatform().IsMobile() {
+		tf.Send(events.ContextMenu)
+	}
 }
 
 // SelectReset resets the selection

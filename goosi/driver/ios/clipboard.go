@@ -24,6 +24,7 @@ import "C"
 import (
 	"unsafe"
 
+	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/mimedata"
 )
 
@@ -31,10 +32,8 @@ import (
 var TheClipboard = &Clipboard{}
 
 // Clipboard is the [goosi.Clipboard] implementation for the iOS platform
-type Clipboard struct{}
-
-func (cl *Clipboard) IsEmpty() bool {
-	return len(cl.Read(nil).Text(mimedata.TextPlain)) == 0
+type Clipboard struct {
+	goosi.ClipboardBase
 }
 
 func (cl *Clipboard) Read(types []string) mimedata.Mimes {
@@ -60,8 +59,4 @@ func (cl *Clipboard) Write(data mimedata.Mimes) error {
 
 	C.setClipboardContent(cstr)
 	return nil
-}
-
-func (cl *Clipboard) Clear() {
-	// no-op
 }
