@@ -326,12 +326,6 @@ func NodesContainingPoint(n Node, pt image.Point, leavesOnly bool) []Node {
 //////////////////////////////////////////////////////////////////
 // Standard Node infrastructure
 
-// todo: remove if not needed:
-
-// Init does any needed initialization
-func (g *NodeBase) Init() {
-}
-
 // Style styles the Paint values directly from node properties
 func (g *NodeBase) Style(sv *SVG) {
 	pc := &g.Paint

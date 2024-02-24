@@ -222,8 +222,8 @@ func (sv *SVG) GradientNew(radial bool) (*Gradient, string) {
 	} else {
 		gnm = "linearGradient"
 	}
-	id := sv.NewUniqueId()
-	gnm = NameId(gnm, id)
+	id := sv.NewUniqueID()
+	gnm = NameID(gnm, id)
 	gr := sv.Defs.NewChild(GradientType, gnm).(*Gradient)
 	url := NameToURL(gnm)
 	if radial {

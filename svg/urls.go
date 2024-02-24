@@ -19,11 +19,11 @@ import (
 /////////////////////////////////////////////////////////////////////////////
 //   Naming elements with unique id's
 
-// SplitNameIdDig splits name into numerical end part and preceding name,
+// SplitNameIDDig splits name into numerical end part and preceding name,
 // based on string of digits from end of name.
 // If Id == 0 then it was not specified or didn't parse.
 // SVG object names are element names + numerical id
-func SplitNameIdDig(nm string) (string, int) {
+func SplitNameIDDig(nm string) (string, int) {
 	sz := len(nm)
 
 	for i := sz - 1; i >= 0; i-- {
@@ -40,12 +40,12 @@ func SplitNameIdDig(nm string) (string, int) {
 	return nm, 0
 }
 
-// SplitNameId splits name after the element name (e.g., 'rect')
+// SplitNameID splits name after the element name (e.g., 'rect')
 // returning true if it starts with element name,
 // and numerical id part after that element.
 // if numerical id part is 0, then it didn't parse.
 // SVG object names are element names + numerical id
-func SplitNameId(elnm, nm string) (bool, int) {
+func SplitNameID(elnm, nm string) (bool, int) {
 	if !strings.HasPrefix(nm, elnm) {
 		// fmt.Printf("not elnm: %s  %s\n", nm, elnm)
 		return false, 0
@@ -55,9 +55,9 @@ func SplitNameId(elnm, nm string) (bool, int) {
 	return true, id
 }
 
-// NameId returns the name with given unique id.
+// NameID returns the name with given unique id.
 // returns plain name if id == 0
-func NameId(nm string, id int) string {
+func NameID(nm string, id int) string {
 	if id == 0 {
 		return nm
 	}
@@ -81,31 +81,31 @@ func (sv *SVG) NodeEnsureUniqueId(ni Node) {
 	if elnm == "" {
 		return
 	}
-	elpfx, id := SplitNameId(elnm, ni.Name())
+	elpfx, id := SplitNameID(elnm, ni.Name())
 	if !elpfx {
 		if !ni.EnforceSVGName() { // if we end in a number, just register it anyway
-			_, id = SplitNameIdDig(ni.Name())
+			_, id = SplitNameIDDig(ni.Name())
 			if id > 0 {
 				sv.UniqueIds[id] = struct{}{}
 			}
 			return
 		}
-		_, id = SplitNameIdDig(ni.Name())
+		_, id = SplitNameIDDig(ni.Name())
 		if id > 0 {
-			ni.SetName(NameId(elnm, id))
+			ni.SetName(NameID(elnm, id))
 		}
 	}
 	_, exists := sv.UniqueIds[id]
 	if id <= 0 || exists {
-		id = sv.NewUniqueId() // automatically registers it
-		ni.SetName(NameId(elnm, id))
+		id = sv.NewUniqueID() // automatically registers it
+		ni.SetName(NameID(elnm, id))
 	} else {
 		sv.UniqueIds[id] = struct{}{}
 	}
 }
 
-// NewUniqueId returns a new unique numerical id number, for naming an object
-func (sv *SVG) NewUniqueId() int {
+// NewUniqueID returns a new unique numerical id number, for naming an object
+func (sv *SVG) NewUniqueID() int {
 	if sv.UniqueIds == nil {
 		sv.GatherIds()
 	}
