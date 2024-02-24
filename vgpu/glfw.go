@@ -7,8 +7,7 @@
 package vgpu
 
 import (
-	"log"
-
+	"cogentcore.org/core/grr"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	vk "github.com/goki/vulkan"
 )
@@ -24,16 +23,10 @@ import (
 func Init() error {
 	err := glfw.Init()
 	if err != nil {
-		log.Println(err)
-		return err
+		return grr.Log(err)
 	}
 	vk.SetGetInstanceProcAddr(glfw.GetVulkanGetInstanceProcAddress())
-	err = vk.Init()
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	return err
+	return grr.Log(vk.Init())
 }
 
 // Terminate shuts down the vulkan system -- call as last thing before quitting.
