@@ -566,9 +566,11 @@ func (tv *TableView) SliceNewAt(idx int) {
 	if tv.TmpSave != nil {
 		tv.TmpSave.SaveTmp()
 	}
+	tv.SelectIdxAction(idx, events.SelectOne)
 	tv.ViewMuUnlock()
 	tv.SetChanged()
 	tv.This().(SliceViewer).UpdateWidgets()
+	tv.IdxGrabFocus(idx)
 }
 
 // SliceDeleteAt deletes element at given index from slice

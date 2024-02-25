@@ -262,7 +262,7 @@ type SliceViewBase struct {
 	SliceNPVal reflect.Value `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
 
 	// Value for the slice itself, if this was created within value view framework -- otherwise nil
-	SliceValView Value `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
+	SliceValue Value `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
 
 	// Value representations of the slice values
 	Values []Value `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
@@ -869,8 +869,8 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 
 	svnp := sv.SliceNPVal
 
-	if iski && sv.SliceValView != nil {
-		vvb := sv.SliceValView.AsValueBase()
+	if iski && sv.SliceValue != nil {
+		vvb := sv.SliceValue.AsValueBase()
 		if vvb.Owner != nil {
 			if ownki, ok := vvb.Owner.(ki.Ki); ok {
 				d := gi.NewBody().AddTitle("Slice New").AddText("Number and Type of Items to Insert:")
@@ -915,9 +915,11 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 	if sv.TmpSave != nil {
 		sv.TmpSave.SaveTmp()
 	}
+	sv.SelectIdxAction(idx, events.SelectOne)
 	sv.ViewMuUnlock()
 	sv.SetChanged()
 	sv.This().(SliceViewer).UpdateWidgets()
+	sv.IdxGrabFocus(idx)
 }
 
 // SliceDeleteAtRow deletes element at given display row
