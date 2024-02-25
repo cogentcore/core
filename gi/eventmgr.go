@@ -363,16 +363,19 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 		} else {
 			if em.DragPress != nil && em.DragStartCheck(e, DeviceSettings.DragStartTime, DeviceSettings.DragStartDistance) {
 				em.CancelRepeatClick()
+				em.CancelLongPress()
 				em.DragPress.Send(events.DragStart, e)
 			} else if em.SlidePress != nil && em.DragStartCheck(e, DeviceSettings.SlideStartTime, DeviceSettings.DragStartDistance) {
 				em.CancelRepeatClick()
+				em.CancelLongPress()
 				em.Slide = em.SlidePress
 				em.Slide.Send(events.SlideStart, e)
+			} else {
+				// if we already have a long press widget, we update it based on our dragging movement
+				if em.LongPressWidget != nil {
+					em.HandleLongPress(e)
+				}
 			}
-		}
-		// if we already have a long press widget, we update it based on our dragging movement
-		if em.LongPressWidget != nil {
-			em.HandleLongPress(e)
 		}
 	case events.MouseUp:
 		em.CancelRepeatClick()
@@ -442,12 +445,7 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 		if em.LongPressWidget != nil && em.LongPressTimer == nil {
 			em.LongPressWidget.Send(events.LongPressEnd, e)
 		}
-		em.LongPressWidget = nil
-		em.LongPressPos = image.Point{}
-		if em.LongPressTimer != nil {
-			em.LongPressTimer.Stop()
-			em.LongPressTimer = nil
-		}
+		em.CancelLongPress()
 		// a mouse up event acts also acts as a mouse leave
 		// event on mobile, as that is needed to clear any
 		// hovered state
@@ -666,6 +664,15 @@ func (em *EventMgr) GetMouseInBBox(w Widget, pos image.Point) {
 		}
 		return ki.Continue
 	})
+}
+
+func (em *EventMgr) CancelLongPress() {
+	em.LongPressWidget = nil
+	em.LongPressPos = image.Point{}
+	if em.LongPressTimer != nil {
+		em.LongPressTimer.Stop()
+		em.LongPressTimer = nil
+	}
 }
 
 func (em *EventMgr) CancelRepeatClick() {
