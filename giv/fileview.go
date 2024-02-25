@@ -340,6 +340,7 @@ func (fv *FileView) ConfigFilesRow() {
 			OnClick(func(e events.Event) {
 				fn := fv.Files[fsv.SelIdx]
 				fn.Duplicate()
+				fv.UpdateFilesAction()
 			})
 		tip := "Delete moves the selected file to the trash / recycling bin"
 		if gi.TheApp.Platform().IsMobile() {
@@ -349,13 +350,14 @@ func (fv *FileView) ConfigFilesRow() {
 			SetTooltip(tip).
 			OnClick(func(e events.Event) {
 				fn := fv.Files[fsv.SelIdx]
-				NewSoloFuncButton(fsv, fn.Delete).SetTooltip(tip).SetConfirm(true).CallFunc()
+				NewSoloFuncButton(fsv, fn.Delete).SetTooltip(tip).SetConfirm(true).
+					SetAfterFunc(fv.UpdateFilesAction).CallFunc()
 			})
 		gi.NewButton(m).SetText("Rename").SetIcon(icons.EditNote).
 			SetTooltip("Rename the selected file").
 			OnClick(func(e events.Event) {
 				fn := fv.Files[fsv.SelIdx]
-				CallFunc(fsv, fn.Rename)
+				NewSoloFuncButton(fsv, fn.Rename).SetAfterFunc(fv.UpdateFilesAction).CallFunc()
 			})
 		gi.NewButton(m).SetText("Info").SetIcon(icons.Info).
 			SetTooltip("View information about the selected file").

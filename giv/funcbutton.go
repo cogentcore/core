@@ -107,6 +107,10 @@ type FuncButton struct { //core:no-new
 
 	// Context is used for opening Dialogs if non-nil.
 	Context gi.Widget
+
+	// AfterFunc is an optional function called after the funcbutton
+	// function is executed
+	AfterFunc func()
 }
 
 // NewFuncButton adds a new [FuncButton] with the given function
@@ -254,6 +258,9 @@ func (fb *FuncButton) GoodContext() gi.Widget {
 }
 
 func (fb *FuncButton) CallFuncShowReturns() {
+	if fb.AfterFunc != nil {
+		defer fb.AfterFunc()
+	}
 	if len(fb.Args) == 0 {
 		rets := fb.ReflectFunc.Call(nil)
 		fb.ShowReturnsDialog(rets)
