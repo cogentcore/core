@@ -382,6 +382,10 @@ type DeviceSettingsData struct { //gti:add
 	// (as opposed to a basic press or slide event)
 	DragStartTime time.Duration `default:"250ms" min:"5ms" max:"1s" step:"5ms"`
 
+	// The amount of time to wait between each repeat click event,
+	// when the mouse is pressed down.  The first click is 8x this.
+	RepeatClickTime time.Duration `default:"100ms" min:"5ms" max:"1s" step:"5ms"`
+
 	// The number of pixels that must be moved before initiating a slide/drag
 	// event (as opposed to a basic press event)
 	DragStartDistance int `default:"4" min:"0" max:"100" step:"1"`

@@ -81,28 +81,34 @@ type EventMgr struct {
 	// stack of drag-hovered widgets: have mouse pointer in BBox and have Droppable flag
 	DragHovers []Widget
 
-	// the deepest node that was just pressed
+	// the deepest widget that was just pressed
 	Press Widget
 
-	// node receiving mouse dragging events -- for drag-n-drop
+	// widget receiving mouse dragging events -- for drag-n-drop
 	Drag Widget
 
-	// the deepest draggable node that was just pressed
+	// the deepest draggable widget that was just pressed
 	DragPress Widget
 
-	// node receiving mouse sliding events
+	// widget receiving mouse sliding events
 	Slide Widget
 
-	// the deepest slideable node that was just pressed
+	// the deepest slideable widget that was just pressed
 	SlidePress Widget
 
-	// node receiving mouse scrolling events
+	// widget receiving mouse scrolling events
 	Scroll Widget
 
-	// node receiving keyboard events -- use SetFocus, CurFocus
+	// widget being held down with RepeatClickable ability
+	RepeatClick Widget
+
+	// the timer for RepeatClickable items
+	RepeatClickTimer *time.Timer
+
+	// widget receiving keyboard events -- use SetFocus, CurFocus
 	Focus Widget
 
-	// node to focus on at start when no other focus has been set yet -- use SetStartFocus
+	// widget to focus on at start when no other focus has been set yet -- use SetStartFocus
 	StartFocus Widget
 
 	// if StartFocus not set, activate starting focus on first element
@@ -212,6 +218,8 @@ func (em *EventMgr) ResetOnMouseDown() {
 	em.Slide = nil
 	em.SlidePress = nil
 
+	em.CancelRepeatClick()
+
 	// if we have sent a long hover start event, we send an end
 	// event (non-nil widget plus nil timer means we already sent)
 	if em.LongHoverWidget != nil && em.LongHoverTimer == nil {
@@ -257,7 +265,7 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 		return
 	}
 
-	var press, dragPress, slidePress, move, up Widget
+	var press, dragPress, slidePress, move, up, repeatClick Widget
 	for i := n - 1; i >= 0; i-- {
 		w := em.MouseInBBox[i]
 		wb := w.AsWidget()
@@ -286,6 +294,9 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 			if slidePress == nil && wb.Styles.Abilities.Is(abilities.Slideable) {
 				slidePress = w
 			}
+			if repeatClick == nil && wb.Styles.Abilities.Is(abilities.RepeatClickable) {
+				repeatClick = w
+			}
 		case events.MouseUp:
 			// in ScRenderBBoxes, everyone is effectively pressable
 			if up == nil && (wb.Styles.Abilities.IsPressable() || sc.Is(ScRenderBBoxes)) {
@@ -303,6 +314,10 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 		}
 		if slidePress != nil {
 			em.SlidePress = slidePress
+		}
+		if repeatClick != nil {
+			em.RepeatClick = repeatClick
+			em.StartRepeatClickTimer()
 		}
 		em.HandleLongPress(e)
 	case events.MouseMove:
@@ -347,8 +362,10 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 			em.Drag.Send(events.DragMove, e) // usually ignored
 		} else {
 			if em.DragPress != nil && em.DragStartCheck(e, DeviceSettings.DragStartTime, DeviceSettings.DragStartDistance) {
+				em.CancelRepeatClick()
 				em.DragPress.Send(events.DragStart, e)
 			} else if em.SlidePress != nil && em.DragStartCheck(e, DeviceSettings.SlideStartTime, DeviceSettings.DragStartDistance) {
+				em.CancelRepeatClick()
 				em.Slide = em.SlidePress
 				em.Slide.Send(events.SlideStart, e)
 			}
@@ -358,6 +375,7 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 			em.HandleLongPress(e)
 		}
 	case events.MouseUp:
+		em.CancelRepeatClick()
 		if em.Slide != nil {
 			em.Slide.Send(events.SlideStop, e)
 			em.Slide = nil
@@ -647,6 +665,31 @@ func (em *EventMgr) GetMouseInBBox(w Widget, pos image.Point) {
 			}
 		}
 		return ki.Continue
+	})
+}
+
+func (em *EventMgr) CancelRepeatClick() {
+	em.RepeatClick = nil
+	if em.RepeatClickTimer != nil {
+		em.RepeatClickTimer.Stop()
+		em.RepeatClickTimer = nil
+	}
+}
+
+func (em *EventMgr) StartRepeatClickTimer() {
+	if em.RepeatClick == nil || !em.RepeatClick.IsVisible() {
+		return
+	}
+	delay := DeviceSettings.RepeatClickTime
+	if em.RepeatClickTimer == nil {
+		delay *= 8
+	}
+	em.RepeatClickTimer = time.AfterFunc(delay, func() {
+		if em.RepeatClick == nil || !em.RepeatClick.IsVisible() {
+			return
+		}
+		em.RepeatClick.Send(events.Click)
+		em.StartRepeatClickTimer()
 	})
 }
 

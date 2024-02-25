@@ -12,11 +12,11 @@ import (
 	"cogentcore.org/core/enums"
 )
 
-var _AbilitiesValues = []Abilities{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}
+var _AbilitiesValues = []Abilities{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}
 
 // AbilitiesN is the highest valid value
 // for type Abilities, plus one.
-const AbilitiesN Abilities = 15
+const AbilitiesN Abilities = 16
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -28,15 +28,16 @@ func _AbilitiesNoOp() {
 	_ = x[Clickable-(3)]
 	_ = x[DoubleClickable-(4)]
 	_ = x[TripleClickable-(5)]
-	_ = x[LongPressable-(6)]
-	_ = x[Draggable-(7)]
-	_ = x[Droppable-(8)]
-	_ = x[Slideable-(9)]
-	_ = x[Checkable-(10)]
-	_ = x[Scrollable-(11)]
-	_ = x[Focusable-(12)]
-	_ = x[Hoverable-(13)]
-	_ = x[LongHoverable-(14)]
+	_ = x[RepeatClickable-(6)]
+	_ = x[LongPressable-(7)]
+	_ = x[Draggable-(8)]
+	_ = x[Droppable-(9)]
+	_ = x[Slideable-(10)]
+	_ = x[Checkable-(11)]
+	_ = x[Scrollable-(12)]
+	_ = x[Focusable-(13)]
+	_ = x[Hoverable-(14)]
+	_ = x[LongHoverable-(15)]
 }
 
 var _AbilitiesNameToValueMap = map[string]Abilities{
@@ -46,15 +47,16 @@ var _AbilitiesNameToValueMap = map[string]Abilities{
 	`Clickable`:       3,
 	`DoubleClickable`: 4,
 	`TripleClickable`: 5,
-	`LongPressable`:   6,
-	`Draggable`:       7,
-	`Droppable`:       8,
-	`Slideable`:       9,
-	`Checkable`:       10,
-	`Scrollable`:      11,
-	`Focusable`:       12,
-	`Hoverable`:       13,
-	`LongHoverable`:   14,
+	`RepeatClickable`: 6,
+	`LongPressable`:   7,
+	`Draggable`:       8,
+	`Droppable`:       9,
+	`Slideable`:       10,
+	`Checkable`:       11,
+	`Scrollable`:      12,
+	`Focusable`:       13,
+	`Hoverable`:       14,
+	`LongHoverable`:   15,
 }
 
 var _AbilitiesDescMap = map[Abilities]string{
@@ -64,15 +66,16 @@ var _AbilitiesDescMap = map[Abilities]string{
 	3:  `Clickable means it can be Clicked, receiving Click events when the user executes a mouse down and up event on the same element, but otherwise does not change its rendering when pressed (as Activatable does). Use this for items that are more passively clickable, such as frames or tables, whereas e.g., a Button is Activatable.`,
 	4:  `DoubleClickable indicates that an element does something different when it is clicked on twice in a row.`,
 	5:  `TripleClickable indicates that an element does something different when it is clicked on three times in a row.`,
-	6:  `LongPressable indicates that an element can be LongPressed`,
-	7:  `Draggable means it can be Dragged`,
-	8:  `Droppable means it can receive DragEnter, DragLeave, and Drop events (not specific to current Drag item, just generally)`,
-	9:  `Slideable means it has a slider element that can be dragged to change value. Cannot be both Draggable and Slideable.`,
-	10: `Checkable means it can be Checked`,
-	11: `Scrollable means it can be Scrolled`,
-	12: `Focusable means it can be Focused: capable of receiving and processing key events directly and typically changing the style when focused to indicate this property to the user.`,
-	13: `Hoverable means it can be Hovered`,
-	14: `LongHoverable means it can be LongHovered`,
+	6:  `RepeatClickable indicates that an element should receive repeated click events when the pointer is held down on it.`,
+	7:  `LongPressable indicates that an element can be LongPressed`,
+	8:  `Draggable means it can be Dragged`,
+	9:  `Droppable means it can receive DragEnter, DragLeave, and Drop events (not specific to current Drag item, just generally)`,
+	10: `Slideable means it has a slider element that can be dragged to change value. Cannot be both Draggable and Slideable.`,
+	11: `Checkable means it can be Checked`,
+	12: `Scrollable means it can be Scrolled`,
+	13: `Focusable means it can be Focused: capable of receiving and processing key events directly and typically changing the style when focused to indicate this property to the user.`,
+	14: `Hoverable means it can be Hovered`,
+	15: `LongHoverable means it can be LongHovered`,
 }
 
 var _AbilitiesMap = map[Abilities]string{
@@ -82,15 +85,16 @@ var _AbilitiesMap = map[Abilities]string{
 	3:  `Clickable`,
 	4:  `DoubleClickable`,
 	5:  `TripleClickable`,
-	6:  `LongPressable`,
-	7:  `Draggable`,
-	8:  `Droppable`,
-	9:  `Slideable`,
-	10: `Checkable`,
-	11: `Scrollable`,
-	12: `Focusable`,
-	13: `Hoverable`,
-	14: `LongHoverable`,
+	6:  `RepeatClickable`,
+	7:  `LongPressable`,
+	8:  `Draggable`,
+	9:  `Droppable`,
+	10: `Slideable`,
+	11: `Checkable`,
+	12: `Scrollable`,
+	13: `Focusable`,
+	14: `Hoverable`,
+	15: `LongHoverable`,
 }
 
 // String returns the string representation

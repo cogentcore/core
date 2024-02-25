@@ -44,6 +44,10 @@ const (
 	// when it is clicked on three times in a row.
 	TripleClickable
 
+	// RepeatClickable indicates that an element should receive repeated
+	// click events when the pointer is held down on it.
+	RepeatClickable
+
 	// LongPressable indicates that an element can be LongPressed
 	LongPressable
 
