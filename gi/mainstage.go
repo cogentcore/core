@@ -11,6 +11,7 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 )
 
@@ -171,14 +172,26 @@ func (st *Stage) RunWindow() *Stage {
 	return st
 }
 
-// RunDialog runs a Dialog with current settings.
-func (st *Stage) RunDialog() *Stage {
-	if st.Context == nil {
+// GetValidContext ensures that the Context is non-nil and has a valid
+// Scene pointer, using CurRenderWin if the current Context is not valid.
+// If CurRenderWin is nil (should not happen), then it returns false and
+// the calling function must bail.
+func (st *Stage) GetValidContext() bool {
+	if st.Context == nil || st.Context.This() == nil || st.Context.Is(ki.Deleted) ||
+		st.Context.AsWidget().Scene == nil {
 		if CurRenderWin == nil {
-			slog.Error("RunDialog: Context is nil and CurRenderWin is nil, cannot Run!", "Dialog", st.Name, "Title", st.Title)
-			return nil
+			slog.Error("Stage Run: Context is nil and CurRenderWin is nil, cannot Run!", "Name", st.Name, "Title", st.Title)
+			return false
 		}
 		st.Context = CurRenderWin.MainStageMgr.Top().Scene
+	}
+	return true
+}
+
+// RunDialog runs a Dialog with current settings.
+func (st *Stage) RunDialog() *Stage {
+	if !st.GetValidContext() {
+		return st
 	}
 	ctx := st.Context.AsWidget()
 	ms := ctx.Scene.MainStageMgr()

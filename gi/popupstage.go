@@ -44,12 +44,12 @@ func (st *Stage) RunPopupAsync() *Stage {
 
 // RunPopup runs a popup-style Stage in context widget's popups.
 func (st *Stage) RunPopup() *Stage {
+	if !st.GetValidContext() { // doesn't even have a scene
+		return st
+	}
 	ctx := st.Context.AsWidget()
 	// if our context stage is nil, we wait until
 	// our context is shown and then try again
-	if ctx == nil || ctx.Scene == nil {
-		return st
-	}
 	if ctx.Scene.Stage == nil {
 		ctx.OnShow(func(e events.Event) {
 			st.RunPopup()
