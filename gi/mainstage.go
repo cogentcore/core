@@ -9,6 +9,7 @@ import (
 	"image"
 	"log/slog"
 
+	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/ki"
@@ -72,14 +73,10 @@ func (st *Stage) AddDialogDecor() *Stage {
 		s.Justify.Content = styles.Center
 	})
 	hl := NewHandle(parts).Style(func(s *styles.Style) {
-		// s.Padding.Zero()
-		// s.Margin.Zero()
 		s.Direction = styles.Column
+	}).StyleFinal(func(s *styles.Style) {
+		s.Cursor = cursors.Move
 	})
-	// .StyleFinal(func(s *styles.Style) {
-	// 	s.Margin.Zero()
-	// })
-	hl.Styles.Direction = styles.Column
 	hl.OnChange(func(e events.Event) {
 		pd := e.PrevDelta()
 		np := sc.SceneGeom.Pos.Add(pd)
