@@ -299,7 +299,6 @@ func (fn *Node) RenameFile(newpath string) error { //gti:add
 		fn.AddToVCS()
 	}
 	if root != nil {
-		// fmt.Println("updating orig path:", orgpath, "and newpath:", newpath)
 		root.UpdatePath(string(orgpath))
 		root.UpdatePath(newpath)
 	}
