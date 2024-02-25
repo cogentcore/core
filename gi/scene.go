@@ -341,32 +341,16 @@ func (sc *Scene) UpdateTitle(title string) {
 	}
 }
 
-/*
-
-todo: failed attempt to get parts to render in top margin
-
 func (sc *Scene) ScenePos() {
 	sc.Frame.ScenePos()
 	if sc.Parts == nil {
 		return
 	}
-	sc.Parts.Geom.Pos.Total.Y -= 10
+	sc.Parts.Geom.Pos.Total.Y = mat32.Ceil(0.5 * sc.Parts.Geom.Size.Actual.Total.Y)
 	sc.Parts.SetContentPosFromPos()
-	sc.Parts.SetBBoxes()
+	sc.Parts.SetBBoxesFromAllocs()
 	sc.Parts.ScenePosChildren()
-	fmt.Println(sc.Parts.Geom.Pos.String())
 }
-
-func (sc *Scene) Render() {
-	if sc.PushBounds() {
-		sc.RenderFrame()
-		sc.RenderChildren()
-		sc.RenderScrolls()
-		sc.PopBounds()
-	}
-	sc.RenderParts()
-}
-*/
 
 //////////////////////////////////////////////////////////////////
 //  Image utilities
