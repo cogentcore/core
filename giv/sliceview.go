@@ -1871,10 +1871,10 @@ func (sv *SliceViewBase) ContextMenu(m *gi.Scene) {
 		return
 	}
 	gi.NewButton(m).SetText("Add row").SetIcon(icons.Add).OnClick(func(e events.Event) {
-		sv.SliceNewAtRow(sv.SelIdx + 1)
+		sv.SliceNewAtRow((sv.SelIdx - sv.StartIdx) + 1)
 	})
 	gi.NewButton(m).SetText("Delete row").SetIcon(icons.Delete).OnClick(func(e events.Event) {
-		sv.SliceDeleteAtRow(sv.SelIdx)
+		sv.SliceDeleteAtRow(sv.SelIdx - sv.StartIdx)
 	})
 	gi.NewSeparator(m)
 	gi.NewButton(m).SetText("Copy").SetIcon(icons.Copy).OnClick(func(e events.Event) {
