@@ -91,8 +91,9 @@ func (tb *Toolbar) SizeDown(iter int) bool {
 func (tb *Toolbar) SizeFromChildren(iter int, pass LayoutPasses) mat32.Vec2 {
 	csz := tb.Frame.SizeFromChildren(iter, pass)
 	if pass == SizeUpPass || (pass == SizeDownPass && iter == 0) {
-		ovsz := tb.OverflowButton.Geom.Size.Actual.Total.X
-		csz.X = ovsz // present the minimum size initially
+		dim := tb.Styles.Direction.Dim()
+		ovsz := tb.OverflowButton.Geom.Size.Actual.Total.Dim(dim)
+		csz.SetDim(dim, ovsz) // present the minimum size initially
 		return csz
 	}
 	return csz
@@ -305,12 +306,19 @@ func (bf *ToolbarFuncs) IsEmpty() bool {
 func ToolbarStyles(ly Layouter) {
 	lb := ly.AsLayout()
 	ly.Style(func(s *styles.Style) {
-		s.Grow.Set(1, 0)
 		s.Border.Radius = styles.BorderRadiusFull
 		s.Background = colors.C(colors.Scheme.SurfaceContainer)
-		s.Padding.SetHoriz(units.Dp(16))
 		s.Gap.Zero()
 		s.Align.Items = styles.Center
+	})
+	ly.AsWidget().StyleFinal(func(s *styles.Style) {
+		if s.Direction == styles.Row {
+			s.Grow.Set(1, 0)
+			s.Padding.SetHoriz(units.Dp(16))
+		} else {
+			s.Grow.Set(0, 1)
+			s.Padding.SetVert(units.Dp(16))
+		}
 	})
 	ly.OnWidgetAdded(func(w Widget) {
 		if bt := AsButton(w); bt != nil {
