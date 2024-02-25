@@ -55,7 +55,7 @@ func (sl *Splits) SetStyles() {
 	})
 	sl.OnWidgetAdded(func(w Widget) {
 		if hl, ok := w.(*Handle); ok && w.Parent() == sl.Parts {
-			hl.On(events.Change, func(e events.Event) {
+			hl.OnChange(func(e events.Event) {
 				sl.SetSplitAction(hl.IndexInParent(), hl.Value())
 			})
 			w.Style(func(s *styles.Style) {

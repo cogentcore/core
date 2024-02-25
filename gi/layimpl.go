@@ -1546,6 +1546,7 @@ func (ly *Layout) SizeFinalLay() {
 	ly.SizeFromChildrenFit(0, SizeFinalPass)
 	ly.GrowToAlloc()
 	ly.StyleSizeUpdate() // now that sizes are stable, ensure styling based on size is updated
+	ly.SizeFinalParts()
 }
 
 // SizeFinalChildren calls SizeFinal on all the children of this node
@@ -1661,6 +1662,7 @@ func (ly *Layout) PositionLay() {
 		ly.PositionCells()
 		ly.PositionChildren()
 	}
+	ly.PositionParts()
 }
 
 func (ly *Layout) PositionCells() {

@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/styles"
 )
 
 // NewMainStage returns a new MainStage with given type and scene contents.
@@ -60,6 +61,46 @@ func (st *Stage) AddWindowDecor() *Stage {
 }
 
 func (st *Stage) AddDialogDecor() *Stage {
+	if st.FullWindow {
+		return st
+	}
+	sc := st.Scene
+	parts := sc.NewParts()
+	parts.Style(func(s *styles.Style) {
+		s.Grow.Set(1, 0)
+		s.Gap.Zero()
+		s.Justify.Content = styles.Center
+	})
+	hl := NewHandle(parts).Style(func(s *styles.Style) {
+		s.Padding.Zero()
+		s.Margin.Zero()
+		s.Direction = styles.Column
+	}).StyleFinal(func(s *styles.Style) {
+		s.Margin.Zero()
+	})
+	hl.Styles.Direction = styles.Column
+	hl.OnChange(func(e events.Event) {
+		pd := e.PrevDelta()
+		np := sc.SceneGeom.Pos.Add(pd)
+		if np.Y < 0 {
+			np.Y = 0
+		}
+		if np.X < 0 {
+			np.X = 0
+		}
+		rw := sc.RenderWin()
+		sz := rw.GoosiWin.Size()
+		mx := sz.X - int(sc.SceneGeom.Size.X)
+		if np.X > mx {
+			np.X = mx
+		}
+		my := sz.Y - int(sc.SceneGeom.Size.Y)
+		if np.Y > my {
+			np.Y = my
+		}
+		sc.SceneGeom.Pos = np
+		sc.SetNeedsRender(true)
+	})
 	return st
 }
 
@@ -206,6 +247,7 @@ func (st *Stage) RunDialog() *Stage {
 
 	sc := st.Scene
 	st.ConfigMainStage()
+	st.AddDialogDecor()
 	sc.SceneGeom.Pos = st.Pos
 
 	st.SetMainMgr(ms) // temporary for prefs
