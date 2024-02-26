@@ -13,7 +13,6 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/colors/matcolor"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/pi/lex"
@@ -36,10 +35,11 @@ func (ed *Editor) RenderLayout() {
 	chg := ed.ManageOverflow(3, true)
 	ed.LayoutAllLines()
 	ed.ConfigScrolls()
-	if chg {
-		ed.Layout.SetNeedsLayout(true) // required to actually update scrollbar vs not
-		ed.Scene.AddReRender(ed.This().(gi.Widget))
-	}
+	_ = chg
+	// if chg {
+	// 	ed.Layout.SetNeedsLayout(true) // required to actually update scrollbar vs not
+	// 	ed.Scene.AddReRender(ed.This().(gi.Widget))
+	// }
 }
 
 func (ed *Editor) Render() {

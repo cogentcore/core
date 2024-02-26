@@ -111,7 +111,6 @@ func (c *Complete) Show(ctx Widget, pos image.Point, text string, force bool) {
 	if c.MatchFunc == nil {
 		return
 	}
-
 	wait := SystemSettings.CompleteWaitDuration
 	if force {
 		wait = 0
@@ -119,14 +118,17 @@ func (c *Complete) Show(ctx Widget, pos image.Point, text string, force bool) {
 	if c.Stage != nil {
 		c.Cancel()
 	}
+	if wait == 0 {
+		c.ShowNow(ctx, pos, text, force)
+		return
+	}
 	c.DelayMu.Lock()
 	if c.DelayTimer != nil {
 		c.DelayTimer.Stop()
 	}
-
 	c.DelayTimer = time.AfterFunc(wait,
 		func() {
-			c.ShowNow(ctx, pos, text, force)
+			c.ShowNowAsync(ctx, pos, text, force)
 			c.DelayMu.Lock()
 			c.DelayTimer = nil
 			c.DelayMu.Unlock()
@@ -135,22 +137,39 @@ func (c *Complete) Show(ctx Widget, pos image.Point, text string, force bool) {
 }
 
 // ShowNow actually calls MatchFunc to get a list of completions and builds the
-// completion popup menu.
+// completion popup menu.  This is the sync version called from
 func (c *Complete) ShowNow(ctx Widget, pos image.Point, text string, force bool) {
-	if c.MatchFunc == nil {
-		return
+	if c.Stage != nil {
+		c.Cancel()
 	}
+	c.ShowMu.Lock()
+	defer c.ShowMu.Unlock()
+	if c.ShowNowImpl(ctx, pos, text, force) {
+		c.Stage.RunPopup()
+	}
+}
+
+// ShowNowAsync actually calls MatchFunc to get a list of completions and builds the
+// completion popup menu.  This is the Async version for delayed AfterFunc call.
+func (c *Complete) ShowNowAsync(ctx Widget, pos image.Point, text string, force bool) {
 	if c.Stage != nil {
 		c.CancelAsync()
 	}
 	c.ShowMu.Lock()
 	defer c.ShowMu.Unlock()
+	if c.ShowNowImpl(ctx, pos, text, force) {
+		c.Stage.RunPopupAsync()
+	}
+}
 
+// ShowNowImpl is the implementation of ShowNow, presenting completions.
+// Returns false if nothing to show.
+func (c *Complete) ShowNowImpl(ctx Widget, pos image.Point, text string, force bool) bool {
 	md := c.MatchFunc(c.Context, text, c.SrcLn, c.SrcCh)
 	c.Completions = md.Matches
 	c.Seed = md.Seed
 	if len(c.Completions) == 0 {
-		return
+		return false
 	}
 	if len(c.Completions) > SystemSettings.CompleteMaxItems {
 		c.Completions = c.Completions[0:SystemSettings.CompleteMaxItems]
@@ -188,7 +207,7 @@ func (c *Complete) ShowNow(ctx Widget, pos image.Point, text string, force bool)
 			sc.EventMgr.SetStartFocus(mi)
 		}
 	}
-	c.Stage.RunPopupAsync()
+	return true
 }
 
 // Cancel cancels any existing *or* pending completion.
@@ -200,7 +219,7 @@ func (c *Complete) Cancel() bool {
 	}
 	st := c.Stage
 	c.Stage = nil
-	st.ClosePopup() // todo async
+	st.ClosePopup()
 	return true
 }
 

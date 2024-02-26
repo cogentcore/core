@@ -165,6 +165,12 @@ type TextField struct { //core:embedder
 
 	// CursorMu is the mutex for updating the cursor between blinker and field.
 	CursorMu sync.Mutex `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
+
+	// the undo stack
+	Undos [][]rune
+
+	// position within the undo stack
+	UndoPos int
 }
 
 // TextFieldTypes is an enum containing the
