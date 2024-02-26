@@ -719,7 +719,7 @@ func (ed *Editor) CursorTransposeWord() {
 }
 
 // JumpToLinePrompt jumps to given line number (minus 1) from prompt
-func (ed *Editor) JumpToLineAddText() {
+func (ed *Editor) JumpToLinePrompt() {
 	val := ""
 	d := gi.NewBody().AddTitle("Jump to line").AddText("Line number to jump to")
 	tf := gi.NewTextField(d).SetPlaceholder("Line number")

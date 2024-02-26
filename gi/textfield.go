@@ -1055,6 +1055,24 @@ func (tf *TextField) ContextMenu(m *Scene) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+//    Undo
+
+func (tf *TextField) SaveUndo() {
+	tf.Undos = append(tf.Undos, tf.EditTxt)
+	tf.UndoPos = len(tf.Undos) - 1
+}
+
+func (tf *TextField) Undo() {
+	n := len(tf.Undos)
+	if tf.UndoPos <= 0 || n == 0 {
+		MessageSnackbar(tf, "Nothing left to undo")
+	}
+	tf.UndoPos--
+	tf.EditTxt = tf.Undos[tf.UndoPos]
+	tf.SetNeedsRender(true)
+}
+
+///////////////////////////////////////////////////////////////////////////////
 //    Complete
 
 // SetCompleter sets completion functions so that completions will

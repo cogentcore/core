@@ -287,7 +287,7 @@ func (ed *Editor) QReplaceSig() {
 
 // QReplacePrompt is an emacs-style query-replace mode -- this starts the process, prompting
 // user for items to search etc
-func (ed *Editor) QReplaceAddText() {
+func (ed *Editor) QReplacePrompt() {
 	find := ""
 	if ed.HasSelection() {
 		find = string(ed.Selection().ToBytes())
