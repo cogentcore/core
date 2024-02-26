@@ -106,13 +106,13 @@ type Value interface {
 	Label() string
 
 	// SetLabel sets the label for the value
-	SetLabel(label string)
+	SetLabel(label string) *ValueBase
 
 	// Doc returns the documentation for the value
 	Doc() string
 
 	// SetDoc sets the documentation for the value
-	SetDoc(doc string)
+	SetDoc(doc string) *ValueBase
 
 	// Is checks if flag is set, using atomic, safe for concurrent access
 	Is(f enums.BitFlag) bool
@@ -355,9 +355,10 @@ func (vv *ValueBase) Label() string {
 	return vv.SavedLabel
 }
 
-func (vv *ValueBase) SetLabel(label string) {
+func (vv *ValueBase) SetLabel(label string) *ValueBase {
 	vv.SavedLabel = label
 	vv.SetFlag(true, ValueHasSavedLabel)
+	return vv
 }
 
 func (vv *ValueBase) Doc() string {
@@ -370,9 +371,10 @@ func (vv *ValueBase) Doc() string {
 	return vv.SavedDoc
 }
 
-func (vv *ValueBase) SetDoc(doc string) {
+func (vv *ValueBase) SetDoc(doc string) *ValueBase {
 	vv.SavedDoc = doc
 	vv.SetFlag(true, ValueHasSavedDoc)
+	return vv
 }
 
 func (vv *ValueBase) String() string {
