@@ -13,7 +13,7 @@ type Circle struct {
 	NodeBase
 
 	// position of the center of the circle
-	Pos mat32.Vec2 `xml:"{cx,cy}" set:"-"`
+	Pos mat32.Vec2 `xml:"{cx,cy}"`
 
 	// radius of the circle
 	Radius float32 `xml:"r"`
@@ -25,14 +25,12 @@ func (g *Circle) OnInit() {
 	g.Radius = 1
 }
 
-func (g *Circle) SetPos(pos mat32.Vec2) *Circle {
+func (g *Circle) SetNodePos(pos mat32.Vec2) {
 	g.Pos = pos.SubScalar(g.Radius)
-	return g
 }
 
-func (g *Circle) SetSize(sz mat32.Vec2) *Circle {
+func (g *Circle) SetNodeSize(sz mat32.Vec2) {
 	g.Radius = 0.25 * (sz.X + sz.Y)
-	return g
 }
 
 func (g *Circle) LocalBBox() mat32.Box2 {

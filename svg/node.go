@@ -45,6 +45,12 @@ type Node interface {
 	// NodeBBox returns the bounding box in image coordinates for this node
 	NodeBBox(sv *SVG) image.Rectangle
 
+	// SetNodePos sets the upper left effective position of this element, in local dimensions
+	SetNodePos(pos mat32.Vec2)
+
+	// SetNodeSize sets the overall effective size of this element, in local dimensions
+	SetNodeSize(sz mat32.Vec2)
+
 	// ApplyTransform applies the given 2D transform to the geometry of this node
 	// this just does a direct transform multiplication on coordinates.
 	ApplyTransform(sv *SVG, xf mat32.Mat2)
@@ -416,6 +422,14 @@ func (g *NodeBase) LocalBBoxToWin(bb mat32.Box2) image.Rectangle {
 func (g *NodeBase) NodeBBox(sv *SVG) image.Rectangle {
 	rs := &sv.RenderState
 	return rs.LastRenderBBox
+}
+
+func (g *NodeBase) SetNodePos(pos mat32.Vec2) {
+	// no-op by default
+}
+
+func (g *NodeBase) SetNodeSize(sz mat32.Vec2) {
+	// no-op by default
 }
 
 // LocalLineWidth returns the line width in local coordinates

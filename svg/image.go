@@ -38,6 +38,14 @@ type Image struct {
 
 func (g *Image) SVGName() string { return "image" }
 
+func (g *Image) SetNodePos(pos mat32.Vec2) {
+	g.Pos = pos
+}
+
+func (g *Image) SetNodeSize(sz mat32.Vec2) {
+	g.Size = sz
+}
+
 // SetImageSize sets size of the bitmap image.
 // This does not resize any existing image, just makes a new image
 // if the size is different

@@ -19,7 +19,7 @@ type Text struct {
 	NodeBase
 
 	// position of the left, baseline of the text
-	Pos mat32.Vec2 `xml:"{x,y}" set:"-"`
+	Pos mat32.Vec2 `xml:"{x,y}"`
 
 	// width of text to render if using word-wrapping
 	Width float32 `xml:"width"`
@@ -72,23 +72,21 @@ func (g *Text) IsParText() bool {
 	return g.NumChildren() > 0 && g.Text == ""
 }
 
-func (g *Text) SetPos(pos mat32.Vec2) *Text {
+func (g *Text) SetNodePos(pos mat32.Vec2) {
 	g.Pos = pos
 	for _, kii := range g.Kids {
 		kt := kii.(*Text)
 		kt.Pos = g.Paint.Transform.MulVec2AsPt(pos)
 	}
-	return g
 }
 
-func (g *Text) SetSize(sz mat32.Vec2) *Text {
+func (g *Text) SetNodeSize(sz mat32.Vec2) {
 	g.Width = sz.X
 	scx, _ := g.Paint.Transform.ExtractScale()
 	for _, kii := range g.Kids {
 		kt := kii.(*Text)
 		kt.Width = g.Width * scx
 	}
-	return g
 }
 
 func (g *Text) NodeBBox(sv *SVG) image.Rectangle {

@@ -30,6 +30,14 @@ func (g *Rect) OnInit() {
 	g.Size.Set(1, 1)
 }
 
+func (g *Rect) SetNodePos(pos mat32.Vec2) {
+	g.Pos = pos
+}
+
+func (g *Rect) SetNodeSize(sz mat32.Vec2) {
+	g.Size = sz
+}
+
 func (g *Rect) LocalBBox() mat32.Box2 {
 	bb := mat32.Box2{}
 	hlw := 0.5 * g.LocalLineWidth()
