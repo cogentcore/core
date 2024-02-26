@@ -28,6 +28,10 @@ func (t *Circle) KiType() *gti.Type { return CircleType }
 // New returns a new [*Circle] value
 func (t *Circle) New() ki.Ki { return &Circle{} }
 
+// SetPos sets the [Circle.Pos]:
+// position of the center of the circle
+func (t *Circle) SetPos(v mat32.Vec2) *Circle { t.Pos = v; return t }
+
 // SetRadius sets the [Circle.Radius]:
 // radius of the circle
 func (t *Circle) SetRadius(v float32) *Circle { t.Radius = v; return t }
@@ -111,6 +115,10 @@ func (t *Ellipse) KiType() *gti.Type { return EllipseType }
 
 // New returns a new [*Ellipse] value
 func (t *Ellipse) New() ki.Ki { return &Ellipse{} }
+
+// SetPos sets the [Ellipse.Pos]:
+// position of the center of the ellipse
+func (t *Ellipse) SetPos(v mat32.Vec2) *Ellipse { t.Pos = v; return t }
 
 // SetRadii sets the [Ellipse.Radii]:
 // radii of the ellipse in the horizontal, vertical axes
@@ -486,6 +494,10 @@ func (t *Text) KiType() *gti.Type { return TextType }
 
 // New returns a new [*Text] value
 func (t *Text) New() ki.Ki { return &Text{} }
+
+// SetPos sets the [Text.Pos]:
+// position of the left, baseline of the text
+func (t *Text) SetPos(v mat32.Vec2) *Text { t.Pos = v; return t }
 
 // SetWidth sets the [Text.Width]:
 // width of text to render if using word-wrapping
