@@ -276,6 +276,7 @@ func (sc *Scene) Resize(geom mat32.Geom2DInt) {
 	// and Android in different contexts.
 	// TODO(kai): is there a more efficient way to do this, and do we need to do this on all platforms?
 	sc.ShowIter = 0
+	sc.SetNeedsLayout(true)
 }
 
 func (sc *Scene) ScIsVisible() bool {
@@ -346,10 +347,35 @@ func (sc *Scene) ScenePos() {
 	if sc.Parts == nil {
 		return
 	}
-	sc.Parts.Geom.Pos.Total.Y = mat32.Ceil(0.5 * sc.Parts.Geom.Size.Actual.Total.Y)
+
+	mvi := sc.Parts.ChildByName("move", 1)
+	if mvi == nil {
+		return
+	}
+	mv := mvi.(Widget).AsWidget()
+
+	sc.Parts.Geom.Pos.Total.Y = mat32.Ceil(0.5 * mv.Geom.Size.Actual.Total.Y)
+	sc.Parts.Geom.Size.Actual = sc.Geom.Size.Actual
 	sc.Parts.SetContentPosFromPos()
 	sc.Parts.SetBBoxesFromAllocs()
 	sc.Parts.ScenePosChildren()
+
+	psz := sc.Parts.Geom.Size.Actual.Content
+
+	mv.Geom.RelPos.X = 0.5*psz.X - 0.5*mv.Geom.Size.Actual.Total.X
+	mv.Geom.RelPos.Y = 0
+	mv.SetPosFromParent()
+	mv.SetBBoxesFromAllocs()
+
+	rszi := sc.Parts.ChildByName("resize", 1)
+	if rszi == nil {
+		return
+	}
+	rsz := rszi.(Widget).AsWidget()
+	rsz.Geom.RelPos.X = psz.X // - 0.5*rsz.Geom.Size.Actual.Total.X
+	rsz.Geom.RelPos.Y = psz.Y // - 0.5*rsz.Geom.Size.Actual.Total.Y
+	rsz.SetPosFromParent()
+	rsz.SetBBoxesFromAllocs()
 }
 
 //////////////////////////////////////////////////////////////////

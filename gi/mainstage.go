@@ -15,6 +15,7 @@ import (
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 // NewMainStage returns a new MainStage with given type and scene contents.
@@ -68,11 +69,11 @@ func (st *Stage) AddDialogDecor() *Stage {
 	sc := st.Scene
 	parts := sc.NewParts()
 	parts.Style(func(s *styles.Style) {
-		s.Grow.Set(1, 0)
+		s.Direction = styles.Column
+		s.Grow.Set(0, 1)
 		s.Gap.Zero()
-		s.Justify.Content = styles.Center
 	})
-	hl := NewHandle(parts).Style(func(s *styles.Style) {
+	hl := NewHandle(parts, "move").Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	}).StyleFinal(func(s *styles.Style) {
 		s.Cursor = cursors.Move
@@ -80,24 +81,33 @@ func (st *Stage) AddDialogDecor() *Stage {
 	hl.OnChange(func(e events.Event) {
 		pd := e.PrevDelta()
 		np := sc.SceneGeom.Pos.Add(pd)
-		if np.Y < 0 {
-			np.Y = 0
-		}
-		if np.X < 0 {
-			np.X = 0
-		}
+		np.X = max(np.X, 0)
+		np.Y = max(np.Y, 0)
 		rw := sc.RenderWin()
 		sz := rw.GoosiWin.Size()
 		mx := sz.X - int(sc.SceneGeom.Size.X)
-		if np.X > mx {
-			np.X = mx
-		}
 		my := sz.Y - int(sc.SceneGeom.Size.Y)
-		if np.Y > my {
-			np.Y = my
-		}
+		np.X = min(np.X, mx)
+		np.Y = min(np.Y, my)
 		sc.SceneGeom.Pos = np
 		sc.SetNeedsRender(true)
+	})
+	rsz := NewHandle(parts, "resize").Style(func(s *styles.Style) {
+		s.Direction = styles.Column
+		s.FillMargin = false
+	}).StyleFinal(func(s *styles.Style) {
+		s.Cursor = cursors.ResizeNWSE
+		s.Min.Set(units.Em(1))
+	})
+	rsz.OnChange(func(e events.Event) {
+		pd := e.PrevDelta()
+		np := sc.SceneGeom.Size.Add(pd)
+		minsz := 100
+		np.X = max(np.X, minsz)
+		np.Y = max(np.Y, minsz)
+		ng := sc.SceneGeom
+		ng.Size = np
+		sc.Resize(ng)
 	})
 	return st
 }
