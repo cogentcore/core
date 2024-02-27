@@ -22,7 +22,7 @@ require (
 	github.com/mattn/go-shellwords v1.0.12
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/muesli/termenv v0.15.2
-	github.com/pelletier/go-toml/v2 v2.1.1
+	github.com/pelletier/go-toml/v2 v2.1.2-0.20240227203013-2b69615b5d55
 	github.com/yuin/goldmark v1.6.0
 	go.abhg.dev/goldmark/wikilink v0.5.0
 	golang.org/x/image v0.15.0

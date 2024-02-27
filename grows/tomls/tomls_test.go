@@ -49,9 +49,7 @@ func TestSlice(t *testing.T) {
 	spath := filepath.Join("testdata", "slice.toml")
 	sl := &testSliceStruct{[]sliceItem{{F: "a"}, {F: "b"}}}
 	grr.Test(t, Save(sl, spath))
-	sl.Slice = nil // note: required -- otherwise adds
 	grr.Test(t, Open(sl, spath))
-	sl.Slice = nil // note: required -- otherwise adds
 	grr.Test(t, Open(sl, spath))
 	if len(sl.Slice) != 2 {
 		t.Errorf("expected slice to be length 2) but got length %d", len(sl.Slice))

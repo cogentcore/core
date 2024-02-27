@@ -532,7 +532,6 @@ func (ss *SystemSettingsData) Apply() { //gti:add
 }
 
 func (ss *SystemSettingsData) Open() error {
-	ss.FavPaths = nil // toml is just adding to this, need to reset prior
 	fnm := ss.Filename()
 	err := tomls.Open(ss, fnm)
 	if len(ss.FavPaths) == 0 {
