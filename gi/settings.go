@@ -397,7 +397,7 @@ type DeviceSettingsData struct { //gti:add
 	LongHoverStopDistance int `default:"5" min:"0" max:"1000" step:"1"`
 
 	// The amount of time to wait before initiating a long press event (e.g., for opening a tooltip)
-	LongPressTime time.Duration `default:"1s" min:"10ms" max:"10s" step:"10ms"`
+	LongPressTime time.Duration `default:"500ms" min:"10ms" max:"10s" step:"10ms"`
 
 	// The maximum number of pixels that mouse/finger can move and still register a long press event
 	LongPressStopDistance int `default:"50" min:"0" max:"1000" step:"1"`

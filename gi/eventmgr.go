@@ -370,25 +370,27 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 				em.CancelLongPress()
 				em.Slide = em.SlidePress
 				em.Slide.Send(events.SlideStart, e)
-			} else {
-				// if we already have a long press widget, we update it based on our dragging movement
-				if em.LongPressWidget != nil {
-					em.HandleLongPress(e)
-				}
 			}
+		}
+		// if we already have a long press widget, we update it based on our dragging movement
+		if em.LongPressWidget != nil {
+			em.HandleLongPress(e)
 		}
 	case events.MouseUp:
 		em.CancelRepeatClick()
 		if em.Slide != nil {
 			em.Slide.Send(events.SlideStop, e)
 			em.Slide = nil
+			em.Press = nil
 		}
 		if em.Drag != nil {
 			em.DragDrop(em.Drag, e)
+			em.Press = nil
 		}
 		// if we have sent a long press start event, we don't send click
 		// events (non-nil widget plus nil timer means we already sent)
 		if em.Press == up && up != nil && !(em.LongPressWidget != nil && em.LongPressTimer == nil) {
+			em.CancelLongPress()
 			switch e.MouseButton() {
 			case events.Left:
 				if sc.SelectedWidgetChan != nil {
@@ -1026,7 +1028,7 @@ func (em *EventMgr) FocusLast() bool {
 // returns true if a focusable item was found.
 func (em *EventMgr) FocusLastFrom(from Widget) bool {
 	last := ki.Last(from.This()).(Widget)
-	fmt.Println("last:", last, "from:", from)
+	// fmt.Println("last:", last, "from:", from)
 	return em.FocusOnOrPrev(last)
 }
 

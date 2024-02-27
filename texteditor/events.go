@@ -566,7 +566,7 @@ func (ed *Editor) OpenLinkAt(pos lex.Pos) (*paint.TextLink, bool) {
 
 // HandleMouse handles mouse events.Event
 func (ed *Editor) HandleMouse() {
-	ed.On(events.MouseDown, func(e events.Event) { // note: usual is Click..
+	ed.On(events.MouseUp, func(e events.Event) { // note: usual is Click..
 		if !ed.StateIs(states.Focused) {
 			ed.SetFocusEvent()
 		}
