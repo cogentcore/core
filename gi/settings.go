@@ -353,6 +353,21 @@ var DeviceSettings = &DeviceSettingsData{
 	},
 }
 
+// SaveScreenZoom saves the current zoom factor for current screen.
+func (as *AppearanceSettingsData) SaveScreenZoom() { //gti:add
+	sc := goosi.TheApp.Screen(0)
+	sp, ok := as.Screens[sc.Name]
+	if !ok {
+		sp = ScreenSettings{}
+	}
+	sp.Zoom = as.Zoom
+	if as.Screens == nil {
+		as.Screens = make(map[string]ScreenSettings)
+	}
+	as.Screens[sc.Name] = sp
+	grr.Log(SaveSettings(as))
+}
+
 // DeviceSettingsData is the data type for the device settings.
 type DeviceSettingsData struct { //gti:add
 	SettingsBase
