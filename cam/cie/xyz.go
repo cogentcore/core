@@ -38,7 +38,7 @@ func SRGB100ToXYZ(r, g, b float32) (x, y, z float32) {
 // XYZToSRGB converts XYZ CIE standard color space into sRGB
 func XYZToSRGB(x, y, z float32) (r, g, b float32) {
 	rl, bl, gl := XYZToSRGBLin(x, y, z)
-	r, g, b = SRGBFmLinear(rl, bl, gl)
+	r, g, b = SRGBFromLinear(rl, bl, gl)
 	return
 }
 
@@ -46,7 +46,7 @@ func XYZToSRGB(x, y, z float32) (r, g, b float32) {
 // into sRGB
 func XYZ100ToSRGB(x, y, z float32) (r, g, b float32) {
 	rl, bl, gl := XYZToSRGBLin(x/100, y/100, z/100)
-	r, g, b = SRGBFmLinear(rl, bl, gl)
+	r, g, b = SRGBFromLinear(rl, bl, gl)
 	return
 }
 

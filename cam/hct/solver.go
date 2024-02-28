@@ -51,7 +51,7 @@ func SolveToRGBLin(hue, chroma, tone float32) mat32.Vec3 {
 // sufficiently close, and chroma will be maximized.
 func SolveToRGB(hue, chroma, tone float32) (r, g, b float32) {
 	lin := SolveToRGBLin(hue, chroma, tone)
-	r, g, b = cie.SRGBFmLinear100(lin.X, lin.Y, lin.Z)
+	r, g, b = cie.SRGBFromLinear100(lin.X, lin.Y, lin.Z)
 	return
 }
 
