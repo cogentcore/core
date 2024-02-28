@@ -136,7 +136,7 @@ func FromXYZView(x, y, z float32, vw *View) *CAM {
 	l, m, s := XYZToLMS(x, y, z)
 	redVgreen, yellowVblue, grey, greyNorm := LMSToOps(l, m, s, vw)
 
-	hue := SanitizeDeg(mat32.RadToDeg(mat32.Atan2(yellowVblue, redVgreen)))
+	hue := SanitizeDegrees(mat32.RadToDeg(mat32.Atan2(yellowVblue, redVgreen)))
 	// achromatic response to color
 	ac := grey * vw.NBB
 

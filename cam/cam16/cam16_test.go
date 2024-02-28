@@ -9,6 +9,7 @@ import (
 
 	"cogentcore.org/core/cam/cie"
 	"cogentcore.org/core/mat32"
+	"github.com/stretchr/testify/assert"
 )
 
 func expect(t *testing.T, ref, val float32) {
@@ -36,6 +37,11 @@ func TestView(t *testing.T) {
 	expect(t, 1.021177769, vw.RGBD.X)
 	expect(t, 0.986307740, vw.RGBD.Y)
 	expect(t, 0.933960497, vw.RGBD.Z)
+
+	nvw := *vw
+	nvw.Surround = 0.5
+	nvw.Update()
+	expect(t, 0.55749995, nvw.C)
 }
 
 func TestCAM(t *testing.T) {
@@ -71,6 +77,13 @@ func TestCAM(t *testing.T) {
 	expect(t, 93.674, camb.Saturation)
 	expect(t, 78.481, camb.Brightness)
 
+	r, g, b, a := (&CAM{40, 60, 80, 50, 45, 55}).RGBA()
+	assert.Equal(t, uint32(0xef5a), r)
+	assert.Equal(t, uint32(0x7439), g)
+	assert.Equal(t, uint32(0x3f53), b)
+	assert.Equal(t, uint32(0xffff), a)
+
+	assert.Equal(t, FromJCHView(60, 50, 40, NewStdView()), FromJCH(60, 50, 40))
 }
 
 func TestXYZ(t *testing.T) {
@@ -105,4 +118,23 @@ func TestUCS(t *testing.T) {
 		expect(t, cam.Saturation, ccam.Saturation)
 		expect(t, cam.Brightness, ccam.Brightness)
 	}
+}
+
+func TestLMS(t *testing.T) {
+	x, y, z := LMSToXYZ(0.25, 0.68, 0.47)
+	assert.Equal(t, float32(-0.15201962), x)
+	assert.Equal(t, float32(0.5152482), y)
+	assert.Equal(t, float32(0.4663193), z)
+
+	assert.Equal(t, float32(28.158047), InverseChromaticAdapt(52.1))
+}
+
+func TestSanitize(t *testing.T) {
+	assert.Equal(t, float32(80), SanitizeDegrees(800))
+	assert.Equal(t, float32(3.141593), SanitizeRadians(5*mat32.Pi))
+}
+
+func TestInCyclicOrder(t *testing.T) {
+	assert.Equal(t, true, InCyclicOrder(0, 1, 2))
+	assert.Equal(t, false, InCyclicOrder(0, 2, 1))
 }

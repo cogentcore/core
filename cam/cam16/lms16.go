@@ -40,8 +40,8 @@ func LuminanceAdaptComp(v, d, fl float32) float32 {
 }
 
 func InverseChromaticAdapt(adapted float32) float32 {
-	adapted_abs := mat32.Abs(adapted)
-	base := mat32.Max(0, 27.13*adapted_abs/(400.0-adapted_abs))
+	adaptedAbs := mat32.Abs(adapted)
+	base := mat32.Max(0, 27.13*adaptedAbs/(400.0-adaptedAbs))
 	return mat32.Sign(adapted) * mat32.Pow(base, 1.0/0.42)
 }
 

@@ -11,10 +11,10 @@ import (
 )
 
 func TestXYZToLMS(t *testing.T) {
-	x, y, z := XYZToLMS(0.3, 0.6, 0.5)
-	assert.Equal(t, float32(0.39640003), x)
-	assert.Equal(t, float32(0.8104701), y)
-	assert.Equal(t, float32(0.50076), z)
+	l, m, s := XYZToLMS(0.3, 0.6, 0.5)
+	assert.Equal(t, float32(0.39640003), l)
+	assert.Equal(t, float32(0.8104701), m)
+	assert.Equal(t, float32(0.50076), s)
 }
 
 func TestSRGBLinToLMS(t *testing.T) {
