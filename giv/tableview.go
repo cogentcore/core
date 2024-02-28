@@ -824,6 +824,9 @@ func (tv *TableView) SizeFinal() {
 	sh := tv.SliceHeader()
 	sh.WidgetKidsIter(func(i int, kwi gi.Widget, kwb *gi.WidgetBase) bool {
 		_, sgb := gi.AsWidget(sg.Child(i))
+		if sgb == nil {
+			return ki.Continue
+		}
 		gsz := &sgb.Geom.Size
 		ksz := &kwb.Geom.Size
 		ksz.Actual.Total.X = gsz.Actual.Total.X

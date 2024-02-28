@@ -2313,6 +2313,9 @@ func (sg *SliceViewGrid) RenderStripes() {
 		ht, _ := sg.LayImpl.RowHeight(r, 0)
 		miny := st.Y
 		for c := 0; c < cols; c++ {
+			if sg.Child(r*cols+c) == nil {
+				continue
+			}
 			kw := sg.Child(r*cols + c).(gi.Widget).AsWidget()
 			pyi := mat32.Floor(kw.Geom.Pos.Total.Y)
 			if pyi < miny {
@@ -2362,6 +2365,9 @@ func (sg *SliceViewGrid) IndexFromPixel(pt image.Point) (row, col int, isValid b
 		miny := st.Y
 		if r > 0 {
 			for c := 0; c < cols; c++ {
+				if sg.Child(r*cols+c) == nil {
+					continue
+				}
 				kw := sg.Child(r*cols + c).(gi.Widget).AsWidget()
 				pyi := mat32.Floor(kw.Geom.Pos.Total.Y)
 				if pyi < miny {
