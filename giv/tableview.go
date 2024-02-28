@@ -354,8 +354,9 @@ func (tv *TableView) ConfigRows() {
 		ridx := i * nWidgPerRow
 		var val reflect.Value
 		if si < tv.SliceSize {
-			if tv.SliceNPVal.Index(si).IsValid() {
-				val = laser.OnePtrUnderlyingValue(tv.SliceNPVal.Index(si)) // deal with pointer lists
+			value := tv.SliceNPVal.Index(si)
+			if value.IsValid() {
+				val = laser.OnePtrUnderlyingValue(value) // deal with pointer lists
 			}
 		} else {
 			val = tv.ElVal
@@ -726,10 +727,11 @@ func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
 	sg := tv.SliceGrid()
 	// first check if we already have focus
 	for fli := 0; fli < tv.NVisFields; fli++ {
-		if sg.Child(ridx+idxOff+fli) == nil {
+		child := sg.Child(ridx + idxOff + fli)
+		if child == nil {
 			continue
 		}
-		w := sg.Child(ridx + idxOff + fli).(gi.Widget).AsWidget()
+		w := child.(gi.Widget).AsWidget()
 		if w.StateIs(states.Focused) || w.ContainsFocus() {
 			return w
 		}
@@ -737,7 +739,11 @@ func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
 	tv.SetFlag(true, SliceViewInFocusGrab)
 	defer func() { tv.SetFlag(false, SliceViewInFocusGrab) }()
 	for fli := 0; fli < tv.NVisFields; fli++ {
-		w := sg.Child(ridx + idxOff + fli).(gi.Widget).AsWidget()
+		child := sg.Child(ridx + idxOff + fli)
+		if child == nil {
+			continue
+		}
+		w := child.(gi.Widget).AsWidget()
 		if w.CanFocus() {
 			w.SetFocusEvent()
 			return w
