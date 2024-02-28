@@ -7,7 +7,7 @@ On all platforms, you need to download and install Go from [the Go website](http
 1. Install the xcode command-line tools if you don't already have them by running `xcode-select --install`
 2. If you don't already have the Vulkan SDK installed, install it by doing the following:
     * Run `curl -O https://sdk.lunarg.com/sdk/download/1.3.261.1/mac/vulkansdk-macos-1.3.261.1.dmg`
-    * Run `open vulkan_sdk.dmg`
+    * Run `open vulkansdk-macos-1.3.261.1.dmg`
     * Double click `InstallVulkan.app`
     * Follow the installation prompts and ignore all warnings about the Vulkan Portability Enumeration extension
 
