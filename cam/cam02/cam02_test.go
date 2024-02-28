@@ -5,11 +5,11 @@
 package cam02
 
 import (
-	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-func TestLumAdapt(t *testing.T) {
-	fl := LuminanceAdapt(200)
-	fmt.Println(fl)
+func TestLuminanceAdapt(t *testing.T) {
+	assert.Equal(t, float32(1), LuminanceAdapt(200))
 }

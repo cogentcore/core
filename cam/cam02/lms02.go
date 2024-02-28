@@ -86,10 +86,10 @@ func LMSToResp(l, m, s float32) (lc, mc, sc, lmc, grey float32) {
 	mA := ResponseCompression(m)
 	sA := ResponseCompression(s)
 	// subtract min and mult by 6 gets values roughly into 1-0 range for L,M
-	lc = 6 * ((lA + (1/11)*sA) - 0.109091)
-	mc = 6 * (((12 / 11) * mA) - 0.109091)
-	sc = 6 * (((2 / 9) * sA) - 0.0222222)
-	lmc = 6 * (((1 / 9) * (lA + mA)) - 0.0222222)
+	lc = 6 * ((lA + (float32(1)/11)*sA) - 0.109091)
+	mc = 6 * (((float32(12) / 11) * mA) - 0.109091)
+	sc = 6 * (((float32(2) / 9) * sA) - 0.0222222)
+	lmc = 6 * (((float32(1) / 9) * (lA + mA)) - 0.0222222)
 	grey = (1 / 0.431787) * (2*lA + mA + .05*sA - 0.305)
 	// note: last term should be: 0.725 * (1/5)^-0.2 = grey background assumption (Yb/Yw = 1/5) = 1
 	return
