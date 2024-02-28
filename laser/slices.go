@@ -197,7 +197,7 @@ func StructSliceSort(struSlice any, fldIdx []int, ascending bool) error {
 	fld := struNpTyp.FieldByIndex(fldIdx) // not easy to check.
 	vk := fld.Type.Kind()
 	struVal := OnePtrValue(svnp.Index(0))
-	if struVal.IsValid() {
+	if !struVal.Elem().IsValid() {
 		return errors.New("struVal.Elem().IsValid()")
 	}
 	fldVal := struVal.Elem().FieldByIndex(fldIdx)
