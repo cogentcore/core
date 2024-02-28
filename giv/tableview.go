@@ -481,6 +481,9 @@ func (tv *TableView) UpdateWidgets() {
 			if len(sg.Kids) == 0 {
 				break
 			}
+			if sg.Kids[ridx] == nil {
+				continue
+			}
 			idxlab = sg.Kids[ridx].(*gi.Label)
 			idxlab.SetTextUpdate(strconv.Itoa(si))
 			idxlab.SetState(invis, states.Invisible)
