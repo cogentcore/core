@@ -268,7 +268,13 @@ func (fb *FuncButton) CallFuncShowReturns() {
 	}
 	rargs := make([]reflect.Value, len(fb.Args))
 	for i, arg := range fb.Args {
-		rargs[i] = laser.NonPtrValue(arg.Val())
+		value := laser.NonPtrValue(arg.Val())
+		if value.IsValid() {
+			rargs[i] = value
+		}
+	}
+	if !rargs[0].IsValid() {
+		return
 	}
 	rets := fb.ReflectFunc.Call(rargs)
 	fb.ShowReturnsDialog(rets)
