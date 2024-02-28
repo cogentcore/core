@@ -17,6 +17,7 @@ import (
 	"strconv"
 
 	"cogentcore.org/core/grows/jsons"
+	"cogentcore.org/core/grr"
 	"cogentcore.org/core/gti"
 )
 
@@ -64,9 +65,9 @@ func (sl Slice) MarshalJSON() ([]byte, error) {
 				b = append(b, []byte(",")...)
 			}
 		} else {
-			fmt.Printf("error doing json.Marshall from kid: %v\n", kid.Path())
-			log.Println(err)
-			fmt.Printf("output to point of error: %v\n", string(b))
+			fmt.Println("ki.Slice.MarshalJSON: error doing json.Marshal from kid:", kid)
+			grr.Log(err)
+			fmt.Println("ki.Slice.MarshalJSON: output to point of error:", string(b))
 		}
 	}
 	b = append(b, []byte("]")...)

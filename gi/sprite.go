@@ -17,7 +17,7 @@ import (
 )
 
 // A Sprite is just an image (with optional background) that can be drawn onto
-// the OverTex overlay texture of a window.  Sprites are used for cursors
+// the OverTex overlay texture of a window.  Sprites are used for text cursors/carets
 // and for dynamic editing / interactive GUI elements (e.g., drag-n-drop elments)
 type Sprite struct {
 
