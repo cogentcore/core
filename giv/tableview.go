@@ -726,6 +726,9 @@ func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
 	sg := tv.SliceGrid()
 	// first check if we already have focus
 	for fli := 0; fli < tv.NVisFields; fli++ {
+		if sg.Child(ridx+idxOff+fli) == nil {
+			continue
+		}
 		w := sg.Child(ridx + idxOff + fli).(gi.Widget).AsWidget()
 		if w.StateIs(states.Focused) || w.ContainsFocus() {
 			return w
