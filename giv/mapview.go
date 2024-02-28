@@ -236,11 +236,11 @@ func (mv *MapView) ConfigMapGrid() {
 		w.Style(func(s *styles.Style) {
 			s.SetTextWrap(false)
 		})
-		w.AddContextMenu(func(m *gi.Scene) {
-			mv.ContextMenu(m, kvb.Value)
-		})
 		keyw.Style(func(s *styles.Style) {
 			s.SetTextWrap(false)
+		})
+		w.AddContextMenu(func(m *gi.Scene) {
+			mv.ContextMenu(m, kvb.Value)
 		})
 		keyw.AddContextMenu(func(m *gi.Scene) {
 			mv.ContextMenu(m, kvb.Value)

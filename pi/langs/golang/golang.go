@@ -79,8 +79,8 @@ func (gl *GoLang) ParseFile(fss *pi.FileStates, txt []byte) {
 		pfs.Syms[pkg.Name] = pkg // keep around..
 		// fmt.Printf("main pkg name: %v\n", pkg.Name)
 		path = strings.TrimSuffix(path, string([]rune{filepath.Separator}))
+		pfs.WaitGp.Add(1)
 		go func() {
-			pfs.WaitGp.Add(1)
 			gl.AddPathToSyms(pfs, path)
 			gl.AddImportsToExts(fss, pfs, pkg) // will do ResolveTypes when it finishes
 			// fmt.Println("done import")

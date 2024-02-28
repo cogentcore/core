@@ -40,6 +40,9 @@ type MapViewInline struct {
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string
+
+	// size of map when gui configed
+	ConfigSize int
 }
 
 func (mv *MapViewInline) OnInit() {
@@ -109,18 +112,20 @@ func (mv *MapViewInline) ConfigWidget() {
 
 // ConfigMap configures children for map view
 func (mv *MapViewInline) ConfigMap() bool {
+	mv.DeleteChildren(ki.DestroyKids)
 	if laser.AnyIsNil(mv.Map) {
+		mv.ConfigSize = 0
 		return false
 	}
 	config := ki.Config{}
-	mv.DeleteChildren(ki.DestroyKids)
 	mv.Keys = make([]Value, 0)
 	mv.Values = make([]Value, 0)
 
 	mpv := reflect.ValueOf(mv.Map)
 	mpvnp := laser.NonPtrValue(laser.OnePtrUnderlyingValue(mpv))
-
 	keys := mpvnp.MapKeys() // this is a slice of reflect.Value
+	mv.ConfigSize = len(keys)
+
 	laser.ValueSliceSort(keys, true)
 	for i, key := range keys {
 		if i >= gi.SystemSettings.MapInlineLength {
@@ -189,6 +194,13 @@ func (mv *MapViewInline) ConfigMap() bool {
 		if mv.IsReadOnly() {
 			wb.SetReadOnly(true)
 			kwb.SetReadOnly(true)
+		} else {
+			wb.AddContextMenu(func(m *gi.Scene) {
+				mv.ContextMenu(m, kvb.Value)
+			})
+			kwb.AddContextMenu(func(m *gi.Scene) {
+				mv.ContextMenu(m, kvb.Value)
+			})
 		}
 	}
 	adack, err := mv.Children().ElemFromEndTry(1)
@@ -224,6 +236,9 @@ func (mv *MapViewInline) MapAdd() {
 	if laser.AnyIsNil(mv.Map) {
 		return
 	}
+	updt := mv.UpdateStart()
+	defer mv.UpdateEndLayout(updt)
+
 	laser.MapAdd(mv.Map)
 
 	if mv.TmpSave != nil {
@@ -233,7 +248,54 @@ func (mv *MapViewInline) MapAdd() {
 	mv.Update()
 }
 
+// MapDelete deletes a key-value from the map
+func (mv *MapViewInline) MapDelete(key reflect.Value) {
+	if laser.AnyIsNil(mv.Map) {
+		return
+	}
+	updt := mv.UpdateStart()
+	defer mv.UpdateEndLayout(updt)
+
+	// kvi := laser.NonPtrValue(key).Interface()
+	laser.MapDeleteValue(mv.Map, laser.NonPtrValue(key))
+
+	if mv.TmpSave != nil {
+		mv.TmpSave.SaveTmp()
+	}
+	mv.SetChanged()
+	mv.Update()
+}
+
+func (mv *MapViewInline) ContextMenu(m *gi.Scene, keyv reflect.Value) {
+	if mv.IsReadOnly() {
+		return
+	}
+	gi.NewButton(m).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
+		mv.MapAdd()
+	})
+	gi.NewButton(m).SetText("Delete").SetIcon(icons.Delete).OnClick(func(e events.Event) {
+		mv.MapDelete(keyv)
+	})
+}
+
 func (mv *MapViewInline) UpdateValues() {
 	// maps have to re-read their values because they can't get pointers!
 	mv.Update()
+}
+
+func (mv *MapViewInline) MapSizeChanged() bool {
+	if laser.AnyIsNil(mv.Map) {
+		return mv.ConfigSize != 0
+	}
+	mpv := reflect.ValueOf(mv.Map)
+	mpvnp := laser.NonPtrValue(laser.OnePtrUnderlyingValue(mpv))
+	keys := mpvnp.MapKeys()
+	return mv.ConfigSize != len(keys)
+}
+
+func (mv *MapViewInline) SizeUp() {
+	if mv.MapSizeChanged() {
+		mv.Update()
+	}
+	mv.Layout.SizeUp()
 }

@@ -47,6 +47,9 @@ type SliceViewInline struct {
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string
+
+	// size of map when gui configed
+	ConfigSize int
 }
 
 func (sv *SliceViewInline) OnInit() {
@@ -131,7 +134,9 @@ func (sv *SliceViewInline) ConfigWidget() {
 
 // ConfigSlice configures children for slice view
 func (sv *SliceViewInline) ConfigSlice() bool {
+	sv.DeleteChildren(ki.DestroyKids)
 	if laser.AnyIsNil(sv.Slice) {
+		sv.ConfigSize = 0
 		return false
 	}
 	config := ki.Config{}
@@ -139,6 +144,7 @@ func (sv *SliceViewInline) ConfigSlice() bool {
 	sv.Values = make([]Value, 0)
 
 	sl := laser.NonPtrValue(laser.OnePtrUnderlyingValue(reflect.ValueOf(sv.Slice)))
+	sv.ConfigSize = sl.Len()
 
 	sz := min(sl.Len(), gi.SystemSettings.SliceInlineLength)
 	for i := 0; i < sz; i++ {
@@ -164,6 +170,7 @@ func (sv *SliceViewInline) ConfigSlice() bool {
 		updt = sv.UpdateStart()
 	}
 	for i, vv := range sv.Values {
+		i := i
 		vvb := vv.AsValueBase()
 		vvb.OnChange(func(e events.Event) { sv.SetChanged() })
 		w := sv.Child(i).(gi.Widget)
@@ -171,15 +178,20 @@ func (sv *SliceViewInline) ConfigSlice() bool {
 			vv.SetTags(sv.SliceValue.AllTags())
 		}
 		vv.ConfigWidget(w)
-		vvb.AsWidgetBase().OnInput(func(e events.Event) {
+		wb := w.AsWidget()
+		wb.OnInput(func(e events.Event) {
 			if tag, _ := vv.Tag("immediate"); tag == "+" {
-				w.AsWidget().SendChange(e)
+				wb.SendChange(e)
 				sv.SendChange(e)
 			}
 			sv.Send(events.Input, e)
 		})
 		if sv.IsReadOnly() {
-			w.AsWidget().SetReadOnly(true)
+			wb.SetReadOnly(true)
+		} else {
+			wb.AddContextMenu(func(m *gi.Scene) {
+				sv.ContextMenu(m, i)
+			})
 		}
 	}
 	if !sv.IsArray && !sv.IsFixedLen {
@@ -229,10 +241,54 @@ func (sv *SliceViewInline) SliceNewAt(idx int) {
 	sv.Update()
 }
 
+// SliceDeleteAt deletes element at given index from slice
+func (sv *SliceViewInline) SliceDeleteAt(idx int) {
+	if sv.IsArray || sv.IsFixedLen {
+		return
+	}
+	updt := sv.UpdateStart()
+	defer sv.UpdateEndLayout(updt)
+
+	laser.SliceDeleteAt(sv.Slice, idx)
+
+	if sv.TmpSave != nil {
+		sv.TmpSave.SaveTmp()
+	}
+	sv.SetChanged()
+	sv.Update()
+}
+
+func (sv *SliceViewInline) ContextMenu(m *gi.Scene, idx int) {
+	if sv.IsReadOnly() || sv.IsArray || sv.IsFixedLen {
+		return
+	}
+	gi.NewButton(m).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
+		sv.SliceNewAt(idx)
+	})
+	gi.NewButton(m).SetText("Delete").SetIcon(icons.Delete).OnClick(func(e events.Event) {
+		sv.SliceDeleteAt(idx)
+	})
+}
+
 func (sv *SliceViewInline) UpdateValues() {
 	updt := sv.UpdateStart()
 	for _, vv := range sv.Values {
 		vv.UpdateWidget()
 	}
 	sv.UpdateEndRender(updt)
+}
+
+func (sv *SliceViewInline) SliceSizeChanged() bool {
+	if laser.AnyIsNil(sv.Slice) {
+		return sv.ConfigSize != 0
+	}
+	sl := laser.NonPtrValue(laser.OnePtrUnderlyingValue(reflect.ValueOf(sv.Slice)))
+	return sv.ConfigSize != sl.Len()
+}
+
+func (sv *SliceViewInline) SizeUp() {
+	if sv.SliceSizeChanged() {
+		sv.Update()
+	}
+	sv.Layout.SizeUp()
 }
