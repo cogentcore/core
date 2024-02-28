@@ -48,7 +48,8 @@ func (ed *Editor) Render() {
 		if ed.Is(EditorNeedsLayout) {
 			ed.RenderLayout()
 			ed.SetFlag(false, EditorNeedsLayout)
-		} else if ed.Is(EditorTargetSet) {
+		}
+		if ed.Is(EditorTargetSet) { // todo: was after position, renderall lines
 			ed.ScrollCursorToTarget()
 		}
 		ed.PositionScrolls()
