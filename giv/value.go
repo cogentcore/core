@@ -774,7 +774,7 @@ func (vv *ValueBase) OwnerLabel() string {
 // can be used for not proceeding in case of non-value-based types.
 func (vv *ValueBase) GetTitle() (label, newPath string, isZero bool) {
 	var npt reflect.Type
-	if vv.Value.IsZero() || laser.NonPtrValue(vv.Value).IsZero() {
+	if vv.Value.IsValid() || laser.NonPtrValue(vv.Value).IsValid() { //clicked demo treeView button context menu will panic here
 		npt = laser.NonPtrType(vv.Value.Type())
 		isZero = true
 	} else {

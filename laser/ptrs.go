@@ -104,8 +104,10 @@ func OnePtrUnderlyingValue(v reflect.Value) reflect.Value {
 	if !npv.IsValid() {
 		return OnePtrValue(npv)
 	}
-	for npv.Type().Kind() == reflect.Interface || npv.Type().Kind() == reflect.Pointer {
-		npv = npv.Elem()
+	if !npv.IsZero() {
+		for npv.Type().Kind() == reflect.Interface || npv.Type().Kind() == reflect.Pointer {
+			npv = npv.Elem()
+		}
 	}
 	return OnePtrValue(npv)
 }
