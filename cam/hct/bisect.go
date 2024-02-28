@@ -71,7 +71,7 @@ func GetAxis(v mat32.Vec3, axis int) float32 {
 	case 2:
 		return v.Z
 	default:
-		return -1.0
+		return -1
 	}
 }
 

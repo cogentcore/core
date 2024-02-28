@@ -8,15 +8,18 @@ import (
 	"testing"
 
 	"cogentcore.org/core/mat32"
+	"github.com/stretchr/testify/assert"
 )
 
 func expect(t *testing.T, ref, val float32) {
+	t.Helper()
 	if mat32.Abs(ref-val) > 0.001 {
 		t.Errorf("expected value: %g != %g\n", ref, val)
 	}
 }
 
 func expectTol(t *testing.T, ref, val, tol float32, str string) {
+	t.Helper()
 	if mat32.Abs(ref-val) > tol {
 		t.Errorf("expected value: %g != %g with tolerance: %g for %s\n", ref, val, tol, str)
 	}
@@ -62,6 +65,10 @@ func TestHCTAll(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestGetAxis(t *testing.T) {
+	assert.Equal(t, float32(-1), GetAxis(mat32.Vec3{}, 5))
 }
 
 func BenchmarkHCT(b *testing.B) {
