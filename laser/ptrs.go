@@ -83,9 +83,11 @@ func OnePtrValue(v reflect.Value) reflect.Value {
 		if v.CanAddr() {
 			return v.Addr()
 		}
-		pv := reflect.New(v.Type())
-		pv.Elem().Set(v)
-		return pv
+		if v.IsValid() {
+			pv := reflect.New(v.Type())
+			pv.Elem().Set(v)
+			return pv
+		}
 	} else {
 		for v.Elem().Kind() == reflect.Ptr {
 			v = v.Elem()
@@ -99,7 +101,7 @@ func OnePtrValue(v reflect.Value) reflect.Value {
 // actual underlying type behind the interface.
 func OnePtrUnderlyingValue(v reflect.Value) reflect.Value {
 	npv := NonPtrValue(v)
-	if npv.IsZero() {
+	if !npv.IsValid() {
 		return OnePtrValue(npv)
 	}
 	for npv.Type().Kind() == reflect.Interface || npv.Type().Kind() == reflect.Pointer {

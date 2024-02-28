@@ -354,13 +354,17 @@ func (tv *TableView) ConfigRows() {
 		ridx := i * nWidgPerRow
 		var val reflect.Value
 		if si < tv.SliceSize {
-			val = laser.OnePtrUnderlyingValue(tv.SliceNPVal.Index(si)) // deal with pointer lists
+			if tv.SliceNPVal.Index(si).IsValid() {
+				val = laser.OnePtrUnderlyingValue(tv.SliceNPVal.Index(si)) // deal with pointer lists
+			}
 		} else {
 			val = tv.ElVal
 		}
-		if val.IsZero() {
-			val = tv.ElVal
+		if !val.IsValid() {
+			continue
 		}
+		val = tv.ElVal
+
 		stru := val.Interface()
 
 		idxlab := &gi.Label{}
