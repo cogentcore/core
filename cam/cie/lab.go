@@ -10,20 +10,20 @@ import "cogentcore.org/core/mat32"
 // prior to performing the LAB conversion
 func LABCompress(t float32) float32 {
 	e := float32(216.0 / 24389.0)
-	kappa := float32(24389.0 / 27.0)
 	if t > e {
 		return mat32.Pow(t, 1.0/3.0)
 	}
+	kappa := float32(24389.0 / 27.0)
 	return (kappa*t + 16) / 116
 }
 
 func LABUncompress(ft float32) float32 {
 	e := float32(216.0 / 24389.0)
-	kappa := float32(24389.0 / 27.0)
 	ft3 := ft * ft * ft
 	if ft3 > e {
 		return ft3
 	}
+	kappa := float32(24389.0 / 27.0)
 	return (116*ft - 16) / kappa
 }
 

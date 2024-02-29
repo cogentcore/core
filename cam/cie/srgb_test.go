@@ -15,6 +15,9 @@ func TestSRGB(t *testing.T) {
 	tolassert.Equal(t, float32(0.00015479876), SRGBToLinearComp(0.002))
 	tolassert.Equal(t, float32(0.23302202), SRGBToLinearComp(0.52))
 
+	tolassert.Equal(t, float32(0.012920001), SRGBFromLinearComp(0.001))
+	tolassert.Equal(t, float32(0.84338915), SRGBFromLinearComp(0.68))
+
 	rl, gl, bl := SRGBToLinear(0.3, 0.2, 0.6)
 	tolassert.Equal(t, float32(0.07323897), rl)
 	tolassert.Equal(t, float32(0.033104762), gl)

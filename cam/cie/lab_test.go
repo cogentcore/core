@@ -12,6 +12,7 @@ import (
 
 func TestLAB(t *testing.T) {
 	tolassert.Equal(t, float32(0.887904), LABCompress(0.7))
+	tolassert.Equal(t, float32(0.1379544), LABCompress(0.000003))
 	tolassert.Equal(t, float32(0.21600002), LABUncompress(0.6))
 
 	l, a, b := XYZToLAB(0.1, 0.3, 0.5)
