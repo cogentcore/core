@@ -40,8 +40,11 @@ func (cm *Map) String() string {
 // which can be used to indicate missing values.
 func (cm *Map) Map(val float32) color.RGBA {
 	nc := len(cm.Colors)
-	if nc < 2 {
+	if nc == 0 {
 		return color.RGBA{}
+	}
+	if nc == 1 {
+		return cm.Colors[0]
 	}
 	if mat32.IsNaN(val) {
 		return cm.NoColor

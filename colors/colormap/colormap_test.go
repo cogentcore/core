@@ -13,8 +13,24 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/grows/images"
+	"cogentcore.org/core/mat32"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestColorMap(t *testing.T) {
+	cm := AvailMaps["ColdHot"]
+	assert.Equal(t, cm.Name, cm.String())
+
+	assert.Equal(t, color.RGBA{54, 64, 212, 255}, cm.Map(0.3))
+	assert.Equal(t, color.RGBA{200, 200, 200, 255}, cm.Map(mat32.NaN()))
+	assert.Equal(t, color.RGBA{0, 255, 255, 255}, cm.Map(-0.5))
+	assert.Equal(t, color.RGBA{255, 255, 0, 255}, cm.Map(1.1))
+
+	cm = &Map{}
+	assert.Equal(t, color.RGBA{}, cm.Map(0.6))
+	cm.Colors = append(cm.Colors, color.RGBA{50, 150, 65, 245})
+	assert.Equal(t, color.RGBA{50, 150, 65, 245}, cm.Map(0.45))
+}
 
 func TestColorMaps(t *testing.T) {
 	nmaps := len(StdMaps)
