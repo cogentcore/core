@@ -28,4 +28,7 @@ func TestTransform(t *testing.T) {
 	assert.True(t, IsLight(color.RGBA{178, 129, 203, 255}))
 	assert.True(t, IsDark(color.RGBA{17, 38, 91, 255}))
 	assert.False(t, IsDark(color.RGBA{178, 129, 203, 255}))
+
+	assert.Equal(t, color.RGBA{255, 255, 255, 255}, ContrastColor(color.RGBA{87, 32, 65, 255}))
+	assert.Equal(t, color.RGBA{0, 0, 0, 255}, ContrastColor(color.RGBA{232, 146, 133, 255}))
 }
