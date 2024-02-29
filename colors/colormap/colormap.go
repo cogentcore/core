@@ -69,7 +69,7 @@ func (cm *Map) Map(val float32) color.RGBA {
 // based on the Indexed flag.
 func (cm *Map) MapIndex(val int) color.RGBA {
 	nc := len(cm.Colors)
-	if val < 0 || val > nc {
+	if val < 0 || val >= nc {
 		return cm.NoColor
 	}
 	return cm.Colors[val]

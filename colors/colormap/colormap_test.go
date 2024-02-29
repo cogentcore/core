@@ -13,6 +13,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/grows/images"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestColorMaps(t *testing.T) {
@@ -57,4 +58,18 @@ func TestColorMaps(t *testing.T) {
 	}
 
 	images.Assert(t, img, "colormaps")
+}
+
+func TestColorMapIndexed(t *testing.T) {
+	cm := AvailMaps["ColdHot"]
+	cm.Indexed = true
+	n := len(cm.Colors)
+	for i := 0; i < n+1; i++ {
+		c := cm.MapIndex(i)
+		if i == n {
+			assert.Equal(t, cm.NoColor, c)
+		} else {
+			assert.Equal(t, cm.Colors[i], c)
+		}
+	}
 }
