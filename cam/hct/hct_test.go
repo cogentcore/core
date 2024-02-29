@@ -33,6 +33,10 @@ func TestHCT(t *testing.T) {
 	tolassert.Equal(t, want.Hue, have.Hue)
 	tolassert.Equal(t, want.Chroma, have.Chroma)
 	tolassert.Equal(t, want.Tone, have.Tone)
+	tolassert.Equal(t, want.R, have.R)
+	tolassert.Equal(t, want.G, have.G)
+	tolassert.Equal(t, want.B, have.B)
+	tolassert.Equal(t, want.A, have.A)
 
 	ru, gu, bu, au := want.RGBA()
 	assert.Equal(t, uint32(0x7e7e), ru)

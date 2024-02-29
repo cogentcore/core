@@ -88,27 +88,11 @@ func (h *HSL) SetUint32(r, g, b, a uint32) {
 // SetColor sets from a standard color.Color
 func (h *HSL) SetColor(ci color.Color) {
 	if ci == nil {
-		h.SetToNil()
+		*h = HSL{}
 		return
 	}
 	r, g, b, a := ci.RGBA()
 	h.SetUint32(r, g, b, a)
-}
-
-func (h *HSL) SetToNil() {
-	h.H = 0
-	h.S = 0
-	h.L = 0
-	h.A = 0
-}
-
-// Round rounds the HSL values (H to the nearest 1
-// and S, L, and A to the nearest 0.01)
-func (h *HSL) Round() {
-	h.H = mat32.Round(h.H)
-	h.S = mat32.Round(h.S*100) / 100
-	h.L = mat32.Round(h.L*100) / 100
-	h.A = mat32.Round(h.A*100) / 100
 }
 
 // HSLtoRGBf32 converts HSL values to RGB float32 0..1 values (non alpha-premultiplied) -- based on https://stackoverflow.com/questions/2353211/hsl-to-rgb-color-conversion, https://www.w3.org/TR/css-color-3/ and github.com/lucasb-eyer/go-colorful
