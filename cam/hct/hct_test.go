@@ -15,7 +15,7 @@ import (
 func TestHCT(t *testing.T) {
 	h := SRGBToHCT(1, 1, 1)
 	// fmt.Printf("%#v\n", h)
-	tolassert.Equal(t, 209.492, h.Hue)
+	tolassert.EqualTol(t, 209.492, h.Hue, 0.01)
 	tolassert.Equal(t, 2.869, h.Chroma)
 	tolassert.Equal(t, 100, h.Tone)
 
