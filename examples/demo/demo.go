@@ -431,7 +431,7 @@ func hello(firstName string, lastName string, age int, likesGo bool) (greeting s
 	weeksOld = age * 52
 	greeting = "Hello, " + firstName + " " + lastName + "! "
 	if likesGo {
-		greeting += "I'm glad to here that you like the best programming language!"
+		greeting += "I'm glad to hear that you like the best programming language!"
 	} else {
 		greeting += "You should reconsider what programming languages you like."
 	}

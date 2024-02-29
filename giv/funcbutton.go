@@ -122,6 +122,11 @@ func NewFuncButton(par ki.Ki, fun any) *FuncButton {
 func (fb *FuncButton) OnInit() {
 	fb.Button.OnInit()
 	fb.WarnUnadded = true
+	fb.OnClick(func(e events.Event) {
+		if !fb.IsReadOnly() {
+			fb.CallFunc()
+		}
+	})
 }
 
 // SetText sets the [FuncButton.Text] and updates the tooltip to correspond to the new name.
@@ -240,9 +245,6 @@ func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButto
 	if ic.IsValid() {
 		fb.SetIcon(ic)
 	}
-	fb.OnClick(func(e events.Event) {
-		fb.CallFunc()
-	})
 	return fb
 }
 
@@ -268,7 +270,7 @@ func (fb *FuncButton) CallFuncShowReturns() {
 	}
 	rargs := make([]reflect.Value, len(fb.Args))
 	for i, arg := range fb.Args {
-		rargs[i] = laser.NonPtrValue(arg.Val())
+		rargs[i] = arg.Val().Elem()
 	}
 	rets := fb.ReflectFunc.Call(rargs)
 	fb.ShowReturnsDialog(rets)
