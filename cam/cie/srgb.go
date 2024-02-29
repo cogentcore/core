@@ -86,7 +86,7 @@ func SRGBFloatToUint32(rf, gf, bf, af float32) (r, g, b, a uint32) {
 
 // SRGBUint8ToFloat converts the given alpha-premultiplied sRGB uint8 values
 // to non-alpha-premuntiplied sRGB float32 values.
-func SRGBUint8ToFloat(r, g, b, a uint32) (fr, fg, fb, fa float32) {
+func SRGBUint8ToFloat(r, g, b, a uint8) (fr, fg, fb, fa float32) {
 	fa = float32(a) / 255
 	fr = (float32(r) / 255) / fa
 	fg = (float32(g) / 255) / fa
