@@ -13,21 +13,21 @@ import (
 
 // Equal asserts that the given two numbers are about equal to each other,
 // using a default tolerance of 0.001.
-func Equal[T num.Float](t assert.TestingT, expected T, actual T) bool {
+func Equal[T num.Float](t assert.TestingT, expected T, actual T, msgAndArgs ...any) bool {
 	if h, ok := t.(interface{ Helper() }); ok {
 		h.Helper()
 	}
-	return EqualTol(t, expected, actual, 0.001)
+	return EqualTol(t, expected, actual, 0.001, msgAndArgs...)
 }
 
 // EqualTol asserts that the given two numbers are about equal to each other,
 // using the given tolerance value.
-func EqualTol[T num.Float](t assert.TestingT, expected T, actual, tolerance T) bool {
+func EqualTol[T num.Float](t assert.TestingT, expected T, actual, tolerance T, msgAndArgs ...any) bool {
 	if h, ok := t.(interface{ Helper() }); ok {
 		h.Helper()
 	}
 	if num.Abs(actual-expected) > tolerance {
-		return assert.Equal(t, expected, actual)
+		return assert.Equal(t, expected, actual, msgAndArgs...)
 	}
 	return true
 }

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/cam/cie"
+	"cogentcore.org/core/glop/tolassert"
 	"cogentcore.org/core/mat32"
 	"github.com/stretchr/testify/assert"
 )
@@ -122,19 +123,19 @@ func TestUCS(t *testing.T) {
 
 func TestLMS(t *testing.T) {
 	x, y, z := LMSToXYZ(0.25, 0.68, 0.47)
-	assert.Equal(t, float32(-0.15201962), x)
-	assert.Equal(t, float32(0.5152482), y)
-	assert.Equal(t, float32(0.4663193), z)
+	tolassert.Equal(t, float32(-0.15201962), x)
+	tolassert.Equal(t, float32(0.5152482), y)
+	tolassert.Equal(t, float32(0.4663193), z)
 
-	assert.Equal(t, float32(28.158047), InverseChromaticAdapt(52.1))
+	tolassert.Equal(t, float32(28.158047), InverseChromaticAdapt(52.1))
 }
 
 func TestSanitize(t *testing.T) {
-	assert.Equal(t, float32(80), SanitizeDegrees(800))
-	assert.Equal(t, float32(3.141593), SanitizeRadians(5*mat32.Pi))
+	tolassert.Equal(t, float32(80), SanitizeDegrees(800))
+	tolassert.Equal(t, float32(3.141593), SanitizeRadians(5*mat32.Pi))
 }
 
 func TestInCyclicOrder(t *testing.T) {
-	assert.Equal(t, true, InCyclicOrder(0, 1, 2))
-	assert.Equal(t, false, InCyclicOrder(0, 2, 1))
+	assert.True(t, InCyclicOrder(0, 1, 2))
+	assert.False(t, InCyclicOrder(0, 2, 1))
 }
