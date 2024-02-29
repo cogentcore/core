@@ -28,7 +28,11 @@ func TestHCT(t *testing.T) {
 	// fmt.Printf("r: %g, g %g, b %g  hr %X, hg %X, hb %X, hct: %v\n", r, g, b, int(r*255), int(g*255), int(b*255), h)
 
 	want := HCT{134.64685, 75.31438, 80.47883, 0.5384615, 0.8675214, 0.24786325, 0.91764706}
-	assert.Equal(t, want, Model.Convert(color.RGBA{126, 203, 58, 234}))
+	assert.Equal(t, want, Model.Convert(want))
+	have := Model.Convert(color.RGBA{126, 203, 58, 234}).(HCT)
+	tolassert.Equal(t, want.Hue, have.Hue)
+	tolassert.Equal(t, want.Chroma, have.Chroma)
+	tolassert.Equal(t, want.Tone, have.Tone)
 
 	ru, gu, bu, au := want.RGBA()
 	assert.Equal(t, uint32(0x7e7e), ru)

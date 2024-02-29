@@ -9,12 +9,18 @@ import (
 	"image/color"
 	"math/rand"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-func TestBlend(t *testing.T) {
-	// yellow and blue
+func TestTransform(t *testing.T) {
+	assert.Equal(t, color.RGBA{131, 140, 255, 255}, Lighten(color.RGBA{0, 0, 255, 255}, 30))
+	assert.Equal(t, color.RGBA{0, 0, 52, 255}, Darken(color.RGBA{0, 0, 255, 255}, 30))
+	assert.Equal(t, color.RGBA{131, 140, 255, 255}, Highlight(color.RGBA{0, 0, 255, 255}, 30))
+	assert.Equal(t, color.RGBA{0, 54, 92, 255}, Highlight(color.RGBA{18, 127, 205, 255}, 30))
+
 	c := Blend(50, color.RGBA{255, 255, 255, 255}, color.RGBA{0, 0, 0, 255})
-	fmt.Println("blend", c)
+	assert.Equal(t, color.RGBA{119, 119, 119, 255}, c)
 }
 
 func TestMinHueDistance(t *testing.T) {
