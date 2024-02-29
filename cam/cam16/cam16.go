@@ -121,7 +121,7 @@ func FromJCHView(j, c, h float32, vw *View) *CAM {
 // under standard viewing conditions.  The RGB value range is 0-1,
 // and RGB values have gamma correction.
 func FromSRGB(r, g, b float32) *CAM {
-	return FromXYZ(cie.SRGB100ToXYZ(r, g, b))
+	return FromXYZ(cie.SRGBToXYZ100(r, g, b))
 }
 
 // FromXYZ returns CAM values from given XYZ color coordinate,

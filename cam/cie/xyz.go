@@ -27,9 +27,9 @@ func SRGBToXYZ(r, g, b float32) (x, y, z float32) {
 	return
 }
 
-// SRGB100ToXYZ converts sRGB into XYZ CIE standard color space
+// SRGBToXYZ100 converts sRGB into XYZ CIE standard color space
 // with 100-base sRGB values -- used for CAM16 but not CAM02
-func SRGB100ToXYZ(r, g, b float32) (x, y, z float32) {
+func SRGBToXYZ100(r, g, b float32) (x, y, z float32) {
 	rl, gl, bl := SRGB100ToLinear(r, g, b)
 	x, y, z = SRGBLinToXYZ(rl, gl, bl)
 	return
@@ -52,8 +52,8 @@ func XYZ100ToSRGB(x, y, z float32) (r, g, b float32) {
 
 // XYZNormD65 normalizes XZY values relative to the D65 outdoor white light values
 func XYZNormD65(x, y, z float32) (xr, yr, zr float32) {
-	xr = x * (1 / 0.95047)
-	zr = z * (1 / 1.08883)
+	xr = x / 0.95047
+	zr = z / 1.08883
 	yr = y
 	return
 }
