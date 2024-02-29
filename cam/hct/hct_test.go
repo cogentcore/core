@@ -39,6 +39,8 @@ func TestHCT(t *testing.T) {
 	assert.Equal(t, uint32(0xcbcb), gu)
 	assert.Equal(t, uint32(0x3a3a), bu)
 	assert.Equal(t, uint32(0xeaea), au)
+
+	assert.Equal(t, "hct(112, 64.2, 51.3)", HCT{Hue: 112, Chroma: 64.2, Tone: 51.3}.String())
 }
 
 func TestHCTAll(t *testing.T) {
