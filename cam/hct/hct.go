@@ -101,20 +101,6 @@ func (h *HCT) SetUint32(r, g, b, a uint32) {
 	h.A = fa
 }
 
-// SetColor sets from a standard color.Color
-func (h *HCT) SetColor(ci color.Color) {
-	if ci == nil {
-		h.SetToNil()
-		return
-	}
-	h.SetUint32(ci.RGBA())
-}
-
-func (h *HCT) SetToNil() {
-	*h = SRGBToHCT(0, 0, 0)
-	h.A = 0
-}
-
 // SetHue sets the hue of this color. Chroma may decrease because chroma has a
 // different maximum for any given hue and tone.
 // 0 <= hue < 360; invalid values are corrected.
