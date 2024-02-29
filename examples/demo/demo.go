@@ -422,6 +422,7 @@ func values(ts *gi.Tabs) {
 	giv.NewValue(tab, 5*time.Minute)
 	giv.NewValue(tab, 500*time.Millisecond).SetTags(map[string]string{"min": "10ms", "max": "10s", "step": "10ms"})
 	giv.NewValue(tab, gi.Filename("demo.go"))
+	giv.NewValue(tab, gi.AppearanceSettings.FontFamily)
 	giv.NewValue(tab, giv.ColorMapName("ColdHot"))
 	giv.NewFuncButton(tab, hello).SetShowReturn(true)
 }

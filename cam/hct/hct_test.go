@@ -65,25 +65,26 @@ func TestHCTAll(t *testing.T) {
 }
 
 func TestHCTSet(t *testing.T) {
-	have := New(100, 80, 60)
-	have.SetHue(200)
-	want := New(200, 80, 60)
-
-	assertEqual := func() {
+	assertEqual := func(want, have HCT) {
 		t.Helper()
 		tolassert.EqualTol(t, want.Hue, have.Hue, 1)
 		tolassert.EqualTol(t, want.Chroma, have.Chroma, 1)
 		tolassert.EqualTol(t, want.Tone, have.Tone, 1)
 	}
-	assertEqual()
+	have := New(100, 80, 60)
+
+	have.SetHue(200)
+	assertEqual(New(200, 80, 60), have)
 
 	have.SetChroma(45)
-	want = New(200, 45, 60)
-	assertEqual()
+	assertEqual(New(200, 45, 60), have)
 
 	have.SetTone(83)
-	want = New(200, 45, 83)
-	assertEqual()
+	assertEqual(New(200, 45, 83), have)
+
+	assertEqual(New(167, 45, 83), have.WithHue(167))
+	assertEqual(New(200, 61, 83), have.WithChroma(61))
+	assertEqual(New(200, 45, 57), have.WithTone(57))
 }
 
 func TestGetAxis(t *testing.T) {
