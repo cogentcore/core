@@ -5,6 +5,7 @@
 package hct
 
 import (
+	"image/color"
 	"testing"
 
 	"cogentcore.org/core/glop/tolassert"
@@ -25,6 +26,15 @@ func TestHCT(t *testing.T) {
 	tolassert.Equal(t, 52.82, h.Chroma) // can't do 60
 	tolassert.Equal(t, 50, h.Tone)
 	// fmt.Printf("r: %g, g %g, b %g  hr %X, hg %X, hb %X, hct: %v\n", r, g, b, int(r*255), int(g*255), int(b*255), h)
+
+	want := HCT{134.64685, 75.31438, 80.47883, 0.5384615, 0.8675214, 0.24786325, 0.91764706}
+	assert.Equal(t, want, Model.Convert(color.RGBA{126, 203, 58, 234}))
+
+	ru, gu, bu, au := want.RGBA()
+	assert.Equal(t, uint32(0x7e7e), ru)
+	assert.Equal(t, uint32(0xcbcb), gu)
+	assert.Equal(t, uint32(0x3a3a), bu)
+	assert.Equal(t, uint32(0xeaea), au)
 }
 
 func TestHCTAll(t *testing.T) {
