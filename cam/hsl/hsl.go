@@ -60,7 +60,7 @@ func model(c color.Color) color.Color {
 // Implements the [color.Color] interface
 // Performs the premultiplication of the RGB components by alpha at this point.
 func (h HSL) RGBA() (r, g, b, a uint32) {
-	fr, fg, fb := HSLtoRGBf32(h.H, h.S, h.L)
+	fr, fg, fb := HSLtoRGBF32(h.H, h.S, h.L)
 	r = uint32(fr*h.A*65535.0 + 0.5)
 	g = uint32(fg*h.A*65535.0 + 0.5)
 	b = uint32(fb*h.A*65535.0 + 0.5)
@@ -70,7 +70,7 @@ func (h HSL) RGBA() (r, g, b, a uint32) {
 
 // AsRGBA returns a standard color.RGBA type
 func (h HSL) AsRGBA() color.RGBA {
-	fr, fg, fb := HSLtoRGBf32(h.H, h.S, h.L)
+	fr, fg, fb := HSLtoRGBF32(h.H, h.S, h.L)
 	return color.RGBA{uint8(fr*h.A*255.0 + 0.5), uint8(fg*h.A*255.0 + 0.5), uint8(fb*h.A*255.0 + 0.5), uint8(h.A*255.0 + 0.5)}
 }
 
@@ -81,7 +81,7 @@ func (h *HSL) SetUint32(r, g, b, a uint32) {
 	fg := (float32(g) / 65535.0) / fa
 	fb := (float32(b) / 65535.0) / fa
 
-	h.H, h.S, h.L = RGBtoHSLf32(fr, fg, fb)
+	h.H, h.S, h.L = RGBtoHSLF32(fr, fg, fb)
 	h.A = fa
 }
 
@@ -95,8 +95,8 @@ func (h *HSL) SetColor(ci color.Color) {
 	h.SetUint32(r, g, b, a)
 }
 
-// HSLtoRGBf32 converts HSL values to RGB float32 0..1 values (non alpha-premultiplied) -- based on https://stackoverflow.com/questions/2353211/hsl-to-rgb-color-conversion, https://www.w3.org/TR/css-color-3/ and github.com/lucasb-eyer/go-colorful
-func HSLtoRGBf32(h, s, l float32) (r, g, b float32) {
+// HSLtoRGBF32 converts HSL values to RGB float32 0..1 values (non alpha-premultiplied) -- based on https://stackoverflow.com/questions/2353211/hsl-to-rgb-color-conversion, https://www.w3.org/TR/css-color-3/ and github.com/lucasb-eyer/go-colorful
+func HSLtoRGBF32(h, s, l float32) (r, g, b float32) {
 	if s == 0 {
 		r = l
 		g = l
@@ -112,13 +112,13 @@ func HSLtoRGBf32(h, s, l float32) (r, g, b float32) {
 		q = l + s - l*s
 	}
 	p := 2.0*l - q
-	r = HueToRGBf32(p, q, h+1.0/3.0)
-	g = HueToRGBf32(p, q, h)
-	b = HueToRGBf32(p, q, h-1.0/3.0)
+	r = HueToRGBF32(p, q, h+1.0/3.0)
+	g = HueToRGBF32(p, q, h)
+	b = HueToRGBF32(p, q, h-1.0/3.0)
 	return
 }
 
-func HueToRGBf32(p, q, t float32) float32 {
+func HueToRGBF32(p, q, t float32) float32 {
 	if t < 0 {
 		t++
 	}
@@ -137,8 +137,8 @@ func HueToRGBf32(p, q, t float32) float32 {
 	return p
 }
 
-// RGBtoHSLf32 converts RGB 0..1 values (non alpha-premultiplied) to HSL -- based on https://stackoverflow.com/questions/2353211/hsl-to-rgb-color-conversion, https://www.w3.org/TR/css-color-3/ and github.com/lucasb-eyer/go-colorful
-func RGBtoHSLf32(r, g, b float32) (h, s, l float32) {
+// RGBtoHSLF32 converts RGB 0..1 values (non alpha-premultiplied) to HSL -- based on https://stackoverflow.com/questions/2353211/hsl-to-rgb-color-conversion, https://www.w3.org/TR/css-color-3/ and github.com/lucasb-eyer/go-colorful
+func RGBtoHSLF32(r, g, b float32) (h, s, l float32) {
 	min := mat32.Min(mat32.Min(r, g), b)
 	max := mat32.Max(mat32.Max(r, g), b)
 
@@ -175,6 +175,6 @@ func RGBtoHSLf32(r, g, b float32) (h, s, l float32) {
 	return
 }
 
-func (h *HSL) String() string {
+func (h HSL) String() string {
 	return fmt.Sprintf("hsl(%g, %g, %g)", h.H, h.S, h.L)
 }

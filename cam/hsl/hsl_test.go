@@ -37,4 +37,13 @@ func TestHSL(t *testing.T) {
 	tolassert.Equal(t, want.S, have.S)
 	tolassert.Equal(t, want.L, have.L)
 	tolassert.Equal(t, want.A, have.A)
+
+	have = HSL{}
+	have.SetColor(want)
+	tolassert.Equal(t, want.H, have.H)
+	tolassert.Equal(t, want.S, have.S)
+	tolassert.Equal(t, want.L, have.L)
+	tolassert.Equal(t, want.A, have.A)
+
+	assert.Equal(t, "hsl(86, 0.54, 0.97)", New(86, 0.54, 0.97).String())
 }
