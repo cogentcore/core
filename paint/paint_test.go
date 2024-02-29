@@ -13,10 +13,10 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/grows/images"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMain(m *testing.M) {
@@ -41,7 +41,7 @@ func RunTest(t *testing.T, nm string, width int, height int, f func(pc *Context)
 func TestRender(t *testing.T) {
 	RunTest(t, "render", 300, 300, func(pc *Context) {
 		testimg, _, err := images.Open("test.png")
-		grr.Test(t, err)
+		assert.NoError(t, err)
 		imgs := []image.Image{
 			colors.C(colors.Blue),
 			gradient.NewLinear().AddStop(colors.Orange, 0).AddStop(colors.Red, 1).SetTransform(mat32.Rotate2D(90)),

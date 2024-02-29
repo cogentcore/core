@@ -9,9 +9,9 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/grows/images"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/styles"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBackgroundColor(t *testing.T) {
@@ -29,7 +29,7 @@ func TestBackgroundColor(t *testing.T) {
 
 func TestBackgroundImage(t *testing.T) {
 	img, _, err := images.Open("test.png")
-	grr.Test(t, err)
+	assert.NoError(t, err)
 	RunTest(t, "background-image", 1260, 200, func(pc *Context) {
 		pabg := colors.C(colors.White)
 		st := styles.NewStyle()
@@ -55,7 +55,7 @@ func TestBackgroundImage(t *testing.T) {
 func TestObjectFit(t *testing.T) {
 	img, _, err := images.Open("test.png")
 	// obj := mat32.V2FromPoint(img.Bounds().Size())
-	grr.Test(t, err)
+	assert.NoError(t, err)
 	RunTest(t, "object-fit", 1260, 300, func(pc *Context) {
 		st := styles.NewStyle()
 		st.ToDots()

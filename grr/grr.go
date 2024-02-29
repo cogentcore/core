@@ -102,39 +102,6 @@ func Must3[T1, T2, T3 any](v1 T1, v2 T2, v3 T3, err error) (T1, T2, T3) {
 	return v1, v2, v3
 }
 
-// TestingT is an interface wrapper around [*testing.T]
-type TestingT interface {
-	Error(args ...any)
-	Fatal(args ...any)
-
-	// Helper marks the calling function as a test helper function.
-	Helper()
-}
-
-// Test takes the given error and errors the test it if it is non-nil.
-// The intended usage is:
-//
-//	grr.Test(t, MyFunc(v))
-func Test(t TestingT, err error) error {
-	t.Helper()
-	if err != nil {
-		t.Error(err)
-	}
-	return err
-}
-
-// TestFatal takes the given error and fatally errors the test it if it is non-nil.
-// The intended usage is:
-//
-//	grr.TestFatal(t, MyFunc(v))
-func TestFatal(t TestingT, err error) error {
-	t.Helper()
-	if err != nil {
-		t.Fatal(err)
-	}
-	return err
-}
-
 // Ignore1 ignores an error return value for a function returning
 // a value and an error, allowing direct usage of the value.
 // The intended usage is:

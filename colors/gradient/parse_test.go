@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/mat32"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFromString(t *testing.T) {
@@ -45,7 +46,7 @@ func TestFromString(t *testing.T) {
 	}
 	for _, test := range tests {
 		have, err := FromString(test.str)
-		grr.Test(t, err)
+		assert.NoError(t, err)
 		if !reflect.DeepEqual(have, test.want) {
 			t.Errorf("for %q: \n expected: \n %#v \n but got: \n %#v", test.str, test.want, have)
 		}
@@ -104,7 +105,7 @@ func TestReadXML(t *testing.T) {
 	for _, test := range tests {
 		r := bytes.NewBufferString(test.str)
 		var have Gradient
-		grr.Test(t, ReadXML(&have, r))
+		assert.NoError(t, ReadXML(&have, r))
 		if !reflect.DeepEqual(have, test.want) {
 			t.Errorf("for %s: \n expected: \n %#v \n but got: \n %#v", test.str, test.want, have)
 		}

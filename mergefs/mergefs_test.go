@@ -14,7 +14,7 @@ import (
 	"testing"
 	"testing/fstest"
 
-	"cogentcore.org/core/grr"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMergeFS(t *testing.T) {
@@ -57,7 +57,7 @@ func TestMergeFS(t *testing.T) {
 		for _, fp := range filePaths {
 			t.Run("testing path: "+fp.path, func(t *testing.T) {
 				dirs, err := fs.ReadDir(filesystem, fp.path)
-				grr.Test(t, err)
+				assert.NoError(t, err)
 				if len(dirs) != fp.dirArrayLength {
 					t.Errorf("expected len(dirs) == %d, but got %d", fp.dirArrayLength, len(dirs))
 				}
@@ -74,24 +74,24 @@ func TestMergeFS(t *testing.T) {
 	t.Run("testing mergefs.Open", func(t *testing.T) {
 		data := make([]byte, 3)
 		file, err := filesystem.Open("a/z/bar.cue")
-		grr.Test(t, err)
+		assert.NoError(t, err)
 
 		_, err = file.Read(data)
-		grr.Test(t, err)
+		assert.NoError(t, err)
 		if string(data) != "bar" {
 			t.Errorf("expected data to be bar, but got %q", data)
 		}
 
 		file, err = filesystem.Open("b/z/foo.cue")
-		grr.Test(t, err)
+		assert.NoError(t, err)
 
 		_, err = file.Read(data)
-		grr.Test(t, err)
+		assert.NoError(t, err)
 		if string(data) != "foo" {
 			t.Errorf("expected data to be foo, but got %q", data)
 		}
 
 		err = file.Close()
-		grr.Test(t, err)
+		assert.NoError(t, err)
 	})
 }

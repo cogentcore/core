@@ -12,8 +12,8 @@ import (
 
 	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/grows/images"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/paint"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSVG(t *testing.T) {
@@ -67,7 +67,7 @@ func TestViewBoxParse(t *testing.T) {
 	tests := []string{"none", "xMinYMin", "xMidYMin", "xMaxYMin", "xMinYMax", "xMaxYMax slice"}
 	var vb ViewBox
 	for _, ts := range tests {
-		grr.Test(t, vb.PreserveAspectRatio.SetString(ts))
+		assert.NoError(t, vb.PreserveAspectRatio.SetString(ts))
 		os := vb.PreserveAspectRatio.String()
 		if os != ts {
 			t.Error("parse fail", os, "!=", ts)

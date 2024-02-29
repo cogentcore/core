@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"cogentcore.org/core/grr"
+	"github.com/stretchr/testify/assert"
 )
 
 type testStruct struct {
@@ -20,18 +20,18 @@ func TestYAML(t *testing.T) {
 	tpath := filepath.Join("testdata", "test.yaml")
 
 	s := &testStruct{A: "aaa", B: 3.14}
-	grr.Test(t, Save(s, tpath))
+	assert.NoError(t, Save(s, tpath))
 	b, err := WriteBytes(s)
-	grr.Test(t, err)
+	assert.NoError(t, err)
 
 	a := &testStruct{}
-	grr.Test(t, Open(a, tpath))
+	assert.NoError(t, Open(a, tpath))
 	if *a != *s {
 		t.Errorf("Open failed to read same data as saved: wanted %v != got %v", s, a)
 	}
 
 	c := &testStruct{}
-	grr.Test(t, ReadBytes(c, b))
+	assert.NoError(t, ReadBytes(c, b))
 	if *c != *s {
 		t.Errorf("ReadBytes or WriteBytes failed to read same data as saved: wanted %v != got %v", s, c)
 	}

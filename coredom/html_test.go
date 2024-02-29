@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/gi"
-	"cogentcore.org/core/grr"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestHTML(t *testing.T) {
@@ -26,7 +26,7 @@ func TestHTML(t *testing.T) {
 	for nm, s := range tests {
 		t.Run(nm, func(t *testing.T) {
 			b := gi.NewBody()
-			grr.Test(t, ReadHTMLString(NewContext(), b, s))
+			assert.NoError(t, ReadHTMLString(NewContext(), b, s))
 			b.AssertRender(t, "html/"+nm)
 		})
 	}

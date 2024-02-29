@@ -18,9 +18,10 @@ import (
 
 	"cogentcore.org/core/core/config"
 	"cogentcore.org/core/core/mobile/sdkpath"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/xe"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRFC1034Label(t *testing.T) {
@@ -82,7 +83,7 @@ func TestAndroidBuild(t *testing.T) {
 	}
 	pout := os.Stdout
 	r, w, err := os.Pipe()
-	grr.TestFatal(t, err)
+	require.NoError(t, err)
 	os.Stdout = w
 
 	c := &config.Config{}
@@ -97,19 +98,19 @@ func TestAndroidBuild(t *testing.T) {
 	}
 	c.ID = "org.golang.todo"
 	pdir, err := os.Getwd()
-	grr.Test(t, err)
-	grr.Test(t, os.Chdir(filepath.Join("..", "..", "goosi", "examples", "drawtri")))
+	assert.NoError(t, err)
+	assert.NoError(t, os.Chdir(filepath.Join("..", "..", "goosi", "examples", "drawtri")))
 	err = Build(c)
 	if err != nil {
 		t.Fatal(err)
 	}
-	grr.Test(t, os.Chdir(pdir))
+	assert.NoError(t, os.Chdir(pdir))
 
-	grr.Test(t, w.Close())
+	assert.NoError(t, w.Close())
 	os.Stdout = pout
 	buf := &bytes.Buffer{}
 	_, err = io.Copy(buf, r)
-	grr.TestFatal(t, err)
+	require.NoError(t, err)
 
 	diff, err := diffOutput(buf.String(), androidBuildTmpl)
 	if err != nil {
@@ -274,12 +275,12 @@ func TestBuildWithGoModules(t *testing.T) {
 					laser.SetFromDefaultTags(c)
 					c.ID = "org.golang.todo"
 					c.Build.Target = make([]config.Platform, 1)
-					grr.Test(t, c.Build.Target[0].SetString(target))
+					assert.NoError(t, c.Build.Target[0].SetString(target))
 					pdir, err := os.Getwd()
-					grr.Test(t, err)
-					grr.Test(t, os.Chdir(tc.Path))
-					grr.Test(t, Build(c))
-					grr.Test(t, os.Chdir(pdir))
+					assert.NoError(t, err)
+					assert.NoError(t, os.Chdir(tc.Path))
+					assert.NoError(t, Build(c))
+					assert.NoError(t, os.Chdir(pdir))
 				})
 			}
 		})

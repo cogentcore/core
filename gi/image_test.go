@@ -9,10 +9,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
+	"github.com/stretchr/testify/assert"
 )
 
 var testImagePath = Filename(filepath.Join("..", "icon.png"))
@@ -21,7 +21,7 @@ func TestImageBasic(t *testing.T) {
 	b := NewBody()
 	fr := NewFrame(b)
 	img := NewImage(fr)
-	grr.Test(t, img.OpenImage(testImagePath))
+	assert.NoError(t, img.OpenImage(testImagePath))
 	b.AssertRender(t, "image/basic")
 }
 
@@ -34,7 +34,7 @@ func TestImageCropped(t *testing.T) {
 		s.Overflow.Set(styles.OverflowAuto)
 	})
 	img := NewImage(fr)
-	grr.Test(t, img.OpenImage(testImagePath))
+	assert.NoError(t, img.OpenImage(testImagePath))
 	b.AssertRender(t, "image/cropped")
 }
 
@@ -47,7 +47,7 @@ func TestImageScrolled(t *testing.T) {
 		s.Overflow.Set(styles.OverflowAuto)
 	})
 	img := NewImage(fr)
-	grr.Test(t, img.OpenImage(testImagePath))
+	assert.NoError(t, img.OpenImage(testImagePath))
 	b.AssertRender(t, "image/scrolled", func() {
 		b.GoosiEventMgr().Scroll(image.Pt(10, 10), mat32.V2(2, 3))
 	})
