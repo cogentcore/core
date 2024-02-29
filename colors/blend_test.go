@@ -39,3 +39,28 @@ func TestAlphaBlend(t *testing.T) {
 		images.Assert(t, img, fnm)
 	}
 }
+
+func ExampleBlend_hct() {
+	fmt.Println(Blend(HCT, 30, Lightblue, Darkblue))
+	// Output: {51 78 160 255}
+}
+
+func ExampleBlend_rgb() {
+	fmt.Println(Blend(RGB, 30, Lightblue, Darkblue))
+	// Output: {52 65 166 255}
+}
+
+func ExampleBlend_cam16() {
+	fmt.Println(Blend(CAM16, 30, Lightblue, Darkblue))
+	// Output: {60 82 148 255}
+}
+
+func ExampleBlendRGB() {
+	fmt.Println(BlendRGB(30, Lightblue, Darkblue))
+	// Output: {52 65 166 255}
+}
+
+func ExampleAlphaBlend() {
+	fmt.Println(AlphaBlend(Wheat, WithAF32(Blue, 0.5)))
+	// Output: {123 111 217 255}
+}
