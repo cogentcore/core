@@ -166,6 +166,7 @@ func (ed *Editor) ISearchStart() {
 // ISearchKeyInput is an emacs-style interactive search mode -- this is called
 // when keys are typed while in search mode
 func (ed *Editor) ISearchKeyInput(kt events.Event) {
+	kt.SetHandled()
 	r := kt.KeyRune()
 	updt := ed.UpdateStart()
 	defer ed.UpdateEndRender(updt)
@@ -425,7 +426,7 @@ func (ed *Editor) QReplaceReplaceAll(midx int) {
 func (ed *Editor) QReplaceKeyInput(kt events.Event) {
 	updt := ed.UpdateStart()
 	defer ed.UpdateEndRender(updt)
-
+	kt.SetHandled()
 	switch {
 	case kt.KeyRune() == 'y':
 		ed.QReplaceReplace(ed.QReplace.Pos)

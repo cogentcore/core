@@ -49,10 +49,6 @@ func (t *Body) KiType() *gti.Type { return BodyType }
 // New returns a new [*Body] value
 func (t *Body) New() ki.Ki { return &Body{} }
 
-// SetTitle sets the [Body.Title]:
-// title of the Body, also used for window title where relevant
-func (t *Body) SetTitle(v string) *Body { t.Title = v; return t }
-
 // SetTooltip sets the [Body.Tooltip]
 func (t *Body) SetTooltip(v string) *Body { t.Tooltip = v; return t }
 

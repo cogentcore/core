@@ -15,7 +15,7 @@ type Body struct { //core:no-new
 	Frame
 
 	// title of the Body, also used for window title where relevant
-	Title string
+	Title string `set:"-"`
 }
 
 // NewBody creates a new Body that will serve as the content of a Scene
@@ -59,11 +59,27 @@ func (bd *Body) SetStyles() {
 	})
 }
 
+// SetTitle sets the Title in the Body, Scene, and Stage, and RenderWin.
+// This is the one place to change the title for everything.
+func (bd *Body) SetTitle(title string) *Body {
+	bd.Nm = title
+	bd.Title = title
+	bd.Scene.Nm = title
+	if bd.Scene.Stage != nil {
+		bd.Scene.Stage.Title = title
+		win := bd.Scene.RenderWin()
+		if win != nil {
+			win.SetName(title)
+			win.SetTitle(title)
+		}
+	}
+	return bd
+}
+
 // AddTitle adds a Label with given title, and sets the Title text
 // which will be used by the Scene etc.
 func (bd *Body) AddTitle(title string) *Body {
-	bd.Title = title
-	bd.Scene.Nm = title
+	bd.SetTitle(title)
 	NewLabel(bd, "title").SetText(title).SetType(LabelHeadlineSmall)
 	return bd
 }
