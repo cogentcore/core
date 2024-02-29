@@ -8,7 +8,8 @@ import (
 	"image/color"
 	"testing"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/glop/tolassert"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestContrastRatio(t *testing.T) {
@@ -25,9 +26,7 @@ func TestContrastRatio(t *testing.T) {
 	}
 	for i, test := range tests {
 		res := ContrastRatio(test.a, test.b)
-		if mat32.Abs(res-test.want) > 0.1 {
-			t.Errorf("%d: expected %g but got %g", i, test.want, res)
-		}
+		tolassert.EqualTol(t, test.want, res, 0.1, i)
 	}
 }
 
@@ -45,9 +44,7 @@ func TestToneContrastRatio(t *testing.T) {
 	}
 	for i, test := range tests {
 		res := ToneContrastRatio(test.a, test.b)
-		if mat32.Abs(res-test.want) > 0.1 {
-			t.Errorf("%d: expected %g but got %g", i, test.want, res)
-		}
+		tolassert.EqualTol(t, test.want, res, 0.1, i)
 	}
 }
 
@@ -65,9 +62,7 @@ func TestContrastColor(t *testing.T) {
 	}
 	for i, test := range tests {
 		res := ContrastColor(test.color, test.ratio)
-		if res != test.want {
-			t.Errorf("%d: expected %v but got %v", i, test.want, res)
-		}
+		assert.Equal(t, test.want, res, i)
 	}
 }
 
@@ -86,9 +81,8 @@ func TestContrastColorTry(t *testing.T) {
 	}
 	for i, test := range tests {
 		res, ok := ContrastColorTry(test.color, test.ratio)
-		if res != test.want {
-			t.Errorf("%d: expected %v, %v but got %v, %v", i, test.want, test.ok, res, ok)
-		}
+		assert.Equal(t, test.ok, ok, i)
+		assert.Equal(t, test.want, res, i)
 	}
 }
 
@@ -106,9 +100,7 @@ func TestContrastTone(t *testing.T) {
 	}
 	for i, test := range tests {
 		res := ContrastTone(test.tone, test.ratio)
-		if mat32.Abs(res-test.want) > 0.5 {
-			t.Errorf("%d: expected %g but got %g", i, test.want, res)
-		}
+		tolassert.EqualTol(t, test.want, res, 0.5, i)
 	}
 }
 
@@ -127,9 +119,8 @@ func TestContrastToneTry(t *testing.T) {
 	}
 	for i, test := range tests {
 		res, ok := ContrastToneTry(test.tone, test.ratio)
-		if ok != test.ok || mat32.Abs(res-test.want) > 0.5 {
-			t.Errorf("%d: expected %g, %v but got %g, %v", i, test.want, test.ok, res, ok)
-		}
+		assert.Equal(t, test.ok, ok, i)
+		tolassert.EqualTol(t, test.want, res, 0.5, i)
 	}
 }
 
@@ -147,9 +138,7 @@ func TestContrastToneLighter(t *testing.T) {
 	}
 	for i, test := range tests {
 		res := ContrastToneLighter(test.tone, test.ratio)
-		if mat32.Abs(res-test.want) > 0.1 {
-			t.Errorf("%d: expected %g but got %g", i, test.want, res)
-		}
+		tolassert.EqualTol(t, test.want, res, 0.1, i)
 	}
 }
 
@@ -168,9 +157,8 @@ func TestContrastToneLighterTry(t *testing.T) {
 	}
 	for i, test := range tests {
 		res, ok := ContrastToneLighterTry(test.tone, test.ratio)
-		if ok != test.ok || mat32.Abs(res-test.want) > 0.1 {
-			t.Errorf("%d: expected %g, %v but got %g, %v", i, test.want, test.ok, res, ok)
-		}
+		assert.Equal(t, test.ok, ok, i)
+		tolassert.EqualTol(t, test.want, res, 0.1, i)
 	}
 }
 
@@ -188,9 +176,7 @@ func TestContrastToneDarker(t *testing.T) {
 	}
 	for i, test := range tests {
 		res := ContrastToneDarker(test.tone, test.ratio)
-		if mat32.Abs(res-test.want) > 0.1 {
-			t.Errorf("%d: expected %g but got %g", i, test.want, res)
-		}
+		tolassert.EqualTol(t, test.want, res, 0.1, i)
 	}
 }
 
@@ -209,8 +195,7 @@ func TestContrastToneDarkerTry(t *testing.T) {
 	}
 	for i, test := range tests {
 		res, ok := ContrastToneDarkerTry(test.tone, test.ratio)
-		if ok != test.ok || mat32.Abs(res-test.want) > 0.1 {
-			t.Errorf("%d: expected %g, %v but got %g, %v", i, test.want, test.ok, res, ok)
-		}
+		assert.Equal(t, test.ok, ok, i)
+		tolassert.EqualTol(t, test.want, res, 0.1, i)
 	}
 }
