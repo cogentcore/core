@@ -16,6 +16,8 @@ func TestTransform(t *testing.T) {
 	assert.Equal(t, color.RGBA{0, 0, 52, 255}, Darken(color.RGBA{0, 0, 255, 255}, 30))
 	assert.Equal(t, color.RGBA{80, 90, 255, 255}, Highlight(color.RGBA{0, 0, 255, 255}, 15))
 	assert.Equal(t, color.RGBA{0, 82, 136, 255}, Highlight(color.RGBA{18, 127, 205, 255}, 18))
+	assert.Equal(t, color.RGBA{0, 7, 77, 255}, Samelight(color.RGBA{29, 46, 171, 255}, 21))
+	assert.Equal(t, color.RGBA{118, 0, 211, 255}, Samelight(color.RGBA{130, 9, 231, 255}, 4))
 
 	assert.Equal(t, color.RGBA{201, 0, 143, 255}, Saturate(color.RGBA{201, 2, 143, 255}, 16))
 	assert.Equal(t, color.RGBA{96, 76, 125, 255}, Desaturate(color.RGBA{112, 35, 206, 255}, 43))

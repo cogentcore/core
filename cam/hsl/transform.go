@@ -15,7 +15,7 @@ import (
 func Lighten(c color.Color, amount float32) color.RGBA {
 	h := FromColor(c)
 	h.L += amount / 100
-	h.L = mat32.Clamp(h.L, 0, 100)
+	h.L = mat32.Clamp(h.L, 0, 1)
 	return h.AsRGBA()
 }
 
@@ -24,7 +24,7 @@ func Lighten(c color.Color, amount float32) color.RGBA {
 func Darken(c color.Color, amount float32) color.RGBA {
 	h := FromColor(c)
 	h.L -= amount / 100
-	h.L = mat32.Clamp(h.L, 0, 100)
+	h.L = mat32.Clamp(h.L, 0, 1)
 	return h.AsRGBA()
 }
 
@@ -39,7 +39,7 @@ func Highlight(c color.Color, amount float32) color.RGBA {
 	} else {
 		h.L += amount / 100
 	}
-	h.L = mat32.Clamp(h.L, 0, 100)
+	h.L = mat32.Clamp(h.L, 0, 1)
 	return h.AsRGBA()
 }
 
@@ -50,11 +50,11 @@ func Highlight(c color.Color, amount float32) color.RGBA {
 func Samelight(c color.Color, amount float32) color.RGBA {
 	h := FromColor(c)
 	if h.L >= 0.5 {
-		h.L += amount
+		h.L += amount / 100
 	} else {
-		h.L -= amount
+		h.L -= amount / 100
 	}
-	h.L = mat32.Clamp(h.L, 0, 100)
+	h.L = mat32.Clamp(h.L, 0, 1)
 	return h.AsRGBA()
 }
 
@@ -62,8 +62,8 @@ func Samelight(c color.Color, amount float32) color.RGBA {
 // given absolute HSL saturation amount (0-100, ranges enforced)
 func Saturate(c color.Color, amount float32) color.RGBA {
 	h := FromColor(c)
-	h.S += amount
-	h.S = mat32.Clamp(h.S, 0, 100)
+	h.S += amount / 100
+	h.S = mat32.Clamp(h.S, 0, 1)
 	return h.AsRGBA()
 }
 
@@ -71,8 +71,8 @@ func Saturate(c color.Color, amount float32) color.RGBA {
 // given absolute HSL saturation amount (0-100, ranges enforced)
 func Desaturate(c color.Color, amount float32) color.RGBA {
 	h := FromColor(c)
-	h.S -= amount
-	h.S = mat32.Clamp(h.S, 0, 100)
+	h.S -= amount / 100
+	h.S = mat32.Clamp(h.S, 0, 1)
 	return h.AsRGBA()
 }
 
