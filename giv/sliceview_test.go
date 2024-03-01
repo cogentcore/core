@@ -10,17 +10,13 @@ import (
 	"cogentcore.org/core/gi"
 )
 
-func TestTableView(t *testing.T) {
+func TestSliceView(t *testing.T) {
 	b := gi.NewBody()
-	sl := make([]myStruct, 10)
+	sl := make([]float32, 10)
 	for i := range sl {
-		sl[i] = myStruct{
-			Name:    "Person",
-			Age:     30 - i,
-			Rating:  1.6 * float32(i),
-			LikesGo: i%2 == 0,
-		}
+		fi := float32(i)
+		sl[i] = 2*fi + (8-fi)/10
 	}
-	NewTableView(b).SetSlice(&sl)
-	b.AssertRender(t, "tableview/basic")
+	NewSliceView(b).SetSlice(&sl)
+	b.AssertRender(t, "sliceview/basic")
 }
