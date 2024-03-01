@@ -72,6 +72,7 @@ func (sc *Scene) MouseScrollEvent(e *events.MouseScroll) {
 	if sc.NoNav {
 		return
 	}
+	e.SetHandled()
 	pt := e.Pos()
 	sz := sc.Geom.Size
 	cdist := mat32.Max(sc.Camera.DistTo(sc.Camera.Target), 1.0)
