@@ -12,7 +12,7 @@ package elide
 // with space reserved for … at the end.
 func End(s string, sz int) string {
 	n := len(s)
-	if n < sz {
+	if n <= sz {
 		return s
 	}
 	return s[:sz-1] + "…"
@@ -23,7 +23,7 @@ func End(s string, sz int) string {
 // with space reserved for … in the middle
 func Middle(s string, sz int) string {
 	n := len(s)
-	if n < sz {
+	if n <= sz {
 		return s
 	}
 	en := sz - 1
