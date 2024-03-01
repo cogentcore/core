@@ -32,17 +32,17 @@ type MapView struct {
 	Changed bool `set:"-"`
 
 	// Value representations of the map keys
-	Keys []Value `json:"-" xml:"-"`
+	Keys []Value `json:"-" xml:"-" set:"-"`
 
 	// Value representations of the map values
-	Values []Value `json:"-" xml:"-"`
+	Values []Value `json:"-" xml:"-" set:"-"`
 
 	// sort by values instead of keys
 	SortVals bool
 
 	// the number of columns in the map; do not set externally;
 	// generally only access internally
-	NCols int
+	NCols int `set:"-"`
 
 	// value view that needs to have SaveTmp called on it whenever a change
 	// is made to one of the underlying values.

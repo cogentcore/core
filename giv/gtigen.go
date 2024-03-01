@@ -17,7 +17,7 @@ import (
 )
 
 // ArgViewType is the [gti.Type] for [ArgView]
-var ArgViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.ArgView", IDName: "arg-view", Doc: "ArgView represents a slice of reflect.Value's and associated names, for the\npurpose of supplying arguments to methods called via the MethodView\nframework.", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Title", Doc: "title / prompt to show above the editor fields"}, {Name: "Args", Doc: "the args that we are a view onto"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}}, Instance: &ArgView{}})
+var ArgViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.ArgView", IDName: "arg-view", Doc: "ArgView represents a slice of reflect.Value's and associated names, for the\npurpose of supplying arguments to methods called via the MethodView\nframework.", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Args", Doc: "Args are the args that we are a view onto"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}}, Instance: &ArgView{}})
 
 // NewArgView adds a new [ArgView] with the given name to the given parent:
 // ArgView represents a slice of reflect.Value's and associated names, for the
@@ -33,12 +33,8 @@ func (t *ArgView) KiType() *gti.Type { return ArgViewType }
 // New returns a new [*ArgView] value
 func (t *ArgView) New() ki.Ki { return &ArgView{} }
 
-// SetTitle sets the [ArgView.Title]:
-// title / prompt to show above the editor fields
-func (t *ArgView) SetTitle(v string) *ArgView { t.Title = v; return t }
-
 // SetArgs sets the [ArgView.Args]:
-// the args that we are a view onto
+// Args are the args that we are a view onto
 func (t *ArgView) SetArgs(v ...Value) *ArgView { t.Args = v; return t }
 
 // SetViewPath sets the [ArgView.ViewPath]:
@@ -275,22 +271,9 @@ func (t *MapView) New() ki.Ki { return &MapView{} }
 // Value for the map itself, if this was created within value view framework; otherwise nil
 func (t *MapView) SetMapValView(v Value) *MapView { t.MapValView = v; return t }
 
-// SetKeys sets the [MapView.Keys]:
-// Value representations of the map keys
-func (t *MapView) SetKeys(v ...Value) *MapView { t.Keys = v; return t }
-
-// SetValues sets the [MapView.Values]:
-// Value representations of the map values
-func (t *MapView) SetValues(v ...Value) *MapView { t.Values = v; return t }
-
 // SetSortVals sets the [MapView.SortVals]:
 // sort by values instead of keys
 func (t *MapView) SetSortVals(v bool) *MapView { t.SortVals = v; return t }
-
-// SetNCols sets the [MapView.NCols]:
-// the number of columns in the map; do not set externally;
-// generally only access internally
-func (t *MapView) SetNCols(v int) *MapView { t.NCols = v; return t }
 
 // SetTmpSave sets the [MapView.TmpSave]:
 // value view that needs to have SaveTmp called on it whenever a change
@@ -310,7 +293,7 @@ func (t *MapView) SetTooltip(v string) *MapView { t.Tooltip = v; return t }
 func (t *MapView) SetStackTop(v int) *MapView { t.StackTop = v; return t }
 
 // MapViewInlineType is the [gti.Type] for [MapViewInline]
-var MapViewInlineType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.MapViewInline", IDName: "map-view-inline", Doc: "MapViewInline represents a map as a single line widget,\nfor smaller maps and those explicitly marked inline.", Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Map", Doc: "the map that we are a view onto"}, {Name: "MapValView", Doc: "Value for the map itself, if this was created within value view framework -- otherwise nil"}, {Name: "Changed", Doc: "has the map been edited?"}, {Name: "Keys", Doc: "Value representations of the map keys"}, {Name: "Values", Doc: "Value representations of the fields"}, {Name: "TmpSave", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}}, Instance: &MapViewInline{}})
+var MapViewInlineType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.MapViewInline", IDName: "map-view-inline", Doc: "MapViewInline represents a map as a single line widget,\nfor smaller maps and those explicitly marked inline.", Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Map", Doc: "the map that we are a view onto"}, {Name: "MapValView", Doc: "Value for the map itself, if this was created within value view framework -- otherwise nil"}, {Name: "Changed", Doc: "has the map been edited?"}, {Name: "Keys", Doc: "Value representations of the map keys"}, {Name: "Values", Doc: "Value representations of the fields"}, {Name: "TmpSave", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}, {Name: "ConfigSize", Doc: "size of map when gui configed"}}, Instance: &MapViewInline{}})
 
 // NewMapViewInline adds a new [MapViewInline] with the given name to the given parent:
 // MapViewInline represents a map as a single line widget,
@@ -328,14 +311,6 @@ func (t *MapViewInline) New() ki.Ki { return &MapViewInline{} }
 // SetMapValView sets the [MapViewInline.MapValView]:
 // Value for the map itself, if this was created within value view framework -- otherwise nil
 func (t *MapViewInline) SetMapValView(v Value) *MapViewInline { t.MapValView = v; return t }
-
-// SetKeys sets the [MapViewInline.Keys]:
-// Value representations of the map keys
-func (t *MapViewInline) SetKeys(v ...Value) *MapViewInline { t.Keys = v; return t }
-
-// SetValues sets the [MapViewInline.Values]:
-// Value representations of the fields
-func (t *MapViewInline) SetValues(v ...Value) *MapViewInline { t.Values = v; return t }
 
 // SetTmpSave sets the [MapViewInline.TmpSave]:
 // value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
@@ -489,7 +464,7 @@ func (t *SliceViewGrid) SetTooltip(v string) *SliceViewGrid { t.Tooltip = v; ret
 func (t *SliceViewGrid) SetStackTop(v int) *SliceViewGrid { t.StackTop = v; return t }
 
 // SliceViewInlineType is the [gti.Type] for [SliceViewInline]
-var SliceViewInlineType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.SliceViewInline", IDName: "slice-view-inline", Doc: "SliceViewInline represents a slice as a single line widget,\nfor smaller slices and those explicitly marked inline.", Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Slice", Doc: "the slice that we are a view onto"}, {Name: "SliceValue", Doc: "SliceValue is the Value for the slice itself\nif this was created within the Value framework.\nOtherwise, it is nil."}, {Name: "IsArray", Doc: "whether the slice is actually an array -- no modifications"}, {Name: "IsFixedLen", Doc: "whether the slice has a fixed-len flag on it"}, {Name: "Changed", Doc: "has the slice been edited?"}, {Name: "Values", Doc: "Value representations of the fields"}, {Name: "TmpSave", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}}, Instance: &SliceViewInline{}})
+var SliceViewInlineType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.SliceViewInline", IDName: "slice-view-inline", Doc: "SliceViewInline represents a slice as a single line widget,\nfor smaller slices and those explicitly marked inline.", Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Slice", Doc: "the slice that we are a view onto"}, {Name: "SliceValue", Doc: "SliceValue is the Value for the slice itself\nif this was created within the Value framework.\nOtherwise, it is nil."}, {Name: "IsArray", Doc: "whether the slice is actually an array -- no modifications"}, {Name: "IsFixedLen", Doc: "whether the slice has a fixed-len flag on it"}, {Name: "Changed", Doc: "has the slice been edited?"}, {Name: "Values", Doc: "Value representations of the fields"}, {Name: "TmpSave", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}, {Name: "ConfigSize", Doc: "size of map when gui configed"}}, Instance: &SliceViewInline{}})
 
 // NewSliceViewInline adds a new [SliceViewInline] with the given name to the given parent:
 // SliceViewInline represents a slice as a single line widget,
@@ -510,17 +485,9 @@ func (t *SliceViewInline) New() ki.Ki { return &SliceViewInline{} }
 // Otherwise, it is nil.
 func (t *SliceViewInline) SetSliceValue(v Value) *SliceViewInline { t.SliceValue = v; return t }
 
-// SetIsArray sets the [SliceViewInline.IsArray]:
-// whether the slice is actually an array -- no modifications
-func (t *SliceViewInline) SetIsArray(v bool) *SliceViewInline { t.IsArray = v; return t }
-
 // SetIsFixedLen sets the [SliceViewInline.IsFixedLen]:
 // whether the slice has a fixed-len flag on it
 func (t *SliceViewInline) SetIsFixedLen(v bool) *SliceViewInline { t.IsFixedLen = v; return t }
-
-// SetValues sets the [SliceViewInline.Values]:
-// Value representations of the fields
-func (t *SliceViewInline) SetValues(v ...Value) *SliceViewInline { t.Values = v; return t }
 
 // SetTmpSave sets the [SliceViewInline.TmpSave]:
 // value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent

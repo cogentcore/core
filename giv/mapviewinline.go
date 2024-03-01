@@ -30,10 +30,10 @@ type MapViewInline struct {
 	Changed bool `set:"-"`
 
 	// Value representations of the map keys
-	Keys []Value `json:"-" xml:"-"`
+	Keys []Value `json:"-" xml:"-" set:"-"`
 
 	// Value representations of the fields
-	Values []Value `json:"-" xml:"-"`
+	Values []Value `json:"-" xml:"-" set:"-"`
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 	TmpSave Value `view:"-" json:"-" xml:"-"`
@@ -42,7 +42,7 @@ type MapViewInline struct {
 	ViewPath string
 
 	// size of map when gui configed
-	ConfigSize int
+	ConfigSize int `set:"-"`
 }
 
 func (mv *MapViewInline) OnInit() {

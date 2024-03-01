@@ -31,7 +31,7 @@ type SliceViewInline struct {
 	SliceValue Value
 
 	// whether the slice is actually an array -- no modifications
-	IsArray bool
+	IsArray bool `set:"-"`
 
 	// whether the slice has a fixed-len flag on it
 	IsFixedLen bool
@@ -40,7 +40,7 @@ type SliceViewInline struct {
 	Changed bool `set:"-"`
 
 	// Value representations of the fields
-	Values []Value `json:"-" xml:"-"`
+	Values []Value `json:"-" xml:"-" set:"-"`
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 	TmpSave Value `view:"-" json:"-" xml:"-"`
@@ -49,7 +49,7 @@ type SliceViewInline struct {
 	ViewPath string
 
 	// size of map when gui configed
-	ConfigSize int
+	ConfigSize int `set:"-"`
 }
 
 func (sv *SliceViewInline) OnInit() {

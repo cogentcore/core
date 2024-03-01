@@ -20,10 +20,7 @@ import (
 type ArgView struct {
 	gi.Frame
 
-	// title / prompt to show above the editor fields
-	Title string
-
-	// the args that we are a view onto
+	// Args are the args that we are a view onto
 	Args []Value
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
@@ -88,17 +85,6 @@ func (av *ArgView) TitleWidget() *gi.Label {
 func (av *ArgView) ArgsGrid() *gi.Frame {
 	return av.ChildByName("args-grid", 0).(*gi.Frame)
 }
-
-// // SetTitle sets the optional title and updates the Title label
-// func (av *ArgView) SetTitle(title string) {
-// 	av.Title = title
-// 	if av.Title != "" {
-// 		lab := av.TitleWidget()
-// 		if lab != nil {
-// 			lab.Text = title
-// 		}
-// 	}
-// }
 
 // ConfigArgsGrid configures the ArgsGrid for the current struct
 func (av *ArgView) ConfigArgsGrid() {
