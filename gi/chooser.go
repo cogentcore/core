@@ -56,8 +56,15 @@ type Chooser struct {
 
 	// AllowNew is whether to allow the user to add new items to the
 	// chooser through the editable textfield (if Editable is set to
-	// true) and a button at the end of the chooser menu.
+	// true) and a button at the end of the chooser menu. See also [DefaultNew].
 	AllowNew bool
+
+	// DefaultNew configures the chooser to accept new items, as in
+	// [AllowNew], and also turns off completion popups and always
+	// adds new items to the list of items, without prompting.
+	// Use this for cases where the typical use-case is to enter new values,
+	// but the history of prior values can also be useful.
+	DefaultNew bool
 
 	// Placeholder, if Editable is set to true, is the text that is
 	// displayed in the text field when it is empty. It must be set
@@ -270,7 +277,9 @@ func (ch *Chooser) ConfigWidget() {
 				ch.OpenMenu(e)
 			})
 			tx.Config() // this is essential
-			tx.SetCompleter(tx, ch.CompleteMatch, ch.CompleteEdit)
+			if !ch.DefaultNew {
+				tx.SetCompleter(tx, ch.CompleteMatch, ch.CompleteEdit)
+			}
 		} else {
 			lbl := ch.Parts.Child(lbi).(*Label)
 			lbl.SetText(ch.CurrentItem.GetLabel())
@@ -430,7 +439,7 @@ func (ch *Chooser) SetCurrentText(text string) error {
 			return nil
 		}
 	}
-	if !ch.AllowNew {
+	if !(ch.AllowNew || ch.DefaultNew) {
 		return errors.New("unknown value")
 	}
 	ch.Items = append(ch.Items, ChooserItem{Value: text})

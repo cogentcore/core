@@ -295,7 +295,7 @@ func (ed *Editor) QReplacePrompt() {
 	}
 	d := gi.NewBody().AddTitle("Query-Replace").
 		AddText("Enter strings for find and replace, then select Query-Replace -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining")
-	fc := gi.NewChooser(d, "find").SetEditable(true).SetAllowNew(true)
+	fc := gi.NewChooser(d, "find").SetEditable(true).SetDefaultNew(true)
 	fc.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
 		s.Min.X.Ch(80)
@@ -305,7 +305,7 @@ func (ed *Editor) QReplacePrompt() {
 		fc.SetCurrentValue(find)
 	}
 
-	rc := gi.NewChooser(d, "repl").SetEditable(true).SetAllowNew(true)
+	rc := gi.NewChooser(d, "repl").SetEditable(true).SetDefaultNew(true)
 	rc.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
 		s.Min.X.Ch(80)
