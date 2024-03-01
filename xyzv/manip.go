@@ -74,17 +74,17 @@ func (sw *Scene) SetSel(nd xyz.Node) {
 	if sw.CurSel == nd {
 		return
 	}
-	sc := sw.Scene
+	xy := sw.XYZ
 	if nd == nil {
 		// if sv.CurSel != nil {
 		// 	sv.CurSel.AsNode().SetSelected(false)
 		// }
 		sw.CurManipPt = nil
 		sw.CurSel = nil
-		updt := sc.UpdateStart()
-		sc.DeleteChildByName(SelBoxName, ki.DestroyKids)
-		sc.DeleteChildByName(ManipBoxName, ki.DestroyKids)
-		sc.UpdateEndRender(updt)
+		updt := xy.UpdateStart()
+		xy.DeleteChildByName(SelBoxName, ki.DestroyKids)
+		xy.DeleteChildByName(ManipBoxName, ki.DestroyKids)
+		xy.UpdateEndRender(updt)
 		return
 	}
 	manip, ok := nd.(*ManipPt)
@@ -109,15 +109,15 @@ func (sw *Scene) SelectBox() {
 	if sw.CurSel == nil {
 		return
 	}
-	sc := sw.Scene
+	xy := sw.XYZ
 
-	updt := sc.UpdateStart()
-	defer sc.UpdateEndUpdate(updt)
+	updt := xy.UpdateStart()
+	defer xy.UpdateEndUpdate(updt)
 
 	nb := sw.CurSel.AsNode()
-	sc.DeleteChildByName(SelBoxName, ki.DestroyKids) // get rid of existing
+	xy.DeleteChildByName(SelBoxName, ki.DestroyKids) // get rid of existing
 	clr := sw.SelParams.Color
-	xyz.NewLineBox(sc, sc, SelBoxName, SelBoxName, nb.WorldBBox.BBox, sw.SelParams.Width, clr, xyz.Inactive)
+	xyz.NewLineBox(xy, xy, SelBoxName, SelBoxName, nb.WorldBBox.BBox, sw.SelParams.Width, clr, xyz.Inactive)
 
 	sw.SetNeedsRender(true)
 }
@@ -128,23 +128,23 @@ func (sw *Scene) ManipBox() {
 	if sw.CurSel == nil {
 		return
 	}
-	sc := sw.Scene
+	xy := sw.XYZ
 
-	updt := sc.UpdateStart()
-	defer sc.UpdateEndConfig(updt)
+	updt := xy.UpdateStart()
+	defer xy.UpdateEndConfig(updt)
 
 	nm := ManipBoxName
 
 	nb := sw.CurSel.AsNode()
-	sc.DeleteChildByName(nm, ki.DestroyKids) // get rid of existing
+	xy.DeleteChildByName(nm, ki.DestroyKids) // get rid of existing
 	clr := sw.SelParams.Color
 
-	cdist := mat32.Max(sc.Camera.DistTo(sc.Camera.Target), 1.0)
+	cdist := mat32.Max(xy.Camera.DistTo(xy.Camera.Target), 1.0)
 
 	bbox := nb.WorldBBox.BBox
-	mb := xyz.NewLineBox(sc, sc, nm, nm, bbox, sw.SelParams.Width*cdist, clr, xyz.Inactive)
+	mb := xyz.NewLineBox(xy, xy, nm, nm, bbox, sw.SelParams.Width*cdist, clr, xyz.Inactive)
 
-	mbspm := xyz.NewSphere(sc, nm+"-pt", sw.SelParams.Radius*cdist, 16)
+	mbspm := xyz.NewSphere(xy, nm+"-pt", sw.SelParams.Radius*cdist, 16)
 
 	bbox.Min.SetSub(mb.Pose.Pos)
 	bbox.Max.SetSub(mb.Pose.Pos)
@@ -195,10 +195,10 @@ func (sw *Scene) HandleSelectEvents() {
 }
 
 func (sw *Scene) HandleSelectEventsImpl(e events.Event) {
-	sc := sw.Scene
+	xy := sw.XYZ
 	pos := sw.Geom.ContentBBox.Min
 	e.SetLocalOff(e.LocalOff().Add(pos))
-	ns := xyz.NodesUnderPoint(sc, e.Pos())
+	ns := xyz.NodesUnderPoint(xy, e.Pos())
 	nsel := len(ns)
 	switch {
 	case nsel == 0:
@@ -238,9 +238,9 @@ func (sw *Scene) HandleSlideEvents() {
 	sw.On(events.SlideMove, func(e events.Event) {
 		pos := sw.Geom.ContentBBox.Min
 		e.SetLocalOff(e.LocalOff().Add(pos))
-		sc := sw.Scene
+		xy := sw.XYZ
 		if sw.CurManipPt == nil || sw.CurSel == nil {
-			sc.SlideMoveEvent(e)
+			xy.SlideMoveEvent(e)
 			sw.SetNeedsRender(true)
 			return
 		}
@@ -251,7 +251,7 @@ func (sw *Scene) HandleSlideEvents() {
 		dx := float32(del.X)
 		dy := float32(del.Y)
 		mpos := mpt.Nm[len(ManipBoxName)+1:] // has ull etc for where positioned
-		camd, sgn := sc.Camera.ViewMainAxis()
+		camd, sgn := xy.Camera.ViewMainAxis()
 		var dm mat32.Vec3 // delta multiplier
 		if mpos[mat32.X] == 'u' {
 			dm.X = 1
@@ -281,8 +281,8 @@ func (sw *Scene) HandleSlideEvents() {
 			dd.Y = -dy
 		}
 		// fmt.Printf("mpos: %v  camd: %v  sgn: %v  dm: %v\n", mpos, camd, sgn, dm)
-		updt := sc.UpdateStart()
-		cdist := sc.Camera.DistTo(sc.Camera.Target)
+		updt := xy.UpdateStart()
+		cdist := xy.Camera.DistTo(xy.Camera.Target)
 		scDel := float32(.0005) * cdist
 		panDel := float32(.0005) * cdist
 		// todo: use SVG ApplyDeltaXForm logic
@@ -312,7 +312,7 @@ func (sw *Scene) HandleSlideEvents() {
 			sn.Pose.Pos.SetAdd(mpos)
 			mb.Pose.Pos.SetAdd(dpos)
 		}
-		sc.UpdateEndUpdate(updt)
+		xy.UpdateEndUpdate(updt)
 		sw.SetNeedsRender(updt)
 	})
 }

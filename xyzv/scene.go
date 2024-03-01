@@ -28,8 +28,8 @@ import (
 type Scene struct {
 	gi.WidgetBase
 
-	// Scene is the 3D Scene
-	Scene *xyz.Scene `set:"-"`
+	// XYZ is the 3D xyz.Scene
+	XYZ *xyz.Scene `set:"-"`
 
 	// how to deal with selection / manipulation events
 	SelMode SelModes
@@ -45,8 +45,8 @@ type Scene struct {
 }
 
 func (sw *Scene) OnInit() {
-	sw.Scene = xyz.NewScene("Scene")
-	sw.Scene.Defaults()
+	sw.XYZ = xyz.NewScene("Scene")
+	sw.XYZ.Defaults()
 	sw.SelParams.Defaults()
 	sw.WidgetBase.OnInit()
 	sw.HandleEvents()
@@ -55,7 +55,7 @@ func (sw *Scene) OnInit() {
 
 // SceneXYZ returns the xyz.Scene
 func (sw *Scene) SceneXYZ() *xyz.Scene {
-	return sw.Scene
+	return sw.XYZ
 }
 
 func (sw *Scene) SetStyles() {
@@ -71,11 +71,11 @@ func (sw *Scene) HandleEvents() {
 		// pos := sw.Geom.ContentBBox.Min
 		// fmt.Println("loc off:", e.LocalOff(), "pos:", pos, "e pos:", e.WindowPos())
 		// e.SetLocalOff(e.LocalOff().Add(pos))
-		sw.Scene.MouseScrollEvent(e.(*events.MouseScroll))
+		sw.XYZ.MouseScrollEvent(e.(*events.MouseScroll))
 		sw.SetNeedsRender(true)
 	})
 	sw.On(events.KeyChord, func(e events.Event) {
-		sw.Scene.KeyChordEvent(e)
+		sw.XYZ.KeyChordEvent(e)
 		sw.SetNeedsRender(true)
 	})
 	sw.HandleSlideEvents()
@@ -94,11 +94,11 @@ func (sw *Scene) ConfigFrame() {
 	if sz == zp {
 		return
 	}
-	sw.Scene.Geom.Size = sz
+	sw.XYZ.Geom.Size = sz
 
 	doConfig := false
-	if sw.Scene.Frame != nil {
-		cursz := sw.Scene.Frame.Format.Size
+	if sw.XYZ.Frame != nil {
+		cursz := sw.XYZ.Frame.Format.Size
 		if cursz == sz {
 			return
 		}
@@ -112,17 +112,17 @@ func (sw *Scene) ConfigFrame() {
 	}
 	drw := win.GoosiWin.Drawer()
 	goosi.TheApp.RunOnMain(func() {
-		sw.Scene.ConfigFrameFromSurface(drw.Surface().(*vgpu.Surface))
+		sw.XYZ.ConfigFrameFromSurface(drw.Surface().(*vgpu.Surface))
 		if doConfig {
-			sw.Scene.Config()
+			sw.XYZ.Config()
 		}
 	})
-	sw.Scene.SetFlag(true, xyz.ScNeedsRender)
+	sw.XYZ.SetFlag(true, xyz.ScNeedsRender)
 	sw.SetNeedsRender(true)
 }
 
 func (sw *Scene) DrawIntoScene() {
-	if sw.Scene.Frame == nil {
+	if sw.XYZ.Frame == nil {
 		return
 	}
 	r := sw.Geom.ContentBBox
@@ -138,27 +138,27 @@ func (sw *Scene) DrawIntoScene() {
 		}
 		r = nr
 	}
-	img, err := sw.Scene.Image() // direct access
+	img, err := sw.XYZ.Image() // direct access
 	if err != nil {
 		log.Println("frame image err:", err)
 		return
 	}
 	draw.Draw(sw.WidgetBase.Scene.Pixels, r, img, sp, draw.Src) // note: critical to not use Over here!
-	sw.Scene.ImageDone()
+	sw.XYZ.ImageDone()
 }
 
 // Render renders the Frame Image
 func (sw *Scene) Render3D() {
 	sw.ConfigFrame() // nop if all good
-	if sw.Scene.Frame == nil {
+	if sw.XYZ.Frame == nil {
 		return
 	}
-	if sw.Scene.Is(xyz.ScNeedsConfig) {
+	if sw.XYZ.Is(xyz.ScNeedsConfig) {
 		goosi.TheApp.RunOnMain(func() {
-			sw.Scene.Config()
+			sw.XYZ.Config()
 		})
 	}
-	sw.Scene.DoUpdate()
+	sw.XYZ.DoUpdate()
 }
 
 func (sw *Scene) Render() {
@@ -176,13 +176,13 @@ func (sw *Scene) Render() {
 // if already updating, returns false.
 // Pass the result to UpdateEnd* methods.
 func (sw *Scene) UpdateStart3D() bool {
-	return sw.Scene.UpdateStart()
+	return sw.XYZ.UpdateStart()
 }
 
 // UpdateEnd3D calls UpdateEnd on the 3D Scene:
 // resets the scene ScUpdating flag if updt = true
 func (sw *Scene) UpdateEnd3D(updt bool) {
-	sw.Scene.UpdateEnd(updt)
+	sw.XYZ.UpdateEnd(updt)
 }
 
 // UpdateEndRender3D calls UpdateEndRender on the 3D Scene
@@ -193,7 +193,7 @@ func (sw *Scene) UpdateEnd3D(updt bool) {
 // changes. See [UpdateEndUpdate].
 func (sw *Scene) UpdateEndRender3D(updt bool) {
 	if updt {
-		sw.Scene.UpdateEndRender(updt)
+		sw.XYZ.UpdateEndRender(updt)
 		sw.SetNeedsRender(updt)
 	}
 }
@@ -206,7 +206,7 @@ func (sw *Scene) UpdateEndRender3D(updt bool) {
 // See [UpdateEndConfig] for major changes.
 func (sw *Scene) UpdateEndUpdate3D(updt bool) {
 	if updt {
-		sw.Scene.UpdateEndUpdate(updt)
+		sw.XYZ.UpdateEndUpdate(updt)
 		sw.SetNeedsRender(updt)
 	}
 }
@@ -218,7 +218,7 @@ func (sw *Scene) UpdateEndUpdate3D(updt bool) {
 // Config is for Texture, Lighting Meshes or more complex nodes).
 func (sw *Scene) UpdateEndConfig3D(updt bool) {
 	if updt {
-		sw.Scene.UpdateEndConfig(updt)
+		sw.XYZ.UpdateEndConfig(updt)
 		sw.SetNeedsRender(updt)
 	}
 }

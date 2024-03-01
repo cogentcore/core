@@ -51,7 +51,7 @@ func (sv *SceneView) SceneWidget() *Scene {
 
 // Scene returns the xyz.Scene
 func (sv *SceneView) SceneXYZ() *xyz.Scene {
-	return sv.SceneWidget().Scene
+	return sv.SceneWidget().XYZ
 }
 
 func (sv *SceneView) Toolbar() *gi.Toolbar {
