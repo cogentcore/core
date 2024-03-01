@@ -10,14 +10,17 @@ import (
 	"cogentcore.org/core/gi"
 )
 
+type myStruct struct {
+	Name    string `default:"Gopher"`
+	Age     int    `default:"40"`
+	Rating  float32
+	LikesGo bool `default:"true"`
+}
+
+var myStructValue = &myStruct{Name: "Gopher", Age: 30, Rating: 7.3}
+
 func TestStructView(t *testing.T) {
-	type myStruct struct {
-		Name    string `default:"Gopher"`
-		Age     int    `default:"40"`
-		Rating  float32
-		LikesGo bool `default:"true"`
-	}
 	b := gi.NewBody()
-	NewStructView(b).SetStruct(&myStruct{Name: "Gopher", Age: 30, Rating: 7.3})
+	NewStructView(b).SetStruct(myStructValue)
 	b.AssertRender(t, "structview/basic")
 }
