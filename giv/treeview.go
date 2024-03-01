@@ -259,6 +259,9 @@ func (tv *TreeView) SetStyles() {
 				// layer so that the parts get it but not the other tree views
 				s.StateLayer = tv.actStateLayer
 			})
+			w.AsWidget().StyleFinal(func(s *styles.Style) {
+				s.Grow.Set(1, 0)
+			})
 			// we let the parts handle our state
 			// so that we only get it when we are doing
 			// something with this treeview specifically,
