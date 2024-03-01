@@ -61,6 +61,7 @@ func TestGenerate(t *testing.T) {
 	if !got {
 		t.Errorf("expected string with newline in testdata/gtigen.golden, but got %q", want)
 	}
+	swant = strings.ReplaceAll(swant, "\r\n", "\n")
 	if shave != swant {
 		t.Errorf("expected generated file and expected file to be the same after the first line, but they are not (compare ./testdata/gtigen.go and ./testdata/gtigen.golden to see the difference)")
 	}
