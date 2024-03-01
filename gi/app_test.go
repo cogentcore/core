@@ -28,3 +28,12 @@ func TestSceneConfig(t *testing.T) {
 	NewButton(b).SetText("Test")
 	b.AssertRender(t, "app/scene-config")
 }
+
+func TestStdAppBarConfig(t *testing.T) {
+	b := NewBody()
+	b.Style(func(s *styles.Style) {
+		s.Min.X.Dp(500)
+	})
+	StdAppBarConfig(b)
+	b.AssertRender(t, "app/std-app-bar-config")
+}
