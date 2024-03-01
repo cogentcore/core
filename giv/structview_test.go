@@ -12,11 +12,12 @@ import (
 
 func TestStructView(t *testing.T) {
 	type myStruct struct {
-		Name    string
-		Age     int
-		LikesGo bool
+		Name    string `default:"Gopher"`
+		Age     int    `default:"40"`
+		Rating  float32
+		LikesGo bool `default:"true"`
 	}
 	b := gi.NewBody()
-	NewStructView(b).SetStruct(&myStruct{})
+	NewStructView(b).SetStruct(&myStruct{Name: "Gopher", Age: 30, Rating: 7.3})
 	b.AssertRender(t, "structview/basic")
 }
