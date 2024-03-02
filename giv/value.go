@@ -26,26 +26,30 @@ import (
 )
 
 // NewValue makes and returns a new [Value] from the given value and creates
-// the widget for it with the given parent and optional name. It is the main
-// way that end-user code should interact with giv. The given value needs to
-// be a pointer for it to be settable.
+// the widget for it with the given parent and optional tags (only the first
+// argument is used). It is the main way that end-user code should interact
+// with giv. The given value needs to be a pointer for it to be settable.
 //
 // NewValue is not appropriate for internal code configuring
 // non-solo values (for example, in StructView), but it should be fine for
 // most end-user code.
-func NewValue(par ki.Ki, val any, name ...string) Value {
-	v := NewSoloValue(val)
+func NewValue(par ki.Ki, val any, tags ...string) Value {
+	v := NewSoloValue(val, tags...)
 	w := par.NewChild(v.WidgetType()).(gi.Widget)
 	v.ConfigWidget(w)
 	return v
 }
 
-// NewSoloValue makes and returns a new [Value] from the given value.
-// It does not configure the widget, so most end-user code should call
-// [NewValue] instead. It is intended for use in internal code that needs
-// standalone solo values (for example, for a custom TmpSave).
-func NewSoloValue(val any) Value {
-	v := ToValue(val, "")
+// NewSoloValue makes and returns a new [Value] from the given value and optional
+// tags (only the first argument is used). It does not configure the widget, so
+// most end-user code should call [NewValue] instead. It is intended for use in
+// internal code that needs standalone solo values (for example, for a custom TmpSave).
+func NewSoloValue(val any, tags ...string) Value {
+	t := ""
+	if len(tags) > 0 {
+		t = tags[0]
+	}
+	v := ToValue(val, t)
 	v.SetSoloValue(reflect.ValueOf(val))
 	return v
 }

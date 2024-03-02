@@ -15,18 +15,18 @@ func TestValues(t *testing.T) {
 	type test struct {
 		Name  string
 		Value any
-		Tags  map[string]string
+		Tags  string
 	}
 	values := []test{
-		{"ki", gi.NewButton(ki.NewRoot[*gi.Frame]("frame")), nil},
-		{"bool", true, nil},
-		{"int", 3, nil},
-		{"float", 6.7, nil},
-		{"slider", 0.4, map[string]string{"view": "slider"}},
+		{"ki", gi.NewButton(ki.NewRoot[*gi.Frame]("frame")), ""},
+		{"bool", true, ""},
+		{"int", 3, ""},
+		{"float", 6.7, ""},
+		{"slider", 0.4, `view:"slider"`},
 	}
 	for _, value := range values {
 		b := gi.NewBody()
-		NewValue(b, value.Value).SetTags(value.Tags)
+		NewValue(b, value.Value, value.Tags)
 		b.AssertRender(t, "values/"+value.Name)
 	}
 }
