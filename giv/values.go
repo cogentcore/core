@@ -221,7 +221,7 @@ func ToValue(it any, tags string) Value {
 		return &ValueBase{}
 	case vk == reflect.Ptr:
 		if ki.IsKi(nptyp) {
-			return &KiPtrValue{}
+			return &KiValue{}
 		}
 		if laser.AnyIsNil(it) {
 			return &NilValue{}
@@ -701,18 +701,18 @@ func (vv *MapInlineValue) ConfigWidget(w gi.Widget) {
 //////////////////////////////////////////////////////////////////////////////
 //  KiPtrValue
 
-// KiPtrValue provides a chooser for pointers to Ki objects
-type KiPtrValue struct {
+// KiValue provides a button for inspecting pointers to Ki objects
+type KiValue struct {
 	ValueBase
 }
 
-func (vv *KiPtrValue) WidgetType() *gti.Type {
+func (vv *KiValue) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.ButtonType
 	return vv.WidgetTyp
 }
 
 // get the Ki struct itself (or nil)
-func (vv *KiPtrValue) KiStruct() ki.Ki {
+func (vv *KiValue) KiStruct() ki.Ki {
 	if !vv.Value.IsValid() {
 		return nil
 	}
@@ -730,7 +730,7 @@ func (vv *KiPtrValue) KiStruct() ki.Ki {
 	return nil
 }
 
-func (vv *KiPtrValue) UpdateWidget() {
+func (vv *KiValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
@@ -743,7 +743,7 @@ func (vv *KiPtrValue) UpdateWidget() {
 	bt.SetTextUpdate(path)
 }
 
-func (vv *KiPtrValue) ConfigWidget(w gi.Widget) {
+func (vv *KiValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -756,10 +756,10 @@ func (vv *KiPtrValue) ConfigWidget(w gi.Widget) {
 	vv.UpdateWidget()
 }
 
-func (vv *KiPtrValue) HasDialog() bool                      { return true }
-func (vv *KiPtrValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
+func (vv *KiValue) HasDialog() bool                      { return true }
+func (vv *KiValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
 
-func (vv *KiPtrValue) ConfigDialog(d *gi.Body) (bool, func()) {
+func (vv *KiValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	k := vv.KiStruct()
 	if k == nil {
 		return false, nil
