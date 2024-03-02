@@ -8,6 +8,8 @@ import (
 	"testing"
 
 	"cogentcore.org/core/gi"
+	"cogentcore.org/core/glop/option"
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/ki"
 )
 
@@ -23,6 +25,18 @@ func TestValues(t *testing.T) {
 		{"int", 3, ""},
 		{"float", 6.7, ""},
 		{"slider", 0.4, `view:"slider"`},
+		{"enum", gi.ButtonElevated, ""},
+		{"bitflag", gi.WidgetFlags(0), ""},
+		{"type", gi.ButtonType, ""},
+		{"byte-slice", []byte("hello"), ""},
+		{"rune-slice", []rune("hello"), ""},
+		{"nil", (*int)(nil), ""},
+		{"icon", icons.Add, ""},
+		{"icon-show-name", icons.Add, `view:"show-name"`},
+		{"font", gi.AppearanceSettings.FontFamily, ""},
+		{"file", gi.Filename("README.md"), ""},
+		{"func", SettingsWindow, ""},
+		{"option", option.New("an option"), ""},
 	}
 	for _, value := range values {
 		b := gi.NewBody()

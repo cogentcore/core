@@ -12,6 +12,13 @@ type Option[T any] struct {
 	Value T
 }
 
+// New returns a new [Option] set to the given value.
+func New[T any](v T) *Option[T] {
+	o := &Option[T]{}
+	o.Set(v)
+	return o
+}
+
 // Set sets the value to the given value.
 func (o *Option[T]) Set(v T) *Option[T] {
 	o.Value = v
