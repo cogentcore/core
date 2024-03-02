@@ -280,7 +280,7 @@ func (km MapsItem) Label() string {
 	return km.Name
 }
 
-// Maps is a list of KeyMap's -- users can edit these in Prefs -- to create
+// Maps is a list of KeyMap's -- users can edit these in their settings -- to create
 // a custom one, just duplicate an existing map, rename, and customize
 type Maps []MapsItem //gti:add
 

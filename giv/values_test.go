@@ -7,9 +7,12 @@ package giv
 import (
 	"testing"
 
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/glop/option"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/ki"
 )
 
@@ -37,6 +40,10 @@ func TestValues(t *testing.T) {
 		{"file", gi.Filename("README.md"), ""},
 		{"func", SettingsWindow, ""},
 		{"option", option.New("an option"), ""},
+		{"colormap", ColorMapName("ColdHot"), ""},
+		{"color", colors.Orange, ""},
+		{"keychord", key.CodeReturnEnter, ""},
+		{"keymap", keyfun.AvailMaps[0], ""},
 	}
 	for _, value := range values {
 		b := gi.NewBody()
