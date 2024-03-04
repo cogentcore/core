@@ -9,7 +9,6 @@ import (
 	"image"
 	"log"
 	"log/slog"
-	"runtime"
 	"sync"
 	"time"
 
@@ -350,19 +349,6 @@ func (w *RenderWin) SetWinSize(sz image.Point) {
 // size is divided by the screen's DevicePixelRatio
 func (w *RenderWin) SetSize(sz image.Point) {
 	w.GoosiWin.SetSize(sz)
-}
-
-// StackAll returns a formatted stack trace of all goroutines.
-// It calls runtime.Stack with a large enough buffer to capture the entire trace.
-func StackAll() []byte {
-	buf := make([]byte, 1024*10)
-	for {
-		n := runtime.Stack(buf, true)
-		if n < len(buf) {
-			return buf[:n]
-		}
-		buf = make([]byte, 2*len(buf))
-	}
 }
 
 // Resized updates internal buffers after a window has been resized.
