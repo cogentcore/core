@@ -18,49 +18,16 @@ import (
 
 var _FruitsValues = []Fruits{0, 1, 2, 3, 4, 5, 6}
 
-// FruitsN is the highest valid value
-// for type Fruits, plus one.
+// FruitsN is the highest valid value for type Fruits, plus one.
 const FruitsN Fruits = 7
 
-var _FruitsNameToValueMap = map[string]Fruits{
-	`Apple`:      0,
-	`apple`:      0,
-	`Orange`:     1,
-	`orange`:     1,
-	`Peach`:      2,
-	`peach`:      2,
-	`Strawberry`: 3,
-	`strawberry`: 3,
-	`Blackberry`: 4,
-	`blackberry`: 4,
-	`Blueberry`:  5,
-	`blueberry`:  5,
-	`Apricot`:    6,
-	`apricot`:    6,
-}
+var _FruitsNameToValueMap = map[string]Fruits{`Apple`: 0, `apple`: 0, `Orange`: 1, `orange`: 1, `Peach`: 2, `peach`: 2, `Strawberry`: 3, `strawberry`: 3, `Blackberry`: 4, `blackberry`: 4, `Blueberry`: 5, `blueberry`: 5, `Apricot`: 6, `apricot`: 6}
 
-var _FruitsDescMap = map[Fruits]string{
-	0: ``,
-	1: ``,
-	2: ``,
-	3: ``,
-	4: ``,
-	5: ``,
-	6: ``,
-}
+var _FruitsDescMap = map[Fruits]string{0: ``, 1: ``, 2: ``, 3: ``, 4: ``, 5: ``, 6: ``}
 
-var _FruitsMap = map[Fruits]string{
-	0: `Apple`,
-	1: `Orange`,
-	2: `Peach`,
-	3: `Strawberry`,
-	4: `Blackberry`,
-	5: `Blueberry`,
-	6: `Apricot`,
-}
+var _FruitsMap = map[Fruits]string{0: `Apple`, 1: `Orange`, 2: `Peach`, 3: `Strawberry`, 4: `Blackberry`, 5: `Blueberry`, 6: `Apricot`}
 
-// String returns the string representation
-// of this Fruits value.
+// String returns the string representation of this Fruits value.
 func (i Fruits) String() string {
 	if str, ok := _FruitsMap[i]; ok {
 		return str
@@ -68,9 +35,8 @@ func (i Fruits) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the Fruits value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the Fruits value from its string representation,
+// and returns an error if the string is invalid.
 func (i *Fruits) SetString(s string) error {
 	if val, ok := _FruitsNameToValueMap[s]; ok {
 		*i = val
@@ -101,14 +67,12 @@ func (i Fruits) Desc() string {
 	return i.String()
 }
 
-// FruitsValues returns all possible values
-// for the type Fruits.
+// FruitsValues returns all possible values for the type Fruits.
 func FruitsValues() []Fruits {
 	return _FruitsValues
 }
 
-// Values returns all possible values
-// for the type Fruits.
+// Values returns all possible values for the type Fruits.
 func (i Fruits) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_FruitsValues))
 	for i, d := range _FruitsValues {
@@ -117,8 +81,7 @@ func (i Fruits) Values() []enums.Enum {
 	return res
 }
 
-// IsValid returns whether the value is a
-// valid option for type Fruits.
+// IsValid returns whether the value is a valid option for type Fruits.
 func (i Fruits) IsValid() bool {
 	_, ok := _FruitsMap[i]
 	return ok
@@ -156,33 +119,16 @@ func (i *Fruits) UnmarshalJSON(data []byte) error {
 
 var _FoodsValues = []Foods{7, 8, 9, 10}
 
-// FoodsN is the highest valid value
-// for type Foods, plus one.
+// FoodsN is the highest valid value for type Foods, plus one.
 const FoodsN Foods = 11
 
-var _FoodsNameToValueMap = map[string]Foods{
-	`Bread`:   7,
-	`Lettuce`: 8,
-	`Cheese`:  9,
-	`Meat`:    10,
-}
+var _FoodsNameToValueMap = map[string]Foods{`Bread`: 7, `Lettuce`: 8, `Cheese`: 9, `Meat`: 10}
 
-var _FoodsDescMap = map[Foods]string{
-	7:  ``,
-	8:  ``,
-	9:  ``,
-	10: ``,
-}
+var _FoodsDescMap = map[Foods]string{7: ``, 8: ``, 9: ``, 10: ``}
 
-var _FoodsMap = map[Foods]string{
-	7:  `Bread`,
-	8:  `Lettuce`,
-	9:  `Cheese`,
-	10: `Meat`,
-}
+var _FoodsMap = map[Foods]string{7: `Bread`, 8: `Lettuce`, 9: `Cheese`, 10: `Meat`}
 
-// String returns the string representation
-// of this Foods value.
+// String returns the string representation of this Foods value.
 func (i Foods) String() string {
 	if str, ok := _FoodsMap[i]; ok {
 		return str
@@ -190,9 +136,8 @@ func (i Foods) String() string {
 	return Fruits(i).String()
 }
 
-// SetString sets the Foods value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the Foods value from its string representation,
+// and returns an error if the string is invalid.
 func (i *Foods) SetString(s string) error {
 	if val, ok := _FoodsNameToValueMap[s]; ok {
 		*i = val
@@ -219,8 +164,7 @@ func (i Foods) Desc() string {
 	return Fruits(i).Desc()
 }
 
-// FoodsValues returns all possible values
-// for the type Foods.
+// FoodsValues returns all possible values for the type Foods.
 func FoodsValues() []Foods {
 	es := FruitsValues()
 	res := make([]Foods, len(es))
@@ -231,8 +175,7 @@ func FoodsValues() []Foods {
 	return res
 }
 
-// Values returns all possible values
-// for the type Foods.
+// Values returns all possible values for the type Foods.
 func (i Foods) Values() []enums.Enum {
 	es := FruitsValues()
 	les := len(es)
@@ -246,8 +189,7 @@ func (i Foods) Values() []enums.Enum {
 	return res
 }
 
-// IsValid returns whether the value is a
-// valid option for type Foods.
+// IsValid returns whether the value is a valid option for type Foods.
 func (i Foods) IsValid() bool {
 	_, ok := _FoodsMap[i]
 	if !ok {
@@ -288,42 +230,16 @@ func (i *Foods) UnmarshalJSON(data []byte) error {
 
 var _DaysValues = []Days{-11, -9, -7, -5, -3, -1, 1}
 
-// DaysN is the highest valid value
-// for type Days, plus one.
+// DaysN is the highest valid value for type Days, plus one.
 const DaysN Days = 2
 
-var _DaysNameToValueMap = map[string]Days{
-	`DAY_SATURDAY`:  -11,
-	`DAY_FRIDAY`:    -9,
-	`DAY_THURSDAY`:  -7,
-	`DAY_WEDNESDAY`: -5,
-	`DAY_TUESDAY`:   -3,
-	`DAY_MONDAY`:    -1,
-	`DAY_SUNDAY`:    1,
-}
+var _DaysNameToValueMap = map[string]Days{`DAY_SATURDAY`: -11, `DAY_FRIDAY`: -9, `DAY_THURSDAY`: -7, `DAY_WEDNESDAY`: -5, `DAY_TUESDAY`: -3, `DAY_MONDAY`: -1, `DAY_SUNDAY`: 1}
 
-var _DaysDescMap = map[Days]string{
-	-11: `Saturday is the seventh day of the week`,
-	-9:  `Friday is the sixth day of the week`,
-	-7:  `Thursday is the fifth day of the week`,
-	-5:  `Wednesday is the fourth day of the week`,
-	-3:  `Tuesday is the third day of the week`,
-	-1:  `Monday is the second day of the week`,
-	1:   `Sunday is the first day of the week`,
-}
+var _DaysDescMap = map[Days]string{-11: `Saturday is the seventh day of the week`, -9: `Friday is the sixth day of the week`, -7: `Thursday is the fifth day of the week`, -5: `Wednesday is the fourth day of the week`, -3: `Tuesday is the third day of the week`, -1: `Monday is the second day of the week`, 1: `Sunday is the first day of the week`}
 
-var _DaysMap = map[Days]string{
-	-11: `DAY_SATURDAY`,
-	-9:  `DAY_FRIDAY`,
-	-7:  `DAY_THURSDAY`,
-	-5:  `DAY_WEDNESDAY`,
-	-3:  `DAY_TUESDAY`,
-	-1:  `DAY_MONDAY`,
-	1:   `DAY_SUNDAY`,
-}
+var _DaysMap = map[Days]string{-11: `DAY_SATURDAY`, -9: `DAY_FRIDAY`, -7: `DAY_THURSDAY`, -5: `DAY_WEDNESDAY`, -3: `DAY_TUESDAY`, -1: `DAY_MONDAY`, 1: `DAY_SUNDAY`}
 
-// String returns the string representation
-// of this Days value.
+// String returns the string representation of this Days value.
 func (i Days) String() string {
 	if str, ok := _DaysMap[i]; ok {
 		return str
@@ -331,9 +247,8 @@ func (i Days) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the Days value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the Days value from its string representation,
+// and returns an error if the string is invalid.
 func (i *Days) SetString(s string) error {
 	if val, ok := _DaysNameToValueMap[s]; ok {
 		*i = val
@@ -360,14 +275,12 @@ func (i Days) Desc() string {
 	return i.String()
 }
 
-// DaysValues returns all possible values
-// for the type Days.
+// DaysValues returns all possible values for the type Days.
 func DaysValues() []Days {
 	return _DaysValues
 }
 
-// Values returns all possible values
-// for the type Days.
+// Values returns all possible values for the type Days.
 func (i Days) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_DaysValues))
 	for i, d := range _DaysValues {
@@ -405,42 +318,16 @@ func (i *Days) UnmarshalGQL(value any) error {
 
 var _StatesValues = []States{1, 3, 5, 7, 9, 11, 13}
 
-// StatesN is the highest valid value
-// for type States, plus one.
+// StatesN is the highest valid value for type States, plus one.
 const StatesN States = 14
 
-var _StatesNameToValueMap = map[string]States{
-	`enabled`:                         1,
-	`not-enabled`:                     3,
-	`focused`:                         5,
-	`vered`:                           7,
-	`currently-being-pressed-by-user`: 9,
-	`actively-focused`:                11,
-	`selected`:                        13,
-}
+var _StatesNameToValueMap = map[string]States{`enabled`: 1, `not-enabled`: 3, `focused`: 5, `vered`: 7, `currently-being-pressed-by-user`: 9, `actively-focused`: 11, `selected`: 13}
 
-var _StatesDescMap = map[States]string{
-	1:  `Enabled indicates the widget is enabled`,
-	3:  `Disabled indicates the widget is disabled`,
-	5:  `Focused indicates the widget has keyboard focus`,
-	7:  `Hovered indicates the widget is being hovered over`,
-	9:  `Active indicates the widget is being interacted with`,
-	11: `ActivelyFocused indicates the widget has active keyboard focus`,
-	13: `Selected indicates the widget is selected`,
-}
+var _StatesDescMap = map[States]string{1: `Enabled indicates the widget is enabled`, 3: `Disabled indicates the widget is disabled`, 5: `Focused indicates the widget has keyboard focus`, 7: `Hovered indicates the widget is being hovered over`, 9: `Active indicates the widget is being interacted with`, 11: `ActivelyFocused indicates the widget has active keyboard focus`, 13: `Selected indicates the widget is selected`}
 
-var _StatesMap = map[States]string{
-	1:  `enabled`,
-	3:  `not-enabled`,
-	5:  `focused`,
-	7:  `vered`,
-	9:  `currently-being-pressed-by-user`,
-	11: `actively-focused`,
-	13: `selected`,
-}
+var _StatesMap = map[States]string{1: `enabled`, 3: `not-enabled`, 5: `focused`, 7: `vered`, 9: `currently-being-pressed-by-user`, 11: `actively-focused`, 13: `selected`}
 
-// String returns the string representation
-// of this States value.
+// String returns the string representation of this States value.
 func (i States) String() string {
 	str := ""
 	for _, ie := range _StatesValues {
@@ -456,10 +343,8 @@ func (i States) String() string {
 	return str
 }
 
-// BitIndexString returns the string
-// representation of this States value
-// if it is a bit index value
-// (typically an enum constant), and
+// BitIndexString returns the string representation of this States value
+// if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
 func (i States) BitIndexString() string {
 	if str, ok := _StatesMap[i]; ok {
@@ -468,17 +353,15 @@ func (i States) BitIndexString() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the States value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the States value from its string representation,
+// and returns an error if the string is invalid.
 func (i *States) SetString(s string) error {
 	*i = 0
 	return i.SetStringOr(s)
 }
 
-// SetStringOr sets the States value from its
-// string representation while preserving any
-// bit flags already set, and returns an
+// SetStringOr sets the States value from its string representation
+// while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *States) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
@@ -512,14 +395,12 @@ func (i States) Desc() string {
 	return i.String()
 }
 
-// StatesValues returns all possible values
-// for the type States.
+// StatesValues returns all possible values for the type States.
 func StatesValues() []States {
 	return _StatesValues
 }
 
-// Values returns all possible values
-// for the type States.
+// Values returns all possible values for the type States.
 func (i States) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_StatesValues))
 	for i, d := range _StatesValues {
@@ -528,14 +409,12 @@ func (i States) Values() []enums.Enum {
 	return res
 }
 
-// HasFlag returns whether these
-// bit flags have the given bit flag set.
+// HasFlag returns whether these bit flags have the given bit flag set.
 func (i States) HasFlag(f enums.BitFlag) bool {
 	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
 }
 
-// SetFlag sets the value of the given
-// flags in these flags to the given value.
+// SetFlag sets the value of the given flags in these flags to the given value.
 func (i *States) SetFlag(on bool, f ...enums.BitFlag) {
 	var mask int64
 	for _, v := range f {
@@ -596,60 +475,16 @@ func (i *States) Scan(value any) error {
 
 var _LanguagesValues = []Languages{6, 10, 14, 18, 22, 26, 30, 34, 38, 42, 46, 50, 54}
 
-// LanguagesN is the highest valid value
-// for type Languages, plus one.
+// LanguagesN is the highest valid value for type Languages, plus one.
 const LanguagesN Languages = 55
 
-var _LanguagesNameToValueMap = map[string]Languages{
-	`Go`:         6,
-	`Python`:     10,
-	`JavaScript`: 14,
-	`Dart`:       18,
-	`Rust`:       22,
-	`Ruby`:       26,
-	`C`:          30,
-	`CPP`:        34,
-	`ObjectiveC`: 38,
-	`Java`:       42,
-	`TypeScript`: 46,
-	`Kotlin`:     50,
-	`Swift`:      54,
-}
+var _LanguagesNameToValueMap = map[string]Languages{`Go`: 6, `Python`: 10, `JavaScript`: 14, `Dart`: 18, `Rust`: 22, `Ruby`: 26, `C`: 30, `CPP`: 34, `ObjectiveC`: 38, `Java`: 42, `TypeScript`: 46, `Kotlin`: 50, `Swift`: 54}
 
-var _LanguagesDescMap = map[Languages]string{
-	6:  `Go is the best programming language`,
-	10: ``,
-	14: `JavaScript is the worst programming language`,
-	18: ``,
-	22: ``,
-	26: ``,
-	30: ``,
-	34: ``,
-	38: ``,
-	42: ``,
-	46: ``,
-	50: ``,
-	54: ``,
-}
+var _LanguagesDescMap = map[Languages]string{6: `Go is the best programming language`, 10: ``, 14: `JavaScript is the worst programming language`, 18: ``, 22: ``, 26: ``, 30: ``, 34: ``, 38: ``, 42: ``, 46: ``, 50: ``, 54: ``}
 
-var _LanguagesMap = map[Languages]string{
-	6:  `Go`,
-	10: `Python`,
-	14: `JavaScript`,
-	18: `Dart`,
-	22: `Rust`,
-	26: `Ruby`,
-	30: `C`,
-	34: `CPP`,
-	38: `ObjectiveC`,
-	42: `Java`,
-	46: `TypeScript`,
-	50: `Kotlin`,
-	54: `Swift`,
-}
+var _LanguagesMap = map[Languages]string{6: `Go`, 10: `Python`, 14: `JavaScript`, 18: `Dart`, 22: `Rust`, 26: `Ruby`, 30: `C`, 34: `CPP`, 38: `ObjectiveC`, 42: `Java`, 46: `TypeScript`, 50: `Kotlin`, 54: `Swift`}
 
-// String returns the string representation
-// of this Languages value.
+// String returns the string representation of this Languages value.
 func (i Languages) String() string {
 	str := ""
 	for _, ie := range _LanguagesValues {
@@ -665,10 +500,8 @@ func (i Languages) String() string {
 	return str
 }
 
-// BitIndexString returns the string
-// representation of this Languages value
-// if it is a bit index value
-// (typically an enum constant), and
+// BitIndexString returns the string representation of this Languages value
+// if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
 func (i Languages) BitIndexString() string {
 	if str, ok := _LanguagesMap[i]; ok {
@@ -677,17 +510,15 @@ func (i Languages) BitIndexString() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the Languages value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the Languages value from its string representation,
+// and returns an error if the string is invalid.
 func (i *Languages) SetString(s string) error {
 	*i = 0
 	return i.SetStringOr(s)
 }
 
-// SetStringOr sets the Languages value from its
-// string representation while preserving any
-// bit flags already set, and returns an
+// SetStringOr sets the Languages value from its string representation
+// while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *Languages) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
@@ -721,14 +552,12 @@ func (i Languages) Desc() string {
 	return i.String()
 }
 
-// LanguagesValues returns all possible values
-// for the type Languages.
+// LanguagesValues returns all possible values for the type Languages.
 func LanguagesValues() []Languages {
 	return _LanguagesValues
 }
 
-// Values returns all possible values
-// for the type Languages.
+// Values returns all possible values for the type Languages.
 func (i Languages) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_LanguagesValues))
 	for i, d := range _LanguagesValues {
@@ -737,14 +566,12 @@ func (i Languages) Values() []enums.Enum {
 	return res
 }
 
-// HasFlag returns whether these
-// bit flags have the given bit flag set.
+// HasFlag returns whether these bit flags have the given bit flag set.
 func (i Languages) HasFlag(f enums.BitFlag) bool {
 	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
 }
 
-// SetFlag sets the value of the given
-// flags in these flags to the given value.
+// SetFlag sets the value of the given flags in these flags to the given value.
 func (i *Languages) SetFlag(on bool, f ...enums.BitFlag) {
 	var mask int64
 	for _, v := range f {
@@ -792,24 +619,16 @@ func (i *Languages) UnmarshalJSON(data []byte) error {
 
 var _MoreLanguagesValues = []MoreLanguages{55}
 
-// MoreLanguagesN is the highest valid value
-// for type MoreLanguages, plus one.
+// MoreLanguagesN is the highest valid value for type MoreLanguages, plus one.
 const MoreLanguagesN MoreLanguages = 56
 
-var _MoreLanguagesNameToValueMap = map[string]MoreLanguages{
-	`Perl`: 55,
-}
+var _MoreLanguagesNameToValueMap = map[string]MoreLanguages{`Perl`: 55}
 
-var _MoreLanguagesDescMap = map[MoreLanguages]string{
-	55: ``,
-}
+var _MoreLanguagesDescMap = map[MoreLanguages]string{55: ``}
 
-var _MoreLanguagesMap = map[MoreLanguages]string{
-	55: `Perl`,
-}
+var _MoreLanguagesMap = map[MoreLanguages]string{55: `Perl`}
 
-// String returns the string representation
-// of this MoreLanguages value.
+// String returns the string representation of this MoreLanguages value.
 func (i MoreLanguages) String() string {
 	str := ""
 	for _, ie := range LanguagesValues() {
@@ -835,10 +654,8 @@ func (i MoreLanguages) String() string {
 	return str
 }
 
-// BitIndexString returns the string
-// representation of this MoreLanguages value
-// if it is a bit index value
-// (typically an enum constant), and
+// BitIndexString returns the string representation of this MoreLanguages value
+// if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
 func (i MoreLanguages) BitIndexString() string {
 	if str, ok := _MoreLanguagesMap[i]; ok {
@@ -847,17 +664,15 @@ func (i MoreLanguages) BitIndexString() string {
 	return Languages(i).BitIndexString()
 }
 
-// SetString sets the MoreLanguages value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the MoreLanguages value from its string representation,
+// and returns an error if the string is invalid.
 func (i *MoreLanguages) SetString(s string) error {
 	*i = 0
 	return i.SetStringOr(s)
 }
 
-// SetStringOr sets the MoreLanguages value from its
-// string representation while preserving any
-// bit flags already set, and returns an
+// SetStringOr sets the MoreLanguages value from its string representation
+// while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *MoreLanguages) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
@@ -894,8 +709,7 @@ func (i MoreLanguages) Desc() string {
 	return Languages(i).Desc()
 }
 
-// MoreLanguagesValues returns all possible values
-// for the type MoreLanguages.
+// MoreLanguagesValues returns all possible values for the type MoreLanguages.
 func MoreLanguagesValues() []MoreLanguages {
 	es := LanguagesValues()
 	res := make([]MoreLanguages, len(es))
@@ -906,8 +720,7 @@ func MoreLanguagesValues() []MoreLanguages {
 	return res
 }
 
-// Values returns all possible values
-// for the type MoreLanguages.
+// Values returns all possible values for the type MoreLanguages.
 func (i MoreLanguages) Values() []enums.Enum {
 	es := LanguagesValues()
 	les := len(es)
@@ -921,14 +734,12 @@ func (i MoreLanguages) Values() []enums.Enum {
 	return res
 }
 
-// HasFlag returns whether these
-// bit flags have the given bit flag set.
+// HasFlag returns whether these bit flags have the given bit flag set.
 func (i MoreLanguages) HasFlag(f enums.BitFlag) bool {
 	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
 }
 
-// SetFlag sets the value of the given
-// flags in these flags to the given value.
+// SetFlag sets the value of the given flags in these flags to the given value.
 func (i *MoreLanguages) SetFlag(on bool, f ...enums.BitFlag) {
 	var mask int64
 	for _, v := range f {

@@ -19,10 +19,10 @@ import (
 // BuildString builds the string function using a map access approach.
 func (g *Generator) BuildString(values []Value, typ *Type) {
 	g.Printf("\n")
-	g.Printf("\nvar _%sMap = map[%s]string{\n", typ.Name, typ.Name)
+	g.Printf("\nvar _%sMap = map[%s]string{", typ.Name, typ.Name)
 	n := 0
 	for _, value := range values {
-		g.Printf("\t%s: `%s`,\n", &value, value.Name)
+		g.Printf("%s: `%s`,", &value, value.Name)
 		n += len(value.Name)
 	}
 	g.Printf("}\n\n")
@@ -34,14 +34,11 @@ func (g *Generator) BuildString(values []Value, typ *Type) {
 
 var StringMethodMapTmpl = template.Must(template.New("StringMethodMap").Parse(
 	`{{if .IsBitFlag}}
-	// BitIndexString returns the string
-	// representation of this {{.Name}} value
-	// if it is a bit index value
-	// (typically an enum constant), and
+	// BitIndexString returns the string representation of this {{.Name}} value
+	// if it is a bit index value (typically an enum constant), and
 	// not an actual bit flag value.
 	{{- else}}
-	// String returns the string representation
-	// of this {{.Name}} value.
+	// String returns the string representation of this {{.Name}} value.
 	{{- end}}
 func (i {{.Name}}) {{if .IsBitFlag}} BitIndexString {{else}} String {{end}} () string {
 	if str, ok := _{{.Name}}Map[i]; ok {
@@ -53,15 +50,13 @@ func (i {{.Name}}) {{if .IsBitFlag}} BitIndexString {{else}} String {{end}} () s
 `))
 
 var NConstantTmpl = template.Must(template.New("StringNConstant").Parse(
-	`//{{.Name}}N is the highest valid value
-// for type {{.Name}}, plus one.
+	`//{{.Name}}N is the highest valid value for type {{.Name}}, plus one.
 const {{.Name}}N {{.Name}} = {{.MaxValueP1}}
 `))
 
 var SetStringMethodTmpl = template.Must(template.New("SetStringMethod").Parse(
-	`// SetString sets the {{.Name}} value from its
-// string representation, and returns an
-// error if the string is invalid.
+	`// SetString sets the {{.Name}} value from its string representation,
+// and returns an error if the string is invalid.
 func (i *{{.Name}}) SetString(s string) error {
 	if val, ok := _{{.Name}}NameToValueMap[s]; ok {
 		*i = val
@@ -101,8 +96,7 @@ func (i {{.Name}}) Desc() string {
 `))
 
 var ValuesGlobalTmpl = template.Must(template.New("ValuesGlobal").Parse(
-	`// {{.Name}}Values returns all possible values
-// for the type {{.Name}}.
+	`// {{.Name}}Values returns all possible values for the type {{.Name}}.
 func {{.Name}}Values() []{{.Name}} { {{if eq .Extends ""}}
 	return _{{.Name}}Values {{else}}
 	es := {{.Extends}}Values()
@@ -116,8 +110,7 @@ func {{.Name}}Values() []{{.Name}} { {{if eq .Extends ""}}
 `))
 
 var ValuesMethodTmpl = template.Must(template.New("ValuesMethod").Parse(
-	`// Values returns all possible values
-// for the type {{.Name}}.
+	`// Values returns all possible values for the type {{.Name}}.
 func (i {{.Name}}) Values() []enums.Enum { {{if eq .Extends ""}}
 	res := make([]enums.Enum, len(_{{.Name}}Values))
 	for i, d := range _{{.Name}}Values {
@@ -137,8 +130,7 @@ func (i {{.Name}}) Values() []enums.Enum { {{if eq .Extends ""}}
 `))
 
 var IsValidMethodMapTmpl = template.Must(template.New("IsValidMethodMap").Parse(
-	`// IsValid returns whether the value is a
-// valid option for type {{.Name}}.
+	`// IsValid returns whether the value is a valid option for type {{.Name}}.
 func (i {{.Name}}) IsValid() bool {
 	_, ok := _{{.Name}}Map[i] {{if ne .Extends ""}}
 	if !ok {
@@ -155,7 +147,7 @@ func (g *Generator) BuildBasicMethods(values []Value, typ *Type) {
 	max := int64(0)
 	g.Printf("\nvar _%sValues = []%s{", typ.Name, typ.Name)
 	for _, value := range values {
-		g.Printf("\t%s, ", &value)
+		g.Printf("%s, ", &value)
 		if value.Value > max {
 			max = value.Value
 		}
@@ -193,13 +185,13 @@ func (g *Generator) BuildBasicMethods(values []Value, typ *Type) {
 
 // PrintValueMap prints the map between name and value
 func (g *Generator) PrintValueMap(values []Value, typ *Type) {
-	g.Printf("\nvar _%sNameToValueMap = map[string]%s{\n", typ.Name, typ.Name)
+	g.Printf("\nvar _%sNameToValueMap = map[string]%s{", typ.Name, typ.Name)
 	for _, value := range values {
-		g.Printf("\t`%s`: %s,\n", value.Name, &value)
+		g.Printf("`%s`: %s,", value.Name, &value)
 		if typ.Config.AcceptLower {
 			l := strings.ToLower(value.Name)
 			if l != value.Name { // avoid duplicate keys
-				g.Printf("\t`%s`: %s,\n", l, &value)
+				g.Printf("`%s`: %s,", l, &value)
 			}
 		}
 	}
@@ -209,10 +201,10 @@ func (g *Generator) PrintValueMap(values []Value, typ *Type) {
 // PrintDescMap prints the map of values to descriptions
 func (g *Generator) PrintDescMap(values []Value, typ *Type) {
 	g.Printf("\n")
-	g.Printf("\nvar _%sDescMap = map[%s]string{\n", typ.Name, typ.Name)
+	g.Printf("\nvar _%sDescMap = map[%s]string{", typ.Name, typ.Name)
 	i := 0
 	for _, value := range values {
-		g.Printf("\t%s: `%s`,\n", &value, value.Desc)
+		g.Printf("%s: `%s`,", &value, value.Desc)
 		i++
 	}
 	g.Printf("}\n\n")
