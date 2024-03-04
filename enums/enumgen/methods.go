@@ -32,22 +32,6 @@ func (g *Generator) BuildString(values []Value, typ *Type) {
 	g.ExecTmpl(StringMethodMapTmpl, typ)
 }
 
-// BuildNoOpOrderChangeDetect lets the compiler and the user know if the order/value of the enum values has changed.
-func (g *Generator) BuildNoOpOrderChangeDetect(values []Value, typ *Type) {
-	g.Printf("\n")
-
-	g.Printf(`
-	// An "invalid array index" compiler error signifies that the constant values have changed.
-	// Re-run the enumgen command to generate them again.
-	`)
-	g.Printf("func _%sNoOp (){ ", typ.Name)
-	g.Printf("\n var x [1]struct{}\n")
-	for _, value := range values {
-		g.Printf("\t_ = x[%s-(%s)]\n", value.OriginalName, value.Str)
-	}
-	g.Printf("}\n\n")
-}
-
 var StringMethodMapTmpl = template.Must(template.New("StringMethodMap").Parse(
 	`{{if .IsBitFlag}}
 	// BitIndexString returns the string
@@ -181,8 +165,6 @@ func (g *Generator) BuildBasicMethods(values []Value, typ *Type) {
 	typ.MaxValueP1 = max + 1
 
 	g.ExecTmpl(NConstantTmpl, typ)
-
-	g.BuildNoOpOrderChangeDetect(values, typ)
 
 	// Print the map between name and value
 	g.PrintValueMap(values, typ)

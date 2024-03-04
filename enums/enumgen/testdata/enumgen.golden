@@ -22,19 +22,6 @@ var _FruitsValues = []Fruits{0, 1, 2, 3, 4, 5, 6}
 // for type Fruits, plus one.
 const FruitsN Fruits = 7
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _FruitsNoOp() {
-	var x [1]struct{}
-	_ = x[Apple-(0)]
-	_ = x[Orange-(1)]
-	_ = x[Peach-(2)]
-	_ = x[Strawberry-(3)]
-	_ = x[Blackberry-(4)]
-	_ = x[Blueberry-(5)]
-	_ = x[Apricot-(6)]
-}
-
 var _FruitsNameToValueMap = map[string]Fruits{
 	`Apple`:      0,
 	`apple`:      0,
@@ -173,16 +160,6 @@ var _FoodsValues = []Foods{7, 8, 9, 10}
 // for type Foods, plus one.
 const FoodsN Foods = 11
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _FoodsNoOp() {
-	var x [1]struct{}
-	_ = x[Bread-(7)]
-	_ = x[Lettuce-(8)]
-	_ = x[Cheese-(9)]
-	_ = x[Meat-(10)]
-}
-
 var _FoodsNameToValueMap = map[string]Foods{
 	`Bread`:   7,
 	`Lettuce`: 8,
@@ -315,19 +292,6 @@ var _DaysValues = []Days{-11, -9, -7, -5, -3, -1, 1}
 // for type Days, plus one.
 const DaysN Days = 2
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _DaysNoOp() {
-	var x [1]struct{}
-	_ = x[Saturday-(-11)]
-	_ = x[Friday-(-9)]
-	_ = x[Thursday-(-7)]
-	_ = x[Wednesday-(-5)]
-	_ = x[Tuesday-(-3)]
-	_ = x[Monday-(-1)]
-	_ = x[Sunday-(1)]
-}
-
 var _DaysNameToValueMap = map[string]Days{
 	`DAY_SATURDAY`:  -11,
 	`DAY_FRIDAY`:    -9,
@@ -444,19 +408,6 @@ var _StatesValues = []States{1, 3, 5, 7, 9, 11, 13}
 // StatesN is the highest valid value
 // for type States, plus one.
 const StatesN States = 14
-
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _StatesNoOp() {
-	var x [1]struct{}
-	_ = x[Enabled-(1)]
-	_ = x[Disabled-(3)]
-	_ = x[Focused-(5)]
-	_ = x[Hovered-(7)]
-	_ = x[Active-(9)]
-	_ = x[ActivelyFocused-(11)]
-	_ = x[Selected-(13)]
-}
 
 var _StatesNameToValueMap = map[string]States{
 	`enabled`:                         1,
@@ -648,25 +599,6 @@ var _LanguagesValues = []Languages{6, 10, 14, 18, 22, 26, 30, 34, 38, 42, 46, 50
 // LanguagesN is the highest valid value
 // for type Languages, plus one.
 const LanguagesN Languages = 55
-
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _LanguagesNoOp() {
-	var x [1]struct{}
-	_ = x[Go-(6)]
-	_ = x[Python-(10)]
-	_ = x[JavaScript-(14)]
-	_ = x[Dart-(18)]
-	_ = x[Rust-(22)]
-	_ = x[Ruby-(26)]
-	_ = x[C-(30)]
-	_ = x[CPP-(34)]
-	_ = x[ObjectiveC-(38)]
-	_ = x[Java-(42)]
-	_ = x[TypeScript-(46)]
-	_ = x[Kotlin-(50)]
-	_ = x[Swift-(54)]
-}
 
 var _LanguagesNameToValueMap = map[string]Languages{
 	`Go`:         6,
@@ -863,13 +795,6 @@ var _MoreLanguagesValues = []MoreLanguages{55}
 // MoreLanguagesN is the highest valid value
 // for type MoreLanguages, plus one.
 const MoreLanguagesN MoreLanguages = 56
-
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _MoreLanguagesNoOp() {
-	var x [1]struct{}
-	_ = x[Perl-(55)]
-}
 
 var _MoreLanguagesNameToValueMap = map[string]MoreLanguages{
 	`Perl`: 55,
