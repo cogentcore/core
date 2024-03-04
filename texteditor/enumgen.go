@@ -15,35 +15,16 @@ import (
 
 var _SpellSignalsValues = []SpellSignals{0, 1}
 
-// SpellSignalsN is the highest valid value
-// for type SpellSignals, plus one.
+// SpellSignalsN is the highest valid value for type SpellSignals, plus one.
 const SpellSignalsN SpellSignals = 2
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _SpellSignalsNoOp() {
-	var x [1]struct{}
-	_ = x[SpellSelect-(0)]
-	_ = x[SpellIgnore-(1)]
-}
+var _SpellSignalsNameToValueMap = map[string]SpellSignals{`Select`: 0, `Ignore`: 1}
 
-var _SpellSignalsNameToValueMap = map[string]SpellSignals{
-	`Select`: 0,
-	`Ignore`: 1,
-}
+var _SpellSignalsDescMap = map[SpellSignals]string{0: `SpellSelect means the user chose one of the possible corrections`, 1: `SpellIgnore signals the user chose ignore so clear the tag`}
 
-var _SpellSignalsDescMap = map[SpellSignals]string{
-	0: `SpellSelect means the user chose one of the possible corrections`,
-	1: `SpellIgnore signals the user chose ignore so clear the tag`,
-}
+var _SpellSignalsMap = map[SpellSignals]string{0: `Select`, 1: `Ignore`}
 
-var _SpellSignalsMap = map[SpellSignals]string{
-	0: `Select`,
-	1: `Ignore`,
-}
-
-// String returns the string representation
-// of this SpellSignals value.
+// String returns the string representation of this SpellSignals value.
 func (i SpellSignals) String() string {
 	if str, ok := _SpellSignalsMap[i]; ok {
 		return str
@@ -51,9 +32,8 @@ func (i SpellSignals) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the SpellSignals value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the SpellSignals value from its string representation,
+// and returns an error if the string is invalid.
 func (i *SpellSignals) SetString(s string) error {
 	if val, ok := _SpellSignalsNameToValueMap[s]; ok {
 		*i = val
@@ -80,27 +60,18 @@ func (i SpellSignals) Desc() string {
 	return i.String()
 }
 
-// SpellSignalsValues returns all possible values
-// for the type SpellSignals.
+// SpellSignalsValues returns all possible values for the type SpellSignals.
 func SpellSignalsValues() []SpellSignals {
 	return _SpellSignalsValues
 }
 
-// Values returns all possible values
-// for the type SpellSignals.
+// Values returns all possible values for the type SpellSignals.
 func (i SpellSignals) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_SpellSignalsValues))
 	for i, d := range _SpellSignalsValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type SpellSignals.
-func (i SpellSignals) IsValid() bool {
-	_, ok := _SpellSignalsMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -118,55 +89,16 @@ func (i *SpellSignals) UnmarshalText(text []byte) error {
 
 var _BufSignalsValues = []BufSignals{0, 1, 2, 3, 4, 5, 6}
 
-// BufSignalsN is the highest valid value
-// for type BufSignals, plus one.
+// BufSignalsN is the highest valid value for type BufSignals, plus one.
 const BufSignalsN BufSignals = 7
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _BufSignalsNoOp() {
-	var x [1]struct{}
-	_ = x[BufDone-(0)]
-	_ = x[BufNew-(1)]
-	_ = x[BufMods-(2)]
-	_ = x[BufInsert-(3)]
-	_ = x[BufDelete-(4)]
-	_ = x[BufMarkUpdt-(5)]
-	_ = x[BufClosed-(6)]
-}
+var _BufSignalsNameToValueMap = map[string]BufSignals{`BufDone`: 0, `BufNew`: 1, `BufMods`: 2, `BufInsert`: 3, `BufDelete`: 4, `BufMarkUpdt`: 5, `BufClosed`: 6}
 
-var _BufSignalsNameToValueMap = map[string]BufSignals{
-	`BufDone`:     0,
-	`BufNew`:      1,
-	`BufMods`:     2,
-	`BufInsert`:   3,
-	`BufDelete`:   4,
-	`BufMarkUpdt`: 5,
-	`BufClosed`:   6,
-}
+var _BufSignalsDescMap = map[BufSignals]string{0: `BufDone means that editing was completed and applied to Txt field -- data is Txt bytes`, 1: `BufNew signals that entirely new text is present. All views should do full layout update.`, 2: `BufMods signals that potentially diffuse modifications have been made. Views should do a Layout and Render.`, 3: `BufInsert signals that some text was inserted. data is textbuf.Edit describing change. The Buf always reflects the current state *after* the edit.`, 4: `BufDelete signals that some text was deleted. data is textbuf.Edit describing change. The Buf always reflects the current state *after* the edit.`, 5: `BufMarkUpdt signals that the Markup text has been updated This signal is typically sent from a separate goroutine, so should be used with a mutex`, 6: `BufClosed signals that the textbuf was closed.`}
 
-var _BufSignalsDescMap = map[BufSignals]string{
-	0: `BufDone means that editing was completed and applied to Txt field -- data is Txt bytes`,
-	1: `BufNew signals that entirely new text is present. All views should do full layout update.`,
-	2: `BufMods signals that potentially diffuse modifications have been made. Views should do a Layout and Render.`,
-	3: `BufInsert signals that some text was inserted. data is textbuf.Edit describing change. The Buf always reflects the current state *after* the edit.`,
-	4: `BufDelete signals that some text was deleted. data is textbuf.Edit describing change. The Buf always reflects the current state *after* the edit.`,
-	5: `BufMarkUpdt signals that the Markup text has been updated This signal is typically sent from a separate goroutine, so should be used with a mutex`,
-	6: `BufClosed signals that the textbuf was closed.`,
-}
+var _BufSignalsMap = map[BufSignals]string{0: `BufDone`, 1: `BufNew`, 2: `BufMods`, 3: `BufInsert`, 4: `BufDelete`, 5: `BufMarkUpdt`, 6: `BufClosed`}
 
-var _BufSignalsMap = map[BufSignals]string{
-	0: `BufDone`,
-	1: `BufNew`,
-	2: `BufMods`,
-	3: `BufInsert`,
-	4: `BufDelete`,
-	5: `BufMarkUpdt`,
-	6: `BufClosed`,
-}
-
-// String returns the string representation
-// of this BufSignals value.
+// String returns the string representation of this BufSignals value.
 func (i BufSignals) String() string {
 	if str, ok := _BufSignalsMap[i]; ok {
 		return str
@@ -174,9 +106,8 @@ func (i BufSignals) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the BufSignals value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the BufSignals value from its string representation,
+// and returns an error if the string is invalid.
 func (i *BufSignals) SetString(s string) error {
 	if val, ok := _BufSignalsNameToValueMap[s]; ok {
 		*i = val
@@ -203,27 +134,18 @@ func (i BufSignals) Desc() string {
 	return i.String()
 }
 
-// BufSignalsValues returns all possible values
-// for the type BufSignals.
+// BufSignalsValues returns all possible values for the type BufSignals.
 func BufSignalsValues() []BufSignals {
 	return _BufSignalsValues
 }
 
-// Values returns all possible values
-// for the type BufSignals.
+// Values returns all possible values for the type BufSignals.
 func (i BufSignals) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_BufSignalsValues))
 	for i, d := range _BufSignalsValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type BufSignals.
-func (i BufSignals) IsValid() bool {
-	_, ok := _BufSignalsMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -241,47 +163,16 @@ func (i *BufSignals) UnmarshalText(text []byte) error {
 
 var _BufFlagsValues = []BufFlags{8, 9, 10, 11, 12}
 
-// BufFlagsN is the highest valid value
-// for type BufFlags, plus one.
+// BufFlagsN is the highest valid value for type BufFlags, plus one.
 const BufFlagsN BufFlags = 13
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _BufFlagsNoOp() {
-	var x [1]struct{}
-	_ = x[BufAutoSaving-(8)]
-	_ = x[BufMarkingUp-(9)]
-	_ = x[BufChanged-(10)]
-	_ = x[BufNotSaved-(11)]
-	_ = x[BufFileModOk-(12)]
-}
+var _BufFlagsNameToValueMap = map[string]BufFlags{`AutoSaving`: 8, `MarkingUp`: 9, `Changed`: 10, `NotSaved`: 11, `FileModOk`: 12}
 
-var _BufFlagsNameToValueMap = map[string]BufFlags{
-	`AutoSaving`: 8,
-	`MarkingUp`:  9,
-	`Changed`:    10,
-	`NotSaved`:   11,
-	`FileModOk`:  12,
-}
+var _BufFlagsDescMap = map[BufFlags]string{8: `BufAutoSaving is used in atomically safe way to protect autosaving`, 9: `BufMarkingUp indicates current markup operation in progress -- don&#39;t redo`, 10: `BufChanged indicates if the text has been changed (edited) relative to the original, since last EditDone`, 11: `BufNotSaved indicates if the text has been changed (edited) relative to the original, since last Save`, 12: `BufFileModOk have already asked about fact that file has changed since being opened, user is ok`}
 
-var _BufFlagsDescMap = map[BufFlags]string{
-	8:  `BufAutoSaving is used in atomically safe way to protect autosaving`,
-	9:  `BufMarkingUp indicates current markup operation in progress -- don&#39;t redo`,
-	10: `BufChanged indicates if the text has been changed (edited) relative to the original, since last EditDone`,
-	11: `BufNotSaved indicates if the text has been changed (edited) relative to the original, since last Save`,
-	12: `BufFileModOk have already asked about fact that file has changed since being opened, user is ok`,
-}
+var _BufFlagsMap = map[BufFlags]string{8: `AutoSaving`, 9: `MarkingUp`, 10: `Changed`, 11: `NotSaved`, 12: `FileModOk`}
 
-var _BufFlagsMap = map[BufFlags]string{
-	8:  `AutoSaving`,
-	9:  `MarkingUp`,
-	10: `Changed`,
-	11: `NotSaved`,
-	12: `FileModOk`,
-}
-
-// String returns the string representation
-// of this BufFlags value.
+// String returns the string representation of this BufFlags value.
 func (i BufFlags) String() string {
 	str := ""
 	for _, ie := range gi.WidgetFlagsValues() {
@@ -307,10 +198,8 @@ func (i BufFlags) String() string {
 	return str
 }
 
-// BitIndexString returns the string
-// representation of this BufFlags value
-// if it is a bit index value
-// (typically an enum constant), and
+// BitIndexString returns the string representation of this BufFlags value
+// if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
 func (i BufFlags) BitIndexString() string {
 	if str, ok := _BufFlagsMap[i]; ok {
@@ -319,17 +208,15 @@ func (i BufFlags) BitIndexString() string {
 	return gi.WidgetFlags(i).BitIndexString()
 }
 
-// SetString sets the BufFlags value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the BufFlags value from its string representation,
+// and returns an error if the string is invalid.
 func (i *BufFlags) SetString(s string) error {
 	*i = 0
 	return i.SetStringOr(s)
 }
 
-// SetStringOr sets the BufFlags value from its
-// string representation while preserving any
-// bit flags already set, and returns an
+// SetStringOr sets the BufFlags value from its string representation
+// while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *BufFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
@@ -366,8 +253,7 @@ func (i BufFlags) Desc() string {
 	return gi.WidgetFlags(i).Desc()
 }
 
-// BufFlagsValues returns all possible values
-// for the type BufFlags.
+// BufFlagsValues returns all possible values for the type BufFlags.
 func BufFlagsValues() []BufFlags {
 	es := gi.WidgetFlagsValues()
 	res := make([]BufFlags, len(es))
@@ -378,8 +264,7 @@ func BufFlagsValues() []BufFlags {
 	return res
 }
 
-// Values returns all possible values
-// for the type BufFlags.
+// Values returns all possible values for the type BufFlags.
 func (i BufFlags) Values() []enums.Enum {
 	es := gi.WidgetFlagsValues()
 	les := len(es)
@@ -393,24 +278,12 @@ func (i BufFlags) Values() []enums.Enum {
 	return res
 }
 
-// IsValid returns whether the value is a
-// valid option for type BufFlags.
-func (i BufFlags) IsValid() bool {
-	_, ok := _BufFlagsMap[i]
-	if !ok {
-		return gi.WidgetFlags(i).IsValid()
-	}
-	return ok
-}
-
-// HasFlag returns whether these
-// bit flags have the given bit flag set.
+// HasFlag returns whether these bit flags have the given bit flag set.
 func (i BufFlags) HasFlag(f enums.BitFlag) bool {
 	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
 }
 
-// SetFlag sets the value of the given
-// flags in these flags to the given value.
+// SetFlag sets the value of the given flags in these flags to the given value.
 func (i *BufFlags) SetFlag(on bool, f ...enums.BitFlag) {
 	var mask int64
 	for _, v := range f {
@@ -441,47 +314,16 @@ func (i *BufFlags) UnmarshalText(text []byte) error {
 
 var _EditorFlagsValues = []EditorFlags{8, 9, 10, 11, 12}
 
-// EditorFlagsN is the highest valid value
-// for type EditorFlags, plus one.
+// EditorFlagsN is the highest valid value for type EditorFlags, plus one.
 const EditorFlagsN EditorFlags = 13
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _EditorFlagsNoOp() {
-	var x [1]struct{}
-	_ = x[EditorHasLineNos-(8)]
-	_ = x[EditorNeedsLayout-(9)]
-	_ = x[EditorLastWasTabAI-(10)]
-	_ = x[EditorLastWasUndo-(11)]
-	_ = x[EditorTargetSet-(12)]
-}
+var _EditorFlagsNameToValueMap = map[string]EditorFlags{`EditorHasLineNos`: 8, `EditorNeedsLayout`: 9, `EditorLastWasTabAI`: 10, `EditorLastWasUndo`: 11, `EditorTargetSet`: 12}
 
-var _EditorFlagsNameToValueMap = map[string]EditorFlags{
-	`EditorHasLineNos`:   8,
-	`EditorNeedsLayout`:  9,
-	`EditorLastWasTabAI`: 10,
-	`EditorLastWasUndo`:  11,
-	`EditorTargetSet`:    12,
-}
+var _EditorFlagsDescMap = map[EditorFlags]string{8: `EditorHasLineNos indicates that this editor has line numbers (per Buf option)`, 9: `EditorNeedsLayout is set by SetNeedsLayout: Editor does significant internal layout in LayoutAllLines, and its layout is simply based on what it gets allocated, so it does not affect the rest of the Scene.`, 10: `EditorLastWasTabAI indicates that last key was a Tab auto-indent`, 11: `EditorLastWasUndo indicates that last key was an undo`, 12: `EditorTargetSet indicates that the CursorTarget is set`}
 
-var _EditorFlagsDescMap = map[EditorFlags]string{
-	8:  `EditorHasLineNos indicates that this editor has line numbers (per Buf option)`,
-	9:  `EditorNeedsLayout is set by SetNeedsLayout: Editor does significant internal layout in LayoutAllLines, and its layout is simply based on what it gets allocated, so it does not affect the rest of the Scene.`,
-	10: `EditorLastWasTabAI indicates that last key was a Tab auto-indent`,
-	11: `EditorLastWasUndo indicates that last key was an undo`,
-	12: `EditorTargetSet indicates that the CursorTarget is set`,
-}
+var _EditorFlagsMap = map[EditorFlags]string{8: `EditorHasLineNos`, 9: `EditorNeedsLayout`, 10: `EditorLastWasTabAI`, 11: `EditorLastWasUndo`, 12: `EditorTargetSet`}
 
-var _EditorFlagsMap = map[EditorFlags]string{
-	8:  `EditorHasLineNos`,
-	9:  `EditorNeedsLayout`,
-	10: `EditorLastWasTabAI`,
-	11: `EditorLastWasUndo`,
-	12: `EditorTargetSet`,
-}
-
-// String returns the string representation
-// of this EditorFlags value.
+// String returns the string representation of this EditorFlags value.
 func (i EditorFlags) String() string {
 	str := ""
 	for _, ie := range gi.WidgetFlagsValues() {
@@ -507,10 +349,8 @@ func (i EditorFlags) String() string {
 	return str
 }
 
-// BitIndexString returns the string
-// representation of this EditorFlags value
-// if it is a bit index value
-// (typically an enum constant), and
+// BitIndexString returns the string representation of this EditorFlags value
+// if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
 func (i EditorFlags) BitIndexString() string {
 	if str, ok := _EditorFlagsMap[i]; ok {
@@ -519,17 +359,15 @@ func (i EditorFlags) BitIndexString() string {
 	return gi.WidgetFlags(i).BitIndexString()
 }
 
-// SetString sets the EditorFlags value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the EditorFlags value from its string representation,
+// and returns an error if the string is invalid.
 func (i *EditorFlags) SetString(s string) error {
 	*i = 0
 	return i.SetStringOr(s)
 }
 
-// SetStringOr sets the EditorFlags value from its
-// string representation while preserving any
-// bit flags already set, and returns an
+// SetStringOr sets the EditorFlags value from its string representation
+// while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *EditorFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
@@ -566,8 +404,7 @@ func (i EditorFlags) Desc() string {
 	return gi.WidgetFlags(i).Desc()
 }
 
-// EditorFlagsValues returns all possible values
-// for the type EditorFlags.
+// EditorFlagsValues returns all possible values for the type EditorFlags.
 func EditorFlagsValues() []EditorFlags {
 	es := gi.WidgetFlagsValues()
 	res := make([]EditorFlags, len(es))
@@ -578,8 +415,7 @@ func EditorFlagsValues() []EditorFlags {
 	return res
 }
 
-// Values returns all possible values
-// for the type EditorFlags.
+// Values returns all possible values for the type EditorFlags.
 func (i EditorFlags) Values() []enums.Enum {
 	es := gi.WidgetFlagsValues()
 	les := len(es)
@@ -593,24 +429,12 @@ func (i EditorFlags) Values() []enums.Enum {
 	return res
 }
 
-// IsValid returns whether the value is a
-// valid option for type EditorFlags.
-func (i EditorFlags) IsValid() bool {
-	_, ok := _EditorFlagsMap[i]
-	if !ok {
-		return gi.WidgetFlags(i).IsValid()
-	}
-	return ok
-}
-
-// HasFlag returns whether these
-// bit flags have the given bit flag set.
+// HasFlag returns whether these bit flags have the given bit flag set.
 func (i EditorFlags) HasFlag(f enums.BitFlag) bool {
 	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
 }
 
-// SetFlag sets the value of the given
-// flags in these flags to the given value.
+// SetFlag sets the value of the given flags in these flags to the given value.
 func (i *EditorFlags) SetFlag(on bool, f ...enums.BitFlag) {
 	var mask int64
 	for _, v := range f {

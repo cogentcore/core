@@ -16,55 +16,16 @@ import (
 
 var _ButtonTypesValues = []ButtonTypes{0, 1, 2, 3, 4, 5, 6}
 
-// ButtonTypesN is the highest valid value
-// for type ButtonTypes, plus one.
+// ButtonTypesN is the highest valid value for type ButtonTypes, plus one.
 const ButtonTypesN ButtonTypes = 7
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _ButtonTypesNoOp() {
-	var x [1]struct{}
-	_ = x[ButtonFilled-(0)]
-	_ = x[ButtonTonal-(1)]
-	_ = x[ButtonElevated-(2)]
-	_ = x[ButtonOutlined-(3)]
-	_ = x[ButtonText-(4)]
-	_ = x[ButtonAction-(5)]
-	_ = x[ButtonMenu-(6)]
-}
+var _ButtonTypesNameToValueMap = map[string]ButtonTypes{`Filled`: 0, `Tonal`: 1, `Elevated`: 2, `Outlined`: 3, `Text`: 4, `Action`: 5, `Menu`: 6}
 
-var _ButtonTypesNameToValueMap = map[string]ButtonTypes{
-	`Filled`:   0,
-	`Tonal`:    1,
-	`Elevated`: 2,
-	`Outlined`: 3,
-	`Text`:     4,
-	`Action`:   5,
-	`Menu`:     6,
-}
+var _ButtonTypesDescMap = map[ButtonTypes]string{0: `ButtonFilled is a filled button with a contrasting background color. It should be used for prominent actions, typically those that are the final in a sequence. It is equivalent to Material Design&#39;s filled button.`, 1: `ButtonTonal is a filled button, similar to [ButtonFilled]. It is used for the same purposes, but it has a lighter background color and less emphasis. It is equivalent to Material Design&#39;s filled tonal button.`, 2: `ButtonElevated is an elevated button with a light background color and a shadow. It is equivalent to Material Design&#39;s elevated button.`, 3: `ButtonOutlined is an outlined button that is used for secondary actions that are still important. It is equivalent to Material Design&#39;s outlined button.`, 4: `ButtonText is a low-importance button with no border, background color, or shadow when not being interacted with. It renders primary-colored text, and it renders a background color and shadow when hovered/focused/active. It should only be used for low emphasis actions, and you must ensure it stands out from the surrounding context sufficiently. It is equivalent to Material Design&#39;s text button, but it can also contain icons and other things.`, 5: `ButtonAction is a simple button that typically serves as a simple action among a series of other buttons (eg: in a toolbar), or as a part of another widget, like a spinner or snackbar. It has no border, background color, or shadow when not being interacted with. It inherits the text color of its parent, and it renders a background when hovered/focused/active. you must ensure it stands out from the surrounding context sufficiently. It is equivalent to Material Design&#39;s icon button, but it can also contain text and other things (and frequently does).`, 6: `ButtonMenu is similar to [ButtonAction], but it is only for buttons located in popup menus.`}
 
-var _ButtonTypesDescMap = map[ButtonTypes]string{
-	0: `ButtonFilled is a filled button with a contrasting background color. It should be used for prominent actions, typically those that are the final in a sequence. It is equivalent to Material Design&#39;s filled button.`,
-	1: `ButtonTonal is a filled button, similar to [ButtonFilled]. It is used for the same purposes, but it has a lighter background color and less emphasis. It is equivalent to Material Design&#39;s filled tonal button.`,
-	2: `ButtonElevated is an elevated button with a light background color and a shadow. It is equivalent to Material Design&#39;s elevated button.`,
-	3: `ButtonOutlined is an outlined button that is used for secondary actions that are still important. It is equivalent to Material Design&#39;s outlined button.`,
-	4: `ButtonText is a low-importance button with no border, background color, or shadow when not being interacted with. It renders primary-colored text, and it renders a background color and shadow when hovered/focused/active. It should only be used for low emphasis actions, and you must ensure it stands out from the surrounding context sufficiently. It is equivalent to Material Design&#39;s text button, but it can also contain icons and other things.`,
-	5: `ButtonAction is a simple button that typically serves as a simple action among a series of other buttons (eg: in a toolbar), or as a part of another widget, like a spinner or snackbar. It has no border, background color, or shadow when not being interacted with. It inherits the text color of its parent, and it renders a background when hovered/focused/active. you must ensure it stands out from the surrounding context sufficiently. It is equivalent to Material Design&#39;s icon button, but it can also contain text and other things (and frequently does).`,
-	6: `ButtonMenu is similar to [ButtonAction], but it is only for buttons located in popup menus.`,
-}
+var _ButtonTypesMap = map[ButtonTypes]string{0: `Filled`, 1: `Tonal`, 2: `Elevated`, 3: `Outlined`, 4: `Text`, 5: `Action`, 6: `Menu`}
 
-var _ButtonTypesMap = map[ButtonTypes]string{
-	0: `Filled`,
-	1: `Tonal`,
-	2: `Elevated`,
-	3: `Outlined`,
-	4: `Text`,
-	5: `Action`,
-	6: `Menu`,
-}
-
-// String returns the string representation
-// of this ButtonTypes value.
+// String returns the string representation of this ButtonTypes value.
 func (i ButtonTypes) String() string {
 	if str, ok := _ButtonTypesMap[i]; ok {
 		return str
@@ -72,9 +33,8 @@ func (i ButtonTypes) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the ButtonTypes value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the ButtonTypes value from its string representation,
+// and returns an error if the string is invalid.
 func (i *ButtonTypes) SetString(s string) error {
 	if val, ok := _ButtonTypesNameToValueMap[s]; ok {
 		*i = val
@@ -101,27 +61,18 @@ func (i ButtonTypes) Desc() string {
 	return i.String()
 }
 
-// ButtonTypesValues returns all possible values
-// for the type ButtonTypes.
+// ButtonTypesValues returns all possible values for the type ButtonTypes.
 func ButtonTypesValues() []ButtonTypes {
 	return _ButtonTypesValues
 }
 
-// Values returns all possible values
-// for the type ButtonTypes.
+// Values returns all possible values for the type ButtonTypes.
 func (i ButtonTypes) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_ButtonTypesValues))
 	for i, d := range _ButtonTypesValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type ButtonTypes.
-func (i ButtonTypes) IsValid() bool {
-	_, ok := _ButtonTypesMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -139,35 +90,16 @@ func (i *ButtonTypes) UnmarshalText(text []byte) error {
 
 var _ChooserTypesValues = []ChooserTypes{0, 1}
 
-// ChooserTypesN is the highest valid value
-// for type ChooserTypes, plus one.
+// ChooserTypesN is the highest valid value for type ChooserTypes, plus one.
 const ChooserTypesN ChooserTypes = 2
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _ChooserTypesNoOp() {
-	var x [1]struct{}
-	_ = x[ChooserFilled-(0)]
-	_ = x[ChooserOutlined-(1)]
-}
+var _ChooserTypesNameToValueMap = map[string]ChooserTypes{`Filled`: 0, `Outlined`: 1}
 
-var _ChooserTypesNameToValueMap = map[string]ChooserTypes{
-	`Filled`:   0,
-	`Outlined`: 1,
-}
+var _ChooserTypesDescMap = map[ChooserTypes]string{0: `ChooserFilled represents a filled Chooser with a background color and a bottom border`, 1: `ChooserOutlined represents an outlined Chooser with a border on all sides and no background color`}
 
-var _ChooserTypesDescMap = map[ChooserTypes]string{
-	0: `ChooserFilled represents a filled Chooser with a background color and a bottom border`,
-	1: `ChooserOutlined represents an outlined Chooser with a border on all sides and no background color`,
-}
+var _ChooserTypesMap = map[ChooserTypes]string{0: `Filled`, 1: `Outlined`}
 
-var _ChooserTypesMap = map[ChooserTypes]string{
-	0: `Filled`,
-	1: `Outlined`,
-}
-
-// String returns the string representation
-// of this ChooserTypes value.
+// String returns the string representation of this ChooserTypes value.
 func (i ChooserTypes) String() string {
 	if str, ok := _ChooserTypesMap[i]; ok {
 		return str
@@ -175,9 +107,8 @@ func (i ChooserTypes) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the ChooserTypes value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the ChooserTypes value from its string representation,
+// and returns an error if the string is invalid.
 func (i *ChooserTypes) SetString(s string) error {
 	if val, ok := _ChooserTypesNameToValueMap[s]; ok {
 		*i = val
@@ -204,27 +135,18 @@ func (i ChooserTypes) Desc() string {
 	return i.String()
 }
 
-// ChooserTypesValues returns all possible values
-// for the type ChooserTypes.
+// ChooserTypesValues returns all possible values for the type ChooserTypes.
 func ChooserTypesValues() []ChooserTypes {
 	return _ChooserTypesValues
 }
 
-// Values returns all possible values
-// for the type ChooserTypes.
+// Values returns all possible values for the type ChooserTypes.
 func (i ChooserTypes) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_ChooserTypesValues))
 	for i, d := range _ChooserTypesValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type ChooserTypes.
-func (i ChooserTypes) IsValid() bool {
-	_, ok := _ChooserTypesMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -242,35 +164,16 @@ func (i *ChooserTypes) UnmarshalText(text []byte) error {
 
 var _CompleteSignalsValues = []CompleteSignals{0, 1}
 
-// CompleteSignalsN is the highest valid value
-// for type CompleteSignals, plus one.
+// CompleteSignalsN is the highest valid value for type CompleteSignals, plus one.
 const CompleteSignalsN CompleteSignals = 2
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _CompleteSignalsNoOp() {
-	var x [1]struct{}
-	_ = x[CompleteSelect-(0)]
-	_ = x[CompleteExtend-(1)]
-}
+var _CompleteSignalsNameToValueMap = map[string]CompleteSignals{`Select`: 0, `Extend`: 1}
 
-var _CompleteSignalsNameToValueMap = map[string]CompleteSignals{
-	`Select`: 0,
-	`Extend`: 1,
-}
+var _CompleteSignalsDescMap = map[CompleteSignals]string{0: `CompleteSelect means the user chose one of the possible completions`, 1: `CompleteExtend means user has requested that the seed extend if all completions have a common prefix longer than current seed`}
 
-var _CompleteSignalsDescMap = map[CompleteSignals]string{
-	0: `CompleteSelect means the user chose one of the possible completions`,
-	1: `CompleteExtend means user has requested that the seed extend if all completions have a common prefix longer than current seed`,
-}
+var _CompleteSignalsMap = map[CompleteSignals]string{0: `Select`, 1: `Extend`}
 
-var _CompleteSignalsMap = map[CompleteSignals]string{
-	0: `Select`,
-	1: `Extend`,
-}
-
-// String returns the string representation
-// of this CompleteSignals value.
+// String returns the string representation of this CompleteSignals value.
 func (i CompleteSignals) String() string {
 	if str, ok := _CompleteSignalsMap[i]; ok {
 		return str
@@ -278,9 +181,8 @@ func (i CompleteSignals) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the CompleteSignals value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the CompleteSignals value from its string representation,
+// and returns an error if the string is invalid.
 func (i *CompleteSignals) SetString(s string) error {
 	if val, ok := _CompleteSignalsNameToValueMap[s]; ok {
 		*i = val
@@ -307,27 +209,18 @@ func (i CompleteSignals) Desc() string {
 	return i.String()
 }
 
-// CompleteSignalsValues returns all possible values
-// for the type CompleteSignals.
+// CompleteSignalsValues returns all possible values for the type CompleteSignals.
 func CompleteSignalsValues() []CompleteSignals {
 	return _CompleteSignalsValues
 }
 
-// Values returns all possible values
-// for the type CompleteSignals.
+// Values returns all possible values for the type CompleteSignals.
 func (i CompleteSignals) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_CompleteSignalsValues))
 	for i, d := range _CompleteSignalsValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type CompleteSignals.
-func (i CompleteSignals) IsValid() bool {
-	_, ok := _CompleteSignalsMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -345,31 +238,16 @@ func (i *CompleteSignals) UnmarshalText(text []byte) error {
 
 var _WidgetFlagsValues = []WidgetFlags{7}
 
-// WidgetFlagsN is the highest valid value
-// for type WidgetFlags, plus one.
+// WidgetFlagsN is the highest valid value for type WidgetFlags, plus one.
 const WidgetFlagsN WidgetFlags = 8
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _WidgetFlagsNoOp() {
-	var x [1]struct{}
-	_ = x[NeedsRender-(7)]
-}
+var _WidgetFlagsNameToValueMap = map[string]WidgetFlags{`NeedsRender`: 7}
 
-var _WidgetFlagsNameToValueMap = map[string]WidgetFlags{
-	`NeedsRender`: 7,
-}
+var _WidgetFlagsDescMap = map[WidgetFlags]string{7: `NeedsRender needs to be rendered on next render iteration`}
 
-var _WidgetFlagsDescMap = map[WidgetFlags]string{
-	7: `NeedsRender needs to be rendered on next render iteration`,
-}
+var _WidgetFlagsMap = map[WidgetFlags]string{7: `NeedsRender`}
 
-var _WidgetFlagsMap = map[WidgetFlags]string{
-	7: `NeedsRender`,
-}
-
-// String returns the string representation
-// of this WidgetFlags value.
+// String returns the string representation of this WidgetFlags value.
 func (i WidgetFlags) String() string {
 	str := ""
 	for _, ie := range ki.FlagsValues() {
@@ -395,10 +273,8 @@ func (i WidgetFlags) String() string {
 	return str
 }
 
-// BitIndexString returns the string
-// representation of this WidgetFlags value
-// if it is a bit index value
-// (typically an enum constant), and
+// BitIndexString returns the string representation of this WidgetFlags value
+// if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
 func (i WidgetFlags) BitIndexString() string {
 	if str, ok := _WidgetFlagsMap[i]; ok {
@@ -407,17 +283,15 @@ func (i WidgetFlags) BitIndexString() string {
 	return ki.Flags(i).BitIndexString()
 }
 
-// SetString sets the WidgetFlags value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the WidgetFlags value from its string representation,
+// and returns an error if the string is invalid.
 func (i *WidgetFlags) SetString(s string) error {
 	*i = 0
 	return i.SetStringOr(s)
 }
 
-// SetStringOr sets the WidgetFlags value from its
-// string representation while preserving any
-// bit flags already set, and returns an
+// SetStringOr sets the WidgetFlags value from its string representation
+// while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *WidgetFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
@@ -454,8 +328,7 @@ func (i WidgetFlags) Desc() string {
 	return ki.Flags(i).Desc()
 }
 
-// WidgetFlagsValues returns all possible values
-// for the type WidgetFlags.
+// WidgetFlagsValues returns all possible values for the type WidgetFlags.
 func WidgetFlagsValues() []WidgetFlags {
 	es := ki.FlagsValues()
 	res := make([]WidgetFlags, len(es))
@@ -466,8 +339,7 @@ func WidgetFlagsValues() []WidgetFlags {
 	return res
 }
 
-// Values returns all possible values
-// for the type WidgetFlags.
+// Values returns all possible values for the type WidgetFlags.
 func (i WidgetFlags) Values() []enums.Enum {
 	es := ki.FlagsValues()
 	les := len(es)
@@ -481,24 +353,12 @@ func (i WidgetFlags) Values() []enums.Enum {
 	return res
 }
 
-// IsValid returns whether the value is a
-// valid option for type WidgetFlags.
-func (i WidgetFlags) IsValid() bool {
-	_, ok := _WidgetFlagsMap[i]
-	if !ok {
-		return ki.Flags(i).IsValid()
-	}
-	return ok
-}
-
-// HasFlag returns whether these
-// bit flags have the given bit flag set.
+// HasFlag returns whether these bit flags have the given bit flag set.
 func (i WidgetFlags) HasFlag(f enums.BitFlag) bool {
 	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
 }
 
-// SetFlag sets the value of the given
-// flags in these flags to the given value.
+// SetFlag sets the value of the given flags in these flags to the given value.
 func (i *WidgetFlags) SetFlag(on bool, f ...enums.BitFlag) {
 	var mask int64
 	for _, v := range f {
@@ -529,87 +389,16 @@ func (i *WidgetFlags) UnmarshalText(text []byte) error {
 
 var _LabelTypesValues = []LabelTypes{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}
 
-// LabelTypesN is the highest valid value
-// for type LabelTypes, plus one.
+// LabelTypesN is the highest valid value for type LabelTypes, plus one.
 const LabelTypesN LabelTypes = 15
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _LabelTypesNoOp() {
-	var x [1]struct{}
-	_ = x[LabelDisplayLarge-(0)]
-	_ = x[LabelDisplayMedium-(1)]
-	_ = x[LabelDisplaySmall-(2)]
-	_ = x[LabelHeadlineLarge-(3)]
-	_ = x[LabelHeadlineMedium-(4)]
-	_ = x[LabelHeadlineSmall-(5)]
-	_ = x[LabelTitleLarge-(6)]
-	_ = x[LabelTitleMedium-(7)]
-	_ = x[LabelTitleSmall-(8)]
-	_ = x[LabelBodyLarge-(9)]
-	_ = x[LabelBodyMedium-(10)]
-	_ = x[LabelBodySmall-(11)]
-	_ = x[LabelLabelLarge-(12)]
-	_ = x[LabelLabelMedium-(13)]
-	_ = x[LabelLabelSmall-(14)]
-}
+var _LabelTypesNameToValueMap = map[string]LabelTypes{`DisplayLarge`: 0, `DisplayMedium`: 1, `DisplaySmall`: 2, `HeadlineLarge`: 3, `HeadlineMedium`: 4, `HeadlineSmall`: 5, `TitleLarge`: 6, `TitleMedium`: 7, `TitleSmall`: 8, `BodyLarge`: 9, `BodyMedium`: 10, `BodySmall`: 11, `LabelLarge`: 12, `LabelMedium`: 13, `LabelSmall`: 14}
 
-var _LabelTypesNameToValueMap = map[string]LabelTypes{
-	`DisplayLarge`:   0,
-	`DisplayMedium`:  1,
-	`DisplaySmall`:   2,
-	`HeadlineLarge`:  3,
-	`HeadlineMedium`: 4,
-	`HeadlineSmall`:  5,
-	`TitleLarge`:     6,
-	`TitleMedium`:    7,
-	`TitleSmall`:     8,
-	`BodyLarge`:      9,
-	`BodyMedium`:     10,
-	`BodySmall`:      11,
-	`LabelLarge`:     12,
-	`LabelMedium`:    13,
-	`LabelSmall`:     14,
-}
+var _LabelTypesDescMap = map[LabelTypes]string{0: `LabelDisplayLarge is a large, short, and important display label with a default font size of 57dp.`, 1: `LabelDisplayMedium is a medium-sized, short, and important display label with a default font size of 45dp.`, 2: `LabelDisplaySmall is a small, short, and important display label with a default font size of 36dp.`, 3: `LabelHeadlineLarge is a large, high-emphasis headline label with a default font size of 32dp.`, 4: `LabelHeadlineMedium is a medium-sized, high-emphasis headline label with a default font size of 28dp.`, 5: `LabelHeadlineSmall is a small, high-emphasis headline label with a default font size of 24dp.`, 6: `LabelTitleLarge is a large, medium-emphasis title label with a default font size of 22dp.`, 7: `LabelTitleMedium is a medium-sized, medium-emphasis title label with a default font size of 16dp.`, 8: `LabelTitleSmall is a small, medium-emphasis title label with a default font size of 14dp.`, 9: `LabelBodyLarge is a large body label used for longer passages of text with a default font size of 16dp.`, 10: `LabelBodyMedium is a medium-sized body label used for longer passages of text with a default font size of 14dp.`, 11: `LabelBodySmall is a small body label used for longer passages of text with a default font size of 12dp.`, 12: `LabelLabelLarge is a large label used for label text (like a caption or the text inside a button) with a default font size of 14dp.`, 13: `LabelLabelMedium is a medium-sized label used for label text (like a caption or the text inside a button) with a default font size of 12dp.`, 14: `LabelLabelSmall is a small label used for label text (like a caption or the text inside a button) with a default font size of 11dp.`}
 
-var _LabelTypesDescMap = map[LabelTypes]string{
-	0:  `LabelDisplayLarge is a large, short, and important display label with a default font size of 57dp.`,
-	1:  `LabelDisplayMedium is a medium-sized, short, and important display label with a default font size of 45dp.`,
-	2:  `LabelDisplaySmall is a small, short, and important display label with a default font size of 36dp.`,
-	3:  `LabelHeadlineLarge is a large, high-emphasis headline label with a default font size of 32dp.`,
-	4:  `LabelHeadlineMedium is a medium-sized, high-emphasis headline label with a default font size of 28dp.`,
-	5:  `LabelHeadlineSmall is a small, high-emphasis headline label with a default font size of 24dp.`,
-	6:  `LabelTitleLarge is a large, medium-emphasis title label with a default font size of 22dp.`,
-	7:  `LabelTitleMedium is a medium-sized, medium-emphasis title label with a default font size of 16dp.`,
-	8:  `LabelTitleSmall is a small, medium-emphasis title label with a default font size of 14dp.`,
-	9:  `LabelBodyLarge is a large body label used for longer passages of text with a default font size of 16dp.`,
-	10: `LabelBodyMedium is a medium-sized body label used for longer passages of text with a default font size of 14dp.`,
-	11: `LabelBodySmall is a small body label used for longer passages of text with a default font size of 12dp.`,
-	12: `LabelLabelLarge is a large label used for label text (like a caption or the text inside a button) with a default font size of 14dp.`,
-	13: `LabelLabelMedium is a medium-sized label used for label text (like a caption or the text inside a button) with a default font size of 12dp.`,
-	14: `LabelLabelSmall is a small label used for label text (like a caption or the text inside a button) with a default font size of 11dp.`,
-}
+var _LabelTypesMap = map[LabelTypes]string{0: `DisplayLarge`, 1: `DisplayMedium`, 2: `DisplaySmall`, 3: `HeadlineLarge`, 4: `HeadlineMedium`, 5: `HeadlineSmall`, 6: `TitleLarge`, 7: `TitleMedium`, 8: `TitleSmall`, 9: `BodyLarge`, 10: `BodyMedium`, 11: `BodySmall`, 12: `LabelLarge`, 13: `LabelMedium`, 14: `LabelSmall`}
 
-var _LabelTypesMap = map[LabelTypes]string{
-	0:  `DisplayLarge`,
-	1:  `DisplayMedium`,
-	2:  `DisplaySmall`,
-	3:  `HeadlineLarge`,
-	4:  `HeadlineMedium`,
-	5:  `HeadlineSmall`,
-	6:  `TitleLarge`,
-	7:  `TitleMedium`,
-	8:  `TitleSmall`,
-	9:  `BodyLarge`,
-	10: `BodyMedium`,
-	11: `BodySmall`,
-	12: `LabelLarge`,
-	13: `LabelMedium`,
-	14: `LabelSmall`,
-}
-
-// String returns the string representation
-// of this LabelTypes value.
+// String returns the string representation of this LabelTypes value.
 func (i LabelTypes) String() string {
 	if str, ok := _LabelTypesMap[i]; ok {
 		return str
@@ -617,9 +406,8 @@ func (i LabelTypes) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the LabelTypes value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the LabelTypes value from its string representation,
+// and returns an error if the string is invalid.
 func (i *LabelTypes) SetString(s string) error {
 	if val, ok := _LabelTypesNameToValueMap[s]; ok {
 		*i = val
@@ -646,27 +434,18 @@ func (i LabelTypes) Desc() string {
 	return i.String()
 }
 
-// LabelTypesValues returns all possible values
-// for the type LabelTypes.
+// LabelTypesValues returns all possible values for the type LabelTypes.
 func LabelTypesValues() []LabelTypes {
 	return _LabelTypesValues
 }
 
-// Values returns all possible values
-// for the type LabelTypes.
+// Values returns all possible values for the type LabelTypes.
 func (i LabelTypes) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_LabelTypesValues))
 	for i, d := range _LabelTypesValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type LabelTypes.
-func (i LabelTypes) IsValid() bool {
-	_, ok := _LabelTypesMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -684,39 +463,16 @@ func (i *LabelTypes) UnmarshalText(text []byte) error {
 
 var _LayoutPassesValues = []LayoutPasses{0, 1, 2}
 
-// LayoutPassesN is the highest valid value
-// for type LayoutPasses, plus one.
+// LayoutPassesN is the highest valid value for type LayoutPasses, plus one.
 const LayoutPassesN LayoutPasses = 3
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _LayoutPassesNoOp() {
-	var x [1]struct{}
-	_ = x[SizeUpPass-(0)]
-	_ = x[SizeDownPass-(1)]
-	_ = x[SizeFinalPass-(2)]
-}
+var _LayoutPassesNameToValueMap = map[string]LayoutPasses{`SizeUpPass`: 0, `SizeDownPass`: 1, `SizeFinalPass`: 2}
 
-var _LayoutPassesNameToValueMap = map[string]LayoutPasses{
-	`SizeUpPass`:    0,
-	`SizeDownPass`:  1,
-	`SizeFinalPass`: 2,
-}
+var _LayoutPassesDescMap = map[LayoutPasses]string{0: ``, 1: ``, 2: ``}
 
-var _LayoutPassesDescMap = map[LayoutPasses]string{
-	0: ``,
-	1: ``,
-	2: ``,
-}
+var _LayoutPassesMap = map[LayoutPasses]string{0: `SizeUpPass`, 1: `SizeDownPass`, 2: `SizeFinalPass`}
 
-var _LayoutPassesMap = map[LayoutPasses]string{
-	0: `SizeUpPass`,
-	1: `SizeDownPass`,
-	2: `SizeFinalPass`,
-}
-
-// String returns the string representation
-// of this LayoutPasses value.
+// String returns the string representation of this LayoutPasses value.
 func (i LayoutPasses) String() string {
 	if str, ok := _LayoutPassesMap[i]; ok {
 		return str
@@ -724,9 +480,8 @@ func (i LayoutPasses) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the LayoutPasses value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the LayoutPasses value from its string representation,
+// and returns an error if the string is invalid.
 func (i *LayoutPasses) SetString(s string) error {
 	if val, ok := _LayoutPassesNameToValueMap[s]; ok {
 		*i = val
@@ -753,27 +508,18 @@ func (i LayoutPasses) Desc() string {
 	return i.String()
 }
 
-// LayoutPassesValues returns all possible values
-// for the type LayoutPasses.
+// LayoutPassesValues returns all possible values for the type LayoutPasses.
 func LayoutPassesValues() []LayoutPasses {
 	return _LayoutPassesValues
 }
 
-// Values returns all possible values
-// for the type LayoutPasses.
+// Values returns all possible values for the type LayoutPasses.
 func (i LayoutPasses) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_LayoutPassesValues))
 	for i, d := range _LayoutPassesValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type LayoutPasses.
-func (i LayoutPasses) IsValid() bool {
-	_, ok := _LayoutPassesMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -791,39 +537,16 @@ func (i *LayoutPasses) UnmarshalText(text []byte) error {
 
 var _LayoutFlagsValues = []LayoutFlags{8, 9, 10}
 
-// LayoutFlagsN is the highest valid value
-// for type LayoutFlags, plus one.
+// LayoutFlagsN is the highest valid value for type LayoutFlags, plus one.
 const LayoutFlagsN LayoutFlags = 11
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _LayoutFlagsNoOp() {
-	var x [1]struct{}
-	_ = x[LayoutStackTopOnly-(8)]
-	_ = x[LayoutNeedsRedo-(9)]
-	_ = x[LayoutNoKeys-(10)]
-}
+var _LayoutFlagsNameToValueMap = map[string]LayoutFlags{`StackTopOnly`: 8, `NeedsRedo`: 9, `NoKeys`: 10}
 
-var _LayoutFlagsNameToValueMap = map[string]LayoutFlags{
-	`StackTopOnly`: 8,
-	`NeedsRedo`:    9,
-	`NoKeys`:       10,
-}
+var _LayoutFlagsDescMap = map[LayoutFlags]string{8: `for stacked layout, only layout the top widget. this is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don&#39;t`, 9: `true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration`, 10: `LayoutNoKeys prevents processing of keyboard events for this layout. By default, Layout handles focus navigation events, but if an outer Widget handles these instead, then this should be set.`}
 
-var _LayoutFlagsDescMap = map[LayoutFlags]string{
-	8:  `for stacked layout, only layout the top widget. this is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don&#39;t`,
-	9:  `true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration`,
-	10: `LayoutNoKeys prevents processing of keyboard events for this layout. By default, Layout handles focus navigation events, but if an outer Widget handles these instead, then this should be set.`,
-}
+var _LayoutFlagsMap = map[LayoutFlags]string{8: `StackTopOnly`, 9: `NeedsRedo`, 10: `NoKeys`}
 
-var _LayoutFlagsMap = map[LayoutFlags]string{
-	8:  `StackTopOnly`,
-	9:  `NeedsRedo`,
-	10: `NoKeys`,
-}
-
-// String returns the string representation
-// of this LayoutFlags value.
+// String returns the string representation of this LayoutFlags value.
 func (i LayoutFlags) String() string {
 	str := ""
 	for _, ie := range WidgetFlagsValues() {
@@ -849,10 +572,8 @@ func (i LayoutFlags) String() string {
 	return str
 }
 
-// BitIndexString returns the string
-// representation of this LayoutFlags value
-// if it is a bit index value
-// (typically an enum constant), and
+// BitIndexString returns the string representation of this LayoutFlags value
+// if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
 func (i LayoutFlags) BitIndexString() string {
 	if str, ok := _LayoutFlagsMap[i]; ok {
@@ -861,17 +582,15 @@ func (i LayoutFlags) BitIndexString() string {
 	return WidgetFlags(i).BitIndexString()
 }
 
-// SetString sets the LayoutFlags value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the LayoutFlags value from its string representation,
+// and returns an error if the string is invalid.
 func (i *LayoutFlags) SetString(s string) error {
 	*i = 0
 	return i.SetStringOr(s)
 }
 
-// SetStringOr sets the LayoutFlags value from its
-// string representation while preserving any
-// bit flags already set, and returns an
+// SetStringOr sets the LayoutFlags value from its string representation
+// while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *LayoutFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
@@ -908,8 +627,7 @@ func (i LayoutFlags) Desc() string {
 	return WidgetFlags(i).Desc()
 }
 
-// LayoutFlagsValues returns all possible values
-// for the type LayoutFlags.
+// LayoutFlagsValues returns all possible values for the type LayoutFlags.
 func LayoutFlagsValues() []LayoutFlags {
 	es := WidgetFlagsValues()
 	res := make([]LayoutFlags, len(es))
@@ -920,8 +638,7 @@ func LayoutFlagsValues() []LayoutFlags {
 	return res
 }
 
-// Values returns all possible values
-// for the type LayoutFlags.
+// Values returns all possible values for the type LayoutFlags.
 func (i LayoutFlags) Values() []enums.Enum {
 	es := WidgetFlagsValues()
 	les := len(es)
@@ -935,24 +652,12 @@ func (i LayoutFlags) Values() []enums.Enum {
 	return res
 }
 
-// IsValid returns whether the value is a
-// valid option for type LayoutFlags.
-func (i LayoutFlags) IsValid() bool {
-	_, ok := _LayoutFlagsMap[i]
-	if !ok {
-		return WidgetFlags(i).IsValid()
-	}
-	return ok
-}
-
-// HasFlag returns whether these
-// bit flags have the given bit flag set.
+// HasFlag returns whether these bit flags have the given bit flag set.
 func (i LayoutFlags) HasFlag(f enums.BitFlag) bool {
 	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
 }
 
-// SetFlag sets the value of the given
-// flags in these flags to the given value.
+// SetFlag sets the value of the given flags in these flags to the given value.
 func (i *LayoutFlags) SetFlag(on bool, f ...enums.BitFlag) {
 	var mask int64
 	for _, v := range f {
@@ -983,39 +688,16 @@ func (i *LayoutFlags) UnmarshalText(text []byte) error {
 
 var _MeterTypesValues = []MeterTypes{0, 1, 2}
 
-// MeterTypesN is the highest valid value
-// for type MeterTypes, plus one.
+// MeterTypesN is the highest valid value for type MeterTypes, plus one.
 const MeterTypesN MeterTypes = 3
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _MeterTypesNoOp() {
-	var x [1]struct{}
-	_ = x[MeterLinear-(0)]
-	_ = x[MeterCircle-(1)]
-	_ = x[MeterSemicircle-(2)]
-}
+var _MeterTypesNameToValueMap = map[string]MeterTypes{`Linear`: 0, `Circle`: 1, `Semicircle`: 2}
 
-var _MeterTypesNameToValueMap = map[string]MeterTypes{
-	`Linear`:     0,
-	`Circle`:     1,
-	`Semicircle`: 2,
-}
+var _MeterTypesDescMap = map[MeterTypes]string{0: `MeterLinear indicates to render a meter that goes in a straight, linear direction, either horizontal or vertical, as specified by [styles.Style.Direction].`, 1: `MeterCircle indicates to render the meter as a circle.`, 2: `MeterSemicircle indicates to render the meter as a semicircle.`}
 
-var _MeterTypesDescMap = map[MeterTypes]string{
-	0: `MeterLinear indicates to render a meter that goes in a straight, linear direction, either horizontal or vertical, as specified by [styles.Style.Direction].`,
-	1: `MeterCircle indicates to render the meter as a circle.`,
-	2: `MeterSemicircle indicates to render the meter as a semicircle.`,
-}
+var _MeterTypesMap = map[MeterTypes]string{0: `Linear`, 1: `Circle`, 2: `Semicircle`}
 
-var _MeterTypesMap = map[MeterTypes]string{
-	0: `Linear`,
-	1: `Circle`,
-	2: `Semicircle`,
-}
-
-// String returns the string representation
-// of this MeterTypes value.
+// String returns the string representation of this MeterTypes value.
 func (i MeterTypes) String() string {
 	if str, ok := _MeterTypesMap[i]; ok {
 		return str
@@ -1023,9 +705,8 @@ func (i MeterTypes) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the MeterTypes value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the MeterTypes value from its string representation,
+// and returns an error if the string is invalid.
 func (i *MeterTypes) SetString(s string) error {
 	if val, ok := _MeterTypesNameToValueMap[s]; ok {
 		*i = val
@@ -1052,27 +733,18 @@ func (i MeterTypes) Desc() string {
 	return i.String()
 }
 
-// MeterTypesValues returns all possible values
-// for the type MeterTypes.
+// MeterTypesValues returns all possible values for the type MeterTypes.
 func MeterTypesValues() []MeterTypes {
 	return _MeterTypesValues
 }
 
-// Values returns all possible values
-// for the type MeterTypes.
+// Values returns all possible values for the type MeterTypes.
 func (i MeterTypes) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_MeterTypesValues))
 	for i, d := range _MeterTypesValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type MeterTypes.
-func (i MeterTypes) IsValid() bool {
-	_, ok := _MeterTypesMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -1090,59 +762,16 @@ func (i *MeterTypes) UnmarshalText(text []byte) error {
 
 var _WinFlagsValues = []WinFlags{0, 1, 2, 3, 4, 5, 6, 7}
 
-// WinFlagsN is the highest valid value
-// for type WinFlags, plus one.
+// WinFlagsN is the highest valid value for type WinFlags, plus one.
 const WinFlagsN WinFlags = 8
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _WinFlagsNoOp() {
-	var x [1]struct{}
-	_ = x[WinHasGeomPrefs-(0)]
-	_ = x[WinClosing-(1)]
-	_ = x[WinResizing-(2)]
-	_ = x[WinGotFocus-(3)]
-	_ = x[WinSentShow-(4)]
-	_ = x[WinGoLoop-(5)]
-	_ = x[WinStopEventLoop-(6)]
-	_ = x[WinSelectionMode-(7)]
-}
+var _WinFlagsNameToValueMap = map[string]WinFlags{`HasGeomPrefs`: 0, `Closing`: 1, `Resizing`: 2, `GotFocus`: 3, `SentShow`: 4, `GoLoop`: 5, `StopEventLoop`: 6, `SelectionMode`: 7}
 
-var _WinFlagsNameToValueMap = map[string]WinFlags{
-	`HasGeomPrefs`:  0,
-	`Closing`:       1,
-	`Resizing`:      2,
-	`GotFocus`:      3,
-	`SentShow`:      4,
-	`GoLoop`:        5,
-	`StopEventLoop`: 6,
-	`SelectionMode`: 7,
-}
+var _WinFlagsDescMap = map[WinFlags]string{0: `WinHasGeomPrefs indicates if this window has WinGeomPrefs setting that sized it -- affects whether other default geom should be applied.`, 1: `WinClosing is atomic flag indicating window is closing`, 2: `WinResizing is atomic flag indicating window is resizing`, 3: `WinGotFocus indicates that have we received RenderWin focus`, 4: `WinSentShow have we sent the show event yet? Only ever sent ONCE`, 5: `WinGoLoop true if we are running from GoStartEventLoop -- requires a WinWait.Done at end`, 6: `WinStopEventLoop is set when event loop stop is requested`, 7: `WinSelectionMode indicates that the window is in Cogent Core inspect editor edit mode`}
 
-var _WinFlagsDescMap = map[WinFlags]string{
-	0: `WinHasGeomPrefs indicates if this window has WinGeomPrefs setting that sized it -- affects whether other default geom should be applied.`,
-	1: `WinClosing is atomic flag indicating window is closing`,
-	2: `WinResizing is atomic flag indicating window is resizing`,
-	3: `WinGotFocus indicates that have we received RenderWin focus`,
-	4: `WinSentShow have we sent the show event yet? Only ever sent ONCE`,
-	5: `WinGoLoop true if we are running from GoStartEventLoop -- requires a WinWait.Done at end`,
-	6: `WinStopEventLoop is set when event loop stop is requested`,
-	7: `WinSelectionMode indicates that the window is in Cogent Core inspect editor edit mode`,
-}
+var _WinFlagsMap = map[WinFlags]string{0: `HasGeomPrefs`, 1: `Closing`, 2: `Resizing`, 3: `GotFocus`, 4: `SentShow`, 5: `GoLoop`, 6: `StopEventLoop`, 7: `SelectionMode`}
 
-var _WinFlagsMap = map[WinFlags]string{
-	0: `HasGeomPrefs`,
-	1: `Closing`,
-	2: `Resizing`,
-	3: `GotFocus`,
-	4: `SentShow`,
-	5: `GoLoop`,
-	6: `StopEventLoop`,
-	7: `SelectionMode`,
-}
-
-// String returns the string representation
-// of this WinFlags value.
+// String returns the string representation of this WinFlags value.
 func (i WinFlags) String() string {
 	str := ""
 	for _, ie := range _WinFlagsValues {
@@ -1158,10 +787,8 @@ func (i WinFlags) String() string {
 	return str
 }
 
-// BitIndexString returns the string
-// representation of this WinFlags value
-// if it is a bit index value
-// (typically an enum constant), and
+// BitIndexString returns the string representation of this WinFlags value
+// if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
 func (i WinFlags) BitIndexString() string {
 	if str, ok := _WinFlagsMap[i]; ok {
@@ -1170,17 +797,15 @@ func (i WinFlags) BitIndexString() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the WinFlags value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the WinFlags value from its string representation,
+// and returns an error if the string is invalid.
 func (i *WinFlags) SetString(s string) error {
 	*i = 0
 	return i.SetStringOr(s)
 }
 
-// SetStringOr sets the WinFlags value from its
-// string representation while preserving any
-// bit flags already set, and returns an
+// SetStringOr sets the WinFlags value from its string representation
+// while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *WinFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
@@ -1214,14 +839,12 @@ func (i WinFlags) Desc() string {
 	return i.String()
 }
 
-// WinFlagsValues returns all possible values
-// for the type WinFlags.
+// WinFlagsValues returns all possible values for the type WinFlags.
 func WinFlagsValues() []WinFlags {
 	return _WinFlagsValues
 }
 
-// Values returns all possible values
-// for the type WinFlags.
+// Values returns all possible values for the type WinFlags.
 func (i WinFlags) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_WinFlagsValues))
 	for i, d := range _WinFlagsValues {
@@ -1230,21 +853,12 @@ func (i WinFlags) Values() []enums.Enum {
 	return res
 }
 
-// IsValid returns whether the value is a
-// valid option for type WinFlags.
-func (i WinFlags) IsValid() bool {
-	_, ok := _WinFlagsMap[i]
-	return ok
-}
-
-// HasFlag returns whether these
-// bit flags have the given bit flag set.
+// HasFlag returns whether these bit flags have the given bit flag set.
 func (i WinFlags) HasFlag(f enums.BitFlag) bool {
 	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
 }
 
-// SetFlag sets the value of the given
-// flags in these flags to the given value.
+// SetFlag sets the value of the given flags in these flags to the given value.
 func (i *WinFlags) SetFlag(on bool, f ...enums.BitFlag) {
 	var mask int64
 	for _, v := range f {
@@ -1275,35 +889,16 @@ func (i *WinFlags) UnmarshalText(text []byte) error {
 
 var _RenderContextFlagsValues = []RenderContextFlags{0, 1}
 
-// RenderContextFlagsN is the highest valid value
-// for type RenderContextFlags, plus one.
+// RenderContextFlagsN is the highest valid value for type RenderContextFlags, plus one.
 const RenderContextFlagsN RenderContextFlags = 2
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _RenderContextFlagsNoOp() {
-	var x [1]struct{}
-	_ = x[RenderVisible-(0)]
-	_ = x[RenderRebuild-(1)]
-}
+var _RenderContextFlagsNameToValueMap = map[string]RenderContextFlags{`Visible`: 0, `Rebuild`: 1}
 
-var _RenderContextFlagsNameToValueMap = map[string]RenderContextFlags{
-	`Visible`: 0,
-	`Rebuild`: 1,
-}
+var _RenderContextFlagsDescMap = map[RenderContextFlags]string{0: `the window is visible and should be rendered to`, 1: `forces a rebuild of all scene elements`}
 
-var _RenderContextFlagsDescMap = map[RenderContextFlags]string{
-	0: `the window is visible and should be rendered to`,
-	1: `forces a rebuild of all scene elements`,
-}
+var _RenderContextFlagsMap = map[RenderContextFlags]string{0: `Visible`, 1: `Rebuild`}
 
-var _RenderContextFlagsMap = map[RenderContextFlags]string{
-	0: `Visible`,
-	1: `Rebuild`,
-}
-
-// String returns the string representation
-// of this RenderContextFlags value.
+// String returns the string representation of this RenderContextFlags value.
 func (i RenderContextFlags) String() string {
 	str := ""
 	for _, ie := range _RenderContextFlagsValues {
@@ -1319,10 +914,8 @@ func (i RenderContextFlags) String() string {
 	return str
 }
 
-// BitIndexString returns the string
-// representation of this RenderContextFlags value
-// if it is a bit index value
-// (typically an enum constant), and
+// BitIndexString returns the string representation of this RenderContextFlags value
+// if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
 func (i RenderContextFlags) BitIndexString() string {
 	if str, ok := _RenderContextFlagsMap[i]; ok {
@@ -1331,17 +924,15 @@ func (i RenderContextFlags) BitIndexString() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the RenderContextFlags value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the RenderContextFlags value from its string representation,
+// and returns an error if the string is invalid.
 func (i *RenderContextFlags) SetString(s string) error {
 	*i = 0
 	return i.SetStringOr(s)
 }
 
-// SetStringOr sets the RenderContextFlags value from its
-// string representation while preserving any
-// bit flags already set, and returns an
+// SetStringOr sets the RenderContextFlags value from its string representation
+// while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *RenderContextFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
@@ -1375,14 +966,12 @@ func (i RenderContextFlags) Desc() string {
 	return i.String()
 }
 
-// RenderContextFlagsValues returns all possible values
-// for the type RenderContextFlags.
+// RenderContextFlagsValues returns all possible values for the type RenderContextFlags.
 func RenderContextFlagsValues() []RenderContextFlags {
 	return _RenderContextFlagsValues
 }
 
-// Values returns all possible values
-// for the type RenderContextFlags.
+// Values returns all possible values for the type RenderContextFlags.
 func (i RenderContextFlags) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_RenderContextFlagsValues))
 	for i, d := range _RenderContextFlagsValues {
@@ -1391,21 +980,12 @@ func (i RenderContextFlags) Values() []enums.Enum {
 	return res
 }
 
-// IsValid returns whether the value is a
-// valid option for type RenderContextFlags.
-func (i RenderContextFlags) IsValid() bool {
-	_, ok := _RenderContextFlagsMap[i]
-	return ok
-}
-
-// HasFlag returns whether these
-// bit flags have the given bit flag set.
+// HasFlag returns whether these bit flags have the given bit flag set.
 func (i RenderContextFlags) HasFlag(f enums.BitFlag) bool {
 	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
 }
 
-// SetFlag sets the value of the given
-// flags in these flags to the given value.
+// SetFlag sets the value of the given flags in these flags to the given value.
 func (i *RenderContextFlags) SetFlag(on bool, f ...enums.BitFlag) {
 	var mask int64
 	for _, v := range f {
@@ -1436,59 +1016,16 @@ func (i *RenderContextFlags) UnmarshalText(text []byte) error {
 
 var _ScFlagsValues = []ScFlags{8, 9, 10, 11, 12, 13, 14, 15}
 
-// ScFlagsN is the highest valid value
-// for type ScFlags, plus one.
+// ScFlagsN is the highest valid value for type ScFlags, plus one.
 const ScFlagsN ScFlags = 16
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _ScFlagsNoOp() {
-	var x [1]struct{}
-	_ = x[ScUpdating-(8)]
-	_ = x[ScNeedsRender-(9)]
-	_ = x[ScNeedsLayout-(10)]
-	_ = x[ScNeedsRebuild-(11)]
-	_ = x[ScImageUpdated-(12)]
-	_ = x[ScPrefSizing-(13)]
-	_ = x[ScPreserve-(14)]
-	_ = x[ScRenderBBoxes-(15)]
-}
+var _ScFlagsNameToValueMap = map[string]ScFlags{`ScUpdating`: 8, `ScNeedsRender`: 9, `ScNeedsLayout`: 10, `ScNeedsRebuild`: 11, `ScImageUpdated`: 12, `ScPrefSizing`: 13, `ScPreserve`: 14, `ScRenderBBoxes`: 15}
 
-var _ScFlagsNameToValueMap = map[string]ScFlags{
-	`ScUpdating`:     8,
-	`ScNeedsRender`:  9,
-	`ScNeedsLayout`:  10,
-	`ScNeedsRebuild`: 11,
-	`ScImageUpdated`: 12,
-	`ScPrefSizing`:   13,
-	`ScPreserve`:     14,
-	`ScRenderBBoxes`: 15,
-}
+var _ScFlagsDescMap = map[ScFlags]string{8: `ScUpdating means scene is in the process of updating: set for any kind of tree-level update. skip any further update passes until it goes off.`, 9: `ScNeedsRender means nodes have flagged that they need a Render update.`, 10: `ScNeedsLayout means that this scene needs DoLayout stack: GetSize, DoLayout, then Render. This is true after any Config.`, 11: `ScNeedsRebuild means that this scene needs full Rebuild: Config, Layout, Render with DoRebuild flag set (e.g., after global style changes, zooming, etc)`, 12: `ScImageUpdated indicates that the Scene&#39;s image has been updated e.g., due to a render or a resize. This is reset by the global RenderWin rendering pass, so it knows whether it needs to copy the image up to the GPU or not.`, 13: `ScPrefSizing means that this scene is currently doing a PrefSize computation to compute the size of the scene (for sizing window for example) -- affects layout size computation only for Over`, 14: `ScPreserve keeps this scene around instead of deleting when it is no longer needed. Set if added to SceneLibrary for example.`, 15: `ScRenderBBoxes renders the bounding boxes for all objects in scene`}
 
-var _ScFlagsDescMap = map[ScFlags]string{
-	8:  `ScUpdating means scene is in the process of updating: set for any kind of tree-level update. skip any further update passes until it goes off.`,
-	9:  `ScNeedsRender means nodes have flagged that they need a Render update.`,
-	10: `ScNeedsLayout means that this scene needs DoLayout stack: GetSize, DoLayout, then Render. This is true after any Config.`,
-	11: `ScNeedsRebuild means that this scene needs full Rebuild: Config, Layout, Render with DoRebuild flag set (e.g., after global style changes, zooming, etc)`,
-	12: `ScImageUpdated indicates that the Scene&#39;s image has been updated e.g., due to a render or a resize. This is reset by the global RenderWin rendering pass, so it knows whether it needs to copy the image up to the GPU or not.`,
-	13: `ScPrefSizing means that this scene is currently doing a PrefSize computation to compute the size of the scene (for sizing window for example) -- affects layout size computation only for Over`,
-	14: `ScPreserve keeps this scene around instead of deleting when it is no longer needed. Set if added to SceneLibrary for example.`,
-	15: `ScRenderBBoxes renders the bounding boxes for all objects in scene`,
-}
+var _ScFlagsMap = map[ScFlags]string{8: `ScUpdating`, 9: `ScNeedsRender`, 10: `ScNeedsLayout`, 11: `ScNeedsRebuild`, 12: `ScImageUpdated`, 13: `ScPrefSizing`, 14: `ScPreserve`, 15: `ScRenderBBoxes`}
 
-var _ScFlagsMap = map[ScFlags]string{
-	8:  `ScUpdating`,
-	9:  `ScNeedsRender`,
-	10: `ScNeedsLayout`,
-	11: `ScNeedsRebuild`,
-	12: `ScImageUpdated`,
-	13: `ScPrefSizing`,
-	14: `ScPreserve`,
-	15: `ScRenderBBoxes`,
-}
-
-// String returns the string representation
-// of this ScFlags value.
+// String returns the string representation of this ScFlags value.
 func (i ScFlags) String() string {
 	str := ""
 	for _, ie := range WidgetFlagsValues() {
@@ -1514,10 +1051,8 @@ func (i ScFlags) String() string {
 	return str
 }
 
-// BitIndexString returns the string
-// representation of this ScFlags value
-// if it is a bit index value
-// (typically an enum constant), and
+// BitIndexString returns the string representation of this ScFlags value
+// if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
 func (i ScFlags) BitIndexString() string {
 	if str, ok := _ScFlagsMap[i]; ok {
@@ -1526,17 +1061,15 @@ func (i ScFlags) BitIndexString() string {
 	return WidgetFlags(i).BitIndexString()
 }
 
-// SetString sets the ScFlags value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the ScFlags value from its string representation,
+// and returns an error if the string is invalid.
 func (i *ScFlags) SetString(s string) error {
 	*i = 0
 	return i.SetStringOr(s)
 }
 
-// SetStringOr sets the ScFlags value from its
-// string representation while preserving any
-// bit flags already set, and returns an
+// SetStringOr sets the ScFlags value from its string representation
+// while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *ScFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
@@ -1573,8 +1106,7 @@ func (i ScFlags) Desc() string {
 	return WidgetFlags(i).Desc()
 }
 
-// ScFlagsValues returns all possible values
-// for the type ScFlags.
+// ScFlagsValues returns all possible values for the type ScFlags.
 func ScFlagsValues() []ScFlags {
 	es := WidgetFlagsValues()
 	res := make([]ScFlags, len(es))
@@ -1585,8 +1117,7 @@ func ScFlagsValues() []ScFlags {
 	return res
 }
 
-// Values returns all possible values
-// for the type ScFlags.
+// Values returns all possible values for the type ScFlags.
 func (i ScFlags) Values() []enums.Enum {
 	es := WidgetFlagsValues()
 	les := len(es)
@@ -1600,24 +1131,12 @@ func (i ScFlags) Values() []enums.Enum {
 	return res
 }
 
-// IsValid returns whether the value is a
-// valid option for type ScFlags.
-func (i ScFlags) IsValid() bool {
-	_, ok := _ScFlagsMap[i]
-	if !ok {
-		return WidgetFlags(i).IsValid()
-	}
-	return ok
-}
-
-// HasFlag returns whether these
-// bit flags have the given bit flag set.
+// HasFlag returns whether these bit flags have the given bit flag set.
 func (i ScFlags) HasFlag(f enums.BitFlag) bool {
 	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
 }
 
-// SetFlag sets the value of the given
-// flags in these flags to the given value.
+// SetFlag sets the value of the given flags in these flags to the given value.
 func (i *ScFlags) SetFlag(on bool, f ...enums.BitFlag) {
 	var mask int64
 	for _, v := range f {
@@ -1648,39 +1167,16 @@ func (i *ScFlags) UnmarshalText(text []byte) error {
 
 var _SizeClassesValues = []SizeClasses{0, 1, 2}
 
-// SizeClassesN is the highest valid value
-// for type SizeClasses, plus one.
+// SizeClassesN is the highest valid value for type SizeClasses, plus one.
 const SizeClassesN SizeClasses = 3
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _SizeClassesNoOp() {
-	var x [1]struct{}
-	_ = x[SizeCompact-(0)]
-	_ = x[SizeMedium-(1)]
-	_ = x[SizeExpanded-(2)]
-}
+var _SizeClassesNameToValueMap = map[string]SizeClasses{`Compact`: 0, `Medium`: 1, `Expanded`: 2}
 
-var _SizeClassesNameToValueMap = map[string]SizeClasses{
-	`Compact`:  0,
-	`Medium`:   1,
-	`Expanded`: 2,
-}
+var _SizeClassesDescMap = map[SizeClasses]string{0: `SizeCompact is the size class for windows with a width less than 600dp, which typically happens on phones.`, 1: `SizeMedium is the size class for windows with a width between 600dp and 840dp inclusive, which typically happens on tablets.`, 2: `SizeExpanded is the size class for windows with a width greater than 840dp, which typically happens on desktop and laptop computers.`}
 
-var _SizeClassesDescMap = map[SizeClasses]string{
-	0: `SizeCompact is the size class for windows with a width less than 600dp, which typically happens on phones.`,
-	1: `SizeMedium is the size class for windows with a width between 600dp and 840dp inclusive, which typically happens on tablets.`,
-	2: `SizeExpanded is the size class for windows with a width greater than 840dp, which typically happens on desktop and laptop computers.`,
-}
+var _SizeClassesMap = map[SizeClasses]string{0: `Compact`, 1: `Medium`, 2: `Expanded`}
 
-var _SizeClassesMap = map[SizeClasses]string{
-	0: `Compact`,
-	1: `Medium`,
-	2: `Expanded`,
-}
-
-// String returns the string representation
-// of this SizeClasses value.
+// String returns the string representation of this SizeClasses value.
 func (i SizeClasses) String() string {
 	if str, ok := _SizeClassesMap[i]; ok {
 		return str
@@ -1688,9 +1184,8 @@ func (i SizeClasses) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the SizeClasses value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the SizeClasses value from its string representation,
+// and returns an error if the string is invalid.
 func (i *SizeClasses) SetString(s string) error {
 	if val, ok := _SizeClassesNameToValueMap[s]; ok {
 		*i = val
@@ -1717,27 +1212,18 @@ func (i SizeClasses) Desc() string {
 	return i.String()
 }
 
-// SizeClassesValues returns all possible values
-// for the type SizeClasses.
+// SizeClassesValues returns all possible values for the type SizeClasses.
 func SizeClassesValues() []SizeClasses {
 	return _SizeClassesValues
 }
 
-// Values returns all possible values
-// for the type SizeClasses.
+// Values returns all possible values for the type SizeClasses.
 func (i SizeClasses) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_SizeClassesValues))
 	for i, d := range _SizeClassesValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type SizeClasses.
-func (i SizeClasses) IsValid() bool {
-	_, ok := _SizeClassesMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -1755,35 +1241,16 @@ func (i *SizeClasses) UnmarshalText(text []byte) error {
 
 var _SliderTypesValues = []SliderTypes{0, 1}
 
-// SliderTypesN is the highest valid value
-// for type SliderTypes, plus one.
+// SliderTypesN is the highest valid value for type SliderTypes, plus one.
 const SliderTypesN SliderTypes = 2
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _SliderTypesNoOp() {
-	var x [1]struct{}
-	_ = x[SliderSlider-(0)]
-	_ = x[SliderScrollbar-(1)]
-}
+var _SliderTypesNameToValueMap = map[string]SliderTypes{`Slider`: 0, `Scrollbar`: 1}
 
-var _SliderTypesNameToValueMap = map[string]SliderTypes{
-	`Slider`:    0,
-	`Scrollbar`: 1,
-}
+var _SliderTypesDescMap = map[SliderTypes]string{0: `SliderSlider indicates a standard, user-controllable slider for setting a numeric value`, 1: `SliderScrollbar indicates a slider acting as a scrollbar for content This sets the`}
 
-var _SliderTypesDescMap = map[SliderTypes]string{
-	0: `SliderSlider indicates a standard, user-controllable slider for setting a numeric value`,
-	1: `SliderScrollbar indicates a slider acting as a scrollbar for content This sets the`,
-}
+var _SliderTypesMap = map[SliderTypes]string{0: `Slider`, 1: `Scrollbar`}
 
-var _SliderTypesMap = map[SliderTypes]string{
-	0: `Slider`,
-	1: `Scrollbar`,
-}
-
-// String returns the string representation
-// of this SliderTypes value.
+// String returns the string representation of this SliderTypes value.
 func (i SliderTypes) String() string {
 	if str, ok := _SliderTypesMap[i]; ok {
 		return str
@@ -1791,9 +1258,8 @@ func (i SliderTypes) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the SliderTypes value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the SliderTypes value from its string representation,
+// and returns an error if the string is invalid.
 func (i *SliderTypes) SetString(s string) error {
 	if val, ok := _SliderTypesNameToValueMap[s]; ok {
 		*i = val
@@ -1820,27 +1286,18 @@ func (i SliderTypes) Desc() string {
 	return i.String()
 }
 
-// SliderTypesValues returns all possible values
-// for the type SliderTypes.
+// SliderTypesValues returns all possible values for the type SliderTypes.
 func SliderTypesValues() []SliderTypes {
 	return _SliderTypesValues
 }
 
-// Values returns all possible values
-// for the type SliderTypes.
+// Values returns all possible values for the type SliderTypes.
 func (i SliderTypes) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_SliderTypesValues))
 	for i, d := range _SliderTypesValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type SliderTypes.
-func (i SliderTypes) IsValid() bool {
-	_, ok := _SliderTypesMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -1858,51 +1315,16 @@ func (i *SliderTypes) UnmarshalText(text []byte) error {
 
 var _StageTypesValues = []StageTypes{0, 1, 2, 3, 4, 5}
 
-// StageTypesN is the highest valid value
-// for type StageTypes, plus one.
+// StageTypesN is the highest valid value for type StageTypes, plus one.
 const StageTypesN StageTypes = 6
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _StageTypesNoOp() {
-	var x [1]struct{}
-	_ = x[WindowStage-(0)]
-	_ = x[DialogStage-(1)]
-	_ = x[MenuStage-(2)]
-	_ = x[TooltipStage-(3)]
-	_ = x[SnackbarStage-(4)]
-	_ = x[CompleterStage-(5)]
-}
+var _StageTypesNameToValueMap = map[string]StageTypes{`WindowStage`: 0, `DialogStage`: 1, `MenuStage`: 2, `TooltipStage`: 3, `SnackbarStage`: 4, `CompleterStage`: 5}
 
-var _StageTypesNameToValueMap = map[string]StageTypes{
-	`WindowStage`:    0,
-	`DialogStage`:    1,
-	`MenuStage`:      2,
-	`TooltipStage`:   3,
-	`SnackbarStage`:  4,
-	`CompleterStage`: 5,
-}
+var _StageTypesDescMap = map[StageTypes]string{0: `WindowStage is a MainStage that displays a Scene in a full window. One of these must be created first, as the primary App contents, and it typically persists throughout. It fills the RenderWin window. Additional Windows can be created either within the same RenderWin (Mobile) or in separate RenderWin windows (Desktop, NewWindow).`, 1: `DialogStage is a MainStage that displays Scene in a smaller dialog window on top of a Window, or in its own RenderWin (on Desktop only). It can be Modal or not.`, 2: `MenuStage is a PopupStage that displays a Scene with Action Widgets overlaid on a MainStage. It is typically Modal and ClickOff, and closes when an Action is selected.`, 3: `TooltipStage is a PopupStage that displays a Scene with extra info overlaid on a MainStage. It is typically ClickOff and not Modal.`, 4: `SnackbarStage is a PopupStage displays a Scene with info and typically an additional optional Action, usually displayed at the bottom. It is typically not ClickOff or Modal, but has a timeout.`, 5: `CompleterStage is a PopupStage that displays a Scene with text completions, spelling corrections, or other such dynamic info. It is typically ClickOff, not Modal, dynamically updating, and closes when something is selected or typing renders it no longer relevant.`}
 
-var _StageTypesDescMap = map[StageTypes]string{
-	0: `WindowStage is a MainStage that displays a Scene in a full window. One of these must be created first, as the primary App contents, and it typically persists throughout. It fills the RenderWin window. Additional Windows can be created either within the same RenderWin (Mobile) or in separate RenderWin windows (Desktop, NewWindow).`,
-	1: `DialogStage is a MainStage that displays Scene in a smaller dialog window on top of a Window, or in its own RenderWin (on Desktop only). It can be Modal or not.`,
-	2: `MenuStage is a PopupStage that displays a Scene with Action Widgets overlaid on a MainStage. It is typically Modal and ClickOff, and closes when an Action is selected.`,
-	3: `TooltipStage is a PopupStage that displays a Scene with extra info overlaid on a MainStage. It is typically ClickOff and not Modal.`,
-	4: `SnackbarStage is a PopupStage displays a Scene with info and typically an additional optional Action, usually displayed at the bottom. It is typically not ClickOff or Modal, but has a timeout.`,
-	5: `CompleterStage is a PopupStage that displays a Scene with text completions, spelling corrections, or other such dynamic info. It is typically ClickOff, not Modal, dynamically updating, and closes when something is selected or typing renders it no longer relevant.`,
-}
+var _StageTypesMap = map[StageTypes]string{0: `WindowStage`, 1: `DialogStage`, 2: `MenuStage`, 3: `TooltipStage`, 4: `SnackbarStage`, 5: `CompleterStage`}
 
-var _StageTypesMap = map[StageTypes]string{
-	0: `WindowStage`,
-	1: `DialogStage`,
-	2: `MenuStage`,
-	3: `TooltipStage`,
-	4: `SnackbarStage`,
-	5: `CompleterStage`,
-}
-
-// String returns the string representation
-// of this StageTypes value.
+// String returns the string representation of this StageTypes value.
 func (i StageTypes) String() string {
 	if str, ok := _StageTypesMap[i]; ok {
 		return str
@@ -1910,9 +1332,8 @@ func (i StageTypes) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the StageTypes value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the StageTypes value from its string representation,
+// and returns an error if the string is invalid.
 func (i *StageTypes) SetString(s string) error {
 	if val, ok := _StageTypesNameToValueMap[s]; ok {
 		*i = val
@@ -1939,27 +1360,18 @@ func (i StageTypes) Desc() string {
 	return i.String()
 }
 
-// StageTypesValues returns all possible values
-// for the type StageTypes.
+// StageTypesValues returns all possible values for the type StageTypes.
 func StageTypesValues() []StageTypes {
 	return _StageTypesValues
 }
 
-// Values returns all possible values
-// for the type StageTypes.
+// Values returns all possible values for the type StageTypes.
 func (i StageTypes) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_StageTypesValues))
 	for i, d := range _StageTypesValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type StageTypes.
-func (i StageTypes) IsValid() bool {
-	_, ok := _StageTypesMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -1977,47 +1389,16 @@ func (i *StageTypes) UnmarshalText(text []byte) error {
 
 var _SwitchTypesValues = []SwitchTypes{0, 1, 2, 3, 4}
 
-// SwitchTypesN is the highest valid value
-// for type SwitchTypes, plus one.
+// SwitchTypesN is the highest valid value for type SwitchTypes, plus one.
 const SwitchTypesN SwitchTypes = 5
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _SwitchTypesNoOp() {
-	var x [1]struct{}
-	_ = x[SwitchSwitch-(0)]
-	_ = x[SwitchChip-(1)]
-	_ = x[SwitchCheckbox-(2)]
-	_ = x[SwitchRadioButton-(3)]
-	_ = x[SwitchSegmentedButton-(4)]
-}
+var _SwitchTypesNameToValueMap = map[string]SwitchTypes{`Switch`: 0, `Chip`: 1, `Checkbox`: 2, `RadioButton`: 3, `SegmentedButton`: 4}
 
-var _SwitchTypesNameToValueMap = map[string]SwitchTypes{
-	`Switch`:          0,
-	`Chip`:            1,
-	`Checkbox`:        2,
-	`RadioButton`:     3,
-	`SegmentedButton`: 4,
-}
+var _SwitchTypesDescMap = map[SwitchTypes]string{0: `SwitchSwitch indicates to display a switch as a switch (toggle slider)`, 1: `SwitchChip indicates to display a switch as chip (like Material Design&#39;s filter chip), which is typically only used in the context of [Switches].`, 2: `SwitchCheckbox indicates to display a switch as a checkbox`, 3: `SwitchRadioButton indicates to display a switch as a radio button`, 4: `SwitchSegmentedButton indicates to display a segmented button, which is typically only used in the context of [Switches].`}
 
-var _SwitchTypesDescMap = map[SwitchTypes]string{
-	0: `SwitchSwitch indicates to display a switch as a switch (toggle slider)`,
-	1: `SwitchChip indicates to display a switch as chip (like Material Design&#39;s filter chip), which is typically only used in the context of [Switches].`,
-	2: `SwitchCheckbox indicates to display a switch as a checkbox`,
-	3: `SwitchRadioButton indicates to display a switch as a radio button`,
-	4: `SwitchSegmentedButton indicates to display a segmented button, which is typically only used in the context of [Switches].`,
-}
+var _SwitchTypesMap = map[SwitchTypes]string{0: `Switch`, 1: `Chip`, 2: `Checkbox`, 3: `RadioButton`, 4: `SegmentedButton`}
 
-var _SwitchTypesMap = map[SwitchTypes]string{
-	0: `Switch`,
-	1: `Chip`,
-	2: `Checkbox`,
-	3: `RadioButton`,
-	4: `SegmentedButton`,
-}
-
-// String returns the string representation
-// of this SwitchTypes value.
+// String returns the string representation of this SwitchTypes value.
 func (i SwitchTypes) String() string {
 	if str, ok := _SwitchTypesMap[i]; ok {
 		return str
@@ -2025,9 +1406,8 @@ func (i SwitchTypes) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the SwitchTypes value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the SwitchTypes value from its string representation,
+// and returns an error if the string is invalid.
 func (i *SwitchTypes) SetString(s string) error {
 	if val, ok := _SwitchTypesNameToValueMap[s]; ok {
 		*i = val
@@ -2054,27 +1434,18 @@ func (i SwitchTypes) Desc() string {
 	return i.String()
 }
 
-// SwitchTypesValues returns all possible values
-// for the type SwitchTypes.
+// SwitchTypesValues returns all possible values for the type SwitchTypes.
 func SwitchTypesValues() []SwitchTypes {
 	return _SwitchTypesValues
 }
 
-// Values returns all possible values
-// for the type SwitchTypes.
+// Values returns all possible values for the type SwitchTypes.
 func (i SwitchTypes) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_SwitchTypesValues))
 	for i, d := range _SwitchTypesValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type SwitchTypes.
-func (i SwitchTypes) IsValid() bool {
-	_, ok := _SwitchTypesMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -2092,51 +1463,16 @@ func (i *SwitchTypes) UnmarshalText(text []byte) error {
 
 var _TabTypesValues = []TabTypes{0, 1, 2, 3, 4, 5}
 
-// TabTypesN is the highest valid value
-// for type TabTypes, plus one.
+// TabTypesN is the highest valid value for type TabTypes, plus one.
 const TabTypesN TabTypes = 6
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _TabTypesNoOp() {
-	var x [1]struct{}
-	_ = x[StandardTabs-(0)]
-	_ = x[FunctionalTabs-(1)]
-	_ = x[NavigationAuto-(2)]
-	_ = x[NavigationBar-(3)]
-	_ = x[NavigationRail-(4)]
-	_ = x[NavigationDrawer-(5)]
-}
+var _TabTypesNameToValueMap = map[string]TabTypes{`StandardTabs`: 0, `FunctionalTabs`: 1, `NavigationAuto`: 2, `NavigationBar`: 3, `NavigationRail`: 4, `NavigationDrawer`: 5}
 
-var _TabTypesNameToValueMap = map[string]TabTypes{
-	`StandardTabs`:     0,
-	`FunctionalTabs`:   1,
-	`NavigationAuto`:   2,
-	`NavigationBar`:    3,
-	`NavigationRail`:   4,
-	`NavigationDrawer`: 5,
-}
+var _TabTypesDescMap = map[TabTypes]string{0: `StandardTabs indicates to render the standard type of Material Design style tabs.`, 1: `FunctionalTabs indicates to render functional tabs like those in Google Chrome. These tabs take up less space and are the only kind that can be closed. They can also be moved.`, 2: `NavigationAuto indicates to render the tabs as either [NavigationBar], [NavigationRail], or [NavigationDrawer], if [WidgetBase.SizeClass] is [SizeCompact], [SizeMedium], or [SizeExpanded], respectively. NavigationAuto should typically be used instead of one of the specific navigation types for better cross-platform compatability.`, 3: `NavigationBar indicates to render the tabs as a bottom navigation bar with text and icons.`, 4: `NavigationRail indicates to render the tabs as a side navigation rail, which only has icons.`, 5: `NavigationDrawer indicates to render the tabs as a side navigation drawer, which has full text labels and icons.`}
 
-var _TabTypesDescMap = map[TabTypes]string{
-	0: `StandardTabs indicates to render the standard type of Material Design style tabs.`,
-	1: `FunctionalTabs indicates to render functional tabs like those in Google Chrome. These tabs take up less space and are the only kind that can be closed. They can also be moved.`,
-	2: `NavigationAuto indicates to render the tabs as either [NavigationBar], [NavigationRail], or [NavigationDrawer], if [WidgetBase.SizeClass] is [SizeCompact], [SizeMedium], or [SizeExpanded], respectively. NavigationAuto should typically be used instead of one of the specific navigation types for better cross-platform compatability.`,
-	3: `NavigationBar indicates to render the tabs as a bottom navigation bar with text and icons.`,
-	4: `NavigationRail indicates to render the tabs as a side navigation rail, which only has icons.`,
-	5: `NavigationDrawer indicates to render the tabs as a side navigation drawer, which has full text labels and icons.`,
-}
+var _TabTypesMap = map[TabTypes]string{0: `StandardTabs`, 1: `FunctionalTabs`, 2: `NavigationAuto`, 3: `NavigationBar`, 4: `NavigationRail`, 5: `NavigationDrawer`}
 
-var _TabTypesMap = map[TabTypes]string{
-	0: `StandardTabs`,
-	1: `FunctionalTabs`,
-	2: `NavigationAuto`,
-	3: `NavigationBar`,
-	4: `NavigationRail`,
-	5: `NavigationDrawer`,
-}
-
-// String returns the string representation
-// of this TabTypes value.
+// String returns the string representation of this TabTypes value.
 func (i TabTypes) String() string {
 	if str, ok := _TabTypesMap[i]; ok {
 		return str
@@ -2144,9 +1480,8 @@ func (i TabTypes) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the TabTypes value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the TabTypes value from its string representation,
+// and returns an error if the string is invalid.
 func (i *TabTypes) SetString(s string) error {
 	if val, ok := _TabTypesNameToValueMap[s]; ok {
 		*i = val
@@ -2173,27 +1508,18 @@ func (i TabTypes) Desc() string {
 	return i.String()
 }
 
-// TabTypesValues returns all possible values
-// for the type TabTypes.
+// TabTypesValues returns all possible values for the type TabTypes.
 func TabTypesValues() []TabTypes {
 	return _TabTypesValues
 }
 
-// Values returns all possible values
-// for the type TabTypes.
+// Values returns all possible values for the type TabTypes.
 func (i TabTypes) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_TabTypesValues))
 	for i, d := range _TabTypesValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type TabTypes.
-func (i TabTypes) IsValid() bool {
-	_, ok := _TabTypesMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -2211,35 +1537,16 @@ func (i *TabTypes) UnmarshalText(text []byte) error {
 
 var _TextFieldTypesValues = []TextFieldTypes{0, 1}
 
-// TextFieldTypesN is the highest valid value
-// for type TextFieldTypes, plus one.
+// TextFieldTypesN is the highest valid value for type TextFieldTypes, plus one.
 const TextFieldTypesN TextFieldTypes = 2
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _TextFieldTypesNoOp() {
-	var x [1]struct{}
-	_ = x[TextFieldFilled-(0)]
-	_ = x[TextFieldOutlined-(1)]
-}
+var _TextFieldTypesNameToValueMap = map[string]TextFieldTypes{`Filled`: 0, `Outlined`: 1}
 
-var _TextFieldTypesNameToValueMap = map[string]TextFieldTypes{
-	`Filled`:   0,
-	`Outlined`: 1,
-}
+var _TextFieldTypesDescMap = map[TextFieldTypes]string{0: `TextFieldFilled represents a filled TextField with a background color and a bottom border`, 1: `TextFieldOutlined represents an outlined TextField with a border on all sides and no background color`}
 
-var _TextFieldTypesDescMap = map[TextFieldTypes]string{
-	0: `TextFieldFilled represents a filled TextField with a background color and a bottom border`,
-	1: `TextFieldOutlined represents an outlined TextField with a border on all sides and no background color`,
-}
+var _TextFieldTypesMap = map[TextFieldTypes]string{0: `Filled`, 1: `Outlined`}
 
-var _TextFieldTypesMap = map[TextFieldTypes]string{
-	0: `Filled`,
-	1: `Outlined`,
-}
-
-// String returns the string representation
-// of this TextFieldTypes value.
+// String returns the string representation of this TextFieldTypes value.
 func (i TextFieldTypes) String() string {
 	if str, ok := _TextFieldTypesMap[i]; ok {
 		return str
@@ -2247,9 +1554,8 @@ func (i TextFieldTypes) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the TextFieldTypes value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the TextFieldTypes value from its string representation,
+// and returns an error if the string is invalid.
 func (i *TextFieldTypes) SetString(s string) error {
 	if val, ok := _TextFieldTypesNameToValueMap[s]; ok {
 		*i = val
@@ -2276,27 +1582,18 @@ func (i TextFieldTypes) Desc() string {
 	return i.String()
 }
 
-// TextFieldTypesValues returns all possible values
-// for the type TextFieldTypes.
+// TextFieldTypesValues returns all possible values for the type TextFieldTypes.
 func TextFieldTypesValues() []TextFieldTypes {
 	return _TextFieldTypesValues
 }
 
-// Values returns all possible values
-// for the type TextFieldTypes.
+// Values returns all possible values for the type TextFieldTypes.
 func (i TextFieldTypes) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_TextFieldTypesValues))
 	for i, d := range _TextFieldTypesValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type TextFieldTypes.
-func (i TextFieldTypes) IsValid() bool {
-	_, ok := _TextFieldTypesMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -2314,39 +1611,16 @@ func (i *TextFieldTypes) UnmarshalText(text []byte) error {
 
 var _ThemesValues = []Themes{0, 1, 2}
 
-// ThemesN is the highest valid value
-// for type Themes, plus one.
+// ThemesN is the highest valid value for type Themes, plus one.
 const ThemesN Themes = 3
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _ThemesNoOp() {
-	var x [1]struct{}
-	_ = x[ThemeAuto-(0)]
-	_ = x[ThemeLight-(1)]
-	_ = x[ThemeDark-(2)]
-}
+var _ThemesNameToValueMap = map[string]Themes{`Auto`: 0, `Light`: 1, `Dark`: 2}
 
-var _ThemesNameToValueMap = map[string]Themes{
-	`Auto`:  0,
-	`Light`: 1,
-	`Dark`:  2,
-}
+var _ThemesDescMap = map[Themes]string{0: `ThemeAuto indicates to use the theme specified by the operating system`, 1: `ThemeLight indicates to use a light theme`, 2: `ThemeDark indicates to use a dark theme`}
 
-var _ThemesDescMap = map[Themes]string{
-	0: `ThemeAuto indicates to use the theme specified by the operating system`,
-	1: `ThemeLight indicates to use a light theme`,
-	2: `ThemeDark indicates to use a dark theme`,
-}
+var _ThemesMap = map[Themes]string{0: `Auto`, 1: `Light`, 2: `Dark`}
 
-var _ThemesMap = map[Themes]string{
-	0: `Auto`,
-	1: `Light`,
-	2: `Dark`,
-}
-
-// String returns the string representation
-// of this Themes value.
+// String returns the string representation of this Themes value.
 func (i Themes) String() string {
 	if str, ok := _ThemesMap[i]; ok {
 		return str
@@ -2354,9 +1628,8 @@ func (i Themes) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the Themes value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the Themes value from its string representation,
+// and returns an error if the string is invalid.
 func (i *Themes) SetString(s string) error {
 	if val, ok := _ThemesNameToValueMap[s]; ok {
 		*i = val
@@ -2383,27 +1656,18 @@ func (i Themes) Desc() string {
 	return i.String()
 }
 
-// ThemesValues returns all possible values
-// for the type Themes.
+// ThemesValues returns all possible values for the type Themes.
 func ThemesValues() []Themes {
 	return _ThemesValues
 }
 
-// Values returns all possible values
-// for the type Themes.
+// Values returns all possible values for the type Themes.
 func (i Themes) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_ThemesValues))
 	for i, d := range _ThemesValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type Themes.
-func (i Themes) IsValid() bool {
-	_, ok := _ThemesMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.

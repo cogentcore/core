@@ -15,55 +15,16 @@ import (
 
 var _PlatformsValues = []Platforms{0, 1, 2, 3, 4, 5, 6}
 
-// PlatformsN is the highest valid value
-// for type Platforms, plus one.
+// PlatformsN is the highest valid value for type Platforms, plus one.
 const PlatformsN Platforms = 7
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _PlatformsNoOp() {
-	var x [1]struct{}
-	_ = x[MacOS-(0)]
-	_ = x[Linux-(1)]
-	_ = x[Windows-(2)]
-	_ = x[IOS-(3)]
-	_ = x[Android-(4)]
-	_ = x[Web-(5)]
-	_ = x[Offscreen-(6)]
-}
+var _PlatformsNameToValueMap = map[string]Platforms{`MacOS`: 0, `Linux`: 1, `Windows`: 2, `IOS`: 3, `Android`: 4, `Web`: 5, `Offscreen`: 6}
 
-var _PlatformsNameToValueMap = map[string]Platforms{
-	`MacOS`:     0,
-	`Linux`:     1,
-	`Windows`:   2,
-	`IOS`:       3,
-	`Android`:   4,
-	`Web`:       5,
-	`Offscreen`: 6,
-}
+var _PlatformsDescMap = map[Platforms]string{0: `MacOS is a Mac OS machine (aka Darwin)`, 1: `Linux is a Linux OS machine`, 2: `Windows is a Microsoft Windows machine`, 3: `IOS is an Apple iOS or iPadOS mobile phone or iPad`, 4: `Android is an Android mobile phone or tablet`, 5: `Web is a web browser running the app through WASM`, 6: `Offscreen is an offscreen driver typically used for testing, specified using the &#34;offscreen&#34; build tag`}
 
-var _PlatformsDescMap = map[Platforms]string{
-	0: `MacOS is a Mac OS machine (aka Darwin)`,
-	1: `Linux is a Linux OS machine`,
-	2: `Windows is a Microsoft Windows machine`,
-	3: `IOS is an Apple iOS or iPadOS mobile phone or iPad`,
-	4: `Android is an Android mobile phone or tablet`,
-	5: `Web is a web browser running the app through WASM`,
-	6: `Offscreen is an offscreen driver typically used for testing, specified using the &#34;offscreen&#34; build tag`,
-}
+var _PlatformsMap = map[Platforms]string{0: `MacOS`, 1: `Linux`, 2: `Windows`, 3: `IOS`, 4: `Android`, 5: `Web`, 6: `Offscreen`}
 
-var _PlatformsMap = map[Platforms]string{
-	0: `MacOS`,
-	1: `Linux`,
-	2: `Windows`,
-	3: `IOS`,
-	4: `Android`,
-	5: `Web`,
-	6: `Offscreen`,
-}
-
-// String returns the string representation
-// of this Platforms value.
+// String returns the string representation of this Platforms value.
 func (i Platforms) String() string {
 	if str, ok := _PlatformsMap[i]; ok {
 		return str
@@ -71,9 +32,8 @@ func (i Platforms) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the Platforms value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the Platforms value from its string representation,
+// and returns an error if the string is invalid.
 func (i *Platforms) SetString(s string) error {
 	if val, ok := _PlatformsNameToValueMap[s]; ok {
 		*i = val
@@ -100,27 +60,18 @@ func (i Platforms) Desc() string {
 	return i.String()
 }
 
-// PlatformsValues returns all possible values
-// for the type Platforms.
+// PlatformsValues returns all possible values for the type Platforms.
 func PlatformsValues() []Platforms {
 	return _PlatformsValues
 }
 
-// Values returns all possible values
-// for the type Platforms.
+// Values returns all possible values for the type Platforms.
 func (i Platforms) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_PlatformsValues))
 	for i, d := range _PlatformsValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type Platforms.
-func (i Platforms) IsValid() bool {
-	_, ok := _PlatformsMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -138,39 +89,16 @@ func (i *Platforms) UnmarshalText(text []byte) error {
 
 var _ScreenOrientationValues = []ScreenOrientation{0, 1, 2}
 
-// ScreenOrientationN is the highest valid value
-// for type ScreenOrientation, plus one.
+// ScreenOrientationN is the highest valid value for type ScreenOrientation, plus one.
 const ScreenOrientationN ScreenOrientation = 3
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _ScreenOrientationNoOp() {
-	var x [1]struct{}
-	_ = x[OrientationUnknown-(0)]
-	_ = x[Portrait-(1)]
-	_ = x[Landscape-(2)]
-}
+var _ScreenOrientationNameToValueMap = map[string]ScreenOrientation{`OrientationUnknown`: 0, `Portrait`: 1, `Landscape`: 2}
 
-var _ScreenOrientationNameToValueMap = map[string]ScreenOrientation{
-	`OrientationUnknown`: 0,
-	`Portrait`:           1,
-	`Landscape`:          2,
-}
+var _ScreenOrientationDescMap = map[ScreenOrientation]string{0: `OrientationUnknown means device orientation cannot be determined. Equivalent on Android to Configuration.ORIENTATION_UNKNOWN and on iOS to: UIDeviceOrientationUnknown UIDeviceOrientationFaceUp UIDeviceOrientationFaceDown`, 1: `Portrait is a device oriented so it is tall and thin. Equivalent on Android to Configuration.ORIENTATION_PORTRAIT and on iOS to: UIDeviceOrientationPortrait UIDeviceOrientationPortraitUpsideDown`, 2: `Landscape is a device oriented so it is short and wide. Equivalent on Android to Configuration.ORIENTATION_LANDSCAPE and on iOS to: UIDeviceOrientationLandscapeLeft UIDeviceOrientationLandscapeRight`}
 
-var _ScreenOrientationDescMap = map[ScreenOrientation]string{
-	0: `OrientationUnknown means device orientation cannot be determined. Equivalent on Android to Configuration.ORIENTATION_UNKNOWN and on iOS to: UIDeviceOrientationUnknown UIDeviceOrientationFaceUp UIDeviceOrientationFaceDown`,
-	1: `Portrait is a device oriented so it is tall and thin. Equivalent on Android to Configuration.ORIENTATION_PORTRAIT and on iOS to: UIDeviceOrientationPortrait UIDeviceOrientationPortraitUpsideDown`,
-	2: `Landscape is a device oriented so it is short and wide. Equivalent on Android to Configuration.ORIENTATION_LANDSCAPE and on iOS to: UIDeviceOrientationLandscapeLeft UIDeviceOrientationLandscapeRight`,
-}
+var _ScreenOrientationMap = map[ScreenOrientation]string{0: `OrientationUnknown`, 1: `Portrait`, 2: `Landscape`}
 
-var _ScreenOrientationMap = map[ScreenOrientation]string{
-	0: `OrientationUnknown`,
-	1: `Portrait`,
-	2: `Landscape`,
-}
-
-// String returns the string representation
-// of this ScreenOrientation value.
+// String returns the string representation of this ScreenOrientation value.
 func (i ScreenOrientation) String() string {
 	if str, ok := _ScreenOrientationMap[i]; ok {
 		return str
@@ -178,9 +106,8 @@ func (i ScreenOrientation) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the ScreenOrientation value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the ScreenOrientation value from its string representation,
+// and returns an error if the string is invalid.
 func (i *ScreenOrientation) SetString(s string) error {
 	if val, ok := _ScreenOrientationNameToValueMap[s]; ok {
 		*i = val
@@ -207,27 +134,18 @@ func (i ScreenOrientation) Desc() string {
 	return i.String()
 }
 
-// ScreenOrientationValues returns all possible values
-// for the type ScreenOrientation.
+// ScreenOrientationValues returns all possible values for the type ScreenOrientation.
 func ScreenOrientationValues() []ScreenOrientation {
 	return _ScreenOrientationValues
 }
 
-// Values returns all possible values
-// for the type ScreenOrientation.
+// Values returns all possible values for the type ScreenOrientation.
 func (i ScreenOrientation) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_ScreenOrientationValues))
 	for i, d := range _ScreenOrientationValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type ScreenOrientation.
-func (i ScreenOrientation) IsValid() bool {
-	_, ok := _ScreenOrientationMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -245,51 +163,16 @@ func (i *ScreenOrientation) UnmarshalText(text []byte) error {
 
 var _WindowFlagsValues = []WindowFlags{0, 1, 2, 3, 4, 5}
 
-// WindowFlagsN is the highest valid value
-// for type WindowFlags, plus one.
+// WindowFlagsN is the highest valid value for type WindowFlags, plus one.
 const WindowFlagsN WindowFlags = 6
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _WindowFlagsNoOp() {
-	var x [1]struct{}
-	_ = x[Dialog-(0)]
-	_ = x[Modal-(1)]
-	_ = x[Tool-(2)]
-	_ = x[Fullscreen-(3)]
-	_ = x[Minimized-(4)]
-	_ = x[Focused-(5)]
-}
+var _WindowFlagsNameToValueMap = map[string]WindowFlags{`Dialog`: 0, `Modal`: 1, `Tool`: 2, `Fullscreen`: 3, `Minimized`: 4, `Focused`: 5}
 
-var _WindowFlagsNameToValueMap = map[string]WindowFlags{
-	`Dialog`:     0,
-	`Modal`:      1,
-	`Tool`:       2,
-	`Fullscreen`: 3,
-	`Minimized`:  4,
-	`Focused`:    5,
-}
+var _WindowFlagsDescMap = map[WindowFlags]string{0: `Dialog indicates that this is a temporary, pop-up window.`, 1: `Modal indicates that this dialog window blocks events going to other windows until it is closed.`, 2: `Tool indicates that this is a floating tool window that has minimized window decoration.`, 3: `Fullscreen indicates a window that occupies the entire screen.`, 4: `Minimized indicates a window reduced to an icon, or otherwise no longer visible or active. Otherwise, the window should be assumed to be visible.`, 5: `Focused indicates that the window has the focus.`}
 
-var _WindowFlagsDescMap = map[WindowFlags]string{
-	0: `Dialog indicates that this is a temporary, pop-up window.`,
-	1: `Modal indicates that this dialog window blocks events going to other windows until it is closed.`,
-	2: `Tool indicates that this is a floating tool window that has minimized window decoration.`,
-	3: `Fullscreen indicates a window that occupies the entire screen.`,
-	4: `Minimized indicates a window reduced to an icon, or otherwise no longer visible or active. Otherwise, the window should be assumed to be visible.`,
-	5: `Focused indicates that the window has the focus.`,
-}
+var _WindowFlagsMap = map[WindowFlags]string{0: `Dialog`, 1: `Modal`, 2: `Tool`, 3: `Fullscreen`, 4: `Minimized`, 5: `Focused`}
 
-var _WindowFlagsMap = map[WindowFlags]string{
-	0: `Dialog`,
-	1: `Modal`,
-	2: `Tool`,
-	3: `Fullscreen`,
-	4: `Minimized`,
-	5: `Focused`,
-}
-
-// String returns the string representation
-// of this WindowFlags value.
+// String returns the string representation of this WindowFlags value.
 func (i WindowFlags) String() string {
 	str := ""
 	for _, ie := range _WindowFlagsValues {
@@ -305,10 +188,8 @@ func (i WindowFlags) String() string {
 	return str
 }
 
-// BitIndexString returns the string
-// representation of this WindowFlags value
-// if it is a bit index value
-// (typically an enum constant), and
+// BitIndexString returns the string representation of this WindowFlags value
+// if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
 func (i WindowFlags) BitIndexString() string {
 	if str, ok := _WindowFlagsMap[i]; ok {
@@ -317,17 +198,15 @@ func (i WindowFlags) BitIndexString() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the WindowFlags value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the WindowFlags value from its string representation,
+// and returns an error if the string is invalid.
 func (i *WindowFlags) SetString(s string) error {
 	*i = 0
 	return i.SetStringOr(s)
 }
 
-// SetStringOr sets the WindowFlags value from its
-// string representation while preserving any
-// bit flags already set, and returns an
+// SetStringOr sets the WindowFlags value from its string representation
+// while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *WindowFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
@@ -361,14 +240,12 @@ func (i WindowFlags) Desc() string {
 	return i.String()
 }
 
-// WindowFlagsValues returns all possible values
-// for the type WindowFlags.
+// WindowFlagsValues returns all possible values for the type WindowFlags.
 func WindowFlagsValues() []WindowFlags {
 	return _WindowFlagsValues
 }
 
-// Values returns all possible values
-// for the type WindowFlags.
+// Values returns all possible values for the type WindowFlags.
 func (i WindowFlags) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_WindowFlagsValues))
 	for i, d := range _WindowFlagsValues {
@@ -377,21 +254,12 @@ func (i WindowFlags) Values() []enums.Enum {
 	return res
 }
 
-// IsValid returns whether the value is a
-// valid option for type WindowFlags.
-func (i WindowFlags) IsValid() bool {
-	_, ok := _WindowFlagsMap[i]
-	return ok
-}
-
-// HasFlag returns whether these
-// bit flags have the given bit flag set.
+// HasFlag returns whether these bit flags have the given bit flag set.
 func (i WindowFlags) HasFlag(f enums.BitFlag) bool {
 	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
 }
 
-// SetFlag sets the value of the given
-// flags in these flags to the given value.
+// SetFlag sets the value of the given flags in these flags to the given value.
 func (i *WindowFlags) SetFlag(on bool, f ...enums.BitFlag) {
 	var mask int64
 	for _, v := range f {

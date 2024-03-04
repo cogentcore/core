@@ -12,39 +12,16 @@ import (
 
 var _BlendTypesValues = []BlendTypes{0, 1, 2}
 
-// BlendTypesN is the highest valid value
-// for type BlendTypes, plus one.
+// BlendTypesN is the highest valid value for type BlendTypes, plus one.
 const BlendTypesN BlendTypes = 3
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _BlendTypesNoOp() {
-	var x [1]struct{}
-	_ = x[HCT-(0)]
-	_ = x[RGB-(1)]
-	_ = x[CAM16-(2)]
-}
+var _BlendTypesNameToValueMap = map[string]BlendTypes{`HCT`: 0, `RGB`: 1, `CAM16`: 2}
 
-var _BlendTypesNameToValueMap = map[string]BlendTypes{
-	`HCT`:   0,
-	`RGB`:   1,
-	`CAM16`: 2,
-}
+var _BlendTypesDescMap = map[BlendTypes]string{0: `HCT uses the hue, chroma, and tone space and generally produces the best results, but at a slight performance cost.`, 1: `RGB uses raw RGB space, which is the standard space that most other programs use. It produces decent results with maximum performance.`, 2: `CAM16 is an alternative colorspace, similar to HCT, but not quite as good.`}
 
-var _BlendTypesDescMap = map[BlendTypes]string{
-	0: `HCT uses the hue, chroma, and tone space and generally produces the best results, but at a slight performance cost.`,
-	1: `RGB uses raw RGB space, which is the standard space that most other programs use. It produces decent results with maximum performance.`,
-	2: `CAM16 is an alternative colorspace, similar to HCT, but not quite as good.`,
-}
+var _BlendTypesMap = map[BlendTypes]string{0: `HCT`, 1: `RGB`, 2: `CAM16`}
 
-var _BlendTypesMap = map[BlendTypes]string{
-	0: `HCT`,
-	1: `RGB`,
-	2: `CAM16`,
-}
-
-// String returns the string representation
-// of this BlendTypes value.
+// String returns the string representation of this BlendTypes value.
 func (i BlendTypes) String() string {
 	if str, ok := _BlendTypesMap[i]; ok {
 		return str
@@ -52,9 +29,8 @@ func (i BlendTypes) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the BlendTypes value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the BlendTypes value from its string representation,
+// and returns an error if the string is invalid.
 func (i *BlendTypes) SetString(s string) error {
 	if val, ok := _BlendTypesNameToValueMap[s]; ok {
 		*i = val
@@ -81,27 +57,18 @@ func (i BlendTypes) Desc() string {
 	return i.String()
 }
 
-// BlendTypesValues returns all possible values
-// for the type BlendTypes.
+// BlendTypesValues returns all possible values for the type BlendTypes.
 func BlendTypesValues() []BlendTypes {
 	return _BlendTypesValues
 }
 
-// Values returns all possible values
-// for the type BlendTypes.
+// Values returns all possible values for the type BlendTypes.
 func (i BlendTypes) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_BlendTypesValues))
 	for i, d := range _BlendTypesValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type BlendTypes.
-func (i BlendTypes) IsValid() bool {
-	_, ok := _BlendTypesMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.

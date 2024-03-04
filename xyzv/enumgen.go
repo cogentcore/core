@@ -12,43 +12,16 @@ import (
 
 var _SelModesValues = []SelModes{0, 1, 2, 3}
 
-// SelModesN is the highest valid value
-// for type SelModes, plus one.
+// SelModesN is the highest valid value for type SelModes, plus one.
 const SelModesN SelModes = 4
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _SelModesNoOp() {
-	var x [1]struct{}
-	_ = x[NotSelectable-(0)]
-	_ = x[Selectable-(1)]
-	_ = x[SelectionBox-(2)]
-	_ = x[Manipulable-(3)]
-}
+var _SelModesNameToValueMap = map[string]SelModes{`NotSelectable`: 0, `Selectable`: 1, `SelectionBox`: 2, `Manipulable`: 3}
 
-var _SelModesNameToValueMap = map[string]SelModes{
-	`NotSelectable`: 0,
-	`Selectable`:    1,
-	`SelectionBox`:  2,
-	`Manipulable`:   3,
-}
+var _SelModesDescMap = map[SelModes]string{0: `NotSelectable means that selection events are ignored entirely`, 1: `Selectable means that nodes can be selected but no visible consequence occurs`, 2: `SelectionBox means that a selection bounding box is drawn around selected nodes`, 3: `Manipulable means that a manipulation box will be created for selected nodes, which can update the Pose parameters dynamically.`}
 
-var _SelModesDescMap = map[SelModes]string{
-	0: `NotSelectable means that selection events are ignored entirely`,
-	1: `Selectable means that nodes can be selected but no visible consequence occurs`,
-	2: `SelectionBox means that a selection bounding box is drawn around selected nodes`,
-	3: `Manipulable means that a manipulation box will be created for selected nodes, which can update the Pose parameters dynamically.`,
-}
+var _SelModesMap = map[SelModes]string{0: `NotSelectable`, 1: `Selectable`, 2: `SelectionBox`, 3: `Manipulable`}
 
-var _SelModesMap = map[SelModes]string{
-	0: `NotSelectable`,
-	1: `Selectable`,
-	2: `SelectionBox`,
-	3: `Manipulable`,
-}
-
-// String returns the string representation
-// of this SelModes value.
+// String returns the string representation of this SelModes value.
 func (i SelModes) String() string {
 	if str, ok := _SelModesMap[i]; ok {
 		return str
@@ -56,9 +29,8 @@ func (i SelModes) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the SelModes value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the SelModes value from its string representation,
+// and returns an error if the string is invalid.
 func (i *SelModes) SetString(s string) error {
 	if val, ok := _SelModesNameToValueMap[s]; ok {
 		*i = val
@@ -85,27 +57,18 @@ func (i SelModes) Desc() string {
 	return i.String()
 }
 
-// SelModesValues returns all possible values
-// for the type SelModes.
+// SelModesValues returns all possible values for the type SelModes.
 func SelModesValues() []SelModes {
 	return _SelModesValues
 }
 
-// Values returns all possible values
-// for the type SelModes.
+// Values returns all possible values for the type SelModes.
 func (i SelModes) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_SelModesValues))
 	for i, d := range _SelModesValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type SelModes.
-func (i SelModes) IsValid() bool {
-	_, ok := _SelModesMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.

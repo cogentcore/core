@@ -12,39 +12,16 @@ import (
 
 var _OpponentsValues = []Opponents{0, 1, 2}
 
-// OpponentsN is the highest valid value
-// for type Opponents, plus one.
+// OpponentsN is the highest valid value for type Opponents, plus one.
 const OpponentsN Opponents = 3
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _OpponentsNoOp() {
-	var x [1]struct{}
-	_ = x[WhiteBlack-(0)]
-	_ = x[RedGreen-(1)]
-	_ = x[BlueYellow-(2)]
-}
+var _OpponentsNameToValueMap = map[string]Opponents{`WhiteBlack`: 0, `RedGreen`: 1, `BlueYellow`: 2}
 
-var _OpponentsNameToValueMap = map[string]Opponents{
-	`WhiteBlack`: 0,
-	`RedGreen`:   1,
-	`BlueYellow`: 2,
-}
+var _OpponentsDescMap = map[Opponents]string{0: `White vs. Black greyscale`, 1: `Red vs. Green`, 2: `Blue vs. Yellow`}
 
-var _OpponentsDescMap = map[Opponents]string{
-	0: `White vs. Black greyscale`,
-	1: `Red vs. Green`,
-	2: `Blue vs. Yellow`,
-}
+var _OpponentsMap = map[Opponents]string{0: `WhiteBlack`, 1: `RedGreen`, 2: `BlueYellow`}
 
-var _OpponentsMap = map[Opponents]string{
-	0: `WhiteBlack`,
-	1: `RedGreen`,
-	2: `BlueYellow`,
-}
-
-// String returns the string representation
-// of this Opponents value.
+// String returns the string representation of this Opponents value.
 func (i Opponents) String() string {
 	if str, ok := _OpponentsMap[i]; ok {
 		return str
@@ -52,9 +29,8 @@ func (i Opponents) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the Opponents value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the Opponents value from its string representation,
+// and returns an error if the string is invalid.
 func (i *Opponents) SetString(s string) error {
 	if val, ok := _OpponentsNameToValueMap[s]; ok {
 		*i = val
@@ -81,27 +57,18 @@ func (i Opponents) Desc() string {
 	return i.String()
 }
 
-// OpponentsValues returns all possible values
-// for the type Opponents.
+// OpponentsValues returns all possible values for the type Opponents.
 func OpponentsValues() []Opponents {
 	return _OpponentsValues
 }
 
-// Values returns all possible values
-// for the type Opponents.
+// Values returns all possible values for the type Opponents.
 func (i Opponents) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_OpponentsValues))
 	for i, d := range _OpponentsValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type Opponents.
-func (i Opponents) IsValid() bool {
-	_, ok := _OpponentsMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.

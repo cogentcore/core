@@ -12,55 +12,16 @@ import (
 
 var _FormatsValues = []Formats{0, 1, 2, 3, 4, 5, 6}
 
-// FormatsN is the highest valid value
-// for type Formats, plus one.
+// FormatsN is the highest valid value for type Formats, plus one.
 const FormatsN Formats = 7
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _FormatsNoOp() {
-	var x [1]struct{}
-	_ = x[None-(0)]
-	_ = x[PNG-(1)]
-	_ = x[JPEG-(2)]
-	_ = x[GIF-(3)]
-	_ = x[TIFF-(4)]
-	_ = x[BMP-(5)]
-	_ = x[WebP-(6)]
-}
+var _FormatsNameToValueMap = map[string]Formats{`None`: 0, `PNG`: 1, `JPEG`: 2, `GIF`: 3, `TIFF`: 4, `BMP`: 5, `WebP`: 6}
 
-var _FormatsNameToValueMap = map[string]Formats{
-	`None`: 0,
-	`PNG`:  1,
-	`JPEG`: 2,
-	`GIF`:  3,
-	`TIFF`: 4,
-	`BMP`:  5,
-	`WebP`: 6,
-}
+var _FormatsDescMap = map[Formats]string{0: ``, 1: ``, 2: ``, 3: ``, 4: ``, 5: ``, 6: ``}
 
-var _FormatsDescMap = map[Formats]string{
-	0: ``,
-	1: ``,
-	2: ``,
-	3: ``,
-	4: ``,
-	5: ``,
-	6: ``,
-}
+var _FormatsMap = map[Formats]string{0: `None`, 1: `PNG`, 2: `JPEG`, 3: `GIF`, 4: `TIFF`, 5: `BMP`, 6: `WebP`}
 
-var _FormatsMap = map[Formats]string{
-	0: `None`,
-	1: `PNG`,
-	2: `JPEG`,
-	3: `GIF`,
-	4: `TIFF`,
-	5: `BMP`,
-	6: `WebP`,
-}
-
-// String returns the string representation
-// of this Formats value.
+// String returns the string representation of this Formats value.
 func (i Formats) String() string {
 	if str, ok := _FormatsMap[i]; ok {
 		return str
@@ -68,9 +29,8 @@ func (i Formats) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the Formats value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the Formats value from its string representation,
+// and returns an error if the string is invalid.
 func (i *Formats) SetString(s string) error {
 	if val, ok := _FormatsNameToValueMap[s]; ok {
 		*i = val
@@ -97,27 +57,18 @@ func (i Formats) Desc() string {
 	return i.String()
 }
 
-// FormatsValues returns all possible values
-// for the type Formats.
+// FormatsValues returns all possible values for the type Formats.
 func FormatsValues() []Formats {
 	return _FormatsValues
 }
 
-// Values returns all possible values
-// for the type Formats.
+// Values returns all possible values for the type Formats.
 func (i Formats) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_FormatsValues))
 	for i, d := range _FormatsValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type Formats.
-func (i Formats) IsValid() bool {
-	_, ok := _FormatsMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.

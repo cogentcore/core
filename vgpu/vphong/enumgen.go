@@ -12,43 +12,16 @@ import (
 
 var _SetsValues = []Sets{0, 1, 2, 3}
 
-// SetsN is the highest valid value
-// for type Sets, plus one.
+// SetsN is the highest valid value for type Sets, plus one.
 const SetsN Sets = 4
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _SetsNoOp() {
-	var x [1]struct{}
-	_ = x[MtxsSet-(0)]
-	_ = x[NLightSet-(1)]
-	_ = x[LightSet-(2)]
-	_ = x[TexSet-(3)]
-}
+var _SetsNameToValueMap = map[string]Sets{`MtxsSet`: 0, `NLightSet`: 1, `LightSet`: 2, `TexSet`: 3}
 
-var _SetsNameToValueMap = map[string]Sets{
-	`MtxsSet`:   0,
-	`NLightSet`: 1,
-	`LightSet`:  2,
-	`TexSet`:    3,
-}
+var _SetsDescMap = map[Sets]string{0: ``, 1: ``, 2: ``, 3: ``}
 
-var _SetsDescMap = map[Sets]string{
-	0: ``,
-	1: ``,
-	2: ``,
-	3: ``,
-}
+var _SetsMap = map[Sets]string{0: `MtxsSet`, 1: `NLightSet`, 2: `LightSet`, 3: `TexSet`}
 
-var _SetsMap = map[Sets]string{
-	0: `MtxsSet`,
-	1: `NLightSet`,
-	2: `LightSet`,
-	3: `TexSet`,
-}
-
-// String returns the string representation
-// of this Sets value.
+// String returns the string representation of this Sets value.
 func (i Sets) String() string {
 	if str, ok := _SetsMap[i]; ok {
 		return str
@@ -56,9 +29,8 @@ func (i Sets) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the Sets value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the Sets value from its string representation,
+// and returns an error if the string is invalid.
 func (i *Sets) SetString(s string) error {
 	if val, ok := _SetsNameToValueMap[s]; ok {
 		*i = val
@@ -85,27 +57,18 @@ func (i Sets) Desc() string {
 	return i.String()
 }
 
-// SetsValues returns all possible values
-// for the type Sets.
+// SetsValues returns all possible values for the type Sets.
 func SetsValues() []Sets {
 	return _SetsValues
 }
 
-// Values returns all possible values
-// for the type Sets.
+// Values returns all possible values for the type Sets.
 func (i Sets) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_SetsValues))
 	for i, d := range _SetsValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type Sets.
-func (i Sets) IsValid() bool {
-	_, ok := _SetsMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.

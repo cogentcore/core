@@ -12,71 +12,16 @@ import (
 
 var _ActionsValues = []Actions{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 
-// ActionsN is the highest valid value
-// for type Actions, plus one.
+// ActionsN is the highest valid value for type Actions, plus one.
 const ActionsN Actions = 11
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _ActionsNoOp() {
-	var x [1]struct{}
-	_ = x[Next-(0)]
-	_ = x[Name-(1)]
-	_ = x[Number-(2)]
-	_ = x[Quoted-(3)]
-	_ = x[QuotedRaw-(4)]
-	_ = x[EOL-(5)]
-	_ = x[ReadUntil-(6)]
-	_ = x[PushState-(7)]
-	_ = x[PopState-(8)]
-	_ = x[SetGuestLex-(9)]
-	_ = x[PopGuestLex-(10)]
-}
+var _ActionsNameToValueMap = map[string]Actions{`Next`: 0, `Name`: 1, `Number`: 2, `Quoted`: 3, `QuotedRaw`: 4, `EOL`: 5, `ReadUntil`: 6, `PushState`: 7, `PopState`: 8, `SetGuestLex`: 9, `PopGuestLex`: 10}
 
-var _ActionsNameToValueMap = map[string]Actions{
-	`Next`:        0,
-	`Name`:        1,
-	`Number`:      2,
-	`Quoted`:      3,
-	`QuotedRaw`:   4,
-	`EOL`:         5,
-	`ReadUntil`:   6,
-	`PushState`:   7,
-	`PopState`:    8,
-	`SetGuestLex`: 9,
-	`PopGuestLex`: 10,
-}
+var _ActionsDescMap = map[Actions]string{0: `Next means advance input position to the next character(s) after the matched characters`, 1: `Name means read in an entire name, which is letters, _ and digits after first letter position will be advanced to just after`, 2: `Number means read in an entire number -- the token type will automatically be set to the actual type of number that was read in, and position advanced to just after`, 3: `Quoted means read in an entire string enclosed in quote delimeter that is present at current position, with proper skipping of escaped. Position advanced to just after`, 4: `QuotedRaw means read in an entire string enclosed in quote delimeter that is present at start position, with proper skipping of escaped. Position advanced to just after. Raw version supports multi-line and includes CR etc at end of lines (e.g., back-tick in various languages)`, 5: `EOL means read till the end of the line (e.g., for single-line comments)`, 6: `ReadUntil reads until string(s) in the Until field are found, or until the EOL if none are found`, 7: `PushState means push the given state value onto the state stack`, 8: `PopState means pop given state value off the state stack`, 9: `SetGuestLex means install the Name (must be a prior action) as the guest lexer -- it will take over lexing until PopGuestLex is called`, 10: `PopGuestLex removes the current guest lexer and returns to the original language lexer`}
 
-var _ActionsDescMap = map[Actions]string{
-	0:  `Next means advance input position to the next character(s) after the matched characters`,
-	1:  `Name means read in an entire name, which is letters, _ and digits after first letter position will be advanced to just after`,
-	2:  `Number means read in an entire number -- the token type will automatically be set to the actual type of number that was read in, and position advanced to just after`,
-	3:  `Quoted means read in an entire string enclosed in quote delimeter that is present at current position, with proper skipping of escaped. Position advanced to just after`,
-	4:  `QuotedRaw means read in an entire string enclosed in quote delimeter that is present at start position, with proper skipping of escaped. Position advanced to just after. Raw version supports multi-line and includes CR etc at end of lines (e.g., back-tick in various languages)`,
-	5:  `EOL means read till the end of the line (e.g., for single-line comments)`,
-	6:  `ReadUntil reads until string(s) in the Until field are found, or until the EOL if none are found`,
-	7:  `PushState means push the given state value onto the state stack`,
-	8:  `PopState means pop given state value off the state stack`,
-	9:  `SetGuestLex means install the Name (must be a prior action) as the guest lexer -- it will take over lexing until PopGuestLex is called`,
-	10: `PopGuestLex removes the current guest lexer and returns to the original language lexer`,
-}
+var _ActionsMap = map[Actions]string{0: `Next`, 1: `Name`, 2: `Number`, 3: `Quoted`, 4: `QuotedRaw`, 5: `EOL`, 6: `ReadUntil`, 7: `PushState`, 8: `PopState`, 9: `SetGuestLex`, 10: `PopGuestLex`}
 
-var _ActionsMap = map[Actions]string{
-	0:  `Next`,
-	1:  `Name`,
-	2:  `Number`,
-	3:  `Quoted`,
-	4:  `QuotedRaw`,
-	5:  `EOL`,
-	6:  `ReadUntil`,
-	7:  `PushState`,
-	8:  `PopState`,
-	9:  `SetGuestLex`,
-	10: `PopGuestLex`,
-}
-
-// String returns the string representation
-// of this Actions value.
+// String returns the string representation of this Actions value.
 func (i Actions) String() string {
 	if str, ok := _ActionsMap[i]; ok {
 		return str
@@ -84,9 +29,8 @@ func (i Actions) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the Actions value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the Actions value from its string representation,
+// and returns an error if the string is invalid.
 func (i *Actions) SetString(s string) error {
 	if val, ok := _ActionsNameToValueMap[s]; ok {
 		*i = val
@@ -113,27 +57,18 @@ func (i Actions) Desc() string {
 	return i.String()
 }
 
-// ActionsValues returns all possible values
-// for the type Actions.
+// ActionsValues returns all possible values for the type Actions.
 func ActionsValues() []Actions {
 	return _ActionsValues
 }
 
-// Values returns all possible values
-// for the type Actions.
+// Values returns all possible values for the type Actions.
 func (i Actions) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_ActionsValues))
 	for i, d := range _ActionsValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type Actions.
-func (i Actions) IsValid() bool {
-	_, ok := _ActionsMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -151,55 +86,16 @@ func (i *Actions) UnmarshalText(text []byte) error {
 
 var _MatchesValues = []Matches{0, 1, 2, 3, 4, 5, 6}
 
-// MatchesN is the highest valid value
-// for type Matches, plus one.
+// MatchesN is the highest valid value for type Matches, plus one.
 const MatchesN Matches = 7
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _MatchesNoOp() {
-	var x [1]struct{}
-	_ = x[String-(0)]
-	_ = x[StrName-(1)]
-	_ = x[Letter-(2)]
-	_ = x[Digit-(3)]
-	_ = x[WhiteSpace-(4)]
-	_ = x[CurState-(5)]
-	_ = x[AnyRune-(6)]
-}
+var _MatchesNameToValueMap = map[string]Matches{`String`: 0, `StrName`: 1, `Letter`: 2, `Digit`: 3, `WhiteSpace`: 4, `CurState`: 5, `AnyRune`: 6}
 
-var _MatchesNameToValueMap = map[string]Matches{
-	`String`:     0,
-	`StrName`:    1,
-	`Letter`:     2,
-	`Digit`:      3,
-	`WhiteSpace`: 4,
-	`CurState`:   5,
-	`AnyRune`:    6,
-}
+var _MatchesDescMap = map[Matches]string{0: `String means match a specific string as given in the rule Note: this only looks for the string with no constraints on what happens after this string -- use StrName to match entire names`, 1: `StrName means match a specific string that is a complete alpha-numeric string (including underbar _) with some other char at the end must use this for all keyword matches to ensure that it isn&#39;t just the start of a longer name`, 2: `Match any letter, including underscore`, 3: `Match digit 0-9`, 4: `Match any white space (space, tab) -- input is already broken into lines`, 5: `CurState means match current state value set by a PushState action, using String value in rule all CurState cases must generally be first in list of rules so they can preempt other rules when the state is active`, 6: `AnyRune means match any rune -- use this as the last condition where other terminators come first!`}
 
-var _MatchesDescMap = map[Matches]string{
-	0: `String means match a specific string as given in the rule Note: this only looks for the string with no constraints on what happens after this string -- use StrName to match entire names`,
-	1: `StrName means match a specific string that is a complete alpha-numeric string (including underbar _) with some other char at the end must use this for all keyword matches to ensure that it isn&#39;t just the start of a longer name`,
-	2: `Match any letter, including underscore`,
-	3: `Match digit 0-9`,
-	4: `Match any white space (space, tab) -- input is already broken into lines`,
-	5: `CurState means match current state value set by a PushState action, using String value in rule all CurState cases must generally be first in list of rules so they can preempt other rules when the state is active`,
-	6: `AnyRune means match any rune -- use this as the last condition where other terminators come first!`,
-}
+var _MatchesMap = map[Matches]string{0: `String`, 1: `StrName`, 2: `Letter`, 3: `Digit`, 4: `WhiteSpace`, 5: `CurState`, 6: `AnyRune`}
 
-var _MatchesMap = map[Matches]string{
-	0: `String`,
-	1: `StrName`,
-	2: `Letter`,
-	3: `Digit`,
-	4: `WhiteSpace`,
-	5: `CurState`,
-	6: `AnyRune`,
-}
-
-// String returns the string representation
-// of this Matches value.
+// String returns the string representation of this Matches value.
 func (i Matches) String() string {
 	if str, ok := _MatchesMap[i]; ok {
 		return str
@@ -207,9 +103,8 @@ func (i Matches) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the Matches value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the Matches value from its string representation,
+// and returns an error if the string is invalid.
 func (i *Matches) SetString(s string) error {
 	if val, ok := _MatchesNameToValueMap[s]; ok {
 		*i = val
@@ -236,27 +131,18 @@ func (i Matches) Desc() string {
 	return i.String()
 }
 
-// MatchesValues returns all possible values
-// for the type Matches.
+// MatchesValues returns all possible values for the type Matches.
 func MatchesValues() []Matches {
 	return _MatchesValues
 }
 
-// Values returns all possible values
-// for the type Matches.
+// Values returns all possible values for the type Matches.
 func (i Matches) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_MatchesValues))
 	for i, d := range _MatchesValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type Matches.
-func (i Matches) IsValid() bool {
-	_, ok := _MatchesMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -274,55 +160,16 @@ func (i *Matches) UnmarshalText(text []byte) error {
 
 var _MatchPosValues = []MatchPos{0, 1, 2, 3, 4, 5, 6}
 
-// MatchPosN is the highest valid value
-// for type MatchPos, plus one.
+// MatchPosN is the highest valid value for type MatchPos, plus one.
 const MatchPosN MatchPos = 7
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _MatchPosNoOp() {
-	var x [1]struct{}
-	_ = x[AnyPos-(0)]
-	_ = x[StartOfLine-(1)]
-	_ = x[EndOfLine-(2)]
-	_ = x[MiddleOfLine-(3)]
-	_ = x[StartOfWord-(4)]
-	_ = x[EndOfWord-(5)]
-	_ = x[MiddleOfWord-(6)]
-}
+var _MatchPosNameToValueMap = map[string]MatchPos{`AnyPos`: 0, `StartOfLine`: 1, `EndOfLine`: 2, `MiddleOfLine`: 3, `StartOfWord`: 4, `EndOfWord`: 5, `MiddleOfWord`: 6}
 
-var _MatchPosNameToValueMap = map[string]MatchPos{
-	`AnyPos`:       0,
-	`StartOfLine`:  1,
-	`EndOfLine`:    2,
-	`MiddleOfLine`: 3,
-	`StartOfWord`:  4,
-	`EndOfWord`:    5,
-	`MiddleOfWord`: 6,
-}
+var _MatchPosDescMap = map[MatchPos]string{0: `AnyPos matches at any position`, 1: `StartOfLine matches at start of line`, 2: `EndOfLine matches at end of line`, 3: `MiddleOfLine matches not at the start or end`, 4: `StartOfWord matches at start of word`, 5: `EndOfWord matches at end of word`, 6: `MiddleOfWord matches not at the start or end`}
 
-var _MatchPosDescMap = map[MatchPos]string{
-	0: `AnyPos matches at any position`,
-	1: `StartOfLine matches at start of line`,
-	2: `EndOfLine matches at end of line`,
-	3: `MiddleOfLine matches not at the start or end`,
-	4: `StartOfWord matches at start of word`,
-	5: `EndOfWord matches at end of word`,
-	6: `MiddleOfWord matches not at the start or end`,
-}
+var _MatchPosMap = map[MatchPos]string{0: `AnyPos`, 1: `StartOfLine`, 2: `EndOfLine`, 3: `MiddleOfLine`, 4: `StartOfWord`, 5: `EndOfWord`, 6: `MiddleOfWord`}
 
-var _MatchPosMap = map[MatchPos]string{
-	0: `AnyPos`,
-	1: `StartOfLine`,
-	2: `EndOfLine`,
-	3: `MiddleOfLine`,
-	4: `StartOfWord`,
-	5: `EndOfWord`,
-	6: `MiddleOfWord`,
-}
-
-// String returns the string representation
-// of this MatchPos value.
+// String returns the string representation of this MatchPos value.
 func (i MatchPos) String() string {
 	if str, ok := _MatchPosMap[i]; ok {
 		return str
@@ -330,9 +177,8 @@ func (i MatchPos) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the MatchPos value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the MatchPos value from its string representation,
+// and returns an error if the string is invalid.
 func (i *MatchPos) SetString(s string) error {
 	if val, ok := _MatchPosNameToValueMap[s]; ok {
 		*i = val
@@ -359,27 +205,18 @@ func (i MatchPos) Desc() string {
 	return i.String()
 }
 
-// MatchPosValues returns all possible values
-// for the type MatchPos.
+// MatchPosValues returns all possible values for the type MatchPos.
 func MatchPosValues() []MatchPos {
 	return _MatchPosValues
 }
 
-// Values returns all possible values
-// for the type MatchPos.
+// Values returns all possible values for the type MatchPos.
 func (i MatchPos) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_MatchPosValues))
 	for i, d := range _MatchPosValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type MatchPos.
-func (i MatchPos) IsValid() bool {
-	_, ok := _MatchPosMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.

@@ -15,31 +15,16 @@ import (
 
 var _NodeFlagsValues = []NodeFlags{7}
 
-// NodeFlagsN is the highest valid value
-// for type NodeFlags, plus one.
+// NodeFlagsN is the highest valid value for type NodeFlags, plus one.
 const NodeFlagsN NodeFlags = 8
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _NodeFlagsNoOp() {
-	var x [1]struct{}
-	_ = x[IsDef-(7)]
-}
+var _NodeFlagsNameToValueMap = map[string]NodeFlags{`IsDef`: 7}
 
-var _NodeFlagsNameToValueMap = map[string]NodeFlags{
-	`IsDef`: 7,
-}
+var _NodeFlagsDescMap = map[NodeFlags]string{7: `Rendering means that the SVG is currently redrawing Can be useful to check for animations etc to decide whether to drive another update`}
 
-var _NodeFlagsDescMap = map[NodeFlags]string{
-	7: `Rendering means that the SVG is currently redrawing Can be useful to check for animations etc to decide whether to drive another update`,
-}
+var _NodeFlagsMap = map[NodeFlags]string{7: `IsDef`}
 
-var _NodeFlagsMap = map[NodeFlags]string{
-	7: `IsDef`,
-}
-
-// String returns the string representation
-// of this NodeFlags value.
+// String returns the string representation of this NodeFlags value.
 func (i NodeFlags) String() string {
 	str := ""
 	for _, ie := range ki.FlagsValues() {
@@ -65,10 +50,8 @@ func (i NodeFlags) String() string {
 	return str
 }
 
-// BitIndexString returns the string
-// representation of this NodeFlags value
-// if it is a bit index value
-// (typically an enum constant), and
+// BitIndexString returns the string representation of this NodeFlags value
+// if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
 func (i NodeFlags) BitIndexString() string {
 	if str, ok := _NodeFlagsMap[i]; ok {
@@ -77,17 +60,15 @@ func (i NodeFlags) BitIndexString() string {
 	return ki.Flags(i).BitIndexString()
 }
 
-// SetString sets the NodeFlags value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the NodeFlags value from its string representation,
+// and returns an error if the string is invalid.
 func (i *NodeFlags) SetString(s string) error {
 	*i = 0
 	return i.SetStringOr(s)
 }
 
-// SetStringOr sets the NodeFlags value from its
-// string representation while preserving any
-// bit flags already set, and returns an
+// SetStringOr sets the NodeFlags value from its string representation
+// while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *NodeFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
@@ -124,8 +105,7 @@ func (i NodeFlags) Desc() string {
 	return ki.Flags(i).Desc()
 }
 
-// NodeFlagsValues returns all possible values
-// for the type NodeFlags.
+// NodeFlagsValues returns all possible values for the type NodeFlags.
 func NodeFlagsValues() []NodeFlags {
 	es := ki.FlagsValues()
 	res := make([]NodeFlags, len(es))
@@ -136,8 +116,7 @@ func NodeFlagsValues() []NodeFlags {
 	return res
 }
 
-// Values returns all possible values
-// for the type NodeFlags.
+// Values returns all possible values for the type NodeFlags.
 func (i NodeFlags) Values() []enums.Enum {
 	es := ki.FlagsValues()
 	les := len(es)
@@ -151,24 +130,12 @@ func (i NodeFlags) Values() []enums.Enum {
 	return res
 }
 
-// IsValid returns whether the value is a
-// valid option for type NodeFlags.
-func (i NodeFlags) IsValid() bool {
-	_, ok := _NodeFlagsMap[i]
-	if !ok {
-		return ki.Flags(i).IsValid()
-	}
-	return ok
-}
-
-// HasFlag returns whether these
-// bit flags have the given bit flag set.
+// HasFlag returns whether these bit flags have the given bit flag set.
 func (i NodeFlags) HasFlag(f enums.BitFlag) bool {
 	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
 }
 
-// SetFlag sets the value of the given
-// flags in these flags to the given value.
+// SetFlag sets the value of the given flags in these flags to the given value.
 func (i *NodeFlags) SetFlag(on bool, f ...enums.BitFlag) {
 	var mask int64
 	for _, v := range f {
@@ -199,43 +166,16 @@ func (i *NodeFlags) UnmarshalText(text []byte) error {
 
 var _ViewBoxAlignsValues = []ViewBoxAligns{0, 1, 2, 3}
 
-// ViewBoxAlignsN is the highest valid value
-// for type ViewBoxAligns, plus one.
+// ViewBoxAlignsN is the highest valid value for type ViewBoxAligns, plus one.
 const ViewBoxAlignsN ViewBoxAligns = 4
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _ViewBoxAlignsNoOp() {
-	var x [1]struct{}
-	_ = x[AlignMid-(0)]
-	_ = x[AlignNone-(1)]
-	_ = x[AlignMin-(2)]
-	_ = x[AlignMax-(3)]
-}
+var _ViewBoxAlignsNameToValueMap = map[string]ViewBoxAligns{`mid`: 0, `none`: 1, `min`: 2, `max`: 3}
 
-var _ViewBoxAlignsNameToValueMap = map[string]ViewBoxAligns{
-	`mid`:  0,
-	`none`: 1,
-	`min`:  2,
-	`max`:  3,
-}
+var _ViewBoxAlignsDescMap = map[ViewBoxAligns]string{0: `align ViewBox.Min with midpoint of Viewport (default)`, 1: `do not preserve uniform scaling (if either X or Y is None, both are treated as such). In this case, the Meet / Slice value is ignored. This is the same as FitFill from styles.ObjectFits`, 2: `align ViewBox.Min with top / left of Viewport`, 3: `align ViewBox.Min+Size with bottom / right of Viewport`}
 
-var _ViewBoxAlignsDescMap = map[ViewBoxAligns]string{
-	0: `align ViewBox.Min with midpoint of Viewport (default)`,
-	1: `do not preserve uniform scaling (if either X or Y is None, both are treated as such). In this case, the Meet / Slice value is ignored. This is the same as FitFill from styles.ObjectFits`,
-	2: `align ViewBox.Min with top / left of Viewport`,
-	3: `align ViewBox.Min+Size with bottom / right of Viewport`,
-}
+var _ViewBoxAlignsMap = map[ViewBoxAligns]string{0: `mid`, 1: `none`, 2: `min`, 3: `max`}
 
-var _ViewBoxAlignsMap = map[ViewBoxAligns]string{
-	0: `mid`,
-	1: `none`,
-	2: `min`,
-	3: `max`,
-}
-
-// String returns the string representation
-// of this ViewBoxAligns value.
+// String returns the string representation of this ViewBoxAligns value.
 func (i ViewBoxAligns) String() string {
 	if str, ok := _ViewBoxAlignsMap[i]; ok {
 		return str
@@ -243,9 +183,8 @@ func (i ViewBoxAligns) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the ViewBoxAligns value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the ViewBoxAligns value from its string representation,
+// and returns an error if the string is invalid.
 func (i *ViewBoxAligns) SetString(s string) error {
 	if val, ok := _ViewBoxAlignsNameToValueMap[s]; ok {
 		*i = val
@@ -272,27 +211,18 @@ func (i ViewBoxAligns) Desc() string {
 	return i.String()
 }
 
-// ViewBoxAlignsValues returns all possible values
-// for the type ViewBoxAligns.
+// ViewBoxAlignsValues returns all possible values for the type ViewBoxAligns.
 func ViewBoxAlignsValues() []ViewBoxAligns {
 	return _ViewBoxAlignsValues
 }
 
-// Values returns all possible values
-// for the type ViewBoxAligns.
+// Values returns all possible values for the type ViewBoxAligns.
 func (i ViewBoxAligns) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_ViewBoxAlignsValues))
 	for i, d := range _ViewBoxAlignsValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type ViewBoxAligns.
-func (i ViewBoxAligns) IsValid() bool {
-	_, ok := _ViewBoxAlignsMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -310,35 +240,16 @@ func (i *ViewBoxAligns) UnmarshalText(text []byte) error {
 
 var _ViewBoxMeetOrSliceValues = []ViewBoxMeetOrSlice{0, 1}
 
-// ViewBoxMeetOrSliceN is the highest valid value
-// for type ViewBoxMeetOrSlice, plus one.
+// ViewBoxMeetOrSliceN is the highest valid value for type ViewBoxMeetOrSlice, plus one.
 const ViewBoxMeetOrSliceN ViewBoxMeetOrSlice = 2
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _ViewBoxMeetOrSliceNoOp() {
-	var x [1]struct{}
-	_ = x[Meet-(0)]
-	_ = x[Slice-(1)]
-}
+var _ViewBoxMeetOrSliceNameToValueMap = map[string]ViewBoxMeetOrSlice{`meet`: 0, `slice`: 1}
 
-var _ViewBoxMeetOrSliceNameToValueMap = map[string]ViewBoxMeetOrSlice{
-	`meet`:  0,
-	`slice`: 1,
-}
+var _ViewBoxMeetOrSliceDescMap = map[ViewBoxMeetOrSlice]string{0: `Meet only applies if Align != None (i.e., only for uniform scaling), and means the entire ViewBox is visible within Viewport, and it is scaled up as much as possible to meet the align constraints. This is the same as FitContain from styles.ObjectFits`, 1: `Slice only applies if Align != None (i.e., only for uniform scaling), and means the entire ViewBox is covered by the ViewBox, and the ViewBox is scaled down as much as possible, while still meeting the align constraints. This is the same as FitCover from styles.ObjectFits`}
 
-var _ViewBoxMeetOrSliceDescMap = map[ViewBoxMeetOrSlice]string{
-	0: `Meet only applies if Align != None (i.e., only for uniform scaling), and means the entire ViewBox is visible within Viewport, and it is scaled up as much as possible to meet the align constraints. This is the same as FitContain from styles.ObjectFits`,
-	1: `Slice only applies if Align != None (i.e., only for uniform scaling), and means the entire ViewBox is covered by the ViewBox, and the ViewBox is scaled down as much as possible, while still meeting the align constraints. This is the same as FitCover from styles.ObjectFits`,
-}
+var _ViewBoxMeetOrSliceMap = map[ViewBoxMeetOrSlice]string{0: `meet`, 1: `slice`}
 
-var _ViewBoxMeetOrSliceMap = map[ViewBoxMeetOrSlice]string{
-	0: `meet`,
-	1: `slice`,
-}
-
-// String returns the string representation
-// of this ViewBoxMeetOrSlice value.
+// String returns the string representation of this ViewBoxMeetOrSlice value.
 func (i ViewBoxMeetOrSlice) String() string {
 	if str, ok := _ViewBoxMeetOrSliceMap[i]; ok {
 		return str
@@ -346,9 +257,8 @@ func (i ViewBoxMeetOrSlice) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the ViewBoxMeetOrSlice value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the ViewBoxMeetOrSlice value from its string representation,
+// and returns an error if the string is invalid.
 func (i *ViewBoxMeetOrSlice) SetString(s string) error {
 	if val, ok := _ViewBoxMeetOrSliceNameToValueMap[s]; ok {
 		*i = val
@@ -375,27 +285,18 @@ func (i ViewBoxMeetOrSlice) Desc() string {
 	return i.String()
 }
 
-// ViewBoxMeetOrSliceValues returns all possible values
-// for the type ViewBoxMeetOrSlice.
+// ViewBoxMeetOrSliceValues returns all possible values for the type ViewBoxMeetOrSlice.
 func ViewBoxMeetOrSliceValues() []ViewBoxMeetOrSlice {
 	return _ViewBoxMeetOrSliceValues
 }
 
-// Values returns all possible values
-// for the type ViewBoxMeetOrSlice.
+// Values returns all possible values for the type ViewBoxMeetOrSlice.
 func (i ViewBoxMeetOrSlice) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_ViewBoxMeetOrSliceValues))
 	for i, d := range _ViewBoxMeetOrSliceValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type ViewBoxMeetOrSlice.
-func (i ViewBoxMeetOrSlice) IsValid() bool {
-	_, ok := _ViewBoxMeetOrSliceMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.

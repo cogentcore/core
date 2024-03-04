@@ -12,47 +12,16 @@ import (
 
 var _PathCommandValues = []PathCommand{0, 1, 2, 3, 4}
 
-// PathCommandN is the highest valid value
-// for type PathCommand, plus one.
+// PathCommandN is the highest valid value for type PathCommand, plus one.
 const PathCommandN PathCommand = 5
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _PathCommandNoOp() {
-	var x [1]struct{}
-	_ = x[PathMoveTo-(0)]
-	_ = x[PathLineTo-(1)]
-	_ = x[PathQuadTo-(2)]
-	_ = x[PathCubicTo-(3)]
-	_ = x[PathClose-(4)]
-}
+var _PathCommandNameToValueMap = map[string]PathCommand{`PathMoveTo`: 0, `PathLineTo`: 1, `PathQuadTo`: 2, `PathCubicTo`: 3, `PathClose`: 4}
 
-var _PathCommandNameToValueMap = map[string]PathCommand{
-	`PathMoveTo`:  0,
-	`PathLineTo`:  1,
-	`PathQuadTo`:  2,
-	`PathCubicTo`: 3,
-	`PathClose`:   4,
-}
+var _PathCommandDescMap = map[PathCommand]string{0: ``, 1: ``, 2: ``, 3: ``, 4: ``}
 
-var _PathCommandDescMap = map[PathCommand]string{
-	0: ``,
-	1: ``,
-	2: ``,
-	3: ``,
-	4: ``,
-}
+var _PathCommandMap = map[PathCommand]string{0: `PathMoveTo`, 1: `PathLineTo`, 2: `PathQuadTo`, 3: `PathCubicTo`, 4: `PathClose`}
 
-var _PathCommandMap = map[PathCommand]string{
-	0: `PathMoveTo`,
-	1: `PathLineTo`,
-	2: `PathQuadTo`,
-	3: `PathCubicTo`,
-	4: `PathClose`,
-}
-
-// String returns the string representation
-// of this PathCommand value.
+// String returns the string representation of this PathCommand value.
 func (i PathCommand) String() string {
 	if str, ok := _PathCommandMap[i]; ok {
 		return str
@@ -60,9 +29,8 @@ func (i PathCommand) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the PathCommand value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the PathCommand value from its string representation,
+// and returns an error if the string is invalid.
 func (i *PathCommand) SetString(s string) error {
 	if val, ok := _PathCommandNameToValueMap[s]; ok {
 		*i = val
@@ -89,27 +57,18 @@ func (i PathCommand) Desc() string {
 	return i.String()
 }
 
-// PathCommandValues returns all possible values
-// for the type PathCommand.
+// PathCommandValues returns all possible values for the type PathCommand.
 func PathCommandValues() []PathCommand {
 	return _PathCommandValues
 }
 
-// Values returns all possible values
-// for the type PathCommand.
+// Values returns all possible values for the type PathCommand.
 func (i PathCommand) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_PathCommandValues))
 	for i, d := range _PathCommandValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type PathCommand.
-func (i PathCommand) IsValid() bool {
-	_, ok := _PathCommandMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -127,51 +86,16 @@ func (i *PathCommand) UnmarshalText(text []byte) error {
 
 var _JoinModeValues = []JoinMode{0, 1, 2, 3, 4, 5}
 
-// JoinModeN is the highest valid value
-// for type JoinMode, plus one.
+// JoinModeN is the highest valid value for type JoinMode, plus one.
 const JoinModeN JoinMode = 6
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _JoinModeNoOp() {
-	var x [1]struct{}
-	_ = x[Arc-(0)]
-	_ = x[ArcClip-(1)]
-	_ = x[Miter-(2)]
-	_ = x[MiterClip-(3)]
-	_ = x[Bevel-(4)]
-	_ = x[Round-(5)]
-}
+var _JoinModeNameToValueMap = map[string]JoinMode{`Arc`: 0, `ArcClip`: 1, `Miter`: 2, `MiterClip`: 3, `Bevel`: 4, `Round`: 5}
 
-var _JoinModeNameToValueMap = map[string]JoinMode{
-	`Arc`:       0,
-	`ArcClip`:   1,
-	`Miter`:     2,
-	`MiterClip`: 3,
-	`Bevel`:     4,
-	`Round`:     5,
-}
+var _JoinModeDescMap = map[JoinMode]string{0: ``, 1: ``, 2: ``, 3: ``, 4: ``, 5: ``}
 
-var _JoinModeDescMap = map[JoinMode]string{
-	0: ``,
-	1: ``,
-	2: ``,
-	3: ``,
-	4: ``,
-	5: ``,
-}
+var _JoinModeMap = map[JoinMode]string{0: `Arc`, 1: `ArcClip`, 2: `Miter`, 3: `MiterClip`, 4: `Bevel`, 5: `Round`}
 
-var _JoinModeMap = map[JoinMode]string{
-	0: `Arc`,
-	1: `ArcClip`,
-	2: `Miter`,
-	3: `MiterClip`,
-	4: `Bevel`,
-	5: `Round`,
-}
-
-// String returns the string representation
-// of this JoinMode value.
+// String returns the string representation of this JoinMode value.
 func (i JoinMode) String() string {
 	if str, ok := _JoinModeMap[i]; ok {
 		return str
@@ -179,9 +103,8 @@ func (i JoinMode) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the JoinMode value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the JoinMode value from its string representation,
+// and returns an error if the string is invalid.
 func (i *JoinMode) SetString(s string) error {
 	if val, ok := _JoinModeNameToValueMap[s]; ok {
 		*i = val
@@ -208,27 +131,18 @@ func (i JoinMode) Desc() string {
 	return i.String()
 }
 
-// JoinModeValues returns all possible values
-// for the type JoinMode.
+// JoinModeValues returns all possible values for the type JoinMode.
 func JoinModeValues() []JoinMode {
 	return _JoinModeValues
 }
 
-// Values returns all possible values
-// for the type JoinMode.
+// Values returns all possible values for the type JoinMode.
 func (i JoinMode) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_JoinModeValues))
 	for i, d := range _JoinModeValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type JoinMode.
-func (i JoinMode) IsValid() bool {
-	_, ok := _JoinModeMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.

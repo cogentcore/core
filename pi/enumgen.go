@@ -12,43 +12,16 @@ import (
 
 var _LangFlagsValues = []LangFlags{0, 1, 2, 3}
 
-// LangFlagsN is the highest valid value
-// for type LangFlags, plus one.
+// LangFlagsN is the highest valid value for type LangFlags, plus one.
 const LangFlagsN LangFlags = 4
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _LangFlagsNoOp() {
-	var x [1]struct{}
-	_ = x[NoFlags-(0)]
-	_ = x[IndentSpace-(1)]
-	_ = x[IndentTab-(2)]
-	_ = x[ReAutoIndent-(3)]
-}
+var _LangFlagsNameToValueMap = map[string]LangFlags{`NoFlags`: 0, `IndentSpace`: 1, `IndentTab`: 2, `ReAutoIndent`: 3}
 
-var _LangFlagsNameToValueMap = map[string]LangFlags{
-	`NoFlags`:      0,
-	`IndentSpace`:  1,
-	`IndentTab`:    2,
-	`ReAutoIndent`: 3,
-}
+var _LangFlagsDescMap = map[LangFlags]string{0: `NoFlags = nothing special`, 1: `IndentSpace means that spaces must be used for this language`, 2: `IndentTab means that tabs must be used for this language`, 3: `ReAutoIndent causes current line to be re-indented during AutoIndent for Enter (newline) -- this should only be set for strongly indented languages where the previous + current line can tell you exactly what indent the current line should be at.`}
 
-var _LangFlagsDescMap = map[LangFlags]string{
-	0: `NoFlags = nothing special`,
-	1: `IndentSpace means that spaces must be used for this language`,
-	2: `IndentTab means that tabs must be used for this language`,
-	3: `ReAutoIndent causes current line to be re-indented during AutoIndent for Enter (newline) -- this should only be set for strongly indented languages where the previous + current line can tell you exactly what indent the current line should be at.`,
-}
+var _LangFlagsMap = map[LangFlags]string{0: `NoFlags`, 1: `IndentSpace`, 2: `IndentTab`, 3: `ReAutoIndent`}
 
-var _LangFlagsMap = map[LangFlags]string{
-	0: `NoFlags`,
-	1: `IndentSpace`,
-	2: `IndentTab`,
-	3: `ReAutoIndent`,
-}
-
-// String returns the string representation
-// of this LangFlags value.
+// String returns the string representation of this LangFlags value.
 func (i LangFlags) String() string {
 	if str, ok := _LangFlagsMap[i]; ok {
 		return str
@@ -56,9 +29,8 @@ func (i LangFlags) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the LangFlags value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the LangFlags value from its string representation,
+// and returns an error if the string is invalid.
 func (i *LangFlags) SetString(s string) error {
 	if val, ok := _LangFlagsNameToValueMap[s]; ok {
 		*i = val
@@ -85,27 +57,18 @@ func (i LangFlags) Desc() string {
 	return i.String()
 }
 
-// LangFlagsValues returns all possible values
-// for the type LangFlags.
+// LangFlagsValues returns all possible values for the type LangFlags.
 func LangFlagsValues() []LangFlags {
 	return _LangFlagsValues
 }
 
-// Values returns all possible values
-// for the type LangFlags.
+// Values returns all possible values for the type LangFlags.
 func (i LangFlags) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_LangFlagsValues))
 	for i, d := range _LangFlagsValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type LangFlags.
-func (i LangFlags) IsValid() bool {
-	_, ok := _LangFlagsMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.

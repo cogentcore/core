@@ -15,63 +15,16 @@ import (
 
 var _BorderStylesValues = []BorderStyles{0, 1, 2, 3, 4, 5, 6, 7, 8}
 
-// BorderStylesN is the highest valid value
-// for type BorderStyles, plus one.
+// BorderStylesN is the highest valid value for type BorderStyles, plus one.
 const BorderStylesN BorderStyles = 9
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _BorderStylesNoOp() {
-	var x [1]struct{}
-	_ = x[BorderSolid-(0)]
-	_ = x[BorderDotted-(1)]
-	_ = x[BorderDashed-(2)]
-	_ = x[BorderDouble-(3)]
-	_ = x[BorderGroove-(4)]
-	_ = x[BorderRidge-(5)]
-	_ = x[BorderInset-(6)]
-	_ = x[BorderOutset-(7)]
-	_ = x[BorderNone-(8)]
-}
+var _BorderStylesNameToValueMap = map[string]BorderStyles{`solid`: 0, `dotted`: 1, `dashed`: 2, `double`: 3, `groove`: 4, `ridge`: 5, `inset`: 6, `outset`: 7, `none`: 8}
 
-var _BorderStylesNameToValueMap = map[string]BorderStyles{
-	`solid`:  0,
-	`dotted`: 1,
-	`dashed`: 2,
-	`double`: 3,
-	`groove`: 4,
-	`ridge`:  5,
-	`inset`:  6,
-	`outset`: 7,
-	`none`:   8,
-}
+var _BorderStylesDescMap = map[BorderStyles]string{0: `BorderSolid indicates to render a solid border.`, 1: `BorderDotted indicates to render a dotted border.`, 2: `BorderDashed indicates to render a dashed border.`, 3: `BorderDouble is not currently supported.`, 4: `BorderGroove is not currently supported.`, 5: `BorderRidge is not currently supported.`, 6: `BorderInset is not currently supported.`, 7: `BorderOutset is not currently supported.`, 8: `BorderNone indicates to render no border.`}
 
-var _BorderStylesDescMap = map[BorderStyles]string{
-	0: `BorderSolid indicates to render a solid border.`,
-	1: `BorderDotted indicates to render a dotted border.`,
-	2: `BorderDashed indicates to render a dashed border.`,
-	3: `BorderDouble is not currently supported.`,
-	4: `BorderGroove is not currently supported.`,
-	5: `BorderRidge is not currently supported.`,
-	6: `BorderInset is not currently supported.`,
-	7: `BorderOutset is not currently supported.`,
-	8: `BorderNone indicates to render no border.`,
-}
+var _BorderStylesMap = map[BorderStyles]string{0: `solid`, 1: `dotted`, 2: `dashed`, 3: `double`, 4: `groove`, 5: `ridge`, 6: `inset`, 7: `outset`, 8: `none`}
 
-var _BorderStylesMap = map[BorderStyles]string{
-	0: `solid`,
-	1: `dotted`,
-	2: `dashed`,
-	3: `double`,
-	4: `groove`,
-	5: `ridge`,
-	6: `inset`,
-	7: `outset`,
-	8: `none`,
-}
-
-// String returns the string representation
-// of this BorderStyles value.
+// String returns the string representation of this BorderStyles value.
 func (i BorderStyles) String() string {
 	if str, ok := _BorderStylesMap[i]; ok {
 		return str
@@ -79,9 +32,8 @@ func (i BorderStyles) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the BorderStyles value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the BorderStyles value from its string representation,
+// and returns an error if the string is invalid.
 func (i *BorderStyles) SetString(s string) error {
 	if val, ok := _BorderStylesNameToValueMap[s]; ok {
 		*i = val
@@ -108,27 +60,18 @@ func (i BorderStyles) Desc() string {
 	return i.String()
 }
 
-// BorderStylesValues returns all possible values
-// for the type BorderStyles.
+// BorderStylesValues returns all possible values for the type BorderStyles.
 func BorderStylesValues() []BorderStyles {
 	return _BorderStylesValues
 }
 
-// Values returns all possible values
-// for the type BorderStyles.
+// Values returns all possible values for the type BorderStyles.
 func (i BorderStyles) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_BorderStylesValues))
 	for i, d := range _BorderStylesValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type BorderStyles.
-func (i BorderStyles) IsValid() bool {
-	_, ok := _BorderStylesMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -146,39 +89,16 @@ func (i *BorderStyles) UnmarshalText(text []byte) error {
 
 var _FontStylesValues = []FontStyles{0, 1, 2}
 
-// FontStylesN is the highest valid value
-// for type FontStyles, plus one.
+// FontStylesN is the highest valid value for type FontStyles, plus one.
 const FontStylesN FontStyles = 3
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _FontStylesNoOp() {
-	var x [1]struct{}
-	_ = x[FontNormal-(0)]
-	_ = x[Italic-(1)]
-	_ = x[Oblique-(2)]
-}
+var _FontStylesNameToValueMap = map[string]FontStyles{`normal`: 0, `italic`: 1, `oblique`: 2}
 
-var _FontStylesNameToValueMap = map[string]FontStyles{
-	`normal`:  0,
-	`italic`:  1,
-	`oblique`: 2,
-}
+var _FontStylesDescMap = map[FontStyles]string{0: ``, 1: `Italic indicates to make font italic`, 2: `Oblique indicates to make font slanted`}
 
-var _FontStylesDescMap = map[FontStyles]string{
-	0: ``,
-	1: `Italic indicates to make font italic`,
-	2: `Oblique indicates to make font slanted`,
-}
+var _FontStylesMap = map[FontStyles]string{0: `normal`, 1: `italic`, 2: `oblique`}
 
-var _FontStylesMap = map[FontStyles]string{
-	0: `normal`,
-	1: `italic`,
-	2: `oblique`,
-}
-
-// String returns the string representation
-// of this FontStyles value.
+// String returns the string representation of this FontStyles value.
 func (i FontStyles) String() string {
 	if str, ok := _FontStylesMap[i]; ok {
 		return str
@@ -186,9 +106,8 @@ func (i FontStyles) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the FontStyles value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the FontStyles value from its string representation,
+// and returns an error if the string is invalid.
 func (i *FontStyles) SetString(s string) error {
 	if val, ok := _FontStylesNameToValueMap[s]; ok {
 		*i = val
@@ -215,27 +134,18 @@ func (i FontStyles) Desc() string {
 	return i.String()
 }
 
-// FontStylesValues returns all possible values
-// for the type FontStyles.
+// FontStylesValues returns all possible values for the type FontStyles.
 func FontStylesValues() []FontStyles {
 	return _FontStylesValues
 }
 
-// Values returns all possible values
-// for the type FontStyles.
+// Values returns all possible values for the type FontStyles.
 func (i FontStyles) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_FontStylesValues))
 	for i, d := range _FontStylesValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type FontStyles.
-func (i FontStyles) IsValid() bool {
-	_, ok := _FontStylesMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -253,107 +163,16 @@ func (i *FontStyles) UnmarshalText(text []byte) error {
 
 var _FontWeightsValues = []FontWeights{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19}
 
-// FontWeightsN is the highest valid value
-// for type FontWeights, plus one.
+// FontWeightsN is the highest valid value for type FontWeights, plus one.
 const FontWeightsN FontWeights = 20
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _FontWeightsNoOp() {
-	var x [1]struct{}
-	_ = x[WeightNormal-(0)]
-	_ = x[Weight100-(1)]
-	_ = x[WeightThin-(2)]
-	_ = x[Weight200-(3)]
-	_ = x[WeightExtraLight-(4)]
-	_ = x[Weight300-(5)]
-	_ = x[WeightLight-(6)]
-	_ = x[Weight400-(7)]
-	_ = x[Weight500-(8)]
-	_ = x[WeightMedium-(9)]
-	_ = x[Weight600-(10)]
-	_ = x[WeightSemiBold-(11)]
-	_ = x[Weight700-(12)]
-	_ = x[WeightBold-(13)]
-	_ = x[Weight800-(14)]
-	_ = x[WeightExtraBold-(15)]
-	_ = x[Weight900-(16)]
-	_ = x[WeightBlack-(17)]
-	_ = x[WeightBolder-(18)]
-	_ = x[WeightLighter-(19)]
-}
+var _FontWeightsNameToValueMap = map[string]FontWeights{`normal`: 0, `100`: 1, `thin`: 2, `200`: 3, `extra-light`: 4, `300`: 5, `light`: 6, `400`: 7, `500`: 8, `medium`: 9, `600`: 10, `semi-bold`: 11, `700`: 12, `bold`: 13, `800`: 14, `extra-bold`: 15, `900`: 16, `black`: 17, `bolder`: 18, `lighter`: 19}
 
-var _FontWeightsNameToValueMap = map[string]FontWeights{
-	`normal`:      0,
-	`100`:         1,
-	`thin`:        2,
-	`200`:         3,
-	`extra-light`: 4,
-	`300`:         5,
-	`light`:       6,
-	`400`:         7,
-	`500`:         8,
-	`medium`:      9,
-	`600`:         10,
-	`semi-bold`:   11,
-	`700`:         12,
-	`bold`:        13,
-	`800`:         14,
-	`extra-bold`:  15,
-	`900`:         16,
-	`black`:       17,
-	`bolder`:      18,
-	`lighter`:     19,
-}
+var _FontWeightsDescMap = map[FontWeights]string{0: ``, 1: ``, 2: ``, 3: ``, 4: ``, 5: ``, 6: ``, 7: ``, 8: ``, 9: ``, 10: ``, 11: ``, 12: ``, 13: ``, 14: ``, 15: ``, 16: ``, 17: ``, 18: ``, 19: ``}
 
-var _FontWeightsDescMap = map[FontWeights]string{
-	0:  ``,
-	1:  ``,
-	2:  ``,
-	3:  ``,
-	4:  ``,
-	5:  ``,
-	6:  ``,
-	7:  ``,
-	8:  ``,
-	9:  ``,
-	10: ``,
-	11: ``,
-	12: ``,
-	13: ``,
-	14: ``,
-	15: ``,
-	16: ``,
-	17: ``,
-	18: ``,
-	19: ``,
-}
+var _FontWeightsMap = map[FontWeights]string{0: `normal`, 1: `100`, 2: `thin`, 3: `200`, 4: `extra-light`, 5: `300`, 6: `light`, 7: `400`, 8: `500`, 9: `medium`, 10: `600`, 11: `semi-bold`, 12: `700`, 13: `bold`, 14: `800`, 15: `extra-bold`, 16: `900`, 17: `black`, 18: `bolder`, 19: `lighter`}
 
-var _FontWeightsMap = map[FontWeights]string{
-	0:  `normal`,
-	1:  `100`,
-	2:  `thin`,
-	3:  `200`,
-	4:  `extra-light`,
-	5:  `300`,
-	6:  `light`,
-	7:  `400`,
-	8:  `500`,
-	9:  `medium`,
-	10: `600`,
-	11: `semi-bold`,
-	12: `700`,
-	13: `bold`,
-	14: `800`,
-	15: `extra-bold`,
-	16: `900`,
-	17: `black`,
-	18: `bolder`,
-	19: `lighter`,
-}
-
-// String returns the string representation
-// of this FontWeights value.
+// String returns the string representation of this FontWeights value.
 func (i FontWeights) String() string {
 	if str, ok := _FontWeightsMap[i]; ok {
 		return str
@@ -361,9 +180,8 @@ func (i FontWeights) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the FontWeights value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the FontWeights value from its string representation,
+// and returns an error if the string is invalid.
 func (i *FontWeights) SetString(s string) error {
 	if val, ok := _FontWeightsNameToValueMap[s]; ok {
 		*i = val
@@ -390,27 +208,18 @@ func (i FontWeights) Desc() string {
 	return i.String()
 }
 
-// FontWeightsValues returns all possible values
-// for the type FontWeights.
+// FontWeightsValues returns all possible values for the type FontWeights.
 func FontWeightsValues() []FontWeights {
 	return _FontWeightsValues
 }
 
-// Values returns all possible values
-// for the type FontWeights.
+// Values returns all possible values for the type FontWeights.
 func (i FontWeights) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_FontWeightsValues))
 	for i, d := range _FontWeightsValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type FontWeights.
-func (i FontWeights) IsValid() bool {
-	_, ok := _FontWeightsMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -428,71 +237,16 @@ func (i *FontWeights) UnmarshalText(text []byte) error {
 
 var _FontStretchValues = []FontStretch{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 
-// FontStretchN is the highest valid value
-// for type FontStretch, plus one.
+// FontStretchN is the highest valid value for type FontStretch, plus one.
 const FontStretchN FontStretch = 11
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _FontStretchNoOp() {
-	var x [1]struct{}
-	_ = x[FontStrNormal-(0)]
-	_ = x[FontStrUltraCondensed-(1)]
-	_ = x[FontStrExtraCondensed-(2)]
-	_ = x[FontStrSemiCondensed-(3)]
-	_ = x[FontStrSemiExpanded-(4)]
-	_ = x[FontStrExtraExpanded-(5)]
-	_ = x[FontStrUltraExpanded-(6)]
-	_ = x[FontStrCondensed-(7)]
-	_ = x[FontStrExpanded-(8)]
-	_ = x[FontStrNarrower-(9)]
-	_ = x[FontStrWider-(10)]
-}
+var _FontStretchNameToValueMap = map[string]FontStretch{`Normal`: 0, `UltraCondensed`: 1, `ExtraCondensed`: 2, `SemiCondensed`: 3, `SemiExpanded`: 4, `ExtraExpanded`: 5, `UltraExpanded`: 6, `Condensed`: 7, `Expanded`: 8, `Narrower`: 9, `Wider`: 10}
 
-var _FontStretchNameToValueMap = map[string]FontStretch{
-	`Normal`:         0,
-	`UltraCondensed`: 1,
-	`ExtraCondensed`: 2,
-	`SemiCondensed`:  3,
-	`SemiExpanded`:   4,
-	`ExtraExpanded`:  5,
-	`UltraExpanded`:  6,
-	`Condensed`:      7,
-	`Expanded`:       8,
-	`Narrower`:       9,
-	`Wider`:          10,
-}
+var _FontStretchDescMap = map[FontStretch]string{0: ``, 1: ``, 2: ``, 3: ``, 4: ``, 5: ``, 6: ``, 7: ``, 8: ``, 9: ``, 10: ``}
 
-var _FontStretchDescMap = map[FontStretch]string{
-	0:  ``,
-	1:  ``,
-	2:  ``,
-	3:  ``,
-	4:  ``,
-	5:  ``,
-	6:  ``,
-	7:  ``,
-	8:  ``,
-	9:  ``,
-	10: ``,
-}
+var _FontStretchMap = map[FontStretch]string{0: `Normal`, 1: `UltraCondensed`, 2: `ExtraCondensed`, 3: `SemiCondensed`, 4: `SemiExpanded`, 5: `ExtraExpanded`, 6: `UltraExpanded`, 7: `Condensed`, 8: `Expanded`, 9: `Narrower`, 10: `Wider`}
 
-var _FontStretchMap = map[FontStretch]string{
-	0:  `Normal`,
-	1:  `UltraCondensed`,
-	2:  `ExtraCondensed`,
-	3:  `SemiCondensed`,
-	4:  `SemiExpanded`,
-	5:  `ExtraExpanded`,
-	6:  `UltraExpanded`,
-	7:  `Condensed`,
-	8:  `Expanded`,
-	9:  `Narrower`,
-	10: `Wider`,
-}
-
-// String returns the string representation
-// of this FontStretch value.
+// String returns the string representation of this FontStretch value.
 func (i FontStretch) String() string {
 	if str, ok := _FontStretchMap[i]; ok {
 		return str
@@ -500,9 +254,8 @@ func (i FontStretch) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the FontStretch value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the FontStretch value from its string representation,
+// and returns an error if the string is invalid.
 func (i *FontStretch) SetString(s string) error {
 	if val, ok := _FontStretchNameToValueMap[s]; ok {
 		*i = val
@@ -529,27 +282,18 @@ func (i FontStretch) Desc() string {
 	return i.String()
 }
 
-// FontStretchValues returns all possible values
-// for the type FontStretch.
+// FontStretchValues returns all possible values for the type FontStretch.
 func FontStretchValues() []FontStretch {
 	return _FontStretchValues
 }
 
-// Values returns all possible values
-// for the type FontStretch.
+// Values returns all possible values for the type FontStretch.
 func (i FontStretch) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_FontStretchValues))
 	for i, d := range _FontStretchValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type FontStretch.
-func (i FontStretch) IsValid() bool {
-	_, ok := _FontStretchMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -567,67 +311,16 @@ func (i *FontStretch) UnmarshalText(text []byte) error {
 
 var _TextDecorationsValues = []TextDecorations{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
 
-// TextDecorationsN is the highest valid value
-// for type TextDecorations, plus one.
+// TextDecorationsN is the highest valid value for type TextDecorations, plus one.
 const TextDecorationsN TextDecorations = 10
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _TextDecorationsNoOp() {
-	var x [1]struct{}
-	_ = x[DecoNone-(0)]
-	_ = x[Underline-(1)]
-	_ = x[Overline-(2)]
-	_ = x[LineThrough-(3)]
-	_ = x[DecoBlink-(4)]
-	_ = x[DecoDottedUnderline-(5)]
-	_ = x[DecoParaStart-(6)]
-	_ = x[DecoSuper-(7)]
-	_ = x[DecoSub-(8)]
-	_ = x[DecoBackgroundColor-(9)]
-}
+var _TextDecorationsNameToValueMap = map[string]TextDecorations{`none`: 0, `underline`: 1, `overline`: 2, `line-through`: 3, `blink`: 4, `dotted-underline`: 5, `para-start`: 6, `super`: 7, `sub`: 8, `background-color`: 9}
 
-var _TextDecorationsNameToValueMap = map[string]TextDecorations{
-	`none`:             0,
-	`underline`:        1,
-	`overline`:         2,
-	`line-through`:     3,
-	`blink`:            4,
-	`dotted-underline`: 5,
-	`para-start`:       6,
-	`super`:            7,
-	`sub`:              8,
-	`background-color`: 9,
-}
+var _TextDecorationsDescMap = map[TextDecorations]string{0: ``, 1: `Underline indicates to place a line below text`, 2: `Overline indicates to place a line above text`, 3: `LineThrough indicates to place a line through text`, 4: `Blink is not currently supported (and probably a bad idea generally ;)`, 5: `DottedUnderline is used for abbr tag -- otherwise not a standard text-decoration option afaik`, 6: `DecoParaStart at start of a SpanRender indicates that it should be styled as the start of a new paragraph and not just the start of a new line`, 7: `DecoSuper indicates super-scripted text`, 8: `DecoSub indicates sub-scripted text`, 9: `DecoBackgroundColor indicates that a bg color has been set -- for use in optimizing rendering`}
 
-var _TextDecorationsDescMap = map[TextDecorations]string{
-	0: ``,
-	1: `Underline indicates to place a line below text`,
-	2: `Overline indicates to place a line above text`,
-	3: `LineThrough indicates to place a line through text`,
-	4: `Blink is not currently supported (and probably a bad idea generally ;)`,
-	5: `DottedUnderline is used for abbr tag -- otherwise not a standard text-decoration option afaik`,
-	6: `DecoParaStart at start of a SpanRender indicates that it should be styled as the start of a new paragraph and not just the start of a new line`,
-	7: `DecoSuper indicates super-scripted text`,
-	8: `DecoSub indicates sub-scripted text`,
-	9: `DecoBackgroundColor indicates that a bg color has been set -- for use in optimizing rendering`,
-}
+var _TextDecorationsMap = map[TextDecorations]string{0: `none`, 1: `underline`, 2: `overline`, 3: `line-through`, 4: `blink`, 5: `dotted-underline`, 6: `para-start`, 7: `super`, 8: `sub`, 9: `background-color`}
 
-var _TextDecorationsMap = map[TextDecorations]string{
-	0: `none`,
-	1: `underline`,
-	2: `overline`,
-	3: `line-through`,
-	4: `blink`,
-	5: `dotted-underline`,
-	6: `para-start`,
-	7: `super`,
-	8: `sub`,
-	9: `background-color`,
-}
-
-// String returns the string representation
-// of this TextDecorations value.
+// String returns the string representation of this TextDecorations value.
 func (i TextDecorations) String() string {
 	str := ""
 	for _, ie := range _TextDecorationsValues {
@@ -643,10 +336,8 @@ func (i TextDecorations) String() string {
 	return str
 }
 
-// BitIndexString returns the string
-// representation of this TextDecorations value
-// if it is a bit index value
-// (typically an enum constant), and
+// BitIndexString returns the string representation of this TextDecorations value
+// if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
 func (i TextDecorations) BitIndexString() string {
 	if str, ok := _TextDecorationsMap[i]; ok {
@@ -655,17 +346,15 @@ func (i TextDecorations) BitIndexString() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the TextDecorations value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the TextDecorations value from its string representation,
+// and returns an error if the string is invalid.
 func (i *TextDecorations) SetString(s string) error {
 	*i = 0
 	return i.SetStringOr(s)
 }
 
-// SetStringOr sets the TextDecorations value from its
-// string representation while preserving any
-// bit flags already set, and returns an
+// SetStringOr sets the TextDecorations value from its string representation
+// while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *TextDecorations) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
@@ -699,14 +388,12 @@ func (i TextDecorations) Desc() string {
 	return i.String()
 }
 
-// TextDecorationsValues returns all possible values
-// for the type TextDecorations.
+// TextDecorationsValues returns all possible values for the type TextDecorations.
 func TextDecorationsValues() []TextDecorations {
 	return _TextDecorationsValues
 }
 
-// Values returns all possible values
-// for the type TextDecorations.
+// Values returns all possible values for the type TextDecorations.
 func (i TextDecorations) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_TextDecorationsValues))
 	for i, d := range _TextDecorationsValues {
@@ -715,21 +402,12 @@ func (i TextDecorations) Values() []enums.Enum {
 	return res
 }
 
-// IsValid returns whether the value is a
-// valid option for type TextDecorations.
-func (i TextDecorations) IsValid() bool {
-	_, ok := _TextDecorationsMap[i]
-	return ok
-}
-
-// HasFlag returns whether these
-// bit flags have the given bit flag set.
+// HasFlag returns whether these bit flags have the given bit flag set.
 func (i TextDecorations) HasFlag(f enums.BitFlag) bool {
 	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
 }
 
-// SetFlag sets the value of the given
-// flags in these flags to the given value.
+// SetFlag sets the value of the given flags in these flags to the given value.
 func (i *TextDecorations) SetFlag(on bool, f ...enums.BitFlag) {
 	var mask int64
 	for _, v := range f {
@@ -760,39 +438,16 @@ func (i *TextDecorations) UnmarshalText(text []byte) error {
 
 var _BaselineShiftsValues = []BaselineShifts{0, 1, 2}
 
-// BaselineShiftsN is the highest valid value
-// for type BaselineShifts, plus one.
+// BaselineShiftsN is the highest valid value for type BaselineShifts, plus one.
 const BaselineShiftsN BaselineShifts = 3
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _BaselineShiftsNoOp() {
-	var x [1]struct{}
-	_ = x[ShiftBaseline-(0)]
-	_ = x[ShiftSuper-(1)]
-	_ = x[ShiftSub-(2)]
-}
+var _BaselineShiftsNameToValueMap = map[string]BaselineShifts{`baseline`: 0, `super`: 1, `sub`: 2}
 
-var _BaselineShiftsNameToValueMap = map[string]BaselineShifts{
-	`baseline`: 0,
-	`super`:    1,
-	`sub`:      2,
-}
+var _BaselineShiftsDescMap = map[BaselineShifts]string{0: ``, 1: ``, 2: ``}
 
-var _BaselineShiftsDescMap = map[BaselineShifts]string{
-	0: ``,
-	1: ``,
-	2: ``,
-}
+var _BaselineShiftsMap = map[BaselineShifts]string{0: `baseline`, 1: `super`, 2: `sub`}
 
-var _BaselineShiftsMap = map[BaselineShifts]string{
-	0: `baseline`,
-	1: `super`,
-	2: `sub`,
-}
-
-// String returns the string representation
-// of this BaselineShifts value.
+// String returns the string representation of this BaselineShifts value.
 func (i BaselineShifts) String() string {
 	if str, ok := _BaselineShiftsMap[i]; ok {
 		return str
@@ -800,9 +455,8 @@ func (i BaselineShifts) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the BaselineShifts value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the BaselineShifts value from its string representation,
+// and returns an error if the string is invalid.
 func (i *BaselineShifts) SetString(s string) error {
 	if val, ok := _BaselineShiftsNameToValueMap[s]; ok {
 		*i = val
@@ -829,27 +483,18 @@ func (i BaselineShifts) Desc() string {
 	return i.String()
 }
 
-// BaselineShiftsValues returns all possible values
-// for the type BaselineShifts.
+// BaselineShiftsValues returns all possible values for the type BaselineShifts.
 func BaselineShiftsValues() []BaselineShifts {
 	return _BaselineShiftsValues
 }
 
-// Values returns all possible values
-// for the type BaselineShifts.
+// Values returns all possible values for the type BaselineShifts.
 func (i BaselineShifts) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_BaselineShiftsValues))
 	for i, d := range _BaselineShiftsValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type BaselineShifts.
-func (i BaselineShifts) IsValid() bool {
-	_, ok := _BaselineShiftsMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -867,35 +512,16 @@ func (i *BaselineShifts) UnmarshalText(text []byte) error {
 
 var _FontVariantsValues = []FontVariants{0, 1}
 
-// FontVariantsN is the highest valid value
-// for type FontVariants, plus one.
+// FontVariantsN is the highest valid value for type FontVariants, plus one.
 const FontVariantsN FontVariants = 2
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _FontVariantsNoOp() {
-	var x [1]struct{}
-	_ = x[FontVarNormal-(0)]
-	_ = x[FontVarSmallCaps-(1)]
-}
+var _FontVariantsNameToValueMap = map[string]FontVariants{`normal`: 0, `small-caps`: 1}
 
-var _FontVariantsNameToValueMap = map[string]FontVariants{
-	`normal`:     0,
-	`small-caps`: 1,
-}
+var _FontVariantsDescMap = map[FontVariants]string{0: ``, 1: ``}
 
-var _FontVariantsDescMap = map[FontVariants]string{
-	0: ``,
-	1: ``,
-}
+var _FontVariantsMap = map[FontVariants]string{0: `normal`, 1: `small-caps`}
 
-var _FontVariantsMap = map[FontVariants]string{
-	0: `normal`,
-	1: `small-caps`,
-}
-
-// String returns the string representation
-// of this FontVariants value.
+// String returns the string representation of this FontVariants value.
 func (i FontVariants) String() string {
 	if str, ok := _FontVariantsMap[i]; ok {
 		return str
@@ -903,9 +529,8 @@ func (i FontVariants) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the FontVariants value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the FontVariants value from its string representation,
+// and returns an error if the string is invalid.
 func (i *FontVariants) SetString(s string) error {
 	if val, ok := _FontVariantsNameToValueMap[s]; ok {
 		*i = val
@@ -932,27 +557,18 @@ func (i FontVariants) Desc() string {
 	return i.String()
 }
 
-// FontVariantsValues returns all possible values
-// for the type FontVariants.
+// FontVariantsValues returns all possible values for the type FontVariants.
 func FontVariantsValues() []FontVariants {
 	return _FontVariantsValues
 }
 
-// Values returns all possible values
-// for the type FontVariants.
+// Values returns all possible values for the type FontVariants.
 func (i FontVariants) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_FontVariantsValues))
 	for i, d := range _FontVariantsValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type FontVariants.
-func (i FontVariants) IsValid() bool {
-	_, ok := _FontVariantsMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -970,35 +586,16 @@ func (i *FontVariants) UnmarshalText(text []byte) error {
 
 var _DirectionsValues = []Directions{0, 1}
 
-// DirectionsN is the highest valid value
-// for type Directions, plus one.
+// DirectionsN is the highest valid value for type Directions, plus one.
 const DirectionsN Directions = 2
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _DirectionsNoOp() {
-	var x [1]struct{}
-	_ = x[Row-(0)]
-	_ = x[Column-(1)]
-}
+var _DirectionsNameToValueMap = map[string]Directions{`row`: 0, `column`: 1}
 
-var _DirectionsNameToValueMap = map[string]Directions{
-	`row`:    0,
-	`column`: 1,
-}
+var _DirectionsDescMap = map[Directions]string{0: `Row indicates that elements are laid out in a row or that an element is longer / travels in the x dimension.`, 1: `Column indicates that elements are laid out in a column or that an element is longer / travels in the y dimension.`}
 
-var _DirectionsDescMap = map[Directions]string{
-	0: `Row indicates that elements are laid out in a row or that an element is longer / travels in the x dimension.`,
-	1: `Column indicates that elements are laid out in a column or that an element is longer / travels in the y dimension.`,
-}
+var _DirectionsMap = map[Directions]string{0: `row`, 1: `column`}
 
-var _DirectionsMap = map[Directions]string{
-	0: `row`,
-	1: `column`,
-}
-
-// String returns the string representation
-// of this Directions value.
+// String returns the string representation of this Directions value.
 func (i Directions) String() string {
 	if str, ok := _DirectionsMap[i]; ok {
 		return str
@@ -1006,9 +603,8 @@ func (i Directions) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the Directions value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the Directions value from its string representation,
+// and returns an error if the string is invalid.
 func (i *Directions) SetString(s string) error {
 	if val, ok := _DirectionsNameToValueMap[s]; ok {
 		*i = val
@@ -1035,27 +631,18 @@ func (i Directions) Desc() string {
 	return i.String()
 }
 
-// DirectionsValues returns all possible values
-// for the type Directions.
+// DirectionsValues returns all possible values for the type Directions.
 func DirectionsValues() []Directions {
 	return _DirectionsValues
 }
 
-// Values returns all possible values
-// for the type Directions.
+// Values returns all possible values for the type Directions.
 func (i Directions) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_DirectionsValues))
 	for i, d := range _DirectionsValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type Directions.
-func (i Directions) IsValid() bool {
-	_, ok := _DirectionsMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -1073,47 +660,16 @@ func (i *Directions) UnmarshalText(text []byte) error {
 
 var _DisplaysValues = []Displays{0, 1, 2, 3, 4}
 
-// DisplaysN is the highest valid value
-// for type Displays, plus one.
+// DisplaysN is the highest valid value for type Displays, plus one.
 const DisplaysN Displays = 5
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _DisplaysNoOp() {
-	var x [1]struct{}
-	_ = x[Flex-(0)]
-	_ = x[Stacked-(1)]
-	_ = x[Grid-(2)]
-	_ = x[NoLayout-(3)]
-	_ = x[DisplayNone-(4)]
-}
+var _DisplaysNameToValueMap = map[string]Displays{`flex`: 0, `stacked`: 1, `grid`: 2, `no-layout`: 3, `none`: 4}
 
-var _DisplaysNameToValueMap = map[string]Displays{
-	`flex`:      0,
-	`stacked`:   1,
-	`grid`:      2,
-	`no-layout`: 3,
-	`none`:      4,
-}
+var _DisplaysDescMap = map[Displays]string{0: `Flex is the default layout model, based on a simplified version of the CSS flex layout: uses MainAxis to specify the direction, Wrap for wrapping of elements, and Min, Max, and Grow values on elements to determine sizing.`, 1: `Stacked is a stack of elements, with one on top that is visible`, 2: `Grid is the X, Y grid layout, with Columns specifying the number of elements in the X axis.`, 3: `NoLayout means that no automatic layout will be applied to elements, which can then be managed via custom code.`, 4: `None means the item is not displayed: sets the Invisible state`}
 
-var _DisplaysDescMap = map[Displays]string{
-	0: `Flex is the default layout model, based on a simplified version of the CSS flex layout: uses MainAxis to specify the direction, Wrap for wrapping of elements, and Min, Max, and Grow values on elements to determine sizing.`,
-	1: `Stacked is a stack of elements, with one on top that is visible`,
-	2: `Grid is the X, Y grid layout, with Columns specifying the number of elements in the X axis.`,
-	3: `NoLayout means that no automatic layout will be applied to elements, which can then be managed via custom code.`,
-	4: `None means the item is not displayed: sets the Invisible state`,
-}
+var _DisplaysMap = map[Displays]string{0: `flex`, 1: `stacked`, 2: `grid`, 3: `no-layout`, 4: `none`}
 
-var _DisplaysMap = map[Displays]string{
-	0: `flex`,
-	1: `stacked`,
-	2: `grid`,
-	3: `no-layout`,
-	4: `none`,
-}
-
-// String returns the string representation
-// of this Displays value.
+// String returns the string representation of this Displays value.
 func (i Displays) String() string {
 	if str, ok := _DisplaysMap[i]; ok {
 		return str
@@ -1121,9 +677,8 @@ func (i Displays) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the Displays value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the Displays value from its string representation,
+// and returns an error if the string is invalid.
 func (i *Displays) SetString(s string) error {
 	if val, ok := _DisplaysNameToValueMap[s]; ok {
 		*i = val
@@ -1150,27 +705,18 @@ func (i Displays) Desc() string {
 	return i.String()
 }
 
-// DisplaysValues returns all possible values
-// for the type Displays.
+// DisplaysValues returns all possible values for the type Displays.
 func DisplaysValues() []Displays {
 	return _DisplaysValues
 }
 
-// Values returns all possible values
-// for the type Displays.
+// Values returns all possible values for the type Displays.
 func (i Displays) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_DisplaysValues))
 	for i, d := range _DisplaysValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type Displays.
-func (i Displays) IsValid() bool {
-	_, ok := _DisplaysMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -1188,59 +734,16 @@ func (i *Displays) UnmarshalText(text []byte) error {
 
 var _AlignsValues = []Aligns{0, 1, 2, 3, 4, 5, 6, 7}
 
-// AlignsN is the highest valid value
-// for type Aligns, plus one.
+// AlignsN is the highest valid value for type Aligns, plus one.
 const AlignsN Aligns = 8
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _AlignsNoOp() {
-	var x [1]struct{}
-	_ = x[Auto-(0)]
-	_ = x[Start-(1)]
-	_ = x[End-(2)]
-	_ = x[Center-(3)]
-	_ = x[Baseline-(4)]
-	_ = x[SpaceBetween-(5)]
-	_ = x[SpaceAround-(6)]
-	_ = x[SpaceEvenly-(7)]
-}
+var _AlignsNameToValueMap = map[string]Aligns{`auto`: 0, `start`: 1, `end`: 2, `center`: 3, `baseline`: 4, `space-between`: 5, `space-around`: 6, `space-evenly`: 7}
 
-var _AlignsNameToValueMap = map[string]Aligns{
-	`auto`:          0,
-	`start`:         1,
-	`end`:           2,
-	`center`:        3,
-	`baseline`:      4,
-	`space-between`: 5,
-	`space-around`:  6,
-	`space-evenly`:  7,
-}
+var _AlignsDescMap = map[Aligns]string{0: `Auto means the item uses the container&#39;s AlignItems value`, 1: `Align items to the start (top, left) of layout`, 2: `Align items to the end (bottom, right) of layout`, 3: `Align items centered`, 4: `Align to text baselines`, 5: `First and last are flush, equal space between remaining items`, 6: `First and last have 1/2 space at edges, full space between remaining items`, 7: `Equal space at start, end, and between all items`}
 
-var _AlignsDescMap = map[Aligns]string{
-	0: `Auto means the item uses the container&#39;s AlignItems value`,
-	1: `Align items to the start (top, left) of layout`,
-	2: `Align items to the end (bottom, right) of layout`,
-	3: `Align items centered`,
-	4: `Align to text baselines`,
-	5: `First and last are flush, equal space between remaining items`,
-	6: `First and last have 1/2 space at edges, full space between remaining items`,
-	7: `Equal space at start, end, and between all items`,
-}
+var _AlignsMap = map[Aligns]string{0: `auto`, 1: `start`, 2: `end`, 3: `center`, 4: `baseline`, 5: `space-between`, 6: `space-around`, 7: `space-evenly`}
 
-var _AlignsMap = map[Aligns]string{
-	0: `auto`,
-	1: `start`,
-	2: `end`,
-	3: `center`,
-	4: `baseline`,
-	5: `space-between`,
-	6: `space-around`,
-	7: `space-evenly`,
-}
-
-// String returns the string representation
-// of this Aligns value.
+// String returns the string representation of this Aligns value.
 func (i Aligns) String() string {
 	if str, ok := _AlignsMap[i]; ok {
 		return str
@@ -1248,9 +751,8 @@ func (i Aligns) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the Aligns value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the Aligns value from its string representation,
+// and returns an error if the string is invalid.
 func (i *Aligns) SetString(s string) error {
 	if val, ok := _AlignsNameToValueMap[s]; ok {
 		*i = val
@@ -1277,27 +779,18 @@ func (i Aligns) Desc() string {
 	return i.String()
 }
 
-// AlignsValues returns all possible values
-// for the type Aligns.
+// AlignsValues returns all possible values for the type Aligns.
 func AlignsValues() []Aligns {
 	return _AlignsValues
 }
 
-// Values returns all possible values
-// for the type Aligns.
+// Values returns all possible values for the type Aligns.
 func (i Aligns) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_AlignsValues))
 	for i, d := range _AlignsValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type Aligns.
-func (i Aligns) IsValid() bool {
-	_, ok := _AlignsMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -1315,43 +808,16 @@ func (i *Aligns) UnmarshalText(text []byte) error {
 
 var _OverflowsValues = []Overflows{0, 1, 2, 3}
 
-// OverflowsN is the highest valid value
-// for type Overflows, plus one.
+// OverflowsN is the highest valid value for type Overflows, plus one.
 const OverflowsN Overflows = 4
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _OverflowsNoOp() {
-	var x [1]struct{}
-	_ = x[OverflowVisible-(0)]
-	_ = x[OverflowHidden-(1)]
-	_ = x[OverflowAuto-(2)]
-	_ = x[OverflowScroll-(3)]
-}
+var _OverflowsNameToValueMap = map[string]Overflows{`visible`: 0, `hidden`: 1, `auto`: 2, `scroll`: 3}
 
-var _OverflowsNameToValueMap = map[string]Overflows{
-	`visible`: 0,
-	`hidden`:  1,
-	`auto`:    2,
-	`scroll`:  3,
-}
+var _OverflowsDescMap = map[Overflows]string{0: `OverflowVisible makes the overflow visible, meaning that the size of the container is always at least the Min size of its contents. No scrollbars are shown.`, 1: `OverflowHidden hides the overflow and doesn&#39;t present scrollbars.`, 2: `OverflowAuto automatically determines if scrollbars should be added to show the overflow. Scrollbars are added only if the actual content size is greater than the currently available size.`, 3: `OverflowScroll means that scrollbars are always visible, and is otherwise identical to Auto. However, only during Viewport PrefSize call, the actual content size is used -- otherwise it behaves just like Auto.`}
 
-var _OverflowsDescMap = map[Overflows]string{
-	0: `OverflowVisible makes the overflow visible, meaning that the size of the container is always at least the Min size of its contents. No scrollbars are shown.`,
-	1: `OverflowHidden hides the overflow and doesn&#39;t present scrollbars.`,
-	2: `OverflowAuto automatically determines if scrollbars should be added to show the overflow. Scrollbars are added only if the actual content size is greater than the currently available size.`,
-	3: `OverflowScroll means that scrollbars are always visible, and is otherwise identical to Auto. However, only during Viewport PrefSize call, the actual content size is used -- otherwise it behaves just like Auto.`,
-}
+var _OverflowsMap = map[Overflows]string{0: `visible`, 1: `hidden`, 2: `auto`, 3: `scroll`}
 
-var _OverflowsMap = map[Overflows]string{
-	0: `visible`,
-	1: `hidden`,
-	2: `auto`,
-	3: `scroll`,
-}
-
-// String returns the string representation
-// of this Overflows value.
+// String returns the string representation of this Overflows value.
 func (i Overflows) String() string {
 	if str, ok := _OverflowsMap[i]; ok {
 		return str
@@ -1359,9 +825,8 @@ func (i Overflows) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the Overflows value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the Overflows value from its string representation,
+// and returns an error if the string is invalid.
 func (i *Overflows) SetString(s string) error {
 	if val, ok := _OverflowsNameToValueMap[s]; ok {
 		*i = val
@@ -1388,27 +853,18 @@ func (i Overflows) Desc() string {
 	return i.String()
 }
 
-// OverflowsValues returns all possible values
-// for the type Overflows.
+// OverflowsValues returns all possible values for the type Overflows.
 func OverflowsValues() []Overflows {
 	return _OverflowsValues
 }
 
-// Values returns all possible values
-// for the type Overflows.
+// Values returns all possible values for the type Overflows.
 func (i Overflows) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_OverflowsValues))
 	for i, d := range _OverflowsValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type Overflows.
-func (i Overflows) IsValid() bool {
-	_, ok := _OverflowsMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -1426,47 +882,16 @@ func (i *Overflows) UnmarshalText(text []byte) error {
 
 var _ObjectFitsValues = []ObjectFits{0, 1, 2, 3, 4}
 
-// ObjectFitsN is the highest valid value
-// for type ObjectFits, plus one.
+// ObjectFitsN is the highest valid value for type ObjectFits, plus one.
 const ObjectFitsN ObjectFits = 5
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _ObjectFitsNoOp() {
-	var x [1]struct{}
-	_ = x[FitFill-(0)]
-	_ = x[FitContain-(1)]
-	_ = x[FitCover-(2)]
-	_ = x[FitNone-(3)]
-	_ = x[FitScaleDown-(4)]
-}
+var _ObjectFitsNameToValueMap = map[string]ObjectFits{`fill`: 0, `contain`: 1, `cover`: 2, `none`: 3, `scale-down`: 4}
 
-var _ObjectFitsNameToValueMap = map[string]ObjectFits{
-	`fill`:       0,
-	`contain`:    1,
-	`cover`:      2,
-	`none`:       3,
-	`scale-down`: 4,
-}
+var _ObjectFitsDescMap = map[ObjectFits]string{0: `FitFill indicates that the replaced object will fill the element&#39;s entire content box, stretching if necessary.`, 1: `FitContain indicates that the replaced object will resize as large as possible while fully fitting within the element&#39;s content box and maintaining its aspect ratio. Therefore, it may not fill the entire element.`, 2: `FitCover indicates that the replaced object will fill the element&#39;s entire content box, clipping if necessary.`, 3: `FitNone indicates that the replaced object will not resize.`, 4: `FitScaleDown indicates that the replaced object will size as if [FitNone] or [FitContain] was specified, using whichever will result in a smaller final size.`}
 
-var _ObjectFitsDescMap = map[ObjectFits]string{
-	0: `FitFill indicates that the replaced object will fill the element&#39;s entire content box, stretching if necessary.`,
-	1: `FitContain indicates that the replaced object will resize as large as possible while fully fitting within the element&#39;s content box and maintaining its aspect ratio. Therefore, it may not fill the entire element.`,
-	2: `FitCover indicates that the replaced object will fill the element&#39;s entire content box, clipping if necessary.`,
-	3: `FitNone indicates that the replaced object will not resize.`,
-	4: `FitScaleDown indicates that the replaced object will size as if [FitNone] or [FitContain] was specified, using whichever will result in a smaller final size.`,
-}
+var _ObjectFitsMap = map[ObjectFits]string{0: `fill`, 1: `contain`, 2: `cover`, 3: `none`, 4: `scale-down`}
 
-var _ObjectFitsMap = map[ObjectFits]string{
-	0: `fill`,
-	1: `contain`,
-	2: `cover`,
-	3: `none`,
-	4: `scale-down`,
-}
-
-// String returns the string representation
-// of this ObjectFits value.
+// String returns the string representation of this ObjectFits value.
 func (i ObjectFits) String() string {
 	if str, ok := _ObjectFitsMap[i]; ok {
 		return str
@@ -1474,9 +899,8 @@ func (i ObjectFits) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the ObjectFits value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the ObjectFits value from its string representation,
+// and returns an error if the string is invalid.
 func (i *ObjectFits) SetString(s string) error {
 	if val, ok := _ObjectFitsNameToValueMap[s]; ok {
 		*i = val
@@ -1503,27 +927,18 @@ func (i ObjectFits) Desc() string {
 	return i.String()
 }
 
-// ObjectFitsValues returns all possible values
-// for the type ObjectFits.
+// ObjectFitsValues returns all possible values for the type ObjectFits.
 func ObjectFitsValues() []ObjectFits {
 	return _ObjectFitsValues
 }
 
-// Values returns all possible values
-// for the type ObjectFits.
+// Values returns all possible values for the type ObjectFits.
 func (i ObjectFits) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_ObjectFitsValues))
 	for i, d := range _ObjectFitsValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type ObjectFits.
-func (i ObjectFits) IsValid() bool {
-	_, ok := _ObjectFitsMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -1541,35 +956,16 @@ func (i *ObjectFits) UnmarshalText(text []byte) error {
 
 var _FillRulesValues = []FillRules{0, 1}
 
-// FillRulesN is the highest valid value
-// for type FillRules, plus one.
+// FillRulesN is the highest valid value for type FillRules, plus one.
 const FillRulesN FillRules = 2
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _FillRulesNoOp() {
-	var x [1]struct{}
-	_ = x[FillRuleNonZero-(0)]
-	_ = x[FillRuleEvenOdd-(1)]
-}
+var _FillRulesNameToValueMap = map[string]FillRules{`non-zero`: 0, `even-odd`: 1}
 
-var _FillRulesNameToValueMap = map[string]FillRules{
-	`non-zero`: 0,
-	`even-odd`: 1,
-}
+var _FillRulesDescMap = map[FillRules]string{0: ``, 1: ``}
 
-var _FillRulesDescMap = map[FillRules]string{
-	0: ``,
-	1: ``,
-}
+var _FillRulesMap = map[FillRules]string{0: `non-zero`, 1: `even-odd`}
 
-var _FillRulesMap = map[FillRules]string{
-	0: `non-zero`,
-	1: `even-odd`,
-}
-
-// String returns the string representation
-// of this FillRules value.
+// String returns the string representation of this FillRules value.
 func (i FillRules) String() string {
 	if str, ok := _FillRulesMap[i]; ok {
 		return str
@@ -1577,9 +973,8 @@ func (i FillRules) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the FillRules value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the FillRules value from its string representation,
+// and returns an error if the string is invalid.
 func (i *FillRules) SetString(s string) error {
 	if val, ok := _FillRulesNameToValueMap[s]; ok {
 		*i = val
@@ -1606,27 +1001,18 @@ func (i FillRules) Desc() string {
 	return i.String()
 }
 
-// FillRulesValues returns all possible values
-// for the type FillRules.
+// FillRulesValues returns all possible values for the type FillRules.
 func FillRulesValues() []FillRules {
 	return _FillRulesValues
 }
 
-// Values returns all possible values
-// for the type FillRules.
+// Values returns all possible values for the type FillRules.
 func (i FillRules) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_FillRulesValues))
 	for i, d := range _FillRulesValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type FillRules.
-func (i FillRules) IsValid() bool {
-	_, ok := _FillRulesMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -1644,35 +1030,16 @@ func (i *FillRules) UnmarshalText(text []byte) error {
 
 var _VectorEffectsValues = []VectorEffects{0, 1}
 
-// VectorEffectsN is the highest valid value
-// for type VectorEffects, plus one.
+// VectorEffectsN is the highest valid value for type VectorEffects, plus one.
 const VectorEffectsN VectorEffects = 2
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _VectorEffectsNoOp() {
-	var x [1]struct{}
-	_ = x[VecEffNone-(0)]
-	_ = x[VecEffNonScalingStroke-(1)]
-}
+var _VectorEffectsNameToValueMap = map[string]VectorEffects{`none`: 0, `non-scaling-stroke`: 1}
 
-var _VectorEffectsNameToValueMap = map[string]VectorEffects{
-	`none`:               0,
-	`non-scaling-stroke`: 1,
-}
+var _VectorEffectsDescMap = map[VectorEffects]string{0: ``, 1: `VecEffNonScalingStroke means that the stroke width is not affected by transform properties`}
 
-var _VectorEffectsDescMap = map[VectorEffects]string{
-	0: ``,
-	1: `VecEffNonScalingStroke means that the stroke width is not affected by transform properties`,
-}
+var _VectorEffectsMap = map[VectorEffects]string{0: `none`, 1: `non-scaling-stroke`}
 
-var _VectorEffectsMap = map[VectorEffects]string{
-	0: `none`,
-	1: `non-scaling-stroke`,
-}
-
-// String returns the string representation
-// of this VectorEffects value.
+// String returns the string representation of this VectorEffects value.
 func (i VectorEffects) String() string {
 	if str, ok := _VectorEffectsMap[i]; ok {
 		return str
@@ -1680,9 +1047,8 @@ func (i VectorEffects) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the VectorEffects value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the VectorEffects value from its string representation,
+// and returns an error if the string is invalid.
 func (i *VectorEffects) SetString(s string) error {
 	if val, ok := _VectorEffectsNameToValueMap[s]; ok {
 		*i = val
@@ -1709,27 +1075,18 @@ func (i VectorEffects) Desc() string {
 	return i.String()
 }
 
-// VectorEffectsValues returns all possible values
-// for the type VectorEffects.
+// VectorEffectsValues returns all possible values for the type VectorEffects.
 func VectorEffectsValues() []VectorEffects {
 	return _VectorEffectsValues
 }
 
-// Values returns all possible values
-// for the type VectorEffects.
+// Values returns all possible values for the type VectorEffects.
 func (i VectorEffects) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_VectorEffectsValues))
 	for i, d := range _VectorEffectsValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type VectorEffects.
-func (i VectorEffects) IsValid() bool {
-	_, ok := _VectorEffectsMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -1747,47 +1104,16 @@ func (i *VectorEffects) UnmarshalText(text []byte) error {
 
 var _LineCapsValues = []LineCaps{0, 1, 2, 3, 4}
 
-// LineCapsN is the highest valid value
-// for type LineCaps, plus one.
+// LineCapsN is the highest valid value for type LineCaps, plus one.
 const LineCapsN LineCaps = 5
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _LineCapsNoOp() {
-	var x [1]struct{}
-	_ = x[LineCapButt-(0)]
-	_ = x[LineCapRound-(1)]
-	_ = x[LineCapSquare-(2)]
-	_ = x[LineCapCubic-(3)]
-	_ = x[LineCapQuadratic-(4)]
-}
+var _LineCapsNameToValueMap = map[string]LineCaps{`butt`: 0, `round`: 1, `square`: 2, `cubic`: 3, `quadratic`: 4}
 
-var _LineCapsNameToValueMap = map[string]LineCaps{
-	`butt`:      0,
-	`round`:     1,
-	`square`:    2,
-	`cubic`:     3,
-	`quadratic`: 4,
-}
+var _LineCapsDescMap = map[LineCaps]string{0: `LineCapButt indicates to draw no line caps; it draws a line with the length of the specified length.`, 1: `LineCapRound indicates to draw a semicircle on each line end with a diameter of the stroke width.`, 2: `LineCapSquare indicates to draw a rectangle on each line end with a height of the stroke width and a width of half of the stroke width.`, 3: `LineCapCubic is a rasterx extension`, 4: `LineCapQuadratic is a rasterx extension`}
 
-var _LineCapsDescMap = map[LineCaps]string{
-	0: `LineCapButt indicates to draw no line caps; it draws a line with the length of the specified length.`,
-	1: `LineCapRound indicates to draw a semicircle on each line end with a diameter of the stroke width.`,
-	2: `LineCapSquare indicates to draw a rectangle on each line end with a height of the stroke width and a width of half of the stroke width.`,
-	3: `LineCapCubic is a rasterx extension`,
-	4: `LineCapQuadratic is a rasterx extension`,
-}
+var _LineCapsMap = map[LineCaps]string{0: `butt`, 1: `round`, 2: `square`, 3: `cubic`, 4: `quadratic`}
 
-var _LineCapsMap = map[LineCaps]string{
-	0: `butt`,
-	1: `round`,
-	2: `square`,
-	3: `cubic`,
-	4: `quadratic`,
-}
-
-// String returns the string representation
-// of this LineCaps value.
+// String returns the string representation of this LineCaps value.
 func (i LineCaps) String() string {
 	if str, ok := _LineCapsMap[i]; ok {
 		return str
@@ -1795,9 +1121,8 @@ func (i LineCaps) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the LineCaps value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the LineCaps value from its string representation,
+// and returns an error if the string is invalid.
 func (i *LineCaps) SetString(s string) error {
 	if val, ok := _LineCapsNameToValueMap[s]; ok {
 		*i = val
@@ -1824,27 +1149,18 @@ func (i LineCaps) Desc() string {
 	return i.String()
 }
 
-// LineCapsValues returns all possible values
-// for the type LineCaps.
+// LineCapsValues returns all possible values for the type LineCaps.
 func LineCapsValues() []LineCaps {
 	return _LineCapsValues
 }
 
-// Values returns all possible values
-// for the type LineCaps.
+// Values returns all possible values for the type LineCaps.
 func (i LineCaps) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_LineCapsValues))
 	for i, d := range _LineCapsValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type LineCaps.
-func (i LineCaps) IsValid() bool {
-	_, ok := _LineCapsMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -1862,51 +1178,16 @@ func (i *LineCaps) UnmarshalText(text []byte) error {
 
 var _LineJoinsValues = []LineJoins{0, 1, 2, 3, 4, 5}
 
-// LineJoinsN is the highest valid value
-// for type LineJoins, plus one.
+// LineJoinsN is the highest valid value for type LineJoins, plus one.
 const LineJoinsN LineJoins = 6
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _LineJoinsNoOp() {
-	var x [1]struct{}
-	_ = x[LineJoinMiter-(0)]
-	_ = x[LineJoinMiterClip-(1)]
-	_ = x[LineJoinRound-(2)]
-	_ = x[LineJoinBevel-(3)]
-	_ = x[LineJoinArcs-(4)]
-	_ = x[LineJoinArcsClip-(5)]
-}
+var _LineJoinsNameToValueMap = map[string]LineJoins{`miter`: 0, `miter-clip`: 1, `round`: 2, `bevel`: 3, `arcs`: 4, `arcs-clip`: 5}
 
-var _LineJoinsNameToValueMap = map[string]LineJoins{
-	`miter`:      0,
-	`miter-clip`: 1,
-	`round`:      2,
-	`bevel`:      3,
-	`arcs`:       4,
-	`arcs-clip`:  5,
-}
+var _LineJoinsDescMap = map[LineJoins]string{0: ``, 1: ``, 2: ``, 3: ``, 4: ``, 5: `rasterx extension`}
 
-var _LineJoinsDescMap = map[LineJoins]string{
-	0: ``,
-	1: ``,
-	2: ``,
-	3: ``,
-	4: ``,
-	5: `rasterx extension`,
-}
+var _LineJoinsMap = map[LineJoins]string{0: `miter`, 1: `miter-clip`, 2: `round`, 3: `bevel`, 4: `arcs`, 5: `arcs-clip`}
 
-var _LineJoinsMap = map[LineJoins]string{
-	0: `miter`,
-	1: `miter-clip`,
-	2: `round`,
-	3: `bevel`,
-	4: `arcs`,
-	5: `arcs-clip`,
-}
-
-// String returns the string representation
-// of this LineJoins value.
+// String returns the string representation of this LineJoins value.
 func (i LineJoins) String() string {
 	if str, ok := _LineJoinsMap[i]; ok {
 		return str
@@ -1914,9 +1195,8 @@ func (i LineJoins) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the LineJoins value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the LineJoins value from its string representation,
+// and returns an error if the string is invalid.
 func (i *LineJoins) SetString(s string) error {
 	if val, ok := _LineJoinsNameToValueMap[s]; ok {
 		*i = val
@@ -1943,27 +1223,18 @@ func (i LineJoins) Desc() string {
 	return i.String()
 }
 
-// LineJoinsValues returns all possible values
-// for the type LineJoins.
+// LineJoinsValues returns all possible values for the type LineJoins.
 func LineJoinsValues() []LineJoins {
 	return _LineJoinsValues
 }
 
-// Values returns all possible values
-// for the type LineJoins.
+// Values returns all possible values for the type LineJoins.
 func (i LineJoins) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_LineJoinsValues))
 	for i, d := range _LineJoinsValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type LineJoins.
-func (i LineJoins) IsValid() bool {
-	_, ok := _LineJoinsMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -1981,43 +1252,16 @@ func (i *LineJoins) UnmarshalText(text []byte) error {
 
 var _SideIndexesValues = []SideIndexes{0, 1, 2, 3}
 
-// SideIndexesN is the highest valid value
-// for type SideIndexes, plus one.
+// SideIndexesN is the highest valid value for type SideIndexes, plus one.
 const SideIndexesN SideIndexes = 4
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _SideIndexesNoOp() {
-	var x [1]struct{}
-	_ = x[Top-(0)]
-	_ = x[Right-(1)]
-	_ = x[Bottom-(2)]
-	_ = x[Left-(3)]
-}
+var _SideIndexesNameToValueMap = map[string]SideIndexes{`Top`: 0, `Right`: 1, `Bottom`: 2, `Left`: 3}
 
-var _SideIndexesNameToValueMap = map[string]SideIndexes{
-	`Top`:    0,
-	`Right`:  1,
-	`Bottom`: 2,
-	`Left`:   3,
-}
+var _SideIndexesDescMap = map[SideIndexes]string{0: ``, 1: ``, 2: ``, 3: ``}
 
-var _SideIndexesDescMap = map[SideIndexes]string{
-	0: ``,
-	1: ``,
-	2: ``,
-	3: ``,
-}
+var _SideIndexesMap = map[SideIndexes]string{0: `Top`, 1: `Right`, 2: `Bottom`, 3: `Left`}
 
-var _SideIndexesMap = map[SideIndexes]string{
-	0: `Top`,
-	1: `Right`,
-	2: `Bottom`,
-	3: `Left`,
-}
-
-// String returns the string representation
-// of this SideIndexes value.
+// String returns the string representation of this SideIndexes value.
 func (i SideIndexes) String() string {
 	if str, ok := _SideIndexesMap[i]; ok {
 		return str
@@ -2025,9 +1269,8 @@ func (i SideIndexes) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the SideIndexes value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the SideIndexes value from its string representation,
+// and returns an error if the string is invalid.
 func (i *SideIndexes) SetString(s string) error {
 	if val, ok := _SideIndexesNameToValueMap[s]; ok {
 		*i = val
@@ -2054,27 +1297,18 @@ func (i SideIndexes) Desc() string {
 	return i.String()
 }
 
-// SideIndexesValues returns all possible values
-// for the type SideIndexes.
+// SideIndexesValues returns all possible values for the type SideIndexes.
 func SideIndexesValues() []SideIndexes {
 	return _SideIndexesValues
 }
 
-// Values returns all possible values
-// for the type SideIndexes.
+// Values returns all possible values for the type SideIndexes.
 func (i SideIndexes) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_SideIndexesValues))
 	for i, d := range _SideIndexesValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type SideIndexes.
-func (i SideIndexes) IsValid() bool {
-	_, ok := _SideIndexesMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -2092,59 +1326,16 @@ func (i *SideIndexes) UnmarshalText(text []byte) error {
 
 var _VirtualKeyboardsValues = []VirtualKeyboards{0, 1, 2, 3, 4, 5, 6, 7}
 
-// VirtualKeyboardsN is the highest valid value
-// for type VirtualKeyboards, plus one.
+// VirtualKeyboardsN is the highest valid value for type VirtualKeyboards, plus one.
 const VirtualKeyboardsN VirtualKeyboards = 8
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _VirtualKeyboardsNoOp() {
-	var x [1]struct{}
-	_ = x[KeyboardNone-(0)]
-	_ = x[KeyboardSingleLine-(1)]
-	_ = x[KeyboardMultiLine-(2)]
-	_ = x[KeyboardNumber-(3)]
-	_ = x[KeyboardPassword-(4)]
-	_ = x[KeyboardEmail-(5)]
-	_ = x[KeyboardPhone-(6)]
-	_ = x[KeyboardURL-(7)]
-}
+var _VirtualKeyboardsNameToValueMap = map[string]VirtualKeyboards{`none`: 0, `single-line`: 1, `multi-line`: 2, `number`: 3, `password`: 4, `email`: 5, `phone`: 6, `url`: 7}
 
-var _VirtualKeyboardsNameToValueMap = map[string]VirtualKeyboards{
-	`none`:        0,
-	`single-line`: 1,
-	`multi-line`:  2,
-	`number`:      3,
-	`password`:    4,
-	`email`:       5,
-	`phone`:       6,
-	`url`:         7,
-}
+var _VirtualKeyboardsDescMap = map[VirtualKeyboards]string{0: `KeyboardNone indicates to display no virtual keyboard.`, 1: `KeyboardSingleLine indicates to display a virtual keyboard with a default input style and a &#34;Done&#34; return key.`, 2: `KeyboardMultiLine indicates to display a virtual keyboard with a default input style and a &#34;Return&#34; return key.`, 3: `KeyboardNumber indicates to display a virtual keyboard for inputting a number.`, 4: `KeyboardPassword indicates to display a virtual keyboard for inputting a password.`, 5: `KeyboardEmail indicates to display a virtual keyboard for inputting an email address.`, 6: `KeyboardPhone indicates to display a virtual keyboard for inputting a phone number.`, 7: `KeyboardURL indicates to display a virtual keyboard for inputting a URL / URI / web address.`}
 
-var _VirtualKeyboardsDescMap = map[VirtualKeyboards]string{
-	0: `KeyboardNone indicates to display no virtual keyboard.`,
-	1: `KeyboardSingleLine indicates to display a virtual keyboard with a default input style and a &#34;Done&#34; return key.`,
-	2: `KeyboardMultiLine indicates to display a virtual keyboard with a default input style and a &#34;Return&#34; return key.`,
-	3: `KeyboardNumber indicates to display a virtual keyboard for inputting a number.`,
-	4: `KeyboardPassword indicates to display a virtual keyboard for inputting a password.`,
-	5: `KeyboardEmail indicates to display a virtual keyboard for inputting an email address.`,
-	6: `KeyboardPhone indicates to display a virtual keyboard for inputting a phone number.`,
-	7: `KeyboardURL indicates to display a virtual keyboard for inputting a URL / URI / web address.`,
-}
+var _VirtualKeyboardsMap = map[VirtualKeyboards]string{0: `none`, 1: `single-line`, 2: `multi-line`, 3: `number`, 4: `password`, 5: `email`, 6: `phone`, 7: `url`}
 
-var _VirtualKeyboardsMap = map[VirtualKeyboards]string{
-	0: `none`,
-	1: `single-line`,
-	2: `multi-line`,
-	3: `number`,
-	4: `password`,
-	5: `email`,
-	6: `phone`,
-	7: `url`,
-}
-
-// String returns the string representation
-// of this VirtualKeyboards value.
+// String returns the string representation of this VirtualKeyboards value.
 func (i VirtualKeyboards) String() string {
 	if str, ok := _VirtualKeyboardsMap[i]; ok {
 		return str
@@ -2152,9 +1343,8 @@ func (i VirtualKeyboards) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the VirtualKeyboards value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the VirtualKeyboards value from its string representation,
+// and returns an error if the string is invalid.
 func (i *VirtualKeyboards) SetString(s string) error {
 	if val, ok := _VirtualKeyboardsNameToValueMap[s]; ok {
 		*i = val
@@ -2181,27 +1371,18 @@ func (i VirtualKeyboards) Desc() string {
 	return i.String()
 }
 
-// VirtualKeyboardsValues returns all possible values
-// for the type VirtualKeyboards.
+// VirtualKeyboardsValues returns all possible values for the type VirtualKeyboards.
 func VirtualKeyboardsValues() []VirtualKeyboards {
 	return _VirtualKeyboardsValues
 }
 
-// Values returns all possible values
-// for the type VirtualKeyboards.
+// Values returns all possible values for the type VirtualKeyboards.
 func (i VirtualKeyboards) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_VirtualKeyboardsValues))
 	for i, d := range _VirtualKeyboardsValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type VirtualKeyboards.
-func (i VirtualKeyboards) IsValid() bool {
-	_, ok := _VirtualKeyboardsMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -2219,39 +1400,16 @@ func (i *VirtualKeyboards) UnmarshalText(text []byte) error {
 
 var _UnicodeBidiValues = []UnicodeBidi{0, 1, 2}
 
-// UnicodeBidiN is the highest valid value
-// for type UnicodeBidi, plus one.
+// UnicodeBidiN is the highest valid value for type UnicodeBidi, plus one.
 const UnicodeBidiN UnicodeBidi = 3
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _UnicodeBidiNoOp() {
-	var x [1]struct{}
-	_ = x[BidiNormal-(0)]
-	_ = x[BidiEmbed-(1)]
-	_ = x[BidiBidiOverride-(2)]
-}
+var _UnicodeBidiNameToValueMap = map[string]UnicodeBidi{`normal`: 0, `embed`: 1, `bidi-override`: 2}
 
-var _UnicodeBidiNameToValueMap = map[string]UnicodeBidi{
-	`normal`:        0,
-	`embed`:         1,
-	`bidi-override`: 2,
-}
+var _UnicodeBidiDescMap = map[UnicodeBidi]string{0: ``, 1: ``, 2: ``}
 
-var _UnicodeBidiDescMap = map[UnicodeBidi]string{
-	0: ``,
-	1: ``,
-	2: ``,
-}
+var _UnicodeBidiMap = map[UnicodeBidi]string{0: `normal`, 1: `embed`, 2: `bidi-override`}
 
-var _UnicodeBidiMap = map[UnicodeBidi]string{
-	0: `normal`,
-	1: `embed`,
-	2: `bidi-override`,
-}
-
-// String returns the string representation
-// of this UnicodeBidi value.
+// String returns the string representation of this UnicodeBidi value.
 func (i UnicodeBidi) String() string {
 	if str, ok := _UnicodeBidiMap[i]; ok {
 		return str
@@ -2259,9 +1417,8 @@ func (i UnicodeBidi) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the UnicodeBidi value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the UnicodeBidi value from its string representation,
+// and returns an error if the string is invalid.
 func (i *UnicodeBidi) SetString(s string) error {
 	if val, ok := _UnicodeBidiNameToValueMap[s]; ok {
 		*i = val
@@ -2288,27 +1445,18 @@ func (i UnicodeBidi) Desc() string {
 	return i.String()
 }
 
-// UnicodeBidiValues returns all possible values
-// for the type UnicodeBidi.
+// UnicodeBidiValues returns all possible values for the type UnicodeBidi.
 func UnicodeBidiValues() []UnicodeBidi {
 	return _UnicodeBidiValues
 }
 
-// Values returns all possible values
-// for the type UnicodeBidi.
+// Values returns all possible values for the type UnicodeBidi.
 func (i UnicodeBidi) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_UnicodeBidiValues))
 	for i, d := range _UnicodeBidiValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type UnicodeBidi.
-func (i UnicodeBidi) IsValid() bool {
-	_, ok := _UnicodeBidiMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -2326,59 +1474,16 @@ func (i *UnicodeBidi) UnmarshalText(text []byte) error {
 
 var _TextDirectionsValues = []TextDirections{0, 1, 2, 3, 4, 5, 6, 7}
 
-// TextDirectionsN is the highest valid value
-// for type TextDirections, plus one.
+// TextDirectionsN is the highest valid value for type TextDirections, plus one.
 const TextDirectionsN TextDirections = 8
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _TextDirectionsNoOp() {
-	var x [1]struct{}
-	_ = x[LRTB-(0)]
-	_ = x[RLTB-(1)]
-	_ = x[TBRL-(2)]
-	_ = x[LR-(3)]
-	_ = x[RL-(4)]
-	_ = x[TB-(5)]
-	_ = x[LTR-(6)]
-	_ = x[RTL-(7)]
-}
+var _TextDirectionsNameToValueMap = map[string]TextDirections{`lrtb`: 0, `rltb`: 1, `tbrl`: 2, `lr`: 3, `rl`: 4, `tb`: 5, `ltr`: 6, `rtl`: 7}
 
-var _TextDirectionsNameToValueMap = map[string]TextDirections{
-	`lrtb`: 0,
-	`rltb`: 1,
-	`tbrl`: 2,
-	`lr`:   3,
-	`rl`:   4,
-	`tb`:   5,
-	`ltr`:  6,
-	`rtl`:  7,
-}
+var _TextDirectionsDescMap = map[TextDirections]string{0: ``, 1: ``, 2: ``, 3: ``, 4: ``, 5: ``, 6: ``, 7: ``}
 
-var _TextDirectionsDescMap = map[TextDirections]string{
-	0: ``,
-	1: ``,
-	2: ``,
-	3: ``,
-	4: ``,
-	5: ``,
-	6: ``,
-	7: ``,
-}
+var _TextDirectionsMap = map[TextDirections]string{0: `lrtb`, 1: `rltb`, 2: `tbrl`, 3: `lr`, 4: `rl`, 5: `tb`, 6: `ltr`, 7: `rtl`}
 
-var _TextDirectionsMap = map[TextDirections]string{
-	0: `lrtb`,
-	1: `rltb`,
-	2: `tbrl`,
-	3: `lr`,
-	4: `rl`,
-	5: `tb`,
-	6: `ltr`,
-	7: `rtl`,
-}
-
-// String returns the string representation
-// of this TextDirections value.
+// String returns the string representation of this TextDirections value.
 func (i TextDirections) String() string {
 	if str, ok := _TextDirectionsMap[i]; ok {
 		return str
@@ -2386,9 +1491,8 @@ func (i TextDirections) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the TextDirections value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the TextDirections value from its string representation,
+// and returns an error if the string is invalid.
 func (i *TextDirections) SetString(s string) error {
 	if val, ok := _TextDirectionsNameToValueMap[s]; ok {
 		*i = val
@@ -2415,27 +1519,18 @@ func (i TextDirections) Desc() string {
 	return i.String()
 }
 
-// TextDirectionsValues returns all possible values
-// for the type TextDirections.
+// TextDirectionsValues returns all possible values for the type TextDirections.
 func TextDirectionsValues() []TextDirections {
 	return _TextDirectionsValues
 }
 
-// Values returns all possible values
-// for the type TextDirections.
+// Values returns all possible values for the type TextDirections.
 func (i TextDirections) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_TextDirectionsValues))
 	for i, d := range _TextDirectionsValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type TextDirections.
-func (i TextDirections) IsValid() bool {
-	_, ok := _TextDirectionsMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -2453,39 +1548,16 @@ func (i *TextDirections) UnmarshalText(text []byte) error {
 
 var _TextAnchorsValues = []TextAnchors{0, 1, 2}
 
-// TextAnchorsN is the highest valid value
-// for type TextAnchors, plus one.
+// TextAnchorsN is the highest valid value for type TextAnchors, plus one.
 const TextAnchorsN TextAnchors = 3
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _TextAnchorsNoOp() {
-	var x [1]struct{}
-	_ = x[AnchorStart-(0)]
-	_ = x[AnchorMiddle-(1)]
-	_ = x[AnchorEnd-(2)]
-}
+var _TextAnchorsNameToValueMap = map[string]TextAnchors{`start`: 0, `middle`: 1, `end`: 2}
 
-var _TextAnchorsNameToValueMap = map[string]TextAnchors{
-	`start`:  0,
-	`middle`: 1,
-	`end`:    2,
-}
+var _TextAnchorsDescMap = map[TextAnchors]string{0: ``, 1: ``, 2: ``}
 
-var _TextAnchorsDescMap = map[TextAnchors]string{
-	0: ``,
-	1: ``,
-	2: ``,
-}
+var _TextAnchorsMap = map[TextAnchors]string{0: `start`, 1: `middle`, 2: `end`}
 
-var _TextAnchorsMap = map[TextAnchors]string{
-	0: `start`,
-	1: `middle`,
-	2: `end`,
-}
-
-// String returns the string representation
-// of this TextAnchors value.
+// String returns the string representation of this TextAnchors value.
 func (i TextAnchors) String() string {
 	if str, ok := _TextAnchorsMap[i]; ok {
 		return str
@@ -2493,9 +1565,8 @@ func (i TextAnchors) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the TextAnchors value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the TextAnchors value from its string representation,
+// and returns an error if the string is invalid.
 func (i *TextAnchors) SetString(s string) error {
 	if val, ok := _TextAnchorsNameToValueMap[s]; ok {
 		*i = val
@@ -2522,27 +1593,18 @@ func (i TextAnchors) Desc() string {
 	return i.String()
 }
 
-// TextAnchorsValues returns all possible values
-// for the type TextAnchors.
+// TextAnchorsValues returns all possible values for the type TextAnchors.
 func TextAnchorsValues() []TextAnchors {
 	return _TextAnchorsValues
 }
 
-// Values returns all possible values
-// for the type TextAnchors.
+// Values returns all possible values for the type TextAnchors.
 func (i TextAnchors) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_TextAnchorsValues))
 	for i, d := range _TextAnchorsValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type TextAnchors.
-func (i TextAnchors) IsValid() bool {
-	_, ok := _TextAnchorsMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -2560,47 +1622,16 @@ func (i *TextAnchors) UnmarshalText(text []byte) error {
 
 var _WhiteSpacesValues = []WhiteSpaces{0, 1, 2, 3, 4}
 
-// WhiteSpacesN is the highest valid value
-// for type WhiteSpaces, plus one.
+// WhiteSpacesN is the highest valid value for type WhiteSpaces, plus one.
 const WhiteSpacesN WhiteSpaces = 5
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _WhiteSpacesNoOp() {
-	var x [1]struct{}
-	_ = x[WhiteSpaceNormal-(0)]
-	_ = x[WhiteSpaceNowrap-(1)]
-	_ = x[WhiteSpacePre-(2)]
-	_ = x[WhiteSpacePreLine-(3)]
-	_ = x[WhiteSpacePreWrap-(4)]
-}
+var _WhiteSpacesNameToValueMap = map[string]WhiteSpaces{`Normal`: 0, `Nowrap`: 1, `Pre`: 2, `PreLine`: 3, `PreWrap`: 4}
 
-var _WhiteSpacesNameToValueMap = map[string]WhiteSpaces{
-	`Normal`:  0,
-	`Nowrap`:  1,
-	`Pre`:     2,
-	`PreLine`: 3,
-	`PreWrap`: 4,
-}
+var _WhiteSpacesDescMap = map[WhiteSpaces]string{0: `WhiteSpaceNormal means that all white space is collapsed to a single space, and text wraps when necessary. To get full word wrapping to expand to all available space, you also need to set GrowWrap = 1. Use the SetTextWrap convenience method to set both.`, 1: `WhiteSpaceNowrap means that sequences of whitespace will collapse into a single whitespace. Text will never wrap to the next line except if there is an explicit line break via a &lt;br&gt; tag. In general you also don&#39;t want simple non-wrapping text labels to Grow (GrowWrap = 0). Use the SetTextWrap method to set both.`, 2: `WhiteSpacePre means that whitespace is preserved. Text will only wrap on line breaks. Acts like the &lt;pre&gt; tag in HTML. This invokes a different hand-written parser because the default Go parser automatically throws away whitespace.`, 3: `WhiteSpacePreLine means that sequences of whitespace will collapse into a single whitespace. Text will wrap when necessary, and on line breaks`, 4: `WhiteSpacePreWrap means that whitespace is preserved. Text will wrap when necessary, and on line breaks`}
 
-var _WhiteSpacesDescMap = map[WhiteSpaces]string{
-	0: `WhiteSpaceNormal means that all white space is collapsed to a single space, and text wraps when necessary. To get full word wrapping to expand to all available space, you also need to set GrowWrap = 1. Use the SetTextWrap convenience method to set both.`,
-	1: `WhiteSpaceNowrap means that sequences of whitespace will collapse into a single whitespace. Text will never wrap to the next line except if there is an explicit line break via a &lt;br&gt; tag. In general you also don&#39;t want simple non-wrapping text labels to Grow (GrowWrap = 0). Use the SetTextWrap method to set both.`,
-	2: `WhiteSpacePre means that whitespace is preserved. Text will only wrap on line breaks. Acts like the &lt;pre&gt; tag in HTML. This invokes a different hand-written parser because the default Go parser automatically throws away whitespace.`,
-	3: `WhiteSpacePreLine means that sequences of whitespace will collapse into a single whitespace. Text will wrap when necessary, and on line breaks`,
-	4: `WhiteSpacePreWrap means that whitespace is preserved. Text will wrap when necessary, and on line breaks`,
-}
+var _WhiteSpacesMap = map[WhiteSpaces]string{0: `Normal`, 1: `Nowrap`, 2: `Pre`, 3: `PreLine`, 4: `PreWrap`}
 
-var _WhiteSpacesMap = map[WhiteSpaces]string{
-	0: `Normal`,
-	1: `Nowrap`,
-	2: `Pre`,
-	3: `PreLine`,
-	4: `PreWrap`,
-}
-
-// String returns the string representation
-// of this WhiteSpaces value.
+// String returns the string representation of this WhiteSpaces value.
 func (i WhiteSpaces) String() string {
 	if str, ok := _WhiteSpacesMap[i]; ok {
 		return str
@@ -2608,9 +1639,8 @@ func (i WhiteSpaces) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the WhiteSpaces value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the WhiteSpaces value from its string representation,
+// and returns an error if the string is invalid.
 func (i *WhiteSpaces) SetString(s string) error {
 	if val, ok := _WhiteSpacesNameToValueMap[s]; ok {
 		*i = val
@@ -2637,27 +1667,18 @@ func (i WhiteSpaces) Desc() string {
 	return i.String()
 }
 
-// WhiteSpacesValues returns all possible values
-// for the type WhiteSpaces.
+// WhiteSpacesValues returns all possible values for the type WhiteSpaces.
 func WhiteSpacesValues() []WhiteSpaces {
 	return _WhiteSpacesValues
 }
 
-// Values returns all possible values
-// for the type WhiteSpaces.
+// Values returns all possible values for the type WhiteSpaces.
 func (i WhiteSpaces) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_WhiteSpacesValues))
 	for i, d := range _WhiteSpacesValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type WhiteSpaces.
-func (i WhiteSpaces) IsValid() bool {
-	_, ok := _WhiteSpacesMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.

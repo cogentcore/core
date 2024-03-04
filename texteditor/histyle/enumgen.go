@@ -12,39 +12,16 @@ import (
 
 var _TrileanValues = []Trilean{0, 1, 2}
 
-// TrileanN is the highest valid value
-// for type Trilean, plus one.
+// TrileanN is the highest valid value for type Trilean, plus one.
 const TrileanN Trilean = 3
 
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _TrileanNoOp() {
-	var x [1]struct{}
-	_ = x[Pass-(0)]
-	_ = x[Yes-(1)]
-	_ = x[No-(2)]
-}
+var _TrileanNameToValueMap = map[string]Trilean{`Pass`: 0, `Yes`: 1, `No`: 2}
 
-var _TrileanNameToValueMap = map[string]Trilean{
-	`Pass`: 0,
-	`Yes`:  1,
-	`No`:   2,
-}
+var _TrileanDescMap = map[Trilean]string{0: ``, 1: ``, 2: ``}
 
-var _TrileanDescMap = map[Trilean]string{
-	0: ``,
-	1: ``,
-	2: ``,
-}
+var _TrileanMap = map[Trilean]string{0: `Pass`, 1: `Yes`, 2: `No`}
 
-var _TrileanMap = map[Trilean]string{
-	0: `Pass`,
-	1: `Yes`,
-	2: `No`,
-}
-
-// String returns the string representation
-// of this Trilean value.
+// String returns the string representation of this Trilean value.
 func (i Trilean) String() string {
 	if str, ok := _TrileanMap[i]; ok {
 		return str
@@ -52,9 +29,8 @@ func (i Trilean) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the Trilean value from its
-// string representation, and returns an
-// error if the string is invalid.
+// SetString sets the Trilean value from its string representation,
+// and returns an error if the string is invalid.
 func (i *Trilean) SetString(s string) error {
 	if val, ok := _TrileanNameToValueMap[s]; ok {
 		*i = val
@@ -81,27 +57,18 @@ func (i Trilean) Desc() string {
 	return i.String()
 }
 
-// TrileanValues returns all possible values
-// for the type Trilean.
+// TrileanValues returns all possible values for the type Trilean.
 func TrileanValues() []Trilean {
 	return _TrileanValues
 }
 
-// Values returns all possible values
-// for the type Trilean.
+// Values returns all possible values for the type Trilean.
 func (i Trilean) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_TrileanValues))
 	for i, d := range _TrileanValues {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type Trilean.
-func (i Trilean) IsValid() bool {
-	_, ok := _TrileanMap[i]
-	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
