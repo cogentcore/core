@@ -1,7 +1,7 @@
 package testdata
 
 // Fruits is an enum containing fruits
-type Fruits uint8 //enums:enum -accept-lower
+type Fruits uint8 //enums:enum -accept-lower -is-valid
 
 const (
 	Apple Fruits = iota
@@ -15,7 +15,7 @@ const (
 )
 
 // Foods is an enum containing foods
-type Foods Fruits //enums:enum
+type Foods Fruits //enums:enum -is-valid
 
 const (
 	Bread Foods = Foods(FruitsN) + iota

@@ -37,6 +37,11 @@ type Config struct { //gti:add
 	// whether to accept lowercase versions of enum names in SetString
 	AcceptLower bool
 
+	// whether to generate a method returning whether a value is
+	// a valid option for its enum type; this must also be set for
+	// any base enum type being extended
+	IsValid bool
+
 	// whether to generate text marshaling methods
 	Text bool `default:"true"`
 

@@ -12,9 +12,11 @@ package enums
 // have a given bit flag.
 type BitFlag interface {
 	Enum
+
 	// Has returns whether these flags
 	// have the given flag set.
 	HasFlag(f BitFlag) bool
+
 	// BitIndexString returns the string
 	// representation of the bit flag if
 	// the bit flag is a bit index value
@@ -30,9 +32,11 @@ type BitFlag interface {
 type BitFlagSetter interface {
 	EnumSetter
 	BitFlag
+
 	// Set sets the value of the given
 	// flags in these flags to the given value.
 	SetFlag(on bool, f ...BitFlag)
+
 	// SetStringOr sets the bit flag from its
 	// string representation while preserving any
 	// bit flags already set, and returns an

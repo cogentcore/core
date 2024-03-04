@@ -204,7 +204,9 @@ func (g *Generator) BuildBasicMethods(values []Value, typ *Type) {
 	g.ExecTmpl(DescMethodTmpl, typ)
 	g.ExecTmpl(ValuesGlobalTmpl, typ)
 	g.ExecTmpl(ValuesMethodTmpl, typ)
-	g.ExecTmpl(IsValidMethodMapTmpl, typ)
+	if typ.Config.IsValid {
+		g.ExecTmpl(IsValidMethodMapTmpl, typ)
+	}
 }
 
 // PrintValueMap prints the map between name and value

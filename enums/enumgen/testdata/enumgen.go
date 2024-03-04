@@ -412,13 +412,6 @@ func (i Days) Values() []enums.Enum {
 	return res
 }
 
-// IsValid returns whether the value is a
-// valid option for type Days.
-func (i Days) IsValid() bool {
-	_, ok := _DaysMap[i]
-	return ok
-}
-
 // MarshalText implements the [encoding.TextMarshaler] interface.
 func (i Days) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
@@ -582,13 +575,6 @@ func (i States) Values() []enums.Enum {
 		res[i] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type States.
-func (i States) IsValid() bool {
-	_, ok := _StatesMap[i]
-	return ok
 }
 
 // HasFlag returns whether these
@@ -819,13 +805,6 @@ func (i Languages) Values() []enums.Enum {
 	return res
 }
 
-// IsValid returns whether the value is a
-// valid option for type Languages.
-func (i Languages) IsValid() bool {
-	_, ok := _LanguagesMap[i]
-	return ok
-}
-
 // HasFlag returns whether these
 // bit flags have the given bit flag set.
 func (i Languages) HasFlag(f enums.BitFlag) bool {
@@ -1015,16 +994,6 @@ func (i MoreLanguages) Values() []enums.Enum {
 		res[i+les] = d
 	}
 	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type MoreLanguages.
-func (i MoreLanguages) IsValid() bool {
-	_, ok := _MoreLanguagesMap[i]
-	if !ok {
-		return Languages(i).IsValid()
-	}
-	return ok
 }
 
 // HasFlag returns whether these

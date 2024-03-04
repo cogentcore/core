@@ -15,13 +15,13 @@ import "fmt"
 // be able to return all possible enum values for their type.
 type Enum interface {
 	fmt.Stringer
+
 	// Int64 returns the enum value as an int64.
 	Int64() int64
+
 	// Desc returns the description of the enum value.
 	Desc() string
-	// IsValid returns whether the value is a
-	// valid option for its enum type.
-	IsValid() bool
+
 	// Values returns all possible values this
 	// enum type has.
 	Values() []Enum
@@ -33,10 +33,12 @@ type Enum interface {
 // be settable from strings and int64s.
 type EnumSetter interface {
 	Enum
+
 	// SetString sets the enum value from its
 	// string representation, and returns an
 	// error if the string is invalid.
 	SetString(s string) error
+
 	// SetInt64 sets the enum value from an int64.
 	SetInt64(i int64)
 }
