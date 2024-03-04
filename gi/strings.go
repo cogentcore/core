@@ -9,7 +9,7 @@ package gi
 // then it is moved to the top and not re-added (unique items only). This is useful for a list
 // of recent items.
 func StringsInsertFirstUnique(strs *[]string, str string, max int) {
-	if strs == nil {
+	if *strs == nil {
 		*strs = make([]string, 0, max)
 	}
 	sz := len(*strs)
