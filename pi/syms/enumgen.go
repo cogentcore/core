@@ -40,14 +40,10 @@ func (i *Kinds) SetString(s string) error {
 }
 
 // Int64 returns the Kinds value as an int64.
-func (i Kinds) Int64() int64 {
-	return int64(i)
-}
+func (i Kinds) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Kinds value from an int64.
-func (i *Kinds) SetInt64(in int64) {
-	*i = Kinds(in)
-}
+func (i *Kinds) SetInt64(in int64) { *i = Kinds(in) }
 
 // Desc returns the description of the Kinds value.
 func (i Kinds) Desc() string {
@@ -58,9 +54,7 @@ func (i Kinds) Desc() string {
 }
 
 // KindsValues returns all possible values for the type Kinds.
-func KindsValues() []Kinds {
-	return _KindsValues
-}
+func KindsValues() []Kinds { return _KindsValues }
 
 // Values returns all possible values for the type Kinds.
 func (i Kinds) Values() []enums.Enum {

@@ -40,14 +40,10 @@ func (i *Cases) SetString(s string) error {
 }
 
 // Int64 returns the Cases value as an int64.
-func (i Cases) Int64() int64 {
-	return int64(i)
-}
+func (i Cases) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Cases value from an int64.
-func (i *Cases) SetInt64(in int64) {
-	*i = Cases(in)
-}
+func (i *Cases) SetInt64(in int64) { *i = Cases(in) }
 
 // Desc returns the description of the Cases value.
 func (i Cases) Desc() string {
@@ -58,9 +54,7 @@ func (i Cases) Desc() string {
 }
 
 // CasesValues returns all possible values for the type Cases.
-func CasesValues() []Cases {
-	return _CasesValues
-}
+func CasesValues() []Cases { return _CasesValues }
 
 // Values returns all possible values for the type Cases.
 func (i Cases) Values() []enums.Enum {
@@ -114,14 +108,10 @@ func (i *WordCases) SetString(s string) error {
 }
 
 // Int64 returns the WordCases value as an int64.
-func (i WordCases) Int64() int64 {
-	return int64(i)
-}
+func (i WordCases) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the WordCases value from an int64.
-func (i *WordCases) SetInt64(in int64) {
-	*i = WordCases(in)
-}
+func (i *WordCases) SetInt64(in int64) { *i = WordCases(in) }
 
 // Desc returns the description of the WordCases value.
 func (i WordCases) Desc() string {
@@ -132,9 +122,7 @@ func (i WordCases) Desc() string {
 }
 
 // WordCasesValues returns all possible values for the type WordCases.
-func WordCasesValues() []WordCases {
-	return _WordCasesValues
-}
+func WordCasesValues() []WordCases { return _WordCasesValues }
 
 // Values returns all possible values for the type WordCases.
 func (i WordCases) Values() []enums.Enum {

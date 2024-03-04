@@ -40,14 +40,10 @@ func (i *Actions) SetString(s string) error {
 }
 
 // Int64 returns the Actions value as an int64.
-func (i Actions) Int64() int64 {
-	return int64(i)
-}
+func (i Actions) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Actions value from an int64.
-func (i *Actions) SetInt64(in int64) {
-	*i = Actions(in)
-}
+func (i *Actions) SetInt64(in int64) { *i = Actions(in) }
 
 // Desc returns the description of the Actions value.
 func (i Actions) Desc() string {
@@ -58,9 +54,7 @@ func (i Actions) Desc() string {
 }
 
 // ActionsValues returns all possible values for the type Actions.
-func ActionsValues() []Actions {
-	return _ActionsValues
-}
+func ActionsValues() []Actions { return _ActionsValues }
 
 // Values returns all possible values for the type Actions.
 func (i Actions) Values() []enums.Enum {
@@ -114,14 +108,10 @@ func (i *Matches) SetString(s string) error {
 }
 
 // Int64 returns the Matches value as an int64.
-func (i Matches) Int64() int64 {
-	return int64(i)
-}
+func (i Matches) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Matches value from an int64.
-func (i *Matches) SetInt64(in int64) {
-	*i = Matches(in)
-}
+func (i *Matches) SetInt64(in int64) { *i = Matches(in) }
 
 // Desc returns the description of the Matches value.
 func (i Matches) Desc() string {
@@ -132,9 +122,7 @@ func (i Matches) Desc() string {
 }
 
 // MatchesValues returns all possible values for the type Matches.
-func MatchesValues() []Matches {
-	return _MatchesValues
-}
+func MatchesValues() []Matches { return _MatchesValues }
 
 // Values returns all possible values for the type Matches.
 func (i Matches) Values() []enums.Enum {
@@ -188,14 +176,10 @@ func (i *MatchPos) SetString(s string) error {
 }
 
 // Int64 returns the MatchPos value as an int64.
-func (i MatchPos) Int64() int64 {
-	return int64(i)
-}
+func (i MatchPos) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the MatchPos value from an int64.
-func (i *MatchPos) SetInt64(in int64) {
-	*i = MatchPos(in)
-}
+func (i *MatchPos) SetInt64(in int64) { *i = MatchPos(in) }
 
 // Desc returns the description of the MatchPos value.
 func (i MatchPos) Desc() string {
@@ -206,9 +190,7 @@ func (i MatchPos) Desc() string {
 }
 
 // MatchPosValues returns all possible values for the type MatchPos.
-func MatchPosValues() []MatchPos {
-	return _MatchPosValues
-}
+func MatchPosValues() []MatchPos { return _MatchPosValues }
 
 // Values returns all possible values for the type MatchPos.
 func (i MatchPos) Values() []enums.Enum {

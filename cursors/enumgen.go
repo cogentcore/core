@@ -40,14 +40,10 @@ func (i *Cursor) SetString(s string) error {
 }
 
 // Int64 returns the Cursor value as an int64.
-func (i Cursor) Int64() int64 {
-	return int64(i)
-}
+func (i Cursor) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Cursor value from an int64.
-func (i *Cursor) SetInt64(in int64) {
-	*i = Cursor(in)
-}
+func (i *Cursor) SetInt64(in int64) { *i = Cursor(in) }
 
 // Desc returns the description of the Cursor value.
 func (i Cursor) Desc() string {
@@ -58,9 +54,7 @@ func (i Cursor) Desc() string {
 }
 
 // CursorValues returns all possible values for the type Cursor.
-func CursorValues() []Cursor {
-	return _CursorValues
-}
+func CursorValues() []Cursor { return _CursorValues }
 
 // Values returns all possible values for the type Cursor.
 func (i Cursor) Values() []enums.Enum {

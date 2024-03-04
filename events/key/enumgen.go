@@ -43,14 +43,10 @@ func (i *Codes) SetString(s string) error {
 }
 
 // Int64 returns the Codes value as an int64.
-func (i Codes) Int64() int64 {
-	return int64(i)
-}
+func (i Codes) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Codes value from an int64.
-func (i *Codes) SetInt64(in int64) {
-	*i = Codes(in)
-}
+func (i *Codes) SetInt64(in int64) { *i = Codes(in) }
 
 // Desc returns the description of the Codes value.
 func (i Codes) Desc() string {
@@ -61,9 +57,7 @@ func (i Codes) Desc() string {
 }
 
 // CodesValues returns all possible values for the type Codes.
-func CodesValues() []Codes {
-	return _CodesValues
-}
+func CodesValues() []Codes { return _CodesValues }
 
 // Values returns all possible values for the type Codes.
 func (i Codes) Values() []enums.Enum {
@@ -149,14 +143,10 @@ func (i *Modifiers) SetStringOr(s string) error {
 }
 
 // Int64 returns the Modifiers value as an int64.
-func (i Modifiers) Int64() int64 {
-	return int64(i)
-}
+func (i Modifiers) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Modifiers value from an int64.
-func (i *Modifiers) SetInt64(in int64) {
-	*i = Modifiers(in)
-}
+func (i *Modifiers) SetInt64(in int64) { *i = Modifiers(in) }
 
 // Desc returns the description of the Modifiers value.
 func (i Modifiers) Desc() string {
@@ -167,9 +157,7 @@ func (i Modifiers) Desc() string {
 }
 
 // ModifiersValues returns all possible values for the type Modifiers.
-func ModifiersValues() []Modifiers {
-	return _ModifiersValues
-}
+func ModifiersValues() []Modifiers { return _ModifiersValues }
 
 // Values returns all possible values for the type Modifiers.
 func (i Modifiers) Values() []enums.Enum {

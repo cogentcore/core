@@ -75,14 +75,10 @@ func (i *ImageFlags) SetStringOr(s string) error {
 }
 
 // Int64 returns the ImageFlags value as an int64.
-func (i ImageFlags) Int64() int64 {
-	return int64(i)
-}
+func (i ImageFlags) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the ImageFlags value from an int64.
-func (i *ImageFlags) SetInt64(in int64) {
-	*i = ImageFlags(in)
-}
+func (i *ImageFlags) SetInt64(in int64) { *i = ImageFlags(in) }
 
 // Desc returns the description of the ImageFlags value.
 func (i ImageFlags) Desc() string {
@@ -93,9 +89,7 @@ func (i ImageFlags) Desc() string {
 }
 
 // ImageFlagsValues returns all possible values for the type ImageFlags.
-func ImageFlagsValues() []ImageFlags {
-	return _ImageFlagsValues
-}
+func ImageFlagsValues() []ImageFlags { return _ImageFlagsValues }
 
 // Values returns all possible values for the type ImageFlags.
 func (i ImageFlags) Values() []enums.Enum {
@@ -170,14 +164,10 @@ func (i *BuffTypes) SetString(s string) error {
 }
 
 // Int64 returns the BuffTypes value as an int64.
-func (i BuffTypes) Int64() int64 {
-	return int64(i)
-}
+func (i BuffTypes) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the BuffTypes value from an int64.
-func (i *BuffTypes) SetInt64(in int64) {
-	*i = BuffTypes(in)
-}
+func (i *BuffTypes) SetInt64(in int64) { *i = BuffTypes(in) }
 
 // Desc returns the description of the BuffTypes value.
 func (i BuffTypes) Desc() string {
@@ -188,9 +178,7 @@ func (i BuffTypes) Desc() string {
 }
 
 // BuffTypesValues returns all possible values for the type BuffTypes.
-func BuffTypesValues() []BuffTypes {
-	return _BuffTypesValues
-}
+func BuffTypesValues() []BuffTypes { return _BuffTypesValues }
 
 // Values returns all possible values for the type BuffTypes.
 func (i BuffTypes) Values() []enums.Enum {
@@ -244,14 +232,10 @@ func (i *OptionStates) SetString(s string) error {
 }
 
 // Int64 returns the OptionStates value as an int64.
-func (i OptionStates) Int64() int64 {
-	return int64(i)
-}
+func (i OptionStates) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the OptionStates value from an int64.
-func (i *OptionStates) SetInt64(in int64) {
-	*i = OptionStates(in)
-}
+func (i *OptionStates) SetInt64(in int64) { *i = OptionStates(in) }
 
 // Desc returns the description of the OptionStates value.
 func (i OptionStates) Desc() string {
@@ -262,9 +246,7 @@ func (i OptionStates) Desc() string {
 }
 
 // OptionStatesValues returns all possible values for the type OptionStates.
-func OptionStatesValues() []OptionStates {
-	return _OptionStatesValues
-}
+func OptionStatesValues() []OptionStates { return _OptionStatesValues }
 
 // Values returns all possible values for the type OptionStates.
 func (i OptionStates) Values() []enums.Enum {
@@ -318,14 +300,10 @@ func (i *CPUOptions) SetString(s string) error {
 }
 
 // Int64 returns the CPUOptions value as an int64.
-func (i CPUOptions) Int64() int64 {
-	return int64(i)
-}
+func (i CPUOptions) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the CPUOptions value from an int64.
-func (i *CPUOptions) SetInt64(in int64) {
-	*i = CPUOptions(in)
-}
+func (i *CPUOptions) SetInt64(in int64) { *i = CPUOptions(in) }
 
 // Desc returns the description of the CPUOptions value.
 func (i CPUOptions) Desc() string {
@@ -336,9 +314,7 @@ func (i CPUOptions) Desc() string {
 }
 
 // CPUOptionsValues returns all possible values for the type CPUOptions.
-func CPUOptionsValues() []CPUOptions {
-	return _CPUOptionsValues
-}
+func CPUOptionsValues() []CPUOptions { return _CPUOptionsValues }
 
 // Values returns all possible values for the type CPUOptions.
 func (i CPUOptions) Values() []enums.Enum {
@@ -392,14 +368,10 @@ func (i *VarRoles) SetString(s string) error {
 }
 
 // Int64 returns the VarRoles value as an int64.
-func (i VarRoles) Int64() int64 {
-	return int64(i)
-}
+func (i VarRoles) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the VarRoles value from an int64.
-func (i *VarRoles) SetInt64(in int64) {
-	*i = VarRoles(in)
-}
+func (i *VarRoles) SetInt64(in int64) { *i = VarRoles(in) }
 
 // Desc returns the description of the VarRoles value.
 func (i VarRoles) Desc() string {
@@ -410,9 +382,7 @@ func (i VarRoles) Desc() string {
 }
 
 // VarRolesValues returns all possible values for the type VarRoles.
-func VarRolesValues() []VarRoles {
-	return _VarRolesValues
-}
+func VarRolesValues() []VarRoles { return _VarRolesValues }
 
 // Values returns all possible values for the type VarRoles.
 func (i VarRoles) Values() []enums.Enum {
@@ -466,14 +436,10 @@ func (i *SamplerModes) SetString(s string) error {
 }
 
 // Int64 returns the SamplerModes value as an int64.
-func (i SamplerModes) Int64() int64 {
-	return int64(i)
-}
+func (i SamplerModes) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the SamplerModes value from an int64.
-func (i *SamplerModes) SetInt64(in int64) {
-	*i = SamplerModes(in)
-}
+func (i *SamplerModes) SetInt64(in int64) { *i = SamplerModes(in) }
 
 // Desc returns the description of the SamplerModes value.
 func (i SamplerModes) Desc() string {
@@ -484,9 +450,7 @@ func (i SamplerModes) Desc() string {
 }
 
 // SamplerModesValues returns all possible values for the type SamplerModes.
-func SamplerModesValues() []SamplerModes {
-	return _SamplerModesValues
-}
+func SamplerModesValues() []SamplerModes { return _SamplerModesValues }
 
 // Values returns all possible values for the type SamplerModes.
 func (i SamplerModes) Values() []enums.Enum {
@@ -540,14 +504,10 @@ func (i *BorderColors) SetString(s string) error {
 }
 
 // Int64 returns the BorderColors value as an int64.
-func (i BorderColors) Int64() int64 {
-	return int64(i)
-}
+func (i BorderColors) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the BorderColors value from an int64.
-func (i *BorderColors) SetInt64(in int64) {
-	*i = BorderColors(in)
-}
+func (i *BorderColors) SetInt64(in int64) { *i = BorderColors(in) }
 
 // Desc returns the description of the BorderColors value.
 func (i BorderColors) Desc() string {
@@ -558,9 +518,7 @@ func (i BorderColors) Desc() string {
 }
 
 // BorderColorsValues returns all possible values for the type BorderColors.
-func BorderColorsValues() []BorderColors {
-	return _BorderColorsValues
-}
+func BorderColorsValues() []BorderColors { return _BorderColorsValues }
 
 // Values returns all possible values for the type BorderColors.
 func (i BorderColors) Values() []enums.Enum {
@@ -614,14 +572,10 @@ func (i *Types) SetString(s string) error {
 }
 
 // Int64 returns the Types value as an int64.
-func (i Types) Int64() int64 {
-	return int64(i)
-}
+func (i Types) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Types value from an int64.
-func (i *Types) SetInt64(in int64) {
-	*i = Types(in)
-}
+func (i *Types) SetInt64(in int64) { *i = Types(in) }
 
 // Desc returns the description of the Types value.
 func (i Types) Desc() string {
@@ -632,9 +586,7 @@ func (i Types) Desc() string {
 }
 
 // TypesValues returns all possible values for the type Types.
-func TypesValues() []Types {
-	return _TypesValues
-}
+func TypesValues() []Types { return _TypesValues }
 
 // Values returns all possible values for the type Types.
 func (i Types) Values() []enums.Enum {
@@ -720,14 +672,10 @@ func (i *ValFlags) SetStringOr(s string) error {
 }
 
 // Int64 returns the ValFlags value as an int64.
-func (i ValFlags) Int64() int64 {
-	return int64(i)
-}
+func (i ValFlags) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the ValFlags value from an int64.
-func (i *ValFlags) SetInt64(in int64) {
-	*i = ValFlags(in)
-}
+func (i *ValFlags) SetInt64(in int64) { *i = ValFlags(in) }
 
 // Desc returns the description of the ValFlags value.
 func (i ValFlags) Desc() string {
@@ -738,9 +686,7 @@ func (i ValFlags) Desc() string {
 }
 
 // ValFlagsValues returns all possible values for the type ValFlags.
-func ValFlagsValues() []ValFlags {
-	return _ValFlagsValues
-}
+func ValFlagsValues() []ValFlags { return _ValFlagsValues }
 
 // Values returns all possible values for the type ValFlags.
 func (i ValFlags) Values() []enums.Enum {

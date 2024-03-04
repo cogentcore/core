@@ -40,14 +40,10 @@ func (i *Spreads) SetString(s string) error {
 }
 
 // Int64 returns the Spreads value as an int64.
-func (i Spreads) Int64() int64 {
-	return int64(i)
-}
+func (i Spreads) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Spreads value from an int64.
-func (i *Spreads) SetInt64(in int64) {
-	*i = Spreads(in)
-}
+func (i *Spreads) SetInt64(in int64) { *i = Spreads(in) }
 
 // Desc returns the description of the Spreads value.
 func (i Spreads) Desc() string {
@@ -58,9 +54,7 @@ func (i Spreads) Desc() string {
 }
 
 // SpreadsValues returns all possible values for the type Spreads.
-func SpreadsValues() []Spreads {
-	return _SpreadsValues
-}
+func SpreadsValues() []Spreads { return _SpreadsValues }
 
 // Values returns all possible values for the type Spreads.
 func (i Spreads) Values() []enums.Enum {
@@ -114,14 +108,10 @@ func (i *Units) SetString(s string) error {
 }
 
 // Int64 returns the Units value as an int64.
-func (i Units) Int64() int64 {
-	return int64(i)
-}
+func (i Units) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Units value from an int64.
-func (i *Units) SetInt64(in int64) {
-	*i = Units(in)
-}
+func (i *Units) SetInt64(in int64) { *i = Units(in) }
 
 // Desc returns the description of the Units value.
 func (i Units) Desc() string {
@@ -132,9 +122,7 @@ func (i Units) Desc() string {
 }
 
 // UnitsValues returns all possible values for the type Units.
-func UnitsValues() []Units {
-	return _UnitsValues
-}
+func UnitsValues() []Units { return _UnitsValues }
 
 // Values returns all possible values for the type Units.
 func (i Units) Values() []enums.Enum {

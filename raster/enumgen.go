@@ -40,14 +40,10 @@ func (i *PathCommand) SetString(s string) error {
 }
 
 // Int64 returns the PathCommand value as an int64.
-func (i PathCommand) Int64() int64 {
-	return int64(i)
-}
+func (i PathCommand) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the PathCommand value from an int64.
-func (i *PathCommand) SetInt64(in int64) {
-	*i = PathCommand(in)
-}
+func (i *PathCommand) SetInt64(in int64) { *i = PathCommand(in) }
 
 // Desc returns the description of the PathCommand value.
 func (i PathCommand) Desc() string {
@@ -58,9 +54,7 @@ func (i PathCommand) Desc() string {
 }
 
 // PathCommandValues returns all possible values for the type PathCommand.
-func PathCommandValues() []PathCommand {
-	return _PathCommandValues
-}
+func PathCommandValues() []PathCommand { return _PathCommandValues }
 
 // Values returns all possible values for the type PathCommand.
 func (i PathCommand) Values() []enums.Enum {
@@ -114,14 +108,10 @@ func (i *JoinMode) SetString(s string) error {
 }
 
 // Int64 returns the JoinMode value as an int64.
-func (i JoinMode) Int64() int64 {
-	return int64(i)
-}
+func (i JoinMode) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the JoinMode value from an int64.
-func (i *JoinMode) SetInt64(in int64) {
-	*i = JoinMode(in)
-}
+func (i *JoinMode) SetInt64(in int64) { *i = JoinMode(in) }
 
 // Desc returns the description of the JoinMode value.
 func (i JoinMode) Desc() string {
@@ -132,9 +122,7 @@ func (i JoinMode) Desc() string {
 }
 
 // JoinModeValues returns all possible values for the type JoinMode.
-func JoinModeValues() []JoinMode {
-	return _JoinModeValues
-}
+func JoinModeValues() []JoinMode { return _JoinModeValues }
 
 // Values returns all possible values for the type JoinMode.
 func (i JoinMode) Values() []enums.Enum {

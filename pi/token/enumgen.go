@@ -40,14 +40,10 @@ func (i *Tokens) SetString(s string) error {
 }
 
 // Int64 returns the Tokens value as an int64.
-func (i Tokens) Int64() int64 {
-	return int64(i)
-}
+func (i Tokens) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Tokens value from an int64.
-func (i *Tokens) SetInt64(in int64) {
-	*i = Tokens(in)
-}
+func (i *Tokens) SetInt64(in int64) { *i = Tokens(in) }
 
 // Desc returns the description of the Tokens value.
 func (i Tokens) Desc() string {
@@ -58,9 +54,7 @@ func (i Tokens) Desc() string {
 }
 
 // TokensValues returns all possible values for the type Tokens.
-func TokensValues() []Tokens {
-	return _TokensValues
-}
+func TokensValues() []Tokens { return _TokensValues }
 
 // Values returns all possible values for the type Tokens.
 func (i Tokens) Values() []enums.Enum {

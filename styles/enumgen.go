@@ -43,14 +43,10 @@ func (i *BorderStyles) SetString(s string) error {
 }
 
 // Int64 returns the BorderStyles value as an int64.
-func (i BorderStyles) Int64() int64 {
-	return int64(i)
-}
+func (i BorderStyles) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the BorderStyles value from an int64.
-func (i *BorderStyles) SetInt64(in int64) {
-	*i = BorderStyles(in)
-}
+func (i *BorderStyles) SetInt64(in int64) { *i = BorderStyles(in) }
 
 // Desc returns the description of the BorderStyles value.
 func (i BorderStyles) Desc() string {
@@ -61,9 +57,7 @@ func (i BorderStyles) Desc() string {
 }
 
 // BorderStylesValues returns all possible values for the type BorderStyles.
-func BorderStylesValues() []BorderStyles {
-	return _BorderStylesValues
-}
+func BorderStylesValues() []BorderStyles { return _BorderStylesValues }
 
 // Values returns all possible values for the type BorderStyles.
 func (i BorderStyles) Values() []enums.Enum {
@@ -117,14 +111,10 @@ func (i *FontStyles) SetString(s string) error {
 }
 
 // Int64 returns the FontStyles value as an int64.
-func (i FontStyles) Int64() int64 {
-	return int64(i)
-}
+func (i FontStyles) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the FontStyles value from an int64.
-func (i *FontStyles) SetInt64(in int64) {
-	*i = FontStyles(in)
-}
+func (i *FontStyles) SetInt64(in int64) { *i = FontStyles(in) }
 
 // Desc returns the description of the FontStyles value.
 func (i FontStyles) Desc() string {
@@ -135,9 +125,7 @@ func (i FontStyles) Desc() string {
 }
 
 // FontStylesValues returns all possible values for the type FontStyles.
-func FontStylesValues() []FontStyles {
-	return _FontStylesValues
-}
+func FontStylesValues() []FontStyles { return _FontStylesValues }
 
 // Values returns all possible values for the type FontStyles.
 func (i FontStyles) Values() []enums.Enum {
@@ -191,14 +179,10 @@ func (i *FontWeights) SetString(s string) error {
 }
 
 // Int64 returns the FontWeights value as an int64.
-func (i FontWeights) Int64() int64 {
-	return int64(i)
-}
+func (i FontWeights) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the FontWeights value from an int64.
-func (i *FontWeights) SetInt64(in int64) {
-	*i = FontWeights(in)
-}
+func (i *FontWeights) SetInt64(in int64) { *i = FontWeights(in) }
 
 // Desc returns the description of the FontWeights value.
 func (i FontWeights) Desc() string {
@@ -209,9 +193,7 @@ func (i FontWeights) Desc() string {
 }
 
 // FontWeightsValues returns all possible values for the type FontWeights.
-func FontWeightsValues() []FontWeights {
-	return _FontWeightsValues
-}
+func FontWeightsValues() []FontWeights { return _FontWeightsValues }
 
 // Values returns all possible values for the type FontWeights.
 func (i FontWeights) Values() []enums.Enum {
@@ -265,14 +247,10 @@ func (i *FontStretch) SetString(s string) error {
 }
 
 // Int64 returns the FontStretch value as an int64.
-func (i FontStretch) Int64() int64 {
-	return int64(i)
-}
+func (i FontStretch) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the FontStretch value from an int64.
-func (i *FontStretch) SetInt64(in int64) {
-	*i = FontStretch(in)
-}
+func (i *FontStretch) SetInt64(in int64) { *i = FontStretch(in) }
 
 // Desc returns the description of the FontStretch value.
 func (i FontStretch) Desc() string {
@@ -283,9 +261,7 @@ func (i FontStretch) Desc() string {
 }
 
 // FontStretchValues returns all possible values for the type FontStretch.
-func FontStretchValues() []FontStretch {
-	return _FontStretchValues
-}
+func FontStretchValues() []FontStretch { return _FontStretchValues }
 
 // Values returns all possible values for the type FontStretch.
 func (i FontStretch) Values() []enums.Enum {
@@ -371,14 +347,10 @@ func (i *TextDecorations) SetStringOr(s string) error {
 }
 
 // Int64 returns the TextDecorations value as an int64.
-func (i TextDecorations) Int64() int64 {
-	return int64(i)
-}
+func (i TextDecorations) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the TextDecorations value from an int64.
-func (i *TextDecorations) SetInt64(in int64) {
-	*i = TextDecorations(in)
-}
+func (i *TextDecorations) SetInt64(in int64) { *i = TextDecorations(in) }
 
 // Desc returns the description of the TextDecorations value.
 func (i TextDecorations) Desc() string {
@@ -389,9 +361,7 @@ func (i TextDecorations) Desc() string {
 }
 
 // TextDecorationsValues returns all possible values for the type TextDecorations.
-func TextDecorationsValues() []TextDecorations {
-	return _TextDecorationsValues
-}
+func TextDecorationsValues() []TextDecorations { return _TextDecorationsValues }
 
 // Values returns all possible values for the type TextDecorations.
 func (i TextDecorations) Values() []enums.Enum {
@@ -466,14 +436,10 @@ func (i *BaselineShifts) SetString(s string) error {
 }
 
 // Int64 returns the BaselineShifts value as an int64.
-func (i BaselineShifts) Int64() int64 {
-	return int64(i)
-}
+func (i BaselineShifts) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the BaselineShifts value from an int64.
-func (i *BaselineShifts) SetInt64(in int64) {
-	*i = BaselineShifts(in)
-}
+func (i *BaselineShifts) SetInt64(in int64) { *i = BaselineShifts(in) }
 
 // Desc returns the description of the BaselineShifts value.
 func (i BaselineShifts) Desc() string {
@@ -484,9 +450,7 @@ func (i BaselineShifts) Desc() string {
 }
 
 // BaselineShiftsValues returns all possible values for the type BaselineShifts.
-func BaselineShiftsValues() []BaselineShifts {
-	return _BaselineShiftsValues
-}
+func BaselineShiftsValues() []BaselineShifts { return _BaselineShiftsValues }
 
 // Values returns all possible values for the type BaselineShifts.
 func (i BaselineShifts) Values() []enums.Enum {
@@ -540,14 +504,10 @@ func (i *FontVariants) SetString(s string) error {
 }
 
 // Int64 returns the FontVariants value as an int64.
-func (i FontVariants) Int64() int64 {
-	return int64(i)
-}
+func (i FontVariants) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the FontVariants value from an int64.
-func (i *FontVariants) SetInt64(in int64) {
-	*i = FontVariants(in)
-}
+func (i *FontVariants) SetInt64(in int64) { *i = FontVariants(in) }
 
 // Desc returns the description of the FontVariants value.
 func (i FontVariants) Desc() string {
@@ -558,9 +518,7 @@ func (i FontVariants) Desc() string {
 }
 
 // FontVariantsValues returns all possible values for the type FontVariants.
-func FontVariantsValues() []FontVariants {
-	return _FontVariantsValues
-}
+func FontVariantsValues() []FontVariants { return _FontVariantsValues }
 
 // Values returns all possible values for the type FontVariants.
 func (i FontVariants) Values() []enums.Enum {
@@ -614,14 +572,10 @@ func (i *Directions) SetString(s string) error {
 }
 
 // Int64 returns the Directions value as an int64.
-func (i Directions) Int64() int64 {
-	return int64(i)
-}
+func (i Directions) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Directions value from an int64.
-func (i *Directions) SetInt64(in int64) {
-	*i = Directions(in)
-}
+func (i *Directions) SetInt64(in int64) { *i = Directions(in) }
 
 // Desc returns the description of the Directions value.
 func (i Directions) Desc() string {
@@ -632,9 +586,7 @@ func (i Directions) Desc() string {
 }
 
 // DirectionsValues returns all possible values for the type Directions.
-func DirectionsValues() []Directions {
-	return _DirectionsValues
-}
+func DirectionsValues() []Directions { return _DirectionsValues }
 
 // Values returns all possible values for the type Directions.
 func (i Directions) Values() []enums.Enum {
@@ -688,14 +640,10 @@ func (i *Displays) SetString(s string) error {
 }
 
 // Int64 returns the Displays value as an int64.
-func (i Displays) Int64() int64 {
-	return int64(i)
-}
+func (i Displays) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Displays value from an int64.
-func (i *Displays) SetInt64(in int64) {
-	*i = Displays(in)
-}
+func (i *Displays) SetInt64(in int64) { *i = Displays(in) }
 
 // Desc returns the description of the Displays value.
 func (i Displays) Desc() string {
@@ -706,9 +654,7 @@ func (i Displays) Desc() string {
 }
 
 // DisplaysValues returns all possible values for the type Displays.
-func DisplaysValues() []Displays {
-	return _DisplaysValues
-}
+func DisplaysValues() []Displays { return _DisplaysValues }
 
 // Values returns all possible values for the type Displays.
 func (i Displays) Values() []enums.Enum {
@@ -762,14 +708,10 @@ func (i *Aligns) SetString(s string) error {
 }
 
 // Int64 returns the Aligns value as an int64.
-func (i Aligns) Int64() int64 {
-	return int64(i)
-}
+func (i Aligns) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Aligns value from an int64.
-func (i *Aligns) SetInt64(in int64) {
-	*i = Aligns(in)
-}
+func (i *Aligns) SetInt64(in int64) { *i = Aligns(in) }
 
 // Desc returns the description of the Aligns value.
 func (i Aligns) Desc() string {
@@ -780,9 +722,7 @@ func (i Aligns) Desc() string {
 }
 
 // AlignsValues returns all possible values for the type Aligns.
-func AlignsValues() []Aligns {
-	return _AlignsValues
-}
+func AlignsValues() []Aligns { return _AlignsValues }
 
 // Values returns all possible values for the type Aligns.
 func (i Aligns) Values() []enums.Enum {
@@ -836,14 +776,10 @@ func (i *Overflows) SetString(s string) error {
 }
 
 // Int64 returns the Overflows value as an int64.
-func (i Overflows) Int64() int64 {
-	return int64(i)
-}
+func (i Overflows) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Overflows value from an int64.
-func (i *Overflows) SetInt64(in int64) {
-	*i = Overflows(in)
-}
+func (i *Overflows) SetInt64(in int64) { *i = Overflows(in) }
 
 // Desc returns the description of the Overflows value.
 func (i Overflows) Desc() string {
@@ -854,9 +790,7 @@ func (i Overflows) Desc() string {
 }
 
 // OverflowsValues returns all possible values for the type Overflows.
-func OverflowsValues() []Overflows {
-	return _OverflowsValues
-}
+func OverflowsValues() []Overflows { return _OverflowsValues }
 
 // Values returns all possible values for the type Overflows.
 func (i Overflows) Values() []enums.Enum {
@@ -910,14 +844,10 @@ func (i *ObjectFits) SetString(s string) error {
 }
 
 // Int64 returns the ObjectFits value as an int64.
-func (i ObjectFits) Int64() int64 {
-	return int64(i)
-}
+func (i ObjectFits) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the ObjectFits value from an int64.
-func (i *ObjectFits) SetInt64(in int64) {
-	*i = ObjectFits(in)
-}
+func (i *ObjectFits) SetInt64(in int64) { *i = ObjectFits(in) }
 
 // Desc returns the description of the ObjectFits value.
 func (i ObjectFits) Desc() string {
@@ -928,9 +858,7 @@ func (i ObjectFits) Desc() string {
 }
 
 // ObjectFitsValues returns all possible values for the type ObjectFits.
-func ObjectFitsValues() []ObjectFits {
-	return _ObjectFitsValues
-}
+func ObjectFitsValues() []ObjectFits { return _ObjectFitsValues }
 
 // Values returns all possible values for the type ObjectFits.
 func (i ObjectFits) Values() []enums.Enum {
@@ -984,14 +912,10 @@ func (i *FillRules) SetString(s string) error {
 }
 
 // Int64 returns the FillRules value as an int64.
-func (i FillRules) Int64() int64 {
-	return int64(i)
-}
+func (i FillRules) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the FillRules value from an int64.
-func (i *FillRules) SetInt64(in int64) {
-	*i = FillRules(in)
-}
+func (i *FillRules) SetInt64(in int64) { *i = FillRules(in) }
 
 // Desc returns the description of the FillRules value.
 func (i FillRules) Desc() string {
@@ -1002,9 +926,7 @@ func (i FillRules) Desc() string {
 }
 
 // FillRulesValues returns all possible values for the type FillRules.
-func FillRulesValues() []FillRules {
-	return _FillRulesValues
-}
+func FillRulesValues() []FillRules { return _FillRulesValues }
 
 // Values returns all possible values for the type FillRules.
 func (i FillRules) Values() []enums.Enum {
@@ -1058,14 +980,10 @@ func (i *VectorEffects) SetString(s string) error {
 }
 
 // Int64 returns the VectorEffects value as an int64.
-func (i VectorEffects) Int64() int64 {
-	return int64(i)
-}
+func (i VectorEffects) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the VectorEffects value from an int64.
-func (i *VectorEffects) SetInt64(in int64) {
-	*i = VectorEffects(in)
-}
+func (i *VectorEffects) SetInt64(in int64) { *i = VectorEffects(in) }
 
 // Desc returns the description of the VectorEffects value.
 func (i VectorEffects) Desc() string {
@@ -1076,9 +994,7 @@ func (i VectorEffects) Desc() string {
 }
 
 // VectorEffectsValues returns all possible values for the type VectorEffects.
-func VectorEffectsValues() []VectorEffects {
-	return _VectorEffectsValues
-}
+func VectorEffectsValues() []VectorEffects { return _VectorEffectsValues }
 
 // Values returns all possible values for the type VectorEffects.
 func (i VectorEffects) Values() []enums.Enum {
@@ -1132,14 +1048,10 @@ func (i *LineCaps) SetString(s string) error {
 }
 
 // Int64 returns the LineCaps value as an int64.
-func (i LineCaps) Int64() int64 {
-	return int64(i)
-}
+func (i LineCaps) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the LineCaps value from an int64.
-func (i *LineCaps) SetInt64(in int64) {
-	*i = LineCaps(in)
-}
+func (i *LineCaps) SetInt64(in int64) { *i = LineCaps(in) }
 
 // Desc returns the description of the LineCaps value.
 func (i LineCaps) Desc() string {
@@ -1150,9 +1062,7 @@ func (i LineCaps) Desc() string {
 }
 
 // LineCapsValues returns all possible values for the type LineCaps.
-func LineCapsValues() []LineCaps {
-	return _LineCapsValues
-}
+func LineCapsValues() []LineCaps { return _LineCapsValues }
 
 // Values returns all possible values for the type LineCaps.
 func (i LineCaps) Values() []enums.Enum {
@@ -1206,14 +1116,10 @@ func (i *LineJoins) SetString(s string) error {
 }
 
 // Int64 returns the LineJoins value as an int64.
-func (i LineJoins) Int64() int64 {
-	return int64(i)
-}
+func (i LineJoins) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the LineJoins value from an int64.
-func (i *LineJoins) SetInt64(in int64) {
-	*i = LineJoins(in)
-}
+func (i *LineJoins) SetInt64(in int64) { *i = LineJoins(in) }
 
 // Desc returns the description of the LineJoins value.
 func (i LineJoins) Desc() string {
@@ -1224,9 +1130,7 @@ func (i LineJoins) Desc() string {
 }
 
 // LineJoinsValues returns all possible values for the type LineJoins.
-func LineJoinsValues() []LineJoins {
-	return _LineJoinsValues
-}
+func LineJoinsValues() []LineJoins { return _LineJoinsValues }
 
 // Values returns all possible values for the type LineJoins.
 func (i LineJoins) Values() []enums.Enum {
@@ -1280,14 +1184,10 @@ func (i *SideIndexes) SetString(s string) error {
 }
 
 // Int64 returns the SideIndexes value as an int64.
-func (i SideIndexes) Int64() int64 {
-	return int64(i)
-}
+func (i SideIndexes) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the SideIndexes value from an int64.
-func (i *SideIndexes) SetInt64(in int64) {
-	*i = SideIndexes(in)
-}
+func (i *SideIndexes) SetInt64(in int64) { *i = SideIndexes(in) }
 
 // Desc returns the description of the SideIndexes value.
 func (i SideIndexes) Desc() string {
@@ -1298,9 +1198,7 @@ func (i SideIndexes) Desc() string {
 }
 
 // SideIndexesValues returns all possible values for the type SideIndexes.
-func SideIndexesValues() []SideIndexes {
-	return _SideIndexesValues
-}
+func SideIndexesValues() []SideIndexes { return _SideIndexesValues }
 
 // Values returns all possible values for the type SideIndexes.
 func (i SideIndexes) Values() []enums.Enum {
@@ -1354,14 +1252,10 @@ func (i *VirtualKeyboards) SetString(s string) error {
 }
 
 // Int64 returns the VirtualKeyboards value as an int64.
-func (i VirtualKeyboards) Int64() int64 {
-	return int64(i)
-}
+func (i VirtualKeyboards) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the VirtualKeyboards value from an int64.
-func (i *VirtualKeyboards) SetInt64(in int64) {
-	*i = VirtualKeyboards(in)
-}
+func (i *VirtualKeyboards) SetInt64(in int64) { *i = VirtualKeyboards(in) }
 
 // Desc returns the description of the VirtualKeyboards value.
 func (i VirtualKeyboards) Desc() string {
@@ -1372,9 +1266,7 @@ func (i VirtualKeyboards) Desc() string {
 }
 
 // VirtualKeyboardsValues returns all possible values for the type VirtualKeyboards.
-func VirtualKeyboardsValues() []VirtualKeyboards {
-	return _VirtualKeyboardsValues
-}
+func VirtualKeyboardsValues() []VirtualKeyboards { return _VirtualKeyboardsValues }
 
 // Values returns all possible values for the type VirtualKeyboards.
 func (i VirtualKeyboards) Values() []enums.Enum {
@@ -1428,14 +1320,10 @@ func (i *UnicodeBidi) SetString(s string) error {
 }
 
 // Int64 returns the UnicodeBidi value as an int64.
-func (i UnicodeBidi) Int64() int64 {
-	return int64(i)
-}
+func (i UnicodeBidi) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the UnicodeBidi value from an int64.
-func (i *UnicodeBidi) SetInt64(in int64) {
-	*i = UnicodeBidi(in)
-}
+func (i *UnicodeBidi) SetInt64(in int64) { *i = UnicodeBidi(in) }
 
 // Desc returns the description of the UnicodeBidi value.
 func (i UnicodeBidi) Desc() string {
@@ -1446,9 +1334,7 @@ func (i UnicodeBidi) Desc() string {
 }
 
 // UnicodeBidiValues returns all possible values for the type UnicodeBidi.
-func UnicodeBidiValues() []UnicodeBidi {
-	return _UnicodeBidiValues
-}
+func UnicodeBidiValues() []UnicodeBidi { return _UnicodeBidiValues }
 
 // Values returns all possible values for the type UnicodeBidi.
 func (i UnicodeBidi) Values() []enums.Enum {
@@ -1502,14 +1388,10 @@ func (i *TextDirections) SetString(s string) error {
 }
 
 // Int64 returns the TextDirections value as an int64.
-func (i TextDirections) Int64() int64 {
-	return int64(i)
-}
+func (i TextDirections) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the TextDirections value from an int64.
-func (i *TextDirections) SetInt64(in int64) {
-	*i = TextDirections(in)
-}
+func (i *TextDirections) SetInt64(in int64) { *i = TextDirections(in) }
 
 // Desc returns the description of the TextDirections value.
 func (i TextDirections) Desc() string {
@@ -1520,9 +1402,7 @@ func (i TextDirections) Desc() string {
 }
 
 // TextDirectionsValues returns all possible values for the type TextDirections.
-func TextDirectionsValues() []TextDirections {
-	return _TextDirectionsValues
-}
+func TextDirectionsValues() []TextDirections { return _TextDirectionsValues }
 
 // Values returns all possible values for the type TextDirections.
 func (i TextDirections) Values() []enums.Enum {
@@ -1576,14 +1456,10 @@ func (i *TextAnchors) SetString(s string) error {
 }
 
 // Int64 returns the TextAnchors value as an int64.
-func (i TextAnchors) Int64() int64 {
-	return int64(i)
-}
+func (i TextAnchors) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the TextAnchors value from an int64.
-func (i *TextAnchors) SetInt64(in int64) {
-	*i = TextAnchors(in)
-}
+func (i *TextAnchors) SetInt64(in int64) { *i = TextAnchors(in) }
 
 // Desc returns the description of the TextAnchors value.
 func (i TextAnchors) Desc() string {
@@ -1594,9 +1470,7 @@ func (i TextAnchors) Desc() string {
 }
 
 // TextAnchorsValues returns all possible values for the type TextAnchors.
-func TextAnchorsValues() []TextAnchors {
-	return _TextAnchorsValues
-}
+func TextAnchorsValues() []TextAnchors { return _TextAnchorsValues }
 
 // Values returns all possible values for the type TextAnchors.
 func (i TextAnchors) Values() []enums.Enum {
@@ -1650,14 +1524,10 @@ func (i *WhiteSpaces) SetString(s string) error {
 }
 
 // Int64 returns the WhiteSpaces value as an int64.
-func (i WhiteSpaces) Int64() int64 {
-	return int64(i)
-}
+func (i WhiteSpaces) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the WhiteSpaces value from an int64.
-func (i *WhiteSpaces) SetInt64(in int64) {
-	*i = WhiteSpaces(in)
-}
+func (i *WhiteSpaces) SetInt64(in int64) { *i = WhiteSpaces(in) }
 
 // Desc returns the description of the WhiteSpaces value.
 func (i WhiteSpaces) Desc() string {
@@ -1668,9 +1538,7 @@ func (i WhiteSpaces) Desc() string {
 }
 
 // WhiteSpacesValues returns all possible values for the type WhiteSpaces.
-func WhiteSpacesValues() []WhiteSpaces {
-	return _WhiteSpacesValues
-}
+func WhiteSpacesValues() []WhiteSpaces { return _WhiteSpacesValues }
 
 // Values returns all possible values for the type WhiteSpaces.
 func (i WhiteSpaces) Values() []enums.Enum {

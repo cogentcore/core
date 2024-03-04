@@ -74,14 +74,10 @@ func (i *States) SetStringOr(s string) error {
 }
 
 // Int64 returns the States value as an int64.
-func (i States) Int64() int64 {
-	return int64(i)
-}
+func (i States) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the States value from an int64.
-func (i *States) SetInt64(in int64) {
-	*i = States(in)
-}
+func (i *States) SetInt64(in int64) { *i = States(in) }
 
 // Desc returns the description of the States value.
 func (i States) Desc() string {
@@ -92,9 +88,7 @@ func (i States) Desc() string {
 }
 
 // StatesValues returns all possible values for the type States.
-func StatesValues() []States {
-	return _StatesValues
-}
+func StatesValues() []States { return _StatesValues }
 
 // Values returns all possible values for the type States.
 func (i States) Values() []enums.Enum {

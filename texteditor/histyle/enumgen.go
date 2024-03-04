@@ -40,14 +40,10 @@ func (i *Trilean) SetString(s string) error {
 }
 
 // Int64 returns the Trilean value as an int64.
-func (i Trilean) Int64() int64 {
-	return int64(i)
-}
+func (i Trilean) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Trilean value from an int64.
-func (i *Trilean) SetInt64(in int64) {
-	*i = Trilean(in)
-}
+func (i *Trilean) SetInt64(in int64) { *i = Trilean(in) }
 
 // Desc returns the description of the Trilean value.
 func (i Trilean) Desc() string {
@@ -58,9 +54,7 @@ func (i Trilean) Desc() string {
 }
 
 // TrileanValues returns all possible values for the type Trilean.
-func TrileanValues() []Trilean {
-	return _TrileanValues
-}
+func TrileanValues() []Trilean { return _TrileanValues }
 
 // Values returns all possible values for the type Trilean.
 func (i Trilean) Values() []enums.Enum {

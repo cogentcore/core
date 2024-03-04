@@ -43,14 +43,10 @@ func (i *SpellSignals) SetString(s string) error {
 }
 
 // Int64 returns the SpellSignals value as an int64.
-func (i SpellSignals) Int64() int64 {
-	return int64(i)
-}
+func (i SpellSignals) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the SpellSignals value from an int64.
-func (i *SpellSignals) SetInt64(in int64) {
-	*i = SpellSignals(in)
-}
+func (i *SpellSignals) SetInt64(in int64) { *i = SpellSignals(in) }
 
 // Desc returns the description of the SpellSignals value.
 func (i SpellSignals) Desc() string {
@@ -61,9 +57,7 @@ func (i SpellSignals) Desc() string {
 }
 
 // SpellSignalsValues returns all possible values for the type SpellSignals.
-func SpellSignalsValues() []SpellSignals {
-	return _SpellSignalsValues
-}
+func SpellSignalsValues() []SpellSignals { return _SpellSignalsValues }
 
 // Values returns all possible values for the type SpellSignals.
 func (i SpellSignals) Values() []enums.Enum {
@@ -117,14 +111,10 @@ func (i *BufSignals) SetString(s string) error {
 }
 
 // Int64 returns the BufSignals value as an int64.
-func (i BufSignals) Int64() int64 {
-	return int64(i)
-}
+func (i BufSignals) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the BufSignals value from an int64.
-func (i *BufSignals) SetInt64(in int64) {
-	*i = BufSignals(in)
-}
+func (i *BufSignals) SetInt64(in int64) { *i = BufSignals(in) }
 
 // Desc returns the description of the BufSignals value.
 func (i BufSignals) Desc() string {
@@ -135,9 +125,7 @@ func (i BufSignals) Desc() string {
 }
 
 // BufSignalsValues returns all possible values for the type BufSignals.
-func BufSignalsValues() []BufSignals {
-	return _BufSignalsValues
-}
+func BufSignalsValues() []BufSignals { return _BufSignalsValues }
 
 // Values returns all possible values for the type BufSignals.
 func (i BufSignals) Values() []enums.Enum {
@@ -236,14 +224,10 @@ func (i *BufFlags) SetStringOr(s string) error {
 }
 
 // Int64 returns the BufFlags value as an int64.
-func (i BufFlags) Int64() int64 {
-	return int64(i)
-}
+func (i BufFlags) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the BufFlags value from an int64.
-func (i *BufFlags) SetInt64(in int64) {
-	*i = BufFlags(in)
-}
+func (i *BufFlags) SetInt64(in int64) { *i = BufFlags(in) }
 
 // Desc returns the description of the BufFlags value.
 func (i BufFlags) Desc() string {
@@ -387,14 +371,10 @@ func (i *EditorFlags) SetStringOr(s string) error {
 }
 
 // Int64 returns the EditorFlags value as an int64.
-func (i EditorFlags) Int64() int64 {
-	return int64(i)
-}
+func (i EditorFlags) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the EditorFlags value from an int64.
-func (i *EditorFlags) SetInt64(in int64) {
-	*i = EditorFlags(in)
-}
+func (i *EditorFlags) SetInt64(in int64) { *i = EditorFlags(in) }
 
 // Desc returns the description of the EditorFlags value.
 func (i EditorFlags) Desc() string {

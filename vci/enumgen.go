@@ -40,14 +40,10 @@ func (i *FileStatus) SetString(s string) error {
 }
 
 // Int64 returns the FileStatus value as an int64.
-func (i FileStatus) Int64() int64 {
-	return int64(i)
-}
+func (i FileStatus) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the FileStatus value from an int64.
-func (i *FileStatus) SetInt64(in int64) {
-	*i = FileStatus(in)
-}
+func (i *FileStatus) SetInt64(in int64) { *i = FileStatus(in) }
 
 // Desc returns the description of the FileStatus value.
 func (i FileStatus) Desc() string {
@@ -58,9 +54,7 @@ func (i FileStatus) Desc() string {
 }
 
 // FileStatusValues returns all possible values for the type FileStatus.
-func FileStatusValues() []FileStatus {
-	return _FileStatusValues
-}
+func FileStatusValues() []FileStatus { return _FileStatusValues }
 
 // Values returns all possible values for the type FileStatus.
 func (i FileStatus) Values() []enums.Enum {

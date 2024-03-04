@@ -43,14 +43,10 @@ func (i *LightColors) SetString(s string) error {
 }
 
 // Int64 returns the LightColors value as an int64.
-func (i LightColors) Int64() int64 {
-	return int64(i)
-}
+func (i LightColors) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the LightColors value from an int64.
-func (i *LightColors) SetInt64(in int64) {
-	*i = LightColors(in)
-}
+func (i *LightColors) SetInt64(in int64) { *i = LightColors(in) }
 
 // Desc returns the description of the LightColors value.
 func (i LightColors) Desc() string {
@@ -61,9 +57,7 @@ func (i LightColors) Desc() string {
 }
 
 // LightColorsValues returns all possible values for the type LightColors.
-func LightColorsValues() []LightColors {
-	return _LightColorsValues
-}
+func LightColorsValues() []LightColors { return _LightColorsValues }
 
 // Values returns all possible values for the type LightColors.
 func (i LightColors) Values() []enums.Enum {
@@ -162,14 +156,10 @@ func (i *NodeFlags) SetStringOr(s string) error {
 }
 
 // Int64 returns the NodeFlags value as an int64.
-func (i NodeFlags) Int64() int64 {
-	return int64(i)
-}
+func (i NodeFlags) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the NodeFlags value from an int64.
-func (i *NodeFlags) SetInt64(in int64) {
-	*i = NodeFlags(in)
-}
+func (i *NodeFlags) SetInt64(in int64) { *i = NodeFlags(in) }
 
 // Desc returns the description of the NodeFlags value.
 func (i NodeFlags) Desc() string {
@@ -268,14 +258,10 @@ func (i *RenderClasses) SetString(s string) error {
 }
 
 // Int64 returns the RenderClasses value as an int64.
-func (i RenderClasses) Int64() int64 {
-	return int64(i)
-}
+func (i RenderClasses) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the RenderClasses value from an int64.
-func (i *RenderClasses) SetInt64(in int64) {
-	*i = RenderClasses(in)
-}
+func (i *RenderClasses) SetInt64(in int64) { *i = RenderClasses(in) }
 
 // Desc returns the description of the RenderClasses value.
 func (i RenderClasses) Desc() string {
@@ -286,9 +272,7 @@ func (i RenderClasses) Desc() string {
 }
 
 // RenderClassesValues returns all possible values for the type RenderClasses.
-func RenderClassesValues() []RenderClasses {
-	return _RenderClassesValues
-}
+func RenderClassesValues() []RenderClasses { return _RenderClassesValues }
 
 // Values returns all possible values for the type RenderClasses.
 func (i RenderClasses) Values() []enums.Enum {
@@ -387,14 +371,10 @@ func (i *ScFlags) SetStringOr(s string) error {
 }
 
 // Int64 returns the ScFlags value as an int64.
-func (i ScFlags) Int64() int64 {
-	return int64(i)
-}
+func (i ScFlags) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the ScFlags value from an int64.
-func (i *ScFlags) SetInt64(in int64) {
-	*i = ScFlags(in)
-}
+func (i *ScFlags) SetInt64(in int64) { *i = ScFlags(in) }
 
 // Desc returns the description of the ScFlags value.
 func (i ScFlags) Desc() string {

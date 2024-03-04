@@ -40,14 +40,10 @@ func (i *CompletionKind) SetString(s string) error {
 }
 
 // Int64 returns the CompletionKind value as an int64.
-func (i CompletionKind) Int64() int64 {
-	return int64(i)
-}
+func (i CompletionKind) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the CompletionKind value from an int64.
-func (i *CompletionKind) SetInt64(in int64) {
-	*i = CompletionKind(in)
-}
+func (i *CompletionKind) SetInt64(in int64) { *i = CompletionKind(in) }
 
 // Desc returns the description of the CompletionKind value.
 func (i CompletionKind) Desc() string {
@@ -58,9 +54,7 @@ func (i CompletionKind) Desc() string {
 }
 
 // CompletionKindValues returns all possible values for the type CompletionKind.
-func CompletionKindValues() []CompletionKind {
-	return _CompletionKindValues
-}
+func CompletionKindValues() []CompletionKind { return _CompletionKindValues }
 
 // Values returns all possible values for the type CompletionKind.
 func (i CompletionKind) Values() []enums.Enum {
@@ -114,14 +108,10 @@ func (i *SymbolKind) SetString(s string) error {
 }
 
 // Int64 returns the SymbolKind value as an int64.
-func (i SymbolKind) Int64() int64 {
-	return int64(i)
-}
+func (i SymbolKind) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the SymbolKind value from an int64.
-func (i *SymbolKind) SetInt64(in int64) {
-	*i = SymbolKind(in)
-}
+func (i *SymbolKind) SetInt64(in int64) { *i = SymbolKind(in) }
 
 // Desc returns the description of the SymbolKind value.
 func (i SymbolKind) Desc() string {
@@ -132,9 +122,7 @@ func (i SymbolKind) Desc() string {
 }
 
 // SymbolKindValues returns all possible values for the type SymbolKind.
-func SymbolKindValues() []SymbolKind {
-	return _SymbolKindValues
-}
+func SymbolKindValues() []SymbolKind { return _SymbolKindValues }
 
 // Values returns all possible values for the type SymbolKind.
 func (i SymbolKind) Values() []enums.Enum {

@@ -40,14 +40,10 @@ func (i *Opponents) SetString(s string) error {
 }
 
 // Int64 returns the Opponents value as an int64.
-func (i Opponents) Int64() int64 {
-	return int64(i)
-}
+func (i Opponents) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Opponents value from an int64.
-func (i *Opponents) SetInt64(in int64) {
-	*i = Opponents(in)
-}
+func (i *Opponents) SetInt64(in int64) { *i = Opponents(in) }
 
 // Desc returns the description of the Opponents value.
 func (i Opponents) Desc() string {
@@ -58,9 +54,7 @@ func (i Opponents) Desc() string {
 }
 
 // OpponentsValues returns all possible values for the type Opponents.
-func OpponentsValues() []Opponents {
-	return _OpponentsValues
-}
+func OpponentsValues() []Opponents { return _OpponentsValues }
 
 // Values returns all possible values for the type Opponents.
 func (i Opponents) Values() []enums.Enum {

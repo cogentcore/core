@@ -43,14 +43,10 @@ func (i *DropMods) SetString(s string) error {
 }
 
 // Int64 returns the DropMods value as an int64.
-func (i DropMods) Int64() int64 {
-	return int64(i)
-}
+func (i DropMods) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the DropMods value from an int64.
-func (i *DropMods) SetInt64(in int64) {
-	*i = DropMods(in)
-}
+func (i *DropMods) SetInt64(in int64) { *i = DropMods(in) }
 
 // Desc returns the description of the DropMods value.
 func (i DropMods) Desc() string {
@@ -61,9 +57,7 @@ func (i DropMods) Desc() string {
 }
 
 // DropModsValues returns all possible values for the type DropMods.
-func DropModsValues() []DropMods {
-	return _DropModsValues
-}
+func DropModsValues() []DropMods { return _DropModsValues }
 
 // Values returns all possible values for the type DropMods.
 func (i DropMods) Values() []enums.Enum {
@@ -117,14 +111,10 @@ func (i *Buttons) SetString(s string) error {
 }
 
 // Int64 returns the Buttons value as an int64.
-func (i Buttons) Int64() int64 {
-	return int64(i)
-}
+func (i Buttons) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Buttons value from an int64.
-func (i *Buttons) SetInt64(in int64) {
-	*i = Buttons(in)
-}
+func (i *Buttons) SetInt64(in int64) { *i = Buttons(in) }
 
 // Desc returns the description of the Buttons value.
 func (i Buttons) Desc() string {
@@ -135,9 +125,7 @@ func (i Buttons) Desc() string {
 }
 
 // ButtonsValues returns all possible values for the type Buttons.
-func ButtonsValues() []Buttons {
-	return _ButtonsValues
-}
+func ButtonsValues() []Buttons { return _ButtonsValues }
 
 // Values returns all possible values for the type Buttons.
 func (i Buttons) Values() []enums.Enum {
@@ -191,14 +179,10 @@ func (i *SelectModes) SetString(s string) error {
 }
 
 // Int64 returns the SelectModes value as an int64.
-func (i SelectModes) Int64() int64 {
-	return int64(i)
-}
+func (i SelectModes) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the SelectModes value from an int64.
-func (i *SelectModes) SetInt64(in int64) {
-	*i = SelectModes(in)
-}
+func (i *SelectModes) SetInt64(in int64) { *i = SelectModes(in) }
 
 // Desc returns the description of the SelectModes value.
 func (i SelectModes) Desc() string {
@@ -209,9 +193,7 @@ func (i SelectModes) Desc() string {
 }
 
 // SelectModesValues returns all possible values for the type SelectModes.
-func SelectModesValues() []SelectModes {
-	return _SelectModesValues
-}
+func SelectModesValues() []SelectModes { return _SelectModesValues }
 
 // Values returns all possible values for the type SelectModes.
 func (i SelectModes) Values() []enums.Enum {
@@ -265,14 +247,10 @@ func (i *Types) SetString(s string) error {
 }
 
 // Int64 returns the Types value as an int64.
-func (i Types) Int64() int64 {
-	return int64(i)
-}
+func (i Types) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Types value from an int64.
-func (i *Types) SetInt64(in int64) {
-	*i = Types(in)
-}
+func (i *Types) SetInt64(in int64) { *i = Types(in) }
 
 // Desc returns the description of the Types value.
 func (i Types) Desc() string {
@@ -283,9 +261,7 @@ func (i Types) Desc() string {
 }
 
 // TypesValues returns all possible values for the type Types.
-func TypesValues() []Types {
-	return _TypesValues
-}
+func TypesValues() []Types { return _TypesValues }
 
 // Values returns all possible values for the type Types.
 func (i Types) Values() []enums.Enum {
@@ -371,14 +347,10 @@ func (i *EventFlags) SetStringOr(s string) error {
 }
 
 // Int64 returns the EventFlags value as an int64.
-func (i EventFlags) Int64() int64 {
-	return int64(i)
-}
+func (i EventFlags) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the EventFlags value from an int64.
-func (i *EventFlags) SetInt64(in int64) {
-	*i = EventFlags(in)
-}
+func (i *EventFlags) SetInt64(in int64) { *i = EventFlags(in) }
 
 // Desc returns the description of the EventFlags value.
 func (i EventFlags) Desc() string {
@@ -389,9 +361,7 @@ func (i EventFlags) Desc() string {
 }
 
 // EventFlagsValues returns all possible values for the type EventFlags.
-func EventFlagsValues() []EventFlags {
-	return _EventFlagsValues
-}
+func EventFlagsValues() []EventFlags { return _EventFlagsValues }
 
 // Values returns all possible values for the type EventFlags.
 func (i EventFlags) Values() []enums.Enum {
@@ -466,14 +436,10 @@ func (i *WinActions) SetString(s string) error {
 }
 
 // Int64 returns the WinActions value as an int64.
-func (i WinActions) Int64() int64 {
-	return int64(i)
-}
+func (i WinActions) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the WinActions value from an int64.
-func (i *WinActions) SetInt64(in int64) {
-	*i = WinActions(in)
-}
+func (i *WinActions) SetInt64(in int64) { *i = WinActions(in) }
 
 // Desc returns the description of the WinActions value.
 func (i WinActions) Desc() string {
@@ -484,9 +450,7 @@ func (i WinActions) Desc() string {
 }
 
 // WinActionsValues returns all possible values for the type WinActions.
-func WinActionsValues() []WinActions {
-	return _WinActionsValues
-}
+func WinActionsValues() []WinActions { return _WinActionsValues }
 
 // Values returns all possible values for the type WinActions.
 func (i WinActions) Values() []enums.Enum {

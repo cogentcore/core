@@ -40,14 +40,10 @@ func (i *LangFlags) SetString(s string) error {
 }
 
 // Int64 returns the LangFlags value as an int64.
-func (i LangFlags) Int64() int64 {
-	return int64(i)
-}
+func (i LangFlags) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the LangFlags value from an int64.
-func (i *LangFlags) SetInt64(in int64) {
-	*i = LangFlags(in)
-}
+func (i *LangFlags) SetInt64(in int64) { *i = LangFlags(in) }
 
 // Desc returns the description of the LangFlags value.
 func (i LangFlags) Desc() string {
@@ -58,9 +54,7 @@ func (i LangFlags) Desc() string {
 }
 
 // LangFlagsValues returns all possible values for the type LangFlags.
-func LangFlagsValues() []LangFlags {
-	return _LangFlagsValues
-}
+func LangFlagsValues() []LangFlags { return _LangFlagsValues }
 
 // Values returns all possible values for the type LangFlags.
 func (i LangFlags) Values() []enums.Enum {

@@ -44,14 +44,10 @@ func (i *ButtonTypes) SetString(s string) error {
 }
 
 // Int64 returns the ButtonTypes value as an int64.
-func (i ButtonTypes) Int64() int64 {
-	return int64(i)
-}
+func (i ButtonTypes) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the ButtonTypes value from an int64.
-func (i *ButtonTypes) SetInt64(in int64) {
-	*i = ButtonTypes(in)
-}
+func (i *ButtonTypes) SetInt64(in int64) { *i = ButtonTypes(in) }
 
 // Desc returns the description of the ButtonTypes value.
 func (i ButtonTypes) Desc() string {
@@ -62,9 +58,7 @@ func (i ButtonTypes) Desc() string {
 }
 
 // ButtonTypesValues returns all possible values for the type ButtonTypes.
-func ButtonTypesValues() []ButtonTypes {
-	return _ButtonTypesValues
-}
+func ButtonTypesValues() []ButtonTypes { return _ButtonTypesValues }
 
 // Values returns all possible values for the type ButtonTypes.
 func (i ButtonTypes) Values() []enums.Enum {
@@ -118,14 +112,10 @@ func (i *ChooserTypes) SetString(s string) error {
 }
 
 // Int64 returns the ChooserTypes value as an int64.
-func (i ChooserTypes) Int64() int64 {
-	return int64(i)
-}
+func (i ChooserTypes) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the ChooserTypes value from an int64.
-func (i *ChooserTypes) SetInt64(in int64) {
-	*i = ChooserTypes(in)
-}
+func (i *ChooserTypes) SetInt64(in int64) { *i = ChooserTypes(in) }
 
 // Desc returns the description of the ChooserTypes value.
 func (i ChooserTypes) Desc() string {
@@ -136,9 +126,7 @@ func (i ChooserTypes) Desc() string {
 }
 
 // ChooserTypesValues returns all possible values for the type ChooserTypes.
-func ChooserTypesValues() []ChooserTypes {
-	return _ChooserTypesValues
-}
+func ChooserTypesValues() []ChooserTypes { return _ChooserTypesValues }
 
 // Values returns all possible values for the type ChooserTypes.
 func (i ChooserTypes) Values() []enums.Enum {
@@ -192,14 +180,10 @@ func (i *CompleteSignals) SetString(s string) error {
 }
 
 // Int64 returns the CompleteSignals value as an int64.
-func (i CompleteSignals) Int64() int64 {
-	return int64(i)
-}
+func (i CompleteSignals) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the CompleteSignals value from an int64.
-func (i *CompleteSignals) SetInt64(in int64) {
-	*i = CompleteSignals(in)
-}
+func (i *CompleteSignals) SetInt64(in int64) { *i = CompleteSignals(in) }
 
 // Desc returns the description of the CompleteSignals value.
 func (i CompleteSignals) Desc() string {
@@ -210,9 +194,7 @@ func (i CompleteSignals) Desc() string {
 }
 
 // CompleteSignalsValues returns all possible values for the type CompleteSignals.
-func CompleteSignalsValues() []CompleteSignals {
-	return _CompleteSignalsValues
-}
+func CompleteSignalsValues() []CompleteSignals { return _CompleteSignalsValues }
 
 // Values returns all possible values for the type CompleteSignals.
 func (i CompleteSignals) Values() []enums.Enum {
@@ -311,14 +293,10 @@ func (i *WidgetFlags) SetStringOr(s string) error {
 }
 
 // Int64 returns the WidgetFlags value as an int64.
-func (i WidgetFlags) Int64() int64 {
-	return int64(i)
-}
+func (i WidgetFlags) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the WidgetFlags value from an int64.
-func (i *WidgetFlags) SetInt64(in int64) {
-	*i = WidgetFlags(in)
-}
+func (i *WidgetFlags) SetInt64(in int64) { *i = WidgetFlags(in) }
 
 // Desc returns the description of the WidgetFlags value.
 func (i WidgetFlags) Desc() string {
@@ -417,14 +395,10 @@ func (i *LabelTypes) SetString(s string) error {
 }
 
 // Int64 returns the LabelTypes value as an int64.
-func (i LabelTypes) Int64() int64 {
-	return int64(i)
-}
+func (i LabelTypes) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the LabelTypes value from an int64.
-func (i *LabelTypes) SetInt64(in int64) {
-	*i = LabelTypes(in)
-}
+func (i *LabelTypes) SetInt64(in int64) { *i = LabelTypes(in) }
 
 // Desc returns the description of the LabelTypes value.
 func (i LabelTypes) Desc() string {
@@ -435,9 +409,7 @@ func (i LabelTypes) Desc() string {
 }
 
 // LabelTypesValues returns all possible values for the type LabelTypes.
-func LabelTypesValues() []LabelTypes {
-	return _LabelTypesValues
-}
+func LabelTypesValues() []LabelTypes { return _LabelTypesValues }
 
 // Values returns all possible values for the type LabelTypes.
 func (i LabelTypes) Values() []enums.Enum {
@@ -491,14 +463,10 @@ func (i *LayoutPasses) SetString(s string) error {
 }
 
 // Int64 returns the LayoutPasses value as an int64.
-func (i LayoutPasses) Int64() int64 {
-	return int64(i)
-}
+func (i LayoutPasses) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the LayoutPasses value from an int64.
-func (i *LayoutPasses) SetInt64(in int64) {
-	*i = LayoutPasses(in)
-}
+func (i *LayoutPasses) SetInt64(in int64) { *i = LayoutPasses(in) }
 
 // Desc returns the description of the LayoutPasses value.
 func (i LayoutPasses) Desc() string {
@@ -509,9 +477,7 @@ func (i LayoutPasses) Desc() string {
 }
 
 // LayoutPassesValues returns all possible values for the type LayoutPasses.
-func LayoutPassesValues() []LayoutPasses {
-	return _LayoutPassesValues
-}
+func LayoutPassesValues() []LayoutPasses { return _LayoutPassesValues }
 
 // Values returns all possible values for the type LayoutPasses.
 func (i LayoutPasses) Values() []enums.Enum {
@@ -610,14 +576,10 @@ func (i *LayoutFlags) SetStringOr(s string) error {
 }
 
 // Int64 returns the LayoutFlags value as an int64.
-func (i LayoutFlags) Int64() int64 {
-	return int64(i)
-}
+func (i LayoutFlags) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the LayoutFlags value from an int64.
-func (i *LayoutFlags) SetInt64(in int64) {
-	*i = LayoutFlags(in)
-}
+func (i *LayoutFlags) SetInt64(in int64) { *i = LayoutFlags(in) }
 
 // Desc returns the description of the LayoutFlags value.
 func (i LayoutFlags) Desc() string {
@@ -716,14 +678,10 @@ func (i *MeterTypes) SetString(s string) error {
 }
 
 // Int64 returns the MeterTypes value as an int64.
-func (i MeterTypes) Int64() int64 {
-	return int64(i)
-}
+func (i MeterTypes) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the MeterTypes value from an int64.
-func (i *MeterTypes) SetInt64(in int64) {
-	*i = MeterTypes(in)
-}
+func (i *MeterTypes) SetInt64(in int64) { *i = MeterTypes(in) }
 
 // Desc returns the description of the MeterTypes value.
 func (i MeterTypes) Desc() string {
@@ -734,9 +692,7 @@ func (i MeterTypes) Desc() string {
 }
 
 // MeterTypesValues returns all possible values for the type MeterTypes.
-func MeterTypesValues() []MeterTypes {
-	return _MeterTypesValues
-}
+func MeterTypesValues() []MeterTypes { return _MeterTypesValues }
 
 // Values returns all possible values for the type MeterTypes.
 func (i MeterTypes) Values() []enums.Enum {
@@ -822,14 +778,10 @@ func (i *WinFlags) SetStringOr(s string) error {
 }
 
 // Int64 returns the WinFlags value as an int64.
-func (i WinFlags) Int64() int64 {
-	return int64(i)
-}
+func (i WinFlags) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the WinFlags value from an int64.
-func (i *WinFlags) SetInt64(in int64) {
-	*i = WinFlags(in)
-}
+func (i *WinFlags) SetInt64(in int64) { *i = WinFlags(in) }
 
 // Desc returns the description of the WinFlags value.
 func (i WinFlags) Desc() string {
@@ -840,9 +792,7 @@ func (i WinFlags) Desc() string {
 }
 
 // WinFlagsValues returns all possible values for the type WinFlags.
-func WinFlagsValues() []WinFlags {
-	return _WinFlagsValues
-}
+func WinFlagsValues() []WinFlags { return _WinFlagsValues }
 
 // Values returns all possible values for the type WinFlags.
 func (i WinFlags) Values() []enums.Enum {
@@ -949,14 +899,10 @@ func (i *RenderContextFlags) SetStringOr(s string) error {
 }
 
 // Int64 returns the RenderContextFlags value as an int64.
-func (i RenderContextFlags) Int64() int64 {
-	return int64(i)
-}
+func (i RenderContextFlags) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the RenderContextFlags value from an int64.
-func (i *RenderContextFlags) SetInt64(in int64) {
-	*i = RenderContextFlags(in)
-}
+func (i *RenderContextFlags) SetInt64(in int64) { *i = RenderContextFlags(in) }
 
 // Desc returns the description of the RenderContextFlags value.
 func (i RenderContextFlags) Desc() string {
@@ -967,9 +913,7 @@ func (i RenderContextFlags) Desc() string {
 }
 
 // RenderContextFlagsValues returns all possible values for the type RenderContextFlags.
-func RenderContextFlagsValues() []RenderContextFlags {
-	return _RenderContextFlagsValues
-}
+func RenderContextFlagsValues() []RenderContextFlags { return _RenderContextFlagsValues }
 
 // Values returns all possible values for the type RenderContextFlags.
 func (i RenderContextFlags) Values() []enums.Enum {
@@ -1089,14 +1033,10 @@ func (i *ScFlags) SetStringOr(s string) error {
 }
 
 // Int64 returns the ScFlags value as an int64.
-func (i ScFlags) Int64() int64 {
-	return int64(i)
-}
+func (i ScFlags) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the ScFlags value from an int64.
-func (i *ScFlags) SetInt64(in int64) {
-	*i = ScFlags(in)
-}
+func (i *ScFlags) SetInt64(in int64) { *i = ScFlags(in) }
 
 // Desc returns the description of the ScFlags value.
 func (i ScFlags) Desc() string {
@@ -1195,14 +1135,10 @@ func (i *SizeClasses) SetString(s string) error {
 }
 
 // Int64 returns the SizeClasses value as an int64.
-func (i SizeClasses) Int64() int64 {
-	return int64(i)
-}
+func (i SizeClasses) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the SizeClasses value from an int64.
-func (i *SizeClasses) SetInt64(in int64) {
-	*i = SizeClasses(in)
-}
+func (i *SizeClasses) SetInt64(in int64) { *i = SizeClasses(in) }
 
 // Desc returns the description of the SizeClasses value.
 func (i SizeClasses) Desc() string {
@@ -1213,9 +1149,7 @@ func (i SizeClasses) Desc() string {
 }
 
 // SizeClassesValues returns all possible values for the type SizeClasses.
-func SizeClassesValues() []SizeClasses {
-	return _SizeClassesValues
-}
+func SizeClassesValues() []SizeClasses { return _SizeClassesValues }
 
 // Values returns all possible values for the type SizeClasses.
 func (i SizeClasses) Values() []enums.Enum {
@@ -1269,14 +1203,10 @@ func (i *SliderTypes) SetString(s string) error {
 }
 
 // Int64 returns the SliderTypes value as an int64.
-func (i SliderTypes) Int64() int64 {
-	return int64(i)
-}
+func (i SliderTypes) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the SliderTypes value from an int64.
-func (i *SliderTypes) SetInt64(in int64) {
-	*i = SliderTypes(in)
-}
+func (i *SliderTypes) SetInt64(in int64) { *i = SliderTypes(in) }
 
 // Desc returns the description of the SliderTypes value.
 func (i SliderTypes) Desc() string {
@@ -1287,9 +1217,7 @@ func (i SliderTypes) Desc() string {
 }
 
 // SliderTypesValues returns all possible values for the type SliderTypes.
-func SliderTypesValues() []SliderTypes {
-	return _SliderTypesValues
-}
+func SliderTypesValues() []SliderTypes { return _SliderTypesValues }
 
 // Values returns all possible values for the type SliderTypes.
 func (i SliderTypes) Values() []enums.Enum {
@@ -1343,14 +1271,10 @@ func (i *StageTypes) SetString(s string) error {
 }
 
 // Int64 returns the StageTypes value as an int64.
-func (i StageTypes) Int64() int64 {
-	return int64(i)
-}
+func (i StageTypes) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the StageTypes value from an int64.
-func (i *StageTypes) SetInt64(in int64) {
-	*i = StageTypes(in)
-}
+func (i *StageTypes) SetInt64(in int64) { *i = StageTypes(in) }
 
 // Desc returns the description of the StageTypes value.
 func (i StageTypes) Desc() string {
@@ -1361,9 +1285,7 @@ func (i StageTypes) Desc() string {
 }
 
 // StageTypesValues returns all possible values for the type StageTypes.
-func StageTypesValues() []StageTypes {
-	return _StageTypesValues
-}
+func StageTypesValues() []StageTypes { return _StageTypesValues }
 
 // Values returns all possible values for the type StageTypes.
 func (i StageTypes) Values() []enums.Enum {
@@ -1417,14 +1339,10 @@ func (i *SwitchTypes) SetString(s string) error {
 }
 
 // Int64 returns the SwitchTypes value as an int64.
-func (i SwitchTypes) Int64() int64 {
-	return int64(i)
-}
+func (i SwitchTypes) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the SwitchTypes value from an int64.
-func (i *SwitchTypes) SetInt64(in int64) {
-	*i = SwitchTypes(in)
-}
+func (i *SwitchTypes) SetInt64(in int64) { *i = SwitchTypes(in) }
 
 // Desc returns the description of the SwitchTypes value.
 func (i SwitchTypes) Desc() string {
@@ -1435,9 +1353,7 @@ func (i SwitchTypes) Desc() string {
 }
 
 // SwitchTypesValues returns all possible values for the type SwitchTypes.
-func SwitchTypesValues() []SwitchTypes {
-	return _SwitchTypesValues
-}
+func SwitchTypesValues() []SwitchTypes { return _SwitchTypesValues }
 
 // Values returns all possible values for the type SwitchTypes.
 func (i SwitchTypes) Values() []enums.Enum {
@@ -1491,14 +1407,10 @@ func (i *TabTypes) SetString(s string) error {
 }
 
 // Int64 returns the TabTypes value as an int64.
-func (i TabTypes) Int64() int64 {
-	return int64(i)
-}
+func (i TabTypes) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the TabTypes value from an int64.
-func (i *TabTypes) SetInt64(in int64) {
-	*i = TabTypes(in)
-}
+func (i *TabTypes) SetInt64(in int64) { *i = TabTypes(in) }
 
 // Desc returns the description of the TabTypes value.
 func (i TabTypes) Desc() string {
@@ -1509,9 +1421,7 @@ func (i TabTypes) Desc() string {
 }
 
 // TabTypesValues returns all possible values for the type TabTypes.
-func TabTypesValues() []TabTypes {
-	return _TabTypesValues
-}
+func TabTypesValues() []TabTypes { return _TabTypesValues }
 
 // Values returns all possible values for the type TabTypes.
 func (i TabTypes) Values() []enums.Enum {
@@ -1565,14 +1475,10 @@ func (i *TextFieldTypes) SetString(s string) error {
 }
 
 // Int64 returns the TextFieldTypes value as an int64.
-func (i TextFieldTypes) Int64() int64 {
-	return int64(i)
-}
+func (i TextFieldTypes) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the TextFieldTypes value from an int64.
-func (i *TextFieldTypes) SetInt64(in int64) {
-	*i = TextFieldTypes(in)
-}
+func (i *TextFieldTypes) SetInt64(in int64) { *i = TextFieldTypes(in) }
 
 // Desc returns the description of the TextFieldTypes value.
 func (i TextFieldTypes) Desc() string {
@@ -1583,9 +1489,7 @@ func (i TextFieldTypes) Desc() string {
 }
 
 // TextFieldTypesValues returns all possible values for the type TextFieldTypes.
-func TextFieldTypesValues() []TextFieldTypes {
-	return _TextFieldTypesValues
-}
+func TextFieldTypesValues() []TextFieldTypes { return _TextFieldTypesValues }
 
 // Values returns all possible values for the type TextFieldTypes.
 func (i TextFieldTypes) Values() []enums.Enum {
@@ -1639,14 +1543,10 @@ func (i *Themes) SetString(s string) error {
 }
 
 // Int64 returns the Themes value as an int64.
-func (i Themes) Int64() int64 {
-	return int64(i)
-}
+func (i Themes) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Themes value from an int64.
-func (i *Themes) SetInt64(in int64) {
-	*i = Themes(in)
-}
+func (i *Themes) SetInt64(in int64) { *i = Themes(in) }
 
 // Desc returns the description of the Themes value.
 func (i Themes) Desc() string {
@@ -1657,9 +1557,7 @@ func (i Themes) Desc() string {
 }
 
 // ThemesValues returns all possible values for the type Themes.
-func ThemesValues() []Themes {
-	return _ThemesValues
-}
+func ThemesValues() []Themes { return _ThemesValues }
 
 // Values returns all possible values for the type Themes.
 func (i Themes) Values() []enums.Enum {

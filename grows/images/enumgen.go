@@ -40,14 +40,10 @@ func (i *Formats) SetString(s string) error {
 }
 
 // Int64 returns the Formats value as an int64.
-func (i Formats) Int64() int64 {
-	return int64(i)
-}
+func (i Formats) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Formats value from an int64.
-func (i *Formats) SetInt64(in int64) {
-	*i = Formats(in)
-}
+func (i *Formats) SetInt64(in int64) { *i = Formats(in) }
 
 // Desc returns the description of the Formats value.
 func (i Formats) Desc() string {
@@ -58,9 +54,7 @@ func (i Formats) Desc() string {
 }
 
 // FormatsValues returns all possible values for the type Formats.
-func FormatsValues() []Formats {
-	return _FormatsValues
-}
+func FormatsValues() []Formats { return _FormatsValues }
 
 // Values returns all possible values for the type Formats.
 func (i Formats) Values() []enums.Enum {

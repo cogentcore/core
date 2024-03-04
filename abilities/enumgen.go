@@ -74,14 +74,10 @@ func (i *Abilities) SetStringOr(s string) error {
 }
 
 // Int64 returns the Abilities value as an int64.
-func (i Abilities) Int64() int64 {
-	return int64(i)
-}
+func (i Abilities) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Abilities value from an int64.
-func (i *Abilities) SetInt64(in int64) {
-	*i = Abilities(in)
-}
+func (i *Abilities) SetInt64(in int64) { *i = Abilities(in) }
 
 // Desc returns the description of the Abilities value.
 func (i Abilities) Desc() string {
@@ -92,9 +88,7 @@ func (i Abilities) Desc() string {
 }
 
 // AbilitiesValues returns all possible values for the type Abilities.
-func AbilitiesValues() []Abilities {
-	return _AbilitiesValues
-}
+func AbilitiesValues() []Abilities { return _AbilitiesValues }
 
 // Values returns all possible values for the type Abilities.
 func (i Abilities) Values() []enums.Enum {

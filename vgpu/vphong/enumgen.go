@@ -40,14 +40,10 @@ func (i *Sets) SetString(s string) error {
 }
 
 // Int64 returns the Sets value as an int64.
-func (i Sets) Int64() int64 {
-	return int64(i)
-}
+func (i Sets) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Sets value from an int64.
-func (i *Sets) SetInt64(in int64) {
-	*i = Sets(in)
-}
+func (i *Sets) SetInt64(in int64) { *i = Sets(in) }
 
 // Desc returns the description of the Sets value.
 func (i Sets) Desc() string {
@@ -58,9 +54,7 @@ func (i Sets) Desc() string {
 }
 
 // SetsValues returns all possible values for the type Sets.
-func SetsValues() []Sets {
-	return _SetsValues
-}
+func SetsValues() []Sets { return _SetsValues }
 
 // Values returns all possible values for the type Sets.
 func (i Sets) Values() []enums.Enum {

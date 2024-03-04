@@ -88,14 +88,10 @@ func (i *NodeFlags) SetStringOr(s string) error {
 }
 
 // Int64 returns the NodeFlags value as an int64.
-func (i NodeFlags) Int64() int64 {
-	return int64(i)
-}
+func (i NodeFlags) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the NodeFlags value from an int64.
-func (i *NodeFlags) SetInt64(in int64) {
-	*i = NodeFlags(in)
-}
+func (i *NodeFlags) SetInt64(in int64) { *i = NodeFlags(in) }
 
 // Desc returns the description of the NodeFlags value.
 func (i NodeFlags) Desc() string {
@@ -194,14 +190,10 @@ func (i *ViewBoxAligns) SetString(s string) error {
 }
 
 // Int64 returns the ViewBoxAligns value as an int64.
-func (i ViewBoxAligns) Int64() int64 {
-	return int64(i)
-}
+func (i ViewBoxAligns) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the ViewBoxAligns value from an int64.
-func (i *ViewBoxAligns) SetInt64(in int64) {
-	*i = ViewBoxAligns(in)
-}
+func (i *ViewBoxAligns) SetInt64(in int64) { *i = ViewBoxAligns(in) }
 
 // Desc returns the description of the ViewBoxAligns value.
 func (i ViewBoxAligns) Desc() string {
@@ -212,9 +204,7 @@ func (i ViewBoxAligns) Desc() string {
 }
 
 // ViewBoxAlignsValues returns all possible values for the type ViewBoxAligns.
-func ViewBoxAlignsValues() []ViewBoxAligns {
-	return _ViewBoxAlignsValues
-}
+func ViewBoxAlignsValues() []ViewBoxAligns { return _ViewBoxAlignsValues }
 
 // Values returns all possible values for the type ViewBoxAligns.
 func (i ViewBoxAligns) Values() []enums.Enum {
@@ -268,14 +258,10 @@ func (i *ViewBoxMeetOrSlice) SetString(s string) error {
 }
 
 // Int64 returns the ViewBoxMeetOrSlice value as an int64.
-func (i ViewBoxMeetOrSlice) Int64() int64 {
-	return int64(i)
-}
+func (i ViewBoxMeetOrSlice) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the ViewBoxMeetOrSlice value from an int64.
-func (i *ViewBoxMeetOrSlice) SetInt64(in int64) {
-	*i = ViewBoxMeetOrSlice(in)
-}
+func (i *ViewBoxMeetOrSlice) SetInt64(in int64) { *i = ViewBoxMeetOrSlice(in) }
 
 // Desc returns the description of the ViewBoxMeetOrSlice value.
 func (i ViewBoxMeetOrSlice) Desc() string {
@@ -286,9 +272,7 @@ func (i ViewBoxMeetOrSlice) Desc() string {
 }
 
 // ViewBoxMeetOrSliceValues returns all possible values for the type ViewBoxMeetOrSlice.
-func ViewBoxMeetOrSliceValues() []ViewBoxMeetOrSlice {
-	return _ViewBoxMeetOrSliceValues
-}
+func ViewBoxMeetOrSliceValues() []ViewBoxMeetOrSlice { return _ViewBoxMeetOrSliceValues }
 
 // Values returns all possible values for the type ViewBoxMeetOrSlice.
 func (i ViewBoxMeetOrSlice) Values() []enums.Enum {

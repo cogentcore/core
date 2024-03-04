@@ -40,14 +40,10 @@ func (i *Funs) SetString(s string) error {
 }
 
 // Int64 returns the Funs value as an int64.
-func (i Funs) Int64() int64 {
-	return int64(i)
-}
+func (i Funs) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Funs value from an int64.
-func (i *Funs) SetInt64(in int64) {
-	*i = Funs(in)
-}
+func (i *Funs) SetInt64(in int64) { *i = Funs(in) }
 
 // Desc returns the description of the Funs value.
 func (i Funs) Desc() string {
@@ -58,9 +54,7 @@ func (i Funs) Desc() string {
 }
 
 // FunsValues returns all possible values for the type Funs.
-func FunsValues() []Funs {
-	return _FunsValues
-}
+func FunsValues() []Funs { return _FunsValues }
 
 // Values returns all possible values for the type Funs.
 func (i Funs) Values() []enums.Enum {

@@ -40,14 +40,10 @@ func (i *SelModes) SetString(s string) error {
 }
 
 // Int64 returns the SelModes value as an int64.
-func (i SelModes) Int64() int64 {
-	return int64(i)
-}
+func (i SelModes) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the SelModes value from an int64.
-func (i *SelModes) SetInt64(in int64) {
-	*i = SelModes(in)
-}
+func (i *SelModes) SetInt64(in int64) { *i = SelModes(in) }
 
 // Desc returns the description of the SelModes value.
 func (i SelModes) Desc() string {
@@ -58,9 +54,7 @@ func (i SelModes) Desc() string {
 }
 
 // SelModesValues returns all possible values for the type SelModes.
-func SelModesValues() []SelModes {
-	return _SelModesValues
-}
+func SelModesValues() []SelModes { return _SelModesValues }
 
 // Values returns all possible values for the type SelModes.
 func (i SelModes) Values() []enums.Enum {

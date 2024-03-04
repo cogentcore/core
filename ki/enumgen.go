@@ -74,14 +74,10 @@ func (i *Flags) SetStringOr(s string) error {
 }
 
 // Int64 returns the Flags value as an int64.
-func (i Flags) Int64() int64 {
-	return int64(i)
-}
+func (i Flags) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Flags value from an int64.
-func (i *Flags) SetInt64(in int64) {
-	*i = Flags(in)
-}
+func (i *Flags) SetInt64(in int64) { *i = Flags(in) }
 
 // Desc returns the description of the Flags value.
 func (i Flags) Desc() string {
@@ -92,9 +88,7 @@ func (i Flags) Desc() string {
 }
 
 // FlagsValues returns all possible values for the type Flags.
-func FlagsValues() []Flags {
-	return _FlagsValues
-}
+func FlagsValues() []Flags { return _FlagsValues }
 
 // Values returns all possible values for the type Flags.
 func (i Flags) Values() []enums.Enum {

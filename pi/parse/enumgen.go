@@ -43,14 +43,10 @@ func (i *Actions) SetString(s string) error {
 }
 
 // Int64 returns the Actions value as an int64.
-func (i Actions) Int64() int64 {
-	return int64(i)
-}
+func (i Actions) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Actions value from an int64.
-func (i *Actions) SetInt64(in int64) {
-	*i = Actions(in)
-}
+func (i *Actions) SetInt64(in int64) { *i = Actions(in) }
 
 // Desc returns the description of the Actions value.
 func (i Actions) Desc() string {
@@ -61,9 +57,7 @@ func (i Actions) Desc() string {
 }
 
 // ActionsValues returns all possible values for the type Actions.
-func ActionsValues() []Actions {
-	return _ActionsValues
-}
+func ActionsValues() []Actions { return _ActionsValues }
 
 // Values returns all possible values for the type Actions.
 func (i Actions) Values() []enums.Enum {
@@ -117,14 +111,10 @@ func (i *AstActs) SetString(s string) error {
 }
 
 // Int64 returns the AstActs value as an int64.
-func (i AstActs) Int64() int64 {
-	return int64(i)
-}
+func (i AstActs) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the AstActs value from an int64.
-func (i *AstActs) SetInt64(in int64) {
-	*i = AstActs(in)
-}
+func (i *AstActs) SetInt64(in int64) { *i = AstActs(in) }
 
 // Desc returns the description of the AstActs value.
 func (i AstActs) Desc() string {
@@ -135,9 +125,7 @@ func (i AstActs) Desc() string {
 }
 
 // AstActsValues returns all possible values for the type AstActs.
-func AstActsValues() []AstActs {
-	return _AstActsValues
-}
+func AstActsValues() []AstActs { return _AstActsValues }
 
 // Values returns all possible values for the type AstActs.
 func (i AstActs) Values() []enums.Enum {
@@ -236,14 +224,10 @@ func (i *RuleFlags) SetStringOr(s string) error {
 }
 
 // Int64 returns the RuleFlags value as an int64.
-func (i RuleFlags) Int64() int64 {
-	return int64(i)
-}
+func (i RuleFlags) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the RuleFlags value from an int64.
-func (i *RuleFlags) SetInt64(in int64) {
-	*i = RuleFlags(in)
-}
+func (i *RuleFlags) SetInt64(in int64) { *i = RuleFlags(in) }
 
 // Desc returns the description of the RuleFlags value.
 func (i RuleFlags) Desc() string {
@@ -342,14 +326,10 @@ func (i *Steps) SetString(s string) error {
 }
 
 // Int64 returns the Steps value as an int64.
-func (i Steps) Int64() int64 {
-	return int64(i)
-}
+func (i Steps) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Steps value from an int64.
-func (i *Steps) SetInt64(in int64) {
-	*i = Steps(in)
-}
+func (i *Steps) SetInt64(in int64) { *i = Steps(in) }
 
 // Desc returns the description of the Steps value.
 func (i Steps) Desc() string {
@@ -360,9 +340,7 @@ func (i Steps) Desc() string {
 }
 
 // StepsValues returns all possible values for the type Steps.
-func StepsValues() []Steps {
-	return _StepsValues
-}
+func StepsValues() []Steps { return _StepsValues }
 
 // Values returns all possible values for the type Steps.
 func (i Steps) Values() []enums.Enum {

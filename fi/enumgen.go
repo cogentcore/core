@@ -40,14 +40,10 @@ func (i *Cat) SetString(s string) error {
 }
 
 // Int64 returns the Cat value as an int64.
-func (i Cat) Int64() int64 {
-	return int64(i)
-}
+func (i Cat) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Cat value from an int64.
-func (i *Cat) SetInt64(in int64) {
-	*i = Cat(in)
-}
+func (i *Cat) SetInt64(in int64) { *i = Cat(in) }
 
 // Desc returns the description of the Cat value.
 func (i Cat) Desc() string {
@@ -58,9 +54,7 @@ func (i Cat) Desc() string {
 }
 
 // CatValues returns all possible values for the type Cat.
-func CatValues() []Cat {
-	return _CatValues
-}
+func CatValues() []Cat { return _CatValues }
 
 // Values returns all possible values for the type Cat.
 func (i Cat) Values() []enums.Enum {
@@ -114,14 +108,10 @@ func (i *Known) SetString(s string) error {
 }
 
 // Int64 returns the Known value as an int64.
-func (i Known) Int64() int64 {
-	return int64(i)
-}
+func (i Known) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Known value from an int64.
-func (i *Known) SetInt64(in int64) {
-	*i = Known(in)
-}
+func (i *Known) SetInt64(in int64) { *i = Known(in) }
 
 // Desc returns the description of the Known value.
 func (i Known) Desc() string {
@@ -132,9 +122,7 @@ func (i Known) Desc() string {
 }
 
 // KnownValues returns all possible values for the type Known.
-func KnownValues() []Known {
-	return _KnownValues
-}
+func KnownValues() []Known { return _KnownValues }
 
 // Values returns all possible values for the type Known.
 func (i Known) Values() []enums.Enum {

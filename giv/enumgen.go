@@ -88,14 +88,10 @@ func (i *SliceViewFlags) SetStringOr(s string) error {
 }
 
 // Int64 returns the SliceViewFlags value as an int64.
-func (i SliceViewFlags) Int64() int64 {
-	return int64(i)
-}
+func (i SliceViewFlags) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the SliceViewFlags value from an int64.
-func (i *SliceViewFlags) SetInt64(in int64) {
-	*i = SliceViewFlags(in)
-}
+func (i *SliceViewFlags) SetInt64(in int64) { *i = SliceViewFlags(in) }
 
 // Desc returns the description of the SliceViewFlags value.
 func (i SliceViewFlags) Desc() string {
@@ -239,14 +235,10 @@ func (i *TreeViewFlags) SetStringOr(s string) error {
 }
 
 // Int64 returns the TreeViewFlags value as an int64.
-func (i TreeViewFlags) Int64() int64 {
-	return int64(i)
-}
+func (i TreeViewFlags) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the TreeViewFlags value from an int64.
-func (i *TreeViewFlags) SetInt64(in int64) {
-	*i = TreeViewFlags(in)
-}
+func (i *TreeViewFlags) SetInt64(in int64) { *i = TreeViewFlags(in) }
 
 // Desc returns the description of the TreeViewFlags value.
 func (i TreeViewFlags) Desc() string {
@@ -377,14 +369,10 @@ func (i *ValueFlags) SetStringOr(s string) error {
 }
 
 // Int64 returns the ValueFlags value as an int64.
-func (i ValueFlags) Int64() int64 {
-	return int64(i)
-}
+func (i ValueFlags) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the ValueFlags value from an int64.
-func (i *ValueFlags) SetInt64(in int64) {
-	*i = ValueFlags(in)
-}
+func (i *ValueFlags) SetInt64(in int64) { *i = ValueFlags(in) }
 
 // Desc returns the description of the ValueFlags value.
 func (i ValueFlags) Desc() string {
@@ -395,9 +383,7 @@ func (i ValueFlags) Desc() string {
 }
 
 // ValueFlagsValues returns all possible values for the type ValueFlags.
-func ValueFlagsValues() []ValueFlags {
-	return _ValueFlagsValues
-}
+func ValueFlagsValues() []ValueFlags { return _ValueFlagsValues }
 
 // Values returns all possible values for the type ValueFlags.
 func (i ValueFlags) Values() []enums.Enum {

@@ -43,14 +43,10 @@ func (i *Platforms) SetString(s string) error {
 }
 
 // Int64 returns the Platforms value as an int64.
-func (i Platforms) Int64() int64 {
-	return int64(i)
-}
+func (i Platforms) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Platforms value from an int64.
-func (i *Platforms) SetInt64(in int64) {
-	*i = Platforms(in)
-}
+func (i *Platforms) SetInt64(in int64) { *i = Platforms(in) }
 
 // Desc returns the description of the Platforms value.
 func (i Platforms) Desc() string {
@@ -61,9 +57,7 @@ func (i Platforms) Desc() string {
 }
 
 // PlatformsValues returns all possible values for the type Platforms.
-func PlatformsValues() []Platforms {
-	return _PlatformsValues
-}
+func PlatformsValues() []Platforms { return _PlatformsValues }
 
 // Values returns all possible values for the type Platforms.
 func (i Platforms) Values() []enums.Enum {
@@ -117,14 +111,10 @@ func (i *ScreenOrientation) SetString(s string) error {
 }
 
 // Int64 returns the ScreenOrientation value as an int64.
-func (i ScreenOrientation) Int64() int64 {
-	return int64(i)
-}
+func (i ScreenOrientation) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the ScreenOrientation value from an int64.
-func (i *ScreenOrientation) SetInt64(in int64) {
-	*i = ScreenOrientation(in)
-}
+func (i *ScreenOrientation) SetInt64(in int64) { *i = ScreenOrientation(in) }
 
 // Desc returns the description of the ScreenOrientation value.
 func (i ScreenOrientation) Desc() string {
@@ -135,9 +125,7 @@ func (i ScreenOrientation) Desc() string {
 }
 
 // ScreenOrientationValues returns all possible values for the type ScreenOrientation.
-func ScreenOrientationValues() []ScreenOrientation {
-	return _ScreenOrientationValues
-}
+func ScreenOrientationValues() []ScreenOrientation { return _ScreenOrientationValues }
 
 // Values returns all possible values for the type ScreenOrientation.
 func (i ScreenOrientation) Values() []enums.Enum {
@@ -223,14 +211,10 @@ func (i *WindowFlags) SetStringOr(s string) error {
 }
 
 // Int64 returns the WindowFlags value as an int64.
-func (i WindowFlags) Int64() int64 {
-	return int64(i)
-}
+func (i WindowFlags) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the WindowFlags value from an int64.
-func (i *WindowFlags) SetInt64(in int64) {
-	*i = WindowFlags(in)
-}
+func (i *WindowFlags) SetInt64(in int64) { *i = WindowFlags(in) }
 
 // Desc returns the description of the WindowFlags value.
 func (i WindowFlags) Desc() string {
@@ -241,9 +225,7 @@ func (i WindowFlags) Desc() string {
 }
 
 // WindowFlagsValues returns all possible values for the type WindowFlags.
-func WindowFlagsValues() []WindowFlags {
-	return _WindowFlagsValues
-}
+func WindowFlagsValues() []WindowFlags { return _WindowFlagsValues }
 
 // Values returns all possible values for the type WindowFlags.
 func (i WindowFlags) Values() []enums.Enum {

@@ -40,14 +40,10 @@ func (i *BlendTypes) SetString(s string) error {
 }
 
 // Int64 returns the BlendTypes value as an int64.
-func (i BlendTypes) Int64() int64 {
-	return int64(i)
-}
+func (i BlendTypes) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the BlendTypes value from an int64.
-func (i *BlendTypes) SetInt64(in int64) {
-	*i = BlendTypes(in)
-}
+func (i *BlendTypes) SetInt64(in int64) { *i = BlendTypes(in) }
 
 // Desc returns the description of the BlendTypes value.
 func (i BlendTypes) Desc() string {
@@ -58,9 +54,7 @@ func (i BlendTypes) Desc() string {
 }
 
 // BlendTypesValues returns all possible values for the type BlendTypes.
-func BlendTypesValues() []BlendTypes {
-	return _BlendTypesValues
-}
+func BlendTypesValues() []BlendTypes { return _BlendTypesValues }
 
 // Values returns all possible values for the type BlendTypes.
 func (i BlendTypes) Values() []enums.Enum {

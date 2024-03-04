@@ -75,14 +75,10 @@ func (i *DirFlags) SetStringOr(s string) error {
 }
 
 // Int64 returns the DirFlags value as an int64.
-func (i DirFlags) Int64() int64 {
-	return int64(i)
-}
+func (i DirFlags) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the DirFlags value from an int64.
-func (i *DirFlags) SetInt64(in int64) {
-	*i = DirFlags(in)
-}
+func (i *DirFlags) SetInt64(in int64) { *i = DirFlags(in) }
 
 // Desc returns the description of the DirFlags value.
 func (i DirFlags) Desc() string {
@@ -93,9 +89,7 @@ func (i DirFlags) Desc() string {
 }
 
 // DirFlagsValues returns all possible values for the type DirFlags.
-func DirFlagsValues() []DirFlags {
-	return _DirFlagsValues
-}
+func DirFlagsValues() []DirFlags { return _DirFlagsValues }
 
 // Values returns all possible values for the type DirFlags.
 func (i DirFlags) Values() []enums.Enum {
@@ -215,14 +209,10 @@ func (i *NodeFlags) SetStringOr(s string) error {
 }
 
 // Int64 returns the NodeFlags value as an int64.
-func (i NodeFlags) Int64() int64 {
-	return int64(i)
-}
+func (i NodeFlags) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the NodeFlags value from an int64.
-func (i *NodeFlags) SetInt64(in int64) {
-	*i = NodeFlags(in)
-}
+func (i *NodeFlags) SetInt64(in int64) { *i = NodeFlags(in) }
 
 // Desc returns the description of the NodeFlags value.
 func (i NodeFlags) Desc() string {
