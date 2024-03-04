@@ -73,16 +73,12 @@ func (i *{{.Name}}) SetString(s string) error {
 
 var Int64MethodTmpl = template.Must(template.New("Int64Method").Parse(
 	`// Int64 returns the {{.Name}} value as an int64.
-func (i {{.Name}}) Int64() int64 {
-	return int64(i)
-}
+func (i {{.Name}}) Int64() int64 { return int64(i) }
 `))
 
 var SetInt64MethodTmpl = template.Must(template.New("SetInt64Method").Parse(
 	`// SetInt64 sets the {{.Name}} value from an int64.
-func (i *{{.Name}}) SetInt64(in int64) {
-	*i = {{.Name}}(in)
-}
+func (i *{{.Name}}) SetInt64(in int64) { *i = {{.Name}}(in) }
 `))
 
 var DescMethodTmpl = template.Must(template.New("DescMethod").Parse(`// Desc returns the description of the {{.Name}} value.
@@ -97,16 +93,15 @@ func (i {{.Name}}) Desc() string {
 
 var ValuesGlobalTmpl = template.Must(template.New("ValuesGlobal").Parse(
 	`// {{.Name}}Values returns all possible values for the type {{.Name}}.
-func {{.Name}}Values() []{{.Name}} { {{if eq .Extends ""}}
-	return _{{.Name}}Values {{else}}
+func {{.Name}}Values() []{{.Name}} { {{if eq .Extends ""}} return _{{.Name}}Values } {{else}}
 	es := {{.Extends}}Values()
 	res := make([]{{.Name}}, len(es))
 	for i, e := range es {
 		res[i] = {{.Name}}(e)
 	}
 	res = append(res, _{{.Name}}Values...)
-	return res {{end}}
-}
+	return res
+} {{end}}
 `))
 
 var ValuesMethodTmpl = template.Must(template.New("ValuesMethod").Parse(

@@ -50,14 +50,10 @@ func (i *Fruits) SetString(s string) error {
 }
 
 // Int64 returns the Fruits value as an int64.
-func (i Fruits) Int64() int64 {
-	return int64(i)
-}
+func (i Fruits) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Fruits value from an int64.
-func (i *Fruits) SetInt64(in int64) {
-	*i = Fruits(in)
-}
+func (i *Fruits) SetInt64(in int64) { *i = Fruits(in) }
 
 // Desc returns the description of the Fruits value.
 func (i Fruits) Desc() string {
@@ -68,9 +64,7 @@ func (i Fruits) Desc() string {
 }
 
 // FruitsValues returns all possible values for the type Fruits.
-func FruitsValues() []Fruits {
-	return _FruitsValues
-}
+func FruitsValues() []Fruits { return _FruitsValues }
 
 // Values returns all possible values for the type Fruits.
 func (i Fruits) Values() []enums.Enum {
@@ -147,14 +141,10 @@ func (i *Foods) SetString(s string) error {
 }
 
 // Int64 returns the Foods value as an int64.
-func (i Foods) Int64() int64 {
-	return int64(i)
-}
+func (i Foods) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Foods value from an int64.
-func (i *Foods) SetInt64(in int64) {
-	*i = Foods(in)
-}
+func (i *Foods) SetInt64(in int64) { *i = Foods(in) }
 
 // Desc returns the description of the Foods value.
 func (i Foods) Desc() string {
@@ -258,14 +248,10 @@ func (i *Days) SetString(s string) error {
 }
 
 // Int64 returns the Days value as an int64.
-func (i Days) Int64() int64 {
-	return int64(i)
-}
+func (i Days) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Days value from an int64.
-func (i *Days) SetInt64(in int64) {
-	*i = Days(in)
-}
+func (i *Days) SetInt64(in int64) { *i = Days(in) }
 
 // Desc returns the description of the Days value.
 func (i Days) Desc() string {
@@ -276,9 +262,7 @@ func (i Days) Desc() string {
 }
 
 // DaysValues returns all possible values for the type Days.
-func DaysValues() []Days {
-	return _DaysValues
-}
+func DaysValues() []Days { return _DaysValues }
 
 // Values returns all possible values for the type Days.
 func (i Days) Values() []enums.Enum {
@@ -378,14 +362,10 @@ func (i *States) SetStringOr(s string) error {
 }
 
 // Int64 returns the States value as an int64.
-func (i States) Int64() int64 {
-	return int64(i)
-}
+func (i States) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the States value from an int64.
-func (i *States) SetInt64(in int64) {
-	*i = States(in)
-}
+func (i *States) SetInt64(in int64) { *i = States(in) }
 
 // Desc returns the description of the States value.
 func (i States) Desc() string {
@@ -396,9 +376,7 @@ func (i States) Desc() string {
 }
 
 // StatesValues returns all possible values for the type States.
-func StatesValues() []States {
-	return _StatesValues
-}
+func StatesValues() []States { return _StatesValues }
 
 // Values returns all possible values for the type States.
 func (i States) Values() []enums.Enum {
@@ -535,14 +513,10 @@ func (i *Languages) SetStringOr(s string) error {
 }
 
 // Int64 returns the Languages value as an int64.
-func (i Languages) Int64() int64 {
-	return int64(i)
-}
+func (i Languages) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the Languages value from an int64.
-func (i *Languages) SetInt64(in int64) {
-	*i = Languages(in)
-}
+func (i *Languages) SetInt64(in int64) { *i = Languages(in) }
 
 // Desc returns the description of the Languages value.
 func (i Languages) Desc() string {
@@ -553,9 +527,7 @@ func (i Languages) Desc() string {
 }
 
 // LanguagesValues returns all possible values for the type Languages.
-func LanguagesValues() []Languages {
-	return _LanguagesValues
-}
+func LanguagesValues() []Languages { return _LanguagesValues }
 
 // Values returns all possible values for the type Languages.
 func (i Languages) Values() []enums.Enum {
@@ -692,14 +664,10 @@ func (i *MoreLanguages) SetStringOr(s string) error {
 }
 
 // Int64 returns the MoreLanguages value as an int64.
-func (i MoreLanguages) Int64() int64 {
-	return int64(i)
-}
+func (i MoreLanguages) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the MoreLanguages value from an int64.
-func (i *MoreLanguages) SetInt64(in int64) {
-	*i = MoreLanguages(in)
-}
+func (i *MoreLanguages) SetInt64(in int64) { *i = MoreLanguages(in) }
 
 // Desc returns the description of the MoreLanguages value.
 func (i MoreLanguages) Desc() string {
