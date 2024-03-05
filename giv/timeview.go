@@ -529,9 +529,8 @@ func (vv *DurationValue) ConfigWidget(w gi.Widget) {
 
 	sp := gi.NewSpinner(ly, "value").SetTooltip("The value of time").SetStep(1).SetPageStep(10)
 	sp.OnChange(func(e events.Event) {
-		vv.SetValue(sp.Value * float32(durationUnitsMap[ch.CurrentItem.Label]))
+		vv.SetValue(sp.Value * float32(durationUnitsMap[ch.CurrentItem.Value.(string)]))
 	})
-	sp.Config()
 
 	units := make([]gi.ChooserItem, len(durationUnits))
 	for i, u := range durationUnits {
@@ -543,7 +542,7 @@ func (vv *DurationValue) ConfigWidget(w gi.Widget) {
 		// we update the value to fit the unit
 		npv := laser.NonPtrValue(vv.Value)
 		dur := npv.Interface().(time.Duration)
-		sp.SetValue(float32(dur) / float32(durationUnitsMap[ch.CurrentItem.Label]))
+		sp.SetValue(float32(dur) / float32(durationUnitsMap[ch.CurrentItem.Value.(string)]))
 	})
 
 	vv.UpdateWidget()
