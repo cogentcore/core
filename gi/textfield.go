@@ -1526,7 +1526,7 @@ func (tf *TextField) SetCursorFromPixel(pt image.Point, selMode events.SelectMod
 func (tf *TextField) HandleEvents() {
 	tf.HandleKeyEvents()
 	tf.HandleSelectToggle()
-	tf.OnChange(func(e events.Event) {
+	tf.OnFirst(events.Change, func(e events.Event) {
 		tf.Validate()
 	})
 	tf.On(events.MouseDown, func(e events.Event) {
