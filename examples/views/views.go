@@ -101,7 +101,7 @@ type Struct struct { //gti:add
 
 	Vec mat32.Vec2
 
-	Things []*TableStruct
+	Things []TableStruct
 
 	Stuff []float32
 
@@ -156,7 +156,7 @@ func main() {
 	stru.Cond2.FloatField = 44.4
 	stru.Cond2.StrField = "fi"
 	// stru.Cond2.File = gi.Filename("views.go")
-	stru.Things = make([]*TableStruct, 2)
+	stru.Things = make([]TableStruct, 2)
 	stru.Stuff = make([]float32, 3)
 
 	b := gi.NewBody("Cogent Core Views Demo")
