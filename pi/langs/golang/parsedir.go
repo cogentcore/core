@@ -356,10 +356,11 @@ func (gl *GoLang) AddImportsToExts(fss *pi.FileStates, pfs *pi.FileState, pkg *s
 		if im.Name == "C" {
 			continue
 		}
-		pfs.WaitGp.Add(1)
-		go gl.AddImportToExts(pfs, im.Name, true) // lock
+		// pfs.WaitGp.Add(1) // note: already under an outer-loop go routine
+		// with *same* waitgp
+		gl.AddImportToExts(pfs, im.Name, false) // no lock
 	}
-	pfs.WaitGp.Wait() // each goroutine will do done when done..
+	// pfs.WaitGp.Wait() // each goroutine will do done when done..
 	// now all the info is in place: parse it
 	if TraceTypes {
 		fmt.Printf("\n#####################\nResolving Types now for: %v\n", pfs.Src.Filename)
