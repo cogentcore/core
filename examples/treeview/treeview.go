@@ -5,7 +5,6 @@
 package main
 
 import (
-	"fmt"
 	"math/rand"
 
 	"cogentcore.org/core/events"
@@ -60,8 +59,7 @@ func main() {
 	// depth := 10 // big tree
 	MakeTree(tv, 0, depth, 5)
 
-	nleaves := tv.RootSetViewIdx()
-	fmt.Println("N leaves:", nleaves)
+	tv.RootSetViewIdx()
 
 	sv := giv.NewStructView(svfr)
 	sv.Style(func(s *styles.Style) {

@@ -11,6 +11,8 @@ import (
 	"strings"
 	"unicode"
 
+	"cogentcore.org/core/abilities"
+	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/gti"
@@ -19,6 +21,7 @@ import (
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/strcase"
+	"cogentcore.org/core/styles"
 )
 
 // CallFunc calls the given function in the context of the given widget,
@@ -122,6 +125,12 @@ func NewFuncButton(par ki.Ki, fun any) *FuncButton {
 func (fb *FuncButton) OnInit() {
 	fb.Button.OnInit()
 	fb.WarnUnadded = true
+	fb.Style(func(s *styles.Style) {
+		if fb.IsReadOnly() {
+			s.SetAbilities(false, abilities.Hoverable, abilities.Clickable, abilities.Activatable)
+			s.Cursor = cursors.None
+		}
+	})
 	fb.OnClick(func(e events.Event) {
 		if !fb.IsReadOnly() {
 			fb.CallFunc()
