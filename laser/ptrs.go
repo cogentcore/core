@@ -99,6 +99,9 @@ func OnePtrValue(v reflect.Value) reflect.Value {
 // actual underlying type behind the interface.
 func OnePtrUnderlyingValue(v reflect.Value) reflect.Value {
 	npv := NonPtrValue(v)
+	if !npv.IsValid() {
+		return v
+	}
 	if npv.IsZero() {
 		return OnePtrValue(npv)
 	}

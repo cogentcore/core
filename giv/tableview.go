@@ -416,7 +416,11 @@ func (tv *TableView) ConfigRows() {
 					mxw := 0
 					for rw := 0; rw < tv.SliceSize; rw++ {
 						sval := laser.OnePtrUnderlyingValue(tv.SliceNPVal.Index(rw))
-						fval := sval.Elem().FieldByIndex(field.Index)
+						elem := sval.Elem()
+						if !elem.IsValid() {
+							continue
+						}
+						fval := elem.FieldByIndex(field.Index)
 						str := fval.String()
 						mxw = max(mxw, len(str))
 					}
