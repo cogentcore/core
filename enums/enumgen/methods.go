@@ -40,13 +40,8 @@ var StringMethodMapTmpl = template.Must(template.New("StringMethodMap").Parse(
 	{{- else}}
 	// String returns the string representation of this {{.Name}} value.
 	{{- end}}
-func (i {{.Name}}) {{if .IsBitFlag}} BitIndexString {{else}} String {{end}} () string {
-	if str, ok := _{{.Name}}Map[i]; ok {
-		return str
-	} {{if eq .Extends ""}}
-	return strconv.FormatInt(int64(i), 10) {{else}}
-	return {{.Extends}}(i).{{if .IsBitFlag}} BitIndexString {{else}} String {{end}}() {{end}}
-}
+func (i {{.Name}}) {{if .IsBitFlag}} BitIndexString {{else}} String {{end}} () string { return enums.
+	{{- if eq .Extends ""}}String {{else -}} {{if .IsBitFlag -}} BitIndexStringExtended {{else -}} StringExtended {{- end}}[{{.Name}}, {{.Extends}}]{{- end}}(i, _{{.Name}}Map) }
 `))
 
 var NConstantTmpl = template.Must(template.New("StringNConstant").Parse(

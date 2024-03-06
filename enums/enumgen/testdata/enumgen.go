@@ -28,12 +28,7 @@ var _FruitsDescMap = map[Fruits]string{0: ``, 1: ``, 2: ``, 3: ``, 4: ``, 5: ``,
 var _FruitsMap = map[Fruits]string{0: `Apple`, 1: `Orange`, 2: `Peach`, 3: `Strawberry`, 4: `Blackberry`, 5: `Blueberry`, 6: `Apricot`}
 
 // String returns the string representation of this Fruits value.
-func (i Fruits) String() string {
-	if str, ok := _FruitsMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+func (i Fruits) String() string { return enums.String(i, _FruitsMap) }
 
 // SetString sets the Fruits value from its string representation,
 // and returns an error if the string is invalid.
@@ -123,12 +118,7 @@ var _FoodsDescMap = map[Foods]string{7: ``, 8: ``, 9: ``, 10: ``}
 var _FoodsMap = map[Foods]string{7: `Bread`, 8: `Lettuce`, 9: `Cheese`, 10: `Meat`}
 
 // String returns the string representation of this Foods value.
-func (i Foods) String() string {
-	if str, ok := _FoodsMap[i]; ok {
-		return str
-	}
-	return Fruits(i).String()
-}
+func (i Foods) String() string { return enums.StringExtended[Foods, Fruits](i, _FoodsMap) }
 
 // SetString sets the Foods value from its string representation,
 // and returns an error if the string is invalid.
@@ -230,12 +220,7 @@ var _DaysDescMap = map[Days]string{-11: `Saturday is the seventh day of the week
 var _DaysMap = map[Days]string{-11: `DAY_SATURDAY`, -9: `DAY_FRIDAY`, -7: `DAY_THURSDAY`, -5: `DAY_WEDNESDAY`, -3: `DAY_TUESDAY`, -1: `DAY_MONDAY`, 1: `DAY_SUNDAY`}
 
 // String returns the string representation of this Days value.
-func (i Days) String() string {
-	if str, ok := _DaysMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+func (i Days) String() string { return enums.String(i, _DaysMap) }
 
 // SetString sets the Days value from its string representation,
 // and returns an error if the string is invalid.
@@ -330,12 +315,7 @@ func (i States) String() string {
 // BitIndexString returns the string representation of this States value
 // if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
-func (i States) BitIndexString() string {
-	if str, ok := _StatesMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+func (i States) BitIndexString() string { return enums.String(i, _StatesMap) }
 
 // SetString sets the States value from its string representation,
 // and returns an error if the string is invalid.
@@ -481,12 +461,7 @@ func (i Languages) String() string {
 // BitIndexString returns the string representation of this Languages value
 // if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
-func (i Languages) BitIndexString() string {
-	if str, ok := _LanguagesMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+func (i Languages) BitIndexString() string { return enums.String(i, _LanguagesMap) }
 
 // SetString sets the Languages value from its string representation,
 // and returns an error if the string is invalid.
@@ -630,10 +605,7 @@ func (i MoreLanguages) String() string {
 // if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
 func (i MoreLanguages) BitIndexString() string {
-	if str, ok := _MoreLanguagesMap[i]; ok {
-		return str
-	}
-	return Languages(i).BitIndexString()
+	return enums.BitIndexStringExtended[MoreLanguages, Languages](i, _MoreLanguagesMap)
 }
 
 // SetString sets the MoreLanguages value from its string representation,
