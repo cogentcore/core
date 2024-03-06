@@ -4,7 +4,7 @@
 
 // Copied and only lightly modified from:
 // https://github.com/nickng/bibtex
-// Licenced under an Apache-2.0 licence
+// Licensed under an Apache-2.0 license
 // and presumably Copyright (c) 2017 by Nick Ng
 
 //go:generate goyacc -p bibtex -o bibtex.y.go bibtex.y
