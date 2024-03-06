@@ -198,13 +198,15 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 		st, ok := ts.Type.(*ast.StructType)
 		if ok && st.Fields != nil {
 			emblist := &ast.FieldList{}
-			delOff := 0 // the offset caused by deleting elements
-			for i, field := range st.Fields.List {
+			delOff := 0
+			for i := range len(st.Fields.List) {
+				i -= delOff
+				field := st.Fields.List[i]
 				// if we have no names, we are embed, so add to embeds and remove from fields
 				if len(field.Names) == 0 {
 					emblist.List = append(emblist.List, field)
-					st.Fields.List = slices.Delete(st.Fields.List, i+delOff, i+1+delOff) // we need to add delOff to correctly handle situations where we delete multiple times and our indices become inaccurate
-					delOff--                                                             // we have deleted so we need to update offset
+					st.Fields.List = slices.Delete(st.Fields.List, i, i+1)
+					delOff++
 				}
 			}
 
