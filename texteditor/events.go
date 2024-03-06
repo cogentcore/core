@@ -566,7 +566,7 @@ func (ed *Editor) OpenLinkAt(pos lex.Pos) (*paint.TextLink, bool) {
 
 // HandleMouse handles mouse events.Event
 func (ed *Editor) HandleMouse() {
-	ed.On(events.MouseUp, func(e events.Event) { // note: usual is Click..
+	ed.On(events.MouseDown, func(e events.Event) { // note: usual is Click..
 		if !ed.StateIs(states.Focused) {
 			ed.SetFocusEvent()
 		}
@@ -575,19 +575,25 @@ func (ed *Editor) HandleMouse() {
 		switch e.MouseButton() {
 		case events.Left:
 			ed.SetState(true, states.Focused)
-			if _, got := ed.OpenLinkAt(newPos); got {
-			} else {
-				ed.SetCursorFromMouse(pt, newPos, e.SelectMode())
-				ed.SavePosHistory(ed.CursorPos)
-			}
+			ed.SetCursorFromMouse(pt, newPos, e.SelectMode())
+			ed.SavePosHistory(ed.CursorPos)
 		case events.Middle:
 			if !ed.IsReadOnly() {
 				ed.SetCursorFromMouse(pt, newPos, e.SelectMode())
 				ed.SavePosHistory(ed.CursorPos)
+			}
+		}
+	})
+	ed.On(events.MouseUp, func(e events.Event) { // note: usual is Click..
+		pt := ed.PointToRelPos(e.Pos())
+		newPos := ed.PixelToCursor(pt)
+		switch e.MouseButton() {
+		case events.Left:
+			ed.OpenLinkAt(newPos)
+		case events.Middle:
+			if !ed.IsReadOnly() {
 				ed.Paste()
 			}
-			// case events.Right:
-			// 	ed.SetCursorFromMouse(pt, newPos, e.SelectMode())
 		}
 	})
 	ed.OnDoubleClick(func(e events.Event) {
