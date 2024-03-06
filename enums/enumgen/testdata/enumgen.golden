@@ -319,10 +319,7 @@ func (i States) BitIndexString() string { return enums.String(i, _StatesMap) }
 
 // SetString sets the States value from its string representation,
 // and returns an error if the string is invalid.
-func (i *States) SetString(s string) error {
-	*i = 0
-	return i.SetStringOr(s)
-}
+func (i *States) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
 
 // SetStringOr sets the States value from its string representation
 // while preserving any bit flags already set, and returns an
@@ -465,10 +462,7 @@ func (i Languages) BitIndexString() string { return enums.String(i, _LanguagesMa
 
 // SetString sets the Languages value from its string representation,
 // and returns an error if the string is invalid.
-func (i *Languages) SetString(s string) error {
-	*i = 0
-	return i.SetStringOr(s)
-}
+func (i *Languages) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
 
 // SetStringOr sets the Languages value from its string representation
 // while preserving any bit flags already set, and returns an
@@ -610,10 +604,7 @@ func (i MoreLanguages) BitIndexString() string {
 
 // SetString sets the MoreLanguages value from its string representation,
 // and returns an error if the string is invalid.
-func (i *MoreLanguages) SetString(s string) error {
-	*i = 0
-	return i.SetStringOr(s)
-}
+func (i *MoreLanguages) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
 
 // SetStringOr sets the MoreLanguages value from its string representation
 // while preserving any bit flags already set, and returns an

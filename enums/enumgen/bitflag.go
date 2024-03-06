@@ -77,10 +77,7 @@ func (i {{.Name}}) String() string {
 var SetStringMethodBitFlagTmpl = template.Must(template.New("SetStringMethodBitFlag").Parse(
 	`// SetString sets the {{.Name}} value from its string representation,
 // and returns an error if the string is invalid.
-func (i *{{.Name}}) SetString(s string) error {
-	*i = 0
-	return i.SetStringOr(s)
-}
+func (i *{{.Name}}) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
 `))
 
 var SetStringOrMethodBitFlagTmpl = template.Must(template.New("SetStringOrMethodBitFlag").Parse(
