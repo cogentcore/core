@@ -101,8 +101,8 @@ func BitFlagStringExtended[T, E BitFlagConstraint](i T, values []T, extendedValu
 
 // SetString sets the given enum value from its string representation, the map from
 // enum names to values, and the name of the enum type, which is used for the error message.
-func SetString[T EnumConstraint](i *T, s string, nameToValueMap map[string]T, typeName string) error {
-	if val, ok := nameToValueMap[s]; ok {
+func SetString[T EnumConstraint](i *T, s string, valueMap map[string]T, typeName string) error {
+	if val, ok := valueMap[s]; ok {
 		*i = val
 		return nil
 	}
@@ -112,12 +112,12 @@ func SetString[T EnumConstraint](i *T, s string, nameToValueMap map[string]T, ty
 // SetStringLower sets the given enum value from its string representation, the map from
 // enum names to values, and the name of the enum type, which is used for the error message.
 // It also tries the lowercase version of the given string if the original version fails.
-func SetStringLower[T EnumConstraint](i *T, s string, nameToValueMap map[string]T, typeName string) error {
-	if val, ok := nameToValueMap[s]; ok {
+func SetStringLower[T EnumConstraint](i *T, s string, valueMap map[string]T, typeName string) error {
+	if val, ok := valueMap[s]; ok {
 		*i = val
 		return nil
 	}
-	if val, ok := nameToValueMap[strings.ToLower(s)]; ok {
+	if val, ok := valueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -127,8 +127,8 @@ func SetStringLower[T EnumConstraint](i *T, s string, nameToValueMap map[string]
 // SetStringExtended sets the given enum value from its string representation and the map from
 // enum names to values, with the enum type extending the other given enum type. It also takes
 // the enum value in terms of the extended enum type (ie).
-func SetStringExtended[T EnumConstraint, E EnumSetter](i *T, ie E, s string, nameToValueMap map[string]T) error {
-	if val, ok := nameToValueMap[s]; ok {
+func SetStringExtended[T EnumConstraint, E EnumSetter](i *T, ie E, s string, valueMap map[string]T) error {
+	if val, ok := valueMap[s]; ok {
 		*i = val
 		return nil
 	}
@@ -139,12 +139,12 @@ func SetStringExtended[T EnumConstraint, E EnumSetter](i *T, ie E, s string, nam
 // enum names to values, with the enum type extending the other given enum type. It also takes
 // the enum value in terms of the extended enum type (ie). It also tries the lowercase version
 // of the given string if the original version fails.
-func SetStringLowerExtended[T EnumConstraint, E EnumSetter](i *T, ie E, s string, nameToValueMap map[string]T) error {
-	if val, ok := nameToValueMap[s]; ok {
+func SetStringLowerExtended[T EnumConstraint, E EnumSetter](i *T, ie E, s string, valueMap map[string]T) error {
+	if val, ok := valueMap[s]; ok {
 		*i = val
 		return nil
 	}
-	if val, ok := nameToValueMap[strings.ToLower(s)]; ok {
+	if val, ok := valueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}

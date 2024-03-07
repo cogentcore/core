@@ -66,9 +66,9 @@ var SetStringOrMethodBitFlagTmpl = template.Must(template.New("SetStringOrMethod
 func (i *{{.Name}}) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
-		if val, ok := _{{.Name}}NameToValueMap[flg]; ok {
+		if val, ok := _{{.Name}}ValueMap[flg]; ok {
 			i.SetFlag(true, &val)
-		{{if .Config.AcceptLower}} } else if val, ok := _{{.Name}}NameToValueMap[strings.ToLower(flg)]; ok {
+		{{if .Config.AcceptLower}} } else if val, ok := _{{.Name}}ValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		{{end}} } else if flg == "" {
 			continue

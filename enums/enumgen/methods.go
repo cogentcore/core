@@ -53,17 +53,8 @@ var SetStringMethodTmpl = template.Must(template.New("SetStringMethod").Parse(
 	`// SetString sets the {{.Name}} value from its string representation,
 // and returns an error if the string is invalid.
 func (i *{{.Name}}) SetString(s string) error {
-	if val, ok := _{{.Name}}NameToValueMap[s]; ok {
-		*i = val
-		return nil
-	} {{if .Config.AcceptLower}}
-	if val, ok := _{{.Name}}NameToValueMap[strings.ToLower(s)]; ok {
-		*i = val
-		return nil
-	} {{end}} {{if eq .Extends ""}}
-	return errors.New(s+" is not a valid value for type {{.Name}}") {{else}}
-	return (*{{.Extends}})(i).SetString(s) {{end}}
-}
+	{{- if eq .Extends ""}} return enums.SetString{{if .Config.AcceptLower}}Lower{{end}}(i, s, _{{.Name}}ValueMap, "{{.Name}}")
+	{{- else}} return enums.SetString{{if .Config.AcceptLower}}Lower{{end}}Extended(i, (*{{.Extends}})(i), s, _{{.Name}}ValueMap) {{end}} }
 `))
 
 var Int64MethodTmpl = template.Must(template.New("Int64Method").Parse(
@@ -175,7 +166,7 @@ func (g *Generator) BuildBasicMethods(values []Value, typ *Type) {
 
 // PrintValueMap prints the map between name and value
 func (g *Generator) PrintValueMap(values []Value, typ *Type) {
-	g.Printf("\nvar _%sNameToValueMap = map[string]%s{", typ.Name, typ.Name)
+	g.Printf("\nvar _%sValueMap = map[string]%s{", typ.Name, typ.Name)
 	for _, value := range values {
 		g.Printf("`%s`: %s,", value.Name, &value)
 		if typ.Config.AcceptLower {

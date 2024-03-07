@@ -62,57 +62,57 @@ func TestString(t *testing.T) {
 }
 
 func TestSetString(t *testing.T) {
-	nameToValueMap := map[string]enum{"apple": 5}
+	valueMap := map[string]enum{"apple": 5}
 
 	i := enum(0)
-	assert.NoError(t, SetString(&i, "apple", nameToValueMap, "Fruits"))
+	assert.NoError(t, SetString(&i, "apple", valueMap, "Fruits"))
 	assert.Equal(t, enum(5), i)
 	i = enum(4)
-	err := SetString(&i, "Apple", nameToValueMap, "Fruits")
+	err := SetString(&i, "Apple", valueMap, "Fruits")
 	if assert.Error(t, err) {
 		assert.Equal(t, "Apple is not a valid value for type Fruits", err.Error())
 	}
 	assert.Equal(t, enum(4), i)
-	err = SetString(&i, "Orange", nameToValueMap, "Fruits")
+	err = SetString(&i, "Orange", valueMap, "Fruits")
 	if assert.Error(t, err) {
 		assert.Equal(t, "Orange is not a valid value for type Fruits", err.Error())
 	}
 	assert.Equal(t, enum(4), i)
 
-	assert.NoError(t, SetStringLower(&i, "apple", nameToValueMap, "Fruits"))
+	assert.NoError(t, SetStringLower(&i, "apple", valueMap, "Fruits"))
 	assert.Equal(t, enum(5), i)
 	i = enum(4)
-	assert.NoError(t, SetStringLower(&i, "Apple", nameToValueMap, "Fruits"))
+	assert.NoError(t, SetStringLower(&i, "Apple", valueMap, "Fruits"))
 	assert.Equal(t, enum(5), i)
 	i = enum(4)
-	err = SetStringLower(&i, "Orange", nameToValueMap, "Fruits")
+	err = SetStringLower(&i, "Orange", valueMap, "Fruits")
 	if assert.Error(t, err) {
 		assert.Equal(t, "Orange is not a valid value for type Fruits", err.Error())
 	}
 	assert.Equal(t, enum(4), i)
 
-	assert.NoError(t, SetStringExtended(&i, &i, "apple", nameToValueMap))
+	assert.NoError(t, SetStringExtended(&i, &i, "apple", valueMap))
 	assert.Equal(t, enum(5), i)
 	i = enum(4)
-	assert.NoError(t, SetStringExtended(&i, &i, "Orange", nameToValueMap))
+	assert.NoError(t, SetStringExtended(&i, &i, "Orange", valueMap))
 	assert.Equal(t, enum(7), i)
 	i = enum(4)
-	err = SetStringExtended(&i, &i, "Apple", nameToValueMap)
+	err = SetStringExtended(&i, &i, "Apple", valueMap)
 	if assert.Error(t, err) {
 		assert.Equal(t, "invalid", err.Error())
 	}
 	assert.Equal(t, enum(4), i)
 
-	assert.NoError(t, SetStringLowerExtended(&i, &i, "apple", nameToValueMap))
+	assert.NoError(t, SetStringLowerExtended(&i, &i, "apple", valueMap))
 	assert.Equal(t, enum(5), i)
 	i = enum(4)
-	assert.NoError(t, SetStringLowerExtended(&i, &i, "Apple", nameToValueMap))
+	assert.NoError(t, SetStringLowerExtended(&i, &i, "Apple", valueMap))
 	assert.Equal(t, enum(5), i)
 	i = enum(4)
-	assert.NoError(t, SetStringLowerExtended(&i, &i, "Orange", nameToValueMap))
+	assert.NoError(t, SetStringLowerExtended(&i, &i, "Orange", valueMap))
 	assert.Equal(t, enum(7), i)
 	i = enum(4)
-	err = SetStringLowerExtended(&i, &i, "Strawberry", nameToValueMap)
+	err = SetStringLowerExtended(&i, &i, "Strawberry", valueMap)
 	if assert.Error(t, err) {
 		assert.Equal(t, "invalid", err.Error())
 	}
