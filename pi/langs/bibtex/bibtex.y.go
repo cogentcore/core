@@ -91,7 +91,6 @@ func Parse(r io.Reader) (*BibTex, error) {
 	}
 }
 
-//line yacctab:1
 var bibtexExca = [...]int{
 	-1, 1,
 	1, -1,
@@ -173,8 +172,6 @@ var bibtexErrorMessages = [...]struct {
 	token int
 	msg   string
 }{}
-
-//line yaccpar:1
 
 /*	parser for yacc output	*/
 
