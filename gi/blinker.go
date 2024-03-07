@@ -7,8 +7,6 @@ package gi
 import (
 	"sync"
 	"time"
-
-	"cogentcore.org/core/ki"
 )
 
 // Blinker manages the logistics of blinking things, such as cursors
@@ -71,7 +69,7 @@ func (bl *Blinker) BlinkLoop() {
 			return
 		}
 		bl.Mu.Lock()
-		if bl.Widget == nil || bl.Widget.This() == nil || bl.Widget.Is(ki.Deleted) {
+		if bl.Widget == nil || bl.Widget.This() == nil {
 			bl.Mu.Unlock()
 			continue
 		}

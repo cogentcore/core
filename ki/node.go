@@ -86,7 +86,7 @@ func (n *Node) String() string {
 // (e.g., in reflect calls).  Returns nil if node is nil,
 // has been destroyed, or is improperly constructed.
 func (n *Node) This() Ki {
-	if n == nil || n.Is(Destroyed) {
+	if n == nil {
 		return nil
 	}
 	return n.Ths
@@ -572,14 +572,6 @@ func (n *Node) DeleteChildAtIndex(idx int) bool {
 		return false
 	}
 	updt := n.This().UpdateStart()
-	if child.Parent() == n.This() {
-		// only deleting if we are still parent -- change parent first to
-		// signal move delete is always sent live to affected node without
-		// update blocking note: children of child etc will not send a signal
-		// at this point -- only later at destroy -- up to this parent to
-		// manage all that
-		DeleteFromParent(child)
-	}
 	n.Kids.DeleteAtIndex(idx)
 	UpdateReset(child) // it won't get the UpdateEnd from us anymore -- init fresh in any case
 	child.Destroy()
@@ -619,7 +611,7 @@ func (n *Node) DeleteChildren() {
 		if kid == nil {
 			continue
 		}
-		kid.SetFlag(true, Deleted)
+		kid.SetFlag(true)
 		UpdateReset(kid)
 		kid.Destroy()
 	}
@@ -638,14 +630,11 @@ func (n *Node) Delete() {
 // Destroy recursively deletes and destroys all children and
 // their children's children, etc.
 func (n *Node) Destroy() {
-	// fmt.Printf("Destroying: %v %T %p Kids: %v\n", n.Nm, n.This(), n.This(), len(n.Kids))
 	if n.This() == nil { // already dead!
 		return
 	}
 	n.DeleteChildren() // delete and destroy all my children
-	n.SetFlag(true, Destroyed)
-	n.Ths = nil // last gasp: lose our own sense of self..
-	// note: above is thread-safe because This() accessor checks Destroyed
+	n.Ths = nil        // last gasp: lose our own sense of self..
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -660,13 +649,6 @@ func (n *Node) Is(f enums.BitFlag) bool {
 // using atomic, safe for concurrent access
 func (n *Node) SetFlag(on bool, f ...enums.BitFlag) {
 	n.Flags.SetFlag(on, f...)
-}
-
-// ClearUpdateFlags resets all structure update related flags:
-// ChildAdded, ChildDeleted, ChildrenDeleted, Deleted
-// automatically called on StartUpdate to reset any old state.
-func (n *Node) ClearUpdateFlags() {
-	n.SetFlag(false, Deleted)
 }
 
 // FlagType is the base implementation of [Ki.FlagType] that returns a
@@ -831,7 +813,7 @@ func (tm TravMap) Get(k Ki) int {
 // aborted, but other branches continue -- i.e., if fun on current node
 // returns false, children are not processed further.
 func (n *Node) WalkPre(fun func(Ki) bool) {
-	if n.This() == nil || n.Is(Deleted) {
+	if n.This() == nil {
 		return
 	}
 	tm := TravMap{} // not significantly faster to pre-allocate larger size
@@ -840,12 +822,12 @@ func (n *Node) WalkPre(fun func(Ki) bool) {
 	tm.Start(cur)
 outer:
 	for {
-		if cur.This() != nil && !cur.Is(Deleted) && fun(cur) { // false return means stop
+		if cur.This() != nil && fun(cur) { // false return means stop
 			n.This().WalkPreNode(fun)
 			if cur.HasChildren() {
 				tm.Set(cur, 0) // 0 for no fields
 				nxt := cur.Child(0)
-				if nxt != nil && nxt.This() != nil && !nxt.Is(Deleted) {
+				if nxt != nil && nxt.This() != nil {
 					cur = nxt.This()
 					tm.Start(cur)
 					continue
@@ -861,7 +843,7 @@ outer:
 				curChild++
 				tm.Set(cur, curChild)
 				nxt := cur.Child(curChild)
-				if nxt != nil && nxt.This() != nil && !nxt.Is(Deleted) {
+				if nxt != nil && nxt.This() != nil {
 					cur = nxt.This()
 					tm.Start(cur)
 					continue outer
@@ -899,7 +881,7 @@ func (n *Node) WalkPreNode(fun func(Ki) bool) {
 // Because WalkPreLevel is not used within Ki itself, it does not have its
 // own version of WalkPreNode -- that can be handled within the closure.
 func (n *Node) WalkPreLevel(fun func(k Ki, level int) bool) {
-	if n.This() == nil || n.Is(Deleted) {
+	if n.This() == nil {
 		return
 	}
 	level := 0
@@ -909,12 +891,12 @@ func (n *Node) WalkPreLevel(fun func(k Ki, level int) bool) {
 	tm.Start(cur)
 outer:
 	for {
-		if cur.This() != nil && !cur.Is(Deleted) && fun(cur, level) { // false return means stop
+		if cur.This() != nil && fun(cur, level) { // false return means stop
 			level++ // this is the descent branch
 			if cur.HasChildren() {
 				tm.Set(cur, 0) // 0 for no fields
 				nxt := cur.Child(0)
-				if nxt != nil && nxt.This() != nil && !nxt.Is(Deleted) {
+				if nxt != nil && nxt.This() != nil {
 					cur = nxt.This()
 					tm.Start(cur)
 					continue
@@ -931,7 +913,7 @@ outer:
 				curChild++
 				tm.Set(cur, curChild)
 				nxt := cur.Child(curChild)
-				if nxt != nil && nxt.This() != nil && !nxt.Is(Deleted) {
+				if nxt != nil && nxt.This() != nil {
 					cur = nxt.This()
 					tm.Start(cur)
 					continue outer
@@ -964,7 +946,7 @@ outer:
 // Function calls are sequential all in current go routine.
 // The level var tracks overall depth in the tree.
 func (n *Node) WalkPost(doChildTestFunc func(Ki) bool, fun func(Ki) bool) {
-	if n.This() == nil || n.Is(Deleted) {
+	if n.This() == nil {
 		return
 	}
 	tm := TravMap{} // not significantly faster to pre-allocate larger size
@@ -973,11 +955,11 @@ func (n *Node) WalkPost(doChildTestFunc func(Ki) bool, fun func(Ki) bool) {
 	tm.Start(cur)
 outer:
 	for {
-		if cur.This() != nil && !cur.Is(Deleted) && doChildTestFunc(cur) { // false return means stop
+		if cur.This() != nil && doChildTestFunc(cur) { // false return means stop
 			if cur.HasChildren() {
 				tm.Set(cur, 0) // 0 for no fields
 				nxt := cur.Child(0)
-				if nxt != nil && nxt.This() != nil && !nxt.Is(Deleted) {
+				if nxt != nil && nxt.This() != nil {
 					cur = nxt.This()
 					tm.Set(cur, -1)
 					continue
@@ -993,7 +975,7 @@ outer:
 				curChild++
 				tm.Set(cur, curChild)
 				nxt := cur.Child(curChild)
-				if nxt != nil && nxt.This() != nil && !nxt.Is(Deleted) {
+				if nxt != nil && nxt.This() != nil {
 					cur = nxt.This()
 					tm.Start(cur)
 					continue outer
@@ -1039,9 +1021,9 @@ func (n *Node) WalkBreadth(fun func(k Ki) bool) {
 		depth := Depth(cur)
 		queue = queue[1:]
 
-		if cur.This() != nil && !cur.Is(Deleted) && fun(cur) { // false return means don't proceed
+		if cur.This() != nil && fun(cur) { // false return means don't proceed
 			for _, k := range *cur.Children() {
-				if k != nil && k.This() != nil && !k.Is(Deleted) {
+				if k != nil && k.This() != nil {
 					SetDepth(k, depth+1)
 					queue = append(queue, k)
 				}
@@ -1075,13 +1057,12 @@ func (n *Node) WalkBreadth(fun func(k Ki) bool) {
 //	defer n.UpdateEnd(updt)
 //	... code
 func (n *Node) UpdateStart() bool {
-	if n.Is(Updating) || n.Is(Destroyed) {
+	if n.Is(Updating) {
 		return false
 	}
 	// pr := prof.Start("ki.Node.UpdateStart")
 	n.WalkPre(func(k Ki) bool {
 		if !k.Is(Updating) {
-			k.ClearUpdateFlags()
 			k.SetFlag(true, Updating)
 			return Continue
 		}
@@ -1101,7 +1082,7 @@ func (n *Node) UpdateEnd(updt bool) {
 	if !updt {
 		return
 	}
-	if n.This() == nil || n.Is(Destroyed) || n.Is(Deleted) {
+	if n.This() == nil {
 		return
 	}
 	n.WalkPre(func(k Ki) bool {

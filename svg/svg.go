@@ -181,7 +181,7 @@ func (sv *SVG) Style() {
 	// set the Defs flags
 	sv.Defs.WalkPre(func(k ki.Ki) bool {
 		ni := k.(Node)
-		if ni == nil || ni.Is(ki.Deleted) || ni.Is(ki.Destroyed) {
+		if ni == nil || ni.This() == nil {
 			return ki.Break
 		}
 		ni.SetFlag(true, IsDef)
@@ -200,7 +200,7 @@ func (sv *SVG) Style() {
 
 	sv.Root.WalkPre(func(k ki.Ki) bool {
 		ni := k.(Node)
-		if ni == nil || ni.Is(ki.Deleted) || ni.Is(ki.Destroyed) {
+		if ni == nil || ni.This() == nil {
 			return ki.Break
 		}
 		ni.Style(sv)

@@ -15,13 +15,4 @@ const (
 	// Updating flag is set at UpdateStart and cleared if we were the first
 	// updater at UpdateEnd.
 	Updating
-
-	// Deleted means this node has been deleted (removed from Parent)
-	// Set just prior to calling OnDelete()
-	Deleted
-
-	// Destroyed means this node has been destroyed.
-	// It should be skipped in all further processing, if there
-	// are remaining pointers to it.
-	Destroyed
 )

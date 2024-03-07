@@ -19,7 +19,6 @@ import (
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"golang.org/x/image/draw"
 )
@@ -182,7 +181,7 @@ func NewRenderWin(name, title string, opts *goosi.NewWindowOptions) *RenderWin {
 		w.SetFlag(true, WinClosing)
 		// ensure that everyone is closed first
 		for _, kv := range w.MainStageMgr.Stack.Order {
-			if kv.Value == nil || kv.Value.Scene == nil || kv.Value.Scene.This() == nil || kv.Value.Scene.Is(ki.Deleted) {
+			if kv.Value == nil || kv.Value.Scene == nil || kv.Value.Scene.This() == nil {
 				continue
 			}
 			if !kv.Value.Scene.Close() {

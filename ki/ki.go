@@ -307,11 +307,6 @@ type Ki interface {
 	// using atomic, safe for concurrent access
 	SetFlag(on bool, f ...enums.BitFlag)
 
-	// ClearUpdateFlags resets all structure update related flags:
-	// ChildAdded, ChildDeleted, ChildrenDeleted, Deleted
-	// automatically called on StartUpdate to reset any old state.
-	ClearUpdateFlags()
-
 	// FlagType returns the flags of the node as the true flag type of the node,
 	// which may be a type that extends the standard [Flags]. Each node type
 	// that extends the flag type should define this method; for example:

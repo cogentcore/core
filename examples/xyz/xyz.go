@@ -13,7 +13,6 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/xyz"
 	"cogentcore.org/core/xyz/examples/assets"
@@ -102,7 +101,7 @@ func (an *Anim) Animate() {
 			return
 		}
 		<-an.Ticker.C // wait for tick
-		if !an.On || an.SceneView.This() == nil || an.SceneView.Is(ki.Deleted) || an.Torus == nil || an.Gopher == nil {
+		if !an.On || an.SceneView.This() == nil || an.Torus == nil || an.Gopher == nil {
 			continue
 		}
 		sc := an.SceneView.SceneXYZ()

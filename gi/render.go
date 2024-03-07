@@ -326,7 +326,7 @@ func (wb *WidgetBase) ConfigTree() {
 // so node will render on next pass.
 // Call SetNeedsLayout to also trigger a layout where needed.
 func (wb *WidgetBase) Update() { //gti:add
-	if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) {
+	if wb == nil || wb.This() == nil {
 		return
 	}
 	updt := wb.UpdateStart()
@@ -582,7 +582,7 @@ func (wb *WidgetBase) PushBounds() bool {
 // PopBounds pops our bounding-box bounds -- last step in Render after
 // rendering children
 func (wb *WidgetBase) PopBounds() {
-	if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) {
+	if wb == nil || wb.This() == nil {
 		return
 	}
 	pc := &wb.Scene.PaintContext

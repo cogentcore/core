@@ -173,7 +173,7 @@ func (wb *WidgetBase) AddCloseDialog(config func(d *Body) bool) *WidgetBase {
 // want the Handled state to persist throughout the call chain;
 // call HandleEvent directly for any existing events.
 func (wb *WidgetBase) Send(typ events.Types, orig ...events.Event) {
-	if wb.This() == nil || wb.Is(ki.Deleted) {
+	if wb.This() == nil {
 		return
 	}
 	var e events.Event
@@ -198,7 +198,7 @@ func (wb *WidgetBase) SendChange(orig ...events.Event) {
 }
 
 func (wb *WidgetBase) SendKeyFun(kf keyfun.Funs, orig ...events.Event) {
-	if wb.This() == nil || wb.Is(ki.Deleted) {
+	if wb.This() == nil {
 		return
 	}
 	kc := keyfun.ChordFor(kf)
@@ -241,14 +241,14 @@ func (wb *WidgetBase) HandleEvent(ev events.Event) {
 			fmt.Println(ev, "to", wb)
 		}
 	}
-	if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) {
+	if wb == nil || wb.This() == nil {
 		return
 	}
 	s := &wb.Styles
 	state := s.State
 
 	shouldContinue := func() bool {
-		return wb.This() != nil && !wb.Is(ki.Deleted)
+		return wb.This() != nil
 	}
 	wb.FirstListeners.Call(ev, shouldContinue)
 	wb.Listeners.Call(ev, shouldContinue)
@@ -268,7 +268,7 @@ func (wb *WidgetBase) FirstHandleEvent(ev events.Event) {
 		}
 	}
 	wb.FirstListeners.Call(ev, func() bool {
-		return wb.This() != nil && !wb.Is(ki.Deleted)
+		return wb.This() != nil
 	})
 }
 
@@ -281,7 +281,7 @@ func (wb *WidgetBase) FinalHandleEvent(ev events.Event) {
 		}
 	}
 	wb.FinalListeners.Call(ev, func() bool {
-		return wb.This() != nil && !wb.Is(ki.Deleted)
+		return wb.This() != nil
 	})
 }
 

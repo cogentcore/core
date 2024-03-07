@@ -144,7 +144,7 @@ func (sv *StructView) UpdateField(field string) {
 // ConfigWidget configures the view
 func (sv *StructView) ConfigWidget() {
 	if ks, ok := sv.Struct.(ki.Ki); ok {
-		if ks == nil || ks.This() == nil || ks.Is(ki.Deleted) {
+		if ks == nil || ks.This() == nil {
 			return
 		}
 	}

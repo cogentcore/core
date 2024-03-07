@@ -446,7 +446,7 @@ func (tf *TextField) EditDone() {
 		tf.Txt = string(tf.EditTxt)
 		tf.SendChange()
 		// widget can be killed after SendChange
-		if tf.This() == nil || tf.Is(ki.Deleted) {
+		if tf.This() == nil {
 			return
 		}
 	}

@@ -25,7 +25,6 @@ import (
 // parent.
 func InitNode(this Ki) {
 	n := this.AsKi()
-	this.ClearUpdateFlags()
 	if n.Ths != this {
 		n.Ths = this
 		n.Ths.OnInit()
@@ -80,17 +79,6 @@ func MoveToParent(kid Ki, parent Ki) {
 	// 	oldPar.DeleteChild(kid, false)
 	// }
 	// parent.AddChild(kid)
-}
-
-// DeleteFromParent calls OnChildDeleting on all parents of given node
-// then calls OnDelete on the node, and finally sets the Parent to nil.
-// Call this *before* deleting the child.
-func DeleteFromParent(kid Ki) {
-	if kid.Parent() == nil {
-		return
-	}
-	kid.SetFlag(true, Deleted)
-	SetParent(kid, nil)
 }
 
 // New adds a new child of the given the type

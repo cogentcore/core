@@ -365,7 +365,6 @@ func (sl *Slice) configDeleteKid(kid Ki, i int, n Ki, mods, updt *bool) {
 			*updt = n.UpdateStart()
 		}
 	}
-	DeleteFromParent(kid)
 	kid.Destroy()
 	sl.DeleteAtIndex(i)
 	UpdateReset(kid) // it won't get the UpdateEnd from us anymore -- init fresh in any case

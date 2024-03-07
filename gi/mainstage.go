@@ -12,7 +12,6 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/goosi"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -226,8 +225,7 @@ func (st *Stage) RunWindow() *Stage {
 // If CurRenderWin is nil (should not happen), then it returns false and
 // the calling function must bail.
 func (st *Stage) GetValidContext() bool {
-	if st.Context == nil || st.Context.This() == nil || st.Context.Is(ki.Deleted) ||
-		st.Context.AsWidget().Scene == nil {
+	if st.Context == nil || st.Context.This() == nil || st.Context.AsWidget().Scene == nil {
 		if CurRenderWin == nil {
 			slog.Error("Stage Run: Context is nil and CurRenderWin is nil, cannot Run!", "Name", st.Name, "Title", st.Title)
 			return false

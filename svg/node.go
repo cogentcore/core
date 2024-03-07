@@ -267,7 +267,7 @@ func (g *NodeBase) ReadGeom(sv *SVG, dat []float32) {
 func SVGWalkPre(n Node, fun func(kni Node, knb *NodeBase) bool) {
 	n.WalkPre(func(k ki.Ki) bool {
 		kni := k.(Node)
-		if kni == nil || kni.This() == nil || kni.Is(ki.Deleted) {
+		if kni == nil || kni.This() == nil {
 			return ki.Break
 		}
 		return fun(kni, kni.AsNodeBase())
@@ -282,7 +282,7 @@ func SVGWalkPre(n Node, fun func(kni Node, knb *NodeBase) bool) {
 func SVGWalkPreNoDefs(n Node, fun func(kni Node, knb *NodeBase) bool) {
 	n.WalkPre(func(k ki.Ki) bool {
 		kni := k.(Node)
-		if kni == nil || kni.This() == nil || kni.Is(ki.Deleted) {
+		if kni == nil || kni.This() == nil {
 			return ki.Break
 		}
 		if kni.Is(IsDef) || kni.KiType() == MetaDataType {

@@ -12,16 +12,16 @@ import (
 	"cogentcore.org/core/enums"
 )
 
-var _FlagsValues = []Flags{0, 1, 2, 3}
+var _FlagsValues = []Flags{0, 1}
 
 // FlagsN is the highest valid value for type Flags, plus one.
-const FlagsN Flags = 4
+const FlagsN Flags = 2
 
-var _FlagsNameToValueMap = map[string]Flags{`Field`: 0, `Updating`: 1, `Deleted`: 2, `Destroyed`: 3}
+var _FlagsNameToValueMap = map[string]Flags{`Field`: 0, `Updating`: 1}
 
-var _FlagsDescMap = map[Flags]string{0: `Field indicates a node is a field in its parent node, not a child in children.`, 1: `Updating flag is set at UpdateStart and cleared if we were the first updater at UpdateEnd.`, 2: `Deleted means this node has been deleted (removed from Parent) Set just prior to calling OnDelete()`, 3: `Destroyed means this node has been destroyed. It should be skipped in all further processing, if there are remaining pointers to it.`}
+var _FlagsDescMap = map[Flags]string{0: `Field indicates a node is a field in its parent node, not a child in children.`, 1: `Updating flag is set at UpdateStart and cleared if we were the first updater at UpdateEnd.`}
 
-var _FlagsMap = map[Flags]string{0: `Field`, 1: `Updating`, 2: `Deleted`, 3: `Destroyed`}
+var _FlagsMap = map[Flags]string{0: `Field`, 1: `Updating`}
 
 // String returns the string representation of this Flags value.
 func (i Flags) String() string {

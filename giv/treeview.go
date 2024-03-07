@@ -267,88 +267,55 @@ func (tv *TreeView) SetStyles() {
 			// something with this treeview specifically,
 			// not with any of our children (see HandleTreeViewMouse)
 			w.On(events.MouseEnter, func(e events.Event) {
-				if tv.This() == nil || tv.Is(ki.Deleted) {
-					return
-				}
 				tv.SetState(true, states.Hovered)
 				tv.ApplyStyle()
 				tv.SetNeedsRender(true)
 				e.SetHandled()
 			})
 			w.On(events.MouseLeave, func(e events.Event) {
-				if tv.This() == nil || tv.Is(ki.Deleted) {
-					return
-				}
 				tv.SetState(false, states.Hovered)
 				tv.ApplyStyle()
 				tv.SetNeedsRender(true)
 				e.SetHandled()
 			})
 			w.On(events.MouseDown, func(e events.Event) {
-				if tv.This() == nil || tv.Is(ki.Deleted) {
-					return
-				}
 				tv.SetState(true, states.Active)
 				tv.ApplyStyle()
 				tv.SetNeedsRender(true)
 				e.SetHandled()
 			})
 			w.On(events.MouseUp, func(e events.Event) {
-				if tv.This() == nil || tv.Is(ki.Deleted) {
-					return
-				}
 				tv.SetState(false, states.Active)
 				tv.ApplyStyle()
 				tv.SetNeedsRender(true)
 				e.SetHandled()
 			})
 			w.OnClick(func(e events.Event) {
-				if tv.This() == nil || tv.Is(ki.Deleted) {
-					return
-				}
 				tv.SelectAction(e.SelectMode())
 				e.SetHandled()
 			})
 			w.AsWidget().OnDoubleClick(func(e events.Event) {
-				if tv.This() == nil || tv.Is(ki.Deleted) {
-					return
-				}
 				tv.This().(TreeViewer).OnDoubleClick(e)
 			})
 			w.On(events.DragStart, func(e events.Event) {
-				if tv.This() == nil || tv.Is(ki.Deleted) {
-					return
-				}
 				tvi.DragStart(e)
 			})
 			w.On(events.DragEnter, func(e events.Event) {
-				if tv.This() == nil || tv.Is(ki.Deleted) {
-					return
-				}
 				tv.SetState(true, states.DragHovered)
 				tv.ApplyStyle()
 				tv.SetNeedsRender(true)
 				e.SetHandled()
 			})
 			w.On(events.DragLeave, func(e events.Event) {
-				if tv.This() == nil || tv.Is(ki.Deleted) {
-					return
-				}
 				tv.SetState(false, states.DragHovered)
 				tv.ApplyStyle()
 				tv.SetNeedsRender(true)
 				e.SetHandled()
 			})
 			w.On(events.Drop, func(e events.Event) {
-				if tv.This() == nil || tv.Is(ki.Deleted) {
-					return
-				}
 				tvi.DragDrop(e)
 			})
 			w.On(events.DropDeleteSource, func(e events.Event) {
-				if tv.This() == nil || tv.Is(ki.Deleted) {
-					return
-				}
 				tvi.DropDeleteSource(e)
 			})
 			// the context menu events will get sent to the parts, so it
@@ -390,9 +357,6 @@ func (tv *TreeView) SetStyles() {
 				}
 			})
 			sw.OnClick(func(e events.Event) {
-				if tv.This() == nil || tv.Is(ki.Deleted) {
-					return
-				}
 				if sw.IsChecked() && !sw.StateIs(states.Indeterminate) {
 					if !tv.IsClosed() {
 						tv.Close()
@@ -771,7 +735,7 @@ func (tv *TreeView) UnselectAll() {
 	tv.SetSelectedViews(nil) // clear in advance
 	for _, v := range sl {
 		vt := v.AsTreeView()
-		if vt == nil || vt.This() == nil || vt.Is(ki.Deleted) {
+		if vt == nil || vt.This() == nil {
 			continue
 		}
 		vt.SetSelected(false)

@@ -462,7 +462,7 @@ func (wb *WidgetBase) ParentWidgetIf(fun func(p *WidgetBase) bool) *WidgetBase {
 // window events.
 // This call recursively calls the parent, which is typically a short path.
 func (wb *WidgetBase) IsVisible() bool {
-	if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) || wb.StateIs(states.Invisible) || wb.Scene == nil {
+	if wb == nil || wb.This() == nil || wb.StateIs(states.Invisible) || wb.Scene == nil {
 		return false
 	}
 	if wb.Par == nil || wb.Par.This() == nil {
@@ -491,7 +491,7 @@ func (wb *WidgetBase) WalkPreNode(fun func(ki.Ki) bool) {
 func (wb *WidgetBase) WidgetKidsIter(fun func(i int, kwi Widget, kwb *WidgetBase) bool) {
 	for i, k := range wb.Kids {
 		kwi, kwb := AsWidget(k)
-		if kwi == nil || kwi.This() == nil || kwi.Is(ki.Deleted) {
+		if kwi == nil || kwi.This() == nil {
 			break
 		}
 		cont := fun(i, kwi, kwb)
@@ -508,7 +508,7 @@ func (wb *WidgetBase) WidgetKidsIter(fun func(i int, kwi Widget, kwb *WidgetBase
 func (wb *WidgetBase) VisibleKidsIter(fun func(i int, kwi Widget, kwb *WidgetBase) bool) {
 	for i, k := range wb.Kids {
 		kwi, kwb := AsWidget(k)
-		if kwi == nil || kwi.This() == nil || kwi.Is(ki.Deleted) {
+		if kwi == nil || kwi.This() == nil {
 			break
 		}
 		if kwb.StateIs(states.Invisible) {
@@ -527,7 +527,7 @@ func (wb *WidgetBase) VisibleKidsIter(fun func(i int, kwi Widget, kwb *WidgetBas
 func (wb *WidgetBase) WidgetWalkPre(fun func(kwi Widget, kwb *WidgetBase) bool) {
 	wb.WalkPre(func(k ki.Ki) bool {
 		kwi, kwb := AsWidget(k)
-		if kwi == nil || kwi.This() == nil || kwi.Is(ki.Deleted) {
+		if kwi == nil || kwi.This() == nil {
 			return ki.Break
 		}
 		return fun(kwi, kwb)
