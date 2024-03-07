@@ -512,36 +512,6 @@ type Ki interface {
 	// This function does nothing by default, but it can be
 	// implemented by higher-level types that want to do something.
 	OnChildAdded(child Ki)
-
-	// OnDelete is called when the node is deleted from a parent.
-	// It will be called only once in the lifetime of the node,
-	// unless the node is moved. It will not be called on root
-	// nodes, as they are never deleted from a parent.
-	// It does nothing by default, but it can be implemented
-	// by higher-level types that want to do something.
-	OnDelete()
-
-	// OnChildDeleting is called when a node is just about to be deleted from
-	// this node or any of its children. When a node is deleted from
-	// a tree, it calls this function on each of its parents,
-	// going in order from the closest parent to the furthest parent,
-	// and then [OnDelete].
-	// This function does nothing by default, but it can be
-	// implemented by higher-level types that want to do something.
-	OnChildDeleting(child Ki)
-
-	// OnChildrenDeleting is called when all children are deleted from
-	// this node or any of its children.
-	// This function does nothing by default, but it can be
-	// implemented by higher-level types that want to do something.
-	OnChildrenDeleting()
-
-	// OnUpdated is called during UpdateEnd if the updt flag is true,
-	// indicating that this was the upper-most Ki node that was
-	// updated in the latest round of updating.
-	// This function does nothing by default, but it can be
-	// implemented by higher-level types that want to do something.
-	OnUpdated()
 }
 
 // see node.go for struct implementing this interface

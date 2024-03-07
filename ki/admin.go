@@ -90,26 +90,8 @@ func DeleteFromParent(kid Ki) {
 	if kid.Parent() == nil {
 		return
 	}
-	n := kid.AsKi()
-	n.WalkUpParent(func(k Ki) bool {
-		k.This().OnChildDeleting(kid)
-		return Continue
-	})
 	kid.SetFlag(true, Deleted)
-	kid.This().OnDelete()
 	SetParent(kid, nil)
-}
-
-// DeletingChildren calls OnChildrenDeleting on given node
-// and all parents thereof.
-// Call this *before* deleting the children.
-func DeletingChildren(k Ki) {
-	k.This().OnChildrenDeleting()
-	n := k.AsKi()
-	n.WalkUpParent(func(k Ki) bool {
-		k.This().OnChildrenDeleting()
-		return Continue
-	})
 }
 
 // New adds a new child of the given the type

@@ -146,22 +146,6 @@ func (n *Node) OnAdd() {}
 // [Ki.OnChildAdded] that does nothing.
 func (n *Node) OnChildAdded(child Ki) {}
 
-// OnDelete is a placeholder implementation of
-// [Ki.OnDelete] that does nothing.
-func (n *Node) OnDelete() {}
-
-// OnChildDeleting is a placeholder implementation of
-// [Ki.OnChildDeleting] that does nothing.
-func (n *Node) OnChildDeleting(child Ki) {}
-
-// OnChildrenDeleting is a placeholder implementation of
-// [Ki.OnChildrenDeleting] that does nothing.
-func (n *Node) OnChildrenDeleting() {}
-
-// OnUpdated is a placeholder implementation of
-// [Ki.OnUpdated] that does nothing.
-func (n *Node) OnUpdated() {}
-
 //////////////////////////////////////////////////////////////////////////
 //  Parents
 
@@ -640,7 +624,6 @@ func (n *Node) DeleteChildByName(name string, destroy bool) bool {
 func (n *Node) DeleteChildren(destroy bool) {
 	updt := n.This().UpdateStart()
 	n.SetFlag(true, ChildrenDeleted)
-	DeletingChildren(n.This())
 	kids := n.Kids
 	n.Kids = n.Kids[:0] // preserves capacity of list
 	for _, kid := range kids {
@@ -648,7 +631,6 @@ func (n *Node) DeleteChildren(destroy bool) {
 			continue
 		}
 		kid.SetFlag(true, Deleted)
-		kid.This().OnDelete()
 		SetParent(kid, nil)
 		UpdateReset(kid)
 	}
@@ -1149,13 +1131,10 @@ func (n *Node) UpdateEnd(updt bool) {
 	if n.Is(ChildDeleted) || n.Is(ChildrenDeleted) {
 		DelMgr.DestroyDeleted()
 	}
-	// pr := prof.Start("ki.Node.UpdateEnd")
 	n.WalkPre(func(k Ki) bool {
 		k.SetFlag(false, Updating) // note: could check first and break here but good to ensure all clear
 		return true
 	})
-	// pr.End()
-	n.This().OnUpdated()
 }
 
 //////////////////////////////////////////////////////////////////////////
