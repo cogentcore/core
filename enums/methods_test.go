@@ -59,7 +59,9 @@ func TestString(t *testing.T) {
 	assert.Equal(t, "bitIndexString", BitFlagStringExtended(0, []enum{}, []enum{3}))
 	assert.Equal(t, "Apple|bitIndexString", BitFlagStringExtended(0, []enum{3}, []enum{5}))
 	assert.Equal(t, "bitIndexString|Apple", BitFlagStringExtended(0, []enum{5, 1}, []enum{2, 3, 1}))
+}
 
+func TestSetString(t *testing.T) {
 	nameToValueMap := map[string]enum{"apple": 5}
 
 	i := enum(0)
@@ -96,6 +98,21 @@ func TestString(t *testing.T) {
 	assert.Equal(t, enum(7), i)
 	i = enum(4)
 	err = SetStringExtended(&i, &i, "Apple", nameToValueMap)
+	if assert.Error(t, err) {
+		assert.Equal(t, "invalid", err.Error())
+	}
+	assert.Equal(t, enum(4), i)
+
+	assert.NoError(t, SetStringLowerExtended(&i, &i, "apple", nameToValueMap))
+	assert.Equal(t, enum(5), i)
+	i = enum(4)
+	assert.NoError(t, SetStringLowerExtended(&i, &i, "Apple", nameToValueMap))
+	assert.Equal(t, enum(5), i)
+	i = enum(4)
+	assert.NoError(t, SetStringLowerExtended(&i, &i, "Orange", nameToValueMap))
+	assert.Equal(t, enum(7), i)
+	i = enum(4)
+	err = SetStringLowerExtended(&i, &i, "Strawberry", nameToValueMap)
 	if assert.Error(t, err) {
 		assert.Equal(t, "invalid", err.Error())
 	}
