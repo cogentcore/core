@@ -400,6 +400,6 @@ func (sl *Slice) ConfigCopy(n Ki, frm Slice) {
 			n.UpdateEnd(updt)
 		}
 	} else {
-		n.DeleteChildren(true)
+		n.DeleteChildren()
 	}
 }

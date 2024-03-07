@@ -77,7 +77,7 @@ func (sv *StructViewInline) ConfigStruct() bool {
 	}
 	config := ki.Config{}
 	// note: widget re-use does not work due to all the closures
-	sv.DeleteChildren(ki.DestroyKids)
+	sv.DeleteChildren()
 	sv.FieldViews = make([]Value, 0)
 	laser.FlatFieldsValueFunc(sv.Struct, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		// todo: check tags, skip various etc

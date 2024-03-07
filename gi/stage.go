@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"cogentcore.org/core/goosi"
-	"cogentcore.org/core/ki"
 )
 
 // StageTypes are the types of Stage containers.
@@ -336,7 +335,7 @@ func (st *Stage) Delete() {
 		st.Sprites.Reset()
 	}
 	if st.Scene != nil {
-		st.Scene.Delete(ki.DestroyKids)
+		st.Scene.Delete()
 	}
 	st.Scene = nil
 	st.Main = nil

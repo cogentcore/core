@@ -112,7 +112,7 @@ func (mv *MapViewInline) ConfigWidget() {
 
 // ConfigMap configures children for map view
 func (mv *MapViewInline) ConfigMap() bool {
-	mv.DeleteChildren(ki.DestroyKids)
+	mv.DeleteChildren()
 	if laser.AnyIsNil(mv.Map) {
 		mv.ConfigSize = 0
 		return false

@@ -134,7 +134,7 @@ func (sv *SliceViewInline) ConfigWidget() {
 
 // ConfigSlice configures children for slice view
 func (sv *SliceViewInline) ConfigSlice() bool {
-	sv.DeleteChildren(ki.DestroyKids)
+	sv.DeleteChildren()
 	if laser.AnyIsNil(sv.Slice) {
 		sv.ConfigSize = 0
 		return false

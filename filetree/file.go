@@ -237,7 +237,7 @@ func (fn *Node) DeleteFile() error {
 		err = fn.Info.Delete()
 	}
 	if err == nil {
-		fn.Delete(true)
+		fn.Delete()
 	}
 	if par != nil {
 		par.UpdateNode()

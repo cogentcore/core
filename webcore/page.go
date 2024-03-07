@@ -133,7 +133,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 
 	fr := pg.FindPath("splits/body").(*gi.Frame)
 	updt := fr.UpdateStart()
-	fr.DeleteChildren(true)
+	fr.DeleteChildren()
 	err = coredom.ReadMD(pg.Context, fr, b)
 	if err != nil {
 		gi.ErrorSnackbar(pg, err, "Error loading page")

@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"cogentcore.org/core/colors/gradient"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 )
 
@@ -197,7 +196,7 @@ func (sv *SVG) GradientDeleteForNode(n Node, grnm string) bool {
 		return false
 	}
 	unm := NameFromURL(grnm)
-	sv.Defs.DeleteChildByName(unm, ki.DestroyKids)
+	sv.Defs.DeleteChildByName(unm)
 	return true
 }
 

@@ -15,7 +15,6 @@ import (
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -192,7 +191,7 @@ func (dv *DateView) SetTime(tim time.Time) *DateView {
 func (dv *DateView) ConfigWidget() {
 	updt := dv.UpdateStart()
 	if dv.HasChildren() {
-		dv.DeleteChildren(ki.DestroyKids)
+		dv.DeleteChildren()
 	} else {
 		dv.Style(func(s *styles.Style) {
 			s.Direction = styles.Column

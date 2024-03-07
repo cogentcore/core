@@ -398,7 +398,7 @@ func (wb *WidgetBase) Destroy() {
 
 func (wb *WidgetBase) DeleteParts() {
 	if wb.Parts != nil {
-		wb.Parts.DeleteChildren(true) // first delete all my children
+		wb.Parts.DeleteChildren() // first delete all my children
 	}
 	wb.Parts = nil
 }

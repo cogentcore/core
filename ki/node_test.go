@@ -153,7 +153,7 @@ func TestNodeDeleteChild(t *testing.T) {
 	parent.InitName(&parent, "par1")
 	typ := parent.KiType()
 	child := parent.NewChild(typ, "child1")
-	parent.DeleteChild(child, true)
+	parent.DeleteChild(child)
 	assert.Zero(t, len(parent.Kids))
 }
 
@@ -162,7 +162,7 @@ func TestNodeDeleteChildName(t *testing.T) {
 	parent.InitName(&parent, "par1")
 	typ := parent.KiType()
 	parent.NewChild(typ, "child1")
-	parent.DeleteChildByName("child1", true)
+	parent.DeleteChildByName("child1")
 	assert.Zero(t, len(parent.Kids))
 }
 
@@ -607,7 +607,7 @@ func TestTreeMod(t *testing.T) {
 	// fmt.Printf("Trees after add child12 move:\n%v%v", tree1, tree2)
 
 	updt = tree2.UpdateStart()
-	tree2.DeleteChild(child12, true)
+	tree2.DeleteChild(child12)
 	tree2.UpdateEnd(updt)
 
 	// fmt.Printf("#################################\n")

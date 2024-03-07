@@ -192,7 +192,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 	}
 	sg := sv.StructGrid()
 	// note: widget re-use does not work due to all the closures
-	sg.DeleteChildren(ki.DestroyKids)
+	sg.DeleteChildren()
 	config := ki.Config{}
 	dupeFields := map[string]bool{}
 	sv.FieldViews = make([]Value, 0)

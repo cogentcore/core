@@ -74,12 +74,12 @@ func SetParent(kid Ki, parent Ki) {
 // MoveToParent deletes given node from its current parent and adds it as a child
 // of given new parent.  Parents could be in different trees or not.
 func MoveToParent(kid Ki, parent Ki) {
-	oldPar := kid.Parent()
-	if oldPar != nil {
-		SetParent(kid, nil)
-		oldPar.DeleteChild(kid, false)
-	}
-	parent.AddChild(kid)
+	// TODO(kai/ki): implement MoveToParent
+	// oldPar := kid.Parent()
+	// if oldPar != nil {
+	// 	oldPar.DeleteChild(kid, false)
+	// }
+	// parent.AddChild(kid)
 }
 
 // DeleteFromParent calls OnChildDeleting on all parents of given node

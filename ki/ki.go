@@ -276,32 +276,25 @@ type Ki interface {
 	//  Deleting Children
 
 	// DeleteChildAtIndex deletes child at given index. It returns false
-	// if there is no child at the given index. Wraps delete in UpdateStart / End
-	// and sets ChildDeleted flag.
-	DeleteChildAtIndex(idx int, destroy bool) bool
+	// if there is no child at the given index.
+	DeleteChildAtIndex(idx int) bool
 
 	// DeleteChild deletes the given child node, returning false if
-	// it can not find it. Wraps delete in UpdateStart / End and
-	// sets ChildDeleted flag.
-	DeleteChild(child Ki, destroy bool) bool
+	// it can not find it.
+	DeleteChild(child Ki) bool
 
 	// DeleteChildByName deletes child node by name, returning false
-	// if it can not find it. Wraps delete in UpdateStart / End and
-	// sets ChildDeleted flag.
-	DeleteChildByName(name string, destroy bool) bool
+	// if it can not find it.
+	DeleteChildByName(name string) bool
 
-	// DeleteChildren deletes all children nodes -- destroy will add removed
-	// children to deleted list, to be destroyed later -- otherwise children
-	// remain intact but parent is nil -- could be inserted elsewhere, but you
-	// better have kept a slice of them before calling this.
-	DeleteChildren(destroy bool)
+	// DeleteChildren deletes all children nodes.
+	DeleteChildren()
 
-	// Delete deletes this node from its parent children list -- destroy will
-	// add removed child to deleted list, to be destroyed later -- otherwise
-	// child remains intact but parent is nil -- could be inserted elsewhere.
-	Delete(destroy bool)
+	// Delete deletes this node from its parent's children list.
+	Delete()
 
-	// Destroy deletes and destroys all children and their childrens-children, etc.
+	// Destroy recursively deletes and destroys all children and
+	// their children's children, etc.
 	Destroy()
 
 	//////////////////////////////////////////////////////////////////////////

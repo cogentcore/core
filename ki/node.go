@@ -527,7 +527,7 @@ func (n *Node) SetNChildren(trgn int, typ *gti.Type, nameStub ...string) (mods, 
 			updt = n.This().UpdateStart()
 		}
 		sz--
-		n.DeleteChildAtIndex(sz, true)
+		n.DeleteChildAtIndex(sz)
 	}
 	ns := typ.IDName
 	if len(nameStub) > 0 {
@@ -565,9 +565,8 @@ func (n *Node) ConfigChildren(config Config) (mods, updt bool) {
 //  Deleting Children
 
 // DeleteChildAtIndex deletes child at given index. It returns false
-// if there is no child at the given index. Wraps delete in UpdateStart / End
-// and sets ChildDeleted flag.
-func (n *Node) DeleteChildAtIndex(idx int, destroy bool) bool {
+// if there is no child at the given index.
+func (n *Node) DeleteChildAtIndex(idx int) bool {
 	child := n.Child(idx)
 	if child == nil {
 		return false
@@ -583,43 +582,36 @@ func (n *Node) DeleteChildAtIndex(idx int, destroy bool) bool {
 	}
 	n.Kids.DeleteAtIndex(idx)
 	UpdateReset(child) // it won't get the UpdateEnd from us anymore -- init fresh in any case
-	if destroy {
-		child.Destroy()
-	}
+	child.Destroy()
 	n.This().UpdateEnd(updt)
 	return true
 }
 
 // DeleteChild deletes the given child node, returning false if
-// it can not find it. Wraps delete in UpdateStart / End and
-// sets ChildDeleted flag.
-func (n *Node) DeleteChild(child Ki, destroy bool) bool {
+// it can not find it.
+func (n *Node) DeleteChild(child Ki) bool {
 	if child == nil {
 		return false
 	}
-	idx, ok := n.Kids.IndexOf(child, 0)
+	idx, ok := n.Kids.IndexOf(child)
 	if !ok {
 		return false
 	}
-	return n.DeleteChildAtIndex(idx, destroy)
+	return n.DeleteChildAtIndex(idx)
 }
 
 // DeleteChildByName deletes child node by name, returning false
-// if it can not find it. Wraps delete in UpdateStart / End and
-// sets ChildDeleted flag.
-func (n *Node) DeleteChildByName(name string, destroy bool) bool {
-	idx, ok := n.Kids.IndexByName(name, 0)
+// if it can not find it.
+func (n *Node) DeleteChildByName(name string) bool {
+	idx, ok := n.Kids.IndexByName(name)
 	if !ok {
 		return false
 	}
-	return n.DeleteChildAtIndex(idx, destroy)
+	return n.DeleteChildAtIndex(idx)
 }
 
-// DeleteChildren deletes all children nodes -- destroy will add removed
-// children to deleted list, to be destroyed later -- otherwise children
-// remain intact but parent is nil -- could be inserted elsewhere, but you
-// better have kept a slice of them before calling this.
-func (n *Node) DeleteChildren(destroy bool) {
+// DeleteChildren deletes all children nodes.
+func (n *Node) DeleteChildren() {
 	updt := n.This().UpdateStart()
 	kids := n.Kids
 	n.Kids = n.Kids[:0] // preserves capacity of list
@@ -629,33 +621,28 @@ func (n *Node) DeleteChildren(destroy bool) {
 		}
 		kid.SetFlag(true, Deleted)
 		UpdateReset(kid)
-		if destroy {
-			kid.Destroy()
-		}
+		kid.Destroy()
 	}
 	n.This().UpdateEnd(updt)
 }
 
-// Delete deletes this node from its parent children list -- destroy will
-// add removed child to deleted list, to be destroyed later -- otherwise
-// child remains intact but parent is nil -- could be inserted elsewhere.
-func (n *Node) Delete(destroy bool) {
+// Delete deletes this node from its parent's children list.
+func (n *Node) Delete() {
 	if n.Par == nil {
-		if destroy {
-			n.This().Destroy()
-		}
+		n.This().Destroy()
 	} else {
-		n.Par.DeleteChild(n.This(), destroy)
+		n.Par.DeleteChild(n.This())
 	}
 }
 
-// Destroy deletes and destroys all children and their childrens-children, etc.
+// Destroy recursively deletes and destroys all children and
+// their children's children, etc.
 func (n *Node) Destroy() {
 	// fmt.Printf("Destroying: %v %T %p Kids: %v\n", n.Nm, n.This(), n.This(), len(n.Kids))
 	if n.This() == nil { // already dead!
 		return
 	}
-	n.DeleteChildren(true) // delete and destroy all my children
+	n.DeleteChildren() // delete and destroy all my children
 	n.SetFlag(true, Destroyed)
 	n.Ths = nil // last gasp: lose our own sense of self..
 	// note: above is thread-safe because This() accessor checks Destroyed

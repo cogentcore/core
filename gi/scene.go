@@ -313,7 +313,7 @@ func (sc *Scene) Close() bool {
 
 // Delete this Scene if not Flagged for preservation.
 // Removes Decor and Frame Widgets
-func (sc *Scene) Delete(destroy bool) {
+func (sc *Scene) Delete() {
 	if sc.Flags.HasFlag(ScPreserve) {
 		return
 	}
@@ -322,7 +322,7 @@ func (sc *Scene) Delete(destroy bool) {
 
 // DeleteImpl does the deletion, removing Decor and Frame Widgets.
 func (sc *Scene) DeleteImpl() {
-	sc.DeleteChildren(ki.DestroyKids)
+	sc.DeleteChildren()
 }
 
 // UpdateTitle updates the title of the Scene's associated [Stage],

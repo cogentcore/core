@@ -401,15 +401,13 @@ func (ts *Tabs) RecycleTabWidget(name string, sel bool, typ *gti.Type) Widget {
 	return wi
 }
 
-// DeleteTabIndex deletes tab at given index, optionally calling destroy on
-// tab contents -- returns frame if destroy == false, tab label, and bool success
-func (ts *Tabs) DeleteTabIndex(idx int, destroy bool) (*Frame, string, bool) {
-	frame, _, ok := ts.TabAtIndex(idx)
+// DeleteTabIndex deletes tab at given index, returning whether it was successful.
+func (ts *Tabs) DeleteTabIndex(idx int) bool {
+	_, _, ok := ts.TabAtIndex(idx)
 	if !ok {
-		return nil, "", false
+		return false
 	}
 
-	tnm := ts.TabLabel(idx)
 	ts.Mu.Lock()
 	fr := ts.Frame()
 	sz := len(*fr.Children())
@@ -429,18 +427,14 @@ func (ts *Tabs) DeleteTabIndex(idx int, destroy bool) (*Frame, string, bool) {
 	if nidx < 0 && ts.NTabs() > 1 {
 		nidx = max(idx-1, 0)
 	}
-	fr.DeleteChildAtIndex(idx, destroy)
-	tb.DeleteChildAtIndex(idx, ki.DestroyKids) // always destroy -- we manage
+	fr.DeleteChildAtIndex(idx)
+	tb.DeleteChildAtIndex(idx)
 	ts.Mu.Unlock()
 
 	if nidx >= 0 {
 		ts.SelectTabIndex(nidx)
 	}
-	if destroy {
-		return nil, tnm, true
-	} else {
-		return frame, tnm, true
-	}
+	return true
 }
 
 // ConfigNewTabButton configures the new tab + button at end of list of tabs
@@ -463,7 +457,7 @@ func (ts *Tabs) ConfigNewTabButton() bool {
 		if ntb == sz {
 			return false
 		}
-		tb.DeleteChildAtIndex(ntb-1, ki.DestroyKids) // always destroy -- we manage
+		tb.DeleteChildAtIndex(ntb - 1)
 		return true
 	}
 }
@@ -633,7 +627,7 @@ func (tb *Tab) SetStyles() {
 				if SystemSettings.OnlyCloseActiveTab && !tb.StateIs(states.Selected) {
 					ts.SelectTabIndex(idx)
 				} else {
-					ts.DeleteTabIndex(idx, true)
+					ts.DeleteTabIndex(idx)
 				}
 			})
 		}

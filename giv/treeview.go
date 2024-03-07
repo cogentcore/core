@@ -1454,7 +1454,7 @@ func (tv *TreeView) Cut() { //gti:add
 	updt := root.UpdateStart()
 	tv.UnselectAll()
 	for _, sn := range sels {
-		sn.Delete(true)
+		sn.Delete()
 	}
 	root.Update()
 	root.TreeViewChanged(nil)
@@ -1709,7 +1709,7 @@ func (tv *TreeView) DropDeleteSource(e events.Event) {
 		path := string(d.Data)
 		sn := root.FindPath(path)
 		if sn != nil {
-			sn.Delete(true)
+			sn.Delete()
 		}
 		sn = root.FindPath(path + TreeViewTempMovedTag)
 		if sn != nil {

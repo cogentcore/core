@@ -143,7 +143,7 @@ func (wb *WidgetBase) ApplyContextMenus(m *Scene) {
 		nc := m.NumChildren()
 		// we delete any extra separator
 		if nc > 0 && m.Child(nc-1).KiType() == SeparatorType {
-			m.DeleteChildAtIndex(nc-1, true)
+			m.DeleteChildAtIndex(nc - 1)
 		}
 		if i != 0 {
 			NewSeparator(m)

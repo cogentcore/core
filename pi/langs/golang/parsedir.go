@@ -370,7 +370,7 @@ reset:
 	pfs.ClearAst()
 	pkg.ClearAst()
 	// if pfs.Ast.HasChildren() {
-	// 	pfs.Ast.DeleteChildren(true)
+	// 	pfs.Ast.DeleteChildren()
 	// }
 }
 

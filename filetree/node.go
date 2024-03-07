@@ -507,7 +507,7 @@ func (fn *Node) RemoveFromExterns() { //gti:add
 		if sn != nil && sn.IsExternal() {
 			sn.FRoot.RemoveExtFile(string(sn.FPath))
 			sn.CloseBuf()
-			sn.Delete(true)
+			sn.Delete()
 		}
 	}
 }

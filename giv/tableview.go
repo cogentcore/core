@@ -331,7 +331,7 @@ func (tv *TableView) ConfigRows() {
 	tv.ViewMuLock()
 	defer tv.ViewMuUnlock()
 
-	sg.DeleteChildren(ki.DestroyKids)
+	sg.DeleteChildren()
 	tv.Values = nil
 
 	tv.This().(SliceViewer).UpdtSliceSize()

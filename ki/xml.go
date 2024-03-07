@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/grr"
 	"cogentcore.org/core/gti"
 )
 
@@ -23,8 +24,7 @@ import (
 func (n *Node) WriteXML(writer io.Writer, indent bool) error {
 	err := ThisCheck(n)
 	if err != nil {
-		log.Println(err)
-		return err
+		return grr.Log(err)
 	}
 	var b []byte
 	if indent {
@@ -33,13 +33,11 @@ func (n *Node) WriteXML(writer io.Writer, indent bool) error {
 		b, err = xml.Marshal(n.This())
 	}
 	if err != nil {
-		log.Println(err)
-		return err
+		return grr.Log(err)
 	}
 	_, err = writer.Write(b)
 	if err != nil {
-		log.Println(err)
-		return err
+		return grr.Log(err)
 	}
 	return nil
 }

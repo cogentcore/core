@@ -91,7 +91,7 @@ func (gl *GoLang) ParseFile(fss *pi.FileStates, txt []byte) {
 		}
 		pfs.ClearAst()
 		if pfs.Ast.HasChildren() {
-			pfs.Ast.DeleteChildren(true)
+			pfs.Ast.DeleteChildren()
 		}
 		// fmt.Println("done no import")
 	}

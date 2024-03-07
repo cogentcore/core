@@ -675,7 +675,7 @@ func (sv *SliceViewBase) ConfigRows() {
 	sv.ViewMuLock()
 	defer sv.ViewMuUnlock()
 
-	sg.DeleteChildren(ki.DestroyKids)
+	sg.DeleteChildren()
 	sv.Values = nil
 
 	sv.This().(SliceViewer).UpdtSliceSize()

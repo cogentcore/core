@@ -334,7 +334,7 @@ func (w *RenderWin) SetZoom(zoom float32) {
 		b.AddSnackbarButton("Reset", func(e events.Event) {
 			w.SetZoom(100)
 		})
-		b.DeleteChildByName("stretch", true)
+		b.DeleteChildByName("stretch")
 		b.NewSnackbar(ms).Run()
 	}
 }

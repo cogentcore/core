@@ -142,8 +142,8 @@ func (sv *SVG) DeleteAll() {
 	}
 	updt := sv.Root.UpdateStart() // don't really need update logic here
 	sv.Root.Paint.Defaults()
-	sv.Root.DeleteChildren(ki.DestroyKids)
-	sv.Defs.DeleteChildren(ki.DestroyKids)
+	sv.Root.DeleteChildren()
+	sv.Defs.DeleteChildren()
 	sv.Root.UpdateEnd(updt)
 }
 

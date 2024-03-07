@@ -82,8 +82,8 @@ func (sw *Scene) SetSel(nd xyz.Node) {
 		sw.CurManipPt = nil
 		sw.CurSel = nil
 		updt := xy.UpdateStart()
-		xy.DeleteChildByName(SelBoxName, ki.DestroyKids)
-		xy.DeleteChildByName(ManipBoxName, ki.DestroyKids)
+		xy.DeleteChildByName(SelBoxName)
+		xy.DeleteChildByName(ManipBoxName)
 		xy.UpdateEndRender(updt)
 		return
 	}
@@ -115,7 +115,7 @@ func (sw *Scene) SelectBox() {
 	defer xy.UpdateEndUpdate(updt)
 
 	nb := sw.CurSel.AsNode()
-	xy.DeleteChildByName(SelBoxName, ki.DestroyKids) // get rid of existing
+	xy.DeleteChildByName(SelBoxName) // get rid of existing
 	clr := sw.SelParams.Color
 	xyz.NewLineBox(xy, xy, SelBoxName, SelBoxName, nb.WorldBBox.BBox, sw.SelParams.Width, clr, xyz.Inactive)
 
@@ -136,7 +136,7 @@ func (sw *Scene) ManipBox() {
 	nm := ManipBoxName
 
 	nb := sw.CurSel.AsNode()
-	xy.DeleteChildByName(nm, ki.DestroyKids) // get rid of existing
+	xy.DeleteChildByName(nm) // get rid of existing
 	clr := sw.SelParams.Color
 
 	cdist := mat32.Max(xy.Camera.DistTo(xy.Camera.Target), 1.0)
