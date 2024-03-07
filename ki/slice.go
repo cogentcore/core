@@ -303,13 +303,11 @@ func (sl *Slice) Swap(i, j int) error {
 ///////////////////////////////////////////////////////////////////////////
 // Config
 
-// Config is a major work-horse routine for minimally-destructive reshaping of
+// Config is a major work-horse routine for minimally destructive reshaping of
 // a tree structure to fit a target configuration, specified in terms of a
-// type-and-name list.  If the node is != nil, then it has UpdateStart / End
-// logic applied to it, only if necessary, as indicated by mods, updt return
-// values.
-func (sl *Slice) Config(n Ki, config Config) (mods, updt bool) {
-	mods, updt = false, false
+// type-and-name list. It returns whether any changes were made to the slice.
+func (sl *Slice) Config(n Ki, config Config) bool {
+	mods := false
 	// first make a map for looking up the indexes of the names
 	nm := make(map[string]int)
 	for i, tn := range config {
@@ -322,16 +320,16 @@ func (sl *Slice) Config(n Ki, config Config) (mods, updt bool) {
 		knm := kid.Name()
 		ti, ok := nm[knm]
 		if !ok {
-			sl.configDeleteKid(kid, i, n, &mods, &updt)
+			sl.configDeleteKid(kid, i, n, &mods)
 		} else if kid.KiType() != config[ti].Type {
-			sl.configDeleteKid(kid, i, n, &mods, &updt)
+			sl.configDeleteKid(kid, i, n, &mods)
 		}
 	}
 	// next add and move items as needed -- in order so guaranteed
 	for i, tn := range config {
 		kidx, ok := sl.IndexByName(tn.Name, i)
 		if !ok {
-			setMods(n, &mods, &updt)
+			mods = true
 			nkid := NewOfType(tn.Type)
 			nkid.SetName(tn.Name)
 			InitNode(nkid)
@@ -341,33 +339,18 @@ func (sl *Slice) Config(n Ki, config Config) (mods, updt bool) {
 			}
 		} else {
 			if kidx != i {
-				setMods(n, &mods, &updt)
+				mods = true
 				sl.Move(kidx, i)
 			}
 		}
 	}
-	return
+	return mods
 }
 
-func setMods(n Ki, mods *bool, updt *bool) {
-	if !*mods {
-		*mods = true
-		if n != nil {
-			*updt = n.UpdateStart()
-		}
-	}
-}
-
-func (sl *Slice) configDeleteKid(kid Ki, i int, n Ki, mods, updt *bool) {
-	if !*mods {
-		*mods = true
-		if n != nil {
-			*updt = n.UpdateStart()
-		}
-	}
+func (sl *Slice) configDeleteKid(kid Ki, i int, n Ki, mods *bool) {
+	*mods = true
 	kid.Destroy()
 	sl.DeleteAtIndex(i)
-	UpdateReset(kid) // it won't get the UpdateEnd from us anymore -- init fresh in any case
 }
 
 // CopyFrom another Slice.  It is efficient by using the Config method
@@ -394,10 +377,7 @@ func (sl *Slice) ConfigCopy(n Ki, frm Slice) {
 			cfg[i].Type = kid.KiType()
 			cfg[i].Name = kid.Name()
 		}
-		mods, updt := sl.Config(n, cfg)
-		if mods && n != nil {
-			n.UpdateEnd(updt)
-		}
+		sl.Config(n, cfg)
 	} else {
 		n.DeleteChildren()
 	}

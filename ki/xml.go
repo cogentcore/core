@@ -55,10 +55,8 @@ func (n *Node) ReadXML(reader io.Reader) error {
 		log.Println(err)
 		return err
 	}
-	updt := n.UpdateStart()
 	err = xml.Unmarshal(b, n.This()) // key use of this!
 	UnmarshalPost(n.This())
-	n.UpdateEnd(updt)
 	return err
 }
 

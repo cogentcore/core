@@ -61,13 +61,6 @@ func SetParent(kid Ki, parent Ki) {
 		k.This().OnChildAdded(kid)
 		return Continue
 	})
-	if parent != nil {
-		parup := parent.Is(Updating)
-		n.WalkPre(func(k Ki) bool {
-			k.SetFlag(parup, Updating)
-			return Continue
-		})
-	}
 }
 
 // MoveToParent deletes given node from its current parent and adds it as a child
@@ -146,16 +139,6 @@ func Depth(kn Ki) int {
 // SetDepth sets the current depth of the node to given value.
 func SetDepth(kn Ki, depth int) {
 	kn.AsKi().depth = depth
-}
-
-// UpdateReset resets Updating flag for this node and all children -- in
-// case they are out-of-sync due to more complex tree manipulations --
-// only call at a known point of non-updating.
-func UpdateReset(kn Ki) {
-	kn.WalkPre(func(k Ki) bool {
-		k.SetFlag(false, Updating)
-		return true
-	})
 }
 
 //////////////////////////////////////////////////

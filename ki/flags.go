@@ -11,8 +11,4 @@ type Flags int64 //enums:bitflag
 const (
 	// Field indicates a node is a field in its parent node, not a child in children.
 	Field Flags = iota
-
-	// Updating flag is set at UpdateStart and cleared if we were the first
-	// updater at UpdateEnd.
-	Updating
 )

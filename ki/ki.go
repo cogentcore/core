@@ -246,31 +246,22 @@ type Ki interface {
 	// extra, and creating any new ones, using NewChild with given type and
 	// naming according to nameStubX where X is the index of the child.
 	// If nameStub is not specified, it defaults to the ID (kebab-case)
-	// name of the type.
-	//
-	// IMPORTANT: returns whether any modifications were made (mods) AND if
-	// that is true, the result from the corresponding UpdateStart call --
-	// UpdateEnd is NOT called, allowing for further subsequent updates before
-	// you call UpdateEnd(updt)
+	// name of the type. It returns whether any changes were made to the
+	// children.
 	//
 	// Note that this does not ensure existing children are of given type, or
 	// change their names, or call UniquifyNames -- use ConfigChildren for
 	// those cases -- this function is for simpler cases where a parent uses
 	// this function consistently to manage children all of the same type.
-	SetNChildren(n int, typ *gti.Type, nameStub ...string) (mods, updt bool)
+	SetNChildren(n int, typ *gti.Type, nameStub ...string) bool
 
 	// ConfigChildren configures children according to given list of
 	// type-and-name's -- attempts to have minimal impact relative to existing
 	// items that fit the type and name constraints (they are moved into the
 	// corresponding positions), and any extra children are removed, and new
-	// ones added, to match the specified config.
-	// It is important that names are unique!
-	//
-	// IMPORTANT: returns whether any modifications were made (mods) AND if
-	// that is true, the result from the corresponding UpdateStart call --
-	// UpdateEnd is NOT called, allowing for further subsequent updates before
-	// you call UpdateEnd(updt).
-	ConfigChildren(config Config) (mods, updt bool)
+	// ones added, to match the specified config. It is important that names
+	// are unique! It returns whether any changes were made to the children.
+	ConfigChildren(config Config) bool
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Deleting Children
@@ -411,31 +402,6 @@ type Ki interface {
 	// Depth parameter of the node.  If fun returns false then any further
 	// traversal of that branch of the tree is aborted, but other branches continue.
 	WalkBreadth(fun func(k Ki) bool)
-
-	// UpdateStart should be called when starting to modify the tree (state or
-	// structure) -- returns whether this node was first to set the Updating
-	// flag (if so, all children have their Updating flag set -- pass the
-	// result to UpdateEnd -- automatically determines the highest level
-	// updated, within the normal top-down updating sequence -- can be called
-	// multiple times at multiple levels -- it is essential to ensure that all
-	// such Start's have an End!  Usage:
-	//
-	//   updt := n.UpdateStart()
-	//   ... code
-	//   n.UpdateEnd(updt)
-	// or
-	//   updt := n.UpdateStart()
-	//   defer n.UpdateEnd(updt)
-	//   ... code
-	UpdateStart() bool
-
-	// UpdateEnd should be called when done updating after an UpdateStart,
-	// and passed the result of the UpdateStart call.
-	// If this arg is true, the OnUpdated method will be called and the Updating
-	// flag will be cleared.  Also, if any ChildDeleted flags have been set,
-	// the delete manager DestroyDeleted is called.
-	// If the updt bool arg is false, this function is a no-op.
-	UpdateEnd(updt bool)
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Deep Copy of Trees

@@ -236,10 +236,8 @@ func ReadNewJSON(reader io.Reader) (Ki, error) {
 	}
 	root := NewOfType(typ)
 	InitNode(root)
-	updt := root.UpdateStart()
 	err = json.Unmarshal(rb, root)
 	UnmarshalPost(root)
-	root.UpdateEnd(updt)
 	return root, nil
 }
 
