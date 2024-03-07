@@ -1,0 +1,46 @@
+// Copyright (c) 2024, Cogent Core. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package enums
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+// it is much easier to test with an independent enum mock
+type enum int
+
+var hasFlag = map[enum]bool{5: true, 3: true}
+var bitIndexString = map[enum]string{5: "Apple", 3: "bitIndexString", 1: "one"}
+
+func (e enum) String() string         { return "extended" }
+func (e enum) Int64() int64           { return int64(e) }
+func (e enum) Desc() string           { return "" }
+func (e enum) Values() []Enum         { return nil }
+func (e enum) HasFlag(f BitFlag) bool { return hasFlag[f.(enum)] }
+func (e enum) BitIndexString() string { return bitIndexString[e] }
+
+func TestString(t *testing.T) {
+	m := map[enum]string{5: "Apple"}
+
+	assert.Equal(t, "Apple", String(5, m))
+	assert.Equal(t, "3", String(3, m))
+
+	assert.Equal(t, "Apple", StringExtended[enum, enum](5, m))
+	assert.Equal(t, "extended", StringExtended[enum, enum](3, m))
+
+	assert.Equal(t, "Apple", BitIndexStringExtended[enum, enum](5, m))
+	assert.Equal(t, "bitIndexString", BitIndexStringExtended[enum, enum](3, m))
+
+	assert.Equal(t, "", BitFlagString(0, []enum{}))
+	assert.Equal(t, "", BitFlagString(0, []enum{1}))
+	assert.Equal(t, "", BitFlagString(0, []enum{1, 2, 47}))
+	assert.Equal(t, "bitIndexString", BitFlagString(0, []enum{3}))
+	assert.Equal(t, "Apple", BitFlagString(0, []enum{5}))
+	assert.Equal(t, "bitIndexString|Apple", BitFlagString(0, []enum{3, 5}))
+	assert.Equal(t, "Apple|bitIndexString", BitFlagString(0, []enum{5, 3}))
+	assert.Equal(t, "Apple|bitIndexString", BitFlagString(0, []enum{5, 1, 3}))
+}
