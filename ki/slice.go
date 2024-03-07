@@ -320,9 +320,9 @@ func (sl *Slice) Config(n Ki, config Config) bool {
 		knm := kid.Name()
 		ti, ok := nm[knm]
 		if !ok {
-			sl.configDeleteKid(kid, i, n, &mods)
+			sl.configDeleteKid(kid, i, &mods)
 		} else if kid.KiType() != config[ti].Type {
-			sl.configDeleteKid(kid, i, n, &mods)
+			sl.configDeleteKid(kid, i, &mods)
 		}
 	}
 	// next add and move items as needed -- in order so guaranteed
@@ -347,7 +347,7 @@ func (sl *Slice) Config(n Ki, config Config) bool {
 	return mods
 }
 
-func (sl *Slice) configDeleteKid(kid Ki, i int, n Ki, mods *bool) {
+func (sl *Slice) configDeleteKid(kid Ki, i int, mods *bool) {
 	*mods = true
 	kid.Destroy()
 	sl.DeleteAtIndex(i)

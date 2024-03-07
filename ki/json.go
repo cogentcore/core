@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"log/slog"
 	"os"
 	"strconv"
@@ -132,10 +131,7 @@ func (sl *Slice) UnmarshalJSON(b []byte) error {
 	sl.Config(nil, tnl)
 
 	nwk := make([]Ki, n) // allocate new slice containing *pointers* to kids
-
-	for i, kid := range *sl {
-		nwk[i] = kid
-	}
+	copy(nwk, *sl)
 
 	cb := make([]byte, 0, 1+len(b)-rb)
 	cb = append(cb, []byte("[")...)
@@ -189,10 +185,10 @@ func WriteNewJSON(k Ki, writer io.Writer) error {
 // so ReadNewJSON can create an object of the proper type.
 func SaveNewJSON(k Ki, filename string) error {
 	fp, err := os.Create(filename)
-	defer fp.Close()
 	if err != nil {
 		return err
 	}
+	defer fp.Close()
 	bw := bufio.NewWriter(fp)
 	err = WriteNewJSON(k, bw)
 	if err != nil {
@@ -208,7 +204,7 @@ func SaveNewJSON(k Ki, filename string) error {
 // unmarshal, and an error.
 func ReadRootTypeJSON(b []byte) (*gti.Type, []byte, error) {
 	if !bytes.HasPrefix(b, JSONTypePrefix) {
-		return nil, b, fmt.Errorf("ki.ReadRootTypeJSON -- type prefix not found at start of file -- must be there to identify type of root node of tree.")
+		return nil, b, fmt.Errorf("ki.ReadRootTypeJSON -- type prefix not found at start of file -- must be there to identify type of root node of tree")
 	}
 	stidx := len(JSONTypePrefix) + 1
 	eidx := bytes.Index(b, JSONTypeSuffix)
@@ -226,30 +222,27 @@ func ReadRootTypeJSON(b []byte) (*gti.Type, []byte, error) {
 func ReadNewJSON(reader io.Reader) (Ki, error) {
 	b, err := io.ReadAll(reader)
 	if err != nil {
-		slog.Error(err.Error())
-		return nil, err
+		return nil, grr.Log(err)
 	}
 	typ, rb, err := ReadRootTypeJSON(b)
 	if err != nil {
-		slog.Error(err.Error())
-		return nil, err
+		return nil, grr.Log(err)
 	}
 	root := NewOfType(typ)
 	InitNode(root)
 	err = json.Unmarshal(rb, root)
 	UnmarshalPost(root)
-	return root, nil
+	return root, grr.Log(err)
 }
 
 // OpenNewJSON opens a new Ki tree from a JSON-encoded file, using type
 // information at start of file to create an object of the proper type
 func OpenNewJSON(filename string) (Ki, error) {
 	fp, err := os.Open(filename)
-	defer fp.Close()
 	if err != nil {
-		log.Println(err)
-		return nil, err
+		return nil, grr.Log(err)
 	}
+	defer fp.Close()
 	return ReadNewJSON(bufio.NewReader(fp))
 }
 

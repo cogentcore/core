@@ -227,19 +227,16 @@ func (sl *Slice) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 
 		for i := 0; i < n; i++ {
 			name, val, err = DecodeXMLCharEl(d)
+			if err != nil {
+				return grr.Log(err)
+			}
 			if name == "Type" {
 				tn := strings.TrimSpace(val)
-				// fmt.Printf("making type: %v\n", tn)
 				typ, err := gti.TypeByNameTry(tn)
 				if typ == nil {
 					return fmt.Errorf("ki.Slice UnmarshalXML: %w", err)
 				}
-				nkid := NewOfType(typ)
-				// fmt.Printf("nkid is new obj of type %T val: %+v\n", nkid, nkid)
-				kid, ok := nkid.(Ki)
-				if !ok {
-					return fmt.Errorf("ki.Slice UnmarshalXML: New child of type %v cannot convert to Ki", tn)
-				}
+				kid := NewOfType(typ)
 				InitNode(kid)
 				nwk = append(nwk, kid)
 			}
