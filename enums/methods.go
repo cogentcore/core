@@ -5,7 +5,9 @@
 package enums
 
 import (
+	"errors"
 	"strconv"
+	"strings"
 
 	"cogentcore.org/core/glop/num"
 )
@@ -95,4 +97,56 @@ func BitFlagStringExtended[T, E BitFlagConstraint](i T, values []T, extendedValu
 		}
 	}
 	return str
+}
+
+// SetString sets the given enum value from its string representation, the map from
+// enum names to values, and the name of the enum type, which is used for the error message.
+func SetString[T EnumConstraint](i *T, s string, nameToValueMap map[string]T, typeName string) error {
+	if val, ok := nameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+	return errors.New(s + " is not a valid value for type " + typeName)
+}
+
+// SetStringLower sets the given enum value from its string representation, the map from
+// enum names to values, and the name of the enum type, which is used for the error message.
+// It also tries the lowercase version of the given string if the original version fails.
+func SetStringLower[T EnumConstraint](i *T, s string, nameToValueMap map[string]T, typeName string) error {
+	if val, ok := nameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+	if val, ok := nameToValueMap[strings.ToLower(s)]; ok {
+		*i = val
+		return nil
+	}
+	return errors.New(s + " is not a valid value for type " + typeName)
+}
+
+// SetStringExtended sets the given enum value from its string representation and the map from
+// enum names to values, with the enum type extending the other given enum type.
+func SetStringExtended[T, E EnumConstraint](i *T, s string, nameToValueMap map[string]T) error {
+	if val, ok := nameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+	e := E(*i)
+	return any(&e).(EnumSetter).SetString(s)
+}
+
+// SetStringLowerExtended sets the given enum value from its string representation and the map from
+// enum names to values, with the enum type extending the other given enum type.
+// It also tries the lowercase version of the given string if the original version fails.
+func SetStringLowerExtended[T, E EnumConstraint](i *T, s string, nameToValueMap map[string]T) error {
+	if val, ok := nameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+	if val, ok := nameToValueMap[strings.ToLower(s)]; ok {
+		*i = val
+		return nil
+	}
+	e := E(*i)
+	return any(&e).(EnumSetter).SetString(s)
 }
