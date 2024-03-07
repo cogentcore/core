@@ -547,7 +547,7 @@ type Ki interface {
 // see node.go for struct implementing this interface
 
 // KiType is a Ki reflect.Type, suitable for checking for Type.Implements.
-var KiType = reflect.TypeOf((*Ki)(nil)).Elem()
+var KiType = reflect.TypeFor[Ki]()
 
 // todo: remove these if possible to eliminate reflect dependencies
 
@@ -557,20 +557,7 @@ func IsKi(typ reflect.Type) bool {
 	if typ == nil {
 		return false
 	}
-	if typ.Implements(KiType) {
-		return true
-	}
-	return reflect.PtrTo(typ).Implements(KiType) // typically need the pointer type to impl
-}
-
-// AsKi returns the Ki interface and Node base type for
-// any given object -- if not a Ki, return values are nil.
-func AsKi(v any) (Ki, *Node) {
-	k, ok := v.(Ki)
-	if !ok {
-		return nil, nil
-	}
-	return k, k.AsKi()
+	return typ.Implements(KiType) || reflect.PointerTo(typ).Implements(KiType)
 }
 
 // NewOfType makes a new Ki struct of given type -- must be a Ki type -- will
