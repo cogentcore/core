@@ -43,4 +43,40 @@ func TestString(t *testing.T) {
 	assert.Equal(t, "bitIndexString|Apple", BitFlagString(0, []enum{3, 5}))
 	assert.Equal(t, "Apple|bitIndexString", BitFlagString(0, []enum{5, 3}))
 	assert.Equal(t, "Apple|bitIndexString", BitFlagString(0, []enum{5, 1, 3}))
+
+	assert.Equal(t, "", BitFlagStringExtended(0, []enum{}, []enum{}))
+	assert.Equal(t, "", BitFlagStringExtended(0, []enum{1}, []enum{2, 1}))
+	assert.Equal(t, "Apple", BitFlagStringExtended(0, []enum{5}, []enum{1}))
+	assert.Equal(t, "bitIndexString", BitFlagStringExtended(0, []enum{}, []enum{3}))
+	assert.Equal(t, "Apple|bitIndexString", BitFlagStringExtended(0, []enum{3}, []enum{5}))
+	assert.Equal(t, "bitIndexString|Apple", BitFlagStringExtended(0, []enum{5, 1}, []enum{2, 3, 1}))
+
+	nameToValueMap := map[string]enum{"apple": 5}
+
+	i := enum(0)
+	assert.NoError(t, SetString(&i, "apple", nameToValueMap, "Fruits"))
+	assert.Equal(t, enum(5), i)
+	i = enum(4)
+	err := SetString(&i, "Apple", nameToValueMap, "Fruits")
+	if assert.Error(t, err) {
+		assert.Equal(t, "Apple is not a valid value for type Fruits", err.Error())
+	}
+	assert.Equal(t, enum(4), i)
+	err = SetString(&i, "Orange", nameToValueMap, "Fruits")
+	if assert.Error(t, err) {
+		assert.Equal(t, "Orange is not a valid value for type Fruits", err.Error())
+	}
+	assert.Equal(t, enum(4), i)
+
+	assert.NoError(t, SetStringLower(&i, "apple", nameToValueMap, "Fruits"))
+	assert.Equal(t, enum(5), i)
+	i = enum(4)
+	assert.NoError(t, SetStringLower(&i, "Apple", nameToValueMap, "Fruits"))
+	assert.Equal(t, enum(5), i)
+	i = enum(4)
+	err = SetStringLower(&i, "Orange", nameToValueMap, "Fruits")
+	if assert.Error(t, err) {
+		assert.Equal(t, "Orange is not a valid value for type Fruits", err.Error())
+	}
+	assert.Equal(t, enum(4), i)
 }
