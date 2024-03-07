@@ -4,6 +4,8 @@
 
 package main
 
+//go:generate core generate
+
 import (
 	"fmt"
 
@@ -18,7 +20,7 @@ import (
 	"cogentcore.org/core/units"
 )
 
-type Control struct {
+type Control struct { //gti:add
 	// Display controls how items are displayed, in terms of layout
 	Display styles.Displays
 
