@@ -170,7 +170,6 @@ func (sv *SliceViewInline) ConfigSlice() bool {
 		updt = sv.UpdateStart()
 	}
 	for i, vv := range sv.Values {
-		i := i
 		vvb := vv.AsValueBase()
 		vvb.OnChange(func(e events.Event) { sv.SetChanged() })
 		w := sv.Child(i).(gi.Widget)

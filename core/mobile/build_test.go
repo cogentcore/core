@@ -269,7 +269,6 @@ func TestBuildWithGoModules(t *testing.T) {
 			}
 
 			for _, tc := range tests {
-				tc := tc
 				t.Run(tc.Name, func(t *testing.T) {
 					c := &config.Config{}
 					laser.SetFromDefaultTags(c)

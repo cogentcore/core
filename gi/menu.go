@@ -184,8 +184,6 @@ func (wb *WidgetBase) ShowContextMenu(e events.Event) {
 func NewMenuFromStrings(strs []string, sel string, fun func(idx int)) *Scene {
 	return NewMenuScene(func(m *Scene) {
 		for i, s := range strs {
-			i := i
-			s := s
 			b := NewButton(m).SetText(s).OnClick(func(e events.Event) {
 				fun(i)
 			})

@@ -77,7 +77,6 @@ func TestSnackbarTime(t *testing.T) {
 	}()
 	times := []time.Duration{0, 25 * time.Millisecond, 75 * time.Millisecond}
 	for _, tm := range times {
-		tm := tm
 		b := NewBody()
 		b.Style(func(s *styles.Style) {
 			s.Min.Set(units.Dp(300))
@@ -92,7 +91,6 @@ func TestSnackbarTime(t *testing.T) {
 
 	// test making two
 	for _, tm := range times {
-		tm := tm
 		b := newBodyForSnackbar()
 		NewLabel(b).SetText(tm.String() + "-two")
 

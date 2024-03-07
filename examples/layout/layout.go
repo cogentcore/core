@@ -69,8 +69,6 @@ var FrameSizes = [5]mat32.Vec2{
 
 func PlainFrames(par gi.Widget, grow mat32.Vec2) {
 	for i, sz := range FrameSizes {
-		i := i
-		sz := sz
 		nm := fmt.Sprintf("fr%v", i)
 		fr := BoxFrame(par, nm)
 		fr.Style(func(s *styles.Style) {

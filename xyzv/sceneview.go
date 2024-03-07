@@ -145,7 +145,6 @@ func (sv *SceneView) ConfigToolbar(tb *gi.Toolbar) {
 
 	gi.NewLabel(tb).SetText("Save:")
 	for i := 1; i <= 4; i++ {
-		i := i
 		nm := fmt.Sprintf("%d", i)
 		gi.NewButton(tb).SetText(nm).
 			SetTooltip("first click (or + Shift) saves current view, second click restores to saved state").

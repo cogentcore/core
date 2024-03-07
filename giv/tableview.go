@@ -271,7 +271,6 @@ func (tv *TableView) ConfigHeader() {
 	_, idxOff := tv.RowWidgetNs()
 	nfld := tv.NVisFields
 	for fli := 0; fli < nfld; fli++ {
-		fli := fli
 		field := tv.VisFields[fli]
 		hdr := sgh.Child(idxOff + fli).(*gi.Button)
 		hdr.SetType(gi.ButtonMenu)
@@ -349,7 +348,6 @@ func (tv *TableView) ConfigRows() {
 	sg.Kids = make(ki.Slice, nWidg)
 
 	for i := 0; i < tv.VisRows; i++ {
-		i := i
 		si := i
 		ridx := i * nWidgPerRow
 		var val reflect.Value
@@ -380,7 +378,6 @@ func (tv *TableView) ConfigRows() {
 
 		vpath := tv.ViewPath + "[" + sitxt + "]"
 		for fli := 0; fli < tv.NVisFields; fli++ {
-			fli := fli
 			field := tv.VisFields[fli]
 			fval := val.Elem().FieldByIndex(field.Index)
 			vvi := i*tv.NVisFields + fli
@@ -471,7 +468,6 @@ func (tv *TableView) UpdateWidgets() {
 	tv.UpdateStartIdx()
 
 	for i := 0; i < tv.VisRows; i++ {
-		i := i
 		ridx := i * nWidgPerRow
 		si := tv.StartIdx + i // slice idx
 		invis := si >= tv.SliceSize
@@ -497,7 +493,6 @@ func (tv *TableView) UpdateWidgets() {
 			}
 		}
 		for fli := 0; fli < tv.NVisFields; fli++ {
-			fli := fli
 			field := tv.VisFields[fli]
 			cidx := ridx + idxOff + fli
 			if len(sg.Kids) < cidx {

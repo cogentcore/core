@@ -54,7 +54,6 @@ func SettingsView(b *gi.Body) {
 	tabs := gi.NewTabs(b)
 
 	for _, se := range gi.AllSettings {
-		se := se
 		fr := tabs.NewTab(se.Label())
 
 		NewStructView(fr).SetStruct(se).OnChange(func(e events.Event) {

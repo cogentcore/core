@@ -33,8 +33,6 @@ func TestLabel(t *testing.T) {
 func TestLabelTextDecoration(t *testing.T) {
 	for d := styles.Underline; d <= styles.LineThrough; d++ {
 		for st := styles.FontNormal; st <= styles.Italic; st++ {
-			d := d
-			st := st
 			b := NewBody()
 			NewLabel(b).SetText("Test").Style(func(s *styles.Style) {
 				s.Font.SetDecoration(d)

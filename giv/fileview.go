@@ -285,7 +285,6 @@ func (fv *FileView) ConfigToolbar(tb *gi.Toolbar) {
 	}
 	ch.ItemsFuncs = slices.Insert(ch.ItemsFuncs, 0, func() {
 		for _, sp := range gi.RecentPaths {
-			sp := sp
 			ch.Items = append(ch.Items, gi.ChooserItem{
 				Value: sp,
 				Icon:  icons.Folder,

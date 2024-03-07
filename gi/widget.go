@@ -490,7 +490,6 @@ func (wb *WidgetBase) WalkPreNode(fun func(ki.Ki) bool) {
 // Return ki.Continue (true) to continue, and ki.Break (false) to terminate.
 func (wb *WidgetBase) WidgetKidsIter(fun func(i int, kwi Widget, kwb *WidgetBase) bool) {
 	for i, k := range wb.Kids {
-		i := i
 		kwi, kwb := AsWidget(k)
 		if kwi == nil || kwi.This() == nil || kwi.Is(ki.Deleted) {
 			break
@@ -508,7 +507,6 @@ func (wb *WidgetBase) WidgetKidsIter(fun func(i int, kwi Widget, kwb *WidgetBase
 // Return ki.Continue (true) to continue, and ki.Break (false) to terminate.
 func (wb *WidgetBase) VisibleKidsIter(fun func(i int, kwi Widget, kwb *WidgetBase) bool) {
 	for i, k := range wb.Kids {
-		i := i
 		kwi, kwb := AsWidget(k)
 		if kwi == nil || kwi.This() == nil || kwi.Is(ki.Deleted) {
 			break

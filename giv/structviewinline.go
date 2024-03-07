@@ -114,8 +114,6 @@ func (sv *StructViewInline) ConfigStruct() bool {
 		updt = sv.UpdateStart()
 	}
 	for i, vv := range sv.FieldViews {
-		vv := vv
-		i := i
 		lbl := sv.Child(i * 2).(*gi.Label)
 		lbl.Style(func(s *styles.Style) {
 			s.SetTextWrap(false)

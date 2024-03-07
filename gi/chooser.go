@@ -503,7 +503,6 @@ func (ch *Chooser) SelectItemAction(idx int) *Chooser {
 func (ch *Chooser) MakeItemsMenu(m *Scene) {
 	ch.CallItemsFuncs()
 	for i, it := range ch.Items {
-		i := i
 		nm := "item-" + strconv.Itoa(i)
 		if it.SeparatorBefore {
 			NewSeparator(m, "separator-"+nm)

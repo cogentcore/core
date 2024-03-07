@@ -287,7 +287,6 @@ func (sv *StructView) ConfigStructGrid() bool {
 		updt = sg.UpdateStart()
 	}
 	for i, vv := range sv.FieldViews {
-		vv := vv
 		lbl := sg.Child(i * 2).(*gi.Label)
 		lbl.Style(func(s *styles.Style) {
 			s.SetTextWrap(false)

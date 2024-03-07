@@ -282,7 +282,6 @@ func (dv *DateView) ConfigDateGrid() {
 	}
 
 	for yd := somwyd; yd <= eomwyd; yd++ {
-		yd := yd
 		yds := strconv.Itoa(yd)
 		// actual time of this date
 		dt := somw.AddDate(0, 0, yd-somwyd)

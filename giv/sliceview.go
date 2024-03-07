@@ -692,7 +692,6 @@ func (sv *SliceViewBase) ConfigRows() {
 	sg.Kids = make(ki.Slice, nWidg)
 
 	for i := 0; i < sv.VisRows; i++ {
-		i := i
 		si := i
 		ridx := i * nWidgPerRow
 		var val reflect.Value
@@ -795,7 +794,6 @@ func (sv *SliceViewBase) UpdateWidgets() {
 	sv.UpdateStartIdx()
 
 	for i := 0; i < sv.VisRows; i++ {
-		i := i
 		ridx := i * nWidgPerRow
 		w := sg.Kids[ridx+idxOff].(gi.Widget)
 		vv := sv.Values[i]

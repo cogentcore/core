@@ -20,7 +20,6 @@ func GUI[T any](opts *grease.Options, cfg T, cmds ...*grease.Cmd[T]) {
 
 	b.AddAppBar(func(tb *gi.Toolbar) {
 		for _, cmd := range cmds {
-			cmd := cmd
 			if cmd.Name == "gui" { // we are already in GUI so that command is irrelevant
 				continue
 			}

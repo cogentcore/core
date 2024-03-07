@@ -65,11 +65,8 @@ func TestLayoutFramesAlignContent(t *testing.T) {
 	aligns := []styles.Aligns{styles.Start, styles.Center, styles.End}
 	tdir := LayoutTestDir(t)
 	for _, wrap := range wraps {
-		wrap := wrap
 		for _, dir := range dirs {
-			dir := dir
 			for _, align := range aligns {
-				align := align
 				tnm := fmt.Sprintf("wrap-%v-dir-%v-align-%v", wrap, dir, align)
 				b := NewBody()
 				b.Style(func(s *styles.Style) {
@@ -96,15 +93,12 @@ func TestLayoutFramesJustifyContent(t *testing.T) {
 	aligns := []styles.Aligns{styles.Start, styles.Center, styles.End}
 	tdir := LayoutTestDir(t)
 	for _, wrap := range wraps {
-		wrap := wrap
 		dsz := float32(600)
 		if wrap {
 			dsz = 400
 		}
 		for _, dir := range dirs {
-			dir := dir
 			for _, align := range aligns {
-				align := align
 				tnm := fmt.Sprintf("wrap_%v_dir_%v_align_%v", wrap, dir, align)
 				b := NewBody()
 				b.Style(func(s *styles.Style) {
@@ -130,7 +124,6 @@ func TestLayoutFramesJustifyItems(t *testing.T) {
 	tdir := LayoutTestDir(t)
 	// dsz := float32(600)
 	for _, align := range aligns {
-		align := align
 		tnm := fmt.Sprintf("align_%v", align)
 		b := NewBody()
 		b.Style(func(s *styles.Style) {
@@ -149,8 +142,6 @@ func TestLayoutFramesJustifySelf(t *testing.T) {
 	tdir := LayoutTestDir(t)
 	// dsz := float32(600)
 	for ai, align := range aligns {
-		ai := ai
-		align := align
 		tnm := fmt.Sprintf("align_%v", align)
 		b := NewBody()
 		b.Style(func(s *styles.Style) {
@@ -173,8 +164,6 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 	tdir := LayoutTestDir(t)
 	// dsz := float32(600)
 	for ai, align := range aligns {
-		ai := ai
-		align := align
 		tnm := fmt.Sprintf("align_%v", align)
 		b := NewBody()
 		b.Style(func(s *styles.Style) {
@@ -415,8 +404,6 @@ func WrapText(par Widget, txt string) *Label {
 
 func PlainFrames(par Widget, grow mat32.Vec2) {
 	for i, sz := range FrameSizes {
-		i := i
-		sz := sz
 		nm := fmt.Sprintf("fr%v", i)
 		fr := BoxFrame(par, nm)
 		fr.Style(func(s *styles.Style) {
