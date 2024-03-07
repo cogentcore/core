@@ -197,48 +197,27 @@ func (pr *Parser) ParserInit(fs *FileState) bool {
 // ParseNext does next step of parsing -- returns lowest-level rule that matched
 // or nil if no match error or at end
 func (pr *Parser) ParseNext(fs *FileState) *parse.Rule {
-	updt := false
-	if !parse.GuiActive {
-		updt = fs.ParseState.Ast.UpdateStart()
-	}
 	mrule := pr.Parser.StartParse(&fs.ParseState)
-	if !parse.GuiActive {
-		fs.ParseState.Ast.UpdateEnd(updt)
-	}
 	return mrule
 }
 
 // ParseRun continues running the parser until the end of the file
 func (pr *Parser) ParseRun(fs *FileState) {
-	updt := false
-	if !parse.GuiActive {
-		updt = fs.ParseState.Ast.UpdateStart()
-	}
 	for {
 		pr.Parser.StartParse(&fs.ParseState)
 		if fs.ParseState.AtEofNext() {
 			break
 		}
 	}
-	if !parse.GuiActive {
-		fs.ParseState.Ast.UpdateEnd(updt)
-	}
 }
 
 // ParseAll does full parsing, including ParseInit and ParseRun, assuming LexAll
 // has been done already
 func (pr *Parser) ParseAll(fs *FileState) {
-	updt := false
-	if !parse.GuiActive { // with gui, need updates to track updating of treeview
-		updt = fs.ParseState.Ast.UpdateStart()
-	}
 	if !pr.ParserInit(fs) {
 		return
 	}
 	pr.ParseRun(fs)
-	if !parse.GuiActive {
-		fs.ParseState.Ast.UpdateEnd(updt)
-	}
 	if pr.ReportErrs {
 		if fs.ParseHasErrs() {
 			fmt.Println(fs.ParseErrReport())
