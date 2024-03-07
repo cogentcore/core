@@ -7,15 +7,12 @@
 // Licensed under an Apache-2.0 license
 // and presumably Copyright (c) 2017 by Nick Ng
 
-//line bibtex.y:2
 package bibtex
 
 import (
 	__yyfmt__ "fmt"
 	"io"
 )
-
-//line bibtex.y:2
 
 type bibTag struct {
 	key string
@@ -24,7 +21,6 @@ type bibTag struct {
 
 var bib *BibTex // Only for holding current bib
 
-//line bibtex.y:16
 type bibtexSymType struct {
 	yys      int
 	bibtex   *BibTex
@@ -76,8 +72,6 @@ var bibtexStatenames = [...]string{}
 const bibtexEofCode = 1
 const bibtexErrCode = 2
 const bibtexInitialStackSize = 16
-
-//line bibtex.y:76
 
 // Parse is the entry point to the bibtex parser.
 func Parse(r io.Reader) (*BibTex, error) {
@@ -504,46 +498,39 @@ bibtexdefault:
 
 	case 1:
 		bibtexDollar = bibtexS[bibtexpt-1 : bibtexpt+1]
-		//line bibtex.y:36
 		{
 		}
 	case 2:
 		bibtexDollar = bibtexS[bibtexpt-0 : bibtexpt+1]
-		//line bibtex.y:39
 		{
 			bibtexVAL.bibtex = NewBibTex()
 			bib = bibtexVAL.bibtex
 		}
 	case 3:
 		bibtexDollar = bibtexS[bibtexpt-2 : bibtexpt+1]
-		//line bibtex.y:40
 		{
 			bibtexVAL.bibtex = bibtexDollar[1].bibtex
 			bibtexVAL.bibtex.AddEntry(bibtexDollar[2].bibentry)
 		}
 	case 4:
 		bibtexDollar = bibtexS[bibtexpt-2 : bibtexpt+1]
-		//line bibtex.y:41
 		{
 			bibtexVAL.bibtex = bibtexDollar[1].bibtex
 		}
 	case 5:
 		bibtexDollar = bibtexS[bibtexpt-2 : bibtexpt+1]
-		//line bibtex.y:42
 		{
 			bibtexVAL.bibtex = bibtexDollar[1].bibtex
 			bibtexVAL.bibtex.AddStringVar(bibtexDollar[2].bibtag.key, bibtexDollar[2].bibtag.val)
 		}
 	case 6:
 		bibtexDollar = bibtexS[bibtexpt-2 : bibtexpt+1]
-		//line bibtex.y:43
 		{
 			bibtexVAL.bibtex = bibtexDollar[1].bibtex
 			bibtexVAL.bibtex.AddPreamble(bibtexDollar[2].strings)
 		}
 	case 7:
 		bibtexDollar = bibtexS[bibtexpt-7 : bibtexpt+1]
-		//line bibtex.y:46
 		{
 			bibtexVAL.bibentry = NewBibEntry(bibtexDollar[2].strval, bibtexDollar[4].strval)
 			for _, t := range bibtexDollar[6].bibtags {
@@ -552,7 +539,6 @@ bibtexdefault:
 		}
 	case 8:
 		bibtexDollar = bibtexS[bibtexpt-7 : bibtexpt+1]
-		//line bibtex.y:47
 		{
 			bibtexVAL.bibentry = NewBibEntry(bibtexDollar[2].strval, bibtexDollar[4].strval)
 			for _, t := range bibtexDollar[6].bibtags {
@@ -561,84 +547,70 @@ bibtexdefault:
 		}
 	case 9:
 		bibtexDollar = bibtexS[bibtexpt-5 : bibtexpt+1]
-		//line bibtex.y:50
 		{
 		}
 	case 10:
 		bibtexDollar = bibtexS[bibtexpt-5 : bibtexpt+1]
-		//line bibtex.y:51
 		{
 		}
 	case 11:
 		bibtexDollar = bibtexS[bibtexpt-7 : bibtexpt+1]
-		//line bibtex.y:54
 		{
 			bibtexVAL.bibtag = &bibTag{key: bibtexDollar[4].strval, val: bibtexDollar[6].strings}
 		}
 	case 12:
 		bibtexDollar = bibtexS[bibtexpt-7 : bibtexpt+1]
-		//line bibtex.y:55
 		{
 			bibtexVAL.bibtag = &bibTag{key: bibtexDollar[4].strval, val: bibtexDollar[6].strings}
 		}
 	case 13:
 		bibtexDollar = bibtexS[bibtexpt-5 : bibtexpt+1]
-		//line bibtex.y:58
 		{
 			bibtexVAL.strings = bibtexDollar[4].strings
 		}
 	case 14:
 		bibtexDollar = bibtexS[bibtexpt-5 : bibtexpt+1]
-		//line bibtex.y:59
 		{
 			bibtexVAL.strings = bibtexDollar[4].strings
 		}
 	case 15:
 		bibtexDollar = bibtexS[bibtexpt-1 : bibtexpt+1]
-		//line bibtex.y:62
 		{
 			bibtexVAL.strings = NewBibConst(bibtexDollar[1].strval)
 		}
 	case 16:
 		bibtexDollar = bibtexS[bibtexpt-1 : bibtexpt+1]
-		//line bibtex.y:63
 		{
 			bibtexVAL.strings = bib.GetStringVar(bibtexDollar[1].strval)
 		}
 	case 17:
 		bibtexDollar = bibtexS[bibtexpt-3 : bibtexpt+1]
-		//line bibtex.y:64
 		{
 			bibtexVAL.strings = NewBibComposite(bibtexDollar[1].strings)
 			bibtexVAL.strings.(*BibComposite).Append(NewBibConst(bibtexDollar[3].strval))
 		}
 	case 18:
 		bibtexDollar = bibtexS[bibtexpt-3 : bibtexpt+1]
-		//line bibtex.y:65
 		{
 			bibtexVAL.strings = NewBibComposite(bibtexDollar[1].strings)
 			bibtexVAL.strings.(*BibComposite).Append(bib.GetStringVar(bibtexDollar[3].strval))
 		}
 	case 19:
 		bibtexDollar = bibtexS[bibtexpt-0 : bibtexpt+1]
-		//line bibtex.y:68
 		{
 		}
 	case 20:
 		bibtexDollar = bibtexS[bibtexpt-3 : bibtexpt+1]
-		//line bibtex.y:69
 		{
 			bibtexVAL.bibtag = &bibTag{key: bibtexDollar[1].strval, val: bibtexDollar[3].strings}
 		}
 	case 21:
 		bibtexDollar = bibtexS[bibtexpt-1 : bibtexpt+1]
-		//line bibtex.y:72
 		{
 			bibtexVAL.bibtags = []*bibTag{bibtexDollar[1].bibtag}
 		}
 	case 22:
 		bibtexDollar = bibtexS[bibtexpt-3 : bibtexpt+1]
-		//line bibtex.y:73
 		{
 			if bibtexDollar[3].bibtag == nil {
 				bibtexVAL.bibtags = bibtexDollar[1].bibtags
