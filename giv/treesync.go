@@ -203,7 +203,6 @@ func (tv *TreeView) AddTreeNodes(rel, myidx int, typ *gti.Type, n int) {
 	var stv *TreeView
 	for i := 0; i < n; i++ {
 		nm := fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i)
-		tv.SetChildAdded()
 		nki := tv.InsertNewChild(typ, myidx+i, nm)
 		ntv := AsTreeView(nki)
 		ntv.Update()
@@ -226,7 +225,6 @@ func (tv *TreeView) AddSyncNodes(rel, myidx int, typ *gti.Type, n int) {
 	var ski ki.Ki
 	for i := 0; i < n; i++ {
 		nm := fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i)
-		par.SetChildAdded()
 		nki := par.InsertNewChild(typ, myidx+i, nm)
 		if i == n-1 {
 			ski = nki
@@ -355,7 +353,6 @@ func (tv *TreeView) Duplicate() { //gti:add
 	nwkid := tv.Clone()
 	nwkid.SetName(nm)
 	ntv := AsTreeView(nwkid)
-	par.SetChildAdded()
 	par.InsertChild(nwkid, myidx+1)
 	ntv.Update()
 	par.Update()
@@ -380,7 +377,6 @@ func (tv *TreeView) DuplicateSync() {
 	nm := fmt.Sprintf("%v_Copy", sk.Name())
 	nwkid := sk.Clone()
 	nwkid.SetName(nm)
-	par.SetChildAdded()
 	par.InsertChild(nwkid, myidx+1)
 	par.UpdateEnd(updt)
 	tvpar.SendChangeEventReSync(nil)
@@ -489,7 +485,6 @@ func (tv *TreeView) PasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int,
 				ns.SetName(ns.Name() + "_Copy")
 			}
 		}
-		par.SetChildAdded()
 		par.InsertChild(ns, myidx+i)
 		npath := ns.PathFrom(sroot)
 		if mod == events.DropMove && npath == orgpath { // we will be nuked immediately after drag
@@ -515,7 +510,6 @@ func (tv *TreeView) PasteChildrenSync(md mimedata.Mimes, mod events.DropMods) {
 	sl, _ := tv.NodesFromMimeData(md)
 	sk := tv.SyncNode
 	updt := sk.UpdateStart()
-	sk.SetChildAdded()
 	for _, ns := range sl {
 		sk.AddChild(ns)
 	}

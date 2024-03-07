@@ -338,7 +338,6 @@ func (sl *Slice) Config(n Ki, config Config) (mods, updt bool) {
 			sl.Insert(nkid, i)
 			if n != nil {
 				SetParent(nkid, n)
-				n.SetChildAdded()
 			}
 		} else {
 			if kidx != i {
@@ -364,7 +363,6 @@ func (sl *Slice) configDeleteKid(kid Ki, i int, n Ki, mods, updt *bool) {
 		*mods = true
 		if n != nil {
 			*updt = n.UpdateStart()
-			n.SetFlag(true, ChildDeleted)
 		}
 	}
 	DeleteFromParent(kid)

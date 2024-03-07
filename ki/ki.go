@@ -314,10 +314,6 @@ type Ki interface {
 	// using atomic, safe for concurrent access
 	SetFlag(on bool, f ...enums.BitFlag)
 
-	// SetChildAdded sets the ChildAdded flag -- set when notification is needed
-	// for Add, Insert methods
-	SetChildAdded()
-
 	// ClearUpdateFlags resets all structure update related flags:
 	// ChildAdded, ChildDeleted, ChildrenDeleted, Deleted
 	// automatically called on StartUpdate to reset any old state.

@@ -1562,7 +1562,6 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, act
 				ns.SetName(ns.Name() + "_Copy")
 			}
 		}
-		par.SetChildAdded()
 		par.InsertChild(ns, myidx+i)
 		_, nwb := gi.AsWidget(ns.This())
 		ntv := AsTreeView(ns.This())
@@ -1594,7 +1593,6 @@ func (tv *TreeView) PasteChildren(md mimedata.Mimes, mod events.DropMods) {
 	sl, _ := tv.NodesFromMimeData(md)
 
 	updt := tv.UpdateStart()
-	tv.SetChildAdded()
 	for _, ns := range sl {
 		tv.AddChild(ns)
 		_, nwb := gi.AsWidget(ns.This())

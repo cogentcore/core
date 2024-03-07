@@ -218,7 +218,6 @@ func (ts *Tabs) InsertNewTab(label string, idx int, icon ...icons.Icon) *Frame {
 	defer ts.UpdateEndLayout(updt)
 
 	fr := ts.Frame()
-	fr.SetChildAdded()
 	frame := fr.InsertNewChild(FrameType, idx, label).(*Frame)
 	frame.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
@@ -243,7 +242,6 @@ func (ts *Tabs) AddTab(frame *Frame, label string) int {
 // for internal use only. An optional icon can also be passed for the tab button.
 func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int, icon ...icons.Icon) {
 	tb := ts.Tabs()
-	tb.SetChildAdded()
 	tab := tb.InsertNewChild(TabType, idx, label).(*Tab)
 	tab.Tooltip = label
 	tab.Type = ts.Type
@@ -273,7 +271,6 @@ func (ts *Tabs) InsertTab(frame *Frame, label string, idx int, icon ...icons.Ico
 	defer ts.UpdateEndLayout(updt)
 
 	fr := ts.Frame()
-	fr.SetChildAdded()
 	fr.InsertChild(frame, idx)
 	ts.InsertTabOnlyAt(frame, label, idx, icon...)
 	ts.Mu.Unlock()

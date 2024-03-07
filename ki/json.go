@@ -239,7 +239,6 @@ func ReadNewJSON(reader io.Reader) (Ki, error) {
 	updt := root.UpdateStart()
 	err = json.Unmarshal(rb, root)
 	UnmarshalPost(root)
-	root.SetChildAdded() // this might not be set..
 	root.UpdateEnd(updt)
 	return root, nil
 }

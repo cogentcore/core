@@ -60,9 +60,8 @@ func (n *Node) ReadXML(reader io.Reader) error {
 	updt := n.UpdateStart()
 	err = xml.Unmarshal(b, n.This()) // key use of this!
 	UnmarshalPost(n.This())
-	n.SetChildAdded() // this might not be set..
 	n.UpdateEnd(updt)
-	return nil
+	return err
 }
 
 // todo: save N as an attr instead of a full element

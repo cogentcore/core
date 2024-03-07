@@ -24,13 +24,4 @@ const (
 	// It should be skipped in all further processing, if there
 	// are remaining pointers to it.
 	Destroyed
-
-	// ChildAdded means one or more new children were added to the node.
-	ChildAdded
-
-	// ChildDeleted means one or more children were deleted from the node.
-	ChildDeleted
-
-	// ChildrenDeleted means all children were deleted.
-	ChildrenDeleted
 )

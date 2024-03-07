@@ -470,7 +470,6 @@ func (n *Node) SetChild(kid Ki, idx int, name ...string) error {
 // The kid node is assumed to not be on another tree (see MoveToParent)
 // and the existing name should be unique among children.
 // No UpdateStart / End wrapping is done: do that externally as needed.
-// Can also call SetChildAdded() if notification is needed.
 func (n *Node) InsertChild(kid Ki, at int) error {
 	if err := ThisCheck(n); err != nil {
 		return err
@@ -574,7 +573,6 @@ func (n *Node) DeleteChildAtIndex(idx int, destroy bool) bool {
 		return false
 	}
 	updt := n.This().UpdateStart()
-	n.SetFlag(true, ChildDeleted)
 	if child.Parent() == n.This() {
 		// only deleting if we are still parent -- change parent first to
 		// signal move delete is always sent live to affected node without
@@ -623,7 +621,6 @@ func (n *Node) DeleteChildByName(name string, destroy bool) bool {
 // better have kept a slice of them before calling this.
 func (n *Node) DeleteChildren(destroy bool) {
 	updt := n.This().UpdateStart()
-	n.SetFlag(true, ChildrenDeleted)
 	kids := n.Kids
 	n.Kids = n.Kids[:0] // preserves capacity of list
 	for _, kid := range kids {
@@ -678,17 +675,11 @@ func (n *Node) SetFlag(on bool, f ...enums.BitFlag) {
 	n.Flags.SetFlag(on, f...)
 }
 
-// SetChildAdded sets the ChildAdded flag -- set when notification is needed
-// for Add, Insert methods
-func (n *Node) SetChildAdded() {
-	n.SetFlag(true, ChildAdded)
-}
-
 // ClearUpdateFlags resets all structure update related flags:
 // ChildAdded, ChildDeleted, ChildrenDeleted, Deleted
 // automatically called on StartUpdate to reset any old state.
 func (n *Node) ClearUpdateFlags() {
-	n.SetFlag(false, ChildAdded, ChildDeleted, ChildrenDeleted, Deleted)
+	n.SetFlag(false, Deleted)
 }
 
 // FlagType is the base implementation of [Ki.FlagType] that returns a
