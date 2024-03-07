@@ -5,6 +5,7 @@
 package enums
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -22,6 +23,14 @@ func (e enum) Desc() string           { return "" }
 func (e enum) Values() []Enum         { return nil }
 func (e enum) HasFlag(f BitFlag) bool { return hasFlag[f.(enum)] }
 func (e enum) BitIndexString() string { return bitIndexString[e] }
+func (e *enum) SetInt64(i int64)      { *e = enum(i) }
+func (e *enum) SetString(s string) error {
+	if s == "Orange" {
+		*e = 7
+		return nil
+	}
+	return errors.New("invalid")
+}
 
 func TestString(t *testing.T) {
 	m := map[enum]string{5: "Apple"}
@@ -77,6 +86,18 @@ func TestString(t *testing.T) {
 	err = SetStringLower(&i, "Orange", nameToValueMap, "Fruits")
 	if assert.Error(t, err) {
 		assert.Equal(t, "Orange is not a valid value for type Fruits", err.Error())
+	}
+	assert.Equal(t, enum(4), i)
+
+	assert.NoError(t, SetStringExtended(&i, &i, "apple", nameToValueMap))
+	assert.Equal(t, enum(5), i)
+	i = enum(4)
+	assert.NoError(t, SetStringExtended(&i, &i, "Orange", nameToValueMap))
+	assert.Equal(t, enum(7), i)
+	i = enum(4)
+	err = SetStringExtended(&i, &i, "Apple", nameToValueMap)
+	if assert.Error(t, err) {
+		assert.Equal(t, "invalid", err.Error())
 	}
 	assert.Equal(t, enum(4), i)
 }
