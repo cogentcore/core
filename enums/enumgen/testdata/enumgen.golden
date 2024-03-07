@@ -297,20 +297,7 @@ var _StatesDescMap = map[States]string{1: `Enabled indicates the widget is enabl
 var _StatesMap = map[States]string{1: `enabled`, 3: `not-enabled`, 5: `focused`, 7: `vered`, 9: `currently-being-pressed-by-user`, 11: `actively-focused`, 13: `selected`}
 
 // String returns the string representation of this States value.
-func (i States) String() string {
-	str := ""
-	for _, ie := range _StatesValues {
-		if i.HasFlag(ie) {
-			ies := ie.BitIndexString()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}
-	return str
-}
+func (i States) String() string { return enums.BitFlagString(i, _StatesValues) }
 
 // BitIndexString returns the string representation of this States value
 // if it is a bit index value (typically an enum constant), and
@@ -440,20 +427,7 @@ var _LanguagesDescMap = map[Languages]string{6: `Go is the best programming lang
 var _LanguagesMap = map[Languages]string{6: `Go`, 10: `Python`, 14: `JavaScript`, 18: `Dart`, 22: `Rust`, 26: `Ruby`, 30: `C`, 34: `CPP`, 38: `ObjectiveC`, 42: `Java`, 46: `TypeScript`, 50: `Kotlin`, 54: `Swift`}
 
 // String returns the string representation of this Languages value.
-func (i Languages) String() string {
-	str := ""
-	for _, ie := range _LanguagesValues {
-		if i.HasFlag(ie) {
-			ies := ie.BitIndexString()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}
-	return str
-}
+func (i Languages) String() string { return enums.BitFlagString(i, _LanguagesValues) }
 
 // BitIndexString returns the string representation of this Languages value
 // if it is a bit index value (typically an enum constant), and
@@ -571,28 +545,7 @@ var _MoreLanguagesMap = map[MoreLanguages]string{55: `Perl`}
 
 // String returns the string representation of this MoreLanguages value.
 func (i MoreLanguages) String() string {
-	str := ""
-	for _, ie := range LanguagesValues() {
-		if i.HasFlag(ie) {
-			ies := ie.BitIndexString()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}
-	for _, ie := range _MoreLanguagesValues {
-		if i.HasFlag(ie) {
-			ies := ie.BitIndexString()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}
-	return str
+	return enums.BitFlagStringExtended(i, _MoreLanguagesValues, LanguagesValues())
 }
 
 // BitIndexString returns the string representation of this MoreLanguages value

@@ -49,29 +49,8 @@ func (i *{{.Name}}) SetFlag(on bool, f ...enums.BitFlag) {
 var StringMethodBitFlagTmpl = template.Must(template.New("StringMethodBitFlag").Parse(
 	`// String returns the string representation of this {{.Name}} value.
 func (i {{.Name}}) String() string {
-	str := "" {{if ne .Extends ""}}
-	for _, ie := range {{.Extends}}Values() {
-		if i.HasFlag(ie) {
-			ies := ie.BitIndexString()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}{{end}}
-	for _, ie := range _{{.Name}}Values {
-		if i.HasFlag(ie) {
-			ies := ie.BitIndexString()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}
-	return str
-}
+	{{- if eq .Extends ""}} return enums.BitFlagString(i, _{{.Name}}Values)
+	{{- else}} return enums.BitFlagStringExtended(i, _{{.Name}}Values, {{.Extends}}Values()) {{end}} }
 `))
 
 var SetStringMethodBitFlagTmpl = template.Must(template.New("SetStringMethodBitFlag").Parse(
