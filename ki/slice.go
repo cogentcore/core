@@ -347,7 +347,6 @@ func (sl *Slice) Config(n Ki, config Config) (mods, updt bool) {
 			}
 		}
 	}
-	DelMgr.DestroyDeleted()
 	return
 }
 
@@ -369,7 +368,7 @@ func (sl *Slice) configDeleteKid(kid Ki, i int, n Ki, mods, updt *bool) {
 		}
 	}
 	DeleteFromParent(kid)
-	DelMgr.Add(kid)
+	kid.Destroy()
 	sl.DeleteAtIndex(i)
 	UpdateReset(kid) // it won't get the UpdateEnd from us anymore -- init fresh in any case
 }

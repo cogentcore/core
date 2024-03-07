@@ -584,10 +584,10 @@ func (n *Node) DeleteChildAtIndex(idx int, destroy bool) bool {
 		DeleteFromParent(child)
 	}
 	n.Kids.DeleteAtIndex(idx)
-	if destroy {
-		DelMgr.Add(child)
-	}
 	UpdateReset(child) // it won't get the UpdateEnd from us anymore -- init fresh in any case
+	if destroy {
+		child.Destroy()
+	}
 	n.This().UpdateEnd(updt)
 	return true
 }
@@ -631,11 +631,10 @@ func (n *Node) DeleteChildren(destroy bool) {
 			continue
 		}
 		kid.SetFlag(true, Deleted)
-		SetParent(kid, nil)
 		UpdateReset(kid)
-	}
-	if destroy {
-		DelMgr.Add(kids...)
+		if destroy {
+			kid.Destroy()
+		}
 	}
 	n.This().UpdateEnd(updt)
 }
@@ -659,8 +658,7 @@ func (n *Node) Destroy() {
 	if n.This() == nil { // already dead!
 		return
 	}
-	n.DeleteChildren(true)  // first delete all my children
-	DelMgr.DestroyDeleted() // then destroy all those kids
+	n.DeleteChildren(true) // delete and destroy all my children
 	n.SetFlag(true, Destroyed)
 	n.Ths = nil // last gasp: lose our own sense of self..
 	// note: above is thread-safe because This() accessor checks Destroyed
@@ -1127,9 +1125,6 @@ func (n *Node) UpdateEnd(updt bool) {
 	}
 	if n.This() == nil || n.Is(Destroyed) || n.Is(Deleted) {
 		return
-	}
-	if n.Is(ChildDeleted) || n.Is(ChildrenDeleted) {
-		DelMgr.DestroyDeleted()
 	}
 	n.WalkPre(func(k Ki) bool {
 		k.SetFlag(false, Updating) // note: could check first and break here but good to ensure all clear

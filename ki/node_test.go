@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/gti"
 	. "cogentcore.org/core/ki"
 	"cogentcore.org/core/ki/testdata"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNodeAddChild(t *testing.T) {
@@ -153,12 +154,7 @@ func TestNodeDeleteChild(t *testing.T) {
 	typ := parent.KiType()
 	child := parent.NewChild(typ, "child1")
 	parent.DeleteChild(child, true)
-	if len(parent.Kids) != 0 {
-		t.Errorf("Children length != 0, was %d", len(parent.Kids))
-	}
-	if len(DelMgr.Dels) != 0 { // note: even though using destroy, UpdateEnd does destroy
-		t.Errorf("Deleted length != 0, was %d", len(DelMgr.Dels))
-	}
+	assert.Zero(t, len(parent.Kids))
 }
 
 func TestNodeDeleteChildName(t *testing.T) {
@@ -167,12 +163,7 @@ func TestNodeDeleteChildName(t *testing.T) {
 	typ := parent.KiType()
 	parent.NewChild(typ, "child1")
 	parent.DeleteChildByName("child1", true)
-	if len(parent.Kids) != 0 {
-		t.Errorf("Children length != 0, was %d", len(parent.Kids))
-	}
-	if len(DelMgr.Dels) != 0 { // note: even though using destroy, UpdateEnd does destroy
-		t.Errorf("Deleted length != 0, was %d", len(DelMgr.Dels))
-	}
+	assert.Zero(t, len(parent.Kids))
 }
 
 func TestNodeFindName(t *testing.T) {
