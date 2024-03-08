@@ -303,7 +303,7 @@ const EditorFlagsN EditorFlags = 13
 
 var _EditorFlagsNameToValueMap = map[string]EditorFlags{`EditorHasLineNos`: 8, `EditorNeedsLayout`: 9, `EditorLastWasTabAI`: 10, `EditorLastWasUndo`: 11, `EditorTargetSet`: 12}
 
-var _EditorFlagsDescMap = map[EditorFlags]string{8: `EditorHasLineNos indicates that this editor has line numbers (per Buf option)`, 9: `EditorNeedsLayout is set by SetNeedsLayout: Editor does significant internal layout in LayoutAllLines, and its layout is simply based on what it gets allocated, so it does not affect the rest of the Scene.`, 10: `EditorLastWasTabAI indicates that last key was a Tab auto-indent`, 11: `EditorLastWasUndo indicates that last key was an undo`, 12: `EditorTargetSet indicates that the CursorTarget is set`}
+var _EditorFlagsDescMap = map[EditorFlags]string{8: `EditorHasLineNos indicates that this editor has line numbers (per Buf option)`, 9: `EditorNeedsLayout is set by NeedsLayout: Editor does significant internal layout in LayoutAllLines, and its layout is simply based on what it gets allocated, so it does not affect the rest of the Scene.`, 10: `EditorLastWasTabAI indicates that last key was a Tab auto-indent`, 11: `EditorLastWasUndo indicates that last key was an undo`, 12: `EditorTargetSet indicates that the CursorTarget is set`}
 
 var _EditorFlagsMap = map[EditorFlags]string{8: `EditorHasLineNos`, 9: `EditorNeedsLayout`, 10: `EditorLastWasTabAI`, 11: `EditorLastWasUndo`, 12: `EditorTargetSet`}
 

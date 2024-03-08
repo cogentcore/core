@@ -582,7 +582,7 @@ func (vv *ColorValue) UpdateWidget() {
 	vv.CreateTempIfNotPtr()
 	bt := vv.Widget.(*gi.Button)
 	bt.Update()
-	bt.SetNeedsRender(true)
+	bt.NeedsRender(true)
 }
 
 func (vv *ColorValue) ConfigWidget(w gi.Widget) {

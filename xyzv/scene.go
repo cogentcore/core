@@ -72,11 +72,11 @@ func (sw *Scene) HandleEvents() {
 		// fmt.Println("loc off:", e.LocalOff(), "pos:", pos, "e pos:", e.WindowPos())
 		// e.SetLocalOff(e.LocalOff().Add(pos))
 		sw.XYZ.MouseScrollEvent(e.(*events.MouseScroll))
-		sw.SetNeedsRender(true)
+		sw.NeedsRender(true)
 	})
 	sw.On(events.KeyChord, func(e events.Event) {
 		sw.XYZ.KeyChordEvent(e)
-		sw.SetNeedsRender(true)
+		sw.NeedsRender(true)
 	})
 	sw.HandleSlideEvents()
 	sw.HandleSelectEvents()
@@ -118,7 +118,7 @@ func (sw *Scene) ConfigFrame() {
 		}
 	})
 	sw.XYZ.SetFlag(true, xyz.ScNeedsRender)
-	sw.SetNeedsRender(true)
+	sw.NeedsRender(true)
 }
 
 func (sw *Scene) DrawIntoScene() {
@@ -186,7 +186,7 @@ func (sw *Scene) UpdateEnd3D(updt bool) {
 }
 
 // UpdateEndRender3D calls UpdateEndRender on the 3D Scene
-// and calls gi SetNeedsRender.
+// and calls gi NeedsRender.
 // resets the scene ScUpdating flag if updt = true
 // and sets the ScNeedsRender flag; updt is from UpdateStart().
 // Render only updates based on camera changes, not any node-level
@@ -194,12 +194,12 @@ func (sw *Scene) UpdateEnd3D(updt bool) {
 func (sw *Scene) UpdateEndRender3D(updt bool) {
 	if updt {
 		sw.XYZ.UpdateEndRender(updt)
-		sw.SetNeedsRender(updt)
+		sw.NeedsRender(updt)
 	}
 }
 
 // UpdateEndUpdate3D calls UpdateEndUpdate on the 3D Scene
-// and calls gi SetNeedsRender.
+// and calls gi NeedsRender.
 // UpdateEndUpdate resets the scene ScUpdating flag if updt = true
 // and sets the ScNeedsUpdate flag; updt is from UpdateStart().
 // Update is for when any node Pose or material changes happen.
@@ -207,19 +207,19 @@ func (sw *Scene) UpdateEndRender3D(updt bool) {
 func (sw *Scene) UpdateEndUpdate3D(updt bool) {
 	if updt {
 		sw.XYZ.UpdateEndUpdate(updt)
-		sw.SetNeedsRender(updt)
+		sw.NeedsRender(updt)
 	}
 }
 
 // UpdateEndConfig3D calls UpdateEndConfig on the 3D Scene
-// and calls gi SetNeedsRender.
+// and calls gi NeedsRender.
 // UpdateEndConfig resets the scene ScUpdating flag if updt = true
 // and sets the ScNeedsConfig flag; updt is from UpdateStart().
 // Config is for Texture, Lighting Meshes or more complex nodes).
 func (sw *Scene) UpdateEndConfig3D(updt bool) {
 	if updt {
 		sw.XYZ.UpdateEndConfig(updt)
-		sw.SetNeedsRender(updt)
+		sw.NeedsRender(updt)
 	}
 }
 

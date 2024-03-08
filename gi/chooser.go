@@ -449,9 +449,6 @@ func (ch *Chooser) SetCurrentText(text string) error {
 
 // ShowCurrentItem updates the display to present the current item.
 func (ch *Chooser) ShowCurrentItem() *Chooser {
-	updt := ch.UpdateStart()
-	defer ch.UpdateEndRender(updt)
-
 	if ch.Editable {
 		tf := ch.TextField()
 		if tf != nil {
@@ -468,12 +465,12 @@ func (ch *Chooser) ShowCurrentItem() *Chooser {
 		ch.SetIcon(ch.CurrentItem.Icon)
 		if ch.Icon != picon {
 			ch.Update()
-			// ch.SetNeedsLayout(true)
 		}
 	}
 	if ch.CurrentItem.Tooltip != "" {
 		ch.SetTooltip(ch.CurrentItem.Tooltip)
 	}
+	ch.NeedsRender(true)
 	return ch
 }
 
@@ -482,9 +479,8 @@ func (ch *Chooser) SelectItem(idx int) *Chooser {
 	if ch.This() == nil {
 		return ch
 	}
-	updt := ch.UpdateStart()
 	ch.SetCurrentIndex(idx)
-	ch.UpdateEndLayout(updt)
+	ch.NeedsLayout(true)
 	return ch
 }
 

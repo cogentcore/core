@@ -62,7 +62,7 @@ func (ic *Icon) SetIcon(icon icons.Icon) *Icon {
 // Does nothing if IconName is already == icon name.
 func (ic *Icon) SetIconUpdate(icon icons.Icon) *Icon {
 	ic.SetIcon(icon)
-	ic.SetNeedsRender(true)
+	ic.NeedsRender(true)
 	return ic
 }
 

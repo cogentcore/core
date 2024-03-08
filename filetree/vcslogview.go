@@ -213,12 +213,12 @@ func (lv *VCSLogView) ConfigToolbar() {
 		cbb.OnClick(func(e events.Event) {
 			lv.SetA = !cbb.IsChecked()
 			cba.SetState(lv.SetA, states.Checked)
-			cba.SetNeedsRender(true)
+			cba.NeedsRender(true)
 		})
 		cba.OnClick(func(e events.Event) {
 			lv.SetA = cba.IsChecked()
 			cbb.SetState(!lv.SetA, states.Checked)
-			cbb.SetNeedsRender(true)
+			cbb.NeedsRender(true)
 		})
 
 		tfb := gi.NewTextField(tb, "b-tf").SetText(lv.RevB)

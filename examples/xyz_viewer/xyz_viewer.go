@@ -61,7 +61,7 @@ func main() {
 					grr.Log1(sc.OpenNewObj(selFile, objgp))
 					sc.SetCamera("default")
 					sc.UpdateEndConfig(updt)
-					sv.SetNeedsRender(true)
+					sv.NeedsRender(true)
 				})
 			})
 	})

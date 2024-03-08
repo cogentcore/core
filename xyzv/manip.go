@@ -119,7 +119,7 @@ func (sw *Scene) SelectBox() {
 	clr := sw.SelParams.Color
 	xyz.NewLineBox(xy, xy, SelBoxName, SelBoxName, nb.WorldBBox.BBox, sw.SelParams.Width, clr, xyz.Inactive)
 
-	sw.SetNeedsRender(true)
+	sw.NeedsRender(true)
 }
 
 // ManipBox draws a manipulation box around selected node
@@ -157,7 +157,7 @@ func (sw *Scene) ManipBox() {
 	NewManipPt(mb, nm+"-uul", mbspm.Name(), clr, mat32.V3(bbox.Max.X, bbox.Max.Y, bbox.Min.Z))
 	NewManipPt(mb, nm+"-uuu", mbspm.Name(), clr, bbox.Max)
 
-	sw.SetNeedsRender(true)
+	sw.NeedsRender(true)
 }
 
 // SetManipPt sets the CurManipPt
@@ -241,7 +241,7 @@ func (sw *Scene) HandleSlideEvents() {
 		xy := sw.XYZ
 		if sw.CurManipPt == nil || sw.CurSel == nil {
 			xy.SlideMoveEvent(e)
-			sw.SetNeedsRender(true)
+			sw.NeedsRender(true)
 			return
 		}
 		sn := sw.CurSel.AsNode()
@@ -313,6 +313,6 @@ func (sw *Scene) HandleSlideEvents() {
 			mb.Pose.Pos.SetAdd(dpos)
 		}
 		xy.UpdateEndUpdate(updt)
-		sw.SetNeedsRender(updt)
+		sw.NeedsRender(updt)
 	})
 }

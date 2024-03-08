@@ -43,7 +43,7 @@ type Widget interface {
 	// manually thereafter as needed after configuration changes.
 	// See Update for a convenience function that does both.
 	// ConfigScene on Scene handles full tree configuration.
-	// This config calls UpdateStart / End, and SetNeedsLayout,
+	// This config calls UpdateStart / End, and NeedsLayout,
 	// and calls ConfigWidget to do the actual configuration,
 	// so it does not need to manage this housekeeping.
 	// Thus, this Config call is typically never changed, and

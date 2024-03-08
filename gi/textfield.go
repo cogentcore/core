@@ -452,7 +452,7 @@ func (tf *TextField) EditDone() {
 	}
 	tf.ClearSelected()
 	tf.ClearCursor()
-	tf.SetNeedsLayout(true)
+	tf.NeedsLayout(true)
 }
 
 // Revert aborts editing and reverts to last saved text
@@ -1069,7 +1069,7 @@ func (tf *TextField) Undo() {
 	}
 	tf.UndoPos--
 	tf.EditTxt = tf.Undos[tf.UndoPos]
-	tf.SetNeedsRender(true)
+	tf.NeedsRender(true)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1352,7 +1352,7 @@ func (tf *TextField) AutoScroll() {
 		tf.StartPos = 0
 		tf.EndPos = n
 		if len(tf.RenderAll.Spans) != tf.NLines {
-			tf.SetNeedsLayout(true)
+			tf.NeedsLayout(true)
 		}
 		return
 	}

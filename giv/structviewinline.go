@@ -189,6 +189,6 @@ func (sv *StructViewInline) UpdateFields() {
 func (sv *StructViewInline) UpdateFieldAction() {
 	if sv.IsShouldShower {
 		sv.Update()
-		sv.SetNeedsLayout(true)
+		sv.NeedsLayout(true)
 	}
 }

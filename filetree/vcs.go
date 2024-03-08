@@ -134,7 +134,7 @@ func (fn *Node) AddToVCS() {
 	err := repo.Add(string(fn.FPath))
 	if err == nil {
 		fn.Info.Vcs = vci.Added
-		fn.SetNeedsRender(true)
+		fn.NeedsRender(true)
 		return
 	}
 	fmt.Println(err)
@@ -160,7 +160,7 @@ func (fn *Node) DeleteFromVCS() {
 	err := repo.DeleteRemote(string(fn.FPath))
 	if fn != nil && err == nil {
 		fn.Info.Vcs = vci.Deleted
-		fn.SetNeedsRender(true)
+		fn.NeedsRender(true)
 		return
 	}
 	fmt.Println(err)
@@ -191,7 +191,7 @@ func (fn *Node) CommitToVCS(message string) (err error) {
 		return err
 	}
 	fn.Info.Vcs = vci.Stored
-	fn.SetNeedsRender(true)
+	fn.NeedsRender(true)
 	return err
 }
 
@@ -226,7 +226,7 @@ func (fn *Node) RevertVCS() (err error) {
 	if fn.Buf != nil {
 		fn.Buf.Revert()
 	}
-	fn.SetNeedsRender(true)
+	fn.NeedsRender(true)
 	return err
 }
 

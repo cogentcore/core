@@ -1822,7 +1822,7 @@ func (sv *SliceViewBase) DragDrop(e events.Event) {
 // DropFinalize is called to finalize Drop actions on the Source node.
 // Only relevant for DropMod == DropMove.
 func (sv *SliceViewBase) DropFinalize(de *events.DragDrop) {
-	sv.SetNeedsLayout(true)
+	sv.NeedsLayout(true)
 	sv.UnselectAllIdxs()
 	sv.Scene.EventMgr.DropFinalize(de) // sends DropDeleteSource to Source
 }
@@ -2045,7 +2045,7 @@ func (sv *SliceViewBase) HandleEvents() {
 		}
 		sv.CurrentCursor = sv.Styles.Cursor
 		if sv.HoverRow != prevHoverRow {
-			sv.SetNeedsRender(true)
+			sv.NeedsRender(true)
 		}
 	})
 	sv.On(events.MouseDrag, func(e events.Event) {
@@ -2064,7 +2064,7 @@ func (sv *SliceViewBase) HandleEvents() {
 		}
 		sv.CurrentCursor = sv.Styles.Cursor
 		if sv.HoverRow != prevHoverRow {
-			sv.SetNeedsRender(true)
+			sv.NeedsRender(true)
 		}
 	})
 	sv.OnFirst(events.DoubleClick, func(e events.Event) {

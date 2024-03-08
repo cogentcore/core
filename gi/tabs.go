@@ -224,7 +224,7 @@ func (ts *Tabs) InsertNewTab(label string, idx int, icon ...icons.Icon) *Frame {
 	})
 	ts.InsertTabOnlyAt(frame, label, idx, icon...)
 	ts.Update()
-	ts.SetNeedsLayout(true)
+	ts.NeedsLayout(true)
 	return frame
 }
 

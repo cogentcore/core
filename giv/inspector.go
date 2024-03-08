@@ -97,7 +97,7 @@ func (is *Inspector) SaveAs(filename gi.Filename) error { //gti:add
 	}
 	is.Changed = false
 	is.Filename = filename
-	is.SetNeedsRender(true) // notify our editor
+	is.NeedsRender(true) // notify our editor
 	return nil
 }
 
@@ -111,7 +111,7 @@ func (is *Inspector) Open(filename gi.Filename) error { //gti:add
 		return err
 	}
 	is.Filename = filename
-	is.SetNeedsRender(true) // notify our editor
+	is.NeedsRender(true) // notify our editor
 	return nil
 }
 
@@ -166,20 +166,20 @@ func (is *Inspector) SelectionMonitor() {
 			return
 		}
 	}
-	updt := is.UpdateStartAsync() // coming from other tree
+	updt := is.AsyncLock() // coming from other tree
 	tv.OpenParents()
 	tv.ScrollToMe()
 	tv.SelectAction(events.SelectOne)
-	is.UpdateEndAsyncLayout(updt)
+	is.AsyncUnlockLayout(updt)
 	is.Scene.Stage.Raise()
 
-	updt = sc.UpdateStartAsync()
+	updt = sc.AsyncLock()
 	sc.SetFlag(false, gi.ScRenderBBoxes)
 	if sc.SelectedWidgetChan != nil {
 		close(sc.SelectedWidgetChan)
 	}
 	sc.SelectedWidgetChan = nil
-	sc.UpdateEndAsyncRender(updt)
+	sc.AsyncUnlockRender(updt)
 }
 
 // InspectApp displays the underlying operating system app
@@ -277,9 +277,9 @@ func (is *Inspector) ConfigSplits() {
 			if w, wb := gi.AsWidget(sn); w != nil {
 				pselw := sc.SelectedWidget
 				sc.SelectedWidget = w
-				wb.SetNeedsRender(true)
+				wb.NeedsRender(true)
 				if pselw != nil {
-					pselw.AsWidget().SetNeedsRender(true)
+					pselw.AsWidget().NeedsRender(true)
 				}
 			}
 		})
@@ -304,7 +304,7 @@ func (is *Inspector) ConfigSplits() {
 			pselw := sc.SelectedWidget
 			sc.SelectedWidget = nil
 			if pselw != nil {
-				pselw.AsWidget().SetNeedsRender(true)
+				pselw.AsWidget().NeedsRender(true)
 			}
 		})
 		split.SetSplits(.3, .7)

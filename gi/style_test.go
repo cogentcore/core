@@ -44,7 +44,7 @@ func TestParentActualBackground(t *testing.T) {
 	sc.AssertRender(t, "style/parent-background-color/white-hovered-post", func() {
 		fr.SetState(true, states.Hovered)
 		fr.ApplyStyleTree()
-		fr.SetNeedsRender(true)
+		fr.NeedsRender(true)
 	})
 
 	sc, fr = make()
@@ -69,6 +69,6 @@ func TestParentActualBackground(t *testing.T) {
 	sc.AssertRender(t, "style/parent-background-color/gray-hovered-post", func() {
 		fr.SetState(true, states.Hovered)
 		fr.ApplyStyleTree()
-		fr.SetNeedsRender(true)
+		fr.NeedsRender(true)
 	})
 }

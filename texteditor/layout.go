@@ -206,7 +206,7 @@ func (ed *Editor) ScenePos() {
 
 // LayoutLine generates render of given line (including highlighting).
 // If the line with exceeds the current maximum, or the number of effective
-// lines (e.g., from word-wrap) is different, then SetNeedsLayout is called
+// lines (e.g., from word-wrap) is different, then NeedsLayout is called
 // and it returns true.
 func (ed *Editor) LayoutLine(ln int) bool {
 	if ed.Buf == nil || ed.Buf.NumLines() == 0 {
@@ -235,9 +235,9 @@ func (ed *Editor) LayoutLine(ln int) bool {
 	ed.Buf.MarkupMu.RUnlock()
 
 	if needLay {
-		ed.SetNeedsLayout(true)
+		ed.NeedsLayout(true)
 	} else {
-		ed.SetNeedsRender(true)
+		ed.NeedsRender(true)
 	}
 	return needLay
 }

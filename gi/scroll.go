@@ -190,7 +190,7 @@ func (ly *Layout) ScrollActionDelta(d mat32.Dims, delta float32) {
 		sb := ly.Scrolls[d]
 		nval := sb.Value + sb.ScrollScale(delta)
 		sb.SetValueAction(nval)
-		ly.SetNeedsRender(true) // only render needed -- scroll updates pos
+		ly.NeedsRender(true) // only render needed -- scroll updates pos
 	}
 }
 
@@ -200,7 +200,7 @@ func (ly *Layout) ScrollActionPos(d mat32.Dims, pos float32) {
 	if ly.HasScroll[d] && ly.Scrolls[d] != nil {
 		sb := ly.Scrolls[d]
 		sb.SetValueAction(pos)
-		ly.SetNeedsRender(true)
+		ly.NeedsRender(true)
 	}
 }
 
@@ -210,7 +210,7 @@ func (ly *Layout) ScrollToPos(d mat32.Dims, pos float32) {
 	if ly.HasScroll[d] && ly.Scrolls[d] != nil {
 		sb := ly.Scrolls[d]
 		sb.SetValueAction(pos)
-		ly.SetNeedsRender(true)
+		ly.NeedsRender(true)
 	}
 }
 
@@ -391,7 +391,7 @@ func (ly *Layout) ScrollToBox(box image.Rectangle) bool {
 		did = ly.ScrollToBoxDim(mat32.X, box.Min.X, box.Max.X)
 	}
 	if did {
-		ly.SetNeedsRender(true)
+		ly.NeedsRender(true)
 	}
 	return did
 }

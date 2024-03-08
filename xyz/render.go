@@ -61,7 +61,7 @@ func (sc *Scene) DoUpdate() bool {
 	return true
 }
 
-func (sc *Scene) SetNeedsRender() {
+func (sc *Scene) NeedsRender() {
 	sc.SetFlag(true, ScNeedsRender)
 }
 

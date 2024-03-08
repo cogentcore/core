@@ -127,7 +127,7 @@ func (an *Anim) Animate() {
 		}
 
 		sc.UpdateEndUpdate(updt)
-		an.SceneView.SceneWidget().SetNeedsRender(true)
+		an.SceneView.SceneWidget().NeedsRender(true)
 		an.Ang += an.Speed
 	}
 }

@@ -746,7 +746,7 @@ type RenderContext struct {
 	// Mu is mutex for locking out rendering and any destructive updates.
 	// It is locked at the RenderWin level during rendering and
 	// event processing to provide exclusive blocking of external updates.
-	// Use UpdateStartAsync from any outside routine to grab the lock before
+	// Use AsyncLock from any outside routine to grab the lock before
 	// doing modifications.
 	Mu sync.Mutex
 }
@@ -772,7 +772,7 @@ func NewRenderContext() *RenderContext {
 // Lock is called by RenderWin during RenderWindow and HandleEvent
 // when updating all widgets and rendering the screen.
 // Any outside access to window contents / scene must acquire this
-// lock first.  In general, use UpdateStartAsync to do this.
+// lock first.  In general, use AsyncLock to do this.
 func (rc *RenderContext) Lock() {
 	rc.Mu.Lock()
 }

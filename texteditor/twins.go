@@ -77,12 +77,12 @@ func (te *TwinEditors) ConfigTexts() {
 	av.On(events.Scroll, func(e events.Event) {
 		// bv.ScrollDelta(e)
 		bv.Geom.Scroll.Y = av.Geom.Scroll.Y
-		bv.SetNeedsRender(true)
+		bv.NeedsRender(true)
 	})
 	bv.On(events.Scroll, func(e events.Event) {
 		// av.ScrollDelta(e)
 		av.Geom.Scroll.Y = bv.Geom.Scroll.Y
-		av.SetNeedsRender(true)
+		av.NeedsRender(true)
 	})
 	inInputEvent := false
 	av.On(events.Input, func(e events.Event) {

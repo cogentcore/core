@@ -269,25 +269,25 @@ func (tv *TreeView) SetStyles() {
 			w.On(events.MouseEnter, func(e events.Event) {
 				tv.SetState(true, states.Hovered)
 				tv.ApplyStyle()
-				tv.SetNeedsRender(true)
+				tv.NeedsRender(true)
 				e.SetHandled()
 			})
 			w.On(events.MouseLeave, func(e events.Event) {
 				tv.SetState(false, states.Hovered)
 				tv.ApplyStyle()
-				tv.SetNeedsRender(true)
+				tv.NeedsRender(true)
 				e.SetHandled()
 			})
 			w.On(events.MouseDown, func(e events.Event) {
 				tv.SetState(true, states.Active)
 				tv.ApplyStyle()
-				tv.SetNeedsRender(true)
+				tv.NeedsRender(true)
 				e.SetHandled()
 			})
 			w.On(events.MouseUp, func(e events.Event) {
 				tv.SetState(false, states.Active)
 				tv.ApplyStyle()
-				tv.SetNeedsRender(true)
+				tv.NeedsRender(true)
 				e.SetHandled()
 			})
 			w.OnClick(func(e events.Event) {
@@ -303,13 +303,13 @@ func (tv *TreeView) SetStyles() {
 			w.On(events.DragEnter, func(e events.Event) {
 				tv.SetState(true, states.DragHovered)
 				tv.ApplyStyle()
-				tv.SetNeedsRender(true)
+				tv.NeedsRender(true)
 				e.SetHandled()
 			})
 			w.On(events.DragLeave, func(e events.Event) {
 				tv.SetState(false, states.DragHovered)
 				tv.ApplyStyle()
-				tv.SetNeedsRender(true)
+				tv.NeedsRender(true)
 				e.SetHandled()
 			})
 			w.On(events.Drop, func(e events.Event) {
@@ -530,11 +530,11 @@ func (tv *TreeView) SetBranchState() {
 	case tv.IsClosed():
 		br.SetState(false, states.Indeterminate)
 		br.SetState(false, states.Checked)
-		br.SetNeedsRender(true)
+		br.NeedsRender(true)
 	default:
 		br.SetState(false, states.Indeterminate)
 		br.SetState(true, states.Checked)
-		br.SetNeedsRender(true)
+		br.NeedsRender(true)
 	}
 }
 
@@ -702,7 +702,7 @@ func (tv *TreeView) Select() {
 		sl := tv.SelectedViews()
 		sl = append(sl, tv.This().(TreeViewer))
 		tv.SetSelectedViews(sl)
-		tv.SetNeedsRender(true)
+		tv.NeedsRender(true)
 	}
 }
 
@@ -721,7 +721,7 @@ func (tv *TreeView) Unselect() {
 			}
 		}
 		tv.SetSelectedViews(sl)
-		tv.SetNeedsRender(true)
+		tv.NeedsRender(true)
 	}
 }
 
@@ -740,7 +740,7 @@ func (tv *TreeView) UnselectAll() {
 		}
 		vt.SetSelected(false)
 		v.ApplyStyle()
-		vt.SetNeedsRender(true)
+		vt.NeedsRender(true)
 	}
 	tv.UpdateEndRender(updt)
 }
@@ -1136,7 +1136,7 @@ func (tv *TreeView) Close() {
 	}
 	updt := tv.UpdateStart()
 	if tv.HasChildren() {
-		tv.SetNeedsLayout(true)
+		tv.NeedsLayout(true)
 	}
 	tv.SetClosed(true)
 	tv.SetBranchState()
@@ -1176,7 +1176,7 @@ func (tv *TreeView) Open() {
 	tv.SetFlag(true, TreeViewInOpen)
 	updt := tv.UpdateStart()
 	if tv.This().(TreeViewer).CanOpen() {
-		tv.SetNeedsLayout(true)
+		tv.NeedsLayout(true)
 		tv.SetClosed(false)
 		tv.SetBranchState()
 		tv.SetKidsVisibility(false)
@@ -1624,7 +1624,7 @@ func (tv *TreeView) DragClearStates() {
 	tv.SetState(false, states.Active, states.Selected, states.Hovered, states.DragHovered)
 	tv.Parts.SetState(false, states.Active, states.Selected, states.Hovered, states.DragHovered)
 	tv.ApplyStyle()
-	tv.SetNeedsRender(true)
+	tv.NeedsRender(true)
 }
 
 // DragDrop handles drag drop event
@@ -1681,7 +1681,7 @@ func (tv *TreeView) DropDeleteSource(e events.Event) {
 			orgnm := psplt[len(psplt)-1]
 			sn.SetName(orgnm)
 			_, swb := gi.AsWidget(sn)
-			swb.SetNeedsRender(true)
+			swb.NeedsRender(true)
 		}
 	}
 }

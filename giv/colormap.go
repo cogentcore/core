@@ -43,7 +43,7 @@ func (vv *ColorMapValue) UpdateWidget() {
 		return
 	}
 	vv.Widget.ApplyStyle()
-	vv.AsWidgetBase().SetNeedsRender(true)
+	vv.AsWidgetBase().NeedsRender(true)
 }
 
 func (vv *ColorMapValue) ConfigWidget(w gi.Widget) {

@@ -147,7 +147,7 @@ func (fn *Node) OpenFileWith(command string) error {
 
 // DuplicateFiles makes a copy of selected files
 func (fn *Node) DuplicateFiles() { //gti:add
-	fn.FRoot.SetNeedsLayout(true)
+	fn.FRoot.NeedsLayout(true)
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := AsNode(sels[i].This())
@@ -185,7 +185,7 @@ func (fn *Node) DeleteFiles() { //gti:add
 
 // DeleteFilesImpl does the actual deletion, no prompts
 func (fn *Node) DeleteFilesImpl() {
-	fn.FRoot.SetNeedsLayout(true)
+	fn.FRoot.NeedsLayout(true)
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		fn := AsNode(sels[i].This())
@@ -247,7 +247,7 @@ func (fn *Node) DeleteFile() error {
 
 // renames any selected files
 func (fn *Node) RenameFiles() { //gti:add
-	fn.FRoot.SetNeedsRender(true)
+	fn.FRoot.NeedsRender(true)
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := AsNode(sels[i].This())

@@ -451,7 +451,7 @@ func (fn *Node) SortBys(modTime bool) { //gti:add
 // optionally can be sorted by modification time.
 func (fn *Node) SortBy(modTime bool) {
 	fn.FRoot.SetDirSortBy(fn.FPath, modTime)
-	fn.SetNeedsLayout(true)
+	fn.NeedsLayout(true)
 }
 
 // OpenAll opens all directories under this one

@@ -184,7 +184,7 @@ func (dv *DateView) SetTime(tim time.Time) *DateView {
 	}
 	dv.SendChange()
 	dv.Update()
-	dv.SetNeedsLayout(true)
+	dv.NeedsLayout(true)
 	return dv
 }
 

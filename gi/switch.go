@@ -109,9 +109,9 @@ func (sw *Switch) HandleEvents() {
 	sw.OnFinal(events.Click, func(e events.Event) {
 		sw.SetChecked(sw.IsChecked())
 		if sw.Type == SwitchChip {
-			sw.SetNeedsLayout(true)
+			sw.NeedsLayout(true)
 		} else {
-			sw.SetNeedsRender(true)
+			sw.NeedsRender(true)
 		}
 		sw.SendChange(e)
 	})

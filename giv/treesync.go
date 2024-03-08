@@ -91,7 +91,7 @@ func (tv *TreeView) SyncToSrc(tvIdx *int, init bool, depth int) {
 	}
 	mods, updt := tv.ConfigChildren(tnl) // false = don't use unique names -- needs to!
 	if mods {
-		tv.SetNeedsLayout(true)
+		tv.NeedsLayout(true)
 		// fmt.Printf("got mod on %v\n", tv.Path())
 	}
 	idx := 0
@@ -547,7 +547,7 @@ func (tv *TreeView) DropDeleteSourceSync(de *events.DragDrop) {
 			orgnm := psplt[len(psplt)-1]
 			sn.SetName(orgnm)
 			_, swb := gi.AsWidget(sn)
-			swb.SetNeedsRender(true)
+			swb.NeedsRender(true)
 		}
 	}
 	tv.SendChangeEventReSync(nil)

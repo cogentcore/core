@@ -114,7 +114,7 @@ func (ft *Tree) OpenPath(path string) {
 
 // UpdateAll does a full update of the tree -- calls ReadDir on current path
 func (ft *Tree) UpdateAll() {
-	// updt := ft.UpdateStartAsync() // note: safe for async updating
+	// updt := ft.AsyncLock() // note: safe for async updating
 	updt := ft.UpdateStart()
 	// fmt.Println(ft, "updt all start")
 	ft.UpdtMu.Lock()
@@ -124,19 +124,19 @@ func (ft *Tree) UpdateAll() {
 	// ft.Dirs.DeleteStale()
 	ft.Update()
 	ft.TreeViewChanged(nil)
-	ft.SetNeedsLayout(true)
+	ft.NeedsLayout(true)
 	ft.UpdtMu.Unlock()
 	// fmt.Println(ft, "updt all end")
-	// ft.UpdateEndAsyncLayout(updt) // todo:
+	// ft.AsyncUnlockLayout(updt) // todo:
 	ft.UpdateEndLayout(updt)
 }
 
 // UpdatePath updates the tree at the directory level for given path
 // and everything below it.  It flags that it needs render update,
-// but if a deletion or insertion happened, then SetNeedsLayout should also
+// but if a deletion or insertion happened, then NeedsLayout should also
 // be called.
 func (ft *Tree) UpdatePath(path string) {
-	ft.SetNeedsRender(true) //
+	ft.NeedsRender(true) //
 	path = filepath.Clean(path)
 	ft.DirsTo(path)
 	if fn, ok := ft.FindFile(path); ok {

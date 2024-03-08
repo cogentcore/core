@@ -88,7 +88,7 @@ func (mv *MapView) SetMap(mp any) *MapView {
 	// end up not being comparable types, so we can't check if equal
 	mv.Map = mp
 	mv.Update()
-	mv.SetNeedsLayout(true)
+	mv.NeedsLayout(true)
 	return mv
 }
 
@@ -214,7 +214,7 @@ func (mv *MapView) ConfigMapGrid() {
 	}
 	mods, updt := sg.ConfigChildren(config)
 	if mods {
-		sg.SetNeedsLayout(updt)
+		sg.NeedsLayout(updt)
 	} else {
 		updt = sg.UpdateStart() // cover rest of updates, which can happen even if same config
 	}

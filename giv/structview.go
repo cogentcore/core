@@ -109,7 +109,7 @@ func (sv *StructView) SetStruct(st any) *StructView {
 	}
 	sv.Struct = st
 	sv.Update()
-	sv.SetNeedsLayout(true)
+	sv.NeedsLayout(true)
 	return sv
 }
 
@@ -367,7 +367,7 @@ func (sv *StructView) UpdateFieldAction() {
 	}
 	if sv.IsShouldShower {
 		sv.Update()
-		sv.SetNeedsLayout(true)
+		sv.NeedsLayout(true)
 	}
 }
 

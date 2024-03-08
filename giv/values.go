@@ -1498,7 +1498,7 @@ func (vv *FileValue) UpdateWidget() {
 	prev := bt.Text
 	bt.SetTextUpdate(txt)
 	if txt != prev {
-		bt.SetNeedsLayout(true)
+		bt.NeedsLayout(true)
 	}
 }
 

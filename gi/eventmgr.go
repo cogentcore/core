@@ -338,10 +338,10 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 			}
 			if sc.SelectedWidget != pselw {
 				if pselw != nil {
-					pselw.AsWidget().SetNeedsRender(true)
+					pselw.AsWidget().NeedsRender(true)
 				}
 				if sc.SelectedWidget != nil {
-					sc.SelectedWidget.AsWidget().SetNeedsRender(true)
+					sc.SelectedWidget.AsWidget().NeedsRender(true)
 				}
 			}
 		}
@@ -740,7 +740,7 @@ func (em *EventMgr) DragMove(e events.Event) {
 		return
 	}
 	sp.Geom.Pos = e.WindowPos()
-	em.Scene.SetNeedsRender(true)
+	em.Scene.NeedsRender(true)
 }
 
 func (em *EventMgr) DragClearSprite() {
