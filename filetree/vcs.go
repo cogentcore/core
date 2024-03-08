@@ -15,6 +15,7 @@ import (
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/glop/dirs"
+	"cogentcore.org/core/grr"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
@@ -132,12 +133,10 @@ func (fn *Node) AddToVCS() {
 	}
 	// fmt.Printf("adding to vcs: %v\n", fn.FPath)
 	err := repo.Add(string(fn.FPath))
-	if err == nil {
+	if grr.Log(err) == nil {
 		fn.Info.Vcs = vci.Added
-		fn.NeedsRender(true)
-		return
+		fn.NeedsRender()
 	}
-	fmt.Println(err)
 }
 
 // DeleteFromVCSSel removes selected files from version control system
@@ -158,12 +157,10 @@ func (fn *Node) DeleteFromVCS() {
 	}
 	// fmt.Printf("deleting remote from vcs: %v\n", fn.FPath)
 	err := repo.DeleteRemote(string(fn.FPath))
-	if fn != nil && err == nil {
+	if fn != nil && grr.Log(err) == nil {
 		fn.Info.Vcs = vci.Deleted
-		fn.NeedsRender(true)
-		return
+		fn.NeedsRender()
 	}
-	fmt.Println(err)
 }
 
 // CommitToVCSSel commits to version control system based on last selected file
@@ -191,7 +188,7 @@ func (fn *Node) CommitToVCS(message string) (err error) {
 		return err
 	}
 	fn.Info.Vcs = vci.Stored
-	fn.NeedsRender(true)
+	fn.NeedsRender()
 	return err
 }
 
@@ -226,7 +223,7 @@ func (fn *Node) RevertVCS() (err error) {
 	if fn.Buf != nil {
 		fn.Buf.Revert()
 	}
-	fn.NeedsRender(true)
+	fn.NeedsRender()
 	return err
 }
 
@@ -471,7 +468,7 @@ func (vv *VersCtrlValue) UpdateWidget() {
 	if txt == "" {
 		txt = "(none)"
 	}
-	bt.SetTextUpdate(txt)
+	bt.SetText(txt).Update()
 }
 
 func (vv *VersCtrlValue) ConfigWidget(w gi.Widget) {
@@ -482,7 +479,6 @@ func (vv *VersCtrlValue) ConfigWidget(w gi.Widget) {
 	vv.Widget = w
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
-	bt.Config()
 	bt.OnClick(func(e events.Event) {
 		if !vv.IsReadOnly() {
 			vv.OpenDialog(bt, nil)

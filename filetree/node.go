@@ -207,10 +207,7 @@ func (fn *Node) UpdateDir() {
 			hasExtFiles = true
 		}
 	}
-	mods, updt := fn.ConfigChildren(config) // NOT unique names
-	if mods {
-		// fmt.Printf("got mods: %v\n", path)
-	}
+	mods := fn.ConfigChildren(config) // NOT unique names
 	// always go through kids, regardless of mods
 	for _, sfk := range fn.Kids {
 		sf := AsNode(sfk)
@@ -239,7 +236,6 @@ func (fn *Node) UpdateDir() {
 		if root != nil {
 			root.TreeViewChanged(nil)
 		}
-		fn.UpdateEndLayout(updt)
 	}
 }
 
@@ -429,9 +425,8 @@ func (fn *Node) CloseDir() {
 // which presumably was not processed originally
 func (fn *Node) OpenEmptyDir() bool {
 	if fn.IsDir() && !fn.HasChildren() {
-		updt := fn.UpdateStart()
 		fn.OpenDir()
-		fn.UpdateEndLayout(updt)
+		fn.NeedsLayout()
 		return true
 	}
 	return false
@@ -451,7 +446,7 @@ func (fn *Node) SortBys(modTime bool) { //gti:add
 // optionally can be sorted by modification time.
 func (fn *Node) SortBy(modTime bool) {
 	fn.FRoot.SetDirSortBy(fn.FPath, modTime)
-	fn.NeedsLayout(true)
+	fn.NeedsLayout()
 }
 
 // OpenAll opens all directories under this one
