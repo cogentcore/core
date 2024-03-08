@@ -14,7 +14,10 @@ import (
 // SettingsViewToolbarBase is the base toolbar configuration function used in [SettingsView].
 func SettingsViewToolbarBase(tb *gi.Toolbar) {
 	NewFuncButton(tb, gi.AppearanceSettings.SaveScreenZoom).SetIcon(icons.ZoomIn).
-		SetAfterFunc(func() { tb.Scene.NeedsLayout(true) })
+		SetAfterFunc(func() {
+			gi.AppearanceSettings.Apply()
+			gi.UpdateAll()
+		})
 		// todo: doesn't work to update..
 
 	tb.AddOverflowMenu(func(m *gi.Scene) {

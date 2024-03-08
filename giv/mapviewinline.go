@@ -107,15 +107,10 @@ func (mv *MapViewInline) SetMap(mp any) *MapViewInline {
 }
 
 func (mv *MapViewInline) ConfigWidget() {
-	mv.ConfigMap()
-}
-
-// ConfigMap configures children for map view
-func (mv *MapViewInline) ConfigMap() bool {
 	mv.DeleteChildren()
 	if laser.AnyIsNil(mv.Map) {
 		mv.ConfigSize = 0
-		return false
+		return
 	}
 	config := ki.Config{}
 	mv.Keys = make([]Value, 0)
@@ -155,10 +150,7 @@ func (mv *MapViewInline) ConfigMap() bool {
 	}
 	config.Add(gi.ButtonType, "add-action")
 	config.Add(gi.ButtonType, "edit-action")
-	mods, updt := mv.ConfigChildren(config)
-	if !mods {
-		updt = mv.UpdateStart()
-	}
+	mv.ConfigChildren(config)
 	for i, vv := range mv.Values {
 		kv := mv.Keys[i]
 		vvb := vv.AsValueBase()
@@ -218,8 +210,6 @@ func (mv *MapViewInline) ConfigMap() bool {
 		edbt.SetIcon(icons.Edit)
 		edbt.Tooltip = "map edit dialog"
 	}
-	mv.UpdateEnd(updt)
-	return updt
 }
 
 // SetChanged sets the Changed flag and emits the ViewSig signal for the
@@ -236,9 +226,6 @@ func (mv *MapViewInline) MapAdd() {
 	if laser.AnyIsNil(mv.Map) {
 		return
 	}
-	updt := mv.UpdateStart()
-	defer mv.UpdateEndLayout(updt)
-
 	laser.MapAdd(mv.Map)
 
 	if mv.TmpSave != nil {
@@ -253,10 +240,6 @@ func (mv *MapViewInline) MapDelete(key reflect.Value) {
 	if laser.AnyIsNil(mv.Map) {
 		return
 	}
-	updt := mv.UpdateStart()
-	defer mv.UpdateEndLayout(updt)
-
-	// kvi := laser.NonPtrValue(key).Interface()
 	laser.MapDeleteValue(mv.Map, laser.NonPtrValue(key))
 
 	if mv.TmpSave != nil {
