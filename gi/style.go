@@ -18,20 +18,7 @@ import (
 	"cogentcore.org/core/units"
 )
 
-// Styling logic:
-//
-// see render.go for rendering logic
-//
-// Style funcs require pervasive access to (distant) parent styles
-// while are themselves modifying their own styles.
-// Styles are used in rendering and layout.
-//
-// Therefore, there is significant risk of read / write race errors.
-//
-// However, the render update logic should mitigate most of these:
-//
-// During normal event or anim-triggered updates, there is an
-// UpdateStart at the start of any changes that
+// Styling logic; see render.go for rendering logic
 
 // CustomConfigStyles is the custom, global style configuration function
 // that is called on all widgets to configure their style functions.

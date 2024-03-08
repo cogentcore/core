@@ -19,7 +19,6 @@ Cogent Core provides a general-purpose tree container type, that can support all
 
 A virtue of using an appropriate data representation is that some important operations can be performed particularly concisely and efficiently when they are naturally supported by the data structure.  For example, matrices and vectors as supported by numpy or MATLAB provide a concise high-level language for expressing many algorithms.
 
-For trees, Cogent Core leverages the tree structure for automatically computing the appropriate extent of a scenegraph that needs to be updated, with an arbitrary sequence of individual operations, by propagating updating flags through the tree, and tracking the "high water mark" (see UpdateStart / End).  This makes the Cogent Core GUI efficient in terms of what needs to be redrawn, while keeping the code local and simple.
 
 In addition, Cogent Core provides functions that traverse the tree in the usual relevant ways ("natural" me-first depth-first, me-last depth-first, and breadth-first) and take a `func` function argument, so you can easily apply a common operation across the whole tree in a transparent and self-contained manner, like this:
 
@@ -37,10 +36,6 @@ func (n *MyNode) DoSomethingOnMyTree() {
 Many operations are naturally expressed in terms of these traversal algorithms.
 
 Three core Cogent Core features include:
-
-* A `Signal` mechanism that allows nodes to communicate changes and other events to arbitrary lists of other nodes (similar to the signals and slots from Qt).
-
-* `UpdateStart()` and `UpdateEnd()` functions that wrap around code that changes the tree structure or contents -- these automatically and efficiently determine the highest level node that was affected by changes, and only that highest node sends an `Updated` signal.  This allows arbitrarily nested modifications to proceed independently, each wrapped in their own Start / End blocks, with the optimal minimal update signaling automatically computed.
 
 * `ConfigChildren` uses a list of types and names and performs a minimal, efficient update of the children of a node to configure them to match (including no changes if already configured accordingly).  This is used during loading from JSON, and extensively in the `Cogent Core` GUI system to efficiently re-use existing tree elements.  There is often complex logic to determine what elements need to be present in a Widget, so separating that out from then configuring the elements that actually are present is efficient and simplifies the code.
 

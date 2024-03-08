@@ -737,8 +737,7 @@ type DebugSettingsData struct { //gti:add
 	WinEventTrace bool
 
 	// Print the stack trace leading up to win publish events
-	// which are expensive; wrap multiple updates in
-	// UpdateStart / End to prevent
+	// which are expensive
 	WinRenderTrace bool
 
 	// Print a trace of window geometry saving / loading functions

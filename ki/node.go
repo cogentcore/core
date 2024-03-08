@@ -129,7 +129,6 @@ func (n *Node) Name() string {
 // Names should generally be unique across children of each node.
 // See Unique* functions to check / fix.
 // If node requires non-unique names, add a separate Label field.
-// Does NOT wrap in UpdateStart / End.
 func (n *Node) SetName(name string) {
 	n.Nm = name
 }
@@ -414,8 +413,6 @@ func (n *Node) FieldByName(field string) (Ki, error) {
 // AddChild adds given child at end of children list.
 // The kid node is assumed to not be on another tree (see MoveToParent)
 // and the existing name should be unique among children.
-// No UpdateStart / End wrapping is done: do that externally as needed.
-// Can also call SetFlag(ki.ChildAdded) if notification is needed.
 func (n *Node) AddChild(kid Ki) error {
 	if err := ThisCheck(n); err != nil {
 		return err
@@ -430,8 +427,6 @@ func (n *Node) AddChild(kid Ki) error {
 // of children list. The name should be unique among children. If the
 // name is unspecified, it defaults to the ID (kebab-case) name of the
 // type, plus the [Ki.NumLifetimeChildren] of its parent.
-// No UpdateStart / End wrapping is done: do that externally as needed.
-// Can also call SetFlag(ki.ChildAdded) if notification is needed.
 func (n *Node) NewChild(typ *gti.Type, name ...string) Ki {
 	if err := ThisCheck(n); err != nil {
 		return nil
@@ -449,9 +444,7 @@ func (n *Node) NewChild(typ *gti.Type, name ...string) Ki {
 // SetChild sets child at given index to be the given item; if it is passed
 // a name, then it sets the name of the child as well; just calls Init
 // (or InitName) on the child, and SetParent. Names should be unique
-// among children. No UpdateStart / End wrapping is done: do that
-// externally as needed. Can also call SetFlag(ki.ChildAdded) if
-// notification is needed.
+// among children.
 func (n *Node) SetChild(kid Ki, idx int, name ...string) error {
 	if err := n.Kids.IsValidIndex(idx); err != nil {
 		return err
@@ -469,7 +462,6 @@ func (n *Node) SetChild(kid Ki, idx int, name ...string) error {
 // InsertChild adds given child at position in children list.
 // The kid node is assumed to not be on another tree (see MoveToParent)
 // and the existing name should be unique among children.
-// No UpdateStart / End wrapping is done: do that externally as needed.
 func (n *Node) InsertChild(kid Ki, at int) error {
 	if err := ThisCheck(n); err != nil {
 		return err
@@ -483,9 +475,7 @@ func (n *Node) InsertChild(kid Ki, at int) error {
 // InsertNewChild creates a new child of given type and add at position
 // in children list. The name should be unique among children. If the
 // name is unspecified, it defaults to the ID (kebab-case) name of the
-// type, plus the [Ki.NumLifetimeChildren] of its parent. No
-// UpdateStart / End wrapping is done: do that externally as needed.
-// Can also call SetFlag(ki.ChildAdded) if notification is needed.
+// type, plus the [Ki.NumLifetimeChildren] of its parent.
 func (n *Node) InsertNewChild(typ *gti.Type, at int, name ...string) Ki {
 	if err := ThisCheck(n); err != nil {
 		return nil
@@ -780,9 +770,7 @@ func (tm TravMap) Get(k Ki) int {
 // WalkPre calls function on this node (MeFirst) and then iterates
 // in a depth-first manner over all the children.
 // The [WalkPreNode] method is called for every node, after the given function,
-// which e.g., enables nodes to also traverse additional Ki Trees (e.g., Fields),
-// including for the basic UpdateStart / End and other such infrastructure calls
-// which use WalkPre (otherwise it could just be done in the given fun).
+// which e.g., enables nodes to also traverse additional Ki Trees (e.g., Fields).
 // The node traversal is non-recursive and uses locally-allocated state -- safe
 // for concurrent calling (modulo conflict management in function call itself).
 // Function calls are sequential all in current go routine.
@@ -844,10 +832,8 @@ outer:
 
 // WalkPreNode is called for every node during WalkPre with the function
 // passed to WalkPre.  This e.g., enables nodes to also traverse additional
-// Ki Trees (e.g., Fields), including for the basic UpdateStart / End and
-// other such infrastructure calls.
-func (n *Node) WalkPreNode(fun func(Ki) bool) {
-}
+// Ki Trees (e.g., Fields).
+func (n *Node) WalkPreNode(fun func(Ki) bool) {}
 
 // WalkPreLevel calls function on this node (MeFirst) and then iterates
 // in a depth-first manner over all the children.

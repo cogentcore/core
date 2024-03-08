@@ -45,10 +45,6 @@ import (
 // This requires proper initialization via Init method of the Ki interface.
 //
 // Ki nodes also support the following core functionality:
-//   - UpdateStart() / UpdateEnd() to wrap around tree updating code, which then
-//     automatically triggers update signals at the highest level of the
-//     affected tree, resulting in efficient updating logic for arbitrary
-//     nested tree modifications.
 //   - ConfigChildren system for minimally updating children to fit a given
 //     Name & Type template.
 //   - Automatic JSON I/O of entire tree including type information.
@@ -85,7 +81,6 @@ type Ki interface {
 	// Names should generally be unique across children of each node.
 	// See Unique* functions to check / fix.
 	// If node requires non-unique names, add a separate Label field.
-	// Does NOT wrap in UpdateStart / End.
 	SetName(name string)
 
 	// KiType returns the gti Type record for this Ki node.
@@ -207,39 +202,29 @@ type Ki interface {
 	// AddChild adds given child at end of children list.
 	// The kid node is assumed to not be on another tree (see MoveToParent)
 	// and the existing name should be unique among children.
-	// No UpdateStart / End wrapping is done: do that externally as needed.
-	// Can also call SetFlag(ki.ChildAdded) if notification is needed.
 	AddChild(kid Ki) error
 
 	// NewChild creates a new child of the given type and adds it at end
 	// of children list. The name should be unique among children. If the
 	// name is unspecified, it defaults to the ID (kebab-case) name of the
 	// type, plus the [Ki.NumLifetimeChildren] of its parent.
-	// No UpdateStart / End wrapping is done: do that externally as needed.
-	// Can also call SetFlag(ki.ChildAdded) if notification is needed.
 	NewChild(typ *gti.Type, name ...string) Ki
 
 	// SetChild sets child at given index to be the given item; if it is passed
 	// a name, then it sets the name of the child as well; just calls Init
 	// (or InitName) on the child, and SetParent. Names should be unique
-	// among children. No UpdateStart / End wrapping is done: do that
-	// externally as needed. Can also call SetFlag(ki.ChildAdded) if
-	// notification is needed.
+	// among children.
 	SetChild(kid Ki, idx int, name ...string) error
 
 	// InsertChild adds given child at position in children list.
 	// The kid node is assumed to not be on another tree (see MoveToParent)
 	// and the existing name should be unique among children.
-	// No UpdateStart / End wrapping is done: do that externally as needed.
-	// Can also call SetFlag(ki.ChildAdded) if notification is needed.
 	InsertChild(kid Ki, at int) error
 
 	// InsertNewChild creates a new child of given type and add at position
 	// in children list. The name should be unique among children. If the
 	// name is unspecified, it defaults to the ID (kebab-case) name of the
-	// type, plus the [Ki.NumLifetimeChildren] of its parent. No
-	// UpdateStart / End wrapping is done: do that externally as needed.
-	// Can also call SetFlag(ki.ChildAdded) if notification is needed.
+	// type, plus the [Ki.NumLifetimeChildren] of its parent.
 	InsertNewChild(typ *gti.Type, at int, name ...string) Ki
 
 	// SetNChildren ensures that there are exactly n children, deleting any
@@ -358,9 +343,7 @@ type Ki interface {
 	// WalkPre calls function on this node (MeFirst) and then iterates
 	// in a depth-first manner over all the children.
 	// The [WalkPreNode] method is called for every node, after the given function,
-	// which e.g., enables nodes to also traverse additional Ki Trees (e.g., Fields),
-	// including for the basic UpdateStart / End and other such infrastructure calls
-	// which use WalkPre (otherwise it could just be done in the given fun).
+	// which e.g., enables nodes to also traverse additional Ki Trees (e.g., Fields).
 	// The node traversal is non-recursive and uses locally-allocated state -- safe
 	// for concurrent calling (modulo conflict management in function call itself).
 	// Function calls are sequential all in current go routine.
@@ -371,8 +354,7 @@ type Ki interface {
 
 	// WalkPreNode is called for every node during WalkPre with the function
 	// passed to WalkPre.  This e.g., enables nodes to also traverse additional
-	// Ki Trees (e.g., Fields), including for the basic UpdateStart / End and
-	// other such infrastructure calls.
+	// Ki Trees (e.g., Fields).
 	WalkPreNode(fun func(k Ki) bool)
 
 	// WalkPreLevel calls function on this node (MeFirst) and then iterates

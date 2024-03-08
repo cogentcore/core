@@ -30,15 +30,6 @@ functionality, including:
 
   - Robust deep copy, clone, move of nodes.
 
-  - Signal sending and receiving between Nodes (simlar to Qt Signals /
-    Slots) -- setup connections once and then emit signals to all receivers
-    when relevant event happens.
-
-  - Robust state updating -- wrap updates in UpdateStart / End, and signals
-    are blocked until the final end, at the highest affected level in the
-    tree, at which point a single update signal is sent -- automatically
-    gives the minimal update.
-
   - Properties (as a string-keyed map) with property inheritance, including
     type-level properties via kit type registry.
 

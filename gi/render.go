@@ -28,20 +28,11 @@ import (
 // Key principles:
 //
 // * Async updates (animation, mouse events, etc) change state, _set only flags_
-//   using thread-safe atomic bitflag operations.  Actually rendering async (in V1)
-//   is really hard to get right, and requires tons of mutexes etc.
+//   using thread-safe atomic bitflag operations. True async rendering
+//   is really hard to get right, and requires tons of mutexes etc. Async updates
+//	 must go through [WidgetBase.AsyncLock] and [WidgetBase.AsyncUnlock].
 // * Synchronous, full-tree render updates do the layout, rendering,
 //   at regular FPS (frames-per-second) rate -- nop unless flag set.
-// * Ki UpdateStart / End ensures that _only the highest changed node is flagged_,
-//   while each individual state update uses the same Update wrapper calls locally,
-//   so that rendering updates automatically happen at this highest common node.
-// * UpdateStart starts naturally on the highest node driving a change, causing
-//   a cascade of other UpdateStart on lower nodes, but the IsUpdating flag signals
-//   that they are not the highest.  Only the highest calls UpdateEnd with true,
-//   which is the point at which the change is flagged for render updating.
-// * Thus, rendering updates skip any nodes with IsUpdating set, and are only
-//   triggered at the highest UpdateEnd, so there shouldn't be conflicts
-//   unless a node starts updating again before the next render hits.
 //
 // Three main steps:
 // * Config: (re)configures widgets based on current params
@@ -54,11 +45,7 @@ import (
 // ApplyStyle is always called after Config, and after any
 // current state of the Widget changes via events, animations, etc
 // (e.g., a Hover started or a Button is pushed down).
-// These changes should be protected by UpdateStart / End,
-// such that ApplyStyle is only ever called within that scope.
-// Use UpdateEndRender(updt) to call NeedsRender on updt
-// which sets the node NeedsRender and ScNeedsRender flags,
-// to drive the rendering update at next DoNeedsRender call.
+// Use NeedsRender() to drive the rendering update at next DoNeedsRender call.
 //
 // The initial configuration of a scene can skip calling
 // Config and ApplyStyle because these will be called automatically
@@ -67,10 +54,6 @@ import (
 // For dynamic reconfiguration after initial display,
 // ReConfg() is the key method, calling Config then
 // ApplyStyle on the node and all of its children.
-//
-// UpdateStart also sets the Scene-level ScUpdating flag, and
-// UpdateEnd clears it, to prevent any Scene-level layout etc
-// from happening while a widget is updating.
 //
 // For nodes with dynamic content that doesn't require styling or config,
 // a simple NeedsRender call will drive re-rendering.
@@ -82,43 +65,6 @@ import (
 // * ScNeedsRender: does NeedsRender on nodes.
 // * ScNeedsLayout: does GetSize, DoLayout, then Render -- after Config.
 //
-// Event handling, styling, etc updates should:
-// * Wrap with UpdateStart / End
-// * End with: SetNeedsStyle(vp, updt) if needs style updates needed based
-//   on state change, or NeedsRender(vp, updt)
-// * Or, if Config-level changes are needed, the Config(vp) must call
-//   NeedsLayout(vp, updt) to trigger vp Layout step after.
-//
-// The one mutex that is still needed is a RWMutex on the BBbox fields
-// because they are read by the event manager (and potentially inside
-// event handler code) which does not have any flag protection,
-// and are also read in rendering and written in Layout.
-
-/*
-// UpdateStart sets the scene ScUpdating flag to prevent
-// render updates during construction on a scene.
-func (wb *WidgetBase) UpdateStart() bool {
-	updt := wb.Node.UpdateStart()
-	if updt && !wb.Is(ki.Field) && wb.Sc != nil {
-		wb.Sc.SetFlag(true, ScUpdating)
-		if DebugSettings.UpdateTrace {
-			fmt.Println("DebugSettings.UpdateTrace Scene Start:", wb.Sc, "from widget:", wb)
-		}
-	}
-	return updt
-}
-
-// UpdateEnd resets the scene ScUpdating flag
-func (wb *WidgetBase) UpdateEnd(updt bool) {
-	if updt && !wb.Is(ki.Field) && wb.Sc != nil {
-		wb.Sc.SetFlag(false, ScUpdating)
-		if DebugSettings.UpdateTrace {
-			fmt.Println("DebugSettings.UpdateTrace Scene End:", wb.Sc, "from widget:", wb)
-		}
-	}
-	wb.Node.UpdateEnd(updt)
-}
-*/
 
 // AsyncLock must be called before making any updates in a separate goroutine
 // outside of the main configuration, rendering, and event handling structure.
