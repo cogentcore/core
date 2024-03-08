@@ -66,6 +66,6 @@ func main() {
 			})
 	})
 
-	sc.SetNeedsConfig()
+	sc.NeedsConfig()
 	b.RunMainWindow()
 }

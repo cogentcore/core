@@ -114,11 +114,10 @@ func NewScene(name ...string) *Scene {
 	return sc
 }
 
-// Update is a global update of everything: Config and re-render
+// Update is a global update of everything: config, update, and re-render
 func (sc *Scene) Update() {
-	updt := sc.UpdateStart()
 	sc.Config()
-	sc.UpdateEndUpdate(updt)
+	sc.NeedsUpdate()
 }
 
 // SaveCamera saves the current camera with given name -- can be restored later with SetCamera.
@@ -188,15 +187,10 @@ func (sc *Scene) Validate() error {
 type ScFlags ki.Flags //enums:bitflag
 
 const (
-	// ScUpdating means scene is in the process of updating:
-	// set for any kind of tree-level update.
-	// skip any further update passes until it goes off.
-	ScUpdating ScFlags = ScFlags(ki.FlagsN) + iota
-
 	// ScNeedsConfig means that a GPU resource (Lights, Texture, Meshes,
 	// or more complex Nodes that require ConfigNodes) has been changed
 	// and a Config call is required.
-	ScNeedsConfig
+	ScNeedsConfig ScFlags = ScFlags(ki.FlagsN) + iota
 
 	// ScNeedsUpdate means that Node Pose has changed and an update pass
 	// is required to update matrix and bounding boxes.

@@ -81,41 +81,41 @@ func (sv *SceneView) ConfigToolbar(tb *gi.Toolbar) {
 	gi.NewButton(tb).SetIcon(icons.Update).SetTooltip("reset to default initial display").
 		OnClick(func(e events.Event) {
 			sc.SetCamera("default")
-			sc.SetNeedsUpdate()
+			sc.NeedsUpdate()
 			sv.NeedsRender(true)
 		})
 	gi.NewButton(tb).SetIcon(icons.ZoomIn).SetTooltip("zoom in").
 		OnClick(func(e events.Event) {
 			sc.Camera.Zoom(-.05)
-			sc.SetNeedsUpdate()
+			sc.NeedsUpdate()
 			sv.NeedsRender(true)
 		})
 	gi.NewButton(tb).SetIcon(icons.ZoomOut).SetTooltip("zoom out").
 		OnClick(func(e events.Event) {
 			sc.Camera.Zoom(.05)
-			sc.SetNeedsUpdate()
+			sc.NeedsUpdate()
 			sv.NeedsRender(true)
 		})
 	gi.NewSeparator(tb)
 	gi.NewLabel(tb).SetText("Rot:").SetTooltip("rotate display")
 	gi.NewButton(tb).SetIcon(icons.KeyboardArrowLeft).OnClick(func(e events.Event) {
 		sc.Camera.Orbit(5, 0)
-		sc.SetNeedsUpdate()
+		sc.NeedsUpdate()
 		sv.NeedsRender(true)
 	})
 	gi.NewButton(tb).SetIcon(icons.KeyboardArrowUp).OnClick(func(e events.Event) {
 		sc.Camera.Orbit(0, 5)
-		sc.SetNeedsUpdate()
+		sc.NeedsUpdate()
 		sv.NeedsRender(true)
 	})
 	gi.NewButton(tb).SetIcon(icons.KeyboardArrowDown).OnClick(func(e events.Event) {
 		sc.Camera.Orbit(0, -5)
-		sc.SetNeedsUpdate()
+		sc.NeedsUpdate()
 		sv.NeedsRender(true)
 	})
 	gi.NewButton(tb).SetIcon(icons.KeyboardArrowRight).OnClick(func(e events.Event) {
 		sc.Camera.Orbit(-5, 0)
-		sc.SetNeedsUpdate()
+		sc.NeedsUpdate()
 		sv.NeedsRender(true)
 	})
 	gi.NewSeparator(tb)
@@ -123,22 +123,22 @@ func (sv *SceneView) ConfigToolbar(tb *gi.Toolbar) {
 	gi.NewLabel(tb).SetText("Pan:").SetTooltip("pan display")
 	gi.NewButton(tb).SetIcon(icons.KeyboardArrowLeft).OnClick(func(e events.Event) {
 		sc.Camera.Pan(-.2, 0)
-		sc.SetNeedsUpdate()
+		sc.NeedsUpdate()
 		sv.NeedsRender(true)
 	})
 	gi.NewButton(tb).SetIcon(icons.KeyboardArrowUp).OnClick(func(e events.Event) {
 		sc.Camera.Pan(0, .2)
-		sc.SetNeedsUpdate()
+		sc.NeedsUpdate()
 		sv.NeedsRender(true)
 	})
 	gi.NewButton(tb).SetIcon(icons.KeyboardArrowDown).OnClick(func(e events.Event) {
 		sc.Camera.Pan(0, -.2)
-		sc.SetNeedsUpdate()
+		sc.NeedsUpdate()
 		sv.NeedsRender(true)
 	})
 	gi.NewButton(tb).SetIcon(icons.KeyboardArrowRight).OnClick(func(e events.Event) {
 		sc.Camera.Pan(.2, 0)
-		sc.SetNeedsUpdate()
+		sc.NeedsUpdate()
 		sv.NeedsRender(true)
 	})
 	gi.NewSeparator(tb)
@@ -159,7 +159,7 @@ func (sv *SceneView) ConfigToolbar(tb *gi.Toolbar) {
 					}
 				}
 				fmt.Printf("Camera %s: %v\n", cam, sc.Camera.GenGoSet(""))
-				sc.SetNeedsUpdate()
+				sc.NeedsUpdate()
 				sv.NeedsRender(true)
 			})
 	}
