@@ -938,7 +938,7 @@ func (tb *Buf) AutoScrollViews() {
 		if ed != nil && ed.This() != nil {
 			ed.CursorPos = tb.EndPos()
 			ed.ScrollCursorInView()
-			ed.NeedsLayout(true)
+			ed.NeedsLayout()
 		}
 	}
 }

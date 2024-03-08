@@ -24,11 +24,9 @@ import (
 // Rendering Notes: all rendering is done in Render call.
 // Layout must be called whenever content changes across lines.
 
-func (ed *Editor) NeedsLayout(updt bool) {
-	if updt {
-		ed.NeedsRender(updt)
-		ed.SetFlag(true, EditorNeedsLayout)
-	}
+func (ed *Editor) NeedsLayout() {
+	ed.NeedsRender()
+	ed.SetFlag(true, EditorNeedsLayout)
 }
 
 func (ed *Editor) RenderLayout() {
@@ -37,7 +35,7 @@ func (ed *Editor) RenderLayout() {
 	ed.ConfigScrolls()
 	// _ = chg
 	if chg {
-		ed.Layout.NeedsLayout(true) // required to actually update scrollbar vs not
+		ed.Layout.NeedsLayout() // required to actually update scrollbar vs not
 		// 	ed.Scene.AddReRender(ed.This().(gi.Widget))
 	}
 }

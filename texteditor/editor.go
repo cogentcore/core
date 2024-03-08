@@ -357,7 +357,7 @@ func (ed *Editor) SetBuf(buf *Buf) *Editor {
 		}
 	}
 	ed.LayoutAllLines()
-	ed.NeedsLayout(true)
+	ed.NeedsLayout()
 	return ed
 }
 
@@ -393,7 +393,7 @@ func (ed *Editor) LinesInserted(tbe *textbuf.Edit) {
 	ed.Offs = nof
 
 	ed.NLines += nsz
-	ed.NeedsLayout(true)
+	ed.NeedsLayout()
 }
 
 // LinesDeleted deletes lines of text and reformats remaining one
@@ -406,7 +406,7 @@ func (ed *Editor) LinesDeleted(tbe *textbuf.Edit) {
 	ed.Offs = append(ed.Offs[:stln], ed.Offs[edln:]...)
 
 	ed.NLines -= dsz
-	ed.NeedsLayout(true)
+	ed.NeedsLayout()
 }
 
 // BufSignal receives a signal from the Buf when underlying text
@@ -417,9 +417,9 @@ func (ed *Editor) BufSignal(sig BufSignals, tbe *textbuf.Edit) {
 	case BufNew:
 		ed.ResetState()
 		ed.SetCursorShow(ed.CursorPos)
-		ed.NeedsLayout(true)
+		ed.NeedsLayout()
 	case BufMods:
-		ed.NeedsLayout(true)
+		ed.NeedsLayout()
 	case BufInsert:
 		if ed == nil || ed.This() == nil || !ed.This().(gi.Widget).IsVisible() {
 			return
@@ -449,7 +449,7 @@ func (ed *Editor) BufSignal(sig BufSignals, tbe *textbuf.Edit) {
 			ed.Update()
 		}
 	case BufMarkUpdt:
-		ed.NeedsLayout(true) // comes from another goroutine
+		ed.NeedsLayout() // comes from another goroutine
 	case BufClosed:
 		ed.SetBuf(nil)
 	}
@@ -495,7 +495,7 @@ func (ed *Editor) Redo() {
 //  Widget Interface
 
 func (ed *Editor) ConfigWidget() {
-	ed.NeedsLayout(true)
+	ed.NeedsLayout()
 }
 
 // StyleView sets the style of widget

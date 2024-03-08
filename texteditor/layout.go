@@ -235,9 +235,9 @@ func (ed *Editor) LayoutLine(ln int) bool {
 	ed.Buf.MarkupMu.RUnlock()
 
 	if needLay {
-		ed.NeedsLayout(true)
+		ed.NeedsLayout()
 	} else {
-		ed.NeedsRender(true)
+		ed.NeedsRender()
 	}
 	return needLay
 }

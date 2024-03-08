@@ -57,8 +57,6 @@ func (ed *Editor) SetCursor(pos lex.Pos) {
 		ed.CursorPos = lex.PosZero
 		return
 	}
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 
 	ed.ClearScopelights()
 	ed.CursorPos = ed.Buf.ValidPos(pos)
@@ -75,6 +73,7 @@ func (ed *Editor) SetCursor(pos lex.Pos) {
 			}
 		}
 	}
+	ed.NeedsRender()
 }
 
 // SetCursorShow sets a new cursor position, enforcing it in range, and shows
@@ -188,8 +187,6 @@ func (ed *Editor) CursorSelect(org lex.Pos) {
 
 // CursorForward moves the cursor forward
 func (ed *Editor) CursorForward(steps int) {
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	ed.ValidateCursor()
 	org := ed.CursorPos
 	for i := 0; i < steps; i++ {
@@ -206,12 +203,11 @@ func (ed *Editor) CursorForward(steps int) {
 	ed.SetCursorCol(ed.CursorPos)
 	ed.SetCursorShow(ed.CursorPos)
 	ed.CursorSelect(org)
+	ed.NeedsRender()
 }
 
 // CursorForwardWord moves the cursor forward by words
 func (ed *Editor) CursorForwardWord(steps int) {
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	ed.ValidateCursor()
 	org := ed.CursorPos
 	for i := 0; i < steps; i++ {
@@ -258,12 +254,11 @@ func (ed *Editor) CursorForwardWord(steps int) {
 	ed.SetCursorCol(ed.CursorPos)
 	ed.SetCursorShow(ed.CursorPos)
 	ed.CursorSelect(org)
+	ed.NeedsRender()
 }
 
 // CursorDown moves the cursor down line(s)
 func (ed *Editor) CursorDown(steps int) {
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	ed.ValidateCursor()
 	org := ed.CursorPos
 	pos := ed.CursorPos
@@ -304,13 +299,12 @@ func (ed *Editor) CursorDown(steps int) {
 	}
 	ed.SetCursorShow(pos)
 	ed.CursorSelect(org)
+	ed.NeedsRender()
 }
 
 // CursorPageDown moves the cursor down page(s), where a page is defined abcdef
 // dynamically as just moving the cursor off the screen
 func (ed *Editor) CursorPageDown(steps int) {
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	ed.ValidateCursor()
 	org := ed.CursorPos
 	for i := 0; i < steps; i++ {
@@ -325,12 +319,11 @@ func (ed *Editor) CursorPageDown(steps int) {
 	}
 	ed.SetCursor(ed.CursorPos)
 	ed.CursorSelect(org)
+	ed.NeedsRender()
 }
 
 // CursorBackward moves the cursor backward
 func (ed *Editor) CursorBackward(steps int) {
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	ed.ValidateCursor()
 	org := ed.CursorPos
 	for i := 0; i < steps; i++ {
@@ -347,12 +340,11 @@ func (ed *Editor) CursorBackward(steps int) {
 	ed.SetCursorCol(ed.CursorPos)
 	ed.SetCursorShow(ed.CursorPos)
 	ed.CursorSelect(org)
+	ed.NeedsRender()
 }
 
 // CursorBackwardWord moves the cursor backward by words
 func (ed *Editor) CursorBackwardWord(steps int) {
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	ed.ValidateCursor()
 	org := ed.CursorPos
 	for i := 0; i < steps; i++ {
@@ -402,12 +394,11 @@ func (ed *Editor) CursorBackwardWord(steps int) {
 	ed.SetCursorCol(ed.CursorPos)
 	ed.SetCursorShow(ed.CursorPos)
 	ed.CursorSelect(org)
+	ed.NeedsRender()
 }
 
 // CursorUp moves the cursor up line(s)
 func (ed *Editor) CursorUp(steps int) {
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	ed.ValidateCursor()
 	org := ed.CursorPos
 	pos := ed.CursorPos
@@ -446,13 +437,12 @@ func (ed *Editor) CursorUp(steps int) {
 	}
 	ed.SetCursorShow(pos)
 	ed.CursorSelect(org)
+	ed.NeedsRender()
 }
 
 // CursorPageUp moves the cursor up page(s), where a page is defined
 // dynamically as just moving the cursor off the screen
 func (ed *Editor) CursorPageUp(steps int) {
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	ed.ValidateCursor()
 	org := ed.CursorPos
 	for i := 0; i < steps; i++ {
@@ -467,6 +457,7 @@ func (ed *Editor) CursorPageUp(steps int) {
 	}
 	ed.SetCursor(ed.CursorPos)
 	ed.CursorSelect(org)
+	ed.NeedsRender()
 }
 
 // CursorRecenter re-centers the view around the cursor position, toggling
@@ -489,8 +480,6 @@ func (ed *Editor) CursorRecenter() {
 // CursorStartLine moves the cursor to the start of the line, updating selection
 // if select mode is active
 func (ed *Editor) CursorStartLine() {
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	ed.ValidateCursor()
 	org := ed.CursorPos
 	pos := ed.CursorPos
@@ -516,13 +505,12 @@ func (ed *Editor) CursorStartLine() {
 	ed.ScrollCursorToRight()
 	ed.RenderCursor(true)
 	ed.CursorSelect(org)
+	ed.NeedsRender()
 }
 
 // CursorStartDoc moves the cursor to the start of the text, updating selection
 // if select mode is active
 func (ed *Editor) CursorStartDoc() {
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	ed.ValidateCursor()
 	org := ed.CursorPos
 	ed.CursorPos.Ln = 0
@@ -532,12 +520,11 @@ func (ed *Editor) CursorStartDoc() {
 	ed.ScrollCursorToTop()
 	ed.RenderCursor(true)
 	ed.CursorSelect(org)
+	ed.NeedsRender()
 }
 
 // CursorEndLine moves the cursor to the end of the text
 func (ed *Editor) CursorEndLine() {
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	ed.ValidateCursor()
 	org := ed.CursorPos
 	pos := ed.CursorPos
@@ -564,13 +551,12 @@ func (ed *Editor) CursorEndLine() {
 	ed.ScrollCursorToRight()
 	ed.RenderCursor(true)
 	ed.CursorSelect(org)
+	ed.NeedsRender()
 }
 
 // CursorEndDoc moves the cursor to the end of the text, updating selection if
 // select mode is active
 func (ed *Editor) CursorEndDoc() {
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	ed.ValidateCursor()
 	org := ed.CursorPos
 	ed.CursorPos.Ln = max(ed.NLines-1, 0)
@@ -580,6 +566,7 @@ func (ed *Editor) CursorEndDoc() {
 	ed.ScrollCursorToBottom()
 	ed.RenderCursor(true)
 	ed.CursorSelect(org)
+	ed.NeedsRender()
 }
 
 // todo: ctrl+backspace = delete word
@@ -588,8 +575,6 @@ func (ed *Editor) CursorEndDoc() {
 
 // CursorBackspace deletes character(s) immediately before cursor
 func (ed *Editor) CursorBackspace(steps int) {
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	ed.ValidateCursor()
 	org := ed.CursorPos
 	if ed.HasSelection() {
@@ -603,12 +588,11 @@ func (ed *Editor) CursorBackspace(steps int) {
 	ed.ScrollCursorToCenterIfHidden()
 	ed.RenderCursor(true)
 	ed.Buf.DeleteText(ed.CursorPos, org, EditSignal)
+	ed.NeedsRender()
 }
 
 // CursorDelete deletes character(s) immediately after the cursor
 func (ed *Editor) CursorDelete(steps int) {
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	ed.ValidateCursor()
 	if ed.HasSelection() {
 		ed.DeleteSelection()
@@ -619,12 +603,11 @@ func (ed *Editor) CursorDelete(steps int) {
 	ed.CursorForward(steps)
 	ed.Buf.DeleteText(org, ed.CursorPos, EditSignal)
 	ed.SetCursorShow(org)
+	ed.NeedsRender()
 }
 
 // CursorBackspaceWord deletes words(s) immediately before cursor
 func (ed *Editor) CursorBackspaceWord(steps int) {
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	ed.ValidateCursor()
 	org := ed.CursorPos
 	if ed.HasSelection() {
@@ -637,12 +620,11 @@ func (ed *Editor) CursorBackspaceWord(steps int) {
 	ed.ScrollCursorToCenterIfHidden()
 	ed.RenderCursor(true)
 	ed.Buf.DeleteText(ed.CursorPos, org, EditSignal)
+	ed.NeedsRender()
 }
 
 // CursorDeleteWord deletes word(s) immediately after the cursor
 func (ed *Editor) CursorDeleteWord(steps int) {
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	ed.ValidateCursor()
 	if ed.HasSelection() {
 		ed.DeleteSelection()
@@ -653,12 +635,11 @@ func (ed *Editor) CursorDeleteWord(steps int) {
 	ed.CursorForwardWord(steps)
 	ed.Buf.DeleteText(org, ed.CursorPos, EditSignal)
 	ed.SetCursorShow(org)
+	ed.NeedsRender()
 }
 
 // CursorKill deletes text from cursor to end of text
 func (ed *Editor) CursorKill() {
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	ed.ValidateCursor()
 	org := ed.CursorPos
 	pos := ed.CursorPos
@@ -682,12 +663,11 @@ func (ed *Editor) CursorKill() {
 	}
 	ed.Buf.DeleteText(org, ed.CursorPos, EditSignal)
 	ed.SetCursorShow(org)
+	ed.NeedsRender()
 }
 
 // CursorTranspose swaps the character at the cursor with the one before it
 func (ed *Editor) CursorTranspose() {
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	ed.ValidateCursor()
 	pos := ed.CursorPos
 	if pos.Ch == 0 {
@@ -712,6 +692,7 @@ func (ed *Editor) CursorTranspose() {
 	if !end {
 		ed.SetCursorShow(pos)
 	}
+	ed.NeedsRender()
 }
 
 // CursorTranspose swaps the word at the cursor with the one before it
@@ -741,10 +722,9 @@ func (ed *Editor) JumpToLinePrompt() {
 
 // JumpToLine jumps to given line number (minus 1)
 func (ed *Editor) JumpToLine(ln int) {
-	updt := ed.UpdateStart()
 	ed.SetCursorShow(lex.Pos{Ln: ln - 1})
 	ed.SavePosHistory(ed.CursorPos)
-	ed.UpdateEndLayout(updt)
+	ed.NeedsLayout()
 }
 
 // FindNextLink finds next link after given position, returns false if no such links
@@ -820,11 +800,10 @@ func (ed *Editor) CursorNextLink(wraparound bool) bool {
 			return false
 		}
 	}
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	ed.HighlightRegion(reg)
 	ed.SetCursorShow(npos)
 	ed.SavePosHistory(ed.CursorPos)
+	ed.NeedsRender()
 	return true
 }
 
@@ -845,12 +824,11 @@ func (ed *Editor) CursorPrevLink(wraparound bool) bool {
 			return false
 		}
 	}
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 
 	ed.HighlightRegion(reg)
 	ed.SetCursorShow(npos)
 	ed.SavePosHistory(ed.CursorPos)
+	ed.NeedsRender()
 	return true
 }
 
@@ -903,7 +881,7 @@ func (ed *Editor) ScrollCursorToCenterIfHidden() bool {
 // ScrollToTop tells any parent scroll layout to scroll to get given vertical
 // coordinate at top of view to extent possible -- returns true if scrolled
 func (ed *Editor) ScrollToTop(pos int) bool {
-	ed.NeedsRender(true)
+	ed.NeedsRender()
 	return ed.ScrollDimToStart(mat32.Y, pos)
 }
 
@@ -918,7 +896,7 @@ func (ed *Editor) ScrollCursorToTop() bool {
 // vertical coordinate at bottom of view to extent possible -- returns true if
 // scrolled
 func (ed *Editor) ScrollToBottom(pos int) bool {
-	ed.NeedsRender(true)
+	ed.NeedsRender()
 	return ed.ScrollDimToEnd(mat32.Y, pos)
 }
 
@@ -933,7 +911,7 @@ func (ed *Editor) ScrollCursorToBottom() bool {
 // vertical coordinate to center of view to extent possible -- returns true if
 // scrolled
 func (ed *Editor) ScrollToVertCenter(pos int) bool {
-	ed.NeedsRender(true)
+	ed.NeedsRender()
 	return ed.ScrollDimToCenter(mat32.Y, pos)
 }
 
