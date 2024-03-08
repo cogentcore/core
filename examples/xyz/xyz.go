@@ -105,7 +105,6 @@ func (an *Anim) Animate() {
 			continue
 		}
 		sc := an.SceneView.SceneXYZ()
-		updt := sc.UpdateStart()
 		radius := float32(0.3)
 
 		if an.DoTorus {
@@ -126,7 +125,7 @@ func (an *Anim) Animate() {
 			an.Gopher.SetPosePos(gp)
 		}
 
-		sc.UpdateEndUpdate(updt)
+		sc.NeedsUpdate()
 		an.SceneView.SceneWidget().NeedsRender()
 		an.Ang += an.Speed
 	}

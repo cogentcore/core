@@ -81,10 +81,9 @@ func (sw *Scene) SetSel(nd xyz.Node) {
 		// }
 		sw.CurManipPt = nil
 		sw.CurSel = nil
-		updt := xy.UpdateStart()
 		xy.DeleteChildByName(SelBoxName)
 		xy.DeleteChildByName(ManipBoxName)
-		xy.UpdateEndRender(updt)
+		xy.NeedsRender()
 		return
 	}
 	manip, ok := nd.(*ManipPt)
@@ -111,15 +110,13 @@ func (sw *Scene) SelectBox() {
 	}
 	xy := sw.XYZ
 
-	updt := xy.UpdateStart()
-	defer xy.UpdateEndUpdate(updt)
-
 	nb := sw.CurSel.AsNode()
 	xy.DeleteChildByName(SelBoxName) // get rid of existing
 	clr := sw.SelParams.Color
 	xyz.NewLineBox(xy, xy, SelBoxName, SelBoxName, nb.WorldBBox.BBox, sw.SelParams.Width, clr, xyz.Inactive)
 
-	sw.NeedsRender(true)
+	xy.NeedsUpdate()
+	sw.NeedsRender()
 }
 
 // ManipBox draws a manipulation box around selected node
@@ -129,9 +126,6 @@ func (sw *Scene) ManipBox() {
 		return
 	}
 	xy := sw.XYZ
-
-	updt := xy.UpdateStart()
-	defer xy.UpdateEndConfig(updt)
 
 	nm := ManipBoxName
 
@@ -157,7 +151,8 @@ func (sw *Scene) ManipBox() {
 	NewManipPt(mb, nm+"-uul", mbspm.Name(), clr, mat32.V3(bbox.Max.X, bbox.Max.Y, bbox.Min.Z))
 	NewManipPt(mb, nm+"-uuu", mbspm.Name(), clr, bbox.Max)
 
-	sw.NeedsRender(true)
+	xy.NeedsConfig()
+	sw.NeedsRender()
 }
 
 // SetManipPt sets the CurManipPt
@@ -241,7 +236,7 @@ func (sw *Scene) HandleSlideEvents() {
 		xy := sw.XYZ
 		if sw.CurManipPt == nil || sw.CurSel == nil {
 			xy.SlideMoveEvent(e)
-			sw.NeedsRender(true)
+			sw.NeedsRender()
 			return
 		}
 		sn := sw.CurSel.AsNode()
@@ -281,7 +276,6 @@ func (sw *Scene) HandleSlideEvents() {
 			dd.Y = -dy
 		}
 		// fmt.Printf("mpos: %v  camd: %v  sgn: %v  dm: %v\n", mpos, camd, sgn, dm)
-		updt := xy.UpdateStart()
 		cdist := xy.Camera.DistTo(xy.Camera.Target)
 		scDel := float32(.0005) * cdist
 		panDel := float32(.0005) * cdist
@@ -312,7 +306,7 @@ func (sw *Scene) HandleSlideEvents() {
 			sn.Pose.Pos.SetAdd(mpos)
 			mb.Pose.Pos.SetAdd(dpos)
 		}
-		xy.UpdateEndUpdate(updt)
-		sw.NeedsRender(updt)
+		xy.NeedsUpdate()
+		sw.NeedsRender()
 	})
 }

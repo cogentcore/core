@@ -54,13 +54,12 @@ func main() {
 			OnClick(func(e events.Event) {
 				giv.FileViewDialog(tb, curFn, exts, "Open 3D Object", func(selFile string) {
 					curFn = selFile
-					updt := sc.UpdateStart()
 					objgp.DeleteChildren()
 					sc.DeleteMeshes()
 					sc.DeleteTextures()
 					grr.Log1(sc.OpenNewObj(selFile, objgp))
 					sc.SetCamera("default")
-					sc.UpdateEndConfig(updt)
+					sc.NeedsUpdate()
 					sv.NeedsRender()
 				})
 			})

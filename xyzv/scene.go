@@ -72,11 +72,11 @@ func (sw *Scene) HandleEvents() {
 		// fmt.Println("loc off:", e.LocalOff(), "pos:", pos, "e pos:", e.WindowPos())
 		// e.SetLocalOff(e.LocalOff().Add(pos))
 		sw.XYZ.MouseScrollEvent(e.(*events.MouseScroll))
-		sw.NeedsRender(true)
+		sw.NeedsRender()
 	})
 	sw.On(events.KeyChord, func(e events.Event) {
 		sw.XYZ.KeyChordEvent(e)
-		sw.NeedsRender(true)
+		sw.NeedsRender()
 	})
 	sw.HandleSlideEvents()
 	sw.HandleSelectEvents()
@@ -118,7 +118,7 @@ func (sw *Scene) ConfigFrame() {
 		}
 	})
 	sw.XYZ.SetFlag(true, xyz.ScNeedsRender)
-	sw.NeedsRender(true)
+	sw.NeedsRender()
 }
 
 func (sw *Scene) DrawIntoScene() {
@@ -167,59 +167,6 @@ func (sw *Scene) Render() {
 		sw.DrawIntoScene()
 		sw.RenderChildren()
 		sw.PopBounds()
-	}
-}
-
-// UpdateStart3D calls UpdateStart on the 3D Scene:
-// sets the scene ScUpdating flag to prevent
-// render updates during construction on a scene.
-// if already updating, returns false.
-// Pass the result to UpdateEnd* methods.
-func (sw *Scene) UpdateStart3D() bool {
-	return sw.XYZ.UpdateStart()
-}
-
-// UpdateEnd3D calls UpdateEnd on the 3D Scene:
-// resets the scene ScUpdating flag if updt = true
-func (sw *Scene) UpdateEnd3D(updt bool) {
-	sw.XYZ.UpdateEnd(updt)
-}
-
-// UpdateEndRender3D calls UpdateEndRender on the 3D Scene
-// and calls gi NeedsRender.
-// resets the scene ScUpdating flag if updt = true
-// and sets the ScNeedsRender flag; updt is from UpdateStart().
-// Render only updates based on camera changes, not any node-level
-// changes. See [UpdateEndUpdate].
-func (sw *Scene) UpdateEndRender3D(updt bool) {
-	if updt {
-		sw.XYZ.UpdateEndRender(updt)
-		sw.NeedsRender(updt)
-	}
-}
-
-// UpdateEndUpdate3D calls UpdateEndUpdate on the 3D Scene
-// and calls gi NeedsRender.
-// UpdateEndUpdate resets the scene ScUpdating flag if updt = true
-// and sets the ScNeedsUpdate flag; updt is from UpdateStart().
-// Update is for when any node Pose or material changes happen.
-// See [UpdateEndConfig] for major changes.
-func (sw *Scene) UpdateEndUpdate3D(updt bool) {
-	if updt {
-		sw.XYZ.UpdateEndUpdate(updt)
-		sw.NeedsRender(updt)
-	}
-}
-
-// UpdateEndConfig3D calls UpdateEndConfig on the 3D Scene
-// and calls gi NeedsRender.
-// UpdateEndConfig resets the scene ScUpdating flag if updt = true
-// and sets the ScNeedsConfig flag; updt is from UpdateStart().
-// Config is for Texture, Lighting Meshes or more complex nodes).
-func (sw *Scene) UpdateEndConfig3D(updt bool) {
-	if updt {
-		sw.XYZ.UpdateEndConfig(updt)
-		sw.NeedsRender(updt)
 	}
 }
 
