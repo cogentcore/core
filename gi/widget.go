@@ -19,49 +19,45 @@ import (
 	"cogentcore.org/core/styles"
 )
 
-// Widget is the interface for all Cogent Core Widget Nodes
+// Widget is the interface for all Cogent Core widgets.
 type Widget interface {
 	ki.Ki
+
+	// AsWidget returns the WidgetBase embedded field for any Widget node.
+	// The Widget interface defines only methods that can be overridden
+	// or need to be called on other nodes. Everything else that is common
+	// to all Widgets is in the WidgetBase.
+	AsWidget() *WidgetBase
 
 	// OnWidgetAdded adds a function to call when a widget is added
 	// as a child to the widget or any of its children.
 	OnWidgetAdded(f func(w Widget)) *WidgetBase
 
-	// Style sets the styling of the widget by adding a Styler function
+	// Style sets the styling of the widget by adding a Styler function.
 	Style(s func(s *styles.Style)) *WidgetBase
 
-	// AsWidget returns the WidgetBase embedded field for any Widget node.
-	// The Widget interface defines only methods that can be overridden
-	// or need to be called on other nodes.  Everything else that is common
-	// to all Widgets is in the WidgetBase.
-	AsWidget() *WidgetBase
-
-	// Config configures the widget, primarily configuring its Parts.
-	// it does _not_ call Config on children, just self.
-	// ApplyStyle must generally be called after Config - it is called
-	// automatically when Scene is first shown, but must be called
-	// manually thereafter as needed after configuration changes.
-	// See Update for a convenience function that does both.
-	// ConfigScene on Scene handles full tree configuration.
-	// This config calls UpdateStart / End, and NeedsLayout,
-	// and calls ConfigWidget to do the actual configuration,
-	// so it does not need to manage this housekeeping.
-	// Thus, this Config call is typically never changed, and
-	// all custom configuration should happen in ConfigWidget.
-	Config()
-
-	// ConfigWidget does the actual configuration of the widget,
-	// primarily configuring its Parts.
-	// All configuration should be robust to multiple calls
-	// (i.e., use Parts.ConfigChildren with Config).
-	// Outer Config call handles all the other infrastructure,
-	// so this call just does the core configuration.
-	ConfigWidget()
-
-	// Update calls Config and ApplyStyle on this widget.
-	// This should be called if any config options are changed
-	// while the Scene is being viewed.
+	// Update does a general purpose update of the widget and everything
+	// below it by reconfiguring it, applying its styles, and indicating
+	// that it needs a new layout pass. It is the main way that end users
+	// should update widgets, and it should be called after making any
+	// changes to the core properties of a widget (for example, the text
+	// of a label, the icon of a button, or the slice of a table view).
+	//
+	// If you are calling this in a separate goroutine outside of the main
+	// configuration, rendering, and event handling structure, you need to
+	// call [WidgetBase.AsyncLock] and [WidgetBase.AsyncUnlock] before and
+	// after this, respectively.
 	Update()
+
+	// ConfigWidget configures the widget, primarily configuring its Parts.
+	// it does not call Config on its children, just on itself.
+	// ApplyStyle must generally be called after Config; it is called
+	// automatically when the Scene is first shown, but must be called
+	// manually thereafter as needed after configuration changes.
+	// See Update for a convenience function that does both and also
+	// triggers a new layout pass. ConfigScene on Scene handles the full
+	// tree configuration.
+	ConfigWidget()
 
 	// StateIs returns whether the widget has the given [states.States] flag set
 	StateIs(flag states.States) bool

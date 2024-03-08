@@ -128,8 +128,6 @@ func (sp *Spinner) SetMax(max float32) *Spinner {
 
 // SetValue sets the value, enforcing any limits, and updates the display
 func (sp *Spinner) SetValue(val float32) *Spinner {
-	updt := sp.UpdateStart()
-	defer sp.UpdateEndRender(updt)
 	sp.Value = val
 	if sp.HasMax && sp.Value > sp.Max {
 		sp.Value = sp.Max
@@ -141,6 +139,7 @@ func (sp *Spinner) SetValue(val float32) *Spinner {
 		sp.Value -= mat32.Mod(sp.Value, sp.Step)
 	}
 	sp.SetTextToValue()
+	sp.NeedsRender()
 	return sp
 }
 

@@ -85,29 +85,25 @@ func (im *Image) OpenImageFS(fsys fs.FS, filename Filename) error {
 
 // SetImage sets the image to the given image.
 // It copies from the given image into an internal image.
-func (im *Image) SetImage(img image.Image) {
-	updt := im.UpdateStart()
-	defer im.UpdateEndRender(updt)
-
+func (im *Image) SetImage(img image.Image) *Image {
 	im.Pixels = clone.AsRGBA(img)
 	im.PrevPixels = nil
+	return im
 }
 
 // SetSize is a convenience method to ensure that the image
-// is given size.  A new image will be created of the given size
+// is given size. A new image will be created of the given size
 // if the current one is not of the specified size.
-func (im *Image) SetSize(sz image.Point) {
-	updt := im.UpdateStart()
-	defer im.UpdateEndRender(updt)
-
+func (im *Image) SetSize(sz image.Point) *Image {
 	if im.Pixels != nil {
 		csz := im.Pixels.Bounds().Size()
 		if sz == csz {
-			return
+			return im
 		}
 	}
 	im.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
 	im.PrevPixels = nil
+	return im
 }
 
 // GrabRenderFrom grabs the rendered image from given node

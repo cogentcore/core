@@ -58,21 +58,13 @@ func (ic *Icon) SetIcon(icon icons.Icon) *Icon {
 	return ic
 }
 
-// SetIconUpdate sets the icon and sets flag to render.
-// Does nothing if IconName is already == icon name.
-func (ic *Icon) SetIconUpdate(icon icons.Icon) *Icon {
-	ic.SetIcon(icon)
-	ic.NeedsRender(true)
-	return ic
-}
-
 // SetIconTry sets the icon, returning error
 // message if not found etc, and returning true if a new icon was actually set.
 // Does nothing and returns false if IconName is already == icon name.
 func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
 	if icon.IsNil() {
 		ic.SVG.DeleteAll()
-		ic.Config()
+		ic.ConfigWidget()
 		return false, nil
 	}
 	if ic.SVG.Root.HasChildren() && ic.Icon == icon {
@@ -83,7 +75,7 @@ func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
 	ic.SVG.Config(2, 2)
 	err := ic.SVG.OpenFS(icons.Icons, fnm)
 	if err != nil {
-		ic.Config()
+		ic.ConfigWidget()
 		return false, err
 	}
 	ic.Icon = icon

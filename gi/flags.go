@@ -55,7 +55,7 @@ func (wb *WidgetBase) SetAbilities(on bool, able ...abilities.Abilities) *Widget
 func (wb *WidgetBase) SetSelected(sel bool) {
 	wb.SetState(sel, states.Selected)
 	wb.ApplyStyleTree()
-	wb.NeedsRender(true)
+	wb.NeedsRender()
 }
 
 // CanFocus checks if this node can receive keyboard focus

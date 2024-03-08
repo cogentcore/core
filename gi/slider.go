@@ -35,7 +35,7 @@ type Slider struct { //core:embedder
 	WidgetBase
 
 	// the type of the slider, which determines the visual and functional properties
-	Type SliderTypes `set:"-"`
+	Type SliderTypes
 
 	// Current value, represented by the position of the thumb.
 	Value float32 `set:"-"`
@@ -208,14 +208,6 @@ func (sr *Slider) SetStyles() {
 	})
 }
 
-// SetType sets the type of the slider
-func (sr *Slider) SetType(typ SliderTypes) *Slider {
-	updt := sr.UpdateStart()
-	sr.Type = typ
-	sr.UpdateEndLayout(updt)
-	return sr
-}
-
 // SnapValue snaps the value to step sizes if snap option is set
 func (sr *Slider) SnapValue() {
 	if !sr.Snap {
@@ -290,8 +282,6 @@ func (sr *Slider) SetSliderPos(pos float32) {
 	if sz <= 0 {
 		return
 	}
-	updt := sr.UpdateStart()
-	defer sr.UpdateEndRender(updt)
 
 	thsz := sr.SlideThumbSize()
 	thszh := .5 * thsz
@@ -306,6 +296,7 @@ func (sr *Slider) SetSliderPos(pos float32) {
 		sr.SnapValue()
 	}
 	sr.SetPosFromValue(sr.Value) // go back the other way to be fully consistent
+	sr.NeedsRender()
 }
 
 // SetSliderPosAction sets the position of the slider at the given position in pixels,
@@ -326,8 +317,6 @@ func (sr *Slider) SetPosFromValue(val float32) {
 	if sz <= 0 {
 		return
 	}
-	updt := sr.UpdateStart()
-	defer sr.UpdateEndRender(updt)
 
 	effmax := sr.EffectiveMax()
 	val = mat32.Clamp(val, sr.Min, effmax)
@@ -336,6 +325,7 @@ func (sr *Slider) SetPosFromValue(val float32) {
 	thszh := .5 * thsz
 	sr.Pos = 0.5*thsz + prel*(sz-thsz)
 	sr.Pos = mat32.Clamp(sr.Pos, thszh, sz-thszh)
+	sr.NeedsRender()
 }
 
 // SetVisiblePct sets the visible pct value for Scrollbar type.
@@ -347,15 +337,13 @@ func (sr *Slider) SetVisiblePct(val float32) *Slider {
 // SetValue sets the value and updates the slider position,
 // but does not send a Change event (see Action version)
 func (sr *Slider) SetValue(val float32) *Slider {
-	updt := sr.UpdateStart()
-	defer sr.UpdateEndRender(updt)
-
 	effmax := sr.EffectiveMax()
 	val = mat32.Clamp(val, sr.Min, effmax)
 	if sr.Value != val {
 		sr.Value = val
 		sr.SetPosFromValue(val)
 	}
+	sr.NeedsRender()
 	return sr
 }
 

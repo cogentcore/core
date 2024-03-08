@@ -276,7 +276,7 @@ func (sc *Scene) Resize(geom mat32.Geom2DInt) {
 	// and Android in different contexts.
 	// TODO(kai): is there a more efficient way to do this, and do we need to do this on all platforms?
 	sc.ShowIter = 0
-	sc.NeedsLayout(true)
+	sc.NeedsLayout()
 }
 
 func (sc *Scene) ScIsVisible() bool {

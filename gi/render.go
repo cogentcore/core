@@ -232,7 +232,7 @@ func (wb *WidgetBase) ConfigTree() {
 	}
 	pr := prof.Start(wb.This().KiType().ShortName())
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
-		wi.Config()
+		wi.ConfigWidget()
 		return ki.Continue
 	})
 	pr.End()

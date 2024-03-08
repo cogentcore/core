@@ -276,14 +276,14 @@ func (ch *Chooser) ConfigWidget() {
 			tx.SetTrailingIcon(ch.Indicator, func(e events.Event) {
 				ch.OpenMenu(e)
 			})
-			tx.Config() // this is essential
+			tx.ConfigWidget() // this is essential
 			if !ch.DefaultNew {
 				tx.SetCompleter(tx, ch.CompleteMatch, ch.CompleteEdit)
 			}
 		} else {
 			lbl := ch.Parts.Child(lbi).(*Label)
 			lbl.SetText(ch.CurrentItem.GetLabel())
-			lbl.Config() // this is essential
+			lbl.ConfigWidget() // this is essential
 
 			ic := ch.Parts.Child(indi).(*Icon)
 			ic.SetIcon(ch.Indicator)
@@ -457,7 +457,7 @@ func (ch *Chooser) ShowCurrentItem() *Chooser {
 	} else {
 		lbl := ch.LabelWidget()
 		if lbl != nil {
-			lbl.SetTextUpdate(ch.CurrentItem.GetLabel())
+			lbl.SetText(ch.CurrentItem.GetLabel()).ConfigWidget()
 		}
 	}
 	if ch.CurrentItem.Icon.IsSet() {
@@ -470,7 +470,7 @@ func (ch *Chooser) ShowCurrentItem() *Chooser {
 	if ch.CurrentItem.Tooltip != "" {
 		ch.SetTooltip(ch.CurrentItem.Tooltip)
 	}
-	ch.NeedsRender(true)
+	ch.NeedsRender()
 	return ch
 }
 
@@ -480,7 +480,7 @@ func (ch *Chooser) SelectItem(idx int) *Chooser {
 		return ch
 	}
 	ch.SetCurrentIndex(idx)
-	ch.NeedsLayout(true)
+	ch.NeedsLayout()
 	return ch
 }
 

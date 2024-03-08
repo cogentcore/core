@@ -89,7 +89,7 @@ func (st *Stage) AddDialogDecor() *Stage {
 		np.X = min(np.X, mx)
 		np.Y = min(np.Y, my)
 		sc.SceneGeom.Pos = np
-		sc.NeedsRender(true)
+		sc.NeedsRender()
 	})
 	rsz := NewHandle(parts, "resize").Style(func(s *styles.Style) {
 		s.Direction = styles.Column

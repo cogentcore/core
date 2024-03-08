@@ -218,16 +218,16 @@ func (i *CompleteSignals) UnmarshalText(text []byte) error {
 	return nil
 }
 
-var _WidgetFlagsValues = []WidgetFlags{7}
+var _WidgetFlagsValues = []WidgetFlags{1}
 
 // WidgetFlagsN is the highest valid value for type WidgetFlags, plus one.
-const WidgetFlagsN WidgetFlags = 8
+const WidgetFlagsN WidgetFlags = 2
 
-var _WidgetFlagsNameToValueMap = map[string]WidgetFlags{`NeedsRender`: 7}
+var _WidgetFlagsNameToValueMap = map[string]WidgetFlags{`NeedsRender`: 1}
 
-var _WidgetFlagsDescMap = map[WidgetFlags]string{7: `NeedsRender needs to be rendered on next render iteration`}
+var _WidgetFlagsDescMap = map[WidgetFlags]string{1: `NeedsRender needs to be rendered on next render iteration`}
 
-var _WidgetFlagsMap = map[WidgetFlags]string{7: `NeedsRender`}
+var _WidgetFlagsMap = map[WidgetFlags]string{1: `NeedsRender`}
 
 // String returns the string representation of this WidgetFlags value.
 func (i WidgetFlags) String() string {
