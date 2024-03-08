@@ -864,7 +864,6 @@ func (vv *ValueBase) ConfigWidget(w gi.Widget) {
 		})
 	}
 
-	tf.Config()
 	tf.OnChange(func(e events.Event) {
 		if vv.SetValue(tf.Text()) {
 			vv.UpdateWidget() // always update after setting value..
