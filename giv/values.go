@@ -364,15 +364,16 @@ func (vv *StructValue) UpdateWidget() {
 	bt := vv.Widget.(*gi.Button)
 	npv := laser.NonPtrValue(vv.Value)
 	if vv.Value.IsZero() || npv.IsZero() {
-		bt.SetTextUpdate("None")
+		bt.SetText("None")
 	} else {
 		opv := laser.OnePtrUnderlyingValue(vv.Value)
 		if lbler, ok := opv.Interface().(gi.Labeler); ok {
-			bt.SetTextUpdate(lbler.Label())
+			bt.SetText(lbler.Label())
 		} else {
-			bt.SetTextUpdate(laser.FriendlyTypeName(npv.Type()))
+			bt.SetText(laser.FriendlyTypeName(npv.Type()))
 		}
 	}
+	bt.Update()
 }
 
 func (vv *StructValue) ConfigWidget(w gi.Widget) {
@@ -471,7 +472,7 @@ func (vv *SliceValue) UpdateWidget() {
 		return
 	}
 	vv.GetTypeInfo()
-	ac := vv.Widget.(*gi.Button)
+	bt := vv.Widget.(*gi.Button)
 	npv := laser.OnePtrUnderlyingValue(vv.Value).Elem()
 	txt := ""
 	if !npv.IsValid() {
@@ -488,7 +489,7 @@ func (vv *SliceValue) UpdateWidget() {
 			txt = "None"
 		}
 	}
-	ac.SetTextUpdate(txt)
+	bt.SetText(txt).Update()
 }
 
 func (vv *SliceValue) GetTypeInfo() {
@@ -622,7 +623,7 @@ func (vv *MapValue) UpdateWidget() {
 			txt = strcase.ToSentence(fmt.Sprintf("%d %ss", npv.Len(), bnm))
 		}
 	}
-	bt.SetTextUpdate(txt)
+	bt.SetText(txt).Update()
 }
 
 func (vv *MapValue) ConfigWidget(w gi.Widget) {
@@ -740,7 +741,7 @@ func (vv *KiValue) UpdateWidget() {
 	if k != nil && k.This() != nil {
 		path = k.AsKi().String()
 	}
-	bt.SetTextUpdate(path)
+	bt.SetText(path).Update()
 }
 
 func (vv *KiValue) ConfigWidget(w gi.Widget) {
@@ -800,7 +801,6 @@ func (vv *BoolValue) ConfigWidget(w gi.Widget) {
 	vv.StdConfigWidget(w)
 	cb := vv.Widget.(*gi.Switch)
 	cb.Tooltip = vv.Doc()
-	cb.Config()
 	cb.OnFinal(events.Change, func(e events.Event) {
 		vv.SetValue(cb.IsChecked())
 	})
@@ -880,7 +880,6 @@ func (vv *IntValue) ConfigWidget(w gi.Widget) {
 	if fmttag, ok := vv.Tag("format"); ok {
 		sb.Format = fmttag
 	}
-	sb.Config()
 	sb.OnFinal(events.Change, func(e events.Event) {
 		vv.SetValue(sb.Value)
 	})
@@ -954,7 +953,6 @@ func (vv *FloatValue) ConfigWidget(w gi.Widget) {
 	if fmttag, ok := vv.Tag("format"); ok {
 		sb.Format = fmttag
 	}
-	sb.Config()
 	sb.OnFinal(events.Change, func(e events.Event) {
 		vv.SetValue(sb.Value)
 	})
@@ -1022,7 +1020,6 @@ func (vv *SliderValue) ConfigWidget(w gi.Widget) {
 			slog.Error("Float Step Value:", "error:", err)
 		}
 	}
-	sl.Config()
 	sl.OnFinal(events.Change, func(e events.Event) {
 		vv.SetValue(sl.Value)
 	})
@@ -1085,7 +1082,6 @@ func (vv *EnumValue) ConfigWidget(w gi.Widget) {
 
 	ev := vv.EnumValue()
 	ch.SetEnum(ev)
-	ch.Config()
 	ch.OnFinal(events.Change, func(e events.Event) {
 		vv.SetValue(ch.CurrentItem.Value)
 	})
@@ -1148,7 +1144,6 @@ func (vv *BitFlagValue) ConfigWidget(w gi.Widget) {
 	sw.OnChange(func(e events.Event) {
 		sw.BitFlagValue(vv.EnumValue())
 	})
-	sw.Config()
 	vv.UpdateWidget()
 }
 
@@ -1198,7 +1193,6 @@ func (vv *TypeValue) ConfigWidget(w gi.Widget) {
 
 	tl := gti.AllEmbeddersOf(typEmbeds)
 	cb.SetTypes(tl)
-	cb.Config()
 	cb.OnFinal(events.Change, func(e events.Event) {
 		tval := cb.CurrentItem.Value.(*gti.Type)
 		vv.SetValue(tval)
@@ -1227,7 +1221,7 @@ func (vv *ByteSliceValue) UpdateWidget() {
 	npv := laser.NonPtrValue(vv.Value)
 	bv, ok := npv.Interface().([]byte)
 	if ok {
-		tf.SetTextUpdate(string(bv))
+		tf.SetText(string(bv))
 	}
 }
 
@@ -1244,7 +1238,6 @@ func (vv *ByteSliceValue) ConfigWidget(w gi.Widget) {
 		s.Min.X.Ch(16)
 	})
 	vv.StdConfigWidget(w)
-	tf.Config()
 
 	tf.OnFinal(events.Change, func(e events.Event) {
 		vv.SetValue(tf.Text())
@@ -1273,7 +1266,7 @@ func (vv *RuneSliceValue) UpdateWidget() {
 	npv := laser.NonPtrValue(vv.Value)
 	rv, ok := npv.Interface().([]rune)
 	if ok {
-		tf.SetTextUpdate(string(rv))
+		tf.SetText(string(rv))
 	}
 }
 
@@ -1289,7 +1282,6 @@ func (vv *RuneSliceValue) ConfigWidget(w gi.Widget) {
 		s.Min.X.Ch(16)
 	})
 	vv.StdConfigWidget(w)
-	tf.Config()
 
 	tf.OnFinal(events.Change, func(e events.Event) {
 		vv.SetValue(tf.Text())
@@ -1314,8 +1306,8 @@ func (vv *NilValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	sb := vv.Widget.(*gi.Label)
-	sb.SetTextUpdate("None")
+	lb := vv.Widget.(*gi.Label)
+	lb.SetText("None")
 }
 
 func (vv *NilValue) ConfigWidget(w gi.Widget) {
@@ -1325,9 +1317,8 @@ func (vv *NilValue) ConfigWidget(w gi.Widget) {
 	}
 	vv.Widget = w
 	vv.StdConfigWidget(w)
-	sb := vv.Widget.(*gi.Label)
-	sb.Tooltip = vv.Doc()
-	sb.Config()
+	lb := vv.Widget.(*gi.Label)
+	lb.Tooltip = vv.Doc()
 	vv.UpdateWidget()
 }
 
@@ -1352,18 +1343,19 @@ func (vv *IconValue) UpdateWidget() {
 	bt := vv.Widget.(*gi.Button)
 	txt := laser.ToString(vv.Value.Interface())
 	if icons.Icon(txt).IsNil() {
-		bt.SetIconUpdate(icons.Blank)
+		bt.SetIcon(icons.Blank)
 	} else {
-		bt.SetIconUpdate(icons.Icon(txt))
+		bt.SetIcon(icons.Icon(txt))
 	}
 	if sntag, ok := vv.Tag("view"); ok {
 		if strings.Contains(sntag, "show-name") {
 			if txt == "" {
 				txt = "None"
 			}
-			bt.SetTextUpdate(strcase.ToSentence(txt))
+			bt.SetText(strcase.ToSentence(txt))
 		}
 	}
+	bt.Update()
 }
 
 func (vv *IconValue) ConfigWidget(w gi.Widget) {
@@ -1420,8 +1412,7 @@ func (vv *FontValue) UpdateWidget() {
 	}
 	bt := vv.Widget.(*gi.Button)
 	txt := laser.ToString(vv.Value.Interface())
-	bt.SetProp("font-family", txt)
-	bt.SetTextUpdate(txt)
+	bt.SetText(txt).Update()
 }
 
 func (vv *FontValue) ConfigWidget(w gi.Widget) {
@@ -1433,6 +1424,10 @@ func (vv *FontValue) ConfigWidget(w gi.Widget) {
 	vv.StdConfigWidget(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
+	bt.Style(func(s *styles.Style) {
+		// TODO(kai): fix this not working (probably due to medium font weight)
+		s.Font.Family = laser.ToString(vv.Value.Interface())
+	})
 	ConfigDialogWidget(vv, bt, false)
 	vv.UpdateWidget()
 }
@@ -1496,9 +1491,9 @@ func (vv *FileValue) UpdateWidget() {
 		txt = "(click to open file chooser)"
 	}
 	prev := bt.Text
-	bt.SetTextUpdate(txt)
+	bt.SetText(txt)
 	if txt != prev {
-		bt.NeedsLayout(true)
+		bt.Update()
 	}
 }
 
