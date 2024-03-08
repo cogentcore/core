@@ -274,8 +274,7 @@ func (sw *Switches) ConfigSwitches() {
 	for _, lb := range sw.Items {
 		config.Add(SwitchType, lb)
 	}
-	mods := sw.ConfigChildren(config)
-	if mods || sw.NeedsRebuild() {
+	if sw.ConfigChildren(config) || sw.NeedsRebuild() {
 		sw.ConfigItems()
 		sw.NeedsLayout()
 	}

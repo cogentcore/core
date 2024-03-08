@@ -137,7 +137,7 @@ func (wb *WidgetBase) AsyncLock() {
 // AsyncUnlock must be called after making any updates in a separate goroutine
 // outside of the main configuration, rendering, and event handling structure.
 // It must have a matching [WidgetBase.AsyncLock] before it.
-func (wb *WidgetBase) AsyncUnlock(updt bool) {
+func (wb *WidgetBase) AsyncUnlock() {
 	rc := wb.Scene.RenderContext()
 	if rc == nil {
 		return

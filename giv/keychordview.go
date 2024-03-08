@@ -49,7 +49,6 @@ func (vv *KeyChordValue) ConfigWidget(w gi.Widget) {
 	vv.Widget = w
 	vv.StdConfigWidget(w)
 	kc := vv.Widget.(*KeyChordEdit)
-	kc.Config()
 	kc.OnChange(func(e events.Event) {
 		if vv.SetValue(key.Chord(kc.Text)) {
 			vv.UpdateWidget()

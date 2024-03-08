@@ -97,7 +97,7 @@ func (is *Inspector) SaveAs(filename gi.Filename) error { //gti:add
 	}
 	is.Changed = false
 	is.Filename = filename
-	is.NeedsRender(true) // notify our editor
+	is.NeedsRender() // notify our editor
 	return nil
 }
 
@@ -111,7 +111,7 @@ func (is *Inspector) Open(filename gi.Filename) error { //gti:add
 		return err
 	}
 	is.Filename = filename
-	is.NeedsRender(true) // notify our editor
+	is.NeedsRender() // notify our editor
 	return nil
 }
 
@@ -124,7 +124,6 @@ func (is *Inspector) ToggleSelectionMode() { //gti:add
 		gi.NewBody().AddSnackbarText("SelectionMode is only available on Scene objects").NewSnackbar(is).Run()
 		return
 	}
-	updt := sc.UpdateStart()
 	sc.SetFlag(!sc.Is(gi.ScRenderBBoxes), gi.ScRenderBBoxes)
 	if sc.Is(gi.ScRenderBBoxes) {
 		sc.SelectedWidgetChan = make(chan gi.Widget)
@@ -135,7 +134,7 @@ func (is *Inspector) ToggleSelectionMode() { //gti:add
 		}
 		sc.SelectedWidgetChan = nil
 	}
-	sc.UpdateEndLayout(updt)
+	sc.NeedsLayout()
 }
 
 // SelectionMonitor monitors for the selected widget
@@ -166,20 +165,22 @@ func (is *Inspector) SelectionMonitor() {
 			return
 		}
 	}
-	updt := is.AsyncLock() // coming from other tree
+	is.AsyncLock() // coming from other tree
 	tv.OpenParents()
 	tv.ScrollToMe()
 	tv.SelectAction(events.SelectOne)
-	is.AsyncUnlockLayout(updt)
+	is.NeedsLayout()
+	is.AsyncUnlock()
 	is.Scene.Stage.Raise()
 
-	updt = sc.AsyncLock()
+	sc.AsyncLock()
 	sc.SetFlag(false, gi.ScRenderBBoxes)
 	if sc.SelectedWidgetChan != nil {
 		close(sc.SelectedWidgetChan)
 	}
 	sc.SelectedWidgetChan = nil
-	sc.AsyncUnlockRender(updt)
+	sc.NeedsRender()
+	sc.AsyncUnlock()
 }
 
 // InspectApp displays the underlying operating system app
@@ -191,14 +192,11 @@ func (is *Inspector) InspectApp() { //gti:add
 
 // SetRoot sets the source root and ensures everything is configured
 func (is *Inspector) SetRoot(root ki.Ki) {
-	updt := false
 	if is.KiRoot != root {
-		updt = is.UpdateStart()
 		is.KiRoot = root
 		// ge.GetAllUpdates(root)
 	}
-	is.Config()
-	is.UpdateEnd(updt)
+	is.ConfigWidget()
 }
 
 // ConfigWidget configures the widget
@@ -212,12 +210,9 @@ func (is *Inspector) ConfigWidget() {
 	config := ki.Config{}
 	config.Add(gi.LabelType, "title")
 	config.Add(gi.SplitsType, "splits")
-	mods, updt := is.ConfigChildren(config)
+	is.ConfigChildren(config)
 	is.SetTitle(is.KiRoot)
 	is.ConfigSplits()
-	if mods {
-		is.UpdateEnd(updt)
-	}
 }
 
 // SetTitle sets the title to correspond to the given node.
@@ -277,9 +272,9 @@ func (is *Inspector) ConfigSplits() {
 			if w, wb := gi.AsWidget(sn); w != nil {
 				pselw := sc.SelectedWidget
 				sc.SelectedWidget = w
-				wb.NeedsRender(true)
+				wb.NeedsRender()
 				if pselw != nil {
-					pselw.AsWidget().NeedsRender(true)
+					pselw.AsWidget().NeedsRender()
 				}
 			}
 		})
@@ -304,7 +299,7 @@ func (is *Inspector) ConfigSplits() {
 			pselw := sc.SelectedWidget
 			sc.SelectedWidget = nil
 			if pselw != nil {
-				pselw.AsWidget().NeedsRender(true)
+				pselw.AsWidget().NeedsRender()
 			}
 		})
 		split.SetSplits(.3, .7)

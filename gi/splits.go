@@ -248,8 +248,7 @@ func (sl *Splits) ConfigWidget() {
 func (sl *Splits) ConfigSplitters() {
 	parts := sl.NewParts()
 	sz := len(sl.Kids)
-	mods := parts.SetNChildren(sz-1, HandleType, "handle-")
-	if mods {
+	if parts.SetNChildren(sz-1, HandleType, "handle-") {
 		parts.Update()
 	}
 }
