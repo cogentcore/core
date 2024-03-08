@@ -157,9 +157,6 @@ func (tv *TableView) SetSlice(sl any) *TableView {
 		return tv
 	}
 
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndLayout(updt)
-
 	tv.SetSliceBase()
 	tv.Slice = sl
 	tv.SliceNPVal = laser.NonPtrValue(reflect.ValueOf(tv.Slice))
@@ -232,13 +229,12 @@ func (tv *TableView) ConfigTableView() {
 		tv.This().(SliceViewer).UpdateWidgets()
 		return
 	}
-	updt := tv.UpdateStart()
 	tv.SortSlice()
 	tv.ConfigFrame()
 	tv.This().(SliceViewer).ConfigRows()
 	tv.This().(SliceViewer).UpdateWidgets()
 	tv.ApplyStyleTree()
-	tv.UpdateEndLayout(updt)
+	tv.NeedsLayout()
 }
 
 func (tv *TableView) ConfigFrame() {
@@ -440,9 +436,6 @@ func (tv *TableView) UpdateWidgets() {
 		return
 	}
 
-	updt := sg.UpdateStart()
-	defer sg.UpdateEndRender(updt)
-
 	tv.ViewMuLock()
 	defer tv.ViewMuUnlock()
 
@@ -478,7 +471,7 @@ func (tv *TableView) UpdateWidgets() {
 				break
 			}
 			idxlab = sg.Kids[ridx].(*gi.Label)
-			idxlab.SetTextUpdate(strconv.Itoa(si))
+			idxlab.SetText(strconv.Itoa(si)).ConfigWidget()
 			idxlab.SetState(invis, states.Invisible)
 		}
 
@@ -536,6 +529,7 @@ func (tv *TableView) UpdateWidgets() {
 			}
 		}
 	}
+	sg.NeedsRender()
 }
 
 func (tv *TableView) HasStyleFunc() bool {
@@ -552,8 +546,6 @@ func (tv *TableView) StyleRow(w gi.Widget, idx, fidx int) {
 // means the end
 func (tv *TableView) SliceNewAt(idx int) {
 	tv.ViewMuLock()
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndLayout(updt)
 
 	tv.SliceNewAtSel(idx)
 	laser.SliceNewAt(tv.Slice, idx)
@@ -570,6 +562,7 @@ func (tv *TableView) SliceNewAt(idx int) {
 	tv.SetChanged()
 	tv.This().(SliceViewer).UpdateWidgets()
 	tv.IdxGrabFocus(idx)
+	tv.NeedsLayout()
 }
 
 // SliceDeleteAt deletes element at given index from slice
@@ -578,8 +571,6 @@ func (tv *TableView) SliceDeleteAt(idx int) {
 		return
 	}
 	tv.ViewMuLock()
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndLayout(updt)
 
 	tv.SliceDeleteAtSel(idx)
 
@@ -593,6 +584,7 @@ func (tv *TableView) SliceDeleteAt(idx int) {
 	tv.ViewMuUnlock()
 	tv.SetChanged()
 	tv.This().(SliceViewer).UpdateWidgets()
+	tv.NeedsLayout()
 }
 
 // SortSlice sorts the slice according to current settings
@@ -607,9 +599,6 @@ func (tv *TableView) SortSlice() {
 // SortSliceAction sorts the slice for given field index -- toggles ascending
 // vs. descending if already sorting on this dimension
 func (tv *TableView) SortSliceAction(fldIdx int) {
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndLayout(updt)
-
 	sgh := tv.SliceHeader()
 	_, idxOff := tv.RowWidgetNs()
 
@@ -639,6 +628,7 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 	tv.SortSlice()
 	sgh.Update() // requires full update due to sort button icon
 	tv.UpdateWidgets()
+	tv.NeedsLayout()
 }
 
 // SortFieldName returns the name of the field being sorted, along with :up or
