@@ -25,12 +25,8 @@ func (tt *TreeTableView) ConfigWidget() {
 	if tt.HasChildren() {
 		return
 	}
-
-	updt := tt.UpdateStart()
-
 	sp := gi.NewSplits(tt)
 	tt.Tree = NewTreeView(sp)
 	tt.Table = NewTableView(sp).SetSlice(&[]color.RGBA{})
-
-	tt.UpdateEndLayout(updt)
+	tt.NeedsLayout()
 }

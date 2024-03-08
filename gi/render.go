@@ -168,8 +168,8 @@ func (wb *WidgetBase) NeedsRender() {
 }
 
 // NeedsLayout specifies that the widget's scene needs to do a layout.
-// This needs to be called after any changes that affect the structure and size
-// of elements.
+// This needs to be called after any changes that affect the structure
+// and/or size of elements.
 func (wb *WidgetBase) NeedsLayout() {
 	if wb.Scene == nil {
 		return

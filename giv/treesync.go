@@ -30,15 +30,13 @@ import (
 // ensure that node names are unique
 // which is essential for proper viewing!
 func (tv *TreeView) SyncRootNode(sk ki.Ki) *TreeView {
-	updt := false
 	ki.UniquifyNamesAll(sk)
 	if tv.SyncNode != sk {
-		updt = tv.UpdateStart()
 		tv.SyncNode = sk
 	}
 	tvIdx := 0
 	tv.SyncToSrc(&tvIdx, true, 0)
-	tv.UpdateEndLayout(updt)
+	tv.NeedsLayout()
 	return tv
 }
 
@@ -48,13 +46,10 @@ func (tv *TreeView) SyncRootNode(sk ki.Ki) *TreeView {
 // It uses ki Config mechanism to perform minimal updates to
 // remain in sync.
 func (tv *TreeView) SetSyncNode(sk ki.Ki, tvIdx *int, init bool, depth int) {
-	updt := false
 	if tv.SyncNode != sk {
-		updt = tv.UpdateStart()
 		tv.SyncNode = sk
 	}
 	tv.SyncToSrc(tvIdx, init, depth)
-	tv.UpdateEnd(updt)
 }
 
 // ReSync resynchronizes the view relative to the underlying nodes
@@ -89,11 +84,7 @@ func (tv *TreeView) SyncToSrc(tvIdx *int, init bool, depth int) {
 	for _, skid := range skids {
 		tnl.Add(typ, "tv_"+skid.Name())
 	}
-	mods, updt := tv.ConfigChildren(tnl) // false = don't use unique names -- needs to!
-	if mods {
-		tv.NeedsLayout(true)
-		// fmt.Printf("got mod on %v\n", tv.Path())
-	}
+	mods := tv.ConfigChildren(tnl)
 	idx := 0
 	for _, skid := range *sk.Children() {
 		if len(tv.Kids) <= idx {
@@ -117,7 +108,7 @@ func (tv *TreeView) SyncToSrc(tvIdx *int, init bool, depth int) {
 		tv.Update()
 		tv.TreeViewChanged(nil)
 	}
-	tv.UpdateEndLayout(updt)
+	tv.NeedsLayout()
 }
 
 // Label returns the display label for this node,
@@ -199,7 +190,6 @@ func (tv *TreeView) InsertBefore() { //gti:add
 }
 
 func (tv *TreeView) AddTreeNodes(rel, myidx int, typ *gti.Type, n int) {
-	updt := tv.UpdateStart()
 	var stv *TreeView
 	for i := 0; i < n; i++ {
 		nm := fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i)
@@ -213,7 +203,6 @@ func (tv *TreeView) AddTreeNodes(rel, myidx int, typ *gti.Type, n int) {
 	tv.Update()
 	tv.Open()
 	tv.TreeViewChanged(nil)
-	tv.UpdateEndLayout(updt)
 	if stv != nil {
 		stv.SelectAction(events.SelectOne)
 	}
@@ -221,7 +210,6 @@ func (tv *TreeView) AddTreeNodes(rel, myidx int, typ *gti.Type, n int) {
 
 func (tv *TreeView) AddSyncNodes(rel, myidx int, typ *gti.Type, n int) {
 	par := tv.SyncNode
-	updt := par.UpdateStart()
 	var ski ki.Ki
 	for i := 0; i < n; i++ {
 		nm := fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i)
@@ -231,7 +219,6 @@ func (tv *TreeView) AddSyncNodes(rel, myidx int, typ *gti.Type, n int) {
 		}
 	}
 	tv.SendChangeEventReSync(nil)
-	par.UpdateEnd(updt)
 	if ski != nil {
 		if tvk := tv.ChildByName("tv_"+ski.Name(), 0); tvk != nil {
 			stv := AsTreeView(tvk)
@@ -319,11 +306,9 @@ func (tv *TreeView) DeleteNode() { //gti:add
 		tv.SendChangeEventReSync(nil)
 	} else {
 		par := AsTreeView(tv.Par)
-		updt := par.UpdateStart()
 		tv.Delete()
 		par.Update()
 		par.TreeViewChanged(nil)
-		par.UpdateEndLayout(updt)
 	}
 }
 
@@ -347,7 +332,6 @@ func (tv *TreeView) Duplicate() { //gti:add
 	if myidx < 0 {
 		return
 	}
-	updt := par.UpdateStart()
 	nm := fmt.Sprintf("%v_Copy", tv.Name())
 	tv.Unselect()
 	nwkid := tv.Clone()
@@ -357,7 +341,6 @@ func (tv *TreeView) Duplicate() { //gti:add
 	ntv.Update()
 	par.Update()
 	par.TreeViewChanged(nil)
-	par.UpdateEndLayout(updt)
 	// ntv.SelectAction(events.SelectOne)
 }
 
@@ -373,12 +356,10 @@ func (tv *TreeView) DuplicateSync() {
 	if myidx < 0 {
 		return
 	}
-	updt := par.UpdateStart()
 	nm := fmt.Sprintf("%v_Copy", sk.Name())
 	nwkid := sk.Clone()
 	nwkid.SetName(nm)
 	par.InsertChild(nwkid, myidx+1)
-	par.UpdateEnd(updt)
 	tvpar.SendChangeEventReSync(nil)
 	if tvk := tvpar.ChildByName("tv_"+nm, 0); tvk != nil {
 		stv := AsTreeView(tvk)
@@ -455,9 +436,8 @@ func (tv *TreeView) PasteAssignSync(md mimedata.Mimes) {
 	if len(sl) == 0 {
 		return
 	}
-	updt := tv.UpdateStart()
 	tv.SyncNode.CopyFrom(sl[0])
-	tv.UpdateEndLayout(updt)
+	tv.NeedsLayout()
 	tv.SendChangeEvent(nil)
 }
 
@@ -475,7 +455,6 @@ func (tv *TreeView) PasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int,
 	}
 	myidx += rel
 	sroot := tv.RootView.SyncNode
-	updt := par.UpdateStart()
 	sz := len(sl)
 	var selKi ki.Ki
 	for i, ns := range sl {
@@ -494,7 +473,6 @@ func (tv *TreeView) PasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int,
 			selKi = ns
 		}
 	}
-	par.UpdateEnd(updt)
 	tvpar.SendChangeEventReSync(nil)
 	if selKi != nil {
 		if tvk := tvpar.ChildByName("tv_"+selKi.Name(), myidx); tvk != nil {
@@ -509,11 +487,9 @@ func (tv *TreeView) PasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int,
 func (tv *TreeView) PasteChildrenSync(md mimedata.Mimes, mod events.DropMods) {
 	sl, _ := tv.NodesFromMimeData(md)
 	sk := tv.SyncNode
-	updt := sk.UpdateStart()
 	for _, ns := range sl {
 		sk.AddChild(ns)
 	}
-	sk.UpdateEnd(updt)
 	tv.SendChangeEventReSync(nil)
 }
 
@@ -547,7 +523,7 @@ func (tv *TreeView) DropDeleteSourceSync(de *events.DragDrop) {
 			orgnm := psplt[len(psplt)-1]
 			sn.SetName(orgnm)
 			_, swb := gi.AsWidget(sn)
-			swb.NeedsRender(true)
+			swb.NeedsRender()
 		}
 	}
 	tv.SendChangeEventReSync(nil)

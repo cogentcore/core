@@ -42,13 +42,12 @@ type TimeView struct {
 
 // SetTime sets the source time and updates the view
 func (tv *TimeView) SetTime(tim time.Time) *TimeView {
-	updt := tv.UpdateStart()
 	tv.Time = tim
 	if tv.TmpSave != nil {
 		tv.TmpSave.SetValue(tv.Time)
 	}
-	tv.UpdateEndLayout(updt)
 	tv.SendChange()
+	tv.NeedsLayout()
 	return tv
 }
 
@@ -56,7 +55,6 @@ func (tv *TimeView) ConfigWidget() {
 	if tv.HasChildren() {
 		return
 	}
-	updt := tv.UpdateStart()
 
 	hour := gi.NewTextField(tv, "hour")
 	if gi.SystemSettings.Clock24 {
@@ -150,8 +148,6 @@ func (tv *TimeView) ConfigWidget() {
 			}
 		})
 	}
-
-	tv.UpdateEnd(updt)
 }
 
 var shortMonths = []string{"Jan", "Feb", "Apr", "Mar", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
@@ -184,12 +180,10 @@ func (dv *DateView) SetTime(tim time.Time) *DateView {
 	}
 	dv.SendChange()
 	dv.Update()
-	dv.NeedsLayout(true)
 	return dv
 }
 
 func (dv *DateView) ConfigWidget() {
-	updt := dv.UpdateStart()
 	if dv.HasChildren() {
 		dv.DeleteChildren()
 	} else {
@@ -252,7 +246,7 @@ func (dv *DateView) ConfigWidget() {
 	}).Style(arrowStyle)
 
 	dv.ConfigDateGrid()
-	dv.UpdateEndLayout(updt)
+	dv.NeedsLayout()
 }
 
 func (dv *DateView) ConfigDateGrid() {
@@ -404,7 +398,6 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget) {
 		// new date and old time
 		*tv = time.Date(d.Year(), d.Month(), d.Day(), tv.Hour(), tv.Minute(), tv.Second(), tv.Nanosecond(), tv.Location())
 	})
-	dt.Config()
 
 	tm := gi.NewTextField(ly, "time").SetTooltip("The time").
 		SetLeadingIcon(icons.Schedule, func(e events.Event) {
@@ -436,7 +429,6 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget) {
 		// old date and new time
 		*tv = time.Date(tv.Year(), tv.Month(), tv.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), tv.Location())
 	})
-	dt.Config()
 
 	vv.UpdateWidget()
 }
