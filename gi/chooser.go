@@ -452,7 +452,7 @@ func (ch *Chooser) ShowCurrentItem() *Chooser {
 	if ch.Editable {
 		tf := ch.TextField()
 		if tf != nil {
-			tf.SetTextUpdate(ch.CurrentItem.GetLabel())
+			tf.SetText(ch.CurrentItem.GetLabel())
 		}
 	} else {
 		lbl := ch.LabelWidget()

@@ -501,16 +501,16 @@ func (i *LayoutPasses) UnmarshalText(text []byte) error {
 	return nil
 }
 
-var _LayoutFlagsValues = []LayoutFlags{8, 9, 10}
+var _LayoutFlagsValues = []LayoutFlags{2, 3, 4}
 
 // LayoutFlagsN is the highest valid value for type LayoutFlags, plus one.
-const LayoutFlagsN LayoutFlags = 11
+const LayoutFlagsN LayoutFlags = 5
 
-var _LayoutFlagsNameToValueMap = map[string]LayoutFlags{`StackTopOnly`: 8, `NeedsRedo`: 9, `NoKeys`: 10}
+var _LayoutFlagsNameToValueMap = map[string]LayoutFlags{`StackTopOnly`: 2, `NeedsRedo`: 3, `NoKeys`: 4}
 
-var _LayoutFlagsDescMap = map[LayoutFlags]string{8: `for stacked layout, only layout the top widget. this is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don&#39;t`, 9: `true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration`, 10: `LayoutNoKeys prevents processing of keyboard events for this layout. By default, Layout handles focus navigation events, but if an outer Widget handles these instead, then this should be set.`}
+var _LayoutFlagsDescMap = map[LayoutFlags]string{2: `for stacked layout, only layout the top widget. this is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don&#39;t`, 3: `true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration`, 4: `LayoutNoKeys prevents processing of keyboard events for this layout. By default, Layout handles focus navigation events, but if an outer Widget handles these instead, then this should be set.`}
 
-var _LayoutFlagsMap = map[LayoutFlags]string{8: `StackTopOnly`, 9: `NeedsRedo`, 10: `NoKeys`}
+var _LayoutFlagsMap = map[LayoutFlags]string{2: `StackTopOnly`, 3: `NeedsRedo`, 4: `NoKeys`}
 
 // String returns the string representation of this LayoutFlags value.
 func (i LayoutFlags) String() string {
@@ -958,16 +958,16 @@ func (i *RenderContextFlags) UnmarshalText(text []byte) error {
 	return nil
 }
 
-var _ScFlagsValues = []ScFlags{8, 9, 10, 11, 12, 13, 14, 15}
+var _ScFlagsValues = []ScFlags{2, 3, 4, 5, 6, 7, 8, 9}
 
 // ScFlagsN is the highest valid value for type ScFlags, plus one.
-const ScFlagsN ScFlags = 16
+const ScFlagsN ScFlags = 10
 
-var _ScFlagsNameToValueMap = map[string]ScFlags{`ScUpdating`: 8, `ScNeedsRender`: 9, `ScNeedsLayout`: 10, `ScNeedsRebuild`: 11, `ScImageUpdated`: 12, `ScPrefSizing`: 13, `ScPreserve`: 14, `ScRenderBBoxes`: 15}
+var _ScFlagsNameToValueMap = map[string]ScFlags{`ScUpdating`: 2, `ScNeedsRender`: 3, `ScNeedsLayout`: 4, `ScNeedsRebuild`: 5, `ScImageUpdated`: 6, `ScPrefSizing`: 7, `ScPreserve`: 8, `ScRenderBBoxes`: 9}
 
-var _ScFlagsDescMap = map[ScFlags]string{8: `ScUpdating means scene is in the process of updating: set for any kind of tree-level update. skip any further update passes until it goes off.`, 9: `ScNeedsRender means nodes have flagged that they need a Render update.`, 10: `ScNeedsLayout means that this scene needs DoLayout stack: GetSize, DoLayout, then Render. This is true after any Config.`, 11: `ScNeedsRebuild means that this scene needs full Rebuild: Config, Layout, Render with DoRebuild flag set (e.g., after global style changes, zooming, etc)`, 12: `ScImageUpdated indicates that the Scene&#39;s image has been updated e.g., due to a render or a resize. This is reset by the global RenderWin rendering pass, so it knows whether it needs to copy the image up to the GPU or not.`, 13: `ScPrefSizing means that this scene is currently doing a PrefSize computation to compute the size of the scene (for sizing window for example) -- affects layout size computation only for Over`, 14: `ScPreserve keeps this scene around instead of deleting when it is no longer needed. Set if added to SceneLibrary for example.`, 15: `ScRenderBBoxes renders the bounding boxes for all objects in scene`}
+var _ScFlagsDescMap = map[ScFlags]string{2: `ScUpdating means scene is in the process of updating: set for any kind of tree-level update. skip any further update passes until it goes off.`, 3: `ScNeedsRender means nodes have flagged that they need a Render update.`, 4: `ScNeedsLayout means that this scene needs DoLayout stack: GetSize, DoLayout, then Render. This is true after any Config.`, 5: `ScNeedsRebuild means that this scene needs full Rebuild: Config, Layout, Render with DoRebuild flag set (e.g., after global style changes, zooming, etc)`, 6: `ScImageUpdated indicates that the Scene&#39;s image has been updated e.g., due to a render or a resize. This is reset by the global RenderWin rendering pass, so it knows whether it needs to copy the image up to the GPU or not.`, 7: `ScPrefSizing means that this scene is currently doing a PrefSize computation to compute the size of the scene (for sizing window for example) -- affects layout size computation only for Over`, 8: `ScPreserve keeps this scene around instead of deleting when it is no longer needed. Set if added to SceneLibrary for example.`, 9: `ScRenderBBoxes renders the bounding boxes for all objects in scene`}
 
-var _ScFlagsMap = map[ScFlags]string{8: `ScUpdating`, 9: `ScNeedsRender`, 10: `ScNeedsLayout`, 11: `ScNeedsRebuild`, 12: `ScImageUpdated`, 13: `ScPrefSizing`, 14: `ScPreserve`, 15: `ScRenderBBoxes`}
+var _ScFlagsMap = map[ScFlags]string{2: `ScUpdating`, 3: `ScNeedsRender`, 4: `ScNeedsLayout`, 5: `ScNeedsRebuild`, 6: `ScImageUpdated`, 7: `ScPrefSizing`, 8: `ScPreserve`, 9: `ScRenderBBoxes`}
 
 // String returns the string representation of this ScFlags value.
 func (i ScFlags) String() string {

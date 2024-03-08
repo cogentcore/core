@@ -393,9 +393,7 @@ func (bt *Button) ConfigWidget() {
 		}
 		if lbi >= 0 {
 			lbl := bt.Parts.Child(lbi).(*Label)
-			if lbl.Text != bt.Text {
-				lbl.SetText(bt.Text).ConfigWidget()
-			}
+			lbl.SetText(bt.Text)
 		}
 
 		if indi >= 0 {
@@ -406,9 +404,7 @@ func (bt *Button) ConfigWidget() {
 		if sci >= 0 {
 			sc := bt.Parts.Child(sci).(*Label)
 			sctxt := bt.Shortcut.Shortcut()
-			if sc.Text != sctxt {
-				sc.SetText(sctxt).ConfigWidget()
-			}
+			sc.SetText(sctxt)
 		}
 	})
 }

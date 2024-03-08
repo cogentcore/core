@@ -104,7 +104,7 @@ func (sp *Spinner) SetStyles() {
 }
 
 func (sp *Spinner) SetTextToValue() {
-	sp.SetTextUpdate(sp.ValToString(sp.Value))
+	sp.SetText(sp.ValToString(sp.Value))
 }
 
 func (sp *Spinner) SizeUp() {

@@ -221,13 +221,12 @@ func (wb *WidgetBase) ApplyStyleSettings() {
 	s.Text.LineHeight.Val *= fsz
 }
 
-// ApplyStyleUpdate calls ApplyStyleTree within an UpdateRender block.
+// ApplyStyleUpdate calls ApplyStyleTree and NeedsRender.
 // This is the main call needed to ensure that state-sensitive styling
-// is updated, when state changes.
+// is updated, when the state changes.
 func (wb *WidgetBase) ApplyStyleUpdate() {
-	updt := wb.UpdateStart()
 	wb.ApplyStyleTree()
-	wb.UpdateEndRender(updt)
+	wb.NeedsRender()
 }
 
 func (wb *WidgetBase) ApplyStyle() {
