@@ -86,7 +86,7 @@ func (n *Node) String() string {
 // (e.g., in reflect calls).  Returns nil if node is nil,
 // has been destroyed, or is improperly constructed.
 func (n *Node) This() Ki {
-	if n == nil || n.Is(Destroyed) {
+	if n == nil {
 		return nil
 	}
 	return n.Ths
@@ -129,7 +129,6 @@ func (n *Node) Name() string {
 // Names should generally be unique across children of each node.
 // See Unique* functions to check / fix.
 // If node requires non-unique names, add a separate Label field.
-// Does NOT wrap in UpdateStart / End.
 func (n *Node) SetName(name string) {
 	n.Nm = name
 }
@@ -145,22 +144,6 @@ func (n *Node) OnAdd() {}
 // OnChildAdded is a placeholder implementation of
 // [Ki.OnChildAdded] that does nothing.
 func (n *Node) OnChildAdded(child Ki) {}
-
-// OnDelete is a placeholder implementation of
-// [Ki.OnDelete] that does nothing.
-func (n *Node) OnDelete() {}
-
-// OnChildDeleting is a placeholder implementation of
-// [Ki.OnChildDeleting] that does nothing.
-func (n *Node) OnChildDeleting(child Ki) {}
-
-// OnChildrenDeleting is a placeholder implementation of
-// [Ki.OnChildrenDeleting] that does nothing.
-func (n *Node) OnChildrenDeleting() {}
-
-// OnUpdated is a placeholder implementation of
-// [Ki.OnUpdated] that does nothing.
-func (n *Node) OnUpdated() {}
 
 //////////////////////////////////////////////////////////////////////////
 //  Parents
@@ -430,8 +413,6 @@ func (n *Node) FieldByName(field string) (Ki, error) {
 // AddChild adds given child at end of children list.
 // The kid node is assumed to not be on another tree (see MoveToParent)
 // and the existing name should be unique among children.
-// No UpdateStart / End wrapping is done: do that externally as needed.
-// Can also call SetFlag(ki.ChildAdded) if notification is needed.
 func (n *Node) AddChild(kid Ki) error {
 	if err := ThisCheck(n); err != nil {
 		return err
@@ -446,8 +427,6 @@ func (n *Node) AddChild(kid Ki) error {
 // of children list. The name should be unique among children. If the
 // name is unspecified, it defaults to the ID (kebab-case) name of the
 // type, plus the [Ki.NumLifetimeChildren] of its parent.
-// No UpdateStart / End wrapping is done: do that externally as needed.
-// Can also call SetFlag(ki.ChildAdded) if notification is needed.
 func (n *Node) NewChild(typ *gti.Type, name ...string) Ki {
 	if err := ThisCheck(n); err != nil {
 		return nil
@@ -465,9 +444,7 @@ func (n *Node) NewChild(typ *gti.Type, name ...string) Ki {
 // SetChild sets child at given index to be the given item; if it is passed
 // a name, then it sets the name of the child as well; just calls Init
 // (or InitName) on the child, and SetParent. Names should be unique
-// among children. No UpdateStart / End wrapping is done: do that
-// externally as needed. Can also call SetFlag(ki.ChildAdded) if
-// notification is needed.
+// among children.
 func (n *Node) SetChild(kid Ki, idx int, name ...string) error {
 	if err := n.Kids.IsValidIndex(idx); err != nil {
 		return err
@@ -485,8 +462,6 @@ func (n *Node) SetChild(kid Ki, idx int, name ...string) error {
 // InsertChild adds given child at position in children list.
 // The kid node is assumed to not be on another tree (see MoveToParent)
 // and the existing name should be unique among children.
-// No UpdateStart / End wrapping is done: do that externally as needed.
-// Can also call SetChildAdded() if notification is needed.
 func (n *Node) InsertChild(kid Ki, at int) error {
 	if err := ThisCheck(n); err != nil {
 		return err
@@ -500,9 +475,7 @@ func (n *Node) InsertChild(kid Ki, at int) error {
 // InsertNewChild creates a new child of given type and add at position
 // in children list. The name should be unique among children. If the
 // name is unspecified, it defaults to the ID (kebab-case) name of the
-// type, plus the [Ki.NumLifetimeChildren] of its parent. No
-// UpdateStart / End wrapping is done: do that externally as needed.
-// Can also call SetFlag(ki.ChildAdded) if notification is needed.
+// type, plus the [Ki.NumLifetimeChildren] of its parent.
 func (n *Node) InsertNewChild(typ *gti.Type, at int, name ...string) Ki {
 	if err := ThisCheck(n); err != nil {
 		return nil
@@ -521,60 +494,43 @@ func (n *Node) InsertNewChild(typ *gti.Type, at int, name ...string) Ki {
 // extra, and creating any new ones, using NewChild with given type and
 // naming according to nameStubX where X is the index of the child.
 // If nameStub is not specified, it defaults to the ID (kebab-case)
-// name of the type.
-//
-// IMPORTANT: returns whether any modifications were made (mods) AND if
-// that is true, the result from the corresponding UpdateStart call --
-// UpdateEnd is NOT called, allowing for further subsequent updates before
-// you call UpdateEnd(updt)
+// name of the type. It returns whether any changes were made to the children.
 //
 // Note that this does not ensure existing children are of given type, or
 // change their names, or call UniquifyNames -- use ConfigChildren for
 // those cases -- this function is for simpler cases where a parent uses
 // this function consistently to manage children all of the same type.
-func (n *Node) SetNChildren(trgn int, typ *gti.Type, nameStub ...string) (mods, updt bool) {
-	mods, updt = false, false
+func (n *Node) SetNChildren(trgn int, typ *gti.Type, nameStub ...string) bool {
 	sz := len(n.Kids)
 	if trgn == sz {
-		return
+		return false
 	}
+	mods := false
 	for sz > trgn {
-		if !mods {
-			mods = true
-			updt = n.This().UpdateStart()
-		}
+		mods = true
 		sz--
-		n.DeleteChildAtIndex(sz, true)
+		n.DeleteChildAtIndex(sz)
 	}
 	ns := typ.IDName
 	if len(nameStub) > 0 {
 		ns = nameStub[0]
 	}
 	for sz < trgn {
-		if !mods {
-			mods = true
-			updt = n.This().UpdateStart()
-		}
+		mods = true
 		nm := fmt.Sprintf("%s%d", ns, sz)
 		n.InsertNewChild(typ, sz, nm)
 		sz++
 	}
-	return
+	return mods
 }
 
 // ConfigChildren configures children according to given list of
 // type-and-name's -- attempts to have minimal impact relative to existing
 // items that fit the type and name constraints (they are moved into the
 // corresponding positions), and any extra children are removed, and new
-// ones added, to match the specified config.  If uniqNm, then names
-// represent UniqueNames (this results in Name == UniqueName for created
-// children).
-//
-// IMPORTANT: returns whether any modifications were made (mods) AND if
-// that is true, the result from the corresponding UpdateStart call --
-// UpdateEnd is NOT called, allowing for further subsequent updates before
-// you call UpdateEnd(updt).
-func (n *Node) ConfigChildren(config Config) (mods, updt bool) {
+// ones added, to match the specified config. It is important that names
+// are unique! It returns whether any changes were made to the children.
+func (n *Node) ConfigChildren(config Config) bool {
 	return n.Kids.Config(n.This(), config)
 }
 
@@ -582,106 +538,70 @@ func (n *Node) ConfigChildren(config Config) (mods, updt bool) {
 //  Deleting Children
 
 // DeleteChildAtIndex deletes child at given index. It returns false
-// if there is no child at the given index. Wraps delete in UpdateStart / End
-// and sets ChildDeleted flag.
-func (n *Node) DeleteChildAtIndex(idx int, destroy bool) bool {
+// if there is no child at the given index.
+func (n *Node) DeleteChildAtIndex(idx int) bool {
 	child := n.Child(idx)
 	if child == nil {
 		return false
 	}
-	updt := n.This().UpdateStart()
-	n.SetFlag(true, ChildDeleted)
-	if child.Parent() == n.This() {
-		// only deleting if we are still parent -- change parent first to
-		// signal move delete is always sent live to affected node without
-		// update blocking note: children of child etc will not send a signal
-		// at this point -- only later at destroy -- up to this parent to
-		// manage all that
-		DeleteFromParent(child)
-	}
 	n.Kids.DeleteAtIndex(idx)
-	if destroy {
-		DelMgr.Add(child)
-	}
-	UpdateReset(child) // it won't get the UpdateEnd from us anymore -- init fresh in any case
-	n.This().UpdateEnd(updt)
+	child.Destroy()
 	return true
 }
 
 // DeleteChild deletes the given child node, returning false if
-// it can not find it. Wraps delete in UpdateStart / End and
-// sets ChildDeleted flag.
-func (n *Node) DeleteChild(child Ki, destroy bool) bool {
+// it can not find it.
+func (n *Node) DeleteChild(child Ki) bool {
 	if child == nil {
 		return false
 	}
-	idx, ok := n.Kids.IndexOf(child, 0)
+	idx, ok := n.Kids.IndexOf(child)
 	if !ok {
 		return false
 	}
-	return n.DeleteChildAtIndex(idx, destroy)
+	return n.DeleteChildAtIndex(idx)
 }
 
 // DeleteChildByName deletes child node by name, returning false
-// if it can not find it. Wraps delete in UpdateStart / End and
-// sets ChildDeleted flag.
-func (n *Node) DeleteChildByName(name string, destroy bool) bool {
-	idx, ok := n.Kids.IndexByName(name, 0)
+// if it can not find it.
+func (n *Node) DeleteChildByName(name string) bool {
+	idx, ok := n.Kids.IndexByName(name)
 	if !ok {
 		return false
 	}
-	return n.DeleteChildAtIndex(idx, destroy)
+	return n.DeleteChildAtIndex(idx)
 }
 
-// DeleteChildren deletes all children nodes -- destroy will add removed
-// children to deleted list, to be destroyed later -- otherwise children
-// remain intact but parent is nil -- could be inserted elsewhere, but you
-// better have kept a slice of them before calling this.
-func (n *Node) DeleteChildren(destroy bool) {
-	updt := n.This().UpdateStart()
-	n.SetFlag(true, ChildrenDeleted)
-	DeletingChildren(n.This())
+// DeleteChildren deletes all children nodes.
+func (n *Node) DeleteChildren() {
 	kids := n.Kids
 	n.Kids = n.Kids[:0] // preserves capacity of list
 	for _, kid := range kids {
 		if kid == nil {
 			continue
 		}
-		kid.SetFlag(true, Deleted)
-		kid.This().OnDelete()
-		SetParent(kid, nil)
-		UpdateReset(kid)
+		kid.SetFlag(true)
+		kid.Destroy()
 	}
-	if destroy {
-		DelMgr.Add(kids...)
-	}
-	n.This().UpdateEnd(updt)
 }
 
-// Delete deletes this node from its parent children list -- destroy will
-// add removed child to deleted list, to be destroyed later -- otherwise
-// child remains intact but parent is nil -- could be inserted elsewhere.
-func (n *Node) Delete(destroy bool) {
+// Delete deletes this node from its parent's children list.
+func (n *Node) Delete() {
 	if n.Par == nil {
-		if destroy {
-			n.This().Destroy()
-		}
+		n.This().Destroy()
 	} else {
-		n.Par.DeleteChild(n.This(), destroy)
+		n.Par.DeleteChild(n.This())
 	}
 }
 
-// Destroy deletes and destroys all children and their childrens-children, etc.
+// Destroy recursively deletes and destroys all children and
+// their children's children, etc.
 func (n *Node) Destroy() {
-	// fmt.Printf("Destroying: %v %T %p Kids: %v\n", n.Nm, n.This(), n.This(), len(n.Kids))
 	if n.This() == nil { // already dead!
 		return
 	}
-	n.DeleteChildren(true)  // first delete all my children
-	DelMgr.DestroyDeleted() // then destroy all those kids
-	n.SetFlag(true, Destroyed)
-	n.Ths = nil // last gasp: lose our own sense of self..
-	// note: above is thread-safe because This() accessor checks Destroyed
+	n.DeleteChildren() // delete and destroy all my children
+	n.Ths = nil        // last gasp: lose our own sense of self..
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -696,19 +616,6 @@ func (n *Node) Is(f enums.BitFlag) bool {
 // using atomic, safe for concurrent access
 func (n *Node) SetFlag(on bool, f ...enums.BitFlag) {
 	n.Flags.SetFlag(on, f...)
-}
-
-// SetChildAdded sets the ChildAdded flag -- set when notification is needed
-// for Add, Insert methods
-func (n *Node) SetChildAdded() {
-	n.SetFlag(true, ChildAdded)
-}
-
-// ClearUpdateFlags resets all structure update related flags:
-// ChildAdded, ChildDeleted, ChildrenDeleted, Deleted
-// automatically called on StartUpdate to reset any old state.
-func (n *Node) ClearUpdateFlags() {
-	n.SetFlag(false, ChildAdded, ChildDeleted, ChildrenDeleted, Deleted)
 }
 
 // FlagType is the base implementation of [Ki.FlagType] that returns a
@@ -863,9 +770,7 @@ func (tm TravMap) Get(k Ki) int {
 // WalkPre calls function on this node (MeFirst) and then iterates
 // in a depth-first manner over all the children.
 // The [WalkPreNode] method is called for every node, after the given function,
-// which e.g., enables nodes to also traverse additional Ki Trees (e.g., Fields),
-// including for the basic UpdateStart / End and other such infrastructure calls
-// which use WalkPre (otherwise it could just be done in the given fun).
+// which e.g., enables nodes to also traverse additional Ki Trees (e.g., Fields).
 // The node traversal is non-recursive and uses locally-allocated state -- safe
 // for concurrent calling (modulo conflict management in function call itself).
 // Function calls are sequential all in current go routine.
@@ -873,7 +778,7 @@ func (tm TravMap) Get(k Ki) int {
 // aborted, but other branches continue -- i.e., if fun on current node
 // returns false, children are not processed further.
 func (n *Node) WalkPre(fun func(Ki) bool) {
-	if n.This() == nil || n.Is(Deleted) {
+	if n.This() == nil {
 		return
 	}
 	tm := TravMap{} // not significantly faster to pre-allocate larger size
@@ -882,12 +787,12 @@ func (n *Node) WalkPre(fun func(Ki) bool) {
 	tm.Start(cur)
 outer:
 	for {
-		if cur.This() != nil && !cur.Is(Deleted) && fun(cur) { // false return means stop
+		if cur.This() != nil && fun(cur) { // false return means stop
 			n.This().WalkPreNode(fun)
 			if cur.HasChildren() {
 				tm.Set(cur, 0) // 0 for no fields
 				nxt := cur.Child(0)
-				if nxt != nil && nxt.This() != nil && !nxt.Is(Deleted) {
+				if nxt != nil && nxt.This() != nil {
 					cur = nxt.This()
 					tm.Start(cur)
 					continue
@@ -903,7 +808,7 @@ outer:
 				curChild++
 				tm.Set(cur, curChild)
 				nxt := cur.Child(curChild)
-				if nxt != nil && nxt.This() != nil && !nxt.Is(Deleted) {
+				if nxt != nil && nxt.This() != nil {
 					cur = nxt.This()
 					tm.Start(cur)
 					continue outer
@@ -927,10 +832,8 @@ outer:
 
 // WalkPreNode is called for every node during WalkPre with the function
 // passed to WalkPre.  This e.g., enables nodes to also traverse additional
-// Ki Trees (e.g., Fields), including for the basic UpdateStart / End and
-// other such infrastructure calls.
-func (n *Node) WalkPreNode(fun func(Ki) bool) {
-}
+// Ki Trees (e.g., Fields).
+func (n *Node) WalkPreNode(fun func(Ki) bool) {}
 
 // WalkPreLevel calls function on this node (MeFirst) and then iterates
 // in a depth-first manner over all the children.
@@ -941,7 +844,7 @@ func (n *Node) WalkPreNode(fun func(Ki) bool) {
 // Because WalkPreLevel is not used within Ki itself, it does not have its
 // own version of WalkPreNode -- that can be handled within the closure.
 func (n *Node) WalkPreLevel(fun func(k Ki, level int) bool) {
-	if n.This() == nil || n.Is(Deleted) {
+	if n.This() == nil {
 		return
 	}
 	level := 0
@@ -951,12 +854,12 @@ func (n *Node) WalkPreLevel(fun func(k Ki, level int) bool) {
 	tm.Start(cur)
 outer:
 	for {
-		if cur.This() != nil && !cur.Is(Deleted) && fun(cur, level) { // false return means stop
+		if cur.This() != nil && fun(cur, level) { // false return means stop
 			level++ // this is the descent branch
 			if cur.HasChildren() {
 				tm.Set(cur, 0) // 0 for no fields
 				nxt := cur.Child(0)
-				if nxt != nil && nxt.This() != nil && !nxt.Is(Deleted) {
+				if nxt != nil && nxt.This() != nil {
 					cur = nxt.This()
 					tm.Start(cur)
 					continue
@@ -973,7 +876,7 @@ outer:
 				curChild++
 				tm.Set(cur, curChild)
 				nxt := cur.Child(curChild)
-				if nxt != nil && nxt.This() != nil && !nxt.Is(Deleted) {
+				if nxt != nil && nxt.This() != nil {
 					cur = nxt.This()
 					tm.Start(cur)
 					continue outer
@@ -1006,7 +909,7 @@ outer:
 // Function calls are sequential all in current go routine.
 // The level var tracks overall depth in the tree.
 func (n *Node) WalkPost(doChildTestFunc func(Ki) bool, fun func(Ki) bool) {
-	if n.This() == nil || n.Is(Deleted) {
+	if n.This() == nil {
 		return
 	}
 	tm := TravMap{} // not significantly faster to pre-allocate larger size
@@ -1015,11 +918,11 @@ func (n *Node) WalkPost(doChildTestFunc func(Ki) bool, fun func(Ki) bool) {
 	tm.Start(cur)
 outer:
 	for {
-		if cur.This() != nil && !cur.Is(Deleted) && doChildTestFunc(cur) { // false return means stop
+		if cur.This() != nil && doChildTestFunc(cur) { // false return means stop
 			if cur.HasChildren() {
 				tm.Set(cur, 0) // 0 for no fields
 				nxt := cur.Child(0)
-				if nxt != nil && nxt.This() != nil && !nxt.Is(Deleted) {
+				if nxt != nil && nxt.This() != nil {
 					cur = nxt.This()
 					tm.Set(cur, -1)
 					continue
@@ -1035,7 +938,7 @@ outer:
 				curChild++
 				tm.Set(cur, curChild)
 				nxt := cur.Child(curChild)
-				if nxt != nil && nxt.This() != nil && !nxt.Is(Deleted) {
+				if nxt != nil && nxt.This() != nil {
 					cur = nxt.This()
 					tm.Start(cur)
 					continue outer
@@ -1081,9 +984,9 @@ func (n *Node) WalkBreadth(fun func(k Ki) bool) {
 		depth := Depth(cur)
 		queue = queue[1:]
 
-		if cur.This() != nil && !cur.Is(Deleted) && fun(cur) { // false return means don't proceed
+		if cur.This() != nil && fun(cur) { // false return means don't proceed
 			for _, k := range *cur.Children() {
-				if k != nil && k.This() != nil && !k.Is(Deleted) {
+				if k != nil && k.This() != nil {
 					SetDepth(k, depth+1)
 					queue = append(queue, k)
 				}
@@ -1091,77 +994,6 @@ func (n *Node) WalkBreadth(fun func(k Ki) bool) {
 		}
 	}
 }
-
-//////////////////////////////////////////////////////////////////////////
-//  State update signaling -- automatically consolidates all changes across
-//   levels so there is only one update at highest level of modification
-//   All modification starts with UpdateStart() and ends with UpdateEnd()
-
-// after an UpdateEnd, DestroyDeleted is called
-
-// UpdateStart should be called when starting to modify the tree (state or
-// structure) -- returns whether this node was first to set the Updating
-// flag (if so, all children have their Updating flag set -- pass the
-// result to UpdateEnd -- automatically determines the highest level
-// updated, within the normal top-down updating sequence -- can be called
-// multiple times at multiple levels -- it is essential to ensure that all
-// such Start's have an End!  Usage:
-//
-//	updt := n.UpdateStart()
-//	... code
-//	n.UpdateEnd(updt)
-//
-// or
-//
-//	updt := n.UpdateStart()
-//	defer n.UpdateEnd(updt)
-//	... code
-func (n *Node) UpdateStart() bool {
-	if n.Is(Updating) || n.Is(Destroyed) {
-		return false
-	}
-	// pr := prof.Start("ki.Node.UpdateStart")
-	n.WalkPre(func(k Ki) bool {
-		if !k.Is(Updating) {
-			k.ClearUpdateFlags()
-			k.SetFlag(true, Updating)
-			return Continue
-		}
-		return Break // bail -- already updating
-	})
-	// pr.End()
-	return true
-}
-
-// UpdateEnd should be called when done updating after an UpdateStart,
-// and passed the result of the UpdateStart call.
-// If this arg is true, the OnUpdated method will be called and the Updating
-// flag will be cleared.  Also, if any ChildDeleted flags have been set,
-// the delete manager DestroyDeleted is called.
-// If the updt bool arg is false, this function is a no-op.
-func (n *Node) UpdateEnd(updt bool) {
-	if !updt {
-		return
-	}
-	if n.This() == nil || n.Is(Destroyed) || n.Is(Deleted) {
-		return
-	}
-	if n.Is(ChildDeleted) || n.Is(ChildrenDeleted) {
-		DelMgr.DestroyDeleted()
-	}
-	// pr := prof.Start("ki.Node.UpdateEnd")
-	n.WalkPre(func(k Ki) bool {
-		k.SetFlag(false, Updating) // note: could check first and break here but good to ensure all clear
-		return true
-	})
-	// pr.End()
-	n.This().OnUpdated()
-}
-
-//////////////////////////////////////////////////////////////////////////
-//  Field Value setting with notification
-
-// note: SetField is in laser -- just call UpdateSig if err == nil to get updating
 
 //////////////////////////////////////////////////////////////////////////
 //  Deep Copy / Clone
@@ -1185,14 +1017,6 @@ func (n *Node) CopyFrom(frm Ki) error {
 		log.Println(err)
 		return err
 	}
-	// todo: see if we want this
-	// if Type(n.This()) != Type(frm.This()) {
-	// 	err := fmt.Errorf("ki.Node Copy to %v from %v -- must have same types, but %v != %v", n.Path(), frm.Path(), Type(n.This()).Name(), Type(frm.This()).Name())
-	// 	log.Println(err)
-	// 	return err
-	// }
-	updt := n.This().UpdateStart()
-	defer n.This().UpdateEnd(updt)
 	CopyFromRaw(n.This(), frm)
 	return nil
 }

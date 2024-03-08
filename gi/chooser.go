@@ -276,14 +276,14 @@ func (ch *Chooser) ConfigWidget() {
 			tx.SetTrailingIcon(ch.Indicator, func(e events.Event) {
 				ch.OpenMenu(e)
 			})
-			tx.Config() // this is essential
+			tx.ConfigWidget() // this is essential
 			if !ch.DefaultNew {
 				tx.SetCompleter(tx, ch.CompleteMatch, ch.CompleteEdit)
 			}
 		} else {
 			lbl := ch.Parts.Child(lbi).(*Label)
 			lbl.SetText(ch.CurrentItem.GetLabel())
-			lbl.Config() // this is essential
+			lbl.ConfigWidget() // this is essential
 
 			ic := ch.Parts.Child(indi).(*Icon)
 			ic.SetIcon(ch.Indicator)
@@ -449,18 +449,15 @@ func (ch *Chooser) SetCurrentText(text string) error {
 
 // ShowCurrentItem updates the display to present the current item.
 func (ch *Chooser) ShowCurrentItem() *Chooser {
-	updt := ch.UpdateStart()
-	defer ch.UpdateEndRender(updt)
-
 	if ch.Editable {
 		tf := ch.TextField()
 		if tf != nil {
-			tf.SetTextUpdate(ch.CurrentItem.GetLabel())
+			tf.SetText(ch.CurrentItem.GetLabel())
 		}
 	} else {
 		lbl := ch.LabelWidget()
 		if lbl != nil {
-			lbl.SetTextUpdate(ch.CurrentItem.GetLabel())
+			lbl.SetText(ch.CurrentItem.GetLabel()).ConfigWidget()
 		}
 	}
 	if ch.CurrentItem.Icon.IsSet() {
@@ -468,12 +465,12 @@ func (ch *Chooser) ShowCurrentItem() *Chooser {
 		ch.SetIcon(ch.CurrentItem.Icon)
 		if ch.Icon != picon {
 			ch.Update()
-			// ch.SetNeedsLayout(true)
 		}
 	}
 	if ch.CurrentItem.Tooltip != "" {
 		ch.SetTooltip(ch.CurrentItem.Tooltip)
 	}
+	ch.NeedsRender()
 	return ch
 }
 
@@ -482,9 +479,8 @@ func (ch *Chooser) SelectItem(idx int) *Chooser {
 	if ch.This() == nil {
 		return ch
 	}
-	updt := ch.UpdateStart()
 	ch.SetCurrentIndex(idx)
-	ch.UpdateEndLayout(updt)
+	ch.NeedsLayout()
 	return ch
 }
 

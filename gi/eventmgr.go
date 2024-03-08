@@ -338,10 +338,10 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 			}
 			if sc.SelectedWidget != pselw {
 				if pselw != nil {
-					pselw.AsWidget().SetNeedsRender(true)
+					pselw.AsWidget().NeedsRender()
 				}
 				if sc.SelectedWidget != nil {
-					sc.SelectedWidget.AsWidget().SetNeedsRender(true)
+					sc.SelectedWidget.AsWidget().NeedsRender()
 				}
 			}
 		}
@@ -492,7 +492,7 @@ func (em *EventMgr) UpdateHovers(hov, prev []Widget, e events.Event, enter, leav
 				break
 			}
 		}
-		if !stillIn && prv.This() != nil && !prv.Is(ki.Deleted) {
+		if !stillIn && prv.This() != nil {
 			prv.Send(leave, e)
 		}
 	}
@@ -740,7 +740,7 @@ func (em *EventMgr) DragMove(e events.Event) {
 		return
 	}
 	sp.Geom.Pos = e.WindowPos()
-	em.Scene.SetNeedsRender(true)
+	em.Scene.NeedsRender()
 }
 
 func (em *EventMgr) DragClearSprite() {
@@ -909,7 +909,7 @@ func (em *EventMgr) SetFocusEvent(w Widget) bool {
 // sendEvent determines whether the events.Focus event is sent to the focused item.
 func (em *EventMgr) SetFocusImpl(w Widget, sendEvent bool) bool {
 	cfoc := em.Focus
-	if cfoc == nil || cfoc.This() == nil || cfoc.Is(ki.Deleted) {
+	if cfoc == nil || cfoc.This() == nil {
 		em.Focus = nil
 		// fmt.Println("nil foc impl")
 		cfoc = nil
@@ -1246,7 +1246,7 @@ func (em *EventMgr) TriggerShortcut(chord key.Chord) bool {
 	if !exists {
 		return false
 	}
-	if sa.Is(ki.Destroyed) {
+	if sa == nil || sa.This() == nil {
 		delete(em.Shortcuts, chord)
 		return false
 	}

@@ -67,17 +67,12 @@ func (sv *StructViewInline) SetStruct(st any) *StructViewInline {
 }
 
 func (sv *StructViewInline) ConfigWidget() {
-	sv.ConfigStruct()
-}
-
-// ConfigStruct configures the children for the current struct
-func (sv *StructViewInline) ConfigStruct() bool {
 	if laser.AnyIsNil(sv.Struct) {
-		return false
+		return
 	}
 	config := ki.Config{}
 	// note: widget re-use does not work due to all the closures
-	sv.DeleteChildren(ki.DestroyKids)
+	sv.DeleteChildren()
 	sv.FieldViews = make([]Value, 0)
 	laser.FlatFieldsValueFunc(sv.Struct, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		// todo: check tags, skip various etc
@@ -109,10 +104,7 @@ func (sv *StructViewInline) ConfigStruct() bool {
 	if sv.AddButton {
 		config.Add(gi.ButtonType, "edit-action")
 	}
-	mods, updt := sv.ConfigChildren(config)
-	if !mods {
-		updt = sv.UpdateStart()
-	}
+	sv.ConfigChildren(config)
 	for i, vv := range sv.FieldViews {
 		lbl := sv.Child(i * 2).(*gi.Label)
 		lbl.Style(func(s *styles.Style) {
@@ -174,21 +166,17 @@ func (sv *StructViewInline) ConfigStruct() bool {
 			})
 		}
 	}
-	sv.UpdateEnd(updt)
-	return updt
 }
 
 func (sv *StructViewInline) UpdateFields() {
-	updt := sv.UpdateStart()
 	for _, vv := range sv.FieldViews {
 		vv.UpdateWidget()
 	}
-	sv.UpdateEndLayout(updt)
+	sv.NeedsLayout()
 }
 
 func (sv *StructViewInline) UpdateFieldAction() {
 	if sv.IsShouldShower {
 		sv.Update()
-		sv.SetNeedsLayout(true)
 	}
 }

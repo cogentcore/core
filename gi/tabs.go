@@ -214,18 +214,13 @@ func (ts *Tabs) NewTab(label string, icon ...icons.Icon) *Frame {
 // within the list of tabs and returns the resulting tab frame. An optional icon
 // can also be passed for the tab button.
 func (ts *Tabs) InsertNewTab(label string, idx int, icon ...icons.Icon) *Frame {
-	updt := ts.UpdateStart()
-	defer ts.UpdateEndLayout(updt)
-
 	fr := ts.Frame()
-	fr.SetChildAdded()
 	frame := fr.InsertNewChild(FrameType, idx, label).(*Frame)
 	frame.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
 	ts.InsertTabOnlyAt(frame, label, idx, icon...)
 	ts.Update()
-	ts.SetNeedsLayout(true)
 	return frame
 }
 
@@ -243,7 +238,6 @@ func (ts *Tabs) AddTab(frame *Frame, label string) int {
 // for internal use only. An optional icon can also be passed for the tab button.
 func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int, icon ...icons.Icon) {
 	tb := ts.Tabs()
-	tb.SetChildAdded()
 	tab := tb.InsertNewChild(TabType, idx, label).(*Tab)
 	tab.Tooltip = label
 	tab.Type = ts.Type
@@ -269,14 +263,12 @@ func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int, icon ...ico
 // An optional icon can also be passed for the tab button.
 func (ts *Tabs) InsertTab(frame *Frame, label string, idx int, icon ...icons.Icon) {
 	ts.Mu.Lock()
-	updt := ts.UpdateStart()
-	defer ts.UpdateEndLayout(updt)
+	defer ts.Mu.Unlock()
 
 	fr := ts.Frame()
-	fr.SetChildAdded()
 	fr.InsertChild(frame, idx)
 	ts.InsertTabOnlyAt(frame, label, idx, icon...)
-	ts.Mu.Unlock()
+	ts.NeedsLayout()
 }
 
 // TabAtIndex returns content frame and tab button at given index, false if
@@ -310,8 +302,6 @@ func (ts *Tabs) SelectTabIndex(idx int) (*Frame, bool) {
 		return frame, true
 	}
 	ts.Mu.Lock()
-	updt := ts.UpdateStart()
-	defer ts.UpdateEndLayout(updt)
 	ts.UnselectOtherTabs(idx)
 	tab.SetSelected(true)
 	fr.StackTop = idx
@@ -400,25 +390,21 @@ func (ts *Tabs) RecycleTabWidget(name string, sel bool, typ *gti.Type) Widget {
 		return wi
 	}
 	wi, _ := AsWidget(fr.NewChild(typ, fr.Nm))
-	wi.Config()
+	wi.ConfigWidget()
 	return wi
 }
 
-// DeleteTabIndex deletes tab at given index, optionally calling destroy on
-// tab contents -- returns frame if destroy == false, tab label, and bool success
-func (ts *Tabs) DeleteTabIndex(idx int, destroy bool) (*Frame, string, bool) {
-	frame, _, ok := ts.TabAtIndex(idx)
+// DeleteTabIndex deletes tab at given index, returning whether it was successful.
+func (ts *Tabs) DeleteTabIndex(idx int) bool {
+	_, _, ok := ts.TabAtIndex(idx)
 	if !ok {
-		return nil, "", false
+		return false
 	}
 
-	tnm := ts.TabLabel(idx)
 	ts.Mu.Lock()
 	fr := ts.Frame()
 	sz := len(*fr.Children())
 	tb := ts.Tabs()
-	updt := ts.UpdateStart()
-	defer ts.UpdateEndLayout(updt)
 	nidx := -1
 	if fr.StackTop == idx {
 		if idx > 0 {
@@ -432,18 +418,15 @@ func (ts *Tabs) DeleteTabIndex(idx int, destroy bool) (*Frame, string, bool) {
 	if nidx < 0 && ts.NTabs() > 1 {
 		nidx = max(idx-1, 0)
 	}
-	fr.DeleteChildAtIndex(idx, destroy)
-	tb.DeleteChildAtIndex(idx, ki.DestroyKids) // always destroy -- we manage
+	fr.DeleteChildAtIndex(idx)
+	tb.DeleteChildAtIndex(idx)
 	ts.Mu.Unlock()
 
 	if nidx >= 0 {
 		ts.SelectTabIndex(nidx)
 	}
-	if destroy {
-		return nil, tnm, true
-	} else {
-		return frame, tnm, true
-	}
+	ts.NeedsLayout()
+	return true
 }
 
 // ConfigNewTabButton configures the new tab + button at end of list of tabs
@@ -466,7 +449,7 @@ func (ts *Tabs) ConfigNewTabButton() bool {
 		if ntb == sz {
 			return false
 		}
-		tb.DeleteChildAtIndex(ntb-1, ki.DestroyKids) // always destroy -- we manage
+		tb.DeleteChildAtIndex(ntb - 1)
 		return true
 	}
 }
@@ -485,9 +468,8 @@ func (ts *Tabs) ConfigWidget() {
 		config.Add(FrameType, "tabs")
 		config.Add(FrameType, "frame")
 	}
-	mods, updt := ts.ConfigChildren(config)
-	if mods {
-		ts.UpdateEndLayout(updt)
+	if ts.ConfigChildren(config) {
+		ts.NeedsLayout()
 	}
 	// ts.ConfigNewTabButton()
 }
@@ -636,7 +618,7 @@ func (tb *Tab) SetStyles() {
 				if SystemSettings.OnlyCloseActiveTab && !tb.StateIs(states.Selected) {
 					ts.SelectTabIndex(idx)
 				} else {
-					ts.DeleteTabIndex(idx, true)
+					ts.DeleteTabIndex(idx)
 				}
 			})
 		}
@@ -684,9 +666,7 @@ func (tb *Tab) ConfigWidget() {
 		}
 		if lbi >= 0 {
 			lbl := tb.Parts.Child(lbi).(*Label)
-			if lbl.Text != tb.Text {
-				lbl.SetTextUpdate(tb.Text)
-			}
+			lbl.SetText(tb.Text)
 		}
 		if clsi >= 0 {
 			cls := tb.Parts.Child(clsi).(*Button)

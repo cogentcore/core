@@ -11,6 +11,7 @@ import (
 	"cogentcore.org/core/grows/jsons"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/ki/testdata"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNodeJSON(t *testing.T) {
@@ -27,40 +28,25 @@ func TestNodeJSON(t *testing.T) {
 	child2.NewChild(typ, "subchild1")
 
 	var buf bytes.Buffer
-	err := jsons.Write(&parent, &buf)
-	if err != nil {
-		t.Error(err)
-	} else {
-		// jsons.SaveIndent(&parent, "json_test.json")
-		// fmt.Printf("json output:\n%v\n", string(buf.Bytes()))
-	}
+	assert.NoError(t, jsons.Write(&parent, &buf))
 	b := buf.Bytes()
 
 	tstload := testdata.NodeEmbed{}
 	tstload.InitName(&tstload, "")
-	err = jsons.Read(&tstload, bytes.NewReader(b))
-	if err != nil {
-		t.Error(err)
-	} else {
+	if assert.NoError(t, jsons.Read(&tstload, bytes.NewReader(b))) {
 		var buf2 bytes.Buffer
-		err = jsons.Write(tstload, &buf2)
-		if err != nil {
-			t.Error(err)
-		}
+		assert.NoError(t, jsons.Write(tstload, &buf2))
 		tstb := buf2.Bytes()
-		// fmt.Printf("test loaded json output: %v\n", string(tstb))
 		if !bytes.Equal(tstb, b) {
 			t.Error("original and unmarshal'd json rep are not equivalent")
 		}
 	}
 
 	var bufn bytes.Buffer
-	err = ki.WriteNewJSON(parent.This(), &bufn)
+	assert.NoError(t, ki.WriteNewJSON(parent.This(), &bufn))
 	b = bufn.Bytes()
 	nwnd, err := ki.ReadNewJSON(bytes.NewReader(b))
-	if err != nil {
-		t.Error(err)
-	} else {
+	if assert.NoError(t, err) {
 		var buf2 bytes.Buffer
 		err = ki.WriteNewJSON(nwnd, &buf2)
 		if err != nil {
@@ -88,30 +74,15 @@ func TestNodeXML(t *testing.T) {
 	child2.NewChild(typ, "subchild1")
 
 	var buf bytes.Buffer
-	err := parent.WriteXML(&buf, true)
-	if err != nil {
-		t.Error(err)
-		// } else {
-		// 	fmt.Printf("xml output:\n%v\n", string(buf.Bytes()))
-	}
+	assert.NoError(t, parent.WriteXML(&buf, true))
 	b := buf.Bytes()
 
 	tstload := testdata.NodeEmbed{}
 	tstload.InitName(&tstload, "")
-	err = tstload.ReadXML(bytes.NewReader(b))
-	if err != nil {
-		t.Error(err)
-	} else {
+	if assert.NoError(t, tstload.ReadXML(bytes.NewReader(b))) {
 		var buf2 bytes.Buffer
-		if err != nil {
-			t.Error(err)
-		}
-		err := tstload.WriteXML(&buf2, true)
-		if err != nil {
-			t.Error(err)
-		}
+		assert.NoError(t, tstload.WriteXML(&buf2, true))
 		tstb := buf2.Bytes()
-		// fmt.Printf("test loaded json output:\n%v\n", string(tstb))
 		if !bytes.Equal(tstb, b) {
 			t.Error("original and unmarshal'd XML rep are not equivalent")
 		}

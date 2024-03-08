@@ -45,10 +45,6 @@ import (
 // This requires proper initialization via Init method of the Ki interface.
 //
 // Ki nodes also support the following core functionality:
-//   - UpdateStart() / UpdateEnd() to wrap around tree updating code, which then
-//     automatically triggers update signals at the highest level of the
-//     affected tree, resulting in efficient updating logic for arbitrary
-//     nested tree modifications.
 //   - ConfigChildren system for minimally updating children to fit a given
 //     Name & Type template.
 //   - Automatic JSON I/O of entire tree including type information.
@@ -85,7 +81,6 @@ type Ki interface {
 	// Names should generally be unique across children of each node.
 	// See Unique* functions to check / fix.
 	// If node requires non-unique names, add a separate Label field.
-	// Does NOT wrap in UpdateStart / End.
 	SetName(name string)
 
 	// KiType returns the gti Type record for this Ki node.
@@ -207,101 +202,75 @@ type Ki interface {
 	// AddChild adds given child at end of children list.
 	// The kid node is assumed to not be on another tree (see MoveToParent)
 	// and the existing name should be unique among children.
-	// No UpdateStart / End wrapping is done: do that externally as needed.
-	// Can also call SetFlag(ki.ChildAdded) if notification is needed.
 	AddChild(kid Ki) error
 
 	// NewChild creates a new child of the given type and adds it at end
 	// of children list. The name should be unique among children. If the
 	// name is unspecified, it defaults to the ID (kebab-case) name of the
 	// type, plus the [Ki.NumLifetimeChildren] of its parent.
-	// No UpdateStart / End wrapping is done: do that externally as needed.
-	// Can also call SetFlag(ki.ChildAdded) if notification is needed.
 	NewChild(typ *gti.Type, name ...string) Ki
 
 	// SetChild sets child at given index to be the given item; if it is passed
 	// a name, then it sets the name of the child as well; just calls Init
 	// (or InitName) on the child, and SetParent. Names should be unique
-	// among children. No UpdateStart / End wrapping is done: do that
-	// externally as needed. Can also call SetFlag(ki.ChildAdded) if
-	// notification is needed.
+	// among children.
 	SetChild(kid Ki, idx int, name ...string) error
 
 	// InsertChild adds given child at position in children list.
 	// The kid node is assumed to not be on another tree (see MoveToParent)
 	// and the existing name should be unique among children.
-	// No UpdateStart / End wrapping is done: do that externally as needed.
-	// Can also call SetFlag(ki.ChildAdded) if notification is needed.
 	InsertChild(kid Ki, at int) error
 
 	// InsertNewChild creates a new child of given type and add at position
 	// in children list. The name should be unique among children. If the
 	// name is unspecified, it defaults to the ID (kebab-case) name of the
-	// type, plus the [Ki.NumLifetimeChildren] of its parent. No
-	// UpdateStart / End wrapping is done: do that externally as needed.
-	// Can also call SetFlag(ki.ChildAdded) if notification is needed.
+	// type, plus the [Ki.NumLifetimeChildren] of its parent.
 	InsertNewChild(typ *gti.Type, at int, name ...string) Ki
 
 	// SetNChildren ensures that there are exactly n children, deleting any
 	// extra, and creating any new ones, using NewChild with given type and
 	// naming according to nameStubX where X is the index of the child.
 	// If nameStub is not specified, it defaults to the ID (kebab-case)
-	// name of the type.
-	//
-	// IMPORTANT: returns whether any modifications were made (mods) AND if
-	// that is true, the result from the corresponding UpdateStart call --
-	// UpdateEnd is NOT called, allowing for further subsequent updates before
-	// you call UpdateEnd(updt)
+	// name of the type. It returns whether any changes were made to the
+	// children.
 	//
 	// Note that this does not ensure existing children are of given type, or
 	// change their names, or call UniquifyNames -- use ConfigChildren for
 	// those cases -- this function is for simpler cases where a parent uses
 	// this function consistently to manage children all of the same type.
-	SetNChildren(n int, typ *gti.Type, nameStub ...string) (mods, updt bool)
+	SetNChildren(n int, typ *gti.Type, nameStub ...string) bool
 
 	// ConfigChildren configures children according to given list of
 	// type-and-name's -- attempts to have minimal impact relative to existing
 	// items that fit the type and name constraints (they are moved into the
 	// corresponding positions), and any extra children are removed, and new
-	// ones added, to match the specified config.
-	// It is important that names are unique!
-	//
-	// IMPORTANT: returns whether any modifications were made (mods) AND if
-	// that is true, the result from the corresponding UpdateStart call --
-	// UpdateEnd is NOT called, allowing for further subsequent updates before
-	// you call UpdateEnd(updt).
-	ConfigChildren(config Config) (mods, updt bool)
+	// ones added, to match the specified config. It is important that names
+	// are unique! It returns whether any changes were made to the children.
+	ConfigChildren(config Config) bool
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Deleting Children
 
 	// DeleteChildAtIndex deletes child at given index. It returns false
-	// if there is no child at the given index. Wraps delete in UpdateStart / End
-	// and sets ChildDeleted flag.
-	DeleteChildAtIndex(idx int, destroy bool) bool
+	// if there is no child at the given index.
+	DeleteChildAtIndex(idx int) bool
 
 	// DeleteChild deletes the given child node, returning false if
-	// it can not find it. Wraps delete in UpdateStart / End and
-	// sets ChildDeleted flag.
-	DeleteChild(child Ki, destroy bool) bool
+	// it can not find it.
+	DeleteChild(child Ki) bool
 
 	// DeleteChildByName deletes child node by name, returning false
-	// if it can not find it. Wraps delete in UpdateStart / End and
-	// sets ChildDeleted flag.
-	DeleteChildByName(name string, destroy bool) bool
+	// if it can not find it.
+	DeleteChildByName(name string) bool
 
-	// DeleteChildren deletes all children nodes -- destroy will add removed
-	// children to deleted list, to be destroyed later -- otherwise children
-	// remain intact but parent is nil -- could be inserted elsewhere, but you
-	// better have kept a slice of them before calling this.
-	DeleteChildren(destroy bool)
+	// DeleteChildren deletes all children nodes.
+	DeleteChildren()
 
-	// Delete deletes this node from its parent children list -- destroy will
-	// add removed child to deleted list, to be destroyed later -- otherwise
-	// child remains intact but parent is nil -- could be inserted elsewhere.
-	Delete(destroy bool)
+	// Delete deletes this node from its parent's children list.
+	Delete()
 
-	// Destroy deletes and destroys all children and their childrens-children, etc.
+	// Destroy recursively deletes and destroys all children and
+	// their children's children, etc.
 	Destroy()
 
 	//////////////////////////////////////////////////////////////////////////
@@ -313,15 +282,6 @@ type Ki interface {
 	// SetFlag sets the given flag(s) to given state
 	// using atomic, safe for concurrent access
 	SetFlag(on bool, f ...enums.BitFlag)
-
-	// SetChildAdded sets the ChildAdded flag -- set when notification is needed
-	// for Add, Insert methods
-	SetChildAdded()
-
-	// ClearUpdateFlags resets all structure update related flags:
-	// ChildAdded, ChildDeleted, ChildrenDeleted, Deleted
-	// automatically called on StartUpdate to reset any old state.
-	ClearUpdateFlags()
 
 	// FlagType returns the flags of the node as the true flag type of the node,
 	// which may be a type that extends the standard [Flags]. Each node type
@@ -383,9 +343,7 @@ type Ki interface {
 	// WalkPre calls function on this node (MeFirst) and then iterates
 	// in a depth-first manner over all the children.
 	// The [WalkPreNode] method is called for every node, after the given function,
-	// which e.g., enables nodes to also traverse additional Ki Trees (e.g., Fields),
-	// including for the basic UpdateStart / End and other such infrastructure calls
-	// which use WalkPre (otherwise it could just be done in the given fun).
+	// which e.g., enables nodes to also traverse additional Ki Trees (e.g., Fields).
 	// The node traversal is non-recursive and uses locally-allocated state -- safe
 	// for concurrent calling (modulo conflict management in function call itself).
 	// Function calls are sequential all in current go routine.
@@ -396,8 +354,7 @@ type Ki interface {
 
 	// WalkPreNode is called for every node during WalkPre with the function
 	// passed to WalkPre.  This e.g., enables nodes to also traverse additional
-	// Ki Trees (e.g., Fields), including for the basic UpdateStart / End and
-	// other such infrastructure calls.
+	// Ki Trees (e.g., Fields).
 	WalkPreNode(fun func(k Ki) bool)
 
 	// WalkPreLevel calls function on this node (MeFirst) and then iterates
@@ -427,31 +384,6 @@ type Ki interface {
 	// Depth parameter of the node.  If fun returns false then any further
 	// traversal of that branch of the tree is aborted, but other branches continue.
 	WalkBreadth(fun func(k Ki) bool)
-
-	// UpdateStart should be called when starting to modify the tree (state or
-	// structure) -- returns whether this node was first to set the Updating
-	// flag (if so, all children have their Updating flag set -- pass the
-	// result to UpdateEnd -- automatically determines the highest level
-	// updated, within the normal top-down updating sequence -- can be called
-	// multiple times at multiple levels -- it is essential to ensure that all
-	// such Start's have an End!  Usage:
-	//
-	//   updt := n.UpdateStart()
-	//   ... code
-	//   n.UpdateEnd(updt)
-	// or
-	//   updt := n.UpdateStart()
-	//   defer n.UpdateEnd(updt)
-	//   ... code
-	UpdateStart() bool
-
-	// UpdateEnd should be called when done updating after an UpdateStart,
-	// and passed the result of the UpdateStart call.
-	// If this arg is true, the OnUpdated method will be called and the Updating
-	// flag will be cleared.  Also, if any ChildDeleted flags have been set,
-	// the delete manager DestroyDeleted is called.
-	// If the updt bool arg is false, this function is a no-op.
-	UpdateEnd(updt bool)
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Deep Copy of Trees
@@ -512,42 +444,12 @@ type Ki interface {
 	// This function does nothing by default, but it can be
 	// implemented by higher-level types that want to do something.
 	OnChildAdded(child Ki)
-
-	// OnDelete is called when the node is deleted from a parent.
-	// It will be called only once in the lifetime of the node,
-	// unless the node is moved. It will not be called on root
-	// nodes, as they are never deleted from a parent.
-	// It does nothing by default, but it can be implemented
-	// by higher-level types that want to do something.
-	OnDelete()
-
-	// OnChildDeleting is called when a node is just about to be deleted from
-	// this node or any of its children. When a node is deleted from
-	// a tree, it calls this function on each of its parents,
-	// going in order from the closest parent to the furthest parent,
-	// and then [OnDelete].
-	// This function does nothing by default, but it can be
-	// implemented by higher-level types that want to do something.
-	OnChildDeleting(child Ki)
-
-	// OnChildrenDeleting is called when all children are deleted from
-	// this node or any of its children.
-	// This function does nothing by default, but it can be
-	// implemented by higher-level types that want to do something.
-	OnChildrenDeleting()
-
-	// OnUpdated is called during UpdateEnd if the updt flag is true,
-	// indicating that this was the upper-most Ki node that was
-	// updated in the latest round of updating.
-	// This function does nothing by default, but it can be
-	// implemented by higher-level types that want to do something.
-	OnUpdated()
 }
 
 // see node.go for struct implementing this interface
 
 // KiType is a Ki reflect.Type, suitable for checking for Type.Implements.
-var KiType = reflect.TypeOf((*Ki)(nil)).Elem()
+var KiType = reflect.TypeFor[Ki]()
 
 // todo: remove these if possible to eliminate reflect dependencies
 
@@ -557,20 +459,7 @@ func IsKi(typ reflect.Type) bool {
 	if typ == nil {
 		return false
 	}
-	if typ.Implements(KiType) {
-		return true
-	}
-	return reflect.PtrTo(typ).Implements(KiType) // typically need the pointer type to impl
-}
-
-// AsKi returns the Ki interface and Node base type for
-// any given object -- if not a Ki, return values are nil.
-func AsKi(v any) (Ki, *Node) {
-	k, ok := v.(Ki)
-	if !ok {
-		return nil, nil
-	}
-	return k, k.AsKi()
+	return typ.Implements(KiType) || reflect.PointerTo(typ).Implements(KiType)
 }
 
 // NewOfType makes a new Ki struct of given type -- must be a Ki type -- will

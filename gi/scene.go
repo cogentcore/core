@@ -276,7 +276,7 @@ func (sc *Scene) Resize(geom mat32.Geom2DInt) {
 	// and Android in different contexts.
 	// TODO(kai): is there a more efficient way to do this, and do we need to do this on all platforms?
 	sc.ShowIter = 0
-	sc.SetNeedsLayout(true)
+	sc.NeedsLayout()
 }
 
 func (sc *Scene) ScIsVisible() bool {
@@ -313,7 +313,7 @@ func (sc *Scene) Close() bool {
 
 // Delete this Scene if not Flagged for preservation.
 // Removes Decor and Frame Widgets
-func (sc *Scene) Delete(destroy bool) {
+func (sc *Scene) Delete() {
 	if sc.Flags.HasFlag(ScPreserve) {
 		return
 	}
@@ -322,7 +322,7 @@ func (sc *Scene) Delete(destroy bool) {
 
 // DeleteImpl does the deletion, removing Decor and Frame Widgets.
 func (sc *Scene) DeleteImpl() {
-	sc.DeleteChildren(ki.DestroyKids)
+	sc.DeleteChildren()
 }
 
 // UpdateTitle updates the title of the Scene's associated [Stage],

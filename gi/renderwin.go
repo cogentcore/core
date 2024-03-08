@@ -19,7 +19,6 @@ import (
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"golang.org/x/image/draw"
 )
@@ -182,7 +181,7 @@ func NewRenderWin(name, title string, opts *goosi.NewWindowOptions) *RenderWin {
 		w.SetFlag(true, WinClosing)
 		// ensure that everyone is closed first
 		for _, kv := range w.MainStageMgr.Stack.Order {
-			if kv.Value == nil || kv.Value.Scene == nil || kv.Value.Scene.This() == nil || kv.Value.Scene.Is(ki.Deleted) {
+			if kv.Value == nil || kv.Value.Scene == nil || kv.Value.Scene.This() == nil {
 				continue
 			}
 			if !kv.Value.Scene.Close() {
@@ -334,7 +333,7 @@ func (w *RenderWin) SetZoom(zoom float32) {
 		b.AddSnackbarButton("Reset", func(e events.Event) {
 			w.SetZoom(100)
 		})
-		b.DeleteChildByName("stretch", true)
+		b.DeleteChildByName("stretch")
 		b.NewSnackbar(ms).Run()
 	}
 }
@@ -747,7 +746,7 @@ type RenderContext struct {
 	// Mu is mutex for locking out rendering and any destructive updates.
 	// It is locked at the RenderWin level during rendering and
 	// event processing to provide exclusive blocking of external updates.
-	// Use UpdateStartAsync from any outside routine to grab the lock before
+	// Use AsyncLock from any outside routine to grab the lock before
 	// doing modifications.
 	Mu sync.Mutex
 }
@@ -773,7 +772,7 @@ func NewRenderContext() *RenderContext {
 // Lock is called by RenderWin during RenderWindow and HandleEvent
 // when updating all widgets and rendering the screen.
 // Any outside access to window contents / scene must acquire this
-// lock first.  In general, use UpdateStartAsync to do this.
+// lock first.  In general, use AsyncLock to do this.
 func (rc *RenderContext) Lock() {
 	rc.Mu.Lock()
 }

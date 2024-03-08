@@ -57,7 +57,7 @@ func (sv *SVG) HandleEvents() {
 		del := e.PrevDelta()
 		sv.SVG.Translate.X += float32(del.X)
 		sv.SVG.Translate.Y += float32(del.Y)
-		sv.SetNeedsRender(true)
+		sv.NeedsRender()
 	})
 	sv.On(events.Scroll, func(e events.Event) {
 		if sv.IsReadOnly() {
@@ -69,7 +69,7 @@ func (sv *SVG) HandleEvents() {
 		if sv.SVG.Scale <= 0.0000001 {
 			sv.SVG.Scale = 0.01
 		}
-		sv.SetNeedsRender(true)
+		sv.NeedsRender()
 	})
 	sv.On(events.LongHoverStart, func(e events.Event) {
 		pos := e.Pos()

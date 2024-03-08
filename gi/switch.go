@@ -109,9 +109,9 @@ func (sw *Switch) HandleEvents() {
 	sw.OnFinal(events.Click, func(e events.Event) {
 		sw.SetChecked(sw.IsChecked())
 		if sw.Type == SwitchChip {
-			sw.SetNeedsLayout(true)
+			sw.NeedsLayout()
 		} else {
-			sw.SetNeedsRender(true)
+			sw.NeedsRender()
 		}
 		sw.SendChange(e)
 	})
@@ -234,7 +234,6 @@ func (sw *Switch) SetStyles() {
 
 // SetType sets the styling type of the switch
 func (sw *Switch) SetType(typ SwitchTypes) *Switch {
-	updt := sw.UpdateStart()
 	sw.Type = typ
 	sw.IconIndeterminate = icons.Blank
 	switch sw.Type {
@@ -257,7 +256,7 @@ func (sw *Switch) SetType(typ SwitchTypes) *Switch {
 		sw.IconOff = icons.RadioButtonUnchecked
 		sw.IconIndeterminate = icons.RadioButtonPartial
 	}
-	sw.UpdateEndLayout(updt)
+	sw.NeedsLayout()
 	return sw
 }
 

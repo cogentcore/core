@@ -114,9 +114,7 @@ func (ft *Tree) OpenPath(path string) {
 
 // UpdateAll does a full update of the tree -- calls ReadDir on current path
 func (ft *Tree) UpdateAll() {
-	// updt := ft.UpdateStartAsync() // note: safe for async updating
-	updt := ft.UpdateStart()
-	// fmt.Println(ft, "updt all start")
+	// updt := ft.AsyncLock() // note: safe for async updating
 	ft.UpdtMu.Lock()
 	ft.Dirs.ClearMarks()
 	ft.ReadDir(string(ft.FPath))
@@ -124,19 +122,16 @@ func (ft *Tree) UpdateAll() {
 	// ft.Dirs.DeleteStale()
 	ft.Update()
 	ft.TreeViewChanged(nil)
-	ft.SetNeedsLayout(true)
 	ft.UpdtMu.Unlock()
-	// fmt.Println(ft, "updt all end")
-	// ft.UpdateEndAsyncLayout(updt) // todo:
-	ft.UpdateEndLayout(updt)
+	// ft.AsyncUnlock(updt) // todo:
 }
 
 // UpdatePath updates the tree at the directory level for given path
 // and everything below it.  It flags that it needs render update,
-// but if a deletion or insertion happened, then SetNeedsLayout should also
+// but if a deletion or insertion happened, then NeedsLayout should also
 // be called.
 func (ft *Tree) UpdatePath(path string) {
-	ft.SetNeedsRender(true) //
+	ft.NeedsRender()
 	path = filepath.Clean(path)
 	ft.DirsTo(path)
 	if fn, ok := ft.FindFile(path); ok {
@@ -373,10 +368,7 @@ func (ft *Tree) UpdateExtFiles(efn *Node) {
 	for _, f := range ft.ExtFiles {
 		config.Add(typ, dirs.DirAndFile(f))
 	}
-	mods, updt := efn.ConfigChildren(config) // NOT unique names
-	if mods {
-		// fmt.Printf("got mods: %v\n", path)
-	}
+	efn.ConfigChildren(config) // NOT unique names
 	// always go through kids, regardless of mods
 	for i, sfk := range efn.Kids {
 		sf := AsNode(sfk)
@@ -384,8 +376,5 @@ func (ft *Tree) UpdateExtFiles(efn *Node) {
 		fp := ft.ExtFiles[i]
 		sf.SetNodePath(fp)
 		sf.Info.Vcs = vci.Stored // no vcs in general
-	}
-	if mods {
-		efn.UpdateEnd(updt)
 	}
 }

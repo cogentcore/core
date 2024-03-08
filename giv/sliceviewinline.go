@@ -129,15 +129,10 @@ func (sv *SliceViewInline) SetSlice(sl any) *SliceViewInline {
 }
 
 func (sv *SliceViewInline) ConfigWidget() {
-	sv.ConfigSlice()
-}
-
-// ConfigSlice configures children for slice view
-func (sv *SliceViewInline) ConfigSlice() bool {
-	sv.DeleteChildren(ki.DestroyKids)
+	sv.DeleteChildren()
 	if laser.AnyIsNil(sv.Slice) {
 		sv.ConfigSize = 0
-		return false
+		return
 	}
 	config := ki.Config{}
 	// always start fresh!
@@ -165,10 +160,7 @@ func (sv *SliceViewInline) ConfigSlice() bool {
 		config.Add(gi.ButtonType, "add-action")
 	}
 	config.Add(gi.ButtonType, "edit-action")
-	mods, updt := sv.ConfigChildren(config)
-	if !mods {
-		updt = sv.UpdateStart()
-	}
+	sv.ConfigChildren(config)
 	for i, vv := range sv.Values {
 		vvb := vv.AsValueBase()
 		vvb.OnChange(func(e events.Event) { sv.SetChanged() })
@@ -209,8 +201,7 @@ func (sv *SliceViewInline) ConfigSlice() bool {
 		edbt.SetIcon(icons.Edit)
 		edbt.Tooltip = "edit in a dialog"
 	}
-	sv.UpdateEndLayout(updt)
-	return updt
+	sv.NeedsLayout()
 }
 
 // SetChanged sets the Changed flag and emits the ViewSig signal for the
@@ -228,9 +219,6 @@ func (sv *SliceViewInline) SliceNewAt(idx int) {
 	if sv.IsArray || sv.IsFixedLen {
 		return
 	}
-	updt := sv.UpdateStart()
-	defer sv.UpdateEndLayout(updt)
-
 	laser.SliceNewAt(sv.Slice, idx)
 
 	if sv.TmpSave != nil {
@@ -245,9 +233,6 @@ func (sv *SliceViewInline) SliceDeleteAt(idx int) {
 	if sv.IsArray || sv.IsFixedLen {
 		return
 	}
-	updt := sv.UpdateStart()
-	defer sv.UpdateEndLayout(updt)
-
 	laser.SliceDeleteAt(sv.Slice, idx)
 
 	if sv.TmpSave != nil {
@@ -270,11 +255,10 @@ func (sv *SliceViewInline) ContextMenu(m *gi.Scene, idx int) {
 }
 
 func (sv *SliceViewInline) UpdateValues() {
-	updt := sv.UpdateStart()
 	for _, vv := range sv.Values {
 		vv.UpdateWidget()
 	}
-	sv.UpdateEndRender(updt)
+	sv.NeedsRender()
 }
 
 func (sv *SliceViewInline) SliceSizeChanged() bool {

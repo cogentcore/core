@@ -248,34 +248,6 @@ func (bt *Button) SetText(v string) *Button {
 	return bt
 }
 
-// SetTextUpdate sets the Label text and does a Config and updates
-// the actual button label render, so it will render next time
-// with the updated text value, without flagging any unnecessary layouts.
-// This is used for more efficient large-scale updating in views.
-func (bt *Button) SetTextUpdate(text string) *Button {
-	bt.Text = text
-	bt.ConfigWidget()
-	lb := bt.LabelWidget()
-	if lb != nil {
-		lb.SetTextUpdate(text)
-	}
-	return bt
-}
-
-// SetIconUpdate sets the Icon and does a Config and updates
-// the actual icon render, so it will render next time
-// with the updated text value, without flagging any unnecessary layouts.
-// This is used for more efficient large-scale updating in views.
-func (bt *Button) SetIconUpdate(icon icons.Icon) *Button {
-	bt.Icon = icon
-	bt.ConfigWidget()
-	ic := bt.IconWidget()
-	if ic != nil {
-		ic.SetIcon(icon)
-	}
-	return bt
-}
-
 func (bt *Button) Label() string {
 	if bt.Text != "" {
 		return bt.Text
@@ -421,9 +393,7 @@ func (bt *Button) ConfigWidget() {
 		}
 		if lbi >= 0 {
 			lbl := bt.Parts.Child(lbi).(*Label)
-			if lbl.Text != bt.Text {
-				lbl.SetTextUpdate(bt.Text)
-			}
+			lbl.SetText(bt.Text)
 		}
 
 		if indi >= 0 {
@@ -434,9 +404,7 @@ func (bt *Button) ConfigWidget() {
 		if sci >= 0 {
 			sc := bt.Parts.Child(sci).(*Label)
 			sctxt := bt.Shortcut.Shortcut()
-			if sc.Text != sctxt {
-				sc.SetTextUpdate(sctxt)
-			}
+			sc.SetText(sctxt)
 		}
 	})
 }

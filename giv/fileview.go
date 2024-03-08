@@ -561,9 +561,6 @@ func (fv *FileView) UpdateFiles() {
 	fv.UpdtMu.Lock()
 	defer fv.UpdtMu.Unlock()
 
-	updt := fv.UpdateStart()
-	defer fv.UpdateEndLayout(updt)
-
 	fv.UpdatePath()
 	if len(gi.RecentPaths) == 0 {
 		gi.OpenRecentPaths()

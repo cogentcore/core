@@ -19,8 +19,8 @@ func KeyMapsView(km *keyfun.Maps) {
 	if gi.ActivateExistingMainWindow(km) {
 		return
 	}
-	d := gi.NewBody("gogi-key-maps").SetData(km)
-	d.AddTitle("Available Key Maps: Duplicate an existing map (using Ctxt Menu) as starting point for creating a custom map")
+	d := gi.NewBody("Key maps").SetData(km)
+	d.AddTitle("Available key maps: duplicate an existing map (using context menu) as starting point for creating a custom map")
 	tv := NewTableView(d).SetSlice(km)
 	keyfun.AvailMapsChanged = false
 	tv.OnChange(func(e events.Event) {
@@ -80,7 +80,7 @@ func (vv *KeyMapValue) UpdateWidget() {
 	}
 	bt := vv.Widget.(*gi.Button)
 	txt := laser.ToString(vv.Value.Interface())
-	bt.SetTextUpdate(txt)
+	bt.SetText(txt).Update()
 }
 
 func (vv *KeyMapValue) ConfigWidget(w gi.Widget) {

@@ -12,7 +12,6 @@ import (
 	_ "cogentcore.org/core/grows/images"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/xyz"
 	_ "cogentcore.org/core/xyz/io/obj"
@@ -23,7 +22,7 @@ func main() {
 	b := gi.NewBody("XYZ Object Viewer")
 
 	sv := xyzv.NewSceneView(b)
-	sv.Config()
+	sv.ConfigWidget()
 	sc := sv.SceneXYZ()
 
 	// first, add lights, set camera
@@ -55,19 +54,17 @@ func main() {
 			OnClick(func(e events.Event) {
 				giv.FileViewDialog(tb, curFn, exts, "Open 3D Object", func(selFile string) {
 					curFn = selFile
-					updt := sc.UpdateStart()
-					objgp.DeleteChildren(true)
+					objgp.DeleteChildren()
 					sc.DeleteMeshes()
 					sc.DeleteTextures()
-					ki.DelMgr.DestroyDeleted() // this is actually essential to prevent leaking memory!
 					grr.Log1(sc.OpenNewObj(selFile, objgp))
 					sc.SetCamera("default")
-					sc.UpdateEndConfig(updt)
-					sv.SetNeedsRender(true)
+					sc.NeedsUpdate()
+					sv.NeedsRender()
 				})
 			})
 	})
 
-	sc.SetNeedsConfig()
+	sc.NeedsConfig()
 	b.RunMainWindow()
 }

@@ -132,22 +132,19 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	NumExamples[pg.Context.PageURL] = 0
 
 	fr := pg.FindPath("splits/body").(*gi.Frame)
-	updt := fr.UpdateStart()
-	fr.DeleteChildren(true)
+	fr.DeleteChildren()
 	err = coredom.ReadMD(pg.Context, fr, b)
 	if err != nil {
 		gi.ErrorSnackbar(pg, err, "Error loading page")
 		return
 	}
 	fr.Update()
-	fr.UpdateEndLayout(updt)
 }
 
 func (pg *Page) ConfigWidget() {
 	if pg.HasChildren() {
 		return
 	}
-	updt := pg.UpdateStart()
 	sp := gi.NewSplits(pg, "splits")
 
 	nfr := gi.NewFrame(sp, "nav-frame")
@@ -210,7 +207,6 @@ func (pg *Page) ConfigWidget() {
 	})
 
 	sp.SetSplits(0.2, 0.8)
-	pg.UpdateEnd(updt)
 }
 
 // AppBar is the default app bar for a [Page]

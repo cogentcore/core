@@ -168,13 +168,11 @@ func (lv *VCSLogView) SetRevB(rev string) {
 // ToggleRev switches the active revision to set
 func (lv *VCSLogView) ToggleRev() {
 	tb := lv.Toolbar()
-	updt := tb.UpdateStart()
 	cba := tb.ChildByName("a-rev", 2).(*gi.Switch)
 	cbb := tb.ChildByName("b-rev", 2).(*gi.Switch)
 	lv.SetA = !lv.SetA
 	cba.SetState(lv.SetA, states.Checked)
 	cbb.SetState(!lv.SetA, states.Checked)
-	tb.UpdateEnd(updt)
 }
 
 // Toolbar returns the toolbar
@@ -213,12 +211,12 @@ func (lv *VCSLogView) ConfigToolbar() {
 		cbb.OnClick(func(e events.Event) {
 			lv.SetA = !cbb.IsChecked()
 			cba.SetState(lv.SetA, states.Checked)
-			cba.SetNeedsRender(true)
+			cba.NeedsRender()
 		})
 		cba.OnClick(func(e events.Event) {
 			lv.SetA = cba.IsChecked()
 			cbb.SetState(!lv.SetA, states.Checked)
-			cbb.SetNeedsRender(true)
+			cbb.NeedsRender()
 		})
 
 		tfb := gi.NewTextField(tb, "b-tf").SetText(lv.RevB)

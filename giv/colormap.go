@@ -43,7 +43,7 @@ func (vv *ColorMapValue) UpdateWidget() {
 		return
 	}
 	vv.Widget.ApplyStyle()
-	vv.AsWidgetBase().SetNeedsRender(true)
+	vv.AsWidgetBase().NeedsRender()
 }
 
 func (vv *ColorMapValue) ConfigWidget(w gi.Widget) {
@@ -54,7 +54,6 @@ func (vv *ColorMapValue) ConfigWidget(w gi.Widget) {
 	vv.Widget = w
 	vv.StdConfigWidget(w)
 	fr := vv.Widget.(*gi.Frame)
-	fr.Config()
 	fr.HandleClickOnEnterSpace()
 	ConfigDialogWidget(vv, fr, false)
 	fr.Style(func(s *styles.Style) {

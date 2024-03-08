@@ -9,7 +9,6 @@ import (
 	"log/slog"
 	"strconv"
 	"strings"
-	"sync"
 	"sync/atomic"
 )
 
@@ -26,7 +25,6 @@ import (
 // parent.
 func InitNode(this Ki) {
 	n := this.AsKi()
-	this.ClearUpdateFlags()
 	if n.Ths != this {
 		n.Ths = this
 		n.Ths.OnInit()
@@ -63,53 +61,17 @@ func SetParent(kid Ki, parent Ki) {
 		k.This().OnChildAdded(kid)
 		return Continue
 	})
-	if parent != nil {
-		parup := parent.Is(Updating)
-		n.WalkPre(func(k Ki) bool {
-			k.SetFlag(parup, Updating)
-			return Continue
-		})
-	}
 }
 
 // MoveToParent deletes given node from its current parent and adds it as a child
 // of given new parent.  Parents could be in different trees or not.
 func MoveToParent(kid Ki, parent Ki) {
-	oldPar := kid.Parent()
-	if oldPar != nil {
-		SetParent(kid, nil)
-		oldPar.DeleteChild(kid, false)
-	}
-	parent.AddChild(kid)
-}
-
-// DeleteFromParent calls OnChildDeleting on all parents of given node
-// then calls OnDelete on the node, and finally sets the Parent to nil.
-// Call this *before* deleting the child.
-func DeleteFromParent(kid Ki) {
-	if kid.Parent() == nil {
-		return
-	}
-	n := kid.AsKi()
-	n.WalkUpParent(func(k Ki) bool {
-		k.This().OnChildDeleting(kid)
-		return Continue
-	})
-	kid.SetFlag(true, Deleted)
-	kid.This().OnDelete()
-	SetParent(kid, nil)
-}
-
-// DeletingChildren calls OnChildrenDeleting on given node
-// and all parents thereof.
-// Call this *before* deleting the children.
-func DeletingChildren(k Ki) {
-	k.This().OnChildrenDeleting()
-	n := k.AsKi()
-	n.WalkUpParent(func(k Ki) bool {
-		k.This().OnChildrenDeleting()
-		return Continue
-	})
+	// TODO(kai/ki): implement MoveToParent
+	// oldPar := kid.Parent()
+	// if oldPar != nil {
+	// 	oldPar.DeleteChild(kid, false)
+	// }
+	// parent.AddChild(kid)
 }
 
 // New adds a new child of the given the type
@@ -177,16 +139,6 @@ func Depth(kn Ki) int {
 // SetDepth sets the current depth of the node to given value.
 func SetDepth(kn Ki, depth int) {
 	kn.AsKi().depth = depth
-}
-
-// UpdateReset resets Updating flag for this node and all children -- in
-// case they are out-of-sync due to more complex tree maninpulations --
-// only call at a known point of non-updating.
-func UpdateReset(kn Ki) {
-	kn.WalkPre(func(k Ki) bool {
-		k.SetFlag(false, Updating)
-		return true
-	})
 }
 
 //////////////////////////////////////////////////
@@ -323,43 +275,4 @@ func UniquifyNamesAll(kn Ki) {
 		UniquifyNames(k)
 		return Continue
 	})
-}
-
-//////////////////////////////////////////////////////////////////////////////
-//  Deletion manager
-
-// DeletedKi manages all the deleted Ki elements, that are destined to then be
-// destroyed, without having an additional pointer on the Ki object
-type DeletedKi struct {
-	Dels []Ki
-	Mu   sync.Mutex
-}
-
-// DelMgr is the manager of all deleted items
-var DelMgr = DeletedKi{}
-
-// Add the Ki elements to the deleted list
-func (dm *DeletedKi) Add(kis ...Ki) {
-	dm.Mu.Lock()
-	if dm.Dels == nil {
-		dm.Dels = make([]Ki, 0)
-	}
-	dm.Dels = append(dm.Dels, kis...)
-	dm.Mu.Unlock()
-}
-
-// DestroyDeleted destroys any deleted items in list
-func (dm *DeletedKi) DestroyDeleted() {
-	// pr := prof.Start("ki.DestroyDeleted")
-	// defer pr.End()
-	dm.Mu.Lock()
-	curdels := dm.Dels
-	dm.Dels = make([]Ki, 0)
-	dm.Mu.Unlock()
-	for _, k := range curdels {
-		if k == nil {
-			continue
-		}
-		k.Destroy() // destroy will add to the dels so we need to do this outside of lock
-	}
 }

@@ -98,7 +98,6 @@ func (sl *Splits) UpdateSplits() {
 
 // EvenSplits splits space evenly across all panels
 func (sl *Splits) EvenSplits() {
-	updt := sl.UpdateStart()
 	sz := len(sl.Kids)
 	if sz == 0 {
 		return
@@ -107,7 +106,7 @@ func (sl *Splits) EvenSplits() {
 	for i := range sl.Splits {
 		sl.Splits[i] = even
 	}
-	sl.UpdateEndLayout(updt)
+	sl.NeedsLayout()
 }
 
 // SetSplits sets the split proportions -- can use 0 to hide / collapse a
@@ -135,9 +134,8 @@ func (sl *Splits) SetSplitsList(splits []float32) *Splits {
 // SetSplitsAction sets the split proportions -- can use 0 to hide / collapse a
 // child entirely -- does full rebuild at level of scene
 func (sl *Splits) SetSplitsAction(splits ...float32) *Splits {
-	updt := sl.UpdateStart()
 	sl.SetSplits(splits...)
-	sl.UpdateEndLayout(updt)
+	sl.NeedsLayout()
 	return sl
 }
 
@@ -165,7 +163,6 @@ func (sl *Splits) RestoreSplits() {
 // optionally saving the prior splits for later Restore function -- does an
 // Update -- triggered by double-click of splitter
 func (sl *Splits) CollapseChild(save bool, idxs ...int) {
-	updt := sl.UpdateStart()
 	if save {
 		sl.SaveSplits()
 	}
@@ -176,12 +173,11 @@ func (sl *Splits) CollapseChild(save bool, idxs ...int) {
 		}
 	}
 	sl.UpdateSplits()
-	sl.UpdateEndLayout(updt)
+	sl.NeedsLayout()
 }
 
 // RestoreChild restores given child(ren) -- does an Update
 func (sl *Splits) RestoreChild(idxs ...int) {
-	updt := sl.UpdateStart()
 	sz := len(sl.Kids)
 	for _, idx := range idxs {
 		if idx >= 0 && idx < sz {
@@ -189,7 +185,7 @@ func (sl *Splits) RestoreChild(idxs ...int) {
 		}
 	}
 	sl.UpdateSplits()
-	sl.UpdateEndLayout(updt)
+	sl.NeedsLayout()
 }
 
 // IsCollapsed returns true if given split number is collapsed
@@ -207,7 +203,6 @@ func (sl *Splits) IsCollapsed(idx int) bool {
 // Splitters are updated to ensure that selected position is achieved,
 // while dividing remainder appropriately.
 func (sl *Splits) SetSplitAction(idx int, nwval float32) {
-	updt := sl.UpdateStart()
 	sz := len(sl.Splits)
 	oldsum := float32(0)
 	for i := 0; i <= idx; i++ {
@@ -242,7 +237,7 @@ func (sl *Splits) SetSplitAction(idx int, nwval float32) {
 	// fmt.Printf("splits: %v value: %v  splts: %v\n", idx, nwval, sl.Splits)
 	sl.UpdateSplits()
 	// fmt.Printf("splits: %v\n", sl.Splits)
-	sl.UpdateEndLayout(updt)
+	sl.NeedsLayout()
 }
 
 func (sl *Splits) ConfigWidget() {
@@ -253,10 +248,8 @@ func (sl *Splits) ConfigWidget() {
 func (sl *Splits) ConfigSplitters() {
 	parts := sl.NewParts()
 	sz := len(sl.Kids)
-	mods, updt := parts.SetNChildren(sz-1, HandleType, "handle-")
-	if mods {
+	if parts.SetNChildren(sz-1, HandleType, "handle-") {
 		parts.Update()
-		parts.UpdateEnd(updt)
 	}
 }
 

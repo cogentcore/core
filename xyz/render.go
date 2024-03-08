@@ -41,12 +41,6 @@ import (
 // so this must be checked separately (e.g., in xyzv.Scene, as it requires
 // a separate RunOnMainThread call).
 func (sc *Scene) DoUpdate() bool {
-	if sc.Is(ScUpdating) {
-		return false
-	}
-	sc.SetFlag(true, ScUpdating) // prevent rendering
-	defer sc.SetFlag(false, ScUpdating)
-
 	switch {
 	case sc.Is(ScNeedsUpdate):
 		sc.UpdateNodes()
@@ -61,15 +55,15 @@ func (sc *Scene) DoUpdate() bool {
 	return true
 }
 
-func (sc *Scene) SetNeedsRender() {
+func (sc *Scene) NeedsRender() {
 	sc.SetFlag(true, ScNeedsRender)
 }
 
-func (sc *Scene) SetNeedsUpdate() {
+func (sc *Scene) NeedsUpdate() {
 	sc.SetFlag(true, ScNeedsUpdate)
 }
 
-func (sc *Scene) SetNeedsConfig() {
+func (sc *Scene) NeedsConfig() {
 	sc.SetFlag(true, ScNeedsConfig)
 }
 
@@ -79,62 +73,6 @@ func (sc *Scene) UpdateNodesIfNeeded() {
 	if sc.Is(ScNeedsUpdate) {
 		sc.UpdateNodes()
 		sc.SetFlag(false, ScNeedsUpdate)
-	}
-}
-
-// UpdateStart sets the scene ScUpdating flag to prevent
-// render updates during construction on a scene.
-// if already updating, returns false.
-// Pass the result to UpdateEnd* methods.
-func (sc *Scene) UpdateStart() bool {
-	updt := sc.Node.UpdateStart()
-	if updt {
-		sc.SetFlag(true, ScUpdating)
-		return true
-	}
-	return false
-}
-
-// UpdateEnd resets the scene ScUpdating flag if updt = true
-func (sc *Scene) UpdateEnd(updt bool) {
-	if updt {
-		sc.Node.UpdateEnd(updt)
-		sc.SetFlag(false, ScUpdating)
-	}
-}
-
-// UpdateEndRender resets the scene ScUpdating flag if updt = true
-// and sets the ScNeedsRender flag; updt is from UpdateStart().
-// Render only updates based on camera changes, not any node-level
-// changes. See [UpdateEndUpdate].
-func (sc *Scene) UpdateEndRender(updt bool) {
-	if updt {
-		sc.Node.UpdateEnd(updt)
-		sc.SetFlag(false, ScUpdating)
-		sc.SetFlag(true, ScNeedsRender)
-	}
-}
-
-// UpdateEndUpdate resets the scene ScUpdating flag if updt = true
-// and sets the ScNeedsUpdate flag; updt is from UpdateStart().
-// Update is for when any node Pose or material changes happen.
-// See [UpdateEndConfig] for major changes.
-func (sc *Scene) UpdateEndUpdate(updt bool) {
-	if updt {
-		sc.Node.UpdateEnd(updt)
-		sc.SetFlag(false, ScUpdating)
-		sc.SetFlag(true, ScNeedsUpdate)
-	}
-}
-
-// UpdateEndConfig resets the scene ScUpdating flag if updt = true
-// and sets the ScNeedsConfig flag; updt is from UpdateStart().
-// Config is for Texture, Lighting Meshes or more complex nodes).
-func (sc *Scene) UpdateEndConfig(updt bool) {
-	if updt {
-		sc.Node.UpdateEnd(updt)
-		sc.SetFlag(false, ScUpdating)
-		sc.SetFlag(true, ScNeedsConfig)
 	}
 }
 
@@ -387,7 +325,7 @@ func (sc *Scene) TrackCamera() bool {
 		return false
 	}
 	tc.TrackCamera()
-	sc.SetNeedsUpdate() // need to update world model for nodes
+	sc.NeedsUpdate() // need to update world model for nodes
 	return true
 }
 
@@ -403,13 +341,11 @@ func (sc *Scene) Render() bool {
 	if len(sc.SavedCams) == 0 {
 		sc.SaveCamera("default")
 	}
-	sc.SetFlag(true, ScUpdating)
 	sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
 	sc.Camera.UpdateMatrix()
 	sc.TrackCamera()
 	sc.UpdateMVPMatrix()
 	sc.RenderImpl()
-	sc.SetFlag(false, ScUpdating)
 	return true
 }
 

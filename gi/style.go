@@ -18,20 +18,7 @@ import (
 	"cogentcore.org/core/units"
 )
 
-// Styling logic:
-//
-// see render.go for rendering logic
-//
-// Style funcs require pervasive access to (distant) parent styles
-// while are themselves modifying their own styles.
-// Styles are used in rendering and layout.
-//
-// Therefore, there is significant risk of read / write race errors.
-//
-// However, the render update logic should mitigate most of these:
-//
-// During normal event or anim-triggered updates, there is an
-// UpdateStart at the start of any changes that
+// Styling logic; see render.go for rendering logic
 
 // CustomConfigStyles is the custom, global style configuration function
 // that is called on all widgets to configure their style functions.
@@ -221,13 +208,12 @@ func (wb *WidgetBase) ApplyStyleSettings() {
 	s.Text.LineHeight.Val *= fsz
 }
 
-// ApplyStyleUpdate calls ApplyStyleTree within an UpdateRender block.
+// ApplyStyleUpdate calls ApplyStyleTree and NeedsRender.
 // This is the main call needed to ensure that state-sensitive styling
-// is updated, when state changes.
+// is updated, when the state changes.
 func (wb *WidgetBase) ApplyStyleUpdate() {
-	updt := wb.UpdateStart()
 	wb.ApplyStyleTree()
-	wb.UpdateEndRender(updt)
+	wb.NeedsRender()
 }
 
 func (wb *WidgetBase) ApplyStyle() {

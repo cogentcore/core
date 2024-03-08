@@ -526,7 +526,6 @@ func StringJSON(it any) string {
 // SetField sets given field name on given struct object to given value,
 // using very robust conversion routines to e.g., convert from strings to numbers, and
 // vice-versa, automatically.  Returns error if not successfully set.
-// wrapped in UpdateStart / End and sets the ValUpdated flag.
 func SetField(obj any, field string, val any) error {
 	fv := FlatFieldValueByName(obj, field)
 	if !fv.IsValid() {

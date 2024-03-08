@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/grr"
 	"cogentcore.org/core/gti"
 )
 
@@ -23,8 +24,7 @@ import (
 func (n *Node) WriteXML(writer io.Writer, indent bool) error {
 	err := ThisCheck(n)
 	if err != nil {
-		log.Println(err)
-		return err
+		return grr.Log(err)
 	}
 	var b []byte
 	if indent {
@@ -33,13 +33,11 @@ func (n *Node) WriteXML(writer io.Writer, indent bool) error {
 		b, err = xml.Marshal(n.This())
 	}
 	if err != nil {
-		log.Println(err)
-		return err
+		return grr.Log(err)
 	}
 	_, err = writer.Write(b)
 	if err != nil {
-		log.Println(err)
-		return err
+		return grr.Log(err)
 	}
 	return nil
 }
@@ -57,12 +55,9 @@ func (n *Node) ReadXML(reader io.Reader) error {
 		log.Println(err)
 		return err
 	}
-	updt := n.UpdateStart()
 	err = xml.Unmarshal(b, n.This()) // key use of this!
 	UnmarshalPost(n.This())
-	n.SetChildAdded() // this might not be set..
-	n.UpdateEnd(updt)
-	return nil
+	return err
 }
 
 // todo: save N as an attr instead of a full element
@@ -232,19 +227,16 @@ func (sl *Slice) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 
 		for i := 0; i < n; i++ {
 			name, val, err = DecodeXMLCharEl(d)
+			if err != nil {
+				return grr.Log(err)
+			}
 			if name == "Type" {
 				tn := strings.TrimSpace(val)
-				// fmt.Printf("making type: %v\n", tn)
 				typ, err := gti.TypeByNameTry(tn)
 				if typ == nil {
 					return fmt.Errorf("ki.Slice UnmarshalXML: %w", err)
 				}
-				nkid := NewOfType(typ)
-				// fmt.Printf("nkid is new obj of type %T val: %+v\n", nkid, nkid)
-				kid, ok := nkid.(Ki)
-				if !ok {
-					return fmt.Errorf("ki.Slice UnmarshalXML: New child of type %v cannot convert to Ki", tn)
-				}
+				kid := NewOfType(typ)
 				InitNode(kid)
 				nwk = append(nwk, kid)
 			}

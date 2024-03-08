@@ -183,8 +183,6 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 	if fn == nil || fn.IsExternal() {
 		return
 	}
-	tupdt := fn.RootView.UpdateStart()
-	defer fn.RootView.UpdateEnd(tupdt)
 
 	tpath := string(fn.FPath)
 	isdir := fn.IsDir()

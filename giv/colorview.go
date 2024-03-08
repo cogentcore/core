@@ -53,13 +53,11 @@ func (cv *ColorView) SetColor(clr color.Color) *ColorView {
 
 // SetHCT sets the source color in terms of HCT
 func (cv *ColorView) SetHCT(hct hct.HCT) *ColorView {
-	updt := cv.UpdateStart()
 	cv.Color = hct
 	if cv.TmpSave != nil {
 		cv.TmpSave.SetValue(cv.Color.AsRGBA())
 	}
 	cv.Update()
-	cv.UpdateEndRender(updt)
 	cv.SendChange()
 	return cv
 }
@@ -73,8 +71,6 @@ func (cv *ColorView) ConfigWidget() {
 	if cv.HasChildren() {
 		return
 	}
-	updt := cv.UpdateStart()
-	defer cv.UpdateEndRender(updt)
 
 	cv.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
@@ -581,8 +577,8 @@ func (vv *ColorValue) UpdateWidget() {
 	}
 	vv.CreateTempIfNotPtr()
 	bt := vv.Widget.(*gi.Button)
-	bt.Update()
-	bt.SetNeedsRender(true)
+	bt.ApplyStyle()
+	bt.NeedsRender()
 }
 
 func (vv *ColorValue) ConfigWidget(w gi.Widget) {

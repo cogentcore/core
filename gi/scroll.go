@@ -99,10 +99,9 @@ func (ly *Layout) ConfigScroll(d mat32.Dims) {
 // when the scrollbar value has changed, for given dimension.
 // This is part of the Layouter interface.
 func (ly *Layout) ScrollChanged(d mat32.Dims, sb *Slider) {
-	updt := ly.UpdateStart()
 	ly.Geom.Scroll.SetDim(d, -sb.Value)
 	ly.This().(Layouter).ScenePos() // computes updated positions
-	ly.UpdateEndRender(updt)
+	ly.NeedsRender()
 }
 
 // ScrollValues returns the maximum size that could be scrolled,
@@ -190,7 +189,7 @@ func (ly *Layout) ScrollActionDelta(d mat32.Dims, delta float32) {
 		sb := ly.Scrolls[d]
 		nval := sb.Value + sb.ScrollScale(delta)
 		sb.SetValueAction(nval)
-		ly.SetNeedsRender(true) // only render needed -- scroll updates pos
+		ly.NeedsRender() // only render needed -- scroll updates pos
 	}
 }
 
@@ -200,7 +199,7 @@ func (ly *Layout) ScrollActionPos(d mat32.Dims, pos float32) {
 	if ly.HasScroll[d] && ly.Scrolls[d] != nil {
 		sb := ly.Scrolls[d]
 		sb.SetValueAction(pos)
-		ly.SetNeedsRender(true)
+		ly.NeedsRender()
 	}
 }
 
@@ -210,7 +209,7 @@ func (ly *Layout) ScrollToPos(d mat32.Dims, pos float32) {
 	if ly.HasScroll[d] && ly.Scrolls[d] != nil {
 		sb := ly.Scrolls[d]
 		sb.SetValueAction(pos)
-		ly.SetNeedsRender(true)
+		ly.NeedsRender()
 	}
 }
 
@@ -391,7 +390,7 @@ func (ly *Layout) ScrollToBox(box image.Rectangle) bool {
 		did = ly.ScrollToBoxDim(mat32.X, box.Min.X, box.Max.X)
 	}
 	if did {
-		ly.SetNeedsRender(true)
+		ly.NeedsRender()
 	}
 	return did
 }

@@ -88,7 +88,6 @@ func (mv *MapView) SetMap(mp any) *MapView {
 	// end up not being comparable types, so we can't check if equal
 	mv.Map = mp
 	mv.Update()
-	mv.SetNeedsLayout(true)
 	return mv
 }
 
@@ -155,7 +154,7 @@ func (mv *MapView) ConfigMapGrid() {
 	// always start fresh!
 	mv.Keys = make([]Value, 0)
 	mv.Values = make([]Value, 0)
-	sg.DeleteChildren(ki.DestroyKids)
+	sg.DeleteChildren()
 
 	mpv := reflect.ValueOf(mv.Map)
 	mpvnp := laser.NonPtrValue(mpv)
@@ -212,11 +211,8 @@ func (mv *MapView) ConfigMapGrid() {
 		mv.Keys = append(mv.Keys, kv)
 		mv.Values = append(mv.Values, vv)
 	}
-	mods, updt := sg.ConfigChildren(config)
-	if mods {
-		sg.SetNeedsLayout(updt)
-	} else {
-		updt = sg.UpdateStart() // cover rest of updates, which can happen even if same config
+	if sg.ConfigChildren(config) {
+		sg.NeedsLayout()
 	}
 	for i, vv := range mv.Values {
 		kv := mv.Keys[i]
@@ -261,7 +257,6 @@ func (mv *MapView) ConfigMapGrid() {
 			// })
 		}
 	}
-	sg.UpdateEnd(updt)
 }
 
 // SetChanged sets the Changed flag and emits the ViewSig signal for the
@@ -278,8 +273,6 @@ func (mv *MapView) MapChangeValueType(idx int, typ reflect.Type) {
 	if laser.AnyIsNil(mv.Map) {
 		return
 	}
-	updt := mv.UpdateStart()
-	defer mv.UpdateEndRender(updt)
 
 	keyv := mv.Keys[idx]
 	ck := laser.NonPtrValue(keyv.Val()) // current key value
@@ -301,6 +294,7 @@ func (mv *MapView) MapChangeValueType(idx int, typ reflect.Type) {
 	}
 	mv.ConfigMapGrid()
 	mv.SetChanged()
+	mv.NeedsRender()
 }
 
 // ToggleSort toggles sorting by values vs. keys
@@ -314,7 +308,6 @@ func (mv *MapView) MapAdd() {
 	if laser.AnyIsNil(mv.Map) {
 		return
 	}
-	updt := mv.UpdateStart()
 	laser.MapAdd(mv.Map)
 
 	if mv.TmpSave != nil {
@@ -322,7 +315,6 @@ func (mv *MapView) MapAdd() {
 	}
 	mv.SetChanged()
 	mv.Update()
-	mv.UpdateEndLayout(updt)
 }
 
 // MapDelete deletes a key-value from the map
@@ -330,7 +322,6 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 	if laser.AnyIsNil(mv.Map) {
 		return
 	}
-	updt := mv.UpdateStart()
 	// kvi := laser.NonPtrValue(key).Interface()
 	laser.MapDeleteValue(mv.Map, laser.NonPtrValue(key))
 
@@ -339,7 +330,6 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 	}
 	mv.SetChanged()
 	mv.Update()
-	mv.UpdateEndLayout(updt)
 }
 
 // ConfigToolbar configures a [gi.Toolbar] for this view

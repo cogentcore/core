@@ -58,12 +58,12 @@ func (ps *State) Init(src *lex.File, ast *Ast) {
 	ps.Src = src
 	if ps.Ast != nil && ps.Ast.This() != nil {
 		// fmt.Println("deleting old ast")
-		ps.Ast.DeleteChildren(true)
+		ps.Ast.DeleteChildren()
 	}
 	ps.Ast = ast
 	if ps.Ast != nil && ps.Ast.This() != nil {
 		// fmt.Println("deleting new ast")
-		ps.Ast.DeleteChildren(true)
+		ps.Ast.DeleteChildren()
 	}
 	ps.ClearAst()
 	ps.Syms.Reset()
@@ -84,7 +84,7 @@ func (ps *State) ClearAst() {
 
 func (ps *State) Destroy() {
 	if ps.Ast != nil && ps.Ast.This() != nil {
-		ps.Ast.DeleteChildren(true)
+		ps.Ast.DeleteChildren()
 	}
 	ps.Ast = nil
 	ps.ClearAst()

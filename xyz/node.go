@@ -198,24 +198,6 @@ func (nb *NodeBase) OnAdd() {
 	fmt.Println(nb, "not set from parent")
 }
 
-// UpdateStart sets the scene ScUpdating flag to prevent
-// render updates during construction on a scene.
-func (nb *NodeBase) UpdateStart() bool {
-	updt := nb.Node.UpdateStart()
-	if updt && nb.Sc != nil {
-		nb.Sc.SetFlag(true, ScUpdating)
-	}
-	return updt
-}
-
-// UpdateEnd resets the scene ScUpdating flag
-func (nb *NodeBase) UpdateEnd(updt bool) {
-	if updt && nb.Sc != nil {
-		nb.Sc.SetFlag(false, ScUpdating)
-	}
-	nb.Node.UpdateEnd(updt)
-}
-
 func (nb *NodeBase) BaseIface() reflect.Type {
 	return reflect.TypeOf((*NodeBase)(nil)).Elem()
 }

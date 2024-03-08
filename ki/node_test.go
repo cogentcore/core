@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/gti"
 	. "cogentcore.org/core/ki"
 	"cogentcore.org/core/ki/testdata"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNodeAddChild(t *testing.T) {
@@ -152,13 +153,8 @@ func TestNodeDeleteChild(t *testing.T) {
 	parent.InitName(&parent, "par1")
 	typ := parent.KiType()
 	child := parent.NewChild(typ, "child1")
-	parent.DeleteChild(child, true)
-	if len(parent.Kids) != 0 {
-		t.Errorf("Children length != 0, was %d", len(parent.Kids))
-	}
-	if len(DelMgr.Dels) != 0 { // note: even though using destroy, UpdateEnd does destroy
-		t.Errorf("Deleted length != 0, was %d", len(DelMgr.Dels))
-	}
+	parent.DeleteChild(child)
+	assert.Zero(t, len(parent.Kids))
 }
 
 func TestNodeDeleteChildName(t *testing.T) {
@@ -166,13 +162,8 @@ func TestNodeDeleteChildName(t *testing.T) {
 	parent.InitName(&parent, "par1")
 	typ := parent.KiType()
 	parent.NewChild(typ, "child1")
-	parent.DeleteChildByName("child1", true)
-	if len(parent.Kids) != 0 {
-		t.Errorf("Children length != 0, was %d", len(parent.Kids))
-	}
-	if len(DelMgr.Dels) != 0 { // note: even though using destroy, UpdateEnd does destroy
-		t.Errorf("Deleted length != 0, was %d", len(DelMgr.Dels))
-	}
+	parent.DeleteChildByName("child1")
+	assert.Zero(t, len(parent.Kids))
 }
 
 func TestNodeFindName(t *testing.T) {
@@ -324,10 +315,7 @@ func TestNodeConfig(t *testing.T) {
 
 	// bf := fmt.Sprintf("mv before:\n%v\n", parent.Kids)
 
-	mods, updt := parent.ConfigChildren(config1)
-	if mods {
-		parent.UpdateEnd(updt)
-	}
+	parent.ConfigChildren(config1)
 
 	cf1 := fmt.Sprintf("config1:\n%v\n", parent.Kids)
 
@@ -339,10 +327,7 @@ func TestNodeConfig(t *testing.T) {
 		{testdata.NodeEmbedType, "child6"},
 	}
 
-	mods, updt = parent.ConfigChildren(config2)
-	if mods {
-		parent.UpdateEnd(updt)
-	}
+	parent.ConfigChildren(config2)
 
 	cf2 := fmt.Sprintf("config2:\n%v\n", parent.Kids)
 
@@ -487,35 +472,18 @@ func TestNodeUpdate(t *testing.T) {
 	parent.Mbr2 = 32
 
 	res := make([]string, 0, 10)
-	// child1 :=
-	updt := parent.UpdateStart()
-	parent.SetChildAdded()
 	parent.NewChild(typ, "child1")
 	child2 := parent.NewChild(typ, "child1")
-	// child3 :=
-	parent.UpdateEnd(updt)
-	updt = parent.UpdateStart()
-	parent.SetChildAdded()
 	parent.NewChild(typ, "child1")
-	parent.UpdateEnd(updt)
-	schild2 := child2.NewChild(typ, "subchild1")
-	child2.SetChildAdded()
-	parent.UpdateEnd(updt)
-
-	// fmt.Print("\nnode update top starting\n")
-	updt = child2.UpdateStart()
-	updt2 := schild2.UpdateStart()
-	schild2.UpdateEnd(updt2)
-	child2.UpdateEnd(updt)
+	child2.NewChild(typ, "subchild1")
 
 	UniquifyNamesAll(parent.This())
 
 	parent.WalkPre(func(n Ki) bool {
-		res = append(res, fmt.Sprintf("%v %v", n.Name(), n.Is(Updating)))
+		res = append(res, n.Path())
 		return Continue
 	})
-	// fmt.Printf("res: %v\n", res)
-
+	assert.Equal(t, []string{"/par1", "/par1/child1", "/par1/child1_001", "/par1/child1_001/subchild1", "/par1/child1_002"}, res)
 }
 
 func TestProps(t *testing.T) {
@@ -525,13 +493,9 @@ func TestProps(t *testing.T) {
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 
-	// child1 :=
 	parent.NewChild(typ, "child1")
 	child2 := parent.NewChild(typ, "child1")
-	// child3 :=
-	updt := parent.UpdateStart()
 	parent.NewChild(typ, "child1")
-	parent.UpdateEnd(updt)
 	schild2 := child2.NewChild(typ, "subchild1")
 
 	parent.SetProp("intprop", 42)
@@ -611,17 +575,12 @@ func TestTreeMod(t *testing.T) {
 	// fmt.Printf("#################################\n")
 
 	// fmt.Printf("Trees before:\n%v%v", tree1, tree2)
-	updt := tree2.UpdateStart()
-	tree2.SetChildAdded()
 	MoveToParent(child12.This(), tree2.This())
-	tree2.UpdateEnd(updt)
 
 	// fmt.Printf("#################################\n")
 	// fmt.Printf("Trees after add child12 move:\n%v%v", tree1, tree2)
 
-	updt = tree2.UpdateStart()
-	tree2.DeleteChild(child12, true)
-	tree2.UpdateEnd(updt)
+	tree2.DeleteChild(child12)
 
 	// fmt.Printf("#################################\n")
 
@@ -748,7 +707,6 @@ func TestAutoTypeName(t *testing.T) {
 func BuildGuiTreeSlow(widgets, parts int, typ *gti.Type) Ki {
 	win := NewOfType(typ)
 	win.InitName(win, "window")
-	updt := win.UpdateStart()
 
 	vp := win.NewChild(typ, "vp")
 	frame := vp.NewChild(typ, "frame")
@@ -759,7 +717,6 @@ func BuildGuiTreeSlow(widgets, parts int, typ *gti.Type) Ki {
 			widg.NewChild(typ, fmt.Sprintf("part_%d", pi))
 		}
 	}
-	win.UpdateEnd(updt)
 	return win
 }
 
@@ -768,7 +725,6 @@ func BuildGuiTreeSlow(widgets, parts int, typ *gti.Type) Ki {
 func BuildGuiTree(widgets, parts int, typ *gti.Type) Ki {
 	win := NewOfType(typ)
 	win.InitName(win, "window")
-	updt := win.UpdateStart()
 
 	vp := win.NewChild(typ, "vp")
 	frame := vp.NewChild(typ, "frame")
@@ -779,7 +735,6 @@ func BuildGuiTree(widgets, parts int, typ *gti.Type) Ki {
 			widg.NewChild(typ, fmt.Sprintf("part_%d", pi))
 		}
 	}
-	win.UpdateEnd(updt)
 	return win
 }
 
@@ -828,7 +783,6 @@ func BenchmarkWalkPre_NodeEmbed(b *testing.B) {
 	nnodes := 0
 	for n := 0; n < b.N; n++ {
 		wt.WalkPre(func(k Ki) bool {
-			k.SetFlag(false, Updating)
 			nnodes++
 			return Continue
 		})
@@ -842,7 +796,6 @@ func BenchmarkWalkPre_NodeField(b *testing.B) {
 	nnodes := 0
 	for n := 0; n < b.N; n++ {
 		wt.WalkPre(func(k Ki) bool {
-			k.SetFlag(false, Updating)
 			nnodes++
 			return Continue
 		})
@@ -856,7 +809,6 @@ func BenchmarkWalkPre_NodeField2(b *testing.B) {
 	nnodes := 0
 	for n := 0; n < b.N; n++ {
 		wt.WalkPre(func(k Ki) bool {
-			k.SetFlag(false, Updating)
 			nnodes++
 			return Continue
 		})
@@ -876,29 +828,5 @@ func BenchmarkStdNew(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		n := new(Node)
 		n.InitName(n)
-	}
-}
-
-// these var arg benchmarks were used to determine whether there
-// would be a performance cost to using var args for name, startIdx,
-// and other things. the result was no cost (about 0.23 ns/op for both)
-
-func BenchmarkVarArgs(b *testing.B) {
-	f := func(v int, vs ...int) int {
-		return 800 + v/70
-	}
-	for n := 0; n < b.N; n++ {
-		v := f(n)
-		v += 3
-	}
-}
-
-func BenchmarkNoVarArgs(b *testing.B) {
-	f := func(v int) int {
-		return 800 + v/70
-	}
-	for n := 0; n < b.N; n++ {
-		v := f(n)
-		v += 3
 	}
 }

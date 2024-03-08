@@ -267,88 +267,55 @@ func (tv *TreeView) SetStyles() {
 			// something with this treeview specifically,
 			// not with any of our children (see HandleTreeViewMouse)
 			w.On(events.MouseEnter, func(e events.Event) {
-				if tv.This() == nil || tv.Is(ki.Deleted) {
-					return
-				}
 				tv.SetState(true, states.Hovered)
 				tv.ApplyStyle()
-				tv.SetNeedsRender(true)
+				tv.NeedsRender()
 				e.SetHandled()
 			})
 			w.On(events.MouseLeave, func(e events.Event) {
-				if tv.This() == nil || tv.Is(ki.Deleted) {
-					return
-				}
 				tv.SetState(false, states.Hovered)
 				tv.ApplyStyle()
-				tv.SetNeedsRender(true)
+				tv.NeedsRender()
 				e.SetHandled()
 			})
 			w.On(events.MouseDown, func(e events.Event) {
-				if tv.This() == nil || tv.Is(ki.Deleted) {
-					return
-				}
 				tv.SetState(true, states.Active)
 				tv.ApplyStyle()
-				tv.SetNeedsRender(true)
+				tv.NeedsRender()
 				e.SetHandled()
 			})
 			w.On(events.MouseUp, func(e events.Event) {
-				if tv.This() == nil || tv.Is(ki.Deleted) {
-					return
-				}
 				tv.SetState(false, states.Active)
 				tv.ApplyStyle()
-				tv.SetNeedsRender(true)
+				tv.NeedsRender()
 				e.SetHandled()
 			})
 			w.OnClick(func(e events.Event) {
-				if tv.This() == nil || tv.Is(ki.Deleted) {
-					return
-				}
 				tv.SelectAction(e.SelectMode())
 				e.SetHandled()
 			})
 			w.AsWidget().OnDoubleClick(func(e events.Event) {
-				if tv.This() == nil || tv.Is(ki.Deleted) {
-					return
-				}
 				tv.This().(TreeViewer).OnDoubleClick(e)
 			})
 			w.On(events.DragStart, func(e events.Event) {
-				if tv.This() == nil || tv.Is(ki.Deleted) {
-					return
-				}
 				tvi.DragStart(e)
 			})
 			w.On(events.DragEnter, func(e events.Event) {
-				if tv.This() == nil || tv.Is(ki.Deleted) {
-					return
-				}
 				tv.SetState(true, states.DragHovered)
 				tv.ApplyStyle()
-				tv.SetNeedsRender(true)
+				tv.NeedsRender()
 				e.SetHandled()
 			})
 			w.On(events.DragLeave, func(e events.Event) {
-				if tv.This() == nil || tv.Is(ki.Deleted) {
-					return
-				}
 				tv.SetState(false, states.DragHovered)
 				tv.ApplyStyle()
-				tv.SetNeedsRender(true)
+				tv.NeedsRender()
 				e.SetHandled()
 			})
 			w.On(events.Drop, func(e events.Event) {
-				if tv.This() == nil || tv.Is(ki.Deleted) {
-					return
-				}
 				tvi.DragDrop(e)
 			})
 			w.On(events.DropDeleteSource, func(e events.Event) {
-				if tv.This() == nil || tv.Is(ki.Deleted) {
-					return
-				}
 				tvi.DropDeleteSource(e)
 			})
 			// the context menu events will get sent to the parts, so it
@@ -390,9 +357,6 @@ func (tv *TreeView) SetStyles() {
 				}
 			})
 			sw.OnClick(func(e events.Event) {
-				if tv.This() == nil || tv.Is(ki.Deleted) {
-					return
-				}
 				if sw.IsChecked() && !sw.StateIs(states.Indeterminate) {
 					if !tv.IsClosed() {
 						tv.Close()
@@ -523,11 +487,11 @@ func (tv *TreeView) ConfigWidget() {
 		config.Add(gi.IconType, "icon")
 	}
 	config.Add(gi.LabelType, "label")
-	mods, updt := parts.ConfigChildren(config)
+	mods := parts.ConfigChildren(config)
 	if tv.This().(TreeViewer).CanOpen() {
 		if wb, ok := tv.BranchPart(); ok {
 			tv.SetBranchState()
-			wb.Config()
+			wb.ConfigWidget()
 		}
 	}
 	if tv.Icon.IsSet() {
@@ -539,8 +503,7 @@ func (tv *TreeView) ConfigWidget() {
 		lbl.SetText(tv.Label())
 	}
 	if mods {
-		parts.UpdateEnd(updt)
-		tv.UpdateEndLayout(updt)
+		tv.NeedsLayout()
 	}
 }
 
@@ -566,11 +529,11 @@ func (tv *TreeView) SetBranchState() {
 	case tv.IsClosed():
 		br.SetState(false, states.Indeterminate)
 		br.SetState(false, states.Checked)
-		br.SetNeedsRender(true)
+		br.NeedsRender()
 	default:
 		br.SetState(false, states.Indeterminate)
 		br.SetState(true, states.Checked)
-		br.SetNeedsRender(true)
+		br.NeedsRender()
 	}
 }
 
@@ -738,7 +701,7 @@ func (tv *TreeView) Select() {
 		sl := tv.SelectedViews()
 		sl = append(sl, tv.This().(TreeViewer))
 		tv.SetSelectedViews(sl)
-		tv.SetNeedsRender(true)
+		tv.NeedsRender()
 	}
 }
 
@@ -757,7 +720,7 @@ func (tv *TreeView) Unselect() {
 			}
 		}
 		tv.SetSelectedViews(sl)
-		tv.SetNeedsRender(true)
+		tv.NeedsRender()
 	}
 }
 
@@ -766,19 +729,18 @@ func (tv *TreeView) UnselectAll() {
 	if tv.Scene == nil {
 		return
 	}
-	updt := tv.UpdateStart()
 	sl := tv.SelectedViews()
 	tv.SetSelectedViews(nil) // clear in advance
 	for _, v := range sl {
 		vt := v.AsTreeView()
-		if vt == nil || vt.This() == nil || vt.Is(ki.Deleted) {
+		if vt == nil || vt.This() == nil {
 			continue
 		}
 		vt.SetSelected(false)
 		v.ApplyStyle()
-		vt.SetNeedsRender(true)
+		vt.NeedsRender()
 	}
-	tv.UpdateEndRender(updt)
+	tv.NeedsRender()
 }
 
 // SelectAll all items in view
@@ -786,14 +748,13 @@ func (tv *TreeView) SelectAll() {
 	if tv.Scene == nil {
 		return
 	}
-	updt := tv.UpdateStart()
 	tv.UnselectAll()
 	nn := tv.RootView
 	nn.Select()
 	for nn != nil {
 		nn = nn.MoveDown(events.SelectQuiet)
 	}
-	tv.UpdateEndRender(updt)
+	tv.NeedsRender()
 }
 
 // SelectUpdate updates selection to include this node,
@@ -803,7 +764,6 @@ func (tv *TreeView) SelectUpdate(mode events.SelectModes) bool {
 	if mode == events.NoSelect {
 		return false
 	}
-	updt := tv.UpdateStart()
 	sel := false
 	switch mode {
 	case events.SelectOne:
@@ -869,7 +829,7 @@ func (tv *TreeView) SelectUpdate(mode events.SelectModes) bool {
 		tv.Unselect()
 		// not sel -- no signal..
 	}
-	tv.UpdateEndRender(updt)
+	tv.NeedsRender()
 	return sel
 }
 
@@ -1029,7 +989,6 @@ var TreeViewPageSteps = 10
 // using given select mode (from keyboard modifiers).
 // Sends select event for newly selected item.
 func (tv *TreeView) MovePageUpAction(selMode events.SelectModes) *TreeView {
-	updt := tv.UpdateStart()
 	mvMode := selMode
 	if selMode == events.SelectOne {
 		mvMode = events.NoSelect
@@ -1052,7 +1011,7 @@ func (tv *TreeView) MovePageUpAction(selMode events.SelectModes) *TreeView {
 		fnn.ScrollToMe()
 		tv.SendSelectEvent(nil)
 	}
-	tv.UpdateEndRender(updt)
+	tv.NeedsRender()
 	return fnn
 }
 
@@ -1061,7 +1020,6 @@ func (tv *TreeView) MovePageUpAction(selMode events.SelectModes) *TreeView {
 // using given select mode (from keyboard modifiers).
 // Sends select event for newly selected item.
 func (tv *TreeView) MovePageDownAction(selMode events.SelectModes) *TreeView {
-	updt := tv.UpdateStart()
 	mvMode := selMode
 	if selMode == events.SelectOne {
 		mvMode = events.NoSelect
@@ -1084,7 +1042,7 @@ func (tv *TreeView) MovePageDownAction(selMode events.SelectModes) *TreeView {
 		fnn.ScrollToMe()
 		tv.SendSelectEvent(nil)
 	}
-	tv.UpdateEndRender(updt)
+	tv.NeedsRender()
 	return fnn
 }
 
@@ -1122,7 +1080,6 @@ func (tv *TreeView) MoveHomeAction(selMode events.SelectModes) *TreeView {
 // using given select mode (from keyboard modifiers)
 // Sends select event for newly selected item.
 func (tv *TreeView) MoveEndAction(selMode events.SelectModes) *TreeView {
-	updt := tv.UpdateStart()
 	mvMode := selMode
 	if selMode == events.SelectOne {
 		mvMode = events.NoSelect
@@ -1145,7 +1102,6 @@ func (tv *TreeView) MoveEndAction(selMode events.SelectModes) *TreeView {
 		fnn.ScrollToMe()
 		tv.SendSelectEvent(nil)
 	}
-	tv.UpdateEnd(updt)
 	return fnn
 }
 
@@ -1170,15 +1126,11 @@ func (tv *TreeView) Close() {
 	if tv.IsClosed() {
 		return
 	}
-	updt := tv.UpdateStart()
-	if tv.HasChildren() {
-		tv.SetNeedsLayout(true)
-	}
 	tv.SetClosed(true)
 	tv.SetBranchState()
 	tv.This().(TreeViewer).OnClose()
 	tv.SetKidsVisibility(true) // parent closed
-	tv.UpdateEndLayout(updt)
+	tv.NeedsLayout()
 }
 
 // OnOpen is called when a node is opened.
@@ -1210,16 +1162,14 @@ func (tv *TreeView) Open() {
 		return
 	}
 	tv.SetFlag(true, TreeViewInOpen)
-	updt := tv.UpdateStart()
 	if tv.This().(TreeViewer).CanOpen() {
-		tv.SetNeedsLayout(true)
 		tv.SetClosed(false)
 		tv.SetBranchState()
 		tv.SetKidsVisibility(false)
 		tv.This().(TreeViewer).OnOpen()
 	}
 	tv.SetFlag(false, TreeViewInOpen)
-	tv.UpdateEndLayout(updt)
+	tv.NeedsLayout()
 }
 
 // ToggleClose toggles the close / open status: if closed, opens, and vice-versa
@@ -1233,7 +1183,6 @@ func (tv *TreeView) ToggleClose() {
 
 // OpenAll opens the given node and all of its sub-nodes
 func (tv *TreeView) OpenAll() { //gti:add
-	updt := tv.UpdateStart()
 	tv.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
 		tvki := AsTreeView(wi)
 		if tvki != nil {
@@ -1242,12 +1191,11 @@ func (tv *TreeView) OpenAll() { //gti:add
 		}
 		return ki.Break
 	})
-	tv.UpdateEndLayout(updt)
+	tv.NeedsLayout()
 }
 
 // CloseAll closes the given node and all of its sub-nodes.
 func (tv *TreeView) CloseAll() { //gti:add
-	updt := tv.UpdateStart()
 	tv.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
 		tvki := AsTreeView(wi)
 		if tvki != nil {
@@ -1256,13 +1204,12 @@ func (tv *TreeView) CloseAll() { //gti:add
 		}
 		return ki.Break
 	})
-	tv.UpdateEndLayout(updt)
+	tv.NeedsLayout()
 }
 
 // OpenParents opens all the parents of this node,
 // so that it will be visible.
 func (tv *TreeView) OpenParents() {
-	updt := tv.UpdateStart()
 	tv.WalkUpParent(func(k ki.Ki) bool {
 		tvki := AsTreeView(k)
 		if tvki != nil {
@@ -1271,7 +1218,7 @@ func (tv *TreeView) OpenParents() {
 		}
 		return ki.Break
 	})
-	tv.UpdateEndLayout(updt)
+	tv.NeedsLayout()
 }
 
 /////////////////////////////////////////////////////////////
@@ -1451,14 +1398,12 @@ func (tv *TreeView) Cut() { //gti:add
 	tv.Copy(false)
 	sels := tv.SelectedViews()
 	root := tv.RootView
-	updt := root.UpdateStart()
 	tv.UnselectAll()
 	for _, sn := range sels {
-		sn.Delete(true)
+		sn.Delete()
 	}
 	root.Update()
 	root.TreeViewChanged(nil)
-	root.UpdateEndLayout(updt)
 }
 
 // Paste pastes clipboard at given node.
@@ -1523,13 +1468,11 @@ func (tv *TreeView) PasteAssign(md mimedata.Mimes) {
 	if len(sl) == 0 {
 		return
 	}
-	updt := tv.UpdateStart()
 	tv.This().CopyFrom(sl[0]) // nodes with data copy here
 	tv.SetScene(tv.Scene)     // ensure children have scene
 	tv.Update()               // could have children
 	tv.Open()
 	tv.TreeViewChanged(nil)
-	tv.UpdateEndLayout(updt)
 }
 
 // PasteBefore inserts object(s) from mime data before this node.
@@ -1576,7 +1519,6 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, act
 		return
 	}
 	myidx += rel
-	updt := par.UpdateStart()
 	sz := len(sl)
 	var selTv *TreeView
 	for i, ns := range sl {
@@ -1586,7 +1528,6 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, act
 				ns.SetName(ns.Name() + "_Copy")
 			}
 		}
-		par.SetChildAdded()
 		par.InsertChild(ns, myidx+i)
 		_, nwb := gi.AsWidget(ns.This())
 		ntv := AsTreeView(ns.This())
@@ -1602,7 +1543,7 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, act
 		}
 	}
 	tv.TreeViewChanged(nil)
-	par.UpdateEndLayout(updt)
+	par.NeedsLayout()
 	if selTv != nil {
 		selTv.SelectAction(events.SelectOne)
 	}
@@ -1617,8 +1558,6 @@ func (tv *TreeView) PasteChildren(md mimedata.Mimes, mod events.DropMods) {
 	}
 	sl, _ := tv.NodesFromMimeData(md)
 
-	updt := tv.UpdateStart()
-	tv.SetChildAdded()
 	for _, ns := range sl {
 		tv.AddChild(ns)
 		_, nwb := gi.AsWidget(ns.This())
@@ -1629,7 +1568,6 @@ func (tv *TreeView) PasteChildren(md mimedata.Mimes, mod events.DropMods) {
 	tv.Update()
 	tv.Open()
 	tv.TreeViewChanged(nil)
-	tv.UpdateEndLayout(updt)
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1662,7 +1600,7 @@ func (tv *TreeView) DragClearStates() {
 	tv.SetState(false, states.Active, states.Selected, states.Hovered, states.DragHovered)
 	tv.Parts.SetState(false, states.Active, states.Selected, states.Hovered, states.DragHovered)
 	tv.ApplyStyle()
-	tv.SetNeedsRender(true)
+	tv.NeedsRender()
 }
 
 // DragDrop handles drag drop event
@@ -1711,7 +1649,7 @@ func (tv *TreeView) DropDeleteSource(e events.Event) {
 		path := string(d.Data)
 		sn := root.FindPath(path)
 		if sn != nil {
-			sn.Delete(true)
+			sn.Delete()
 		}
 		sn = root.FindPath(path + TreeViewTempMovedTag)
 		if sn != nil {
@@ -1719,7 +1657,7 @@ func (tv *TreeView) DropDeleteSource(e events.Event) {
 			orgnm := psplt[len(psplt)-1]
 			sn.SetName(orgnm)
 			_, swb := gi.AsWidget(sn)
-			swb.SetNeedsRender(true)
+			swb.NeedsRender()
 		}
 	}
 }

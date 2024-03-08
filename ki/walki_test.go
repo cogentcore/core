@@ -5,8 +5,9 @@
 package ki
 
 import (
-	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var testTree *Node
@@ -29,24 +30,28 @@ func init() {
 
 func TestDown(t *testing.T) {
 	cur := testTree
+	res := []string{}
 	for {
-		fmt.Println(cur.Path())
+		res = append(res, cur.Path())
 		curi := Next(cur)
 		if curi == nil {
 			break
 		}
 		cur = curi.(*Node)
 	}
+	assert.Equal(t, []string{"/root", "/root/child0", "/root/child1", "/root/child1/subchild1", "/root/child1/subchild1/subsubchild1", "/root/child2", "/root/child3"}, res)
 }
 
 func TestUp(t *testing.T) {
 	cur := Last(testTree)
+	res := []string{}
 	for {
-		fmt.Println(cur.Path())
+		res = append(res, cur.Path())
 		curi := Prev(cur)
 		if curi == nil {
 			break
 		}
 		cur = curi.(*Node)
 	}
+	assert.Equal(t, []string{"/root/child3", "/root/child2", "/root/child1/subchild1/subsubchild1", "/root/child1/subchild1", "/root/child1", "/root/child0", "/root"}, res)
 }

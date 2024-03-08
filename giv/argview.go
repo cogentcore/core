@@ -68,11 +68,8 @@ func (av *ArgView) ConfigWidget() {
 	config := ki.Config{}
 	config.Add(gi.LabelType, "title")
 	config.Add(gi.FrameType, "args-grid")
-	mods, updt := av.ConfigChildren(config)
+	av.ConfigChildren(config)
 	av.ConfigArgsGrid()
-	if mods {
-		av.UpdateEnd(updt)
-	}
 }
 
 // TitleWidget returns the title label widget
@@ -110,11 +107,8 @@ func (av *ArgView) ConfigArgsGrid() {
 		config.Add(gi.LabelType, labnm)
 		config.Add(vtyp, valnm)
 	}
-	mods, updt := sg.ConfigChildren(config) // not sure if always unique?
-	if mods {
-		av.SetNeedsLayout(updt)
-	} else {
-		updt = sg.UpdateStart()
+	if sg.ConfigChildren(config) {
+		av.NeedsLayout()
 	}
 	idx := 0
 	for i := range av.Args {
@@ -136,15 +130,4 @@ func (av *ArgView) ConfigArgsGrid() {
 		}
 		idx++
 	}
-	sg.UpdateEnd(updt)
-}
-
-// UpdateArgs updates each of the value-view widgets for the args
-func (av *ArgView) UpdateArgs() {
-	updt := av.UpdateStart()
-	for i := range av.Args {
-		ad := av.Args[i]
-		ad.UpdateWidget()
-	}
-	av.UpdateEnd(updt)
 }

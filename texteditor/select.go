@@ -24,7 +24,7 @@ import (
 // triggers updating.
 func (ed *Editor) HighlightRegion(reg textbuf.Region) {
 	ed.Highlights = []textbuf.Region{reg}
-	ed.SetNeedsRender(true)
+	ed.NeedsRender()
 }
 
 // ClearHighlights clears the Highlights slice of all regions
@@ -33,7 +33,7 @@ func (ed *Editor) ClearHighlights() {
 		return
 	}
 	ed.Highlights = ed.Highlights[:0]
-	ed.SetNeedsRender(true)
+	ed.NeedsRender()
 }
 
 // ClearScopelights clears the Highlights slice of all regions
@@ -41,11 +41,10 @@ func (ed *Editor) ClearScopelights() {
 	if len(ed.Scopelights) == 0 {
 		return
 	}
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	sl := make([]textbuf.Region, len(ed.Scopelights))
 	copy(sl, ed.Scopelights)
 	ed.Scopelights = ed.Scopelights[:0]
+	ed.NeedsRender()
 }
 
 //////////////////////////////////////////////////////////
@@ -85,10 +84,9 @@ func (ed *Editor) SelectModeToggle() {
 
 // SelectAll selects all the text
 func (ed *Editor) SelectAll() {
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	ed.SelectReg.Start = lex.PosZero
 	ed.SelectReg.End = ed.Buf.EndPos()
+	ed.NeedsRender()
 }
 
 // WordBefore returns the word before the lex.Pos
@@ -332,11 +330,10 @@ func (ed *Editor) PasteHist() {
 	m := gi.NewMenuFromStrings(cl, "", func(idx int) {
 		clip := ViewClipHistory[idx]
 		if clip != nil {
-			updt := ed.UpdateStart()
-			defer ed.UpdateEndRender(updt)
 			ed.Clipboard().Write(mimedata.NewTextBytes(clip))
 			ed.InsertAtCursor(clip)
 			ed.SavePosHistory(ed.CursorPos)
+			ed.NeedsRender()
 		}
 	})
 	gi.NewMenuStage(m, ed, ed.CursorBBox(ed.CursorPos).Min).Run()
@@ -347,8 +344,6 @@ func (ed *Editor) Cut() *textbuf.Edit {
 	if !ed.HasSelection() {
 		return nil
 	}
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	org := ed.SelectReg.Start
 	cut := ed.DeleteSelection()
 	if cut != nil {
@@ -358,6 +353,7 @@ func (ed *Editor) Cut() *textbuf.Edit {
 	}
 	ed.SetCursorShow(org)
 	ed.SavePosHistory(ed.CursorPos)
+	ed.NeedsRender()
 	return cut
 }
 
@@ -376,8 +372,6 @@ func (ed *Editor) Copy(reset bool) *textbuf.Edit {
 	if tbe == nil {
 		return nil
 	}
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	cb := tbe.ToBytes()
 	ViewClipHistAdd(cb)
 	ed.Clipboard().Write(mimedata.NewTextBytes(cb))
@@ -385,25 +379,22 @@ func (ed *Editor) Copy(reset bool) *textbuf.Edit {
 		ed.SelectReset()
 	}
 	ed.SavePosHistory(ed.CursorPos)
+	ed.NeedsRender()
 	return tbe
 }
 
 // Paste inserts text from the clipboard at current cursor position
 func (ed *Editor) Paste() {
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	data := ed.Clipboard().Read([]string{fi.TextPlain})
 	if data != nil {
 		ed.InsertAtCursor(data.TypeData(fi.TextPlain))
 		ed.SavePosHistory(ed.CursorPos)
 	}
+	ed.NeedsRender()
 }
 
 // InsertAtCursor inserts given text at current cursor position
 func (ed *Editor) InsertAtCursor(txt []byte) {
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
-
 	if ed.HasSelection() {
 		tbe := ed.DeleteSelection()
 		ed.CursorPos = tbe.AdjustPos(ed.CursorPos, textbuf.AdjustPosDelStart) // move to start if in reg
@@ -418,6 +409,7 @@ func (ed *Editor) InsertAtCursor(txt []byte) {
 	}
 	ed.SetCursorShow(pos)
 	ed.SetCursorCol(ed.CursorPos)
+	ed.NeedsRender()
 }
 
 ///////////////////////////////////////////////////////////
@@ -434,8 +426,6 @@ func (ed *Editor) CutRect() *textbuf.Edit {
 	if !ed.HasSelection() {
 		return nil
 	}
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	npos := lex.Pos{Ln: ed.SelectReg.End.Ln, Ch: ed.SelectReg.Start.Ch}
 	cut := ed.Buf.DeleteTextRect(ed.SelectReg.Start, ed.SelectReg.End, EditSignal)
 	if cut != nil {
@@ -445,6 +435,7 @@ func (ed *Editor) CutRect() *textbuf.Edit {
 	}
 	ed.SetCursorShow(npos)
 	ed.SavePosHistory(ed.CursorPos)
+	ed.NeedsRender()
 	return cut
 }
 
@@ -455,8 +446,6 @@ func (ed *Editor) CopyRect(reset bool) *textbuf.Edit {
 	if tbe == nil {
 		return nil
 	}
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	cb := tbe.ToBytes()
 	ed.Clipboard().Write(mimedata.NewTextBytes(cb))
 	ViewClipRect = tbe
@@ -464,6 +453,7 @@ func (ed *Editor) CopyRect(reset bool) *textbuf.Edit {
 		ed.SelectReset()
 	}
 	ed.SavePosHistory(ed.CursorPos)
+	ed.NeedsRender()
 	return tbe
 }
 
@@ -472,8 +462,6 @@ func (ed *Editor) PasteRect() {
 	if ViewClipRect == nil {
 		return
 	}
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	ce := ViewClipRect.Clone()
 	nl := ce.Reg.End.Ln - ce.Reg.Start.Ln
 	nch := ce.Reg.End.Ch - ce.Reg.Start.Ch
@@ -487,6 +475,7 @@ func (ed *Editor) PasteRect() {
 	ed.SetCursorShow(pos)
 	ed.SetCursorCol(ed.CursorPos)
 	ed.SavePosHistory(ed.CursorPos)
+	ed.NeedsRender()
 }
 
 // ReCaseSelection changes the case of the currently-selected text.

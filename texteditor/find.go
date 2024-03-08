@@ -128,8 +128,6 @@ func (ed *Editor) ISearchSig() {
 // ISearchStart is an emacs-style interactive search mode -- this is called when
 // the search command itself is entered
 func (ed *Editor) ISearchStart() {
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	if ed.ISearch.On {
 		if ed.ISearch.Find != "" { // already searching -- find next
 			sz := len(ed.ISearch.Matches)
@@ -161,6 +159,7 @@ func (ed *Editor) ISearchStart() {
 		ed.ISearch.Pos = -1
 		ed.ISearchSig()
 	}
+	ed.NeedsRender()
 }
 
 // ISearchKeyInput is an emacs-style interactive search mode -- this is called
@@ -168,8 +167,6 @@ func (ed *Editor) ISearchStart() {
 func (ed *Editor) ISearchKeyInput(kt events.Event) {
 	kt.SetHandled()
 	r := kt.KeyRune()
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	// if ed.ISearch.Find == PrevISearchString { // undo starting point
 	// 	ed.ISearch.Find = ""
 	// }
@@ -185,12 +182,11 @@ func (ed *Editor) ISearchKeyInput(kt events.Event) {
 		return
 	}
 	ed.ISearchNextMatch(ed.CursorPos)
+	ed.NeedsRender()
 }
 
 // ISearchBackspace gets rid of one item in search string
 func (ed *Editor) ISearchBackspace() {
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	if ed.ISearch.Find == PrevISearchString { // undo starting point
 		ed.ISearch.Find = ""
 		ed.ISearch.UseCase = false
@@ -215,6 +211,7 @@ func (ed *Editor) ISearchBackspace() {
 		return
 	}
 	ed.ISearchNextMatch(ed.CursorPos)
+	ed.NeedsRender()
 }
 
 // ISearchCancel cancels ISearch mode
@@ -222,8 +219,6 @@ func (ed *Editor) ISearchCancel() {
 	if !ed.ISearch.On {
 		return
 	}
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	if ed.ISearch.Find != "" {
 		PrevISearchString = ed.ISearch.Find
 	}
@@ -237,6 +232,7 @@ func (ed *Editor) ISearchCancel() {
 	ed.SavePosHistory(ed.CursorPos)
 	ed.SelectReset()
 	ed.ISearchSig()
+	ed.NeedsRender()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -424,8 +420,6 @@ func (ed *Editor) QReplaceReplaceAll(midx int) {
 // QReplaceKeyInput is an emacs-style interactive search mode -- this is called
 // when keys are typed while in search mode
 func (ed *Editor) QReplaceKeyInput(kt events.Event) {
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	kt.SetHandled()
 	switch {
 	case kt.KeyRune() == 'y':
@@ -443,6 +437,7 @@ func (ed *Editor) QReplaceKeyInput(kt events.Event) {
 		ed.QReplaceReplaceAll(ed.QReplace.Pos)
 		ed.QReplaceCancel()
 	}
+	ed.NeedsRender()
 }
 
 // QReplaceCancel cancels QReplace mode
@@ -450,8 +445,6 @@ func (ed *Editor) QReplaceCancel() {
 	if !ed.QReplace.On {
 		return
 	}
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	ed.QReplace.On = false
 	ed.QReplace.Pos = -1
 	ed.QReplace.Matches = nil
@@ -459,12 +452,11 @@ func (ed *Editor) QReplaceCancel() {
 	ed.SavePosHistory(ed.CursorPos)
 	ed.SelectReset()
 	ed.QReplaceSig()
+	ed.NeedsRender()
 }
 
 // EscPressed emitted for keyfun.Abort or keyfun.CancelSelect -- effect depends on state..
 func (ed *Editor) EscPressed() {
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
 	switch {
 	case ed.ISearch.On:
 		ed.ISearchCancel()
@@ -477,4 +469,5 @@ func (ed *Editor) EscPressed() {
 	default:
 		ed.Highlights = nil
 	}
+	ed.NeedsRender()
 }

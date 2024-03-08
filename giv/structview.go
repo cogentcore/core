@@ -109,14 +109,12 @@ func (sv *StructView) SetStruct(st any) *StructView {
 	}
 	sv.Struct = st
 	sv.Update()
-	sv.SetNeedsLayout(true)
 	return sv
 }
 
 // UpdateFields updates each of the value-view widgets for the fields --
 // called by the ViewSig update
 func (sv *StructView) UpdateFields() {
-	updt := sv.UpdateStart()
 	for _, vv := range sv.FieldViews {
 		// we do not update focused elements to prevent panics
 		if wb := vv.AsWidgetBase(); wb != nil {
@@ -126,25 +124,24 @@ func (sv *StructView) UpdateFields() {
 		}
 		vv.UpdateWidget()
 	}
-	sv.UpdateEndRender(updt)
+	sv.NeedsRender()
 }
 
 // UpdateField updates the value-view widget for the named field
 func (sv *StructView) UpdateField(field string) {
-	updt := sv.UpdateStart()
 	for _, vv := range sv.FieldViews {
 		if vv.Name() == field {
 			vv.UpdateWidget()
 			break
 		}
 	}
-	sv.UpdateEndRender(updt)
+	sv.NeedsRender()
 }
 
 // ConfigWidget configures the view
 func (sv *StructView) ConfigWidget() {
 	if ks, ok := sv.Struct.(ki.Ki); ok {
-		if ks == nil || ks.This() == nil || ks.Is(ki.Deleted) {
+		if ks == nil || ks.This() == nil {
 			return
 		}
 	}
@@ -152,10 +149,9 @@ func (sv *StructView) ConfigWidget() {
 		sv.ConfigStructGrid()
 		return
 	}
-	updt := sv.UpdateStart()
 	gi.NewFrame(sv, "struct-grid")
 	sv.ConfigStructGrid()
-	sv.UpdateEndLayout(updt)
+	sv.NeedsLayout()
 }
 
 // IsConfiged returns true if the widget is fully configured
@@ -192,7 +188,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 	}
 	sg := sv.StructGrid()
 	// note: widget re-use does not work due to all the closures
-	sg.DeleteChildren(ki.DestroyKids)
+	sg.DeleteChildren()
 	config := ki.Config{}
 	dupeFields := map[string]bool{}
 	sv.FieldViews = make([]Value, 0)
@@ -282,10 +278,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 			sv.FieldViews = append(sv.FieldViews, vv)
 			return true
 		})
-	mods, updt := sg.ConfigChildren(config) // fields could be non-unique with labels..
-	if !mods {
-		updt = sg.UpdateStart()
-	}
+	sg.ConfigChildren(config) // fields could be non-unique with labels..
 	for i, vv := range sv.FieldViews {
 		lbl := sg.Child(i * 2).(*gi.Label)
 		lbl.Style(func(s *styles.Style) {
@@ -357,8 +350,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 			})
 		}
 	}
-	sg.UpdateEnd(updt)
-	return updt
+	return true
 }
 
 func (sv *StructView) UpdateFieldAction() {
@@ -367,7 +359,6 @@ func (sv *StructView) UpdateFieldAction() {
 	}
 	if sv.IsShouldShower {
 		sv.Update()
-		sv.SetNeedsLayout(true)
 	}
 }
 

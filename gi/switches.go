@@ -109,13 +109,12 @@ func (sw *Switches) SelectItem(idx int) error {
 	if idx >= sw.NumChildren() || idx < 0 {
 		return fmt.Errorf("gi.Switches: SelectItem, index out of range: %v", idx)
 	}
-	updt := sw.UpdateStart()
 	if sw.Mutex {
 		sw.UnCheckAllBut(idx)
 	}
 	cs := sw.Child(idx).(*Switch)
 	cs.SetChecked(true)
-	sw.UpdateEndRender(updt)
+	sw.NeedsRender()
 	return nil
 }
 
@@ -123,9 +122,6 @@ func (sw *Switches) SelectItem(idx int) error {
 // This is mainly for Mutex use.
 // returns error if index is out of range.
 func (sw *Switches) SelectItemAction(idx int) error {
-	updt := sw.UpdateStart()
-	defer sw.UpdateEnd(updt)
-
 	err := sw.SelectItem(idx)
 	if err != nil {
 		return err
@@ -149,17 +145,15 @@ func (sw *Switches) SelectedItem() string {
 
 // UnCheckAll unchecks all switches
 func (sw *Switches) UnCheckAll() {
-	updt := sw.UpdateStart()
 	for _, cbi := range sw.Kids {
 		cs := cbi.(*Switch)
 		cs.SetChecked(false)
 	}
-	sw.UpdateEndRender(updt)
+	sw.NeedsRender()
 }
 
 // UnCheckAllBut unchecks all switches except given one
 func (sw *Switches) UnCheckAllBut(idx int) {
-	updt := sw.UpdateStart()
 	for i, cbi := range sw.Kids {
 		if i == idx {
 			continue
@@ -168,7 +162,7 @@ func (sw *Switches) UnCheckAllBut(idx int) {
 		cs.SetChecked(false)
 		cs.Update()
 	}
-	sw.UpdateEndRender(updt)
+	sw.NeedsRender()
 }
 
 // SetStrings sets the Items list from a list of string values -- if
@@ -226,7 +220,6 @@ func (sw *Switches) SetEnum(enum enums.Enum) *Switches {
 func (sw *Switches) UpdateFromBitFlag(bitflag enums.BitFlag) {
 	els := bitflag.Values()
 	mn := min(len(els), sw.NumChildren())
-	updt := sw.UpdateStart()
 	for i := 0; i < mn; i++ {
 		ev := els[i]
 		swi := sw.Child(i)
@@ -234,7 +227,7 @@ func (sw *Switches) UpdateFromBitFlag(bitflag enums.BitFlag) {
 		on := bitflag.HasFlag(ev.(enums.BitFlag))
 		sw.SetChecked(on)
 	}
-	sw.UpdateEndRender(updt)
+	sw.NeedsRender()
 }
 
 // BitFlagsValue sets the given bitflag value to the value specified
@@ -277,18 +270,13 @@ func (sw *Switches) ConfigItems() {
 }
 
 func (sw *Switches) ConfigSwitches() {
-	// if len(sw.Items) == 0 {
-	// 	sw.DeleteChildren(ki.DestroyKids)
-	// 	return
-	// }
 	config := ki.Config{}
 	for _, lb := range sw.Items {
 		config.Add(SwitchType, lb)
 	}
-	mods, updt := sw.ConfigChildren(config)
-	if mods || sw.NeedsRebuild() {
+	if sw.ConfigChildren(config) || sw.NeedsRebuild() {
 		sw.ConfigItems()
-		sw.UpdateEndLayout(updt)
+		sw.NeedsLayout()
 	}
 }
 

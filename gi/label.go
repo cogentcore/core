@@ -199,17 +199,6 @@ func (lb *Label) SetStyles() {
 	})
 }
 
-// SetTextUpdate sets the text and updates the underlying render
-// (i.e., ConfigLabel) so it will actually show on next render.
-// (including an UpdateRender flag)
-func (lb *Label) SetTextUpdate(text string) *Label {
-	updt := lb.UpdateStart()
-	lb.Text = text
-	lb.ConfigLabel()
-	lb.UpdateEndRender(updt)
-	return lb
-}
-
 func (lb *Label) HandleEvents() {
 	lb.HandleLabelClick(func(tl *paint.TextLink) {
 		goosi.TheApp.OpenURL(tl.URL)
@@ -293,10 +282,6 @@ func (lb *Label) Label() string {
 	return lb.Nm
 }
 
-func (lb *Label) ConfigWidget() {
-	lb.ConfigLabel()
-}
-
 // todo: ideally it would be possible to only call SetHTML once during config
 // and then do the layout only during sizing.  However, layout starts with
 // existing line breaks (which could come from <br> and <p> in HTML),
@@ -304,7 +289,7 @@ func (lb *Label) ConfigWidget() {
 
 // ConfigLabel does the HTML and Layout in TextRender for label text,
 // using actual content size to constrain layout.
-func (lb *Label) ConfigLabel() {
+func (lb *Label) ConfigWidget() {
 	lb.ConfigLabelSize(lb.Geom.Size.Actual.Content)
 }
 

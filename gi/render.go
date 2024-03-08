@@ -28,20 +28,11 @@ import (
 // Key principles:
 //
 // * Async updates (animation, mouse events, etc) change state, _set only flags_
-//   using thread-safe atomic bitflag operations.  Actually rendering async (in V1)
-//   is really hard to get right, and requires tons of mutexes etc.
+//   using thread-safe atomic bitflag operations. True async rendering
+//   is really hard to get right, and requires tons of mutexes etc. Async updates
+//	 must go through [WidgetBase.AsyncLock] and [WidgetBase.AsyncUnlock].
 // * Synchronous, full-tree render updates do the layout, rendering,
 //   at regular FPS (frames-per-second) rate -- nop unless flag set.
-// * Ki UpdateStart / End ensures that _only the highest changed node is flagged_,
-//   while each individual state update uses the same Update wrapper calls locally,
-//   so that rendering updates automatically happen at this highest common node.
-// * UpdateStart starts naturally on the highest node driving a change, causing
-//   a cascade of other UpdateStart on lower nodes, but the IsUpdating flag signals
-//   that they are not the highest.  Only the highest calls UpdateEnd with true,
-//   which is the point at which the change is flagged for render updating.
-// * Thus, rendering updates skip any nodes with IsUpdating set, and are only
-//   triggered at the highest UpdateEnd, so there shouldn't be conflicts
-//   unless a node starts updating again before the next render hits.
 //
 // Three main steps:
 // * Config: (re)configures widgets based on current params
@@ -54,11 +45,7 @@ import (
 // ApplyStyle is always called after Config, and after any
 // current state of the Widget changes via events, animations, etc
 // (e.g., a Hover started or a Button is pushed down).
-// These changes should be protected by UpdateStart / End,
-// such that ApplyStyle is only ever called within that scope.
-// Use UpdateEndRender(updt) to call SetNeedsRender on updt
-// which sets the node NeedsRender and ScNeedsRender flags,
-// to drive the rendering update at next DoNeedsRender call.
+// Use NeedsRender() to drive the rendering update at next DoNeedsRender call.
 //
 // The initial configuration of a scene can skip calling
 // Config and ApplyStyle because these will be called automatically
@@ -68,12 +55,8 @@ import (
 // ReConfg() is the key method, calling Config then
 // ApplyStyle on the node and all of its children.
 //
-// UpdateStart also sets the Scene-level ScUpdating flag, and
-// UpdateEnd clears it, to prevent any Scene-level layout etc
-// from happening while a widget is updating.
-//
 // For nodes with dynamic content that doesn't require styling or config,
-// a simple SetNeedsRender call will drive re-rendering.
+// a simple NeedsRender call will drive re-rendering.
 //
 // Updating is _always_ driven top-down by RenderWin at FPS sampling rate,
 // in the DoUpdate() call on the Scene.
@@ -82,110 +65,36 @@ import (
 // * ScNeedsRender: does NeedsRender on nodes.
 // * ScNeedsLayout: does GetSize, DoLayout, then Render -- after Config.
 //
-// Event handling, styling, etc updates should:
-// * Wrap with UpdateStart / End
-// * End with: SetNeedsStyle(vp, updt) if needs style updates needed based
-//   on state change, or SetNeedsRender(vp, updt)
-// * Or, if Config-level changes are needed, the Config(vp) must call
-//   SetNeedsLayout(vp, updt) to trigger vp Layout step after.
-//
-// The one mutex that is still needed is a RWMutex on the BBbox fields
-// because they are read by the event manager (and potentially inside
-// event handler code) which does not have any flag protection,
-// and are also read in rendering and written in Layout.
 
-/*
-// UpdateStart sets the scene ScUpdating flag to prevent
-// render updates during construction on a scene.
-func (wb *WidgetBase) UpdateStart() bool {
-	updt := wb.Node.UpdateStart()
-	if updt && !wb.Is(ki.Field) && wb.Sc != nil {
-		wb.Sc.SetFlag(true, ScUpdating)
-		if DebugSettings.UpdateTrace {
-			fmt.Println("DebugSettings.UpdateTrace Scene Start:", wb.Sc, "from widget:", wb)
-		}
-	}
-	return updt
-}
-
-// UpdateEnd resets the scene ScUpdating flag
-func (wb *WidgetBase) UpdateEnd(updt bool) {
-	if updt && !wb.Is(ki.Field) && wb.Sc != nil {
-		wb.Sc.SetFlag(false, ScUpdating)
-		if DebugSettings.UpdateTrace {
-			fmt.Println("DebugSettings.UpdateTrace Scene End:", wb.Sc, "from widget:", wb)
-		}
-	}
-	wb.Node.UpdateEnd(updt)
-}
-*/
-
-// UpdateStartAsync must be called for any asynchronous update
-// that happens outside of the usual user event-driven, same-thread
-// updates, or other updates that can happen during standard layout / rendering.
-// It waits for any current Render or Event update to finish,
-// via RenderContext().Lock().
-// If the parent Scene has been deleted, or it is already updating, it will
-// just block indefinitely.
-// It must be paired with an UpdateEndAsync.
-// These calls CANNOT be triggered during a standard render update,
-// (whereas UpdateStart / End can be, and typically are)
-// because it will cause a hang on the Read Lock which
-// was already write locked at the start of the render.
-func (wb *WidgetBase) UpdateStartAsync() bool {
+// AsyncLock must be called before making any updates in a separate goroutine
+// outside of the main configuration, rendering, and event handling structure.
+// It must have a matching [WidgetBase.AsyncUnlock] after it.
+func (wb *WidgetBase) AsyncLock() {
 	rc := wb.Scene.RenderContext()
 	if rc == nil {
+		// if there is no render context, we are probably
+		// being deleted, so we just block forever
 		select {}
 	}
 	rc.Lock()
-	updt := wb.UpdateStart()
-	if !updt {
-		rc.Unlock()
-		select {}
-	}
 	wb.Scene.SetFlag(true, ScUpdating)
-	return updt
 }
 
-// UpdateEndAsync must be called after [UpdateStartAsync] for any
-// asynchronous update that happens outside of the usual user event-driven,
-// same-thread updates.
-func (wb *WidgetBase) UpdateEndAsync(updt bool) {
+// AsyncUnlock must be called after making any updates in a separate goroutine
+// outside of the main configuration, rendering, and event handling structure.
+// It must have a matching [WidgetBase.AsyncLock] before it.
+func (wb *WidgetBase) AsyncUnlock() {
 	rc := wb.Scene.RenderContext()
 	if rc == nil {
 		return
 	}
 	rc.Unlock()
 	wb.Scene.SetFlag(false, ScUpdating)
-	wb.UpdateEnd(updt)
 }
 
-// UpdateEndAsyncLayout should be called instead of [UpdateEndAsync]
-// for any [UpdateStartAsync] / [UpdateEndAsync] block that needs
-// a re-layout at the end.  Just does [SetNeedsLayoutUpdate] after UpdateEnd,
-// and uses the cached wb.Sc pointer.
-func (wb *WidgetBase) UpdateEndAsyncLayout(updt bool) {
-	wb.UpdateEndAsync(updt)
-	wb.SetNeedsLayout(updt)
-}
-
-// UpdateEndAsyncRender should be called instead of [UpdateEndAsync]
-// for any [UpdateStartAsync] / [UpdateEndAsync] block that needs
-// a re-render at the end.  Just does [SetNeedsRenderUpdate] after UpdateEnd,
-// and uses the cached wb.Sc pointer.
-func (wb *WidgetBase) UpdateEndAsyncRender(updt bool) {
-	wb.UpdateEndAsync(updt)
-	wb.SetNeedsRender(updt)
-}
-
-// SetNeedsRender sets the NeedsRender and Scene NeedsRender flags, if updt is true.
-// See [UpdateEndRender] for convenience method.
-// This should be called after widget state changes
-// that don't need styling, e.g., in event handlers
-// or other update code, _after_ calling UpdateEnd(updt) and passing
-// that same updt flag from UpdateStart.
-func (wb *WidgetBase) SetNeedsRender(updt bool) {
-	if !updt || wb.Scene == nil {
+// NeedsRender specifies that the widget needs to be rendered.
+func (wb *WidgetBase) NeedsRender() {
+	if wb.Scene == nil {
 		return
 	}
 	if DebugSettings.UpdateTrace {
@@ -200,54 +109,26 @@ func (wb *WidgetBase) SetNeedsRender(updt bool) {
 		return p.Is(ki.Field)
 	})
 	if fi != nil && fi.Parent() != nil && fi.Parent().This() != nil {
-		fi.Parent().(Widget).AsWidget().SetNeedsRender(true)
+		fi.Parent().(Widget).AsWidget().NeedsRender()
 	}
 }
 
-// UpdateEndRender should be called instead of UpdateEnd
-// for any [UpdateStart] / [UpdateEnd] block that needs a re-render
-// at the end.  Just does [SetNeedsRenderUpdate] after UpdateEnd,
-// and uses the cached wb.Sc pointer.
-func (wb *WidgetBase) UpdateEndRender(updt bool) {
-	if !updt {
+// NeedsLayout specifies that the widget's scene needs to do a layout.
+// This needs to be called after any changes that affect the structure
+// and/or size of elements.
+func (wb *WidgetBase) NeedsLayout() {
+	if wb.Scene == nil {
 		return
 	}
-	wb.UpdateEnd(updt)
-	wb.SetNeedsRender(updt)
-}
-
-// AddReRender adds given widget to be re-rendered next pass
-func (sc *Scene) AddReRender(w Widget) {
-	sc.ReRender = append(sc.ReRender, w)
-}
-
-// note: this is replacement for "SetNeedsFullReRender()" call:
-
-// SetNeedsLayoutUpdate sets the ScNeedsLayout flag
-// if updt is true. See UpdateEndLayout for convenience method.
-// This should be called after widget Config call
-// _after_ calling UpdateEnd(updt) and passing
-// that same updt flag from UpdateStart.
-func (wb *WidgetBase) SetNeedsLayout(updt bool) {
-	if !updt || wb.Scene == nil {
-		return
-	}
-	if updt && DebugSettings.UpdateTrace {
+	if DebugSettings.UpdateTrace {
 		fmt.Println("\tDebugSettings.UpdateTrace: NeedsLayout:", wb)
 	}
 	wb.Scene.SetFlag(true, ScNeedsLayout)
 }
 
-// UpdateEndLayout should be called instead of UpdateEnd
-// for any UpdateStart / UpdateEnd block that needs a re-layout
-// at the end.  Just does SetNeedsLayout after UpdateEnd,
-// and uses the cached wb.Sc pointer.
-func (wb *WidgetBase) UpdateEndLayout(updt bool) {
-	if !updt {
-		return
-	}
-	wb.UpdateEnd(updt)
-	wb.SetNeedsLayout(updt)
+// AddReRender adds given widget to be re-rendered next pass
+func (sc *Scene) AddReRender(w Widget) {
+	sc.ReRender = append(sc.ReRender, w)
 }
 
 // NeedsRebuild returns true if the RenderContext indicates
@@ -266,19 +147,6 @@ func (wb *WidgetBase) NeedsRebuild() bool {
 ///////////////////////////////////////////////////////////////
 // 	Config
 
-// Config is the main wrapper configuration call, calling ConfigWidget
-// which actually does the work. Use [WidgetBase.Update] to update styles too,
-// which is typically needed once an item is displayed.
-// Config by itself is sufficient during initial construction because
-// everything will be automatically styled during initial display.
-func (wb *WidgetBase) Config() {
-	wi := wb.This().(Widget)
-	updt := wi.UpdateStart()
-	wi.ConfigWidget() // where everything actually happens
-	wb.UpdateEnd(updt)
-	wb.SetNeedsLayout(updt) // todo: switch to render here
-}
-
 // ConfigWidget is the interface method called by Config that
 // should be defined for each Widget type, which actually does
 // the configuration work.
@@ -293,7 +161,7 @@ func (wb *WidgetBase) ConfigWidget() {
 // and then handles necessary updating logic.
 func (wb *WidgetBase) ConfigParts(config ki.Config, after ...func()) {
 	parts := wb.NewParts()
-	mods, updt := parts.ConfigChildren(config)
+	mods := parts.ConfigChildren(config)
 	if len(after) > 0 {
 		after[0]()
 	}
@@ -301,8 +169,6 @@ func (wb *WidgetBase) ConfigParts(config ki.Config, after ...func()) {
 		return
 	}
 	parts.Update()
-	parts.UpdateEnd(updt)
-	wb.SetNeedsLayout(updt)
 }
 
 // ConfigTree calls Config on every Widget in the tree from me.
@@ -312,33 +178,36 @@ func (wb *WidgetBase) ConfigTree() {
 	}
 	pr := prof.Start(wb.This().KiType().ShortName())
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
-		wi.Config()
+		wi.ConfigWidget()
 		return ki.Continue
 	})
 	pr.End()
 }
 
-// Update calls Config and then ApplyStyle
-// on every Widget in the tree from me.
-// This should be used after any structural changes
-// to currently-displayed widgets.
-// It wraps everything in UpdateStart / UpdateEndRender
-// so node will render on next pass.
-// Call SetNeedsLayout to also trigger a layout where needed.
-func (wb *WidgetBase) Update() { //gti:add
-	if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) {
+// Update does a general purpose update of the widget and everything
+// below it by reconfiguring it, applying its styles, and indicating
+// that it needs a new layout pass. It is the main way that end users
+// should update widgets, and it should be called after making any
+// changes to the core properties of a widget (for example, the text
+// of a label, the icon of a button, or the slice of a table view).
+//
+// If you are calling this in a separate goroutine outside of the main
+// configuration, rendering, and event handling structure, you need to
+// call [WidgetBase.AsyncLock] and [WidgetBase.AsyncUnlock] before and
+// after this, respectively.
+func (wb *WidgetBase) Update() {
+	if wb == nil || wb.This() == nil {
 		return
 	}
-	updt := wb.UpdateStart()
 	if DebugSettings.UpdateTrace {
-		fmt.Println("\tDebugSettings.UpdateTrace Update:", wb, "updt:", updt)
+		fmt.Println("\tDebugSettings.UpdateTrace Update:", wb)
 	}
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
-		wi.Config()
+		wi.ConfigWidget()
 		wi.ApplyStyle()
 		return ki.Continue
 	})
-	wb.UpdateEndRender(updt)
+	wb.NeedsLayout()
 }
 
 // ApplyStyleTree calls ApplyStyle on every Widget in the tree from me.
@@ -408,8 +277,7 @@ func (wb *WidgetBase) DoNeedsRender() {
 	}
 	pr := prof.Start(wb.This().KiType().ShortName())
 	wb.WidgetWalkPre(func(kwi Widget, kwb *WidgetBase) bool {
-		if kwi.Is(NeedsRender) && !kwi.Is(ki.Updating) {
-			kwi.SetFlag(false, NeedsRender)
+		if kwi.Is(NeedsRender) {
 			kwi.Render()
 			return ki.Break // done
 		}
@@ -582,7 +450,7 @@ func (wb *WidgetBase) PushBounds() bool {
 // PopBounds pops our bounding-box bounds -- last step in Render after
 // rendering children
 func (wb *WidgetBase) PopBounds() {
-	if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) {
+	if wb == nil || wb.This() == nil {
 		return
 	}
 	pc := &wb.Scene.PaintContext
@@ -638,12 +506,10 @@ func (wb *WidgetBase) RenderParts() {
 	wb.Parts.Render() // is a layout, will do all
 }
 
-// RenderChildren renders all of node's children.
+// RenderChildren renders all of the widget's children.
 func (wb *WidgetBase) RenderChildren() {
 	wb.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		if !kwi.Is(ki.Updating) {
-			kwi.Render()
-		}
+		kwi.Render()
 		return ki.Continue
 	})
 }

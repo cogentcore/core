@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"image"
+	"log/slog"
 
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
@@ -1257,7 +1258,8 @@ func (ly *Layout) SizeDownGrowCells(iter int, extra mat32.Vec2) bool {
 	// todo: use max growth values instead of individual ones to ensure consistency!
 	li := &ly.LayImpl
 	if len(li.Cells) == 0 {
-		panic(fmt.Sprintf("%v Has not been initialized -- UpdateStart / End error!", ly.String()))
+		slog.Error("unexpected error: layout has not been initialized", "layout", ly.String())
+		return false
 	}
 	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		cidx := kwb.Geom.Cell

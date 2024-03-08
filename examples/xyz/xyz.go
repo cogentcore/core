@@ -13,7 +13,6 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/xyz"
 	"cogentcore.org/core/xyz/examples/assets"
@@ -102,11 +101,10 @@ func (an *Anim) Animate() {
 			return
 		}
 		<-an.Ticker.C // wait for tick
-		if !an.On || an.SceneView.This() == nil || an.SceneView.Is(ki.Deleted) || an.Torus == nil || an.Gopher == nil {
+		if !an.On || an.SceneView.This() == nil || an.Torus == nil || an.Gopher == nil {
 			continue
 		}
 		sc := an.SceneView.SceneXYZ()
-		updt := sc.UpdateStart()
 		radius := float32(0.3)
 
 		if an.DoTorus {
@@ -127,8 +125,8 @@ func (an *Anim) Animate() {
 			an.Gopher.SetPosePos(gp)
 		}
 
-		sc.UpdateEndUpdate(updt)
-		an.SceneView.SceneWidget().SetNeedsRender(true)
+		sc.NeedsUpdate()
+		an.SceneView.SceneWidget().NeedsRender()
 		an.Ang += an.Speed
 	}
 }
@@ -149,7 +147,7 @@ func main() {
 	})
 
 	sv := xyzv.NewSceneView(b)
-	sv.Config()
+	sv.ConfigWidget()
 	sw := sv.SceneWidget()
 	sc := sv.SceneXYZ()
 	sw.SelMode = xyzv.Manipulable
