@@ -276,8 +276,6 @@ func (dv *DiffView) SaveFileB(fname gi.Filename) { //gti:add
 // DiffView.
 func (dv *DiffView) DiffStrings(astr, bstr []string) {
 	av, bv := dv.TextEditors()
-	aupdt := av.UpdateStart()
-	bupdt := bv.UpdateStart()
 
 	dv.Diffs.SetStringLines(astr, bstr)
 
@@ -380,8 +378,8 @@ func (dv *DiffView) DiffStrings(astr, bstr []string) {
 	dv.TagWordDiffs()
 	dv.BufA.ReMarkup()
 	dv.BufB.ReMarkup()
-	av.UpdateEndRender(aupdt)
-	bv.UpdateEndRender(bupdt)
+	av.NeedsRender()
+	bv.NeedsRender()
 }
 
 // TagWordDiffs goes through replace diffs and tags differences at the
@@ -513,12 +511,12 @@ func (dv *DiffView) ConfigDiffView() {
 	av.On(events.Scroll, func(e events.Event) {
 		// bv.ScrollDelta(e)
 		bv.Geom.Scroll.Y = av.Geom.Scroll.Y
-		bv.NeedsRender(true)
+		bv.NeedsRender()
 	})
 	bv.On(events.Scroll, func(e events.Event) {
 		// av.ScrollDelta(e)
 		av.Geom.Scroll.Y = bv.Geom.Scroll.Y
-		av.NeedsRender(true)
+		av.NeedsRender()
 	})
 	inInputEvent := false
 	av.On(events.Input, func(e events.Event) {

@@ -460,9 +460,6 @@ func (ed *Editor) BufSignal(sig BufSignals, tbe *textbuf.Edit) {
 
 // Undo undoes previous action
 func (ed *Editor) Undo() {
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
-
 	tbe := ed.Buf.Undo()
 	if tbe != nil {
 		if tbe.Delete { // now an insert
@@ -475,13 +472,11 @@ func (ed *Editor) Undo() {
 		ed.ScrollCursorToCenterIfHidden()
 	}
 	ed.SavePosHistory(ed.CursorPos)
+	ed.NeedsRender()
 }
 
 // Redo redoes previously undone action
 func (ed *Editor) Redo() {
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
-
 	tbe := ed.Buf.Redo()
 	if tbe != nil {
 		if tbe.Delete {
@@ -493,6 +488,7 @@ func (ed *Editor) Redo() {
 		ed.ScrollCursorToCenterIfHidden()
 	}
 	ed.SavePosHistory(ed.CursorPos)
+	ed.NeedsRender()
 }
 
 ////////////////////////////////////////////////////

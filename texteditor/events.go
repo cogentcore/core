@@ -377,7 +377,6 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		cancelAll()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetHandled()
-			updt := ed.UpdateStart()
 			lasttab := ed.Is(EditorLastWasTabAI)
 			if !lasttab && ed.CursorPos.Ch == 0 && ed.Buf.Opts.AutoIndent {
 				_, _, cpos := ed.Buf.AutoIndent(ed.CursorPos.Ln)
@@ -387,7 +386,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 			} else {
 				ed.InsertAtCursor(indent.Bytes(ed.Buf.Opts.IndentChar(), 1, ed.Styles.Text.TabSize))
 			}
-			ed.UpdateEndRender(updt)
+			ed.NeedsRender()
 			ed.ISpellKeyInput(kt)
 		}
 	case keyfun.FocusPrev: // shift-tab
@@ -601,19 +600,17 @@ func (ed *Editor) HandleMouse() {
 			ed.SetFocusEvent()
 			ed.Send(events.Focus, e) // sets focused flag
 		}
-		updt := ed.UpdateStart()
 		e.SetHandled()
 		if ed.SelectWord() {
 			ed.CursorPos = ed.SelectReg.Start
 		}
-		ed.UpdateEndRender(updt)
+		ed.NeedsRender()
 	})
 	ed.On(events.TripleClick, func(e events.Event) {
 		if !ed.StateIs(states.Focused) {
 			ed.SetFocusEvent()
 			ed.Send(events.Focus, e) // sets focused flag
 		}
-		updt := ed.UpdateStart()
 		e.SetHandled()
 		sz := ed.Buf.LineLen(ed.CursorPos.Ln)
 		if sz > 0 {
@@ -622,7 +619,7 @@ func (ed *Editor) HandleMouse() {
 			ed.SelectReg.End.Ln = ed.CursorPos.Ln
 			ed.SelectReg.End.Ch = sz
 		}
-		ed.UpdateEndRender(updt)
+		ed.NeedsRender()
 	})
 	ed.On(events.SlideMove, func(e events.Event) {
 		e.SetHandled()
@@ -673,8 +670,7 @@ func (ed *Editor) SetCursorFromMouse(pt image.Point, newPos lex.Pos, selMode eve
 		return
 	}
 	//	fmt.Printf("set cursor fm mouse: %v\n", newPos)
-	updt := ed.UpdateStart()
-	defer ed.UpdateEndRender(updt)
+	defer ed.NeedsRender()
 
 	if !ed.SelectMode && selMode == events.ExtendContinuous {
 		if ed.SelectReg == textbuf.RegionNil {
