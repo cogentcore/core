@@ -22,7 +22,7 @@ func main() {
 	b := gi.NewBody("XYZ Object Viewer")
 
 	sv := xyzv.NewSceneView(b)
-	sv.Config()
+	sv.ConfigWidget()
 	sc := sv.SceneXYZ()
 
 	// first, add lights, set camera
@@ -61,7 +61,7 @@ func main() {
 					grr.Log1(sc.OpenNewObj(selFile, objgp))
 					sc.SetCamera("default")
 					sc.UpdateEndConfig(updt)
-					sv.NeedsRender(true)
+					sv.NeedsRender()
 				})
 			})
 	})

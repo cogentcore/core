@@ -59,6 +59,7 @@ func (fb *FileBrowse) Defaults() {
 func (fb *FileBrowse) OnInit() {
 	fb.Defaults()
 	fb.Style(func(s *styles.Style) {
+		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 		s.Margin.Set(units.Dp(8))
 	})
@@ -135,13 +136,10 @@ func (fb *FileBrowse) OpenPath(path gi.Filename) { //gti:add
 
 // UpdateProj does full update to current proj
 func (fb *FileBrowse) UpdateProj() {
-	mods, updt := fb.StdConfig()
+	fb.StdConfig()
 	fb.SetTitle(fmt.Sprintf("FileBrowse of: %v", fb.ProjRoot)) // todo: get rid of title
 	fb.UpdateFiles()
 	fb.ConfigSplits()
-	if mods {
-		fb.UpdateEnd(updt)
-	}
 }
 
 // ProjPathParse parses given project path into a root directory (which could
@@ -264,15 +262,11 @@ func (fb *FileBrowse) StdFrameConfig() ki.Config {
 	return config
 }
 
-// StdConfig configures a standard setup of the overall Frame -- returns mods,
-// updt from ConfigChildren and does NOT call UpdateEnd
-func (fb *FileBrowse) StdConfig() (mods, updt bool) {
-	fb.Style(func(s *styles.Style) {
-		s.Direction = styles.Column
-	})
+// StdConfig configures a standard setup of the overall Frame.
+// It returns whether any modifications were made.
+func (fb *FileBrowse) StdConfig() bool {
 	config := fb.StdFrameConfig()
-	mods, updt = fb.ConfigChildren(config)
-	return
+	return fb.ConfigChildren(config)
 }
 
 // SetTitle sets the optional title and updates the Title label
@@ -350,8 +344,7 @@ func (fb *FileBrowse) ConfigSplits() {
 	}
 
 	config := fb.SplitsConfig()
-	mods, updt := split.ConfigChildren(config)
-	if mods {
+	if split.ConfigChildren(config) {
 		ftfr := split.Child(0).(*gi.Frame)
 		fb.Files = filetree.NewTree(ftfr, "filetree")
 		fb.Files.OnSelect(func(e events.Event) {
@@ -373,7 +366,6 @@ func (fb *FileBrowse) ConfigSplits() {
 			}
 		}
 		split.SetSplits(.2, .4, .4)
-		split.UpdateEnd(updt)
 	}
 }
 

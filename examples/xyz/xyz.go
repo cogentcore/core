@@ -127,7 +127,7 @@ func (an *Anim) Animate() {
 		}
 
 		sc.UpdateEndUpdate(updt)
-		an.SceneView.SceneWidget().NeedsRender(true)
+		an.SceneView.SceneWidget().NeedsRender()
 		an.Ang += an.Speed
 	}
 }
@@ -148,7 +148,7 @@ func main() {
 	})
 
 	sv := xyzv.NewSceneView(b)
-	sv.Config()
+	sv.ConfigWidget()
 	sw := sv.SceneWidget()
 	sc := sv.SceneXYZ()
 	sw.SelMode = xyzv.Manipulable
