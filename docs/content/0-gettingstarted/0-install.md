@@ -4,15 +4,6 @@
 2. Run `go install cogentcore.org/core/core@main` to install the Cogent Core command line tool.
 3. Run `core setup` to install platform-specific dependencies.
 
-## MacOS
-
-1. Install the xcode command-line tools if you don't already have them by running `xcode-select --install`
-2. If you don't already have the Vulkan SDK installed, install it by doing the following:
-    * Run `curl -O https://sdk.lunarg.com/sdk/download/1.3.261.1/mac/vulkansdk-macos-1.3.261.1.dmg`
-    * Run `open vulkansdk-macos-1.3.261.1.dmg`
-    * Double click `InstallVulkan.app`
-    * Follow the installation prompts and ignore all warnings about the Vulkan Portability Enumeration extension
-
 ## Windows
 
 1. Download and install Git for Windows from the [git website](https://git-scm.com/download/win) if you don't already have it. You should install Git Bash as part of this process and use it for development.

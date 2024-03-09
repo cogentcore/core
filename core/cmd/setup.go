@@ -6,10 +6,12 @@ package cmd
 
 import (
 	"fmt"
+	"path/filepath"
 	"runtime"
 
 	"cogentcore.org/core/core/config"
 	"cogentcore.org/core/xe"
+	"github.com/mitchellh/go-homedir"
 )
 
 // Setup installs platform-specific dependencies for the current platform.
@@ -29,7 +31,16 @@ func Setup(c *config.Config) error { //gti:add
 		if err != nil {
 			return err
 		}
-		err = vc.Run("open", "vulkansdk-macos-1.3.261.1.dmg")
+		err = xe.Run("sudo", "hdiutil", "attach", "vulkansdk-macos-1.3.261.1.dmg")
+		if err != nil {
+			return err
+		}
+		home, err := homedir.Dir()
+		if err != nil {
+			return err
+		}
+		root := filepath.Join(home, "VulkanSDK", "1.3.261.1")
+		err = vc.Run("sudo", "/Volumes/vulkansdk-macos-1.3.261.1/InstallVulkan.app/Contents/MacOS/InstallVulkan", "--root", root, "--accept-licenses", "--default-answer", "--confirm-command", "install")
 		if err != nil {
 			return err
 		}
