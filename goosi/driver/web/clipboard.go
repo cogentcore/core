@@ -7,8 +7,10 @@
 package web
 
 import (
+	"log/slog"
 	"syscall/js"
 
+	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/mimedata"
 )
 
@@ -18,10 +20,8 @@ import (
 var TheClipboard = &Clipboard{}
 
 // Clipboard is the [goosi.Clipboard] implementation for the web platform
-type Clipboard struct{}
-
-func (cl *Clipboard) IsEmpty() bool {
-	return len(cl.Read(nil).Text(mimedata.TextPlain)) == 0
+type Clipboard struct {
+	goosi.ClipboardBase
 }
 
 func (cl *Clipboard) Read(types []string) mimedata.Mimes {
@@ -29,6 +29,10 @@ func (cl *Clipboard) Read(types []string) mimedata.Mimes {
 	js.Global().Get("navigator").Get("clipboard").Call("readText").
 		Call("then", js.FuncOf(func(this js.Value, args []js.Value) any {
 			str <- args[0].String()
+			return nil
+		}), js.FuncOf(func(this js.Value, args []js.Value) any {
+			slog.Error("unable to read clipboard text")
+			str <- ""
 			return nil
 		}))
 	return mimedata.NewText(<-str)
@@ -50,8 +54,4 @@ func (cl *Clipboard) Write(data mimedata.Mimes) error {
 	}
 	js.Global().Get("navigator").Get("clipboard").Call("writeText", str)
 	return nil
-}
-
-func (cl *Clipboard) Clear() {
-	// no-op
 }
