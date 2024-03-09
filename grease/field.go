@@ -133,10 +133,13 @@ func AddFieldsImpl(obj any, path string, cmdPath string, allFields *Fields, used
 			Name:   name,
 			Names:  names,
 		}
-		for i, name := range names {
+		for i, name := range nf.Names {
+			// duplicate deletion can cause us to get out of range
+			if i >= len(nf.Names) {
+				return
+			}
 			name := strcase.ToCamel(name)        // everybody is in camel for naming conflict check
 			if of, has := usedNames[name]; has { // we have a conflict
-
 				// if we have a naming conflict between two fields with the same base
 				// (in the same parent struct), then there is no nesting and they have
 				// been directly given conflicting names, so there is a simple programmer error
