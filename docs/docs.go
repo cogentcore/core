@@ -13,16 +13,34 @@ import (
 	"cogentcore.org/core/coredom"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/grr"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/webcore"
 )
 
 //go:embed content
 var content embed.FS
 
+//go:embed icon.svg
+var icon []byte
+
 func main() {
 	b := gi.NewBody("Cogent Core Docs")
 	pg := webcore.NewPage(b).SetSource(grr.Log1(fs.Sub(content, "content")))
 	pg.Context.WikilinkResolver = coredom.PkgGoDevWikilink("cogentcore.org/core")
 	b.AddAppBar(pg.AppBar)
+
+	coredom.ElementHandlers["home-header"] = func(ctx *coredom.Context) bool {
+		fr := coredom.New[*gi.Frame](ctx).Style(func(s *styles.Style) {
+			s.Direction = styles.Column
+			s.Justify.Content = styles.Center
+			s.Align.Content = styles.Center
+			s.Align.Items = styles.Center
+			s.Text.Align = styles.Center
+		})
+		grr.Log(gi.NewSVG(fr).ReadBytes(icon))
+		gi.NewLabel(fr).SetType(gi.LabelDisplayLarge).SetText("Cogent Core")
+		return true
+	}
+
 	b.RunMainWindow()
 }
