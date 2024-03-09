@@ -6,6 +6,7 @@ package cmd
 
 import (
 	"fmt"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 
@@ -45,6 +46,16 @@ func Setup(c *config.Config) error { //gti:add
 			return err
 		}
 		return nil
+	case "linux":
+		_, err := exec.LookPath("apt-get")
+		if err == nil {
+			return vc.Run("sudo", "apt-get", "install", "libgl1-mesa-dev", "xorg-dev")
+		}
+		_, err = exec.LookPath("dnf")
+		if err == nil {
+			return vc.Run("sudo", "dnf", "install", "libX11-devel", "libXcursor-devel", "libXrandr-devel", "libXinerama-devel", "mesa-libGL-devel", "libXi-devel", "libXxf86vm-devel")
+		}
+		return fmt.Errorf("unknown Linux distro (apt-get and dnf not found); file an issue at https://github.com/cogentcore/core/issues")
 	}
 	return fmt.Errorf("platform %q not supported for core setup", runtime.GOOS)
 }
