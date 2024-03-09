@@ -136,7 +136,7 @@ func AddFieldsImpl(obj any, path string, cmdPath string, allFields *Fields, used
 		for i, name := range nf.Names {
 			// duplicate deletion can cause us to get out of range
 			if i >= len(nf.Names) {
-				return
+				break
 			}
 			name := strcase.ToCamel(name)        // everybody is in camel for naming conflict check
 			if of, has := usedNames[name]; has { // we have a conflict
