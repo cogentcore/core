@@ -79,7 +79,7 @@ func (wb *WidgetBase) ApplyStyleParts() {
 // ApplyStyleWidget is the primary styling function for all Widgets.
 // Handles inheritance and runs the Styler functions.
 func (wb *WidgetBase) ApplyStyleWidget() {
-	if wb.OverrideStyle {
+	if wb.OverrideStyle || wb.This() == nil {
 		return
 	}
 	wb.ResetStyleWidget()
