@@ -15,5 +15,5 @@ func main() {
 	opts := grease.DefaultOptions("Cogent Core", "Command line tools for developing apps and libraries using the Cogent Core framework.")
 	opts.DefaultFiles = []string{"core.toml"}
 	opts.SearchUp = true
-	grease.Run(opts, &config.Config{}, cmd.Build, cmd.Run, cmd.Pack, cmd.Install, generate.Generate, cmd.Changed, cmd.Pull, cmd.Log, cmd.Release, cmd.NextRelease)
+	grease.Run(opts, &config.Config{}, cmd.Setup, cmd.Build, cmd.Run, cmd.Pack, cmd.Install, generate.Generate, cmd.Changed, cmd.Pull, cmd.Log, cmd.Release, cmd.NextRelease)
 }

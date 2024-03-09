@@ -60,9 +60,6 @@ type Config struct { //gti:add
 	// the configuration information for web
 	Web Web `cmd:"build,install,run,pack" view:"add-fields"`
 
-	// the configuration options for the setup command
-	Setup Setup `cmd:"setup" view:"add-fields"`
-
 	// the configuration options for the log command
 	Log Log `cmd:"log" view:"add-fields"`
 
@@ -95,12 +92,6 @@ type Pack struct { //gti:add
 	// whether to build a .dmg file on macOS in addition to a .app file.
 	// This is automatically disabled for the install command.
 	DMG bool `default:"true"`
-}
-
-type Setup struct { //gti:add
-
-	// the platform to set things up for
-	Platform Platform `posarg:"0"`
 }
 
 type Log struct { //gti:add

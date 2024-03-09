@@ -23,3 +23,5 @@ var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/core/cmd.Release", Doc:
 var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/core/cmd.NextRelease", Doc: "NextRelease releases the project with the current git version\ntag incremented by one patch version.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
 
 var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/core/cmd.Run", Doc: "Run builds and runs the config package. It also displays the logs generated\nby the app. It uses the same config info as build.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
+
+var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/core/cmd.Setup", Doc: "Setup installs platform-specific dependencies for the current platform.\nIt only needs to be called once per system.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})

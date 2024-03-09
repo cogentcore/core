@@ -3,9 +3,7 @@
 package config
 
 import (
-	"errors"
 	"log"
-	"strconv"
 
 	"cogentcore.org/core/enums"
 )
@@ -15,29 +13,18 @@ var _TypesValues = []Types{0, 1}
 // TypesN is the highest valid value for type Types, plus one.
 const TypesN Types = 2
 
-var _TypesNameToValueMap = map[string]Types{`App`: 0, `Library`: 1}
+var _TypesValueMap = map[string]Types{`App`: 0, `Library`: 1}
 
 var _TypesDescMap = map[Types]string{0: `TypeApp is an executable app`, 1: `TypeLibrary is an importable library`}
 
 var _TypesMap = map[Types]string{0: `App`, 1: `Library`}
 
 // String returns the string representation of this Types value.
-func (i Types) String() string {
-	if str, ok := _TypesMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+func (i Types) String() string { return enums.String(i, _TypesMap) }
 
 // SetString sets the Types value from its string representation,
 // and returns an error if the string is invalid.
-func (i *Types) SetString(s string) error {
-	if val, ok := _TypesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type Types")
-}
+func (i *Types) SetString(s string) error { return enums.SetString(i, s, _TypesValueMap, "Types") }
 
 // Int64 returns the Types value as an int64.
 func (i Types) Int64() int64 { return int64(i) }
