@@ -49,6 +49,10 @@ func Setup(c *config.Config) error { //gti:add
 	case "linux":
 		_, err := exec.LookPath("apt-get")
 		if err == nil {
+			err := vc.Run("sudo", "apt-get", "update")
+			if err != nil {
+				return err
+			}
 			return vc.Run("sudo", "apt-get", "install", "libgl1-mesa-dev", "xorg-dev")
 		}
 		_, err = exec.LookPath("dnf")
