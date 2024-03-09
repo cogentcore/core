@@ -40,7 +40,7 @@ func Setup(c *config.Config) error { //gti:add
 			return err
 		}
 		root := filepath.Join(home, "VulkanSDK", "1.3.261.1")
-		err = vc.Run("sudo", "/Volumes/vulkansdk-macos-1.3.261.1/InstallVulkan.app/Contents/MacOS/InstallVulkan", "--root", root, "--accept-licenses", "--default-answer", "--confirm-command", "install")
+		err = vc.Run("sudo", "/Volumes/vulkansdk-macos-1.3.261.1/InstallVulkan.app/Contents/MacOS/InstallVulkan", "--root", root, "--accept-licenses", "--default-answer", "--confirm-command", "install", "com.lunarg.vulkan.core", "com.lunarg.vulkan.usr", "com.lunarg.vulkan.sdl2", "com.lunarg.vulkan.glm", "com.lunarg.vulkan.volk", "com.lunarg.vulkan.vma")
 		if err != nil {
 			return err
 		}
