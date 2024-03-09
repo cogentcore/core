@@ -138,8 +138,8 @@ func (sv *StructView) UpdateField(field string) {
 	sv.NeedsRender()
 }
 
-// ConfigWidget configures the view
-func (sv *StructView) ConfigWidget() {
+// Config configures the view
+func (sv *StructView) Config() {
 	if ks, ok := sv.Struct.(ki.Ki); ok {
 		if ks == nil || ks.This() == nil {
 			return
@@ -324,7 +324,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 		}
 		if wb.Prop("configured") == nil {
 			wb.SetProp("configured", true)
-			vv.ConfigWidget(w)
+			vv.Config(w)
 			vvb.AsWidgetBase().OnInput(func(e events.Event) {
 				if tag, _ := vv.Tag("immediate"); tag == "+" {
 					wb.SendChange(e)

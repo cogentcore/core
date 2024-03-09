@@ -147,10 +147,10 @@ func (wb *WidgetBase) NeedsRebuild() bool {
 ///////////////////////////////////////////////////////////////
 // 	Config
 
-// ConfigWidget is the interface method called by Config that
+// Config is the interface method called by Config that
 // should be defined for each Widget type, which actually does
 // the configuration work.
-func (wb *WidgetBase) ConfigWidget() {
+func (wb *WidgetBase) Config() {
 	// this must be defined for each widget type
 }
 
@@ -178,7 +178,7 @@ func (wb *WidgetBase) ConfigTree() {
 	}
 	pr := prof.Start(wb.This().KiType().ShortName())
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
-		wi.ConfigWidget()
+		wi.Config()
 		return ki.Continue
 	})
 	pr.End()
@@ -203,7 +203,7 @@ func (wb *WidgetBase) Update() {
 		fmt.Println("\tDebugSettings.UpdateTrace Update:", wb)
 	}
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
-		wi.ConfigWidget()
+		wi.Config()
 		wi.ApplyStyle()
 		return ki.Continue
 	})

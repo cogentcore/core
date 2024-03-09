@@ -376,13 +376,13 @@ func (vv *StructValue) UpdateWidget() {
 	bt.Update()
 }
 
-func (vv *StructValue) ConfigWidget(w gi.Widget) {
+func (vv *StructValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
@@ -431,13 +431,13 @@ func (vv *StructInlineValue) UpdateWidget() {
 	sv.SetStruct(cst)
 }
 
-func (vv *StructInlineValue) ConfigWidget(w gi.Widget) {
+func (vv *StructInlineValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 	sv := vv.Widget.(*StructViewInline)
 	sv.Tooltip = vv.Doc()
 	sv.StructValView = vv
@@ -501,14 +501,14 @@ func (vv *SliceValue) GetTypeInfo() {
 	}
 }
 
-func (vv *SliceValue) ConfigWidget(w gi.Widget) {
+func (vv *SliceValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
 	vv.GetTypeInfo()
 	vv.Widget = w
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
 	bt.Icon = icons.Edit
@@ -573,13 +573,13 @@ func (vv *SliceInlineValue) UpdateWidget() {
 	}
 }
 
-func (vv *SliceInlineValue) ConfigWidget(w gi.Widget) {
+func (vv *SliceInlineValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 	sv := vv.Widget.(*SliceViewInline)
 	sv.Tooltip = vv.Doc()
 	sv.SliceValue = vv
@@ -626,13 +626,13 @@ func (vv *MapValue) UpdateWidget() {
 	bt.SetText(txt).Update()
 }
 
-func (vv *MapValue) ConfigWidget(w gi.Widget) {
+func (vv *MapValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
 	bt.Icon = icons.Edit
@@ -680,13 +680,13 @@ func (vv *MapInlineValue) UpdateWidget() {
 	}
 }
 
-func (vv *MapInlineValue) ConfigWidget(w gi.Widget) {
+func (vv *MapInlineValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 	sv := vv.Widget.(*MapViewInline)
 	sv.Tooltip = vv.Doc()
 	sv.MapValView = vv
@@ -744,13 +744,13 @@ func (vv *KiValue) UpdateWidget() {
 	bt.SetText(path).Update()
 }
 
-func (vv *KiValue) ConfigWidget(w gi.Widget) {
+func (vv *KiValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
 	ConfigDialogWidget(vv, bt, true)
@@ -792,13 +792,13 @@ func (vv *BoolValue) UpdateWidget() {
 	cb.SetState(bv, states.Checked)
 }
 
-func (vv *BoolValue) ConfigWidget(w gi.Widget) {
+func (vv *BoolValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 	cb := vv.Widget.(*gi.Switch)
 	cb.Tooltip = vv.Doc()
 	cb.OnFinal(events.Change, func(e events.Event) {
@@ -834,13 +834,13 @@ func (vv *IntValue) UpdateWidget() {
 	}
 }
 
-func (vv *IntValue) ConfigWidget(w gi.Widget) {
+func (vv *IntValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 	sb := vv.Widget.(*gi.Spinner)
 	sb.Tooltip = vv.Doc()
 	sb.Step = 1.0
@@ -913,13 +913,13 @@ func (vv *FloatValue) UpdateWidget() {
 	}
 }
 
-func (vv *FloatValue) ConfigWidget(w gi.Widget) {
+func (vv *FloatValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 	sb := vv.Widget.(*gi.Spinner)
 	sb.Tooltip = vv.Doc()
 	sb.PageStep = 10.0
@@ -986,13 +986,13 @@ func (vv *SliderValue) UpdateWidget() {
 	}
 }
 
-func (vv *SliderValue) ConfigWidget(w gi.Widget) {
+func (vv *SliderValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 	sl := vv.Widget.(*gi.Slider)
 	sl.Tooltip = vv.Doc()
 
@@ -1070,13 +1070,13 @@ func (vv *EnumValue) UpdateWidget() {
 	// }
 }
 
-func (vv *EnumValue) ConfigWidget(w gi.Widget) {
+func (vv *EnumValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 	ch := vv.Widget.(*gi.Chooser)
 	ch.Tooltip = vv.Doc()
 
@@ -1129,7 +1129,7 @@ func (vv *BitFlagValue) UpdateWidget() {
 	sw.UpdateFromBitFlag(ev)
 }
 
-func (vv *BitFlagValue) ConfigWidget(w gi.Widget) {
+func (vv *BitFlagValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -1172,13 +1172,13 @@ func (vv *TypeValue) UpdateWidget() {
 	}
 }
 
-func (vv *TypeValue) ConfigWidget(w gi.Widget) {
+func (vv *TypeValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 	cb := vv.Widget.(*gi.Chooser)
 	cb.Tooltip = vv.Doc()
 
@@ -1225,7 +1225,7 @@ func (vv *ByteSliceValue) UpdateWidget() {
 	}
 }
 
-func (vv *ByteSliceValue) ConfigWidget(w gi.Widget) {
+func (vv *ByteSliceValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -1237,7 +1237,7 @@ func (vv *ByteSliceValue) ConfigWidget(w gi.Widget) {
 	tf.Style(func(s *styles.Style) {
 		s.Min.X.Ch(16)
 	})
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 
 	tf.OnFinal(events.Change, func(e events.Event) {
 		vv.SetValue(tf.Text())
@@ -1270,7 +1270,7 @@ func (vv *RuneSliceValue) UpdateWidget() {
 	}
 }
 
-func (vv *RuneSliceValue) ConfigWidget(w gi.Widget) {
+func (vv *RuneSliceValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -1281,7 +1281,7 @@ func (vv *RuneSliceValue) ConfigWidget(w gi.Widget) {
 	tf.Style(func(s *styles.Style) {
 		s.Min.X.Ch(16)
 	})
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 
 	tf.OnFinal(events.Change, func(e events.Event) {
 		vv.SetValue(tf.Text())
@@ -1310,13 +1310,13 @@ func (vv *NilValue) UpdateWidget() {
 	lb.SetText("None")
 }
 
-func (vv *NilValue) ConfigWidget(w gi.Widget) {
+func (vv *NilValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 	lb := vv.Widget.(*gi.Label)
 	lb.Tooltip = vv.Doc()
 	vv.UpdateWidget()
@@ -1358,13 +1358,13 @@ func (vv *IconValue) UpdateWidget() {
 	bt.Update()
 }
 
-func (vv *IconValue) ConfigWidget(w gi.Widget) {
+func (vv *IconValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
 	ConfigDialogWidget(vv, bt, false)
@@ -1415,13 +1415,13 @@ func (vv *FontValue) UpdateWidget() {
 	bt.SetText(txt).Update()
 }
 
-func (vv *FontValue) ConfigWidget(w gi.Widget) {
+func (vv *FontValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
 	bt.Style(func(s *styles.Style) {
@@ -1497,13 +1497,13 @@ func (vv *FileValue) UpdateWidget() {
 	}
 }
 
-func (vv *FileValue) ConfigWidget(w gi.Widget) {
+func (vv *FileValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
 	ConfigDialogWidget(vv, bt, false)
@@ -1552,13 +1552,13 @@ func (vv *FuncValue) UpdateWidget() {
 	fbt.SetFunc(fun)
 }
 
-func (vv *FuncValue) ConfigWidget(w gi.Widget) {
+func (vv *FuncValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 
 	fbt := vv.Widget.(*FuncButton)
 	fbt.Type = gi.ButtonTonal
@@ -1585,13 +1585,13 @@ func (vv *OptionValue) UpdateWidget() {
 	}
 }
 
-func (vv *OptionValue) ConfigWidget(w gi.Widget) {
+func (vv *OptionValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 
 	fr := vv.Widget.(*gi.Frame)
 

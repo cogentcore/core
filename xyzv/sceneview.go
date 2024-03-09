@@ -30,7 +30,7 @@ func (sv *SceneView) OnInit() {
 	})
 }
 
-func (sv *SceneView) ConfigWidget() {
+func (sv *SceneView) Config() {
 	sv.ConfigSceneView()
 }
 

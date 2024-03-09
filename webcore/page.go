@@ -141,7 +141,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	fr.Update()
 }
 
-func (pg *Page) ConfigWidget() {
+func (pg *Page) Config() {
 	if pg.HasChildren() {
 		return
 	}

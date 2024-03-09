@@ -289,7 +289,7 @@ func (lb *Label) Label() string {
 
 // ConfigLabel does the HTML and Layout in TextRender for label text,
 // using actual content size to constrain layout.
-func (lb *Label) ConfigWidget() {
+func (lb *Label) Config() {
 	lb.ConfigLabelSize(lb.Geom.Size.Actual.Content)
 }
 

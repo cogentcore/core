@@ -46,13 +46,13 @@ func (vv *ColorMapValue) UpdateWidget() {
 	vv.AsWidgetBase().NeedsRender()
 }
 
-func (vv *ColorMapValue) ConfigWidget(w gi.Widget) {
+func (vv *ColorMapValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 	fr := vv.Widget.(*gi.Frame)
 	fr.HandleClickOnEnterSpace()
 	ConfigDialogWidget(vv, fr, false)

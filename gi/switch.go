@@ -287,7 +287,7 @@ func (sw *Switch) ClearIcons() *Switch {
 	return sw
 }
 
-func (sw *Switch) ConfigWidget() {
+func (sw *Switch) Config() {
 	config := ki.Config{}
 	if sw.IconOn == "" {
 		sw.IconOn = icons.ToggleOn.Fill() // fallback

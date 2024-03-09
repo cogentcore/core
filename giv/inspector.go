@@ -196,11 +196,11 @@ func (is *Inspector) SetRoot(root ki.Ki) {
 		is.KiRoot = root
 		// ge.GetAllUpdates(root)
 	}
-	is.ConfigWidget()
+	is.Config()
 }
 
-// ConfigWidget configures the widget
-func (is *Inspector) ConfigWidget() {
+// Config configures the widget
+func (is *Inspector) Config() {
 	if is.KiRoot == nil {
 		return
 	}

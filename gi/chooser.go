@@ -235,7 +235,7 @@ func (ch *Chooser) SetStyles() {
 	})
 }
 
-func (ch *Chooser) ConfigWidget() {
+func (ch *Chooser) Config() {
 	config := ki.Config{}
 
 	ici := -1
@@ -276,14 +276,14 @@ func (ch *Chooser) ConfigWidget() {
 			tx.SetTrailingIcon(ch.Indicator, func(e events.Event) {
 				ch.OpenMenu(e)
 			})
-			tx.ConfigWidget() // this is essential
+			tx.Config() // this is essential
 			if !ch.DefaultNew {
 				tx.SetCompleter(tx, ch.CompleteMatch, ch.CompleteEdit)
 			}
 		} else {
 			lbl := ch.Parts.Child(lbi).(*Label)
 			lbl.SetText(ch.CurrentItem.GetLabel())
-			lbl.ConfigWidget() // this is essential
+			lbl.Config() // this is essential
 
 			ic := ch.Parts.Child(indi).(*Icon)
 			ic.SetIcon(ch.Indicator)
@@ -457,7 +457,7 @@ func (ch *Chooser) ShowCurrentItem() *Chooser {
 	} else {
 		lbl := ch.LabelWidget()
 		if lbl != nil {
-			lbl.SetText(ch.CurrentItem.GetLabel()).ConfigWidget()
+			lbl.SetText(ch.CurrentItem.GetLabel()).Config()
 		}
 	}
 	if ch.CurrentItem.Icon.IsSet() {

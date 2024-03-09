@@ -280,6 +280,6 @@ func (sw *Switches) ConfigSwitches() {
 	}
 }
 
-func (sw *Switches) ConfigWidget() {
+func (sw *Switches) Config() {
 	sw.ConfigSwitches()
 }

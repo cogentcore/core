@@ -390,7 +390,7 @@ func (ts *Tabs) RecycleTabWidget(name string, sel bool, typ *gti.Type) Widget {
 		return wi
 	}
 	wi, _ := AsWidget(fr.NewChild(typ, fr.Nm))
-	wi.ConfigWidget()
+	wi.Config()
 	return wi
 }
 
@@ -454,11 +454,11 @@ func (ts *Tabs) ConfigNewTabButton() bool {
 	}
 }
 
-// ConfigWidget configures the tabs widget children if necessary.
+// Config configures the tabs widget children if necessary.
 // Only the 2 primary children (Frames) need to be configured.
 // Re-config is needed when the type of tabs changes, but not
 // when a new tab is added, which only requires a new layout pass.
-func (ts *Tabs) ConfigWidget() {
+func (ts *Tabs) Config() {
 	config := ki.Config{}
 	// frame only comes before tabs in bottom nav bar
 	if ts.Type.Effective(ts) == NavigationBar {
@@ -477,14 +477,14 @@ func (ts *Tabs) ConfigWidget() {
 // Tabs returns the layout containing the tabs (the first element within us).
 // It configures the Tabs if necessary.
 func (ts *Tabs) Tabs() *Frame {
-	ts.ConfigWidget()
+	ts.Config()
 	return ts.ChildByName("tabs", 0).(*Frame)
 }
 
 // Frame returns the stacked frame layout (the second element within us).
 // It configures the Tabs if necessary.
 func (ts *Tabs) Frame() *Frame {
-	ts.ConfigWidget()
+	ts.Config()
 	return ts.ChildByName("frame", 1).(*Frame)
 }
 
@@ -633,7 +633,7 @@ func (tb *Tab) Tabs() *Tabs {
 	return AsTabs(ts)
 }
 
-func (tb *Tab) ConfigWidget() {
+func (tb *Tab) Config() {
 	config := ki.Config{}
 	if tb.MaxChars > 0 {
 		tb.Text = elide.Middle(tb.Text, tb.MaxChars)

@@ -83,13 +83,13 @@ func (vv *KeyMapValue) UpdateWidget() {
 	bt.SetText(txt).Update()
 }
 
-func (vv *KeyMapValue) ConfigWidget(w gi.Widget) {
+func (vv *KeyMapValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
 	ConfigDialogWidget(vv, bt, false)

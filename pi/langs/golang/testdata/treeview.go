@@ -491,7 +491,7 @@ func (tv *TreeView) LabelPart() (*gi.Label, bool) {
 	return nil, false
 }
 
-func (tv *TreeView) ConfigWidget() {
+func (tv *TreeView) Config() {
 	parts := tv.NewParts()
 	config := ki.Config{}
 	config.Add(gi.SwitchType, "branch")

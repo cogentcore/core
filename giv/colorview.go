@@ -66,8 +66,8 @@ func (cv *ColorView) OnInit() {
 	cv.Frame.OnInit()
 }
 
-// ConfigWidget configures a standard setup of entire view
-func (cv *ColorView) ConfigWidget() {
+// Config configures a standard setup of entire view
+func (cv *ColorView) Config() {
 	if cv.HasChildren() {
 		return
 	}
@@ -199,7 +199,7 @@ func (cv *ColorView) SetColor(clr color.Color) *ColorView {
 }
 
 // Config configures a standard setup of entire view
-func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
+func (cv *ColorView) Config(sc *gi.Scene) {
 	if cv.HasChildren() {
 		return
 	}
@@ -581,7 +581,7 @@ func (vv *ColorValue) UpdateWidget() {
 	bt.NeedsRender()
 }
 
-func (vv *ColorValue) ConfigWidget(w gi.Widget) {
+func (vv *ColorValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -591,7 +591,7 @@ func (vv *ColorValue) ConfigWidget(w gi.Widget) {
 		vv.TmpSave = vv
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
@@ -655,13 +655,13 @@ func (vv *ColorNameValue) UpdateWidget() {
 	bt.SetText(txt)
 }
 
-func (vv *ColorNameValue) ConfigWidget(w gi.Widget) {
+func (vv *ColorNameValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
 	ConfigDialogWidget(vv, bt, false)

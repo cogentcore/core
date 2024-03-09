@@ -22,7 +22,7 @@ func main() {
 	b := gi.NewBody("XYZ Object Viewer")
 
 	sv := xyzv.NewSceneView(b)
-	sv.ConfigWidget()
+	sv.Config()
 	sc := sv.SceneXYZ()
 
 	// first, add lights, set camera

@@ -128,7 +128,7 @@ func (sv *SliceViewInline) SetSlice(sl any) *SliceViewInline {
 	return sv
 }
 
-func (sv *SliceViewInline) ConfigWidget() {
+func (sv *SliceViewInline) Config() {
 	sv.DeleteChildren()
 	if laser.AnyIsNil(sv.Slice) {
 		sv.ConfigSize = 0
@@ -168,7 +168,7 @@ func (sv *SliceViewInline) ConfigWidget() {
 		if sv.SliceValue != nil {
 			vv.SetTags(sv.SliceValue.AllTags())
 		}
-		vv.ConfigWidget(w)
+		vv.Config(w)
 		wb := w.AsWidget()
 		wb.OnInput(func(e events.Event) {
 			if tag, _ := vv.Tag("immediate"); tag == "+" {

@@ -471,7 +471,7 @@ func (vv *VersCtrlValue) UpdateWidget() {
 	bt.SetText(txt).Update()
 }
 
-func (vv *VersCtrlValue) ConfigWidget(w gi.Widget) {
+func (vv *VersCtrlValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return

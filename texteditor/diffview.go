@@ -489,7 +489,7 @@ func (dv *DiffView) UndoDiff(ab int) error {
 	return nil
 }
 
-func (dv *DiffView) ConfigWidget() {
+func (dv *DiffView) Config() {
 	dv.ConfigDiffView()
 }
 

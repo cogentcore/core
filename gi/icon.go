@@ -64,7 +64,7 @@ func (ic *Icon) SetIcon(icon icons.Icon) *Icon {
 func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
 	if icon.IsNil() {
 		ic.SVG.DeleteAll()
-		ic.ConfigWidget()
+		ic.Config()
 		return false, nil
 	}
 	if ic.SVG.Root.HasChildren() && ic.Icon == icon {
@@ -75,7 +75,7 @@ func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
 	ic.SVG.Config(2, 2)
 	err := ic.SVG.OpenFS(icons.Icons, fnm)
 	if err != nil {
-		ic.ConfigWidget()
+		ic.Config()
 		return false, err
 	}
 	ic.Icon = icon

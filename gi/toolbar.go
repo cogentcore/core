@@ -61,7 +61,7 @@ func (tb *Toolbar) AppChooser() *Chooser {
 	return ch
 }
 
-func (tb *Toolbar) ConfigWidget() {
+func (tb *Toolbar) Config() {
 	if len(tb.Kids) == 0 {
 		if len(tb.ToolbarFuncs) > 0 {
 			for _, f := range tb.ToolbarFuncs {
@@ -69,7 +69,7 @@ func (tb *Toolbar) ConfigWidget() {
 			}
 		}
 	}
-	tb.Frame.ConfigWidget()
+	tb.Frame.Config()
 }
 
 func (tb *Toolbar) SizeUp() {
@@ -189,7 +189,7 @@ func (tb *Toolbar) OverflowMenu(m *Scene) {
 			}
 			cl := k.This().Clone()
 			m.AddChild(cl)
-			cl.This().(Widget).ConfigWidget()
+			cl.This().(Widget).Config()
 		}
 		if nm > 1 { // default includes sep
 			NewSeparator(m)

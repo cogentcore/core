@@ -333,7 +333,7 @@ func (bt *Button) HandleEvents() {
 	})
 }
 
-func (bt *Button) ConfigWidget() {
+func (bt *Button) Config() {
 	config := ki.Config{}
 
 	// we check if the icons are unset, not if they are nil, so

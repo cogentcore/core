@@ -82,7 +82,7 @@ func (sw *Scene) HandleEvents() {
 	sw.HandleSelectEvents()
 }
 
-func (sw *Scene) ConfigWidget() {
+func (sw *Scene) Config() {
 	sw.ConfigFrame()
 }
 

@@ -63,8 +63,8 @@ func (av *ArgView) SetStyles() {
 	})
 }
 
-// ConfigWidget configures the view
-func (av *ArgView) ConfigWidget() {
+// Config configures the view
+func (av *ArgView) Config() {
 	config := ki.Config{}
 	config.Add(gi.LabelType, "title")
 	config.Add(gi.FrameType, "args-grid")
@@ -123,7 +123,7 @@ func (av *ArgView) ConfigArgsGrid() {
 		w, wb := gi.AsWidget(sg.Child((idx * 2) + 1))
 		if wb.Prop("configured") == nil {
 			wb.SetProp("configured", true)
-			arg.ConfigWidget(w)
+			arg.Config(w)
 		} else {
 			arg.AsValueBase().Widget = w
 			arg.UpdateWidget()

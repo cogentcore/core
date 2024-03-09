@@ -38,13 +38,13 @@ func (vv *Value) UpdateWidget() {
 	bt.SetText(txt)
 }
 
-func (vv *Value) ConfigWidget(w gi.Widget) {
+func (vv *Value) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
 	giv.ConfigDialogWidget(vv, bt, false)

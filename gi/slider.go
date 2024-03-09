@@ -475,7 +475,7 @@ func (sr *Slider) HandleKeys() {
 ///////////////////////////////////////////////////////////
 // 	Config
 
-func (sr *Slider) ConfigWidget() {
+func (sr *Slider) Config() {
 	if sr.Icon.IsNil() {
 		if sr.Parts != nil {
 			sr.DeleteParts()

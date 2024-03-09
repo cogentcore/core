@@ -240,7 +240,7 @@ func (sl *Splits) SetSplitAction(idx int, nwval float32) {
 	sl.NeedsLayout()
 }
 
-func (sl *Splits) ConfigWidget() {
+func (sl *Splits) Config() {
 	sl.UpdateSplits()
 	sl.ConfigSplitters()
 }

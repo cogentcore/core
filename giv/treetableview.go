@@ -21,7 +21,7 @@ type TreeTableView struct {
 	Table *TableView `set:"-"`
 }
 
-func (tt *TreeTableView) ConfigWidget() {
+func (tt *TreeTableView) Config() {
 	if tt.HasChildren() {
 		return
 	}

@@ -97,8 +97,8 @@ func (mv *MapView) UpdateValues() {
 	mv.Update()
 }
 
-// ConfigWidget configures the view
-func (mv *MapView) ConfigWidget() {
+// Config configures the view
+func (mv *MapView) Config() {
 	if !mv.HasChildren() {
 		gi.NewFrame(mv, "map-grid")
 	}
@@ -225,8 +225,8 @@ func (mv *MapView) ConfigMapGrid() {
 		})
 		keyw := sg.Child(i * ncol).(gi.Widget)
 		w := sg.Child(i*ncol + 1).(gi.Widget)
-		kv.ConfigWidget(keyw)
-		vv.ConfigWidget(w)
+		kv.Config(keyw)
+		vv.Config(w)
 		vvb.AsWidgetBase().OnInput(mv.HandleEvent)
 		kvb.AsWidgetBase().OnInput(mv.HandleEvent)
 		w.Style(func(s *styles.Style) {

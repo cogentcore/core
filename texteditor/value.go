@@ -34,13 +34,13 @@ func (vv *Value) UpdateWidget() {
 	te.Buf.SetText([]byte(npv.String()))
 }
 
-func (vv *Value) ConfigWidget(w gi.Widget) {
+func (vv *Value) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 
 	tb := NewBuf()
 	grr.Log(tb.Stat())

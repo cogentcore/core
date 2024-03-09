@@ -49,7 +49,7 @@ type Widget interface {
 	// after this, respectively.
 	Update()
 
-	// ConfigWidget configures the widget, primarily configuring its Parts.
+	// Config configures the widget, typically primarily configuring its Parts.
 	// it does not call Config on its children, just on itself.
 	// ApplyStyle must generally be called after Config; it is called
 	// automatically when the Scene is first shown, but must be called
@@ -57,7 +57,7 @@ type Widget interface {
 	// See Update for a convenience function that does both and also
 	// triggers a new layout pass. ConfigScene on Scene handles the full
 	// tree configuration.
-	ConfigWidget()
+	Config()
 
 	// StateIs returns whether the widget has the given [states.States] flag set
 	StateIs(flag states.States) bool

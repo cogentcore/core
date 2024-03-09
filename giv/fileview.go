@@ -255,7 +255,7 @@ var FileViewKindColorMap = map[string]string{
 	"folder": "pref(link)",
 }
 
-func (fv *FileView) ConfigWidget() {
+func (fv *FileView) Config() {
 	fv.ConfigFileView()
 }
 

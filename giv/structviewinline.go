@@ -66,7 +66,7 @@ func (sv *StructViewInline) SetStruct(st any) *StructViewInline {
 	return sv
 }
 
-func (sv *StructViewInline) ConfigWidget() {
+func (sv *StructViewInline) Config() {
 	if laser.AnyIsNil(sv.Struct) {
 		return
 	}
@@ -147,7 +147,7 @@ func (sv *StructViewInline) ConfigWidget() {
 		}
 		if wb.Prop("configured") == nil {
 			wb.SetProp("configured", true)
-			vv.ConfigWidget(w)
+			vv.Config(w)
 			vvb.AsWidgetBase().OnInput(sv.HandleEvent)
 		} else {
 			vvb.Widget = w

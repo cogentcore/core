@@ -102,7 +102,7 @@ func (ly *Layout) OnInit() {
 	ly.HandleEvents()
 }
 
-func (ly *Layout) ConfigWidget() {
+func (ly *Layout) Config() {
 	for d := mat32.X; d <= mat32.Y; d++ {
 		if ly.HasScroll[d] && ly.Scrolls[d] != nil {
 			ly.Scrolls[d].ApplyStyle()

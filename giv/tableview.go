@@ -219,8 +219,8 @@ func (tv *TableView) CacheVisFields() {
 	tv.NVisFields = len(tv.VisFields)
 }
 
-// ConfigWidget configures the view
-func (tv *TableView) ConfigWidget() {
+// Config configures the view
+func (tv *TableView) Config() {
 	tv.ConfigTableView()
 }
 
@@ -391,7 +391,7 @@ func (tv *TableView) ConfigRows() {
 			cidx := ridx + idxOff + fli
 			w := ki.NewOfType(vtyp).(gi.Widget)
 			sg.SetChild(w, cidx, valnm)
-			vv.ConfigWidget(w)
+			vv.Config(w)
 			w.SetProp(SliceViewRowProp, i)
 			w.SetProp(SliceViewColProp, fli)
 
@@ -471,7 +471,7 @@ func (tv *TableView) UpdateWidgets() {
 				break
 			}
 			idxlab = sg.Kids[ridx].(*gi.Label)
-			idxlab.SetText(strconv.Itoa(si)).ConfigWidget()
+			idxlab.SetText(strconv.Itoa(si)).Config()
 			idxlab.SetState(invis, states.Invisible)
 		}
 

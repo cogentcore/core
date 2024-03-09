@@ -106,7 +106,7 @@ func (mv *MapViewInline) SetMap(mp any) *MapViewInline {
 	return mv
 }
 
-func (mv *MapViewInline) ConfigWidget() {
+func (mv *MapViewInline) Config() {
 	mv.DeleteChildren()
 	if laser.AnyIsNil(mv.Map) {
 		mv.ConfigSize = 0
@@ -165,8 +165,8 @@ func (mv *MapViewInline) ConfigWidget() {
 		kw, kwb := gi.AsWidget(mv.Child(i * 2))
 		// TODO: is this configured logic right?
 		if wb.Prop("configured") == nil {
-			vv.ConfigWidget(w)
-			kv.ConfigWidget(kw)
+			vv.Config(w)
+			kv.Config(kw)
 			vvb.AsWidgetBase().OnInput(mv.HandleEvent)
 			kvb.AsWidgetBase().OnInput(mv.HandleEvent)
 			w.Style(func(s *styles.Style) {

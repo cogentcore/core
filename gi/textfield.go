@@ -1717,7 +1717,7 @@ func (tf *TextField) HandleKeyEvents() {
 	})
 }
 
-func (tf *TextField) ConfigWidget() {
+func (tf *TextField) Config() {
 	config := ki.Config{}
 
 	tf.EditTxt = []rune(tf.Txt)

@@ -51,7 +51,7 @@ func (tv *TimeView) SetTime(tim time.Time) *TimeView {
 	return tv
 }
 
-func (tv *TimeView) ConfigWidget() {
+func (tv *TimeView) Config() {
 	if tv.HasChildren() {
 		return
 	}
@@ -183,7 +183,7 @@ func (dv *DateView) SetTime(tim time.Time) *DateView {
 	return dv
 }
 
-func (dv *DateView) ConfigWidget() {
+func (dv *DateView) Config() {
 	if dv.HasChildren() {
 		dv.DeleteChildren()
 	} else {
@@ -349,7 +349,7 @@ func (vv *TimeValue) UpdateWidget() {
 	fr.ChildByName("time").(*gi.TextField).SetText(tm.Format(gi.SystemSettings.TimeFormat()))
 }
 
-func (vv *TimeValue) ConfigWidget(w gi.Widget) {
+func (vv *TimeValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -359,7 +359,7 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget) {
 		vv.TmpSave = vv
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 	ly := vv.Widget.(*gi.Layout)
 	if len(ly.Kids) > 0 {
 		return
@@ -498,13 +498,13 @@ func (vv *DurationValue) UpdateWidget() {
 	ly.ChildByName("unit").(*gi.Chooser).SetCurrentValue(un)
 }
 
-func (vv *DurationValue) ConfigWidget(w gi.Widget) {
+func (vv *DurationValue) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 	ly := vv.Widget.(*gi.Layout)
 
 	if len(ly.Kids) > 0 {

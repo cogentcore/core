@@ -49,9 +49,9 @@ func (vv *MeshValue) UpdateWidget() {
 	bt.Update()
 }
 
-func (vv *MeshValue) ConfigWidget(widg gi.Widget) {
+func (vv *MeshValue) Config(widg gi.Widget) {
 	vv.Widget = widg
-	vv.StdConfigWidget(widg)
+	vv.StdConfig(widg)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
 	giv.ConfigDialogWidget(vv, bt, false)
@@ -131,7 +131,7 @@ func (vv *TexValue) UpdateWidget() {
 	ac.SetText(txt)
 }
 
-func (vv *TexValue) ConfigWidget(widg gi.Node2D) {
+func (vv *TexValue) Config(widg gi.Node2D) {
 	vv.Widget = widg
 	ac := vv.Widget.(*gi.Button)
 	ac.SetProp("border-radius", units.NewPx(4))

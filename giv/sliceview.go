@@ -558,8 +558,8 @@ func (sv *SliceViewBase) BindSelect(val *int) *SliceViewBase {
 	return sv
 }
 
-// ConfigWidget configures a standard setup of the overall Frame
-func (sv *SliceViewBase) ConfigWidget() {
+// Config configures a standard setup of the overall Frame
+func (sv *SliceViewBase) Config() {
 	sv.ConfigSliceView()
 }
 
@@ -722,7 +722,7 @@ func (sv *SliceViewBase) ConfigRows() {
 
 		w := ki.NewOfType(vtyp).(gi.Widget)
 		sg.SetChild(w, ridx+idxOff, valnm)
-		vv.ConfigWidget(w)
+		vv.Config(w)
 		w.SetProp(SliceViewRowProp, i)
 
 		if !sv.IsReadOnly() {
@@ -798,7 +798,7 @@ func (sv *SliceViewBase) UpdateWidgets() {
 		var idxlab *gi.Label
 		if sv.Is(SliceViewShowIndex) {
 			idxlab = sg.Kids[ridx].(*gi.Label)
-			idxlab.SetText(strconv.Itoa(si)).ConfigWidget()
+			idxlab.SetText(strconv.Itoa(si)).Config()
 			idxlab.SetState(invis, states.Invisible)
 		}
 		w.SetState(invis, states.Invisible)

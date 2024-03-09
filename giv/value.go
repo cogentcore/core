@@ -36,7 +36,7 @@ import (
 func NewValue(par ki.Ki, val any, tags ...string) Value {
 	v := NewSoloValue(val, tags...)
 	w := par.NewChild(v.WidgetType()).(gi.Widget)
-	v.ConfigWidget(w)
+	v.Config(w)
 	return v
 }
 
@@ -165,12 +165,12 @@ type Value interface {
 	// no-widget context (e.g., for single-argument values with actions).
 	UpdateWidget()
 
-	// ConfigWidget configures a widget of WidgetType for representing the
+	// Config configures a widget of WidgetType for representing the
 	// value, including setting up the OnChange event listener to set the value
 	// when the user edits it (values are always set immediately when the
 	// widget is updated).  Note: use OnFinal(events.Change, ...) to ensure that
 	// any other change modifiers have had a chance to intervene first.
-	ConfigWidget(w gi.Widget)
+	Config(w gi.Widget)
 
 	// HasDialog returns true if this value has an associated Dialog,
 	// e.g., for Filename, StructView, SliceView, etc.
@@ -294,7 +294,7 @@ type ValueBase struct {
 	// type of widget to create -- cached during WidgetType method -- chosen based on the Value type and reflect.Value type -- see Valuer interface
 	WidgetTyp *gti.Type `set:"-" edit:"-"`
 
-	// the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget
+	// the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during Config
 	Widget gi.Widget `set:"-" edit:"-"`
 
 	// Listeners are event listener functions for processing events on this widget.
@@ -823,7 +823,7 @@ func (vv *ValueBase) UpdateWidget() {
 	}
 }
 
-func (vv *ValueBase) ConfigWidget(w gi.Widget) {
+func (vv *ValueBase) Config(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -839,7 +839,7 @@ func (vv *ValueBase) ConfigWidget(w gi.Widget) {
 	// 	s.Min.X.Ch(16)
 	// 	s.Min.Y.Em(1.4)
 	// })
-	vv.StdConfigWidget(w)
+	vv.StdConfig(w)
 	if completetag, ok := vv.Tag("complete"); ok {
 		// todo: this does not seem to be up-to-date and should use Completer interface..
 		in := []reflect.Value{reflect.ValueOf(tf)}
@@ -872,8 +872,8 @@ func (vv *ValueBase) ConfigWidget(w gi.Widget) {
 	vv.UpdateWidget()
 }
 
-// StdConfigWidget does all of the standard widget configuration tag options
-func (vv *ValueBase) StdConfigWidget(w gi.Widget) {
+// StdConfig does all of the standard widget configuration tag options
+func (vv *ValueBase) StdConfig(w gi.Widget) {
 	w.SetState(vv.IsReadOnly(), states.ReadOnly) // do right away
 	w.Style(func(s *styles.Style) {
 		w.SetState(vv.IsReadOnly(), states.ReadOnly) // and in style
