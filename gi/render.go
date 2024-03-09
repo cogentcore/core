@@ -195,7 +195,7 @@ func (wb *WidgetBase) ConfigTree() {
 // configuration, rendering, and event handling structure, you need to
 // call [WidgetBase.AsyncLock] and [WidgetBase.AsyncUnlock] before and
 // after this, respectively.
-func (wb *WidgetBase) Update() {
+func (wb *WidgetBase) Update() { //gti:add
 	if wb == nil || wb.This() == nil {
 		return
 	}

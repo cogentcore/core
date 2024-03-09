@@ -3,10 +3,8 @@
 package gi
 
 import (
-	"errors"
 	"fmt"
 	"log"
-	"strconv"
 	"strings"
 	"sync/atomic"
 
@@ -19,28 +17,19 @@ var _ButtonTypesValues = []ButtonTypes{0, 1, 2, 3, 4, 5, 6}
 // ButtonTypesN is the highest valid value for type ButtonTypes, plus one.
 const ButtonTypesN ButtonTypes = 7
 
-var _ButtonTypesNameToValueMap = map[string]ButtonTypes{`Filled`: 0, `Tonal`: 1, `Elevated`: 2, `Outlined`: 3, `Text`: 4, `Action`: 5, `Menu`: 6}
+var _ButtonTypesValueMap = map[string]ButtonTypes{`Filled`: 0, `Tonal`: 1, `Elevated`: 2, `Outlined`: 3, `Text`: 4, `Action`: 5, `Menu`: 6}
 
 var _ButtonTypesDescMap = map[ButtonTypes]string{0: `ButtonFilled is a filled button with a contrasting background color. It should be used for prominent actions, typically those that are the final in a sequence. It is equivalent to Material Design&#39;s filled button.`, 1: `ButtonTonal is a filled button, similar to [ButtonFilled]. It is used for the same purposes, but it has a lighter background color and less emphasis. It is equivalent to Material Design&#39;s filled tonal button.`, 2: `ButtonElevated is an elevated button with a light background color and a shadow. It is equivalent to Material Design&#39;s elevated button.`, 3: `ButtonOutlined is an outlined button that is used for secondary actions that are still important. It is equivalent to Material Design&#39;s outlined button.`, 4: `ButtonText is a low-importance button with no border, background color, or shadow when not being interacted with. It renders primary-colored text, and it renders a background color and shadow when hovered/focused/active. It should only be used for low emphasis actions, and you must ensure it stands out from the surrounding context sufficiently. It is equivalent to Material Design&#39;s text button, but it can also contain icons and other things.`, 5: `ButtonAction is a simple button that typically serves as a simple action among a series of other buttons (eg: in a toolbar), or as a part of another widget, like a spinner or snackbar. It has no border, background color, or shadow when not being interacted with. It inherits the text color of its parent, and it renders a background when hovered/focused/active. you must ensure it stands out from the surrounding context sufficiently. It is equivalent to Material Design&#39;s icon button, but it can also contain text and other things (and frequently does).`, 6: `ButtonMenu is similar to [ButtonAction], but it is only for buttons located in popup menus.`}
 
 var _ButtonTypesMap = map[ButtonTypes]string{0: `Filled`, 1: `Tonal`, 2: `Elevated`, 3: `Outlined`, 4: `Text`, 5: `Action`, 6: `Menu`}
 
 // String returns the string representation of this ButtonTypes value.
-func (i ButtonTypes) String() string {
-	if str, ok := _ButtonTypesMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+func (i ButtonTypes) String() string { return enums.String(i, _ButtonTypesMap) }
 
 // SetString sets the ButtonTypes value from its string representation,
 // and returns an error if the string is invalid.
 func (i *ButtonTypes) SetString(s string) error {
-	if val, ok := _ButtonTypesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type ButtonTypes")
+	return enums.SetString(i, s, _ButtonTypesValueMap, "ButtonTypes")
 }
 
 // Int64 returns the ButtonTypes value as an int64.
@@ -87,28 +76,19 @@ var _ChooserTypesValues = []ChooserTypes{0, 1}
 // ChooserTypesN is the highest valid value for type ChooserTypes, plus one.
 const ChooserTypesN ChooserTypes = 2
 
-var _ChooserTypesNameToValueMap = map[string]ChooserTypes{`Filled`: 0, `Outlined`: 1}
+var _ChooserTypesValueMap = map[string]ChooserTypes{`Filled`: 0, `Outlined`: 1}
 
 var _ChooserTypesDescMap = map[ChooserTypes]string{0: `ChooserFilled represents a filled Chooser with a background color and a bottom border`, 1: `ChooserOutlined represents an outlined Chooser with a border on all sides and no background color`}
 
 var _ChooserTypesMap = map[ChooserTypes]string{0: `Filled`, 1: `Outlined`}
 
 // String returns the string representation of this ChooserTypes value.
-func (i ChooserTypes) String() string {
-	if str, ok := _ChooserTypesMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+func (i ChooserTypes) String() string { return enums.String(i, _ChooserTypesMap) }
 
 // SetString sets the ChooserTypes value from its string representation,
 // and returns an error if the string is invalid.
 func (i *ChooserTypes) SetString(s string) error {
-	if val, ok := _ChooserTypesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type ChooserTypes")
+	return enums.SetString(i, s, _ChooserTypesValueMap, "ChooserTypes")
 }
 
 // Int64 returns the ChooserTypes value as an int64.
@@ -155,28 +135,19 @@ var _CompleteSignalsValues = []CompleteSignals{0, 1}
 // CompleteSignalsN is the highest valid value for type CompleteSignals, plus one.
 const CompleteSignalsN CompleteSignals = 2
 
-var _CompleteSignalsNameToValueMap = map[string]CompleteSignals{`Select`: 0, `Extend`: 1}
+var _CompleteSignalsValueMap = map[string]CompleteSignals{`Select`: 0, `Extend`: 1}
 
 var _CompleteSignalsDescMap = map[CompleteSignals]string{0: `CompleteSelect means the user chose one of the possible completions`, 1: `CompleteExtend means user has requested that the seed extend if all completions have a common prefix longer than current seed`}
 
 var _CompleteSignalsMap = map[CompleteSignals]string{0: `Select`, 1: `Extend`}
 
 // String returns the string representation of this CompleteSignals value.
-func (i CompleteSignals) String() string {
-	if str, ok := _CompleteSignalsMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+func (i CompleteSignals) String() string { return enums.String(i, _CompleteSignalsMap) }
 
 // SetString sets the CompleteSignals value from its string representation,
 // and returns an error if the string is invalid.
 func (i *CompleteSignals) SetString(s string) error {
-	if val, ok := _CompleteSignalsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type CompleteSignals")
+	return enums.SetString(i, s, _CompleteSignalsValueMap, "CompleteSignals")
 }
 
 // Int64 returns the CompleteSignals value as an int64.
@@ -223,7 +194,7 @@ var _WidgetFlagsValues = []WidgetFlags{1}
 // WidgetFlagsN is the highest valid value for type WidgetFlags, plus one.
 const WidgetFlagsN WidgetFlags = 2
 
-var _WidgetFlagsNameToValueMap = map[string]WidgetFlags{`NeedsRender`: 1}
+var _WidgetFlagsValueMap = map[string]WidgetFlags{`NeedsRender`: 1}
 
 var _WidgetFlagsDescMap = map[WidgetFlags]string{1: `NeedsRender needs to be rendered on next render iteration`}
 
@@ -231,46 +202,19 @@ var _WidgetFlagsMap = map[WidgetFlags]string{1: `NeedsRender`}
 
 // String returns the string representation of this WidgetFlags value.
 func (i WidgetFlags) String() string {
-	str := ""
-	for _, ie := range ki.FlagsValues() {
-		if i.HasFlag(ie) {
-			ies := ie.BitIndexString()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}
-	for _, ie := range _WidgetFlagsValues {
-		if i.HasFlag(ie) {
-			ies := ie.BitIndexString()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}
-	return str
+	return enums.BitFlagStringExtended(i, _WidgetFlagsValues, ki.FlagsValues())
 }
 
 // BitIndexString returns the string representation of this WidgetFlags value
 // if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
 func (i WidgetFlags) BitIndexString() string {
-	if str, ok := _WidgetFlagsMap[i]; ok {
-		return str
-	}
-	return ki.Flags(i).BitIndexString()
+	return enums.BitIndexStringExtended[WidgetFlags, ki.Flags](i, _WidgetFlagsMap)
 }
 
 // SetString sets the WidgetFlags value from its string representation,
 // and returns an error if the string is invalid.
-func (i *WidgetFlags) SetString(s string) error {
-	*i = 0
-	return i.SetStringOr(s)
-}
+func (i *WidgetFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
 
 // SetStringOr sets the WidgetFlags value from its string representation
 // while preserving any bit flags already set, and returns an
@@ -278,7 +222,7 @@ func (i *WidgetFlags) SetString(s string) error {
 func (i *WidgetFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
-		if val, ok := _WidgetFlagsNameToValueMap[flg]; ok {
+		if val, ok := _WidgetFlagsValueMap[flg]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue
@@ -370,28 +314,19 @@ var _LabelTypesValues = []LabelTypes{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 1
 // LabelTypesN is the highest valid value for type LabelTypes, plus one.
 const LabelTypesN LabelTypes = 15
 
-var _LabelTypesNameToValueMap = map[string]LabelTypes{`DisplayLarge`: 0, `DisplayMedium`: 1, `DisplaySmall`: 2, `HeadlineLarge`: 3, `HeadlineMedium`: 4, `HeadlineSmall`: 5, `TitleLarge`: 6, `TitleMedium`: 7, `TitleSmall`: 8, `BodyLarge`: 9, `BodyMedium`: 10, `BodySmall`: 11, `LabelLarge`: 12, `LabelMedium`: 13, `LabelSmall`: 14}
+var _LabelTypesValueMap = map[string]LabelTypes{`DisplayLarge`: 0, `DisplayMedium`: 1, `DisplaySmall`: 2, `HeadlineLarge`: 3, `HeadlineMedium`: 4, `HeadlineSmall`: 5, `TitleLarge`: 6, `TitleMedium`: 7, `TitleSmall`: 8, `BodyLarge`: 9, `BodyMedium`: 10, `BodySmall`: 11, `LabelLarge`: 12, `LabelMedium`: 13, `LabelSmall`: 14}
 
 var _LabelTypesDescMap = map[LabelTypes]string{0: `LabelDisplayLarge is a large, short, and important display label with a default font size of 57dp.`, 1: `LabelDisplayMedium is a medium-sized, short, and important display label with a default font size of 45dp.`, 2: `LabelDisplaySmall is a small, short, and important display label with a default font size of 36dp.`, 3: `LabelHeadlineLarge is a large, high-emphasis headline label with a default font size of 32dp.`, 4: `LabelHeadlineMedium is a medium-sized, high-emphasis headline label with a default font size of 28dp.`, 5: `LabelHeadlineSmall is a small, high-emphasis headline label with a default font size of 24dp.`, 6: `LabelTitleLarge is a large, medium-emphasis title label with a default font size of 22dp.`, 7: `LabelTitleMedium is a medium-sized, medium-emphasis title label with a default font size of 16dp.`, 8: `LabelTitleSmall is a small, medium-emphasis title label with a default font size of 14dp.`, 9: `LabelBodyLarge is a large body label used for longer passages of text with a default font size of 16dp.`, 10: `LabelBodyMedium is a medium-sized body label used for longer passages of text with a default font size of 14dp.`, 11: `LabelBodySmall is a small body label used for longer passages of text with a default font size of 12dp.`, 12: `LabelLabelLarge is a large label used for label text (like a caption or the text inside a button) with a default font size of 14dp.`, 13: `LabelLabelMedium is a medium-sized label used for label text (like a caption or the text inside a button) with a default font size of 12dp.`, 14: `LabelLabelSmall is a small label used for label text (like a caption or the text inside a button) with a default font size of 11dp.`}
 
 var _LabelTypesMap = map[LabelTypes]string{0: `DisplayLarge`, 1: `DisplayMedium`, 2: `DisplaySmall`, 3: `HeadlineLarge`, 4: `HeadlineMedium`, 5: `HeadlineSmall`, 6: `TitleLarge`, 7: `TitleMedium`, 8: `TitleSmall`, 9: `BodyLarge`, 10: `BodyMedium`, 11: `BodySmall`, 12: `LabelLarge`, 13: `LabelMedium`, 14: `LabelSmall`}
 
 // String returns the string representation of this LabelTypes value.
-func (i LabelTypes) String() string {
-	if str, ok := _LabelTypesMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+func (i LabelTypes) String() string { return enums.String(i, _LabelTypesMap) }
 
 // SetString sets the LabelTypes value from its string representation,
 // and returns an error if the string is invalid.
 func (i *LabelTypes) SetString(s string) error {
-	if val, ok := _LabelTypesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type LabelTypes")
+	return enums.SetString(i, s, _LabelTypesValueMap, "LabelTypes")
 }
 
 // Int64 returns the LabelTypes value as an int64.
@@ -438,28 +373,19 @@ var _LayoutPassesValues = []LayoutPasses{0, 1, 2}
 // LayoutPassesN is the highest valid value for type LayoutPasses, plus one.
 const LayoutPassesN LayoutPasses = 3
 
-var _LayoutPassesNameToValueMap = map[string]LayoutPasses{`SizeUpPass`: 0, `SizeDownPass`: 1, `SizeFinalPass`: 2}
+var _LayoutPassesValueMap = map[string]LayoutPasses{`SizeUpPass`: 0, `SizeDownPass`: 1, `SizeFinalPass`: 2}
 
 var _LayoutPassesDescMap = map[LayoutPasses]string{0: ``, 1: ``, 2: ``}
 
 var _LayoutPassesMap = map[LayoutPasses]string{0: `SizeUpPass`, 1: `SizeDownPass`, 2: `SizeFinalPass`}
 
 // String returns the string representation of this LayoutPasses value.
-func (i LayoutPasses) String() string {
-	if str, ok := _LayoutPassesMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+func (i LayoutPasses) String() string { return enums.String(i, _LayoutPassesMap) }
 
 // SetString sets the LayoutPasses value from its string representation,
 // and returns an error if the string is invalid.
 func (i *LayoutPasses) SetString(s string) error {
-	if val, ok := _LayoutPassesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type LayoutPasses")
+	return enums.SetString(i, s, _LayoutPassesValueMap, "LayoutPasses")
 }
 
 // Int64 returns the LayoutPasses value as an int64.
@@ -506,7 +432,7 @@ var _LayoutFlagsValues = []LayoutFlags{2, 3, 4}
 // LayoutFlagsN is the highest valid value for type LayoutFlags, plus one.
 const LayoutFlagsN LayoutFlags = 5
 
-var _LayoutFlagsNameToValueMap = map[string]LayoutFlags{`StackTopOnly`: 2, `NeedsRedo`: 3, `NoKeys`: 4}
+var _LayoutFlagsValueMap = map[string]LayoutFlags{`StackTopOnly`: 2, `NeedsRedo`: 3, `NoKeys`: 4}
 
 var _LayoutFlagsDescMap = map[LayoutFlags]string{2: `for stacked layout, only layout the top widget. this is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don&#39;t`, 3: `true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration`, 4: `LayoutNoKeys prevents processing of keyboard events for this layout. By default, Layout handles focus navigation events, but if an outer Widget handles these instead, then this should be set.`}
 
@@ -514,46 +440,19 @@ var _LayoutFlagsMap = map[LayoutFlags]string{2: `StackTopOnly`, 3: `NeedsRedo`, 
 
 // String returns the string representation of this LayoutFlags value.
 func (i LayoutFlags) String() string {
-	str := ""
-	for _, ie := range WidgetFlagsValues() {
-		if i.HasFlag(ie) {
-			ies := ie.BitIndexString()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}
-	for _, ie := range _LayoutFlagsValues {
-		if i.HasFlag(ie) {
-			ies := ie.BitIndexString()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}
-	return str
+	return enums.BitFlagStringExtended(i, _LayoutFlagsValues, WidgetFlagsValues())
 }
 
 // BitIndexString returns the string representation of this LayoutFlags value
 // if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
 func (i LayoutFlags) BitIndexString() string {
-	if str, ok := _LayoutFlagsMap[i]; ok {
-		return str
-	}
-	return WidgetFlags(i).BitIndexString()
+	return enums.BitIndexStringExtended[LayoutFlags, WidgetFlags](i, _LayoutFlagsMap)
 }
 
 // SetString sets the LayoutFlags value from its string representation,
 // and returns an error if the string is invalid.
-func (i *LayoutFlags) SetString(s string) error {
-	*i = 0
-	return i.SetStringOr(s)
-}
+func (i *LayoutFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
 
 // SetStringOr sets the LayoutFlags value from its string representation
 // while preserving any bit flags already set, and returns an
@@ -561,7 +460,7 @@ func (i *LayoutFlags) SetString(s string) error {
 func (i *LayoutFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
-		if val, ok := _LayoutFlagsNameToValueMap[flg]; ok {
+		if val, ok := _LayoutFlagsValueMap[flg]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue
@@ -653,28 +552,19 @@ var _MeterTypesValues = []MeterTypes{0, 1, 2}
 // MeterTypesN is the highest valid value for type MeterTypes, plus one.
 const MeterTypesN MeterTypes = 3
 
-var _MeterTypesNameToValueMap = map[string]MeterTypes{`Linear`: 0, `Circle`: 1, `Semicircle`: 2}
+var _MeterTypesValueMap = map[string]MeterTypes{`Linear`: 0, `Circle`: 1, `Semicircle`: 2}
 
 var _MeterTypesDescMap = map[MeterTypes]string{0: `MeterLinear indicates to render a meter that goes in a straight, linear direction, either horizontal or vertical, as specified by [styles.Style.Direction].`, 1: `MeterCircle indicates to render the meter as a circle.`, 2: `MeterSemicircle indicates to render the meter as a semicircle.`}
 
 var _MeterTypesMap = map[MeterTypes]string{0: `Linear`, 1: `Circle`, 2: `Semicircle`}
 
 // String returns the string representation of this MeterTypes value.
-func (i MeterTypes) String() string {
-	if str, ok := _MeterTypesMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+func (i MeterTypes) String() string { return enums.String(i, _MeterTypesMap) }
 
 // SetString sets the MeterTypes value from its string representation,
 // and returns an error if the string is invalid.
 func (i *MeterTypes) SetString(s string) error {
-	if val, ok := _MeterTypesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type MeterTypes")
+	return enums.SetString(i, s, _MeterTypesValueMap, "MeterTypes")
 }
 
 // Int64 returns the MeterTypes value as an int64.
@@ -721,44 +611,23 @@ var _WinFlagsValues = []WinFlags{0, 1, 2, 3, 4, 5, 6, 7}
 // WinFlagsN is the highest valid value for type WinFlags, plus one.
 const WinFlagsN WinFlags = 8
 
-var _WinFlagsNameToValueMap = map[string]WinFlags{`HasGeomPrefs`: 0, `Closing`: 1, `Resizing`: 2, `GotFocus`: 3, `SentShow`: 4, `GoLoop`: 5, `StopEventLoop`: 6, `SelectionMode`: 7}
+var _WinFlagsValueMap = map[string]WinFlags{`HasGeomPrefs`: 0, `Closing`: 1, `Resizing`: 2, `GotFocus`: 3, `SentShow`: 4, `GoLoop`: 5, `StopEventLoop`: 6, `SelectionMode`: 7}
 
 var _WinFlagsDescMap = map[WinFlags]string{0: `WinHasGeomPrefs indicates if this window has WinGeomPrefs setting that sized it -- affects whether other default geom should be applied.`, 1: `WinClosing is atomic flag indicating window is closing`, 2: `WinResizing is atomic flag indicating window is resizing`, 3: `WinGotFocus indicates that have we received RenderWin focus`, 4: `WinSentShow have we sent the show event yet? Only ever sent ONCE`, 5: `WinGoLoop true if we are running from GoStartEventLoop -- requires a WinWait.Done at end`, 6: `WinStopEventLoop is set when event loop stop is requested`, 7: `WinSelectionMode indicates that the window is in Cogent Core inspect editor edit mode`}
 
 var _WinFlagsMap = map[WinFlags]string{0: `HasGeomPrefs`, 1: `Closing`, 2: `Resizing`, 3: `GotFocus`, 4: `SentShow`, 5: `GoLoop`, 6: `StopEventLoop`, 7: `SelectionMode`}
 
 // String returns the string representation of this WinFlags value.
-func (i WinFlags) String() string {
-	str := ""
-	for _, ie := range _WinFlagsValues {
-		if i.HasFlag(ie) {
-			ies := ie.BitIndexString()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}
-	return str
-}
+func (i WinFlags) String() string { return enums.BitFlagString(i, _WinFlagsValues) }
 
 // BitIndexString returns the string representation of this WinFlags value
 // if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
-func (i WinFlags) BitIndexString() string {
-	if str, ok := _WinFlagsMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+func (i WinFlags) BitIndexString() string { return enums.String(i, _WinFlagsMap) }
 
 // SetString sets the WinFlags value from its string representation,
 // and returns an error if the string is invalid.
-func (i *WinFlags) SetString(s string) error {
-	*i = 0
-	return i.SetStringOr(s)
-}
+func (i *WinFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
 
 // SetStringOr sets the WinFlags value from its string representation
 // while preserving any bit flags already set, and returns an
@@ -766,7 +635,7 @@ func (i *WinFlags) SetString(s string) error {
 func (i *WinFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
-		if val, ok := _WinFlagsNameToValueMap[flg]; ok {
+		if val, ok := _WinFlagsValueMap[flg]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue
@@ -842,44 +711,23 @@ var _RenderContextFlagsValues = []RenderContextFlags{0, 1}
 // RenderContextFlagsN is the highest valid value for type RenderContextFlags, plus one.
 const RenderContextFlagsN RenderContextFlags = 2
 
-var _RenderContextFlagsNameToValueMap = map[string]RenderContextFlags{`Visible`: 0, `Rebuild`: 1}
+var _RenderContextFlagsValueMap = map[string]RenderContextFlags{`Visible`: 0, `Rebuild`: 1}
 
 var _RenderContextFlagsDescMap = map[RenderContextFlags]string{0: `the window is visible and should be rendered to`, 1: `forces a rebuild of all scene elements`}
 
 var _RenderContextFlagsMap = map[RenderContextFlags]string{0: `Visible`, 1: `Rebuild`}
 
 // String returns the string representation of this RenderContextFlags value.
-func (i RenderContextFlags) String() string {
-	str := ""
-	for _, ie := range _RenderContextFlagsValues {
-		if i.HasFlag(ie) {
-			ies := ie.BitIndexString()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}
-	return str
-}
+func (i RenderContextFlags) String() string { return enums.BitFlagString(i, _RenderContextFlagsValues) }
 
 // BitIndexString returns the string representation of this RenderContextFlags value
 // if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
-func (i RenderContextFlags) BitIndexString() string {
-	if str, ok := _RenderContextFlagsMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+func (i RenderContextFlags) BitIndexString() string { return enums.String(i, _RenderContextFlagsMap) }
 
 // SetString sets the RenderContextFlags value from its string representation,
 // and returns an error if the string is invalid.
-func (i *RenderContextFlags) SetString(s string) error {
-	*i = 0
-	return i.SetStringOr(s)
-}
+func (i *RenderContextFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
 
 // SetStringOr sets the RenderContextFlags value from its string representation
 // while preserving any bit flags already set, and returns an
@@ -887,7 +735,7 @@ func (i *RenderContextFlags) SetString(s string) error {
 func (i *RenderContextFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
-		if val, ok := _RenderContextFlagsNameToValueMap[flg]; ok {
+		if val, ok := _RenderContextFlagsValueMap[flg]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue
@@ -963,7 +811,7 @@ var _ScFlagsValues = []ScFlags{2, 3, 4, 5, 6, 7, 8, 9}
 // ScFlagsN is the highest valid value for type ScFlags, plus one.
 const ScFlagsN ScFlags = 10
 
-var _ScFlagsNameToValueMap = map[string]ScFlags{`ScUpdating`: 2, `ScNeedsRender`: 3, `ScNeedsLayout`: 4, `ScNeedsRebuild`: 5, `ScImageUpdated`: 6, `ScPrefSizing`: 7, `ScPreserve`: 8, `ScRenderBBoxes`: 9}
+var _ScFlagsValueMap = map[string]ScFlags{`ScUpdating`: 2, `ScNeedsRender`: 3, `ScNeedsLayout`: 4, `ScNeedsRebuild`: 5, `ScImageUpdated`: 6, `ScPrefSizing`: 7, `ScPreserve`: 8, `ScRenderBBoxes`: 9}
 
 var _ScFlagsDescMap = map[ScFlags]string{2: `ScUpdating means scene is in the process of updating: set for any kind of tree-level update. skip any further update passes until it goes off.`, 3: `ScNeedsRender means nodes have flagged that they need a Render update.`, 4: `ScNeedsLayout means that this scene needs DoLayout stack: GetSize, DoLayout, then Render. This is true after any Config.`, 5: `ScNeedsRebuild means that this scene needs full Rebuild: Config, Layout, Render with DoRebuild flag set (e.g., after global style changes, zooming, etc)`, 6: `ScImageUpdated indicates that the Scene&#39;s image has been updated e.g., due to a render or a resize. This is reset by the global RenderWin rendering pass, so it knows whether it needs to copy the image up to the GPU or not.`, 7: `ScPrefSizing means that this scene is currently doing a PrefSize computation to compute the size of the scene (for sizing window for example) -- affects layout size computation only for Over`, 8: `ScPreserve keeps this scene around instead of deleting when it is no longer needed. Set if added to SceneLibrary for example.`, 9: `ScRenderBBoxes renders the bounding boxes for all objects in scene`}
 
@@ -971,46 +819,19 @@ var _ScFlagsMap = map[ScFlags]string{2: `ScUpdating`, 3: `ScNeedsRender`, 4: `Sc
 
 // String returns the string representation of this ScFlags value.
 func (i ScFlags) String() string {
-	str := ""
-	for _, ie := range WidgetFlagsValues() {
-		if i.HasFlag(ie) {
-			ies := ie.BitIndexString()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}
-	for _, ie := range _ScFlagsValues {
-		if i.HasFlag(ie) {
-			ies := ie.BitIndexString()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}
-	return str
+	return enums.BitFlagStringExtended(i, _ScFlagsValues, WidgetFlagsValues())
 }
 
 // BitIndexString returns the string representation of this ScFlags value
 // if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
 func (i ScFlags) BitIndexString() string {
-	if str, ok := _ScFlagsMap[i]; ok {
-		return str
-	}
-	return WidgetFlags(i).BitIndexString()
+	return enums.BitIndexStringExtended[ScFlags, WidgetFlags](i, _ScFlagsMap)
 }
 
 // SetString sets the ScFlags value from its string representation,
 // and returns an error if the string is invalid.
-func (i *ScFlags) SetString(s string) error {
-	*i = 0
-	return i.SetStringOr(s)
-}
+func (i *ScFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
 
 // SetStringOr sets the ScFlags value from its string representation
 // while preserving any bit flags already set, and returns an
@@ -1018,7 +839,7 @@ func (i *ScFlags) SetString(s string) error {
 func (i *ScFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
-		if val, ok := _ScFlagsNameToValueMap[flg]; ok {
+		if val, ok := _ScFlagsValueMap[flg]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue
@@ -1110,28 +931,19 @@ var _SizeClassesValues = []SizeClasses{0, 1, 2}
 // SizeClassesN is the highest valid value for type SizeClasses, plus one.
 const SizeClassesN SizeClasses = 3
 
-var _SizeClassesNameToValueMap = map[string]SizeClasses{`Compact`: 0, `Medium`: 1, `Expanded`: 2}
+var _SizeClassesValueMap = map[string]SizeClasses{`Compact`: 0, `Medium`: 1, `Expanded`: 2}
 
 var _SizeClassesDescMap = map[SizeClasses]string{0: `SizeCompact is the size class for windows with a width less than 600dp, which typically happens on phones.`, 1: `SizeMedium is the size class for windows with a width between 600dp and 840dp inclusive, which typically happens on tablets.`, 2: `SizeExpanded is the size class for windows with a width greater than 840dp, which typically happens on desktop and laptop computers.`}
 
 var _SizeClassesMap = map[SizeClasses]string{0: `Compact`, 1: `Medium`, 2: `Expanded`}
 
 // String returns the string representation of this SizeClasses value.
-func (i SizeClasses) String() string {
-	if str, ok := _SizeClassesMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+func (i SizeClasses) String() string { return enums.String(i, _SizeClassesMap) }
 
 // SetString sets the SizeClasses value from its string representation,
 // and returns an error if the string is invalid.
 func (i *SizeClasses) SetString(s string) error {
-	if val, ok := _SizeClassesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type SizeClasses")
+	return enums.SetString(i, s, _SizeClassesValueMap, "SizeClasses")
 }
 
 // Int64 returns the SizeClasses value as an int64.
@@ -1178,28 +990,19 @@ var _SliderTypesValues = []SliderTypes{0, 1}
 // SliderTypesN is the highest valid value for type SliderTypes, plus one.
 const SliderTypesN SliderTypes = 2
 
-var _SliderTypesNameToValueMap = map[string]SliderTypes{`Slider`: 0, `Scrollbar`: 1}
+var _SliderTypesValueMap = map[string]SliderTypes{`Slider`: 0, `Scrollbar`: 1}
 
 var _SliderTypesDescMap = map[SliderTypes]string{0: `SliderSlider indicates a standard, user-controllable slider for setting a numeric value`, 1: `SliderScrollbar indicates a slider acting as a scrollbar for content This sets the`}
 
 var _SliderTypesMap = map[SliderTypes]string{0: `Slider`, 1: `Scrollbar`}
 
 // String returns the string representation of this SliderTypes value.
-func (i SliderTypes) String() string {
-	if str, ok := _SliderTypesMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+func (i SliderTypes) String() string { return enums.String(i, _SliderTypesMap) }
 
 // SetString sets the SliderTypes value from its string representation,
 // and returns an error if the string is invalid.
 func (i *SliderTypes) SetString(s string) error {
-	if val, ok := _SliderTypesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type SliderTypes")
+	return enums.SetString(i, s, _SliderTypesValueMap, "SliderTypes")
 }
 
 // Int64 returns the SliderTypes value as an int64.
@@ -1246,28 +1049,19 @@ var _StageTypesValues = []StageTypes{0, 1, 2, 3, 4, 5}
 // StageTypesN is the highest valid value for type StageTypes, plus one.
 const StageTypesN StageTypes = 6
 
-var _StageTypesNameToValueMap = map[string]StageTypes{`WindowStage`: 0, `DialogStage`: 1, `MenuStage`: 2, `TooltipStage`: 3, `SnackbarStage`: 4, `CompleterStage`: 5}
+var _StageTypesValueMap = map[string]StageTypes{`WindowStage`: 0, `DialogStage`: 1, `MenuStage`: 2, `TooltipStage`: 3, `SnackbarStage`: 4, `CompleterStage`: 5}
 
 var _StageTypesDescMap = map[StageTypes]string{0: `WindowStage is a MainStage that displays a Scene in a full window. One of these must be created first, as the primary App contents, and it typically persists throughout. It fills the RenderWin window. Additional Windows can be created either within the same RenderWin (Mobile) or in separate RenderWin windows (Desktop, NewWindow).`, 1: `DialogStage is a MainStage that displays Scene in a smaller dialog window on top of a Window, or in its own RenderWin (on Desktop only). It can be Modal or not.`, 2: `MenuStage is a PopupStage that displays a Scene with Action Widgets overlaid on a MainStage. It is typically Modal and ClickOff, and closes when an Action is selected.`, 3: `TooltipStage is a PopupStage that displays a Scene with extra info overlaid on a MainStage. It is typically ClickOff and not Modal.`, 4: `SnackbarStage is a PopupStage displays a Scene with info and typically an additional optional Action, usually displayed at the bottom. It is typically not ClickOff or Modal, but has a timeout.`, 5: `CompleterStage is a PopupStage that displays a Scene with text completions, spelling corrections, or other such dynamic info. It is typically ClickOff, not Modal, dynamically updating, and closes when something is selected or typing renders it no longer relevant.`}
 
 var _StageTypesMap = map[StageTypes]string{0: `WindowStage`, 1: `DialogStage`, 2: `MenuStage`, 3: `TooltipStage`, 4: `SnackbarStage`, 5: `CompleterStage`}
 
 // String returns the string representation of this StageTypes value.
-func (i StageTypes) String() string {
-	if str, ok := _StageTypesMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+func (i StageTypes) String() string { return enums.String(i, _StageTypesMap) }
 
 // SetString sets the StageTypes value from its string representation,
 // and returns an error if the string is invalid.
 func (i *StageTypes) SetString(s string) error {
-	if val, ok := _StageTypesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type StageTypes")
+	return enums.SetString(i, s, _StageTypesValueMap, "StageTypes")
 }
 
 // Int64 returns the StageTypes value as an int64.
@@ -1314,28 +1108,19 @@ var _SwitchTypesValues = []SwitchTypes{0, 1, 2, 3, 4}
 // SwitchTypesN is the highest valid value for type SwitchTypes, plus one.
 const SwitchTypesN SwitchTypes = 5
 
-var _SwitchTypesNameToValueMap = map[string]SwitchTypes{`Switch`: 0, `Chip`: 1, `Checkbox`: 2, `RadioButton`: 3, `SegmentedButton`: 4}
+var _SwitchTypesValueMap = map[string]SwitchTypes{`Switch`: 0, `Chip`: 1, `Checkbox`: 2, `RadioButton`: 3, `SegmentedButton`: 4}
 
 var _SwitchTypesDescMap = map[SwitchTypes]string{0: `SwitchSwitch indicates to display a switch as a switch (toggle slider)`, 1: `SwitchChip indicates to display a switch as chip (like Material Design&#39;s filter chip), which is typically only used in the context of [Switches].`, 2: `SwitchCheckbox indicates to display a switch as a checkbox`, 3: `SwitchRadioButton indicates to display a switch as a radio button`, 4: `SwitchSegmentedButton indicates to display a segmented button, which is typically only used in the context of [Switches].`}
 
 var _SwitchTypesMap = map[SwitchTypes]string{0: `Switch`, 1: `Chip`, 2: `Checkbox`, 3: `RadioButton`, 4: `SegmentedButton`}
 
 // String returns the string representation of this SwitchTypes value.
-func (i SwitchTypes) String() string {
-	if str, ok := _SwitchTypesMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+func (i SwitchTypes) String() string { return enums.String(i, _SwitchTypesMap) }
 
 // SetString sets the SwitchTypes value from its string representation,
 // and returns an error if the string is invalid.
 func (i *SwitchTypes) SetString(s string) error {
-	if val, ok := _SwitchTypesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type SwitchTypes")
+	return enums.SetString(i, s, _SwitchTypesValueMap, "SwitchTypes")
 }
 
 // Int64 returns the SwitchTypes value as an int64.
@@ -1382,28 +1167,19 @@ var _TabTypesValues = []TabTypes{0, 1, 2, 3, 4, 5}
 // TabTypesN is the highest valid value for type TabTypes, plus one.
 const TabTypesN TabTypes = 6
 
-var _TabTypesNameToValueMap = map[string]TabTypes{`StandardTabs`: 0, `FunctionalTabs`: 1, `NavigationAuto`: 2, `NavigationBar`: 3, `NavigationRail`: 4, `NavigationDrawer`: 5}
+var _TabTypesValueMap = map[string]TabTypes{`StandardTabs`: 0, `FunctionalTabs`: 1, `NavigationAuto`: 2, `NavigationBar`: 3, `NavigationRail`: 4, `NavigationDrawer`: 5}
 
 var _TabTypesDescMap = map[TabTypes]string{0: `StandardTabs indicates to render the standard type of Material Design style tabs.`, 1: `FunctionalTabs indicates to render functional tabs like those in Google Chrome. These tabs take up less space and are the only kind that can be closed. They can also be moved.`, 2: `NavigationAuto indicates to render the tabs as either [NavigationBar], [NavigationRail], or [NavigationDrawer], if [WidgetBase.SizeClass] is [SizeCompact], [SizeMedium], or [SizeExpanded], respectively. NavigationAuto should typically be used instead of one of the specific navigation types for better cross-platform compatability.`, 3: `NavigationBar indicates to render the tabs as a bottom navigation bar with text and icons.`, 4: `NavigationRail indicates to render the tabs as a side navigation rail, which only has icons.`, 5: `NavigationDrawer indicates to render the tabs as a side navigation drawer, which has full text labels and icons.`}
 
 var _TabTypesMap = map[TabTypes]string{0: `StandardTabs`, 1: `FunctionalTabs`, 2: `NavigationAuto`, 3: `NavigationBar`, 4: `NavigationRail`, 5: `NavigationDrawer`}
 
 // String returns the string representation of this TabTypes value.
-func (i TabTypes) String() string {
-	if str, ok := _TabTypesMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+func (i TabTypes) String() string { return enums.String(i, _TabTypesMap) }
 
 // SetString sets the TabTypes value from its string representation,
 // and returns an error if the string is invalid.
 func (i *TabTypes) SetString(s string) error {
-	if val, ok := _TabTypesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type TabTypes")
+	return enums.SetString(i, s, _TabTypesValueMap, "TabTypes")
 }
 
 // Int64 returns the TabTypes value as an int64.
@@ -1450,28 +1226,19 @@ var _TextFieldTypesValues = []TextFieldTypes{0, 1}
 // TextFieldTypesN is the highest valid value for type TextFieldTypes, plus one.
 const TextFieldTypesN TextFieldTypes = 2
 
-var _TextFieldTypesNameToValueMap = map[string]TextFieldTypes{`Filled`: 0, `Outlined`: 1}
+var _TextFieldTypesValueMap = map[string]TextFieldTypes{`Filled`: 0, `Outlined`: 1}
 
 var _TextFieldTypesDescMap = map[TextFieldTypes]string{0: `TextFieldFilled represents a filled TextField with a background color and a bottom border`, 1: `TextFieldOutlined represents an outlined TextField with a border on all sides and no background color`}
 
 var _TextFieldTypesMap = map[TextFieldTypes]string{0: `Filled`, 1: `Outlined`}
 
 // String returns the string representation of this TextFieldTypes value.
-func (i TextFieldTypes) String() string {
-	if str, ok := _TextFieldTypesMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+func (i TextFieldTypes) String() string { return enums.String(i, _TextFieldTypesMap) }
 
 // SetString sets the TextFieldTypes value from its string representation,
 // and returns an error if the string is invalid.
 func (i *TextFieldTypes) SetString(s string) error {
-	if val, ok := _TextFieldTypesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type TextFieldTypes")
+	return enums.SetString(i, s, _TextFieldTypesValueMap, "TextFieldTypes")
 }
 
 // Int64 returns the TextFieldTypes value as an int64.
@@ -1518,29 +1285,18 @@ var _ThemesValues = []Themes{0, 1, 2}
 // ThemesN is the highest valid value for type Themes, plus one.
 const ThemesN Themes = 3
 
-var _ThemesNameToValueMap = map[string]Themes{`Auto`: 0, `Light`: 1, `Dark`: 2}
+var _ThemesValueMap = map[string]Themes{`Auto`: 0, `Light`: 1, `Dark`: 2}
 
 var _ThemesDescMap = map[Themes]string{0: `ThemeAuto indicates to use the theme specified by the operating system`, 1: `ThemeLight indicates to use a light theme`, 2: `ThemeDark indicates to use a dark theme`}
 
 var _ThemesMap = map[Themes]string{0: `Auto`, 1: `Light`, 2: `Dark`}
 
 // String returns the string representation of this Themes value.
-func (i Themes) String() string {
-	if str, ok := _ThemesMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+func (i Themes) String() string { return enums.String(i, _ThemesMap) }
 
 // SetString sets the Themes value from its string representation,
 // and returns an error if the string is invalid.
-func (i *Themes) SetString(s string) error {
-	if val, ok := _ThemesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type Themes")
-}
+func (i *Themes) SetString(s string) error { return enums.SetString(i, s, _ThemesValueMap, "Themes") }
 
 // Int64 returns the Themes value as an int64.
 func (i Themes) Int64() int64 { return int64(i) }
