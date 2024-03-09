@@ -30,15 +30,15 @@ func main() {
 	b.AddAppBar(pg.AppBar)
 
 	coredom.ElementHandlers["home-header"] = func(ctx *coredom.Context) bool {
-		fr := coredom.New[*gi.Frame](ctx).Style(func(s *styles.Style) {
+		ly := gi.NewLayout(ctx.BlockParent).Style(func(s *styles.Style) {
 			s.Direction = styles.Column
 			s.Justify.Content = styles.Center
 			s.Align.Content = styles.Center
 			s.Align.Items = styles.Center
 			s.Text.Align = styles.Center
 		})
-		grr.Log(gi.NewSVG(fr).ReadBytes(icon))
-		gi.NewLabel(fr).SetType(gi.LabelDisplayLarge).SetText("Cogent Core")
+		grr.Log(gi.NewSVG(ly).ReadBytes(icon))
+		gi.NewLabel(ly).SetType(gi.LabelDisplayLarge).SetText("Cogent Core")
 		return true
 	}
 

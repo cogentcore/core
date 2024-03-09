@@ -141,7 +141,7 @@ func (c *Context) InlineParent() gi.Widget {
 	}
 	c.InlinePw = gi.NewLayout(c.BlockParent, fmt.Sprintf("inline-container-%d", c.BlockParent.NumLifetimeChildren()))
 	c.InlinePw.Style(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
+		s.Grow.Set(1, 0)
 	})
 	return c.InlinePw
 }
