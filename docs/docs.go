@@ -24,6 +24,5 @@ func main() {
 	pg := webcore.NewPage(b).SetSource(grr.Log1(fs.Sub(content, "content")))
 	pg.Context.WikilinkResolver = coredom.PkgGoDevWikilink("cogentcore.org/core")
 	b.AddAppBar(pg.AppBar)
-	pg.OpenURL("/", true)
 	b.RunMainWindow()
 }

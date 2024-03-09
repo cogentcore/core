@@ -207,6 +207,10 @@ func (pg *Page) Config() {
 	})
 
 	sp.SetSplits(0.2, 0.8)
+
+	if pg.PagePath == "" {
+		pg.OpenURL("/", true)
+	}
 }
 
 // AppBar is the default app bar for a [Page]

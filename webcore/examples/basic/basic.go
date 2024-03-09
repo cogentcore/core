@@ -20,6 +20,5 @@ func main() {
 	b := gi.NewBody("Webcore Example")
 	pg := webcore.NewPage(b).SetSource(grr.Log1(fs.Sub(content, "content")))
 	b.AddAppBar(pg.AppBar)
-	pg.OpenURL("", true)
 	b.RunMainWindow()
 }
