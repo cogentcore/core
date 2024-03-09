@@ -494,15 +494,6 @@ func WinNewCloseStamp() {
 /////////////////////////////////////////////////////////////////////////////
 //                   Event Loop
 
-// StartEventLoop is the main startup method to call after the initial window
-// configuration is setup -- does any necessary final initialization and then
-// starts the event loop in this same goroutine, and does not return until the
-// window is closed -- see GoStartEventLoop for a version that starts in a
-// separate goroutine and returns immediately.
-func (w *RenderWin) StartEventLoop() {
-	w.EventLoop()
-}
-
 // GoStartEventLoop starts the event processing loop for this window in a new
 // goroutine, and returns immediately.  Adds to WinWait waitgroup so a main
 // thread can wait on that for all windows to close.
