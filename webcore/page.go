@@ -9,6 +9,7 @@ package webcore
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io/fs"
 	"log/slog"
@@ -96,18 +97,31 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	// the paths in the fs are never rooted, so we trim a rooted one
 	rawURL = strings.TrimPrefix(rawURL, "/")
 
+	pg.PagePath = pg.URLToPagePath[rawURL]
+
+	b, err := fs.ReadFile(pg.Source, pg.PagePath)
+	if err != nil {
+		// we go to the first page in the directory if there is no index page
+		if errors.Is(err, fs.ErrNotExist) && (strings.HasSuffix(pg.PagePath, "index.md") || strings.HasSuffix(pg.PagePath, "index.html")) {
+			fs.WalkDir(pg.Source, path.Dir(pg.PagePath), func(path string, d fs.DirEntry, err error) error {
+				if path == pg.PagePath || d.IsDir() {
+					return nil
+				}
+				pg.PagePath = path
+				return fs.SkipAll
+			})
+			b, err = fs.ReadFile(pg.Source, pg.PagePath)
+		}
+		if err != nil {
+			gi.ErrorSnackbar(pg, err, "Error opening page")
+			return
+		}
+	}
+
 	pg.Context.PageURL = rawURL
 	if addToHistory {
 		pg.HistoryIndex = len(pg.History)
 		pg.History = append(pg.History, pg.Context.PageURL)
-	}
-
-	pg.PagePath = pg.URLToPagePath[pg.Context.PageURL]
-
-	b, err := fs.ReadFile(pg.Source, pg.PagePath)
-	if err != nil {
-		gi.ErrorSnackbar(pg, err, "Error opening page")
-		return
 	}
 
 	btp := []byte("+++")
