@@ -556,6 +556,7 @@ func (tb *Buf) OpenFile(filename gi.Filename) error {
 // not -- uses an optimized diff-based update to preserve existing formatting
 // -- very fast if not very different
 func (tb *Buf) Revert() bool {
+	tb.StopDelayedReMarkup()
 	tb.AutoSaveDelete() // justin case
 	if tb.Filename == "" {
 		return false
@@ -681,6 +682,7 @@ func (tb *Buf) Save() error {
 // if afterFun is non-nil, then it is called with the status of the user action
 func (tb *Buf) Close(afterFun func(canceled bool)) bool {
 	if tb.IsChanged() {
+		tb.StopDelayedReMarkup()
 		sc := tb.SceneFromView()
 		if tb.Filename != "" {
 			d := gi.NewBody().AddTitle("Close without saving?").
