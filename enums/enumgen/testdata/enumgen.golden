@@ -338,20 +338,7 @@ func (i States) HasFlag(f enums.BitFlag) bool {
 }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
-func (i *States) SetFlag(on bool, f ...enums.BitFlag) {
-	var mask int64
-	for _, v := range f {
-		mask |= 1 << v.Int64()
-	}
-	in := int64(*i)
-	if on {
-		in |= mask
-		atomic.StoreInt64((*int64)(i), in)
-	} else {
-		in &^= mask
-		atomic.StoreInt64((*int64)(i), in)
-	}
-}
+func (i *States) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
 
 // MarshalJSON implements the [json.Marshaler] interface.
 func (i States) MarshalJSON() ([]byte, error) {
@@ -468,20 +455,7 @@ func (i Languages) HasFlag(f enums.BitFlag) bool {
 }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
-func (i *Languages) SetFlag(on bool, f ...enums.BitFlag) {
-	var mask int64
-	for _, v := range f {
-		mask |= 1 << v.Int64()
-	}
-	in := int64(*i)
-	if on {
-		in |= mask
-		atomic.StoreInt64((*int64)(i), in)
-	} else {
-		in &^= mask
-		atomic.StoreInt64((*int64)(i), in)
-	}
-}
+func (i *Languages) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
 func (i Languages) MarshalText() ([]byte, error) {
@@ -605,20 +579,7 @@ func (i MoreLanguages) HasFlag(f enums.BitFlag) bool {
 }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
-func (i *MoreLanguages) SetFlag(on bool, f ...enums.BitFlag) {
-	var mask int64
-	for _, v := range f {
-		mask |= 1 << v.Int64()
-	}
-	in := int64(*i)
-	if on {
-		in |= mask
-		atomic.StoreInt64((*int64)(i), in)
-	} else {
-		in &^= mask
-		atomic.StoreInt64((*int64)(i), in)
-	}
-}
+func (i *MoreLanguages) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
 func (i MoreLanguages) MarshalText() ([]byte, error) {
