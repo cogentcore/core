@@ -69,12 +69,8 @@ func (i *{{.Name}}) SetInt64(in int64) { *i = {{.Name}}(in) }
 
 var DescMethodTmpl = template.Must(template.New("DescMethod").Parse(`// Desc returns the description of the {{.Name}} value.
 func (i {{.Name}}) Desc() string {
-	if str, ok := _{{.Name}}DescMap[i]; ok {
-		return str
-	} {{if eq .Extends ""}}
-	return i.String() {{else}}
-	return {{.Extends}}(i).Desc() {{end}}
-}
+	{{- if eq .Extends ""}} return enums.Desc(i, _{{.Name}}DescMap)
+	{{- else}} return enums.DescExtended[{{.Name}}, {{.Extends}}](i, _{{.Name}}DescMap) {{end}} }
 `))
 
 var ValuesGlobalTmpl = template.Must(template.New("ValuesGlobal").Parse(

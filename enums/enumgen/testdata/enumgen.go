@@ -41,12 +41,7 @@ func (i Fruits) Int64() int64 { return int64(i) }
 func (i *Fruits) SetInt64(in int64) { *i = Fruits(in) }
 
 // Desc returns the description of the Fruits value.
-func (i Fruits) Desc() string {
-	if str, ok := _FruitsDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
+func (i Fruits) Desc() string { return enums.Desc(i, _FruitsDescMap) }
 
 // FruitsValues returns all possible values for the type Fruits.
 func FruitsValues() []Fruits { return _FruitsValues }
@@ -123,12 +118,7 @@ func (i Foods) Int64() int64 { return int64(i) }
 func (i *Foods) SetInt64(in int64) { *i = Foods(in) }
 
 // Desc returns the description of the Foods value.
-func (i Foods) Desc() string {
-	if str, ok := _FoodsDescMap[i]; ok {
-		return str
-	}
-	return Fruits(i).Desc()
-}
+func (i Foods) Desc() string { return enums.DescExtended[Foods, Fruits](i, _FoodsDescMap) }
 
 // FoodsValues returns all possible values for the type Foods.
 func FoodsValues() []Foods {
@@ -219,12 +209,7 @@ func (i Days) Int64() int64 { return int64(i) }
 func (i *Days) SetInt64(in int64) { *i = Days(in) }
 
 // Desc returns the description of the Days value.
-func (i Days) Desc() string {
-	if str, ok := _DaysDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
+func (i Days) Desc() string { return enums.Desc(i, _DaysDescMap) }
 
 // DaysValues returns all possible values for the type Days.
 func DaysValues() []Days { return _DaysValues }
@@ -302,12 +287,7 @@ func (i States) Int64() int64 { return int64(i) }
 func (i *States) SetInt64(in int64) { *i = States(in) }
 
 // Desc returns the description of the States value.
-func (i States) Desc() string {
-	if str, ok := _StatesDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
+func (i States) Desc() string { return enums.Desc(i, _StatesDescMap) }
 
 // StatesValues returns all possible values for the type States.
 func StatesValues() []States { return _StatesValues }
@@ -409,12 +389,7 @@ func (i Languages) Int64() int64 { return int64(i) }
 func (i *Languages) SetInt64(in int64) { *i = Languages(in) }
 
 // Desc returns the description of the Languages value.
-func (i Languages) Desc() string {
-	if str, ok := _LanguagesDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
+func (i Languages) Desc() string { return enums.Desc(i, _LanguagesDescMap) }
 
 // LanguagesValues returns all possible values for the type Languages.
 func LanguagesValues() []Languages { return _LanguagesValues }
@@ -508,10 +483,7 @@ func (i *MoreLanguages) SetInt64(in int64) { *i = MoreLanguages(in) }
 
 // Desc returns the description of the MoreLanguages value.
 func (i MoreLanguages) Desc() string {
-	if str, ok := _MoreLanguagesDescMap[i]; ok {
-		return str
-	}
-	return Languages(i).Desc()
+	return enums.DescExtended[MoreLanguages, Languages](i, _MoreLanguagesDescMap)
 }
 
 // MoreLanguagesValues returns all possible values for the type MoreLanguages.
