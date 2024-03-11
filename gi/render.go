@@ -77,6 +77,10 @@ func (wb *WidgetBase) AsyncLock() {
 		select {}
 	}
 	rc.Lock()
+	if wb.This() == nil {
+		rc.Unlock()
+		select {}
+	}
 	wb.Scene.SetFlag(true, ScUpdating)
 }
 
