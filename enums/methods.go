@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync/atomic"
 
 	"cogentcore.org/core/glop/num"
 )
@@ -166,4 +167,20 @@ func SetStringOr[T BitFlagConstraint, S BitFlagSetter](i S, s string, valueMap m
 		}
 	}
 	return nil
+}
+
+// SetFlag sets the value of the given flags in these flags to the given value.
+func SetFlag(i *int64, on bool, f ...BitFlag) {
+	var mask int64
+	for _, v := range f {
+		mask |= 1 << v.Int64()
+	}
+	in := *i
+	if on {
+		in |= mask
+		atomic.StoreInt64(i, in)
+	} else {
+		in &^= mask
+		atomic.StoreInt64(i, in)
+	}
 }

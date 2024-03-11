@@ -12,7 +12,7 @@ import (
 )
 
 // it is much easier to test with an independent enum mock
-type enum int
+type enum int64
 
 var hasFlag = map[enum]bool{5: true, 3: true}
 var bitIndexString = map[enum]string{5: "Apple", 3: "bitIndexString", 1: "one"}
@@ -128,4 +128,21 @@ func TestSetStringOr(t *testing.T) {
 	// i := enum(0)
 	// assert.NoError(t, SetStringOr(&i, "apple", valueMap))
 	// assert.Equal(t, enum(5), i)
+}
+
+func TestSetFlag(t *testing.T) {
+	i := enum(0)
+	pi := (*int64)(&i)
+
+	SetFlag(pi, true, enum(1))
+	assert.Equal(t, enum(2), i)
+
+	SetFlag(pi, true, enum(4), enum(7))
+	assert.Equal(t, enum(146), i)
+
+	SetFlag(pi, false, enum(4), enum(7))
+	assert.Equal(t, enum(2), i)
+
+	SetFlag(pi, false, enum(1))
+	assert.Equal(t, enum(0), i)
 }
