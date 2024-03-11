@@ -51,22 +51,6 @@ var SetStringOrMethodBitFlagTmpl = template.Must(template.New("SetStringOrMethod
 // while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *{{.Name}}) SetStringOr(s string) error {
-	flgs := strings.Split(s, "|")
-	for _, flg := range flgs {
-		if val, ok := _{{.Name}}ValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		{{if .Config.AcceptLower}} } else if val, ok := _{{.Name}}ValueMap[strings.ToLower(flg)]; ok {
-			i.SetFlag(true, &val)
-		{{end}} } else if flg == "" {
-			continue
-		} else { {{if eq .Extends ""}}
-			return fmt.Errorf("%q is not a valid value for type {{.Name}}", flg){{else}}
-			err := (*{{.Extends}})(i).SetStringOr(flg)
-			if err != nil {
-				return err
-			}{{end}}
-		}
-	}
-	return nil
-}
+	{{- if eq .Extends ""}} return enums.SetStringOr{{if .Config.AcceptLower}}Lower{{end}}(i, s, _{{.Name}}ValueMap, "{{.Name}}")
+	{{- else}} return enums.SetStringOr{{if .Config.AcceptLower}}Lower{{end}}Extended(i, (*{{.Extends}})(i), s, _{{.Name}}ValueMap) {{end}} }
 `))

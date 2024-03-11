@@ -9,7 +9,6 @@ import (
 	"io"
 	"log"
 	"strconv"
-	"strings"
 	"sync/atomic"
 
 	"cogentcore.org/core/enums"
@@ -293,17 +292,7 @@ func (i *States) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
 // while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *States) SetStringOr(s string) error {
-	flgs := strings.Split(s, "|")
-	for _, flg := range flgs {
-		if val, ok := _StatesValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if flg == "" {
-			continue
-		} else {
-			return fmt.Errorf("%q is not a valid value for type States", flg)
-		}
-	}
-	return nil
+	return enums.SetStringOr(i, s, _StatesValueMap, "States")
 }
 
 // Int64 returns the States value as an int64.
@@ -410,17 +399,7 @@ func (i *Languages) SetString(s string) error { *i = 0; return i.SetStringOr(s) 
 // while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *Languages) SetStringOr(s string) error {
-	flgs := strings.Split(s, "|")
-	for _, flg := range flgs {
-		if val, ok := _LanguagesValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if flg == "" {
-			continue
-		} else {
-			return fmt.Errorf("%q is not a valid value for type Languages", flg)
-		}
-	}
-	return nil
+	return enums.SetStringOr(i, s, _LanguagesValueMap, "Languages")
 }
 
 // Int64 returns the Languages value as an int64.
@@ -518,20 +497,7 @@ func (i *MoreLanguages) SetString(s string) error { *i = 0; return i.SetStringOr
 // while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *MoreLanguages) SetStringOr(s string) error {
-	flgs := strings.Split(s, "|")
-	for _, flg := range flgs {
-		if val, ok := _MoreLanguagesValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if flg == "" {
-			continue
-		} else {
-			err := (*Languages)(i).SetStringOr(flg)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
+	return enums.SetStringOrExtended(i, (*Languages)(i), s, _MoreLanguagesValueMap)
 }
 
 // Int64 returns the MoreLanguages value as an int64.
