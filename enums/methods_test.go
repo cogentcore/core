@@ -17,13 +17,14 @@ type enum int
 var hasFlag = map[enum]bool{5: true, 3: true}
 var bitIndexString = map[enum]string{5: "Apple", 3: "bitIndexString", 1: "one"}
 
-func (e enum) String() string         { return "extended" }
-func (e enum) Int64() int64           { return int64(e) }
-func (e enum) Desc() string           { return "" }
-func (e enum) Values() []Enum         { return nil }
-func (e enum) HasFlag(f BitFlag) bool { return hasFlag[f.(enum)] }
-func (e enum) BitIndexString() string { return bitIndexString[e] }
-func (e *enum) SetInt64(i int64)      { *e = enum(i) }
+func (e enum) String() string                 { return "extended" }
+func (e enum) Int64() int64                   { return int64(e) }
+func (e enum) Desc() string                   { return "" }
+func (e enum) Values() []Enum                 { return nil }
+func (e enum) HasFlag(f BitFlag) bool         { return hasFlag[f.(enum)] }
+func (e enum) BitIndexString() string         { return bitIndexString[e] }
+func (e *enum) SetInt64(i int64)              { *e = enum(i) }
+func (e *enum) SetFlag(on bool, f ...BitFlag) {}
 func (e *enum) SetString(s string) error {
 	if s == "Orange" {
 		*e = 7
@@ -31,6 +32,7 @@ func (e *enum) SetString(s string) error {
 	}
 	return errors.New("invalid")
 }
+func (e *enum) SetStringOr(s string) error { return nil }
 
 func TestString(t *testing.T) {
 	m := map[enum]string{5: "Apple"}
@@ -118,4 +120,12 @@ func TestSetString(t *testing.T) {
 		assert.Equal(t, "invalid", err.Error())
 	}
 	assert.Equal(t, enum(4), i)
+}
+
+func TestSetStringOr(t *testing.T) {
+	// valueMap := map[string]enum{"apple": 5, "Orange": 3}
+
+	// i := enum(0)
+	// assert.NoError(t, SetStringOr(&i, "apple", valueMap))
+	// assert.Equal(t, enum(5), i)
 }

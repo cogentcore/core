@@ -6,6 +6,7 @@ package enums
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -149,4 +150,20 @@ func SetStringLowerExtended[T EnumConstraint, E EnumSetter](i *T, ie E, s string
 		return nil
 	}
 	return ie.SetString(s)
+}
+
+// SetStringOr sets the given bit flag value from its string representation while
+// preserving any bit flags already set.
+func SetStringOr[T BitFlagConstraint, S BitFlagSetter](i S, s string, valueMap map[string]T) error {
+	flags := strings.Split(s, "|")
+	for _, flag := range flags {
+		if val, ok := valueMap[flag]; ok {
+			i.SetFlag(true, val)
+		} else if flag == "" {
+			continue
+		} else {
+			return fmt.Errorf("%q is not a valid value for type States", flag)
+		}
+	}
+	return nil
 }
