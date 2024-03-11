@@ -155,7 +155,7 @@ func SetStringLowerExtended[T EnumConstraint, E EnumSetter](i *T, ie E, s string
 
 // SetStringOr sets the given bit flag value from its string representation while
 // preserving any bit flags already set.
-func SetStringOr[T BitFlagConstraint, S BitFlagSetter](i S, s string, valueMap map[string]T) error {
+func SetStringOr[T BitFlagConstraint, S BitFlagSetter](i S, s string, valueMap map[string]T, typeName string) error {
 	flags := strings.Split(s, "|")
 	for _, flag := range flags {
 		if val, ok := valueMap[flag]; ok {
@@ -163,7 +163,26 @@ func SetStringOr[T BitFlagConstraint, S BitFlagSetter](i S, s string, valueMap m
 		} else if flag == "" {
 			continue
 		} else {
-			return fmt.Errorf("%q is not a valid value for type States", flag)
+			return fmt.Errorf("%q is not a valid value for type %s", flag, typeName)
+		}
+	}
+	return nil
+}
+
+// SetStringOrLower sets the given bit flag value from its string representation while
+// preserving any bit flags already set.
+// It also tries the lowercase version of each flag string if the original version fails.
+func SetStringOrLower[T BitFlagConstraint, S BitFlagSetter](i S, s string, valueMap map[string]T, typeName string) error {
+	flags := strings.Split(s, "|")
+	for _, flag := range flags {
+		if val, ok := valueMap[flag]; ok {
+			i.SetFlag(true, val)
+		} else if val, ok := valueMap[strings.ToLower(flag)]; ok {
+			i.SetFlag(true, val)
+		} else if flag == "" {
+			continue
+		} else {
+			return fmt.Errorf("%q is not a valid value for type %s", flag, typeName)
 		}
 	}
 	return nil
