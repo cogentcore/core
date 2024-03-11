@@ -32,7 +32,13 @@ func (e *enum) SetString(s string) error {
 	}
 	return errors.New("invalid")
 }
-func (e *enum) SetStringOr(s string) error { return nil }
+func (e *enum) SetStringOr(s string) error {
+	if s == "Pear" {
+		*e = 3
+		return nil
+	}
+	return errors.New("invalid")
+}
 
 func TestString(t *testing.T) {
 	m := map[enum]string{5: "Apple"}
@@ -153,6 +159,22 @@ func TestSetStringOr(t *testing.T) {
 	assert.Equal(t, enum(40), i)
 	assert.Error(t, SetStringOrLower(&i, "strawberry", valueMap, "Fruits"))
 	assert.Error(t, SetStringOrLower(&i, "apple|Orange|Pear", valueMap, "Fruits"))
+
+	i = enum(0)
+	assert.NoError(t, SetStringOrExtended(&i, &i, "apple", valueMap))
+	assert.Equal(t, enum(32), i)
+	assert.NoError(t, SetStringOrExtended(&i, &i, "Orange", valueMap))
+	assert.Equal(t, enum(40), i)
+	i = enum(0)
+	assert.NoError(t, SetStringOrExtended(&i, &i, "apple|Orange", valueMap))
+	assert.Equal(t, enum(40), i)
+	assert.NoError(t, SetStringOrExtended(&i, &i, "Pear", valueMap))
+	assert.Equal(t, enum(3), i)
+	assert.NoError(t, SetStringOrExtended(&i, &i, "Orange|Pear", valueMap))
+	assert.Equal(t, enum(3), i)
+	assert.Error(t, SetStringOrExtended(&i, &i, "Apple", valueMap))
+	assert.Error(t, SetStringOrExtended(&i, &i, "Apple|Orange", valueMap))
+	assert.Error(t, SetStringOrExtended(&i, &i, "apple|Orange|Peach", valueMap))
 }
 
 func TestSetFlag(t *testing.T) {

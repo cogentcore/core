@@ -188,6 +188,27 @@ func SetStringOrLower[T BitFlagConstraint, S BitFlagSetter](i S, s string, value
 	return nil
 }
 
+// SetStringOr sets the given bit flag value from its string representation while
+// preserving any bit flags already set, with the enum type extending the other
+// given enum type. It also takes the enum value in terms of the extended enum
+// type (ie).
+func SetStringOrExtended[T BitFlagConstraint, S BitFlagSetter, E BitFlagSetter](i S, ie E, s string, valueMap map[string]T) error {
+	flags := strings.Split(s, "|")
+	for _, flag := range flags {
+		if val, ok := valueMap[flag]; ok {
+			i.SetFlag(true, val)
+		} else if flag == "" {
+			continue
+		} else {
+			err := ie.SetStringOr(flag)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 // SetFlag sets the value of the given flags in these flags to the given value.
 func SetFlag(i *int64, on bool, f ...BitFlag) {
 	var mask int64
