@@ -240,12 +240,13 @@ func Desc[T EnumConstraint](i T, descMap map[T]string) string {
 	return i.String()
 }
 
-// DescExtended returns the description of the given enum value.
-func DescExtended[T EnumConstraint](i T, descMap map[T]string) string {
+// DescExtended returns the description of the given enum value, with
+// the enum type extending the other given enum type.
+func DescExtended[T, E EnumConstraint](i T, descMap map[T]string) string {
 	if str, ok := descMap[i]; ok {
 		return str
 	}
-	return i.String()
+	return E(i).Desc()
 }
 
 // SetFlag sets the value of the given flags in these flags to the given value.

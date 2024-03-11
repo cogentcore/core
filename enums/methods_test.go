@@ -19,7 +19,7 @@ var bitIndexString = map[enum]string{5: "Apple", 3: "bitIndexString", 1: "one"}
 
 func (e enum) String() string                 { return "extended" }
 func (e enum) Int64() int64                   { return int64(e) }
-func (e enum) Desc() string                   { return "" }
+func (e enum) Desc() string                   { return "extendedDesc" }
 func (e enum) Values() []Enum                 { return nil }
 func (e enum) HasFlag(f BitFlag) bool         { return hasFlag[f.(enum)] }
 func (e enum) BitIndexString() string         { return bitIndexString[e] }
@@ -194,6 +194,16 @@ func TestSetStringOr(t *testing.T) {
 	assert.NoError(t, SetStringOrLowerExtended(&i, &i, "Apple|Orange", valueMap))
 	assert.Equal(t, enum(40), i)
 	assert.Error(t, SetStringOrLowerExtended(&i, &i, "apple|Orange|Peach", valueMap))
+}
+
+func TestDesc(t *testing.T) {
+	descMap := map[enum]string{5: "A red fruit"}
+
+	assert.Equal(t, "A red fruit", Desc(enum(5), descMap))
+	assert.Equal(t, "extended", Desc(enum(3), descMap))
+
+	assert.Equal(t, "A red fruit", DescExtended[enum, enum](enum(5), descMap))
+	assert.Equal(t, "extendedDesc", DescExtended[enum, enum](enum(3), descMap))
 }
 
 func TestSetFlag(t *testing.T) {
