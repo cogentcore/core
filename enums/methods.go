@@ -232,6 +232,22 @@ func SetStringOrLowerExtended[T BitFlagConstraint, S BitFlagSetter, E BitFlagSet
 	return nil
 }
 
+// Desc returns the description of the given enum value.
+func Desc[T EnumConstraint](i T, descMap map[T]string) string {
+	if str, ok := descMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// DescExtended returns the description of the given enum value.
+func DescExtended[T EnumConstraint](i T, descMap map[T]string) string {
+	if str, ok := descMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
 // SetFlag sets the value of the given flags in these flags to the given value.
 func SetFlag(i *int64, on bool, f ...BitFlag) {
 	var mask int64
