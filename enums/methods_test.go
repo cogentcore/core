@@ -58,6 +58,7 @@ func TestString(t *testing.T) {
 	assert.Equal(t, "Apple", BitFlagStringExtended(0, []enum{5}, []enum{1}))
 	assert.Equal(t, "bitIndexString", BitFlagStringExtended(0, []enum{}, []enum{3}))
 	assert.Equal(t, "Apple|bitIndexString", BitFlagStringExtended(0, []enum{3}, []enum{5}))
+	assert.Equal(t, "bitIndexString|Apple|bitIndexString", BitFlagStringExtended(0, []enum{3}, []enum{3, 5}))
 	assert.Equal(t, "bitIndexString|Apple", BitFlagStringExtended(0, []enum{5, 1}, []enum{2, 3, 1}))
 }
 
