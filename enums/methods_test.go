@@ -175,6 +175,25 @@ func TestSetStringOr(t *testing.T) {
 	assert.Error(t, SetStringOrExtended(&i, &i, "Apple", valueMap))
 	assert.Error(t, SetStringOrExtended(&i, &i, "Apple|Orange", valueMap))
 	assert.Error(t, SetStringOrExtended(&i, &i, "apple|Orange|Peach", valueMap))
+
+	i = enum(0)
+	assert.NoError(t, SetStringOrLowerExtended(&i, &i, "apple", valueMap))
+	assert.Equal(t, enum(32), i)
+	assert.NoError(t, SetStringOrLowerExtended(&i, &i, "Orange", valueMap))
+	assert.Equal(t, enum(40), i)
+	i = enum(0)
+	assert.NoError(t, SetStringOrLowerExtended(&i, &i, "apple|Orange", valueMap))
+	assert.Equal(t, enum(40), i)
+	assert.NoError(t, SetStringOrLowerExtended(&i, &i, "Pear", valueMap))
+	assert.Equal(t, enum(3), i)
+	assert.NoError(t, SetStringOrLowerExtended(&i, &i, "Orange|Pear", valueMap))
+	assert.Equal(t, enum(3), i)
+	i = enum(0)
+	assert.NoError(t, SetStringOrLowerExtended(&i, &i, "Apple", valueMap))
+	assert.Equal(t, enum(32), i)
+	assert.NoError(t, SetStringOrLowerExtended(&i, &i, "Apple|Orange", valueMap))
+	assert.Equal(t, enum(40), i)
+	assert.Error(t, SetStringOrLowerExtended(&i, &i, "apple|Orange|Peach", valueMap))
 }
 
 func TestSetFlag(t *testing.T) {
