@@ -23,12 +23,12 @@ func Run(c *config.Config) error { //gti:add
 		return fmt.Errorf("expected 1 target platform, but got %d (%v)", len(c.Build.Target), c.Build.Target)
 	}
 	t := c.Build.Target[0]
-	// if no arch is specified, we can assume it is the current arch,
-	// as the user is running it (it could be a different arch when testing
-	// on an external mobile device, but it is up to the user to specify
-	// that arch in that case)
 	if t.Arch == "*" {
-		t.Arch = runtime.GOARCH
+		if t.OS == "android" || t.OS == "ios" {
+			t.Arch = "arm64"
+		} else {
+			t.Arch = runtime.GOARCH
+		}
 		c.Build.Target[0] = t
 	}
 

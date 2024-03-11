@@ -22,12 +22,12 @@ func Install(c *config.Config) error { //gti:add
 		if err != nil {
 			return fmt.Errorf("install: %w", err)
 		}
-		// if no arch is specified, we can assume it is the current arch,
-		// as the user is running it (it could be a different arch when testing
-		// on an external mobile device, but it is up to the user to specify
-		// that arch in that case)
 		if p.Arch == "*" {
-			p.Arch = runtime.GOARCH
+			if p.OS == "android" || p.OS == "ios" {
+				p.Arch = "arm64"
+			} else {
+				p.Arch = runtime.GOARCH
+			}
 			c.Build.Target[i] = p
 		}
 
