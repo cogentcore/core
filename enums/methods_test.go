@@ -24,7 +24,7 @@ func (e enum) Values() []Enum                 { return nil }
 func (e enum) HasFlag(f BitFlag) bool         { return hasFlag[f.(enum)] }
 func (e enum) BitIndexString() string         { return bitIndexString[e] }
 func (e *enum) SetInt64(i int64)              { *e = enum(i) }
-func (e *enum) SetFlag(on bool, f ...BitFlag) {}
+func (e *enum) SetFlag(on bool, f ...BitFlag) { SetFlag((*int64)(e), on, f...) }
 func (e *enum) SetString(s string) error {
 	if s == "Orange" {
 		*e = 7
@@ -123,11 +123,22 @@ func TestSetString(t *testing.T) {
 }
 
 func TestSetStringOr(t *testing.T) {
-	// valueMap := map[string]enum{"apple": 5, "Orange": 3}
+	valueMap := map[string]enum{"apple": 5, "Orange": 3}
 
-	// i := enum(0)
-	// assert.NoError(t, SetStringOr(&i, "apple", valueMap))
-	// assert.Equal(t, enum(5), i)
+	i := enum(0)
+	assert.NoError(t, SetStringOr(&i, "apple", valueMap))
+	assert.Equal(t, enum(32), i)
+
+	assert.NoError(t, SetStringOr(&i, "Orange", valueMap))
+	assert.Equal(t, enum(40), i)
+
+	i = enum(0)
+	assert.NoError(t, SetStringOr(&i, "apple|Orange", valueMap))
+	assert.Equal(t, enum(40), i)
+
+	assert.Error(t, SetStringOr(&i, "Apple", valueMap))
+	assert.Error(t, SetStringOr(&i, "Apple|Orange", valueMap))
+	assert.Error(t, SetStringOr(&i, "apple|Orange|Pear", valueMap))
 }
 
 func TestSetFlag(t *testing.T) {
