@@ -46,13 +46,7 @@ func (i Fruits) Desc() string { return enums.Desc(i, _FruitsDescMap) }
 func FruitsValues() []Fruits { return _FruitsValues }
 
 // Values returns all possible values for the type Fruits.
-func (i Fruits) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_FruitsValues))
-	for i, d := range _FruitsValues {
-		res[i] = d
-	}
-	return res
-}
+func (i Fruits) Values() []enums.Enum { return enums.Values(_FruitsValues) }
 
 // IsValid returns whether the value is a valid option for type Fruits.
 func (i Fruits) IsValid() bool {
@@ -123,18 +117,7 @@ func (i Foods) Desc() string { return enums.DescExtended[Foods, Fruits](i, _Food
 func FoodsValues() []Foods { return enums.ValuesGlobalExtended(_FoodsValues, FruitsValues()) }
 
 // Values returns all possible values for the type Foods.
-func (i Foods) Values() []enums.Enum {
-	es := FruitsValues()
-	les := len(es)
-	res := make([]enums.Enum, les+len(_FoodsValues))
-	for i, d := range es {
-		res[i] = d
-	}
-	for i, d := range _FoodsValues {
-		res[i+les] = d
-	}
-	return res
-}
+func (i Foods) Values() []enums.Enum { return enums.ValuesExtended(_FoodsValues, FruitsValues()) }
 
 // IsValid returns whether the value is a valid option for type Foods.
 func (i Foods) IsValid() bool {
@@ -206,13 +189,7 @@ func (i Days) Desc() string { return enums.Desc(i, _DaysDescMap) }
 func DaysValues() []Days { return _DaysValues }
 
 // Values returns all possible values for the type Days.
-func (i Days) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_DaysValues))
-	for i, d := range _DaysValues {
-		res[i] = d
-	}
-	return res
-}
+func (i Days) Values() []enums.Enum { return enums.Values(_DaysValues) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
 func (i Days) MarshalText() ([]byte, error) {
@@ -284,13 +261,7 @@ func (i States) Desc() string { return enums.Desc(i, _StatesDescMap) }
 func StatesValues() []States { return _StatesValues }
 
 // Values returns all possible values for the type States.
-func (i States) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_StatesValues))
-	for i, d := range _StatesValues {
-		res[i] = d
-	}
-	return res
-}
+func (i States) Values() []enums.Enum { return enums.Values(_StatesValues) }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
 func (i States) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
@@ -384,13 +355,7 @@ func (i Languages) Desc() string { return enums.Desc(i, _LanguagesDescMap) }
 func LanguagesValues() []Languages { return _LanguagesValues }
 
 // Values returns all possible values for the type Languages.
-func (i Languages) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_LanguagesValues))
-	for i, d := range _LanguagesValues {
-		res[i] = d
-	}
-	return res
-}
+func (i Languages) Values() []enums.Enum { return enums.Values(_LanguagesValues) }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
 func (i Languages) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
@@ -480,16 +445,7 @@ func MoreLanguagesValues() []MoreLanguages {
 
 // Values returns all possible values for the type MoreLanguages.
 func (i MoreLanguages) Values() []enums.Enum {
-	es := LanguagesValues()
-	les := len(es)
-	res := make([]enums.Enum, les+len(_MoreLanguagesValues))
-	for i, d := range es {
-		res[i] = d
-	}
-	for i, d := range _MoreLanguagesValues {
-		res[i+les] = d
-	}
-	return res
+	return enums.ValuesExtended(_MoreLanguagesValues, LanguagesValues())
 }
 
 // HasFlag returns whether these bit flags have the given bit flag set.

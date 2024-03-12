@@ -83,22 +83,10 @@ func {{.Name}}Values() []{{.Name}} {
 
 var ValuesMethodTmpl = template.Must(template.New("ValuesMethod").Parse(
 	`// Values returns all possible values for the type {{.Name}}.
-func (i {{.Name}}) Values() []enums.Enum { {{if eq .Extends ""}}
-	res := make([]enums.Enum, len(_{{.Name}}Values))
-	for i, d := range _{{.Name}}Values {
-		res[i] = d
-	} {{else}}
-	es := {{.Extends}}Values()
-	les := len(es)
-	res := make([]enums.Enum, les + len(_{{.Name}}Values))
-	for i, d := range es {
-		res[i] = d
-	}
-	for i, d := range _{{.Name}}Values {
-		res[i + les] = d
-	} {{end}}
-	return res 
-}
+func (i {{.Name}}) Values() []enums.Enum {
+	{{- if eq .Extends ""}} return enums.Values(_{{.Name}}Values)
+	{{- else}} return enums.ValuesExtended(_{{.Name}}Values, {{.Extends}}Values())
+	{{- end}} }
 `))
 
 var IsValidMethodMapTmpl = template.Must(template.New("IsValidMethodMap").Parse(

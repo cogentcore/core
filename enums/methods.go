@@ -249,14 +249,37 @@ func DescExtended[T, E EnumConstraint](i T, descMap map[T]string) string {
 	return E(i).Desc()
 }
 
-// ValuesGlobalExtended returns also possible values for the given enum type that
-// extends the other given enum type.
+// ValuesGlobalExtended returns also possible values for the given enum
+// type that extends the other given enum type.
 func ValuesGlobalExtended[T, E EnumConstraint](values []T, extendedValues []E) []T {
 	res := make([]T, len(extendedValues))
 	for i, e := range extendedValues {
 		res[i] = T(e)
 	}
 	res = append(res, values...)
+	return res
+}
+
+// Values returns all possible values for the given enum type.
+func Values[T EnumConstraint](values []T) []Enum {
+	res := make([]Enum, len(values))
+	for i, d := range values {
+		res[i] = d
+	}
+	return res
+}
+
+// ValuesExtended returns all possible values for the given enum type
+// that extends the other given enum type.
+func ValuesExtended[T, E EnumConstraint](values []T, extendedValues []E) []Enum {
+	les := len(extendedValues)
+	res := make([]Enum, les+len(values))
+	for i, d := range extendedValues {
+		res[i] = d
+	}
+	for i, d := range values {
+		res[i+les] = d
+	}
 	return res
 }
 
