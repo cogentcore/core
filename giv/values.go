@@ -343,87 +343,64 @@ func FieldToValue(it any, field string, fval any) Value {
 	return ToValue(fval, "")
 }
 
-// StringValue represents a string value.
+// StringValue represents any value with a text field.
 type StringValue struct {
 	ValueBase[*gi.TextField]
 }
 
-func (vv *StringValue) Config() {
-	if vtag, _ := vv.Tag("view"); vtag == "password" {
-		vv.Widget.SetTypePassword()
+func (v *StringValue) Config() {
+	if vtag, _ := v.Tag("view"); vtag == "password" {
+		v.Widget.SetTypePassword()
 	}
-	if vl, ok := vv.Value.Interface().(gi.Validator); ok {
-		vv.Widget.SetValidator(vl.Validate)
+	if vl, ok := v.Value.Interface().(gi.Validator); ok {
+		v.Widget.SetValidator(vl.Validate)
 	}
-	if fv, ok := vv.Owner.(gi.FieldValidator); ok {
-		vv.Widget.SetValidator(func() error {
-			return fv.ValidateField(vv.Field.Name)
+	if fv, ok := v.Owner.(gi.FieldValidator); ok {
+		v.Widget.SetValidator(func() error {
+			return fv.ValidateField(v.Field.Name)
 		})
 	}
 
-	vv.Widget.OnFinal(events.Change, func(e events.Event) {
-		if vv.SetValue(vv.Widget.Text()) {
-			vv.UpdateWidget()
+	v.Widget.OnFinal(events.Change, func(e events.Event) {
+		if v.SetValue(v.Widget.Text()) {
+			v.UpdateWidget()
 		}
 	})
 }
 
-func (vv *StringValue) Update() {
-	npv := laser.NonPtrValue(vv.Value)
+func (v *StringValue) Update() {
+	npv := laser.NonPtrValue(v.Value)
 	if npv.Kind() == reflect.Interface && npv.IsZero() {
-		vv.Widget.SetText("None")
+		v.Widget.SetText("None")
 	} else {
-		txt := laser.ToString(vv.Value.Interface())
-		vv.Widget.SetText(txt)
+		txt := laser.ToString(v.Value.Interface())
+		v.Widget.SetText(txt)
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//  StructValue
-
-// StructValue presents a button to edit the struct
+// StructValue represents a struct value with a button.
 type StructValue struct {
-	ValueBase
+	ValueBase[*gi.Button]
 }
 
-func (vv *StructValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ButtonType
-	return vv.WidgetTyp
+func (v *StructValue) Config() {
+	v.Widget.SetType(gi.ButtonTonal).SetIcon(icons.Edit)
+	ConfigDialogWidget(v, true)
 }
 
-func (vv *StructValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
-	bt := vv.Widget.(*gi.Button)
-	npv := laser.NonPtrValue(vv.Value)
-	if vv.Value.IsZero() || npv.IsZero() {
-		bt.SetText("None")
+func (v *StructValue) Update() {
+	npv := laser.NonPtrValue(v.Value)
+	if v.Value.IsZero() || npv.IsZero() {
+		v.Widget.SetText("None")
 	} else {
-		opv := laser.OnePtrUnderlyingValue(vv.Value)
+		opv := laser.OnePtrUnderlyingValue(v.Value)
 		if lbler, ok := opv.Interface().(gi.Labeler); ok {
-			bt.SetText(lbler.Label())
+			v.Widget.SetText(lbler.Label())
 		} else {
-			bt.SetText(laser.FriendlyTypeName(npv.Type()))
+			v.Widget.SetText(laser.FriendlyTypeName(npv.Type()))
 		}
 	}
-	bt.Update()
-}
-
-func (vv *StructValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	vv.StdConfig(w)
-	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
-	bt := vv.Widget.(*gi.Button)
-	bt.SetType(gi.ButtonTonal)
-	bt.Icon = icons.Edit
-	ConfigDialogWidget(vv, bt, true)
-	vv.UpdateWidget()
+	v.Widget.Update()
 }
 
 func (vv *StructValue) HasDialog() bool                      { return true }

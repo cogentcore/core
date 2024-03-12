@@ -728,23 +728,6 @@ func (vv *ValueData) SaveTmp() {
 	}
 }
 
-func (vv *ValueData) CreateTempIfNotPtr() bool {
-	if vv.Value.Kind() != reflect.Ptr { // we create a temp variable -- SaveTmp will save it!
-		// if vv.TmpSave == vv {
-		// 	return true
-		// }
-		// TODO(kai/giv): TmpSave CreateTempIfNotPtr
-		// vv.TmpSave = vv // we are it!  note: this is saving the ValueBase rep ONLY, not the full iface
-		vtyp := reflect.TypeOf(vv.Value.Interface())
-		vtp := reflect.New(vtyp)
-		// fmt.Printf("vtyp: %v %v %v, vtp: %v %v %T\n", vtyp, vtyp.Name(), vtyp.String(), vtp, vtp.Type(), vtp.Interface())
-		laser.SetRobust(vtp.Interface(), vv.Value.Interface())
-		vv.Value = vtp // use this instead
-		return true
-	}
-	return false
-}
-
 func (vv *ValueData) SetTags(tags map[string]string) {
 	if vv.Tags == nil {
 		vv.Tags = make(map[string]string, len(tags))
@@ -920,13 +903,12 @@ func (vv *ValueBase) Config(w gi.Widget) {
 	vv.UpdateWidget()
 }
 
-// ConfigDialogWidget configures the given widget to open the dialog for
+// ConfigDialogWidget configures the widget for the given value to open the dialog for
 // the given value when clicked and have the appropriate tooltip for that.
 // If allowReadOnly is false, the dialog will not be opened if the value
 // is read only.
-func ConfigDialogWidget(vv Value, w gi.Widget, allowReadOnly bool) {
-	vb := vv.AsValueData()
-	doc := vv.Doc()
+func ConfigDialogWidget(v Value, allowReadOnly bool) {
+	doc := v.Doc()
 	tip := ""
 	// windows are never new on mobile
 	if !gi.TheApp.Platform().IsMobile() {
@@ -936,11 +918,11 @@ func ConfigDialogWidget(vv Value, w gi.Widget, allowReadOnly bool) {
 		}
 	}
 	tip += doc
-	w.AsWidget().SetTooltip(tip)
-	w.OnClick(func(e events.Event) {
-		if allowReadOnly || !vv.IsReadOnly() {
-			vv.SetFlag(e.HasAnyModifier(key.Shift), ValueDialogNewWindow)
-			vv.OpenDialog(vb.Widget, nil)
+	v.AsWidgetBase().SetTooltip(tip)
+	v.AsWidget().OnClick(func(e events.Event) {
+		if allowReadOnly || !v.IsReadOnly() {
+			v.SetFlag(e.HasAnyModifier(key.Shift), ValueDialogNewWindow)
+			v.OpenDialog(v.AsWidget(), nil)
 		}
 	})
 }
