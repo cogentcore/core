@@ -32,16 +32,7 @@ var JSONMethodsTmpl = template.Must(template.New("JSONMethods").Parse(
 func (i {{.Name}}) MarshalJSON() ([]byte, error) { return json.Marshal(i.String()) }
 
 // UnmarshalJSON implements the [json.Unmarshaler] interface.
-func (i *{{.Name}}) UnmarshalJSON(data []byte) error {
-	var s string
-	if err := json.Unmarshal(data, &s); err != nil {
-		return err
-	}
-	if err := i.SetString(s); err != nil {
-		log.Println("{{.Name}}.UnmarshalJSON:", err)
-	}
-	return nil
-}
+func (i *{{.Name}}) UnmarshalJSON(data []byte) error { return enums.UnmarshalJSON(i, data, "{{.Name}}") }
 `))
 
 func (g *Generator) BuildJSONMethods(runs []Value, typ *Type) {

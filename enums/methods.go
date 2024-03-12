@@ -5,6 +5,7 @@
 package enums
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -307,10 +308,24 @@ func SetFlag(i *int64, on bool, f ...BitFlag) {
 
 // UnmarshalText loads the enum from the given text.
 // It logs any error instead of returning it to prevent
-// one modified enum from tanking a whole object loading operation.
+// one modified enum from tanking an entire object loading operation.
 func UnmarshalText[T EnumSetter](i T, text []byte, typeName string) error {
 	if err := i.SetString(string(text)); err != nil {
 		slog.Error(typeName+".UnmarshalText", "err", err)
+	}
+	return nil
+}
+
+// UnmarshalJSON loads the enum from the given JSON data.
+// It logs any SetString error instead of returning it to prevent
+// one modified enum from tanking an entire object loading operation.
+func UnmarshalJSON[T EnumSetter](i T, data []byte, typeName string) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+	if err := i.SetString(s); err != nil {
+		slog.Error(typeName+".UnmarshalJSON", "err", err)
 	}
 	return nil
 }

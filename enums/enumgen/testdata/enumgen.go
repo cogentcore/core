@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"strconv"
 
 	"cogentcore.org/core/enums"
@@ -61,16 +60,7 @@ func (i *Fruits) UnmarshalText(text []byte) error { return enums.UnmarshalText(i
 func (i Fruits) MarshalJSON() ([]byte, error) { return json.Marshal(i.String()) }
 
 // UnmarshalJSON implements the [json.Unmarshaler] interface.
-func (i *Fruits) UnmarshalJSON(data []byte) error {
-	var s string
-	if err := json.Unmarshal(data, &s); err != nil {
-		return err
-	}
-	if err := i.SetString(s); err != nil {
-		log.Println("Fruits.UnmarshalJSON:", err)
-	}
-	return nil
-}
+func (i *Fruits) UnmarshalJSON(data []byte) error { return enums.UnmarshalJSON(i, data, "Fruits") }
 
 var _FoodsValues = []Foods{7, 8, 9, 10}
 
@@ -120,16 +110,7 @@ func (i *Foods) UnmarshalText(text []byte) error { return enums.UnmarshalText(i,
 func (i Foods) MarshalJSON() ([]byte, error) { return json.Marshal(i.String()) }
 
 // UnmarshalJSON implements the [json.Unmarshaler] interface.
-func (i *Foods) UnmarshalJSON(data []byte) error {
-	var s string
-	if err := json.Unmarshal(data, &s); err != nil {
-		return err
-	}
-	if err := i.SetString(s); err != nil {
-		log.Println("Foods.UnmarshalJSON:", err)
-	}
-	return nil
-}
+func (i *Foods) UnmarshalJSON(data []byte) error { return enums.UnmarshalJSON(i, data, "Foods") }
 
 var _DaysValues = []Days{-11, -9, -7, -5, -3, -1, 1}
 
@@ -237,16 +218,7 @@ func (i *States) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i
 func (i States) MarshalJSON() ([]byte, error) { return json.Marshal(i.String()) }
 
 // UnmarshalJSON implements the [json.Unmarshaler] interface.
-func (i *States) UnmarshalJSON(data []byte) error {
-	var s string
-	if err := json.Unmarshal(data, &s); err != nil {
-		return err
-	}
-	if err := i.SetString(s); err != nil {
-		log.Println("States.UnmarshalJSON:", err)
-	}
-	return nil
-}
+func (i *States) UnmarshalJSON(data []byte) error { return enums.UnmarshalJSON(i, data, "States") }
 
 // Scan implements the [driver.Valuer] interface.
 func (i States) Value() (driver.Value, error) { return i.String(), nil }
@@ -336,14 +308,7 @@ func (i Languages) MarshalJSON() ([]byte, error) { return json.Marshal(i.String(
 
 // UnmarshalJSON implements the [json.Unmarshaler] interface.
 func (i *Languages) UnmarshalJSON(data []byte) error {
-	var s string
-	if err := json.Unmarshal(data, &s); err != nil {
-		return err
-	}
-	if err := i.SetString(s); err != nil {
-		log.Println("Languages.UnmarshalJSON:", err)
-	}
-	return nil
+	return enums.UnmarshalJSON(i, data, "Languages")
 }
 
 var _MoreLanguagesValues = []MoreLanguages{55}
@@ -420,12 +385,5 @@ func (i MoreLanguages) MarshalJSON() ([]byte, error) { return json.Marshal(i.Str
 
 // UnmarshalJSON implements the [json.Unmarshaler] interface.
 func (i *MoreLanguages) UnmarshalJSON(data []byte) error {
-	var s string
-	if err := json.Unmarshal(data, &s); err != nil {
-		return err
-	}
-	if err := i.SetString(s); err != nil {
-		log.Println("MoreLanguages.UnmarshalJSON:", err)
-	}
-	return nil
+	return enums.UnmarshalJSON(i, data, "MoreLanguages")
 }

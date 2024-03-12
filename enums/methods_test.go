@@ -249,4 +249,10 @@ func TestUnmarshal(t *testing.T) {
 	i = 4
 	assert.NoError(t, UnmarshalText(&i, []byte("Apple"), "Fruits"))
 	assert.Equal(t, enum(4), i)
+
+	assert.NoError(t, UnmarshalJSON(&i, []byte(`"Orange"`), "Fruits"))
+	assert.Equal(t, enum(7), i)
+	i = 4
+	assert.NoError(t, UnmarshalJSON(&i, []byte(`"Apple"`), "Fruits"))
+	assert.Equal(t, enum(4), i)
 }
