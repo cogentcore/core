@@ -157,16 +157,15 @@ type Value interface {
 	SetReadOnly(ro bool)
 
 	// UpdateWidget updates the widget representation to reflect the current
-	// value.  Must first check for a nil widget -- can be called in a
-	// no-widget context (e.g., for single-argument values with actions).
+	// value.
 	UpdateWidget()
 
-	// Config configures a widget of WidgetType for representing the
+	// Config configures the widget to represent the
 	// value, including setting up the OnChange event listener to set the value
 	// when the user edits it (values are always set immediately when the
 	// widget is updated).  Note: use OnFinal(events.Change, ...) to ensure that
 	// any other change modifiers have had a chance to intervene first.
-	Config(w gi.Widget)
+	Config()
 
 	// HasDialog returns true if this value has an associated Dialog,
 	// e.g., for Filename, StructView, SliceView, etc.
@@ -232,6 +231,23 @@ type Value interface {
 	// in SetValue but other cases that use something different need to call
 	// it explicitly.
 	SaveTmp()
+}
+
+// ValueBase is the base type that all [Value] objects extend. It contains both
+// [ValueData] and a generically parameterized [gi.Widget].
+type ValueBase[W gi.Widget] struct {
+	ValueData
+
+	// Widget is the GUI widget used to display and edit the value in the GUI.
+	Widget W
+}
+
+func (vv *ValueBase[W]) AsWidget() gi.Widget {
+	return vv.Widget
+}
+
+func (vv *ValueBase[W]) AsWidgetBase() *gi.WidgetBase {
+	return vv.Widget.AsWidget()
 }
 
 // note: could have a more efficient way to represent the different owner type
@@ -780,18 +796,6 @@ func (vv *ValueData) GetTitle() (label, newPath string, isZero bool) {
 	return
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-//   Base Widget Functions -- these are typically redefined in Value subtypes
-
-// ValueBase is the base type that all [Value] objects extend. It contains both
-// [ValueData] and a generically parameterized [gi.Widget].
-type ValueBase[W gi.Widget] struct {
-	ValueData
-
-	// Widget is the GUI widget used to display and edit the value in the GUI.
-	Widget W
-}
-
 func (vv *ValueBase) UpdateWidget() {
 	if vv.Widget == nil {
 		fmt.Println("nil widget")
@@ -918,7 +922,7 @@ func (vv *ValueBase[W]) StdConfig() {
 // If allowReadOnly is false, the dialog will not be opened if the value
 // is read only.
 func ConfigDialogWidget(vv Value, w gi.Widget, allowReadOnly bool) {
-	vb := vv.AsValueBase()
+	vb := vv.AsValueData()
 	doc := vv.Doc()
 	tip := ""
 	// windows are never new on mobile

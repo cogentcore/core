@@ -343,6 +343,41 @@ func FieldToValue(it any, field string, fval any) Value {
 	return ToValue(fval, "")
 }
 
+// StringValue represents a string value.
+type StringValue struct {
+	ValueBase[*gi.TextField]
+}
+
+func (vv *StringValue) Config() {
+	if vtag, _ := vv.Tag("view"); vtag == "password" {
+		vv.Widget.SetTypePassword()
+	}
+	if vl, ok := vv.Value.Interface().(gi.Validator); ok {
+		vv.Widget.SetValidator(vl.Validate)
+	}
+	if fv, ok := vv.Owner.(gi.FieldValidator); ok {
+		vv.Widget.SetValidator(func() error {
+			return fv.ValidateField(vv.Field.Name)
+		})
+	}
+
+	vv.Widget.OnFinal(events.Change, func(e events.Event) {
+		if vv.SetValue(vv.Widget.Text()) {
+			vv.UpdateWidget()
+		}
+	})
+}
+
+func (vv *StringValue) Update() {
+	npv := laser.NonPtrValue(vv.Value)
+	if npv.Kind() == reflect.Interface && npv.IsZero() {
+		vv.Widget.SetText("None")
+	} else {
+		txt := laser.ToString(vv.Value.Interface())
+		vv.Widget.SetText(txt)
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////////
 //  StructValue
 
