@@ -18,13 +18,7 @@ var GQLMethodsTmpl = template.Must(template.New("GQLMethods").Parse(`
 func (i {{.Name}}) MarshalGQL(w io.Writer) { w.Write([]byte(strconv.Quote(i.String()))) }
 
 // UnmarshalGQL implements the [graphql.Unmarshaler] interface.
-func (i *{{.Name}}) UnmarshalGQL(value any) error {
-	str, ok := value.(string)
-	if !ok {
-		return fmt.Errorf("{{.Name}} should be a string, but got a value of type %T instead", value)
-	}
-	return i.SetString(str)
-}
+func (i *{{.Name}}) UnmarshalGQL(value any) error { return enums.Scan(i, value, "{{.Name}}") }
 `))
 
 func (g *Generator) BuildGQLMethods(runs []Value, typ *Type) {

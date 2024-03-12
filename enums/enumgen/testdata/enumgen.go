@@ -5,7 +5,6 @@ package testdata
 import (
 	"database/sql/driver"
 	"encoding/json"
-	"fmt"
 	"io"
 	"strconv"
 
@@ -162,13 +161,7 @@ func (i *Days) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, 
 func (i Days) MarshalGQL(w io.Writer) { w.Write([]byte(strconv.Quote(i.String()))) }
 
 // UnmarshalGQL implements the [graphql.Unmarshaler] interface.
-func (i *Days) UnmarshalGQL(value any) error {
-	str, ok := value.(string)
-	if !ok {
-		return fmt.Errorf("Days should be a string, but got a value of type %T instead", value)
-	}
-	return i.SetString(str)
-}
+func (i *Days) UnmarshalGQL(value any) error { return enums.Scan(i, value, "Days") }
 
 var _StatesValues = []States{1, 3, 5, 7, 9, 11, 13}
 
