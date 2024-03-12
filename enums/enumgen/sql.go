@@ -15,9 +15,7 @@ import "text/template"
 
 var ValueMethodTmpl = template.Must(template.New("ValueMethod").Parse(
 	`// Scan implements the [driver.Valuer] interface.
-func (i {{.Name}}) Value() (driver.Value, error) {
-	return i.String(), nil
-}
+func (i {{.Name}}) Value() (driver.Value, error) { return i.String(), nil }
 `))
 
 var ScanMethodTmpl = template.Must(template.New("ScanMethod").Parse(

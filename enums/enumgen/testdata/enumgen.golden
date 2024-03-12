@@ -264,9 +264,7 @@ func (i *States) UnmarshalJSON(data []byte) error {
 }
 
 // Scan implements the [driver.Valuer] interface.
-func (i States) Value() (driver.Value, error) {
-	return i.String(), nil
-}
+func (i States) Value() (driver.Value, error) { return i.String(), nil }
 
 // Value implements the [sql.Scanner] interface.
 func (i *States) Scan(value any) error {
