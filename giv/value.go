@@ -34,23 +34,14 @@ import (
 // non-solo values (for example, in StructView), but it should be fine for
 // most end-user code.
 func NewValue(par ki.Ki, val any, tags ...string) Value {
-	v := NewSoloValue(val, tags...)
-	w := par.NewChild(v.WidgetType()).(gi.Widget)
-	v.Config(w)
-	return v
-}
-
-// NewSoloValue makes and returns a new [Value] from the given value and optional
-// tags (only the first argument is used). It does not configure the widget, so
-// most end-user code should call [NewValue] instead. It is intended for use in
-// internal code that needs standalone solo values (for example, for a custom TmpSave).
-func NewSoloValue(val any, tags ...string) Value {
 	t := ""
 	if len(tags) > 0 {
 		t = tags[0]
 	}
 	v := ToValue(val, t)
 	v.SetSoloValue(reflect.ValueOf(val))
+	w := v.MakeWidget(par)
+	Config(v, w)
 	return v
 }
 
@@ -99,6 +90,20 @@ type Value interface {
 
 	// AsWidgetBase returns the widget base associated with the value
 	AsWidgetBase() *gi.WidgetBase
+
+	// MakeWidget makes the widget for this value with the given parent.
+	MakeWidget(par ki.Ki) gi.Widget
+
+	// Config configures the widget to represent the value, including setting up
+	// the OnChange event listener to set the value when the user edits it
+	// (values are always set immediately when the widget is updated).
+	// You should typically call the global [Config] function instead of this;
+	// this is the method that values implement, which is called in the global
+	// Config helper function.
+	Config()
+
+	// Update updates the widget representation to reflect the current value.
+	Update()
 
 	// Name returns the name of the value
 	Name() string
@@ -155,17 +160,6 @@ type Value interface {
 
 	// SetReadOnly marks this value as ReadOnly or not
 	SetReadOnly(ro bool)
-
-	// UpdateWidget updates the widget representation to reflect the current
-	// value.
-	UpdateWidget()
-
-	// Config configures the widget to represent the
-	// value, including setting up the OnChange event listener to set the value
-	// when the user edits it (values are always set immediately when the
-	// widget is updated).  Note: use OnFinal(events.Change, ...) to ensure that
-	// any other change modifiers have had a chance to intervene first.
-	Config()
 
 	// HasDialog returns true if this value has an associated Dialog,
 	// e.g., for Filename, StructView, SliceView, etc.
@@ -248,6 +242,70 @@ func (vv *ValueBase[W]) AsWidget() gi.Widget {
 
 func (vv *ValueBase[W]) AsWidgetBase() *gi.WidgetBase {
 	return vv.Widget.AsWidget()
+}
+
+func (vv *ValueBase[W]) MakeWidget(par ki.Ki) gi.Widget {
+	return ki.New[W](par)
+}
+
+// Config configures the given [gi.Widget] to represent the given [Value].
+func Config(v Value, w gi.Widget) {
+	BaseConfig(v, w)
+	v.Config()
+	v.Update()
+}
+
+// BaseConfig does the base configuration for the given [gi.Widget] to represent the given [Value].
+func BaseConfig(v Value, w gi.Widget) {
+	w.AsWidget().SetTooltip(v.Doc())
+	w.SetState(v.IsReadOnly(), states.ReadOnly) // do right away
+	w.Style(func(s *styles.Style) {
+		s.SetState(v.IsReadOnly(), states.ReadOnly) // and in style
+		if tv, ok := v.Tag("width"); ok {
+			v, err := laser.ToFloat32(tv)
+			if err == nil {
+				s.Min.X.Ch(v)
+			}
+		}
+		if tv, ok := v.Tag("max-width"); ok {
+			v, err := laser.ToFloat32(tv)
+			if err == nil {
+				if v < 0 {
+					s.Grow.X = 1 // support legacy
+				} else {
+					s.Max.X.Ch(v)
+				}
+			}
+		}
+		if tv, ok := v.Tag("height"); ok {
+			v, err := laser.ToFloat32(tv)
+			if err == nil {
+				s.Min.Y.Em(v)
+			}
+		}
+		if tv, ok := v.Tag("max-height"); ok {
+			v, err := laser.ToFloat32(tv)
+			if err == nil {
+				if v < 0 {
+					s.Grow.Y = 1
+				} else {
+					s.Max.Y.Em(v)
+				}
+			}
+		}
+		if tv, ok := v.Tag("grow"); ok {
+			v, err := laser.ToFloat32(tv)
+			if err == nil {
+				s.Grow.X = v
+			}
+		}
+		if tv, ok := v.Tag("grow-y"); ok {
+			v, err := laser.ToFloat32(tv)
+			if err == nil {
+				s.Grow.Y = v
+			}
+		}
+	})
 }
 
 // note: could have a more efficient way to represent the different owner type
@@ -860,61 +918,6 @@ func (vv *ValueBase) Config(w gi.Widget) {
 		}
 	})
 	vv.UpdateWidget()
-}
-
-// StdConfig does all of the standard widget configuration tag options
-func (vv *ValueBase[W]) StdConfig() {
-	vv.Widget.SetState(vv.IsReadOnly(), states.ReadOnly) // do right away
-	vv.Widget.Style(func(s *styles.Style) {
-		vv.Widget.SetState(vv.IsReadOnly(), states.ReadOnly) // and in style
-		if tv, ok := vv.Tag("width"); ok {
-			v, err := laser.ToFloat32(tv)
-			if err == nil {
-				s.Min.X.Ch(v)
-			}
-		}
-		if tv, ok := vv.Tag("max-width"); ok {
-			v, err := laser.ToFloat32(tv)
-			if err == nil {
-				if v < 0 {
-					s.Grow.X = 1 // support legacy
-				} else {
-					s.Max.X.Ch(v)
-				}
-			}
-		}
-		if tv, ok := vv.Tag("height"); ok {
-			v, err := laser.ToFloat32(tv)
-			if err == nil {
-				s.Min.Y.Em(v)
-			}
-		}
-		if tv, ok := vv.Tag("max-height"); ok {
-			v, err := laser.ToFloat32(tv)
-			if err == nil {
-				if v < 0 {
-					s.Grow.Y = 1
-				} else {
-					s.Max.Y.Em(v)
-				}
-			}
-		}
-		if tv, ok := vv.Tag("grow"); ok {
-			v, err := laser.ToFloat32(tv)
-			if err == nil {
-				s.Grow.X = v
-			}
-		}
-		if tv, ok := vv.Tag("grow-y"); ok {
-			v, err := laser.ToFloat32(tv)
-			if err == nil {
-				s.Grow.Y = v
-			}
-		}
-		if vv.IsReadOnly() {
-			vv.AsWidget().SetReadOnly(true)
-		}
-	})
 }
 
 // ConfigDialogWidget configures the given widget to open the dialog for
