@@ -72,7 +72,8 @@ func (a *App) DataDir() string {
 }
 
 func (w *Window) Handle() any {
-	return uintptr(w.Glw.GetCocoaWindow())
+	return nil // TODO(kai/mado): Handle
+	// return uintptr(w.Glw.GetCocoaWindow())
 }
 
 /////////////////////////////////////////////////////////////////
