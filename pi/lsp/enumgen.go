@@ -3,10 +3,6 @@
 package lsp
 
 import (
-	"errors"
-	"log"
-	"strconv"
-
 	"cogentcore.org/core/enums"
 )
 
@@ -15,28 +11,19 @@ var _CompletionKindValues = []CompletionKind{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1
 // CompletionKindN is the highest valid value for type CompletionKind, plus one.
 const CompletionKindN CompletionKind = 26
 
-var _CompletionKindNameToValueMap = map[string]CompletionKind{`None`: 0, `Text`: 1, `Method`: 2, `Function`: 3, `Constructor`: 4, `Field`: 5, `Variable`: 6, `Class`: 7, `Interface`: 8, `Module`: 9, `Property`: 10, `Unit`: 11, `Value`: 12, `Enum`: 13, `Keyword`: 14, `Snippet`: 15, `Color`: 16, `File`: 17, `Reference`: 18, `Folder`: 19, `EnumMember`: 20, `Constant`: 21, `Struct`: 22, `Event`: 23, `Operator`: 24, `TypeParameter`: 25}
+var _CompletionKindValueMap = map[string]CompletionKind{`None`: 0, `Text`: 1, `Method`: 2, `Function`: 3, `Constructor`: 4, `Field`: 5, `Variable`: 6, `Class`: 7, `Interface`: 8, `Module`: 9, `Property`: 10, `Unit`: 11, `Value`: 12, `Enum`: 13, `Keyword`: 14, `Snippet`: 15, `Color`: 16, `File`: 17, `Reference`: 18, `Folder`: 19, `EnumMember`: 20, `Constant`: 21, `Struct`: 22, `Event`: 23, `Operator`: 24, `TypeParameter`: 25}
 
 var _CompletionKindDescMap = map[CompletionKind]string{0: ``, 1: ``, 2: ``, 3: ``, 4: ``, 5: ``, 6: ``, 7: ``, 8: ``, 9: ``, 10: ``, 11: ``, 12: ``, 13: ``, 14: ``, 15: ``, 16: ``, 17: ``, 18: ``, 19: ``, 20: ``, 21: ``, 22: ``, 23: ``, 24: ``, 25: ``}
 
 var _CompletionKindMap = map[CompletionKind]string{0: `None`, 1: `Text`, 2: `Method`, 3: `Function`, 4: `Constructor`, 5: `Field`, 6: `Variable`, 7: `Class`, 8: `Interface`, 9: `Module`, 10: `Property`, 11: `Unit`, 12: `Value`, 13: `Enum`, 14: `Keyword`, 15: `Snippet`, 16: `Color`, 17: `File`, 18: `Reference`, 19: `Folder`, 20: `EnumMember`, 21: `Constant`, 22: `Struct`, 23: `Event`, 24: `Operator`, 25: `TypeParameter`}
 
 // String returns the string representation of this CompletionKind value.
-func (i CompletionKind) String() string {
-	if str, ok := _CompletionKindMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+func (i CompletionKind) String() string { return enums.String(i, _CompletionKindMap) }
 
 // SetString sets the CompletionKind value from its string representation,
 // and returns an error if the string is invalid.
 func (i *CompletionKind) SetString(s string) error {
-	if val, ok := _CompletionKindNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type CompletionKind")
+	return enums.SetString(i, s, _CompletionKindValueMap, "CompletionKind")
 }
 
 // Int64 returns the CompletionKind value as an int64.
@@ -46,36 +33,20 @@ func (i CompletionKind) Int64() int64 { return int64(i) }
 func (i *CompletionKind) SetInt64(in int64) { *i = CompletionKind(in) }
 
 // Desc returns the description of the CompletionKind value.
-func (i CompletionKind) Desc() string {
-	if str, ok := _CompletionKindDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
+func (i CompletionKind) Desc() string { return enums.Desc(i, _CompletionKindDescMap) }
 
 // CompletionKindValues returns all possible values for the type CompletionKind.
 func CompletionKindValues() []CompletionKind { return _CompletionKindValues }
 
 // Values returns all possible values for the type CompletionKind.
-func (i CompletionKind) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_CompletionKindValues))
-	for i, d := range _CompletionKindValues {
-		res[i] = d
-	}
-	return res
-}
+func (i CompletionKind) Values() []enums.Enum { return enums.Values(_CompletionKindValues) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i CompletionKind) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
+func (i CompletionKind) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *CompletionKind) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("CompletionKind.UnmarshalText:", err)
-	}
-	return nil
+	return enums.UnmarshalText(i, text, "CompletionKind")
 }
 
 var _SymbolKindValues = []SymbolKind{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26}
@@ -83,28 +54,19 @@ var _SymbolKindValues = []SymbolKind{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 1
 // SymbolKindN is the highest valid value for type SymbolKind, plus one.
 const SymbolKindN SymbolKind = 27
 
-var _SymbolKindNameToValueMap = map[string]SymbolKind{`NoSymbolKind`: 0, `File`: 1, `Module`: 2, `Namespace`: 3, `Package`: 4, `Class`: 5, `Method`: 6, `Property`: 7, `Field`: 8, `Constructor`: 9, `Enum`: 10, `Interface`: 11, `Function`: 12, `Variable`: 13, `Constant`: 14, `String`: 15, `Number`: 16, `Boolean`: 17, `Array`: 18, `Object`: 19, `Key`: 20, `Null`: 21, `EnumMember`: 22, `Struct`: 23, `Event`: 24, `Operator`: 25, `TypeParameter`: 26}
+var _SymbolKindValueMap = map[string]SymbolKind{`NoSymbolKind`: 0, `File`: 1, `Module`: 2, `Namespace`: 3, `Package`: 4, `Class`: 5, `Method`: 6, `Property`: 7, `Field`: 8, `Constructor`: 9, `Enum`: 10, `Interface`: 11, `Function`: 12, `Variable`: 13, `Constant`: 14, `String`: 15, `Number`: 16, `Boolean`: 17, `Array`: 18, `Object`: 19, `Key`: 20, `Null`: 21, `EnumMember`: 22, `Struct`: 23, `Event`: 24, `Operator`: 25, `TypeParameter`: 26}
 
 var _SymbolKindDescMap = map[SymbolKind]string{0: ``, 1: ``, 2: ``, 3: ``, 4: ``, 5: ``, 6: ``, 7: ``, 8: ``, 9: ``, 10: ``, 11: ``, 12: ``, 13: ``, 14: ``, 15: ``, 16: ``, 17: ``, 18: ``, 19: ``, 20: ``, 21: ``, 22: ``, 23: ``, 24: ``, 25: ``, 26: ``}
 
 var _SymbolKindMap = map[SymbolKind]string{0: `NoSymbolKind`, 1: `File`, 2: `Module`, 3: `Namespace`, 4: `Package`, 5: `Class`, 6: `Method`, 7: `Property`, 8: `Field`, 9: `Constructor`, 10: `Enum`, 11: `Interface`, 12: `Function`, 13: `Variable`, 14: `Constant`, 15: `String`, 16: `Number`, 17: `Boolean`, 18: `Array`, 19: `Object`, 20: `Key`, 21: `Null`, 22: `EnumMember`, 23: `Struct`, 24: `Event`, 25: `Operator`, 26: `TypeParameter`}
 
 // String returns the string representation of this SymbolKind value.
-func (i SymbolKind) String() string {
-	if str, ok := _SymbolKindMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+func (i SymbolKind) String() string { return enums.String(i, _SymbolKindMap) }
 
 // SetString sets the SymbolKind value from its string representation,
 // and returns an error if the string is invalid.
 func (i *SymbolKind) SetString(s string) error {
-	if val, ok := _SymbolKindNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type SymbolKind")
+	return enums.SetString(i, s, _SymbolKindValueMap, "SymbolKind")
 }
 
 // Int64 returns the SymbolKind value as an int64.
@@ -114,34 +76,18 @@ func (i SymbolKind) Int64() int64 { return int64(i) }
 func (i *SymbolKind) SetInt64(in int64) { *i = SymbolKind(in) }
 
 // Desc returns the description of the SymbolKind value.
-func (i SymbolKind) Desc() string {
-	if str, ok := _SymbolKindDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
+func (i SymbolKind) Desc() string { return enums.Desc(i, _SymbolKindDescMap) }
 
 // SymbolKindValues returns all possible values for the type SymbolKind.
 func SymbolKindValues() []SymbolKind { return _SymbolKindValues }
 
 // Values returns all possible values for the type SymbolKind.
-func (i SymbolKind) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_SymbolKindValues))
-	for i, d := range _SymbolKindValues {
-		res[i] = d
-	}
-	return res
-}
+func (i SymbolKind) Values() []enums.Enum { return enums.Values(_SymbolKindValues) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i SymbolKind) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
+func (i SymbolKind) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *SymbolKind) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("SymbolKind.UnmarshalText:", err)
-	}
-	return nil
+	return enums.UnmarshalText(i, text, "SymbolKind")
 }

@@ -3,10 +3,6 @@
 package mat32
 
 import (
-	"errors"
-	"log"
-	"strconv"
-
 	"cogentcore.org/core/enums"
 )
 
@@ -15,29 +11,18 @@ var _DimsValues = []Dims{0, 1, 2, 3}
 // DimsN is the highest valid value for type Dims, plus one.
 const DimsN Dims = 4
 
-var _DimsNameToValueMap = map[string]Dims{`X`: 0, `Y`: 1, `Z`: 2, `W`: 3}
+var _DimsValueMap = map[string]Dims{`X`: 0, `Y`: 1, `Z`: 2, `W`: 3}
 
 var _DimsDescMap = map[Dims]string{0: ``, 1: ``, 2: ``, 3: ``}
 
 var _DimsMap = map[Dims]string{0: `X`, 1: `Y`, 2: `Z`, 3: `W`}
 
 // String returns the string representation of this Dims value.
-func (i Dims) String() string {
-	if str, ok := _DimsMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+func (i Dims) String() string { return enums.String(i, _DimsMap) }
 
 // SetString sets the Dims value from its string representation,
 // and returns an error if the string is invalid.
-func (i *Dims) SetString(s string) error {
-	if val, ok := _DimsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type Dims")
-}
+func (i *Dims) SetString(s string) error { return enums.SetString(i, s, _DimsValueMap, "Dims") }
 
 // Int64 returns the Dims value as an int64.
 func (i Dims) Int64() int64 { return int64(i) }
@@ -46,34 +31,16 @@ func (i Dims) Int64() int64 { return int64(i) }
 func (i *Dims) SetInt64(in int64) { *i = Dims(in) }
 
 // Desc returns the description of the Dims value.
-func (i Dims) Desc() string {
-	if str, ok := _DimsDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
+func (i Dims) Desc() string { return enums.Desc(i, _DimsDescMap) }
 
 // DimsValues returns all possible values for the type Dims.
 func DimsValues() []Dims { return _DimsValues }
 
 // Values returns all possible values for the type Dims.
-func (i Dims) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_DimsValues))
-	for i, d := range _DimsValues {
-		res[i] = d
-	}
-	return res
-}
+func (i Dims) Values() []enums.Enum { return enums.Values(_DimsValues) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i Dims) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
+func (i Dims) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *Dims) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("Dims.UnmarshalText:", err)
-	}
-	return nil
-}
+func (i *Dims) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "Dims") }

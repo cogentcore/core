@@ -3,8 +3,6 @@
 package config
 
 import (
-	"log"
-
 	"cogentcore.org/core/enums"
 )
 
@@ -33,34 +31,16 @@ func (i Types) Int64() int64 { return int64(i) }
 func (i *Types) SetInt64(in int64) { *i = Types(in) }
 
 // Desc returns the description of the Types value.
-func (i Types) Desc() string {
-	if str, ok := _TypesDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
+func (i Types) Desc() string { return enums.Desc(i, _TypesDescMap) }
 
 // TypesValues returns all possible values for the type Types.
 func TypesValues() []Types { return _TypesValues }
 
 // Values returns all possible values for the type Types.
-func (i Types) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_TypesValues))
-	for i, d := range _TypesValues {
-		res[i] = d
-	}
-	return res
-}
+func (i Types) Values() []enums.Enum { return enums.Values(_TypesValues) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i Types) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
+func (i Types) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *Types) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("Types.UnmarshalText:", err)
-	}
-	return nil
-}
+func (i *Types) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "Types") }

@@ -3,10 +3,6 @@
 package colors
 
 import (
-	"errors"
-	"log"
-	"strconv"
-
 	"cogentcore.org/core/enums"
 )
 
@@ -15,28 +11,19 @@ var _BlendTypesValues = []BlendTypes{0, 1, 2}
 // BlendTypesN is the highest valid value for type BlendTypes, plus one.
 const BlendTypesN BlendTypes = 3
 
-var _BlendTypesNameToValueMap = map[string]BlendTypes{`HCT`: 0, `RGB`: 1, `CAM16`: 2}
+var _BlendTypesValueMap = map[string]BlendTypes{`HCT`: 0, `RGB`: 1, `CAM16`: 2}
 
 var _BlendTypesDescMap = map[BlendTypes]string{0: `HCT uses the hue, chroma, and tone space and generally produces the best results, but at a slight performance cost.`, 1: `RGB uses raw RGB space, which is the standard space that most other programs use. It produces decent results with maximum performance.`, 2: `CAM16 is an alternative colorspace, similar to HCT, but not quite as good.`}
 
 var _BlendTypesMap = map[BlendTypes]string{0: `HCT`, 1: `RGB`, 2: `CAM16`}
 
 // String returns the string representation of this BlendTypes value.
-func (i BlendTypes) String() string {
-	if str, ok := _BlendTypesMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+func (i BlendTypes) String() string { return enums.String(i, _BlendTypesMap) }
 
 // SetString sets the BlendTypes value from its string representation,
 // and returns an error if the string is invalid.
 func (i *BlendTypes) SetString(s string) error {
-	if val, ok := _BlendTypesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type BlendTypes")
+	return enums.SetString(i, s, _BlendTypesValueMap, "BlendTypes")
 }
 
 // Int64 returns the BlendTypes value as an int64.
@@ -46,34 +33,18 @@ func (i BlendTypes) Int64() int64 { return int64(i) }
 func (i *BlendTypes) SetInt64(in int64) { *i = BlendTypes(in) }
 
 // Desc returns the description of the BlendTypes value.
-func (i BlendTypes) Desc() string {
-	if str, ok := _BlendTypesDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
+func (i BlendTypes) Desc() string { return enums.Desc(i, _BlendTypesDescMap) }
 
 // BlendTypesValues returns all possible values for the type BlendTypes.
 func BlendTypesValues() []BlendTypes { return _BlendTypesValues }
 
 // Values returns all possible values for the type BlendTypes.
-func (i BlendTypes) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_BlendTypesValues))
-	for i, d := range _BlendTypesValues {
-		res[i] = d
-	}
-	return res
-}
+func (i BlendTypes) Values() []enums.Enum { return enums.Values(_BlendTypesValues) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i BlendTypes) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
+func (i BlendTypes) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *BlendTypes) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("BlendTypes.UnmarshalText:", err)
-	}
-	return nil
+	return enums.UnmarshalText(i, text, "BlendTypes")
 }

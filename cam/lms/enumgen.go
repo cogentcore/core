@@ -3,10 +3,6 @@
 package lms
 
 import (
-	"errors"
-	"log"
-	"strconv"
-
 	"cogentcore.org/core/enums"
 )
 
@@ -15,28 +11,19 @@ var _OpponentsValues = []Opponents{0, 1, 2}
 // OpponentsN is the highest valid value for type Opponents, plus one.
 const OpponentsN Opponents = 3
 
-var _OpponentsNameToValueMap = map[string]Opponents{`WhiteBlack`: 0, `RedGreen`: 1, `BlueYellow`: 2}
+var _OpponentsValueMap = map[string]Opponents{`WhiteBlack`: 0, `RedGreen`: 1, `BlueYellow`: 2}
 
 var _OpponentsDescMap = map[Opponents]string{0: `White vs. Black greyscale`, 1: `Red vs. Green`, 2: `Blue vs. Yellow`}
 
 var _OpponentsMap = map[Opponents]string{0: `WhiteBlack`, 1: `RedGreen`, 2: `BlueYellow`}
 
 // String returns the string representation of this Opponents value.
-func (i Opponents) String() string {
-	if str, ok := _OpponentsMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+func (i Opponents) String() string { return enums.String(i, _OpponentsMap) }
 
 // SetString sets the Opponents value from its string representation,
 // and returns an error if the string is invalid.
 func (i *Opponents) SetString(s string) error {
-	if val, ok := _OpponentsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type Opponents")
+	return enums.SetString(i, s, _OpponentsValueMap, "Opponents")
 }
 
 // Int64 returns the Opponents value as an int64.
@@ -46,34 +33,18 @@ func (i Opponents) Int64() int64 { return int64(i) }
 func (i *Opponents) SetInt64(in int64) { *i = Opponents(in) }
 
 // Desc returns the description of the Opponents value.
-func (i Opponents) Desc() string {
-	if str, ok := _OpponentsDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
+func (i Opponents) Desc() string { return enums.Desc(i, _OpponentsDescMap) }
 
 // OpponentsValues returns all possible values for the type Opponents.
 func OpponentsValues() []Opponents { return _OpponentsValues }
 
 // Values returns all possible values for the type Opponents.
-func (i Opponents) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_OpponentsValues))
-	for i, d := range _OpponentsValues {
-		res[i] = d
-	}
-	return res
-}
+func (i Opponents) Values() []enums.Enum { return enums.Values(_OpponentsValues) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i Opponents) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
+func (i Opponents) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Opponents) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("Opponents.UnmarshalText:", err)
-	}
-	return nil
+	return enums.UnmarshalText(i, text, "Opponents")
 }

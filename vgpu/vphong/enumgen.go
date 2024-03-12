@@ -3,10 +3,6 @@
 package vphong
 
 import (
-	"errors"
-	"log"
-	"strconv"
-
 	"cogentcore.org/core/enums"
 )
 
@@ -15,29 +11,18 @@ var _SetsValues = []Sets{0, 1, 2, 3}
 // SetsN is the highest valid value for type Sets, plus one.
 const SetsN Sets = 4
 
-var _SetsNameToValueMap = map[string]Sets{`MtxsSet`: 0, `NLightSet`: 1, `LightSet`: 2, `TexSet`: 3}
+var _SetsValueMap = map[string]Sets{`MtxsSet`: 0, `NLightSet`: 1, `LightSet`: 2, `TexSet`: 3}
 
 var _SetsDescMap = map[Sets]string{0: ``, 1: ``, 2: ``, 3: ``}
 
 var _SetsMap = map[Sets]string{0: `MtxsSet`, 1: `NLightSet`, 2: `LightSet`, 3: `TexSet`}
 
 // String returns the string representation of this Sets value.
-func (i Sets) String() string {
-	if str, ok := _SetsMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+func (i Sets) String() string { return enums.String(i, _SetsMap) }
 
 // SetString sets the Sets value from its string representation,
 // and returns an error if the string is invalid.
-func (i *Sets) SetString(s string) error {
-	if val, ok := _SetsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type Sets")
-}
+func (i *Sets) SetString(s string) error { return enums.SetString(i, s, _SetsValueMap, "Sets") }
 
 // Int64 returns the Sets value as an int64.
 func (i Sets) Int64() int64 { return int64(i) }
@@ -46,34 +31,16 @@ func (i Sets) Int64() int64 { return int64(i) }
 func (i *Sets) SetInt64(in int64) { *i = Sets(in) }
 
 // Desc returns the description of the Sets value.
-func (i Sets) Desc() string {
-	if str, ok := _SetsDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
+func (i Sets) Desc() string { return enums.Desc(i, _SetsDescMap) }
 
 // SetsValues returns all possible values for the type Sets.
 func SetsValues() []Sets { return _SetsValues }
 
 // Values returns all possible values for the type Sets.
-func (i Sets) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_SetsValues))
-	for i, d := range _SetsValues {
-		res[i] = d
-	}
-	return res
-}
+func (i Sets) Values() []enums.Enum { return enums.Values(_SetsValues) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i Sets) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
+func (i Sets) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *Sets) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("Sets.UnmarshalText:", err)
-	}
-	return nil
-}
+func (i *Sets) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "Sets") }

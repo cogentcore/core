@@ -3,11 +3,6 @@
 package gi
 
 import (
-	"fmt"
-	"log"
-	"strings"
-	"sync/atomic"
-
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/ki"
 )
@@ -39,36 +34,20 @@ func (i ButtonTypes) Int64() int64 { return int64(i) }
 func (i *ButtonTypes) SetInt64(in int64) { *i = ButtonTypes(in) }
 
 // Desc returns the description of the ButtonTypes value.
-func (i ButtonTypes) Desc() string {
-	if str, ok := _ButtonTypesDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
+func (i ButtonTypes) Desc() string { return enums.Desc(i, _ButtonTypesDescMap) }
 
 // ButtonTypesValues returns all possible values for the type ButtonTypes.
 func ButtonTypesValues() []ButtonTypes { return _ButtonTypesValues }
 
 // Values returns all possible values for the type ButtonTypes.
-func (i ButtonTypes) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_ButtonTypesValues))
-	for i, d := range _ButtonTypesValues {
-		res[i] = d
-	}
-	return res
-}
+func (i ButtonTypes) Values() []enums.Enum { return enums.Values(_ButtonTypesValues) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i ButtonTypes) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
+func (i ButtonTypes) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *ButtonTypes) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("ButtonTypes.UnmarshalText:", err)
-	}
-	return nil
+	return enums.UnmarshalText(i, text, "ButtonTypes")
 }
 
 var _ChooserTypesValues = []ChooserTypes{0, 1}
@@ -98,36 +77,20 @@ func (i ChooserTypes) Int64() int64 { return int64(i) }
 func (i *ChooserTypes) SetInt64(in int64) { *i = ChooserTypes(in) }
 
 // Desc returns the description of the ChooserTypes value.
-func (i ChooserTypes) Desc() string {
-	if str, ok := _ChooserTypesDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
+func (i ChooserTypes) Desc() string { return enums.Desc(i, _ChooserTypesDescMap) }
 
 // ChooserTypesValues returns all possible values for the type ChooserTypes.
 func ChooserTypesValues() []ChooserTypes { return _ChooserTypesValues }
 
 // Values returns all possible values for the type ChooserTypes.
-func (i ChooserTypes) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_ChooserTypesValues))
-	for i, d := range _ChooserTypesValues {
-		res[i] = d
-	}
-	return res
-}
+func (i ChooserTypes) Values() []enums.Enum { return enums.Values(_ChooserTypesValues) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i ChooserTypes) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
+func (i ChooserTypes) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *ChooserTypes) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("ChooserTypes.UnmarshalText:", err)
-	}
-	return nil
+	return enums.UnmarshalText(i, text, "ChooserTypes")
 }
 
 var _CompleteSignalsValues = []CompleteSignals{0, 1}
@@ -157,36 +120,20 @@ func (i CompleteSignals) Int64() int64 { return int64(i) }
 func (i *CompleteSignals) SetInt64(in int64) { *i = CompleteSignals(in) }
 
 // Desc returns the description of the CompleteSignals value.
-func (i CompleteSignals) Desc() string {
-	if str, ok := _CompleteSignalsDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
+func (i CompleteSignals) Desc() string { return enums.Desc(i, _CompleteSignalsDescMap) }
 
 // CompleteSignalsValues returns all possible values for the type CompleteSignals.
 func CompleteSignalsValues() []CompleteSignals { return _CompleteSignalsValues }
 
 // Values returns all possible values for the type CompleteSignals.
-func (i CompleteSignals) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_CompleteSignalsValues))
-	for i, d := range _CompleteSignalsValues {
-		res[i] = d
-	}
-	return res
-}
+func (i CompleteSignals) Values() []enums.Enum { return enums.Values(_CompleteSignalsValues) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i CompleteSignals) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
+func (i CompleteSignals) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *CompleteSignals) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("CompleteSignals.UnmarshalText:", err)
-	}
-	return nil
+	return enums.UnmarshalText(i, text, "CompleteSignals")
 }
 
 var _WidgetFlagsValues = []WidgetFlags{1}
@@ -220,20 +167,7 @@ func (i *WidgetFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s
 // while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *WidgetFlags) SetStringOr(s string) error {
-	flgs := strings.Split(s, "|")
-	for _, flg := range flgs {
-		if val, ok := _WidgetFlagsValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if flg == "" {
-			continue
-		} else {
-			err := (*ki.Flags)(i).SetStringOr(flg)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
+	return enums.SetStringOrExtended(i, (*ki.Flags)(i), s, _WidgetFlagsValueMap)
 }
 
 // Int64 returns the WidgetFlags value as an int64.
@@ -244,69 +178,31 @@ func (i *WidgetFlags) SetInt64(in int64) { *i = WidgetFlags(in) }
 
 // Desc returns the description of the WidgetFlags value.
 func (i WidgetFlags) Desc() string {
-	if str, ok := _WidgetFlagsDescMap[i]; ok {
-		return str
-	}
-	return ki.Flags(i).Desc()
+	return enums.DescExtended[WidgetFlags, ki.Flags](i, _WidgetFlagsDescMap)
 }
 
 // WidgetFlagsValues returns all possible values for the type WidgetFlags.
 func WidgetFlagsValues() []WidgetFlags {
-	es := ki.FlagsValues()
-	res := make([]WidgetFlags, len(es))
-	for i, e := range es {
-		res[i] = WidgetFlags(e)
-	}
-	res = append(res, _WidgetFlagsValues...)
-	return res
+	return enums.ValuesGlobalExtended(_WidgetFlagsValues, ki.FlagsValues())
 }
 
 // Values returns all possible values for the type WidgetFlags.
 func (i WidgetFlags) Values() []enums.Enum {
-	es := ki.FlagsValues()
-	les := len(es)
-	res := make([]enums.Enum, les+len(_WidgetFlagsValues))
-	for i, d := range es {
-		res[i] = d
-	}
-	for i, d := range _WidgetFlagsValues {
-		res[i+les] = d
-	}
-	return res
+	return enums.ValuesExtended(_WidgetFlagsValues, ki.FlagsValues())
 }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i WidgetFlags) HasFlag(f enums.BitFlag) bool {
-	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
-}
+func (i WidgetFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
-func (i *WidgetFlags) SetFlag(on bool, f ...enums.BitFlag) {
-	var mask int64
-	for _, v := range f {
-		mask |= 1 << v.Int64()
-	}
-	in := int64(*i)
-	if on {
-		in |= mask
-		atomic.StoreInt64((*int64)(i), in)
-	} else {
-		in &^= mask
-		atomic.StoreInt64((*int64)(i), in)
-	}
-}
+func (i *WidgetFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i WidgetFlags) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
+func (i WidgetFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *WidgetFlags) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("WidgetFlags.UnmarshalText:", err)
-	}
-	return nil
+	return enums.UnmarshalText(i, text, "WidgetFlags")
 }
 
 var _LabelTypesValues = []LabelTypes{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}
@@ -336,36 +232,20 @@ func (i LabelTypes) Int64() int64 { return int64(i) }
 func (i *LabelTypes) SetInt64(in int64) { *i = LabelTypes(in) }
 
 // Desc returns the description of the LabelTypes value.
-func (i LabelTypes) Desc() string {
-	if str, ok := _LabelTypesDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
+func (i LabelTypes) Desc() string { return enums.Desc(i, _LabelTypesDescMap) }
 
 // LabelTypesValues returns all possible values for the type LabelTypes.
 func LabelTypesValues() []LabelTypes { return _LabelTypesValues }
 
 // Values returns all possible values for the type LabelTypes.
-func (i LabelTypes) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_LabelTypesValues))
-	for i, d := range _LabelTypesValues {
-		res[i] = d
-	}
-	return res
-}
+func (i LabelTypes) Values() []enums.Enum { return enums.Values(_LabelTypesValues) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i LabelTypes) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
+func (i LabelTypes) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *LabelTypes) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("LabelTypes.UnmarshalText:", err)
-	}
-	return nil
+	return enums.UnmarshalText(i, text, "LabelTypes")
 }
 
 var _LayoutPassesValues = []LayoutPasses{0, 1, 2}
@@ -395,36 +275,20 @@ func (i LayoutPasses) Int64() int64 { return int64(i) }
 func (i *LayoutPasses) SetInt64(in int64) { *i = LayoutPasses(in) }
 
 // Desc returns the description of the LayoutPasses value.
-func (i LayoutPasses) Desc() string {
-	if str, ok := _LayoutPassesDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
+func (i LayoutPasses) Desc() string { return enums.Desc(i, _LayoutPassesDescMap) }
 
 // LayoutPassesValues returns all possible values for the type LayoutPasses.
 func LayoutPassesValues() []LayoutPasses { return _LayoutPassesValues }
 
 // Values returns all possible values for the type LayoutPasses.
-func (i LayoutPasses) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_LayoutPassesValues))
-	for i, d := range _LayoutPassesValues {
-		res[i] = d
-	}
-	return res
-}
+func (i LayoutPasses) Values() []enums.Enum { return enums.Values(_LayoutPassesValues) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i LayoutPasses) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
+func (i LayoutPasses) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *LayoutPasses) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("LayoutPasses.UnmarshalText:", err)
-	}
-	return nil
+	return enums.UnmarshalText(i, text, "LayoutPasses")
 }
 
 var _LayoutFlagsValues = []LayoutFlags{2, 3, 4}
@@ -458,20 +322,7 @@ func (i *LayoutFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s
 // while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *LayoutFlags) SetStringOr(s string) error {
-	flgs := strings.Split(s, "|")
-	for _, flg := range flgs {
-		if val, ok := _LayoutFlagsValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if flg == "" {
-			continue
-		} else {
-			err := (*WidgetFlags)(i).SetStringOr(flg)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
+	return enums.SetStringOrExtended(i, (*WidgetFlags)(i), s, _LayoutFlagsValueMap)
 }
 
 // Int64 returns the LayoutFlags value as an int64.
@@ -482,69 +333,31 @@ func (i *LayoutFlags) SetInt64(in int64) { *i = LayoutFlags(in) }
 
 // Desc returns the description of the LayoutFlags value.
 func (i LayoutFlags) Desc() string {
-	if str, ok := _LayoutFlagsDescMap[i]; ok {
-		return str
-	}
-	return WidgetFlags(i).Desc()
+	return enums.DescExtended[LayoutFlags, WidgetFlags](i, _LayoutFlagsDescMap)
 }
 
 // LayoutFlagsValues returns all possible values for the type LayoutFlags.
 func LayoutFlagsValues() []LayoutFlags {
-	es := WidgetFlagsValues()
-	res := make([]LayoutFlags, len(es))
-	for i, e := range es {
-		res[i] = LayoutFlags(e)
-	}
-	res = append(res, _LayoutFlagsValues...)
-	return res
+	return enums.ValuesGlobalExtended(_LayoutFlagsValues, WidgetFlagsValues())
 }
 
 // Values returns all possible values for the type LayoutFlags.
 func (i LayoutFlags) Values() []enums.Enum {
-	es := WidgetFlagsValues()
-	les := len(es)
-	res := make([]enums.Enum, les+len(_LayoutFlagsValues))
-	for i, d := range es {
-		res[i] = d
-	}
-	for i, d := range _LayoutFlagsValues {
-		res[i+les] = d
-	}
-	return res
+	return enums.ValuesExtended(_LayoutFlagsValues, WidgetFlagsValues())
 }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i LayoutFlags) HasFlag(f enums.BitFlag) bool {
-	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
-}
+func (i LayoutFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
-func (i *LayoutFlags) SetFlag(on bool, f ...enums.BitFlag) {
-	var mask int64
-	for _, v := range f {
-		mask |= 1 << v.Int64()
-	}
-	in := int64(*i)
-	if on {
-		in |= mask
-		atomic.StoreInt64((*int64)(i), in)
-	} else {
-		in &^= mask
-		atomic.StoreInt64((*int64)(i), in)
-	}
-}
+func (i *LayoutFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i LayoutFlags) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
+func (i LayoutFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *LayoutFlags) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("LayoutFlags.UnmarshalText:", err)
-	}
-	return nil
+	return enums.UnmarshalText(i, text, "LayoutFlags")
 }
 
 var _MeterTypesValues = []MeterTypes{0, 1, 2}
@@ -574,36 +387,20 @@ func (i MeterTypes) Int64() int64 { return int64(i) }
 func (i *MeterTypes) SetInt64(in int64) { *i = MeterTypes(in) }
 
 // Desc returns the description of the MeterTypes value.
-func (i MeterTypes) Desc() string {
-	if str, ok := _MeterTypesDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
+func (i MeterTypes) Desc() string { return enums.Desc(i, _MeterTypesDescMap) }
 
 // MeterTypesValues returns all possible values for the type MeterTypes.
 func MeterTypesValues() []MeterTypes { return _MeterTypesValues }
 
 // Values returns all possible values for the type MeterTypes.
-func (i MeterTypes) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_MeterTypesValues))
-	for i, d := range _MeterTypesValues {
-		res[i] = d
-	}
-	return res
-}
+func (i MeterTypes) Values() []enums.Enum { return enums.Values(_MeterTypesValues) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i MeterTypes) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
+func (i MeterTypes) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *MeterTypes) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("MeterTypes.UnmarshalText:", err)
-	}
-	return nil
+	return enums.UnmarshalText(i, text, "MeterTypes")
 }
 
 var _WinFlagsValues = []WinFlags{0, 1, 2, 3, 4, 5, 6, 7}
@@ -633,17 +430,7 @@ func (i *WinFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
 // while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *WinFlags) SetStringOr(s string) error {
-	flgs := strings.Split(s, "|")
-	for _, flg := range flgs {
-		if val, ok := _WinFlagsValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if flg == "" {
-			continue
-		} else {
-			return fmt.Errorf("%q is not a valid value for type WinFlags", flg)
-		}
-	}
-	return nil
+	return enums.SetStringOr(i, s, _WinFlagsValueMap, "WinFlags")
 }
 
 // Int64 returns the WinFlags value as an int64.
@@ -653,58 +440,25 @@ func (i WinFlags) Int64() int64 { return int64(i) }
 func (i *WinFlags) SetInt64(in int64) { *i = WinFlags(in) }
 
 // Desc returns the description of the WinFlags value.
-func (i WinFlags) Desc() string {
-	if str, ok := _WinFlagsDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
+func (i WinFlags) Desc() string { return enums.Desc(i, _WinFlagsDescMap) }
 
 // WinFlagsValues returns all possible values for the type WinFlags.
 func WinFlagsValues() []WinFlags { return _WinFlagsValues }
 
 // Values returns all possible values for the type WinFlags.
-func (i WinFlags) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_WinFlagsValues))
-	for i, d := range _WinFlagsValues {
-		res[i] = d
-	}
-	return res
-}
+func (i WinFlags) Values() []enums.Enum { return enums.Values(_WinFlagsValues) }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i WinFlags) HasFlag(f enums.BitFlag) bool {
-	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
-}
+func (i WinFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
-func (i *WinFlags) SetFlag(on bool, f ...enums.BitFlag) {
-	var mask int64
-	for _, v := range f {
-		mask |= 1 << v.Int64()
-	}
-	in := int64(*i)
-	if on {
-		in |= mask
-		atomic.StoreInt64((*int64)(i), in)
-	} else {
-		in &^= mask
-		atomic.StoreInt64((*int64)(i), in)
-	}
-}
+func (i *WinFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i WinFlags) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
+func (i WinFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *WinFlags) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("WinFlags.UnmarshalText:", err)
-	}
-	return nil
-}
+func (i *WinFlags) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "WinFlags") }
 
 var _RenderContextFlagsValues = []RenderContextFlags{0, 1}
 
@@ -733,17 +487,7 @@ func (i *RenderContextFlags) SetString(s string) error { *i = 0; return i.SetStr
 // while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *RenderContextFlags) SetStringOr(s string) error {
-	flgs := strings.Split(s, "|")
-	for _, flg := range flgs {
-		if val, ok := _RenderContextFlagsValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if flg == "" {
-			continue
-		} else {
-			return fmt.Errorf("%q is not a valid value for type RenderContextFlags", flg)
-		}
-	}
-	return nil
+	return enums.SetStringOr(i, s, _RenderContextFlagsValueMap, "RenderContextFlags")
 }
 
 // Int64 returns the RenderContextFlags value as an int64.
@@ -753,57 +497,28 @@ func (i RenderContextFlags) Int64() int64 { return int64(i) }
 func (i *RenderContextFlags) SetInt64(in int64) { *i = RenderContextFlags(in) }
 
 // Desc returns the description of the RenderContextFlags value.
-func (i RenderContextFlags) Desc() string {
-	if str, ok := _RenderContextFlagsDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
+func (i RenderContextFlags) Desc() string { return enums.Desc(i, _RenderContextFlagsDescMap) }
 
 // RenderContextFlagsValues returns all possible values for the type RenderContextFlags.
 func RenderContextFlagsValues() []RenderContextFlags { return _RenderContextFlagsValues }
 
 // Values returns all possible values for the type RenderContextFlags.
-func (i RenderContextFlags) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_RenderContextFlagsValues))
-	for i, d := range _RenderContextFlagsValues {
-		res[i] = d
-	}
-	return res
-}
+func (i RenderContextFlags) Values() []enums.Enum { return enums.Values(_RenderContextFlagsValues) }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i RenderContextFlags) HasFlag(f enums.BitFlag) bool {
-	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
-}
+func (i RenderContextFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
 func (i *RenderContextFlags) SetFlag(on bool, f ...enums.BitFlag) {
-	var mask int64
-	for _, v := range f {
-		mask |= 1 << v.Int64()
-	}
-	in := int64(*i)
-	if on {
-		in |= mask
-		atomic.StoreInt64((*int64)(i), in)
-	} else {
-		in &^= mask
-		atomic.StoreInt64((*int64)(i), in)
-	}
+	enums.SetFlag((*int64)(i), on, f...)
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i RenderContextFlags) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
+func (i RenderContextFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *RenderContextFlags) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("RenderContextFlags.UnmarshalText:", err)
-	}
-	return nil
+	return enums.UnmarshalText(i, text, "RenderContextFlags")
 }
 
 var _ScFlagsValues = []ScFlags{2, 3, 4, 5, 6, 7, 8, 9}
@@ -837,20 +552,7 @@ func (i *ScFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
 // while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *ScFlags) SetStringOr(s string) error {
-	flgs := strings.Split(s, "|")
-	for _, flg := range flgs {
-		if val, ok := _ScFlagsValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if flg == "" {
-			continue
-		} else {
-			err := (*WidgetFlags)(i).SetStringOr(flg)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
+	return enums.SetStringOrExtended(i, (*WidgetFlags)(i), s, _ScFlagsValueMap)
 }
 
 // Int64 returns the ScFlags value as an int64.
@@ -860,71 +562,29 @@ func (i ScFlags) Int64() int64 { return int64(i) }
 func (i *ScFlags) SetInt64(in int64) { *i = ScFlags(in) }
 
 // Desc returns the description of the ScFlags value.
-func (i ScFlags) Desc() string {
-	if str, ok := _ScFlagsDescMap[i]; ok {
-		return str
-	}
-	return WidgetFlags(i).Desc()
-}
+func (i ScFlags) Desc() string { return enums.DescExtended[ScFlags, WidgetFlags](i, _ScFlagsDescMap) }
 
 // ScFlagsValues returns all possible values for the type ScFlags.
 func ScFlagsValues() []ScFlags {
-	es := WidgetFlagsValues()
-	res := make([]ScFlags, len(es))
-	for i, e := range es {
-		res[i] = ScFlags(e)
-	}
-	res = append(res, _ScFlagsValues...)
-	return res
+	return enums.ValuesGlobalExtended(_ScFlagsValues, WidgetFlagsValues())
 }
 
 // Values returns all possible values for the type ScFlags.
 func (i ScFlags) Values() []enums.Enum {
-	es := WidgetFlagsValues()
-	les := len(es)
-	res := make([]enums.Enum, les+len(_ScFlagsValues))
-	for i, d := range es {
-		res[i] = d
-	}
-	for i, d := range _ScFlagsValues {
-		res[i+les] = d
-	}
-	return res
+	return enums.ValuesExtended(_ScFlagsValues, WidgetFlagsValues())
 }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i ScFlags) HasFlag(f enums.BitFlag) bool {
-	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
-}
+func (i ScFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
-func (i *ScFlags) SetFlag(on bool, f ...enums.BitFlag) {
-	var mask int64
-	for _, v := range f {
-		mask |= 1 << v.Int64()
-	}
-	in := int64(*i)
-	if on {
-		in |= mask
-		atomic.StoreInt64((*int64)(i), in)
-	} else {
-		in &^= mask
-		atomic.StoreInt64((*int64)(i), in)
-	}
-}
+func (i *ScFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i ScFlags) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
+func (i ScFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *ScFlags) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("ScFlags.UnmarshalText:", err)
-	}
-	return nil
-}
+func (i *ScFlags) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "ScFlags") }
 
 var _SizeClassesValues = []SizeClasses{0, 1, 2}
 
@@ -953,36 +613,20 @@ func (i SizeClasses) Int64() int64 { return int64(i) }
 func (i *SizeClasses) SetInt64(in int64) { *i = SizeClasses(in) }
 
 // Desc returns the description of the SizeClasses value.
-func (i SizeClasses) Desc() string {
-	if str, ok := _SizeClassesDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
+func (i SizeClasses) Desc() string { return enums.Desc(i, _SizeClassesDescMap) }
 
 // SizeClassesValues returns all possible values for the type SizeClasses.
 func SizeClassesValues() []SizeClasses { return _SizeClassesValues }
 
 // Values returns all possible values for the type SizeClasses.
-func (i SizeClasses) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_SizeClassesValues))
-	for i, d := range _SizeClassesValues {
-		res[i] = d
-	}
-	return res
-}
+func (i SizeClasses) Values() []enums.Enum { return enums.Values(_SizeClassesValues) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i SizeClasses) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
+func (i SizeClasses) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *SizeClasses) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("SizeClasses.UnmarshalText:", err)
-	}
-	return nil
+	return enums.UnmarshalText(i, text, "SizeClasses")
 }
 
 var _SliderTypesValues = []SliderTypes{0, 1}
@@ -1012,36 +656,20 @@ func (i SliderTypes) Int64() int64 { return int64(i) }
 func (i *SliderTypes) SetInt64(in int64) { *i = SliderTypes(in) }
 
 // Desc returns the description of the SliderTypes value.
-func (i SliderTypes) Desc() string {
-	if str, ok := _SliderTypesDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
+func (i SliderTypes) Desc() string { return enums.Desc(i, _SliderTypesDescMap) }
 
 // SliderTypesValues returns all possible values for the type SliderTypes.
 func SliderTypesValues() []SliderTypes { return _SliderTypesValues }
 
 // Values returns all possible values for the type SliderTypes.
-func (i SliderTypes) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_SliderTypesValues))
-	for i, d := range _SliderTypesValues {
-		res[i] = d
-	}
-	return res
-}
+func (i SliderTypes) Values() []enums.Enum { return enums.Values(_SliderTypesValues) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i SliderTypes) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
+func (i SliderTypes) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *SliderTypes) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("SliderTypes.UnmarshalText:", err)
-	}
-	return nil
+	return enums.UnmarshalText(i, text, "SliderTypes")
 }
 
 var _StageTypesValues = []StageTypes{0, 1, 2, 3, 4, 5}
@@ -1071,36 +699,20 @@ func (i StageTypes) Int64() int64 { return int64(i) }
 func (i *StageTypes) SetInt64(in int64) { *i = StageTypes(in) }
 
 // Desc returns the description of the StageTypes value.
-func (i StageTypes) Desc() string {
-	if str, ok := _StageTypesDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
+func (i StageTypes) Desc() string { return enums.Desc(i, _StageTypesDescMap) }
 
 // StageTypesValues returns all possible values for the type StageTypes.
 func StageTypesValues() []StageTypes { return _StageTypesValues }
 
 // Values returns all possible values for the type StageTypes.
-func (i StageTypes) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_StageTypesValues))
-	for i, d := range _StageTypesValues {
-		res[i] = d
-	}
-	return res
-}
+func (i StageTypes) Values() []enums.Enum { return enums.Values(_StageTypesValues) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i StageTypes) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
+func (i StageTypes) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *StageTypes) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("StageTypes.UnmarshalText:", err)
-	}
-	return nil
+	return enums.UnmarshalText(i, text, "StageTypes")
 }
 
 var _SwitchTypesValues = []SwitchTypes{0, 1, 2, 3, 4}
@@ -1130,36 +742,20 @@ func (i SwitchTypes) Int64() int64 { return int64(i) }
 func (i *SwitchTypes) SetInt64(in int64) { *i = SwitchTypes(in) }
 
 // Desc returns the description of the SwitchTypes value.
-func (i SwitchTypes) Desc() string {
-	if str, ok := _SwitchTypesDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
+func (i SwitchTypes) Desc() string { return enums.Desc(i, _SwitchTypesDescMap) }
 
 // SwitchTypesValues returns all possible values for the type SwitchTypes.
 func SwitchTypesValues() []SwitchTypes { return _SwitchTypesValues }
 
 // Values returns all possible values for the type SwitchTypes.
-func (i SwitchTypes) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_SwitchTypesValues))
-	for i, d := range _SwitchTypesValues {
-		res[i] = d
-	}
-	return res
-}
+func (i SwitchTypes) Values() []enums.Enum { return enums.Values(_SwitchTypesValues) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i SwitchTypes) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
+func (i SwitchTypes) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *SwitchTypes) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("SwitchTypes.UnmarshalText:", err)
-	}
-	return nil
+	return enums.UnmarshalText(i, text, "SwitchTypes")
 }
 
 var _TabTypesValues = []TabTypes{0, 1, 2, 3, 4, 5}
@@ -1189,37 +785,19 @@ func (i TabTypes) Int64() int64 { return int64(i) }
 func (i *TabTypes) SetInt64(in int64) { *i = TabTypes(in) }
 
 // Desc returns the description of the TabTypes value.
-func (i TabTypes) Desc() string {
-	if str, ok := _TabTypesDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
+func (i TabTypes) Desc() string { return enums.Desc(i, _TabTypesDescMap) }
 
 // TabTypesValues returns all possible values for the type TabTypes.
 func TabTypesValues() []TabTypes { return _TabTypesValues }
 
 // Values returns all possible values for the type TabTypes.
-func (i TabTypes) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_TabTypesValues))
-	for i, d := range _TabTypesValues {
-		res[i] = d
-	}
-	return res
-}
+func (i TabTypes) Values() []enums.Enum { return enums.Values(_TabTypesValues) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i TabTypes) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
+func (i TabTypes) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *TabTypes) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("TabTypes.UnmarshalText:", err)
-	}
-	return nil
-}
+func (i *TabTypes) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "TabTypes") }
 
 var _TextFieldTypesValues = []TextFieldTypes{0, 1}
 
@@ -1248,36 +826,20 @@ func (i TextFieldTypes) Int64() int64 { return int64(i) }
 func (i *TextFieldTypes) SetInt64(in int64) { *i = TextFieldTypes(in) }
 
 // Desc returns the description of the TextFieldTypes value.
-func (i TextFieldTypes) Desc() string {
-	if str, ok := _TextFieldTypesDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
+func (i TextFieldTypes) Desc() string { return enums.Desc(i, _TextFieldTypesDescMap) }
 
 // TextFieldTypesValues returns all possible values for the type TextFieldTypes.
 func TextFieldTypesValues() []TextFieldTypes { return _TextFieldTypesValues }
 
 // Values returns all possible values for the type TextFieldTypes.
-func (i TextFieldTypes) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_TextFieldTypesValues))
-	for i, d := range _TextFieldTypesValues {
-		res[i] = d
-	}
-	return res
-}
+func (i TextFieldTypes) Values() []enums.Enum { return enums.Values(_TextFieldTypesValues) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i TextFieldTypes) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
+func (i TextFieldTypes) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *TextFieldTypes) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("TextFieldTypes.UnmarshalText:", err)
-	}
-	return nil
+	return enums.UnmarshalText(i, text, "TextFieldTypes")
 }
 
 var _ThemesValues = []Themes{0, 1, 2}
@@ -1305,34 +867,16 @@ func (i Themes) Int64() int64 { return int64(i) }
 func (i *Themes) SetInt64(in int64) { *i = Themes(in) }
 
 // Desc returns the description of the Themes value.
-func (i Themes) Desc() string {
-	if str, ok := _ThemesDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
+func (i Themes) Desc() string { return enums.Desc(i, _ThemesDescMap) }
 
 // ThemesValues returns all possible values for the type Themes.
 func ThemesValues() []Themes { return _ThemesValues }
 
 // Values returns all possible values for the type Themes.
-func (i Themes) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_ThemesValues))
-	for i, d := range _ThemesValues {
-		res[i] = d
-	}
-	return res
-}
+func (i Themes) Values() []enums.Enum { return enums.Values(_ThemesValues) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i Themes) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
+func (i Themes) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *Themes) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("Themes.UnmarshalText:", err)
-	}
-	return nil
-}
+func (i *Themes) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "Themes") }

@@ -3,10 +3,6 @@
 package vci
 
 import (
-	"errors"
-	"log"
-	"strconv"
-
 	"cogentcore.org/core/enums"
 )
 
@@ -15,28 +11,19 @@ var _FileStatusValues = []FileStatus{0, 1, 2, 3, 4, 5, 6}
 // FileStatusN is the highest valid value for type FileStatus, plus one.
 const FileStatusN FileStatus = 7
 
-var _FileStatusNameToValueMap = map[string]FileStatus{`Untracked`: 0, `Stored`: 1, `Modified`: 2, `Added`: 3, `Deleted`: 4, `Conflicted`: 5, `Updated`: 6}
+var _FileStatusValueMap = map[string]FileStatus{`Untracked`: 0, `Stored`: 1, `Modified`: 2, `Added`: 3, `Deleted`: 4, `Conflicted`: 5, `Updated`: 6}
 
 var _FileStatusDescMap = map[FileStatus]string{0: `Untracked means file is not under VCS control`, 1: `Stored means file is stored under VCS control, and has not been modified in working copy`, 2: `Modified means file is under VCS control, and has been modified in working copy`, 3: `Added means file has just been added to VCS but is not yet committed`, 4: `Deleted means file has been deleted from VCS`, 5: `Conflicted means file is in conflict -- has not been merged`, 6: `Updated means file has been updated in the remote but not locally`}
 
 var _FileStatusMap = map[FileStatus]string{0: `Untracked`, 1: `Stored`, 2: `Modified`, 3: `Added`, 4: `Deleted`, 5: `Conflicted`, 6: `Updated`}
 
 // String returns the string representation of this FileStatus value.
-func (i FileStatus) String() string {
-	if str, ok := _FileStatusMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+func (i FileStatus) String() string { return enums.String(i, _FileStatusMap) }
 
 // SetString sets the FileStatus value from its string representation,
 // and returns an error if the string is invalid.
 func (i *FileStatus) SetString(s string) error {
-	if val, ok := _FileStatusNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type FileStatus")
+	return enums.SetString(i, s, _FileStatusValueMap, "FileStatus")
 }
 
 // Int64 returns the FileStatus value as an int64.
@@ -46,34 +33,18 @@ func (i FileStatus) Int64() int64 { return int64(i) }
 func (i *FileStatus) SetInt64(in int64) { *i = FileStatus(in) }
 
 // Desc returns the description of the FileStatus value.
-func (i FileStatus) Desc() string {
-	if str, ok := _FileStatusDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
+func (i FileStatus) Desc() string { return enums.Desc(i, _FileStatusDescMap) }
 
 // FileStatusValues returns all possible values for the type FileStatus.
 func FileStatusValues() []FileStatus { return _FileStatusValues }
 
 // Values returns all possible values for the type FileStatus.
-func (i FileStatus) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_FileStatusValues))
-	for i, d := range _FileStatusValues {
-		res[i] = d
-	}
-	return res
-}
+func (i FileStatus) Values() []enums.Enum { return enums.Values(_FileStatusValues) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i FileStatus) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
+func (i FileStatus) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *FileStatus) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("FileStatus.UnmarshalText:", err)
-	}
-	return nil
+	return enums.UnmarshalText(i, text, "FileStatus")
 }

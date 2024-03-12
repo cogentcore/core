@@ -3,12 +3,6 @@
 package ki
 
 import (
-	"fmt"
-	"log"
-	"strconv"
-	"strings"
-	"sync/atomic"
-
 	"cogentcore.org/core/enums"
 )
 
@@ -17,61 +11,28 @@ var _FlagsValues = []Flags{0}
 // FlagsN is the highest valid value for type Flags, plus one.
 const FlagsN Flags = 1
 
-var _FlagsNameToValueMap = map[string]Flags{`Field`: 0}
+var _FlagsValueMap = map[string]Flags{`Field`: 0}
 
 var _FlagsDescMap = map[Flags]string{0: `Field indicates a node is a field in its parent node, not a child in children.`}
 
 var _FlagsMap = map[Flags]string{0: `Field`}
 
 // String returns the string representation of this Flags value.
-func (i Flags) String() string {
-	str := ""
-	for _, ie := range _FlagsValues {
-		if i.HasFlag(ie) {
-			ies := ie.BitIndexString()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}
-	return str
-}
+func (i Flags) String() string { return enums.BitFlagString(i, _FlagsValues) }
 
 // BitIndexString returns the string representation of this Flags value
 // if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
-func (i Flags) BitIndexString() string {
-	if str, ok := _FlagsMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+func (i Flags) BitIndexString() string { return enums.String(i, _FlagsMap) }
 
 // SetString sets the Flags value from its string representation,
 // and returns an error if the string is invalid.
-func (i *Flags) SetString(s string) error {
-	*i = 0
-	return i.SetStringOr(s)
-}
+func (i *Flags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
 
 // SetStringOr sets the Flags value from its string representation
 // while preserving any bit flags already set, and returns an
 // error if the string is invalid.
-func (i *Flags) SetStringOr(s string) error {
-	flgs := strings.Split(s, "|")
-	for _, flg := range flgs {
-		if val, ok := _FlagsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if flg == "" {
-			continue
-		} else {
-			return fmt.Errorf("%q is not a valid value for type Flags", flg)
-		}
-	}
-	return nil
-}
+func (i *Flags) SetStringOr(s string) error { return enums.SetStringOr(i, s, _FlagsValueMap, "Flags") }
 
 // Int64 returns the Flags value as an int64.
 func (i Flags) Int64() int64 { return int64(i) }
@@ -80,55 +41,22 @@ func (i Flags) Int64() int64 { return int64(i) }
 func (i *Flags) SetInt64(in int64) { *i = Flags(in) }
 
 // Desc returns the description of the Flags value.
-func (i Flags) Desc() string {
-	if str, ok := _FlagsDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
+func (i Flags) Desc() string { return enums.Desc(i, _FlagsDescMap) }
 
 // FlagsValues returns all possible values for the type Flags.
 func FlagsValues() []Flags { return _FlagsValues }
 
 // Values returns all possible values for the type Flags.
-func (i Flags) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_FlagsValues))
-	for i, d := range _FlagsValues {
-		res[i] = d
-	}
-	return res
-}
+func (i Flags) Values() []enums.Enum { return enums.Values(_FlagsValues) }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i Flags) HasFlag(f enums.BitFlag) bool {
-	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
-}
+func (i Flags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
-func (i *Flags) SetFlag(on bool, f ...enums.BitFlag) {
-	var mask int64
-	for _, v := range f {
-		mask |= 1 << v.Int64()
-	}
-	in := int64(*i)
-	if on {
-		in |= mask
-		atomic.StoreInt64((*int64)(i), in)
-	} else {
-		in &^= mask
-		atomic.StoreInt64((*int64)(i), in)
-	}
-}
+func (i *Flags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i Flags) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
+func (i Flags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *Flags) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("Flags.UnmarshalText:", err)
-	}
-	return nil
-}
+func (i *Flags) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "Flags") }
