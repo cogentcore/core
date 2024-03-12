@@ -199,35 +199,35 @@ func ToValue(val any, tags string) Value {
 	return &StringValue{} // fallback
 }
 
-// FieldToValue returns the appropriate Value for given field on a
-// struct -- attempts to get the FieldValuer interface, and falls back on
-// ToValue otherwise, using field value (fval)
+// FieldToValue converts the given value into its appropriate [Value] representation,
+// using its type, tags, value, field name, and parent struct. It checks [FieldValuer]
+// before falling back on [ToValue], which you should use for values that are not struct
+// fields.
 //
 //gopy:interface=handle
-func FieldToValue(it any, field string, fval any) Value {
-	if it == nil || field == "" {
-		return ToValue(fval, "")
+func FieldToValue(str any, field string, val any) Value {
+	if str == nil || field == "" {
+		return ToValue(val, "")
 	}
-	if vv, ok := it.(FieldValuer); ok {
-		vvo := vv.FieldValue(field, fval)
-		if vvo != nil {
-			return vvo
+	if vl, ok := str.(FieldValuer); ok {
+		v := vl.FieldValue(field, val)
+		if v != nil {
+			return v
 		}
 	}
-	// try pointer version..
-	if vv, ok := laser.PtrInterface(it).(FieldValuer); ok {
-		vvo := vv.FieldValue(field, fval)
-		if vvo != nil {
-			return vvo
+	if vl, ok := laser.PtrInterface(str).(FieldValuer); ok {
+		v := vl.FieldValue(field, val)
+		if v != nil {
+			return v
 		}
 	}
 
-	typ := reflect.TypeOf(it)
+	typ := reflect.TypeOf(str)
 	nptyp := laser.NonPtrType(typ)
 
 	ftyp, ok := nptyp.FieldByName(field)
 	if ok {
-		return ToValue(fval, string(ftyp.Tag))
+		return ToValue(val, string(ftyp.Tag))
 	}
-	return ToValue(fval, "")
+	return ToValue(val, "")
 }
