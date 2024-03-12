@@ -71,58 +71,50 @@ func AddValue(val any, fun func() Value) {
 	ValueMap[nm] = fun
 }
 
-// StructTagVal returns the value for given key in given struct tag string
-// uses reflect.StructTag Lookup method -- just a wrapper for external
-// use (e.g., in Python code)
-func StructTagVal(key, tags string) string {
-	stag := reflect.StructTag(tags)
-	val, _ := stag.Lookup(key)
-	return val
-}
-
-// ToValue returns the appropriate Value for given item, based only on
-// its type -- attempts to get the Valuer interface and failing that,
-// falls back on default Kind-based options.  tags are optional tags, e.g.,
-// from the field in a struct, that control the view properties -- see the gi wiki
-// for details on supported tags -- these are NOT set for the view element, only
-// used for options that affect what kind of view to create.
-// See FieldToValue for version that takes into account the properties of the owner.
+// ToValue converts the given value into its appropriate [Value] representation,
+// using its type, tags, and value. It checks the [Valuer] interface and the
+// [ValueMap] before falling back on checks for standard primitive and compound
+// types. If it can not find any good representation for the value, it falls back
+// on [StringValue]. The tags are optional tags in [reflect.StructTag] format that
+// can affect what [Value] is returned; see the Tags page in the Cogent Core Docs
+// to learn more. You should use [FieldToValue] when making a value in the context
+// of a broader struct owner.
 //
 //gopy:interface=handle
-func ToValue(it any, tags string) Value {
-	if it == nil {
+func ToValue(val any, tags string) Value {
+	if val == nil {
 		return &NilValue{}
 	}
-	if vv, ok := it.(Valuer); ok {
-		vvo := vv.Value()
-		if vvo != nil {
-			return vvo
+	if vl, ok := val.(Valuer); ok {
+		v := vl.Value()
+		if v != nil {
+			return v
 		}
 	}
-	// try pointer version..
-	if vv, ok := laser.PtrInterface(it).(Valuer); ok {
-		vvo := vv.Value()
-		if vvo != nil {
-			return vvo
+	if vl, ok := laser.PtrInterface(val).(Valuer); ok {
+		v := vl.Value()
+		if v != nil {
+			return v
 		}
 	}
 
-	if _, ok := it.(enums.BitFlag); ok {
+	if _, ok := val.(enums.BitFlag); ok {
 		return &BitFlagValue{}
 	}
-	if _, ok := it.(enums.Enum); ok {
+	if _, ok := val.(enums.Enum); ok {
 		return &EnumValue{}
 	}
 
-	typ := reflect.TypeOf(it)
+	typ := reflect.TypeOf(val)
 	nptyp := laser.NonPtrType(typ)
 	vk := typ.Kind()
-	// fmt.Printf("vv val %v: typ: %v nptyp: %v kind: %v\n", it, typ.String(), nptyp.String(), vk)
 
 	nptypnm := laser.LongTypeName(nptyp)
-	if vvf, has := ValueMap[nptypnm]; has {
-		vv := vvf()
-		return vv
+	if vf, has := ValueMap[nptypnm]; has {
+		v := vf()
+		if v != nil {
+			return v
+		}
 	}
 
 	forceInline := false
@@ -143,8 +135,8 @@ func ToValue(it any, tags string) Value {
 		if vtag == "slider" {
 			return &SliderValue{}
 		}
-		if _, ok := it.(fmt.Stringer); ok { // use stringer
-			return &ValueBase{}
+		if _, ok := val.(fmt.Stringer); ok {
+			return &StringValue{}
 		}
 		return &IntValue{}
 	case vk == reflect.Bool:
@@ -155,29 +147,27 @@ func ToValue(it any, tags string) Value {
 		}
 		return &FloatValue{} // handles step, min / max etc
 	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
-		// todo: special edit with 2 fields..
-		return &ValueBase{}
+		// TODO: special value for complex numbers with two fields
+		return &StringValue{}
 	case vk == reflect.Ptr:
 		if ki.IsKi(nptyp) {
 			return &KiValue{}
 		}
-		if laser.AnyIsNil(it) {
+		if laser.AnyIsNil(val) {
 			return &NilValue{}
 		}
-		v := reflect.ValueOf(it)
+		v := reflect.ValueOf(val)
 		if !v.IsZero() {
-			// note: interfaces go here:
-			// fmt.Printf("vv indirecting on pointer: %v type: %v\n", it, nptyp.String())
 			return ToValue(v.Elem().Interface(), tags)
 		}
 	case vk == reflect.Array, vk == reflect.Slice:
-		v := reflect.ValueOf(it)
+		v := reflect.ValueOf(val)
 		sz := v.Len()
-		eltyp := laser.SliceElType(it)
-		if _, ok := it.([]byte); ok {
+		eltyp := laser.SliceElType(val)
+		if _, ok := val.([]byte); ok {
 			return &ByteSliceValue{}
 		}
-		if _, ok := it.([]rune); ok {
+		if _, ok := val.([]rune); ok {
 			return &RuneSliceValue{}
 		}
 		isstru := (laser.NonPtrType(eltyp).Kind() == reflect.Struct)
@@ -187,7 +177,7 @@ func ToValue(it any, tags string) Value {
 			return &SliceValue{}
 		}
 	case vk == reflect.Map:
-		sz := laser.MapStructElsN(it)
+		sz := laser.MapStructElsN(val)
 		if !forceNoInline && (forceInline || sz <= gi.SystemSettings.MapInlineLength) {
 			return &MapInlineValue{}
 		} else {
@@ -201,7 +191,7 @@ func ToValue(it any, tags string) Value {
 			return &StructValue{}
 		}
 	case vk == reflect.Func:
-		if laser.AnyIsNil(it) {
+		if laser.AnyIsNil(val) {
 			return &NilValue{}
 		}
 		return &FuncValue{}
