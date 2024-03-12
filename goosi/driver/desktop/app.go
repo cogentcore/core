@@ -77,11 +77,7 @@ func (a *App) MainLoop() {
 
 // InitVk initializes glfw, vulkan, vgpu, and the screens.
 func (a *App) InitVk() {
-	if err := glfw.Init(); err != nil {
-		log.Fatalln("goosi/driver/desktop failed to initialize glfw:", err)
-	}
-	vk.SetGetInstanceProcAddr(glfw.GetVulkanGetInstanceProcAddress())
-	vk.Init()
+	grr.Must(vgpu.Init())
 	glfw.SetMonitorCallback(a.MonitorChange)
 	// glfw.DefaultWindowHints()
 	glfw.WindowHint(glfw.ClientAPI, glfw.NoAPI)

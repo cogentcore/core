@@ -25,7 +25,7 @@ func Init() error {
 	if err != nil {
 		return grr.Log(err)
 	}
-	vk.SetGetInstanceProcAddr(glfw.GetVulkanGetInstanceProcAddress())
+	vk.SetDefaultGetInstanceProcAddr()
 	return grr.Log(vk.Init())
 }
 
