@@ -75,15 +75,10 @@ func (i {{.Name}}) Desc() string {
 
 var ValuesGlobalTmpl = template.Must(template.New("ValuesGlobal").Parse(
 	`// {{.Name}}Values returns all possible values for the type {{.Name}}.
-func {{.Name}}Values() []{{.Name}} { {{if eq .Extends ""}} return _{{.Name}}Values } {{else}}
-	es := {{.Extends}}Values()
-	res := make([]{{.Name}}, len(es))
-	for i, e := range es {
-		res[i] = {{.Name}}(e)
-	}
-	res = append(res, _{{.Name}}Values...)
-	return res
-} {{end}}
+func {{.Name}}Values() []{{.Name}} {
+	{{- if eq .Extends ""}} return _{{.Name}}Values
+	{{- else}} return enums.ValuesGlobalExtended(_{{.Name}}Values, {{.Extends}}Values())
+	{{- end}} }
 `))
 
 var ValuesMethodTmpl = template.Must(template.New("ValuesMethod").Parse(

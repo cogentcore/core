@@ -120,15 +120,7 @@ func (i *Foods) SetInt64(in int64) { *i = Foods(in) }
 func (i Foods) Desc() string { return enums.DescExtended[Foods, Fruits](i, _FoodsDescMap) }
 
 // FoodsValues returns all possible values for the type Foods.
-func FoodsValues() []Foods {
-	es := FruitsValues()
-	res := make([]Foods, len(es))
-	for i, e := range es {
-		res[i] = Foods(e)
-	}
-	res = append(res, _FoodsValues...)
-	return res
-}
+func FoodsValues() []Foods { return enums.ValuesGlobalExtended(_FoodsValues, FruitsValues()) }
 
 // Values returns all possible values for the type Foods.
 func (i Foods) Values() []enums.Enum {
@@ -483,13 +475,7 @@ func (i MoreLanguages) Desc() string {
 
 // MoreLanguagesValues returns all possible values for the type MoreLanguages.
 func MoreLanguagesValues() []MoreLanguages {
-	es := LanguagesValues()
-	res := make([]MoreLanguages, len(es))
-	for i, e := range es {
-		res[i] = MoreLanguages(e)
-	}
-	res = append(res, _MoreLanguagesValues...)
-	return res
+	return enums.ValuesGlobalExtended(_MoreLanguagesValues, LanguagesValues())
 }
 
 // Values returns all possible values for the type MoreLanguages.

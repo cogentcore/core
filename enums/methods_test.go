@@ -206,6 +206,10 @@ func TestDesc(t *testing.T) {
 	assert.Equal(t, "extendedDesc", DescExtended[enum, enum](enum(3), descMap))
 }
 
+func TestValuesGlobalExtended(t *testing.T) {
+	assert.Equal(t, []enum{1, 5, 2, 3}, ValuesGlobalExtended([]enum{2, 3}, []enum{1, 5}))
+}
+
 func TestHasFlag(t *testing.T) {
 	i := enum(20)
 	pi := (*int64)(&i)

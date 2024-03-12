@@ -249,6 +249,17 @@ func DescExtended[T, E EnumConstraint](i T, descMap map[T]string) string {
 	return E(i).Desc()
 }
 
+// ValuesGlobalExtended returns also possible values for the given enum type that
+// extends the other given enum type.
+func ValuesGlobalExtended[T, E EnumConstraint](values []T, extendedValues []E) []T {
+	res := make([]T, len(extendedValues))
+	for i, e := range extendedValues {
+		res[i] = T(e)
+	}
+	res = append(res, values...)
+	return res
+}
+
 // HasFlag returns whether these bit flags have the given bit flag set.
 func HasFlag(i *int64, f BitFlag) bool {
 	return atomic.LoadInt64(i)&(1<<uint32(f.Int64())) != 0
