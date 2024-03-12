@@ -49,10 +49,7 @@ func FruitsValues() []Fruits { return _FruitsValues }
 func (i Fruits) Values() []enums.Enum { return enums.Values(_FruitsValues) }
 
 // IsValid returns whether the value is a valid option for type Fruits.
-func (i Fruits) IsValid() bool {
-	_, ok := _FruitsMap[i]
-	return ok
-}
+func (i Fruits) IsValid() bool { _, ok := _FruitsMap[i]; return ok }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
 func (i Fruits) MarshalText() ([]byte, error) {
@@ -120,13 +117,7 @@ func FoodsValues() []Foods { return enums.ValuesGlobalExtended(_FoodsValues, Fru
 func (i Foods) Values() []enums.Enum { return enums.ValuesExtended(_FoodsValues, FruitsValues()) }
 
 // IsValid returns whether the value is a valid option for type Foods.
-func (i Foods) IsValid() bool {
-	_, ok := _FoodsMap[i]
-	if !ok {
-		return Fruits(i).IsValid()
-	}
-	return ok
-}
+func (i Foods) IsValid() bool { _, ok := _FoodsMap[i]; return ok || Fruits(i).IsValid() }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
 func (i Foods) MarshalText() ([]byte, error) {

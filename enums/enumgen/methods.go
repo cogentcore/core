@@ -91,13 +91,8 @@ func (i {{.Name}}) Values() []enums.Enum {
 
 var IsValidMethodMapTmpl = template.Must(template.New("IsValidMethodMap").Parse(
 	`// IsValid returns whether the value is a valid option for type {{.Name}}.
-func (i {{.Name}}) IsValid() bool {
-	_, ok := _{{.Name}}Map[i] {{if ne .Extends ""}}
-	if !ok {
-		return {{.Extends}}(i).IsValid()
-	} {{end}}
-	return ok
-}
+func (i {{.Name}}) IsValid() bool { _, ok := _{{.Name}}Map[i]; return ok
+	{{- if ne .Extends ""}} || {{.Extends}}(i).IsValid() {{end}} }
 `))
 
 // BuildBasicMethods builds methods common to all types, like Desc and SetString.
