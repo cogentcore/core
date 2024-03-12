@@ -141,7 +141,7 @@ func StructTagVal(key, tags string) string {
 //gopy:interface=handle
 func ToValue(it any, tags string) Value {
 	if it == nil {
-		return &ValueBase{}
+		return &NilValue{}
 	}
 	if vv, ok := it.(Valuer); ok {
 		vvo := vv.Value()
@@ -177,18 +177,6 @@ func ToValue(it any, tags string) Value {
 
 	forceInline := false
 	forceNoInline := false
-
-	/*
-		tprops := kit.Types.Properties(typ, false) // don't make
-		if tprops != nil {
-			if inprop, ok := kit.TypeProp(*tprops, "inline"); ok {
-				forceInline, ok = kit.ToBool(inprop)
-			}
-			if inprop, ok := kit.TypeProp(*tprops, "no-inline"); ok {
-				forceNoInline, ok = kit.ToBool(inprop)
-			}
-		}
-	*/
 
 	stag := reflect.StructTag(tags)
 	vtag := stag.Get("view")
@@ -267,37 +255,15 @@ func ToValue(it any, tags string) Value {
 			return &NilValue{}
 		}
 		return &FuncValue{}
-	case vk == reflect.Interface:
-		// note: we never get here -- all interfaces are captured by pointer kind above
-		// apparently (because the non-ptr vk indirection does that I guess?)
-		fmt.Printf("interface kind: %v %v %v\n", nptyp, nptyp.Name(), nptyp.String())
-	case vk == reflect.String:
-		v := reflect.ValueOf(it)
-		str := v.String()
-		_ = str
-		switch vtag {
-		case "text-field", "password":
-			return &ValueBase{}
-		// TODO(kai): figure out how to return text editor values here
-		// case "text-editor":
-		// 	return &TextEditorValue{}
-		case "filename":
-			return &FileValue{}
-		default:
-			// if strings.Contains(str, "\n") {
-			// 	return &TextEditorValue{}
-			// }
-			return &ValueBase{}
-		}
 	}
-	// fallback.
-	return &ValueBase{}
+	return &StringValue{} // fallback
 }
 
 // FieldToValue returns the appropriate Value for given field on a
 // struct -- attempts to get the FieldValuer interface, and falls back on
 // ToValue otherwise, using field value (fval)
-// gopy:interface=handle
+//
+//gopy:interface=handle
 func FieldToValue(it any, field string, fval any) Value {
 	if it == nil || field == "" {
 		return ToValue(fval, "")
@@ -318,23 +284,6 @@ func FieldToValue(it any, field string, fval any) Value {
 
 	typ := reflect.TypeOf(it)
 	nptyp := laser.NonPtrType(typ)
-
-	/*
-		if pv, has := kit.Types.Prop(nptyp, "EnumType:"+field); has {
-			et := pv.(reflect.Type)
-			if kit.Enums.IsBitFlag(et) {
-				vv := &BitFlagView{}
-				vv.AltType = et
-				ki.InitNode(vv)
-				return vv
-			} else {
-				vv := &EnumValue{}
-				vv.AltType = et
-				ki.InitNode(vv)
-				return vv
-			}
-		}
-	*/
 
 	ftyp, ok := nptyp.FieldByName(field)
 	if ok {
