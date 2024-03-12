@@ -45,16 +45,7 @@ var YAMLMethodsTmpl = template.Must(template.New("YAMLMethods").Parse(
 func (i {{.Name}}) MarshalYAML() (any, error) { return i.String(), nil }
 
 // UnmarshalYAML implements the [yaml.Unmarshaler] interface.
-func (i *{{.Name}}) UnmarshalYAML(value *yaml.Node) error {
-	var s string
-	if err := n.Decode(&s); err != nil {
-		return err
-	}
-	if err := i.SetString(s); err != nil {
-		log.Println("{{.Name}}.UnmarshalYAML:", err)
-	}
-	return nil
-}
+func (i *{{.Name}}) UnmarshalYAML(n *yaml.Node) error { return enums.UnmarshalYAML(i, n, "{{.Name}}") }
 `))
 
 func (g *Generator) BuildYAMLMethods(runs []Value, typ *Type) {

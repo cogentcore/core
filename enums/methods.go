@@ -14,6 +14,7 @@ import (
 	"sync/atomic"
 
 	"cogentcore.org/core/glop/num"
+	"gopkg.in/yaml.v3"
 )
 
 // This file contains implementations of enumgen methods.
@@ -326,6 +327,20 @@ func UnmarshalJSON[T EnumSetter](i T, data []byte, typeName string) error {
 	}
 	if err := i.SetString(s); err != nil {
 		slog.Error(typeName+".UnmarshalJSON", "err", err)
+	}
+	return nil
+}
+
+// UnmarshalYAML loads the enum from the given YAML node.
+// It logs any SetString error instead of returning it to prevent
+// one modified enum from tanking an entire object loading operation.
+func UnmarshalYAML[T EnumSetter](i T, n *yaml.Node, typeName string) error {
+	var s string
+	if err := n.Decode(&s); err != nil {
+		return err
+	}
+	if err := i.SetString(s); err != nil {
+		slog.Error(typeName+".UnmarshalYAML", "err", err)
 	}
 	return nil
 }

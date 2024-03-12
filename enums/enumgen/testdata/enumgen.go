@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"cogentcore.org/core/enums"
+	"gopkg.in/yaml.v3"
 )
 
 var _FruitsValues = []Fruits{0, 1, 2, 3, 4, 5, 6}
@@ -111,6 +112,12 @@ func (i Foods) MarshalJSON() ([]byte, error) { return json.Marshal(i.String()) }
 
 // UnmarshalJSON implements the [json.Unmarshaler] interface.
 func (i *Foods) UnmarshalJSON(data []byte) error { return enums.UnmarshalJSON(i, data, "Foods") }
+
+// MarshalYAML implements the [yaml.Marshaler] interface.
+func (i Foods) MarshalYAML() (any, error) { return i.String(), nil }
+
+// UnmarshalYAML implements the [yaml.Unmarshaler] interface.
+func (i *Foods) UnmarshalYAML(n *yaml.Node) error { return enums.UnmarshalYAML(i, n, "Foods") }
 
 var _DaysValues = []Days{-11, -9, -7, -5, -3, -1, 1}
 

@@ -15,7 +15,7 @@ const (
 )
 
 // Foods is an enum containing foods
-type Foods Fruits //enums:enum -is-valid
+type Foods Fruits //enums:enum -is-valid -yaml
 
 const (
 	Bread Foods = Foods(FruitsN) + iota
