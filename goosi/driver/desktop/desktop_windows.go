@@ -15,7 +15,7 @@ import (
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/mimedata"
-	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/kanryu/mado/glfw"
 )
 
 /////////////////////////////////////////////////////////////////

@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/cursors/cursorimg"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/goosi"
-	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/kanryu/mado/glfw"
 )
 
 // TheCursor is the single [goosi.Cursor] for the desktop platform

@@ -17,7 +17,7 @@ import (
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/goosi/driver/base"
 	"cogentcore.org/core/vgpu/vdraw"
-	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/kanryu/mado/glfw"
 
 	vk "github.com/goki/vulkan"
 )

@@ -20,7 +20,7 @@ import (
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/vgpu"
 	"cogentcore.org/core/vgpu/vdraw"
-	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/kanryu/mado/glfw"
 
 	vk "github.com/goki/vulkan"
 )

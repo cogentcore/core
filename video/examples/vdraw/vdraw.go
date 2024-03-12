@@ -16,7 +16,7 @@ import (
 
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/speaker"
-	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/kanryu/mado/glfw"
 	"github.com/zergon321/reisen"
 	"goki.dev/vgpu/v2/vdraw"
 	"goki.dev/vgpu/v2/vgpu"

@@ -8,8 +8,8 @@ package vgpu
 
 import (
 	"cogentcore.org/core/grr"
-	"github.com/go-gl/glfw/v3.3/glfw"
 	vk "github.com/goki/vulkan"
+	"github.com/kanryu/mado/glfw"
 )
 
 // note: this file contains the glfw dependencies, for desktop platform builds
