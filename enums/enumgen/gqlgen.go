@@ -15,9 +15,7 @@ import "text/template"
 
 var GQLMethodsTmpl = template.Must(template.New("GQLMethods").Parse(`
 // MarshalGQL implements the [graphql.Marshaler] interface.
-func (i {{.Name}}) MarshalGQL(w io.Writer) {
-	w.Write([]byte(strconv.Quote(i.String())))
-}
+func (i {{.Name}}) MarshalGQL(w io.Writer) { w.Write([]byte(strconv.Quote(i.String()))) }
 
 // UnmarshalGQL implements the [graphql.Unmarshaler] interface.
 func (i *{{.Name}}) UnmarshalGQL(value any) error {
