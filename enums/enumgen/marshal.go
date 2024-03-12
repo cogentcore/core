@@ -19,12 +19,7 @@ var TextMethodsTmpl = template.Must(template.New("TextMethods").Parse(
 func (i {{.Name}}) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *{{.Name}}) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("{{.Name}}.UnmarshalText:", err)
-	}
-	return nil
-}
+func (i *{{.Name}}) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "{{.Name}}") }
 `))
 
 func (g *Generator) BuildTextMethods(runs []Value, typ *Type) {

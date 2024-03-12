@@ -7,6 +7,7 @@ package enums
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -302,4 +303,14 @@ func SetFlag(i *int64, on bool, f ...BitFlag) {
 		in &^= mask
 		atomic.StoreInt64(i, in)
 	}
+}
+
+// UnmarshalText loads the enum from the given text.
+// It logs any error instead of returning it to prevent
+// one modified enum from tanking a whole object loading operation.
+func UnmarshalText[T EnumSetter](i T, text []byte, typeName string) error {
+	if err := i.SetString(string(text)); err != nil {
+		slog.Error(typeName+".UnmarshalText", "err", err)
+	}
+	return nil
 }

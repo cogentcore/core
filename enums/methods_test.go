@@ -240,3 +240,13 @@ func TestSetFlag(t *testing.T) {
 	SetFlag(pi, false, enum(1))
 	assert.Equal(t, enum(0), i)
 }
+
+func TestUnmarshal(t *testing.T) {
+	i := enum(0)
+
+	assert.NoError(t, UnmarshalText(&i, []byte("Orange"), "Fruits"))
+	assert.Equal(t, enum(7), i)
+	i = 4
+	assert.NoError(t, UnmarshalText(&i, []byte("Apple"), "Fruits"))
+	assert.Equal(t, enum(4), i)
+}

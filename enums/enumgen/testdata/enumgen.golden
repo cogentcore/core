@@ -55,12 +55,7 @@ func (i Fruits) IsValid() bool { _, ok := _FruitsMap[i]; return ok }
 func (i Fruits) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *Fruits) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("Fruits.UnmarshalText:", err)
-	}
-	return nil
-}
+func (i *Fruits) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "Fruits") }
 
 // MarshalJSON implements the [json.Marshaler] interface.
 func (i Fruits) MarshalJSON() ([]byte, error) { return json.Marshal(i.String()) }
@@ -119,12 +114,7 @@ func (i Foods) IsValid() bool { _, ok := _FoodsMap[i]; return ok || Fruits(i).Is
 func (i Foods) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *Foods) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("Foods.UnmarshalText:", err)
-	}
-	return nil
-}
+func (i *Foods) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "Foods") }
 
 // MarshalJSON implements the [json.Marshaler] interface.
 func (i Foods) MarshalJSON() ([]byte, error) { return json.Marshal(i.String()) }
@@ -178,12 +168,7 @@ func (i Days) Values() []enums.Enum { return enums.Values(_DaysValues) }
 func (i Days) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *Days) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("Days.UnmarshalText:", err)
-	}
-	return nil
-}
+func (i *Days) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "Days") }
 
 // MarshalGQL implements the [graphql.Marshaler] interface.
 func (i Days) MarshalGQL(w io.Writer) { w.Write([]byte(strconv.Quote(i.String()))) }
@@ -343,10 +328,7 @@ func (i Languages) MarshalText() ([]byte, error) { return []byte(i.String()), ni
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Languages) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("Languages.UnmarshalText:", err)
-	}
-	return nil
+	return enums.UnmarshalText(i, text, "Languages")
 }
 
 // MarshalJSON implements the [json.Marshaler] interface.
@@ -430,10 +412,7 @@ func (i MoreLanguages) MarshalText() ([]byte, error) { return []byte(i.String())
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *MoreLanguages) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println("MoreLanguages.UnmarshalText:", err)
-	}
-	return nil
+	return enums.UnmarshalText(i, text, "MoreLanguages")
 }
 
 // MarshalJSON implements the [json.Marshaler] interface.
