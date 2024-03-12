@@ -9,7 +9,6 @@ import (
 	"io"
 	"log"
 	"strconv"
-	"sync/atomic"
 
 	"cogentcore.org/core/enums"
 )
@@ -302,9 +301,7 @@ func (i States) Values() []enums.Enum {
 }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i States) HasFlag(f enums.BitFlag) bool {
-	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
-}
+func (i States) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
 func (i *States) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
@@ -404,9 +401,7 @@ func (i Languages) Values() []enums.Enum {
 }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i Languages) HasFlag(f enums.BitFlag) bool {
-	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
-}
+func (i Languages) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
 func (i *Languages) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
@@ -512,9 +507,7 @@ func (i MoreLanguages) Values() []enums.Enum {
 }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i MoreLanguages) HasFlag(f enums.BitFlag) bool {
-	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
-}
+func (i MoreLanguages) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
 func (i *MoreLanguages) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }

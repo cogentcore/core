@@ -249,6 +249,11 @@ func DescExtended[T, E EnumConstraint](i T, descMap map[T]string) string {
 	return E(i).Desc()
 }
 
+// HasFlag returns whether these bit flags have the given bit flag set.
+func HasFlag(i *int64, f BitFlag) bool {
+	return atomic.LoadInt64(i)&(1<<uint32(f.Int64())) != 0
+}
+
 // SetFlag sets the value of the given flags in these flags to the given value.
 func SetFlag(i *int64, on bool, f ...BitFlag) {
 	var mask int64

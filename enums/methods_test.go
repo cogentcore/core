@@ -206,6 +206,18 @@ func TestDesc(t *testing.T) {
 	assert.Equal(t, "extendedDesc", DescExtended[enum, enum](enum(3), descMap))
 }
 
+func TestHasFlag(t *testing.T) {
+	i := enum(20)
+	pi := (*int64)(&i)
+
+	assert.True(t, HasFlag(pi, enum(2)))
+	assert.True(t, HasFlag(pi, enum(4)))
+
+	assert.False(t, HasFlag(pi, enum(1)))
+	assert.False(t, HasFlag(pi, enum(3)))
+	assert.False(t, HasFlag(pi, enum(0)))
+}
+
 func TestSetFlag(t *testing.T) {
 	i := enum(0)
 	pi := (*int64)(&i)
