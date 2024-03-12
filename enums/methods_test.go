@@ -262,4 +262,19 @@ func TestUnmarshal(t *testing.T) {
 	i = 4
 	assert.NoError(t, UnmarshalYAML(&i, &yaml.Node{Kind: yaml.ScalarNode, Value: "Apple"}, "Fruits"))
 	assert.Equal(t, enum(4), i)
+
+	assert.NoError(t, Scan(&i, []byte("Orange"), "Fruits"))
+	assert.Equal(t, enum(7), i)
+	i = 4
+	assert.NoError(t, Scan(&i, "Orange", "Fruits"))
+	assert.Equal(t, enum(7), i)
+	i = 4
+	assert.NoError(t, Scan(&i, nil, "Fruits"))
+	assert.Equal(t, enum(4), i)
+	i = 4
+	assert.Error(t, Scan(&i, enum(0), "Fruits"))
+	assert.Equal(t, enum(4), i)
+	i = 4
+	assert.Error(t, Scan(&i, 78, "Fruits"))
+	assert.Equal(t, enum(4), i)
 }

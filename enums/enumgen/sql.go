@@ -14,31 +14,13 @@ package enumgen
 import "text/template"
 
 var ValueMethodTmpl = template.Must(template.New("ValueMethod").Parse(
-	`// Scan implements the [driver.Valuer] interface.
+	`// Value implements the [driver.Valuer] interface.
 func (i {{.Name}}) Value() (driver.Value, error) { return i.String(), nil }
 `))
 
 var ScanMethodTmpl = template.Must(template.New("ScanMethod").Parse(
-	`// Value implements the [sql.Scanner] interface.
-func (i *{{.Name}}) Scan(value any) error {
-	if value == nil {
-		return nil
-	}
-
-	var str string
-	switch v := value.(type) {
-	case []byte:
-		str = string(v)
-	case string:
-		str = v
-	case fmt.Stringer:
-		str = v.String()
-	default:
-		return fmt.Errorf("invalid value for type {{.Name}}: %[1]T(%[1]v)", value)
-	}
-
-	return i.SetString(str)
-}
+	`// Scan implements the [sql.Scanner] interface.
+func (i *{{.Name}}) Scan(value any) error { return enums.Scan(i, value, "{{.Name}}") }
 `))
 
 func (g *Generator) AddValueAndScanMethod(typ *Type) {

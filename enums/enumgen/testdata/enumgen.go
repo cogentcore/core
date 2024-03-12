@@ -227,29 +227,11 @@ func (i States) MarshalJSON() ([]byte, error) { return json.Marshal(i.String()) 
 // UnmarshalJSON implements the [json.Unmarshaler] interface.
 func (i *States) UnmarshalJSON(data []byte) error { return enums.UnmarshalJSON(i, data, "States") }
 
-// Scan implements the [driver.Valuer] interface.
+// Value implements the [driver.Valuer] interface.
 func (i States) Value() (driver.Value, error) { return i.String(), nil }
 
-// Value implements the [sql.Scanner] interface.
-func (i *States) Scan(value any) error {
-	if value == nil {
-		return nil
-	}
-
-	var str string
-	switch v := value.(type) {
-	case []byte:
-		str = string(v)
-	case string:
-		str = v
-	case fmt.Stringer:
-		str = v.String()
-	default:
-		return fmt.Errorf("invalid value for type States: %[1]T(%[1]v)", value)
-	}
-
-	return i.SetString(str)
-}
+// Scan implements the [sql.Scanner] interface.
+func (i *States) Scan(value any) error { return enums.Scan(i, value, "States") }
 
 var _LanguagesValues = []Languages{6, 10, 14, 18, 22, 26, 30, 34, 38, 42, 46, 50, 54}
 

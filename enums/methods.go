@@ -344,3 +344,24 @@ func UnmarshalYAML[T EnumSetter](i T, n *yaml.Node, typeName string) error {
 	}
 	return nil
 }
+
+// Scan loads the enum from the given SQL scanner value.
+func Scan[T EnumSetter](i T, value any, typeName string) error {
+	if value == nil {
+		return nil
+	}
+
+	var str string
+	switch v := value.(type) {
+	case []byte:
+		str = string(v)
+	case string:
+		str = v
+	case fmt.Stringer:
+		str = v.String()
+	default:
+		return fmt.Errorf("invalid value for type %s: %T(%v)", typeName, value, value)
+	}
+
+	return i.SetString(str)
+}
