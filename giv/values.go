@@ -13,12 +13,12 @@ import (
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
+	"cogentcore.org/core/grr"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/paint"
-	"cogentcore.org/core/states"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -58,6 +58,72 @@ func (v *StringValue) Update() {
 	} else {
 		txt := laser.ToString(v.Value.Interface())
 		v.Widget.SetText(txt)
+	}
+}
+
+// BoolValue represents a bool value with a switch.
+type BoolValue struct {
+	ValueBase[*gi.Switch]
+}
+
+func (v *BoolValue) Config() {
+	v.Widget.OnChange(func(e events.Event) {
+		v.SetValue(v.Widget.IsChecked())
+	})
+}
+
+func (v *BoolValue) Update() {
+	npv := laser.NonPtrValue(v.Value)
+	bv, err := laser.ToBool(npv.Interface())
+	if grr.Log(err) == nil {
+		v.Widget.SetChecked(bv)
+	}
+}
+
+// NumberValue represents an integer or float value with a spinner.
+type NumberValue struct {
+	ValueBase[*gi.Spinner]
+}
+
+func (v *NumberValue) Config() {
+	vk := v.Value.Kind()
+	if vk >= reflect.Int && vk <= reflect.Uintptr {
+		v.Widget.SetStep(1).SetPageStep(10)
+	}
+	if vk >= reflect.Uint && vk <= reflect.Uintptr {
+		v.Widget.SetMin(0)
+	}
+	if min, ok := v.Tag("min"); ok {
+		minv, err := laser.ToFloat32(min)
+		if grr.Log(err) == nil {
+			v.Widget.SetMin(minv)
+		}
+	}
+	if max, ok := v.Tag("max"); ok {
+		maxv, err := laser.ToFloat32(max)
+		if grr.Log(err) == nil {
+			v.Widget.SetMax(maxv)
+		}
+	}
+	if step, ok := v.Tag("step"); ok {
+		step, err := laser.ToFloat32(step)
+		if grr.Log(err) == nil {
+			v.Widget.SetStep(step)
+		}
+	}
+	if format, ok := v.Tag("format"); ok {
+		v.Widget.SetFormat(format)
+	}
+	v.Widget.OnChange(func(e events.Event) {
+		v.SetValue(v.Widget.Value)
+	})
+}
+
+func (v *NumberValue) Update() {
+	npv := laser.NonPtrValue(v.Value)
+	fv, err := laser.ToFloat32(npv.Interface())
+	if grr.Log(err) == nil {
+		v.Widget.SetValue(fv)
 	}
 }
 
@@ -264,69 +330,27 @@ func (v *MapInlineValue) Update() {
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//  KiPtrValue
-
-// KiValue provides a button for inspecting pointers to Ki objects
+// KiValue represents a [ki.Ki] value with a button.
 type KiValue struct {
-	ValueBase
+	ValueBase[*gi.Button]
 }
 
-func (vv *KiValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ButtonType
-	return vv.WidgetTyp
+func (v *KiValue) Config() {
+	v.Widget.SetType(gi.ButtonTonal).SetIcon(icons.Edit)
+	ConfigDialogWidget(v, true)
 }
 
-// get the Ki struct itself (or nil)
-func (vv *KiValue) KiStruct() ki.Ki {
-	if !vv.Value.IsValid() {
-		return nil
-	}
-	if vv.Value.IsNil() {
-		return nil
-	}
-	opv := laser.OnePtrValue(vv.Value)
-	if opv.IsNil() {
-		return nil
-	}
-	k, ok := opv.Interface().(ki.Ki)
-	if ok && k != nil {
-		return k
-	}
-	return nil
-}
-
-func (vv *KiValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	bt := vv.Widget.(*gi.Button)
+func (v *KiValue) Update() {
 	path := "None"
-	k := vv.KiStruct()
+	k := v.KiStruct()
 	if k != nil && k.This() != nil {
 		path = k.AsKi().String()
 	}
-	bt.SetText(path).Update()
+	v.Widget.SetText(path).Update()
 }
 
-func (vv *KiValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	vv.StdConfig(w)
-	bt := vv.Widget.(*gi.Button)
-	bt.SetType(gi.ButtonTonal)
-	ConfigDialogWidget(vv, bt, true)
-	vv.UpdateWidget()
-}
-
-func (vv *KiValue) HasDialog() bool                      { return true }
-func (vv *KiValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
-
-func (vv *KiValue) ConfigDialog(d *gi.Body) (bool, func()) {
-	k := vv.KiStruct()
+func (v *KiValue) ConfigDialog(d *gi.Body) (bool, func()) {
+	k := v.KiStruct()
 	if k == nil {
 		return false, nil
 	}
@@ -334,194 +358,17 @@ func (vv *KiValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	return true, nil
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//  BoolValue
-
-// BoolValue presents a checkbox for a boolean
-type BoolValue struct {
-	ValueBase
-}
-
-func (vv *BoolValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.SwitchType
-	return vv.WidgetTyp
-}
-
-func (vv *BoolValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
+// KiStruct returns the actual underlying Ki struct itself, or nil.
+func (vv *KiValue) KiStruct() ki.Ki {
+	if !vv.Value.IsValid() || vv.Value.IsNil() {
+		return nil
 	}
-	cb := vv.Widget.(*gi.Switch)
-	npv := laser.NonPtrValue(vv.Value)
-	bv, _ := laser.ToBool(npv.Interface())
-	cb.SetState(bv, states.Checked)
-}
-
-func (vv *BoolValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
+	opv := laser.OnePtrValue(vv.Value)
+	if opv.IsNil() {
+		return nil
 	}
-	vv.Widget = w
-	vv.StdConfig(w)
-	cb := vv.Widget.(*gi.Switch)
-	cb.Tooltip = vv.Doc()
-	cb.OnFinal(events.Change, func(e events.Event) {
-		vv.SetValue(cb.IsChecked())
-	})
-	vv.UpdateWidget()
-}
-
-//////////////////////////////////////////////////////////////////////////////
-//  IntValue
-
-// IntValue presents a spinner
-type IntValue struct {
-	ValueBase
-}
-
-func (vv *IntValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.SpinnerType
-	return vv.WidgetTyp
-}
-
-func (vv *IntValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	sb := vv.Widget.(*gi.Spinner)
-	npv := laser.NonPtrValue(vv.Value)
-	fv, err := laser.ToFloat32(npv.Interface())
-	if err == nil {
-		sb.SetValue(fv)
-	} else {
-		slog.Error("IntValue set", "error", err)
-	}
-}
-
-func (vv *IntValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	vv.StdConfig(w)
-	sb := vv.Widget.(*gi.Spinner)
-	sb.Tooltip = vv.Doc()
-	sb.Step = 1.0
-	sb.PageStep = 10.0
-	// STYTODO: figure out what to do about this
-	// sb.Parts.AddChildStyler("textfield", 0, gi.StylerParent(vv), func(tf *gi.WidgetBase) {
-	// 	s.Min.X.SetCh(5)
-	// })
-	vk := vv.Value.Kind()
-	if vk >= reflect.Uint && vk <= reflect.Uint64 {
-		sb.SetMin(0)
-	}
-	if mintag, ok := vv.Tag("min"); ok {
-		minv, err := laser.ToFloat32(mintag)
-		if err == nil {
-			sb.SetMin(minv)
-		} else {
-			slog.Error("Int Min Value:", "error:", err)
-		}
-	}
-	if maxtag, ok := vv.Tag("max"); ok {
-		maxv, err := laser.ToFloat32(maxtag)
-		if err == nil {
-			sb.SetMax(maxv)
-		} else {
-			slog.Error("Int Max Value:", "error:", err)
-		}
-	}
-	if steptag, ok := vv.Tag("step"); ok {
-		step, err := laser.ToFloat32(steptag)
-		if err == nil {
-			sb.Step = step
-		} else {
-			slog.Error("Int Step Value:", "error:", err)
-		}
-	}
-	if fmttag, ok := vv.Tag("format"); ok {
-		sb.Format = fmttag
-	}
-	sb.OnFinal(events.Change, func(e events.Event) {
-		vv.SetValue(sb.Value)
-	})
-	vv.UpdateWidget()
-}
-
-//////////////////////////////////////////////////////////////////////////////
-//  FloatValue
-
-// FloatValue presents a spinner
-type FloatValue struct {
-	ValueBase
-}
-
-func (vv *FloatValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.SpinnerType
-	return vv.WidgetTyp
-}
-
-func (vv *FloatValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	sb := vv.Widget.(*gi.Spinner)
-	npv := laser.NonPtrValue(vv.Value)
-	fv, err := laser.ToFloat32(npv.Interface())
-	if err == nil {
-		sb.SetValue(fv)
-	} else {
-		slog.Error("Float Value set", "error:", err)
-	}
-}
-
-func (vv *FloatValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	vv.StdConfig(w)
-	sb := vv.Widget.(*gi.Spinner)
-	sb.Tooltip = vv.Doc()
-	sb.PageStep = 10.0
-	if mintag, ok := vv.Tag("min"); ok {
-		minv, err := laser.ToFloat32(mintag)
-		if err == nil {
-			sb.HasMin = true
-			sb.Min = minv
-		} else {
-			slog.Error("Invalid float min value", "value", mintag, "err", err)
-		}
-	}
-	if maxtag, ok := vv.Tag("max"); ok {
-		maxv, err := laser.ToFloat32(maxtag)
-		if err == nil {
-			sb.HasMax = true
-			sb.Max = maxv
-		} else {
-			slog.Error("Invalid float max value", "value", maxtag, "err", err)
-		}
-	}
-	sb.Step = .1 // smaller default
-	if steptag, ok := vv.Tag("step"); ok {
-		step, err := laser.ToFloat32(steptag)
-		if err == nil {
-			sb.Step = step
-		} else {
-			slog.Error("Invalid float step value", "value", steptag, "err", err)
-		}
-	}
-	if fmttag, ok := vv.Tag("format"); ok {
-		sb.Format = fmttag
-	}
-	sb.OnFinal(events.Change, func(e events.Event) {
-		vv.SetValue(sb.Value)
-	})
-	vv.UpdateWidget()
+	k, _ := opv.Interface().(ki.Ki)
+	return k
 }
 
 //////////////////////////////////////////////////////////////////////////////
