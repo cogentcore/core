@@ -310,7 +310,7 @@ func (t *MapViewInline) New() ki.Ki { return &MapViewInline{} }
 
 // SetMapValView sets the [MapViewInline.MapValView]:
 // Value for the map itself, if this was created within value view framework -- otherwise nil
-func (t *MapViewInline) SetMapValView(v Value) *MapViewInline { t.MapValView = v; return t }
+func (t *MapViewInline) SetMapValView(v Value) *MapViewInline { t.MapValue = v; return t }
 
 // SetTmpSave sets the [MapViewInline.TmpSave]:
 // value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent

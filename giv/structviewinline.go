@@ -26,7 +26,7 @@ type StructViewInline struct {
 	Struct any `set:"-"`
 
 	// Value for the struct itself, if this was created within value view framework -- otherwise nil
-	StructValue Value
+	StructValue Value `set:"-"`
 
 	// if true add an edit action button at the end -- other users of this widget can then configure that -- it is called 'edit-action'
 	AddButton bool

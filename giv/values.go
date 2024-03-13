@@ -172,77 +172,49 @@ func (v *SliceValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	return true, nil
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//  SliceInlineValue
-
-// SliceInlineValue presents a SliceViewInline for a map
+// SliceInlineValue represents a slice or array value with a [SliceViewInline].
 type SliceInlineValue struct {
-	ValueBase
+	ValueBase[*SliceViewInline]
 }
 
-func (vv *SliceInlineValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = SliceViewInlineType
-	return vv.WidgetTyp
-}
-
-func (vv *SliceInlineValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	sv := vv.Widget.(*SliceViewInline)
-	csl := vv.Value.Interface()
-	newslc := false
-	if reflect.TypeOf(vv.Value).Kind() != reflect.Pointer { // prevent crash on non-comparable
-		newslc = true
-	} else {
-		newslc = (sv.Slice != csl)
-	}
-	if newslc {
-		sv.SetSlice(csl)
-	} else {
-		sv.Update()
-	}
-}
-
-func (vv *SliceInlineValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	vv.StdConfig(w)
-	sv := vv.Widget.(*SliceViewInline)
-	sv.Tooltip = vv.Doc()
-	sv.SliceValue = vv
-	sv.ViewPath = vv.ViewPath
-	sv.TmpSave = vv.TmpSave
-	// npv := vv.Value.Elem()
-	sv.SetSlice(vv.Value.Interface())
-	sv.OnFinal(events.Change, func(e events.Event) {
-		vv.SendChange()
+func (v *SliceInlineValue) Config() {
+	v.Widget.SliceValue = v
+	v.Widget.ViewPath = v.ViewPath
+	v.Widget.TmpSave = v.TmpSave
+	v.Widget.SetSlice(v.Value.Interface())
+	v.Widget.OnChange(func(e events.Event) {
+		v.SendChange(e)
 	})
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//  MapValue
-
-// MapValue presents a button to edit maps
-type MapValue struct {
-	ValueBase
-}
-
-func (vv *MapValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ButtonType
-	return vv.WidgetTyp
-}
-
-func (vv *MapValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
+func (v *SliceInlineValue) Update() {
+	csl := v.Value.Interface()
+	newslc := false
+	if reflect.TypeOf(v.Value).Kind() != reflect.Pointer { // prevent crash on non-comparable
+		newslc = true
+	} else {
+		newslc = v.Widget.Slice != csl
 	}
-	bt := vv.Widget.(*gi.Button)
-	npv := laser.NonPtrValue(vv.Value)
-	mpi := vv.Value.Interface()
+	if newslc {
+		v.Widget.SetSlice(csl)
+	} else {
+		v.Widget.Update()
+	}
+}
+
+// MapValue represents a map value with a button.
+type MapValue struct {
+	ValueBase[*gi.Button]
+}
+
+func (v *MapValue) Config() {
+	v.Widget.SetType(gi.ButtonTonal).SetIcon(icons.Edit)
+	ConfigDialogWidget(v, true)
+}
+
+func (v *MapValue) Update() {
+	npv := laser.NonPtrValue(v.Value)
+	mpi := v.Value.Interface()
 	txt := ""
 	if !npv.IsValid() || npv.IsNil() {
 		txt = "None"
@@ -254,80 +226,42 @@ func (vv *MapValue) UpdateWidget() {
 			txt = strcase.ToSentence(fmt.Sprintf("%d %ss", npv.Len(), bnm))
 		}
 	}
-	bt.SetText(txt).Update()
+	v.Widget.SetText(txt).Update()
 }
 
-func (vv *MapValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	vv.StdConfig(w)
-	bt := vv.Widget.(*gi.Button)
-	bt.SetType(gi.ButtonTonal)
-	bt.Icon = icons.Edit
-	ConfigDialogWidget(vv, bt, true)
-	vv.UpdateWidget()
-}
-
-func (vv *MapValue) HasDialog() bool                      { return true }
-func (vv *MapValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
-
-func (vv *MapValue) ConfigDialog(d *gi.Body) (bool, func()) {
-	if vv.Value.IsZero() || laser.NonPtrValue(vv.Value).IsZero() {
+func (v *MapValue) ConfigDialog(d *gi.Body) (bool, func()) {
+	if v.Value.IsZero() || laser.NonPtrValue(v.Value).IsZero() {
 		return false, nil
 	}
-	mpi := vv.Value.Interface()
+	mpi := v.Value.Interface()
 	mv := NewMapView(d).SetMap(mpi)
-	mv.SetViewPath(vv.ViewPath).SetTmpSave(vv.TmpSave).SetReadOnly(vv.IsReadOnly())
+	mv.SetViewPath(v.ViewPath).SetTmpSave(v.TmpSave).SetReadOnly(v.IsReadOnly())
 	d.AddAppBar(mv.ConfigToolbar)
 	return true, nil
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//  MapInlineValue
-
-// MapInlineValue presents a MapViewInline for a map
+// MapInlineValue represents a map value with a [MapViewInline].
 type MapInlineValue struct {
-	ValueBase
+	ValueBase[*MapViewInline]
 }
 
-func (vv *MapInlineValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = MapViewInlineType
-	return vv.WidgetTyp
-}
-
-func (vv *MapInlineValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	sv := vv.Widget.(*MapViewInline)
-	cmp := vv.Value.Interface()
-	if sv.Map != cmp {
-		sv.SetMap(cmp)
-	} else {
-		sv.UpdateValues()
-	}
-}
-
-func (vv *MapInlineValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	vv.StdConfig(w)
-	sv := vv.Widget.(*MapViewInline)
-	sv.Tooltip = vv.Doc()
-	sv.MapValView = vv
-	sv.ViewPath = vv.ViewPath
-	sv.TmpSave = vv.TmpSave
-	// npv := vv.Value.Elem()
-	sv.SetMap(vv.Value.Interface())
-	sv.OnFinal(events.Change, func(e events.Event) {
-		vv.SendChange()
+func (v *MapInlineValue) Config() {
+	v.Widget.MapValue = v
+	v.Widget.ViewPath = v.ViewPath
+	v.Widget.TmpSave = v.TmpSave
+	v.Widget.SetMap(v.Value.Interface())
+	v.Widget.OnChange(func(e events.Event) {
+		v.SendChange(e)
 	})
+}
+
+func (v *MapInlineValue) Update() {
+	cmp := v.Value.Interface()
+	if v.Widget.Map != cmp {
+		v.Widget.SetMap(cmp)
+	} else {
+		v.Widget.UpdateValues()
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////

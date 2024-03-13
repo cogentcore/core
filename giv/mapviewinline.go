@@ -23,8 +23,10 @@ type MapViewInline struct {
 	// the map that we are a view onto
 	Map any `set:"-"`
 
-	// Value for the map itself, if this was created within value view framework -- otherwise nil
-	MapValView Value
+	// MapValue is the Value for the map itself
+	// if this was created within the Value framework.
+	// Otherwise, it is nil.
+	MapValue Value `set:"-"`
 
 	// has the map been edited?
 	Changed bool `set:"-"`
@@ -71,10 +73,10 @@ func (mv *MapViewInline) SetStyles() {
 			w.OnClick(func(e events.Event) {
 				vpath := mv.ViewPath
 				title := ""
-				if mv.MapValView != nil {
+				if mv.MapValue != nil {
 					newPath := ""
 					isZero := false
-					title, newPath, isZero = mv.MapValView.AsValueBase().GetTitle()
+					title, newPath, isZero = mv.MapValue.AsValueBase().GetTitle()
 					if isZero {
 						return
 					}

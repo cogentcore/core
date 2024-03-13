@@ -51,8 +51,10 @@ type StructView struct {
 	// the struct that we are a view onto
 	Struct any `set:"-"`
 
-	// Value for the struct itself, if this was created within value view framework -- otherwise nil
-	StructValView Value `set:"-"`
+	// StructValue is the Value for the struct itself
+	// if this was created within the Value framework.
+	// Otherwise, it is nil.
+	StructValue Value `set:"-"`
 
 	// has the value of any field changed?  updated by the ViewSig signals from fields
 	Changed bool `set:"-"`
