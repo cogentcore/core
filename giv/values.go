@@ -86,18 +86,15 @@ func (v *StructValue) Update() {
 	v.Widget.Update()
 }
 
-func (vv *StructValue) HasDialog() bool                      { return true }
-func (vv *StructValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
-
-func (vv *StructValue) ConfigDialog(d *gi.Body) (bool, func()) {
-	if vv.Value.IsZero() || laser.NonPtrValue(vv.Value).IsZero() {
+func (v *StructValue) ConfigDialog(d *gi.Body) (bool, func()) {
+	if v.Value.IsZero() || laser.NonPtrValue(v.Value).IsZero() {
 		return false, nil
 	}
-	opv := laser.OnePtrUnderlyingValue(vv.Value)
-	stru := opv.Interface()
-	NewStructView(d).SetStruct(stru).SetViewPath(vv.ViewPath).SetTmpSave(vv.TmpSave).
-		SetReadOnly(vv.IsReadOnly())
-	if tb, ok := stru.(gi.Toolbarer); ok {
+	opv := laser.OnePtrUnderlyingValue(v.Value)
+	str := opv.Interface()
+	NewStructView(d).SetStruct(str).SetViewPath(v.ViewPath).SetTmpSave(v.TmpSave).
+		SetReadOnly(v.IsReadOnly())
+	if tb, ok := str.(gi.Toolbarer); ok {
 		d.AddAppBar(tb.ConfigToolbar)
 	}
 	return true, nil
@@ -121,9 +118,6 @@ func (v *StructInlineValue) Config() {
 func (v *StructInlineValue) Update() {
 	v.Widget.SetStruct(v.Value.Interface())
 }
-
-//////////////////////////////////////////////////////////////////////////////
-//  SliceValue
 
 // SliceValue presents a button to edit slices
 type SliceValue struct {
