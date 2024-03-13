@@ -86,7 +86,7 @@ type NumberValue struct {
 }
 
 func (v *NumberValue) Config() {
-	vk := v.Value.Kind()
+	vk := laser.NonPtrType(v.Value.Type()).Kind()
 	if vk >= reflect.Int && vk <= reflect.Uintptr {
 		v.Widget.SetStep(1).SetPageStep(10)
 	}
@@ -120,6 +120,43 @@ func (v *NumberValue) Config() {
 }
 
 func (v *NumberValue) Update() {
+	npv := laser.NonPtrValue(v.Value)
+	fv, err := laser.ToFloat32(npv.Interface())
+	if grr.Log(err) == nil {
+		v.Widget.SetValue(fv)
+	}
+}
+
+// SliderValue represents an integer or float value with a slider.
+type SliderValue struct {
+	ValueBase[*gi.Slider]
+}
+
+func (v *SliderValue) Config() {
+	if min, ok := v.Tag("min"); ok {
+		minv, err := laser.ToFloat32(min)
+		if grr.Log(err) == nil {
+			v.Widget.SetMin(minv)
+		}
+	}
+	if max, ok := v.Tag("max"); ok {
+		maxv, err := laser.ToFloat32(max)
+		if grr.Log(err) == nil {
+			v.Widget.SetMax(maxv)
+		}
+	}
+	if step, ok := v.Tag("step"); ok {
+		stepv, err := laser.ToFloat32(step)
+		if grr.Log(err) == nil {
+			v.Widget.SetStep(stepv)
+		}
+	}
+	v.Widget.OnChange(func(e events.Event) {
+		v.SetValue(v.Widget.Value)
+	})
+}
+
+func (v *SliderValue) Update() {
 	npv := laser.NonPtrValue(v.Value)
 	fv, err := laser.ToFloat32(npv.Interface())
 	if grr.Log(err) == nil {
@@ -342,7 +379,7 @@ func (v *KiValue) Config() {
 
 func (v *KiValue) Update() {
 	path := "None"
-	k := v.KiStruct()
+	k := v.KiValue()
 	if k != nil && k.This() != nil {
 		path = k.AsKi().String()
 	}
@@ -350,7 +387,7 @@ func (v *KiValue) Update() {
 }
 
 func (v *KiValue) ConfigDialog(d *gi.Body) (bool, func()) {
-	k := v.KiStruct()
+	k := v.KiValue()
 	if k == nil {
 		return false, nil
 	}
@@ -358,8 +395,8 @@ func (v *KiValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	return true, nil
 }
 
-// KiStruct returns the actual underlying Ki struct itself, or nil.
-func (vv *KiValue) KiStruct() ki.Ki {
+// KiValue returns the actual underlying [ki.Ki] value, or nil.
+func (vv *KiValue) KiValue() ki.Ki {
 	if !vv.Value.IsValid() || vv.Value.IsNil() {
 		return nil
 	}
@@ -371,133 +408,22 @@ func (vv *KiValue) KiStruct() ki.Ki {
 	return k
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//  SliderValue
-
-// SliderValue presents a slider
-type SliderValue struct {
-	ValueBase
-}
-
-func (vv *SliderValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.SliderType
-	return vv.WidgetTyp
-}
-
-func (vv *SliderValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	sl := vv.Widget.(*gi.Slider)
-	npv := laser.NonPtrValue(vv.Value)
-	fv, err := laser.ToFloat32(npv.Interface())
-	if err == nil {
-		sl.SetValue(fv)
-	} else {
-		slog.Error("Float Value set", "error:", err)
-	}
-}
-
-func (vv *SliderValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	vv.StdConfig(w)
-	sl := vv.Widget.(*gi.Slider)
-	sl.Tooltip = vv.Doc()
-
-	if mintag, ok := vv.Tag("min"); ok {
-		minv, err := laser.ToFloat32(mintag)
-		if err == nil {
-			sl.Min = minv
-		} else {
-			slog.Error("Float Min Value:", "error:", err)
-		}
-	}
-	if maxtag, ok := vv.Tag("max"); ok {
-		maxv, err := laser.ToFloat32(maxtag)
-		if err == nil {
-			sl.Max = maxv
-		} else {
-			slog.Error("Float Max Value:", "error:", err)
-		}
-	}
-	if steptag, ok := vv.Tag("step"); ok {
-		step, err := laser.ToFloat32(steptag)
-		if err == nil {
-			sl.Step = step
-		} else {
-			slog.Error("Float Step Value:", "error:", err)
-		}
-	}
-	sl.OnFinal(events.Change, func(e events.Event) {
-		vv.SetValue(sl.Value)
-	})
-	vv.UpdateWidget()
-}
-
-//////////////////////////////////////////////////////////////////////////////
-//  EnumValue
-
-// EnumValue presents a chooser for choosing enums
+// EnumValue represents an [enums.Enum] value with a chooser.
 type EnumValue struct {
-	ValueBase
+	ValueBase[*gi.Chooser]
 }
 
-func (vv *EnumValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ChooserType
-	return vv.WidgetTyp
-}
-
-func (vv *EnumValue) EnumValue() enums.Enum {
-	ev, ok := laser.OnePtrUnderlyingValue(vv.Value).Interface().(enums.Enum)
-	if ok {
-		return ev
-	}
-	slog.Error("giv.EnumValue: type must be enums.Enum", "was", vv.Value.Type())
-	return nil
-}
-
-// func (vv *EnumValue) SetEnumValueFromInt(ival int64) bool {
-// 	// typ := vv.EnumType()
-// 	// eval := laser.EnumIfaceFromInt64(ival, typ)
-// 	return vv.SetValue(ival)
-// }
-
-func (vv *EnumValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	ch := vv.Widget.(*gi.Chooser)
-	npv := laser.NonPtrValue(vv.Value)
-	ch.SetCurrentValue(npv.Interface())
-
-	// iv, err := laser.ToInt(npv.Interface())
-	// if err == nil {
-	// 	ch.SetCurIndex(int(iv)) // todo: currently only working for 0-based values
-	// } else {
-	// 	slog.Error("Enum Value:", err)
-	// }
-}
-
-func (vv *EnumValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	vv.StdConfig(w)
-	ch := vv.Widget.(*gi.Chooser)
-	ch.Tooltip = vv.Doc()
-
-	ev := vv.EnumValue()
-	ch.SetEnum(ev)
-	ch.OnFinal(events.Change, func(e events.Event) {
-		vv.SetValue(ch.CurrentItem.Value)
+func (v *EnumValue) Config() {
+	e, _ := laser.OnePtrUnderlyingValue(v.Value).Interface().(enums.Enum)
+	v.Widget.SetEnum(e)
+	v.Widget.OnChange(func(e events.Event) {
+		v.SetValue(v.Widget.CurrentItem.Value)
 	})
-	vv.UpdateWidget()
+}
+
+func (v *EnumValue) Update() {
+	npv := laser.NonPtrValue(v.Value)
+	v.Widget.SetCurrentValue(npv.Interface())
 }
 
 //////////////////////////////////////////////////////////////////////////////
