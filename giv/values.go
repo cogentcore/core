@@ -431,95 +431,37 @@ type BitFlagValue struct {
 	ValueBase[*gi.Switches]
 }
 
-func (vv *BitFlagValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.SwitchesType
-	return vv.WidgetTyp
+func (v *BitFlagValue) Config() {
+	v.Widget.SetType(gi.SwitchChip).SetEnum(v.EnumValue())
+	v.Widget.OnChange(func(e events.Event) {
+		v.Widget.BitFlagValue(v.EnumValue())
+	})
 }
 
-func (vv *BitFlagValue) EnumValue() enums.BitFlagSetter {
-	ev, ok := vv.Value.Interface().(enums.BitFlagSetter)
-	if !ok {
-		slog.Error("giv.BitFlagView: type must be enums.BitFlag")
-		return nil
-	}
+func (v *BitFlagValue) Update() {
+	v.Widget.UpdateFromBitFlag(v.EnumValue())
+}
+
+// EnumValue returns the underlying [enums.BitFlagSetter] value.
+func (v *BitFlagValue) EnumValue() enums.BitFlagSetter {
 	// special case to use [ki.Ki.FlagType] if we are the Flags field
-	if vv.Field != nil && vv.Field.Name == "Flags" {
-		if k, ok := vv.Owner.(ki.Ki); ok {
+	if v.Field != nil && v.Field.Name == "Flags" {
+		if k, ok := v.Owner.(ki.Ki); ok {
 			return k.FlagType()
 		}
 	}
-	return ev
+	e, _ := v.Value.Interface().(enums.BitFlagSetter)
+	return e
 }
 
-func (vv *BitFlagValue) SetEnumValueFromInt(ival int64) bool {
-	return vv.SetValue(ival)
-}
-
-func (vv *BitFlagValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	sw := vv.Widget.(*gi.Switches)
-	ev := vv.EnumValue()
-	sw.UpdateFromBitFlag(ev)
-}
-
-func (vv *BitFlagValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	sw := vv.Widget.(*gi.Switches)
-	sw.SetType(gi.SwitchChip)
-	sw.Tooltip = vv.Doc()
-
-	ev := vv.EnumValue()
-	sw.SetEnum(ev)
-	sw.OnChange(func(e events.Event) {
-		sw.BitFlagValue(vv.EnumValue())
-	})
-	vv.UpdateWidget()
-}
-
-//////////////////////////////////////////////////////////////////////////////
-//  TypeValue
-
-// TypeValue presents a chooser for choosing types
+// TypeValue represents a [gti.Type] value with a chooser.
 type TypeValue struct {
-	ValueBase
+	ValueBase[*gi.Chooser]
 }
 
-func (vv *TypeValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ChooserType
-	return vv.WidgetTyp
-}
-
-func (vv *TypeValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	sb := vv.Widget.(*gi.Chooser)
-	npv := laser.OnePtrValue(vv.Value)
-	typ, ok := npv.Interface().(*gti.Type)
-	if ok {
-		sb.SetCurrentValue(typ)
-	}
-}
-
-func (vv *TypeValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	vv.StdConfig(w)
-	cb := vv.Widget.(*gi.Chooser)
-	cb.Tooltip = vv.Doc()
-
-	// typEmbeds := ki.NodeType
+func (v *TypeValue) Config() {
 	typEmbeds := gi.WidgetBaseType
-	if tetag, ok := vv.Tag("type-embeds"); ok {
+	if tetag, ok := v.Tag("type-embeds"); ok {
 		typ := gti.TypeByName(tetag)
 		if typ != nil {
 			typEmbeds = typ
@@ -527,12 +469,17 @@ func (vv *TypeValue) Config(w gi.Widget) {
 	}
 
 	tl := gti.AllEmbeddersOf(typEmbeds)
-	cb.SetTypes(tl)
-	cb.OnFinal(events.Change, func(e events.Event) {
-		tval := cb.CurrentItem.Value.(*gti.Type)
-		vv.SetValue(tval)
+	v.Widget.SetTypes(tl)
+	v.Widget.OnChange(func(e events.Event) {
+		tval := v.Widget.CurrentItem.Value.(*gti.Type)
+		v.SetValue(tval)
 	})
-	vv.UpdateWidget()
+}
+
+func (v *TypeValue) Update() {
+	opv := laser.OnePtrValue(v.Value)
+	typ, _ := opv.Interface().(*gti.Type)
+	v.Widget.SetCurrentValue(typ)
 }
 
 //////////////////////////////////////////////////////////////////////////////
