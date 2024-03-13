@@ -552,7 +552,7 @@ func (t *StructViewInline) New() ki.Ki { return &StructViewInline{} }
 
 // SetStructValView sets the [StructViewInline.StructValView]:
 // Value for the struct itself, if this was created within value view framework -- otherwise nil
-func (t *StructViewInline) SetStructValView(v Value) *StructViewInline { t.StructValView = v; return t }
+func (t *StructViewInline) SetStructValView(v Value) *StructViewInline { t.StructValue = v; return t }
 
 // SetAddButton sets the [StructViewInline.AddButton]:
 // if true add an edit action button at the end -- other users of this widget can then configure that -- it is called 'edit-action'

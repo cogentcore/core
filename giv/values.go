@@ -44,7 +44,7 @@ func (v *StringValue) Config() {
 
 	v.Widget.OnFinal(events.Change, func(e events.Event) {
 		if v.SetValue(v.Widget.Text()) {
-			v.UpdateWidget()
+			v.Update()
 		}
 	})
 }
@@ -101,47 +101,23 @@ func (vv *StructValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	return true, nil
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//  StructInlineValue
-
-// StructInlineValue presents a StructViewInline for a struct
+// StructInlineValue represents a struct value with a [StructViewInline].
 type StructInlineValue struct {
-	ValueBase
+	ValueBase[*StructViewInline]
 }
 
-func (vv *StructInlineValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = StructViewInlineType
-	return vv.WidgetTyp
-}
-
-func (vv *StructInlineValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	vv.CreateTempIfNotPtr() // essential to always have this set
-	sv := vv.Widget.(*StructViewInline)
-	cst := vv.Value.Interface()
-	sv.SetStruct(cst)
-}
-
-func (vv *StructInlineValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	vv.StdConfig(w)
-	sv := vv.Widget.(*StructViewInline)
-	sv.Tooltip = vv.Doc()
-	sv.StructValView = vv
-	sv.ViewPath = vv.ViewPath
-	sv.TmpSave = vv.TmpSave
-	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
-	sv.SetStruct(vv.Value.Interface())
-	sv.OnFinal(events.Change, func(e events.Event) {
-		vv.SendChange()
+func (v *StructInlineValue) Config() {
+	v.Widget.StructValue = v
+	v.Widget.ViewPath = v.ViewPath
+	v.Widget.TmpSave = v.TmpSave
+	v.Widget.SetStruct(v.Value.Interface())
+	v.Widget.OnChange(func(e events.Event) {
+		v.SendChange(e)
 	})
-	vv.UpdateWidget()
+}
+
+func (v *StructInlineValue) Update() {
+	v.Widget.SetStruct(v.Value.Interface())
 }
 
 //////////////////////////////////////////////////////////////////////////////

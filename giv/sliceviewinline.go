@@ -28,13 +28,13 @@ type SliceViewInline struct {
 	// SliceValue is the Value for the slice itself
 	// if this was created within the Value framework.
 	// Otherwise, it is nil.
-	SliceValue Value
+	SliceValue Value `set:"-"`
 
 	// whether the slice is actually an array -- no modifications
 	IsArray bool `set:"-"`
 
 	// whether the slice has a fixed-len flag on it
-	IsFixedLen bool
+	IsFixedLen bool `set:"-"`
 
 	// has the slice been edited?
 	Changed bool `set:"-"`
@@ -48,7 +48,7 @@ type SliceViewInline struct {
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string
 
-	// size of map when gui configed
+	// size of map when gui was configured
 	ConfigSize int `set:"-"`
 }
 
