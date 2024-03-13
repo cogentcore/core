@@ -24,6 +24,8 @@ import (
 	"cogentcore.org/core/units"
 )
 
+// This file contains the standard [Value]s built into giv.
+
 // StringValue represents any value with a text field.
 type StringValue struct {
 	ValueBase[*gi.TextField]
