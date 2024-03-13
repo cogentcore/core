@@ -28,11 +28,11 @@ import (
 // NewValue makes and returns a new [Value] from the given value and creates
 // the widget for it with the given parent and optional tags (only the first
 // argument is used). It is the main way that end-user code should interact
-// with giv. The given value needs to be a pointer for it to be settable.
+// with [Value]s. The given value needs to be a pointer for it to be modified.
 //
 // NewValue is not appropriate for internal code configuring
-// non-solo values (for example, in StructView), but it should be fine for
-// most end-user code.
+// non-solo values (for example, in StructView), but it should be fine
+// for end-user code.
 func NewValue(par ki.Ki, val any, tags ...string) Value {
 	t := ""
 	if len(tags) > 0 {
@@ -45,39 +45,10 @@ func NewValue(par ki.Ki, val any, tags ...string) Value {
 	return v
 }
 
-// ValueFlags for Value bool state
-type ValueFlags int64 //enums:bitflag -trim-prefix Value
-
-const (
-	// ValueReadOnly flagged after first configuration
-	ValueReadOnly ValueFlags = iota
-
-	// ValueMapKey for OwnKind = Map, this value represents the Key -- otherwise the Value
-	ValueMapKey
-
-	// ValueHasSavedLabel is whether the value has a saved version of its
-	// label, which can be set either automatically or explicitly
-	ValueHasSavedLabel
-
-	// ValueHasSavedDoc is whether the value has a saved version of its
-	// documentation, which can be set either automatically or explicitly
-	ValueHasSavedDoc
-
-	// ValueDialogNewWindow indicates that the dialog should be opened with
-	// in a new window, instead of a typical FullWindow in same current window.
-	// this is triggered by holding down any modifier key while clicking on a
-	// button that opens the window.
-	ValueDialogNewWindow
-)
-
-// Value is an interface for managing the GUI representation of values
-// (e.g., fields, map values, slice values) in Views (StructView, MapView,
-// etc).  It is a GUI version of the reflect.Value, and uses that for
-// representing the underlying Value being represented graphically.
-// The different types of Value are for different Kinds of values
-// (bool, float, etc) -- which can have different Kinds of owners.
-// The ValueBase class supports all the basic fields for managing
-// the owner kinds.
+// A Value is a bridge between Go values like strings, integers, and structs
+// and GUI widgets. It allows you to represent simple and complicated values
+// of any kind with automatic, editable, and user-friendly widgets. The most
+// common pathway for making [Value]s is [NewValue].
 type Value interface {
 	fmt.Stringer
 
@@ -85,10 +56,10 @@ type Value interface {
 	// interface doesn't need to provide accessors for them.
 	AsValueData() *ValueData
 
-	// AsWidget returns the widget associated with the value
+	// AsWidget returns the widget associated with the value.
 	AsWidget() gi.Widget
 
-	// AsWidgetBase returns the widget base associated with the value
+	// AsWidgetBase returns the widget base associated with the value.
 	AsWidgetBase() *gi.WidgetBase
 
 	// MakeWidget makes the widget for this value with the given parent.
@@ -367,6 +338,31 @@ type ValueData struct {
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 	TmpSave Value `set:"-" view:"-"`
 }
+
+// ValueFlags for Value bool state
+type ValueFlags int64 //enums:bitflag -trim-prefix Value
+
+const (
+	// ValueReadOnly flagged after first configuration
+	ValueReadOnly ValueFlags = iota
+
+	// ValueMapKey for OwnKind = Map, this value represents the Key -- otherwise the Value
+	ValueMapKey
+
+	// ValueHasSavedLabel is whether the value has a saved version of its
+	// label, which can be set either automatically or explicitly
+	ValueHasSavedLabel
+
+	// ValueHasSavedDoc is whether the value has a saved version of its
+	// documentation, which can be set either automatically or explicitly
+	ValueHasSavedDoc
+
+	// ValueDialogNewWindow indicates that the dialog should be opened with
+	// in a new window, instead of a typical FullWindow in same current window.
+	// this is triggered by holding down any modifier key while clicking on a
+	// button that opens the window.
+	ValueDialogNewWindow
+)
 
 func (vv *ValueData) AsValueData() *ValueData {
 	return vv
