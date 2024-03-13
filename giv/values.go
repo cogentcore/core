@@ -426,12 +426,9 @@ func (v *EnumValue) Update() {
 	v.Widget.SetCurrentValue(npv.Interface())
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//  BitFlagView
-
-// BitFlagValue presents chip [gi.Switches] for editing bitflags
+// BitFlagValue represents an [enums.BitFlag] value with chip switches.
 type BitFlagValue struct {
-	ValueBase
+	ValueBase[*gi.Switches]
 }
 
 func (vv *BitFlagValue) WidgetType() *gti.Type {
