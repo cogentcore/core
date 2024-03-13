@@ -220,6 +220,10 @@ func (vv *ValueBase[W]) MakeWidget(par ki.Ki) gi.Widget {
 
 // Config configures the given [gi.Widget] to represent the given [Value].
 func Config(v Value, w gi.Widget) {
+	if w == v.AsWidget() {
+		v.Update()
+		return
+	}
 	BaseConfig(v, w)
 	v.Config()
 	v.Update()
