@@ -8,7 +8,6 @@ package giv
 
 import (
 	"fmt"
-	"log"
 	"log/slog"
 	"reflect"
 	"strconv"
@@ -622,7 +621,7 @@ func (vv *ValueData) SetValueMap(val any) (bool, error) {
 		curnv := ov.MapIndex(nv) // see if new value there already
 		if val != kv.Interface() && curnv.IsValid() && !curnv.IsZero() {
 			// actually new key and current exists
-			d := gi.NewBody().AddTitle("Map Key Conflict").
+			d := gi.NewBody().AddTitle("Map key conflict").
 				AddText(fmt.Sprintf("The map key value: %v already exists in the map; are you sure you want to overwrite the current value?", val))
 			d.AddBottomBar(func(pw gi.Widget) {
 				d.AddCancel(pw).SetText("Cancel change")
@@ -833,72 +832,6 @@ func (vv *ValueData) GetTitle() (label, newPath string, isZero bool) {
 	return
 }
 
-func (vv *ValueBase) UpdateWidget() {
-	if vv.Widget == nil {
-		fmt.Println("nil widget")
-		return
-	}
-	tf := vv.Widget.(*gi.TextField)
-	npv := laser.NonPtrValue(vv.Value)
-	// fmt.Printf("vvb val: %v  type: %v  kind: %v\n", npv.Interface(), npv.Type().String(), npv.Kind())
-	if npv.Kind() == reflect.Interface && npv.IsZero() {
-		tf.SetText("None")
-	} else {
-		txt := laser.ToString(vv.Value.Interface())
-		// fmt.Println("text set to:", txt)
-		tf.SetText(txt)
-	}
-}
-
-func (vv *ValueBase) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	tf, ok := vv.Widget.(*gi.TextField)
-	if !ok {
-		return
-	}
-	tf.Tooltip = vv.Doc()
-	// STYTODO: need better solution to value view style configuration (this will add too many stylers)
-	// tf.Style(func(s *styles.Style) {
-	// 	s.Min.X.Ch(16)
-	// 	s.Min.Y.Em(1.4)
-	// })
-	vv.StdConfig(w)
-	if completetag, ok := vv.Tag("complete"); ok {
-		// todo: this does not seem to be up-to-date and should use Completer interface..
-		in := []reflect.Value{reflect.ValueOf(tf)}
-		in = append(in, reflect.ValueOf(completetag)) // pass tag value - object may doing completion on multiple fields
-		cmpfv := reflect.ValueOf(vv.Owner).MethodByName("SetCompleter")
-		if cmpfv.IsZero() {
-			log.Printf("giv.ValueBase: programmer error -- SetCompleter method not found in type: %T\n", vv.Owner)
-		} else {
-			cmpfv.Call(in)
-		}
-	}
-	if vtag, _ := vv.Tag("view"); vtag == "password" {
-		tf.SetTypePassword()
-	}
-
-	if vl, ok := vv.Value.Interface().(gi.Validator); ok {
-		tf.SetValidator(vl.Validate)
-	}
-	if fv, ok := vv.Owner.(gi.FieldValidator); ok {
-		tf.SetValidator(func() error {
-			return fv.ValidateField(vv.Field.Name)
-		})
-	}
-
-	tf.OnChange(func(e events.Event) {
-		if vv.SetValue(tf.Text()) {
-			vv.UpdateWidget() // always update after setting value..
-		}
-	})
-	vv.UpdateWidget()
-}
-
 // ConfigDialogWidget configures the widget for the given value to open the dialog for
 // the given value when clicked and have the appropriate tooltip for that.
 // If allowReadOnly is false, the dialog will not be opened if the value
@@ -927,13 +860,13 @@ func ConfigDialogWidget(v Value, allowReadOnly bool) {
 // [ConfigDialog] method to configure the dialog contents.
 // If a title is specified, it is used as the title for the dialog
 // instead of the default one.
-func OpenValueDialog(vv Value, ctx gi.Widget, fun func(), title ...string) {
-	vb := vv.AsValueBase()
-	ttl, _, _ := vb.GetTitle()
+func OpenValueDialog(v Value, ctx gi.Widget, fun func(), title ...string) {
+	vd := v.AsValueData()
+	ttl, _, _ := vd.GetTitle()
 	if len(title) > 0 {
 		ttl = title[0]
 	}
-	opv := laser.OnePtrUnderlyingValue(vb.Value)
+	opv := laser.OnePtrUnderlyingValue(vd.Value)
 	if !opv.IsValid() {
 		return
 	}
@@ -941,8 +874,8 @@ func OpenValueDialog(vv Value, ctx gi.Widget, fun func(), title ...string) {
 	if gi.RecycleDialog(obj) {
 		return
 	}
-	d := gi.NewBody().AddTitle(ttl).AddText(vv.Doc())
-	ok, okfun := vv.ConfigDialog(d)
+	d := gi.NewBody().AddTitle(ttl).AddText(v.Doc())
+	ok, okfun := v.ConfigDialog(d)
 	if !ok {
 		return
 	}
@@ -952,8 +885,8 @@ func OpenValueDialog(vv Value, ctx gi.Widget, fun func(), title ...string) {
 	// OK and Cancel buttons
 	if okfun == nil && fun == nil {
 		d.OnClose(func(e events.Event) {
-			vv.UpdateWidget()
-			vv.SendChange()
+			v.Update()
+			v.SendChange()
 		})
 	} else {
 		// otherwise, we have to make the bottom bar
@@ -963,8 +896,8 @@ func OpenValueDialog(vv Value, ctx gi.Widget, fun func(), title ...string) {
 				if okfun != nil {
 					okfun()
 				}
-				vv.UpdateWidget()
-				vv.SendChange()
+				v.Update()
+				v.SendChange()
 				if fun != nil {
 					fun()
 				}
@@ -973,7 +906,7 @@ func OpenValueDialog(vv Value, ctx gi.Widget, fun func(), title ...string) {
 	}
 
 	ds := d.NewFullDialog(ctx)
-	if vv.Is(ValueDialogNewWindow) {
+	if v.Is(ValueDialogNewWindow) {
 		ds.SetNewWindow(true)
 	}
 	ds.Run()
