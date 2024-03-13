@@ -131,26 +131,6 @@ type Value interface {
 	// SetReadOnly marks this value as ReadOnly or not
 	SetReadOnly(ro bool)
 
-	// HasDialog returns true if this value has an associated Dialog,
-	// e.g., for Filename, StructView, SliceView, etc.
-	// The OpenDialog method will open the dialog.
-	HasDialog() bool
-
-	// OpenDialog opens the dialog for this Value, if [HasDialog] is true.
-	// Given function closure is called for the Ok action, after value
-	// has been updated, if using the dialog as part of another control flow.
-	// Note that some cases just pop up a menu chooser, not a full dialog.
-	OpenDialog(ctx gi.Widget, fun func())
-
-	// ConfigDialog adds content to given dialog body for this value,
-	// for Values with [HasDialog] == true, that use full dialog scenes.
-	// The bool return is false if the value does not use this method
-	// (e.g., for simple menu choosers).
-	// The [OpenValueDialog] function is used to construct and run the dialog.
-	// The returned function is an optional closure to be called
-	// in the Ok case, for cases where extra logic is required.
-	ConfigDialog(d *gi.Body) (bool, func())
-
 	// Val returns the reflect.Value representation for this item.
 	Val() reflect.Value
 
@@ -197,6 +177,34 @@ type Value interface {
 	SaveTmp()
 }
 
+// ConfigDialoger is an optional interface that [Value]s may implement to
+// indicate that they have a dialog associated with them that is configured
+// with the ConfigDialog method. The dialog body itself is constructed and run
+// using [OpenDialog].
+type ConfigDialoger interface {
+	// ConfigDialog adds content to the given dialog body for this value.
+	// The bool return is false if the value does not use this method
+	// (e.g., for simple menu choosers).
+	// The returned function is an optional closure to be called
+	// in the Ok case, for cases where extra logic is required.
+	ConfigDialog(d *gi.Body) (bool, func())
+}
+
+// OpenDialoger is an optional interface that [Value]s may implement to
+// indicate that they have a dialog associated with them that is created,
+// configured, and run with the OpenDialog method. This method typically
+// calls a separate ConfigDialog method. If the [Value] does not implement
+// [OpenDialoger] but does implement [ConfigDialoger], then [OpenDialogBase]
+// will be used to create and run the dialog, and [ConfigDialoger.ConfigDialog]
+// will be used to configure it.
+type OpenDialoger interface {
+	// OpenDialog opens the dialog for this Value.
+	// Given function closure is called for the Ok action, after value
+	// has been updated, if using the dialog as part of another control flow.
+	// Note that some cases just pop up a menu chooser, not a full dialog.
+	OpenDialog(ctx gi.Widget, fun func())
+}
+
 // ValueBase is the base type that all [Value] objects extend. It contains both
 // [ValueData] and a generically parameterized [gi.Widget].
 type ValueBase[W gi.Widget] struct {
@@ -224,13 +232,14 @@ func Config(v Value, w gi.Widget) {
 		v.Update()
 		return
 	}
-	BaseConfig(v, w)
+	ConfigBase(v, w)
 	v.Config()
 	v.Update()
 }
 
-// BaseConfig does the base configuration for the given [gi.Widget] to represent the given [Value].
-func BaseConfig(v Value, w gi.Widget) {
+// ConfigBase does the base configuration for the given [gi.Widget]
+// to represent the given [Value].
+func ConfigBase(v Value, w gi.Widget) {
 	w.AsWidget().SetTooltip(v.Doc())
 	w.SetState(v.IsReadOnly(), states.ReadOnly) // do right away
 	w.Style(func(s *styles.Style) {
@@ -280,6 +289,74 @@ func BaseConfig(v Value, w gi.Widget) {
 			}
 		}
 	})
+}
+
+// OpenDialog opens any applicable dialog for the given value in the
+// context of the given widget. It first tries [OpenDialoger], then
+// [ConfigDialoger] with [OpenDialogBase]. If both of those fail, it
+// returns false.
+func OpenDialog(v Value, ctx gi.Widget, fun func()) bool {
+	if od, ok := v.(OpenDialoger); ok {
+		od.OpenDialog(ctx, fun)
+		return true
+	}
+	if cd, ok := v.(ConfigDialoger); ok {
+		OpenDialogBase(v, cd, ctx, fun)
+		return true
+	}
+	return false
+}
+
+// OpenDialogBase is a helper for [OpenDialog] for cases that
+// do not implement [OpenDialoger] but do implement [ConfigDialoger]
+// to configure the dialog contents.
+func OpenDialogBase(v Value, cd ConfigDialoger, ctx gi.Widget, fun func()) {
+	vd := v.AsValueData()
+	title, _, _ := vd.GetTitle()
+	opv := laser.OnePtrUnderlyingValue(vd.Value)
+	if !opv.IsValid() {
+		return
+	}
+	obj := opv.Interface()
+	if gi.RecycleDialog(obj) {
+		return
+	}
+	d := gi.NewBody().AddTitle(title).AddText(v.Doc())
+	ok, okfun := cd.ConfigDialog(d)
+	if !ok {
+		return
+	}
+
+	// if we don't have anything specific for ok events,
+	// we just register an OnClose event and skip the
+	// OK and Cancel buttons
+	if okfun == nil && fun == nil {
+		d.OnClose(func(e events.Event) {
+			v.Update()
+			v.SendChange()
+		})
+	} else {
+		// otherwise, we have to make the bottom bar
+		d.AddBottomBar(func(pw gi.Widget) {
+			d.AddCancel(pw)
+			d.AddOk(pw).OnClick(func(e events.Event) {
+				if okfun != nil {
+					okfun()
+				}
+				v.Update()
+				v.SendChange()
+				if fun != nil {
+					fun()
+				}
+			})
+		})
+	}
+
+	ds := d.NewFullDialog(ctx)
+	if v.Is(ValueDialogNewWindow) {
+		ds.SetNewWindow(true)
+	}
+	ds.Run()
 }
 
 // note: could have a more efficient way to represent the different owner type
@@ -855,63 +932,7 @@ func ConfigDialogWidget(v Value, allowReadOnly bool) {
 	v.AsWidget().OnClick(func(e events.Event) {
 		if allowReadOnly || !v.IsReadOnly() {
 			v.SetFlag(e.HasAnyModifier(key.Shift), ValueDialogNewWindow)
-			v.OpenDialog(v.AsWidget(), nil)
+			OpenDialog(v, v.AsWidget(), nil)
 		}
 	})
-}
-
-// OpenValueDialog is a helper for OpenDialog for cases that use
-// [ConfigDialog] method to configure the dialog contents.
-// If a title is specified, it is used as the title for the dialog
-// instead of the default one.
-func OpenValueDialog(v Value, ctx gi.Widget, fun func(), title ...string) {
-	vd := v.AsValueData()
-	ttl, _, _ := vd.GetTitle()
-	if len(title) > 0 {
-		ttl = title[0]
-	}
-	opv := laser.OnePtrUnderlyingValue(vd.Value)
-	if !opv.IsValid() {
-		return
-	}
-	obj := opv.Interface()
-	if gi.RecycleDialog(obj) {
-		return
-	}
-	d := gi.NewBody().AddTitle(ttl).AddText(v.Doc())
-	ok, okfun := v.ConfigDialog(d)
-	if !ok {
-		return
-	}
-
-	// if we don't have anything specific for ok events,
-	// we just register an OnClose event and skip the
-	// OK and Cancel buttons
-	if okfun == nil && fun == nil {
-		d.OnClose(func(e events.Event) {
-			v.Update()
-			v.SendChange()
-		})
-	} else {
-		// otherwise, we have to make the bottom bar
-		d.AddBottomBar(func(pw gi.Widget) {
-			d.AddCancel(pw)
-			d.AddOk(pw).OnClick(func(e events.Event) {
-				if okfun != nil {
-					okfun()
-				}
-				v.Update()
-				v.SendChange()
-				if fun != nil {
-					fun()
-				}
-			})
-		})
-	}
-
-	ds := d.NewFullDialog(ctx)
-	if v.Is(ValueDialogNewWindow) {
-		ds.SetNewWindow(true)
-	}
-	ds.Run()
 }
