@@ -119,32 +119,24 @@ func (v *StructInlineValue) Update() {
 	v.Widget.SetStruct(v.Value.Interface())
 }
 
-// SliceValue presents a button to edit slices
+// SliceValue represents a slice or array value with a button.
 type SliceValue struct {
-	ValueBase
-	IsArray    bool         // is an array, not a slice
-	ElType     reflect.Type // type of element in the slice -- has pointer if slice has pointers
-	ElIsStruct bool         // whether non-pointer element type is a struct or not
+	ValueBase[*gi.Button]
 }
 
-func (vv *SliceValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ButtonType
-	return vv.WidgetTyp
+func (v *SliceValue) Config() {
+	v.Widget.SetType(gi.ButtonTonal).SetIcon(icons.Edit)
+	ConfigDialogWidget(v, true)
 }
 
-func (vv *SliceValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	vv.GetTypeInfo()
-	bt := vv.Widget.(*gi.Button)
-	npv := laser.OnePtrUnderlyingValue(vv.Value).Elem()
+func (v *SliceValue) Update() {
+	npv := laser.OnePtrUnderlyingValue(v.Value).Elem()
 	txt := ""
 	if !npv.IsValid() {
 		txt = "None"
 	} else {
 		if npv.Kind() == reflect.Array || !npv.IsNil() {
-			bnm := laser.FriendlyTypeName(vv.ElType)
+			bnm := laser.FriendlyTypeName(laser.SliceElType(v.Value.Interface()))
 			if strings.HasSuffix(bnm, "s") {
 				txt = strcase.ToSentence(fmt.Sprintf("%d lists of %s", npv.Len(), bnm))
 			} else {
@@ -154,53 +146,27 @@ func (vv *SliceValue) UpdateWidget() {
 			txt = "None"
 		}
 	}
-	bt.SetText(txt).Update()
+	v.Widget.SetText(txt).Update()
 }
 
-func (vv *SliceValue) GetTypeInfo() {
-	slci := vv.Value.Interface()
-	vv.IsArray = laser.NonPtrType(reflect.TypeOf(slci)).Kind() == reflect.Array
-	if slci != nil && !laser.AnyIsNil(slci) {
-		vv.ElType = laser.SliceElType(slci)
-		vv.ElIsStruct = (laser.NonPtrType(vv.ElType).Kind() == reflect.Struct)
-	}
-}
-
-func (vv *SliceValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.GetTypeInfo()
-	vv.Widget = w
-	vv.StdConfig(w)
-	bt := vv.Widget.(*gi.Button)
-	bt.SetType(gi.ButtonTonal)
-	bt.Icon = icons.Edit
-	ConfigDialogWidget(vv, bt, true)
-	vv.UpdateWidget()
-}
-
-func (vv *SliceValue) HasDialog() bool                      { return true }
-func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
-
-func (vv *SliceValue) ConfigDialog(d *gi.Body) (bool, func()) {
-	if vv.Value.IsZero() || laser.NonPtrValue(vv.Value).IsZero() {
+func (v *SliceValue) ConfigDialog(d *gi.Body) (bool, func()) {
+	npv := laser.NonPtrValue(v.Value)
+	if v.Value.IsZero() || npv.IsZero() {
 		return false, nil
 	}
-	vvp := laser.OnePtrValue(vv.Value)
+	vvp := laser.OnePtrValue(v.Value)
 	if vvp.Kind() != reflect.Ptr {
-		slog.Error("giv.SliceValue: Cannot view unadressable (non-pointer) slices", "type", vv.Value.Type())
+		slog.Error("giv.SliceValue: Cannot view unadressable (non-pointer) slices", "type", v.Value.Type())
 		return false, nil
 	}
 	slci := vvp.Interface()
-	if !vv.IsArray && vv.ElIsStruct {
-		tv := NewTableView(d).SetSlice(slci).SetTmpSave(vv.TmpSave).SetViewPath(vv.ViewPath)
-		tv.SetReadOnly(vv.IsReadOnly())
+	if npv.Kind() != reflect.Array && laser.NonPtrType(laser.SliceElType(v.Value.Interface())).Kind() == reflect.Struct {
+		tv := NewTableView(d).SetSlice(slci).SetTmpSave(v.TmpSave).SetViewPath(v.ViewPath)
+		tv.SetReadOnly(v.IsReadOnly())
 		d.AddAppBar(tv.ConfigToolbar)
 	} else {
-		sv := NewSliceView(d).SetSlice(slci).SetTmpSave(vv.TmpSave).SetViewPath(vv.ViewPath)
-		sv.SetReadOnly(vv.IsReadOnly())
+		sv := NewSliceView(d).SetSlice(slci).SetTmpSave(v.TmpSave).SetViewPath(v.ViewPath)
+		sv.SetReadOnly(v.IsReadOnly())
 		d.AddAppBar(sv.ConfigToolbar)
 	}
 	return true, nil
