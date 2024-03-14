@@ -76,7 +76,7 @@ func (mv *MapViewInline) SetStyles() {
 				if mv.MapValue != nil {
 					newPath := ""
 					isZero := false
-					title, newPath, isZero = mv.MapValue.AsValueBase().GetTitle()
+					title, newPath, isZero = mv.MapValue.AsValueData().GetTitle()
 					if isZero {
 						return
 					}
@@ -109,7 +109,7 @@ func (mv *MapViewInline) SetMap(mp any) *MapViewInline {
 }
 
 func (mv *MapViewInline) Config() {
-	mv.DeleteChildren()
+	mv.DeleteChildren() // need to delete everything
 	if laser.AnyIsNil(mv.Map) {
 		mv.ConfigSize = 0
 		return
@@ -155,45 +155,32 @@ func (mv *MapViewInline) Config() {
 	mv.ConfigChildren(config)
 	for i, vv := range mv.Values {
 		kv := mv.Keys[i]
-		vvb := vv.AsValueBase()
-		kvb := kv.AsValueBase()
-		vvb.OnChange(func(e events.Event) { mv.SendChange() })
-		kvb.OnChange(func(e events.Event) {
+		vv.OnChange(func(e events.Event) { mv.SendChange() })
+		kv.OnChange(func(e events.Event) {
 			mv.SendChange()
 			mv.Update()
 		})
-		// note: values are always new, but widgets persist!
 		w, wb := gi.AsWidget(mv.Child((i * 2) + 1))
 		kw, kwb := gi.AsWidget(mv.Child(i * 2))
-		// TODO: is this configured logic right?
-		if wb.Prop("configured") == nil {
-			vv.Config(w)
-			kv.Config(kw)
-			vvb.AsWidgetBase().OnInput(mv.HandleEvent)
-			kvb.AsWidgetBase().OnInput(mv.HandleEvent)
-			w.Style(func(s *styles.Style) {
-				s.SetTextWrap(false)
-			})
-			kw.Style(func(s *styles.Style) {
-				s.SetTextWrap(false)
-			})
-		} else {
-			wb.SetProp("configured", true)
-			kwb.SetProp("configured", true)
-			vvb.Widget = w
-			kvb.Widget = kw
-			vv.UpdateWidget()
-			kv.UpdateWidget()
-		}
+		Config(vv, w)
+		Config(kv, kw)
+		vv.AsWidgetBase().OnInput(mv.HandleEvent)
+		kv.AsWidgetBase().OnInput(mv.HandleEvent)
+		w.Style(func(s *styles.Style) {
+			s.SetTextWrap(false)
+		})
+		kw.Style(func(s *styles.Style) {
+			s.SetTextWrap(false)
+		})
 		if mv.IsReadOnly() {
 			wb.SetReadOnly(true)
 			kwb.SetReadOnly(true)
 		} else {
 			wb.AddContextMenu(func(m *gi.Scene) {
-				mv.ContextMenu(m, kvb.Value)
+				mv.ContextMenu(m, kv.Val())
 			})
 			kwb.AddContextMenu(func(m *gi.Scene) {
-				mv.ContextMenu(m, kvb.Value)
+				mv.ContextMenu(m, kv.Val())
 			})
 		}
 	}
