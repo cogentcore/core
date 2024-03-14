@@ -7,7 +7,6 @@ package giv
 import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/laser"
@@ -60,57 +59,32 @@ func ViewStdKeyMaps() { //gti:add
 	KeyMapsView(&keyfun.StdMaps)
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-//  KeyMapValue
-
-// KeyMapValue presents an action for displaying a KeyMapName and selecting
-// from chooser
+// KeyMapValue represents a [keyfun.MapName] value with a button.
 type KeyMapValue struct {
-	ValueBase
+	ValueBase[*gi.Button]
 }
 
-func (vv *KeyMapValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ButtonType
-	return vv.WidgetTyp
+func (v *KeyMapValue) Config() {
+	v.Widget.SetType(gi.ButtonTonal)
+	ConfigDialogWidget(v, false)
 }
 
-func (vv *KeyMapValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	bt := vv.Widget.(*gi.Button)
-	txt := laser.ToString(vv.Value.Interface())
-	bt.SetText(txt).Update()
+func (v *KeyMapValue) Update() {
+	txt := laser.ToString(v.Value.Interface())
+	v.Widget.SetText(txt).Update()
 }
 
-func (vv *KeyMapValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	vv.StdConfig(w)
-	bt := vv.Widget.(*gi.Button)
-	bt.SetType(gi.ButtonTonal)
-	ConfigDialogWidget(vv, bt, false)
-	vv.UpdateWidget()
-}
-
-func (vv *KeyMapValue) HasDialog() bool { return true }
-func (vv *KeyMapValue) OpenDialog(ctx gi.Widget, fun func()) {
-	OpenValueDialog(vv, ctx, fun, "Select a key map")
-}
-
-func (vv *KeyMapValue) ConfigDialog(d *gi.Body) (bool, func()) {
+// TODO(dtl): Select a key map
+func (v *KeyMapValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	si := 0
-	cur := laser.ToString(vv.Value.Interface())
+	cur := laser.ToString(v.Value.Interface())
 	_, curRow, _ := keyfun.AvailMaps.MapByName(keyfun.MapName(cur))
 	NewTableView(d).SetSlice(&keyfun.AvailMaps).SetSelIdx(curRow).BindSelect(&si)
 	return true, func() {
 		if si >= 0 {
 			km := keyfun.AvailMaps[si]
-			vv.SetValue(keyfun.MapName(km.Name))
-			vv.UpdateWidget()
+			v.SetValue(keyfun.MapName(km.Name))
+			v.Update()
 		}
 	}
 }
