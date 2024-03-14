@@ -506,20 +506,13 @@ type ColorValue struct {
 	ValueBase[*gi.Button]
 }
 
-// Color returns a standardized color value from whatever value is represented
-// internally, or nil.
-func (v *ColorValue) Color() color.RGBA {
-	c, _ := v.Value.Interface().(color.Color)
-	return colors.AsRGBA(c)
-}
-
 func (v *ColorValue) Config() {
 	v.Widget.SetType(gi.ButtonTonal).SetText("Edit color").SetIcon(icons.Colors)
 	ConfigDialogWidget(v, false)
 	v.Widget.Style(func(s *styles.Style) {
 		// we need to display button as non-transparent
 		// so that it can be seen
-		dclr := colors.WithAF32(v.Color(), 1)
+		dclr := colors.WithAF32(v.ColorValue(), 1)
 		s.Background = colors.C(dclr)
 		s.Color = colors.C(hct.ContrastColor(dclr, hct.ContrastAAA))
 	})
@@ -532,9 +525,16 @@ func (v *ColorValue) Update() {
 
 // TODO(dtl): Edit color
 func (v *ColorValue) ConfigDialog(d *gi.Body) (bool, func()) {
-	cv := NewColorView(d).SetColor(v.Color())
+	cv := NewColorView(d).SetColor(v.ColorValue())
 	return true, func() {
 		v.SetValue(cv.Color.AsRGBA())
 		v.Update()
 	}
+}
+
+// ColorValue returns a standardized color value from whatever value is represented
+// internally, or nil.
+func (v *ColorValue) ColorValue() color.RGBA {
+	c, _ := v.Value.Interface().(color.Color)
+	return colors.AsRGBA(c)
 }
