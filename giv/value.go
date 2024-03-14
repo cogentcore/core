@@ -64,6 +64,10 @@ type Value interface {
 	// WidgetType returns the type of widget associated with this value.
 	WidgetType() *gti.Type
 
+	// SetWidget sets the widget used to represent the value.
+	// It is typically only used internally in [Config].
+	SetWidget(w gi.Widget)
+
 	// Config configures the widget to represent the value, including setting up
 	// the OnChange event listener to set the value when the user edits it
 	// (values are always set immediately when the widget is updated).
@@ -227,12 +231,17 @@ func (v *ValueBase[W]) WidgetType() *gti.Type {
 	return w.KiType()
 }
 
+func (v *ValueBase[W]) SetWidget(w gi.Widget) {
+	v.Widget = w.(W)
+}
+
 // Config configures the given [gi.Widget] to represent the given [Value].
 func Config(v Value, w gi.Widget) {
 	if w == v.AsWidget() {
 		v.Update()
 		return
 	}
+	v.SetWidget(w)
 	ConfigBase(v, w)
 	v.Config()
 	v.Update()
