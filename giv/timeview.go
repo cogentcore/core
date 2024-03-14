@@ -13,7 +13,6 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fi"
 	"cogentcore.org/core/gi"
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
@@ -403,6 +402,59 @@ func (v *TimeValue) TimeValue() *time.Time {
 	return nil
 }
 
+// DurationValue represents a [time.Duration] value with a spinner and unit chooser.
+type DurationValue struct {
+	ValueBase[*gi.Layout]
+}
+
+func (v *DurationValue) Config() {
+	v.Widget.Style(func(s *styles.Style) {
+		s.Grow.Set(0, 0)
+	})
+
+	var ch *gi.Chooser
+
+	sp := gi.NewSpinner(v.Widget, "value").SetTooltip("The value of time").SetStep(1).SetPageStep(10)
+	sp.OnChange(func(e events.Event) {
+		v.SetValue(sp.Value * float32(durationUnitsMap[ch.CurrentItem.Value.(string)]))
+	})
+
+	units := make([]gi.ChooserItem, len(durationUnits))
+	for i, u := range durationUnits {
+		units[i] = gi.ChooserItem{Value: u}
+	}
+
+	ch = gi.NewChooser(v.Widget, "unit").SetTooltip("The unit of time").SetItems(units...)
+	ch.OnChange(func(e events.Event) {
+		// we update the value to fit the unit
+		npv := laser.NonPtrValue(v.Value)
+		dur := npv.Interface().(time.Duration)
+		sp.SetValue(float32(dur) / float32(durationUnitsMap[ch.CurrentItem.Value.(string)]))
+	})
+}
+
+func (v *DurationValue) Update() {
+	npv := laser.NonPtrValue(v.Value)
+	dur := npv.Interface().(time.Duration)
+	un := "seconds"
+	undur := time.Duration(0)
+	for _, u := range durationUnits {
+		v := durationUnitsMap[u]
+		if v > dur {
+			break
+		}
+		un = u
+		undur = v
+	}
+	adur := float32(dur)
+	if undur != 0 {
+		adur /= float32(undur)
+	}
+
+	v.Widget.ChildByName("value").(*gi.Spinner).SetValue(adur)
+	v.Widget.ChildByName("unit").(*gi.Chooser).SetCurrentValue(un)
+}
+
 var durationUnits = []string{
 	"nanoseconds",
 	"microseconds",
@@ -427,83 +479,4 @@ var durationUnitsMap = map[string]time.Duration{
 	"weeks":        7 * 24 * time.Hour,
 	"months":       30 * 24 * time.Hour,
 	"years":        365 * 24 * time.Hour,
-}
-
-// DurationValue presents a spinner and unit chooser for a [time.Duration]
-type DurationValue struct {
-	ValueBase
-}
-
-func (vv *DurationValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.LayoutType
-	return vv.WidgetTyp
-}
-
-func (vv *DurationValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	npv := laser.NonPtrValue(vv.Value)
-	dur := npv.Interface().(time.Duration)
-	un := "seconds"
-	undur := time.Duration(0)
-	for _, u := range durationUnits {
-		v := durationUnitsMap[u]
-		if v > dur {
-			break
-		}
-		un = u
-		undur = v
-	}
-	adur := float32(dur)
-	if undur != 0 {
-		adur /= float32(undur)
-	}
-
-	ly := vv.Widget.(*gi.Layout)
-	ly.ChildByName("value").(*gi.Spinner).SetValue(adur)
-	if ly.ChildByName("unit") == nil {
-		return
-	}
-	ly.ChildByName("unit").(*gi.Chooser).SetCurrentValue(un)
-}
-
-func (vv *DurationValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	vv.StdConfig(w)
-	ly := vv.Widget.(*gi.Layout)
-
-	if len(ly.Kids) > 0 {
-		return
-	}
-
-	ly.Style(func(s *styles.Style) {
-		s.Grow.Set(0, 0)
-	})
-
-	var ch *gi.Chooser
-
-	sp := gi.NewSpinner(ly, "value").SetTooltip("The value of time").SetStep(1).SetPageStep(10)
-	sp.OnChange(func(e events.Event) {
-		vv.SetValue(sp.Value * float32(durationUnitsMap[ch.CurrentItem.Value.(string)]))
-	})
-
-	units := make([]gi.ChooserItem, len(durationUnits))
-	for i, u := range durationUnits {
-		units[i] = gi.ChooserItem{Value: u}
-	}
-
-	ch = gi.NewChooser(ly, "unit").SetTooltip("The unit of time").SetItems(units...)
-	ch.OnChange(func(e events.Event) {
-		// we update the value to fit the unit
-		npv := laser.NonPtrValue(vv.Value)
-		dur := npv.Interface().(time.Duration)
-		sp.SetValue(float32(dur) / float32(durationUnitsMap[ch.CurrentItem.Value.(string)]))
-	})
-
-	vv.UpdateWidget()
 }
