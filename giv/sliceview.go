@@ -722,21 +722,20 @@ func (sv *SliceViewBase) ConfigRows() {
 
 		w := ki.NewOfType(vtyp).(gi.Widget)
 		sg.SetChild(w, ridx+idxOff, valnm)
-		vv.Config(w)
+		Config(vv, w)
 		w.SetProp(SliceViewRowProp, i)
 
 		if !sv.IsReadOnly() {
-			vvb := vv.AsValueBase()
-			vvb.OnChange(func(e events.Event) {
-				sv.SendChange()
+			vv.OnChange(func(e events.Event) {
+				sv.SendChange(e)
 			})
-			vvb.AsWidgetBase().OnInput(sv.HandleEvent)
+			vv.AsWidgetBase().OnInput(sv.HandleEvent)
 		}
 		if i == 0 {
 			sv.MaxWidth = 0
-			_, isbase := vv.(*ValueBase)
+			_, isString := vv.(*StringValue)
 			npv := laser.NonPtrValue(val)
-			if isbase && sv.SliceSize > 0 && npv.Kind() == reflect.String {
+			if isString && sv.SliceSize > 0 && npv.Kind() == reflect.String {
 				mxw := 0
 				for rw := 0; rw < sv.SliceSize; rw++ {
 					val := laser.OnePtrUnderlyingValue(sv.SliceNPVal.Index(rw)).Elem()
@@ -806,14 +805,14 @@ func (sv *SliceViewBase) UpdateWidgets() {
 			val := laser.OnePtrUnderlyingValue(sv.SliceNPVal.Index(si)) // deal with pointer lists
 			vv.SetSliceValue(val, sv.Slice, si, sv.TmpSave, sv.ViewPath)
 			vv.SetReadOnly(sv.IsReadOnly())
-			vv.UpdateWidget()
+			vv.Update()
 
 			if sv.IsReadOnly() {
 				w.AsWidget().SetReadOnly(true)
 			}
 		} else {
 			vv.SetSliceValue(sv.ElVal, sv.Slice, 0, sv.TmpSave, sv.ViewPath)
-			vv.UpdateWidget()
+			vv.Update()
 			w.AsWidget().SetSelected(false)
 			if sv.Is(SliceViewShowIndex) {
 				idxlab.SetSelected(false)
@@ -861,9 +860,9 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 	svnp := sv.SliceNPVal
 
 	if iski && sv.SliceValue != nil {
-		vvb := sv.SliceValue.AsValueBase()
-		if vvb.Owner != nil {
-			if ownki, ok := vvb.Owner.(ki.Ki); ok {
+		vd := sv.SliceValue.AsValueData()
+		if vd.Owner != nil {
+			if ownki, ok := vd.Owner.(ki.Ki); ok {
 				d := gi.NewBody().AddTitle("Slice New").AddText("Number and Type of Items to Insert:")
 				nd := &gi.NewItemsData{}
 				w := NewValue(d, nd).AsWidget()
