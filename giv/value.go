@@ -214,15 +214,15 @@ type ValueBase[W gi.Widget] struct {
 	Widget W
 }
 
-func (vv *ValueBase[W]) AsWidget() gi.Widget {
-	return vv.Widget
+func (v *ValueBase[W]) AsWidget() gi.Widget {
+	return v.Widget
 }
 
-func (vv *ValueBase[W]) AsWidgetBase() *gi.WidgetBase {
-	return vv.Widget.AsWidget()
+func (v *ValueBase[W]) AsWidgetBase() *gi.WidgetBase {
+	return v.Widget.AsWidget()
 }
 
-func (vv *ValueBase[W]) WidgetType() *gti.Type {
+func (v *ValueBase[W]) WidgetType() *gti.Type {
 	var w W
 	return w.KiType()
 }
@@ -445,91 +445,91 @@ const (
 	ValueDialogNewWindow
 )
 
-func (vv *ValueData) AsValueData() *ValueData {
-	return vv
+func (v *ValueData) AsValueData() *ValueData {
+	return v
 }
 
-func (vv *ValueData) Name() string {
-	return vv.Nm
+func (v *ValueData) Name() string {
+	return v.Nm
 }
 
-func (vv *ValueData) SetName(name string) {
-	vv.Nm = name
+func (v *ValueData) SetName(name string) {
+	v.Nm = name
 }
 
-func (vv *ValueData) Label() string {
-	if vv.Is(ValueHasSavedLabel) {
-		return vv.SavedLabel
+func (v *ValueData) Label() string {
+	if v.Is(ValueHasSavedLabel) {
+		return v.SavedLabel
 	}
 
 	lbl := ""
-	lbltag, has := vv.Tag("label")
+	lbltag, has := v.Tag("label")
 
 	// whether to sentence case
 	sc := true
-	if vv.Owner != nil && len(NoSentenceCaseFor) > 0 {
-		sc = !NoSentenceCaseForType(gti.TypeNameObj(vv.Owner))
+	if v.Owner != nil && len(NoSentenceCaseFor) > 0 {
+		sc = !NoSentenceCaseForType(gti.TypeNameObj(v.Owner))
 	}
 
 	switch {
 	case has:
 		lbl = lbltag
-	case vv.Field != nil:
-		lbl = vv.Field.Name
+	case v.Field != nil:
+		lbl = v.Field.Name
 		if sc {
 			lbl = strcase.ToSentence(lbl)
 		}
 	default:
-		lbl = vv.Nm
+		lbl = v.Nm
 		if sc {
 			lbl = strcase.ToSentence(lbl)
 		}
 	}
 
-	vv.SavedLabel = lbl
-	vv.SetFlag(true, ValueHasSavedLabel)
-	return vv.SavedLabel
+	v.SavedLabel = lbl
+	v.SetFlag(true, ValueHasSavedLabel)
+	return v.SavedLabel
 }
 
-func (vv *ValueData) SetLabel(label string) *ValueData {
-	vv.SavedLabel = label
-	vv.SetFlag(true, ValueHasSavedLabel)
-	return vv
+func (v *ValueData) SetLabel(label string) *ValueData {
+	v.SavedLabel = label
+	v.SetFlag(true, ValueHasSavedLabel)
+	return v
 }
 
-func (vv *ValueData) Doc() string {
-	if vv.Is(ValueHasSavedDoc) {
-		return vv.SavedDoc
+func (v *ValueData) Doc() string {
+	if v.Is(ValueHasSavedDoc) {
+		return v.SavedDoc
 	}
-	doc, _ := gti.GetDoc(vv.Value, reflect.ValueOf(vv.Owner), vv.Field, vv.Label())
-	vv.SavedDoc = doc
-	vv.SetFlag(true, ValueHasSavedDoc)
-	return vv.SavedDoc
+	doc, _ := gti.GetDoc(v.Value, reflect.ValueOf(v.Owner), v.Field, v.Label())
+	v.SavedDoc = doc
+	v.SetFlag(true, ValueHasSavedDoc)
+	return v.SavedDoc
 }
 
-func (vv *ValueData) SetDoc(doc string) *ValueData {
-	vv.SavedDoc = doc
-	vv.SetFlag(true, ValueHasSavedDoc)
-	return vv
+func (v *ValueData) SetDoc(doc string) *ValueData {
+	v.SavedDoc = doc
+	v.SetFlag(true, ValueHasSavedDoc)
+	return v
 }
 
-func (vv *ValueData) String() string {
-	return vv.Nm + ": " + vv.Value.String()
+func (v *ValueData) String() string {
+	return v.Nm + ": " + v.Value.String()
 }
 
 // Is checks if flag is set, using atomic, safe for concurrent access
-func (vv *ValueData) Is(f enums.BitFlag) bool {
-	return vv.Flags.HasFlag(f)
+func (v *ValueData) Is(f enums.BitFlag) bool {
+	return v.Flags.HasFlag(f)
 }
 
 // SetFlag sets the given flag(s) to given state
 // using atomic, safe for concurrent access
-func (vv *ValueData) SetFlag(on bool, f ...enums.BitFlag) {
-	vv.Flags.SetFlag(on, f...)
+func (v *ValueData) SetFlag(on bool, f ...enums.BitFlag) {
+	v.Flags.SetFlag(on, f...)
 }
 
-func (vv *ValueData) SetReadOnly(ro bool) {
-	vv.SetFlag(ro, ValueReadOnly)
+func (v *ValueData) SetReadOnly(ro bool) {
+	v.SetFlag(ro, ValueReadOnly)
 }
 
 // JoinViewPath returns a view path composed of two elements,
@@ -548,64 +548,64 @@ func JoinViewPath(a, b string) string {
 	}
 }
 
-func (vv *ValueData) SetStructValue(val reflect.Value, owner any, field *reflect.StructField, tmpSave Value, viewPath string) {
-	vv.OwnKind = reflect.Struct
-	vv.Value = val
-	vv.Owner = owner
-	vv.Field = field
-	vv.TmpSave = tmpSave
-	vv.ViewPath = viewPath
-	vv.SetName(field.Name)
+func (v *ValueData) SetStructValue(val reflect.Value, owner any, field *reflect.StructField, tmpSave Value, viewPath string) {
+	v.OwnKind = reflect.Struct
+	v.Value = val
+	v.Owner = owner
+	v.Field = field
+	v.TmpSave = tmpSave
+	v.ViewPath = viewPath
+	v.SetName(field.Name)
 }
 
-func (vv *ValueData) SetMapKey(key reflect.Value, owner any, tmpSave Value) {
-	vv.OwnKind = reflect.Map
-	vv.SetFlag(true, ValueMapKey)
-	vv.Value = key
-	vv.Owner = owner
-	vv.TmpSave = tmpSave
-	vv.SetName(laser.ToString(key.Interface()))
+func (v *ValueData) SetMapKey(key reflect.Value, owner any, tmpSave Value) {
+	v.OwnKind = reflect.Map
+	v.SetFlag(true, ValueMapKey)
+	v.Value = key
+	v.Owner = owner
+	v.TmpSave = tmpSave
+	v.SetName(laser.ToString(key.Interface()))
 }
 
-func (vv *ValueData) SetMapValue(val reflect.Value, owner any, key any, keyView Value, tmpSave Value, viewPath string) {
-	vv.OwnKind = reflect.Map
-	vv.Value = val
-	vv.Owner = owner
-	vv.Key = key
-	vv.KeyView = keyView
-	vv.TmpSave = tmpSave
+func (v *ValueData) SetMapValue(val reflect.Value, owner any, key any, keyView Value, tmpSave Value, viewPath string) {
+	v.OwnKind = reflect.Map
+	v.Value = val
+	v.Owner = owner
+	v.Key = key
+	v.KeyView = keyView
+	v.TmpSave = tmpSave
 	keystr := laser.ToString(key)
-	vv.ViewPath = JoinViewPath(viewPath, keystr)
-	vv.SetName(keystr)
+	v.ViewPath = JoinViewPath(viewPath, keystr)
+	v.SetName(keystr)
 }
 
-func (vv *ValueData) SetSliceValue(val reflect.Value, owner any, idx int, tmpSave Value, viewPath string) {
-	vv.OwnKind = reflect.Slice
-	vv.Value = val
-	vv.Owner = owner
-	vv.Idx = idx
-	vv.TmpSave = tmpSave
+func (v *ValueData) SetSliceValue(val reflect.Value, owner any, idx int, tmpSave Value, viewPath string) {
+	v.OwnKind = reflect.Slice
+	v.Value = val
+	v.Owner = owner
+	v.Idx = idx
+	v.TmpSave = tmpSave
 	idxstr := fmt.Sprintf("%v", idx)
 	vpath := viewPath + "[" + idxstr + "]"
-	if vv.Owner != nil {
-		if lblr, ok := vv.Owner.(gi.SliceLabeler); ok {
+	if v.Owner != nil {
+		if lblr, ok := v.Owner.(gi.SliceLabeler); ok {
 			slbl := lblr.ElemLabel(idx)
 			if slbl != "" {
 				vpath = JoinViewPath(viewPath, slbl)
 			}
 		}
 	}
-	vv.ViewPath = vpath
-	vv.SetName(idxstr)
+	v.ViewPath = vpath
+	v.SetName(idxstr)
 }
 
 // SetSoloValue sets the value for a singleton standalone value
 // (e.g., for arg values).
-func (vv *ValueData) SetSoloValue(val reflect.Value) {
-	vv.OwnKind = reflect.Invalid
+func (v *ValueData) SetSoloValue(val reflect.Value) {
+	v.OwnKind = reflect.Invalid
 	// we must ensure that it is a pointer value so that it has
 	// an underlying value that updates when changes occur
-	vv.Value = laser.PtrValue(val)
+	v.Value = laser.PtrValue(val)
 }
 
 // SetSoloValueIface sets the value for a singleton standalone value
@@ -613,92 +613,92 @@ func (vv *ValueData) SetSoloValue(val reflect.Value) {
 // for now, this cannot be a method because gopy doesn't find the
 // key comment below that tells it what to do with the interface
 // gopy:interface=handle
-func SetSoloValueIface(vv *ValueData, val any) {
-	vv.OwnKind = reflect.Invalid
-	vv.Value = reflect.ValueOf(val)
+func SetSoloValueIface(v *ValueData, val any) {
+	v.OwnKind = reflect.Invalid
+	v.Value = reflect.ValueOf(val)
 }
 
 // OwnerKind we have this one accessor b/c it is more useful for outside consumers vs. internal usage
-func (vv *ValueData) OwnerKind() reflect.Kind {
-	return vv.OwnKind
+func (v *ValueData) OwnerKind() reflect.Kind {
+	return v.OwnKind
 }
 
-func (vv *ValueData) IsReadOnly() bool {
-	if vv.Is(ValueReadOnly) {
+func (v *ValueData) IsReadOnly() bool {
+	if v.Is(ValueReadOnly) {
 		return true
 	}
-	if vv.OwnKind == reflect.Struct {
-		if et, has := vv.Tag("edit"); has && et == "-" {
-			vv.SetReadOnly(true) // cache
+	if v.OwnKind == reflect.Struct {
+		if et, has := v.Tag("edit"); has && et == "-" {
+			v.SetReadOnly(true) // cache
 			return true
 		}
 	}
-	npv := laser.NonPtrValue(vv.Value)
+	npv := laser.NonPtrValue(v.Value)
 	if npv.Kind() == reflect.Interface && npv.IsZero() {
-		vv.SetReadOnly(true) // cache
+		v.SetReadOnly(true) // cache
 		return true
 	}
 	return false
 }
 
-func (vv *ValueData) HasDialog() bool {
+func (v *ValueData) HasDialog() bool {
 	return false
 }
 
-func (vv *ValueData) OpenDialog(ctx gi.Widget, fun func()) {
+func (v *ValueData) OpenDialog(ctx gi.Widget, fun func()) {
 }
 
-func (vv *ValueData) ConfigDialog(d *gi.Body) (bool, func()) {
+func (v *ValueData) ConfigDialog(d *gi.Body) (bool, func()) {
 	return false, nil
 }
 
-func (vv *ValueData) Val() reflect.Value {
-	return vv.Value
+func (v *ValueData) Val() reflect.Value {
+	return v.Value
 }
 
-func (vv *ValueData) SetValue(val any) bool {
-	if vv.IsReadOnly() {
+func (v *ValueData) SetValue(val any) bool {
+	if v.IsReadOnly() {
 		return false
 	}
 	var err error
 	wasSet := false
-	if vv.Owner != nil {
-		switch vv.OwnKind {
+	if v.Owner != nil {
+		switch v.OwnKind {
 		case reflect.Struct:
-			err = laser.SetRobust(laser.PtrValue(vv.Value).Interface(), val)
+			err = laser.SetRobust(laser.PtrValue(v.Value).Interface(), val)
 			wasSet = true
 		case reflect.Map:
-			wasSet, err = vv.SetValueMap(val)
+			wasSet, err = v.SetValueMap(val)
 		case reflect.Slice:
-			err = laser.SetRobust(laser.PtrValue(vv.Value).Interface(), val)
+			err = laser.SetRobust(laser.PtrValue(v.Value).Interface(), val)
 		}
-		if updtr, ok := vv.Owner.(gi.Updater); ok {
+		if updtr, ok := v.Owner.(gi.Updater); ok {
 			// fmt.Printf("updating: %v\n", updtr)
 			updtr.Update()
 		}
 	} else {
-		err = laser.SetRobust(laser.PtrValue(vv.Value).Interface(), val)
+		err = laser.SetRobust(laser.PtrValue(v.Value).Interface(), val)
 		wasSet = true
 	}
 	if wasSet {
-		vv.SaveTmp()
+		v.SaveTmp()
 	}
-	// fmt.Printf("value view: %T sending for setting val %v\n", vv.This(), val)
-	vv.SendChange()
+	// fmt.Printf("value view: %T sending for setting val %v\n", v.This(), val)
+	v.SendChange()
 	if err != nil {
 		// todo: snackbar for error?
-		slog.Error("giv.SetValue error", "type", vv.Value.Type(), "err", err)
+		slog.Error("giv.SetValue error", "type", v.Value.Type(), "err", err)
 	}
 	return wasSet
 }
 
-func (vv *ValueData) SetValueMap(val any) (bool, error) {
-	ov := laser.NonPtrValue(reflect.ValueOf(vv.Owner))
+func (v *ValueData) SetValueMap(val any) (bool, error) {
+	ov := laser.NonPtrValue(reflect.ValueOf(v.Owner))
 	wasSet := false
 	var err error
-	if vv.Is(ValueMapKey) {
+	if v.Is(ValueMapKey) {
 		nv := laser.NonPtrValue(reflect.ValueOf(val)) // new key value
-		kv := laser.NonPtrValue(vv.Value)
+		kv := laser.NonPtrValue(v.Value)
 		cv := ov.MapIndex(kv)    // get current value
 		curnv := ov.MapIndex(nv) // see if new value there already
 		if val != kv.Interface() && curnv.IsValid() && !curnv.IsZero() {
@@ -711,25 +711,25 @@ func (vv *ValueData) SetValueMap(val any) (bool, error) {
 					cv := ov.MapIndex(kv)               // get current value
 					ov.SetMapIndex(kv, reflect.Value{}) // delete old key
 					ov.SetMapIndex(nv, cv)              // set new key to current value
-					vv.Value = nv                       // update value to new key
-					vv.SaveTmp()
-					vv.SendChange()
+					v.Value = nv                        // update value to new key
+					v.SaveTmp()
+					v.SendChange()
 				})
 			})
-			d.NewDialog(vv.Widget).Run()
+			d.NewDialog(v.Widget).Run()
 			return false, nil // abort this action right now
 		}
 		ov.SetMapIndex(kv, reflect.Value{}) // delete old key
 		ov.SetMapIndex(nv, cv)              // set new key to current value
-		vv.Value = nv                       // update value to new key
+		v.Value = nv                        // update value to new key
 		wasSet = true
 	} else {
-		vv.Value = laser.NonPtrValue(reflect.ValueOf(val))
-		if vv.KeyView != nil {
-			ck := laser.NonPtrValue(vv.KeyView.Val())                 // current key value
+		v.Value = laser.NonPtrValue(reflect.ValueOf(val))
+		if v.KeyView != nil {
+			ck := laser.NonPtrValue(v.KeyView.Val())                  // current key value
 			wasSet = laser.SetMapRobust(ov, ck, reflect.ValueOf(val)) // todo: error
 		} else { // static, key not editable?
-			wasSet = laser.SetMapRobust(ov, laser.NonPtrValue(reflect.ValueOf(vv.Key)), vv.Value) // todo: error
+			wasSet = laser.SetMapRobust(ov, laser.NonPtrValue(reflect.ValueOf(v.Key)), v.Value) // todo: error
 		}
 		// wasSet = true
 	}
@@ -738,20 +738,20 @@ func (vv *ValueData) SetValueMap(val any) (bool, error) {
 
 // OnChange registers given listener function for Change events on Value.
 // This is the primary notification event for all Value elements.
-func (vv *ValueData) OnChange(fun func(e events.Event)) {
-	vv.On(events.Change, fun)
+func (v *ValueData) OnChange(fun func(e events.Event)) {
+	v.On(events.Change, fun)
 }
 
 // On adds an event listener function for the given event type
-func (vv *ValueData) On(etype events.Types, fun func(e events.Event)) {
-	vv.Listeners.Add(etype, fun)
+func (v *ValueData) On(etype events.Types, fun func(e events.Event)) {
+	v.Listeners.Add(etype, fun)
 }
 
 // SendChange sends events.Change event to all listeners registered on this view.
 // This is the primary notification event for all Value elements. It takes
 // an optional original event to base the event on.
-func (vv *ValueData) SendChange(orig ...events.Event) {
-	vv.Send(events.Change, orig...)
+func (v *ValueData) SendChange(orig ...events.Event) {
+	v.Send(events.Change, orig...)
 }
 
 // Send sends an NEW event of given type to this widget,
@@ -760,7 +760,7 @@ func (vv *ValueData) SendChange(orig ...events.Event) {
 // Do NOT send an existing event using this method if you
 // want the Handled state to persist throughout the call chain;
 // call HandleEvent directly for any existing events.
-func (vv *ValueData) Send(typ events.Types, orig ...events.Event) {
+func (v *ValueData) Send(typ events.Types, orig ...events.Event) {
 	var e events.Event
 	if len(orig) > 0 && orig[0] != nil {
 		e = orig[0].Clone()
@@ -768,82 +768,82 @@ func (vv *ValueData) Send(typ events.Types, orig ...events.Event) {
 	} else {
 		e = &events.Base{Typ: typ}
 	}
-	vv.HandleEvent(e)
+	v.HandleEvent(e)
 }
 
 // HandleEvent sends the given event to all Listeners for that event type.
 // It also checks if the State has changed and calls ApplyStyle if so.
 // If more significant Config level changes are needed due to an event,
 // the event handler must do this itself.
-func (vv *ValueData) HandleEvent(ev events.Event) {
+func (v *ValueData) HandleEvent(ev events.Event) {
 	if gi.DebugSettings.EventTrace {
-		fmt.Println("Event to Value:", vv.String(), ev.String())
+		fmt.Println("Event to Value:", v.String(), ev.String())
 	}
-	vv.Listeners.Call(ev)
+	v.Listeners.Call(ev)
 }
 
-func (vv *ValueData) SaveTmp() {
-	if vv.TmpSave == nil {
+func (v *ValueData) SaveTmp() {
+	if v.TmpSave == nil {
 		return
 	}
-	if vv.TmpSave.AsValueData() == vv {
+	if v.TmpSave.AsValueData() == v {
 		// if we are a map value, of a struct value, we save our value
-		if vv.Owner != nil && vv.OwnKind == reflect.Map && !vv.Is(ValueMapKey) {
-			if laser.NonPtrValue(vv.Value).Kind() == reflect.Struct {
-				ov := laser.NonPtrValue(reflect.ValueOf(vv.Owner))
-				if vv.KeyView != nil {
-					ck := laser.NonPtrValue(vv.KeyView.Val())
-					laser.SetMapRobust(ov, ck, laser.NonPtrValue(vv.Value))
+		if v.Owner != nil && v.OwnKind == reflect.Map && !v.Is(ValueMapKey) {
+			if laser.NonPtrValue(v.Value).Kind() == reflect.Struct {
+				ov := laser.NonPtrValue(reflect.ValueOf(v.Owner))
+				if v.KeyView != nil {
+					ck := laser.NonPtrValue(v.KeyView.Val())
+					laser.SetMapRobust(ov, ck, laser.NonPtrValue(v.Value))
 				} else {
-					laser.SetMapRobust(ov, laser.NonPtrValue(reflect.ValueOf(vv.Key)), laser.NonPtrValue(vv.Value))
-					// fmt.Printf("save tmp of struct value in key: %v\n", vv.Key)
+					laser.SetMapRobust(ov, laser.NonPtrValue(reflect.ValueOf(v.Key)), laser.NonPtrValue(v.Value))
+					// fmt.Printf("save tmp of struct value in key: %v\n", v.Key)
 				}
 			}
 		}
 	} else {
-		vv.TmpSave.SaveTmp()
+		v.TmpSave.SaveTmp()
 	}
 }
 
-func (vv *ValueData) SetTags(tags map[string]string) {
-	if vv.Tags == nil {
-		vv.Tags = make(map[string]string, len(tags))
+func (v *ValueData) SetTags(tags map[string]string) {
+	if v.Tags == nil {
+		v.Tags = make(map[string]string, len(tags))
 	}
 	for tag, val := range tags {
-		vv.Tags[tag] = val
+		v.Tags[tag] = val
 	}
 }
 
-func (vv *ValueData) SetTag(tag, value string) {
-	if vv.Tags == nil {
-		vv.Tags = make(map[string]string, 10)
+func (v *ValueData) SetTag(tag, value string) {
+	if v.Tags == nil {
+		v.Tags = make(map[string]string, 10)
 	}
-	vv.Tags[tag] = value
+	v.Tags[tag] = value
 }
 
-func (vv *ValueData) Tag(tag string) (string, bool) {
-	if vv.Tags != nil {
-		if tv, ok := vv.Tags[tag]; ok {
+func (v *ValueData) Tag(tag string) (string, bool) {
+	if v.Tags != nil {
+		if tv, ok := v.Tags[tag]; ok {
 			return tv, ok
 		}
 	}
-	if !(vv.Owner != nil && vv.OwnKind == reflect.Struct) {
+	if !(v.Owner != nil && v.OwnKind == reflect.Struct) {
 		return "", false
 	}
-	return vv.Field.Tag.Lookup(tag)
+	return v.Field.Tag.Lookup(tag)
 }
 
-func (vv *ValueData) AllTags() map[string]string {
+func (v *ValueData) AllTags() map[string]string {
 	rvt := make(map[string]string)
-	if vv.Tags != nil {
-		for key, val := range vv.Tags {
+	if v.Tags != nil {
+		for key, val := range v.Tags {
 			rvt[key] = val
 		}
 	}
-	if !(vv.Owner != nil && vv.OwnKind == reflect.Struct) {
+	if !(v.Owner != nil && v.OwnKind == reflect.Struct) {
 		return rvt
 	}
-	smap := laser.StructTags(vv.Field.Tag)
+	smap := laser.StructTags(v.Field.Tag)
 	for key, val := range smap {
 		rvt[key] = val
 	}
@@ -852,37 +852,37 @@ func (vv *ValueData) AllTags() map[string]string {
 
 // OwnerLabel returns some extra info about the owner of this value view
 // which is useful to put in title of our object
-func (vv *ValueData) OwnerLabel() string {
-	if vv.Owner == nil {
+func (v *ValueData) OwnerLabel() string {
+	if v.Owner == nil {
 		return ""
 	}
-	switch vv.OwnKind {
+	switch v.OwnKind {
 	case reflect.Struct:
-		return strcase.ToSentence(vv.Field.Name)
+		return strcase.ToSentence(v.Field.Name)
 	case reflect.Map:
 		kystr := ""
-		if vv.Is(ValueMapKey) {
-			kv := laser.NonPtrValue(vv.Value)
+		if v.Is(ValueMapKey) {
+			kv := laser.NonPtrValue(v.Value)
 			kystr = laser.ToString(kv.Interface())
 		} else {
-			if vv.KeyView != nil {
-				ck := laser.NonPtrValue(vv.KeyView.Val()) // current key value
+			if v.KeyView != nil {
+				ck := laser.NonPtrValue(v.KeyView.Val()) // current key value
 				kystr = laser.ToString(ck.Interface())
 			} else {
-				kystr = laser.ToString(vv.Key)
+				kystr = laser.ToString(v.Key)
 			}
 		}
 		if kystr != "" {
 			return kystr
 		}
 	case reflect.Slice:
-		if lblr, ok := vv.Owner.(gi.SliceLabeler); ok {
-			slbl := lblr.ElemLabel(vv.Idx)
+		if lblr, ok := v.Owner.(gi.SliceLabeler); ok {
+			slbl := lblr.ElemLabel(v.Idx)
 			if slbl != "" {
 				return slbl
 			}
 		}
-		return strconv.Itoa(vv.Idx)
+		return strconv.Itoa(v.Idx)
 	}
 	return ""
 }
@@ -892,24 +892,24 @@ func (vv *ValueData) OwnerLabel() string {
 // newPath returns just what should be added to a ViewPath
 // also includes zero value check reported in the isZero bool, which
 // can be used for not proceeding in case of non-value-based types.
-func (vv *ValueData) GetTitle() (label, newPath string, isZero bool) {
+func (v *ValueData) GetTitle() (label, newPath string, isZero bool) {
 	var npt reflect.Type
-	if vv.Value.IsZero() || laser.NonPtrValue(vv.Value).IsZero() {
-		npt = laser.NonPtrType(vv.Value.Type())
+	if v.Value.IsZero() || laser.NonPtrValue(v.Value).IsZero() {
+		npt = laser.NonPtrType(v.Value.Type())
 		isZero = true
 	} else {
-		opv := laser.OnePtrUnderlyingValue(vv.Value)
+		opv := laser.OnePtrUnderlyingValue(v.Value)
 		npt = laser.NonPtrType(opv.Type())
 	}
 	newPath = laser.FriendlyTypeName(npt)
-	olbl := vv.OwnerLabel()
+	olbl := v.OwnerLabel()
 	if olbl != "" && olbl != newPath {
 		label = olbl + " (" + newPath + ")"
 	} else {
 		label = newPath
 	}
-	if vv.ViewPath != "" {
-		label += " (" + vv.ViewPath + ")"
+	if v.ViewPath != "" {
+		label += " (" + v.ViewPath + ")"
 	}
 	return
 }
