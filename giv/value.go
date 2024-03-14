@@ -730,17 +730,6 @@ func (v *ValueData) IsReadOnly() bool {
 	return false
 }
 
-func (v *ValueData) HasDialog() bool {
-	return false
-}
-
-func (v *ValueData) OpenDialog(ctx gi.Widget, fun func()) {
-}
-
-func (v *ValueData) ConfigDialog(d *gi.Body) (bool, func()) {
-	return false, nil
-}
-
 func (v *ValueData) Val() reflect.Value {
 	return v.Value
 }
