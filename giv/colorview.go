@@ -519,7 +519,7 @@ func (v *ColorValue) Config() {
 }
 
 func (v *ColorValue) Update() {
-	v.Widget.ApplyStyle()
+	v.Widget.ApplyStyleTree()
 	v.Widget.NeedsRender()
 }
 

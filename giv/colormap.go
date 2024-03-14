@@ -64,7 +64,7 @@ func (v *ColorMapValue) Config() {
 }
 
 func (v *ColorMapValue) Update() {
-	v.Widget.ApplyStyle()
+	v.Widget.ApplyStyleTree()
 	v.Widget.NeedsRender()
 }
 
