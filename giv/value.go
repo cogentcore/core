@@ -360,6 +360,86 @@ func OpenDialogBase(v Value, cd ConfigDialoger, ctx gi.Widget, fun func()) {
 	ds.Run()
 }
 
+func (v *ValueBase[W]) SetValue(val any) bool {
+	if v.IsReadOnly() {
+		return false
+	}
+	var err error
+	wasSet := false
+	if v.Owner != nil {
+		switch v.OwnKind {
+		case reflect.Struct:
+			err = laser.SetRobust(laser.PtrValue(v.Value).Interface(), val)
+			wasSet = true
+		case reflect.Map:
+			wasSet, err = v.SetValueMap(val)
+		case reflect.Slice:
+			err = laser.SetRobust(laser.PtrValue(v.Value).Interface(), val)
+		}
+		if updtr, ok := v.Owner.(gi.Updater); ok {
+			// fmt.Printf("updating: %v\n", updtr)
+			updtr.Update()
+		}
+	} else {
+		err = laser.SetRobust(laser.PtrValue(v.Value).Interface(), val)
+		wasSet = true
+	}
+	if wasSet {
+		v.SaveTmp()
+	}
+	// fmt.Printf("value view: %T sending for setting val %v\n", v.This(), val)
+	v.SendChange()
+	if err != nil {
+		// todo: snackbar for error?
+		slog.Error("giv.SetValue error", "type", v.Value.Type(), "err", err)
+	}
+	return wasSet
+}
+
+func (v *ValueBase[W]) SetValueMap(val any) (bool, error) {
+	ov := laser.NonPtrValue(reflect.ValueOf(v.Owner))
+	wasSet := false
+	var err error
+	if v.Is(ValueMapKey) {
+		nv := laser.NonPtrValue(reflect.ValueOf(val)) // new key value
+		kv := laser.NonPtrValue(v.Value)
+		cv := ov.MapIndex(kv)    // get current value
+		curnv := ov.MapIndex(nv) // see if new value there already
+		if val != kv.Interface() && curnv.IsValid() && !curnv.IsZero() {
+			// actually new key and current exists
+			d := gi.NewBody().AddTitle("Map key conflict").
+				AddText(fmt.Sprintf("The map key value: %v already exists in the map; are you sure you want to overwrite the current value?", val))
+			d.AddBottomBar(func(pw gi.Widget) {
+				d.AddCancel(pw).SetText("Cancel change")
+				d.AddOk(pw).SetText("Overwrite").OnClick(func(e events.Event) {
+					cv := ov.MapIndex(kv)               // get current value
+					ov.SetMapIndex(kv, reflect.Value{}) // delete old key
+					ov.SetMapIndex(nv, cv)              // set new key to current value
+					v.Value = nv                        // update value to new key
+					v.SaveTmp()
+					v.SendChange()
+				})
+			})
+			d.NewDialog(v.Widget).Run()
+			return false, nil // abort this action right now
+		}
+		ov.SetMapIndex(kv, reflect.Value{}) // delete old key
+		ov.SetMapIndex(nv, cv)              // set new key to current value
+		v.Value = nv                        // update value to new key
+		wasSet = true
+	} else {
+		v.Value = laser.NonPtrValue(reflect.ValueOf(val))
+		if v.KeyView != nil {
+			ck := laser.NonPtrValue(v.KeyView.Val())                  // current key value
+			wasSet = laser.SetMapRobust(ov, ck, reflect.ValueOf(val)) // todo: error
+		} else { // static, key not editable?
+			wasSet = laser.SetMapRobust(ov, laser.NonPtrValue(reflect.ValueOf(v.Key)), v.Value) // todo: error
+		}
+		// wasSet = true
+	}
+	return wasSet, err
+}
+
 // note: could have a more efficient way to represent the different owner type
 // data (Key vs. Field vs. Idx), instead of just having everything for
 // everything.  However, Value itself gets customized for different target
@@ -654,86 +734,6 @@ func (v *ValueData) ConfigDialog(d *gi.Body) (bool, func()) {
 
 func (v *ValueData) Val() reflect.Value {
 	return v.Value
-}
-
-func (v *ValueData) SetValue(val any) bool {
-	if v.IsReadOnly() {
-		return false
-	}
-	var err error
-	wasSet := false
-	if v.Owner != nil {
-		switch v.OwnKind {
-		case reflect.Struct:
-			err = laser.SetRobust(laser.PtrValue(v.Value).Interface(), val)
-			wasSet = true
-		case reflect.Map:
-			wasSet, err = v.SetValueMap(val)
-		case reflect.Slice:
-			err = laser.SetRobust(laser.PtrValue(v.Value).Interface(), val)
-		}
-		if updtr, ok := v.Owner.(gi.Updater); ok {
-			// fmt.Printf("updating: %v\n", updtr)
-			updtr.Update()
-		}
-	} else {
-		err = laser.SetRobust(laser.PtrValue(v.Value).Interface(), val)
-		wasSet = true
-	}
-	if wasSet {
-		v.SaveTmp()
-	}
-	// fmt.Printf("value view: %T sending for setting val %v\n", v.This(), val)
-	v.SendChange()
-	if err != nil {
-		// todo: snackbar for error?
-		slog.Error("giv.SetValue error", "type", v.Value.Type(), "err", err)
-	}
-	return wasSet
-}
-
-func (v *ValueData) SetValueMap(val any) (bool, error) {
-	ov := laser.NonPtrValue(reflect.ValueOf(v.Owner))
-	wasSet := false
-	var err error
-	if v.Is(ValueMapKey) {
-		nv := laser.NonPtrValue(reflect.ValueOf(val)) // new key value
-		kv := laser.NonPtrValue(v.Value)
-		cv := ov.MapIndex(kv)    // get current value
-		curnv := ov.MapIndex(nv) // see if new value there already
-		if val != kv.Interface() && curnv.IsValid() && !curnv.IsZero() {
-			// actually new key and current exists
-			d := gi.NewBody().AddTitle("Map key conflict").
-				AddText(fmt.Sprintf("The map key value: %v already exists in the map; are you sure you want to overwrite the current value?", val))
-			d.AddBottomBar(func(pw gi.Widget) {
-				d.AddCancel(pw).SetText("Cancel change")
-				d.AddOk(pw).SetText("Overwrite").OnClick(func(e events.Event) {
-					cv := ov.MapIndex(kv)               // get current value
-					ov.SetMapIndex(kv, reflect.Value{}) // delete old key
-					ov.SetMapIndex(nv, cv)              // set new key to current value
-					v.Value = nv                        // update value to new key
-					v.SaveTmp()
-					v.SendChange()
-				})
-			})
-			d.NewDialog(v.Widget).Run()
-			return false, nil // abort this action right now
-		}
-		ov.SetMapIndex(kv, reflect.Value{}) // delete old key
-		ov.SetMapIndex(nv, cv)              // set new key to current value
-		v.Value = nv                        // update value to new key
-		wasSet = true
-	} else {
-		v.Value = laser.NonPtrValue(reflect.ValueOf(val))
-		if v.KeyView != nil {
-			ck := laser.NonPtrValue(v.KeyView.Val())                  // current key value
-			wasSet = laser.SetMapRobust(ov, ck, reflect.ValueOf(val)) // todo: error
-		} else { // static, key not editable?
-			wasSet = laser.SetMapRobust(ov, laser.NonPtrValue(reflect.ValueOf(v.Key)), v.Value) // todo: error
-		}
-		// wasSet = true
-	}
-	return wasSet, err
 }
 
 // OnChange registers given listener function for Change events on Value.
