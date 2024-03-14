@@ -13,7 +13,6 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/gi"
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -30,33 +29,13 @@ func (cmn ColorMapName) Value() Value {
 // to display a dialog for selecting different color map options.
 // It represents a [ColorMapName] value.
 type ColorMapValue struct {
-	ValueBase
+	ValueBase[*gi.Frame]
 }
 
-func (vv *ColorMapValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.FrameType
-	return vv.WidgetTyp
-}
-
-func (vv *ColorMapValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	vv.Widget.ApplyStyle()
-	vv.AsWidgetBase().NeedsRender()
-}
-
-func (vv *ColorMapValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	vv.StdConfig(w)
-	fr := vv.Widget.(*gi.Frame)
-	fr.HandleClickOnEnterSpace()
-	ConfigDialogWidget(vv, fr, false)
-	fr.Style(func(s *styles.Style) {
+func (v *ColorMapValue) Config() {
+	v.Widget.HandleClickOnEnterSpace()
+	ConfigDialogWidget(v, false)
+	v.Widget.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Hoverable, abilities.Clickable, abilities.Focusable)
 		s.Cursor = cursors.Pointer
 		s.Border.Radius = styles.BorderRadiusMedium
@@ -64,7 +43,7 @@ func (vv *ColorMapValue) Config(w gi.Widget) {
 		s.Grow.Set(0, 0)
 		s.Min.Set(units.Em(10), units.Em(1.5))
 
-		cmn, ok := laser.NonPtrValue(vv.Value).Interface().(ColorMapName)
+		cmn, ok := laser.NonPtrValue(v.Value).Interface().(ColorMapName)
 		if !ok || cmn == "" {
 			s.Background = colors.C(colors.Scheme.OutlineVariant)
 			return
@@ -82,23 +61,23 @@ func (vv *ColorMapValue) Config(w gi.Widget) {
 		}
 		s.Background = g
 	})
-	vv.UpdateWidget()
 }
 
-func (vv *ColorMapValue) HasDialog() bool { return true }
-func (vv *ColorMapValue) OpenDialog(ctx gi.Widget, fun func()) {
-	OpenValueDialog(vv, ctx, fun, "Select a color map")
+func (v *ColorMapValue) Update() {
+	v.Widget.ApplyStyle()
+	v.Widget.NeedsRender()
 }
 
-func (vv *ColorMapValue) ConfigDialog(d *gi.Body) (bool, func()) {
+// TODO(dtl): Select a color map
+func (v *ColorMapValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	sl := colormap.AvailMapsList()
-	cur := laser.ToString(vv.Value.Interface())
+	cur := laser.ToString(v.Value.Interface())
 	si := 0
 	NewSliceView(d).SetSlice(&sl).SetSelVal(cur).BindSelect(&si)
 	return true, func() {
 		if si >= 0 {
-			vv.SetValue(sl[si])
-			vv.UpdateWidget()
+			v.SetValue(sl[si])
+			v.Update()
 		}
 	}
 }
