@@ -482,74 +482,26 @@ func (v *TypeValue) Update() {
 	v.Widget.SetCurrentValue(typ)
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//  ByteSliceValue
-
-// ByteSliceValue presents a textfield of the bytes
+// ByteSliceValue represents a slice of bytes with a text field.
 type ByteSliceValue struct {
-	ValueBase
+	ValueBase[*gi.TextField]
 }
 
-func (vv *ByteSliceValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.TextFieldType
-	return vv.WidgetTyp
-}
-
-func (vv *ByteSliceValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	tf := vv.Widget.(*gi.TextField)
-	npv := laser.NonPtrValue(vv.Value)
-	bv, ok := npv.Interface().([]byte)
-	if ok {
-		tf.SetText(string(bv))
-	}
-}
-
-func (vv *ByteSliceValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	tf := vv.Widget.(*gi.TextField)
-	tf.Tooltip = vv.Doc()
-	// STYTODO: figure out how how to handle these kinds of styles
-	tf.Style(func(s *styles.Style) {
-		s.Min.X.Ch(16)
+func (v *ByteSliceValue) Config() {
+	v.Widget.OnChange(func(e events.Event) {
+		v.SetValue(v.Widget.Text())
 	})
-	vv.StdConfig(w)
-
-	tf.OnFinal(events.Change, func(e events.Event) {
-		vv.SetValue(tf.Text())
-	})
-	vv.UpdateWidget()
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//  RuneSliceValue
+func (v *ByteSliceValue) Update() {
+	npv := laser.NonPtrValue(v.Value)
+	bv, _ := npv.Interface().([]byte)
+	v.Widget.SetText(string(bv))
+}
 
-// RuneSliceValue presents a textfield of the bytes
+// RuneSliceValue represents a slice of runes with a text field.
 type RuneSliceValue struct {
-	ValueBase
-}
-
-func (vv *RuneSliceValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.TextFieldType
-	return vv.WidgetTyp
-}
-
-func (vv *RuneSliceValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	tf := vv.Widget.(*gi.TextField)
-	npv := laser.NonPtrValue(vv.Value)
-	rv, ok := npv.Interface().([]rune)
-	if ok {
-		tf.SetText(string(rv))
-	}
+	ValueBase[*gi.TextField]
 }
 
 func (vv *RuneSliceValue) Config(w gi.Widget) {
@@ -569,6 +521,18 @@ func (vv *RuneSliceValue) Config(w gi.Widget) {
 		vv.SetValue(tf.Text())
 	})
 	vv.UpdateWidget()
+}
+
+func (vv *RuneSliceValue) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
+	tf := vv.Widget.(*gi.TextField)
+	npv := laser.NonPtrValue(vv.Value)
+	rv, ok := npv.Interface().([]rune)
+	if ok {
+		tf.SetText(string(rv))
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
