@@ -112,9 +112,8 @@ func (sv *StructViewInline) Config() {
 			s.Align.Self = styles.Center // was Start
 			s.Min.X.Em(2)
 		})
-		vvb := vv.AsValueBase()
-		vvb.ViewPath = sv.ViewPath
-		w, wb := gi.AsWidget(sv.Child((i * 2) + 1))
+		vv.AsValueData().ViewPath = sv.ViewPath
+		w, _ := gi.AsWidget(sv.Child((i * 2) + 1))
 		hasDef, readOnlyTag := StructViewFieldTags(vv, lbl, w, sv.IsReadOnly()) // in structview.go
 		if hasDef {
 			lbl.Style(func(s *styles.Style) {
@@ -145,18 +144,12 @@ func (sv *StructViewInline) Config() {
 				}
 			})
 		}
-		if wb.Prop("configured") == nil {
-			wb.SetProp("configured", true)
-			vv.Config(w)
-			vvb.AsWidgetBase().OnInput(sv.HandleEvent)
-		} else {
-			vvb.Widget = w
-			vv.UpdateWidget()
-		}
+		Config(vv, w)
+		vv.AsWidgetBase().OnInput(sv.HandleEvent)
 		if !sv.IsReadOnly() && !readOnlyTag {
-			vvb.OnChange(func(e events.Event) {
+			vv.OnChange(func(e events.Event) {
 				sv.UpdateFieldAction()
-				if !laser.KindIsBasic(laser.NonPtrValue(vvb.Value).Kind()) {
+				if !laser.KindIsBasic(laser.NonPtrValue(vv.Val()).Kind()) {
 					if updtr, ok := sv.Struct.(gi.Updater); ok {
 						// fmt.Printf("updating: %v kind: %v\n", updtr, vvv.Value.Kind())
 						updtr.Update()
@@ -170,7 +163,7 @@ func (sv *StructViewInline) Config() {
 
 func (sv *StructViewInline) UpdateFields() {
 	for _, vv := range sv.FieldViews {
-		vv.UpdateWidget()
+		vv.Update()
 	}
 	sv.NeedsLayout()
 }
