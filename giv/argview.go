@@ -56,10 +56,6 @@ func (av *ArgView) SetStyles() {
 				s.Overflow.Set(styles.OverflowAuto)
 			})
 		}
-		if w.Parent().Name() == "args-grid" {
-			w.Style(func(s *styles.Style) {
-			})
-		}
 	})
 }
 
@@ -96,7 +92,6 @@ func (av *ArgView) ConfigArgsGrid() {
 		if view, _ := arg.Tag("view"); view == "-" {
 			continue
 		}
-		vtyp := arg.WidgetType()
 		knm := strcase.ToKebab(arg.Name())
 		if _, has := argnms[knm]; has {
 			knm += fmt.Sprintf("%d", i)
@@ -105,7 +100,7 @@ func (av *ArgView) ConfigArgsGrid() {
 		labnm := "label-" + knm
 		valnm := "value-" + knm
 		config.Add(gi.LabelType, labnm)
-		config.Add(vtyp, valnm)
+		config.Add(arg.WidgetType(), valnm)
 	}
 	if sg.ConfigChildren(config) {
 		av.NeedsLayout()
@@ -120,14 +115,8 @@ func (av *ArgView) ConfigArgsGrid() {
 		lbl := sg.Child(idx * 2).(*gi.Label)
 		lbl.Text = arg.Label()
 		lbl.Tooltip = arg.Doc()
-		w, wb := gi.AsWidget(sg.Child((idx * 2) + 1))
-		if wb.Prop("configured") == nil {
-			wb.SetProp("configured", true)
-			arg.Config(w)
-		} else {
-			arg.AsValueBase().Widget = w
-			arg.UpdateWidget()
-		}
+		w, _ := gi.AsWidget(sg.Child((idx * 2) + 1))
+		Config(arg, w)
 		idx++
 	}
 }

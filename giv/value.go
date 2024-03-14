@@ -39,7 +39,7 @@ func NewValue(par ki.Ki, val any, tags ...string) Value {
 	}
 	v := ToValue(val, t)
 	v.SetSoloValue(reflect.ValueOf(val))
-	w := v.MakeWidget(par)
+	w := par.NewChild(v.WidgetType()).(gi.Widget)
 	Config(v, w)
 	return v
 }
@@ -61,8 +61,8 @@ type Value interface {
 	// AsWidgetBase returns the widget base associated with the value.
 	AsWidgetBase() *gi.WidgetBase
 
-	// MakeWidget makes the widget for this value with the given parent.
-	MakeWidget(par ki.Ki) gi.Widget
+	// WidgetType returns the type of widget associated with this value.
+	WidgetType() *gti.Type
 
 	// Config configures the widget to represent the value, including setting up
 	// the OnChange event listener to set the value when the user edits it
@@ -222,8 +222,9 @@ func (vv *ValueBase[W]) AsWidgetBase() *gi.WidgetBase {
 	return vv.Widget.AsWidget()
 }
 
-func (vv *ValueBase[W]) MakeWidget(par ki.Ki) gi.Widget {
-	return ki.New[W](par)
+func (vv *ValueBase[W]) WidgetType() *gti.Type {
+	var w W
+	return w.KiType()
 }
 
 // Config configures the given [gi.Widget] to represent the given [Value].
