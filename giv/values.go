@@ -504,136 +504,70 @@ type RuneSliceValue struct {
 	ValueBase[*gi.TextField]
 }
 
-func (vv *RuneSliceValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	tf := vv.Widget.(*gi.TextField)
-	tf.Tooltip = vv.Doc()
-	tf.Style(func(s *styles.Style) {
-		s.Min.X.Ch(16)
+func (v *RuneSliceValue) Config() {
+	v.Widget.OnChange(func(e events.Event) {
+		v.SetValue(v.Widget.Text())
 	})
-	vv.StdConfig(w)
-
-	tf.OnFinal(events.Change, func(e events.Event) {
-		vv.SetValue(tf.Text())
-	})
-	vv.UpdateWidget()
 }
 
-func (vv *RuneSliceValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	tf := vv.Widget.(*gi.TextField)
-	npv := laser.NonPtrValue(vv.Value)
-	rv, ok := npv.Interface().([]rune)
-	if ok {
-		tf.SetText(string(rv))
-	}
+func (v *RuneSliceValue) Update() {
+	npv := laser.NonPtrValue(v.Value)
+	rv, _ := npv.Interface().([]rune)
+	v.Widget.SetText(string(rv))
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//  NilValue
-
-// NilValue presents a label saying 'nil' -- for any nil or otherwise unrepresentable items
+// NilValue represents a nil value with a label that has text "None".
 type NilValue struct {
-	ValueBase
+	ValueBase[*gi.Label]
 }
 
-func (vv *NilValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.LabelType
-	return vv.WidgetTyp
+func (v *NilValue) Config() {
+	v.Widget.SetText("None")
 }
 
-func (vv *NilValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	lb := vv.Widget.(*gi.Label)
-	lb.SetText("None")
-}
+func (vv *NilValue) Update() {}
 
-func (vv *NilValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	vv.StdConfig(w)
-	lb := vv.Widget.(*gi.Label)
-	lb.Tooltip = vv.Doc()
-	vv.UpdateWidget()
-}
-
-//////////////////////////////////////////////////////////////////////////////
-//  IconValue
-
-// IconValue presents an action for displaying an IconName and selecting
-// icons from IconChooserDialog
+// IconValue represents an [icons.Icon] with a button.
 type IconValue struct {
-	ValueBase
+	ValueBase[*gi.Button]
 }
 
-func (vv *IconValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ButtonType
-	return vv.WidgetTyp
+func (v *IconValue) Config() {
+	v.Widget.SetType(gi.ButtonTonal)
+	ConfigDialogWidget(v, false)
 }
 
-func (vv *IconValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	bt := vv.Widget.(*gi.Button)
-	txt := laser.ToString(vv.Value.Interface())
+func (v *IconValue) Update() {
+	txt := laser.ToString(v.Value.Interface())
 	if icons.Icon(txt).IsNil() {
-		bt.SetIcon(icons.Blank)
+		v.Widget.SetIcon(icons.Blank)
 	} else {
-		bt.SetIcon(icons.Icon(txt))
+		v.Widget.SetIcon(icons.Icon(txt))
 	}
-	if sntag, ok := vv.Tag("view"); ok {
-		if strings.Contains(sntag, "show-name") {
+	if view, ok := v.Tag("view"); ok {
+		if strings.Contains(view, "show-name") {
 			if txt == "" {
 				txt = "None"
 			}
-			bt.SetText(strcase.ToSentence(txt))
+			v.Widget.SetText(strcase.ToSentence(txt))
 		}
 	}
-	bt.Update()
+	v.Widget.Update()
 }
 
-func (vv *IconValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	vv.StdConfig(w)
-	bt := vv.Widget.(*gi.Button)
-	bt.SetType(gi.ButtonTonal)
-	ConfigDialogWidget(vv, bt, false)
-	vv.UpdateWidget()
-}
-
-func (vv *IconValue) HasDialog() bool { return true }
-func (vv *IconValue) OpenDialog(ctx gi.Widget, fun func()) {
-	OpenValueDialog(vv, ctx, fun, "Select an icon")
-}
-
-func (vv *IconValue) ConfigDialog(d *gi.Body) (bool, func()) {
+// TODO(dtl): Select an icon
+func (v *IconValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	si := 0
 	ics := icons.All()
-	cur := icons.Icon(laser.ToString(vv.Value.Interface()))
+	cur := icons.Icon(laser.ToString(v.Value.Interface()))
 	NewSliceView(d).SetStyleFunc(func(w gi.Widget, s *styles.Style, row int) {
 		w.(*gi.Button).SetText(strcase.ToSentence(string(ics[row])))
 	}).SetSlice(&ics).SetSelVal(cur).BindSelect(&si)
 	return true, func() {
 		if si >= 0 {
 			ic := icons.AllIcons[si]
-			vv.SetValue(ic)
-			vv.UpdateWidget()
+			v.SetValue(ic)
+			v.Update()
 		}
 	}
 }
