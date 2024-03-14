@@ -21,7 +21,6 @@ import (
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/units"
 )
 
 // This file contains the standard [Value]s built into giv.
@@ -572,61 +571,30 @@ func (v *IconValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//  FontValue
-
-// FontValue presents an action for displaying a FontName and selecting
-// fonts from FontChooserDialog
+// FontValue represents a [gi.FontName] with a button.
 type FontValue struct {
-	ValueBase
+	ValueBase[*gi.Button]
 }
 
-func (vv *FontValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ButtonType
-	return vv.WidgetTyp
-}
-
-func (vv *FontValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	bt := vv.Widget.(*gi.Button)
-	txt := laser.ToString(vv.Value.Interface())
-	bt.SetText(txt).Update()
-}
-
-func (vv *FontValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	vv.StdConfig(w)
-	bt := vv.Widget.(*gi.Button)
-	bt.SetType(gi.ButtonTonal)
-	bt.Style(func(s *styles.Style) {
+func (v *FontValue) Config() {
+	v.Widget.SetType(gi.ButtonTonal)
+	v.Widget.Style(func(s *styles.Style) {
 		// TODO(kai): fix this not working (probably due to medium font weight)
-		s.Font.Family = laser.ToString(vv.Value.Interface())
+		s.Font.Family = laser.ToString(v.Value.Interface())
 	})
-	ConfigDialogWidget(vv, bt, false)
-	vv.UpdateWidget()
+	ConfigDialogWidget(v, false)
 }
 
-func (vv *FontValue) HasDialog() bool { return true }
-func (vv *FontValue) OpenDialog(ctx gi.Widget, fun func()) {
-	OpenValueDialog(vv, ctx, fun, "Select a font")
+func (v *FontValue) Update() {
+	txt := laser.ToString(v.Value.Interface())
+	v.Widget.SetText(txt).Update()
 }
 
-// show fonts in a bigger size so you can actually see the differences
-var FontChooserSize = units.Pt(18)
-
-func (vv *FontValue) ConfigDialog(d *gi.Body) (bool, func()) {
+// TODO(dtl): Select a font
+func (v *FontValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	si := 0
-	wb := vv.Widget.AsWidget()
-	FontChooserSize.ToDots(&wb.Styles.UnitContext)
-	paint.FontLibrary.OpenAllFonts(int(FontChooserSize.Dots))
 	fi := paint.FontLibrary.FontInfo
-	cur := gi.FontName(laser.ToString(vv.Value.Interface()))
+	cur := gi.FontName(laser.ToString(v.Value.Interface()))
 	NewTableView(d).SetStyleFunc(func(w gi.Widget, s *styles.Style, row, col int) {
 		if col != 4 {
 			return
@@ -635,14 +603,14 @@ func (vv *FontValue) ConfigDialog(d *gi.Body) (bool, func()) {
 		s.Font.Stretch = fi[row].Stretch
 		s.Font.Weight = fi[row].Weight
 		s.Font.Style = fi[row].Style
-		s.Font.Size = FontChooserSize
+		s.Font.Size.Pt(18)
 	}).SetSlice(&fi).SetSelVal(cur).SetSelField("Name").BindSelect(&si)
 
 	return true, func() {
 		if si >= 0 {
 			fi := paint.FontLibrary.FontInfo[si]
-			vv.SetValue(fi.Name)
-			vv.UpdateWidget()
+			v.SetValue(fi.Name)
+			v.Update()
 		}
 	}
 }
