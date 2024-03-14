@@ -615,137 +615,50 @@ func (v *FontValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//  FileValue
-
-// FileValue presents an action for displaying a Filename and selecting
-// icons from FileChooserDialog
+// FileValue represents a [gi.Filename] with a button.
 type FileValue struct {
-	ValueBase
+	ValueBase[*gi.Button]
 }
 
-func (vv *FileValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ButtonType
-	return vv.WidgetTyp
+func (v *FileValue) Config() {
+	v.Widget.SetType(gi.ButtonTonal).SetIcon(icons.File)
+	ConfigDialogWidget(v, false)
 }
 
-func (vv *FileValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	bt := vv.Widget.(*gi.Button)
-	txt := laser.ToString(vv.Value.Interface())
+func (v *FileValue) Update() {
+	txt := laser.ToString(v.Value.Interface())
 	if txt == "" {
 		txt = "(click to open file chooser)"
 	}
-	prev := bt.Text
-	bt.SetText(txt)
-	if txt != prev {
-		bt.Update()
-	}
+	v.Widget.SetText(txt).Update()
 }
 
-func (vv *FileValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	vv.StdConfig(w)
-	bt := vv.Widget.(*gi.Button)
-	bt.SetType(gi.ButtonTonal)
-	ConfigDialogWidget(vv, bt, false)
-	vv.UpdateWidget()
-}
-
-func (vv *FileValue) HasDialog() bool                      { return true }
-func (vv *FileValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
-
-func (vv *FileValue) ConfigDialog(d *gi.Body) (bool, func()) {
-	vv.SetFlag(true, ValueDialogNewWindow) // default to new window on supported platforms
-	cur := laser.ToString(vv.Value.Interface())
-	ext, _ := vv.Tag("ext")
+func (v *FileValue) ConfigDialog(d *gi.Body) (bool, func()) {
+	v.SetFlag(true, ValueDialogNewWindow) // default to new window on supported platforms
+	cur := laser.ToString(v.Value.Interface())
+	ext, _ := v.Tag("ext")
 	fv := NewFileView(d).SetFilename(cur, ext)
 	d.AddAppBar(fv.ConfigToolbar)
 	return true, func() {
 		cur = fv.SelectedFile()
-		vv.SetValue(cur)
-		vv.UpdateWidget()
+		v.SetValue(cur)
+		v.Update()
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//  FuncValue
-
-// FuncValue presents a [FuncButton] for viewing the information of and calling a function
+// FuncValue represents a function with a [FuncButton].
 type FuncValue struct {
-	ValueBase
+	ValueBase[*FuncButton]
 }
 
-func (vv *FuncValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = FuncButtonType
-	return vv.WidgetTyp
+func (v *FuncValue) Config() {
+	v.Widget.SetType(gi.ButtonTonal)
 }
 
-func (vv *FuncValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	fbt := vv.Widget.(*FuncButton)
-	fun := laser.NonPtrValue(vv.Value).Interface()
+func (v *FuncValue) Update() {
+	fun := laser.NonPtrValue(v.Value).Interface()
 	// if someone is viewing an arbitrary function, there is a good chance
 	// that it is not added to gti (and that is out of their control)
-	// (eg: in the inspector).
-	fbt.SetWarnUnadded(false)
-	fbt.SetFunc(fun)
-}
-
-func (vv *FuncValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	vv.StdConfig(w)
-
-	fbt := vv.Widget.(*FuncButton)
-	fbt.Type = gi.ButtonTonal
-
-	vv.UpdateWidget()
-}
-
-//////////////////////////////////////////////////////////////////////////////
-//  OptionValue
-
-// OptionValue presents an [option.Option]
-type OptionValue struct {
-	ValueBase
-}
-
-func (vv *OptionValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.FrameType
-	return vv.WidgetTyp
-}
-
-func (vv *OptionValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-}
-
-func (vv *OptionValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	vv.StdConfig(w)
-
-	fr := vv.Widget.(*gi.Frame)
-
-	gi.NewButton(fr, "unset").SetText("Unset")
-	val := vv.Value.FieldByName("Value").Interface()
-	NewValue(fr, val, "value")
-
-	vv.UpdateWidget()
+	// (eg: in the inspector), so we do not warn on unadded functions.
+	v.Widget.SetWarnUnadded(false).SetFunc(fun)
 }
