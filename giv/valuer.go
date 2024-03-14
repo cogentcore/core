@@ -131,21 +131,16 @@ func ToValue(val any, tags string) Value {
 	}
 
 	switch {
-	case vk >= reflect.Int && vk <= reflect.Uint64:
+	case vk >= reflect.Int && vk <= reflect.Float64:
 		if vtag == "slider" {
 			return &SliderValue{}
 		}
 		if _, ok := val.(fmt.Stringer); ok {
 			return &StringValue{}
 		}
-		return &IntValue{}
+		return &NumberValue{}
 	case vk == reflect.Bool:
 		return &BoolValue{}
-	case vk >= reflect.Float32 && vk <= reflect.Float64:
-		if vtag == "slider" {
-			return &SliderValue{}
-		}
-		return &FloatValue{} // handles step, min / max etc
 	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
 		// TODO: special value for complex numbers with two fields
 		return &StringValue{}
