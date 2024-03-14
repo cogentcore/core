@@ -501,7 +501,7 @@ func (cv *ColorView) UpdateNums() {
 ////////////////////////////////////////////////////////////////////////////////////////
 //  ColorValue
 
-// ColorValue represents a color with a button.
+// ColorValue represents a color value with a button.
 type ColorValue struct {
 	ValueBase[*gi.Button]
 }

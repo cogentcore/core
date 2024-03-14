@@ -526,7 +526,7 @@ func (v *NilValue) Config() {
 
 func (vv *NilValue) Update() {}
 
-// IconValue represents an [icons.Icon] with a button.
+// IconValue represents an [icons.Icon] value with a button.
 type IconValue struct {
 	ValueBase[*gi.Button]
 }
@@ -571,7 +571,7 @@ func (v *IconValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	}
 }
 
-// FontValue represents a [gi.FontName] with a button.
+// FontValue represents a [gi.FontName] value with a button.
 type FontValue struct {
 	ValueBase[*gi.Button]
 }
@@ -615,7 +615,7 @@ func (v *FontValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	}
 }
 
-// FileValue represents a [gi.Filename] with a button.
+// FileValue represents a [gi.Filename] value with a button.
 type FileValue struct {
 	ValueBase[*gi.Button]
 }
@@ -646,7 +646,7 @@ func (v *FileValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	}
 }
 
-// FuncValue represents a function with a [FuncButton].
+// FuncValue represents a function value with a [FuncButton].
 type FuncValue struct {
 	ValueBase[*FuncButton]
 }
