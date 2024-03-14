@@ -153,7 +153,7 @@ func (mv *MapView) ConfigMapGrid() {
 	// always start fresh!
 	mv.Keys = make([]Value, 0)
 	mv.Values = make([]Value, 0)
-	sg.DeleteChildren() // need to delete everything
+	sg.DeleteChildren()
 
 	mpv := reflect.ValueOf(mv.Map)
 	mpvnp := laser.NonPtrValue(mpv)

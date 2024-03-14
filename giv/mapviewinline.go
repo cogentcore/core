@@ -109,7 +109,7 @@ func (mv *MapViewInline) SetMap(mp any) *MapViewInline {
 }
 
 func (mv *MapViewInline) Config() {
-	mv.DeleteChildren() // need to delete everything
+	mv.DeleteChildren()
 	if laser.AnyIsNil(mv.Map) {
 		mv.ConfigSize = 0
 		return
