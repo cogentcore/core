@@ -519,8 +519,7 @@ func (v *ColorValue) Config() {
 }
 
 func (v *ColorValue) Update() {
-	v.Widget.ApplyStyleTree()
-	v.Widget.NeedsRender()
+	v.Widget.Update()
 }
 
 // TODO(dtl): Edit color
