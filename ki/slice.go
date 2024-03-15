@@ -6,6 +6,7 @@ package ki
 
 import (
 	"fmt"
+	"slices"
 
 	"cogentcore.org/core/gti"
 )
@@ -207,45 +208,20 @@ func (sl *Slice) ElemByTypeTry(t *gti.Type, embeds bool, startIdx ...int) (Ki, e
 	return (*sl)[idx], nil
 }
 
-// SliceInsert item at index; does not do any parent updating etc;
-// use the [Ki] or [Node] method unless you know what you are doing.
-func SliceInsert(sl *[]Ki, k Ki, idx int) {
-	kl := len(*sl)
-	if idx < 0 {
-		idx = kl + idx
-	}
-	if idx < 0 { // still?
-		idx = 0
-	}
-	if idx > kl { // last position allowed for insert
-		idx = kl
-	}
-	// this avoids extra garbage collection
-	*sl = append(*sl, nil)
-	if idx < kl {
-		copy((*sl)[idx+1:], (*sl)[idx:kl])
-	}
-	(*sl)[idx] = k
-}
-
 // Insert item at index; does not do any parent updating etc; use
 // the [Ki] or [Node] method unless you know what you are doing.
-func (sl *Slice) Insert(k Ki, idx int) {
-	SliceInsert((*[]Ki)(sl), k, idx)
+func (sl *Slice) Insert(k Ki, i int) {
+	*sl = slices.Insert(*sl, i, k)
 }
 
 // SliceDeleteAtIndex deletes item at index; does not do any further management of
 // deleted item. It is an optimized version for avoiding memory leaks. It returns
 // an error if the index is invalid.
-func SliceDeleteAtIndex(sl *[]Ki, idx int) error {
-	if err := SliceIsValidIndex(sl, idx); err != nil {
+func SliceDeleteAtIndex(sl *[]Ki, i int) error {
+	if err := SliceIsValidIndex(sl, i); err != nil {
 		return err
 	}
-	// this copy makes sure there are no memory leaks
-	sz := len(*sl)
-	copy((*sl)[idx:], (*sl)[idx+1:])
-	(*sl)[sz-1] = nil
-	(*sl) = (*sl)[:sz-1]
+	*sl = slices.Delete(*sl, i, i+1) // this copy makes sure there are no memory leaks
 	return nil
 }
 
@@ -258,19 +234,19 @@ func (sl *Slice) DeleteAtIndex(idx int) error {
 
 // SliceMove moves element from one position to another.  Returns error if
 // either index is invalid.
-func SliceMove(sl *[]Ki, frm, to int) error {
+func SliceMove(sl *[]Ki, frm, i int) error {
 	if err := SliceIsValidIndex(sl, frm); err != nil {
 		return err
 	}
-	if err := SliceIsValidIndex(sl, to); err != nil {
+	if err := SliceIsValidIndex(sl, i); err != nil {
 		return err
 	}
-	if frm == to {
+	if frm == i {
 		return nil
 	}
 	tmp := (*sl)[frm]
 	SliceDeleteAtIndex(sl, frm)
-	SliceInsert(sl, tmp, to)
+	*sl = slices.Insert(*sl, i, tmp)
 	return nil
 }
 
