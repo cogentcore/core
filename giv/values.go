@@ -175,7 +175,7 @@ func (v *StructValue) Config() {
 
 func (v *StructValue) Update() {
 	npv := laser.NonPtrValue(v.Value)
-	if v.Value.IsZero() || npv.IsZero() {
+	if v.Value.IsZero() {
 		v.Widget.SetText("None")
 	} else {
 		opv := laser.OnePtrUnderlyingValue(v.Value)
@@ -189,7 +189,7 @@ func (v *StructValue) Update() {
 }
 
 func (v *StructValue) ConfigDialog(d *gi.Body) (bool, func()) {
-	if v.Value.IsZero() || laser.NonPtrValue(v.Value).IsZero() {
+	if v.Value.IsZero() {
 		return false, nil
 	}
 	opv := laser.OnePtrUnderlyingValue(v.Value)
