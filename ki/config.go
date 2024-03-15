@@ -22,7 +22,7 @@ type TypeAndName struct {
 type Config []TypeAndName
 
 func (t *Config) Add(typ *gti.Type, nm string) {
-	(*t) = append(*t, TypeAndName{typ, nm})
+	*t = append(*t, TypeAndName{typ, nm})
 }
 
 func (t Config) GoString() string {

@@ -10,16 +10,16 @@ package ki
 import (
 	"errors"
 	"fmt"
+	"log"
 	"log/slog"
 	"strconv"
-
-	"log"
 	"strings"
+
+	"github.com/jinzhu/copier"
 
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/glop/elide"
 	"cogentcore.org/core/gti"
-	"github.com/jinzhu/copier"
 )
 
 // The Node struct implements the [Ki] interface and provides the core functionality
@@ -92,7 +92,7 @@ func (n *Node) This() Ki {
 	return n.Ths
 }
 
-// AsNode returns the *ki.Node base type for this node.
+// AsKi returns the *ki.Node base type for this node.
 func (n *Node) AsKi() *Node {
 	return n
 }

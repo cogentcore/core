@@ -9,10 +9,11 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"cogentcore.org/core/gti"
 	. "cogentcore.org/core/ki"
 	"cogentcore.org/core/ki/testdata"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestNodeAddChild(t *testing.T) {
