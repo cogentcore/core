@@ -9,7 +9,6 @@ package main
 import (
 	"fmt"
 
-	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/icons"
@@ -146,40 +145,27 @@ func main() {
 
 	tsttable[0].StrField = "this is a particularly long field"
 
-	var stru Struct
-	stru.Name = "happy"
-	stru.Cond = 2
-	stru.Val = 3.1415
-	stru.Vec.Set(5, 7)
-	stru.Inline.Val = 3
-	stru.Cond2.IntField = 22
-	stru.Cond2.FloatField = 44.4
-	stru.Cond2.StrField = "fi"
-	// stru.Cond2.File = gi.Filename("views.go")
-	stru.Things = make([]TableStruct, 2)
-	stru.Stuff = make([]float32, 3)
+	str := Struct{
+		Name:   "happy",
+		Cond:   2,
+		Val:    3.1415,
+		Vec:    mat32.V2(5, 7),
+		Inline: ILStruct{Val: 3},
+		Cond2: TableStruct{
+			IntField:   22,
+			FloatField: 44.4,
+			StrField:   "fi",
+			File:       "views.go",
+		},
+		Things: make([]TableStruct, 2),
+		Stuff:  make([]float32, 3),
+	}
 
 	b := gi.NewBody("Cogent Core Views Demo")
 
-	b.AddAppBar(func(tb *gi.Toolbar) {
-		gi.NewButton(tb).SetText("Slice dialog").
-			OnClick(func(e events.Event) {
-				sl := make([]float32, 2880)
-				d := gi.NewBody().AddTitle("Slice view test")
-				giv.NewSliceView(d).SetSlice(&sl)
-				d.NewFullDialog(tb).Run()
-			})
-		gi.NewButton(tb).SetText("Table dialog").
-			OnClick(func(e events.Event) {
-				d := gi.NewBody().AddTitle("Table view test")
-				giv.NewTableView(d).SetSlice(&tsttable)
-				d.NewFullDialog(tb).Run()
-			})
-	})
-
 	ts := gi.NewTabs(b)
 
-	giv.NewStructView(ts.NewTab("Struct view")).SetStruct(&stru)
+	giv.NewStructView(ts.NewTab("Struct view")).SetStruct(&str)
 	giv.NewMapView(ts.NewTab("Map view")).SetMap(&tstmap)
 	giv.NewSliceView(ts.NewTab("Slice view")).SetSlice(&tstslice)
 	giv.NewTableView(ts.NewTab("Table view")).SetSlice(&tsttable)
