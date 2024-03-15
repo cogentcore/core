@@ -234,19 +234,19 @@ func (sl *Slice) DeleteAtIndex(idx int) error {
 
 // SliceMove moves element from one position to another.  Returns error if
 // either index is invalid.
-func SliceMove(sl *[]Ki, frm, i int) error {
+func SliceMove(sl *[]Ki, frm, to int) error {
 	if err := SliceIsValidIndex(sl, frm); err != nil {
 		return err
 	}
-	if err := SliceIsValidIndex(sl, i); err != nil {
+	if err := SliceIsValidIndex(sl, to); err != nil {
 		return err
 	}
-	if frm == i {
+	if frm == to {
 		return nil
 	}
 	tmp := (*sl)[frm]
 	SliceDeleteAtIndex(sl, frm)
-	*sl = slices.Insert(*sl, i, tmp)
+	*sl = slices.Insert(*sl, to, tmp)
 	return nil
 }
 
