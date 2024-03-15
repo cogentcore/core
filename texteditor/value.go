@@ -8,50 +8,27 @@ import (
 	"fmt"
 
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/grr"
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/laser"
 )
 
-// Value is a [texteditor.Editor] [giv.Value] for editing longer text
+// Value represents a string with an [Editor].
 type Value struct {
-	giv.ValueBase
+	giv.ValueBase[*Editor]
 }
 
-func (vv *Value) WidgetType() *gti.Type {
-	vv.WidgetTyp = EditorType
-	return vv.WidgetTyp
-}
-
-func (vv *Value) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	te := vv.Widget.(*Editor)
-	npv := laser.NonPtrValue(vv.Value)
-	te.Buf.SetText([]byte(npv.String()))
-}
-
-func (vv *Value) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	vv.StdConfig(w)
-
+func (v *Value) Config() {
 	tb := NewBuf()
 	grr.Log(tb.Stat())
 	tb.OnChange(func(e events.Event) {
-		// fmt.Println(tb.Txt)
-		vv.SetValue(string(tb.Txt))
-		fmt.Println(laser.OnePtrUnderlyingValue(vv.Value).Interface())
+		v.SetValue(string(tb.Text()))
+		fmt.Println(laser.OnePtrUnderlyingValue(v.Value).Interface())
 	})
+	v.Widget.SetBuf(tb)
+}
 
-	te := w.(*Editor)
-	te.SetBuf(tb)
-
-	vv.UpdateWidget()
+func (v *Value) Update() {
+	npv := laser.NonPtrValue(v.Value)
+	v.Widget.Buf.SetText([]byte(npv.String()))
 }
