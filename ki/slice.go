@@ -221,7 +221,7 @@ func SliceDeleteAtIndex(sl *[]Ki, i int) error {
 	if err := SliceIsValidIndex(sl, i); err != nil {
 		return err
 	}
-	*sl = slices.Delete(*sl, i, i+1) // this copy makes sure there are no memory leaks
+	*sl = slices.Delete(*sl, i, i+1)
 	return nil
 }
 

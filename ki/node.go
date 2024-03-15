@@ -279,7 +279,6 @@ func (n *Node) ChildByType(t *gti.Type, embeds bool, startIdx ...int) Ki {
 // EscapePathName returns a name that replaces any path delimiter symbols
 // . or / with \, and \\ escaped versions.
 func EscapePathName(name string) string {
-	//strings.NewReplacer(".", `\,`, "/", `\\`, ).Replace(name)
 	return strings.ReplaceAll(strings.ReplaceAll(name, ".", `\,`), "/", `\\`)
 }
 
