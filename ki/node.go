@@ -10,16 +10,16 @@ package ki
 import (
 	"errors"
 	"fmt"
+	"log"
 	"log/slog"
 	"strconv"
-
-	"log"
 	"strings"
+
+	"github.com/jinzhu/copier"
 
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/glop/elide"
 	"cogentcore.org/core/gti"
-	"github.com/jinzhu/copier"
 )
 
 // The Node struct implements the [Ki] interface and provides the core functionality
@@ -92,7 +92,7 @@ func (n *Node) This() Ki {
 	return n.Ths
 }
 
-// AsNode returns the *ki.Node base type for this node.
+// AsKi returns the *ki.Node base type for this node.
 func (n *Node) AsKi() *Node {
 	return n
 }
@@ -279,13 +279,14 @@ func (n *Node) ChildByType(t *gti.Type, embeds bool, startIdx ...int) Ki {
 // EscapePathName returns a name that replaces any path delimiter symbols
 // . or / with \, and \\ escaped versions.
 func EscapePathName(name string) string {
-	return strings.Replace(strings.Replace(name, ".", `\,`, -1), "/", `\\`, -1)
+	//strings.NewReplacer(".", `\,`, "/", `\\`, ).Replace(name)
+	return strings.ReplaceAll(strings.ReplaceAll(name, ".", `\,`), "/", `\\`)
 }
 
 // UnescapePathName returns a name that replaces any escaped path delimiter symbols
 // \, or \\ with . and / unescaped versions.
 func UnescapePathName(name string) string {
-	return strings.Replace(strings.Replace(name, `\,`, ".", -1), `\\`, "/", -1)
+	return strings.ReplaceAll(strings.ReplaceAll(name, `\,`, "."), `\\`, "/")
 }
 
 // Path returns path to this node from the tree root, using node Names

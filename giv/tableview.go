@@ -445,15 +445,15 @@ func (tv *TableView) UpdateWidgets() {
 
 	scrollTo := -1
 	if tv.SelField != "" && tv.SelVal != nil {
-		tv.SelIdx, _ = StructSliceIdxByValue(tv.Slice, tv.SelField, tv.SelVal)
+		tv.SelectedIndex, _ = StructSliceIdxByValue(tv.Slice, tv.SelField, tv.SelVal)
 		tv.SelField = ""
 		tv.SelVal = nil
 		tv.InitSelIdx = -1
-		scrollTo = tv.SelIdx
+		scrollTo = tv.SelectedIndex
 	} else if tv.InitSelIdx >= 0 {
-		tv.SelIdx = tv.InitSelIdx
+		tv.SelectedIndex = tv.InitSelIdx
 		tv.InitSelIdx = -1
-		scrollTo = tv.SelIdx
+		scrollTo = tv.SelectedIndex
 	}
 	if scrollTo >= 0 {
 		tv.ScrollToIdx(scrollTo)
@@ -792,7 +792,7 @@ func (tv *TableView) ContextMenu(m *gi.Scene) {
 	if !tv.Is(SliceViewIsArray) {
 		gi.NewButton(m).SetText("Edit").SetIcon(icons.Edit).
 			OnClick(func(e events.Event) {
-				tv.EditIdx(tv.SelIdx)
+				tv.EditIdx(tv.SelectedIndex)
 			})
 	}
 }

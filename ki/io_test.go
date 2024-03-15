@@ -8,10 +8,11 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"cogentcore.org/core/grows/jsons"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/ki/testdata"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestNodeJSON(t *testing.T) {
