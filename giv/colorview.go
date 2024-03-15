@@ -11,6 +11,8 @@ import (
 	"log/slog"
 	"sort"
 
+	"golang.org/x/image/colornames"
+
 	"cogentcore.org/core/cam/hct"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
@@ -20,7 +22,6 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
-	"golang.org/x/image/colornames"
 )
 
 /////////////////////////////////////////////////////////////////////////////
@@ -695,7 +696,7 @@ func (vv *ColorNameValue) ConfigDialog(d *gi.Body) (bool, func()) {
 		}
 	}
 	si := 0
-	NewTableView(d).SetSlice(&sl).SetSelIdx(curRow).BindSelect(&si)
+	NewTableView(d).SetSlice(&sl).SetSelectedIndex(curRow).BindSelect(&si)
 	return true, func() {
 		if si >= 0 {
 			vv.SetValue(sl[si].Name)
