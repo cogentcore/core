@@ -10,6 +10,7 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
+	"math/rand"
 	"strings"
 	"time"
 
@@ -495,6 +496,41 @@ func views(ts *gi.Tabs) {
 	tbl[0].StrField = "this is a particularly long field"
 
 	giv.NewTableView(vts.NewTab("Table view")).SetSlice(&tbl)
+
+	sp := gi.NewSplits(vts.NewTab("Tree view"))
+
+	tv := giv.NewTreeView(gi.NewFrame(sp)).SetText("Root")
+	makeTree(tv, 0, 3, 5)
+
+	sv := giv.NewStructView(sp)
+	sv.Style(func(s *styles.Style) {
+		s.Grow.Set(1, 1)
+	})
+	sv.SetStruct(tv)
+
+	tv.OnSelect(func(e events.Event) {
+		if len(tv.SelectedNodes) > 0 {
+			sv.SetStruct(tv.SelectedNodes[0])
+		}
+	})
+
+	sp.SetSplits(0.3, 0.7)
+}
+
+func makeTree(tv *giv.TreeView, iter, maxIter, maxKids int) {
+	if iter > maxIter {
+		return
+	}
+	n := rand.Intn(maxKids)
+	if iter == 0 {
+		n = maxKids
+	}
+	iter++
+	tv.SetNChildren(n, giv.TreeViewType, "Child ")
+	for j := 0; j < n; j++ {
+		kt := tv.Child(j).(*giv.TreeView)
+		makeTree(kt, iter, maxIter, maxKids)
+	}
 }
 
 type tableStruct struct { //gti:add
