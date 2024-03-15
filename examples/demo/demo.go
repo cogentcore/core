@@ -36,14 +36,11 @@ func main() {
 	ts := gi.NewTabs(b)
 
 	home(ts)
-	text(ts)
-	buttons(ts)
-	inputs(ts)
-	layouts(ts)
-	dialogs(ts)
+	widgets(ts)
 	values(ts)
 	views(ts)
-	other(ts)
+	dialogs(ts)
+	layouts(ts)
 
 	b.RunMainWindow()
 }
@@ -64,12 +61,20 @@ func home(ts *gi.Tabs) {
 	gi.NewLabel(tab).SetType(gi.LabelTitleLarge).SetText(`A <b>demonstration</b> of the <i>various</i> features of the <a href="https://cogentcore.org/core">Cogent Core</a> 2D and 3D Go GUI <u>framework</u>`)
 }
 
+func widgets(ts *gi.Tabs) {
+	wts := gi.NewTabs(ts.NewTab("Widgets"))
+
+	text(wts)
+	buttons(wts)
+	inputs(wts)
+	sliders(wts)
+}
+
 func text(ts *gi.Tabs) {
 	tab := ts.NewTab("Text")
 
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Text")
-	gi.NewLabel(tab).SetText(
-		`Cogent Core provides fully customizable text elements that can be styled in any way you want. Also, there are pre-configured style types for text that allow you to easily create common text types.`)
+	gi.NewLabel(tab).SetText("Cogent Core provides fully customizable text elements that can be styled in any way you want. Also, there are pre-configured style types for text that allow you to easily create common text types.")
 
 	for _, typ := range gi.LabelTypesValues() {
 		s := strcase.ToSentence(typ.String())
@@ -82,8 +87,7 @@ func buttons(ts *gi.Tabs) {
 
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Buttons")
 
-	gi.NewLabel(tab).SetText(
-		`Cogent Core provides customizable buttons that support various events and can be styled in any way you want. Also, there are pre-configured style types for buttons that allow you to achieve common functionality with ease. All buttons support any combination of a label, icon, and indicator.`)
+	gi.NewLabel(tab).SetText("Cogent Core provides customizable buttons that support various events and can be styled in any way you want. Also, there are pre-configured style types for buttons that allow you to achieve common functionality with ease. All buttons support any combination of a label, icon, and indicator.")
 
 	makeRow := func() gi.Widget {
 		return gi.NewLayout(tab).Style(func(s *styles.Style) {
@@ -182,8 +186,7 @@ func inputs(ts *gi.Tabs) {
 	tab := ts.NewTab("Inputs")
 
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Inputs")
-	gi.NewLabel(tab).SetText(
-		`Cogent Core provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.`)
+	gi.NewLabel(tab).SetText("Cogent Core provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.")
 
 	gi.NewTextField(tab).SetPlaceholder("Text field")
 	gi.NewTextField(tab).SetPlaceholder("Email").SetType(gi.TextFieldOutlined).Style(func(s *styles.Style) {
@@ -255,26 +258,13 @@ func inputs(ts *gi.Tabs) {
 
 	gi.NewSwitches(tab).SetType(gi.SwitchSegmentedButton).SetMutex(true).SetItems("Segmented Button 1", "Segmented Button 2", "Segmented Button 3").
 		SetTooltips("A description for Segmented Button 1", "A description for Segmented Button 2", "A description for Segmented Button 3")
-
-	gi.NewSlider(tab).SetValue(0.5)
-	gi.NewSlider(tab).SetValue(0.7).SetState(true, states.Disabled)
-
-	colsliders := gi.NewLayout(tab)
-
-	gi.NewSlider(colsliders).SetValue(0.3).Style(func(s *styles.Style) {
-		s.Direction = styles.Column
-	})
-	gi.NewSlider(colsliders).SetValue(0.2).SetState(true, states.Disabled).Style(func(s *styles.Style) {
-		s.Direction = styles.Column
-	})
 }
 
 func layouts(ts *gi.Tabs) {
 	tab := ts.NewTab("Layouts")
 
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Layout")
-	gi.NewLabel(tab).SetText(
-		`Cogent Core provides various adaptable layout types that allow you to easily organize content so that it is easy to use, customize, and understand.`)
+	gi.NewLabel(tab).SetText("Cogent Core provides various adaptable layout types that allow you to easily organize content so that it is easy to use, customize, and understand.")
 
 	// vw := gi.NewLabel(layouts, "vw", "50vw")
 	// vw.Style(func(s *styles.Style) {
@@ -306,8 +296,7 @@ func dialogs(ts *gi.Tabs) {
 	tab := ts.NewTab("Dialogs")
 
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Dialogs, snackbars, and windows")
-	gi.NewLabel(tab).SetText(
-		`Cogent Core provides completely customizable dialogs, snackbars, and windows that allow you to easily display, obtain, and organize information.`)
+	gi.NewLabel(tab).SetText("Cogent Core provides completely customizable dialogs, snackbars, and windows that allow you to easily display, obtain, and organize information.")
 
 	makeRow := func() gi.Widget {
 		return gi.NewLayout(tab).Style(func(s *styles.Style) {
@@ -413,8 +402,7 @@ func values(ts *gi.Tabs) {
 	tab := ts.NewTab("Values")
 
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Values")
-	gi.NewLabel(tab).SetText(
-		`Cogent Core provides the giv value system, which allows you to instantly turn Go values and functions into type-specific widgets bound to the original values. This powerful system means that you can automatically turn backend data structures into GUI apps with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.`)
+	gi.NewLabel(tab).SetText("Cogent Core provides the giv value system, which allows you to instantly turn Go values and functions into type-specific widgets bound to the original values. This powerful system means that you can automatically turn backend data structures into GUI apps with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.")
 
 	gi.NewButton(tab).SetText("Inspector").OnClick(func(e events.Event) {
 		giv.InspectorWindow(ts.Scene)
@@ -446,8 +434,7 @@ func views(ts *gi.Tabs) {
 	tab := ts.NewTab("Views")
 
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Views")
-	gi.NewLabel(tab).SetText(
-		`Cogent Core provides powerful views that allow you to easily view and edit complex data types like structs, maps, and slices, allowing you to easily create widgets like lists, tables, and forms.`)
+	gi.NewLabel(tab).SetText("Cogent Core provides powerful views that allow you to easily view and edit complex data types like structs, maps, and slices, allowing you to easily create widgets like lists, tables, and forms.")
 
 	vts := gi.NewTabs(tab)
 
@@ -637,11 +624,23 @@ func (ts *testStruct) ShouldShow(field string) bool {
 	return true
 }
 
-func other(ts *gi.Tabs) {
-	tab := ts.NewTab("Other")
+func sliders(ts *gi.Tabs) {
+	tab := ts.NewTab("Sliders")
 
-	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Other")
-	gi.NewLabel(tab).SetText(`Other features of the Cogent Core framework`)
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Sliders and meters")
+	gi.NewLabel(tab).SetText("Cogent Core provides interactive sliders and customizable meters, allowing you to edit and display bounded numbers.")
+
+	gi.NewSlider(tab).SetValue(0.5)
+	gi.NewSlider(tab).SetValue(0.7).SetState(true, states.Disabled)
+
+	csliders := gi.NewLayout(tab)
+
+	gi.NewSlider(csliders).SetValue(0.3).Style(func(s *styles.Style) {
+		s.Direction = styles.Column
+	})
+	gi.NewSlider(csliders).SetValue(0.2).SetState(true, states.Disabled).Style(func(s *styles.Style) {
+		s.Direction = styles.Column
+	})
 
 	gi.NewMeter(tab).SetType(gi.MeterCircle).SetValue(0.7).SetText("70%")
 	gi.NewMeter(tab).SetType(gi.MeterSemicircle).SetValue(0.7).SetText("70%")
