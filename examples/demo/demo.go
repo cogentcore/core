@@ -24,6 +24,7 @@ import (
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 //go:embed icon.svg
@@ -68,6 +69,7 @@ func widgets(ts *gi.Tabs) {
 	buttons(wts)
 	inputs(wts)
 	sliders(wts)
+	makeIcons(wts)
 }
 
 func text(ts *gi.Tabs) {
@@ -260,142 +262,62 @@ func inputs(ts *gi.Tabs) {
 		SetTooltips("A description for Segmented Button 1", "A description for Segmented Button 2", "A description for Segmented Button 3")
 }
 
-func layouts(ts *gi.Tabs) {
-	tab := ts.NewTab("Layouts")
+func sliders(ts *gi.Tabs) {
+	tab := ts.NewTab("Sliders")
 
-	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Layout")
-	gi.NewLabel(tab).SetText("Cogent Core provides various adaptable layout types that allow you to easily organize content so that it is easy to use, customize, and understand.")
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Sliders and meters")
+	gi.NewLabel(tab).SetText("Cogent Core provides interactive sliders and customizable meters, allowing you to edit and display bounded numbers.")
 
-	// vw := gi.NewLabel(layouts, "vw", "50vw")
-	// vw.Style(func(s *styles.Style) {
-	// 	s.Min.X.Vw(50)
-	// 	s.BackgroundColor.SetSolid(colors.Scheme.Primary.Base)
-	// 	s.Color = colors.C(colors.Scheme.Primary.On)
-	// })
+	gi.NewSlider(tab).SetValue(0.5)
+	gi.NewSlider(tab).SetValue(0.7).SetState(true, states.Disabled)
 
-	// pw := gi.NewLabel(layouts, "pw", "50pw")
-	// pw.Style(func(s *styles.Style) {
-	// 	s.Min.X.Pw(50)
-	// 	s.BackgroundColor.SetSolid(colors.Scheme.Primary.Container)
-	// 	s.Color = colors.C(colors.Scheme.Primary.OnContainer)
-	// })
+	csliders := gi.NewLayout(tab)
 
-	sv := gi.NewSplits(tab)
-
-	left := gi.NewFrame(sv).Style(func(s *styles.Style) {
-		s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
+	gi.NewSlider(csliders).SetValue(0.3).Style(func(s *styles.Style) {
+		s.Direction = styles.Column
 	})
-	gi.NewLabel(left).SetType(gi.LabelHeadlineMedium).SetText("Left")
-	right := gi.NewFrame(sv).Style(func(s *styles.Style) {
-		s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
+	gi.NewSlider(csliders).SetValue(0.2).SetState(true, states.Disabled).Style(func(s *styles.Style) {
+		s.Direction = styles.Column
 	})
-	gi.NewLabel(right).SetType(gi.LabelHeadlineMedium).SetText("Right")
+
+	gi.NewMeter(tab).SetType(gi.MeterCircle).SetValue(0.7).SetText("70%")
+	gi.NewMeter(tab).SetType(gi.MeterSemicircle).SetValue(0.7).SetText("70%")
+	gi.NewMeter(tab).SetValue(0.7)
+	gi.NewMeter(tab).SetValue(0.7).Style(func(s *styles.Style) {
+		s.Direction = styles.Column
+	})
 }
 
-func dialogs(ts *gi.Tabs) {
-	tab := ts.NewTab("Dialogs")
+func makeIcons(ts *gi.Tabs) {
+	tab := ts.NewTab("Icons")
 
-	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Dialogs, snackbars, and windows")
-	gi.NewLabel(tab).SetText("Cogent Core provides completely customizable dialogs, snackbars, and windows that allow you to easily display, obtain, and organize information.")
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Icons")
+	gi.NewLabel(tab).SetText("Cogent Core provides more than 2,000 unique icons from the Material Symbols collection.")
 
-	makeRow := func() gi.Widget {
-		return gi.NewLayout(tab).Style(func(s *styles.Style) {
-			s.Wrap = true
-			s.Align.Items = styles.Center
+	grid := gi.NewFrame(tab)
+	grid.Style(func(s *styles.Style) {
+		s.Wrap = true
+		s.Overflow.Y = styles.OverflowAuto
+	})
+
+	icnms := icons.All()
+	for _, ic := range icnms {
+		icnm := string(ic)
+		if strings.HasSuffix(icnm, "-fill") {
+			continue
+		}
+		vb := gi.NewLayout(grid, icnm).Style(func(s *styles.Style) {
+			s.Direction = styles.Column
+			s.Max.X.Em(15) // constraining width exactly gives nice grid-like appearance
+			s.Min.X.Em(15)
+		})
+		gi.NewIcon(vb, icnm).SetIcon(icons.Icon(icnm)).Style(func(s *styles.Style) {
+			s.Min.Set(units.Em(4))
+		})
+		gi.NewLabel(vb, icnm).SetText(strcase.ToSentence(icnm)).Style(func(s *styles.Style) {
+			s.SetTextWrap(false)
 		})
 	}
-
-	gi.NewLabel(tab).SetType(gi.LabelHeadlineSmall).SetText("Dialogs")
-	drow := makeRow()
-
-	md := gi.NewButton(drow).SetText("Message")
-	md.OnClick(func(e events.Event) {
-		gi.MessageDialog(md, "Something happened", "Message")
-	})
-
-	ed := gi.NewButton(drow).SetText("Error")
-	ed.OnClick(func(e events.Event) {
-		gi.ErrorDialog(ed, errors.New("invalid encoding format"), "Error loading file")
-	})
-
-	cd := gi.NewButton(drow).SetText("Confirm")
-	cd.OnClick(func(e events.Event) {
-		d := gi.NewBody().AddTitle("Confirm").AddText("Send message?")
-		d.AddBottomBar(func(pw gi.Widget) {
-			d.AddCancel(pw).OnClick(func(e events.Event) {
-				fmt.Println("Dialog canceled")
-			})
-			d.AddOk(pw).OnClick(func(e events.Event) {
-				fmt.Println("Dialog accepted")
-			})
-		})
-		d.NewDialog(cd).Run()
-	})
-
-	td := gi.NewButton(drow).SetText("Input")
-	td.OnClick(func(e events.Event) {
-		d := gi.NewBody().AddTitle("Input").AddText("What is your name?")
-		tf := gi.NewTextField(d)
-		d.AddBottomBar(func(pw gi.Widget) {
-			d.AddCancel(pw)
-			d.AddOk(pw).OnClick(func(e events.Event) {
-				fmt.Println("Your name is", tf.Text())
-			})
-		})
-		d.NewDialog(td).Run()
-	})
-
-	fd := gi.NewButton(drow).SetText("Full window")
-	u := &gi.User{}
-	fd.OnClick(func(e events.Event) {
-		d := gi.NewBody().AddTitle("Full window dialog").AddText("Edit your information")
-		giv.NewStructView(d).SetStruct(u).OnInput(func(e events.Event) {
-			fmt.Println("Got input event")
-		})
-		d.OnClose(func(e events.Event) {
-			fmt.Println("Your information is:", u)
-		})
-		d.NewFullDialog(td).Run()
-	})
-
-	nd := gi.NewButton(drow).SetText("New window")
-	nd.OnClick(func(e events.Event) {
-		gi.NewBody().AddTitle("New window dialog").AddText("This dialog opens in a new window on multi-window platforms").NewDialog(nd).SetNewWindow(true).Run()
-	})
-
-	gi.NewLabel(tab).SetType(gi.LabelHeadlineSmall).SetText("Snackbars")
-	srow := makeRow()
-
-	ms := gi.NewButton(srow).SetText("Message")
-	ms.OnClick(func(e events.Event) {
-		gi.MessageSnackbar(ms, "New messages loaded")
-	})
-
-	es := gi.NewButton(srow).SetText("Error")
-	es.OnClick(func(e events.Event) {
-		gi.ErrorSnackbar(es, errors.New("file not found"), "Error loading page")
-	})
-
-	cs := gi.NewButton(srow).SetText("Custom")
-	cs.OnClick(func(e events.Event) {
-		gi.NewBody().AddSnackbarText("Files updated").
-			AddSnackbarButton("Refresh", func(e events.Event) {
-				fmt.Println("Refreshed files")
-			}).AddSnackbarIcon(icons.Close).NewSnackbar(cs).Run()
-	})
-
-	gi.NewLabel(tab).SetType(gi.LabelHeadlineSmall).SetText("Windows")
-	wrow := makeRow()
-
-	nw := gi.NewButton(wrow).SetText("New window")
-	nw.OnClick(func(e events.Event) {
-		gi.NewBody().AddTitle("New window").AddText("A standalone window that opens in a new window on multi-window platforms").NewWindow().Run()
-	})
-
-	fw := gi.NewButton(wrow).SetText("Full window")
-	fw.OnClick(func(e events.Event) {
-		gi.NewBody().AddTitle("Full window").AddText("A standalone window that opens in the same system window").NewWindow().SetNewWindow(false).Run()
-	})
 }
 
 func values(ts *gi.Tabs) {
@@ -624,28 +546,140 @@ func (ts *testStruct) ShouldShow(field string) bool {
 	return true
 }
 
-func sliders(ts *gi.Tabs) {
-	tab := ts.NewTab("Sliders")
+func dialogs(ts *gi.Tabs) {
+	tab := ts.NewTab("Dialogs")
 
-	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Sliders and meters")
-	gi.NewLabel(tab).SetText("Cogent Core provides interactive sliders and customizable meters, allowing you to edit and display bounded numbers.")
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Dialogs, snackbars, and windows")
+	gi.NewLabel(tab).SetText("Cogent Core provides completely customizable dialogs, snackbars, and windows that allow you to easily display, obtain, and organize information.")
 
-	gi.NewSlider(tab).SetValue(0.5)
-	gi.NewSlider(tab).SetValue(0.7).SetState(true, states.Disabled)
+	makeRow := func() gi.Widget {
+		return gi.NewLayout(tab).Style(func(s *styles.Style) {
+			s.Wrap = true
+			s.Align.Items = styles.Center
+		})
+	}
 
-	csliders := gi.NewLayout(tab)
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineSmall).SetText("Dialogs")
+	drow := makeRow()
 
-	gi.NewSlider(csliders).SetValue(0.3).Style(func(s *styles.Style) {
-		s.Direction = styles.Column
+	md := gi.NewButton(drow).SetText("Message")
+	md.OnClick(func(e events.Event) {
+		gi.MessageDialog(md, "Something happened", "Message")
 	})
-	gi.NewSlider(csliders).SetValue(0.2).SetState(true, states.Disabled).Style(func(s *styles.Style) {
-		s.Direction = styles.Column
+
+	ed := gi.NewButton(drow).SetText("Error")
+	ed.OnClick(func(e events.Event) {
+		gi.ErrorDialog(ed, errors.New("invalid encoding format"), "Error loading file")
 	})
 
-	gi.NewMeter(tab).SetType(gi.MeterCircle).SetValue(0.7).SetText("70%")
-	gi.NewMeter(tab).SetType(gi.MeterSemicircle).SetValue(0.7).SetText("70%")
-	gi.NewMeter(tab).SetValue(0.7)
-	gi.NewMeter(tab).SetValue(0.7).Style(func(s *styles.Style) {
-		s.Direction = styles.Column
+	cd := gi.NewButton(drow).SetText("Confirm")
+	cd.OnClick(func(e events.Event) {
+		d := gi.NewBody().AddTitle("Confirm").AddText("Send message?")
+		d.AddBottomBar(func(pw gi.Widget) {
+			d.AddCancel(pw).OnClick(func(e events.Event) {
+				fmt.Println("Dialog canceled")
+			})
+			d.AddOk(pw).OnClick(func(e events.Event) {
+				fmt.Println("Dialog accepted")
+			})
+		})
+		d.NewDialog(cd).Run()
 	})
+
+	td := gi.NewButton(drow).SetText("Input")
+	td.OnClick(func(e events.Event) {
+		d := gi.NewBody().AddTitle("Input").AddText("What is your name?")
+		tf := gi.NewTextField(d)
+		d.AddBottomBar(func(pw gi.Widget) {
+			d.AddCancel(pw)
+			d.AddOk(pw).OnClick(func(e events.Event) {
+				fmt.Println("Your name is", tf.Text())
+			})
+		})
+		d.NewDialog(td).Run()
+	})
+
+	fd := gi.NewButton(drow).SetText("Full window")
+	u := &gi.User{}
+	fd.OnClick(func(e events.Event) {
+		d := gi.NewBody().AddTitle("Full window dialog").AddText("Edit your information")
+		giv.NewStructView(d).SetStruct(u).OnInput(func(e events.Event) {
+			fmt.Println("Got input event")
+		})
+		d.OnClose(func(e events.Event) {
+			fmt.Println("Your information is:", u)
+		})
+		d.NewFullDialog(td).Run()
+	})
+
+	nd := gi.NewButton(drow).SetText("New window")
+	nd.OnClick(func(e events.Event) {
+		gi.NewBody().AddTitle("New window dialog").AddText("This dialog opens in a new window on multi-window platforms").NewDialog(nd).SetNewWindow(true).Run()
+	})
+
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineSmall).SetText("Snackbars")
+	srow := makeRow()
+
+	ms := gi.NewButton(srow).SetText("Message")
+	ms.OnClick(func(e events.Event) {
+		gi.MessageSnackbar(ms, "New messages loaded")
+	})
+
+	es := gi.NewButton(srow).SetText("Error")
+	es.OnClick(func(e events.Event) {
+		gi.ErrorSnackbar(es, errors.New("file not found"), "Error loading page")
+	})
+
+	cs := gi.NewButton(srow).SetText("Custom")
+	cs.OnClick(func(e events.Event) {
+		gi.NewBody().AddSnackbarText("Files updated").
+			AddSnackbarButton("Refresh", func(e events.Event) {
+				fmt.Println("Refreshed files")
+			}).AddSnackbarIcon(icons.Close).NewSnackbar(cs).Run()
+	})
+
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineSmall).SetText("Windows")
+	wrow := makeRow()
+
+	nw := gi.NewButton(wrow).SetText("New window")
+	nw.OnClick(func(e events.Event) {
+		gi.NewBody().AddTitle("New window").AddText("A standalone window that opens in a new window on multi-window platforms").NewWindow().Run()
+	})
+
+	fw := gi.NewButton(wrow).SetText("Full window")
+	fw.OnClick(func(e events.Event) {
+		gi.NewBody().AddTitle("Full window").AddText("A standalone window that opens in the same system window").NewWindow().SetNewWindow(false).Run()
+	})
+}
+
+func layouts(ts *gi.Tabs) {
+	tab := ts.NewTab("Layouts")
+
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Layout")
+	gi.NewLabel(tab).SetText("Cogent Core provides various adaptable layout types that allow you to easily organize content so that it is easy to use, customize, and understand.")
+
+	// vw := gi.NewLabel(layouts, "vw", "50vw")
+	// vw.Style(func(s *styles.Style) {
+	// 	s.Min.X.Vw(50)
+	// 	s.BackgroundColor.SetSolid(colors.Scheme.Primary.Base)
+	// 	s.Color = colors.C(colors.Scheme.Primary.On)
+	// })
+
+	// pw := gi.NewLabel(layouts, "pw", "50pw")
+	// pw.Style(func(s *styles.Style) {
+	// 	s.Min.X.Pw(50)
+	// 	s.BackgroundColor.SetSolid(colors.Scheme.Primary.Container)
+	// 	s.Color = colors.C(colors.Scheme.Primary.OnContainer)
+	// })
+
+	sv := gi.NewSplits(tab)
+
+	left := gi.NewFrame(sv).Style(func(s *styles.Style) {
+		s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
+	})
+	gi.NewLabel(left).SetType(gi.LabelHeadlineMedium).SetText("Left")
+	right := gi.NewFrame(sv).Style(func(s *styles.Style) {
+		s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
+	})
+	gi.NewLabel(right).SetType(gi.LabelHeadlineMedium).SetText("Right")
 }
