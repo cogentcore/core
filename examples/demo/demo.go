@@ -19,6 +19,7 @@ import (
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
@@ -40,6 +41,7 @@ func main() {
 	layouts(ts)
 	dialogs(ts)
 	values(ts)
+	views(ts)
 	other(ts)
 
 	b.RunMainWindow()
@@ -437,6 +439,161 @@ func hello(firstName string, lastName string, age int, likesGo bool) (greeting s
 		greeting += "You should reconsider what programming languages you like."
 	}
 	return
+}
+
+func views(ts *gi.Tabs) {
+	tab := ts.NewTab("Views")
+	vts := gi.NewTabs(tab)
+
+	str := testStruct{
+		Name:   "happy",
+		Cond:   2,
+		Val:    3.1415,
+		Vec:    mat32.V2(5, 7),
+		Inline: inlineStruct{Val: 3},
+		Cond2: tableStruct{
+			IntField:   22,
+			FloatField: 44.4,
+			StrField:   "fi",
+			File:       "views.go",
+		},
+		Things: make([]tableStruct, 2),
+		Stuff:  make([]float32, 3),
+	}
+
+	giv.NewStructView(vts.NewTab("Struct view")).SetStruct(&str)
+
+	mp := map[string]string{}
+
+	mp["mapkey1"] = "whatever"
+	mp["mapkey2"] = "testing"
+	mp["mapkey3"] = "boring"
+
+	giv.NewMapView(vts.NewTab("Map view")).SetMap(&mp)
+
+	sl := make([]string, 20)
+
+	for i := 0; i < len(sl); i++ {
+		sl[i] = fmt.Sprintf("el: %v", i)
+	}
+	sl[10] = "this is a particularly long slice value"
+
+	giv.NewSliceView(vts.NewTab("Slice view")).SetSlice(&sl)
+
+	tbl := make([]*tableStruct, 100)
+
+	for i := range tbl {
+		ts := &tableStruct{IntField: i, FloatField: float32(i) / 10}
+		tbl[i] = ts
+	}
+
+	tbl[0].StrField = "this is a particularly long field"
+
+	giv.NewTableView(vts.NewTab("Table view")).SetSlice(&tbl)
+}
+
+type tableStruct struct { //gti:add
+
+	// an icon
+	Icon icons.Icon
+
+	// an integer field
+	IntField int `default:"2"`
+
+	// a float field
+	FloatField float32
+
+	// a string field
+	StrField string
+
+	// a file
+	File gi.Filename
+}
+
+type inlineStruct struct { //gti:add
+
+	// click to show next
+	On bool
+
+	// can u see me?
+	ShowMe string
+
+	// a conditional
+	Cond int
+
+	// On and Cond=0
+	Cond1 string
+
+	// if Cond=0
+	Cond2 tableStruct
+
+	// a value
+	Val float32
+}
+
+func (il *inlineStruct) ShouldShow(field string) bool {
+	switch field {
+	case "ShowMe", "Cond":
+		return il.On
+	case "Cond1":
+		return il.On && il.Cond == 0
+	case "Cond2":
+		return il.On && il.Cond <= 1
+	}
+	return true
+}
+
+type testStruct struct { //gti:add
+
+	// An enum value
+	Enum gi.ButtonTypes
+
+	// a string
+	Name string
+
+	// click to show next
+	ShowNext bool
+
+	// can u see me?
+	ShowMe string
+
+	// how about that
+	Inline inlineStruct `view:"inline"`
+
+	// a conditional
+	Cond int
+
+	// if Cond=0
+	Cond1 string
+
+	// if Cond>=0
+	Cond2 tableStruct
+
+	// a value
+	Val float32
+
+	Vec mat32.Vec2
+
+	Things []tableStruct
+
+	Stuff []float32
+
+	// a file
+	File gi.Filename
+}
+
+func (ts *testStruct) ShouldShow(field string) bool {
+	switch field {
+	case "Name":
+		return ts.Enum <= gi.ButtonElevated
+	case "ShowMe":
+		return ts.ShowNext
+	case "Cond1":
+		return ts.Cond == 0
+	case "Cond2":
+		return ts.Cond >= 0
+	}
+	return true
 }
 
 func other(ts *gi.Tabs) {
