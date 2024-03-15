@@ -403,7 +403,7 @@ func (vv *KiValue) KiValue() ki.Ki {
 	if opv.IsNil() {
 		return nil
 	}
-	k, _ := opv.Interface().(ki.Ki)
+	k := opv.Interface().(ki.Ki)
 	return k
 }
 
@@ -413,7 +413,7 @@ type EnumValue struct {
 }
 
 func (v *EnumValue) Config() {
-	e, _ := laser.OnePtrUnderlyingValue(v.Value).Interface().(enums.Enum)
+	e := laser.OnePtrUnderlyingValue(v.Value).Interface().(enums.Enum)
 	v.Widget.SetEnum(e)
 	v.Widget.OnChange(func(e events.Event) {
 		v.SetValue(v.Widget.CurrentItem.Value)
@@ -449,7 +449,7 @@ func (v *BitFlagValue) EnumValue() enums.BitFlagSetter {
 			return k.FlagType()
 		}
 	}
-	e, _ := v.Value.Interface().(enums.BitFlagSetter)
+	e := v.Value.Interface().(enums.BitFlagSetter)
 	return e
 }
 
@@ -477,7 +477,7 @@ func (v *TypeValue) Config() {
 
 func (v *TypeValue) Update() {
 	opv := laser.OnePtrValue(v.Value)
-	typ, _ := opv.Interface().(*gti.Type)
+	typ := opv.Interface().(*gti.Type)
 	v.Widget.SetCurrentValue(typ)
 }
 
@@ -494,7 +494,7 @@ func (v *ByteSliceValue) Config() {
 
 func (v *ByteSliceValue) Update() {
 	npv := laser.NonPtrValue(v.Value)
-	bv, _ := npv.Interface().([]byte)
+	bv := npv.Interface().([]byte)
 	v.Widget.SetText(string(bv))
 }
 
@@ -511,7 +511,7 @@ func (v *RuneSliceValue) Config() {
 
 func (v *RuneSliceValue) Update() {
 	npv := laser.NonPtrValue(v.Value)
-	rv, _ := npv.Interface().([]rune)
+	rv := npv.Interface().([]rune)
 	v.Widget.SetText(string(rv))
 }
 

@@ -5,6 +5,7 @@
 package giv
 
 import (
+	"image"
 	"image/color"
 
 	"cogentcore.org/core/cam/hct"
@@ -13,6 +14,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
 )
 
@@ -526,7 +528,11 @@ func (v *ColorValue) Update() {
 func (v *ColorValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	cv := NewColorView(d).SetColor(v.ColorValue())
 	return true, func() {
-		v.SetValue(cv.Color.AsRGBA())
+		if u, ok := laser.OnePtrUnderlyingValue(v.Value).Interface().(*image.Uniform); ok {
+			u.C = cv.Color.AsRGBA()
+		} else {
+			v.SetValue(cv.Color.AsRGBA())
+		}
 		v.Update()
 	}
 }
@@ -534,6 +540,6 @@ func (v *ColorValue) ConfigDialog(d *gi.Body) (bool, func()) {
 // ColorValue returns a standardized color value from whatever value is represented
 // internally, or nil.
 func (v *ColorValue) ColorValue() color.RGBA {
-	c, _ := v.Value.Interface().(color.Color)
+	c := laser.NonPtrValue(v.Value).Interface().(color.Color)
 	return colors.AsRGBA(c)
 }

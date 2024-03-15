@@ -6,6 +6,7 @@ package giv
 
 import (
 	"fmt"
+	"image"
 	"image/color"
 	"reflect"
 	"time"
@@ -33,6 +34,7 @@ func init() {
 	AddValue(keyfun.MapName(""), func() Value { return &KeyMapValue{} })
 	AddValue(gti.Type{}, func() Value { return &TypeValue{} })
 	AddValue(color.RGBA{}, func() Value { return &ColorValue{} })
+	AddValue(image.Uniform{}, func() Value { return &ColorValue{} })
 	AddValue(key.Chord(""), func() Value { return &KeyChordValue{} })
 	AddValue(time.Time{}, func() Value { return &TimeValue{} })
 	AddValue(time.Duration(0), func() Value { return &DurationValue{} })
