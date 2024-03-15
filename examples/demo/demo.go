@@ -28,10 +28,10 @@ import (
 )
 
 //go:embed icon.svg
-var icon []byte
+var appIcon []byte
 
 func main() {
-	gi.TheApp.SetIconBytes(icon)
+	gi.TheApp.SetIconBytes(appIcon)
 
 	b := gi.NewBody("Cogent Core Demo")
 	ts := gi.NewTabs(b)
@@ -41,7 +41,7 @@ func main() {
 	values(ts)
 	views(ts)
 	dialogs(ts)
-	layouts(ts)
+	style(ts)
 
 	b.RunMainWindow()
 }
@@ -55,7 +55,7 @@ func home(ts *gi.Tabs) {
 		s.Text.Align = styles.Center
 	})
 
-	grr.Log(gi.NewSVG(tab).ReadBytes(icon))
+	grr.Log(gi.NewSVG(tab).ReadBytes(appIcon))
 
 	gi.NewLabel(tab).SetType(gi.LabelDisplayLarge).SetText("The Cogent Core Demo")
 
@@ -69,7 +69,7 @@ func widgets(ts *gi.Tabs) {
 	buttons(wts)
 	inputs(wts)
 	sliders(wts)
-	makeIcons(wts)
+	icon(wts)
 }
 
 func text(ts *gi.Tabs) {
@@ -288,7 +288,7 @@ func sliders(ts *gi.Tabs) {
 	})
 }
 
-func makeIcons(ts *gi.Tabs) {
+func icon(ts *gi.Tabs) {
 	tab := ts.NewTab("Icons")
 
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Icons")
@@ -652,34 +652,28 @@ func dialogs(ts *gi.Tabs) {
 	})
 }
 
-func layouts(ts *gi.Tabs) {
-	tab := ts.NewTab("Layouts")
+func style(ts *gi.Tabs) {
+	tab := ts.NewTab("Styles")
 
-	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Layout")
-	gi.NewLabel(tab).SetText("Cogent Core provides various adaptable layout types that allow you to easily organize content so that it is easy to use, customize, and understand.")
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Styles and layouts")
+	gi.NewLabel(tab).SetText("Cogent Core provides a fully customizable styling and layout system that allows you to easily control the position, size, and look of all widgets.")
 
-	// vw := gi.NewLabel(layouts, "vw", "50vw")
-	// vw.Style(func(s *styles.Style) {
-	// 	s.Min.X.Vw(50)
-	// 	s.BackgroundColor.SetSolid(colors.Scheme.Primary.Base)
-	// 	s.Color = colors.C(colors.Scheme.Primary.On)
-	// })
+	sp := gi.NewSplits(tab)
 
-	// pw := gi.NewLabel(layouts, "pw", "50pw")
-	// pw.Style(func(s *styles.Style) {
-	// 	s.Min.X.Pw(50)
-	// 	s.BackgroundColor.SetSolid(colors.Scheme.Primary.Container)
-	// 	s.Color = colors.C(colors.Scheme.Primary.OnContainer)
-	// })
+	sv := giv.NewStructView(sp)
 
-	sv := gi.NewSplits(tab)
+	fr := gi.NewFrame(sp)
+	sv.SetStruct(&fr.Styles)
 
-	left := gi.NewFrame(sv).Style(func(s *styles.Style) {
-		s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
+	fr.Style(func(s *styles.Style) {
+		s.Background = colors.C(colors.Scheme.Primary.Base)
 	})
-	gi.NewLabel(left).SetType(gi.LabelHeadlineMedium).SetText("Left")
-	right := gi.NewFrame(sv).Style(func(s *styles.Style) {
-		s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
+
+	fr.OnShow(func(e events.Event) {
+		fr.OverrideStyle = true
 	})
-	gi.NewLabel(right).SetType(gi.LabelHeadlineMedium).SetText("Right")
+
+	sv.OnChange(func(e events.Event) {
+		fr.Update()
+	})
 }
