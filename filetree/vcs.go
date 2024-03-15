@@ -407,19 +407,16 @@ func (fn *Node) UpdateAllVCS() {
 	})
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-//  VersCtrlValue
-
-// VersCtrlSystems is a list of supported Version Control Systems.
+// VersionControlSystems is a list of supported Version Control Systems.
 // These must match the VCS Types from goki/pi/vci which in turn
 // is based on masterminds/vcs
-var VersCtrlSystems = []string{"git", "svn", "bzr", "hg"}
+var VersionControlSystems = []string{"git", "svn", "bzr", "hg"}
 
-// IsVersCtrlSystem returns true if the given string matches one of the
-// standard VersCtrlSystems -- uses lowercase version of str.
-func IsVersCtrlSystem(str string) bool {
+// IsVersionControlSystem returns true if the given string matches one of the
+// standard VersionControlSystems -- uses lowercase version of str.
+func IsVersionControlSystem(str string) bool {
 	stl := strings.ToLower(str)
-	for _, vcn := range VersCtrlSystems {
+	for _, vcn := range VersionControlSystems {
 		if stl == vcn {
 			return true
 		}
@@ -432,7 +429,7 @@ type VersionControlName string
 
 func VersionControlNameProper(vc string) VersionControlName {
 	vcl := strings.ToLower(vc)
-	for _, vcnp := range VersCtrlSystems {
+	for _, vcnp := range VersionControlSystems {
 		vcnpl := strings.ToLower(vcnp)
 		if strings.Compare(vcl, vcnpl) == 0 {
 			return VersionControlName(vcnp)
@@ -466,8 +463,8 @@ func (v *VersionControlValue) Update() {
 
 func (v *VersionControlValue) OpenDialog(ctx gi.Widget, fun func()) {
 	cur := laser.ToString(v.Value.Interface())
-	m := gi.NewMenuFromStrings(VersCtrlSystems, cur, func(idx int) {
-		v.SetValue(VersCtrlSystems[idx])
+	m := gi.NewMenuFromStrings(VersionControlSystems, cur, func(idx int) {
+		v.SetValue(VersionControlSystems[idx])
 		v.Update()
 	})
 	gi.NewMenuStage(m, ctx, ctx.ContextMenuPos(nil)).Run()
