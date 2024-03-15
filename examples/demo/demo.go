@@ -499,7 +499,7 @@ func views(ts *gi.Tabs) {
 
 	sp := gi.NewSplits(vts.NewTab("Tree view"))
 
-	tv := giv.NewTreeView(gi.NewFrame(sp)).SetText("Root")
+	tv := giv.NewTreeViewFrame(sp).SetText("Root")
 	makeTree(tv, 0, 3, 5)
 
 	sv := giv.NewStructView(sp)
