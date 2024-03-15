@@ -84,30 +84,30 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 		gi.NewButton(m).SetText("Set Revision A").
 			SetTooltip("Set Buffer A's revision to this").
 			OnClick(func(e events.Event) {
-				cmt := lv.Log[tv.SelIdx]
+				cmt := lv.Log[tv.SelectedIndex]
 				lv.SetRevA(cmt.Rev)
 			})
 		gi.NewButton(m).SetText("Set Revision B").
 			SetTooltip("Set Buffer B's revision to this").
 			OnClick(func(e events.Event) {
-				cmt := lv.Log[tv.SelIdx]
+				cmt := lv.Log[tv.SelectedIndex]
 				lv.SetRevB(cmt.Rev)
 			})
 		gi.NewButton(m).SetText("Copy Revision ID").
 			SetTooltip("Copies the revision number / hash for this ").
 			OnClick(func(e events.Event) {
-				cmt := lv.Log[tv.SelIdx]
+				cmt := lv.Log[tv.SelectedIndex]
 				tv.Clipboard().Write(mimedata.NewText(cmt.Rev))
 			})
 		gi.NewButton(m).SetText("Checkout Revision").
 			SetTooltip("Checks out this revision").
 			OnClick(func(e events.Event) {
-				cmt := lv.Log[tv.SelIdx]
+				cmt := lv.Log[tv.SelectedIndex]
 				grr.Log(repo.UpdateVersion(cmt.Rev))
 			})
 	})
 	tv.OnDoubleClick(func(e events.Event) {
-		idx := tv.SelIdx
+		idx := tv.SelectedIndex
 		if idx < 0 || idx >= len(lv.Log) {
 			return
 		}

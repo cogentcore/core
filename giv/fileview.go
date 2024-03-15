@@ -13,8 +13,10 @@ import (
 	"slices"
 	"strings"
 	"sync"
-
 	"unicode"
+
+	"github.com/fsnotify/fsnotify"
+	"github.com/mitchellh/go-homedir"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
@@ -28,8 +30,6 @@ import (
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/pi/complete"
 	"cogentcore.org/core/styles"
-	"github.com/fsnotify/fsnotify"
-	"github.com/mitchellh/go-homedir"
 )
 
 // FileViewDialog opens a dialog for selecting a file.
@@ -319,11 +319,11 @@ func (fv *FileView) ConfigFilesRow() {
 	sv := NewTableView(fr, "favs-view")
 	fsv := NewTableView(fr, "files-view")
 
-	sv.SelIdx = -1
+	sv.SelectedIndex = -1
 	sv.SetReadOnly(true)
 	sv.SetSlice(&gi.SystemSettings.FavPaths)
 	sv.OnSelect(func(e events.Event) {
-		fv.FavSelect(sv.SelIdx)
+		fv.FavSelect(sv.SelectedIndex)
 	})
 
 	fsv.ContextMenus = nil
@@ -337,7 +337,7 @@ func (fv *FileView) ConfigFilesRow() {
 		gi.NewButton(m).SetText("Duplicate").SetIcon(icons.FileCopy).
 			SetTooltip("Make a copy of the selected file").
 			OnClick(func(e events.Event) {
-				fn := fv.Files[fsv.SelIdx]
+				fn := fv.Files[fsv.SelectedIndex]
 				fn.Duplicate()
 				fv.UpdateFilesAction()
 			})
@@ -348,20 +348,20 @@ func (fv *FileView) ConfigFilesRow() {
 		gi.NewButton(m).SetText("Delete").SetIcon(icons.Delete).
 			SetTooltip(tip).
 			OnClick(func(e events.Event) {
-				fn := fv.Files[fsv.SelIdx]
+				fn := fv.Files[fsv.SelectedIndex]
 				NewSoloFuncButton(fsv, fn.Delete).SetTooltip(tip).SetConfirm(true).
 					SetAfterFunc(fv.UpdateFilesAction).CallFunc()
 			})
 		gi.NewButton(m).SetText("Rename").SetIcon(icons.EditNote).
 			SetTooltip("Rename the selected file").
 			OnClick(func(e events.Event) {
-				fn := fv.Files[fsv.SelIdx]
+				fn := fv.Files[fsv.SelectedIndex]
 				NewSoloFuncButton(fsv, fn.Rename).SetAfterFunc(fv.UpdateFilesAction).CallFunc()
 			})
 		gi.NewButton(m).SetText("Info").SetIcon(icons.Info).
 			SetTooltip("View information about the selected file").
 			OnClick(func(e events.Event) {
-				fn := fv.Files[fsv.SelIdx]
+				fn := fv.Files[fsv.SelectedIndex]
 				d := gi.NewBody().AddTitle("Info: " + fn.Name)
 				NewStructView(d).SetStruct(&fn).SetReadOnly(true)
 				d.AddOkOnly().NewFullDialog(fsv).Run()
@@ -393,7 +393,7 @@ func (fv *FileView) ConfigFilesRow() {
 		s.Cursor = cursors.Pointer
 	})
 	fsv.OnSelect(func(e events.Event) {
-		fv.FileSelectAction(fsv.SelIdx)
+		fv.FileSelectAction(fsv.SelectedIndex)
 	})
 	fsv.OnDoubleClick(func(e events.Event) {
 		if fsv.ClickSelectEvent(e) {
@@ -584,9 +584,9 @@ func (fv *FileView) UpdateFiles() {
 	sv.SortSlice()
 	sv.Update()
 
-	fv.SelectedIdx = sv.SelIdx
-	if sv.SelIdx >= 0 {
-		sv.ScrollToIdx(sv.SelIdx)
+	fv.SelectedIdx = sv.SelectedIndex
+	if sv.SelectedIndex >= 0 {
+		sv.ScrollToIdx(sv.SelectedIndex)
 	}
 
 	if fv.PrevPath != fv.DirPath {
@@ -680,7 +680,7 @@ func (fv *FileView) SetSelFileAction(sel string) {
 			}
 		}
 	}
-	fv.SelectedIdx = sv.SelIdx
+	fv.SelectedIdx = sv.SelectedIndex
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile) // make sure
 	fv.Send(events.Select) // receiver needs to get selectedFile
