@@ -443,6 +443,11 @@ func hello(firstName string, lastName string, age int, likesGo bool) (greeting s
 
 func views(ts *gi.Tabs) {
 	tab := ts.NewTab("Views")
+
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Views")
+	gi.NewLabel(tab).SetText(
+		`Cogent Core provides powerful views that allow you to easily view and edit complex data types like structs, maps, and slices, allowing you to easily create widgets like lists, tables, and forms.`)
+
 	vts := gi.NewTabs(tab)
 
 	str := testStruct{
