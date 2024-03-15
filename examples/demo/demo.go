@@ -656,17 +656,17 @@ func style(ts *gi.Tabs) {
 	tab := ts.NewTab("Styles")
 
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Styles and layouts")
-	gi.NewLabel(tab).SetText("Cogent Core provides a fully customizable styling and layout system that allows you to easily control the position, size, and look of all widgets.")
+	gi.NewLabel(tab).SetText("Cogent Core provides a fully customizable styling and layout system that allows you to easily control the position, size, and look of all widgets. You can edit the style properties of the outer frame below.")
 
 	sp := gi.NewSplits(tab)
 
 	sv := giv.NewStructView(sp)
 
-	fr := gi.NewFrame(sp)
+	fr := gi.NewFrame(gi.NewFrame(sp)) // can not control layout when directly in splits
 	sv.SetStruct(&fr.Styles)
 
 	fr.Style(func(s *styles.Style) {
-		s.Background = colors.C(colors.Scheme.Primary.Base)
+		s.Background = colors.C(colors.Scheme.Select.Container)
 	})
 
 	fr.OnShow(func(e events.Event) {
@@ -676,4 +676,20 @@ func style(ts *gi.Tabs) {
 	sv.OnChange(func(e events.Event) {
 		fr.Update()
 	})
+
+	frameSizes := []mat32.Vec2{
+		{20, 100},
+		{80, 20},
+		{60, 80},
+		{40, 120},
+		{150, 100},
+	}
+
+	for _, sz := range frameSizes {
+		gi.NewFrame(fr).Style(func(s *styles.Style) {
+			s.Min.Set(units.Px(sz.X), units.Px(sz.Y))
+			s.Grow.Set(0, 0)
+			s.Background = colors.C(colors.Scheme.Primary.Base)
+		})
+	}
 }
