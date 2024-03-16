@@ -1103,7 +1103,7 @@ func (t *Switch) SetIconIndeterminate(v icons.Icon) *Switch { t.IconIndeterminat
 func (t *Switch) SetTooltip(v string) *Switch { t.Tooltip = v; return t }
 
 // SwitchesType is the [gti.Type] for [Switches]
-var SwitchesType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Switches", IDName: "switches", Doc: "Switches is a widget for containing a set of switches.\nIt can optionally enforce mutual exclusivity (i.e., Radio Buttons).\nThe buttons are all in the Parts of the widget and the Parts layout\ndetermines how they are displayed.", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Type", Doc: "the type of switches that will be made"}, {Name: "Items", Doc: "the list of items (switch labels)"}, {Name: "Tooltips", Doc: "an optional list of tooltips displayed on hover for checkbox items; the indices for tooltips correspond to those for items"}, {Name: "Mutex", Doc: "whether to make the items mutually exclusive (checking one turns off all the others)"}}, Instance: &Switches{}})
+var SwitchesType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Switches", IDName: "switches", Doc: "Switches is a widget for containing a set of switches.\nIt can optionally enforce mutual exclusivity (i.e., Radio Buttons).\nThe buttons are all in the Parts of the widget and the Parts layout\ndetermines how they are displayed.", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Type", Doc: "the type of switches that will be made"}, {Name: "Items", Doc: "Items are the items displayed to the user."}, {Name: "Mutex", Doc: "whether to make the items mutually exclusive (checking one turns off all the others)"}}, Instance: &Switches{}})
 
 // NewSwitches adds a new [Switches] with the given name to the given parent:
 // Switches is a widget for containing a set of switches.
@@ -1145,12 +1145,8 @@ func (t *Switches) AsSwitches() *Switches { return t }
 func (t *Switches) SetType(v SwitchTypes) *Switches { t.Type = v; return t }
 
 // SetItems sets the [Switches.Items]:
-// the list of items (switch labels)
-func (t *Switches) SetItems(v ...string) *Switches { t.Items = v; return t }
-
-// SetTooltips sets the [Switches.Tooltips]:
-// an optional list of tooltips displayed on hover for checkbox items; the indices for tooltips correspond to those for items
-func (t *Switches) SetTooltips(v ...string) *Switches { t.Tooltips = v; return t }
+// Items are the items displayed to the user.
+func (t *Switches) SetItems(v ...SwitchesItem) *Switches { t.Items = v; return t }
 
 // SetMutex sets the [Switches.Mutex]:
 // whether to make the items mutually exclusive (checking one turns off all the others)

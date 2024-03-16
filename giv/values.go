@@ -430,7 +430,7 @@ type BitFlagValue struct {
 func (v *BitFlagValue) Config() {
 	v.Widget.SetType(gi.SwitchChip).SetEnum(v.EnumValue())
 	v.Widget.OnChange(func(e events.Event) {
-		v.Widget.BitFlagValue(v.EnumValue())
+		v.Widget.UpdateBitFlag(v.EnumValue())
 	})
 }
 

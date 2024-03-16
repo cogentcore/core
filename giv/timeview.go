@@ -100,7 +100,7 @@ func (tv *TimeView) Config() {
 	})
 
 	if !gi.SystemSettings.Clock24 {
-		sw := gi.NewSwitches(tv, "am-pm").SetMutex(true).SetType(gi.SwitchSegmentedButton).SetItems("AM", "PM")
+		sw := gi.NewSwitches(tv, "am-pm").SetMutex(true).SetType(gi.SwitchSegmentedButton).SetItems(gi.SwitchesItem{Label: "AM"}, gi.SwitchesItem{Label: "PM"})
 		if tv.Time.Hour() < 12 {
 			tv.PM = false
 			sw.SelectItemAction(0)

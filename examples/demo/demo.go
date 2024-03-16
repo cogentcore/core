@@ -230,36 +230,50 @@ func inputs(ts *gi.Tabs) {
 
 	gi.NewSwitch(tab).SetText("Toggle")
 
-	gi.NewSwitches(tab).SetItems("Switch 1", "Switch 2", "Switch 3").
-		SetTooltips("A description for Switch 1", "A description for Switch 2", "A description for Switch 3")
+	gi.NewSwitches(tab).SetItems(
+		gi.SwitchesItem{"Switch 1", "A description for Switch 1"},
+		gi.SwitchesItem{"Switch 2", "A description for Switch 2"},
+		gi.SwitchesItem{"Switch 3", "A description for Switch 3"})
 
-	gi.NewSwitches(tab).SetType(gi.SwitchChip).SetItems("Chip 1", "Chip 2", "Chip 3").
-		SetTooltips("A description for Chip 1", "A description for Chip 2", "A description for Chip 3")
+	gi.NewSwitches(tab).SetType(gi.SwitchChip).SetItems(
+		gi.SwitchesItem{"Chip 1", "A description for Chip 1"},
+		gi.SwitchesItem{"Chip 2", "A description for Chip 2"},
+		gi.SwitchesItem{"Chip 3", "A description for Chip 3"})
 
-	gi.NewSwitches(tab).SetType(gi.SwitchCheckbox).SetItems("Checkbox 1", "Checkbox 2", "Checkbox 3").
-		SetTooltips("A description for Checkbox 1", "A description for Checkbox 2", "A description for Checkbox 3")
+	gi.NewSwitches(tab).SetType(gi.SwitchCheckbox).SetItems(
+		gi.SwitchesItem{"Checkbox 1", "A description for Checkbox 1"},
+		gi.SwitchesItem{"Checkbox 2", "A description for Checkbox 2"},
+		gi.SwitchesItem{"Checkbox 3", "A description for Checkbox 3"})
 
-	gi.NewSwitches(tab).SetType(gi.SwitchCheckbox).SetItems("Indeterminate 1", "Indeterminate 2", "Indeterminate 3").
-		SetTooltips("A description for Checkbox 1", "A description for Checkbox 2", "A description for Checkbox 3").
+	gi.NewSwitches(tab).SetType(gi.SwitchCheckbox).SetItems(
+		gi.SwitchesItem{"Indeterminate 1", "A description for Indeterminate Checkbox 1"},
+		gi.SwitchesItem{"Indeterminate 2", "A description for Indeterminate Checkbox 2"},
+		gi.SwitchesItem{"Indeterminate 3", "A description for Indeterminate Checkbox 3"}).
 		OnWidgetAdded(func(w gi.Widget) {
 			if sw, ok := w.(*gi.Switch); ok {
 				sw.SetState(true, states.Indeterminate)
 			}
 		})
 
-	gi.NewSwitches(tab).SetType(gi.SwitchRadioButton).SetMutex(true).SetItems("Radio Button 1", "Radio Button 2", "Radio Button 3").
-		SetTooltips("A description for Radio Button 1", "A description for Radio Button 2", "A description for Radio Button 3")
+	gi.NewSwitches(tab).SetType(gi.SwitchRadioButton).SetMutex(true).SetItems(
+		gi.SwitchesItem{"Radio Button 1", "A description for Radio Button 1"},
+		gi.SwitchesItem{"Radio Button 2", "A description for Radio Button 2"},
+		gi.SwitchesItem{"Radio Button 3", "A description for Radio Button 3"})
 
-	gi.NewSwitches(tab).SetType(gi.SwitchRadioButton).SetMutex(true).SetItems("Indeterminate 1", "Indeterminate 2", "Indeterminate 3").
-		SetTooltips("A description for Radio Button 1", "A description for Radio Button 2", "A description for Radio Button 3").
+	gi.NewSwitches(tab).SetType(gi.SwitchRadioButton).SetMutex(true).SetItems(
+		gi.SwitchesItem{"Indeterminate 1", "A description for Indeterminate Radio Button 1"},
+		gi.SwitchesItem{"Indeterminate 2", "A description for Indeterminate Radio Button 2"},
+		gi.SwitchesItem{"Indeterminate 3", "A description for Indeterminate Radio Button 3"}).
 		OnWidgetAdded(func(w gi.Widget) {
 			if sw, ok := w.(*gi.Switch); ok {
 				sw.SetState(true, states.Indeterminate)
 			}
 		})
 
-	gi.NewSwitches(tab).SetType(gi.SwitchSegmentedButton).SetMutex(true).SetItems("Segmented Button 1", "Segmented Button 2", "Segmented Button 3").
-		SetTooltips("A description for Segmented Button 1", "A description for Segmented Button 2", "A description for Segmented Button 3")
+	gi.NewSwitches(tab).SetType(gi.SwitchSegmentedButton).SetMutex(true).SetItems(
+		gi.SwitchesItem{"Segmented Button 1", "A description for Segmented Button 1"},
+		gi.SwitchesItem{"Segmented Button 2", "A description for Segmented Button 2"},
+		gi.SwitchesItem{"Segmented Button 3", "A description for Segmented Button 3"})
 }
 
 func sliders(ts *gi.Tabs) {

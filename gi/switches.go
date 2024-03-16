@@ -29,14 +29,21 @@ type Switches struct { //core:embedder
 	// the type of switches that will be made
 	Type SwitchTypes
 
-	// the list of items (switch labels)
-	Items []string
-
-	// an optional list of tooltips displayed on hover for checkbox items; the indices for tooltips correspond to those for items
-	Tooltips []string
+	// Items are the items displayed to the user.
+	Items []SwitchesItem
 
 	// whether to make the items mutually exclusive (checking one turns off all the others)
 	Mutex bool
+}
+
+// SwitchesItem contains the properties of one item in a [Switches].
+type SwitchesItem struct {
+
+	// Label is the label displayed to the user for this item.
+	Label string
+
+	// Tooltip is the tooltip displayed to the user for this item.
+	Tooltip string
 }
 
 func (sw *Switches) OnInit() {
@@ -165,29 +172,19 @@ func (sw *Switches) UnCheckAllBut(idx int) {
 	sw.NeedsRender()
 }
 
-// SetStrings sets the Items list from a list of string values -- if
-// setFirst then set current item to the first item in the list, and maxLen if
-// > 0 auto-sets the width of the button to the contents, with the given upper
-// limit
-func (sw *Switches) SetStrings(el []string) *Switches {
-	sz := len(el)
-	if sz == 0 {
-		return sw
+// SetStrings sets the [Switches.Items] from the given strings.
+func (sw *Switches) SetStrings(ss []string) *Switches {
+	sw.Items = make([]SwitchesItem, len(ss))
+	for i, s := range ss {
+		sw.Items[i] = SwitchesItem{Label: s}
 	}
-	sw.Items = make([]string, sz)
-	copy(sw.Items, el)
 	return sw
 }
 
-// SetEnums sets the Items list from a list of enum values
-func (sw *Switches) SetEnums(el []enums.Enum) *Switches {
-	sz := len(el)
-	if sz == 0 {
-		return sw
-	}
-	sw.Items = make([]string, sz)
-	sw.Tooltips = make([]string, sz)
-	for i, enum := range el {
+// SetEnums sets the [Switches.Items] from the given enums.
+func (sw *Switches) SetEnums(es []enums.Enum) *Switches {
+	sw.Items = make([]SwitchesItem, len(es))
+	for i, enum := range es {
 		str := ""
 		if bf, ok := enum.(enums.BitFlag); ok {
 			str = bf.BitIndexString()
@@ -195,7 +192,6 @@ func (sw *Switches) SetEnums(el []enums.Enum) *Switches {
 			str = enum.String()
 		}
 		lbl := strcase.ToSentence(str)
-		sw.Items[i] = lbl
 		desc := enum.Desc()
 		// If the documentation does not start with the transformed name, but it does
 		// start with an uppercase letter, then we assume that the first word of the
@@ -204,13 +200,13 @@ func (sw *Switches) SetEnums(el []enums.Enum) *Switches {
 		if !strings.HasPrefix(desc, str) && len(desc) > 0 && unicode.IsUpper(rune(desc[0])) {
 			str, _, _ = strings.Cut(desc, " ")
 		}
-		sw.Tooltips[i] = gti.FormatDoc(desc, str, lbl)
+		tip := gti.FormatDoc(desc, str, lbl)
+		sw.Items[i] = SwitchesItem{Label: lbl, Tooltip: tip}
 	}
 	return sw
 }
 
-// SetEnum sets the Items list from an enum value by calling [Switches.SetEnums]
-// using the result of [enums.Enum.Values] on the given value
+// SetEnum sets the [Switches.Items] from the [enums.Enum.Values] of the given enum.
 func (sw *Switches) SetEnum(enum enums.Enum) *Switches {
 	return sw.SetEnums(enum.Values())
 }
@@ -230,9 +226,9 @@ func (sw *Switches) UpdateFromBitFlag(bitflag enums.BitFlag) {
 	sw.NeedsRender()
 }
 
-// BitFlagsValue sets the given bitflag value to the value specified
-// by the switches.
-func (sw *Switches) BitFlagValue(bitflag enums.BitFlagSetter) {
+// UpdateBitFlag sets the given bitflag value to the value specified
+// by the checked state of the switches.
+func (sw *Switches) UpdateBitFlag(bitflag enums.BitFlagSetter) {
 	bitflag.SetInt64(0)
 
 	els := bitflag.Values()
@@ -257,29 +253,17 @@ func (sw *Switches) HandleSwitchEvents(swi *Switch) {
 	})
 }
 
-func (sw *Switches) ConfigItems() {
-	for i, swi := range sw.Kids {
-		s := swi.(*Switch)
-		s.SetType(sw.Type)
-		lbl := sw.Items[i]
-		s.SetText(lbl)
-		if len(sw.Tooltips) > i {
-			s.Tooltip = sw.Tooltips[i]
-		}
-	}
-}
-
-func (sw *Switches) ConfigSwitches() {
+func (sw *Switches) Config() {
 	config := ki.Config{}
-	for _, lb := range sw.Items {
-		config.Add(SwitchType, lb)
+	for _, item := range sw.Items {
+		config.Add(SwitchType, item.Label)
 	}
 	if sw.ConfigChildren(config) || sw.NeedsRebuild() {
-		sw.ConfigItems()
+		for i, swi := range sw.Kids {
+			s := swi.(*Switch)
+			item := sw.Items[i]
+			s.SetType(sw.Type).SetText(item.Label).SetTooltip(item.Tooltip)
+		}
 		sw.NeedsLayout()
 	}
-}
-
-func (sw *Switches) Config() {
-	sw.ConfigSwitches()
 }

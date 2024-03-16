@@ -378,7 +378,7 @@ func (ch *Chooser) SetEnums(es []enums.Enum) *Chooser {
 	return ch
 }
 
-// SetEnum sets the [Chooser.Items] from [enums.Enum.Values] of the given enum.
+// SetEnum sets the [Chooser.Items] from the [enums.Enum.Values] of the given enum.
 func (ch *Chooser) SetEnum(enum enums.Enum) *Chooser {
 	return ch.SetEnums(enum.Values())
 }
