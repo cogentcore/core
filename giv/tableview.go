@@ -447,11 +447,11 @@ func (tv *TableView) UpdateWidgets() {
 		tv.SelectedIndex, _ = StructSliceIdxByValue(tv.Slice, tv.SelField, tv.SelVal)
 		tv.SelField = ""
 		tv.SelVal = nil
-		tv.InitSelIdx = -1
+		tv.InitSelectedIndex = -1
 		scrollTo = tv.SelectedIndex
-	} else if tv.InitSelIdx >= 0 {
-		tv.SelectedIndex = tv.InitSelIdx
-		tv.InitSelIdx = -1
+	} else if tv.InitSelectedIndex >= 0 {
+		tv.SelectedIndex = tv.InitSelectedIndex
+		tv.InitSelectedIndex = -1
 		scrollTo = tv.SelectedIndex
 	}
 	if scrollTo >= 0 {
