@@ -30,7 +30,7 @@ func (tx *Text) RuneSpanPos(idx int) (si, ri int, ok bool) {
 		return si, ri, true
 	}
 	si = len(tx.Spans) - 1
-	ri = len(tx.Spans[si].Render) - 1
+	ri = len(tx.Spans[si].Render)
 	return si, ri, false
 }
 
@@ -45,7 +45,7 @@ func (tx *Text) SpanPosToRuneIdx(si, ri int) (idx int, ok bool) {
 			idx += len(sr.Render)
 			continue
 		}
-		if ri < len(sr.Render) {
+		if ri <= len(sr.Render) {
 			return idx + ri, true
 		}
 		return idx + (len(sr.Render)), false

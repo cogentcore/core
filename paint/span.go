@@ -55,6 +55,10 @@ type Span struct {
 	HasDeco styles.TextDecorations
 }
 
+func (sr *Span) Len() int {
+	return len(sr.Render)
+}
+
 // Init initializes a new span with given capacity
 func (sr *Span) Init(capsz int) {
 	sr.Text = make([]rune, 0, capsz)

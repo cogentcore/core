@@ -275,9 +275,6 @@ func (ed *Editor) CursorDown(steps int) {
 					ri = mxlen
 				}
 				nwc, _ := ed.Renders[pos.Ln].SpanPosToRuneIdx(si, ri)
-				if si == wln-1 && ri == mxlen {
-					nwc++
-				}
 				pos.Ch = nwc
 				gotwrap = true
 
@@ -408,8 +405,12 @@ func (ed *Editor) CursorUp(steps int) {
 			si, ri, _ := ed.WrappedLineNo(pos)
 			if si > 0 {
 				ri = ed.CursorCol
-				// fmt.Printf("up cursorcol: %v\n", ed.CursorCol)
 				nwc, _ := ed.Renders[pos.Ln].SpanPosToRuneIdx(si-1, ri)
+				if nwc == pos.Ch {
+					ed.CursorCol = 0
+					ri = 0
+					nwc, _ = ed.Renders[pos.Ln].SpanPosToRuneIdx(si-1, ri)
+				}
 				pos.Ch = nwc
 				gotwrap = true
 			}
