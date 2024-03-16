@@ -391,16 +391,15 @@ func (tv *TableView) ConfigRows() {
 			cidx := ridx + idxOff + fli
 			w := ki.NewOfType(vtyp).(gi.Widget)
 			sg.SetChild(w, cidx, valnm)
-			vv.Config(w)
+			Config(vv, w)
 			w.SetProp(SliceViewRowProp, i)
 			w.SetProp(SliceViewColProp, fli)
 
 			if !tv.IsReadOnly() {
-				vvb := vv.AsValueBase()
-				vvb.OnChange(func(e events.Event) {
+				vv.OnChange(func(e events.Event) {
 					tv.SetChanged()
 				})
-				vvb.AsWidgetBase().OnInput(tv.HandleEvent)
+				vv.AsWidgetBase().OnInput(tv.HandleEvent)
 			}
 			if i == 0 && tv.SliceSize > 0 {
 				tv.ColMaxWidths[fli] = 0
@@ -512,7 +511,7 @@ func (tv *TableView) UpdateWidgets() {
 			vv := tv.Values[vvi]
 			vv.SetStructValue(fval.Addr(), stru, &field, tv.TmpSave, vpath)
 			vv.SetReadOnly(tv.IsReadOnly())
-			vv.UpdateWidget()
+			vv.Update()
 			w.SetState(invis, states.Invisible)
 			if !invis {
 				if tv.IsReadOnly() {

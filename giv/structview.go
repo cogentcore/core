@@ -51,8 +51,10 @@ type StructView struct {
 	// the struct that we are a view onto
 	Struct any `set:"-"`
 
-	// Value for the struct itself, if this was created within value view framework -- otherwise nil
-	StructValView Value `set:"-"`
+	// StructValue is the Value for the struct itself
+	// if this was created within the Value framework.
+	// Otherwise, it is nil.
+	StructValue Value `set:"-"`
 
 	// has the value of any field changed?  updated by the ViewSig signals from fields
 	Changed bool `set:"-"`
@@ -122,7 +124,7 @@ func (sv *StructView) UpdateFields() {
 				continue
 			}
 		}
-		vv.UpdateWidget()
+		vv.Update()
 	}
 	sv.NeedsRender()
 }
@@ -131,7 +133,7 @@ func (sv *StructView) UpdateFields() {
 func (sv *StructView) UpdateField(field string) {
 	for _, vv := range sv.FieldViews {
 		if vv.Name() == field {
-			vv.UpdateWidget()
+			vv.Update()
 			break
 		}
 	}
@@ -285,8 +287,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 			s.SetTextWrap(false)
 		})
 		lbl.Tooltip = vv.Doc()
-		vvb := vv.AsValueBase()
-		vvb.ViewPath = sv.ViewPath
+		vv.AsValueData().ViewPath = sv.ViewPath
 		w, wb := gi.AsWidget(sg.Child((i * 2) + 1))
 		hasDef, readOnlyTag := StructViewFieldTags(vv, lbl, w, sv.IsReadOnly())
 		if hasDef {
@@ -322,26 +323,20 @@ func (sv *StructView) ConfigStructGrid() bool {
 			slog.Error("StructView: Widget Type is not the proper type.  This usually means there are duplicate field names (including across embedded types", "field:", lbl.Text, "is:", w.KiType().Name, "should be:", vv.WidgetType().Name)
 			break
 		}
-		if wb.Prop("configured") == nil {
-			wb.SetProp("configured", true)
-			vv.Config(w)
-			vvb.AsWidgetBase().OnInput(func(e events.Event) {
-				if tag, _ := vv.Tag("immediate"); tag == "+" {
-					wb.SendChange(e)
-					sv.SendChange(e)
-				}
-				sv.Send(events.Input, e)
-			})
-		} else {
-			vvb.Widget = w
-			vv.UpdateWidget()
-		}
+		Config(vv, w)
+		vv.AsWidgetBase().OnInput(func(e events.Event) {
+			if tag, _ := vv.Tag("immediate"); tag == "+" {
+				wb.SendChange(e)
+				sv.SendChange(e)
+			}
+			sv.Send(events.Input, e)
+		})
 		if !sv.IsReadOnly() && !readOnlyTag {
-			vvb.OnChange(func(e events.Event) {
+			vv.OnChange(func(e events.Event) {
 				sv.UpdateFieldAction()
 				// note: updating vv here is redundant -- relevant field will have already updated
 				sv.Changed = true
-				if !laser.KindIsBasic(laser.NonPtrValue(vvb.Value).Kind()) {
+				if !laser.KindIsBasic(laser.NonPtrValue(vv.Val()).Kind()) {
 					if updtr, ok := sv.Struct.(gi.Updater); ok {
 						updtr.Update()
 					}

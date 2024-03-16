@@ -13,7 +13,6 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fi"
 	"cogentcore.org/core/gi"
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
@@ -318,17 +317,82 @@ func (dv *DateView) ConfigDateGrid() {
 // TimeValue presents two text fields for editing a date and time,
 // both of which can pull up corresponding picker view dialogs.
 type TimeValue struct {
-	ValueBase
+	ValueBase[*gi.Layout]
 }
 
-func (vv *TimeValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.LayoutType
-	return vv.WidgetTyp
+func (v *TimeValue) Config() {
+	v.Widget.Style(func(s *styles.Style) {
+		s.Grow.Set(0, 0)
+	})
+
+	dt := gi.NewTextField(v.Widget, "date").SetTooltip("The date")
+	dt.SetLeadingIcon(icons.CalendarToday, func(e events.Event) {
+		d := gi.NewBody().AddTitle("Select date")
+		dv := NewDateView(d).SetTime(*v.TimeValue())
+		d.AddBottomBar(func(pw gi.Widget) {
+			d.AddCancel(pw)
+			d.AddOk(pw).OnClick(func(e events.Event) {
+				v.SetValue(dv.Time)
+				v.Update()
+			})
+		})
+		d.NewDialog(dt).Run()
+	})
+	dt.Style(func(s *styles.Style) {
+		s.Min.X.Em(8)
+		s.Max.X.Em(10)
+	})
+	dt.SetReadOnly(v.IsReadOnly())
+	dt.SetValidator(func() error {
+		d, err := time.Parse("01/02/2006", dt.Text())
+		if err != nil {
+			return err
+		}
+		tv := v.TimeValue()
+		// new date and old time
+		*tv = time.Date(d.Year(), d.Month(), d.Day(), tv.Hour(), tv.Minute(), tv.Second(), tv.Nanosecond(), tv.Location())
+		return nil
+	})
+
+	tm := gi.NewTextField(v.Widget, "time").SetTooltip("The time")
+	tm.SetLeadingIcon(icons.Schedule, func(e events.Event) {
+		d := gi.NewBody().AddTitle("Edit time")
+		tv := NewTimeView(d).SetTime(*v.TimeValue())
+		d.AddBottomBar(func(pw gi.Widget) {
+			d.AddCancel(pw)
+			d.AddOk(pw).OnClick(func(e events.Event) {
+				v.SetValue(tv.Time)
+				v.Update()
+			})
+		})
+		d.NewDialog(tm).Run()
+	})
+	tm.Style(func(s *styles.Style) {
+		s.Min.X.Em(8)
+		s.Max.X.Em(10)
+	})
+	tm.SetReadOnly(v.IsReadOnly())
+	tm.SetValidator(func() error {
+		t, err := time.Parse(gi.SystemSettings.TimeFormat(), tm.Text())
+		if err != nil {
+			return err
+		}
+		tv := v.TimeValue()
+		// old date and new time
+		*tv = time.Date(tv.Year(), tv.Month(), tv.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), tv.Location())
+		return nil
+	})
 }
 
-// TimeVal decodes Value into a *time.Time value -- also handles FileTime case
-func (vv *TimeValue) TimeVal() *time.Time {
-	tmi := laser.PtrValue(vv.Value).Interface()
+func (v *TimeValue) Update() {
+	tm := v.TimeValue()
+	v.Widget.ChildByName("date").(*gi.TextField).SetText(tm.Format("1/2/2006"))
+	v.Widget.ChildByName("time").(*gi.TextField).SetText(tm.Format(gi.SystemSettings.TimeFormat()))
+}
+
+// TimeValue decodes the value into a *time.Time value, also handling the [fi.FileTime] case.
+func (v *TimeValue) TimeValue() *time.Time {
+	tmi := laser.PtrValue(v.Value).Interface()
 	switch v := tmi.(type) {
 	case *time.Time:
 		return v
@@ -338,99 +402,57 @@ func (vv *TimeValue) TimeVal() *time.Time {
 	return nil
 }
 
-func (vv *TimeValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	fr := vv.Widget.(*gi.Layout)
-	tm := vv.TimeVal()
-
-	fr.ChildByName("date").(*gi.TextField).SetText(tm.Format("1/2/2006"))
-	fr.ChildByName("time").(*gi.TextField).SetText(tm.Format(gi.SystemSettings.TimeFormat()))
+// DurationValue represents a [time.Duration] value with a spinner and unit chooser.
+type DurationValue struct {
+	ValueBase[*gi.Layout]
 }
 
-func (vv *TimeValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	// need TmpSave
-	if vv.TmpSave == nil {
-		vv.TmpSave = vv
-	}
-	vv.Widget = w
-	vv.StdConfig(w)
-	ly := vv.Widget.(*gi.Layout)
-	if len(ly.Kids) > 0 {
-		return
-	}
-	ly.Style(func(s *styles.Style) {
+func (v *DurationValue) Config() {
+	v.Widget.Style(func(s *styles.Style) {
 		s.Grow.Set(0, 0)
 	})
 
-	dt := gi.NewTextField(ly, "date").SetTooltip("The date").
-		SetLeadingIcon(icons.CalendarToday, func(e events.Event) {
-			d := gi.NewBody().AddTitle("Select date")
-			NewDateView(d).SetTmpSave(vv.TmpSave).SetTime(*vv.TimeVal())
-			d.AddBottomBar(func(pw gi.Widget) {
-				d.AddCancel(pw)
-				d.AddOk(pw).OnClick(func(e events.Event) {
-					tt := vv.TmpSave.Val().Interface().(*time.Time)
-					vv.SetValue(tt)
-					vv.UpdateWidget()
-				})
-			})
-			d.NewDialog(w).Run()
-		})
-	dt.Style(func(s *styles.Style) {
-		s.Min.X.Em(8)
-		s.Max.X.Em(10)
-	})
-	dt.SetReadOnly(vv.IsReadOnly())
-	dt.OnChange(func(e events.Event) {
-		d, err := time.Parse("01/02/2006", dt.Text())
-		if err != nil {
-			// TODO(kai/snack)
-			slog.Error(err.Error())
-			return
-		}
-		tv := vv.TimeVal()
-		// new date and old time
-		*tv = time.Date(d.Year(), d.Month(), d.Day(), tv.Hour(), tv.Minute(), tv.Second(), tv.Nanosecond(), tv.Location())
+	var ch *gi.Chooser
+
+	sp := gi.NewSpinner(v.Widget, "value").SetTooltip("The value of time").SetStep(1).SetPageStep(10)
+	sp.OnChange(func(e events.Event) {
+		v.SetValue(sp.Value * float32(durationUnitsMap[ch.CurrentItem.Value.(string)]))
 	})
 
-	tm := gi.NewTextField(ly, "time").SetTooltip("The time").
-		SetLeadingIcon(icons.Schedule, func(e events.Event) {
-			d := gi.NewBody().AddTitle("Edit time")
-			NewTimeView(d).SetTime(*vv.TimeVal()).SetTmpSave(vv.TmpSave)
-			d.AddBottomBar(func(pw gi.Widget) {
-				d.AddCancel(pw)
-				d.AddOk(pw).OnClick(func(e events.Event) {
-					tt := laser.OnePtrValue(vv.TmpSave.Val()).Interface().(*time.Time)
-					vv.SetValue(tt)
-					vv.UpdateWidget()
-				})
-			})
-			d.NewDialog(w).Run()
-		})
-	tm.Style(func(s *styles.Style) {
-		s.Min.X.Em(8)
-		s.Max.X.Em(10)
-	})
-	tm.SetReadOnly(vv.IsReadOnly())
-	tm.OnChange(func(e events.Event) {
-		t, err := time.Parse(gi.SystemSettings.TimeFormat(), tm.Text())
-		if err != nil {
-			// TODO(kai/snack)
-			slog.Error(err.Error())
-			return
-		}
-		tv := vv.TimeVal()
-		// old date and new time
-		*tv = time.Date(tv.Year(), tv.Month(), tv.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), tv.Location())
-	})
+	units := make([]gi.ChooserItem, len(durationUnits))
+	for i, u := range durationUnits {
+		units[i] = gi.ChooserItem{Value: u}
+	}
 
-	vv.UpdateWidget()
+	ch = gi.NewChooser(v.Widget, "unit").SetTooltip("The unit of time").SetItems(units...)
+	ch.OnChange(func(e events.Event) {
+		// we update the value to fit the unit
+		npv := laser.NonPtrValue(v.Value)
+		dur := npv.Interface().(time.Duration)
+		sp.SetValue(float32(dur) / float32(durationUnitsMap[ch.CurrentItem.Value.(string)]))
+	})
+}
+
+func (v *DurationValue) Update() {
+	npv := laser.NonPtrValue(v.Value)
+	dur := npv.Interface().(time.Duration)
+	un := "seconds"
+	undur := time.Duration(0)
+	for _, u := range durationUnits {
+		v := durationUnitsMap[u]
+		if v > dur {
+			break
+		}
+		un = u
+		undur = v
+	}
+	adur := float32(dur)
+	if undur != 0 {
+		adur /= float32(undur)
+	}
+
+	v.Widget.ChildByName("value").(*gi.Spinner).SetValue(adur)
+	v.Widget.ChildByName("unit").(*gi.Chooser).SetCurrentValue(un)
 }
 
 var durationUnits = []string{
@@ -457,83 +479,4 @@ var durationUnitsMap = map[string]time.Duration{
 	"weeks":        7 * 24 * time.Hour,
 	"months":       30 * 24 * time.Hour,
 	"years":        365 * 24 * time.Hour,
-}
-
-// DurationValue presents a spinner and unit chooser for a [time.Duration]
-type DurationValue struct {
-	ValueBase
-}
-
-func (vv *DurationValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.LayoutType
-	return vv.WidgetTyp
-}
-
-func (vv *DurationValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	npv := laser.NonPtrValue(vv.Value)
-	dur := npv.Interface().(time.Duration)
-	un := "seconds"
-	undur := time.Duration(0)
-	for _, u := range durationUnits {
-		v := durationUnitsMap[u]
-		if v > dur {
-			break
-		}
-		un = u
-		undur = v
-	}
-	adur := float32(dur)
-	if undur != 0 {
-		adur /= float32(undur)
-	}
-
-	ly := vv.Widget.(*gi.Layout)
-	ly.ChildByName("value").(*gi.Spinner).SetValue(adur)
-	if ly.ChildByName("unit") == nil {
-		return
-	}
-	ly.ChildByName("unit").(*gi.Chooser).SetCurrentValue(un)
-}
-
-func (vv *DurationValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	vv.StdConfig(w)
-	ly := vv.Widget.(*gi.Layout)
-
-	if len(ly.Kids) > 0 {
-		return
-	}
-
-	ly.Style(func(s *styles.Style) {
-		s.Grow.Set(0, 0)
-	})
-
-	var ch *gi.Chooser
-
-	sp := gi.NewSpinner(ly, "value").SetTooltip("The value of time").SetStep(1).SetPageStep(10)
-	sp.OnChange(func(e events.Event) {
-		vv.SetValue(sp.Value * float32(durationUnitsMap[ch.CurrentItem.Value.(string)]))
-	})
-
-	units := make([]gi.ChooserItem, len(durationUnits))
-	for i, u := range durationUnits {
-		units[i] = gi.ChooserItem{Value: u}
-	}
-
-	ch = gi.NewChooser(ly, "unit").SetTooltip("The unit of time").SetItems(units...)
-	ch.OnChange(func(e events.Event) {
-		// we update the value to fit the unit
-		npv := laser.NonPtrValue(vv.Value)
-		dur := npv.Interface().(time.Duration)
-		sp.SetValue(float32(dur) / float32(durationUnitsMap[ch.CurrentItem.Value.(string)]))
-	})
-
-	vv.UpdateWidget()
 }

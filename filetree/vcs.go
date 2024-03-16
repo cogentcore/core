@@ -11,12 +11,10 @@ import (
 	"log/slog"
 	"strings"
 
-	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/grr"
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
@@ -409,19 +407,16 @@ func (fn *Node) UpdateAllVCS() {
 	})
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-//  VersCtrlValue
-
-// VersCtrlSystems is a list of supported Version Control Systems.
+// VersionControlSystems is a list of supported Version Control Systems.
 // These must match the VCS Types from goki/pi/vci which in turn
 // is based on masterminds/vcs
-var VersCtrlSystems = []string{"git", "svn", "bzr", "hg"}
+var VersionControlSystems = []string{"git", "svn", "bzr", "hg"}
 
-// IsVersCtrlSystem returns true if the given string matches one of the
-// standard VersCtrlSystems -- uses lowercase version of str.
-func IsVersCtrlSystem(str string) bool {
+// IsVersionControlSystem returns true if the given string matches one of the
+// standard VersionControlSystems -- uses lowercase version of str.
+func IsVersionControlSystem(str string) bool {
 	stl := strings.ToLower(str)
-	for _, vcn := range VersCtrlSystems {
+	for _, vcn := range VersionControlSystems {
 		if stl == vcn {
 			return true
 		}
@@ -429,71 +424,48 @@ func IsVersCtrlSystem(str string) bool {
 	return false
 }
 
-// VersCtrlName is the name of a version control system
-type VersCtrlName string
+// VersionControlName is the name of a version control system
+type VersionControlName string
 
-func VersCtrlNameProper(vc string) VersCtrlName {
+func VersionControlNameProper(vc string) VersionControlName {
 	vcl := strings.ToLower(vc)
-	for _, vcnp := range VersCtrlSystems {
+	for _, vcnp := range VersionControlSystems {
 		vcnpl := strings.ToLower(vcnp)
 		if strings.Compare(vcl, vcnpl) == 0 {
-			return VersCtrlName(vcnp)
+			return VersionControlName(vcnp)
 		}
 	}
 	return ""
 }
 
-// Value registers VersCtrlValue as the viewer of VersCtrlName
-func (kn VersCtrlName) Value() giv.Value {
-	return &VersCtrlValue{}
+// Value registers [VersionControlValue] as the [giv.Value] for [VersionControlName]
+func (kn VersionControlName) Value() giv.Value {
+	return &VersionControlValue{}
 }
 
-// VersCtrlValue presents an action for displaying an VersCtrlName and selecting
-// from StringPopup
-type VersCtrlValue struct {
-	giv.ValueBase
+// VersionControlValue represents a [VersionControlName] with a button.
+type VersionControlValue struct {
+	giv.ValueBase[*gi.Button]
 }
 
-func (vv *VersCtrlValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ButtonType
-	return vv.WidgetTyp
+func (v *VersionControlValue) Config() {
+	v.Widget.SetType(gi.ButtonTonal)
+	giv.ConfigDialogWidget(v, false)
 }
 
-func (vv *VersCtrlValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	bt := vv.Widget.(*gi.Button)
-	txt := laser.ToString(vv.Value.Interface())
+func (v *VersionControlValue) Update() {
+	txt := laser.ToString(v.Value.Interface())
 	if txt == "" {
 		txt = "(none)"
 	}
-	bt.SetText(txt).Update()
+	v.Widget.SetText(txt).Update()
 }
 
-func (vv *VersCtrlValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	bt := vv.Widget.(*gi.Button)
-	bt.SetType(gi.ButtonTonal)
-	bt.OnClick(func(e events.Event) {
-		if !vv.IsReadOnly() {
-			vv.OpenDialog(bt, nil)
-		}
-	})
-	vv.UpdateWidget()
-}
-
-func (vv *VersCtrlValue) HasDialog() bool { return true }
-
-func (vv *VersCtrlValue) OpenDialog(ctx gi.Widget, fun func()) {
-	cur := laser.ToString(vv.Value.Interface())
-	m := gi.NewMenuFromStrings(VersCtrlSystems, cur, func(idx int) {
-		vv.SetValue(VersCtrlSystems[idx])
-		vv.UpdateWidget()
+func (v *VersionControlValue) OpenDialog(ctx gi.Widget, fun func()) {
+	cur := laser.ToString(v.Value.Interface())
+	m := gi.NewMenuFromStrings(VersionControlSystems, cur, func(idx int) {
+		v.SetValue(VersionControlSystems[idx])
+		v.Update()
 	})
 	gi.NewMenuStage(m, ctx, ctx.ContextMenuPos(nil)).Run()
 }

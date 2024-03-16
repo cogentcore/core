@@ -5,11 +5,8 @@
 package giv
 
 import (
-	"fmt"
+	"image"
 	"image/color"
-	"log"
-	"log/slog"
-	"sort"
 
 	"golang.org/x/image/colornames"
 
@@ -18,7 +15,6 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
@@ -509,198 +505,43 @@ func (cv *ColorView) UpdateNums() {
 ////////////////////////////////////////////////////////////////////////////////////////
 //  ColorValue
 
-// ColorValue presents a StructViewInline for a struct plus a ColorView button..
+// ColorValue represents a color value with a button.
 type ColorValue struct {
-	ValueBase
-	TmpColor color.RGBA
+	ValueBase[*gi.Button]
 }
 
-// Color returns a standardized color value from whatever value is represented
-// internally
-func (vv *ColorValue) Color() (*color.RGBA, bool) {
-	ok := true
-	clri := vv.Value.Interface()
-	clr := &vv.TmpColor
-	switch c := clri.(type) {
-	case color.RGBA:
-		vv.TmpColor = c
-	case *color.RGBA:
-		clr = c
-	case **color.RGBA:
-		if c != nil {
-			// todo: not clear this ever works
-			clr = *c
-		}
-	case color.Color:
-		vv.TmpColor = colors.AsRGBA(c)
-	case *color.Color:
-		if c != nil {
-			vv.TmpColor = colors.AsRGBA(*c)
-		}
-	default:
-		ok = false
-		// todo: validation
-		slog.Error(fmt.Sprintf("ColorValue: could not get color value from type: %T val: %+v\n", c, c))
-	}
-	return clr, ok
-}
-
-// SetColor sets color value from a standard color value -- more robust than
-// plain SetValue
-func (vv *ColorValue) SetColor(clr color.RGBA) {
-	clri := vv.Value.Interface()
-	switch c := clri.(type) {
-	case color.RGBA:
-		vv.SetValue(clr)
-	case *color.RGBA:
-		vv.SetValue(clr)
-	case **color.RGBA:
-		vv.SetValue(clr)
-	case color.Color:
-		vv.SetValue((color.Color)(clr))
-	case *color.Color:
-		if c != nil {
-			vv.SetValue((color.Color)(clr))
-		}
-	default:
-		log.Printf("ColorValue: could not set color value from type: %T val: %+v\n", c, c)
-	}
-}
-
-func (vv *ColorValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ButtonType
-	return vv.WidgetTyp
-}
-
-func (vv *ColorValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	vv.CreateTempIfNotPtr()
-	bt := vv.Widget.(*gi.Button)
-	bt.ApplyStyle()
-	bt.NeedsRender()
-}
-
-func (vv *ColorValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	// need TmpSave
-	if vv.TmpSave == nil {
-		vv.TmpSave = vv
-	}
-	vv.Widget = w
-	vv.StdConfig(w)
-	bt := vv.Widget.(*gi.Button)
-	bt.SetType(gi.ButtonTonal)
-	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
-
-	bt.SetText("Edit color")
-	bt.SetIcon(icons.Colors)
-	ConfigDialogWidget(vv, bt, false)
-	bt.Style(func(s *styles.Style) {
-		clr, _ := vv.Color()
+func (v *ColorValue) Config() {
+	v.Widget.SetType(gi.ButtonTonal).SetText("Edit color").SetIcon(icons.Colors)
+	ConfigDialogWidget(v, false)
+	v.Widget.Style(func(s *styles.Style) {
 		// we need to display button as non-transparent
 		// so that it can be seen
-		dclr := colors.WithAF32(clr, 1)
+		dclr := colors.WithAF32(v.ColorValue(), 1)
 		s.Background = colors.C(dclr)
 		s.Color = colors.C(hct.ContrastColor(dclr, hct.ContrastAAA))
 	})
-	vv.UpdateWidget()
 }
 
-func (vv *ColorValue) HasDialog() bool { return true }
-func (vv *ColorValue) OpenDialog(ctx gi.Widget, fun func()) {
-	OpenValueDialog(vv, ctx, fun, "Edit color")
+func (v *ColorValue) Update() {
+	v.Widget.Update()
 }
 
-func (vv *ColorValue) ConfigDialog(d *gi.Body) (bool, func()) {
-	dclr := color.RGBA{}
-	clr, ok := vv.Color()
-	if ok && clr != nil {
-		dclr = *clr
-	}
-	NewColorView(d).SetColor(dclr).SetTmpSave(vv.TmpSave)
+// TODO(dtl): Edit color
+func (v *ColorValue) ConfigDialog(d *gi.Body) (bool, func()) {
+	cv := NewColorView(d).SetColor(v.ColorValue())
 	return true, func() {
-		cclr := laser.NonPtrValue(vv.TmpSave.Val()).Interface().(color.Color)
-		vv.SetColor(colors.AsRGBA(cclr))
-		vv.UpdateWidget()
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-//  ColorNameValue
-
-// ColorNameValue presents an button for displaying a ColorNameName and selecting
-// meshes from a ChooserDialog
-type ColorNameValue struct {
-	ValueBase
-}
-
-func (vv *ColorNameValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ButtonType
-	return vv.WidgetTyp
-}
-
-func (vv *ColorNameValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	bt := vv.Widget.(*gi.Button)
-	txt := laser.ToString(vv.Value.Interface())
-	if txt == "" {
-		txt = "(none, click to select)"
-	}
-	bt.SetText(txt)
-}
-
-func (vv *ColorNameValue) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	vv.StdConfig(w)
-	bt := vv.Widget.(*gi.Button)
-	bt.SetType(gi.ButtonTonal)
-	ConfigDialogWidget(vv, bt, false)
-	vv.UpdateWidget()
-}
-
-func (vv *ColorNameValue) HasDialog() bool { return true }
-func (vv *ColorNameValue) OpenDialog(ctx gi.Widget, fun func()) {
-	OpenValueDialog(vv, ctx, fun, "Select a color name")
-}
-
-func (vv *ColorNameValue) ConfigDialog(d *gi.Body) (bool, func()) {
-	cur := laser.ToString(vv.Value.Interface())
-	sl := make([]struct {
-		Name  string
-		Color color.RGBA
-	}, len(colornames.Map))
-	ctr := 0
-	for k, v := range colornames.Map {
-		sl[ctr].Name = k
-		sl[ctr].Color = colors.AsRGBA(v)
-		ctr++
-	}
-	sort.Slice(sl, func(i, j int) bool {
-		return sl[i].Name < sl[j].Name
-	})
-	curRow := -1
-	for i := range sl {
-		if sl[i].Name == cur {
-			curRow = i
+		if u, ok := laser.OnePtrUnderlyingValue(v.Value).Interface().(*image.Uniform); ok {
+			u.C = cv.Color.AsRGBA()
+		} else {
+			v.SetValue(cv.Color.AsRGBA())
 		}
+		v.Update()
 	}
-	si := 0
-	NewTableView(d).SetSlice(&sl).SetSelectedIndex(curRow).BindSelect(&si)
-	return true, func() {
-		if si >= 0 {
-			vv.SetValue(sl[si].Name)
-			vv.UpdateWidget()
-		}
-	}
+}
+
+// ColorValue returns a standardized color value from whatever value is represented
+// internally, or nil.
+func (v *ColorValue) ColorValue() color.RGBA {
+	c := laser.NonPtrValue(v.Value).Interface().(color.Color)
+	return colors.AsRGBA(c)
 }

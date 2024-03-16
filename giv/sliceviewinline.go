@@ -28,13 +28,13 @@ type SliceViewInline struct {
 	// SliceValue is the Value for the slice itself
 	// if this was created within the Value framework.
 	// Otherwise, it is nil.
-	SliceValue Value
+	SliceValue Value `set:"-"`
 
 	// whether the slice is actually an array -- no modifications
 	IsArray bool `set:"-"`
 
 	// whether the slice has a fixed-len flag on it
-	IsFixedLen bool
+	IsFixedLen bool `set:"-"`
 
 	// has the slice been edited?
 	Changed bool `set:"-"`
@@ -48,7 +48,7 @@ type SliceViewInline struct {
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string
 
-	// size of map when gui configed
+	// size of map when gui was configured
 	ConfigSize int `set:"-"`
 }
 
@@ -81,7 +81,7 @@ func (sv *SliceViewInline) SetStyles() {
 				if sv.SliceValue != nil {
 					newPath := ""
 					isZero := false
-					title, newPath, isZero = sv.SliceValue.AsValueBase().GetTitle()
+					title, newPath, isZero = sv.SliceValue.AsValueData().GetTitle()
 					if isZero {
 						return
 					}
@@ -162,13 +162,12 @@ func (sv *SliceViewInline) Config() {
 	config.Add(gi.ButtonType, "edit-action")
 	sv.ConfigChildren(config)
 	for i, vv := range sv.Values {
-		vvb := vv.AsValueBase()
-		vvb.OnChange(func(e events.Event) { sv.SetChanged() })
+		vv.OnChange(func(e events.Event) { sv.SetChanged() })
 		w := sv.Child(i).(gi.Widget)
 		if sv.SliceValue != nil {
 			vv.SetTags(sv.SliceValue.AllTags())
 		}
-		vv.Config(w)
+		Config(vv, w)
 		wb := w.AsWidget()
 		wb.OnInput(func(e events.Event) {
 			if tag, _ := vv.Tag("immediate"); tag == "+" {
@@ -256,7 +255,7 @@ func (sv *SliceViewInline) ContextMenu(m *gi.Scene, idx int) {
 
 func (sv *SliceViewInline) UpdateValues() {
 	for _, vv := range sv.Values {
-		vv.UpdateWidget()
+		vv.Update()
 	}
 	sv.NeedsRender()
 }

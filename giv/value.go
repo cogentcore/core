@@ -8,7 +8,6 @@ package giv
 
 import (
 	"fmt"
-	"log"
 	"log/slog"
 	"reflect"
 	"strconv"
@@ -28,77 +27,57 @@ import (
 // NewValue makes and returns a new [Value] from the given value and creates
 // the widget for it with the given parent and optional tags (only the first
 // argument is used). It is the main way that end-user code should interact
-// with giv. The given value needs to be a pointer for it to be settable.
+// with [Value]s. The given value needs to be a pointer for it to be modified.
 //
 // NewValue is not appropriate for internal code configuring
-// non-solo values (for example, in StructView), but it should be fine for
-// most end-user code.
+// non-solo values (for example, in StructView), but it should be fine
+// for end-user code.
 func NewValue(par ki.Ki, val any, tags ...string) Value {
-	v := NewSoloValue(val, tags...)
-	w := par.NewChild(v.WidgetType()).(gi.Widget)
-	v.Config(w)
-	return v
-}
-
-// NewSoloValue makes and returns a new [Value] from the given value and optional
-// tags (only the first argument is used). It does not configure the widget, so
-// most end-user code should call [NewValue] instead. It is intended for use in
-// internal code that needs standalone solo values (for example, for a custom TmpSave).
-func NewSoloValue(val any, tags ...string) Value {
 	t := ""
 	if len(tags) > 0 {
 		t = tags[0]
 	}
 	v := ToValue(val, t)
 	v.SetSoloValue(reflect.ValueOf(val))
+	w := par.NewChild(v.WidgetType()).(gi.Widget)
+	Config(v, w)
 	return v
 }
 
-// ValueFlags for Value bool state
-type ValueFlags int64 //enums:bitflag -trim-prefix Value
-
-const (
-	// ValueReadOnly flagged after first configuration
-	ValueReadOnly ValueFlags = iota
-
-	// ValueMapKey for OwnKind = Map, this value represents the Key -- otherwise the Value
-	ValueMapKey
-
-	// ValueHasSavedLabel is whether the value has a saved version of its
-	// label, which can be set either automatically or explicitly
-	ValueHasSavedLabel
-
-	// ValueHasSavedDoc is whether the value has a saved version of its
-	// documentation, which can be set either automatically or explicitly
-	ValueHasSavedDoc
-
-	// ValueDialogNewWindow indicates that the dialog should be opened with
-	// in a new window, instead of a typical FullWindow in same current window.
-	// this is triggered by holding down any modifier key while clicking on a
-	// button that opens the window.
-	ValueDialogNewWindow
-)
-
-// Value is an interface for managing the GUI representation of values
-// (e.g., fields, map values, slice values) in Views (StructView, MapView,
-// etc).  It is a GUI version of the reflect.Value, and uses that for
-// representing the underlying Value being represented graphically.
-// The different types of Value are for different Kinds of values
-// (bool, float, etc) -- which can have different Kinds of owners.
-// The ValueBase class supports all the basic fields for managing
-// the owner kinds.
+// A Value is a bridge between Go values like strings, integers, and structs
+// and GUI widgets. It allows you to represent simple and complicated values
+// of any kind with automatic, editable, and user-friendly widgets. The most
+// common pathway for making [Value]s is [NewValue].
 type Value interface {
 	fmt.Stringer
 
-	// AsValueBase gives access to the basic data fields so that the
+	// AsValueData gives access to the basic data fields so that the
 	// interface doesn't need to provide accessors for them.
-	AsValueBase() *ValueBase
+	AsValueData() *ValueData
 
-	// AsWidget returns the widget associated with the value
+	// AsWidget returns the widget associated with the value.
 	AsWidget() gi.Widget
 
-	// AsWidgetBase returns the widget base associated with the value
+	// AsWidgetBase returns the widget base associated with the value.
 	AsWidgetBase() *gi.WidgetBase
+
+	// WidgetType returns the type of widget associated with this value.
+	WidgetType() *gti.Type
+
+	// SetWidget sets the widget used to represent the value.
+	// It is typically only used internally in [Config].
+	SetWidget(w gi.Widget)
+
+	// Config configures the widget to represent the value, including setting up
+	// the OnChange event listener to set the value when the user edits it
+	// (values are always set immediately when the widget is updated).
+	// You should typically call the global [Config] function instead of this;
+	// this is the method that values implement, which is called in the global
+	// Config helper function.
+	Config()
+
+	// Update updates the widget representation to reflect the current value.
+	Update()
 
 	// Name returns the name of the value
 	Name() string
@@ -110,13 +89,13 @@ type Value interface {
 	Label() string
 
 	// SetLabel sets the label for the value
-	SetLabel(label string) *ValueBase
+	SetLabel(label string) *ValueData
 
 	// Doc returns the documentation for the value
 	Doc() string
 
 	// SetDoc sets the documentation for the value
-	SetDoc(doc string) *ValueBase
+	SetDoc(doc string) *ValueData
 
 	// Is checks if flag is set, using atomic, safe for concurrent access
 	Is(f enums.BitFlag) bool
@@ -155,42 +134,6 @@ type Value interface {
 
 	// SetReadOnly marks this value as ReadOnly or not
 	SetReadOnly(ro bool)
-
-	// WidgetType returns an appropriate type of widget to represent the
-	// current value.
-	WidgetType() *gti.Type
-
-	// UpdateWidget updates the widget representation to reflect the current
-	// value.  Must first check for a nil widget -- can be called in a
-	// no-widget context (e.g., for single-argument values with actions).
-	UpdateWidget()
-
-	// Config configures a widget of WidgetType for representing the
-	// value, including setting up the OnChange event listener to set the value
-	// when the user edits it (values are always set immediately when the
-	// widget is updated).  Note: use OnFinal(events.Change, ...) to ensure that
-	// any other change modifiers have had a chance to intervene first.
-	Config(w gi.Widget)
-
-	// HasDialog returns true if this value has an associated Dialog,
-	// e.g., for Filename, StructView, SliceView, etc.
-	// The OpenDialog method will open the dialog.
-	HasDialog() bool
-
-	// OpenDialog opens the dialog for this Value, if [HasDialog] is true.
-	// Given function closure is called for the Ok action, after value
-	// has been updated, if using the dialog as part of another control flow.
-	// Note that some cases just pop up a menu chooser, not a full dialog.
-	OpenDialog(ctx gi.Widget, fun func())
-
-	// ConfigDialog adds content to given dialog body for this value,
-	// for Values with [HasDialog] == true, that use full dialog scenes.
-	// The bool return is false if the value does not use this method
-	// (e.g., for simple menu choosers).
-	// The [OpenValueDialog] function is used to construct and run the dialog.
-	// The returned function is an optional closure to be called
-	// in the Ok case, for cases where extra logic is required.
-	ConfigDialog(d *gi.Body) (bool, func())
 
 	// Val returns the reflect.Value representation for this item.
 	Val() reflect.Value
@@ -238,6 +181,274 @@ type Value interface {
 	SaveTmp()
 }
 
+// ConfigDialoger is an optional interface that [Value]s may implement to
+// indicate that they have a dialog associated with them that is configured
+// with the ConfigDialog method. The dialog body itself is constructed and run
+// using [OpenDialog].
+type ConfigDialoger interface {
+	// ConfigDialog adds content to the given dialog body for this value.
+	// The bool return is false if the value does not use this method
+	// (e.g., for simple menu choosers).
+	// The returned function is an optional closure to be called
+	// in the Ok case, for cases where extra logic is required.
+	ConfigDialog(d *gi.Body) (bool, func())
+}
+
+// OpenDialoger is an optional interface that [Value]s may implement to
+// indicate that they have a dialog associated with them that is created,
+// configured, and run with the OpenDialog method. This method typically
+// calls a separate ConfigDialog method. If the [Value] does not implement
+// [OpenDialoger] but does implement [ConfigDialoger], then [OpenDialogBase]
+// will be used to create and run the dialog, and [ConfigDialoger.ConfigDialog]
+// will be used to configure it.
+type OpenDialoger interface {
+	// OpenDialog opens the dialog for this Value.
+	// Given function closure is called for the Ok action, after value
+	// has been updated, if using the dialog as part of another control flow.
+	// Note that some cases just pop up a menu chooser, not a full dialog.
+	OpenDialog(ctx gi.Widget, fun func())
+}
+
+// ValueBase is the base type that all [Value] objects extend. It contains both
+// [ValueData] and a generically parameterized [gi.Widget].
+type ValueBase[W gi.Widget] struct {
+	ValueData
+
+	// Widget is the GUI widget used to display and edit the value in the GUI.
+	Widget W
+}
+
+func (v *ValueBase[W]) AsWidget() gi.Widget {
+	return v.Widget
+}
+
+func (v *ValueBase[W]) AsWidgetBase() *gi.WidgetBase {
+	return v.Widget.AsWidget()
+}
+
+func (v *ValueBase[W]) WidgetType() *gti.Type {
+	var w W
+	return w.KiType()
+}
+
+func (v *ValueBase[W]) SetWidget(w gi.Widget) {
+	v.Widget = w.(W)
+}
+
+// Config configures the given [gi.Widget] to represent the given [Value].
+func Config(v Value, w gi.Widget) {
+	if w == v.AsWidget() {
+		v.Update()
+		return
+	}
+	v.SetWidget(w)
+	ConfigBase(v, w)
+	v.Config()
+	v.Update()
+}
+
+// ConfigBase does the base configuration for the given [gi.Widget]
+// to represent the given [Value].
+func ConfigBase(v Value, w gi.Widget) {
+	w.AsWidget().SetTooltip(v.Doc())
+	w.SetState(v.IsReadOnly(), states.ReadOnly) // do right away
+	w.Style(func(s *styles.Style) {
+		s.SetState(v.IsReadOnly(), states.ReadOnly) // and in style
+		if tv, ok := v.Tag("width"); ok {
+			v, err := laser.ToFloat32(tv)
+			if err == nil {
+				s.Min.X.Ch(v)
+			}
+		}
+		if tv, ok := v.Tag("max-width"); ok {
+			v, err := laser.ToFloat32(tv)
+			if err == nil {
+				if v < 0 {
+					s.Grow.X = 1 // support legacy
+				} else {
+					s.Max.X.Ch(v)
+				}
+			}
+		}
+		if tv, ok := v.Tag("height"); ok {
+			v, err := laser.ToFloat32(tv)
+			if err == nil {
+				s.Min.Y.Em(v)
+			}
+		}
+		if tv, ok := v.Tag("max-height"); ok {
+			v, err := laser.ToFloat32(tv)
+			if err == nil {
+				if v < 0 {
+					s.Grow.Y = 1
+				} else {
+					s.Max.Y.Em(v)
+				}
+			}
+		}
+		if tv, ok := v.Tag("grow"); ok {
+			v, err := laser.ToFloat32(tv)
+			if err == nil {
+				s.Grow.X = v
+			}
+		}
+		if tv, ok := v.Tag("grow-y"); ok {
+			v, err := laser.ToFloat32(tv)
+			if err == nil {
+				s.Grow.Y = v
+			}
+		}
+	})
+}
+
+// OpenDialog opens any applicable dialog for the given value in the
+// context of the given widget. It first tries [OpenDialoger], then
+// [ConfigDialoger] with [OpenDialogBase]. If both of those fail, it
+// returns false.
+func OpenDialog(v Value, ctx gi.Widget, fun func()) bool {
+	if od, ok := v.(OpenDialoger); ok {
+		od.OpenDialog(ctx, fun)
+		return true
+	}
+	if cd, ok := v.(ConfigDialoger); ok {
+		OpenDialogBase(v, cd, ctx, fun)
+		return true
+	}
+	return false
+}
+
+// OpenDialogBase is a helper for [OpenDialog] for cases that
+// do not implement [OpenDialoger] but do implement [ConfigDialoger]
+// to configure the dialog contents.
+func OpenDialogBase(v Value, cd ConfigDialoger, ctx gi.Widget, fun func()) {
+	vd := v.AsValueData()
+	title, _, _ := vd.GetTitle()
+	opv := laser.OnePtrUnderlyingValue(vd.Value)
+	if !opv.IsValid() {
+		return
+	}
+	obj := opv.Interface()
+	if gi.RecycleDialog(obj) {
+		return
+	}
+	d := gi.NewBody().AddTitle(title).AddText(v.Doc())
+	ok, okfun := cd.ConfigDialog(d)
+	if !ok {
+		return
+	}
+
+	// if we don't have anything specific for ok events,
+	// we just register an OnClose event and skip the
+	// OK and Cancel buttons
+	if okfun == nil && fun == nil {
+		d.OnClose(func(e events.Event) {
+			v.Update()
+			v.SendChange()
+		})
+	} else {
+		// otherwise, we have to make the bottom bar
+		d.AddBottomBar(func(pw gi.Widget) {
+			d.AddCancel(pw)
+			d.AddOk(pw).OnClick(func(e events.Event) {
+				if okfun != nil {
+					okfun()
+				}
+				v.Update()
+				v.SendChange()
+				if fun != nil {
+					fun()
+				}
+			})
+		})
+	}
+
+	ds := d.NewFullDialog(ctx)
+	if v.Is(ValueDialogNewWindow) {
+		ds.SetNewWindow(true)
+	}
+	ds.Run()
+}
+
+func (v *ValueBase[W]) SetValue(val any) bool {
+	if v.IsReadOnly() {
+		return false
+	}
+	var err error
+	wasSet := false
+	if v.Owner != nil {
+		switch v.OwnKind {
+		case reflect.Struct:
+			err = laser.SetRobust(laser.PtrValue(v.Value).Interface(), val)
+			wasSet = true
+		case reflect.Map:
+			wasSet, err = v.SetValueMap(val)
+		case reflect.Slice:
+			err = laser.SetRobust(laser.PtrValue(v.Value).Interface(), val)
+		}
+		if updtr, ok := v.Owner.(gi.Updater); ok {
+			// fmt.Printf("updating: %v\n", updtr)
+			updtr.Update()
+		}
+	} else {
+		err = laser.SetRobust(laser.PtrValue(v.Value).Interface(), val)
+		wasSet = true
+	}
+	if wasSet {
+		v.SaveTmp()
+	}
+	// fmt.Printf("value view: %T sending for setting val %v\n", v.This(), val)
+	v.SendChange()
+	if err != nil {
+		// todo: snackbar for error?
+		slog.Error("giv.SetValue error", "type", v.Value.Type(), "err", err)
+	}
+	return wasSet
+}
+
+func (v *ValueBase[W]) SetValueMap(val any) (bool, error) {
+	ov := laser.NonPtrValue(reflect.ValueOf(v.Owner))
+	wasSet := false
+	var err error
+	if v.Is(ValueMapKey) {
+		nv := laser.NonPtrValue(reflect.ValueOf(val)) // new key value
+		kv := laser.NonPtrValue(v.Value)
+		cv := ov.MapIndex(kv)    // get current value
+		curnv := ov.MapIndex(nv) // see if new value there already
+		if val != kv.Interface() && curnv.IsValid() && !curnv.IsZero() {
+			// actually new key and current exists
+			d := gi.NewBody().AddTitle("Map key conflict").
+				AddText(fmt.Sprintf("The map key value: %v already exists in the map; are you sure you want to overwrite the current value?", val))
+			d.AddBottomBar(func(pw gi.Widget) {
+				d.AddCancel(pw).SetText("Cancel change")
+				d.AddOk(pw).SetText("Overwrite").OnClick(func(e events.Event) {
+					cv := ov.MapIndex(kv)               // get current value
+					ov.SetMapIndex(kv, reflect.Value{}) // delete old key
+					ov.SetMapIndex(nv, cv)              // set new key to current value
+					v.Value = nv                        // update value to new key
+					v.SaveTmp()
+					v.SendChange()
+				})
+			})
+			d.NewDialog(v.Widget).Run()
+			return false, nil // abort this action right now
+		}
+		ov.SetMapIndex(kv, reflect.Value{}) // delete old key
+		ov.SetMapIndex(nv, cv)              // set new key to current value
+		v.Value = nv                        // update value to new key
+		wasSet = true
+	} else {
+		v.Value = laser.NonPtrValue(reflect.ValueOf(val))
+		if v.KeyView != nil {
+			ck := laser.NonPtrValue(v.KeyView.Val())                  // current key value
+			wasSet = laser.SetMapRobust(ov, ck, reflect.ValueOf(val)) // todo: error
+		} else { // static, key not editable?
+			wasSet = laser.SetMapRobust(ov, laser.NonPtrValue(reflect.ValueOf(v.Key)), v.Value) // todo: error
+		}
+		// wasSet = true
+	}
+	return wasSet, err
+}
+
 // note: could have a more efficient way to represent the different owner type
 // data (Key vs. Field vs. Idx), instead of just having everything for
 // everything.  However, Value itself gets customized for different target
@@ -246,11 +457,10 @@ type Value interface {
 // that introduces another struct alloc and pointer -- not clear if it is
 // worth it..
 
-// ValueBase provides the basis for implementations of the Value
-// interface, representing values in the interface -- it implements a generic
-// TextField representation of the string value, and provides the generic
-// fallback for everything that doesn't provide a specific Valuer type.
-type ValueBase struct {
+// ValueData contains the base data common to all [Value] objects.
+// [Value] objects should extend [ValueBase], not ValueData.
+type ValueData struct {
+
 	// Nm is locally-unique name of Value
 	Nm string
 
@@ -291,12 +501,6 @@ type ValueBase struct {
 	// if Owner is a slice, this is the index for the value in the slice
 	Idx int `set:"-" edit:"-"`
 
-	// type of widget to create -- cached during WidgetType method -- chosen based on the Value type and reflect.Value type -- see Valuer interface
-	WidgetTyp *gti.Type `set:"-" edit:"-"`
-
-	// the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during Config
-	Widget gi.Widget `set:"-" edit:"-"`
-
 	// Listeners are event listener functions for processing events on this widget.
 	// type specific Listeners are added in OnInit when the widget is initialized.
 	Listeners events.Listeners `set:"-" view:"-"`
@@ -305,99 +509,116 @@ type ValueBase struct {
 	TmpSave Value `set:"-" view:"-"`
 }
 
-func (vv *ValueBase) AsValueBase() *ValueBase {
-	return vv
+// ValueFlags for Value bool state
+type ValueFlags int64 //enums:bitflag -trim-prefix Value
+
+const (
+	// ValueReadOnly flagged after first configuration
+	ValueReadOnly ValueFlags = iota
+
+	// ValueMapKey for OwnKind = Map, this value represents the Key -- otherwise the Value
+	ValueMapKey
+
+	// ValueHasSavedLabel is whether the value has a saved version of its
+	// label, which can be set either automatically or explicitly
+	ValueHasSavedLabel
+
+	// ValueHasSavedDoc is whether the value has a saved version of its
+	// documentation, which can be set either automatically or explicitly
+	ValueHasSavedDoc
+
+	// ValueDialogNewWindow indicates that the dialog should be opened with
+	// in a new window, instead of a typical FullWindow in same current window.
+	// this is triggered by holding down any modifier key while clicking on a
+	// button that opens the window.
+	ValueDialogNewWindow
+)
+
+func (v *ValueData) AsValueData() *ValueData {
+	return v
 }
 
-func (vv *ValueBase) AsWidget() gi.Widget {
-	return vv.Widget
+func (v *ValueData) Name() string {
+	return v.Nm
 }
 
-func (vv *ValueBase) AsWidgetBase() *gi.WidgetBase {
-	return vv.Widget.AsWidget()
+func (v *ValueData) SetName(name string) {
+	v.Nm = name
 }
 
-func (vv *ValueBase) Name() string {
-	return vv.Nm
-}
-
-func (vv *ValueBase) SetName(name string) {
-	vv.Nm = name
-}
-
-func (vv *ValueBase) Label() string {
-	if vv.Is(ValueHasSavedLabel) {
-		return vv.SavedLabel
+func (v *ValueData) Label() string {
+	if v.Is(ValueHasSavedLabel) {
+		return v.SavedLabel
 	}
 
 	lbl := ""
-	lbltag, has := vv.Tag("label")
+	lbltag, has := v.Tag("label")
 
 	// whether to sentence case
 	sc := true
-	if vv.Owner != nil && len(NoSentenceCaseFor) > 0 {
-		sc = !NoSentenceCaseForType(gti.TypeNameObj(vv.Owner))
+	if v.Owner != nil && len(NoSentenceCaseFor) > 0 {
+		sc = !NoSentenceCaseForType(gti.TypeNameObj(v.Owner))
 	}
 
 	switch {
 	case has:
 		lbl = lbltag
-	case vv.Field != nil:
-		lbl = vv.Field.Name
+	case v.Field != nil:
+		lbl = v.Field.Name
 		if sc {
 			lbl = strcase.ToSentence(lbl)
 		}
 	default:
-		lbl = vv.Nm
+		lbl = v.Nm
 		if sc {
 			lbl = strcase.ToSentence(lbl)
 		}
 	}
 
-	vv.SavedLabel = lbl
-	vv.SetFlag(true, ValueHasSavedLabel)
-	return vv.SavedLabel
+	v.SavedLabel = lbl
+	v.SetFlag(true, ValueHasSavedLabel)
+	return v.SavedLabel
 }
 
-func (vv *ValueBase) SetLabel(label string) *ValueBase {
-	vv.SavedLabel = label
-	vv.SetFlag(true, ValueHasSavedLabel)
-	return vv
+func (v *ValueData) SetLabel(label string) *ValueData {
+	v.SavedLabel = label
+	v.SetFlag(true, ValueHasSavedLabel)
+	return v
 }
 
-func (vv *ValueBase) Doc() string {
-	if vv.Is(ValueHasSavedDoc) {
-		return vv.SavedDoc
+func (v *ValueData) Doc() string {
+	if v.Is(ValueHasSavedDoc) {
+		return v.SavedDoc
 	}
-	doc, _ := gti.GetDoc(vv.Value, reflect.ValueOf(vv.Owner), vv.Field, vv.Label())
-	vv.SavedDoc = doc
-	vv.SetFlag(true, ValueHasSavedDoc)
-	return vv.SavedDoc
+	doc, _ := gti.GetDoc(v.Value, reflect.ValueOf(v.Owner), v.Field, v.Label())
+	v.SavedDoc = doc
+	v.SetFlag(true, ValueHasSavedDoc)
+	return v.SavedDoc
 }
 
-func (vv *ValueBase) SetDoc(doc string) *ValueBase {
-	vv.SavedDoc = doc
-	vv.SetFlag(true, ValueHasSavedDoc)
-	return vv
+func (v *ValueData) SetDoc(doc string) *ValueData {
+	v.SavedDoc = doc
+	v.SetFlag(true, ValueHasSavedDoc)
+	return v
 }
 
-func (vv *ValueBase) String() string {
-	return vv.Nm + ": " + vv.Value.String()
+func (v *ValueData) String() string {
+	return v.Nm + ": " + v.Value.String()
 }
 
 // Is checks if flag is set, using atomic, safe for concurrent access
-func (vv *ValueBase) Is(f enums.BitFlag) bool {
-	return vv.Flags.HasFlag(f)
+func (v *ValueData) Is(f enums.BitFlag) bool {
+	return v.Flags.HasFlag(f)
 }
 
 // SetFlag sets the given flag(s) to given state
 // using atomic, safe for concurrent access
-func (vv *ValueBase) SetFlag(on bool, f ...enums.BitFlag) {
-	vv.Flags.SetFlag(on, f...)
+func (v *ValueData) SetFlag(on bool, f ...enums.BitFlag) {
+	v.Flags.SetFlag(on, f...)
 }
 
-func (vv *ValueBase) SetReadOnly(ro bool) {
-	vv.SetFlag(ro, ValueReadOnly)
+func (v *ValueData) SetReadOnly(ro bool) {
+	v.SetFlag(ro, ValueReadOnly)
 }
 
 // JoinViewPath returns a view path composed of two elements,
@@ -416,64 +637,64 @@ func JoinViewPath(a, b string) string {
 	}
 }
 
-func (vv *ValueBase) SetStructValue(val reflect.Value, owner any, field *reflect.StructField, tmpSave Value, viewPath string) {
-	vv.OwnKind = reflect.Struct
-	vv.Value = val
-	vv.Owner = owner
-	vv.Field = field
-	vv.TmpSave = tmpSave
-	vv.ViewPath = viewPath
-	vv.SetName(field.Name)
+func (v *ValueData) SetStructValue(val reflect.Value, owner any, field *reflect.StructField, tmpSave Value, viewPath string) {
+	v.OwnKind = reflect.Struct
+	v.Value = val
+	v.Owner = owner
+	v.Field = field
+	v.TmpSave = tmpSave
+	v.ViewPath = viewPath
+	v.SetName(field.Name)
 }
 
-func (vv *ValueBase) SetMapKey(key reflect.Value, owner any, tmpSave Value) {
-	vv.OwnKind = reflect.Map
-	vv.SetFlag(true, ValueMapKey)
-	vv.Value = key
-	vv.Owner = owner
-	vv.TmpSave = tmpSave
-	vv.SetName(laser.ToString(key.Interface()))
+func (v *ValueData) SetMapKey(key reflect.Value, owner any, tmpSave Value) {
+	v.OwnKind = reflect.Map
+	v.SetFlag(true, ValueMapKey)
+	v.Value = key
+	v.Owner = owner
+	v.TmpSave = tmpSave
+	v.SetName(laser.ToString(key.Interface()))
 }
 
-func (vv *ValueBase) SetMapValue(val reflect.Value, owner any, key any, keyView Value, tmpSave Value, viewPath string) {
-	vv.OwnKind = reflect.Map
-	vv.Value = val
-	vv.Owner = owner
-	vv.Key = key
-	vv.KeyView = keyView
-	vv.TmpSave = tmpSave
+func (v *ValueData) SetMapValue(val reflect.Value, owner any, key any, keyView Value, tmpSave Value, viewPath string) {
+	v.OwnKind = reflect.Map
+	v.Value = val
+	v.Owner = owner
+	v.Key = key
+	v.KeyView = keyView
+	v.TmpSave = tmpSave
 	keystr := laser.ToString(key)
-	vv.ViewPath = JoinViewPath(viewPath, keystr)
-	vv.SetName(keystr)
+	v.ViewPath = JoinViewPath(viewPath, keystr)
+	v.SetName(keystr)
 }
 
-func (vv *ValueBase) SetSliceValue(val reflect.Value, owner any, idx int, tmpSave Value, viewPath string) {
-	vv.OwnKind = reflect.Slice
-	vv.Value = val
-	vv.Owner = owner
-	vv.Idx = idx
-	vv.TmpSave = tmpSave
+func (v *ValueData) SetSliceValue(val reflect.Value, owner any, idx int, tmpSave Value, viewPath string) {
+	v.OwnKind = reflect.Slice
+	v.Value = val
+	v.Owner = owner
+	v.Idx = idx
+	v.TmpSave = tmpSave
 	idxstr := fmt.Sprintf("%v", idx)
 	vpath := viewPath + "[" + idxstr + "]"
-	if vv.Owner != nil {
-		if lblr, ok := vv.Owner.(gi.SliceLabeler); ok {
+	if v.Owner != nil {
+		if lblr, ok := v.Owner.(gi.SliceLabeler); ok {
 			slbl := lblr.ElemLabel(idx)
 			if slbl != "" {
 				vpath = JoinViewPath(viewPath, slbl)
 			}
 		}
 	}
-	vv.ViewPath = vpath
-	vv.SetName(idxstr)
+	v.ViewPath = vpath
+	v.SetName(idxstr)
 }
 
 // SetSoloValue sets the value for a singleton standalone value
 // (e.g., for arg values).
-func (vv *ValueBase) SetSoloValue(val reflect.Value) {
-	vv.OwnKind = reflect.Invalid
+func (v *ValueData) SetSoloValue(val reflect.Value) {
+	v.OwnKind = reflect.Invalid
 	// we must ensure that it is a pointer value so that it has
 	// an underlying value that updates when changes occur
-	vv.Value = laser.PtrValue(val)
+	v.Value = laser.PtrValue(val)
 }
 
 // SetSoloValueIface sets the value for a singleton standalone value
@@ -481,145 +702,54 @@ func (vv *ValueBase) SetSoloValue(val reflect.Value) {
 // for now, this cannot be a method because gopy doesn't find the
 // key comment below that tells it what to do with the interface
 // gopy:interface=handle
-func SetSoloValueIface(vv *ValueBase, val any) {
-	vv.OwnKind = reflect.Invalid
-	vv.Value = reflect.ValueOf(val)
+func SetSoloValueIface(v *ValueData, val any) {
+	v.OwnKind = reflect.Invalid
+	v.Value = reflect.ValueOf(val)
 }
 
 // OwnerKind we have this one accessor b/c it is more useful for outside consumers vs. internal usage
-func (vv *ValueBase) OwnerKind() reflect.Kind {
-	return vv.OwnKind
+func (v *ValueData) OwnerKind() reflect.Kind {
+	return v.OwnKind
 }
 
-func (vv *ValueBase) IsReadOnly() bool {
-	if vv.Is(ValueReadOnly) {
+func (v *ValueData) IsReadOnly() bool {
+	if v.Is(ValueReadOnly) {
 		return true
 	}
-	if vv.OwnKind == reflect.Struct {
-		if et, has := vv.Tag("edit"); has && et == "-" {
-			vv.SetReadOnly(true) // cache
+	if v.OwnKind == reflect.Struct {
+		if et, has := v.Tag("edit"); has && et == "-" {
+			v.SetReadOnly(true) // cache
 			return true
 		}
 	}
-	npv := laser.NonPtrValue(vv.Value)
+	npv := laser.NonPtrValue(v.Value)
 	if npv.Kind() == reflect.Interface && npv.IsZero() {
-		vv.SetReadOnly(true) // cache
+		v.SetReadOnly(true) // cache
 		return true
 	}
 	return false
 }
 
-func (vv *ValueBase) HasDialog() bool {
-	return false
-}
-
-func (vv *ValueBase) OpenDialog(ctx gi.Widget, fun func()) {
-}
-
-func (vv *ValueBase) ConfigDialog(d *gi.Body) (bool, func()) {
-	return false, nil
-}
-
-func (vv *ValueBase) Val() reflect.Value {
-	return vv.Value
-}
-
-func (vv *ValueBase) SetValue(val any) bool {
-	if vv.IsReadOnly() {
-		return false
-	}
-	var err error
-	wasSet := false
-	if vv.Owner != nil {
-		switch vv.OwnKind {
-		case reflect.Struct:
-			err = laser.SetRobust(laser.PtrValue(vv.Value).Interface(), val)
-			wasSet = true
-		case reflect.Map:
-			wasSet, err = vv.SetValueMap(val)
-		case reflect.Slice:
-			err = laser.SetRobust(laser.PtrValue(vv.Value).Interface(), val)
-		}
-		if updtr, ok := vv.Owner.(gi.Updater); ok {
-			// fmt.Printf("updating: %v\n", updtr)
-			updtr.Update()
-		}
-	} else {
-		err = laser.SetRobust(laser.PtrValue(vv.Value).Interface(), val)
-		wasSet = true
-	}
-	if wasSet {
-		vv.SaveTmp()
-	}
-	// fmt.Printf("value view: %T sending for setting val %v\n", vv.This(), val)
-	vv.SendChange()
-	if err != nil {
-		// todo: snackbar for error?
-		slog.Error("giv.SetValue error", "type", vv.Value.Type(), "err", err)
-	}
-	return wasSet
-}
-
-func (vv *ValueBase) SetValueMap(val any) (bool, error) {
-	ov := laser.NonPtrValue(reflect.ValueOf(vv.Owner))
-	wasSet := false
-	var err error
-	if vv.Is(ValueMapKey) {
-		nv := laser.NonPtrValue(reflect.ValueOf(val)) // new key value
-		kv := laser.NonPtrValue(vv.Value)
-		cv := ov.MapIndex(kv)    // get current value
-		curnv := ov.MapIndex(nv) // see if new value there already
-		if val != kv.Interface() && curnv.IsValid() && !curnv.IsZero() {
-			// actually new key and current exists
-			d := gi.NewBody().AddTitle("Map Key Conflict").
-				AddText(fmt.Sprintf("The map key value: %v already exists in the map; are you sure you want to overwrite the current value?", val))
-			d.AddBottomBar(func(pw gi.Widget) {
-				d.AddCancel(pw).SetText("Cancel change")
-				d.AddOk(pw).SetText("Overwrite").OnClick(func(e events.Event) {
-					cv := ov.MapIndex(kv)               // get current value
-					ov.SetMapIndex(kv, reflect.Value{}) // delete old key
-					ov.SetMapIndex(nv, cv)              // set new key to current value
-					vv.Value = nv                       // update value to new key
-					vv.SaveTmp()
-					vv.SendChange()
-				})
-			})
-			d.NewDialog(vv.Widget).Run()
-			return false, nil // abort this action right now
-		}
-		ov.SetMapIndex(kv, reflect.Value{}) // delete old key
-		ov.SetMapIndex(nv, cv)              // set new key to current value
-		vv.Value = nv                       // update value to new key
-		wasSet = true
-	} else {
-		vv.Value = laser.NonPtrValue(reflect.ValueOf(val))
-		if vv.KeyView != nil {
-			ck := laser.NonPtrValue(vv.KeyView.Val())                 // current key value
-			wasSet = laser.SetMapRobust(ov, ck, reflect.ValueOf(val)) // todo: error
-		} else { // static, key not editable?
-			wasSet = laser.SetMapRobust(ov, laser.NonPtrValue(reflect.ValueOf(vv.Key)), vv.Value) // todo: error
-		}
-		// wasSet = true
-	}
-	return wasSet, err
+func (v *ValueData) Val() reflect.Value {
+	return v.Value
 }
 
 // OnChange registers given listener function for Change events on Value.
 // This is the primary notification event for all Value elements.
-func (vv *ValueBase) OnChange(fun func(e events.Event)) {
-	vv.On(events.Change, fun)
+func (v *ValueData) OnChange(fun func(e events.Event)) {
+	v.On(events.Change, fun)
 }
 
 // On adds an event listener function for the given event type
-func (vv *ValueBase) On(etype events.Types, fun func(e events.Event)) {
-	vv.Listeners.Add(etype, fun)
+func (v *ValueData) On(etype events.Types, fun func(e events.Event)) {
+	v.Listeners.Add(etype, fun)
 }
 
 // SendChange sends events.Change event to all listeners registered on this view.
 // This is the primary notification event for all Value elements. It takes
 // an optional original event to base the event on.
-func (vv *ValueBase) SendChange(orig ...events.Event) {
-	vv.Send(events.Change, orig...)
+func (v *ValueData) SendChange(orig ...events.Event) {
+	v.Send(events.Change, orig...)
 }
 
 // Send sends an NEW event of given type to this widget,
@@ -628,7 +758,7 @@ func (vv *ValueBase) SendChange(orig ...events.Event) {
 // Do NOT send an existing event using this method if you
 // want the Handled state to persist throughout the call chain;
 // call HandleEvent directly for any existing events.
-func (vv *ValueBase) Send(typ events.Types, orig ...events.Event) {
+func (v *ValueData) Send(typ events.Types, orig ...events.Event) {
 	var e events.Event
 	if len(orig) > 0 && orig[0] != nil {
 		e = orig[0].Clone()
@@ -636,98 +766,82 @@ func (vv *ValueBase) Send(typ events.Types, orig ...events.Event) {
 	} else {
 		e = &events.Base{Typ: typ}
 	}
-	vv.HandleEvent(e)
+	v.HandleEvent(e)
 }
 
 // HandleEvent sends the given event to all Listeners for that event type.
 // It also checks if the State has changed and calls ApplyStyle if so.
 // If more significant Config level changes are needed due to an event,
 // the event handler must do this itself.
-func (vv *ValueBase) HandleEvent(ev events.Event) {
+func (v *ValueData) HandleEvent(ev events.Event) {
 	if gi.DebugSettings.EventTrace {
-		fmt.Println("Event to Value:", vv.String(), ev.String())
+		fmt.Println("Event to Value:", v.String(), ev.String())
 	}
-	vv.Listeners.Call(ev)
+	v.Listeners.Call(ev)
 }
 
-func (vv *ValueBase) SaveTmp() {
-	if vv.TmpSave == nil {
+func (v *ValueData) SaveTmp() {
+	if v.TmpSave == nil {
 		return
 	}
-	if vv.TmpSave.AsValueBase() == vv {
+	if v.TmpSave.AsValueData() == v {
 		// if we are a map value, of a struct value, we save our value
-		if vv.Owner != nil && vv.OwnKind == reflect.Map && !vv.Is(ValueMapKey) {
-			if laser.NonPtrValue(vv.Value).Kind() == reflect.Struct {
-				ov := laser.NonPtrValue(reflect.ValueOf(vv.Owner))
-				if vv.KeyView != nil {
-					ck := laser.NonPtrValue(vv.KeyView.Val())
-					laser.SetMapRobust(ov, ck, laser.NonPtrValue(vv.Value))
+		if v.Owner != nil && v.OwnKind == reflect.Map && !v.Is(ValueMapKey) {
+			if laser.NonPtrValue(v.Value).Kind() == reflect.Struct {
+				ov := laser.NonPtrValue(reflect.ValueOf(v.Owner))
+				if v.KeyView != nil {
+					ck := laser.NonPtrValue(v.KeyView.Val())
+					laser.SetMapRobust(ov, ck, laser.NonPtrValue(v.Value))
 				} else {
-					laser.SetMapRobust(ov, laser.NonPtrValue(reflect.ValueOf(vv.Key)), laser.NonPtrValue(vv.Value))
-					// fmt.Printf("save tmp of struct value in key: %v\n", vv.Key)
+					laser.SetMapRobust(ov, laser.NonPtrValue(reflect.ValueOf(v.Key)), laser.NonPtrValue(v.Value))
+					// fmt.Printf("save tmp of struct value in key: %v\n", v.Key)
 				}
 			}
 		}
 	} else {
-		vv.TmpSave.SaveTmp()
+		v.TmpSave.SaveTmp()
 	}
 }
 
-func (vv *ValueBase) CreateTempIfNotPtr() bool {
-	if vv.Value.Kind() != reflect.Ptr { // we create a temp variable -- SaveTmp will save it!
-		// if vv.TmpSave == vv {
-		// 	return true
-		// }
-		vv.TmpSave = vv // we are it!  note: this is saving the ValueBase rep ONLY, not the full iface
-		vtyp := reflect.TypeOf(vv.Value.Interface())
-		vtp := reflect.New(vtyp)
-		// fmt.Printf("vtyp: %v %v %v, vtp: %v %v %T\n", vtyp, vtyp.Name(), vtyp.String(), vtp, vtp.Type(), vtp.Interface())
-		laser.SetRobust(vtp.Interface(), vv.Value.Interface())
-		vv.Value = vtp // use this instead
-		return true
-	}
-	return false
-}
-
-func (vv *ValueBase) SetTags(tags map[string]string) {
-	if vv.Tags == nil {
-		vv.Tags = make(map[string]string, len(tags))
+func (v *ValueData) SetTags(tags map[string]string) {
+	if v.Tags == nil {
+		v.Tags = make(map[string]string, len(tags))
 	}
 	for tag, val := range tags {
-		vv.Tags[tag] = val
+		v.Tags[tag] = val
 	}
 }
 
-func (vv *ValueBase) SetTag(tag, value string) {
-	if vv.Tags == nil {
-		vv.Tags = make(map[string]string, 10)
+func (v *ValueData) SetTag(tag, value string) {
+	if v.Tags == nil {
+		v.Tags = make(map[string]string, 10)
 	}
-	vv.Tags[tag] = value
+	v.Tags[tag] = value
 }
 
-func (vv *ValueBase) Tag(tag string) (string, bool) {
-	if vv.Tags != nil {
-		if tv, ok := vv.Tags[tag]; ok {
+func (v *ValueData) Tag(tag string) (string, bool) {
+	if v.Tags != nil {
+		if tv, ok := v.Tags[tag]; ok {
 			return tv, ok
 		}
 	}
-	if !(vv.Owner != nil && vv.OwnKind == reflect.Struct) {
+	if !(v.Owner != nil && v.OwnKind == reflect.Struct) {
 		return "", false
 	}
-	return vv.Field.Tag.Lookup(tag)
+	return v.Field.Tag.Lookup(tag)
 }
 
-func (vv *ValueBase) AllTags() map[string]string {
+func (v *ValueData) AllTags() map[string]string {
 	rvt := make(map[string]string)
-	if vv.Tags != nil {
-		for key, val := range vv.Tags {
+	if v.Tags != nil {
+		for key, val := range v.Tags {
 			rvt[key] = val
 		}
 	}
-	if !(vv.Owner != nil && vv.OwnKind == reflect.Struct) {
+	if !(v.Owner != nil && v.OwnKind == reflect.Struct) {
 		return rvt
 	}
-	smap := laser.StructTags(vv.Field.Tag)
+	smap := laser.StructTags(v.Field.Tag)
 	for key, val := range smap {
 		rvt[key] = val
 	}
@@ -736,37 +850,37 @@ func (vv *ValueBase) AllTags() map[string]string {
 
 // OwnerLabel returns some extra info about the owner of this value view
 // which is useful to put in title of our object
-func (vv *ValueBase) OwnerLabel() string {
-	if vv.Owner == nil {
+func (v *ValueData) OwnerLabel() string {
+	if v.Owner == nil {
 		return ""
 	}
-	switch vv.OwnKind {
+	switch v.OwnKind {
 	case reflect.Struct:
-		return strcase.ToSentence(vv.Field.Name)
+		return strcase.ToSentence(v.Field.Name)
 	case reflect.Map:
 		kystr := ""
-		if vv.Is(ValueMapKey) {
-			kv := laser.NonPtrValue(vv.Value)
+		if v.Is(ValueMapKey) {
+			kv := laser.NonPtrValue(v.Value)
 			kystr = laser.ToString(kv.Interface())
 		} else {
-			if vv.KeyView != nil {
-				ck := laser.NonPtrValue(vv.KeyView.Val()) // current key value
+			if v.KeyView != nil {
+				ck := laser.NonPtrValue(v.KeyView.Val()) // current key value
 				kystr = laser.ToString(ck.Interface())
 			} else {
-				kystr = laser.ToString(vv.Key)
+				kystr = laser.ToString(v.Key)
 			}
 		}
 		if kystr != "" {
 			return kystr
 		}
 	case reflect.Slice:
-		if lblr, ok := vv.Owner.(gi.SliceLabeler); ok {
-			slbl := lblr.ElemLabel(vv.Idx)
+		if lblr, ok := v.Owner.(gi.SliceLabeler); ok {
+			slbl := lblr.ElemLabel(v.Idx)
 			if slbl != "" {
 				return slbl
 			}
 		}
-		return strconv.Itoa(vv.Idx)
+		return strconv.Itoa(v.Idx)
 	}
 	return ""
 }
@@ -776,164 +890,34 @@ func (vv *ValueBase) OwnerLabel() string {
 // newPath returns just what should be added to a ViewPath
 // also includes zero value check reported in the isZero bool, which
 // can be used for not proceeding in case of non-value-based types.
-func (vv *ValueBase) GetTitle() (label, newPath string, isZero bool) {
+func (v *ValueData) GetTitle() (label, newPath string, isZero bool) {
 	var npt reflect.Type
-	if vv.Value.IsZero() || laser.NonPtrValue(vv.Value).IsZero() {
-		npt = laser.NonPtrType(vv.Value.Type())
+	if v.Value.IsZero() || laser.NonPtrValue(v.Value).IsZero() {
+		npt = laser.NonPtrType(v.Value.Type())
 		isZero = true
 	} else {
-		opv := laser.OnePtrUnderlyingValue(vv.Value)
+		opv := laser.OnePtrUnderlyingValue(v.Value)
 		npt = laser.NonPtrType(opv.Type())
 	}
 	newPath = laser.FriendlyTypeName(npt)
-	olbl := vv.OwnerLabel()
+	olbl := v.OwnerLabel()
 	if olbl != "" && olbl != newPath {
 		label = olbl + " (" + newPath + ")"
 	} else {
 		label = newPath
 	}
-	if vv.ViewPath != "" {
-		label += " (" + vv.ViewPath + ")"
+	if v.ViewPath != "" {
+		label += " (" + v.ViewPath + ")"
 	}
 	return
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-//   Base Widget Functions -- these are typically redefined in Value subtypes
-
-func (vv *ValueBase) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.TextFieldType
-	return vv.WidgetTyp
-}
-
-func (vv *ValueBase) UpdateWidget() {
-	if vv.Widget == nil {
-		fmt.Println("nil widget")
-		return
-	}
-	tf := vv.Widget.(*gi.TextField)
-	npv := laser.NonPtrValue(vv.Value)
-	// fmt.Printf("vvb val: %v  type: %v  kind: %v\n", npv.Interface(), npv.Type().String(), npv.Kind())
-	if npv.Kind() == reflect.Interface && npv.IsZero() {
-		tf.SetText("None")
-	} else {
-		txt := laser.ToString(vv.Value.Interface())
-		// fmt.Println("text set to:", txt)
-		tf.SetText(txt)
-	}
-}
-
-func (vv *ValueBase) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	tf, ok := vv.Widget.(*gi.TextField)
-	if !ok {
-		return
-	}
-	tf.Tooltip = vv.Doc()
-	// STYTODO: need better solution to value view style configuration (this will add too many stylers)
-	// tf.Style(func(s *styles.Style) {
-	// 	s.Min.X.Ch(16)
-	// 	s.Min.Y.Em(1.4)
-	// })
-	vv.StdConfig(w)
-	if completetag, ok := vv.Tag("complete"); ok {
-		// todo: this does not seem to be up-to-date and should use Completer interface..
-		in := []reflect.Value{reflect.ValueOf(tf)}
-		in = append(in, reflect.ValueOf(completetag)) // pass tag value - object may doing completion on multiple fields
-		cmpfv := reflect.ValueOf(vv.Owner).MethodByName("SetCompleter")
-		if cmpfv.IsZero() {
-			log.Printf("giv.ValueBase: programmer error -- SetCompleter method not found in type: %T\n", vv.Owner)
-		} else {
-			cmpfv.Call(in)
-		}
-	}
-	if vtag, _ := vv.Tag("view"); vtag == "password" {
-		tf.SetTypePassword()
-	}
-
-	if vl, ok := vv.Value.Interface().(gi.Validator); ok {
-		tf.SetValidator(vl.Validate)
-	}
-	if fv, ok := vv.Owner.(gi.FieldValidator); ok {
-		tf.SetValidator(func() error {
-			return fv.ValidateField(vv.Field.Name)
-		})
-	}
-
-	tf.OnChange(func(e events.Event) {
-		if vv.SetValue(tf.Text()) {
-			vv.UpdateWidget() // always update after setting value..
-		}
-	})
-	vv.UpdateWidget()
-}
-
-// StdConfig does all of the standard widget configuration tag options
-func (vv *ValueBase) StdConfig(w gi.Widget) {
-	w.SetState(vv.IsReadOnly(), states.ReadOnly) // do right away
-	w.Style(func(s *styles.Style) {
-		w.SetState(vv.IsReadOnly(), states.ReadOnly) // and in style
-		if tv, ok := vv.Tag("width"); ok {
-			v, err := laser.ToFloat32(tv)
-			if err == nil {
-				s.Min.X.Ch(v)
-			}
-		}
-		if tv, ok := vv.Tag("max-width"); ok {
-			v, err := laser.ToFloat32(tv)
-			if err == nil {
-				if v < 0 {
-					s.Grow.X = 1 // support legacy
-				} else {
-					s.Max.X.Ch(v)
-				}
-			}
-		}
-		if tv, ok := vv.Tag("height"); ok {
-			v, err := laser.ToFloat32(tv)
-			if err == nil {
-				s.Min.Y.Em(v)
-			}
-		}
-		if tv, ok := vv.Tag("max-height"); ok {
-			v, err := laser.ToFloat32(tv)
-			if err == nil {
-				if v < 0 {
-					s.Grow.Y = 1
-				} else {
-					s.Max.Y.Em(v)
-				}
-			}
-		}
-		if tv, ok := vv.Tag("grow"); ok {
-			v, err := laser.ToFloat32(tv)
-			if err == nil {
-				s.Grow.X = v
-			}
-		}
-		if tv, ok := vv.Tag("grow-y"); ok {
-			v, err := laser.ToFloat32(tv)
-			if err == nil {
-				s.Grow.Y = v
-			}
-		}
-		if vv.IsReadOnly() {
-			w.AsWidget().SetReadOnly(true)
-		}
-	})
-}
-
-// ConfigDialogWidget configures the given widget to open the dialog for
+// ConfigDialogWidget configures the widget for the given value to open the dialog for
 // the given value when clicked and have the appropriate tooltip for that.
 // If allowReadOnly is false, the dialog will not be opened if the value
 // is read only.
-func ConfigDialogWidget(vv Value, w gi.Widget, allowReadOnly bool) {
-	vb := vv.AsValueBase()
-	doc := vv.Doc()
+func ConfigDialogWidget(v Value, allowReadOnly bool) {
+	doc := v.Doc()
 	tip := ""
 	// windows are never new on mobile
 	if !gi.TheApp.Platform().IsMobile() {
@@ -943,67 +927,11 @@ func ConfigDialogWidget(vv Value, w gi.Widget, allowReadOnly bool) {
 		}
 	}
 	tip += doc
-	w.AsWidget().SetTooltip(tip)
-	w.OnClick(func(e events.Event) {
-		if allowReadOnly || !vv.IsReadOnly() {
-			vv.SetFlag(e.HasAnyModifier(key.Shift), ValueDialogNewWindow)
-			vv.OpenDialog(vb.Widget, nil)
+	v.AsWidgetBase().SetTooltip(tip)
+	v.AsWidget().OnClick(func(e events.Event) {
+		if allowReadOnly || !v.IsReadOnly() {
+			v.SetFlag(e.HasAnyModifier(key.Shift), ValueDialogNewWindow)
+			OpenDialog(v, v.AsWidget(), nil)
 		}
 	})
-}
-
-// OpenValueDialog is a helper for OpenDialog for cases that use
-// [ConfigDialog] method to configure the dialog contents.
-// If a title is specified, it is used as the title for the dialog
-// instead of the default one.
-func OpenValueDialog(vv Value, ctx gi.Widget, fun func(), title ...string) {
-	vb := vv.AsValueBase()
-	ttl, _, _ := vb.GetTitle()
-	if len(title) > 0 {
-		ttl = title[0]
-	}
-	opv := laser.OnePtrUnderlyingValue(vb.Value)
-	if !opv.IsValid() {
-		return
-	}
-	obj := opv.Interface()
-	if gi.RecycleDialog(obj) {
-		return
-	}
-	d := gi.NewBody().AddTitle(ttl).AddText(vv.Doc())
-	ok, okfun := vv.ConfigDialog(d)
-	if !ok {
-		return
-	}
-
-	// if we don't have anything specific for ok events,
-	// we just register an OnClose event and skip the
-	// OK and Cancel buttons
-	if okfun == nil && fun == nil {
-		d.OnClose(func(e events.Event) {
-			vv.UpdateWidget()
-			vv.SendChange()
-		})
-	} else {
-		// otherwise, we have to make the bottom bar
-		d.AddBottomBar(func(pw gi.Widget) {
-			d.AddCancel(pw)
-			d.AddOk(pw).OnClick(func(e events.Event) {
-				if okfun != nil {
-					okfun()
-				}
-				vv.UpdateWidget()
-				vv.SendChange()
-				if fun != nil {
-					fun()
-				}
-			})
-		})
-	}
-
-	ds := d.NewFullDialog(ctx)
-	if vv.Is(ValueDialogNewWindow) {
-		ds.SetNewWindow(true)
-	}
-	ds.Run()
 }

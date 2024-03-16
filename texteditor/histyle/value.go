@@ -8,63 +8,39 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/giv"
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/laser"
 )
 
 func init() {
-	giv.ValueMapAdd(gi.HiStyleName(""), func() giv.Value {
-		return &Value{}
-	})
+	giv.AddValue(gi.HiStyleName(""), func() giv.Value { return &Value{} })
 }
 
-// Value presents a button for selecting a highlight styling method
+// Value represents a [gi.HiStyleName] with a button.
 type Value struct {
-	giv.ValueBase
+	giv.ValueBase[*gi.Button]
 }
 
-func (vv *Value) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ButtonType
-	return vv.WidgetTyp
+func (v *Value) Config() {
+	v.Widget.SetType(gi.ButtonTonal).SetIcon(icons.Brush)
+	giv.ConfigDialogWidget(v, false)
 }
 
-func (vv *Value) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	bt := vv.Widget.(*gi.Button)
-	txt := laser.ToString(vv.Value.Interface())
-	bt.SetText(txt)
+func (v *Value) Update() {
+	txt := laser.ToString(v.Value.Interface())
+	v.Widget.SetText(txt).Update()
 }
 
-func (vv *Value) Config(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	vv.StdConfig(w)
-	bt := vv.Widget.(*gi.Button)
-	bt.SetType(gi.ButtonTonal)
-	giv.ConfigDialogWidget(vv, bt, false)
-	vv.UpdateWidget()
-}
-
-func (vv *Value) HasDialog() bool { return true }
-func (vv *Value) OpenDialog(ctx gi.Widget, fun func()) {
-	giv.OpenValueDialog(vv, ctx, fun, "Select a syntax highlighting style")
-}
-
-func (vv *Value) ConfigDialog(d *gi.Body) (bool, func()) {
+// TODO(dtl): Select a syntax highlighting style
+func (v *Value) ConfigDialog(d *gi.Body) (bool, func()) {
 	si := 0
-	cur := laser.ToString(vv.Value.Interface())
+	cur := laser.ToString(v.Value.Interface())
 	giv.NewSliceView(d).SetSlice(&StyleNames).SetSelVal(cur).BindSelect(&si)
 	return true, func() {
 		if si >= 0 {
 			hs := StyleNames[si]
-			vv.SetValue(hs)
-			vv.UpdateWidget()
+			v.SetValue(hs)
+			v.Update()
 		}
 	}
 }

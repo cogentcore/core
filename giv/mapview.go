@@ -120,13 +120,12 @@ func (mv *MapView) KiPropTag() string {
 	if mv.MapValView == nil {
 		return ""
 	}
-	vvb := mv.MapValView.AsValueBase()
-	if vvb.Owner == nil {
+	vd := mv.MapValView.AsValueData()
+	if vd.Owner == nil {
 		return ""
 	}
-	if ownki, ok := vvb.Owner.(ki.Ki); ok {
+	if ownki, ok := vd.Owner.(ki.Ki); ok {
 		pt := ownki.PropTag()
-		// fmt.Printf("got prop tag: %v\n", pt)
 		return pt
 	}
 	return ""
@@ -216,19 +215,17 @@ func (mv *MapView) ConfigMapGrid() {
 	}
 	for i, vv := range mv.Values {
 		kv := mv.Keys[i]
-		vvb := vv.AsValueBase()
-		kvb := kv.AsValueBase()
-		vvb.OnChange(func(e events.Event) { mv.SendChange() })
-		kvb.OnChange(func(e events.Event) {
-			mv.SendChange()
+		vv.OnChange(func(e events.Event) { mv.SendChange(e) })
+		kv.OnChange(func(e events.Event) {
+			mv.SendChange(e)
 			mv.Update()
 		})
 		keyw := sg.Child(i * ncol).(gi.Widget)
 		w := sg.Child(i*ncol + 1).(gi.Widget)
-		kv.Config(keyw)
-		vv.Config(w)
-		vvb.AsWidgetBase().OnInput(mv.HandleEvent)
-		kvb.AsWidgetBase().OnInput(mv.HandleEvent)
+		Config(kv, keyw)
+		Config(vv, w)
+		vv.AsWidgetBase().OnInput(mv.HandleEvent)
+		kv.AsWidgetBase().OnInput(mv.HandleEvent)
 		w.Style(func(s *styles.Style) {
 			s.SetTextWrap(false)
 		})
@@ -236,10 +233,10 @@ func (mv *MapView) ConfigMapGrid() {
 			s.SetTextWrap(false)
 		})
 		w.AddContextMenu(func(m *gi.Scene) {
-			mv.ContextMenu(m, kvb.Value)
+			mv.ContextMenu(m, kv.Val())
 		})
 		keyw.AddContextMenu(func(m *gi.Scene) {
-			mv.ContextMenu(m, kvb.Value)
+			mv.ContextMenu(m, kv.Val())
 		})
 		if ifaceType {
 			typw := sg.Child(i*ncol + 2).(*gi.Chooser)
@@ -249,12 +246,6 @@ func (mv *MapView) ConfigMapGrid() {
 				vtyp = strtyp // default to string
 			}
 			typw.SetCurrentValue(vtyp)
-			// typw.SetProp("mapview-index", i)
-			// typw.OnChange(func(e events.Event) {
-			// 	typ := typw.CurVal.(reflect.Type)
-			// 	idx := typw.Prop("mapview-index").(int) // todo: does anything?
-			// 	mv.SendChange()
-			// })
 		}
 	}
 }
@@ -287,7 +278,7 @@ func (mv *MapView) MapChangeValueType(idx int, typ reflect.Type) {
 		evn = laser.CloneToType(typ, cv.Interface())
 	}
 	ov := laser.NonPtrValue(reflect.ValueOf(mv.Map))
-	valv.AsValueBase().Value = evn.Elem()
+	valv.AsValueData().Value = evn.Elem()
 	ov.SetMapIndex(ck, evn.Elem())
 	if mv.TmpSave != nil {
 		mv.TmpSave.SaveTmp()

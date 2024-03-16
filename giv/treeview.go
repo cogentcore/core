@@ -93,8 +93,11 @@ func AsTreeView(k ki.Ki) *TreeView {
 // note: see treesync.go for all the SyncNode mode specific
 // functions.
 
-// TreeView provides a graphical representation of a tree tructure
+// TreeView provides a graphical representation of a tree structure,
 // providing full navigation and manipulation abilities.
+//
+// It does not handle layout by itself, so if you want it to scroll
+// separately from the rest of the surrounding context, use [NewTreeViewFrame].
 //
 // If the SyncNode field is non-nil, typically via
 // SyncRootNode method, then the TreeView mirrors another
@@ -164,6 +167,16 @@ type TreeView struct {
 	// (other tree views) do not inherit its stateful background color, as
 	// that does not look good.
 	actStateLayer float32 `set:"-"`
+}
+
+// NewTreeViewFrame adds a new [TreeView] with the given name to a new
+// frame in the given parent that ensures that the tree view scrolls
+// separately from the surrounding context.
+func NewTreeViewFrame(par ki.Ki, name ...string) *TreeView {
+	fr := gi.NewFrame(par).Style(func(s *styles.Style) {
+		s.Overflow.Set(styles.OverflowAuto)
+	})
+	return NewTreeView(fr, name...)
 }
 
 func (tv *TreeView) FlagType() enums.BitFlagSetter {

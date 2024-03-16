@@ -310,10 +310,10 @@ func (fb *FuncButton) CallFunc() {
 		fb.ConfirmDialog()
 		return
 	}
-	if len(fb.Args) == 1 && fb.Args[0].HasDialog() { // go direct to dialog
-		fb.Args[0].OpenDialog(ctx, func() {
-			fb.CallFuncShowReturns()
-		})
+	// go directly to the dialog if there is one
+	if len(fb.Args) == 1 && OpenDialog(fb.Args[0], ctx, func() {
+		fb.CallFuncShowReturns()
+	}) {
 		return
 	}
 	d := gi.NewBody().AddTitle(fb.Text).AddText(fb.Tooltip)
@@ -376,8 +376,8 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 		gi.NewBody().AddSnackbarText(txt).NewSnackbar(ctx).Run()
 		return
 	}
-	if len(fb.Returns) == 1 && fb.Returns[0].HasDialog() { // go direct to dialog
-		fb.Returns[0].OpenDialog(ctx, nil)
+	// go directly to the dialog if there is one
+	if len(fb.Returns) == 1 && OpenDialog(fb.Returns[0], ctx, nil) {
 		return
 	}
 	d := gi.NewBody().AddTitle(main).AddText(fb.Tooltip).AddOkOnly()

@@ -11,63 +11,40 @@ import (
 
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/giv"
-	"cogentcore.org/core/gti"
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/xyz"
 )
 
-////////////////////////////////////////////////////////////////////////////////////////
-//  MeshValue
+func init() {
+	giv.AddValue(xyz.MeshName(""), func() giv.Value { return &MeshValue{} })
+}
 
-// Value restylesers MeshValue as the viewer of MeshName
-// func (mn xyz.MeshName) Value() giv.Value {
-// 	return &MeshValue{}
-// }
-
-// MeshValue presents an action for displaying a MeshName and selecting
-// meshes from a ChooserDialog
+// MeshValue represents an [xyz.MeshName] with a button.
 type MeshValue struct {
-	giv.ValueBase
+	giv.ValueBase[*gi.Button]
 }
 
-func (vv *MeshValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ButtonType
-	return vv.WidgetTyp
+func (v *MeshValue) Config() {
+	v.Widget.SetType(gi.ButtonTonal).SetIcon(icons.DeployedCode)
+	giv.ConfigDialogWidget(v, false)
 }
 
-func (vv *MeshValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	bt := vv.Widget.(*gi.Button)
-	txt := laser.ToString(vv.Value.Interface())
+func (v *MeshValue) Update() {
+	txt := laser.ToString(v.Value.Interface())
 	if txt == "" {
 		txt = "(none, click to select)"
 	}
-	bt.SetText(txt)
-	bt.Update()
+	v.Widget.SetText(txt).Update()
 }
 
-func (vv *MeshValue) Config(widg gi.Widget) {
-	vv.Widget = widg
-	vv.StdConfig(widg)
-	bt := vv.Widget.(*gi.Button)
-	bt.SetType(gi.ButtonTonal)
-	giv.ConfigDialogWidget(vv, bt, false)
-	vv.UpdateWidget()
-}
-
-func (vv *MeshValue) HasDialog() bool { return true }
-func (vv *MeshValue) OpenDialog(ctx gi.Widget, fun func()) {
-	giv.OpenValueDialog(vv, ctx, fun, "Select a mesh")
-}
-
-func (vv *MeshValue) ConfigDialog(d *gi.Body) (bool, func()) {
-	if vv.OwnKind != reflect.Struct {
+// TODO(dtl): Select a mesh
+func (v *MeshValue) ConfigDialog(d *gi.Body) (bool, func()) {
+	if v.OwnKind != reflect.Struct {
 		return false, nil
 	}
-	ndi, ok := vv.Owner.(xyz.Node)
+	ndi, ok := v.Owner.(xyz.Node)
 	if !ok {
 		return false, nil
 	}
@@ -81,25 +58,21 @@ func (vv *MeshValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	sort.Strings(sl)
 
 	si := 0
-	cur := laser.ToString(vv.Value.Interface())
+	cur := laser.ToString(v.Value.Interface())
 	giv.NewSliceView(d).SetSlice(&sl).SetSelVal(cur).BindSelect(&si)
 
 	return true, func() {
 		if si >= 0 {
 			ms := sl[si]
-			vv.SetValue(ms)
-			vv.UpdateWidget()
+			v.SetValue(ms)
+			v.Update()
 		}
 	}
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-//  TexValue
-
 /*
 
-This doesn't work because texture is on Material which doesn't have a pointer to the
-Scene!
+TODO: This doesn't work because texture is on Material which doesn't have a pointer to the Scene!
 
 // Value restylesers TexValue as the viewer of TexName
 func (mn TexName) Value() giv.Value {

@@ -10,6 +10,7 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
+	"math/rand"
 	"strings"
 	"time"
 
@@ -19,28 +20,28 @@ import (
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 //go:embed icon.svg
-var icon []byte
+var appIcon []byte
 
 func main() {
-	gi.TheApp.SetIconBytes(icon)
+	gi.TheApp.SetIconBytes(appIcon)
 
 	b := gi.NewBody("Cogent Core Demo")
 	ts := gi.NewTabs(b)
 
 	home(ts)
-	text(ts)
-	buttons(ts)
-	inputs(ts)
-	layouts(ts)
-	dialogs(ts)
+	widgets(ts)
 	values(ts)
-	other(ts)
+	views(ts)
+	dialogs(ts)
+	style(ts)
 
 	b.RunMainWindow()
 }
@@ -54,19 +55,28 @@ func home(ts *gi.Tabs) {
 		s.Text.Align = styles.Center
 	})
 
-	grr.Log(gi.NewSVG(tab).ReadBytes(icon))
+	grr.Log(gi.NewSVG(tab).ReadBytes(appIcon))
 
 	gi.NewLabel(tab).SetType(gi.LabelDisplayLarge).SetText("The Cogent Core Demo")
 
 	gi.NewLabel(tab).SetType(gi.LabelTitleLarge).SetText(`A <b>demonstration</b> of the <i>various</i> features of the <a href="https://cogentcore.org/core">Cogent Core</a> 2D and 3D Go GUI <u>framework</u>`)
 }
 
+func widgets(ts *gi.Tabs) {
+	wts := gi.NewTabs(ts.NewTab("Widgets"))
+
+	text(wts)
+	buttons(wts)
+	inputs(wts)
+	sliders(wts)
+	icon(wts)
+}
+
 func text(ts *gi.Tabs) {
 	tab := ts.NewTab("Text")
 
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Text")
-	gi.NewLabel(tab).SetText(
-		`Cogent Core provides fully customizable text elements that can be styled in any way you want. Also, there are pre-configured style types for text that allow you to easily create common text types.`)
+	gi.NewLabel(tab).SetText("Cogent Core provides fully customizable text elements that can be styled in any way you want. Also, there are pre-configured style types for text that allow you to easily create common text types.")
 
 	for _, typ := range gi.LabelTypesValues() {
 		s := strcase.ToSentence(typ.String())
@@ -79,8 +89,7 @@ func buttons(ts *gi.Tabs) {
 
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Buttons")
 
-	gi.NewLabel(tab).SetText(
-		`Cogent Core provides customizable buttons that support various events and can be styled in any way you want. Also, there are pre-configured style types for buttons that allow you to achieve common functionality with ease. All buttons support any combination of a label, icon, and indicator.`)
+	gi.NewLabel(tab).SetText("Cogent Core provides customizable buttons that support various events and can be styled in any way you want. Also, there are pre-configured style types for buttons that allow you to achieve common functionality with ease. All buttons support any combination of a label, icon, and indicator.")
 
 	makeRow := func() gi.Widget {
 		return gi.NewLayout(tab).Style(func(s *styles.Style) {
@@ -179,8 +188,7 @@ func inputs(ts *gi.Tabs) {
 	tab := ts.NewTab("Inputs")
 
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Inputs")
-	gi.NewLabel(tab).SetText(
-		`Cogent Core provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.`)
+	gi.NewLabel(tab).SetText("Cogent Core provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.")
 
 	gi.NewTextField(tab).SetPlaceholder("Text field")
 	gi.NewTextField(tab).SetPlaceholder("Email").SetType(gi.TextFieldOutlined).Style(func(s *styles.Style) {
@@ -252,59 +260,297 @@ func inputs(ts *gi.Tabs) {
 
 	gi.NewSwitches(tab).SetType(gi.SwitchSegmentedButton).SetMutex(true).SetItems("Segmented Button 1", "Segmented Button 2", "Segmented Button 3").
 		SetTooltips("A description for Segmented Button 1", "A description for Segmented Button 2", "A description for Segmented Button 3")
+}
+
+func sliders(ts *gi.Tabs) {
+	tab := ts.NewTab("Sliders")
+
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Sliders and meters")
+	gi.NewLabel(tab).SetText("Cogent Core provides interactive sliders and customizable meters, allowing you to edit and display bounded numbers.")
 
 	gi.NewSlider(tab).SetValue(0.5)
 	gi.NewSlider(tab).SetValue(0.7).SetState(true, states.Disabled)
 
-	colsliders := gi.NewLayout(tab)
+	csliders := gi.NewLayout(tab)
 
-	gi.NewSlider(colsliders).SetValue(0.3).Style(func(s *styles.Style) {
+	gi.NewSlider(csliders).SetValue(0.3).Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
-	gi.NewSlider(colsliders).SetValue(0.2).SetState(true, states.Disabled).Style(func(s *styles.Style) {
+	gi.NewSlider(csliders).SetValue(0.2).SetState(true, states.Disabled).Style(func(s *styles.Style) {
+		s.Direction = styles.Column
+	})
+
+	gi.NewMeter(tab).SetType(gi.MeterCircle).SetValue(0.7).SetText("70%")
+	gi.NewMeter(tab).SetType(gi.MeterSemicircle).SetValue(0.7).SetText("70%")
+	gi.NewMeter(tab).SetValue(0.7)
+	gi.NewMeter(tab).SetValue(0.7).Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
 }
 
-func layouts(ts *gi.Tabs) {
-	tab := ts.NewTab("Layouts")
+func icon(ts *gi.Tabs) {
+	tab := ts.NewTab("Icons")
 
-	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Layout")
-	gi.NewLabel(tab).SetText(
-		`Cogent Core provides various adaptable layout types that allow you to easily organize content so that it is easy to use, customize, and understand.`)
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Icons")
+	gi.NewLabel(tab).SetText("Cogent Core provides more than 2,000 unique icons from the Material Symbols collection.")
 
-	// vw := gi.NewLabel(layouts, "vw", "50vw")
-	// vw.Style(func(s *styles.Style) {
-	// 	s.Min.X.Vw(50)
-	// 	s.BackgroundColor.SetSolid(colors.Scheme.Primary.Base)
-	// 	s.Color = colors.C(colors.Scheme.Primary.On)
-	// })
-
-	// pw := gi.NewLabel(layouts, "pw", "50pw")
-	// pw.Style(func(s *styles.Style) {
-	// 	s.Min.X.Pw(50)
-	// 	s.BackgroundColor.SetSolid(colors.Scheme.Primary.Container)
-	// 	s.Color = colors.C(colors.Scheme.Primary.OnContainer)
-	// })
-
-	sv := gi.NewSplits(tab)
-
-	left := gi.NewFrame(sv).Style(func(s *styles.Style) {
-		s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
+	grid := gi.NewFrame(tab)
+	grid.Style(func(s *styles.Style) {
+		s.Wrap = true
+		s.Overflow.Y = styles.OverflowAuto
 	})
-	gi.NewLabel(left).SetType(gi.LabelHeadlineMedium).SetText("Left")
-	right := gi.NewFrame(sv).Style(func(s *styles.Style) {
-		s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
+
+	icnms := icons.All()
+	for _, ic := range icnms {
+		icnm := string(ic)
+		if strings.HasSuffix(icnm, "-fill") {
+			continue
+		}
+		vb := gi.NewLayout(grid, icnm).Style(func(s *styles.Style) {
+			s.Direction = styles.Column
+			s.Max.X.Em(15) // constraining width exactly gives nice grid-like appearance
+			s.Min.X.Em(15)
+		})
+		gi.NewIcon(vb, icnm).SetIcon(icons.Icon(icnm)).Style(func(s *styles.Style) {
+			s.Min.Set(units.Em(4))
+		})
+		gi.NewLabel(vb, icnm).SetText(strcase.ToSentence(icnm)).Style(func(s *styles.Style) {
+			s.SetTextWrap(false)
+		})
+	}
+}
+
+func values(ts *gi.Tabs) {
+	tab := ts.NewTab("Values")
+
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Values")
+	gi.NewLabel(tab).SetText("Cogent Core provides the giv value system, which allows you to instantly turn Go values and functions into type-specific widgets bound to the original values. This powerful system means that you can automatically turn backend data structures into GUI apps with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.")
+
+	gi.NewButton(tab).SetText("Inspector").OnClick(func(e events.Event) {
+		giv.InspectorWindow(ts.Scene)
 	})
-	gi.NewLabel(right).SetType(gi.LabelHeadlineMedium).SetText("Right")
+
+	giv.NewValue(tab, colors.Orange)
+	giv.NewValue(tab, time.Now())
+	giv.NewValue(tab, 5*time.Minute)
+	giv.NewValue(tab, 500*time.Millisecond).SetTags(map[string]string{"min": "10ms", "max": "10s", "step": "10ms"})
+	giv.NewValue(tab, gi.Filename("demo.go"))
+	giv.NewValue(tab, gi.AppearanceSettings.FontFamily)
+	giv.NewValue(tab, giv.ColorMapName("ColdHot"))
+	giv.NewFuncButton(tab, hello).SetShowReturn(true)
+}
+
+// Hello displays a greeting message and an age in weeks based on the given information.
+func hello(firstName string, lastName string, age int, likesGo bool) (greeting string, weeksOld int) { //gti:add
+	weeksOld = age * 52
+	greeting = "Hello, " + firstName + " " + lastName + "! "
+	if likesGo {
+		greeting += "I'm glad to hear that you like the best programming language!"
+	} else {
+		greeting += "You should reconsider what programming languages you like."
+	}
+	return
+}
+
+func views(ts *gi.Tabs) {
+	tab := ts.NewTab("Views")
+
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Views")
+	gi.NewLabel(tab).SetText("Cogent Core provides powerful views that allow you to easily view and edit complex data types like structs, maps, and slices, allowing you to easily create widgets like lists, tables, and forms.")
+
+	vts := gi.NewTabs(tab)
+
+	str := testStruct{
+		Name:   "happy",
+		Cond:   2,
+		Val:    3.1415,
+		Vec:    mat32.V2(5, 7),
+		Inline: inlineStruct{Val: 3},
+		Cond2: tableStruct{
+			IntField:   22,
+			FloatField: 44.4,
+			StrField:   "fi",
+			File:       "views.go",
+		},
+		Things: make([]tableStruct, 2),
+		Stuff:  make([]float32, 3),
+	}
+
+	giv.NewStructView(vts.NewTab("Struct view")).SetStruct(&str)
+
+	mp := map[string]string{}
+
+	mp["mapkey1"] = "whatever"
+	mp["mapkey2"] = "testing"
+	mp["mapkey3"] = "boring"
+
+	giv.NewMapView(vts.NewTab("Map view")).SetMap(&mp)
+
+	sl := make([]string, 20)
+
+	for i := 0; i < len(sl); i++ {
+		sl[i] = fmt.Sprintf("el: %v", i)
+	}
+	sl[10] = "this is a particularly long slice value"
+
+	giv.NewSliceView(vts.NewTab("Slice view")).SetSlice(&sl)
+
+	tbl := make([]*tableStruct, 100)
+
+	for i := range tbl {
+		ts := &tableStruct{IntField: i, FloatField: float32(i) / 10}
+		tbl[i] = ts
+	}
+
+	tbl[0].StrField = "this is a particularly long field"
+
+	giv.NewTableView(vts.NewTab("Table view")).SetSlice(&tbl)
+
+	sp := gi.NewSplits(vts.NewTab("Tree view"))
+
+	tv := giv.NewTreeViewFrame(sp).SetText("Root")
+	makeTree(tv, 0, 3, 5)
+
+	sv := giv.NewStructView(sp)
+	sv.Style(func(s *styles.Style) {
+		s.Grow.Set(1, 1)
+	})
+	sv.SetStruct(tv)
+
+	tv.OnSelect(func(e events.Event) {
+		if len(tv.SelectedNodes) > 0 {
+			sv.SetStruct(tv.SelectedNodes[0])
+		}
+	})
+
+	sp.SetSplits(0.3, 0.7)
+}
+
+func makeTree(tv *giv.TreeView, iter, maxIter, maxKids int) {
+	if iter > maxIter {
+		return
+	}
+	n := rand.Intn(maxKids)
+	if iter == 0 {
+		n = maxKids
+	}
+	iter++
+	tv.SetNChildren(n, giv.TreeViewType, "Child ")
+	for j := 0; j < n; j++ {
+		kt := tv.Child(j).(*giv.TreeView)
+		makeTree(kt, iter, maxIter, maxKids)
+	}
+}
+
+type tableStruct struct { //gti:add
+
+	// an icon
+	Icon icons.Icon
+
+	// an integer field
+	IntField int `default:"2"`
+
+	// a float field
+	FloatField float32
+
+	// a string field
+	StrField string
+
+	// a file
+	File gi.Filename
+}
+
+type inlineStruct struct { //gti:add
+
+	// click to show next
+	On bool
+
+	// can u see me?
+	ShowMe string
+
+	// a conditional
+	Cond int
+
+	// On and Cond=0
+	Cond1 string
+
+	// if Cond=0
+	Cond2 tableStruct
+
+	// a value
+	Val float32
+}
+
+func (il *inlineStruct) ShouldShow(field string) bool {
+	switch field {
+	case "ShowMe", "Cond":
+		return il.On
+	case "Cond1":
+		return il.On && il.Cond == 0
+	case "Cond2":
+		return il.On && il.Cond <= 1
+	}
+	return true
+}
+
+type testStruct struct { //gti:add
+
+	// An enum value
+	Enum gi.ButtonTypes
+
+	// a string
+	Name string
+
+	// click to show next
+	ShowNext bool
+
+	// can u see me?
+	ShowMe string
+
+	// how about that
+	Inline inlineStruct `view:"inline"`
+
+	// a conditional
+	Cond int
+
+	// if Cond=0
+	Cond1 string
+
+	// if Cond>=0
+	Cond2 tableStruct
+
+	// a value
+	Val float32
+
+	Vec mat32.Vec2
+
+	Things []tableStruct
+
+	Stuff []float32
+
+	// a file
+	File gi.Filename
+}
+
+func (ts *testStruct) ShouldShow(field string) bool {
+	switch field {
+	case "Name":
+		return ts.Enum <= gi.ButtonElevated
+	case "ShowMe":
+		return ts.ShowNext
+	case "Cond1":
+		return ts.Cond == 0
+	case "Cond2":
+		return ts.Cond >= 0
+	}
+	return true
 }
 
 func dialogs(ts *gi.Tabs) {
 	tab := ts.NewTab("Dialogs")
 
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Dialogs, snackbars, and windows")
-	gi.NewLabel(tab).SetText(
-		`Cogent Core provides completely customizable dialogs, snackbars, and windows that allow you to easily display, obtain, and organize information.`)
+	gi.NewLabel(tab).SetText("Cogent Core provides completely customizable dialogs, snackbars, and windows that allow you to easily display, obtain, and organize information.")
 
 	makeRow := func() gi.Widget {
 		return gi.NewLayout(tab).Style(func(s *styles.Style) {
@@ -406,49 +652,44 @@ func dialogs(ts *gi.Tabs) {
 	})
 }
 
-func values(ts *gi.Tabs) {
-	tab := ts.NewTab("Values")
+func style(ts *gi.Tabs) {
+	tab := ts.NewTab("Styles")
 
-	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Values")
-	gi.NewLabel(tab).SetText(
-		`Cogent Core provides the giv value system, which allows you to instantly turn Go values and functions into type-specific widgets bound to the original values. This powerful system means that you can automatically turn backend data structures into GUI apps with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.`)
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Styles and layouts")
+	gi.NewLabel(tab).SetText("Cogent Core provides a fully customizable styling and layout system that allows you to easily control the position, size, and appearance of all widgets. You can edit the style properties of the outer frame below.")
 
-	gi.NewButton(tab).SetText("Inspector").OnClick(func(e events.Event) {
-		giv.InspectorWindow(ts.Scene)
+	sp := gi.NewSplits(tab)
+
+	sv := giv.NewStructView(sp)
+
+	fr := gi.NewFrame(gi.NewFrame(sp)) // can not control layout when directly in splits
+	sv.SetStruct(&fr.Styles)
+
+	fr.Style(func(s *styles.Style) {
+		s.Background = colors.C(colors.Scheme.Select.Container)
 	})
 
-	giv.NewValue(tab, colors.Orange)
-	giv.NewValue(tab, time.Now())
-	giv.NewValue(tab, 5*time.Minute)
-	giv.NewValue(tab, 500*time.Millisecond).SetTags(map[string]string{"min": "10ms", "max": "10s", "step": "10ms"})
-	giv.NewValue(tab, gi.Filename("demo.go"))
-	giv.NewValue(tab, gi.AppearanceSettings.FontFamily)
-	giv.NewValue(tab, giv.ColorMapName("ColdHot"))
-	giv.NewFuncButton(tab, hello).SetShowReturn(true)
-}
+	fr.OnShow(func(e events.Event) {
+		fr.OverrideStyle = true
+	})
 
-// Hello displays a greeting message and an age in weeks based on the given information.
-func hello(firstName string, lastName string, age int, likesGo bool) (greeting string, weeksOld int) { //gti:add
-	weeksOld = age * 52
-	greeting = "Hello, " + firstName + " " + lastName + "! "
-	if likesGo {
-		greeting += "I'm glad to hear that you like the best programming language!"
-	} else {
-		greeting += "You should reconsider what programming languages you like."
+	sv.OnChange(func(e events.Event) {
+		fr.Update()
+	})
+
+	frameSizes := []mat32.Vec2{
+		{20, 100},
+		{80, 20},
+		{60, 80},
+		{40, 120},
+		{150, 100},
 	}
-	return
-}
 
-func other(ts *gi.Tabs) {
-	tab := ts.NewTab("Other")
-
-	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Other")
-	gi.NewLabel(tab).SetText(`Other features of the Cogent Core framework`)
-
-	gi.NewMeter(tab).SetType(gi.MeterCircle).SetValue(0.7).SetText("70%")
-	gi.NewMeter(tab).SetType(gi.MeterSemicircle).SetValue(0.7).SetText("70%")
-	gi.NewMeter(tab).SetValue(0.7)
-	gi.NewMeter(tab).SetValue(0.7).Style(func(s *styles.Style) {
-		s.Direction = styles.Column
-	})
+	for _, sz := range frameSizes {
+		gi.NewFrame(fr).Style(func(s *styles.Style) {
+			s.Min.Set(units.Px(sz.X), units.Px(sz.Y))
+			s.Grow.Set(0, 0)
+			s.Background = colors.C(colors.Scheme.Primary.Base)
+		})
+	}
 }

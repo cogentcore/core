@@ -220,36 +220,6 @@ func (t *Inspector) SetTooltip(v string) *Inspector { t.Tooltip = v; return t }
 // SetStackTop sets the [Inspector.StackTop]
 func (t *Inspector) SetStackTop(v int) *Inspector { t.StackTop = v; return t }
 
-// KeyChordEditType is the [gti.Type] for [KeyChordEdit]
-var KeyChordEditType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.KeyChordEdit", IDName: "key-chord-edit", Doc: "KeyChordEdit is a label widget that shows a key chord string, and, when in\nfocus (after being clicked) will update to whatever key chord is typed --\nused for representing and editing key chords.", Embeds: []gti.Field{{Name: "Label"}}, Fields: []gti.Field{{Name: "FocusActive", Doc: "true if the keyboard focus is active or not -- when we lose active focus we apply changes"}}, Instance: &KeyChordEdit{}})
-
-// NewKeyChordEdit adds a new [KeyChordEdit] with the given name to the given parent:
-// KeyChordEdit is a label widget that shows a key chord string, and, when in
-// focus (after being clicked) will update to whatever key chord is typed --
-// used for representing and editing key chords.
-func NewKeyChordEdit(par ki.Ki, name ...string) *KeyChordEdit {
-	return par.NewChild(KeyChordEditType, name...).(*KeyChordEdit)
-}
-
-// KiType returns the [*gti.Type] of [KeyChordEdit]
-func (t *KeyChordEdit) KiType() *gti.Type { return KeyChordEditType }
-
-// New returns a new [*KeyChordEdit] value
-func (t *KeyChordEdit) New() ki.Ki { return &KeyChordEdit{} }
-
-// SetFocusActive sets the [KeyChordEdit.FocusActive]:
-// true if the keyboard focus is active or not -- when we lose active focus we apply changes
-func (t *KeyChordEdit) SetFocusActive(v bool) *KeyChordEdit { t.FocusActive = v; return t }
-
-// SetTooltip sets the [KeyChordEdit.Tooltip]
-func (t *KeyChordEdit) SetTooltip(v string) *KeyChordEdit { t.Tooltip = v; return t }
-
-// SetText sets the [KeyChordEdit.Text]
-func (t *KeyChordEdit) SetText(v string) *KeyChordEdit { t.Text = v; return t }
-
-// SetType sets the [KeyChordEdit.Type]
-func (t *KeyChordEdit) SetType(v gi.LabelTypes) *KeyChordEdit { t.Type = v; return t }
-
 // MapViewType is the [gti.Type] for [MapView]
 var MapViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.MapView", IDName: "map-view", Doc: "MapView represents a map, creating a property editor of the values --\nconstructs Children widgets to show the key / value pairs, within an\noverall frame.", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Map", Doc: "the map that we are a view onto"}, {Name: "MapValView", Doc: "Value for the map itself, if this was created within value view framework; otherwise nil"}, {Name: "Changed", Doc: "has the map been edited?"}, {Name: "Keys", Doc: "Value representations of the map keys"}, {Name: "Values", Doc: "Value representations of the map values"}, {Name: "SortVals", Doc: "sort by values instead of keys"}, {Name: "NCols", Doc: "the number of columns in the map; do not set externally;\ngenerally only access internally"}, {Name: "TmpSave", Doc: "value view that needs to have SaveTmp called on it whenever a change\nis made to one of the underlying values.\nPass this down to any sub-views created from a parent"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view.\nDisplayed as extra contextual information in view dialog windows."}}, Instance: &MapView{}})
 
@@ -293,7 +263,7 @@ func (t *MapView) SetTooltip(v string) *MapView { t.Tooltip = v; return t }
 func (t *MapView) SetStackTop(v int) *MapView { t.StackTop = v; return t }
 
 // MapViewInlineType is the [gti.Type] for [MapViewInline]
-var MapViewInlineType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.MapViewInline", IDName: "map-view-inline", Doc: "MapViewInline represents a map as a single line widget,\nfor smaller maps and those explicitly marked inline.", Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Map", Doc: "the map that we are a view onto"}, {Name: "MapValView", Doc: "Value for the map itself, if this was created within value view framework -- otherwise nil"}, {Name: "Changed", Doc: "has the map been edited?"}, {Name: "Keys", Doc: "Value representations of the map keys"}, {Name: "Values", Doc: "Value representations of the fields"}, {Name: "TmpSave", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}, {Name: "ConfigSize", Doc: "size of map when gui configed"}}, Instance: &MapViewInline{}})
+var MapViewInlineType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.MapViewInline", IDName: "map-view-inline", Doc: "MapViewInline represents a map as a single line widget,\nfor smaller maps and those explicitly marked inline.", Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Map", Doc: "the map that we are a view onto"}, {Name: "MapValue", Doc: "MapValue is the Value for the map itself\nif this was created within the Value framework.\nOtherwise, it is nil."}, {Name: "Changed", Doc: "has the map been edited?"}, {Name: "Keys", Doc: "Value representations of the map keys"}, {Name: "Values", Doc: "Value representations of the fields"}, {Name: "TmpSave", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}, {Name: "ConfigSize", Doc: "size of map when gui configed"}}, Instance: &MapViewInline{}})
 
 // NewMapViewInline adds a new [MapViewInline] with the given name to the given parent:
 // MapViewInline represents a map as a single line widget,
@@ -307,10 +277,6 @@ func (t *MapViewInline) KiType() *gti.Type { return MapViewInlineType }
 
 // New returns a new [*MapViewInline] value
 func (t *MapViewInline) New() ki.Ki { return &MapViewInline{} }
-
-// SetMapValView sets the [MapViewInline.MapValView]:
-// Value for the map itself, if this was created within value view framework -- otherwise nil
-func (t *MapViewInline) SetMapValView(v Value) *MapViewInline { t.MapValView = v; return t }
 
 // SetTmpSave sets the [MapViewInline.TmpSave]:
 // value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
@@ -464,7 +430,7 @@ func (t *SliceViewGrid) SetTooltip(v string) *SliceViewGrid { t.Tooltip = v; ret
 func (t *SliceViewGrid) SetStackTop(v int) *SliceViewGrid { t.StackTop = v; return t }
 
 // SliceViewInlineType is the [gti.Type] for [SliceViewInline]
-var SliceViewInlineType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.SliceViewInline", IDName: "slice-view-inline", Doc: "SliceViewInline represents a slice as a single line widget,\nfor smaller slices and those explicitly marked inline.", Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Slice", Doc: "the slice that we are a view onto"}, {Name: "SliceValue", Doc: "SliceValue is the Value for the slice itself\nif this was created within the Value framework.\nOtherwise, it is nil."}, {Name: "IsArray", Doc: "whether the slice is actually an array -- no modifications"}, {Name: "IsFixedLen", Doc: "whether the slice has a fixed-len flag on it"}, {Name: "Changed", Doc: "has the slice been edited?"}, {Name: "Values", Doc: "Value representations of the fields"}, {Name: "TmpSave", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}, {Name: "ConfigSize", Doc: "size of map when gui configed"}}, Instance: &SliceViewInline{}})
+var SliceViewInlineType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.SliceViewInline", IDName: "slice-view-inline", Doc: "SliceViewInline represents a slice as a single line widget,\nfor smaller slices and those explicitly marked inline.", Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Slice", Doc: "the slice that we are a view onto"}, {Name: "SliceValue", Doc: "SliceValue is the Value for the slice itself\nif this was created within the Value framework.\nOtherwise, it is nil."}, {Name: "IsArray", Doc: "whether the slice is actually an array -- no modifications"}, {Name: "IsFixedLen", Doc: "whether the slice has a fixed-len flag on it"}, {Name: "Changed", Doc: "has the slice been edited?"}, {Name: "Values", Doc: "Value representations of the fields"}, {Name: "TmpSave", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}, {Name: "ConfigSize", Doc: "size of map when gui was configured"}}, Instance: &SliceViewInline{}})
 
 // NewSliceViewInline adds a new [SliceViewInline] with the given name to the given parent:
 // SliceViewInline represents a slice as a single line widget,
@@ -478,16 +444,6 @@ func (t *SliceViewInline) KiType() *gti.Type { return SliceViewInlineType }
 
 // New returns a new [*SliceViewInline] value
 func (t *SliceViewInline) New() ki.Ki { return &SliceViewInline{} }
-
-// SetSliceValue sets the [SliceViewInline.SliceValue]:
-// SliceValue is the Value for the slice itself
-// if this was created within the Value framework.
-// Otherwise, it is nil.
-func (t *SliceViewInline) SetSliceValue(v Value) *SliceViewInline { t.SliceValue = v; return t }
-
-// SetIsFixedLen sets the [SliceViewInline.IsFixedLen]:
-// whether the slice has a fixed-len flag on it
-func (t *SliceViewInline) SetIsFixedLen(v bool) *SliceViewInline { t.IsFixedLen = v; return t }
 
 // SetTmpSave sets the [SliceViewInline.TmpSave]:
 // value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
@@ -504,7 +460,7 @@ func (t *SliceViewInline) SetTooltip(v string) *SliceViewInline { t.Tooltip = v;
 func (t *SliceViewInline) SetStackTop(v int) *SliceViewInline { t.StackTop = v; return t }
 
 // StructViewType is the [gti.Type] for [StructView]
-var StructViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.StructView", IDName: "struct-view", Doc: "StructView represents a struct, creating a property editor of the fields --\nconstructs Children widgets to show the field names and editor fields for\neach field, within an overall frame.", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Struct", Doc: "the struct that we are a view onto"}, {Name: "StructValView", Doc: "Value for the struct itself, if this was created within value view framework -- otherwise nil"}, {Name: "Changed", Doc: "has the value of any field changed?  updated by the ViewSig signals from fields"}, {Name: "FieldViews", Doc: "Value representations of the fields"}, {Name: "TmpSave", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}, {Name: "IsShouldShower", Doc: "IsShouldShower is whether the struct implements [gi.ShouldShower], which results\nin additional updating being done at certain points."}, {Name: "TypeFieldTags", Doc: "extra tags by field name -- from type properties"}}, Instance: &StructView{}})
+var StructViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.StructView", IDName: "struct-view", Doc: "StructView represents a struct, creating a property editor of the fields --\nconstructs Children widgets to show the field names and editor fields for\neach field, within an overall frame.", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Struct", Doc: "the struct that we are a view onto"}, {Name: "StructValue", Doc: "StructValue is the Value for the struct itself\nif this was created within the Value framework.\nOtherwise, it is nil."}, {Name: "Changed", Doc: "has the value of any field changed?  updated by the ViewSig signals from fields"}, {Name: "FieldViews", Doc: "Value representations of the fields"}, {Name: "TmpSave", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}, {Name: "IsShouldShower", Doc: "IsShouldShower is whether the struct implements [gi.ShouldShower], which results\nin additional updating being done at certain points."}, {Name: "TypeFieldTags", Doc: "extra tags by field name -- from type properties"}}, Instance: &StructView{}})
 
 // NewStructView adds a new [StructView] with the given name to the given parent:
 // StructView represents a struct, creating a property editor of the fields --
@@ -535,7 +491,7 @@ func (t *StructView) SetTooltip(v string) *StructView { t.Tooltip = v; return t 
 func (t *StructView) SetStackTop(v int) *StructView { t.StackTop = v; return t }
 
 // StructViewInlineType is the [gti.Type] for [StructViewInline]
-var StructViewInlineType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.StructViewInline", IDName: "struct-view-inline", Doc: "StructViewInline represents a struct as a single line widget,\nfor smaller structs and those explicitly marked inline.", Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Struct", Doc: "the struct that we are a view onto"}, {Name: "StructValView", Doc: "Value for the struct itself, if this was created within value view framework -- otherwise nil"}, {Name: "AddButton", Doc: "if true add an edit action button at the end -- other users of this widget can then configure that -- it is called 'edit-action'"}, {Name: "FieldViews", Doc: "Value representations of the fields"}, {Name: "TmpSave", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}, {Name: "IsShouldShower", Doc: "IsShouldShower is whether the struct implements [gi.ShouldShower], which results\nin additional updating being done at certain points."}}, Instance: &StructViewInline{}})
+var StructViewInlineType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.StructViewInline", IDName: "struct-view-inline", Doc: "StructViewInline represents a struct as a single line widget,\nfor smaller structs and those explicitly marked inline.", Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Struct", Doc: "the struct that we are a view onto"}, {Name: "StructValue", Doc: "Value for the struct itself, if this was created within value view framework -- otherwise nil"}, {Name: "AddButton", Doc: "if true add an edit action button at the end -- other users of this widget can then configure that -- it is called 'edit-action'"}, {Name: "FieldViews", Doc: "Value representations of the fields"}, {Name: "TmpSave", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}, {Name: "IsShouldShower", Doc: "IsShouldShower is whether the struct implements [gi.ShouldShower], which results\nin additional updating being done at certain points."}}, Instance: &StructViewInline{}})
 
 // NewStructViewInline adds a new [StructViewInline] with the given name to the given parent:
 // StructViewInline represents a struct as a single line widget,
@@ -549,10 +505,6 @@ func (t *StructViewInline) KiType() *gti.Type { return StructViewInlineType }
 
 // New returns a new [*StructViewInline] value
 func (t *StructViewInline) New() ki.Ki { return &StructViewInline{} }
-
-// SetStructValView sets the [StructViewInline.StructValView]:
-// Value for the struct itself, if this was created within value view framework -- otherwise nil
-func (t *StructViewInline) SetStructValView(v Value) *StructViewInline { t.StructValView = v; return t }
 
 // SetAddButton sets the [StructViewInline.AddButton]:
 // if true add an edit action button at the end -- other users of this widget can then configure that -- it is called 'edit-action'
