@@ -446,7 +446,6 @@ func (tf *TextField) EditDone() {
 	}
 	tf.ClearSelected()
 	tf.ClearCursor()
-	tf.NeedsLayout()
 }
 
 // Revert aborts editing and reverts to last saved text
@@ -1792,7 +1791,6 @@ func (tf *TextField) SizeUp() {
 	} else {
 		tf.EditTxt = []rune(tf.Txt)
 	}
-	tf.Edited = false
 	tf.StartPos = 0
 	tf.EndPos = len(tf.EditTxt)
 

@@ -236,7 +236,7 @@ type SliceViewBase struct {
 	SelVal any `copier:"-" view:"-" json:"-" xml:"-"`
 
 	// index of currently selected item
-	SelIdx int `copier:"-" json:"-" xml:"-"`
+	SelectedIndex int `copier:"-" json:"-" xml:"-"`
 
 	// index of row to select at start
 	InitSelIdx int `copier:"-" json:"-" xml:"-"`
@@ -463,7 +463,7 @@ func (sv *SliceViewBase) SetSliceBase() {
 	sv.StartIdx = 0
 	sv.VisRows = sv.MinRows
 	if !sv.IsReadOnly() {
-		sv.SelIdx = -1
+		sv.SelectedIndex = -1
 	}
 	sv.ResetSelectedIdxs()
 }
@@ -547,11 +547,11 @@ func (sv *SliceViewBase) ClickSelectEvent(e events.Event) bool {
 func (sv *SliceViewBase) BindSelect(val *int) *SliceViewBase {
 	sv.SetReadOnly(true)
 	sv.OnSelect(func(e events.Event) {
-		*val = sv.SelIdx
+		*val = sv.SelectedIndex
 	})
 	sv.OnDoubleClick(func(e events.Event) {
 		if sv.ClickSelectEvent(e) {
-			*val = sv.SelIdx
+			*val = sv.SelectedIndex
 			sv.Scene.SendKeyFun(keyfun.Accept, e) // activates Ok button code
 		}
 	})
@@ -772,15 +772,15 @@ func (sv *SliceViewBase) UpdateWidgets() {
 	if sv.SelVal != nil {
 		idx, ok := SliceIdxByValue(sv.Slice, sv.SelVal)
 		if ok {
-			sv.SelIdx = idx
-			scrollTo = sv.SelIdx
+			sv.SelectedIndex = idx
+			scrollTo = sv.SelectedIndex
 		}
 		sv.SelVal = nil
 		sv.InitSelIdx = -1
 	} else if sv.InitSelIdx >= 0 {
-		sv.SelIdx = sv.InitSelIdx
+		sv.SelectedIndex = sv.InitSelIdx
 		sv.InitSelIdx = -1
-		scrollTo = sv.SelIdx
+		scrollTo = sv.SelectedIndex
 	}
 	if scrollTo >= 0 {
 		sv.ScrollToIdx(scrollTo)
@@ -1168,13 +1168,13 @@ func SliceIdxByValue(slc any, fldVal any) (int, bool) {
 // MoveDown moves the selection down to next row, using given select mode
 // (from keyboard modifiers) -- returns newly selected row or -1 if failed
 func (sv *SliceViewBase) MoveDown(selMode events.SelectModes) int {
-	if sv.SelIdx >= sv.SliceSize-1 {
-		sv.SelIdx = sv.SliceSize - 1
+	if sv.SelectedIndex >= sv.SliceSize-1 {
+		sv.SelectedIndex = sv.SliceSize - 1
 		return -1
 	}
-	sv.SelIdx++
-	sv.SelectIdxAction(sv.SelIdx, selMode)
-	return sv.SelIdx
+	sv.SelectedIndex++
+	sv.SelectIdxAction(sv.SelectedIndex, selMode)
+	return sv.SelectedIndex
 }
 
 // MoveDownAction moves the selection down to next row, using given select
@@ -1192,13 +1192,13 @@ func (sv *SliceViewBase) MoveDownAction(selMode events.SelectModes) int {
 // MoveUp moves the selection up to previous idx, using given select mode
 // (from keyboard modifiers) -- returns newly selected idx or -1 if failed
 func (sv *SliceViewBase) MoveUp(selMode events.SelectModes) int {
-	if sv.SelIdx <= 0 {
-		sv.SelIdx = 0
+	if sv.SelectedIndex <= 0 {
+		sv.SelectedIndex = 0
 		return -1
 	}
-	sv.SelIdx--
-	sv.SelectIdxAction(sv.SelIdx, selMode)
-	return sv.SelIdx
+	sv.SelectedIndex--
+	sv.SelectIdxAction(sv.SelectedIndex, selMode)
+	return sv.SelectedIndex
 }
 
 // MoveUpAction moves the selection up to previous idx, using given select
@@ -1215,14 +1215,14 @@ func (sv *SliceViewBase) MoveUpAction(selMode events.SelectModes) int {
 // MovePageDown moves the selection down to next page, using given select mode
 // (from keyboard modifiers) -- returns newly selected idx or -1 if failed
 func (sv *SliceViewBase) MovePageDown(selMode events.SelectModes) int {
-	if sv.SelIdx >= sv.SliceSize-1 {
-		sv.SelIdx = sv.SliceSize - 1
+	if sv.SelectedIndex >= sv.SliceSize-1 {
+		sv.SelectedIndex = sv.SliceSize - 1
 		return -1
 	}
-	sv.SelIdx += sv.VisRows
-	sv.SelIdx = min(sv.SelIdx, sv.SliceSize-1)
-	sv.SelectIdxAction(sv.SelIdx, selMode)
-	return sv.SelIdx
+	sv.SelectedIndex += sv.VisRows
+	sv.SelectedIndex = min(sv.SelectedIndex, sv.SliceSize-1)
+	sv.SelectIdxAction(sv.SelectedIndex, selMode)
+	return sv.SelectedIndex
 }
 
 // MovePageDownAction moves the selection down to next page, using given select
@@ -1239,14 +1239,14 @@ func (sv *SliceViewBase) MovePageDownAction(selMode events.SelectModes) int {
 // MovePageUp moves the selection up to previous page, using given select mode
 // (from keyboard modifiers) -- returns newly selected idx or -1 if failed
 func (sv *SliceViewBase) MovePageUp(selMode events.SelectModes) int {
-	if sv.SelIdx <= 0 {
-		sv.SelIdx = 0
+	if sv.SelectedIndex <= 0 {
+		sv.SelectedIndex = 0
 		return -1
 	}
-	sv.SelIdx -= sv.VisRows
-	sv.SelIdx = max(0, sv.SelIdx)
-	sv.SelectIdxAction(sv.SelIdx, selMode)
-	return sv.SelIdx
+	sv.SelectedIndex -= sv.VisRows
+	sv.SelectedIndex = max(0, sv.SelectedIndex)
+	sv.SelectIdxAction(sv.SelectedIndex, selMode)
+	return sv.SelectedIndex
 }
 
 // MovePageUpAction moves the selection up to previous page, using given select
@@ -1339,8 +1339,8 @@ func (sv *SliceViewBase) UpdateSelectRow(row int, selMode events.SelectModes) {
 func (sv *SliceViewBase) UpdateSelectIdx(idx int, sel bool, selMode events.SelectModes) {
 	if sv.IsReadOnly() && !sv.Is(SliceViewReadOnlyMultiSel) {
 		sv.UnselectAllIdxs()
-		if sel || sv.SelIdx == idx {
-			sv.SelIdx = idx
+		if sel || sv.SelectedIndex == idx {
+			sv.SelectedIndex = idx
 			sv.SelectIdx(idx)
 		}
 		sv.ApplyStyleTree()
@@ -1357,7 +1357,7 @@ func (sv *SliceViewBase) IdxIsSelected(idx int) bool {
 	sv.ViewMuLock()
 	defer sv.ViewMuUnlock()
 	if sv.IsReadOnly() {
-		return idx == sv.SelIdx
+		return idx == sv.SelectedIndex
 	}
 	_, ok := sv.SelIdxs[idx]
 	return ok
@@ -1447,19 +1447,19 @@ func (sv *SliceViewBase) SelectIdxAction(idx int, mode events.SelectModes) {
 			if len(sv.SelIdxs) > 1 {
 				sv.UnselectAllIdxs()
 			}
-			sv.SelIdx = idx
+			sv.SelectedIndex = idx
 			sv.SelectIdx(idx)
 			sv.IdxGrabFocus(idx)
 		} else {
 			sv.UnselectAllIdxs()
-			sv.SelIdx = idx
+			sv.SelectedIndex = idx
 			sv.SelectIdx(idx)
 			sv.IdxGrabFocus(idx)
 		}
 		sv.Send(events.Select) //  sv.SelectedIdx)
 	case events.ExtendContinuous:
 		if len(sv.SelIdxs) == 0 {
-			sv.SelIdx = idx
+			sv.SelectedIndex = idx
 			sv.SelectIdx(idx)
 			sv.IdxGrabFocus(idx)
 			sv.Send(events.Select) //  sv.SelectedIdx)
@@ -1475,7 +1475,7 @@ func (sv *SliceViewBase) SelectIdxAction(idx int, mode events.SelectModes) {
 				maxIdx = max(maxIdx, r)
 			}
 			cidx := idx
-			sv.SelIdx = idx
+			sv.SelectedIndex = idx
 			sv.SelectIdx(idx)
 			if idx < minIdx {
 				for cidx < minIdx {
@@ -1496,19 +1496,19 @@ func (sv *SliceViewBase) SelectIdxAction(idx int, mode events.SelectModes) {
 			sv.UnselectIdxAction(idx)
 			sv.Send(events.Select) //  sv.SelectedIdx)
 		} else {
-			sv.SelIdx = idx
+			sv.SelectedIndex = idx
 			sv.SelectIdx(idx)
 			sv.IdxGrabFocus(idx)
 			sv.Send(events.Select) //  sv.SelectedIdx)
 		}
 	case events.Unselect:
-		sv.SelIdx = idx
+		sv.SelectedIndex = idx
 		sv.UnselectIdxAction(idx)
 	case events.SelectQuiet:
-		sv.SelIdx = idx
+		sv.SelectedIndex = idx
 		sv.SelectIdx(idx)
 	case events.UnselectQuiet:
-		sv.SelIdx = idx
+		sv.SelectedIndex = idx
 		sv.UnselectIdx(idx)
 	}
 	sv.This().(SliceViewer).UpdateWidgets()
@@ -1847,10 +1847,10 @@ func (sv *SliceViewBase) ContextMenu(m *gi.Scene) {
 		return
 	}
 	gi.NewButton(m).SetText("Add row").SetIcon(icons.Add).OnClick(func(e events.Event) {
-		sv.SliceNewAtRow((sv.SelIdx - sv.StartIdx) + 1)
+		sv.SliceNewAtRow((sv.SelectedIndex - sv.StartIdx) + 1)
 	})
 	gi.NewButton(m).SetText("Delete row").SetIcon(icons.Delete).OnClick(func(e events.Event) {
-		sv.SliceDeleteAtRow(sv.SelIdx - sv.StartIdx)
+		sv.SliceDeleteAtRow(sv.SelectedIndex - sv.StartIdx)
 	})
 	gi.NewSeparator(m)
 	gi.NewButton(m).SetText("Copy").SetIcon(icons.Copy).OnClick(func(e events.Event) {
@@ -1860,7 +1860,7 @@ func (sv *SliceViewBase) ContextMenu(m *gi.Scene) {
 		sv.CutIdxs()
 	})
 	gi.NewButton(m).SetText("Paste").SetIcon(icons.Paste).OnClick(func(e events.Event) {
-		sv.PasteIdx(sv.SelIdx)
+		sv.PasteIdx(sv.SelectedIndex)
 	})
 	gi.NewButton(m).SetText("Duplicate").SetIcon(icons.Copy).OnClick(func(e events.Event) {
 		sv.Duplicate()
@@ -1908,7 +1908,7 @@ func (sv *SliceViewBase) KeyInputEditable(kt events.Event) {
 	if kt.IsHandled() {
 		return
 	}
-	idx := sv.SelIdx
+	idx := sv.SelectedIndex
 	kf := keyfun.Of(kt.KeyChord())
 	if gi.DebugSettings.KeyEventTrace {
 		slog.Info("SliceViewBase KeyInput", "widget", sv, "keyfun", kf)
@@ -1946,7 +1946,7 @@ func (sv *SliceViewBase) KeyInputEditable(kt events.Event) {
 		sv.SetFlag(false, SliceViewSelectMode)
 		kt.SetHandled()
 	case keyfun.Paste:
-		sv.PasteIdx(sv.SelIdx)
+		sv.PasteIdx(sv.SelectedIndex)
 		sv.SetFlag(false, SliceViewSelectMode)
 		kt.SetHandled()
 	}
@@ -1967,7 +1967,7 @@ func (sv *SliceViewBase) KeyInputReadOnly(kt events.Event) {
 	if gi.DebugSettings.KeyEventTrace {
 		slog.Info("SliceViewBase ReadOnly KeyInput", "widget", sv, "keyfun", kf)
 	}
-	idx := sv.SelIdx
+	idx := sv.SelectedIndex
 	switch {
 	case kf == keyfun.MoveDown:
 		ni := idx + 1

@@ -66,7 +66,7 @@ type Ki interface {
 	// has been destroyed, or is improperly constructed.
 	This() Ki
 
-	// AsNode returns the *ki.Node base type for this node.
+	// AsKi returns the *ki.Node base type for this node.
 	AsKi() *Node
 
 	// BaseType returns the base node type for all elements within this tree.
