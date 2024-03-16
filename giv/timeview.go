@@ -26,9 +26,6 @@ type TimeView struct {
 	// the time that we are viewing
 	Time time.Time `set:"-"`
 
-	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
-	ViewPath string
-
 	// the raw input hour
 	Hour int `set:"-"`
 
@@ -142,10 +139,6 @@ type DateView struct {
 
 	// the time that we are viewing
 	Time time.Time `set:"-"`
-
-	// a record of parent View names that have led up to this view
-	// displayed as extra contextual information in view dialog windows
-	ViewPath string
 
 	// ConfigTime is the time that was configured
 	ConfigTime time.Time `set:"-" view:"-"`

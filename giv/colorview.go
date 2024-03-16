@@ -27,9 +27,6 @@ type ColorView struct {
 
 	// the color that we view
 	Color hct.HCT `set:"-"`
-
-	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
-	ViewPath string
 }
 
 // SetColor sets the source color

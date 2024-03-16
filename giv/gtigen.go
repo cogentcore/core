@@ -17,7 +17,7 @@ import (
 )
 
 // ArgViewType is the [gti.Type] for [ArgView]
-var ArgViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.ArgView", IDName: "arg-view", Doc: "ArgView represents a slice of reflect.Value's and associated names, for the\npurpose of supplying arguments to methods called via the MethodView\nframework.", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Args", Doc: "Args are the args that we are a view onto"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}}, Instance: &ArgView{}})
+var ArgViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.ArgView", IDName: "arg-view", Doc: "ArgView represents a slice of reflect.Value's and associated names, for the\npurpose of supplying arguments to methods called via the MethodView\nframework.", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Args", Doc: "Args are the args that we are a view onto"}}, Instance: &ArgView{}})
 
 // NewArgView adds a new [ArgView] with the given name to the given parent:
 // ArgView represents a slice of reflect.Value's and associated names, for the
@@ -37,10 +37,6 @@ func (t *ArgView) New() ki.Ki { return &ArgView{} }
 // Args are the args that we are a view onto
 func (t *ArgView) SetArgs(v ...Value) *ArgView { t.Args = v; return t }
 
-// SetViewPath sets the [ArgView.ViewPath]:
-// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
-func (t *ArgView) SetViewPath(v string) *ArgView { t.ViewPath = v; return t }
-
 // SetTooltip sets the [ArgView.Tooltip]
 func (t *ArgView) SetTooltip(v string) *ArgView { t.Tooltip = v; return t }
 
@@ -48,7 +44,7 @@ func (t *ArgView) SetTooltip(v string) *ArgView { t.Tooltip = v; return t }
 func (t *ArgView) SetStackTop(v int) *ArgView { t.StackTop = v; return t }
 
 // ColorViewType is the [gti.Type] for [ColorView]
-var ColorViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.ColorView", IDName: "color-view", Doc: "ColorView shows a color, using sliders or numbers to set values.", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Color", Doc: "the color that we view"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}}, Instance: &ColorView{}})
+var ColorViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.ColorView", IDName: "color-view", Doc: "ColorView shows a color, using sliders or numbers to set values.", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Color", Doc: "the color that we view"}}, Instance: &ColorView{}})
 
 // NewColorView adds a new [ColorView] with the given name to the given parent:
 // ColorView shows a color, using sliders or numbers to set values.
@@ -61,10 +57,6 @@ func (t *ColorView) KiType() *gti.Type { return ColorViewType }
 
 // New returns a new [*ColorView] value
 func (t *ColorView) New() ki.Ki { return &ColorView{} }
-
-// SetViewPath sets the [ColorView.ViewPath]:
-// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
-func (t *ColorView) SetViewPath(v string) *ColorView { t.ViewPath = v; return t }
 
 // SetTooltip sets the [ColorView.Tooltip]
 func (t *ColorView) SetTooltip(v string) *ColorView { t.Tooltip = v; return t }
@@ -555,7 +547,7 @@ func (t *TableView) SetSelectedIndex(v int) *TableView { t.SelectedIndex = v; re
 func (t *TableView) SetInitSelIdx(v int) *TableView { t.InitSelIdx = v; return t }
 
 // TimeViewType is the [gti.Type] for [TimeView]
-var TimeViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.TimeView", IDName: "time-view", Doc: "TimeView is a view for selecting a time", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Time", Doc: "the time that we are viewing"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}, {Name: "Hour", Doc: "the raw input hour"}, {Name: "PM", Doc: "whether we are in PM mode (so we have to add 12h to everything)"}}, Instance: &TimeView{}})
+var TimeViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.TimeView", IDName: "time-view", Doc: "TimeView is a view for selecting a time", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Time", Doc: "the time that we are viewing"}, {Name: "Hour", Doc: "the raw input hour"}, {Name: "PM", Doc: "whether we are in PM mode (so we have to add 12h to everything)"}}, Instance: &TimeView{}})
 
 // NewTimeView adds a new [TimeView] with the given name to the given parent:
 // TimeView is a view for selecting a time
@@ -569,10 +561,6 @@ func (t *TimeView) KiType() *gti.Type { return TimeViewType }
 // New returns a new [*TimeView] value
 func (t *TimeView) New() ki.Ki { return &TimeView{} }
 
-// SetViewPath sets the [TimeView.ViewPath]:
-// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
-func (t *TimeView) SetViewPath(v string) *TimeView { t.ViewPath = v; return t }
-
 // SetTooltip sets the [TimeView.Tooltip]
 func (t *TimeView) SetTooltip(v string) *TimeView { t.Tooltip = v; return t }
 
@@ -580,7 +568,7 @@ func (t *TimeView) SetTooltip(v string) *TimeView { t.Tooltip = v; return t }
 func (t *TimeView) SetStackTop(v int) *TimeView { t.StackTop = v; return t }
 
 // DateViewType is the [gti.Type] for [DateView]
-var DateViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.DateView", IDName: "date-view", Doc: "DateView is a view for selecting a date", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Time", Doc: "the time that we are viewing"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view\ndisplayed as extra contextual information in view dialog windows"}, {Name: "ConfigTime", Doc: "ConfigTime is the time that was configured"}}, Instance: &DateView{}})
+var DateViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.DateView", IDName: "date-view", Doc: "DateView is a view for selecting a date", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Time", Doc: "the time that we are viewing"}, {Name: "ConfigTime", Doc: "ConfigTime is the time that was configured"}}, Instance: &DateView{}})
 
 // NewDateView adds a new [DateView] with the given name to the given parent:
 // DateView is a view for selecting a date
@@ -593,11 +581,6 @@ func (t *DateView) KiType() *gti.Type { return DateViewType }
 
 // New returns a new [*DateView] value
 func (t *DateView) New() ki.Ki { return &DateView{} }
-
-// SetViewPath sets the [DateView.ViewPath]:
-// a record of parent View names that have led up to this view
-// displayed as extra contextual information in view dialog windows
-func (t *DateView) SetViewPath(v string) *DateView { t.ViewPath = v; return t }
 
 // SetTooltip sets the [DateView.Tooltip]
 func (t *DateView) SetTooltip(v string) *DateView { t.Tooltip = v; return t }

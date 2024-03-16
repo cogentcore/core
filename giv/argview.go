@@ -22,9 +22,6 @@ type ArgView struct {
 
 	// Args are the args that we are a view onto
 	Args []Value
-
-	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
-	ViewPath string
 }
 
 func (av *ArgView) OnInit() {
