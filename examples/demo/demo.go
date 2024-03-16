@@ -308,30 +308,34 @@ func icon(ts *gi.Tabs) {
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Icons")
 	gi.NewLabel(tab).SetText("Cogent Core provides more than 2,000 unique icons from the Material Symbols collection.")
 
-	grid := gi.NewFrame(tab)
-	grid.Style(func(s *styles.Style) {
-		s.Wrap = true
-		s.Overflow.Y = styles.OverflowAuto
-	})
+	gi.NewButton(tab).SetText("View icons").OnClick(func(e events.Event) {
+		d := gi.NewBody().AddTitle("Cogent Core Icons")
+		grid := gi.NewFrame(d)
+		grid.Style(func(s *styles.Style) {
+			s.Wrap = true
+			s.Overflow.Y = styles.OverflowAuto
+		})
 
-	icnms := icons.All()
-	for _, ic := range icnms {
-		icnm := string(ic)
-		if strings.HasSuffix(icnm, "-fill") {
-			continue
+		icnms := icons.All()
+		for _, ic := range icnms {
+			icnm := string(ic)
+			if strings.HasSuffix(icnm, "-fill") {
+				continue
+			}
+			vb := gi.NewLayout(grid, icnm).Style(func(s *styles.Style) {
+				s.Direction = styles.Column
+				s.Max.X.Em(15) // constraining width exactly gives nice grid-like appearance
+				s.Min.X.Em(15)
+			})
+			gi.NewIcon(vb, icnm).SetIcon(icons.Icon(icnm)).Style(func(s *styles.Style) {
+				s.Min.Set(units.Em(4))
+			})
+			gi.NewLabel(vb, icnm).SetText(strcase.ToSentence(icnm)).Style(func(s *styles.Style) {
+				s.SetTextWrap(false)
+			})
 		}
-		vb := gi.NewLayout(grid, icnm).Style(func(s *styles.Style) {
-			s.Direction = styles.Column
-			s.Max.X.Em(15) // constraining width exactly gives nice grid-like appearance
-			s.Min.X.Em(15)
-		})
-		gi.NewIcon(vb, icnm).SetIcon(icons.Icon(icnm)).Style(func(s *styles.Style) {
-			s.Min.Set(units.Em(4))
-		})
-		gi.NewLabel(vb, icnm).SetText(strcase.ToSentence(icnm)).Style(func(s *styles.Style) {
-			s.SetTextWrap(false)
-		})
-	}
+		d.NewFullDialog(tab).Run()
+	})
 }
 
 func values(ts *gi.Tabs) {
