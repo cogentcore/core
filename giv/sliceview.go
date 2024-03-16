@@ -271,13 +271,13 @@ type SliceViewBase struct {
 	HoverRow int `set:"-" view:"-" copier:"-" json:"-" xml:"-"`
 
 	// list of currently-dragged indexes
-	DraggedIdxs []int `set:"-" view:"-" copier:"-" json:"-" xml:"-"`
+	DraggedIndexes []int `set:"-" view:"-" copier:"-" json:"-" xml:"-"`
 
 	// total number of rows visible in allocated display size
 	VisRows int `set:"-" edit:"-" copier:"-" json:"-" xml:"-"`
 
 	// starting slice index of visible rows
-	StartIdx int `set:"-" edit:"-" copier:"-" json:"-" xml:"-"`
+	StartIndex int `set:"-" edit:"-" copier:"-" json:"-" xml:"-"`
 
 	// size of slice
 	SliceSize int `set:"-" edit:"-" copier:"-" json:"-" xml:"-"`
@@ -286,7 +286,7 @@ type SliceViewBase struct {
 	ConfigIter int `set:"-" edit:"-" copier:"-" json:"-" xml:"-"`
 
 	// temp idx state for e.g., dnd
-	TmpIdx int `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
+	TmpIndex int `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
 
 	// ElVal is a Value representation of the underlying element type
 	// which is used whenever there are no slice elements available
@@ -367,7 +367,7 @@ func (sv *SliceViewBase) SetStyles() {
 				row, _, isValid := sg.IndexFromPixel(e.Pos())
 				if isValid {
 					sv.UpdateSelectRow(row, e.SelectMode())
-					sv.LastClick = row + sv.StartIdx
+					sv.LastClick = row + sv.StartIndex
 				}
 			}
 			sg.OnClick(oc)
@@ -422,7 +422,7 @@ func (sv *SliceViewBase) SetStyles() {
 						wb.SetReadOnly(true)
 					}
 					row, col := sv.WidgetIndex(w)
-					row += sv.StartIdx
+					row += sv.StartIndex
 					sv.This().(SliceViewer).StyleValueWidget(w, s, row, col)
 					if row < sv.SliceSize {
 						sv.This().(SliceViewer).StyleRow(w, row, col)
@@ -432,7 +432,7 @@ func (sv *SliceViewBase) SetStyles() {
 					e.SetHandled()
 					row, _ := sv.WidgetIndex(w)
 					sv.UpdateSelectRow(row, e.SelectMode())
-					sv.LastClick = row + sv.StartIdx
+					sv.LastClick = row + sv.StartIndex
 				})
 				wb.OnDoubleClick(sv.HandleEvent)
 				wb.On(events.ContextMenu, sv.HandleEvent)
@@ -457,7 +457,7 @@ func (sv *SliceViewBase) AsSliceViewBase() *SliceViewBase {
 func (sv *SliceViewBase) SetSliceBase() {
 	sv.SetFlag(false, SliceViewConfigured, SliceViewSelectMode)
 	sv.ConfigIter = 0
-	sv.StartIdx = 0
+	sv.StartIndex = 0
 	sv.VisRows = sv.MinRows
 	if !sv.IsReadOnly() {
 		sv.SelectedIndex = -1
@@ -517,7 +517,7 @@ func (sv *SliceViewBase) RowFromEventPos(e events.Event) (row, idx int, isValid 
 	if !isValid {
 		return
 	}
-	idx = row + sv.StartIdx
+	idx = row + sv.StartIndex
 	if row < 0 || idx >= sv.SliceSize {
 		isValid = false
 	}
@@ -640,10 +640,10 @@ func (sv *SliceViewBase) UpdateStartIdx() {
 	sz := sv.This().(SliceViewer).UpdtSliceSize()
 	if sz > sv.VisRows {
 		lastSt := sz - sv.VisRows
-		sv.StartIdx = min(lastSt, sv.StartIdx)
-		sv.StartIdx = max(0, sv.StartIdx)
+		sv.StartIndex = min(lastSt, sv.StartIndex)
+		sv.StartIndex = max(0, sv.StartIndex)
 	} else {
-		sv.StartIdx = 0
+		sv.StartIndex = 0
 	}
 }
 
@@ -653,7 +653,7 @@ func (sv *SliceViewBase) UpdateScroll() {
 	if sg == nil {
 		return
 	}
-	sg.UpdateScroll(sv.StartIdx)
+	sg.UpdateScroll(sv.StartIndex)
 }
 
 // ConfigRows configures VisRows worth of widgets
@@ -712,7 +712,7 @@ func (sv *SliceViewBase) ConfigRows() {
 			idxlab.OnSelect(func(e events.Event) {
 				e.SetHandled()
 				sv.UpdateSelectRow(i, e.SelectMode())
-				sv.LastClick = i + sv.StartIdx
+				sv.LastClick = i + sv.StartIndex
 			})
 			idxlab.SetProp(SliceViewRowProp, i)
 		}
@@ -788,7 +788,7 @@ func (sv *SliceViewBase) UpdateWidgets() {
 		ridx := i * nWidgPerRow
 		w := sg.Kids[ridx+idxOff].(gi.Widget)
 		vv := sv.Values[i]
-		si := sv.StartIdx + i // slice idx
+		si := sv.StartIndex + i // slice idx
 		invis := si >= sv.SliceSize
 
 		var idxlab *gi.Label
@@ -833,7 +833,7 @@ func (sv *SliceViewBase) SetChanged() {
 
 // SliceNewAtRow inserts a new blank element at given display row
 func (sv *SliceViewBase) SliceNewAtRow(row int) {
-	sv.This().(SliceViewer).SliceNewAt(sv.StartIdx + row)
+	sv.This().(SliceViewer).SliceNewAt(sv.StartIndex + row)
 }
 
 // SliceNewAt inserts a new blank element at given index in the slice -- -1
@@ -908,7 +908,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 // SliceDeleteAtRow deletes element at given display row
 // if updt is true, then update the grid after
 func (sv *SliceViewBase) SliceDeleteAtRow(row int) {
-	sv.This().(SliceViewer).SliceDeleteAt(sv.StartIdx + row)
+	sv.This().(SliceViewer).SliceDeleteAt(sv.StartIndex + row)
 }
 
 // SliceNewAtSel updates selected rows based on
@@ -1002,7 +1002,7 @@ func (sv *SliceViewBase) IsRowInBounds(row int) bool {
 
 // IsIdxVisible returns true if slice index is currently visible
 func (sv *SliceViewBase) IsIdxVisible(idx int) bool {
-	return sv.IsRowInBounds(idx - sv.StartIdx)
+	return sv.IsRowInBounds(idx - sv.StartIndex)
 }
 
 // RowFirstWidget returns the first widget for given row (could be index or
@@ -1044,12 +1044,12 @@ func (sv *SliceViewBase) RowGrabFocus(row int) *gi.WidgetBase {
 // in given idx.  returns that element or nil if not successful.
 func (sv *SliceViewBase) IdxGrabFocus(idx int) *gi.WidgetBase {
 	sv.ScrollToIdx(idx)
-	return sv.This().(SliceViewer).RowGrabFocus(idx - sv.StartIdx)
+	return sv.This().(SliceViewer).RowGrabFocus(idx - sv.StartIndex)
 }
 
 // IdxPos returns center of window position of index label for idx (ContextMenuPos)
 func (sv *SliceViewBase) IdxPos(idx int) image.Point {
-	row := idx - sv.StartIdx
+	row := idx - sv.StartIndex
 	if row < 0 {
 		row = 0
 	}
@@ -1084,7 +1084,7 @@ func (sv *SliceViewBase) IdxFromPos(posY int) (int, bool) {
 	if !ok {
 		return -1, false
 	}
-	return row + sv.StartIdx, true
+	return row + sv.StartIndex, true
 }
 
 // ScrollToIdxNoUpdt ensures that given slice idx is visible
@@ -1095,15 +1095,15 @@ func (sv *SliceViewBase) ScrollToIdxNoUpdt(idx int) bool {
 	if sv.VisRows == 0 {
 		return false
 	}
-	if idx < sv.StartIdx {
-		sv.StartIdx = idx
-		sv.StartIdx = max(0, sv.StartIdx)
+	if idx < sv.StartIndex {
+		sv.StartIndex = idx
+		sv.StartIndex = max(0, sv.StartIndex)
 		sv.UpdateScroll()
 		return true
 	}
-	if idx >= sv.StartIdx+sv.VisRows {
-		sv.StartIdx = idx - (sv.VisRows - 4)
-		sv.StartIdx = max(0, sv.StartIdx)
+	if idx >= sv.StartIndex+sv.VisRows {
+		sv.StartIndex = idx - (sv.VisRows - 4)
+		sv.StartIndex = max(0, sv.StartIndex)
 		sv.UpdateScroll()
 		return true
 	}
@@ -1311,13 +1311,13 @@ func (sv *SliceViewBase) SelectIdxWidgets(idx int, sel bool) bool {
 	if !sv.IsIdxVisible(idx) {
 		return false
 	}
-	sv.SelectRowWidgets(idx-sv.StartIdx, sel)
+	sv.SelectRowWidgets(idx-sv.StartIndex, sel)
 	return true
 }
 
 // UpdateSelectRow updates the selection for the given row
 func (sv *SliceViewBase) UpdateSelectRow(row int, selMode events.SelectModes) {
-	idx := row + sv.StartIdx
+	idx := row + sv.StartIndex
 	if row < 0 || idx >= sv.SliceSize {
 		return
 	}
@@ -1618,11 +1618,11 @@ func (sv *SliceViewBase) CutIdxs() { //gti:add
 
 // PasteIdx pastes clipboard at given idx
 func (sv *SliceViewBase) PasteIdx(idx int) { //gti:add
-	sv.TmpIdx = idx
+	sv.TmpIndex = idx
 	dt := sv.This().(SliceViewer).MimeDataType()
 	md := sv.Clipboard().Read([]string{dt})
 	if md != nil {
-		sv.PasteMenu(md, sv.TmpIdx)
+		sv.PasteMenu(md, sv.TmpIndex)
 	}
 }
 
@@ -1750,7 +1750,7 @@ func (sv *SliceViewBase) DragStart(e events.Event) {
 	}
 	md := sv.This().(SliceViewer).CopySelToMime()
 	ixs := sv.SelectedIdxsList(false) // ascending
-	w, ok := sv.This().(SliceViewer).RowFirstWidget(ixs[0] - sv.StartIdx)
+	w, ok := sv.This().(SliceViewer).RowFirstWidget(ixs[0] - sv.StartIndex)
 	if ok {
 		sv.Scene.EventMgr.DragStart(w, md, e)
 		e.SetHandled()
@@ -1769,7 +1769,7 @@ func (sv *SliceViewBase) DragDrop(e events.Event) {
 	idx, ok := sv.IdxFromPos(pos.Y)
 	if ok {
 		// sv.DraggedIdxs = nil
-		sv.TmpIdx = idx
+		sv.TmpIndex = idx
 		sv.SaveDraggedIdxs(idx)
 		md := de.Data.(mimedata.Mimes)
 		mf := func(m *gi.Scene) {
@@ -1778,7 +1778,7 @@ func (sv *SliceViewBase) DragDrop(e events.Event) {
 				svi.DropFinalize(de)
 			})
 		}
-		pos := sv.IdxPos(sv.TmpIdx)
+		pos := sv.IdxPos(sv.TmpIndex)
 		gi.NewMenu(mf, sv.This().(gi.Widget), pos).Run()
 	}
 }
@@ -1793,14 +1793,14 @@ func (sv *SliceViewBase) DropFinalize(de *events.DragDrop) {
 
 // DropDeleteSource handles delete source event for DropMove case
 func (sv *SliceViewBase) DropDeleteSource(e events.Event) {
-	sort.Slice(sv.DraggedIdxs, func(i, j int) bool {
-		return sv.DraggedIdxs[i] > sv.DraggedIdxs[j]
+	sort.Slice(sv.DraggedIndexes, func(i, j int) bool {
+		return sv.DraggedIndexes[i] > sv.DraggedIndexes[j]
 	})
-	idx := sv.DraggedIdxs[0]
-	for _, i := range sv.DraggedIdxs {
+	idx := sv.DraggedIndexes[0]
+	for _, i := range sv.DraggedIndexes {
 		sv.This().(SliceViewer).SliceDeleteAt(i)
 	}
-	sv.DraggedIdxs = nil
+	sv.DraggedIndexes = nil
 	sv.SelectIdxAction(idx, events.SelectOne)
 }
 
@@ -1809,16 +1809,16 @@ func (sv *SliceViewBase) DropDeleteSource(e events.Event) {
 func (sv *SliceViewBase) SaveDraggedIdxs(idx int) {
 	sz := len(sv.SelectedIndexs)
 	if sz == 0 {
-		sv.DraggedIdxs = nil
+		sv.DraggedIndexes = nil
 		return
 	}
 	ixs := sv.SelectedIdxsList(false) // ascending
-	sv.DraggedIdxs = make([]int, len(ixs))
+	sv.DraggedIndexes = make([]int, len(ixs))
 	for i, ix := range ixs {
 		if ix > idx {
-			sv.DraggedIdxs[i] = ix + sz // make room for insertion
+			sv.DraggedIndexes[i] = ix + sz // make room for insertion
 		} else {
-			sv.DraggedIdxs[i] = ix
+			sv.DraggedIndexes[i] = ix
 		}
 	}
 }
@@ -1831,10 +1831,10 @@ func (sv *SliceViewBase) ContextMenu(m *gi.Scene) {
 		return
 	}
 	gi.NewButton(m).SetText("Add row").SetIcon(icons.Add).OnClick(func(e events.Event) {
-		sv.SliceNewAtRow((sv.SelectedIndex - sv.StartIdx) + 1)
+		sv.SliceNewAtRow((sv.SelectedIndex - sv.StartIndex) + 1)
 	})
 	gi.NewButton(m).SetText("Delete row").SetIcon(icons.Delete).OnClick(func(e events.Event) {
-		sv.SliceDeleteAtRow(sv.SelectedIndex - sv.StartIdx)
+		sv.SliceDeleteAtRow(sv.SelectedIndex - sv.StartIndex)
 	})
 	gi.NewSeparator(m)
 	gi.NewButton(m).SetText("Copy").SetIcon(icons.Copy).OnClick(func(e events.Event) {
@@ -2032,7 +2032,7 @@ func (sv *SliceViewBase) HandleEvents() {
 		if !isValid {
 			return
 		}
-		if sv.LastClick != row+sv.StartIdx {
+		if sv.LastClick != row+sv.StartIndex {
 			sv.This().(SliceViewer).SliceGrid().Send(events.Click, e)
 			e.SetHandled()
 		}
@@ -2152,7 +2152,7 @@ func (sg *SliceViewGrid) ScrollChanged(d mat32.Dims, sb *gi.Slider) {
 	if sv == nil {
 		return
 	}
-	sv.StartIdx = int(mat32.Round(sb.Value))
+	sv.StartIndex = int(mat32.Round(sb.Value))
 	sv.This().(SliceViewer).UpdateWidgets()
 	sg.NeedsRender()
 }
@@ -2242,7 +2242,7 @@ func (sg *SliceViewGrid) ChildBackground(child gi.Widget) image.Image {
 	}
 	sg.UpdateBackgrounds()
 	row, _ := sv.WidgetIndex(child)
-	si := row + sv.StartIdx
+	si := row + sv.StartIndex
 	return sg.RowBackground(sv.IdxIsSelected(si), si%2 == 1, row == sv.HoverRow)
 }
 
@@ -2262,7 +2262,7 @@ func (sg *SliceViewGrid) RenderStripes() {
 	_, sv := sg.SliceView()
 	startIdx := 0
 	if sv != nil {
-		startIdx = sv.StartIdx
+		startIdx = sv.StartIndex
 		offset = startIdx % 2
 	}
 	for r := 0; r < rows; r++ {

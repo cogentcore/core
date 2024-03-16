@@ -601,7 +601,7 @@ func (v *FontValue) ConfigDialog(d *gi.Body) (bool, func()) {
 		s.Font.Weight = fi[row].Weight
 		s.Font.Style = fi[row].Style
 		s.Font.Size.Pt(18)
-	}).SetSlice(&fi).SetSelVal(cur).SetSelField("Name").BindSelect(&si)
+	}).SetSlice(&fi).SetSelVal(cur).SetSelectedField("Name").BindSelect(&si)
 
 	return true, func() {
 		if si >= 0 {

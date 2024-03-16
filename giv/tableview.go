@@ -39,10 +39,10 @@ type TableView struct {
 	StyleFunc TableViewStyleFunc `copier:"-" view:"-" json:"-" xml:"-"`
 
 	// current selection field -- initially select value in this field
-	SelField string `copier:"-" view:"-" json:"-" xml:"-"`
+	SelectedField string `copier:"-" view:"-" json:"-" xml:"-"`
 
 	// current sort index
-	SortIdx int
+	SortIndex int
 
 	// whether current sort order is descending
 	SortDesc bool
@@ -80,7 +80,7 @@ func (tv *TableView) OnInit() {
 
 func (tv *TableView) SetStyles() {
 	tv.SliceViewBase.SetStyles() // handles all the basics
-	tv.SortIdx = -1
+	tv.SortIndex = -1
 
 	// we only have to handle the header
 	tv.OnWidgetAdded(func(w gi.Widget) {
@@ -103,7 +103,7 @@ func (tv *TableView) SetStyles() {
 			w.Style(func(s *styles.Style) {
 				if hdr, ok := w.(*gi.Button); ok {
 					fli := hdr.Prop("field-index").(int)
-					if fli == tv.SortIdx {
+					if fli == tv.SortIndex {
 						if tv.SortDesc {
 							hdr.SetIcon(icons.KeyboardArrowDown)
 						} else {
@@ -119,7 +119,7 @@ func (tv *TableView) SetStyles() {
 // StyleValueWidget performs additional value widget styling
 func (tv *TableView) StyleValueWidget(w gi.Widget, s *styles.Style, row, col int) {
 	hw := float32(tv.HeaderWidths[col])
-	if col == tv.SortIdx {
+	if col == tv.SortIndex {
 		hw += 6
 	}
 	if len(tv.ColMaxWidths) > col {
@@ -279,7 +279,7 @@ func (tv *TableView) ConfigHeader() {
 		hdr.SetText(htxt)
 		tv.HeaderWidths[fli] = len(htxt)
 		hdr.SetProp("field-index", fli)
-		if fli == tv.SortIdx {
+		if fli == tv.SortIndex {
 			if tv.SortDesc {
 				hdr.SetIcon(icons.KeyboardArrowDown)
 			} else {
@@ -443,9 +443,9 @@ func (tv *TableView) UpdateWidgets() {
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 
 	scrollTo := -1
-	if tv.SelField != "" && tv.SelVal != nil {
-		tv.SelectedIndex, _ = StructSliceIdxByValue(tv.Slice, tv.SelField, tv.SelVal)
-		tv.SelField = ""
+	if tv.SelectedField != "" && tv.SelVal != nil {
+		tv.SelectedIndex, _ = StructSliceIdxByValue(tv.Slice, tv.SelectedField, tv.SelVal)
+		tv.SelectedField = ""
 		tv.SelVal = nil
 		tv.InitSelectedIndex = -1
 		scrollTo = tv.SelectedIndex
@@ -461,7 +461,7 @@ func (tv *TableView) UpdateWidgets() {
 
 	for i := 0; i < tv.VisRows; i++ {
 		ridx := i * nWidgPerRow
-		si := tv.StartIdx + i // slice idx
+		si := tv.StartIndex + i // slice idx
 		invis := si >= tv.SliceSize
 
 		var idxlab *gi.Label
@@ -582,10 +582,10 @@ func (tv *TableView) SliceDeleteAt(idx int) {
 
 // SortSlice sorts the slice according to current settings
 func (tv *TableView) SortSlice() {
-	if tv.SortIdx < 0 || tv.SortIdx >= len(tv.VisFields) {
+	if tv.SortIndex < 0 || tv.SortIndex >= len(tv.VisFields) {
 		return
 	}
-	rawIdx := tv.VisFields[tv.SortIdx].Index
+	rawIdx := tv.VisFields[tv.SortIndex].Index
 	laser.StructSliceSort(tv.Slice, rawIdx, !tv.SortDesc)
 }
 
@@ -601,7 +601,7 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 		hdr := sgh.Child(idxOff + fli).(*gi.Button)
 		hdr.SetType(gi.ButtonAction)
 		if fli == fldIdx {
-			if tv.SortIdx == fli {
+			if tv.SortIndex == fli {
 				tv.SortDesc = !tv.SortDesc
 				ascending = !tv.SortDesc
 			} else {
@@ -617,7 +617,7 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 		}
 	}
 
-	tv.SortIdx = fldIdx
+	tv.SortIndex = fldIdx
 	tv.SortSlice()
 	sgh.Update() // requires full update due to sort button icon
 	tv.UpdateWidgets()
@@ -627,8 +627,8 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 // SortFieldName returns the name of the field being sorted, along with :up or
 // :down depending on descending
 func (tv *TableView) SortFieldName() string {
-	if tv.SortIdx >= 0 && tv.SortIdx < tv.NVisFields {
-		nm := tv.VisFields[tv.SortIdx].Name
+	if tv.SortIndex >= 0 && tv.SortIndex < tv.NVisFields {
+		nm := tv.VisFields[tv.SortIndex].Name
 		if tv.SortDesc {
 			nm += ":down"
 		} else {
@@ -652,7 +652,7 @@ func (tv *TableView) SetSortFieldName(nm string) {
 		if fld.Name == spnm[0] {
 			got = true
 			// fmt.Println("sorting on:", fld.Name, fli, "from:", nm)
-			tv.SortIdx = fli
+			tv.SortIndex = fli
 		}
 	}
 	if len(spnm) == 2 {
@@ -722,10 +722,10 @@ func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
 // row, setting SelectedIdx and selecting row if found -- returns true if
 // found, false otherwise
 func (tv *TableView) SelectFieldVal(fld, val string) bool {
-	tv.SelField = fld
+	tv.SelectedField = fld
 	tv.SelVal = val
-	if tv.SelField != "" && tv.SelVal != nil {
-		idx, _ := StructSliceIdxByValue(tv.Slice, tv.SelField, tv.SelVal)
+	if tv.SelectedField != "" && tv.SelVal != nil {
+		idx, _ := StructSliceIdxByValue(tv.Slice, tv.SelectedField, tv.SelVal)
 		if idx >= 0 {
 			tv.ScrollToIdx(idx)
 			tv.UpdateSelectIdx(idx, true, events.SelectOne)

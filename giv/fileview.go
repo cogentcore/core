@@ -579,7 +579,7 @@ func (fv *FileView) UpdateFiles() {
 
 	sv := fv.FilesView()
 	sv.ResetSelectedIdxs()
-	sv.SelField = "Name"
+	sv.SelectedField = "Name"
 	sv.SelVal = fv.SelFile
 	sv.SortSlice()
 	sv.Update()
