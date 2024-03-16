@@ -208,7 +208,7 @@ func (tb *Toolbar) StdOverflowMenu(m *Scene) { //gti:add
 			})
 		NewButton(m, "quit-app").SetText("Quit").SetIcon(icons.Close).SetShortcut("Command+Q").
 			OnClick(func(e events.Event) {
-				TheApp.QuitReq()
+				go TheApp.QuitReq()
 			})
 		NewSeparator(m)
 		for _, w := range MainRenderWins {
