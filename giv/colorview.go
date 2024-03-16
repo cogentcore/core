@@ -8,8 +8,6 @@ import (
 	"image"
 	"image/color"
 
-	"golang.org/x/image/colornames"
-
 	"cogentcore.org/core/cam/hct"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
