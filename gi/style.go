@@ -79,7 +79,22 @@ func (wb *WidgetBase) ApplyStyleParts() {
 // ApplyStyleWidget is the primary styling function for all Widgets.
 // Handles inheritance and runs the Styler functions.
 func (wb *WidgetBase) ApplyStyleWidget() {
-	if wb.OverrideStyle || wb.This() == nil {
+	if wb.This() == nil {
+		return
+	}
+
+	// we do these things even if we are overriding the style
+	defer func() {
+		// note: this does not un-set the Invisible if not None, because all kinds of things
+		// can turn invisible to off.
+		if wb.Styles.Display == styles.DisplayNone {
+			wb.SetState(true, states.Invisible)
+		}
+		SetUnitContext(&wb.Styles, wb.Scene, mat32.Vec2{}, mat32.Vec2{})
+		wb.ApplyStyleParts()
+	}()
+
+	if wb.OverrideStyle {
 		return
 	}
 	wb.ResetStyleWidget()
@@ -92,14 +107,6 @@ func (wb *WidgetBase) ApplyStyleWidget() {
 	wb.ResetStyleSettings()
 	wb.RunStylers()
 	wb.ApplyStyleSettings()
-
-	// note: this does not un-set the Invisible if not None, because all kinds of things
-	// can turn invisible to off.
-	if wb.Styles.Display == styles.DisplayNone {
-		wb.SetState(true, states.Invisible)
-	}
-	SetUnitContext(&wb.Styles, wb.Scene, mat32.Vec2{}, mat32.Vec2{})
-	wb.ApplyStyleParts()
 }
 
 // ResetStyleWidget resets the widget styles and applies the basic
