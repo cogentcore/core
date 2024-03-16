@@ -198,6 +198,7 @@ func (sp *Spell) ShowNow(word string, ctx gi.Widget, pos image.Point) {
 	if sp.IsLastLearned(word) {
 		gi.NewButton(sc).SetText("unlearn").SetTooltip("unlearn the last learned word").
 			OnClick(func(e events.Event) {
+				sp.Cancel()
 				sp.UnLearnLast()
 			})
 	} else {
@@ -211,15 +212,18 @@ func (sp *Spell) ShowNow(word string, ctx gi.Widget, pos image.Point) {
 			for i := 0; i < count; i++ {
 				text := sp.Suggest[i]
 				gi.NewButton(sc).SetText(text).OnClick(func(e events.Event) {
+					sp.Cancel()
 					sp.Spell(text)
 				})
 			}
 		}
 		gi.NewSeparator(sc)
 		gi.NewButton(sc).SetText("learn").OnClick(func(e events.Event) {
+			sp.Cancel()
 			sp.LearnWord()
 		})
 		gi.NewButton(sc).SetText("ignore").OnClick(func(e events.Event) {
+			sp.Cancel()
 			sp.IgnoreWord()
 		})
 	}
