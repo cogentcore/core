@@ -107,19 +107,16 @@ func (c *Complete) IsAboutToShow() bool {
 // a delay, which resets every time it is called.
 // After delay, Calls ShowNow, which calls MatchFunc
 // to get a list of completions and builds the completion popup menu
-func (c *Complete) Show(ctx Widget, pos image.Point, text string, force bool) {
+func (c *Complete) Show(ctx Widget, pos image.Point, text string) {
 	if c.MatchFunc == nil {
 		return
 	}
 	wait := SystemSettings.CompleteWaitDuration
-	if force {
-		wait = 0
-	}
 	if c.Stage != nil {
 		c.Cancel()
 	}
 	if wait == 0 {
-		c.ShowNow(ctx, pos, text, force)
+		c.ShowNow(ctx, pos, text)
 		return
 	}
 	c.DelayMu.Lock()
@@ -128,7 +125,7 @@ func (c *Complete) Show(ctx Widget, pos image.Point, text string, force bool) {
 	}
 	c.DelayTimer = time.AfterFunc(wait,
 		func() {
-			c.ShowNowAsync(ctx, pos, text, force)
+			c.ShowNowAsync(ctx, pos, text)
 			c.DelayMu.Lock()
 			c.DelayTimer = nil
 			c.DelayMu.Unlock()
@@ -138,33 +135,33 @@ func (c *Complete) Show(ctx Widget, pos image.Point, text string, force bool) {
 
 // ShowNow actually calls MatchFunc to get a list of completions and builds the
 // completion popup menu.  This is the sync version called from
-func (c *Complete) ShowNow(ctx Widget, pos image.Point, text string, force bool) {
+func (c *Complete) ShowNow(ctx Widget, pos image.Point, text string) {
 	if c.Stage != nil {
 		c.Cancel()
 	}
 	c.ShowMu.Lock()
 	defer c.ShowMu.Unlock()
-	if c.ShowNowImpl(ctx, pos, text, force) {
+	if c.ShowNowImpl(ctx, pos, text) {
 		c.Stage.RunPopup()
 	}
 }
 
 // ShowNowAsync actually calls MatchFunc to get a list of completions and builds the
 // completion popup menu.  This is the Async version for delayed AfterFunc call.
-func (c *Complete) ShowNowAsync(ctx Widget, pos image.Point, text string, force bool) {
+func (c *Complete) ShowNowAsync(ctx Widget, pos image.Point, text string) {
 	if c.Stage != nil {
 		c.CancelAsync()
 	}
 	c.ShowMu.Lock()
 	defer c.ShowMu.Unlock()
-	if c.ShowNowImpl(ctx, pos, text, force) {
+	if c.ShowNowImpl(ctx, pos, text) {
 		c.Stage.RunPopupAsync()
 	}
 }
 
 // ShowNowImpl is the implementation of ShowNow, presenting completions.
 // Returns false if nothing to show.
-func (c *Complete) ShowNowImpl(ctx Widget, pos image.Point, text string, force bool) bool {
+func (c *Complete) ShowNowImpl(ctx Widget, pos image.Point, text string) bool {
 	md := c.MatchFunc(c.Context, text, c.SrcLn, c.SrcCh)
 	c.Completions = md.Matches
 	c.Seed = md.Seed
@@ -253,7 +250,7 @@ func (c *Complete) Abort() bool {
 }
 
 // Lookup is the main call for doing lookups
-func (c *Complete) Lookup(text string, posLn, posCh int, sc *Scene, pt image.Point, force bool) {
+func (c *Complete) Lookup(text string, posLn, posCh int, sc *Scene, pt image.Point) {
 	if c.LookupFunc == nil || sc == nil {
 		return
 	}

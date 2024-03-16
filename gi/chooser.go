@@ -634,7 +634,7 @@ func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 	})
 	tf.OnClick(func(e events.Event) {
 		ch.CallItemsFuncs()
-		tf.OfferComplete(dontForce)
+		tf.OfferComplete()
 	})
 	tf.OnKeyChord(func(e events.Event) {
 		kf := keyfun.Of(e.KeyChord())

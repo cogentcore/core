@@ -26,7 +26,7 @@ func (ed *Editor) OfferComplete() {
 		return
 	}
 	ed.Buf.Complete.Cancel()
-	if !ed.Buf.Opts.Completion && !ed.ForceComplete {
+	if !ed.Buf.Opts.Completion {
 		return
 	}
 	if ed.Buf.InComment(ed.CursorPos) || ed.Buf.InLitString(ed.CursorPos) {
@@ -52,13 +52,12 @@ func (ed *Editor) OfferComplete() {
 	ed.Buf.CurView = ed
 	ed.Buf.Complete.SrcLn = ed.CursorPos.Ln
 	ed.Buf.Complete.SrcCh = ed.CursorPos.Ch
-	ed.Buf.Complete.Show(ed, cpos, s, ed.ForceComplete)
+	ed.Buf.Complete.Show(ed, cpos, s)
 }
 
 // CancelComplete cancels any pending completion.
 // Call this when new events have moved beyond any prior completion scenario.
 func (ed *Editor) CancelComplete() {
-	ed.ForceComplete = false
 	if ed.Buf == nil {
 		return
 	}
@@ -111,7 +110,7 @@ func (ed *Editor) Lookup() { //gti:add
 	cpos.Y += 10
 	ed.Buf.SetByteOffs() // make sure the pos offset is updated!!
 	ed.Buf.CurView = ed
-	ed.Buf.Complete.Lookup(s, ed.CursorPos.Ln, ed.CursorPos.Ch, ed.Scene, cpos, ed.ForceComplete)
+	ed.Buf.Complete.Lookup(s, ed.CursorPos.Ln, ed.CursorPos.Ch, ed.Scene, cpos)
 }
 
 // ISpellKeyInput locates the word to spell check based on cursor position and

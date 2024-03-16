@@ -131,9 +131,6 @@ type Editor struct { //core:embedder
 	// if true, select text as cursor moves
 	SelectMode bool `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// if true, complete regardless of any disqualifying reasons
-	ForceComplete bool `set:"-" edit:"-" json:"-" xml:"-"`
-
 	// interactive search data
 	ISearch ISearch `set:"-" edit:"-" json:"-" xml:"-"`
 

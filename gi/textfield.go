@@ -29,11 +29,6 @@ import (
 	"golang.org/x/image/draw"
 )
 
-// TODO(kai): get rid of these?
-
-const force = true
-const dontForce = false
-
 // TextField is a widget for editing a line of text.
 // With the default WhiteSpaceNormal style setting,
 // text will wrap onto multiple lines as needed.
@@ -1060,7 +1055,7 @@ func (tf *TextField) SetCompleter(data any, matchFun complete.MatchFunc, editFun
 }
 
 // OfferComplete pops up a menu of possible completions
-func (tf *TextField) OfferComplete(forceComplete bool) {
+func (tf *TextField) OfferComplete() {
 	if tf.Complete == nil {
 		return
 	}
@@ -1070,7 +1065,7 @@ func (tf *TextField) OfferComplete(forceComplete bool) {
 	cpos.Y = tf.Geom.TotalBBox.Max.Y
 	tf.Complete.SrcLn = 0
 	tf.Complete.SrcCh = tf.CursorPos
-	tf.Complete.Show(tf, cpos, s, forceComplete)
+	tf.Complete.Show(tf, cpos, s)
 }
 
 // CancelComplete cancels any pending completion -- call this when new events
@@ -1569,22 +1564,22 @@ func (tf *TextField) HandleKeyEvents() {
 			e.SetHandled()
 			tf.ShiftSelect(e)
 			tf.CursorForward(1)
-			tf.OfferComplete(dontForce)
+			tf.OfferComplete()
 		case keyfun.WordRight:
 			e.SetHandled()
 			tf.ShiftSelect(e)
 			tf.CursorForwardWord(1)
-			tf.OfferComplete(dontForce)
+			tf.OfferComplete()
 		case keyfun.MoveLeft:
 			e.SetHandled()
 			tf.ShiftSelect(e)
 			tf.CursorBackward(1)
-			tf.OfferComplete(dontForce)
+			tf.OfferComplete()
 		case keyfun.WordLeft:
 			e.SetHandled()
 			tf.ShiftSelect(e)
 			tf.CursorBackwardWord(1)
-			tf.OfferComplete(dontForce)
+			tf.OfferComplete()
 		case keyfun.MoveDown:
 			if tf.NLines > 1 {
 				e.SetHandled()
@@ -1652,7 +1647,7 @@ func (tf *TextField) HandleKeyEvents() {
 		case keyfun.Backspace:
 			e.SetHandled()
 			tf.CursorBackspace(1)
-			tf.OfferComplete(dontForce)
+			tf.OfferComplete()
 			tf.Send(events.Input, e)
 		case keyfun.Kill:
 			e.SetHandled()
@@ -1662,17 +1657,17 @@ func (tf *TextField) HandleKeyEvents() {
 		case keyfun.Delete:
 			e.SetHandled()
 			tf.CursorDelete(1)
-			tf.OfferComplete(dontForce)
+			tf.OfferComplete()
 			tf.Send(events.Input, e)
 		case keyfun.BackspaceWord:
 			e.SetHandled()
 			tf.CursorBackspaceWord(1)
-			tf.OfferComplete(dontForce)
+			tf.OfferComplete()
 			tf.Send(events.Input, e)
 		case keyfun.DeleteWord:
 			e.SetHandled()
 			tf.CursorDeleteWord(1)
-			tf.OfferComplete(dontForce)
+			tf.OfferComplete()
 			tf.Send(events.Input, e)
 		case keyfun.Cut:
 			e.SetHandled()
@@ -1686,7 +1681,7 @@ func (tf *TextField) HandleKeyEvents() {
 			tf.Send(events.Input, e)
 		case keyfun.Complete:
 			e.SetHandled()
-			tf.OfferComplete(force)
+			tf.OfferComplete()
 		case keyfun.Nil:
 			if unicode.IsPrint(e.KeyRune()) {
 				if !e.HasAnyModifier(key.Control, key.Meta) {
@@ -1695,7 +1690,7 @@ func (tf *TextField) HandleKeyEvents() {
 					if e.KeyRune() == ' ' {
 						tf.CancelComplete()
 					} else {
-						tf.OfferComplete(dontForce)
+						tf.OfferComplete()
 					}
 					tf.Send(events.Input, e)
 				}

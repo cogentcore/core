@@ -343,9 +343,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		if ed.Buf.IsSpellEnabled(ed.CursorPos) {
 			ed.OfferCorrect()
 		} else {
-			ed.ForceComplete = true
 			ed.OfferComplete()
-			ed.ForceComplete = false
 		}
 	case keyfun.Enter:
 		cancelAll()
@@ -409,9 +407,6 @@ func (ed *Editor) KeyInput(kt events.Event) {
 			if !kt.HasAnyModifier(key.Control, key.Meta) {
 				ed.KeyInputInsertRune(kt)
 			}
-		}
-		if unicode.IsSpace(kt.KeyRune()) {
-			ed.ForceComplete = false
 		}
 		ed.ISpellKeyInput(kt)
 	}

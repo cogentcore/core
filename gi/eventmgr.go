@@ -1111,7 +1111,7 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 			ch := ki.ChildByType[*Chooser](tb, true)
 			if ch != nil {
 				ch.SetFocusEvent()
-				ch.TextField().OfferComplete(dontForce)
+				ch.TextField().OfferComplete()
 			} else {
 				tb.SetFocusEvent()
 			}
