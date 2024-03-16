@@ -1146,7 +1146,7 @@ func (t *Switches) SetType(v SwitchTypes) *Switches { t.Type = v; return t }
 
 // SetItems sets the [Switches.Items]:
 // Items are the items displayed to the user.
-func (t *Switches) SetItems(v ...SwitchesItem) *Switches { t.Items = v; return t }
+func (t *Switches) SetItems(v ...SwitchItem) *Switches { t.Items = v; return t }
 
 // SetMutex sets the [Switches.Mutex]:
 // whether to make the items mutually exclusive (checking one turns off all the others)

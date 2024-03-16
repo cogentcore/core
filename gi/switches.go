@@ -30,14 +30,14 @@ type Switches struct { //core:embedder
 	Type SwitchTypes
 
 	// Items are the items displayed to the user.
-	Items []SwitchesItem
+	Items []SwitchItem
 
 	// whether to make the items mutually exclusive (checking one turns off all the others)
 	Mutex bool
 }
 
-// SwitchesItem contains the properties of one item in a [Switches].
-type SwitchesItem struct {
+// SwitchItem contains the properties of one item in a [Switches].
+type SwitchItem struct {
 
 	// Label is the label displayed to the user for this item.
 	Label string
@@ -174,16 +174,16 @@ func (sw *Switches) UnCheckAllBut(idx int) {
 
 // SetStrings sets the [Switches.Items] from the given strings.
 func (sw *Switches) SetStrings(ss []string) *Switches {
-	sw.Items = make([]SwitchesItem, len(ss))
+	sw.Items = make([]SwitchItem, len(ss))
 	for i, s := range ss {
-		sw.Items[i] = SwitchesItem{Label: s}
+		sw.Items[i] = SwitchItem{Label: s}
 	}
 	return sw
 }
 
 // SetEnums sets the [Switches.Items] from the given enums.
 func (sw *Switches) SetEnums(es []enums.Enum) *Switches {
-	sw.Items = make([]SwitchesItem, len(es))
+	sw.Items = make([]SwitchItem, len(es))
 	for i, enum := range es {
 		str := ""
 		if bf, ok := enum.(enums.BitFlag); ok {
@@ -201,7 +201,7 @@ func (sw *Switches) SetEnums(es []enums.Enum) *Switches {
 			str, _, _ = strings.Cut(desc, " ")
 		}
 		tip := gti.FormatDoc(desc, str, lbl)
-		sw.Items[i] = SwitchesItem{Label: lbl, Tooltip: tip}
+		sw.Items[i] = SwitchItem{Label: lbl, Tooltip: tip}
 	}
 	return sw
 }
