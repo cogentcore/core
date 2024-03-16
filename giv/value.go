@@ -105,18 +105,18 @@ type Value interface {
 	SetFlag(on bool, f ...enums.BitFlag)
 
 	// SetStructValue sets the value, owner and field information for a struct field.
-	SetStructValue(val reflect.Value, owner any, field *reflect.StructField, tmpSave Value, viewPath string)
+	SetStructValue(val reflect.Value, owner any, field *reflect.StructField, viewPath string)
 
 	// SetMapKey sets the key value and owner for a map key.
-	SetMapKey(val reflect.Value, owner any, tmpSave Value)
+	SetMapKey(val reflect.Value, owner any)
 
 	// SetMapValue sets the value, owner and map key information for a map
 	// element -- needs pointer to Value representation of key to track
 	// current key value.
-	SetMapValue(val reflect.Value, owner any, key any, keyView Value, tmpSave Value, viewPath string)
+	SetMapValue(val reflect.Value, owner any, key any, keyView Value, viewPath string)
 
 	// SetSliceValue sets the value, owner and index information for a slice element.
-	SetSliceValue(val reflect.Value, owner any, idx int, tmpSave Value, viewPath string)
+	SetSliceValue(val reflect.Value, owner any, idx int, viewPath string)
 
 	// SetSoloValue sets the value for a singleton standalone value
 	// (e.g., for arg values).
@@ -171,14 +171,6 @@ type Value interface {
 	// AllTags returns all the tags for this value view, from structfield or set
 	// specifically using SetTag* methods
 	AllTags() map[string]string
-
-	// SaveTmp saves a temporary copy of a struct to a map -- map values must
-	// be explicitly re-saved and cannot be directly written to by the value
-	// elements -- each Value has a pointer to any parent Value that
-	// might need to be saved after SetValue -- SaveTmp called automatically
-	// in SetValue but other cases that use something different need to call
-	// it explicitly.
-	SaveTmp()
 }
 
 // ConfigDialoger is an optional interface that [Value]s may implement to
@@ -393,9 +385,6 @@ func (v *ValueBase[W]) SetValue(val any) bool {
 		err = laser.SetRobust(laser.PtrValue(v.Value).Interface(), val)
 		wasSet = true
 	}
-	if wasSet {
-		v.SaveTmp()
-	}
 	// fmt.Printf("value view: %T sending for setting val %v\n", v.This(), val)
 	v.SendChange()
 	if err != nil {
@@ -425,7 +414,6 @@ func (v *ValueBase[W]) SetValueMap(val any) (bool, error) {
 					ov.SetMapIndex(kv, reflect.Value{}) // delete old key
 					ov.SetMapIndex(nv, cv)              // set new key to current value
 					v.Value = nv                        // update value to new key
-					v.SaveTmp()
 					v.SendChange()
 				})
 			})
@@ -504,9 +492,6 @@ type ValueData struct {
 	// Listeners are event listener functions for processing events on this widget.
 	// type specific Listeners are added in OnInit when the widget is initialized.
 	Listeners events.Listeners `set:"-" view:"-"`
-
-	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
-	TmpSave Value `set:"-" view:"-"`
 }
 
 // ValueFlags for Value bool state
@@ -637,43 +622,39 @@ func JoinViewPath(a, b string) string {
 	}
 }
 
-func (v *ValueData) SetStructValue(val reflect.Value, owner any, field *reflect.StructField, tmpSave Value, viewPath string) {
+func (v *ValueData) SetStructValue(val reflect.Value, owner any, field *reflect.StructField, viewPath string) {
 	v.OwnKind = reflect.Struct
 	v.Value = val
 	v.Owner = owner
 	v.Field = field
-	v.TmpSave = tmpSave
 	v.ViewPath = viewPath
 	v.SetName(field.Name)
 }
 
-func (v *ValueData) SetMapKey(key reflect.Value, owner any, tmpSave Value) {
+func (v *ValueData) SetMapKey(key reflect.Value, owner any) {
 	v.OwnKind = reflect.Map
 	v.SetFlag(true, ValueMapKey)
 	v.Value = key
 	v.Owner = owner
-	v.TmpSave = tmpSave
 	v.SetName(laser.ToString(key.Interface()))
 }
 
-func (v *ValueData) SetMapValue(val reflect.Value, owner any, key any, keyView Value, tmpSave Value, viewPath string) {
+func (v *ValueData) SetMapValue(val reflect.Value, owner any, key any, keyView Value, viewPath string) {
 	v.OwnKind = reflect.Map
 	v.Value = val
 	v.Owner = owner
 	v.Key = key
 	v.KeyView = keyView
-	v.TmpSave = tmpSave
 	keystr := laser.ToString(key)
 	v.ViewPath = JoinViewPath(viewPath, keystr)
 	v.SetName(keystr)
 }
 
-func (v *ValueData) SetSliceValue(val reflect.Value, owner any, idx int, tmpSave Value, viewPath string) {
+func (v *ValueData) SetSliceValue(val reflect.Value, owner any, idx int, viewPath string) {
 	v.OwnKind = reflect.Slice
 	v.Value = val
 	v.Owner = owner
 	v.Idx = idx
-	v.TmpSave = tmpSave
 	idxstr := fmt.Sprintf("%v", idx)
 	vpath := viewPath + "[" + idxstr + "]"
 	if v.Owner != nil {
@@ -778,29 +759,6 @@ func (v *ValueData) HandleEvent(ev events.Event) {
 		fmt.Println("Event to Value:", v.String(), ev.String())
 	}
 	v.Listeners.Call(ev)
-}
-
-func (v *ValueData) SaveTmp() {
-	if v.TmpSave == nil {
-		return
-	}
-	if v.TmpSave.AsValueData() == v {
-		// if we are a map value, of a struct value, we save our value
-		if v.Owner != nil && v.OwnKind == reflect.Map && !v.Is(ValueMapKey) {
-			if laser.NonPtrValue(v.Value).Kind() == reflect.Struct {
-				ov := laser.NonPtrValue(reflect.ValueOf(v.Owner))
-				if v.KeyView != nil {
-					ck := laser.NonPtrValue(v.KeyView.Val())
-					laser.SetMapRobust(ov, ck, laser.NonPtrValue(v.Value))
-				} else {
-					laser.SetMapRobust(ov, laser.NonPtrValue(reflect.ValueOf(v.Key)), laser.NonPtrValue(v.Value))
-					// fmt.Printf("save tmp of struct value in key: %v\n", v.Key)
-				}
-			}
-		}
-	} else {
-		v.TmpSave.SaveTmp()
-	}
 }
 
 func (v *ValueData) SetTags(tags map[string]string) {

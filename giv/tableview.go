@@ -383,7 +383,7 @@ func (tv *TableView) ConfigRows() {
 			}
 			vv := ToValue(fval.Interface(), tags)
 			tv.Values[vvi] = vv
-			vv.SetStructValue(fval.Addr(), stru, &field, tv.TmpSave, vpath)
+			vv.SetStructValue(fval.Addr(), stru, &field, vpath)
 			vv.SetReadOnly(tv.IsReadOnly())
 
 			vtyp := vv.WidgetType()
@@ -509,7 +509,7 @@ func (tv *TableView) UpdateWidgets() {
 			fval := val.Elem().FieldByIndex(field.Index)
 			vvi := i*tv.NVisFields + fli
 			vv := tv.Values[vvi]
-			vv.SetStructValue(fval.Addr(), stru, &field, tv.TmpSave, vpath)
+			vv.SetStructValue(fval.Addr(), stru, &field, vpath)
 			vv.SetReadOnly(tv.IsReadOnly())
 			vv.Update()
 			w.SetState(invis, states.Invisible)
@@ -553,9 +553,6 @@ func (tv *TableView) SliceNewAt(idx int) {
 	}
 
 	tv.This().(SliceViewer).UpdtSliceSize()
-	if tv.TmpSave != nil {
-		tv.TmpSave.SaveTmp()
-	}
 	tv.SelectIdxAction(idx, events.SelectOne)
 	tv.ViewMuUnlock()
 	tv.SetChanged()
@@ -577,9 +574,6 @@ func (tv *TableView) SliceDeleteAt(idx int) {
 
 	tv.This().(SliceViewer).UpdtSliceSize()
 
-	if tv.TmpSave != nil {
-		tv.TmpSave.SaveTmp()
-	}
 	tv.ViewMuUnlock()
 	tv.SetChanged()
 	tv.This().(SliceViewer).UpdateWidgets()

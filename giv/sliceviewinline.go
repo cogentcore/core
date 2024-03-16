@@ -5,7 +5,6 @@
 package giv
 
 import (
-	"fmt"
 	"reflect"
 	"strconv"
 
@@ -42,9 +41,6 @@ type SliceViewInline struct {
 	// Value representations of the fields
 	Values []Value `json:"-" xml:"-" set:"-"`
 
-	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
-	TmpSave Value `view:"-" json:"-" xml:"-"`
-
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string
 
@@ -63,7 +59,7 @@ func (sv *SliceViewInline) SetStyles() {
 	})
 	sv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(sv) {
-		case "add-action":
+		case "add-button":
 			ab := w.(*gi.Button)
 			w.Style(func(s *styles.Style) {
 				ab.SetType(gi.ButtonTonal)
@@ -71,7 +67,7 @@ func (sv *SliceViewInline) SetStyles() {
 			ab.OnClick(func(e events.Event) {
 				sv.SliceNewAt(-1)
 			})
-		case "edit-action":
+		case "edit-button":
 			w.Style(func(s *styles.Style) {
 				w.(*gi.Button).SetType(gi.ButtonTonal)
 			})
@@ -91,7 +87,7 @@ func (sv *SliceViewInline) SetStyles() {
 					title = "Slice of " + laser.NonPtrType(elType).Name()
 				}
 				d := gi.NewBody().AddTitle(title)
-				NewSliceView(d).SetViewPath(vpath).SetSlice(sv.Slice).SetTmpSave(sv.TmpSave)
+				NewSliceView(d).SetViewPath(vpath).SetSlice(sv.Slice)
 				d.AddBottomBar(func(pw gi.Widget) {
 					d.AddCancel(pw)
 					d.AddOk(pw).OnClick(func(e events.Event) {
@@ -145,11 +141,7 @@ func (sv *SliceViewInline) Config() {
 	for i := 0; i < sz; i++ {
 		val := laser.OnePtrUnderlyingValue(sl.Index(i)) // deal with pointer lists
 		vv := ToValue(val.Interface(), "")
-		if vv == nil { // shouldn't happen
-			fmt.Printf("nil value view!\n")
-			continue
-		}
-		vv.SetSliceValue(val, sv.Slice, i, sv.TmpSave, sv.ViewPath)
+		vv.SetSliceValue(val, sv.Slice, i, sv.ViewPath)
 		vtyp := vv.WidgetType()
 		idxtxt := strconv.Itoa(i)
 		valnm := "value-" + idxtxt
@@ -157,9 +149,9 @@ func (sv *SliceViewInline) Config() {
 		sv.Values = append(sv.Values, vv)
 	}
 	if !sv.IsArray && !sv.IsFixedLen {
-		config.Add(gi.ButtonType, "add-action")
+		config.Add(gi.ButtonType, "add-button")
 	}
-	config.Add(gi.ButtonType, "edit-action")
+	config.Add(gi.ButtonType, "edit-button")
 	sv.ConfigChildren(config)
 	for i, vv := range sv.Values {
 		vv.OnChange(func(e events.Event) { sv.SetChanged() })
@@ -220,9 +212,6 @@ func (sv *SliceViewInline) SliceNewAt(idx int) {
 	}
 	laser.SliceNewAt(sv.Slice, idx)
 
-	if sv.TmpSave != nil {
-		sv.TmpSave.SaveTmp()
-	}
 	sv.SetChanged()
 	sv.Update()
 }
@@ -234,9 +223,6 @@ func (sv *SliceViewInline) SliceDeleteAt(idx int) {
 	}
 	laser.SliceDeleteAt(sv.Slice, idx)
 
-	if sv.TmpSave != nil {
-		sv.TmpSave.SaveTmp()
-	}
 	sv.SetChanged()
 	sv.Update()
 }

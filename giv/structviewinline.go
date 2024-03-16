@@ -28,14 +28,11 @@ type StructViewInline struct {
 	// Value for the struct itself, if this was created within value view framework -- otherwise nil
 	StructValue Value `set:"-"`
 
-	// if true add an edit action button at the end -- other users of this widget can then configure that -- it is called 'edit-action'
+	// if true, add an edit button at the end
 	AddButton bool
 
 	// Value representations of the fields
 	FieldViews []Value `json:"-" xml:"-"`
-
-	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
-	TmpSave Value `json:"-" xml:"-" view:"-"`
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string
@@ -91,7 +88,7 @@ func (sv *StructViewInline) Config() {
 			return true
 		}
 		vvp := fieldVal.Addr()
-		vv.SetStructValue(vvp, sv.Struct, &field, sv.TmpSave, sv.ViewPath)
+		vv.SetStructValue(vvp, sv.Struct, &field, sv.ViewPath)
 		vtyp := vv.WidgetType()
 		// todo: other things with view tag..
 		labnm := "label-" + field.Name
@@ -102,7 +99,7 @@ func (sv *StructViewInline) Config() {
 		return true
 	})
 	if sv.AddButton {
-		config.Add(gi.ButtonType, "edit-action")
+		config.Add(gi.ButtonType, "edit-button")
 	}
 	sv.ConfigChildren(config)
 	for i, vv := range sv.FieldViews {

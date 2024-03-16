@@ -273,9 +273,6 @@ type SliceViewBase struct {
 	// list of currently-dragged indexes
 	DraggedIdxs []int `set:"-" view:"-" copier:"-" json:"-" xml:"-"`
 
-	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
-	TmpSave Value `view:"-" copier:"-" json:"-" xml:"-"`
-
 	// total number of rows visible in allocated display size
 	VisRows int `set:"-" edit:"-" copier:"-" json:"-" xml:"-"`
 
@@ -699,7 +696,7 @@ func (sv *SliceViewBase) ConfigRows() {
 		}
 		vv := ToValue(val.Interface(), "")
 		sv.Values[i] = vv
-		vv.SetSliceValue(val, sv.Slice, si, sv.TmpSave, sv.ViewPath)
+		vv.SetSliceValue(val, sv.Slice, si, sv.ViewPath)
 		vv.SetReadOnly(sv.IsReadOnly())
 
 		vtyp := vv.WidgetType()
@@ -803,7 +800,7 @@ func (sv *SliceViewBase) UpdateWidgets() {
 		w.SetState(invis, states.Invisible)
 		if si < sv.SliceSize {
 			val := laser.OnePtrUnderlyingValue(sv.SliceNPVal.Index(si)) // deal with pointer lists
-			vv.SetSliceValue(val, sv.Slice, si, sv.TmpSave, sv.ViewPath)
+			vv.SetSliceValue(val, sv.Slice, si, sv.ViewPath)
 			vv.SetReadOnly(sv.IsReadOnly())
 			vv.Update()
 
@@ -811,7 +808,7 @@ func (sv *SliceViewBase) UpdateWidgets() {
 				w.AsWidget().SetReadOnly(true)
 			}
 		} else {
-			vv.SetSliceValue(sv.ElVal, sv.Slice, 0, sv.TmpSave, sv.ViewPath)
+			vv.SetSliceValue(sv.ElVal, sv.Slice, 0, sv.ViewPath)
 			vv.Update()
 			w.AsWidget().SetSelected(false)
 			if sv.Is(SliceViewShowIndex) {
@@ -900,9 +897,6 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 
 	sv.This().(SliceViewer).UpdtSliceSize()
 
-	if sv.TmpSave != nil {
-		sv.TmpSave.SaveTmp()
-	}
 	sv.SelectIdxAction(idx, events.SelectOne)
 	sv.ViewMuUnlock()
 	sv.SetChanged()
@@ -963,10 +957,6 @@ func (sv *SliceViewBase) SliceDeleteAt(idx int) {
 	laser.SliceDeleteAt(sv.Slice, idx)
 
 	sv.This().(SliceViewer).UpdtSliceSize()
-
-	if sv.TmpSave != nil {
-		sv.TmpSave.SaveTmp()
-	}
 
 	sv.ViewMuUnlock()
 	sv.SetChanged()
@@ -1681,9 +1671,6 @@ func (sv *SliceViewBase) PasteAssign(md mimedata.Mimes, idx int) {
 	}
 	ns := sl[0]
 	sv.SliceNPVal.Index(idx).Set(reflect.ValueOf(ns).Elem())
-	if sv.TmpSave != nil {
-		sv.TmpSave.SaveTmp()
-	}
 	sv.SetChanged()
 	sv.NeedsRender()
 }
@@ -1711,9 +1698,6 @@ func (sv *SliceViewBase) PasteAtIdx(md mimedata.Mimes, idx int) {
 
 	sv.SliceNPVal = laser.NonPtrValue(reflect.ValueOf(sv.Slice)) // need to update after changes
 
-	if sv.TmpSave != nil {
-		sv.TmpSave.SaveTmp()
-	}
 	sv.SetChanged()
 	sv.SelectIdxAction(idx, events.SelectOne)
 	sv.This().(SliceViewer).UpdateWidgets()

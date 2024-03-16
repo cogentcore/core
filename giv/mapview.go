@@ -44,11 +44,6 @@ type MapView struct {
 	// generally only access internally
 	NCols int `set:"-"`
 
-	// value view that needs to have SaveTmp called on it whenever a change
-	// is made to one of the underlying values.
-	// Pass this down to any sub-views created from a parent
-	TmpSave Value `json:"-" xml:"-"`
-
 	// a record of parent View names that have led up to this view.
 	// Displayed as extra contextual information in view dialog windows.
 	ViewPath string
@@ -188,14 +183,14 @@ func (mv *MapView) ConfigMapGrid() {
 		if kv == nil { // shouldn't happen
 			continue
 		}
-		kv.SetMapKey(key, mv.Map, mv.TmpSave)
+		kv.SetMapKey(key, mv.Map)
 
 		val := laser.OnePtrUnderlyingValue(mpvnp.MapIndex(key))
 		vv := ToValue(val.Interface(), "")
 		if vv == nil { // shouldn't happen
 			continue
 		}
-		vv.SetMapValue(val, mv.Map, key.Interface(), kv, mv.TmpSave, mv.ViewPath) // needs key value view to track updates
+		vv.SetMapValue(val, mv.Map, key.Interface(), kv, mv.ViewPath) // needs key value value to track updates
 
 		keytxt := laser.ToString(key.Interface())
 		keynm := "key-" + keytxt
@@ -280,9 +275,6 @@ func (mv *MapView) MapChangeValueType(idx int, typ reflect.Type) {
 	ov := laser.NonPtrValue(reflect.ValueOf(mv.Map))
 	valv.AsValueData().Value = evn.Elem()
 	ov.SetMapIndex(ck, evn.Elem())
-	if mv.TmpSave != nil {
-		mv.TmpSave.SaveTmp()
-	}
 	mv.ConfigMapGrid()
 	mv.SetChanged()
 	mv.NeedsRender()
@@ -301,9 +293,6 @@ func (mv *MapView) MapAdd() {
 	}
 	laser.MapAdd(mv.Map)
 
-	if mv.TmpSave != nil {
-		mv.TmpSave.SaveTmp()
-	}
 	mv.SetChanged()
 	mv.Update()
 }
@@ -313,12 +302,8 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 	if laser.AnyIsNil(mv.Map) {
 		return
 	}
-	// kvi := laser.NonPtrValue(key).Interface()
 	laser.MapDeleteValue(mv.Map, laser.NonPtrValue(key))
 
-	if mv.TmpSave != nil {
-		mv.TmpSave.SaveTmp()
-	}
 	mv.SetChanged()
 	mv.Update()
 }

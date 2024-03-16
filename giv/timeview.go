@@ -26,9 +26,6 @@ type TimeView struct {
 	// the time that we are viewing
 	Time time.Time `set:"-"`
 
-	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
-	TmpSave Value `json:"-" xml:"-"`
-
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string
 
@@ -42,9 +39,6 @@ type TimeView struct {
 // SetTime sets the source time and updates the view
 func (tv *TimeView) SetTime(tim time.Time) *TimeView {
 	tv.Time = tim
-	if tv.TmpSave != nil {
-		tv.TmpSave.SetValue(tv.Time)
-	}
 	tv.SendChange()
 	tv.NeedsLayout()
 	return tv
@@ -81,9 +75,6 @@ func (tv *TimeView) Config() {
 		// we set our hour and keep everything else
 		tt := tv.Time
 		tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), hr, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
-		if tv.TmpSave != nil {
-			tv.TmpSave.SetValue(tv.Time)
-		}
 		tv.SendChange()
 	})
 
@@ -108,9 +99,6 @@ func (tv *TimeView) Config() {
 		// we set our minute and keep everything else
 		tt := tv.Time
 		tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tt.Hour(), minute, tt.Second(), tt.Nanosecond(), tt.Location())
-		if tv.TmpSave != nil {
-			tv.TmpSave.SetValue(tv.Time)
-		}
 		tv.SendChange()
 	})
 
@@ -142,9 +130,6 @@ func (tv *TimeView) Config() {
 				sw.SelectItem(0)
 				tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tv.Hour, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
 			}
-			if tv.TmpSave != nil {
-				tv.TmpSave.SetValue(tv.Time)
-			}
 		})
 	}
 }
@@ -158,11 +143,6 @@ type DateView struct {
 	// the time that we are viewing
 	Time time.Time `set:"-"`
 
-	// value view that needs to have SaveTmp called on it whenever a change
-	// is made to one of the underlying values.
-	// pass this down to any sub-views created from a parent
-	TmpSave Value `json:"-" xml:"-"`
-
 	// a record of parent View names that have led up to this view
 	// displayed as extra contextual information in view dialog windows
 	ViewPath string
@@ -174,9 +154,6 @@ type DateView struct {
 // SetTime sets the source time and updates the view
 func (dv *DateView) SetTime(tim time.Time) *DateView {
 	dv.Time = tim
-	if dv.TmpSave != nil {
-		dv.TmpSave.SetValue(dv.Time)
-	}
 	dv.SendChange()
 	dv.Update()
 	return dv

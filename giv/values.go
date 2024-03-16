@@ -194,7 +194,7 @@ func (v *StructValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	}
 	opv := laser.OnePtrUnderlyingValue(v.Value)
 	str := opv.Interface()
-	NewStructView(d).SetStruct(str).SetViewPath(v.ViewPath).SetTmpSave(v.TmpSave).
+	NewStructView(d).SetStruct(str).SetViewPath(v.ViewPath).
 		SetReadOnly(v.IsReadOnly())
 	if tb, ok := str.(gi.Toolbarer); ok {
 		d.AddAppBar(tb.ConfigToolbar)
@@ -210,7 +210,6 @@ type StructInlineValue struct {
 func (v *StructInlineValue) Config() {
 	v.Widget.StructValue = v
 	v.Widget.ViewPath = v.ViewPath
-	v.Widget.TmpSave = v.TmpSave
 	v.Widget.SetStruct(v.Value.Interface())
 	v.Widget.OnChange(func(e events.Event) {
 		v.SendChange(e)
@@ -263,11 +262,11 @@ func (v *SliceValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	}
 	slci := vvp.Interface()
 	if npv.Kind() != reflect.Array && laser.NonPtrType(laser.SliceElType(v.Value.Interface())).Kind() == reflect.Struct {
-		tv := NewTableView(d).SetSlice(slci).SetTmpSave(v.TmpSave).SetViewPath(v.ViewPath)
+		tv := NewTableView(d).SetSlice(slci).SetViewPath(v.ViewPath)
 		tv.SetReadOnly(v.IsReadOnly())
 		d.AddAppBar(tv.ConfigToolbar)
 	} else {
-		sv := NewSliceView(d).SetSlice(slci).SetTmpSave(v.TmpSave).SetViewPath(v.ViewPath)
+		sv := NewSliceView(d).SetSlice(slci).SetViewPath(v.ViewPath)
 		sv.SetReadOnly(v.IsReadOnly())
 		d.AddAppBar(sv.ConfigToolbar)
 	}
@@ -282,7 +281,6 @@ type SliceInlineValue struct {
 func (v *SliceInlineValue) Config() {
 	v.Widget.SliceValue = v
 	v.Widget.ViewPath = v.ViewPath
-	v.Widget.TmpSave = v.TmpSave
 	v.Widget.SetSlice(v.Value.Interface())
 	v.Widget.OnChange(func(e events.Event) {
 		v.SendChange(e)
@@ -337,7 +335,7 @@ func (v *MapValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	}
 	mpi := v.Value.Interface()
 	mv := NewMapView(d).SetMap(mpi)
-	mv.SetViewPath(v.ViewPath).SetTmpSave(v.TmpSave).SetReadOnly(v.IsReadOnly())
+	mv.SetViewPath(v.ViewPath).SetReadOnly(v.IsReadOnly())
 	d.AddAppBar(mv.ConfigToolbar)
 	return true, nil
 }
@@ -350,7 +348,6 @@ type MapInlineValue struct {
 func (v *MapInlineValue) Config() {
 	v.Widget.MapValue = v
 	v.Widget.ViewPath = v.ViewPath
-	v.Widget.TmpSave = v.TmpSave
 	v.Widget.SetMap(v.Value.Interface())
 	v.Widget.OnChange(func(e events.Event) {
 		v.SendChange(e)

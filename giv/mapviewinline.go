@@ -37,9 +37,6 @@ type MapViewInline struct {
 	// Value representations of the fields
 	Values []Value `json:"-" xml:"-" set:"-"`
 
-	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
-	TmpSave Value `view:"-" json:"-" xml:"-"`
-
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string
 
@@ -58,7 +55,7 @@ func (mv *MapViewInline) SetStyles() {
 	})
 	mv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(mv) {
-		case "add-action":
+		case "add-button":
 			ab := w.(*gi.Button)
 			w.Style(func(s *styles.Style) {
 				ab.SetType(gi.ButtonTonal)
@@ -66,7 +63,7 @@ func (mv *MapViewInline) SetStyles() {
 			w.OnClick(func(e events.Event) {
 				mv.MapAdd()
 			})
-		case "edit-action":
+		case "edit-button":
 			w.Style(func(s *styles.Style) {
 				w.(*gi.Button).SetType(gi.ButtonTonal)
 			})
@@ -86,7 +83,7 @@ func (mv *MapViewInline) SetStyles() {
 					title = "Map of " + tmptyp.String()
 				}
 				d := gi.NewBody().AddTitle(title).AddText(mv.Tooltip)
-				NewMapView(d).SetViewPath(vpath).SetMap(mv.Map).SetTmpSave(mv.TmpSave)
+				NewMapView(d).SetViewPath(vpath).SetMap(mv.Map)
 				d.AddBottomBar(func(pw gi.Widget) {
 					d.AddCancel(pw)
 					d.AddOk(pw).OnClick(func(e events.Event) {
@@ -132,14 +129,14 @@ func (mv *MapViewInline) Config() {
 		if kv == nil { // shouldn't happen
 			continue
 		}
-		kv.SetMapKey(key, mv.Map, mv.TmpSave)
+		kv.SetMapKey(key, mv.Map)
 
 		val := laser.OnePtrUnderlyingValue(mpvnp.MapIndex(key))
 		vv := ToValue(val.Interface(), "")
 		if vv == nil { // shouldn't happen
 			continue
 		}
-		vv.SetMapValue(val, mv.Map, key.Interface(), kv, mv.TmpSave, mv.ViewPath) // needs key value view to track updates
+		vv.SetMapValue(val, mv.Map, key.Interface(), kv, mv.ViewPath) // needs key value to track updates
 
 		keytxt := laser.ToString(key.Interface())
 		keynm := "key-" + keytxt
@@ -150,8 +147,8 @@ func (mv *MapViewInline) Config() {
 		mv.Keys = append(mv.Keys, kv)
 		mv.Values = append(mv.Values, vv)
 	}
-	config.Add(gi.ButtonType, "add-action")
-	config.Add(gi.ButtonType, "edit-action")
+	config.Add(gi.ButtonType, "add-button")
+	config.Add(gi.ButtonType, "edit-button")
 	mv.ConfigChildren(config)
 	for i, vv := range mv.Values {
 		kv := mv.Keys[i]
@@ -217,9 +214,6 @@ func (mv *MapViewInline) MapAdd() {
 	}
 	laser.MapAdd(mv.Map)
 
-	if mv.TmpSave != nil {
-		mv.TmpSave.SaveTmp()
-	}
 	mv.SetChanged()
 	mv.Update()
 }
@@ -231,9 +225,6 @@ func (mv *MapViewInline) MapDelete(key reflect.Value) {
 	}
 	laser.MapDeleteValue(mv.Map, laser.NonPtrValue(key))
 
-	if mv.TmpSave != nil {
-		mv.TmpSave.SaveTmp()
-	}
 	mv.SetChanged()
 	mv.Update()
 }
