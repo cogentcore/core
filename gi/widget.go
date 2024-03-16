@@ -206,7 +206,7 @@ type Widget interface {
 // reasonable way (Selected only essential when also ReadOnly), so they can
 // function appropriately in a chooser (e.g., SliceView or TableView) -- this
 // includes toggling selection on left mouse press.
-type WidgetBase struct {
+type WidgetBase struct { //core:no-new
 	ki.Node
 
 	// Tooltip is the text for the tooltip for this widget,

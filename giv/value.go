@@ -296,13 +296,19 @@ func ConfigBase(v Value, w gi.Widget) {
 // OpenDialog opens any applicable dialog for the given value in the
 // context of the given widget. It first tries [OpenDialoger], then
 // [ConfigDialoger] with [OpenDialogBase]. If both of those fail, it
-// returns false.
-func OpenDialog(v Value, ctx gi.Widget, fun func()) bool {
+// returns false. It calls the given beforeFunc before opening any dialog.
+func OpenDialog(v Value, ctx gi.Widget, fun, beforeFunc func()) bool {
 	if od, ok := v.(OpenDialoger); ok {
+		if beforeFunc != nil {
+			beforeFunc()
+		}
 		od.OpenDialog(ctx, fun)
 		return true
 	}
 	if cd, ok := v.(ConfigDialoger); ok {
+		if beforeFunc != nil {
+			beforeFunc()
+		}
 		OpenDialogBase(v, cd, ctx, fun)
 		return true
 	}
@@ -889,7 +895,7 @@ func ConfigDialogWidget(v Value, allowReadOnly bool) {
 	v.AsWidget().OnClick(func(e events.Event) {
 		if allowReadOnly || !v.IsReadOnly() {
 			v.SetFlag(e.HasAnyModifier(key.Shift), ValueDialogNewWindow)
-			OpenDialog(v, v.AsWidget(), nil)
+			OpenDialog(v, v.AsWidget(), nil, nil)
 		}
 	})
 }

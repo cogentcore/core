@@ -313,6 +313,8 @@ func (fb *FuncButton) CallFunc() {
 	// go directly to the dialog if there is one
 	if len(fb.Args) == 1 && OpenDialog(fb.Args[0], ctx, func() {
 		fb.CallFuncShowReturns()
+	}, func() {
+		makeTmpWidget(fb.Args[0])
 	}) {
 		return
 	}
@@ -377,7 +379,9 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 		return
 	}
 	// go directly to the dialog if there is one
-	if len(fb.Returns) == 1 && OpenDialog(fb.Returns[0], ctx, nil) {
+	if len(fb.Returns) == 1 && OpenDialog(fb.Returns[0], ctx, nil, func() {
+		makeTmpWidget(fb.Returns[0])
+	}) {
 		return
 	}
 	d := gi.NewBody().AddTitle(main).AddText(fb.Tooltip).AddOkOnly()
@@ -473,4 +477,9 @@ func (fb *FuncButton) SetReturnValues(rets []reflect.Value) {
 func (fb *FuncButton) SetKey(kf keyfun.Funs) *FuncButton {
 	fb.SetShortcut(keyfun.ShortcutFor(kf))
 	return fb
+}
+
+// makeTmpWidget makes a temporary widget in a temporary parent for the given value.
+func makeTmpWidget(v Value) {
+	v.SetWidget(ki.NewRoot[*gi.WidgetBase]("value-tmp-parent").NewChild(v.WidgetType(), "value-tmp-widget").(gi.Widget))
 }
