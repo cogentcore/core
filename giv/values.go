@@ -551,8 +551,8 @@ func (v *IconValue) Update() {
 	v.Widget.Update()
 }
 
-// TODO(dtl): Select an icon
 func (v *IconValue) ConfigDialog(d *gi.Body) (bool, func()) {
+	d.SetTitle("Select an icon")
 	si := 0
 	ics := icons.All()
 	cur := icons.Icon(laser.ToString(v.Value.Interface()))
@@ -587,8 +587,8 @@ func (v *FontValue) Update() {
 	v.Widget.SetText(txt).Update()
 }
 
-// TODO(dtl): Select a font
 func (v *FontValue) ConfigDialog(d *gi.Body) (bool, func()) {
+	d.SetTitle("Select a font")
 	si := 0
 	fi := paint.FontLibrary.FontInfo
 	cur := gi.FontName(laser.ToString(v.Value.Interface()))

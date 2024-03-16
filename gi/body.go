@@ -59,7 +59,7 @@ func (bd *Body) SetStyles() {
 	})
 }
 
-// SetTitle sets the Title in the Body, Scene, and Stage, and RenderWin.
+// SetTitle sets the title in the Body, Scene, and Stage, RenderWin, and title widget.
 // This is the one place to change the title for everything.
 func (bd *Body) SetTitle(title string) *Body {
 	bd.Nm = title
@@ -72,6 +72,9 @@ func (bd *Body) SetTitle(title string) *Body {
 			win.SetName(title)
 			win.SetTitle(title)
 		}
+	}
+	if lb, ok := bd.ChildByName("title", 0).(*Label); ok {
+		lb.SetText(title)
 	}
 	return bd
 }

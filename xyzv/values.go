@@ -39,8 +39,8 @@ func (v *MeshValue) Update() {
 	v.Widget.SetText(txt).Update()
 }
 
-// TODO(dtl): Select a mesh
 func (v *MeshValue) ConfigDialog(d *gi.Body) (bool, func()) {
+	d.SetTitle("Select a mesh")
 	if v.OwnKind != reflect.Struct {
 		return false, nil
 	}

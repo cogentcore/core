@@ -31,8 +31,8 @@ func (v *Value) Update() {
 	v.Widget.SetText(txt).Update()
 }
 
-// TODO(dtl): Select a syntax highlighting style
 func (v *Value) ConfigDialog(d *gi.Body) (bool, func()) {
+	d.SetTitle("Select a syntax highlighting style")
 	si := 0
 	cur := laser.ToString(v.Value.Interface())
 	giv.NewSliceView(d).SetSlice(&StyleNames).SetSelVal(cur).BindSelect(&si)

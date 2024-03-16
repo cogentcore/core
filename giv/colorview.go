@@ -512,8 +512,8 @@ func (v *ColorValue) Update() {
 	v.Widget.Update()
 }
 
-// TODO(dtl): Edit color
 func (v *ColorValue) ConfigDialog(d *gi.Body) (bool, func()) {
+	d.SetTitle("Edit color")
 	cv := NewColorView(d).SetColor(v.ColorValue())
 	return true, func() {
 		if u, ok := laser.OnePtrUnderlyingValue(v.Value).Interface().(*image.Uniform); ok {

@@ -74,8 +74,8 @@ func (v *KeyMapValue) Update() {
 	v.Widget.SetText(txt).Update()
 }
 
-// TODO(dtl): Select a key map
 func (v *KeyMapValue) ConfigDialog(d *gi.Body) (bool, func()) {
+	d.SetTitle("Select a key map")
 	si := 0
 	cur := laser.ToString(v.Value.Interface())
 	_, curRow, _ := keyfun.AvailMaps.MapByName(keyfun.MapName(cur))

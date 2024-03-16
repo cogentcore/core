@@ -68,8 +68,8 @@ func (v *ColorMapValue) Update() {
 	v.Widget.NeedsRender()
 }
 
-// TODO(dtl): Select a color map
 func (v *ColorMapValue) ConfigDialog(d *gi.Body) (bool, func()) {
+	d.SetTitle("Select a color map")
 	sl := colormap.AvailMapsList()
 	cur := laser.ToString(v.Value.Interface())
 	si := 0
