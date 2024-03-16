@@ -656,7 +656,7 @@ func style(ts *gi.Tabs) {
 	tab := ts.NewTab("Styles")
 
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Styles and layouts")
-	gi.NewLabel(tab).SetText("Cogent Core provides a fully customizable styling and layout system that allows you to easily control the position, size, and look of all widgets. You can edit the style properties of the outer frame below.")
+	gi.NewLabel(tab).SetText("Cogent Core provides a fully customizable styling and layout system that allows you to easily control the position, size, and appearance of all widgets. You can edit the style properties of the outer frame below.")
 
 	sp := gi.NewSplits(tab)
 
