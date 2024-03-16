@@ -198,6 +198,7 @@ func (st *Stage) RunWindow() *Stage {
 	if st.NewWindow || CurRenderWin == nil {
 		sc.Resize(mat32.Geom2DInt{st.RenderContext.Geom.Pos, sz})
 		win := st.NewRenderWin()
+		MainRenderWins.Add(win)
 		CurRenderWin = win
 		win.GoStartEventLoop()
 		return st
@@ -320,7 +321,6 @@ func (st *Stage) NewRenderWin() *RenderWin {
 		win.SetFlag(true, WinHasGeomPrefs)
 	}
 	AllRenderWins.Add(win)
-	MainRenderWins.Add(win)
 	WinNewCloseStamp()
 	// initialize MainStageMgr
 	win.MainStageMgr.RenderWin = win
