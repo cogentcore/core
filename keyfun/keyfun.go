@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"log/slog"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 
@@ -181,16 +182,14 @@ func (km *Map) ToSlice() []MapItem {
 // ChordFor returns all of the key chord triggers for the given
 // key function in the map, separating them with newlines.
 func (km *Map) ChordFor(kf Funs) key.Chord {
-	res := key.Chord("")
+	res := []string{}
 	for key, fun := range *km {
 		if fun == kf {
-			if res != "" {
-				res += "\n"
-			}
-			res += key
+			res = append(res, string(key))
 		}
 	}
-	return res
+	slices.Sort(res)
+	return key.Chord(strings.Join(res, "\n"))
 }
 
 // Chord returns all of the key chord triggers for this
