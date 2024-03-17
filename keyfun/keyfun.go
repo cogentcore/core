@@ -152,20 +152,12 @@ func SetActiveMapName(mapnm MapName) {
 	}
 }
 
-// Of translates chord into keyboard function -- use goosi key.Chord
-// to get chord
+// Of converts the given [key.Chord] into a keyboard function.
 func Of(chord key.Chord) Funs {
-	kf := Nil
-	if chord != "" {
-		kf = (*ActiveMap)[chord]
-		// if DebugSettings.KeyEventTrace {
-		// 	fmt.Printf("keyfun.KeyFun chord: %v = %v\n", chord, kf)
-		// }
-	}
-	return kf
+	return (*ActiveMap)[chord]
 }
 
-// MapItem records one element of the key map -- used for organizing the map.
+// MapItem records one element of the key map, which is used for organizing the map.
 type MapItem struct {
 
 	// the key chord that activates a function
@@ -175,7 +167,7 @@ type MapItem struct {
 	Fun Funs
 }
 
-// ToSlice copies this keymap to a slice of KeyMapItem's
+// ToSlice copies this keymap to a slice of [MapItem]s.
 func (km *Map) ToSlice() []MapItem {
 	kms := make([]MapItem, len(*km))
 	idx := 0
@@ -186,32 +178,31 @@ func (km *Map) ToSlice() []MapItem {
 	return kms
 }
 
-// ChordForFun returns first key chord trigger for given KeyFun in map
+// ChordFor returns all of the key chord triggers for the given
+// key function in the map, separating them with newlines.
 func (km *Map) ChordFor(kf Funs) key.Chord {
+	res := key.Chord("")
 	for key, fun := range *km {
 		if fun == kf {
-			return key
+			if res != "" {
+				res += "\n"
+			}
+			res += key
 		}
 	}
-	return ""
+	return res
 }
 
-// ChordForFun returns first key chord trigger for given KeyFun in the
-// current active map
-func ChordFor(kf Funs) key.Chord {
+// Chord returns all of the key chord triggers for this
+// key function in the current active map, separating them with newlines.
+func (kf Funs) Chord() key.Chord {
 	return ActiveMap.ChordFor(kf)
 }
 
-// ShortcutForFun returns a formatted shortcut for the first key chord
-// trigger for the given KeyFun in the map.
-func (km *Map) ShortcutFor(kf Funs) key.Chord {
-	return km.ChordFor(kf).OSShortcut()
-}
-
-// ShortcutFor returns OS-specific formatted shortcut for first key chord
-// trigger for given KeyFun in the current active map
-func ShortcutFor(kf Funs) key.Chord {
-	return ActiveMap.ShortcutFor(kf)
+// Label transforms the key function into a string representing
+// its underlying key chord(s) in a form suitable for display to users.
+func (kf Funs) Label() string {
+	return kf.Chord().Label()
 }
 
 // Update ensures that the given keymap has at least one entry for every

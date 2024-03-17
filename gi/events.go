@@ -201,7 +201,7 @@ func (wb *WidgetBase) SendKeyFun(kf keyfun.Funs, orig ...events.Event) {
 	if wb.This() == nil {
 		return
 	}
-	kc := keyfun.ChordFor(kf)
+	kc := kf.Chord()
 	wb.SendKeyChord(kc, orig...)
 }
 

@@ -475,7 +475,7 @@ func (fb *FuncButton) SetReturnValues(rets []reflect.Value) {
 
 // SetKey sets the shortcut of the function button from the given [keyfun.Funs]
 func (fb *FuncButton) SetKey(kf keyfun.Funs) *FuncButton {
-	fb.SetShortcut(keyfun.ShortcutFor(kf))
+	fb.Button.SetKey(kf)
 	return fb
 }
 

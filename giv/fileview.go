@@ -412,7 +412,7 @@ func (fv *FileView) ConfigSelRow() {
 		SetTooltip("enter file name here (or select from above list)")
 
 	sf := gi.NewTextField(sr, "sel").SetText(fv.SelFile).
-		SetTooltip(fmt.Sprintf("enter file name.  special keys: up/down to move selection; %v or %v to go up to parent folder; %v or %v or %v or %v to select current file (if directory, goes into it, if file, selects and closes); %v or %v for prev / next history item; %s return to this field", keyfun.ShortcutFor(keyfun.WordLeft), keyfun.ShortcutFor(keyfun.Jump), keyfun.ShortcutFor(keyfun.SelectMode), keyfun.ShortcutFor(keyfun.Insert), keyfun.ShortcutFor(keyfun.InsertAfter), keyfun.ShortcutFor(keyfun.Open), keyfun.ShortcutFor(keyfun.HistPrev), keyfun.ShortcutFor(keyfun.HistNext), keyfun.ShortcutFor(keyfun.Search)))
+		SetTooltip(fmt.Sprintf("Enter the file name. Special keys: up/down to move selection; %s or %s to go up to parent folder; %s or %s or %s or %s to select current file (if directory, goes into it, if file, selects and closes); %s or %s for prev / next history item; %s return to this field", keyfun.WordLeft.Label(), keyfun.Jump.Label(), keyfun.SelectMode.Label(), keyfun.Insert.Label(), keyfun.InsertAfter.Label(), keyfun.Open.Label(), keyfun.HistPrev.Label(), keyfun.HistNext.Label(), keyfun.Search.Label()))
 	sf.SetCompleter(fv, fv.FileComplete, fv.FileCompleteEdit)
 	sf.OnChange(func(e events.Event) {
 		fv.SetSelFileAction(sf.Text())

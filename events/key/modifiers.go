@@ -34,9 +34,9 @@ func ModsString(mods Modifiers) string {
 	return modstr
 }
 
-// ModsFmString returns the modifiers corresponding to given string
+// ModsFromString returns the modifiers corresponding to given string
 // and the remainder of the string after modifiers have been stripped
-func ModsFmString(cs string) (Modifiers, string) {
+func ModsFromString(cs string) (Modifiers, string) {
 	var mods Modifiers
 	for m := Shift; m < ModifiersN; m++ {
 		mstr := m.BitIndexString() + "+"

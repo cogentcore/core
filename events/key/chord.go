@@ -61,8 +61,8 @@ func CodeIsModifier(c Codes) bool {
 
 // Decode decodes a chord string into rune and modifiers (set as bit flags)
 func (ch Chord) Decode() (r rune, code Codes, mods Modifiers, err error) {
-	cs := string(ch)
-	mods, cs = ModsFmString(cs)
+	cs := string(ch.OSShortcut())
+	mods, cs = ModsFromString(cs)
 	rs := ([]rune)(cs)
 	if len(rs) == 1 {
 		r = rs[0]
@@ -78,9 +78,10 @@ func (ch Chord) Decode() (r rune, code Codes, mods Modifiers, err error) {
 	return
 }
 
-// Shortcut transforms chord string into short form suitable for display to users
-func (ch Chord) Shortcut() string {
-	cs := strings.ReplaceAll(string(ch), "Control", "Ctrl")
+// Label transforms the chord string into a short form suitable for display to users.
+func (ch Chord) Label() string {
+	cs := string(ch.OSShortcut())
+	cs = strings.ReplaceAll(cs, "Control", "Ctrl")
 	switch runtime.GOOS {
 	case "darwin":
 		cs = strings.ReplaceAll(cs, "Ctrl+", "^") // ⌃ doesn't look as good
@@ -92,5 +93,6 @@ func (ch Chord) Shortcut() string {
 	}
 	cs = strings.ReplaceAll(cs, "Backspace", "⌫")
 	cs = strings.ReplaceAll(cs, "Delete", "⌦")
+	cs = strings.ReplaceAll(cs, "\n", " or ")
 	return cs
 }

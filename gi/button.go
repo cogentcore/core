@@ -233,7 +233,7 @@ func (bt *Button) SetStyles() {
 
 // SetKey sets the shortcut of the button from the given [keyfun.Funs]
 func (bt *Button) SetKey(kf keyfun.Funs) *Button {
-	bt.SetShortcut(keyfun.ShortcutFor(kf))
+	bt.SetShortcut(kf.Chord())
 	return bt
 }
 
@@ -310,7 +310,7 @@ func (bt *Button) HandleClickDismissMenu() {
 func (bt *Button) WidgetTooltip() string {
 	res := bt.Tooltip
 	if bt.Shortcut != "" {
-		res = "[ " + bt.Shortcut.Shortcut() + " ]"
+		res = "[ " + bt.Shortcut.Label() + " ]"
 		if bt.Tooltip != "" {
 			res += " " + bt.Tooltip
 		}
@@ -403,8 +403,7 @@ func (bt *Button) Config() {
 
 		if sci >= 0 {
 			sc := bt.Parts.Child(sci).(*Label)
-			sctxt := bt.Shortcut.Shortcut()
-			sc.SetText(sctxt)
+			sc.SetText(bt.Shortcut.Label())
 		}
 	})
 }

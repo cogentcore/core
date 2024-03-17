@@ -244,7 +244,7 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 	if TheApp.SystemPlatform().IsMobile() {
 		ch.SetPlaceholder("Search")
 	} else {
-		ch.SetPlaceholder(fmt.Sprintf("Search (%s)", keyfun.ChordFor(keyfun.Menu).Shortcut()))
+		ch.SetPlaceholder(fmt.Sprintf("Search (%s)", keyfun.Menu.Label()))
 	}
 
 	ch.OnWidgetAdded(func(w Widget) {
