@@ -396,11 +396,15 @@ func (vv *KiValue) KiValue() ki.Ki {
 	if !vv.Value.IsValid() || vv.Value.IsNil() {
 		return nil
 	}
+	if vv.Value.Kind() == reflect.Interface {
+		k := vv.Value.Interface().(ki.Ki)
+		return k
+	}
 	opv := laser.OnePtrValue(vv.Value)
 	if opv.IsNil() {
 		return nil
 	}
-	k, _ := opv.Interface().(ki.Ki)
+	k := opv.Interface().(ki.Ki)
 	return k
 }
 
