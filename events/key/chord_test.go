@@ -5,28 +5,24 @@
 package key
 
 import (
-	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-func RunChordDecode(ch Chord, t *testing.T) {
-	r, code, mods, err := ch.Decode()
-	if err != nil {
-		t.Error(err.Error())
-		return
-	}
-	fmt.Println("ch:", ch, "r:", r, "code:", code.String(), "mods:", mods.String())
-	nch := NewChord(r, code, mods)
-	if nch != ch {
-		t.Error("ChordDecode error: orig:", ch.String(), "new:", nch.String())
-	}
+func TestChordDecode(t *testing.T) {
+	RunChordDecode(t, "a")
+	RunChordDecode(t, "Control+A")
+	RunChordDecode(t, "ReturnEnter")
+	RunChordDecode(t, "KeypadEnter")
+	RunChordDecode(t, "Backspace")
+	RunChordDecode(t, "Escape")
 }
 
-func TestChordDecode(t *testing.T) {
-	RunChordDecode(Chord("a"), t)
-	RunChordDecode(Chord("Control+A"), t)
-	RunChordDecode(Chord("ReturnEnter"), t)
-	RunChordDecode(Chord("KeypadEnter"), t)
-	RunChordDecode(Chord("Backspace"), t)
-	RunChordDecode(Chord("Escape"), t)
+func RunChordDecode(t *testing.T, ch Chord) {
+	r, code, mods, err := ch.Decode()
+	if assert.NoError(t, err) {
+		nch := NewChord(r, code, mods)
+		assert.Equal(t, ch, nch)
+	}
 }

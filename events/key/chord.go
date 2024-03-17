@@ -43,8 +43,8 @@ func NewChord(rn rune, code Codes, mods Modifiers) Chord {
 	return Chord(modstr + codestr)
 }
 
-// OSShortcut translates Command into either Control or Meta depending on platform
-func (ch Chord) OSShortcut() Chord {
+// PlatformChord translates Command into either Control or Meta depending on the platform
+func (ch Chord) PlatformChord() Chord {
 	sc := string(ch)
 	if runtime.GOOS == "darwin" {
 		sc = strings.Replace(sc, "Command+", "Meta+", -1)
@@ -61,7 +61,7 @@ func CodeIsModifier(c Codes) bool {
 
 // Decode decodes a chord string into rune and modifiers (set as bit flags)
 func (ch Chord) Decode() (r rune, code Codes, mods Modifiers, err error) {
-	cs := string(ch.OSShortcut())
+	cs := string(ch.PlatformChord())
 	mods, cs = ModsFromString(cs)
 	rs := ([]rune)(cs)
 	if len(rs) == 1 {
@@ -80,7 +80,7 @@ func (ch Chord) Decode() (r rune, code Codes, mods Modifiers, err error) {
 
 // Label transforms the chord string into a short form suitable for display to users.
 func (ch Chord) Label() string {
-	cs := string(ch.OSShortcut())
+	cs := string(ch.PlatformChord())
 	cs = strings.ReplaceAll(cs, "Control", "Ctrl")
 	switch runtime.GOOS {
 	case "darwin":
