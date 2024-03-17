@@ -18,10 +18,6 @@ import (
 // type keys to set key chords.
 type Chord string
 
-func (ch Chord) String() string {
-	return string(ch)
-}
-
 // NewChord returns a string representation of the keyboard event suitable for
 // keyboard function maps, etc. Printable runes are sent directly, and
 // non-printable ones are converted to their corresponding code names without
@@ -39,7 +35,7 @@ func NewChord(rn rune, code Codes, mods Modifiers) Chord {
 		}
 	}
 	// now convert code
-	codestr := strings.TrimPrefix(any(code).(fmt.Stringer).String(), "Code")
+	codestr := strings.TrimPrefix(code.String(), "Code")
 	return Chord(modstr + codestr)
 }
 
@@ -62,6 +58,7 @@ func CodeIsModifier(c Codes) bool {
 // Decode decodes a chord string into rune and modifiers (set as bit flags)
 func (ch Chord) Decode() (r rune, code Codes, mods Modifiers, err error) {
 	cs := string(ch.PlatformChord())
+	cs, _, _ = strings.Cut(cs, "\n") // we only care about the first chord
 	mods, cs = ModsFromString(cs)
 	rs := ([]rune)(cs)
 	if len(rs) == 1 {

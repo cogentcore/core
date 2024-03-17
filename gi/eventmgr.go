@@ -8,7 +8,9 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"log/slog"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -1207,15 +1209,19 @@ func (em *EventMgr) AddShortcut(chord key.Chord, bt *Button) {
 		return
 	}
 	if em.Shortcuts == nil {
-		em.Shortcuts = make(Shortcuts, 100)
+		em.Shortcuts = Shortcuts{}
 	}
-	sa, exists := em.Shortcuts[chord]
-	if exists && sa != bt && sa.Text != bt.Text {
+	chords := strings.Split(string(chord), "\n")
+	for _, c := range chords {
+		cc := key.Chord(c)
 		if DebugSettings.KeyEventTrace {
-			log.Printf("gi.RenderWin shortcut: %v already exists on button: %v -- will be overwritten with button: %v\n", chord, sa.Text, bt.Text)
+			old, exists := em.Shortcuts[cc]
+			if exists && old != bt {
+				slog.Error("gi.EventMgr.AddShortcut: overwriting duplicate shortcut", "shortcut", cc, "originalButton", old, "newButton", bt)
+			}
 		}
+		em.Shortcuts[cc] = bt
 	}
-	em.Shortcuts[chord] = bt
 }
 
 // DeleteShortcut deletes given shortcut
