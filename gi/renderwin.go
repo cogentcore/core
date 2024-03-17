@@ -906,9 +906,11 @@ func (rs *RenderScenes) DrawAll(drw goosi.Drawer) {
 			drw.Copy(i, 0, sc.SceneGeom.Pos, bb, op, rs.FlipY)
 		} else {
 			wb := w.AsWidget()
-			bb := wb.Geom.TotalBBox
-			ibb := image.Rectangle{Max: bb.Size()}
-			drw.Copy(i, 0, bb.Min, ibb, draw.Src, rs.FlipY)
+			if w.IsVisible() {
+				bb := wb.Geom.TotalBBox
+				ibb := image.Rectangle{Max: bb.Size()}
+				drw.Copy(i, 0, bb.Min, ibb, draw.Src, rs.FlipY)
+			}
 		}
 	}
 }
