@@ -72,7 +72,7 @@ const (
 	InsertAfter
 	ZoomOut
 	ZoomIn
-	Prefs
+	Settings
 	Refresh
 	Recenter // Ctrl+L in emacs
 	Complete
