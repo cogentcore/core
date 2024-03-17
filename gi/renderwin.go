@@ -791,8 +791,9 @@ func (rc *RenderContext) String() string {
 //////////////////////////////////////////////////////////////////////
 //  RenderScenes
 
-// RenderScenes are a list of Scene objects, compiled in rendering order,
-// whose Pixels images are composed directly to the RenderWin window.
+// RenderScenes are a list of Scene and direct rendering widgets,
+// compiled in rendering order, whose Pixels images are composed
+// directly to the RenderWin window.
 type RenderScenes struct {
 
 	// starting index for this set of Scenes
@@ -804,11 +805,12 @@ type RenderScenes struct {
 	// set to true to flip Y axis in drawing these images
 	FlipY bool
 
-	// ordered list of scenes -- index is Drawer image index.
-	Scenes []*Scene
+	// ordered list of scenes and direct rendering widgets. Index is Drawer image index.
+	Scenes []Widget
 
-	// SceneIdx holds the index for each scene -- used to detect changes in index
-	SceneIdx map[*Scene]int
+	// SceneIdx holds the index for each scene / direct render widget.
+	// Used to detect changes in index.
+	SceneIdx map[Widget]int
 }
 
 // SetIdxRange sets the index range based on starting index and n
@@ -821,12 +823,13 @@ func (rs *RenderScenes) SetIdxRange(st, n int) {
 func (rs *RenderScenes) Reset() {
 	rs.Scenes = nil
 	if rs.SceneIdx == nil {
-		rs.SceneIdx = make(map[*Scene]int)
+		rs.SceneIdx = make(map[Widget]int)
 	}
 }
 
 // Add adds a new node, returning index
-func (rs *RenderScenes) Add(sc *Scene, scIdx map[*Scene]int) int {
+func (rs *RenderScenes) Add(w Widget, scIdx map[Widget]int) int {
+	sc := w.AsWidget().Scene
 	if sc.Pixels == nil {
 		return -1
 	}
@@ -835,15 +838,15 @@ func (rs *RenderScenes) Add(sc *Scene, scIdx map[*Scene]int) int {
 		slog.Error("gi.RenderScenes: too many Scenes to render all of them!", "max", rs.MaxIdx)
 		return -1
 	}
-	if prvIdx, has := rs.SceneIdx[sc]; has {
+	if prvIdx, has := rs.SceneIdx[w]; has {
 		if prvIdx != idx {
 			sc.SetFlag(true, ScImageUpdated) // need to copy b/c cur has diff image
 		}
 	} else {
 		sc.SetFlag(true, ScImageUpdated) // need to copy b/c new
 	}
-	scIdx[sc] = idx
-	rs.Scenes = append(rs.Scenes, sc)
+	scIdx[w] = idx
+	rs.Scenes = append(rs.Scenes, w)
 	return idx
 }
 
@@ -854,7 +857,8 @@ func (rs *RenderScenes) SetImages(drw goosi.Drawer) {
 			fmt.Println("RenderScene.SetImages: no scenes")
 		}
 	}
-	for i, sc := range rs.Scenes {
+	for i, w := range rs.Scenes {
+		sc := w.AsWidget().Scene
 		if sc.Is(ScUpdating) || !sc.Is(ScImageUpdated) {
 			if DebugSettings.WinRenderTrace {
 				if sc.Is(ScUpdating) {
@@ -867,10 +871,14 @@ func (rs *RenderScenes) SetImages(drw goosi.Drawer) {
 			continue
 		}
 		if DebugSettings.WinRenderTrace {
-			fmt.Println("RenderScenes.SetImages:", sc.Name(), sc.Pixels.Bounds())
+			fmt.Println("RenderScenes.SetImages:", sc.Name())
 		}
-		drw.SetGoImage(i, 0, sc.Pixels, goosi.NoFlipY)
-		sc.SetFlag(false, ScImageUpdated)
+		if _, isSc := w.(*Scene); isSc {
+			drw.SetGoImage(i, 0, sc.Pixels, goosi.NoFlipY)
+			sc.SetFlag(false, ScImageUpdated)
+		} else {
+			w.DirectRender(drw, i)
+		}
 	}
 }
 
@@ -879,17 +887,23 @@ func (rs *RenderScenes) SetImages(drw goosi.Drawer) {
 func (rs *RenderScenes) DrawAll(drw goosi.Drawer) {
 	nPerSet := goosi.MaxTexturesPerSet
 
-	for i, sc := range rs.Scenes {
+	for i, w := range rs.Scenes {
 		set := i / nPerSet
 		if i%nPerSet == 0 && set > 0 {
 			drw.UseTextureSet(set)
 		}
-		bb := sc.Pixels.Bounds()
 		op := draw.Over
 		if i == 0 {
 			op = draw.Src
 		}
-		drw.Copy(i, 0, sc.SceneGeom.Pos, bb, op, rs.FlipY)
+		if sc, isSc := w.(*Scene); isSc {
+			bb := sc.Pixels.Bounds()
+			drw.Copy(i, 0, sc.SceneGeom.Pos, bb, op, rs.FlipY)
+		} else {
+			wb := w.AsWidget()
+			bb := wb.Geom.TotalBBox
+			drw.Copy(i, 0, bb.Min, bb, op, rs.FlipY)
+		}
 	}
 }
 
@@ -1023,7 +1037,7 @@ func (w *RenderWin) FillInsets() {
 func (w *RenderWin) GatherScenes() bool {
 	rs := &w.RenderScenes
 	rs.Reset()
-	scIdx := make(map[*Scene]int)
+	scIdx := make(map[Widget]int)
 
 	sm := &w.MainStageMgr
 	n := sm.Stack.Len()
@@ -1041,6 +1055,9 @@ func (w *RenderWin) GatherScenes() bool {
 				fmt.Println("GatherScenes: main Window:", st.String())
 			}
 			rs.Add(st.Scene, scIdx)
+			for _, w := range st.Scene.DirectRenders {
+				rs.Add(w, scIdx)
+			}
 			winIdx = i
 			break
 		}

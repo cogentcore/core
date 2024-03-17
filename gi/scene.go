@@ -112,6 +112,10 @@ type Scene struct {
 	// hasShown is whether this scene has already been shown.
 	// This is used to ensure that [events.Show] is only sent once.
 	hasShown bool `set:"-"`
+
+	// DirectRenders are widgets that render directly to the RenderWin
+	// instead of rendering into the Scene Pixels image.
+	DirectRenders []Widget
 }
 
 func (sc *Scene) FlagType() enums.BitFlagSetter {

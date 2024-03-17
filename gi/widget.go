@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/states"
@@ -183,21 +184,8 @@ type Widget interface {
 	// specifically for the child (e.g., for zebra stripes in giv.SliceViewGrid)
 	ChildBackground(child Widget) image.Image
 
-	// todo: revisit this -- in general anything with a largish image (including svg,
-	// SubScene, but not Icon) should get put on a list so the RenderWin Drawer just
-	// directly uploads its image.
-
-	// IsDirectWinUpload returns true if this is a node that does a direct window upload
-	// e.g., for gi3d.Scene which renders directly to the window texture for maximum efficiency
-	IsDirectWinUpload() bool
-
-	// DirectWinUpload does a direct upload of contents to a window
-	// Drawer compositing image, which will then be used for drawing
-	// the window during a Publish() event (triggered by the window Update
-	// event).  This is called by the scene in its Update signal processing
-	// routine on nodes that respond true to IsDirectWinUpload().
-	// The node is also free to update itself of its own accord at any point.
-	DirectWinUpload()
+	// DirectRender draws directly into given draw image in given drawer object
+	DirectRender(drw goosi.Drawer, idx int)
 }
 
 // WidgetBase is the base type for all Widget Widget elements, which are
@@ -467,11 +455,8 @@ func (wb *WidgetBase) IsVisible() bool {
 	return wb.Par.This().(Widget).IsVisible()
 }
 
-func (wb *WidgetBase) IsDirectWinUpload() bool {
-	return false
-}
-
-func (wb *WidgetBase) DirectWinUpload() {
+// DirectRender draws directly into given draw image in given drawer object
+func (wb *WidgetBase) DirectRender(drw goosi.Drawer, idx int) {
 }
 
 // WalkPreNode extends WalkPre to Parts -- key for getting full Update protection!
