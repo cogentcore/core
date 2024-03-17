@@ -875,9 +875,12 @@ func (rs *RenderScenes) SetImages(drw goosi.Drawer) {
 		}
 		if _, isSc := w.(*Scene); isSc {
 			drw.SetGoImage(i, 0, sc.Pixels, goosi.NoFlipY)
-			sc.SetFlag(false, ScImageUpdated)
+			if len(sc.DirectRenders) == 0 {
+				sc.SetFlag(false, ScImageUpdated)
+			}
 		} else {
 			w.DirectRender(drw, i)
+			sc.SetFlag(false, ScImageUpdated)
 		}
 	}
 }
@@ -902,7 +905,8 @@ func (rs *RenderScenes) DrawAll(drw goosi.Drawer) {
 		} else {
 			wb := w.AsWidget()
 			bb := wb.Geom.TotalBBox
-			drw.Copy(i, 0, bb.Min, bb, op, rs.FlipY)
+			ibb := image.Rectangle{Max: bb.Size()}
+			drw.Copy(i, 0, bb.Min, ibb, draw.Src, rs.FlipY)
 		}
 	}
 }

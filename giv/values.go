@@ -400,7 +400,7 @@ func (vv *KiValue) KiValue() ki.Ki {
 	if opv.IsNil() {
 		return nil
 	}
-	k := opv.Interface().(ki.Ki)
+	k, _ := opv.Interface().(ki.Ki)
 	return k
 }
 

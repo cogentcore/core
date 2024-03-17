@@ -61,9 +61,13 @@ func (dw *Drawer) ConfigImage(idx int, fmt *vgpu.ImageFormat) {
 	dw.UpdtMu.Unlock()
 }
 
-// SetFrameImage sets given Framebuffer image as a drawing source at index,
+// SetFrameImage sets given vgpu.Framebuffer image as a drawing source at index,
 // used in subsequent Draw methods.  Must have already been configured to fit!
-func (dw *Drawer) SetFrameImage(idx int, fb *vgpu.Framebuffer) {
+func (dw *Drawer) SetFrameImage(idx int, fbi any) {
+	fb := fbi.(*vgpu.Framebuffer)
+	if fb == nil {
+		return
+	}
 	dw.UpdtMu.Lock()
 	_, tx, _ := dw.Sys.Vars().ValByIdxTry(0, "Tex", idx)
 	if fb.Format.Size != tx.Texture.Format.Size {

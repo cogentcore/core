@@ -8,6 +8,7 @@ import (
 	"image"
 	"image/png"
 	"io"
+	"slices"
 	"sync"
 
 	"cogentcore.org/core/colors"
@@ -380,6 +381,17 @@ func (sc *Scene) ScenePos() {
 	rsz.Geom.RelPos.Y = psz.Y // - 0.5*rsz.Geom.Size.Actual.Total.Y
 	rsz.SetPosFromParent()
 	rsz.SetBBoxesFromAllocs()
+}
+
+func (sc *Scene) AddDirectRender(w Widget) {
+	sc.DirectRenders = append(sc.DirectRenders, w)
+}
+
+func (sc *Scene) DeleteDirectRender(w Widget) {
+	idx := slices.Index(sc.DirectRenders, w)
+	if idx >= 0 {
+		sc.DirectRenders = slices.Delete(sc.DirectRenders, idx, idx+1)
+	}
 }
 
 //////////////////////////////////////////////////////////////////

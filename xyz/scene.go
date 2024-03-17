@@ -225,7 +225,7 @@ func (sc *Scene) Destroy() {
 	if sc.Frame != nil {
 		sc.Frame.Destroy()
 		sc.Frame = nil
-		fmt.Println("Phong, Frame destroyed")
+		// fmt.Println("Phong, Frame destroyed")
 	}
 }
 

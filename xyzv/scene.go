@@ -53,6 +53,17 @@ func (sw *Scene) OnInit() {
 	sw.SetStyles()
 }
 
+func (sw *Scene) OnAdd() {
+	sw.WidgetBase.OnAdd()
+	sw.Scene.AddDirectRender(sw)
+}
+
+func (sw *Scene) Destroy() {
+	sw.Scene.DeleteDirectRender(sw)
+	sw.XYZ.Destroy()
+	sw.WidgetBase.Destroy()
+}
+
 // SceneXYZ returns the xyz.Scene
 func (sw *Scene) SceneXYZ() *xyz.Scene {
 	return sw.XYZ
@@ -121,6 +132,9 @@ func (sw *Scene) ConfigFrame() {
 	sw.NeedsRender()
 }
 
+// DrawIntoScene is the slower path for rendering, by grabbing the image
+// down from the GPU and drawing it into the Scene image.
+// This is retained for the time being in case it is needed for another case.
 func (sw *Scene) DrawIntoScene() {
 	if sw.XYZ.Frame == nil {
 		return
@@ -164,14 +178,16 @@ func (sw *Scene) Render3D() {
 func (sw *Scene) Render() {
 	if sw.PushBounds() {
 		sw.Render3D()
-		sw.DrawIntoScene()
-		sw.RenderChildren()
+		// sw.DrawIntoScene() // using direct rendering
+		// sw.RenderChildren() // this is entirely pointless actually
 		sw.PopBounds()
 	}
 }
 
-// Direct render to Drawer frame
-// drw := sc.Win.OSWin.Drawer()
-// drw.SetFrameImage(sc.DirUpIdx, sc.Frame.Frames[0])
-// sc.Win.DirDraws.SetWinBBox(sc.DirUpIdx, sc.WinBBox)
-// drw.SyncImages()
+// DirectRender renders the scene directly into the drawer
+func (sw *Scene) DirectRender(drw goosi.Drawer, idx int) {
+	if sw.XYZ.Frame == nil || !sw.IsVisible() {
+		return
+	}
+	drw.SetFrameImage(idx, sw.XYZ.Frame.Frames[0])
+}

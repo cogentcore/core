@@ -108,6 +108,10 @@ type Drawer interface {
 	// Surface is the vgpu device being drawn to.
 	// Could be nil on unsupported devices (web).
 	Surface() any
+
+	// SetFrameImage does direct rendering from a *vgpu.Framebuffer image.
+	// This is much more efficient for GPU-resident images, as in 3D or video.
+	SetFrameImage(idx int, fb any)
 }
 
 // DrawerBase is a base implementation of [Drawer] with basic no-ops
@@ -221,4 +225,10 @@ func (dw *DrawerBase) EndFill() {
 func (dw *DrawerBase) Surface() any {
 	// no-op
 	return nil
+}
+
+// SetFrameImage does direct rendering from a *vgpu.Framebuffer image.
+// This is much more efficient for GPU-resident images, as in 3D or video.
+func (dw *DrawerBase) SetFrameImage(idx int, fb any) {
+	// no-op
 }
