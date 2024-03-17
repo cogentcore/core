@@ -43,9 +43,9 @@ func NewChord(rn rune, code Codes, mods Modifiers) Chord {
 func (ch Chord) PlatformChord() Chord {
 	sc := string(ch)
 	if runtime.GOOS == "darwin" {
-		sc = strings.Replace(sc, "Command+", "Meta+", -1)
+		sc = strings.ReplaceAll(sc, "Command+", "Meta+")
 	} else {
-		sc = strings.Replace(sc, "Command+", "Control+", -1)
+		sc = strings.ReplaceAll(sc, "Command+", "Control+")
 	}
 	return Chord(sc)
 }
