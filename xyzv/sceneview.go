@@ -7,6 +7,7 @@ package xyzv
 import (
 	"fmt"
 
+	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/gi"
@@ -79,18 +80,27 @@ func (sv *SceneView) ConfigToolbar(tb *gi.Toolbar) {
 	sw := sv.SceneWidget()
 	sc := sv.SceneXYZ()
 	gi.NewButton(tb).SetIcon(icons.Update).SetTooltip("reset to default initial display").
+		Style(func(s *styles.Style) {
+			s.SetAbilities(true, abilities.RepeatClickable)
+		}).
 		OnClick(func(e events.Event) {
 			sc.SetCamera("default")
 			sc.NeedsUpdate()
 			sv.NeedsRender()
 		})
 	gi.NewButton(tb).SetIcon(icons.ZoomIn).SetTooltip("zoom in").
+		Style(func(s *styles.Style) {
+			s.SetAbilities(true, abilities.RepeatClickable)
+		}).
 		OnClick(func(e events.Event) {
 			sc.Camera.Zoom(-.05)
 			sc.NeedsUpdate()
 			sv.NeedsRender()
 		})
 	gi.NewButton(tb).SetIcon(icons.ZoomOut).SetTooltip("zoom out").
+		Style(func(s *styles.Style) {
+			s.SetAbilities(true, abilities.RepeatClickable)
+		}).
 		OnClick(func(e events.Event) {
 			sc.Camera.Zoom(.05)
 			sc.NeedsUpdate()
@@ -98,49 +108,81 @@ func (sv *SceneView) ConfigToolbar(tb *gi.Toolbar) {
 		})
 	gi.NewSeparator(tb)
 	gi.NewLabel(tb).SetText("Rot:").SetTooltip("rotate display")
-	gi.NewButton(tb).SetIcon(icons.KeyboardArrowLeft).OnClick(func(e events.Event) {
-		sc.Camera.Orbit(5, 0)
-		sc.NeedsUpdate()
-		sv.NeedsRender()
-	})
-	gi.NewButton(tb).SetIcon(icons.KeyboardArrowUp).OnClick(func(e events.Event) {
-		sc.Camera.Orbit(0, 5)
-		sc.NeedsUpdate()
-		sv.NeedsRender()
-	})
-	gi.NewButton(tb).SetIcon(icons.KeyboardArrowDown).OnClick(func(e events.Event) {
-		sc.Camera.Orbit(0, -5)
-		sc.NeedsUpdate()
-		sv.NeedsRender()
-	})
-	gi.NewButton(tb).SetIcon(icons.KeyboardArrowRight).OnClick(func(e events.Event) {
-		sc.Camera.Orbit(-5, 0)
-		sc.NeedsUpdate()
-		sv.NeedsRender()
-	})
+	gi.NewButton(tb).SetIcon(icons.KeyboardArrowLeft).
+		Style(func(s *styles.Style) {
+			s.SetAbilities(true, abilities.RepeatClickable)
+		}).
+		OnClick(func(e events.Event) {
+			sc.Camera.Orbit(5, 0)
+			sc.NeedsUpdate()
+			sv.NeedsRender()
+		})
+	gi.NewButton(tb).SetIcon(icons.KeyboardArrowUp).
+		Style(func(s *styles.Style) {
+			s.SetAbilities(true, abilities.RepeatClickable)
+		}).
+		OnClick(func(e events.Event) {
+			sc.Camera.Orbit(0, 5)
+			sc.NeedsUpdate()
+			sv.NeedsRender()
+		})
+	gi.NewButton(tb).SetIcon(icons.KeyboardArrowDown).
+		Style(func(s *styles.Style) {
+			s.SetAbilities(true, abilities.RepeatClickable)
+		}).
+		OnClick(func(e events.Event) {
+			sc.Camera.Orbit(0, -5)
+			sc.NeedsUpdate()
+			sv.NeedsRender()
+		})
+	gi.NewButton(tb).SetIcon(icons.KeyboardArrowRight).
+		Style(func(s *styles.Style) {
+			s.SetAbilities(true, abilities.RepeatClickable)
+		}).
+		OnClick(func(e events.Event) {
+			sc.Camera.Orbit(-5, 0)
+			sc.NeedsUpdate()
+			sv.NeedsRender()
+		})
 	gi.NewSeparator(tb)
 
 	gi.NewLabel(tb).SetText("Pan:").SetTooltip("pan display")
-	gi.NewButton(tb).SetIcon(icons.KeyboardArrowLeft).OnClick(func(e events.Event) {
-		sc.Camera.Pan(-.2, 0)
-		sc.NeedsUpdate()
-		sv.NeedsRender()
-	})
-	gi.NewButton(tb).SetIcon(icons.KeyboardArrowUp).OnClick(func(e events.Event) {
-		sc.Camera.Pan(0, .2)
-		sc.NeedsUpdate()
-		sv.NeedsRender()
-	})
-	gi.NewButton(tb).SetIcon(icons.KeyboardArrowDown).OnClick(func(e events.Event) {
-		sc.Camera.Pan(0, -.2)
-		sc.NeedsUpdate()
-		sv.NeedsRender()
-	})
-	gi.NewButton(tb).SetIcon(icons.KeyboardArrowRight).OnClick(func(e events.Event) {
-		sc.Camera.Pan(.2, 0)
-		sc.NeedsUpdate()
-		sv.NeedsRender()
-	})
+	gi.NewButton(tb).SetIcon(icons.KeyboardArrowLeft).
+		Style(func(s *styles.Style) {
+			s.SetAbilities(true, abilities.RepeatClickable)
+		}).
+		OnClick(func(e events.Event) {
+			sc.Camera.Pan(-.2, 0)
+			sc.NeedsUpdate()
+			sv.NeedsRender()
+		})
+	gi.NewButton(tb).SetIcon(icons.KeyboardArrowUp).
+		Style(func(s *styles.Style) {
+			s.SetAbilities(true, abilities.RepeatClickable)
+		}).
+		OnClick(func(e events.Event) {
+			sc.Camera.Pan(0, .2)
+			sc.NeedsUpdate()
+			sv.NeedsRender()
+		})
+	gi.NewButton(tb).SetIcon(icons.KeyboardArrowDown).
+		Style(func(s *styles.Style) {
+			s.SetAbilities(true, abilities.RepeatClickable)
+		}).
+		OnClick(func(e events.Event) {
+			sc.Camera.Pan(0, -.2)
+			sc.NeedsUpdate()
+			sv.NeedsRender()
+		})
+	gi.NewButton(tb).SetIcon(icons.KeyboardArrowRight).
+		Style(func(s *styles.Style) {
+			s.SetAbilities(true, abilities.RepeatClickable)
+		}).
+		OnClick(func(e events.Event) {
+			sc.Camera.Pan(.2, 0)
+			sc.NeedsUpdate()
+			sv.NeedsRender()
+		})
 	gi.NewSeparator(tb)
 
 	gi.NewLabel(tb).SetText("Save:")
