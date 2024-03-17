@@ -27,15 +27,11 @@ func TestRenderOneSideBorder(t *testing.T) {
 
 // For https://github.com/cogentcore/core/issues/660
 func TestRenderParentBorderRadius(t *testing.T) {
+	AppearanceSettings.Spacing = 10
 	b := NewBody()
-	outer := NewFrame(b).Style(func(s *styles.Style) {
+	NewButton(b).SetText("Test").Style(func(s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusFull
 		s.Background = colors.C(colors.Blue)
-		s.Min.Set(units.Dp(100))
-	})
-	NewBox(outer).Style(func(s *styles.Style) {
-		s.Background = colors.C(colors.Red)
-		s.Min.Set(units.Dp(80))
 	})
 	b.AssertRender(t, "render/parent-border-radius")
 }
