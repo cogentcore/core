@@ -19,7 +19,6 @@ import (
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/grows/images"
 	"cogentcore.org/core/grr"
-	"cogentcore.org/core/icons"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/states"
@@ -97,9 +96,8 @@ func HandleElement(ctx *Context) {
 		ctx.AddStyle(string(b))
 	case "style":
 		ctx.AddStyle(ExtractText(ctx))
-	case "body", "main", "div", "section", "nav", "footer", "header":
-		f := New[*gi.Frame](ctx)
-		ctx.NewParent = f
+	case "body", "main", "div", "section", "nav", "footer", "header", "ol", "ul":
+		ctx.NewParent = New[*gi.Frame](ctx)
 	case "button":
 		New[*gi.Button](ctx).SetText(ExtractText(ctx))
 	case "h1":
@@ -125,51 +123,19 @@ func HandleElement(ctx *Context) {
 				s.Border.Radius = styles.BorderRadiusMedium
 			}
 		})
-	case "ol", "ul":
-		// if we are already in a treeview, we just return in the last item in it
-		// (which is the list item we are contained in), which fixes the associativity
-		// of nested list items and prevents the created of duplicated tree view items.
-		if ptv, ok := ctx.Parent().(*giv.TreeView); ok {
-			w := ki.LastChild(ptv).(gi.Widget)
-			ctx.NewParent = w
-			return
-		}
-		tv := New[*giv.TreeView](ctx).SetText("").SetIcon(icons.None)
-		ctx.NewParent = tv
-		return
 	case "li":
-		ntv := New[*giv.TreeView](ctx)
-		ftxt := ""
-		if ptv := giv.AsTreeView(ctx.Parent()); ptv != nil {
-			if ptv.Prop("tag") == "ol" {
-				ftxt = strconv.Itoa(ntv.IndexInParent()+1) + ". " // start at 1
-			} else {
+		label := HandleLabel(ctx)
+		start := ""
+		if pw, ok := label.Parent().(gi.Widget); ok {
+			switch pw.Prop("tag") {
+			case "ol":
+				start = strconv.Itoa(label.IndexInParent()+1) + ". " // start at 1
+			case "ul":
 				// TODO(kai/coredom): have different bullets for different depths
-				ftxt = "• "
+				start = "• "
 			}
 		}
-
-		// if we have a p as our first or second child, which is typical
-		// for markdown-generated HTML, we use it directly for data extraction
-		// to prevent double elements and unnecessary line breaks.
-		if ctx.Node.FirstChild != nil && ctx.Node.FirstChild.Data == "p" {
-			ctx.Node = ctx.Node.FirstChild
-		} else if ctx.Node.FirstChild != nil && ctx.Node.FirstChild.NextSibling != nil && ctx.Node.FirstChild.NextSibling.Data == "p" {
-			ctx.Node = ctx.Node.FirstChild.NextSibling
-		}
-
-		etxt := ExtractText(ctx)
-		ntv.SetText(ftxt + etxt)
-		ntv.OnWidgetAdded(func(w gi.Widget) {
-			switch w := w.(type) {
-			case *gi.Label:
-				if w.PathFrom(ntv) == "parts/label" {
-					w.HandleLabelClick(func(tl *paint.TextLink) {
-						ctx.OpenURL(tl.URL)
-					})
-				}
-			}
-		})
+		label.SetText(start + label.Text)
 	case "img":
 		img := New[*gi.Image](ctx)
 		n := ctx.Node

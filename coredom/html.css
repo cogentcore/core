@@ -27,6 +27,11 @@ area {
     cursor: pointer;
 }
 
+ol, ul {
+    flex-direction: column;
+    padding: 0dp, 0dp, 0dp, 16dp;
+}
+
 ruby > rt {
     display: block;
     font-size: 50%;
