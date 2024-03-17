@@ -1025,15 +1025,31 @@ func (tf *TextField) ContextMenu(m *Scene) {
 
 func (tf *TextField) SaveUndo() {
 	tf.Undos = append(tf.Undos, tf.EditTxt)
-	tf.UndoPos = len(tf.Undos) - 1
+	tf.UndoPos = len(tf.Undos)
 }
 
 func (tf *TextField) Undo() {
 	n := len(tf.Undos)
 	if tf.UndoPos <= 0 || n == 0 {
 		MessageSnackbar(tf, "Nothing left to undo")
+		return
+	}
+	if tf.UndoPos == n {
+		tf.SaveUndo()
+		tf.UndoPos--
 	}
 	tf.UndoPos--
+	tf.EditTxt = tf.Undos[tf.UndoPos]
+	tf.NeedsRender()
+}
+
+func (tf *TextField) Redo() {
+	n := len(tf.Undos)
+	if tf.UndoPos >= n-1 {
+		MessageSnackbar(tf, "Nothing left to redo")
+		return
+	}
+	tf.UndoPos++
 	tf.EditTxt = tf.Undos[tf.UndoPos]
 	tf.NeedsRender()
 }
@@ -1646,6 +1662,7 @@ func (tf *TextField) HandleKeyEvents() {
 			// tf.FocusChanged(FocusInactive)
 		case keyfun.Backspace:
 			e.SetHandled()
+			tf.SaveUndo()
 			tf.CursorBackspace(1)
 			tf.OfferComplete()
 			tf.Send(events.Input, e)
@@ -1656,29 +1673,40 @@ func (tf *TextField) HandleKeyEvents() {
 			tf.Send(events.Input, e)
 		case keyfun.Delete:
 			e.SetHandled()
+			tf.SaveUndo()
 			tf.CursorDelete(1)
 			tf.OfferComplete()
 			tf.Send(events.Input, e)
 		case keyfun.BackspaceWord:
 			e.SetHandled()
+			tf.SaveUndo()
 			tf.CursorBackspaceWord(1)
 			tf.OfferComplete()
 			tf.Send(events.Input, e)
 		case keyfun.DeleteWord:
 			e.SetHandled()
+			tf.SaveUndo()
 			tf.CursorDeleteWord(1)
 			tf.OfferComplete()
 			tf.Send(events.Input, e)
 		case keyfun.Cut:
 			e.SetHandled()
+			tf.SaveUndo()
 			tf.CancelComplete()
 			tf.Cut()
 			tf.Send(events.Input, e)
 		case keyfun.Paste:
 			e.SetHandled()
+			tf.SaveUndo()
 			tf.CancelComplete()
 			tf.Paste()
 			tf.Send(events.Input, e)
+		case keyfun.Undo:
+			e.SetHandled()
+			tf.Undo()
+		case keyfun.Redo:
+			e.SetHandled()
+			tf.Redo()
 		case keyfun.Complete:
 			e.SetHandled()
 			tf.OfferComplete()
@@ -1686,6 +1714,7 @@ func (tf *TextField) HandleKeyEvents() {
 			if unicode.IsPrint(e.KeyRune()) {
 				if !e.HasAnyModifier(key.Control, key.Meta) {
 					e.SetHandled()
+					tf.SaveUndo()
 					tf.InsertAtCursor(string(e.KeyRune()))
 					if e.KeyRune() == ' ' {
 						tf.CancelComplete()
