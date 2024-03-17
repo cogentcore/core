@@ -857,9 +857,11 @@ func (rs *RenderScenes) SetImages(drw goosi.Drawer) {
 			fmt.Println("RenderScene.SetImages: no scenes")
 		}
 	}
+	var skipScene *Scene
 	for i, w := range rs.Scenes {
 		sc := w.AsWidget().Scene
-		if sc.Is(ScUpdating) || !sc.Is(ScImageUpdated) {
+		_, isSc := w.(*Scene)
+		if isSc && (sc.Is(ScUpdating) || !sc.Is(ScImageUpdated)) {
 			if DebugSettings.WinRenderTrace {
 				if sc.Is(ScUpdating) {
 					fmt.Println("RenderScenes.SetImages: sc IsUpdating", sc.Name())
@@ -868,19 +870,19 @@ func (rs *RenderScenes) SetImages(drw goosi.Drawer) {
 					fmt.Println("RenderScenes.SetImages: sc Image NotUpdated", sc.Name())
 				}
 			}
+			skipScene = sc
 			continue
 		}
 		if DebugSettings.WinRenderTrace {
 			fmt.Println("RenderScenes.SetImages:", sc.Name())
 		}
-		if _, isSc := w.(*Scene); isSc {
+		if isSc {
 			drw.SetGoImage(i, 0, sc.Pixels, goosi.NoFlipY)
-			if len(sc.DirectRenders) == 0 {
-				sc.SetFlag(false, ScImageUpdated)
-			}
-		} else {
-			w.DirectRender(drw, i)
 			sc.SetFlag(false, ScImageUpdated)
+		} else {
+			if sc != skipScene {
+				w.DirectRender(drw, i)
+			}
 		}
 	}
 }
