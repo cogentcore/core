@@ -129,7 +129,15 @@ func HandleElement(ctx *Context) {
 		if pw, ok := label.Parent().(gi.Widget); ok {
 			switch pw.Prop("tag") {
 			case "ol":
-				start = strconv.Itoa(label.IndexInParent()+1) + ". " // start at 1
+				number := 0
+				for _, k := range *pw.Children() {
+					// we only consider labels for the number (frames may be
+					// added for nested lists, interfering with the number)
+					if _, ok := k.(*gi.Label); ok {
+						number++
+					}
+				}
+				start = strconv.Itoa(number) + ". "
 			case "ul":
 				// TODO(kai/coredom): have different bullets for different depths
 				start = "• "
