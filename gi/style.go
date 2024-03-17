@@ -210,30 +210,9 @@ func (wb *WidgetBase) ApplyStyleSettings() {
 	s.Gap.X.Val *= spc
 	s.Gap.Y.Val *= spc
 
-	wb.PaddingForBorderRadius()
-
 	fsz := AppearanceSettings.FontSize / 100
 	s.Font.Size.Val *= fsz
 	s.Text.LineHeight.Val *= fsz
-}
-
-// PaddingforBorderRadius ensures that left / right padding is sufficient for
-// the curvature of the BorderRadius.
-// We have to use an approximate max value for Full radius.
-func (wb *WidgetBase) PaddingForBorderRadius() {
-	if !wb.HasChildren() && wb.Parts == nil {
-		return
-	}
-	maxrad := float32(9 * (AppearanceSettings.FontSize / 100)) // approx 1/2 font size
-	s := &wb.Styles
-	bv := mat32.Ceil(min(s.Border.Radius.Left.Val, maxrad))
-	if bv > s.Padding.Left.Val {
-		s.Padding.Left.Val = bv
-	}
-	bv = mat32.Ceil(min(s.Border.Radius.Right.Val, maxrad))
-	if bv > s.Padding.Right.Val {
-		s.Padding.Right.Val = bv
-	}
 }
 
 // ApplyStyleUpdate calls ApplyStyleTree and NeedsRender.
