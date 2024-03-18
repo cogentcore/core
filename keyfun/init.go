@@ -10,11 +10,11 @@ func init() {
 	AvailMaps.CopyFrom(StdMaps)
 	switch goosi.TheApp.SystemPlatform() {
 	case goosi.MacOS:
-		DefaultMap = "MacStd"
+		DefaultMap = "MacStandard"
 	case goosi.Windows:
-		DefaultMap = "WindowsStd"
+		DefaultMap = "WindowsStandard"
 	default:
-		DefaultMap = "LinuxStd"
+		DefaultMap = "LinuxStandard"
 	}
 	SetActiveMapName(DefaultMap)
 }

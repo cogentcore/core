@@ -250,7 +250,7 @@ func (km *Map) Update(kmName MapName) {
 
 // DefaultMap is the overall default keymap, which is set in init
 // depending on the platform
-var DefaultMap MapName = "LinuxStd"
+var DefaultMap MapName = "LinuxStandard"
 
 // MapsItem is an entry in a Maps list
 type MapsItem struct { //gti:add -setters

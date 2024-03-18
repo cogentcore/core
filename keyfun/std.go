@@ -7,7 +7,7 @@ package keyfun
 // StdMaps is the original compiled-in set of standard keymaps that have
 // the lastest key functions bound to standard key chords.
 var StdMaps = Maps{
-	{"MacStd", "Standard Mac KeyMap", Map{
+	{"MacStandard", "Standard Mac KeyMap", Map{
 		"UpArrow":              MoveUp,
 		"Shift+UpArrow":        MoveUp,
 		"Meta+UpArrow":         MoveUp,
@@ -396,7 +396,7 @@ var StdMaps = Maps{
 		"Shift+Alt+W":         CloseAlt1,
 		"Control+Alt+W":       CloseAlt2,
 	}},
-	{"LinuxStd", "Standard Linux KeyMap", Map{
+	{"LinuxStandard", "Standard Linux KeyMap", Map{
 		"UpArrow":             MoveUp,
 		"Shift+UpArrow":       MoveUp,
 		"DownArrow":           MoveDown,
@@ -485,7 +485,7 @@ var StdMaps = Maps{
 		"Shift+Control+W":     CloseAlt1,
 		"Control+Alt+W":       CloseAlt2,
 	}},
-	{"WindowsStd", "Standard Windows KeyMap", Map{
+	{"WindowsStandard", "Standard Windows KeyMap", Map{
 		"UpArrow":             MoveUp,
 		"Shift+UpArrow":       MoveUp,
 		"DownArrow":           MoveDown,
