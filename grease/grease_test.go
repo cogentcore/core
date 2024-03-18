@@ -16,6 +16,8 @@ import (
 	"cogentcore.org/core/grease/testdata"
 	"cogentcore.org/core/grog"
 	"cogentcore.org/core/grows/tomls"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // TestSubConfig is a sub-struct with special params
@@ -221,31 +223,21 @@ func TestArgsPrint(t *testing.T) {
 func TestSetFromArgs(t *testing.T) {
 	cfg := &TestConfig{}
 	err := SetFromDefaults(cfg)
-	if err != nil {
-		t.Error(err)
-	}
+	require.NoError(t, err)
 	// note: cannot use "-Includes=testcfg.toml",
-	args := []string{"-save-wts", "goki", "-nogui", "-no-epoch-log", "--NoRunLog", "play", "--runs=5", "--run", "1", "--TAG", "nice", "--PatParams.Sparseness=0.1", "orange", "--Network", "{'.PFCLayer:Layer.Inhib.Gi' = '2.4', '#VSPatchPrjn:Prjn.Learn.LRate' = '0.01'}", "-Enum=TestValue2", "apple", "-Slice=3.2,2.4,1.9"}
+	args := []string{"-save-wts", "core", "-nogui", "-no-epoch-log", "--NoRunLog", "play", "--runs=5", "--run", "1", "--TAG", "nice", "--PatParams.Sparseness=0.1", "orange", "--Network", "{'.PFCLayer:Layer.Inhib.Gi' = '2.4', '#VSPatchPrjn:Prjn.Learn.LRate' = '0.01'}", "-Enum=TestValue2", "apple", "-Slice=3.2,2.4,1.9"}
 
 	_, err = SetFromArgs(cfg, args, ErrNotFound)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	if cfg.Runs != 5 || cfg.Run != 1 || cfg.Tag != "nice" || cfg.PatParams.Sparseness != 0.1 || cfg.SaveWts != true || cfg.GUI != false || cfg.EpochLog != false || cfg.RunLog != false {
 		t.Errorf("args not set properly (config: %#v)", cfg)
 	}
-	if cfg.Enum != testdata.TestValue2 {
-		t.Errorf("expected args enum from string to be \n%v\n\tbut got \n%v", testdata.TestValue2, cfg.Enum)
-	}
+	assert.Equal(t, testdata.TestValue2, cfg.Enum)
 	wcs := []float32{3.2, 2.4, 1.9}
-	if !reflect.DeepEqual(cfg.Slice, wcs) {
-		t.Errorf("expected args slice to be \n%#v\n\tbut got \n%#v", wcs, cfg.Slice)
-	}
-	wcss := []string{"goki", "play", "orange", "apple"}
-	if !reflect.DeepEqual(cfg.StrSlice, wcss) {
-		t.Errorf("expected args string slice to be \n%#v\n\tbut got \n%#v", wcss, cfg.StrSlice)
-	}
+	assert.Equal(t, wcs, cfg.Slice)
+	wcss := []string{"core", "play", "orange", "apple"}
+	assert.Equal(t, wcss, cfg.StrSlice)
 	// if cfg.Network != nil {
 	// 	mv := cfg.Network
 	// 	for k, v := range mv {
@@ -263,7 +255,7 @@ func TestSetFromArgsErr(t *testing.T) {
 	}
 
 	args := [][]string{
-		{"-save-wts", "goki", "---runs=5", "apple"},
+		{"-save-wts", "core", "---runs=5", "apple"},
 		{"--No RunLog", "-note", "hi"},
 		{"-sparsenes", "0.1"},
 		{"-runs={"},

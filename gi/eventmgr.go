@@ -593,7 +593,7 @@ func (em *EventMgr) HandleLong(e events.Event, deep Widget, w *Widget, pos *imag
 		// we must make a new tooltip immediately; otherwise, we may end
 		// up not getting another mouse move event, so we will be on the
 		// element with no tooltip, which is a bug. Not returning here is
-		// the solution to https://github.com/goki/gi/issues/553
+		// the solution to https://github.com/cogentcore/core/issues/553
 		(*w).Send(etyp, e)
 		clearLong()
 		// fmt.Println("fallthrough after clear")

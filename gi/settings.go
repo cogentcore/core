@@ -30,7 +30,7 @@ import (
 )
 
 // AllSettings is a global slice containing all of the user [Settings]
-// that the user will see in the settings window. It contains the base Goki
+// that the user will see in the settings window. It contains the base Cogent Core
 // settings by default and should be modified by other apps to add their
 // app settings.
 var AllSettings = []Settings{AppearanceSettings, SystemSettings, DeviceSettings, DebugSettings}

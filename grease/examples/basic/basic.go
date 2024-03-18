@@ -59,7 +59,7 @@ type Client struct {
 // suitable C compiler located on the system.
 //
 // It is the main command used during a local development workflow, and
-// it serves as a direct replacement for go build when building Goki
+// it serves as a direct replacement for go build when building Cogent Core
 // apps. In addition to the basic capacities of go build, Build supports
 // cross-compiling CGO applications with ease. Also, it handles the
 // bundling of icons and fonts into the executable.

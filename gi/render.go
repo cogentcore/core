@@ -637,7 +637,7 @@ func EndCPUMemProfile() {
 	f.Close()
 }
 
-// StartTargProfile starts targeted profiling using goki prof package.
+// StartTargProfile starts targeted profiling using the prof package.
 func StartTargProfile() {
 	fmt.Printf("Starting Targeted Profiling\n")
 	prof.Reset()

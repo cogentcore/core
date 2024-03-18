@@ -275,8 +275,8 @@ func (sc *Scene) Resize(geom mat32.Geom2DInt) {
 
 	sc.ApplyStyleScene()
 	// restart the multi-render updating after resize, to get windows to update correctly while
-	// resizing on Windows (OS) and Linux (see https://github.com/goki/gi/issues/584), to get
-	// windows on Windows (OS) to update after a window snap (see https://github.com/goki/gi/issues/497),
+	// resizing on Windows (OS) and Linux (see https://github.com/cogentcore/core/issues/584), to get
+	// windows on Windows (OS) to update after a window snap (see https://github.com/cogentcore/core/issues/497),
 	// and to get FillInsets to overwrite mysterious black bars that otherwise are rendered on both iOS
 	// and Android in different contexts.
 	// TODO(kai): is there a more efficient way to do this, and do we need to do this on all platforms?
