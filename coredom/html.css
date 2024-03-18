@@ -28,6 +28,7 @@ area {
 }
 
 ol, ul {
+    flex-grow: 0;
     flex-direction: column;
     padding: 0dp, 0dp, 0dp, 16dp;
 }
