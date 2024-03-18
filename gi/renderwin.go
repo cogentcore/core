@@ -7,7 +7,6 @@ package gi
 import (
 	"fmt"
 	"image"
-	"image/color"
 	"log"
 	"log/slog"
 	"sync"
@@ -910,7 +909,7 @@ func (rs *RenderScenes) DrawAll(drw goosi.Drawer) {
 			bb := rw.Pixels.Bounds()
 			drw.Copy(i, 0, rw.SceneGeom.Pos, bb, op, rs.FlipY)
 		case *Scrim:
-			drw.Fill(color.RGBA{64, 64, 64, 128}, *mat32.Identity3(), winScene.Geom.TotalBBox, draw.Over)
+			drw.Fill(colors.ApplyOpacity(colors.Scheme.Scrim, .5), *mat32.Identity3(), winScene.Geom.TotalBBox, draw.Over)
 		default:
 			wb := w.AsWidget()
 			if w.IsVisible() {
