@@ -1330,6 +1330,8 @@ func (tf *TextField) AutoScroll() {
 	availSz := sz.Actual.Content.Sub(icsz)
 	tf.ConfigTextSize(availSz)
 	n := len(tf.EditTxt)
+	tf.CursorPos = mat32.ClampInt(tf.CursorPos, 0, n)
+
 	if tf.HasWordWrap() { // does not scroll
 		tf.StartPos = 0
 		tf.EndPos = n
@@ -1362,7 +1364,6 @@ func (tf *TextField) AutoScroll() {
 	if tf.StartPos >= tf.EndPos {
 		tf.StartPos = max(0, tf.EndPos-tf.CharWidth)
 	}
-	tf.CursorPos = mat32.ClampInt(tf.CursorPos, 0, n)
 
 	inc := int(mat32.Ceil(.1 * float32(tf.CharWidth)))
 	inc = max(4, inc)
