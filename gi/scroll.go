@@ -432,7 +432,7 @@ func (ly *Layout) ScrollDimToEnd(d mat32.Dims, posi int) bool {
 }
 
 // ScrollDimToContentEnd is a helper function that scrolls the layout to the
-// end of its content (ie: moves the scrollbar to the very bottom).
+// end of its content (ie: moves the scrollbar to the very end).
 func (ly *Layout) ScrollDimToContentEnd(d mat32.Dims) bool {
 	end := ly.Geom.Pos.Content.Dim(d) + ly.Geom.Size.Internal.Dim(d)
 	return ly.ScrollDimToEnd(d, int(end))
