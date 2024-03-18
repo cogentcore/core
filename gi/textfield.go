@@ -8,7 +8,9 @@ import (
 	"fmt"
 	"image"
 	"log/slog"
+	"slices"
 	"sync"
+	"time"
 	"unicode"
 
 	"cogentcore.org/core/abilities"
@@ -161,11 +163,8 @@ type TextField struct { //core:embedder
 	// CursorMu is the mutex for updating the cursor between blinker and field.
 	CursorMu sync.Mutex `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 
-	// the undo stack
-	Undos [][]rune
-
-	// position within the undo stack
-	UndoPos int
+	// the undo manager
+	UndoMgr TextFieldUndoMgr
 }
 
 // TextFieldTypes is an enum containing the
@@ -1023,35 +1022,93 @@ func (tf *TextField) ContextMenu(m *Scene) {
 ///////////////////////////////////////////////////////////////////////////////
 //    Undo
 
+// TextFieldUndoRec holds one undo record
+type TextFieldUndoRec struct {
+	Text      []rune
+	CursorPos int
+}
+
+func (ur *TextFieldUndoRec) Set(txt []rune, curpos int) {
+	ur.Text = slices.Clone(txt)
+	ur.CursorPos = curpos
+}
+
+// TextFieldUndoMgr manages everything about the undo process
+type TextFieldUndoMgr struct {
+	// stack of undo records
+	Stack []TextFieldUndoRec
+
+	// position within the undo stack
+	Pos int
+
+	// last time undo was saved, for grouping
+	LastSave time.Time
+}
+
+func (um *TextFieldUndoMgr) SaveUndo(txt []rune, curpos int) {
+	n := len(um.Stack)
+	now := time.Now()
+	ts := now.Sub(um.LastSave)
+	if n > 0 && ts < 250*time.Millisecond {
+		r := um.Stack[n-1]
+		r.Set(txt, curpos)
+		um.Stack[n-1] = r
+		um.LastSave = now
+		return
+	}
+	r := TextFieldUndoRec{}
+	r.Set(txt, curpos)
+	um.Stack = append(um.Stack, r)
+	um.Pos = len(um.Stack)
+	um.LastSave = now
+}
+
 func (tf *TextField) SaveUndo() {
-	tf.Undos = append(tf.Undos, tf.EditTxt)
-	tf.UndoPos = len(tf.Undos)
+	tf.UndoMgr.SaveUndo(tf.EditTxt, tf.CursorPos)
+}
+
+func (um *TextFieldUndoMgr) Undo(txt []rune, curpos int) *TextFieldUndoRec {
+	n := len(um.Stack)
+	if um.Pos <= 0 || n == 0 {
+		return &TextFieldUndoRec{}
+	}
+	if um.Pos == n {
+		um.LastSave = time.Time{}
+		um.SaveUndo(txt, curpos)
+		um.Pos--
+	}
+	um.Pos--
+	um.LastSave = time.Time{} // prevent any merging
+	r := &um.Stack[um.Pos]
+	return r
 }
 
 func (tf *TextField) Undo() {
-	n := len(tf.Undos)
-	if tf.UndoPos <= 0 || n == 0 {
-		MessageSnackbar(tf, "Nothing left to undo")
-		return
+	r := tf.UndoMgr.Undo(tf.EditTxt, tf.CursorPos)
+	if r != nil {
+		tf.EditTxt = r.Text
+		tf.CursorPos = r.CursorPos
+		tf.NeedsRender()
 	}
-	if tf.UndoPos == n {
-		tf.SaveUndo()
-		tf.UndoPos--
+}
+
+func (um *TextFieldUndoMgr) Redo() *TextFieldUndoRec {
+	n := len(um.Stack)
+	if um.Pos >= n-1 {
+		return nil
 	}
-	tf.UndoPos--
-	tf.EditTxt = tf.Undos[tf.UndoPos]
-	tf.NeedsRender()
+	um.LastSave = time.Time{} // prevent any merging
+	um.Pos++
+	return &um.Stack[um.Pos]
 }
 
 func (tf *TextField) Redo() {
-	n := len(tf.Undos)
-	if tf.UndoPos >= n-1 {
-		MessageSnackbar(tf, "Nothing left to redo")
-		return
+	r := tf.UndoMgr.Redo()
+	if r != nil {
+		tf.EditTxt = r.Text
+		tf.CursorPos = r.CursorPos
+		tf.NeedsRender()
 	}
-	tf.UndoPos++
-	tf.EditTxt = tf.Undos[tf.UndoPos]
-	tf.NeedsRender()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
