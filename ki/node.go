@@ -366,7 +366,7 @@ func (n *Node) FindPath(path string) Ki {
 		myp := n.Path()
 		path = strings.TrimPrefix(path, myp)
 	}
-	curn := Ki(n)
+	curn := n.This()
 	pels := strings.Split(strings.Trim(strings.TrimSpace(path), "\""), "/")
 	for i, pe := range pels {
 		if len(pe) == 0 {

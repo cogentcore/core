@@ -171,9 +171,15 @@ type TreeView struct {
 
 // NewTreeViewFrame adds a new [TreeView] with the given name to a new
 // frame in the given parent that ensures that the tree view scrolls
-// separately from the surrounding context.
+// separately from the surrounding context. If a name is provided, it
+// sets the name of the tree view to that and the name of the frame to
+// that plus "-frame".
 func NewTreeViewFrame(par ki.Ki, name ...string) *TreeView {
-	fr := gi.NewFrame(par).Style(func(s *styles.Style) {
+	frnm := []string{}
+	if len(name) > 0 {
+		frnm = []string{name[0] + "-frame"}
+	}
+	fr := gi.NewFrame(par, frnm...).Style(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowAuto)
 	})
 	return NewTreeView(fr, name...)

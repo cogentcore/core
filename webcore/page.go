@@ -152,6 +152,10 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	// need to reset
 	NumExamples[pg.Context.PageURL] = 0
 
+	nav := pg.FindPath("splits/nav-frame/nav").(*giv.TreeView)
+	nav.UnselectAll()
+	nav.FindPath(rawURL).(*giv.TreeView).Select()
+
 	fr := pg.FindPath("splits/body").(*gi.Frame)
 	fr.DeleteChildren()
 	err = coredom.ReadMD(pg.Context, fr, b)
@@ -168,8 +172,7 @@ func (pg *Page) Config() {
 	}
 	sp := gi.NewSplits(pg, "splits")
 
-	nfr := gi.NewFrame(sp, "nav-frame")
-	nav := giv.NewTreeView(nfr, "nav").SetText(gi.TheApp.Name())
+	nav := giv.NewTreeViewFrame(sp, "nav").SetText(gi.TheApp.Name())
 	nav.OnSelect(func(e events.Event) {
 		if len(nav.SelectedNodes) == 0 {
 			return
