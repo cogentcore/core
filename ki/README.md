@@ -1,17 +1,10 @@
-![alt tag](logo/goki_logo.png)
-
 Go language (golang) tree structure (ki = 木 = tree in Japanese)
 
-[![Go Report Card](https://goreportcard.com/badge/cogentcore.org/core/ki)](https://goreportcard.com/report/cogentcore.org/core/ki)
 [![Go Reference](https://pkg.go.dev/badge/cogentcore.org/core/ki.svg)](https://pkg.go.dev/cogentcore.org/core/ki)
-[![CI](https://cogentcore.org/core/ki/actions/workflows/ci.yml/badge.svg)](https://cogentcore.org/core/ki/actions/workflows/ci.yml)
-[![Codecov](https://codecov.io/gh/goki/ki/branch/master/graph/badge.svg?token=Hw5cInAxY3)](https://codecov.io/gh/goki/ki)
 
 **NOTE:** A new version of Ki is being developed on this branch, so there may be breaking changes and unstable code. For the last stable version of Ki, import v1.1.16 and see the [v1 branch](https://cogentcore.org/core/ki/tree/v1).
 
 # Overview
-
-See the [Wiki](https://cogentcore.org/core/ki/wiki) for more docs, and [Google Groups goki-gi](https://groups.google.com/forum/#!forum/goki-gi) emailing list.
 
 The **Tree** is one of the most flexible, widely-used data structures in programming, including the DOM structure at the core of a web browser, scene graphs for 3D and 2D graphics systems, JSON, XML, SVG, filesystems, programs themselves, etc.  This is because trees can capture most relevant forms of *structure* (hierarchical groupings, categories, relationships, etc) and are most powerful when they are fully *generative* -- arbitrary new types can be inserted flexibly.
 
@@ -43,11 +36,11 @@ In addition, Ki nodes support a general-purpose `Props` property `map`, and the 
 
 Ki Nodes can be used as fields in a struct -- they function much like pre-defined Children elements, and all the standard FuncDown* iterators traverse the fields automatically.  The Ki Init function automatically names these structs with their field names, and sets the parent to the parent struct.  This was essential in the Cogent Core framework to support separate Widget Parts independent of the larger scenegraph.
 
-## Cogent Core Graphical Interface and Gide IDE App
+## Cogent Core Graphical Interface
 
-The first and most important application of Cogent Core is the [Cogent Core](https://github.com/goki/gi) graphical interface system, in the `gi` package, and the [Gide](https://github.com/goki/gide) IDE built on top of Cogent Core.  The scene graph of Ki elements automatically drives minimal refresh updates, and the signaling framework supports gui event delivery and e.g., the "onclick" event signaling from the `Button` widget, etc.  In short, Cogent Core provides a complete interactive 2D and 3D GUI environment in native Go, in a compact codebase.  Part of this is the natural elegance of Go, but Cogent Core enhances that by providing the robust natural primitives needed to express all the GUI functionality.  Because Cogent Core is based around standard CSS styles, SVG rendering, and supports all the major HTML elements, it could even provide a lightweight web browser: [Glide](https://github.com/goki/glide).
+The first and most important application of ki is the Cogent Core graphical interface system, in the [gi](https://pkg.go.dev/cogentcore.org/core/gi) package.  The scene graph of Ki elements automatically drives minimal refresh updates, allowing Cogent Core to provide a complete interactive 2D and 3D GUI environment in native Go, in a compact codebase.  Part of this is the natural elegance of Go, but Cogent Core enhances that by providing the robust natural primitives needed to express all the GUI functionality.
 
-The [GoPi](https://github.com/goki/pi) interactive parsing framework also leverages Cogent Core trees to represent the AST (abstract syntax tree) of programs in different langauges.  Further, the parser grammar itself is written (in a GUI interactive way) as a tree of parsing elements using Ki nodes.
+The [pi](https://pkg.go.dev/cogentcore.org/core/pi) interactive parsing framework also leverages Cogent Core trees to represent the AST (abstract syntax tree) of programs in different languages.  Further, the parser grammar itself is written (in a GUI interactive way) as a tree of parsing elements using Ki nodes.
 
 # Code Map
 

@@ -58,7 +58,7 @@ type FontLib struct {
 
 	// An fs containing available fonts, which are typically embedded through go:embed.
 	// It is initialized to contain of the default fonts located in the fonts directory
-	// (https://github.com/goki/girl/tree/main/paint/fonts), but it can be extended by
+	// (https://github.com/cogentcore/core/tree/main/paint/fonts), but it can be extended by
 	// any packages by using a merged fs package.
 	FontsFS fs.FS
 
