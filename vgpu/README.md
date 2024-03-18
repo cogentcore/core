@@ -151,7 +151,7 @@ This [blog](http://kylehalladay.com/blog/tutorial/vulkan/2018/01/28/Textue-Array
 
 See `examples/compute1` for a very simple compute shader, and [compute.go](vgpu/compute.go) for `Compute*` methods specifically useful for this case.
 
-See the [gosl](https://github.com/goki/gosl) repository for a tool that converts Go code into HLSL shader code, so you can effectively run Go on the GPU.
+See the [gosl](https://github.com/emer/gosl) repository for a tool that converts Go code into HLSL shader code, so you can effectively run Go on the GPU.
 
 Here's how it works:
 

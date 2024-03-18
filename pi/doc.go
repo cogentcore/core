@@ -14,6 +14,6 @@ stages of parsing etc.
 and tex (latter are lexer-only)
 
 Note that the GUI editor framework for creating and testing parsers is
-in the Gide package: https://github.com/goki/gide  under the piv sub-package.
+in the piv subpackage in Cogent Code: https://github.com/cogentcore/cogent/tree/main/code/piv
 */
 package pi

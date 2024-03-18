@@ -2,16 +2,11 @@
 
 GoPi is part of the Cogent Core Go language (golang) full strength tree structure system (ki = 木 = tree in Japanese).
 
-The `pi` package supports a simple and robust form of lexing and parsing based on top-down recursive descent, and allows users to create parsers using the [Cogent Core](https://github.com/goki/gi) graphical interface system.  It is used for syntax highlighting, completion, and more advanced language-structure specific functionality in Cogent Core and in the [Gide](https://github.com/goki/gide) IDE / editor (where we need to support multiple different languages, and can't just rely on the excellent builtin Go parser).
+The `pi` package supports a simple and robust form of lexing and parsing based on top-down recursive descent, and allows users to create parsers using the Cogent Core graphical interface system.  It is used for syntax highlighting, completion, and more advanced language-structure specific functionality in Cogent Core and in the [Cogent Code](https://github.com/cogentcore/cogent/tree/main/code) IDE / editor (where we need to support multiple different languages, and can't just rely on the excellent builtin Go parser).
 
 We call it `Pi` (or `GoPi`) because Ip is not as easy to pronounce, and also because it makes parsing as easy as pi!  You can think of it as a French acronym, which are typically the reverse of English ones -- "parseur interactif".  Also, it matches Cogent Core and Cogent Core. 
 
-[![Go Report Card](https://goreportcard.com/badge/cogentcore.org/core/pi)](https://goreportcard.com/report/cogentcore.org/core/pi)
 [![Go Reference](https://pkg.go.dev/badge/cogentcore.org/core/pi.svg)](https://pkg.go.dev/cogentcore.org/core/pi)
-[![CI](https://cogentcore.org/core/pi/actions/workflows/ci.yml/badge.svg)](https://cogentcore.org/core/pi/actions/workflows/ci.yml)
-[![Codecov](https://codecov.io/gh/goki/pi/branch/master/graph/badge.svg?token=Hw5cInAxY3)](https://codecov.io/gh/goki/pi)
-
-See the [Wiki](https://cogentcore.org/core/pi/wiki) for more detailed docs, and [Google Groups goki-gi](https://groups.google.com/forum/#!forum/goki-gi) emailing list.
 
 The `pi` repository is also home to various other basic file-level packages including:
 
@@ -72,7 +67,7 @@ GoPi does three distinct passes through the source file, each creating a solid f
 
 * **StepTwo** -- this is a critical second pass through the lexical tokens, performing two important things:
 
-    + **Nesting Depth** -- all programming languages use some form of parens `( )` brackets `[ ]` and braces `{ }` to group elements, and parsing must be sensitive to these.  Instead of dealing with these issues locally at every step, we do a single pass through the entire tokenized version of the source and compute the depth of every token.  Then, the token matching in parsing only needs to compare relative depth values, without having to constantly re-compute that.  As an extra bonus, you can use this depth information in syntax highlighting (as we do in [Gide](https://github.com/goki/gide)).
+    + **Nesting Depth** -- all programming languages use some form of parens `( )` brackets `[ ]` and braces `{ }` to group elements, and parsing must be sensitive to these.  Instead of dealing with these issues locally at every step, we do a single pass through the entire tokenized version of the source and compute the depth of every token.  Then, the token matching in parsing only needs to compare relative depth values, without having to constantly re-compute that.  As an extra bonus, you can use this depth information in syntax highlighting (as we do in [Cogent Code](https://github.com/cogentcore/cogent/tree/main/code)).
 	
     + **EOS Detection** -- This step detects *end of statement* tokens, which provide an essential first-pass rough-cut chunking of the source into *statements*.  In C / C++ / Go and related languages, these are the *semicolons* `;` (in Go, semicolons are mostly automatically computed from tokens that appear at the end of lines -- Pi supports this as well).  In Python, this is the end of line itself, unless it is not at the same nesting depth as at the start of the line.
 	

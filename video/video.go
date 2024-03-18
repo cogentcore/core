@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package video implements a video player widget in Goki.
+// Package video implements a video player widget in Cogent Core.
 package video
 
 // TODO(kai): video
