@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"log"
 	"log/slog"
 	"sync"
@@ -891,7 +892,10 @@ func (rs *RenderScenes) SetImages(drw goosi.Drawer) {
 // using proper TextureSet for each of goosi.MaxTexturesPerSet Scenes.
 func (rs *RenderScenes) DrawAll(drw goosi.Drawer) {
 	nPerSet := goosi.MaxTexturesPerSet
-
+	if len(rs.Scenes) == 0 {
+		return
+	}
+	winScene := rs.Scenes[0].(*Scene)
 	for i, w := range rs.Scenes {
 		set := i / nPerSet
 		if i%nPerSet == 0 && set > 0 {
@@ -901,10 +905,13 @@ func (rs *RenderScenes) DrawAll(drw goosi.Drawer) {
 		if i == 0 {
 			op = draw.Src
 		}
-		if sc, isSc := w.(*Scene); isSc {
-			bb := sc.Pixels.Bounds()
-			drw.Copy(i, 0, sc.SceneGeom.Pos, bb, op, rs.FlipY)
-		} else {
+		switch rw := w.(type) {
+		case *Scene:
+			bb := rw.Pixels.Bounds()
+			drw.Copy(i, 0, rw.SceneGeom.Pos, bb, op, rs.FlipY)
+		case *Scrim:
+			drw.Fill(color.RGBA{64, 64, 64, 128}, *mat32.Identity3(), winScene.Geom.TotalBBox, draw.Over)
+		default:
 			wb := w.AsWidget()
 			if w.IsVisible() {
 				bb := wb.Geom.TotalBBox
@@ -1056,12 +1063,14 @@ func (w *RenderWin) GatherScenes() bool {
 
 	// first, find the top-level window:
 	winIdx := 0
+	var winScene *Scene
 	for i := n - 1; i >= 0; i-- {
 		st := sm.Stack.ValueByIndex(i)
 		if st.Type == WindowStage {
 			if DebugSettings.WinRenderTrace {
 				fmt.Println("GatherScenes: main Window:", st.String())
 			}
+			winScene = st.Scene
 			rs.Add(st.Scene, scIdx)
 			for _, w := range st.Scene.DirectRenders {
 				rs.Add(w, scIdx)
@@ -1074,6 +1083,9 @@ func (w *RenderWin) GatherScenes() bool {
 	// then add everyone above that
 	for i := winIdx + 1; i < n; i++ {
 		st := sm.Stack.ValueByIndex(i)
+		if st.Scrim && i == n-1 {
+			rs.Add(NewScrim(winScene.Scene), scIdx)
+		}
 		rs.Add(st.Scene, scIdx)
 		if DebugSettings.WinRenderTrace {
 			fmt.Println("GatherScenes: overlay Stage:", st.String())
@@ -1097,4 +1109,13 @@ func (w *RenderWin) GatherScenes() bool {
 
 func (w *RenderWin) SendShowEvents() {
 	w.MainStageMgr.SendShowEvents()
+}
+
+////////////////////////////////////////////////////////////////////////////
+//  Scrim
+
+// A Scrim is just a dummy Widget used for rendering a Scrim.
+// Only used for its type. Everything else managed by RenderWin.
+type Scrim struct {
+	WidgetBase
 }

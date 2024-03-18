@@ -80,9 +80,6 @@ func (sv *SceneView) ConfigToolbar(tb *gi.Toolbar) {
 	sw := sv.SceneWidget()
 	sc := sv.SceneXYZ()
 	gi.NewButton(tb).SetIcon(icons.Update).SetTooltip("reset to default initial display").
-		Style(func(s *styles.Style) {
-			s.SetAbilities(true, abilities.RepeatClickable)
-		}).
 		OnClick(func(e events.Event) {
 			sc.SetCamera("default")
 			sc.NeedsUpdate()
