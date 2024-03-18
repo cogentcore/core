@@ -19,7 +19,7 @@ import (
 //	return grr.Log(MyFunc(v))
 func Log(err error) error {
 	if err != nil {
-		slog.Error(err.Error() + " (" + CallerInfo() + ")")
+		slog.Error(err.Error() + " | " + CallerInfo())
 	}
 	return err
 }
@@ -31,7 +31,7 @@ func Log(err error) error {
 //	a := grr.Log1(MyFunc(v))
 func Log1[T any](v T, err error) T {
 	if err != nil {
-		slog.Error(err.Error() + " (" + CallerInfo() + ")")
+		slog.Error(err.Error() + " | " + CallerInfo())
 	}
 	return v
 }
@@ -43,7 +43,7 @@ func Log1[T any](v T, err error) T {
 //	a, b := grr.Log2(MyFunc(v))
 func Log2[T1, T2 any](v1 T1, v2 T2, err error) (T1, T2) {
 	if err != nil {
-		slog.Error(err.Error() + " (" + CallerInfo() + ")")
+		slog.Error(err.Error() + " | " + CallerInfo())
 	}
 	return v1, v2
 }
@@ -55,7 +55,7 @@ func Log2[T1, T2 any](v1 T1, v2 T2, err error) (T1, T2) {
 //	a, b, c := grr.Log3(MyFunc(v))
 func Log3[T1, T2, T3 any](v1 T1, v2 T2, v3 T3, err error) (T1, T2, T3) {
 	if err != nil {
-		slog.Error(err.Error() + " (" + CallerInfo() + ")")
+		slog.Error(err.Error() + " | " + CallerInfo())
 	}
 	return v1, v2, v3
 }
