@@ -110,6 +110,13 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 				pg.PagePath = path
 				return fs.SkipAll
 			})
+			// need to update rawURL with new page path
+			for u, p := range pg.URLToPagePath {
+				if p == pg.PagePath {
+					rawURL = u
+					break
+				}
+			}
 			b, err = fs.ReadFile(pg.Source, pg.PagePath)
 		}
 		if err != nil {
@@ -229,7 +236,7 @@ func (pg *Page) Config() {
 
 // AppBar is the default app bar for a [Page]
 func (pg *Page) AppBar(tb *gi.Toolbar) {
-	ch := tb.AppChooser()
+	// ch := tb.AppChooser()
 
 	back := tb.ChildByName("back").(*gi.Button)
 	back.OnClick(func(e events.Event) {
@@ -242,7 +249,6 @@ func (pg *Page) AppBar(tb *gi.Toolbar) {
 		}
 	})
 
-	ch.AllowNew = true
 	// TODO(kai/abc)
 	// ch.AddItemsFunc(func() {
 	// 	ch.Items = make([]any, len(pg.History))
