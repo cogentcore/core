@@ -408,7 +408,7 @@ func (fn *Node) UpdateAllVCS() {
 }
 
 // VersionControlSystems is a list of supported Version Control Systems.
-// These must match the VCS Types from goki/pi/vci which in turn
+// These must match the VCS Types from vci which in turn
 // is based on masterminds/vcs
 var VersionControlSystems = []string{"git", "svn", "bzr", "hg"}
 

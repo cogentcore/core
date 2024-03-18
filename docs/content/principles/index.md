@@ -43,9 +43,9 @@ However, using a `struct` with appropriately-named fields has the following adva
 * Compile time type-safety: the type of the property is not `any` but the actual type needed.
 * Tab completion and full lookup in IDEs -- much easier when _using_ config values in an app, and also when setting styling in GUI.
 * GUI editor of config opts as a StructView has full access to field tag GUI hints, etc.
-* [gti](https://github.com/goki/gti) can provide access to field comments for full docs for each option -- the map impl requires  separate maps of docs vs. values.
+* [[gti]] can provide access to field comments for full docs for each option -- the map impl requires  separate maps of docs vs. values.
 
-This is why the [grease](https://github.com/goki/grease) configuration and app command management system is based structs, and v2 of GoGi uses "direct styling" functions that directly set values on the `styles.Style` style structs.
+This is why the [[grease]] configuration and app command management system is based structs, and v2 of GoGi uses "direct styling" functions that directly set values on the `styles.Style` style structs.
 
 # Generate instead of `reflect`
 
@@ -55,20 +55,20 @@ Generated code is faster and cleaner and can be targeted to just what is needed.
 
 Interfaces go hand-in-hand with generated code: the boilerplate code that satisfies the interfaces is auto-generated as needed.
 
-The prototype here is [enums](https://github.com/goki/enums)
+The prototype here is [[enums]]
 
-# Repositories and packages should be small, focused, and minimal
+# Packages should be small, focused, and minimal
 
-Find the coherent chunks of functionality and encapsulate them in separate repositories, instead of creating sprawling mega-repos like `ki` was before.  Now that we know all the functionality we need, we can think more carefully about how to package it.
+Find the coherent chunks of functionality and encapsulate them in separate packages, instead of creating sprawling mega-packages like `ki` was before.  Now that we know all the functionality we need, we can think more carefully about how to package it.
 
-Try to make these repos as independent as possible -- don't have them depend on other goki infrastructure unless absolutely necessary, so that they can be used by anyone in an unencumbered way.
+Try to make these packages as independent as possible; don't have them depend on other infrastructure unless absolutely necessary, so that they can be used by anyone in an unencumbered way.
 
 This is what we look for, in considering whether to import a given package, so it is what we should provide.
 
 Examples:
-* [colors](https://github.com/goki/colors) -- pulled out of gi
-* [laser](https://github.com/goki/laser) -- pulled reflection stuff out of kit
-* [greasi](https://github.com/goki/greasi) separated from [grease](https://github.com/goki/grease) to keep grease free of gi dependency.
+* [[colors]] pulled out of gi
+* [[laser]] pulled reflection stuff out of kit
+* [[greasi]] separated from [[grease]] to keep grease free of gi dependency
 
 # Use function libraries instead of putting lots of methods on a type
 
@@ -77,4 +77,4 @@ Go uses the `strings` package instead of adding a lot of builtin methods on the 
 * Multiple different such packages can be used for different subsets of functionality (e.g., regex, unicode etc are all separate).
 * Type itself remains small and only handles most basic functionality -- presumably this works better for checking Interface implementation etc.
 
-Consistent with this approach, [colors](https://github.com/goki/colors) implements functions operating on the standard `color.RGBA` data type, instead of the many methods we defined on `gist.Color` in V1.
+Consistent with this approach, [[colors]] implements functions operating on the standard `color.RGBA` data type, instead of the many methods we defined on `gist.Color` in V1.

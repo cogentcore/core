@@ -1,10 +1,10 @@
 # Gidom in Markdown
 
-### Made with ***Goki***
+### Made with ***Cogent Core***
 
-This is a sample _MD_ (markdown) **document** displayed using `gidom`.
+This is a sample _MD_ (markdown) **document** displayed using `coredom`.
 
-This is a [link to the ***Goki*** website](https://goki.dev), which you can _click_ on to see helpful **documentation** and examples for the *Goki* framework.
+This is a [link to the ***Cogent Core*** website](https://cogentcore.org/core), which you can _click_ on to see helpful **documentation** and examples for the *Cogent Core* framework.
 
 # Heading 1
 ## Heading 2
