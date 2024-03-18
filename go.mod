@@ -25,6 +25,7 @@ require (
 	github.com/pelletier/go-toml/v2 v2.1.2-0.20240227203013-2b69615b5d55
 	github.com/stretchr/testify v1.9.0
 	github.com/yuin/goldmark v1.7.0
+	github.com/yuin/goldmark-highlighting/v2 v2.0.0-20230729083705-37449abec8cc
 	go.abhg.dev/goldmark/wikilink v0.5.0
 	golang.org/x/image v0.15.0
 	golang.org/x/mod v0.16.0

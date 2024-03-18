@@ -10,6 +10,7 @@ import (
 
 	"cogentcore.org/core/gi"
 	"github.com/yuin/goldmark"
+	highlighting "github.com/yuin/goldmark-highlighting/v2"
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/renderer/html"
 	"go.abhg.dev/goldmark/wikilink"
@@ -22,6 +23,9 @@ func ReadMD(ctx *Context, par gi.Widget, b []byte) error {
 		goldmark.WithExtensions(
 			extension.GFM,
 			&wikilink.Extender{ctx},
+			highlighting.NewHighlighting(
+				highlighting.WithStyle(string(gi.AppearanceSettings.HiStyle)),
+			),
 		),
 		goldmark.WithRendererOptions(
 			html.WithUnsafe(),

@@ -116,30 +116,13 @@ func HandleElement(ctx *Context) {
 		HandleLabel(ctx)
 	case "pre":
 		hasCode := ctx.Node.FirstChild != nil && ctx.Node.FirstChild.Data == "code"
-		label := HandleLabel(ctx)
-		label.Style(func(s *styles.Style) {
+		HandleLabel(ctx).Style(func(s *styles.Style) {
 			s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 			if hasCode {
 				s.Background = colors.C(colors.Scheme.SurfaceContainer)
 				s.Border.Radius = styles.BorderRadiusMedium
 			}
 		})
-		/*
-			if hasCode {
-				class := GetAttr(ctx.Node.FirstChild, "class")
-				for _, c := range strings.Split(class, "") {
-					lang := strings.TrimPrefix(c, "language-")
-					if lang == "" {
-						continue
-					}
-					buf := &bytes.Buffer{}
-					err := quick.Highlight(buf, label.Text, lang, "html", string(gi.AppearanceSettings.HiStyle))
-					if grr.Log(err) == nil {
-						label.SetText(buf.String())
-					}
-				}
-			}
-		*/
 	case "li":
 		label := HandleLabel(ctx)
 		start := ""
