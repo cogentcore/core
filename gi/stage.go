@@ -98,7 +98,7 @@ type Stage struct { //gti:add -setters
 	Title string
 
 	// Modal, if true, blocks input to all other stages.
-	Modal bool
+	Modal bool `set:"-"`
 
 	// Scrim, if true, places a darkening scrim over other stages,
 	// if not a full window.
@@ -259,6 +259,16 @@ func (st *Stage) SetType(typ StageTypes) *Stage {
 		st.Modal = false
 		st.Scrim = false
 		st.ClickOff = true
+	}
+	return st
+}
+
+// SetModal sets modal flag for blocking other input (for dialogs).
+// Also updates Scrim accordingly if not modal.
+func (st *Stage) SetModal(modal bool) *Stage {
+	st.Modal = modal
+	if !st.Modal {
+		st.Scrim = false
 	}
 	return st
 }

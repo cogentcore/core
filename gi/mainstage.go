@@ -72,12 +72,13 @@ func (st *Stage) AddDialogDecor() *Stage {
 		s.Grow.Set(0, 1)
 		s.Gap.Zero()
 	})
-	hl := NewHandle(parts, "move").Style(func(s *styles.Style) {
+	mv := NewHandle(parts, "move").Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	}).StyleFinal(func(s *styles.Style) {
 		s.Cursor = cursors.Move
 	})
-	hl.OnChange(func(e events.Event) {
+	mv.OnChange(func(e events.Event) {
+		e.SetHandled()
 		pd := e.PrevDelta()
 		np := sc.SceneGeom.Pos.Add(pd)
 		np.X = max(np.X, 0)
@@ -99,6 +100,7 @@ func (st *Stage) AddDialogDecor() *Stage {
 		s.Min.Set(units.Em(1))
 	})
 	rsz.OnChange(func(e events.Event) {
+		e.SetHandled()
 		pd := e.PrevDelta()
 		np := sc.SceneGeom.Size.Add(pd)
 		minsz := 100

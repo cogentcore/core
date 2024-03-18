@@ -555,10 +555,11 @@ func (t *Meter) SetWidth(v units.Value) *Meter { t.Width = v; return t }
 func (t *Meter) SetTooltip(v string) *Meter { t.Tooltip = v; return t }
 
 // ScrimType is the [gti.Type] for [Scrim]
-var ScrimType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Scrim", IDName: "scrim", Doc: "A Scrim is just a dummy Widget used for rendering a Scrim", Embeds: []gti.Field{{Name: "WidgetBase"}}, Instance: &Scrim{}})
+var ScrimType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Scrim", IDName: "scrim", Doc: "A Scrim is just a dummy Widget used for rendering a Scrim.\nOnly used for its type. Everything else managed by RenderWin.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Instance: &Scrim{}})
 
 // NewScrim adds a new [Scrim] with the given name to the given parent:
-// A Scrim is just a dummy Widget used for rendering a Scrim
+// A Scrim is just a dummy Widget used for rendering a Scrim.
+// Only used for its type. Everything else managed by RenderWin.
 func NewScrim(par ki.Ki, name ...string) *Scrim {
 	return par.NewChild(ScrimType, name...).(*Scrim)
 }
@@ -984,10 +985,6 @@ func (t *Stage) SetName(v string) *Stage { t.Name = v; return t }
 // based on the Scene Title. Used for title of WindowStage and
 // DialogStage types.
 func (t *Stage) SetTitle(v string) *Stage { t.Title = v; return t }
-
-// SetModal sets the [Stage.Modal]:
-// Modal, if true, blocks input to all other stages.
-func (t *Stage) SetModal(v bool) *Stage { t.Modal = v; return t }
 
 // SetScrim sets the [Stage.Scrim]:
 // Scrim, if true, places a darkening scrim over other stages,
