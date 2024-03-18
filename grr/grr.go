@@ -8,6 +8,7 @@ package grr
 import (
 	"log/slog"
 	"runtime"
+	"strconv"
 )
 
 // Log takes the given error and logs it if it is non-nil.
@@ -18,7 +19,7 @@ import (
 //	return grr.Log(MyFunc(v))
 func Log(err error) error {
 	if err != nil {
-		slog.Error(CallerName() + ": " + err.Error())
+		slog.Error(err.Error() + " (" + CallerInfo() + ")")
 	}
 	return err
 }
@@ -30,7 +31,7 @@ func Log(err error) error {
 //	a := grr.Log1(MyFunc(v))
 func Log1[T any](v T, err error) T {
 	if err != nil {
-		slog.Error(CallerName() + ": " + err.Error())
+		slog.Error(err.Error() + " (" + CallerInfo() + ")")
 	}
 	return v
 }
@@ -42,7 +43,7 @@ func Log1[T any](v T, err error) T {
 //	a, b := grr.Log2(MyFunc(v))
 func Log2[T1, T2 any](v1 T1, v2 T2, err error) (T1, T2) {
 	if err != nil {
-		slog.Error(CallerName() + ": " + err.Error())
+		slog.Error(err.Error() + " (" + CallerInfo() + ")")
 	}
 	return v1, v2
 }
@@ -54,7 +55,7 @@ func Log2[T1, T2 any](v1 T1, v2 T2, err error) (T1, T2) {
 //	a, b, c := grr.Log3(MyFunc(v))
 func Log3[T1, T2, T3 any](v1 T1, v2 T2, v3 T3, err error) (T1, T2, T3) {
 	if err != nil {
-		slog.Error(CallerName() + ": " + err.Error())
+		slog.Error(err.Error() + " (" + CallerInfo() + ")")
 	}
 	return v1, v2, v3
 }
@@ -129,11 +130,10 @@ func Ignore3[T1, T2, T3 any](v1 T1, v2 T2, v3 T3, err error) (T1, T2, T3) {
 	return v1, v2, v3
 }
 
-// CallerName returns the name of the caller of the function that called
-// CallerName.
-func CallerName() string {
-	pc, _, _, _ := runtime.Caller(2)
-	return runtime.FuncForPC(pc).Name()
+// CallerInfo returns string information about the caller of the function that called CallerInfo.
+func CallerInfo() string {
+	pc, file, line, _ := runtime.Caller(2)
+	return runtime.FuncForPC(pc).Name() + " " + file + ":" + strconv.Itoa(line)
 }
 
 // Note: errors.Join is the std way to do AllErrors
