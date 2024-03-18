@@ -396,16 +396,15 @@ func (vv *KiValue) KiValue() ki.Ki {
 	if !vv.Value.IsValid() || vv.Value.IsNil() {
 		return nil
 	}
-	if vv.Value.Kind() == reflect.Interface {
-		k := vv.Value.Interface().(ki.Ki)
-		return k
+	npv := laser.NonPtrValue(vv.Value)
+	if npv.Kind() == reflect.Interface {
+		return npv.Interface().(ki.Ki)
 	}
 	opv := laser.OnePtrValue(vv.Value)
 	if opv.IsNil() {
 		return nil
 	}
-	k := opv.Interface().(ki.Ki)
-	return k
+	return opv.Interface().(ki.Ki)
 }
 
 // EnumValue represents an [enums.Enum] value with a chooser.
