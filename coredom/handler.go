@@ -124,6 +124,15 @@ func HandleElement(ctx *Context) {
 			}
 		})
 	case "li":
+		// if we have a p as our first or second child, which is typical
+		// for markdown-generated HTML, we use it directly for data extraction
+		// to prevent double elements and unnecessary line breaks.
+		if ctx.Node.FirstChild != nil && ctx.Node.FirstChild.Data == "p" {
+			ctx.Node = ctx.Node.FirstChild
+		} else if ctx.Node.FirstChild != nil && ctx.Node.FirstChild.NextSibling != nil && ctx.Node.FirstChild.NextSibling.Data == "p" {
+			ctx.Node = ctx.Node.FirstChild.NextSibling
+		}
+
 		label := HandleLabel(ctx)
 		start := ""
 		if pw, ok := label.Parent().(gi.Widget); ok {
