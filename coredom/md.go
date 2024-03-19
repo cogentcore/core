@@ -13,6 +13,7 @@ import (
 	highlighting "github.com/yuin/goldmark-highlighting/v2"
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/renderer/html"
+	"github.com/yuin/goldmark/util"
 	"go.abhg.dev/goldmark/wikilink"
 )
 
@@ -25,6 +26,7 @@ func ReadMD(ctx *Context, par gi.Widget, b []byte) error {
 			&wikilink.Extender{ctx},
 			highlighting.NewHighlighting(
 				highlighting.WithStyle(string(gi.AppearanceSettings.HiStyle)),
+				highlighting.WithWrapperRenderer(HighlightingWrapperRenderer),
 			),
 		),
 		goldmark.WithRendererOptions(
@@ -43,4 +45,18 @@ func ReadMD(ctx *Context, par gi.Widget, b []byte) error {
 // corresponding Cogent Core widgets to the given [gi.Widget], using the given context.
 func ReadMDString(ctx *Context, par gi.Widget, s string) error {
 	return ReadMD(ctx, par, []byte(s))
+}
+
+// HighlightingWrapperRenderer is the [highlighting.WrapperRenderer] for markdown rendering
+// that enables webcore runnable Go code examples to work correctly.
+func HighlightingWrapperRenderer(w util.BufWriter, context highlighting.CodeBlockContext, entering bool) {
+	lang, ok := context.Language()
+	if !ok || string(lang) != "Go" {
+		return
+	}
+	if entering {
+		w.WriteString("<webcore-example>")
+	} else {
+		w.WriteString("</webcore-example>")
+	}
 }
