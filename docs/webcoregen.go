@@ -80,6 +80,12 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 	"widgets/buttons-8": func(parent gi.Widget) {
 		gi.NewButton(parent).SetType(gi.ButtonAction).SetText("Action")
 	},
+	"widgets/spinners-0": func(parent gi.Widget) {
+		gi.NewSpinner(parent)
+	},
+	"widgets/spinners-1": func(parent gi.Widget) {
+		gi.NewSpinner(parent).SetValue(12.7)
+	},
 	"widgets/text-fields-0": func(parent gi.Widget) {
 		gi.NewTextField(parent)
 	},
