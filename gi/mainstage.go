@@ -135,6 +135,9 @@ func (st *Stage) ConfigMainStage() {
 	if TheApp.Platform().IsMobile() {
 		st.NewWindow = false
 	}
+	if st.FullWindow || st.NewWindow {
+		st.Scrim = false
+	}
 	sc := st.Scene
 	st.AddWindowDecor() // sensitive to cases
 	sc.ConfigSceneBars()

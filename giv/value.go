@@ -320,11 +320,11 @@ func OpenDialog(v Value, ctx gi.Widget, fun, beforeFunc func()) bool {
 // to configure the dialog contents.
 func OpenDialogBase(v Value, cd ConfigDialoger, ctx gi.Widget, fun func()) {
 	vd := v.AsValueData()
-	title, _, _ := vd.GetTitle()
 	opv := laser.OnePtrUnderlyingValue(vd.Value)
 	if !opv.IsValid() {
 		return
 	}
+	title, _, _ := vd.GetTitle()
 	obj := opv.Interface()
 	if gi.RecycleDialog(obj) {
 		return
