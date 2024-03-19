@@ -96,9 +96,12 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		gi.NewSpinner(parent).SetStep(4).SetEnforceStep(true)
 	},
 	"widgets/spinners-5": func(parent gi.Widget) {
-		gi.NewSpinner(parent).SetFormat("%X").SetStep(1).SetValue(44)
+		gi.NewSpinner(parent).SetType(gi.TextFieldOutlined)
 	},
 	"widgets/spinners-6": func(parent gi.Widget) {
+		gi.NewSpinner(parent).SetFormat("%X").SetStep(1).SetValue(44)
+	},
+	"widgets/spinners-7": func(parent gi.Widget) {
 		sp := gi.NewSpinner(parent)
 		sp.OnChange(func(e events.Event) {
 			gi.MessageSnackbar(parent, fmt.Sprintf("Value changed to %g", sp.Value))

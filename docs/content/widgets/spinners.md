@@ -32,6 +32,12 @@ You can ensure that the value is always a multiple of the step:
 gi.NewSpinner(parent).SetStep(4).SetEnforceStep(true)
 ```
 
+You can make a spinner outlined instead of filled:
+
+```Go
+gi.NewSpinner(parent).SetType(gi.TextFieldOutlined)
+```
+
 You can change the way that the value is formatted:
 
 ```Go
