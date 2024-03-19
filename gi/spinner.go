@@ -171,6 +171,9 @@ func (sp *Spinner) PageIncrValue(steps float32) *Spinner {
 	if sp.IsReadOnly() {
 		return sp
 	}
+	if sp.PageStep < sp.Step {
+		sp.PageStep = 2 * sp.Step
+	}
 	val := sp.Value + steps*sp.PageStep
 	val = mat32.IntMultiple(val, sp.PageStep)
 	val = sp.WrapAround(val)
