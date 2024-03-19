@@ -24,7 +24,7 @@ gi.NewTextField(parent).SetText("Hello, world!")
 Text field content can overflow onto multiple lines:
 
 ```Go
-gi.NewTextField(parent).SetText("This is a really long sentence that demonstrates how text field content can overflow onto multiple lines")
+gi.NewTextField(parent).SetText("This is a long sentence that demonstrates how text field content can overflow onto multiple lines")
 ```
 
 You can make a text field outlined instead of filled:
@@ -62,5 +62,23 @@ tf.SetValidator(func() error {
         return errors.New("Must contain Go")
     }
     return nil
+})
+```
+
+You can detect when the user changes the content of the text field and then exits it:
+
+```Go
+tf := gi.NewTextField(parent)
+tf.OnChange(func(e events.Event) {
+    gi.MessageSnackbar(parent, "OnChange: "+tf.Text())
+})
+```
+
+You can detect when the user makes any change to the content of the text field as they type:
+
+```Go
+tf := gi.NewTextField(parent)
+tf.OnInput(func(e events.Event) {
+    gi.MessageSnackbar(parent, "OnInput: "+tf.Text())
 })
 ```

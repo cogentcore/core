@@ -91,7 +91,7 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		gi.NewTextField(parent).SetText("Hello, world!")
 	},
 	"widgets/text-fields-3": func(parent gi.Widget) {
-		gi.NewTextField(parent).SetText("This is a really long sentence that demonstrates how text field content can overflow onto multiple lines")
+		gi.NewTextField(parent).SetText("This is a long sentence that demonstrates how text field content can overflow onto multiple lines")
 	},
 	"widgets/text-fields-4": func(parent gi.Widget) {
 		gi.NewTextField(parent).SetType(gi.TextFieldOutlined)
@@ -114,6 +114,18 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 				return errors.New("Must contain Go")
 			}
 			return nil
+		})
+	},
+	"widgets/text-fields-9": func(parent gi.Widget) {
+		tf := gi.NewTextField(parent)
+		tf.OnChange(func(e events.Event) {
+			gi.MessageSnackbar(parent, "OnChange: "+tf.Text())
+		})
+	},
+	"widgets/text-fields-10": func(parent gi.Widget) {
+		tf := gi.NewTextField(parent)
+		tf.OnInput(func(e events.Event) {
+			gi.MessageSnackbar(parent, "OnInput: "+tf.Text())
 		})
 	},
 }
