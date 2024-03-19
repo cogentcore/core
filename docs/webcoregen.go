@@ -3,8 +3,10 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"maps"
+	"strings"
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
@@ -77,5 +79,41 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 	},
 	"widgets/buttons-8": func(parent gi.Widget) {
 		gi.NewButton(parent).SetType(gi.ButtonAction).SetText("Action")
+	},
+	"widgets/text-fields-0": func(parent gi.Widget) {
+		gi.NewTextField(parent)
+	},
+	"widgets/text-fields-1": func(parent gi.Widget) {
+		gi.NewLabel(parent).SetText("Name:")
+		gi.NewTextField(parent).SetPlaceholder("Jane Doe")
+	},
+	"widgets/text-fields-2": func(parent gi.Widget) {
+		gi.NewTextField(parent).SetText("Hello, world!")
+	},
+	"widgets/text-fields-3": func(parent gi.Widget) {
+		gi.NewTextField(parent).SetText("This is a really long sentence that demonstrates how text field content can overflow onto multiple lines")
+	},
+	"widgets/text-fields-4": func(parent gi.Widget) {
+		gi.NewTextField(parent).SetType(gi.TextFieldOutlined)
+	},
+	"widgets/text-fields-5": func(parent gi.Widget) {
+		gi.NewTextField(parent).SetTypePassword()
+	},
+	"widgets/text-fields-6": func(parent gi.Widget) {
+		gi.NewTextField(parent).AddClearButton()
+	},
+	"widgets/text-fields-7": func(parent gi.Widget) {
+		gi.NewTextField(parent).SetLeadingIcon(icons.Euro).SetTrailingIcon(icons.OpenInNew, func(e events.Event) {
+			gi.MessageSnackbar(parent, "Opening shopping cart")
+		})
+	},
+	"widgets/text-fields-8": func(parent gi.Widget) {
+		tf := gi.NewTextField(parent)
+		tf.SetValidator(func() error {
+			if !strings.Contains(tf.Text(), "Go") {
+				return errors.New("Must contain Go")
+			}
+			return nil
+		})
 	},
 }
