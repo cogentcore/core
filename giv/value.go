@@ -856,7 +856,7 @@ func (v *ValueData) OwnerLabel() string {
 // can be used for not proceeding in case of non-value-based types.
 func (v *ValueData) GetTitle() (label, newPath string, isZero bool) {
 	var npt reflect.Type
-	if v.Value.IsZero() || laser.NonPtrValue(v.Value).IsZero() {
+	if v.Value.IsZero() || !laser.NonPtrValue(v.Value).IsValid() || laser.NonPtrValue(v.Value).IsZero() {
 		npt = laser.NonPtrType(v.Value.Type())
 		isZero = true
 	} else {
