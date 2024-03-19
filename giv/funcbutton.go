@@ -232,6 +232,11 @@ func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButto
 	}
 	if li >= 0 {
 		snm = snm[li+1:] // must also get rid of "."
+		// if we are a global function, we may have gone too far with the second to last period,
+		// so we go after the last slash if there still is one
+		if strings.Contains(snm, "/") {
+			snm = snm[strings.LastIndex(snm, "/")+1:]
+		}
 	}
 	snm = strings.Map(func(r rune) rune {
 		if r == '(' || r == ')' || r == '*' {
