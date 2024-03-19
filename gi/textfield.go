@@ -1053,7 +1053,6 @@ func (um *TextFieldUndoMgr) SaveUndo(txt []rune, curpos int) {
 		r := um.Stack[n-1]
 		r.Set(txt, curpos)
 		um.Stack[n-1] = r
-		um.LastSave = now
 		return
 	}
 	r := TextFieldUndoRec{}
