@@ -47,8 +47,35 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		})
 	},
 	"widgets/buttons-0": func(parent gi.Widget) {
+		gi.NewButton(parent).SetText("Download").SetIcon(icons.Download)
+	},
+	"widgets/buttons-1": func(parent gi.Widget) {
 		gi.NewButton(parent).SetText("Send").SetIcon(icons.Send).OnClick(func(e events.Event) {
 			gi.MessageSnackbar(parent, "Message sent")
 		})
+	},
+	"widgets/buttons-2": func(parent gi.Widget) {
+		gi.NewButton(parent).SetText("Share").SetIcon(icons.Share).SetMenu(func(m *gi.Scene) {
+			gi.NewButton(m).SetText("Copy link")
+			gi.NewButton(m).SetText("Send message")
+		})
+	},
+	"widgets/buttons-3": func(parent gi.Widget) {
+		gi.NewButton(parent).SetType(gi.ButtonFilled).SetText("Filled")
+	},
+	"widgets/buttons-4": func(parent gi.Widget) {
+		gi.NewButton(parent).SetType(gi.ButtonTonal).SetText("Tonal")
+	},
+	"widgets/buttons-5": func(parent gi.Widget) {
+		gi.NewButton(parent).SetType(gi.ButtonElevated).SetText("Elevated")
+	},
+	"widgets/buttons-6": func(parent gi.Widget) {
+		gi.NewButton(parent).SetType(gi.ButtonOutlined).SetText("Outlined")
+	},
+	"widgets/buttons-7": func(parent gi.Widget) {
+		gi.NewButton(parent).SetType(gi.ButtonText).SetText("Text")
+	},
+	"widgets/buttons-8": func(parent gi.Widget) {
+		gi.NewButton(parent).SetType(gi.ButtonAction).SetText("Action")
 	},
 }

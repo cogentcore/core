@@ -104,7 +104,7 @@ const (
 	// or shadow when not being interacted with. It inherits the text
 	// color of its parent, and it renders a background when
 	// hovered/focused/active. you must ensure it stands out from the
-	// surrounding context  sufficiently. It is equivalent to Material Design's
+	// surrounding context sufficiently. It is equivalent to Material Design's
 	// icon button, but it can also contain text and other things (and frequently does).
 	ButtonAction
 
