@@ -7,7 +7,6 @@ package webcore
 import (
 	"log/slog"
 	"strconv"
-	"strings"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/coredom"
@@ -23,24 +22,18 @@ import (
 var Examples = map[string]func(parent gi.Widget){}
 
 func init() {
-	coredom.ElementHandlers["pre"] = ExamplePreHandler
+	coredom.ElementHandlers["webcore-example"] = ExampleHandler
 }
 
 // NumExamples has the number of examples per page URL.
 var NumExamples = map[string]int{}
 
-// ExamplePreHandler is the coredom handler for <pre> HTML elements
-// that handles examples. It falls back on [coredom.HandleElement]
-// for <pre> elements that do not have a <code> with class="language-Go"
-// (must be uppercase, as that indicates that is an "exported" example).
-func ExamplePreHandler(ctx *coredom.Context) bool {
-	if ctx.Node.FirstChild == nil || ctx.Node.FirstChild.Data != "code" {
-		return false
-	}
-	class := coredom.GetAttr(ctx.Node.FirstChild, "class")
-	if !strings.Contains(class, "language-Go") {
-		return false
-	}
+// ExampleHandler is the coredom handler for <webcore-example> HTML elements
+// that handles examples.
+func ExampleHandler(ctx *coredom.Context) bool {
+	// the node we actually care about is our first child, the <pre> element
+	ctx.Node = ctx.Node.FirstChild
+
 	fr := coredom.New[*gi.Frame](ctx)
 	fr.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
@@ -57,7 +50,7 @@ func ExamplePreHandler(ctx *coredom.Context) bool {
 	NumExamples[ctx.PageURL]++
 	fn := Examples[id]
 	if fn == nil {
-		slog.Error("programmer error: core example not found in webcore.Examples (you probably need to run go generate again)", "id", id)
+		slog.Error("programmer error: webcore example not found in webcore.Examples (you probably need to run go generate again)", "id", id)
 	} else {
 		fn(fr)
 	}
