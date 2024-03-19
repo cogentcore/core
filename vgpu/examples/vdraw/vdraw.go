@@ -116,7 +116,7 @@ func main() {
 			descIdx = 1
 		}
 		drw.StartDraw(descIdx) // specifically starting with correct descIdx is key..
-		drw.Scale(idx+stoff, 0, sf.Format.Bounds(), image.ZR, vdraw.Src, vgpu.NoFlipY)
+		drw.Scale(idx+stoff, 0, sf.Format.Bounds(), image.ZR, vdraw.Src, vgpu.NoFlipY, 0)
 		for i := range imgFiles {
 			// dp := image.Point{rand.Intn(500), rand.Intn(500)}
 			dp := image.Point{i * 50, i * 50}

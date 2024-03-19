@@ -212,7 +212,7 @@ func main() {
 		drw.SetFrameImage(0, fr)
 		drw.SyncImages()
 		drw.StartDraw(0)
-		drw.Scale(0, 0, sf.Format.Bounds(), image.ZR, draw.Src, vgpu.NoFlipY)
+		drw.Scale(0, 0, sf.Format.Bounds(), image.ZR, draw.Src, vgpu.NoFlipY, 0)
 		drw.EndDraw()
 
 		// fmt.Printf("present %v\n\n", time.Now().Sub(rt))
