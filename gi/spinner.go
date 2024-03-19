@@ -136,7 +136,8 @@ func (sp *Spinner) SetValue(val float32) *Spinner {
 	}
 	sp.Value = mat32.Truncate(sp.Value, sp.Prec)
 	if sp.EnforceStep {
-		sp.Value -= mat32.Mod(sp.Value, sp.Step)
+		// round to the nearest step
+		sp.Value = sp.Step * mat32.Round(sp.Value/sp.Step)
 	}
 	sp.SetTextToValue()
 	sp.NeedsRender()

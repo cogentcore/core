@@ -86,6 +86,15 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 	"widgets/spinners-1": func(parent gi.Widget) {
 		gi.NewSpinner(parent).SetValue(12.7)
 	},
+	"widgets/spinners-2": func(parent gi.Widget) {
+		gi.NewSpinner(parent).SetMin(-0.5).SetMax(2.7)
+	},
+	"widgets/spinners-3": func(parent gi.Widget) {
+		gi.NewSpinner(parent).SetStep(6)
+	},
+	"widgets/spinners-4": func(parent gi.Widget) {
+		gi.NewSpinner(parent).SetStep(4).SetEnforceStep(true)
+	},
 	"widgets/text-fields-0": func(parent gi.Widget) {
 		gi.NewTextField(parent)
 	},
