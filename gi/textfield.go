@@ -1565,6 +1565,9 @@ func (tf *TextField) HandleEvents() {
 	tf.HandleSelectToggle()
 	tf.OnFirst(events.Change, func(e events.Event) {
 		tf.Validate()
+		if tf.Error != nil {
+			e.SetHandled()
+		}
 	})
 	tf.On(events.MouseDown, func(e events.Event) {
 		if !tf.StateIs(states.Focused) {

@@ -31,3 +31,18 @@ You can ensure that the value is always a multiple of the step:
 ```Go
 gi.NewSpinner(parent).SetStep(4).SetEnforceStep(true)
 ```
+
+You can change the way that the value is formatted:
+
+```Go
+gi.NewSpinner(parent).SetFormat("%X").SetStep(1).SetValue(44)
+```
+
+You can detect when the user changes the value of the spinner:
+
+```Go
+sp := gi.NewSpinner(parent)
+sp.OnChange(func(e events.Event) {
+    gi.MessageSnackbar(parent, fmt.Sprintf("Value changed to %g", sp.Value))
+})
+```
