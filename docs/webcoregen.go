@@ -18,7 +18,7 @@ func init() {
 
 // WebcoreExamples are the compiled webcore examples for this app.
 var WebcoreExamples = map[string]func(parent gi.Widget){
-	"gettingstarted/helloworld-0": func(parent gi.Widget) {
+	"getting-started/hello-world-0": func(parent gi.Widget) {
 		b := parent
 		gi.NewButton(b).SetText("Hello, World!")
 	},
@@ -46,7 +46,7 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 			gi.MessageSnackbar(parent, "Message sent")
 		})
 	},
-	"widgets/button-0": func(parent gi.Widget) {
+	"widgets/buttons-0": func(parent gi.Widget) {
 		gi.NewButton(parent).SetText("Send").SetIcon(icons.Send).OnClick(func(e events.Event) {
 			gi.MessageSnackbar(parent, "Message sent")
 		})
