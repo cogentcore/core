@@ -5,10 +5,6 @@
 // Package video implements a video player widget in Cogent Core.
 package video
 
-// TODO(kai): video
-
-/*
-
 //go:generate core generate
 
 import (
@@ -17,23 +13,49 @@ import (
 	"image"
 	"time"
 
+	"cogentcore.org/core/gi"
+	"cogentcore.org/core/goosi"
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/speaker"
 	"github.com/zergon321/reisen"
-	"cogentcore.org/core/gi"
-	"cogentcore.org/core/ki"
 )
 
 // Video represents a video playback widget without any controls.
 // See [Player] for a version with controls.
+//
+//gti:add
 type Video struct {
-	gi.Image
+	gi.WidgetBase
 
 	// Media is the video media.
 	Media *reisen.Media
+
+	frameBuffer <-chan *image.RGBA
 }
 
-var _ ki.Ki = (*Video)(nil)
+func (v *Video) OnAdd() {
+	v.WidgetBase.OnAdd()
+	v.Scene.AddDirectRender(v)
+}
+
+func (v *Video) Destroy() {
+	v.Scene.DeleteDirectRender(v)
+	// v.Media.Destroy()
+	// todo: frameBuffer
+	v.WidgetBase.Destroy()
+}
+
+// DirectRender renders the video directly into the drawer
+func (v *Video) DirectRender(drw goosi.Drawer, idx int) {
+	if !v.IsVisible() {
+		return
+	}
+	frame, ok := <-v.frameBuffer
+	if !ok {
+		return
+	}
+	drw.SetGoImage(idx, 0, frame, goosi.NoFlipY)
+}
 
 // Open opens the video specified by the given filepath.
 func (v *Video) Open(fpath string) error {
@@ -68,6 +90,8 @@ func (v *Video) Play(width, height float32) error {
 		return err
 	}
 
+	v.frameBuffer = frameBuffer
+
 	// Start playing audio samples.
 	speaker.Play(v.StreamSamples(sampleSource))
 
@@ -81,12 +105,7 @@ func (v *Video) Play(width, height float32) error {
 			}
 		default:
 		}
-
-		frame, ok := <-frameBuffer
-		if ok {
-			v.SetImage(frame, width, height)
-			v.Update()
-		}
+		v.NeedsRender()
 	}
 	return nil
 }
@@ -127,7 +146,6 @@ func (v *Video) ReadVideoAndAudio() (<-chan *image.RGBA, <-chan [2]float64, chan
 		return nil, nil, nil, err
 	}
 
-
 	go func() {
 		for {
 			packet, gotPacket, err := v.Media.ReadPacket()
@@ -141,7 +159,6 @@ func (v *Video) ReadVideoAndAudio() (<-chan *image.RGBA, <-chan [2]float64, chan
 			if !gotPacket {
 				break
 			}
-
 
 			switch packet.Type() {
 			case reisen.StreamVideo:
@@ -254,5 +271,3 @@ func (v *Video) StreamSamples(sampleSource <-chan [2]float64) beep.Streamer {
 		return numRead, true
 	})
 }
-
-*/

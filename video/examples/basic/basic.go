@@ -1,26 +1,21 @@
-// Copyright (c) 2023, Cogent Core. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 package main
-
-func main() {}
-
-/*
 
 import (
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/grr"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/video"
 )
 
 func main() {
-	sc := gi.NewScene("basic-video").SetTitle("Basic Video Example")
-	v := video.NewVideo(sc)
+	b := gi.NewBody("Basic Video Example")
+	v := video.NewVideo(b)
+	v.Style(func(s *styles.Style) {
+		s.Grow.Set(1, 1)
+	})
 	grr.Log(v.Open("../videos/deer.mp4"))
-	w := gi.NewWindow(sc).Run()
-	grr.Log(v.Play(0, 0))
+	// grr.Log(v.Open("../videos/countdown.mp4"))
+	w := b.NewWindow().Run()
+	go v.Play(0, 0)
 	w.Wait()
 }
-
-*/

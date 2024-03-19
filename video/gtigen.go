@@ -2,61 +2,36 @@
 
 package video
 
-/*
-
 import (
-	"github.com/zergon321/reisen"
+	"image"
+
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/ki"
-	"cogentcore.org/core/ordmap"
+	"github.com/zergon321/reisen"
 )
 
 // VideoType is the [gti.Type] for [Video]
-var VideoType = gti.AddType(&gti.Type{
-	Name:       "cogentcore.org/core/video.Video",
-	ShortName:  "video.Video",
-	IDName:     "video",
-	Doc:        "Video represents a video playback widget without any controls.\nSee [Player] for a version with controls.",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Media", &gti.Field{Name: "Media", Type: "*github.com/zergon321/reisen.Media", LocalType: "*reisen.Media", Doc: "Media is the video media.", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Image", &gti.Field{Name: "Image", Type: "cogentcore.org/core/gi.Image", LocalType: "gi.Image", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &Video{},
-})
+var VideoType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/video.Video", IDName: "video", Doc: "Video represents a video playback widget without any controls.\nSee [Player] for a version with controls.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Media", Doc: "Media is the video media."}, {Name: "frameBuffer"}}, Instance: &Video{}})
 
-// NewVideo adds a new [Video] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
+// NewVideo adds a new [Video] with the given name to the given parent:
+// Video represents a video playback widget without any controls.
+// See [Player] for a version with controls.
 func NewVideo(par ki.Ki, name ...string) *Video {
 	return par.NewChild(VideoType, name...).(*Video)
 }
 
 // KiType returns the [*gti.Type] of [Video]
-func (t *Video) KiType() *gti.Type {
-	return VideoType
-}
+func (t *Video) KiType() *gti.Type { return VideoType }
 
 // New returns a new [*Video] value
-func (t *Video) New() ki.Ki {
-	return &Video{}
-}
+func (t *Video) New() ki.Ki { return &Video{} }
 
 // SetMedia sets the [Video.Media]:
 // Media is the video media.
-func (t *Video) SetMedia(v *reisen.Media) *Video {
-	t.Media = v
-	return t
-}
+func (t *Video) SetMedia(v *reisen.Media) *Video { t.Media = v; return t }
+
+// SetFrameBuffer sets the [Video.frameBuffer]
+func (t *Video) SetFrameBuffer(v <-chan *image.RGBA) *Video { t.frameBuffer = v; return t }
 
 // SetTooltip sets the [Video.Tooltip]
-func (t *Video) SetTooltip(v string) *Video {
-	t.Tooltip = v
-	return t
-}
-
-*/
+func (t *Video) SetTooltip(v string) *Video { t.Tooltip = v; return t }
