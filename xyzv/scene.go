@@ -184,10 +184,20 @@ func (sw *Scene) Render() {
 	}
 }
 
-// DirectRender renders the scene directly into the drawer
-func (sw *Scene) DirectRender(drw goosi.Drawer, idx int) {
+// DirectRenderImage uploads framebuffer image
+func (sw *Scene) DirectRenderImage(drw goosi.Drawer, idx int) {
 	if sw.XYZ.Frame == nil || !sw.IsVisible() {
 		return
 	}
 	drw.SetFrameImage(idx, sw.XYZ.Frame.Frames[0])
+}
+
+// DirectRenderDraw draws the current image to RenderWin drawer
+func (sw *Scene) DirectRenderDraw(drw goosi.Drawer, idx int, flipY bool) {
+	if !sw.IsVisible() {
+		return
+	}
+	bb := sw.Geom.TotalBBox
+	ibb := image.Rectangle{Max: bb.Size()}
+	drw.Copy(idx, 0, bb.Min, ibb, draw.Src, flipY)
 }

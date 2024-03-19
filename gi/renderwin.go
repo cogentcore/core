@@ -876,13 +876,8 @@ func (rs *RenderScenes) SetImages(drw goosi.Drawer) {
 		if DebugSettings.WinRenderTrace {
 			fmt.Println("RenderScenes.SetImages:", sc.Name())
 		}
-		if isSc {
-			drw.SetGoImage(i, 0, sc.Pixels, goosi.NoFlipY)
-			sc.SetFlag(false, ScImageUpdated)
-		} else {
-			if sc != skipScene {
-				w.DirectRender(drw, i)
-			}
+		if isSc || sc != skipScene {
+			w.DirectRenderImage(drw, i)
 		}
 	}
 }
@@ -894,31 +889,27 @@ func (rs *RenderScenes) DrawAll(drw goosi.Drawer) {
 	if len(rs.Scenes) == 0 {
 		return
 	}
-	winScene := rs.Scenes[0].(*Scene)
 	for i, w := range rs.Scenes {
 		set := i / nPerSet
 		if i%nPerSet == 0 && set > 0 {
 			drw.UseTextureSet(set)
 		}
-		op := draw.Over
-		if i == 0 {
-			op = draw.Src
-		}
-		switch rw := w.(type) {
-		case *Scene:
-			bb := rw.Pixels.Bounds()
-			drw.Copy(i, 0, rw.SceneGeom.Pos, bb, op, rs.FlipY)
-		case *Scrim:
-			drw.Fill(colors.ApplyOpacity(colors.Scheme.Scrim, .5), *mat32.Identity3(), winScene.Geom.TotalBBox, draw.Over)
-		default:
-			wb := w.AsWidget()
-			if w.IsVisible() {
-				bb := wb.Geom.TotalBBox
-				ibb := image.Rectangle{Max: bb.Size()}
-				drw.Copy(i, 0, bb.Min, ibb, draw.Src, rs.FlipY)
-			}
-		}
+		w.DirectRenderDraw(drw, i, rs.FlipY)
 	}
+}
+
+func (sc *Scene) DirectRenderImage(drw goosi.Drawer, idx int) {
+	drw.SetGoImage(idx, 0, sc.Pixels, goosi.NoFlipY)
+	sc.SetFlag(false, ScImageUpdated)
+}
+
+func (sc *Scene) DirectRenderDraw(drw goosi.Drawer, idx int, flipY bool) {
+	op := draw.Over
+	if idx == 0 {
+		op = draw.Src
+	}
+	bb := sc.Pixels.Bounds()
+	drw.Copy(idx, 0, sc.SceneGeom.Pos, bb, op, flipY)
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1083,7 +1074,7 @@ func (w *RenderWin) GatherScenes() bool {
 	for i := winIdx + 1; i < n; i++ {
 		st := sm.Stack.ValueByIndex(i)
 		if st.Scrim && i == n-1 {
-			rs.Add(NewScrim(winScene.Scene), scIdx)
+			rs.Add(NewScrim(winScene), scIdx)
 		}
 		rs.Add(st.Scene, scIdx)
 		if DebugSettings.WinRenderTrace {
@@ -1117,4 +1108,13 @@ func (w *RenderWin) SendShowEvents() {
 // Only used for its type. Everything else managed by RenderWin.
 type Scrim struct {
 	WidgetBase
+}
+
+func (sr *Scrim) DirectRenderImage(drw goosi.Drawer, idx int) {
+	// no-op
+}
+
+func (sr *Scrim) DirectRenderDraw(drw goosi.Drawer, idx int, flipY bool) {
+	sc := sr.Par.(*Scene)
+	drw.Fill(colors.ApplyOpacity(colors.Scheme.Scrim, .5), *mat32.Identity3(), sc.Geom.TotalBBox, draw.Over)
 }

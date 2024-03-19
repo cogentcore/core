@@ -15,7 +15,8 @@ func main() {
 	})
 	grr.Log(v.Open("../videos/deer.mp4"))
 	// grr.Log(v.Open("../videos/countdown.mp4"))
+	// grr.Log(v.Open("../videos/randy_first_360.mov")) // note: not uploaded -- good test case tho
 	w := b.NewWindow().Run()
-	go v.Play(0, 0)
+	v.Play(0, 0)
 	w.Wait()
 }

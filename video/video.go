@@ -10,7 +10,9 @@ package video
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 	"image"
+	"image/draw"
 	"time"
 
 	"cogentcore.org/core/gi"
@@ -30,7 +32,19 @@ type Video struct {
 	// Media is the video media.
 	Media *reisen.Media
 
+	// setting this to true will stop the playing
+	Stop bool
+
 	frameBuffer <-chan *image.RGBA
+
+	// target frame number to be played
+	frameTarg int
+
+	// actual frame number displayed
+	framePlayed int
+
+	// frame number to stop playing at, if > 0
+	frameStop int
 }
 
 func (v *Video) OnAdd() {
@@ -45,16 +59,30 @@ func (v *Video) Destroy() {
 	v.WidgetBase.Destroy()
 }
 
-// DirectRender renders the video directly into the drawer
-func (v *Video) DirectRender(drw goosi.Drawer, idx int) {
+// DirectRenderImage uploads the current view frame directly into the drawer
+func (v *Video) DirectRenderImage(drw goosi.Drawer, idx int) {
 	if !v.IsVisible() {
+		return
+	}
+	if v.framePlayed >= v.frameTarg {
 		return
 	}
 	frame, ok := <-v.frameBuffer
 	if !ok {
+		v.Stop = true
 		return
 	}
+	v.framePlayed++
 	drw.SetGoImage(idx, 0, frame, goosi.NoFlipY)
+}
+
+// DirectRenderDraw draws the current image to RenderWin drawer
+func (v *Video) DirectRenderDraw(drw goosi.Drawer, idx int, flipY bool) {
+	if !v.IsVisible() {
+		return
+	}
+	bb := v.Geom.TotalBBox
+	drw.Scale(idx, 0, bb, image.Rectangle{}, draw.Src, flipY)
 }
 
 // Open opens the video specified by the given filepath.
@@ -78,9 +106,12 @@ func (v *Video) Open(fpath string) error {
 func (v *Video) Play(width, height float32) error {
 	videoFPS, _ := v.Media.Streams()[0].FrameRate()
 
+	if videoFPS == 0 || videoFPS > 100 {
+		videoFPS = 30
+	}
 	// seconds per frame for frame ticker
-	spf := 1.0 / float64(videoFPS)
-	frameDuration := time.Duration(float64(time.Second) * spf)
+	spf := time.Duration(float64(time.Second) / float64(videoFPS))
+	fmt.Println(videoFPS, spf)
 
 	// Start decoding streams.
 	var sampleSource <-chan [2]float64
@@ -92,21 +123,52 @@ func (v *Video) Play(width, height float32) error {
 
 	v.frameBuffer = frameBuffer
 
+	start := time.Now()
+	v.Stop = false
+	// todo: should set a v.frameStop target, and also get this as an arg
+	// to set for playing just a snippet.  probably need more general timestamp etc stuff there.
+	v.frameTarg = 0
+	v.framePlayed = 0
+	v.NeedsRender()
 	// Start playing audio samples.
 	speaker.Play(v.StreamSamples(sampleSource))
+	_ = errChan
 
-	tick := time.NewTicker(frameDuration)
-	for range tick.C {
-		// Check for incoming errors.
-		select {
-		case err, ok := <-errChan:
-			if ok {
-				return err
+	go func() {
+		for {
+			// todo: this is causing everything to stop on my sample video that
+			// has an error a ways into it -- maybe need a buffered chan or something?
+			// also see commented-out parts where it tries to send the errors
+			// or something?
+			// select {
+			// case err, ok := <-errChan:
+			// 	if ok {
+			// 		fmt.Println(err)
+			// 		// return err
+			// 	}
+			// default:
+			if v.Stop {
+				return
 			}
-		default:
+			d := time.Now().Sub(start)
+			td := time.Duration(v.frameTarg) * spf
+			shouldStop := v.frameStop > 0 && v.frameTarg >= v.frameStop
+			if d > td && !shouldStop {
+				v.AsyncLock()
+				v.frameTarg++
+				v.NeedsRender()
+				v.AsyncUnlock()
+			} else if v.frameTarg > v.framePlayed {
+				v.AsyncLock()
+				v.NeedsRender()
+				v.AsyncUnlock()
+			} else if shouldStop {
+				return
+			} else {
+				time.Sleep(td - d)
+			}
 		}
-		v.NeedsRender()
-	}
+	}()
 	return nil
 }
 
@@ -164,12 +226,14 @@ func (v *Video) ReadVideoAndAudio() (<-chan *image.RGBA, <-chan [2]float64, chan
 			case reisen.StreamVideo:
 				s := v.Media.Streams()[packet.StreamIndex()].(*reisen.VideoStream)
 				videoFrame, gotFrame, err := s.ReadVideoFrame()
+				_ = err
 
-				if err != nil {
-					go func(err error) {
-						errs <- err
-					}(err)
-				}
+				// note: this is causing a panic send on closed channel
+				// if err != nil {
+				// 	go func(err error) {
+				// 		errs <- err
+				// 	}(err)
+				// }
 
 				if !gotFrame {
 					break
@@ -185,11 +249,12 @@ func (v *Video) ReadVideoAndAudio() (<-chan *image.RGBA, <-chan [2]float64, chan
 				s := v.Media.Streams()[packet.StreamIndex()].(*reisen.AudioStream)
 				audioFrame, gotFrame, err := s.ReadAudioFrame()
 
-				if err != nil {
-					go func(err error) {
-						errs <- err
-					}(err)
-				}
+				// note: this is causing a panic send on closed channel
+				// if err != nil {
+				// 	go func(err error) {
+				// 		errs <- err
+				// 	}(err)
+				// }
 
 				if !gotFrame {
 					break

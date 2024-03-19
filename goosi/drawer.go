@@ -75,6 +75,16 @@ type Drawer interface {
 	// flipY = flipY axis when drawing this image
 	Copy(idx, layer int, dp image.Point, sr image.Rectangle, op draw.Op, flipY bool) error
 
+	// Scale copies texture at given index and layer to render target,
+	// scaling the region defined by src and sr to the destination
+	// such that sr in src-space is mapped to dr in dst-space.
+	// dr is the destination rectangle
+	// sr is the source region (set to image.ZR zero rect for all),
+	// op is the drawing operation: Src = copy source directly (blit),
+	// Over = alpha blend with existing
+	// flipY = flipY axis when drawing this image
+	Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, op draw.Op, flipY bool) error
+
 	// UseTextureSet selects the descriptor set to use --
 	// choose this based on the bank of 16
 	// texture values if number of textures > MaxTexturesPerSet.
@@ -175,6 +185,21 @@ func (dw *DrawerBase) SyncImages() {
 func (dw *DrawerBase) Copy(idx, layer int, dp image.Point, sr image.Rectangle, op draw.Op, flipY bool) error {
 	img := dw.Images[idx][layer]
 	draw.Draw(dw.Image, image.Rectangle{dp, dp.Add(img.Rect.Size())}, img, sr.Min, op)
+	return nil
+}
+
+// Scale copies texture at given index and layer to render target,
+// scaling the region defined by src and sr to the destination
+// such that sr in src-space is mapped to dr in dst-space.
+// dr is the destination rectangle
+// sr is the source region (set to image.ZR zero rect for all),
+// op is the drawing operation: Src = copy source directly (blit),
+// Over = alpha blend with existing
+// flipY = flipY axis when drawing this image
+func (dw *DrawerBase) Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, op draw.Op, flipY bool) error {
+	img := dw.Images[idx][layer]
+	// todo: this needs to implement Scale!
+	draw.Draw(dw.Image, dr, img, sr.Min, op)
 	return nil
 }
 
