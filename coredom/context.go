@@ -100,8 +100,6 @@ func (c *Context) Config(w gi.Widget) {
 		switch attr.Key {
 		case "id":
 			wb.SetName(attr.Val)
-		case "class":
-			// wb.SetClass(attr.Val)
 		case "style":
 			// our CSS parser is strict about semicolons, but
 			// they aren't needed in normal inline styles in HTML

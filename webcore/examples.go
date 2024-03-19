@@ -38,6 +38,7 @@ func ExampleHandler(ctx *coredom.Context) bool {
 	fr.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 0)
+		s.Background = nil
 	})
 
 	gi.NewLabel(fr).SetText(coredom.ExtractText(ctx)).Style(func(s *styles.Style) {
