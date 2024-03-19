@@ -173,18 +173,17 @@ func (dw *Drawer) Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, 
 		_, tx, _ := dw.Sys.Vars().ValByIdxTry(0, "Tex", idx)
 		sr = tx.Texture.Format.Bounds()
 	}
-	rx := float32(dr.Dx()) / float32(sr.Dx())
-	ry := float32(dr.Dy()) / float32(sr.Dy())
-	mat := mat32.Identity3()
-	if rotDeg != 0 {
-		mat = mat32.NewMat3FromMat2(mat32.Rotate2D(mat32.DegToRad(rotDeg)))
+	sx := float32(dr.Dx()) / float32(sr.Dx())
+	sy := float32(dr.Dy()) / float32(sr.Dy())
+	tx := float32(dr.Min.X) - sx*float32(sr.Min.X)
+	ty := float32(dr.Min.Y) - sy*float32(sr.Min.Y)
+	stmat := mat32.Mat3{
+		sx, 0, 0,
+		0, sy, 0,
+		tx,
+		ty, 1,
 	}
-	mat = mat32.Mat3{
-		rx, 0, 0,
-		0, ry, 0,
-		float32(dr.Min.X) - rx*float32(sr.Min.X),
-		float32(dr.Min.Y) - ry*float32(sr.Min.Y), 1,
-	}
+	mat := stmat.Mul(mat32.Mat3Rotate2D(mat32.DegToRad(rotDeg)))
 	return dw.Draw(idx, layer, mat, sr, op, flipY)
 }
 

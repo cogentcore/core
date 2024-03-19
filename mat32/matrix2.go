@@ -62,6 +62,7 @@ func (m Mat2) IsIdentity() bool {
 	return m.XX == 1 && m.YX == 0 && m.XY == 0 && m.YY == 1 && m.X0 == 0 && m.Y0 == 0
 }
 
+// Translate2D returns a Mat2 2D matrix with given translations
 func Translate2D(x, y float32) Mat2 {
 	return Mat2{
 		1, 0,
@@ -70,6 +71,7 @@ func Translate2D(x, y float32) Mat2 {
 	}
 }
 
+// Scale2D returns a Mat2 2D matrix with given scaling factors
 func Scale2D(x, y float32) Mat2 {
 	return Mat2{
 		x, 0,
@@ -78,6 +80,7 @@ func Scale2D(x, y float32) Mat2 {
 	}
 }
 
+// Rotate2D returns a Mat2 2D matrix with given rotation, specified in radians
 func Rotate2D(angle float32) Mat2 {
 	c := float32(Cos(angle))
 	s := float32(Sin(angle))
@@ -88,6 +91,7 @@ func Rotate2D(angle float32) Mat2 {
 	}
 }
 
+// Shear2D returns a Mat2 2D matrix with given shearing
 func Shear2D(x, y float32) Mat2 {
 	return Mat2{
 		1, y,
@@ -96,6 +100,7 @@ func Shear2D(x, y float32) Mat2 {
 	}
 }
 
+// Skew2D returns a Mat2 2D matrix with given skewing
 func Skew2D(x, y float32) Mat2 {
 	return Mat2{
 		1, Tan(y),

@@ -165,7 +165,7 @@ func main() {
 	dir.Pos.Set(0, 2, 1) // default: 0,1,1 = above and behind us (we are at 0,0,X)
 
 	// se.Camera.Pose.Pos.Set(-2, 9, 3)
-	sc.Camera.Pose.Pos.Set(-2, 2, 10)
+	sc.Camera.Pose.Pos.Set(0, 2, 10)
 	// se.Camera.Pose.Pos.Set(0, 0, 10)              // default position
 	sc.Camera.LookAt(mat32.Vec3{}, mat32.V3(0, 1, 0)) // defaults to looking at origin
 

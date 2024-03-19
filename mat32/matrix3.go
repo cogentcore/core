@@ -22,16 +22,31 @@ func Identity3() Mat3 {
 	return m
 }
 
-func NewMat3FromMat2(m Mat2) Mat3 {
+func Mat3FromMat2(m Mat2) Mat3 {
 	nm := Mat3{}
 	nm.SetFromMat2(m)
 	return nm
 }
 
-func NewMat3FromMat4(m *Mat4) Mat3 {
+func Mat3FromMat4(m *Mat4) Mat3 {
 	nm := Mat3{}
 	nm.SetFromMat4(m)
 	return nm
+}
+
+// Mat3Translate2D returns a Mat3 2D matrix with given translations
+func Mat3Translate2D(x, y float32) Mat3 {
+	return Mat3FromMat2(Translate2D(x, y))
+}
+
+// Mat3Scale2D returns a Mat3 2D matrix with given scaling factors
+func Mat3Scale2D(x, y float32) Mat3 {
+	return Mat3FromMat2(Scale2D(x, y))
+}
+
+// Rotate2D returns a Mat2 2D matrix with given rotation, specified in radians
+func Mat3Rotate2D(angle float32) Mat3 {
+	return Mat3FromMat2(Rotate2D(angle))
 }
 
 // Set sets all the elements of the matrix row by row starting at row1, column1,
@@ -100,7 +115,7 @@ func (m *Mat3) CopyFrom(src Mat3) {
 	copy(m[:], src[:])
 }
 
-// MulMatrices sets ths matrix as matrix multiplication a by b (i.e., b*a).
+// MulMatrices sets ths matrix as matrix multiplication a by b (i.e., a*b).
 func (m *Mat3) MulMatrices(a, b Mat3) {
 	a11 := a[0]
 	a12 := a[3]
@@ -122,17 +137,17 @@ func (m *Mat3) MulMatrices(a, b Mat3) {
 	b32 := b[5]
 	b33 := b[8]
 
-	m[0] = a11*b11 + a12*b21 + a13*b31
-	m[3] = a11*b12 + a12*b22 + a13*b32
-	m[6] = a11*b13 + a12*b23 + a13*b33
+	m[0] = b11*a11 + b12*a21 + b13*a31
+	m[3] = b11*a12 + b12*a22 + b13*a32
+	m[6] = b11*a13 + b12*a23 + b13*a33
 
-	m[1] = a21*b11 + a22*b21 + a23*b31
-	m[4] = a21*b12 + a22*b22 + a23*b32
-	m[7] = a21*b13 + a22*b23 + a23*b33
+	m[1] = b21*a11 + b22*a21 + b23*a31
+	m[4] = b21*a12 + b22*a22 + b23*a32
+	m[7] = b21*a13 + b22*a23 + b23*a33
 
-	m[2] = a31*b11 + a32*b21 + a33*b31
-	m[5] = a31*b12 + a32*b22 + a33*b32
-	m[8] = a31*b13 + a32*b23 + a33*b33
+	m[2] = b31*a11 + b32*a21 + b33*a31
+	m[5] = b31*a12 + b32*a22 + b33*a32
+	m[8] = b31*a13 + b32*a23 + b33*a33
 }
 
 // Mul returns this matrix times other matrix (this matrix is unchanged)
@@ -312,7 +327,7 @@ func (m *Mat3) SetScaleCols(v Vec3) {
 // If the src matrix cannot be inverted returns error.
 func (m *Mat3) SetNormalMatrix(src *Mat4) error {
 	var err error
-	*m, err = NewMat3FromMat4(src).InverseTry()
+	*m, err = Mat3FromMat4(src).InverseTry()
 	m.SetTranspose()
 	return err
 }
