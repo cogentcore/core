@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/grows/images"
 	"cogentcore.org/core/paint"
@@ -48,6 +49,7 @@ func TestViewBox(t *testing.T) {
 
 	tests := []string{"none", "xMinYMin", "xMidYMid", "xMaxYMax", "xMaxYMax slice"}
 	sv := NewSVG(640, 480)
+	sv.Background = colors.C(colors.White)
 	err := sv.OpenXML(file)
 	if err != nil {
 		t.Error("error opening xml:", err)

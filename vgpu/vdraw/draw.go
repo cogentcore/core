@@ -161,18 +161,25 @@ func (dw *Drawer) Copy(idx, layer int, dp image.Point, sr image.Rectangle, op dr
 // scaling the region defined by src and sr to the destination
 // such that sr in src-space is mapped to dr in dst-space.
 // dr is the destination rectangle
-// sr is the source region (set to image.ZR zero rect for all),
+// sr is the source region (set to image.Rectangle{} zero rect for all),
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
 // flipY = flipY axis when drawing this image
-func (dw *Drawer) Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, op draw.Op, flipY bool) error {
-	if sr == image.ZR {
+// rotDeg = rotation degrees to apply in the mapping, e.g., 90
+// rotates 90 degrees to the left, -90 = right.
+func (dw *Drawer) Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, op draw.Op, flipY bool, rotDeg float32) error {
+	zr := image.Rectangle{}
+	if sr == zr {
 		_, tx, _ := dw.Sys.Vars().ValByIdxTry(0, "Tex", idx)
 		sr = tx.Texture.Format.Bounds()
 	}
 	rx := float32(dr.Dx()) / float32(sr.Dx())
 	ry := float32(dr.Dy()) / float32(sr.Dy())
-	mat := mat32.Mat3{
+	mat := mat32.Identity3()
+	if rotDeg != 0 {
+		mat = mat32.NewMat3FromMat2(mat32.Rotate2D(mat32.DegToRad(rotDeg)))
+	}
+	mat = mat32.Mat3{
 		rx, 0, 0,
 		0, ry, 0,
 		float32(dr.Min.X) - rx*float32(sr.Min.X),

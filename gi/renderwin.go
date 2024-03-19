@@ -1025,7 +1025,7 @@ func (w *RenderWin) FillInsets() {
 		if r.Dx() == 0 || r.Dy() == 0 {
 			return
 		}
-		drw.Fill(colors.Scheme.Background, *mat32.Identity3(), r, draw.Src)
+		drw.Fill(colors.Scheme.Background, mat32.Identity3(), r, draw.Src)
 	}
 	rb := rg.Bounds()
 	wb := wg.Bounds()
@@ -1074,7 +1074,7 @@ func (w *RenderWin) GatherScenes() bool {
 	for i := winIdx + 1; i < n; i++ {
 		st := sm.Stack.ValueByIndex(i)
 		if st.Scrim && i == n-1 {
-			rs.Add(NewScrim(winScene), scIdx)
+			rs.Add(NewScrimForScene(winScene), scIdx)
 		}
 		rs.Add(st.Scene, scIdx)
 		if DebugSettings.WinRenderTrace {
@@ -1110,11 +1110,22 @@ type Scrim struct {
 	WidgetBase
 }
 
+// NewScrimForScene is the proper function to use for creating a new Scrim
+// for use in rendering.  Critical to not actually add the Scrim to the
+// Scene -- just set its pointers.
+func NewScrimForScene(sc *Scene) *Scrim {
+	sr := &Scrim{} // critical to not add to scene!
+	sr.InitName(sr)
+	sr.Par = sc
+	sr.Scene = sc
+	return sr
+}
+
 func (sr *Scrim) DirectRenderImage(drw goosi.Drawer, idx int) {
 	// no-op
 }
 
 func (sr *Scrim) DirectRenderDraw(drw goosi.Drawer, idx int, flipY bool) {
 	sc := sr.Par.(*Scene)
-	drw.Fill(colors.ApplyOpacity(colors.Scheme.Scrim, .5), *mat32.Identity3(), sc.Geom.TotalBBox, draw.Over)
+	drw.Fill(colors.ApplyOpacity(colors.Scheme.Scrim, .5), mat32.Identity3(), sc.Geom.TotalBBox, draw.Over)
 }

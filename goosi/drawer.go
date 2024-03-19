@@ -83,7 +83,9 @@ type Drawer interface {
 	// op is the drawing operation: Src = copy source directly (blit),
 	// Over = alpha blend with existing
 	// flipY = flipY axis when drawing this image
-	Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, op draw.Op, flipY bool) error
+	// rotDeg = rotation degrees to apply in the mapping, e.g., 90
+	// rotates 90 degrees to the left, -90 = right.
+	Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, op draw.Op, flipY bool, rotDeg float32) error
 
 	// UseTextureSet selects the descriptor set to use --
 	// choose this based on the bank of 16
@@ -196,7 +198,9 @@ func (dw *DrawerBase) Copy(idx, layer int, dp image.Point, sr image.Rectangle, o
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
 // flipY = flipY axis when drawing this image
-func (dw *DrawerBase) Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, op draw.Op, flipY bool) error {
+// rotDeg = rotation degrees to apply in the mapping, e.g., 90
+// rotates 90 degrees to the left, -90 = right.
+func (dw *DrawerBase) Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, op draw.Op, flipY bool, rotDeg float32) error {
 	img := dw.Images[idx][layer]
 	// todo: this needs to implement Scale!
 	draw.Draw(dw.Image, dr, img, sr.Min, op)

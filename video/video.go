@@ -32,6 +32,10 @@ type Video struct {
 	// Media is the video media.
 	Media *reisen.Media
 
+	// degrees of rotation to apply to the video images
+	// 90 = left 90, -90 = right 90
+	Rotation float32
+
 	// setting this to true will stop the playing
 	Stop bool
 
@@ -82,7 +86,7 @@ func (v *Video) DirectRenderDraw(drw goosi.Drawer, idx int, flipY bool) {
 		return
 	}
 	bb := v.Geom.TotalBBox
-	drw.Scale(idx, 0, bb, image.Rectangle{}, draw.Src, flipY)
+	drw.Scale(idx, 0, bb, image.Rectangle{}, draw.Src, flipY, v.Rotation)
 }
 
 // Open opens the video specified by the given filepath.
