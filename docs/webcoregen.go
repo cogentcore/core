@@ -160,6 +160,18 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 	"widgets/sliders-4": func(parent gi.Widget) {
 		gi.NewSlider(parent).SetStep(0.2).SetEnforceStep(true)
 	},
+	"widgets/sliders-5": func(parent gi.Widget) {
+		sr := gi.NewSlider(parent)
+		sr.OnChange(func(e events.Event) {
+			gi.MessageSnackbar(parent, fmt.Sprintf("OnChange: %v", sr.Value))
+		})
+	},
+	"widgets/sliders-6": func(parent gi.Widget) {
+		sr := gi.NewSlider(parent)
+		sr.OnInput(func(e events.Event) {
+			gi.MessageSnackbar(parent, fmt.Sprintf("OnInput: %v", sr.Value))
+		})
+	},
 	"widgets/spinners-0": func(parent gi.Widget) {
 		gi.NewSpinner(parent)
 	},

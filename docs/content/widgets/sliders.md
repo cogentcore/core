@@ -31,3 +31,21 @@ You can ensure that the value is always a multiple of the step:
 ```Go
 gi.NewSlider(parent).SetStep(0.2).SetEnforceStep(true)
 ```
+
+You can detect when the user changes the value of the slider and then stops:
+
+```Go
+sr := gi.NewSlider(parent)
+sr.OnChange(func(e events.Event) {
+    gi.MessageSnackbar(parent, fmt.Sprintf("OnChange: %v", sr.Value))
+})
+```
+
+You can detect when the user changes the value of the slider as they slide it:
+
+```Go
+sr := gi.NewSlider(parent)
+sr.OnInput(func(e events.Event) {
+    gi.MessageSnackbar(parent, fmt.Sprintf("OnInput: %v", sr.Value))
+})
+```
