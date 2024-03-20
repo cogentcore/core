@@ -4,31 +4,35 @@ This section contains a list of fundamental principles that Cogent Core is built
 
 # Code is always the best solution
 
-A common approach to programming, especially for the web, is to reduce the amount of actual programming that takes place and instead use simplified markup, configuration, and selection formats like CSS, HTML, YAML, and Regex. The promise of this is that you will be able to accomplish everything you need to do in a very easy, simple way. However, there are several problems with this strategy. Firstly, it requires learning many different languages, typically with very magic syntaxes packed with random symbols that do various things, with no clear connection between the symbols and the actions. Second of all, the simplified formats never end up covering all use cases, resulting in hacky workarounds to achieve the desired functionality, or, in some cases, entirely new languages that promise to cover all of the use cases, for real this time.
+A common approach to programming, especially for the web, is to reduce the amount of actual programming that takes place and instead use simplified markup, configuration, and selection formats like CSS, HTML, YAML, and Regex. The promise of this is that you will be able to accomplish everything you need to do in a very easy, simple way. However, there are several problems with this strategy. First, it requires learning many different languages, typically with very magic syntaxes packed with random symbols that do various things, with no clear connection between the symbols and the actions. Second of all, the simplified formats never end up covering all use cases, resulting in hacky workarounds to achieve the desired functionality, or, in some cases, entirely new languages that promise to cover all of the use cases, for real this time.
 
-The eventual result of this trend is that people end up stuffing entire programming languages into these supposedly simple formats to cover their requirements (for example, SCSS, JSX, and templates). The resulting languages are neither simple, clear, nor extensible, creating massive amounts of unreadable and inefficient code. This means that everyone has to learn these languages and their magic syntaxes, struggle to read their complicated code, reach constant limits in functionality, and suffer runtime errors and bad performance due to the typically duck-typed, interpreted nature of these languages. Unless there are very limited uses for something, avoiding real code will always cause many problems and no benefits. 
+The eventual result of this trend is that people end up stuffing entire programming languages into these supposedly simple formats to cover their requirements (for example, SCSS, JSX, and templates). The resulting languages are neither simple, clear, nor extensible, creating massive amounts of unreadable and inefficient code. This means that everyone has to learn these languages and their magic syntaxes, struggle to read their complicated code, reach their inevitable limits in functionality, and suffer runtime errors and bad performance due to the typically duck-typed, interpreted nature of these languages.
 
-The solution to this is simple—whenever possible, everything should be written in real code, preferably in one language. Therefore, Cogent Core takes this approach: everything, from trees to widgets to styling to enums, is written in real, pure Go code. The only non-Go functional files in a Cogent Core package or app should be TOML files, which are only used for very simple configuration options to commands, and not for any actual code.
+The solution to this is simple: whenever possible, everything should be written in real code, preferably in one language. Therefore, Cogent Core takes this approach: everything, from trees to widgets to styling to enums, is written in real, pure Go code. The only non-Go functional files in a Cogent Core package or app should be TOML files, which are only used for very simple configuration options to commands, and not for any actual code.
 
-# Go is the only good programming language (for GUIs)
+# Go is the best programming language (for GUIs)
 
-There are many programming languages. However, almost all of them lack at least one of several fundamental characteristics required to make a good programming language for GUIs, making Go the only good programming language, and thus the basis for the Cogent Core framework.
+There are many programming languages, and each one represents a different set of tradeoffs.  We think that Go is the best language (for GUIs and most other use-cases) according to the following list of fundamental characteristics:
 
 ### Type safety and compilation
 
-One of the most important features of a programming language is type safety. Type safety and compilation give helpful compile-time errors, code completion, and syntax highlighting that make code safe and readable. This requirement eliminates many popular languages like JavaScript and Python.
+One of the most important features of a programming language is type safety. Type safety and compilation give helpful compile-time errors, code completion, and syntax highlighting that make code safe and readable. This requirement eliminates many popular languages like JavaScript and Python, where it is common for simple bugs to lurk unnoticed until each line of code is executed at runtime.
 
 ### Simplicity and elegance
 
-Code must be *simple* to write. Humans must read and write code, and it is much easier to read and write code with simple, semantic, and consistent operations, not symbol soup like that found in Regex, SCSS, and Rust macros (what does `($($($([` do?). Humans should not have to waste time writing semicolons and parentheses around their `if` conditions. Humans should not have to repeat the type of something a million times (`Something something = Something{};`). Type safety should make code safe, not intricate and verbose. This condition eliminates many compiled languages like Rust and C++ (note: Rust and C++ are useful for certain things like operating system kernels and graphics drivers, but this is about end-user GUI development).
+Code must be *simple* to write. Humans must read and write code, and it is much easier to read and write code with simple, semantic, and consistent operations, not symbol soup like that found in Regex, SCSS, and Rust macros (what does `($($($([` do?). Humans should not have to waste time writing semicolons and parentheses around their `if` conditions. Humans should not have to redundantly repeat the type of something (`Something something = Something{};`). Type safety should make code safe, not intricate and verbose. This condition eliminates many compiled languages like Rust and C++ (note: Rust and C++ are useful for certain things like operating system kernels and graphics drivers, but this is about end-user GUI development).
 
 ### Speed
 
 Programs must be quick to write, compile, and run. Most compiled languages fail the first and second conditions, and most interpreted languages fail the last. Go can be written extremely quickly due to its simple and elegant syntax, it compiles in seconds even for complex GUIs, and there is no runtime performance deficit significant enough to impact GUIs.
 
-### Cross compilation
+### Cross-platform and cross-compilation
 
+Every widely-used platform should be well supported, and to the greatest extent possible, the exact same code should work as expected on every platform.  Furthermore, because Go's compiler is written in Go, it is relatively straightforward to cross-compile for other platforms.  By contrast, JavaScript has to deal with the notorious inconsistency across different browsers, and because most of Python requires further C / C++ code to be compiled (to manage the performance-critical aspects), it is often a nightmare to manage all the dependencies and environment variables required to get something to work on a given platform, at the right version, etc.
 
+### Robust versioning and package management
+
+Go's `module` based versioning and package management system is built into the language, and is extremely robust and simple to use.  By contrast, dependencies and package management in JavaScript and Python is notoriously bad.
 
 ### Rationality and consistency
 
