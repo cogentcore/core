@@ -468,7 +468,7 @@ func (v *TypeValue) Config() {
 	}
 
 	tl := gti.AllEmbeddersOf(typEmbeds)
-	v.Widget.SetTypes(tl)
+	v.Widget.SetTypes(tl...)
 	v.Widget.OnChange(func(e events.Event) {
 		tval := v.Widget.CurrentItem.Value.(*gti.Type)
 		v.SetValue(tval)

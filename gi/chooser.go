@@ -341,7 +341,7 @@ func (ch *Chooser) CallItemsFuncs() {
 }
 
 // SetTypes sets the [Chooser.Items] from the given types.
-func (ch *Chooser) SetTypes(ts []*gti.Type) *Chooser {
+func (ch *Chooser) SetTypes(ts ...*gti.Type) *Chooser {
 	ch.Items = make([]ChooserItem, len(ts))
 	for i, typ := range ts {
 		ch.Items[i] = ChooserItem{Value: typ}
@@ -350,7 +350,7 @@ func (ch *Chooser) SetTypes(ts []*gti.Type) *Chooser {
 }
 
 // SetStrings sets the [Chooser.Items] from the given strings.
-func (ch *Chooser) SetStrings(ss []string) *Chooser {
+func (ch *Chooser) SetStrings(ss ...string) *Chooser {
 	ch.Items = make([]ChooserItem, len(ss))
 	for i, s := range ss {
 		ch.Items[i] = ChooserItem{Value: s}
@@ -359,7 +359,7 @@ func (ch *Chooser) SetStrings(ss []string) *Chooser {
 }
 
 // SetEnums sets the [Chooser.Items] from the given enums.
-func (ch *Chooser) SetEnums(es []enums.Enum) *Chooser {
+func (ch *Chooser) SetEnums(es ...enums.Enum) *Chooser {
 	ch.Items = make([]ChooserItem, len(es))
 	for i, enum := range es {
 		str := enum.String()
@@ -380,7 +380,7 @@ func (ch *Chooser) SetEnums(es []enums.Enum) *Chooser {
 
 // SetEnum sets the [Chooser.Items] from the [enums.Enum.Values] of the given enum.
 func (ch *Chooser) SetEnum(enum enums.Enum) *Chooser {
-	return ch.SetEnums(enum.Values())
+	return ch.SetEnums(enum.Values()...)
 }
 
 // FindItem finds the given item value on the list of items and returns its index

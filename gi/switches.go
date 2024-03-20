@@ -173,7 +173,7 @@ func (sw *Switches) UnCheckAllBut(idx int) {
 }
 
 // SetStrings sets the [Switches.Items] from the given strings.
-func (sw *Switches) SetStrings(ss []string) *Switches {
+func (sw *Switches) SetStrings(ss ...string) *Switches {
 	sw.Items = make([]SwitchItem, len(ss))
 	for i, s := range ss {
 		sw.Items[i] = SwitchItem{Label: s}
@@ -182,7 +182,7 @@ func (sw *Switches) SetStrings(ss []string) *Switches {
 }
 
 // SetEnums sets the [Switches.Items] from the given enums.
-func (sw *Switches) SetEnums(es []enums.Enum) *Switches {
+func (sw *Switches) SetEnums(es ...enums.Enum) *Switches {
 	sw.Items = make([]SwitchItem, len(es))
 	for i, enum := range es {
 		str := ""
@@ -208,7 +208,7 @@ func (sw *Switches) SetEnums(es []enums.Enum) *Switches {
 
 // SetEnum sets the [Switches.Items] from the [enums.Enum.Values] of the given enum.
 func (sw *Switches) SetEnum(enum enums.Enum) *Switches {
-	return sw.SetEnums(enum.Values())
+	return sw.SetEnums(enum.Values()...)
 }
 
 // UpdateFromBitFlags sets the checked state of the switches from the
