@@ -455,17 +455,17 @@ func (sr *Slider) HandleKeys() {
 			sr.SetValueAction(sr.Value + sr.Step)
 			e.SetHandled()
 		case keyfun.PageUp:
+			if sr.PageStep < sr.Step {
+				sr.PageStep = 2 * sr.Step
+			}
 			sr.SetValueAction(sr.Value - sr.PageStep)
 			e.SetHandled()
-		// case keyfun.PageLeft:
-		// 	sr.SetValueAction(sr.Value - sr.PageStep)
-		// 	kt.SetHandled()
 		case keyfun.PageDown:
+			if sr.PageStep < sr.Step {
+				sr.PageStep = 2 * sr.Step
+			}
 			sr.SetValueAction(sr.Value + sr.PageStep)
 			e.SetHandled()
-		// case keyfun.PageRight:
-		// 	sr.SetValueAction(sr.Value + sr.PageStep)
-		// 	kt.SetHandled()
 		case keyfun.Home:
 			sr.SetValueAction(sr.Min)
 			e.SetHandled()
