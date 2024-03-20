@@ -255,6 +255,11 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 			gi.MessageSnackbar(parent, fmt.Sprintf("Value changed to %g", sp.Value))
 		})
 	},
+	"widgets/splits-0": func(parent gi.Widget) {
+		sp := gi.NewSplits(parent)
+		gi.NewLabel(sp).SetText("First")
+		gi.NewLabel(sp).SetText("Last")
+	},
 	"widgets/switches-0": func(parent gi.Widget) {
 		gi.NewSwitch(parent)
 	},

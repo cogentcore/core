@@ -19,10 +19,9 @@ import (
 // Config notes: only needs config when number of kids changes
 // otherwise just needs new layout
 
-// Splits allocates a fixed proportion of space to each child, along given
-// dimension.  It uses the Widget Parts to hold the Handle widgets
-// separately from the children that contain the rest of the scene to be
-// displayed within each panel.
+// Splits allocates a certain proportion of its space to each of its children
+// along [styles.Style.Direction]. It adds [Handle] widgets to its parts that
+// allow the user to customize the amount of space allocated to each child.
 type Splits struct { //core:embedder
 	Layout
 
@@ -46,6 +45,7 @@ func (sl *Splits) SetStyles() {
 		s.Grow.Set(1, 1)
 		s.Margin.Zero()
 		s.Padding.Zero()
+		s.Min.Y.Em(10)
 
 		if sl.SizeClass() == SizeCompact {
 			s.Direction = styles.Column
