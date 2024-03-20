@@ -89,6 +89,18 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 			gi.ChooserItem{Value: "Phone", Icon: icons.Smartphone, Tooltip: "Use a phone"},
 		)
 	},
+	"widgets/choosers-2": func(parent gi.Widget) {
+		gi.NewChooser(parent).SetPlaceholder("Choose a platform").SetStrings("macOS", "Windows", "Linux")
+	},
+	"widgets/choosers-3": func(parent gi.Widget) {
+		gi.NewChooser(parent).SetStrings("Apple", "Orange", "Strawberry").SetCurrentValue("Orange")
+	},
+	"widgets/choosers-4": func(parent gi.Widget) {
+		gi.NewChooser(parent).SetType(gi.ChooserOutlined).SetStrings("Apple", "Orange", "Strawberry")
+	},
+	"widgets/choosers-5": func(parent gi.Widget) {
+		gi.NewChooser(parent).SetIcon(icons.Sort).SetStrings("Newest", "Oldest", "Trending")
+	},
 	"widgets/spinners-0": func(parent gi.Widget) {
 		gi.NewSpinner(parent)
 	},
