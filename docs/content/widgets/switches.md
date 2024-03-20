@@ -26,6 +26,15 @@ You can make a standalone switch render as a radio button:
 gi.NewSwitch(parent).SetType(gi.SwitchRadioButton).SetText("Remember me")
 ```
 
+You can detect when the user changes whether the switch is checked:
+
+```Go
+sw := gi.NewSwitch(parent).SetText("Remember me")
+sw.OnChange(func(e events.Event) {
+    gi.MessageSnackbar(sw, fmt.Sprintf("Switch is %v", sw.IsChecked()))
+})
+```
+
 You can make a group of switches from a list of strings:
 
 ```Go
@@ -77,5 +86,14 @@ You can make switches render vertically:
 ```Go
 gi.NewSwitches(parent).SetStrings("Go", "Python", "C++").Style(func(s *styles.Style) {
     s.Direction = styles.Column
+})
+```
+
+You can detect when the user changes which switches are selected:
+
+```Go
+sw := gi.NewSwitches(parent).SetStrings("Go", "Python", "C++")
+sw.OnChange(func(e events.Event) {
+    gi.MessageSnackbar(sw, fmt.Sprintf("Currently selected: %v", sw.SelectedItems()))
 })
 ```

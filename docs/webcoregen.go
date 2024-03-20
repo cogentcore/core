@@ -157,33 +157,45 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		gi.NewSwitch(parent).SetType(gi.SwitchRadioButton).SetText("Remember me")
 	},
 	"widgets/switches-4": func(parent gi.Widget) {
-		gi.NewSwitches(parent).SetStrings("Go", "Python", "C++")
+		sw := gi.NewSwitch(parent).SetText("Remember me")
+		sw.OnChange(func(e events.Event) {
+			gi.MessageSnackbar(sw, fmt.Sprintf("Switch is %v", sw.IsChecked()))
+		})
 	},
 	"widgets/switches-5": func(parent gi.Widget) {
+		gi.NewSwitches(parent).SetStrings("Go", "Python", "C++")
+	},
+	"widgets/switches-6": func(parent gi.Widget) {
 		gi.NewSwitches(parent).SetItems(
 			gi.SwitchItem{Label: "Go", Tooltip: "Elegant, fast, and easy-to-use"},
 			gi.SwitchItem{Label: "Python", Tooltip: "Slow and duck-typed"},
 			gi.SwitchItem{Label: "C++", Tooltip: "Hard to use and slow to compile"},
 		)
 	},
-	"widgets/switches-6": func(parent gi.Widget) {
+	"widgets/switches-7": func(parent gi.Widget) {
 		gi.NewSwitches(parent).SetMutex(true).SetStrings("Go", "Python", "C++")
 	},
-	"widgets/switches-7": func(parent gi.Widget) {
+	"widgets/switches-8": func(parent gi.Widget) {
 		gi.NewSwitches(parent).SetType(gi.SwitchChip).SetStrings("Go", "Python", "C++")
 	},
-	"widgets/switches-8": func(parent gi.Widget) {
+	"widgets/switches-9": func(parent gi.Widget) {
 		gi.NewSwitches(parent).SetType(gi.SwitchCheckbox).SetStrings("Go", "Python", "C++")
 	},
-	"widgets/switches-9": func(parent gi.Widget) {
+	"widgets/switches-10": func(parent gi.Widget) {
 		gi.NewSwitches(parent).SetType(gi.SwitchRadioButton).SetStrings("Go", "Python", "C++")
 	},
-	"widgets/switches-10": func(parent gi.Widget) {
+	"widgets/switches-11": func(parent gi.Widget) {
 		gi.NewSwitches(parent).SetType(gi.SwitchSegmentedButton).SetStrings("Go", "Python", "C++")
 	},
-	"widgets/switches-11": func(parent gi.Widget) {
+	"widgets/switches-12": func(parent gi.Widget) {
 		gi.NewSwitches(parent).SetStrings("Go", "Python", "C++").Style(func(s *styles.Style) {
 			s.Direction = styles.Column
+		})
+	},
+	"widgets/switches-13": func(parent gi.Widget) {
+		sw := gi.NewSwitches(parent).SetStrings("Go", "Python", "C++")
+		sw.OnChange(func(e events.Event) {
+			gi.MessageSnackbar(sw, fmt.Sprintf("Currently selected: %v", sw.SelectedItems()))
 		})
 	},
 	"widgets/text-fields-0": func(parent gi.Widget) {
