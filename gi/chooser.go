@@ -152,6 +152,7 @@ func (ch *Chooser) OnInit() {
 func (ch *Chooser) SetStyles() {
 	ch.Icon = icons.None
 	ch.Indicator = icons.KeyboardArrowDown
+	ch.CurrentIndex = -1
 	ch.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Hoverable, abilities.LongHoverable)
 		if !ch.Editable {
@@ -237,6 +238,11 @@ func (ch *Chooser) SetStyles() {
 
 func (ch *Chooser) Config() {
 	config := ki.Config{}
+
+	// automatically select the first item if we have nothing selected and no placeholder
+	if !ch.Editable && ch.CurrentIndex < 0 && ch.CurrentItem.Label == "" {
+		ch.SetCurrentIndex(0)
+	}
 
 	ici := -1
 	var lbi, txi, indi int
