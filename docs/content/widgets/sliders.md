@@ -32,6 +32,12 @@ You can ensure that the value is always a multiple of the step:
 gi.NewSlider(parent).SetStep(0.2).SetEnforceStep(true)
 ```
 
+You can use an icon for the thumb of the slider:
+
+```Go
+gi.NewSlider(parent).SetIcon(icons.DeployedCode.Fill())
+```
+
 You can detect when the user changes the value of the slider and then stops:
 
 ```Go

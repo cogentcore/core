@@ -207,6 +207,7 @@ func (sr *Slider) SetStyles() {
 				s.Font.Size.Dp(24)
 				s.Margin.Zero()
 				s.Padding.Zero()
+				s.Color = sr.ThumbColor
 			})
 		}
 	})
@@ -569,8 +570,7 @@ func (sr *Slider) RenderSlider() {
 		if sr.Icon.IsSet() && sr.Parts.HasChildren() {
 			sr.RenderUnlock()
 			ic := sr.Parts.Child(0).(*Icon)
-			icsz := ic.Geom.Size.Actual.Content
-			tpos.SetSub(icsz.MulScalar(.5))
+			tpos.SetSub(thsz.MulScalar(.5))
 			ic.Geom.Pos.Total = tpos
 			ic.SetContentPosFromPos()
 			ic.SetBBoxes()
