@@ -244,7 +244,6 @@ func (ch *Chooser) Config() {
 	if ch.Icon.IsSet() && !ch.Editable {
 		ici = len(config)
 		config.Add(IconType, "icon")
-		config.Add(SpaceType, "space")
 	}
 	if ch.Editable {
 		lbi = -1
