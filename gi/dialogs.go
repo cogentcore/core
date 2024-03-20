@@ -16,6 +16,8 @@ import (
 
 // todo: need a mechanism for nil Context to attach later
 
+// NonNilContext returns a non-nil context widget, falling back on the top
+// scene of the current window.
 func NonNilContext(ctx Widget) Widget {
 	if !laser.AnyIsNil(ctx) {
 		return ctx
@@ -63,9 +65,9 @@ func RecycleDialog(data any) bool {
 }
 
 // MessageDialog opens a new Dialog displaying the given message
-// in the context of the given widget.  Optional title can be provided.
+// in the context of the given widget. An optional title can be provided.
 func MessageDialog(ctx Widget, msg string, title ...string) {
-	b := NewBody(ctx.Name() + "-msg-dialog")
+	b := NewBody(ctx.Name() + "-message-dialog")
 	if len(title) > 0 {
 		b.AddTitle(title[0])
 	}

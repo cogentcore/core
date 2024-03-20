@@ -124,6 +124,18 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 			gi.MessageSnackbar(parent, fmt.Sprintf("Sorting by %v", ch.CurrentItem.Value))
 		})
 	},
+	"widgets/dialogs-0": func(parent gi.Widget) {
+		bt := gi.NewButton(parent).SetText("Message dialog")
+		bt.OnClick(func(e events.Event) {
+			gi.MessageDialog(bt, "Something happened", "Message")
+		})
+	},
+	"widgets/dialogs-1": func(parent gi.Widget) {
+		bt := gi.NewButton(parent).SetText("Error dialog")
+		bt.OnClick(func(e events.Event) {
+			gi.ErrorDialog(bt, errors.New("invalid encoding format"), "Error loading file")
+		})
+	},
 	"widgets/labels-0": func(parent gi.Widget) {
 		gi.NewLabel(parent).SetText("Hello, world!")
 	},
