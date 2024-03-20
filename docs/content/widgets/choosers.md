@@ -38,5 +38,32 @@ gi.NewChooser(parent).SetType(gi.ChooserOutlined).SetStrings("Apple", "Orange", 
 You can add an icon to a chooser:
 
 ```Go
-gi.NewChooser(parent).SetIcon(icons.Sort).SetStrings("Newest", "Oldest", "Trending")
+gi.NewChooser(parent).SetIcon(icons.Sort).SetStrings("Newest", "Oldest", "Popular")
+```
+
+You can make a chooser a text field with automatic completion and validation support:
+
+```Go
+gi.NewChooser(parent).SetEditable(true).SetStrings("Newest", "Oldest", "Popular")
+```
+
+You can allow the user to add new items to a chooser:
+
+```Go
+gi.NewChooser(parent).SetAllowNew(true).SetStrings("Newest", "Oldest", "Popular")
+```
+
+You can make a chooser a text field and allow the user to add new items to it:
+
+```Go
+gi.NewChooser(parent).SetEditable(true).SetAllowNew(true).SetStrings("Newest", "Oldest", "Popular")
+```
+
+You can detect when the user changes the value of the chooser:
+
+```Go
+ch := gi.NewChooser(parent).SetStrings("Newest", "Oldest", "Popular")
+ch.OnChange(func(e events.Event) {
+    gi.MessageSnackbar(parent, fmt.Sprintf("Sorting by %v", ch.CurrentItem.Value))
+})
 ```
