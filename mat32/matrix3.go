@@ -72,6 +72,10 @@ func (m *Mat3) SetFromMat4(src *Mat4) {
 	)
 }
 
+// note: following use of [2], [5] for translation works
+// exactly as the 2x3 Mat2 case works.  But vulkan and wikipedia
+// use [6][7] for translation.  Not sure exactly what is going on.
+
 // SetFromMat2 sets the matrix elements based on a Mat2.
 func (m *Mat3) SetFromMat2(src Mat2) {
 	m.Set(
