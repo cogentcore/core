@@ -88,6 +88,7 @@ func (im *Image) OpenImageFS(fsys fs.FS, filename Filename) error {
 func (im *Image) SetImage(img image.Image) *Image {
 	im.Pixels = clone.AsRGBA(img)
 	im.PrevPixels = nil
+	im.NeedsRender()
 	return im
 }
 
