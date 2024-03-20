@@ -143,6 +143,43 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 			gi.MessageSnackbar(parent, fmt.Sprintf("Value changed to %g", sp.Value))
 		})
 	},
+	"widgets/switches-0": func(parent gi.Widget) {
+		gi.NewSwitch(parent)
+	},
+	"widgets/switches-1": func(parent gi.Widget) {
+		gi.NewSwitch(parent).SetText("Remember me")
+	},
+	"widgets/switches-2": func(parent gi.Widget) {
+		gi.NewSwitch(parent).SetType(gi.SwitchCheckbox).SetText("Remember me")
+	},
+	"widgets/switches-3": func(parent gi.Widget) {
+		gi.NewSwitch(parent).SetType(gi.SwitchRadioButton).SetText("Remember me")
+	},
+	"widgets/switches-4": func(parent gi.Widget) {
+		gi.NewSwitches(parent).SetStrings("Go", "Python", "C++")
+	},
+	"widgets/switches-5": func(parent gi.Widget) {
+		gi.NewSwitches(parent).SetItems(
+			gi.SwitchItem{Label: "Go", Tooltip: "Elegant, fast, and easy-to-use"},
+			gi.SwitchItem{Label: "Python", Tooltip: "Slow and duck-typed"},
+			gi.SwitchItem{Label: "C++", Tooltip: "Hard to use and slow to compile"},
+		)
+	},
+	"widgets/switches-6": func(parent gi.Widget) {
+		gi.NewSwitches(parent).SetMutex(true).SetStrings("Go", "Python", "C++")
+	},
+	"widgets/switches-7": func(parent gi.Widget) {
+		gi.NewSwitches(parent).SetType(gi.SwitchChip).SetStrings("Go", "Python", "C++")
+	},
+	"widgets/switches-8": func(parent gi.Widget) {
+		gi.NewSwitches(parent).SetType(gi.SwitchCheckbox).SetStrings("Go", "Python", "C++")
+	},
+	"widgets/switches-9": func(parent gi.Widget) {
+		gi.NewSwitches(parent).SetType(gi.SwitchRadioButton).SetStrings("Go", "Python", "C++")
+	},
+	"widgets/switches-10": func(parent gi.Widget) {
+		gi.NewSwitches(parent).SetType(gi.SwitchSegmentedButton).SetStrings("Go", "Python", "C++")
+	},
 	"widgets/text-fields-0": func(parent gi.Widget) {
 		gi.NewTextField(parent)
 	},

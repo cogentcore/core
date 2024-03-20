@@ -41,17 +41,17 @@ type Switch struct {
 type SwitchTypes int32 //enums:enum -trim-prefix Switch
 
 const (
-	// SwitchSwitch indicates to display a switch as a switch (toggle slider)
+	// SwitchSwitch indicates to display a switch as a switch (toggle slider).
 	SwitchSwitch SwitchTypes = iota
 
 	// SwitchChip indicates to display a switch as chip (like Material Design's filter chip),
 	// which is typically only used in the context of [Switches].
 	SwitchChip
 
-	// SwitchCheckbox indicates to display a switch as a checkbox
+	// SwitchCheckbox indicates to display a switch as a checkbox.
 	SwitchCheckbox
 
-	// SwitchRadioButton indicates to display a switch as a radio button
+	// SwitchRadioButton indicates to display a switch as a radio button.
 	SwitchRadioButton
 
 	// SwitchSegmentedButton indicates to display a segmented button, which is typically only used in

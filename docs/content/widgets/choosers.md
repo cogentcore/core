@@ -17,7 +17,7 @@ gi.NewChooser(parent).SetItems(
 )
 ```
 
-You can set the placeholder value of a chooser:
+You can set the placeholder of a chooser:
 
 ```Go
 gi.NewChooser(parent).SetPlaceholder("Choose a platform").SetStrings("macOS", "Windows", "Linux")
