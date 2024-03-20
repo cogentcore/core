@@ -6,6 +6,7 @@ package paint
 
 import (
 	"embed"
+	"errors"
 	"fmt"
 	"io/fs"
 	"log/slog"
@@ -223,7 +224,7 @@ func (fl *FontLib) AddFontPaths(paths ...string) bool {
 // UpdateFontsAvail scans for all fonts we can use on the FontPaths
 func (fl *FontLib) UpdateFontsAvail() bool {
 	if len(fl.FontPaths) == 0 {
-		slog.Error("girl/paint.FontLib: no font paths; need to add some")
+		slog.Error("girl/paint.FontLib: programmer error: no font paths; need to add some")
 	}
 	loadFontMu.Lock()
 	defer loadFontMu.Unlock()
@@ -235,6 +236,10 @@ func (fl *FontLib) UpdateFontsAvail() bool {
 		slog.Error("girl/paint.FontLib: error walking FontLib.FontsFS", "err", err)
 	}
 	for _, p := range fl.FontPaths {
+		// we can ignore missing font paths, since some of them may not work on certain systems
+		if _, err := os.Stat(p); err != nil && errors.Is(err, fs.ErrNotExist) {
+			continue
+		}
 		err := fl.FontsAvailFromFS(os.DirFS(p), p+string(filepath.Separator))
 		if err != nil {
 			slog.Error("girl/paint.FontLib: error walking path", "path", p, "err", err)

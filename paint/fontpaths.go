@@ -16,9 +16,10 @@ func init() {
 	case "darwin", "ios":
 		FontPaths = []string{"/System/Library/Fonts", "/Library/Fonts"}
 	case "js":
-		FontPaths = []string{""}
+		FontPaths = []string{"/fonts"}
 	case "linux":
-		FontPaths = []string{"/usr/share/fonts/truetype"}
+		// different distros have a different path
+		FontPaths = []string{"/usr/share/fonts/truetype", "/usr/share/fonts/TTF"}
 	case "windows":
 		FontPaths = []string{"C:\\Windows\\Fonts"}
 	}
