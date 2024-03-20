@@ -157,6 +157,64 @@ func (dw *Drawer) Copy(idx, layer int, dp image.Point, sr image.Rectangle, op dr
 	return dw.Draw(idx, layer, mat, sr, op, flipY)
 }
 
+// TransformMatrix returns a transformation matrix for the generic Draw function
+// that scales, translates, and rotates the source image by the given degrees.
+// to make it fit within the destination rectangle dr, given its original size sr (unrotated).
+// To avoid scaling, ensure that the dr and sr are the same dimensions (post rotation).
+// rotDeg = rotation degrees to apply in the mapping: 90 = left, -90 = right, 180 = invert
+func TransformMatrix(dr image.Rectangle, sr image.Rectangle, rotDeg float32) mat32.Mat3 {
+	sx := float32(dr.Dx()) / float32(sr.Dx())
+	sy := float32(dr.Dy()) / float32(sr.Dy())
+	tx := float32(dr.Min.X) - sx*float32(sr.Min.X)
+	ty := float32(dr.Min.Y) - sy*float32(sr.Min.Y)
+
+	if rotDeg == 0 {
+		return mat32.Mat3{
+			sx, 0, 0,
+			0, sy, 0,
+			tx, ty, 1,
+		}
+	}
+	rad := mat32.DegToRad(rotDeg)
+	dsz := mat32.V2FromPoint(dr.Size())
+	rmat := mat32.Rotate2D(rad)
+
+	dmnr := rmat.MulVec2AsPt(mat32.V2FromPoint(dr.Min))
+	dmxr := rmat.MulVec2AsPt(mat32.V2FromPoint(dr.Max))
+	sx = mat32.Abs(dmxr.X-dmnr.X) / float32(sr.Dx())
+	sy = mat32.Abs(dmxr.Y-dmnr.Y) / float32(sr.Dy())
+	tx = dmnr.X - sx*float32(sr.Min.X)
+	ty = dmnr.Y - sy*float32(sr.Min.Y)
+
+	if rotDeg < -45 && rotDeg > -135 {
+		ty -= dsz.X
+	} else if rotDeg > 45 && rotDeg < 135 {
+		tx -= dsz.Y
+	} else if rotDeg > 135 || rotDeg < -135 {
+		ty -= dsz.Y
+		tx -= dsz.X
+	}
+
+	mat := mat32.Mat3{
+		sx, 0, 0,
+		0, sy, 0,
+		tx, ty, 1,
+	}
+
+	return mat.Mul(mat32.Mat3FromMat2(rmat))
+
+	/*  stuff that didn't work, but theoretically should?
+	rad := mat32.DegToRad(rotDeg)
+	dsz := mat32.V2FromPoint(dr.Size())
+	dctr := dsz.MulScalar(0.5)
+	_ = dctr
+	// mat2 := mat32.Translate2D(dctr.X, 0).Mul(mat32.Rotate2D(rad)).Mul(mat32.Translate2D(tx, ty)).Mul(mat32.Scale2D(sx, sy))
+	mat2 := mat32.Translate2D(tx, ty).Mul(mat32.Scale2D(sx, sy)).Mul(mat32.Translate2D(dctr.X, 0)).Mul(mat32.Rotate2D(rad))
+	// mat2 := mat32.Rotate2D(rad).MulCtr(mat32.Translate2D(tx, ty).Mul(mat32.Scale2D(sx, sy)), dctr)
+	mat := mat32.Mat3FromMat2(mat2)
+	*/
+}
+
 // Scale copies texture at given index and layer to render target,
 // scaling the region defined by src and sr to the destination
 // such that sr in src-space is mapped to dr in dst-space.
@@ -165,57 +223,14 @@ func (dw *Drawer) Copy(idx, layer int, dp image.Point, sr image.Rectangle, op dr
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
 // flipY = flipY axis when drawing this image
-// rotDeg = rotation degrees to apply in the mapping, e.g., 90
-// rotates 90 degrees to the left, -90 = right.
+// rotDeg = rotation degrees to apply in the mapping: 90 = left, -90 = right, 180 = invert
 func (dw *Drawer) Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, op draw.Op, flipY bool, rotDeg float32) error {
 	zr := image.Rectangle{}
 	if sr == zr {
 		_, tx, _ := dw.Sys.Vars().ValByIdxTry(0, "Tex", idx)
 		sr = tx.Texture.Format.Bounds()
 	}
-	sx := float32(dr.Dx()) / float32(sr.Dx())
-	sy := float32(dr.Dy()) / float32(sr.Dy())
-	tx := float32(dr.Min.X) - sx*float32(sr.Min.X)
-	ty := float32(dr.Min.Y) - sy*float32(sr.Min.Y)
-
-	/*
-		rad := mat32.DegToRad(rotDeg)
-		dsz := mat32.V2FromPoint(dr.Size())
-		dctr := dsz.MulScalar(0.5)
-		_ = dctr
-		// mat2 := mat32.Translate2D(dctr.X, 0).Mul(mat32.Rotate2D(rad)).Mul(mat32.Translate2D(tx, ty)).Mul(mat32.Scale2D(sx, sy))
-		mat2 := mat32.Translate2D(tx, ty).Mul(mat32.Scale2D(sx, sy)).Mul(mat32.Translate2D(dctr.X, 0)).Mul(mat32.Rotate2D(rad))
-		// mat2 := mat32.Rotate2D(rad).MulCtr(mat32.Translate2D(tx, ty).Mul(mat32.Scale2D(sx, sy)), dctr)
-		mat := mat32.Mat3FromMat2(mat2)
-	*/
-
-	rmat := mat32.Identity2()
-	if rotDeg != 0 {
-		rad := mat32.DegToRad(rotDeg)
-		dsz := mat32.V2FromPoint(dr.Size())
-		rmat = mat32.Rotate2D(rad)
-
-		dmnr := rmat.MulVec2AsPt(mat32.V2FromPoint(dr.Min))
-		dmxr := rmat.MulVec2AsPt(mat32.V2FromPoint(dr.Max))
-		sx = mat32.Abs(dmxr.X-dmnr.X) / float32(sr.Dx())
-		sy = mat32.Abs(dmxr.Y-dmnr.Y) / float32(sr.Dy())
-		tx = dmnr.X - sx*float32(sr.Min.X)
-		ty = dmnr.Y - sy*float32(sr.Min.Y)
-
-		if rotDeg < -45 && rotDeg > -135 {
-			ty += -dsz.X
-		} else if rotDeg > 45 && rotDeg < 135 {
-			tx -= dsz.Y
-		}
-	}
-	stmat := mat32.Mat3{
-		sx, 0, 0,
-		0, sy, 0,
-		tx, ty, 1,
-	}
-	mat := stmat.Mul(mat32.Mat3FromMat2(rmat))
-
-	return dw.Draw(idx, layer, mat, sr, op, flipY)
+	return dw.Draw(idx, layer, TransformMatrix(dr, sr, rotDeg), sr, op, flipY)
 }
 
 // Draw draws texture at index and layer to render target.
