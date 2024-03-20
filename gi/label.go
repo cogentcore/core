@@ -19,11 +19,9 @@ import (
 	"cogentcore.org/core/styles"
 )
 
-// Label is a widget for rendering text labels -- supports full widget model
-// including box rendering, and full HTML styling, including links -- LinkSig
-// emits link with data of URL -- opens default browser if nobody receiving
-// signal.  The default white-space option is 'pre' -- set to 'normal' or
-// other options to get word-wrapping etc.
+// Label is a widget for rendering text labels. It supports full HTML styling,
+// including links. By default, labels wrap and collapse whitespace, although
+// you can change this by changing [styles.Text.WhiteSpace].
 type Label struct { //core:embedder
 	WidgetBase
 

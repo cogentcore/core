@@ -123,6 +123,12 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 			gi.MessageSnackbar(parent, fmt.Sprintf("Sorting by %v", ch.CurrentItem.Value))
 		})
 	},
+	"widgets/labels-0": func(parent gi.Widget) {
+		gi.NewLabel(parent).SetText("Hello, world!")
+	},
+	"widgets/labels-1": func(parent gi.Widget) {
+		gi.NewLabel(parent).SetText("This is a very long sentence that demonstrates how label content will overflow onto multiple lines when the size of the label text exceeds the size of its surrounding container; labels are a customizable widget that Cogent Core provides, allowing you to display many kinds of text")
+	},
 	"widgets/spinners-0": func(parent gi.Widget) {
 		gi.NewSpinner(parent)
 	},
