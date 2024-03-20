@@ -182,7 +182,9 @@ func (dw *Drawer) Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, 
 		rad := mat32.DegToRad(rotDeg)
 		dsz := mat32.V2FromPoint(dr.Size())
 		dctr := dsz.MulScalar(0.5)
-		mat2 := mat32.Translate2D(tx, ty).Mul(mat32.Scale2D(sx, sy)).Mul(mat32.Translate2D(-dctr.X, -dctr.Y)).Mul(mat32.Rotate2D(rad)).Mul(mat32.Translate2D(dctr.X, dctr.Y))
+		_ = dctr
+		// mat2 := mat32.Translate2D(dctr.X, 0).Mul(mat32.Rotate2D(rad)).Mul(mat32.Translate2D(tx, ty)).Mul(mat32.Scale2D(sx, sy))
+		mat2 := mat32.Translate2D(tx, ty).Mul(mat32.Scale2D(sx, sy)).Mul(mat32.Translate2D(dctr.X, 0)).Mul(mat32.Rotate2D(rad))
 		// mat2 := mat32.Rotate2D(rad).MulCtr(mat32.Translate2D(tx, ty).Mul(mat32.Scale2D(sx, sy)), dctr)
 		mat := mat32.Mat3FromMat2(mat2)
 	*/
