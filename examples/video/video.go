@@ -25,9 +25,9 @@ func main() {
 		s.SetTextWrap(false)
 	})
 	gi.NewLabel(b).SetText("footer:")
-	// grr.Log(v.Open("../videos/deer.mp4"))
-	grr.Log(v.Open("../videos/countdown.mp4"))
-	// grr.Log(v.Open("../videos/randy_first_360.mov")) // note: not uploaded -- good test case tho
+	// grr.Log(v.Open("deer.mp4"))
+	grr.Log(v.Open("countdown.mp4"))
+	// grr.Log(v.Open(randy_first_360.mov")) // note: not uploaded -- good test case tho
 	v.Rotation = -90
 	w := b.NewWindow().Run()
 	v.Play(0, 0)
