@@ -40,15 +40,19 @@ type Slider struct { //core:embedder
 	Type SliderTypes
 
 	// Value is the current value, represented by the position of the thumb.
+	// It defaults to 0.5.
 	Value float32 `set:"-"`
 
-	// Min is the minimum value supported.
+	// Min is the minimum possible value.
+	// It defaults to 0.
 	Min float32
 
 	// Max is the maximum value supported.
+	// It defaults to 1.
 	Max float32
 
 	// Step is the amount that the arrow keys increment/decrement the value by.
+	// It defaults to 0.1.
 	Step float32
 
 	// EnforceStep is whether to ensure that the value is always
@@ -57,6 +61,7 @@ type Slider struct { //core:embedder
 
 	// PageStep is the amount that the PageUp and PageDown keys
 	// increment/decrement the value by.
+	// It defaults to 0.2, and will be at least as big as [Slider.Step].
 	PageStep float32
 
 	// Icon is an optional icon to use for the dragging knob.
@@ -143,6 +148,7 @@ func (sr *Slider) OnInit() {
 }
 
 func (sr *Slider) SetStyles() {
+	sr.Value = 0.5
 	sr.Max = 1
 	sr.VisiblePct = 1
 	sr.Step = 0.1

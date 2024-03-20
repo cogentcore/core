@@ -282,7 +282,7 @@ func sliders(ts *gi.Tabs) {
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Sliders and meters")
 	gi.NewLabel(tab).SetText("Cogent Core provides interactive sliders and customizable meters, allowing you to edit and display bounded numbers.")
 
-	gi.NewSlider(tab).SetValue(0.5)
+	gi.NewSlider(tab)
 	gi.NewSlider(tab).SetValue(0.7).SetState(true, states.Disabled)
 
 	csliders := gi.NewLayout(tab)

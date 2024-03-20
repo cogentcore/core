@@ -39,7 +39,7 @@ type Spinner struct { //core:embedder
 	Max float32 `set:"-"`
 
 	// Step is the amount that the up and down buttons and arrow keys
-	// increment/decrement the value by.
+	// increment/decrement the value by. It defaults to 0.1.
 	Step float32
 
 	// EnforceStep is whether to ensure that the value of the spinner
@@ -48,6 +48,7 @@ type Spinner struct { //core:embedder
 
 	// PageStep is the amount that the PageUp and PageDown keys
 	// increment/decrement the value by.
+	// It defaults to 0.2, and will be at least as big as [Spinner.Step].
 	PageStep float32
 
 	// Prec specifies the precision of decimal places

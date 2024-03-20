@@ -20,16 +20,19 @@ import (
 type Meter struct {
 	WidgetBase
 
-	// Type is the styling type of the meter
+	// Type is the styling type of the meter.
 	Type MeterTypes
 
-	// Value is the current value of the meter
+	// Value is the current value of the meter.
+	// It defaults to 0.5.
 	Value float32
 
-	// Min is the minimum possible value of the meter
+	// Min is the minimum possible value of the meter.
+	// It defaults to 0.
 	Min float32
 
-	// Max is the maximum possible value of the meter
+	// Max is the maximum possible value of the meter.
+	// It defaults to 1.
 	Max float32
 
 	// Text, for [MeterCircle] and [MeterSemicircle], is the
@@ -67,6 +70,7 @@ func (m *Meter) OnInit() {
 }
 
 func (m *Meter) SetStyles() {
+	m.Value = 0.5
 	m.Max = 1
 	m.Style(func(s *styles.Style) {
 		m.ValueColor = colors.C(colors.Scheme.Primary.Base)
