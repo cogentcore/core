@@ -8,6 +8,7 @@ import (
 	"maps"
 	"strings"
 
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/icons"
@@ -128,6 +129,21 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 	},
 	"widgets/labels-1": func(parent gi.Widget) {
 		gi.NewLabel(parent).SetText("This is a very long sentence that demonstrates how label content will overflow onto multiple lines when the size of the label text exceeds the size of its surrounding container; labels are a customizable widget that Cogent Core provides, allowing you to display many kinds of text")
+	},
+	"widgets/labels-2": func(parent gi.Widget) {
+		gi.NewLabel(parent).SetText(`<b>You</b> can use <i>HTML</i> <u>formatting</u> inside of <b><i><u>Cogent Core</u></i></b> labels, including <span style="color:red;background-color:yellow">custom styling</span> and <a href="https://example.com">links</a>`)
+	},
+	"widgets/labels-3": func(parent gi.Widget) {
+		gi.NewLabel(parent).SetType(gi.LabelHeadlineMedium).SetText("Hello, world!")
+	},
+	"widgets/labels-4": func(parent gi.Widget) {
+		gi.NewLabel(parent).SetText("Hello,\n\tworld!").Style(func(s *styles.Style) {
+			s.Font.Size.Dp(21)
+			s.Font.Style = styles.Italic
+			s.Text.WhiteSpace = styles.WhiteSpacePre
+			s.Color = colors.C(colors.Scheme.Success.Base)
+			s.Font.Family = string(gi.AppearanceSettings.MonoFont)
+		})
 	},
 	"widgets/spinners-0": func(parent gi.Widget) {
 		gi.NewSpinner(parent)
