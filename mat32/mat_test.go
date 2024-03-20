@@ -79,6 +79,8 @@ func TestMat3(t *testing.T) {
 	// 1,0 -> scale(2) = 2,0 -> rotate 90 = 0,2 -> trans 1,1 -> 1,3
 	// multiplication order is *reverse* of "logical" order:
 	TolAssertEqualVec(t, StdTol, V2(1, 3), Mat3Translate2D(1, 1).Mul(Mat3Rotate2D(DegToRad(90))).Mul(Mat3Scale2D(2, 2)).MulVec2AsPt(vx))
+
+	// xmat := Mat3Translate2D(1, 1).Mul(Mat3Rotate2D(DegToRad(90))).Mul(Mat3Scale2D(2, 2)).MulVec2AsPt(vx))
 }
 
 func TestMat4Prjn(t *testing.T) {

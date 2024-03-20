@@ -177,13 +177,29 @@ func (dw *Drawer) Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, 
 	sy := float32(dr.Dy()) / float32(sr.Dy())
 	tx := float32(dr.Min.X) - sx*float32(sr.Min.X)
 	ty := float32(dr.Min.Y) - sy*float32(sr.Min.Y)
+	rmat := mat32.Identity2()
+	if rotDeg != 0 {
+		// todo: this
+		dzr := mat32.V2FromPoint(dr.Size())
+		rad := mat32.DegToRad(rotDeg)
+		srad := mat32.Sin(rad)
+		sx = float32(dr.Dy()) / float32(sr.Dx())
+		sy = float32(dr.Dx()) / float32(sr.Dy())
+		tx = -srad * (float32(dr.Min.Y) - sx*float32(sr.Min.X))
+		ty = srad * (float32(dr.Min.X) - sy*float32(sr.Min.Y))
+		if rad < 0 {
+			ty += srad * dzr.X
+		} else {
+			tx -= srad * dzr.Y
+		}
+		rmat = mat32.Rotate2D(rad)
+	}
 	stmat := mat32.Mat3{
 		sx, 0, 0,
 		0, sy, 0,
-		tx,
-		ty, 1,
+		tx, ty, 1,
 	}
-	mat := stmat.Mul(mat32.Mat3Rotate2D(mat32.DegToRad(rotDeg)))
+	mat := stmat.Mul(mat32.Mat3FromMat2(rmat))
 	return dw.Draw(idx, layer, mat, sr, op, flipY)
 }
 
