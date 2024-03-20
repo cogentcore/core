@@ -10,7 +10,6 @@ package video
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
 	"image"
 	"image/draw"
 	"time"
@@ -115,7 +114,7 @@ func (v *Video) Play(width, height float32) error {
 	}
 	// seconds per frame for frame ticker
 	spf := time.Duration(float64(time.Second) / float64(videoFPS))
-	fmt.Println(videoFPS, spf)
+	// fmt.Println(videoFPS, spf)
 
 	// Start decoding streams.
 	var sampleSource <-chan [2]float64

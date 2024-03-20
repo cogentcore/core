@@ -181,11 +181,10 @@ func (dw *Drawer) Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, 
 	/*
 		rad := mat32.DegToRad(rotDeg)
 		dsz := mat32.V2FromPoint(dr.Size())
-		// note: this produces the correct 0 rotation case,
-		// but vulkan uses [6][7] as translation slots
-		mat2 := mat32.Translate2D(tx, ty).Mul(mat32.Scale2D(float32(dr.Dx()), float32(dr.Dy()))).Mul(mat32.Scale2D(1/float32(sr.Dx()), 1/float32(sr.Dy())))
+		dctr := dsz.MulScalar(0.5)
+		mat2 := mat32.Translate2D(tx, ty).Mul(mat32.Scale2D(sx, sy)).Mul(mat32.Translate2D(-dctr.X, -dctr.Y)).Mul(mat32.Rotate2D(rad)).Mul(mat32.Translate2D(dctr.X, dctr.Y))
+		// mat2 := mat32.Rotate2D(rad).MulCtr(mat32.Translate2D(tx, ty).Mul(mat32.Scale2D(sx, sy)), dctr)
 		mat := mat32.Mat3FromMat2(mat2)
-		mat[6], mat[7] = mat[2], mat[5] // move translation over to other spot
 	*/
 
 	rmat := mat32.Identity2()
