@@ -159,6 +159,18 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 			s.Direction = styles.Column
 		})
 	},
+	"widgets/meters-4": func(parent gi.Widget) {
+		gi.NewMeter(parent).SetType(gi.MeterCircle)
+	},
+	"widgets/meters-5": func(parent gi.Widget) {
+		gi.NewMeter(parent).SetType(gi.MeterSemicircle)
+	},
+	"widgets/meters-6": func(parent gi.Widget) {
+		gi.NewMeter(parent).SetType(gi.MeterCircle).SetText("50%")
+	},
+	"widgets/meters-7": func(parent gi.Widget) {
+		gi.NewMeter(parent).SetType(gi.MeterSemicircle).SetText("50%")
+	},
 	"widgets/sliders-0": func(parent gi.Widget) {
 		gi.NewSlider(parent)
 	},

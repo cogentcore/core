@@ -27,3 +27,27 @@ gi.NewMeter(parent).Style(func(s *styles.Style) {
     s.Direction = styles.Column
 })
 ```
+
+You can make a meter render as a circle:
+
+```Go
+gi.NewMeter(parent).SetType(gi.MeterCircle)
+```
+
+You can make a meter render as a semicircle:
+
+```Go
+gi.NewMeter(parent).SetType(gi.MeterSemicircle)
+```
+
+You can add text to a circular meter:
+
+```Go
+gi.NewMeter(parent).SetType(gi.MeterCircle).SetText("50%")
+```
+
+You can add text to a semicircular meter:
+
+```Go
+gi.NewMeter(parent).SetType(gi.MeterSemicircle).SetText("50%")
+```
