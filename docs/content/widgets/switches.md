@@ -71,3 +71,11 @@ You can make switches render as segmented buttons:
 ```Go
 gi.NewSwitches(parent).SetType(gi.SwitchSegmentedButton).SetStrings("Go", "Python", "C++")
 ```
+
+You can make switches render vertically:
+
+```Go
+gi.NewSwitches(parent).SetStrings("Go", "Python", "C++").Style(func(s *styles.Style) {
+    s.Direction = styles.Column
+})
+```

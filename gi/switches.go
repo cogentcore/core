@@ -55,11 +55,18 @@ func (sw *Switches) SetStyles() {
 	sw.Style(func(s *styles.Style) {
 		s.Padding.Set(units.Dp(2))
 		s.Margin.Set(units.Dp(2))
-		s.Grow.Set(1, 0)
 		if sw.Type == SwitchSegmentedButton {
 			s.Gap.Zero()
 		} else {
 			s.Wrap = true
+		}
+	})
+	sw.StyleFinal(func(s *styles.Style) {
+		if s.Direction == styles.Row {
+			s.Grow.Set(1, 0)
+		} else {
+			// if we wrap, it just goes in the x direction
+			s.Wrap = false
 		}
 	})
 	sw.OnWidgetAdded(func(w Widget) {

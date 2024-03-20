@@ -11,6 +11,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/webcore"
 )
 
@@ -179,6 +180,11 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 	},
 	"widgets/switches-10": func(parent gi.Widget) {
 		gi.NewSwitches(parent).SetType(gi.SwitchSegmentedButton).SetStrings("Go", "Python", "C++")
+	},
+	"widgets/switches-11": func(parent gi.Widget) {
+		gi.NewSwitches(parent).SetStrings("Go", "Python", "C++").Style(func(s *styles.Style) {
+			s.Direction = styles.Column
+		})
 	},
 	"widgets/text-fields-0": func(parent gi.Widget) {
 		gi.NewTextField(parent)
