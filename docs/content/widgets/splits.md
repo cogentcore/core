@@ -7,5 +7,15 @@ You can make splits without any custom options:
 ```Go
 sp := gi.NewSplits(parent)
 gi.NewLabel(sp).SetText("First")
-gi.NewLabel(sp).SetText("Last")
+gi.NewLabel(sp).SetText("Second")
+```
+
+You can add as many items as you want to splits:
+
+```Go
+sp := gi.NewSplits(parent)
+gi.NewLabel(sp).SetText("First")
+gi.NewLabel(sp).SetText("Second")
+gi.NewLabel(sp).SetText("Third")
+gi.NewLabel(sp).SetText("Fourth")
 ```

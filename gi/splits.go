@@ -122,15 +122,6 @@ func (sl *Splits) SetSplits(splits ...float32) *Splits {
 	return sl
 }
 
-// SetSplitsList sets the split proportions using a list (slice) argument,
-// instead of variable args -- e.g., for Python or other external users.
-// can use 0 to hide / collapse a child entirely -- just does the basic local
-// update start / end -- use SetSplitsAction to trigger full rebuild
-// which is typically required
-func (sl *Splits) SetSplitsList(splits []float32) *Splits {
-	return sl.SetSplits(splits...)
-}
-
 // SetSplitsAction sets the split proportions -- can use 0 to hide / collapse a
 // child entirely -- does full rebuild at level of scene
 func (sl *Splits) SetSplitsAction(splits ...float32) *Splits {
