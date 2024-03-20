@@ -125,15 +125,30 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		})
 	},
 	"widgets/dialogs-0": func(parent gi.Widget) {
-		bt := gi.NewButton(parent).SetText("Message dialog")
+		bt := gi.NewButton(parent).SetText("Message")
 		bt.OnClick(func(e events.Event) {
 			gi.MessageDialog(bt, "Something happened", "Message")
 		})
 	},
 	"widgets/dialogs-1": func(parent gi.Widget) {
-		bt := gi.NewButton(parent).SetText("Error dialog")
+		bt := gi.NewButton(parent).SetText("Error")
 		bt.OnClick(func(e events.Event) {
 			gi.ErrorDialog(bt, errors.New("invalid encoding format"), "Error loading file")
+		})
+	},
+	"widgets/dialogs-2": func(parent gi.Widget) {
+		bt := gi.NewButton(parent).SetText("Confirm")
+		bt.OnClick(func(e events.Event) {
+			d := gi.NewBody().AddTitle("Confirm").AddText("Send message?")
+			d.AddBottomBar(func(pw gi.Widget) {
+				d.AddCancel(pw).OnClick(func(e events.Event) {
+					gi.MessageSnackbar(bt, "Dialog canceled")
+				})
+				d.AddOk(pw).OnClick(func(e events.Event) {
+					gi.MessageSnackbar(bt, "Dialog accepted")
+				})
+			})
+			d.NewDialog(bt).Run()
 		})
 	},
 	"widgets/labels-0": func(parent gi.Widget) {

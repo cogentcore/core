@@ -5,7 +5,7 @@ Cogent Core provides various different types of customizable dialogs with suppor
 You can use the [[gi.MessageDialog]] helper function to make a dialog with a text message:
 
 ```Go
-bt := gi.NewButton(parent).SetText("Message dialog")
+bt := gi.NewButton(parent).SetText("Message")
 bt.OnClick(func(e events.Event) {
     gi.MessageDialog(bt, "Something happened", "Message")
 })
@@ -14,9 +14,27 @@ bt.OnClick(func(e events.Event) {
 You can use the [[gi.ErrorDialog]] helper function to make a dialog with an error:
 
 ```Go
-bt := gi.NewButton(parent).SetText("Error dialog")
+bt := gi.NewButton(parent).SetText("Error")
 bt.OnClick(func(e events.Event) {
     gi.ErrorDialog(bt, errors.New("invalid encoding format"), "Error loading file")
+})
+```
+
+If you need to make a dialog more complicated than a simple message or error dialog, you can use the [[gi.NewBody]] and [[gi.Body.NewDialog]] functions to construct a dialog with any content you want. For example, you can make a confirmation dialog:
+
+```Go
+bt := gi.NewButton(parent).SetText("Confirm")
+bt.OnClick(func(e events.Event) {
+    d := gi.NewBody().AddTitle("Confirm").AddText("Send message?")
+    d.AddBottomBar(func(pw gi.Widget) {
+        d.AddCancel(pw).OnClick(func(e events.Event) {
+            gi.MessageSnackbar(bt, "Dialog canceled")
+        })
+        d.AddOk(pw).OnClick(func(e events.Event) {
+            gi.MessageSnackbar(bt, "Dialog accepted")
+        })
+    })
+    d.NewDialog(bt).Run()
 })
 ```
 

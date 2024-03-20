@@ -51,6 +51,7 @@ func GetWebcoreExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
 		var curExample [][]byte
 		inExample := false
 		gotNewBody := false
+		gotMain := false
 		numExamples := 0
 		for sc.Scan() {
 			b := sc.Bytes()
@@ -62,8 +63,12 @@ func GetWebcoreExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
 				continue
 			}
 
-			// gi.NewBody counts as a new start so that full examples work
-			if !gotNewBody && bytes.Contains(b, []byte("gi.NewBody(")) {
+			if bytes.HasPrefix(b, []byte("func main() {")) {
+				gotMain = true
+			}
+
+			// gi.NewBody in a main function counts as a new start so that full examples work
+			if gotMain && !gotNewBody && bytes.Contains(b, []byte("gi.NewBody(")) {
 				gotNewBody = true
 				curExample = nil
 				curExample = append(curExample, []byte("b := parent"))
