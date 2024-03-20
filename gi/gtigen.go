@@ -375,14 +375,12 @@ func (t *Image) New() ki.Ki { return &Image{} }
 func (t *Image) SetTooltip(v string) *Image { t.Tooltip = v; return t }
 
 // LabelType is the [gti.Type] for [Label]
-var LabelType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Label", IDName: "label", Doc: "Label is a widget for rendering text labels -- supports full widget model\nincluding box rendering, and full HTML styling, including links -- LinkSig\nemits link with data of URL -- opens default browser if nobody receiving\nsignal.  The default white-space option is 'pre' -- set to 'normal' or\nother options to get word-wrapping etc.", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Text", Doc: "label to display"}, {Name: "Type", Doc: "the type of label"}, {Name: "TextRender", Doc: "render data for text label"}, {Name: "NormalCursor", Doc: "NormalCursor is the cached cursor to display when there\nis no link being hovered."}}, Instance: &Label{}})
+var LabelType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Label", IDName: "label", Doc: "Label is a widget for rendering text labels. It supports full HTML styling,\nincluding links. By default, labels wrap and collapse whitespace, although\nyou can change this by changing [styles.Text.WhiteSpace].", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Text", Doc: "label to display"}, {Name: "Type", Doc: "the type of label"}, {Name: "TextRender", Doc: "render data for text label"}, {Name: "NormalCursor", Doc: "NormalCursor is the cached cursor to display when there\nis no link being hovered."}}, Instance: &Label{}})
 
 // NewLabel adds a new [Label] with the given name to the given parent:
-// Label is a widget for rendering text labels -- supports full widget model
-// including box rendering, and full HTML styling, including links -- LinkSig
-// emits link with data of URL -- opens default browser if nobody receiving
-// signal.  The default white-space option is 'pre' -- set to 'normal' or
-// other options to get word-wrapping etc.
+// Label is a widget for rendering text labels. It supports full HTML styling,
+// including links. By default, labels wrap and collapse whitespace, although
+// you can change this by changing [styles.Text.WhiteSpace].
 func NewLabel(par ki.Ki, name ...string) *Label {
 	return par.NewChild(LabelType, name...).(*Label)
 }
@@ -695,7 +693,7 @@ var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.FavPathItem", IDName
 var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.DebugSettingsData", IDName: "debug-settings-data", Doc: "DebugSettingsData is the data type for debugging settings.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Embeds: []gti.Field{{Name: "SettingsBase"}}, Fields: []gti.Field{{Name: "UpdateTrace", Doc: "Print a trace of updates that trigger re-rendering"}, {Name: "RenderTrace", Doc: "Print a trace of the nodes rendering"}, {Name: "LayoutTrace", Doc: "Print a trace of all layouts"}, {Name: "LayoutTraceDetail", Doc: "Print more detailed info about the underlying layout computations"}, {Name: "WinEventTrace", Doc: "Print a trace of window events"}, {Name: "WinRenderTrace", Doc: "Print the stack trace leading up to win publish events\nwhich are expensive"}, {Name: "WinGeomTrace", Doc: "Print a trace of window geometry saving / loading functions"}, {Name: "KeyEventTrace", Doc: "Print a trace of keyboard events"}, {Name: "EventTrace", Doc: "Print a trace of event handling"}, {Name: "FocusTrace", Doc: "Print a trace of focus changes"}, {Name: "DNDTrace", Doc: "Print a trace of DND event handling"}, {Name: "GoCompleteTrace", Doc: "Print a trace of Go language completion and lookup process"}, {Name: "GoTypeTrace", Doc: "Print a trace of Go language type parsing and inference process"}}})
 
 // SliderType is the [gti.Type] for [Slider]
-var SliderType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Slider", IDName: "slider", Doc: "Slider is a slideable widget that provides slider functionality for two Types:\nSlider type provides a movable thumb that represents Value as the center of thumb\nPos position, with room reserved at ends for 1/2 of the thumb size.\nScrollbar has a VisiblePct factor that specifies the percent of the content\ncurrently visible, which determines the size of the thumb, and thus the range of motion\nremaining for the thumb Value (VisiblePct = 1 means thumb is full size, and no remaining\nrange of motion).\nThe Content size (inside the margin and padding) determines the outer bounds of\nthe rendered area.\nThe [styles.Style.Direction] determines the direction in which the slider slides.", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Type", Doc: "the type of the slider, which determines the visual and functional properties"}, {Name: "Value", Doc: "Current value, represented by the position of the thumb."}, {Name: "Min", Doc: "minimum value in range"}, {Name: "Max", Doc: "maximum value in range"}, {Name: "Step", Doc: "smallest step size to increment"}, {Name: "PageStep", Doc: "larger PageUp / Dn step size"}, {Name: "VisiblePct", Doc: "For Scrollbar type only: proportion (1 max) of the full range of scrolled data\nthat is currently visible.  This determines the thumb size and range of motion:\nif 1, full slider is the thumb and no motion is possible."}, {Name: "ThumbSize", Doc: "Size of the thumb as a proportion of the slider thickness, which is\nContent size (inside the padding).  This is for actual X,Y dimensions,\nso must be sensitive to Dim dimension alignment."}, {Name: "TrackSize", Doc: "TrackSize is the proportion of slider thickness for the visible track\nfor the Slider type.  It is often thinner than the thumb, achieved by\nvalues < 1 (.5 default)"}, {Name: "Icon", Doc: "optional icon for the dragging knob"}, {Name: "InputThreshold", Doc: "threshold for amount of change in scroll value before emitting an input event"}, {Name: "Snap", Doc: "whether to snap the values to Step size increments"}, {Name: "Prec", Doc: "specifies the precision of decimal places (total, not after the decimal point)\nto use in representing the number. This helps to truncate small weird floating\npoint values in the nether regions."}, {Name: "ValueColor", Doc: "The background color that is used for styling the selected value section of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no value is rendered, so the value section of the slider\njust looks like the rest of the slider."}, {Name: "ThumbColor", Doc: "The background color that is used for styling the thumb (handle) of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no thumb is rendered, so the thumb section of the slider\njust looks like the rest of the slider."}, {Name: "StayInView", Doc: "If true, keep the slider (typically a Scrollbar) within the parent Scene\nbounding box, if the parent is in view.  This is the default behavior\nfor Layout scrollbars, and setting this flag replicates that behavior\nin other scrollbars."}, {Name: "Pos", Doc: "logical position of the slider relative to Size"}, {Name: "LastValue", Doc: "previous Change event emitted value - don't re-emit Change if it is the same"}, {Name: "PrevSlide", Doc: "previous sliding value - for computing the Input change"}, {Name: "Size", Doc: "Computed size of the slide box in the relevant dimension\nrange of motion, exclusive of spacing, based on layout allocation."}, {Name: "SlideStartPos", Doc: "underlying drag position of slider -- not subject to snapping"}}, Instance: &Slider{}})
+var SliderType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Slider", IDName: "slider", Doc: "Slider is a slideable widget that provides slider functionality for two Types:\nSlider type provides a movable thumb that represents Value as the center of thumb\nPos position, with room reserved at ends for 1/2 of the thumb size.\nScrollbar has a VisiblePct factor that specifies the percent of the content\ncurrently visible, which determines the size of the thumb, and thus the range of motion\nremaining for the thumb Value (VisiblePct = 1 means thumb is full size, and no remaining\nrange of motion).\nThe Content size (inside the margin and padding) determines the outer bounds of\nthe rendered area.\nThe [styles.Style.Direction] determines the direction in which the slider slides.", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Type", Doc: "Type is the type of the slider, which determines its visual\nand functional properties. The default type, [SliderSlider],\nshould work for most end-user use cases."}, {Name: "Value", Doc: "Value is the current value, represented by the position of the thumb."}, {Name: "Min", Doc: "Min is the minimum value supported."}, {Name: "Max", Doc: "Max is the maximum value supported."}, {Name: "Step", Doc: "Step is the amount that the arrow keys increment/decrement the value by."}, {Name: "EnforceStep", Doc: "EnforceStep is whether to ensure that the value is always\na multiple of [Slider.Step]."}, {Name: "PageStep", Doc: "PageStep is the amount that the PageUp and PageDown keys\nincrement/decrement the value by."}, {Name: "Icon", Doc: "Icon is an optional icon to use for the dragging knob."}, {Name: "VisiblePct", Doc: "For Scrollbar type only: proportion (1 max) of the full range of scrolled data\nthat is currently visible.  This determines the thumb size and range of motion:\nif 1, full slider is the thumb and no motion is possible."}, {Name: "ThumbSize", Doc: "Size of the thumb as a proportion of the slider thickness, which is\nContent size (inside the padding).  This is for actual X,Y dimensions,\nso must be sensitive to Dim dimension alignment."}, {Name: "TrackSize", Doc: "TrackSize is the proportion of slider thickness for the visible track\nfor the Slider type.  It is often thinner than the thumb, achieved by\nvalues < 1 (.5 default)"}, {Name: "InputThreshold", Doc: "threshold for amount of change in scroll value before emitting an input event"}, {Name: "Prec", Doc: "specifies the precision of decimal places (total, not after the decimal point)\nto use in representing the number. This helps to truncate small weird floating\npoint values in the nether regions."}, {Name: "ValueColor", Doc: "The background color that is used for styling the selected value section of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no value is rendered, so the value section of the slider\njust looks like the rest of the slider."}, {Name: "ThumbColor", Doc: "The background color that is used for styling the thumb (handle) of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no thumb is rendered, so the thumb section of the slider\njust looks like the rest of the slider."}, {Name: "StayInView", Doc: "If true, keep the slider (typically a Scrollbar) within the parent Scene\nbounding box, if the parent is in view.  This is the default behavior\nfor Layout scrollbars, and setting this flag replicates that behavior\nin other scrollbars."}, {Name: "Pos", Doc: "logical position of the slider relative to Size"}, {Name: "LastValue", Doc: "previous Change event emitted value - don't re-emit Change if it is the same"}, {Name: "PrevSlide", Doc: "previous sliding value - for computing the Input change"}, {Name: "Size", Doc: "Computed size of the slide box in the relevant dimension\nrange of motion, exclusive of spacing, based on layout allocation."}, {Name: "SlideStartPos", Doc: "underlying drag position of slider -- not subject to snapping"}}, Instance: &Slider{}})
 
 // NewSlider adds a new [Slider] with the given name to the given parent:
 // Slider is a slideable widget that provides slider functionality for two Types:
@@ -739,24 +737,36 @@ func AsSlider(k ki.Ki) *Slider {
 func (t *Slider) AsSlider() *Slider { return t }
 
 // SetType sets the [Slider.Type]:
-// the type of the slider, which determines the visual and functional properties
+// Type is the type of the slider, which determines its visual
+// and functional properties. The default type, [SliderSlider],
+// should work for most end-user use cases.
 func (t *Slider) SetType(v SliderTypes) *Slider { t.Type = v; return t }
 
 // SetMin sets the [Slider.Min]:
-// minimum value in range
+// Min is the minimum value supported.
 func (t *Slider) SetMin(v float32) *Slider { t.Min = v; return t }
 
 // SetMax sets the [Slider.Max]:
-// maximum value in range
+// Max is the maximum value supported.
 func (t *Slider) SetMax(v float32) *Slider { t.Max = v; return t }
 
 // SetStep sets the [Slider.Step]:
-// smallest step size to increment
+// Step is the amount that the arrow keys increment/decrement the value by.
 func (t *Slider) SetStep(v float32) *Slider { t.Step = v; return t }
 
+// SetEnforceStep sets the [Slider.EnforceStep]:
+// EnforceStep is whether to ensure that the value is always
+// a multiple of [Slider.Step].
+func (t *Slider) SetEnforceStep(v bool) *Slider { t.EnforceStep = v; return t }
+
 // SetPageStep sets the [Slider.PageStep]:
-// larger PageUp / Dn step size
+// PageStep is the amount that the PageUp and PageDown keys
+// increment/decrement the value by.
 func (t *Slider) SetPageStep(v float32) *Slider { t.PageStep = v; return t }
+
+// SetIcon sets the [Slider.Icon]:
+// Icon is an optional icon to use for the dragging knob.
+func (t *Slider) SetIcon(v icons.Icon) *Slider { t.Icon = v; return t }
 
 // SetThumbSize sets the [Slider.ThumbSize]:
 // Size of the thumb as a proportion of the slider thickness, which is
@@ -770,17 +780,9 @@ func (t *Slider) SetThumbSize(v mat32.Vec2) *Slider { t.ThumbSize = v; return t 
 // values < 1 (.5 default)
 func (t *Slider) SetTrackSize(v float32) *Slider { t.TrackSize = v; return t }
 
-// SetIcon sets the [Slider.Icon]:
-// optional icon for the dragging knob
-func (t *Slider) SetIcon(v icons.Icon) *Slider { t.Icon = v; return t }
-
 // SetInputThreshold sets the [Slider.InputThreshold]:
 // threshold for amount of change in scroll value before emitting an input event
 func (t *Slider) SetInputThreshold(v float32) *Slider { t.InputThreshold = v; return t }
-
-// SetSnap sets the [Slider.Snap]:
-// whether to snap the values to Step size increments
-func (t *Slider) SetSnap(v bool) *Slider { t.Snap = v; return t }
 
 // SetPrec sets the [Slider.Prec]:
 // specifies the precision of decimal places (total, not after the decimal point)
@@ -813,7 +815,7 @@ func (t *Slider) SetStayInView(v bool) *Slider { t.StayInView = v; return t }
 func (t *Slider) SetTooltip(v string) *Slider { t.Tooltip = v; return t }
 
 // SpinnerType is the [gti.Type] for [Spinner]
-var SpinnerType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Spinner", IDName: "spinner", Doc: "Spinner combines a TextField with up / down buttons for incrementing /\ndecrementing values -- all configured within the Parts of the widget", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "TextField"}}, Fields: []gti.Field{{Name: "Value", Doc: "Value is the current value."}, {Name: "HasMin", Doc: "HasMin is whether there is a minimum value to enforce."}, {Name: "Min", Doc: "Min, if HasMin is true, is the the minimum value in range."}, {Name: "HasMax", Doc: "HaxMax is whether there is a maximum value to enforce."}, {Name: "Max", Doc: "Max, if HasMax is true, is the maximum value in range."}, {Name: "Step", Doc: "Step is the smallest step size to increment when using the\nup and down buttons and arrow keys."}, {Name: "EnforceStep", Doc: "EnforceStep is whether to ensure that the value of the spinner\nis always a multiple of [Spinner.Step]."}, {Name: "PageStep", Doc: "PageStep is a larger step size used for PageUp and PageDown events."}, {Name: "Prec", Doc: "Prec specifies the precision of decimal places\n(total, not after the decimal point) to use in\nrepresenting the number. This helps to truncate\nsmall weird floating point values."}, {Name: "Format", Doc: "Format is the format string to use for printing the value.\nIf it unset, %g is used. If it is decimal based\n(ends in d, b, c, o, O, q, x, X, or U) then the value is\nconverted to decimal prior to printing."}}, Instance: &Spinner{}})
+var SpinnerType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Spinner", IDName: "spinner", Doc: "Spinner combines a TextField with up / down buttons for incrementing /\ndecrementing values -- all configured within the Parts of the widget", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "TextField"}}, Fields: []gti.Field{{Name: "Value", Doc: "Value is the current value."}, {Name: "HasMin", Doc: "HasMin is whether there is a minimum value to enforce."}, {Name: "Min", Doc: "Min, if HasMin is true, is the the minimum value in range."}, {Name: "HasMax", Doc: "HaxMax is whether there is a maximum value to enforce."}, {Name: "Max", Doc: "Max, if HasMax is true, is the maximum value in range."}, {Name: "Step", Doc: "Step is the amount that the up and down buttons and arrow keys\nincrement/decrement the value by."}, {Name: "EnforceStep", Doc: "EnforceStep is whether to ensure that the value of the spinner\nis always a multiple of [Spinner.Step]."}, {Name: "PageStep", Doc: "PageStep is the amount that the PageUp and PageDown keys\nincrement/decrement the value by."}, {Name: "Prec", Doc: "Prec specifies the precision of decimal places\n(total, not after the decimal point) to use in\nrepresenting the number. This helps to truncate\nsmall weird floating point values."}, {Name: "Format", Doc: "Format is the format string to use for printing the value.\nIf it unset, %g is used. If it is decimal based\n(ends in d, b, c, o, O, q, x, X, or U) then the value is\nconverted to decimal prior to printing."}}, Instance: &Spinner{}})
 
 // NewSpinner adds a new [Spinner] with the given name to the given parent:
 // Spinner combines a TextField with up / down buttons for incrementing /
@@ -849,8 +851,8 @@ func AsSpinner(k ki.Ki) *Spinner {
 func (t *Spinner) AsSpinner() *Spinner { return t }
 
 // SetStep sets the [Spinner.Step]:
-// Step is the smallest step size to increment when using the
-// up and down buttons and arrow keys.
+// Step is the amount that the up and down buttons and arrow keys
+// increment/decrement the value by.
 func (t *Spinner) SetStep(v float32) *Spinner { t.Step = v; return t }
 
 // SetEnforceStep sets the [Spinner.EnforceStep]:
@@ -859,7 +861,8 @@ func (t *Spinner) SetStep(v float32) *Spinner { t.Step = v; return t }
 func (t *Spinner) SetEnforceStep(v bool) *Spinner { t.EnforceStep = v; return t }
 
 // SetPageStep sets the [Spinner.PageStep]:
-// PageStep is a larger step size used for PageUp and PageDown events.
+// PageStep is the amount that the PageUp and PageDown keys
+// increment/decrement the value by.
 func (t *Spinner) SetPageStep(v float32) *Spinner { t.PageStep = v; return t }
 
 // SetPrec sets the [Spinner.Prec]:

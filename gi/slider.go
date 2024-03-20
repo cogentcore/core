@@ -34,23 +34,33 @@ import (
 type Slider struct { //core:embedder
 	WidgetBase
 
-	// the type of the slider, which determines the visual and functional properties
+	// Type is the type of the slider, which determines its visual
+	// and functional properties. The default type, [SliderSlider],
+	// should work for most end-user use cases.
 	Type SliderTypes
 
-	// Current value, represented by the position of the thumb.
+	// Value is the current value, represented by the position of the thumb.
 	Value float32 `set:"-"`
 
-	// minimum value in range
+	// Min is the minimum value supported.
 	Min float32
 
-	// maximum value in range
+	// Max is the maximum value supported.
 	Max float32
 
-	// smallest step size to increment
+	// Step is the amount that the arrow keys increment/decrement the value by.
 	Step float32
 
-	// larger PageUp / Dn step size
+	// EnforceStep is whether to ensure that the value is always
+	// a multiple of [Slider.Step].
+	EnforceStep bool
+
+	// PageStep is the amount that the PageUp and PageDown keys
+	// increment/decrement the value by.
 	PageStep float32
+
+	// Icon is an optional icon to use for the dragging knob.
+	Icon icons.Icon `view:"show-name"`
 
 	// For Scrollbar type only: proportion (1 max) of the full range of scrolled data
 	// that is currently visible.  This determines the thumb size and range of motion:
@@ -67,14 +77,8 @@ type Slider struct { //core:embedder
 	// values < 1 (.5 default)
 	TrackSize float32
 
-	// optional icon for the dragging knob
-	Icon icons.Icon `view:"show-name"`
-
 	// threshold for amount of change in scroll value before emitting an input event
 	InputThreshold float32
-
-	// whether to snap the values to Step size increments
-	Snap bool
 
 	// specifies the precision of decimal places (total, not after the decimal point)
 	// to use in representing the number. This helps to truncate small weird floating
@@ -208,13 +212,13 @@ func (sr *Slider) SetStyles() {
 	})
 }
 
-// SnapValue snaps the value to step sizes if snap option is set
+// SnapValue snaps the value to step sizes if [Slider.EnforceStep] is on
 func (sr *Slider) SnapValue() {
-	if !sr.Snap {
+	if !sr.EnforceStep {
 		return
 	}
-	sr.Value = mat32.IntMultiple(sr.Value, sr.Step)
-	sr.Value = mat32.Truncate(sr.Value, sr.Prec)
+	// round to the nearest step
+	sr.Value = sr.Step * mat32.Round(sr.Value/sr.Step)
 }
 
 // SendChanged sends a Changed message if given new value is
@@ -292,7 +296,7 @@ func (sr *Slider) SetSliderPos(pos float32) {
 	val = mat32.Clamp(val, sr.Min, effmax)
 	// fmt.Println(pos, thsz, prel, val)
 	sr.Value = val
-	if sr.Snap {
+	if sr.EnforceStep {
 		sr.SnapValue()
 	}
 	sr.SetPosFromValue(sr.Value) // go back the other way to be fully consistent

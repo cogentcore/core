@@ -38,15 +38,16 @@ type Spinner struct { //core:embedder
 	// Max, if HasMax is true, is the maximum value in range.
 	Max float32 `set:"-"`
 
-	// Step is the smallest step size to increment when using the
-	// up and down buttons and arrow keys.
+	// Step is the amount that the up and down buttons and arrow keys
+	// increment/decrement the value by.
 	Step float32
 
 	// EnforceStep is whether to ensure that the value of the spinner
 	// is always a multiple of [Spinner.Step].
 	EnforceStep bool
 
-	// PageStep is a larger step size used for PageUp and PageDown events.
+	// PageStep is the amount that the PageUp and PageDown keys
+	// increment/decrement the value by.
 	PageStep float32
 
 	// Prec specifies the precision of decimal places

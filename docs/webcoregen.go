@@ -145,6 +145,21 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 			s.Font.Family = string(gi.AppearanceSettings.MonoFont)
 		})
 	},
+	"widgets/sliders-0": func(parent gi.Widget) {
+		gi.NewSlider(parent)
+	},
+	"widgets/sliders-1": func(parent gi.Widget) {
+		gi.NewSlider(parent).SetValue(0.7)
+	},
+	"widgets/sliders-2": func(parent gi.Widget) {
+		gi.NewSlider(parent).SetMin(5.7).SetMax(18).SetValue(10.2)
+	},
+	"widgets/sliders-3": func(parent gi.Widget) {
+		gi.NewSlider(parent).SetStep(0.2)
+	},
+	"widgets/sliders-4": func(parent gi.Widget) {
+		gi.NewSlider(parent).SetStep(0.2).SetEnforceStep(true)
+	},
 	"widgets/spinners-0": func(parent gi.Widget) {
 		gi.NewSpinner(parent)
 	},

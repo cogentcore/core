@@ -722,7 +722,7 @@ const SwitchTypesN SwitchTypes = 5
 
 var _SwitchTypesValueMap = map[string]SwitchTypes{`Switch`: 0, `Chip`: 1, `Checkbox`: 2, `RadioButton`: 3, `SegmentedButton`: 4}
 
-var _SwitchTypesDescMap = map[SwitchTypes]string{0: `SwitchSwitch indicates to display a switch as a switch (toggle slider)`, 1: `SwitchChip indicates to display a switch as chip (like Material Design&#39;s filter chip), which is typically only used in the context of [Switches].`, 2: `SwitchCheckbox indicates to display a switch as a checkbox`, 3: `SwitchRadioButton indicates to display a switch as a radio button`, 4: `SwitchSegmentedButton indicates to display a segmented button, which is typically only used in the context of [Switches].`}
+var _SwitchTypesDescMap = map[SwitchTypes]string{0: `SwitchSwitch indicates to display a switch as a switch (toggle slider).`, 1: `SwitchChip indicates to display a switch as chip (like Material Design&#39;s filter chip), which is typically only used in the context of [Switches].`, 2: `SwitchCheckbox indicates to display a switch as a checkbox.`, 3: `SwitchRadioButton indicates to display a switch as a radio button.`, 4: `SwitchSegmentedButton indicates to display a segmented button, which is typically only used in the context of [Switches].`}
 
 var _SwitchTypesMap = map[SwitchTypes]string{0: `Switch`, 1: `Chip`, 2: `Checkbox`, 3: `RadioButton`, 4: `SegmentedButton`}
 
