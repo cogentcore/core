@@ -79,8 +79,8 @@ func (m *Mat3) SetFromMat4(src *Mat4) {
 // SetFromMat2 sets the matrix elements based on a Mat2.
 func (m *Mat3) SetFromMat2(src Mat2) {
 	m.Set(
-		src.XX, src.YX, 0,
-		src.XY, src.YY, 0,
+		src.XX, src.YX, src.X0,
+		src.XY, src.YY, src.Y0,
 		src.X0, src.Y0, 1,
 	)
 }
