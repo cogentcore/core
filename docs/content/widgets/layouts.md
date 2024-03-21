@@ -72,3 +72,17 @@ gi.NewButton(ly).SetText("First")
 gi.NewButton(ly).SetText("Second")
 gi.NewButton(ly).SetText("Third")
 ```
+
+You can position elements in a grid:
+
+```Go
+ly := gi.NewLayout(parent)
+ly.Style(func(s *styles.Style) {
+    s.Display = styles.Grid
+    s.Columns = 2
+})
+gi.NewButton(ly).SetText("First")
+gi.NewButton(ly).SetText("Second")
+gi.NewButton(ly).SetText("Third")
+gi.NewButton(ly).SetText("Fourth")
+```

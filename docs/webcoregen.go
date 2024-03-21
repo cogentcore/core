@@ -273,6 +273,17 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		gi.NewButton(ly).SetText("Second")
 		gi.NewButton(ly).SetText("Third")
 	},
+	"widgets/layouts-6": func(parent gi.Widget) {
+		ly := gi.NewLayout(parent)
+		ly.Style(func(s *styles.Style) {
+			s.Display = styles.Grid
+			s.Columns = 2
+		})
+		gi.NewButton(ly).SetText("First")
+		gi.NewButton(ly).SetText("Second")
+		gi.NewButton(ly).SetText("Third")
+		gi.NewButton(ly).SetText("Fourth")
+	},
 	"widgets/meters-0": func(parent gi.Widget) {
 		gi.NewMeter(parent)
 	},
