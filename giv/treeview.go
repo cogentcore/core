@@ -256,8 +256,6 @@ func (tv *TreeView) SetStyles() {
 		s.Text.Align = styles.Start
 
 		// need to copy over to actual and then clear styles one
-		tv.actStateLayer = s.StateLayer
-		s.StateLayer = 0
 		if s.Is(states.Selected) {
 			// render handles manually, similar to with actStateLayer
 			s.Background = nil
@@ -265,6 +263,11 @@ func (tv *TreeView) SetStyles() {
 			s.Color = colors.C(colors.Scheme.OnSurface)
 		}
 	})
+	tv.StyleFinal(func(s *styles.Style) {
+		tv.actStateLayer = s.StateLayer
+		s.StateLayer = 0
+	})
+
 	tv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(tv) {
 		case "parts":
@@ -570,7 +573,12 @@ func (tv *TreeView) SizeUp() {
 		tv.WidgetKidsIter(func(i int, kwi gi.Widget, kwb *gi.WidgetBase) bool {
 			kwi.SizeUp()
 			h += kwb.Geom.Size.Actual.Total.Y
-			w = max(w, tv.Indent.Dots+kwb.Geom.Size.Actual.Total.X)
+			kw := kwb.Geom.Size.Actual.Total.X
+			if mat32.IsNaN(kw) { // somehow getting a nan
+				slog.Error("TreeView, node width is NaN", "node:", kwb)
+			} else {
+				w = max(w, tv.Indent.Dots+kw)
+			}
 			// fmt.Println(kwb, w, h)
 			return ki.Continue
 		})
@@ -1628,7 +1636,7 @@ func (tv *TreeView) DragDrop(e events.Event) {
 	tvi := tv.This().(TreeViewer)
 	tv.UnselectAll()
 	de := e.(*events.DragDrop)
-	stv := AsTreeView(de.Source.(gi.Widget).Parent()) // note: source is actually .parts!
+	stv := AsTreeView(de.Source.(gi.Widget))
 	if stv != nil {
 		stv.DragClearStates()
 	}
