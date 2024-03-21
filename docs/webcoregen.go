@@ -41,6 +41,22 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 			gi.MessageSnackbar(parent, fmt.Sprint("Button clicked at ", e.Pos()))
 		})
 	},
+	"basics/styling-0": func(parent gi.Widget) {
+		gi.NewLabel(parent).SetText("Bold text").Style(func(s *styles.Style) {
+			s.Font.Weight = styles.WeightBold
+		})
+	},
+	"basics/styling-1": func(parent gi.Widget) {
+		gi.NewButton(parent).SetText("Error button").Style(func(s *styles.Style) {
+			s.Background = colors.C(colors.Scheme.Error.Base)
+			s.Color = colors.C(colors.Scheme.Error.On)
+		})
+	},
+	"basics/styling-2": func(parent gi.Widget) {
+		gi.NewLabel(parent).SetText("Big text").Style(func(s *styles.Style) {
+			s.Font.Size.Dp(21)
+		})
+	},
 	"basics/icons-0": func(parent gi.Widget) {
 		gi.NewButton(parent).SetText("Send").SetIcon(icons.Send).OnClick(func(e events.Event) {
 			gi.MessageSnackbar(parent, "Message sent")

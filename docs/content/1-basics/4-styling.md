@@ -1,10 +1,31 @@
 # Styling
 
-(TODO)
+Cogent Core provides a highly versatile styling system that allows you to easily customize every aspect of the appearance of widgets at any level.
 
-## Basics
+You can change styling properties of a specific widget:
 
-## OnWidgetAdded
+```Go
+gi.NewLabel(parent).SetText("Bold text").Style(func(s *styles.Style) {
+    s.Font.Weight = styles.WeightBold
+})
+```
+
+You can use Cogent Core's color scheme system based on Material Design 3's dynamic color to change the colors of a widget:
+
+```Go
+gi.NewButton(parent).SetText("Error button").Style(func(s *styles.Style) {
+    s.Background = colors.C(colors.Scheme.Error.Base)
+    s.Color = colors.C(colors.Scheme.Error.On)
+})
+```
+
+You can use Cogent Core's flexible unit system to specify sizing properties of a widget in one of many different units. The most common units are `dp` (density-independent pixels, or 1/160th of 1 inch), and `em` (the font size of the element).
+
+```Go
+gi.NewLabel(parent).SetText("Big text").Style(func(s *styles.Style) {
+    s.Font.Size.Dp(21)
+})
+```
 
 ## Global configuration functions
 
