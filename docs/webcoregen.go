@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 	"cogentcore.org/core/webcore"
 )
 
@@ -150,6 +151,74 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 			})
 			d.NewDialog(bt).Run()
 		})
+	},
+	"widgets/frames-0": func(parent gi.Widget) {
+		fr := gi.NewFrame(parent)
+		gi.NewButton(fr).SetText("First")
+		gi.NewButton(fr).SetText("Second")
+		gi.NewButton(fr).SetText("Third")
+	},
+	"widgets/frames-1": func(parent gi.Widget) {
+		fr := gi.NewFrame(parent)
+		fr.Style(func(s *styles.Style) {
+			s.Direction = styles.Column
+		})
+		gi.NewButton(fr).SetText("First")
+		gi.NewButton(fr).SetText("Second")
+		gi.NewButton(fr).SetText("Third")
+	},
+	"widgets/frames-2": func(parent gi.Widget) {
+		fr := gi.NewFrame(parent)
+		fr.Style(func(s *styles.Style) {
+			s.Background = colors.C(colors.Scheme.Warn.Container)
+		})
+		gi.NewButton(fr).SetText("First")
+		gi.NewButton(fr).SetText("Second")
+		gi.NewButton(fr).SetText("Third")
+	},
+	"widgets/frames-3": func(parent gi.Widget) {
+		fr := gi.NewFrame(parent)
+		fr.Style(func(s *styles.Style) {
+			s.Border.Width.Set(units.Dp(4))
+			s.Border.Color.Set(colors.C(colors.Scheme.Outline))
+		})
+		gi.NewButton(fr).SetText("First")
+		gi.NewButton(fr).SetText("Second")
+		gi.NewButton(fr).SetText("Third")
+	},
+	"widgets/frames-4": func(parent gi.Widget) {
+		fr := gi.NewFrame(parent)
+		fr.Style(func(s *styles.Style) {
+			s.Border.Radius = styles.BorderRadiusLarge
+			s.Border.Width.Set(units.Dp(4))
+			s.Border.Color.Set(colors.C(colors.Scheme.Outline))
+		})
+		gi.NewButton(fr).SetText("First")
+		gi.NewButton(fr).SetText("Second")
+		gi.NewButton(fr).SetText("Third")
+	},
+	"widgets/frames-5": func(parent gi.Widget) {
+		fr := gi.NewFrame(parent)
+		fr.Style(func(s *styles.Style) {
+			s.Grow.Set(0, 0)
+			s.Border.Width.Set(units.Dp(4))
+			s.Border.Color.Set(colors.C(colors.Scheme.Outline))
+		})
+		gi.NewButton(fr).SetText("First")
+		gi.NewButton(fr).SetText("Second")
+		gi.NewButton(fr).SetText("Third")
+	},
+	"widgets/frames-6": func(parent gi.Widget) {
+		fr := gi.NewFrame(parent)
+		fr.Style(func(s *styles.Style) {
+			s.Gap.Set(units.Em(2))
+			s.Grow.Set(0, 0)
+			s.Border.Width.Set(units.Dp(4))
+			s.Border.Color.Set(colors.C(colors.Scheme.Outline))
+		})
+		gi.NewButton(fr).SetText("First")
+		gi.NewButton(fr).SetText("Second")
+		gi.NewButton(fr).SetText("Third")
 	},
 	"widgets/labels-0": func(parent gi.Widget) {
 		gi.NewLabel(parent).SetText("Hello, world!")
