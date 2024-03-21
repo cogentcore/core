@@ -1,6 +1,6 @@
 # Layouts
 
-Cogent Core provides customizable layouts that can position content in many different ways. Layouts are similar to frames, but frames also render a container in addition to laying out elements. Frames support everything that layouts support.
+Cogent Core provides customizable layouts that can position content in many different ways. Layouts are similar to frames, but frames also render a container in addition to laying out elements. Frames support everything that layouts support. Also, layouts only grow in one direction by default, whereas frames grow in both directions by default.
 
 You can make a layout and place elements inside of it:
 

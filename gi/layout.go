@@ -56,24 +56,23 @@ const (
 
 // Layout is the primary node type responsible for organizing the sizes
 // and positions of child widgets. It does not render, only organize,
-// so properties like background color will have no effect.
+// so properties like background and border will have no effect.
 // All arbitrary collections of widgets should generally be contained
-// within a layout -- otherwise the parent widget must take over
-// responsibility for positioning.
-// Layouts can automatically add scrollbars depending on the Overflow
-// layout style.
-// For a Grid layout, the 'columns' property should generally be set
-// to the desired number of columns, from which the number of rows
-// is computed -- otherwise it uses the square root of number of
+// within a layout or a [Frame]; otherwise, the parent widget must take over
+// responsibility for positioning. Layouts automatically add scrollbars
+// depending on the [styles.Style.Overflow].
+// For a [styles.Grid] layout, the [styles.Style.Columns] property should
+// generally be set to the desired number of columns, from which the number of rows
+// is computed; otherwise, it uses the square root of number of
 // elements.
 type Layout struct {
 	WidgetBase
 
-	// for Stacked layout, index of node to use as the top of the stack.
-	// Only the node at this index is rendered -- if not a valid index, nothing is rendered.
+	// StackTop, for a [styles.Stacked] layout, is the index of the node to use as the top of the stack.
+	// Only the node at this index is rendered; if not a valid index, nothing is rendered.
 	StackTop int
 
-	// LayImpl contains implementational state info for doing layout
+	// LayImpl contains implementation state info for doing layout
 	LayImpl LayImplState `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// whether scrollbar is used for given dim
