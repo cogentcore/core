@@ -53,8 +53,9 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		})
 	},
 	"basics/styling-2": func(parent gi.Widget) {
-		gi.NewLabel(parent).SetText("Big text").Style(func(s *styles.Style) {
-			s.Font.Size.Dp(21)
+		gi.NewFrame(parent).Style(func(s *styles.Style) {
+			s.Min.Set(units.Dp(50))
+			s.Background = colors.C(colors.Scheme.Primary.Base)
 		})
 	},
 	"widgets/buttons-0": func(parent gi.Widget) {

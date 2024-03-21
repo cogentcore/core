@@ -19,12 +19,13 @@ gi.NewButton(parent).SetText("Success button").Style(func(s *styles.Style) {
 })
 ```
 
-You can use Cogent Core's flexible unit system to specify sizing properties of a widget in one of many different units. The most common units are `dp` (density-independent pixels, or 1/160th of 1 inch), and `em` (the font size of the element).
+You can change the size of a widget using Cogent Core's flexible unit system:
 
 ```Go
-gi.NewLabel(parent).SetText("Big text").Style(func(s *styles.Style) {
-    s.Font.Size.Dp(21)
+gi.NewFrame(parent).Style(func(s *styles.Style) {
+    s.Min.Set(units.Dp(50))
+    s.Background = colors.C(colors.Scheme.Primary.Base)
 })
 ```
 
-Throughout the documentation for different widgets, you will learn how to use various other styling properties.
+Throughout the documentation for different widgets, you will learn how to use various other styling properties. This is just an introduction to the basic structure of styling.
