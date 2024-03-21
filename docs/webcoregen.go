@@ -67,6 +67,19 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		gi.NewSwitch(parent).SetText("Switch")
 		gi.NewTextField(parent).SetText("Text field")
 	},
+	"basics/styling-4": func(parent gi.Widget) {
+		parent.OnWidgetAdded(func(w gi.Widget) {
+			switch w := w.(type) {
+			case *gi.Button:
+				w.Style(func(s *styles.Style) {
+					s.Border.Radius = styles.BorderRadiusSmall
+				})
+			}
+		})
+		gi.NewButton(parent).SetText("First")
+		gi.NewButton(parent).SetText("Second")
+		gi.NewButton(parent).SetText("Third")
+	},
 	"basics/icons-0": func(parent gi.Widget) {
 		gi.NewButton(parent).SetText("Send").SetIcon(icons.Send).OnClick(func(e events.Event) {
 			gi.MessageSnackbar(parent, "Message sent")
