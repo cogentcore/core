@@ -1,4 +1,4 @@
-# App creation and structure
+# Apps
 
 The first call in every Cogent Core app is [[gi.NewBody]]. This creates and returns a new [[gi.Body]], which is a container in which app content is placed.
 

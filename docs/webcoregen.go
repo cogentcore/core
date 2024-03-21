@@ -80,11 +80,6 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		gi.NewButton(parent).SetText("Second")
 		gi.NewButton(parent).SetText("Third")
 	},
-	"basics/icons-0": func(parent gi.Widget) {
-		gi.NewButton(parent).SetText("Send").SetIcon(icons.Send).OnClick(func(e events.Event) {
-			gi.MessageSnackbar(parent, "Message sent")
-		})
-	},
 	"widgets/buttons-0": func(parent gi.Widget) {
 		gi.NewButton(parent).SetText("Download")
 	},
@@ -241,6 +236,11 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		gi.NewButton(fr).SetText("First")
 		gi.NewButton(fr).SetText("Second")
 		gi.NewButton(fr).SetText("Third")
+	},
+	"widgets/icons-0": func(parent gi.Widget) {
+		gi.NewButton(parent).SetText("Send").SetIcon(icons.Send).OnClick(func(e events.Event) {
+			gi.MessageSnackbar(parent, "Message sent")
+		})
 	},
 	"widgets/labels-0": func(parent gi.Widget) {
 		gi.NewLabel(parent).SetText("Hello, world!")
