@@ -1,10 +1,10 @@
 # Events
 
-## Order of event handling
+## Event handling order
 
-Events handlers are called in the reverse order that they are added (last added, first called), so that default event handling (added during initial widget configuration) can be overridden by special end-user handlers.
+Event handlers are called in the reverse order that they are added (last added, first called), so that default event handling (added during initial widget configuration) can be overridden by special end-user handlers.
 
-There are three levels of event handlers (see [[events.Listeners]]): `First`, regular, and `Final`, which are processed in that order (and last added, first processed within each Listener). For example, this allows a default event handler to get the first crack at handling an event, even though it would be the last one called by default, by adding it to `First` using [[gi.WidgetBase.OnFirst]] instead.
+As with stylers, there are three levels of event handlers: `First`, regular, and `Final`, which are called in that order (and last added, first processed within each Listener). For example, this allows a default event handler to get the first crack at handling an event, even though it would be the last one called by default, by adding it to `First` using [[gi.WidgetBase.OnFirst]] instead.
 
 If an event handler calls [[events.Event.SetHandled]], further event handlers will not be called after it for that event.
 

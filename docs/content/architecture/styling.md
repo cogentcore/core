@@ -1,5 +1,13 @@
 # Styling
 
+## Styling order
+
+Stylers are called in the order that they are added (first added, first called), which means that the stylers added last get the final say on the styles. This means that the base stylers set during initial widget configuration will be overridden by special end-user stylers.
+
+As with event handlers, there are three levels of stylers: `First`, regular, and `Final`, which are called in that order.
+
+## Styling multiple widgets
+
 You can style all widgets within a certain container at once using [[gi.Widget.OnWidgetAdded]]:
 
 ```Go
