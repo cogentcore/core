@@ -228,10 +228,10 @@ const (
 // hasn't!
 var FontWeightNames = []string{"Normal", "Thin", "ExtraLight", "Light", "Medium", "SemiBold", "ExtraBold", "Bold", "Black"}
 
-// FontWeightNameVals is 1-to-1 index map from FontWeightNames to
+// FontWeightNameValues is 1-to-1 index map from FontWeightNames to
 // corresponding weight value (using more semantic term instead of numerical
 // one)
-var FontWeightNameVals = []FontWeights{WeightNormal, WeightThin, WeightExtraLight, WeightLight, WeightMedium, WeightSemiBold, WeightExtraBold, WeightBold, WeightBlack}
+var FontWeightNameValues = []FontWeights{WeightNormal, WeightThin, WeightExtraLight, WeightLight, WeightMedium, WeightSemiBold, WeightExtraBold, WeightBold, WeightBlack}
 
 // FontWeightToNameMap maps all the style enums to canonical regularized font names
 var FontWeightToNameMap = map[FontWeights]string{
@@ -352,7 +352,7 @@ func FontNameToMods(fn string) (basenm string, str FontStretch, wt FontWeights, 
 	for mi, mod := range FontWeightNames {
 		spmod := " " + mod
 		if strings.Contains(fn, spmod) {
-			wt = FontWeightNameVals[mi]
+			wt = FontWeightNameValues[mi]
 			basenm = strings.Replace(basenm, spmod, "", 1)
 			break
 		}

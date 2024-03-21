@@ -13,9 +13,9 @@ gi.NewLabel(parent).SetText("Bold text").Style(func(s *styles.Style) {
 You can use Cogent Core's color scheme system based on Material Design 3's dynamic color to change the colors of a widget:
 
 ```Go
-gi.NewButton(parent).SetText("Error button").Style(func(s *styles.Style) {
-    s.Background = colors.C(colors.Scheme.Error.Base)
-    s.Color = colors.C(colors.Scheme.Error.On)
+gi.NewButton(parent).SetText("Success button").Style(func(s *styles.Style) {
+    s.Background = colors.C(colors.Scheme.Success.Base)
+    s.Color = colors.C(colors.Scheme.Success.On)
 })
 ```
 
@@ -25,6 +25,23 @@ You can use Cogent Core's flexible unit system to specify sizing properties of a
 gi.NewLabel(parent).SetText("Big text").Style(func(s *styles.Style) {
     s.Font.Size.Dp(21)
 })
+```
+
+Throughout the documentation for different widgets, you will learn how to use various other styling properties. To see all styling properties available, you can look at the documentation for [[styles.Style]].
+
+## Styling multiple widgets
+
+You can style all widgets within a certain container at once using [[gi.Widget.OnWidgetAdded]]:
+
+```Go
+parent.OnWidgetAdded(func(w gi.Widget) {
+    w.Style(func(s *styles.Style) {
+        s.Color = colors.C(colors.Scheme.Error.Base)
+    })
+})
+gi.NewLabel(parent).SetText("Label")
+gi.NewSwitch(parent).SetText("Switch")
+gi.NewTextField(parent).SetText("Text field")
 ```
 
 ## Global configuration functions

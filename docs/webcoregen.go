@@ -47,15 +47,25 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		})
 	},
 	"basics/styling-1": func(parent gi.Widget) {
-		gi.NewButton(parent).SetText("Error button").Style(func(s *styles.Style) {
-			s.Background = colors.C(colors.Scheme.Error.Base)
-			s.Color = colors.C(colors.Scheme.Error.On)
+		gi.NewButton(parent).SetText("Success button").Style(func(s *styles.Style) {
+			s.Background = colors.C(colors.Scheme.Success.Base)
+			s.Color = colors.C(colors.Scheme.Success.On)
 		})
 	},
 	"basics/styling-2": func(parent gi.Widget) {
 		gi.NewLabel(parent).SetText("Big text").Style(func(s *styles.Style) {
 			s.Font.Size.Dp(21)
 		})
+	},
+	"basics/styling-3": func(parent gi.Widget) {
+		parent.OnWidgetAdded(func(w gi.Widget) {
+			w.Style(func(s *styles.Style) {
+				s.Color = colors.C(colors.Scheme.Error.Base)
+			})
+		})
+		gi.NewLabel(parent).SetText("Label")
+		gi.NewSwitch(parent).SetText("Switch")
+		gi.NewTextField(parent).SetText("Text field")
 	},
 	"basics/icons-0": func(parent gi.Widget) {
 		gi.NewButton(parent).SetText("Send").SetIcon(icons.Send).OnClick(func(e events.Event) {
