@@ -595,10 +595,10 @@ func dialogs(ts *gi.Tabs) {
 		d := gi.NewBody().AddTitle("Confirm").AddText("Send message?")
 		d.AddBottomBar(func(pw gi.Widget) {
 			d.AddCancel(pw).OnClick(func(e events.Event) {
-				fmt.Println("Dialog canceled")
+				gi.MessageSnackbar(cd, "Dialog canceled")
 			})
 			d.AddOk(pw).OnClick(func(e events.Event) {
-				fmt.Println("Dialog accepted")
+				gi.MessageSnackbar(cd, "Dialog accepted")
 			})
 		})
 		d.NewDialog(cd).Run()
@@ -611,7 +611,7 @@ func dialogs(ts *gi.Tabs) {
 		d.AddBottomBar(func(pw gi.Widget) {
 			d.AddCancel(pw)
 			d.AddOk(pw).OnClick(func(e events.Event) {
-				fmt.Println("Your name is", tf.Text())
+				gi.MessageSnackbar(td, "Your name is "+tf.Text())
 			})
 		})
 		d.NewDialog(td).Run()
@@ -652,7 +652,7 @@ func dialogs(ts *gi.Tabs) {
 	cs.OnClick(func(e events.Event) {
 		gi.NewBody().AddSnackbarText("Files updated").
 			AddSnackbarButton("Refresh", func(e events.Event) {
-				fmt.Println("Refreshed files")
+				gi.MessageSnackbar(cs, "Refreshed files")
 			}).AddSnackbarIcon(icons.Close).NewSnackbar(cs).Run()
 	})
 
