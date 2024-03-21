@@ -247,7 +247,7 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 	"widgets/layouts-3": func(parent gi.Widget) {
 		ly := gi.NewLayout(parent)
 		ly.Style(func(s *styles.Style) {
-			s.Max.X.Em(5)
+			s.Max.X.Em(10)
 		})
 		gi.NewButton(ly).SetText("First")
 		gi.NewButton(ly).SetText("Second")
@@ -257,7 +257,17 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		ly := gi.NewLayout(parent)
 		ly.Style(func(s *styles.Style) {
 			s.Overflow.X = styles.OverflowAuto
-			s.Max.X.Em(5)
+			s.Max.X.Em(10)
+		})
+		gi.NewButton(ly).SetText("First")
+		gi.NewButton(ly).SetText("Second")
+		gi.NewButton(ly).SetText("Third")
+	},
+	"widgets/layouts-5": func(parent gi.Widget) {
+		ly := gi.NewLayout(parent)
+		ly.Style(func(s *styles.Style) {
+			s.Wrap = true
+			s.Max.X.Em(10)
 		})
 		gi.NewButton(ly).SetText("First")
 		gi.NewButton(ly).SetText("Second")

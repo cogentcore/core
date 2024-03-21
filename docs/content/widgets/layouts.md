@@ -40,7 +40,7 @@ You can limit the size of a layout:
 ```Go
 ly := gi.NewLayout(parent)
 ly.Style(func(s *styles.Style) {
-    s.Max.X.Em(5)
+    s.Max.X.Em(10)
 })
 gi.NewButton(ly).SetText("First")
 gi.NewButton(ly).SetText("Second")
@@ -53,7 +53,20 @@ You can make a layout add scroll bars when it overflows:
 ly := gi.NewLayout(parent)
 ly.Style(func(s *styles.Style) {
     s.Overflow.X = styles.OverflowAuto
-    s.Max.X.Em(5)
+    s.Max.X.Em(10)
+})
+gi.NewButton(ly).SetText("First")
+gi.NewButton(ly).SetText("Second")
+gi.NewButton(ly).SetText("Third")
+```
+
+You can make a layout wrap when it overflows:
+
+```Go
+ly := gi.NewLayout(parent)
+ly.Style(func(s *styles.Style) {
+    s.Wrap = true
+    s.Max.X.Em(10)
 })
 gi.NewButton(ly).SetText("First")
 gi.NewButton(ly).SetText("Second")
