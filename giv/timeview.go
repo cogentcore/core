@@ -320,7 +320,7 @@ func (v *TimeValue) Config() {
 		}
 		tv := v.TimeValue()
 		// new date and old time
-		*tv = time.Date(d.Year(), d.Month(), d.Day(), tv.Hour(), tv.Minute(), tv.Second(), tv.Nanosecond(), tv.Location())
+		v.SetValue(time.Date(d.Year(), d.Month(), d.Day(), tv.Hour(), tv.Minute(), tv.Second(), tv.Nanosecond(), tv.Location()))
 		return nil
 	})
 
@@ -349,7 +349,7 @@ func (v *TimeValue) Config() {
 		}
 		tv := v.TimeValue()
 		// old date and new time
-		*tv = time.Date(tv.Year(), tv.Month(), tv.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), tv.Location())
+		v.SetValue(time.Date(tv.Year(), tv.Month(), tv.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), tv.Location()))
 		return nil
 	})
 }
