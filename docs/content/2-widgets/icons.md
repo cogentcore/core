@@ -1,13 +1,23 @@
 # Icons
 
-The [[icons]] package contains a number of SVG icons selected from [Material Design Symbols](https://fonts.google.com/icons), sourced through [marella/material-symbols](https://github.com/marella/material-symbols).
+Cogent Core provides more than 2,000 unique icons from the Material Symbols collection, allowing you to easily represent many things in a concise, visually pleasing, and language-independent way.
 
-To specify a standard icon, it is best to refer to it by the named constants defined in the `icons` package, like the `icons.Send` case in the following example:
+Icons are specified using their named constant in the [[icons]] package, and they are typically used in the context of another widget, like a button:
 
 ```Go
-gi.NewButton(parent).SetText("Send").SetIcon(icons.Send).OnClick(func(e events.Event) {
-    gi.MessageSnackbar(parent, "Message sent")
-})
+gi.NewButton(parent).SetIcon(icons.Send)
+```
+
+However, you can also make a standalone icon widget:
+
+```Go
+gi.NewIcon(parent).SetIcon(icons.Home)
+```
+
+You can convert an icon into its filled version:
+
+```Go
+gi.NewButton(parent).SetIcon(icons.Home.Fill())
 ```
 
 ## Adding app-specific icons

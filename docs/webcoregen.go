@@ -216,9 +216,13 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		gi.NewButton(fr).SetText("Third")
 	},
 	"widgets/icons-0": func(parent gi.Widget) {
-		gi.NewButton(parent).SetText("Send").SetIcon(icons.Send).OnClick(func(e events.Event) {
-			gi.MessageSnackbar(parent, "Message sent")
-		})
+		gi.NewButton(parent).SetIcon(icons.Send)
+	},
+	"widgets/icons-1": func(parent gi.Widget) {
+		gi.NewIcon(parent).SetIcon(icons.Home)
+	},
+	"widgets/icons-2": func(parent gi.Widget) {
+		gi.NewButton(parent).SetIcon(icons.Home.Fill())
 	},
 	"widgets/labels-0": func(parent gi.Widget) {
 		gi.NewLabel(parent).SetText("Hello, world!")

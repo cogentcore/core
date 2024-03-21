@@ -306,7 +306,7 @@ func icon(ts *gi.Tabs) {
 	tab := ts.NewTab("Icons")
 
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Icons")
-	gi.NewLabel(tab).SetText("Cogent Core provides more than 2,000 unique icons from the Material Symbols collection.")
+	gi.NewLabel(tab).SetText("Cogent Core provides more than 2,000 unique icons from the Material Symbols collection, allowing you to easily represent many things in a concise, visually pleasing, and language-independent way.")
 
 	gi.NewButton(tab).SetText("View icons").OnClick(func(e events.Event) {
 		d := gi.NewBody().AddTitle("Cogent Core Icons")
