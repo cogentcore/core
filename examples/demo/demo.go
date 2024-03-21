@@ -38,9 +38,8 @@ func main() {
 
 	home(ts)
 	widgets(ts)
-	values(ts)
 	views(ts)
-	dialogs(ts)
+	values(ts)
 	style(ts)
 
 	b.RunMainWindow()
@@ -69,6 +68,7 @@ func widgets(ts *gi.Tabs) {
 	buttons(wts)
 	inputs(wts)
 	sliders(wts)
+	dialogs(wts)
 	icon(wts)
 }
 
