@@ -241,6 +241,30 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 			s.Font.Family = string(gi.AppearanceSettings.MonoFont)
 		})
 	},
+	"widgets/layouts-0": func(parent gi.Widget) {
+		ly := gi.NewLayout(parent)
+		gi.NewButton(ly).SetText("First")
+		gi.NewButton(ly).SetText("Second")
+		gi.NewButton(ly).SetText("Third")
+	},
+	"widgets/layouts-1": func(parent gi.Widget) {
+		ly := gi.NewLayout(parent)
+		ly.Style(func(s *styles.Style) {
+			s.Direction = styles.Column
+		})
+		gi.NewButton(ly).SetText("First")
+		gi.NewButton(ly).SetText("Second")
+		gi.NewButton(ly).SetText("Third")
+	},
+	"widgets/layouts-2": func(parent gi.Widget) {
+		ly := gi.NewLayout(parent)
+		ly.Style(func(s *styles.Style) {
+			s.Gap.Set(units.Em(2))
+		})
+		gi.NewButton(ly).SetText("First")
+		gi.NewButton(ly).SetText("Second")
+		gi.NewButton(ly).SetText("Third")
+	},
 	"widgets/meters-0": func(parent gi.Widget) {
 		gi.NewMeter(parent)
 	},
