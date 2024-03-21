@@ -2,7 +2,7 @@
 
 Cogent Core provides various different types of customizable dialogs with support for any kind of content.
 
-You can use the [[gi.MessageDialog]] helper function to make a dialog with a text message:
+You can make a dialog with a text message:
 
 ```Go
 bt := gi.NewButton(parent).SetText("Message")
@@ -11,7 +11,7 @@ bt.OnClick(func(e events.Event) {
 })
 ```
 
-You can use the [[gi.ErrorDialog]] helper function to make a dialog with an error:
+You can make a dialog with an error:
 
 ```Go
 bt := gi.NewButton(parent).SetText("Error")

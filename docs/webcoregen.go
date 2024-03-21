@@ -228,6 +228,18 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 			gi.MessageSnackbar(parent, fmt.Sprintf("OnInput: %v", sr.Value))
 		})
 	},
+	"widgets/snackbars-0": func(parent gi.Widget) {
+		bt := gi.NewButton(parent).SetText("Message")
+		bt.OnClick(func(e events.Event) {
+			gi.MessageSnackbar(bt, "New messages loaded")
+		})
+	},
+	"widgets/snackbars-1": func(parent gi.Widget) {
+		bt := gi.NewButton(parent).SetText("Message")
+		bt.OnClick(func(e events.Event) {
+			gi.ErrorSnackbar(bt, errors.New("file not found"), "Error loading page")
+		})
+	},
 	"widgets/spinners-0": func(parent gi.Widget) {
 		gi.NewSpinner(parent)
 	},
