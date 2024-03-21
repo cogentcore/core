@@ -15,5 +15,3 @@ gi.NewButton(parent).SetText("Click me!").OnClick(func(e events.Event) {
     gi.MessageSnackbar(parent, fmt.Sprint("Button clicked at ", e.Pos()))
 })
 ```
-
-
