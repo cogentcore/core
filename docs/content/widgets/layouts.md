@@ -34,3 +34,28 @@ gi.NewButton(ly).SetText("First")
 gi.NewButton(ly).SetText("Second")
 gi.NewButton(ly).SetText("Third")
 ```
+
+You can limit the size of a layout:
+
+```Go
+ly := gi.NewLayout(parent)
+ly.Style(func(s *styles.Style) {
+    s.Max.X.Em(5)
+})
+gi.NewButton(ly).SetText("First")
+gi.NewButton(ly).SetText("Second")
+gi.NewButton(ly).SetText("Third")
+```
+
+You can make a layout add scroll bars when it overflows:
+
+```Go
+ly := gi.NewLayout(parent)
+ly.Style(func(s *styles.Style) {
+    s.Overflow.X = styles.OverflowAuto
+    s.Max.X.Em(5)
+})
+gi.NewButton(ly).SetText("First")
+gi.NewButton(ly).SetText("Second")
+gi.NewButton(ly).SetText("Third")
+```

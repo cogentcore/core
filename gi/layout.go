@@ -59,8 +59,9 @@ const (
 // so properties like background and border will have no effect.
 // All arbitrary collections of widgets should generally be contained
 // within a layout or a [Frame]; otherwise, the parent widget must take over
-// responsibility for positioning. Layouts automatically add scrollbars
+// responsibility for positioning. Layouts automatically can add scrollbars
 // depending on the [styles.Style.Overflow].
+//
 // For a [styles.Grid] layout, the [styles.Style.Columns] property should
 // generally be set to the desired number of columns, from which the number of rows
 // is computed; otherwise, it uses the square root of number of
