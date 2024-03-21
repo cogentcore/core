@@ -31,11 +31,6 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 	"basics/widgets-0": func(parent gi.Widget) {
 		gi.NewButton(parent).SetText("Click me!").SetIcon(icons.Add)
 	},
-	"basics/widgets-1": func(parent gi.Widget) {
-		sw := gi.NewSwitch(parent).SetText("Switch me!")
-		// Later...
-		gi.MessageSnackbar(parent, sw.Text)
-	},
 	"basics/events-0": func(parent gi.Widget) {
 		gi.NewButton(parent).SetText("Click me!").OnClick(func(e events.Event) {
 			gi.MessageSnackbar(parent, "Button clicked")
@@ -44,7 +39,6 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 	"basics/events-1": func(parent gi.Widget) {
 		gi.NewButton(parent).SetText("Click me!").OnClick(func(e events.Event) {
 			gi.MessageSnackbar(parent, fmt.Sprint("Button clicked at ", e.Pos()))
-			e.SetHandled() // this event will not be handled by other event handlers now
 		})
 	},
 	"basics/icons-0": func(parent gi.Widget) {

@@ -1,8 +1,8 @@
 # Building Cogent Core Apps
 
-All Cogent Core apps can be built using normal `go` command line tools (`go build`, `go run`, `go install`, etc). However, the Cogent Core command line tool `core` provides a build process optimized for cross-platform Cogent Core development. This tool automatically sets appropriate linker flags to reduce binary sizes, optimizes binaries for running as standalone GUI apps, and provides support for building for mobile and web platforms.
+All Cogent Core apps can be built using normal `go` commands (`go build`, `go run`, `go install`, etc). However, the Cogent Core command line tool `core` provides a build process optimized for cross-platform Cogent Core development. This tool automatically sets appropriate linker flags to reduce binary sizes, optimizes binaries for running as standalone GUI apps, and provides support for building for mobile and web platforms.
 
-The `core` command line tool provides four main building commands:
+The `core` command line tool provides four main build commands, as documented below. In general, you should use `core run` during development.
 
 1. `core build` builds a standalone binary executable for the app (`.exe` on Windows, `.app` on iOS, `.apk` on Android, `.wasm` and associated `.html` and `.js` files on Web, and no extension on macOS and Linux). The resulting file(s) are placed in the current directory for desktop platforms, and `bin/{platform}` for other platforms (eg: `bin/android`).
 

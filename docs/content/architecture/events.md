@@ -1,10 +1,18 @@
 # Events
 
+## Order of event handling
+
 Events handlers are called in the reverse order that they are added (last added, first called), so that default event handling (added during initial widget configuration) can be overridden by special end-user handlers.
 
-There are two main categories of events that differ in the way they are handled: Mouse / Touch events, vs. Key events.
+There are three levels of event handlers (see [[events.Listeners]]): `First`, regular, and `Final`, which are processed in that order (and last added, first processed within each Listener). For example, this allows a default event handler to get the first crack at handling an event, even though it would be the last one called by default, by adding it to `First` using [[gi.WidgetBase.OnFirst]] instead.
 
-## Mouse events
+If an event handler calls [[events.Event.SetHandled]], further event handlers will not be called after it for that event.
+
+## Mouse and key events
+
+There are two main categories of events that differ in the way they are handled: mouse/touch events and key events.
+
+### Mouse events
 
 Mouse events are generally processed in a _depth first_ manner, with the most deeply nested Widget receiving the event first, and, if not yet handled, outer Widgets get their chance.
 
@@ -14,15 +22,11 @@ Basic mouse events, which begin with `Mouse` (e.g., [[events.MouseDown]], [[even
 
 Processed events such as [[events.Click]] are generated from basic events (e.g., a Click is a Down and Up on the same Widget), and are the main target of event handlers.
 
-## Key events and Focus
+### Key events and Focus
 
 The [[events.KeyChord]] is the main key event, because it provides the full set of modifiers in a string-formatted form, whereas the more basic [[events.Key]] event records each specific key down and up event using standardized key codes.
 
 Key events are mainly sent to the single _current focus_ Widget, which is determined by focus-changing events and typically has a style indicating that it is in focus.  However, see the next section for other ways to get key events based on priority ordering.
-
-## Priority Ordering (First, Final)
-
-There are three levels of event handlers (see [[events.Listeners]]): `First`, regular, and `Final`, which are processed in that order (and last added, first processed within each Listener).  This allows a default event handler to get first crack at handling a given event, even though it is added last, for example, by adding it to First.
 
 ### Key events
 
