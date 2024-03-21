@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/icons"
@@ -170,6 +171,15 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 	"widgets/frames-2": func(parent gi.Widget) {
 		fr := gi.NewFrame(parent)
 		fr.Style(func(s *styles.Style) {
+			s.Background = gradient.NewLinear().AddStop(colors.Yellow, 0).AddStop(colors.Orange, 0.5).AddStop(colors.Red, 1)
+		})
+		gi.NewButton(fr).SetText("First")
+		gi.NewButton(fr).SetText("Second")
+		gi.NewButton(fr).SetText("Third")
+	},
+	"widgets/frames-3": func(parent gi.Widget) {
+		fr := gi.NewFrame(parent)
+		fr.Style(func(s *styles.Style) {
 			s.Border.Width.Set(units.Dp(4))
 			s.Border.Color.Set(colors.C(colors.Scheme.Outline))
 		})
@@ -177,7 +187,7 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		gi.NewButton(fr).SetText("Second")
 		gi.NewButton(fr).SetText("Third")
 	},
-	"widgets/frames-3": func(parent gi.Widget) {
+	"widgets/frames-4": func(parent gi.Widget) {
 		fr := gi.NewFrame(parent)
 		fr.Style(func(s *styles.Style) {
 			s.Border.Radius = styles.BorderRadiusLarge
@@ -188,7 +198,7 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		gi.NewButton(fr).SetText("Second")
 		gi.NewButton(fr).SetText("Third")
 	},
-	"widgets/frames-4": func(parent gi.Widget) {
+	"widgets/frames-5": func(parent gi.Widget) {
 		fr := gi.NewFrame(parent)
 		fr.Style(func(s *styles.Style) {
 			s.Grow.Set(0, 0)

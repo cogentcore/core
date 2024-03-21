@@ -23,6 +23,18 @@ gi.NewButton(fr).SetText("Second")
 gi.NewButton(fr).SetText("Third")
 ```
 
+You can add a gradient background to a frame:
+
+```Go
+fr := gi.NewFrame(parent)
+fr.Style(func(s *styles.Style) {
+    s.Background = gradient.NewLinear().AddStop(colors.Yellow, 0).AddStop(colors.Orange, 0.5).AddStop(colors.Red, 1)
+})
+gi.NewButton(fr).SetText("First")
+gi.NewButton(fr).SetText("Second")
+gi.NewButton(fr).SetText("Third")
+```
+
 You can add a border to a frame:
 
 ```Go
