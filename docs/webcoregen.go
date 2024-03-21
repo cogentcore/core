@@ -7,11 +7,13 @@ import (
 	"fmt"
 	"maps"
 	"strings"
+	"time"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
+	"cogentcore.org/core/giv"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -525,6 +527,15 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		tf := gi.NewTextField(parent)
 		tf.OnInput(func(e events.Event) {
 			gi.MessageSnackbar(parent, "OnInput: "+tf.Text())
+		})
+	},
+	"views/values-0": func(parent gi.Widget) {
+		giv.NewValue(parent, colors.Orange)
+	},
+	"views/values-1": func(parent gi.Widget) {
+		t := time.Now()
+		giv.NewValue(parent, &t).OnChange(func(e events.Event) {
+			gi.MessageSnackbar(parent, "The time is "+t.Format(time.DateTime))
 		})
 	},
 	"architecture/styling-0": func(parent gi.Widget) {

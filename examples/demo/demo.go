@@ -342,7 +342,7 @@ func values(ts *gi.Tabs) {
 	tab := ts.NewTab("Values")
 
 	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Values")
-	gi.NewLabel(tab).SetText("Cogent Core provides the giv value system, which allows you to instantly turn Go values and functions into type-specific widgets bound to the original values. This powerful system means that you can automatically turn backend data structures into GUI apps with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.")
+	gi.NewLabel(tab).SetText("Cogent Core provides the giv value system, which allows you to instantly turn Go values into interactive widgets bound to the original values with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.")
 
 	gi.NewButton(tab).SetText("Inspector").OnClick(func(e events.Event) {
 		giv.InspectorWindow(ts.Scene)
@@ -351,7 +351,7 @@ func values(ts *gi.Tabs) {
 	giv.NewValue(tab, colors.Orange)
 	giv.NewValue(tab, time.Now())
 	giv.NewValue(tab, 5*time.Minute)
-	giv.NewValue(tab, 500*time.Millisecond).SetTags(map[string]string{"min": "10ms", "max": "10s", "step": "10ms"})
+	giv.NewValue(tab, 500*time.Millisecond)
 	giv.NewValue(tab, gi.Filename("demo.go"))
 	giv.NewValue(tab, gi.AppearanceSettings.FontFamily)
 	giv.NewValue(tab, giv.ColorMapName("ColdHot"))
