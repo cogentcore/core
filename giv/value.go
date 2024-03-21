@@ -8,7 +8,6 @@ package giv
 
 import (
 	"fmt"
-	"log/slog"
 	"reflect"
 	"strconv"
 
@@ -367,7 +366,10 @@ func OpenDialogBase(v Value, cd ConfigDialoger, ctx gi.Widget, fun func()) {
 	ds.Run()
 }
 
-func (v *ValueBase[W]) SetValue(val any) bool {
+// SetValue updates the underlying value representation of the Value to the given value.
+// It also sends a change event. It does nothing if the value is read-only. It returns
+// whether the value was successfully set.
+func (v *ValueBase[W]) SetValue(value any) bool {
 	if v.IsReadOnly() {
 		return false
 	}
@@ -376,26 +378,24 @@ func (v *ValueBase[W]) SetValue(val any) bool {
 	if v.Owner != nil {
 		switch v.OwnKind {
 		case reflect.Struct:
-			err = laser.SetRobust(laser.PtrValue(v.Value).Interface(), val)
+			err = laser.SetRobust(laser.PtrValue(v.Value).Interface(), value)
 			wasSet = true
 		case reflect.Map:
-			wasSet, err = v.SetValueMap(val)
+			wasSet, err = v.SetValueMap(value)
 		case reflect.Slice:
-			err = laser.SetRobust(laser.PtrValue(v.Value).Interface(), val)
+			err = laser.SetRobust(laser.PtrValue(v.Value).Interface(), value)
 		}
 		if updtr, ok := v.Owner.(gi.Updater); ok {
-			// fmt.Printf("updating: %v\n", updtr)
 			updtr.Update()
 		}
 	} else {
-		err = laser.SetRobust(laser.PtrValue(v.Value).Interface(), val)
+		err = laser.SetRobust(laser.PtrValue(v.Value).Interface(), value)
 		wasSet = true
 	}
-	// fmt.Printf("value view: %T sending for setting val %v\n", v.This(), val)
 	v.SendChange()
 	if err != nil {
-		// todo: snackbar for error?
-		slog.Error("giv.SetValue error", "type", v.Value.Type(), "err", err)
+		gi.ErrorSnackbar(v.Widget, err, "Error setting value")
+		return false
 	}
 	return wasSet
 }

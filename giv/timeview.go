@@ -314,7 +314,7 @@ func (v *TimeValue) Config() {
 	})
 	dt.SetReadOnly(v.IsReadOnly())
 	dt.SetValidator(func() error {
-		d, err := time.Parse("01/02/2006", dt.Text())
+		d, err := time.Parse("1/2/2006", dt.Text())
 		if err != nil {
 			return err
 		}
