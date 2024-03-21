@@ -20,58 +20,35 @@ You can convert an icon into its filled version:
 gi.NewButton(parent).SetIcon(icons.Home.Fill())
 ```
 
-## Adding app-specific icons
+## Custom icons
 
-To add your own icons, use something like the following cases.
-
-If the icons are in a `icons` subdirectory, and you're building a `main` app:
+You can add custom icons to your app using [[icons.AddFS]]:
 
 ```go
 //go:embed icons/*.svg
 var myIcons embed.FS
 
-func main() {
+func main() { // or init()
     icons.AddFS(grr.Log1(fs.Sub(myIcons, "icons")))
 }
 ```
 
-Alternatively, if you have a separate icons directory in a larger, more complex app, you can do the embed directly in that directory, and include it in the main:
-
-In `icons/icons.go`:
+Then, you can just use the string name of one of your icons, without the .svg extension, to specify your icon:
 
 ```go
-//go:embed *.svg
-var Icons embed.FS
-
-func init() {
-	icons.AddFS(Icons)
-}
+gi.NewButton(parent).SetIcon("my-icon-name")
 ```
 
-In a `main.go`, anonymously import the icons to trigger the init function:
-
-```go
-	_ "cogentcore.org/cogent/code/icons"
-```
-
-In either case, you can just use the string name, _without the .svg extension_, as an argument to any place where an icon is specified:
-
-```go
-    gi.NewButton(b).SetIcon("my_icon_name")
-```    
-
-## Using bitmap files instead of SVG
-
-Although only SVG files are supported for icons, you can easily embed a bitmap image file in an SVG.  The `svg` tool can do this for you, as follows:
+Although only SVG files are supported for icons, you can easily embed a bitmap image file in an SVG file. Cogent Core provides an `svg` command line tool that can do this for you. To install it, run:
 
 ```sh
 go install cogentcore.org/core/svg/cmd/svg@main
 ```
 
+Then, to embed an image into an svg file, run:
+
 ```sh
 svg embed-image my-image.png
 ```
 
-This will put create a file called `my-image.svg` that has the image embedded into it. Then, you can use that SVG file as an icon by adding the svg file to the icons filesystem, as described above.
-
-
+This will create a file called `my-image.svg` that has the image embedded into it. Then, you can use that SVG file as an icon by adding the svg file to the icons filesystem, as described above.
