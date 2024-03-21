@@ -57,29 +57,6 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 			s.Font.Size.Dp(21)
 		})
 	},
-	"basics/styling-3": func(parent gi.Widget) {
-		parent.OnWidgetAdded(func(w gi.Widget) {
-			w.Style(func(s *styles.Style) {
-				s.Color = colors.C(colors.Scheme.Error.Base)
-			})
-		})
-		gi.NewLabel(parent).SetText("Label")
-		gi.NewSwitch(parent).SetText("Switch")
-		gi.NewTextField(parent).SetText("Text field")
-	},
-	"basics/styling-4": func(parent gi.Widget) {
-		parent.OnWidgetAdded(func(w gi.Widget) {
-			switch w := w.(type) {
-			case *gi.Button:
-				w.Style(func(s *styles.Style) {
-					s.Border.Radius = styles.BorderRadiusSmall
-				})
-			}
-		})
-		gi.NewButton(parent).SetText("First")
-		gi.NewButton(parent).SetText("Second")
-		gi.NewButton(parent).SetText("Third")
-	},
 	"widgets/buttons-0": func(parent gi.Widget) {
 		gi.NewButton(parent).SetText("Download")
 	},
@@ -544,5 +521,28 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		tf.OnInput(func(e events.Event) {
 			gi.MessageSnackbar(parent, "OnInput: "+tf.Text())
 		})
+	},
+	"architecture/styling-0": func(parent gi.Widget) {
+		parent.OnWidgetAdded(func(w gi.Widget) {
+			w.Style(func(s *styles.Style) {
+				s.Color = colors.C(colors.Scheme.Error.Base)
+			})
+		})
+		gi.NewLabel(parent).SetText("Label")
+		gi.NewSwitch(parent).SetText("Switch")
+		gi.NewTextField(parent).SetText("Text field")
+	},
+	"architecture/styling-1": func(parent gi.Widget) {
+		parent.OnWidgetAdded(func(w gi.Widget) {
+			switch w := w.(type) {
+			case *gi.Button:
+				w.Style(func(s *styles.Style) {
+					s.Border.Radius = styles.BorderRadiusSmall
+				})
+			}
+		})
+		gi.NewButton(parent).SetText("First")
+		gi.NewButton(parent).SetText("Second")
+		gi.NewButton(parent).SetText("Third")
 	},
 }
