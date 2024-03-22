@@ -8,11 +8,17 @@ You can create a [[giv.Value]] from any value:
 giv.NewValue(parent, colors.Orange)
 ```
 
-You can detect when the user changes the value:
+You can detect when the user changes a value:
 
 ```Go
 t := time.Now()
 giv.NewValue(parent, &t).OnChange(func(e events.Event) {
     gi.MessageSnackbar(parent, "The time is "+t.Format(time.DateTime))
 })
+```
+
+You can customize a value using tags:
+
+```Go
+giv.NewValue(parent, 70, `view:"slider"`)
 ```

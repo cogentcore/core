@@ -87,7 +87,7 @@ type NumberValue struct {
 func (v *NumberValue) Config() {
 	vk := laser.NonPtrType(v.Value.Type()).Kind()
 	if vk >= reflect.Int && vk <= reflect.Uintptr {
-		v.Widget.SetStep(1).SetPageStep(10)
+		v.Widget.SetStep(1).SetEnforceStep(true)
 	}
 	if vk >= reflect.Uint && vk <= reflect.Uintptr {
 		v.Widget.SetMin(0)
@@ -132,6 +132,10 @@ type SliderValue struct {
 }
 
 func (v *SliderValue) Config() {
+	vk := laser.NonPtrType(v.Value.Type()).Kind()
+	if vk >= reflect.Int && vk <= reflect.Uintptr {
+		v.Widget.SetStep(1).SetEnforceStep(true).SetMax(100)
+	}
 	if min, ok := v.Tag("min"); ok {
 		minv, err := laser.ToFloat32(min)
 		if grr.Log(err) == nil {

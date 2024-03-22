@@ -538,6 +538,9 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 			gi.MessageSnackbar(parent, "The time is "+t.Format(time.DateTime))
 		})
 	},
+	"views/values-2": func(parent gi.Widget) {
+		giv.NewValue(parent, 70, `view:"slider"`)
+	},
 	"architecture/styling-0": func(parent gi.Widget) {
 		parent.OnWidgetAdded(func(w gi.Widget) {
 			w.Style(func(s *styles.Style) {
