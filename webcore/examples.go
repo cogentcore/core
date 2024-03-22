@@ -34,14 +34,7 @@ func ExampleHandler(ctx *coredom.Context) bool {
 	// the node we actually care about is our first child, the <pre> element
 	ctx.Node = ctx.Node.FirstChild
 
-	fr := coredom.New[*gi.Frame](ctx)
-	fr.Style(func(s *styles.Style) {
-		s.Direction = styles.Column
-		s.Grow.Set(1, 0)
-		s.Background = nil
-	})
-
-	gi.NewLabel(fr).SetText(coredom.ExtractText(ctx)).Style(func(s *styles.Style) {
+	gi.NewLabel(ctx.Parent()).SetText(coredom.ExtractText(ctx)).Style(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 		s.Background = colors.C(colors.Scheme.SurfaceContainer)
 		s.Border.Radius = styles.BorderRadiusMedium
@@ -53,7 +46,7 @@ func ExampleHandler(ctx *coredom.Context) bool {
 	if fn == nil {
 		slog.Error("programmer error: webcore example not found in webcore.Examples (you probably need to run go generate again)", "id", id)
 	} else {
-		fn(fr)
+		fn(ctx.Parent())
 	}
 
 	return true
