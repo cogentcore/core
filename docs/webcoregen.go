@@ -529,6 +529,9 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 			gi.MessageSnackbar(parent, "OnInput: "+tf.Text())
 		})
 	},
+	"widgets/tooltips-0": func(parent gi.Widget) {
+		gi.NewButton(parent).SetIcon(icons.Add).SetTooltip("Add a new item to the list")
+	},
 	"views/values-0": func(parent gi.Widget) {
 		giv.NewValue(parent, colors.Orange)
 	},
