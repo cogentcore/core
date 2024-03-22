@@ -23,7 +23,7 @@ import (
 // platforms (desktop), for which you should use [AppMulti]. An AppSingle is associated
 // with a corresponding type of [goosi.Drawer] and [goosi.Window]. The [goosi.Window]
 // type should embed [WindowSingle].
-type AppSingle[D goosi.Drawer, W goosi.Window] struct { //gti:add
+type AppSingle[D goosi.Drawer, W goosi.Window] struct {
 	App
 
 	// EvMgr is the event manager for the app

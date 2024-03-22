@@ -11,7 +11,7 @@ import (
 )
 
 // Window is the implementation of [goosi.Window] for the iOS platform.
-type Window struct { //gti:add
+type Window struct {
 	base.WindowSingle[*App]
 }
 

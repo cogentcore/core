@@ -7,8 +7,6 @@
 // Package ios implements goosi interfaces on iOS mobile devices
 package ios
 
-//go:generate core generate
-
 import (
 	"log"
 	"os/user"
@@ -43,7 +41,7 @@ func Init() {
 var TheApp = &App{AppSingle: base.NewAppSingle[*vdraw.Drawer, *Window]()}
 
 // App is the [goosi.App] implementation for the iOS platform
-type App struct { //gti:add
+type App struct {
 	base.AppSingle[*vdraw.Drawer, *Window]
 
 	// GPU is the system GPU used for the app

@@ -6,8 +6,6 @@
 // to allow for offscreen testing and capturing of apps.
 package offscreen
 
-//go:generate core generate
-
 import (
 	"image"
 	"os"
@@ -31,7 +29,7 @@ func Init() {
 var TheApp = &App{AppSingle: base.NewAppSingle[*Drawer, *Window]()}
 
 // App is the [goosi.App] implementation for the offscreen platform
-type App struct { //gti:add
+type App struct {
 	base.AppSingle[*Drawer, *Window]
 
 	// TempDataDir is the path of the app data directory, used as the

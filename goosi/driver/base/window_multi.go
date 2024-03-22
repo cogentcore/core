@@ -21,7 +21,7 @@ import (
 // platforms (mobile, web, and offscreen), for which you should use [WindowSingle].
 // A WindowMulti is associated with a corresponding [goosi.App] type.
 // The [goosi.App] type should embed [AppMulti].
-type WindowMulti[A goosi.App, D goosi.Drawer] struct { //gti:add
+type WindowMulti[A goosi.App, D goosi.Drawer] struct {
 	Window[A]
 
 	// EvMgr is the event manager for the window

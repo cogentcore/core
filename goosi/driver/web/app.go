@@ -7,8 +7,6 @@
 // Package web implements goosi interfaces on the web through WASM
 package web
 
-//go:generate core generate
-
 import (
 	"fmt"
 	"image"
@@ -53,7 +51,7 @@ func Init() {
 var TheApp = &App{AppSingle: base.NewAppSingle[*Drawer, *Window]()}
 
 // App is the [goosi.App] implementation for the web platform
-type App struct { //gti:add
+type App struct {
 	base.AppSingle[*Drawer, *Window]
 
 	// UnderlyingPlatform is the underlying system platform (Android, iOS, etc)

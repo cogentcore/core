@@ -9,8 +9,6 @@
 
 package desktop
 
-//go:generate core generate
-
 import (
 	"log"
 	"runtime"
@@ -37,7 +35,7 @@ func Init() {
 var TheApp = &App{AppMulti: base.NewAppMulti[*Window]()}
 
 // App is the [goosi.App] implementation for the desktop platform
-type App struct { //gti:add
+type App struct {
 	base.AppMulti[*Window]
 
 	// GPU is the system GPU used for the app

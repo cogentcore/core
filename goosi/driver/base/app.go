@@ -11,8 +11,6 @@
 // to implement interfaces defined in package goosi.
 package base
 
-//go:generate core generate
-
 import (
 	"os"
 	"path/filepath"
@@ -23,7 +21,7 @@ import (
 )
 
 // App contains the data and logic common to all implementations of [goosi.App].
-type App struct { //gti:add
+type App struct {
 	// This is the App as a [goosi.App] interface, which preserves the actual identity
 	// of the app when calling interface methods in the base App.
 	This goosi.App `view:"-"`

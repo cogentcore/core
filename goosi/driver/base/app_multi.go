@@ -20,7 +20,7 @@ import (
 // platforms (mobile, web, and offscreen), for which you should use [AppSingle]. An AppMulti is associated
 // with a corresponding type of [goosi.Window]. The [goosi.Window]
 // type should embed [WindowMulti].
-type AppMulti[W goosi.Window] struct { //gti:add
+type AppMulti[W goosi.Window] struct {
 	App
 
 	// Windows are the windows associated with the app
