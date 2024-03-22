@@ -492,6 +492,11 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 			gi.MessageSnackbar(sw, fmt.Sprintf("Currently selected: %v", sw.SelectedItems()))
 		})
 	},
+	"widgets/tabs-0": func(parent gi.Widget) {
+		ts := gi.NewTabs(parent)
+		ts.NewTab("First")
+		ts.NewTab("Second")
+	},
 	"widgets/text-fields-0": func(parent gi.Widget) {
 		gi.NewTextField(parent)
 	},
