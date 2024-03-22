@@ -56,9 +56,6 @@ type StructView struct {
 	// Otherwise, it is nil.
 	StructValue Value `set:"-"`
 
-	// has the value of any field changed?  updated by the ViewSig signals from fields
-	Changed bool `set:"-"`
-
 	// Value representations of the fields
 	FieldViews []Value `set:"-" json:"-" xml:"-"`
 
@@ -103,9 +100,6 @@ func (sv *StructView) SetStyles() {
 // SetStruct sets the source struct that we are viewing -- rebuilds the
 // children to represent this struct
 func (sv *StructView) SetStruct(st any) *StructView {
-	if sv.Struct != st {
-		sv.Changed = false
-	}
 	sv.Struct = st
 	sv.Update()
 	return sv
@@ -334,7 +328,6 @@ func (sv *StructView) ConfigStructGrid() bool {
 			vv.OnChange(func(e events.Event) {
 				sv.UpdateFieldAction()
 				// note: updating vv here is redundant -- relevant field will have already updated
-				sv.Changed = true
 				if !laser.KindIsBasic(laser.NonPtrValue(vv.Val()).Kind()) {
 					if updtr, ok := sv.Struct.(gi.Updater); ok {
 						updtr.Update()
