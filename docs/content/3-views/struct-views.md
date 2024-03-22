@@ -67,3 +67,13 @@ type person struct {
 }
 giv.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35}).SetReadOnly(true)
 ```
+
+You can specify a default value for a field, which will be displayed in the tooltip for the field label, make the label highlighted when the value is non-default, and allow the user to reset the value to the default value by double clicking on the label:
+
+```Go
+type person struct {
+    Name string `default:"Gopher"`
+    Age int `default:"20:30"`
+}
+giv.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35})
+```

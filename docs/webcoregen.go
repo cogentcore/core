@@ -589,6 +589,13 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		}
 		giv.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35}).SetReadOnly(true)
 	},
+	"views/struct-views-6": func(parent gi.Widget) {
+		type person struct {
+			Name string `default:"Gopher"`
+			Age  int    `default:"20:30"`
+		}
+		giv.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35})
+	},
 	"architecture/styling-0": func(parent gi.Widget) {
 		parent.OnWidgetAdded(func(w gi.Widget) {
 			w.Style(func(s *styles.Style) {

@@ -133,10 +133,13 @@ func (sv *StructViewInline) Config() {
 				if isDef {
 					return
 				}
+				e.SetHandled()
 				err := laser.SetFromDefaultTag(vv.Val(), dtag)
 				if err != nil {
 					gi.ErrorSnackbar(lbl, err, "Error setting default value")
 				} else {
+					lbl.Update()
+					vv.Update()
 					vv.SendChange(e)
 				}
 			})
