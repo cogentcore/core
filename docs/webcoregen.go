@@ -55,7 +55,7 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		})
 	},
 	"basics/styling-2": func(parent gi.Widget) {
-		gi.NewFrame(parent).Style(func(s *styles.Style) {
+		gi.NewBox(parent).Style(func(s *styles.Style) {
 			s.Min.Set(units.Dp(50))
 			s.Background = colors.C(colors.Scheme.Primary.Base)
 		})

@@ -22,7 +22,7 @@ gi.NewButton(parent).SetText("Success button").Style(func(s *styles.Style) {
 You can change the size of a widget using Cogent Core's flexible unit system:
 
 ```Go
-gi.NewFrame(parent).Style(func(s *styles.Style) {
+gi.NewBox(parent).Style(func(s *styles.Style) {
     s.Min.Set(units.Dp(50))
     s.Background = colors.C(colors.Scheme.Primary.Base)
 })
