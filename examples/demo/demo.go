@@ -398,9 +398,9 @@ func views(ts *gi.Tabs) {
 
 	mp := map[string]string{}
 
-	mp["mapkey1"] = "whatever"
-	mp["mapkey2"] = "testing"
-	mp["mapkey3"] = "boring"
+	mp["Go"] = "Elegant, fast, and easy-to-use"
+	mp["Python"] = "Slow and duck-typed"
+	mp["C++"] = "Hard to use and slow to compile"
 
 	giv.NewMapView(vts.NewTab("Map view")).SetMap(&mp)
 
