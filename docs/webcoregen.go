@@ -541,6 +541,27 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 	"views/values-2": func(parent gi.Widget) {
 		giv.NewValue(parent, 70, `view:"slider"`)
 	},
+	"views/map-views-0": func(parent gi.Widget) {
+		giv.NewMapView(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5})
+	},
+	"views/map-views-1": func(parent gi.Widget) {
+		m := map[string]int{"Go": 1, "C++": 3, "Python": 5}
+		giv.NewMapView(parent).SetMap(&m).OnChange(func(e events.Event) {
+			gi.MessageSnackbar(parent, fmt.Sprintf("Map: %v", m))
+		})
+	},
+	"views/map-views-2": func(parent gi.Widget) {
+		giv.NewMapView(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5}).SetReadOnly(true)
+	},
+	"views/map-views-3": func(parent gi.Widget) {
+		giv.NewMapViewInline(parent).SetMap(&map[string]int{"Go": 1, "C++": 3})
+	},
+	"views/map-views-4": func(parent gi.Widget) {
+		giv.NewValue(parent, &map[string]int{"Go": 1, "C++": 3})
+	},
+	"views/map-views-5": func(parent gi.Widget) {
+		giv.NewValue(parent, &map[string]int{"Go": 1, "C++": 3, "Python": 5})
+	},
 	"views/slice-views-0": func(parent gi.Widget) {
 		giv.NewSliceView(parent).SetSlice(&[]int{1, 3, 5})
 	},
