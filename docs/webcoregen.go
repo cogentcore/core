@@ -568,6 +568,27 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 			gi.MessageSnackbar(parent, fmt.Sprintf("You are %v", p))
 		})
 	},
+	"views/struct-views-3": func(parent gi.Widget) {
+		type person struct {
+			Name string
+			Age  int `view:"-"`
+		}
+		giv.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35})
+	},
+	"views/struct-views-4": func(parent gi.Widget) {
+		type person struct {
+			Name string `edit:"-"`
+			Age  int
+		}
+		giv.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35})
+	},
+	"views/struct-views-5": func(parent gi.Widget) {
+		type person struct {
+			Name string
+			Age  int
+		}
+		giv.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35}).SetReadOnly(true)
+	},
 	"architecture/styling-0": func(parent gi.Widget) {
 		parent.OnWidgetAdded(func(w gi.Widget) {
 			w.Style(func(s *styles.Style) {
