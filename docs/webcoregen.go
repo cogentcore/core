@@ -542,11 +542,31 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		giv.NewValue(parent, 70, `view:"slider"`)
 	},
 	"views/struct-views-0": func(parent gi.Widget) {
-		type myStruct struct {
+		type person struct {
 			Name string
 			Age  int
 		}
-		giv.NewStructView(parent).SetStruct(&myStruct{Name: "Go", Age: 35})
+		giv.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35})
+	},
+	"views/struct-views-1": func(parent gi.Widget) {
+		type person struct {
+			Name string
+			Age  int
+		}
+		p := person{Name: "Go", Age: 35}
+		giv.NewStructView(parent).SetStruct(&p).OnChange(func(e events.Event) {
+			gi.MessageSnackbar(parent, fmt.Sprintf("You are %v", p))
+		})
+	},
+	"views/struct-views-2": func(parent gi.Widget) {
+		type person struct {
+			Name string `immediate:"+"`
+			Age  int
+		}
+		p := person{Name: "Go", Age: 35}
+		giv.NewStructView(parent).SetStruct(&p).OnChange(func(e events.Event) {
+			gi.MessageSnackbar(parent, fmt.Sprintf("You are %v", p))
+		})
 	},
 	"architecture/styling-0": func(parent gi.Widget) {
 		parent.OnWidgetAdded(func(w gi.Widget) {
