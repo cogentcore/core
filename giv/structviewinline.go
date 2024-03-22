@@ -138,7 +138,6 @@ func (sv *StructViewInline) Config() {
 				if err != nil {
 					gi.ErrorSnackbar(lbl, err, "Error setting default value")
 				} else {
-					lbl.Update()
 					vv.Update()
 					vv.SendChange(e)
 				}
@@ -154,6 +153,9 @@ func (sv *StructViewInline) Config() {
 						// fmt.Printf("updating: %v kind: %v\n", updtr, vvv.Value.Kind())
 						updtr.Update()
 					}
+				}
+				if hasDef {
+					lbl.Update()
 				}
 				sv.SendChange(e)
 			})

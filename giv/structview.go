@@ -313,7 +313,6 @@ func (sv *StructView) ConfigStructGrid() bool {
 				if err != nil {
 					gi.ErrorSnackbar(lbl, err, "Error setting default value")
 				} else {
-					lbl.Update()
 					vv.Update()
 					vv.SendChange(e)
 				}
@@ -340,6 +339,9 @@ func (sv *StructView) ConfigStructGrid() bool {
 					if updtr, ok := sv.Struct.(gi.Updater); ok {
 						updtr.Update()
 					}
+				}
+				if hasDef {
+					lbl.Update()
 				}
 				sv.SendChange(e)
 			})
