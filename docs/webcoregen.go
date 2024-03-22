@@ -550,6 +550,12 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 			gi.MessageSnackbar(parent, fmt.Sprintf("Slice: %v", sl))
 		})
 	},
+	"views/slice-views-2": func(parent gi.Widget) {
+		giv.NewSliceView(parent).SetSlice(&[]int{1, 3, 5}).SetReadOnly(true)
+	},
+	"views/slice-views-3": func(parent gi.Widget) {
+		giv.NewSliceViewInline(parent).SetSlice(&[]int{1, 3, 5})
+	},
 	"views/struct-views-0": func(parent gi.Widget) {
 		type person struct {
 			Name string

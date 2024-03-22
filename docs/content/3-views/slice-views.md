@@ -16,3 +16,15 @@ giv.NewSliceView(parent).SetSlice(&sl).OnChange(func(e events.Event) {
     gi.MessageSnackbar(parent, fmt.Sprintf("Slice: %v", sl))
 })
 ```
+
+You can prevent the user from editing the slice:
+
+```Go
+giv.NewSliceView(parent).SetSlice(&[]int{1, 3, 5}).SetReadOnly(true)
+```
+
+You can make a slice view that fits in one line:
+
+```Go
+giv.NewSliceViewInline(parent).SetSlice(&[]int{1, 3, 5})
+```
