@@ -133,7 +133,7 @@ giv.NewStructViewInline(parent).SetStruct(&person{Name: "Go", Age: 35})
 
 Inline struct views support everything that normal struct views do, including everything documented above.
 
-When you use [[giv.NewValue]] with a struct object, it will create an inline struct view if the struct has four or fewer fields:
+When you use [[giv.NewValue]] with a struct value, it will create an inline struct view if the struct has four or fewer fields:
 
 ```Go
 type person struct {

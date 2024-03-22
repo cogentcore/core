@@ -28,3 +28,17 @@ You can make a slice view that fits in one line:
 ```Go
 giv.NewSliceViewInline(parent).SetSlice(&[]int{1, 3, 5})
 ```
+
+Inline slice views support everything that normal slice views do, including everything documented above.
+
+When you use [[giv.NewValue]] with a slice value, it will create an inline slice view if the slice has four or fewer elements:
+
+```Go
+giv.NewValue(parent, &[]int{1, 3, 5})
+```
+
+Otherwise, it will create a button that opens a dialog with a normal slice view:
+
+```Go
+giv.NewValue(parent, &[]int{1, 3, 5, 7, 9})
+```

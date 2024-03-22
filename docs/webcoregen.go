@@ -556,6 +556,12 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 	"views/slice-views-3": func(parent gi.Widget) {
 		giv.NewSliceViewInline(parent).SetSlice(&[]int{1, 3, 5})
 	},
+	"views/slice-views-4": func(parent gi.Widget) {
+		giv.NewValue(parent, &[]int{1, 3, 5})
+	},
+	"views/slice-views-5": func(parent gi.Widget) {
+		giv.NewValue(parent, &[]int{1, 3, 5, 7, 9})
+	},
 	"views/struct-views-0": func(parent gi.Widget) {
 		type person struct {
 			Name string
