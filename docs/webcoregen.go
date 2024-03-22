@@ -597,7 +597,7 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		}
 		giv.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35, Precision: 50})
 	},
-	"architecture/styling-0": func(parent gi.Widget) {
+	"advanced/styling-0": func(parent gi.Widget) {
 		parent.OnWidgetAdded(func(w gi.Widget) {
 			w.Style(func(s *styles.Style) {
 				s.Color = colors.C(colors.Scheme.Error.Base)
@@ -607,7 +607,7 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		gi.NewSwitch(parent).SetText("Switch")
 		gi.NewTextField(parent).SetText("Text field")
 	},
-	"architecture/styling-1": func(parent gi.Widget) {
+	"advanced/styling-1": func(parent gi.Widget) {
 		parent.OnWidgetAdded(func(w gi.Widget) {
 			switch w := w.(type) {
 			case *gi.Button:
