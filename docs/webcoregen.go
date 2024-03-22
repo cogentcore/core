@@ -591,10 +591,11 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 	},
 	"views/struct-views-6": func(parent gi.Widget) {
 		type person struct {
-			Name string `default:"Gopher"`
-			Age  int    `default:"20:30"`
+			Name      string `default:"Gopher"`
+			Age       int    `default:"20:30"`
+			Precision int    `default:"64,32"`
 		}
-		giv.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35})
+		giv.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35, Precision: 50})
 	},
 	"architecture/styling-0": func(parent gi.Widget) {
 		parent.OnWidgetAdded(func(w gi.Widget) {
