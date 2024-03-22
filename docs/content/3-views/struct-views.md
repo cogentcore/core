@@ -68,6 +68,34 @@ type person struct {
 giv.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35}).SetReadOnly(true)
 ```
 
+You can use structs with embedded fields:
+
+```Go
+type Person struct {
+    Name string
+    Age  int
+}
+type employee struct {
+    Person
+    Role string
+}
+giv.NewStructView(parent).SetStruct(&employee{Person{Name: "Go", Age: 35}, "Programmer"})
+```
+
+You can expand fields that are themselves structs:
+
+```Go
+type person struct {
+    Name string
+    Age  int
+}
+type employee struct {
+    Role    string
+    Manager person `view:"add-fields"`
+}
+giv.NewStructView(parent).SetStruct(&employee{"Programmer", person{Name: "Go", Age: 35}})
+```
+
 You can specify a default value (or list or range of values) for a field, which will be displayed in the tooltip for the field label, make the label highlighted when the value is non-default, and allow the user to reset the value to the default value by double clicking on the label:
 
 ```Go

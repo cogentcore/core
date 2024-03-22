@@ -590,6 +590,28 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		giv.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35}).SetReadOnly(true)
 	},
 	"views/struct-views-6": func(parent gi.Widget) {
+		type Person struct {
+			Name string
+			Age  int
+		}
+		type employee struct {
+			Person
+			Role string
+		}
+		giv.NewStructView(parent).SetStruct(&employee{Person{Name: "Go", Age: 35}, "Programmer"})
+	},
+	"views/struct-views-7": func(parent gi.Widget) {
+		type person struct {
+			Name string
+			Age  int
+		}
+		type employee struct {
+			Role    string
+			Manager person `view:"add-fields"`
+		}
+		giv.NewStructView(parent).SetStruct(&employee{"Programmer", person{Name: "Go", Age: 35}})
+	},
+	"views/struct-views-8": func(parent gi.Widget) {
 		type person struct {
 			Name      string `default:"Gopher"`
 			Age       int    `default:"20:30"`
@@ -597,21 +619,21 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		}
 		giv.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35, Precision: 50})
 	},
-	"views/struct-views-7": func(parent gi.Widget) {
+	"views/struct-views-9": func(parent gi.Widget) {
 		type person struct {
 			Name string
 			Age  int
 		}
 		giv.NewStructViewInline(parent).SetStruct(&person{Name: "Go", Age: 35})
 	},
-	"views/struct-views-8": func(parent gi.Widget) {
+	"views/struct-views-10": func(parent gi.Widget) {
 		type person struct {
 			Name string
 			Age  int
 		}
 		giv.NewValue(parent, &person{Name: "Go", Age: 35})
 	},
-	"views/struct-views-9": func(parent gi.Widget) {
+	"views/struct-views-11": func(parent gi.Widget) {
 		type person struct {
 			Name        string
 			Age         int
