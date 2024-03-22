@@ -2,24 +2,11 @@
 
 Package GTI provides general purpose type information for Go types, methods, functions and variables.
 
-
-# key questions:
-
-* separate registries?  YES -- keeps it type specific
-
-* TypeRegistry
-* FuncRegistry
-
-not sure about these:
-
-* VarRegistry
-* ConstRegistry
-
 # Key functionality
 
-* generate tooltips for fields in structs
+* generate tooltips for fields in struct views
 
-* generate toolbar props for gogi methodview to generate greasi toolbars for arbitrary App types, and for Ki types.
+* generate tooltips for functions in func buttons
 
 * in grease, command method docs and config field docs
 
@@ -27,7 +14,7 @@ not sure about these:
 
 * Ki needs NameAndType, need to be able to use Type token to specify type.  Also for making a new child of given type.
 
-# notes
+# Notes
 
 * GTI is NOT Go ast because it doesn't store Type info for Fields, methods, etc.  There is no assumption that all types are processed -- only designated types.  It only records names, comments and directives.
 
