@@ -543,6 +543,9 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 	"widgets/tooltips-0": func(parent gi.Widget) {
 		gi.NewButton(parent).SetIcon(icons.Add).SetTooltip("Add a new item to the list")
 	},
+	"widgets/tooltips-1": func(parent gi.Widget) {
+		gi.NewSlider(parent)
+	},
 	"views/values-0": func(parent gi.Widget) {
 		giv.NewValue(parent, colors.Orange)
 	},

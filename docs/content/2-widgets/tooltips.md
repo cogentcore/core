@@ -7,3 +7,9 @@ You can set the tooltip of any widget:
 ```Go
 gi.NewButton(parent).SetIcon(icons.Add).SetTooltip("Add a new item to the list")
 ```
+
+Some widgets automatically add certain information to their tooltip by implementing the [[gi.Widget.WidgetTooltip]] method, like sliders:
+
+```Go
+gi.NewSlider(parent)
+```
