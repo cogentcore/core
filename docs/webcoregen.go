@@ -597,6 +597,30 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		}
 		giv.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35, Precision: 50})
 	},
+	"views/struct-views-7": func(parent gi.Widget) {
+		type person struct {
+			Name string
+			Age  int
+		}
+		giv.NewStructViewInline(parent).SetStruct(&person{Name: "Go", Age: 35})
+	},
+	"views/struct-views-8": func(parent gi.Widget) {
+		type person struct {
+			Name string
+			Age  int
+		}
+		giv.NewValue(parent, &person{Name: "Go", Age: 35})
+	},
+	"views/struct-views-9": func(parent gi.Widget) {
+		type person struct {
+			Name        string
+			Age         int
+			Job         string
+			LikesGo     bool
+			LikesPython bool
+		}
+		giv.NewValue(parent, &person{Name: "Go", Age: 35, Job: "Programmer", LikesGo: true})
+	},
 	"advanced/styling-0": func(parent gi.Widget) {
 		parent.OnWidgetAdded(func(w gi.Widget) {
 			w.Style(func(s *styles.Style) {

@@ -92,3 +92,38 @@ type person struct { //gti:add
     Name string
 }
 ```
+
+You can make a struct view that fits in one line:
+
+```Go
+type person struct {
+    Name string
+    Age  int
+}
+giv.NewStructViewInline(parent).SetStruct(&person{Name: "Go", Age: 35})
+```
+
+Inline struct views support everything that normal struct views do, including everything documented above.
+
+When you use [[giv.NewValue]] with a struct object, it will create an inline struct view if the struct has four or fewer fields:
+
+```Go
+type person struct {
+    Name string
+    Age  int
+}
+giv.NewValue(parent, &person{Name: "Go", Age: 35})
+```
+
+Otherwise, it will create a button that opens a dialog with a normal struct view:
+
+```Go
+type person struct {
+    Name        string
+    Age         int
+    Job         string
+    LikesGo     bool
+    LikesPython bool
+}
+giv.NewValue(parent, &person{Name: "Go", Age: 35, Job: "Programmer", LikesGo: true})
+```
