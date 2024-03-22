@@ -487,13 +487,12 @@ func FormatDefault(def string) string {
 	if def == "" {
 		return ""
 	}
-	if def[0] == '{' || def[0] == '[' { // complex type
+	if strings.ContainsAny(def, "{[") { // complex type, so don't split on commas and colons
 		return strings.ReplaceAll(def, `'`, `"`) // allow single quote to work as double quote for JSON format
 	}
+	// we split on commas and colons so we get the first item of lists and ranges
 	def = strings.Split(def, ",")[0]
-	if strings.Contains(def, ":") { // don't do ranges
-		return ""
-	}
+	def = strings.Split(def, ":")[0]
 	return def
 }
 

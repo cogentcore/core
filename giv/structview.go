@@ -405,7 +405,7 @@ func StructFieldIsDef(defs string, valPtr any, kind reflect.Kind) (bool, string)
 	}
 	v := laser.NonPtrValue(reflect.ValueOf(valPtr))
 	dtags := strings.Split(defs, ",")
-	if strings.ContainsAny(defs, "{[") { // complex type, no split on commas
+	if strings.ContainsAny(defs, "{[") { // complex type, so don't split on commas
 		dtags = []string{defs}
 	}
 	for _, def := range dtags {
