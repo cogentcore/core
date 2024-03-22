@@ -2,7 +2,7 @@
 
 Cogent Core provides interactive struct views that allow you to display a struct value to the user and have them edit it.
 
-You can make a struct view from any struct:
+You can make a struct view from any struct pointer:
 
 ```Go
 type person struct {
