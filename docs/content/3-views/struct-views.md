@@ -25,6 +25,8 @@ giv.NewStructView(parent).SetStruct(&p).OnChange(func(e events.Event) {
 })
 ```
 
+The display and behavior of the view can be controlled by setting various `struct tag` values.
+
 You can make it so that change events are sent immediately as the user types:
 
 ```Go
