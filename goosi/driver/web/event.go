@@ -12,6 +12,7 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/grr"
 	"cogentcore.org/core/mat32"
 )
 
@@ -171,14 +172,8 @@ func (a *App) RuneAndCodeFromKey(k string, down bool) (rune, key.Codes) {
 	case "Meta":
 		a.KeyMods.SetFlag(down, key.Meta)
 		return 0, key.CodeLeftMeta
-	case "Backspace":
-		return 0, key.CodeBackspace
-	case "Delete":
-		return 0, key.CodeDelete
 	case "Enter":
 		return 0, key.CodeReturnEnter
-	case "Tab":
-		return 0, key.CodeTab
 	case "ArrowDown":
 		return 0, key.CodeDownArrow
 	case "ArrowLeft":
@@ -190,7 +185,16 @@ func (a *App) RuneAndCodeFromKey(k string, down bool) (rune, key.Codes) {
 	case "Spacebar":
 		return ' ', 0
 	default:
-		return []rune(k)[0], 0
+		r := []rune(k)
+		// if there is more than one rune, we assume it is a key code
+		if len(r) > 1 {
+			kc := key.Codes(0)
+			err := kc.SetString(k)
+			if grr.Log(err) == nil {
+				return 0, kc
+			}
+		}
+		return r[0], 0
 	}
 }
 
