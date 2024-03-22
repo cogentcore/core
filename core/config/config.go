@@ -52,19 +52,19 @@ type Config struct { //gti:add
 	Webcore string
 
 	// the configuration options for the build, install, run, and pack commands
-	Build Build `cmd:"build,install,run,pack" view:"add-fields"`
+	Build Build `cmd:"build,install,run,pack"`
 
 	// the configuration information for the pack command
-	Pack Pack `cmd:"pack" view:"add-fields"`
+	Pack Pack `cmd:"pack"`
 
 	// the configuration information for web
-	Web Web `cmd:"build,install,run,pack" view:"add-fields"`
+	Web Web `cmd:"build,install,run,pack"`
 
 	// the configuration options for the log command
-	Log Log `cmd:"log" view:"add-fields"`
+	Log Log `cmd:"log"`
 
 	// the configuration options for the generate command
-	Generate Generate `cmd:"generate" view:"add-fields"`
+	Generate Generate `cmd:"generate"`
 }
 
 type Build struct { //gti:add
