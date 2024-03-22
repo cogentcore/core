@@ -37,6 +37,22 @@ gi.NewButton(parent).SetText("Share").SetIcon(icons.Share).SetMenu(func(m *gi.Sc
 })
 ```
 
+You can make a button trigger on a certain keyboard shortcut (`Command` is automatically converted to `Control` on non-macOS platforms):
+
+```Go
+gi.NewButton(parent).SetText("Save").SetShortcut("Command+S").OnClick(func(e events.Event) {
+    gi.MessageSnackbar(parent, "File saved")
+})
+```
+
+You can make a button trigger on a certain semantic key function, which have default bindings that the user can customize in their settings:
+
+```Go
+gi.NewButton(parent).SetText("Open").SetKey(keyfun.Open).OnClick(func(e events.Event) {
+    gi.MessageSnackbar(parent, "File opened")
+})
+```
+
 ## Types
 
 Cogent Core provides several different types of buttons for different use cases.

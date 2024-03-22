@@ -15,6 +15,7 @@ import (
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 	"cogentcore.org/core/webcore"
@@ -81,21 +82,31 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		})
 	},
 	"widgets/buttons-5": func(parent gi.Widget) {
-		gi.NewButton(parent).SetType(gi.ButtonFilled).SetText("Filled")
+		gi.NewButton(parent).SetText("Save").SetShortcut("Command+S").OnClick(func(e events.Event) {
+			gi.MessageSnackbar(parent, "File saved")
+		})
 	},
 	"widgets/buttons-6": func(parent gi.Widget) {
-		gi.NewButton(parent).SetType(gi.ButtonTonal).SetText("Tonal")
+		gi.NewButton(parent).SetText("Open").SetKey(keyfun.Open).OnClick(func(e events.Event) {
+			gi.MessageSnackbar(parent, "File opened")
+		})
 	},
 	"widgets/buttons-7": func(parent gi.Widget) {
-		gi.NewButton(parent).SetType(gi.ButtonElevated).SetText("Elevated")
+		gi.NewButton(parent).SetType(gi.ButtonFilled).SetText("Filled")
 	},
 	"widgets/buttons-8": func(parent gi.Widget) {
-		gi.NewButton(parent).SetType(gi.ButtonOutlined).SetText("Outlined")
+		gi.NewButton(parent).SetType(gi.ButtonTonal).SetText("Tonal")
 	},
 	"widgets/buttons-9": func(parent gi.Widget) {
-		gi.NewButton(parent).SetType(gi.ButtonText).SetText("Text")
+		gi.NewButton(parent).SetType(gi.ButtonElevated).SetText("Elevated")
 	},
 	"widgets/buttons-10": func(parent gi.Widget) {
+		gi.NewButton(parent).SetType(gi.ButtonOutlined).SetText("Outlined")
+	},
+	"widgets/buttons-11": func(parent gi.Widget) {
+		gi.NewButton(parent).SetType(gi.ButtonText).SetText("Text")
+	},
+	"widgets/buttons-12": func(parent gi.Widget) {
 		gi.NewButton(parent).SetType(gi.ButtonAction).SetText("Action")
 	},
 	"widgets/choosers-0": func(parent gi.Widget) {
