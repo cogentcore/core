@@ -88,11 +88,9 @@ func (sv *SliceViewInline) SetStyles() {
 				}
 				d := gi.NewBody().AddTitle(title)
 				NewSliceView(d).SetViewPath(vpath).SetSlice(sv.Slice)
-				d.AddBottomBar(func(pw gi.Widget) {
-					d.AddCancel(pw)
-					d.AddOk(pw).OnClick(func(e events.Event) {
-						sv.SendChange()
-					})
+				d.OnClose(func(e events.Event) {
+					sv.Update()
+					sv.SendChange()
 				})
 				d.NewFullDialog(sv).Run()
 			})

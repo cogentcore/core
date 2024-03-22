@@ -84,11 +84,9 @@ func (mv *MapViewInline) SetStyles() {
 				}
 				d := gi.NewBody().AddTitle(title).AddText(mv.Tooltip)
 				NewMapView(d).SetViewPath(vpath).SetMap(mv.Map)
-				d.AddBottomBar(func(pw gi.Widget) {
-					d.AddCancel(pw)
-					d.AddOk(pw).OnClick(func(e events.Event) {
-						mv.SendChange()
-					})
+				d.OnClose(func(e events.Event) {
+					mv.Update()
+					mv.SendChange()
 				})
 				d.NewFullDialog(mv).Run()
 			})
