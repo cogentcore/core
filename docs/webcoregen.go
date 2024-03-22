@@ -542,7 +542,13 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		giv.NewValue(parent, 70, `view:"slider"`)
 	},
 	"views/slice-views-0": func(parent gi.Widget) {
-		giv.NewSliceView(parent).SetSlice(&[]int{3, 5})
+		giv.NewSliceView(parent).SetSlice(&[]int{1, 3, 5})
+	},
+	"views/slice-views-1": func(parent gi.Widget) {
+		sl := []int{1, 3, 5}
+		giv.NewSliceView(parent).SetSlice(&sl).OnChange(func(e events.Event) {
+			gi.MessageSnackbar(parent, fmt.Sprintf("Slice: %v", sl))
+		})
 	},
 	"views/struct-views-0": func(parent gi.Widget) {
 		type person struct {
