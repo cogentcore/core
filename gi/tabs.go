@@ -138,7 +138,6 @@ func (ts *Tabs) SetStyles() {
 		switch w.PathFrom(ts) {
 		case "tabs":
 			w.Style(func(s *styles.Style) {
-				s.Wrap = true
 				s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
 				s.Margin.Zero()
 				s.Padding.Zero()
@@ -150,6 +149,7 @@ func (ts *Tabs) SetStyles() {
 				} else {
 					s.Direction = styles.Row
 					s.Grow.Set(1, 0)
+					s.Wrap = true
 				}
 
 				// s.Border.Style.Set(styles.BorderNone)

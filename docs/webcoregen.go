@@ -524,9 +524,9 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 	},
 	"widgets/tabs-5": func(parent gi.Widget) {
 		ts := gi.NewTabs(parent).SetType(gi.NavigationAuto)
-		ts.NewTab("First")
-		ts.NewTab("Second")
-		ts.NewTab("Third")
+		ts.NewTab("First", icons.Home)
+		ts.NewTab("Second", icons.Explore)
+		ts.NewTab("Third", icons.History)
 	},
 	"widgets/text-fields-0": func(parent gi.Widget) {
 		gi.NewTextField(parent)
