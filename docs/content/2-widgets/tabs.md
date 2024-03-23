@@ -9,3 +9,13 @@ ts := gi.NewTabs(parent)
 ts.NewTab("First")
 ts.NewTab("Second")
 ```
+
+You can add any widgets to tabs:
+
+```Go
+ts := gi.NewTabs(parent)
+first := ts.NewTab("First")
+gi.NewLabel(first).SetText("I am first!")
+second := ts.NewTab("Second")
+gi.NewLabel(second).SetText("I am second!")
+```
