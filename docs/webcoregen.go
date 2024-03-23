@@ -504,6 +504,25 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		second := ts.NewTab("Second")
 		gi.NewLabel(second).SetText("I am second!")
 	},
+	"widgets/tabs-2": func(parent gi.Widget) {
+		ts := gi.NewTabs(parent)
+		ts.NewTab("First")
+		ts.NewTab("Second")
+		ts.NewTab("Third")
+		ts.NewTab("Fourth")
+	},
+	"widgets/tabs-3": func(parent gi.Widget) {
+		ts := gi.NewTabs(parent).SetType(gi.FunctionalTabs)
+		ts.NewTab("First")
+		ts.NewTab("Second")
+		ts.NewTab("Third")
+	},
+	"widgets/tabs-4": func(parent gi.Widget) {
+		ts := gi.NewTabs(parent).SetType(gi.NavigationAuto)
+		ts.NewTab("First")
+		ts.NewTab("Second")
+		ts.NewTab("Third")
+	},
 	"widgets/text-fields-0": func(parent gi.Widget) {
 		gi.NewTextField(parent)
 	},
