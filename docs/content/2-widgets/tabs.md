@@ -47,11 +47,19 @@ ts.NewTab("Second")
 ts.NewTab("Third")
 ```
 
-You can add navigation tabs, which dynamically serve as a bottom navigation bar, side navigation rail, or side navigation drawer depending on the size of the screen:
+You can make navigation tabs, which dynamically serve as a bottom navigation bar, side navigation rail, or side navigation drawer depending on the size of the screen:
 
 ```Go
 ts := gi.NewTabs(parent).SetType(gi.NavigationAuto)
 ts.NewTab("First", icons.Home)
 ts.NewTab("Second", icons.Explore)
 ts.NewTab("Third", icons.History)
+```
+
+You can allow the user to add new tabs:
+
+```Go
+ts := gi.NewTabs(parent).SetNewTabButton(true)
+ts.NewTab("First")
+ts.NewTab("Second")
 ```

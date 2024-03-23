@@ -528,6 +528,11 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		ts.NewTab("Second", icons.Explore)
 		ts.NewTab("Third", icons.History)
 	},
+	"widgets/tabs-6": func(parent gi.Widget) {
+		ts := gi.NewTabs(parent).SetNewTabButton(true)
+		ts.NewTab("First")
+		ts.NewTab("Second")
+	},
 	"widgets/text-fields-0": func(parent gi.Widget) {
 		gi.NewTextField(parent)
 	},

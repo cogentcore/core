@@ -36,12 +36,12 @@ type Tabs struct { //core:embedder
 	// the tabs.
 	Type TabTypes
 
-	// Maximum number of characters to include in tab label.
-	// Elides labels that are longer than that
-	MaxChars int
-
-	// show a new tab button at right of list of tabs
+	// NewTabButton is whether to show a new tab button at the end of the list of tabs.
 	NewTabButton bool
+
+	// MaxChars is the maximum number of characters to include in the tab label.
+	// It elides labels that are longer than that.
+	MaxChars int
 
 	// CloseIcon is the icon used for tab close buttons.
 	// If it is "" or [icons.None], the tab is not closeable.
@@ -429,7 +429,7 @@ func (ts *Tabs) DeleteTabIndex(idx int) bool {
 	return true
 }
 
-// ConfigNewTabButton configures the new tab + button at end of list of tabs
+// ConfigNewTabButton configures the new tab button at the end of the list of tabs, if applicable.
 func (ts *Tabs) ConfigNewTabButton() bool {
 	sz := ts.NTabs()
 	tb := ts.Tabs()
@@ -471,20 +471,24 @@ func (ts *Tabs) Config() {
 	if ts.ConfigChildren(config) {
 		ts.NeedsLayout()
 	}
-	// ts.ConfigNewTabButton()
+	ts.ConfigNewTabButton()
 }
 
 // Tabs returns the layout containing the tabs (the first element within us).
 // It configures the Tabs if necessary.
 func (ts *Tabs) Tabs() *Frame {
-	ts.Config()
+	if ts.ChildByName("tabs", 0) == nil {
+		ts.Config()
+	}
 	return ts.ChildByName("tabs", 0).(*Frame)
 }
 
 // Frame returns the stacked frame layout (the second element within us).
 // It configures the Tabs if necessary.
 func (ts *Tabs) Frame() *Frame {
-	ts.Config()
+	if ts.ChildByName("frame", 1) == nil {
+		ts.Config()
+	}
 	return ts.ChildByName("frame", 1).(*Frame)
 }
 
