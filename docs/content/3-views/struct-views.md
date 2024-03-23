@@ -1,6 +1,6 @@
 # Struct views
 
-Cogent Core provides interactive struct views that allow you to display a struct value to the user and have them edit it.
+Cogent Core provides interactive struct views that allow you to display a struct value to users and have them edit it.
 
 You can make a struct view from any struct pointer:
 

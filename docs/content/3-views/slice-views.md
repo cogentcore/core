@@ -1,6 +1,6 @@
 # Slice views
 
-Cogent Core provides interactive slice views that allow you to display a slice value to the user and have them edit it. The user can use the context menu to add, remove, and copy rows.
+Cogent Core provides interactive slice views that allow you to display a slice value to users and have them edit it. Users can use context menus and drag-and-drop to add, remove, and copy rows.
 
 You can make a slice view from any slice pointer:
 

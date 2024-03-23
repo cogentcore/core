@@ -1,6 +1,6 @@
 # Map views
 
-Cogent Core provides interactive map views that allow you to display a map value to the user and have them edit it. The user can use the context menu to add, remove, and copy rows.
+Cogent Core provides interactive map views that allow you to display a map value to users and have them edit it. Users can use context menus to add, remove, and copy rows.
 
 You can make a map view from any map pointer:
 
