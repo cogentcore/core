@@ -512,12 +512,17 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		ts.NewTab("Fourth")
 	},
 	"widgets/tabs-3": func(parent gi.Widget) {
+		ts := gi.NewTabs(parent)
+		ts.NewTab("First", icons.Home)
+		ts.NewTab("Second", icons.Explore)
+	},
+	"widgets/tabs-4": func(parent gi.Widget) {
 		ts := gi.NewTabs(parent).SetType(gi.FunctionalTabs)
 		ts.NewTab("First")
 		ts.NewTab("Second")
 		ts.NewTab("Third")
 	},
-	"widgets/tabs-4": func(parent gi.Widget) {
+	"widgets/tabs-5": func(parent gi.Widget) {
 		ts := gi.NewTabs(parent).SetType(gi.NavigationAuto)
 		ts.NewTab("First")
 		ts.NewTab("Second")

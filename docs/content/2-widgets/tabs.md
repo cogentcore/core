@@ -30,6 +30,14 @@ ts.NewTab("Third")
 ts.NewTab("Fourth")
 ```
 
+You can add icons to tabs:
+
+```Go
+ts := gi.NewTabs(parent)
+ts.NewTab("First", icons.Home)
+ts.NewTab("Second", icons.Explore)
+```
+
 You can make functional tabs, which can be closed and moved:
 
 ```Go
