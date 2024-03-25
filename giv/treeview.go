@@ -273,7 +273,8 @@ func (tv *TreeView) SetStyles() {
 		case "parts":
 			w.Style(func(s *styles.Style) {
 				s.Cursor = cursors.Pointer
-				s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable, abilities.DoubleClickable, abilities.Draggable, abilities.Droppable)
+				s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable, abilities.DoubleClickable)
+				s.SetAbilities(!tv.IsReadOnly() && !tv.RootIsReadOnly(), abilities.Draggable, abilities.Droppable)
 				s.Gap.X.Ch(0.1)
 				s.Padding.Zero()
 

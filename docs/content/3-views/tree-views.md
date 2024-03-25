@@ -21,7 +21,7 @@ ki.New[*ki.Node](c2, "Nested child")
 giv.NewTreeView(parent).SyncTree(tree)
 ```
 
-You can detect when the user changes the value of the underlying tree value:
+You can detect when the user changes the value of the tree value:
 
 ```Go
 tree := ki.NewRoot[*ki.Node]("Root")
