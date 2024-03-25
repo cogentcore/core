@@ -795,6 +795,12 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		}
 		giv.NewValue(parent, &[]language{{"Go", 10}, {"Python", 5}})
 	},
+	"views/tree-views-0": func(parent gi.Widget) {
+		tv := giv.NewTreeView(parent).SetText("Root")
+		giv.NewTreeView(tv, "Child 1")
+		n2 := giv.NewTreeView(tv, "Child 2")
+		giv.NewTreeView(n2, "Nested child")
+	},
 	"advanced/styling-0": func(parent gi.Widget) {
 		parent.OnWidgetAdded(func(w gi.Widget) {
 			w.Style(func(s *styles.Style) {
