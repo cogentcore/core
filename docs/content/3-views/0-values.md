@@ -22,3 +22,5 @@ You can customize a value using tags:
 ```Go
 giv.NewValue(parent, 70, `view:"slider"`)
 ```
+
+Cogent Core provides interactive widget values for many types, including most elementary types, like strings, integers, and floats; composite types, like maps, slices, and structs; and widely used other types, like colors, times, and durations. More values are documented in the documentation pages for certain views, like map and slice views.
