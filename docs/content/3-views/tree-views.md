@@ -20,3 +20,15 @@ c2 := ki.New[*ki.Node](tree, "Child 2")
 ki.New[*ki.Node](c2, "Nested child")
 giv.NewTreeView(parent).SyncTree(tree)
 ```
+
+You can detect when the user changes the value of the underlying tree value:
+
+```Go
+tree := ki.NewRoot[*ki.Node]("Root")
+ki.New[*ki.Node](tree, "Child 1")
+c2 := ki.New[*ki.Node](tree, "Child 2")
+ki.New[*ki.Node](c2, "Nested child")
+giv.NewTreeView(parent).SyncTree(tree).OnChange(func(e events.Event) {
+    gi.MessageSnackbar(parent, "Tree view changed")
+})
+```
