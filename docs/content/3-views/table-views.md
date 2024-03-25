@@ -25,7 +25,7 @@ giv.NewTableView(parent).SetSlice(&sl).OnChange(func(e events.Event) {
 })
 ```
 
-You can hide certain fields from the user:
+You can hide certain columns from the user:
 
 ```Go
 type language struct {
@@ -43,4 +43,24 @@ type language struct {
     Rating int `view:"-" tableview:"+"`
 }
 giv.NewTableView(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+```
+
+You can prevent the user from editing certain columns:
+
+```Go
+type language struct {
+    Name   string `edit:"-"`
+    Rating int
+}
+giv.NewTableView(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+```
+
+You can prevent the user from editing the entire table:
+
+```Go
+type language struct {
+    Name   string
+    Rating int
+}
+giv.NewTableView(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}}).SetReadOnly(true)
 ```
