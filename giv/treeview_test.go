@@ -19,6 +19,6 @@ func TestTreeView(t *testing.T) {
 	gi.NewLabel(fr)
 	gi.NewButton(gi.NewLayout(fr))
 
-	NewTreeView(b).SyncRootNode(fr)
+	NewTreeView(b).SyncTree(fr)
 	b.AssertRender(t, "treeview/basic")
 }

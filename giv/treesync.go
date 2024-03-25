@@ -23,16 +23,14 @@ import (
 // note: see this file has all the SyncNode specific
 // functions for TreeView.
 
-// SyncRootNode sets the root view to the root
-// of the sync source node for this TreeView,
-// and syncs the rest of the tree to match.
-// Calls ki.UniquifyNamesAll on source tree to
-// ensure that node names are unique
-// which is essential for proper viewing!
-func (tv *TreeView) SyncRootNode(sk ki.Ki) *TreeView {
-	ki.UniquifyNamesAll(sk)
-	if tv.SyncNode != sk {
-		tv.SyncNode = sk
+// SyncTree sets the root view to the root of the sync source tree node
+// for this TreeView, and syncs the rest of the tree to match.
+// It calls [ki.UniquifyNamesAll] on the source tree to ensure
+// that node names are unique, which is essential for proper viewing.
+func (tv *TreeView) SyncTree(tree ki.Ki) *TreeView {
+	ki.UniquifyNamesAll(tree)
+	if tv.SyncNode != tree {
+		tv.SyncNode = tree
 	}
 	tvIdx := 0
 	tv.SyncToSrc(&tvIdx, true, 0)

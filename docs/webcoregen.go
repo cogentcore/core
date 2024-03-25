@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/ki"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 	"cogentcore.org/core/webcore"
@@ -798,8 +799,15 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 	"views/tree-views-0": func(parent gi.Widget) {
 		tv := giv.NewTreeView(parent).SetText("Root")
 		giv.NewTreeView(tv, "Child 1")
-		n2 := giv.NewTreeView(tv, "Child 2")
-		giv.NewTreeView(n2, "Nested child")
+		c2 := giv.NewTreeView(tv, "Child 2")
+		giv.NewTreeView(c2, "Nested child")
+	},
+	"views/tree-views-1": func(parent gi.Widget) {
+		tree := ki.NewRoot[*ki.Node]("Root")
+		ki.New[*ki.Node](tree, "Child 1")
+		c2 := ki.New[*ki.Node](tree, "Child 2")
+		ki.New[*ki.Node](c2, "Nested child")
+		giv.NewTreeView(parent).SyncTree(tree)
 	},
 	"advanced/styling-0": func(parent gi.Widget) {
 		parent.OnWidgetAdded(func(w gi.Widget) {

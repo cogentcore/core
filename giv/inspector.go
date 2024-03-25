@@ -305,7 +305,7 @@ func (is *Inspector) ConfigSplits() {
 		split.SetSplits(.3, .7)
 	}
 	tv := is.TreeView()
-	tv.SyncRootNode(is.KiRoot)
+	tv.SyncTree(is.KiRoot)
 	sv := is.StructView()
 	sv.SetStruct(is.KiRoot)
 }
