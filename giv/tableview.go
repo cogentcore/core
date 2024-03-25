@@ -773,7 +773,7 @@ func (tv *TableView) EditIdx(idx int) {
 		tynm += ": " + lbl
 	}
 	d := gi.NewBody().AddTitle(tynm)
-	NewStructView(d).SetStruct(stru)
+	NewStructView(d).SetStruct(stru).SetReadOnly(tv.IsReadOnly())
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
 		d.AddOk(pw)
