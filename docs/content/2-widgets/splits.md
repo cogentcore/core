@@ -19,3 +19,11 @@ gi.NewLabel(sp).SetText("Second")
 gi.NewLabel(sp).SetText("Third")
 gi.NewLabel(sp).SetText("Fourth")
 ```
+
+You can change the default amount of space that each widget receives:
+
+```Go
+sp := gi.NewSplits(parent).SetSplits(0.2, 0.8)
+gi.NewLabel(sp).SetText("First")
+gi.NewLabel(sp).SetText("Second")
+```

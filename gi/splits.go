@@ -303,12 +303,10 @@ func (sl *Splits) PositionSplits() {
 	cszd := csz.Dim(dim)
 	pos := float32(0)
 
-	mid := .5 * csz.Dim(od)
 	hand := sl.Parts.Child(0).(*Handle)
 	hwd := hand.Geom.Size.Actual.Total.Dim(dim)
 	hht := hand.Geom.Size.Actual.Total.Dim(od)
-	nhand := float32(len(*sl.Parts.Children()))
-	sod := mid - .5*nhand*hht
+	mid := (csz.Dim(od) - hht) / 2
 
 	sl.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwb.Geom.RelPos.SetZero()
@@ -320,7 +318,7 @@ func (sl *Splits) PositionSplits() {
 		kwb.Geom.RelPos.SetDim(dim, pos)
 		hl := sl.Parts.Child(i - 1).(*Handle)
 		hl.Geom.RelPos.SetDim(dim, pos-hwd)
-		hl.Geom.RelPos.SetDim(od, sod)
+		hl.Geom.RelPos.SetDim(od, mid)
 		hl.Min = 0
 		hl.Max = cszd
 		hl.Pos = pos
