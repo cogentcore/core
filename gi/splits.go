@@ -225,9 +225,7 @@ func (sl *Splits) SetSplitAction(idx int, nwval float32) {
 		}
 	}
 	sl.Splits[idx] = uval
-	// fmt.Printf("splits: %v value: %v  splts: %v\n", idx, nwval, sl.Splits)
 	sl.UpdateSplits()
-	// fmt.Printf("splits: %v\n", sl.Splits)
 	sl.NeedsLayout()
 }
 
@@ -261,7 +259,6 @@ func (sl *Splits) HandleEvents() {
 			return
 		}
 		kn := int(knc)
-		// fmt.Printf("kc: %v kns: %v kn: %v\n", kc, kns, kn)
 		if kn == 0 {
 			e.SetHandled()
 			sl.EvenSplits()
@@ -341,7 +338,7 @@ func (sl *Splits) PositionSplits() {
 		kwb.Geom.RelPos.SetDim(dim, pos)
 		hl := sl.Parts.Child(i - 1).(*Handle)
 		hl.Geom.RelPos.SetDim(dim, pos-hwd)
-		hl.Geom.RelPos.SetDim(od, sod+float32(i-1)*hht)
+		hl.Geom.RelPos.SetDim(od, sod)
 		hl.Min = 0
 		hl.Max = cszd
 		hl.Pos = pos
@@ -365,7 +362,3 @@ func (sl *Splits) Render() {
 		sl.PopBounds()
 	}
 }
-
-// func (sl *Splits) StateIs(states.Focused) bool {
-// 	return sl.ContainsFocus() // anyone within us gives us focus..
-// }
