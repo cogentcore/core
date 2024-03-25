@@ -42,3 +42,13 @@ c2 := ki.New[*ki.Node](tree, "Child 2")
 ki.New[*ki.Node](c2, "Nested child")
 giv.NewTreeView(parent).SyncTree(tree).SetReadOnly(true)
 ```
+
+When you use [[giv.NewValue]] with a [[ki.Ki]] tree node value, it will create a button that opens an interactive inspector of that node:
+
+```Go
+tree := ki.NewRoot[*ki.Node]("Root")
+ki.New[*ki.Node](tree, "Child 1")
+c2 := ki.New[*ki.Node](tree, "Child 2")
+ki.New[*ki.Node](c2, "Nested child")
+giv.NewValue(parent, tree)
+```

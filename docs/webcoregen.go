@@ -825,6 +825,13 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		ki.New[*ki.Node](c2, "Nested child")
 		giv.NewTreeView(parent).SyncTree(tree).SetReadOnly(true)
 	},
+	"views/tree-views-4": func(parent gi.Widget) {
+		tree := ki.NewRoot[*ki.Node]("Root")
+		ki.New[*ki.Node](tree, "Child 1")
+		c2 := ki.New[*ki.Node](tree, "Child 2")
+		ki.New[*ki.Node](c2, "Nested child")
+		giv.NewValue(parent, tree)
+	},
 	"advanced/styling-0": func(parent gi.Widget) {
 		parent.OnWidgetAdded(func(w gi.Widget) {
 			w.Style(func(s *styles.Style) {
