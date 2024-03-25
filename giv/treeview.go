@@ -459,7 +459,7 @@ func (tv *TreeView) RootIsReadOnly() bool {
 	if tv.RootView == nil {
 		return true
 	}
-	return tv.RootView.IsDisabled()
+	return tv.RootView.IsReadOnly()
 }
 
 ////////////////////////////////////////////////////
@@ -1280,7 +1280,7 @@ func (tv *TreeView) ContextMenuReadOnly(m *gi.Scene) {
 }
 
 func (tv *TreeView) ContextMenu(m *gi.Scene) {
-	if tv.IsReadOnly() {
+	if tv.IsReadOnly() || tv.RootIsReadOnly() {
 		tv.ContextMenuReadOnly(m)
 		return
 	}
