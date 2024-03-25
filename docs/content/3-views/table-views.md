@@ -24,3 +24,23 @@ giv.NewTableView(parent).SetSlice(&sl).OnChange(func(e events.Event) {
     gi.MessageSnackbar(parent, fmt.Sprintf("Languages: %v", sl))
 })
 ```
+
+You can hide certain fields from the user:
+
+```Go
+type language struct {
+    Name   string
+    Rating int `view:"-"`
+}
+giv.NewTableView(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+```
+
+You can also use the `tableview` struct tag, which overrides the `view` struct tag. This allows you to have a struct field displayed in a struct view but not a table view, or vise versa:
+
+```Go
+type language struct {
+    Name   string
+    Rating int `view:"-" tableview:"+"`
+}
+giv.NewTableView(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+```
