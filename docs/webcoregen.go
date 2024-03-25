@@ -444,6 +444,22 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		gi.NewLabel(sp).SetText("First")
 		gi.NewLabel(sp).SetText("Second")
 	},
+	"widgets/splits-3": func(parent gi.Widget) {
+		sp := gi.NewSplits(parent)
+		sp.Style(func(s *styles.Style) {
+			s.Direction = styles.Column
+		})
+		gi.NewLabel(sp).SetText("First")
+		gi.NewLabel(sp).SetText("Second")
+	},
+	"widgets/splits-4": func(parent gi.Widget) {
+		sp := gi.NewSplits(parent)
+		sp.Style(func(s *styles.Style) {
+			s.Direction = styles.Row
+		})
+		gi.NewLabel(sp).SetText("First")
+		gi.NewLabel(sp).SetText("Second")
+	},
 	"widgets/switches-0": func(parent gi.Widget) {
 		gi.NewSwitch(parent)
 	},

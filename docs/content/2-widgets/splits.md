@@ -27,3 +27,25 @@ sp := gi.NewSplits(parent).SetSplits(0.2, 0.8)
 gi.NewLabel(sp).SetText("First")
 gi.NewLabel(sp).SetText("Second")
 ```
+
+You can arrange widgets in a column (by default, split widgets are arranged in a row on wide screens and a column on compact screens):
+
+```Go
+sp := gi.NewSplits(parent)
+sp.Style(func(s *styles.Style) {
+    s.Direction = styles.Column
+})
+gi.NewLabel(sp).SetText("First")
+gi.NewLabel(sp).SetText("Second")
+```
+
+You can arrange widgets in a row:
+
+```Go
+sp := gi.NewSplits(parent)
+sp.Style(func(s *styles.Style) {
+    s.Direction = styles.Row
+})
+gi.NewLabel(sp).SetText("First")
+gi.NewLabel(sp).SetText("Second")
+```
