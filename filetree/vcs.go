@@ -317,6 +317,7 @@ func BlameDialog(ctx gi.Widget, fname string, blame, fbytes []byte) *texteditor.
 
 	d := gi.NewBody().AddTitle(title)
 	tv := texteditor.NewTwinEditors(d, "twin-view")
+	tv.SetSplits(.3, .7)
 	tv.SetFiles(fname, fname, true)
 	flns := bytes.Split(fbytes, []byte("\n"))
 	lns := bytes.Split(blame, []byte("\n"))
@@ -339,7 +340,6 @@ func BlameDialog(ctx gi.Widget, fname string, blame, fbytes []byte) *texteditor.
 	tv.BufA.SetText(btxt)
 	tv.BufB.SetText(fbytes)
 	tv.ConfigTexts()
-	tv.SetSplits(.3, .7)
 
 	tva, tvb := tv.Editors()
 	tva.Style(func(s *styles.Style) {

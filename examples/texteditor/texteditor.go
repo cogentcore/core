@@ -18,8 +18,7 @@ var samplefile embed.FS
 func main() {
 	b := gi.NewBody("Cogent Core Text Editor Demo")
 
-	sp := gi.NewSplits(b)
-	sp.SetSplits(.5, .5)
+	sp := gi.NewSplits(b).SetSplits(.5, .5)
 	// these are all inherited so we can put them at the top "editor panel" level
 	sp.Style(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpacePreWrap

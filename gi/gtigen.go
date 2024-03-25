@@ -933,7 +933,7 @@ func (t *Spinner) SetSelectMode(v bool) *Spinner { t.SelectMode = v; return t }
 func (t *Spinner) SetUndoMgr(v TextFieldUndoMgr) *Spinner { t.UndoMgr = v; return t }
 
 // SplitsType is the [gti.Type] for [Splits]
-var SplitsType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Splits", IDName: "splits", Doc: "Splits allocates a certain proportion of its space to each of its children\nalong [styles.Style.Direction]. It adds [Handle] widgets to its parts that\nallow the user to customize the amount of space allocated to each child.", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Splits", Doc: "Splits is the proportion (0-1 normalized, enforced) of space\nallocated to each element. 0 indicates that an element should\nbe completely collapsed."}, {Name: "SavedSplits", Doc: "SavedSplits is a saved version of the splits that can be restored\nfor dynamic collapse/expand operations."}}, Instance: &Splits{}})
+var SplitsType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Splits", IDName: "splits", Doc: "Splits allocates a certain proportion of its space to each of its children\nalong [styles.Style.Direction]. It adds [Handle] widgets to its parts that\nallow the user to customize the amount of space allocated to each child.", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Splits", Doc: "Splits is the proportion (0-1 normalized, enforced) of space\nallocated to each element. 0 indicates that an element should\nbe completely collapsed. By default, each element gets the\nsame amount of space."}, {Name: "SavedSplits", Doc: "SavedSplits is a saved version of the splits that can be restored\nfor dynamic collapse/expand operations."}}, Instance: &Splits{}})
 
 // NewSplits adds a new [Splits] with the given name to the given parent:
 // Splits allocates a certain proportion of its space to each of its children
@@ -968,6 +968,13 @@ func AsSplits(k ki.Ki) *Splits {
 
 // AsSplits satisfies the [SplitsEmbedder] interface
 func (t *Splits) AsSplits() *Splits { return t }
+
+// SetSplits sets the [Splits.Splits]:
+// Splits is the proportion (0-1 normalized, enforced) of space
+// allocated to each element. 0 indicates that an element should
+// be completely collapsed. By default, each element gets the
+// same amount of space.
+func (t *Splits) SetSplits(v ...float32) *Splits { t.Splits = v; return t }
 
 // SetTooltip sets the [Splits.Tooltip]
 func (t *Splits) SetTooltip(v string) *Splits { t.Tooltip = v; return t }

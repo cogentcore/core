@@ -170,7 +170,7 @@ func (pg *Page) Config() {
 	if pg.HasChildren() {
 		return
 	}
-	sp := gi.NewSplits(pg, "splits")
+	sp := gi.NewSplits(pg, "splits").SetSplits(0.2, 0.8)
 
 	nav := giv.NewTreeViewFrame(sp, "nav").SetText(gi.TheApp.Name())
 	nav.OnSelect(func(e events.Event) {
@@ -229,8 +229,6 @@ func (pg *Page) Config() {
 	gi.NewFrame(sp, "body").Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
-
-	sp.SetSplits(0.2, 0.8)
 
 	if pg.PagePath == "" {
 		pg.OpenURL("/", true)

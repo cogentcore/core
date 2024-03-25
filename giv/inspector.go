@@ -245,7 +245,7 @@ func (is *Inspector) ConfigSplits() {
 	if is.KiRoot == nil {
 		return
 	}
-	split := is.Splits()
+	split := is.Splits().SetSplits(.3, .7)
 
 	if len(split.Kids) == 0 {
 		tvfr := gi.NewFrame(split, "tvfr")
@@ -302,7 +302,6 @@ func (is *Inspector) ConfigSplits() {
 				pselw.AsWidget().NeedsRender()
 			}
 		})
-		split.SetSplits(.3, .7)
 	}
 	tv := is.TreeView()
 	tv.SyncTree(is.KiRoot)

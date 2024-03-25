@@ -27,8 +27,9 @@ type Splits struct { //core:embedder
 
 	// Splits is the proportion (0-1 normalized, enforced) of space
 	// allocated to each element. 0 indicates that an element should
-	// be completely collapsed.
-	Splits []float32 `set:"-"`
+	// be completely collapsed. By default, each element gets the
+	// same amount of space.
+	Splits []float32
 
 	// SavedSplits is a saved version of the splits that can be restored
 	// for dynamic collapse/expand operations.
@@ -72,29 +73,30 @@ func (sl *Splits) SetStyles() {
 	})
 }
 
-// UpdateSplits updates the splits to be same length as number of children,
-// and normalized
-func (sl *Splits) UpdateSplits() {
+// UpdateSplits normalizes the splits and ensures that there are as
+// many split proportions as children.
+func (sl *Splits) UpdateSplits() *Splits {
 	sz := len(sl.Kids)
 	if sz == 0 {
-		return
+		return sl
 	}
 	if sl.Splits == nil || len(sl.Splits) != sz {
 		sl.Splits = make([]float32, sz)
 	}
-	sum := float32(0.0)
+	sum := float32(0)
 	for _, sp := range sl.Splits {
 		sum += sp
 	}
 	if sum == 0 { // set default even splits
 		sl.EvenSplits()
-		sum = 1.0
+		sum = 1
 	} else {
-		norm := 1.0 / sum
+		norm := 1 / sum
 		for i := range sl.Splits {
 			sl.Splits[i] *= norm
 		}
 	}
+	return sl
 }
 
 // EvenSplits splits space evenly across all panels
@@ -108,27 +110,6 @@ func (sl *Splits) EvenSplits() {
 		sl.Splits[i] = even
 	}
 	sl.NeedsLayout()
-}
-
-// SetSplits sets the split proportions -- can use 0 to hide / collapse a
-// child entirely.
-func (sl *Splits) SetSplits(splits ...float32) *Splits {
-	sl.UpdateSplits()
-	sz := len(sl.Kids)
-	mx := min(sz, len(splits))
-	for i := 0; i < mx; i++ {
-		sl.Splits[i] = splits[i]
-	}
-	sl.UpdateSplits()
-	return sl
-}
-
-// SetSplitsAction sets the split proportions -- can use 0 to hide / collapse a
-// child entirely -- does full rebuild at level of scene
-func (sl *Splits) SetSplitsAction(splits ...float32) *Splits {
-	sl.SetSplits(splits...)
-	sl.NeedsLayout()
-	return sl
 }
 
 // SaveSplits saves the current set of splits in SavedSplits, for a later RestoreSplits
@@ -148,7 +129,7 @@ func (sl *Splits) RestoreSplits() {
 	if sl.SavedSplits == nil {
 		return
 	}
-	sl.SetSplitsAction(sl.SavedSplits...)
+	sl.SetSplits(sl.SavedSplits...).NeedsLayout()
 }
 
 // CollapseChild collapses given child(ren) (sets split proportion to 0),

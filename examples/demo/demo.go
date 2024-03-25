@@ -424,7 +424,7 @@ func views(ts *gi.Tabs) {
 
 	giv.NewTableView(vts.NewTab("Table view")).SetSlice(&tbl)
 
-	sp := gi.NewSplits(vts.NewTab("Tree view"))
+	sp := gi.NewSplits(vts.NewTab("Tree view")).SetSplits(0.3, 0.7)
 
 	tv := giv.NewTreeViewFrame(sp).SetText("Root")
 	makeTree(tv, 0, 3, 5)
@@ -440,8 +440,6 @@ func views(ts *gi.Tabs) {
 			sv.SetStruct(tv.SelectedNodes[0])
 		}
 	})
-
-	sp.SetSplits(0.3, 0.7)
 }
 
 func makeTree(tv *giv.TreeView, iter, maxIter, maxKids int) {

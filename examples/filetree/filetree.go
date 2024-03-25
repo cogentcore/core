@@ -342,6 +342,7 @@ func (fb *FileBrowse) ConfigSplits() {
 	if split == nil {
 		return
 	}
+	split.SetSplits(.2, .4, .4)
 
 	config := fb.SplitsConfig()
 	if split.ConfigChildren(config) {
@@ -365,7 +366,6 @@ func (fb *FileBrowse) ConfigSplits() {
 				}
 			}
 		}
-		split.SetSplits(.2, .4, .4)
 	}
 }
 
