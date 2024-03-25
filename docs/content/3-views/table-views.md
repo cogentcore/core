@@ -78,3 +78,13 @@ type language struct { //gti:add
     Name string
 }
 ```
+
+When you use [[giv.NewValue]] with a slice of structs, it will create a button that opens a dialog with a table view:
+
+```Go
+type language struct {
+    Name   string
+    Rating int
+}
+giv.NewValue(parent, &[]language{{"Go", 10}, {"Python", 5}})
+```
