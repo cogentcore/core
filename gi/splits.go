@@ -25,12 +25,13 @@ import (
 type Splits struct { //core:embedder
 	Layout
 
-	// proportion (0-1 normalized, enforced) of space allocated to each element.
-	// Enter 0 to collapse a given element
+	// Splits is the proportion (0-1 normalized, enforced) of space
+	// allocated to each element. 0 indicates that an element should
+	// be completely collapsed.
 	Splits []float32 `set:"-"`
 
-	// A saved version of the splits which can be restored.
-	// For dynamic collapse / expand operations
+	// SavedSplits is a saved version of the splits that can be restored
+	// for dynamic collapse/expand operations.
 	SavedSplits []float32 `set:"-"`
 }
 

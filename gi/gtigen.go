@@ -429,20 +429,20 @@ var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.GeomSize", IDName: "
 var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.GeomState", IDName: "geom-state", Doc: "GeomState contains the the layout geometry state for each widget.\nSet by the parent Layout during the Layout process.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Fields: []gti.Field{{Name: "Size", Doc: "Size has sizing data for the widget: use Actual for rendering.\nAlloc shows the potentially larger space top-down allocated."}, {Name: "Pos", Doc: "Pos is position within the overall Scene that we render into,\nincluding effects of scroll offset, for both Total outer dimension\nand inner Content dimension."}, {Name: "Cell", Doc: "Cell is the logical X, Y index coordinates (col, row) of element\nwithin its parent layout"}, {Name: "RelPos", Doc: "RelPos is top, left position relative to parent Content size space"}, {Name: "Scroll", Doc: "Scroll is additional scrolling offset within our parent layout"}, {Name: "TotalBBox", Doc: "2D bounding box for Actual.Total size occupied within parent Scene\nthat we render onto, starting at Pos.Total and ending at Pos.Total + Size.Total.\nThese are the pixels we can draw into, intersected with parent bounding boxes\n(empty for invisible). Used for render Bounds clipping.\nThis includes all space (margin, padding etc)."}, {Name: "ContentBBox", Doc: "2D bounding box for our Content, which excludes our padding, margin, etc.\nstarting at Pos.Content and ending at Pos.Content + Size.Content.\nIt is intersected with parent bounding boxes."}}})
 
 // LayoutType is the [gti.Type] for [Layout]
-var LayoutType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Layout", IDName: "layout", Doc: "Layout is the primary node type responsible for organizing the sizes\nand positions of child widgets. It does not render, only organize,\nso properties like background color will have no effect.\nAll arbitrary collections of widgets should generally be contained\nwithin a layout -- otherwise the parent widget must take over\nresponsibility for positioning.\nLayouts can automatically add scrollbars depending on the Overflow\nlayout style.\nFor a Grid layout, the 'columns' property should generally be set\nto the desired number of columns, from which the number of rows\nis computed -- otherwise it uses the square root of number of\nelements.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "StackTop", Doc: "for Stacked layout, index of node to use as the top of the stack.\nOnly the node at this index is rendered -- if not a valid index, nothing is rendered."}, {Name: "LayImpl", Doc: "LayImpl contains implementational state info for doing layout"}, {Name: "HasScroll", Doc: "whether scrollbar is used for given dim"}, {Name: "Scrolls", Doc: "scroll bars -- we fully manage them as needed"}, {Name: "FocusName", Doc: "accumulated name to search for when keys are typed"}, {Name: "FocusNameTime", Doc: "time of last focus name event -- for timeout"}, {Name: "FocusNameLast", Doc: "last element focused on -- used as a starting point if name is the same"}}, Instance: &Layout{}})
+var LayoutType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Layout", IDName: "layout", Doc: "Layout is the primary node type responsible for organizing the sizes\nand positions of child widgets. It does not render, only organize,\nso properties like background and border will have no effect.\nAll arbitrary collections of widgets should generally be contained\nwithin a layout or a [Frame]; otherwise, the parent widget must take over\nresponsibility for positioning. Layouts automatically can add scrollbars\ndepending on the [styles.Style.Overflow].\n\nFor a [styles.Grid] layout, the [styles.Style.Columns] property should\ngenerally be set to the desired number of columns, from which the number of rows\nis computed; otherwise, it uses the square root of number of\nelements.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "StackTop", Doc: "StackTop, for a [styles.Stacked] layout, is the index of the node to use as the top of the stack.\nOnly the node at this index is rendered; if not a valid index, nothing is rendered."}, {Name: "LayImpl", Doc: "LayImpl contains implementation state info for doing layout"}, {Name: "HasScroll", Doc: "whether scrollbar is used for given dim"}, {Name: "Scrolls", Doc: "scroll bars -- we fully manage them as needed"}, {Name: "FocusName", Doc: "accumulated name to search for when keys are typed"}, {Name: "FocusNameTime", Doc: "time of last focus name event -- for timeout"}, {Name: "FocusNameLast", Doc: "last element focused on -- used as a starting point if name is the same"}}, Instance: &Layout{}})
 
 // NewLayout adds a new [Layout] with the given name to the given parent:
 // Layout is the primary node type responsible for organizing the sizes
 // and positions of child widgets. It does not render, only organize,
-// so properties like background color will have no effect.
+// so properties like background and border will have no effect.
 // All arbitrary collections of widgets should generally be contained
-// within a layout -- otherwise the parent widget must take over
-// responsibility for positioning.
-// Layouts can automatically add scrollbars depending on the Overflow
-// layout style.
-// For a Grid layout, the 'columns' property should generally be set
-// to the desired number of columns, from which the number of rows
-// is computed -- otherwise it uses the square root of number of
+// within a layout or a [Frame]; otherwise, the parent widget must take over
+// responsibility for positioning. Layouts automatically can add scrollbars
+// depending on the [styles.Style.Overflow].
+//
+// For a [styles.Grid] layout, the [styles.Style.Columns] property should
+// generally be set to the desired number of columns, from which the number of rows
+// is computed; otherwise, it uses the square root of number of
 // elements.
 func NewLayout(par ki.Ki, name ...string) *Layout {
 	return par.NewChild(LayoutType, name...).(*Layout)
@@ -455,8 +455,8 @@ func (t *Layout) KiType() *gti.Type { return LayoutType }
 func (t *Layout) New() ki.Ki { return &Layout{} }
 
 // SetStackTop sets the [Layout.StackTop]:
-// for Stacked layout, index of node to use as the top of the stack.
-// Only the node at this index is rendered -- if not a valid index, nothing is rendered.
+// StackTop, for a [styles.Stacked] layout, is the index of the node to use as the top of the stack.
+// Only the node at this index is rendered; if not a valid index, nothing is rendered.
 func (t *Layout) SetStackTop(v int) *Layout { t.StackTop = v; return t }
 
 // SetTooltip sets the [Layout.Tooltip]
@@ -503,7 +503,7 @@ func (t *Space) New() ki.Ki { return &Space{} }
 func (t *Space) SetTooltip(v string) *Space { t.Tooltip = v; return t }
 
 // MeterType is the [gti.Type] for [Meter]
-var MeterType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Meter", IDName: "meter", Doc: "Meter is a widget that renders a current value on as a filled\nbar/semicircle relative to a minimum and maximum potential value.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Type", Doc: "Type is the styling type of the meter"}, {Name: "Value", Doc: "Value is the current value of the meter"}, {Name: "Min", Doc: "Min is the minimum possible value of the meter"}, {Name: "Max", Doc: "Max is the maximum possible value of the meter"}, {Name: "Text", Doc: "Text, for [MeterCircle] and [MeterSemicircle], is the\ntext to render inside of the circle/semicircle."}, {Name: "ValueColor", Doc: "ValueColor is the image color that will be used to\nrender the filled value bar. It should be set in Style."}, {Name: "Width", Doc: "Width, for [MeterCircle] and [MeterSemicircle], is the\nwidth of the circle/semicircle. It should be set in Style."}}, Instance: &Meter{}})
+var MeterType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Meter", IDName: "meter", Doc: "Meter is a widget that renders a current value on as a filled\nbar/semicircle relative to a minimum and maximum potential value.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Type", Doc: "Type is the styling type of the meter."}, {Name: "Value", Doc: "Value is the current value of the meter.\nIt defaults to 0.5."}, {Name: "Min", Doc: "Min is the minimum possible value of the meter.\nIt defaults to 0."}, {Name: "Max", Doc: "Max is the maximum possible value of the meter.\nIt defaults to 1."}, {Name: "Text", Doc: "Text, for [MeterCircle] and [MeterSemicircle], is the\ntext to render inside of the circle/semicircle."}, {Name: "ValueColor", Doc: "ValueColor is the image color that will be used to\nrender the filled value bar. It should be set in Style."}, {Name: "Width", Doc: "Width, for [MeterCircle] and [MeterSemicircle], is the\nwidth of the circle/semicircle. It should be set in Style."}}, Instance: &Meter{}})
 
 // NewMeter adds a new [Meter] with the given name to the given parent:
 // Meter is a widget that renders a current value on as a filled
@@ -519,19 +519,22 @@ func (t *Meter) KiType() *gti.Type { return MeterType }
 func (t *Meter) New() ki.Ki { return &Meter{} }
 
 // SetType sets the [Meter.Type]:
-// Type is the styling type of the meter
+// Type is the styling type of the meter.
 func (t *Meter) SetType(v MeterTypes) *Meter { t.Type = v; return t }
 
 // SetValue sets the [Meter.Value]:
-// Value is the current value of the meter
+// Value is the current value of the meter.
+// It defaults to 0.5.
 func (t *Meter) SetValue(v float32) *Meter { t.Value = v; return t }
 
 // SetMin sets the [Meter.Min]:
-// Min is the minimum possible value of the meter
+// Min is the minimum possible value of the meter.
+// It defaults to 0.
 func (t *Meter) SetMin(v float32) *Meter { t.Min = v; return t }
 
 // SetMax sets the [Meter.Max]:
-// Max is the maximum possible value of the meter
+// Max is the maximum possible value of the meter.
+// It defaults to 1.
 func (t *Meter) SetMax(v float32) *Meter { t.Max = v; return t }
 
 // SetText sets the [Meter.Text]:
@@ -693,7 +696,7 @@ var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.FavPathItem", IDName
 var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.DebugSettingsData", IDName: "debug-settings-data", Doc: "DebugSettingsData is the data type for debugging settings.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Embeds: []gti.Field{{Name: "SettingsBase"}}, Fields: []gti.Field{{Name: "UpdateTrace", Doc: "Print a trace of updates that trigger re-rendering"}, {Name: "RenderTrace", Doc: "Print a trace of the nodes rendering"}, {Name: "LayoutTrace", Doc: "Print a trace of all layouts"}, {Name: "LayoutTraceDetail", Doc: "Print more detailed info about the underlying layout computations"}, {Name: "WinEventTrace", Doc: "Print a trace of window events"}, {Name: "WinRenderTrace", Doc: "Print the stack trace leading up to win publish events\nwhich are expensive"}, {Name: "WinGeomTrace", Doc: "Print a trace of window geometry saving / loading functions"}, {Name: "KeyEventTrace", Doc: "Print a trace of keyboard events"}, {Name: "EventTrace", Doc: "Print a trace of event handling"}, {Name: "FocusTrace", Doc: "Print a trace of focus changes"}, {Name: "DNDTrace", Doc: "Print a trace of DND event handling"}, {Name: "GoCompleteTrace", Doc: "Print a trace of Go language completion and lookup process"}, {Name: "GoTypeTrace", Doc: "Print a trace of Go language type parsing and inference process"}}})
 
 // SliderType is the [gti.Type] for [Slider]
-var SliderType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Slider", IDName: "slider", Doc: "Slider is a slideable widget that provides slider functionality for two Types:\nSlider type provides a movable thumb that represents Value as the center of thumb\nPos position, with room reserved at ends for 1/2 of the thumb size.\nScrollbar has a VisiblePct factor that specifies the percent of the content\ncurrently visible, which determines the size of the thumb, and thus the range of motion\nremaining for the thumb Value (VisiblePct = 1 means thumb is full size, and no remaining\nrange of motion).\nThe Content size (inside the margin and padding) determines the outer bounds of\nthe rendered area.\nThe [styles.Style.Direction] determines the direction in which the slider slides.", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Type", Doc: "Type is the type of the slider, which determines its visual\nand functional properties. The default type, [SliderSlider],\nshould work for most end-user use cases."}, {Name: "Value", Doc: "Value is the current value, represented by the position of the thumb."}, {Name: "Min", Doc: "Min is the minimum value supported."}, {Name: "Max", Doc: "Max is the maximum value supported."}, {Name: "Step", Doc: "Step is the amount that the arrow keys increment/decrement the value by."}, {Name: "EnforceStep", Doc: "EnforceStep is whether to ensure that the value is always\na multiple of [Slider.Step]."}, {Name: "PageStep", Doc: "PageStep is the amount that the PageUp and PageDown keys\nincrement/decrement the value by."}, {Name: "Icon", Doc: "Icon is an optional icon to use for the dragging knob."}, {Name: "VisiblePct", Doc: "For Scrollbar type only: proportion (1 max) of the full range of scrolled data\nthat is currently visible.  This determines the thumb size and range of motion:\nif 1, full slider is the thumb and no motion is possible."}, {Name: "ThumbSize", Doc: "Size of the thumb as a proportion of the slider thickness, which is\nContent size (inside the padding).  This is for actual X,Y dimensions,\nso must be sensitive to Dim dimension alignment."}, {Name: "TrackSize", Doc: "TrackSize is the proportion of slider thickness for the visible track\nfor the Slider type.  It is often thinner than the thumb, achieved by\nvalues < 1 (.5 default)"}, {Name: "InputThreshold", Doc: "threshold for amount of change in scroll value before emitting an input event"}, {Name: "Prec", Doc: "specifies the precision of decimal places (total, not after the decimal point)\nto use in representing the number. This helps to truncate small weird floating\npoint values in the nether regions."}, {Name: "ValueColor", Doc: "The background color that is used for styling the selected value section of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no value is rendered, so the value section of the slider\njust looks like the rest of the slider."}, {Name: "ThumbColor", Doc: "The background color that is used for styling the thumb (handle) of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no thumb is rendered, so the thumb section of the slider\njust looks like the rest of the slider."}, {Name: "StayInView", Doc: "If true, keep the slider (typically a Scrollbar) within the parent Scene\nbounding box, if the parent is in view.  This is the default behavior\nfor Layout scrollbars, and setting this flag replicates that behavior\nin other scrollbars."}, {Name: "Pos", Doc: "logical position of the slider relative to Size"}, {Name: "LastValue", Doc: "previous Change event emitted value - don't re-emit Change if it is the same"}, {Name: "PrevSlide", Doc: "previous sliding value - for computing the Input change"}, {Name: "Size", Doc: "Computed size of the slide box in the relevant dimension\nrange of motion, exclusive of spacing, based on layout allocation."}, {Name: "SlideStartPos", Doc: "underlying drag position of slider -- not subject to snapping"}}, Instance: &Slider{}})
+var SliderType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Slider", IDName: "slider", Doc: "Slider is a slideable widget that provides slider functionality for two Types:\nSlider type provides a movable thumb that represents Value as the center of thumb\nPos position, with room reserved at ends for 1/2 of the thumb size.\nScrollbar has a VisiblePct factor that specifies the percent of the content\ncurrently visible, which determines the size of the thumb, and thus the range of motion\nremaining for the thumb Value (VisiblePct = 1 means thumb is full size, and no remaining\nrange of motion).\nThe Content size (inside the margin and padding) determines the outer bounds of\nthe rendered area.\nThe [styles.Style.Direction] determines the direction in which the slider slides.", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Type", Doc: "Type is the type of the slider, which determines its visual\nand functional properties. The default type, [SliderSlider],\nshould work for most end-user use cases."}, {Name: "Value", Doc: "Value is the current value, represented by the position of the thumb.\nIt defaults to 0.5."}, {Name: "Min", Doc: "Min is the minimum possible value.\nIt defaults to 0."}, {Name: "Max", Doc: "Max is the maximum value supported.\nIt defaults to 1."}, {Name: "Step", Doc: "Step is the amount that the arrow keys increment/decrement the value by.\nIt defaults to 0.1."}, {Name: "EnforceStep", Doc: "EnforceStep is whether to ensure that the value is always\na multiple of [Slider.Step]."}, {Name: "PageStep", Doc: "PageStep is the amount that the PageUp and PageDown keys\nincrement/decrement the value by.\nIt defaults to 0.2, and will be at least as big as [Slider.Step]."}, {Name: "Icon", Doc: "Icon is an optional icon to use for the dragging knob."}, {Name: "VisiblePct", Doc: "For Scrollbar type only: proportion (1 max) of the full range of scrolled data\nthat is currently visible.  This determines the thumb size and range of motion:\nif 1, full slider is the thumb and no motion is possible."}, {Name: "ThumbSize", Doc: "Size of the thumb as a proportion of the slider thickness, which is\nContent size (inside the padding).  This is for actual X,Y dimensions,\nso must be sensitive to Dim dimension alignment."}, {Name: "TrackSize", Doc: "TrackSize is the proportion of slider thickness for the visible track\nfor the Slider type.  It is often thinner than the thumb, achieved by\nvalues < 1 (.5 default)"}, {Name: "InputThreshold", Doc: "threshold for amount of change in scroll value before emitting an input event"}, {Name: "Prec", Doc: "specifies the precision of decimal places (total, not after the decimal point)\nto use in representing the number. This helps to truncate small weird floating\npoint values in the nether regions."}, {Name: "ValueColor", Doc: "The background color that is used for styling the selected value section of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no value is rendered, so the value section of the slider\njust looks like the rest of the slider."}, {Name: "ThumbColor", Doc: "The background color that is used for styling the thumb (handle) of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no thumb is rendered, so the thumb section of the slider\njust looks like the rest of the slider."}, {Name: "StayInView", Doc: "If true, keep the slider (typically a Scrollbar) within the parent Scene\nbounding box, if the parent is in view.  This is the default behavior\nfor Layout scrollbars, and setting this flag replicates that behavior\nin other scrollbars."}, {Name: "Pos", Doc: "logical position of the slider relative to Size"}, {Name: "LastValue", Doc: "previous Change event emitted value - don't re-emit Change if it is the same"}, {Name: "PrevSlide", Doc: "previous sliding value - for computing the Input change"}, {Name: "Size", Doc: "Computed size of the slide box in the relevant dimension\nrange of motion, exclusive of spacing, based on layout allocation."}, {Name: "SlideStartPos", Doc: "underlying drag position of slider -- not subject to snapping"}}, Instance: &Slider{}})
 
 // NewSlider adds a new [Slider] with the given name to the given parent:
 // Slider is a slideable widget that provides slider functionality for two Types:
@@ -743,15 +746,18 @@ func (t *Slider) AsSlider() *Slider { return t }
 func (t *Slider) SetType(v SliderTypes) *Slider { t.Type = v; return t }
 
 // SetMin sets the [Slider.Min]:
-// Min is the minimum value supported.
+// Min is the minimum possible value.
+// It defaults to 0.
 func (t *Slider) SetMin(v float32) *Slider { t.Min = v; return t }
 
 // SetMax sets the [Slider.Max]:
 // Max is the maximum value supported.
+// It defaults to 1.
 func (t *Slider) SetMax(v float32) *Slider { t.Max = v; return t }
 
 // SetStep sets the [Slider.Step]:
 // Step is the amount that the arrow keys increment/decrement the value by.
+// It defaults to 0.1.
 func (t *Slider) SetStep(v float32) *Slider { t.Step = v; return t }
 
 // SetEnforceStep sets the [Slider.EnforceStep]:
@@ -762,6 +768,7 @@ func (t *Slider) SetEnforceStep(v bool) *Slider { t.EnforceStep = v; return t }
 // SetPageStep sets the [Slider.PageStep]:
 // PageStep is the amount that the PageUp and PageDown keys
 // increment/decrement the value by.
+// It defaults to 0.2, and will be at least as big as [Slider.Step].
 func (t *Slider) SetPageStep(v float32) *Slider { t.PageStep = v; return t }
 
 // SetIcon sets the [Slider.Icon]:
@@ -815,7 +822,7 @@ func (t *Slider) SetStayInView(v bool) *Slider { t.StayInView = v; return t }
 func (t *Slider) SetTooltip(v string) *Slider { t.Tooltip = v; return t }
 
 // SpinnerType is the [gti.Type] for [Spinner]
-var SpinnerType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Spinner", IDName: "spinner", Doc: "Spinner combines a TextField with up / down buttons for incrementing /\ndecrementing values -- all configured within the Parts of the widget", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "TextField"}}, Fields: []gti.Field{{Name: "Value", Doc: "Value is the current value."}, {Name: "HasMin", Doc: "HasMin is whether there is a minimum value to enforce."}, {Name: "Min", Doc: "Min, if HasMin is true, is the the minimum value in range."}, {Name: "HasMax", Doc: "HaxMax is whether there is a maximum value to enforce."}, {Name: "Max", Doc: "Max, if HasMax is true, is the maximum value in range."}, {Name: "Step", Doc: "Step is the amount that the up and down buttons and arrow keys\nincrement/decrement the value by."}, {Name: "EnforceStep", Doc: "EnforceStep is whether to ensure that the value of the spinner\nis always a multiple of [Spinner.Step]."}, {Name: "PageStep", Doc: "PageStep is the amount that the PageUp and PageDown keys\nincrement/decrement the value by."}, {Name: "Prec", Doc: "Prec specifies the precision of decimal places\n(total, not after the decimal point) to use in\nrepresenting the number. This helps to truncate\nsmall weird floating point values."}, {Name: "Format", Doc: "Format is the format string to use for printing the value.\nIf it unset, %g is used. If it is decimal based\n(ends in d, b, c, o, O, q, x, X, or U) then the value is\nconverted to decimal prior to printing."}}, Instance: &Spinner{}})
+var SpinnerType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Spinner", IDName: "spinner", Doc: "Spinner combines a TextField with up / down buttons for incrementing /\ndecrementing values -- all configured within the Parts of the widget", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "TextField"}}, Fields: []gti.Field{{Name: "Value", Doc: "Value is the current value."}, {Name: "HasMin", Doc: "HasMin is whether there is a minimum value to enforce."}, {Name: "Min", Doc: "Min, if HasMin is true, is the the minimum value in range."}, {Name: "HasMax", Doc: "HaxMax is whether there is a maximum value to enforce."}, {Name: "Max", Doc: "Max, if HasMax is true, is the maximum value in range."}, {Name: "Step", Doc: "Step is the amount that the up and down buttons and arrow keys\nincrement/decrement the value by. It defaults to 0.1."}, {Name: "EnforceStep", Doc: "EnforceStep is whether to ensure that the value of the spinner\nis always a multiple of [Spinner.Step]."}, {Name: "PageStep", Doc: "PageStep is the amount that the PageUp and PageDown keys\nincrement/decrement the value by.\nIt defaults to 0.2, and will be at least as big as [Spinner.Step]."}, {Name: "Prec", Doc: "Prec specifies the precision of decimal places\n(total, not after the decimal point) to use in\nrepresenting the number. This helps to truncate\nsmall weird floating point values."}, {Name: "Format", Doc: "Format is the format string to use for printing the value.\nIf it unset, %g is used. If it is decimal based\n(ends in d, b, c, o, O, q, x, X, or U) then the value is\nconverted to decimal prior to printing."}}, Instance: &Spinner{}})
 
 // NewSpinner adds a new [Spinner] with the given name to the given parent:
 // Spinner combines a TextField with up / down buttons for incrementing /
@@ -852,7 +859,7 @@ func (t *Spinner) AsSpinner() *Spinner { return t }
 
 // SetStep sets the [Spinner.Step]:
 // Step is the amount that the up and down buttons and arrow keys
-// increment/decrement the value by.
+// increment/decrement the value by. It defaults to 0.1.
 func (t *Spinner) SetStep(v float32) *Spinner { t.Step = v; return t }
 
 // SetEnforceStep sets the [Spinner.EnforceStep]:
@@ -863,6 +870,7 @@ func (t *Spinner) SetEnforceStep(v bool) *Spinner { t.EnforceStep = v; return t 
 // SetPageStep sets the [Spinner.PageStep]:
 // PageStep is the amount that the PageUp and PageDown keys
 // increment/decrement the value by.
+// It defaults to 0.2, and will be at least as big as [Spinner.Step].
 func (t *Spinner) SetPageStep(v float32) *Spinner { t.PageStep = v; return t }
 
 // SetPrec sets the [Spinner.Prec]:
@@ -925,13 +933,12 @@ func (t *Spinner) SetSelectMode(v bool) *Spinner { t.SelectMode = v; return t }
 func (t *Spinner) SetUndoMgr(v TextFieldUndoMgr) *Spinner { t.UndoMgr = v; return t }
 
 // SplitsType is the [gti.Type] for [Splits]
-var SplitsType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Splits", IDName: "splits", Doc: "Splits allocates a fixed proportion of space to each child, along given\ndimension.  It uses the Widget Parts to hold the Handle widgets\nseparately from the children that contain the rest of the scene to be\ndisplayed within each panel.", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Splits", Doc: "proportion (0-1 normalized, enforced) of space allocated to each element.\nEnter 0 to collapse a given element"}, {Name: "SavedSplits", Doc: "A saved version of the splits which can be restored.\nFor dynamic collapse / expand operations"}}, Instance: &Splits{}})
+var SplitsType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Splits", IDName: "splits", Doc: "Splits allocates a certain proportion of its space to each of its children\nalong [styles.Style.Direction]. It adds [Handle] widgets to its parts that\nallow the user to customize the amount of space allocated to each child.", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Splits", Doc: "Splits is the proportion (0-1 normalized, enforced) of space\nallocated to each element. 0 indicates that an element should\nbe completely collapsed."}, {Name: "SavedSplits", Doc: "SavedSplits is a saved version of the splits that can be restored\nfor dynamic collapse/expand operations."}}, Instance: &Splits{}})
 
 // NewSplits adds a new [Splits] with the given name to the given parent:
-// Splits allocates a fixed proportion of space to each child, along given
-// dimension.  It uses the Widget Parts to hold the Handle widgets
-// separately from the children that contain the rest of the scene to be
-// displayed within each panel.
+// Splits allocates a certain proportion of its space to each of its children
+// along [styles.Style.Direction]. It adds [Handle] widgets to its parts that
+// allow the user to customize the amount of space allocated to each child.
 func NewSplits(par ki.Ki, name ...string) *Splits {
 	return par.NewChild(SplitsType, name...).(*Splits)
 }
@@ -1179,7 +1186,7 @@ func (t *Switches) SetTooltip(v string) *Switches { t.Tooltip = v; return t }
 func (t *Switches) SetStackTop(v int) *Switches { t.StackTop = v; return t }
 
 // TabsType is the [gti.Type] for [Tabs]
-var TabsType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Tabs", IDName: "tabs", Doc: "Tabs switches among child widgets via tabs.  The selected widget gets\nthe full allocated space avail after the tabs are accounted for.  The\nTabs is just a Vertical layout that manages two child widgets: a\nHorizFlow Layout for the tabs (which can flow across multiple rows as\nneeded) and a Stacked Frame that actually contains all the children, and\nprovides scrollbars as needed to any content within.  Typically should have\nmax stretch and a set preferred size, so it expands.", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Type", Doc: "Type is the styling type of the tabs. If it is changed after\nthe tabs are first configured, Update needs to be called on\nthe tabs."}, {Name: "MaxChars", Doc: "Maximum number of characters to include in tab label.\nElides labels that are longer than that"}, {Name: "NewTabButton", Doc: "show a new tab button at right of list of tabs"}, {Name: "CloseIcon", Doc: "CloseIcon is the icon used for tab close buttons.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed."}, {Name: "PrevEffectiveType", Doc: "PrevEffectiveType is the previous effective type of the tabs\nas computed by [TabTypes.Effective]."}, {Name: "Mu", Doc: "Mu is a mutex protecting updates to tabs. Tabs can be driven\nprogrammatically and via user input so need extra protection."}}, Instance: &Tabs{}})
+var TabsType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Tabs", IDName: "tabs", Doc: "Tabs switches among child widgets via tabs.  The selected widget gets\nthe full allocated space avail after the tabs are accounted for.  The\nTabs is just a Vertical layout that manages two child widgets: a\nHorizFlow Layout for the tabs (which can flow across multiple rows as\nneeded) and a Stacked Frame that actually contains all the children, and\nprovides scrollbars as needed to any content within.  Typically should have\nmax stretch and a set preferred size, so it expands.", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Type", Doc: "Type is the styling type of the tabs. If it is changed after\nthe tabs are first configured, Update needs to be called on\nthe tabs."}, {Name: "NewTabButton", Doc: "NewTabButton is whether to show a new tab button at the end of the list of tabs."}, {Name: "MaxChars", Doc: "MaxChars is the maximum number of characters to include in the tab label.\nIt elides labels that are longer than that."}, {Name: "CloseIcon", Doc: "CloseIcon is the icon used for tab close buttons.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed."}, {Name: "PrevEffectiveType", Doc: "PrevEffectiveType is the previous effective type of the tabs\nas computed by [TabTypes.Effective]."}, {Name: "Mu", Doc: "Mu is a mutex protecting updates to tabs. Tabs can be driven\nprogrammatically and via user input so need extra protection."}}, Instance: &Tabs{}})
 
 // NewTabs adds a new [Tabs] with the given name to the given parent:
 // Tabs switches among child widgets via tabs.  The selected widget gets
@@ -1225,14 +1232,14 @@ func (t *Tabs) AsTabs() *Tabs { return t }
 // the tabs.
 func (t *Tabs) SetType(v TabTypes) *Tabs { t.Type = v; return t }
 
-// SetMaxChars sets the [Tabs.MaxChars]:
-// Maximum number of characters to include in tab label.
-// Elides labels that are longer than that
-func (t *Tabs) SetMaxChars(v int) *Tabs { t.MaxChars = v; return t }
-
 // SetNewTabButton sets the [Tabs.NewTabButton]:
-// show a new tab button at right of list of tabs
+// NewTabButton is whether to show a new tab button at the end of the list of tabs.
 func (t *Tabs) SetNewTabButton(v bool) *Tabs { t.NewTabButton = v; return t }
+
+// SetMaxChars sets the [Tabs.MaxChars]:
+// MaxChars is the maximum number of characters to include in the tab label.
+// It elides labels that are longer than that.
+func (t *Tabs) SetMaxChars(v int) *Tabs { t.MaxChars = v; return t }
 
 // SetCloseIcon sets the [Tabs.CloseIcon]:
 // CloseIcon is the icon used for tab close buttons.
