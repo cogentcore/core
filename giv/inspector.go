@@ -120,10 +120,6 @@ func (is *Inspector) Open(filename gi.Filename) error { //gti:add
 // and clicking on a Widget pulls it up in the inspector.
 func (is *Inspector) ToggleSelectionMode() { //gti:add
 	sc := gi.AsScene(is.KiRoot)
-	if sc == nil {
-		gi.NewBody().AddSnackbarText("SelectionMode is only available on Scene objects").NewSnackbar(is).Run()
-		return
-	}
 	sc.SetFlag(!sc.Is(gi.ScRenderBBoxes), gi.ScRenderBBoxes)
 	if sc.Is(gi.ScRenderBBoxes) {
 		sc.SelectedWidgetChan = make(chan gi.Widget)
@@ -295,6 +291,9 @@ func (is *Inspector) ConfigSplits() {
 			sc := gi.AsScene(is.KiRoot)
 			if sc == nil {
 				return
+			}
+			if sc.Is(gi.ScRenderBBoxes) {
+				is.ToggleSelectionMode()
 			}
 			pselw := sc.SelectedWidget
 			sc.SelectedWidget = nil
