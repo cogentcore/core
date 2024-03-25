@@ -1263,20 +1263,26 @@ func (tv *TreeView) ContextMenuPos(e events.Event) (pos image.Point) {
 
 func (tv *TreeView) ContextMenuReadOnly(m *gi.Scene) {
 	gi.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy).
-		SetState(!tv.HasSelection(), states.Disabled).
+		SetEnabled(tv.HasSelection()).
 		OnClick(func(e events.Event) {
 			tv.Copy(true)
 		})
-	gi.NewButton(m).SetText("Edit").SetIcon(icons.Edit).
-		SetState(!tv.HasSelection(), states.Disabled).
+	gi.NewButton(m).SetText("View").SetIcon(icons.Visibility).
+		SetEnabled(tv.HasSelection()).
 		OnClick(func(e events.Event) {
 			tv.EditNode()
 		})
-	gi.NewButton(m).SetText("Inspector").SetIcon(icons.EditDocument).
-		SetState(!tv.HasSelection(), states.Disabled).
+	gi.NewButton(m).SetText("Inspect").SetIcon(icons.EditDocument).
+		SetEnabled(tv.HasSelection()).
 		OnClick(func(e events.Event) {
 			tv.InspectNode()
 		})
+	gi.NewSeparator(m)
+
+	NewFuncButton(m, tv.OpenAll).SetIcon(icons.KeyboardArrowDown).
+		SetEnabled(tv.HasSelection())
+	NewFuncButton(m, tv.CloseAll).SetIcon(icons.KeyboardArrowRight).
+		SetEnabled(tv.HasSelection())
 }
 
 func (tv *TreeView) ContextMenu(m *gi.Scene) {
@@ -1286,38 +1292,38 @@ func (tv *TreeView) ContextMenu(m *gi.Scene) {
 	}
 	tvi := tv.This().(TreeViewer)
 	gi.NewButton(m).SetText("Add child").SetIcon(icons.Add).
-		SetState(!tv.HasSelection(), states.Disabled).
+		SetEnabled(tv.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.AddChildNode()
 		})
 	gi.NewButton(m).SetText("Insert before").SetIcon(icons.Add).
-		SetState(!tv.HasSelection(), states.Disabled).
+		SetEnabled(tv.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.InsertBefore()
 		})
 	gi.NewButton(m).SetText("Insert after").SetIcon(icons.Add).
-		SetState(!tv.HasSelection(), states.Disabled).
+		SetEnabled(tv.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.InsertAfter()
 		})
 	gi.NewButton(m).SetText("Duplicate").SetIcon(icons.ContentCopy).
-		SetState(!tv.HasSelection(), states.Disabled).
+		SetEnabled(tv.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.Duplicate()
 		})
 	gi.NewButton(m).SetText("Delete").SetIcon(icons.Delete).
-		SetState(!tv.HasSelection(), states.Disabled).
+		SetEnabled(tv.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.DeleteNode()
 		})
 	gi.NewSeparator(m)
 	gi.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy).
-		SetState(!tv.HasSelection(), states.Disabled).
+		SetEnabled(tv.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.Copy(true)
 		})
 	gi.NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keyfun.Cut).
-		SetState(!tv.HasSelection(), states.Disabled).
+		SetEnabled(tv.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.Cut()
 		})
@@ -1331,16 +1337,15 @@ func (tv *TreeView) ContextMenu(m *gi.Scene) {
 	}
 	gi.NewSeparator(m)
 	NewFuncButton(m, tv.EditNode).SetText("Edit").SetIcon(icons.Edit).
-		SetState(!tv.HasSelection(), states.Disabled)
-	NewFuncButton(m, tv.InspectNode).SetText("Inspector").SetIcon(icons.EditDocument).
-		SetState(!tv.HasSelection(), states.Disabled)
+		SetEnabled(tv.HasSelection())
+	NewFuncButton(m, tv.InspectNode).SetText("Inspect").SetIcon(icons.EditDocument).
+		SetEnabled(tv.HasSelection())
 	gi.NewSeparator(m)
 
-	// icons.Open, Close
 	NewFuncButton(m, tv.OpenAll).SetIcon(icons.KeyboardArrowDown).
-		SetState(!tv.HasSelection(), states.Disabled)
+		SetEnabled(tv.HasSelection())
 	NewFuncButton(m, tv.CloseAll).SetIcon(icons.KeyboardArrowRight).
-		SetState(!tv.HasSelection(), states.Disabled)
+		SetEnabled(tv.HasSelection())
 }
 
 // IsRoot returns true if given node is the root of the tree.
