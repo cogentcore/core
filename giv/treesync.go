@@ -371,12 +371,12 @@ func (tv *TreeView) EditNode() { //gti:add
 	if tv.SyncNode != nil {
 		tynm := tv.SyncNode.KiType().Name
 		d := gi.NewBody().AddTitle(tynm)
-		NewStructView(d).SetStruct(tv.SyncNode)
+		NewStructView(d).SetStruct(tv.SyncNode).SetReadOnly(tv.IsReadOnly())
 		d.NewFullDialog(tv).Run()
 	} else {
 		tynm := tv.KiType().Name
 		d := gi.NewBody().AddTitle(tynm)
-		NewStructView(d).SetStruct(tv.This())
+		NewStructView(d).SetStruct(tv.This()).SetReadOnly(tv.IsReadOnly())
 		d.NewFullDialog(tv).Run()
 	}
 }
