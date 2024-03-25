@@ -11,3 +11,16 @@ type language struct {
 }
 giv.NewTableView(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 ```
+
+You can detect when the user changes the value of the table:
+
+```Go
+type language struct {
+    Name   string
+    Rating int
+}
+sl := []language{{"Go", 10}, {"Python", 5}}
+giv.NewTableView(parent).SetSlice(&sl).OnChange(func(e events.Event) {
+    gi.MessageSnackbar(parent, fmt.Sprintf("Languages: %v", sl))
+})
+```

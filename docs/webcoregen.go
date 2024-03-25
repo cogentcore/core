@@ -750,6 +750,16 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		}
 		giv.NewTableView(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 	},
+	"views/table-views-1": func(parent gi.Widget) {
+		type language struct {
+			Name   string
+			Rating int
+		}
+		sl := []language{{"Go", 10}, {"Python", 5}}
+		giv.NewTableView(parent).SetSlice(&sl).OnChange(func(e events.Event) {
+			gi.MessageSnackbar(parent, fmt.Sprintf("Languages: %v", sl))
+		})
+	},
 	"advanced/styling-0": func(parent gi.Widget) {
 		parent.OnWidgetAdded(func(w gi.Widget) {
 			w.Style(func(s *styles.Style) {
