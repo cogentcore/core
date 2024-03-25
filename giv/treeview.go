@@ -1272,11 +1272,6 @@ func (tv *TreeView) ContextMenuReadOnly(m *gi.Scene) {
 		OnClick(func(e events.Event) {
 			tv.EditNode()
 		})
-	gi.NewButton(m).SetText("Inspect").SetIcon(icons.EditDocument).
-		SetEnabled(tv.HasSelection()).
-		OnClick(func(e events.Event) {
-			tv.InspectNode()
-		})
 	gi.NewSeparator(m)
 
 	NewFuncButton(m, tv.OpenAll).SetIcon(icons.KeyboardArrowDown).
