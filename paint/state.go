@@ -200,3 +200,8 @@ func (rs *State) PopClip() {
 	rs.ClipStack[sz-1] = nil
 	rs.ClipStack = rs.ClipStack[:sz-1]
 }
+
+// Size returns the size of the underlying image as a [mat32.Vec2].
+func (rs *State) Size() mat32.Vec2 {
+	return mat32.V2FromPoint(rs.Image.Rect.Size())
+}
