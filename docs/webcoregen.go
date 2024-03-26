@@ -17,6 +17,8 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/ki"
+	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 	"cogentcore.org/core/webcore"
@@ -109,6 +111,11 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 	},
 	"widgets/buttons-12": func(parent gi.Widget) {
 		gi.NewButton(parent).SetType(gi.ButtonAction).SetText("Action")
+	},
+	"widgets/canvases-0": func(parent gi.Widget) {
+		gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
+			pc.FillBoxColor(mat32.V2(0, 0), mat32.V2FromPoint(pc.Image.Rect.Max), colors.Scheme.Primary.Base)
+		})
 	},
 	"widgets/choosers-0": func(parent gi.Widget) {
 		gi.NewChooser(parent).SetStrings("macOS", "Windows", "Linux")
