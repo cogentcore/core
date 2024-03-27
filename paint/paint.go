@@ -530,22 +530,6 @@ func (pc *Context) DrawPolygonPxToDots(points []mat32.Vec2) {
 	pc.ClosePath()
 }
 
-// // DrawRectangle draws a rectangle by setting the stroke style and width
-// // and calling DrawConsistentRectangle if the given border width and
-// // color styles for each side are the same. Otherwise, it calls DrawChangingRectangle.
-// func (pc *Paint) DrawRectangle1(x, y, w, h float32, bs styles.Border) {
-// 	if bs.Color.AllSame() && bs.Width.Dots().AllSame() {
-// 		// set the color if it is not the same as the already set color
-// 		if pc.StrokeStyle.Color.Source != styles.SolidColor || bs.Color.Top != pc.StrokeStyle.Color.Color {
-// 			pc.StrokeStyle.SetColor(bs.Color.Top)
-// 		}
-// 		pc.StrokeStyle.Width = bs.Width.Top
-// 		pc.DrawConsistentRectangle(x, y, w, h)
-// 		return
-// 	}
-// 	pc.DrawChangingRectangle(x, y, w, h, bs)
-// }
-
 // DrawBorder is a higher-level function that draws, strokes, and fills
 // an potentially rounded border box with the given position, size, and border styles.
 func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {

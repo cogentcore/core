@@ -33,6 +33,28 @@ gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
 })
 ```
 
+You can draw ellipses:
+
+```Go
+gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
+    sz := pc.Size()
+    pc.DrawEllipse(sz.X/2, sz.Y/2, sz.X/2, sz.Y/4)
+    pc.FillStyle.Color = colors.C(colors.Scheme.Success.Base)
+    pc.Fill()
+})
+```
+
+You can draw elliptical arcs:
+
+```Go
+gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
+    sz := pc.Size()
+    pc.DrawEllipticalArc(sz.X/2, sz.Y/2, sz.X/2, sz.Y/4, mat32.Pi, 2*mat32.Pi)
+    pc.FillStyle.Color = colors.C(colors.Scheme.Success.Base)
+    pc.Fill()
+})
+```
+
 You can draw quadratic arcs:
 
 ```Go
