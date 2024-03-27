@@ -29,8 +29,9 @@ gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
     sz := pc.Size()
     pc.MoveTo(0, 0)
     pc.LineTo(sz.X, sz.Y)
-    pc.StrokeStyle.Width.Dp(8)
     pc.StrokeStyle.Color = colors.C(colors.Scheme.Error.Base)
+    pc.StrokeStyle.Width.Dp(8)
+    pc.ToDots()
     pc.Stroke()
 })
 ```
