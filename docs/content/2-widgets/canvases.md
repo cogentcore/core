@@ -55,6 +55,17 @@ gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
 })
 ```
 
+You can draw regular polygons:
+
+```Go
+gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
+    sz := pc.Size()
+    pc.DrawRegularPolygon(6, sz.X/2, sz.Y/2, sz.X/2, mat32.Pi)
+    pc.FillStyle.Color = colors.C(colors.Scheme.Success.Base)
+    pc.Fill()
+})
+```
+
 You can draw quadratic arcs:
 
 ```Go

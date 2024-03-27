@@ -153,13 +153,21 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 	"widgets/canvases-5": func(parent gi.Widget) {
 		gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
 			sz := pc.Size()
+			pc.DrawRegularPolygon(6, sz.X/2, sz.Y/2, sz.X/2, mat32.Pi)
+			pc.FillStyle.Color = colors.C(colors.Scheme.Success.Base)
+			pc.Fill()
+		})
+	},
+	"widgets/canvases-6": func(parent gi.Widget) {
+		gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
+			sz := pc.Size()
 			pc.MoveTo(0, 0)
 			pc.QuadraticTo(sz.X/2, sz.Y/4, sz.X, sz.Y)
 			pc.StrokeStyle.Color = colors.C(colors.Scheme.Error.Base)
 			pc.Stroke()
 		})
 	},
-	"widgets/canvases-6": func(parent gi.Widget) {
+	"widgets/canvases-7": func(parent gi.Widget) {
 		gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
 			sz := pc.Size()
 			pc.MoveTo(0, 0)

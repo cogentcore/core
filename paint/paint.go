@@ -934,6 +934,8 @@ func (pc *Context) DrawCircle(x, y, r float32) {
 	pc.ClosePath()
 }
 
+// DrawRegularPolygon draws a regular polygon with the given number of sides
+// at the given position with the given rotation.
 func (pc *Context) DrawRegularPolygon(n int, x, y, r, rotation float32) {
 	angle := 2 * mat32.Pi / float32(n)
 	rotation -= mat32.Pi / 2
