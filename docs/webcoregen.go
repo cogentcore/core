@@ -117,6 +117,14 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 			pc.FillBoxColor(mat32.Vec2{}, pc.Size(), colors.Scheme.Primary.Base)
 		})
 	},
+	"widgets/canvases-1": func(parent gi.Widget) {
+		gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
+			pc.MoveTo(0, 0)
+			pc.LineTo(pc.Size().X, pc.Size().Y)
+			pc.StrokeStyle.Color = colors.C(colors.Scheme.Error.Base)
+			pc.Stroke()
+		})
+	},
 	"widgets/choosers-0": func(parent gi.Widget) {
 		gi.NewChooser(parent).SetStrings("macOS", "Windows", "Linux")
 	},
