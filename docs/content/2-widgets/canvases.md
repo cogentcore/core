@@ -20,3 +20,13 @@ gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
     pc.Stroke()
 })
 ```
+
+You can draw circles:
+
+```Go
+gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
+    pc.DrawCircle(pc.Size().X/2, pc.Size().Y/2, pc.Size().X/2)
+    pc.FillStyle.Color = colors.C(colors.Scheme.Success.Base)
+    pc.Fill()
+})
+```
