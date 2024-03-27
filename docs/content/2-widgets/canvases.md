@@ -22,6 +22,19 @@ gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
 })
 ```
 
+You can change the width of lines:
+
+```Go
+gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
+    sz := pc.Size()
+    pc.MoveTo(0, 0)
+    pc.LineTo(sz.X, sz.Y)
+    pc.StrokeStyle.Width.Dp(8)
+    pc.StrokeStyle.Color = colors.C(colors.Scheme.Error.Base)
+    pc.Stroke()
+})
+```
+
 You can draw circles:
 
 ```Go
