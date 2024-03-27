@@ -119,17 +119,37 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 	},
 	"widgets/canvases-1": func(parent gi.Widget) {
 		gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
+			sz := pc.Size()
 			pc.MoveTo(0, 0)
-			pc.LineTo(pc.Size().X, pc.Size().Y)
+			pc.LineTo(sz.X, sz.Y)
 			pc.StrokeStyle.Color = colors.C(colors.Scheme.Error.Base)
 			pc.Stroke()
 		})
 	},
 	"widgets/canvases-2": func(parent gi.Widget) {
 		gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
-			pc.DrawCircle(pc.Size().X/2, pc.Size().Y/2, pc.Size().X/2)
+			sz := pc.Size()
+			pc.DrawCircle(sz.X/2, sz.Y/2, sz.X/2)
 			pc.FillStyle.Color = colors.C(colors.Scheme.Success.Base)
 			pc.Fill()
+		})
+	},
+	"widgets/canvases-3": func(parent gi.Widget) {
+		gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
+			sz := pc.Size()
+			pc.MoveTo(0, 0)
+			pc.QuadraticTo(sz.X/2, sz.Y/4, sz.X, sz.Y)
+			pc.StrokeStyle.Color = colors.C(colors.Scheme.Error.Base)
+			pc.Stroke()
+		})
+	},
+	"widgets/canvases-4": func(parent gi.Widget) {
+		gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
+			sz := pc.Size()
+			pc.MoveTo(0, 0)
+			pc.CubicTo(sz.X/2, sz.Y/4, sz.X/4, sz.Y/2, sz.X, sz.Y)
+			pc.StrokeStyle.Color = colors.C(colors.Scheme.Error.Base)
+			pc.Stroke()
 		})
 	},
 	"widgets/choosers-0": func(parent gi.Widget) {
