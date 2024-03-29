@@ -6,11 +6,9 @@ package gi
 
 import (
 	"image"
-	"image/png"
 	"io/fs"
 	"log"
 	"log/slog"
-	"os"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/grows/images"
@@ -60,7 +58,6 @@ func (im *Image) SetStyles() {
 func (im *Image) OpenImage(filename Filename) error { //gti:add
 	img, _, err := images.Open(string(filename))
 	if err != nil {
-		slog.Error("gi.Image.OpenImage: could not open", "file", filename, "err", err)
 		return err
 	}
 	im.SetImage(img)
@@ -85,29 +82,6 @@ func (im *Image) SetImage(img image.Image) *Image {
 	im.PrevPixels = nil
 	im.NeedsRender()
 	return im
-}
-
-// SetSize is a convenience method to ensure that the image
-// is given size. A new image will be created of the given size
-// if the current one is not of the specified size.
-func (im *Image) SetSize(sz image.Point) *Image {
-	if im.Pixels != nil {
-		csz := im.Pixels.Bounds().Size()
-		if sz == csz {
-			return im
-		}
-	}
-	im.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
-	im.PrevPixels = nil
-	return im
-}
-
-// GrabRenderFrom grabs the rendered image from given node
-func (im *Image) GrabRenderFrom(wi Widget) {
-	img := GrabRenderFrom(wi)
-	if img != nil {
-		im.Pixels = img
-	}
 }
 
 func (im *Image) DrawIntoScene() {
@@ -157,34 +131,6 @@ func GrabRenderFrom(wi Widget) *image.RGBA {
 	img := image.NewRGBA(image.Rectangle{Max: sz})
 	draw.Draw(img, img.Bounds(), sc.Pixels, wb.Geom.TotalBBox.Min, draw.Src)
 	return img
-}
-
-// ImageToRGBA returns given image as an image.RGBA (no conversion if it is already)
-func ImageToRGBA(img image.Image) *image.RGBA {
-	if rg, ok := img.(*image.RGBA); ok {
-		return rg
-	}
-	return images.CloneAsRGBA(img)
-}
-
-// OpenPNG opens an image encoded in the PNG format
-func OpenPNG(path string) (image.Image, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-	return png.Decode(file)
-}
-
-// SavePNG saves an image encoded in the PNG format
-func SavePNG(path string, im image.Image) error {
-	file, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	return png.Encode(file, im)
 }
 
 //////////////////////////////////////////////////////////////////////////////////

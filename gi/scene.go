@@ -6,8 +6,6 @@ package gi
 
 import (
 	"image"
-	"image/png"
-	"io"
 	"slices"
 	"sync"
 
@@ -392,19 +390,6 @@ func (sc *Scene) DeleteDirectRender(w Widget) {
 	if idx >= 0 {
 		sc.DirectRenders = slices.Delete(sc.DirectRenders, idx, idx+1)
 	}
-}
-
-//////////////////////////////////////////////////////////////////
-//  Image utilities
-
-// SavePNG encodes the image as a PNG and writes it to disk.
-func (sc *Scene) SavePNG(path string) error {
-	return SavePNG(path, sc.Pixels)
-}
-
-// EncodePNG encodes the image as a PNG and writes it to the provided io.Writer.
-func (sc *Scene) EncodePNG(w io.Writer) error {
-	return png.Encode(w, sc.Pixels)
 }
 
 // ScFlags has critical state information signaling when rendering,
