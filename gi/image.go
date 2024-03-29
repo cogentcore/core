@@ -28,9 +28,6 @@ import (
 type Image struct {
 	Box
 
-	// file name of image loaded -- set by OpenImage
-	Filename Filename `set:"-"`
-
 	// the bitmap image
 	Pixels *image.RGBA `view:"-" xml:"-" json:"-" set:"-"`
 
@@ -66,7 +63,6 @@ func (im *Image) OpenImage(filename Filename) error { //gti:add
 		slog.Error("gi.Image.OpenImage: could not open", "file", filename, "err", err)
 		return err
 	}
-	im.Filename = filename
 	im.SetImage(img)
 	return nil
 }
@@ -78,7 +74,6 @@ func (im *Image) OpenImageFS(fsys fs.FS, filename Filename) error {
 		slog.Error("gi.Image.OpenImage: could not open", "file", filename, "err", err)
 		return err
 	}
-	im.Filename = filename
 	im.SetImage(img)
 	return nil
 }

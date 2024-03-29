@@ -171,7 +171,6 @@ func HandleElement(ctx *Context) {
 					slog.Error("error loading image", "url", src, "err", err)
 					return
 				}
-				img.Filename = gi.Filename(src)
 				img.SetImage(im)
 				img.Update()
 			}
