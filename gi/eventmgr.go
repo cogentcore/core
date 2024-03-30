@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"cogentcore.org/core/abilities"
+	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
@@ -25,6 +26,7 @@ import (
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/states"
+	"github.com/anthonynsimon/bild/clone"
 )
 
 const (
@@ -724,8 +726,8 @@ func (em *EventMgr) DragStart(w Widget, data any, e events.Event) {
 	em.Drag = w
 	em.DragData = data
 	sp := NewSprite(DragSpriteName, image.Point{}, e.WindowPos())
-	sp.GrabRenderFrom(w) // todo: show number of items?
-	ImageClearer(sp.Pixels, 50.0)
+	sp.GrabRenderFrom(w) // TODO: maybe show the number of items being dragged
+	sp.Pixels = clone.AsRGBA(gradient.ApplyOpacityImage(sp.Pixels, 0.5))
 	sp.On = true
 	ms.Sprites.Add(sp)
 }

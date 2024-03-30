@@ -78,7 +78,7 @@ func (sp *Sprite) GrabRenderFrom(w Widget) {
 		sp.Pixels = img
 		sp.Geom.Size = sp.Pixels.Bounds().Size()
 	} else {
-		sp.SetSize(image.Point{10, 10}) // just a blank placeholder
+		sp.SetSize(image.Pt(10, 10)) // just a blank placeholder
 	}
 }
 

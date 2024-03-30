@@ -9,7 +9,6 @@ import (
 	"io/fs"
 	"log/slog"
 
-	"cogentcore.org/core/colors"
 	"cogentcore.org/core/grows/images"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/styles"
@@ -108,33 +107,5 @@ func (im *Image) Render() {
 		im.DrawIntoScene()
 		im.RenderChildren()
 		im.PopBounds()
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-//  Image IO
-
-//////////////////////////////////////////////////////////////////////////////////
-//  Image Manipulations
-
-// see https://github.com/anthonynsimon/bild for a great image manip library
-// with parallel speedup
-
-// only put gi-specific, specialized utilities here
-
-// ImageClearer makes an image more transparent -- pct is amount to alter
-// alpha transparency factor by -- 100 = fully transparent, 0 = no change --
-// affects the image itself -- make a copy if you want to keep the original
-// or see bild/blend/multiply -- this is specifically used for gi DND etc
-func ImageClearer(im *image.RGBA, pct float32) {
-	pct = mat32.Clamp(pct, 0, 100.0)
-	fact := pct / 100.0
-	sz := im.Bounds().Size()
-	for y := 0; y < sz.Y; y++ {
-		for x := 0; x < sz.X; x++ {
-			f32 := colors.NRGBAF32Model.Convert(im.At(x, y)).(colors.NRGBAF32)
-			f32.A -= f32.A * fact
-			im.Set(x, y, f32)
-		}
 	}
 }
