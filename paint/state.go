@@ -74,20 +74,8 @@ type State struct {
 func (rs *State) Init(width, height int, img *image.RGBA) {
 	rs.CurTransform = mat32.Identity2()
 	rs.Image = img
-	// to use the golang.org/x/image/vector scanner, do this:
-	// rs.Scanner = raster.NewScannerGV(width, height, img, img.Bounds())
-	// and cut out painter:
-	/*
-		painter := scanFT.NewRGBAPainter(img)
-		rs.Scanner = scanFT.NewScannerFT(width, height, painter)
-	*/
-	/*
-		rs.CompSpanner = &scanx.CompressSpanner{}
-		rs.CompSpanner.SetBounds(img.Bounds())
-	*/
 	rs.ImgSpanner = scan.NewImgSpanner(img)
 	rs.Scanner = scan.NewScanner(rs.ImgSpanner, width, height)
-	// rs.Scanner = scanx.NewScanner(rs.CompSpanner, width, height)
 	rs.Raster = raster.NewDasher(width, height, rs.Scanner)
 }
 
@@ -130,10 +118,10 @@ func (rs *State) PopTransformLock() {
 	rs.RenderMu.Unlock()
 }
 
-// PushBounds pushes current bounds onto stack and set new bounds.
-// this is the essential first step in rendering!
-// any further actual rendering should always be surrounded
-// by Lock() / Unlock() calls
+// PushBounds pushes current bounds onto stack and sets new bounds.
+// This is the essential first step in rendering.
+// Any further actual rendering should always be surrounded
+// by [State.Lock] and [State.Unlock] calls.
 func (rs *State) PushBounds(b image.Rectangle) {
 	rs.RenderMu.Lock()
 	defer rs.RenderMu.Unlock()
@@ -145,24 +133,21 @@ func (rs *State) PushBounds(b image.Rectangle) {
 		rs.Bounds = rs.Image.Bounds()
 	}
 	rs.BoundsStack = append(rs.BoundsStack, rs.Bounds)
-	// note: this does not fix the ghost trace from rendering..
-	// bp1 := image.Rectangle{Min: image.Point{X: b.Min.X - 1, Y: b.Min.Y - 1}, Max: image.Point{X: b.Max.X + 1, Y: b.Max.Y + 1}}
 	rs.Bounds = b
 }
 
-// Lock locks the render mutex -- must lock prior to rendering!
+// Lock locks the render mutex, which must happen prior to rendering.
 func (rs *State) Lock() {
 	rs.RenderMu.Lock()
 }
 
-// Unlock unlocks the render mutex, locked with PushBounds --
-// call this prior to children rendering etc.
+// Unlock unlocks the render mutex, which must happen after rendering.
 func (rs *State) Unlock() {
 	rs.RenderMu.Unlock()
 }
 
-// PopBounds pops bounds off the stack and set to current bounds
-// must be equally balanced with corresponding PushBounds
+// PopBounds pops the bounds off the stack and sets the current bounds.
+// This must be equally balanced with corresponding [State.PushBounds] calls.
 func (rs *State) PopBounds() {
 	rs.RenderMu.Lock()
 	defer rs.RenderMu.Unlock()

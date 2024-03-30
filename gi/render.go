@@ -422,10 +422,11 @@ func (sc *Scene) PrefSize(initSz image.Point) image.Point {
 //////////////////////////////////////////////////////////////////
 //		Widget local rendering
 
-// PushBounds pushes our bounding-box bounds onto the bounds stack if non-empty
-// -- this limits our drawing to our own bounding box, automatically -- must
-// be called as first step in Render returns whether the new bounds are
-// empty or not -- if empty then don't render!
+// PushBounds pushes our bounding box bounds onto the bounds stack
+// if they are non-empty. This automatically limits our drawing to
+// our own bounding box. This must be called as the first step in
+// Render implementations. It returns whether the new bounds are
+// empty or not; if they are empty, then don't render.
 func (wb *WidgetBase) PushBounds() bool {
 	if wb == nil || wb.This() == nil {
 		return false
@@ -443,7 +444,6 @@ func (wb *WidgetBase) PushBounds() bool {
 	wb.Styles.ComputeActualBackground(wb.ParentActualBackground())
 	pc := &wb.Scene.PaintContext
 	pc.PushBounds(wb.Geom.TotalBBox)
-	// rs.PushBounds(wb.Sc.Geom.TotalBBox)
 	pc.Defaults() // start with default values
 	if DebugSettings.RenderTrace {
 		fmt.Printf("Render: %v at %v\n", wb.Path(), wb.Geom.TotalBBox)
@@ -451,8 +451,8 @@ func (wb *WidgetBase) PushBounds() bool {
 	return true
 }
 
-// PopBounds pops our bounding-box bounds -- last step in Render after
-// rendering children
+// PopBounds pops our bounding box bounds. This is the last step
+// in Render implementations after rendering children.
 func (wb *WidgetBase) PopBounds() {
 	if wb == nil || wb.This() == nil {
 		return
