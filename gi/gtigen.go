@@ -353,12 +353,12 @@ func (t *Icon) New() ki.Ki { return &Icon{} }
 func (t *Icon) SetTooltip(v string) *Icon { t.Tooltip = v; return t }
 
 // ImageType is the [gti.Type] for [Image]
-var ImageType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Image", IDName: "image", Doc: "Image is a Widget that renders a static bitmap image.\nSee [Styles.ObjectFits] for how to control the image rendering within\nthe allocated size.  The default minimum requested size is the pixel\nsize in [units.Dp] units (1/160th of an inch). See [giv.ConfigImageToolbar]\nfor a toolbar with I/O buttons.", Methods: []gti.Method{{Name: "OpenImage", Doc: "OpenImage sets the image to the image located at the given filename.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}}, Embeds: []gti.Field{{Name: "Box"}}, Fields: []gti.Field{{Name: "Pixels", Doc: "the bitmap image"}, {Name: "PrevPixels", Doc: "cached last rendered image"}, {Name: "PrevObjectFit", Doc: "cached [styles.Style.ObjectFit] of the last rendered image"}, {Name: "PrevSize", Doc: "cached allocated size for the last rendered image"}}, Instance: &Image{}})
+var ImageType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Image", IDName: "image", Doc: "Image is a widget that renders a static bitmap image.\nSee [styles.ObjectFits] for how to control the image rendering within\nthe allocated size. The default minimum requested size is the pixel\nsize in [units.Dp] units (1/160th of an inch). See [giv.ConfigImageToolbar]\nfor a toolbar with I/O buttons.", Methods: []gti.Method{{Name: "Open", Doc: "Open sets the image to the image located at the given filename.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}}, Embeds: []gti.Field{{Name: "Box"}}, Fields: []gti.Field{{Name: "Image", Doc: "Image is the bitmap image."}, {Name: "prevPixels", Doc: "prevPixels is the cached last rendered image."}, {Name: "prevObjectFit", Doc: "prevObjectFit is the cached [styles.Style.ObjectFit] of the last rendered image."}, {Name: "prevSize", Doc: "prevSize is the cached allocated size for the last rendered image."}}, Instance: &Image{}})
 
 // NewImage adds a new [Image] with the given name to the given parent:
-// Image is a Widget that renders a static bitmap image.
-// See [Styles.ObjectFits] for how to control the image rendering within
-// the allocated size.  The default minimum requested size is the pixel
+// Image is a widget that renders a static bitmap image.
+// See [styles.ObjectFits] for how to control the image rendering within
+// the allocated size. The default minimum requested size is the pixel
 // size in [units.Dp] units (1/160th of an inch). See [giv.ConfigImageToolbar]
 // for a toolbar with I/O buttons.
 func NewImage(par ki.Ki, name ...string) *Image {

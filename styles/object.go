@@ -91,7 +91,7 @@ func (s *Style) ResizeImage(img image.Image, box mat32.Vec2) image.Image {
 	if s.ObjectFit != FitCover {
 		return rimg
 	}
-	// but we cap the destination size to the size of the containg object
+	// but we cap the destination size to the size of the containing object
 	drect := image.Rect(0, 0, int(min(sz.X, box.X)), int(min(sz.Y, box.Y)))
 	dst := image.NewRGBA(drect)
 	draw.Draw(dst, drect, rimg, image.Point{}, draw.Src)
