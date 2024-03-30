@@ -54,8 +54,8 @@ func (im *Image) SetStyles() {
 	})
 }
 
-// OpenImage sets the image to the image located at the given filename.
-func (im *Image) OpenImage(filename Filename) error { //gti:add
+// Open sets the image to the image located at the given filename.
+func (im *Image) Open(filename Filename) error { //gti:add
 	img, _, err := images.Open(string(filename))
 	if err != nil {
 		return err
@@ -64,9 +64,9 @@ func (im *Image) OpenImage(filename Filename) error { //gti:add
 	return nil
 }
 
-// OpenImageFS sets the image to the image located at the given filename in the given fs.
-func (im *Image) OpenImageFS(fsys fs.FS, filename Filename) error {
-	img, _, err := images.OpenFS(fsys, string(filename))
+// OpenFS sets the image to the image located at the given filename in the given fs.
+func (im *Image) OpenFS(fsys fs.FS, filename string) error {
+	img, _, err := images.OpenFS(fsys, filename)
 	if err != nil {
 		slog.Error("gi.Image.OpenImage: could not open", "file", filename, "err", err)
 		return err

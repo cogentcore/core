@@ -14,7 +14,7 @@ import (
 
 // ConfigImageToolbar configures the given toolbar for the given image.
 func ConfigImageToolbar(tb *gi.Toolbar, im *gi.Image) {
-	NewFuncButton(tb, im.OpenImage).SetIcon(icons.Open)
+	NewFuncButton(tb, im.Open).SetIcon(icons.Open)
 }
 
 // ConfigSVGToolbar configures the given toolbar for the given SVG.
