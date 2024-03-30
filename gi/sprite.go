@@ -71,15 +71,31 @@ func (sp *Sprite) SetBottomPos(pos image.Point) {
 	sp.Geom.Pos.X = max(sp.Geom.Pos.X, 0)
 }
 
-// GrabRenderFrom grabs the rendered image from given node
-func (sp *Sprite) GrabRenderFrom(wi Widget) {
-	img := GrabRenderFrom(wi) // in bitmap.go
+// GrabRenderFrom grabs the rendered image from the given widget.
+func (sp *Sprite) GrabRenderFrom(w Widget) {
+	img := GrabRenderFrom(w)
 	if img != nil {
 		sp.Pixels = img
 		sp.Geom.Size = sp.Pixels.Bounds().Size()
 	} else {
-		sp.SetSize(image.Point{10, 10}) // just a blank something..
+		sp.SetSize(image.Point{10, 10}) // just a blank placeholder
 	}
+}
+
+// GrabRenderFrom grabs the rendered image from the given widget.
+// If it returns nil, then the image could not be fetched.
+func GrabRenderFrom(w Widget) *image.RGBA {
+	wb := w.AsWidget()
+	if wb.Scene.Pixels == nil {
+		return nil
+	}
+	if wb.Geom.TotalBBox.Empty() { // the widget is offscreen
+		return nil
+	}
+	sz := wb.Geom.TotalBBox.Size()
+	img := image.NewRGBA(image.Rectangle{Max: sz})
+	draw.Draw(img, img.Bounds(), wb.Scene.Pixels, wb.Geom.TotalBBox.Min, draw.Src)
+	return img
 }
 
 /////////////////////////////////////////////////////////////////////

@@ -7,7 +7,6 @@ package gi
 import (
 	"image"
 	"io/fs"
-	"log"
 	"log/slog"
 
 	"cogentcore.org/core/colors"
@@ -114,24 +113,6 @@ func (im *Image) Render() {
 
 //////////////////////////////////////////////////////////////////////////////////
 //  Image IO
-
-// GrabRenderFrom grabs the rendered image from given node
-// if nil, then image could not be grabbed
-func GrabRenderFrom(wi Widget) *image.RGBA {
-	wb := wi.AsWidget()
-	sc := wb.Scene
-	if sc == nil || sc.Pixels == nil {
-		log.Printf("gi.GrabRenderFrom could not grab from node, scene or pixels nil: %v\n", wb.Path())
-		return nil
-	}
-	if wb.Geom.TotalBBox.Empty() {
-		return nil // offscreen -- can happen -- no warning -- just check rval
-	}
-	sz := wb.Geom.TotalBBox.Size()
-	img := image.NewRGBA(image.Rectangle{Max: sz})
-	draw.Draw(img, img.Bounds(), sc.Pixels, wb.Geom.TotalBBox.Min, draw.Src)
-	return img
-}
 
 //////////////////////////////////////////////////////////////////////////////////
 //  Image Manipulations
