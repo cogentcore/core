@@ -39,7 +39,8 @@ func (c *Canvas) SetStyles() {
 }
 
 func (c *Canvas) DrawIntoScene() {
-	c.Context = paint.NewContext(c.Geom.ContentBBox.Dx(), c.Geom.ContentBBox.Dy())
+	sz := c.Geom.Size.Actual.Content.ToPoint()
+	c.Context = paint.NewContext(sz.X, sz.Y)
 	c.Context.Lock()
 	c.Context.UnitContext = c.Styles.UnitContext
 	c.Draw(c.Context)
