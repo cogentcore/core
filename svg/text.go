@@ -168,9 +168,9 @@ func (g *Text) TextBBox() mat32.Box2 {
 func (g *Text) RenderText(sv *SVG) {
 	pc := &paint.Context{&sv.RenderState, &g.Paint}
 	orgsz := pc.FontStyle.Size
-	pos := pc.CurTransform.MulVec2AsPt(mat32.V2(g.Pos.X, g.Pos.Y))
-	rot := pc.CurTransform.ExtractRot()
-	scx, scy := pc.CurTransform.ExtractScale()
+	pos := pc.CurrentTransform.MulVec2AsPt(mat32.V2(g.Pos.X, g.Pos.Y))
+	rot := pc.CurrentTransform.ExtractRot()
+	scx, scy := pc.CurrentTransform.ExtractScale()
 	scalex := scx / scy
 	if scalex == 1 {
 		scalex = 0
@@ -195,7 +195,7 @@ func (g *Text) RenderText(sv *SVG) {
 		pos.X -= g.TextRender.Size.X
 	}
 	for i := range sr.Render {
-		sr.Render[i].RelPos = pc.CurTransform.MulVec2AsVec(sr.Render[i].RelPos)
+		sr.Render[i].RelPos = pc.CurrentTransform.MulVec2AsVec(sr.Render[i].RelPos)
 		sr.Render[i].Size.Y *= scy
 		sr.Render[i].Size.X *= scx
 	}
@@ -204,21 +204,21 @@ func (g *Text) RenderText(sv *SVG) {
 		mx := min(len(g.CharPosX), len(sr.Render))
 		for i := 0; i < mx; i++ {
 			// todo: this may not be fully correct, given relativity constraints
-			cpx := pc.CurTransform.MulVec2AsVec(mat32.V2(g.CharPosX[i], 0))
+			cpx := pc.CurrentTransform.MulVec2AsVec(mat32.V2(g.CharPosX[i], 0))
 			sr.Render[i].RelPos.X = cpx.X
 		}
 	}
 	if len(g.CharPosY) > 0 {
 		mx := min(len(g.CharPosY), len(sr.Render))
 		for i := 0; i < mx; i++ {
-			cpy := pc.CurTransform.MulVec2AsPt(mat32.V2(g.CharPosY[i], 0))
+			cpy := pc.CurrentTransform.MulVec2AsPt(mat32.V2(g.CharPosY[i], 0))
 			sr.Render[i].RelPos.Y = cpy.Y
 		}
 	}
 	if len(g.CharPosDX) > 0 {
 		mx := min(len(g.CharPosDX), len(sr.Render))
 		for i := 0; i < mx; i++ {
-			dx := pc.CurTransform.MulVec2AsVec(mat32.V2(g.CharPosDX[i], 0))
+			dx := pc.CurrentTransform.MulVec2AsVec(mat32.V2(g.CharPosDX[i], 0))
 			if i > 0 {
 				sr.Render[i].RelPos.X = sr.Render[i-1].RelPos.X + dx.X
 			} else {
@@ -229,7 +229,7 @@ func (g *Text) RenderText(sv *SVG) {
 	if len(g.CharPosDY) > 0 {
 		mx := min(len(g.CharPosDY), len(sr.Render))
 		for i := 0; i < mx; i++ {
-			dy := pc.CurTransform.MulVec2AsVec(mat32.V2(g.CharPosDY[i], 0))
+			dy := pc.CurrentTransform.MulVec2AsVec(mat32.V2(g.CharPosDY[i], 0))
 			if i > 0 {
 				sr.Render[i].RelPos.Y = sr.Render[i-1].RelPos.Y + dy.Y
 			} else {

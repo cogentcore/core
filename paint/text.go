@@ -90,7 +90,7 @@ func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 
 	pc.PushTransform(mat32.Identity2()) // needed for SVG
 	defer pc.PopTransform()
-	pc.CurTransform = mat32.Identity2()
+	pc.CurrentTransform = mat32.Identity2()
 
 	TextFontRenderMu.Lock()
 	defer TextFontRenderMu.Unlock()
@@ -112,7 +112,7 @@ func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 		curFace := sr.Render[0].Face
 		curColor := sr.Render[0].Color
 		if g, ok := curColor.(gradient.Gradient); ok {
-			g.Update(pc.FontStyle.Opacity, mat32.B2FromRect(pc.LastRenderBBox), pc.CurTransform)
+			g.Update(pc.FontStyle.Opacity, mat32.B2FromRect(pc.LastRenderBBox), pc.CurrentTransform)
 		} else {
 			curColor = gradient.ApplyOpacityImage(curColor, pc.FontStyle.Opacity)
 		}

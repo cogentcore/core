@@ -19,7 +19,7 @@ import (
 type State struct {
 
 	// current transform
-	CurTransform mat32.Mat2
+	CurrentTransform mat32.Mat2
 
 	// current path
 	Path raster.Path
@@ -27,10 +27,10 @@ type State struct {
 	// rasterizer -- stroke / fill rendering engine from raster
 	Raster *raster.Dasher
 
-	// scanner for scanx
+	// scan scanner
 	Scanner *scan.Scanner
 
-	// spanner for scanx
+	// scan spanner
 	ImgSpanner *scan.ImgSpanner
 
 	// starting point, for close path
@@ -72,7 +72,7 @@ type State struct {
 
 // Init initializes State -- must be called whenever image size changes
 func (rs *State) Init(width, height int, img *image.RGBA) {
-	rs.CurTransform = mat32.Identity2()
+	rs.CurrentTransform = mat32.Identity2()
 	rs.Image = img
 	rs.ImgSpanner = scan.NewImgSpanner(img)
 	rs.Scanner = scan.NewScanner(rs.ImgSpanner, width, height)
@@ -85,8 +85,8 @@ func (rs *State) PushTransform(xf mat32.Mat2) {
 	if rs.TransformStack == nil {
 		rs.TransformStack = make([]mat32.Mat2, 0)
 	}
-	rs.TransformStack = append(rs.TransformStack, rs.CurTransform)
-	rs.CurTransform.SetMul(xf)
+	rs.TransformStack = append(rs.TransformStack, rs.CurrentTransform)
+	rs.CurrentTransform.SetMul(xf)
 }
 
 // PushTransformLock pushes current transform onto stack and apply new transform on top of it
@@ -103,10 +103,10 @@ func (rs *State) PopTransform() {
 	sz := len(rs.TransformStack)
 	if sz == 0 {
 		slog.Error("programmer error: paint.State.PopTransform: stack is empty")
-		rs.CurTransform = mat32.Identity2()
+		rs.CurrentTransform = mat32.Identity2()
 		return
 	}
-	rs.CurTransform = rs.TransformStack[sz-1]
+	rs.CurrentTransform = rs.TransformStack[sz-1]
 	rs.TransformStack = rs.TransformStack[:sz-1]
 }
 
