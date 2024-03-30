@@ -655,7 +655,6 @@ func (em *EventMgr) GetMouseInBBox(w Widget, pos image.Point) {
 		if !kwb.PosInScBBox(pos) {
 			return ki.Break
 		}
-		// fmt.Println("in bb:", kwi, kwb.Styles.State)
 		em.MouseInBBox = append(em.MouseInBBox, kwi)
 		if kwb.Parts != nil {
 			em.GetMouseInBBox(kwb.Parts, pos)
