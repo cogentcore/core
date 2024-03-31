@@ -81,14 +81,14 @@ func (g *NodeBase) GradientApplyTransformPt(sv *SVG, xf mat32.Mat2, pt mat32.Vec
 	if gnm != "" {
 		gr := sv.GradientByName(gi, gnm)
 		if gr != nil {
-			gr.Grad.AsBase().Transform.SetMulCtr(xf, pt) // todo: ctr off?
+			gr.Grad.AsBase().Transform.SetMulCenter(xf, pt) // todo: ctr off?
 		}
 	}
 	gnm = NodePropURL(gi, "stroke")
 	if gnm != "" {
 		gr := sv.GradientByName(gi, gnm)
 		if gr != nil {
-			gr.Grad.AsBase().Transform.SetMulCtr(xf, pt)
+			gr.Grad.AsBase().Transform.SetMulCenter(xf, pt)
 		}
 	}
 }

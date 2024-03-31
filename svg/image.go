@@ -104,8 +104,8 @@ func (g *Image) DrawImage(sv *SVG) {
 
 func (g *Image) NodeBBox(sv *SVG) image.Rectangle {
 	rs := &sv.RenderState
-	pos := rs.CurrentTransform.MulVec2AsPt(g.Pos)
-	max := rs.CurrentTransform.MulVec2AsPt(g.Pos.Add(g.Size))
+	pos := rs.CurrentTransform.MulVec2AsPoint(g.Pos)
+	max := rs.CurrentTransform.MulVec2AsPoint(g.Pos.Add(g.Size))
 	posi := pos.ToPointCeil()
 	maxi := max.ToPointCeil()
 	return image.Rectangle{posi, maxi}.Canon()
@@ -139,7 +139,7 @@ func (g *Image) ApplyTransform(sv *SVG, xf mat32.Mat2) {
 		g.Paint.Transform.SetMul(xf)
 		g.SetProp("transform", g.Paint.Transform.String())
 	} else {
-		g.Pos = xf.MulVec2AsPt(g.Pos)
+		g.Pos = xf.MulVec2AsPoint(g.Pos)
 		g.Size = xf.MulVec2AsVec(g.Size)
 	}
 }
@@ -153,11 +153,11 @@ func (g *Image) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2,
 	crot := g.Paint.Transform.ExtractRot()
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
-		g.Paint.Transform.SetMulCtr(xf, lpt)
+		g.Paint.Transform.SetMulCenter(xf, lpt)
 		g.SetProp("transform", g.Paint.Transform.String())
 	} else {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self
-		g.Pos = xf.MulVec2AsPtCtr(g.Pos, lpt)
+		g.Pos = xf.MulVec2AsPointCenter(g.Pos, lpt)
 		g.Size = xf.MulVec2AsVec(g.Size)
 	}
 }

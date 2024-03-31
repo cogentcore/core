@@ -179,8 +179,8 @@ func TransformMatrix(dr image.Rectangle, sr image.Rectangle, rotDeg float32) mat
 	dsz := mat32.V2FromPoint(dr.Size())
 	rmat := mat32.Rotate2D(rad)
 
-	dmnr := rmat.MulVec2AsPt(mat32.V2FromPoint(dr.Min))
-	dmxr := rmat.MulVec2AsPt(mat32.V2FromPoint(dr.Max))
+	dmnr := rmat.MulVec2AsPoint(mat32.V2FromPoint(dr.Min))
+	dmxr := rmat.MulVec2AsPoint(mat32.V2FromPoint(dr.Max))
 	sx = mat32.Abs(dmxr.X-dmnr.X) / float32(sr.Dx())
 	sy = mat32.Abs(dmxr.Y-dmnr.Y) / float32(sr.Dy())
 	tx = dmnr.X - sx*float32(sr.Min.X)

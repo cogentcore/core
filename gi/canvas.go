@@ -18,13 +18,12 @@ type Canvas struct {
 	Box
 
 	// Draw is the function used to draw the content of the
-	// canvas every time that it is rendered. It renders directly
-	// to an image the size of the widget in real pixels (dots).
-	// The image is 256dp by 256dp by default. You can access the
-	// size of it in pixels by calling pc.Size().
+	// canvas every time that it is rendered. The paint context
+	// is automatically normalized to the size of the canvas,
+	// so you should specify points on a 0-1 scaled.
 	Draw func(pc *paint.Context)
 
-	// Context is the paint context that we use for drawing.
+	// Context is the paint context used for drawing.
 	Context *paint.Context `set:"-"`
 }
 

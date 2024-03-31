@@ -69,7 +69,7 @@ func (g *Group) ApplyTransform(sv *SVG, xf mat32.Mat2) {
 // and for rotation it is the center point around which to rotate
 func (g *Group) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
 	xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // group does NOT include self
-	g.Paint.Transform.SetMulCtr(xf, lpt)
+	g.Paint.Transform.SetMulCenter(xf, lpt)
 	g.SetProp("transform", g.Paint.Transform.String())
 }
 

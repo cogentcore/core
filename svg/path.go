@@ -884,7 +884,7 @@ func (g *Path) ApplyTransform(sv *SVG, xf mat32.Mat2) {
 // PathDataTransformAbs does the transform of next two data points as absolute coords
 func PathDataTransformAbs(data []PathData, i *int, xf mat32.Mat2, lpt mat32.Vec2) mat32.Vec2 {
 	cp := PathDataNextVec(data, i)
-	tc := xf.MulVec2AsPtCtr(cp, lpt)
+	tc := xf.MulVec2AsPointCenter(cp, lpt)
 	data[*i-2] = PathData(tc.X)
 	data[*i-1] = PathData(tc.Y)
 	return tc
@@ -909,7 +909,7 @@ func (g *Path) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, 
 	crot := g.Paint.Transform.ExtractRot()
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
-		g.Paint.Transform.SetMulCtr(xf, lpt)
+		g.Paint.Transform.SetMulCenter(xf, lpt)
 		g.SetProp("transform", g.Paint.Transform.String())
 	} else {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self
@@ -956,7 +956,7 @@ func (g *Path) ApplyTransformImpl(xf mat32.Mat2, lpt mat32.Vec2) {
 		case PcH:
 			for np := 0; np < n; np++ {
 				cp.X = PathDataNext(data, &i)
-				tc := xf.MulVec2AsPtCtr(cp, lpt)
+				tc := xf.MulVec2AsPointCenter(cp, lpt)
 				data[i-1] = PathData(tc.X)
 			}
 		case Pch:
@@ -970,7 +970,7 @@ func (g *Path) ApplyTransformImpl(xf mat32.Mat2, lpt mat32.Vec2) {
 		case PcV:
 			for np := 0; np < n; np++ {
 				cp.Y = PathDataNext(data, &i)
-				tc := xf.MulVec2AsPtCtr(cp, lpt)
+				tc := xf.MulVec2AsPointCenter(cp, lpt)
 				data[i-1] = PathData(tc.Y)
 			}
 		case Pcv:

@@ -74,11 +74,11 @@ func (r *Radial) Update(opacity float32, box mat32.Box2, objTransform mat32.Mat2
 		f = r.Box.Min.Add(sz.Mul(f))
 		rs.SetMul(sz)
 	} else {
-		c = r.Transform.MulVec2AsPt(c)
-		f = r.Transform.MulVec2AsPt(f)
+		c = r.Transform.MulVec2AsPoint(c)
+		f = r.Transform.MulVec2AsPoint(f)
 		rs = r.Transform.MulVec2AsVec(rs)
-		c = objTransform.MulVec2AsPt(c)
-		f = objTransform.MulVec2AsPt(f)
+		c = objTransform.MulVec2AsPoint(c)
+		f = objTransform.MulVec2AsPoint(f)
 		rs = objTransform.MulVec2AsVec(rs)
 	}
 	if c != f {
@@ -113,7 +113,7 @@ func (r *Radial) At(x, y int) color.Color {
 		// pos is just distance from center scaled by radius
 		pt := mat32.V2(float32(x)+0.5, float32(y)+0.5)
 		if r.Units == ObjectBoundingBox {
-			pt = r.boxTransform.MulVec2AsPt(pt)
+			pt = r.boxTransform.MulVec2AsPoint(pt)
 		}
 		d := pt.Sub(r.rCenter)
 		pos := mat32.Sqrt(d.X*d.X/(r.rRadius.X*r.rRadius.X) + (d.Y*d.Y)/(r.rRadius.Y*r.rRadius.Y))
@@ -125,7 +125,7 @@ func (r *Radial) At(x, y int) color.Color {
 
 	pt := mat32.V2(float32(x)+0.5, float32(y)+0.5)
 	if r.Units == ObjectBoundingBox {
-		pt = r.boxTransform.MulVec2AsPt(pt)
+		pt = r.boxTransform.MulVec2AsPoint(pt)
 	}
 	e := pt.Div(r.rRadius)
 

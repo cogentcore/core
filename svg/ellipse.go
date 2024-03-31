@@ -65,7 +65,7 @@ func (g *Ellipse) ApplyTransform(sv *SVG, xf mat32.Mat2) {
 		g.Paint.Transform.SetMul(xf)
 		g.SetProp("transform", g.Paint.Transform.String())
 	} else {
-		g.Pos = xf.MulVec2AsPt(g.Pos)
+		g.Pos = xf.MulVec2AsPoint(g.Pos)
 		g.Radii = xf.MulVec2AsVec(g.Radii)
 		g.GradientApplyTransform(sv, xf)
 	}
@@ -80,11 +80,11 @@ func (g *Ellipse) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec
 	crot := g.Paint.Transform.ExtractRot()
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
-		g.Paint.Transform.SetMulCtr(xf, lpt)
+		g.Paint.Transform.SetMulCenter(xf, lpt)
 		g.SetProp("transform", g.Paint.Transform.String())
 	} else {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self
-		g.Pos = xf.MulVec2AsPtCtr(g.Pos, lpt)
+		g.Pos = xf.MulVec2AsPointCenter(g.Pos, lpt)
 		g.Radii = xf.MulVec2AsVec(g.Radii)
 		g.GradientApplyTransformPt(sv, xf, lpt)
 	}

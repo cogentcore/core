@@ -87,7 +87,7 @@ func (g *Polyline) ApplyTransform(sv *SVG, xf mat32.Mat2) {
 		g.SetProp("transform", g.Paint.Transform.String())
 	} else {
 		for i, p := range g.Points {
-			p = xf.MulVec2AsPt(p)
+			p = xf.MulVec2AsPoint(p)
 			g.Points[i] = p
 		}
 		g.GradientApplyTransform(sv, xf)
@@ -103,12 +103,12 @@ func (g *Polyline) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Ve
 	crot := g.Paint.Transform.ExtractRot()
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
-		g.Paint.Transform.SetMulCtr(xf, lpt)
+		g.Paint.Transform.SetMulCenter(xf, lpt)
 		g.SetProp("transform", g.Paint.Transform.String())
 	} else {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self
 		for i, p := range g.Points {
-			p = xf.MulVec2AsPtCtr(p, lpt)
+			p = xf.MulVec2AsPointCenter(p, lpt)
 			g.Points[i] = p
 		}
 		g.GradientApplyTransformPt(sv, xf, lpt)

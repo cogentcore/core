@@ -192,7 +192,7 @@ func (g *NodeBase) ApplyTransform(sv *SVG, xf mat32.Mat2) {
 func (g *NodeBase) DeltaTransform(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2, self bool) (mat32.Mat2, mat32.Vec2) {
 	mxi := g.ParTransform(self)
 	mxi = mxi.Inverse()
-	lpt := mxi.MulVec2AsPt(pt)
+	lpt := mxi.MulVec2AsPoint(pt)
 	ldel := mxi.MulVec2AsVec(trans)
 	xf := mat32.Scale2D(scale.X, scale.Y).Rotate(rot)
 	xf.X0 = ldel.X

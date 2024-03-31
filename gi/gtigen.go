@@ -146,7 +146,7 @@ func (t *Button) SetMenu(v func(m *Scene)) *Button { t.Menu = v; return t }
 func (t *Button) SetTooltip(v string) *Button { t.Tooltip = v; return t }
 
 // CanvasType is the [gti.Type] for [Canvas]
-var CanvasType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Canvas", IDName: "canvas", Doc: "Canvas is a widget that can be arbitrarily drawn to by setting\nits Draw function using [Canvas.SetDraw].", Embeds: []gti.Field{{Name: "Box"}}, Fields: []gti.Field{{Name: "Draw", Doc: "Draw is the function used to draw the content of the\ncanvas every time that it is rendered. It renders directly\nto an image the size of the widget in real pixels (dots).\nThe image is 256dp by 256dp by default. You can access the\nsize of it in pixels by calling pc.Size()."}, {Name: "Context", Doc: "Context is the paint context that we use for drawing."}}, Instance: &Canvas{}})
+var CanvasType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Canvas", IDName: "canvas", Doc: "Canvas is a widget that can be arbitrarily drawn to by setting\nits Draw function using [Canvas.SetDraw].", Embeds: []gti.Field{{Name: "Box"}}, Fields: []gti.Field{{Name: "Draw", Doc: "Draw is the function used to draw the content of the\ncanvas every time that it is rendered. The paint context\nis automatically normalized to the size of the canvas,\nso you should specify points on a 0-1 scaled."}, {Name: "Context", Doc: "Context is the paint context used for drawing."}}, Instance: &Canvas{}})
 
 // NewCanvas adds a new [Canvas] with the given name to the given parent:
 // Canvas is a widget that can be arbitrarily drawn to by setting
@@ -163,10 +163,9 @@ func (t *Canvas) New() ki.Ki { return &Canvas{} }
 
 // SetDraw sets the [Canvas.Draw]:
 // Draw is the function used to draw the content of the
-// canvas every time that it is rendered. It renders directly
-// to an image the size of the widget in real pixels (dots).
-// The image is 256dp by 256dp by default. You can access the
-// size of it in pixels by calling pc.Size().
+// canvas every time that it is rendered. The paint context
+// is automatically normalized to the size of the canvas,
+// so you should specify points on a 0-1 scaled.
 func (t *Canvas) SetDraw(v func(pc *paint.Context)) *Canvas { t.Draw = v; return t }
 
 // SetTooltip sets the [Canvas.Tooltip]

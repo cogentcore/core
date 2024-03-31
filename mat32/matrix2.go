@@ -134,25 +134,25 @@ func (a Mat2) MulVec2AsVec(v Vec2) Vec2 {
 	return V2(tx, ty)
 }
 
-// MulVec2AsPt multiplies the Vec2 as a point, including adding translations.
-func (a Mat2) MulVec2AsPt(v Vec2) Vec2 {
+// MulVec2AsPoint multiplies the Vec2 as a point, including adding translations.
+func (a Mat2) MulVec2AsPoint(v Vec2) Vec2 {
 	tx := a.XX*v.X + a.XY*v.Y + a.X0
 	ty := a.YX*v.X + a.YY*v.Y + a.Y0
 	return V2(tx, ty)
 }
 
-// MulVec2AsPtCtr multiplies the Vec2 as a point relative to given center-point
+// MulVec2AsPointCenter multiplies the Vec2 as a point relative to given center-point
 // including adding translations.
-func (a Mat2) MulVec2AsPtCtr(v, ctr Vec2) Vec2 {
+func (a Mat2) MulVec2AsPointCenter(v, ctr Vec2) Vec2 {
 	rel := v.Sub(ctr)
 	tx := ctr.X + a.XX*rel.X + a.XY*rel.Y + a.X0
 	ty := ctr.Y + a.YX*rel.X + a.YY*rel.Y + a.Y0
 	return V2(tx, ty)
 }
 
-// MulCtr multiplies the Mat2, first subtracting given translation center point
+// MulCenter multiplies the Mat2, first subtracting given translation center point
 // from the translation components, and then adding it back in.
-func (a Mat2) MulCtr(b Mat2, ctr Vec2) Mat2 {
+func (a Mat2) MulCenter(b Mat2, ctr Vec2) Mat2 {
 	a.X0 -= ctr.X
 	a.Y0 -= ctr.Y
 	rv := a.Mul(b)
@@ -161,13 +161,13 @@ func (a Mat2) MulCtr(b Mat2, ctr Vec2) Mat2 {
 	return rv
 }
 
-// SetMulCtr sets the matrix to the result of [Mat2.MulCtr].
-func (a *Mat2) SetMulCtr(b Mat2, ctr Vec2) {
-	*a = a.MulCtr(b, ctr)
+// SetMulCenter sets the matrix to the result of [Mat2.MulCenter].
+func (a *Mat2) SetMulCenter(b Mat2, ctr Vec2) {
+	*a = a.MulCenter(b, ctr)
 }
 
-// MulFixedAsPt multiplies the fixed point as a point, including adding translations.
-func (a Mat2) MulFixedAsPt(fp fixed.Point26_6) fixed.Point26_6 {
+// MulFixedAsPoint multiplies the fixed point as a point, including adding translations.
+func (a Mat2) MulFixedAsPoint(fp fixed.Point26_6) fixed.Point26_6 {
 	x := fixed.Int26_6((float32(fp.X)*a.XX + float32(fp.Y)*a.XY) + a.X0*32)
 	y := fixed.Int26_6((float32(fp.X)*a.YX + float32(fp.Y)*a.YY) + a.Y0*32)
 	return fixed.Point26_6{x, y}

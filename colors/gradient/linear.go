@@ -64,10 +64,10 @@ func (l *Linear) Update(opacity float32, box mat32.Box2, objTransform mat32.Mat2
 		l.rStart = l.Box.Min.Add(sz.Mul(l.Start))
 		l.rEnd = l.Box.Min.Add(sz.Mul(l.End))
 	} else {
-		l.rStart = l.Transform.MulVec2AsPt(l.Start)
-		l.rEnd = l.Transform.MulVec2AsPt(l.End)
-		l.rStart = objTransform.MulVec2AsPt(l.rStart)
-		l.rEnd = objTransform.MulVec2AsPt(l.rEnd)
+		l.rStart = l.Transform.MulVec2AsPoint(l.Start)
+		l.rEnd = l.Transform.MulVec2AsPoint(l.End)
+		l.rStart = objTransform.MulVec2AsPoint(l.rStart)
+		l.rEnd = objTransform.MulVec2AsPoint(l.rEnd)
 	}
 }
 
@@ -85,7 +85,7 @@ func (l *Linear) At(x, y int) color.Color {
 
 	pt := mat32.V2(float32(x)+0.5, float32(y)+0.5)
 	if l.Units == ObjectBoundingBox {
-		pt = l.boxTransform.MulVec2AsPt(pt)
+		pt = l.boxTransform.MulVec2AsPoint(pt)
 	}
 	df := pt.Sub(l.rStart)
 	pos := (d.X*df.X + d.Y*df.Y) / dd
