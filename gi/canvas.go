@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -39,10 +40,12 @@ func (c *Canvas) SetStyles() {
 }
 
 func (c *Canvas) DrawIntoScene() {
-	sz := c.Geom.Size.Actual.Content.ToPoint()
-	c.Context = paint.NewContext(sz.X, sz.Y)
+	sz := c.Geom.Size.Actual.Content
+	szp := c.Geom.Size.Actual.Content.ToPoint()
+	c.Context = paint.NewContext(szp.X, szp.Y)
 	c.Context.Lock()
 	c.Context.UnitContext = c.Styles.UnitContext
+	c.Context.CurrentTransform = mat32.Scale2D(sz.X, sz.Y)
 	c.Draw(c.Context)
 	c.Context.Unlock()
 

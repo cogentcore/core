@@ -114,23 +114,21 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 	},
 	"widgets/canvases-0": func(parent gi.Widget) {
 		gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
-			pc.FillBoxColor(mat32.Vec2{}, pc.Size(), colors.Scheme.Primary.Base)
+			pc.FillBoxColor(mat32.Vec2{}, mat32.V2(1, 1), colors.Scheme.Primary.Base)
 		})
 	},
 	"widgets/canvases-1": func(parent gi.Widget) {
 		gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
-			sz := pc.Size()
 			pc.MoveTo(0, 0)
-			pc.LineTo(sz.X, sz.Y)
+			pc.LineTo(1, 1)
 			pc.StrokeStyle.Color = colors.C(colors.Scheme.Error.Base)
 			pc.Stroke()
 		})
 	},
 	"widgets/canvases-2": func(parent gi.Widget) {
 		gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
-			sz := pc.Size()
 			pc.MoveTo(0, 0)
-			pc.LineTo(sz.X, sz.Y)
+			pc.LineTo(1, 1)
 			pc.StrokeStyle.Color = colors.C(colors.Scheme.Error.Base)
 			pc.StrokeStyle.Width.Dp(8)
 			pc.ToDots()
@@ -139,50 +137,44 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 	},
 	"widgets/canvases-3": func(parent gi.Widget) {
 		gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
-			sz := pc.Size()
-			pc.DrawCircle(sz.X/2, sz.Y/2, sz.X/2)
+			pc.DrawCircle(0.5, 0.5, 0.5)
 			pc.FillStyle.Color = colors.C(colors.Scheme.Success.Base)
 			pc.Fill()
 		})
 	},
 	"widgets/canvases-4": func(parent gi.Widget) {
 		gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
-			sz := pc.Size()
-			pc.DrawEllipse(sz.X/2, sz.Y/2, sz.X/2, sz.Y/4)
+			pc.DrawEllipse(0.5, 0.5, 0.5, 0.25)
 			pc.FillStyle.Color = colors.C(colors.Scheme.Success.Base)
 			pc.Fill()
 		})
 	},
 	"widgets/canvases-5": func(parent gi.Widget) {
 		gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
-			sz := pc.Size()
-			pc.DrawEllipticalArc(sz.X/2, sz.Y/2, sz.X/2, sz.Y/4, mat32.Pi, 2*mat32.Pi)
+			pc.DrawEllipticalArc(0.5, 0.5, 0.5, 0.25, mat32.Pi, 2*mat32.Pi)
 			pc.FillStyle.Color = colors.C(colors.Scheme.Success.Base)
 			pc.Fill()
 		})
 	},
 	"widgets/canvases-6": func(parent gi.Widget) {
 		gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
-			sz := pc.Size()
-			pc.DrawRegularPolygon(6, sz.X/2, sz.Y/2, sz.X/2, mat32.Pi)
+			pc.DrawRegularPolygon(6, 0.5, 0.5, 0.5, mat32.Pi)
 			pc.FillStyle.Color = colors.C(colors.Scheme.Success.Base)
 			pc.Fill()
 		})
 	},
 	"widgets/canvases-7": func(parent gi.Widget) {
 		gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
-			sz := pc.Size()
 			pc.MoveTo(0, 0)
-			pc.QuadraticTo(sz.X/2, sz.Y/4, sz.X, sz.Y)
+			pc.QuadraticTo(0.5, 0.25, 1, 1)
 			pc.StrokeStyle.Color = colors.C(colors.Scheme.Error.Base)
 			pc.Stroke()
 		})
 	},
 	"widgets/canvases-8": func(parent gi.Widget) {
 		gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
-			sz := pc.Size()
 			pc.MoveTo(0, 0)
-			pc.CubicTo(sz.X/2, sz.Y/4, sz.X/4, sz.Y/2, sz.X, sz.Y)
+			pc.CubicTo(0.5, 0.25, 0.25, 0.5, 1, 1)
 			pc.StrokeStyle.Color = colors.C(colors.Scheme.Error.Base)
 			pc.Stroke()
 		})
