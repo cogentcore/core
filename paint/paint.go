@@ -386,6 +386,9 @@ func (pc *Context) DrawBox(pos, size mat32.Vec2, img image.Image, op draw.Op) {
 	pos = pc.CurrentTransform.MulVec2AsPoint(pos)
 	size = pc.CurrentTransform.MulVec2AsVec(size)
 	b := pc.Bounds.Intersect(mat32.RectFromPosSizeMax(pos, size))
+	if g, ok := img.(gradient.Gradient); ok {
+		g.Update(pc.FillStyle.Opacity, mat32.B2FromRect(b), pc.CurrentTransform)
+	}
 	i := gradient.ApplyOpacityImage(img, pc.FillStyle.Opacity)
 	draw.Draw(pc.Image, b, i, image.Point{}, op)
 }
