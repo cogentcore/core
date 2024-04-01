@@ -1,6 +1,6 @@
 # Canvases
 
-Cogent Core provides customizable canvases that allow you to arbitrarily draw anything that you want.
+Cogent Core provides customizable canvases that allow you to arbitrarily draw anything that you want. All canvas coordinates are on a normalized 0-1 scale.
 
 You can set the function used to draw the canvas:
 
