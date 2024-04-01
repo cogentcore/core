@@ -176,8 +176,8 @@ var StyleFillFuncs = map[string]StyleFunc{
 
 // StylePaintFuncs are functions for styling the Stroke object
 var StylePaintFuncs = map[string]StyleFunc{
-	"vector-effect": StyleFuncEnum(VecEffNone,
-		func(obj *Paint) enums.EnumSetter { return &(obj.VecEff) }),
+	"vector-effect": StyleFuncEnum(VectorEffectNone,
+		func(obj *Paint) enums.EnumSetter { return &(obj.VectorEffect) }),
 	"transform": func(obj any, key string, val any, par any, cc colors.Context) {
 		pc := obj.(*Paint)
 		if inh, init := StyleInhInit(val, par); inh || init {

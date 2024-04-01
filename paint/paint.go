@@ -266,7 +266,7 @@ func (pc *Context) StrokeWidth() float32 {
 	if dw == 0 {
 		return dw
 	}
-	if pc.VecEff == styles.VecEffNonScalingStroke {
+	if pc.VectorEffect == styles.VectorEffectNonScalingStroke {
 		return dw
 	}
 	scx, scy := pc.CurrentTransform.ExtractScale()

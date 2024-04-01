@@ -44,7 +44,9 @@ func (c *Canvas) DrawIntoScene() {
 	c.Context = paint.NewContext(szp.X, szp.Y)
 	c.Context.Lock()
 	c.Context.UnitContext = c.Styles.UnitContext
-	c.Context.CurrentTransform = mat32.Scale2D(sz.X, sz.Y)
+	c.Context.ToDots()
+	c.Context.PushTransform(mat32.Scale2D(sz.X, sz.Y))
+	c.Context.VectorEffect = styles.VectorEffectNonScalingStroke
 	c.Draw(c.Context)
 	c.Context.Unlock()
 

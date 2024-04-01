@@ -35,7 +35,7 @@ type Paint struct { //gti:add
 	TextStyle Text
 
 	// various rendering special effects settings
-	VecEff VectorEffects
+	VectorEffect VectorEffects
 
 	// our additions to transform -- pushed to render state
 	Transform mat32.Mat2
@@ -71,7 +71,7 @@ func (pc *Paint) CopyStyleFrom(cp *Paint) {
 	pc.FillStyle = cp.FillStyle
 	pc.FontStyle = cp.FontStyle
 	pc.TextStyle = cp.TextStyle
-	pc.VecEff = cp.VecEff
+	pc.VectorEffect = cp.VectorEffect
 }
 
 // InheritFields from parent: Manual inheriting of values is much faster than
@@ -132,9 +132,6 @@ func (pc *Paint) ToDots() {
 	}
 }
 
-/////////////////////////////////////////////////////////////////
-//  enums
-
 type FillRules int32 //enums:enum -trim-prefix FillRule -transform kebab
 
 const (
@@ -143,14 +140,14 @@ const (
 )
 
 // VectorEffects contains special effects for rendering
-type VectorEffects int32 //enums:enum -trim-prefix VecEff -transform kebab
+type VectorEffects int32 //enums:enum -trim-prefix VectorEffect -transform kebab
 
 const (
-	VecEffNone VectorEffects = iota
+	VectorEffectNone VectorEffects = iota
 
-	// VecEffNonScalingStroke means that the stroke width is not affected by
+	// VectorEffectNonScalingStroke means that the stroke width is not affected by
 	// transform properties
-	VecEffNonScalingStroke
+	VectorEffectNonScalingStroke
 )
 
 // IMPORTANT: any changes here must be updated below in StyleFillFuncs

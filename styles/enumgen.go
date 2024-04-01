@@ -582,7 +582,7 @@ const VectorEffectsN VectorEffects = 2
 
 var _VectorEffectsValueMap = map[string]VectorEffects{`none`: 0, `non-scaling-stroke`: 1}
 
-var _VectorEffectsDescMap = map[VectorEffects]string{0: ``, 1: `VecEffNonScalingStroke means that the stroke width is not affected by transform properties`}
+var _VectorEffectsDescMap = map[VectorEffects]string{0: ``, 1: `VectorEffectNonScalingStroke means that the stroke width is not affected by transform properties`}
 
 var _VectorEffectsMap = map[VectorEffects]string{0: `none`, 1: `non-scaling-stroke`}
 
