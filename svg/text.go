@@ -264,27 +264,25 @@ func (g *Text) Render(sv *SVG) {
 	if g.IsParText() {
 		pc := &g.Paint
 		rs := &sv.RenderState
-		rs.PushTransformLock(pc.Transform)
+		rs.PushTransform(pc.Transform)
 
 		g.RenderChildren(sv)
 		g.BBoxes(sv) // must come after render
 
-		rs.PopTransformLock()
+		rs.PopTransform()
 	} else {
 		vis, rs := g.PushTransform(sv)
 		if !vis {
 			return
 		}
 		if len(g.Text) > 0 {
-			rs.Lock()
 			g.RenderText(sv)
-			rs.Unlock()
 		}
 		g.RenderChildren(sv)
 		if g.IsParText() {
 			g.BBoxes(sv) // after kids have rendered
 		}
-		rs.PopTransformLock()
+		rs.PopTransform()
 	}
 }
 

@@ -68,10 +68,8 @@ func (g *Path) Render(sv *SVG) {
 	if !vis {
 		return
 	}
-	pc.Lock()
 	PathDataRender(g.Data, pc)
 	pc.FillStrokeClear()
-	pc.Unlock()
 
 	g.BBoxes(sv)
 
@@ -106,7 +104,7 @@ func (g *Path) Render(sv *SVG) {
 	}
 
 	g.RenderChildren(sv)
-	pc.PopTransformLock()
+	pc.PopTransform()
 }
 
 // PathCmds are the commands within the path SVG drawing data type

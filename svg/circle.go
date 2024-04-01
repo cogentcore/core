@@ -46,15 +46,13 @@ func (g *Circle) Render(sv *SVG) {
 	if !vis {
 		return
 	}
-	pc.Lock()
 	pc.DrawCircle(g.Pos.X, g.Pos.Y, g.Radius)
 	pc.FillStrokeClear()
-	pc.Unlock()
 
 	g.BBoxes(sv)
 	g.RenderChildren(sv)
 
-	pc.PopTransformLock()
+	pc.PopTransform()
 }
 
 // ApplyTransform applies the given 2D transform to the geometry of this node

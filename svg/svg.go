@@ -226,9 +226,7 @@ func (sv *SVG) Render() {
 
 func (sv *SVG) FillViewport() {
 	pc := &paint.Context{&sv.RenderState, &sv.Root.Paint}
-	pc.Lock()
 	pc.FillBox(mat32.Vec2{}, mat32.V2FromPoint(sv.Geom.Size), sv.Background)
-	pc.Unlock()
 }
 
 // SetRootTransform sets the Root node transform based on ViewBox, Translate, Scale

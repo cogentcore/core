@@ -24,10 +24,8 @@ func (g *Polygon) Render(sv *SVG) {
 	if !vis {
 		return
 	}
-	pc.Lock()
 	pc.DrawPolygon(g.Points)
 	pc.FillStrokeClear()
-	pc.Unlock()
 	g.BBoxes(sv)
 
 	if mrk := sv.MarkerByName(g, "marker-start"); mrk != nil {
@@ -53,5 +51,5 @@ func (g *Polygon) Render(sv *SVG) {
 	}
 
 	g.RenderChildren(sv)
-	pc.PopTransformLock()
+	pc.PopTransform()
 }

@@ -51,7 +51,6 @@ func (g *Rect) Render(sv *SVG) {
 	if !vis {
 		return
 	}
-	pc.Lock()
 	// TODO: figure out a better way to do this
 	bs := styles.Border{}
 	bs.Style.Set(styles.BorderSolid)
@@ -66,10 +65,9 @@ func (g *Rect) Render(sv *SVG) {
 		pc.DrawRoundedRectangle(g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y, styles.NewSideFloats(g.Radius.X))
 	}
 	pc.FillStrokeClear()
-	pc.Unlock()
 	g.BBoxes(sv)
 	g.RenderChildren(sv)
-	pc.PopTransformLock()
+	pc.PopTransform()
 }
 
 // ApplyTransform applies the given 2D transform to the geometry of this node

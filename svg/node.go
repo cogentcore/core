@@ -477,7 +477,7 @@ func (g *NodeBase) PushTransform(sv *SVG) (bool, *paint.Context) {
 	}
 
 	rs := &sv.RenderState
-	rs.PushTransformLock(g.Paint.Transform)
+	rs.PushTransform(g.Paint.Transform)
 
 	pc := &paint.Context{rs, &g.Paint}
 	return true, pc
@@ -499,7 +499,7 @@ func (g *NodeBase) Render(sv *SVG) {
 	// render path elements, then compute bbox, then fill / stroke
 	g.BBoxes(sv)
 	g.RenderChildren(sv)
-	rs.PopTransformLock()
+	rs.PopTransform()
 }
 
 // NodeFlags extend ki.Flags to hold SVG node state

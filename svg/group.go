@@ -47,12 +47,12 @@ func (g *Group) Render(sv *SVG) {
 	if pc.Off || rs == nil {
 		return
 	}
-	rs.PushTransformLock(pc.Transform)
+	rs.PushTransform(pc.Transform)
 
 	g.RenderChildren(sv)
 	g.BBoxes(sv) // must come after render
 
-	rs.PopTransformLock()
+	rs.PopTransform()
 }
 
 // ApplyTransform applies the given 2D transform to the geometry of this node

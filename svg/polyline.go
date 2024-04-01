@@ -46,10 +46,8 @@ func (g *Polyline) Render(sv *SVG) {
 	if !vis {
 		return
 	}
-	pc.Lock()
 	pc.DrawPolyline(g.Points)
 	pc.FillStrokeClear()
-	pc.Unlock()
 	g.BBoxes(sv)
 
 	if mrk := sv.MarkerByName(g, "marker-start"); mrk != nil {
@@ -75,7 +73,7 @@ func (g *Polyline) Render(sv *SVG) {
 	}
 
 	g.RenderChildren(sv)
-	pc.PopTransformLock()
+	pc.PopTransform()
 }
 
 // ApplyTransform applies the given 2D transform to the geometry of this node

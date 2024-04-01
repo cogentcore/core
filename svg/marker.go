@@ -90,12 +90,12 @@ func (mrk *Marker) RenderMarker(sv *SVG, vertexPos mat32.Vec2, vertexAng, stroke
 func (g *Marker) Render(sv *SVG) {
 	pc := &g.Paint
 	rs := &sv.RenderState
-	rs.PushTransformLock(pc.Transform)
+	rs.PushTransform(pc.Transform)
 
 	g.RenderChildren(sv)
 	g.BBoxes(sv) // must come after render
 
-	rs.PopTransformLock()
+	rs.PopTransform()
 }
 
 func (g *Marker) BBoxes(sv *SVG) {

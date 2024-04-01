@@ -123,12 +123,10 @@ func (g *Image) Render(sv *SVG) {
 	if !vis {
 		return
 	}
-	rs.Lock()
 	g.DrawImage(sv)
-	rs.Unlock()
 	g.BBoxes(sv)
 	g.RenderChildren(sv)
-	rs.PopTransformLock()
+	rs.PopTransform()
 }
 
 // ApplyTransform applies the given 2D transform to the geometry of this node
