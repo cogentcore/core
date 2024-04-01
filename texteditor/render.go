@@ -320,7 +320,6 @@ func (ed *Editor) RenderStartPos() mat32.Vec2 {
 // after PushBounds has already been called.
 func (ed *Editor) RenderAllLines() {
 	pc := &ed.Scene.PaintContext
-	pc.Lock()
 	sty := &ed.Styles
 	bb := ed.Geom.ContentBBox
 	bbmin := mat32.V2FromPoint(bb.Min)
@@ -348,7 +347,6 @@ func (ed *Editor) RenderAllLines() {
 	}
 
 	if stln < 0 || edln < 0 { // shouldn't happen.
-		pc.Unlock()
 		return
 	}
 
@@ -366,9 +364,7 @@ func (ed *Editor) RenderAllLines() {
 	if ed.HasLineNos() {
 		tbb := bb
 		tbb.Min.X += int(ed.LineNoOff)
-		pc.Unlock()
 		pc.PushBounds(tbb)
-		pc.Lock()
 	}
 	for ln := stln; ln <= edln; ln++ {
 		lst := pos.Y + ed.Offs[ln]
@@ -380,7 +376,6 @@ func (ed *Editor) RenderAllLines() {
 		}
 		ed.Renders[ln].Render(pc, lp) // not top pos -- already has baseline offset
 	}
-	pc.Unlock()
 	if ed.HasLineNos() {
 		pc.PopBounds()
 	}
