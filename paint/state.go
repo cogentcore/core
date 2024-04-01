@@ -7,7 +7,6 @@ package paint
 import (
 	"image"
 	"log/slog"
-	"sync"
 
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/raster"
@@ -62,12 +61,6 @@ type State struct {
 
 	// stack of clips, if needed
 	ClipStack []*image.Alpha
-
-	// mutex for overall rendering
-	RenderMu sync.Mutex
-
-	// mutex for final raster rendering -- only one at a time
-	RasterMu sync.Mutex
 }
 
 // Init initializes State -- must be called whenever image size changes
@@ -81,20 +74,12 @@ func (rs *State) Init(width, height int, img *image.RGBA) {
 
 // PushTransform pushes current transform onto stack and apply new transform on top of it
 // must protect within render mutex lock (see Lock version)
-func (rs *State) PushTransform(xf mat32.Mat2) {
+func (rs *State) PushTransform(tf mat32.Mat2) {
 	if rs.TransformStack == nil {
 		rs.TransformStack = make([]mat32.Mat2, 0)
 	}
 	rs.TransformStack = append(rs.TransformStack, rs.CurrentTransform)
-	rs.CurrentTransform.SetMul(xf)
-}
-
-// PushTransformLock pushes current transform onto stack and apply new transform on top of it
-// protects within render mutex lock
-func (rs *State) PushTransformLock(xf mat32.Mat2) {
-	rs.RenderMu.Lock()
-	rs.PushTransform(xf)
-	rs.RenderMu.Unlock()
+	rs.CurrentTransform.SetMul(tf)
 }
 
 // PopTransform pops transform off the stack and set to current transform
@@ -110,22 +95,11 @@ func (rs *State) PopTransform() {
 	rs.TransformStack = rs.TransformStack[:sz-1]
 }
 
-// PopTransformLock pops transform off the stack and set to current transform
-// protects within render mutex lock (see Lock version)
-func (rs *State) PopTransformLock() {
-	rs.RenderMu.Lock()
-	rs.PopTransform()
-	rs.RenderMu.Unlock()
-}
-
 // PushBounds pushes current bounds onto stack and sets new bounds.
 // This is the essential first step in rendering.
 // Any further actual rendering should always be surrounded
 // by [State.Lock] and [State.Unlock] calls.
 func (rs *State) PushBounds(b image.Rectangle) {
-	rs.RenderMu.Lock()
-	defer rs.RenderMu.Unlock()
-
 	if rs.BoundsStack == nil {
 		rs.BoundsStack = make([]image.Rectangle, 0, 100)
 	}
@@ -136,22 +110,9 @@ func (rs *State) PushBounds(b image.Rectangle) {
 	rs.Bounds = b
 }
 
-// Lock locks the render mutex, which must happen prior to rendering.
-func (rs *State) Lock() {
-	rs.RenderMu.Lock()
-}
-
-// Unlock unlocks the render mutex, which must happen after rendering.
-func (rs *State) Unlock() {
-	rs.RenderMu.Unlock()
-}
-
 // PopBounds pops the bounds off the stack and sets the current bounds.
 // This must be equally balanced with corresponding [State.PushBounds] calls.
 func (rs *State) PopBounds() {
-	rs.RenderMu.Lock()
-	defer rs.RenderMu.Unlock()
-
 	sz := len(rs.BoundsStack)
 	if sz == 0 {
 		slog.Error("programmer error: paint.State.PopBounds: stack is empty")

@@ -38,9 +38,7 @@ func (fr *Frame) SetStyles() {
 
 // RenderFrame does the standard rendering of the frame itself
 func (fr *Frame) RenderFrame() {
-	_, st := fr.RenderLock()
-	fr.RenderStdBox(st)
-	fr.RenderUnlock()
+	fr.RenderStdBox(&fr.Styles)
 }
 
 func (fr *Frame) Render() {

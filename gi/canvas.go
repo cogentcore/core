@@ -42,13 +42,11 @@ func (c *Canvas) DrawIntoScene() {
 	sz := c.Geom.Size.Actual.Content
 	szp := c.Geom.Size.Actual.Content.ToPoint()
 	c.Context = paint.NewContext(szp.X, szp.Y)
-	c.Context.Lock()
 	c.Context.UnitContext = c.Styles.UnitContext
 	c.Context.ToDots()
 	c.Context.PushTransform(mat32.Scale2D(sz.X, sz.Y))
 	c.Context.VectorEffect = styles.VectorEffectNonScalingStroke
 	c.Draw(c.Context)
-	c.Context.Unlock()
 
 	draw.Draw(c.Scene.Pixels, c.Geom.ContentBBox, c.Context.Image, c.Geom.ScrollOffset(), draw.Over)
 }

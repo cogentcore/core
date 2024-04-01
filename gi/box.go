@@ -11,9 +11,7 @@ type Box struct {
 
 // RenderBox does the standard box model rendering
 func (bx *Box) RenderBox() {
-	_, st := bx.RenderLock()
-	bx.RenderStdBox(st)
-	bx.RenderUnlock()
+	bx.RenderStdBox(&bx.Styles)
 }
 
 func (bx *Box) Render() {

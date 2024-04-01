@@ -29,12 +29,7 @@ func TestMain(m *testing.M) {
 func RunTest(t *testing.T, nm string, width int, height int, f func(pc *Context)) {
 	pc := NewContext(width, height)
 	pc.PushBounds(pc.Image.Rect)
-	pc.Lock()
-
 	f(pc)
-
-	pc.Unlock()
-
 	images.Assert(t, pc.Image, nm)
 }
 

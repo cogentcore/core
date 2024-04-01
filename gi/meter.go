@@ -125,8 +125,8 @@ func (m *Meter) Render() {
 }
 
 func (m *Meter) RenderMeter() {
-	pc, st := m.RenderLock()
-	defer m.RenderUnlock()
+	pc := &m.Scene.PaintContext
+	st := &m.Styles
 
 	prop := (m.Value - m.Min) / (m.Max - m.Min)
 

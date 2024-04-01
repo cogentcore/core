@@ -510,9 +510,10 @@ func (sr *Slider) Render() {
 }
 
 func (sr *Slider) RenderSlider() {
-	pc, st := sr.RenderLock()
-
 	sr.SetPosFromValue(sr.Value)
+
+	pc := &sr.Scene.PaintContext
+	st := &sr.Styles
 
 	dim := sr.Styles.Direction.Dim()
 	od := dim.Other()
@@ -538,7 +539,6 @@ func (sr *Slider) RenderSlider() {
 			pc.FillStyle.Color = vabg
 			sr.RenderBoxImpl(tpos, tsz, styles.Border{Radius: st.Border.Radius}) // thumb
 		}
-		sr.RenderUnlock()
 	} else {
 		prevbg := st.Background
 		prevsl := st.StateLayer
@@ -574,7 +574,6 @@ func (sr *Slider) RenderSlider() {
 
 		// render thumb as icon or box
 		if sr.Icon.IsSet() && sr.Parts.HasChildren() {
-			sr.RenderUnlock()
 			ic := sr.Parts.Child(0).(*Icon)
 			tpos.SetSub(thsz.MulScalar(.5))
 			ic.Geom.Pos.Total = tpos
@@ -586,7 +585,6 @@ func (sr *Slider) RenderSlider() {
 			pc.FillStyle.Color = tabg
 			tpos.SetSub(thsz.MulScalar(0.5))
 			sr.RenderBoxImpl(tpos, thsz, styles.Border{Radius: st.Border.Radius})
-			sr.RenderUnlock()
 		}
 	}
 }

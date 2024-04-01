@@ -283,9 +283,6 @@ func (pc *Context) StrokePreserve() {
 		return
 	}
 
-	pc.RasterMu.Lock()
-	defer pc.RasterMu.Unlock()
-
 	dash := slices.Clone(pc.StrokeStyle.Dashes)
 	if dash != nil {
 		scx, scy := pc.CurrentTransform.ExtractScale()
@@ -333,9 +330,6 @@ func (pc *Context) FillPreserve() {
 	if pc.Raster == nil || pc.FillStyle.Color == nil {
 		return
 	}
-
-	pc.RasterMu.Lock()
-	defer pc.RasterMu.Unlock()
 
 	rf := &pc.Raster.Filler
 	rf.SetWinding(pc.FillStyle.Rule == styles.FillRuleNonZero)

@@ -635,8 +635,8 @@ func (tv *TreeView) ScenePos() {
 }
 
 func (tv *TreeView) RenderNode() {
-	pc, st := tv.RenderLock()
-	defer tv.RenderUnlock()
+	pc := &tv.Scene.PaintContext
+	st := &tv.Styles
 
 	pabg := tv.ParentActualBackground()
 

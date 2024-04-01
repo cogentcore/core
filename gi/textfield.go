@@ -1974,8 +1974,8 @@ func (tf *TextField) SetEffPosAndSize() {
 }
 
 func (tf *TextField) RenderTextField() {
-	pc, st := tf.RenderLock()
-	defer tf.RenderUnlock()
+	pc := &tf.Scene.PaintContext
+	st := &tf.Styles
 
 	tf.AutoScroll() // inits paint with our style
 	fs := st.FontRender()

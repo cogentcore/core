@@ -18,7 +18,6 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
-	"cogentcore.org/core/paint"
 	"cogentcore.org/core/prof"
 	"cogentcore.org/core/styles"
 )
@@ -521,37 +520,18 @@ func (wb *WidgetBase) RenderChildren() {
 ////////////////////////////////////////////////////////////////////////////////
 //  Standard Box Model rendering
 
-// RenderLock returns the locked [paint.Context] and [styles.Style].
-// This should be called at start of widget-level rendering, and should always
-// be associated with a corresponding [WidgetBase.RenderUnlock].
-func (wb *WidgetBase) RenderLock() (*paint.Context, *styles.Style) {
-	pc := &wb.Scene.PaintContext
-	pc.Lock()
-	return pc, &wb.Styles
-}
-
-// RenderUnlock unlocks the widget's associated [paint.Context].
-// This should be called at the end of widget-level rendering, and should always
-// be associated with a corresponding [WidgetBase.RenderLock].
-func (wb *WidgetBase) RenderUnlock() {
-	wb.Scene.PaintContext.Unlock()
-}
-
 // RenderBoxImpl implements the standard box model rendering -- assumes all
 // paint params have already been set
 func (wb *WidgetBase) RenderBoxImpl(pos mat32.Vec2, sz mat32.Vec2, bs styles.Border) {
-	pc := &wb.Scene.PaintContext
-	pc.DrawBorder(pos.X, pos.Y, sz.X, sz.Y, bs)
+	wb.Scene.PaintContext.DrawBorder(pos.X, pos.Y, sz.X, sz.Y, bs)
 }
 
 // RenderStdBox draws standard box using given style.
 // paint.State and Style must already be locked at this point (RenderLock)
 func (wb *WidgetBase) RenderStdBox(st *styles.Style) {
-	pc := &wb.Scene.PaintContext
-
 	pos := wb.Geom.Pos.Total
 	sz := wb.Geom.Size.Actual.Total
-	pc.DrawStdBox(st, pos, sz, wb.ParentActualBackground())
+	wb.Scene.PaintContext.DrawStdBox(st, pos, sz, wb.ParentActualBackground())
 }
 
 //////////////////////////////////////////////////////////////////
