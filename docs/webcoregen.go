@@ -114,7 +114,7 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 	},
 	"widgets/canvases-0": func(parent gi.Widget) {
 		gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
-			pc.FillBoxColor(mat32.Vec2{}, mat32.V2(1, 1), colors.Scheme.Primary.Base)
+			pc.FillBox(mat32.Vec2{}, mat32.V2(1, 1), colors.C(colors.Scheme.Primary.Base))
 		})
 	},
 	"widgets/canvases-1": func(parent gi.Widget) {

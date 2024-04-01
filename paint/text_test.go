@@ -17,7 +17,7 @@ func TestText(t *testing.T) {
 	size := image.Point{100, 40}
 	sizef := mat32.V2FromPoint(size)
 	RunTest(t, "text", size.X, size.Y, func(pc *Context) {
-		pc.BlitBoxColor(mat32.Vec2{}, sizef, colors.White)
+		pc.BlitBox(mat32.Vec2{}, sizef, colors.C(colors.White))
 		tsty := &styles.Text{}
 		tsty.Defaults()
 		fsty := &styles.FontRender{}

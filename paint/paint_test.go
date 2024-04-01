@@ -136,7 +136,7 @@ func TestPaintFill(t *testing.T) {
 		})
 	}
 	test("fill-box-color", func(pc *Context) {
-		pc.FillBoxColor(mat32.V2(10, 100), mat32.V2(200, 100), colors.Green)
+		pc.FillBox(mat32.V2(10, 100), mat32.V2(200, 100), colors.C(colors.Green))
 	})
 	test("fill-box-solid", func(pc *Context) {
 		pc.FillBox(mat32.V2(10, 100), mat32.V2(200, 100), colors.C(colors.Blue))
@@ -159,7 +159,7 @@ func TestPaintFill(t *testing.T) {
 		pc.FillBox(mat32.V2(10, 100), mat32.V2(200, 100), g)
 	})
 	test("blur-box", func(pc *Context) {
-		pc.FillBoxColor(mat32.V2(10, 100), mat32.V2(200, 100), colors.Green)
+		pc.FillBox(mat32.V2(10, 100), mat32.V2(200, 100), colors.C(colors.Green))
 		pc.BlurBox(mat32.V2(0, 50), mat32.V2(300, 200), 10)
 	})
 

@@ -6,7 +6,7 @@ You can set the function used to draw the canvas:
 
 ```Go
 gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
-    pc.FillBoxColor(mat32.Vec2{}, mat32.V2(1, 1), colors.Scheme.Primary.Base)
+    pc.FillBox(mat32.Vec2{}, mat32.V2(1, 1), colors.C(colors.Scheme.Primary.Base))
 })
 ```
 

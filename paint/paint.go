@@ -7,11 +7,9 @@ package paint
 import (
 	"errors"
 	"image"
-	"image/color"
 	"math"
 	"slices"
 
-	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/raster"
@@ -367,53 +365,27 @@ func (pc *Context) Fill() {
 	pc.ClearPath()
 }
 
-// BlitBox performs an optimized overwriting fill of a square region with a uniform color if
-// the given image is an [image.Uniform]. If it is not, it calls [Context.DrawRectangle]
-// and [Context.Fill] to fill the region.
-func (pc *Context) BlitBox(pos, size mat32.Vec2, img image.Image) {
-	if img == nil {
-		pc.BlitBoxColor(pos, size, color.RGBA{})
-		return
-	}
-	if u, ok := img.(*image.Uniform); ok {
-		pc.BlitBoxColor(pos, size, u.C)
-		return
-	}
-	pc.FillStyle.Color = img
-	pc.DrawRectangle(pos.X, pos.Y, size.X, size.Y)
-	pc.Fill()
-}
-
-// FillBox performs an optimized fill of a square region with a uniform color if
-// the given image is an [image.Uniform]. If it is not, it calls [Context.DrawRectangle]
-// and [Context.Fill] to fill the region.
+// FillBox performs an optimized fill of the given
+// rectangular region with the given image.
 func (pc *Context) FillBox(pos, size mat32.Vec2, img image.Image) {
+	pc.DrawBox(pos, size, img, draw.Over)
+}
+
+// BlitBox performs an optimized overwriting fill (blit) of the given
+// rectangular region with the given image.
+func (pc *Context) BlitBox(pos, size mat32.Vec2, img image.Image) {
+	pc.DrawBox(pos, size, img, draw.Src)
+}
+
+// DrawBox performs an optimized fill/blit of the given rectangular region
+// with the given image, using the given draw operation.
+func (pc *Context) DrawBox(pos, size mat32.Vec2, img image.Image, op draw.Op) {
 	if img == nil {
 		return
 	}
-	if u, ok := img.(*image.Uniform); ok {
-		pc.FillBoxColor(pos, size, u.C)
-		return
-	}
-	pc.FillStyle.Color = img
-	pc.DrawRectangle(pos.X, pos.Y, size.X, size.Y)
-	pc.Fill()
-}
-
-// FillBoxColor performs an optimized overlay (alpha blend) fill
-// of a square region with the given uniform color.
-func (pc *Context) FillBoxColor(pos, size mat32.Vec2, clr color.Color) {
 	b := pc.Bounds.Intersect(mat32.RectFromPosSizeMax(pos, size))
-	c := colors.ApplyOpacity(clr, pc.FillStyle.Opacity)
-	draw.Draw(pc.Image, b, &image.Uniform{c}, image.Point{}, draw.Over)
-}
-
-// BlitBoxColor performs an optimized overwriting fill
-// of a square region with the given uniform color.
-func (pc *Context) BlitBoxColor(pos, size mat32.Vec2, clr color.Color) {
-	b := pc.Bounds.Intersect(mat32.RectFromPosSizeMax(pos, size))
-	c := colors.ApplyOpacity(clr, pc.FillStyle.Opacity)
-	draw.Draw(pc.Image, b, &image.Uniform{c}, image.Point{}, draw.Src)
+	i := gradient.ApplyOpacityImage(img, pc.FillStyle.Opacity)
+	draw.Draw(pc.Image, b, i, image.Point{}, op)
 }
 
 // BlurBox blurs the given already drawn region with the given blur radius.
