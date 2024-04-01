@@ -391,7 +391,7 @@ func (pc *Context) DrawBox(pos, size mat32.Vec2, img image.Image, op draw.Op) {
 	} else {
 		img = gradient.ApplyOpacityImage(img, pc.FillStyle.Opacity)
 	}
-	draw.Draw(pc.Image, b, img, image.Point{}, op)
+	draw.Draw(pc.Image, b, img, b.Min, op)
 }
 
 // BlurBox blurs the given already drawn region with the given blur radius.
