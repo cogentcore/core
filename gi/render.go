@@ -493,16 +493,15 @@ func (wb *WidgetBase) PopBounds() {
 	pc.PopBounds()
 }
 
-// Render performs rendering on widget and parts, but not Children
-// for the base type, which does not manage children (see Layout).
-func (wb *WidgetBase) Render() {
-	if wb.PushBounds() {
-		wb.RenderParts()
-		wb.PopBounds()
-	}
-}
+// Render is the method that widgets should implement to define their
+// custom rendering steps. It should not be called outside of
+// [Widget.RenderWidget], which also does other steps applicable
+// for all widgets.
+func (wb *WidgetBase) Render() {}
 
-// RenderWidget
+// RenderWidget renders the widget and any parts and children that it has.
+// It does not render if the widget is invisible. It calls Widget.Render]
+// for widget-specific rendering.
 func (wb *WidgetBase) RenderWidget() {
 	if wb.PushBounds() {
 		wb.This().(Widget).Render()
@@ -513,10 +512,9 @@ func (wb *WidgetBase) RenderWidget() {
 }
 
 func (wb *WidgetBase) RenderParts() {
-	if wb.Parts == nil {
-		return
+	if wb.Parts != nil {
+		wb.Parts.Render()
 	}
-	wb.Parts.Render() // is a layout, will do all
 }
 
 // RenderChildren renders all of the widget's children.

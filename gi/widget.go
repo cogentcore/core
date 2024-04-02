@@ -120,9 +120,9 @@ type Widget interface {
 	// for all widgets.
 	Render()
 
-	// RenderWidget renders the widget and any parts, children, and scrollbars
-	// that it has. It does not render if the widget is invisible. It calls
-	// [Widget.Render] for widget-specific rendering.
+	// RenderWidget renders the widget and any parts and children that it has.
+	// It does not render if the widget is invisible. It calls Widget.Render]
+	// for widget-specific rendering.
 	RenderWidget()
 
 	// On adds an event listener function for the given event type
