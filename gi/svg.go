@@ -120,7 +120,9 @@ func (sv *SVG) SizeFinal() {
 	sv.SVG.Resize(sv.Geom.Size.Actual.Content.ToPoint())
 }
 
-func (sv *SVG) DrawIntoScene() {
+func (sv *SVG) Render() {
+	sv.Box.Render()
+
 	if sv.SVG == nil {
 		return
 	}
@@ -134,13 +136,4 @@ func (sv *SVG) DrawIntoScene() {
 	r := sv.Geom.ContentBBox
 	sp := sv.Geom.ScrollOffset()
 	draw.Draw(sv.Scene.Pixels, r, sv.SVG.Pixels, sp, draw.Over)
-}
-
-func (sv *SVG) Render() {
-	if sv.PushBounds() {
-		sv.RenderBox()
-		sv.DrawIntoScene()
-		sv.RenderChildren()
-		sv.PopBounds()
-	}
 }

@@ -66,10 +66,6 @@ const (
 
 func (m *Meter) OnInit() {
 	m.WidgetBase.OnInit()
-	m.SetStyles()
-}
-
-func (m *Meter) SetStyles() {
 	m.Value = 0.5
 	m.Max = 1
 	m.Style(func(s *styles.Style) {
@@ -118,13 +114,6 @@ func (m *Meter) WidgetTooltip() string {
 }
 
 func (m *Meter) Render() {
-	if m.PushBounds() {
-		m.RenderMeter()
-		m.PopBounds()
-	}
-}
-
-func (m *Meter) RenderMeter() {
 	pc := &m.Scene.PaintContext
 	st := &m.Styles
 

@@ -29,16 +29,14 @@ type Canvas struct {
 
 func (c *Canvas) OnInit() {
 	c.Box.OnInit()
-	c.SetStyles()
-}
-
-func (c *Canvas) SetStyles() {
 	c.Style(func(s *styles.Style) {
 		s.Min.Set(units.Dp(256))
 	})
 }
 
-func (c *Canvas) DrawIntoScene() {
+func (c *Canvas) Render() {
+	c.Box.Render()
+
 	sz := c.Geom.Size.Actual.Content
 	szp := c.Geom.Size.Actual.Content.ToPoint()
 	c.Context = paint.NewContext(szp.X, szp.Y)
@@ -49,13 +47,4 @@ func (c *Canvas) DrawIntoScene() {
 	c.Draw(c.Context)
 
 	draw.Draw(c.Scene.Pixels, c.Geom.ContentBBox, c.Context.Image, c.Geom.ScrollOffset(), draw.Over)
-}
-
-func (c *Canvas) Render() {
-	if c.PushBounds() {
-		c.RenderBox()
-		c.DrawIntoScene()
-		c.RenderChildren()
-		c.PopBounds()
-	}
 }

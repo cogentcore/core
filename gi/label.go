@@ -389,15 +389,7 @@ func (lb *Label) SizeDown(iter int) bool {
 	return chg
 }
 
-func (lb *Label) RenderLabel() {
+func (lb *Label) Render() {
 	lb.RenderStdBox(&lb.Styles)
 	lb.TextRender.Render(&lb.Scene.PaintContext, lb.Geom.Pos.Content)
-}
-
-func (lb *Label) Render() {
-	if lb.PushBounds() {
-		lb.RenderLabel()
-		lb.RenderChildren()
-		lb.PopBounds()
-	}
 }

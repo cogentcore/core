@@ -1973,7 +1973,18 @@ func (tf *TextField) SetEffPosAndSize() {
 	tf.EffPos = pos.Ceil()
 }
 
-func (tf *TextField) RenderTextField() {
+func (tf *TextField) Render() {
+	defer func() {
+		if tf.IsReadOnly() {
+			return
+		}
+		if tf.StateIs(states.Focused) {
+			tf.StartCursor()
+		} else {
+			tf.StopCursor()
+		}
+	}()
+
 	pc := &tf.Scene.PaintContext
 	st := &tf.Styles
 
@@ -2003,26 +2014,6 @@ func (tf *TextField) RenderTextField() {
 	tf.RenderVis.Layout(txs, fs, &st.UnitContext, availSz)
 	tf.RenderVis.Render(pc, pos)
 	st.Color = prevColor
-}
-
-func (tf *TextField) Render() {
-	// todo: this is probably not a great idea
-	// if tf.StateIs(states.Focused) && TextFieldBlinker.Widget == tf.This().(Widget) {
-	// 	tf.ScrollLayoutToCursor()
-	// }
-	if tf.PushBounds() {
-		tf.RenderTextField()
-		if !tf.IsReadOnly() {
-			if tf.StateIs(states.Focused) {
-				tf.StartCursor()
-			} else {
-				tf.StopCursor()
-			}
-		}
-		tf.RenderParts()
-		tf.RenderChildren()
-		tf.PopBounds()
-	}
 }
 
 // IsWordBreak defines what counts as a word break for the purposes of selecting words.

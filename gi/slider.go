@@ -503,13 +503,6 @@ func (sr *Slider) Config() {
 }
 
 func (sr *Slider) Render() {
-	if sr.PushBounds() {
-		sr.RenderSlider()
-		sr.PopBounds()
-	}
-}
-
-func (sr *Slider) RenderSlider() {
 	sr.SetPosFromValue(sr.Value)
 
 	pc := &sr.Scene.PaintContext

@@ -326,7 +326,7 @@ func (sl *Splits) PositionSplits() {
 	})
 }
 
-func (sl *Splits) Render() {
+func (sl *Splits) RenderWidget() {
 	if sl.PushBounds() {
 		sl.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			sp := sl.Splits[i]

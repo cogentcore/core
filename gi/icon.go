@@ -84,16 +84,7 @@ func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
 
 }
 
-func (ic *Icon) DrawIntoScene() {
-	if ic.SVG.Pixels == nil {
-		return
-	}
-	r := ic.Geom.ContentBBox
-	sp := ic.Geom.ScrollOffset()
-	draw.Draw(ic.Scene.Pixels, r, ic.SVG.Pixels, sp, draw.Over)
-}
-
-// RenderSVG renders the SVG to Pixels if needs update
+// RenderSVG renders the [Icon.SVG] to the [Icon.Pixels] if they need to be updated.
 func (ic *Icon) RenderSVG() {
 	rc := ic.Scene.RenderContext()
 	sv := &ic.SVG
@@ -124,14 +115,15 @@ func (ic *Icon) RenderSVG() {
 	sv.Scale = 1
 	sv.Render()
 	sv.Name = string(ic.Icon)
-	// fmt.Println("re-rendered icon:", sv.Name, "size:", sz)
 }
 
 func (ic *Icon) Render() {
 	ic.RenderSVG()
-	if ic.PushBounds() {
-		ic.RenderChildren()
-		ic.DrawIntoScene()
-		ic.PopBounds()
+
+	if ic.SVG.Pixels == nil {
+		return
 	}
+	r := ic.Geom.ContentBBox
+	sp := ic.Geom.ScrollOffset()
+	draw.Draw(ic.Scene.Pixels, r, ic.SVG.Pixels, sp, draw.Over)
 }

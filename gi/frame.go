@@ -36,16 +36,14 @@ func (fr *Frame) SetStyles() {
 	})
 }
 
-// RenderFrame does the standard rendering of the frame itself
-func (fr *Frame) RenderFrame() {
+func (fr *Frame) Render() {
 	fr.RenderStdBox(&fr.Styles)
 }
 
-func (fr *Frame) Render() {
+func (fr *Frame) RenderWidget() {
 	if fr.PushBounds() {
-		fr.RenderFrame()
+		fr.Render()
 		fr.RenderChildren()
-		fr.RenderParts()
 		fr.RenderScrolls()
 		fr.PopBounds()
 	}

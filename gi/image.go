@@ -39,10 +39,6 @@ type Image struct {
 
 func (im *Image) OnInit() {
 	im.WidgetBase.OnInit()
-	im.SetStyles()
-}
-
-func (im *Image) SetStyles() {
 	im.Style(func(s *styles.Style) {
 		if im.Image != nil {
 			sz := im.Image.Bounds().Size()
@@ -82,7 +78,9 @@ func (im *Image) SetImage(img image.Image) *Image {
 	return im
 }
 
-func (im *Image) DrawIntoScene() {
+func (im *Image) Render() {
+	im.Box.Render()
+
 	if im.Image == nil {
 		return
 	}
@@ -99,13 +97,4 @@ func (im *Image) DrawIntoScene() {
 		im.prevSize = im.Geom.Size.Actual.Content
 	}
 	draw.Draw(im.Scene.Pixels, r, rimg, sp, draw.Over)
-}
-
-func (im *Image) Render() {
-	if im.PushBounds() {
-		im.RenderBox()
-		im.DrawIntoScene()
-		im.RenderChildren()
-		im.PopBounds()
-	}
 }

@@ -167,8 +167,8 @@ func (ly *Layout) RenderChildren() {
 func (ly *Layout) Render() {
 	if ly.PushBounds() {
 		ly.RenderChildren()
-		ly.PopBounds()
 		ly.RenderScrolls()
+		ly.PopBounds()
 	}
 }
 
