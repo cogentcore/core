@@ -95,3 +95,14 @@ gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
     pc.Stroke()
 })
 ```
+
+You can change the size of the canvas:
+
+```Go
+c := gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
+    pc.FillBox(mat32.Vec2{}, mat32.V2(1, 1), colors.C(colors.Scheme.Warn.Base))
+})
+c.Style(func(s *styles.Style) {
+    s.Min.Set(units.Dp(128))
+})
+```

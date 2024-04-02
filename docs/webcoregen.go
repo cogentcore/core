@@ -179,6 +179,14 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 			pc.Stroke()
 		})
 	},
+	"widgets/canvases-9": func(parent gi.Widget) {
+		c := gi.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
+			pc.FillBox(mat32.Vec2{}, mat32.V2(1, 1), colors.C(colors.Scheme.Warn.Base))
+		})
+		c.Style(func(s *styles.Style) {
+			s.Min.Set(units.Dp(128))
+		})
+	},
 	"widgets/choosers-0": func(parent gi.Widget) {
 		gi.NewChooser(parent).SetStrings("macOS", "Windows", "Linux")
 	},

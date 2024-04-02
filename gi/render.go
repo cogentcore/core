@@ -502,6 +502,16 @@ func (wb *WidgetBase) Render() {
 	}
 }
 
+// RenderWidget
+func (wb *WidgetBase) RenderWidget() {
+	if wb.PushBounds() {
+		wb.This().(Widget).Render()
+		wb.RenderParts()
+		wb.RenderChildren()
+		wb.PopBounds()
+	}
+}
+
 func (wb *WidgetBase) RenderParts() {
 	if wb.Parts == nil {
 		return

@@ -114,12 +114,16 @@ type Widget interface {
 	// This is the only step needed when scrolling (very fast).
 	ScenePos()
 
-	// Render performs actual rendering pass.  Bracket the render calls in
-	// PushBounds / PopBounds and a false from PushBounds indicates that
-	// the node is invisible and should not be rendered.
-	// If Parts are present, RenderParts is called by default.
-	// Layouts or other widgets that manage children should call RenderChildren.
+	// Render is the method that widgets should implement to define their
+	// custom rendering steps. It should not be called outside of
+	// [Widget.RenderWidget], which also does other steps applicable
+	// for all widgets.
 	Render()
+
+	// RenderWidget renders the widget and any parts, children, and scrollbars
+	// that it has. It does not render if the widget is invisible. It calls
+	// [Widget.Render] for widget-specific rendering.
+	RenderWidget()
 
 	// On adds an event listener function for the given event type
 	On(etype events.Types, fun func(e events.Event)) *WidgetBase

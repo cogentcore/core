@@ -20,7 +20,7 @@ type Canvas struct {
 	// Draw is the function used to draw the content of the
 	// canvas every time that it is rendered. The paint context
 	// is automatically normalized to the size of the canvas,
-	// so you should specify points on a 0-1 scaled.
+	// so you should specify points on a 0-1 scale.
 	Draw func(pc *paint.Context)
 
 	// Context is the paint context used for drawing.
