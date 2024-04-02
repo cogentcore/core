@@ -269,7 +269,7 @@ func (sc *Scene) LayoutScene() {
 // GetSize, DoLayout, Render.  Needed after Config.
 func (sc *Scene) LayoutRenderScene() {
 	sc.LayoutScene()
-	sc.Render()
+	sc.RenderWidget()
 }
 
 // DoNeedsRender calls Render on tree from me for nodes
@@ -281,7 +281,7 @@ func (wb *WidgetBase) DoNeedsRender() {
 	pr := prof.Start(wb.This().KiType().ShortName())
 	wb.WidgetWalkPre(func(kwi Widget, kwb *WidgetBase) bool {
 		if kwi.Is(NeedsRender) {
-			kwi.Render()
+			kwi.RenderWidget()
 			return ki.Break // done
 		}
 		if ly := AsLayout(kwi); ly != nil {
@@ -513,14 +513,14 @@ func (wb *WidgetBase) RenderWidget() {
 
 func (wb *WidgetBase) RenderParts() {
 	if wb.Parts != nil {
-		wb.Parts.Render()
+		wb.Parts.RenderWidget()
 	}
 }
 
 // RenderChildren renders all of the widget's children.
 func (wb *WidgetBase) RenderChildren() {
 	wb.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		kwi.Render()
+		kwi.RenderWidget()
 		return ki.Continue
 	})
 }
@@ -660,7 +660,7 @@ func (sc *Scene) BenchmarkFullRender() {
 	n := 50
 	for i := 0; i < n; i++ {
 		sc.LayoutScene()
-		sc.Render()
+		sc.RenderWidget()
 	}
 	td := time.Since(ts)
 	fmt.Printf("Time for %v Re-Renders: %12.2f s\n", n, float64(td)/float64(time.Second))
@@ -678,7 +678,7 @@ func (sc *Scene) BenchmarkReRender() {
 	ts := time.Now()
 	n := 50
 	for i := 0; i < n; i++ {
-		sc.Render()
+		sc.RenderWidget()
 	}
 	td := time.Since(ts)
 	fmt.Printf("Time for %v Re-Renders: %12.2f s\n", n, float64(td)/float64(time.Second))

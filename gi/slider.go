@@ -579,7 +579,7 @@ func (sr *Slider) RenderSlider() {
 			ic.Geom.Pos.Total = tpos
 			ic.SetContentPosFromPos()
 			ic.SetBBoxes()
-			sr.Parts.Render()
+			sr.Parts.RenderWidget()
 		} else {
 			tabg := sr.Styles.ComputeActualBackgroundFor(sr.ThumbColor, pabg)
 			pc.FillStyle.Color = tabg

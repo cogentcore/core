@@ -335,7 +335,7 @@ func (sl *Splits) Render() {
 			} else {
 				kwb.SetState(false, states.Invisible)
 			}
-			kwi.Render()
+			kwi.RenderWidget()
 			return ki.Continue
 		})
 		sl.RenderParts()

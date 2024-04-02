@@ -170,7 +170,7 @@ func (ly *Layout) PositionScroll(d mat32.Dims) {
 func (ly *Layout) RenderScrolls() {
 	for d := mat32.X; d <= mat32.Y; d++ {
 		if ly.HasScroll[d] && ly.Scrolls[d] != nil {
-			ly.Scrolls[d].Render()
+			ly.Scrolls[d].RenderWidget()
 		}
 	}
 }

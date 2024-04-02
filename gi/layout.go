@@ -154,12 +154,12 @@ func (ly *Layout) RenderChildren() {
 	if ly.Styles.Display == styles.Stacked {
 		kwi, _ := ly.StackTopWidget()
 		if kwi != nil {
-			kwi.Render()
+			kwi.RenderWidget()
 		}
 		return
 	}
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		kwi.Render()
+		kwi.RenderWidget()
 		return ki.Continue
 	})
 }
