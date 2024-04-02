@@ -634,7 +634,7 @@ func (tv *TreeView) ScenePos() {
 	tv.Geom.Size.Actual.Total = tv.WidgetSize // key: we revert to just ourselves
 }
 
-func (tv *TreeView) RenderNode() {
+func (tv *TreeView) Render() {
 	pc := &tv.Scene.PaintContext
 	st := &tv.Styles
 
@@ -655,9 +655,9 @@ func (tv *TreeView) RenderNode() {
 	tv.Styles.ComputeActualBackground(pabg)
 }
 
-func (tv *TreeView) Render() {
+func (tv *TreeView) RenderWidget() {
 	if tv.PushBounds() {
-		tv.RenderNode()
+		tv.Render()
 		if tv.Parts != nil {
 			// we must copy from actual values in parent
 			tv.Parts.Styles.StateLayer = tv.actStateLayer

@@ -9,8 +9,6 @@ package xyzv
 import (
 	"image"
 	"image/draw"
-	"log"
-	"log/slog"
 
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/events"
@@ -132,38 +130,8 @@ func (sw *Scene) ConfigFrame() {
 	sw.NeedsRender()
 }
 
-// DrawIntoScene is the slower path for rendering, by grabbing the image
-// down from the GPU and drawing it into the Scene image.
-// This is retained for the time being in case it is needed for another case.
-func (sw *Scene) DrawIntoScene() {
-	if sw.XYZ.Frame == nil {
-		return
-	}
-	r := sw.Geom.ContentBBox
-	sp := image.Point{}
-	if sw.Par != nil { // use parents children bbox to determine where we can draw
-		_, pwb := gi.AsWidget(sw.Par)
-		pbb := pwb.Geom.ContentBBox
-		nr := r.Intersect(pbb)
-		sp = nr.Min.Sub(r.Min)
-		if sp.X < 0 || sp.Y < 0 || sp.X > 10000 || sp.Y > 10000 {
-			slog.Error("xyzv.Scene bad bounding box", "path", sw, "startPos", sp, "bbox", r, "parBBox", pbb)
-			return
-		}
-		r = nr
-	}
-	img, err := sw.XYZ.Image() // direct access
-	if err != nil {
-		log.Println("frame image err:", err)
-		return
-	}
-	draw.Draw(sw.WidgetBase.Scene.Pixels, r, img, sp, draw.Src) // note: critical to not use Over here!
-	sw.XYZ.ImageDone()
-}
-
-// Render renders the Frame Image
-func (sw *Scene) Render3D() {
-	sw.ConfigFrame() // nop if all good
+func (sw *Scene) Render() {
+	sw.ConfigFrame() // no-op if all good
 	if sw.XYZ.Frame == nil {
 		return
 	}
@@ -173,15 +141,6 @@ func (sw *Scene) Render3D() {
 		})
 	}
 	sw.XYZ.DoUpdate()
-}
-
-func (sw *Scene) Render() {
-	if sw.PushBounds() {
-		sw.Render3D()
-		// sw.DrawIntoScene() // using direct rendering
-		// sw.RenderChildren() // this is entirely pointless actually
-		sw.PopBounds()
-	}
 }
 
 // DirectRenderImage uploads framebuffer image

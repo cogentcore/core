@@ -2343,8 +2343,9 @@ func (sg *SliceViewGrid) IndexFromPixel(pt image.Point) (row, col int, isValid b
 	return
 }
 
-func (sg *SliceViewGrid) Render() {
+func (sg *SliceViewGrid) RenderWidget() {
 	if sg.PushBounds() {
+		sg.Frame.Render()
 		sg.RenderStripes()
 		sg.RenderChildren()
 		sg.RenderScrolls()

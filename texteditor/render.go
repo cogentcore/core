@@ -39,7 +39,7 @@ func (ed *Editor) RenderLayout() {
 	}
 }
 
-func (ed *Editor) Render() {
+func (ed *Editor) RenderWidget() {
 	if ed.PushBounds() {
 		ed.ApplyStyle()
 		if ed.Is(EditorNeedsLayout) {
@@ -57,8 +57,8 @@ func (ed *Editor) Render() {
 			ed.StopCursor()
 		}
 		ed.RenderChildren()
-		ed.PopBounds()
 		ed.RenderScrolls()
+		ed.PopBounds()
 	} else {
 		ed.StopCursor()
 	}
