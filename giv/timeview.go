@@ -49,8 +49,10 @@ func (tv *TimeView) Config() {
 	hour.SetStep(1).SetEnforceStep(true)
 	if gi.SystemSettings.Clock24 {
 		tv.Hour = tv.Time.Hour()
+		hour.SetMax(24).SetMin(0)
 	} else {
 		tv.Hour = tv.Time.Hour() % 12
+		hour.SetMax(12).SetMin(1)
 	}
 	hour.SetValue(float32(tv.Hour))
 	hour.Style(func(s *styles.Style) {
@@ -78,6 +80,7 @@ func (tv *TimeView) Config() {
 
 	minute := gi.NewSpinner(tv, "minute").
 		SetStep(1).SetEnforceStep(true).
+		SetMin(0).SetMax(60).SetFormat("%02d").
 		SetValue(float32(tv.Time.Minute()))
 	minute.Style(func(s *styles.Style) {
 		s.Font.Size.Dp(57)
