@@ -15,12 +15,6 @@ Then, you can open an image from your embedded filesystem:
 gi.NewImage(parent).OpenFS(myImage, "image.png")
 ```
 
-You can also open images directly from the operating system filesystem, but this is not recommended for images built into your app, since they may end up in a different location on different platforms:
-
-```go
-gi.NewImage(parent).Open("image.png")
-```
-
 You can change the size of an image:
 
 ```Go
@@ -39,4 +33,10 @@ draw.Draw(img, image.Rect(10, 5, 100, 90), colors.C(colors.Scheme.Warn.Container
 draw.Draw(img, image.Rect(20, 20, 60, 50), colors.C(colors.Scheme.Success.Base), image.Point{}, draw.Src)
 draw.Draw(img, image.Rect(60, 70, 80, 100), colors.C(colors.Scheme.Error.Base), image.Point{}, draw.Src)
 gi.NewImage(parent).SetImage(img)
+```
+
+You can also open images directly from the system filesystem, but this is not recommended for images built into your app, since they may end up in a different location on different platforms:
+
+```go
+gi.NewImage(parent).Open("image.png")
 ```
