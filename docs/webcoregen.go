@@ -315,6 +315,9 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 	"widgets/icons-2": func(parent gi.Widget) {
 		gi.NewButton(parent).SetIcon(icons.Home.Fill())
 	},
+	"widgets/images-0": func(parent gi.Widget) {
+		gi.NewImage(parent).OpenFS(myImage, "image.png")
+	},
 	"widgets/labels-0": func(parent gi.Widget) {
 		gi.NewLabel(parent).SetText("Hello, world!")
 	},

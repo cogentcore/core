@@ -23,6 +23,9 @@ var content embed.FS
 //go:embed icon.svg
 var icon []byte
 
+//go:embed image.png
+var myImage embed.FS
+
 func main() {
 	b := gi.NewBody("Cogent Core Docs")
 	pg := webcore.NewPage(b).SetSource(grr.Log1(fs.Sub(content, "content")))
