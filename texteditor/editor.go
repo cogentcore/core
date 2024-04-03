@@ -267,6 +267,13 @@ func (ed *Editor) Destroy() {
 	ed.Layout.Destroy()
 }
 
+// SetText is a helper function that sets the current text of the
+// underlying buffer from a string.
+func (ed *Editor) SetText(txt string) *Editor {
+	ed.Buf.SetText([]byte(txt))
+	return ed
+}
+
 // EditDone completes editing and copies the active edited text to the text --
 // called when the return key is pressed or goes out of focus
 func (ed *Editor) EditDone() {
