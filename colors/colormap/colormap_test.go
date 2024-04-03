@@ -33,7 +33,7 @@ func TestColorMap(t *testing.T) {
 }
 
 func TestColorMaps(t *testing.T) {
-	nmaps := len(StdMaps)
+	nmaps := len(StandardMaps)
 	nblend := int(colors.BlendTypesN)
 	// y axis is maps x blend mode
 	nY := nmaps * (nblend + 1)
@@ -48,13 +48,13 @@ func TestColorMaps(t *testing.T) {
 	yp := 0
 	idx := 0
 	keys := make([]string, nmaps)
-	for k := range StdMaps {
+	for k := range StandardMaps {
 		keys[idx] = k
 		idx++
 	}
 	slices.Sort(keys)
 	for idx, k := range keys {
-		cm := StdMaps[k]
+		cm := StandardMaps[k]
 		for bi, bm := range colors.BlendTypesValues() {
 			yp = idx*(nblend+1) + bi
 			cm.Blend = bm

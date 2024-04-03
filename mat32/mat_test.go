@@ -16,7 +16,7 @@ func TolAssertEqualVec(t *testing.T, tol float32, vt, va Vec2) {
 	tolassert.EqualTol(t, vt.Y, va.Y, tol)
 }
 
-const StdTol = float32(1.0e-6)
+const StandardTol = float32(1.0e-6)
 
 func TestMat2(t *testing.T) {
 	v0 := V2(0, 0)
@@ -32,25 +32,25 @@ func TestMat2(t *testing.T) {
 
 	assert.Equal(t, vxy.MulScalar(2), Scale2D(2, 2).MulVec2AsPoint(vxy))
 
-	TolAssertEqualVec(t, StdTol, vy, Rotate2D(DegToRad(90)).MulVec2AsPoint(vx))  // left
-	TolAssertEqualVec(t, StdTol, vx, Rotate2D(DegToRad(-90)).MulVec2AsPoint(vy)) // right
-	TolAssertEqualVec(t, StdTol, vxy.Normal(), Rotate2D(DegToRad(45)).MulVec2AsPoint(vx))
-	TolAssertEqualVec(t, StdTol, vxy.Normal(), Rotate2D(DegToRad(-45)).MulVec2AsPoint(vy))
+	TolAssertEqualVec(t, StandardTol, vy, Rotate2D(DegToRad(90)).MulVec2AsPoint(vx))  // left
+	TolAssertEqualVec(t, StandardTol, vx, Rotate2D(DegToRad(-90)).MulVec2AsPoint(vy)) // right
+	TolAssertEqualVec(t, StandardTol, vxy.Normal(), Rotate2D(DegToRad(45)).MulVec2AsPoint(vx))
+	TolAssertEqualVec(t, StandardTol, vxy.Normal(), Rotate2D(DegToRad(-45)).MulVec2AsPoint(vy))
 
-	TolAssertEqualVec(t, StdTol, vy, Rotate2D(DegToRad(-90)).Inverse().MulVec2AsPoint(vx))
-	TolAssertEqualVec(t, StdTol, vx, Rotate2D(DegToRad(90)).Inverse().MulVec2AsPoint(vy))
+	TolAssertEqualVec(t, StandardTol, vy, Rotate2D(DegToRad(-90)).Inverse().MulVec2AsPoint(vx))
+	TolAssertEqualVec(t, StandardTol, vx, Rotate2D(DegToRad(90)).Inverse().MulVec2AsPoint(vy))
 
-	TolAssertEqualVec(t, StdTol, vxy, Rotate2D(DegToRad(-45)).Mul(Rotate2D(DegToRad(45))).MulVec2AsPoint(vxy))
-	TolAssertEqualVec(t, StdTol, vxy, Rotate2D(DegToRad(-45)).Mul(Rotate2D(DegToRad(-45)).Inverse()).MulVec2AsPoint(vxy))
+	TolAssertEqualVec(t, StandardTol, vxy, Rotate2D(DegToRad(-45)).Mul(Rotate2D(DegToRad(45))).MulVec2AsPoint(vxy))
+	TolAssertEqualVec(t, StandardTol, vxy, Rotate2D(DegToRad(-45)).Mul(Rotate2D(DegToRad(-45)).Inverse()).MulVec2AsPoint(vxy))
 
-	tolassert.EqualTol(t, DegToRad(-90), Rotate2D(DegToRad(-90)).ExtractRot(), StdTol)
-	tolassert.EqualTol(t, DegToRad(-45), Rotate2D(DegToRad(-45)).ExtractRot(), StdTol)
-	tolassert.EqualTol(t, DegToRad(45), Rotate2D(DegToRad(45)).ExtractRot(), StdTol)
-	tolassert.EqualTol(t, DegToRad(90), Rotate2D(DegToRad(90)).ExtractRot(), StdTol)
+	tolassert.EqualTol(t, DegToRad(-90), Rotate2D(DegToRad(-90)).ExtractRot(), StandardTol)
+	tolassert.EqualTol(t, DegToRad(-45), Rotate2D(DegToRad(-45)).ExtractRot(), StandardTol)
+	tolassert.EqualTol(t, DegToRad(45), Rotate2D(DegToRad(45)).ExtractRot(), StandardTol)
+	tolassert.EqualTol(t, DegToRad(90), Rotate2D(DegToRad(90)).ExtractRot(), StandardTol)
 
 	// 1,0 -> scale(2) = 2,0 -> rotate 90 = 0,2 -> trans 1,1 -> 1,3
 	// multiplication order is *reverse* of "logical" order:
-	TolAssertEqualVec(t, StdTol, V2(1, 3), Translate2D(1, 1).Mul(Rotate2D(DegToRad(90))).Mul(Scale2D(2, 2)).MulVec2AsPoint(vx))
+	TolAssertEqualVec(t, StandardTol, V2(1, 3), Translate2D(1, 1).Mul(Rotate2D(DegToRad(90))).Mul(Scale2D(2, 2)).MulVec2AsPoint(vx))
 
 }
 
@@ -68,17 +68,17 @@ func TestMat3(t *testing.T) {
 
 	assert.Equal(t, vxy.MulScalar(2), Mat3FromMat2(Scale2D(2, 2)).MulVec2AsPt(vxy))
 
-	TolAssertEqualVec(t, StdTol, vy, Mat3FromMat2(Rotate2D(DegToRad(90))).MulVec2AsPt(vx))  // left
-	TolAssertEqualVec(t, StdTol, vx, Mat3FromMat2(Rotate2D(DegToRad(-90))).MulVec2AsPt(vy)) // right
-	TolAssertEqualVec(t, StdTol, vxy.Normal(), Mat3FromMat2(Rotate2D(DegToRad(45))).MulVec2AsPt(vx))
-	TolAssertEqualVec(t, StdTol, vxy.Normal(), Mat3FromMat2(Rotate2D(DegToRad(-45))).MulVec2AsPt(vy))
+	TolAssertEqualVec(t, StandardTol, vy, Mat3FromMat2(Rotate2D(DegToRad(90))).MulVec2AsPt(vx))  // left
+	TolAssertEqualVec(t, StandardTol, vx, Mat3FromMat2(Rotate2D(DegToRad(-90))).MulVec2AsPt(vy)) // right
+	TolAssertEqualVec(t, StandardTol, vxy.Normal(), Mat3FromMat2(Rotate2D(DegToRad(45))).MulVec2AsPt(vx))
+	TolAssertEqualVec(t, StandardTol, vxy.Normal(), Mat3FromMat2(Rotate2D(DegToRad(-45))).MulVec2AsPt(vy))
 
-	TolAssertEqualVec(t, StdTol, vy, Mat3FromMat2(Rotate2D(DegToRad(-90))).Inverse().MulVec2AsPt(vx)) // left
-	TolAssertEqualVec(t, StdTol, vx, Mat3FromMat2(Rotate2D(DegToRad(90))).Inverse().MulVec2AsPt(vy))  // right
+	TolAssertEqualVec(t, StandardTol, vy, Mat3FromMat2(Rotate2D(DegToRad(-90))).Inverse().MulVec2AsPt(vx)) // left
+	TolAssertEqualVec(t, StandardTol, vx, Mat3FromMat2(Rotate2D(DegToRad(90))).Inverse().MulVec2AsPt(vy))  // right
 
 	// 1,0 -> scale(2) = 2,0 -> rotate 90 = 0,2 -> trans 1,1 -> 1,3
 	// multiplication order is *reverse* of "logical" order:
-	TolAssertEqualVec(t, StdTol, V2(1, 3), Mat3Translate2D(1, 1).Mul(Mat3Rotate2D(DegToRad(90))).Mul(Mat3Scale2D(2, 2)).MulVec2AsPt(vx))
+	TolAssertEqualVec(t, StandardTol, V2(1, 3), Mat3Translate2D(1, 1).Mul(Mat3Rotate2D(DegToRad(90))).Mul(Mat3Scale2D(2, 2)).MulVec2AsPt(vx))
 
 	// xmat := Mat3Translate2D(1, 1).Mul(Mat3Rotate2D(DegToRad(90))).Mul(Mat3Scale2D(2, 2)).MulVec2AsPt(vx))
 }

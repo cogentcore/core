@@ -19,7 +19,7 @@ type State struct {
 	Src *lex.File `view:"no-inline"`
 
 	// tracing for this parser
-	Trace TraceOpts
+	Trace TraceOptions
 
 	// root of the Ast abstract syntax tree we're updating
 	Ast *Ast

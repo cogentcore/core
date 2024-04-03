@@ -12,8 +12,8 @@ import (
 	"cogentcore.org/core/pi/lex"
 )
 
-// TraceOpts provides options for debugging / monitoring the rule matching and execution process
-type TraceOpts struct {
+// TraceOptions provides options for debugging / monitoring the rule matching and execution process
+type TraceOptions struct {
 
 	// perform tracing
 	On bool
@@ -53,7 +53,7 @@ type TraceOpts struct {
 }
 
 // Init intializes tracer after any changes -- opens pipe if not already open
-func (pt *TraceOpts) Init() {
+func (pt *TraceOptions) Init() {
 	if pt.Rules == "" {
 		pt.RulesList = nil
 	} else {
@@ -62,7 +62,7 @@ func (pt *TraceOpts) Init() {
 }
 
 // FullOn sets all options on
-func (pt *TraceOpts) FullOn() {
+func (pt *TraceOptions) FullOn() {
 	pt.On = true
 	pt.Match = true
 	pt.SubMatch = true
@@ -73,19 +73,19 @@ func (pt *TraceOpts) FullOn() {
 }
 
 // PipeOut sets output to a pipe for monitoring (OutWrite -> OutRead)
-func (pt *TraceOpts) PipeOut() {
+func (pt *TraceOptions) PipeOut() {
 	if pt.OutWrite == nil {
 		pt.OutRead, pt.OutWrite, _ = os.Pipe() // seriously, does this ever fail?
 	}
 }
 
-// StdOut sets OutWrite to os.Stdout
-func (pt *TraceOpts) StdOut() {
+// Stdout sets [TraceOptions.OutWrite] to [os.Stdout]
+func (pt *TraceOptions) Stdout() {
 	pt.OutWrite = os.Stdout
 }
 
 // CheckRule checks if given rule should be traced
-func (pt *TraceOpts) CheckRule(rule string) bool {
+func (pt *TraceOptions) CheckRule(rule string) bool {
 	if len(pt.RulesList) == 0 {
 		if pt.Rules != "" {
 			pt.Init()
@@ -105,7 +105,7 @@ func (pt *TraceOpts) CheckRule(rule string) bool {
 }
 
 // Out outputs a trace message -- returns true if actually output
-func (pt *TraceOpts) Out(ps *State, pr *Rule, step Steps, pos lex.Pos, scope lex.Reg, ast *Ast, msg string) bool {
+func (pt *TraceOptions) Out(ps *State, pr *Rule, step Steps, pos lex.Pos, scope lex.Reg, ast *Ast, msg string) bool {
 	if !pt.On {
 		return false
 	}
@@ -149,7 +149,7 @@ func (pt *TraceOpts) Out(ps *State, pr *Rule, step Steps, pos lex.Pos, scope lex
 }
 
 // CopyOpts copies just the options
-func (pt *TraceOpts) CopyOpts(ot *TraceOpts) {
+func (pt *TraceOptions) CopyOpts(ot *TraceOptions) {
 	pt.On = ot.On
 	pt.Rules = ot.Rules
 	pt.Match = ot.Match

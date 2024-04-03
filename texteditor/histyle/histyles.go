@@ -23,14 +23,14 @@ var defaults []byte
 // Styles is a collection of styles
 type Styles map[string]*Style
 
-// StdStyles are the styles from chroma package
-var StdStyles Styles
+// StandardStyles are the styles from chroma package
+var StandardStyles Styles
 
 // CustomStyles are user's special styles
 var CustomStyles = Styles{}
 
-// AvailStyles are all highlighting styles
-var AvailStyles Styles
+// AvailableStyles are all highlighting styles
+var AvailableStyles Styles
 
 // StyleDefault is the default highlighting style name -- can set this to whatever you want
 var StyleDefault = gi.HiStyleName("emacs")
@@ -41,13 +41,13 @@ var StyleNames []string
 // AvailStyle returns a style by name from the AvailStyles list -- if not found
 // default is used as a fallback
 func AvailStyle(nm gi.HiStyleName) *Style {
-	if AvailStyles == nil {
+	if AvailableStyles == nil {
 		Init()
 	}
-	if st, ok := AvailStyles[string(nm)]; ok {
+	if st, ok := AvailableStyles[string(nm)]; ok {
 		return st
 	}
-	return AvailStyles[string(StyleDefault)]
+	return AvailableStyles[string(StyleDefault)]
 }
 
 // Add adds a new style to the list
@@ -70,10 +70,10 @@ func (hs *Styles) CopyFrom(os Styles) {
 
 // MergeAvailStyles updates AvailStyles as combination of std and custom styles
 func MergeAvailStyles() {
-	AvailStyles = make(Styles, len(CustomStyles)+len(StdStyles))
-	AvailStyles.CopyFrom(StdStyles)
-	AvailStyles.CopyFrom(CustomStyles)
-	StyleNames = AvailStyles.Names()
+	AvailableStyles = make(Styles, len(CustomStyles)+len(StandardStyles))
+	AvailableStyles.CopyFrom(StandardStyles)
+	AvailableStyles.CopyFrom(CustomStyles)
+	StyleNames = AvailableStyles.Names()
 }
 
 // Open hi styles from a JSON-formatted file. You can save and open
@@ -159,26 +159,26 @@ func (hs *Styles) Names() []string {
 	return nms
 }
 
-// ViewStd shows the standard styles that are compiled into the program via
+// ViewStandard shows the standard styles that are compiled into the program via
 // chroma package
-func (hs *Styles) ViewStd() {
-	View(&StdStyles)
+func (hs *Styles) ViewStandard() {
+	View(&StandardStyles)
 }
 
 // Init must be called to initialize the hi styles -- post startup
 // so chroma stuff is all in place, and loads custom styles
 func Init() {
-	pi.LangSupport.OpenStd()
-	StdStyles.OpenDefaults()
+	pi.LangSupport.OpenStandard()
+	StandardStyles.OpenDefaults()
 	CustomStyles.OpenPrefs()
 	if len(CustomStyles) == 0 {
 		cs := &Style{}
-		cs.CopyFrom(StdStyles[string(StyleDefault)])
+		cs.CopyFrom(StandardStyles[string(StyleDefault)])
 		CustomStyles["custom-sample"] = cs
 	}
 	MergeAvailStyles()
 
-	for _, s := range AvailStyles {
+	for _, s := range AvailableStyles {
 		for _, se := range *s {
 			se.Norm()
 		}

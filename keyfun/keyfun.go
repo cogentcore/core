@@ -313,7 +313,7 @@ func (km *Maps) Save(filename string) error { //gti:add
 func (km *Maps) OpenSettings() error { //gti:add
 	pdir := goosi.TheApp.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, PrefsMapsFilename)
-	AvailMapsChanged = false
+	AvailableMapsChanged = false
 	return km.Open(pnm)
 }
 
@@ -323,7 +323,7 @@ func (km *Maps) OpenSettings() error { //gti:add
 func (km *Maps) SavePrefs() error { //gti:add
 	pdir := goosi.TheApp.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, PrefsMapsFilename)
-	AvailMapsChanged = false
+	AvailableMapsChanged = false
 	return km.Save(pnm)
 }
 
@@ -334,19 +334,19 @@ func (km *Maps) CopyFrom(cp Maps) {
 	json.Unmarshal(b, km)
 }
 
-// RevertToStd reverts the keymaps to using the StdKeyMaps that are compiled into the program
+// RevertToStandard reverts the keymaps to using the StdKeyMaps that are compiled into the program
 // and have all the lastest key functions defined.  If you have edited your maps, and are finding
 // things not working, it is a good idea to save your current maps and try this, or at least do
 // ViewStdMaps to see the current standards. Your current map edits will be lost if you proceed!
-func (km *Maps) RevertToStd() { //gti:add
-	km.CopyFrom(StdMaps)
-	AvailMapsChanged = true
+func (km *Maps) RevertToStandard() { //gti:add
+	km.CopyFrom(StandardMaps)
+	AvailableMapsChanged = true
 }
 
-// AvailMapsChanged is used to update giv.KeyMapsView toolbars via
+// AvailableMapsChanged is used to update giv.KeyMapsView toolbars via
 // following menu, toolbar props update methods -- not accurate if editing any
 // other map but works for now..
-var AvailMapsChanged = false
+var AvailableMapsChanged = false
 
 // order is: Shift, Control, Alt, Meta
 // note: shift and meta modifiers for navigation keys do select + move

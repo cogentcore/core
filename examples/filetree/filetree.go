@@ -136,7 +136,7 @@ func (fb *FileBrowse) OpenPath(path gi.Filename) { //gti:add
 
 // UpdateProj does full update to current proj
 func (fb *FileBrowse) UpdateProj() {
-	fb.StdConfig()
+	fb.StandardConfig()
 	fb.SetTitle(fmt.Sprintf("FileBrowse of: %v", fb.ProjRoot)) // todo: get rid of title
 	fb.UpdateFiles()
 	fb.ConfigSplits()
@@ -253,19 +253,19 @@ func (fb *FileBrowse) ViewFile(fnm string) bool {
 //////////////////////////////////////////////////////////////////////////////////////
 //   GUI configs
 
-// StdFrameConfig returns a Config for configuring a standard Frame
+// StandardFrameConfig returns a Config for configuring a standard Frame
 // -- can modify as desired before calling ConfigChildren on Frame using this
-func (fb *FileBrowse) StdFrameConfig() ki.Config {
+func (fb *FileBrowse) StandardFrameConfig() ki.Config {
 	config := ki.Config{}
 	config.Add(gi.LabelType, "title")
 	config.Add(gi.SplitsType, "splits")
 	return config
 }
 
-// StdConfig configures a standard setup of the overall Frame.
+// StandardConfig configures a standard setup of the overall Frame.
 // It returns whether any modifications were made.
-func (fb *FileBrowse) StdConfig() bool {
-	config := fb.StdFrameConfig()
+func (fb *FileBrowse) StandardConfig() bool {
+	config := fb.StandardFrameConfig()
 	return fb.ConfigChildren(config)
 }
 

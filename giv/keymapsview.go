@@ -21,15 +21,15 @@ func KeyMapsView(km *keyfun.Maps) {
 	d := gi.NewBody("Key maps").SetData(km)
 	d.AddTitle("Available key maps: duplicate an existing map (using context menu) as starting point for creating a custom map")
 	tv := NewTableView(d).SetSlice(km)
-	keyfun.AvailMapsChanged = false
+	keyfun.AvailableMapsChanged = false
 	tv.OnChange(func(e events.Event) {
-		keyfun.AvailMapsChanged = true
+		keyfun.AvailableMapsChanged = true
 	})
 
 	d.Scene.Data = km // todo: needed?
 	d.AddAppBar(func(tb *gi.Toolbar) {
 		NewFuncButton(tb, km.SavePrefs).SetText("Save to preferences").SetIcon(icons.Save).SetKey(keyfun.Save).
-			StyleFirst(func(s *styles.Style) { s.SetEnabled(keyfun.AvailMapsChanged && km == &keyfun.AvailMaps) })
+			StyleFirst(func(s *styles.Style) { s.SetEnabled(keyfun.AvailableMapsChanged && km == &keyfun.AvailMaps) })
 		oj := NewFuncButton(tb, km.Open).SetText("Open from file").SetIcon(icons.Open).SetKey(keyfun.Open)
 		oj.Args[0].SetTag("ext", ".json")
 		sj := NewFuncButton(tb, km.Save).SetText("Save to file").SetIcon(icons.SaveAs).SetKey(keyfun.SaveAs)
@@ -37,11 +37,11 @@ func KeyMapsView(km *keyfun.Maps) {
 		gi.NewSeparator(tb)
 		NewFuncButton(tb, ViewStdKeyMaps).SetConfirm(true).
 			SetText("View standard").SetIcon(icons.Visibility).
-			StyleFirst(func(s *styles.Style) { s.SetEnabled(km != &keyfun.StdMaps) })
+			StyleFirst(func(s *styles.Style) { s.SetEnabled(km != &keyfun.StandardMaps) })
 
-		NewFuncButton(tb, km.RevertToStd).SetConfirm(true).
+		NewFuncButton(tb, km.RevertToStandard).SetConfirm(true).
 			SetText("Revert to standard").SetIcon(icons.DeviceReset).
-			StyleFirst(func(s *styles.Style) { s.SetEnabled(km != &keyfun.StdMaps) })
+			StyleFirst(func(s *styles.Style) { s.SetEnabled(km != &keyfun.StandardMaps) })
 		NewFuncButton(tb, km.MarkdownDoc).SetIcon(icons.Document).
 			SetShowReturn(true).SetShowReturnAsDialog(true)
 		tb.AddOverflowMenu(func(m *gi.Scene) {
@@ -56,7 +56,7 @@ func KeyMapsView(km *keyfun.Maps) {
 // all the lastest key functions bound to standard values.  Useful for
 // comparing against custom maps.
 func ViewStdKeyMaps() { //gti:add
-	KeyMapsView(&keyfun.StdMaps)
+	KeyMapsView(&keyfun.StandardMaps)
 }
 
 // KeyMapValue represents a [keyfun.MapName] value with a button.

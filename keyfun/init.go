@@ -7,7 +7,7 @@ package keyfun
 import "cogentcore.org/core/goosi"
 
 func init() {
-	AvailMaps.CopyFrom(StdMaps)
+	AvailMaps.CopyFrom(StandardMaps)
 	switch goosi.TheApp.SystemPlatform() {
 	case goosi.MacOS:
 		DefaultMap = "MacStandard"

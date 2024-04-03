@@ -81,8 +81,8 @@ func (cm *Map) MapIndex(val int) color.RGBA {
 // see https://matplotlib.org/tutorials/colors/colormap-manipulation.html
 // for how to read out matplotlib scales -- still don't understand segmented ones!
 
-// StdMaps is a list of standard color maps
-var StdMaps = map[string]*Map{
+// StandardMaps is a list of standard color maps
+var StandardMaps = map[string]*Map{
 	"ColdHot": {
 		Name:    "ColdHot",
 		NoColor: colors.FromRGB(200, 200, 200),
@@ -273,7 +273,7 @@ var StdMaps = map[string]*Map{
 var AvailMaps = map[string]*Map{}
 
 func init() {
-	maps.Copy(AvailMaps, StdMaps)
+	maps.Copy(AvailMaps, StandardMaps)
 }
 
 // AvailMapsList returns a sorted list of color map names, e.g., for choosers

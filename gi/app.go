@@ -95,13 +95,13 @@ func Quit() {
 // StandardAppBarConfig is the standard impl for a [App.AppBarConfig].
 // It adds a Back navigation buttons and the AppChooser,
 // followed by the [Widget.ConfigToolbar] for the current FullWindow
-// Scene being viewed, along with [StdOverflowMenu] items.
+// Scene being viewed, along with [StandardOverflowMenu] items.
 // and calls AddDefaultOverflowMenu to provide default menu items,
 // which will appear below any other OverflowMenu items added.
 func StandardAppBarConfig(pw Widget) {
 	tb := RecycleToolbar(pw)
 	StandardAppBarStart(tb) // adds back nav and AppChooser
-	StdOverflowMenu(tb)
+	StandardOverflowMenu(tb)
 	CurrentWindowAppBar(tb)
 	// apps should add their own app-general functions here
 }
@@ -154,15 +154,15 @@ func CurrentWindowAppBar(tb *Toolbar) {
 	tb.Scene.AppBars.Call(tb)
 }
 
-// StdOverflowMenu adds the standard overflow menu function.
-func StdOverflowMenu(tb *Toolbar) {
-	tb.OverflowMenus = append(tb.OverflowMenus, tb.StdOverflowMenu)
+// StandardOverflowMenu adds the standard overflow menu function.
+func StandardOverflowMenu(tb *Toolbar) {
+	tb.OverflowMenus = append(tb.OverflowMenus, tb.StandardOverflowMenu)
 }
 
 // note: must be a method on toolbar to get scene
 
-// StdOverflowMenu adds standard overflow menu items.
-func (tb *Toolbar) StdOverflowMenu(m *Scene) { //gti:add
+// StandardOverflowMenu adds standard overflow menu items.
+func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //gti:add
 	if SettingsWindow != nil {
 		NewButton(m).SetText("Settings").SetIcon(icons.Settings).SetKey(keyfun.Settings).
 			OnClick(func(e events.Event) {

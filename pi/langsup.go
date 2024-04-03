@@ -71,8 +71,8 @@ func (lp *LangProps) HasFlag(flg LangFlags) bool {
 	return false
 }
 
-// StdLangProps is the standard compiled-in set of language properties
-var StdLangProps = map[fi.Known]*LangProps{
+// StandardLangProps is the standard compiled-in set of language properties
+var StandardLangProps = map[fi.Known]*LangProps{
 	fi.Ada:        {fi.Ada, "--", "", "", nil, nil, nil},
 	fi.Bash:       {fi.Bash, "# ", "", "", nil, nil, nil},
 	fi.Csh:        {fi.Csh, "# ", "", "", nil, nil, nil},
@@ -115,11 +115,11 @@ type LangSupporter struct {
 // support interfaces for each supported language
 var LangSupport = LangSupporter{}
 
-// OpenStd opens all the standard parsers for languages, from the langs/ directory
-func (ll *LangSupporter) OpenStd() error {
+// OpenStandard opens all the standard parsers for languages, from the langs/ directory
+func (ll *LangSupporter) OpenStandard() error {
 	lex.TheLangLexer = &LangSupport
 
-	for sl, lp := range StdLangProps {
+	for sl, lp := range StandardLangProps {
 		pib, err := langs.OpenParser(sl)
 		if err != nil {
 			continue
@@ -139,7 +139,7 @@ func (ll *LangSupporter) OpenStd() error {
 
 // Props looks up language properties by fi.Known const int type
 func (ll *LangSupporter) Props(sup fi.Known) (*LangProps, error) {
-	lp, has := StdLangProps[sup]
+	lp, has := StandardLangProps[sup]
 	if !has {
 		err := fmt.Errorf("pi.LangSupport.Props: no specific support for language: %v", sup)
 		//		log.Println(err.Error()) // don't want output

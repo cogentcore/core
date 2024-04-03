@@ -189,8 +189,8 @@ func KnownFromFile(fname string) Known {
 // and KnownMimes map of known file types onto their full
 // mime type entry
 func MergeAvailMimes() {
-	AvailMimes = make(map[string]MimeType, len(StdMimes)+len(CustomMimes))
-	for _, mt := range StdMimes {
+	AvailMimes = make(map[string]MimeType, len(StandardMimes)+len(CustomMimes))
+	for _, mt := range StandardMimes {
 		AvailMimes[mt.Mime] = mt
 	}
 	for _, mt := range CustomMimes {
@@ -239,11 +239,11 @@ func init() {
 // https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/UTIRef/Articles/System-DeclaredUniformTypeIdentifiers.html
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types
 
-// StdMimes is the full list of standard mime types compiled into our code
+// StandardMimes is the full list of standard mime types compiled into our code
 // various other maps etc are constructed from it.
 // When there are multiple types associated with the same real type, pick one
 // to be the canonical one and give it, and *only* it, the extensions!
-var StdMimes = []MimeType{
+var StandardMimes = []MimeType{
 	// Folder
 	{"text/directory", nil, Folder, Unknown},
 

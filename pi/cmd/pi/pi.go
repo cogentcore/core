@@ -25,7 +25,7 @@ func main() {
 	var recurse bool
 	var excl string
 
-	pi.LangSupport.OpenStd()
+	pi.LangSupport.OpenStandard()
 
 	flag.Usage = func() {
 		fmt.Fprintf(flag.CommandLine.Output(), "Usage of %s:\n", os.Args[0])

@@ -19,7 +19,7 @@ import (
 )
 
 func init() {
-	pi.LangSupport.OpenStd()
+	pi.LangSupport.OpenStandard()
 }
 
 func TestParse(t *testing.T) {

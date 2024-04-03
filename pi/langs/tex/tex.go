@@ -33,7 +33,7 @@ type TexLang struct {
 var TheTexLang = TexLang{}
 
 func init() {
-	pi.StdLangProps[fi.TeX].Lang = &TheTexLang
+	pi.StandardLangProps[fi.TeX].Lang = &TheTexLang
 	langs.ParserBytes[fi.TeX] = parserBytes
 }
 
@@ -43,7 +43,7 @@ func (tl *TexLang) Parser() *pi.Parser {
 	}
 	lp, _ := pi.LangSupport.Props(fi.TeX)
 	if lp.Parser == nil {
-		pi.LangSupport.OpenStd()
+		pi.LangSupport.OpenStandard()
 	}
 	tl.Pr = lp.Parser
 	if tl.Pr == nil {

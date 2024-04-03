@@ -4,9 +4,9 @@
 
 package keyfun
 
-// StdMaps is the original compiled-in set of standard keymaps that have
+// StandardMaps is the original compiled-in set of standard keymaps that have
 // the lastest key functions bound to standard key chords.
-var StdMaps = Maps{
+var StandardMaps = Maps{
 	{"MacStandard", "Standard Mac KeyMap", Map{
 		"UpArrow":              MoveUp,
 		"Shift+UpArrow":        MoveUp,
