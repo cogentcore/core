@@ -9,14 +9,14 @@ package units
 // Dp returns a new dp value.
 // Dp is density-independent pixels. 1dp is 1/160 in.
 func Dp(val float32) Value {
-	return Value{Val: val, Un: UnitDp}
+	return Value{Value: val, Unit: UnitDp}
 }
 
 // Dp sets the value in terms of dp.
 // Dp is density-independent pixels. 1dp is 1/160 in.
 func (v *Value) Dp(val float32) {
-	v.Val = val
-	v.Un = UnitDp
+	v.Value = val
+	v.Unit = UnitDp
 }
 
 // Dp converts the given dp value to dots.
@@ -28,14 +28,14 @@ func (uc *Context) Dp(val float32) float32 {
 // Px returns a new px value.
 // Px is logical pixels. 1px is 1/96 in. These are not raw display pixels, for which you should use dots.
 func Px(val float32) Value {
-	return Value{Val: val, Un: UnitPx}
+	return Value{Value: val, Unit: UnitPx}
 }
 
 // Px sets the value in terms of px.
 // Px is logical pixels. 1px is 1/96 in. These are not raw display pixels, for which you should use dots.
 func (v *Value) Px(val float32) {
-	v.Val = val
-	v.Un = UnitPx
+	v.Value = val
+	v.Unit = UnitPx
 }
 
 // Px converts the given px value to dots.
@@ -47,14 +47,14 @@ func (uc *Context) Px(val float32) float32 {
 // Ew returns a new ew value.
 // Ew is percentage of element width, which is equivalent to CSS % in some contexts.
 func Ew(val float32) Value {
-	return Value{Val: val, Un: UnitEw}
+	return Value{Value: val, Unit: UnitEw}
 }
 
 // Ew sets the value in terms of ew.
 // Ew is percentage of element width, which is equivalent to CSS % in some contexts.
 func (v *Value) Ew(val float32) {
-	v.Val = val
-	v.Un = UnitEw
+	v.Value = val
+	v.Unit = UnitEw
 }
 
 // Ew converts the given ew value to dots.
@@ -66,14 +66,14 @@ func (uc *Context) Ew(val float32) float32 {
 // Eh returns a new eh value.
 // Eh is percentage of element height, which is equivalent to CSS % in some contexts.
 func Eh(val float32) Value {
-	return Value{Val: val, Un: UnitEh}
+	return Value{Value: val, Unit: UnitEh}
 }
 
 // Eh sets the value in terms of eh.
 // Eh is percentage of element height, which is equivalent to CSS % in some contexts.
 func (v *Value) Eh(val float32) {
-	v.Val = val
-	v.Un = UnitEh
+	v.Value = val
+	v.Unit = UnitEh
 }
 
 // Eh converts the given eh value to dots.
@@ -85,14 +85,14 @@ func (uc *Context) Eh(val float32) float32 {
 // Pw returns a new pw value.
 // Pw is percentage of parent width, which is equivalent to CSS % in some contexts.
 func Pw(val float32) Value {
-	return Value{Val: val, Un: UnitPw}
+	return Value{Value: val, Unit: UnitPw}
 }
 
 // Pw sets the value in terms of pw.
 // Pw is percentage of parent width, which is equivalent to CSS % in some contexts.
 func (v *Value) Pw(val float32) {
-	v.Val = val
-	v.Un = UnitPw
+	v.Value = val
+	v.Unit = UnitPw
 }
 
 // Pw converts the given pw value to dots.
@@ -104,14 +104,14 @@ func (uc *Context) Pw(val float32) float32 {
 // Ph returns a new ph value.
 // Ph is percentage of parent height, which is equivalent to CSS % in some contexts.
 func Ph(val float32) Value {
-	return Value{Val: val, Un: UnitPh}
+	return Value{Value: val, Unit: UnitPh}
 }
 
 // Ph sets the value in terms of ph.
 // Ph is percentage of parent height, which is equivalent to CSS % in some contexts.
 func (v *Value) Ph(val float32) {
-	v.Val = val
-	v.Un = UnitPh
+	v.Value = val
+	v.Unit = UnitPh
 }
 
 // Ph converts the given ph value to dots.
@@ -123,14 +123,14 @@ func (uc *Context) Ph(val float32) float32 {
 // Rem returns a new rem value.
 // Rem is the font size of the root element, which is always 16dp.
 func Rem(val float32) Value {
-	return Value{Val: val, Un: UnitRem}
+	return Value{Value: val, Unit: UnitRem}
 }
 
 // Rem sets the value in terms of rem.
 // Rem is the font size of the root element, which is always 16dp.
 func (v *Value) Rem(val float32) {
-	v.Val = val
-	v.Un = UnitRem
+	v.Value = val
+	v.Unit = UnitRem
 }
 
 // Rem converts the given rem value to dots.
@@ -142,14 +142,14 @@ func (uc *Context) Rem(val float32) float32 {
 // Em returns a new em value.
 // Em is the font size of the element.
 func Em(val float32) Value {
-	return Value{Val: val, Un: UnitEm}
+	return Value{Value: val, Unit: UnitEm}
 }
 
 // Em sets the value in terms of em.
 // Em is the font size of the element.
 func (v *Value) Em(val float32) {
-	v.Val = val
-	v.Un = UnitEm
+	v.Value = val
+	v.Unit = UnitEm
 }
 
 // Em converts the given em value to dots.
@@ -161,14 +161,14 @@ func (uc *Context) Em(val float32) float32 {
 // Ex returns a new ex value.
 // Ex is x-height of the element's font (size of 'x' glyph). It falls back to a default of 0.5em.
 func Ex(val float32) Value {
-	return Value{Val: val, Un: UnitEx}
+	return Value{Value: val, Unit: UnitEx}
 }
 
 // Ex sets the value in terms of ex.
 // Ex is x-height of the element's font (size of 'x' glyph). It falls back to a default of 0.5em.
 func (v *Value) Ex(val float32) {
-	v.Val = val
-	v.Un = UnitEx
+	v.Value = val
+	v.Unit = UnitEx
 }
 
 // Ex converts the given ex value to dots.
@@ -180,14 +180,14 @@ func (uc *Context) Ex(val float32) float32 {
 // Ch returns a new ch value.
 // Ch is width of the '0' glyph in the element's font. It falls back to a default of 0.5em.
 func Ch(val float32) Value {
-	return Value{Val: val, Un: UnitCh}
+	return Value{Value: val, Unit: UnitCh}
 }
 
 // Ch sets the value in terms of ch.
 // Ch is width of the '0' glyph in the element's font. It falls back to a default of 0.5em.
 func (v *Value) Ch(val float32) {
-	v.Val = val
-	v.Un = UnitCh
+	v.Value = val
+	v.Unit = UnitCh
 }
 
 // Ch converts the given ch value to dots.
@@ -199,14 +199,14 @@ func (uc *Context) Ch(val float32) float32 {
 // Vw returns a new vw value.
 // Vw is percentage of viewport (Scene) width.
 func Vw(val float32) Value {
-	return Value{Val: val, Un: UnitVw}
+	return Value{Value: val, Unit: UnitVw}
 }
 
 // Vw sets the value in terms of vw.
 // Vw is percentage of viewport (Scene) width.
 func (v *Value) Vw(val float32) {
-	v.Val = val
-	v.Un = UnitVw
+	v.Value = val
+	v.Unit = UnitVw
 }
 
 // Vw converts the given vw value to dots.
@@ -218,14 +218,14 @@ func (uc *Context) Vw(val float32) float32 {
 // Vh returns a new vh value.
 // Vh is percentage of viewport (Scene) height.
 func Vh(val float32) Value {
-	return Value{Val: val, Un: UnitVh}
+	return Value{Value: val, Unit: UnitVh}
 }
 
 // Vh sets the value in terms of vh.
 // Vh is percentage of viewport (Scene) height.
 func (v *Value) Vh(val float32) {
-	v.Val = val
-	v.Un = UnitVh
+	v.Value = val
+	v.Unit = UnitVh
 }
 
 // Vh converts the given vh value to dots.
@@ -237,14 +237,14 @@ func (uc *Context) Vh(val float32) float32 {
 // Vmin returns a new vmin value.
 // Vmin is percentage of the smaller dimension of the viewport (Scene).
 func Vmin(val float32) Value {
-	return Value{Val: val, Un: UnitVmin}
+	return Value{Value: val, Unit: UnitVmin}
 }
 
 // Vmin sets the value in terms of vmin.
 // Vmin is percentage of the smaller dimension of the viewport (Scene).
 func (v *Value) Vmin(val float32) {
-	v.Val = val
-	v.Un = UnitVmin
+	v.Value = val
+	v.Unit = UnitVmin
 }
 
 // Vmin converts the given vmin value to dots.
@@ -256,14 +256,14 @@ func (uc *Context) Vmin(val float32) float32 {
 // Vmax returns a new vmax value.
 // Vmax is percentage of the larger dimension of the viewport (Scene).
 func Vmax(val float32) Value {
-	return Value{Val: val, Un: UnitVmax}
+	return Value{Value: val, Unit: UnitVmax}
 }
 
 // Vmax sets the value in terms of vmax.
 // Vmax is percentage of the larger dimension of the viewport (Scene).
 func (v *Value) Vmax(val float32) {
-	v.Val = val
-	v.Un = UnitVmax
+	v.Value = val
+	v.Unit = UnitVmax
 }
 
 // Vmax converts the given vmax value to dots.
@@ -275,14 +275,14 @@ func (uc *Context) Vmax(val float32) float32 {
 // Cm returns a new cm value.
 // Cm is centimeters. 1cm is 1/2.54 in.
 func Cm(val float32) Value {
-	return Value{Val: val, Un: UnitCm}
+	return Value{Value: val, Unit: UnitCm}
 }
 
 // Cm sets the value in terms of cm.
 // Cm is centimeters. 1cm is 1/2.54 in.
 func (v *Value) Cm(val float32) {
-	v.Val = val
-	v.Un = UnitCm
+	v.Value = val
+	v.Unit = UnitCm
 }
 
 // Cm converts the given cm value to dots.
@@ -294,14 +294,14 @@ func (uc *Context) Cm(val float32) float32 {
 // Mm returns a new mm value.
 // Mm is millimeters. 1mm is 1/10 cm.
 func Mm(val float32) Value {
-	return Value{Val: val, Un: UnitMm}
+	return Value{Value: val, Unit: UnitMm}
 }
 
 // Mm sets the value in terms of mm.
 // Mm is millimeters. 1mm is 1/10 cm.
 func (v *Value) Mm(val float32) {
-	v.Val = val
-	v.Un = UnitMm
+	v.Value = val
+	v.Unit = UnitMm
 }
 
 // Mm converts the given mm value to dots.
@@ -313,14 +313,14 @@ func (uc *Context) Mm(val float32) float32 {
 // Q returns a new q value.
 // Q is quarter-millimeters. 1q is 1/40 cm.
 func Q(val float32) Value {
-	return Value{Val: val, Un: UnitQ}
+	return Value{Value: val, Unit: UnitQ}
 }
 
 // Q sets the value in terms of q.
 // Q is quarter-millimeters. 1q is 1/40 cm.
 func (v *Value) Q(val float32) {
-	v.Val = val
-	v.Un = UnitQ
+	v.Value = val
+	v.Unit = UnitQ
 }
 
 // Q converts the given q value to dots.
@@ -332,14 +332,14 @@ func (uc *Context) Q(val float32) float32 {
 // In returns a new in value.
 // In is inches. 1in is 2.54cm or 96px.
 func In(val float32) Value {
-	return Value{Val: val, Un: UnitIn}
+	return Value{Value: val, Unit: UnitIn}
 }
 
 // In sets the value in terms of in.
 // In is inches. 1in is 2.54cm or 96px.
 func (v *Value) In(val float32) {
-	v.Val = val
-	v.Un = UnitIn
+	v.Value = val
+	v.Unit = UnitIn
 }
 
 // In converts the given in value to dots.
@@ -351,14 +351,14 @@ func (uc *Context) In(val float32) float32 {
 // Pc returns a new pc value.
 // Pc is picas. 1pc is 1/6 in.
 func Pc(val float32) Value {
-	return Value{Val: val, Un: UnitPc}
+	return Value{Value: val, Unit: UnitPc}
 }
 
 // Pc sets the value in terms of pc.
 // Pc is picas. 1pc is 1/6 in.
 func (v *Value) Pc(val float32) {
-	v.Val = val
-	v.Un = UnitPc
+	v.Value = val
+	v.Unit = UnitPc
 }
 
 // Pc converts the given pc value to dots.
@@ -370,14 +370,14 @@ func (uc *Context) Pc(val float32) float32 {
 // Pt returns a new pt value.
 // Pt is points. 1pt is 1/72 in.
 func Pt(val float32) Value {
-	return Value{Val: val, Un: UnitPt}
+	return Value{Value: val, Unit: UnitPt}
 }
 
 // Pt sets the value in terms of pt.
 // Pt is points. 1pt is 1/72 in.
 func (v *Value) Pt(val float32) {
-	v.Val = val
-	v.Un = UnitPt
+	v.Value = val
+	v.Unit = UnitPt
 }
 
 // Pt converts the given pt value to dots.

@@ -351,7 +351,7 @@ func SetHTMLSimpleTag(tag string, fs *styles.FontRender, ctxt *units.Context, cs
 		did = true
 	case "sup":
 		fs.SetDecoration(styles.DecoSuper)
-		curpts := math.Round(float64(fs.Size.Convert(units.UnitPt, ctxt).Val))
+		curpts := math.Round(float64(fs.Size.Convert(units.UnitPt, ctxt).Value))
 		curpts -= 2
 		fs.Size = units.Pt(float32(curpts))
 		fs.Size.ToDots(ctxt)
@@ -361,14 +361,14 @@ func SetHTMLSimpleTag(tag string, fs *styles.FontRender, ctxt *units.Context, cs
 		fs.SetDecoration(styles.DecoSub)
 		fallthrough
 	case "small":
-		curpts := math.Round(float64(fs.Size.Convert(units.UnitPt, ctxt).Val))
+		curpts := math.Round(float64(fs.Size.Convert(units.UnitPt, ctxt).Value))
 		curpts -= 2
 		fs.Size = units.Pt(float32(curpts))
 		fs.Size.ToDots(ctxt)
 		fs.Font = OpenFont(fs, ctxt)
 		did = true
 	case "big":
-		curpts := math.Round(float64(fs.Size.Convert(units.UnitPt, ctxt).Val))
+		curpts := math.Round(float64(fs.Size.Convert(units.UnitPt, ctxt).Value))
 		curpts += 2
 		fs.Size = units.Pt(float32(curpts))
 		fs.Size.ToDots(ctxt)

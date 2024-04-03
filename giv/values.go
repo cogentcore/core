@@ -565,7 +565,7 @@ func (v *IconValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	cur := icons.Icon(laser.ToString(v.Value.Interface()))
 	NewSliceView(d).SetStyleFunc(func(w gi.Widget, s *styles.Style, row int) {
 		w.(*gi.Button).SetText(strcase.ToSentence(string(ics[row])))
-	}).SetSlice(&ics).SetSelVal(cur).BindSelect(&si)
+	}).SetSlice(&ics).SetSelectedValue(cur).BindSelect(&si)
 	return true, func() {
 		if si >= 0 {
 			ic := icons.AllIcons[si]
@@ -608,7 +608,7 @@ func (v *FontValue) ConfigDialog(d *gi.Body) (bool, func()) {
 		s.Font.Weight = fi[row].Weight
 		s.Font.Style = fi[row].Style
 		s.Font.Size.Pt(18)
-	}).SetSlice(&fi).SetSelVal(cur).SetSelectedField("Name").BindSelect(&si)
+	}).SetSlice(&fi).SetSelectedValue(cur).SetSelectedField("Name").BindSelect(&si)
 
 	return true, func() {
 		if si >= 0 {

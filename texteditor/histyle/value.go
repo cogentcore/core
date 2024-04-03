@@ -35,7 +35,7 @@ func (v *Value) ConfigDialog(d *gi.Body) (bool, func()) {
 	d.SetTitle("Select a syntax highlighting style")
 	si := 0
 	cur := laser.ToString(v.Value.Interface())
-	giv.NewSliceView(d).SetSlice(&StyleNames).SetSelVal(cur).BindSelect(&si)
+	giv.NewSliceView(d).SetSlice(&StyleNames).SetSelectedValue(cur).BindSelect(&si)
 	return true, func() {
 		if si >= 0 {
 			hs := StyleNames[si]

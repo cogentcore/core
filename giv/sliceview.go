@@ -226,7 +226,7 @@ type SliceViewBase struct {
 	// read / modify the underlying Slice data.
 	// Can be used to protect against random updating if your code has specific
 	// update points that can be likewise protected with this same mutex.
-	ViewMu *sync.Mutex `copier:"-" view:"-" json:"-" xml:"-"`
+	ViewMu *sync.Mutex `copier:"-" view:"-" json:"-" xml:"-" set:"-"`
 
 	// Changed indicates whether the underlying slice
 	// has been edited in any way
@@ -445,7 +445,7 @@ func (sv *SliceViewBase) SetStyles() {
 func (sv *SliceViewBase) StyleValueWidget(w gi.Widget, s *styles.Style, row, col int) {
 	if sv.MaxWidth > 0 {
 		hv := units.Ch(float32(sv.MaxWidth))
-		s.Min.X.Val = max(s.Min.X.Val, hv.Convert(s.Min.X.Un, &s.UnitContext).Val)
+		s.Min.X.Value = max(s.Min.X.Value, hv.Convert(s.Min.X.Unit, &s.UnitContext).Value)
 	}
 	s.SetTextWrap(false)
 }
@@ -860,7 +860,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 		vd := sv.SliceValue.AsValueData()
 		if vd.Owner != nil {
 			if ownki, ok := vd.Owner.(ki.Ki); ok {
-				d := gi.NewBody().AddTitle("Slice New").AddText("Number and Type of Items to Insert:")
+				d := gi.NewBody().AddTitle("Add list items").AddText("Number and type of items to insert:")
 				nd := &gi.NewItemsData{}
 				w := NewValue(d, nd).AsWidget()
 				ki.ChildByType[*gi.Chooser](w, ki.Embeds).SetTypes(gti.AllEmbeddersOf(ownki.BaseType())...).SetCurrentIndex(0)

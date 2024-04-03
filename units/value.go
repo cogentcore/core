@@ -21,55 +21,55 @@ import (
 // Value and units, and converted value into raw pixels (dots in DPI)
 type Value struct { //gti:add
 
-	// the value in terms of the specified unit
-	Val float32 `label:""`
+	// Value is the value in terms of the specified unit
+	Value float32 `label:""`
 
-	// the unit used for the value
-	Un Units `label:""`
+	// Unit is the unit used for the value
+	Unit Units `label:""`
 
-	// the computed value in raw pixels (dots in DPI)
+	// Dots is the computed value in raw pixels (dots in DPI)
 	Dots float32 `view:"-"`
 
-	// custom function that returns the dots of the value;
-	// if non-nil, it overrides all other fields;
-	// if nil, standard ToDots with the other fields is used
+	// Custom is a custom function that returns the dots of the value.
+	// If it is non-nil, it overrides all other fields.
+	// Otherwise, the standard ToDots with the other fields is used.
 	Custom func(uc *Context) float32 `view:"-" json:"-" xml:"-"`
 }
 
 // New creates a new value with the given unit type
 func New(val float32, un Units) Value {
-	return Value{Val: val, Un: un}
+	return Value{Value: val, Unit: un}
 }
 
 // Set sets the value and units of an existing value
 func (v *Value) Set(val float32, un Units) {
-	v.Val = val
-	v.Un = un
+	v.Value = val
+	v.Unit = un
 }
 
 // Zero returns a new zero (0) value.
 func Zero() Value {
-	return Value{Un: UnitDot}
+	return Value{Unit: UnitDot}
 }
 
 // Zero sets the value to zero (0).
 func (v *Value) Zero() {
-	v.Val = 0
-	v.Un = UnitDot
+	v.Value = 0
+	v.Unit = UnitDot
 	v.Dots = 0
 }
 
 // Dot returns a new dots value.
 // Dots are actual real display pixels, which are generally only used internally.
 func Dot(val float32) Value {
-	return Value{Val: val, Un: UnitDot, Dots: val}
+	return Value{Value: val, Unit: UnitDot, Dots: val}
 }
 
 // Dot sets the value directly in terms of dots.
 // Dots are actual real display pixels, which are generally only used internally.
 func (v *Value) Dot(val float32) {
-	v.Val = val
-	v.Un = UnitDot
+	v.Value = val
+	v.Unit = UnitDot
 	v.Dots = val
 }
 
@@ -91,7 +91,7 @@ func (v *Value) ToDots(uc *Context) float32 {
 	if v.Custom != nil {
 		v.Dots = v.Custom(uc)
 	} else {
-		v.Dots = uc.ToDots(v.Val, v.Un)
+		v.Dots = uc.ToDots(v.Value, v.Unit)
 	}
 	return v.Dots
 }
@@ -105,12 +105,12 @@ func (v *Value) ToDotsFixed(uc *Context) fixed.Int26_6 {
 // Convert converts value to the given units, given unit context
 func (v *Value) Convert(to Units, uc *Context) Value {
 	dots := v.ToDots(uc)
-	return Value{Val: dots / uc.Dots(to), Un: to, Dots: dots}
+	return Value{Value: dots / uc.Dots(to), Unit: to, Dots: dots}
 }
 
 // String implements the fmt.Stringer interface.
 func (v *Value) String() string {
-	return fmt.Sprintf("%g%s", v.Val, v.Un.String())
+	return fmt.Sprintf("%g%s", v.Value, v.Unit.String())
 }
 
 // SetString sets value from a string
@@ -122,8 +122,8 @@ func (v *Value) SetString(str string) error {
 		if err != nil {
 			return fmt.Errorf("(units.Value).SetString: unable to convert string value %q into a number: %w", trstr, err)
 		}
-		v.Val = float32(vc)
-		v.Un = UnitPx
+		v.Value = float32(vc)
+		v.Unit = UnitPx
 		return nil
 	}
 	var ends [4]string
@@ -192,28 +192,3 @@ func (v *Value) SetAny(iface any, key string) error {
 	}
 	return nil
 }
-
-/*
-
-// SetFmProp sets value from property of given key name in given list of properties
-// -- returns true if property found and set, error for any errors in setting
-// property
-func (v *Value) SetFmProp(key string, props map[string]any) (bool, error) {
-	pv, ok := props[key]
-	if !ok {
-		return false, nil
-	}
-	return true, v.SetAny(pv, key)
-}
-
-// SetFmInheritProp sets value from property of given key name in inherited or
-// type properties from given Ki.ki type -- returns true if property found and
-// set, error for any errors in setting property
-func (v *Value) SetFmInheritProp(key string, k ki.Ki, inherit, typ bool) (bool, error) {
-	pv, ok := k.PropInherit(key, inherit, typ)
-	if !ok {
-		return false, nil
-	}
-	return true, v.SetAny(pv, key)
-}
-*/

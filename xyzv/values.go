@@ -59,7 +59,7 @@ func (v *MeshValue) ConfigDialog(d *gi.Body) (bool, func()) {
 
 	si := 0
 	cur := laser.ToString(v.Value.Interface())
-	giv.NewSliceView(d).SetSlice(&sl).SetSelVal(cur).BindSelect(&si)
+	giv.NewSliceView(d).SetSlice(&sl).SetSelectedValue(cur).BindSelect(&si)
 
 	return true, func() {
 		if si >= 0 {

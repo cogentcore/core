@@ -59,7 +59,7 @@ func (fs *Font) InheritFields(par *Font) {
 	// fs.Color = par.Color
 	fs.Family = par.Family
 	fs.Style = par.Style
-	if par.Size.Val != 0 {
+	if par.Size.Value != 0 {
 		fs.Size = par.Size
 	}
 	fs.Weight = par.Weight
@@ -69,8 +69,8 @@ func (fs *Font) InheritFields(par *Font) {
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels
 func (fs *Font) ToDots(uc *units.Context) {
-	if fs.Size.Un == units.UnitEm || fs.Size.Un == units.UnitEx || fs.Size.Un == units.UnitCh {
-		slog.Error("girl/styles.Font.Size was set to Em, Ex, or Ch; that is recursive and unstable!", "unit", fs.Size.Un)
+	if fs.Size.Unit == units.UnitEm || fs.Size.Unit == units.UnitEx || fs.Size.Unit == units.UnitCh {
+		slog.Error("girl/styles.Font.Size was set to Em, Ex, or Ch; that is recursive and unstable!", "unit", fs.Size.Unit)
 		fs.Size.Dp(16)
 	}
 	fs.Size.ToDots(uc)

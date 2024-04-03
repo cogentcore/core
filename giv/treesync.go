@@ -243,7 +243,7 @@ func (tv *TreeView) InsertAt(rel int, actNm string) {
 	if tv.SyncNode != nil {
 		typ = tv.SyncNode.This().BaseType()
 	}
-	d := gi.NewBody().AddTitle(actNm).AddText("Number and Type of Items to Insert:")
+	d := gi.NewBody().AddTitle(actNm).AddText("Number and type of items to insert:")
 	nd := &gi.NewItemsData{Number: 1, Type: typ}
 	sg := NewStructView(d).SetStruct(nd).StructGrid()
 	ki.ChildByType[*gi.Chooser](sg, ki.Embeds).SetTypes(gti.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
@@ -265,12 +265,12 @@ func (tv *TreeView) InsertAt(rel int, actNm string) {
 // prompting the user for the type of node to add
 // If SyncNode is set, operates on Sync Tree.
 func (tv *TreeView) AddChildNode() { //gti:add
-	ttl := "Add Child"
+	ttl := "Add child"
 	typ := tv.This().BaseType()
 	if tv.SyncNode != nil {
 		typ = tv.SyncNode.This().BaseType()
 	}
-	d := gi.NewBody().AddTitle(ttl).AddText("Number and Type of Items to Add:")
+	d := gi.NewBody().AddTitle(ttl).AddText("Number and type of items to insert:")
 	nd := &gi.NewItemsData{Number: 1, Type: typ}
 	sg := NewStructView(d).SetStruct(nd).StructGrid()
 	ki.ChildByType[*gi.Chooser](sg, ki.Embeds).SetTypes(gti.AllEmbeddersOf(typ)...).SetCurrentIndex(0)

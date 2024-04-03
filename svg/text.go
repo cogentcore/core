@@ -180,7 +180,7 @@ func (g *Text) RenderText(sv *SVG) {
 		pc.FontStyle.Color = pc.FillStyle.Color
 	}
 	g.TextRender.SetString(g.Text, &pc.FontStyle, &pc.UnitContext, &pc.TextStyle, true, rot, scalex)
-	pc.FontStyle.Size = units.Value{Val: orgsz.Val * scy, Un: orgsz.Un, Dots: orgsz.Dots * scy} // rescale by y
+	pc.FontStyle.Size = units.Value{Value: orgsz.Value * scy, Unit: orgsz.Unit, Dots: orgsz.Dots * scy} // rescale by y
 	pc.FontStyle.Font = paint.OpenFont(&pc.FontStyle, &pc.UnitContext)
 	sr := &(g.TextRender.Spans[0])
 	sr.Render[0].Face = pc.FontStyle.Face.Face // upscale

@@ -76,9 +76,9 @@ func (sp *Spinner) SetStyles() {
 	sp.Max = 1.0
 	sp.Prec = 6
 	sp.SetLeadingIcon(icons.Remove, func(e events.Event) {
-		sp.IncrValue(-1)
+		sp.IncrementValue(-1)
 	}).SetTrailingIcon(icons.Add, func(e events.Event) {
-		sp.IncrValue(1)
+		sp.IncrementValue(1)
 	})
 	sp.TextField.SetStyles()
 	sp.Style(func(s *styles.Style) {
@@ -106,7 +106,7 @@ func (sp *Spinner) SetStyles() {
 }
 
 func (sp *Spinner) SetTextToValue() {
-	sp.SetText(sp.ValToString(sp.Value))
+	sp.SetText(sp.ValueToString(sp.Value))
 }
 
 func (sp *Spinner) SizeUp() {
@@ -153,10 +153,10 @@ func (sp *Spinner) SetValueAction(val float32) *Spinner {
 	return sp
 }
 
-// IncrValue increments the value by given number of steps (+ or -),
+// IncrementValue increments the value by given number of steps (+ or -),
 // and enforces it to be an even multiple of the step size (snap-to-value),
 // and emits the signal
-func (sp *Spinner) IncrValue(steps float32) *Spinner {
+func (sp *Spinner) IncrementValue(steps float32) *Spinner {
 	if sp.IsReadOnly() {
 		return sp
 	}
@@ -166,10 +166,10 @@ func (sp *Spinner) IncrValue(steps float32) *Spinner {
 	return sp.SetValueAction(val)
 }
 
-// PageIncrValue increments the value by given number of page steps (+ or -),
+// PageIncrementValue increments the value by given number of page steps (+ or -),
 // and enforces it to be an even multiple of the step size (snap-to-value),
 // and emits the signal
-func (sp *Spinner) PageIncrValue(steps float32) *Spinner {
+func (sp *Spinner) PageIncrementValue(steps float32) *Spinner {
 	if sp.IsReadOnly() {
 		return sp
 	}
@@ -210,8 +210,8 @@ func (sp *Spinner) FormatIsInt() bool {
 	return false
 }
 
-// ValToString converts the value to the string representation thereof
-func (sp *Spinner) ValToString(val float32) string {
+// ValueToString converts the value to the string representation thereof
+func (sp *Spinner) ValueToString(val float32) string {
 	if sp.Format == "" {
 		return fmt.Sprintf("%g", val)
 	}
@@ -221,8 +221,8 @@ func (sp *Spinner) ValToString(val float32) string {
 	return fmt.Sprintf(sp.Format, val)
 }
 
-// StringToVal converts the string field back to float value
-func (sp *Spinner) StringToVal(str string) (float32, error) {
+// StringToValue converts the string field back to float value
+func (sp *Spinner) StringToValue(str string) (float32, error) {
 	if sp.Format == "" {
 		f64, err := strconv.ParseFloat(str, 32)
 		return float32(f64), err
@@ -262,7 +262,7 @@ func (sp *Spinner) WidgetTooltip() string {
 		if res != "" {
 			res += " "
 		}
-		res += "(minimum: " + sp.ValToString(sp.Min)
+		res += "(minimum: " + sp.ValueToString(sp.Min)
 		if !sp.HasMax {
 			res += ")"
 		}
@@ -275,7 +275,7 @@ func (sp *Spinner) WidgetTooltip() string {
 		} else {
 			res += "("
 		}
-		res += "maximum: " + sp.ValToString(sp.Max) + ")"
+		res += "maximum: " + sp.ValueToString(sp.Max) + ")"
 	}
 	return res
 }
@@ -288,11 +288,11 @@ func (sp *Spinner) HandleEvents() {
 		}
 		se := e.(*events.MouseScroll)
 		se.SetHandled()
-		sp.IncrValue(float32(se.Delta.Y))
+		sp.IncrementValue(float32(se.Delta.Y))
 	})
 	sp.SetValidator(func() error {
 		text := sp.Text()
-		val, err := sp.StringToVal(text)
+		val, err := sp.StringToValue(text)
 		if err != nil {
 			return err
 		}
@@ -310,16 +310,16 @@ func (sp *Spinner) HandleEvents() {
 		switch {
 		case kf == keyfun.MoveUp:
 			e.SetHandled()
-			sp.IncrValue(1)
+			sp.IncrementValue(1)
 		case kf == keyfun.MoveDown:
 			e.SetHandled()
-			sp.IncrValue(-1)
+			sp.IncrementValue(-1)
 		case kf == keyfun.PageUp:
 			e.SetHandled()
-			sp.PageIncrValue(1)
+			sp.PageIncrementValue(1)
 		case kf == keyfun.PageDown:
 			e.SetHandled()
-			sp.PageIncrValue(-1)
+			sp.PageIncrementValue(-1)
 		}
 	})
 }

@@ -189,8 +189,8 @@ func (wb *WidgetBase) ResetStyleSettings() {
 		return
 	}
 	fsz := AppearanceSettings.FontSize / 100
-	wb.Styles.Font.Size.Val /= fsz
-	wb.Styles.Text.LineHeight.Val /= fsz
+	wb.Styles.Font.Size.Value /= fsz
+	wb.Styles.Text.LineHeight.Value /= fsz
 }
 
 // ApplyStyleSettings applies [AppearanceSettingsData.Spacing]
@@ -199,20 +199,20 @@ func (wb *WidgetBase) ApplyStyleSettings() {
 	s := &wb.Styles
 
 	spc := AppearanceSettings.Spacing / 100
-	s.Margin.Top.Val *= spc
-	s.Margin.Right.Val *= spc
-	s.Margin.Bottom.Val *= spc
-	s.Margin.Left.Val *= spc
-	s.Padding.Top.Val *= spc
-	s.Padding.Right.Val *= spc
-	s.Padding.Bottom.Val *= spc
-	s.Padding.Left.Val *= spc
-	s.Gap.X.Val *= spc
-	s.Gap.Y.Val *= spc
+	s.Margin.Top.Value *= spc
+	s.Margin.Right.Value *= spc
+	s.Margin.Bottom.Value *= spc
+	s.Margin.Left.Value *= spc
+	s.Padding.Top.Value *= spc
+	s.Padding.Right.Value *= spc
+	s.Padding.Bottom.Value *= spc
+	s.Padding.Left.Value *= spc
+	s.Gap.X.Value *= spc
+	s.Gap.Y.Value *= spc
 
 	fsz := AppearanceSettings.FontSize / 100
-	s.Font.Size.Val *= fsz
-	s.Text.LineHeight.Val *= fsz
+	s.Font.Size.Value *= fsz
+	s.Text.LineHeight.Value *= fsz
 }
 
 // ApplyStyleUpdate calls ApplyStyleTree and NeedsRender.

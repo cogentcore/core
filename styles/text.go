@@ -121,7 +121,7 @@ func (ts *Text) InheritFields(par *Text) {
 // EffLineHeight returns the effective line height for the given
 // font height, handling the [LineHeightNormal] special case.
 func (ts *Text) EffLineHeight(fontHeight float32) float32 {
-	if ts.LineHeight.Val < 0 {
+	if ts.LineHeight.Value < 0 {
 		return fontHeight
 	}
 	return ts.LineHeight.Dots

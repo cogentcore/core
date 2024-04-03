@@ -38,17 +38,17 @@ func (s *Style) LayoutDefaults() {
 // LayoutHasParSizing returns true if the layout parameters use parent-relative
 // sizing units, which requires additional updating during layout
 func (s *Style) LayoutHasParSizing() bool {
-	if s.Min.X.Un == units.UnitEw || s.Min.X.Un == units.UnitEh ||
-		s.Min.Y.Un == units.UnitEw || s.Min.Y.Un == units.UnitEh ||
-		s.Max.X.Un == units.UnitEw || s.Max.X.Un == units.UnitEh ||
-		s.Max.Y.Un == units.UnitEw || s.Max.Y.Un == units.UnitEh {
+	if s.Min.X.Unit == units.UnitEw || s.Min.X.Unit == units.UnitEh ||
+		s.Min.Y.Unit == units.UnitEw || s.Min.Y.Unit == units.UnitEh ||
+		s.Max.X.Unit == units.UnitEw || s.Max.X.Unit == units.UnitEh ||
+		s.Max.Y.Unit == units.UnitEw || s.Max.Y.Unit == units.UnitEh {
 		slog.Error("styling error: cannot use Ew or Eh for Min size -- that is self-referential!")
 	}
 
-	return s.Min.X.Un == units.UnitPw || s.Min.X.Un == units.UnitPh ||
-		s.Min.Y.Un == units.UnitPw || s.Min.Y.Un == units.UnitPh ||
-		s.Max.X.Un == units.UnitPw || s.Max.X.Un == units.UnitPh ||
-		s.Max.Y.Un == units.UnitPw || s.Max.Y.Un == units.UnitPh
+	return s.Min.X.Unit == units.UnitPw || s.Min.X.Unit == units.UnitPh ||
+		s.Min.Y.Unit == units.UnitPw || s.Min.Y.Unit == units.UnitPh ||
+		s.Max.X.Unit == units.UnitPw || s.Max.X.Unit == units.UnitPh ||
+		s.Max.Y.Unit == units.UnitPw || s.Max.Y.Unit == units.UnitPh
 }
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels

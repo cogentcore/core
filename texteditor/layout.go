@@ -72,7 +72,7 @@ func (ed *Editor) InternalSizeFromLines() {
 // It computes the total LinesSize and TotalSize.
 func (ed *Editor) LayoutAllLines() {
 	ed.UpdateFromAlloc()
-	if ed.LineLayoutSize.Y == 0 || ed.Styles.Font.Size.Val == 0 {
+	if ed.LineLayoutSize.Y == 0 || ed.Styles.Font.Size.Value == 0 {
 		return
 	}
 	if ed.Buf == nil || ed.Buf.NumLines() == 0 {
@@ -133,7 +133,7 @@ func (ed *Editor) LayoutAllLines() {
 // ReLayoutAllLines updates the Renders Layout given current size, if changed
 func (ed *Editor) ReLayoutAllLines() {
 	ed.UpdateFromAlloc()
-	if ed.LineLayoutSize.Y == 0 || ed.Styles.Font.Size.Val == 0 {
+	if ed.LineLayoutSize.Y == 0 || ed.Styles.Font.Size.Value == 0 {
 		return
 	}
 	if ed.Buf == nil || ed.Buf.NumLines() == 0 {

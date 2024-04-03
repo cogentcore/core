@@ -353,7 +353,7 @@ fraction:
 		if ls.Ch == '-' || ls.Ch == '+' {
 			ls.NextRune()
 		}
-		if DigitVal(ls.Ch) < 10 {
+		if DigitValue(ls.Ch) < 10 {
 			ls.ScanMantissa(10)
 		} else {
 			ls.Error(offs, "illegal floating-point exponent", nil)
@@ -369,7 +369,7 @@ exit:
 	return tok
 }
 
-func DigitVal(ch rune) int {
+func DigitValue(ch rune) int {
 	switch {
 	case '0' <= ch && ch <= '9':
 		return int(ch - '0')
@@ -382,7 +382,7 @@ func DigitVal(ch rune) int {
 }
 
 func (ls *State) ScanMantissa(base int) {
-	for DigitVal(ls.Ch) < base {
+	for DigitValue(ls.Ch) < base {
 		if !ls.NextRune() {
 			break
 		}
@@ -444,7 +444,7 @@ func (ls *State) ReadEscape(quote rune) bool {
 
 	var x uint32
 	for n > 0 {
-		d := uint32(DigitVal(ls.Ch))
+		d := uint32(DigitValue(ls.Ch))
 		if d >= base {
 			msg := fmt.Sprintf("illegal character %#U in escape sequence", ls.Ch)
 			if ls.Ch < 0 {

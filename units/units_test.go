@@ -52,7 +52,7 @@ func TestToDots(t *testing.T) {
 	}
 }
 
-func TestValCvt(t *testing.T) {
+func TestValueConvert(t *testing.T) {
 	var ctxt Context
 	ctxt.Defaults()
 	for _, un := range UnitsValues() {

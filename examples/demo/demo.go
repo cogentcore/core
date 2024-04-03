@@ -381,9 +381,9 @@ func views(ts *gi.Tabs) {
 	str := testStruct{
 		Name:   "happy",
 		Cond:   2,
-		Val:    3.1415,
+		Value:  3.1415,
 		Vec:    mat32.V2(5, 7),
-		Inline: inlineStruct{Val: 3},
+		Inline: inlineStruct{Value: 3},
 		Cond2: tableStruct{
 			IntField:   22,
 			FloatField: 44.4,
@@ -494,7 +494,7 @@ type inlineStruct struct { //gti:add
 	Cond2 tableStruct
 
 	// a value
-	Val float32
+	Value float32
 }
 
 func (il *inlineStruct) ShouldShow(field string) bool {
@@ -536,7 +536,7 @@ type testStruct struct { //gti:add
 	Cond2 tableStruct
 
 	// a value
-	Val float32
+	Value float32
 
 	Vec mat32.Vec2
 

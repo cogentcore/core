@@ -279,8 +279,8 @@ func (t *SliceView) SetViewPath(v string) *SliceView { t.ViewPath = v; return t 
 // SetViewMu sets the [SliceView.ViewMu]
 func (t *SliceView) SetViewMu(v *sync.Mutex) *SliceView { t.ViewMu = v; return t }
 
-// SetSelVal sets the [SliceView.SelVal]
-func (t *SliceView) SetSelVal(v any) *SliceView { t.SelectedValue = v; return t }
+// SetSelectedValue sets the [SliceView.SelVal]
+func (t *SliceView) SetSelectedValue(v any) *SliceView { t.SelectedValue = v; return t }
 
 // SetSelectedIndex sets the [SliceView.SelectedIndex]
 func (t *SliceView) SetSelectedIndex(v int) *SliceView { t.SelectedIndex = v; return t }
@@ -324,9 +324,9 @@ func (t *SliceViewBase) SetViewPath(v string) *SliceViewBase { t.ViewPath = v; r
 // update points that can be likewise protected with this same mutex.
 func (t *SliceViewBase) SetViewMu(v *sync.Mutex) *SliceViewBase { t.ViewMu = v; return t }
 
-// SetSelVal sets the [SliceViewBase.SelVal]:
+// SetSelectedValue sets the [SliceViewBase.SelVal]:
 // current selection value -- initially select this value if set
-func (t *SliceViewBase) SetSelVal(v any) *SliceViewBase { t.SelectedValue = v; return t }
+func (t *SliceViewBase) SetSelectedValue(v any) *SliceViewBase { t.SelectedValue = v; return t }
 
 // SetSelectedIndex sets the [SliceViewBase.SelectedIndex]:
 // index of currently selected item
@@ -490,8 +490,8 @@ func (t *TableView) SetViewPath(v string) *TableView { t.ViewPath = v; return t 
 // SetViewMu sets the [TableView.ViewMu]
 func (t *TableView) SetViewMu(v *sync.Mutex) *TableView { t.ViewMu = v; return t }
 
-// SetSelVal sets the [TableView.SelVal]
-func (t *TableView) SetSelVal(v any) *TableView { t.SelectedValue = v; return t }
+// SetSelectedValue sets the [TableView.SelVal]
+func (t *TableView) SetSelectedValue(v any) *TableView { t.SelectedValue = v; return t }
 
 // SetSelectedIndex sets the [TableView.SelectedIndex]
 func (t *TableView) SetSelectedIndex(v int) *TableView { t.SelectedIndex = v; return t }

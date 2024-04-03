@@ -10,8 +10,8 @@ import (
 	"cogentcore.org/core/difflib"
 )
 
-// DiffSelData contains data for one set of text
-type DiffSelData struct {
+// DiffSelectData contains data for one set of text
+type DiffSelectData struct {
 	// original text
 	Orig []string
 
@@ -39,7 +39,7 @@ type DiffSelData struct {
 // The Orig is set directly and Edit is cloned
 // if the input will be modified during the processing,
 // call slices.Clone first
-func (ds *DiffSelData) SetStringLines(s []string) {
+func (ds *DiffSelectData) SetStringLines(s []string) {
 	ds.Orig = s
 	ds.Edit = slices.Clone(s)
 	nl := len(s)
@@ -49,13 +49,13 @@ func (ds *DiffSelData) SetStringLines(s []string) {
 	}
 }
 
-func (ds *DiffSelData) SaveUndo(op difflib.OpCode) {
+func (ds *DiffSelectData) SaveUndo(op difflib.OpCode) {
 	ds.Undos = append(ds.Undos, op)
 	ds.EditUndo = append(ds.EditUndo, slices.Clone(ds.Edit))
 	ds.LineMapUndo = append(ds.LineMapUndo, slices.Clone(ds.LineMap))
 }
 
-func (ds *DiffSelData) Undo() bool {
+func (ds *DiffSelectData) Undo() bool {
 	n := len(ds.LineMapUndo)
 	if n == 0 {
 		return false
@@ -115,8 +115,8 @@ func ApplyOneDiff(op difflib.OpCode, bedit *[]string, aorig []string, blmap []in
 // DiffSelected supports the incremental application of selected diffs
 // between two files (either A -> B or B <- A), with Undo
 type DiffSelected struct {
-	A DiffSelData
-	B DiffSelData
+	A DiffSelectData
+	B DiffSelectData
 
 	// Diffs are the diffs between A and B
 	Diffs Diffs

@@ -126,7 +126,7 @@ func (tv *TableView) StyleValueWidget(w gi.Widget, s *styles.Style, row, col int
 		hw = max(float32(tv.ColMaxWidths[col]), hw)
 	}
 	hv := units.Ch(hw)
-	s.Min.X.Val = max(s.Min.X.Val, hv.Convert(s.Min.X.Un, &s.UnitContext).Val)
+	s.Min.X.Value = max(s.Min.X.Value, hv.Convert(s.Min.X.Unit, &s.UnitContext).Value)
 	s.SetTextWrap(false)
 }
 
