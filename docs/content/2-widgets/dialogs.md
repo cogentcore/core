@@ -20,7 +20,7 @@ bt.OnClick(func(e events.Event) {
 })
 ```
 
-If you need to make a dialog more complicated than a simple message or error dialog, you can use the [[gi.NewBody]] and [[gi.Body.NewDialog]] functions to construct a dialog with any content you want. For example, you can make a confirmation dialog:
+You can also construct a dialog with any content you want. For example, you can make a confirmation dialog:
 
 ```Go
 bt := gi.NewButton(parent).SetText("Confirm")
@@ -38,9 +38,44 @@ bt.OnClick(func(e events.Event) {
 })
 ```
 
-## Close dialogs
+You can make an input dialog:
 
-Cogent Core supports dialogs that confirm that the user wants to close a scene when they try to close it, using the function [[gi.WidgetBase.AddCloseDialog]]. You can read the documentation of that function for more information on how it works, but a basic example is as follows: 
+```Go
+bt := gi.NewButton(parent).SetText("Input")
+bt.OnClick(func(e events.Event) {
+    d := gi.NewBody().AddTitle("Input").AddText("What is your name?")
+    tf := gi.NewTextField(d)
+    d.AddBottomBar(func(pw gi.Widget) {
+        d.AddCancel(pw)
+        d.AddOk(pw).OnClick(func(e events.Event) {
+            gi.MessageSnackbar(bt, "Your name is "+tf.Text())
+        })
+    })
+    d.NewDialog(bt).Run()
+})
+```
+
+You can make a dialog that takes up the entire window:
+
+```Go
+bt := gi.NewButton(parent).SetText("Full window")
+bt.OnClick(func(e events.Event) {
+    d := gi.NewBody().AddTitle("Full window dialog")
+    d.NewFullDialog(bt).Run()
+})
+```
+
+You can make a dialog that opens in a new window on multi-window platforms (not mobile and web):
+
+```Go
+bt := gi.NewButton(parent).SetText("New window")
+bt.OnClick(func(e events.Event) {
+    d := gi.NewBody().AddTitle("New window dialog")
+    d.NewDialog(bt).SetNewWindow(true).Run()
+})
+```
+
+You can confirm that the user wants to close a scene when they try to close it:
 
 ```go
 b.AddCloseDialog(func(d *gi.Body) bool {

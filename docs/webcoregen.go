@@ -252,6 +252,34 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 			d.NewDialog(bt).Run()
 		})
 	},
+	"widgets/dialogs-3": func(parent gi.Widget) {
+		bt := gi.NewButton(parent).SetText("Input")
+		bt.OnClick(func(e events.Event) {
+			d := gi.NewBody().AddTitle("Input").AddText("What is your name?")
+			tf := gi.NewTextField(d)
+			d.AddBottomBar(func(pw gi.Widget) {
+				d.AddCancel(pw)
+				d.AddOk(pw).OnClick(func(e events.Event) {
+					gi.MessageSnackbar(bt, "Your name is "+tf.Text())
+				})
+			})
+			d.NewDialog(bt).Run()
+		})
+	},
+	"widgets/dialogs-4": func(parent gi.Widget) {
+		bt := gi.NewButton(parent).SetText("Full window")
+		bt.OnClick(func(e events.Event) {
+			d := gi.NewBody().AddTitle("Full window dialog")
+			d.NewFullDialog(bt).Run()
+		})
+	},
+	"widgets/dialogs-5": func(parent gi.Widget) {
+		bt := gi.NewButton(parent).SetText("New window")
+		bt.OnClick(func(e events.Event) {
+			d := gi.NewBody().AddTitle("New window dialog")
+			d.NewDialog(bt).SetNewWindow(true).Run()
+		})
+	},
 	"widgets/frames-0": func(parent gi.Widget) {
 		fr := gi.NewFrame(parent)
 		gi.NewButton(fr).SetText("First")
