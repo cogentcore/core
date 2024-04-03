@@ -174,16 +174,12 @@ func (bd *Body) Close() {
 func (bd *Body) DialogStyles() {
 	bd.Scene.BarsInherit.Top = true
 	bd.Scene.Style(func(s *styles.Style) {
-		// s.Border.Radius = styles.BorderRadiusExtraLarge
 		s.Direction = styles.Column
 		s.Color = colors.C(colors.Scheme.OnSurface)
 		if !bd.Scene.Stage.NewWindow && !bd.Scene.Stage.FullWindow {
 			s.Padding.Set(units.Dp(24))
-			// s.Justify.Content = styles.Center // vert
-			// s.Align.Content = styles.Center // horiz
 			s.Border.Radius = styles.BorderRadiusLarge
 			s.BoxShadow = styles.BoxShadow3()
-			// material likes SurfaceContainerHigh here, but that seems like too much; STYTODO: maybe figure out a better background color setup for dialogs?
 			s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
 		}
 	})

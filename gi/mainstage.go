@@ -308,7 +308,6 @@ func (st *Stage) NewRenderWin() *RenderWin {
 		opts.Size = wgp.Size()
 		opts.Pos = wgp.Pos()
 		opts.StdPixels = false
-		// fmt.Printf("got prefs for %v: size: %v pos: %v\n", name, opts.Size, opts.Pos)
 		if _, found := AllRenderWins.FindName(name); found { // offset from existing
 			opts.Pos.X += 20
 			opts.Pos.Y += 20

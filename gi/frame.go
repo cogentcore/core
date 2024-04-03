@@ -44,6 +44,7 @@ func (fr *Frame) RenderWidget() {
 	if fr.PushBounds() {
 		fr.Render()
 		fr.RenderChildren()
+		fr.RenderParts()
 		fr.RenderScrolls()
 		fr.PopBounds()
 	}
