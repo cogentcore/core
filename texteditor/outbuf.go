@@ -28,7 +28,7 @@ type OutBuf struct {
 	Out io.Reader
 
 	// the Buf that we output to
-	Buf *Buf
+	Buf *Buffer
 
 	// how much time to wait while batching output (default: 200ms)
 	Batch time.Duration
@@ -53,7 +53,7 @@ type OutBuf struct {
 }
 
 // Init sets the various params and prepares for running
-func (ob *OutBuf) Init(out io.Reader, buf *Buf, batch time.Duration, markup OutBufMarkupFunc) {
+func (ob *OutBuf) Init(out io.Reader, buf *Buffer, batch time.Duration, markup OutBufMarkupFunc) {
 	ob.Out = out
 	ob.Buf = buf
 	ob.MarkupFun = markup

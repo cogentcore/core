@@ -52,7 +52,7 @@ func DiffFiles(ctx gi.Widget, afile, bfile string) (*DiffView, error) {
 // at two different revisions from given repository
 // if empty, defaults to: A = current HEAD, B = current WC file.
 // -1, -2 etc also work as universal ways of specifying prior revisions.
-func DiffViewDialogFromRevs(ctx gi.Widget, repo vci.Repo, file string, fbuf *Buf, rev_a, rev_b string) (*DiffView, error) {
+func DiffViewDialogFromRevs(ctx gi.Widget, repo vci.Repo, file string, fbuf *Buffer, rev_a, rev_b string) (*DiffView, error) {
 	var astr, bstr []string
 	if rev_b == "" { // default to current file
 		if fbuf != nil {
@@ -105,8 +105,8 @@ func DiffViewDialog(ctx gi.Widget, title string, astr, bstr []string, afile, bfi
 // TextDialog opens a dialog for displaying text string
 func TextDialog(ctx gi.Widget, title, text string) *Editor {
 	d := gi.NewBody().AddTitle(title)
-	buf := NewBuf()
-	ed := NewEditor(d).SetBuf(buf)
+	buf := NewBuffer()
+	ed := NewEditor(d).SetBuffer(buf)
 	buf.SetText([]byte(text))
 	d.AddBottomBar(func(pw gi.Widget) {
 		gi.NewButton(pw).SetText("Copy to clipboard").SetIcon(icons.ContentCopy).
@@ -140,10 +140,10 @@ type DiffView struct {
 	RevB string
 
 	// textbuf for A showing the aligned edit view
-	BufA *Buf `json:"-" xml:"-" set:"-"`
+	BufA *Buffer `json:"-" xml:"-" set:"-"`
 
 	// textbuf for B showing the aligned edit view
-	BufB *Buf `json:"-" xml:"-" set:"-"`
+	BufB *Buffer `json:"-" xml:"-" set:"-"`
 
 	// aligned diffs records diff for aligned lines
 	AlignD textbuf.Diffs `json:"-" xml:"-" set:"-"`
@@ -497,15 +497,15 @@ func (dv *DiffView) ConfigDiffView() {
 	if dv.HasChildren() {
 		return
 	}
-	dv.BufA = NewBuf().SetFilename(dv.FileA)
-	dv.BufB = NewBuf().SetFilename(dv.FileB)
+	dv.BufA = NewBuffer().SetFilename(dv.FileA)
+	dv.BufB = NewBuffer().SetFilename(dv.FileB)
 	dv.BufA.Opts.LineNos = true
 	dv.BufA.Stat() // update markup
 	dv.BufB.Opts.LineNos = true
 	dv.BufB.Stat() // update markup
-	av := NewDiffTextEditor(dv, "text-a").SetBuf(dv.BufA)
+	av := NewDiffTextEditor(dv, "text-a").SetBuffer(dv.BufA)
 	av.SetReadOnly(true)
-	bv := NewDiffTextEditor(dv, "text-b").SetBuf(dv.BufB)
+	bv := NewDiffTextEditor(dv, "text-b").SetBuffer(dv.BufB)
 	bv.SetReadOnly(true)
 
 	av.On(events.Scroll, func(e events.Event) {
@@ -673,7 +673,7 @@ func (tv *DiffTextEditor) HandleDoubleClick() {
 			newPos := tv.PixelToCursor(pt)
 			ln := newPos.Ln
 			dv := tv.DiffView()
-			if dv != nil && tv.Buf != nil {
+			if dv != nil && tv.Buffer != nil {
 				if tv.Nm == "text-a" {
 					dv.ApplyDiff(0, ln)
 				} else {

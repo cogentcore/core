@@ -99,7 +99,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 	if kt.IsHandled() {
 		return
 	}
-	if ed.Buf == nil || ed.Buf.NumLines() == 0 {
+	if ed.Buffer == nil || ed.Buffer.NumLines() == 0 {
 		return
 	}
 
@@ -117,7 +117,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 	}
 
 	if kf != keyfun.Undo && ed.Is(EditorLastWasUndo) {
-		ed.Buf.EmacsUndoSave()
+		ed.Buffer.EmacsUndoSave()
 		ed.SetFlag(false, EditorLastWasUndo)
 	}
 
@@ -340,7 +340,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 	case keyfun.Complete:
 		ed.ISearchCancel()
 		kt.SetHandled()
-		if ed.Buf.IsSpellEnabled(ed.CursorPos) {
+		if ed.Buffer.IsSpellEnabled(ed.CursorPos) {
 			ed.OfferCorrect()
 		} else {
 			ed.OfferComplete()
@@ -349,19 +349,19 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		cancelAll()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetHandled()
-			if ed.Buf.Opts.AutoIndent {
-				lp, _ := pi.LangSupport.Props(ed.Buf.PiState.Sup)
+			if ed.Buffer.Opts.AutoIndent {
+				lp, _ := pi.LangSupport.Props(ed.Buffer.PiState.Sup)
 				if lp != nil && lp.Lang != nil && lp.HasFlag(pi.ReAutoIndent) {
 					// only re-indent current line for supported types
-					tbe, _, _ := ed.Buf.AutoIndent(ed.CursorPos.Ln) // reindent current line
+					tbe, _, _ := ed.Buffer.AutoIndent(ed.CursorPos.Ln) // reindent current line
 					if tbe != nil {
 						// go back to end of line!
-						npos := lex.Pos{Ln: ed.CursorPos.Ln, Ch: ed.Buf.LineLen(ed.CursorPos.Ln)}
+						npos := lex.Pos{Ln: ed.CursorPos.Ln, Ch: ed.Buffer.LineLen(ed.CursorPos.Ln)}
 						ed.SetCursor(npos)
 					}
 				}
 				ed.InsertAtCursor([]byte("\n"))
-				tbe, _, cpos := ed.Buf.AutoIndent(ed.CursorPos.Ln)
+				tbe, _, cpos := ed.Buffer.AutoIndent(ed.CursorPos.Ln)
 				if tbe != nil {
 					ed.SetCursorShow(lex.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos})
 				}
@@ -376,13 +376,13 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetHandled()
 			lasttab := ed.Is(EditorLastWasTabAI)
-			if !lasttab && ed.CursorPos.Ch == 0 && ed.Buf.Opts.AutoIndent {
-				_, _, cpos := ed.Buf.AutoIndent(ed.CursorPos.Ln)
+			if !lasttab && ed.CursorPos.Ch == 0 && ed.Buffer.Opts.AutoIndent {
+				_, _, cpos := ed.Buffer.AutoIndent(ed.CursorPos.Ln)
 				ed.CursorPos.Ch = cpos
 				ed.RenderCursor(true)
 				gotTabAI = true
 			} else {
-				ed.InsertAtCursor(indent.Bytes(ed.Buf.Opts.IndentChar(), 1, ed.Styles.Text.TabSize))
+				ed.InsertAtCursor(indent.Bytes(ed.Buffer.Opts.IndentChar(), 1, ed.Styles.Text.TabSize))
 			}
 			ed.NeedsRender()
 			ed.ISpellKeyInput(kt)
@@ -392,10 +392,10 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetHandled()
 			if ed.CursorPos.Ch > 0 {
-				ind, _ := lex.LineIndent(ed.Buf.Line(ed.CursorPos.Ln), ed.Styles.Text.TabSize)
+				ind, _ := lex.LineIndent(ed.Buffer.Line(ed.CursorPos.Ln), ed.Styles.Text.TabSize)
 				if ind > 0 {
-					ed.Buf.IndentLine(ed.CursorPos.Ln, ind-1)
-					intxt := indent.Bytes(ed.Buf.Opts.IndentChar(), ind-1, ed.Styles.Text.TabSize)
+					ed.Buffer.IndentLine(ed.CursorPos.Ln, ind-1)
+					intxt := indent.Bytes(ed.Buffer.Opts.IndentChar(), ind-1, ed.Styles.Text.TabSize)
 					npos := lex.Pos{Ln: ed.CursorPos.Ln, Ch: len(intxt)}
 					ed.SetCursorShow(npos)
 				}
@@ -418,11 +418,11 @@ func (ed *Editor) KeyInputInsertBra(kt events.Event) {
 	pos := ed.CursorPos
 	match := true
 	newLine := false
-	curLn := ed.Buf.Line(pos.Ln)
+	curLn := ed.Buffer.Line(pos.Ln)
 	lnLen := len(curLn)
-	lp, _ := pi.LangSupport.Props(ed.Buf.PiState.Sup)
+	lp, _ := pi.LangSupport.Props(ed.Buffer.PiState.Sup)
 	if lp != nil && lp.Lang != nil {
-		match, newLine = lp.Lang.AutoBracket(&ed.Buf.PiState, kt.KeyRune(), pos, curLn)
+		match, newLine = lp.Lang.AutoBracket(&ed.Buffer.PiState, kt.KeyRune(), pos, curLn)
 	} else {
 		if kt.KeyRune() == '{' {
 			if pos.Ch == lnLen {
@@ -439,15 +439,15 @@ func (ed *Editor) KeyInputInsertBra(kt events.Event) {
 	}
 	if match {
 		ket, _ := lex.BracePair(kt.KeyRune())
-		if newLine && ed.Buf.Opts.AutoIndent {
+		if newLine && ed.Buffer.Opts.AutoIndent {
 			ed.InsertAtCursor([]byte(string(kt.KeyRune()) + "\n"))
-			tbe, _, cpos := ed.Buf.AutoIndent(ed.CursorPos.Ln)
+			tbe, _, cpos := ed.Buffer.AutoIndent(ed.CursorPos.Ln)
 			if tbe != nil {
 				pos = lex.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos}
 				ed.SetCursorShow(pos)
 			}
 			ed.InsertAtCursor([]byte("\n" + string(ket)))
-			ed.Buf.AutoIndent(ed.CursorPos.Ln)
+			ed.Buffer.AutoIndent(ed.CursorPos.Ln)
 		} else {
 			ed.InsertAtCursor([]byte(string(kt.KeyRune()) + string(ket)))
 			pos.Ch++
@@ -473,11 +473,11 @@ func (ed *Editor) KeyInputInsertRune(kt events.Event) {
 	} else {
 		if kt.KeyRune() == '{' || kt.KeyRune() == '(' || kt.KeyRune() == '[' {
 			ed.KeyInputInsertBra(kt)
-		} else if kt.KeyRune() == '}' && ed.Buf.Opts.AutoIndent && ed.CursorPos.Ch == ed.Buf.LineLen(ed.CursorPos.Ln) {
+		} else if kt.KeyRune() == '}' && ed.Buffer.Opts.AutoIndent && ed.CursorPos.Ch == ed.Buffer.LineLen(ed.CursorPos.Ln) {
 			ed.CancelComplete()
 			ed.lastAutoInsert = 0
 			ed.InsertAtCursor([]byte(string(kt.KeyRune())))
-			tbe, _, cpos := ed.Buf.AutoIndent(ed.CursorPos.Ln)
+			tbe, _, cpos := ed.Buffer.AutoIndent(ed.CursorPos.Ln)
 			if tbe != nil {
 				ed.SetCursorShow(lex.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos})
 			}
@@ -498,7 +498,7 @@ func (ed *Editor) KeyInputInsertRune(kt events.Event) {
 			cp := ed.CursorPos
 			np := cp
 			np.Ch--
-			tp, found := ed.Buf.BraceMatch(kt.KeyRune(), np)
+			tp, found := ed.Buffer.BraceMatch(kt.KeyRune(), np)
 			if found {
 				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(tp, lex.Pos{tp.Ln, tp.Ch + 1}))
 				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(np, lex.Pos{cp.Ln, cp.Ch}))
@@ -607,7 +607,7 @@ func (ed *Editor) HandleMouse() {
 			ed.Send(events.Focus, e) // sets focused flag
 		}
 		e.SetHandled()
-		sz := ed.Buf.LineLen(ed.CursorPos.Ln)
+		sz := ed.Buffer.LineLen(ed.CursorPos.Ln)
 		if sz > 0 {
 			ed.SelectReg.Start.Ln = ed.CursorPos.Ln
 			ed.SelectReg.Start.Ch = 0

@@ -203,9 +203,9 @@ func HandleElement(ctx *Context) {
 			New[*gi.TextField](ctx).SetText(val)
 		}
 	case "textarea":
-		buf := texteditor.NewBuf()
+		buf := texteditor.NewBuffer()
 		buf.SetText([]byte(ExtractText(ctx)))
-		New[*texteditor.Editor](ctx).SetBuf(buf)
+		New[*texteditor.Editor](ctx).SetBuffer(buf)
 	default:
 		ctx.NewParent = ctx.Parent()
 	}

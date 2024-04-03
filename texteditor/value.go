@@ -19,16 +19,16 @@ type Value struct {
 }
 
 func (v *Value) Config() {
-	tb := NewBuf()
+	tb := NewBuffer()
 	grr.Log(tb.Stat())
 	tb.OnBufferChange(func(e events.Event) {
 		v.SetValue(string(tb.Text()))
 		fmt.Println(laser.OnePtrUnderlyingValue(v.Value).Interface())
 	})
-	v.Widget.SetBuf(tb)
+	v.Widget.SetBuffer(tb)
 }
 
 func (v *Value) Update() {
 	npv := laser.NonPtrValue(v.Value)
-	v.Widget.Buf.SetText([]byte(npv.String()))
+	v.Widget.Buffer.SetText([]byte(npv.String()))
 }

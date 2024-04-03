@@ -25,8 +25,8 @@ func (ed *Editor) CursorMovedSig() {
 
 // ValidateCursor sets current cursor to a valid cursor position
 func (ed *Editor) ValidateCursor() {
-	if ed.Buf != nil {
-		ed.CursorPos = ed.Buf.ValidPos(ed.CursorPos)
+	if ed.Buffer != nil {
+		ed.CursorPos = ed.Buffer.ValidPos(ed.CursorPos)
 	} else {
 		ed.CursorPos = lex.PosZero
 	}
@@ -53,20 +53,20 @@ func (ed *Editor) WrappedLineNo(pos lex.Pos) (si, ri int, ok bool) {
 // SetCursor sets a new cursor position, enforcing it in range.
 // This is the main final pathway for all cursor movement.
 func (ed *Editor) SetCursor(pos lex.Pos) {
-	if ed.NLines == 0 || ed.Buf == nil {
+	if ed.NLines == 0 || ed.Buffer == nil {
 		ed.CursorPos = lex.PosZero
 		return
 	}
 
 	ed.ClearScopelights()
-	ed.CursorPos = ed.Buf.ValidPos(pos)
+	ed.CursorPos = ed.Buffer.ValidPos(pos)
 	ed.CursorMovedSig()
-	txt := ed.Buf.Line(ed.CursorPos.Ln)
+	txt := ed.Buffer.Line(ed.CursorPos.Ln)
 	ch := ed.CursorPos.Ch
 	if ch < len(txt) {
 		r := txt[ch]
 		if r == '{' || r == '}' || r == '(' || r == ')' || r == '[' || r == ']' {
-			tp, found := ed.Buf.BraceMatch(txt[ch], ed.CursorPos)
+			tp, found := ed.Buffer.BraceMatch(txt[ch], ed.CursorPos)
 			if found {
 				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(ed.CursorPos, lex.Pos{ed.CursorPos.Ln, ed.CursorPos.Ch + 1}))
 				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(tp, lex.Pos{tp.Ln, tp.Ch + 1}))
@@ -108,21 +108,21 @@ func (ed *Editor) SetCursorCol(pos lex.Pos) {
 
 // SavePosHistory saves the cursor position in history stack of cursor positions
 func (ed *Editor) SavePosHistory(pos lex.Pos) {
-	if ed.Buf == nil {
+	if ed.Buffer == nil {
 		return
 	}
-	ed.Buf.SavePosHistory(pos)
-	ed.PosHistIndex = len(ed.Buf.PosHistory) - 1
+	ed.Buffer.SavePosHistory(pos)
+	ed.PosHistIndex = len(ed.Buffer.PosHistory) - 1
 }
 
 // CursorToHistPrev moves cursor to previous position on history list --
 // returns true if moved
 func (ed *Editor) CursorToHistPrev() bool {
-	if ed.NLines == 0 || ed.Buf == nil {
+	if ed.NLines == 0 || ed.Buffer == nil {
 		ed.CursorPos = lex.PosZero
 		return false
 	}
-	sz := len(ed.Buf.PosHistory)
+	sz := len(ed.Buffer.PosHistory)
 	if sz == 0 {
 		return false
 	}
@@ -132,8 +132,8 @@ func (ed *Editor) CursorToHistPrev() bool {
 		return false
 	}
 	ed.PosHistIndex = min(sz-1, ed.PosHistIndex)
-	pos := ed.Buf.PosHistory[ed.PosHistIndex]
-	ed.CursorPos = ed.Buf.ValidPos(pos)
+	pos := ed.Buffer.PosHistory[ed.PosHistIndex]
+	ed.CursorPos = ed.Buffer.ValidPos(pos)
 	ed.CursorMovedSig()
 	ed.ScrollCursorToCenterIfHidden()
 	ed.RenderCursor(true)
@@ -143,11 +143,11 @@ func (ed *Editor) CursorToHistPrev() bool {
 // CursorToHistNext moves cursor to previous position on history list --
 // returns true if moved
 func (ed *Editor) CursorToHistNext() bool {
-	if ed.NLines == 0 || ed.Buf == nil {
+	if ed.NLines == 0 || ed.Buffer == nil {
 		ed.CursorPos = lex.PosZero
 		return false
 	}
-	sz := len(ed.Buf.PosHistory)
+	sz := len(ed.Buffer.PosHistory)
 	if sz == 0 {
 		return false
 	}
@@ -156,8 +156,8 @@ func (ed *Editor) CursorToHistNext() bool {
 		ed.PosHistIndex = sz - 1
 		return false
 	}
-	pos := ed.Buf.PosHistory[ed.PosHistIndex]
-	ed.CursorPos = ed.Buf.ValidPos(pos)
+	pos := ed.Buffer.PosHistory[ed.PosHistIndex]
+	ed.CursorPos = ed.Buffer.ValidPos(pos)
 	ed.CursorMovedSig()
 	ed.ScrollCursorToCenterIfHidden()
 	ed.RenderCursor(true)
@@ -191,12 +191,12 @@ func (ed *Editor) CursorForward(steps int) {
 	org := ed.CursorPos
 	for i := 0; i < steps; i++ {
 		ed.CursorPos.Ch++
-		if ed.CursorPos.Ch > ed.Buf.LineLen(ed.CursorPos.Ln) {
+		if ed.CursorPos.Ch > ed.Buffer.LineLen(ed.CursorPos.Ln) {
 			if ed.CursorPos.Ln < ed.NLines-1 {
 				ed.CursorPos.Ch = 0
 				ed.CursorPos.Ln++
 			} else {
-				ed.CursorPos.Ch = ed.Buf.LineLen(ed.CursorPos.Ln)
+				ed.CursorPos.Ch = ed.Buffer.LineLen(ed.CursorPos.Ln)
 			}
 		}
 	}
@@ -211,7 +211,7 @@ func (ed *Editor) CursorForwardWord(steps int) {
 	ed.ValidateCursor()
 	org := ed.CursorPos
 	for i := 0; i < steps; i++ {
-		txt := ed.Buf.Line(ed.CursorPos.Ln)
+		txt := ed.Buffer.Line(ed.CursorPos.Ln)
 		sz := len(txt)
 		if sz > 0 && ed.CursorPos.Ch < sz {
 			ch := ed.CursorPos.Ch
@@ -247,7 +247,7 @@ func (ed *Editor) CursorForwardWord(steps int) {
 				ed.CursorPos.Ch = 0
 				ed.CursorPos.Ln++
 			} else {
-				ed.CursorPos.Ch = ed.Buf.LineLen(ed.CursorPos.Ln)
+				ed.CursorPos.Ch = ed.Buffer.LineLen(ed.CursorPos.Ln)
 			}
 		}
 	}
@@ -286,7 +286,7 @@ func (ed *Editor) CursorDown(steps int) {
 				pos.Ln = ed.NLines - 1
 				break
 			}
-			mxlen := min(ed.Buf.LineLen(pos.Ln), ed.CursorCol)
+			mxlen := min(ed.Buffer.LineLen(pos.Ln), ed.CursorCol)
 			if ed.CursorCol < mxlen {
 				pos.Ch = ed.CursorCol
 			} else {
@@ -310,7 +310,7 @@ func (ed *Editor) CursorPageDown(steps int) {
 		if ed.CursorPos.Ln >= ed.NLines {
 			ed.CursorPos.Ln = ed.NLines - 1
 		}
-		ed.CursorPos.Ch = min(ed.Buf.LineLen(ed.CursorPos.Ln), ed.CursorCol)
+		ed.CursorPos.Ch = min(ed.Buffer.LineLen(ed.CursorPos.Ln), ed.CursorCol)
 		ed.ScrollCursorToTop()
 		ed.RenderCursor(true)
 	}
@@ -328,7 +328,7 @@ func (ed *Editor) CursorBackward(steps int) {
 		if ed.CursorPos.Ch < 0 {
 			if ed.CursorPos.Ln > 0 {
 				ed.CursorPos.Ln--
-				ed.CursorPos.Ch = ed.Buf.LineLen(ed.CursorPos.Ln)
+				ed.CursorPos.Ch = ed.Buffer.LineLen(ed.CursorPos.Ln)
 			} else {
 				ed.CursorPos.Ch = 0
 			}
@@ -345,7 +345,7 @@ func (ed *Editor) CursorBackwardWord(steps int) {
 	ed.ValidateCursor()
 	org := ed.CursorPos
 	for i := 0; i < steps; i++ {
-		txt := ed.Buf.Line(ed.CursorPos.Ln)
+		txt := ed.Buffer.Line(ed.CursorPos.Ln)
 		sz := len(txt)
 		if sz > 0 && ed.CursorPos.Ch > 0 {
 			ch := min(ed.CursorPos.Ch, sz-1)
@@ -382,7 +382,7 @@ func (ed *Editor) CursorBackwardWord(steps int) {
 		} else {
 			if ed.CursorPos.Ln > 0 {
 				ed.CursorPos.Ln--
-				ed.CursorPos.Ch = ed.Buf.LineLen(ed.CursorPos.Ln)
+				ed.CursorPos.Ch = ed.Buffer.LineLen(ed.CursorPos.Ln)
 			} else {
 				ed.CursorPos.Ch = 0
 			}
@@ -427,7 +427,7 @@ func (ed *Editor) CursorUp(steps int) {
 				nwc, _ := ed.Renders[pos.Ln].SpanPosToRuneIndex(si, ri)
 				pos.Ch = nwc
 			} else {
-				mxlen := min(ed.Buf.LineLen(pos.Ln), ed.CursorCol)
+				mxlen := min(ed.Buffer.LineLen(pos.Ln), ed.CursorCol)
 				if ed.CursorCol < mxlen {
 					pos.Ch = ed.CursorCol
 				} else {
@@ -452,7 +452,7 @@ func (ed *Editor) CursorPageUp(steps int) {
 		if ed.CursorPos.Ln <= 0 {
 			ed.CursorPos.Ln = 0
 		}
-		ed.CursorPos.Ch = min(ed.Buf.LineLen(ed.CursorPos.Ln), ed.CursorCol)
+		ed.CursorPos.Ch = min(ed.Buffer.LineLen(ed.CursorPos.Ln), ed.CursorCol)
 		ed.ScrollCursorToBottom()
 		ed.RenderCursor(true)
 	}
@@ -545,7 +545,7 @@ func (ed *Editor) CursorEndLine() {
 		gotwrap = true
 	}
 	if !gotwrap {
-		ed.CursorPos.Ch = ed.Buf.LineLen(ed.CursorPos.Ln)
+		ed.CursorPos.Ch = ed.Buffer.LineLen(ed.CursorPos.Ln)
 		ed.CursorCol = ed.CursorPos.Ch
 	}
 	ed.SetCursor(ed.CursorPos)
@@ -561,7 +561,7 @@ func (ed *Editor) CursorEndDoc() {
 	ed.ValidateCursor()
 	org := ed.CursorPos
 	ed.CursorPos.Ln = max(ed.NLines-1, 0)
-	ed.CursorPos.Ch = ed.Buf.LineLen(ed.CursorPos.Ln)
+	ed.CursorPos.Ch = ed.Buffer.LineLen(ed.CursorPos.Ln)
 	ed.CursorCol = ed.CursorPos.Ch
 	ed.SetCursor(ed.CursorPos)
 	ed.ScrollCursorToBottom()
@@ -588,7 +588,7 @@ func (ed *Editor) CursorBackspace(steps int) {
 	ed.CursorBackward(steps)
 	ed.ScrollCursorToCenterIfHidden()
 	ed.RenderCursor(true)
-	ed.Buf.DeleteText(ed.CursorPos, org, EditSignal)
+	ed.Buffer.DeleteText(ed.CursorPos, org, EditSignal)
 	ed.NeedsRender()
 }
 
@@ -602,7 +602,7 @@ func (ed *Editor) CursorDelete(steps int) {
 	// note: no update b/c signal from buf will drive update
 	org := ed.CursorPos
 	ed.CursorForward(steps)
-	ed.Buf.DeleteText(org, ed.CursorPos, EditSignal)
+	ed.Buffer.DeleteText(org, ed.CursorPos, EditSignal)
 	ed.SetCursorShow(org)
 	ed.NeedsRender()
 }
@@ -620,7 +620,7 @@ func (ed *Editor) CursorBackspaceWord(steps int) {
 	ed.CursorBackwardWord(steps)
 	ed.ScrollCursorToCenterIfHidden()
 	ed.RenderCursor(true)
-	ed.Buf.DeleteText(ed.CursorPos, org, EditSignal)
+	ed.Buffer.DeleteText(ed.CursorPos, org, EditSignal)
 	ed.NeedsRender()
 }
 
@@ -634,7 +634,7 @@ func (ed *Editor) CursorDeleteWord(steps int) {
 	// note: no update b/c signal from buf will drive update
 	org := ed.CursorPos
 	ed.CursorForwardWord(steps)
-	ed.Buf.DeleteText(org, ed.CursorPos, EditSignal)
+	ed.Buffer.DeleteText(org, ed.CursorPos, EditSignal)
 	ed.SetCursorShow(org)
 	ed.NeedsRender()
 }
@@ -654,7 +654,7 @@ func (ed *Editor) CursorKill() {
 		}
 		atEnd = (ri == llen)
 	} else {
-		llen := ed.Buf.LineLen(pos.Ln)
+		llen := ed.Buffer.LineLen(pos.Ln)
 		atEnd = (ed.CursorPos.Ch == llen)
 	}
 	if atEnd {
@@ -662,7 +662,7 @@ func (ed *Editor) CursorKill() {
 	} else {
 		ed.CursorEndLine()
 	}
-	ed.Buf.DeleteText(org, ed.CursorPos, EditSignal)
+	ed.Buffer.DeleteText(org, ed.CursorPos, EditSignal)
 	ed.SetCursorShow(org)
 	ed.NeedsRender()
 }
@@ -676,20 +676,20 @@ func (ed *Editor) CursorTranspose() {
 	}
 	ppos := pos
 	ppos.Ch--
-	ed.Buf.LinesMu.Lock()
-	lln := len(ed.Buf.Lines[pos.Ln])
+	ed.Buffer.LinesMu.Lock()
+	lln := len(ed.Buffer.Lines[pos.Ln])
 	end := false
 	if pos.Ch >= lln {
 		end = true
 		pos.Ch = lln - 1
 		ppos.Ch = lln - 2
 	}
-	chr := ed.Buf.Lines[pos.Ln][pos.Ch]
-	pchr := ed.Buf.Lines[pos.Ln][ppos.Ch]
-	ed.Buf.LinesMu.Unlock()
+	chr := ed.Buffer.Lines[pos.Ln][pos.Ch]
+	pchr := ed.Buffer.Lines[pos.Ln][ppos.Ch]
+	ed.Buffer.LinesMu.Unlock()
 	repl := string([]rune{chr, pchr})
 	pos.Ch++
-	ed.Buf.ReplaceText(ppos, pos, ppos, repl, EditSignal, ReplaceMatchCase)
+	ed.Buffer.ReplaceText(ppos, pos, ppos, repl, EditSignal, ReplaceMatchCase)
 	if !end {
 		ed.SetCursorShow(pos)
 	}
@@ -759,10 +759,10 @@ func (ed *Editor) FindPrevLink(pos lex.Pos) (lex.Pos, textbuf.Region, bool) {
 	for ln := pos.Ln - 1; ln >= 0; ln-- {
 		if len(ed.Renders[ln].Links) == 0 {
 			if ln-1 >= 0 {
-				pos.Ch = ed.Buf.LineLen(ln-1) - 2
+				pos.Ch = ed.Buffer.LineLen(ln-1) - 2
 			} else {
 				ln = ed.NLines
-				pos.Ch = ed.Buf.LineLen(ln - 2)
+				pos.Ch = ed.Buffer.LineLen(ln - 2)
 			}
 			continue
 		}

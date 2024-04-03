@@ -37,9 +37,9 @@ func main() {
 		s.Min.Y.Ch(10)
 	})
 
-	tb := texteditor.NewBuf()
-	te1.SetBuf(tb)
-	te2.SetBuf(tb)
+	tb := texteditor.NewBuffer()
+	te1.SetBuffer(tb)
+	te2.SetBuffer(tb)
 
 	tb.Hi.Lang = "Go"
 	tb.OpenFS(samplefile, "texteditor.go")

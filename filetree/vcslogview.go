@@ -126,11 +126,11 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 			return
 		}
 		d := gi.NewBody().AddTitle("Commit Info: " + cmt.Rev)
-		buf := texteditor.NewBuf()
+		buf := texteditor.NewBuffer()
 		buf.Filename = gi.Filename(lv.File)
 		buf.Opts.LineNos = true
 		buf.Stat()
-		texteditor.NewEditor(d).SetBuf(buf)
+		texteditor.NewEditor(d).SetBuffer(buf)
 		buf.SetText(cinfo)
 		d.AddBottomBar(func(pw gi.Widget) {
 			gi.NewButton(pw).SetText("Copy to clipboard").SetIcon(icons.ContentCopy).
@@ -271,8 +271,8 @@ func FileAtRevDialog(ctx gi.Widget, repo vci.Repo, file, rev string) *gi.Body {
 	title := "File at VCS Revision: " + dirs.DirAndFile(file) + "@" + rev
 	d := gi.NewBody().AddTitle(title)
 
-	tb := texteditor.NewBuf().SetText(fb).SetFilename(file) // file is key for getting lang
-	texteditor.NewEditor(d).SetBuf(tb).SetReadOnly(true)
+	tb := texteditor.NewBuffer().SetText(fb).SetFilename(file) // file is key for getting lang
+	texteditor.NewEditor(d).SetBuffer(tb).SetReadOnly(true)
 	d.NewFullDialog(ctx).SetNewWindow(true).Run()
 	tb.StartDelayedReMarkup() // update markup
 	return d

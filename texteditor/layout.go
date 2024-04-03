@@ -20,8 +20,8 @@ func (ed *Editor) StyleSizes() {
 	ed.FontAscent = mat32.FromFixed(ed.Styles.Font.Face.Face.Metrics().Ascent)
 	ed.LineNoDigs = max(1+int(mat32.Log10(float32(ed.NLines))), 3)
 	lno := true
-	if ed.Buf != nil {
-		lno = ed.Buf.Opts.LineNos
+	if ed.Buffer != nil {
+		lno = ed.Buffer.Opts.LineNos
 	}
 	if lno {
 		ed.SetFlag(true, EditorHasLineNos)
@@ -75,15 +75,15 @@ func (ed *Editor) LayoutAllLines() {
 	if ed.LineLayoutSize.Y == 0 || ed.Styles.Font.Size.Value == 0 {
 		return
 	}
-	if ed.Buf == nil || ed.Buf.NumLines() == 0 {
+	if ed.Buffer == nil || ed.Buffer.NumLines() == 0 {
 		ed.NLines = 0
 		return
 	}
-	ed.lastFilename = ed.Buf.Filename
+	ed.lastFilename = ed.Buffer.Filename
 
-	ed.Buf.Hi.TabSize = ed.Styles.Text.TabSize
-	ed.NLines = ed.Buf.NumLines()
-	buf := ed.Buf
+	ed.Buffer.Hi.TabSize = ed.Styles.Text.TabSize
+	ed.NLines = ed.Buffer.NumLines()
+	buf := ed.Buffer
 	buf.MarkupMu.RLock()
 
 	nln := ed.NLines
@@ -136,14 +136,14 @@ func (ed *Editor) ReLayoutAllLines() {
 	if ed.LineLayoutSize.Y == 0 || ed.Styles.Font.Size.Value == 0 {
 		return
 	}
-	if ed.Buf == nil || ed.Buf.NumLines() == 0 {
+	if ed.Buffer == nil || ed.Buffer.NumLines() == 0 {
 		return
 	}
 	if ed.lastlineLayoutSize == ed.LineLayoutSize {
 		ed.InternalSizeFromLines()
 		return
 	}
-	buf := ed.Buf
+	buf := ed.Buffer
 	buf.MarkupMu.RLock()
 
 	nln := ed.NLines
@@ -209,7 +209,7 @@ func (ed *Editor) ScenePos() {
 // lines (e.g., from word-wrap) is different, then NeedsLayout is called
 // and it returns true.
 func (ed *Editor) LayoutLine(ln int) bool {
-	if ed.Buf == nil || ed.Buf.NumLines() == 0 {
+	if ed.Buffer == nil || ed.Buffer.NumLines() == 0 {
 		return false
 	}
 	sty := &ed.Styles
@@ -218,9 +218,9 @@ func (ed *Editor) LayoutLine(ln int) bool {
 	mxwd := float32(ed.LinesSize.X)
 	needLay := false
 
-	ed.Buf.MarkupMu.RLock()
+	ed.Buffer.MarkupMu.RLock()
 	curspans := len(ed.Renders[ln].Spans)
-	ed.Renders[ln].SetHTMLPre(ed.Buf.Markup[ln], fst, &sty.Text, &sty.UnitContext, ed.TextStyleProps())
+	ed.Renders[ln].SetHTMLPre(ed.Buffer.Markup[ln], fst, &sty.Text, &sty.UnitContext, ed.TextStyleProps())
 	ed.Renders[ln].Layout(&sty.Text, sty.FontRender(), &sty.UnitContext, ed.LineLayoutSize)
 	if !ed.HasLinks && len(ed.Renders[ln].Links) > 0 {
 		ed.HasLinks = true
@@ -232,7 +232,7 @@ func (ed *Editor) LayoutLine(ln int) bool {
 	if ed.Renders[ln].Size.X > mxwd {
 		needLay = true
 	}
-	ed.Buf.MarkupMu.RUnlock()
+	ed.Buffer.MarkupMu.RUnlock()
 
 	if needLay {
 		ed.NeedsLayout()

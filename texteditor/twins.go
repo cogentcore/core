@@ -16,10 +16,10 @@ type TwinEditors struct {
 	gi.Splits
 
 	// textbuf for A
-	BufA *Buf `json:"-" xml:"-"`
+	BufA *Buffer `json:"-" xml:"-"`
 
 	// textbuf for B
-	BufB *Buf `json:"-" xml:"-"`
+	BufB *Buffer `json:"-" xml:"-"`
 }
 
 func (te *TwinEditors) OnInit() {
@@ -49,8 +49,8 @@ func (te *TwinEditors) MakeBufs() {
 	if te.BufA != nil {
 		return
 	}
-	te.BufA = NewBuf()
-	te.BufB = NewBuf()
+	te.BufA = NewBuffer()
+	te.BufB = NewBuffer()
 }
 
 // SetFiles sets files for each text buf
@@ -71,8 +71,8 @@ func (te *TwinEditors) ConfigTexts() {
 	te.MakeBufs()
 	av := NewEditor(te, "text-a")
 	bv := NewEditor(te, "text-b")
-	av.SetBuf(te.BufA)
-	bv.SetBuf(te.BufB)
+	av.SetBuffer(te.BufA)
+	bv.SetBuffer(te.BufB)
 
 	av.On(events.Scroll, func(e events.Event) {
 		// bv.ScrollDelta(e)

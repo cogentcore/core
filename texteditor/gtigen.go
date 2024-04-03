@@ -124,7 +124,7 @@ var EditorType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/texteditor.Edi
 
 // NewEditor adds a new [Editor] with the given name to the given parent:
 // Editor is a widget for editing multiple lines of text (as compared to
-// [gi.TextField] for a single line).  The Editor is driven by a [Buf]
+// [gi.TextField] for a single line).  The Editor is driven by a [Buffer]
 // buffer which contains all the text, and manages all the edits,
 // sending update signals out to the views.
 //
@@ -216,11 +216,11 @@ func (t *TwinEditors) New() ki.Ki { return &TwinEditors{} }
 
 // SetBufA sets the [TwinEditors.BufA]:
 // textbuf for A
-func (t *TwinEditors) SetBufA(v *Buf) *TwinEditors { t.BufA = v; return t }
+func (t *TwinEditors) SetBufA(v *Buffer) *TwinEditors { t.BufA = v; return t }
 
 // SetBufB sets the [TwinEditors.BufB]:
 // textbuf for B
-func (t *TwinEditors) SetBufB(v *Buf) *TwinEditors { t.BufB = v; return t }
+func (t *TwinEditors) SetBufB(v *Buffer) *TwinEditors { t.BufB = v; return t }
 
 // SetTooltip sets the [TwinEditors.Tooltip]
 func (t *TwinEditors) SetTooltip(v string) *TwinEditors { t.Tooltip = v; return t }

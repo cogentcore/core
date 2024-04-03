@@ -66,10 +66,10 @@ func (ed *Editor) RenderWidget() {
 
 // TextStyleProps returns the styling properties for text based on HiStyle Markup
 func (ed *Editor) TextStyleProps() ki.Props {
-	if ed.Buf == nil || !ed.Buf.Hi.HasHi() {
+	if ed.Buffer == nil || !ed.Buffer.Hi.HasHi() {
 		return nil
 	}
-	return ed.Buf.Hi.CSSProps
+	return ed.Buffer.Hi.CSSProps
 }
 
 // CharStartPos returns the starting (top left) render coords for the given
@@ -158,13 +158,13 @@ var ViewDepthColors = []color.RGBA{
 
 // RenderDepthBackground renders the depth background color.
 func (ed *Editor) RenderDepthBackground(stln, edln int) {
-	if ed.Buf == nil {
+	if ed.Buffer == nil {
 		return
 	}
-	if !ed.Buf.Opts.DepthColor || ed.IsDisabled() || !ed.StateIs(states.Focused) {
+	if !ed.Buffer.Opts.DepthColor || ed.IsDisabled() || !ed.StateIs(states.Focused) {
 		return
 	}
-	buf := ed.Buf
+	buf := ed.Buffer
 	buf.MarkupMu.RLock() // needed for HiTags access
 	defer buf.MarkupMu.RUnlock()
 
@@ -228,7 +228,7 @@ func (ed *Editor) RenderSelect() {
 // highlighted background color.
 func (ed *Editor) RenderHighlights(stln, edln int) {
 	for _, reg := range ed.Highlights {
-		reg := ed.Buf.AdjustReg(reg)
+		reg := ed.Buffer.AdjustReg(reg)
 		if reg.IsNil() || (stln >= 0 && (reg.Start.Ln > edln || reg.End.Ln < stln)) {
 			continue
 		}
@@ -240,7 +240,7 @@ func (ed *Editor) RenderHighlights(stln, edln int) {
 // in the Scopelights list.
 func (ed *Editor) RenderScopelights(stln, edln int) {
 	for _, reg := range ed.Scopelights {
-		reg := ed.Buf.AdjustReg(reg)
+		reg := ed.Buffer.AdjustReg(reg)
 		if reg.IsNil() || (stln >= 0 && (reg.Start.Ln > edln || reg.End.Ln < stln)) {
 			continue
 		}
@@ -414,7 +414,7 @@ func (ed *Editor) RenderLineNosBox(st, end int) {
 // RenderLineNo renders given line number -- called within context of other render
 // if defFill is true, it fills box color for default background color (use false for batch mode)
 func (ed *Editor) RenderLineNo(ln int, defFill bool) {
-	if !ed.HasLineNos() || ed.Buf == nil {
+	if !ed.HasLineNos() || ed.Buffer == nil {
 		return
 	}
 
@@ -436,7 +436,7 @@ func (ed *Editor) RenderLineNo(ln int, defFill bool) {
 	}
 	ebox.X = sbox.X + ed.LineNoOff
 	bsz := ebox.Sub(sbox)
-	lclr, hasLClr := ed.Buf.LineColors[ln]
+	lclr, hasLClr := ed.Buffer.LineColors[ln]
 	actClr := lclr
 	if ed.CursorPos.Ln == ln {
 		if hasLClr { // split the diff!
@@ -584,7 +584,7 @@ func (ed *Editor) PixelToCursor(pt image.Point) lex.Pos {
 	if cln >= len(ed.Renders) {
 		return lex.Pos{Ln: cln, Ch: 0}
 	}
-	lnsz := ed.Buf.LineLen(cln)
+	lnsz := ed.Buffer.LineLen(cln)
 	if lnsz == 0 || sty.Font.Face == nil {
 		return lex.Pos{Ln: cln, Ch: 0}
 	}

@@ -46,7 +46,7 @@ type Node struct { //core:embedder
 	Info fi.FileInfo `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
 	// file buffer for editing this file
-	Buf *texteditor.Buf `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
+	Buf *texteditor.Buffer `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
 	// root of the tree -- has global state
 	FRoot *Tree `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
@@ -483,7 +483,7 @@ func (fn *Node) OpenBuf() (bool, error) {
 			return false, nil
 		}
 	} else {
-		fn.Buf = texteditor.NewBuf()
+		fn.Buf = texteditor.NewBuffer()
 		fn.Buf.OnBufferChange(func(e events.Event) {
 			if fn.Info.Vcs == vci.Stored {
 				fn.Info.Vcs = vci.Modified

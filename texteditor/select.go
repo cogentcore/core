@@ -65,7 +65,7 @@ func (ed *Editor) HasSelection() bool {
 // captures start, end, and full lines in between -- nil if no selection
 func (ed *Editor) Selection() *textbuf.Edit {
 	if ed.HasSelection() {
-		return ed.Buf.Region(ed.SelectReg.Start, ed.SelectReg.End)
+		return ed.Buffer.Region(ed.SelectReg.Start, ed.SelectReg.End)
 	}
 	return nil
 }
@@ -85,14 +85,14 @@ func (ed *Editor) SelectModeToggle() {
 // SelectAll selects all the text
 func (ed *Editor) SelectAll() {
 	ed.SelectReg.Start = lex.PosZero
-	ed.SelectReg.End = ed.Buf.EndPos()
+	ed.SelectReg.End = ed.Buffer.EndPos()
 	ed.NeedsRender()
 }
 
 // WordBefore returns the word before the lex.Pos
 // uses IsWordBreak to determine the bounds of the word
 func (ed *Editor) WordBefore(tp lex.Pos) *textbuf.Edit {
-	txt := ed.Buf.Line(tp.Ln)
+	txt := ed.Buffer.Line(tp.Ln)
 	ch := tp.Ch
 	ch = min(ch, len(txt))
 	st := ch
@@ -109,7 +109,7 @@ func (ed *Editor) WordBefore(tp lex.Pos) *textbuf.Edit {
 		}
 	}
 	if st != ch {
-		return ed.Buf.Region(lex.Pos{Ln: tp.Ln, Ch: st}, tp)
+		return ed.Buffer.Region(lex.Pos{Ln: tp.Ln, Ch: st}, tp)
 	}
 	return nil
 }
@@ -117,7 +117,7 @@ func (ed *Editor) WordBefore(tp lex.Pos) *textbuf.Edit {
 // IsWordStart returns true if the cursor is just before the start of a word
 // word is a string of characters none of which are classified as a word break
 func (ed *Editor) IsWordStart(tp lex.Pos) bool {
-	txt := ed.Buf.Line(ed.CursorPos.Ln)
+	txt := ed.Buffer.Line(ed.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
 		return false
@@ -140,7 +140,7 @@ func (ed *Editor) IsWordStart(tp lex.Pos) bool {
 // IsWordEnd returns true if the cursor is just past the last letter of a word
 // word is a string of characters none of which are classified as a word break
 func (ed *Editor) IsWordEnd(tp lex.Pos) bool {
-	txt := ed.Buf.Line(ed.CursorPos.Ln)
+	txt := ed.Buffer.Line(ed.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
 		return false
@@ -168,7 +168,7 @@ func (ed *Editor) IsWordEnd(tp lex.Pos) bool {
 // i.e. the character before the cursor and the one after the cursor
 // are not classified as word break characters
 func (ed *Editor) IsWordMiddle(tp lex.Pos) bool {
-	txt := ed.Buf.Line(ed.CursorPos.Ln)
+	txt := ed.Buffer.Line(ed.CursorPos.Ln)
 	sz := len(txt)
 	if sz < 2 {
 		return false
@@ -187,10 +187,10 @@ func (ed *Editor) IsWordMiddle(tp lex.Pos) bool {
 // SelectWord selects the word (whitespace, punctuation delimited) that the cursor is on
 // returns true if word selected
 func (ed *Editor) SelectWord() bool {
-	if ed.Buf == nil {
+	if ed.Buffer == nil {
 		return false
 	}
-	txt := ed.Buf.Line(ed.CursorPos.Ln)
+	txt := ed.Buffer.Line(ed.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
 		return false
@@ -205,7 +205,7 @@ func (ed *Editor) SelectWord() bool {
 func (ed *Editor) WordAt() (reg textbuf.Region) {
 	reg.Start = ed.CursorPos
 	reg.End = ed.CursorPos
-	txt := ed.Buf.Line(ed.CursorPos.Ln)
+	txt := ed.Buffer.Line(ed.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
 		return reg
@@ -360,7 +360,7 @@ func (ed *Editor) Cut() *textbuf.Edit {
 // DeleteSelection deletes any selected text, without adding to clipboard --
 // returns text deleted as textbuf.Edit (nil if none)
 func (ed *Editor) DeleteSelection() *textbuf.Edit {
-	tbe := ed.Buf.DeleteText(ed.SelectReg.Start, ed.SelectReg.End, EditSignal)
+	tbe := ed.Buffer.DeleteText(ed.SelectReg.Start, ed.SelectReg.End, EditSignal)
 	ed.SelectReset()
 	return tbe
 }
@@ -399,7 +399,7 @@ func (ed *Editor) InsertAtCursor(txt []byte) {
 		tbe := ed.DeleteSelection()
 		ed.CursorPos = tbe.AdjustPos(ed.CursorPos, textbuf.AdjustPosDelStart) // move to start if in reg
 	}
-	tbe := ed.Buf.InsertText(ed.CursorPos, txt, EditSignal)
+	tbe := ed.Buffer.InsertText(ed.CursorPos, txt, EditSignal)
 	if tbe == nil {
 		return
 	}
@@ -427,7 +427,7 @@ func (ed *Editor) CutRect() *textbuf.Edit {
 		return nil
 	}
 	npos := lex.Pos{Ln: ed.SelectReg.End.Ln, Ch: ed.SelectReg.Start.Ch}
-	cut := ed.Buf.DeleteTextRect(ed.SelectReg.Start, ed.SelectReg.End, EditSignal)
+	cut := ed.Buffer.DeleteTextRect(ed.SelectReg.Start, ed.SelectReg.End, EditSignal)
 	if cut != nil {
 		cb := cut.ToBytes()
 		ed.Clipboard().Write(mimedata.NewTextBytes(cb))
@@ -442,7 +442,7 @@ func (ed *Editor) CutRect() *textbuf.Edit {
 // CopyRect copies any selected text to the clipboard, and returns that text,
 // optionally resetting the current selection
 func (ed *Editor) CopyRect(reset bool) *textbuf.Edit {
-	tbe := ed.Buf.RegionRect(ed.SelectReg.Start, ed.SelectReg.End)
+	tbe := ed.Buffer.RegionRect(ed.SelectReg.Start, ed.SelectReg.End)
 	if tbe == nil {
 		return nil
 	}
@@ -469,7 +469,7 @@ func (ed *Editor) PasteRect() {
 	ce.Reg.End.Ln = ed.CursorPos.Ln + nl
 	ce.Reg.Start.Ch = ed.CursorPos.Ch
 	ce.Reg.End.Ch = ed.CursorPos.Ch + nch
-	tbe := ed.Buf.InsertTextRect(ce, EditSignal)
+	tbe := ed.Buffer.InsertTextRect(ce, EditSignal)
 
 	pos := tbe.Reg.End
 	ed.SetCursorShow(pos)
@@ -486,7 +486,7 @@ func (ed *Editor) ReCaseSelection(c strcase.Cases) string {
 	}
 	sel := ed.Selection()
 	nstr := strcase.To(string(sel.ToBytes()), c)
-	ed.Buf.ReplaceText(sel.Reg.Start, sel.Reg.End, sel.Reg.Start, nstr, EditSignal, ReplaceNoMatchCase)
+	ed.Buffer.ReplaceText(sel.Reg.Start, sel.Reg.End, sel.Reg.Start, nstr, EditSignal, ReplaceNoMatchCase)
 	return nstr
 }
 
@@ -495,8 +495,8 @@ func (ed *Editor) ReCaseSelection(c strcase.Cases) string {
 
 // ShowContextMenu displays the context menu with options dependent on situation
 func (ed *Editor) ShowContextMenu(e events.Event) {
-	if ed.Buf.Spell != nil && !ed.HasSelection() && ed.Buf.IsSpellEnabled(ed.CursorPos) {
-		if ed.Buf.Spell != nil {
+	if ed.Buffer.Spell != nil && !ed.HasSelection() && ed.Buffer.IsSpellEnabled(ed.CursorPos) {
+		if ed.Buffer.Spell != nil {
 			if ed.OfferCorrect() {
 				return
 			}

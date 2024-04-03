@@ -46,7 +46,7 @@ var (
 )
 
 // Editor is a widget for editing multiple lines of complicated text (as compared to
-// [gi.TextField] for a single line of simple text).  The Editor is driven by a [Buf]
+// [gi.TextField] for a single line of simple text).  The Editor is driven by a [Buffer]
 // buffer which contains all the text, and manages all the edits,
 // sending update events out to the editors.
 //
@@ -62,8 +62,8 @@ var (
 type Editor struct { //core:embedder
 	gi.Layout
 
-	// Buf is the text buffer being edited.
-	*Buf `set:"-" json:"-" xml:"-"`
+	// Buffer is the text buffer being edited.
+	*Buffer `set:"-" json:"-" xml:"-"`
 
 	// text that is displayed when the field is empty, in a lower-contrast manner
 	Placeholder string `json:"-" xml:"placeholder"`
@@ -184,12 +184,12 @@ type Editor struct { //core:embedder
 	lastFilename   gi.Filename `set:"-"`
 }
 
-// NewSoloEditor returns a new [Editor] with an associated [Buf].
+// NewSoloEditor returns a new [Editor] with an associated [Buffer].
 // This is appropriate for making a standalone editor in which there
 // is there is one editor per buffer.
 func NewSoloEditor(par ki.Ki, name ...string) *Editor {
-	tb := NewBuf().SetText([]byte{})
-	return NewEditor(par, name...).SetBuf(tb)
+	tb := NewBuffer().SetText([]byte{})
+	return NewEditor(par, name...).SetBuffer(tb)
 }
 
 func (ed *Editor) FlagType() enums.BitFlagSetter {
@@ -270,8 +270,8 @@ func (ed *Editor) Destroy() {
 // EditDone completes editing and copies the active edited text to the text --
 // called when the return key is pressed or goes out of focus
 func (ed *Editor) EditDone() {
-	if ed.Buf != nil {
-		ed.Buf.EditDone()
+	if ed.Buffer != nil {
+		ed.Buffer.EditDone()
 	}
 	ed.ClearSelected()
 	ed.ClearCursor()
@@ -282,20 +282,20 @@ func (ed *Editor) EditDone() {
 // can do this when needed if the markup gets off due to multi-line
 // formatting issues -- via Recenter key
 func (ed *Editor) ReMarkup() {
-	if ed.Buf == nil {
+	if ed.Buffer == nil {
 		return
 	}
-	ed.Buf.ReMarkup()
+	ed.Buffer.ReMarkup()
 }
 
 // IsChanged returns true if buffer was changed (edited) since last EditDone
 func (ed *Editor) IsChanged() bool {
-	return ed.Buf != nil && ed.Buf.IsChanged()
+	return ed.Buffer != nil && ed.Buffer.IsChanged()
 }
 
 // IsNotSaved returns true if buffer was changed (edited) since last Save
 func (ed *Editor) IsNotSaved() bool {
-	return ed.Buf != nil && ed.Buf.IsNotSaved()
+	return ed.Buffer != nil && ed.Buffer.IsNotSaved()
 }
 
 // HasLineNos returns true if view is showing line numbers (per textbuf option, cached here)
@@ -305,10 +305,10 @@ func (ed *Editor) HasLineNos() bool {
 
 // Clear resets all the text in the buffer for this view
 func (ed *Editor) Clear() {
-	if ed.Buf == nil {
+	if ed.Buffer == nil {
 		return
 	}
-	ed.Buf.NewBuf(0)
+	ed.Buffer.NewBuffer(0)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -320,25 +320,25 @@ func (ed *Editor) ResetState() {
 	ed.Highlights = nil
 	ed.ISearch.On = false
 	ed.QReplace.On = false
-	if ed.Buf == nil || ed.lastFilename != ed.Buf.Filename { // don't reset if reopening..
+	if ed.Buffer == nil || ed.lastFilename != ed.Buffer.Filename { // don't reset if reopening..
 		ed.CursorPos = lex.Pos{}
 	}
-	if ed.Buf != nil {
-		ed.Buf.SetReadOnly(ed.IsReadOnly())
+	if ed.Buffer != nil {
+		ed.Buffer.SetReadOnly(ed.IsReadOnly())
 	}
 }
 
-// SetBuf sets the Buf that this is a view of, and interconnects their signals
-func (ed *Editor) SetBuf(buf *Buf) *Editor {
-	if buf != nil && ed.Buf == buf {
+// SetBuffer sets the [Buffer] that this is a view of, and interconnects their events.
+func (ed *Editor) SetBuffer(buf *Buffer) *Editor {
+	if buf != nil && ed.Buffer == buf {
 		return ed
 	}
 	// had := false
-	if ed.Buf != nil {
+	if ed.Buffer != nil {
 		// had = true
-		ed.Buf.DeleteView(ed)
+		ed.Buffer.DeleteView(ed)
 	}
-	ed.Buf = buf
+	ed.Buffer = buf
 	ed.ResetState()
 	if buf != nil {
 		buf.AddView(ed)
@@ -406,16 +406,16 @@ func (ed *Editor) LinesDeleted(tbe *textbuf.Edit) {
 
 // BufSignal receives a signal from the Buf when underlying text
 // is changed.
-func (ed *Editor) BufSignal(sig BufSignals, tbe *textbuf.Edit) {
+func (ed *Editor) BufSignal(sig BufferSignals, tbe *textbuf.Edit) {
 	switch sig {
-	case BufDone:
-	case BufNew:
+	case BufferDone:
+	case BufferNew:
 		ed.ResetState()
 		ed.SetCursorShow(ed.CursorPos)
 		ed.NeedsLayout()
-	case BufMods:
+	case BufferMods:
 		ed.NeedsLayout()
-	case BufInsert:
+	case BufferInsert:
 		if ed == nil || ed.This() == nil || !ed.This().(gi.Widget).IsVisible() {
 			return
 		}
@@ -430,7 +430,7 @@ func (ed *Editor) BufSignal(sig BufSignals, tbe *textbuf.Edit) {
 		if ndup {
 			ed.Update()
 		}
-	case BufDelete:
+	case BufferDelete:
 		if ed == nil || ed.This() == nil || !ed.This().(gi.Widget).IsVisible() {
 			return
 		}
@@ -443,10 +443,10 @@ func (ed *Editor) BufSignal(sig BufSignals, tbe *textbuf.Edit) {
 		if ndup {
 			ed.Update()
 		}
-	case BufMarkUpdt:
+	case BufferMarkupUpdated:
 		ed.NeedsLayout() // comes from another goroutine
-	case BufClosed:
-		ed.SetBuf(nil)
+	case BufferClosed:
+		ed.SetBuffer(nil)
 	}
 }
 
@@ -455,7 +455,7 @@ func (ed *Editor) BufSignal(sig BufSignals, tbe *textbuf.Edit) {
 
 // Undo undoes previous action
 func (ed *Editor) Undo() {
-	tbe := ed.Buf.Undo()
+	tbe := ed.Buffer.Undo()
 	if tbe != nil {
 		if tbe.Delete { // now an insert
 			ed.SetCursorShow(tbe.Reg.End)
@@ -472,7 +472,7 @@ func (ed *Editor) Undo() {
 
 // Redo redoes previously undone action
 func (ed *Editor) Redo() {
-	tbe := ed.Buf.Redo()
+	tbe := ed.Buffer.Redo()
 	if tbe != nil {
 		if tbe.Delete {
 			ed.SetCursorShow(tbe.Reg.Start)
@@ -496,8 +496,8 @@ func (ed *Editor) Config() {
 // StyleView sets the style of widget
 func (ed *Editor) StyleView() {
 	if ed.NeedsRebuild() {
-		if ed.Buf != nil {
-			ed.Buf.SetHiStyle(histyle.StyleDefault)
+		if ed.Buffer != nil {
+			ed.Buffer.SetHiStyle(histyle.StyleDefault)
 		}
 	}
 	ed.ApplyStyleWidget()

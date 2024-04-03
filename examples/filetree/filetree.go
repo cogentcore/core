@@ -186,8 +186,8 @@ func (fb *FileBrowse) SetActiveTextEditor(idx int) *texteditor.Editor {
 	}
 	fb.ActiveTextEditorIndex = idx
 	av := fb.ActiveTextEditor()
-	if av.Buf != nil {
-		fb.ActiveFilename = av.Buf.Filename
+	if av.Buffer != nil {
+		fb.ActiveFilename = av.Buffer.Filename
 	}
 	av.SetFocusEvent()
 	return av
@@ -198,7 +198,7 @@ func (fb *FileBrowse) SetActiveTextEditor(idx int) *texteditor.Editor {
 // it is the next one
 func (fb *FileBrowse) NextTextEditor() (*texteditor.Editor, int) {
 	av := fb.TextEditorByIndex(fb.ActiveTextEditorIndex)
-	if av.Buf == nil {
+	if av.Buffer == nil {
 		return av, fb.ActiveTextEditorIndex
 	}
 	nxt := (fb.ActiveTextEditorIndex + 1) % fb.NTextEditors
@@ -208,8 +208,8 @@ func (fb *FileBrowse) NextTextEditor() (*texteditor.Editor, int) {
 // SaveActiveView saves the contents of the currently-active texteditor
 func (fb *FileBrowse) SaveActiveView() { //gti:add
 	tv := fb.ActiveTextEditor()
-	if tv.Buf != nil {
-		tv.Buf.Save() // todo: errs..
+	if tv.Buffer != nil {
+		tv.Buffer.Save() // todo: errs..
 		fb.UpdateFiles()
 	}
 }
@@ -218,8 +218,8 @@ func (fb *FileBrowse) SaveActiveView() { //gti:add
 // currently-active texteditor
 func (fb *FileBrowse) SaveActiveViewAs(filename gi.Filename) { //gti:add
 	tv := fb.ActiveTextEditor()
-	if tv.Buf != nil {
-		tv.Buf.SaveAs(filename)
+	if tv.Buffer != nil {
+		tv.Buffer.SaveAs(filename)
 	}
 }
 
@@ -228,10 +228,10 @@ func (fb *FileBrowse) SaveActiveViewAs(filename gi.Filename) { //gti:add
 func (fb *FileBrowse) ViewFileNode(fn *filetree.Node) {
 	if _, err := fn.OpenBuf(); err == nil {
 		nv, nidx := fb.NextTextEditor()
-		if nv.Buf != nil && nv.Buf.IsNotSaved() { // todo: save current changes?
-			fmt.Printf("Changes not saved in file: %v before switching view there to new file\n", nv.Buf.Filename)
+		if nv.Buffer != nil && nv.Buffer.IsNotSaved() { // todo: save current changes?
+			fmt.Printf("Changes not saved in file: %v before switching view there to new file\n", nv.Buffer.Filename)
 		}
-		nv.SetBuf(fn.Buf)
+		nv.SetBuffer(fn.Buf)
 		fn.Buf.Hi.Style = "emacs" // todo prefs
 		fb.SetActiveTextEditor(nidx)
 		fb.UpdateFiles()
