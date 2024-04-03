@@ -9,15 +9,11 @@ package keyfun
 import (
 	"encoding/json"
 	"log/slog"
-	"path/filepath"
 	"slices"
 	"sort"
 	"strings"
 
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/goosi"
-	"cogentcore.org/core/grows/jsons"
-	"cogentcore.org/core/grr"
 )
 
 // https://en.wikipedia.org/wiki/Table_of_keyboard_shortcuts
@@ -245,9 +241,6 @@ func (km *Map) Update(kmName MapName) {
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-// KeyMaps -- list of KeyMap's
-
 // DefaultMap is the overall default keymap, which is set in init
 // depending on the platform
 var DefaultMap MapName = "LinuxStandard"
@@ -291,62 +284,12 @@ func (km *Maps) MapByName(name MapName) (*Map, int, bool) {
 	return nil, -1, false
 }
 
-// PrefsMapsFilename is the name of the preferences file in Cogent Core prefs
-// directory for saving / loading the default AvailMaps key maps list
-var PrefsMapsFilename = "key_maps_prefs.json"
-
-// Open opens keymaps from a json-formatted file.
-// You can save and open key maps to / from files to share, experiment, transfer, etc
-func (km *Maps) Open(filename string) error { //gti:add
-	*km = make(Maps, 0, 10) // reset
-	return grr.Log(jsons.Open(km, filename))
-}
-
-// Save saves keymaps to a json-formatted file.
-// You can save and open key maps to / from files to share, experiment, transfer, etc
-func (km *Maps) Save(filename string) error { //gti:add
-	return grr.Log(jsons.Save(km, filename))
-}
-
-// OpenSettings opens KeyMaps from Cogent Core standard prefs directory, in file key_maps_prefs.json.
-// This is called automatically, so calling it manually should not be necessary in most cases.
-func (km *Maps) OpenSettings() error { //gti:add
-	pdir := goosi.TheApp.CogentCoreDataDir()
-	pnm := filepath.Join(pdir, PrefsMapsFilename)
-	AvailableMapsChanged = false
-	return km.Open(pnm)
-}
-
-// SavePrefs saves KeyMaps to Cogent Core standard prefs directory, in file key_maps_prefs.json,
-// which will be loaded automatically at startup if prefs SaveKeyMaps is checked
-// (should be if you're using custom keymaps)
-func (km *Maps) SavePrefs() error { //gti:add
-	pdir := goosi.TheApp.CogentCoreDataDir()
-	pnm := filepath.Join(pdir, PrefsMapsFilename)
-	AvailableMapsChanged = false
-	return km.Save(pnm)
-}
-
 // CopyFrom copies keymaps from given other map
 func (km *Maps) CopyFrom(cp Maps) {
 	*km = make(Maps, 0, len(cp)) // reset
 	b, _ := json.Marshal(cp)
 	json.Unmarshal(b, km)
 }
-
-// RevertToStandard reverts the keymaps to using the StdKeyMaps that are compiled into the program
-// and have all the lastest key functions defined.  If you have edited your maps, and are finding
-// things not working, it is a good idea to save your current maps and try this, or at least do
-// ViewStdMaps to see the current standards. Your current map edits will be lost if you proceed!
-func (km *Maps) RevertToStandard() { //gti:add
-	km.CopyFrom(StandardMaps)
-	AvailableMapsChanged = true
-}
-
-// AvailableMapsChanged is used to update giv.KeyMapsView toolbars via
-// following menu, toolbar props update methods -- not accurate if editing any
-// other map but works for now..
-var AvailableMapsChanged = false
 
 // order is: Shift, Control, Alt, Meta
 // note: shift and meta modifiers for navigation keys do select + move
