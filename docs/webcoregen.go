@@ -22,6 +22,7 @@ import (
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/units"
 	"cogentcore.org/core/webcore"
 )
@@ -678,6 +679,9 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		ts := gi.NewTabs(parent).SetNewTabButton(true)
 		ts.NewTab("First")
 		ts.NewTab("Second")
+	},
+	"widgets/text-editors-0": func(parent gi.Widget) {
+		texteditor.NewSoloEditor(parent)
 	},
 	"widgets/text-fields-0": func(parent gi.Widget) {
 		gi.NewTextField(parent)

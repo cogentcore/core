@@ -45,10 +45,10 @@ var (
 	MarkupDelay = 1000 * time.Millisecond // `default:"1000" min:"100" step:"100"`
 )
 
-// Editor is a widget for editing multiple lines of text (as compared to
-// [gi.TextField] for a single line).  The Editor is driven by a [Buf]
+// Editor is a widget for editing multiple lines of complicated text (as compared to
+// [gi.TextField] for a single line of simple text).  The Editor is driven by a [Buf]
 // buffer which contains all the text, and manages all the edits,
-// sending update signals out to the views.
+// sending update events out to the views.
 //
 // Use NeedsRender to drive an render update for any change that does
 // not change the line-level layout of the text.
@@ -184,18 +184,16 @@ type Editor struct { //core:embedder
 	lastFilename   gi.Filename `set:"-"`
 }
 
-func (ed *Editor) FlagType() enums.BitFlagSetter {
-	return (*EditorFlags)(&ed.Flags)
+// NewSoloEditor returns a new [Editor] with an associated [Buf].
+// This is appropriate for making a standalone editor in which there
+// is there is one editor per buffer.
+func NewSoloEditor(par ki.Ki, name ...string) *Editor {
+	tb := NewBuf().SetText([]byte{})
+	return NewEditor(par, name...).SetBuf(tb)
 }
 
-// NewViewLayout adds a new layout with text editor
-// to given parent node, with given name.  Layout adds "-lay" suffix.
-// Texediew should always have a parent Layout to manage
-// the scrollbars.
-func NewViewLayout(parent ki.Ki, name string) (*Editor, *gi.Layout) {
-	ly := parent.NewChild(gi.LayoutType, name+"-lay").(*gi.Layout)
-	ed := NewEditor(ly, name)
-	return ed, ly
+func (ed *Editor) FlagType() enums.BitFlagSetter {
+	return (*EditorFlags)(&ed.Flags)
 }
 
 func (ed *Editor) OnInit() {
