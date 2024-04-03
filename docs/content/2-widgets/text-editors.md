@@ -9,3 +9,9 @@ You can make a text editor without any custom options:
 ```Go
 texteditor.NewSoloEditor(parent)
 ```
+
+You can set the starting text of a text editor:
+
+```Go
+texteditor.NewSoloEditor(parent).Buf.SetText([]byte("Hello, world!"))
+```

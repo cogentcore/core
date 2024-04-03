@@ -683,6 +683,9 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 	"widgets/text-editors-0": func(parent gi.Widget) {
 		texteditor.NewSoloEditor(parent)
 	},
+	"widgets/text-editors-1": func(parent gi.Widget) {
+		texteditor.NewSoloEditor(parent).Buf.SetText([]byte("Hello, world!"))
+	},
 	"widgets/text-fields-0": func(parent gi.Widget) {
 		gi.NewTextField(parent)
 	},

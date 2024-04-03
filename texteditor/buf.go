@@ -37,14 +37,14 @@ import (
 	"cogentcore.org/core/texteditor/textbuf"
 )
 
-// Buf is a buffer of text, which can be viewed by View(s).
+// Buf is a buffer of text, which can be viewed by [Editor](s).
 // It holds the raw text lines (in original string and rune formats,
 // and marked-up from syntax highlighting), and sends signals for making
 // edits to the text and coordinating those edits across multiple views.
 // Views always only view a single buffer, so they directly call methods
 // on the buffer to drive updates, which are then broadcast.
 // It also has methods for loading and saving buffers to files.
-// Unlike GUI Widgets, its methods are generally signaling, without an
+// Unlike GUI Widgets, its methods generally send events, without an
 // explicit Action suffix.
 // Internally, the buffer represents new lines using \n = LF, but saving
 // and loading can deal with Windows/DOS CRLF format.
@@ -119,8 +119,8 @@ type Buf struct {
 	// mutex for updating markup delay timer
 	MarkupDelayMu sync.Mutex `json:"-" xml:"-"`
 
-	// the Views that are currently viewing this buffer
-	Views []*Editor `json:"-" xml:"-"`
+	// the [Editor]s that are currently viewing this buffer
+	Editors []*Editor `json:"-" xml:"-"`
 
 	// undo manager
 	Undos textbuf.Undo `json:"-" xml:"-"`
@@ -190,7 +190,7 @@ const (
 // SignalViews sends the given signal and optional edit info
 // to all the Views for this Buf
 func (tb *Buf) SignalViews(sig BufSignals, edit *textbuf.Edit) {
-	for _, vw := range tb.Views {
+	for _, vw := range tb.Editors {
 		vw.BufSignal(sig, edit)
 	}
 	if sig == BufDone {
@@ -903,7 +903,7 @@ func (tb *Buf) AppendTextLineMarkup(text []byte, markup []byte, signal bool) *te
 
 // AddView adds a viewer of this buffer -- connects our signals to the viewer
 func (tb *Buf) AddView(vw *Editor) {
-	tb.Views = append(tb.Views, vw)
+	tb.Editors = append(tb.Editors, vw)
 	// tb.BufSig.Connect(vw.This(), ViewBufSigRecv)
 }
 
@@ -916,9 +916,9 @@ func (tb *Buf) DeleteView(vw *Editor) {
 		tb.MarkupMu.Unlock()
 	}()
 
-	for i, ede := range tb.Views {
+	for i, ede := range tb.Editors {
 		if ede == vw {
-			tb.Views = append(tb.Views[:i], tb.Views[i+1:]...)
+			tb.Editors = append(tb.Editors[:i], tb.Editors[i+1:]...)
 			break
 		}
 	}
@@ -926,15 +926,15 @@ func (tb *Buf) DeleteView(vw *Editor) {
 
 // SceneFromView returns Scene from text editor, if avail
 func (tb *Buf) SceneFromView() *gi.Scene {
-	if len(tb.Views) > 0 {
-		return tb.Views[0].Scene
+	if len(tb.Editors) > 0 {
+		return tb.Editors[0].Scene
 	}
 	return nil
 }
 
 // AutoscrollViews ensures that views are always viewing the end of the buffer
 func (tb *Buf) AutoScrollViews() {
-	for _, ed := range tb.Views {
+	for _, ed := range tb.Editors {
 		if ed != nil && ed.This() != nil {
 			ed.CursorPos = tb.EndPos()
 			ed.ScrollCursorInView()

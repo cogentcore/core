@@ -48,7 +48,7 @@ var (
 // Editor is a widget for editing multiple lines of complicated text (as compared to
 // [gi.TextField] for a single line of simple text).  The Editor is driven by a [Buf]
 // buffer which contains all the text, and manages all the edits,
-// sending update events out to the views.
+// sending update events out to the editors.
 //
 // Use NeedsRender to drive an render update for any change that does
 // not change the line-level layout of the text.
@@ -56,7 +56,7 @@ var (
 // re-layout of the text.  This sets the Widget NeedsRender flag and triggers
 // layout during that render.
 //
-// Multiple views can be attached to a given buffer.  All updating in the
+// Multiple editors can be attached to a given buffer.  All updating in the
 // Editor should be within a single goroutine, as it would require
 // extensive protections throughout code otherwise.
 type Editor struct { //core:embedder
