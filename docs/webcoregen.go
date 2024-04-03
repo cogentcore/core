@@ -5,6 +5,8 @@ package main
 import (
 	"errors"
 	"fmt"
+	"image"
+	"image/draw"
 	"maps"
 	"strings"
 	"time"
@@ -317,6 +319,20 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 	},
 	"widgets/images-0": func(parent gi.Widget) {
 		gi.NewImage(parent).OpenFS(myImage, "image.png")
+	},
+	"widgets/images-1": func(parent gi.Widget) {
+		img := gi.NewImage(parent)
+		img.OpenFS(myImage, "image.png")
+		img.Style(func(s *styles.Style) {
+			s.Min.Set(units.Dp(256))
+		})
+	},
+	"widgets/images-2": func(parent gi.Widget) {
+		img := image.NewRGBA(image.Rect(0, 0, 100, 100))
+		draw.Draw(img, image.Rect(10, 5, 100, 90), colors.C(colors.Scheme.Warn.Container), image.Point{}, draw.Src)
+		draw.Draw(img, image.Rect(20, 20, 60, 50), colors.C(colors.Scheme.Success.Base), image.Point{}, draw.Src)
+		draw.Draw(img, image.Rect(60, 70, 80, 100), colors.C(colors.Scheme.Error.Base), image.Point{}, draw.Src)
+		gi.NewImage(parent).SetImage(img)
 	},
 	"widgets/labels-0": func(parent gi.Widget) {
 		gi.NewLabel(parent).SetText("Hello, world!")
