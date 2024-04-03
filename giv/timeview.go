@@ -5,7 +5,6 @@
 package giv
 
 import (
-	"log/slog"
 	"strconv"
 	"time"
 
@@ -46,27 +45,23 @@ func (tv *TimeView) Config() {
 		return
 	}
 
-	hour := gi.NewTextField(tv, "hour")
+	hour := gi.NewSpinner(tv, "hour")
+	hour.SetStep(1).SetEnforceStep(true)
 	if gi.SystemSettings.Clock24 {
 		tv.Hour = tv.Time.Hour()
-		hour.SetText(strconv.Itoa(tv.Hour))
 	} else {
 		tv.Hour = tv.Time.Hour() % 12
-		hour.SetText(strconv.Itoa(tv.Hour))
 	}
+	hour.SetValue(float32(tv.Hour))
 	hour.Style(func(s *styles.Style) {
 		s.Font.Size.Dp(57)
 		s.Min.X.Dp(96)
 	})
 	hour.OnChange(func(e events.Event) {
-		hr, err := strconv.Atoi(hour.Text())
-		// TODO(kai/snack)
-		if err != nil {
-			slog.Error(err.Error())
-		}
+		hr := int(hour.Value)
 		tv.Hour = hr
 		if tv.PM {
-			// only add to local
+			// only add to local variable
 			hr += 12
 		}
 		// we set our hour and keep everything else
@@ -81,21 +76,17 @@ func (tv *TimeView) Config() {
 			s.Min.X.Ch(1)
 		})
 
-	minute := gi.NewTextField(tv, "minute").
-		SetText(strconv.Itoa(tv.Time.Minute()))
+	minute := gi.NewSpinner(tv, "minute").
+		SetStep(1).SetEnforceStep(true).
+		SetValue(float32(tv.Time.Minute()))
 	minute.Style(func(s *styles.Style) {
 		s.Font.Size.Dp(57)
 		s.Min.X.Dp(96)
 	})
 	minute.OnChange(func(e events.Event) {
-		minute, err := strconv.Atoi(minute.Text())
-		// TODO(kai/snack)
-		if err != nil {
-			slog.Error(err.Error())
-		}
 		// we set our minute and keep everything else
 		tt := tv.Time
-		tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tt.Hour(), minute, tt.Second(), tt.Nanosecond(), tt.Location())
+		tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tt.Hour(), int(minute.Value), tt.Second(), tt.Nanosecond(), tt.Location())
 		tv.SendChange()
 	})
 
