@@ -29,11 +29,11 @@ func (v *KeyMapValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	d.SetTitle("Select a key map")
 	si := 0
 	cur := laser.ToString(v.Value.Interface())
-	_, curRow, _ := keyfun.AvailMaps.MapByName(keyfun.MapName(cur))
-	NewTableView(d).SetSlice(&keyfun.AvailMaps).SetSelectedIndex(curRow).BindSelect(&si)
+	_, curRow, _ := keyfun.AvailableMaps.MapByName(keyfun.MapName(cur))
+	NewTableView(d).SetSlice(&keyfun.AvailableMaps).SetSelectedIndex(curRow).BindSelect(&si)
 	return true, func() {
 		if si >= 0 {
-			km := keyfun.AvailMaps[si]
+			km := keyfun.AvailableMaps[si]
 			v.SetValue(keyfun.MapName(km.Name))
 			v.Update()
 		}

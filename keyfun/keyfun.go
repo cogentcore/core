@@ -127,22 +127,22 @@ func SetActiveMap(km *Map, kmName MapName) {
 // defined in AvailKeyMaps, calling Update on the map prior to setting it to
 // ensure that it is a valid, complete map
 func SetActiveMapName(mapnm MapName) {
-	km, _, ok := AvailMaps.MapByName(mapnm)
+	km, _, ok := AvailableMaps.MapByName(mapnm)
 	if ok {
 		SetActiveMap(km, mapnm)
 	} else {
 		slog.Error("keyfun.SetActiveKeyMapName: key map named not found, using default", "requested", mapnm, "default", DefaultMap)
-		km, _, ok = AvailMaps.MapByName(DefaultMap)
+		km, _, ok = AvailableMaps.MapByName(DefaultMap)
 		if ok {
 			SetActiveMap(km, DefaultMap)
 		} else {
-			avail := make([]string, len(AvailMaps))
-			for i, km := range AvailMaps {
+			avail := make([]string, len(AvailableMaps))
+			for i, km := range AvailableMaps {
 				avail[i] = km.Name
 			}
 			slog.Error("keyfun.SetActiveKeyMapName: DefaultKeyMap not found either; trying first one", "default", DefaultMap, "available", avail)
-			if len(AvailMaps) > 0 {
-				nkm := AvailMaps[0]
+			if len(AvailableMaps) > 0 {
+				nkm := AvailableMaps[0]
 				SetActiveMap(&nkm.Map, MapName(nkm.Name))
 			}
 		}
@@ -267,10 +267,10 @@ func (km MapsItem) Label() string {
 // a custom one, just duplicate an existing map, rename, and customize
 type Maps []MapsItem //gti:add
 
-// AvailMaps is the current list of available keymaps for use -- can be
+// AvailableMaps is the current list of available keymaps for use -- can be
 // loaded / saved / edited with preferences.  This is set to StdKeyMaps at
 // startup.
-var AvailMaps Maps
+var AvailableMaps Maps
 
 // MapByName returns a keymap and index by name -- returns false and emits a
 // message to stdout if not found

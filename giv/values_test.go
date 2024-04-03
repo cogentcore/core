@@ -43,7 +43,7 @@ func TestValues(t *testing.T) {
 		{"colormap", ColorMapName("ColdHot"), ""},
 		{"color", colors.Orange, ""},
 		{"keychord", key.CodeReturnEnter, ""},
-		{"keymap", keyfun.AvailMaps[0], ""},
+		{"keymap", keyfun.AvailableMaps[0], ""},
 	}
 	for _, value := range values {
 		b := gi.NewBody()

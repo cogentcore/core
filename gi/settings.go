@@ -420,12 +420,12 @@ type DeviceSettingsData struct { //gti:add
 
 func (ds *DeviceSettingsData) Defaults() {
 	ds.KeyMap = keyfun.DefaultMap
-	ds.KeyMaps.Value = keyfun.AvailMaps
+	ds.KeyMaps.Value = keyfun.AvailableMaps
 }
 
 func (ds *DeviceSettingsData) Apply() {
 	if ds.KeyMaps.Valid {
-		keyfun.AvailMaps = ds.KeyMaps.Value
+		keyfun.AvailableMaps = ds.KeyMaps.Value
 	}
 	if ds.KeyMap != "" {
 		keyfun.SetActiveMapName(ds.KeyMap)
