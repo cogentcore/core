@@ -38,9 +38,9 @@ var StyleDefault = gi.HiStyleName("emacs")
 // StyleNames are all the names of all the available highlighting styles
 var StyleNames []string
 
-// AvailStyle returns a style by name from the AvailStyles list -- if not found
+// AvailableStyle returns a style by name from the AvailStyles list -- if not found
 // default is used as a fallback
-func AvailStyle(nm gi.HiStyleName) *Style {
+func AvailableStyle(nm gi.HiStyleName) *Style {
 	if AvailableStyles == nil {
 		Init()
 	}

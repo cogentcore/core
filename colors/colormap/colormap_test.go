@@ -18,7 +18,7 @@ import (
 )
 
 func TestColorMap(t *testing.T) {
-	cm := AvailMaps["ColdHot"]
+	cm := AvailableMaps["ColdHot"]
 	assert.Equal(t, cm.Name, cm.String())
 
 	assert.Equal(t, color.RGBA{54, 64, 212, 255}, cm.Map(0.3))
@@ -77,7 +77,7 @@ func TestColorMaps(t *testing.T) {
 }
 
 func TestColorMapIndexed(t *testing.T) {
-	cm := AvailMaps["ColdHot"]
+	cm := AvailableMaps["ColdHot"]
 	cm.Indexed = true
 	n := len(cm.Colors)
 	for i := 0; i < n+1; i++ {

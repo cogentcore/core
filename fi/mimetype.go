@@ -144,14 +144,14 @@ type MimeType struct {
 // override the standard one
 var CustomMimes []MimeType
 
-// AvailMimes is the full list (as a map from mimetype) of available defined mime types
+// AvailableMimes is the full list (as a map from mimetype) of available defined mime types
 // built from StdMimes (compiled in) and then CustomMimes can override
-var AvailMimes map[string]MimeType
+var AvailableMimes map[string]MimeType
 
 // MimeKnown returns the known type for given mime key,
 // or Unknown if not found or not a known file type
 func MimeKnown(mime string) Known {
-	mt, has := AvailMimes[MimeNoChar(mime)]
+	mt, has := AvailableMimes[MimeNoChar(mime)]
 	if !has {
 		return Unknown
 	}
@@ -165,7 +165,7 @@ func ExtKnown(ext string) Known {
 	if !has {
 		return Unknown
 	}
-	mt, has := AvailMimes[mime]
+	mt, has := AvailableMimes[mime]
 	if !has {
 		return Unknown
 	}
@@ -182,23 +182,23 @@ func KnownFromFile(fname string) Known {
 	return MimeKnown(mtyp)
 }
 
-// MergeAvailMimes merges the StdMimes and CustomMimes into AvailMimes
+// MergeAvailableMimes merges the StdMimes and CustomMimes into AvailMimes
 // if CustomMimes is updated, then this should be called -- initially
 // it just has StdMimes.
 // It also builds the ExtMimeMap to map from extension to mime type
 // and KnownMimes map of known file types onto their full
 // mime type entry
-func MergeAvailMimes() {
-	AvailMimes = make(map[string]MimeType, len(StandardMimes)+len(CustomMimes))
+func MergeAvailableMimes() {
+	AvailableMimes = make(map[string]MimeType, len(StandardMimes)+len(CustomMimes))
 	for _, mt := range StandardMimes {
-		AvailMimes[mt.Mime] = mt
+		AvailableMimes[mt.Mime] = mt
 	}
 	for _, mt := range CustomMimes {
-		AvailMimes[mt.Mime] = mt // overwrite automatically
+		AvailableMimes[mt.Mime] = mt // overwrite automatically
 	}
 	ExtMimeMap = make(map[string]string) // start over
 	KnownMimes = make(map[Known]MimeType)
-	for _, mt := range AvailMimes {
+	for _, mt := range AvailableMimes {
 		if len(mt.Exts) > 0 { // first pass add only ext guys to support
 			for _, ex := range mt.Exts {
 				if ex[0] != '.' {
@@ -220,7 +220,7 @@ func MergeAvailMimes() {
 		}
 	}
 	// second pass to get any known guys that don't have exts
-	for _, mt := range AvailMimes {
+	for _, mt := range AvailableMimes {
 		if mt.Sup != Unknown {
 			if _, has := KnownMimes[mt.Sup]; !has {
 				KnownMimes[mt.Sup] = mt
@@ -230,7 +230,7 @@ func MergeAvailMimes() {
 }
 
 func init() {
-	MergeAvailMimes()
+	MergeAvailableMimes()
 }
 
 // http://www.iana.org/assignments/media-types/media-types.xhtml

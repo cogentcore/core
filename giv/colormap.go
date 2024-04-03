@@ -48,7 +48,7 @@ func (v *ColorMapValue) Config() {
 			s.Background = colors.C(colors.Scheme.OutlineVariant)
 			return
 		}
-		cm, ok := colormap.AvailMaps[string(cmn)]
+		cm, ok := colormap.AvailableMaps[string(cmn)]
 		if !ok {
 			slog.Error("got invalid color map name", "name", cmn)
 			s.Background = colors.C(colors.Scheme.OutlineVariant)
@@ -70,7 +70,7 @@ func (v *ColorMapValue) Update() {
 
 func (v *ColorMapValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	d.SetTitle("Select a color map")
-	sl := colormap.AvailMapsList()
+	sl := colormap.AvailableMapsList()
 	cur := laser.ToString(v.Value.Interface())
 	si := 0
 	NewSliceView(d).SetSlice(&sl).SetSelVal(cur).BindSelect(&si)

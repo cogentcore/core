@@ -269,18 +269,18 @@ var StandardMaps = map[string]*Map{
 	},
 }
 
-// AvailMaps is the list of all available color maps
-var AvailMaps = map[string]*Map{}
+// AvailableMaps is the list of all available color maps
+var AvailableMaps = map[string]*Map{}
 
 func init() {
-	maps.Copy(AvailMaps, StandardMaps)
+	maps.Copy(AvailableMaps, StandardMaps)
 }
 
-// AvailMapsList returns a sorted list of color map names, e.g., for choosers
-func AvailMapsList() []string {
-	sl := make([]string, len(AvailMaps))
+// AvailableMapsList returns a sorted list of color map names, e.g., for choosers
+func AvailableMapsList() []string {
+	sl := make([]string, len(AvailableMaps))
 	ctr := 0
-	for k := range AvailMaps {
+	for k := range AvailableMaps {
 		sl[ctr] = k
 		ctr++
 	}

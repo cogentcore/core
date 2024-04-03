@@ -89,7 +89,7 @@ func CatFromMime(mime string) Cat {
 		return UnknownCat
 	}
 	mime = MimeNoChar(mime)
-	if mt, has := AvailMimes[mime]; has {
+	if mt, has := AvailableMimes[mime]; has {
 		return mt.Cat // must be set!
 	}
 	// try from type:

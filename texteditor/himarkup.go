@@ -106,7 +106,7 @@ func (hm *HiMarkup) Init(info *fi.FileInfo, pist *pi.FileStates) {
 	hm.Has = true
 
 	if hm.Style != hm.lastStyle {
-		hm.HiStyle = histyle.AvailStyle(hm.Style)
+		hm.HiStyle = histyle.AvailableStyle(hm.Style)
 		hm.CSSProps = hm.HiStyle.ToProps()
 		hm.lastStyle = hm.Style
 	}
@@ -123,7 +123,7 @@ func (hm *HiMarkup) SetHiStyle(style gi.HiStyleName) {
 	if style == "" {
 		return
 	}
-	st := histyle.AvailStyle(hm.Style)
+	st := histyle.AvailableStyle(hm.Style)
 	if st == nil {
 		slog.Error("Highlighting Style not found:", "style", style)
 		return
