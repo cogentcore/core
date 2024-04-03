@@ -52,6 +52,9 @@ func (tv *TimeView) Config() {
 		hour.SetMax(24).SetMin(0)
 	} else {
 		tv.Hour = tv.Time.Hour() % 12
+		if tv.Hour == 0 {
+			tv.Hour = 12
+		}
 		hour.SetMax(12).SetMin(1)
 	}
 	hour.SetValue(float32(tv.Hour))
@@ -61,6 +64,9 @@ func (tv *TimeView) Config() {
 	})
 	hour.OnChange(func(e events.Event) {
 		hr := int(hour.Value)
+		if hr == 12 && !gi.SystemSettings.Clock24 {
+			hr = 0
+		}
 		tv.Hour = hr
 		if tv.PM {
 			// only add to local variable
@@ -111,6 +117,9 @@ func (tv *TimeView) Config() {
 		sw.OnChange(func(e events.Event) {
 			si := sw.SelectedItem()
 			tt := tv.Time
+			if tv.Hour == 12 {
+				tv.Hour = 0
+			}
 			switch si {
 			case "AM":
 				tv.PM = false
