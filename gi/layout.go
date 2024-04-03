@@ -71,7 +71,7 @@ type Layout struct {
 
 	// StackTop, for a [styles.Stacked] layout, is the index of the node to use as the top of the stack.
 	// Only the node at this index is rendered; if not a valid index, nothing is rendered.
-	StackTop int
+	StackTop int `set:"-"`
 
 	// LayImpl contains implementation state info for doing layout
 	LayImpl LayImplState `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`

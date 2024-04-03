@@ -6,43 +6,45 @@ import (
 	"cogentcore.org/core/enums"
 )
 
-var _SelModesValues = []SelModes{0, 1, 2, 3}
+var _SelectionModesValues = []SelectionModes{0, 1, 2, 3}
 
-// SelModesN is the highest valid value for type SelModes, plus one.
-const SelModesN SelModes = 4
+// SelectionModesN is the highest valid value for type SelectionModes, plus one.
+const SelectionModesN SelectionModes = 4
 
-var _SelModesValueMap = map[string]SelModes{`NotSelectable`: 0, `Selectable`: 1, `SelectionBox`: 2, `Manipulable`: 3}
+var _SelectionModesValueMap = map[string]SelectionModes{`NotSelectable`: 0, `Selectable`: 1, `SelectionBox`: 2, `Manipulable`: 3}
 
-var _SelModesDescMap = map[SelModes]string{0: `NotSelectable means that selection events are ignored entirely`, 1: `Selectable means that nodes can be selected but no visible consequence occurs`, 2: `SelectionBox means that a selection bounding box is drawn around selected nodes`, 3: `Manipulable means that a manipulation box will be created for selected nodes, which can update the Pose parameters dynamically.`}
+var _SelectionModesDescMap = map[SelectionModes]string{0: `NotSelectable means that selection events are ignored entirely`, 1: `Selectable means that nodes can be selected but no visible consequence occurs`, 2: `SelectionBox means that a selection bounding box is drawn around selected nodes`, 3: `Manipulable means that a manipulation box will be created for selected nodes, which can update the Pose parameters dynamically.`}
 
-var _SelModesMap = map[SelModes]string{0: `NotSelectable`, 1: `Selectable`, 2: `SelectionBox`, 3: `Manipulable`}
+var _SelectionModesMap = map[SelectionModes]string{0: `NotSelectable`, 1: `Selectable`, 2: `SelectionBox`, 3: `Manipulable`}
 
-// String returns the string representation of this SelModes value.
-func (i SelModes) String() string { return enums.String(i, _SelModesMap) }
+// String returns the string representation of this SelectionModes value.
+func (i SelectionModes) String() string { return enums.String(i, _SelectionModesMap) }
 
-// SetString sets the SelModes value from its string representation,
+// SetString sets the SelectionModes value from its string representation,
 // and returns an error if the string is invalid.
-func (i *SelModes) SetString(s string) error {
-	return enums.SetString(i, s, _SelModesValueMap, "SelModes")
+func (i *SelectionModes) SetString(s string) error {
+	return enums.SetString(i, s, _SelectionModesValueMap, "SelectionModes")
 }
 
-// Int64 returns the SelModes value as an int64.
-func (i SelModes) Int64() int64 { return int64(i) }
+// Int64 returns the SelectionModes value as an int64.
+func (i SelectionModes) Int64() int64 { return int64(i) }
 
-// SetInt64 sets the SelModes value from an int64.
-func (i *SelModes) SetInt64(in int64) { *i = SelModes(in) }
+// SetInt64 sets the SelectionModes value from an int64.
+func (i *SelectionModes) SetInt64(in int64) { *i = SelectionModes(in) }
 
-// Desc returns the description of the SelModes value.
-func (i SelModes) Desc() string { return enums.Desc(i, _SelModesDescMap) }
+// Desc returns the description of the SelectionModes value.
+func (i SelectionModes) Desc() string { return enums.Desc(i, _SelectionModesDescMap) }
 
-// SelModesValues returns all possible values for the type SelModes.
-func SelModesValues() []SelModes { return _SelModesValues }
+// SelectionModesValues returns all possible values for the type SelectionModes.
+func SelectionModesValues() []SelectionModes { return _SelectionModesValues }
 
-// Values returns all possible values for the type SelModes.
-func (i SelModes) Values() []enums.Enum { return enums.Values(_SelModesValues) }
+// Values returns all possible values for the type SelectionModes.
+func (i SelectionModes) Values() []enums.Enum { return enums.Values(_SelectionModesValues) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i SelModes) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
+func (i SelectionModes) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *SelModes) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "SelModes") }
+func (i *SelectionModes) UnmarshalText(text []byte) error {
+	return enums.UnmarshalText(i, text, "SelectionModes")
+}

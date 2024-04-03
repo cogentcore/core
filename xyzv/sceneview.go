@@ -72,7 +72,7 @@ func (sv *SceneView) UpdateToolbar() {
 	smi := tb.ChildByName("selmode", 10)
 	if smi != nil {
 		sm := smi.(*gi.Chooser)
-		sm.SetCurrentValue(sw.SelMode)
+		sm.SetCurrentValue(sw.SelectionMode)
 	}
 }
 
@@ -204,20 +204,20 @@ func (sv *SceneView) ConfigToolbar(tb *gi.Toolbar) {
 	}
 	gi.NewSeparator(tb)
 
-	sm := gi.NewChooser(tb, "selmode").SetEnum(sw.SelMode)
+	sm := gi.NewChooser(tb, "selmode").SetEnum(sw.SelectionMode)
 	sm.OnChange(func(e events.Event) {
-		sw.SelMode = sm.CurrentItem.Value.(SelModes)
+		sw.SelectionMode = sm.CurrentItem.Value.(SelectionModes)
 	})
-	sm.SetCurrentValue(sw.SelMode)
+	sm.SetCurrentValue(sw.SelectionMode)
 
 	gi.NewButton(tb).SetText("Edit").SetIcon(icons.Edit).
 		SetTooltip("edit the currently-selected object").
 		OnClick(func(e events.Event) {
-			if sw.CurSel == nil {
+			if sw.CurrentSelected == nil {
 				return
 			}
 			d := gi.NewBody().AddTitle("Selected Node")
-			giv.NewStructView(d).SetStruct(sw.CurSel)
+			giv.NewStructView(d).SetStruct(sw.CurrentSelected)
 			d.NewFullDialog(sv).SetNewWindow(true).Run()
 		})
 

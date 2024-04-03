@@ -63,10 +63,10 @@ type FileView struct {
 	gi.Frame
 
 	// path to directory of files to display
-	DirPath string
+	DirPath string `set:"-"`
 
-	// selected file
-	SelFile string
+	// currently selected file
+	CurrentSelectedFile string `set:"-"`
 
 	// target extension(s) (comma separated if multiple, including initial .), if any
 	Ext string `set:"-"`
@@ -204,22 +204,22 @@ func FileViewExtOnlyFilter(fv *FileView, fi *fi.FileInfo) bool {
 // SetFilename sets the initial filename (splitting out path and filename) and
 // initializes the view
 func (fv *FileView) SetFilename(filename, ext string) *FileView {
-	fv.DirPath, fv.SelFile = filepath.Split(filename)
+	fv.DirPath, fv.CurrentSelectedFile = filepath.Split(filename)
 	return fv.SetExt(ext)
 }
 
 // SetPathFile sets the path, initial select file (or "") and initializes the view
 func (fv *FileView) SetPathFile(path, file, ext string) *FileView {
 	fv.DirPath = path
-	fv.SelFile = file
+	fv.CurrentSelectedFile = file
 	return fv.SetExt(ext)
 }
 
 // SelectedFile returns the full path to selected file
 func (fv *FileView) SelectedFile() string {
-	sf := fv.SelField()
+	sf := fv.SelectField()
 	sf.EditDone()
-	return filepath.Join(fv.DirPath, fv.SelFile)
+	return filepath.Join(fv.DirPath, fv.CurrentSelectedFile)
 }
 
 // SelectedFileInfo returns the currently-selected fileinfo, returns
@@ -239,7 +239,7 @@ func (fv *FileView) SelectFile() bool {
 	if fi, ok := fv.SelectedFileInfo(); ok {
 		if fi.IsDir() {
 			fv.DirPath = filepath.Join(fv.DirPath, fi.Name)
-			fv.SelFile = ""
+			fv.CurrentSelectedFile = ""
 			fv.SelectedIndex = -1
 			fv.UpdateFilesAction()
 			return false
@@ -407,11 +407,11 @@ func (fv *FileView) ConfigFilesRow() {
 }
 
 func (fv *FileView) ConfigSelRow() {
-	sr := fv.SelRow()
+	sr := fv.SelectRow()
 	gi.NewLabel(sr, "sel-lbl").SetText("File: ").
 		SetTooltip("enter file name here (or select from above list)")
 
-	sf := gi.NewTextField(sr, "sel").SetText(fv.SelFile).
+	sf := gi.NewTextField(sr, "sel").SetText(fv.CurrentSelectedFile).
 		SetTooltip(fmt.Sprintf("Enter the file name. Special keys: up/down to move selection; %s or %s to go up to parent folder; %s or %s or %s or %s to select current file (if directory, goes into it, if file, selects and closes); %s or %s for prev / next history item; %s return to this field", keyfun.WordLeft.Label(), keyfun.Jump.Label(), keyfun.SelectMode.Label(), keyfun.Insert.Label(), keyfun.InsertAfter.Label(), keyfun.Open.Label(), keyfun.HistPrev.Label(), keyfun.HistNext.Label(), keyfun.Search.Label()))
 	sf.SetCompleter(fv, fv.FileComplete, fv.FileCompleteEdit)
 	sf.OnChange(func(e events.Event) {
@@ -485,18 +485,18 @@ func (fv *FileView) FilesView() *TableView {
 	return fv.FilesRow().ChildByName("files-view", 1).(*TableView)
 }
 
-func (fv *FileView) SelRow() *gi.Layout {
+func (fv *FileView) SelectRow() *gi.Layout {
 	return fv.ChildByName("sel-row", 4).(*gi.Layout)
 }
 
-// SelField returns the TextField of the selected file
-func (fv *FileView) SelField() *gi.TextField {
-	return fv.SelRow().ChildByName("sel", 1).(*gi.TextField)
+// SelectField returns the TextField of the select file
+func (fv *FileView) SelectField() *gi.TextField {
+	return fv.SelectRow().ChildByName("sel", 1).(*gi.TextField)
 }
 
 // ExtField returns the TextField of the extension
 func (fv *FileView) ExtField() *gi.TextField {
-	return fv.SelRow().ChildByName("ext", 2).(*gi.TextField)
+	return fv.SelectRow().ChildByName("ext", 2).(*gi.TextField)
 }
 
 // UpdatePath ensures that path is in abs form and ready to be used..
@@ -511,7 +511,7 @@ func (fv *FileView) UpdatePath() {
 // UpdateFilesAction updates the list of files and other views for the current path.
 func (fv *FileView) UpdateFilesAction() { //gti:add
 	fv.UpdateFiles()
-	sf := fv.SelField()
+	sf := fv.SelectField()
 	sf.SetFocusEvent()
 }
 
@@ -567,8 +567,8 @@ func (fv *FileView) UpdateFiles() {
 	}
 	gi.RecentPaths.AddPath(fv.DirPath, gi.SystemSettings.SavedPathsMax)
 	gi.SaveRecentPaths()
-	sf := fv.SelField()
-	sf.SetText(fv.SelFile)
+	sf := fv.SelectField()
+	sf.SetText(fv.CurrentSelectedFile)
 
 	fv.Scene.UpdateTitle("Files: " + fv.DirPath)
 
@@ -580,7 +580,7 @@ func (fv *FileView) UpdateFiles() {
 	sv := fv.FilesView()
 	sv.ResetSelectedIndexs()
 	sv.SelectedField = "Name"
-	sv.SelVal = fv.SelFile
+	sv.SelectedValue = fv.CurrentSelectedFile
 	sv.SortSlice()
 	sv.Update()
 
@@ -668,22 +668,22 @@ func (fv *FileView) NewFolder(name string) error { //gti:add
 // selection action with current full file name, and updates selection in
 // table view
 func (fv *FileView) SetSelFileAction(sel string) {
-	fv.SelFile = sel
+	fv.CurrentSelectedFile = sel
 	sv := fv.FilesView()
 	ef := fv.ExtField()
 	exts := ef.Text()
-	if !sv.SelectFieldVal("Name", fv.SelFile) { // not found
+	if !sv.SelectFieldVal("Name", fv.CurrentSelectedFile) { // not found
 		extl := strings.Split(exts, ",")
 		if len(extl) == 1 {
-			if !strings.HasSuffix(fv.SelFile, extl[0]) {
-				fv.SelFile += extl[0]
+			if !strings.HasSuffix(fv.CurrentSelectedFile, extl[0]) {
+				fv.CurrentSelectedFile += extl[0]
 			}
 		}
 	}
 	fv.SelectedIndex = sv.SelectedIndex
-	sf := fv.SelField()
-	sf.SetText(fv.SelFile) // make sure
-	fv.Send(events.Select) // receiver needs to get selectedFile
+	sf := fv.SelectField()
+	sf.SetText(fv.CurrentSelectedFile) // make sure
+	fv.Send(events.Select)             // receiver needs to get selectedFile
 }
 
 // FileSelectAction updates selection with given selected file and emits
@@ -695,9 +695,9 @@ func (fv *FileView) FileSelectAction(idx int) {
 	fv.SaveSortPrefs()
 	fi := fv.Files[idx]
 	fv.SelectedIndex = idx
-	fv.SelFile = fi.Name
-	sf := fv.SelField()
-	sf.SetText(fv.SelFile)
+	fv.CurrentSelectedFile = fi.Name
+	sf := fv.SelectField()
+	sf.SetText(fv.CurrentSelectedFile)
 	fv.Send(events.Select)
 	// fv.WidgetSig.Emit(fv.This(), int64(gi.WidgetSelected), fv.SelectedFile())
 }
@@ -705,8 +705,8 @@ func (fv *FileView) FileSelectAction(idx int) {
 // SetExt updates the ext to given (list of, comma separated) extensions
 func (fv *FileView) SetExt(ext string) *FileView {
 	if ext == "" {
-		if fv.SelFile != "" {
-			ext = strings.ToLower(filepath.Ext(fv.SelFile))
+		if fv.CurrentSelectedFile != "" {
+			ext = strings.ToLower(filepath.Ext(fv.CurrentSelectedFile))
 		}
 	}
 	fv.Ext = ext
@@ -755,7 +755,7 @@ func (fv *FileView) SaveSortPrefs() {
 
 func (fv *FileView) ApplyStyle() {
 	fv.Frame.ApplyStyle()
-	sf := fv.SelField()
+	sf := fv.SelectField()
 	sf.StartFocus() // need to call this when window is actually active
 }
 
@@ -781,7 +781,7 @@ func (fv *FileView) KeyInput(kt events.Event) {
 		}
 	case keyfun.Search:
 		kt.SetHandled()
-		sf := fv.SelField()
+		sf := fv.SelectField()
 		sf.SetFocusEvent()
 	}
 }

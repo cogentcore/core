@@ -78,11 +78,11 @@ func (s *Sides[T]) Set(vals ...T) *Sides[T] {
 	case 1:
 		s.SetAll(vals[0])
 	case 2:
-		s.SetVert(vals[0])
-		s.SetHoriz(vals[1])
+		s.SetVertical(vals[0])
+		s.SetHorizontal(vals[1])
 	case 3:
 		s.Top = vals[0]
-		s.SetHoriz(vals[1])
+		s.SetHorizontal(vals[1])
 		s.Bottom = vals[2]
 	case 4:
 		s.Top = vals[0]
@@ -105,19 +105,19 @@ func (s *Sides[T]) Zero() *Sides[T] {
 	return s
 }
 
-// SetVert sets the values for the sides/corners in the
+// SetVertical sets the values for the sides/corners in the
 // vertical/diagonally descending direction
 // (top/top-left and bottom/bottom-right) to the given value
-func (s *Sides[T]) SetVert(val T) *Sides[T] {
+func (s *Sides[T]) SetVertical(val T) *Sides[T] {
 	s.Top = val
 	s.Bottom = val
 	return s
 }
 
-// SetHoriz sets the values for the sides/corners in the
+// SetHorizontal sets the values for the sides/corners in the
 // horizontal/diagonally ascending direction
 // (right/top-right and left/bottom-left) to the given value
-func (s *Sides[T]) SetHoriz(val T) *Sides[T] {
+func (s *Sides[T]) SetHorizontal(val T) *Sides[T] {
 	s.Right = val
 	s.Left = val
 	return s

@@ -443,10 +443,10 @@ func (tv *TableView) UpdateWidgets() {
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 
 	scrollTo := -1
-	if tv.SelectedField != "" && tv.SelVal != nil {
-		tv.SelectedIndex, _ = StructSliceIndexByValue(tv.Slice, tv.SelectedField, tv.SelVal)
+	if tv.SelectedField != "" && tv.SelectedValue != nil {
+		tv.SelectedIndex, _ = StructSliceIndexByValue(tv.Slice, tv.SelectedField, tv.SelectedValue)
 		tv.SelectedField = ""
-		tv.SelVal = nil
+		tv.SelectedValue = nil
 		tv.InitSelectedIndex = -1
 		scrollTo = tv.SelectedIndex
 	} else if tv.InitSelectedIndex >= 0 {
@@ -546,7 +546,7 @@ func (tv *TableView) StyleRow(w gi.Widget, idx, fidx int) {
 func (tv *TableView) SliceNewAt(idx int) {
 	tv.ViewMuLock()
 
-	tv.SliceNewAtSel(idx)
+	tv.SliceNewAtSelect(idx)
 	laser.SliceNewAt(tv.Slice, idx)
 	if idx < 0 {
 		idx = tv.SliceSize
@@ -568,7 +568,7 @@ func (tv *TableView) SliceDeleteAt(idx int) {
 	}
 	tv.ViewMuLock()
 
-	tv.SliceDeleteAtSel(idx)
+	tv.SliceDeleteAtSelect(idx)
 
 	laser.SliceDeleteAt(tv.Slice, idx)
 
@@ -723,9 +723,9 @@ func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
 // found, false otherwise
 func (tv *TableView) SelectFieldVal(fld, val string) bool {
 	tv.SelectedField = fld
-	tv.SelVal = val
-	if tv.SelectedField != "" && tv.SelVal != nil {
-		idx, _ := StructSliceIndexByValue(tv.Slice, tv.SelectedField, tv.SelVal)
+	tv.SelectedValue = val
+	if tv.SelectedField != "" && tv.SelectedValue != nil {
+		idx, _ := StructSliceIndexByValue(tv.Slice, tv.SelectedField, tv.SelectedValue)
 		if idx >= 0 {
 			tv.ScrollToIndex(idx)
 			tv.UpdateSelectIndex(idx, true, events.SelectOne)

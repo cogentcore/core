@@ -111,9 +111,9 @@ const (
 	// SliceViewSelectMode is whether to be in select rows mode or editing mode
 	SliceViewSelectMode
 
-	// SliceViewReadOnlyMultiSel: if view is ReadOnly, default selection mode is to choose one row only.
+	// SliceViewReadOnlyMultiSelect: if view is ReadOnly, default selection mode is to choose one row only.
 	// If this is true, standard multiple selection logic with modifier keys is instead supported
-	SliceViewReadOnlyMultiSel
+	SliceViewReadOnlyMultiSelect
 
 	// SliceViewInFocusGrab is a guard for recursive focus grabbing
 	SliceViewInFocusGrab
@@ -186,8 +186,8 @@ type SliceViewer interface {
 	// (copy / paste) data e.g., fi.DataJson
 	MimeDataType() string
 
-	// CopySelToMime copies selected rows to mime data
-	CopySelToMime() mimedata.Mimes
+	// CopySelectToMime copies selected rows to mime data
+	CopySelectToMime() mimedata.Mimes
 
 	// PasteAssign assigns mime data (only the first one!) to this idx
 	PasteAssign(md mimedata.Mimes, idx int)
@@ -233,7 +233,7 @@ type SliceViewBase struct {
 	Changed bool `set:"-"`
 
 	// current selection value -- initially select this value if set
-	SelVal any `copier:"-" view:"-" json:"-" xml:"-"`
+	SelectedValue any `copier:"-" view:"-" json:"-" xml:"-"`
 
 	// index of currently selected item
 	SelectedIndex int `copier:"-" json:"-" xml:"-"`
@@ -766,13 +766,13 @@ func (sv *SliceViewBase) UpdateWidgets() {
 	nWidgPerRow, idxOff := sv.RowWidgetNs()
 
 	scrollTo := -1
-	if sv.SelVal != nil {
-		idx, ok := SliceIndexByValue(sv.Slice, sv.SelVal)
+	if sv.SelectedValue != nil {
+		idx, ok := SliceIndexByValue(sv.Slice, sv.SelectedValue)
 		if ok {
 			sv.SelectedIndex = idx
 			scrollTo = sv.SelectedIndex
 		}
-		sv.SelVal = nil
+		sv.SelectedValue = nil
 		sv.InitSelectedIndex = -1
 	} else if sv.InitSelectedIndex >= 0 {
 		sv.SelectedIndex = sv.InitSelectedIndex
@@ -845,7 +845,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 
 	sv.ViewMuLock() // no return!  must unlock before return below
 
-	sv.SliceNewAtSel(idx)
+	sv.SliceNewAtSelect(idx)
 
 	sltyp := laser.SliceElType(sv.Slice) // has pointer if it is there
 	iski := ki.IsKi(sltyp)
@@ -911,31 +911,31 @@ func (sv *SliceViewBase) SliceDeleteAtRow(row int) {
 	sv.This().(SliceViewer).SliceDeleteAt(sv.StartIndex + row)
 }
 
-// SliceNewAtSel updates selected rows based on
+// SliceNewAtSelect updates selected rows based on
 // inserting new element at given index.
 // must be called with successful SliceNewAt
-func (sv *SliceViewBase) SliceNewAtSel(idx int) {
+func (sv *SliceViewBase) SliceNewAtSelect(i int) {
 	sl := sv.SelectedIndexsList(false) // ascending
 	sv.ResetSelectedIndexs()
 	for _, ix := range sl {
-		if ix >= idx {
+		if ix >= i {
 			ix++
 		}
 		sv.SelectedIndexs[ix] = struct{}{}
 	}
 }
 
-// SliceDeleteAtSel updates selected rows based on
+// SliceDeleteAtSelect updates selected rows based on
 // deleting element at given index
 // must be called with successful SliceDeleteAt
-func (sv *SliceViewBase) SliceDeleteAtSel(idx int) {
+func (sv *SliceViewBase) SliceDeleteAtSelect(i int) {
 	sl := sv.SelectedIndexsList(true) // desscending
 	sv.ResetSelectedIndexs()
 	for _, ix := range sl {
 		switch {
-		case ix == idx:
+		case ix == i:
 			continue
-		case ix > idx:
+		case ix > i:
 			ix--
 		}
 		sv.SelectedIndexs[ix] = struct{}{}
@@ -943,18 +943,18 @@ func (sv *SliceViewBase) SliceDeleteAtSel(idx int) {
 }
 
 // SliceDeleteAt deletes element at given index from slice
-func (sv *SliceViewBase) SliceDeleteAt(idx int) {
+func (sv *SliceViewBase) SliceDeleteAt(i int) {
 	if sv.Is(SliceViewIsArray) {
 		return
 	}
-	if idx < 0 || idx >= sv.SliceSize {
+	if i < 0 || i >= sv.SliceSize {
 		return
 	}
 	sv.ViewMuLock()
 
-	sv.SliceDeleteAtSel(idx)
+	sv.SliceDeleteAtSelect(i)
 
-	laser.SliceDeleteAt(sv.Slice, idx)
+	laser.SliceDeleteAt(sv.Slice, i)
 
 	sv.This().(SliceViewer).UpdtSliceSize()
 
@@ -1120,14 +1120,14 @@ func (sv *SliceViewBase) ScrollToIndex(idx int) bool {
 	return updt
 }
 
-// SelectVal sets SelVal and attempts to find corresponding row, setting
+// SelectValue sets SelVal and attempts to find corresponding row, setting
 // SelectedIndex and selecting row if found -- returns true if found, false
 // otherwise.
-func (sv *SliceViewBase) SelectVal(val string) bool {
-	sv.SelVal = val
-	if sv.SelVal != nil {
+func (sv *SliceViewBase) SelectValue(val string) bool {
+	sv.SelectedValue = val
+	if sv.SelectedValue != nil {
 		sv.ViewMuLock()
-		idx, _ := SliceIndexByValue(sv.Slice, sv.SelVal)
+		idx, _ := SliceIndexByValue(sv.Slice, sv.SelectedValue)
 		sv.ViewMuUnlock()
 		if idx >= 0 {
 			sv.UpdateSelectIndex(idx, true, events.SelectOne)
@@ -1327,7 +1327,7 @@ func (sv *SliceViewBase) UpdateSelectRow(row int, selMode events.SelectModes) {
 
 // UpdateSelectIndex updates the selection for the given index
 func (sv *SliceViewBase) UpdateSelectIndex(idx int, sel bool, selMode events.SelectModes) {
-	if sv.IsReadOnly() && !sv.Is(SliceViewReadOnlyMultiSel) {
+	if sv.IsReadOnly() && !sv.Is(SliceViewReadOnlyMultiSelect) {
 		sv.UnselectAllIndexs()
 		if sel || sv.SelectedIndex == idx {
 			sv.SelectedIndex = idx
@@ -1553,8 +1553,8 @@ func (sv *SliceViewBase) MimeDataType() string {
 	return fi.DataJson
 }
 
-// CopySelToMime copies selected rows to mime data
-func (sv *SliceViewBase) CopySelToMime() mimedata.Mimes {
+// CopySelectToMime copies selected rows to mime data
+func (sv *SliceViewBase) CopySelectToMime() mimedata.Mimes {
 	nitms := len(sv.SelectedIndexs)
 	if nitms == 0 {
 		return nil
@@ -1573,7 +1573,7 @@ func (sv *SliceViewBase) CopyIndexs(reset bool) { //gti:add
 	if nitms == 0 {
 		return
 	}
-	md := sv.This().(SliceViewer).CopySelToMime()
+	md := sv.This().(SliceViewer).CopySelectToMime()
 	if md != nil {
 		sv.Clipboard().Write(md)
 	}
@@ -1748,7 +1748,7 @@ func (sv *SliceViewBase) DragStart(e events.Event) {
 	if !sv.SelectRowIfNone(e) || !sv.MousePosInGrid(e) {
 		return
 	}
-	md := sv.This().(SliceViewer).CopySelToMime()
+	md := sv.This().(SliceViewer).CopySelectToMime()
 	ixs := sv.SelectedIndexsList(false) // ascending
 	w, ok := sv.This().(SliceViewer).RowFirstWidget(ixs[0] - sv.StartIndex)
 	if ok {
@@ -1937,7 +1937,7 @@ func (sv *SliceViewBase) KeyInputEditable(kt events.Event) {
 }
 
 func (sv *SliceViewBase) KeyInputReadOnly(kt events.Event) {
-	if sv.Is(SliceViewReadOnlyMultiSel) {
+	if sv.Is(SliceViewReadOnlyMultiSelect) {
 		sv.KeyInputNav(kt)
 		if kt.IsHandled() {
 			return

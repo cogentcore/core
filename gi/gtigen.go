@@ -52,14 +52,11 @@ func (t *Body) New() ki.Ki { return &Body{} }
 // SetTooltip sets the [Body.Tooltip]
 func (t *Body) SetTooltip(v string) *Body { t.Tooltip = v; return t }
 
-// SetStackTop sets the [Body.StackTop]
-func (t *Body) SetStackTop(v int) *Body { t.StackTop = v; return t }
-
 // BoxType is the [gti.Type] for [Box]
-var BoxType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Box", IDName: "box", Doc: "Box is a simple base [Widget] that renders the Std Box model", Embeds: []gti.Field{{Name: "WidgetBase"}}, Instance: &Box{}})
+var BoxType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Box", IDName: "box", Doc: "Box is a simple base [Widget] that renders the standard box model.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Instance: &Box{}})
 
 // NewBox adds a new [Box] with the given name to the given parent:
-// Box is a simple base [Widget] that renders the Std Box model
+// Box is a simple base [Widget] that renders the standard box model.
 func NewBox(par ki.Ki, name ...string) *Box {
 	return par.NewChild(BoxType, name...).(*Box)
 }
@@ -146,7 +143,7 @@ func (t *Button) SetMenu(v func(m *Scene)) *Button { t.Menu = v; return t }
 func (t *Button) SetTooltip(v string) *Button { t.Tooltip = v; return t }
 
 // CanvasType is the [gti.Type] for [Canvas]
-var CanvasType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Canvas", IDName: "canvas", Doc: "Canvas is a widget that can be arbitrarily drawn to by setting\nits Draw function using [Canvas.SetDraw].", Embeds: []gti.Field{{Name: "Box"}}, Fields: []gti.Field{{Name: "Draw", Doc: "Draw is the function used to draw the content of the\ncanvas every time that it is rendered. The paint context\nis automatically normalized to the size of the canvas,\nso you should specify points on a 0-1 scaled."}, {Name: "Context", Doc: "Context is the paint context used for drawing."}}, Instance: &Canvas{}})
+var CanvasType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Canvas", IDName: "canvas", Doc: "Canvas is a widget that can be arbitrarily drawn to by setting\nits Draw function using [Canvas.SetDraw].", Embeds: []gti.Field{{Name: "Box"}}, Fields: []gti.Field{{Name: "Draw", Doc: "Draw is the function used to draw the content of the\ncanvas every time that it is rendered. The paint context\nis automatically normalized to the size of the canvas,\nso you should specify points on a 0-1 scale."}, {Name: "Context", Doc: "Context is the paint context used for drawing."}}, Instance: &Canvas{}})
 
 // NewCanvas adds a new [Canvas] with the given name to the given parent:
 // Canvas is a widget that can be arbitrarily drawn to by setting
@@ -165,7 +162,7 @@ func (t *Canvas) New() ki.Ki { return &Canvas{} }
 // Draw is the function used to draw the content of the
 // canvas every time that it is rendered. The paint context
 // is automatically normalized to the size of the canvas,
-// so you should specify points on a 0-1 scaled.
+// so you should specify points on a 0-1 scale.
 func (t *Canvas) SetDraw(v func(pc *paint.Context)) *Canvas { t.Draw = v; return t }
 
 // SetTooltip sets the [Canvas.Tooltip]
@@ -291,9 +288,6 @@ func (t *Frame) New() ki.Ki { return &Frame{} }
 
 // SetTooltip sets the [Frame.Tooltip]
 func (t *Frame) SetTooltip(v string) *Frame { t.Tooltip = v; return t }
-
-// SetStackTop sets the [Frame.StackTop]
-func (t *Frame) SetStackTop(v int) *Frame { t.StackTop = v; return t }
 
 // HandleType is the [gti.Type] for [Handle]
 var HandleType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Handle", IDName: "handle", Doc: "Handle represents a draggable handle that can be used to\ncontrol the size of an element. The [Handle.Styles.Direction]\ncontrols the direction in which the handle moves.", Embeds: []gti.Field{{Name: "Box"}}, Fields: []gti.Field{{Name: "Min", Doc: "Min is the minimum value that the handle can go to\n(typically the lower bound of the dialog/splits)"}, {Name: "Max", Doc: "Max is the maximum value that the handle can go to\n(typically the upper bound of the dialog/splits)"}, {Name: "Pos", Doc: "Pos is the current position of the handle on the\nscale of [Handle.Min] to [Handle.Max]"}}, Instance: &Handle{}})
@@ -452,11 +446,6 @@ func (t *Layout) KiType() *gti.Type { return LayoutType }
 
 // New returns a new [*Layout] value
 func (t *Layout) New() ki.Ki { return &Layout{} }
-
-// SetStackTop sets the [Layout.StackTop]:
-// StackTop, for a [styles.Stacked] layout, is the index of the node to use as the top of the stack.
-// Only the node at this index is rendered; if not a valid index, nothing is rendered.
-func (t *Layout) SetStackTop(v int) *Layout { t.StackTop = v; return t }
 
 // SetTooltip sets the [Layout.Tooltip]
 func (t *Layout) SetTooltip(v string) *Layout { t.Tooltip = v; return t }
@@ -655,9 +644,6 @@ func (t *Scene) SetDirectRenders(v ...Widget) *Scene { t.DirectRenders = v; retu
 
 // SetTooltip sets the [Scene.Tooltip]
 func (t *Scene) SetTooltip(v string) *Scene { t.Tooltip = v; return t }
-
-// SetStackTop sets the [Scene.StackTop]
-func (t *Scene) SetStackTop(v int) *Scene { t.StackTop = v; return t }
 
 // SeparatorType is the [gti.Type] for [Separator]
 var SeparatorType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Separator", IDName: "separator", Doc: "Separator draws a separator line. It goes in the direction\nspecified by [style.Style.Direction].", Embeds: []gti.Field{{Name: "Box"}}, Instance: &Separator{}})
@@ -978,9 +964,6 @@ func (t *Splits) SetSplits(v ...float32) *Splits { t.Splits = v; return t }
 // SetTooltip sets the [Splits.Tooltip]
 func (t *Splits) SetTooltip(v string) *Splits { t.Tooltip = v; return t }
 
-// SetStackTop sets the [Splits.StackTop]
-func (t *Splits) SetStackTop(v int) *Splits { t.StackTop = v; return t }
-
 var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Stage", IDName: "stage", Doc: "Stage is a container and manager for displaying a Scene\nin different functional ways, defined by StageTypes, in two categories:\nMain types (WindowStage and DialogStage) and Popup types\n(Menu, Tooltip, Snackbar, Chooser).", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Fields: []gti.Field{{Name: "Type", Doc: "type of Stage: determines behavior and Styling"}, {Name: "Scene", Doc: "Scene contents of this Stage (what it displays)."}, {Name: "Context", Doc: "widget in another scene that requested this stage to be created\nand provides context (stage)"}, {Name: "Name", Doc: "Name is the name of the Stage, which is generally auto-set\nbased on the Scene Name."}, {Name: "Title", Doc: "Title is the title of the Stage, which is generally auto-set\nbased on the Scene Title. Used for title of WindowStage and\nDialogStage types."}, {Name: "Modal", Doc: "Modal, if true, blocks input to all other stages."}, {Name: "Scrim", Doc: "Scrim, if true, places a darkening scrim over other stages,\nif not a full window."}, {Name: "ClickOff", Doc: "ClickOff, if true, dismisses the Stage if user clicks anywhere\noff the Stage."}, {Name: "IgnoreEvents", Doc: "IgnoreEvents is whether to send no events to the stage and\njust pass them down to lower stages."}, {Name: "NewWindow", Doc: "NewWindow, if true, opens a WindowStage or DialogStage in its own\nseparate operating system window (RenderWin).  This is true by\ndefault for WindowStage on non-mobile platforms, otherwise false."}, {Name: "FullWindow", Doc: "FullWindow, if NewWindow is false, makes DialogStages and\nWindowStages take up the entire window they are created in."}, {Name: "CloseOnBack", Doc: "CloseOnBack is whether to close the stage when the back button\nis pressed in the app bar. Otherwise, it goes back to the next\nstage but keeps this one open. This is on by default for\nDialogStages and off for WindowStages."}, {Name: "Closeable", Doc: "Closeable, if true, includes a close button for closing dialogs."}, {Name: "Movable", Doc: "Movable, if true, adds a handle titlebar Decor for moving dialogs."}, {Name: "Resizable", Doc: "Resizable, if true, adds a resize handle Decor for resizing dialogs."}, {Name: "Timeout", Doc: "Timeout, if greater than 0, results in a popup stages disappearing\nafter a timeout duration."}, {Name: "Pos", Doc: "Pos is the target position for Scene to be placed within RenderWin."}, {Name: "Data", Doc: "Data is item represented by this main stage -- used for recycling windows"}, {Name: "Main", Doc: "If a Popup Stage, this is the Main Stage that owns it (via its PopupMgr)\nIf a Main Stage, it points to itself."}, {Name: "PopupMgr", Doc: "For Main stages, this is the manager for the popups within it (created\nspecifically for the main stage).\nFor Popups, this is the pointer to the PopupMgr within the\nMain Stage managing it."}, {Name: "MainMgr", Doc: "For all stages, this is the Main stage manager that lives in a RenderWin\nand manages the Main Scenes."}, {Name: "RenderContext", Doc: "rendering context which has info about the RenderWin onto which we render.\nThis should be used instead of the RenderWin itself for all relevant\nrendering information.  This is only available once a Stage is Run,\nand must always be checked for nil."}, {Name: "Sprites", Doc: "sprites are named images that are rendered last overlaying everything else."}, {Name: "SpriteDragging", Doc: "name of sprite that is being dragged -- sprite event function is responsible for setting this."}}})
 
 // SetContext sets the [Stage.Context]:
@@ -1188,9 +1171,6 @@ func (t *Switches) SetMutex(v bool) *Switches { t.Mutex = v; return t }
 // SetTooltip sets the [Switches.Tooltip]
 func (t *Switches) SetTooltip(v string) *Switches { t.Tooltip = v; return t }
 
-// SetStackTop sets the [Switches.StackTop]
-func (t *Switches) SetStackTop(v int) *Switches { t.StackTop = v; return t }
-
 // TabsType is the [gti.Type] for [Tabs]
 var TabsType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Tabs", IDName: "tabs", Doc: "Tabs switches among child widgets via tabs.  The selected widget gets\nthe full allocated space avail after the tabs are accounted for.  The\nTabs is just a Vertical layout that manages two child widgets: a\nHorizFlow Layout for the tabs (which can flow across multiple rows as\nneeded) and a Stacked Frame that actually contains all the children, and\nprovides scrollbars as needed to any content within.  Typically should have\nmax stretch and a set preferred size, so it expands.", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Type", Doc: "Type is the styling type of the tabs. If it is changed after\nthe tabs are first configured, Update needs to be called on\nthe tabs."}, {Name: "NewTabButton", Doc: "NewTabButton is whether to show a new tab button at the end of the list of tabs."}, {Name: "MaxChars", Doc: "MaxChars is the maximum number of characters to include in the tab label.\nIt elides labels that are longer than that."}, {Name: "CloseIcon", Doc: "CloseIcon is the icon used for tab close buttons.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed."}, {Name: "PrevEffectiveType", Doc: "PrevEffectiveType is the previous effective type of the tabs\nas computed by [TabTypes.Effective]."}, {Name: "Mu", Doc: "Mu is a mutex protecting updates to tabs. Tabs can be driven\nprogrammatically and via user input so need extra protection."}}, Instance: &Tabs{}})
 
@@ -1257,9 +1237,6 @@ func (t *Tabs) SetCloseIcon(v icons.Icon) *Tabs { t.CloseIcon = v; return t }
 
 // SetTooltip sets the [Tabs.Tooltip]
 func (t *Tabs) SetTooltip(v string) *Tabs { t.Tooltip = v; return t }
-
-// SetStackTop sets the [Tabs.StackTop]
-func (t *Tabs) SetStackTop(v int) *Tabs { t.StackTop = v; return t }
 
 // TabType is the [gti.Type] for [Tab]
 var TabType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Tab", IDName: "tab", Doc: "Tab is a tab button that contains any, all, or none of a label, an icon,\nand a close icon. Tabs should be made using the [Tabs.NewTab] function.", Directives: []gti.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []gti.Field{{Name: "Box"}}, Fields: []gti.Field{{Name: "Type", Doc: "Type is the styling type of the tab. This property\nmust be set on the parent [Tabs] for it to work correctly."}, {Name: "Text", Doc: "Text is the label text for the tab.\nIf it is nil, no label is shown.\nLabels are never shown for [NavigationRail] tabs."}, {Name: "Icon", Doc: "Icon is the icon for the tab.\nIf it is \"\" or [icons.None], no icon is shown."}, {Name: "CloseIcon", Doc: "CloseIcon is the icon used as a close button for the tab.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed."}, {Name: "MaxChars", Doc: "Maximum number of characters to include in tab label.\nElides labels that are longer than that"}}, Instance: &Tab{}})
@@ -1417,7 +1394,7 @@ func (t *TextField) SetUndoMgr(v TextFieldUndoMgr) *TextField { t.UndoMgr = v; r
 func (t *TextField) SetTooltip(v string) *TextField { t.Tooltip = v; return t }
 
 // ToolbarType is the [gti.Type] for [Toolbar]
-var ToolbarType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Toolbar", IDName: "toolbar", Doc: "Toolbar is a [Frame] that is useful for holding [Button]s that do things.\nIt automatically moves items that do not fit into an overflow menu, and\nmanages additional items that are always placed onto this overflow menu.\nIn general it should be possible to use a single toolbar + overflow to\nmanage all an app's functionality, in a way that is portable across\nmobile and desktop environments.\nSee [Widget.ConfigToolbar] for the standard toolbar config method for\nany given widget, and [Scene.AppBars] for [ToolbarFuncs] for [Scene]\nelements who should be represented in the main AppBar (e.g., TopAppBar).", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Methods: []gti.Method{{Name: "StdOverflowMenu", Doc: "StdOverflowMenu adds standard overflow menu items.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"m"}}}, Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "OverflowItems", Doc: "items moved from the main toolbar, will be shown in the overflow menu"}, {Name: "OverflowMenus", Doc: "functions for overflow menu: use AddOverflowMenu to add.\nThese are processed in _reverse_ order (last in, first called)\nso that the default items are added last."}, {Name: "ToolbarFuncs", Doc: "ToolbarFuncs contains functions for configuring this toolbar,\ncalled on Config"}, {Name: "OverflowButton", Doc: "This is the overflow button"}}, Instance: &Toolbar{}})
+var ToolbarType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Toolbar", IDName: "toolbar", Doc: "Toolbar is a [Frame] that is useful for holding [Button]s that do things.\nIt automatically moves items that do not fit into an overflow menu, and\nmanages additional items that are always placed onto this overflow menu.\nIn general it should be possible to use a single toolbar + overflow to\nmanage all an app's functionality, in a way that is portable across\nmobile and desktop environments.\nSee [Widget.ConfigToolbar] for the standard toolbar config method for\nany given widget, and [Scene.AppBars] for [ToolbarFuncs] for [Scene]\nelements who should be represented in the main AppBar (e.g., TopAppBar).", Directives: []gti.Directive{{Tool: "core", Directive: "embedder"}}, Methods: []gti.Method{{Name: "StandardOverflowMenu", Doc: "StandardOverflowMenu adds standard overflow menu items.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"m"}}}, Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "OverflowItems", Doc: "items moved from the main toolbar, will be shown in the overflow menu"}, {Name: "OverflowMenus", Doc: "functions for overflow menu: use AddOverflowMenu to add.\nThese are processed in _reverse_ order (last in, first called)\nso that the default items are added last."}, {Name: "ToolbarFuncs", Doc: "ToolbarFuncs contains functions for configuring this toolbar,\ncalled on Config"}, {Name: "OverflowButton", Doc: "This is the overflow button"}}, Instance: &Toolbar{}})
 
 // NewToolbar adds a new [Toolbar] with the given name to the given parent:
 // Toolbar is a [Frame] that is useful for holding [Button]s that do things.
@@ -1471,9 +1448,6 @@ func (t *Toolbar) SetOverflowButton(v *Button) *Toolbar { t.OverflowButton = v; 
 // SetTooltip sets the [Toolbar.Tooltip]
 func (t *Toolbar) SetTooltip(v string) *Toolbar { t.Tooltip = v; return t }
 
-// SetStackTop sets the [Toolbar.StackTop]
-func (t *Toolbar) SetStackTop(v int) *Toolbar { t.StackTop = v; return t }
-
 // BasicBarType is the [gti.Type] for [BasicBar]
 var BasicBarType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.BasicBar", IDName: "basic-bar", Doc: "BasicBar is just a styled Frame layout for holding buttons\nand other widgets.  Use this when the more advanced features\nof the Toolbar are not needed.", Embeds: []gti.Field{{Name: "Frame"}}, Instance: &BasicBar{}})
 
@@ -1493,9 +1467,6 @@ func (t *BasicBar) New() ki.Ki { return &BasicBar{} }
 
 // SetTooltip sets the [BasicBar.Tooltip]
 func (t *BasicBar) SetTooltip(v string) *BasicBar { t.Tooltip = v; return t }
-
-// SetStackTop sets the [BasicBar.StackTop]
-func (t *BasicBar) SetStackTop(v int) *BasicBar { t.StackTop = v; return t }
 
 // WidgetBaseType is the [gti.Type] for [WidgetBase]
 var WidgetBaseType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.WidgetBase", IDName: "widget-base", Doc: "WidgetBase is the base type for all Widget Widget elements, which are\nmanaged by a containing Layout, and use all 5 rendering passes.  All\nelemental widgets must support the ReadOnly and Selected states in a\nreasonable way (Selected only essential when also ReadOnly), so they can\nfunction appropriately in a chooser (e.g., SliceView or TableView) -- this\nincludes toggling selection on left mouse press.", Directives: []gti.Directive{{Tool: "core", Directive: "no-new"}}, Methods: []gti.Method{{Name: "Update", Doc: "Update does a general purpose update of the widget and everything\nbelow it by reconfiguring it, applying its styles, and indicating\nthat it needs a new layout pass. It is the main way that end users\nshould update widgets, and it should be called after making any\nchanges to the core properties of a widget (for example, the text\nof a label, the icon of a button, or the slice of a table view).\n\nIf you are calling this in a separate goroutine outside of the main\nconfiguration, rendering, and event handling structure, you need to\ncall [WidgetBase.AsyncLock] and [WidgetBase.AsyncUnlock] before and\nafter this, respectively.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}}, Embeds: []gti.Field{{Name: "Node"}}, Fields: []gti.Field{{Name: "Tooltip", Doc: "Tooltip is the text for the tooltip for this widget,\nwhich can use HTML formatting."}, {Name: "Parts", Doc: "Parts are a separate tree of sub-widgets that implement discrete parts\nof a widget.  Positions are relative to the parent widget.\nThese are fully managed by the parent widget"}, {Name: "Geom", Doc: "Geom has the full layout geometry for size and position of this Widget"}, {Name: "OverrideStyle", Doc: "If true, Override the computed styles and allow directly editing Style"}, {Name: "Styles", Doc: "Styles are styling settings for this widget.\nThese are set in SetApplyStyle which should be called after any Config\nchange (e.g., as done by the Update method).  See Stylers for functions\nthat set all of the styles, ordered from initial base defaults to later\nadded overrides."}, {Name: "Stylers", Doc: "Stylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using Style function. FirstStylers and\nFinalStylers are called before and after these stylers, respectively."}, {Name: "FirstStylers", Doc: "FirstStylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using StyleFirst function. These stylers\nare called before Stylers and FinalStylers."}, {Name: "FinalStylers", Doc: "FinalStylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using StyleFinal function. These stylers\nare called after FirstStylers and Stylers."}, {Name: "Listeners", Doc: "Listeners are event listener functions for processing events on this widget.\nThey are called in sequential descending order (so the last added listener\nis called first). They should be added using the On function. FirstListeners\nand FinalListeners are called before and after these listeners, respectively."}, {Name: "FirstListeners", Doc: "FirstListeners are event listener functions for processing events on this widget.\nThey are called in sequential descending order (so the last added listener\nis called first). They should be added using the OnFirst function. These listeners\nare called before Listeners and FinalListeners."}, {Name: "FinalListeners", Doc: "FinalListeners are event listener functions for processing events on this widget.\nThey are called in sequential descending order (so the last added listener\nis called first). They should be added using the OnFinal function. These listeners\nare called after FirstListeners and Listeners."}, {Name: "OnWidgetAdders", Doc: "A slice of functions to call on all widgets that are added as children\nto this widget or its children.  These functions are called in sequential\nascending order, so the last added one is called last and thus can\noverride anything set by the other ones. These should be set using\nOnWidgetAdded, which can be called by both end-user and internal code."}, {Name: "ContextMenus", Doc: "ContextMenus is a slice of menu functions to call to construct\nthe widget's context menu on an [events.ContextMenu]. The\nfunctions are called in reverse order such that the elements\nadded in the last function are the first in the menu.\nContext menus should be added through [Widget.AddContextMenu].\nSeparators will be added between each context menu function."}, {Name: "Scene", Doc: "Scene is the overall Scene to which we belong. It is automatically\nby widgets whenever they are added to another widget parent."}}, Instance: &WidgetBase{}})

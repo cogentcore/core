@@ -168,7 +168,7 @@ func (dv *DateView) Config() {
 	})
 
 	arrowStyle := func(s *styles.Style) {
-		s.Padding.SetHoriz(units.Dp(12))
+		s.Padding.SetHorizontal(units.Dp(12))
 		s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 	}
 

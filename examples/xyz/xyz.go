@@ -150,7 +150,7 @@ func main() {
 	sv.Config()
 	sw := sv.SceneWidget()
 	sc := sv.SceneXYZ()
-	sw.SelMode = xyzv.Manipulable
+	sw.SelectionMode = xyzv.Manipulable
 
 	// options - must be set here
 	// sc.MultiSample = 1

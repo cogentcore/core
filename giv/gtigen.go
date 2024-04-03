@@ -40,9 +40,6 @@ func (t *ArgView) SetArgs(v ...Value) *ArgView { t.Args = v; return t }
 // SetTooltip sets the [ArgView.Tooltip]
 func (t *ArgView) SetTooltip(v string) *ArgView { t.Tooltip = v; return t }
 
-// SetStackTop sets the [ArgView.StackTop]
-func (t *ArgView) SetStackTop(v int) *ArgView { t.StackTop = v; return t }
-
 // ColorViewType is the [gti.Type] for [ColorView]
 var ColorViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.ColorView", IDName: "color-view", Doc: "ColorView shows a color, using sliders or numbers to set values.", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Color", Doc: "the color that we view"}}, Instance: &ColorView{}})
 
@@ -61,11 +58,8 @@ func (t *ColorView) New() ki.Ki { return &ColorView{} }
 // SetTooltip sets the [ColorView.Tooltip]
 func (t *ColorView) SetTooltip(v string) *ColorView { t.Tooltip = v; return t }
 
-// SetStackTop sets the [ColorView.StackTop]
-func (t *ColorView) SetStackTop(v int) *ColorView { t.StackTop = v; return t }
-
 // FileViewType is the [gti.Type] for [FileView]
-var FileViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.FileView", IDName: "file-view", Doc: "FileView is a viewer onto files -- core of the file chooser dialog", Methods: []gti.Method{{Name: "UpdateFilesAction", Doc: "UpdateFilesAction updates the list of files and other views for the current path.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "AddPathToFavs", Doc: "AddPathToFavs adds the current path to favorites", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "DirPathUp", Doc: "DirPathUp moves up one directory in the path", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "NewFolder", Doc: "NewFolder creates a new folder with the given name in the current directory.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"name"}, Returns: []string{"error"}}}, Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "DirPath", Doc: "path to directory of files to display"}, {Name: "SelFile", Doc: "selected file"}, {Name: "Ext", Doc: "target extension(s) (comma separated if multiple, including initial .), if any"}, {Name: "FilterFunc", Doc: "optional styling function"}, {Name: "ExtMap", Doc: "map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value"}, {Name: "Files", Doc: "files for current directory"}, {Name: "SelectedIndex", Doc: "index of currently-selected file in Files list (-1 if none)"}, {Name: "Watcher", Doc: "change notify for current dir"}, {Name: "DoneWatcher", Doc: "channel to close watcher watcher"}, {Name: "UpdtMu", Doc: "UpdateFiles mutex"}, {Name: "PrevPath", Doc: "Previous path that was processed via UpdateFiles"}}, Instance: &FileView{}})
+var FileViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.FileView", IDName: "file-view", Doc: "FileView is a viewer onto files -- core of the file chooser dialog", Methods: []gti.Method{{Name: "UpdateFilesAction", Doc: "UpdateFilesAction updates the list of files and other views for the current path.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "AddPathToFavs", Doc: "AddPathToFavs adds the current path to favorites", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "DirPathUp", Doc: "DirPathUp moves up one directory in the path", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "NewFolder", Doc: "NewFolder creates a new folder with the given name in the current directory.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"name"}, Returns: []string{"error"}}}, Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "DirPath", Doc: "path to directory of files to display"}, {Name: "CurrentSelectedFile", Doc: "currently selected file"}, {Name: "Ext", Doc: "target extension(s) (comma separated if multiple, including initial .), if any"}, {Name: "FilterFunc", Doc: "optional styling function"}, {Name: "ExtMap", Doc: "map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value"}, {Name: "Files", Doc: "files for current directory"}, {Name: "SelectedIndex", Doc: "index of currently-selected file in Files list (-1 if none)"}, {Name: "Watcher", Doc: "change notify for current dir"}, {Name: "DoneWatcher", Doc: "channel to close watcher watcher"}, {Name: "UpdtMu", Doc: "UpdateFiles mutex"}, {Name: "PrevPath", Doc: "Previous path that was processed via UpdateFiles"}}, Instance: &FileView{}})
 
 // NewFileView adds a new [FileView] with the given name to the given parent:
 // FileView is a viewer onto files -- core of the file chooser dialog
@@ -78,14 +72,6 @@ func (t *FileView) KiType() *gti.Type { return FileViewType }
 
 // New returns a new [*FileView] value
 func (t *FileView) New() ki.Ki { return &FileView{} }
-
-// SetDirPath sets the [FileView.DirPath]:
-// path to directory of files to display
-func (t *FileView) SetDirPath(v string) *FileView { t.DirPath = v; return t }
-
-// SetSelFile sets the [FileView.SelFile]:
-// selected file
-func (t *FileView) SetSelFile(v string) *FileView { t.SelFile = v; return t }
 
 // SetFilterFunc sets the [FileView.FilterFunc]:
 // optional styling function
@@ -101,9 +87,6 @@ func (t *FileView) SetFiles(v ...*fi.FileInfo) *FileView { t.Files = v; return t
 
 // SetTooltip sets the [FileView.Tooltip]
 func (t *FileView) SetTooltip(v string) *FileView { t.Tooltip = v; return t }
-
-// SetStackTop sets the [FileView.StackTop]
-func (t *FileView) SetStackTop(v int) *FileView { t.StackTop = v; return t }
 
 // FuncButtonType is the [gti.Type] for [FuncButton]
 var FuncButtonType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.FuncButton", IDName: "func-button", Doc: "FuncButton is a button that is set up to call a function when it\nis pressed, using a dialog to prompt the user for any arguments.\nAlso, it automatically sets various properties of the button like\nthe name, text, tooltip, and icon based on the properties of the\nfunction, using reflect and gti. The function must be registered\nwith gti to get documentation information, but that is not required;\nadd a `//gti:add` comment directive and run `core generate`\nif you want tooltips. If the function is a method, both the method and\nits receiver type must be added to gti to get documentation.", Directives: []gti.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []gti.Field{{Name: "Button"}}, Fields: []gti.Field{{Name: "Func", Doc: "Func is the [gti.Func] associated with this button.\nThis function can also be a method, but it must be\nconverted to a [gti.Func] first. It should typically\nbe set using [FuncButton.SetFunc]."}, {Name: "ReflectFunc", Doc: "ReflectFunc is the [reflect.Value] of the function or\nmethod associated with this button. It should typically\nbet set using [FuncButton.SetFunc]."}, {Name: "Args", Doc: "Args are the [Value] objects associated with the\narguments of the function. They are automatically set in\n[SetFunc], but they can be customized to configure\ndefault values and other options."}, {Name: "Returns", Doc: "Returns are the [Value] objects associated with the\nreturn values of the function. They are automatically\nset in [SetFunc], but they can be customized to configure\ndefault values and other options. The [reflect.Value]s of\nthe [Value] objects are not set until the function is\ncalled, and are thus not typically applicable to access."}, {Name: "Confirm", Doc: "Confirm is whether to prompt the user for confirmation\nbefore calling the function."}, {Name: "ShowReturn", Doc: "ShowReturn is whether to display the return values of\nthe function (and a success message if there are none).\nThe way that the return values are shown is determined\nby ShowReturnAsDialog. Non-nil error return values will\nalways be shown, even if ShowReturn is set to false."}, {Name: "ShowReturnAsDialog", Doc: "ShowReturnAsDialog, if and only if ShowReturn is true,\nindicates to show the return values of the function in\na dialog, instead of in a snackbar, as they are by default.\nIf there are multiple return values from the function, or if\none of them is a complex type (pointer, struct, slice,\narray, map), then ShowReturnAsDialog will\nautomatically be set to true."}, {Name: "NewWindow", Doc: "NewWindow makes the ReturnDialog a NewWindow dialog\n(if supported by platform)."}, {Name: "WarnUnadded", Doc: "WarnUnadded is whether to log warnings when a function that\nhas not been added to gti is used. It is on by default and\nmust be set before [FuncButton.SetFunc] is called for it to\nhave any effect."}, {Name: "Context", Doc: "Context is used for opening Dialogs if non-nil."}, {Name: "AfterFunc", Doc: "AfterFunc is an optional function called after the funcbutton\nfunction is executed"}}, Instance: &FuncButton{}})
@@ -205,9 +188,6 @@ func (t *Inspector) SetFilename(v gi.Filename) *Inspector { t.Filename = v; retu
 // SetTooltip sets the [Inspector.Tooltip]
 func (t *Inspector) SetTooltip(v string) *Inspector { t.Tooltip = v; return t }
 
-// SetStackTop sets the [Inspector.StackTop]
-func (t *Inspector) SetStackTop(v int) *Inspector { t.StackTop = v; return t }
-
 // MapViewType is the [gti.Type] for [MapView]
 var MapViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.MapView", IDName: "map-view", Doc: "MapView represents a map, creating a property editor of the values --\nconstructs Children widgets to show the key / value pairs, within an\noverall frame.", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Map", Doc: "the map that we are a view onto"}, {Name: "MapValView", Doc: "Value for the map itself, if this was created within value view framework; otherwise nil"}, {Name: "Changed", Doc: "has the map been edited?"}, {Name: "Keys", Doc: "Value representations of the map keys"}, {Name: "Values", Doc: "Value representations of the map values"}, {Name: "SortVals", Doc: "sort by values instead of keys"}, {Name: "NCols", Doc: "the number of columns in the map; do not set externally;\ngenerally only access internally"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view.\nDisplayed as extra contextual information in view dialog windows."}}, Instance: &MapView{}})
 
@@ -241,9 +221,6 @@ func (t *MapView) SetViewPath(v string) *MapView { t.ViewPath = v; return t }
 // SetTooltip sets the [MapView.Tooltip]
 func (t *MapView) SetTooltip(v string) *MapView { t.Tooltip = v; return t }
 
-// SetStackTop sets the [MapView.StackTop]
-func (t *MapView) SetStackTop(v int) *MapView { t.StackTop = v; return t }
-
 // MapViewInlineType is the [gti.Type] for [MapViewInline]
 var MapViewInlineType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.MapViewInline", IDName: "map-view-inline", Doc: "MapViewInline represents a map as a single line widget,\nfor smaller maps and those explicitly marked inline.", Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Map", Doc: "the map that we are a view onto"}, {Name: "MapValue", Doc: "MapValue is the Value for the map itself\nif this was created within the Value framework.\nOtherwise, it is nil."}, {Name: "Changed", Doc: "has the map been edited?"}, {Name: "Keys", Doc: "Value representations of the map keys"}, {Name: "Values", Doc: "Value representations of the fields"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}, {Name: "ConfigSize", Doc: "size of map when gui configed"}}, Instance: &MapViewInline{}})
 
@@ -266,9 +243,6 @@ func (t *MapViewInline) SetViewPath(v string) *MapViewInline { t.ViewPath = v; r
 
 // SetTooltip sets the [MapViewInline.Tooltip]
 func (t *MapViewInline) SetTooltip(v string) *MapViewInline { t.Tooltip = v; return t }
-
-// SetStackTop sets the [MapViewInline.StackTop]
-func (t *MapViewInline) SetStackTop(v int) *MapViewInline { t.StackTop = v; return t }
 
 // SliceViewType is the [gti.Type] for [SliceView]
 var SliceViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.SliceView", IDName: "slice-view", Doc: "SliceView represents a slice, creating an interactive viewer / editor of the\nelements as rows in a table.  Widgets to show the index / value pairs, within an\noverall frame.\nSet to ReadOnly for select-only mode, which emits WidgetSig WidgetSelected\nsignals when selection is updated.", Embeds: []gti.Field{{Name: "SliceViewBase"}}, Fields: []gti.Field{{Name: "StyleFunc", Doc: "optional styling function"}}, Instance: &SliceView{}})
@@ -296,9 +270,6 @@ func (t *SliceView) SetStyleFunc(v SliceViewStyleFunc) *SliceView { t.StyleFunc 
 // SetTooltip sets the [SliceView.Tooltip]
 func (t *SliceView) SetTooltip(v string) *SliceView { t.Tooltip = v; return t }
 
-// SetStackTop sets the [SliceView.StackTop]
-func (t *SliceView) SetStackTop(v int) *SliceView { t.StackTop = v; return t }
-
 // SetMinRows sets the [SliceView.MinRows]
 func (t *SliceView) SetMinRows(v int) *SliceView { t.MinRows = v; return t }
 
@@ -309,7 +280,7 @@ func (t *SliceView) SetViewPath(v string) *SliceView { t.ViewPath = v; return t 
 func (t *SliceView) SetViewMu(v *sync.Mutex) *SliceView { t.ViewMu = v; return t }
 
 // SetSelVal sets the [SliceView.SelVal]
-func (t *SliceView) SetSelVal(v any) *SliceView { t.SelVal = v; return t }
+func (t *SliceView) SetSelVal(v any) *SliceView { t.SelectedValue = v; return t }
 
 // SetSelectedIndex sets the [SliceView.SelectedIndex]
 func (t *SliceView) SetSelectedIndex(v int) *SliceView { t.SelectedIndex = v; return t }
@@ -355,7 +326,7 @@ func (t *SliceViewBase) SetViewMu(v *sync.Mutex) *SliceViewBase { t.ViewMu = v; 
 
 // SetSelVal sets the [SliceViewBase.SelVal]:
 // current selection value -- initially select this value if set
-func (t *SliceViewBase) SetSelVal(v any) *SliceViewBase { t.SelVal = v; return t }
+func (t *SliceViewBase) SetSelVal(v any) *SliceViewBase { t.SelectedValue = v; return t }
 
 // SetSelectedIndex sets the [SliceViewBase.SelectedIndex]:
 // index of currently selected item
@@ -367,9 +338,6 @@ func (t *SliceViewBase) SetInitSelectedIndex(v int) *SliceViewBase { t.InitSelec
 
 // SetTooltip sets the [SliceViewBase.Tooltip]
 func (t *SliceViewBase) SetTooltip(v string) *SliceViewBase { t.Tooltip = v; return t }
-
-// SetStackTop sets the [SliceViewBase.StackTop]
-func (t *SliceViewBase) SetStackTop(v int) *SliceViewBase { t.StackTop = v; return t }
 
 // SliceViewGridType is the [gti.Type] for [SliceViewGrid]
 var SliceViewGridType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.SliceViewGrid", IDName: "slice-view-grid", Doc: "SliceViewGrid handles the resizing logic for SliceView, TableView.", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "MinRows", Doc: "MinRows is set from parent SV"}, {Name: "RowHeight", Doc: "height of a single row, computed during layout"}, {Name: "VisRows", Doc: "total number of rows visible in allocated display size"}, {Name: "BgStripe", Doc: "Various computed backgrounds"}, {Name: "BgSelect", Doc: "Various computed backgrounds"}, {Name: "BgSelectStripe", Doc: "Various computed backgrounds"}, {Name: "BgHover", Doc: "Various computed backgrounds"}, {Name: "BgHoverStripe", Doc: "Various computed backgrounds"}, {Name: "BgHoverSelect", Doc: "Various computed backgrounds"}, {Name: "BgHoverSelectStripe", Doc: "Various computed backgrounds"}, {Name: "LastBackground", Doc: "LastBackground is the background for which modified\nbackgrounds were computed -- don't update if same"}}, Instance: &SliceViewGrid{}})
@@ -397,9 +365,6 @@ func (t *SliceViewGrid) SetLastBackground(v image.Image) *SliceViewGrid {
 // SetTooltip sets the [SliceViewGrid.Tooltip]
 func (t *SliceViewGrid) SetTooltip(v string) *SliceViewGrid { t.Tooltip = v; return t }
 
-// SetStackTop sets the [SliceViewGrid.StackTop]
-func (t *SliceViewGrid) SetStackTop(v int) *SliceViewGrid { t.StackTop = v; return t }
-
 // SliceViewInlineType is the [gti.Type] for [SliceViewInline]
 var SliceViewInlineType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.SliceViewInline", IDName: "slice-view-inline", Doc: "SliceViewInline represents a slice as a single line widget,\nfor smaller slices and those explicitly marked inline.", Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Slice", Doc: "the slice that we are a view onto"}, {Name: "SliceValue", Doc: "SliceValue is the Value for the slice itself\nif this was created within the Value framework.\nOtherwise, it is nil."}, {Name: "IsArray", Doc: "whether the slice is actually an array -- no modifications"}, {Name: "IsFixedLen", Doc: "whether the slice has a fixed-len flag on it"}, {Name: "Changed", Doc: "has the slice been edited?"}, {Name: "Values", Doc: "Value representations of the fields"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}, {Name: "ConfigSize", Doc: "size of map when gui was configured"}}, Instance: &SliceViewInline{}})
 
@@ -423,11 +388,8 @@ func (t *SliceViewInline) SetViewPath(v string) *SliceViewInline { t.ViewPath = 
 // SetTooltip sets the [SliceViewInline.Tooltip]
 func (t *SliceViewInline) SetTooltip(v string) *SliceViewInline { t.Tooltip = v; return t }
 
-// SetStackTop sets the [SliceViewInline.StackTop]
-func (t *SliceViewInline) SetStackTop(v int) *SliceViewInline { t.StackTop = v; return t }
-
 // StructViewType is the [gti.Type] for [StructView]
-var StructViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.StructView", IDName: "struct-view", Doc: "StructView represents a struct, creating a property editor of the fields --\nconstructs Children widgets to show the field names and editor fields for\neach field, within an overall frame.", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Struct", Doc: "the struct that we are a view onto"}, {Name: "StructValue", Doc: "StructValue is the Value for the struct itself\nif this was created within the Value framework.\nOtherwise, it is nil."}, {Name: "Changed", Doc: "has the value of any field changed?  updated by the ViewSig signals from fields"}, {Name: "FieldViews", Doc: "Value representations of the fields"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}, {Name: "IsShouldShower", Doc: "IsShouldShower is whether the struct implements [gi.ShouldShower], which results\nin additional updating being done at certain points."}, {Name: "TypeFieldTags", Doc: "extra tags by field name -- from type properties"}}, Instance: &StructView{}})
+var StructViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.StructView", IDName: "struct-view", Doc: "StructView represents a struct, creating a property editor of the fields --\nconstructs Children widgets to show the field names and editor fields for\neach field, within an overall frame.", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Struct", Doc: "the struct that we are a view onto"}, {Name: "StructValue", Doc: "StructValue is the Value for the struct itself\nif this was created within the Value framework.\nOtherwise, it is nil."}, {Name: "FieldViews", Doc: "Value representations of the fields"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}, {Name: "IsShouldShower", Doc: "IsShouldShower is whether the struct implements [gi.ShouldShower], which results\nin additional updating being done at certain points."}, {Name: "TypeFieldTags", Doc: "extra tags by field name -- from type properties"}}, Instance: &StructView{}})
 
 // NewStructView adds a new [StructView] with the given name to the given parent:
 // StructView represents a struct, creating a property editor of the fields --
@@ -449,9 +411,6 @@ func (t *StructView) SetViewPath(v string) *StructView { t.ViewPath = v; return 
 
 // SetTooltip sets the [StructView.Tooltip]
 func (t *StructView) SetTooltip(v string) *StructView { t.Tooltip = v; return t }
-
-// SetStackTop sets the [StructView.StackTop]
-func (t *StructView) SetStackTop(v int) *StructView { t.StackTop = v; return t }
 
 // StructViewInlineType is the [gti.Type] for [StructViewInline]
 var StructViewInlineType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.StructViewInline", IDName: "struct-view-inline", Doc: "StructViewInline represents a struct as a single line widget,\nfor smaller structs and those explicitly marked inline.", Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Struct", Doc: "the struct that we are a view onto"}, {Name: "StructValue", Doc: "Value for the struct itself, if this was created within value view framework -- otherwise nil"}, {Name: "AddButton", Doc: "if true, add an edit button at the end"}, {Name: "FieldViews", Doc: "Value representations of the fields"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}, {Name: "IsShouldShower", Doc: "IsShouldShower is whether the struct implements [gi.ShouldShower], which results\nin additional updating being done at certain points."}}, Instance: &StructViewInline{}})
@@ -483,9 +442,6 @@ func (t *StructViewInline) SetViewPath(v string) *StructViewInline { t.ViewPath 
 
 // SetTooltip sets the [StructViewInline.Tooltip]
 func (t *StructViewInline) SetTooltip(v string) *StructViewInline { t.Tooltip = v; return t }
-
-// SetStackTop sets the [StructViewInline.StackTop]
-func (t *StructViewInline) SetStackTop(v int) *StructViewInline { t.StackTop = v; return t }
 
 // TableViewType is the [gti.Type] for [TableView]
 var TableViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.TableView", IDName: "table-view", Doc: "TableView represents a slice-of-structs as a table, where the fields are\nthe columns, within an overall frame.  It is a full-featured editor with\nmultiple-selection, cut-and-paste, and drag-and-drop.\nIf ReadOnly, it functions as a mutually-exclusive item\nselector, highlighting the selected row and emitting a Selected action.", Embeds: []gti.Field{{Name: "SliceViewBase"}}, Fields: []gti.Field{{Name: "StyleFunc", Doc: "optional styling function"}, {Name: "SelectedField", Doc: "current selection field -- initially select value in this field"}, {Name: "SortIndex", Doc: "current sort index"}, {Name: "SortDesc", Doc: "whether current sort order is descending"}, {Name: "StruType", Doc: "struct type for each row"}, {Name: "VisFields", Doc: "the visible fields"}, {Name: "NVisFields", Doc: "number of visible fields"}, {Name: "HeaderWidths", Doc: "HeaderWidths has number of characters in each header, per visfields"}, {Name: "ColMaxWidths", Doc: "ColMaxWidths records maximum width in chars of string type fields"}}, Instance: &TableView{}})
@@ -525,9 +481,6 @@ func (t *TableView) SetSortDesc(v bool) *TableView { t.SortDesc = v; return t }
 // SetTooltip sets the [TableView.Tooltip]
 func (t *TableView) SetTooltip(v string) *TableView { t.Tooltip = v; return t }
 
-// SetStackTop sets the [TableView.StackTop]
-func (t *TableView) SetStackTop(v int) *TableView { t.StackTop = v; return t }
-
 // SetMinRows sets the [TableView.MinRows]
 func (t *TableView) SetMinRows(v int) *TableView { t.MinRows = v; return t }
 
@@ -538,7 +491,7 @@ func (t *TableView) SetViewPath(v string) *TableView { t.ViewPath = v; return t 
 func (t *TableView) SetViewMu(v *sync.Mutex) *TableView { t.ViewMu = v; return t }
 
 // SetSelVal sets the [TableView.SelVal]
-func (t *TableView) SetSelVal(v any) *TableView { t.SelVal = v; return t }
+func (t *TableView) SetSelVal(v any) *TableView { t.SelectedValue = v; return t }
 
 // SetSelectedIndex sets the [TableView.SelectedIndex]
 func (t *TableView) SetSelectedIndex(v int) *TableView { t.SelectedIndex = v; return t }
@@ -564,9 +517,6 @@ func (t *TimeView) New() ki.Ki { return &TimeView{} }
 // SetTooltip sets the [TimeView.Tooltip]
 func (t *TimeView) SetTooltip(v string) *TimeView { t.Tooltip = v; return t }
 
-// SetStackTop sets the [TimeView.StackTop]
-func (t *TimeView) SetStackTop(v int) *TimeView { t.StackTop = v; return t }
-
 // DateViewType is the [gti.Type] for [DateView]
 var DateViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.DateView", IDName: "date-view", Doc: "DateView is a view for selecting a date", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Time", Doc: "the time that we are viewing"}, {Name: "ConfigTime", Doc: "ConfigTime is the time that was configured"}}, Instance: &DateView{}})
 
@@ -585,9 +535,6 @@ func (t *DateView) New() ki.Ki { return &DateView{} }
 // SetTooltip sets the [DateView.Tooltip]
 func (t *DateView) SetTooltip(v string) *DateView { t.Tooltip = v; return t }
 
-// SetStackTop sets the [DateView.StackTop]
-func (t *DateView) SetStackTop(v int) *DateView { t.StackTop = v; return t }
-
 // TreeTableViewType is the [gti.Type] for [TreeTableView]
 var TreeTableViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.TreeTableView", IDName: "tree-table-view", Doc: "TreeTableView combines a [TreeView] and [TableView].", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Tree", Doc: "Tree is the tree view component of the tree table view."}, {Name: "Table", Doc: "Table is the table view component of the tree table view."}}, Instance: &TreeTableView{}})
 
@@ -605,9 +552,6 @@ func (t *TreeTableView) New() ki.Ki { return &TreeTableView{} }
 
 // SetTooltip sets the [TreeTableView.Tooltip]
 func (t *TreeTableView) SetTooltip(v string) *TreeTableView { t.Tooltip = v; return t }
-
-// SetStackTop sets the [TreeTableView.StackTop]
-func (t *TreeTableView) SetStackTop(v int) *TreeTableView { t.StackTop = v; return t }
 
 // TreeViewType is the [gti.Type] for [TreeView]
 var TreeViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.TreeView", IDName: "tree-view", Doc: "TreeView provides a graphical representation of a tree structure,\nproviding full navigation and manipulation abilities.\n\nIt does not handle layout by itself, so if you want it to scroll\nseparately from the rest of the surrounding context, use [NewTreeViewFrame].\n\nIf the SyncNode field is non-nil, typically via\nSyncRootNode method, then the TreeView mirrors another\nKi tree structure, and tree editing functions apply to\nthe source tree first, and then to the TreeView by sync.\n\nOtherwise, data can be directly encoded in a TreeView\nderived type, to represent any kind of tree structure\nand associated data.\n\nStandard events.Event are sent to any listeners, including\nSelect, Change, and DoubleClick.  The selected nodes\nare in the root SelectedNodes list.", Methods: []gti.Method{{Name: "InsertAfter", Doc: "InsertAfter inserts a new node in the tree\nafter this node, at the same (sibling) level,\nprompting for the type of node to insert.\nIf SyncNode is set, operates on Sync Tree.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "InsertBefore", Doc: "InsertBefore inserts a new node in the tree\nbefore this node, at the same (sibling) level,\nprompting for the type of node to insert\nIf SyncNode is set, operates on Sync Tree.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "AddChildNode", Doc: "AddChildNode adds a new child node to this one in the tree,\nprompting the user for the type of node to add\nIf SyncNode is set, operates on Sync Tree.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "DeleteNode", Doc: "DeleteNode deletes the tree node or sync node corresponding\nto this view node in the sync tree.\nIf SyncNode is set, operates on Sync Tree.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "Duplicate", Doc: "Duplicate duplicates the sync node corresponding to this view node in\nthe tree, and inserts the duplicate after this node (as a new sibling).\nIf SyncNode is set, operates on Sync Tree.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "EditNode", Doc: "EditNode pulls up a StructViewDialog window on the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "InspectNode", Doc: "InspectNode pulls up a new Inspector window on the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "OpenAll", Doc: "OpenAll opens the given node and all of its sub-nodes", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "CloseAll", Doc: "CloseAll closes the given node and all of its sub-nodes.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "Copy", Doc: "Copy copies to goosi.Clipboard, optionally resetting the selection.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"reset"}}, {Name: "Cut", Doc: "Cut copies to goosi.Clipboard and deletes selected items.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "Paste", Doc: "Paste pastes clipboard at given node.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}}, Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "SyncNode", Doc: "If non-nil, the Ki Node that this widget is viewing in the tree (the source)"}, {Name: "Text", Doc: "The text to display for the tree view item label, which automatically\ndefaults to the [ki.Node.Name] of the tree view node. It has no effect\nif [TreeView.SyncNode] is non-nil."}, {Name: "Icon", Doc: "optional icon, displayed to the the left of the text label"}, {Name: "IconOpen", Doc: "icon to use for an open (expanded) branch; defaults to [icons.KeyboardArrowDown]"}, {Name: "IconClosed", Doc: "icon to use for a closed (collapsed) branch; defaults to [icons.KeyboardArrowRight]"}, {Name: "IconLeaf", Doc: "icon to use for a terminal node branch that has no children; defaults to [icons.Blank]"}, {Name: "Indent", Doc: "amount to indent children relative to this node"}, {Name: "OpenDepth", Doc: "depth for nodes be initialized as open (default 4).\nNodes beyond this depth will be initialized as closed."}, {Name: "ViewIndex", Doc: "linear index of this node within the entire tree.\nupdated on full rebuilds and may sometimes be off,\nbut close enough for expected uses"}, {Name: "WidgetSize", Doc: "size of just this node widget.\nour alloc includes all of our children, but we only draw us."}, {Name: "RootView", Doc: "The cached root of the view. It is automatically set and does not need to be\nset by the end user."}, {Name: "SelectedNodes", Doc: "SelectedNodes holds the currently-selected nodes, on the\nRootView node only."}, {Name: "actStateLayer", Doc: "actStateLayer is the actual state layer of the tree view, which\nshould be used when rendering it and its parts (but not its children).\nthe reason that it exists is so that the children of the tree view\n(other tree views) do not inherit its stateful background color, as\nthat does not look good."}}, Instance: &TreeView{}})
@@ -695,5 +639,3 @@ func (t *TreeView) SetSelectedNodes(v ...TreeViewer) *TreeView { t.SelectedNodes
 
 // SetTooltip sets the [TreeView.Tooltip]
 func (t *TreeView) SetTooltip(v string) *TreeView { t.Tooltip = v; return t }
-
-var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/giv.ViewStdKeyMaps", Doc: "ViewStdKeyMaps shows the standard maps that are compiled into the program and have\nall the lastest key functions bound to standard values.  Useful for\ncomparing against custom maps.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}})

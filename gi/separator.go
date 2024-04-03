@@ -31,11 +31,11 @@ func (sp *Separator) SetStyles() {
 		if s.Direction == styles.Row {
 			s.Grow.Set(1, 0)
 			s.Min.Y.Dp(1)
-			s.Margin.SetHoriz(units.Dp(6))
+			s.Margin.SetHorizontal(units.Dp(6))
 		} else {
 			s.Grow.Set(0, 1)
 			s.Min.X.Dp(1)
-			s.Margin.SetVert(units.Dp(6))
+			s.Margin.SetVertical(units.Dp(6))
 		}
 	})
 }

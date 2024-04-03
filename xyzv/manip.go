@@ -15,12 +15,12 @@ import (
 	"cogentcore.org/core/xyz"
 )
 
-// SelModes are selection modes for Scene
-type SelModes int32 //enums:enum
+// SelectionModes are selection modes for Scene
+type SelectionModes int32 //enums:enum
 
 const (
 	// NotSelectable means that selection events are ignored entirely
-	NotSelectable SelModes = iota
+	NotSelectable SelectionModes = iota
 
 	// Selectable means that nodes can be selected but no visible consequence occurs
 	Selectable
@@ -34,18 +34,18 @@ const (
 )
 
 const (
-	// SelBoxName is the reserved top-level Group name for holding
+	// SelectedBoxName is the reserved top-level Group name for holding
 	// a bounding box or manipulator for currently selected object.
 	// also used for meshes representing the box.
-	SelBoxName = "__SelectedBox"
+	SelectedBoxName = "__SelectedBox"
 
 	// ManipBoxName is the reserved top-level name for meshes
 	// representing the manipulation box.
 	ManipBoxName = "__ManipBox"
 )
 
-// SelParams are parameters for selection / manipulation box
-type SelParams struct {
+// SelectionParams are parameters for selection / manipulation box
+type SelectionParams struct {
 	// color for selection box (default yellow)
 	Color color.RGBA
 
@@ -56,7 +56,7 @@ type SelParams struct {
 	Radius float32 `default:"0.005"`
 }
 
-func (sp *SelParams) Defaults() {
+func (sp *SelectionParams) Defaults() {
 	sp.Color = colors.Yellow
 	sp.Width = .001
 	sp.Radius = .005
@@ -65,13 +65,13 @@ func (sp *SelParams) Defaults() {
 /////////////////////////////////////////////////////////////////////////////////////
 // 		Scene interface
 
-// SetSel -- if Selectable is true, then given object is selected
+// SetSelected -- if Selectable is true, then given object is selected
 // if node is nil then selection is reset.
-func (sw *Scene) SetSel(nd xyz.Node) {
-	if sw.SelMode == NotSelectable {
+func (sw *Scene) SetSelected(nd xyz.Node) {
+	if sw.SelectionMode == NotSelectable {
 		return
 	}
-	if sw.CurSel == nd {
+	if sw.CurrentSelected == nd {
 		return
 	}
 	xy := sw.XYZ
@@ -79,21 +79,21 @@ func (sw *Scene) SetSel(nd xyz.Node) {
 		// if sv.CurSel != nil {
 		// 	sv.CurSel.AsNode().SetSelected(false)
 		// }
-		sw.CurManipPt = nil
-		sw.CurSel = nil
-		xy.DeleteChildByName(SelBoxName)
+		sw.CurrentManipPoint = nil
+		sw.CurrentSelected = nil
+		xy.DeleteChildByName(SelectedBoxName)
 		xy.DeleteChildByName(ManipBoxName)
 		xy.NeedsRender()
 		return
 	}
 	manip, ok := nd.(*ManipPt)
 	if ok {
-		sw.CurManipPt = manip
+		sw.CurrentManipPoint = manip
 		return
 	}
-	sw.CurSel = nd
+	sw.CurrentSelected = nd
 	// nd.AsNode().SetSelected()
-	switch sw.SelMode {
+	switch sw.SelectionMode {
 	case Selectable:
 		return
 	case SelectionBox:
@@ -105,15 +105,15 @@ func (sw *Scene) SetSel(nd xyz.Node) {
 
 // SelectBox draws a selection box around selected node
 func (sw *Scene) SelectBox() {
-	if sw.CurSel == nil {
+	if sw.CurrentSelected == nil {
 		return
 	}
 	xy := sw.XYZ
 
-	nb := sw.CurSel.AsNode()
-	xy.DeleteChildByName(SelBoxName) // get rid of existing
-	clr := sw.SelParams.Color
-	xyz.NewLineBox(xy, xy, SelBoxName, SelBoxName, nb.WorldBBox.BBox, sw.SelParams.Width, clr, xyz.Inactive)
+	nb := sw.CurrentSelected.AsNode()
+	xy.DeleteChildByName(SelectedBoxName) // get rid of existing
+	clr := sw.SelectionParams.Color
+	xyz.NewLineBox(xy, xy, SelectedBoxName, SelectedBoxName, nb.WorldBBox.BBox, sw.SelectionParams.Width, clr, xyz.Inactive)
 
 	xy.NeedsUpdate()
 	sw.NeedsRender()
@@ -121,24 +121,24 @@ func (sw *Scene) SelectBox() {
 
 // ManipBox draws a manipulation box around selected node
 func (sw *Scene) ManipBox() {
-	sw.CurManipPt = nil
-	if sw.CurSel == nil {
+	sw.CurrentManipPoint = nil
+	if sw.CurrentSelected == nil {
 		return
 	}
 	xy := sw.XYZ
 
 	nm := ManipBoxName
 
-	nb := sw.CurSel.AsNode()
+	nb := sw.CurrentSelected.AsNode()
 	xy.DeleteChildByName(nm) // get rid of existing
-	clr := sw.SelParams.Color
+	clr := sw.SelectionParams.Color
 
 	cdist := mat32.Max(xy.Camera.DistTo(xy.Camera.Target), 1.0)
 
 	bbox := nb.WorldBBox.BBox
-	mb := xyz.NewLineBox(xy, xy, nm, nm, bbox, sw.SelParams.Width*cdist, clr, xyz.Inactive)
+	mb := xyz.NewLineBox(xy, xy, nm, nm, bbox, sw.SelectionParams.Width*cdist, clr, xyz.Inactive)
 
-	mbspm := xyz.NewSphere(xy, nm+"-pt", sw.SelParams.Radius*cdist, 16)
+	mbspm := xyz.NewSphere(xy, nm+"-pt", sw.SelectionParams.Radius*cdist, 16)
 
 	bbox.Min.SetSub(mb.Pose.Pos)
 	bbox.Max.SetSub(mb.Pose.Pos)
@@ -157,7 +157,7 @@ func (sw *Scene) ManipBox() {
 
 // SetManipPt sets the CurManipPt
 func (sw *Scene) SetManipPt(pt *ManipPt) {
-	sw.CurManipPt = pt
+	sw.CurrentManipPoint = pt
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -197,33 +197,33 @@ func (sw *Scene) HandleSelectEventsImpl(e events.Event) {
 	nsel := len(ns)
 	switch {
 	case nsel == 0:
-		sw.SetSel(nil)
+		sw.SetSelected(nil)
 	case nsel == 1:
-		sw.SetSel(ns[0])
+		sw.SetSelected(ns[0])
 	default:
 		for _, n := range ns {
 			if _, ok := n.(*ManipPt); ok {
-				sw.SetSel(n)
+				sw.SetSelected(n)
 				return
 			}
 		}
-		if sw.CurSel == nil {
-			sw.SetSel(ns[0])
+		if sw.CurrentSelected == nil {
+			sw.SetSelected(ns[0])
 		} else {
 			got := false
 			for i, n := range ns {
-				if sw.CurSel == n {
+				if sw.CurrentSelected == n {
 					if i < nsel-1 {
-						sw.SetSel(ns[i+1])
+						sw.SetSelected(ns[i+1])
 					} else {
-						sw.SetSel(ns[0])
+						sw.SetSelected(ns[0])
 					}
 					got = true
 					break
 				}
 			}
 			if !got {
-				sw.SetSel(ns[0])
+				sw.SetSelected(ns[0])
 			}
 		}
 	}
@@ -234,13 +234,13 @@ func (sw *Scene) HandleSlideEvents() {
 		pos := sw.Geom.ContentBBox.Min
 		e.SetLocalOff(e.LocalOff().Add(pos))
 		xy := sw.XYZ
-		if sw.CurManipPt == nil || sw.CurSel == nil {
+		if sw.CurrentManipPoint == nil || sw.CurrentSelected == nil {
 			xy.SlideMoveEvent(e)
 			sw.NeedsRender()
 			return
 		}
-		sn := sw.CurSel.AsNode()
-		mpt := sw.CurManipPt
+		sn := sw.CurrentSelected.AsNode()
+		mpt := sw.CurrentManipPoint
 		mb := mpt.Par.(*xyz.Group)
 		del := e.PrevDelta()
 		dx := float32(del.X)

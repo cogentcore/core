@@ -39,19 +39,19 @@ func (t *Scene) New() ki.Ki { return &Scene{} }
 
 // SetSelMode sets the [Scene.SelMode]:
 // how to deal with selection / manipulation events
-func (t *Scene) SetSelMode(v SelModes) *Scene { t.SelMode = v; return t }
+func (t *Scene) SetSelMode(v SelectionModes) *Scene { t.SelectionMode = v; return t }
 
 // SetCurSel sets the [Scene.CurSel]:
 // currently selected node
-func (t *Scene) SetCurSel(v xyz.Node) *Scene { t.CurSel = v; return t }
+func (t *Scene) SetCurSel(v xyz.Node) *Scene { t.CurrentSelected = v; return t }
 
 // SetCurManipPt sets the [Scene.CurManipPt]:
 // currently selected manipulation control point
-func (t *Scene) SetCurManipPt(v *ManipPt) *Scene { t.CurManipPt = v; return t }
+func (t *Scene) SetCurManipPt(v *ManipPt) *Scene { t.CurrentManipPoint = v; return t }
 
 // SetSelParams sets the [Scene.SelParams]:
 // parameters for selection / manipulation box
-func (t *Scene) SetSelParams(v SelParams) *Scene { t.SelParams = v; return t }
+func (t *Scene) SetSelParams(v SelectionParams) *Scene { t.SelectionParams = v; return t }
 
 // SetTooltip sets the [Scene.Tooltip]
 func (t *Scene) SetTooltip(v string) *Scene { t.Tooltip = v; return t }

@@ -314,10 +314,10 @@ func ToolbarStyles(ly Layouter) {
 	ly.AsWidget().StyleFinal(func(s *styles.Style) {
 		if s.Direction == styles.Row {
 			s.Grow.Set(1, 0)
-			s.Padding.SetHoriz(units.Dp(16))
+			s.Padding.SetHorizontal(units.Dp(16))
 		} else {
 			s.Grow.Set(0, 1)
-			s.Padding.SetVert(units.Dp(16))
+			s.Padding.SetVertical(units.Dp(16))
 		}
 	})
 	ly.OnWidgetAdded(func(w Widget) {

@@ -30,22 +30,22 @@ type Scene struct {
 	XYZ *xyz.Scene `set:"-"`
 
 	// how to deal with selection / manipulation events
-	SelMode SelModes
+	SelectionMode SelectionModes
 
 	// currently selected node
-	CurSel xyz.Node `copier:"-" json:"-" xml:"-" view:"-"`
+	CurrentSelected xyz.Node `copier:"-" json:"-" xml:"-" view:"-"`
 
 	// currently selected manipulation control point
-	CurManipPt *ManipPt `copier:"-" json:"-" xml:"-" view:"-"`
+	CurrentManipPoint *ManipPt `copier:"-" json:"-" xml:"-" view:"-"`
 
 	// parameters for selection / manipulation box
-	SelParams SelParams `view:"inline"`
+	SelectionParams SelectionParams `view:"inline"`
 }
 
 func (sw *Scene) OnInit() {
 	sw.XYZ = xyz.NewScene("Scene")
 	sw.XYZ.Defaults()
-	sw.SelParams.Defaults()
+	sw.SelectionParams.Defaults()
 	sw.WidgetBase.OnInit()
 	sw.HandleEvents()
 	sw.SetStyles()
