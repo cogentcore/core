@@ -21,7 +21,7 @@ func (t *ManipPt) New() ki.Ki { return &ManipPt{} }
 func (t *ManipPt) SetMat(v xyz.Material) *ManipPt { t.Mat = v; return t }
 
 // SceneType is the [gti.Type] for [Scene]
-var SceneType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyzv.Scene", IDName: "scene", Doc: "Scene is a gi.Widget that manages a xyz.Scene,\nproviding the basic rendering logic for the 3D scene\nin the 2D gi gui context.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "XYZ", Doc: "XYZ is the 3D xyz.Scene"}, {Name: "SelMode", Doc: "how to deal with selection / manipulation events"}, {Name: "CurSel", Doc: "currently selected node"}, {Name: "CurManipPt", Doc: "currently selected manipulation control point"}, {Name: "SelParams", Doc: "parameters for selection / manipulation box"}}, Instance: &Scene{}})
+var SceneType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyzv.Scene", IDName: "scene", Doc: "Scene is a gi.Widget that manages a xyz.Scene,\nproviding the basic rendering logic for the 3D scene\nin the 2D gi gui context.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "XYZ", Doc: "XYZ is the 3D xyz.Scene"}, {Name: "SelectionMode", Doc: "how to deal with selection / manipulation events"}, {Name: "CurrentSelected", Doc: "currently selected node"}, {Name: "CurrentManipPoint", Doc: "currently selected manipulation control point"}, {Name: "SelectionParams", Doc: "parameters for selection / manipulation box"}}, Instance: &Scene{}})
 
 // NewScene adds a new [Scene] with the given name to the given parent:
 // Scene is a gi.Widget that manages a xyz.Scene,
@@ -37,21 +37,21 @@ func (t *Scene) KiType() *gti.Type { return SceneType }
 // New returns a new [*Scene] value
 func (t *Scene) New() ki.Ki { return &Scene{} }
 
-// SetSelMode sets the [Scene.SelMode]:
+// SetSelectionMode sets the [Scene.SelectionMode]:
 // how to deal with selection / manipulation events
-func (t *Scene) SetSelMode(v SelectionModes) *Scene { t.SelectionMode = v; return t }
+func (t *Scene) SetSelectionMode(v SelectionModes) *Scene { t.SelectionMode = v; return t }
 
-// SetCurSel sets the [Scene.CurSel]:
+// SetCurrentSelected sets the [Scene.CurrentSelected]:
 // currently selected node
-func (t *Scene) SetCurSel(v xyz.Node) *Scene { t.CurrentSelected = v; return t }
+func (t *Scene) SetCurrentSelected(v xyz.Node) *Scene { t.CurrentSelected = v; return t }
 
-// SetCurManipPt sets the [Scene.CurManipPt]:
+// SetCurrentManipPoint sets the [Scene.CurrentManipPoint]:
 // currently selected manipulation control point
-func (t *Scene) SetCurManipPt(v *ManipPt) *Scene { t.CurrentManipPoint = v; return t }
+func (t *Scene) SetCurrentManipPoint(v *ManipPt) *Scene { t.CurrentManipPoint = v; return t }
 
-// SetSelParams sets the [Scene.SelParams]:
+// SetSelectionParams sets the [Scene.SelectionParams]:
 // parameters for selection / manipulation box
-func (t *Scene) SetSelParams(v SelectionParams) *Scene { t.SelectionParams = v; return t }
+func (t *Scene) SetSelectionParams(v SelectionParams) *Scene { t.SelectionParams = v; return t }
 
 // SetTooltip sets the [Scene.Tooltip]
 func (t *Scene) SetTooltip(v string) *Scene { t.Tooltip = v; return t }
@@ -74,6 +74,3 @@ func (t *SceneView) New() ki.Ki { return &SceneView{} }
 
 // SetTooltip sets the [SceneView.Tooltip]
 func (t *SceneView) SetTooltip(v string) *SceneView { t.Tooltip = v; return t }
-
-// SetStackTop sets the [SceneView.StackTop]
-func (t *SceneView) SetStackTop(v int) *SceneView { t.StackTop = v; return t }

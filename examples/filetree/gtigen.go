@@ -48,10 +48,10 @@ func (t *FileBrowse) SetNTextEditors(v int) *FileBrowse { t.NTextEditors = v; re
 
 // SetActiveTextEditorIndex sets the [FileBrowse.ActiveTextEditorIndex]:
 // index of the currently-active texteditor -- new files will be viewed in other views if available
-func (t *FileBrowse) SetActiveTextEditorIndex(v int) *FileBrowse { t.ActiveTextEditorIndex = v; return t }
+func (t *FileBrowse) SetActiveTextEditorIndex(v int) *FileBrowse {
+	t.ActiveTextEditorIndex = v
+	return t
+}
 
 // SetTooltip sets the [FileBrowse.Tooltip]
 func (t *FileBrowse) SetTooltip(v string) *FileBrowse { t.Tooltip = v; return t }
-
-// SetStackTop sets the [FileBrowse.StackTop]
-func (t *FileBrowse) SetStackTop(v int) *FileBrowse { t.StackTop = v; return t }

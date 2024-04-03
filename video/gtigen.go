@@ -11,7 +11,7 @@ import (
 )
 
 // VideoType is the [gti.Type] for [Video]
-var VideoType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/video.Video", IDName: "video", Doc: "Video represents a video playback widget without any controls.\nSee [Player] for a version with controls.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Media", Doc: "Media is the video media."}, {Name: "frameBuffer"}}, Instance: &Video{}})
+var VideoType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/video.Video", IDName: "video", Doc: "Video represents a video playback widget without any controls.\nSee [Player] for a version with controls.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Media", Doc: "Media is the video media."}, {Name: "Rotation", Doc: "degrees of rotation to apply to the video images\n90 = left 90, -90 = right 90"}, {Name: "Stop", Doc: "setting this to true will stop the playing"}, {Name: "frameBuffer"}, {Name: "frameTarg", Doc: "target frame number to be played"}, {Name: "framePlayed", Doc: "actual frame number displayed"}, {Name: "frameStop", Doc: "frame number to stop playing at, if > 0"}}, Instance: &Video{}})
 
 // NewVideo adds a new [Video] with the given name to the given parent:
 // Video represents a video playback widget without any controls.
@@ -30,8 +30,29 @@ func (t *Video) New() ki.Ki { return &Video{} }
 // Media is the video media.
 func (t *Video) SetMedia(v *reisen.Media) *Video { t.Media = v; return t }
 
+// SetRotation sets the [Video.Rotation]:
+// degrees of rotation to apply to the video images
+// 90 = left 90, -90 = right 90
+func (t *Video) SetRotation(v float32) *Video { t.Rotation = v; return t }
+
+// SetStop sets the [Video.Stop]:
+// setting this to true will stop the playing
+func (t *Video) SetStop(v bool) *Video { t.Stop = v; return t }
+
 // SetFrameBuffer sets the [Video.frameBuffer]
 func (t *Video) SetFrameBuffer(v <-chan *image.RGBA) *Video { t.frameBuffer = v; return t }
+
+// SetFrameTarg sets the [Video.frameTarg]:
+// target frame number to be played
+func (t *Video) SetFrameTarg(v int) *Video { t.frameTarg = v; return t }
+
+// SetFramePlayed sets the [Video.framePlayed]:
+// actual frame number displayed
+func (t *Video) SetFramePlayed(v int) *Video { t.framePlayed = v; return t }
+
+// SetFrameStop sets the [Video.frameStop]:
+// frame number to stop playing at, if > 0
+func (t *Video) SetFrameStop(v int) *Video { t.frameStop = v; return t }
 
 // SetTooltip sets the [Video.Tooltip]
 func (t *Video) SetTooltip(v string) *Video { t.Tooltip = v; return t }

@@ -191,6 +191,3 @@ func (t *VCSLogView) SetSetA(v bool) *VCSLogView { t.SetA = v; return t }
 
 // SetTooltip sets the [VCSLogView.Tooltip]
 func (t *VCSLogView) SetTooltip(v string) *VCSLogView { t.Tooltip = v; return t }
-
-// SetStackTop sets the [VCSLogView.StackTop]
-func (t *VCSLogView) SetStackTop(v int) *VCSLogView { t.StackTop = v; return t }

@@ -12,11 +12,11 @@ var _SliceViewFlagsValues = []SliceViewFlags{2, 3, 4, 5, 6, 7, 8, 9}
 // SliceViewFlagsN is the highest valid value for type SliceViewFlags, plus one.
 const SliceViewFlagsN SliceViewFlags = 10
 
-var _SliceViewFlagsValueMap = map[string]SliceViewFlags{`Configured`: 2, `IsArray`: 3, `ShowIndex`: 4, `ReadOnlyKeyNav`: 5, `SelectMode`: 6, `ReadOnlyMultiSel`: 7, `InFocusGrab`: 8, `InFullRebuild`: 9}
+var _SliceViewFlagsValueMap = map[string]SliceViewFlags{`Configured`: 2, `IsArray`: 3, `ShowIndex`: 4, `ReadOnlyKeyNav`: 5, `SelectMode`: 6, `ReadOnlyMultiSelect`: 7, `InFocusGrab`: 8, `InFullRebuild`: 9}
 
-var _SliceViewFlagsDescMap = map[SliceViewFlags]string{2: `SliceViewConfigured indicates that the widgets have been configured`, 3: `SliceViewIsArray is whether the slice is actually an array -- no modifications -- set by SetSlice`, 4: `SliceViewShowIndex is whether to show index or not`, 5: `SliceViewReadOnlyKeyNav is whether support key navigation when ReadOnly (default true). uses a capture of up / down events to manipulate selection, not focus.`, 6: `SliceViewSelectMode is whether to be in select rows mode or editing mode`, 7: `SliceViewReadOnlyMultiSel: if view is ReadOnly, default selection mode is to choose one row only. If this is true, standard multiple selection logic with modifier keys is instead supported`, 8: `SliceViewInFocusGrab is a guard for recursive focus grabbing`, 9: `SliceViewInFullRebuild is a guard for recursive rebuild`}
+var _SliceViewFlagsDescMap = map[SliceViewFlags]string{2: `SliceViewConfigured indicates that the widgets have been configured`, 3: `SliceViewIsArray is whether the slice is actually an array -- no modifications -- set by SetSlice`, 4: `SliceViewShowIndex is whether to show index or not`, 5: `SliceViewReadOnlyKeyNav is whether support key navigation when ReadOnly (default true). uses a capture of up / down events to manipulate selection, not focus.`, 6: `SliceViewSelectMode is whether to be in select rows mode or editing mode`, 7: `SliceViewReadOnlyMultiSelect: if view is ReadOnly, default selection mode is to choose one row only. If this is true, standard multiple selection logic with modifier keys is instead supported`, 8: `SliceViewInFocusGrab is a guard for recursive focus grabbing`, 9: `SliceViewInFullRebuild is a guard for recursive rebuild`}
 
-var _SliceViewFlagsMap = map[SliceViewFlags]string{2: `Configured`, 3: `IsArray`, 4: `ShowIndex`, 5: `ReadOnlyKeyNav`, 6: `SelectMode`, 7: `ReadOnlyMultiSel`, 8: `InFocusGrab`, 9: `InFullRebuild`}
+var _SliceViewFlagsMap = map[SliceViewFlags]string{2: `Configured`, 3: `IsArray`, 4: `ShowIndex`, 5: `ReadOnlyKeyNav`, 6: `SelectMode`, 7: `ReadOnlyMultiSelect`, 8: `InFocusGrab`, 9: `InFullRebuild`}
 
 // String returns the string representation of this SliceViewFlags value.
 func (i SliceViewFlags) String() string {
