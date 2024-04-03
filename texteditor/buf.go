@@ -566,13 +566,11 @@ func (tb *Buf) Revert() bool {
 	if tb.NLines < DiffRevertLines {
 		ob := NewBuf()
 		err := ob.OpenFile(tb.Filename)
-		if err != nil {
+		if grr.Log(err) != nil {
 			sc := tb.SceneFromView()
 			if sc != nil { // only if viewing
-				// TODO(kai/snack)
-				// gi.PromptDialog(vp, gi.DlgOpts{Title: "File could not be Re-Opened", Prompt: err.Error(), Ok: true, Cancel: false}, nil)
+				gi.ErrorSnackbar(sc, err, "Error reopening file")
 			}
-			slog.Error(err.Error())
 			return false
 		}
 		tb.Stat() // "own" the new file..

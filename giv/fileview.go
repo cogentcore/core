@@ -628,8 +628,7 @@ func (fv *FileView) AddPathToFavs() { //gti:add
 		fnm = dp
 	}
 	if _, found := gi.SystemSettings.FavPaths.FindPath(dp); found {
-		// TODO(kai/snack)
-		// gi.PromptDialog(fv, gi.DlgOpts{Title: "Add Path To Favorites", Prompt: fmt.Sprintf("Path is already on the favorites list: %v", dp), Ok: true, Cancel: false}, nil)
+		gi.MessageSnackbar(fv, "Error: path is already on the favorites list")
 		return
 	}
 	fi := gi.FavPathItem{"folder", fnm, dp}

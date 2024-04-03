@@ -1537,8 +1537,7 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, act
 	}
 	par := AsTreeView(tv.Par)
 	if par == nil {
-		// TODO(kai/snack)
-		// gi.PromptDialog(tv, gi.DlgOpts{Title: actNm, Prompt: "Cannot insert after the root of the tree", Ok: true, Cancel: false}, nil)
+		gi.MessageSnackbar(tv, "Error: cannot insert after the root of the tree")
 		return
 	}
 	if tv.SyncNode != nil {

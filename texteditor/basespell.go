@@ -60,10 +60,7 @@ func NewSpellModelFromText() error {
 	bigdatafile := filepath.Join(bigdatapath, "big.txt")
 	file, err := os.Open(bigdatafile)
 	if err != nil {
-		// TODO(kai/snack)
 		slog.Error("Could not open corpus file. This file is used to create the spelling model", "file", bigdatafile, "err", err)
-		gi.ErrorDialog(nil, err)
-		// nil).AddTitle("Corpus File Not Found").AddText("You can build a spelling model to check against by clicking the \"Train\" button and selecting text files to train on.").Ok().Run()
 		return err
 	}
 
