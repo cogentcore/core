@@ -106,38 +106,38 @@ func main() {
 
 	floor := vshape.NewPlane(mat32.Y, 100, 100)
 	floor.Segs.Set(100, 100) // won't show lighting without
-	nVtx, nIdx := floor.N()
-	ph.AddMesh("floor", nVtx, nIdx, false)
+	nVtx, nIndex := floor.N()
+	ph.AddMesh("floor", nVtx, nIndex, false)
 
 	cube := vshape.NewBox(1, 1, 1)
 	cube.Segs.Set(100, 100, 100) // key for showing lights
-	nVtx, nIdx = cube.N()
-	ph.AddMesh("cube", nVtx, nIdx, false)
+	nVtx, nIndex = cube.N()
+	ph.AddMesh("cube", nVtx, nIndex, false)
 
 	sphere := vshape.NewSphere(.5, 64)
-	nVtx, nIdx = sphere.N()
-	ph.AddMesh("sphere", nVtx, nIdx, false)
+	nVtx, nIndex = sphere.N()
+	ph.AddMesh("sphere", nVtx, nIndex, false)
 
 	cylinder := vshape.NewCylinder(1, .5, 64, 64, true, true)
-	nVtx, nIdx = cylinder.N()
-	ph.AddMesh("cylinder", nVtx, nIdx, false)
+	nVtx, nIndex = cylinder.N()
+	ph.AddMesh("cylinder", nVtx, nIndex, false)
 
 	cone := vshape.NewCone(1, .5, 64, 64, true)
-	nVtx, nIdx = cone.N()
-	ph.AddMesh("cone", nVtx, nIdx, false)
+	nVtx, nIndex = cone.N()
+	ph.AddMesh("cone", nVtx, nIndex, false)
 
 	capsule := vshape.NewCapsule(1, .5, 64, 64)
 	// capsule.BotRad = 0
-	nVtx, nIdx = capsule.N()
-	ph.AddMesh("capsule", nVtx, nIdx, false)
+	nVtx, nIndex = capsule.N()
+	ph.AddMesh("capsule", nVtx, nIndex, false)
 
 	torus := vshape.NewTorus(2, .2, 64)
-	nVtx, nIdx = torus.N()
-	ph.AddMesh("torus", nVtx, nIdx, false)
+	nVtx, nIndex = torus.N()
+	ph.AddMesh("torus", nVtx, nIndex, false)
 
 	lines := vshape.NewLines([]mat32.Vec3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, mat32.V2(.2, .1), false)
-	nVtx, nIdx = lines.N()
-	ph.AddMesh("lines", nVtx, nIdx, false)
+	nVtx, nIndex = lines.N()
+	ph.AddMesh("lines", nVtx, nIndex, false)
 
 	/////////////////////////////
 	// Textures
@@ -318,8 +318,8 @@ func main() {
 			return
 		}
 		cmd := sy.CmdPool.Buff
-		descIdx := 0 // if running multiple frames in parallel, need diff sets
-		sy.ResetBeginRenderPass(cmd, sf.Frames[idx], descIdx)
+		descIndex := 0 // if running multiple frames in parallel, need diff sets
+		sy.ResetBeginRenderPass(cmd, sf.Frames[idx], descIndex)
 
 		fcr := frameCount % 10
 		_ = fcr

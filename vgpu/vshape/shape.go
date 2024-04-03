@@ -9,7 +9,7 @@ import "cogentcore.org/core/mat32"
 // Shape is an interface for all shape-constructing elements
 type Shape interface {
 	// N returns number of vertex, index points in this shape element
-	N() (nVtx, nIdx int)
+	N() (nVtx, nIndex int)
 
 	// Offs returns starting offset for verticies, indexes in full shape array,
 	// in terms of points, not floats
@@ -34,7 +34,7 @@ type ShapeBase struct {
 	VtxOff int
 
 	// index offset, in points
-	IdxOff int
+	IndexOff int
 
 	// cubic bounding box in local coords
 	CBBox mat32.Box3
@@ -46,13 +46,13 @@ type ShapeBase struct {
 // Offs returns starting offset for verticies, indexes in full shape array,
 // in terms of points, not floats
 func (sb *ShapeBase) Offs() (vtxOff, idxOff int) {
-	vtxOff, idxOff = sb.VtxOff, sb.IdxOff
+	vtxOff, idxOff = sb.VtxOff, sb.IndexOff
 	return
 }
 
 // SetOffs sets starting offsets for verticies, indexes in full shape array
 func (sb *ShapeBase) SetOffs(vtxOff, idxOff int) {
-	sb.VtxOff, sb.IdxOff = vtxOff, idxOff
+	sb.VtxOff, sb.IndexOff = vtxOff, idxOff
 }
 
 // BBox returns the bounding box for the shape, typically centered around 0

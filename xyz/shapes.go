@@ -66,10 +66,10 @@ func NewPlane(sc *Scene, name string, width, height float32) *Plane {
 	return pl
 }
 
-func (pl *Plane) Sizes() (nVtx, nIdx int, hasColor bool) {
-	pl.NVtx, pl.NIdx = vshape.PlaneN(int(pl.Segs.X), int(pl.Segs.Y))
+func (pl *Plane) Sizes() (nVtx, nIndex int, hasColor bool) {
+	pl.NVtx, pl.NIndex = vshape.PlaneN(int(pl.Segs.X), int(pl.Segs.Y))
 	pl.Color = false
-	return pl.NVtx, pl.NIdx, pl.Color
+	return pl.NVtx, pl.NIndex, pl.Color
 }
 
 func (pl *Plane) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
@@ -106,10 +106,10 @@ func NewBox(sc *Scene, name string, width, height, depth float32) *Box {
 	return bx
 }
 
-func (bx *Box) Sizes() (nVtx, nIdx int, hasColor bool) {
-	bx.NVtx, bx.NIdx = vshape.BoxN(bx.Segs)
+func (bx *Box) Sizes() (nVtx, nIndex int, hasColor bool) {
+	bx.NVtx, bx.NIndex = vshape.BoxN(bx.Segs)
 	bx.Color = false
-	return bx.NVtx, bx.NIdx, bx.Color
+	return bx.NVtx, bx.NIndex, bx.Color
 }
 
 func (bx *Box) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
@@ -177,10 +177,10 @@ func (sp *Sphere) Defaults() {
 	sp.ElevLen = 180
 }
 
-func (sp *Sphere) Sizes() (nVtx, nIdx int, hasColor bool) {
-	sp.NVtx, sp.NIdx = vshape.SphereSectorN(sp.WidthSegs, sp.HeightSegs, sp.ElevStart, sp.ElevLen)
+func (sp *Sphere) Sizes() (nVtx, nIndex int, hasColor bool) {
+	sp.NVtx, sp.NIndex = vshape.SphereSectorN(sp.WidthSegs, sp.HeightSegs, sp.ElevStart, sp.ElevLen)
 	sp.Color = false
-	return sp.NVtx, sp.NIdx, sp.Color
+	return sp.NVtx, sp.NIndex, sp.Color
 }
 
 func (sp *Sphere) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
@@ -276,10 +276,10 @@ func (cy *Cylinder) Defaults() {
 	cy.AngLen = 360
 }
 
-func (cy *Cylinder) Sizes() (nVtx, nIdx int, hasColor bool) {
-	cy.NVtx, cy.NIdx = vshape.CylinderSectorN(cy.RadialSegs, cy.HeightSegs, cy.Top, cy.Bottom)
+func (cy *Cylinder) Sizes() (nVtx, nIndex int, hasColor bool) {
+	cy.NVtx, cy.NIndex = vshape.CylinderSectorN(cy.RadialSegs, cy.HeightSegs, cy.Top, cy.Bottom)
 	cy.Color = false
-	return cy.NVtx, cy.NIdx, cy.Color
+	return cy.NVtx, cy.NIndex, cy.Color
 }
 
 func (cy *Cylinder) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
@@ -354,17 +354,17 @@ func (cp *Capsule) Defaults() {
 	cp.AngLen = 360
 }
 
-func (cp *Capsule) Sizes() (nVtx, nIdx int, hasColor bool) {
-	nVtx, nIdx = vshape.CylinderSectorN(cp.RadialSegs, cp.HeightSegs, false, false)
+func (cp *Capsule) Sizes() (nVtx, nIndex int, hasColor bool) {
+	nVtx, nIndex = vshape.CylinderSectorN(cp.RadialSegs, cp.HeightSegs, false, false)
 	if cp.BotRad > 0 {
 		nv, ni := vshape.SphereSectorN(cp.RadialSegs, cp.CapSegs, 90, 90)
 		nVtx += nv
-		nIdx += ni
+		nIndex += ni
 	}
 	if cp.TopRad > 0 {
 		nv, ni := vshape.SphereSectorN(cp.RadialSegs, cp.CapSegs, 0, 90)
 		nVtx += nv
-		nIdx += ni
+		nIndex += ni
 	}
 	return
 }
@@ -449,8 +449,8 @@ func (tr *Torus) Defaults() {
 	tr.AngLen = 360
 }
 
-func (tr *Torus) Sizes() (nVtx, nIdx int, hasColor bool) {
-	nVtx, nIdx = vshape.TorusSectorN(tr.RadialSegs, tr.TubeSegs)
+func (tr *Torus) Sizes() (nVtx, nIndex int, hasColor bool) {
+	nVtx, nIndex = vshape.TorusSectorN(tr.RadialSegs, tr.TubeSegs)
 	return
 }
 

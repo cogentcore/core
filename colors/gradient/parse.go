@@ -160,7 +160,7 @@ func (l *Linear) SetString(str string) error {
 	// TODO(kai): not fully following spec yet
 	plist := strings.Split(str, ", ")
 	var prevColor color.Color
-	stopIdx := 0
+	stopIndex := 0
 outer:
 	for pidx := 0; pidx < len(plist); pidx++ {
 		par := strings.TrimRight(strings.TrimSpace(plist[pidx]), ",")
@@ -199,8 +199,8 @@ outer:
 			break outer
 		default: // must be a color stop
 			var stop *Stop
-			if len(l.Stops) > stopIdx {
-				stop = &(l.Stops[stopIdx])
+			if len(l.Stops) > stopIndex {
+				stop = &(l.Stops[stopIndex])
 			} else {
 				stop = &Stop{Opacity: 1}
 			}
@@ -208,15 +208,15 @@ outer:
 			if err != nil {
 				return err
 			}
-			if len(l.Stops) <= stopIdx {
+			if len(l.Stops) <= stopIndex {
 				l.Stops = append(l.Stops, *stop)
 			}
 			prevColor = stop.Color
-			stopIdx++
+			stopIndex++
 		}
 	}
-	if len(l.Stops) > stopIdx {
-		l.Stops = l.Stops[:stopIdx]
+	if len(l.Stops) > stopIndex {
+		l.Stops = l.Stops[:stopIndex]
 	}
 	return nil
 }
@@ -228,7 +228,7 @@ func (r *Radial) SetString(str string) error {
 	// TODO(kai): not fully following spec yet
 	plist := strings.Split(str, ", ")
 	var prevColor color.Color
-	stopIdx := 0
+	stopIndex := 0
 outer:
 	for pidx := 0; pidx < len(plist); pidx++ {
 		par := strings.TrimRight(strings.TrimSpace(plist[pidx]), ",")
@@ -259,8 +259,8 @@ outer:
 			break outer
 		default: // must be a color stop
 			var stop *Stop
-			if len(r.Stops) > stopIdx {
-				stop = &r.Stops[stopIdx]
+			if len(r.Stops) > stopIndex {
+				stop = &r.Stops[stopIndex]
 			} else {
 				stop = &Stop{Opacity: 1}
 			}
@@ -268,15 +268,15 @@ outer:
 			if err != nil {
 				return err
 			}
-			if len(r.Stops) <= stopIdx {
+			if len(r.Stops) <= stopIndex {
 				r.Stops = append(r.Stops, *stop)
 			}
 			prevColor = stop.Color
-			stopIdx++
+			stopIndex++
 		}
 	}
-	if len(r.Stops) > stopIdx {
-		r.Stops = r.Stops[:stopIdx]
+	if len(r.Stops) > stopIndex {
+		r.Stops = r.Stops[:stopIndex]
 	}
 	return nil
 }

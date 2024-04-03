@@ -444,7 +444,7 @@ func (tv *TableView) UpdateWidgets() {
 
 	scrollTo := -1
 	if tv.SelectedField != "" && tv.SelVal != nil {
-		tv.SelectedIndex, _ = StructSliceIdxByValue(tv.Slice, tv.SelectedField, tv.SelVal)
+		tv.SelectedIndex, _ = StructSliceIndexByValue(tv.Slice, tv.SelectedField, tv.SelVal)
 		tv.SelectedField = ""
 		tv.SelVal = nil
 		tv.InitSelectedIndex = -1
@@ -455,9 +455,9 @@ func (tv *TableView) UpdateWidgets() {
 		scrollTo = tv.SelectedIndex
 	}
 	if scrollTo >= 0 {
-		tv.ScrollToIdx(scrollTo)
+		tv.ScrollToIndex(scrollTo)
 	}
-	tv.UpdateStartIdx()
+	tv.UpdateStartIndex()
 
 	for i := 0; i < tv.VisRows; i++ {
 		ridx := i * nWidgPerRow
@@ -553,11 +553,11 @@ func (tv *TableView) SliceNewAt(idx int) {
 	}
 
 	tv.This().(SliceViewer).UpdtSliceSize()
-	tv.SelectIdxAction(idx, events.SelectOne)
+	tv.SelectIndexAction(idx, events.SelectOne)
 	tv.ViewMuUnlock()
 	tv.SetChanged()
 	tv.This().(SliceViewer).UpdateWidgets()
-	tv.IdxGrabFocus(idx)
+	tv.IndexGrabFocus(idx)
 	tv.NeedsLayout()
 }
 
@@ -585,13 +585,13 @@ func (tv *TableView) SortSlice() {
 	if tv.SortIndex < 0 || tv.SortIndex >= len(tv.VisFields) {
 		return
 	}
-	rawIdx := tv.VisFields[tv.SortIndex].Index
-	laser.StructSliceSort(tv.Slice, rawIdx, !tv.SortDesc)
+	rawIndex := tv.VisFields[tv.SortIndex].Index
+	laser.StructSliceSort(tv.Slice, rawIndex, !tv.SortDesc)
 }
 
 // SortSliceAction sorts the slice for given field index -- toggles ascending
 // vs. descending if already sorting on this dimension
-func (tv *TableView) SortSliceAction(fldIdx int) {
+func (tv *TableView) SortSliceAction(fldIndex int) {
 	sgh := tv.SliceHeader()
 	_, idxOff := tv.RowWidgetNs()
 
@@ -600,7 +600,7 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		hdr := sgh.Child(idxOff + fli).(*gi.Button)
 		hdr.SetType(gi.ButtonAction)
-		if fli == fldIdx {
+		if fli == fldIndex {
 			if tv.SortIndex == fli {
 				tv.SortDesc = !tv.SortDesc
 				ascending = !tv.SortDesc
@@ -617,7 +617,7 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 		}
 	}
 
-	tv.SortIndex = fldIdx
+	tv.SortIndex = fldIndex
 	tv.SortSlice()
 	sgh.Update() // requires full update due to sort button icon
 	tv.UpdateWidgets()
@@ -719,25 +719,25 @@ func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
 }
 
 // SelectFieldVal sets SelField and SelVal and attempts to find corresponding
-// row, setting SelectedIdx and selecting row if found -- returns true if
+// row, setting SelectedIndex and selecting row if found -- returns true if
 // found, false otherwise
 func (tv *TableView) SelectFieldVal(fld, val string) bool {
 	tv.SelectedField = fld
 	tv.SelVal = val
 	if tv.SelectedField != "" && tv.SelVal != nil {
-		idx, _ := StructSliceIdxByValue(tv.Slice, tv.SelectedField, tv.SelVal)
+		idx, _ := StructSliceIndexByValue(tv.Slice, tv.SelectedField, tv.SelVal)
 		if idx >= 0 {
-			tv.ScrollToIdx(idx)
-			tv.UpdateSelectIdx(idx, true, events.SelectOne)
+			tv.ScrollToIndex(idx)
+			tv.UpdateSelectIndex(idx, true, events.SelectOne)
 			return true
 		}
 	}
 	return false
 }
 
-// StructSliceIdxByValue searches for first index that contains given value in field of
+// StructSliceIndexByValue searches for first index that contains given value in field of
 // given name.
-func StructSliceIdxByValue(struSlice any, fldName string, fldVal any) (int, error) {
+func StructSliceIndexByValue(struSlice any, fldName string, fldVal any) (int, error) {
 	svnp := laser.NonPtrValue(reflect.ValueOf(struSlice))
 	sz := svnp.Len()
 	struTyp := laser.NonPtrType(reflect.TypeOf(struSlice).Elem().Elem())
@@ -747,10 +747,10 @@ func StructSliceIdxByValue(struSlice any, fldName string, fldVal any) (int, erro
 		slog.Error(err.Error())
 		return -1, err
 	}
-	fldIdx := fld.Index
+	fldIndex := fld.Index
 	for idx := 0; idx < sz; idx++ {
 		rval := laser.OnePtrUnderlyingValue(svnp.Index(idx))
-		fval := rval.Elem().FieldByIndex(fldIdx)
+		fval := rval.Elem().FieldByIndex(fldIndex)
 		if !fval.IsValid() {
 			continue
 		}
@@ -761,7 +761,7 @@ func StructSliceIdxByValue(struSlice any, fldName string, fldVal any) (int, erro
 	return -1, nil
 }
 
-func (tv *TableView) EditIdx(idx int) {
+func (tv *TableView) EditIndex(idx int) {
 	if idx < 0 || idx >= tv.SliceNPVal.Len() {
 		return
 	}
@@ -785,7 +785,7 @@ func (tv *TableView) ContextMenu(m *gi.Scene) {
 	if !tv.Is(SliceViewIsArray) {
 		gi.NewButton(m).SetText("Edit").SetIcon(icons.Edit).
 			OnClick(func(e events.Event) {
-				tv.EditIdx(tv.SelectedIndex)
+				tv.EditIndex(tv.SelectedIndex)
 			})
 	}
 }

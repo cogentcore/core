@@ -29,12 +29,12 @@ func (sy *System) ComputeCmdBuff() vk.CommandBuffer {
 
 // ComputeResetBindVars adds command to the given
 // command buffer, to bind the Vars descriptors,
-// for given collection of descriptors descIdx
+// for given collection of descriptors descIndex
 // (see Vars NDescs for info).
 // Required whenever variables have changed their mappings,
 // before running a command.
-func (sy *System) ComputeResetBindVars(cmd vk.CommandBuffer, descIdx int) {
-	sy.CmdResetBindVars(cmd, descIdx)
+func (sy *System) ComputeResetBindVars(cmd vk.CommandBuffer, descIndex int) {
+	sy.CmdResetBindVars(cmd, descIndex)
 }
 
 // ComputeResetBegin resets and begins the recording of commands
@@ -118,14 +118,14 @@ func (sy *System) ComputeWaitEvents(cmd vk.CommandBuffer, event ...string) error
 
 // ComputeCopyToGPU records command to copy given regions
 // in the Storage buffer memory from CPU to GPU, in one call.
-// Use SyncRegValIdxFmCPU to get the regions.
+// Use SyncRegValIndexFmCPU to get the regions.
 func (sy *System) ComputeCopyToGPU(cmd vk.CommandBuffer, regs ...MemReg) {
 	sy.Mem.CmdTransferStorageRegsToGPU(cmd, regs)
 }
 
 // ComputeCopyFmGPU records command to copy given regions
 // in the Storage buffer memory from GPU to CPU, in one call.
-// Use SyncRegValIdxFmCPU to get the regions.
+// Use SyncRegValIndexFmCPU to get the regions.
 func (sy *System) ComputeCopyFmGPU(cmd vk.CommandBuffer, regs ...MemReg) {
 	sy.Mem.CmdTransferStorageRegsFmGPU(cmd, regs)
 }

@@ -95,10 +95,10 @@ type Rule struct {
 	FiTokMap map[string]*Rule `edit:"-" json:"-" xml:"-"`
 
 	// for FirstTokMap, the start of the else cases not covered by the map
-	FiTokElseIdx int `edit:"-" json:"-" xml:"-"`
+	FiTokElseIndex int `edit:"-" json:"-" xml:"-"`
 
 	// exclusionary key index -- this is the token in Rules that we need to exclude matches for using ExclFwd and ExclRev rules
-	ExclKeyIdx int `edit:"-" json:"-" xml:"-"`
+	ExclKeyIndex int `edit:"-" json:"-" xml:"-"`
 
 	// exclusionary forward-search rule elements compiled from Rule string
 	ExclFwd RuleList `edit:"-" json:"-" xml:"-"`
@@ -469,18 +469,18 @@ func (pr *Rule) OptimizeOrder(ps *State) {
 func (pr *Rule) CompileTokMap(ps *State) bool {
 	valid := true
 	pr.FiTokMap = make(map[string]*Rule, len(pr.Kids))
-	pr.FiTokElseIdx = len(pr.Kids)
+	pr.FiTokElseIndex = len(pr.Kids)
 	for i, kpri := range pr.Kids {
 		kpr := kpri.(*Rule)
 		if len(kpr.Rules) == 0 || !kpr.Rules[0].IsToken() {
-			pr.FiTokElseIdx = i
+			pr.FiTokElseIndex = i
 			break
 		}
 		fr := kpr.Rules[0]
 		skey := fr.Tok.StringKey()
 		if _, has := pr.FiTokMap[skey]; has {
 			ps.Error(lex.PosZero, fmt.Sprintf("CompileFirstTokMap: multiple rules have the same first token: %v -- must be unique -- use a :'tok' group to match that first token and put all the sub-rules as children of that node", fr.Tok), pr)
-			pr.FiTokElseIdx = 0
+			pr.FiTokElseIndex = 0
 			valid = false
 		} else {
 			pr.FiTokMap[skey] = kpr
@@ -556,7 +556,7 @@ func (pr *Rule) CompileExcl(ps *State, rs []string, rist int) bool {
 		valid = false
 		return valid
 	}
-	pr.ExclKeyIdx = ktoki
+	pr.ExclKeyIndex = ktoki
 	pr.ExclFwd = pr.ExclRev[ki+1-rist:]
 	pr.ExclRev = pr.ExclRev[:ki-rist]
 	return valid
@@ -847,7 +847,7 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap l
 	}
 
 	if len(pr.ExclFwd) > 0 || len(pr.ExclRev) > 0 {
-		ktpos := mpos[pr.ExclKeyIdx]
+		ktpos := mpos[pr.ExclKeyIndex]
 		if pr.MatchExclude(ps, scope, ktpos, depth, optMap) {
 			if ps.Trace.On {
 				ps.Trace.Out(ps, pr, NoMatch, ktpos.St, scope, parAst, "Exclude criteria matched")
@@ -1136,7 +1136,7 @@ func (pr *Rule) MatchGroup(ps *State, parAst *Ast, scope lex.Reg, depth int, opt
 				return true, nscope, mpos
 			}
 		}
-		sti = pr.FiTokElseIdx
+		sti = pr.FiTokElseIndex
 	}
 
 	for i := sti; i < nk; i++ {
@@ -1493,7 +1493,7 @@ func (pr *Rule) DoActs(ps *State, ri int, par *Rule, ourAst, parAst *Ast) bool {
 	valid := true
 	for ai := range pr.Acts {
 		act := &pr.Acts[ai]
-		if act.RunIdx != ri {
+		if act.RunIndex != ri {
 			continue
 		}
 		if !pr.DoAct(ps, act, par, ourAst, parAst) {

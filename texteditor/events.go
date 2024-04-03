@@ -546,8 +546,8 @@ func (ed *Editor) OpenLinkAt(pos lex.Pos) (*paint.TextLink, bool) {
 	tl, ok := ed.LinkAt(pos)
 	if ok {
 		rend := &ed.Renders[pos.Ln]
-		st, _ := rend.SpanPosToRuneIdx(tl.StartSpan, tl.StartIdx)
-		end, _ := rend.SpanPosToRuneIdx(tl.EndSpan, tl.EndIdx)
+		st, _ := rend.SpanPosToRuneIndex(tl.StartSpan, tl.StartIndex)
+		end, _ := rend.SpanPosToRuneIndex(tl.EndSpan, tl.EndIndex)
 		reg := textbuf.NewRegion(pos.Ln, st, pos.Ln, end)
 		_ = reg
 		ed.HighlightRegion(reg)

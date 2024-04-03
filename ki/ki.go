@@ -143,20 +143,20 @@ type Ki interface {
 	Child(idx int) Ki
 
 	// ChildByName returns the first element that has given name, and nil
-	// if no such element is found. startIdx arg allows for optimized
+	// if no such element is found. startIndex arg allows for optimized
 	// bidirectional find if you have an idea where it might be, which
 	// can be a key speedup for large lists. If no value is specified for
-	// startIdx, it starts in the middle, which is a good default.
-	ChildByName(name string, startIdx ...int) Ki
+	// startIndex, it starts in the middle, which is a good default.
+	ChildByName(name string, startIndex ...int) Ki
 
 	// ChildByType returns the first element that has the given type, and nil
 	// if not found. If embeds is true, then it also looks for any type that
 	// embeds the given type at any level of anonymous embedding.
-	// startIdx arg allows for optimized bidirectional find if you have an
+	// startIndex arg allows for optimized bidirectional find if you have an
 	// idea where it might be, which can be a key speedup for large lists. If
-	// no value is specified for startIdx, it starts in the middle, which is a
+	// no value is specified for startIndex, it starts in the middle, which is a
 	// good default.
-	ChildByType(t *gti.Type, embeds bool, startIdx ...int) Ki
+	ChildByType(t *gti.Type, embeds bool, startIndex ...int) Ki
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Paths

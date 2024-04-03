@@ -444,7 +444,7 @@ func (v *ValueBase[W]) SetValueMap(val any) (bool, error) {
 }
 
 // note: could have a more efficient way to represent the different owner type
-// data (Key vs. Field vs. Idx), instead of just having everything for
+// data (Key vs. Field vs. Index), instead of just having everything for
 // everything.  However, Value itself gets customized for different target
 // value types, and those are orthogonal to the owner type, so need a separate
 // ValueOwner class that encodes these options more efficiently -- but
@@ -493,7 +493,7 @@ type ValueData struct {
 	KeyView Value `set:"-" edit:"-"`
 
 	// if Owner is a slice, this is the index for the value in the slice
-	Idx int `set:"-" edit:"-"`
+	Index int `set:"-" edit:"-"`
 
 	// Listeners are event listener functions for processing events on this widget.
 	// type specific Listeners are added in OnInit when the widget is initialized.
@@ -660,7 +660,7 @@ func (v *ValueData) SetSliceValue(val reflect.Value, owner any, idx int, viewPat
 	v.OwnKind = reflect.Slice
 	v.Value = val
 	v.Owner = owner
-	v.Idx = idx
+	v.Index = idx
 	idxstr := fmt.Sprintf("%v", idx)
 	vpath := viewPath + "[" + idxstr + "]"
 	if v.Owner != nil {
@@ -839,12 +839,12 @@ func (v *ValueData) OwnerLabel() string {
 		}
 	case reflect.Slice:
 		if lblr, ok := v.Owner.(gi.SliceLabeler); ok {
-			slbl := lblr.ElemLabel(v.Idx)
+			slbl := lblr.ElemLabel(v.Index)
 			if slbl != "" {
 				return slbl
 			}
 		}
-		return strconv.Itoa(v.Idx)
+		return strconv.Itoa(v.Index)
 	}
 	return ""
 }

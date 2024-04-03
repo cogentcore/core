@@ -449,7 +449,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles
 
 	// set when a </p> is encountered
 	nextIsParaStart := false
-	curLinkIdx := -1 // if currently processing an <a> link element
+	curLinkIndex := -1 // if currently processing an <a> link element
 
 	fstack := make([]*styles.FontRender, 1, 10)
 	fstack[0] = font
@@ -467,14 +467,14 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles
 			curf := fstack[len(fstack)-1]
 			fs := *curf
 			nm := strings.ToLower(se.Name.Local)
-			curLinkIdx = -1
+			curLinkIndex = -1
 			if !SetHTMLSimpleTag(nm, &fs, ctxt, cssAgg) {
 				switch nm {
 				case "a":
 					fs.Color = colors.C(colors.Scheme.Primary.Base)
 					fs.SetDecoration(styles.Underline)
-					curLinkIdx = len(tr.Links)
-					tl := &TextLink{StartSpan: len(tr.Spans) - 1, StartIdx: len(curSp.Text)}
+					curLinkIndex = len(tr.Links)
+					tl := &TextLink{StartSpan: len(tr.Spans) - 1, StartIndex: len(curSp.Text)}
 					sprop := make(map[string]any, len(se.Attr))
 					tl.Props = sprop
 					for _, attr := range se.Attr {
@@ -548,11 +548,11 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles
 				curf := fstack[len(fstack)-1]
 				curSp.AppendRune('”', curf.Face.Face, curf.Color, curf.Background, curf.Decoration)
 			case "a":
-				if curLinkIdx >= 0 {
-					tl := &tr.Links[curLinkIdx]
+				if curLinkIndex >= 0 {
+					tl := &tr.Links[curLinkIndex]
 					tl.EndSpan = len(tr.Spans) - 1
-					tl.EndIdx = len(curSp.Text)
-					curLinkIdx = -1
+					tl.EndIndex = len(curSp.Text)
+					curLinkIndex = -1
 				}
 			}
 			if len(fstack) > 1 {
@@ -572,8 +572,8 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles
 				curSp.SetNewPara()
 			}
 			nextIsParaStart = false
-			if curLinkIdx >= 0 {
-				tl := &tr.Links[curLinkIdx]
+			if curLinkIndex >= 0 {
+				tl := &tr.Links[curLinkIndex]
 				tl.Label = sstr
 			}
 		}
@@ -605,7 +605,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 	font.Font = OpenFont(font, ctxt)
 
 	nextIsParaStart := false
-	curLinkIdx := -1 // if currently processing an <a> link element
+	curLinkIndex := -1 // if currently processing an <a> link element
 
 	fstack := make([]*styles.FontRender, 1, 10)
 	fstack[0] = font
@@ -652,11 +652,11 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 					curf := fstack[len(fstack)-1]
 					curSp.AppendRune('”', curf.Face.Face, curf.Color, curf.Background, curf.Decoration)
 				case "a":
-					if curLinkIdx >= 0 {
-						tl := &tr.Links[curLinkIdx]
+					if curLinkIndex >= 0 {
+						tl := &tr.Links[curLinkIndex]
 						tl.EndSpan = len(tr.Spans) - 1
-						tl.EndIdx = len(curSp.Text)
-						curLinkIdx = -1
+						tl.EndIndex = len(curSp.Text)
+						curLinkIndex = -1
 					}
 				}
 				if len(fstack) > 1 { // pop at end
@@ -679,14 +679,14 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 				nattr := len(attr) / 2
 				curf := fstack[len(fstack)-1]
 				fs := *curf
-				curLinkIdx = -1
+				curLinkIndex = -1
 				if !SetHTMLSimpleTag(stag, &fs, ctxt, cssAgg) {
 					switch stag {
 					case "a":
 						fs.Color = colors.C(colors.Scheme.Primary.Base)
 						fs.SetDecoration(styles.Underline)
-						curLinkIdx = len(tr.Links)
-						tl := &TextLink{StartSpan: len(tr.Spans) - 1, StartIdx: len(curSp.Text)}
+						curLinkIndex = len(tr.Links)
+						tl := &TextLink{StartSpan: len(tr.Spans) - 1, StartIndex: len(curSp.Text)}
 						if nattr > 0 {
 							sprop := make(map[string]any, len(parts)-1)
 							tl.Props = sprop
@@ -795,8 +795,8 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 				unestr := html.UnescapeString(string(tmpbuf))
 				// fmt.Printf("%v added: %v\n", bidx, unestr)
 				curSp.AppendString(unestr, curf.Face.Face, curf.Color, curf.Background, curf.Decoration, font, ctxt)
-				if curLinkIdx >= 0 {
-					tl := &tr.Links[curLinkIdx]
+				if curLinkIndex >= 0 {
+					tl := &tr.Links[curLinkIndex]
 					tl.Label = unestr
 				}
 			}

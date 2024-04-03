@@ -77,9 +77,9 @@ func main() {
 			return
 		}
 		// fmt.Printf("\nacq: %v\n", time.Now().Sub(rt))
-		descIdx := 0 // if running multiple frames in parallel, need diff sets
+		descIndex := 0 // if running multiple frames in parallel, need diff sets
 		cmd := sy.CmdPool.Buff
-		sy.ResetBeginRenderPass(cmd, sf.Frames[idx], descIdx)
+		sy.ResetBeginRenderPass(cmd, sf.Frames[idx], descIndex)
 		// fmt.Printf("rp: %v\n", time.Now().Sub(rt))
 		pl.BindPipeline(cmd)
 		pl.Draw(cmd, 3, 1, 0, 0)

@@ -55,28 +55,28 @@ func (tr *Torus) Defaults() {
 	tr.AngLen = 360
 }
 
-func (tr *Torus) N() (nVtx, nIdx int) {
-	nVtx, nIdx = TorusSectorN(tr.RadialSegs, tr.TubeSegs)
+func (tr *Torus) N() (nVtx, nIndex int) {
+	nVtx, nIndex = TorusSectorN(tr.RadialSegs, tr.TubeSegs)
 	return
 }
 
 // Set sets points for torus in given allocated arrays
 func (tr *Torus) Set(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
-	tr.CBBox = SetTorusSector(vtxAry, normAry, texAry, idxAry, tr.VtxOff, tr.IdxOff, tr.Radius, tr.TubeRadius, tr.RadialSegs, tr.TubeSegs, tr.AngStart, tr.AngLen, tr.Pos)
+	tr.CBBox = SetTorusSector(vtxAry, normAry, texAry, idxAry, tr.VtxOff, tr.IndexOff, tr.Radius, tr.TubeRadius, tr.RadialSegs, tr.TubeSegs, tr.AngStart, tr.AngLen, tr.Pos)
 }
 
 // TorusSectorN returns N's for a torus geometry with
 // number of radial segments, number of tubular segments,
 // radial sector start angle and length in degrees (0 - 360)
-func TorusSectorN(radialSegs, tubeSegs int) (nVtx, nIdx int) {
+func TorusSectorN(radialSegs, tubeSegs int) (nVtx, nIndex int) {
 	nVtx = (radialSegs + 1) * (tubeSegs + 1)
-	nIdx = radialSegs * tubeSegs * 6
+	nIndex = radialSegs * tubeSegs * 6
 	return
 }
 
 // SetTorusSector sets torus sector vertex, norm, tex, index data
 // at given starting *vertex* index (i.e., multiply this *3 to get
-// actual float offset in Vtx array), and starting Idx index,
+// actual float offset in Vtx array), and starting Index index,
 // with the specified revolution radius, tube radius,
 // number of radial segments, number of tubular segments,
 // radial sector start angle and length in degrees (0 - 360)

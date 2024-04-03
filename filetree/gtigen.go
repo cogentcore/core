@@ -74,8 +74,8 @@ func (t *Node) SetIndent(v units.Value) *Node { t.Indent = v; return t }
 // SetOpenDepth sets the [Node.OpenDepth]
 func (t *Node) SetOpenDepth(v int) *Node { t.OpenDepth = v; return t }
 
-// SetViewIdx sets the [Node.ViewIdx]
-func (t *Node) SetViewIdx(v int) *Node { t.ViewIdx = v; return t }
+// SetViewIndex sets the [Node.ViewIndex]
+func (t *Node) SetViewIndex(v int) *Node { t.ViewIndex = v; return t }
 
 // SetWidgetSize sets the [Node.WidgetSize]
 func (t *Node) SetWidgetSize(v mat32.Vec2) *Node { t.WidgetSize = v; return t }
@@ -142,8 +142,8 @@ func (t *Tree) SetIndent(v units.Value) *Tree { t.Indent = v; return t }
 // SetOpenDepth sets the [Tree.OpenDepth]
 func (t *Tree) SetOpenDepth(v int) *Tree { t.OpenDepth = v; return t }
 
-// SetViewIdx sets the [Tree.ViewIdx]
-func (t *Tree) SetViewIdx(v int) *Tree { t.ViewIdx = v; return t }
+// SetViewIndex sets the [Tree.ViewIndex]
+func (t *Tree) SetViewIndex(v int) *Tree { t.ViewIndex = v; return t }
 
 // SetWidgetSize sets the [Tree.WidgetSize]
 func (t *Tree) SetWidgetSize(v mat32.Vec2) *Tree { t.WidgetSize = v; return t }

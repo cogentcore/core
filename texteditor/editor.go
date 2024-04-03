@@ -111,7 +111,7 @@ type Editor struct { //core:embedder
 	CursorCol int `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// current index within PosHistory
-	PosHistIdx int `set:"-" edit:"-" json:"-" xml:"-"`
+	PosHistIndex int `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// starting point for selection -- will either be the start or end of selected region depending on subsequent selection.
 	SelectStart lex.Pos `set:"-" edit:"-" json:"-" xml:"-"`
@@ -347,7 +347,7 @@ func (ed *Editor) SetBuf(buf *Buf) *Editor {
 		bhl := len(buf.PosHistory)
 		if bhl > 0 {
 			cp := buf.PosHistory[bhl-1]
-			ed.PosHistIdx = bhl - 1
+			ed.PosHistIndex = bhl - 1
 			ed.SetCursorShow(cp)
 		} else {
 			ed.SetCursorShow(lex.Pos{})

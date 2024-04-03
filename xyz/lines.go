@@ -62,10 +62,10 @@ func NewLines(sc *Scene, name string, points []mat32.Vec3, width mat32.Vec2, clo
 	return ln
 }
 
-func (ln *Lines) Sizes() (nVtx, nIdx int, hasColor bool) {
-	ln.NVtx, ln.NIdx = vshape.LinesN(len(ln.Points), ln.Closed)
+func (ln *Lines) Sizes() (nVtx, nIndex int, hasColor bool) {
+	ln.NVtx, ln.NIndex = vshape.LinesN(len(ln.Points), ln.Closed)
 	ln.Color = len(ln.Colors) > 0
-	return ln.NVtx, ln.NIdx, ln.Color
+	return ln.NVtx, ln.NIndex, ln.Color
 }
 
 func (ln *Lines) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {

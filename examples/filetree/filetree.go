@@ -47,7 +47,7 @@ type FileBrowse struct {
 	NTextEditors int `xml:"n-text-views" desc:"number of texteditors available for editing files (default 2) -- configurable with n-text-views property"`
 
 	// index of the currently-active texteditor -- new files will be viewed in other views if available
-	ActiveTextEditorIdx int `json:"-" desc:"index of the currently-active texteditor -- new files will be viewed in other views if available"`
+	ActiveTextEditorIndex int `json:"-" desc:"index of the currently-active texteditor -- new files will be viewed in other views if available"`
 }
 
 func (fb *FileBrowse) Defaults() {
@@ -174,7 +174,7 @@ func ProjPathParse(path string) (root, projnm, fnm string, ok bool) {
 
 // ActiveTextEditor returns the currently-active TextEditor
 func (fb *FileBrowse) ActiveTextEditor() *texteditor.Editor {
-	return fb.TextEditorByIndex(fb.ActiveTextEditorIdx)
+	return fb.TextEditorByIndex(fb.ActiveTextEditorIndex)
 }
 
 // SetActiveTextEditor sets the given view index as the currently-active
@@ -184,7 +184,7 @@ func (fb *FileBrowse) SetActiveTextEditor(idx int) *texteditor.Editor {
 		log.Printf("FileBrowse SetActiveTextEditor: text view index out of range: %v\n", idx)
 		return nil
 	}
-	fb.ActiveTextEditorIdx = idx
+	fb.ActiveTextEditorIndex = idx
 	av := fb.ActiveTextEditor()
 	if av.Buf != nil {
 		fb.ActiveFilename = av.Buf.Filename
@@ -197,11 +197,11 @@ func (fb *FileBrowse) SetActiveTextEditor(idx int) *texteditor.Editor {
 // its index -- if the active text view is empty, then it is used, otherwise
 // it is the next one
 func (fb *FileBrowse) NextTextEditor() (*texteditor.Editor, int) {
-	av := fb.TextEditorByIndex(fb.ActiveTextEditorIdx)
+	av := fb.TextEditorByIndex(fb.ActiveTextEditorIndex)
 	if av.Buf == nil {
-		return av, fb.ActiveTextEditorIdx
+		return av, fb.ActiveTextEditorIndex
 	}
-	nxt := (fb.ActiveTextEditorIdx + 1) % fb.NTextEditors
+	nxt := (fb.ActiveTextEditorIndex + 1) % fb.NTextEditors
 	return fb.TextEditorByIndex(nxt), nxt
 }
 

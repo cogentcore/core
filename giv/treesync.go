@@ -32,8 +32,8 @@ func (tv *TreeView) SyncTree(tree ki.Ki) *TreeView {
 	if tv.SyncNode != tree {
 		tv.SyncNode = tree
 	}
-	tvIdx := 0
-	tv.SyncToSrc(&tvIdx, true, 0)
+	tvIndex := 0
+	tv.SyncToSrc(&tvIndex, true, 0)
 	tv.NeedsLayout()
 	return tv
 }
@@ -43,32 +43,32 @@ func (tv *TreeView) SyncTree(tree ki.Ki) *TreeView {
 // via SyncToSrc during tree updating.
 // It uses ki Config mechanism to perform minimal updates to
 // remain in sync.
-func (tv *TreeView) SetSyncNode(sk ki.Ki, tvIdx *int, init bool, depth int) {
+func (tv *TreeView) SetSyncNode(sk ki.Ki, tvIndex *int, init bool, depth int) {
 	if tv.SyncNode != sk {
 		tv.SyncNode = sk
 	}
-	tv.SyncToSrc(tvIdx, init, depth)
+	tv.SyncToSrc(tvIndex, init, depth)
 }
 
 // ReSync resynchronizes the view relative to the underlying nodes
 // and forces a full rerender
 func (tv *TreeView) ReSync() {
-	tvIdx := tv.ViewIdx
-	tv.SyncToSrc(&tvIdx, false, 0)
+	tvIndex := tv.ViewIndex
+	tv.SyncToSrc(&tvIndex, false, 0)
 }
 
 // SyncToSrc updates the view tree to match the sync tree, using
 // ConfigChildren to maximally preserve existing tree elements.
 // init means we are doing initial build, and depth tracks depth
 // (only during init).
-func (tv *TreeView) SyncToSrc(tvIdx *int, init bool, depth int) {
+func (tv *TreeView) SyncToSrc(tvIndex *int, init bool, depth int) {
 	// pr := prof.Start("TreeView.SyncToSrc")
 	// defer pr.End()
 	sk := tv.SyncNode
 	nm := "tv_" + sk.Name()
 	tv.SetName(nm)
-	tv.ViewIdx = *tvIdx
-	*tvIdx++
+	tv.ViewIndex = *tvIndex
+	*tvIndex++
 	// tvPar := tv.TreeViewParent()
 	// if tvPar != nil {
 	// 	if init && depth >= tv.RootView.OpenDepth {
@@ -89,7 +89,7 @@ func (tv *TreeView) SyncToSrc(tvIdx *int, init bool, depth int) {
 			break
 		}
 		vk := AsTreeView(tv.Kids[idx])
-		vk.SetSyncNode(skid, tvIdx, init, depth+1)
+		vk.SetSyncNode(skid, tvIndex, init, depth+1)
 		if mods {
 			if vcp, ok := skid.PropInherit(vcprop, ki.NoInherit); ok {
 				if vc, err := laser.ToBool(vcp); vc && err != nil {

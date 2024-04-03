@@ -647,7 +647,7 @@ func (tf *TextField) CursorDown(steps int) {
 
 	_, ri, _ := tf.RenderAll.RuneSpanPos(tf.CursorPos)
 	tf.CursorLine = min(tf.CursorLine+steps, tf.NLines-1)
-	tf.CursorPos, _ = tf.RenderAll.SpanPosToRuneIdx(tf.CursorLine, ri)
+	tf.CursorPos, _ = tf.RenderAll.SpanPosToRuneIndex(tf.CursorLine, ri)
 	if tf.SelectMode {
 		tf.SelectRegUpdate(tf.CursorPos)
 	}
@@ -665,7 +665,7 @@ func (tf *TextField) CursorUp(steps int) {
 
 	_, ri, _ := tf.RenderAll.RuneSpanPos(tf.CursorPos)
 	tf.CursorLine = max(tf.CursorLine-steps, 0)
-	tf.CursorPos, _ = tf.RenderAll.SpanPosToRuneIdx(tf.CursorLine, ri)
+	tf.CursorPos, _ = tf.RenderAll.SpanPosToRuneIndex(tf.CursorLine, ri)
 	if tf.SelectMode {
 		tf.SelectRegUpdate(tf.CursorPos)
 	}
@@ -1497,7 +1497,7 @@ func (tf *TextField) PixelToCursor(pt image.Point) int {
 	if tf.HasWordWrap() {
 		si, ri, ok := tf.RenderAll.PosToRune(rpt)
 		if ok {
-			ix, _ := tf.RenderAll.SpanPosToRuneIdx(si, ri)
+			ix, _ := tf.RenderAll.SpanPosToRuneIndex(si, ri)
 			ix = min(ix, n)
 			return ix
 		}

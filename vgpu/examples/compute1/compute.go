@@ -52,7 +52,7 @@ func main() {
 	set.ConfigVals(1) // one val per var
 	sy.Config()       // configures vars, allocates vals, configs pipelines..
 
-	ivl, _ := inv.Vals.ValByIdxTry(0)
+	ivl, _ := inv.Vals.ValByIndexTry(0)
 	idat := ivl.Floats32()
 	for i := 0; i < n; i++ {
 		idat[i*4+0] = rand.Float32()
@@ -64,7 +64,7 @@ func main() {
 
 	sy.Mem.SyncToGPU()
 
-	vars.BindDynValsAllIdx(0)
+	vars.BindDynValsAllIndex(0)
 
 	cmd := sy.ComputeCmdBuff()
 	sy.ComputeResetBindVars(cmd, 0)
@@ -72,8 +72,8 @@ func main() {
 	sy.ComputeCmdEnd(cmd)
 	sy.ComputeSubmitWait(cmd) // if no wait, faster, but validation complains
 
-	sy.Mem.SyncValIdxFmGPU(0, "Out", 0)
-	_, ovl, _ := vars.ValByIdxTry(0, "Out", 0)
+	sy.Mem.SyncValIndexFmGPU(0, "Out", 0)
+	_, ovl, _ := vars.ValByIndexTry(0, "Out", 0)
 
 	odat := ovl.Floats32()
 	for i := 0; i < n; i++ {

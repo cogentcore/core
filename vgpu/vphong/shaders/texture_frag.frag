@@ -5,7 +5,7 @@
 layout(push_constant) uniform PushU {
 	mat4 ModelMtx; // 64 bytes, [3][3] = TexPct.X
 	vec4 Color; // 16
-	vec4 ShinyBright; // 16 x = Shiny, y = Reflect, z = Bright, w = TexIdx
+	vec4 ShinyBright; // 16 x = Shiny, y = Reflect, z = Bright, w = TexIndex
 	vec4 Emissive; // 16 rgb, a = TexPct.Y
 	vec4 TexRepeatOff; // 16 xy = Repeat, zw = Offset
 };
@@ -31,13 +31,13 @@ void TexWin(vec2 pct, out vec2 tc) {
 }
 
 void main() {
-	int TexIdxP = int(ShinyBright.w);
-	int TexIdx = TexIdxP / 1024;
-	int TexLay = TexIdxP % 1024;
+	int TexIndexP = int(ShinyBright.w);
+	int TexIndex = TexIndexP / 1024;
+	int TexLay = TexIndexP % 1024;
 	vec2 TexPct = vec2(ModelMtx[3][3], Emissive.a);
 	vec2 tc;
 	TexWin(TexPct, tc);
-	vec4 TColor = texture(TexSampler[TexIdx], vec3(tc, TexLay));
+	vec4 TColor = texture(TexSampler[TexIndex], vec3(tc, TexLay));
 	float opacity = TColor.a;
 	vec3 clr = TColor.rgb;	
 	

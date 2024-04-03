@@ -26,7 +26,7 @@ type FileStates struct {
 	BasePath string
 
 	// index of the state that is done
-	DoneIdx int
+	DoneIndex int
 
 	// one filestate
 	FsA FileState
@@ -85,7 +85,7 @@ func (fs *FileStates) Done() *FileState {
 // The state is accessed under a lock, and as long as any use of state is
 // fast enough, it should be usable over next two switches (typically true).
 func (fs *FileStates) DoneNoLock() *FileState {
-	switch fs.DoneIdx {
+	switch fs.DoneIndex {
 	case 0:
 		return &fs.FsA
 	case 1:
@@ -111,7 +111,7 @@ func (fs *FileStates) Proc() *FileState {
 // The state is accessed under a lock, and as long as any use of state is
 // fast enough, it should be usable over next two switches (typically true).
 func (fs *FileStates) ProcNoLock() *FileState {
-	switch fs.DoneIdx {
+	switch fs.DoneIndex {
 	case 0:
 		return &fs.FsB
 	case 1:
@@ -145,9 +145,9 @@ func (fs *FileStates) EndProc() {
 func (fs *FileStates) Switch() {
 	fs.SwitchMu.Lock()
 	defer fs.SwitchMu.Unlock()
-	fs.DoneIdx++
-	fs.DoneIdx = fs.DoneIdx % 2
-	// fmt.Printf("switched: %v  %v\n", fs.DoneIdx, fs.Filename)
+	fs.DoneIndex++
+	fs.DoneIndex = fs.DoneIndex % 2
+	// fmt.Printf("switched: %v  %v\n", fs.DoneIndex, fs.Filename)
 }
 
 // MetaData returns given meta data string for given key,

@@ -56,21 +56,21 @@ func (sp *Sphere) Defaults() {
 	sp.ElevLen = 180
 }
 
-func (sp *Sphere) N() (nVtx, nIdx int) {
-	nVtx, nIdx = SphereSectorN(sp.WidthSegs, sp.HeightSegs, sp.ElevStart, sp.ElevLen)
+func (sp *Sphere) N() (nVtx, nIndex int) {
+	nVtx, nIndex = SphereSectorN(sp.WidthSegs, sp.HeightSegs, sp.ElevStart, sp.ElevLen)
 	return
 }
 
 // SetSphereSector sets points in given allocated arrays
 func (sp *Sphere) Set(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
-	sp.CBBox = SetSphereSector(vtxAry, normAry, texAry, idxAry, sp.VtxOff, sp.IdxOff, sp.Radius, sp.WidthSegs, sp.HeightSegs, sp.AngStart, sp.AngLen, sp.ElevStart, sp.ElevLen, sp.Pos)
+	sp.CBBox = SetSphereSector(vtxAry, normAry, texAry, idxAry, sp.VtxOff, sp.IndexOff, sp.Radius, sp.WidthSegs, sp.HeightSegs, sp.AngStart, sp.AngLen, sp.ElevStart, sp.ElevLen, sp.Pos)
 }
 
 // SphereSectorN returns the N's for a sphere sector's
 // vertex and index data with given number of segments.
 // Note: In *vertex* units, not float units (i.e., x3 to get
 // actual float offset in Vtx array).
-func SphereSectorN(widthSegs, heightSegs int, elevStart, elevLen float32) (nVtx, nIdx int) {
+func SphereSectorN(widthSegs, heightSegs int, elevStart, elevLen float32) (nVtx, nIndex int) {
 	nVtx = (widthSegs + 1) * (heightSegs + 1)
 
 	elevStRad := mat32.DegToRad(elevStart)
@@ -85,13 +85,13 @@ func SphereSectorN(widthSegs, heightSegs int, elevStart, elevLen float32) (nVtx,
 	if elevEndRad < math.Pi {
 		h2idx++
 	}
-	nIdx = 3*h1idx*widthSegs + 3*h2idx*widthSegs
+	nIndex = 3*h1idx*widthSegs + 3*h2idx*widthSegs
 	return
 }
 
 // SetSphereSector sets a sphere sector vertex, norm, tex, index data at
 // given starting *vertex* index (i.e., multiply this *3 to get
-// actual float offset in Vtx array), and starting Idx index,
+// actual float offset in Vtx array), and starting Index index,
 // with the specified radius, number of radial segments in each
 // dimension (min 3), radial sector start
 // angle and length in degrees (0 - 360), start = -1,0,0,
@@ -166,15 +166,15 @@ func SetSphereSector(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU
 // vertex and index data with given number of segments.
 // Note: In *vertex* units, not float units (i.e., x3 to get
 // actual float offset in Vtx array).
-func DiskSectorN(segs int) (nVtx, nIdx int) {
+func DiskSectorN(segs int) (nVtx, nIndex int) {
 	nVtx = segs + 2
-	nIdx = 2 * (segs - 1)
+	nIndex = 2 * (segs - 1)
 	return
 }
 
 // SetDiskSector sets a disk sector vertex, norm, tex, index data at
 // given starting *vertex* index (i.e., multiply this *3 to get
-// actual float offset in Vtx array), and starting Idx index,
+// actual float offset in Vtx array), and starting Index index,
 // with the specified radius, number of radial segments (minimum 3),
 // sector start angle and angle length in degrees.
 // The center of the disk is at the origin,

@@ -21,7 +21,7 @@ type Mesh struct {
 	NVtx int
 
 	// number of indexes, as mat32.ArrayU32
-	NIdx int
+	NIndex int
 
 	// has per-vertex colors, as mat32.Vec4 per vertex
 	HasColor bool
@@ -37,15 +37,15 @@ func (ph *Phong) ConfigMeshes() {
 	vset.ConfigVals(nm)
 	for i, kv := range ph.Meshes.Order {
 		mv := kv.Value
-		_, vp, _ := vset.ValByIdxTry("Pos", i)
+		_, vp, _ := vset.ValByIndexTry("Pos", i)
 		vp.N = mv.NVtx
-		_, vn, _ := vset.ValByIdxTry("Norm", i)
+		_, vn, _ := vset.ValByIndexTry("Norm", i)
 		vn.N = mv.NVtx
-		_, vt, _ := vset.ValByIdxTry("Tex", i)
+		_, vt, _ := vset.ValByIndexTry("Tex", i)
 		vt.N = mv.NVtx
-		_, vi, _ := vset.ValByIdxTry("Index", i)
-		vi.N = mv.NIdx
-		_, vc, _ := vset.ValByIdxTry("Color", i)
+		_, vi, _ := vset.ValByIndexTry("Index", i)
+		vi.N = mv.NIndex
+		_, vc, _ := vset.ValByIndexTry("Color", i)
 		if mv.HasColor {
 			vc.N = mv.NVtx
 		} else {
@@ -61,8 +61,8 @@ func (ph *Phong) ResetMeshes() {
 
 // AddMesh adds a Mesh with name and given number of verticies, indexes,
 // and optional per-vertex color
-func (ph *Phong) AddMesh(name string, nVtx, nIdx int, hasColor bool) {
-	ph.Meshes.Add(name, &Mesh{NVtx: nVtx, NIdx: nIdx, HasColor: hasColor})
+func (ph *Phong) AddMesh(name string, nVtx, nIndex int, hasColor bool) {
+	ph.Meshes.Add(name, &Mesh{NVtx: nVtx, NIndex: nIndex, HasColor: hasColor})
 }
 
 // DeleteMesh deletes Mesh with name
@@ -81,21 +81,21 @@ func (ph *Phong) UseMeshName(name string) error {
 			log.Println(err)
 		}
 	}
-	return ph.UseMeshIdx(idx)
+	return ph.UseMeshIndex(idx)
 }
 
-// UseMeshIdx selects mesh by index for current render step.
+// UseMeshIndex selects mesh by index for current render step.
 // If mesh has per-vertex colors, these are selected for rendering,
 // and texture is turned off.  UseTexture* after this to override.
-func (ph *Phong) UseMeshIdx(idx int) error {
+func (ph *Phong) UseMeshIndex(idx int) error {
 	mesh := ph.Meshes.ValueByIndex(idx)
 	vars := ph.Sys.Vars()
-	vars.BindVertexValIdx("Pos", idx)
-	vars.BindVertexValIdx("Norm", idx)
-	vars.BindVertexValIdx("Tex", idx)
-	vars.BindVertexValIdx("Index", idx)
+	vars.BindVertexValIndex("Pos", idx)
+	vars.BindVertexValIndex("Norm", idx)
+	vars.BindVertexValIndex("Tex", idx)
+	vars.BindVertexValIndex("Index", idx)
 	if mesh.HasColor {
-		vars.BindVertexValIdx("Color", idx)
+		vars.BindVertexValIndex("Color", idx)
 		ph.Cur.UseVtxColor = true
 		ph.Cur.UseTexture = false
 	}
@@ -113,20 +113,20 @@ func (ph *Phong) MeshFloatsByName(name string) (pos, norm, tex, clr mat32.ArrayF
 			log.Println(err)
 		}
 	}
-	return ph.MeshFloatsByIdx(i)
+	return ph.MeshFloatsByIndex(i)
 }
 
-// MeshFloatsByIdx returns the mat32.ArrayF32's and mat32.ArrayU32 for given mesh
+// MeshFloatsByIndex returns the mat32.ArrayF32's and mat32.ArrayU32 for given mesh
 // for assigning values to the mesh.
-// Must call ModMeshByIdx after setting these values to mark as modified.
-func (ph *Phong) MeshFloatsByIdx(i int) (pos, norm, tex, clr mat32.ArrayF32, idx mat32.ArrayU32) {
+// Must call ModMeshByIndex after setting these values to mark as modified.
+func (ph *Phong) MeshFloatsByIndex(i int) (pos, norm, tex, clr mat32.ArrayF32, idx mat32.ArrayU32) {
 	vars := ph.Sys.Vars()
 	vset := vars.VertexSet()
-	_, vp, _ := vset.ValByIdxTry("Pos", i)
-	_, vn, _ := vset.ValByIdxTry("Norm", i)
-	_, vt, _ := vset.ValByIdxTry("Tex", i)
-	_, vi, _ := vset.ValByIdxTry("Index", i)
-	_, vc, _ := vset.ValByIdxTry("Color", i)
+	_, vp, _ := vset.ValByIndexTry("Pos", i)
+	_, vn, _ := vset.ValByIndexTry("Norm", i)
+	_, vt, _ := vset.ValByIndexTry("Tex", i)
+	_, vi, _ := vset.ValByIndexTry("Index", i)
+	_, vc, _ := vset.ValByIndexTry("Color", i)
 	return vp.Floats32(), vn.Floats32(), vt.Floats32(), vc.Floats32(), vi.UInts32()
 }
 
@@ -137,17 +137,17 @@ func (ph *Phong) ModMeshByName(name string) {
 	if !ok { // may not have been configed yet
 		return
 	}
-	ph.ModMeshByIdx(i)
+	ph.ModMeshByIndex(i)
 }
 
-// ModMeshByIdx marks given mesh by index as modified.
+// ModMeshByIndex marks given mesh by index as modified.
 // Must call after modifying mesh values, to mark for syncing
-func (ph *Phong) ModMeshByIdx(i int) {
+func (ph *Phong) ModMeshByIndex(i int) {
 	vars := ph.Sys.Vars()
 	vset := vars.VertexSet()
 	nms := []string{"Pos", "Norm", "Tex", "Index", "Color"}
 	for _, nm := range nms {
-		_, vl, _ := vset.ValByIdxTry(nm, i)
+		_, vl, _ := vset.ValByIndexTry(nm, i)
 		vl.SetMod()
 	}
 }

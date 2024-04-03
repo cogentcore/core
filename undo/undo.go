@@ -17,7 +17,7 @@ Redoing the action means restoring the state *after* the action.
 This means that the first Undo action must save the current state
 before doing the undo.
 
-The Idx is always on the last state saved, which will then be the one
+The Index is always on the last state saved, which will then be the one
 that would be undone for an undo action.
 */
 package undo
@@ -69,7 +69,7 @@ func (rc *Rec) Init(action, data string) {
 type Mgr struct {
 
 	// current index in the undo records -- this is the record that will be undone if user hits undo
-	Idx int
+	Index int
 
 	// the list of saved state / action records
 	Recs []*Rec
@@ -114,24 +114,24 @@ func (um *Mgr) Save(action, data string, state []string) {
 			um.RawInterval = DefaultRawInterval
 		}
 		um.Recs = make([]*Rec, 1)
-		um.Idx = 0
+		um.Index = 0
 		nr := &Rec{Action: action, Data: data, Raw: state}
 		um.Recs[0] = nr
 		um.Mu.Unlock()
 		return
 	}
-	// recs will be [old..., Idx] after this
-	um.Idx++
+	// recs will be [old..., Index] after this
+	um.Index++
 	var nr *Rec
-	if len(um.Recs) > um.Idx {
-		um.Recs = um.Recs[:um.Idx+1]
-		nr = um.Recs[um.Idx]
-	} else if len(um.Recs) == um.Idx {
+	if len(um.Recs) > um.Index {
+		um.Recs = um.Recs[:um.Index+1]
+		nr = um.Recs[um.Index]
+	} else if len(um.Recs) == um.Index {
 		nr = &Rec{}
 		um.Recs = append(um.Recs, nr)
 	} else {
-		log.Printf("undo.Mgr error: index: %d > len(um.Recs): %d\n", um.Idx, len(um.Recs))
-		um.Idx = len(um.Recs)
+		log.Printf("undo.Mgr error: index: %d > len(um.Recs): %d\n", um.Index, len(um.Recs))
+		um.Index = len(um.Recs)
 		nr = &Rec{}
 		um.Recs = append(um.Recs, nr)
 	}
@@ -140,7 +140,7 @@ func (um *Mgr) Save(action, data string, state []string) {
 		um.Mu.Unlock()
 		return
 	}
-	go um.SaveState(nr, um.Idx, state) // fork off save -- it will unlock when done
+	go um.SaveState(nr, um.Index, state) // fork off save -- it will unlock when done
 	// now we return straight away, with lock still held
 }
 
@@ -148,7 +148,7 @@ func (um *Mgr) Save(action, data string, state []string) {
 // the first Undo action when at the end of the stack.  If this returns true, then
 // call SaveUndoStart.  It sets a special flag on the record.
 func (um *Mgr) MustSaveUndoStart() bool {
-	return um.Idx == len(um.Recs)-1
+	return um.Index == len(um.Recs)-1
 }
 
 // SaveUndoStart saves the current state -- call if MustSaveUndoStart is true.
@@ -158,7 +158,7 @@ func (um *Mgr) SaveUndoStart(state []string) {
 	um.Mu.Lock()
 	nr := &Rec{UndoSave: true}
 	um.Recs = append(um.Recs, nr)
-	um.SaveState(nr, um.Idx+1, state) // do it now because we need to immediately do Undo, does unlock
+	um.SaveState(nr, um.Index+1, state) // do it now because we need to immediately do Undo, does unlock
 }
 
 // SaveReplace replaces the current Undo record with new state,
@@ -169,8 +169,8 @@ func (um *Mgr) SaveUndoStart(state []string) {
 // in some cases it is not possible).
 func (um *Mgr) SaveReplace(action, data string, state []string) {
 	um.Mu.Lock()
-	nr := um.Recs[um.Idx]
-	go um.SaveState(nr, um.Idx, state)
+	nr := um.Recs[um.Index]
+	go um.SaveState(nr, um.Index, state)
 }
 
 // SaveState saves given record of state at given index
@@ -190,33 +190,33 @@ func (um *Mgr) SaveState(nr *Rec, idx int, state []string) {
 // This does NOT get the lock -- may rarely be inaccurate but is used for
 // gui enabling so not such a big deal.
 func (um *Mgr) HasUndoAvail() bool {
-	return um.Idx >= 0
+	return um.Index >= 0
 }
 
 // HasRedoAvail returns true if there is at least one redo record available.
 // This does NOT get the lock -- may rarely be inaccurate but is used for
 // gui enabling so not such a big deal.
 func (um *Mgr) HasRedoAvail() bool {
-	return um.Idx < len(um.Recs)-2
+	return um.Index < len(um.Recs)-2
 }
 
 // Undo returns the action, action data, and state at the current index
 // and decrements the index to the previous record.
 // This state is the state just prior to the action.
-// If already at the start (Idx = -1) then returns empty everything
+// If already at the start (Index = -1) then returns empty everything
 // Before calling, first check MustSaveUndoStart() -- if false, then you need
 // to call SaveUndoStart() so that the state just before Undoing can be redone!
 func (um *Mgr) Undo() (action, data string, state []string) {
 	um.Mu.Lock()
-	if um.Idx < 0 || um.Idx >= len(um.Recs) {
+	if um.Index < 0 || um.Index >= len(um.Recs) {
 		um.Mu.Unlock()
 		return
 	}
-	rec := um.Recs[um.Idx]
+	rec := um.Recs[um.Index]
 	action = rec.Action
 	data = rec.Data
-	state = um.RecState(um.Idx)
-	um.Idx--
+	state = um.RecState(um.Index)
+	um.Index--
 	um.Mu.Unlock()
 	return
 }
@@ -234,7 +234,7 @@ func (um *Mgr) UndoTo(idx int) (action, data string, state []string) {
 	action = rec.Action
 	data = rec.Data
 	state = um.RecState(idx)
-	um.Idx = idx - 1
+	um.Index = idx - 1
 	um.Mu.Unlock()
 	return
 }
@@ -244,15 +244,15 @@ func (um *Mgr) UndoTo(idx int) (action, data string, state []string) {
 // returning nil if already at end of saved records.
 func (um *Mgr) Redo() (action, data string, state []string) {
 	um.Mu.Lock()
-	if um.Idx >= len(um.Recs)-2 {
+	if um.Index >= len(um.Recs)-2 {
 		um.Mu.Unlock()
 		return
 	}
-	um.Idx++
-	rec := um.Recs[um.Idx] // action being redone is this one
+	um.Index++
+	rec := um.Recs[um.Index] // action being redone is this one
 	action = rec.Action
 	data = rec.Data
-	state = um.RecState(um.Idx + 1) // state is the one *after* it
+	state = um.RecState(um.Index + 1) // state is the one *after* it
 	um.Mu.Unlock()
 	return
 }
@@ -265,7 +265,7 @@ func (um *Mgr) RedoTo(idx int) (action, data string, state []string) {
 		um.Mu.Unlock()
 		return
 	}
-	um.Idx = idx
+	um.Index = idx
 	rec := um.Recs[idx]
 	action = rec.Action
 	data = rec.Data
@@ -278,16 +278,16 @@ func (um *Mgr) RedoTo(idx int) (action, data string, state []string) {
 func (um *Mgr) Reset() {
 	um.Mu.Lock()
 	um.Recs = nil
-	um.Idx = 0
+	um.Index = 0
 	um.Mu.Unlock()
 }
 
 // UndoList returns the list actions in order from the most recent back in time
 // suitable for a menu of actions to undo.
 func (um *Mgr) UndoList() []string {
-	al := make([]string, um.Idx)
-	for i := um.Idx; i >= 0; i-- {
-		al[um.Idx-i] = um.Recs[i].Action
+	al := make([]string, um.Index)
+	for i := um.Index; i >= 0; i-- {
+		al[um.Index-i] = um.Recs[i].Action
 	}
 	return al
 }
@@ -296,10 +296,10 @@ func (um *Mgr) UndoList() []string {
 // suitable for a menu of actions to redo
 func (um *Mgr) RedoList() []string {
 	nl := len(um.Recs)
-	if um.Idx >= nl-2 {
+	if um.Index >= nl-2 {
 		return nil
 	}
-	st := um.Idx + 1
+	st := um.Index + 1
 	n := (nl - 1) - st
 	al := make([]string, n)
 	for i := st; i < nl-1; i++ {

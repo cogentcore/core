@@ -34,7 +34,7 @@ func main() {
 				table = append(table, &tableStruct{IntField: i, FloatField: float32(i) / 10.0})
 				tv.Update()
 				if len(table) > 0 {
-					tv.ScrollToIdx(len(table) - 1)
+					tv.ScrollToIndex(len(table) - 1)
 				}
 				b.AsyncUnlock()
 				time.Sleep(1 * time.Millisecond)

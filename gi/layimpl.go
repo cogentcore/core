@@ -491,18 +491,18 @@ func (ls *LayImplState) ShapeCheck(w Widget, phase string) bool {
 // Cell returns the cell for given dimension and index along that
 // dimension, and given other-dimension axis which is ignored for non-Wrap cases.
 // Does no range checking and will crash if out of bounds.
-func (ls *LayImplState) Cell(d mat32.Dims, dIdx, odIdx int) *LayCell {
+func (ls *LayImplState) Cell(d mat32.Dims, dIndex, odIndex int) *LayCell {
 	if ls.Wraps == nil {
-		return ls.Cells[0].Cell(d, dIdx)
+		return ls.Cells[0].Cell(d, dIndex)
 	}
 	if ls.MainAxis == d {
-		return ls.Cells[odIdx].Cell(d, dIdx)
+		return ls.Cells[odIndex].Cell(d, dIndex)
 	}
-	return ls.Cells[dIdx].Cell(d, 0)
+	return ls.Cells[dIndex].Cell(d, 0)
 }
 
-// WrapIdxToCoord returns the X,Y coordinates in Wrap case for given sequential idx
-func (ls *LayImplState) WrapIdxToCoord(idx int) image.Point {
+// WrapIndexToCoord returns the X,Y coordinates in Wrap case for given sequential idx
+func (ls *LayImplState) WrapIndexToCoord(idx int) image.Point {
 	y := 0
 	x := 0
 	sum := 0
@@ -850,16 +850,16 @@ func (ly *Layout) LaySetInitCellsWrap() {
 		li.Wraps[i] = n
 		sum += n
 	}
-	ly.LaySetWrapIdxs()
+	ly.LaySetWrapIndexs()
 }
 
-// LaySetWrapIdxs sets indexes for Wrap case
-func (ly *Layout) LaySetWrapIdxs() {
+// LaySetWrapIndexs sets indexes for Wrap case
+func (ly *Layout) LaySetWrapIndexs() {
 	li := &ly.LayImpl
 	idx := 0
 	var maxc image.Point
 	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		ic := li.WrapIdxToCoord(idx)
+		ic := li.WrapIndexToCoord(idx)
 		kwb.Geom.Cell = ic
 		if ic.X > maxc.X {
 			maxc.X = ic.X
@@ -1371,7 +1371,7 @@ func (ly *Layout) SizeDownWrap(iter int) bool {
 		fmt.Println(ly, "wrapped:", wraps)
 	}
 	li.Wraps = wraps
-	ly.LaySetWrapIdxs()
+	ly.LaySetWrapIndexs()
 	li.InitCells()
 	ly.LaySetGapSizeFromCells()
 	ly.SizeFromChildrenCells(iter, SizeDownPass)

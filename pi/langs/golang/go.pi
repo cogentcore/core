@@ -3523,14 +3523,14 @@
             "Ast": "AnchorAst",
             "Acts": [
               {
-                "RunIdx": -1,
+                "RunIndex": -1,
                 "Act": "PushNewScope",
                 "Path": "Name",
                 "Tok": "NamePackage",
                 "FmTok": "None"
               },
               {
-                "RunIdx": -1,
+                "RunIndex": -1,
                 "Act": "ChgToken",
                 "Path": "Name",
                 "Tok": "NamePackage",
@@ -3668,7 +3668,7 @@
             "type": "cogentcore.org/core/pi/parse.Rule",
             "name": "SliceExpr",
             "type": "cogentcore.org/core/pi/parse.Rule",
-            "name": "SliceIdxs",
+            "name": "SliceIndexs",
             "type": "cogentcore.org/core/pi/parse.Rule",
             "name": "ArgsExpr",
             "type": "cogentcore.org/core/pi/parse.Rule",
@@ -4866,7 +4866,7 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "[0]",
                     "Tok": "NameTag",
@@ -4930,7 +4930,7 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "[0]",
                     "Tok": "NameFunction",
@@ -4952,7 +4952,7 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "[0]",
                     "Tok": "NameFunction",
@@ -4974,7 +4974,7 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "[0]",
                     "Tok": "NameFunction",
@@ -5038,21 +5038,21 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
-                    "RunIdx": 0,
+                    "RunIndex": 0,
                     "Act": "ChgToken",
                     "Path": "../Name",
                     "Tok": "NameStruct",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": 0,
+                    "RunIndex": 0,
                     "Act": "PushNewScope",
                     "Path": "../Name",
                     "Tok": "NameStruct",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "PopScopeReg",
                     "Path": "../Name",
                     "Tok": "None",
@@ -5102,14 +5102,14 @@
                     "Ast": "AnchorAst",
                     "Acts": [
                       {
-                        "RunIdx": 0,
+                        "RunIndex": 0,
                         "Act": "ChgToken",
                         "Path": "../Name",
                         "Tok": "NameArray",
                         "FmTok": "None"
                       },
                       {
-                        "RunIdx": 0,
+                        "RunIndex": 0,
                         "Act": "AddSymbol",
                         "Path": "../Name",
                         "Tok": "NameArray",
@@ -5131,14 +5131,14 @@
                     "Ast": "AnchorAst",
                     "Acts": [
                       {
-                        "RunIdx": 0,
+                        "RunIndex": 0,
                         "Act": "ChgToken",
                         "Path": "../Name",
                         "Tok": "NameArray",
                         "FmTok": "None"
                       },
                       {
-                        "RunIdx": 0,
+                        "RunIndex": 0,
                         "Act": "AddSymbol",
                         "Path": "../Name",
                         "Tok": "NameArray",
@@ -5160,14 +5160,14 @@
                     "Ast": "AnchorAst",
                     "Acts": [
                       {
-                        "RunIdx": 0,
+                        "RunIndex": 0,
                         "Act": "ChgToken",
                         "Path": "../Name",
                         "Tok": "NameArray",
                         "FmTok": "None"
                       },
                       {
-                        "RunIdx": 0,
+                        "RunIndex": 0,
                         "Act": "AddSymbol",
                         "Path": "../Name",
                         "Tok": "NameArray",
@@ -5199,14 +5199,14 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
-                    "RunIdx": 0,
+                    "RunIndex": 0,
                     "Act": "ChgToken",
                     "Path": "../Name",
                     "Tok": "NameMap",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": 0,
+                    "RunIndex": 0,
                     "Act": "AddSymbol",
                     "Path": "../Name",
                     "Tok": "NameMap",
@@ -5529,7 +5529,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "?SliceIdx1 ':' SliceIdx2 ':' SliceIdx3",
+                "Rule": "?SliceIndex1 ':' SliceIndex2 ':' SliceIndex3",
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
@@ -5543,7 +5543,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "?SliceIdx1 ':' ?SliceIdx2",
+                "Rule": "?SliceIndex1 ':' ?SliceIndex2",
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
@@ -5575,22 +5575,22 @@
             "FirstTokMap": false
           },
           {
-            "Nm": "SliceIdxs",
-            "UniqueNm": "SliceIdxs",
+            "Nm": "SliceIndexs",
+            "UniqueNm": "SliceIndexs",
             "Props": null,
             "Kids": [
               {
                 "n": 3,
                 "type": "cogentcore.org/core/pi/parse.Rule",
-                "name": "SliceIdx1",
+                "name": "SliceIndex1",
                 "type": "cogentcore.org/core/pi/parse.Rule",
-                "name": "SliceIdx2",
+                "name": "SliceIndex2",
                 "type": "cogentcore.org/core/pi/parse.Rule",
-                "name": "SliceIdx3"
+                "name": "SliceIndex3"
               },
               {
-                "Nm": "SliceIdx1",
-                "UniqueNm": "SliceIdx1",
+                "Nm": "SliceIndex1",
+                "UniqueNm": "SliceIndex1",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
@@ -5603,8 +5603,8 @@
                 "FirstTokMap": false
               },
               {
-                "Nm": "SliceIdx2",
-                "UniqueNm": "SliceIdx2",
+                "Nm": "SliceIndex2",
+                "UniqueNm": "SliceIndex2",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
@@ -5617,8 +5617,8 @@
                 "FirstTokMap": false
               },
               {
-                "Nm": "SliceIdx3",
-                "UniqueNm": "SliceIdx3",
+                "Nm": "SliceIndex3",
+                "UniqueNm": "SliceIndex3",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
@@ -5858,7 +5858,7 @@
                     "Ast": "AddAst",
                     "Acts": [
                       {
-                        "RunIdx": -1,
+                        "RunIndex": -1,
                         "Act": "ChgToken",
                         "Path": "",
                         "Tok": "NameType",
@@ -5880,7 +5880,7 @@
                     "Ast": "AddAst",
                     "Acts": [
                       {
-                        "RunIdx": -1,
+                        "RunIndex": -1,
                         "Act": "ChgToken",
                         "Path": "",
                         "Tok": "NameType",
@@ -5902,7 +5902,7 @@
                     "Ast": "AddAst",
                     "Acts": [
                       {
-                        "RunIdx": -1,
+                        "RunIndex": -1,
                         "Act": "ChgToken",
                         "Path": "",
                         "Tok": "NameType",
@@ -5982,14 +5982,14 @@
                     "Ast": "AnchorAst",
                     "Acts": [
                       {
-                        "RunIdx": 0,
+                        "RunIndex": 0,
                         "Act": "ChgToken",
                         "Path": "../Name",
                         "Tok": "NameArray",
                         "FmTok": "None"
                       },
                       {
-                        "RunIdx": 0,
+                        "RunIndex": 0,
                         "Act": "AddSymbol",
                         "Path": "../Name",
                         "Tok": "NameArray",
@@ -6011,14 +6011,14 @@
                     "Ast": "AnchorAst",
                     "Acts": [
                       {
-                        "RunIdx": 0,
+                        "RunIndex": 0,
                         "Act": "ChgToken",
                         "Path": "../Name",
                         "Tok": "NameArray",
                         "FmTok": "None"
                       },
                       {
-                        "RunIdx": 0,
+                        "RunIndex": 0,
                         "Act": "AddSymbol",
                         "Path": "../Name",
                         "Tok": "NameArray",
@@ -6040,14 +6040,14 @@
                     "Ast": "AnchorAst",
                     "Acts": [
                       {
-                        "RunIdx": 0,
+                        "RunIndex": 0,
                         "Act": "ChgToken",
                         "Path": "../Name",
                         "Tok": "NameArray",
                         "FmTok": "None"
                       },
                       {
-                        "RunIdx": 0,
+                        "RunIndex": 0,
                         "Act": "AddSymbol",
                         "Path": "../Name",
                         "Tok": "NameArray",
@@ -6079,21 +6079,21 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
-                    "RunIdx": 0,
+                    "RunIndex": 0,
                     "Act": "ChgToken",
                     "Path": "../Name",
                     "Tok": "NameStruct",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": 0,
+                    "RunIndex": 0,
                     "Act": "PushNewScope",
                     "Path": "../Name",
                     "Tok": "NameStruct",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "PopScopeReg",
                     "Path": "../Name",
                     "Tok": "None",
@@ -6143,21 +6143,21 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
-                    "RunIdx": 0,
+                    "RunIndex": 0,
                     "Act": "ChgToken",
                     "Path": "../Name",
                     "Tok": "NameInterface",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": 0,
+                    "RunIndex": 0,
                     "Act": "PushNewScope",
                     "Path": "../Name",
                     "Tok": "NameInterface",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "PopScopeReg",
                     "Path": "../Name",
                     "Tok": "None",
@@ -6179,14 +6179,14 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
-                    "RunIdx": 0,
+                    "RunIndex": 0,
                     "Act": "ChgToken",
                     "Path": "../Name",
                     "Tok": "NameMap",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": 0,
+                    "RunIndex": 0,
                     "Act": "AddSymbol",
                     "Path": "../Name",
                     "Tok": "NameMap",
@@ -6310,14 +6310,14 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "",
                     "Tok": "NameField",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "AddSymbol",
                     "Path": "",
                     "Tok": "NameField",
@@ -6339,14 +6339,14 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "Name|QualName",
                     "Tok": "NameField",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "AddSymbol",
                     "Path": "Name|QualName",
                     "Tok": "NameField",
@@ -6368,14 +6368,14 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "Name\u0026NameListEls/Name...",
                     "Tok": "NameField",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "AddSymbol",
                     "Path": "Name\u0026NameListEls/Name...",
                     "Tok": "NameField",
@@ -6447,28 +6447,28 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "Name",
                     "Tok": "NameType",
                     "FmTok": "Name"
                   },
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "AddSymbol",
                     "Path": "Name",
                     "Tok": "NameType",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "AddDetail",
                     "Path": "[1]",
                     "Tok": "None",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "AddType",
                     "Path": "Name",
                     "Tok": "None",
@@ -6610,49 +6610,49 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
-                    "RunIdx": 5,
+                    "RunIndex": 5,
                     "Act": "ChgToken",
                     "Path": "Name",
                     "Tok": "NameMethod",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": 5,
+                    "RunIndex": 5,
                     "Act": "PushNewScope",
                     "Path": "Name",
                     "Tok": "NameMethod",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "AddDetail",
                     "Path": "MethRecvName|MethRecvNoNm",
                     "Tok": "None",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "AddDetail",
                     "Path": "SigParams|SigParamsResult",
                     "Tok": "None",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "AddSymbol",
                     "Path": "MethRecvName/Name",
                     "Tok": "NameVarClass",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "PopScopeReg",
                     "Path": "",
                     "Tok": "None",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "PopScope",
                     "Path": "",
                     "Tok": "None",
@@ -6674,28 +6674,28 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "Name",
                     "Tok": "NameFunction",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": 2,
+                    "RunIndex": 2,
                     "Act": "PushNewScope",
                     "Path": "Name",
                     "Tok": "NameFunction",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "AddDetail",
                     "Path": "SigParams|SigParamsResult",
                     "Tok": "None",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "PopScopeReg",
                     "Path": "",
                     "Tok": "None",
@@ -6739,14 +6739,14 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "PushScope",
                     "Path": "TypeNm|PointerType/TypeNm",
                     "Tok": "NameStruct",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "Name",
                     "Tok": "NameVarClass",
@@ -6768,7 +6768,7 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "PushScope",
                     "Path": "TypeNm|PointerType/TypeNm",
                     "Tok": "NameStruct",
@@ -6866,14 +6866,14 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "",
                     "Tok": "NameInterface",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "AddSymbol",
                     "Path": "",
                     "Tok": "NameInterface",
@@ -6895,14 +6895,14 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "Name",
                     "Tok": "NameMethod",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "AddSymbol",
                     "Path": "Name",
                     "Tok": "NameMethod",
@@ -6924,14 +6924,14 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "",
                     "Tok": "NameInterface",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "AddSymbol",
                     "Path": "",
                     "Tok": "NameInterface",
@@ -7069,21 +7069,21 @@
                 "Ast": "SubAst",
                 "Acts": [
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "Name|NameListEls/Name...",
                     "Tok": "NameVarParam",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "AddSymbol",
                     "Path": "Name|NameListEls/Name...",
                     "Tok": "NameVarParam",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "AddDetail",
                     "Path": "[1]",
                     "Tok": "None",
@@ -7473,14 +7473,14 @@
                     "Ast": "AnchorAst",
                     "Acts": [
                       {
-                        "RunIdx": -1,
+                        "RunIndex": -1,
                         "Act": "ChgToken",
                         "Path": "[0]",
                         "Tok": "NameVar",
                         "FmTok": "None"
                       },
                       {
-                        "RunIdx": -1,
+                        "RunIndex": -1,
                         "Act": "AddSymbol",
                         "Path": "[0]",
                         "Tok": "NameVar",
@@ -7502,14 +7502,14 @@
                     "Ast": "AnchorAst",
                     "Acts": [
                       {
-                        "RunIdx": -1,
+                        "RunIndex": -1,
                         "Act": "ChgToken",
                         "Path": "[0]",
                         "Tok": "NameVar",
                         "FmTok": "None"
                       },
                       {
-                        "RunIdx": -1,
+                        "RunIndex": -1,
                         "Act": "AddSymbol",
                         "Path": "[0]",
                         "Tok": "NameVar",
@@ -7531,7 +7531,7 @@
                     "Ast": "AnchorAst",
                     "Acts": [
                       {
-                        "RunIdx": -1,
+                        "RunIndex": -1,
                         "Act": "ChgToken",
                         "Path": "NameListEls",
                         "Tok": "NameVar",
@@ -7611,14 +7611,14 @@
                     "Ast": "AnchorAst",
                     "Acts": [
                       {
-                        "RunIdx": 0,
+                        "RunIndex": 0,
                         "Act": "PushStack",
                         "Path": "SwitchType",
                         "Tok": "None",
                         "FmTok": "None"
                       },
                       {
-                        "RunIdx": -1,
+                        "RunIndex": -1,
                         "Act": "PopStack",
                         "Path": "",
                         "Tok": "None",
@@ -7640,14 +7640,14 @@
                     "Ast": "AnchorAst",
                     "Acts": [
                       {
-                        "RunIdx": 0,
+                        "RunIndex": 0,
                         "Act": "PushStack",
                         "Path": "SwitchType",
                         "Tok": "None",
                         "FmTok": "None"
                       },
                       {
-                        "RunIdx": -1,
+                        "RunIndex": -1,
                         "Act": "PopStack",
                         "Path": "",
                         "Tok": "None",
@@ -7683,14 +7683,14 @@
                     "Ast": "AnchorAst",
                     "Acts": [
                       {
-                        "RunIdx": 0,
+                        "RunIndex": 0,
                         "Act": "PushStack",
                         "Path": "SwitchType",
                         "Tok": "None",
                         "FmTok": "None"
                       },
                       {
-                        "RunIdx": -1,
+                        "RunIndex": -1,
                         "Act": "PopStack",
                         "Path": "",
                         "Tok": "None",
@@ -7712,14 +7712,14 @@
                     "Ast": "AnchorAst",
                     "Acts": [
                       {
-                        "RunIdx": 0,
+                        "RunIndex": 0,
                         "Act": "PushStack",
                         "Path": "SwitchType",
                         "Tok": "None",
                         "FmTok": "None"
                       },
                       {
-                        "RunIdx": -1,
+                        "RunIndex": -1,
                         "Act": "PopStack",
                         "Path": "",
                         "Tok": "None",
@@ -7923,7 +7923,7 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "",
                     "Tok": "NameLabel",
@@ -8189,21 +8189,21 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "Name...",
                     "Tok": "NameVar",
                     "FmTok": "Name"
                   },
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "AddSymbol",
                     "Path": "Name",
                     "Tok": "NameVar",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "AddDetail",
                     "Path": "[1]",
                     "Tok": "None",
@@ -8279,21 +8279,21 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "Name...",
                     "Tok": "NameVar",
                     "FmTok": "Name"
                   },
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "AddSymbol",
                     "Path": "Name",
                     "Tok": "NameVar",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "AddDetail",
                     "Path": "[1]",
                     "Tok": "None",
@@ -8503,14 +8503,14 @@
                 "Ast": "AddAst",
                 "Acts": [
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "AddSymbol",
                     "Path": "",
                     "Tok": "NameLibrary",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "",
                     "Tok": "NameLibrary",
@@ -8532,14 +8532,14 @@
                 "Ast": "AddAst",
                 "Acts": [
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "AddSymbol",
                     "Path": "",
                     "Tok": "NameLibrary",
                     "FmTok": "None"
                   },
                   {
-                    "RunIdx": -1,
+                    "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "",
                     "Tok": "NameLibrary",
@@ -8683,21 +8683,21 @@
                     "Ast": "AnchorAst",
                     "Acts": [
                       {
-                        "RunIdx": -1,
+                        "RunIndex": -1,
                         "Act": "ChgToken",
                         "Path": "[0]",
                         "Tok": "NameConstant",
                         "FmTok": "None"
                       },
                       {
-                        "RunIdx": -1,
+                        "RunIndex": -1,
                         "Act": "AddSymbol",
                         "Path": "[0]",
                         "Tok": "NameConstant",
                         "FmTok": "None"
                       },
                       {
-                        "RunIdx": -1,
+                        "RunIndex": -1,
                         "Act": "AddDetail",
                         "Path": "[-1]",
                         "Tok": "None",
@@ -8719,14 +8719,14 @@
                     "Ast": "AnchorAst",
                     "Acts": [
                       {
-                        "RunIdx": -1,
+                        "RunIndex": -1,
                         "Act": "ChgToken",
                         "Path": "[0]",
                         "Tok": "NameConstant",
                         "FmTok": "None"
                       },
                       {
-                        "RunIdx": -1,
+                        "RunIndex": -1,
                         "Act": "AddSymbol",
                         "Path": "[0]",
                         "Tok": "NameConstant",
@@ -8820,21 +8820,21 @@
                     "Ast": "AnchorAst",
                     "Acts": [
                       {
-                        "RunIdx": -1,
+                        "RunIndex": -1,
                         "Act": "ChgToken",
                         "Path": "[0]",
                         "Tok": "NameVarGlobal",
                         "FmTok": "None"
                       },
                       {
-                        "RunIdx": -1,
+                        "RunIndex": -1,
                         "Act": "AddSymbol",
                         "Path": "[0]",
                         "Tok": "NameVarGlobal",
                         "FmTok": "None"
                       },
                       {
-                        "RunIdx": -1,
+                        "RunIndex": -1,
                         "Act": "AddDetail",
                         "Path": "[-1]",
                         "Tok": "None",
@@ -8856,21 +8856,21 @@
                     "Ast": "AnchorAst",
                     "Acts": [
                       {
-                        "RunIdx": -1,
+                        "RunIndex": -1,
                         "Act": "ChgToken",
                         "Path": "[0]",
                         "Tok": "NameVarGlobal",
                         "FmTok": "None"
                       },
                       {
-                        "RunIdx": -1,
+                        "RunIndex": -1,
                         "Act": "AddSymbol",
                         "Path": "[0]",
                         "Tok": "NameVarGlobal",
                         "FmTok": "None"
                       },
                       {
-                        "RunIdx": -1,
+                        "RunIndex": -1,
                         "Act": "AddDetail",
                         "Path": "[1]",
                         "Tok": "None",

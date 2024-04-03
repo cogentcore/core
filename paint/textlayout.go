@@ -34,10 +34,10 @@ func (tx *Text) RuneSpanPos(idx int) (si, ri int, ok bool) {
 	return si, ri, false
 }
 
-// SpanPosToRuneIdx returns the absolute rune index for a given span, rune
+// SpanPosToRuneIndex returns the absolute rune index for a given span, rune
 // index position -- i.e., the inverse of RuneSpanPos.  Returns false if given
 // input position is out of range, and returns last valid index in that case.
-func (tx *Text) SpanPosToRuneIdx(si, ri int) (idx int, ok bool) {
+func (tx *Text) SpanPosToRuneIndex(si, ri int) (idx int, ok bool) {
 	idx = 0
 	for i := range tx.Spans {
 		sr := &tx.Spans[i]
@@ -226,16 +226,16 @@ func (tr *Text) LayoutStdLR(txtSty *styles.Text, fontSty *styles.FontRender, ctx
 					for li := range tr.Links {
 						tl := &tr.Links[li]
 						if tl.StartSpan == si-1 {
-							if tl.StartIdx >= wp {
-								tl.StartIdx -= wp
+							if tl.StartIndex >= wp {
+								tl.StartIndex -= wp
 								tl.StartSpan++
 							}
 						} else if tl.StartSpan > si-1 {
 							tl.StartSpan++
 						}
 						if tl.EndSpan == si-1 {
-							if tl.EndIdx >= wp {
-								tl.EndIdx -= wp
+							if tl.EndIndex >= wp {
+								tl.EndIndex -= wp
 								tl.EndSpan++
 							}
 						} else if tl.EndSpan > si-1 {
@@ -269,12 +269,12 @@ func (tr *Text) LayoutStdLR(txtSty *styles.Text, fontSty *styles.FontRender, ctx
 	for li := range tr.Links {
 		tl := &tr.Links[li]
 		stsp := tr.Spans[tl.StartSpan]
-		if tl.StartIdx >= len(stsp.Text) {
-			tl.StartIdx = len(stsp.Text) - 1
+		if tl.StartIndex >= len(stsp.Text) {
+			tl.StartIndex = len(stsp.Text) - 1
 		}
 		edsp := tr.Spans[tl.EndSpan]
-		if tl.EndIdx >= len(edsp.Text) {
-			tl.EndIdx = len(edsp.Text) - 1
+		if tl.EndIndex >= len(edsp.Text) {
+			tl.EndIndex = len(edsp.Text) - 1
 		}
 	}
 

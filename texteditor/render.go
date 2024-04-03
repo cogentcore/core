@@ -602,7 +602,7 @@ func (ed *Editor) PixelToCursor(pt image.Point) lex.Pos {
 
 	si, ri, ok := ed.Renders[cln].PosToRune(rpt)
 	if ok {
-		cch, _ := ed.Renders[cln].SpanPosToRuneIdx(si, ri)
+		cch, _ := ed.Renders[cln].SpanPosToRuneIndex(si, ri)
 		return lex.Pos{Ln: cln, Ch: cch}
 	}
 

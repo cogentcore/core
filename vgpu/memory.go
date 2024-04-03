@@ -26,10 +26,10 @@ func MemSizeAlign(size, align int) int {
 
 // MemReg is a region of memory for transferring to / from GPU
 type MemReg struct {
-	Offset   int
-	Size     int
-	BuffType BuffTypes
-	BuffIdx  int // for storage buffers, storage buffer index
+	Offset    int
+	Size      int
+	BuffType  BuffTypes
+	BuffIndex int // for storage buffers, storage buffer index
 }
 
 // VarMem is memory allocation info per Var, for Storage types.
@@ -79,7 +79,7 @@ func (mm *Memory) Init(gp *GPU, device *Device) {
 	mm.GPU = gp
 	mm.Device = *device
 	mm.CmdPool.ConfigTransient(device)
-	for bt := VtxIdxBuff; bt < BuffTypesN; bt++ {
+	for bt := VtxIndexBuff; bt < BuffTypesN; bt++ {
 		mm.Buffs[bt] = &MemBuff{Type: bt, GPU: mm.GPU}
 	}
 	mm.Vars.Mem = mm
@@ -106,7 +106,7 @@ func (mm *Memory) Config(dev vk.Device) {
 
 // AllocHost allocates memory for all buffers
 func (mm *Memory) AllocHost() {
-	for bt := VtxIdxBuff; bt < BuffTypesN; bt++ {
+	for bt := VtxIndexBuff; bt < BuffTypesN; bt++ {
 		mm.AllocHostBuff(bt)
 	}
 }
@@ -179,7 +179,7 @@ func (mm *Memory) AllocHostStorageBuff() {
 
 // AllocDev allocates device memory for all bufers
 func (mm *Memory) AllocDev() {
-	for bt := VtxIdxBuff; bt < BuffTypesN; bt++ {
+	for bt := VtxIndexBuff; bt < BuffTypesN; bt++ {
 		mm.AllocDevBuff(bt)
 	}
 }
@@ -225,7 +225,7 @@ func (mm *Memory) Free() bool {
 		vm.Var.Free()
 	}
 	mm.StorageMems = nil
-	for bt := VtxIdxBuff; bt < BuffTypesN; bt++ {
+	for bt := VtxIndexBuff; bt < BuffTypesN; bt++ {
 		fr := mm.FreeBuff(bt)
 		if fr {
 			freed = true
@@ -260,7 +260,7 @@ func (mm *Memory) FreeBuff(bt BuffTypes) bool {
 
 // Deactivate deactivates device memory for all buffs
 func (mm *Memory) Deactivate() {
-	for bt := VtxIdxBuff; bt < BuffTypesN; bt++ {
+	for bt := VtxIndexBuff; bt < BuffTypesN; bt++ {
 		mm.DeactivateBuff(bt)
 	}
 }
@@ -282,7 +282,7 @@ func (mm *Memory) DeactivateBuff(bt BuffTypes) {
 
 // SyncToGPU syncs all modified Val regions from CPU to GPU device memory, for all buffs
 func (mm *Memory) SyncToGPU() {
-	for bt := VtxIdxBuff; bt < BuffTypesN; bt++ {
+	for bt := VtxIndexBuff; bt < BuffTypesN; bt++ {
 		mm.SyncToGPUBuff(bt)
 	}
 }
@@ -327,18 +327,18 @@ func (mm *Memory) SyncRegionValName(set int, varNm, valNm string) (MemReg, error
 	return vl.MemReg(vr), nil
 }
 
-// SyncRegionValIdx returns memory region for syncing given value
+// SyncRegionValIndex returns memory region for syncing given value
 // from GPU device memory to CPU host memory,
 // specifying value by index for given named variable, in given set.
 // Variable can only only be Storage memory -- otherwise an error is returned.
 // Multiple regions can be combined into one transfer call for greater efficiency.
-func (mm *Memory) SyncRegionValIdx(set int, varNm string, valIdx int) (MemReg, error) {
-	vr, vl, err := mm.Vars.ValByIdxTry(set, varNm, valIdx)
+func (mm *Memory) SyncRegionValIndex(set int, varNm string, valIndex int) (MemReg, error) {
+	vr, vl, err := mm.Vars.ValByIndexTry(set, varNm, valIndex)
 	if err != nil {
 		return MemReg{}, err
 	}
 	if vr.BuffType() != StorageBuff {
-		err = fmt.Errorf("SyncRegionValIdx: Variable must be in Storage buffer, not: %s", vr.BuffType().String())
+		err = fmt.Errorf("SyncRegionValIndex: Variable must be in Storage buffer, not: %s", vr.BuffType().String())
 		if Debug {
 			log.Println(err)
 			return MemReg{}, err
@@ -359,11 +359,11 @@ func (mm *Memory) SyncValNameFmGPU(set int, varNm, valNm string) error {
 	return nil
 }
 
-// SyncValIdxFmGPU syncs given value from GPU device memory to CPU host memory,
+// SyncValIndexFmGPU syncs given value from GPU device memory to CPU host memory,
 // specifying value by index for given named variable, in given set.
 // Variable can only only be Storage memory -- otherwise an error is returned.
-func (mm *Memory) SyncValIdxFmGPU(set int, varNm string, valIdx int) error {
-	mr, err := mm.SyncRegionValIdx(set, varNm, valIdx)
+func (mm *Memory) SyncValIndexFmGPU(set int, varNm string, valIndex int) error {
+	mr, err := mm.SyncRegionValIndex(set, varNm, valIndex)
 	if err != nil {
 		return err
 	}
@@ -372,7 +372,7 @@ func (mm *Memory) SyncValIdxFmGPU(set int, varNm string, valIdx int) error {
 }
 
 // SyncStorageRegionsFmGPU syncs given regions from the Storage buffer memory
-// from GPU to CPU, in one call.   Use SyncRegValIdxFmCPU to get the regions.
+// from GPU to CPU, in one call.   Use SyncRegValIndexFmCPU to get the regions.
 func (mm *Memory) SyncStorageRegionsFmGPU(regs ...MemReg) {
 	mm.TransferRegsFmGPU(regs)
 }
@@ -386,7 +386,7 @@ func (mm *Memory) SyncStorageRegionsFmGPU(regs ...MemReg) {
 
 // TransferToGPU transfers entire staging to GPU for all buffs
 func (mm *Memory) TransferToGPU() {
-	for bt := VtxIdxBuff; bt < BuffTypesN; bt++ {
+	for bt := VtxIndexBuff; bt < BuffTypesN; bt++ {
 		mm.TransferToGPUBuff(bt)
 	}
 }
@@ -397,7 +397,7 @@ func (mm *Memory) TransferToGPUBuff(bt BuffTypes) {
 	case StorageBuff:
 		regs := make([]MemReg, len(mm.StorageBuffs))
 		for i, stb := range mm.StorageBuffs {
-			regs[i] = MemReg{Offset: 0, Size: stb.Size, BuffType: bt, BuffIdx: i}
+			regs[i] = MemReg{Offset: 0, Size: stb.Size, BuffType: bt, BuffIndex: i}
 		}
 		mm.TransferRegsToGPU(regs)
 	case TextureBuff:
@@ -509,30 +509,30 @@ func (mm *Memory) CmdTransferStorageRegsToGPU(cmd vk.CommandBuffer, regs []MemRe
 		return
 	}
 	sort.Slice(regs, func(i, j int) bool {
-		return regs[i].BuffIdx < regs[j].BuffIdx
+		return regs[i].BuffIndex < regs[j].BuffIndex
 	})
-	buffIdx := regs[0].BuffIdx
-	buff := mm.StorageBuffs[buffIdx]
-	mm.CmdTransferStorageBuffRegsToGPU(cmd, buff, buffIdx, regs)
+	buffIndex := regs[0].BuffIndex
+	buff := mm.StorageBuffs[buffIndex]
+	mm.CmdTransferStorageBuffRegsToGPU(cmd, buff, buffIndex, regs)
 	for i := 1; i < len(regs); i++ {
-		if regs[i].BuffIdx == buffIdx {
+		if regs[i].BuffIndex == buffIndex {
 			continue
 		}
-		buffIdx = regs[i].BuffIdx
-		buff = mm.StorageBuffs[buffIdx]
-		mm.CmdTransferStorageBuffRegsToGPU(cmd, buff, buffIdx, regs)
+		buffIndex = regs[i].BuffIndex
+		buff = mm.StorageBuffs[buffIndex]
+		mm.CmdTransferStorageBuffRegsToGPU(cmd, buff, buffIndex, regs)
 	}
 }
 
 // CmdTransferStorageBuffRegsToGPU transfers memory from CPU to GPU for given regions
 // by recording command to given storage buffer of given index.
-func (mm *Memory) CmdTransferStorageBuffRegsToGPU(cmd vk.CommandBuffer, buff *MemBuff, buffIdx int, regs []MemReg) {
+func (mm *Memory) CmdTransferStorageBuffRegsToGPU(cmd vk.CommandBuffer, buff *MemBuff, buffIndex int, regs []MemReg) {
 	if buff.Size == 0 || buff.DevMem == vk.NullDeviceMemory || len(regs) == 0 {
 		return
 	}
 	var rg []vk.BufferCopy
 	for _, mr := range regs {
-		if mr.BuffIdx != buffIdx {
+		if mr.BuffIndex != buffIndex {
 			continue
 		}
 		rg = append(rg, vk.BufferCopy{SrcOffset: vk.DeviceSize(mr.Offset), DstOffset: vk.DeviceSize(mr.Offset), Size: vk.DeviceSize(mr.Size)})
@@ -547,30 +547,30 @@ func (mm *Memory) CmdTransferStorageRegsFmGPU(cmd vk.CommandBuffer, regs []MemRe
 		return
 	}
 	sort.Slice(regs, func(i, j int) bool {
-		return regs[i].BuffIdx < regs[j].BuffIdx
+		return regs[i].BuffIndex < regs[j].BuffIndex
 	})
-	buffIdx := regs[0].BuffIdx
-	buff := mm.StorageBuffs[buffIdx]
-	mm.CmdTransferStorageBuffRegsFmGPU(cmd, buff, buffIdx, regs)
+	buffIndex := regs[0].BuffIndex
+	buff := mm.StorageBuffs[buffIndex]
+	mm.CmdTransferStorageBuffRegsFmGPU(cmd, buff, buffIndex, regs)
 	for i := 1; i < len(regs); i++ {
-		if regs[i].BuffIdx == buffIdx {
+		if regs[i].BuffIndex == buffIndex {
 			continue
 		}
-		buffIdx = regs[i].BuffIdx
-		buff = mm.StorageBuffs[buffIdx]
-		mm.CmdTransferStorageBuffRegsFmGPU(cmd, buff, buffIdx, regs)
+		buffIndex = regs[i].BuffIndex
+		buff = mm.StorageBuffs[buffIndex]
+		mm.CmdTransferStorageBuffRegsFmGPU(cmd, buff, buffIndex, regs)
 	}
 }
 
 // CmdTransferStorageBuffRegsFmGPU transfers memory from GPU to CPU for given regions
 // by recording command to given storage buffer of given index.
-func (mm *Memory) CmdTransferStorageBuffRegsFmGPU(cmd vk.CommandBuffer, buff *MemBuff, buffIdx int, regs []MemReg) {
+func (mm *Memory) CmdTransferStorageBuffRegsFmGPU(cmd vk.CommandBuffer, buff *MemBuff, buffIndex int, regs []MemReg) {
 	if buff.Size == 0 || buff.DevMem == vk.NullDeviceMemory || len(regs) == 0 {
 		return
 	}
 	var rg []vk.BufferCopy
 	for _, mr := range regs {
-		if mr.BuffIdx != buffIdx {
+		if mr.BuffIndex != buffIndex {
 			continue
 		}
 		rg = append(rg, vk.BufferCopy{SrcOffset: vk.DeviceSize(mr.Offset), DstOffset: vk.DeviceSize(mr.Offset), Size: vk.DeviceSize(mr.Size)})

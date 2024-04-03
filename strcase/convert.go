@@ -81,10 +81,10 @@ func ToWordCase(input string, wordCase WordCases, delimiter rune) string {
 			}
 		}
 
-		skipIdx := 0
+		skipIndex := 0
 		for i := start; i < end; i++ {
-			if len(skipIndexes) > 0 && skipIdx < len(skipIndexes) && i == skipIndexes[skipIdx] {
-				skipIdx++
+			if len(skipIndexes) > 0 && skipIndex < len(skipIndexes) && i == skipIndexes[skipIndex] {
+				skipIndex++
 				continue
 			}
 			r := runes[i]

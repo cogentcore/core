@@ -252,23 +252,23 @@ func (n *Node) Child(idx int) Ki {
 }
 
 // ChildByName returns the first element that has given name, and nil
-// if no such element is found. startIdx arg allows for optimized
+// if no such element is found. startIndex arg allows for optimized
 // bidirectional find if you have an idea where it might be, which
 // can be a key speedup for large lists. If no value is specified for
-// startIdx, it starts in the middle, which is a good default.
-func (n *Node) ChildByName(name string, startIdx ...int) Ki {
-	return n.Kids.ElemByName(name, startIdx...)
+// startIndex, it starts in the middle, which is a good default.
+func (n *Node) ChildByName(name string, startIndex ...int) Ki {
+	return n.Kids.ElemByName(name, startIndex...)
 }
 
 // ChildByType returns the first element that has the given type, and nil
 // if not found. If embeds is true, then it also looks for any type that
 // embeds the given type at any level of anonymous embedding.
-// startIdx arg allows for optimized bidirectional find if you have an
+// startIndex arg allows for optimized bidirectional find if you have an
 // idea where it might be, which can be a key speedup for large lists. If
-// no value is specified for startIdx, it starts in the middle, which is a
+// no value is specified for startIndex, it starts in the middle, which is a
 // good default.
-func (n *Node) ChildByType(t *gti.Type, embeds bool, startIdx ...int) Ki {
-	return n.Kids.ElemByType(t, embeds, startIdx...)
+func (n *Node) ChildByType(t *gti.Type, embeds bool, startIndex ...int) Ki {
+	return n.Kids.ElemByType(t, embeds, startIndex...)
 }
 
 //////////////////////////////////////////////////////////////////////////

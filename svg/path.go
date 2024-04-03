@@ -85,7 +85,7 @@ func (g *Path) Render(sv *SVG) {
 	if mrk := sv.MarkerByName(g, "marker-mid"); mrk != nil {
 		var ptm2, ptm1, pt mat32.Vec2
 		gotidx := 0
-		PathDataIterFunc(g.Data, func(idx int, cmd PathCmds, ptIdx int, cp mat32.Vec2, ctrls []mat32.Vec2) bool {
+		PathDataIterFunc(g.Data, func(idx int, cmd PathCmds, ptIndex int, cp mat32.Vec2, ctrls []mat32.Vec2) bool {
 			ptm2 = ptm1
 			ptm1 = pt
 			pt = cp
@@ -380,7 +380,7 @@ func PathDataRender(data []PathData, pc *paint.Context) {
 // For Control points, order is in same order as in standard path stream
 // when multiple, e.g., C,S.
 // For A: order is: nc, prv, rad, mat32.Vec2{X: ang}, mat32.V2(laf, sf)}
-func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIdx int, cp mat32.Vec2, ctrls []mat32.Vec2) bool) {
+func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIndex int, cp mat32.Vec2, ctrls []mat32.Vec2) bool) {
 	sz := len(data)
 	if sz == 0 {
 		return
@@ -571,7 +571,7 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIdx int
 // PathDataBBox traverses the path data and extracts the local bounding box
 func PathDataBBox(data []PathData) mat32.Box2 {
 	bb := mat32.B2Empty()
-	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIdx int, cp mat32.Vec2, ctrls []mat32.Vec2) bool {
+	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIndex int, cp mat32.Vec2, ctrls []mat32.Vec2) bool {
 		bb.ExpandByPoint(cp)
 		return ki.Continue
 	})
@@ -581,7 +581,7 @@ func PathDataBBox(data []PathData) mat32.Box2 {
 // PathDataStart gets the starting coords and angle from the path
 func PathDataStart(data []PathData) (vec mat32.Vec2, ang float32) {
 	gotSt := false
-	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIdx int, cp mat32.Vec2, ctrls []mat32.Vec2) bool {
+	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIndex int, cp mat32.Vec2, ctrls []mat32.Vec2) bool {
 		if gotSt {
 			ang = mat32.Atan2(cp.Y-vec.Y, cp.X-vec.X)
 			return ki.Break
@@ -596,7 +596,7 @@ func PathDataStart(data []PathData) (vec mat32.Vec2, ang float32) {
 // PathDataEnd gets the ending coords and angle from the path
 func PathDataEnd(data []PathData) (vec mat32.Vec2, ang float32) {
 	gotSome := false
-	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIdx int, cp mat32.Vec2, ctrls []mat32.Vec2) bool {
+	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIndex int, cp mat32.Vec2, ctrls []mat32.Vec2) bool {
 		if gotSome {
 			ang = mat32.Atan2(cp.Y-vec.Y, cp.X-vec.X)
 		}

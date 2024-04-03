@@ -181,16 +181,16 @@ func (ly *Layout) ChildWithFocus() (Widget, int) {
 		return nil, -1
 	}
 	var foc Widget
-	focIdx := -1
+	focIndex := -1
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		if kwb.ContainsFocus() {
 			foc = kwi
-			focIdx = i
+			focIndex = i
 			return ki.Break
 		}
 		return ki.Continue
 	})
-	return foc, focIdx
+	return foc, focIndex
 }
 
 // FocusNextChild attempts to move the focus into the next layout child

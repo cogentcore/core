@@ -63,7 +63,7 @@ const (
 type Act struct {
 
 	// at what point during sequence of sub-rules / tokens should this action be run?  -1 = at end, 0 = before first rule, 1 = before second rule, etc -- must be at point when relevant Ast nodes have been added, but for scope setting, must be early enough so that scope is present
-	RunIdx int
+	RunIndex int
 
 	// what action to perform
 	Act Actions
@@ -81,9 +81,9 @@ type Act struct {
 // String satisfies fmt.Stringer interface
 func (ac Act) String() string {
 	if ac.FmTok != token.None {
-		return fmt.Sprintf(`%v:%v:"%v":%v<-%v`, ac.RunIdx, ac.Act, ac.Path, ac.Tok, ac.FmTok)
+		return fmt.Sprintf(`%v:%v:"%v":%v<-%v`, ac.RunIndex, ac.Act, ac.Path, ac.Tok, ac.FmTok)
 	} else {
-		return fmt.Sprintf(`%v:%v:"%v":%v`, ac.RunIdx, ac.Act, ac.Path, ac.Tok)
+		return fmt.Sprintf(`%v:%v:"%v":%v`, ac.RunIndex, ac.Act, ac.Path, ac.Tok)
 	}
 }
 

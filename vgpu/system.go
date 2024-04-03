@@ -360,16 +360,16 @@ func (sy *System) SetClearDepthStencil(depth float32, stencil uint32) {
 // Rendering
 
 // CmdBindVars adds command to the given command buffer
-// to bind the Vars descriptors, for given collection of descriptors descIdx
+// to bind the Vars descriptors, for given collection of descriptors descIndex
 // (see Vars NDescs for info).
-func (sy *System) CmdBindVars(cmd vk.CommandBuffer, descIdx int) {
+func (sy *System) CmdBindVars(cmd vk.CommandBuffer, descIndex int) {
 	vars := sy.Vars()
 	if len(vars.SetMap) == 0 {
 		return
 	}
-	vars.BindDescIdx = descIdx
-	dset := vars.VkDescSets[descIdx]
-	doff := vars.DynOffs[descIdx]
+	vars.BindDescIndex = descIndex
+	dset := vars.VkDescSets[descIndex]
+	doff := vars.DynOffs[descIndex]
 
 	if sy.Compute {
 		if sy.StaticVars {
@@ -386,50 +386,50 @@ func (sy *System) CmdBindVars(cmd vk.CommandBuffer, descIdx int) {
 
 }
 
-// CmdBindTextureVarIdx returns the txIdx needed to select the given Texture value
-// at valIdx in given variable in given set index, for use in a shader (i.e., pass
-// txIdx as a push constant to the shader to select this texture).  If there are
+// CmdBindTextureVarIndex returns the txIndex needed to select the given Texture value
+// at valIndex in given variable in given set index, for use in a shader (i.e., pass
+// txIndex as a push constant to the shader to select this texture).  If there are
 // more than MaxTexturesPerSet textures, then it may need to select a different
-// descIdx where that val has been allocated -- the descIdx is returned, and
+// descIndex where that val has been allocated -- the descIndex is returned, and
 // switched is true if it had to issue a CmdBindVars to given command buffer
-// to bind to that desc set, updating BindDescIdx.  Typically other vars are
+// to bind to that desc set, updating BindDescIndex.  Typically other vars are
 // bound to the same vals across sets, so this should not affect them, but
 // that is not necessarily the case, so other steps might need to be taken.
-// If the texture is not valid, a -1 is returned for txIdx, and an error is logged.
-func (sy *System) CmdBindTextureVarIdx(cmd vk.CommandBuffer, setIdx int, varNm string, valIdx int) (txIdx, descIdx int, switched bool, err error) {
+// If the texture is not valid, a -1 is returned for txIndex, and an error is logged.
+func (sy *System) CmdBindTextureVarIndex(cmd vk.CommandBuffer, setIndex int, varNm string, valIndex int) (txIndex, descIndex int, switched bool, err error) {
 	vars := sy.Vars()
-	txv, _, _ := vars.ValByIdxTry(setIdx, varNm, valIdx)
+	txv, _, _ := vars.ValByIndexTry(setIndex, varNm, valIndex)
 
-	descIdx = valIdx / MaxTexturesPerSet
-	if descIdx != vars.BindDescIdx {
-		sy.CmdBindVars(cmd, descIdx)
-		vars.BindDescIdx = descIdx
+	descIndex = valIndex / MaxTexturesPerSet
+	if descIndex != vars.BindDescIndex {
+		sy.CmdBindVars(cmd, descIndex)
+		vars.BindDescIndex = descIndex
 		switched = true
 	}
-	stIdx := descIdx * MaxTexturesPerSet
-	txIdx = txv.TextureValidIdx(stIdx, valIdx)
-	if txIdx < 0 {
-		err = fmt.Errorf("vgpu.CmdBindTextureVarIdx: Texture var %s image val at index %d (starting at idx: %d) is not valid", varNm, valIdx, stIdx)
+	stIndex := descIndex * MaxTexturesPerSet
+	txIndex = txv.TextureValidIndex(stIndex, valIndex)
+	if txIndex < 0 {
+		err = fmt.Errorf("vgpu.CmdBindTextureVarIndex: Texture var %s image val at index %d (starting at idx: %d) is not valid", varNm, valIndex, stIndex)
 		log.Println(err) // this is always bad
 	}
 	return
 }
 
 // CmdResetBindVars adds command to the given command buffer
-// to bind the Vars descriptors, for given collection of descriptors descIdx
+// to bind the Vars descriptors, for given collection of descriptors descIndex
 // (see Vars NDescs for info).
-func (sy *System) CmdResetBindVars(cmd vk.CommandBuffer, descIdx int) {
+func (sy *System) CmdResetBindVars(cmd vk.CommandBuffer, descIndex int) {
 	CmdResetBegin(cmd)
-	sy.CmdBindVars(cmd, descIdx)
+	sy.CmdBindVars(cmd, descIndex)
 }
 
 // BeginRenderPass adds commands to the given command buffer
 // to start the render pass on given framebuffer.
 // Clears the frame first, according to the ClearVals.
 // Also Binds descriptor sets to command buffer for given collection
-// of descriptors descIdx (see Vars NDescs for info).
-func (sy *System) BeginRenderPass(cmd vk.CommandBuffer, fr *Framebuffer, descIdx int) {
-	sy.CmdBindVars(cmd, descIdx)
+// of descriptors descIndex (see Vars NDescs for info).
+func (sy *System) BeginRenderPass(cmd vk.CommandBuffer, fr *Framebuffer, descIndex int) {
+	sy.CmdBindVars(cmd, descIndex)
 	sy.Render.BeginRenderPass(cmd, fr)
 }
 
@@ -438,19 +438,19 @@ func (sy *System) BeginRenderPass(cmd vk.CommandBuffer, fr *Framebuffer, descIdx
 // the render pass on given framebuffer (BeginRenderPass)
 // Clears the frame first, according to the ClearVals.
 // Also Binds descriptor sets to command buffer for given collection
-// of descriptors descIdx (see Vars NDescs for info).
-func (sy *System) ResetBeginRenderPass(cmd vk.CommandBuffer, fr *Framebuffer, descIdx int) {
+// of descriptors descIndex (see Vars NDescs for info).
+func (sy *System) ResetBeginRenderPass(cmd vk.CommandBuffer, fr *Framebuffer, descIndex int) {
 	CmdResetBegin(cmd)
-	sy.BeginRenderPass(cmd, fr, descIdx)
+	sy.BeginRenderPass(cmd, fr, descIndex)
 }
 
 // BeginRenderPassNoClear adds commands to the given command buffer
 // to start the render pass on given framebuffer.
 // does NOT clear the frame first -- loads prior state.
 // Also Binds descriptor sets to command buffer for given collection
-// of descriptors descIdx (see Vars NDescs for info).
-func (sy *System) BeginRenderPassNoClear(cmd vk.CommandBuffer, fr *Framebuffer, descIdx int) {
-	sy.CmdBindVars(cmd, descIdx)
+// of descriptors descIndex (see Vars NDescs for info).
+func (sy *System) BeginRenderPassNoClear(cmd vk.CommandBuffer, fr *Framebuffer, descIndex int) {
+	sy.CmdBindVars(cmd, descIndex)
 	sy.Render.BeginRenderPassNoClear(cmd, fr)
 }
 
@@ -459,10 +459,10 @@ func (sy *System) BeginRenderPassNoClear(cmd vk.CommandBuffer, fr *Framebuffer, 
 // the render pass on given framebuffer (BeginRenderPass)
 // does NOT clear the frame first -- loads prior state.
 // Also Binds descriptor sets to command buffer for given collection
-// of descriptors descIdx (see Vars NDescs for info).
-func (sy *System) ResetBeginRenderPassNoClear(cmd vk.CommandBuffer, fr *Framebuffer, descIdx int) {
+// of descriptors descIndex (see Vars NDescs for info).
+func (sy *System) ResetBeginRenderPassNoClear(cmd vk.CommandBuffer, fr *Framebuffer, descIndex int) {
 	CmdResetBegin(cmd)
-	sy.BeginRenderPassNoClear(cmd, fr, descIdx)
+	sy.BeginRenderPassNoClear(cmd, fr, descIndex)
 }
 
 // EndRenderPass adds commands to the given command buffer

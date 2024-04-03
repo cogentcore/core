@@ -37,7 +37,7 @@ type Mesh interface {
 
 	// Sizes returns the number of vertex and index elements required for this mesh
 	// including a bool representing whether it has per-vertex color.
-	Sizes() (nVtx, nIdx int, hasColor bool)
+	Sizes() (nVtx, nIndex int, hasColor bool)
 
 	// Set sets the mesh points into given arrays, which have been allocated
 	// according to the Sizes() returned by this Mesh.
@@ -75,7 +75,7 @@ type MeshBase struct { //gti:add -setters
 	NVtx int `set:"-"`
 
 	// number of indexes, as mat32.ArrayU32 -- only valid after Sizes() has been called
-	NIdx int `set:"-"`
+	NIndex int `set:"-"`
 
 	// has per-vertex colors, as mat32.Vec4 per vertex
 	Color bool
@@ -93,11 +93,11 @@ type MeshBase struct { //gti:add -setters
 	BBoxMu sync.RWMutex `view:"-" copier:"-" json:"-" xml:"-" set:"-"`
 }
 
-func (ms *MeshBase) Name() string                           { return ms.Nm }
-func (ms *MeshBase) SetName(nm string)                      { ms.Nm = nm }
-func (ms *MeshBase) AsMeshBase() *MeshBase                  { return ms }
-func (ms *MeshBase) HasColor() bool                         { return ms.Color }
-func (ms *MeshBase) Sizes() (nVtx, nIdx int, hasColor bool) { return ms.NVtx, ms.NIdx, ms.Color }
+func (ms *MeshBase) Name() string                             { return ms.Nm }
+func (ms *MeshBase) SetName(nm string)                        { ms.Nm = nm }
+func (ms *MeshBase) AsMeshBase() *MeshBase                    { return ms }
+func (ms *MeshBase) HasColor() bool                           { return ms.Color }
+func (ms *MeshBase) Sizes() (nVtx, nIndex int, hasColor bool) { return ms.NVtx, ms.NIndex, ms.Color }
 
 func (ms *MeshBase) IsTransparent() bool {
 	if !ms.HasColor() {
@@ -200,8 +200,8 @@ func (sc *Scene) ConfigMeshes() {
 	ph.ResetMeshes()
 	for _, kv := range sc.Meshes.Order {
 		ms := kv.Value
-		nVtx, nIdx, hasColor := ms.Sizes()
-		ph.AddMesh(kv.Key, nVtx, nIdx, hasColor)
+		nVtx, nIndex, hasColor := ms.Sizes()
+		ph.AddMesh(kv.Key, nVtx, nIndex, hasColor)
 	}
 	ph.ConfigMeshes()
 	ph.UpdtMu.Unlock()
@@ -252,18 +252,18 @@ func (sc *Scene) ReconfigMeshes() {
 // GenMesh is a generic, arbitrary Mesh, storing its values
 type GenMesh struct {
 	MeshBase
-	Vtx  mat32.ArrayF32
-	Norm mat32.ArrayF32
-	Tex  mat32.ArrayF32
-	Clr  mat32.ArrayF32
-	Idx  mat32.ArrayU32
+	Vtx   mat32.ArrayF32
+	Norm  mat32.ArrayF32
+	Tex   mat32.ArrayF32
+	Clr   mat32.ArrayF32
+	Index mat32.ArrayU32
 }
 
-func (ms *GenMesh) Sizes() (nVtx, nIdx int, hasColor bool) {
+func (ms *GenMesh) Sizes() (nVtx, nIndex int, hasColor bool) {
 	ms.NVtx = len(ms.Vtx) / 3
-	ms.NIdx = len(ms.Idx)
+	ms.NIndex = len(ms.Index)
 	ms.Color = len(ms.Clr) > 0
-	return ms.NVtx, ms.NIdx, ms.Color
+	return ms.NVtx, ms.NIndex, ms.Color
 }
 
 func (ms *GenMesh) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
@@ -273,7 +273,7 @@ func (ms *GenMesh) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32
 	if ms.Color {
 		copy(clrAry, ms.Clr)
 	}
-	copy(idxAry, ms.Idx)
+	copy(idxAry, ms.Index)
 	bb := vshape.BBoxFromVtxs(ms.Vtx, 0, ms.NVtx)
 	ms.BBoxMu.Lock()
 	ms.BBox.SetBounds(bb.Min, bb.Max)

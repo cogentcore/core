@@ -70,11 +70,11 @@ var _BuffTypesValues = []BuffTypes{0, 1, 2, 3}
 // BuffTypesN is the highest valid value for type BuffTypes, plus one.
 const BuffTypesN BuffTypes = 4
 
-var _BuffTypesValueMap = map[string]BuffTypes{`VtxIdxBuff`: 0, `UniformBuff`: 1, `StorageBuff`: 2, `TextureBuff`: 3}
+var _BuffTypesValueMap = map[string]BuffTypes{`VtxIndexBuff`: 0, `UniformBuff`: 1, `StorageBuff`: 2, `TextureBuff`: 3}
 
-var _BuffTypesDescMap = map[BuffTypes]string{0: `VtxIdxBuff is a buffer holding Vertex and Index values`, 1: `UniformBuff holds Uniform and UniformTexel objects: read-only, small footprint`, 2: `StorageBuff holds Storage and StorageTexel: read-write, larger mostly for compute shaders`, 3: `TextureBuff holds Images / Textures -- hardware optimizes allocation on device side, and staging-side is general`}
+var _BuffTypesDescMap = map[BuffTypes]string{0: `VtxIndexBuff is a buffer holding Vertex and Index values`, 1: `UniformBuff holds Uniform and UniformTexel objects: read-only, small footprint`, 2: `StorageBuff holds Storage and StorageTexel: read-write, larger mostly for compute shaders`, 3: `TextureBuff holds Images / Textures -- hardware optimizes allocation on device side, and staging-side is general`}
 
-var _BuffTypesMap = map[BuffTypes]string{0: `VtxIdxBuff`, 1: `UniformBuff`, 2: `StorageBuff`, 3: `TextureBuff`}
+var _BuffTypesMap = map[BuffTypes]string{0: `VtxIndexBuff`, 1: `UniformBuff`, 2: `StorageBuff`, 3: `TextureBuff`}
 
 // String returns the string representation of this BuffTypes value.
 func (i BuffTypes) String() string { return enums.String(i, _BuffTypesMap) }

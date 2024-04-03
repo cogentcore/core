@@ -111,8 +111,8 @@ func (mb *MemBuff) Free(dev vk.Device) {
 type BuffTypes int32 //enums:enum
 
 const (
-	// VtxIdxBuff is a buffer holding Vertex and Index values
-	VtxIdxBuff BuffTypes = iota
+	// VtxIndexBuff is a buffer holding Vertex and Index values
+	VtxIndexBuff BuffTypes = iota
 
 	// UniformBuff holds Uniform and UniformTexel objects: read-only, small footprint
 	UniformBuff
@@ -139,7 +139,7 @@ func (bt BuffTypes) AlignBytes(gp *GPU) int {
 	switch bt {
 	case StorageBuff:
 		return int(gp.GPUProps.Limits.MinStorageBufferOffsetAlignment)
-	case UniformBuff, VtxIdxBuff:
+	case UniformBuff, VtxIndexBuff:
 		return int(gp.GPUProps.Limits.MinUniformBufferOffsetAlignment)
 	case TextureBuff:
 		return int(gp.GPUProps.Limits.MinTexelBufferOffsetAlignment)
@@ -149,10 +149,10 @@ func (bt BuffTypes) AlignBytes(gp *GPU) int {
 
 // BuffUsages maps BuffTypes into buffer usage flags
 var BuffUsages = map[BuffTypes]vk.BufferUsageFlagBits{
-	VtxIdxBuff:  vk.BufferUsageVertexBufferBit | vk.BufferUsageIndexBufferBit,
-	UniformBuff: vk.BufferUsageUniformBufferBit | vk.BufferUsageUniformTexelBufferBit,
-	StorageBuff: vk.BufferUsageStorageBufferBit | vk.BufferUsageStorageTexelBufferBit,
-	TextureBuff: vk.BufferUsageStorageTexelBufferBit,
+	VtxIndexBuff: vk.BufferUsageVertexBufferBit | vk.BufferUsageIndexBufferBit,
+	UniformBuff:  vk.BufferUsageUniformBufferBit | vk.BufferUsageUniformTexelBufferBit,
+	StorageBuff:  vk.BufferUsageStorageBufferBit | vk.BufferUsageStorageTexelBufferBit,
+	TextureBuff:  vk.BufferUsageStorageTexelBufferBit,
 }
 
 /////////////////////////////////////////////////////////////////////

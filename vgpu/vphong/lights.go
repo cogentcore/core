@@ -93,24 +93,24 @@ type SpotLight struct {
 func (ph *Phong) ConfigLights() {
 	vars := ph.Sys.Vars()
 	vs := vars.SetMap[int(NLightSet)]
-	nlv, nl, _ := vs.ValByIdxTry("NLights", 0)
+	nlv, nl, _ := vs.ValByIndexTry("NLights", 0)
 	nl.CopyFromBytes(unsafe.Pointer(&ph.NLights))
 	vs.BindDynVal(vars, nlv, nl)
 
 	vs = vars.SetMap[int(LightSet)]
-	alv, al, _ := vs.ValByIdxTry("AmbLights", 0)
+	alv, al, _ := vs.ValByIndexTry("AmbLights", 0)
 	al.CopyFromBytes(unsafe.Pointer(&ph.Ambient[0]))
 	vs.BindDynVal(vars, alv, al)
 
-	dlv, dl, _ := vs.ValByIdxTry("DirLights", 0)
+	dlv, dl, _ := vs.ValByIndexTry("DirLights", 0)
 	dl.CopyFromBytes(unsafe.Pointer(&ph.Dir[0]))
 	vs.BindDynVal(vars, dlv, dl)
 
-	plv, pl, _ := vs.ValByIdxTry("PointLights", 0)
+	plv, pl, _ := vs.ValByIndexTry("PointLights", 0)
 	pl.CopyFromBytes(unsafe.Pointer(&ph.Point[0]))
 	vs.BindDynVal(vars, plv, pl)
 
-	slv, sl, _ := vs.ValByIdxTry("SpotLights", 0)
+	slv, sl, _ := vs.ValByIndexTry("SpotLights", 0)
 	sl.CopyFromBytes(unsafe.Pointer(&ph.Spot[0]))
 	vs.BindDynVal(vars, slv, sl)
 }

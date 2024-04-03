@@ -71,8 +71,8 @@ var StaticRoleDescriptors = map[VarRoles]vk.DescriptorType{
 // RoleBuffers maps VarRoles onto type of memory buffer
 var RoleBuffers = map[VarRoles]BuffTypes{
 	UndefVarRole: StorageBuff,
-	Vertex:       VtxIdxBuff,
-	Index:        VtxIdxBuff,
+	Vertex:       VtxIndexBuff,
+	Index:        VtxIndexBuff,
 	Uniform:      UniformBuff,
 	Storage:      StorageBuff,
 	UniformTexel: UniformBuff,

@@ -89,30 +89,30 @@ func (cy *Cylinder) Defaults() {
 	cy.AngLen = 360
 }
 
-func (cy *Cylinder) N() (nVtx, nIdx int) {
-	nVtx, nIdx = CylinderSectorN(cy.RadialSegs, cy.HeightSegs, cy.Top, cy.Bottom)
+func (cy *Cylinder) N() (nVtx, nIndex int) {
+	nVtx, nIndex = CylinderSectorN(cy.RadialSegs, cy.HeightSegs, cy.Top, cy.Bottom)
 	return
 }
 
 // SetCylinderSector sets points in given allocated arrays
 func (cy *Cylinder) Set(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
-	cy.CBBox = SetCylinderSector(vtxAry, normAry, texAry, idxAry, cy.VtxOff, cy.IdxOff, cy.Height, cy.TopRad, cy.BotRad, cy.RadialSegs, cy.HeightSegs, cy.AngStart, cy.AngLen, cy.Top, cy.Bottom, cy.Pos)
+	cy.CBBox = SetCylinderSector(vtxAry, normAry, texAry, idxAry, cy.VtxOff, cy.IndexOff, cy.Height, cy.TopRad, cy.BotRad, cy.RadialSegs, cy.HeightSegs, cy.AngStart, cy.AngLen, cy.Top, cy.Bottom, cy.Pos)
 }
 
 ////////////////////////////////////////////////////////////////
 
 // CylinderSectorN returns the N's for the cylinder (truncated cone) sector
 // vertex and index data with given parameters
-func CylinderSectorN(radialSegs, heightSegs int, top, bottom bool) (nVtx, nIdx int) {
+func CylinderSectorN(radialSegs, heightSegs int, top, bottom bool) (nVtx, nIndex int) {
 	nVtx = (heightSegs + 1) * (radialSegs + 1)
-	nIdx = radialSegs * heightSegs * 6
+	nIndex = radialSegs * heightSegs * 6
 	if top {
 		nVtx += radialSegs*2 + 2
-		nIdx += radialSegs * 3
+		nIndex += radialSegs * 3
 	}
 	if bottom {
 		nVtx += radialSegs*2 + 2
-		nIdx += radialSegs * 3
+		nIndex += radialSegs * 3
 	}
 	return
 }

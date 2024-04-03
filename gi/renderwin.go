@@ -193,8 +193,8 @@ func NewRenderWin(name, title string, opts *goosi.NewWindowOptions) *RenderWin {
 	})
 
 	drw := w.GoosiWin.Drawer()
-	drw.SetMaxTextures(goosi.MaxTexturesPerSet * 3)     // use 3 sets
-	w.RenderScenes.MaxIdx = goosi.MaxTexturesPerSet * 2 // reserve last for sprites
+	drw.SetMaxTextures(goosi.MaxTexturesPerSet * 3)       // use 3 sets
+	w.RenderScenes.MaxIndex = goosi.MaxTexturesPerSet * 2 // reserve last for sprites
 
 	// win.GoosiWin.SetDestroyGPUResourcesFunc(func() {
 	// 	for _, ph := range win.Phongs {
@@ -797,10 +797,10 @@ func (rc *RenderContext) String() string {
 type RenderScenes struct {
 
 	// starting index for this set of Scenes
-	StartIdx int
+	StartIndex int
 
 	// max index (exclusive) for this set of Scenes
-	MaxIdx int
+	MaxIndex int
 
 	// set to true to flip Y axis in drawing these images
 	FlipY bool
@@ -808,44 +808,44 @@ type RenderScenes struct {
 	// ordered list of scenes and direct rendering widgets. Index is Drawer image index.
 	Scenes []Widget
 
-	// SceneIdx holds the index for each scene / direct render widget.
+	// SceneIndex holds the index for each scene / direct render widget.
 	// Used to detect changes in index.
-	SceneIdx map[Widget]int
+	SceneIndex map[Widget]int
 }
 
-// SetIdxRange sets the index range based on starting index and n
-func (rs *RenderScenes) SetIdxRange(st, n int) {
-	rs.StartIdx = st
-	rs.MaxIdx = st + n
+// SetIndexRange sets the index range based on starting index and n
+func (rs *RenderScenes) SetIndexRange(st, n int) {
+	rs.StartIndex = st
+	rs.MaxIndex = st + n
 }
 
 // Reset resets the list
 func (rs *RenderScenes) Reset() {
 	rs.Scenes = nil
-	if rs.SceneIdx == nil {
-		rs.SceneIdx = make(map[Widget]int)
+	if rs.SceneIndex == nil {
+		rs.SceneIndex = make(map[Widget]int)
 	}
 }
 
 // Add adds a new node, returning index
-func (rs *RenderScenes) Add(w Widget, scIdx map[Widget]int) int {
+func (rs *RenderScenes) Add(w Widget, scIndex map[Widget]int) int {
 	sc := w.AsWidget().Scene
 	if sc.Pixels == nil {
 		return -1
 	}
 	idx := len(rs.Scenes)
-	if idx >= rs.MaxIdx {
-		slog.Error("gi.RenderScenes: too many Scenes to render all of them!", "max", rs.MaxIdx)
+	if idx >= rs.MaxIndex {
+		slog.Error("gi.RenderScenes: too many Scenes to render all of them!", "max", rs.MaxIndex)
 		return -1
 	}
-	if prvIdx, has := rs.SceneIdx[w]; has {
-		if prvIdx != idx {
+	if prvIndex, has := rs.SceneIndex[w]; has {
+		if prvIndex != idx {
 			sc.SetFlag(true, ScImageUpdated) // need to copy b/c cur has diff image
 		}
 	} else {
 		sc.SetFlag(true, ScImageUpdated) // need to copy b/c new
 	}
-	scIdx[w] = idx
+	scIndex[w] = idx
 	rs.Scenes = append(rs.Scenes, w)
 	return idx
 }
@@ -1042,7 +1042,7 @@ func (w *RenderWin) FillInsets() {
 func (w *RenderWin) GatherScenes() bool {
 	rs := &w.RenderScenes
 	rs.Reset()
-	scIdx := make(map[Widget]int)
+	scIndex := make(map[Widget]int)
 
 	sm := &w.MainStageMgr
 	n := sm.Stack.Len()
@@ -1052,7 +1052,7 @@ func (w *RenderWin) GatherScenes() bool {
 	}
 
 	// first, find the top-level window:
-	winIdx := 0
+	winIndex := 0
 	var winScene *Scene
 	for i := n - 1; i >= 0; i-- {
 		st := sm.Stack.ValueByIndex(i)
@@ -1061,22 +1061,22 @@ func (w *RenderWin) GatherScenes() bool {
 				fmt.Println("GatherScenes: main Window:", st.String())
 			}
 			winScene = st.Scene
-			rs.Add(st.Scene, scIdx)
+			rs.Add(st.Scene, scIndex)
 			for _, w := range st.Scene.DirectRenders {
-				rs.Add(w, scIdx)
+				rs.Add(w, scIndex)
 			}
-			winIdx = i
+			winIndex = i
 			break
 		}
 	}
 
 	// then add everyone above that
-	for i := winIdx + 1; i < n; i++ {
+	for i := winIndex + 1; i < n; i++ {
 		st := sm.Stack.ValueByIndex(i)
 		if st.Scrim && i == n-1 {
-			rs.Add(NewScrimForScene(winScene), scIdx)
+			rs.Add(NewScrimForScene(winScene), scIndex)
 		}
-		rs.Add(st.Scene, scIdx)
+		rs.Add(st.Scene, scIndex)
 		if DebugSettings.WinRenderTrace {
 			fmt.Println("GatherScenes: overlay Stage:", st.String())
 		}
@@ -1088,12 +1088,12 @@ func (w *RenderWin) GatherScenes() bool {
 	// then add the popups for the top main stage
 	for _, kv := range top.PopupMgr.Stack.Order {
 		st := kv.Value
-		rs.Add(st.Scene, scIdx)
+		rs.Add(st.Scene, scIndex)
 		if DebugSettings.WinRenderTrace {
 			fmt.Println("GatherScenes: popup:", st.String())
 		}
 	}
-	rs.SceneIdx = scIdx
+	rs.SceneIndex = scIndex
 	return true
 }
 

@@ -23,7 +23,7 @@ type Val struct {
 	Name string
 
 	// index of this value within the Var list of values
-	Idx int
+	Index int
 
 	// actual number of elements in an array -- 1 means scalar / singular value.  If 0, this is a dynamically sized item and the size must be set.
 	N int
@@ -75,8 +75,8 @@ func (vl *Val) ClearMod() {
 
 // Init initializes value based on variable and index within list of vals for this var
 func (vl *Val) Init(gp *GPU, vr *Var, idx int) {
-	vl.Idx = idx
-	vl.Name = fmt.Sprintf("%s_%d", vr.Name, vl.Idx)
+	vl.Index = idx
+	vl.Name = fmt.Sprintf("%s_%d", vr.Name, vl.Index)
 	vl.N = vr.ArrayN
 	if vr.Role >= TextureRole {
 		vl.Texture = &Texture{}
@@ -229,7 +229,7 @@ func (vl *Val) SetGoImage(img image.Image, layer int, flipY bool) error {
 	if vl.HasFlag(ValTextureOwns) {
 		vl.Texture.AllocTexture()
 		// svimg, _ := vl.Texture.GoImage()
-		// images.Save(svimg, fmt.Sprintf("dimg_%d.png", vl.Idx))
+		// images.Save(svimg, fmt.Sprintf("dimg_%d.png", vl.Index))
 	}
 	return err
 }
@@ -239,7 +239,7 @@ func (vl *Val) MemReg(vr *Var) MemReg {
 	bt := vr.Role.BuffType()
 	mr := MemReg{Offset: vl.Offset, Size: vl.AllocSize, BuffType: bt}
 	if bt == StorageBuff {
-		mr.BuffIdx = vr.StorageBuff
+		mr.BuffIndex = vr.StorageBuff
 	}
 	return mr
 }
@@ -288,10 +288,10 @@ func (vs *Vals) ConfigVals(gp *GPU, dev vk.Device, vr *Var, nvals int) bool {
 	return true
 }
 
-// ValByIdxTry returns Val at given index with range checking error message.
-func (vs *Vals) ValByIdxTry(idx int) (*Val, error) {
+// ValByIndexTry returns Val at given index with range checking error message.
+func (vs *Vals) ValByIndexTry(idx int) (*Val, error) {
 	if idx >= len(vs.Vals) || idx < 0 {
-		err := fmt.Errorf("vgpu.Vals:ValByIdxTry index %d out of range", idx)
+		err := fmt.Errorf("vgpu.Vals:ValByIndexTry index %d out of range", idx)
 		if Debug {
 			log.Println(err)
 		}
@@ -303,7 +303,7 @@ func (vs *Vals) ValByIdxTry(idx int) (*Val, error) {
 // SetName sets name of given Val, by index, adds name to map, checking
 // that it is not already there yet.  Returns val.
 func (vs *Vals) SetName(idx int, name string) (*Val, error) {
-	vl, err := vs.ValByIdxTry(idx)
+	vl, err := vs.ValByIndexTry(idx)
 	if err != nil {
 		return nil, err
 	}
@@ -470,9 +470,9 @@ func (vs *Vals) SetGoImage(idx int, img image.Image, flipy bool) {
 		vl.SetGoImage(img, 0, flipy)
 		return
 	}
-	idxs := vs.TexSzAlloc.ItemIdxs[idx]
-	vl := vs.GpTexVals[idxs.GpIdx]
-	vl.SetGoImage(img, idxs.ItemIdx, flipy)
+	idxs := vs.TexSzAlloc.ItemIndexs[idx]
+	vl := vs.GpTexVals[idxs.GpIndex]
+	vl.SetGoImage(img, idxs.ItemIndex, flipy)
 }
 
 ////////////////////////////////////////////////////////////////

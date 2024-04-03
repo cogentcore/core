@@ -19,15 +19,15 @@ func TestOrdMap(t *testing.T) {
 	}
 
 	if i, ok := om.IndexByKeyTry("key2"); !ok || i != 2 {
-		t.Error("IdxByKey")
+		t.Error("IndexByKey")
 	}
 
 	if om.KeyByIndex(0) != "key0" {
-		t.Error("KeyByIdx")
+		t.Error("KeyByIndex")
 	}
 
 	if om.ValueByIndex(1) != 1 {
-		t.Error("ValByIdx")
+		t.Error("ValByIndex")
 	}
 
 	if om.Len() != 3 {
@@ -39,23 +39,23 @@ func TestOrdMap(t *testing.T) {
 	// 	fmt.Printf("i: %d\tkv: %v\n", i, kv)
 	// }
 	if om.ValueByIndex(1) != 2 {
-		t.Error("DeleteIdx")
+		t.Error("DeleteIndex")
 	}
 	if i, ok := om.IndexByKeyTry("key2"); !ok || i != 1 {
-		t.Error("Delete IdxByKey")
+		t.Error("Delete IndexByKey")
 	}
 
 	// fmt.Printf("%v\n", om.Map)
 	om.InsertAtIndex(0, "new0", 3)
 	// fmt.Printf("%v\n", om.Map)
 	if om.ValueByIndex(0) != 3 {
-		t.Error("InsertAtIdx ValByIdx 0")
+		t.Error("InsertAtIndex ValByIndex 0")
 	}
 	if om.ValueByIndex(1) != 0 {
-		t.Error("InsertAtIdx ValByIdx 1")
+		t.Error("InsertAtIndex ValByIndex 1")
 	}
 	if i, ok := om.IndexByKeyTry("key2"); !ok || i != 2 {
-		t.Errorf("InsertAtIdx IdxByKey: %d != 2", i)
+		t.Errorf("InsertAtIndex IndexByKey: %d != 2", i)
 	}
 
 	// constr
@@ -63,10 +63,10 @@ func TestOrdMap(t *testing.T) {
 	nm := Make([]KeyValue[string, int]{{"one", 1}, {"two", 2}, {"three", 3}})
 
 	if nm.ValueByIndex(2) != 3 {
-		t.Error("Make ValByIdx 2")
+		t.Error("Make ValByIndex 2")
 	}
 	if nm.ValueByIndex(1) != 2 {
-		t.Error("Make ValByIdx 1")
+		t.Error("Make ValByIndex 1")
 	}
 	if val, ok := nm.ValueByKeyTry("three"); !ok || val != 3 {
 		t.Error("Make ValByKey 3")

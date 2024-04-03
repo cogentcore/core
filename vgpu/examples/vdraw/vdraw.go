@@ -99,23 +99,23 @@ func main() {
 	// icons loaded into a texture array
 	iconFiles := []string{"sound1.png", "text.png", "up.png", "world1.png"}
 	iconImgs := make([]image.Image, len(iconFiles))
-	iconIdx := 0
+	iconIndex := 0
 	iconFmt := vgpu.NewImageFormat(20, 22, len(iconFiles))
-	drw.ConfigImage(iconIdx, iconFmt)
+	drw.ConfigImage(iconIndex, iconFmt)
 	for i, fnm := range iconFiles {
 		pnm := filepath.Join("../images", fnm)
 		iconImgs[i] = OpenImage(pnm)
-		drw.SetGoImage(iconIdx, i, iconImgs[i], vgpu.NoFlipY)
+		drw.SetGoImage(iconIndex, i, iconImgs[i], vgpu.NoFlipY)
 	}
 
 	drw.SyncImages()
 
 	rendImgs := func(idx int) {
-		descIdx := 0
+		descIndex := 0
 		if idx+stoff >= vgpu.MaxTexturesPerSet {
-			descIdx = 1
+			descIndex = 1
 		}
-		drw.StartDraw(descIdx) // specifically starting with correct descIdx is key..
+		drw.StartDraw(descIndex) // specifically starting with correct descIndex is key..
 		drw.Scale(idx+stoff, 0, sf.Format.Bounds(), image.ZR, vdraw.Src, vgpu.NoFlipY, 0)
 		for i := range imgFiles {
 			// dp := image.Point{rand.Intn(500), rand.Intn(500)}
@@ -124,7 +124,7 @@ func main() {
 		}
 		for i := range iconFiles {
 			dp := image.Point{rand.Intn(500), rand.Intn(500)}
-			drw.Copy(iconIdx, i, dp, image.ZR, vdraw.Over, vgpu.NoFlipY)
+			drw.Copy(iconIndex, i, dp, image.ZR, vdraw.Over, vgpu.NoFlipY)
 		}
 		drw.EndDraw()
 	}

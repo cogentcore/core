@@ -93,7 +93,7 @@ type Scene struct {
 	ImgCopy image.RGBA `set:"-"`
 
 	// index in list of window direct uploading images
-	DirUpIdx int `set:"-"`
+	DirUpIndex int `set:"-"`
 
 	// mutex on rendering
 	RenderMu sync.Mutex `view:"-" copier:"-" json:"-" xml:"-" set:"-"`

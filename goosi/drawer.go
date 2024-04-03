@@ -90,14 +90,14 @@ type Drawer interface {
 	// UseTextureSet selects the descriptor set to use --
 	// choose this based on the bank of 16
 	// texture values if number of textures > MaxTexturesPerSet.
-	UseTextureSet(descIdx int)
+	UseTextureSet(descIndex int)
 
 	// StartDraw starts image drawing rendering process on render target
 	// No images can be added or set after this point.
-	// descIdx is the descriptor set to use -- choose this based on the bank of 16
+	// descIndex is the descriptor set to use -- choose this based on the bank of 16
 	// texture values if number of textures > MaxTexturesPerSet.
 	// It returns false if rendering can not proceed.
-	StartDraw(descIdx int) bool
+	StartDraw(descIndex int) bool
 
 	// EndDraw ends image drawing rendering process on render target
 	EndDraw()
@@ -210,20 +210,20 @@ func (dw *DrawerBase) Scale(idx, layer int, dr image.Rectangle, sr image.Rectang
 // UseTextureSet selects the descriptor set to use --
 // choose this based on the bank of 16
 // texture values if number of textures > MaxTexturesPerSet.
-func (dw *DrawerBase) UseTextureSet(descIdx int) {
+func (dw *DrawerBase) UseTextureSet(descIndex int) {
 	// no-op
 }
 
 // StartDraw starts image drawing rendering process on render target
 // No images can be added or set after this point.
-// descIdx is the descriptor set to use -- choose this based on the bank of 16
+// descIndex is the descriptor set to use -- choose this based on the bank of 16
 // texture values if number of textures > MaxTexturesPerSet.
 // This is a no-op on DrawerBase; if rendering logic is done here instead of
 // EndDraw, everything is delayed by one render because Scale and Copy are
 // called after StartDraw but before EndDraw, and we need them to be called
 // before actually rendering the image to the capture channel.
 // It returns false if rendering can not proceed.
-func (dw *DrawerBase) StartDraw(descIdx int) bool {
+func (dw *DrawerBase) StartDraw(descIndex int) bool {
 	// no-op
 	return true
 }

@@ -374,7 +374,7 @@ outer:
 }
 
 
-func setScreen(scrIdx int, dpi, pixratio float32, widthPx, heightPx, widthMM, heightMM, depth int, sname *C.char, snlen C.int) {
+func setScreen(scrIndex int, dpi, pixratio float32, widthPx, heightPx, widthMM, heightMM, depth int, sname *C.char, snlen C.int) {
 	theApp.mu.Lock()
 }
 

@@ -56,9 +56,9 @@ type Vars struct {
 	VkWriteVals []vk.WriteDescriptorSet `view:"-"`
 
 	// current descriptor collection index, set in BindValsStart
-	BindDescIdx int `inactive:"-"`
+	BindDescIndex int `inactive:"-"`
 
-	// dynamic offsets for Uniform and Storage variables, -- outer index is Vars.NDescs for different groups of descriptor sets, one of which can be bound to a pipeline at any given time, inner index is DynOffIdx on Var -- offsets are set when Val is bound via BindDynVal*.
+	// dynamic offsets for Uniform and Storage variables, -- outer index is Vars.NDescs for different groups of descriptor sets, one of which can be bound to a pipeline at any given time, inner index is DynOffIndex on Var -- offsets are set when Val is bound via BindDynVal*.
 	DynOffs [][]uint32
 }
 
@@ -135,14 +135,14 @@ func (vs *Vars) ValByNameTry(set int, varName, valName string) (*Var, *Val, erro
 	return st.ValByNameTry(varName, valName)
 }
 
-// ValByIdxTry returns value by first looking up variable name, then value index,
+// ValByIndexTry returns value by first looking up variable name, then value index,
 // returning error if not found
-func (vs *Vars) ValByIdxTry(set int, varName string, valIdx int) (*Var, *Val, error) {
+func (vs *Vars) ValByIndexTry(set int, varName string, valIndex int) (*Var, *Val, error) {
 	st, err := vs.SetTry(set)
 	if err != nil {
 		return nil, nil, err
 	}
-	return st.ValByIdxTry(varName, valIdx)
+	return st.ValByIndexTry(varName, valIndex)
 }
 
 // Config must be called after all variables have been added.
@@ -341,7 +341,7 @@ func (vs *Vars) DescLayout(dev vk.Device) {
 	if vs.HasVertex {
 		vset := vs.SetMap[VertexSet]
 		for _, vr := range vset.Vars {
-			vr.BindValIdx = make([]int, vs.NDescs)
+			vr.BindValIndex = make([]int, vs.NDescs)
 		}
 	}
 
@@ -383,7 +383,7 @@ func (vs *Vars) AddDynOff() {
 // Bind Vars -- call prior to render pass only!!
 
 // BindVarsStart starts a new step of binding vars to descriptor sets,
-// using given descIdx description set index (among the NDescs allocated).
+// using given descIndex description set index (among the NDescs allocated).
 // Bound vars determine what the shader programs see,
 // in subsequent calls to Pipeline commands.
 //
@@ -397,9 +397,9 @@ func (vs *Vars) AddDynOff() {
 // will be executed when BindValsEnd is called.
 //
 // This creates a set of entries in a list of WriteDescriptorSet's
-func (vs *Vars) BindVarsStart(descIdx int) {
+func (vs *Vars) BindVarsStart(descIndex int) {
 	vs.VkWriteVals = []vk.WriteDescriptorSet{}
-	vs.BindDescIdx = descIdx
+	vs.BindDescIndex = descIndex
 }
 
 // BindVarsEnd finishes a new step of binding started by BindVarsStart.
@@ -528,13 +528,13 @@ func (vs *Vars) BindAllTextureVars(set int) error {
 	if err != nil {
 		return err
 	}
-	cbi := vs.BindDescIdx
+	cbi := vs.BindDescIndex
 	for i := 0; i < st.NTextureDescs; i++ {
 		vs.BindVarsStart(i)
 		st.BindStatVars(vs)
 		vs.BindVarsEnd()
 	}
-	vs.BindDescIdx = cbi
+	vs.BindDescIndex = cbi
 	return nil
 }
 
@@ -543,7 +543,7 @@ func (vs *Vars) BindAllTextureVars(set int) error {
 
 // BindVertexValName dynamically binds given VertexSet value
 // by name for given variable name.
-// using given descIdx description set index (among the NDescs allocated).
+// using given descIndex description set index (among the NDescs allocated).
 //
 // Value must have already been updated into device memory prior to this,
 // ideally through a batch update prior to starting rendering, so that
@@ -559,13 +559,13 @@ func (vs *Vars) BindVertexValName(varNm, valNm string) error {
 	if err != nil {
 		return err
 	}
-	vr.BindValIdx[vs.BindDescIdx] = vl.Idx // this is then consumed by draw command
+	vr.BindValIndex[vs.BindDescIndex] = vl.Index // this is then consumed by draw command
 	return nil
 }
 
-// BindVertexValIdx dynamically binds given VertexSet value
+// BindVertexValIndex dynamically binds given VertexSet value
 // by index for given variable name.
-// using given descIdx description set index (among the NDescs allocated).
+// using given descIndex description set index (among the NDescs allocated).
 //
 // Value must have already been updated into device memory prior to this,
 // ideally through a batch update prior to starting rendering, so that
@@ -575,17 +575,17 @@ func (vs *Vars) BindVertexValName(varNm, valNm string) error {
 // Do NOT call BindValsStart / End around this.
 //
 // returns error if not found.
-func (vs *Vars) BindVertexValIdx(varNm string, valIdx int) error {
+func (vs *Vars) BindVertexValIndex(varNm string, valIndex int) error {
 	st := vs.SetMap[VertexSet]
-	vr, vl, err := st.ValByIdxTry(varNm, valIdx)
+	vr, vl, err := st.ValByIndexTry(varNm, valIndex)
 	if err != nil {
 		return err
 	}
-	vr.BindValIdx[vs.BindDescIdx] = vl.Idx // this is then consumed by draw command
+	vr.BindValIndex[vs.BindDescIndex] = vl.Index // this is then consumed by draw command
 	return nil
 }
 
-// BindDynValsAllIdx dynamically binds all uniform, storage values
+// BindDynValsAllIndex dynamically binds all uniform, storage values
 // by index for all variables in all sets.
 //
 // This only dynamically updates the offset to point to the specified val.
@@ -594,12 +594,12 @@ func (vs *Vars) BindVertexValIdx(varNm string, valIdx int) error {
 // (call after all such dynamic bindings are updated.)
 //
 // Do NOT call BindValsStart / End around this.
-func (vs *Vars) BindDynValsAllIdx(idx int) {
+func (vs *Vars) BindDynValsAllIndex(idx int) {
 	for si, st := range vs.SetMap {
 		if si < 0 {
 			continue
 		}
-		st.BindDynValsAllIdx(vs, idx)
+		st.BindDynValsAllIndex(vs, idx)
 	}
 }
 
@@ -622,7 +622,7 @@ func (vs *Vars) BindDynValName(set int, varNm, valNm string) error {
 	return st.BindDynValName(vs, varNm, valNm)
 }
 
-// BindDynValIdx dynamically binds given uniform or storage value
+// BindDynValIndex dynamically binds given uniform or storage value
 // by index for given variable name, in given set.
 //
 // This only dynamically updates the offset to point to the specified val.
@@ -633,12 +633,12 @@ func (vs *Vars) BindDynValName(set int, varNm, valNm string) error {
 // Do NOT call BindValsStart / End around this.
 //
 // returns error if not found.
-func (vs *Vars) BindDynValIdx(set int, varNm string, valIdx int) error {
+func (vs *Vars) BindDynValIndex(set int, varNm string, valIndex int) error {
 	st, err := vs.SetTry(set)
 	if err != nil {
 		return err
 	}
-	return st.BindDynValIdx(vs, varNm, valIdx)
+	return st.BindDynValIndex(vs, varNm, valIndex)
 }
 
 // BindDynVal dynamically binds given uniform or storage value
@@ -660,16 +660,16 @@ func (vs *Vars) BindDynVal(set int, vr *Var, vl *Val) error {
 	return st.BindDynVal(vs, vr, vl)
 }
 
-// TexGpSzIdxs for texture at given index, allocated in groups by size
+// TexGpSzIndexs for texture at given index, allocated in groups by size
 // using Vals.AllocTexBySize, returns the indexes for the texture
 // and layer to actually select the texture in the shader, and proportion
 // of the Gp allocated texture size occupied by the texture.
-func (vs *Vars) TexGpSzIdxs(set int, varNm string, valIdx int) *szalloc.Idxs {
+func (vs *Vars) TexGpSzIndexs(set int, varNm string, valIndex int) *szalloc.Indexs {
 	st, err := vs.SetTry(set)
 	if err != nil {
 		return nil
 	}
-	return st.TexGpSzIdxs(vs, varNm, valIdx)
+	return st.TexGpSzIndexs(vs, varNm, valIndex)
 }
 
 ///////////////////////////////////////////////////////////
@@ -767,7 +767,7 @@ func (vs *Vars) ModRegs(bt BuffTypes) []MemReg {
 }
 
 // ModRegStorage returns the regions of Storage Vals that have been modified
-func (vs *Vars) ModRegsStorage(bufIdx int, buff *MemBuff) []MemReg {
+func (vs *Vars) ModRegsStorage(bufIndex int, buff *MemBuff) []MemReg {
 	ns := vs.NSets()
 	var mods []MemReg
 	for si := vs.StartSet(); si < ns; si++ {
@@ -779,7 +779,7 @@ func (vs *Vars) ModRegsStorage(bufIdx int, buff *MemBuff) []MemReg {
 			if vr.Role.BuffType() != StorageBuff {
 				continue
 			}
-			if vr.StorageBuff != bufIdx {
+			if vr.StorageBuff != bufIndex {
 				continue
 			}
 			md := vr.Vals.ModRegs(vr)

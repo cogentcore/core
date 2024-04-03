@@ -273,7 +273,7 @@ func (dec *Decoder) addNorms(ms *xyz.GenMesh, ai, bi, ci int, idxs []int) {
 
 func (dec *Decoder) setIndex(ms *xyz.GenMesh, face *Face, idx int, idxs *[]int) {
 	if len(*idxs) > idx {
-		ms.Idx.Append(uint32((*idxs)[idx]))
+		ms.Index.Append(uint32((*idxs)[idx]))
 	} else {
 		*idxs = append(*idxs, dec.copyVertex(ms, face, idx))
 	}
@@ -305,7 +305,7 @@ func (dec *Decoder) copyVertex(ms *xyz.GenMesh, face *Face, idx int) int {
 		}
 		ms.Tex.AppendVec2(vec2)
 	}
-	ms.Idx.Append(uint32(vidx))
+	ms.Index.Append(uint32(vidx))
 	return vidx
 }
 

@@ -22,7 +22,7 @@ var content embed.FS
 type CurRender struct {
 
 	// index of descriptor collection to use -- for threaded / parallel rendering -- see vgup.Vars NDescs for more info
-	DescIdx int
+	DescIndex int
 
 	// a texture was selected -- if true, overrides other options
 	UseTexture bool
@@ -43,7 +43,7 @@ type CurRender struct {
 	TexPars TexPars
 
 	// index of currently-selected texture
-	TexIdx int
+	TexIndex int
 }
 
 // PushU is the push constants structure, holding everything that

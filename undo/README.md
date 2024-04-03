@@ -12,6 +12,6 @@ Redoing the action means restoring the state *after* the action.
 
 This means that the first Undo action must save the current state before doing the undo.
 
-The Idx is always on the last state saved, which will then be the one that would be undone for an undo action.
+The Index is always on the last state saved, which will then be the one that would be undone for an undo action.
 
 

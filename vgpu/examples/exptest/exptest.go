@@ -74,11 +74,11 @@ func main() {
 		cur += inc
 	}
 
-	ivl, _ := inv.Vals.ValByIdxTry(0)
+	ivl, _ := inv.Vals.ValByIndexTry(0)
 	ivl.CopyFromBytes(unsafe.Pointer(&(ivals[0])))
 	sy.Mem.SyncToGPU()
 
-	vars.BindDynValsAllIdx(0)
+	vars.BindDynValsAllIndex(0)
 
 	cmd := sy.ComputeCmdBuff()
 
@@ -87,8 +87,8 @@ func main() {
 	sy.ComputeCmdEnd(cmd)
 	sy.ComputeSubmitWait(cmd)
 
-	sy.Mem.SyncValIdxFmGPU(0, "Out", 0)
-	_, ovl, _ := vars.ValByIdxTry(0, "Out", 0)
+	sy.Mem.SyncValIndexFmGPU(0, "Out", 0)
+	_, ovl, _ := vars.ValByIndexTry(0, "Out", 0)
 
 	odat := ovl.Floats32()
 	for i := 0; i < n; i++ {

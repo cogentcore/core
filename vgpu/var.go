@@ -52,13 +52,13 @@ type Var struct {
 	TextureOwns bool `edit:"-"`
 
 	// index into the dynamic offset list, where dynamic offsets of vals need to be set -- for Uniform and Storage roles -- set during Set:DescLayout
-	DynOffIdx int `edit:"-"`
+	DynOffIndex int `edit:"-"`
 
 	// the array of values allocated for this variable.  The size of this array is determined by the Set membership of this Var, and the current index is updated at the set level.  For Texture Roles, there is a separate descriptor for each value (image) -- otherwise dynamic offset binding is used.
 	Vals Vals
 
-	// for dynamically bound vars (Vertex, Uniform, Storage), this is the index of the currently bound value in Vals list -- index in this array is the descIdx out of Vars NDescs (see for docs) to allow for parallel update pathways -- only valid until set again -- only actually used for Vertex binding, as unforms etc have the WriteDescriptor mechanism.
-	BindValIdx []int `edit:"-"`
+	// for dynamically bound vars (Vertex, Uniform, Storage), this is the index of the currently bound value in Vals list -- index in this array is the descIndex out of Vars NDescs (see for docs) to allow for parallel update pathways -- only valid until set again -- only actually used for Vertex binding, as unforms etc have the WriteDescriptor mechanism.
+	BindValIndex []int `edit:"-"`
 
 	// index of the storage buffer in Memory that holds this Var -- for Storage buffer types.  Due to support for dynamic binding, all Vals of a given Var must be stored in the same buffer, and the allocation mechanism ensures this.  This constrains large vars approaching the MaxStorageBufferRange capacity to only have 1 val, which is typically reasonable given that compute shaders use large data and tend to use static binding anyway, and graphics uses tend to be smaller.
 	StorageBuff int `edit:"-"`
@@ -101,9 +101,9 @@ func (vr *Var) BuffType() BuffTypes {
 
 // BindVal returns the currently bound value at given descriptor collection index
 // as set by BindDyn* methods.  Returns nil, error if not valid.
-func (vr *Var) BindVal(descIdx int) (*Val, error) {
-	idx := vr.BindValIdx[descIdx]
-	return vr.Vals.ValByIdxTry(idx)
+func (vr *Var) BindVal(descIndex int) (*Val, error) {
+	idx := vr.BindValIndex[descIndex]
+	return vr.Vals.ValByIndexTry(idx)
 }
 
 // ValsMemSize returns the memory allocation size
@@ -177,16 +177,16 @@ func (vr *Var) AllocTextures(mm *Memory) {
 	vr.Vals.AllocTextures(mm)
 }
 
-// TextureValidIdx returns the index of the given texture value at our
+// TextureValidIndex returns the index of the given texture value at our
 // index in list of vals, starting at given index, skipping over any
 // inactive textures which do not show up when accessed in the shader.
 // You must use this value when passing a texture index to the shader!
 // returns -1 if idx is not valid
-func (vr *Var) TextureValidIdx(stIdx, idx int) int {
+func (vr *Var) TextureValidIndex(stIndex, idx int) int {
 	vals := vr.Vals.ActiveVals()
 	vidx := 0
-	mx := min(stIdx+MaxTexturesPerSet, len(vals))
-	for i := stIdx; i < mx; i++ {
+	mx := min(stIndex+MaxTexturesPerSet, len(vals))
+	for i := stIndex; i < mx; i++ {
 		vl := vals[i]
 		if i == idx {
 			return vidx
@@ -239,13 +239,13 @@ func (vs *VarList) ValByNameTry(varName, valName string) (*Var, *Val, error) {
 	return vr, vl, err
 }
 
-// ValByIdxTry returns value by first looking up variable name, then value index,
+// ValByIndexTry returns value by first looking up variable name, then value index,
 // returning error if not found
-func (vs *VarList) ValByIdxTry(varName string, valIdx int) (*Var, *Val, error) {
+func (vs *VarList) ValByIndexTry(varName string, valIndex int) (*Var, *Val, error) {
 	vr, err := vs.VarByNameTry(varName)
 	if err != nil {
 		return nil, nil, err
 	}
-	vl, err := vr.Vals.ValByIdxTry(valIdx)
+	vl, err := vr.Vals.ValByIndexTry(valIndex)
 	return vr, vl, err
 }

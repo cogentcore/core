@@ -58,10 +58,10 @@ type VarSet struct {
 	// set number
 	Set int
 
-	// number of value instances to allocate per variable in this set: each value must be allocated in advance for each unique instance of a variable required across a complete scene rendering -- e.g., if this is an object position matrix, then one per object is required.  If a dynamic number are required, allocate the max possible.  For Texture vars, each of the NDesc sets can have a maximum of MaxTexturesPerSet (16) -- if NValsPer > MaxTexturesPerSet, then vals are wrapped across sets, and accessing them requires using the appropriate DescIdx, as in System.CmdBindTextureVarIdx.
+	// number of value instances to allocate per variable in this set: each value must be allocated in advance for each unique instance of a variable required across a complete scene rendering -- e.g., if this is an object position matrix, then one per object is required.  If a dynamic number are required, allocate the max possible.  For Texture vars, each of the NDesc sets can have a maximum of MaxTexturesPerSet (16) -- if NValsPer > MaxTexturesPerSet, then vals are wrapped across sets, and accessing them requires using the appropriate DescIndex, as in System.CmdBindTextureVarIndex.
 	NValsPer int
 
-	// for texture vars, this is the number of descriptor sets required to represent all of the different Texture image Vals that have been allocated.  Use Vars.BindAllTextureVals to bind all such vals, and System.CmdBindTextureVarIdx to automatically bind the correct set.
+	// for texture vars, this is the number of descriptor sets required to represent all of the different Texture image Vals that have been allocated.  Use Vars.BindAllTextureVals to bind all such vals, and System.CmdBindTextureVarIndex to automatically bind the correct set.
 	NTextureDescs int
 
 	// map of vars by different roles, within this set -- updated in Config(), after all vars added
@@ -225,8 +225,8 @@ func (st *VarSet) DescLayout(dev vk.Device, vs *Vars) {
 		binds = append(binds, bd)
 		if !vs.StaticVars {
 			if vr.Role == Uniform || vr.Role == Storage {
-				vr.BindValIdx = make([]int, vs.NDescs)
-				vr.DynOffIdx = dyno
+				vr.BindValIndex = make([]int, vs.NDescs)
+				vr.DynOffIndex = dyno
 				vs.AddDynOff()
 				dyno++
 			}
@@ -329,7 +329,7 @@ func (st *VarSet) BindDynVar(vs *Vars, vr *Var) error {
 	}
 	wd := vk.WriteDescriptorSet{
 		SType:           vk.StructureTypeWriteDescriptorSet,
-		DstSet:          st.VkDescSets[vs.BindDescIdx],
+		DstSet:          st.VkDescSets[vs.BindDescIndex],
 		DstBinding:      uint32(vr.BindLoc),
 		DescriptorCount: 1,
 		DescriptorType:  vr.Role.VkDescriptor(),
@@ -406,7 +406,7 @@ func (st *VarSet) BindStatVar(vs *Vars, vr *Var) {
 	nvals := len(vals)
 	wd := vk.WriteDescriptorSet{
 		SType:          vk.StructureTypeWriteDescriptorSet,
-		DstSet:         st.VkDescSets[vs.BindDescIdx],
+		DstSet:         st.VkDescSets[vs.BindDescIndex],
 		DstBinding:     uint32(vr.BindLoc),
 		DescriptorType: vr.Role.VkDescriptorStatic(),
 	}
@@ -430,7 +430,7 @@ func (st *VarSet) BindStatVar(vs *Vars, vr *Var) {
 		imgs := []vk.DescriptorImageInfo{}
 		nvals := len(vals)
 		if nvals > MaxTexturesPerSet {
-			sti := vs.BindDescIdx * MaxTexturesPerSet
+			sti := vs.BindDescIndex * MaxTexturesPerSet
 			if sti > nvals-MaxTexturesPerSet {
 				sti = nvals - MaxTexturesPerSet
 			}
@@ -530,7 +530,7 @@ func (vs *VarSet) VkPushConfig() []vk.PushConstantRange {
 /////////////////////////////////////////////////////////////////////////
 // Dynamic Binding
 
-// BindDynValsAllIdx dynamically binds all uniform, storage values
+// BindDynValsAllIndex dynamically binds all uniform, storage values
 // in given set, for all variables, for given value index.
 //
 // This only dynamically updates the offset to point to the specified val.
@@ -539,7 +539,7 @@ func (vs *VarSet) VkPushConfig() []vk.PushConstantRange {
 // (call after all such dynamic bindings are updated.)
 //
 // Do NOT call BindValsStart / End around this.
-func (st *VarSet) BindDynValsAllIdx(vs *Vars, idx int) {
+func (st *VarSet) BindDynValsAllIndex(vs *Vars, idx int) {
 	for _, vr := range st.Vars {
 		if vr.Role < Uniform || vr.Role > Storage {
 			continue
@@ -569,7 +569,7 @@ func (st *VarSet) BindDynValName(vs *Vars, varNm, valNm string) error {
 	return nil
 }
 
-// BindDynValIdx dynamically binds given uniform or storage value
+// BindDynValIndex dynamically binds given uniform or storage value
 // by index for given variable name, in given set.
 //
 // This only dynamically updates the offset to point to the specified val.
@@ -580,8 +580,8 @@ func (st *VarSet) BindDynValName(vs *Vars, varNm, valNm string) error {
 // Do NOT call BindValsStart / End around this.
 //
 // returns error if not found.
-func (st *VarSet) BindDynValIdx(vs *Vars, varNm string, valIdx int) error {
-	vr, vl, err := st.ValByIdxTry(varNm, valIdx)
+func (st *VarSet) BindDynValIndex(vs *Vars, varNm string, valIndex int) error {
+	vr, vl, err := st.ValByIndexTry(varNm, valIndex)
 	if err != nil {
 		return err
 	}
@@ -607,21 +607,21 @@ func (st *VarSet) BindDynVal(vs *Vars, vr *Var, vl *Val) error {
 		}
 		return err
 	}
-	vr.BindValIdx[vs.BindDescIdx] = vl.Idx // note: not used but potentially informative
-	vs.DynOffs[vs.BindDescIdx][vr.DynOffIdx] = uint32(vl.Offset)
+	vr.BindValIndex[vs.BindDescIndex] = vl.Index // note: not used but potentially informative
+	vs.DynOffs[vs.BindDescIndex][vr.DynOffIndex] = uint32(vl.Offset)
 	return nil
 }
 
-// TexGpSzIdxs for texture at given index, allocated in groups by size
+// TexGpSzIndexs for texture at given index, allocated in groups by size
 // using Vals.AllocTexBySize, returns the indexes for the texture
 // and layer to actually select the texture in the shader, and proportion
 // of the Gp allocated texture size occupied by the texture.
-func (st *VarSet) TexGpSzIdxs(vs *Vars, varNm string, valIdx int) *szalloc.Idxs {
+func (st *VarSet) TexGpSzIndexs(vs *Vars, varNm string, valIndex int) *szalloc.Indexs {
 	vr, err := st.VarByNameTry(varNm)
 	if err != nil {
 		log.Println(err)
 		return nil
 	}
-	idxs := vr.Vals.TexSzAlloc.ItemIdxs[valIdx]
+	idxs := vr.Vals.TexSzAlloc.ItemIndexs[valIndex]
 	return idxs
 }

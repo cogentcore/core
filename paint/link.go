@@ -30,25 +30,25 @@ type TextLink struct {
 	StartSpan int
 
 	// index in StartSpan where link starts
-	StartIdx int
+	StartIndex int
 
 	// span index where link ends (can be same as EndSpan)
 	EndSpan int
 
 	// index in EndSpan where link ends (index of last rune in label)
-	EndIdx int
+	EndIndex int
 }
 
 // Bounds returns the bounds of the link
 func (tl *TextLink) Bounds(tr *Text, pos mat32.Vec2) image.Rectangle {
 	stsp := &tr.Spans[tl.StartSpan]
 	tpos := pos.Add(stsp.RelPos)
-	sr := &(stsp.Render[tl.StartIdx])
+	sr := &(stsp.Render[tl.StartIndex])
 	sp := tpos.Add(sr.RelPos)
 	sp.Y -= sr.Size.Y
 	ep := sp
 	if tl.EndSpan == tl.StartSpan {
-		er := &(stsp.Render[tl.EndIdx])
+		er := &(stsp.Render[tl.EndIndex])
 		ep = tpos.Add(er.RelPos)
 		ep.X += er.Size.X
 	} else {

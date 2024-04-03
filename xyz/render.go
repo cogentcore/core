@@ -399,8 +399,8 @@ func (sc *Scene) RenderImpl() {
 	sc.Phong.UpdtMu.Lock()
 	sy := &sc.Phong.Sys
 	cmd := sy.CmdPool.Buff
-	descIdx := 0
-	sy.ResetBeginRenderPass(cmd, sc.Frame.Frames[0], descIdx)
+	descIndex := 0
+	sy.ResetBeginRenderPass(cmd, sc.Frame.Frames[0], descIndex)
 	sc.Phong.UpdtMu.Unlock()
 
 	for rci, objs := range rcs {

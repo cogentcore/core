@@ -12,13 +12,13 @@ import (
 //   Triangle
 
 // TriangleN returns 3, 3
-func TriangleN() (nVtx, nIdx int) {
+func TriangleN() (nVtx, nIndex int) {
 	return 3, 3
 }
 
 // SetTriangle sets one triangle of vertex data indexes, and optionally
 // texUV coords, at given starting *vertex* index (i.e., multiply this *3
-// to get actual float offset in Vtx array), and starting Idx index.
+// to get actual float offset in Vtx array), and starting Index index.
 // Norm is auto-computed, and bounds expanded.
 // pos is a 3D position offset. returns 3D size of plane.
 // returns bounding box.
@@ -52,13 +52,13 @@ func SetTriangle(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, 
 //   Quad
 
 // QuadN returns 4, 6
-func QuadN() (nVtx, nIdx int) {
+func QuadN() (nVtx, nIndex int) {
 	return 4, 6
 }
 
 // SetQuad sets quad vertex data (optionally texUV, color, and indexes)
 // at given starting *vertex* index (i.e., multiply this *3 to get actual float
-// offset in Vtx array), and starting Idx index.
+// offset in Vtx array), and starting Index index.
 // Norm is auto-computed, and bbox expanded by points.
 // pos is a 3D position offset. returns 3D size of plane.
 // returns bounding box.

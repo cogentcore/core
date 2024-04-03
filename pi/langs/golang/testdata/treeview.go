@@ -135,7 +135,7 @@ type TreeView struct {
 	// linear index of this node within the entire tree.
 	// updated on full rebuilds and may sometimes be off,
 	// but close enough for expected uses
-	ViewIdx int `copier:"-" json:"-" xml:"-" edit:"-"`
+	ViewIndex int `copier:"-" json:"-" xml:"-" edit:"-"`
 
 	// size of just this node widget.
 	// our alloc includes all of our children, but we only draw us.
@@ -170,16 +170,16 @@ func (tv *TreeView) BaseType() *gti.Type {
 	return tv.KiType()
 }
 
-// RootSetViewIdx sets the RootView and ViewIdx for all nodes.
+// RootSetViewIndex sets the RootView and ViewIndex for all nodes.
 // This must be called from the root node after
 // construction or any modification to the tree.
 // Returns the total number of leaves in the tree.
-func (tv *TreeView) RootSetViewIdx() int {
+func (tv *TreeView) RootSetViewIndex() int {
 	idx := 0
 	tv.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
 		tvki := AsTreeView(wi)
 		if tvki != nil {
-			tvki.ViewIdx = idx
+			tvki.ViewIndex = idx
 			tvki.RootView = tv
 			idx++
 		}
@@ -804,29 +804,29 @@ func (tv *TreeView) SelectUpdate(mode events.SelectModes) bool {
 			tv.SetFocus()
 			sel = true
 		} else {
-			minIdx := -1
-			maxIdx := 0
+			minIndex := -1
+			maxIndex := 0
 			for _, v := range sl {
 				vn := v.AsTreeView()
-				if minIdx < 0 {
-					minIdx = vn.ViewIdx
+				if minIndex < 0 {
+					minIndex = vn.ViewIndex
 				} else {
-					minIdx = min(minIdx, vn.ViewIdx)
+					minIndex = min(minIndex, vn.ViewIndex)
 				}
-				maxIdx = max(maxIdx, vn.ViewIdx)
+				maxIndex = max(maxIndex, vn.ViewIndex)
 			}
-			cidx := tv.ViewIdx
+			cidx := tv.ViewIndex
 			nn := tv
 			tv.Select()
-			if tv.ViewIdx < minIdx {
-				for cidx < minIdx {
+			if tv.ViewIndex < minIndex {
+				for cidx < minIndex {
 					nn = nn.MoveDown(events.SelectQuiet) // just select
-					cidx = nn.ViewIdx
+					cidx = nn.ViewIndex
 				}
-			} else if tv.ViewIdx > maxIdx {
-				for cidx > maxIdx {
+			} else if tv.ViewIndex > maxIndex {
+				for cidx > maxIndex {
 					nn = nn.MoveUp(events.SelectQuiet) // just select
-					cidx = nn.ViewIdx
+					cidx = nn.ViewIndex
 				}
 			}
 		}
@@ -863,10 +863,10 @@ func (tv *TreeView) SendChangeEvent(ctx events.Event) {
 
 // TreeViewChanged must be called after any structural
 // change to the TreeView (adding or deleting nodes).
-// It calls: RootSetViewIdx() to update indexes and
+// It calls: RootSetViewIndex() to update indexes and
 // SendChangeEvent to notify of changes.
 func (tv *TreeView) TreeViewChanged(ctx events.Event) {
-	tv.RootView.RootSetViewIdx()
+	tv.RootView.RootSetViewIndex()
 	// tv.SendChangeEvent(ctx)
 }
 

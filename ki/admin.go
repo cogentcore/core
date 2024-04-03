@@ -110,9 +110,9 @@ func ParentByType[T Ki](k Ki, embeds bool) T {
 }
 
 // ChildByType is a generic helper function for [Ki.ChildByType]
-func ChildByType[T Ki](k Ki, embeds bool, startIdx ...int) T {
+func ChildByType[T Ki](k Ki, embeds bool, startIndex ...int) T {
 	var n T
-	v, _ := k.ChildByType(n.KiType(), embeds, startIdx...).(T)
+	v, _ := k.ChildByType(n.KiType(), embeds, startIndex...).(T)
 	return v
 }
 

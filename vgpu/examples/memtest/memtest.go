@@ -65,7 +65,7 @@ func main() {
 	// bahost := make([]float32, bav)
 	// bbhost := make([]float32, bbv)
 
-	// vars.BindDynValsAllIdx(0)
+	// vars.BindDynValsAllIndex(0)
 
 	cmd := sy.ComputeCmdBuff()
 	sy.ComputeResetBindVars(cmd, 0)
@@ -73,10 +73,10 @@ func main() {
 	sy.ComputeCmdEnd(cmd)
 	sy.ComputeSubmitWait(cmd)
 
-	sy.Mem.SyncValIdxFmGPU(0, "Ba", 0)
-	_, bavl, _ := vars.ValByIdxTry(0, "Ba", 0)
-	sy.Mem.SyncValIdxFmGPU(0, "Bb", 0)
-	_, bbvl, _ := vars.ValByIdxTry(0, "Bb", 0)
+	sy.Mem.SyncValIndexFmGPU(0, "Ba", 0)
+	_, bavl, _ := vars.ValByIndexTry(0, "Ba", 0)
+	sy.Mem.SyncValIndexFmGPU(0, "Bb", 0)
+	_, bbvl, _ := vars.ValByIndexTry(0, "Bb", 0)
 
 	bas := bavl.UInts32()
 	bbs := bbvl.UInts32()

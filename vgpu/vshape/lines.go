@@ -46,21 +46,21 @@ func (ln *Lines) Defaults() {
 	ln.Width.Set(.1, .1)
 }
 
-func (ln *Lines) N() (nVtx, nIdx int) {
-	nVtx, nIdx = LinesN(len(ln.Points), ln.Closed)
+func (ln *Lines) N() (nVtx, nIndex int) {
+	nVtx, nIndex = LinesN(len(ln.Points), ln.Closed)
 	return
 }
 
 // Set sets points in given allocated arrays
 func (ln *Lines) Set(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
-	ln.CBBox = SetLines(vtxAry, normAry, texAry, idxAry, ln.VtxOff, ln.IdxOff, ln.Points, ln.Width, ln.Closed, ln.Pos)
+	ln.CBBox = SetLines(vtxAry, normAry, texAry, idxAry, ln.VtxOff, ln.IndexOff, ln.Points, ln.Width, ln.Closed, ln.Pos)
 	// todo: colors!
 }
 
 /////////////////////////////////////////////////////////////////////
 
 // LinesN returns number of vertex and idx points
-func LinesN(npoints int, closed bool) (nVtx, nIdx int) {
+func LinesN(npoints int, closed bool) (nVtx, nIndex int) {
 	qvn, qin := QuadN()
 	nv, ni := 4*(npoints-1)*qvn, 4*(npoints-1)*qin
 	if closed {

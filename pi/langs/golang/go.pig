@@ -367,14 +367,14 @@ ExprRules {
         RecvTp:         TypeName              
     }
     SliceExpr {
-        SliceThree:  ?SliceIdx1 ':' SliceIdx2 ':' SliceIdx3  >Ast
-        SliceTwo:    ?SliceIdx1 ':' ?SliceIdx2               >Ast
+        SliceThree:  ?SliceIndex1 ':' SliceIndex2 ':' SliceIndex3  >Ast
+        SliceTwo:    ?SliceIndex1 ':' ?SliceIndex2               >Ast
         SliceOne:    Expr                                    >Ast
     }
-    SliceIdxs {
-        SliceIdx1:  Expr  >Ast
-        SliceIdx2:  Expr  >Ast
-        SliceIdx3:  Expr  >Ast
+    SliceIndexs {
+        SliceIndex1:  Expr  >Ast
+        SliceIndex2:  Expr  >Ast
+        SliceIndex3:  Expr  >Ast
     }
     ArgsExpr {
         ArgsEllipsis:  ArgsList '...'  >Ast

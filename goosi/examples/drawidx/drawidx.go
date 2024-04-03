@@ -89,7 +89,7 @@ func main() {
 		set.ConfigVals(1)  // one val per var
 		sy.Config()
 
-		triPos, _ := posv.Vals.ValByIdxTry(0)
+		triPos, _ := posv.Vals.ValByIndexTry(0)
 		triPosA := triPos.Floats32()
 		triPosA.Set(0,
 			-0.5, 0.5, 0.0,
@@ -97,7 +97,7 @@ func main() {
 			0.0, -0.5, 0.0) // negative point is UP in native Vulkan
 		triPos.SetMod()
 
-		triClr, _ := clrv.Vals.ValByIdxTry(0)
+		triClr, _ := clrv.Vals.ValByIndexTry(0)
 		triClrA := triClr.Floats32()
 		triClrA.Set(0,
 			1.0, 0.0, 0.0,
@@ -105,12 +105,12 @@ func main() {
 			0.0, 0.0, 1.0)
 		triClr.SetMod()
 
-		triIdx, _ := idxv.Vals.ValByIdxTry(0)
+		triIndex, _ := idxv.Vals.ValByIndexTry(0)
 		idxs := []uint16{0, 1, 2}
-		triIdx.CopyFromBytes(unsafe.Pointer(&idxs[0]))
+		triIndex.CopyFromBytes(unsafe.Pointer(&idxs[0]))
 
 		// This is the standard camera view projection computation
-		cam, _ = camv.Vals.ValByIdxTry(0)
+		cam, _ = camv.Vals.ValByIndexTry(0)
 		campos := mat32.V3(0, 0, 2)
 		target := mat32.V3(0, 0, 0)
 		var lookq mat32.Quat
@@ -154,10 +154,10 @@ func main() {
 			return
 		}
 		// fmt.Printf("\nacq: %v\n", time.Now().Sub(rt))
-		descIdx := 0 // if running multiple frames in parallel, need diff sets
+		descIndex := 0 // if running multiple frames in parallel, need diff sets
 		cmd := sy.CmdPool.Buff
-		sy.ResetBeginRenderPass(cmd, sf.Frames[idx], descIdx)
-		pl.BindDrawVertex(cmd, descIdx)
+		sy.ResetBeginRenderPass(cmd, sf.Frames[idx], descIndex)
+		pl.BindDrawVertex(cmd, descIndex)
 		sy.EndRenderPass(cmd)
 		// fmt.Printf("cmd %v\n", time.Now().Sub(rt))
 		sf.SubmitRender(cmd) // this is where it waits for the 16 msec

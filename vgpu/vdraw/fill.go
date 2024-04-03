@@ -56,8 +56,8 @@ func (dw *Drawer) StartFill() bool {
 		if !ok {
 			return false
 		}
-		dw.Impl.SurfIdx = idx
-		sy.ResetBeginRenderPassNoClear(cmd, dw.Surf.Frames[dw.Impl.SurfIdx], 0)
+		dw.Impl.SurfIndex = idx
+		sy.ResetBeginRenderPassNoClear(cmd, dw.Surf.Frames[dw.Impl.SurfIndex], 0)
 	} else {
 		sy.ResetBeginRenderPassNoClear(cmd, dw.Frame.Frames[0], 0)
 	}
@@ -72,7 +72,7 @@ func (dw *Drawer) EndFill() {
 	sy.EndRenderPass(cmd)
 	if dw.Surf != nil {
 		dw.Surf.SubmitRender(cmd) // this is where it waits for the 16 msec
-		dw.Surf.PresentImage(dw.Impl.SurfIdx)
+		dw.Surf.PresentImage(dw.Impl.SurfIndex)
 	} else {
 		dw.Frame.SubmitRender(cmd)
 		dw.Frame.WaitForRender()

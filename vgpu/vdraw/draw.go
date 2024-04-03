@@ -29,7 +29,7 @@ const (
 // Set flipY to true to flip.
 func (dw *Drawer) SetGoImage(idx, layer int, img image.Image, flipY bool) {
 	dw.UpdtMu.Lock()
-	_, tx, _ := dw.Sys.Vars().ValByIdxTry(0, "Tex", idx)
+	_, tx, _ := dw.Sys.Vars().ValByIndexTry(0, "Tex", idx)
 	err := tx.SetGoImage(img, layer, flipY)
 	if err != nil && vgpu.Debug {
 		fmt.Println(err)
@@ -39,7 +39,7 @@ func (dw *Drawer) SetGoImage(idx, layer int, img image.Image, flipY bool) {
 
 // GetImageVal returns vgpu Val value of Image for given index
 func (dw *Drawer) GetImageVal(idx int) *vgpu.Val {
-	_, tx, _ := dw.Sys.Vars().ValByIdxTry(0, "Tex", idx)
+	_, tx, _ := dw.Sys.Vars().ValByIndexTry(0, "Tex", idx)
 	return tx
 }
 
@@ -54,7 +54,7 @@ func (dw *Drawer) ConfigImageDefaultFormat(idx int, width int, height int, layer
 // to fit the given image format and number of layers as a drawing source.
 func (dw *Drawer) ConfigImage(idx int, fmt *vgpu.ImageFormat) {
 	dw.UpdtMu.Lock()
-	_, tx, _ := dw.Sys.Vars().ValByIdxTry(0, "Tex", idx)
+	_, tx, _ := dw.Sys.Vars().ValByIndexTry(0, "Tex", idx)
 	tx.Texture.Format = *fmt
 	tx.Texture.Format.SetMultisample(1) // can't be multi
 	tx.Texture.AllocTexture()
@@ -69,7 +69,7 @@ func (dw *Drawer) SetFrameImage(idx int, fbi any) {
 		return
 	}
 	dw.UpdtMu.Lock()
-	_, tx, _ := dw.Sys.Vars().ValByIdxTry(0, "Tex", idx)
+	_, tx, _ := dw.Sys.Vars().ValByIndexTry(0, "Tex", idx)
 	if fb.Format.Size != tx.Texture.Format.Size {
 		dw.UpdtMu.Unlock()
 		dw.ConfigImage(idx, &fb.Format)
@@ -92,16 +92,16 @@ func (dw *Drawer) SetImageName(idx int, name string) error {
 	return err
 }
 
-// ImageIdxByName returns index of image val by name.
+// ImageIndexByName returns index of image val by name.
 // Logs error if not found, and returns 0.
-func (dw *Drawer) ImageIdxByName(name string) int {
+func (dw *Drawer) ImageIndexByName(name string) int {
 	vr := dw.Sys.Vars().SetMap[0].Vars[0]
 	vl, err := vr.Vals.ValByNameTry(name)
 	if err != nil {
 		log.Println(err)
 		return 0
 	}
-	return vl.Idx
+	return vl.Index
 }
 
 // SetGoImageName sets given Go image as a drawing source to given image name,
@@ -109,21 +109,21 @@ func (dw *Drawer) ImageIdxByName(name string) int {
 // A standard Go image is rendered upright on a standard Vulkan surface.
 // Set flipY to true to flip. This can be used directly without pre-configuring.
 func (dw *Drawer) SetGoImageName(name string, layer int, img image.Image, flipY bool) {
-	idx := dw.ImageIdxByName(name)
+	idx := dw.ImageIndexByName(name)
 	dw.SetGoImage(idx, layer, img, flipY)
 }
 
 // ConfigImageName configures the draw image at given name
 // to fit the given image format as a drawing source.
 func (dw *Drawer) ConfigImageName(name string, fmt *vgpu.ImageFormat) {
-	idx := dw.ImageIdxByName(name)
+	idx := dw.ImageIndexByName(name)
 	dw.ConfigImage(idx, fmt)
 }
 
 // SetFrameImageName sets given Framebuffer image as a drawing source at name,
 // used in subsequent Draw methods.  Must have already been configured to fit!
 func (dw *Drawer) SetFrameImageName(name string, fb *vgpu.Framebuffer) {
-	idx := dw.ImageIdxByName(name)
+	idx := dw.ImageIndexByName(name)
 	dw.SetFrameImage(idx, fb)
 }
 
@@ -227,7 +227,7 @@ func TransformMatrix(dr image.Rectangle, sr image.Rectangle, rotDeg float32) mat
 func (dw *Drawer) Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, op draw.Op, flipY bool, rotDeg float32) error {
 	zr := image.Rectangle{}
 	if sr == zr {
-		_, tx, _ := dw.Sys.Vars().ValByIdxTry(0, "Tex", idx)
+		_, tx, _ := dw.Sys.Vars().ValByIndexTry(0, "Tex", idx)
 		sr = tx.Texture.Format.Bounds()
 	}
 	return dw.Draw(idx, layer, TransformMatrix(dr, sr, rotDeg), sr, op, flipY)
@@ -247,18 +247,18 @@ func (dw *Drawer) Draw(idx, layer int, src2dst mat32.Mat3, sr image.Rectangle, o
 	vars := sy.Vars()
 	cmd := sy.CmdPool.Buff
 
-	txIdx, _, _, err := sy.CmdBindTextureVarIdx(cmd, 0, "Tex", idx)
+	txIndex, _, _, err := sy.CmdBindTextureVarIndex(cmd, 0, "Tex", idx)
 	if err != nil {
 		return err
 	}
-	_, tx, _ := vars.ValByIdxTry(0, "Tex", idx)
+	_, tx, _ := vars.ValByIndexTry(0, "Tex", idx)
 	if sr == image.ZR {
 		sr = tx.Texture.Format.Bounds()
 	}
 
 	tmat := dw.ConfigMtxs(src2dst, tx.Texture.Format.Size, sr, op, flipY)
 	// fmt.Printf("idx: %d sr: %v  sz: %v  omat: %v  tmat: %v \n", idx, sr, tx.Texture.Format.Size, src2dst, tmat)
-	tmat.MVP[3*4] = float32(txIdx) // pack in unused 4th column
+	tmat.MVP[3*4] = float32(txIndex) // pack in unused 4th column
 	tmat.MVP[3*4+1] = float32(layer)
 	matv, _ := vars.VarByNameTry(vgpu.PushSet, "Mtxs")
 	dpl.Push(cmd, matv, unsafe.Pointer(tmat))
@@ -270,20 +270,20 @@ func (dw *Drawer) Draw(idx, layer int, src2dst mat32.Mat3, sr image.Rectangle, o
 // UseTextureSet selects the descriptor set to use --
 // choose this based on the bank of 16
 // texture values if number of textures > MaxTexturesPerSet.
-func (dw *Drawer) UseTextureSet(descIdx int) {
+func (dw *Drawer) UseTextureSet(descIndex int) {
 	dw.UpdtMu.Lock()
 	sy := &dw.Sys
 	cmd := sy.CmdPool.Buff
-	sy.CmdBindVars(cmd, descIdx)
+	sy.CmdBindVars(cmd, descIndex)
 	dw.UpdtMu.Unlock()
 }
 
 // StartDraw starts image drawing rendering process on render target
 // No images can be added or set after this point.
-// descIdx is the descriptor set to use -- choose this based on the bank of 16
+// descIndex is the descriptor set to use -- choose this based on the bank of 16
 // texture values if number of textures > MaxTexturesPerSet.
 // It returns false if rendering can not proceed.
-func (dw *Drawer) StartDraw(descIdx int) bool {
+func (dw *Drawer) StartDraw(descIndex int) bool {
 	dw.UpdtMu.Lock()
 	defer dw.UpdtMu.Unlock()
 	sy := &dw.Sys
@@ -293,10 +293,10 @@ func (dw *Drawer) StartDraw(descIdx int) bool {
 		if !ok {
 			return false
 		}
-		dw.Impl.SurfIdx = idx
-		sy.ResetBeginRenderPassNoClear(cmd, dw.Surf.Frames[dw.Impl.SurfIdx], descIdx)
+		dw.Impl.SurfIndex = idx
+		sy.ResetBeginRenderPassNoClear(cmd, dw.Surf.Frames[dw.Impl.SurfIndex], descIndex)
 	} else {
-		sy.ResetBeginRenderPassNoClear(cmd, dw.Frame.Frames[0], descIdx)
+		sy.ResetBeginRenderPassNoClear(cmd, dw.Frame.Frames[0], descIndex)
 	}
 	dw.Impl.LastOp = draw.Src
 	dpl := sy.PipelineMap["draw_src"]
@@ -331,7 +331,7 @@ func (dw *Drawer) EndDraw() {
 	cmd := sy.CmdPool.Buff
 	sy.EndRenderPass(cmd)
 	if dw.Surf != nil {
-		sidx := dw.Impl.SurfIdx
+		sidx := dw.Impl.SurfIndex
 		dw.Surf.SubmitRender(cmd)
 		dw.Surf.PresentImage(sidx)
 	} else {

@@ -46,8 +46,8 @@ func (ph *Phong) AddColor(name string, clr *Colors) {
 	ph.Colors.Add(name, clr)
 }
 
-// UseColorIdx selects color by index for current render step
-func (ph *Phong) UseColorIdx(idx int) error {
+// UseColorIndex selects color by index for current render step
+func (ph *Phong) UseColorIndex(idx int) error {
 	if err := ph.Colors.IndexIsValid(idx); err != nil {
 		log.Println(err)
 		return err
@@ -82,7 +82,7 @@ func (ph *Phong) RenderOnecolor() {
 	pl := sy.PipelineMap["onecolor"]
 	push := ph.Cur.NewPush()
 	ph.Push(pl, push)
-	pl.BindDrawVertex(cmd, ph.Cur.DescIdx)
+	pl.BindDrawVertex(cmd, ph.Cur.DescIndex)
 }
 
 // RenderVtxColor renders current settings to vertexcolor pipeline
@@ -92,5 +92,5 @@ func (ph *Phong) RenderVtxColor() {
 	pl := sy.PipelineMap["pervertex"]
 	push := ph.Cur.NewPush()
 	ph.Push(pl, push)
-	pl.BindDrawVertex(cmd, ph.Cur.DescIdx)
+	pl.BindDrawVertex(cmd, ph.Cur.DescIndex)
 }

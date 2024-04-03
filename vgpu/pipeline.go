@@ -386,8 +386,8 @@ func (pl *Pipeline) Draw(cmd vk.CommandBuffer, vtxCount, instanceCount, firstVtx
 // DrawVertex adds commands to the given command buffer
 // to bind vertex / index values and Draw based on current BindVertexVal
 // setting for any Vertex (and associated Index) Vars,
-// for given descIdx set of descriptors (see Vars NDescs for info).
-func (pl *Pipeline) DrawVertex(cmd vk.CommandBuffer, descIdx int) {
+// for given descIndex set of descriptors (see Vars NDescs for info).
+func (pl *Pipeline) DrawVertex(cmd vk.CommandBuffer, descIndex int) {
 	vs := pl.Vars()
 	if !vs.HasVertex {
 		return
@@ -398,11 +398,11 @@ func (pl *Pipeline) DrawVertex(cmd vk.CommandBuffer, descIdx int) {
 	var idxVal *Val
 	if len(st.RoleMap[Index]) == 1 {
 		idxVar = st.RoleMap[Index][0]
-		idxVal, _ = idxVar.BindVal(descIdx)
+		idxVal, _ = idxVar.BindVal(descIndex)
 	}
 	vtxn := 0
 	for _, vr := range st.Vars {
-		vl, err := vr.BindVal(descIdx)
+		vl, err := vr.BindVal(descIndex)
 		if err != nil || vr.Role != Vertex {
 			continue
 		}
@@ -413,7 +413,7 @@ func (pl *Pipeline) DrawVertex(cmd vk.CommandBuffer, descIdx int) {
 			vtxn = min(vtxn, vl.N)
 		}
 	}
-	mbuf := pl.Sys.Mem.Buffs[VtxIdxBuff].Dev
+	mbuf := pl.Sys.Mem.Buffs[VtxIndexBuff].Dev
 	vtxbuf := make([]vk.Buffer, len(offs))
 	for i := range vtxbuf {
 		vtxbuf[i] = mbuf
@@ -431,9 +431,9 @@ func (pl *Pipeline) DrawVertex(cmd vk.CommandBuffer, descIdx int) {
 // BindDrawVertex adds commands to the given command buffer
 // to bind this pipeline, and then bind vertex / index values and Draw
 // based on current vals for any Vertex (and associated Index) Vars.
-// for given descIdx set of descriptors (see Vars NDescs for info).
+// for given descIndex set of descriptors (see Vars NDescs for info).
 // This is the standard unit of drawing between Begin and End.
-func (pl *Pipeline) BindDrawVertex(cmd vk.CommandBuffer, descIdx int) {
+func (pl *Pipeline) BindDrawVertex(cmd vk.CommandBuffer, descIndex int) {
 	pl.BindPipeline(cmd)
-	pl.DrawVertex(cmd, descIdx)
+	pl.DrawVertex(cmd, descIndex)
 }

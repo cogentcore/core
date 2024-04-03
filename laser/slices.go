@@ -185,7 +185,7 @@ func SliceSort(sl any, ascending bool) error {
 // conversions (first fmt.Stringer String()) and supporting time.Time directly
 // as well.  There is no direct method for checking the field indexes so those
 // are assumed to be accurate -- will panic if not!
-func StructSliceSort(struSlice any, fldIdx []int, ascending bool) error {
+func StructSliceSort(struSlice any, fldIndex []int, ascending bool) error {
 	sv := reflect.ValueOf(struSlice)
 	svnp := NonPtrValue(sv)
 	if svnp.Len() == 0 {
@@ -193,18 +193,18 @@ func StructSliceSort(struSlice any, fldIdx []int, ascending bool) error {
 	}
 	struTyp := SliceElType(struSlice)
 	struNpTyp := NonPtrType(struTyp)
-	fld := struNpTyp.FieldByIndex(fldIdx) // not easy to check.
+	fld := struNpTyp.FieldByIndex(fldIndex) // not easy to check.
 	vk := fld.Type.Kind()
 	struVal := OnePtrValue(svnp.Index(0))
-	fldVal := struVal.Elem().FieldByIndex(fldIdx)
+	fldVal := struVal.Elem().FieldByIndex(fldIndex)
 	fldIf := fldVal.Interface()
 
 	if _, ok := fldIf.(SortInter); ok {
 		sort.Slice(svnp.Interface(), func(i, j int) bool {
 			ival := OnePtrValue(svnp.Index(i))
-			iv := ival.Elem().FieldByIndex(fldIdx).Interface().(SortInter).Int()
+			iv := ival.Elem().FieldByIndex(fldIndex).Interface().(SortInter).Int()
 			jval := OnePtrValue(svnp.Index(j))
-			jv := jval.Elem().FieldByIndex(fldIdx).Interface().(SortInter).Int()
+			jv := jval.Elem().FieldByIndex(fldIndex).Interface().(SortInter).Int()
 			if ascending {
 				return iv < jv
 			}
@@ -218,9 +218,9 @@ func StructSliceSort(struSlice any, fldIdx []int, ascending bool) error {
 	case vk >= reflect.Int && vk <= reflect.Int64:
 		sort.Slice(svnp.Interface(), func(i, j int) bool {
 			ival := OnePtrValue(svnp.Index(i))
-			iv := ival.Elem().FieldByIndex(fldIdx).Int()
+			iv := ival.Elem().FieldByIndex(fldIndex).Int()
 			jval := OnePtrValue(svnp.Index(j))
-			jv := jval.Elem().FieldByIndex(fldIdx).Int()
+			jv := jval.Elem().FieldByIndex(fldIndex).Int()
 			if ascending {
 				return iv < jv
 			}
@@ -230,9 +230,9 @@ func StructSliceSort(struSlice any, fldIdx []int, ascending bool) error {
 	case vk >= reflect.Uint && vk <= reflect.Uint64:
 		sort.Slice(svnp.Interface(), func(i, j int) bool {
 			ival := OnePtrValue(svnp.Index(i))
-			iv := ival.Elem().FieldByIndex(fldIdx).Uint()
+			iv := ival.Elem().FieldByIndex(fldIndex).Uint()
 			jval := OnePtrValue(svnp.Index(j))
-			jv := jval.Elem().FieldByIndex(fldIdx).Uint()
+			jv := jval.Elem().FieldByIndex(fldIndex).Uint()
 			if ascending {
 				return iv < jv
 			}
@@ -242,9 +242,9 @@ func StructSliceSort(struSlice any, fldIdx []int, ascending bool) error {
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
 		sort.Slice(svnp.Interface(), func(i, j int) bool {
 			ival := OnePtrValue(svnp.Index(i))
-			iv := ival.Elem().FieldByIndex(fldIdx).Float()
+			iv := ival.Elem().FieldByIndex(fldIndex).Float()
 			jval := OnePtrValue(svnp.Index(j))
-			jv := jval.Elem().FieldByIndex(fldIdx).Float()
+			jv := jval.Elem().FieldByIndex(fldIndex).Float()
 			if ascending {
 				return iv < jv
 			}
@@ -254,9 +254,9 @@ func StructSliceSort(struSlice any, fldIdx []int, ascending bool) error {
 	case vk == reflect.Struct && ShortTypeName(fld.Type) == "time.Time":
 		sort.Slice(svnp.Interface(), func(i, j int) bool {
 			ival := OnePtrValue(svnp.Index(i))
-			iv := ival.Elem().FieldByIndex(fldIdx).Interface().(time.Time)
+			iv := ival.Elem().FieldByIndex(fldIndex).Interface().(time.Time)
 			jval := OnePtrValue(svnp.Index(j))
-			jv := jval.Elem().FieldByIndex(fldIdx).Interface().(time.Time)
+			jv := jval.Elem().FieldByIndex(fldIndex).Interface().(time.Time)
 			if ascending {
 				return iv.Before(jv)
 			}
@@ -269,9 +269,9 @@ func StructSliceSort(struSlice any, fldIdx []int, ascending bool) error {
 	case fmt.Stringer:
 		sort.Slice(svnp.Interface(), func(i, j int) bool {
 			ival := OnePtrValue(svnp.Index(i))
-			iv := ival.Elem().FieldByIndex(fldIdx).Interface().(fmt.Stringer).String()
+			iv := ival.Elem().FieldByIndex(fldIndex).Interface().(fmt.Stringer).String()
 			jval := OnePtrValue(svnp.Index(j))
-			jv := jval.Elem().FieldByIndex(fldIdx).Interface().(fmt.Stringer).String()
+			jv := jval.Elem().FieldByIndex(fldIndex).Interface().(fmt.Stringer).String()
 			if ascending {
 				return iv < jv
 			}
@@ -285,9 +285,9 @@ func StructSliceSort(struSlice any, fldIdx []int, ascending bool) error {
 	case vk == reflect.String:
 		sort.Slice(svnp.Interface(), func(i, j int) bool {
 			ival := OnePtrValue(svnp.Index(i))
-			iv := ival.Elem().FieldByIndex(fldIdx).String()
+			iv := ival.Elem().FieldByIndex(fldIndex).String()
 			jval := OnePtrValue(svnp.Index(j))
-			jv := jval.Elem().FieldByIndex(fldIdx).String()
+			jv := jval.Elem().FieldByIndex(fldIndex).String()
 			if ascending {
 				return strings.ToLower(iv) < strings.ToLower(jv)
 			}

@@ -88,8 +88,8 @@ func (ll *Line) Sort() {
 	})
 }
 
-// DeleteIdx deletes at given index
-func (ll *Line) DeleteIdx(idx int) {
+// DeleteIndex deletes at given index
+func (ll *Line) DeleteIndex(idx int) {
 	*ll = append((*ll)[:idx], (*ll)[idx+1:]...)
 }
 
@@ -99,7 +99,7 @@ func (ll *Line) DeleteToken(tok token.Tokens) {
 	for i := nt - 1; i >= 0; i-- { // remove
 		t := (*ll)[i]
 		if t.Tok.Tok == tok {
-			ll.DeleteIdx(i)
+			ll.DeleteIndex(i)
 		}
 	}
 }

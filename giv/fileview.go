@@ -81,7 +81,7 @@ type FileView struct {
 	Files []*fi.FileInfo
 
 	// index of currently-selected file in Files list (-1 if none)
-	SelectedIdx int `set:"-" edit:"-"`
+	SelectedIndex int `set:"-" edit:"-"`
 
 	// change notify for current dir
 	Watcher *fsnotify.Watcher `set:"-" view:"-"`
@@ -225,10 +225,10 @@ func (fv *FileView) SelectedFile() string {
 // SelectedFileInfo returns the currently-selected fileinfo, returns
 // false if none
 func (fv *FileView) SelectedFileInfo() (*fi.FileInfo, bool) {
-	if fv.SelectedIdx < 0 || fv.SelectedIdx >= len(fv.Files) {
+	if fv.SelectedIndex < 0 || fv.SelectedIndex >= len(fv.Files) {
 		return nil, false
 	}
-	return fv.Files[fv.SelectedIdx], true
+	return fv.Files[fv.SelectedIndex], true
 }
 
 // SelectFile selects the current file as the selection.
@@ -240,7 +240,7 @@ func (fv *FileView) SelectFile() bool {
 		if fi.IsDir() {
 			fv.DirPath = filepath.Join(fv.DirPath, fi.Name)
 			fv.SelFile = ""
-			fv.SelectedIdx = -1
+			fv.SelectedIndex = -1
 			fv.UpdateFilesAction()
 			return false
 		}
@@ -575,18 +575,18 @@ func (fv *FileView) UpdateFiles() {
 	fv.ReadFiles()
 
 	fvv := fv.FavsView()
-	fvv.ResetSelectedIdxs()
+	fvv.ResetSelectedIndexs()
 
 	sv := fv.FilesView()
-	sv.ResetSelectedIdxs()
+	sv.ResetSelectedIndexs()
 	sv.SelectedField = "Name"
 	sv.SelVal = fv.SelFile
 	sv.SortSlice()
 	sv.Update()
 
-	fv.SelectedIdx = sv.SelectedIndex
+	fv.SelectedIndex = sv.SelectedIndex
 	if sv.SelectedIndex >= 0 {
-		sv.ScrollToIdx(sv.SelectedIndex)
+		sv.ScrollToIndex(sv.SelectedIndex)
 	}
 
 	if fv.PrevPath != fv.DirPath {
@@ -680,7 +680,7 @@ func (fv *FileView) SetSelFileAction(sel string) {
 			}
 		}
 	}
-	fv.SelectedIdx = sv.SelectedIndex
+	fv.SelectedIndex = sv.SelectedIndex
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile) // make sure
 	fv.Send(events.Select) // receiver needs to get selectedFile
@@ -694,7 +694,7 @@ func (fv *FileView) FileSelectAction(idx int) {
 	}
 	fv.SaveSortPrefs()
 	fi := fv.Files[idx]
-	fv.SelectedIdx = idx
+	fv.SelectedIndex = idx
 	fv.SelFile = fi.Name
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)

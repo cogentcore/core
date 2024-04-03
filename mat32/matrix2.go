@@ -275,13 +275,13 @@ func ParseAngle32(pstr string) (float32, error) {
 // ReadPoints reads a set of floating point values from a SVG format number
 // string -- returns a slice or nil if there was an error
 func ReadPoints(pstr string) []float32 {
-	lastIdx := -1
+	lastIndex := -1
 	var pts []float32
 	lr := ' '
 	for i, r := range pstr {
 		if !unicode.IsNumber(r) && r != '.' && !(r == '-' && lr == 'e') && r != 'e' {
-			if lastIdx != -1 {
-				s := pstr[lastIdx:i]
+			if lastIndex != -1 {
+				s := pstr[lastIndex:i]
 				p, err := ParseFloat32(s)
 				if err != nil {
 					return nil
@@ -289,17 +289,17 @@ func ReadPoints(pstr string) []float32 {
 				pts = append(pts, p)
 			}
 			if r == '-' {
-				lastIdx = i
+				lastIndex = i
 			} else {
-				lastIdx = -1
+				lastIndex = -1
 			}
-		} else if lastIdx == -1 {
-			lastIdx = i
+		} else if lastIndex == -1 {
+			lastIndex = i
 		}
 		lr = r
 	}
-	if lastIdx != -1 && lastIdx != len(pstr) {
-		s := pstr[lastIdx:]
+	if lastIndex != -1 && lastIndex != len(pstr) {
+		s := pstr[lastIndex:]
 		p, err := ParseFloat32(s)
 		if err != nil {
 			return nil

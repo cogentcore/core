@@ -419,14 +419,14 @@ func (sf *Surface) SubmitRender(cmd vk.CommandBuffer) {
 // PresentImage waits on the RenderDone semaphore to present the
 // rendered image to the surface, for the given frame index,
 // as returned by AcquireNextImage.
-func (sf *Surface) PresentImage(frameIdx uint32) error {
+func (sf *Surface) PresentImage(frameIndex uint32) error {
 	ret := vk.QueuePresent(sf.Device.Queue, &vk.PresentInfo{
 		SType:              vk.StructureTypePresentInfo,
 		WaitSemaphoreCount: 1,
 		PWaitSemaphores:    []vk.Semaphore{sf.RenderDone},
 		SwapchainCount:     1,
 		PSwapchains:        []vk.Swapchain{sf.Swapchain},
-		PImageIndices:      []uint32{frameIdx},
+		PImageIndices:      []uint32{frameIndex},
 	})
 
 	switch ret {

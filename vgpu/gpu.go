@@ -270,8 +270,8 @@ func (gp *GPU) Config(name string, opts ...*GPUOpts) error {
 	ret = vk.EnumeratePhysicalDevices(gp.Instance, &gpuCountU, gpus)
 	IfPanic(NewError(ret))
 
-	gpIdx := gp.SelectGPU(gpus, gpuCount)
-	gp.GPU = gpus[gpIdx]
+	gpIndex := gp.SelectGPU(gpus, gpuCount)
+	gp.GPU = gpus[gpIndex]
 
 	vk.GetPhysicalDeviceFeatures(gp.GPU, &gp.GPUFeats)
 	gp.GPUFeats.Deref()
@@ -356,20 +356,20 @@ func (gp *GPU) SelectGPU(gpus []vk.PhysicalDevice, gpuCount int) int {
 	if trgDevNm != "" {
 		idx, err := strconv.Atoi(trgDevNm)
 		if err == nil && idx >= 0 && idx < gpuCount {
-			curIdx := 0
+			curIndex := 0
 			for gi := 0; gi < gpuCount; gi++ {
 				var props vk.PhysicalDeviceProperties
 				vk.GetPhysicalDeviceProperties(gpus[gi], &props)
 				props.Deref()
 				if props.DeviceType == vk.PhysicalDeviceTypeDiscreteGpu {
-					if curIdx == idx {
+					if curIndex == idx {
 						gp.DeviceName = gp.GetDeviceName(&props, gi)
 						if Debug {
 							log.Printf("vgpu: selected device named: %s, specified by index in *_DEVICE_SELECT environment variable, index: %d\n", gp.DeviceName, gi)
 						}
 						return gi
 					} else {
-						curIdx++
+						curIndex++
 					}
 				}
 			}
@@ -395,7 +395,7 @@ func (gp *GPU) SelectGPU(gpus []vk.PhysicalDevice, gpuCount int) int {
 
 	devNm := ""
 	maxSz := 0
-	maxIdx := 0
+	maxIndex := 0
 	for gi := 0; gi < gpuCount; gi++ {
 		// note: we could potentially check for the optional features here
 		// but generally speaking the discrete device is going to be the most
@@ -419,7 +419,7 @@ func (gp *GPU) SelectGPU(gpus []vk.PhysicalDevice, gpuCount int) int {
 				if sz > maxSz {
 					devNm = gp.GetDeviceName(&props, gi)
 					maxSz = sz
-					maxIdx = gi
+					maxIndex = gi
 				}
 				// }
 			}
@@ -431,10 +431,10 @@ func (gp *GPU) SelectGPU(gpus []vk.PhysicalDevice, gpuCount int) int {
 	}
 	gp.DeviceName = devNm
 	if Debug {
-		log.Printf("vgpu: %d selected device named: %s, memory size: %d\n", maxIdx, devNm, maxSz)
+		log.Printf("vgpu: %d selected device named: %s, memory size: %d\n", maxIndex, devNm, maxSz)
 	}
 
-	return maxIdx
+	return maxIndex
 }
 
 // Destroy destroys GPU resources -- call after everything else has been destroyed

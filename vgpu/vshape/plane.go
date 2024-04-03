@@ -47,14 +47,14 @@ func (pl *Plane) Defaults() {
 }
 
 // N returns number of vertex, index points in this shape element
-func (pl *Plane) N() (nVtx, nIdx int) {
-	nVtx, nIdx = PlaneN(int(pl.Segs.X), int(pl.Segs.Y))
+func (pl *Plane) N() (nVtx, nIndex int) {
+	nVtx, nIndex = PlaneN(int(pl.Segs.X), int(pl.Segs.Y))
 	return
 }
 
 // Set sets points in given allocated arrays
 func (pl *Plane) Set(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
-	sz := SetPlaneAxisSize(vtxAry, normAry, texAry, idxAry, pl.VtxOff, pl.IdxOff, pl.NormAxis, pl.NormNeg, pl.Size, pl.Segs, pl.Offset, pl.Pos)
+	sz := SetPlaneAxisSize(vtxAry, normAry, texAry, idxAry, pl.VtxOff, pl.IndexOff, pl.NormAxis, pl.NormNeg, pl.Size, pl.Segs, pl.Offset, pl.Pos)
 	mn := pl.Pos.Sub(sz)
 	mx := pl.Pos.Add(sz)
 	pl.CBBox.Set(&mn, &mx)
@@ -65,18 +65,18 @@ func (pl *Plane) Set(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU
 // Note: In *vertex* units, not float units (i.e., x3 to get
 // actual float offset in Vtx array).
 // nVtx = (wsegs + 1) * (hsegs + 1)
-// nIdx = wsegs * hsegs * 6
-func PlaneN(wsegs, hsegs int) (nVtx, nIdx int) {
+// nIndex = wsegs * hsegs * 6
+func PlaneN(wsegs, hsegs int) (nVtx, nIndex int) {
 	wsegs = max(wsegs, 1)
 	hsegs = max(hsegs, 1)
 	nVtx = (wsegs + 1) * (hsegs + 1)
-	nIdx = wsegs * hsegs * 6
+	nIndex = wsegs * hsegs * 6
 	return
 }
 
 // SetPlaneAxisSize sets plane vertex, norm, tex, index data at
 // given starting *vertex* index (i.e., multiply this *3 to get
-// actual float offset in Vtx array), and starting Idx index.
+// actual float offset in Vtx array), and starting Index index.
 // using Norm Axis, offset, and size params.
 // wsegs, hsegs = number of segments to create in each dimension --
 // more finely subdividing a plane allows for higher-quality lighting
@@ -121,7 +121,7 @@ func SetPlaneAxisSize(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.Array
 }
 
 // SetPlane sets plane vertex, norm, tex, index data at given starting *vertex* index
-// (i.e., multiply this *3 to get actual float offset in Vtx array), and starting Idx index.
+// (i.e., multiply this *3 to get actual float offset in Vtx array), and starting Index index.
 // waxis, haxis = width, height axis, wdir, hdir are the directions for width
 // and height dimensions.
 // wsegs, hsegs = number of segments to create in each dimension --

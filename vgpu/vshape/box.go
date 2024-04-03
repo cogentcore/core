@@ -30,14 +30,14 @@ func (bx *Box) Defaults() {
 	bx.Segs.Set(1, 1, 1)
 }
 
-func (bx *Box) N() (nVtx, nIdx int) {
-	nVtx, nIdx = BoxN(bx.Segs)
+func (bx *Box) N() (nVtx, nIndex int) {
+	nVtx, nIndex = BoxN(bx.Segs)
 	return
 }
 
 // SetBox sets points in given allocated arrays
 func (bx *Box) Set(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
-	hSz := SetBox(vtxAry, normAry, texAry, idxAry, bx.VtxOff, bx.IdxOff, bx.Size, bx.Segs, bx.Pos)
+	hSz := SetBox(vtxAry, normAry, texAry, idxAry, bx.VtxOff, bx.IndexOff, bx.Size, bx.Segs, bx.Pos)
 
 	mn := bx.Pos.Sub(hSz)
 	mx := bx.Pos.Add(hSz)
@@ -48,22 +48,22 @@ func (bx *Box) Set(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32
 // vertex and index data with given number of segments.
 // Note: In *vertex* units, not float units (i.e., x3 to get
 // actual float offset in Vtx array).
-func BoxN(segs mat32.Vec3i) (nVtx, nIdx int) {
+func BoxN(segs mat32.Vec3i) (nVtx, nIndex int) {
 	nv, ni := PlaneN(int(segs.X), int(segs.Y))
 	nVtx += 2 * nv
-	nIdx += 2 * ni
+	nIndex += 2 * ni
 	nv, ni = PlaneN(int(segs.X), int(segs.Z))
 	nVtx += 2 * nv
-	nIdx += 2 * ni
+	nIndex += 2 * ni
 	nv, ni = PlaneN(int(segs.Z), int(segs.Y))
 	nVtx += 2 * nv
-	nIdx += 2 * ni
+	nIndex += 2 * ni
 	return
 }
 
 // SetBox sets box vertex, norm, tex, index data at
 // given starting *vertex* index (i.e., multiply this *3 to get
-// actual float offset in Vtx array), and starting Idx index.
+// actual float offset in Vtx array), and starting Index index.
 // for given 3D size, and given number of segments per side.
 // finely subdividing a plane allows for higher-quality lighting
 // and texture rendering (minimum of 1 will be enforced).
@@ -71,7 +71,7 @@ func BoxN(segs mat32.Vec3i) (nVtx, nIdx int) {
 func SetBox(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtxOff, idxOff int, size mat32.Vec3, segs mat32.Vec3i, pos mat32.Vec3) mat32.Vec3 {
 	hSz := size.DivScalar(2)
 
-	nVtx, nIdx := PlaneN(int(segs.X), int(segs.Y))
+	nVtx, nIndex := PlaneN(int(segs.X), int(segs.Y))
 
 	voff := vtxOff
 	ioff := idxOff
@@ -79,19 +79,19 @@ func SetBox(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtxOf
 	// start with neg z as typically back
 	SetPlane(vtxAry, normAry, texAry, idxAry, voff, ioff, mat32.X, mat32.Y, -1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -hSz.Z, int(segs.X), int(segs.Y), pos) // nz
 	voff += nVtx
-	ioff += nIdx
+	ioff += nIndex
 	SetPlane(vtxAry, normAry, texAry, idxAry, voff, ioff, mat32.X, mat32.Z, 1, -1, size.X, size.Z, -hSz.X, -hSz.Z, -hSz.Y, int(segs.X), int(segs.Z), pos) // ny
 	voff += nVtx
-	ioff += nIdx
+	ioff += nIndex
 	SetPlane(vtxAry, normAry, texAry, idxAry, voff, ioff, mat32.Z, mat32.Y, -1, -1, size.Z, size.Y, -hSz.Z, -hSz.Y, hSz.X, int(segs.Z), int(segs.Y), pos) // px
 	voff += nVtx
-	ioff += nIdx
+	ioff += nIndex
 	SetPlane(vtxAry, normAry, texAry, idxAry, voff, ioff, mat32.Z, mat32.Y, 1, -1, size.Z, size.Y, -hSz.Z, -hSz.Y, -hSz.X, int(segs.Z), int(segs.Y), pos) // nx
 	voff += nVtx
-	ioff += nIdx
+	ioff += nIndex
 	SetPlane(vtxAry, normAry, texAry, idxAry, voff, ioff, mat32.X, mat32.Z, 1, 1, size.X, size.Z, -hSz.X, -hSz.Z, hSz.Y, int(segs.X), int(segs.Z), pos) // py
 	voff += nVtx
-	ioff += nIdx
+	ioff += nIndex
 	SetPlane(vtxAry, normAry, texAry, idxAry, voff, ioff, mat32.X, mat32.Y, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, hSz.Z, int(segs.X), int(segs.Y), pos) // pz
 	return hSz
 }

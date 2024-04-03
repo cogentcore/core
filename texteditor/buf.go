@@ -2116,7 +2116,7 @@ func (tb *Buf) RemoveTag(pos lex.Pos, tag token.Tokens) (reg lex.Lex, ok bool) {
 			if tag > 0 && t.Tok.Tok != tag {
 				continue
 			}
-			tb.Tags[pos.Ln].DeleteIdx(i)
+			tb.Tags[pos.Ln].DeleteIndex(i)
 			reg = t
 			ok = true
 			break

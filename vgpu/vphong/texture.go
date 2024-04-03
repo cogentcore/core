@@ -47,7 +47,7 @@ func (ph *Phong) configDummyTexture() {
 	txset := vars.SetMap[int(TexSet)]
 	txset.ConfigVals(1)
 	dimg := image.NewRGBA(image.Rectangle{Max: image.Point{2, 2}})
-	_, img, _ := txset.ValByIdxTry("Tex", 0)
+	_, img, _ := txset.ValByIndexTry("Tex", 0)
 	img.Texture.ConfigGoImage(dimg.Bounds().Size(), 0)
 }
 
@@ -65,7 +65,7 @@ func (ph *Phong) ConfigTextures() {
 	txset := vars.SetMap[int(TexSet)]
 	txset.ConfigVals(ntx)
 	for i, kv := range ph.Textures.Order {
-		_, img, err := txset.ValByIdxTry("Tex", i)
+		_, img, err := txset.ValByIndexTry("Tex", i)
 		if err != nil {
 			slog.Error("vgpu.Phong ConfigTextures: txset Image is nil", "Image", i)
 			continue
@@ -108,13 +108,13 @@ func (ph *Phong) UseNoTexture() {
 	ph.Cur.UseTexture = false
 }
 
-// UseTextureIdx selects texture by index for current render step
-func (ph *Phong) UseTextureIdx(idx int) error {
-	ph.Cur.TexIdx = idx // todo: range check
+// UseTextureIndex selects texture by index for current render step
+func (ph *Phong) UseTextureIndex(idx int) error {
+	ph.Cur.TexIndex = idx // todo: range check
 	ph.Cur.UseTexture = true
 	// sy := &ph.Sys
 	// cmd := sy.CmdPool.Buff
-	// sy.CmdBindTextureVarIdx(cmd, int(TexSet), "Tex", ph.Cur.TexIdx)
+	// sy.CmdBindTextureVarIndex(cmd, int(TexSet), "Tex", ph.Cur.TexIndex)
 	return nil
 }
 
@@ -127,13 +127,13 @@ func (ph *Phong) UseTextureName(name string) error {
 			log.Println(err)
 		}
 	}
-	return ph.UseTextureIdx(idx)
+	return ph.UseTextureIndex(idx)
 }
 
-// UpdateTextureIdx updates texture by index -- call this when
+// UpdateTextureIndex updates texture by index -- call this when
 // the underlying image changes.  Assumes the size remains the same.
 // Must Sync for the changes to take effect.
-func (ph *Phong) UpdateTextureIdx(idx int) error {
+func (ph *Phong) UpdateTextureIndex(idx int) error {
 	ph.UpdtMu.Lock()
 	defer ph.UpdtMu.Unlock()
 	if idx >= ph.Textures.Len() {
@@ -156,7 +156,7 @@ func (ph *Phong) UpdateTextureName(name string) error {
 			log.Println(err)
 		}
 	}
-	return ph.UpdateTextureIdx(idx)
+	return ph.UpdateTextureIndex(idx)
 }
 
 // UseTexturePars sets the texture parameters for the next render command:
@@ -193,9 +193,9 @@ func (ph *Phong) RenderTexture() {
 	pl := sy.PipelineMap["texture"]
 
 	vars := ph.Sys.Vars()
-	idxs := vars.TexGpSzIdxs(int(TexSet), "Tex", ph.Cur.TexIdx)
+	idxs := vars.TexGpSzIndexs(int(TexSet), "Tex", ph.Cur.TexIndex)
 
-	txIdx, _, _, err := sy.CmdBindTextureVarIdx(cmd, int(TexSet), "Tex", idxs.GpIdx)
+	txIndex, _, _, err := sy.CmdBindTextureVarIndex(cmd, int(TexSet), "Tex", idxs.GpIndex)
 	if err != nil {
 		return
 	}
@@ -203,8 +203,8 @@ func (ph *Phong) RenderTexture() {
 	push.Tex = ph.Cur.TexPars
 	push.ModelMtx[15] = idxs.PctSize.X // packing bits..
 	push.Color.Emissive.W = idxs.PctSize.Y
-	txIdxP := txIdx*1024 + idxs.ItemIdx // packing index and layer into one
-	push.Color.ShinyBright.W = float32(txIdxP)
+	txIndexP := txIndex*1024 + idxs.ItemIndex // packing index and layer into one
+	push.Color.ShinyBright.W = float32(txIndexP)
 	ph.Push(pl, push)
-	pl.BindDrawVertex(cmd, ph.Cur.DescIdx)
+	pl.BindDrawVertex(cmd, ph.Cur.DescIndex)
 }

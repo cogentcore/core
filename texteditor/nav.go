@@ -112,7 +112,7 @@ func (ed *Editor) SavePosHistory(pos lex.Pos) {
 		return
 	}
 	ed.Buf.SavePosHistory(pos)
-	ed.PosHistIdx = len(ed.Buf.PosHistory) - 1
+	ed.PosHistIndex = len(ed.Buf.PosHistory) - 1
 }
 
 // CursorToHistPrev moves cursor to previous position on history list --
@@ -126,13 +126,13 @@ func (ed *Editor) CursorToHistPrev() bool {
 	if sz == 0 {
 		return false
 	}
-	ed.PosHistIdx--
-	if ed.PosHistIdx < 0 {
-		ed.PosHistIdx = 0
+	ed.PosHistIndex--
+	if ed.PosHistIndex < 0 {
+		ed.PosHistIndex = 0
 		return false
 	}
-	ed.PosHistIdx = min(sz-1, ed.PosHistIdx)
-	pos := ed.Buf.PosHistory[ed.PosHistIdx]
+	ed.PosHistIndex = min(sz-1, ed.PosHistIndex)
+	pos := ed.Buf.PosHistory[ed.PosHistIndex]
 	ed.CursorPos = ed.Buf.ValidPos(pos)
 	ed.CursorMovedSig()
 	ed.ScrollCursorToCenterIfHidden()
@@ -151,12 +151,12 @@ func (ed *Editor) CursorToHistNext() bool {
 	if sz == 0 {
 		return false
 	}
-	ed.PosHistIdx++
-	if ed.PosHistIdx >= sz-1 {
-		ed.PosHistIdx = sz - 1
+	ed.PosHistIndex++
+	if ed.PosHistIndex >= sz-1 {
+		ed.PosHistIndex = sz - 1
 		return false
 	}
-	pos := ed.Buf.PosHistory[ed.PosHistIdx]
+	pos := ed.Buf.PosHistory[ed.PosHistIndex]
 	ed.CursorPos = ed.Buf.ValidPos(pos)
 	ed.CursorMovedSig()
 	ed.ScrollCursorToCenterIfHidden()
@@ -274,7 +274,7 @@ func (ed *Editor) CursorDown(steps int) {
 				} else {
 					ri = mxlen
 				}
-				nwc, _ := ed.Renders[pos.Ln].SpanPosToRuneIdx(si, ri)
+				nwc, _ := ed.Renders[pos.Ln].SpanPosToRuneIndex(si, ri)
 				pos.Ch = nwc
 				gotwrap = true
 
@@ -405,11 +405,11 @@ func (ed *Editor) CursorUp(steps int) {
 			si, ri, _ := ed.WrappedLineNo(pos)
 			if si > 0 {
 				ri = ed.CursorCol
-				nwc, _ := ed.Renders[pos.Ln].SpanPosToRuneIdx(si-1, ri)
+				nwc, _ := ed.Renders[pos.Ln].SpanPosToRuneIndex(si-1, ri)
 				if nwc == pos.Ch {
 					ed.CursorCol = 0
 					ri = 0
-					nwc, _ = ed.Renders[pos.Ln].SpanPosToRuneIdx(si-1, ri)
+					nwc, _ = ed.Renders[pos.Ln].SpanPosToRuneIndex(si-1, ri)
 				}
 				pos.Ch = nwc
 				gotwrap = true
@@ -424,7 +424,7 @@ func (ed *Editor) CursorUp(steps int) {
 			if wln := ed.WrappedLines(pos.Ln); wln > 1 { // just entered end of wrapped line
 				si := wln - 1
 				ri := ed.CursorCol
-				nwc, _ := ed.Renders[pos.Ln].SpanPosToRuneIdx(si, ri)
+				nwc, _ := ed.Renders[pos.Ln].SpanPosToRuneIndex(si, ri)
 				pos.Ch = nwc
 			} else {
 				mxlen := min(ed.Buf.LineLen(pos.Ln), ed.CursorCol)
@@ -490,7 +490,7 @@ func (ed *Editor) CursorStartLine() {
 		si, ri, _ := ed.WrappedLineNo(pos)
 		if si > 0 {
 			ri = 0
-			nwc, _ := ed.Renders[pos.Ln].SpanPosToRuneIdx(si, ri)
+			nwc, _ := ed.Renders[pos.Ln].SpanPosToRuneIndex(si, ri)
 			pos.Ch = nwc
 			ed.CursorPos = pos
 			ed.CursorCol = ri
@@ -534,7 +534,7 @@ func (ed *Editor) CursorEndLine() {
 	if wln := ed.WrappedLines(pos.Ln); wln > 1 {
 		si, ri, _ := ed.WrappedLineNo(pos)
 		ri = len(ed.Renders[pos.Ln].Spans[si].Text) - 1
-		nwc, _ := ed.Renders[pos.Ln].SpanPosToRuneIdx(si, ri)
+		nwc, _ := ed.Renders[pos.Ln].SpanPosToRuneIndex(si, ri)
 		if si == len(ed.Renders[pos.Ln].Spans)-1 { // last span
 			ri++
 			nwc++
@@ -740,9 +740,9 @@ func (ed *Editor) FindNextLink(pos lex.Pos) (lex.Pos, textbuf.Region, bool) {
 		si, ri, _ := rend.RuneSpanPos(pos.Ch)
 		for ti := range rend.Links {
 			tl := &rend.Links[ti]
-			if tl.StartSpan >= si && tl.StartIdx >= ri {
-				st, _ := rend.SpanPosToRuneIdx(tl.StartSpan, tl.StartIdx)
-				ed, _ := rend.SpanPosToRuneIdx(tl.EndSpan, tl.EndIdx)
+			if tl.StartSpan >= si && tl.StartIndex >= ri {
+				st, _ := rend.SpanPosToRuneIndex(tl.StartSpan, tl.StartIndex)
+				ed, _ := rend.SpanPosToRuneIndex(tl.EndSpan, tl.EndIndex)
 				reg := textbuf.NewRegion(ln, st, ln, ed)
 				pos.Ch = st + 1 // get into it so next one will go after..
 				return pos, reg, true
@@ -771,9 +771,9 @@ func (ed *Editor) FindPrevLink(pos lex.Pos) (lex.Pos, textbuf.Region, bool) {
 		nl := len(rend.Links)
 		for ti := nl - 1; ti >= 0; ti-- {
 			tl := &rend.Links[ti]
-			if tl.StartSpan <= si && tl.StartIdx < ri {
-				st, _ := rend.SpanPosToRuneIdx(tl.StartSpan, tl.StartIdx)
-				ed, _ := rend.SpanPosToRuneIdx(tl.EndSpan, tl.EndIdx)
+			if tl.StartSpan <= si && tl.StartIndex < ri {
+				st, _ := rend.SpanPosToRuneIndex(tl.StartSpan, tl.StartIndex)
+				ed, _ := rend.SpanPosToRuneIndex(tl.EndSpan, tl.EndIndex)
 				reg := textbuf.NewRegion(ln, st, ln, ed)
 				pos.Ln = ln
 				pos.Ch = st + 1

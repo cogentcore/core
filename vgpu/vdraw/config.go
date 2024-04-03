@@ -28,7 +28,7 @@ type Mtxs struct {
 type DrawerImpl struct {
 
 	// surface index for current render process
-	SurfIdx uint32
+	SurfIndex uint32
 
 	// maximum number of images per pass -- set by user at config
 	MaxTextures int
@@ -88,10 +88,10 @@ func (dw *Drawer) ConfigSys() {
 	txset := vars.AddSet() // 0
 
 	nPts := 4
-	nIdxs := 6
+	nIndexs := 6
 
 	posv := vset.Add("Pos", vgpu.Float32Vec2, nPts, vgpu.Vertex, vgpu.VertexShader)
-	idxv := vset.Add("Index", vgpu.Uint16, nIdxs, vgpu.Index, vgpu.VertexShader)
+	idxv := vset.Add("Index", vgpu.Uint16, nIndexs, vgpu.Index, vgpu.VertexShader)
 
 	pcset.AddStruct("Mtxs", vgpu.Float32Mat4.Bytes()*2, 1, vgpu.Push, vgpu.VertexShader, vgpu.FragmentShader)
 	// note: packing texidx into mvp[0][3] to fit within 128 byte limit
@@ -106,7 +106,7 @@ func (dw *Drawer) ConfigSys() {
 	sy.Config()
 
 	// note: first val in set is offset
-	rectPos, _ := posv.Vals.ValByIdxTry(0)
+	rectPos, _ := posv.Vals.ValByIndexTry(0)
 	rectPosA := rectPos.Floats32()
 	rectPosA.Set(0,
 		0.0, 0.0,
@@ -115,14 +115,14 @@ func (dw *Drawer) ConfigSys() {
 		1.0, 1.0)
 	rectPos.SetMod()
 
-	rectIdx, _ := idxv.Vals.ValByIdxTry(0)
+	rectIndex, _ := idxv.Vals.ValByIndexTry(0)
 	idxs := []uint16{0, 1, 2, 2, 1, 3} // triangle strip order
-	rectIdx.CopyFromBytes(unsafe.Pointer(&idxs[0]))
+	rectIndex.CopyFromBytes(unsafe.Pointer(&idxs[0]))
 
 	sy.Mem.SyncToGPU()
 
-	vars.BindVertexValIdx("Pos", 0)
-	vars.BindVertexValIdx("Index", 0)
+	vars.BindVertexValIndex("Pos", 0)
+	vars.BindVertexValIndex("Index", 0)
 }
 
 // ConfigMtxs configures the draw matrix for given draw parameters:

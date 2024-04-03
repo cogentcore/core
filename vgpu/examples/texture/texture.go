@@ -101,17 +101,17 @@ func main() {
 	txset := vars.AddSet()
 
 	nPts := 4
-	nIdxs := 6
+	nIndexs := 6
 
 	posv := vset.Add("Pos", vgpu.Float32Vec3, nPts, vgpu.Vertex, vgpu.VertexShader)
 	clrv := vset.Add("Color", vgpu.Float32Vec3, nPts, vgpu.Vertex, vgpu.VertexShader)
 	txcv := vset.Add("TexCoord", vgpu.Float32Vec2, nPts, vgpu.Vertex, vgpu.VertexShader)
 	// note: always put indexes last so there isn't a gap in the location indexes!
-	idxv := vset.Add("Index", vgpu.Uint16, nIdxs, vgpu.Index, vgpu.VertexShader)
+	idxv := vset.Add("Index", vgpu.Uint16, nIndexs, vgpu.Index, vgpu.VertexShader)
 
 	camv := uset.AddStruct("Camera", vgpu.Float32Mat4.Bytes()*3, 1, vgpu.Uniform, vgpu.VertexShader)
 
-	txidxv := pcset.Add("TexIdx", vgpu.Int32, 1, vgpu.Push, vgpu.FragmentShader)
+	txidxv := pcset.Add("TexIndex", vgpu.Int32, 1, vgpu.Push, vgpu.FragmentShader)
 	tximgv := txset.Add("TexSampler", vgpu.ImageRGBA32, 1, vgpu.TextureRole, vgpu.FragmentShader)
 
 	vset.ConfigVals(1) // val per var
@@ -123,7 +123,7 @@ func main() {
 	for i, fnm := range imgFiles {
 		pnm := filepath.Join("../images", fnm)
 		imgs[i] = OpenImage(pnm)
-		img, _ := tximgv.Vals.ValByIdxTry(i)
+		img, _ := tximgv.Vals.ValByIndexTry(i)
 		img.Texture.ConfigGoImage(imgs[i].Bounds().Size(), 0)
 		// img.Texture.Sampler.Border = vgpu.BorderBlack
 		// img.Texture.Sampler.UMode = vgpu.ClampToBorder
@@ -133,7 +133,7 @@ func main() {
 	sy.Config() // allocates everything etc
 
 	// note: first val in set is offset
-	rectPos, _ := posv.Vals.ValByIdxTry(0)
+	rectPos, _ := posv.Vals.ValByIndexTry(0)
 	rectPosA := rectPos.Floats32()
 	rectPosA.Set(0,
 		-0.5, -0.5, 0.0,
@@ -142,7 +142,7 @@ func main() {
 		-0.5, 0.5, 0.0)
 	rectPos.SetMod()
 
-	rectClr, _ := clrv.Vals.ValByIdxTry(0)
+	rectClr, _ := clrv.Vals.ValByIndexTry(0)
 	rectClrA := rectClr.Floats32()
 	rectClrA.Set(0,
 		1.0, 0.0, 0.0,
@@ -151,7 +151,7 @@ func main() {
 		1.0, 1.0, 0.0)
 	rectClr.SetMod()
 
-	rectTex, _ := txcv.Vals.ValByIdxTry(0)
+	rectTex, _ := txcv.Vals.ValByIndexTry(0)
 	rectTexA := rectTex.Floats32()
 	rectTexA.Set(0,
 		1.0, 0.0,
@@ -160,17 +160,17 @@ func main() {
 		1.0, 1.0)
 	rectTex.SetMod()
 
-	rectIdx, _ := idxv.Vals.ValByIdxTry(0)
+	rectIndex, _ := idxv.Vals.ValByIndexTry(0)
 	idxs := []uint16{0, 1, 2, 0, 2, 3}
-	rectIdx.CopyFromBytes(unsafe.Pointer(&idxs[0]))
+	rectIndex.CopyFromBytes(unsafe.Pointer(&idxs[0]))
 
 	for i, gimg := range imgs {
-		img, _ := tximgv.Vals.ValByIdxTry(i)
+		img, _ := tximgv.Vals.ValByIndexTry(i)
 		img.SetGoImage(gimg, 0, vgpu.FlipY)
 	}
 
 	// This is the standard camera view projection computation
-	cam, _ := camv.Vals.ValByIdxTry(0)
+	cam, _ := camv.Vals.ValByIndexTry(0)
 	campos := mat32.V3(0, 0, 2)
 	target := mat32.V3(0, 0, 0)
 	var lookq mat32.Quat
@@ -210,7 +210,7 @@ func main() {
 		cam.CopyFromBytes(unsafe.Pointer(&camo)) // sets mod
 		sy.Mem.SyncToGPU()
 
-		imgIdx := int32(frameCount % len(imgs))
+		imgIndex := int32(frameCount % len(imgs))
 
 		idx, ok := sf.AcquireNextImage()
 		if !ok {
@@ -218,11 +218,11 @@ func main() {
 		}
 
 		cmd := sy.CmdPool.Buff
-		descIdx := 0 // if running multiple frames in parallel, need diff sets
+		descIndex := 0 // if running multiple frames in parallel, need diff sets
 
-		sy.ResetBeginRenderPass(cmd, sf.Frames[idx], descIdx)
-		pl.Push(cmd, txidxv, unsafe.Pointer(&imgIdx))
-		pl.BindDrawVertex(cmd, descIdx)
+		sy.ResetBeginRenderPass(cmd, sf.Frames[idx], descIndex)
+		pl.Push(cmd, txidxv, unsafe.Pointer(&imgIndex))
+		pl.BindDrawVertex(cmd, descIndex)
 		sy.EndRenderPass(cmd)
 
 		sf.SubmitRender(cmd) // this is where it waits for the 16 msec
