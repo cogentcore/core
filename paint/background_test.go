@@ -23,7 +23,7 @@ func TestBackgroundColor(t *testing.T) {
 		st.ToDots()
 
 		sz := st.BoxSpace().Size().Add(mat32.V2(200, 100))
-		pc.DrawStdBox(st, mat32.V2(50, 100), sz, pabg)
+		pc.DrawStandardBox(st, mat32.V2(50, 100), sz, pabg)
 	})
 }
 
@@ -41,7 +41,7 @@ func TestBackgroundImage(t *testing.T) {
 
 		test := func(of styles.ObjectFits, pos mat32.Vec2) {
 			st.ObjectFit = of
-			pc.DrawStdBox(st, pos, sz, pabg)
+			pc.DrawStandardBox(st, pos, sz, pabg)
 		}
 
 		test(styles.FitFill, mat32.V2(0, 0))

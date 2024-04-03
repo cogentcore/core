@@ -82,7 +82,7 @@ func RunShadowBlur(t *testing.T, imgName string, shadow styles.Shadow) {
 
 		spc := st.BoxSpace().Size()
 		sz := spc.Add(mat32.V2(200, 100))
-		pc.DrawStdBox(st, mat32.V2(50, 100), sz, colors.C(colors.White))
+		pc.DrawStandardBox(st, mat32.V2(50, 100), sz, colors.C(colors.White))
 	})
 }
 

@@ -516,7 +516,7 @@ func (sr *Slider) Render() {
 	pabg := sr.ParentActualBackground()
 
 	if sr.Type == SliderScrollbar {
-		pc.DrawStdBox(st, pos, sz, pabg) // track
+		pc.DrawStandardBox(st, pos, sz, pabg) // track
 		if sr.ValueColor != nil {
 			thsz := sr.SlideThumbSize()
 			osz := sr.ThumbSizeDots().Dim(od)
@@ -540,7 +540,7 @@ func (sr *Slider) Render() {
 		st.StateLayer = 0
 		st.ComputeActualBackground(pabg)
 		// surrounding box (needed to prevent it from rendering over itself)
-		sr.RenderStdBox(st)
+		sr.RenderStandardBox()
 		st.Background = prevbg
 		st.StateLayer = prevsl
 		st.ComputeActualBackground(pabg)

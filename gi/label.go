@@ -390,6 +390,6 @@ func (lb *Label) SizeDown(iter int) bool {
 }
 
 func (lb *Label) Render() {
-	lb.RenderStdBox(&lb.Styles)
+	lb.RenderStandardBox()
 	lb.TextRender.Render(&lb.Scene.PaintContext, lb.Geom.Pos.Content)
 }

@@ -1992,7 +1992,7 @@ func (tf *TextField) Render() {
 	fs := st.FontRender()
 	txs := &st.Text
 	st.Font = paint.OpenFont(fs, &st.UnitContext)
-	tf.RenderStdBox(st)
+	tf.RenderStandardBox()
 	if tf.StartPos < 0 || tf.EndPos > len(tf.EditTxt) {
 		return
 	}

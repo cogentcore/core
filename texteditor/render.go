@@ -156,8 +156,8 @@ var ViewDepthColors = []color.RGBA{
 	{5, 0, 5, 0},
 }
 
-// RenderDepthBg renders the depth background color.
-func (ed *Editor) RenderDepthBg(stln, edln int) {
+// RenderDepthBackground renders the depth background color.
+func (ed *Editor) RenderDepthBackground(stln, edln int) {
 	if ed.Buf == nil {
 		return
 	}
@@ -357,7 +357,7 @@ func (ed *Editor) RenderAllLines() {
 		}
 	}
 
-	ed.RenderDepthBg(stln, edln)
+	ed.RenderDepthBackground(stln, edln)
 	ed.RenderHighlights(stln, edln)
 	ed.RenderScopelights(stln, edln)
 	ed.RenderSelect()

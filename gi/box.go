@@ -10,5 +10,5 @@ type Box struct {
 }
 
 func (bx *Box) Render() {
-	bx.RenderStdBox(&bx.Styles)
+	bx.RenderStandardBox()
 }

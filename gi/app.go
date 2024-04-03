@@ -92,29 +92,29 @@ func Quit() {
 //////////////////////////////////////////////////////////////////////////////
 //		AppBar
 
-// StdAppBarConfig is the standard impl for a [App.AppBarConfig].
+// StandardAppBarConfig is the standard impl for a [App.AppBarConfig].
 // It adds a Back navigation buttons and the AppChooser,
 // followed by the [Widget.ConfigToolbar] for the current FullWindow
 // Scene being viewed, along with [StdOverflowMenu] items.
 // and calls AddDefaultOverflowMenu to provide default menu items,
 // which will appear below any other OverflowMenu items added.
-func StdAppBarConfig(pw Widget) {
+func StandardAppBarConfig(pw Widget) {
 	tb := RecycleToolbar(pw)
-	StdAppBarStart(tb) // adds back nav and AppChooser
+	StandardAppBarStart(tb) // adds back nav and AppChooser
 	StdOverflowMenu(tb)
 	CurrentWindowAppBar(tb)
 	// apps should add their own app-general functions here
 }
 
-// StdAppBarStart adds standard items to start of an AppBar:
-// [StdAppBarBack] and [StdAppBarChooser]
-func StdAppBarStart(tb *Toolbar) {
-	StdAppBarBack(tb)
-	StdAppBarChooser(tb)
+// StandardAppBarStart adds standard items to start of an AppBar:
+// [StandardAppBarBack] and [StandardAppBarChooser]
+func StandardAppBarStart(tb *Toolbar) {
+	StandardAppBarBack(tb)
+	StandardAppBarChooser(tb)
 }
 
-// StdAppBarBack adds a back button
-func StdAppBarBack(tb *Toolbar) *Button {
+// StandardAppBarBack adds a back button
+func StandardAppBarBack(tb *Toolbar) *Button {
 	bt := NewButton(tb, "back").SetIcon(icons.ArrowBack).SetTooltip("Back").SetKey(keyfun.HistPrev)
 	// bt.StyleFirst(func(s *styles.Style) {
 	// 	if tb.Scene.Stage.MainMgr == nil {
@@ -141,8 +141,8 @@ func StdAppBarBack(tb *Toolbar) *Button {
 	return bt
 }
 
-// StdAppBarChooser adds an AppChooser
-func StdAppBarChooser(tb *Toolbar) *Chooser {
+// StandardAppBarChooser adds an AppChooser
+func StandardAppBarChooser(tb *Toolbar) *Chooser {
 	return ConfigAppChooser(NewChooser(tb, "app-chooser"), tb)
 }
 

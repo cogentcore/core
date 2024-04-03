@@ -37,7 +37,7 @@ func (fr *Frame) SetStyles() {
 }
 
 func (fr *Frame) Render() {
-	fr.RenderStdBox(&fr.Styles)
+	fr.RenderStandardBox()
 }
 
 func (fr *Frame) RenderWidget() {

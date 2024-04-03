@@ -12,10 +12,10 @@ import (
 	"cogentcore.org/core/styles"
 )
 
-// DrawStdBox draws the CSS "standard box" model using the given styling information,
+// DrawStandardBox draws the CSS "standard box" model using the given styling information,
 // position, size, and parent actual background. This is used for rendering
 // widgets such as buttons, textfields, etc in a GUI.
-func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, pabg image.Image) {
+func (pc *Context) DrawStandardBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, pabg image.Image) {
 	tm := st.TotalMargin().Round()
 	mpos := pos.Add(tm.Pos())
 	msz := sz.Sub(tm.Size())
@@ -76,7 +76,6 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 	}
 
 	// then draw the box over top of that.
-	// need to set clipping to box first.. (?)
 	// we need to draw things twice here because we need to clear
 	// the whole area with the background color first so the border
 	// doesn't render weirdly

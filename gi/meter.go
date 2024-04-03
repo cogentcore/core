@@ -120,7 +120,7 @@ func (m *Meter) Render() {
 	prop := (m.Value - m.Min) / (m.Max - m.Min)
 
 	if m.Type == MeterLinear {
-		m.RenderStdBox(st)
+		m.RenderStandardBox()
 		if m.ValueColor != nil {
 			dim := m.Styles.Direction.Dim()
 			size := m.Geom.Size.Actual.Content.MulDim(dim, prop)

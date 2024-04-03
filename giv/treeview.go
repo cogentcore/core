@@ -647,7 +647,7 @@ func (tv *TreeView) Render() {
 	}
 	tv.Styles.ComputeActualBackground(pabg)
 
-	pc.DrawStdBox(st, tv.Geom.Pos.Total, tv.Geom.Size.Actual.Total, pabg)
+	pc.DrawStandardBox(st, tv.Geom.Pos.Total, tv.Geom.Size.Actual.Total, pabg)
 
 	// after we are done rendering, we clear the values so they aren't inherited
 	st.StateLayer = 0

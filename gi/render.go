@@ -534,12 +534,11 @@ func (wb *WidgetBase) RenderBoxImpl(pos mat32.Vec2, sz mat32.Vec2, bs styles.Bor
 	wb.Scene.PaintContext.DrawBorder(pos.X, pos.Y, sz.X, sz.Y, bs)
 }
 
-// RenderStdBox draws standard box using given style.
-// paint.State and Style must already be locked at this point (RenderLock)
-func (wb *WidgetBase) RenderStdBox(st *styles.Style) {
+// RenderStandardBox renders the standard box model.
+func (wb *WidgetBase) RenderStandardBox() {
 	pos := wb.Geom.Pos.Total
 	sz := wb.Geom.Size.Actual.Total
-	wb.Scene.PaintContext.DrawStdBox(st, pos, sz, wb.ParentActualBackground())
+	wb.Scene.PaintContext.DrawStandardBox(&wb.Styles, pos, sz, wb.ParentActualBackground())
 }
 
 //////////////////////////////////////////////////////////////////
