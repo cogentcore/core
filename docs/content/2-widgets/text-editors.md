@@ -19,5 +19,5 @@ texteditor.NewSoloEditor(parent).SetPlaceholder("Enter text here")
 You can set the starting text of a text editor:
 
 ```Go
-texteditor.NewSoloEditor(parent).SetText("Hello, world!")
+texteditor.NewSoloEditor(parent).SetTextString("Hello, world!")
 ```

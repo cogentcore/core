@@ -62,8 +62,8 @@ var (
 type Editor struct { //core:embedder
 	gi.Layout
 
-	// the text buffer that we're editing
-	Buf *Buf `set:"-" json:"-" xml:"-"`
+	// Buf is the text buffer being edited.
+	*Buf `set:"-" json:"-" xml:"-"`
 
 	// text that is displayed when the field is empty, in a lower-contrast manner
 	Placeholder string `json:"-" xml:"placeholder"`
@@ -265,13 +265,6 @@ const (
 func (ed *Editor) Destroy() {
 	ed.StopCursor()
 	ed.Layout.Destroy()
-}
-
-// SetText is a helper function that sets the current text of the
-// underlying buffer from a string.
-func (ed *Editor) SetText(txt string) *Editor {
-	ed.Buf.SetText([]byte(txt))
-	return ed
 }
 
 // EditDone completes editing and copies the active edited text to the text --

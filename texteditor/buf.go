@@ -141,15 +141,12 @@ type Buf struct {
 	Listeners events.Listeners
 }
 
+// NewBuf makes a new [Buf] with default settings.
 func NewBuf() *Buf {
 	tb := &Buf{}
 	tb.SetHiStyle(histyle.StyleDefault)
 	tb.Opts.EditorSettings = gi.SystemSettings.Editor
 	return tb
-}
-
-func (tb *Buf) FlagType() enums.BitFlagSetter {
-	return (*BufFlags)(&tb.Flags)
 }
 
 // BufSignals are signals that text buffer can send to View
@@ -276,7 +273,7 @@ func (tb *Buf) SetChanged() {
 	tb.SetFlag(true, BufNotSaved)
 }
 
-// SetText sets the text to given bytes
+// SetText sets the text to the given bytes.
 func (tb *Buf) SetText(txt []byte) *Buf {
 	tb.Txt = txt
 	tb.BytesToLines()
@@ -284,6 +281,11 @@ func (tb *Buf) SetText(txt []byte) *Buf {
 	tb.SignalViews(BufNew, nil)
 	tb.ReMarkup()
 	return tb
+}
+
+// SetTextString sets the text to the given string.
+func (tb *Buf) SetTextString(txt string) *Buf {
+	return tb.SetText([]byte(txt))
 }
 
 func (tb *Buf) Update() {
