@@ -58,20 +58,20 @@ var funcs = template.Must(template.New("funcs").Parse(
 	`
 // {{.Camel}} returns a new {{.Lower}} value.
 // {{.Camel}} is {{.Desc}}
-func {{.Camel}}(val float32) Value {
-	return Value{Val: val, Un: Unit{{.Camel}}}
+func {{.Camel}}(value float32) Value {
+	return Value{Value: value, Unit: Unit{{.Camel}}}
 }
 
 // {{.Camel}} sets the value in terms of {{.Lower}}.
 // {{.Camel}} is {{.Desc}}
-func (v *Value) {{.Camel}}(val float32) {
-	v.Val = val
-	v.Un = Unit{{.Camel}}
+func (v *Value) {{.Camel}}(value float32) {
+	v.Value = value
+	v.Unit = Unit{{.Camel}}
 }
 
 // {{.Camel}} converts the given {{.Lower}} value to dots.
 // {{.Camel}} is {{.Desc}}
-func (uc *Context) {{.Camel}}(val float32) float32 {
-	return uc.ToDots(val, Unit{{.Camel}})
+func (uc *Context) {{.Camel}}(value float32) float32 {
+	return uc.ToDots(value, Unit{{.Camel}})
 }
 `))

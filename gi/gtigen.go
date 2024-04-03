@@ -954,13 +954,6 @@ func AsSplits(k ki.Ki) *Splits {
 // AsSplits satisfies the [SplitsEmbedder] interface
 func (t *Splits) AsSplits() *Splits { return t }
 
-// SetSplits sets the [Splits.Splits]:
-// Splits is the proportion (0-1 normalized, enforced) of space
-// allocated to each element. 0 indicates that an element should
-// be completely collapsed. By default, each element gets the
-// same amount of space.
-func (t *Splits) SetSplits(v ...float32) *Splits { t.Splits = v; return t }
-
 // SetTooltip sets the [Splits.Tooltip]
 func (t *Splits) SetTooltip(v string) *Splits { t.Tooltip = v; return t }
 

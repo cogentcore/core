@@ -224,6 +224,3 @@ func (t *TwinEditors) SetBufB(v *Buf) *TwinEditors { t.BufB = v; return t }
 
 // SetTooltip sets the [TwinEditors.Tooltip]
 func (t *TwinEditors) SetTooltip(v string) *TwinEditors { t.Tooltip = v; return t }
-
-// SetSplits sets the [TwinEditors.Splits]
-func (t *TwinEditors) SetSplits(v ...float32) *TwinEditors { t.Splits = v; return t }
