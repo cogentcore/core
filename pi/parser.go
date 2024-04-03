@@ -124,7 +124,6 @@ func (pr *Parser) LexNextLine(fs *FileState) *lex.Rule {
 			return nil
 		}
 	}
-	return mrule
 }
 
 // LexRun keeps running LextNext until it stops
