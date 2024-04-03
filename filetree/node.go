@@ -484,7 +484,7 @@ func (fn *Node) OpenBuf() (bool, error) {
 		}
 	} else {
 		fn.Buf = texteditor.NewBuf()
-		fn.Buf.OnChange(func(e events.Event) {
+		fn.Buf.OnBufferChange(func(e events.Event) {
 			if fn.Info.Vcs == vci.Stored {
 				fn.Info.Vcs = vci.Modified
 			}

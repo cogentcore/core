@@ -21,7 +21,7 @@ type Value struct {
 func (v *Value) Config() {
 	tb := NewBuf()
 	grr.Log(tb.Stat())
-	tb.OnChange(func(e events.Event) {
+	tb.OnBufferChange(func(e events.Event) {
 		v.SetValue(string(tb.Text()))
 		fmt.Println(laser.OnePtrUnderlyingValue(v.Value).Interface())
 	})
