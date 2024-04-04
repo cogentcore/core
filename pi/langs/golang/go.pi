@@ -3668,7 +3668,7 @@
             "type": "cogentcore.org/core/pi/parse.Rule",
             "name": "SliceExpr",
             "type": "cogentcore.org/core/pi/parse.Rule",
-            "name": "SliceIndexs",
+            "name": "SliceIndexes",
             "type": "cogentcore.org/core/pi/parse.Rule",
             "name": "ArgsExpr",
             "type": "cogentcore.org/core/pi/parse.Rule",
@@ -5575,8 +5575,8 @@
             "FirstTokMap": false
           },
           {
-            "Nm": "SliceIndexs",
-            "UniqueNm": "SliceIndexs",
+            "Nm": "SliceIndexes",
+            "UniqueNm": "SliceIndexes",
             "Props": null,
             "Kids": [
               {
