@@ -174,9 +174,9 @@ func (fn *Node) DuplicateFile() error {
 func (fn *Node) DeleteFiles() { //gti:add
 	d := gi.NewBody().AddTitle("Delete Files?").
 		AddText("Ok to delete file(s)?  This is not undoable and files are not moving to trash / recycle bin. If any selections are directories all files and subdirectories will also be deleted.")
-	d.AddBottomBar(func(pw gi.Widget) {
-		d.AddCancel(pw)
-		d.AddOK(pw).SetText("Delete Files").OnClick(func(e events.Event) {
+	d.AddBottomBar(func(parent gi.Widget) {
+		d.AddCancel(parent)
+		d.AddOK(parent).SetText("Delete Files").OnClick(func(e events.Event) {
 			fn.This().(Filer).DeleteFilesImpl()
 		})
 	})

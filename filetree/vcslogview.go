@@ -132,12 +132,12 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 		buf.Stat()
 		texteditor.NewEditor(d).SetBuffer(buf)
 		buf.SetText(cinfo)
-		d.AddBottomBar(func(pw gi.Widget) {
-			gi.NewButton(pw).SetText("Copy to clipboard").SetIcon(icons.ContentCopy).
+		d.AddBottomBar(func(parent gi.Widget) {
+			gi.NewButton(parent).SetText("Copy to clipboard").SetIcon(icons.ContentCopy).
 				OnClick(func(e events.Event) {
 					d.Clipboard().Write(mimedata.NewTextBytes(cinfo))
 				})
-			d.AddOK(pw)
+			d.AddOK(parent)
 		})
 		d.NewFullDialog(lv).Run()
 	})

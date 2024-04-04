@@ -247,9 +247,9 @@ func (tv *TreeView) InsertAt(rel int, actNm string) {
 	nd := &gi.NewItemsData{Number: 1, Type: typ}
 	sg := NewStructView(d).SetStruct(nd).StructGrid()
 	ki.ChildByType[*gi.Chooser](sg, ki.Embeds).SetTypes(gti.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
-	d.AddBottomBar(func(pw gi.Widget) {
-		d.AddCancel(pw)
-		d.AddOK(pw).OnClick(func(e events.Event) {
+	d.AddBottomBar(func(parent gi.Widget) {
+		d.AddCancel(parent)
+		d.AddOK(parent).OnClick(func(e events.Event) {
 			parent := AsTreeView(tv.Par)
 			if tv.SyncNode != nil {
 				parent.AddSyncNodes(rel, myidx, nd.Type, nd.Number)
@@ -274,9 +274,9 @@ func (tv *TreeView) AddChildNode() { //gti:add
 	nd := &gi.NewItemsData{Number: 1, Type: typ}
 	sg := NewStructView(d).SetStruct(nd).StructGrid()
 	ki.ChildByType[*gi.Chooser](sg, ki.Embeds).SetTypes(gti.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
-	d.AddBottomBar(func(pw gi.Widget) {
-		d.AddCancel(pw)
-		d.AddOK(pw).OnClick(func(e events.Event) {
+	d.AddBottomBar(func(parent gi.Widget) {
+		d.AddCancel(parent)
+		d.AddOK(parent).OnClick(func(e events.Event) {
 			if tv.SyncNode != nil {
 				tv.AddSyncNodes(0, 0, nd.Type, nd.Number)
 			} else {

@@ -708,9 +708,9 @@ func (ed *Editor) JumpToLinePrompt() {
 	tf.OnChange(func(e events.Event) {
 		val = tf.Text()
 	})
-	d.AddBottomBar(func(pw gi.Widget) {
-		d.AddCancel(pw)
-		d.AddOK(pw).SetText("Jump").OnClick(func(e events.Event) {
+	d.AddBottomBar(func(parent gi.Widget) {
+		d.AddCancel(parent)
+		d.AddOK(parent).SetText("Jump").OnClick(func(e events.Event) {
 			val = tf.Text()
 			ln, err := laser.ToInt(val)
 			if err == nil {

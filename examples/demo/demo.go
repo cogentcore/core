@@ -591,11 +591,11 @@ func dialogs(ts *gi.Tabs) {
 	cd := gi.NewButton(drow).SetText("Confirm")
 	cd.OnClick(func(e events.Event) {
 		d := gi.NewBody().AddTitle("Confirm").AddText("Send message?")
-		d.AddBottomBar(func(pw gi.Widget) {
-			d.AddCancel(pw).OnClick(func(e events.Event) {
+		d.AddBottomBar(func(parent gi.Widget) {
+			d.AddCancel(parent).OnClick(func(e events.Event) {
 				gi.MessageSnackbar(cd, "Dialog canceled")
 			})
-			d.AddOK(pw).OnClick(func(e events.Event) {
+			d.AddOK(parent).OnClick(func(e events.Event) {
 				gi.MessageSnackbar(cd, "Dialog accepted")
 			})
 		})
@@ -606,9 +606,9 @@ func dialogs(ts *gi.Tabs) {
 	td.OnClick(func(e events.Event) {
 		d := gi.NewBody().AddTitle("Input").AddText("What is your name?")
 		tf := gi.NewTextField(d)
-		d.AddBottomBar(func(pw gi.Widget) {
-			d.AddCancel(pw)
-			d.AddOK(pw).OnClick(func(e events.Event) {
+		d.AddBottomBar(func(parent gi.Widget) {
+			d.AddCancel(parent)
+			d.AddOK(parent).OnClick(func(e events.Event) {
 				gi.MessageSnackbar(td, "Your name is "+tf.Text())
 			})
 		})

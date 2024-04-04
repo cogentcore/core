@@ -344,9 +344,9 @@ func OpenDialogBase(v Value, cd ConfigDialoger, ctx gi.Widget, fun func()) {
 		})
 	} else {
 		// otherwise, we have to make the bottom bar
-		d.AddBottomBar(func(pw gi.Widget) {
-			d.AddCancel(pw)
-			d.AddOK(pw).OnClick(func(e events.Event) {
+		d.AddBottomBar(func(parent gi.Widget) {
+			d.AddCancel(parent)
+			d.AddOK(parent).OnClick(func(e events.Event) {
 				if okfun != nil {
 					okfun()
 				}
@@ -413,9 +413,9 @@ func (v *ValueBase[W]) SetValueMap(val any) (bool, error) {
 			// actually new key and current exists
 			d := gi.NewBody().AddTitle("Map key conflict").
 				AddText(fmt.Sprintf("The map key value: %v already exists in the map; are you sure you want to overwrite the current value?", val))
-			d.AddBottomBar(func(pw gi.Widget) {
-				d.AddCancel(pw).SetText("Cancel change")
-				d.AddOK(pw).SetText("Overwrite").OnClick(func(e events.Event) {
+			d.AddBottomBar(func(parent gi.Widget) {
+				d.AddCancel(parent).SetText("Cancel change")
+				d.AddOK(parent).SetText("Overwrite").OnClick(func(e events.Event) {
 					cv := ov.MapIndex(kv)               // get current value
 					ov.SetMapIndex(kv, reflect.Value{}) // delete old key
 					ov.SetMapIndex(nv, cv)              // set new key to current value

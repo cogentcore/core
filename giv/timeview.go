@@ -305,9 +305,9 @@ func (v *TimeValue) Config() {
 	dt.SetLeadingIcon(icons.CalendarToday, func(e events.Event) {
 		d := gi.NewBody().AddTitle("Select date")
 		dv := NewDateView(d).SetTime(*v.TimeValue())
-		d.AddBottomBar(func(pw gi.Widget) {
-			d.AddCancel(pw)
-			d.AddOK(pw).OnClick(func(e events.Event) {
+		d.AddBottomBar(func(parent gi.Widget) {
+			d.AddCancel(parent)
+			d.AddOK(parent).OnClick(func(e events.Event) {
 				v.SetValue(dv.Time)
 				v.Update()
 			})
@@ -334,9 +334,9 @@ func (v *TimeValue) Config() {
 	tm.SetLeadingIcon(icons.Schedule, func(e events.Event) {
 		d := gi.NewBody().AddTitle("Edit time")
 		tv := NewTimeView(d).SetTime(*v.TimeValue())
-		d.AddBottomBar(func(pw gi.Widget) {
-			d.AddCancel(pw)
-			d.AddOK(pw).OnClick(func(e events.Event) {
+		d.AddBottomBar(func(parent gi.Widget) {
+			d.AddCancel(parent)
+			d.AddOK(parent).OnClick(func(e events.Event) {
 				v.SetValue(tv.Time)
 				v.Update()
 			})

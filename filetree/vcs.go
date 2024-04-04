@@ -352,9 +352,7 @@ func BlameDialog(ctx gi.Widget, fname string, blame, fbytes []byte) *texteditor.
 		s.Min.X.Ch(80)
 		s.Min.Y.Em(40)
 	})
-	d.AddBottomBar(func(pw gi.Widget) {
-		d.AddOK(pw)
-	})
+	d.AddOKOnly()
 	d.NewFullDialog(ctx).SetNewWindow(true).Run()
 	return tv
 }

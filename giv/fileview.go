@@ -40,9 +40,9 @@ func FileViewDialog(ctx gi.Widget, filename, exts, title string, fun func(selfil
 	}
 	fv := NewFileView(d).SetFilename(filename, exts)
 	d.AddAppBar(fv.ConfigToolbar)
-	d.AddBottomBar(func(pw gi.Widget) {
-		d.AddCancel(pw)
-		d.AddOK(pw).OnClick(func(e events.Event) {
+	d.AddBottomBar(func(parent gi.Widget) {
+		d.AddCancel(parent)
+		d.AddOK(parent).OnClick(func(e events.Event) {
 			fun(fv.SelectedFile())
 		})
 	})
@@ -863,9 +863,9 @@ func (fv *FileView) FileCompleteEdit(data any, text string, cursorPos int, c com
 func (fv *FileView) EditRecentPaths() {
 	d := gi.NewBody().AddTitle("Recent file paths").AddText("You can delete paths you no longer use")
 	NewSliceView(d).SetSlice(&gi.RecentPaths)
-	d.AddBottomBar(func(pw gi.Widget) {
-		d.AddCancel(pw)
-		d.AddOK(pw).OnClick(func(e events.Event) {
+	d.AddBottomBar(func(parent gi.Widget) {
+		d.AddCancel(parent)
+		d.AddOK(parent).OnClick(func(e events.Event) {
 			gi.SaveRecentPaths()
 			fv.UpdateFiles()
 		})

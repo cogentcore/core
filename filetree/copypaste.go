@@ -161,9 +161,9 @@ func (fn *Node) PasteCopyFilesCheck(tdir *Node, md mimedata.Mimes, externalDrop 
 	}
 	d := gi.NewBody().AddTitle("File(s) Exist in Target Dir, Overwrite?").
 		AddText(fmt.Sprintf("File(s): %v exist, do you want to overwrite?", existing))
-	d.AddBottomBar(func(pw gi.Widget) {
-		d.AddCancel(pw)
-		d.AddOK(pw).SetText("Overwrite").OnClick(func(e events.Event) {
+	d.AddBottomBar(func(parent gi.Widget) {
+		d.AddCancel(parent)
+		d.AddOK(parent).SetText("Overwrite").OnClick(func(e events.Event) {
 			fn.PasteCopyFiles(tdir, md, externalDrop)
 			if dropFinal != nil {
 				dropFinal()
@@ -213,12 +213,12 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 	case len(existing) == 1 && fname == fn.Nm:
 		d := gi.NewBody().AddTitle("Overwrite?").
 			AddText(fmt.Sprintf("Overwrite target file: %s with source file of same name?, or diff (compare) two files?", fn.Nm))
-		d.AddBottomBar(func(pw gi.Widget) {
-			d.AddCancel(pw)
-			d.AddOK(pw).SetText("Diff (compare)").OnClick(func(e events.Event) {
+		d.AddBottomBar(func(parent gi.Widget) {
+			d.AddCancel(parent)
+			d.AddOK(parent).SetText("Diff (compare)").OnClick(func(e events.Event) {
 				texteditor.DiffFiles(fn, tpath, srcpath)
 			})
-			d.AddOK(pw).SetText("Overwrite").OnClick(func(e events.Event) {
+			d.AddOK(parent).SetText("Overwrite").OnClick(func(e events.Event) {
 				fi.CopyFile(tpath, srcpath, mode)
 				if dropFinal != nil {
 					dropFinal()
@@ -229,22 +229,22 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 	case len(existing) > 0:
 		d := gi.NewBody().AddTitle("Overwrite?").
 			AddText(fmt.Sprintf("Overwrite target file: %s with source file: %s, or overwrite existing file with same name as source file (%s), or diff (compare) files?", fn.Nm, fname, fname))
-		d.AddBottomBar(func(pw gi.Widget) {
-			d.AddCancel(pw)
-			d.AddOK(pw).SetText("Diff to target").OnClick(func(e events.Event) {
+		d.AddBottomBar(func(parent gi.Widget) {
+			d.AddCancel(parent)
+			d.AddOK(parent).SetText("Diff to target").OnClick(func(e events.Event) {
 				texteditor.DiffFiles(fn, tpath, srcpath)
 			})
-			d.AddOK(pw).SetText("Diff to existing").OnClick(func(e events.Event) {
+			d.AddOK(parent).SetText("Diff to existing").OnClick(func(e events.Event) {
 				npath := filepath.Join(string(tdir.FPath), fname)
 				texteditor.DiffFiles(fn, npath, srcpath)
 			})
-			d.AddOK(pw).SetText("Overwrite target").OnClick(func(e events.Event) {
+			d.AddOK(parent).SetText("Overwrite target").OnClick(func(e events.Event) {
 				fi.CopyFile(tpath, srcpath, mode)
 				if dropFinal != nil {
 					dropFinal()
 				}
 			})
-			d.AddOK(pw).SetText("Overwrite existing").OnClick(func(e events.Event) {
+			d.AddOK(parent).SetText("Overwrite existing").OnClick(func(e events.Event) {
 				npath := filepath.Join(string(tdir.FPath), fname)
 				fi.CopyFile(npath, srcpath, mode)
 				if dropFinal != nil {
@@ -256,18 +256,18 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 	default:
 		d := gi.NewBody().AddTitle("Overwrite?").
 			AddText(fmt.Sprintf("Overwrite target file: %s with source file: %s, or copy to: %s in current folder (which doesn't yet exist), or diff (compare) the two files?", fn.Nm, fname, fname))
-		d.AddBottomBar(func(pw gi.Widget) {
-			d.AddCancel(pw)
-			d.AddOK(pw).SetText("Diff (compare)").OnClick(func(e events.Event) {
+		d.AddBottomBar(func(parent gi.Widget) {
+			d.AddCancel(parent)
+			d.AddOK(parent).SetText("Diff (compare)").OnClick(func(e events.Event) {
 				texteditor.DiffFiles(fn, tpath, srcpath)
 			})
-			d.AddOK(pw).SetText("Overwrite target").OnClick(func(e events.Event) {
+			d.AddOK(parent).SetText("Overwrite target").OnClick(func(e events.Event) {
 				fi.CopyFile(tpath, srcpath, mode)
 				if dropFinal != nil {
 					dropFinal()
 				}
 			})
-			d.AddOK(pw).SetText("Copy new file").OnClick(func(e events.Event) {
+			d.AddOK(parent).SetText("Copy new file").OnClick(func(e events.Event) {
 				tdir.CopyFileToDir(srcpath, mode)
 				if dropFinal != nil {
 					dropFinal()

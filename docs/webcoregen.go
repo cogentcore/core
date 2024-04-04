@@ -242,11 +242,11 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		bt := gi.NewButton(parent).SetText("Confirm")
 		bt.OnClick(func(e events.Event) {
 			d := gi.NewBody().AddTitle("Confirm").AddText("Send message?")
-			d.AddBottomBar(func(pw gi.Widget) {
-				d.AddCancel(pw).OnClick(func(e events.Event) {
+			d.AddBottomBar(func(parent gi.Widget) {
+				d.AddCancel(parent).OnClick(func(e events.Event) {
 					gi.MessageSnackbar(bt, "Dialog canceled")
 				})
-				d.AddOK(pw).OnClick(func(e events.Event) {
+				d.AddOK(parent).OnClick(func(e events.Event) {
 					gi.MessageSnackbar(bt, "Dialog accepted")
 				})
 			})
@@ -258,9 +258,9 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		bt.OnClick(func(e events.Event) {
 			d := gi.NewBody().AddTitle("Input").AddText("What is your name?")
 			tf := gi.NewTextField(d)
-			d.AddBottomBar(func(pw gi.Widget) {
-				d.AddCancel(pw)
-				d.AddOK(pw).OnClick(func(e events.Event) {
+			d.AddBottomBar(func(parent gi.Widget) {
+				d.AddCancel(parent)
+				d.AddOK(parent).OnClick(func(e events.Event) {
 					gi.MessageSnackbar(bt, "Your name is "+tf.Text())
 				})
 			})

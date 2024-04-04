@@ -124,7 +124,7 @@ func (bd *Body) AddOK(parent Widget, name ...string) *Button {
 // AddOKOnly just adds an OK button in the BottomBar
 // for simple popup dialogs that just need that one button
 func (bd *Body) AddOKOnly() *Body {
-	bd.Scene.Bars.Bottom.Add(func(parent Widget) { bd.AddOK(parent) })
+	bd.AddBottomBar(func(parent Widget) { bd.AddOK(parent) })
 	return bd
 }
 

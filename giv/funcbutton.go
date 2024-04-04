@@ -294,9 +294,9 @@ func (fb *FuncButton) CallFuncShowReturns() {
 func (fb *FuncButton) ConfirmDialog() {
 	ctx := fb.GoodContext()
 	d := gi.NewBody().AddTitle(fb.Text + "?").AddText("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip)
-	d.AddBottomBar(func(pw gi.Widget) {
-		d.AddCancel(pw)
-		d.AddOK(pw).SetText(fb.Text).OnClick(func(e events.Event) {
+	d.AddBottomBar(func(parent gi.Widget) {
+		d.AddCancel(parent)
+		d.AddOK(parent).SetText(fb.Text).OnClick(func(e events.Event) {
 			fb.CallFuncShowReturns()
 		})
 	})
@@ -325,9 +325,9 @@ func (fb *FuncButton) CallFunc() {
 	}
 	d := gi.NewBody().AddTitle(fb.Text).AddText(fb.Tooltip)
 	NewArgView(d).SetArgs(fb.Args...)
-	d.AddBottomBar(func(pw gi.Widget) {
-		d.AddCancel(pw)
-		d.AddOK(pw).SetText(fb.Text).OnClick(func(e events.Event) {
+	d.AddBottomBar(func(parent gi.Widget) {
+		d.AddCancel(parent)
+		d.AddOK(parent).SetText(fb.Text).OnClick(func(e events.Event) {
 			d.Scene.Send(events.Close, e) // note: the other Close event happens too late!
 			fb.CallFuncShowReturns()
 		})

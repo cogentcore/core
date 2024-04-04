@@ -108,12 +108,12 @@ func TextDialog(ctx gi.Widget, title, text string) *Editor {
 	buf := NewBuffer()
 	ed := NewEditor(d).SetBuffer(buf)
 	buf.SetText([]byte(text))
-	d.AddBottomBar(func(pw gi.Widget) {
-		gi.NewButton(pw).SetText("Copy to clipboard").SetIcon(icons.ContentCopy).
+	d.AddBottomBar(func(parent gi.Widget) {
+		gi.NewButton(parent).SetText("Copy to clipboard").SetIcon(icons.ContentCopy).
 			OnClick(func(e events.Event) {
 				d.Clipboard().Write(mimedata.NewText(text))
 			})
-		d.AddOK(pw)
+		d.AddOK(parent)
 	})
 	d.NewFullDialog(ctx).SetNewWindow(true).Run()
 	return ed
@@ -234,9 +234,9 @@ func (dv *DiffView) SaveAs(ab bool, filename gi.Filename) {
 	} else {
 		d := gi.NewBody().AddTitle("File Exists, Overwrite?").
 			AddText(fmt.Sprintf("File already exists, overwrite?  File: %v", filename))
-		d.AddBottomBar(func(pw gi.Widget) {
-			d.AddCancel(pw)
-			d.AddOK(pw).OnClick(func(e events.Event) {
+		d.AddBottomBar(func(parent gi.Widget) {
+			d.AddCancel(parent)
+			d.AddOK(parent).OnClick(func(e events.Event) {
 				dv.SaveFile(ab, filename)
 			})
 		})

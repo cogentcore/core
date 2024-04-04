@@ -774,9 +774,9 @@ func (tv *TableView) EditIndex(idx int) {
 	}
 	d := gi.NewBody().AddTitle(tynm)
 	NewStructView(d).SetStruct(stru).SetReadOnly(tv.IsReadOnly())
-	d.AddBottomBar(func(pw gi.Widget) {
-		d.AddCancel(pw)
-		d.AddOK(pw)
+	d.AddBottomBar(func(parent gi.Widget) {
+		d.AddCancel(parent)
+		d.AddOK(parent)
 	})
 	d.NewFullDialog(tv).Run()
 }
