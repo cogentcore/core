@@ -3406,62 +3406,62 @@
     "RBraceEos": true,
     "EolToks": [
       {
-        "Tok": "Name",
+        "Token": "Name",
         "Key": "",
         "Depth": 0
       },
       {
-        "Tok": "Literal",
+        "Token": "Literal",
         "Key": "",
         "Depth": 0
       },
       {
-        "Tok": "OpAsgnInc",
+        "Token": "OpAsgnInc",
         "Key": "",
         "Depth": 0
       },
       {
-        "Tok": "OpAsgnDec",
+        "Token": "OpAsgnDec",
         "Key": "",
         "Depth": 0
       },
       {
-        "Tok": "PunctGpRParen",
+        "Token": "PunctGpRParen",
         "Key": "",
         "Depth": 0
       },
       {
-        "Tok": "PunctGpRBrack",
+        "Token": "PunctGpRBrack",
         "Key": "",
         "Depth": 0
       },
       {
-        "Tok": "Keyword",
+        "Token": "Keyword",
         "Key": "break",
         "Depth": 0
       },
       {
-        "Tok": "Keyword",
+        "Token": "Keyword",
         "Key": "continue",
         "Depth": 0
       },
       {
-        "Tok": "Keyword",
+        "Token": "Keyword",
         "Key": "fallthrough",
         "Depth": 0
       },
       {
-        "Tok": "Keyword",
+        "Token": "Keyword",
         "Key": "return",
         "Depth": 0
       },
       {
-        "Tok": "KeywordType",
+        "Token": "KeywordType",
         "Key": "",
         "Depth": 0
       },
       {
-        "Tok": "PunctSepColon",
+        "Token": "PunctSepColon",
         "Key": "",
         "Depth": 0
       }
@@ -3526,15 +3526,15 @@
                 "RunIndex": -1,
                 "Act": "PushNewScope",
                 "Path": "Name",
-                "Tok": "NamePackage",
-                "FmTok": "None"
+                "Token": "NamePackage",
+                "FromToken": "None"
               },
               {
                 "RunIndex": -1,
                 "Act": "ChgToken",
                 "Path": "Name",
-                "Tok": "NamePackage",
-                "FmTok": "None"
+                "Token": "NamePackage",
+                "FromToken": "None"
               }
             ],
             "OptTokMap": false,
@@ -3668,7 +3668,7 @@
             "type": "cogentcore.org/core/pi/parse.Rule",
             "name": "SliceExpr",
             "type": "cogentcore.org/core/pi/parse.Rule",
-            "name": "SliceIndexes",
+            "name": "SliceIndexs",
             "type": "cogentcore.org/core/pi/parse.Rule",
             "name": "ArgsExpr",
             "type": "cogentcore.org/core/pi/parse.Rule",
@@ -4869,8 +4869,8 @@
                     "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "[0]",
-                    "Tok": "NameTag",
-                    "FmTok": "None"
+                    "Token": "NameTag",
+                    "FromToken": "None"
                   }
                 ],
                 "OptTokMap": false,
@@ -4933,8 +4933,8 @@
                     "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "[0]",
-                    "Tok": "NameFunction",
-                    "FmTok": "None"
+                    "Token": "NameFunction",
+                    "FromToken": "None"
                   }
                 ],
                 "OptTokMap": false,
@@ -4955,8 +4955,8 @@
                     "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "[0]",
-                    "Tok": "NameFunction",
-                    "FmTok": "None"
+                    "Token": "NameFunction",
+                    "FromToken": "None"
                   }
                 ],
                 "OptTokMap": false,
@@ -4977,8 +4977,8 @@
                     "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "[0]",
-                    "Tok": "NameFunction",
-                    "FmTok": "None"
+                    "Token": "NameFunction",
+                    "FromToken": "None"
                   }
                 ],
                 "OptTokMap": false,
@@ -5041,22 +5041,22 @@
                     "RunIndex": 0,
                     "Act": "ChgToken",
                     "Path": "../Name",
-                    "Tok": "NameStruct",
-                    "FmTok": "None"
+                    "Token": "NameStruct",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": 0,
                     "Act": "PushNewScope",
                     "Path": "../Name",
-                    "Tok": "NameStruct",
-                    "FmTok": "None"
+                    "Token": "NameStruct",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": -1,
                     "Act": "PopScopeReg",
                     "Path": "../Name",
-                    "Tok": "None",
-                    "FmTok": "None"
+                    "Token": "None",
+                    "FromToken": "None"
                   }
                 ],
                 "OptTokMap": false,
@@ -5105,15 +5105,15 @@
                         "RunIndex": 0,
                         "Act": "ChgToken",
                         "Path": "../Name",
-                        "Tok": "NameArray",
-                        "FmTok": "None"
+                        "Token": "NameArray",
+                        "FromToken": "None"
                       },
                       {
                         "RunIndex": 0,
                         "Act": "AddSymbol",
                         "Path": "../Name",
-                        "Tok": "NameArray",
-                        "FmTok": "None"
+                        "Token": "NameArray",
+                        "FromToken": "None"
                       }
                     ],
                     "OptTokMap": false,
@@ -5134,15 +5134,15 @@
                         "RunIndex": 0,
                         "Act": "ChgToken",
                         "Path": "../Name",
-                        "Tok": "NameArray",
-                        "FmTok": "None"
+                        "Token": "NameArray",
+                        "FromToken": "None"
                       },
                       {
                         "RunIndex": 0,
                         "Act": "AddSymbol",
                         "Path": "../Name",
-                        "Tok": "NameArray",
-                        "FmTok": "None"
+                        "Token": "NameArray",
+                        "FromToken": "None"
                       }
                     ],
                     "OptTokMap": false,
@@ -5163,15 +5163,15 @@
                         "RunIndex": 0,
                         "Act": "ChgToken",
                         "Path": "../Name",
-                        "Tok": "NameArray",
-                        "FmTok": "None"
+                        "Token": "NameArray",
+                        "FromToken": "None"
                       },
                       {
                         "RunIndex": 0,
                         "Act": "AddSymbol",
                         "Path": "../Name",
-                        "Tok": "NameArray",
-                        "FmTok": "None"
+                        "Token": "NameArray",
+                        "FromToken": "None"
                       }
                     ],
                     "OptTokMap": false,
@@ -5202,15 +5202,15 @@
                     "RunIndex": 0,
                     "Act": "ChgToken",
                     "Path": "../Name",
-                    "Tok": "NameMap",
-                    "FmTok": "None"
+                    "Token": "NameMap",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": 0,
                     "Act": "AddSymbol",
                     "Path": "../Name",
-                    "Tok": "NameMap",
-                    "FmTok": "None"
+                    "Token": "NameMap",
+                    "FromToken": "None"
                   }
                 ],
                 "OptTokMap": false,
@@ -5575,8 +5575,8 @@
             "FirstTokMap": false
           },
           {
-            "Nm": "SliceIndexes",
-            "UniqueNm": "SliceIndexes",
+            "Nm": "SliceIndexs",
+            "UniqueNm": "SliceIndexs",
             "Props": null,
             "Kids": [
               {
@@ -5861,8 +5861,8 @@
                         "RunIndex": -1,
                         "Act": "ChgToken",
                         "Path": "",
-                        "Tok": "NameType",
-                        "FmTok": "None"
+                        "Token": "NameType",
+                        "FromToken": "None"
                       }
                     ],
                     "OptTokMap": false,
@@ -5883,8 +5883,8 @@
                         "RunIndex": -1,
                         "Act": "ChgToken",
                         "Path": "",
-                        "Tok": "NameType",
-                        "FmTok": "None"
+                        "Token": "NameType",
+                        "FromToken": "None"
                       }
                     ],
                     "OptTokMap": false,
@@ -5905,8 +5905,8 @@
                         "RunIndex": -1,
                         "Act": "ChgToken",
                         "Path": "",
-                        "Tok": "NameType",
-                        "FmTok": "None"
+                        "Token": "NameType",
+                        "FromToken": "None"
                       }
                     ],
                     "OptTokMap": false,
@@ -5985,15 +5985,15 @@
                         "RunIndex": 0,
                         "Act": "ChgToken",
                         "Path": "../Name",
-                        "Tok": "NameArray",
-                        "FmTok": "None"
+                        "Token": "NameArray",
+                        "FromToken": "None"
                       },
                       {
                         "RunIndex": 0,
                         "Act": "AddSymbol",
                         "Path": "../Name",
-                        "Tok": "NameArray",
-                        "FmTok": "None"
+                        "Token": "NameArray",
+                        "FromToken": "None"
                       }
                     ],
                     "OptTokMap": false,
@@ -6014,15 +6014,15 @@
                         "RunIndex": 0,
                         "Act": "ChgToken",
                         "Path": "../Name",
-                        "Tok": "NameArray",
-                        "FmTok": "None"
+                        "Token": "NameArray",
+                        "FromToken": "None"
                       },
                       {
                         "RunIndex": 0,
                         "Act": "AddSymbol",
                         "Path": "../Name",
-                        "Tok": "NameArray",
-                        "FmTok": "None"
+                        "Token": "NameArray",
+                        "FromToken": "None"
                       }
                     ],
                     "OptTokMap": false,
@@ -6043,15 +6043,15 @@
                         "RunIndex": 0,
                         "Act": "ChgToken",
                         "Path": "../Name",
-                        "Tok": "NameArray",
-                        "FmTok": "None"
+                        "Token": "NameArray",
+                        "FromToken": "None"
                       },
                       {
                         "RunIndex": 0,
                         "Act": "AddSymbol",
                         "Path": "../Name",
-                        "Tok": "NameArray",
-                        "FmTok": "None"
+                        "Token": "NameArray",
+                        "FromToken": "None"
                       }
                     ],
                     "OptTokMap": false,
@@ -6082,22 +6082,22 @@
                     "RunIndex": 0,
                     "Act": "ChgToken",
                     "Path": "../Name",
-                    "Tok": "NameStruct",
-                    "FmTok": "None"
+                    "Token": "NameStruct",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": 0,
                     "Act": "PushNewScope",
                     "Path": "../Name",
-                    "Tok": "NameStruct",
-                    "FmTok": "None"
+                    "Token": "NameStruct",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": -1,
                     "Act": "PopScopeReg",
                     "Path": "../Name",
-                    "Tok": "None",
-                    "FmTok": "None"
+                    "Token": "None",
+                    "FromToken": "None"
                   }
                 ],
                 "OptTokMap": false,
@@ -6146,22 +6146,22 @@
                     "RunIndex": 0,
                     "Act": "ChgToken",
                     "Path": "../Name",
-                    "Tok": "NameInterface",
-                    "FmTok": "None"
+                    "Token": "NameInterface",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": 0,
                     "Act": "PushNewScope",
                     "Path": "../Name",
-                    "Tok": "NameInterface",
-                    "FmTok": "None"
+                    "Token": "NameInterface",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": -1,
                     "Act": "PopScopeReg",
                     "Path": "../Name",
-                    "Tok": "None",
-                    "FmTok": "None"
+                    "Token": "None",
+                    "FromToken": "None"
                   }
                 ],
                 "OptTokMap": false,
@@ -6182,15 +6182,15 @@
                     "RunIndex": 0,
                     "Act": "ChgToken",
                     "Path": "../Name",
-                    "Tok": "NameMap",
-                    "FmTok": "None"
+                    "Token": "NameMap",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": 0,
                     "Act": "AddSymbol",
                     "Path": "../Name",
-                    "Tok": "NameMap",
-                    "FmTok": "None"
+                    "Token": "NameMap",
+                    "FromToken": "None"
                   }
                 ],
                 "OptTokMap": false,
@@ -6313,15 +6313,15 @@
                     "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "",
-                    "Tok": "NameField",
-                    "FmTok": "None"
+                    "Token": "NameField",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": -1,
                     "Act": "AddSymbol",
                     "Path": "",
-                    "Tok": "NameField",
-                    "FmTok": "None"
+                    "Token": "NameField",
+                    "FromToken": "None"
                   }
                 ],
                 "OptTokMap": false,
@@ -6342,15 +6342,15 @@
                     "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "Name|QualName",
-                    "Tok": "NameField",
-                    "FmTok": "None"
+                    "Token": "NameField",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": -1,
                     "Act": "AddSymbol",
                     "Path": "Name|QualName",
-                    "Tok": "NameField",
-                    "FmTok": "None"
+                    "Token": "NameField",
+                    "FromToken": "None"
                   }
                 ],
                 "OptTokMap": false,
@@ -6371,15 +6371,15 @@
                     "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "Name\u0026NameListEls/Name...",
-                    "Tok": "NameField",
-                    "FmTok": "None"
+                    "Token": "NameField",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": -1,
                     "Act": "AddSymbol",
                     "Path": "Name\u0026NameListEls/Name...",
-                    "Tok": "NameField",
-                    "FmTok": "None"
+                    "Token": "NameField",
+                    "FromToken": "None"
                   }
                 ],
                 "OptTokMap": false,
@@ -6450,29 +6450,29 @@
                     "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "Name",
-                    "Tok": "NameType",
-                    "FmTok": "Name"
+                    "Token": "NameType",
+                    "FromToken": "Name"
                   },
                   {
                     "RunIndex": -1,
                     "Act": "AddSymbol",
                     "Path": "Name",
-                    "Tok": "NameType",
-                    "FmTok": "None"
+                    "Token": "NameType",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": -1,
                     "Act": "AddDetail",
                     "Path": "[1]",
-                    "Tok": "None",
-                    "FmTok": "None"
+                    "Token": "None",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": -1,
                     "Act": "AddType",
                     "Path": "Name",
-                    "Tok": "None",
-                    "FmTok": "None"
+                    "Token": "None",
+                    "FromToken": "None"
                   }
                 ],
                 "OptTokMap": false,
@@ -6613,50 +6613,50 @@
                     "RunIndex": 5,
                     "Act": "ChgToken",
                     "Path": "Name",
-                    "Tok": "NameMethod",
-                    "FmTok": "None"
+                    "Token": "NameMethod",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": 5,
                     "Act": "PushNewScope",
                     "Path": "Name",
-                    "Tok": "NameMethod",
-                    "FmTok": "None"
+                    "Token": "NameMethod",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": -1,
                     "Act": "AddDetail",
                     "Path": "MethRecvName|MethRecvNoNm",
-                    "Tok": "None",
-                    "FmTok": "None"
+                    "Token": "None",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": -1,
                     "Act": "AddDetail",
                     "Path": "SigParams|SigParamsResult",
-                    "Tok": "None",
-                    "FmTok": "None"
+                    "Token": "None",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": -1,
                     "Act": "AddSymbol",
                     "Path": "MethRecvName/Name",
-                    "Tok": "NameVarClass",
-                    "FmTok": "None"
+                    "Token": "NameVarClass",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": -1,
                     "Act": "PopScopeReg",
                     "Path": "",
-                    "Tok": "None",
-                    "FmTok": "None"
+                    "Token": "None",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": -1,
                     "Act": "PopScope",
                     "Path": "",
-                    "Tok": "None",
-                    "FmTok": "None"
+                    "Token": "None",
+                    "FromToken": "None"
                   }
                 ],
                 "OptTokMap": false,
@@ -6677,29 +6677,29 @@
                     "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "Name",
-                    "Tok": "NameFunction",
-                    "FmTok": "None"
+                    "Token": "NameFunction",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": 2,
                     "Act": "PushNewScope",
                     "Path": "Name",
-                    "Tok": "NameFunction",
-                    "FmTok": "None"
+                    "Token": "NameFunction",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": -1,
                     "Act": "AddDetail",
                     "Path": "SigParams|SigParamsResult",
-                    "Tok": "None",
-                    "FmTok": "None"
+                    "Token": "None",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": -1,
                     "Act": "PopScopeReg",
                     "Path": "",
-                    "Tok": "None",
-                    "FmTok": "None"
+                    "Token": "None",
+                    "FromToken": "None"
                   }
                 ],
                 "OptTokMap": false,
@@ -6742,15 +6742,15 @@
                     "RunIndex": -1,
                     "Act": "PushScope",
                     "Path": "TypeNm|PointerType/TypeNm",
-                    "Tok": "NameStruct",
-                    "FmTok": "None"
+                    "Token": "NameStruct",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "Name",
-                    "Tok": "NameVarClass",
-                    "FmTok": "None"
+                    "Token": "NameVarClass",
+                    "FromToken": "None"
                   }
                 ],
                 "OptTokMap": false,
@@ -6771,8 +6771,8 @@
                     "RunIndex": -1,
                     "Act": "PushScope",
                     "Path": "TypeNm|PointerType/TypeNm",
-                    "Tok": "NameStruct",
-                    "FmTok": "None"
+                    "Token": "NameStruct",
+                    "FromToken": "None"
                   }
                 ],
                 "OptTokMap": false,
@@ -6869,15 +6869,15 @@
                     "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "",
-                    "Tok": "NameInterface",
-                    "FmTok": "None"
+                    "Token": "NameInterface",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": -1,
                     "Act": "AddSymbol",
                     "Path": "",
-                    "Tok": "NameInterface",
-                    "FmTok": "None"
+                    "Token": "NameInterface",
+                    "FromToken": "None"
                   }
                 ],
                 "OptTokMap": false,
@@ -6898,15 +6898,15 @@
                     "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "Name",
-                    "Tok": "NameMethod",
-                    "FmTok": "None"
+                    "Token": "NameMethod",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": -1,
                     "Act": "AddSymbol",
                     "Path": "Name",
-                    "Tok": "NameMethod",
-                    "FmTok": "None"
+                    "Token": "NameMethod",
+                    "FromToken": "None"
                   }
                 ],
                 "OptTokMap": false,
@@ -6927,15 +6927,15 @@
                     "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "",
-                    "Tok": "NameInterface",
-                    "FmTok": "None"
+                    "Token": "NameInterface",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": -1,
                     "Act": "AddSymbol",
                     "Path": "",
-                    "Tok": "NameInterface",
-                    "FmTok": "None"
+                    "Token": "NameInterface",
+                    "FromToken": "None"
                   }
                 ],
                 "OptTokMap": false,
@@ -7072,22 +7072,22 @@
                     "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "Name|NameListEls/Name...",
-                    "Tok": "NameVarParam",
-                    "FmTok": "None"
+                    "Token": "NameVarParam",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": -1,
                     "Act": "AddSymbol",
                     "Path": "Name|NameListEls/Name...",
-                    "Tok": "NameVarParam",
-                    "FmTok": "None"
+                    "Token": "NameVarParam",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": -1,
                     "Act": "AddDetail",
                     "Path": "[1]",
-                    "Tok": "None",
-                    "FmTok": "None"
+                    "Token": "None",
+                    "FromToken": "None"
                   }
                 ],
                 "OptTokMap": false,
@@ -7476,15 +7476,15 @@
                         "RunIndex": -1,
                         "Act": "ChgToken",
                         "Path": "[0]",
-                        "Tok": "NameVar",
-                        "FmTok": "None"
+                        "Token": "NameVar",
+                        "FromToken": "None"
                       },
                       {
                         "RunIndex": -1,
                         "Act": "AddSymbol",
                         "Path": "[0]",
-                        "Tok": "NameVar",
-                        "FmTok": "None"
+                        "Token": "NameVar",
+                        "FromToken": "None"
                       }
                     ],
                     "OptTokMap": false,
@@ -7505,15 +7505,15 @@
                         "RunIndex": -1,
                         "Act": "ChgToken",
                         "Path": "[0]",
-                        "Tok": "NameVar",
-                        "FmTok": "None"
+                        "Token": "NameVar",
+                        "FromToken": "None"
                       },
                       {
                         "RunIndex": -1,
                         "Act": "AddSymbol",
                         "Path": "[0]",
-                        "Tok": "NameVar",
-                        "FmTok": "None"
+                        "Token": "NameVar",
+                        "FromToken": "None"
                       }
                     ],
                     "OptTokMap": false,
@@ -7534,8 +7534,8 @@
                         "RunIndex": -1,
                         "Act": "ChgToken",
                         "Path": "NameListEls",
-                        "Tok": "NameVar",
-                        "FmTok": "None"
+                        "Token": "NameVar",
+                        "FromToken": "None"
                       }
                     ],
                     "OptTokMap": false,
@@ -7614,15 +7614,15 @@
                         "RunIndex": 0,
                         "Act": "PushStack",
                         "Path": "SwitchType",
-                        "Tok": "None",
-                        "FmTok": "None"
+                        "Token": "None",
+                        "FromToken": "None"
                       },
                       {
                         "RunIndex": -1,
                         "Act": "PopStack",
                         "Path": "",
-                        "Tok": "None",
-                        "FmTok": "None"
+                        "Token": "None",
+                        "FromToken": "None"
                       }
                     ],
                     "OptTokMap": false,
@@ -7643,15 +7643,15 @@
                         "RunIndex": 0,
                         "Act": "PushStack",
                         "Path": "SwitchType",
-                        "Tok": "None",
-                        "FmTok": "None"
+                        "Token": "None",
+                        "FromToken": "None"
                       },
                       {
                         "RunIndex": -1,
                         "Act": "PopStack",
                         "Path": "",
-                        "Tok": "None",
-                        "FmTok": "None"
+                        "Token": "None",
+                        "FromToken": "None"
                       }
                     ],
                     "OptTokMap": false,
@@ -7686,15 +7686,15 @@
                         "RunIndex": 0,
                         "Act": "PushStack",
                         "Path": "SwitchType",
-                        "Tok": "None",
-                        "FmTok": "None"
+                        "Token": "None",
+                        "FromToken": "None"
                       },
                       {
                         "RunIndex": -1,
                         "Act": "PopStack",
                         "Path": "",
-                        "Tok": "None",
-                        "FmTok": "None"
+                        "Token": "None",
+                        "FromToken": "None"
                       }
                     ],
                     "OptTokMap": false,
@@ -7715,15 +7715,15 @@
                         "RunIndex": 0,
                         "Act": "PushStack",
                         "Path": "SwitchType",
-                        "Tok": "None",
-                        "FmTok": "None"
+                        "Token": "None",
+                        "FromToken": "None"
                       },
                       {
                         "RunIndex": -1,
                         "Act": "PopStack",
                         "Path": "",
-                        "Tok": "None",
-                        "FmTok": "None"
+                        "Token": "None",
+                        "FromToken": "None"
                       }
                     ],
                     "OptTokMap": false,
@@ -7926,8 +7926,8 @@
                     "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "",
-                    "Tok": "NameLabel",
-                    "FmTok": "None"
+                    "Token": "NameLabel",
+                    "FromToken": "None"
                   }
                 ],
                 "OptTokMap": false,
@@ -8192,22 +8192,22 @@
                     "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "Name...",
-                    "Tok": "NameVar",
-                    "FmTok": "Name"
+                    "Token": "NameVar",
+                    "FromToken": "Name"
                   },
                   {
                     "RunIndex": -1,
                     "Act": "AddSymbol",
                     "Path": "Name",
-                    "Tok": "NameVar",
-                    "FmTok": "None"
+                    "Token": "NameVar",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": -1,
                     "Act": "AddDetail",
                     "Path": "[1]",
-                    "Tok": "None",
-                    "FmTok": "None"
+                    "Token": "None",
+                    "FromToken": "None"
                   }
                 ],
                 "OptTokMap": false,
@@ -8282,22 +8282,22 @@
                     "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "Name...",
-                    "Tok": "NameVar",
-                    "FmTok": "Name"
+                    "Token": "NameVar",
+                    "FromToken": "Name"
                   },
                   {
                     "RunIndex": -1,
                     "Act": "AddSymbol",
                     "Path": "Name",
-                    "Tok": "NameVar",
-                    "FmTok": "None"
+                    "Token": "NameVar",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": -1,
                     "Act": "AddDetail",
                     "Path": "[1]",
-                    "Tok": "None",
-                    "FmTok": "None"
+                    "Token": "None",
+                    "FromToken": "None"
                   }
                 ],
                 "OptTokMap": false,
@@ -8506,15 +8506,15 @@
                     "RunIndex": -1,
                     "Act": "AddSymbol",
                     "Path": "",
-                    "Tok": "NameLibrary",
-                    "FmTok": "None"
+                    "Token": "NameLibrary",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "",
-                    "Tok": "NameLibrary",
-                    "FmTok": "None"
+                    "Token": "NameLibrary",
+                    "FromToken": "None"
                   }
                 ],
                 "OptTokMap": false,
@@ -8535,15 +8535,15 @@
                     "RunIndex": -1,
                     "Act": "AddSymbol",
                     "Path": "",
-                    "Tok": "NameLibrary",
-                    "FmTok": "None"
+                    "Token": "NameLibrary",
+                    "FromToken": "None"
                   },
                   {
                     "RunIndex": -1,
                     "Act": "ChgToken",
                     "Path": "",
-                    "Tok": "NameLibrary",
-                    "FmTok": "None"
+                    "Token": "NameLibrary",
+                    "FromToken": "None"
                   }
                 ],
                 "OptTokMap": false,
@@ -8686,22 +8686,22 @@
                         "RunIndex": -1,
                         "Act": "ChgToken",
                         "Path": "[0]",
-                        "Tok": "NameConstant",
-                        "FmTok": "None"
+                        "Token": "NameConstant",
+                        "FromToken": "None"
                       },
                       {
                         "RunIndex": -1,
                         "Act": "AddSymbol",
                         "Path": "[0]",
-                        "Tok": "NameConstant",
-                        "FmTok": "None"
+                        "Token": "NameConstant",
+                        "FromToken": "None"
                       },
                       {
                         "RunIndex": -1,
                         "Act": "AddDetail",
                         "Path": "[-1]",
-                        "Tok": "None",
-                        "FmTok": "None"
+                        "Token": "None",
+                        "FromToken": "None"
                       }
                     ],
                     "OptTokMap": false,
@@ -8722,15 +8722,15 @@
                         "RunIndex": -1,
                         "Act": "ChgToken",
                         "Path": "[0]",
-                        "Tok": "NameConstant",
-                        "FmTok": "None"
+                        "Token": "NameConstant",
+                        "FromToken": "None"
                       },
                       {
                         "RunIndex": -1,
                         "Act": "AddSymbol",
                         "Path": "[0]",
-                        "Tok": "NameConstant",
-                        "FmTok": "None"
+                        "Token": "NameConstant",
+                        "FromToken": "None"
                       }
                     ],
                     "OptTokMap": false,
@@ -8823,22 +8823,22 @@
                         "RunIndex": -1,
                         "Act": "ChgToken",
                         "Path": "[0]",
-                        "Tok": "NameVarGlobal",
-                        "FmTok": "None"
+                        "Token": "NameVarGlobal",
+                        "FromToken": "None"
                       },
                       {
                         "RunIndex": -1,
                         "Act": "AddSymbol",
                         "Path": "[0]",
-                        "Tok": "NameVarGlobal",
-                        "FmTok": "None"
+                        "Token": "NameVarGlobal",
+                        "FromToken": "None"
                       },
                       {
                         "RunIndex": -1,
                         "Act": "AddDetail",
                         "Path": "[-1]",
-                        "Tok": "None",
-                        "FmTok": "None"
+                        "Token": "None",
+                        "FromToken": "None"
                       }
                     ],
                     "OptTokMap": false,
@@ -8859,22 +8859,22 @@
                         "RunIndex": -1,
                         "Act": "ChgToken",
                         "Path": "[0]",
-                        "Tok": "NameVarGlobal",
-                        "FmTok": "None"
+                        "Token": "NameVarGlobal",
+                        "FromToken": "None"
                       },
                       {
                         "RunIndex": -1,
                         "Act": "AddSymbol",
                         "Path": "[0]",
-                        "Tok": "NameVarGlobal",
-                        "FmTok": "None"
+                        "Token": "NameVarGlobal",
+                        "FromToken": "None"
                       },
                       {
                         "RunIndex": -1,
                         "Act": "AddDetail",
                         "Path": "[1]",
-                        "Tok": "None",
-                        "FmTok": "None"
+                        "Token": "None",
+                        "FromToken": "None"
                       }
                     ],
                     "OptTokMap": false,
