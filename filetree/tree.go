@@ -66,13 +66,13 @@ type Tree struct {
 	WatchedPaths map[string]bool `copier:"-" set:"-" view:"-"`
 
 	// last path updated by watcher
-	LastWatchUpdt string `copier:"-" set:"-" view:"-"`
+	LastWatchUpdate string `copier:"-" set:"-" view:"-"`
 
 	// timestamp of last update
 	LastWatchTime time.Time `copier:"-" set:"-" view:"-"`
 
 	// Update mutex
-	UpdtMu sync.Mutex `copier:"-" set:"-" view:"-"`
+	UpdateMu sync.Mutex `copier:"-" set:"-" view:"-"`
 }
 
 func (fv *Tree) Destroy() {
@@ -115,14 +115,14 @@ func (ft *Tree) OpenPath(path string) {
 // UpdateAll does a full update of the tree -- calls ReadDir on current path
 func (ft *Tree) UpdateAll() {
 	// updt := ft.AsyncLock() // note: safe for async updating
-	ft.UpdtMu.Lock()
+	ft.UpdateMu.Lock()
 	ft.Dirs.ClearMarks()
 	ft.ReadDir(string(ft.FPath))
 	// the problem here is that closed dirs are not visited but we want to keep their settings:
 	// ft.Dirs.DeleteStale()
 	ft.Update()
 	ft.TreeViewChanged(nil)
-	ft.UpdtMu.Unlock()
+	ft.UpdateMu.Unlock()
 	// ft.AsyncUnlock(updt) // todo:
 }
 
@@ -182,7 +182,7 @@ func (ft *Tree) WatchWatcher() {
 				case event.Op&fsnotify.Create == fsnotify.Create ||
 					event.Op&fsnotify.Remove == fsnotify.Remove ||
 					event.Op&fsnotify.Rename == fsnotify.Rename:
-					ft.WatchUpdt(event.Name)
+					ft.WatchUpdate(event.Name)
 				}
 			case err := <-watch.Errors:
 				_ = err
@@ -191,15 +191,15 @@ func (ft *Tree) WatchWatcher() {
 	}()
 }
 
-// WatchUpdt does the update for given path
-func (ft *Tree) WatchUpdt(path string) {
-	ft.UpdtMu.Lock()
-	defer ft.UpdtMu.Unlock()
+// WatchUpdate does the update for given path
+func (ft *Tree) WatchUpdate(path string) {
+	ft.UpdateMu.Lock()
+	defer ft.UpdateMu.Unlock()
 	// fmt.Println(path)
 
 	dir, _ := filepath.Split(path)
 	rp := ft.RelPath(gi.Filename(dir))
-	if rp == ft.LastWatchUpdt {
+	if rp == ft.LastWatchUpdate {
 		now := time.Now()
 		lagMs := int(now.Sub(ft.LastWatchTime) / time.Millisecond)
 		if lagMs < 100 {
@@ -212,7 +212,7 @@ func (ft *Tree) WatchUpdt(path string) {
 		// slog.Error(err.Error())
 		return
 	}
-	ft.LastWatchUpdt = rp
+	ft.LastWatchUpdate = rp
 	ft.LastWatchTime = time.Now()
 	if !fn.IsOpen() {
 		// fmt.Printf("warning: watcher updating closed node: %s\n", rp)

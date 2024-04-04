@@ -28,13 +28,13 @@ const (
 // A standard Go image is rendered upright on a standard Vulkan surface.
 // Set flipY to true to flip.
 func (dw *Drawer) SetGoImage(idx, layer int, img image.Image, flipY bool) {
-	dw.UpdtMu.Lock()
+	dw.UpdateMu.Lock()
 	_, tx, _ := dw.Sys.Vars().ValByIndexTry(0, "Tex", idx)
 	err := tx.SetGoImage(img, layer, flipY)
 	if err != nil && vgpu.Debug {
 		fmt.Println(err)
 	}
-	dw.UpdtMu.Unlock()
+	dw.UpdateMu.Unlock()
 }
 
 // GetImageVal returns vgpu Val value of Image for given index
@@ -53,12 +53,12 @@ func (dw *Drawer) ConfigImageDefaultFormat(idx int, width int, height int, layer
 // ConfigImage configures the draw image at given index
 // to fit the given image format and number of layers as a drawing source.
 func (dw *Drawer) ConfigImage(idx int, fmt *vgpu.ImageFormat) {
-	dw.UpdtMu.Lock()
+	dw.UpdateMu.Lock()
 	_, tx, _ := dw.Sys.Vars().ValByIndexTry(0, "Tex", idx)
 	tx.Texture.Format = *fmt
 	tx.Texture.Format.SetMultisample(1) // can't be multi
 	tx.Texture.AllocTexture()
-	dw.UpdtMu.Unlock()
+	dw.UpdateMu.Unlock()
 }
 
 // SetFrameImage sets given vgpu.Framebuffer image as a drawing source at index,
@@ -68,17 +68,17 @@ func (dw *Drawer) SetFrameImage(idx int, fbi any) {
 	if fb == nil {
 		return
 	}
-	dw.UpdtMu.Lock()
+	dw.UpdateMu.Lock()
 	_, tx, _ := dw.Sys.Vars().ValByIndexTry(0, "Tex", idx)
 	if fb.Format.Size != tx.Texture.Format.Size {
-		dw.UpdtMu.Unlock()
+		dw.UpdateMu.Unlock()
 		dw.ConfigImage(idx, &fb.Format)
-		dw.UpdtMu.Lock()
+		dw.UpdateMu.Lock()
 	}
 	cmd := dw.Sys.MemCmdStart()
 	fb.CopyToImage(&tx.Texture.Image, dw.Sys.Device.Device, cmd)
 	dw.Sys.MemCmdEndSubmitWaitFree()
-	dw.UpdtMu.Unlock()
+	dw.UpdateMu.Unlock()
 }
 
 ////////////////////////////////////////////////////////////////
@@ -130,13 +130,13 @@ func (dw *Drawer) SetFrameImageName(name string, fb *vgpu.Framebuffer) {
 // SyncImages must be called after images have been updated, to sync
 // memory up to the GPU.
 func (dw *Drawer) SyncImages() {
-	dw.UpdtMu.Lock()
+	dw.UpdateMu.Lock()
 	sy := &dw.Sys
 	sy.Mem.SyncToGPU()
 	vars := sy.Vars()
 	vk.DeviceWaitIdle(sy.Device.Device)
 	vars.BindAllTextureVars(0) // set = 0, iterates over multiple desc sets
-	dw.UpdtMu.Unlock()
+	dw.UpdateMu.Unlock()
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -241,7 +241,7 @@ func (dw *Drawer) Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, 
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
 func (dw *Drawer) Draw(idx, layer int, src2dst mat32.Mat3, sr image.Rectangle, op draw.Op, flipY bool) error {
-	dw.UpdtMu.Lock()
+	dw.UpdateMu.Lock()
 	sy := &dw.Sys
 	dpl := dw.SelectPipeline(op)
 	vars := sy.Vars()
@@ -263,7 +263,7 @@ func (dw *Drawer) Draw(idx, layer int, src2dst mat32.Mat3, sr image.Rectangle, o
 	matv, _ := vars.VarByNameTry(vgpu.PushSet, "Mtxs")
 	dpl.Push(cmd, matv, unsafe.Pointer(tmat))
 	dpl.DrawVertex(cmd, 0)
-	dw.UpdtMu.Unlock()
+	dw.UpdateMu.Unlock()
 	return nil
 }
 
@@ -271,11 +271,11 @@ func (dw *Drawer) Draw(idx, layer int, src2dst mat32.Mat3, sr image.Rectangle, o
 // choose this based on the bank of 16
 // texture values if number of textures > MaxTexturesPerSet.
 func (dw *Drawer) UseTextureSet(descIndex int) {
-	dw.UpdtMu.Lock()
+	dw.UpdateMu.Lock()
 	sy := &dw.Sys
 	cmd := sy.CmdPool.Buff
 	sy.CmdBindVars(cmd, descIndex)
-	dw.UpdtMu.Unlock()
+	dw.UpdateMu.Unlock()
 }
 
 // StartDraw starts image drawing rendering process on render target
@@ -284,8 +284,8 @@ func (dw *Drawer) UseTextureSet(descIndex int) {
 // texture values if number of textures > MaxTexturesPerSet.
 // It returns false if rendering can not proceed.
 func (dw *Drawer) StartDraw(descIndex int) bool {
-	dw.UpdtMu.Lock()
-	defer dw.UpdtMu.Unlock()
+	dw.UpdateMu.Lock()
+	defer dw.UpdateMu.Unlock()
 	sy := &dw.Sys
 	cmd := sy.CmdPool.Buff
 	if dw.Surf != nil {
@@ -326,7 +326,7 @@ func (dw *Drawer) SelectPipeline(op draw.Op) *vgpu.Pipeline {
 
 // EndDraw ends image drawing rendering process on render target
 func (dw *Drawer) EndDraw() {
-	dw.UpdtMu.Lock()
+	dw.UpdateMu.Lock()
 	sy := &dw.Sys
 	cmd := sy.CmdPool.Buff
 	sy.EndRenderPass(cmd)
@@ -338,5 +338,5 @@ func (dw *Drawer) EndDraw() {
 		dw.Frame.SubmitRender(cmd)
 		dw.Frame.WaitForRender()
 	}
-	dw.UpdtMu.Unlock()
+	dw.UpdateMu.Unlock()
 }

@@ -90,7 +90,7 @@ type FileView struct {
 	DoneWatcher chan bool `set:"-" view:"-"`
 
 	// UpdateFiles mutex
-	UpdtMu sync.Mutex `set:"-" view:"-"`
+	UpdateMu sync.Mutex `set:"-" view:"-"`
 
 	// Previous path that was processed via UpdateFiles
 	PrevPath string `set:"-" view:"-"`
@@ -558,8 +558,8 @@ func (fv *FileView) ReadFiles() {
 
 // UpdateFiles updates list of files and other views for current path
 func (fv *FileView) UpdateFiles() {
-	fv.UpdtMu.Lock()
-	defer fv.UpdtMu.Unlock()
+	fv.UpdateMu.Lock()
+	defer fv.UpdateMu.Unlock()
 
 	fv.UpdatePath()
 	if len(gi.RecentPaths) == 0 {

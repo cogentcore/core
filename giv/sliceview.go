@@ -141,9 +141,9 @@ type SliceViewer interface {
 	// offset for index label
 	RowWidgetNs() (nWidgPerRow, idxOff int)
 
-	// UpdtSliceSize updates the current size of the slice
+	// UpdateSliceSize updates the current size of the slice
 	// and sets SliceSize if changed.
-	UpdtSliceSize() int
+	UpdateSliceSize() int
 
 	// StyleValueWidget performs additional value widget styling
 	StyleValueWidget(w gi.Widget, s *styles.Style, row, col int)
@@ -179,7 +179,6 @@ type SliceViewer interface {
 	SliceNewAt(idx int)
 
 	// SliceDeleteAt deletes element at given index from slice
-	// if updt is true, then update the grid after
 	SliceDeleteAt(idx int)
 
 	// MimeDataType returns the data type for mime clipboard
@@ -599,9 +598,9 @@ func (sv *SliceViewBase) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	return
 }
 
-// UpdtSliceSize updates and returns the size of the slice
+// UpdateSliceSize updates and returns the size of the slice
 // and sets SliceSize
-func (sv *SliceViewBase) UpdtSliceSize() int {
+func (sv *SliceViewBase) UpdateSliceSize() int {
 	sz := sv.SliceNPVal.Len()
 	sv.SliceSize = sz
 	return sz
@@ -637,7 +636,7 @@ func (sv *SliceViewBase) ViewMuUnlock() {
 
 // UpdateStartIndex updates StartIndex to fit current view
 func (sv *SliceViewBase) UpdateStartIndex() {
-	sz := sv.This().(SliceViewer).UpdtSliceSize()
+	sz := sv.This().(SliceViewer).UpdateSliceSize()
 	if sz > sv.VisRows {
 		lastSt := sz - sv.VisRows
 		sv.StartIndex = min(lastSt, sv.StartIndex)
@@ -672,7 +671,7 @@ func (sv *SliceViewBase) ConfigRows() {
 	sg.DeleteChildren()
 	sv.Values = nil
 
-	sv.This().(SliceViewer).UpdtSliceSize()
+	sv.This().(SliceViewer).UpdateSliceSize()
 
 	if sv.IsNil() {
 		return
@@ -761,7 +760,7 @@ func (sv *SliceViewBase) UpdateWidgets() {
 	sv.ViewMuLock()
 	defer sv.ViewMuUnlock()
 
-	sv.This().(SliceViewer).UpdtSliceSize()
+	sv.This().(SliceViewer).UpdateSliceSize()
 
 	nWidgPerRow, idxOff := sv.RowWidgetNs()
 
@@ -895,7 +894,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 
 	sv.SliceNPVal = laser.NonPtrValue(reflect.ValueOf(sv.Slice)) // need to update after changes
 
-	sv.This().(SliceViewer).UpdtSliceSize()
+	sv.This().(SliceViewer).UpdateSliceSize()
 
 	sv.SelectIndexAction(idx, events.SelectOne)
 	sv.ViewMuUnlock()
@@ -956,7 +955,7 @@ func (sv *SliceViewBase) SliceDeleteAt(i int) {
 
 	laser.SliceDeleteAt(sv.Slice, i)
 
-	sv.This().(SliceViewer).UpdtSliceSize()
+	sv.This().(SliceViewer).UpdateSliceSize()
 
 	sv.ViewMuUnlock()
 	sv.SetChanged()
@@ -1087,11 +1086,11 @@ func (sv *SliceViewBase) IndexFromPos(posY int) (int, bool) {
 	return row + sv.StartIndex, true
 }
 
-// ScrollToIndexNoUpdt ensures that given slice idx is visible
+// ScrollToIndexNoUpdate ensures that given slice idx is visible
 // by scrolling display as needed.
 // This version does not update the slicegrid.
 // Just computes the StartIndex and updates the scrollbar
-func (sv *SliceViewBase) ScrollToIndexNoUpdt(idx int) bool {
+func (sv *SliceViewBase) ScrollToIndexNoUpdate(idx int) bool {
 	if sv.VisRows == 0 {
 		return false
 	}
@@ -1113,7 +1112,7 @@ func (sv *SliceViewBase) ScrollToIndexNoUpdt(idx int) bool {
 // ScrollToIndex ensures that given slice idx is visible
 // by scrolling display as needed.
 func (sv *SliceViewBase) ScrollToIndex(idx int) bool {
-	updt := sv.ScrollToIndexNoUpdt(idx)
+	updt := sv.ScrollToIndexNoUpdate(idx)
 	if updt {
 		sv.This().(SliceViewer).UpdateWidgets()
 	}

@@ -196,7 +196,7 @@ func (sc *Scene) PlaneMesh2D() Mesh {
 // the number of verticies.
 func (sc *Scene) ConfigMeshes() {
 	ph := &sc.Phong
-	ph.UpdtMu.Lock()
+	ph.UpdateMu.Lock()
 	ph.ResetMeshes()
 	for _, kv := range sc.Meshes.Order {
 		ms := kv.Value
@@ -204,20 +204,20 @@ func (sc *Scene) ConfigMeshes() {
 		ph.AddMesh(kv.Key, nVtx, nIndex, hasColor)
 	}
 	ph.ConfigMeshes()
-	ph.UpdtMu.Unlock()
+	ph.UpdateMu.Unlock()
 }
 
 // SetMeshes sets the meshes after config
 func (sc *Scene) SetMeshes() {
 	ph := &sc.Phong
-	ph.UpdtMu.Lock()
+	ph.UpdateMu.Lock()
 	for _, kv := range sc.Meshes.Order {
 		ms := kv.Value
 		vtxAry, normAry, texAry, clrAry, idxAry := ph.MeshFloatsByName(kv.Key)
 		ms.Set(sc, vtxAry, normAry, texAry, clrAry, idxAry)
 		ph.ModMeshByName(kv.Key)
 	}
-	ph.UpdtMu.Unlock()
+	ph.UpdateMu.Unlock()
 	ph.Sync()
 }
 
@@ -225,13 +225,13 @@ func (sc *Scene) SetMeshes() {
 // each mesh Update method must call SetMod to trigger the update
 func (sc *Scene) UpdateMeshes() {
 	ph := &sc.Phong
-	ph.UpdtMu.Lock()
+	ph.UpdateMu.Lock()
 	for _, kv := range sc.Meshes.Order {
 		ms := kv.Value
 		vtxAry, normAry, texAry, clrAry, idxAry := ph.MeshFloatsByName(kv.Key)
 		ms.Update(sc, vtxAry, normAry, texAry, clrAry, idxAry)
 	}
-	ph.UpdtMu.Unlock()
+	ph.UpdateMu.Unlock()
 	ph.Sync()
 }
 

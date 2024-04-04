@@ -368,9 +368,9 @@ const (
 // RenderImpl renders the scene to the framebuffer.
 // all scene-level resources must be initialized and activated at this point
 func (sc *Scene) RenderImpl() {
-	sc.Phong.UpdtMu.Lock()
+	sc.Phong.UpdateMu.Lock()
 	sc.Phong.SetViewPrjn(&sc.Camera.ViewMatrix, &sc.Camera.VkPrjnMatrix)
-	sc.Phong.UpdtMu.Unlock()
+	sc.Phong.UpdateMu.Unlock()
 	sc.Phong.Sync()
 
 	var rcs [RenderClassesN][]Node
@@ -396,12 +396,12 @@ func (sc *Scene) RenderImpl() {
 		return ki.Continue
 	})
 
-	sc.Phong.UpdtMu.Lock()
+	sc.Phong.UpdateMu.Lock()
 	sy := &sc.Phong.Sys
 	cmd := sy.CmdPool.Buff
 	descIndex := 0
 	sy.ResetBeginRenderPass(cmd, sc.Frame.Frames[0], descIndex)
-	sc.Phong.UpdtMu.Unlock()
+	sc.Phong.UpdateMu.Unlock()
 
 	for rci, objs := range rcs {
 		rc := RenderClasses(rci)
@@ -431,9 +431,9 @@ func (sc *Scene) RenderImpl() {
 			obj.Render()
 		}
 	}
-	sc.Phong.UpdtMu.Lock()
+	sc.Phong.UpdateMu.Lock()
 	sy.EndRenderPass(cmd)
 	sc.Frame.SubmitRender(cmd) // this is where it waits for the 16 msec
 	sc.Frame.WaitForRender()
-	sc.Phong.UpdtMu.Unlock()
+	sc.Phong.UpdateMu.Unlock()
 }

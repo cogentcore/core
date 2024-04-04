@@ -318,7 +318,7 @@ func (fb *FileBrowse) ConfigToolbar(tb *gi.Toolbar) { //gti:add
 	// op.Args[0].SetTag("ext", ".json")
 	giv.NewFuncButton(tb, fb.SaveActiveView).SetKey(keyfun.Save)
 	// save.SetUpdateFunc(func() {
-	// 	save.SetEnabledUpdt(fb.Changed && ge.Filename != "")
+	// 	save.SetEnabledUpdate(fb.Changed && ge.Filename != "")
 	// })
 	sa := giv.NewFuncButton(tb, fb.SaveActiveViewAs).SetKey(keyfun.SaveAs)
 	sa.Args[0].SetValue(fb.ActiveFilename)

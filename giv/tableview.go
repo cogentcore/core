@@ -330,7 +330,7 @@ func (tv *TableView) ConfigRows() {
 	sg.DeleteChildren()
 	tv.Values = nil
 
-	tv.This().(SliceViewer).UpdtSliceSize()
+	tv.This().(SliceViewer).UpdateSliceSize()
 
 	if tv.IsNil() {
 		return
@@ -438,7 +438,7 @@ func (tv *TableView) UpdateWidgets() {
 	tv.ViewMuLock()
 	defer tv.ViewMuUnlock()
 
-	tv.This().(SliceViewer).UpdtSliceSize()
+	tv.This().(SliceViewer).UpdateSliceSize()
 
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 
@@ -552,7 +552,7 @@ func (tv *TableView) SliceNewAt(idx int) {
 		idx = tv.SliceSize
 	}
 
-	tv.This().(SliceViewer).UpdtSliceSize()
+	tv.This().(SliceViewer).UpdateSliceSize()
 	tv.SelectIndexAction(idx, events.SelectOne)
 	tv.ViewMuUnlock()
 	tv.SetChanged()
@@ -572,7 +572,7 @@ func (tv *TableView) SliceDeleteAt(idx int) {
 
 	laser.SliceDeleteAt(tv.Slice, idx)
 
-	tv.This().(SliceViewer).UpdtSliceSize()
+	tv.This().(SliceViewer).UpdateSliceSize()
 
 	tv.ViewMuUnlock()
 	tv.SetChanged()

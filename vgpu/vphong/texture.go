@@ -134,8 +134,8 @@ func (ph *Phong) UseTextureName(name string) error {
 // the underlying image changes.  Assumes the size remains the same.
 // Must Sync for the changes to take effect.
 func (ph *Phong) UpdateTextureIndex(idx int) error {
-	ph.UpdtMu.Lock()
-	defer ph.UpdtMu.Unlock()
+	ph.UpdateMu.Lock()
+	defer ph.UpdateMu.Unlock()
 	if idx >= ph.Textures.Len() {
 		return nil
 	}
