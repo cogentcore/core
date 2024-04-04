@@ -99,14 +99,14 @@ func (dw *Drawer) ConfigSys() {
 	tximgv := txset.Add("Tex", vgpu.ImageRGBA32, 1, vgpu.TextureRole, vgpu.FragmentShader)
 	tximgv.TextureOwns = true
 
-	vset.ConfigVals(1)
-	txset.ConfigVals(dw.Impl.MaxTextures)
+	vset.ConfigValues(1)
+	txset.ConfigValues(dw.Impl.MaxTextures)
 
 	// note: add all values per above before doing Config
 	sy.Config()
 
 	// note: first val in set is offset
-	rectPos, _ := posv.Vals.ValByIndexTry(0)
+	rectPos, _ := posv.Values.ValueByIndexTry(0)
 	rectPosA := rectPos.Floats32()
 	rectPosA.Set(0,
 		0.0, 0.0,
@@ -115,14 +115,14 @@ func (dw *Drawer) ConfigSys() {
 		1.0, 1.0)
 	rectPos.SetMod()
 
-	rectIndex, _ := idxv.Vals.ValByIndexTry(0)
+	rectIndex, _ := idxv.Values.ValueByIndexTry(0)
 	idxs := []uint16{0, 1, 2, 2, 1, 3} // triangle strip order
 	rectIndex.CopyFromBytes(unsafe.Pointer(&idxs[0]))
 
 	sy.Mem.SyncToGPU()
 
-	vars.BindVertexValIndex("Pos", 0)
-	vars.BindVertexValIndex("Index", 0)
+	vars.BindVertexValueIndex("Pos", 0)
+	vars.BindVertexValueIndex("Index", 0)
 }
 
 // ConfigMtxs configures the draw matrix for given draw parameters:

@@ -23,7 +23,7 @@ import (
 // RenderFrame, and Framebuffers point to it.
 type Render struct {
 
-	// system that we belong to and manages all shared resources (Memory, Vars, Vals, etc), etc
+	// system that we belong to and manages all shared resources (Memory, Vars, Values, etc), etc
 	Sys *System
 
 	// the device we're associated with -- this must be the same device that owns the Framebuffer -- e.g., the Surface
@@ -54,7 +54,7 @@ type Render struct {
 	NotSurface bool
 
 	// values for clearing image when starting render pass
-	ClearVals []vk.ClearValue
+	ClearValues []vk.ClearValue
 
 	// the vulkan renderpass config that clears target first
 	VkClearPass vk.RenderPass
@@ -224,23 +224,23 @@ func (rp *Render) SetSize(size image.Point) {
 
 // SetClearColor sets the RGBA colors to set when starting new render
 func (rp *Render) SetClearColor(r, g, b, a float32) {
-	if len(rp.ClearVals) == 0 {
-		rp.ClearVals = make([]vk.ClearValue, 2)
+	if len(rp.ClearValues) == 0 {
+		rp.ClearValues = make([]vk.ClearValue, 2)
 	}
-	rp.ClearVals[0].SetColor([]float32{r, g, b, a})
+	rp.ClearValues[0].SetColor([]float32{r, g, b, a})
 }
 
 // SetClearDepthStencil sets the depth and stencil values when starting new render
 func (rp *Render) SetClearDepthStencil(depth float32, stencil uint32) {
-	if len(rp.ClearVals) == 0 {
-		rp.ClearVals = make([]vk.ClearValue, 2)
+	if len(rp.ClearValues) == 0 {
+		rp.ClearValues = make([]vk.ClearValue, 2)
 	}
-	rp.ClearVals[1].SetDepthStencil(depth, stencil)
+	rp.ClearValues[1].SetDepthStencil(depth, stencil)
 }
 
 // BeginRenderPass adds commands to the given command buffer
 // to start the render pass on given framebuffer.
-// Clears the frame first, according to the ClearVals
+// Clears the frame first, according to the ClearValues
 // See BeginRenderPassNoClear for non-clearing version.
 func (rp *Render) BeginRenderPass(cmd vk.CommandBuffer, fr *Framebuffer) {
 	rp.BeginRenderPassImpl(cmd, fr, true)
@@ -255,13 +255,13 @@ func (rp *Render) BeginRenderPassNoClear(cmd vk.CommandBuffer, fr *Framebuffer) 
 
 // BeginRenderPassImpl adds commands to the given command buffer
 // to start the render pass on given framebuffer.
-// If clear = true, clears the frame according to the ClearVals.
+// If clear = true, clears the frame according to the ClearValues.
 func (rp *Render) BeginRenderPassImpl(cmd vk.CommandBuffer, fr *Framebuffer, clear bool) {
 	w, h := fr.Image.Format.Size32()
-	clearVals := rp.ClearVals
+	clearValues := rp.ClearValues
 	vrp := rp.VkClearPass
 	if !clear && fr.HasCleared {
-		clearVals = nil
+		clearValues = nil
 		vrp = rp.VkLoadPass
 	}
 	fr.HasCleared = true
@@ -273,8 +273,8 @@ func (rp *Render) BeginRenderPassImpl(cmd vk.CommandBuffer, fr *Framebuffer, cle
 			Offset: vk.Offset2D{X: 0, Y: 0},
 			Extent: vk.Extent2D{Width: w, Height: h},
 		},
-		ClearValueCount: uint32(len(clearVals)),
-		PClearValues:    clearVals,
+		ClearValueCount: uint32(len(clearValues)),
+		PClearValues:    clearValues,
 	}, vk.SubpassContentsInline)
 
 	vk.CmdSetViewport(cmd, 0, 1, []vk.Viewport{{

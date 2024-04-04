@@ -36,7 +36,7 @@ type MemReg struct {
 // Used in initial allocation algorithm.
 type VarMem struct {
 
-	// variable -- all Vals of given Var are stored in the same Buffer
+	// variable -- all Values of given Var are stored in the same Buffer
 	Var *Var
 
 	// index into storage buffer array holding this value
@@ -51,7 +51,7 @@ type VarMem struct {
 
 // Memory manages memory for the GPU, using separate buffers for
 // different roles, defined in the BuffTypes and managed by a MemBuff.
-// Memory is organized by Vars with associated Vals.
+// Memory is organized by Vars with associated Values.
 type Memory struct {
 	GPU *GPU
 
@@ -61,7 +61,7 @@ type Memory struct {
 	// command pool for memory transfers
 	CmdPool CmdPool
 
-	// Vars variables used in shaders, which manage associated Vals containing specific value instances of each var
+	// Vars variables used in shaders, which manage associated Values containing specific value instances of each var
 	Vars Vars
 
 	// memory buffers, organized by different Roles of vars.  Storage is managed separately in StorageBuffs
@@ -93,7 +93,7 @@ func (mm *Memory) Destroy(dev vk.Device) {
 	mm.GPU = nil
 }
 
-// Config should be called after all Vals have been configured
+// Config should be called after all Values have been configured
 // and are ready to go with their initial data.
 // Does: AllocHost(), AllocDev().
 // Note: dynamic binding must be called separately after this.
@@ -280,14 +280,14 @@ func (mm *Memory) DeactivateBuff(bt BuffTypes) {
 	}
 }
 
-// SyncToGPU syncs all modified Val regions from CPU to GPU device memory, for all buffs
+// SyncToGPU syncs all modified Value regions from CPU to GPU device memory, for all buffs
 func (mm *Memory) SyncToGPU() {
 	for bt := VtxIndexBuff; bt < BuffTypesN; bt++ {
 		mm.SyncToGPUBuff(bt)
 	}
 }
 
-// SyncToGPUBuff syncs all modified Val regions from CPU to GPU device memory, for given buff
+// SyncToGPUBuff syncs all modified Value regions from CPU to GPU device memory, for given buff
 func (mm *Memory) SyncToGPUBuff(bt BuffTypes) {
 	switch bt {
 	case StorageBuff:
@@ -298,7 +298,7 @@ func (mm *Memory) SyncToGPUBuff(bt BuffTypes) {
 			}
 		}
 	case TextureBuff:
-		mm.SyncValsTextures(mm.Buffs[bt])
+		mm.SyncValuesTextures(mm.Buffs[bt])
 	default:
 		mods := mm.Vars.ModRegs(bt)
 		if len(mods) > 0 {
@@ -307,18 +307,18 @@ func (mm *Memory) SyncToGPUBuff(bt BuffTypes) {
 	}
 }
 
-// SyncRegionValName returns memory region for syncing given value
+// SyncRegionValueName returns memory region for syncing given value
 // from GPU device memory to CPU host memory,
 // specifying value by name for given named variable in given set.
 // Variable can only only be Storage memory -- otherwise an error is returned.
 // Multiple regions can be combined into one transfer call for greater efficiency.
-func (mm *Memory) SyncRegionValName(set int, varNm, valNm string) (MemReg, error) {
-	vr, vl, err := mm.Vars.ValByNameTry(set, varNm, valNm)
+func (mm *Memory) SyncRegionValueName(set int, varNm, valNm string) (MemReg, error) {
+	vr, vl, err := mm.Vars.ValueByNameTry(set, varNm, valNm)
 	if err != nil {
 		return MemReg{}, err
 	}
 	if vr.BuffType() != StorageBuff {
-		err = fmt.Errorf("SyncRegionValName: Variable must be in Storage buffer, not: %s", vr.BuffType().String())
+		err = fmt.Errorf("SyncRegionValueName: Variable must be in Storage buffer, not: %s", vr.BuffType().String())
 		if Debug {
 			log.Println(err)
 			return MemReg{}, err
@@ -327,18 +327,18 @@ func (mm *Memory) SyncRegionValName(set int, varNm, valNm string) (MemReg, error
 	return vl.MemReg(vr), nil
 }
 
-// SyncRegionValIndex returns memory region for syncing given value
+// SyncRegionValueIndex returns memory region for syncing given value
 // from GPU device memory to CPU host memory,
 // specifying value by index for given named variable, in given set.
 // Variable can only only be Storage memory -- otherwise an error is returned.
 // Multiple regions can be combined into one transfer call for greater efficiency.
-func (mm *Memory) SyncRegionValIndex(set int, varNm string, valIndex int) (MemReg, error) {
-	vr, vl, err := mm.Vars.ValByIndexTry(set, varNm, valIndex)
+func (mm *Memory) SyncRegionValueIndex(set int, varNm string, valIndex int) (MemReg, error) {
+	vr, vl, err := mm.Vars.ValueByIndexTry(set, varNm, valIndex)
 	if err != nil {
 		return MemReg{}, err
 	}
 	if vr.BuffType() != StorageBuff {
-		err = fmt.Errorf("SyncRegionValIndex: Variable must be in Storage buffer, not: %s", vr.BuffType().String())
+		err = fmt.Errorf("SyncRegionValueIndex: Variable must be in Storage buffer, not: %s", vr.BuffType().String())
 		if Debug {
 			log.Println(err)
 			return MemReg{}, err
@@ -347,11 +347,11 @@ func (mm *Memory) SyncRegionValIndex(set int, varNm string, valIndex int) (MemRe
 	return vl.MemReg(vr), nil
 }
 
-// SyncValNameFmGPU syncs given value from GPU device memory to CPU host memory,
+// SyncValueNameFmGPU syncs given value from GPU device memory to CPU host memory,
 // specifying value by name for given named variable in given set.
 // Variable can only only be Storage memory -- otherwise an error is returned.
-func (mm *Memory) SyncValNameFmGPU(set int, varNm, valNm string) error {
-	mr, err := mm.SyncRegionValName(set, varNm, valNm)
+func (mm *Memory) SyncValueNameFmGPU(set int, varNm, valNm string) error {
+	mr, err := mm.SyncRegionValueName(set, varNm, valNm)
 	if err != nil {
 		return err
 	}
@@ -359,11 +359,11 @@ func (mm *Memory) SyncValNameFmGPU(set int, varNm, valNm string) error {
 	return nil
 }
 
-// SyncValIndexFmGPU syncs given value from GPU device memory to CPU host memory,
+// SyncValueIndexFmGPU syncs given value from GPU device memory to CPU host memory,
 // specifying value by index for given named variable, in given set.
 // Variable can only only be Storage memory -- otherwise an error is returned.
-func (mm *Memory) SyncValIndexFmGPU(set int, varNm string, valIndex int) error {
-	mr, err := mm.SyncRegionValIndex(set, varNm, valIndex)
+func (mm *Memory) SyncValueIndexFmGPU(set int, varNm string, valIndex int) error {
+	mr, err := mm.SyncRegionValueIndex(set, varNm, valIndex)
 	if err != nil {
 		return err
 	}
@@ -372,14 +372,14 @@ func (mm *Memory) SyncValIndexFmGPU(set int, varNm string, valIndex int) error {
 }
 
 // SyncStorageRegionsFmGPU syncs given regions from the Storage buffer memory
-// from GPU to CPU, in one call.   Use SyncRegValIndexFmCPU to get the regions.
+// from GPU to CPU, in one call.   Use SyncRegValueIndexFmCPU to get the regions.
 func (mm *Memory) SyncStorageRegionsFmGPU(regs ...MemReg) {
 	mm.TransferRegsFmGPU(regs)
 }
 
-// // SyncValFmGPU syncs given value from GPU device memory to CPU host memory.
+// // SyncValueFmGPU syncs given value from GPU device memory to CPU host memory.
 // // Must be in Storage memory -- otherwise an error will be printed and returned.
-// func (mm *Memory) SyncValFmGPU(vl *Val) {
+// func (mm *Memory) SyncValueFmGPU(vl *Value) {
 // 	mods := vl.MemReg()
 // 	mm.TransferRegsFmGPU([]MemReg{mods})
 // }
@@ -401,7 +401,7 @@ func (mm *Memory) TransferToGPUBuff(bt BuffTypes) {
 		}
 		mm.TransferRegsToGPU(regs)
 	case TextureBuff:
-		mm.TransferAllValsTextures(mm.Buffs[bt])
+		mm.TransferAllValuesTextures(mm.Buffs[bt])
 	default:
 		buff := mm.Buffs[bt]
 		mm.TransferRegsToGPU([]MemReg{{Offset: 0, Size: buff.Size, BuffType: bt}})
@@ -620,8 +620,8 @@ func (mm *Memory) TransferImagesFmGPU(buff vk.Buffer, imgs ...*Image) {
 	mm.CmdPool.EndSubmitWaitFree(&mm.Device)
 }
 
-// TransferAllValsTextures copies all vals images from host buffer to device memory
-func (mm *Memory) TransferAllValsTextures(buff *MemBuff) {
+// TransferAllValuesTextures copies all vals images from host buffer to device memory
+func (mm *Memory) TransferAllValuesTextures(buff *MemBuff) {
 	var imgs []*Image
 	vs := &mm.Vars
 	ns := vs.NSets()
@@ -634,7 +634,7 @@ func (mm *Memory) TransferAllValsTextures(buff *MemBuff) {
 			if vr.Role != TextureRole {
 				continue
 			}
-			vals := vr.Vals.ActiveVals()
+			vals := vr.Values.ActiveValues()
 			for _, vl := range vals {
 				if vl.Texture == nil {
 					continue
@@ -648,8 +648,8 @@ func (mm *Memory) TransferAllValsTextures(buff *MemBuff) {
 	}
 }
 
-// SyncValsTextures syncs all changed vals images from host buffer to device memory
-func (mm *Memory) SyncValsTextures(buff *MemBuff) {
+// SyncValuesTextures syncs all changed vals images from host buffer to device memory
+func (mm *Memory) SyncValuesTextures(buff *MemBuff) {
 	var imgs []*Image
 	vs := &mm.Vars
 	ns := vs.NSets()
@@ -662,7 +662,7 @@ func (mm *Memory) SyncValsTextures(buff *MemBuff) {
 			if vr.Role != TextureRole {
 				continue
 			}
-			vals := vr.Vals.ActiveVals()
+			vals := vr.Values.ActiveValues()
 			for _, vl := range vals {
 				if vl.Texture == nil || !vl.IsMod() {
 					continue

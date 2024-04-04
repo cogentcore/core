@@ -16,7 +16,7 @@ import (
 )
 
 // Pipeline manages Shader program(s) that accomplish a specific
-// type of rendering or compute function, using Vars / Vals
+// type of rendering or compute function, using Vars / Values
 // defined by the overall System.
 // In the graphics context, each pipeline could handle a different
 // class of materials (textures, Phong lighting, etc).
@@ -25,7 +25,7 @@ type Pipeline struct {
 	// unique name of this pipeline
 	Name string
 
-	// system that we belong to and manages all shared resources (Memory, Vars, Vals, etc), etc
+	// system that we belong to and manages all shared resources (Memory, Vars, Values, etc), etc
 	Sys *System
 
 	// shaders in order added -- should be execution order
@@ -384,7 +384,7 @@ func (pl *Pipeline) Draw(cmd vk.CommandBuffer, vtxCount, instanceCount, firstVtx
 }
 
 // DrawVertex adds commands to the given command buffer
-// to bind vertex / index values and Draw based on current BindVertexVal
+// to bind vertex / index values and Draw based on current BindVertexValue
 // setting for any Vertex (and associated Index) Vars,
 // for given descIndex set of descriptors (see Vars NDescs for info).
 func (pl *Pipeline) DrawVertex(cmd vk.CommandBuffer, descIndex int) {
@@ -395,14 +395,14 @@ func (pl *Pipeline) DrawVertex(cmd vk.CommandBuffer, descIndex int) {
 	st := vs.SetMap[VertexSet]
 	var offs []vk.DeviceSize
 	var idxVar *Var
-	var idxVal *Val
+	var idxValue *Value
 	if len(st.RoleMap[Index]) == 1 {
 		idxVar = st.RoleMap[Index][0]
-		idxVal, _ = idxVar.BindVal(descIndex)
+		idxValue, _ = idxVar.BindValue(descIndex)
 	}
 	vtxn := 0
 	for _, vr := range st.Vars {
-		vl, err := vr.BindVal(descIndex)
+		vl, err := vr.BindValue(descIndex)
 		if err != nil || vr.Role != Vertex {
 			continue
 		}
@@ -419,10 +419,10 @@ func (pl *Pipeline) DrawVertex(cmd vk.CommandBuffer, descIndex int) {
 		vtxbuf[i] = mbuf
 	}
 	vk.CmdBindVertexBuffers(cmd, 0, uint32(len(offs)), vtxbuf, offs)
-	if idxVal != nil {
+	if idxValue != nil {
 		vktyp := idxVar.Type.VkIndexType()
-		vk.CmdBindIndexBuffer(cmd, mbuf, vk.DeviceSize(idxVal.Offset), vktyp)
-		vk.CmdDrawIndexed(cmd, uint32(idxVal.N), 1, 0, 0, 0)
+		vk.CmdBindIndexBuffer(cmd, mbuf, vk.DeviceSize(idxValue.Offset), vktyp)
+		vk.CmdDrawIndexed(cmd, uint32(idxValue.N), 1, 0, 0, 0)
 	} else {
 		vk.CmdDraw(cmd, uint32(vtxn), 1, 0, 0)
 	}

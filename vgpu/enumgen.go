@@ -11,11 +11,11 @@ var _ImageFlagsValues = []ImageFlags{0, 1, 2, 3, 4, 5, 6, 7}
 // ImageFlagsN is the highest valid value for type ImageFlags, plus one.
 const ImageFlagsN ImageFlags = 8
 
-var _ImageFlagsValueMap = map[string]ImageFlags{`Active`: 0, `HostActive`: 1, `OwnsImage`: 2, `OwnsHost`: 3, `IsVal`: 4, `DepthImage`: 5, `FramebufferImage`: 6, `OnHostOnly`: 7}
+var _ImageFlagsValueMap = map[string]ImageFlags{`Active`: 0, `HostActive`: 1, `OwnsImage`: 2, `OwnsHost`: 3, `IsValue`: 4, `DepthImage`: 5, `FramebufferImage`: 6, `OnHostOnly`: 7}
 
-var _ImageFlagsDescMap = map[ImageFlags]string{0: `ImageActive: the Image and ImageView are configured and ready to use`, 1: `ImageHostActive: the Host representation of the image is present and ready to be accessed`, 2: `ImageOwnsImage: we own the Vk.Image`, 3: `ImageOwnsHost: we own the Host buffer (and it is initialized)`, 4: `ImageIsVal: we are a Val image and our Host buffer is shared, with offset. this is incompatible with ImageOwnsHost`, 5: `DepthImage indicates that this is a Depth buffer image`, 6: `FramebufferImage indicates that this is a Framebuffer image`, 7: `ImageOnHostOnly causes the image to be created only on host visible memory, not on device memory -- no additional host buffer should be created. this is for an ImageGrab image. layout is LINEAR`}
+var _ImageFlagsDescMap = map[ImageFlags]string{0: `ImageActive: the Image and ImageView are configured and ready to use`, 1: `ImageHostActive: the Host representation of the image is present and ready to be accessed`, 2: `ImageOwnsImage: we own the Vk.Image`, 3: `ImageOwnsHost: we own the Host buffer (and it is initialized)`, 4: `ImageIsValue: we are a Value image and our Host buffer is shared, with offset. this is incompatible with ImageOwnsHost`, 5: `DepthImage indicates that this is a Depth buffer image`, 6: `FramebufferImage indicates that this is a Framebuffer image`, 7: `ImageOnHostOnly causes the image to be created only on host visible memory, not on device memory -- no additional host buffer should be created. this is for an ImageGrab image. layout is LINEAR`}
 
-var _ImageFlagsMap = map[ImageFlags]string{0: `Active`, 1: `HostActive`, 2: `OwnsImage`, 3: `OwnsHost`, 4: `IsVal`, 5: `DepthImage`, 6: `FramebufferImage`, 7: `OnHostOnly`}
+var _ImageFlagsMap = map[ImageFlags]string{0: `Active`, 1: `HostActive`, 2: `OwnsImage`, 3: `OwnsHost`, 4: `IsValue`, 5: `DepthImage`, 6: `FramebufferImage`, 7: `OnHostOnly`}
 
 // String returns the string representation of this ImageFlags value.
 func (i ImageFlags) String() string { return enums.BitFlagString(i, _ImageFlagsValues) }
@@ -360,59 +360,59 @@ func (i Types) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Types) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "Types") }
 
-var _ValFlagsValues = []ValFlags{0, 1, 2}
+var _ValueFlagsValues = []ValueFlags{0, 1, 2}
 
-// ValFlagsN is the highest valid value for type ValFlags, plus one.
-const ValFlagsN ValFlags = 3
+// ValueFlagsN is the highest valid value for type ValueFlags, plus one.
+const ValueFlagsN ValueFlags = 3
 
-var _ValFlagsValueMap = map[string]ValFlags{`Mod`: 0, `PaddedArray`: 1, `TextureOwns`: 2}
+var _ValueFlagsValueMap = map[string]ValueFlags{`Mod`: 0, `PaddedArray`: 1, `TextureOwns`: 2}
 
-var _ValFlagsDescMap = map[ValFlags]string{0: `ValMod the value has been modified`, 1: `ValPaddedArray array had to be padded -- cannot access elements continuously`, 2: `ValTextureOwns val owns and manages the host staging memory for texture. based on Var TextureOwns -- for dynamically changings images.`}
+var _ValueFlagsDescMap = map[ValueFlags]string{0: `ValueMod the value has been modified`, 1: `ValuePaddedArray array had to be padded -- cannot access elements continuously`, 2: `ValueTextureOwns val owns and manages the host staging memory for texture. based on Var TextureOwns -- for dynamically changings images.`}
 
-var _ValFlagsMap = map[ValFlags]string{0: `Mod`, 1: `PaddedArray`, 2: `TextureOwns`}
+var _ValueFlagsMap = map[ValueFlags]string{0: `Mod`, 1: `PaddedArray`, 2: `TextureOwns`}
 
-// String returns the string representation of this ValFlags value.
-func (i ValFlags) String() string { return enums.BitFlagString(i, _ValFlagsValues) }
+// String returns the string representation of this ValueFlags value.
+func (i ValueFlags) String() string { return enums.BitFlagString(i, _ValueFlagsValues) }
 
-// BitIndexString returns the string representation of this ValFlags value
+// BitIndexString returns the string representation of this ValueFlags value
 // if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
-func (i ValFlags) BitIndexString() string { return enums.String(i, _ValFlagsMap) }
+func (i ValueFlags) BitIndexString() string { return enums.String(i, _ValueFlagsMap) }
 
-// SetString sets the ValFlags value from its string representation,
+// SetString sets the ValueFlags value from its string representation,
 // and returns an error if the string is invalid.
-func (i *ValFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
+func (i *ValueFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
 
-// SetStringOr sets the ValFlags value from its string representation
+// SetStringOr sets the ValueFlags value from its string representation
 // while preserving any bit flags already set, and returns an
 // error if the string is invalid.
-func (i *ValFlags) SetStringOr(s string) error {
-	return enums.SetStringOr(i, s, _ValFlagsValueMap, "ValFlags")
+func (i *ValueFlags) SetStringOr(s string) error {
+	return enums.SetStringOr(i, s, _ValueFlagsValueMap, "ValueFlags")
 }
 
-// Int64 returns the ValFlags value as an int64.
-func (i ValFlags) Int64() int64 { return int64(i) }
+// Int64 returns the ValueFlags value as an int64.
+func (i ValueFlags) Int64() int64 { return int64(i) }
 
-// SetInt64 sets the ValFlags value from an int64.
-func (i *ValFlags) SetInt64(in int64) { *i = ValFlags(in) }
+// SetInt64 sets the ValueFlags value from an int64.
+func (i *ValueFlags) SetInt64(in int64) { *i = ValueFlags(in) }
 
-// Desc returns the description of the ValFlags value.
-func (i ValFlags) Desc() string { return enums.Desc(i, _ValFlagsDescMap) }
+// Desc returns the description of the ValueFlags value.
+func (i ValueFlags) Desc() string { return enums.Desc(i, _ValueFlagsDescMap) }
 
-// ValFlagsValues returns all possible values for the type ValFlags.
-func ValFlagsValues() []ValFlags { return _ValFlagsValues }
+// ValueFlagsValues returns all possible values for the type ValueFlags.
+func ValueFlagsValues() []ValueFlags { return _ValueFlagsValues }
 
-// Values returns all possible values for the type ValFlags.
-func (i ValFlags) Values() []enums.Enum { return enums.Values(_ValFlagsValues) }
+// Values returns all possible values for the type ValueFlags.
+func (i ValueFlags) Values() []enums.Enum { return enums.Values(_ValueFlagsValues) }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i ValFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
+func (i ValueFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
-func (i *ValFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
+func (i *ValueFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i ValFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
+func (i ValueFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *ValFlags) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "ValFlags") }
+func (i *ValueFlags) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "ValueFlags") }

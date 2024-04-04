@@ -34,18 +34,18 @@ func (ph *Phong) ConfigMeshes() {
 	nm := ph.Meshes.Len()
 	vars := ph.Sys.Vars()
 	vset := vars.VertexSet()
-	vset.ConfigVals(nm)
+	vset.ConfigValues(nm)
 	for i, kv := range ph.Meshes.Order {
 		mv := kv.Value
-		_, vp, _ := vset.ValByIndexTry("Pos", i)
+		_, vp, _ := vset.ValueByIndexTry("Pos", i)
 		vp.N = mv.NVtx
-		_, vn, _ := vset.ValByIndexTry("Norm", i)
+		_, vn, _ := vset.ValueByIndexTry("Norm", i)
 		vn.N = mv.NVtx
-		_, vt, _ := vset.ValByIndexTry("Tex", i)
+		_, vt, _ := vset.ValueByIndexTry("Tex", i)
 		vt.N = mv.NVtx
-		_, vi, _ := vset.ValByIndexTry("Index", i)
+		_, vi, _ := vset.ValueByIndexTry("Index", i)
 		vi.N = mv.NIndex
-		_, vc, _ := vset.ValByIndexTry("Color", i)
+		_, vc, _ := vset.ValueByIndexTry("Color", i)
 		if mv.HasColor {
 			vc.N = mv.NVtx
 		} else {
@@ -90,12 +90,12 @@ func (ph *Phong) UseMeshName(name string) error {
 func (ph *Phong) UseMeshIndex(idx int) error {
 	mesh := ph.Meshes.ValueByIndex(idx)
 	vars := ph.Sys.Vars()
-	vars.BindVertexValIndex("Pos", idx)
-	vars.BindVertexValIndex("Norm", idx)
-	vars.BindVertexValIndex("Tex", idx)
-	vars.BindVertexValIndex("Index", idx)
+	vars.BindVertexValueIndex("Pos", idx)
+	vars.BindVertexValueIndex("Norm", idx)
+	vars.BindVertexValueIndex("Tex", idx)
+	vars.BindVertexValueIndex("Index", idx)
 	if mesh.HasColor {
-		vars.BindVertexValIndex("Color", idx)
+		vars.BindVertexValueIndex("Color", idx)
 		ph.Cur.UseVtxColor = true
 		ph.Cur.UseTexture = false
 	}
@@ -122,11 +122,11 @@ func (ph *Phong) MeshFloatsByName(name string) (pos, norm, tex, clr mat32.ArrayF
 func (ph *Phong) MeshFloatsByIndex(i int) (pos, norm, tex, clr mat32.ArrayF32, idx mat32.ArrayU32) {
 	vars := ph.Sys.Vars()
 	vset := vars.VertexSet()
-	_, vp, _ := vset.ValByIndexTry("Pos", i)
-	_, vn, _ := vset.ValByIndexTry("Norm", i)
-	_, vt, _ := vset.ValByIndexTry("Tex", i)
-	_, vi, _ := vset.ValByIndexTry("Index", i)
-	_, vc, _ := vset.ValByIndexTry("Color", i)
+	_, vp, _ := vset.ValueByIndexTry("Pos", i)
+	_, vn, _ := vset.ValueByIndexTry("Norm", i)
+	_, vt, _ := vset.ValueByIndexTry("Tex", i)
+	_, vi, _ := vset.ValueByIndexTry("Index", i)
+	_, vc, _ := vset.ValueByIndexTry("Color", i)
 	return vp.Floats32(), vn.Floats32(), vt.Floats32(), vc.Floats32(), vi.UInts32()
 }
 
@@ -147,7 +147,7 @@ func (ph *Phong) ModMeshByIndex(i int) {
 	vset := vars.VertexSet()
 	nms := []string{"Pos", "Norm", "Tex", "Index", "Color"}
 	for _, nm := range nms {
-		_, vl, _ := vset.ValByIndexTry(nm, i)
+		_, vl, _ := vset.ValueByIndexTry(nm, i)
 		vl.SetMod()
 	}
 }

@@ -17,10 +17,10 @@ import (
 // Images (Textures), and arbitrary Structs for Compute shaders.
 // Each Var belongs to a Set, and its binding location is allocated within that.
 // Each set is updated at the same time scale, and all vars in the set have the same
-// number of allocated Val instances representing a specific value of the variable.
-// There must be a unique Val instance for each value of the variable used in
-// a single render -- a previously-used Val's contents cannot be updated within
-// the render pass, but new information can be written to an as-yet unused Val
+// number of allocated Value instances representing a specific value of the variable.
+// There must be a unique Value instance for each value of the variable used in
+// a single render -- a previously-used Value's contents cannot be updated within
+// the render pass, but new information can be written to an as-yet unused Value
 // prior to using in a render (although this comes at a performance cost).
 type Var struct {
 
@@ -30,7 +30,7 @@ type Var struct {
 	// type of data in variable.  Note that there are strict contraints on the alignment of fields within structs -- if you can keep all fields at 4 byte increments, that works, but otherwise larger fields trigger a 16 byte alignment constraint.  Texture Images do not have such alignment constraints, and can be allocated in a big host buffer or in separate buffers depending on how frequently they are updated with different sizes.
 	Type Types
 
-	// number of elements if this is a fixed array -- use 1 if singular element, and 0 if a variable-sized array, where each Val can have its own specific size. This also works for arrays of Textures -- up to 128 max.
+	// number of elements if this is a fixed array -- use 1 if singular element, and 0 if a variable-sized array, where each Value can have its own specific size. This also works for arrays of Textures -- up to 128 max.
 	ArrayN int
 
 	// role of variable: Vertex is configured in the pipeline VkConfig structure, and everything else is configured in a DescriptorSet.  For TextureRole items, the last such Var in a set will automatically be flagged as variable sized, so the shader can specify: #extension GL_EXT_nonuniform_qualifier : require and the list of textures can be specified as a array.
@@ -55,12 +55,12 @@ type Var struct {
 	DynOffIndex int `edit:"-"`
 
 	// the array of values allocated for this variable.  The size of this array is determined by the Set membership of this Var, and the current index is updated at the set level.  For Texture Roles, there is a separate descriptor for each value (image) -- otherwise dynamic offset binding is used.
-	Vals Vals
+	Values Values
 
-	// for dynamically bound vars (Vertex, Uniform, Storage), this is the index of the currently bound value in Vals list -- index in this array is the descIndex out of Vars NDescs (see for docs) to allow for parallel update pathways -- only valid until set again -- only actually used for Vertex binding, as unforms etc have the WriteDescriptor mechanism.
-	BindValIndex []int `edit:"-"`
+	// for dynamically bound vars (Vertex, Uniform, Storage), this is the index of the currently bound value in Values list -- index in this array is the descIndex out of Vars NDescs (see for docs) to allow for parallel update pathways -- only valid until set again -- only actually used for Vertex binding, as unforms etc have the WriteDescriptor mechanism.
+	BindValueIndex []int `edit:"-"`
 
-	// index of the storage buffer in Memory that holds this Var -- for Storage buffer types.  Due to support for dynamic binding, all Vals of a given Var must be stored in the same buffer, and the allocation mechanism ensures this.  This constrains large vars approaching the MaxStorageBufferRange capacity to only have 1 val, which is typically reasonable given that compute shaders use large data and tend to use static binding anyway, and graphics uses tend to be smaller.
+	// index of the storage buffer in Memory that holds this Var -- for Storage buffer types.  Due to support for dynamic binding, all Values of a given Var must be stored in the same buffer, and the allocation mechanism ensures this.  This constrains large vars approaching the MaxStorageBufferRange capacity to only have 1 val, which is typically reasonable given that compute shaders use large data and tend to use static binding anyway, and graphics uses tend to be smaller.
 	StorageBuff int `edit:"-"`
 
 	// offset -- only for push constants
@@ -90,7 +90,7 @@ func (vr *Var) String() string {
 			typ = fmt.Sprintf("%s[%d]", typ, vr.ArrayN)
 		}
 	}
-	s := fmt.Sprintf("%d:\t%s\t%s\t(size: %d)\tVals: %d", vr.BindLoc, vr.Name, typ, vr.SizeOf, len(vr.Vals.Vals))
+	s := fmt.Sprintf("%d:\t%s\t%s\t(size: %d)\tValues: %d", vr.BindLoc, vr.Name, typ, vr.SizeOf, len(vr.Values.Values))
 	return s
 }
 
@@ -99,23 +99,23 @@ func (vr *Var) BuffType() BuffTypes {
 	return vr.Role.BuffType()
 }
 
-// BindVal returns the currently bound value at given descriptor collection index
+// BindValue returns the currently bound value at given descriptor collection index
 // as set by BindDyn* methods.  Returns nil, error if not valid.
-func (vr *Var) BindVal(descIndex int) (*Val, error) {
-	idx := vr.BindValIndex[descIndex]
-	return vr.Vals.ValByIndexTry(idx)
+func (vr *Var) BindValue(descIndex int) (*Value, error) {
+	idx := vr.BindValueIndex[descIndex]
+	return vr.Values.ValueByIndexTry(idx)
 }
 
-// ValsMemSize returns the memory allocation size
+// ValuesMemSize returns the memory allocation size
 // for all values for this Var, in bytes
-func (vr *Var) ValsMemSize(alignBytes int) int {
-	return vr.Vals.MemSize(vr, alignBytes)
+func (vr *Var) ValuesMemSize(alignBytes int) int {
+	return vr.Values.MemSize(vr, alignBytes)
 }
 
 // MemSizeStorage adds a Storage memory allocation record to Memory
 // for all values for this Var
 func (vr *Var) MemSizeStorage(mm *Memory, alignBytes int) {
-	tsz := vr.Vals.MemSize(vr, alignBytes)
+	tsz := vr.Values.MemSize(vr, alignBytes)
 	mm.StorageMems = append(mm.StorageMems, &VarMem{Var: vr, Size: tsz})
 }
 
@@ -144,25 +144,25 @@ func (vr *Var) MemSize() int {
 // aligned at the given align byte level, which should be
 // MinUniformBufferOffsetAlignment from gpu.
 func (vr *Var) AllocHost(buff *MemBuff, offset int) int {
-	return vr.Vals.AllocHost(vr, buff, offset)
+	return vr.Values.AllocHost(vr, buff, offset)
 }
 
 // Free resets the MemPtr for values, resets any self-owned resources (Textures)
 func (vr *Var) Free() {
-	vr.Vals.Free()
+	vr.Values.Free()
 	vr.StorageBuff = -1
 	// todo: free anything in var
 }
 
-// ModRegs returns the regions of Vals that have been modified
+// ModRegs returns the regions of Values that have been modified
 func (vr *Var) ModRegs() []MemReg {
-	return vr.Vals.ModRegs(vr)
+	return vr.Values.ModRegs(vr)
 }
 
 // SetTextureDev sets Device for textures
 // only called on Role = TextureRole
 func (vr *Var) SetTextureDev(dev vk.Device) {
-	vals := vr.Vals.ActiveVals()
+	vals := vr.Values.ActiveValues()
 	for _, vl := range vals {
 		if vl.Texture == nil {
 			continue
@@ -174,7 +174,7 @@ func (vr *Var) SetTextureDev(dev vk.Device) {
 // AllocTextures allocates images on device memory
 // only called on Role = TextureRole
 func (vr *Var) AllocTextures(mm *Memory) {
-	vr.Vals.AllocTextures(mm)
+	vr.Values.AllocTextures(mm)
 }
 
 // TextureValidIndex returns the index of the given texture value at our
@@ -183,7 +183,7 @@ func (vr *Var) AllocTextures(mm *Memory) {
 // You must use this value when passing a texture index to the shader!
 // returns -1 if idx is not valid
 func (vr *Var) TextureValidIndex(stIndex, idx int) int {
-	vals := vr.Vals.ActiveVals()
+	vals := vr.Values.ActiveValues()
 	vidx := 0
 	mx := min(stIndex+MaxTexturesPerSet, len(vals))
 	for i := stIndex; i < mx; i++ {
@@ -228,24 +228,24 @@ func (vs *VarList) VarByNameTry(name string) (*Var, error) {
 	return vr, nil
 }
 
-// ValByNameTry returns value by first looking up variable name, then value name,
+// ValueByNameTry returns value by first looking up variable name, then value name,
 // returning error if not found
-func (vs *VarList) ValByNameTry(varName, valName string) (*Var, *Val, error) {
+func (vs *VarList) ValueByNameTry(varName, valName string) (*Var, *Value, error) {
 	vr, err := vs.VarByNameTry(varName)
 	if err != nil {
 		return nil, nil, err
 	}
-	vl, err := vr.Vals.ValByNameTry(valName)
+	vl, err := vr.Values.ValueByNameTry(valName)
 	return vr, vl, err
 }
 
-// ValByIndexTry returns value by first looking up variable name, then value index,
+// ValueByIndexTry returns value by first looking up variable name, then value index,
 // returning error if not found
-func (vs *VarList) ValByIndexTry(varName string, valIndex int) (*Var, *Val, error) {
+func (vs *VarList) ValueByIndexTry(varName string, valIndex int) (*Var, *Value, error) {
 	vr, err := vs.VarByNameTry(varName)
 	if err != nil {
 		return nil, nil, err
 	}
-	vl, err := vr.Vals.ValByIndexTry(valIndex)
+	vl, err := vr.Values.ValueByIndexTry(valIndex)
 	return vr, vl, err
 }

@@ -49,10 +49,10 @@ func main() {
 	outv := set.Add("Out", vgpu.Float32Vec4, n, vgpu.Storage, vgpu.ComputeShader)
 	_ = outv
 
-	set.ConfigVals(1) // one val per var
-	sy.Config()       // configures vars, allocates vals, configs pipelines..
+	set.ConfigValues(1) // one val per var
+	sy.Config()         // configures vars, allocates vals, configs pipelines..
 
-	ivl, _ := inv.Vals.ValByIndexTry(0)
+	ivl, _ := inv.Values.ValueByIndexTry(0)
 	idat := ivl.Floats32()
 	for i := 0; i < n; i++ {
 		idat[i*4+0] = rand.Float32()
@@ -64,7 +64,7 @@ func main() {
 
 	sy.Mem.SyncToGPU()
 
-	vars.BindDynValsAllIndex(0)
+	vars.BindDynValuesAllIndex(0)
 
 	cmd := sy.ComputeCmdBuff()
 	sy.ComputeResetBindVars(cmd, 0)
@@ -72,8 +72,8 @@ func main() {
 	sy.ComputeCmdEnd(cmd)
 	sy.ComputeSubmitWait(cmd) // if no wait, faster, but validation complains
 
-	sy.Mem.SyncValIndexFmGPU(0, "Out", 0)
-	_, ovl, _ := vars.ValByIndexTry(0, "Out", 0)
+	sy.Mem.SyncValueIndexFmGPU(0, "Out", 0)
+	_, ovl, _ := vars.ValueByIndexTry(0, "Out", 0)
 
 	odat := ovl.Floats32()
 	for i := 0; i < n; i++ {

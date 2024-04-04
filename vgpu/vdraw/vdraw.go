@@ -75,7 +75,7 @@ func (dw *Drawer) SetMaxTextures(maxTextures int) {
 	sy := &dw.Sys
 	vars := sy.Vars()
 	txset := vars.SetMap[0]
-	txset.ConfigVals(maxTextures)
+	txset.ConfigValues(maxTextures)
 	dw.Impl.MaxTextures = maxTextures
 	vars.NDescs = vgpu.NDescForTextures(dw.Impl.MaxTextures)
 	vars.Config() // update after config changes

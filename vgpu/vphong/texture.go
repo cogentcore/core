@@ -45,9 +45,9 @@ func (ph *Phong) configDummyTexture() {
 	// there must be one texture -- otherwise Mac Molten triggers an error
 	vars := ph.Sys.Vars()
 	txset := vars.SetMap[int(TexSet)]
-	txset.ConfigVals(1)
+	txset.ConfigValues(1)
 	dimg := image.NewRGBA(image.Rectangle{Max: image.Point{2, 2}})
-	_, img, _ := txset.ValByIndexTry("Tex", 0)
+	_, img, _ := txset.ValueByIndexTry("Tex", 0)
 	img.Texture.ConfigGoImage(dimg.Bounds().Size(), 0)
 }
 
@@ -63,9 +63,9 @@ func (ph *Phong) ConfigTextures() {
 	}
 	vars := ph.Sys.Vars()
 	txset := vars.SetMap[int(TexSet)]
-	txset.ConfigVals(ntx)
+	txset.ConfigValues(ntx)
 	for i, kv := range ph.Textures.Order {
-		_, img, err := txset.ValByIndexTry("Tex", i)
+		_, img, err := txset.ValueByIndexTry("Tex", i)
 		if err != nil {
 			slog.Error("vgpu.Phong ConfigTextures: txset Image is nil", "Image", i)
 			continue
@@ -77,7 +77,7 @@ func (ph *Phong) ConfigTextures() {
 		img.Texture.ConfigGoImage(kv.Value.Image.Bounds().Size(), 1)
 	}
 	ivar := txset.VarMap["Tex"]
-	ivar.Vals.AllocTexBySize(ph.Sys.GPU, ivar) // organize images by size so all fit
+	ivar.Values.AllocTexBySize(ph.Sys.GPU, ivar) // organize images by size so all fit
 }
 
 // AllocTextures allocates textures that have been previously configured,
@@ -89,7 +89,7 @@ func (ph *Phong) AllocTextures() {
 		txset := vars.SetMap[int(TexSet)]
 		ivar := txset.VarMap["Tex"]
 		for i, kv := range ph.Textures.Order {
-			ivar.Vals.SetGoImage(i, kv.Value.Image, vgpu.FlipY)
+			ivar.Values.SetGoImage(i, kv.Value.Image, vgpu.FlipY)
 		}
 	}
 	vars.BindAllTextureVars(int(TexSet)) // gets images
@@ -143,7 +143,7 @@ func (ph *Phong) UpdateTextureIndex(idx int) error {
 	vars := ph.Sys.Vars()
 	txset := vars.SetMap[int(TexSet)]
 	ivar := txset.VarMap["Tex"]
-	ivar.Vals.SetGoImage(idx, tx.Image, vgpu.FlipY)
+	ivar.Values.SetGoImage(idx, tx.Image, vgpu.FlipY)
 	return nil
 }
 

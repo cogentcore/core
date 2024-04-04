@@ -129,10 +129,10 @@ func (ph *Phong) ConfigSys() {
 	txset.Add("Tex", vgpu.ImageRGBA32, 1, vgpu.TextureRole, vgpu.FragmentShader)
 	// tximgv.TextureOwns = true
 
-	pcset.ConfigVals(1)
-	mtxset.ConfigVals(1)
-	nliteset.ConfigVals(1)
-	liteset.ConfigVals(1)
+	pcset.ConfigValues(1)
+	mtxset.ConfigValues(1)
+	nliteset.ConfigValues(1)
+	liteset.ConfigValues(1)
 }
 
 // Push pushes given push constant data

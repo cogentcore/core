@@ -41,29 +41,29 @@ MSL conversion error: Unsized array of images is not supported in MSL.
 ```
 Set: -2
     Role: Vertex
-        Var: 0:	Pos	Float32Vec3	(size: 12)	Vals: 6
-        Var: 1:	Norm	Float32Vec3	(size: 12)	Vals: 6
-        Var: 2:	Tex	Float32Vec2	(size: 8)	Vals: 6
-        Var: 3:	Color	Float32Vec4	(size: 16)	Vals: 6
+        Var: 0:	Pos	Float32Vec3	(size: 12)	Values: 6
+        Var: 1:	Norm	Float32Vec3	(size: 12)	Values: 6
+        Var: 2:	Tex	Float32Vec2	(size: 8)	Values: 6
+        Var: 3:	Color	Float32Vec4	(size: 16)	Values: 6
     Role: Index
-        Var: 4:	Index	Uint32	(size: 4)	Vals: 6
+        Var: 4:	Index	Uint32	(size: 4)	Values: 6
 Set: -1
     Role: Push
-        Var: 0:	PushU	Struct	(size: 128)	Vals: 1
+        Var: 0:	PushU	Struct	(size: 128)	Values: 1
 Set: 0
     Role: Uniform
-        Var: 0:	Mtxs	Struct	(size: 128)	Vals: 1
+        Var: 0:	Mtxs	Struct	(size: 128)	Values: 1
 Set: 1
     Role: Uniform
-        Var: 0:	NLights	Struct	(size: 16)	Vals: 1
+        Var: 0:	NLights	Struct	(size: 16)	Values: 1
 Set: 2
     Role: Uniform
-        Var: 0:	AmbLights	Struct[8]	(size: 16)	Vals: 1
-        Var: 1:	DirLights	Struct[8]	(size: 32)	Vals: 1
-        Var: 2:	PointLights	Struct[8]	(size: 48)	Vals: 1
-        Var: 3:	SpotLights	Struct[8]	(size: 64)	Vals: 1
+        Var: 0:	AmbLights	Struct[8]	(size: 16)	Values: 1
+        Var: 1:	DirLights	Struct[8]	(size: 32)	Values: 1
+        Var: 2:	PointLights	Struct[8]	(size: 48)	Values: 1
+        Var: 3:	SpotLights	Struct[8]	(size: 64)	Values: 1
 Set: 3
     Role: TextureRole
-        Var: 0:	Tex	ImageRGBA32	(size: 4)	Vals: 3
+        Var: 0:	Tex	ImageRGBA32	(size: 4)	Values: 3
 ```
 

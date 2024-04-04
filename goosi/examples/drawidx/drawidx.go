@@ -45,7 +45,7 @@ func main() {
 	var sf *vgpu.Surface
 	var sy *vgpu.System
 	var pl *vgpu.Pipeline
-	var cam *vgpu.Val
+	var cam *vgpu.Value
 	var camo CamView
 
 	make := func() {
@@ -85,11 +85,11 @@ func main() {
 		camv := set.Add("Camera", vgpu.Struct, 1, vgpu.Uniform, vgpu.VertexShader)
 		camv.SizeOf = vgpu.Float32Mat4.Bytes() * 3 // no padding for these
 
-		vset.ConfigVals(1) // one val per var
-		set.ConfigVals(1)  // one val per var
+		vset.ConfigValues(1) // one val per var
+		set.ConfigValues(1)  // one val per var
 		sy.Config()
 
-		triPos, _ := posv.Vals.ValByIndexTry(0)
+		triPos, _ := posv.Values.ValueByIndexTry(0)
 		triPosA := triPos.Floats32()
 		triPosA.Set(0,
 			-0.5, 0.5, 0.0,
@@ -97,7 +97,7 @@ func main() {
 			0.0, -0.5, 0.0) // negative point is UP in native Vulkan
 		triPos.SetMod()
 
-		triClr, _ := clrv.Vals.ValByIndexTry(0)
+		triClr, _ := clrv.Values.ValueByIndexTry(0)
 		triClrA := triClr.Floats32()
 		triClrA.Set(0,
 			1.0, 0.0, 0.0,
@@ -105,12 +105,12 @@ func main() {
 			0.0, 0.0, 1.0)
 		triClr.SetMod()
 
-		triIndex, _ := idxv.Vals.ValByIndexTry(0)
+		triIndex, _ := idxv.Values.ValueByIndexTry(0)
 		idxs := []uint16{0, 1, 2}
 		triIndex.CopyFromBytes(unsafe.Pointer(&idxs[0]))
 
 		// This is the standard camera view projection computation
-		cam, _ = camv.Vals.ValByIndexTry(0)
+		cam, _ = camv.Values.ValueByIndexTry(0)
 		campos := mat32.V3(0, 0, 2)
 		target := mat32.V3(0, 0, 0)
 		var lookq mat32.Quat
@@ -133,7 +133,7 @@ func main() {
 
 		sy.Mem.SyncToGPU()
 
-		vars.BindDynVal(0, camv, cam)
+		vars.BindDynValue(0, camv, cam)
 	}
 
 	frameCount := 0

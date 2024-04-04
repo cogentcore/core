@@ -118,14 +118,14 @@ func (sy *System) ComputeWaitEvents(cmd vk.CommandBuffer, event ...string) error
 
 // ComputeCopyToGPU records command to copy given regions
 // in the Storage buffer memory from CPU to GPU, in one call.
-// Use SyncRegValIndexFmCPU to get the regions.
+// Use SyncRegValueIndexFmCPU to get the regions.
 func (sy *System) ComputeCopyToGPU(cmd vk.CommandBuffer, regs ...MemReg) {
 	sy.Mem.CmdTransferStorageRegsToGPU(cmd, regs)
 }
 
 // ComputeCopyFmGPU records command to copy given regions
 // in the Storage buffer memory from GPU to CPU, in one call.
-// Use SyncRegValIndexFmCPU to get the regions.
+// Use SyncRegValueIndexFmCPU to get the regions.
 func (sy *System) ComputeCopyFmGPU(cmd vk.CommandBuffer, regs ...MemReg) {
 	sy.Mem.CmdTransferStorageRegsFmGPU(cmd, regs)
 }

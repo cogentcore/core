@@ -34,7 +34,7 @@ type Vars struct {
 	// true if PushSet has been added
 	HasPush bool `edit:"-"`
 
-	// number of complete descriptor sets to construct -- each descriptor set can be bound to a specific pipeline at the start of rendering, and updated with specific Val instances to provide values for each Var used during rendering.  If multiple rendering passes are performed in parallel, then each requires a separate descriptor set (e.g., typically associated with a different Frame in the swapchain), so this number should be increased.
+	// number of complete descriptor sets to construct -- each descriptor set can be bound to a specific pipeline at the start of rendering, and updated with specific Value instances to provide values for each Var used during rendering.  If multiple rendering passes are performed in parallel, then each requires a separate descriptor set (e.g., typically associated with a different Frame in the swapchain), so this number should be increased.
 	NDescs int
 
 	// our parent memory manager
@@ -52,13 +52,13 @@ type Vars struct {
 	// allocated descriptor sets -- outer index is Vars.NDescs for different groups of descriptor sets, one of which can be bound to a pipeline at any given time.  The inner dimension is per VarSet to cover the different sets of variable updated at different times or with different numbers of items.  This variable is used for whole-pipline binding at start of rendering.
 	VkDescSets [][]vk.DescriptorSet
 
-	// currently accumulating set of vals to write to update bindings -- initiated by BindValsStart, executed by BindValsEnd
-	VkWriteVals []vk.WriteDescriptorSet `view:"-"`
+	// currently accumulating set of vals to write to update bindings -- initiated by BindValuesStart, executed by BindValuesEnd
+	VkWriteValues []vk.WriteDescriptorSet `view:"-"`
 
-	// current descriptor collection index, set in BindValsStart
+	// current descriptor collection index, set in BindValuesStart
 	BindDescIndex int `inactive:"-"`
 
-	// dynamic offsets for Uniform and Storage variables, -- outer index is Vars.NDescs for different groups of descriptor sets, one of which can be bound to a pipeline at any given time, inner index is DynOffIndex on Var -- offsets are set when Val is bound via BindDynVal*.
+	// dynamic offsets for Uniform and Storage variables, -- outer index is Vars.NDescs for different groups of descriptor sets, one of which can be bound to a pipeline at any given time, inner index is DynOffIndex on Var -- offsets are set when Value is bound via BindDynValue*.
 	DynOffs [][]uint32
 }
 
@@ -125,24 +125,24 @@ func (vs *Vars) VarByNameTry(set int, name string) (*Var, error) {
 	return st.VarByNameTry(name)
 }
 
-// ValByNameTry returns value by first looking up variable name, then value name,
+// ValueByNameTry returns value by first looking up variable name, then value name,
 // within given set number, returning error if not found
-func (vs *Vars) ValByNameTry(set int, varName, valName string) (*Var, *Val, error) {
+func (vs *Vars) ValueByNameTry(set int, varName, valName string) (*Var, *Value, error) {
 	st, err := vs.SetTry(set)
 	if err != nil {
 		return nil, nil, err
 	}
-	return st.ValByNameTry(varName, valName)
+	return st.ValueByNameTry(varName, valName)
 }
 
-// ValByIndexTry returns value by first looking up variable name, then value index,
+// ValueByIndexTry returns value by first looking up variable name, then value index,
 // returning error if not found
-func (vs *Vars) ValByIndexTry(set int, varName string, valIndex int) (*Var, *Val, error) {
+func (vs *Vars) ValueByIndexTry(set int, varName string, valIndex int) (*Var, *Value, error) {
 	st, err := vs.SetTry(set)
 	if err != nil {
 		return nil, nil, err
 	}
-	return st.ValByIndexTry(varName, valIndex)
+	return st.ValueByIndexTry(varName, valIndex)
 }
 
 // Config must be called after all variables have been added.
@@ -296,7 +296,7 @@ func (vs *Vars) DescLayout(dev vk.Device) {
 		if ri > Storage {
 			dcount = 0
 			for _, vr := range vl {
-				vals := vr.Vals.ActiveVals()
+				vals := vr.Values.ActiveValues()
 				dcount += vs.NDescs * len(vals)
 			}
 		}
@@ -341,7 +341,7 @@ func (vs *Vars) DescLayout(dev vk.Device) {
 	if vs.HasVertex {
 		vset := vs.SetMap[VertexSet]
 		for _, vr := range vset.Vars {
-			vr.BindValIndex = make([]int, vs.NDescs)
+			vr.BindValueIndex = make([]int, vs.NDescs)
 		}
 	}
 
@@ -390,15 +390,15 @@ func (vs *Vars) AddDynOff() {
 // This must be called *prior* to a render pass, never within it.
 // Only BindDyn* and BindVertex* calls can be called within render.
 //
-// Do NOT use this around BindDynVal or BindVertexVal calls
+// Do NOT use this around BindDynValue or BindVertexValue calls
 // only for BindVar* methods.
 //
 // Subsequent calls of BindVar* methods will add to a list, which
-// will be executed when BindValsEnd is called.
+// will be executed when BindValuesEnd is called.
 //
 // This creates a set of entries in a list of WriteDescriptorSet's
 func (vs *Vars) BindVarsStart(descIndex int) {
-	vs.VkWriteVals = []vk.WriteDescriptorSet{}
+	vs.VkWriteValues = []vk.WriteDescriptorSet{}
 	vs.BindDescIndex = descIndex
 }
 
@@ -406,14 +406,14 @@ func (vs *Vars) BindVarsStart(descIndex int) {
 // Actually executes the binding updates, based on prior BindVar* calls.
 func (vs *Vars) BindVarsEnd() {
 	dev := vs.Mem.Device.Device
-	if len(vs.VkWriteVals) > 0 {
-		vk.UpdateDescriptorSets(dev, uint32(len(vs.VkWriteVals)), vs.VkWriteVals, 0, nil)
+	if len(vs.VkWriteValues) > 0 {
+		vk.UpdateDescriptorSets(dev, uint32(len(vs.VkWriteValues)), vs.VkWriteValues, 0, nil)
 	}
-	vs.VkWriteVals = nil
+	vs.VkWriteValues = nil
 }
 
 // BindDynVars binds all dynamic vars in given set, to be able to
-// use dynamic vars, in subsequent BindDynVal* calls during the
+// use dynamic vars, in subsequent BindDynValue* calls during the
 // render pass, which update the offsets.
 // For Uniform & Storage variables, which use dynamic binding.
 //
@@ -482,7 +482,7 @@ func (vs *Vars) BindDynVarName(set int, varNm string) error {
 
 // BindStatVars binds all static vars to their current values,
 // for given set, for non-Uniform, Storage, variables (e.g., Textures).
-// Each Val for a given Var is given a descriptor binding
+// Each Value for a given Var is given a descriptor binding
 // and the shader sees an array of values of corresponding length.
 //
 // All vals must be uploaded to Device memory prior to this,
@@ -500,7 +500,7 @@ func (vs *Vars) BindStatVars(set int) error {
 
 // BindStatVarName does static variable binding for given var
 // looked up by name, for non-Uniform, Storage, variables (e.g., Textures).
-// Each Val for a given Var is given a descriptor binding
+// Each Value for a given Var is given a descriptor binding
 // and the shader sees an array of values of corresponding length.
 //
 // All vals must be uploaded to Device memory prior to this,
@@ -518,7 +518,7 @@ func (vs *Vars) BindStatVarName(set int, varNm string) error {
 // BindAllTextureVars binds all Texture vars in given set to their current values,
 // iterating over NTextureDescs in case there are multiple Desc sets
 // required to represent more than MaxTexturesPerSet.
-// Each Val for a given Var is given a descriptor binding
+// Each Value for a given Var is given a descriptor binding
 // and the shader sees an array of values of corresponding length.
 // All vals must be uploaded to Device memory prior to this,
 // and it is not possible to update anything during a render pass.
@@ -541,7 +541,7 @@ func (vs *Vars) BindAllTextureVars(set int) error {
 /////////////////////////////////////////////////////////////////////////
 // Dynamic Binding
 
-// BindVertexValName dynamically binds given VertexSet value
+// BindVertexValueName dynamically binds given VertexSet value
 // by name for given variable name.
 // using given descIndex description set index (among the NDescs allocated).
 //
@@ -550,20 +550,20 @@ func (vs *Vars) BindAllTextureVars(set int) error {
 // all the values are ready to be used during the render pass.
 // This dynamically updates the offset to point to the specified val.
 //
-// Do NOT call BindValsStart / End around this.
+// Do NOT call BindValuesStart / End around this.
 //
 // returns error if not found.
-func (vs *Vars) BindVertexValName(varNm, valNm string) error {
+func (vs *Vars) BindVertexValueName(varNm, valNm string) error {
 	st := vs.SetMap[VertexSet]
-	vr, vl, err := st.ValByNameTry(varNm, valNm)
+	vr, vl, err := st.ValueByNameTry(varNm, valNm)
 	if err != nil {
 		return err
 	}
-	vr.BindValIndex[vs.BindDescIndex] = vl.Index // this is then consumed by draw command
+	vr.BindValueIndex[vs.BindDescIndex] = vl.Index // this is then consumed by draw command
 	return nil
 }
 
-// BindVertexValIndex dynamically binds given VertexSet value
+// BindVertexValueIndex dynamically binds given VertexSet value
 // by index for given variable name.
 // using given descIndex description set index (among the NDescs allocated).
 //
@@ -572,20 +572,20 @@ func (vs *Vars) BindVertexValName(varNm, valNm string) error {
 // all the values are ready to be used during the render pass.
 // This only dynamically updates the offset to point to the specified val.
 //
-// Do NOT call BindValsStart / End around this.
+// Do NOT call BindValuesStart / End around this.
 //
 // returns error if not found.
-func (vs *Vars) BindVertexValIndex(varNm string, valIndex int) error {
+func (vs *Vars) BindVertexValueIndex(varNm string, valIndex int) error {
 	st := vs.SetMap[VertexSet]
-	vr, vl, err := st.ValByIndexTry(varNm, valIndex)
+	vr, vl, err := st.ValueByIndexTry(varNm, valIndex)
 	if err != nil {
 		return err
 	}
-	vr.BindValIndex[vs.BindDescIndex] = vl.Index // this is then consumed by draw command
+	vr.BindValueIndex[vs.BindDescIndex] = vl.Index // this is then consumed by draw command
 	return nil
 }
 
-// BindDynValsAllIndex dynamically binds all uniform, storage values
+// BindDynValuesAllIndex dynamically binds all uniform, storage values
 // by index for all variables in all sets.
 //
 // This only dynamically updates the offset to point to the specified val.
@@ -593,17 +593,17 @@ func (vs *Vars) BindVertexValIndex(varNm string, valIndex int) error {
 // new offset to be bound at the proper point in the command buffer prior
 // (call after all such dynamic bindings are updated.)
 //
-// Do NOT call BindValsStart / End around this.
-func (vs *Vars) BindDynValsAllIndex(idx int) {
+// Do NOT call BindValuesStart / End around this.
+func (vs *Vars) BindDynValuesAllIndex(idx int) {
 	for si, st := range vs.SetMap {
 		if si < 0 {
 			continue
 		}
-		st.BindDynValsAllIndex(vs, idx)
+		st.BindDynValuesAllIndex(vs, idx)
 	}
 }
 
-// BindDynValName dynamically binds given uniform or storage value
+// BindDynValueName dynamically binds given uniform or storage value
 // by name for given variable name, in given set.
 //
 // This only dynamically updates the offset to point to the specified val.
@@ -611,18 +611,18 @@ func (vs *Vars) BindDynValsAllIndex(idx int) {
 // new offset to be bound at the proper point in the command buffer prior
 // (call after all such dynamic bindings are updated.)
 //
-// Do NOT call BindValsStart / End around this.
+// Do NOT call BindValuesStart / End around this.
 //
 // returns error if not found.
-func (vs *Vars) BindDynValName(set int, varNm, valNm string) error {
+func (vs *Vars) BindDynValueName(set int, varNm, valNm string) error {
 	st, err := vs.SetTry(set)
 	if err != nil {
 		return err
 	}
-	return st.BindDynValName(vs, varNm, valNm)
+	return st.BindDynValueName(vs, varNm, valNm)
 }
 
-// BindDynValIndex dynamically binds given uniform or storage value
+// BindDynValueIndex dynamically binds given uniform or storage value
 // by index for given variable name, in given set.
 //
 // This only dynamically updates the offset to point to the specified val.
@@ -630,18 +630,18 @@ func (vs *Vars) BindDynValName(set int, varNm, valNm string) error {
 // new offset to be bound at the proper point in the command buffer prior
 // (call after all such dynamic bindings are updated.)
 //
-// Do NOT call BindValsStart / End around this.
+// Do NOT call BindValuesStart / End around this.
 //
 // returns error if not found.
-func (vs *Vars) BindDynValIndex(set int, varNm string, valIndex int) error {
+func (vs *Vars) BindDynValueIndex(set int, varNm string, valIndex int) error {
 	st, err := vs.SetTry(set)
 	if err != nil {
 		return err
 	}
-	return st.BindDynValIndex(vs, varNm, valIndex)
+	return st.BindDynValueIndex(vs, varNm, valIndex)
 }
 
-// BindDynVal dynamically binds given uniform or storage value
+// BindDynValue dynamically binds given uniform or storage value
 // for given variable in given set.
 //
 // This only dynamically updates the offset to point to the specified val.
@@ -649,19 +649,19 @@ func (vs *Vars) BindDynValIndex(set int, varNm string, valIndex int) error {
 // new offset to be bound at the proper point in the command buffer prior
 // (call after all such dynamic bindings are updated.)
 //
-// Do NOT call BindValsStart / End around this.
+// Do NOT call BindValuesStart / End around this.
 //
 // returns error if not found.
-func (vs *Vars) BindDynVal(set int, vr *Var, vl *Val) error {
+func (vs *Vars) BindDynValue(set int, vr *Var, vl *Value) error {
 	st, err := vs.SetTry(set)
 	if err != nil {
 		return err
 	}
-	return st.BindDynVal(vs, vr, vl)
+	return st.BindDynValue(vs, vr, vl)
 }
 
 // TexGpSzIndexs for texture at given index, allocated in groups by size
-// using Vals.AllocTexBySize, returns the indexes for the texture
+// using Values.AllocTexBySize, returns the indexes for the texture
 // and layer to actually select the texture in the shader, and proportion
 // of the Gp allocated texture size occupied by the texture.
 func (vs *Vars) TexGpSzIndexs(set int, varNm string, valIndex int) *szalloc.Indexs {
@@ -687,7 +687,7 @@ func (vs *Vars) MemSize(buff *MemBuff) int {
 			if vr.Role.BuffType() != buff.Type {
 				continue
 			}
-			tsz += vr.ValsMemSize(buff.AlignBytes)
+			tsz += vr.ValuesMemSize(buff.AlignBytes)
 		}
 	}
 	return tsz
@@ -721,7 +721,7 @@ func (vs *Vars) AllocHost(buff *MemBuff, offset int) int {
 			if vr.Role.BuffType() != buff.Type {
 				continue
 			}
-			sz := vr.Vals.AllocHost(vr, buff, offset)
+			sz := vr.Values.AllocHost(vr, buff, offset)
 			offset += sz
 			tsz += sz
 		}
@@ -741,12 +741,12 @@ func (vs *Vars) Free(buff *MemBuff) {
 			if vr.Role.BuffType() != buff.Type {
 				continue
 			}
-			vr.Vals.Free()
+			vr.Values.Free()
 		}
 	}
 }
 
-// ModRegs returns the regions of Vals that have been modified
+// ModRegs returns the regions of Values that have been modified
 func (vs *Vars) ModRegs(bt BuffTypes) []MemReg {
 	ns := vs.NSets()
 	var mods []MemReg
@@ -759,14 +759,14 @@ func (vs *Vars) ModRegs(bt BuffTypes) []MemReg {
 			if vr.Role.BuffType() != bt {
 				continue
 			}
-			md := vr.Vals.ModRegs(vr)
+			md := vr.Values.ModRegs(vr)
 			mods = append(mods, md...)
 		}
 	}
 	return mods
 }
 
-// ModRegStorage returns the regions of Storage Vals that have been modified
+// ModRegStorage returns the regions of Storage Values that have been modified
 func (vs *Vars) ModRegsStorage(bufIndex int, buff *MemBuff) []MemReg {
 	ns := vs.NSets()
 	var mods []MemReg
@@ -782,7 +782,7 @@ func (vs *Vars) ModRegsStorage(bufIndex int, buff *MemBuff) []MemReg {
 			if vr.StorageBuff != bufIndex {
 				continue
 			}
-			md := vr.Vals.ModRegs(vr)
+			md := vr.Values.ModRegs(vr)
 			mods = append(mods, md...)
 		}
 	}
@@ -801,7 +801,7 @@ func (vs *Vars) AllocTextures(mm *Memory) {
 			if vr.Role != TextureRole {
 				continue
 			}
-			vr.Vals.AllocTextures(mm)
+			vr.Values.AllocTextures(mm)
 		}
 	}
 }

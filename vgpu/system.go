@@ -12,7 +12,7 @@ import (
 )
 
 // System manages a system of Pipelines that all share
-// a common collection of Vars, Vals, and a Memory manager.
+// a common collection of Vars, Values, and a Memory manager.
 // For example, this could be a collection of different
 // pipelines for different material types, or different
 // compute operations performed on a common set of data.
@@ -55,7 +55,7 @@ type System struct {
 	// map of command buffers, for persistent recorded commands -- names must be unique
 	CmdBuffs map[string]vk.CommandBuffer
 
-	// manages all the memory for all the Vals
+	// manages all the memory for all the Values
 	Mem Memory
 
 	// renderpass with depth buffer for this system
@@ -258,9 +258,9 @@ func (sy *System) ConfigRenderNonSurface(imgFmt *ImageFormat, depthFmt Types) {
 }
 
 // Config configures the entire system, after everything has been
-// setup (Pipelines, Vars, etc).  Memory / Vals do not yet need to
+// setup (Pipelines, Vars, etc).  Memory / Values do not yet need to
 // be initialized but are allocated from the Vars on this call,
-// so the total number of Vals per Var, and number of VarSets,
+// so the total number of Values per Var, and number of VarSets,
 // all must be configured.
 func (sy *System) Config() {
 	sy.Mem.Vars.StaticVars = sy.StaticVars
@@ -398,7 +398,7 @@ func (sy *System) CmdBindVars(cmd vk.CommandBuffer, descIndex int) {
 // If the texture is not valid, a -1 is returned for txIndex, and an error is logged.
 func (sy *System) CmdBindTextureVarIndex(cmd vk.CommandBuffer, setIndex int, varNm string, valIndex int) (txIndex, descIndex int, switched bool, err error) {
 	vars := sy.Vars()
-	txv, _, _ := vars.ValByIndexTry(setIndex, varNm, valIndex)
+	txv, _, _ := vars.ValueByIndexTry(setIndex, varNm, valIndex)
 
 	descIndex = valIndex / MaxTexturesPerSet
 	if descIndex != vars.BindDescIndex {
@@ -425,7 +425,7 @@ func (sy *System) CmdResetBindVars(cmd vk.CommandBuffer, descIndex int) {
 
 // BeginRenderPass adds commands to the given command buffer
 // to start the render pass on given framebuffer.
-// Clears the frame first, according to the ClearVals.
+// Clears the frame first, according to the ClearValues.
 // Also Binds descriptor sets to command buffer for given collection
 // of descriptors descIndex (see Vars NDescs for info).
 func (sy *System) BeginRenderPass(cmd vk.CommandBuffer, fr *Framebuffer, descIndex int) {
@@ -436,7 +436,7 @@ func (sy *System) BeginRenderPass(cmd vk.CommandBuffer, fr *Framebuffer, descInd
 // ResetBeginRenderPass adds commands to the given command buffer
 // to reset command buffer and call begin on it, then starts
 // the render pass on given framebuffer (BeginRenderPass)
-// Clears the frame first, according to the ClearVals.
+// Clears the frame first, according to the ClearValues.
 // Also Binds descriptor sets to command buffer for given collection
 // of descriptors descIndex (see Vars NDescs for info).
 func (sy *System) ResetBeginRenderPass(cmd vk.CommandBuffer, fr *Framebuffer, descIndex int) {

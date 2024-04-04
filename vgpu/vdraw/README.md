@@ -17,14 +17,14 @@ The fill color is uploaded as a push constant and thus is not subject to any lim
 ```
 Set: -2
     Role: Vertex
-        Var: 0:	Pos	Float32Vec2[4]	(size: 8)	Vals: 1
+        Var: 0:	Pos	Float32Vec2[4]	(size: 8)	Values: 1
     Role: Index
-        Var: 1:	Index	Uint16[6]	(size: 2)	Vals: 1
+        Var: 1:	Index	Uint16[6]	(size: 2)	Values: 1
 Set: -1
     Role: Push
-        Var: 0:	Mtxs	Struct	(size: 128)	Vals: 0
+        Var: 0:	Mtxs	Struct	(size: 128)	Values: 0
 Set: 0
     Role: TextureRole
-        Var: 0:	Tex	ImageRGBA32	(size: 4)	Vals: 1
+        Var: 0:	Tex	ImageRGBA32	(size: 4)	Values: 1
 ```
 

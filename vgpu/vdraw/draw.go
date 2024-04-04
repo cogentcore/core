@@ -29,7 +29,7 @@ const (
 // Set flipY to true to flip.
 func (dw *Drawer) SetGoImage(idx, layer int, img image.Image, flipY bool) {
 	dw.UpdateMu.Lock()
-	_, tx, _ := dw.Sys.Vars().ValByIndexTry(0, "Tex", idx)
+	_, tx, _ := dw.Sys.Vars().ValueByIndexTry(0, "Tex", idx)
 	err := tx.SetGoImage(img, layer, flipY)
 	if err != nil && vgpu.Debug {
 		fmt.Println(err)
@@ -37,9 +37,9 @@ func (dw *Drawer) SetGoImage(idx, layer int, img image.Image, flipY bool) {
 	dw.UpdateMu.Unlock()
 }
 
-// GetImageVal returns vgpu Val value of Image for given index
-func (dw *Drawer) GetImageVal(idx int) *vgpu.Val {
-	_, tx, _ := dw.Sys.Vars().ValByIndexTry(0, "Tex", idx)
+// GetImageValue returns vgpu Value value of Image for given index
+func (dw *Drawer) GetImageValue(idx int) *vgpu.Value {
+	_, tx, _ := dw.Sys.Vars().ValueByIndexTry(0, "Tex", idx)
 	return tx
 }
 
@@ -54,7 +54,7 @@ func (dw *Drawer) ConfigImageDefaultFormat(idx int, width int, height int, layer
 // to fit the given image format and number of layers as a drawing source.
 func (dw *Drawer) ConfigImage(idx int, fmt *vgpu.ImageFormat) {
 	dw.UpdateMu.Lock()
-	_, tx, _ := dw.Sys.Vars().ValByIndexTry(0, "Tex", idx)
+	_, tx, _ := dw.Sys.Vars().ValueByIndexTry(0, "Tex", idx)
 	tx.Texture.Format = *fmt
 	tx.Texture.Format.SetMultisample(1) // can't be multi
 	tx.Texture.AllocTexture()
@@ -69,7 +69,7 @@ func (dw *Drawer) SetFrameImage(idx int, fbi any) {
 		return
 	}
 	dw.UpdateMu.Lock()
-	_, tx, _ := dw.Sys.Vars().ValByIndexTry(0, "Tex", idx)
+	_, tx, _ := dw.Sys.Vars().ValueByIndexTry(0, "Tex", idx)
 	if fb.Format.Size != tx.Texture.Format.Size {
 		dw.UpdateMu.Unlock()
 		dw.ConfigImage(idx, &fb.Format)
@@ -88,7 +88,7 @@ func (dw *Drawer) SetFrameImage(idx int, fbi any) {
 // access for subsequent calls.  Returns error if name already exists.
 func (dw *Drawer) SetImageName(idx int, name string) error {
 	vr := dw.Sys.Vars().SetMap[0].Vars[0]
-	_, err := vr.Vals.SetName(idx, name)
+	_, err := vr.Values.SetName(idx, name)
 	return err
 }
 
@@ -96,7 +96,7 @@ func (dw *Drawer) SetImageName(idx int, name string) error {
 // Logs error if not found, and returns 0.
 func (dw *Drawer) ImageIndexByName(name string) int {
 	vr := dw.Sys.Vars().SetMap[0].Vars[0]
-	vl, err := vr.Vals.ValByNameTry(name)
+	vl, err := vr.Values.ValueByNameTry(name)
 	if err != nil {
 		log.Println(err)
 		return 0
@@ -227,7 +227,7 @@ func TransformMatrix(dr image.Rectangle, sr image.Rectangle, rotDeg float32) mat
 func (dw *Drawer) Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, op draw.Op, flipY bool, rotDeg float32) error {
 	zr := image.Rectangle{}
 	if sr == zr {
-		_, tx, _ := dw.Sys.Vars().ValByIndexTry(0, "Tex", idx)
+		_, tx, _ := dw.Sys.Vars().ValueByIndexTry(0, "Tex", idx)
 		sr = tx.Texture.Format.Bounds()
 	}
 	return dw.Draw(idx, layer, TransformMatrix(dr, sr, rotDeg), sr, op, flipY)
@@ -251,7 +251,7 @@ func (dw *Drawer) Draw(idx, layer int, src2dst mat32.Mat3, sr image.Rectangle, o
 	if err != nil {
 		return err
 	}
-	_, tx, _ := vars.ValByIndexTry(0, "Tex", idx)
+	_, tx, _ := vars.ValueByIndexTry(0, "Tex", idx)
 	if sr == image.ZR {
 		sr = tx.Texture.Format.Bounds()
 	}

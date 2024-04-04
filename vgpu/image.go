@@ -321,7 +321,7 @@ func (im *ImageFormat) Stride() int {
 // which can be a pointer into a larger buffer or owned by the Image.
 type Image struct {
 
-	// name of the image -- e.g., same as Val name if used that way -- helpful for debugging -- set to filename if loaded from a file and otherwise empty
+	// name of the image -- e.g., same as Value name if used that way -- helpful for debugging -- set to filename if loaded from a file and otherwise empty
 	Name string
 
 	// bit flags for image state, for indicating nature of ownership and state
@@ -381,9 +381,9 @@ func (im *Image) IsHostOwner() bool {
 	return im.HasFlag(ImageOwnsHost)
 }
 
-// IsVal returns true if the image belongs to a Val
-func (im *Image) IsVal() bool {
-	return im.HasFlag(ImageIsVal)
+// IsValue returns true if the image belongs to a Value
+func (im *Image) IsValue() bool {
+	return im.HasFlag(ImageIsValue)
 }
 
 // HostPixels returns host staging pixels at given layer
@@ -875,8 +875,8 @@ func (im *Image) AllocHost() {
 	im.SetFlag(true, ImageOwnsHost, ImageHostActive)
 }
 
-// ConfigValHost configures host staging buffer from memory buffer for val-owned image
-func (im *Image) ConfigValHost(buff *MemBuff, buffPtr unsafe.Pointer, offset int) {
+// ConfigValueHost configures host staging buffer from memory buffer for val-owned image
+func (im *Image) ConfigValueHost(buff *MemBuff, buffPtr unsafe.Pointer, offset int) {
 	if im.IsHostOwner() {
 		return
 	}
@@ -886,7 +886,7 @@ func (im *Image) ConfigValHost(buff *MemBuff, buffPtr unsafe.Pointer, offset int
 	im.Host.Size = imsz
 	im.Host.Ptr = unsafe.Pointer(uintptr(buffPtr) + uintptr(offset))
 	im.Host.Offset = offset
-	im.SetFlag(true, ImageIsVal, ImageHostActive)
+	im.SetFlag(true, ImageIsValue, ImageHostActive)
 }
 
 // CopyRec returns info for this Image for the BufferImageCopy operations
@@ -1004,7 +1004,7 @@ type HostImage struct {
 	// size in bytes allocated for host representation of image
 	Size int
 
-	// buffer for host CPU-visible memory, for staging -- can be owned by us or managed by Memory (for Val)
+	// buffer for host CPU-visible memory, for staging -- can be owned by us or managed by Memory (for Value)
 	Buff vk.Buffer `view:"-"`
 
 	// offset into host buffer, when Buff is Memory managed
@@ -1051,9 +1051,9 @@ const (
 	// ImageOwnsHost: we own the Host buffer (and it is initialized)
 	ImageOwnsHost
 
-	// ImageIsVal: we are a Val image and our Host buffer is shared, with offset.
+	// ImageIsValue: we are a Value image and our Host buffer is shared, with offset.
 	// this is incompatible with ImageOwnsHost
-	ImageIsVal
+	ImageIsValue
 
 	// DepthImage indicates that this is a Depth buffer image
 	DepthImage

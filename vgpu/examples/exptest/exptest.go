@@ -51,11 +51,11 @@ func main() {
 	outv := set.Add("Out", vgpu.Float32, n, vgpu.Storage, vgpu.ComputeShader)
 	_ = outv
 
-	set.ConfigVals(1) // one val per var
-	sy.Config()       // configures vars, allocates vals, configs pipelines..
+	set.ConfigValues(1) // one val per var
+	sy.Config()         // configures vars, allocates vals, configs pipelines..
 
 	ivals := make([]float32, n)
-	cpuVals := make([]float32, n)
+	cpuValues := make([]float32, n)
 
 	// st := float32(-89)
 	// st := float32(3)
@@ -64,21 +64,21 @@ func main() {
 	cur := st
 	for i := 0; i < n; i++ {
 		ivals[i] = cur
-		// cpuVals[i] = mat32.FastExp(ivals[i]) // 0 diffs
+		// cpuValues[i] = mat32.FastExp(ivals[i]) // 0 diffs
 		vbio := ivals[i]
 		eval := 0.1 * ((vbio + 90.0) + 10.0)
-		// cpuVals[i] = (vbio + 90.0) / (1.0 + mat32.FastExp(eval)) // lots of diffs
-		// cpuVals[i] = eval // 0 diff
-		cpuVals[i] = float32(1.0) / eval // no diff from casting
-		// cpuVals[i] = 1.0 / mat32.FastExp(eval)
+		// cpuValues[i] = (vbio + 90.0) / (1.0 + mat32.FastExp(eval)) // lots of diffs
+		// cpuValues[i] = eval // 0 diff
+		cpuValues[i] = float32(1.0) / eval // no diff from casting
+		// cpuValues[i] = 1.0 / mat32.FastExp(eval)
 		cur += inc
 	}
 
-	ivl, _ := inv.Vals.ValByIndexTry(0)
+	ivl, _ := inv.Values.ValueByIndexTry(0)
 	ivl.CopyFromBytes(unsafe.Pointer(&(ivals[0])))
 	sy.Mem.SyncToGPU()
 
-	vars.BindDynValsAllIndex(0)
+	vars.BindDynValuesAllIndex(0)
 
 	cmd := sy.ComputeCmdBuff()
 
@@ -87,13 +87,13 @@ func main() {
 	sy.ComputeCmdEnd(cmd)
 	sy.ComputeSubmitWait(cmd)
 
-	sy.Mem.SyncValIndexFmGPU(0, "Out", 0)
-	_, ovl, _ := vars.ValByIndexTry(0, "Out", 0)
+	sy.Mem.SyncValueIndexFmGPU(0, "Out", 0)
+	_, ovl, _ := vars.ValueByIndexTry(0, "Out", 0)
 
 	odat := ovl.Floats32()
 	for i := 0; i < n; i++ {
-		diff := odat[i] - cpuVals[i]
-		fmt.Printf("In:  %d\tival: %g\tcpu: %g\tgpu: %g\tdiff: %g\n", i, ivals[i], cpuVals[i], odat[i], diff)
+		diff := odat[i] - cpuValues[i]
+		fmt.Printf("In:  %d\tival: %g\tcpu: %g\tgpu: %g\tdiff: %g\n", i, ivals[i], cpuValues[i], odat[i], diff)
 	}
 	fmt.Printf("\n")
 

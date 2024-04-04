@@ -114,16 +114,16 @@ func main() {
 	txidxv := pcset.Add("TexIndex", vgpu.Int32, 1, vgpu.Push, vgpu.FragmentShader)
 	tximgv := txset.Add("TexSampler", vgpu.ImageRGBA32, 1, vgpu.TextureRole, vgpu.FragmentShader)
 
-	vset.ConfigVals(1) // val per var
-	uset.ConfigVals(1)
-	txset.ConfigVals(3)
+	vset.ConfigValues(1) // val per var
+	uset.ConfigValues(1)
+	txset.ConfigValues(3)
 
 	imgFiles := []string{"ground.png", "wood.png", "teximg.jpg"}
 	imgs := make([]image.Image, len(imgFiles))
 	for i, fnm := range imgFiles {
 		pnm := filepath.Join("../images", fnm)
 		imgs[i] = OpenImage(pnm)
-		img, _ := tximgv.Vals.ValByIndexTry(i)
+		img, _ := tximgv.Values.ValueByIndexTry(i)
 		img.Texture.ConfigGoImage(imgs[i].Bounds().Size(), 0)
 		// img.Texture.Sampler.Border = vgpu.BorderBlack
 		// img.Texture.Sampler.UMode = vgpu.ClampToBorder
@@ -133,7 +133,7 @@ func main() {
 	sy.Config() // allocates everything etc
 
 	// note: first val in set is offset
-	rectPos, _ := posv.Vals.ValByIndexTry(0)
+	rectPos, _ := posv.Values.ValueByIndexTry(0)
 	rectPosA := rectPos.Floats32()
 	rectPosA.Set(0,
 		-0.5, -0.5, 0.0,
@@ -142,7 +142,7 @@ func main() {
 		-0.5, 0.5, 0.0)
 	rectPos.SetMod()
 
-	rectClr, _ := clrv.Vals.ValByIndexTry(0)
+	rectClr, _ := clrv.Values.ValueByIndexTry(0)
 	rectClrA := rectClr.Floats32()
 	rectClrA.Set(0,
 		1.0, 0.0, 0.0,
@@ -151,7 +151,7 @@ func main() {
 		1.0, 1.0, 0.0)
 	rectClr.SetMod()
 
-	rectTex, _ := txcv.Vals.ValByIndexTry(0)
+	rectTex, _ := txcv.Values.ValueByIndexTry(0)
 	rectTexA := rectTex.Floats32()
 	rectTexA.Set(0,
 		1.0, 0.0,
@@ -160,17 +160,17 @@ func main() {
 		1.0, 1.0)
 	rectTex.SetMod()
 
-	rectIndex, _ := idxv.Vals.ValByIndexTry(0)
+	rectIndex, _ := idxv.Values.ValueByIndexTry(0)
 	idxs := []uint16{0, 1, 2, 0, 2, 3}
 	rectIndex.CopyFromBytes(unsafe.Pointer(&idxs[0]))
 
 	for i, gimg := range imgs {
-		img, _ := tximgv.Vals.ValByIndexTry(i)
+		img, _ := tximgv.Values.ValueByIndexTry(i)
 		img.SetGoImage(gimg, 0, vgpu.FlipY)
 	}
 
 	// This is the standard camera view projection computation
-	cam, _ := camv.Vals.ValByIndexTry(0)
+	cam, _ := camv.Values.ValueByIndexTry(0)
 	campos := mat32.V3(0, 0, 2)
 	target := mat32.V3(0, 0, 0)
 	var lookq mat32.Quat
@@ -198,7 +198,7 @@ func main() {
 	vars.BindStatVars(1)  // gets images
 	vars.BindVarsEnd()
 
-	vars.BindDynVal(0, camv, cam)
+	vars.BindDynValue(0, camv, cam)
 
 	frameCount := 0
 	stTime := time.Now()
