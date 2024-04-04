@@ -7,7 +7,7 @@ package main
 //go:generate core generate
 
 import (
-	_ "embed"
+	"embed"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -24,11 +24,15 @@ import (
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/units"
 )
 
 //go:embed icon.svg
 var appIcon []byte
+
+//go:embed demo.go
+var demoFile embed.FS
 
 func main() {
 	gi.TheApp.SetIconBytes(appIcon)
@@ -68,6 +72,7 @@ func widgets(ts *gi.Tabs) {
 	buttons(wts)
 	inputs(wts)
 	sliders(wts)
+	editors(wts)
 	dialogs(wts)
 	icon(wts)
 }
@@ -300,6 +305,18 @@ func sliders(ts *gi.Tabs) {
 	gi.NewMeter(tab).SetValue(0.7).Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
+}
+
+func editors(ts *gi.Tabs) {
+	tab := ts.NewTab("Editors")
+
+	gi.NewLabel(tab).SetType(gi.LabelHeadlineLarge).SetText("Text editors")
+	gi.NewLabel(tab).SetText("Cogent Core provides powerful text editors that support advanced code editing features, like syntax highlighting, completion, undo and redo, copy and paste, rectangular selection, and word, line, and page based navigation, selection, and deletion.")
+
+	sp := gi.NewSplits(tab)
+
+	texteditor.NewSoloEditor(sp).Buffer.SetTextString("Enter\n\ttext\n\t\there")
+	grr.Log(texteditor.NewSoloEditor(sp).Buffer.OpenFS(demoFile, "demo.go"))
 }
 
 func icon(ts *gi.Tabs) {
