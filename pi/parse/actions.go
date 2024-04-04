@@ -72,31 +72,31 @@ type Act struct {
 	Path string `width:"50"`
 
 	// for ChgToken, the new token type to assign to token at given path
-	Tok token.Tokens
+	Token token.Tokens
 
 	// for ChgToken, only change if token is this to start with (only if != None))
-	FmTok token.Tokens
+	FromToken token.Tokens
 }
 
 // String satisfies fmt.Stringer interface
 func (ac Act) String() string {
-	if ac.FmTok != token.None {
-		return fmt.Sprintf(`%v:%v:"%v":%v<-%v`, ac.RunIndex, ac.Act, ac.Path, ac.Tok, ac.FmTok)
+	if ac.FromToken != token.None {
+		return fmt.Sprintf(`%v:%v:"%v":%v<-%v`, ac.RunIndex, ac.Act, ac.Path, ac.Token, ac.FromToken)
 	} else {
-		return fmt.Sprintf(`%v:%v:"%v":%v`, ac.RunIndex, ac.Act, ac.Path, ac.Tok)
+		return fmt.Sprintf(`%v:%v:"%v":%v`, ac.RunIndex, ac.Act, ac.Path, ac.Token)
 	}
 }
 
-// ChgTok changes the token type, using FmTok logic
+// ChgTok changes the token type, using FromToken logic
 func (ac *Act) ChgTok(lx *lex.Lex) {
-	if ac.FmTok == token.None {
-		lx.Tok.Tok = ac.Tok
+	if ac.FromToken == token.None {
+		lx.Tok.Tok = ac.Token
 		return
 	}
-	if lx.Tok.Tok != ac.FmTok {
+	if lx.Tok.Tok != ac.FromToken {
 		return
 	}
-	lx.Tok.Tok = ac.Tok
+	lx.Tok.Tok = ac.Token
 }
 
 // Acts are multiple actions

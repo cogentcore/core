@@ -58,8 +58,8 @@ func Base64SplitLines(b []byte) []byte {
 	return rb
 }
 
-// FmBase64PNG returns image from Base64-encoded bytes in PNG format
-func FmBase64PNG(eb []byte) (image.Image, error) {
+// FromBase64PNG returns image from Base64-encoded bytes in PNG format
+func FromBase64PNG(eb []byte) (image.Image, error) {
 	if eb[76] == ' ' {
 		eb = bytes.ReplaceAll(eb, []byte(" "), []byte("\n"))
 	}
@@ -73,8 +73,8 @@ func FmBase64PNG(eb []byte) (image.Image, error) {
 	return png.Decode(rb)
 }
 
-// FmBase64PNG returns image from Base64-encoded bytes in PNG format
-func FmBase64JPG(eb []byte) (image.Image, error) {
+// FromBase64JPG returns image from Base64-encoded bytes in PNG format
+func FromBase64JPG(eb []byte) (image.Image, error) {
 	if eb[76] == ' ' {
 		eb = bytes.ReplaceAll(eb, []byte(" "), []byte("\n"))
 	}
@@ -88,14 +88,14 @@ func FmBase64JPG(eb []byte) (image.Image, error) {
 	return jpeg.Decode(rb)
 }
 
-// FmBase64 returns image from Base64-encoded bytes in either PNG or JPEG format
-// based on fmt which must end in either png or jpeg
-func FmBase64(fmt string, eb []byte) (image.Image, error) {
+// FromBase64 returns image from Base64-encoded bytes in either PNG or JPEG format
+// based on fmt which must end in either png, jpg, or jpeg
+func FromBase64(fmt string, eb []byte) (image.Image, error) {
 	if strings.HasSuffix(fmt, "png") {
-		return FmBase64PNG(eb)
+		return FromBase64PNG(eb)
 	}
-	if strings.HasSuffix(fmt, "jpeg") {
-		return FmBase64JPG(eb)
+	if strings.HasSuffix(fmt, "jpg") || strings.HasSuffix(fmt, "jpeg") {
+		return FromBase64JPG(eb)
 	}
 	return nil, errors.New("image format must be either png or jpeg")
 }

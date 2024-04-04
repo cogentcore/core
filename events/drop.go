@@ -82,7 +82,7 @@ const (
 	DropCopy
 
 	// Move is signaled with a Shift or Meta key (by default) and implies that
-	// the source should delete itself when it receives the DropFmSource event
+	// the source should delete itself when it receives the DropFromSource event
 	// action with this Mod value set -- receiver must update the Mod to
 	// reflect actual action taken, and be particularly careful with this one
 	DropMove

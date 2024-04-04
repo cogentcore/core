@@ -112,10 +112,10 @@ const (
 	Landscape
 )
 
-// LogicalFmPhysicalDPI computes the logical DPI used in actual screen scaling
+// LogicalFromPhysicalDPI computes the logical DPI used in actual screen scaling
 // based on the given logical DPI scale factor (logScale), and also makes it a
 // multiple of 6 to make normal font sizes look best.
-func LogicalFmPhysicalDPI(logScale, pdpi float32) float32 {
+func LogicalFromPhysicalDPI(logScale, pdpi float32) float32 {
 	idpi := int(math.Round(float64(pdpi * logScale)))
 	mdpi := idpi / 6
 	mdpi *= 6
@@ -139,7 +139,7 @@ func (sc *Screen) UpdateLogicalDPI() {
 			dpisc = dsc
 		}
 	}
-	sc.LogicalDPI = LogicalFmPhysicalDPI(dpisc, sc.PhysicalDPI)
+	sc.LogicalDPI = LogicalFromPhysicalDPI(dpisc, sc.PhysicalDPI)
 	// fmt.Println("log dpi:", sc.LogicalDPI, "zoom:", ZoomFactor, "dpisc:", dpisc)
 }
 

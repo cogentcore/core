@@ -13,7 +13,7 @@ const DropModsN DropMods = 5
 
 var _DropModsValueMap = map[string]DropMods{`NoDropMod`: 0, `Copy`: 1, `Move`: 2, `Link`: 3, `Ignore`: 4}
 
-var _DropModsDescMap = map[DropMods]string{0: ``, 1: `Copy is the default and implies data is just copied -- receiver can do with it as they please and source does not need to take any further action`, 2: `Move is signaled with a Shift or Meta key (by default) and implies that the source should delete itself when it receives the DropFmSource event action with this Mod value set -- receiver must update the Mod to reflect actual action taken, and be particularly careful with this one`, 3: `Link can be any other kind of alternative action -- link is applicable to files (symbolic link)`, 4: `Ignore means that the receiver chose to not process this drop`}
+var _DropModsDescMap = map[DropMods]string{0: ``, 1: `Copy is the default and implies data is just copied -- receiver can do with it as they please and source does not need to take any further action`, 2: `Move is signaled with a Shift or Meta key (by default) and implies that the source should delete itself when it receives the DropFromSource event action with this Mod value set -- receiver must update the Mod to reflect actual action taken, and be particularly careful with this one`, 3: `Link can be any other kind of alternative action -- link is applicable to files (symbolic link)`, 4: `Ignore means that the receiver chose to not process this drop`}
 
 var _DropModsMap = map[DropMods]string{0: `NoDropMod`, 1: `Copy`, 2: `Move`, 3: `Link`, 4: `Ignore`}
 

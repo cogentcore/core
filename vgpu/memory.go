@@ -347,42 +347,35 @@ func (mm *Memory) SyncRegionValueIndex(set int, varNm string, valIndex int) (Mem
 	return vl.MemReg(vr), nil
 }
 
-// SyncValueNameFmGPU syncs given value from GPU device memory to CPU host memory,
+// SyncValueNameFromGPU syncs given value from GPU device memory to CPU host memory,
 // specifying value by name for given named variable in given set.
 // Variable can only only be Storage memory -- otherwise an error is returned.
-func (mm *Memory) SyncValueNameFmGPU(set int, varNm, valNm string) error {
+func (mm *Memory) SyncValueNameFromGPU(set int, varNm, valNm string) error {
 	mr, err := mm.SyncRegionValueName(set, varNm, valNm)
 	if err != nil {
 		return err
 	}
-	mm.TransferRegsFmGPU([]MemReg{mr})
+	mm.TransferRegsFromGPU([]MemReg{mr})
 	return nil
 }
 
-// SyncValueIndexFmGPU syncs given value from GPU device memory to CPU host memory,
+// SyncValueIndexFromGPU syncs given value from GPU device memory to CPU host memory,
 // specifying value by index for given named variable, in given set.
 // Variable can only only be Storage memory -- otherwise an error is returned.
-func (mm *Memory) SyncValueIndexFmGPU(set int, varNm string, valIndex int) error {
+func (mm *Memory) SyncValueIndexFromGPU(set int, varNm string, valIndex int) error {
 	mr, err := mm.SyncRegionValueIndex(set, varNm, valIndex)
 	if err != nil {
 		return err
 	}
-	mm.TransferRegsFmGPU([]MemReg{mr})
+	mm.TransferRegsFromGPU([]MemReg{mr})
 	return nil
 }
 
-// SyncStorageRegionsFmGPU syncs given regions from the Storage buffer memory
-// from GPU to CPU, in one call.   Use SyncRegValueIndexFmCPU to get the regions.
-func (mm *Memory) SyncStorageRegionsFmGPU(regs ...MemReg) {
-	mm.TransferRegsFmGPU(regs)
+// SyncStorageRegionsFromGPU syncs given regions from the Storage buffer memory
+// from GPU to CPU, in one call.   Use SyncRegValueIndexFromCPU to get the regions.
+func (mm *Memory) SyncStorageRegionsFromGPU(regs ...MemReg) {
+	mm.TransferRegsFromGPU(regs)
 }
-
-// // SyncValueFmGPU syncs given value from GPU device memory to CPU host memory.
-// // Must be in Storage memory -- otherwise an error will be printed and returned.
-// func (mm *Memory) SyncValueFmGPU(vl *Value) {
-// 	mods := vl.MemReg()
-// 	mm.TransferRegsFmGPU([]MemReg{mods})
-// }
 
 // TransferToGPU transfers entire staging to GPU for all buffs
 func (mm *Memory) TransferToGPU() {
@@ -430,16 +423,16 @@ func (mm *Memory) TransferRegsToGPU(regs []MemReg) {
 	mm.CmdPool.EndSubmitWaitFree(&mm.Device)
 }
 
-// TransferRegsFmGPU transfers memory from GPU to CPU for given regions,
+// TransferRegsFromGPU transfers memory from GPU to CPU for given regions,
 // using a one-time memory command buffer.
 // All buffs must be of the same type.
-func (mm *Memory) TransferRegsFmGPU(regs []MemReg) {
+func (mm *Memory) TransferRegsFromGPU(regs []MemReg) {
 	if len(regs) == 0 {
 		return
 	}
 	bt := regs[0].BuffType
 	if bt == StorageBuff {
-		mm.TransferStorageRegsFmGPU(regs)
+		mm.TransferStorageRegsFromGPU(regs)
 		return
 	}
 	buff := mm.Buffs[bt]
@@ -448,7 +441,7 @@ func (mm *Memory) TransferRegsFmGPU(regs []MemReg) {
 	}
 	cmd := mm.CmdPool.NewBuffer(&mm.Device)
 	mm.CmdPool.BeginCmdOneTime()
-	mm.CmdTransferRegsFmGPU(cmd, buff, regs)
+	mm.CmdTransferRegsFromGPU(cmd, buff, regs)
 	mm.CmdPool.EndSubmitWaitFree(&mm.Device)
 }
 
@@ -465,9 +458,9 @@ func (mm *Memory) CmdTransferRegsToGPU(cmd vk.CommandBuffer, buff *MemBuff, regs
 	vk.CmdCopyBuffer(cmd, buff.Host, buff.Dev, uint32(len(rg)), rg)
 }
 
-// CmdTransferRegsFmGPU transfers memory from GPU to CPU for given regions
+// CmdTransferRegsFromGPU transfers memory from GPU to CPU for given regions
 // by recording command to given buffer.
-func (mm *Memory) CmdTransferRegsFmGPU(cmd vk.CommandBuffer, buff *MemBuff, regs []MemReg) {
+func (mm *Memory) CmdTransferRegsFromGPU(cmd vk.CommandBuffer, buff *MemBuff, regs []MemReg) {
 	if buff.Size == 0 || buff.DevMem == vk.NullDeviceMemory || len(regs) == 0 {
 		return
 	}
@@ -490,15 +483,15 @@ func (mm *Memory) TransferStorageRegsToGPU(regs []MemReg) {
 	mm.CmdPool.EndSubmitWaitFree(&mm.Device)
 }
 
-// TransferStorageRegsFmGPU transfers memory from GPU to CPU for given regions,
+// TransferStorageRegsFromGPU transfers memory from GPU to CPU for given regions,
 // using a one-time memory command buffer, for Storage
-func (mm *Memory) TransferStorageRegsFmGPU(regs []MemReg) {
+func (mm *Memory) TransferStorageRegsFromGPU(regs []MemReg) {
 	if len(regs) == 0 {
 		return
 	}
 	cmd := mm.CmdPool.NewBuffer(&mm.Device)
 	CmdBeginOneTime(cmd)
-	mm.CmdTransferStorageRegsFmGPU(cmd, regs)
+	mm.CmdTransferStorageRegsFromGPU(cmd, regs)
 	mm.CmdPool.EndSubmitWaitFree(&mm.Device)
 }
 
@@ -540,9 +533,9 @@ func (mm *Memory) CmdTransferStorageBuffRegsToGPU(cmd vk.CommandBuffer, buff *Me
 	vk.CmdCopyBuffer(cmd, buff.Host, buff.Dev, uint32(len(rg)), rg)
 }
 
-// CmdTransferStorageRegsFmGPU transfers memory from GPU to CPU for given storage regions
+// CmdTransferStorageRegsFromGPU transfers memory from GPU to CPU for given storage regions
 // by recording command to given command buffer.
-func (mm *Memory) CmdTransferStorageRegsFmGPU(cmd vk.CommandBuffer, regs []MemReg) {
+func (mm *Memory) CmdTransferStorageRegsFromGPU(cmd vk.CommandBuffer, regs []MemReg) {
 	if len(regs) == 0 {
 		return
 	}
@@ -551,20 +544,20 @@ func (mm *Memory) CmdTransferStorageRegsFmGPU(cmd vk.CommandBuffer, regs []MemRe
 	})
 	buffIndex := regs[0].BuffIndex
 	buff := mm.StorageBuffs[buffIndex]
-	mm.CmdTransferStorageBuffRegsFmGPU(cmd, buff, buffIndex, regs)
+	mm.CmdTransferStorageBuffRegsFromGPU(cmd, buff, buffIndex, regs)
 	for i := 1; i < len(regs); i++ {
 		if regs[i].BuffIndex == buffIndex {
 			continue
 		}
 		buffIndex = regs[i].BuffIndex
 		buff = mm.StorageBuffs[buffIndex]
-		mm.CmdTransferStorageBuffRegsFmGPU(cmd, buff, buffIndex, regs)
+		mm.CmdTransferStorageBuffRegsFromGPU(cmd, buff, buffIndex, regs)
 	}
 }
 
-// CmdTransferStorageBuffRegsFmGPU transfers memory from GPU to CPU for given regions
+// CmdTransferStorageBuffRegsFromGPU transfers memory from GPU to CPU for given regions
 // by recording command to given storage buffer of given index.
-func (mm *Memory) CmdTransferStorageBuffRegsFmGPU(cmd vk.CommandBuffer, buff *MemBuff, buffIndex int, regs []MemReg) {
+func (mm *Memory) CmdTransferStorageBuffRegsFromGPU(cmd vk.CommandBuffer, buff *MemBuff, buffIndex int, regs []MemReg) {
 	if buff.Size == 0 || buff.DevMem == vk.NullDeviceMemory || len(regs) == 0 {
 		return
 	}
@@ -607,10 +600,10 @@ func (mm *Memory) TransferTexturesToGPU(buff vk.Buffer, imgs ...*Image) {
 	mm.CmdPool.EndSubmitWaitFree(&mm.Device)
 }
 
-// TransferImagesFmGPU transfers image memory from GPU to CPU for given images.
+// TransferImagesFromGPU transfers image memory from GPU to CPU for given images.
 // the image Host.Offset *must* be accurate for the given buffer, whether its own
 // individual buffer or the shared memory-managed buffer.
-func (mm *Memory) TransferImagesFmGPU(buff vk.Buffer, imgs ...*Image) {
+func (mm *Memory) TransferImagesFromGPU(buff vk.Buffer, imgs ...*Image) {
 	cmd := mm.CmdPool.NewBuffer(&mm.Device)
 	CmdBeginOneTime(cmd)
 

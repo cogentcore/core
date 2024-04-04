@@ -28,10 +28,10 @@ func SRGBToLinearComp(srgb float32) float32 {
 	return mat32.Pow((srgb+0.055)/1.055, 2.4)
 }
 
-// SRGBFmLinearComp converts an sRGB rgb linear component
+// SRGBFromLinearComp converts an sRGB rgb linear component
 // to non-linear (gamma corrected) sRGB value
 // Used in converting from XYZ to sRGB.
-func SRGBFmLinearComp(lin float32) float32 {
+func SRGBFromLinearComp(lin float32) float32 {
 	if lin <= 0.0031308 {
 		return 12.92 * lin
 	}
@@ -47,12 +47,12 @@ func SRGBToLinear(r, g, b float32) (rl, gl, bl float32) {
 	return
 }
 
-// SRGBFmLinear converts set of sRGB components from linear values,
+// SRGBFromLinear converts set of sRGB components from linear values,
 // adding gamma correction.
-func SRGBFmLinear(rl, gl, bl float32) (r, g, b float32) {
-	r = SRGBFmLinearComp(rl)
-	g = SRGBFmLinearComp(gl)
-	b = SRGBFmLinearComp(bl)
+func SRGBFromLinear(rl, gl, bl float32) (r, g, b float32) {
+	r = SRGBFromLinearComp(rl)
+	g = SRGBFromLinearComp(gl)
+	b = SRGBFromLinearComp(bl)
 	return
 }
 
@@ -63,9 +63,9 @@ func ImgCompToUint8(val float32) uint8 {
 	return uint8(val * float32(0xff))
 }
 
-// ImageSRGBFmLinear returns a sRGB colorspace version of given linear
+// ImageSRGBFromLinear returns a sRGB colorspace version of given linear
 // colorspace image
-func ImageSRGBFmLinear(img *image.RGBA) *image.RGBA {
+func ImageSRGBFromLinear(img *image.RGBA) *image.RGBA {
 	out := image.NewRGBA(img.Rect)
 	sz := len(img.Pix)
 	tof := 1.0 / float32(0xff)
@@ -74,7 +74,7 @@ func ImageSRGBFmLinear(img *image.RGBA) *image.RGBA {
 		g := float32(img.Pix[i+1]) * tof
 		b := float32(img.Pix[i+2]) * tof
 		a := img.Pix[i+3]
-		rs, gs, bs := SRGBFmLinear(r, g, b)
+		rs, gs, bs := SRGBFromLinear(r, g, b)
 		out.Pix[i] = ImgCompToUint8(rs)
 		out.Pix[i+1] = ImgCompToUint8(gs)
 		out.Pix[i+2] = ImgCompToUint8(bs)
@@ -103,10 +103,10 @@ func ImageSRGBToLinear(img *image.RGBA) *image.RGBA {
 	return out
 }
 
-// SetImageSRGBFmLinear sets in place the pixel values to sRGB colorspace
+// SetImageSRGBFromLinear sets in place the pixel values to sRGB colorspace
 // version of given linear colorspace image.
 // This directly modifies the given image!
-func SetImageSRGBFmLinear(img *image.RGBA) {
+func SetImageSRGBFromLinear(img *image.RGBA) {
 	sz := len(img.Pix)
 	tof := 1.0 / float32(0xff)
 	for i := 0; i < sz; i += 4 {
@@ -114,7 +114,7 @@ func SetImageSRGBFmLinear(img *image.RGBA) {
 		g := float32(img.Pix[i+1]) * tof
 		b := float32(img.Pix[i+2]) * tof
 		a := img.Pix[i+3]
-		rs, gs, bs := SRGBFmLinear(r, g, b)
+		rs, gs, bs := SRGBFromLinear(r, g, b)
 		img.Pix[i] = ImgCompToUint8(rs)
 		img.Pix[i+1] = ImgCompToUint8(gs)
 		img.Pix[i+2] = ImgCompToUint8(bs)
@@ -409,7 +409,7 @@ func (im *Image) GoImage(layer int) (*image.RGBA, error) {
 	rgba.Stride = im.Format.Stride()
 	rgba.Rect = image.Rect(0, 0, im.Format.Size.X, im.Format.Size.Y)
 	if im.Format.IsRGBAUnorm() {
-		return ImageSRGBFmLinear(rgba), nil
+		return ImageSRGBFromLinear(rgba), nil
 	}
 	return rgba, nil
 }
@@ -482,7 +482,7 @@ func (im *Image) DevGoImageCopy(rgba *image.RGBA) error {
 	vk.UnmapMemory(im.Dev, im.Mem)
 	if im.Format.IsRGBAUnorm() {
 		fmt.Println("converting to linear")
-		SetImageSRGBFmLinear(rgba)
+		SetImageSRGBFromLinear(rgba)
 	}
 	rgba.Stride = im.Format.Stride()
 	rgba.Rect = image.Rect(0, 0, im.Format.Size.X, im.Format.Size.Y)

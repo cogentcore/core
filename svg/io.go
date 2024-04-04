@@ -406,7 +406,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 								log.Printf("image base64 encoding string not properly formatted: %s\n", bs64)
 							}
 							eb := []byte(es[fmti+8:])
-							im, err := images.FmBase64(fm, eb)
+							im, err := images.FromBase64(fm, eb)
 							if err != nil {
 								log.Println(err)
 							} else {

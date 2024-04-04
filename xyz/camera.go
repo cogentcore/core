@@ -223,10 +223,10 @@ func (cm *Camera) PanTarget(delX, delY, delZ float32) {
 	cm.LookAtTarget()
 }
 
-// TargetFmView updates the target location from the current view matrix,
+// TargetFromView updates the target location from the current view matrix,
 // by projecting the current target distance along the current camera
 // view matrix.
-func (cm *Camera) TargetFmView() {
+func (cm *Camera) TargetFromView() {
 	cm.CamMu.Lock()
 	trgdist := cm.Pose.Pos.Sub(cm.Target).Length() // distance to existing target
 	tpos := mat32.V4(0, 0, -trgdist, 1)            // target is that distance along -Z axis in front of me
@@ -271,5 +271,5 @@ func (cm *Camera) ZoomTo(pt, size image.Point, zoomPct float32) {
 	cm.Pose.Pos.SetAdd(del)
 	cm.CamMu.Unlock()
 	cm.UpdateMatrix()
-	cm.TargetFmView()
+	cm.TargetFromView()
 }

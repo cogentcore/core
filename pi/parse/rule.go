@@ -184,8 +184,8 @@ type RuleEl struct {
 	// this rule is optional -- will absorb tokens if they exist -- indicated with ? prefix
 	Opt bool
 
-	// match this rule working backward from the next token -- triggered by - (minus) prefix and optimizes cases where there can be a lot of tokens going forward but few going from end -- must be anchored by a terminal EOS or other FmNext elements and is ignored if at the very end
-	FmNext bool
+	// match this rule working backward from the next token -- triggered by - (minus) prefix and optimizes cases where there can be a lot of tokens going forward but few going from end -- must be anchored by a terminal EOS or other FromNext elements and is ignored if at the very end
+	FromNext bool
 }
 
 func (re RuleEl) IsRule() bool {
@@ -351,7 +351,7 @@ func (pr *Rule) Compile(ps *State) bool {
 				td, _ := strconv.ParseInt(rn[1:tokst], 10, 64)
 				rr.Tok.Depth = int(td)
 			} else if rn[0] == '-' {
-				rr.FmNext = true
+				rr.FromNext = true
 			}
 			tn := rn[tokst+1 : sz-1]
 			if len(tn) > 4 && tn[:4] == "key:" {
@@ -435,7 +435,7 @@ func (pr *Rule) OptimizeOrder(ps *State) {
 	for oi := 0; oi < osz; oi++ {
 		ri := pr.Order[oi]
 		rr := &pr.Rules[ri]
-		if rr.FmNext {
+		if rr.FromNext {
 			nfmnxt++
 			if fmnSt < 0 {
 				fmnSt = oi
@@ -883,7 +883,7 @@ func (pr *Rule) MatchOnlyToks(ps *State, parAst *Ast, scope lex.Reg, depth int, 
 		if optMap != nil && !optMap.Has(kt.Tok) { // not even a possibility
 			return false, nil
 		}
-		if rr.FmNext {
+		if rr.FromNext {
 			if mpos == nil {
 				mpos = make(Matches, nr) // make on demand -- cuts out a lot of allocations!
 			}
@@ -928,7 +928,7 @@ func (pr *Rule) MatchToken(ps *State, rr *RuleEl, ri int, kt token.KeyToken, cre
 		lpos := mpos[ri-1].Ed
 		if lpos != lex.PosZero { // previous has matched
 			matchst = true
-		} else if ri < nr-1 && rr.FmNext {
+		} else if ri < nr-1 && rr.FromNext {
 			lpos := mpos[ri+1].St
 			if lpos != lex.PosZero { // previous has matched
 				creg.Ed, _ = ps.Src.PrevTokenPos(lpos)
@@ -1005,7 +1005,7 @@ func (pr *Rule) MatchMixed(ps *State, parAst *Ast, scope lex.Reg, depth int, opt
 		// Token
 		if rr.IsToken() {
 			kt := rr.Tok
-			if rr.FmNext {
+			if rr.FromNext {
 				if mpos == nil {
 					mpos = make(Matches, nr) // make on demand -- cuts out a lot of allocations!
 				}
@@ -1587,8 +1587,8 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *Ast) bo
 	ast := node.(*Ast)
 	lx := ps.Src.LexAt(ast.TokReg.St)
 	useTok := lx.Tok.Tok
-	if act.Tok != token.None {
-		useTok = act.Tok
+	if act.Token != token.None {
+		useTok = act.Token
 	}
 	nm := ast.Src
 	nms := strings.Split(nm, ",")
@@ -1623,7 +1623,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *Ast) bo
 			}
 		}
 		if ps.Trace.On {
-			ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Token set to: %v from path: %v = %v in node: %v", act.Tok, act.Path, nm, apath))
+			ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Token set to: %v from path: %v = %v in node: %v", act.Token, act.Path, nm, apath))
 		}
 		return false
 	case AddSymbol:

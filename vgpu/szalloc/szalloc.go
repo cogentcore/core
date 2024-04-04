@@ -125,7 +125,7 @@ func (sa *SzAlloc) Alloc() {
 	if maxItems > sa.MaxItemsPerGp {
 		sa.LimitGpNs()
 	}
-	sa.GpSizes = sa.SizesFmIndexs(sa.XGpIndexs, sa.YGpIndexs)
+	sa.GpSizes = sa.SizesFromIndexs(sa.XGpIndexs, sa.YGpIndexs)
 	sa.GpAllocs, _ = sa.AllocGps(sa.XGpIndexs, sa.YGpIndexs) // final updates
 	sa.AllocGpItems()
 	sa.UpdateGpMaxSz()
@@ -151,22 +151,22 @@ func (sa *SzAlloc) UniqSz() {
 	// fmt.Printf("n uniq sizes: %d\n", len(sa.UniqSizes))
 }
 
-// XYSizeFmIndex returns X,Y sizes from X,Y indexes in image.Point
+// XYSizeFromIndex returns X,Y sizes from X,Y indexes in image.Point
 // into XSizes, YSizes
-func (sa *SzAlloc) XYSizeFmIndex(idx image.Point) image.Point {
+func (sa *SzAlloc) XYSizeFromIndex(idx image.Point) image.Point {
 	return image.Point{sa.XSizes[idx.X], sa.YSizes[idx.Y]}
 }
 
-// XYFmGpi returns x, y indexes from gp index
-func XYfmGpi(gi, nxi int) (xi, yi int) {
+// XYFromGpIndex returns x, y indexes from gp index
+func XYFromGpIndex(gi, nxi int) (xi, yi int) {
 	xi = gi % nxi
 	yi = gi / nxi
 	return
 }
 
-// SizesFmIndexs returns X,Y sizes from X,Y indexes in image.Point
+// SizesFromIndexs returns X,Y sizes from X,Y indexes in image.Point
 // into XSizes, YSizes arrays
-func (sa *SzAlloc) SizesFmIndexs(xgpi, ygpi []int) []image.Point {
+func (sa *SzAlloc) SizesFromIndexs(xgpi, ygpi []int) []image.Point {
 	ng := len(xgpi) * len(ygpi)
 	szs := make([]image.Point, ng)
 	for yi, ygi := range ygpi {
@@ -262,7 +262,7 @@ func (sa *SzAlloc) LimitGpNs() {
 	for itr = 0; itr < MaxIters; itr++ {
 		chg := false
 		for j, ga := range gpallocs {
-			xi, yi := XYfmGpi(j, nxi)
+			xi, yi := XYFromGpIndex(j, nxi)
 			na := len(ga)
 			if na <= low {
 				if rand.Intn(2) == 0 {
@@ -299,7 +299,7 @@ func (sa *SzAlloc) LimitGpNs() {
 			bestXidxs = slices.Clone(xidxs)
 			bestYidxs = slices.Clone(yidxs)
 		}
-		// gps := sa.SizesFmIndexs(xidxs, yidxs)
+		// gps := sa.SizesFromIndexs(xidxs, yidxs)
 		// fmt.Printf("itr: %d  maxi: %d  gps: %v\n", itr, maxItems, gps)
 		if maxItems <= sa.MaxItemsPerGp {
 			break
@@ -309,7 +309,7 @@ func (sa *SzAlloc) LimitGpNs() {
 	sa.YGpIndexs = bestYidxs
 	// _, maxItems := sa.AllocGps(sa.XGpIndexs, sa.YGpIndexs)
 	// fmt.Printf("itrs: %d  maxItems: %d\n", itr, maxItems)
-	// edgps := sa.SizesFmIndexs(sa.XGpIndexs, sa.YGpIndexs)
+	// edgps := sa.SizesFromIndexs(sa.XGpIndexs, sa.YGpIndexs)
 	// fmt.Printf("ending gps: %v\n", edgps)
 }
 

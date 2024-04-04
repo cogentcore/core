@@ -238,10 +238,10 @@ func main() {
 
 	gogp := xyz.NewGroup(sc, "go-group")
 
-	bgo, _ := sc.AddFmLibrary("gopher", gogp)
+	bgo, _ := sc.AddFromLibrary("gopher", gogp)
 	bgo.SetScale(.5, .5, .5).SetPos(1.4, -2.5, 0).SetAxisRotation(0, 1, 0, -160)
 
-	sgo, _ := sc.AddFmLibrary("gopher", gogp)
+	sgo, _ := sc.AddFromLibrary("gopher", gogp)
 	sgo.SetPos(-1.5, -2, 0).SetScale(.2, .2, .2)
 
 	trsm := xyz.NewTorus(sc, "torus", .75, .1, 32)

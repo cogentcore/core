@@ -87,7 +87,7 @@ func main() {
 	sy.ComputeCmdEnd(cmd)
 	sy.ComputeSubmitWait(cmd)
 
-	sy.Mem.SyncValueIndexFmGPU(0, "Out", 0)
+	sy.Mem.SyncValueIndexFromGPU(0, "Out", 0)
 	_, ovl, _ := vars.ValueByIndexTry(0, "Out", 0)
 
 	odat := ovl.Floats32()

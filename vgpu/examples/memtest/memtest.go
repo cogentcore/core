@@ -73,9 +73,9 @@ func main() {
 	sy.ComputeCmdEnd(cmd)
 	sy.ComputeSubmitWait(cmd)
 
-	sy.Mem.SyncValueIndexFmGPU(0, "Ba", 0)
+	sy.Mem.SyncValueIndexFromGPU(0, "Ba", 0)
 	_, bavl, _ := vars.ValueByIndexTry(0, "Ba", 0)
-	sy.Mem.SyncValueIndexFmGPU(0, "Bb", 0)
+	sy.Mem.SyncValueIndexFromGPU(0, "Bb", 0)
 	_, bbvl, _ := vars.ValueByIndexTry(0, "Bb", 0)
 
 	bas := bavl.UInts32()

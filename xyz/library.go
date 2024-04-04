@@ -30,12 +30,12 @@ func (sc *Scene) NewInLibrary(nm string) *Group {
 	return gp
 }
 
-// AddFmLibrary adds a Clone of named item in the Library under given parent
+// AddFromLibrary adds a Clone of named item in the Library under given parent
 // in the scenegraph.  Returns an error if item not found.
-func (sc *Scene) AddFmLibrary(nm string, parent ki.Ki) (*Group, error) {
+func (sc *Scene) AddFromLibrary(nm string, parent ki.Ki) (*Group, error) {
 	gp, ok := sc.Library[nm]
 	if !ok {
-		return nil, fmt.Errorf("Scene AddFmLibrary: Library item: %s not found", nm)
+		return nil, fmt.Errorf("Scene AddFromLibrary: Library item: %s not found", nm)
 	}
 	nwgp := gp.Clone().(*Group)
 	parent.AddChild(nwgp)
