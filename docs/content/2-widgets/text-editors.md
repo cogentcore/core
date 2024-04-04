@@ -10,12 +10,6 @@ You can make a text editor without any custom options:
 texteditor.NewSoloEditor(parent)
 ```
 
-You can set the placeholder of a text editor:
-
-```Go
-texteditor.NewSoloEditor(parent).SetPlaceholder("Enter text here")
-```
-
 You can set the starting text of a text editor:
 
 ```Go

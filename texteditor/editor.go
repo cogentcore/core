@@ -65,9 +65,6 @@ type Editor struct { //core:embedder
 	// Buffer is the text buffer being edited.
 	Buffer *Buffer `set:"-" json:"-" xml:"-"`
 
-	// text that is displayed when the field is empty, in a lower-contrast manner
-	Placeholder string `json:"-" xml:"placeholder"`
-
 	// width of cursor -- set from cursor-width property (inherited)
 	CursorWidth units.Value `xml:"cursor-width"`
 
