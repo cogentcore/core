@@ -88,10 +88,10 @@ func (dw *Drawer) ConfigSys() {
 	txset := vars.AddSet() // 0
 
 	nPts := 4
-	nIndexs := 6
+	nIndexes := 6
 
 	posv := vset.Add("Pos", vgpu.Float32Vec2, nPts, vgpu.Vertex, vgpu.VertexShader)
-	idxv := vset.Add("Index", vgpu.Uint16, nIndexs, vgpu.Index, vgpu.VertexShader)
+	idxv := vset.Add("Index", vgpu.Uint16, nIndexes, vgpu.Index, vgpu.VertexShader)
 
 	pcset.AddStruct("Mtxs", vgpu.Float32Mat4.Bytes()*2, 1, vgpu.Push, vgpu.VertexShader, vgpu.FragmentShader)
 	// note: packing texidx into mvp[0][3] to fit within 128 byte limit

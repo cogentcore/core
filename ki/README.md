@@ -96,19 +96,19 @@ Here's example code for a separate Find method where the indexes are stored in a
 ```Go
 // FindByName finds item by name, using cached indexes for speed
 func (ob *Obj) FindByName(nm string) *Obj {
-	if sv.FindIndexs == nil {
-		ob.FindIndexs = make(map[string]int) // field on object
+	if sv.FindIndexes == nil {
+		ob.FindIndexes = make(map[string]int) // field on object
 	}
-	idx, has := ob.FindIndexs[nm]
+	idx, has := ob.FindIndexes[nm]
 	if !has {
 		idx = len(ob.Kids) / 2 // start in middle first time
 	}
 	idx, has = ob.Kids.IndexByName(nm, idx)
 	if has {
-		ob.FindIndexs[nm] = idx
+		ob.FindIndexes[nm] = idx
 		return ob.Kids[idx].(*Obj)
   	}
-	delete(ob.FindIndexs, nm) // must have been deleted
+	delete(ob.FindIndexes, nm) // must have been deleted
 	return nil
 }
 ```

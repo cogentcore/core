@@ -10,9 +10,9 @@ import (
 	"cogentcore.org/core/mat32"
 )
 
-// Indexs contains the indexes where a given item image size is allocated
+// Indexes contains the indexes where a given item image size is allocated
 // there is one of these per each ItemSizes
-type Indexs struct {
+type Indexes struct {
 
 	// percent size of this image relative to max size allocated
 	PctSize mat32.Vec2
@@ -24,13 +24,13 @@ type Indexs struct {
 	ItemIndex int
 }
 
-func NewIndexs(gpi, itmi int, sz, mxsz image.Point) *Indexs {
-	ii := &Indexs{}
+func NewIndexes(gpi, itmi int, sz, mxsz image.Point) *Indexes {
+	ii := &Indexes{}
 	ii.Set(gpi, itmi, sz, mxsz)
 	return ii
 }
 
-func (ii *Indexs) Set(gpi, itmi int, sz, mxsz image.Point) {
+func (ii *Indexes) Set(gpi, itmi int, sz, mxsz image.Point) {
 	ii.GpIndex = gpi
 	ii.ItemIndex = itmi
 	ii.PctSize.X = float32(sz.X) / float32(mxsz.X)

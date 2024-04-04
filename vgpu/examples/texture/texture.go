@@ -101,13 +101,13 @@ func main() {
 	txset := vars.AddSet()
 
 	nPts := 4
-	nIndexs := 6
+	nIndexes := 6
 
 	posv := vset.Add("Pos", vgpu.Float32Vec3, nPts, vgpu.Vertex, vgpu.VertexShader)
 	clrv := vset.Add("Color", vgpu.Float32Vec3, nPts, vgpu.Vertex, vgpu.VertexShader)
 	txcv := vset.Add("TexCoord", vgpu.Float32Vec2, nPts, vgpu.Vertex, vgpu.VertexShader)
 	// note: always put indexes last so there isn't a gap in the location indexes!
-	idxv := vset.Add("Index", vgpu.Uint16, nIndexs, vgpu.Index, vgpu.VertexShader)
+	idxv := vset.Add("Index", vgpu.Uint16, nIndexes, vgpu.Index, vgpu.VertexShader)
 
 	camv := uset.AddStruct("Camera", vgpu.Float32Mat4.Bytes()*3, 1, vgpu.Uniform, vgpu.VertexShader)
 
@@ -198,7 +198,7 @@ func main() {
 	vars.BindStatVars(1)  // gets images
 	vars.BindVarsEnd()
 
-	vars.BindDynValue(0, camv, cam)
+	vars.BindDynamicValue(0, camv, cam)
 
 	frameCount := 0
 	stTime := time.Now()

@@ -575,10 +575,10 @@ func (fv *FileView) UpdateFiles() {
 	fv.ReadFiles()
 
 	fvv := fv.FavsView()
-	fvv.ResetSelectedIndexs()
+	fvv.ResetSelectedIndexes()
 
 	sv := fv.FilesView()
-	sv.ResetSelectedIndexs()
+	sv.ResetSelectedIndexes()
 	sv.SelectedField = "Name"
 	sv.SelectedValue = fv.CurrentSelectedFile
 	sv.SortSlice()

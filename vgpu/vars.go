@@ -603,7 +603,7 @@ func (vs *Vars) BindDynValuesAllIndex(idx int) {
 	}
 }
 
-// BindDynValueName dynamically binds given uniform or storage value
+// BindDynamicValueName dynamically binds given uniform or storage value
 // by name for given variable name, in given set.
 //
 // This only dynamically updates the offset to point to the specified val.
@@ -614,7 +614,7 @@ func (vs *Vars) BindDynValuesAllIndex(idx int) {
 // Do NOT call BindValuesStart / End around this.
 //
 // returns error if not found.
-func (vs *Vars) BindDynValueName(set int, varNm, valNm string) error {
+func (vs *Vars) BindDynamicValueName(set int, varNm, valNm string) error {
 	st, err := vs.SetTry(set)
 	if err != nil {
 		return err
@@ -622,7 +622,7 @@ func (vs *Vars) BindDynValueName(set int, varNm, valNm string) error {
 	return st.BindDynValueName(vs, varNm, valNm)
 }
 
-// BindDynValueIndex dynamically binds given uniform or storage value
+// BindDynamicValueIndex dynamically binds given uniform or storage value
 // by index for given variable name, in given set.
 //
 // This only dynamically updates the offset to point to the specified val.
@@ -633,7 +633,7 @@ func (vs *Vars) BindDynValueName(set int, varNm, valNm string) error {
 // Do NOT call BindValuesStart / End around this.
 //
 // returns error if not found.
-func (vs *Vars) BindDynValueIndex(set int, varNm string, valIndex int) error {
+func (vs *Vars) BindDynamicValueIndex(set int, varNm string, valIndex int) error {
 	st, err := vs.SetTry(set)
 	if err != nil {
 		return err
@@ -641,7 +641,7 @@ func (vs *Vars) BindDynValueIndex(set int, varNm string, valIndex int) error {
 	return st.BindDynValueIndex(vs, varNm, valIndex)
 }
 
-// BindDynValue dynamically binds given uniform or storage value
+// BindDynamicValue dynamically binds given uniform or storage value
 // for given variable in given set.
 //
 // This only dynamically updates the offset to point to the specified val.
@@ -652,7 +652,7 @@ func (vs *Vars) BindDynValueIndex(set int, varNm string, valIndex int) error {
 // Do NOT call BindValuesStart / End around this.
 //
 // returns error if not found.
-func (vs *Vars) BindDynValue(set int, vr *Var, vl *Value) error {
+func (vs *Vars) BindDynamicValue(set int, vr *Var, vl *Value) error {
 	st, err := vs.SetTry(set)
 	if err != nil {
 		return err
@@ -660,16 +660,16 @@ func (vs *Vars) BindDynValue(set int, vr *Var, vl *Value) error {
 	return st.BindDynValue(vs, vr, vl)
 }
 
-// TexGpSzIndexs for texture at given index, allocated in groups by size
+// TextureGroupSizeIndexes for texture at given index, allocated in groups by size
 // using Values.AllocTexBySize, returns the indexes for the texture
 // and layer to actually select the texture in the shader, and proportion
 // of the Gp allocated texture size occupied by the texture.
-func (vs *Vars) TexGpSzIndexs(set int, varNm string, valIndex int) *szalloc.Indexs {
+func (vs *Vars) TextureGroupSizeIndexes(set int, varNm string, valIndex int) *szalloc.Indexes {
 	st, err := vs.SetTry(set)
 	if err != nil {
 		return nil
 	}
-	return st.TexGpSzIndexs(vs, varNm, valIndex)
+	return st.TextureGroupSizeIndexes(vs, varNm, valIndex)
 }
 
 ///////////////////////////////////////////////////////////

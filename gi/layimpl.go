@@ -850,11 +850,11 @@ func (ly *Layout) LaySetInitCellsWrap() {
 		li.Wraps[i] = n
 		sum += n
 	}
-	ly.LaySetWrapIndexs()
+	ly.LaySetWrapIndexes()
 }
 
-// LaySetWrapIndexs sets indexes for Wrap case
-func (ly *Layout) LaySetWrapIndexs() {
+// LaySetWrapIndexes sets indexes for Wrap case
+func (ly *Layout) LaySetWrapIndexes() {
 	li := &ly.LayImpl
 	idx := 0
 	var maxc image.Point
@@ -1371,7 +1371,7 @@ func (ly *Layout) SizeDownWrap(iter int) bool {
 		fmt.Println(ly, "wrapped:", wraps)
 	}
 	li.Wraps = wraps
-	ly.LaySetWrapIndexs()
+	ly.LaySetWrapIndexes()
 	li.InitCells()
 	ly.LaySetGapSizeFromCells()
 	ly.SizeFromChildrenCells(iter, SizeDownPass)

@@ -58,7 +58,7 @@ type SzAlloc struct {
 	GpAllocs [][]int
 
 	// allocation image value indexes to image indexes
-	ItemIndexs []*Indexs
+	ItemIndexes []*Indexes
 
 	// sorted list of all unique sizes
 	XSizes []int
@@ -70,10 +70,10 @@ type SzAlloc struct {
 	GpNs image.Point
 
 	// list of x group indexes
-	XGpIndexs []int
+	XGpIndexes []int
 
 	// list of y group indexes
-	YGpIndexs []int
+	YGpIndexes []int
 }
 
 // SetSizes sets the max number of groups along each dimension (X, Y),
@@ -117,16 +117,16 @@ func (sa *SzAlloc) Alloc() {
 	}
 	sa.XSizes = UniqSortedInts(sa.XSizes)
 	sa.YSizes = UniqSortedInts(sa.YSizes)
-	sa.XGpIndexs = SizeGroups(sa.XSizes, sa.MaxGps.X)
-	sa.YGpIndexs = SizeGroups(sa.YSizes, sa.MaxGps.Y)
+	sa.XGpIndexes = SizeGroups(sa.XSizes, sa.MaxGps.X)
+	sa.YGpIndexes = SizeGroups(sa.YSizes, sa.MaxGps.Y)
 
 	maxItems := 0
-	sa.GpAllocs, maxItems = sa.AllocGps(sa.XGpIndexs, sa.YGpIndexs)
+	sa.GpAllocs, maxItems = sa.AllocGps(sa.XGpIndexes, sa.YGpIndexes)
 	if maxItems > sa.MaxItemsPerGp {
 		sa.LimitGpNs()
 	}
-	sa.GpSizes = sa.SizesFromIndexs(sa.XGpIndexs, sa.YGpIndexs)
-	sa.GpAllocs, _ = sa.AllocGps(sa.XGpIndexs, sa.YGpIndexs) // final updates
+	sa.GpSizes = sa.SizesFromIndexes(sa.XGpIndexes, sa.YGpIndexes)
+	sa.GpAllocs, _ = sa.AllocGps(sa.XGpIndexes, sa.YGpIndexes) // final updates
 	sa.AllocGpItems()
 	sa.UpdateGpMaxSz()
 
@@ -164,9 +164,9 @@ func XYFromGpIndex(gi, nxi int) (xi, yi int) {
 	return
 }
 
-// SizesFromIndexs returns X,Y sizes from X,Y indexes in image.Point
+// SizesFromIndexes returns X,Y sizes from X,Y indexes in image.Point
 // into XSizes, YSizes arrays
-func (sa *SzAlloc) SizesFromIndexs(xgpi, ygpi []int) []image.Point {
+func (sa *SzAlloc) SizesFromIndexes(xgpi, ygpi []int) []image.Point {
 	ng := len(xgpi) * len(ygpi)
 	szs := make([]image.Point, ng)
 	for yi, ygi := range ygpi {
@@ -214,12 +214,12 @@ func (sa *SzAlloc) AllocGps(xgpi, ygpi []int) (allocs [][]int, maxItems int) {
 // AllocGpItems allocates items in groups based on final GpAllocs
 func (sa *SzAlloc) AllocGpItems() {
 	ni := len(sa.ItemSizes)
-	sa.ItemIndexs = make([]*Indexs, ni)
+	sa.ItemIndexes = make([]*Indexes, ni)
 	for gi, ga := range sa.GpAllocs {
 		gsz := sa.GpSizes[gi]
 		for i, li := range ga {
 			sz := sa.ItemSizes[li]
-			sa.ItemIndexs[li] = NewIndexs(gi, i, sz, gsz)
+			sa.ItemIndexes[li] = NewIndexes(gi, i, sz, gsz)
 		}
 	}
 }
@@ -246,17 +246,17 @@ func (sa *SzAlloc) UpdateGpMaxSz() {
 // LimitGpNs updates group sizes to ensure that the MaxItemsPerGp limit
 // is not exceeded.
 func (sa *SzAlloc) LimitGpNs() {
-	nxi := len(sa.XGpIndexs)
+	nxi := len(sa.XGpIndexes)
 
-	xidxs := slices.Clone(sa.XGpIndexs)
-	yidxs := slices.Clone(sa.YGpIndexs)
+	xidxs := slices.Clone(sa.XGpIndexes)
+	yidxs := slices.Clone(sa.YGpIndexes)
 	gpallocs, bestmax := sa.AllocGps(xidxs, yidxs)
 
 	avg := len(sa.ItemSizes) / sa.MaxNGps
 	low := (avg * 3) / 4
 
-	bestXidxs := slices.Clone(sa.XGpIndexs)
-	bestYidxs := slices.Clone(sa.YGpIndexs)
+	bestXidxs := slices.Clone(sa.XGpIndexes)
+	bestYidxs := slices.Clone(sa.YGpIndexes)
 
 	itr := 0
 	for itr = 0; itr < MaxIters; itr++ {
@@ -299,17 +299,17 @@ func (sa *SzAlloc) LimitGpNs() {
 			bestXidxs = slices.Clone(xidxs)
 			bestYidxs = slices.Clone(yidxs)
 		}
-		// gps := sa.SizesFromIndexs(xidxs, yidxs)
+		// gps := sa.SizesFromIndexes(xidxs, yidxs)
 		// fmt.Printf("itr: %d  maxi: %d  gps: %v\n", itr, maxItems, gps)
 		if maxItems <= sa.MaxItemsPerGp {
 			break
 		}
 	}
-	sa.XGpIndexs = bestXidxs
-	sa.YGpIndexs = bestYidxs
-	// _, maxItems := sa.AllocGps(sa.XGpIndexs, sa.YGpIndexs)
+	sa.XGpIndexes = bestXidxs
+	sa.YGpIndexes = bestYidxs
+	// _, maxItems := sa.AllocGps(sa.XGpIndexes, sa.YGpIndexes)
 	// fmt.Printf("itrs: %d  maxItems: %d\n", itr, maxItems)
-	// edgps := sa.SizesFromIndexs(sa.XGpIndexs, sa.YGpIndexs)
+	// edgps := sa.SizesFromIndexes(sa.XGpIndexes, sa.YGpIndexes)
 	// fmt.Printf("ending gps: %v\n", edgps)
 }
 
@@ -324,11 +324,11 @@ func (sa *SzAlloc) PrintGps() {
 func (sa *SzAlloc) AllocItemsNoGps() {
 	ni := len(sa.ItemSizes)
 	sa.GpSizes = make([]image.Point, ni)
-	sa.ItemIndexs = make([]*Indexs, ni)
+	sa.ItemIndexes = make([]*Indexes, ni)
 	sa.GpAllocs = make([][]int, ni)
 	for i, sz := range sa.ItemSizes {
 		sa.GpAllocs[i] = append(sa.GpAllocs[i], i)
-		sa.ItemIndexs[i] = NewIndexs(i, 0, sz, sz)
+		sa.ItemIndexes[i] = NewIndexes(i, 0, sz, sz)
 		sa.GpSizes[i] = sz
 	}
 	// sa.PrintGps()
@@ -340,13 +340,13 @@ func (sa *SzAlloc) AllocItemsUniqGps() {
 	ni := len(sa.ItemSizes)
 	ng := len(sa.UniqSizes)
 	sa.GpSizes = make([]image.Point, ng)
-	sa.ItemIndexs = make([]*Indexs, ni)
+	sa.ItemIndexes = make([]*Indexes, ni)
 	sa.GpAllocs = make([][]int, ng)
 	for i, isz := range sa.ItemSizes {
 		gi := sa.UniqSzItems[i]
 		gsz := sa.UniqSizes[gi]
 		sa.GpAllocs[gi] = append(sa.GpAllocs[gi], i)
-		sa.ItemIndexs[i] = NewIndexs(gi, len(sa.GpAllocs[gi])-1, isz, gsz)
+		sa.ItemIndexes[i] = NewIndexes(gi, len(sa.GpAllocs[gi])-1, isz, gsz)
 		sa.GpSizes[gi] = gsz
 	}
 	// sa.PrintGps()

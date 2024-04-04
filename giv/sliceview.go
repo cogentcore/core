@@ -241,7 +241,7 @@ type SliceViewBase struct {
 	InitSelectedIndex int `copier:"-" json:"-" xml:"-"`
 
 	// list of currently-selected slice indexes
-	SelectedIndexs map[int]struct{} `set:"-" copier:"-"`
+	SelectedIndexes map[int]struct{} `set:"-" copier:"-"`
 
 	// LastClick is the last row that has been clicked on.
 	// This is used to prevent erroneous double click events
@@ -461,7 +461,7 @@ func (sv *SliceViewBase) SetSliceBase() {
 	if !sv.IsReadOnly() {
 		sv.SelectedIndex = -1
 	}
-	sv.ResetSelectedIndexs()
+	sv.ResetSelectedIndexes()
 }
 
 // SetSlice sets the source slice that we are viewing.
@@ -914,13 +914,13 @@ func (sv *SliceViewBase) SliceDeleteAtRow(row int) {
 // inserting new element at given index.
 // must be called with successful SliceNewAt
 func (sv *SliceViewBase) SliceNewAtSelect(i int) {
-	sl := sv.SelectedIndexsList(false) // ascending
-	sv.ResetSelectedIndexs()
+	sl := sv.SelectedIndexesList(false) // ascending
+	sv.ResetSelectedIndexes()
 	for _, ix := range sl {
 		if ix >= i {
 			ix++
 		}
-		sv.SelectedIndexs[ix] = struct{}{}
+		sv.SelectedIndexes[ix] = struct{}{}
 	}
 }
 
@@ -928,8 +928,8 @@ func (sv *SliceViewBase) SliceNewAtSelect(i int) {
 // deleting element at given index
 // must be called with successful SliceDeleteAt
 func (sv *SliceViewBase) SliceDeleteAtSelect(i int) {
-	sl := sv.SelectedIndexsList(true) // desscending
-	sv.ResetSelectedIndexs()
+	sl := sv.SelectedIndexesList(true) // desscending
+	sv.ResetSelectedIndexes()
 	for _, ix := range sl {
 		switch {
 		case ix == i:
@@ -937,7 +937,7 @@ func (sv *SliceViewBase) SliceDeleteAtSelect(i int) {
 		case ix > i:
 			ix--
 		}
-		sv.SelectedIndexs[ix] = struct{}{}
+		sv.SelectedIndexes[ix] = struct{}{}
 	}
 }
 
@@ -1327,7 +1327,7 @@ func (sv *SliceViewBase) UpdateSelectRow(row int, selMode events.SelectModes) {
 // UpdateSelectIndex updates the selection for the given index
 func (sv *SliceViewBase) UpdateSelectIndex(idx int, sel bool, selMode events.SelectModes) {
 	if sv.IsReadOnly() && !sv.Is(SliceViewReadOnlyMultiSelect) {
-		sv.UnselectAllIndexs()
+		sv.UnselectAllIndexes()
 		if sel || sv.SelectedIndex == idx {
 			sv.SelectedIndex = idx
 			sv.SelectIndex(idx)
@@ -1348,22 +1348,22 @@ func (sv *SliceViewBase) IndexIsSelected(idx int) bool {
 	if sv.IsReadOnly() {
 		return idx == sv.SelectedIndex
 	}
-	_, ok := sv.SelectedIndexs[idx]
+	_, ok := sv.SelectedIndexes[idx]
 	return ok
 }
 
-func (sv *SliceViewBase) ResetSelectedIndexs() {
-	sv.SelectedIndexs = make(map[int]struct{})
+func (sv *SliceViewBase) ResetSelectedIndexes() {
+	sv.SelectedIndexes = make(map[int]struct{})
 }
 
-// SelectedIndexsList returns list of selected indexes,
+// SelectedIndexesList returns list of selected indexes,
 // sorted either ascending or descending
-func (sv *SliceViewBase) SelectedIndexsList(descendingSort bool) []int {
-	rws := make([]int, len(sv.SelectedIndexs))
+func (sv *SliceViewBase) SelectedIndexesList(descendingSort bool) []int {
+	rws := make([]int, len(sv.SelectedIndexes))
 	i := 0
-	for r := range sv.SelectedIndexs {
+	for r := range sv.SelectedIndexes {
 		if r >= sv.SliceSize { // double safety check at this point
-			delete(sv.SelectedIndexs, r)
+			delete(sv.SelectedIndexes, r)
 			rws = rws[:len(rws)-1]
 			continue
 		}
@@ -1385,32 +1385,32 @@ func (sv *SliceViewBase) SelectedIndexsList(descendingSort bool) []int {
 // SelectIndex selects given idx (if not already selected) -- updates select
 // status of index label
 func (sv *SliceViewBase) SelectIndex(idx int) {
-	sv.SelectedIndexs[idx] = struct{}{}
+	sv.SelectedIndexes[idx] = struct{}{}
 	// sv.SelectIndexWidgets(idx, true)
 }
 
 // UnselectIndex unselects given idx (if selected)
 func (sv *SliceViewBase) UnselectIndex(idx int) {
 	if sv.IndexIsSelected(idx) {
-		delete(sv.SelectedIndexs, idx)
+		delete(sv.SelectedIndexes, idx)
 	}
 	// sv.SelectIndexWidgets(idx, false)
 }
 
-// UnselectAllIndexs unselects all selected idxs
-func (sv *SliceViewBase) UnselectAllIndexs() {
-	// for r := range sv.SelectedIndexs {
+// UnselectAllIndexes unselects all selected idxs
+func (sv *SliceViewBase) UnselectAllIndexes() {
+	// for r := range sv.SelectedIndexes {
 	// 	sv.SelectIndexWidgets(r, false)
 	// }
-	sv.ResetSelectedIndexs()
+	sv.ResetSelectedIndexes()
 }
 
-// SelectAllIndexs selects all idxs
-func (sv *SliceViewBase) SelectAllIndexs() {
-	sv.UnselectAllIndexs()
-	sv.SelectedIndexs = make(map[int]struct{}, sv.SliceSize)
+// SelectAllIndexes selects all idxs
+func (sv *SliceViewBase) SelectAllIndexes() {
+	sv.UnselectAllIndexes()
+	sv.SelectedIndexes = make(map[int]struct{}, sv.SliceSize)
 	for idx := 0; idx < sv.SliceSize; idx++ {
-		sv.SelectedIndexs[idx] = struct{}{}
+		sv.SelectedIndexes[idx] = struct{}{}
 		// sv.SelectIndexWidgets(idx, true)
 	}
 	sv.NeedsRender()
@@ -1425,7 +1425,7 @@ func (sv *SliceViewBase) SelectIndexAction(idx int, mode events.SelectModes) {
 	}
 	idx = min(idx, sv.SliceSize-1)
 	if idx < 0 {
-		sv.ResetSelectedIndexs()
+		sv.ResetSelectedIndexes()
 		return
 	}
 	// row := idx - sv.StartIndex // note: could be out of bounds
@@ -1433,21 +1433,21 @@ func (sv *SliceViewBase) SelectIndexAction(idx int, mode events.SelectModes) {
 	switch mode {
 	case events.SelectOne:
 		if sv.IndexIsSelected(idx) {
-			if len(sv.SelectedIndexs) > 1 {
-				sv.UnselectAllIndexs()
+			if len(sv.SelectedIndexes) > 1 {
+				sv.UnselectAllIndexes()
 			}
 			sv.SelectedIndex = idx
 			sv.SelectIndex(idx)
 			sv.IndexGrabFocus(idx)
 		} else {
-			sv.UnselectAllIndexs()
+			sv.UnselectAllIndexes()
 			sv.SelectedIndex = idx
 			sv.SelectIndex(idx)
 			sv.IndexGrabFocus(idx)
 		}
 		sv.Send(events.Select) //  sv.SelectedIndex)
 	case events.ExtendContinuous:
-		if len(sv.SelectedIndexs) == 0 {
+		if len(sv.SelectedIndexes) == 0 {
 			sv.SelectedIndex = idx
 			sv.SelectIndex(idx)
 			sv.IndexGrabFocus(idx)
@@ -1455,7 +1455,7 @@ func (sv *SliceViewBase) SelectIndexAction(idx int, mode events.SelectModes) {
 		} else {
 			minIndex := -1
 			maxIndex := 0
-			for r := range sv.SelectedIndexs {
+			for r := range sv.SelectedIndexes {
 				if minIndex < 0 {
 					minIndex = r
 				} else {
@@ -1554,11 +1554,11 @@ func (sv *SliceViewBase) MimeDataType() string {
 
 // CopySelectToMime copies selected rows to mime data
 func (sv *SliceViewBase) CopySelectToMime() mimedata.Mimes {
-	nitms := len(sv.SelectedIndexs)
+	nitms := len(sv.SelectedIndexes)
 	if nitms == 0 {
 		return nil
 	}
-	ixs := sv.SelectedIndexsList(false) // ascending
+	ixs := sv.SelectedIndexesList(false) // ascending
 	md := make(mimedata.Mimes, 0, nitms)
 	for _, i := range ixs {
 		sv.MimeDataIndex(&md, i)
@@ -1566,9 +1566,9 @@ func (sv *SliceViewBase) CopySelectToMime() mimedata.Mimes {
 	return md
 }
 
-// CopyIndexs copies selected idxs to goosi.Clipboard, optionally resetting the selection
-func (sv *SliceViewBase) CopyIndexs(reset bool) { //gti:add
-	nitms := len(sv.SelectedIndexs)
+// CopyIndexes copies selected idxs to goosi.Clipboard, optionally resetting the selection
+func (sv *SliceViewBase) CopyIndexes(reset bool) { //gti:add
+	nitms := len(sv.SelectedIndexes)
 	if nitms == 0 {
 		return
 	}
@@ -1577,17 +1577,17 @@ func (sv *SliceViewBase) CopyIndexs(reset bool) { //gti:add
 		sv.Clipboard().Write(md)
 	}
 	if reset {
-		sv.UnselectAllIndexs()
+		sv.UnselectAllIndexes()
 	}
 }
 
-// DeleteIndexs deletes all selected indexes
-func (sv *SliceViewBase) DeleteIndexs() { //gti:add
-	if len(sv.SelectedIndexs) == 0 {
+// DeleteIndexes deletes all selected indexes
+func (sv *SliceViewBase) DeleteIndexes() { //gti:add
+	if len(sv.SelectedIndexes) == 0 {
 		return
 	}
 
-	ixs := sv.SelectedIndexsList(true) // descending sort
+	ixs := sv.SelectedIndexesList(true) // descending sort
 	for _, i := range ixs {
 		sv.This().(SliceViewer).SliceDeleteAt(i)
 	}
@@ -1596,16 +1596,16 @@ func (sv *SliceViewBase) DeleteIndexs() { //gti:add
 	sv.NeedsRender()
 }
 
-// CutIndexs copies selected indexes to goosi.Clipboard and deletes selected indexes
-func (sv *SliceViewBase) CutIndexs() { //gti:add
-	if len(sv.SelectedIndexs) == 0 {
+// CutIndexes copies selected indexes to goosi.Clipboard and deletes selected indexes
+func (sv *SliceViewBase) CutIndexes() { //gti:add
+	if len(sv.SelectedIndexes) == 0 {
 		return
 	}
 
-	sv.CopyIndexs(false)
-	ixs := sv.SelectedIndexsList(true) // descending sort
+	sv.CopyIndexes(false)
+	ixs := sv.SelectedIndexesList(true) // descending sort
 	idx := ixs[0]
-	sv.UnselectAllIndexs()
+	sv.UnselectAllIndexes()
 	for _, i := range ixs {
 		sv.This().(SliceViewer).SliceDeleteAt(i)
 	}
@@ -1654,7 +1654,7 @@ func (sv *SliceViewBase) MakePasteMenu(m *gi.Scene, md mimedata.Mimes, idx int, 
 // PasteMenu performs a paste from the clipboard using given data -- pops up
 // a menu to determine what specifically to do
 func (sv *SliceViewBase) PasteMenu(md mimedata.Mimes, idx int) {
-	sv.UnselectAllIndexs()
+	sv.UnselectAllIndexes()
 	mf := func(m *gi.Scene) {
 		sv.MakePasteMenu(m, md, idx, events.DropCopy, nil)
 	}
@@ -1706,13 +1706,13 @@ func (sv *SliceViewBase) PasteAtIndex(md mimedata.Mimes, idx int) {
 // Duplicate copies selected items and inserts them after current selection --
 // return idx of start of duplicates if successful, else -1
 func (sv *SliceViewBase) Duplicate() int { //gti:add
-	nitms := len(sv.SelectedIndexs)
+	nitms := len(sv.SelectedIndexes)
 	if nitms == 0 {
 		return -1
 	}
-	ixs := sv.SelectedIndexsList(true) // descending sort -- last first
+	ixs := sv.SelectedIndexesList(true) // descending sort -- last first
 	pasteAt := ixs[0]
-	sv.CopyIndexs(true)
+	sv.CopyIndexes(true)
 	dt := sv.This().(SliceViewer).MimeDataType()
 	md := sv.Clipboard().Read([]string{dt})
 	sv.This().(SliceViewer).PasteAtIndex(md, pasteAt)
@@ -1725,7 +1725,7 @@ func (sv *SliceViewBase) Duplicate() int { //gti:add
 // SelectRowIfNone selects the row the mouse is on if there
 // are no currently selected items.  Returns false if no valid mouse row.
 func (sv *SliceViewBase) SelectRowIfNone(e events.Event) bool {
-	nitms := len(sv.SelectedIndexs)
+	nitms := len(sv.SelectedIndexes)
 	if nitms > 0 {
 		return true
 	}
@@ -1748,7 +1748,7 @@ func (sv *SliceViewBase) DragStart(e events.Event) {
 		return
 	}
 	md := sv.This().(SliceViewer).CopySelectToMime()
-	ixs := sv.SelectedIndexsList(false) // ascending
+	ixs := sv.SelectedIndexesList(false) // ascending
 	w, ok := sv.This().(SliceViewer).RowFirstWidget(ixs[0] - sv.StartIndex)
 	if ok {
 		sv.Scene.EventMgr.DragStart(w, md, e)
@@ -1767,9 +1767,9 @@ func (sv *SliceViewBase) DragDrop(e events.Event) {
 	pos := de.Pos()
 	idx, ok := sv.IndexFromPos(pos.Y)
 	if ok {
-		// sv.DraggedIndexs = nil
+		// sv.DraggedIndexes = nil
 		sv.TmpIndex = idx
-		sv.SaveDraggedIndexs(idx)
+		sv.SaveDraggedIndexes(idx)
 		md := de.Data.(mimedata.Mimes)
 		mf := func(m *gi.Scene) {
 			sv.Scene.EventMgr.DragMenuAddModLabel(m, de.DropMod)
@@ -1786,7 +1786,7 @@ func (sv *SliceViewBase) DragDrop(e events.Event) {
 // Only relevant for DropMod == DropMove.
 func (sv *SliceViewBase) DropFinalize(de *events.DragDrop) {
 	sv.NeedsLayout()
-	sv.UnselectAllIndexs()
+	sv.UnselectAllIndexes()
 	sv.Scene.EventMgr.DropFinalize(de) // sends DropDeleteSource to Source
 }
 
@@ -1803,15 +1803,15 @@ func (sv *SliceViewBase) DropDeleteSource(e events.Event) {
 	sv.SelectIndexAction(idx, events.SelectOne)
 }
 
-// SaveDraggedIndexs saves selectedindexes into dragged indexes
+// SaveDraggedIndexes saves selectedindexes into dragged indexes
 // taking into account insertion at idx
-func (sv *SliceViewBase) SaveDraggedIndexs(idx int) {
-	sz := len(sv.SelectedIndexs)
+func (sv *SliceViewBase) SaveDraggedIndexes(idx int) {
+	sz := len(sv.SelectedIndexes)
 	if sz == 0 {
 		sv.DraggedIndexes = nil
 		return
 	}
-	ixs := sv.SelectedIndexsList(false) // ascending
+	ixs := sv.SelectedIndexesList(false) // ascending
 	sv.DraggedIndexes = make([]int, len(ixs))
 	for i, ix := range ixs {
 		if ix > idx {
@@ -1837,10 +1837,10 @@ func (sv *SliceViewBase) ContextMenu(m *gi.Scene) {
 	})
 	gi.NewSeparator(m)
 	gi.NewButton(m).SetText("Copy").SetIcon(icons.Copy).OnClick(func(e events.Event) {
-		sv.CopyIndexs(true)
+		sv.CopyIndexes(true)
 	})
 	gi.NewButton(m).SetText("Cut").SetIcon(icons.Cut).OnClick(func(e events.Event) {
-		sv.CutIndexs()
+		sv.CutIndexes()
 	})
 	gi.NewButton(m).SetText("Paste").SetIcon(icons.Paste).OnClick(func(e events.Event) {
 		sv.PasteIndex(sv.SelectedIndex)
@@ -1861,7 +1861,7 @@ func (sv *SliceViewBase) KeyInputNav(kt events.Event) {
 	}
 	switch kf {
 	case keyfun.CancelSelect:
-		sv.UnselectAllIndexs()
+		sv.UnselectAllIndexes()
 		sv.SetFlag(false, SliceViewSelectMode)
 		kt.SetHandled()
 	case keyfun.MoveDown:
@@ -1880,7 +1880,7 @@ func (sv *SliceViewBase) KeyInputNav(kt events.Event) {
 		sv.SetFlag(!sv.Is(SliceViewSelectMode), SliceViewSelectMode)
 		kt.SetHandled()
 	case keyfun.SelectAll:
-		sv.SelectAllIndexs()
+		sv.SelectAllIndexes()
 		sv.SetFlag(false, SliceViewSelectMode)
 		kt.SetHandled()
 	}
@@ -1920,12 +1920,12 @@ func (sv *SliceViewBase) KeyInputEditable(kt events.Event) {
 		sv.SelectIndexAction(idx+1, events.SelectOne)
 		kt.SetHandled()
 	case keyfun.Copy:
-		sv.CopyIndexs(true)
+		sv.CopyIndexes(true)
 		sv.SetFlag(false, SliceViewSelectMode)
 		sv.SelectIndexAction(idx, events.SelectOne)
 		kt.SetHandled()
 	case keyfun.Cut:
-		sv.CutIndexs()
+		sv.CutIndexes()
 		sv.SetFlag(false, SliceViewSelectMode)
 		kt.SetHandled()
 	case keyfun.Paste:

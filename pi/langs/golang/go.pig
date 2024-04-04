@@ -371,7 +371,7 @@ ExprRules {
         SliceTwo:    ?SliceIndex1 ':' ?SliceIndex2               >Ast
         SliceOne:    Expr                                    >Ast
     }
-    SliceIndexs {
+    SliceIndexes {
         SliceIndex1:  Expr  >Ast
         SliceIndex2:  Expr  >Ast
         SliceIndex3:  Expr  >Ast

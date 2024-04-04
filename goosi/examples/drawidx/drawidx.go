@@ -133,7 +133,7 @@ func main() {
 
 		sy.Mem.SyncToGPU()
 
-		vars.BindDynValue(0, camv, cam)
+		vars.BindDynamicValue(0, camv, cam)
 	}
 
 	frameCount := 0

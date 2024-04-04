@@ -29,7 +29,7 @@ func (ph *Phong) SetViewPrjn(view, prjn *mat32.Mat4) {
 	_, mtx, _ := vars.ValueByIndexTry(int(MtxsSet), "Mtxs", 0)
 	mtx.CopyFromBytes(unsafe.Pointer(&ph.Cur.VPMtx))
 	ph.Sys.Mem.SyncToGPU()
-	vars.BindDynValueIndex(int(MtxsSet), "Mtxs", 0)
+	vars.BindDynamicValueIndex(int(MtxsSet), "Mtxs", 0)
 }
 
 // SetModelMtx sets the model pose matrix -- must be set per render step

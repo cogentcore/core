@@ -131,19 +131,19 @@ func (sv *SVG) NewUniqueID() int {
 
 // FindDefByName finds Defs item by name, using cached indexes for speed
 func (sv *SVG) FindDefByName(defnm string) Node {
-	if sv.DefIndexs == nil {
-		sv.DefIndexs = make(map[string]int)
+	if sv.DefIndexes == nil {
+		sv.DefIndexes = make(map[string]int)
 	}
-	idx, has := sv.DefIndexs[defnm]
+	idx, has := sv.DefIndexes[defnm]
 	if !has {
 		idx = len(sv.Defs.Kids) / 2
 	}
 	idx, has = sv.Defs.Kids.IndexByName(defnm, idx)
 	if has {
-		sv.DefIndexs[defnm] = idx
+		sv.DefIndexes[defnm] = idx
 		return sv.Defs.Kids[idx].(Node)
 	}
-	delete(sv.DefIndexs, defnm) // not found -- delete from map
+	delete(sv.DefIndexes, defnm) // not found -- delete from map
 	return nil
 }
 

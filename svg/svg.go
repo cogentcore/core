@@ -78,7 +78,7 @@ type SVG struct {
 
 	// map of def names to index. uses starting index to find element.
 	// always updated after each search.
-	DefIndexs map[string]int `view:"-" json:"-" xml:"-"`
+	DefIndexes map[string]int `view:"-" json:"-" xml:"-"`
 
 	// map of unique numeric ids for all elements.
 	// Used for allocating new unique id numbers, appended to end of elements.

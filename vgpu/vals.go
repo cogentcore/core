@@ -470,7 +470,7 @@ func (vs *Values) SetGoImage(idx int, img image.Image, flipy bool) {
 		vl.SetGoImage(img, 0, flipy)
 		return
 	}
-	idxs := vs.TexSzAlloc.ItemIndexs[idx]
+	idxs := vs.TexSzAlloc.ItemIndexes[idx]
 	vl := vs.GpTexValues[idxs.GpIndex]
 	vl.SetGoImage(img, idxs.ItemIndex, flipy)
 }

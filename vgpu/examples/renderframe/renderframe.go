@@ -170,7 +170,7 @@ func main() {
 
 	updateAspect()
 
-	vars.BindDynValue(0, camv, cam)
+	vars.BindDynamicValue(0, camv, cam)
 
 	drw.ConfigImage(0, &rf.Format)
 

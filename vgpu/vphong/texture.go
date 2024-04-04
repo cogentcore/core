@@ -193,7 +193,7 @@ func (ph *Phong) RenderTexture() {
 	pl := sy.PipelineMap["texture"]
 
 	vars := ph.Sys.Vars()
-	idxs := vars.TexGpSzIndexs(int(TexSet), "Tex", ph.Cur.TexIndex)
+	idxs := vars.TextureGroupSizeIndexes(int(TexSet), "Tex", ph.Cur.TexIndex)
 
 	txIndex, _, _, err := sy.CmdBindTextureVarIndex(cmd, int(TexSet), "Tex", idxs.GpIndex)
 	if err != nil {

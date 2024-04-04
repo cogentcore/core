@@ -612,16 +612,16 @@ func (st *VarSet) BindDynValue(vs *Vars, vr *Var, vl *Value) error {
 	return nil
 }
 
-// TexGpSzIndexs for texture at given index, allocated in groups by size
+// TextureGroupSizeIndexes for texture at given index, allocated in groups by size
 // using Values.AllocTexBySize, returns the indexes for the texture
 // and layer to actually select the texture in the shader, and proportion
 // of the Gp allocated texture size occupied by the texture.
-func (st *VarSet) TexGpSzIndexs(vs *Vars, varNm string, valIndex int) *szalloc.Indexs {
+func (st *VarSet) TextureGroupSizeIndexes(vs *Vars, varNm string, valIndex int) *szalloc.Indexes {
 	vr, err := st.VarByNameTry(varNm)
 	if err != nil {
 		log.Println(err)
 		return nil
 	}
-	idxs := vr.Values.TexSzAlloc.ItemIndexs[valIndex]
+	idxs := vr.Values.TexSzAlloc.ItemIndexes[valIndex]
 	return idxs
 }
