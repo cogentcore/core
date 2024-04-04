@@ -22,8 +22,8 @@ var ArgViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.ArgView",
 // ArgView represents a slice of reflect.Value's and associated names, for the
 // purpose of supplying arguments to methods called via the MethodView
 // framework.
-func NewArgView(par ki.Ki, name ...string) *ArgView {
-	return par.NewChild(ArgViewType, name...).(*ArgView)
+func NewArgView(parent ki.Ki, name ...string) *ArgView {
+	return parent.NewChild(ArgViewType, name...).(*ArgView)
 }
 
 // KiType returns the [*gti.Type] of [ArgView]
@@ -44,8 +44,8 @@ var ColorViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.ColorVi
 
 // NewColorView adds a new [ColorView] with the given name to the given parent:
 // ColorView shows a color, using sliders or numbers to set values.
-func NewColorView(par ki.Ki, name ...string) *ColorView {
-	return par.NewChild(ColorViewType, name...).(*ColorView)
+func NewColorView(parent ki.Ki, name ...string) *ColorView {
+	return parent.NewChild(ColorViewType, name...).(*ColorView)
 }
 
 // KiType returns the [*gti.Type] of [ColorView]
@@ -62,8 +62,8 @@ var FileViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.FileView
 
 // NewFileView adds a new [FileView] with the given name to the given parent:
 // FileView is a viewer onto files -- core of the file chooser dialog
-func NewFileView(par ki.Ki, name ...string) *FileView {
-	return par.NewChild(FileViewType, name...).(*FileView)
+func NewFileView(parent ki.Ki, name ...string) *FileView {
+	return parent.NewChild(FileViewType, name...).(*FileView)
 }
 
 // KiType returns the [*gti.Type] of [FileView]
@@ -166,8 +166,8 @@ var InspectorType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.Inspect
 // constructs Children widgets to show the field names and editor fields for
 // each field, within an overall frame with an optional title, and a button
 // box at the bottom where methods can be invoked
-func NewInspector(par ki.Ki, name ...string) *Inspector {
-	return par.NewChild(InspectorType, name...).(*Inspector)
+func NewInspector(parent ki.Ki, name ...string) *Inspector {
+	return parent.NewChild(InspectorType, name...).(*Inspector)
 }
 
 // KiType returns the [*gti.Type] of [Inspector]
@@ -194,8 +194,8 @@ var MapViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.MapView",
 // MapView represents a map, creating a property editor of the values --
 // constructs Children widgets to show the key / value pairs, within an
 // overall frame.
-func NewMapView(par ki.Ki, name ...string) *MapView {
-	return par.NewChild(MapViewType, name...).(*MapView)
+func NewMapView(parent ki.Ki, name ...string) *MapView {
+	return parent.NewChild(MapViewType, name...).(*MapView)
 }
 
 // KiType returns the [*gti.Type] of [MapView]
@@ -226,8 +226,8 @@ var MapViewInlineType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.Map
 // NewMapViewInline adds a new [MapViewInline] with the given name to the given parent:
 // MapViewInline represents a map as a single line widget,
 // for smaller maps and those explicitly marked inline.
-func NewMapViewInline(par ki.Ki, name ...string) *MapViewInline {
-	return par.NewChild(MapViewInlineType, name...).(*MapViewInline)
+func NewMapViewInline(parent ki.Ki, name ...string) *MapViewInline {
+	return parent.NewChild(MapViewInlineType, name...).(*MapViewInline)
 }
 
 // KiType returns the [*gti.Type] of [MapViewInline]
@@ -252,8 +252,8 @@ var SliceViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.SliceVi
 // overall frame.
 // Set to ReadOnly for select-only mode, which emits WidgetSig WidgetSelected
 // signals when selection is updated.
-func NewSliceView(par ki.Ki, name ...string) *SliceView {
-	return par.NewChild(SliceViewType, name...).(*SliceView)
+func NewSliceView(parent ki.Ki, name ...string) *SliceView {
+	return parent.NewChild(SliceViewType, name...).(*SliceView)
 }
 
 // KiType returns the [*gti.Type] of [SliceView]
@@ -294,8 +294,8 @@ var SliceViewBaseType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.Sli
 // list of items, and supports row selection, copy / paste, Drag-n-Drop, etc.
 // Set to ReadOnly for select-only mode, which emits WidgetSig WidgetSelected
 // signals when selection is updated.
-func NewSliceViewBase(par ki.Ki, name ...string) *SliceViewBase {
-	return par.NewChild(SliceViewBaseType, name...).(*SliceViewBase)
+func NewSliceViewBase(parent ki.Ki, name ...string) *SliceViewBase {
+	return parent.NewChild(SliceViewBaseType, name...).(*SliceViewBase)
 }
 
 // KiType returns the [*gti.Type] of [SliceViewBase]
@@ -333,8 +333,8 @@ var SliceViewGridType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.Sli
 
 // NewSliceViewGrid adds a new [SliceViewGrid] with the given name to the given parent:
 // SliceViewGrid handles the resizing logic for SliceView, TableView.
-func NewSliceViewGrid(par ki.Ki, name ...string) *SliceViewGrid {
-	return par.NewChild(SliceViewGridType, name...).(*SliceViewGrid)
+func NewSliceViewGrid(parent ki.Ki, name ...string) *SliceViewGrid {
+	return parent.NewChild(SliceViewGridType, name...).(*SliceViewGrid)
 }
 
 // KiType returns the [*gti.Type] of [SliceViewGrid]
@@ -360,8 +360,8 @@ var SliceViewInlineType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.S
 // NewSliceViewInline adds a new [SliceViewInline] with the given name to the given parent:
 // SliceViewInline represents a slice as a single line widget,
 // for smaller slices and those explicitly marked inline.
-func NewSliceViewInline(par ki.Ki, name ...string) *SliceViewInline {
-	return par.NewChild(SliceViewInlineType, name...).(*SliceViewInline)
+func NewSliceViewInline(parent ki.Ki, name ...string) *SliceViewInline {
+	return parent.NewChild(SliceViewInlineType, name...).(*SliceViewInline)
 }
 
 // KiType returns the [*gti.Type] of [SliceViewInline]
@@ -384,8 +384,8 @@ var StructViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.Struct
 // StructView represents a struct, creating a property editor of the fields --
 // constructs Children widgets to show the field names and editor fields for
 // each field, within an overall frame.
-func NewStructView(par ki.Ki, name ...string) *StructView {
-	return par.NewChild(StructViewType, name...).(*StructView)
+func NewStructView(parent ki.Ki, name ...string) *StructView {
+	return parent.NewChild(StructViewType, name...).(*StructView)
 }
 
 // KiType returns the [*gti.Type] of [StructView]
@@ -407,8 +407,8 @@ var StructViewInlineType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.
 // NewStructViewInline adds a new [StructViewInline] with the given name to the given parent:
 // StructViewInline represents a struct as a single line widget,
 // for smaller structs and those explicitly marked inline.
-func NewStructViewInline(par ki.Ki, name ...string) *StructViewInline {
-	return par.NewChild(StructViewInlineType, name...).(*StructViewInline)
+func NewStructViewInline(parent ki.Ki, name ...string) *StructViewInline {
+	return parent.NewChild(StructViewInlineType, name...).(*StructViewInline)
 }
 
 // KiType returns the [*gti.Type] of [StructViewInline]
@@ -441,8 +441,8 @@ var TableViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.TableVi
 // multiple-selection, cut-and-paste, and drag-and-drop.
 // If ReadOnly, it functions as a mutually-exclusive item
 // selector, highlighting the selected row and emitting a Selected action.
-func NewTableView(par ki.Ki, name ...string) *TableView {
-	return par.NewChild(TableViewType, name...).(*TableView)
+func NewTableView(parent ki.Ki, name ...string) *TableView {
+	return parent.NewChild(TableViewType, name...).(*TableView)
 }
 
 // KiType returns the [*gti.Type] of [TableView]
@@ -490,8 +490,8 @@ var TimeViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.TimeView
 
 // NewTimeView adds a new [TimeView] with the given name to the given parent:
 // TimeView is a view for selecting a time
-func NewTimeView(par ki.Ki, name ...string) *TimeView {
-	return par.NewChild(TimeViewType, name...).(*TimeView)
+func NewTimeView(parent ki.Ki, name ...string) *TimeView {
+	return parent.NewChild(TimeViewType, name...).(*TimeView)
 }
 
 // KiType returns the [*gti.Type] of [TimeView]
@@ -508,8 +508,8 @@ var DateViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.DateView
 
 // NewDateView adds a new [DateView] with the given name to the given parent:
 // DateView is a view for selecting a date
-func NewDateView(par ki.Ki, name ...string) *DateView {
-	return par.NewChild(DateViewType, name...).(*DateView)
+func NewDateView(parent ki.Ki, name ...string) *DateView {
+	return parent.NewChild(DateViewType, name...).(*DateView)
 }
 
 // KiType returns the [*gti.Type] of [DateView]
@@ -526,8 +526,8 @@ var TreeTableViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.Tre
 
 // NewTreeTableView adds a new [TreeTableView] with the given name to the given parent:
 // TreeTableView combines a [TreeView] and [TableView].
-func NewTreeTableView(par ki.Ki, name ...string) *TreeTableView {
-	return par.NewChild(TreeTableViewType, name...).(*TreeTableView)
+func NewTreeTableView(parent ki.Ki, name ...string) *TreeTableView {
+	return parent.NewChild(TreeTableViewType, name...).(*TreeTableView)
 }
 
 // KiType returns the [*gti.Type] of [TreeTableView]
@@ -561,8 +561,8 @@ var TreeViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.TreeView
 // Standard events.Event are sent to any listeners, including
 // Select, Change, and DoubleClick.  The selected nodes
 // are in the root SelectedNodes list.
-func NewTreeView(par ki.Ki, name ...string) *TreeView {
-	return par.NewChild(TreeViewType, name...).(*TreeView)
+func NewTreeView(parent ki.Ki, name ...string) *TreeView {
+	return parent.NewChild(TreeViewType, name...).(*TreeView)
 }
 
 // KiType returns the [*gti.Type] of [TreeView]

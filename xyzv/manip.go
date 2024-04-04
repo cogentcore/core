@@ -86,7 +86,7 @@ func (sw *Scene) SetSelected(nd xyz.Node) {
 		xy.NeedsRender()
 		return
 	}
-	manip, ok := nd.(*ManipPt)
+	manip, ok := nd.(*ManipPoint)
 	if ok {
 		sw.CurrentManipPoint = manip
 		return
@@ -142,37 +142,29 @@ func (sw *Scene) ManipBox() {
 
 	bbox.Min.SetSub(mb.Pose.Pos)
 	bbox.Max.SetSub(mb.Pose.Pos)
-	NewManipPt(mb, nm+"-lll", mbspm.Name(), clr, bbox.Min)
-	NewManipPt(mb, nm+"-llu", mbspm.Name(), clr, mat32.V3(bbox.Min.X, bbox.Min.Y, bbox.Max.Z))
-	NewManipPt(mb, nm+"-lul", mbspm.Name(), clr, mat32.V3(bbox.Min.X, bbox.Max.Y, bbox.Min.Z))
-	NewManipPt(mb, nm+"-ull", mbspm.Name(), clr, mat32.V3(bbox.Max.X, bbox.Min.Y, bbox.Min.Z))
-	NewManipPt(mb, nm+"-luu", mbspm.Name(), clr, mat32.V3(bbox.Min.X, bbox.Max.Y, bbox.Max.Z))
-	NewManipPt(mb, nm+"-ulu", mbspm.Name(), clr, mat32.V3(bbox.Max.X, bbox.Min.Y, bbox.Max.Z))
-	NewManipPt(mb, nm+"-uul", mbspm.Name(), clr, mat32.V3(bbox.Max.X, bbox.Max.Y, bbox.Min.Z))
-	NewManipPt(mb, nm+"-uuu", mbspm.Name(), clr, bbox.Max)
+	NewManipPoint(mb, nm+"-lll", mbspm.Name(), clr, bbox.Min)
+	NewManipPoint(mb, nm+"-llu", mbspm.Name(), clr, mat32.V3(bbox.Min.X, bbox.Min.Y, bbox.Max.Z))
+	NewManipPoint(mb, nm+"-lul", mbspm.Name(), clr, mat32.V3(bbox.Min.X, bbox.Max.Y, bbox.Min.Z))
+	NewManipPoint(mb, nm+"-ull", mbspm.Name(), clr, mat32.V3(bbox.Max.X, bbox.Min.Y, bbox.Min.Z))
+	NewManipPoint(mb, nm+"-luu", mbspm.Name(), clr, mat32.V3(bbox.Min.X, bbox.Max.Y, bbox.Max.Z))
+	NewManipPoint(mb, nm+"-ulu", mbspm.Name(), clr, mat32.V3(bbox.Max.X, bbox.Min.Y, bbox.Max.Z))
+	NewManipPoint(mb, nm+"-uul", mbspm.Name(), clr, mat32.V3(bbox.Max.X, bbox.Max.Y, bbox.Min.Z))
+	NewManipPoint(mb, nm+"-uuu", mbspm.Name(), clr, bbox.Max)
 
 	xy.NeedsConfig()
 	sw.NeedsRender()
 }
 
-// SetManipPt sets the CurManipPt
-func (sw *Scene) SetManipPt(pt *ManipPt) {
-	sw.CurrentManipPoint = pt
-}
-
-///////////////////////////////////////////////////////////////////////////
-//  ManipPt is a manipulation point
-
-// ManipPt is a manipulation control point
+// ManipPoint is a manipulation control point
 //
 //core:no-new
-type ManipPt struct {
+type ManipPoint struct {
 	xyz.Solid
 }
 
-// NewManipPt adds a new manipulation point
-func NewManipPt(par ki.Ki, name string, meshName string, clr color.RGBA, pos mat32.Vec3) *ManipPt {
-	mpt := par.NewChild(ManipPtType, name).(*ManipPt)
+// NewManipPoint adds a new manipulation point
+func NewManipPoint(parent ki.Ki, name string, meshName string, clr color.RGBA, pos mat32.Vec3) *ManipPoint {
+	mpt := parent.NewChild(ManipPtType, name).(*ManipPoint)
 	mpt.SetMeshName(meshName)
 	mpt.Defaults()
 	mpt.Pose.Pos = pos
@@ -202,7 +194,7 @@ func (sw *Scene) HandleSelectEventsImpl(e events.Event) {
 		sw.SetSelected(ns[0])
 	default:
 		for _, n := range ns {
-			if _, ok := n.(*ManipPt); ok {
+			if _, ok := n.(*ManipPoint); ok {
 				sw.SetSelected(n)
 				return
 			}

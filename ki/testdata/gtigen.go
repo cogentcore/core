@@ -11,8 +11,8 @@ import (
 var TestNodeType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/ki/testdata.TestNode", IDName: "test-node", Embeds: []gti.Field{{Name: "Node"}}, Instance: &TestNode{}})
 
 // NewTestNode adds a new [TestNode] with the given name to the given parent:
-func NewTestNode(par ki.Ki, name ...string) *TestNode {
-	return par.NewChild(TestNodeType, name...).(*TestNode)
+func NewTestNode(parent ki.Ki, name ...string) *TestNode {
+	return parent.NewChild(TestNodeType, name...).(*TestNode)
 }
 
 // KiType returns the [*gti.Type] of [TestNode]
@@ -27,8 +27,8 @@ var NodeEmbedType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/ki/testdata
 // NewNodeEmbed adds a new [NodeEmbed] with the given name to the given parent:
 // NodeEmbed embeds ki.Node and adds a couple of fields.
 // Also has a directive processed by gti
-func NewNodeEmbed(par ki.Ki, name ...string) *NodeEmbed {
-	return par.NewChild(NodeEmbedType, name...).(*NodeEmbed)
+func NewNodeEmbed(parent ki.Ki, name ...string) *NodeEmbed {
+	return parent.NewChild(NodeEmbedType, name...).(*NodeEmbed)
 }
 
 // KiType returns the [*gti.Type] of [NodeEmbed]
@@ -47,8 +47,8 @@ func (t *NodeEmbed) SetMbr2(v int) *NodeEmbed { t.Mbr2 = v; return t }
 var NodeFieldType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/ki/testdata.NodeField", IDName: "node-field", Embeds: []gti.Field{{Name: "NodeEmbed"}}, Fields: []gti.Field{{Name: "Field1"}}, Instance: &NodeField{}})
 
 // NewNodeField adds a new [NodeField] with the given name to the given parent:
-func NewNodeField(par ki.Ki, name ...string) *NodeField {
-	return par.NewChild(NodeFieldType, name...).(*NodeField)
+func NewNodeField(parent ki.Ki, name ...string) *NodeField {
+	return parent.NewChild(NodeFieldType, name...).(*NodeField)
 }
 
 // KiType returns the [*gti.Type] of [NodeField]
@@ -70,8 +70,8 @@ func (t *NodeField) SetMbr2(v int) *NodeField { t.Mbr2 = v; return t }
 var NodeField2Type = gti.AddType(&gti.Type{Name: "cogentcore.org/core/ki/testdata.NodeField2", IDName: "node-field2", Embeds: []gti.Field{{Name: "NodeField"}}, Fields: []gti.Field{{Name: "Field2"}}, Instance: &NodeField2{}})
 
 // NewNodeField2 adds a new [NodeField2] with the given name to the given parent:
-func NewNodeField2(par ki.Ki, name ...string) *NodeField2 {
-	return par.NewChild(NodeField2Type, name...).(*NodeField2)
+func NewNodeField2(parent ki.Ki, name ...string) *NodeField2 {
+	return parent.NewChild(NodeField2Type, name...).(*NodeField2)
 }
 
 // KiType returns the [*gti.Type] of [NodeField2]

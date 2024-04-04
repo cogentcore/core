@@ -16,8 +16,8 @@ var VideoType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/video.Video", I
 // NewVideo adds a new [Video] with the given name to the given parent:
 // Video represents a video playback widget without any controls.
 // See [Player] for a version with controls.
-func NewVideo(par ki.Ki, name ...string) *Video {
-	return par.NewChild(VideoType, name...).(*Video)
+func NewVideo(parent ki.Ki, name ...string) *Video {
+	return parent.NewChild(VideoType, name...).(*Video)
 }
 
 // KiType returns the [*gti.Type] of [Video]

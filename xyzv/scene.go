@@ -36,7 +36,7 @@ type Scene struct {
 	CurrentSelected xyz.Node `copier:"-" json:"-" xml:"-" view:"-"`
 
 	// currently selected manipulation control point
-	CurrentManipPoint *ManipPt `copier:"-" json:"-" xml:"-" view:"-"`
+	CurrentManipPoint *ManipPoint `copier:"-" json:"-" xml:"-" view:"-"`
 
 	// parameters for selection / manipulation box
 	SelectionParams SelectionParams `view:"inline"`

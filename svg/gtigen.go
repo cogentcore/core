@@ -18,8 +18,8 @@ var CircleType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Circle", I
 
 // NewCircle adds a new [Circle] with the given name to the given parent:
 // Circle is a SVG circle
-func NewCircle(par ki.Ki, name ...string) *Circle {
-	return par.NewChild(CircleType, name...).(*Circle)
+func NewCircle(parent ki.Ki, name ...string) *Circle {
+	return parent.NewChild(CircleType, name...).(*Circle)
 }
 
 // KiType returns the [*gti.Type] of [Circle]
@@ -44,8 +44,8 @@ var ClipPathType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.ClipPath
 
 // NewClipPath adds a new [ClipPath] with the given name to the given parent:
 // ClipPath is used for holding a path that renders as a clip path
-func NewClipPath(par ki.Ki, name ...string) *ClipPath {
-	return par.NewChild(ClipPathType, name...).(*ClipPath)
+func NewClipPath(parent ki.Ki, name ...string) *ClipPath {
+	return parent.NewChild(ClipPathType, name...).(*ClipPath)
 }
 
 // KiType returns the [*gti.Type] of [ClipPath]
@@ -64,8 +64,8 @@ var StyleSheetType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.StyleS
 // StyleSheet is a Node2D node that contains a stylesheet -- property values
 // contained in this sheet can be transformed into ki.Props and set in CSS
 // field of appropriate node
-func NewStyleSheet(par ki.Ki, name ...string) *StyleSheet {
-	return par.NewChild(StyleSheetType, name...).(*StyleSheet)
+func NewStyleSheet(parent ki.Ki, name ...string) *StyleSheet {
+	return parent.NewChild(StyleSheetType, name...).(*StyleSheet)
 }
 
 // KiType returns the [*gti.Type] of [StyleSheet]
@@ -85,8 +85,8 @@ var MetaDataType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.MetaData
 
 // NewMetaData adds a new [MetaData] with the given name to the given parent:
 // MetaData is used for holding meta data info
-func NewMetaData(par ki.Ki, name ...string) *MetaData {
-	return par.NewChild(MetaDataType, name...).(*MetaData)
+func NewMetaData(parent ki.Ki, name ...string) *MetaData {
+	return parent.NewChild(MetaDataType, name...).(*MetaData)
 }
 
 // KiType returns the [*gti.Type] of [MetaData]
@@ -106,8 +106,8 @@ var EllipseType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Ellipse",
 
 // NewEllipse adds a new [Ellipse] with the given name to the given parent:
 // Ellipse is a SVG ellipse
-func NewEllipse(par ki.Ki, name ...string) *Ellipse {
-	return par.NewChild(EllipseType, name...).(*Ellipse)
+func NewEllipse(parent ki.Ki, name ...string) *Ellipse {
+	return parent.NewChild(EllipseType, name...).(*Ellipse)
 }
 
 // KiType returns the [*gti.Type] of [Ellipse]
@@ -132,8 +132,8 @@ var FilterType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Filter", I
 
 // NewFilter adds a new [Filter] with the given name to the given parent:
 // Filter represents SVG filter* elements
-func NewFilter(par ki.Ki, name ...string) *Filter {
-	return par.NewChild(FilterType, name...).(*Filter)
+func NewFilter(parent ki.Ki, name ...string) *Filter {
+	return parent.NewChild(FilterType, name...).(*Filter)
 }
 
 // KiType returns the [*gti.Type] of [Filter]
@@ -153,8 +153,8 @@ var FlowType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Flow", IDNam
 
 // NewFlow adds a new [Flow] with the given name to the given parent:
 // Flow represents SVG flow* elements
-func NewFlow(par ki.Ki, name ...string) *Flow {
-	return par.NewChild(FlowType, name...).(*Flow)
+func NewFlow(parent ki.Ki, name ...string) *Flow {
+	return parent.NewChild(FlowType, name...).(*Flow)
 }
 
 // KiType returns the [*gti.Type] of [Flow]
@@ -175,8 +175,8 @@ var GradientType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Gradient
 // NewGradient adds a new [Gradient] with the given name to the given parent:
 // Gradient is used for holding a specified color gradient.
 // The name is the id for lookup in url
-func NewGradient(par ki.Ki, name ...string) *Gradient {
-	return par.NewChild(GradientType, name...).(*Gradient)
+func NewGradient(parent ki.Ki, name ...string) *Gradient {
+	return parent.NewChild(GradientType, name...).(*Gradient)
 }
 
 // KiType returns the [*gti.Type] of [Gradient]
@@ -203,8 +203,8 @@ var GroupType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Group", IDN
 // Group groups together SVG elements.
 // Provides a common transform for all group elements
 // and shared style properties.
-func NewGroup(par ki.Ki, name ...string) *Group {
-	return par.NewChild(GroupType, name...).(*Group)
+func NewGroup(parent ki.Ki, name ...string) *Group {
+	return parent.NewChild(GroupType, name...).(*Group)
 }
 
 // KiType returns the [*gti.Type] of [Group]
@@ -221,8 +221,8 @@ var ImageType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Image", IDN
 
 // NewImage adds a new [Image] with the given name to the given parent:
 // Image is an SVG image (bitmap)
-func NewImage(par ki.Ki, name ...string) *Image {
-	return par.NewChild(ImageType, name...).(*Image)
+func NewImage(parent ki.Ki, name ...string) *Image {
+	return parent.NewChild(ImageType, name...).(*Image)
 }
 
 // KiType returns the [*gti.Type] of [Image]
@@ -259,8 +259,8 @@ var LineType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Line", IDNam
 
 // NewLine adds a new [Line] with the given name to the given parent:
 // Line is a SVG line
-func NewLine(par ki.Ki, name ...string) *Line {
-	return par.NewChild(LineType, name...).(*Line)
+func NewLine(parent ki.Ki, name ...string) *Line {
+	return parent.NewChild(LineType, name...).(*Line)
 }
 
 // KiType returns the [*gti.Type] of [Line]
@@ -285,8 +285,8 @@ var MarkerType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Marker", I
 
 // NewMarker adds a new [Marker] with the given name to the given parent:
 // Marker represents marker elements that can be drawn along paths (arrow heads, etc)
-func NewMarker(par ki.Ki, name ...string) *Marker {
-	return par.NewChild(MarkerType, name...).(*Marker)
+func NewMarker(parent ki.Ki, name ...string) *Marker {
+	return parent.NewChild(MarkerType, name...).(*Marker)
 }
 
 // KiType returns the [*gti.Type] of [Marker]
@@ -343,8 +343,8 @@ var NodeBaseType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.NodeBase
 
 // NewNodeBase adds a new [NodeBase] with the given name to the given parent:
 // svg.NodeBase is the base type for elements within the SVG scenegraph
-func NewNodeBase(par ki.Ki, name ...string) *NodeBase {
-	return par.NewChild(NodeBaseType, name...).(*NodeBase)
+func NewNodeBase(parent ki.Ki, name ...string) *NodeBase {
+	return parent.NewChild(NodeBaseType, name...).(*NodeBase)
 }
 
 // KiType returns the [*gti.Type] of [NodeBase]
@@ -365,8 +365,8 @@ var PathType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Path", IDNam
 
 // NewPath adds a new [Path] with the given name to the given parent:
 // Path renders SVG data sequences that can render just about anything
-func NewPath(par ki.Ki, name ...string) *Path {
-	return par.NewChild(PathType, name...).(*Path)
+func NewPath(parent ki.Ki, name ...string) *Path {
+	return parent.NewChild(PathType, name...).(*Path)
 }
 
 // KiType returns the [*gti.Type] of [Path]
@@ -387,8 +387,8 @@ var PolygonType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Polygon",
 
 // NewPolygon adds a new [Polygon] with the given name to the given parent:
 // Polygon is a SVG polygon
-func NewPolygon(par ki.Ki, name ...string) *Polygon {
-	return par.NewChild(PolygonType, name...).(*Polygon)
+func NewPolygon(parent ki.Ki, name ...string) *Polygon {
+	return parent.NewChild(PolygonType, name...).(*Polygon)
 }
 
 // KiType returns the [*gti.Type] of [Polygon]
@@ -408,8 +408,8 @@ var PolylineType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Polyline
 
 // NewPolyline adds a new [Polyline] with the given name to the given parent:
 // Polyline is a SVG multi-line shape
-func NewPolyline(par ki.Ki, name ...string) *Polyline {
-	return par.NewChild(PolylineType, name...).(*Polyline)
+func NewPolyline(parent ki.Ki, name ...string) *Polyline {
+	return parent.NewChild(PolylineType, name...).(*Polyline)
 }
 
 // KiType returns the [*gti.Type] of [Polyline]
@@ -430,8 +430,8 @@ var RectType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Rect", IDNam
 
 // NewRect adds a new [Rect] with the given name to the given parent:
 // Rect is a SVG rectangle, optionally with rounded corners
-func NewRect(par ki.Ki, name ...string) *Rect {
-	return par.NewChild(RectType, name...).(*Rect)
+func NewRect(parent ki.Ki, name ...string) *Rect {
+	return parent.NewChild(RectType, name...).(*Rect)
 }
 
 // KiType returns the [*gti.Type] of [Rect]
@@ -460,8 +460,8 @@ var SVGNodeType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.SVGNode",
 
 // NewSVGNode adds a new [SVGNode] with the given name to the given parent:
 // SVGNode represents the root of an SVG tree
-func NewSVGNode(par ki.Ki, name ...string) *SVGNode {
-	return par.NewChild(SVGNodeType, name...).(*SVGNode)
+func NewSVGNode(parent ki.Ki, name ...string) *SVGNode {
+	return parent.NewChild(SVGNodeType, name...).(*SVGNode)
 }
 
 // KiType returns the [*gti.Type] of [SVGNode]
@@ -485,8 +485,8 @@ var TextType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Text", IDNam
 // NewText adds a new [Text] with the given name to the given parent:
 // Text renders SVG text, handling both text and tspan elements.
 // tspan is nested under a parent text -- text has empty Text string.
-func NewText(par ki.Ki, name ...string) *Text {
-	return par.NewChild(TextType, name...).(*Text)
+func NewText(parent ki.Ki, name ...string) *Text {
+	return parent.NewChild(TextType, name...).(*Text)
 }
 
 // KiType returns the [*gti.Type] of [Text]

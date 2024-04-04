@@ -22,8 +22,8 @@ var RuleType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/pi/lex.Rule", ID
 //
 // In general it is best to keep lexing as simple as possible and
 // leave the more complex things for the parsing step.
-func NewRule(par ki.Ki, name ...string) *Rule {
-	return par.NewChild(RuleType, name...).(*Rule)
+func NewRule(parent ki.Ki, name ...string) *Rule {
+	return parent.NewChild(RuleType, name...).(*Rule)
 }
 
 // KiType returns the [*gti.Type] of [Rule]

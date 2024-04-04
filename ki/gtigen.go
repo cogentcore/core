@@ -15,8 +15,8 @@ var NodeType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/ki.Node", IDName
 // field; the embedded version supports full JSON saving and loading. All types that
 // implement the [Ki] interface will automatically be added to gti in `core generate`, which
 // is required for various pieces of core functionality.
-func NewNode(par Ki, name ...string) *Node {
-	return par.NewChild(NodeType, name...).(*Node)
+func NewNode(parent Ki, name ...string) *Node {
+	return parent.NewChild(NodeType, name...).(*Node)
 }
 
 // KiType returns the [*gti.Type] of [Node]

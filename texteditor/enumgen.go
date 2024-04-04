@@ -50,102 +50,102 @@ func (i *SpellSignals) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "SpellSignals")
 }
 
-var _BufSignalsValues = []BufferSignals{0, 1, 2, 3, 4, 5, 6}
+var _BufferSignalsValues = []BufferSignals{0, 1, 2, 3, 4, 5, 6}
 
-// BufSignalsN is the highest valid value for type BufSignals, plus one.
-const BufSignalsN BufferSignals = 7
+// BufferSignalsN is the highest valid value for type BufferSignals, plus one.
+const BufferSignalsN BufferSignals = 7
 
-var _BufSignalsValueMap = map[string]BufferSignals{`BufDone`: 0, `BufNew`: 1, `BufMods`: 2, `BufInsert`: 3, `BufDelete`: 4, `BufMarkUpdt`: 5, `BufClosed`: 6}
+var _BufferSignalsValueMap = map[string]BufferSignals{`Done`: 0, `New`: 1, `Mods`: 2, `Insert`: 3, `Delete`: 4, `MarkupUpdated`: 5, `Closed`: 6}
 
-var _BufSignalsDescMap = map[BufferSignals]string{0: `BufDone means that editing was completed and applied to Txt field -- data is Txt bytes`, 1: `BufNew signals that entirely new text is present. All views should do full layout update.`, 2: `BufMods signals that potentially diffuse modifications have been made. Views should do a Layout and Render.`, 3: `BufInsert signals that some text was inserted. data is textbuf.Edit describing change. The Buf always reflects the current state *after* the edit.`, 4: `BufDelete signals that some text was deleted. data is textbuf.Edit describing change. The Buf always reflects the current state *after* the edit.`, 5: `BufMarkUpdt signals that the Markup text has been updated This signal is typically sent from a separate goroutine, so should be used with a mutex`, 6: `BufClosed signals that the textbuf was closed.`}
+var _BufferSignalsDescMap = map[BufferSignals]string{0: `BufferDone means that editing was completed and applied to Txt field -- data is Txt bytes`, 1: `BufferNew signals that entirely new text is present. All views should do full layout update.`, 2: `BufferMods signals that potentially diffuse modifications have been made. Views should do a Layout and Render.`, 3: `BufferInsert signals that some text was inserted. data is textbuf.Edit describing change. The Buf always reflects the current state *after* the edit.`, 4: `BufferDelete signals that some text was deleted. data is textbuf.Edit describing change. The Buf always reflects the current state *after* the edit.`, 5: `BufferMarkupUpdated signals that the Markup text has been updated This signal is typically sent from a separate goroutine, so should be used with a mutex`, 6: `BufferClosed signals that the textbuf was closed.`}
 
-var _BufSignalsMap = map[BufferSignals]string{0: `BufDone`, 1: `BufNew`, 2: `BufMods`, 3: `BufInsert`, 4: `BufDelete`, 5: `BufMarkUpdt`, 6: `BufClosed`}
+var _BufferSignalsMap = map[BufferSignals]string{0: `Done`, 1: `New`, 2: `Mods`, 3: `Insert`, 4: `Delete`, 5: `MarkupUpdated`, 6: `Closed`}
 
-// String returns the string representation of this BufSignals value.
-func (i BufferSignals) String() string { return enums.String(i, _BufSignalsMap) }
+// String returns the string representation of this BufferSignals value.
+func (i BufferSignals) String() string { return enums.String(i, _BufferSignalsMap) }
 
-// SetString sets the BufSignals value from its string representation,
+// SetString sets the BufferSignals value from its string representation,
 // and returns an error if the string is invalid.
 func (i *BufferSignals) SetString(s string) error {
-	return enums.SetString(i, s, _BufSignalsValueMap, "BufSignals")
+	return enums.SetString(i, s, _BufferSignalsValueMap, "BufferSignals")
 }
 
-// Int64 returns the BufSignals value as an int64.
+// Int64 returns the BufferSignals value as an int64.
 func (i BufferSignals) Int64() int64 { return int64(i) }
 
-// SetInt64 sets the BufSignals value from an int64.
+// SetInt64 sets the BufferSignals value from an int64.
 func (i *BufferSignals) SetInt64(in int64) { *i = BufferSignals(in) }
 
-// Desc returns the description of the BufSignals value.
-func (i BufferSignals) Desc() string { return enums.Desc(i, _BufSignalsDescMap) }
+// Desc returns the description of the BufferSignals value.
+func (i BufferSignals) Desc() string { return enums.Desc(i, _BufferSignalsDescMap) }
 
-// BufSignalsValues returns all possible values for the type BufSignals.
-func BufSignalsValues() []BufferSignals { return _BufSignalsValues }
+// BufferSignalsValues returns all possible values for the type BufferSignals.
+func BufferSignalsValues() []BufferSignals { return _BufferSignalsValues }
 
-// Values returns all possible values for the type BufSignals.
-func (i BufferSignals) Values() []enums.Enum { return enums.Values(_BufSignalsValues) }
+// Values returns all possible values for the type BufferSignals.
+func (i BufferSignals) Values() []enums.Enum { return enums.Values(_BufferSignalsValues) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
 func (i BufferSignals) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *BufferSignals) UnmarshalText(text []byte) error {
-	return enums.UnmarshalText(i, text, "BufSignals")
+	return enums.UnmarshalText(i, text, "BufferSignals")
 }
 
-var _BufFlagsValues = []BufferFlags{2, 3, 4, 5, 6}
+var _BufferFlagsValues = []BufferFlags{2, 3, 4, 5, 6}
 
-// BufFlagsN is the highest valid value for type BufFlags, plus one.
-const BufFlagsN BufferFlags = 7
+// BufferFlagsN is the highest valid value for type BufferFlags, plus one.
+const BufferFlagsN BufferFlags = 7
 
-var _BufFlagsValueMap = map[string]BufferFlags{`AutoSaving`: 2, `MarkingUp`: 3, `Changed`: 4, `NotSaved`: 5, `FileModOk`: 6}
+var _BufferFlagsValueMap = map[string]BufferFlags{`AutoSaving`: 2, `MarkingUp`: 3, `Changed`: 4, `NotSaved`: 5, `FileModOK`: 6}
 
-var _BufFlagsDescMap = map[BufferFlags]string{2: `BufAutoSaving is used in atomically safe way to protect autosaving`, 3: `BufMarkingUp indicates current markup operation in progress -- don&#39;t redo`, 4: `BufChanged indicates if the text has been changed (edited) relative to the original, since last EditDone`, 5: `BufNotSaved indicates if the text has been changed (edited) relative to the original, since last Save`, 6: `BufFileModOk have already asked about fact that file has changed since being opened, user is ok`}
+var _BufferFlagsDescMap = map[BufferFlags]string{2: `BufferAutoSaving is used in atomically safe way to protect autosaving`, 3: `BufferMarkingUp indicates current markup operation in progress -- don&#39;t redo`, 4: `BufferChanged indicates if the text has been changed (edited) relative to the original, since last EditDone`, 5: `BufferNotSaved indicates if the text has been changed (edited) relative to the original, since last Save`, 6: `BufferFileModOK have already asked about fact that file has changed since being opened, user is ok`}
 
-var _BufFlagsMap = map[BufferFlags]string{2: `AutoSaving`, 3: `MarkingUp`, 4: `Changed`, 5: `NotSaved`, 6: `FileModOk`}
+var _BufferFlagsMap = map[BufferFlags]string{2: `AutoSaving`, 3: `MarkingUp`, 4: `Changed`, 5: `NotSaved`, 6: `FileModOK`}
 
-// String returns the string representation of this BufFlags value.
+// String returns the string representation of this BufferFlags value.
 func (i BufferFlags) String() string {
-	return enums.BitFlagStringExtended(i, _BufFlagsValues, gi.WidgetFlagsValues())
+	return enums.BitFlagStringExtended(i, _BufferFlagsValues, gi.WidgetFlagsValues())
 }
 
-// BitIndexString returns the string representation of this BufFlags value
+// BitIndexString returns the string representation of this BufferFlags value
 // if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
 func (i BufferFlags) BitIndexString() string {
-	return enums.BitIndexStringExtended[BufferFlags, gi.WidgetFlags](i, _BufFlagsMap)
+	return enums.BitIndexStringExtended[BufferFlags, gi.WidgetFlags](i, _BufferFlagsMap)
 }
 
-// SetString sets the BufFlags value from its string representation,
+// SetString sets the BufferFlags value from its string representation,
 // and returns an error if the string is invalid.
 func (i *BufferFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
 
-// SetStringOr sets the BufFlags value from its string representation
+// SetStringOr sets the BufferFlags value from its string representation
 // while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *BufferFlags) SetStringOr(s string) error {
-	return enums.SetStringOrExtended(i, (*gi.WidgetFlags)(i), s, _BufFlagsValueMap)
+	return enums.SetStringOrExtended(i, (*gi.WidgetFlags)(i), s, _BufferFlagsValueMap)
 }
 
-// Int64 returns the BufFlags value as an int64.
+// Int64 returns the BufferFlags value as an int64.
 func (i BufferFlags) Int64() int64 { return int64(i) }
 
-// SetInt64 sets the BufFlags value from an int64.
+// SetInt64 sets the BufferFlags value from an int64.
 func (i *BufferFlags) SetInt64(in int64) { *i = BufferFlags(in) }
 
-// Desc returns the description of the BufFlags value.
+// Desc returns the description of the BufferFlags value.
 func (i BufferFlags) Desc() string {
-	return enums.DescExtended[BufferFlags, gi.WidgetFlags](i, _BufFlagsDescMap)
+	return enums.DescExtended[BufferFlags, gi.WidgetFlags](i, _BufferFlagsDescMap)
 }
 
-// BufFlagsValues returns all possible values for the type BufFlags.
-func BufFlagsValues() []BufferFlags {
-	return enums.ValuesGlobalExtended(_BufFlagsValues, gi.WidgetFlagsValues())
+// BufferFlagsValues returns all possible values for the type BufferFlags.
+func BufferFlagsValues() []BufferFlags {
+	return enums.ValuesGlobalExtended(_BufferFlagsValues, gi.WidgetFlagsValues())
 }
 
-// Values returns all possible values for the type BufFlags.
+// Values returns all possible values for the type BufferFlags.
 func (i BufferFlags) Values() []enums.Enum {
-	return enums.ValuesExtended(_BufFlagsValues, gi.WidgetFlagsValues())
+	return enums.ValuesExtended(_BufferFlagsValues, gi.WidgetFlagsValues())
 }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
@@ -158,7 +158,9 @@ func (i *BufferFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int
 func (i BufferFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *BufferFlags) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "BufFlags") }
+func (i *BufferFlags) UnmarshalText(text []byte) error {
+	return enums.UnmarshalText(i, text, "BufferFlags")
+}
 
 var _EditorFlagsValues = []EditorFlags{2, 3, 4, 5, 6}
 

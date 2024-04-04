@@ -14,8 +14,8 @@ var PageType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/webcore.Page", I
 
 // NewPage adds a new [Page] with the given name to the given parent:
 // Page represents one site page
-func NewPage(par ki.Ki, name ...string) *Page {
-	return par.NewChild(PageType, name...).(*Page)
+func NewPage(parent ki.Ki, name ...string) *Page {
+	return parent.NewChild(PageType, name...).(*Page)
 }
 
 // KiType returns the [*gti.Type] of [Page]

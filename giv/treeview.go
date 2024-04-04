@@ -174,12 +174,12 @@ type TreeView struct {
 // separately from the surrounding context. If a name is provided, it
 // sets the name of the tree view to that and the name of the frame to
 // that plus "-frame".
-func NewTreeViewFrame(par ki.Ki, name ...string) *TreeView {
+func NewTreeViewFrame(parent ki.Ki, name ...string) *TreeView {
 	frnm := []string{}
 	if len(name) > 0 {
 		frnm = []string{name[0] + "-frame"}
 	}
-	fr := gi.NewFrame(par, frnm...).Style(func(s *styles.Style) {
+	fr := gi.NewFrame(parent, frnm...).Style(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowAuto)
 	})
 	return NewTreeView(fr, name...)

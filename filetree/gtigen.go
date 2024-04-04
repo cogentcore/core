@@ -20,8 +20,8 @@ var NodeType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/filetree.Node", 
 // Node represents a file in the file system, as a TreeView node.
 // The name of the node is the name of the file.
 // Folders have children containing further nodes.
-func NewNode(par ki.Ki, name ...string) *Node {
-	return par.NewChild(NodeType, name...).(*Node)
+func NewNode(parent ki.Ki, name ...string) *Node {
+	return parent.NewChild(NodeType, name...).(*Node)
 }
 
 // KiType returns the [*gti.Type] of [Node]
@@ -94,8 +94,8 @@ var TreeType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/filetree.Tree", 
 // (and subdirectories thereof), and has some overall management state for how to
 // view things.  The Tree can be viewed by a TreeView to provide a GUI
 // interface into it.
-func NewTree(par ki.Ki, name ...string) *Tree {
-	return par.NewChild(TreeType, name...).(*Tree)
+func NewTree(parent ki.Ki, name ...string) *Tree {
+	return parent.NewChild(TreeType, name...).(*Tree)
 }
 
 // KiType returns the [*gti.Type] of [Tree]
@@ -159,8 +159,8 @@ var VCSLogViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/filetree.V
 
 // NewVCSLogView adds a new [VCSLogView] with the given name to the given parent:
 // VCSLogView is a view of the VCS log data
-func NewVCSLogView(par ki.Ki, name ...string) *VCSLogView {
-	return par.NewChild(VCSLogViewType, name...).(*VCSLogView)
+func NewVCSLogView(parent ki.Ki, name ...string) *VCSLogView {
+	return parent.NewChild(VCSLogViewType, name...).(*VCSLogView)
 }
 
 // KiType returns the [*gti.Type] of [VCSLogView]

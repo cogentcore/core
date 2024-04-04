@@ -20,8 +20,8 @@ var GroupType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyz.Group", IDN
 // NewGroup adds a new [Group] with the given name to the given parent:
 // Group collects individual elements in a scene but does not have a Mesh or Material of
 // its own.  It does have a transform that applies to all nodes under it.
-func NewGroup(par ki.Ki, name ...string) *Group {
-	return par.NewChild(GroupType, name...).(*Group)
+func NewGroup(parent ki.Ki, name ...string) *Group {
+	return parent.NewChild(GroupType, name...).(*Group)
 }
 
 // KiType returns the [*gti.Type] of [Group]
@@ -115,8 +115,8 @@ var NodeBaseType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyz.NodeBase
 // NodeBase is the basic 3D scenegraph node, which has the full transform information
 // relative to parent, and computed bounding boxes, etc.
 // There are only two different kinds of Nodes: Group and Solid
-func NewNodeBase(par ki.Ki, name ...string) *NodeBase {
-	return par.NewChild(NodeBaseType, name...).(*NodeBase)
+func NewNodeBase(parent ki.Ki, name ...string) *NodeBase {
+	return parent.NewChild(NodeBaseType, name...).(*NodeBase)
 }
 
 // KiType returns the [*gti.Type] of [NodeBase]
@@ -399,8 +399,8 @@ var SolidType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyz.Solid", IDN
 // Solid represents an individual 3D solid element.
 // It has its own unique spatial transforms and material properties,
 // and points to a mesh structure defining the shape of the solid.
-func NewSolid(par ki.Ki, name ...string) *Solid {
-	return par.NewChild(SolidType, name...).(*Solid)
+func NewSolid(parent ki.Ki, name ...string) *Solid {
+	return parent.NewChild(SolidType, name...).(*Solid)
 }
 
 // KiType returns the [*gti.Type] of [Solid]
@@ -430,8 +430,8 @@ var Text2DType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyz.Text2D", I
 // The margin property creates blank margin of the background color around the text
 // (2 px default) and the background-color defaults to transparent
 // but can be set to any color.
-func NewText2D(par ki.Ki, name ...string) *Text2D {
-	return par.NewChild(Text2DType, name...).(*Text2D)
+func NewText2D(parent ki.Ki, name ...string) *Text2D {
+	return parent.NewChild(Text2DType, name...).(*Text2D)
 }
 
 // KiType returns the [*gti.Type] of [Text2D]

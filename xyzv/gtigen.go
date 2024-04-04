@@ -8,17 +8,17 @@ import (
 	"cogentcore.org/core/xyz"
 )
 
-// ManipPtType is the [gti.Type] for [ManipPt]
-var ManipPtType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyzv.ManipPt", IDName: "manip-pt", Doc: "ManipPt is a manipulation control point", Directives: []gti.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []gti.Field{{Name: "Solid"}}, Instance: &ManipPt{}})
+// ManipPtType is the [gti.Type] for [ManipPoint]
+var ManipPtType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyzv.ManipPt", IDName: "manip-pt", Doc: "ManipPt is a manipulation control point", Directives: []gti.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []gti.Field{{Name: "Solid"}}, Instance: &ManipPoint{}})
 
-// KiType returns the [*gti.Type] of [ManipPt]
-func (t *ManipPt) KiType() *gti.Type { return ManipPtType }
+// KiType returns the [*gti.Type] of [ManipPoint]
+func (t *ManipPoint) KiType() *gti.Type { return ManipPtType }
 
-// New returns a new [*ManipPt] value
-func (t *ManipPt) New() ki.Ki { return &ManipPt{} }
+// New returns a new [*ManipPoint] value
+func (t *ManipPoint) New() ki.Ki { return &ManipPoint{} }
 
-// SetMat sets the [ManipPt.Mat]
-func (t *ManipPt) SetMat(v xyz.Material) *ManipPt { t.Mat = v; return t }
+// SetMat sets the [ManipPoint.Mat]
+func (t *ManipPoint) SetMat(v xyz.Material) *ManipPoint { t.Mat = v; return t }
 
 // SceneType is the [gti.Type] for [Scene]
 var SceneType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyzv.Scene", IDName: "scene", Doc: "Scene is a gi.Widget that manages a xyz.Scene,\nproviding the basic rendering logic for the 3D scene\nin the 2D gi gui context.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "XYZ", Doc: "XYZ is the 3D xyz.Scene"}, {Name: "SelectionMode", Doc: "how to deal with selection / manipulation events"}, {Name: "CurrentSelected", Doc: "currently selected node"}, {Name: "CurrentManipPoint", Doc: "currently selected manipulation control point"}, {Name: "SelectionParams", Doc: "parameters for selection / manipulation box"}}, Instance: &Scene{}})
@@ -27,8 +27,8 @@ var SceneType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyzv.Scene", ID
 // Scene is a gi.Widget that manages a xyz.Scene,
 // providing the basic rendering logic for the 3D scene
 // in the 2D gi gui context.
-func NewScene(par ki.Ki, name ...string) *Scene {
-	return par.NewChild(SceneType, name...).(*Scene)
+func NewScene(parent ki.Ki, name ...string) *Scene {
+	return parent.NewChild(SceneType, name...).(*Scene)
 }
 
 // KiType returns the [*gti.Type] of [Scene]
@@ -47,7 +47,7 @@ func (t *Scene) SetCurrentSelected(v xyz.Node) *Scene { t.CurrentSelected = v; r
 
 // SetCurrentManipPoint sets the [Scene.CurrentManipPoint]:
 // currently selected manipulation control point
-func (t *Scene) SetCurrentManipPoint(v *ManipPt) *Scene { t.CurrentManipPoint = v; return t }
+func (t *Scene) SetCurrentManipPoint(v *ManipPoint) *Scene { t.CurrentManipPoint = v; return t }
 
 // SetSelectionParams sets the [Scene.SelectionParams]:
 // parameters for selection / manipulation box
@@ -62,8 +62,8 @@ var SceneViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyzv.SceneV
 // NewSceneView adds a new [SceneView] with the given name to the given parent:
 // SceneView provides a toolbar controller for an xyz.Scene,
 // and manipulation abilities.
-func NewSceneView(par ki.Ki, name ...string) *SceneView {
-	return par.NewChild(SceneViewType, name...).(*SceneView)
+func NewSceneView(parent ki.Ki, name ...string) *SceneView {
+	return parent.NewChild(SceneViewType, name...).(*SceneView)
 }
 
 // KiType returns the [*gti.Type] of [SceneView]

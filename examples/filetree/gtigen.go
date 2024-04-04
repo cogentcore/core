@@ -16,8 +16,8 @@ var FileBrowseType = gti.AddType(&gti.Type{Name: "main.FileBrowse", IDName: "fil
 // FileBrowse is a simple file browser / viewer / editor with a file tree and
 // one or more editor windows.  It is based on an early version of the Gide
 // IDE framework, and remains simple to test / demo the file tree component.
-func NewFileBrowse(par ki.Ki, name ...string) *FileBrowse {
-	return par.NewChild(FileBrowseType, name...).(*FileBrowse)
+func NewFileBrowse(parent ki.Ki, name ...string) *FileBrowse {
+	return parent.NewChild(FileBrowseType, name...).(*FileBrowse)
 }
 
 // KiType returns the [*gti.Type] of [FileBrowse]
