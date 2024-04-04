@@ -50,13 +50,15 @@ import (
 // and loading can deal with Windows/DOS CRLF format.
 type Buffer struct {
 
-	// filename of file last loaded or saved
+	// Filename is the filename of file last loaded or saved,
+	// which is used when highlighting code.
 	Filename gi.Filename `json:"-" xml:"-"`
 
 	// Flags are key state flags
 	Flags BufferFlags
 
-	// the current value of the entire text being edited -- using byte slice for greater efficiency
+	// Txt is the current value of the entire text being edited,
+	// as a byte slice for greater efficiency.
 	Txt []byte `json:"-" xml:"text"`
 
 	// if true, auto-save file after changes (in a separate routine)
@@ -188,9 +190,9 @@ const (
 	BufferClosed
 )
 
-// SignalViews sends the given signal and optional edit info
-// to all the Views for this Buf
-func (tb *Buffer) SignalViews(sig BufferSignals, edit *textbuf.Edit) {
+// SignalEditors sends the given signal and optional edit info
+// to all the [Editor]s for this [Buffer]
+func (tb *Buffer) SignalEditors(sig BufferSignals, edit *textbuf.Edit) {
 	for _, vw := range tb.Editors {
 		vw.BufferSignal(sig, edit)
 	}
@@ -282,7 +284,7 @@ func (tb *Buffer) SetText(txt []byte) *Buffer {
 	tb.Txt = txt
 	tb.BytesToLines()
 	tb.InitialMarkup()
-	tb.SignalViews(BufferNew, nil)
+	tb.SignalEditors(BufferNew, nil)
 	tb.ReMarkup()
 	return tb
 }
@@ -321,7 +323,7 @@ func (tb *Buffer) SetTextLines(lns [][]byte, cpy bool) {
 	tb.LinesMu.Unlock()
 	tb.LinesToBytes()
 	tb.InitialMarkup()
-	tb.SignalViews(BufferNew, nil)
+	tb.SignalEditors(BufferNew, nil)
 	tb.ReMarkup()
 }
 
@@ -330,7 +332,7 @@ func (tb *Buffer) EditDone() {
 	tb.AutoSaveDelete()
 	tb.ClearChanged()
 	tb.LinesToBytes()
-	tb.SignalViews(BufferDone, nil)
+	tb.SignalEditors(BufferDone, nil)
 }
 
 // Text returns the current text as a []byte array, applying all current
@@ -390,6 +392,14 @@ func (tb *Buffer) BytesLine(ln int) []byte {
 	return tb.LineBytes[ln]
 }
 
+// SetLang sets the language for highlighting and updates
+// the highlighting style and buffer accordingly.
+func (tb *Buffer) SetLang(lang string) *Buffer {
+	tb.SetFilename("_placeholder." + lang)
+	tb.SetText(tb.Txt) // to update it
+	return tb
+}
+
 // SetHiStyle sets the highlighting style -- needs to be protected by mutex
 func (tb *Buffer) SetHiStyle(style gi.HiStyleName) *Buffer {
 	tb.MarkupMu.Lock()
@@ -401,7 +411,7 @@ func (tb *Buffer) SetHiStyle(style gi.HiStyleName) *Buffer {
 // SignalMods sends the BufMods signal for misc, potentially
 // widespread modifications to buffer.
 func (tb *Buffer) SignalMods() {
-	tb.SignalViews(BufferMods, nil)
+	tb.SignalEditors(BufferMods, nil)
 }
 
 // SetReadOnly sets the buffer in a ReadOnly state if readonly = true
@@ -411,6 +421,8 @@ func (tb *Buffer) SetReadOnly(readonly bool) *Buffer {
 	return tb
 }
 
+// SetFilename sets the filename associated with the buffer and updates
+// the code highlighting information accordingly.
 func (tb *Buffer) SetFilename(fn string) *Buffer {
 	tb.Filename = gi.Filename(fn)
 	tb.Stat()
@@ -453,7 +465,7 @@ func (tb *Buffer) NewBuffer(nlines int) {
 
 	tb.MarkupMu.Unlock()
 	tb.LinesMu.Unlock()
-	tb.SignalViews(BufferNew, nil)
+	tb.SignalEditors(BufferNew, nil)
 }
 
 // Stat gets info about the file, including highlighting language
@@ -524,7 +536,7 @@ func (tb *Buffer) Open(filename gi.Filename) error {
 		return err
 	}
 	tb.InitialMarkup()
-	tb.SignalViews(BufferNew, nil)
+	tb.SignalEditors(BufferNew, nil)
 	tb.ReMarkup()
 	return nil
 }
@@ -539,7 +551,7 @@ func (tb *Buffer) OpenFS(fsys fs.FS, filename string) error {
 	tb.SetFilename(filename)
 	tb.BytesToLines()
 	tb.InitialMarkup()
-	tb.SignalViews(BufferNew, nil)
+	tb.SignalEditors(BufferNew, nil)
 	tb.ReMarkup()
 	return nil
 }
@@ -593,7 +605,7 @@ func (tb *Buffer) Revert() bool {
 	}
 	tb.ClearNotSaved()
 	tb.AutoSaveDelete()
-	tb.SignalViews(BufferNew, nil)
+	tb.SignalEditors(BufferNew, nil)
 	tb.ReMarkup()
 	return true
 }
@@ -729,7 +741,7 @@ func (tb *Buffer) Close(afterFun func(canceled bool)) bool {
 		}
 		return false // awaiting decisions..
 	}
-	tb.SignalViews(BufferClosed, nil)
+	tb.SignalEditors(BufferClosed, nil)
 	tb.NewBuffer(1)
 	tb.Filename = ""
 	tb.ClearNotSaved()
@@ -870,7 +882,7 @@ func (tb *Buffer) AppendTextMarkup(text []byte, markup []byte, signal bool) *tex
 		tb.Markup[ln] = msplt[ln-st]
 	}
 	if signal {
-		tb.SignalViews(BufferInsert, tbe)
+		tb.SignalEditors(BufferInsert, tbe)
 	}
 	return tbe
 }
@@ -899,7 +911,7 @@ func (tb *Buffer) AppendTextLineMarkup(text []byte, markup []byte, signal bool) 
 	tbe := tb.InsertText(ed, efft, false)
 	tb.Markup[tbe.Reg.Start.Ln] = markup
 	if signal {
-		tb.SignalViews(BufferInsert, tbe)
+		tb.SignalEditors(BufferInsert, tbe)
 	}
 	return tbe
 }
@@ -1150,7 +1162,7 @@ func (tb *Buffer) DeleteText(st, ed lex.Pos, signal bool) *textbuf.Edit {
 	tb.SaveUndo(tbe)
 	tb.LinesMu.Unlock()
 	if signal {
-		tb.SignalViews(BufferDelete, tbe)
+		tb.SignalEditors(BufferDelete, tbe)
 	}
 	if tb.Autosave {
 		go tb.AutoSave()
@@ -1263,7 +1275,7 @@ func (tb *Buffer) InsertText(st lex.Pos, text []byte, signal bool) *textbuf.Edit
 	tb.SaveUndo(tbe)
 	tb.LinesMu.Unlock()
 	if signal {
-		tb.SignalViews(BufferInsert, tbe)
+		tb.SignalEditors(BufferInsert, tbe)
 	}
 	if tb.Autosave {
 		go tb.AutoSave()
@@ -1343,7 +1355,7 @@ func (tb *Buffer) InsertTextRect(tbe *textbuf.Edit, signal bool) *textbuf.Edit {
 			ie := &textbuf.Edit{}
 			ie.Reg.Start.Ln = nln - 1
 			ie.Reg.End.Ln = re.Reg.End.Ln
-			tb.SignalViews(BufferInsert, ie)
+			tb.SignalEditors(BufferInsert, ie)
 		} else {
 			tb.SignalMods()
 		}
@@ -1863,7 +1875,7 @@ func (tb *Buffer) MarkupAllLines(maxLines int) {
 	tb.MarkupMu.Unlock()
 	tb.LinesMu.Unlock()
 	tb.SetFlag(false, BufferMarkingUp)
-	tb.SignalViews(BufferMarkupUpdated, nil)
+	tb.SignalEditors(BufferMarkupUpdated, nil)
 }
 
 // MarkupFromTags does syntax highlighting markup using existing HiTags without
@@ -1880,7 +1892,7 @@ func (tb *Buffer) MarkupFromTags() {
 	}
 	tb.MarkupMu.Unlock()
 	tb.SetFlag(false, BufferMarkingUp)
-	tb.SignalViews(BufferMarkupUpdated, nil)
+	tb.SignalEditors(BufferMarkupUpdated, nil)
 }
 
 // MarkupLines generates markup of given range of lines. end is *inclusive*
@@ -1967,7 +1979,7 @@ func (tb *Buffer) Undo() *textbuf.Edit {
 					tb.Undos.SaveUndo(utbe)
 				}
 				tb.LinesMu.Unlock()
-				tb.SignalViews(BufferInsert, utbe)
+				tb.SignalEditors(BufferInsert, utbe)
 			} else {
 				utbe := tb.DeleteTextImpl(tbe.Reg.Start, tbe.Reg.End)
 				utbe.Group = stgp + tbe.Group
@@ -1975,7 +1987,7 @@ func (tb *Buffer) Undo() *textbuf.Edit {
 					tb.Undos.SaveUndo(utbe)
 				}
 				tb.LinesMu.Unlock()
-				tb.SignalViews(BufferDelete, utbe)
+				tb.SignalEditors(BufferDelete, utbe)
 			}
 		}
 		tb.LinesMu.Lock()
@@ -2031,11 +2043,11 @@ func (tb *Buffer) Redo() *textbuf.Edit {
 			if tbe.Delete {
 				tb.DeleteTextImpl(tbe.Reg.Start, tbe.Reg.End)
 				tb.LinesMu.Unlock()
-				tb.SignalViews(BufferDelete, tbe)
+				tb.SignalEditors(BufferDelete, tbe)
 			} else {
 				tb.InsertTextImpl(tbe.Reg.Start, tbe.ToBytes())
 				tb.LinesMu.Unlock()
-				tb.SignalViews(BufferInsert, tbe)
+				tb.SignalEditors(BufferInsert, tbe)
 			}
 		}
 		tb.LinesMu.Lock()

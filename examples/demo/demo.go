@@ -315,7 +315,7 @@ func editors(ts *gi.Tabs) {
 
 	sp := gi.NewSplits(tab)
 
-	texteditor.NewSoloEditor(sp).Buffer.SetTextString("Enter\n\ttext\n\t\there")
+	texteditor.NewSoloEditor(sp).Buffer.SetLang("md").SetTextString("# Enter\n\t**markdown**\n\t\t*here*")
 	grr.Log(texteditor.NewSoloEditor(sp).Buffer.OpenFS(demoFile, "demo.go"))
 }
 

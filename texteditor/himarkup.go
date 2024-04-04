@@ -66,7 +66,7 @@ func (hm *HiMarkup) HasHi() bool {
 	return hm.Has
 }
 
-// UsingPi returns true if markup is using GoPi lexer / parser -- affects
+// UsingPi returns true if markup is using pi lexer / parser, which affects
 // use of results
 func (hm *HiMarkup) UsingPi() bool {
 	return hm.PiLang != nil

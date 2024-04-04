@@ -15,3 +15,9 @@ You can set the starting text of a text editor:
 ```Go
 texteditor.NewSoloEditor(parent).Buffer.SetTextString("Hello, world!")
 ```
+
+You can set the highlighting language of a text editor:
+
+```Go
+texteditor.NewSoloEditor(parent).Buffer.SetLang("go").SetTextString("package main")
+```
