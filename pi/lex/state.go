@@ -159,17 +159,17 @@ func (ls *State) CurRune() bool {
 
 // Add adds a lex token for given region -- merges with prior if same
 func (ls *State) Add(tok token.KeyToken, st, ed int) {
-	if tok.Tok == token.TextWhitespace && !ls.KeepWS {
+	if tok.Token == token.TextWhitespace && !ls.KeepWS {
 		return
 	}
 	lxl := &ls.Lex
-	if tok.Tok.Cat() == token.Comment {
+	if tok.Token.Cat() == token.Comment {
 		lxl = &ls.Comments
 	}
 	sz := len(*lxl)
-	if sz > 0 && tok.Tok.CombineRepeats() {
+	if sz > 0 && tok.Token.CombineRepeats() {
 		lst := &(*lxl)[sz-1]
-		if lst.Token.Tok == tok.Tok && lst.Ed == st {
+		if lst.Token.Token == tok.Token && lst.Ed == st {
 			lst.Ed = ed
 			return
 		}

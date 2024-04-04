@@ -148,16 +148,16 @@ var bibtexDef = [...]int{
 	21, 0, 0, 17, 18, 0, 0, 7, 19, 0,
 	8, 11, 12, 22, 20,
 }
-var bibtexTok1 = [...]int{
+var bibtexToken1 = [...]int{
 
 	1,
 }
-var bibtexTok2 = [...]int{
+var bibtexToken2 = [...]int{
 
 	2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
 	12, 13, 14, 15, 16, 17, 18,
 }
-var bibtexTok3 = [...]int{
+var bibtexTokem3 = [...]int{
 	0,
 }
 
@@ -286,30 +286,30 @@ func bibtexlex1(lex bibtexLexer, lval *bibtexSymType) (char, token int) {
 	token = 0
 	char = lex.Lex(lval)
 	if char <= 0 {
-		token = bibtexTok1[0]
+		token = bibtexToken1[0]
 		goto out
 	}
-	if char < len(bibtexTok1) {
-		token = bibtexTok1[char]
+	if char < len(bibtexToken1) {
+		token = bibtexToken1[char]
 		goto out
 	}
 	if char >= bibtexPrivate {
-		if char < bibtexPrivate+len(bibtexTok2) {
-			token = bibtexTok2[char-bibtexPrivate]
+		if char < bibtexPrivate+len(bibtexToken2) {
+			token = bibtexToken2[char-bibtexPrivate]
 			goto out
 		}
 	}
-	for i := 0; i < len(bibtexTok3); i += 2 {
-		token = bibtexTok3[i+0]
+	for i := 0; i < len(bibtexTokem3); i += 2 {
+		token = bibtexTokem3[i+0]
 		if token == char {
-			token = bibtexTok3[i+1]
+			token = bibtexTokem3[i+1]
 			goto out
 		}
 	}
 
 out:
 	if token == 0 {
-		token = bibtexTok2[1] /* unknown char */
+		token = bibtexToken2[1] /* unknown char */
 	}
 	if bibtexDebug >= 3 {
 		__yyfmt__.Printf("lex %s(%d)\n", bibtexTokname(token), uint(char))

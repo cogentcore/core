@@ -155,7 +155,7 @@ func ObjPathAt(line Line, lx *Lex) *Lex {
 		_, lxidx := line.AtPos(lx.St - 1)
 		for i := lxidx; i >= 0; i-- {
 			clx := &line[i]
-			if clx.Token.Tok == token.PunctSepPeriod || clx.Token.Tok.InCat(token.Name) {
+			if clx.Token.Token == token.PunctSepPeriod || clx.Token.Token.InCat(token.Name) {
 				stlx = clx
 			} else {
 				break

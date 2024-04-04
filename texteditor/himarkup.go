@@ -180,7 +180,7 @@ func ChromaTagsForLine(tags *lex.Line, toks []chroma.Token) {
 		ep := cp + slen
 		if tok.Type < chroma.Text {
 			ht := histyle.TokenFromChroma(tok.Type)
-			tags.AddLex(token.KeyToken{Tok: ht}, cp, ep)
+			tags.AddLex(token.KeyToken{Token: ht}, cp, ep)
 		}
 		cp = ep
 	}
@@ -280,7 +280,7 @@ func (hm *HiMarkup) MarkupLine(txt []rune, hitags, tags lex.Line) []byte {
 			mu = append(mu, HTMLEscapeRunes(txt[cp:tr.St])...)
 		}
 		mu = append(mu, sps...)
-		clsnm := tr.Token.Tok.StyleName()
+		clsnm := tr.Token.Token.StyleName()
 		mu = append(mu, []byte(clsnm)...)
 		mu = append(mu, sps2...)
 		ep := tr.Ed

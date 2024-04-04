@@ -169,7 +169,7 @@ func (tk Tokens) ClassName() string {
 // if Tok is in Keyword category, then Key string can be used to check for same keyword.
 // Also has a Depth for matching against a particular nesting depth
 type KeyToken struct {
-	Tok   Tokens
+	Token Tokens
 	Key   string
 	Depth int
 }
@@ -182,18 +182,18 @@ func (kt KeyToken) String() string {
 		ds = fmt.Sprintf("+%d:", kt.Depth)
 	}
 	if kt.Key != "" {
-		return ds + kt.Tok.String() + ": " + kt.Key
+		return ds + kt.Token.String() + ": " + kt.Key
 	}
-	return ds + kt.Tok.String()
+	return ds + kt.Token.String()
 }
 
 // Equal compares equality of two tokens including keywords if token is in Keyword category.
 // See also Match for version that uses category / subcategory matching
 func (kt KeyToken) Equal(okt KeyToken) bool {
-	if kt.Tok.IsKeyword() && kt.Key != "" {
-		return kt.Tok == okt.Tok && kt.Key == okt.Key
+	if kt.Token.IsKeyword() && kt.Key != "" {
+		return kt.Token == okt.Token && kt.Key == okt.Key
 	}
-	return kt.Tok == okt.Tok
+	return kt.Token == okt.Token
 }
 
 // Match compares equality of two tokens including keywords if token is in Keyword category.
@@ -201,10 +201,10 @@ func (kt KeyToken) Equal(okt KeyToken) bool {
 // if receiver token is a category, then it matches other token if it is the same category
 // and likewise for subcategory
 func (kt KeyToken) Match(okt KeyToken) bool {
-	if kt.Tok.IsKeyword() && kt.Key != "" {
-		return kt.Tok.Match(okt.Tok) && kt.Key == okt.Key
+	if kt.Token.IsKeyword() && kt.Key != "" {
+		return kt.Token.Match(okt.Token) && kt.Key == okt.Key
 	}
-	return kt.Tok.Match(okt.Tok)
+	return kt.Token.Match(okt.Token)
 }
 
 // MatchDepth compares equality of two tokens including depth -- see Match for other matching
@@ -218,8 +218,8 @@ func (kt KeyToken) MatchDepth(okt KeyToken) bool {
 
 // StringKey encodes token into a string for optimized string-based map key lookup
 func (kt KeyToken) StringKey() string {
-	tstr := string([]byte{byte(kt.Tok)})
-	if kt.Tok.IsKeyword() {
+	tstr := string([]byte{byte(kt.Token)})
+	if kt.Token.IsKeyword() {
 		return tstr + kt.Key
 	} else {
 		return tstr

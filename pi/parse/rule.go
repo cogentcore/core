@@ -92,19 +92,19 @@ type Rule struct {
 	Order []int `edit:"-" json:"-" xml:"-"`
 
 	// map from first tokens / keywords to rules for FirstTokenMap case
-	FiTokenMap map[string]*Rule `edit:"-" json:"-" xml:"-"`
+	FiTokenMap map[string]*Rule `edit:"-" json:"-" xml:"-" set:"-"`
 
 	// for FirstTokenMap, the start of the else cases not covered by the map
-	FiTokenElseIndex int `edit:"-" json:"-" xml:"-"`
+	FiTokenElseIndex int `edit:"-" json:"-" xml:"-" set:"-"`
 
 	// exclusionary key index -- this is the token in Rules that we need to exclude matches for using ExclFwd and ExclRev rules
-	ExclKeyIndex int `edit:"-" json:"-" xml:"-"`
+	ExclKeyIndex int `edit:"-" json:"-" xml:"-" set:"-"`
 
 	// exclusionary forward-search rule elements compiled from Rule string
-	ExclFwd RuleList `edit:"-" json:"-" xml:"-"`
+	ExclFwd RuleList `edit:"-" json:"-" xml:"-" set:"-"`
 
 	// exclusionary reverse-search rule elements compiled from Rule string
-	ExclRev RuleList `edit:"-" json:"-" xml:"-"`
+	ExclRev RuleList `edit:"-" json:"-" xml:"-" set:"-"`
 }
 
 // RuleFlags define bitflags for rule options compiled from rule syntax
@@ -355,20 +355,20 @@ func (pr *Rule) Compile(ps *State) bool {
 			}
 			tn := rn[tokst+1 : sz-1]
 			if len(tn) > 4 && tn[:4] == "key:" {
-				rr.Token.Tok = token.Keyword
+				rr.Token.Token = token.Keyword
 				rr.Token.Key = tn[4:]
 			} else {
 				if pmt, has := token.OpPunctMap[tn]; has {
-					rr.Token.Tok = pmt
+					rr.Token.Token = pmt
 				} else {
-					err := rr.Token.Tok.SetString(tn)
+					err := rr.Token.Token.SetString(tn)
 					if err != nil {
 						ps.Error(lex.PosZero, fmt.Sprintf("Compile: token convert error: %v", err.Error()), pr)
 						valid = false
 					}
 				}
 			}
-			if rr.Token.Tok == token.EOS {
+			if rr.Token.Token == token.EOS {
 				eoses++
 				if eoses > 1 {
 					pr.SetFlag(true, MultiEOS)
@@ -534,13 +534,13 @@ func (pr *Rule) CompileExcl(ps *State, rs []string, rist int) bool {
 		}
 		tn := rn[tokst+1 : sz-1]
 		if len(tn) > 4 && tn[:4] == "key:" {
-			rr.Token.Tok = token.Keyword
+			rr.Token.Token = token.Keyword
 			rr.Token.Key = tn[4:]
 		} else {
 			if pmt, has := token.OpPunctMap[tn]; has {
-				rr.Token.Tok = pmt
+				rr.Token.Token = pmt
 			} else {
-				err := rr.Token.Tok.SetString(tn)
+				err := rr.Token.Token.SetString(tn)
 				if err != nil {
 					ps.Error(lex.PosZero, fmt.Sprintf("CompileExcl: token convert error: %v", err.Error()), pr)
 					valid = false
@@ -880,7 +880,7 @@ func (pr *Rule) MatchOnlyToks(ps *State, parAst *Ast, scope lex.Reg, depth int, 
 		ri := pr.Order[oi]
 		rr := &pr.Rules[ri]
 		kt := rr.Token
-		if optMap != nil && !optMap.Has(kt.Tok) { // not even a possibility
+		if optMap != nil && !optMap.Has(kt.Token) { // not even a possibility
 			return false, nil
 		}
 		if rr.FromNext {
@@ -939,7 +939,7 @@ func (pr *Rule) MatchToken(ps *State, rr *RuleEl, ri int, kt token.KeyToken, cre
 	for stinc := 0; stinc < rr.StInc; stinc++ {
 		creg.St, _ = ps.Src.NextTokenPos(creg.St)
 	}
-	if ri == nr-1 && rr.Token.Tok == token.EOS {
+	if ri == nr-1 && rr.Token.Token == token.EOS {
 		return true, scope.Ed
 	}
 	if creg.IsNil() && !matched {
@@ -990,7 +990,7 @@ func (pr *Rule) MatchMixed(ps *State, parAst *Ast, scope lex.Reg, depth int, opt
 			rr := &pr.Rules[ri]
 			if rr.IsToken() {
 				kt := rr.Token
-				if !optMap.Has(kt.Tok) { // not even a possibility
+				if !optMap.Has(kt.Token) { // not even a possibility
 					return false, nil
 				}
 			}
@@ -1172,7 +1172,7 @@ func (pr *Rule) MatchExclude(ps *State, scope lex.Reg, ktpos lex.Reg, depth int,
 			rr := pr.ExclFwd[ri]
 			kt := rr.Token
 			kt.Depth += scstDepth // always use starting scope depth
-			if kt.Tok == token.None {
+			if kt.Token == token.None {
 				prevAny = true // wild card
 				continue
 			}
@@ -1223,7 +1223,7 @@ func (pr *Rule) MatchExclude(ps *State, scope lex.Reg, ktpos lex.Reg, depth int,
 			rr := pr.ExclRev[ri]
 			kt := rr.Token
 			kt.Depth += scstDepth // always use starting scope depth
-			if kt.Tok == token.None {
+			if kt.Token == token.None {
 				prevAny = true // wild card
 				continue
 			}
@@ -1307,14 +1307,14 @@ func (pr *Rule) DoRules(ps *State, parent *Rule, parentAst *Ast, scope lex.Reg, 
 				}
 			} else if mp.IsLess(ps.Pos) {
 				// ps.Pos has moved beyond our expected token -- sub-rule has eaten more than expected!
-				if rr.Token.Tok == token.EOS {
+				if rr.Token.Token == token.EOS {
 					if ps.Trace.On {
 						ps.Trace.Out(ps, pr, Run, mp, scope, trcAst, fmt.Sprintf("%v: EOS token consumed by sub-rule: %v", ri, rr.Token))
 					}
 				} else {
 					ps.Error(mp, fmt.Sprintf("expected token: %v (at rule index: %v) was consumed by prior sub-rule(s)", rr.Token, ri), pr)
 				}
-			} else if ri == nr-1 && rr.Token.Tok == token.EOS {
+			} else if ri == nr-1 && rr.Token.Token == token.EOS {
 				ps.ResetNonMatches() // passed this chunk of inputs -- don't need those nonmatches
 			} else {
 				ps.Error(mp, fmt.Sprintf("token: %v (at rule index: %v) has extra preceding input inconsistent with grammar", rr.Token, ri), pr)
@@ -1586,7 +1586,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *Ast) bo
 	}
 	ast := node.(*Ast)
 	lx := ps.Src.LexAt(ast.TokReg.St)
-	useTok := lx.Token.Tok
+	useTok := lx.Token.Token
 	if act.Token != token.None {
 		useTok = act.Token
 	}
@@ -1604,11 +1604,11 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *Ast) bo
 		nms[i] = strings.TrimSpace(nms[i])
 	}
 	switch act.Act {
-	case ChgToken:
+	case ChangeToken:
 		cp := ast.TokReg.St
 		for cp.IsLess(ast.TokReg.Ed) {
 			tlx := ps.Src.LexAt(cp)
-			act.ChgTok(tlx)
+			act.ChangeToken(tlx)
 			cp, _ = ps.Src.NextTokenPos(cp)
 		}
 		if len(adnl) > 0 {
@@ -1617,7 +1617,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *Ast) bo
 				cp := nast.TokReg.St
 				for cp.IsLess(nast.TokReg.Ed) {
 					tlx := ps.Src.LexAt(cp)
-					act.ChgTok(tlx)
+					act.ChangeToken(tlx)
 					cp, _ = ps.Src.NextTokenPos(cp)
 				}
 			}

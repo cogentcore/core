@@ -3531,7 +3531,7 @@
               },
               {
                 "RunIndex": -1,
-                "Act": "ChgToken",
+                "Act": "ChangeToken",
                 "Path": "Name",
                 "Token": "NamePackage",
                 "FromToken": "None"
@@ -4867,7 +4867,7 @@
                 "Acts": [
                   {
                     "RunIndex": -1,
-                    "Act": "ChgToken",
+                    "Act": "ChangeToken",
                     "Path": "[0]",
                     "Token": "NameTag",
                     "FromToken": "None"
@@ -4931,7 +4931,7 @@
                 "Acts": [
                   {
                     "RunIndex": -1,
-                    "Act": "ChgToken",
+                    "Act": "ChangeToken",
                     "Path": "[0]",
                     "Token": "NameFunction",
                     "FromToken": "None"
@@ -4953,7 +4953,7 @@
                 "Acts": [
                   {
                     "RunIndex": -1,
-                    "Act": "ChgToken",
+                    "Act": "ChangeToken",
                     "Path": "[0]",
                     "Token": "NameFunction",
                     "FromToken": "None"
@@ -4975,7 +4975,7 @@
                 "Acts": [
                   {
                     "RunIndex": -1,
-                    "Act": "ChgToken",
+                    "Act": "ChangeToken",
                     "Path": "[0]",
                     "Token": "NameFunction",
                     "FromToken": "None"
@@ -5039,7 +5039,7 @@
                 "Acts": [
                   {
                     "RunIndex": 0,
-                    "Act": "ChgToken",
+                    "Act": "ChangeToken",
                     "Path": "../Name",
                     "Token": "NameStruct",
                     "FromToken": "None"
@@ -5103,7 +5103,7 @@
                     "Acts": [
                       {
                         "RunIndex": 0,
-                        "Act": "ChgToken",
+                        "Act": "ChangeToken",
                         "Path": "../Name",
                         "Token": "NameArray",
                         "FromToken": "None"
@@ -5132,7 +5132,7 @@
                     "Acts": [
                       {
                         "RunIndex": 0,
-                        "Act": "ChgToken",
+                        "Act": "ChangeToken",
                         "Path": "../Name",
                         "Token": "NameArray",
                         "FromToken": "None"
@@ -5161,7 +5161,7 @@
                     "Acts": [
                       {
                         "RunIndex": 0,
-                        "Act": "ChgToken",
+                        "Act": "ChangeToken",
                         "Path": "../Name",
                         "Token": "NameArray",
                         "FromToken": "None"
@@ -5200,7 +5200,7 @@
                 "Acts": [
                   {
                     "RunIndex": 0,
-                    "Act": "ChgToken",
+                    "Act": "ChangeToken",
                     "Path": "../Name",
                     "Token": "NameMap",
                     "FromToken": "None"
@@ -5859,7 +5859,7 @@
                     "Acts": [
                       {
                         "RunIndex": -1,
-                        "Act": "ChgToken",
+                        "Act": "ChangeToken",
                         "Path": "",
                         "Token": "NameType",
                         "FromToken": "None"
@@ -5881,7 +5881,7 @@
                     "Acts": [
                       {
                         "RunIndex": -1,
-                        "Act": "ChgToken",
+                        "Act": "ChangeToken",
                         "Path": "",
                         "Token": "NameType",
                         "FromToken": "None"
@@ -5903,7 +5903,7 @@
                     "Acts": [
                       {
                         "RunIndex": -1,
-                        "Act": "ChgToken",
+                        "Act": "ChangeToken",
                         "Path": "",
                         "Token": "NameType",
                         "FromToken": "None"
@@ -5983,7 +5983,7 @@
                     "Acts": [
                       {
                         "RunIndex": 0,
-                        "Act": "ChgToken",
+                        "Act": "ChangeToken",
                         "Path": "../Name",
                         "Token": "NameArray",
                         "FromToken": "None"
@@ -6012,7 +6012,7 @@
                     "Acts": [
                       {
                         "RunIndex": 0,
-                        "Act": "ChgToken",
+                        "Act": "ChangeToken",
                         "Path": "../Name",
                         "Token": "NameArray",
                         "FromToken": "None"
@@ -6041,7 +6041,7 @@
                     "Acts": [
                       {
                         "RunIndex": 0,
-                        "Act": "ChgToken",
+                        "Act": "ChangeToken",
                         "Path": "../Name",
                         "Token": "NameArray",
                         "FromToken": "None"
@@ -6080,7 +6080,7 @@
                 "Acts": [
                   {
                     "RunIndex": 0,
-                    "Act": "ChgToken",
+                    "Act": "ChangeToken",
                     "Path": "../Name",
                     "Token": "NameStruct",
                     "FromToken": "None"
@@ -6144,7 +6144,7 @@
                 "Acts": [
                   {
                     "RunIndex": 0,
-                    "Act": "ChgToken",
+                    "Act": "ChangeToken",
                     "Path": "../Name",
                     "Token": "NameInterface",
                     "FromToken": "None"
@@ -6180,7 +6180,7 @@
                 "Acts": [
                   {
                     "RunIndex": 0,
-                    "Act": "ChgToken",
+                    "Act": "ChangeToken",
                     "Path": "../Name",
                     "Token": "NameMap",
                     "FromToken": "None"
@@ -6311,7 +6311,7 @@
                 "Acts": [
                   {
                     "RunIndex": -1,
-                    "Act": "ChgToken",
+                    "Act": "ChangeToken",
                     "Path": "",
                     "Token": "NameField",
                     "FromToken": "None"
@@ -6340,7 +6340,7 @@
                 "Acts": [
                   {
                     "RunIndex": -1,
-                    "Act": "ChgToken",
+                    "Act": "ChangeToken",
                     "Path": "Name|QualName",
                     "Token": "NameField",
                     "FromToken": "None"
@@ -6369,7 +6369,7 @@
                 "Acts": [
                   {
                     "RunIndex": -1,
-                    "Act": "ChgToken",
+                    "Act": "ChangeToken",
                     "Path": "Name\u0026NameListEls/Name...",
                     "Token": "NameField",
                     "FromToken": "None"
@@ -6448,7 +6448,7 @@
                 "Acts": [
                   {
                     "RunIndex": -1,
-                    "Act": "ChgToken",
+                    "Act": "ChangeToken",
                     "Path": "Name",
                     "Token": "NameType",
                     "FromToken": "Name"
@@ -6611,7 +6611,7 @@
                 "Acts": [
                   {
                     "RunIndex": 5,
-                    "Act": "ChgToken",
+                    "Act": "ChangeToken",
                     "Path": "Name",
                     "Token": "NameMethod",
                     "FromToken": "None"
@@ -6675,7 +6675,7 @@
                 "Acts": [
                   {
                     "RunIndex": -1,
-                    "Act": "ChgToken",
+                    "Act": "ChangeToken",
                     "Path": "Name",
                     "Token": "NameFunction",
                     "FromToken": "None"
@@ -6747,7 +6747,7 @@
                   },
                   {
                     "RunIndex": -1,
-                    "Act": "ChgToken",
+                    "Act": "ChangeToken",
                     "Path": "Name",
                     "Token": "NameVarClass",
                     "FromToken": "None"
@@ -6867,7 +6867,7 @@
                 "Acts": [
                   {
                     "RunIndex": -1,
-                    "Act": "ChgToken",
+                    "Act": "ChangeToken",
                     "Path": "",
                     "Token": "NameInterface",
                     "FromToken": "None"
@@ -6896,7 +6896,7 @@
                 "Acts": [
                   {
                     "RunIndex": -1,
-                    "Act": "ChgToken",
+                    "Act": "ChangeToken",
                     "Path": "Name",
                     "Token": "NameMethod",
                     "FromToken": "None"
@@ -6925,7 +6925,7 @@
                 "Acts": [
                   {
                     "RunIndex": -1,
-                    "Act": "ChgToken",
+                    "Act": "ChangeToken",
                     "Path": "",
                     "Token": "NameInterface",
                     "FromToken": "None"
@@ -7070,7 +7070,7 @@
                 "Acts": [
                   {
                     "RunIndex": -1,
-                    "Act": "ChgToken",
+                    "Act": "ChangeToken",
                     "Path": "Name|NameListEls/Name...",
                     "Token": "NameVarParam",
                     "FromToken": "None"
@@ -7474,7 +7474,7 @@
                     "Acts": [
                       {
                         "RunIndex": -1,
-                        "Act": "ChgToken",
+                        "Act": "ChangeToken",
                         "Path": "[0]",
                         "Token": "NameVar",
                         "FromToken": "None"
@@ -7503,7 +7503,7 @@
                     "Acts": [
                       {
                         "RunIndex": -1,
-                        "Act": "ChgToken",
+                        "Act": "ChangeToken",
                         "Path": "[0]",
                         "Token": "NameVar",
                         "FromToken": "None"
@@ -7532,7 +7532,7 @@
                     "Acts": [
                       {
                         "RunIndex": -1,
-                        "Act": "ChgToken",
+                        "Act": "ChangeToken",
                         "Path": "NameListEls",
                         "Token": "NameVar",
                         "FromToken": "None"
@@ -7924,7 +7924,7 @@
                 "Acts": [
                   {
                     "RunIndex": -1,
-                    "Act": "ChgToken",
+                    "Act": "ChangeToken",
                     "Path": "",
                     "Token": "NameLabel",
                     "FromToken": "None"
@@ -8190,7 +8190,7 @@
                 "Acts": [
                   {
                     "RunIndex": -1,
-                    "Act": "ChgToken",
+                    "Act": "ChangeToken",
                     "Path": "Name...",
                     "Token": "NameVar",
                     "FromToken": "Name"
@@ -8280,7 +8280,7 @@
                 "Acts": [
                   {
                     "RunIndex": -1,
-                    "Act": "ChgToken",
+                    "Act": "ChangeToken",
                     "Path": "Name...",
                     "Token": "NameVar",
                     "FromToken": "Name"
@@ -8511,7 +8511,7 @@
                   },
                   {
                     "RunIndex": -1,
-                    "Act": "ChgToken",
+                    "Act": "ChangeToken",
                     "Path": "",
                     "Token": "NameLibrary",
                     "FromToken": "None"
@@ -8540,7 +8540,7 @@
                   },
                   {
                     "RunIndex": -1,
-                    "Act": "ChgToken",
+                    "Act": "ChangeToken",
                     "Path": "",
                     "Token": "NameLibrary",
                     "FromToken": "None"
@@ -8684,7 +8684,7 @@
                     "Acts": [
                       {
                         "RunIndex": -1,
-                        "Act": "ChgToken",
+                        "Act": "ChangeToken",
                         "Path": "[0]",
                         "Token": "NameConstant",
                         "FromToken": "None"
@@ -8720,7 +8720,7 @@
                     "Acts": [
                       {
                         "RunIndex": -1,
-                        "Act": "ChgToken",
+                        "Act": "ChangeToken",
                         "Path": "[0]",
                         "Token": "NameConstant",
                         "FromToken": "None"
@@ -8821,7 +8821,7 @@
                     "Acts": [
                       {
                         "RunIndex": -1,
-                        "Act": "ChgToken",
+                        "Act": "ChangeToken",
                         "Path": "[0]",
                         "Token": "NameVarGlobal",
                         "FromToken": "None"
@@ -8857,7 +8857,7 @@
                     "Acts": [
                       {
                         "RunIndex": -1,
-                        "Act": "ChgToken",
+                        "Act": "ChangeToken",
                         "Path": "[0]",
                         "Token": "NameVarGlobal",
                         "FromToken": "None"

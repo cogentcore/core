@@ -168,7 +168,7 @@ func (ml *MarkdownLang) IndentLine(fs *pi.FileStates, src [][]rune, tags []lex.L
 	}
 	fpt := ptg[0]
 	fct := ctg[0]
-	if fpt.Token.Tok != token.Keyword || fct.Token.Tok != token.Keyword {
+	if fpt.Token.Token != token.Keyword || fct.Token.Token != token.Keyword {
 		return
 	}
 	pk := strings.TrimSpace(string(fpt.Src(src[pLn])))

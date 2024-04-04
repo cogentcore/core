@@ -98,7 +98,7 @@ func (ll *Line) DeleteToken(tok token.Tokens) {
 	nt := len(*ll)
 	for i := nt - 1; i >= 0; i-- { // remove
 		t := (*ll)[i]
-		if t.Token.Tok == tok {
+		if t.Token.Token == tok {
 			ll.DeleteIndex(i)
 		}
 	}
@@ -174,7 +174,7 @@ func (ll *Line) Strings(src []rune) []string {
 func (ll *Line) NonCodeWords(src []rune) Line {
 	wsrc := slices.Clone(src)
 	for _, t := range *ll { // blank out code parts first
-		if t.Token.Tok.IsCode() {
+		if t.Token.Token.IsCode() {
 			for i := t.St; i < t.Ed; i++ {
 				wsrc[i] = ' '
 			}

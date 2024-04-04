@@ -2086,7 +2086,7 @@ func (tb *Buffer) AddTag(ln, st, ed int, tag token.Tokens) {
 		return
 	}
 	tb.MarkupMu.Lock()
-	tr := lex.NewLex(token.KeyToken{Tok: tag}, st, ed)
+	tr := lex.NewLex(token.KeyToken{Token: tag}, st, ed)
 	tr.Time.Now()
 	if len(tb.Tags[ln]) == 0 {
 		tb.Tags[ln] = append(tb.Tags[ln], tr)
@@ -2129,7 +2129,7 @@ func (tb *Buffer) RemoveTag(pos lex.Pos, tag token.Tokens) (reg lex.Lex, ok bool
 	tb.Tags[pos.Ln] = tb.AdjustedTags(pos.Ln) // re-adjust for current info
 	for i, t := range tb.Tags[pos.Ln] {
 		if t.ContainsPos(pos.Ch) {
-			if tag > 0 && t.Token.Tok != tag {
+			if tag > 0 && t.Token.Token != tag {
 				continue
 			}
 			tb.Tags[pos.Ln].DeleteIndex(i)
@@ -2186,7 +2186,7 @@ func (tb *Buffer) LexObjPathString(ln int, lx *lex.Lex) string {
 // type in given SubCat sub-category
 func (tb *Buffer) InTokenSubCat(pos lex.Pos, subCat token.Tokens) bool {
 	lx, _ := tb.HiTagAtPos(pos)
-	return lx != nil && lx.Token.Tok.InSubCat(subCat)
+	return lx != nil && lx.Token.Token.InSubCat(subCat)
 }
 
 // InLitString returns true if position is in a string literal
@@ -2201,7 +2201,7 @@ func (tb *Buffer) InTokenCode(pos lex.Pos) bool {
 	if lx == nil {
 		return false
 	}
-	return lx.Token.Tok.IsCode()
+	return lx.Token.Token.IsCode()
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2386,7 +2386,7 @@ func (tb *Buffer) LineCommented(ln int) bool {
 	if len(tags) == 0 {
 		return false
 	}
-	return tags[0].Token.Tok.InCat(token.Comment)
+	return tags[0].Token.Token.InCat(token.Comment)
 }
 
 // CommentRegion inserts comment marker on given lines -- end is *exclusive*

@@ -363,7 +363,7 @@ func (fl *File) PrevDepth(ln int) int {
 	}
 	lx := fl.LexAt(pos)
 	depth := lx.Token.Depth
-	if lx.Token.Tok.IsPunctGpLeft() {
+	if lx.Token.Token.IsPunctGpLeft() {
 		depth++
 	}
 	return depth
@@ -387,7 +387,7 @@ func (fl *File) TokenMapReg(reg Reg) TokenMap {
 	m := make(TokenMap)
 	cp, ok := fl.ValidTokenPos(reg.St)
 	for ok && cp.IsLess(reg.Ed) {
-		tok := fl.Token(cp).Tok
+		tok := fl.Token(cp).Token
 		m.Set(tok)
 		subc := tok.SubCat()
 		if subc != tok {
@@ -490,7 +490,7 @@ func (fl *File) InsertEos(cp Pos) Pos {
 	np := Pos{cp.Ln, cp.Ch + 1}
 	elx := fl.LexAt(cp)
 	depth := elx.Token.Depth
-	fl.Lexs[cp.Ln].Insert(np.Ch, Lex{Token: token.KeyToken{Tok: token.EOS, Depth: depth}, St: elx.Ed, Ed: elx.Ed})
+	fl.Lexs[cp.Ln].Insert(np.Ch, Lex{Token: token.KeyToken{Token: token.EOS, Depth: depth}, St: elx.Ed, Ed: elx.Ed})
 	fl.EosPos[np.Ln] = append(fl.EosPos[np.Ln], np.Ch)
 	return np
 }
@@ -498,7 +498,7 @@ func (fl *File) InsertEos(cp Pos) Pos {
 // ReplaceEos replaces given token with an EOS
 func (fl *File) ReplaceEos(cp Pos) {
 	clex := fl.LexAt(cp)
-	clex.Token.Tok = token.EOS
+	clex.Token.Token = token.EOS
 	fl.EosPos[cp.Ln] = append(fl.EosPos[cp.Ln], cp.Ch)
 }
 
@@ -516,7 +516,7 @@ func (fl *File) EnsureFinalEos(ln int) {
 	}
 	ep := Pos{ln, sz - 1}
 	elx := fl.LexAt(ep)
-	if elx.Token.Tok == token.EOS {
+	if elx.Token.Token == token.EOS {
 		return
 	}
 	fl.InsertEos(ep)

@@ -276,13 +276,13 @@ func (lr *Rule) Lex(ls *State) *Rule {
 		return nil
 	}
 	st := ls.Pos // starting pos that we're consuming
-	tok := token.KeyToken{Tok: lr.Token}
+	tok := token.KeyToken{Token: lr.Token}
 	for _, act := range lr.Acts {
 		lr.DoAct(ls, act, &tok)
 	}
 	ed := ls.Pos // our ending state
 	if ed > st {
-		if tok.Tok.IsKeyword() {
+		if tok.Token.IsKeyword() {
 			tok.Key = lr.String //  if we matched, this is it
 		}
 		ls.Add(tok, st, ed)
@@ -453,7 +453,7 @@ func (lr *Rule) DoAct(ls *State, act Actions, tok *token.KeyToken) {
 	case Name:
 		ls.ReadName()
 	case Number:
-		tok.Tok = ls.ReadNumber()
+		tok.Token = ls.ReadNumber()
 	case Quoted:
 		ls.ReadQuoted()
 	case QuotedRaw:

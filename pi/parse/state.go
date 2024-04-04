@@ -180,7 +180,7 @@ func (ps *State) MatchLex(lx *lex.Lex, tkey token.KeyToken, isCat, isSubCat bool
 	if lx.Token.Depth != tkey.Depth {
 		return false
 	}
-	if !(lx.Token.Tok == tkey.Tok || (isCat && lx.Token.Tok.Cat() == tkey.Tok) || (isSubCat && lx.Token.Tok.SubCat() == tkey.Tok)) {
+	if !(lx.Token.Token == tkey.Token || (isCat && lx.Token.Token.Cat() == tkey.Token) || (isSubCat && lx.Token.Token.SubCat() == tkey.Token)) {
 		return false
 	}
 	if tkey.Key == "" {
@@ -199,7 +199,7 @@ func (ps *State) FindToken(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bool) {
 	if !ok {
 		return cp, false
 	}
-	tok := tkey.Tok
+	tok := tkey.Token
 	isCat := tok.Cat() == tok
 	isSubCat := tok.SubCat() == tok
 	for cp.IsLess(reg.Ed) {
@@ -218,7 +218,7 @@ func (ps *State) FindToken(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bool) {
 // MatchToken returns true if token matches at given position -- must be
 // a valid position!
 func (ps *State) MatchToken(tkey token.KeyToken, pos lex.Pos) bool {
-	tok := tkey.Tok
+	tok := tkey.Token
 	isCat := tok.Cat() == tok
 	isSubCat := tok.SubCat() == tok
 	lx := ps.Src.LexAt(pos)
@@ -239,7 +239,7 @@ func (ps *State) FindTokenReverse(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bo
 	if !ok {
 		return cp, false
 	}
-	tok := tkey.Tok
+	tok := tkey.Token
 	isCat := tok.Cat() == tok
 	isSubCat := tok.SubCat() == tok
 	isAmbigUnary := tok.IsAmbigUnaryOp()
@@ -251,11 +251,11 @@ func (ps *State) FindTokenReverse(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bo
 				if ok {
 					pt := ps.Src.Token(pp)
 					if tok == token.OpMathMul {
-						if !pt.Tok.IsUnaryOp() {
+						if !pt.Token.IsUnaryOp() {
 							return cp, true
 						}
 					} else {
-						if !pt.Tok.IsAmbigUnaryOp() {
+						if !pt.Token.IsAmbigUnaryOp() {
 							return cp, true
 						}
 					}

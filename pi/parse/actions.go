@@ -16,8 +16,8 @@ type Actions int32 //enums:enum
 
 // The parsing acts
 const (
-	// ChgToken changes the token to the Tok specified in the Act action
-	ChgToken Actions = iota
+	// ChangeToken changes the token to the Tok specified in the Act action
+	ChangeToken Actions = iota
 
 	// AddSymbol means add name as a symbol, using current scoping and token type
 	// or the token specified in the Act action if != None
@@ -71,10 +71,10 @@ type Act struct {
 	// Ast path, relative to current node: empty = current node; specifies a child node by index, and a name specifies it by name -- include name/name for sub-nodes etc -- multiple path options can be specified by | or & and will be tried in order until one succeeds (for |) or all that succeed will be used for &. ... means use all nodes with given name (only for change token) -- for PushStack, this is what to push on the stack
 	Path string `width:"50"`
 
-	// for ChgToken, the new token type to assign to token at given path
+	// for ChangeToken, the new token type to assign to token at given path
 	Token token.Tokens
 
-	// for ChgToken, only change if token is this to start with (only if != None))
+	// for ChangeToken, only change if token is this to start with (only if != None))
 	FromToken token.Tokens
 }
 
@@ -87,16 +87,16 @@ func (ac Act) String() string {
 	}
 }
 
-// ChgTok changes the token type, using FromToken logic
-func (ac *Act) ChgTok(lx *lex.Lex) {
+// ChangeToken changes the token type, using FromToken logic
+func (ac *Act) ChangeToken(lx *lex.Lex) {
 	if ac.FromToken == token.None {
-		lx.Token.Tok = ac.Token
+		lx.Token.Token = ac.Token
 		return
 	}
-	if lx.Token.Tok != ac.FromToken {
+	if lx.Token.Token != ac.FromToken {
 		return
 	}
-	lx.Token.Tok = ac.Token
+	lx.Token.Token = ac.Token
 }
 
 // Acts are multiple actions

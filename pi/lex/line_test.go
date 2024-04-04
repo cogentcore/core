@@ -14,11 +14,11 @@ import (
 
 func TestLineMerge(t *testing.T) {
 	l1 := Line{
-		Lex{token.KeyToken{Tok: token.TextSpellErr}, 0, 10, nptime.TimeZero},
-		Lex{token.KeyToken{Tok: token.TextSpellErr}, 15, 20, nptime.TimeZero},
+		Lex{token.KeyToken{Token: token.TextSpellErr}, 0, 10, nptime.TimeZero},
+		Lex{token.KeyToken{Token: token.TextSpellErr}, 15, 20, nptime.TimeZero},
 	}
 	l2 := Line{
-		Lex{token.KeyToken{Tok: token.Text}, 0, 40, nptime.TimeZero},
+		Lex{token.KeyToken{Token: token.Text}, 0, 40, nptime.TimeZero},
 	}
 
 	ml := MergeLines(l1, l2)
