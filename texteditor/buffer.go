@@ -91,9 +91,13 @@ type Buffer struct {
 	Lines [][]rune `json:"-" xml:"-"`
 
 	// the live lines of text being edited, with latest modifications -- encoded in bytes per line translated from Lines, and used for input to markup -- essential to use Lines and not LineBytes when dealing with TextPos positions, which are in runes
-	LineBytes [][]byte   `json:"-" xml:"-"`
-	Tags      []lex.Line `json:"extra custom tagged regions for each line"`
-	HiTags    []lex.Line `json:"syntax highlighting tags -- auto-generated"`
+	LineBytes [][]byte `json:"-" xml:"-"`
+
+	// extra custom tagged regions for each line
+	Tags []lex.Line `json:"-" xml:"-"`
+
+	// syntax highlighting tags -- auto-generated
+	HiTags []lex.Line `json:"-" xml:"-"`
 
 	// marked-up version of the edit text lines, after being run through the syntax highlighting process etc -- this is what is actually rendered
 	Markup [][]byte `json:"-" xml:"-"`
