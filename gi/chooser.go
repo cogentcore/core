@@ -522,9 +522,9 @@ func (ch *Chooser) MakeItemsMenu(m *Scene) {
 			OnClick(func(e events.Event) {
 				d := NewBody().AddTitle("New item").AddText("Add a new item to the chooser")
 				tf := NewTextField(d)
-				d.AddBottomBar(func(pw Widget) {
-					d.AddCancel(pw)
-					d.AddOk(pw).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
+				d.AddBottomBar(func(parent Widget) {
+					d.AddCancel(parent)
+					d.AddOK(parent).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
 						ch.Items = append(ch.Items, ChooserItem{Value: tf.Text()})
 						ch.SelectItemAction(len(ch.Items) - 1)
 					})

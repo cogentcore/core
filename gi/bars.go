@@ -15,18 +15,18 @@ import (
 // attached to different sides of a Scene (e.g., TopAppBar at Top,
 // NavBar at Bottom, etc).  Functions are called in forward order
 // so first added are called first.
-type BarFuncs []func(pw Widget)
+type BarFuncs []func(parent Widget)
 
 // Add adds the given function for configuring a control bar
-func (bf *BarFuncs) Add(fun func(pw Widget)) *BarFuncs {
+func (bf *BarFuncs) Add(fun func(parent Widget)) *BarFuncs {
 	*bf = append(*bf, fun)
 	return bf
 }
 
 // Call calls all the functions for configuring given widget
-func (bf *BarFuncs) Call(pw Widget) {
+func (bf *BarFuncs) Call(parent Widget) {
 	for _, fun := range *bf {
-		fun(pw)
+		fun(parent)
 	}
 }
 
@@ -122,12 +122,12 @@ func (sc *Scene) GetTopAppBar() *Toolbar {
 }
 
 // RecycleToolbar constructs or returns a Toolbar in given parent Widget
-func RecycleToolbar(pw Widget) *Toolbar {
-	tb := pw.ChildByType(ToolbarType, ki.NoEmbeds)
+func RecycleToolbar(parent Widget) *Toolbar {
+	tb := parent.ChildByType(ToolbarType, ki.NoEmbeds)
 	if tb != nil {
 		return tb.(*Toolbar)
 	}
-	return NewToolbar(pw)
+	return NewToolbar(parent)
 }
 
 // InheritBarsWidget inherits Bar functions based on a source widget
@@ -172,25 +172,25 @@ func (sc *Scene) InheritBars(osc *Scene) {
 
 // AddTopBar adds the given function for configuring a control bar
 // at the top of the window
-func (bd *Body) AddTopBar(fun func(pw Widget)) {
+func (bd *Body) AddTopBar(fun func(parent Widget)) {
 	bd.Scene.Bars.Top.Add(fun)
 }
 
 // AddLeftBar adds the given function for configuring a control bar
 // on the left of the window
-func (bd *Body) AddLeftBar(fun func(pw Widget)) {
+func (bd *Body) AddLeftBar(fun func(parent Widget)) {
 	bd.Scene.Bars.Left.Add(fun)
 }
 
 // AddRightBar adds the given function for configuring a control bar
 // on the right of the window
-func (bd *Body) AddRightBar(fun func(pw Widget)) {
+func (bd *Body) AddRightBar(fun func(parent Widget)) {
 	bd.Scene.Bars.Right.Add(fun)
 }
 
 // AddBottomBar adds the given function for configuring a control bar
 // at the bottom of the window
-func (bd *Body) AddBottomBar(fun func(pw Widget)) {
+func (bd *Body) AddBottomBar(fun func(parent Widget)) {
 	bd.Scene.Bars.Bottom.Add(fun)
 }
 

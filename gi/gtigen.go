@@ -31,7 +31,7 @@ func (t *App) SetIcon(v ...image.Image) *App { t.Icon = v; return t }
 // It is set to StdAppBarConfig by default, which makes the
 // standard AppBar behavior. If this is nil, then no AppBar
 // will be created by default.
-func (t *App) SetAppBarConfig(v func(pw Widget)) *App { t.AppBarConfig = v; return t }
+func (t *App) SetAppBarConfig(v func(parent Widget)) *App { t.AppBarConfig = v; return t }
 
 // SetSceneConfig sets the [App.SceneConfig]:
 // SceneConfig is the function called on every newly created [gi.Scene]

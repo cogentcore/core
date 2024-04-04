@@ -866,7 +866,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 				ki.ChildByType[*gi.Chooser](w, ki.Embeds).SetTypes(gti.AllEmbeddersOf(ownki.BaseType())...).SetCurrentIndex(0)
 				d.AddBottomBar(func(pw gi.Widget) {
 					d.AddCancel(pw)
-					d.AddOk(pw).OnClick(func(e events.Event) {
+					d.AddOK(pw).OnClick(func(e events.Event) {
 						for i := 0; i < nd.Number; i++ {
 							nm := fmt.Sprintf("New%v%v", nd.Type.Name, idx+1+i)
 							ownki.InsertNewChild(nd.Type, idx+1+i, nm)

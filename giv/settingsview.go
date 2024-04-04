@@ -26,7 +26,7 @@ func SettingsViewToolbarBase(tb *gi.Toolbar) {
 			d := gi.NewBody().AddTitle("App version")
 			gi.NewLabel(d).SetText("App version: " + goosi.AppVersion)
 			gi.NewLabel(d).SetText("Core version: " + goosi.CoreVersion)
-			d.AddOkOnly().NewDialog(tb).Run()
+			d.AddOKOnly().NewDialog(tb).Run()
 		})
 
 		NewFuncButton(m, gi.AppearanceSettings.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)

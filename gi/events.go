@@ -143,12 +143,12 @@ func (wb *WidgetBase) AddCloseDialog(config func(d *Body) bool) *WidgetBase {
 		}
 		inClose = true
 		d := NewBody()
-		d.AddBottomBar(func(pw Widget) {
-			d.AddCancel(pw).OnClick(func(e events.Event) {
+		d.AddBottomBar(func(parent Widget) {
+			d.AddCancel(parent).OnClick(func(e events.Event) {
 				inClose = false
 				canClose = false
 			})
-			pw.OnWidgetAdded(func(w Widget) {
+			parent.OnWidgetAdded(func(w Widget) {
 				if bt := AsButton(w); bt != nil {
 					bt.OnFirst(events.Click, func(e events.Event) {
 						// any button click gives us permission to close

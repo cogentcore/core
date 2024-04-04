@@ -307,7 +307,7 @@ func (v *TimeValue) Config() {
 		dv := NewDateView(d).SetTime(*v.TimeValue())
 		d.AddBottomBar(func(pw gi.Widget) {
 			d.AddCancel(pw)
-			d.AddOk(pw).OnClick(func(e events.Event) {
+			d.AddOK(pw).OnClick(func(e events.Event) {
 				v.SetValue(dv.Time)
 				v.Update()
 			})
@@ -336,7 +336,7 @@ func (v *TimeValue) Config() {
 		tv := NewTimeView(d).SetTime(*v.TimeValue())
 		d.AddBottomBar(func(pw gi.Widget) {
 			d.AddCancel(pw)
-			d.AddOk(pw).OnClick(func(e events.Event) {
+			d.AddOK(pw).OnClick(func(e events.Event) {
 				v.SetValue(tv.Time)
 				v.Update()
 			})

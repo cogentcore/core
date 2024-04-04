@@ -1174,8 +1174,8 @@ func (em *EventMgr) GetShortcuts() {
 
 // GetShortcutsIn gathers all [Button]s in the given parent widget with
 // a shortcut specified. It recursively navigates [Button.Menu]s.
-func (em *EventMgr) GetShortcutsIn(pw Widget) {
-	pw.AsWidget().WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
+func (em *EventMgr) GetShortcutsIn(parent Widget) {
+	parent.AsWidget().WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		bt := AsButton(wi.This())
 		if bt == nil {
 			return ki.Continue

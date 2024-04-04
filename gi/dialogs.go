@@ -71,7 +71,7 @@ func MessageDialog(ctx Widget, msg string, title ...string) {
 	if len(title) > 0 {
 		b.AddTitle(title[0])
 	}
-	b.AddText(msg).AddOkOnly()
+	b.AddText(msg).AddOKOnly()
 	b.NewDialog(ctx).Run()
 }
 
@@ -89,21 +89,21 @@ func ErrorDialog(ctx Widget, err error, title ...string) {
 		ttl = title[0]
 	}
 	NewBody(ctx.Name() + "-error-dialog").AddTitle(ttl).AddText(err.Error()).
-		AddOkOnly().NewDialog(ctx).Run()
+		AddOKOnly().NewDialog(ctx).Run()
 }
 
-// AddOk adds an OK button to given parent Widget (typically in Bottom
+// AddOK adds an OK button to given parent Widget (typically in Bottom
 // Bar function), connecting to Close method the Ctrl+Enter keychord event.
 // Close sends a Change event to the Scene for listeners there.
 // Should add an OnClick listener to this button to perform additional
 // specific actions needed beyond Close.
 // Name should be passed when there are multiple effective OK buttons.
-func (bd *Body) AddOk(pw Widget, name ...string) *Button {
+func (bd *Body) AddOK(parent Widget, name ...string) *Button {
 	nm := "ok"
 	if len(name) > 0 {
 		nm = name[0]
 	}
-	bt := NewButton(pw, nm).SetText("OK")
+	bt := NewButton(parent, nm).SetText("OK")
 	bt.OnFirst(events.Click, func(e events.Event) { // first de-focus any active editors
 		bt.FocusClear()
 	})
@@ -121,10 +121,10 @@ func (bd *Body) AddOk(pw Widget, name ...string) *Button {
 	return bt
 }
 
-// AddOkOnly just adds an OK button in the BottomBar
+// AddOKOnly just adds an OK button in the BottomBar
 // for simple popup dialogs that just need that one button
-func (bd *Body) AddOkOnly() *Body {
-	bd.Scene.Bars.Bottom.Add(func(pw Widget) { bd.AddOk(pw) })
+func (bd *Body) AddOKOnly() *Body {
+	bd.Scene.Bars.Bottom.Add(func(parent Widget) { bd.AddOK(parent) })
 	return bd
 }
 
@@ -135,12 +135,12 @@ func (bd *Body) AddOkOnly() *Body {
 // Should add an OnClick listener to this button to perform additional
 // specific actions needed beyond Close.
 // Name should be passed when there are multiple effective Cancel buttons (rare).
-func (bd *Body) AddCancel(pw Widget, name ...string) *Button {
+func (bd *Body) AddCancel(parent Widget, name ...string) *Button {
 	nm := "cancel"
 	if len(name) > 0 {
 		nm = name[0]
 	}
-	bt := NewButton(pw, nm).SetType(ButtonOutlined).SetText("Cancel")
+	bt := NewButton(parent, nm).SetType(ButtonOutlined).SetText("Cancel")
 	bt.OnClick(func(e events.Event) {
 		e.SetHandled() // otherwise propagates to dead elements
 		bd.Close()

@@ -42,7 +42,7 @@ func FileViewDialog(ctx gi.Widget, filename, exts, title string, fun func(selfil
 	d.AddAppBar(fv.ConfigToolbar)
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
-		d.AddOk(pw).OnClick(func(e events.Event) {
+		d.AddOK(pw).OnClick(func(e events.Event) {
 			fun(fv.SelectedFile())
 		})
 	})
@@ -364,7 +364,7 @@ func (fv *FileView) ConfigFilesRow() {
 				fn := fv.Files[fsv.SelectedIndex]
 				d := gi.NewBody().AddTitle("Info: " + fn.Name)
 				NewStructView(d).SetStruct(&fn).SetReadOnly(true)
-				d.AddOkOnly().NewFullDialog(fsv).Run()
+				d.AddOKOnly().NewFullDialog(fsv).Run()
 			})
 		gi.NewSeparator(m)
 		NewFuncButton(m, fv.NewFolder).SetIcon(icons.CreateNewFolder)
@@ -865,7 +865,7 @@ func (fv *FileView) EditRecentPaths() {
 	NewSliceView(d).SetSlice(&gi.RecentPaths)
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
-		d.AddOk(pw).OnClick(func(e events.Event) {
+		d.AddOK(pw).OnClick(func(e events.Event) {
 			gi.SaveRecentPaths()
 			fv.UpdateFiles()
 		})

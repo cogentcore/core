@@ -314,7 +314,7 @@ func (ed *Editor) QReplacePrompt() {
 
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
-		d.AddOk(pw).SetText("Query-Replace").OnClick(func(e events.Event) {
+		d.AddOK(pw).SetText("Query-Replace").OnClick(func(e events.Event) {
 			var find, repl string
 			if s, ok := fc.CurrentItem.Value.(string); ok {
 				find = s

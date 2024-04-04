@@ -113,7 +113,7 @@ func TextDialog(ctx gi.Widget, title, text string) *Editor {
 			OnClick(func(e events.Event) {
 				d.Clipboard().Write(mimedata.NewText(text))
 			})
-		d.AddOk(pw)
+		d.AddOK(pw)
 	})
 	d.NewFullDialog(ctx).SetNewWindow(true).Run()
 	return ed
@@ -236,7 +236,7 @@ func (dv *DiffView) SaveAs(ab bool, filename gi.Filename) {
 			AddText(fmt.Sprintf("File already exists, overwrite?  File: %v", filename))
 		d.AddBottomBar(func(pw gi.Widget) {
 			d.AddCancel(pw)
-			d.AddOk(pw).OnClick(func(e events.Event) {
+			d.AddOK(pw).OnClick(func(e events.Event) {
 				dv.SaveFile(ab, filename)
 			})
 		})

@@ -137,7 +137,7 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 				OnClick(func(e events.Event) {
 					d.Clipboard().Write(mimedata.NewTextBytes(cinfo))
 				})
-			d.AddOk(pw)
+			d.AddOK(pw)
 		})
 		d.NewFullDialog(lv).Run()
 	})

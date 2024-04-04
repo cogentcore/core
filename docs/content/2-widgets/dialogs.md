@@ -30,7 +30,7 @@ bt.OnClick(func(e events.Event) {
         d.AddCancel(pw).OnClick(func(e events.Event) {
             gi.MessageSnackbar(bt, "Dialog canceled")
         })
-        d.AddOk(pw).OnClick(func(e events.Event) {
+        d.AddOK(pw).OnClick(func(e events.Event) {
             gi.MessageSnackbar(bt, "Dialog accepted")
         })
     })
@@ -47,7 +47,7 @@ bt.OnClick(func(e events.Event) {
     tf := gi.NewTextField(d)
     d.AddBottomBar(func(pw gi.Widget) {
         d.AddCancel(pw)
-        d.AddOk(pw).OnClick(func(e events.Event) {
+        d.AddOK(pw).OnClick(func(e events.Event) {
             gi.MessageSnackbar(bt, "Your name is "+tf.Text())
         })
     })
@@ -81,7 +81,7 @@ You can confirm that the user wants to close a scene when they try to close it:
 b.AddCloseDialog(func(d *gi.Body) bool {
     d.AddTitle("Are you sure?").AddText("Are you sure you want to close the Cogent Core Demo?")
     d.AddBottomBar(func(pw gi.Widget) {
-        d.AddOk(pw).SetText("Close").OnClick(func(e events.Event) {
+        d.AddOK(pw).SetText("Close").OnClick(func(e events.Event) {
             b.Scene.Close()
         })
     })

@@ -249,7 +249,7 @@ func (tv *TreeView) InsertAt(rel int, actNm string) {
 	ki.ChildByType[*gi.Chooser](sg, ki.Embeds).SetTypes(gti.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
-		d.AddOk(pw).OnClick(func(e events.Event) {
+		d.AddOK(pw).OnClick(func(e events.Event) {
 			parent := AsTreeView(tv.Par)
 			if tv.SyncNode != nil {
 				parent.AddSyncNodes(rel, myidx, nd.Type, nd.Number)
@@ -276,7 +276,7 @@ func (tv *TreeView) AddChildNode() { //gti:add
 	ki.ChildByType[*gi.Chooser](sg, ki.Embeds).SetTypes(gti.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
-		d.AddOk(pw).OnClick(func(e events.Event) {
+		d.AddOK(pw).OnClick(func(e events.Event) {
 			if tv.SyncNode != nil {
 				tv.AddSyncNodes(0, 0, nd.Type, nd.Number)
 			} else {

@@ -296,7 +296,7 @@ func (fb *FuncButton) ConfirmDialog() {
 	d := gi.NewBody().AddTitle(fb.Text + "?").AddText("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip)
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
-		d.AddOk(pw).SetText(fb.Text).OnClick(func(e events.Event) {
+		d.AddOK(pw).SetText(fb.Text).OnClick(func(e events.Event) {
 			fb.CallFuncShowReturns()
 		})
 	})
@@ -327,7 +327,7 @@ func (fb *FuncButton) CallFunc() {
 	NewArgView(d).SetArgs(fb.Args...)
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
-		d.AddOk(pw).SetText(fb.Text).OnClick(func(e events.Event) {
+		d.AddOK(pw).SetText(fb.Text).OnClick(func(e events.Event) {
 			d.Scene.Send(events.Close, e) // note: the other Close event happens too late!
 			fb.CallFuncShowReturns()
 		})
@@ -389,7 +389,7 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 	}) {
 		return
 	}
-	d := gi.NewBody().AddTitle(main).AddText(fb.Tooltip).AddOkOnly()
+	d := gi.NewBody().AddTitle(main).AddText(fb.Tooltip).AddOKOnly()
 	NewArgView(d).SetArgs(fb.Returns...).SetReadOnly(true)
 	if fb.NewWindow {
 		d.NewDialog(ctx).SetNewWindow(true).Run()

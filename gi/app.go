@@ -42,7 +42,7 @@ type App struct { //gti:add -setters
 	// It is set to StdAppBarConfig by default, which makes the
 	// standard AppBar behavior. If this is nil, then no AppBar
 	// will be created by default.
-	AppBarConfig func(pw Widget)
+	AppBarConfig func(parent Widget)
 
 	// SceneConfig is the function called on every newly created [gi.Scene]
 	// to configure it, if it is non-nil. This can be used to set global
@@ -98,12 +98,11 @@ func Quit() {
 // Scene being viewed, along with [StandardOverflowMenu] items.
 // and calls AddDefaultOverflowMenu to provide default menu items,
 // which will appear below any other OverflowMenu items added.
-func StandardAppBarConfig(pw Widget) {
-	tb := RecycleToolbar(pw)
-	StandardAppBarStart(tb) // adds back nav and AppChooser
+func StandardAppBarConfig(parent Widget) {
+	tb := RecycleToolbar(parent)
+	StandardAppBarStart(tb)
 	StandardOverflowMenu(tb)
 	CurrentWindowAppBar(tb)
-	// apps should add their own app-general functions here
 }
 
 // StandardAppBarStart adds standard items to start of an AppBar:
@@ -116,6 +115,7 @@ func StandardAppBarStart(tb *Toolbar) {
 // StandardAppBarBack adds a back button
 func StandardAppBarBack(tb *Toolbar) *Button {
 	bt := NewButton(tb, "back").SetIcon(icons.ArrowBack).SetTooltip("Back").SetKey(keyfun.HistPrev)
+	// TODO(kai/abc): app bar back button disabling
 	// bt.StyleFirst(func(s *styles.Style) {
 	// 	if tb.Scene.Stage.MainMgr == nil {
 	// 		return

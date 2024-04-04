@@ -616,7 +616,7 @@ func (tb *Buffer) SaveAsFunc(filename gi.Filename, afterFunc func(canceled bool)
 					afterFunc(true)
 				}
 			})
-			d.AddOk(pw).OnClick(func(e events.Event) {
+			d.AddOK(pw).OnClick(func(e events.Event) {
 				tb.SaveFile(filename)
 				if afterFunc != nil {
 					afterFunc(false)
@@ -715,7 +715,7 @@ func (tb *Buffer) Close(afterFun func(canceled bool)) bool {
 						afterFun(true)
 					}
 				})
-				d.AddOk(pw).SetText("Close without saving").OnClick(func(e events.Event) {
+				d.AddOK(pw).SetText("Close without saving").OnClick(func(e events.Event) {
 					tb.ClearNotSaved()
 					tb.AutoSaveDelete()
 					tb.Close(afterFun)

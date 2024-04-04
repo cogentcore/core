@@ -176,7 +176,7 @@ func (fn *Node) DeleteFiles() { //gti:add
 		AddText("Ok to delete file(s)?  This is not undoable and files are not moving to trash / recycle bin. If any selections are directories all files and subdirectories will also be deleted.")
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
-		d.AddOk(pw).SetText("Delete Files").OnClick(func(e events.Event) {
+		d.AddOK(pw).SetText("Delete Files").OnClick(func(e events.Event) {
 			fn.This().(Filer).DeleteFilesImpl()
 		})
 	})
@@ -407,6 +407,6 @@ func (fn *Node) ShowFileInfo() { //gti:add
 		fn := AsNode(sels[i].This())
 		d := gi.NewBody().AddTitle("File info")
 		giv.NewStructView(d).SetStruct(&fn.Info).SetReadOnly(true)
-		d.AddOkOnly().NewFullDialog(fn).Run()
+		d.AddOKOnly().NewFullDialog(fn).Run()
 	}
 }

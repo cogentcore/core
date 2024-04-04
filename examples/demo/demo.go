@@ -595,7 +595,7 @@ func dialogs(ts *gi.Tabs) {
 			d.AddCancel(pw).OnClick(func(e events.Event) {
 				gi.MessageSnackbar(cd, "Dialog canceled")
 			})
-			d.AddOk(pw).OnClick(func(e events.Event) {
+			d.AddOK(pw).OnClick(func(e events.Event) {
 				gi.MessageSnackbar(cd, "Dialog accepted")
 			})
 		})
@@ -608,7 +608,7 @@ func dialogs(ts *gi.Tabs) {
 		tf := gi.NewTextField(d)
 		d.AddBottomBar(func(pw gi.Widget) {
 			d.AddCancel(pw)
-			d.AddOk(pw).OnClick(func(e events.Event) {
+			d.AddOK(pw).OnClick(func(e events.Event) {
 				gi.MessageSnackbar(td, "Your name is "+tf.Text())
 			})
 		})

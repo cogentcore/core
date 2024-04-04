@@ -42,8 +42,8 @@ func HandleRecover(r any) {
 
 	b := NewBody("app-stopped-unexpectedly").AddTitle(goosi.TheApp.Name() + " stopped unexpectedly").
 		AddText("There was an unexpected error and " + goosi.TheApp.Name() + " stopped running.")
-	b.AddBottomBar(func(pw Widget) {
-		NewButton(pw).SetText("Details").SetType(ButtonOutlined).OnClick(func(e events.Event) {
+	b.AddBottomBar(func(parent Widget) {
+		NewButton(parent).SetText("Details").SetType(ButtonOutlined).OnClick(func(e events.Event) {
 			clpath := filepath.Join(TheApp.AppDataDir(), "crash-logs")
 			txt := fmt.Sprintf("Crash log saved in %s\n\n%s", clpath, goosi.CrashLogText(r, stack))
 			d := NewBody("crash-details").AddTitle("Crash details")
@@ -51,16 +51,16 @@ func HandleRecover(r any) {
 				s.Font.Family = string(AppearanceSettings.MonoFont)
 				s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 			})
-			d.AddBottomBar(func(pw Widget) {
-				NewButton(pw).SetText("Copy").SetIcon(icons.Copy).SetType(ButtonOutlined).
+			d.AddBottomBar(func(parent Widget) {
+				NewButton(parent).SetText("Copy").SetIcon(icons.Copy).SetType(ButtonOutlined).
 					OnClick(func(e events.Event) {
 						d.Clipboard().Write(mimedata.NewText(txt))
 					})
-				d.AddOk(pw)
+				d.AddOK(parent)
 			})
 			d.NewFullDialog(b).Run()
 		})
-		NewButton(pw).SetText("Quit").OnClick(func(e events.Event) {
+		NewButton(parent).SetText("Quit").OnClick(func(e events.Event) {
 			quit <- struct{}{}
 		})
 	})

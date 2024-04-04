@@ -73,8 +73,8 @@ func ExampleWidgetBase_AddCloseDialog() {
 	b := NewBody()
 	b.AddCloseDialog(func(d *Body) bool {
 		d.AddTitle("Are you sure?").AddText("Are you sure you want to close the Cogent Core Demo?")
-		d.AddBottomBar(func(pw Widget) {
-			d.AddOk(pw).SetText("Close").OnClick(func(e events.Event) {
+		d.AddBottomBar(func(parent Widget) {
+			d.AddOK(parent).SetText("Close").OnClick(func(e events.Event) {
 				b.Scene.Close()
 			})
 		})

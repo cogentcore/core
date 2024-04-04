@@ -710,7 +710,7 @@ func (ed *Editor) JumpToLinePrompt() {
 	})
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
-		d.AddOk(pw).SetText("Jump").OnClick(func(e events.Event) {
+		d.AddOK(pw).SetText("Jump").OnClick(func(e events.Event) {
 			val = tf.Text()
 			ln, err := laser.ToInt(val)
 			if err == nil {
