@@ -46,7 +46,7 @@ type Node struct { //core:embedder
 	Info fi.FileInfo `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
 	// file buffer for editing this file
-	Buf *texteditor.Buffer `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
+	Buffer *texteditor.Buffer `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
 	// root of the tree -- has global state
 	FRoot *Tree `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
@@ -149,12 +149,12 @@ func (fn *Node) IsOpen() bool {
 
 // IsChanged returns true if the file is open and has been changed (edited) since last EditDone
 func (fn *Node) IsChanged() bool {
-	return fn.Buf != nil && fn.Buf.IsChanged()
+	return fn.Buffer != nil && fn.Buffer.IsChanged()
 }
 
 // IsNotSaved returns true if the file is open and has been changed (edited) since last Save
 func (fn *Node) IsNotSaved() bool {
-	return fn.Buf != nil && fn.Buf.IsNotSaved()
+	return fn.Buffer != nil && fn.Buffer.IsNotSaved()
 }
 
 // IsAutoSave returns true if file is an auto-save file (starts and ends with #)
@@ -478,20 +478,20 @@ func (fn *Node) OpenBuf() (bool, error) {
 		log.Println(err)
 		return false, err
 	}
-	if fn.Buf != nil {
-		if fn.Buf.Filename == fn.FPath { // close resets filename
+	if fn.Buffer != nil {
+		if fn.Buffer.Filename == fn.FPath { // close resets filename
 			return false, nil
 		}
 	} else {
-		fn.Buf = texteditor.NewBuffer()
-		fn.Buf.OnBufferChange(func(e events.Event) {
+		fn.Buffer = texteditor.NewBuffer()
+		fn.Buffer.OnChange(func(e events.Event) {
 			if fn.Info.Vcs == vci.Stored {
 				fn.Info.Vcs = vci.Modified
 			}
 		})
 	}
-	fn.Buf.Hi.Style = NodeHiStyle
-	return true, fn.Buf.Open(fn.FPath)
+	fn.Buffer.Hi.Style = NodeHiStyle
+	return true, fn.Buffer.Open(fn.FPath)
 }
 
 // RemoveFromExterns removes file from list of external files
@@ -510,11 +510,11 @@ func (fn *Node) RemoveFromExterns() { //gti:add
 // CloseBuf closes the file in its buffer if it is open.
 // returns true if closed.
 func (fn *Node) CloseBuf() bool {
-	if fn.Buf == nil {
+	if fn.Buffer == nil {
 		return false
 	}
-	fn.Buf.Close(nil)
-	fn.Buf = nil
+	fn.Buffer.Close(nil)
+	fn.Buffer = nil
 	return true
 }
 

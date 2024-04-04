@@ -218,8 +218,8 @@ func (fn *Node) RevertVCS() (err error) {
 	} else if fn.Info.Vcs == vci.Added {
 		// do nothing - leave in "added" state
 	}
-	if fn.Buf != nil {
-		fn.Buf.Revert()
+	if fn.Buffer != nil {
+		fn.Buffer.Revert()
 	}
 	fn.NeedsRender()
 	return err
@@ -250,7 +250,7 @@ func (fn *Node) DiffVCS(rev_a, rev_b string) error {
 	if fn.Info.Vcs == vci.Untracked {
 		return errors.New("file not in vcs repo: " + string(fn.FPath))
 	}
-	_, err := texteditor.DiffViewDialogFromRevs(fn, repo, string(fn.FPath), fn.Buf, rev_a, rev_b)
+	_, err := texteditor.DiffViewDialogFromRevs(fn, repo, string(fn.FPath), fn.Buffer, rev_a, rev_b)
 	return err
 }
 

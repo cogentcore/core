@@ -38,7 +38,7 @@ func (fn *Node) SetStyles() {
 		if fn.IsExec() && !fn.IsDir() {
 			s.Font.Weight = styles.WeightBold // todo: somehow not working
 		}
-		if fn.Buf != nil {
+		if fn.Buffer != nil {
 			s.Font.Style = styles.Italic
 		}
 		switch {

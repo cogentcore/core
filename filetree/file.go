@@ -202,7 +202,7 @@ func (fn *Node) DeleteFilesImpl() {
 			if !ok {
 				return
 			}
-			if fn.Buf != nil {
+			if fn.Buffer != nil {
 				openList = append(openList, filename)
 			}
 		}

@@ -63,7 +63,7 @@ type Editor struct { //core:embedder
 	gi.Layout
 
 	// Buffer is the text buffer being edited.
-	*Buffer `set:"-" json:"-" xml:"-"`
+	Buffer *Buffer `set:"-" json:"-" xml:"-"`
 
 	// text that is displayed when the field is empty, in a lower-contrast manner
 	Placeholder string `json:"-" xml:"placeholder"`

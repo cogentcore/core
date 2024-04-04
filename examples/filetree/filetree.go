@@ -231,8 +231,8 @@ func (fb *FileBrowse) ViewFileNode(fn *filetree.Node) {
 		if nv.Buffer != nil && nv.Buffer.IsNotSaved() { // todo: save current changes?
 			fmt.Printf("Changes not saved in file: %v before switching view there to new file\n", nv.Buffer.Filename)
 		}
-		nv.SetBuffer(fn.Buf)
-		fn.Buf.Hi.Style = "emacs" // todo prefs
+		nv.SetBuffer(fn.Buffer)
+		fn.Buffer.Hi.Style = "emacs" // todo prefs
 		fb.SetActiveTextEditor(nidx)
 		fb.UpdateFiles()
 	}
