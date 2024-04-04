@@ -79,11 +79,11 @@ func (ed *Editor) Lookup() { //gti:add
 	var ln int
 	var ch int
 	if ed.HasSelection() {
-		ln = ed.SelectReg.Start.Ln
-		if ed.SelectReg.End.Ln != ln {
+		ln = ed.SelectRegion.Start.Ln
+		if ed.SelectRegion.End.Ln != ln {
 			return // no multiline selections for lookup
 		}
-		ch = ed.SelectReg.End.Ch
+		ch = ed.SelectRegion.End.Ch
 	} else {
 		ln = ed.CursorPos.Ln
 		if ed.IsWordEnd(ed.CursorPos) {
@@ -232,17 +232,17 @@ func (ed *Editor) OfferCorrect() bool {
 	if ed.Buffer.Spell == nil || ed.ISearch.On || ed.QReplace.On || ed.IsDisabled() {
 		return false
 	}
-	sel := ed.SelectReg
+	sel := ed.SelectRegion
 	if !ed.SelectWord() {
-		ed.SelectReg = sel
+		ed.SelectRegion = sel
 		return false
 	}
 	tbe := ed.Selection()
 	if tbe == nil {
-		ed.SelectReg = sel
+		ed.SelectRegion = sel
 		return false
 	}
-	ed.SelectReg = sel
+	ed.SelectRegion = sel
 	wb := string(tbe.ToBytes())
 	wbn := strings.TrimLeft(wb, " \t")
 	if len(wb) != len(wbn) {

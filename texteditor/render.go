@@ -221,7 +221,7 @@ func (ed *Editor) RenderSelect() {
 	if !ed.HasSelection() {
 		return
 	}
-	ed.RenderRegionBox(ed.SelectReg, ed.SelectColor)
+	ed.RenderRegionBox(ed.SelectRegion, ed.SelectColor)
 }
 
 // RenderHighlights renders the highlight regions as a

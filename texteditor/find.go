@@ -113,7 +113,7 @@ func (ed *Editor) ISearchSelectMatch(midx int) {
 	m := ed.ISearch.Matches[midx]
 	reg := ed.Buffer.AdjustReg(m.Reg)
 	pos := reg.Start
-	ed.SelectReg = reg
+	ed.SelectRegion = reg
 	ed.SetCursor(pos)
 	ed.SavePosHistory(ed.CursorPos)
 	ed.ScrollCursorToCenterIfHidden()
@@ -379,7 +379,7 @@ func (ed *Editor) QReplaceSelectMatch(midx int) {
 	m := ed.QReplace.Matches[midx]
 	reg := ed.Buffer.AdjustReg(m.Reg)
 	pos := reg.Start
-	ed.SelectReg = reg
+	ed.SelectRegion = reg
 	ed.SetCursor(pos)
 	ed.SavePosHistory(ed.CursorPos)
 	ed.ScrollCursorToCenterIfHidden()

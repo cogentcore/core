@@ -58,14 +58,14 @@ func (ed *Editor) ClearSelected() {
 
 // HasSelection returns whether there is a selected region of text
 func (ed *Editor) HasSelection() bool {
-	return ed.SelectReg.Start.IsLess(ed.SelectReg.End)
+	return ed.SelectRegion.Start.IsLess(ed.SelectRegion.End)
 }
 
 // Selection returns the currently selected text as a textbuf.Edit, which
 // captures start, end, and full lines in between -- nil if no selection
 func (ed *Editor) Selection() *textbuf.Edit {
 	if ed.HasSelection() {
-		return ed.Buffer.Region(ed.SelectReg.Start, ed.SelectReg.End)
+		return ed.Buffer.Region(ed.SelectRegion.Start, ed.SelectRegion.End)
 	}
 	return nil
 }
@@ -84,8 +84,8 @@ func (ed *Editor) SelectModeToggle() {
 
 // SelectAll selects all the text
 func (ed *Editor) SelectAll() {
-	ed.SelectReg.Start = lex.PosZero
-	ed.SelectReg.End = ed.Buffer.EndPos()
+	ed.SelectRegion.Start = lex.PosZero
+	ed.SelectRegion.End = ed.Buffer.EndPos()
 	ed.NeedsRender()
 }
 
@@ -196,8 +196,8 @@ func (ed *Editor) SelectWord() bool {
 		return false
 	}
 	reg := ed.WordAt()
-	ed.SelectReg = reg
-	ed.SelectStart = ed.SelectReg.Start
+	ed.SelectRegion = reg
+	ed.SelectStart = ed.SelectRegion.Start
 	return true
 }
 
@@ -264,13 +264,13 @@ func (ed *Editor) SelectReset() {
 	if !ed.HasSelection() {
 		return
 	}
-	ed.SelectReg = textbuf.RegionNil
-	ed.PrevSelectReg = textbuf.RegionNil
+	ed.SelectRegion = textbuf.RegionNil
+	ed.PreviousSelectRegion = textbuf.RegionNil
 }
 
 // RenderSelectLines renders the lines within the current selection region
 func (ed *Editor) RenderSelectLines() {
-	ed.PrevSelectReg = ed.SelectReg
+	ed.PreviousSelectRegion = ed.SelectRegion
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -344,7 +344,7 @@ func (ed *Editor) Cut() *textbuf.Edit {
 	if !ed.HasSelection() {
 		return nil
 	}
-	org := ed.SelectReg.Start
+	org := ed.SelectRegion.Start
 	cut := ed.DeleteSelection()
 	if cut != nil {
 		cb := cut.ToBytes()
@@ -360,7 +360,7 @@ func (ed *Editor) Cut() *textbuf.Edit {
 // DeleteSelection deletes any selected text, without adding to clipboard --
 // returns text deleted as textbuf.Edit (nil if none)
 func (ed *Editor) DeleteSelection() *textbuf.Edit {
-	tbe := ed.Buffer.DeleteText(ed.SelectReg.Start, ed.SelectReg.End, EditSignal)
+	tbe := ed.Buffer.DeleteText(ed.SelectRegion.Start, ed.SelectRegion.End, EditSignal)
 	ed.SelectReset()
 	return tbe
 }
@@ -426,8 +426,8 @@ func (ed *Editor) CutRect() *textbuf.Edit {
 	if !ed.HasSelection() {
 		return nil
 	}
-	npos := lex.Pos{Ln: ed.SelectReg.End.Ln, Ch: ed.SelectReg.Start.Ch}
-	cut := ed.Buffer.DeleteTextRect(ed.SelectReg.Start, ed.SelectReg.End, EditSignal)
+	npos := lex.Pos{Ln: ed.SelectRegion.End.Ln, Ch: ed.SelectRegion.Start.Ch}
+	cut := ed.Buffer.DeleteTextRect(ed.SelectRegion.Start, ed.SelectRegion.End, EditSignal)
 	if cut != nil {
 		cb := cut.ToBytes()
 		ed.Clipboard().Write(mimedata.NewTextBytes(cb))
@@ -442,7 +442,7 @@ func (ed *Editor) CutRect() *textbuf.Edit {
 // CopyRect copies any selected text to the clipboard, and returns that text,
 // optionally resetting the current selection
 func (ed *Editor) CopyRect(reset bool) *textbuf.Edit {
-	tbe := ed.Buffer.RegionRect(ed.SelectReg.Start, ed.SelectReg.End)
+	tbe := ed.Buffer.RegionRect(ed.SelectRegion.Start, ed.SelectRegion.End)
 	if tbe == nil {
 		return nil
 	}

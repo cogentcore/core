@@ -72,11 +72,11 @@ func (ed *Editor) HandleKeyChord() {
 func (ed *Editor) ShiftSelect(kt events.Event) {
 	hasShift := kt.HasAnyModifier(key.Shift)
 	if hasShift {
-		if ed.SelectReg == textbuf.RegionNil {
+		if ed.SelectRegion == textbuf.RegionNil {
 			ed.SelectStart = ed.CursorPos
 		}
 	} else {
-		ed.SelectReg = textbuf.RegionNil
+		ed.SelectRegion = textbuf.RegionNil
 	}
 }
 
@@ -597,7 +597,7 @@ func (ed *Editor) HandleMouse() {
 		}
 		e.SetHandled()
 		if ed.SelectWord() {
-			ed.CursorPos = ed.SelectReg.Start
+			ed.CursorPos = ed.SelectRegion.Start
 		}
 		ed.NeedsRender()
 	})
@@ -609,10 +609,10 @@ func (ed *Editor) HandleMouse() {
 		e.SetHandled()
 		sz := ed.Buffer.LineLen(ed.CursorPos.Ln)
 		if sz > 0 {
-			ed.SelectReg.Start.Ln = ed.CursorPos.Ln
-			ed.SelectReg.Start.Ch = 0
-			ed.SelectReg.End.Ln = ed.CursorPos.Ln
-			ed.SelectReg.End.Ch = sz
+			ed.SelectRegion.Start.Ln = ed.CursorPos.Ln
+			ed.SelectRegion.Start.Ch = 0
+			ed.SelectRegion.End.Ln = ed.CursorPos.Ln
+			ed.SelectRegion.End.Ch = sz
 		}
 		ed.NeedsRender()
 	})
@@ -668,7 +668,7 @@ func (ed *Editor) SetCursorFromMouse(pt image.Point, newPos lex.Pos, selMode eve
 	defer ed.NeedsRender()
 
 	if !ed.SelectMode && selMode == events.ExtendContinuous {
-		if ed.SelectReg == textbuf.RegionNil {
+		if ed.SelectRegion == textbuf.RegionNil {
 			ed.SelectStart = ed.CursorPos
 		}
 		ed.SetCursor(newPos)
@@ -687,7 +687,7 @@ func (ed *Editor) SetCursorFromMouse(pt image.Point, newPos lex.Pos, selMode eve
 		if !ed.StateIs(states.Sliding) && selMode == events.SelectOne {
 			ln := ed.CursorPos.Ln
 			ch := ed.CursorPos.Ch
-			if ln != ed.SelectReg.Start.Ln || ch < ed.SelectReg.Start.Ch || ch > ed.SelectReg.End.Ch {
+			if ln != ed.SelectRegion.Start.Ln || ch < ed.SelectRegion.Start.Ch || ch > ed.SelectRegion.End.Ch {
 				ed.SelectReset()
 			}
 		} else {
@@ -701,7 +701,7 @@ func (ed *Editor) SetCursorFromMouse(pt image.Point, newPos lex.Pos, selMode eve
 	} else if ed.HasSelection() {
 		ln := ed.CursorPos.Ln
 		ch := ed.CursorPos.Ch
-		if ln != ed.SelectReg.Start.Ln || ch < ed.SelectReg.Start.Ch || ch > ed.SelectReg.End.Ch {
+		if ln != ed.SelectRegion.Start.Ln || ch < ed.SelectRegion.Start.Ch || ch > ed.SelectRegion.End.Ch {
 			ed.SelectReset()
 		}
 	}

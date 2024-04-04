@@ -168,11 +168,11 @@ func (ed *Editor) CursorToHistNext() bool {
 // relative to SelectStart position
 func (ed *Editor) SelectRegUpdate(pos lex.Pos) {
 	if pos.IsLess(ed.SelectStart) {
-		ed.SelectReg.Start = pos
-		ed.SelectReg.End = ed.SelectStart
+		ed.SelectRegion.Start = pos
+		ed.SelectRegion.End = ed.SelectStart
 	} else {
-		ed.SelectReg.Start = ed.SelectStart
-		ed.SelectReg.End = pos
+		ed.SelectRegion.Start = ed.SelectStart
+		ed.SelectRegion.End = pos
 	}
 }
 
@@ -579,7 +579,7 @@ func (ed *Editor) CursorBackspace(steps int) {
 	ed.ValidateCursor()
 	org := ed.CursorPos
 	if ed.HasSelection() {
-		org = ed.SelectReg.Start
+		org = ed.SelectRegion.Start
 		ed.DeleteSelection()
 		ed.SetCursorShow(org)
 		return

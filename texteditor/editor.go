@@ -114,10 +114,10 @@ type Editor struct { //core:embedder
 	SelectStart lex.Pos `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// current selection region
-	SelectReg textbuf.Region `set:"-" edit:"-" json:"-" xml:"-"`
+	SelectRegion textbuf.Region `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// previous selection region, that was actually rendered -- needed to update render
-	PrevSelectReg textbuf.Region `set:"-" edit:"-" json:"-" xml:"-"`
+	PreviousSelectRegion textbuf.Region `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// highlighted regions, e.g., for search results
 	Highlights []textbuf.Region `set:"-" edit:"-" json:"-" xml:"-"`
