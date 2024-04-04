@@ -19,5 +19,10 @@ texteditor.NewSoloEditor(parent).Buffer.SetTextString("Hello, world!")
 You can set the highlighting language of a text editor:
 
 ```Go
-texteditor.NewSoloEditor(parent).Buffer.SetLang("go").SetTextString("package main")
+texteditor.NewSoloEditor(parent).Buffer.SetLang("go").SetTextString(`package main
+
+func main() {
+    fmt.Println("Hello, world!")
+}
+`)
 ```

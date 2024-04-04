@@ -687,7 +687,12 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		texteditor.NewSoloEditor(parent).Buffer.SetTextString("Hello, world!")
 	},
 	"widgets/text-editors-2": func(parent gi.Widget) {
-		texteditor.NewSoloEditor(parent).Buffer.SetLang("go").SetTextString("package main")
+		texteditor.NewSoloEditor(parent).Buffer.SetLang("go").SetTextString(`package main
+
+func main() {
+    fmt.Println("Hello, world!")
+}
+`)
 	},
 	"widgets/text-fields-0": func(parent gi.Widget) {
 		gi.NewTextField(parent)
@@ -713,7 +718,7 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 	},
 	"widgets/text-fields-7": func(parent gi.Widget) {
 		gi.NewTextField(parent).SetLeadingIcon(icons.Euro).SetTrailingIcon(icons.OpenInNew, func(e events.Event) {
-			gi.MessageSnackbar(parent, "Opening shopping cart")
+			gi.MessageSnackbar(parent, "Opening shopping cart")
 		})
 	},
 	"widgets/text-fields-8": func(parent gi.Widget) {

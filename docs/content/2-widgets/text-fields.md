@@ -49,7 +49,7 @@ You can set any custom leading and trailing icons you want:
 
 ```Go
 gi.NewTextField(parent).SetLeadingIcon(icons.Euro).SetTrailingIcon(icons.OpenInNew, func(e events.Event) {
-    gi.MessageSnackbar(parent, "Opening shopping cart")
+    gi.MessageSnackbar(parent, "Opening shopping cart")
 })
 ```
 
