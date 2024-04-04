@@ -1,5 +1,9 @@
 # Events
 
+## Low-level events
+
+For low-level system events like [[events.MouseDown]] and [[events.KeyUp]], there is no `On{EventType}` helper method for listening to the event, so you must use [[gi.Widget.On]] with the event type as an argument.
+
 ## Event handling order
 
 Event handlers are called in the reverse order that they are added (last added, first called), so that default event handling (added during initial widget configuration) can be overridden by special end-user handlers.
@@ -35,6 +39,3 @@ Key events ([[events.KeyChord]]) have special logic for priority ordering, so th
 Thus, if you need to intercept key events that might otherwise be processed by the Focus Widget, add a First KeyChord event handler function.  If you only want to handle any events not otherwise processed by the Focus Widget (low priority), add a Final KeyChord event.  Generally, these container Widgets should not have the [[abilities.Focusable]] flag set, and they should not get standard Focus events.
 
 The default Focus event handler calls all three priority ordering of handlers, so Focus Widgets can also take advantage of the priority ordering within themselves.
-
-
-
