@@ -404,9 +404,9 @@ func (ed *Editor) LinesDeleted(tbe *textbuf.Edit) {
 	ed.NeedsLayout()
 }
 
-// BufSignal receives a signal from the Buf when underlying text
+// BufferSignal receives a signal from the Buffer when the underlying text
 // is changed.
-func (ed *Editor) BufSignal(sig BufferSignals, tbe *textbuf.Edit) {
+func (ed *Editor) BufferSignal(sig BufferSignals, tbe *textbuf.Edit) {
 	switch sig {
 	case BufferDone:
 	case BufferNew:

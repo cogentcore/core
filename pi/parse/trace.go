@@ -48,7 +48,7 @@ type TraceOptions struct {
 	// trace output is written here, connected via os.Pipe to OutRead
 	OutWrite *os.File `view:"-" json:"-" xml:"-"`
 
-	// trace output is read here -- can connect this to a TextBuf via giv.OutBuf to monitor tracing output
+	// trace output is read here; can connect this using [texteditor.OutputBuffer] to monitor tracing output
 	OutRead *os.File `view:"-" json:"-" xml:"-"`
 }
 

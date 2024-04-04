@@ -188,7 +188,7 @@ const (
 // to all the Views for this Buf
 func (tb *Buffer) SignalViews(sig BufferSignals, edit *textbuf.Edit) {
 	for _, vw := range tb.Editors {
-		vw.BufSignal(sig, edit)
+		vw.BufferSignal(sig, edit)
 	}
 	if sig == BufferDone {
 		e := &events.Base{Typ: events.Change}

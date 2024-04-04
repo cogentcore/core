@@ -13,36 +13,36 @@ import (
 	"time"
 )
 
-// OutBufMarkupFunc is a function that returns a marked-up version of a given line of
+// OutputBufferMarkupFunc is a function that returns a marked-up version of a given line of
 // output text by adding html tags.  It is essential that it ONLY adds tags,
 // and otherwise has the exact same visible bytes as the input
-type OutBufMarkupFunc func(line []byte) []byte
+type OutputBufferMarkupFunc func(line []byte) []byte
 
-// OutBuf is a Buf that records the output from an io.Reader using
+// OutputBuffer is a [Buffer] that records the output from an io.Reader using
 // bufio.Scanner -- optimized to combine fast chunks of output into
 // large blocks of updating.  Also supports arbitrary markup function
 // that operates on each line of output bytes.
-type OutBuf struct {
+type OutputBuffer struct {
 
 	// the output that we are reading from, as an io.Reader
-	Out io.Reader
+	Output io.Reader
 
-	// the Buf that we output to
-	Buf *Buffer
+	// the [Buffer] that we output to
+	Buffer *Buffer
 
 	// how much time to wait while batching output (default: 200ms)
 	Batch time.Duration
 
 	// optional markup function that adds html tags to given line of output -- essential that it ONLY adds tags, and otherwise has the exact same visible bytes as the input
-	MarkupFun OutBufMarkupFunc
+	MarkupFun OutputBufferMarkupFunc
 
-	// current buffered output raw lines -- not yet sent to Buf
-	CurOutLns [][]byte
+	// current buffered output raw lines, which are not yet sent to the Buffer
+	CurrentOutputLines [][]byte
 
-	// current buffered output markup lines -- not yet sent to Buf
-	CurOutMus [][]byte
+	// current buffered output markup lines, which are not yet sent to the Buffer
+	CurrentOutputMarkupLines [][]byte
 
-	// mutex protecting updating of CurOutLns and Buf, and timer
+	// mutex protecting updating of CurrentOutputLines and Buffer, and timer
 	Mu sync.Mutex
 
 	// time when last output was sent to buffer
@@ -52,10 +52,10 @@ type OutBuf struct {
 	AfterTimer *time.Timer
 }
 
-// Init sets the various params and prepares for running
-func (ob *OutBuf) Init(out io.Reader, buf *Buffer, batch time.Duration, markup OutBufMarkupFunc) {
-	ob.Out = out
-	ob.Buf = buf
+// Init sets the various params and prepares for running.
+func (ob *OutputBuffer) Init(out io.Reader, buf *Buffer, batch time.Duration, markup OutputBufferMarkupFunc) {
+	ob.Output = out
+	ob.Buffer = buf
 	ob.MarkupFun = markup
 	if batch == 0 {
 		ob.Batch = 200 * time.Millisecond
@@ -64,11 +64,11 @@ func (ob *OutBuf) Init(out io.Reader, buf *Buffer, batch time.Duration, markup O
 	}
 }
 
-// MonOut monitors the output and updates the Buf
-func (ob *OutBuf) MonOut() {
-	outscan := bufio.NewScanner(ob.Out) // line at a time
-	ob.CurOutLns = make([][]byte, 0, 100)
-	ob.CurOutMus = make([][]byte, 0, 100)
+// MonitorOutput monitors the output and updates the [Buffer].
+func (ob *OutputBuffer) MonitorOutput() {
+	outscan := bufio.NewScanner(ob.Output) // line at a time
+	ob.CurrentOutputLines = make([][]byte, 0, 100)
+	ob.CurrentOutputMarkupLines = make([][]byte, 0, 100)
 	for outscan.Scan() {
 		b := outscan.Bytes()
 		bc := slices.Clone(b) // outscan bytes are temp
@@ -79,45 +79,45 @@ func (ob *OutBuf) MonOut() {
 			ob.AfterTimer.Stop()
 			ob.AfterTimer = nil
 		}
-		ob.CurOutLns = append(ob.CurOutLns, bc)
+		ob.CurrentOutputLines = append(ob.CurrentOutputLines, bc)
 		mup := bec
 		if ob.MarkupFun != nil {
 			mup = ob.MarkupFun(bec)
 		}
-		ob.CurOutMus = append(ob.CurOutMus, mup)
+		ob.CurrentOutputMarkupLines = append(ob.CurrentOutputMarkupLines, mup)
 		lag := time.Since(ob.LastOut)
 		if lag > ob.Batch {
 			ob.LastOut = time.Now()
-			ob.OutToBuf()
+			ob.OutputToBuffer()
 		} else {
 			ob.AfterTimer = time.AfterFunc(ob.Batch*2, func() {
 				ob.Mu.Lock()
 				ob.LastOut = time.Now()
-				ob.OutToBuf()
+				ob.OutputToBuffer()
 				ob.AfterTimer = nil
 				ob.Mu.Unlock()
 			})
 		}
 		ob.Mu.Unlock()
 	}
-	ob.OutToBuf()
+	ob.OutputToBuffer()
 }
 
-// OutToBuf sends the current output to Buf
+// OutputToBuffer sends the current output to Buf.
 // MUST be called under mutex protection
-func (ob *OutBuf) OutToBuf() {
+func (ob *OutputBuffer) OutputToBuffer() {
 	lfb := []byte("\n")
-	if len(ob.CurOutLns) == 0 {
+	if len(ob.CurrentOutputLines) == 0 {
 		return
 	}
-	tlns := bytes.Join(ob.CurOutLns, lfb)
-	mlns := bytes.Join(ob.CurOutMus, lfb)
+	tlns := bytes.Join(ob.CurrentOutputLines, lfb)
+	mlns := bytes.Join(ob.CurrentOutputMarkupLines, lfb)
 	tlns = append(tlns, lfb...)
 	mlns = append(mlns, lfb...)
-	ob.Buf.Undos.Off = true
-	ob.Buf.AppendTextMarkup(tlns, mlns, EditSignal)
+	ob.Buffer.Undos.Off = true
+	ob.Buffer.AppendTextMarkup(tlns, mlns, EditSignal)
 	// ob.Buf.AppendText(mlns, EditSignal) // todo: trying to allow markup according to styles
-	ob.Buf.AutoScrollViews()
-	ob.CurOutLns = make([][]byte, 0, 100)
-	ob.CurOutMus = make([][]byte, 0, 100)
+	ob.Buffer.AutoScrollViews()
+	ob.CurrentOutputLines = make([][]byte, 0, 100)
+	ob.CurrentOutputMarkupLines = make([][]byte, 0, 100)
 }
