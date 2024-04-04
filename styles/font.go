@@ -53,18 +53,17 @@ func (fs *Font) Defaults() {
 	fs.Size = units.Dp(16)
 }
 
-// InheritFields from parent: Manual inheriting of values is much faster than
-// automatic version!
-func (fs *Font) InheritFields(par *Font) {
+// InheritFields from parent
+func (fs *Font) InheritFields(parent *Font) {
 	// fs.Color = par.Color
-	fs.Family = par.Family
-	fs.Style = par.Style
-	if par.Size.Value != 0 {
-		fs.Size = par.Size
+	fs.Family = parent.Family
+	fs.Style = parent.Style
+	if parent.Size.Value != 0 {
+		fs.Size = parent.Size
 	}
-	fs.Weight = par.Weight
-	fs.Stretch = par.Stretch
-	fs.Variant = par.Variant
+	fs.Weight = parent.Weight
+	fs.Stretch = parent.Stretch
+	fs.Variant = parent.Variant
 }
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels
@@ -92,7 +91,7 @@ func (fs *Font) SetUnitContext(uc *units.Context) {
 	}
 }
 
-func (fs *Font) StyleFromProps(par *Font, props map[string]any, ctxt colors.Context) {
+func (fs *Font) StyleFromProps(parent *Font, props map[string]any, ctxt colors.Context) {
 	for key, val := range props {
 		if len(key) == 0 {
 			continue
@@ -101,7 +100,7 @@ func (fs *Font) StyleFromProps(par *Font, props map[string]any, ctxt colors.Cont
 			continue
 		}
 		if sfunc, ok := StyleFontFuncs[key]; ok {
-			sfunc(fs, key, val, par, ctxt)
+			sfunc(fs, key, val, parent, ctxt)
 		}
 	}
 }
@@ -465,10 +464,10 @@ func (fr *FontRender) Defaults() {
 }
 
 // InheritFields from parent
-func (fr *FontRender) InheritFields(par *FontRender) {
-	fr.Color = par.Color
-	fr.Opacity = par.Opacity
-	fr.Font.InheritFields(&par.Font)
+func (fr *FontRender) InheritFields(parent *FontRender) {
+	fr.Color = parent.Color
+	fr.Opacity = parent.Opacity
+	fr.Font.InheritFields(&parent.Font)
 }
 
 // SetStyleProps sets font style values based on given property map (name:
@@ -483,7 +482,7 @@ func (fr *FontRender) SetStyleProps(parent *FontRender, props map[string]any, ct
 	fr.StyleRenderFromProps(parent, props, ctxt)
 }
 
-func (fs *FontRender) StyleRenderFromProps(par *FontRender, props map[string]any, ctxt colors.Context) {
+func (fs *FontRender) StyleRenderFromProps(parent *FontRender, props map[string]any, ctxt colors.Context) {
 	for key, val := range props {
 		if len(key) == 0 {
 			continue
@@ -492,7 +491,7 @@ func (fs *FontRender) StyleRenderFromProps(par *FontRender, props map[string]any
 			continue
 		}
 		if sfunc, ok := StyleFontRenderFuncs[key]; ok {
-			sfunc(fs, key, val, par, ctxt)
+			sfunc(fs, key, val, parent, ctxt)
 		}
 	}
 }

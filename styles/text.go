@@ -99,23 +99,22 @@ func (ts *Text) ToDots(uc *units.Context) {
 	ts.ParaSpacing.ToDots(uc)
 }
 
-// InheritFields from parent: Manual inheriting of values is much faster than
-// automatic version!
-func (ts *Text) InheritFields(par *Text) {
-	ts.Align = par.Align
-	ts.AlignV = par.AlignV
-	ts.Anchor = par.Anchor
-	ts.WordSpacing = par.WordSpacing
-	ts.LineHeight = par.LineHeight
+// InheritFields from parent
+func (ts *Text) InheritFields(parent *Text) {
+	ts.Align = parent.Align
+	ts.AlignV = parent.AlignV
+	ts.Anchor = parent.Anchor
+	ts.WordSpacing = parent.WordSpacing
+	ts.LineHeight = parent.LineHeight
 	// ts.WhiteSpace = par.WhiteSpace // todo: we can't inherit this b/c label base default then gets overwritten
-	ts.UnicodeBidi = par.UnicodeBidi
-	ts.Direction = par.Direction
-	ts.WritingMode = par.WritingMode
-	ts.OrientationVert = par.OrientationVert
-	ts.OrientationHoriz = par.OrientationHoriz
-	ts.Indent = par.Indent
-	ts.ParaSpacing = par.ParaSpacing
-	ts.TabSize = par.TabSize
+	ts.UnicodeBidi = parent.UnicodeBidi
+	ts.Direction = parent.Direction
+	ts.WritingMode = parent.WritingMode
+	ts.OrientationVert = parent.OrientationVert
+	ts.OrientationHoriz = parent.OrientationHoriz
+	ts.Indent = parent.Indent
+	ts.ParaSpacing = parent.ParaSpacing
+	ts.TabSize = parent.TabSize
 }
 
 // EffLineHeight returns the effective line height for the given

@@ -172,11 +172,11 @@ func (n *Node) IndexInParent() int {
 // ParentLevel finds a given potential parent node recursively up the
 // hierarchy, returning level above current node that the parent was
 // found, and -1 if not found.
-func (n *Node) ParentLevel(par Ki) int {
+func (n *Node) ParentLevel(parent Ki) int {
 	parLev := -1
 	level := 0
 	n.WalkUpParent(func(k Ki) bool {
-		if k == par {
+		if k == parent {
 			parLev = level
 			return Break
 		}
@@ -311,18 +311,18 @@ func (n *Node) Path() string {
 // a/b/c/d/e, the result of d.PathFrom(b) would be c/d. PathFrom
 // automatically gets the [Ki.This] version of the given parent,
 // so a base type can be passed in without manually calling [Ki.This].
-func (n *Node) PathFrom(par Ki) string {
+func (n *Node) PathFrom(parent Ki) string {
 	// critical to get "This"
-	par = par.This()
+	parent = parent.This()
 	// we bail a level below the parent so it isn't in the path
-	if n.Par == nil || n.Par == par {
+	if n.Par == nil || n.Par == parent {
 		return n.Nm
 	}
 	ppath := ""
-	if n.Par == par {
-		ppath = "/" + EscapePathName(par.Name())
+	if n.Par == parent {
+		ppath = "/" + EscapePathName(parent.Name())
 	} else {
-		ppath = n.Par.PathFrom(par)
+		ppath = n.Par.PathFrom(parent)
 	}
 	if n.Is(Field) {
 		return ppath + "." + EscapePathName(n.Nm)
@@ -708,11 +708,11 @@ func (n *Node) WalkUp(fun func(k Ki) bool) bool {
 		if !fun(cur) { // false return means stop
 			return false
 		}
-		par := cur.Parent()
-		if par == nil || par == cur { // prevent loops
+		parent := cur.Parent()
+		if parent == nil || parent == cur { // prevent loops
 			return true
 		}
-		cur = par
+		cur = parent
 	}
 }
 
@@ -730,11 +730,11 @@ func (n *Node) WalkUpParent(fun func(k Ki) bool) bool {
 		if !fun(cur) { // false return means stop
 			return false
 		}
-		par := cur.Parent()
-		if par == nil || par == cur { // prevent loops
+		parent := cur.Parent()
+		if parent == nil || parent == cur { // prevent loops
 			return true
 		}
-		cur = par
+		cur = parent
 	}
 }
 
@@ -820,12 +820,12 @@ outer:
 			if cur == start {
 				break outer // done!
 			}
-			par := cur.Parent()
-			if par == nil || par == cur { // shouldn't happen, but does..
+			parent := cur.Parent()
+			if parent == nil || parent == cur { // shouldn't happen, but does..
 				// fmt.Printf("nil / cur parent %v\n", par)
 				break outer
 			}
-			cur = par
+			cur = parent
 		}
 	}
 }
@@ -889,12 +889,12 @@ outer:
 				break outer // done!
 			}
 			level--
-			par := cur.Parent()
-			if par == nil || par == cur { // shouldn't happen, but does..
+			parent := cur.Parent()
+			if parent == nil || parent == cur { // shouldn't happen, but does..
 				// fmt.Printf("nil / cur parent %v\n", par)
 				break outer
 			}
-			cur = par
+			cur = parent
 		}
 	}
 }
@@ -951,11 +951,11 @@ outer:
 			if cur == start {
 				break outer // done!
 			}
-			par := cur.Parent()
-			if par == nil || par == cur { // shouldn't happen
+			parent := cur.Parent()
+			if parent == nil || parent == cur { // shouldn't happen
 				break outer
 			}
-			cur = par
+			cur = parent
 		}
 	}
 }

@@ -1530,8 +1530,8 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, act
 	if tv.Par == nil {
 		return
 	}
-	par := AsTreeView(tv.Par)
-	if par == nil {
+	parent := AsTreeView(tv.Par)
+	if parent == nil {
 		gi.MessageSnackbar(tv, "Error: cannot insert after the root of the tree")
 		return
 	}
@@ -1551,11 +1551,11 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, act
 	for i, ns := range sl {
 		orgpath := pl[i]
 		if mod != events.DropMove {
-			if cn := par.ChildByName(ns.Name(), 0); cn != nil {
+			if cn := parent.ChildByName(ns.Name(), 0); cn != nil {
 				ns.SetName(ns.Name() + "_Copy")
 			}
 		}
-		par.InsertChild(ns, myidx+i)
+		parent.InsertChild(ns, myidx+i)
 		_, nwb := gi.AsWidget(ns.This())
 		ntv := AsTreeView(ns.This())
 		ntv.RootView = tv.RootView
@@ -1570,7 +1570,7 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, act
 		}
 	}
 	tv.TreeViewChanged(nil)
-	par.NeedsLayout()
+	parent.NeedsLayout()
 	if selTv != nil {
 		selTv.SelectAction(events.SelectOne)
 	}

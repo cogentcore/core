@@ -207,11 +207,11 @@ func (tv *TreeView) AddTreeNodes(rel, myidx int, typ *gti.Type, n int) {
 }
 
 func (tv *TreeView) AddSyncNodes(rel, myidx int, typ *gti.Type, n int) {
-	par := tv.SyncNode
+	parent := tv.SyncNode
 	var ski ki.Ki
 	for i := 0; i < n; i++ {
 		nm := fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i)
-		nki := par.InsertNewChild(typ, myidx+i, nm)
+		nki := parent.InsertNewChild(typ, myidx+i, nm)
 		if i == n-1 {
 			ski = nki
 		}
@@ -250,11 +250,11 @@ func (tv *TreeView) InsertAt(rel int, actNm string) {
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
 		d.AddOk(pw).OnClick(func(e events.Event) {
-			par := AsTreeView(tv.Par)
+			parent := AsTreeView(tv.Par)
 			if tv.SyncNode != nil {
-				par.AddSyncNodes(rel, myidx, nd.Type, nd.Number)
+				parent.AddSyncNodes(rel, myidx, nd.Type, nd.Number)
 			} else {
-				par.AddTreeNodes(rel, myidx, nd.Type, nd.Number)
+				parent.AddTreeNodes(rel, myidx, nd.Type, nd.Number)
 			}
 		})
 	})
@@ -303,10 +303,10 @@ func (tv *TreeView) DeleteNode() { //gti:add
 		tv.SyncNode.Delete()
 		tv.SendChangeEventReSync(nil)
 	} else {
-		par := AsTreeView(tv.Par)
+		parent := AsTreeView(tv.Par)
 		tv.Delete()
-		par.Update()
-		par.TreeViewChanged(nil)
+		parent.Update()
+		parent.TreeViewChanged(nil)
 	}
 }
 
@@ -325,7 +325,7 @@ func (tv *TreeView) Duplicate() { //gti:add
 		tv.DuplicateSync()
 		return
 	}
-	par := AsTreeView(tv.Par)
+	parent := AsTreeView(tv.Par)
 	myidx := tv.IndexInParent()
 	if myidx < 0 {
 		return
@@ -335,19 +335,19 @@ func (tv *TreeView) Duplicate() { //gti:add
 	nwkid := tv.Clone()
 	nwkid.SetName(nm)
 	ntv := AsTreeView(nwkid)
-	par.InsertChild(nwkid, myidx+1)
+	parent.InsertChild(nwkid, myidx+1)
 	ntv.Update()
-	par.Update()
-	par.TreeViewChanged(nil)
+	parent.Update()
+	parent.TreeViewChanged(nil)
 	// ntv.SelectAction(events.SelectOne)
 }
 
 func (tv *TreeView) DuplicateSync() {
 	sk := tv.SyncNode
-	tvpar := AsTreeView(tv.Par)
-	par := tvpar.SyncNode
-	if par == nil {
-		log.Printf("TreeView %v nil SyncNode in: %v\n", tv, tvpar.Path())
+	tvparent := AsTreeView(tv.Par)
+	parent := tvparent.SyncNode
+	if parent == nil {
+		log.Printf("TreeView %v nil SyncNode in: %v\n", tv, tvparent.Path())
 		return
 	}
 	myidx := sk.IndexInParent()
@@ -357,9 +357,9 @@ func (tv *TreeView) DuplicateSync() {
 	nm := fmt.Sprintf("%v_Copy", sk.Name())
 	nwkid := sk.Clone()
 	nwkid.SetName(nm)
-	par.InsertChild(nwkid, myidx+1)
-	tvpar.SendChangeEventReSync(nil)
-	if tvk := tvpar.ChildByName("tv_"+nm, 0); tvk != nil {
+	parent.InsertChild(nwkid, myidx+1)
+	tvparent.SendChangeEventReSync(nil)
+	if tvk := tvparent.ChildByName("tv_"+nm, 0); tvk != nil {
 		stv := AsTreeView(tvk)
 		stv.SelectAction(events.SelectOne)
 	}
@@ -445,8 +445,8 @@ func (tv *TreeView) PasteAssignSync(md mimedata.Mimes) {
 func (tv *TreeView) PasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int, actNm string) {
 	sk := tv.SyncNode
 	sl, pl := tv.NodesFromMimeData(md)
-	tvpar := AsTreeView(tv.Par)
-	par := sk.Parent()
+	tvparent := AsTreeView(tv.Par)
+	parent := sk.Parent()
 	myidx := sk.IndexInParent()
 	if myidx < 0 {
 		return
@@ -458,11 +458,11 @@ func (tv *TreeView) PasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int,
 	for i, ns := range sl {
 		orgpath := pl[i]
 		if mod != events.DropMove {
-			if cn := par.ChildByName(ns.Name(), 0); cn != nil {
+			if cn := parent.ChildByName(ns.Name(), 0); cn != nil {
 				ns.SetName(ns.Name() + "_Copy")
 			}
 		}
-		par.InsertChild(ns, myidx+i)
+		parent.InsertChild(ns, myidx+i)
 		npath := ns.PathFrom(sroot)
 		if mod == events.DropMove && npath == orgpath { // we will be nuked immediately after drag
 			ns.SetName(ns.Name() + TreeViewTempMovedTag) // special keyword :)
@@ -471,9 +471,9 @@ func (tv *TreeView) PasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int,
 			selKi = ns
 		}
 	}
-	tvpar.SendChangeEventReSync(nil)
+	tvparent.SendChangeEventReSync(nil)
 	if selKi != nil {
-		if tvk := tvpar.ChildByName("tv_"+selKi.Name(), myidx); tvk != nil {
+		if tvk := tvparent.ChildByName("tv_"+selKi.Name(), myidx); tvk != nil {
 			stv := AsTreeView(tvk)
 			stv.SelectAction(events.SelectOne)
 		}

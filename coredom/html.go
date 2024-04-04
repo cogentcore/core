@@ -17,24 +17,24 @@ import (
 
 // ReadHTML reads HTML from the given [io.Reader] and adds corresponding
 // Cogent Core widgets to the given [gi.Widget], using the given context.
-func ReadHTML(ctx *Context, par gi.Widget, r io.Reader) error {
+func ReadHTML(ctx *Context, parent gi.Widget, r io.Reader) error {
 	n, err := html.Parse(r)
 	if err != nil {
 		return fmt.Errorf("error parsing HTML: %w", err)
 	}
-	return ReadHTMLNode(ctx, par, n)
+	return ReadHTMLNode(ctx, parent, n)
 }
 
 // ReadHTMLString reads HTML from the given string and adds corresponding
 // Cogent Core widgets to the given [gi.Widget], using the given context.
-func ReadHTMLString(ctx *Context, par gi.Widget, s string) error {
+func ReadHTMLString(ctx *Context, parent gi.Widget, s string) error {
 	b := bytes.NewBufferString(s)
-	return ReadHTML(ctx, par, b)
+	return ReadHTML(ctx, parent, b)
 }
 
 // ReadHTMLNode reads HTML from the given [*html.Node] and adds corresponding
 // Cogent Core widgets to the given [gi.Widget], using the given context.
-func ReadHTMLNode(ctx *Context, par gi.Widget, n *html.Node) error {
+func ReadHTMLNode(ctx *Context, parent gi.Widget, n *html.Node) error {
 	// nil parent means we are root, so we add user agent styles here
 	if n.Parent == nil {
 		ctx.Node = n
@@ -49,12 +49,12 @@ func ReadHTMLNode(ctx *Context, par gi.Widget, n *html.Node) error {
 		}
 	case html.ElementNode:
 		ctx.Node = n
-		ctx.BlockParent = par
+		ctx.BlockParent = parent
 		ctx.NewParent = nil
 
 		HandleElement(ctx)
 	default:
-		ctx.NewParent = par
+		ctx.NewParent = parent
 	}
 
 	if ctx.NewParent != nil && n.FirstChild != nil {
@@ -62,7 +62,7 @@ func ReadHTMLNode(ctx *Context, par gi.Widget, n *html.Node) error {
 	}
 
 	if n.NextSibling != nil {
-		ReadHTMLNode(ctx, par, n.NextSibling)
+		ReadHTMLNode(ctx, parent, n.NextSibling)
 	}
 	return nil
 }

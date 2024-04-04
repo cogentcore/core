@@ -350,13 +350,12 @@ func (s *Style) SetAbilities(on bool, able ...abilities.Abilities) {
 	s.Abilities.SetFlag(on, bfs...)
 }
 
-// InheritFields from parent: Manual inheriting of values is much faster than
-// automatic version!
-func (s *Style) InheritFields(par *Style) {
-	s.Color = par.Color
-	s.Opacity = par.Opacity
-	s.Font.InheritFields(&par.Font)
-	s.Text.InheritFields(&par.Text)
+// InheritFields from parent
+func (s *Style) InheritFields(parent *Style) {
+	s.Color = parent.Color
+	s.Opacity = parent.Opacity
+	s.Font.InheritFields(&parent.Font)
+	s.Text.InheritFields(&parent.Text)
 }
 
 // ToDotsImpl runs ToDots on unit values, to compile down to raw pixels

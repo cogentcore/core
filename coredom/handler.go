@@ -38,8 +38,8 @@ var ElementHandlers = map[string]func(ctx *Context) bool{}
 // New adds a new widget of the given type to the context parent.
 // It automatically calls [Context.Config] on the resulting widget.
 func New[T gi.Widget](ctx *Context) T {
-	par := ctx.Parent()
-	w := ki.New[T](par)
+	parent := ctx.Parent()
+	w := ki.New[T](parent)
 	ctx.Config(w)
 	return w
 }
@@ -48,8 +48,8 @@ func New[T gi.Widget](ctx *Context) T {
 // context parent. It automatically calls [Context.Config] on
 // the resulting value widget.
 func NewValue(ctx *Context, val any) giv.Value {
-	par := ctx.Parent()
-	v := giv.NewValue(par, val)
+	parent := ctx.Parent()
+	v := giv.NewValue(parent, val)
 	ctx.Config(v.AsWidget())
 	return v
 }

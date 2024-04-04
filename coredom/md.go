@@ -19,7 +19,7 @@ import (
 
 // ReadMD reads MD (markdown) from the given bytes and adds corresponding
 // Cogent Core widgets to the given [gi.Widget], using the given context.
-func ReadMD(ctx *Context, par gi.Widget, b []byte) error {
+func ReadMD(ctx *Context, parent gi.Widget, b []byte) error {
 	md := goldmark.New(
 		goldmark.WithExtensions(
 			extension.GFM,
@@ -38,13 +38,13 @@ func ReadMD(ctx *Context, par gi.Widget, b []byte) error {
 	if err != nil {
 		return fmt.Errorf("error parsing MD (markdown): %w", err)
 	}
-	return ReadHTML(ctx, par, &buf)
+	return ReadHTML(ctx, parent, &buf)
 }
 
 // ReadMDString reads MD (markdown) from the given string and adds
 // corresponding Cogent Core widgets to the given [gi.Widget], using the given context.
-func ReadMDString(ctx *Context, par gi.Widget, s string) error {
-	return ReadMD(ctx, par, []byte(s))
+func ReadMDString(ctx *Context, parent gi.Widget, s string) error {
+	return ReadMD(ctx, parent, []byte(s))
 }
 
 // HighlightingWrapperRenderer is the [highlighting.WrapperRenderer] for markdown rendering

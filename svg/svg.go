@@ -293,14 +293,14 @@ func (g *SVGNode) NodeBBox(sv *SVG) image.Rectangle {
 // SetUnitContext sets the unit context based on size of viewport, element,
 // and parent element (from bbox) and then caches everything out in terms of raw pixel
 // dots for rendering -- call at start of render
-func (sv *SVG) SetUnitContext(pc *styles.Paint, el, par mat32.Vec2) {
+func (sv *SVG) SetUnitContext(pc *styles.Paint, el, parent mat32.Vec2) {
 	pc.UnitContext.Defaults()
 	pc.UnitContext.DPI = 96 // paint (SVG) context is always 96 = 1to1
 	if sv.RenderState.Image != nil {
 		sz := sv.RenderState.Image.Bounds().Size()
-		pc.UnitContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, par.X, par.Y)
+		pc.UnitContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, parent.X, parent.Y)
 	} else {
-		pc.UnitContext.SetSizes(0, 0, el.X, el.Y, par.X, par.Y)
+		pc.UnitContext.SetSizes(0, 0, el.X, el.Y, parent.X, parent.Y)
 	}
 	pc.FontStyle.SetUnitContext(&pc.UnitContext)
 	pc.ToDots()

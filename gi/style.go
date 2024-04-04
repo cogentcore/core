@@ -231,7 +231,7 @@ func (wb *WidgetBase) ApplyStyle() {
 // element (from bbox) and then caches everything out in terms of raw pixel
 // dots for rendering.
 // Zero values for element and parent size are ignored.
-func SetUnitContext(st *styles.Style, sc *Scene, el, par mat32.Vec2) {
+func SetUnitContext(st *styles.Style, sc *Scene, el, parent mat32.Vec2) {
 	rebuild := false
 	var rc *RenderContext
 	sz := image.Point{1920, 1280}
@@ -245,7 +245,7 @@ func SetUnitContext(st *styles.Style, sc *Scene, el, par mat32.Vec2) {
 	} else {
 		st.UnitContext.DPI = 160
 	}
-	st.UnitContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, par.X, par.Y)
+	st.UnitContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, parent.X, parent.Y)
 	if st.Font.Face == nil || rebuild {
 		st.Font = paint.OpenFont(st.FontRender(), &st.UnitContext) // calls SetUnContext after updating metrics
 	}

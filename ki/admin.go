@@ -80,9 +80,9 @@ func MoveToParent(kid Ki, parent Ki) {
 // ID (kebab-case) name of the type, plus the
 // [Ki.NumLifetimeChildren] of its parent.
 // It is a helper function that calls [Ki.NewChild].
-func New[T Ki](par Ki, name ...string) T {
+func New[T Ki](parent Ki, name ...string) T {
 	var n T
-	return par.NewChild(n.KiType(), name...).(T)
+	return parent.NewChild(n.KiType(), name...).(T)
 }
 
 // NewRoot returns a new root node of the given the type
@@ -97,9 +97,9 @@ func NewRoot[T Ki](name ...string) T {
 }
 
 // InsertNewChild is a generic helper function for [Ki.InsertNewChild]
-func InsertNewChild[T Ki](par Ki, at int, name ...string) T {
+func InsertNewChild[T Ki](parent Ki, at int, name ...string) T {
 	var n T
-	return par.InsertNewChild(n.KiType(), at, name...).(T)
+	return parent.InsertNewChild(n.KiType(), at, name...).(T)
 }
 
 // ParentByType is a generic helper function for [Ki.ParentByType]

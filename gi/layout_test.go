@@ -266,7 +266,7 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 		// does not grow -- stacked not doing the right thing
 		tab, tfr := TabFrame(sc)
 		_ = tab
-		par := tfr // or sc
+		parent := tfr // or sc
 		row := HorizRow(par)
 
 		sp := NewSpace(row)
@@ -350,8 +350,8 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 }
 */
 
-func BoxFrame(par Widget, nm ...string) *Frame {
-	fr := NewFrame(par, nm...)
+func BoxFrame(parent Widget, nm ...string) *Frame {
+	fr := NewFrame(parent, nm...)
 	fr.Style(func(s *styles.Style) {
 		s.Border.Color.Set(colors.C(colors.Scheme.Outline))
 		s.Border.Width.Set(units.Dp(2))
@@ -359,8 +359,8 @@ func BoxFrame(par Widget, nm ...string) *Frame {
 	return fr
 }
 
-func SpaceFrame(par Widget, nm ...string) (*Frame, *Space) {
-	fr := NewFrame(par, nm...)
+func SpaceFrame(parent Widget, nm ...string) (*Frame, *Space) {
+	fr := NewFrame(parent, nm...)
 	fr.Style(func(s *styles.Style) {
 		s.Border.Color.Set(colors.C(colors.Scheme.Outline))
 		s.Border.Width.Set(units.Dp(2))
@@ -369,23 +369,23 @@ func SpaceFrame(par Widget, nm ...string) (*Frame, *Space) {
 	return fr, sp
 }
 
-func HorizRow(par Widget, nm ...string) *Frame {
-	row := BoxFrame(par, nm...)
+func HorizontalRow(parent Widget, nm ...string) *Frame {
+	row := BoxFrame(parent, nm...)
 	row.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
 	})
 	return row
 }
 
-func Splits2(par Widget) (*Splits, *Frame, *Frame) {
-	sp := NewSplits(par)
+func Splits2(parent Widget) (*Splits, *Frame, *Frame) {
+	sp := NewSplits(parent)
 	f1 := BoxFrame(sp)
 	f2 := BoxFrame(sp)
 	return sp, f1, f2
 }
 
-func TabFrame(par Widget) (*Frame, *Frame) {
-	tab := BoxFrame(par)
+func TabFrame(parent Widget) (*Frame, *Frame) {
+	tab := BoxFrame(parent)
 	tab.Style(func(s *styles.Style) {
 		s.Display = styles.Stacked
 		tab.StackTop = 0
@@ -397,15 +397,15 @@ func TabFrame(par Widget) (*Frame, *Frame) {
 	return tab, tfr
 }
 
-func WrapText(par Widget, txt string) *Label {
-	lbl := NewLabel(par, "wrap-text").SetText(txt)
+func WrapText(parent Widget, txt string) *Label {
+	lbl := NewLabel(parent, "wrap-text").SetText(txt)
 	return lbl
 }
 
-func PlainFrames(par Widget, grow mat32.Vec2) {
+func PlainFrames(parent Widget, grow mat32.Vec2) {
 	for i, sz := range FrameSizes {
 		nm := fmt.Sprintf("fr%v", i)
-		fr := BoxFrame(par, nm)
+		fr := BoxFrame(parent, nm)
 		fr.Style(func(s *styles.Style) {
 			s.Min.X.Px(sz.X)
 			s.Min.Y.Px(sz.Y)

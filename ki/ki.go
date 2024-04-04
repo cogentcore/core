@@ -107,7 +107,7 @@ type Ki interface {
 	// ParentLevel finds a given potential parent node recursively up the
 	// hierarchy, returning level above current node that the parent was
 	// found, and -1 if not found.
-	ParentLevel(par Ki) int
+	ParentLevel(parent Ki) int
 
 	// ParentByName finds first parent recursively up hierarchy that matches
 	// given name.  Returns nil if not found.
@@ -176,7 +176,7 @@ type Ki interface {
 	// a/b/c/d/e, the result of d.PathFrom(b) would be c/d. PathFrom
 	// automatically gets the [Ki.This] version of the given parent,
 	// so a base type can be passed in without manually calling [Ki.This].
-	PathFrom(par Ki) string
+	PathFrom(parent Ki) string
 
 	// FindPath returns Ki object at given path, starting from this node
 	// (e.g., the root).  If this node is not the root, then the path

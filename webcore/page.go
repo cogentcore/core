@@ -209,14 +209,14 @@ func (pg *Page) Config() {
 			return nil
 		}
 
-		par := nav
+		parent := nav
 		if pdir != "" && pdir != "." {
-			par = nav.FindPath(pdir).(*giv.TreeView)
+			parent = nav.FindPath(pdir).(*giv.TreeView)
 		}
 
 		nm := strings.TrimSuffix(base, ext)
 		txt := strcase.ToSentence(nm)
-		tv := giv.NewTreeView(par, nm).SetText(txt)
+		tv := giv.NewTreeView(parent, nm).SetText(txt)
 
 		// need index.md for page path
 		if d.IsDir() {

@@ -380,9 +380,9 @@ func (gl *GoLang) CompleteAstStart(ast *parse.Ast, scope token.Tokens) (start, l
 	start = cur
 	prv := cur
 	for {
-		var par *parse.Ast
+		var parent *parse.Ast
 		if cur.Par != nil {
-			par = cur.Par.(*parse.Ast)
+			parent = cur.Par.(*parse.Ast)
 		}
 		switch {
 		case cur.Nm == "TypeNm":
@@ -393,11 +393,11 @@ func (gl *GoLang) CompleteAstStart(ast *parse.Ast, scope token.Tokens) (start, l
 			}
 			return prv, last
 		case cur.Nm == "Selector":
-			if par != nil {
-				if par.Nm[:4] == "Asgn" {
+			if parent != nil {
+				if parent.Nm[:4] == "Asgn" {
 					return cur, last
 				}
-				if strings.HasSuffix(par.Nm, "Expr") {
+				if strings.HasSuffix(parent.Nm, "Expr") {
 					return cur, last
 				}
 			} else {
@@ -412,11 +412,11 @@ func (gl *GoLang) CompleteAstStart(ast *parse.Ast, scope token.Tokens) (start, l
 				}
 				return prv, last
 			}
-			if par != nil {
-				if par.Nm[:4] == "Asgn" {
+			if parent != nil {
+				if parent.Nm[:4] == "Asgn" {
 					return prv, last
 				}
-				if strings.HasSuffix(par.Nm, "Expr") {
+				if strings.HasSuffix(parent.Nm, "Expr") {
 					return cur, last
 				}
 			}

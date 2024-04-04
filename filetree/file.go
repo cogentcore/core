@@ -222,9 +222,9 @@ func (fn *Node) DeleteFile() error {
 		return nil
 	}
 	pari := fn.Par
-	var par *Node
+	var parent *Node
 	if pari != nil {
-		par = AsNode(pari)
+		parent = AsNode(pari)
 	}
 	fn.CloseBuf()
 	repo, _ := fn.Repo()
@@ -239,8 +239,8 @@ func (fn *Node) DeleteFile() error {
 	if err == nil {
 		fn.Delete()
 	}
-	if par != nil {
-		par.UpdateNode()
+	if parent != nil {
+		parent.UpdateNode()
 	}
 	return err
 }

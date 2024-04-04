@@ -1535,8 +1535,8 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, act
 	if tv.Par == nil {
 		return
 	}
-	par := AsTreeView(tv.Par)
-	if par == nil {
+	parent := AsTreeView(tv.Par)
+	if parent == nil {
 		gi.MessageSnackbar(tv, "Error: cannot insert after the root of the tree")
 		return
 	}

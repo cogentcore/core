@@ -433,11 +433,11 @@ func (wb *WidgetBase) ParentWidget() *WidgetBase {
 func (wb *WidgetBase) ParentWidgetIf(fun func(p *WidgetBase) bool) *WidgetBase {
 	cur := wb
 	for {
-		par := cur.Par
-		if par == nil {
+		parent := cur.Par
+		if parent == nil {
 			return nil
 		}
-		pwi, ok := par.(Widget)
+		pwi, ok := parent.(Widget)
 		if !ok {
 			return nil
 		}
@@ -559,15 +559,15 @@ func WidgetNextSibling(wi Widget) Widget {
 	if wi.Parent() == nil {
 		return nil
 	}
-	par := wi.Parent().(Widget)
+	parent := wi.Parent().(Widget)
 	myidx := wi.IndexInParent()
 	if myidx >= 0 && myidx < wi.Parent().NumChildren()-1 {
-		return par.Child(myidx + 1).(Widget)
+		return parent.Child(myidx + 1).(Widget)
 	}
-	if par.Is(ki.Field) { // we are parts, go up
-		return WidgetNextSibling(par.Parent().(Widget))
+	if parent.Is(ki.Field) { // we are parts, go up
+		return WidgetNextSibling(parent.Parent().(Widget))
 	}
-	return WidgetNextSibling(par)
+	return WidgetNextSibling(parent)
 }
 
 // WidgetPrev returns the previous widget in the tree,
@@ -577,18 +577,18 @@ func WidgetPrev(wi Widget) Widget {
 	if wi.Parent() == nil {
 		return nil
 	}
-	par := wi.Parent().(Widget)
+	parent := wi.Parent().(Widget)
 	myidx := wi.IndexInParent()
 	if myidx > 0 {
-		nn := par.Child(myidx - 1).(Widget)
+		nn := parent.Child(myidx - 1).(Widget)
 		return WidgetLastChildParts(nn) // go to parts
 	}
-	if par.Is(ki.Field) { // we are parts, go into children
-		par = par.Parent().(Widget)
-		return WidgetLastChild(par) // go to children
+	if parent.Is(ki.Field) { // we are parts, go into children
+		parent = parent.Parent().(Widget)
+		return WidgetLastChild(parent) // go to children
 	}
 	// we were children, done
-	return par
+	return parent
 }
 
 // WidgetLastChildParts returns the last child under given node,

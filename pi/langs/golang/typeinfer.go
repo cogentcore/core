@@ -103,9 +103,9 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 				}
 				return
 			}
-			par := ast.ParAst()
-			if par != nil && par.HasChildren() {
-				fc := par.ChildAst(0)
+			parent := ast.ParentAst()
+			if parent != nil && parent.HasChildren() {
+				fc := parent.ChildAst(0)
 				if fc.HasChildren() {
 					ffc := fc.ChildAst(0)
 					if ffc.Nm == "Name" {

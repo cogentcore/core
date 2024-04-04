@@ -49,8 +49,8 @@ func (ast *Ast) ChildAst(idx int) *Ast {
 	return ast.Child(idx).(*Ast)
 }
 
-// ParAst returns the Parent as an Ast.
-func (ast *Ast) ParAst() *Ast {
+// ParentAst returns the Parent as an Ast.
+func (ast *Ast) ParentAst() *Ast {
 	if ast.Par == nil {
 		return nil
 	}

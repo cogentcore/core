@@ -80,15 +80,15 @@ func (c *Context) Parent() gi.Widget {
 			}
 		}
 	}
-	var par gi.Widget
+	var parent gi.Widget
 	switch display {
 	case "inline", "inline-block", "":
-		par = c.InlineParent()
+		parent = c.InlineParent()
 	default:
-		par = c.BlockParent
+		parent = c.BlockParent
 		c.InlinePw = nil
 	}
-	return par
+	return parent
 }
 
 // Config configures the given widget. It needs to be called

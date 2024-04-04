@@ -155,9 +155,9 @@ type Parser interface {
 	Validate(ps *State) bool
 
 	// Parse tries to apply rule to given input state, returns rule that matched or nil
-	// par is the parent rule that we're being called from
+	// parent is the parent rule that we're being called from
 	// ast is the current ast node that we add to
-	Parse(ps *State, par *Rule, ast *Ast, scope lex.Reg, optMap lex.TokenMap, depth int) *Rule
+	Parse(ps *State, parent *Rule, ast *Ast, scope lex.Reg, optMap lex.TokenMap, depth int) *Rule
 
 	// AsParseRule returns object as a parse.Rule
 	AsParseRule() *Rule
@@ -672,11 +672,11 @@ func (pr *Rule) StartParse(ps *State) *Rule {
 }
 
 // Parse tries to apply rule to given input state, returns rule that matched or nil
-// par is the parent rule that we're being called from.
+// parent is the parent rule that we're being called from.
 // parAst is the current ast node that we add to.
 // scope is the region to search within, defined by parent or EOS if we have a terminal
 // one
-func (pr *Rule) Parse(ps *State, par *Rule, parAst *Ast, scope lex.Reg, optMap lex.TokenMap, depth int) *Rule {
+func (pr *Rule) Parse(ps *State, parent *Rule, parAst *Ast, scope lex.Reg, optMap lex.TokenMap, depth int) *Rule {
 	if pr.Off {
 		return nil
 	}
@@ -688,7 +688,7 @@ func (pr *Rule) Parse(ps *State, par *Rule, parAst *Ast, scope lex.Reg, optMap l
 
 	nr := len(pr.Rules)
 	if !pr.Is(TokMatchGroup) && nr > 0 {
-		return pr.ParseRules(ps, par, parAst, scope, optMap, depth)
+		return pr.ParseRules(ps, parent, parAst, scope, optMap, depth)
 	}
 
 	if optMap == nil && pr.OptTokMap {
@@ -709,7 +709,7 @@ func (pr *Rule) Parse(ps *State, par *Rule, parAst *Ast, scope lex.Reg, optMap l
 }
 
 // ParseRules parses rules and returns this rule if it matches, nil if not
-func (pr *Rule) ParseRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, optMap lex.TokenMap, depth int) *Rule {
+func (pr *Rule) ParseRules(ps *State, parent *Rule, parAst *Ast, scope lex.Reg, optMap lex.TokenMap, depth int) *Rule {
 	ok := false
 	if pr.Is(SetsScope) {
 		scope, ok = pr.Scope(ps, parAst, scope)
@@ -727,26 +727,26 @@ func (pr *Rule) ParseRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, opt
 		return nil
 	}
 
-	ppar := par.Par.(*Rule)
+	rparent := parent.Par.(*Rule)
 
-	if par.Ast != NoAst && par.IsGroup() {
-		if parAst.Nm != par.Nm {
+	if parent.Ast != NoAst && parent.IsGroup() {
+		if parAst.Nm != parent.Nm {
 			mreg := mpos.StartEndExcl(ps)
-			newAst := ps.AddAst(parAst, par.Name(), mreg)
-			if par.Ast == AnchorAst {
+			newAst := ps.AddAst(parAst, parent.Name(), mreg)
+			if parent.Ast == AnchorAst {
 				parAst = newAst
 			}
 		}
-	} else if par.IsGroup() && ppar.Ast != NoAst && ppar.IsGroup() { // two-level group...
-		if parAst.Nm != ppar.Nm {
+	} else if parent.IsGroup() && rparent.Ast != NoAst && rparent.IsGroup() { // two-level group...
+		if parAst.Nm != rparent.Nm {
 			mreg := mpos.StartEndExcl(ps)
-			newAst := ps.AddAst(parAst, ppar.Name(), mreg)
-			if ppar.Ast == AnchorAst {
+			newAst := ps.AddAst(parAst, rparent.Name(), mreg)
+			if rparent.Ast == AnchorAst {
 				parAst = newAst
 			}
 		}
 	}
-	valid := pr.DoRules(ps, par, parAst, nscope, mpos, optMap, depth) // returns validity but we don't care once matched..
+	valid := pr.DoRules(ps, parent, parAst, nscope, mpos, optMap, depth) // returns validity but we don't care once matched..
 	if !valid {
 		return nil
 	}
@@ -1269,14 +1269,14 @@ func (pr *Rule) MatchExclude(ps *State, scope lex.Reg, ktpos lex.Reg, depth int,
 
 // DoRules after we have matched, goes through rest of the rules -- returns false if
 // there were any issues encountered
-func (pr *Rule) DoRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, mpos Matches, optMap lex.TokenMap, depth int) bool {
-	trcAst := parAst
+func (pr *Rule) DoRules(ps *State, parent *Rule, parentAst *Ast, scope lex.Reg, mpos Matches, optMap lex.TokenMap, depth int) bool {
+	trcAst := parentAst
 	var ourAst *Ast
-	anchorFirst := (pr.Ast == AnchorFirstAst && parAst.Nm != pr.Nm)
+	anchorFirst := (pr.Ast == AnchorFirstAst && parentAst.Nm != pr.Nm)
 
 	if pr.Ast != NoAst {
 		// prf := prof.Start("AddAst")
-		ourAst = ps.AddAst(parAst, pr.Name(), scope)
+		ourAst = ps.AddAst(parentAst, pr.Name(), scope)
 		// prf.End()
 		trcAst = ourAst
 		if ps.Trace.On {
@@ -1284,19 +1284,19 @@ func (pr *Rule) DoRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, mpos M
 		}
 	} else {
 		if ps.Trace.On {
-			ps.Trace.Out(ps, pr, Run, scope.St, scope, trcAst, fmt.Sprintf("running with par ast: %v", trcAst.Path()))
+			ps.Trace.Out(ps, pr, Run, scope.St, scope, trcAst, fmt.Sprintf("running with parent ast: %v", trcAst.Path()))
 		}
 	}
 
 	if pr.Is(Reverse) {
-		return pr.DoRulesRevBinExp(ps, par, parAst, scope, mpos, ourAst, optMap, depth)
+		return pr.DoRulesRevBinExp(ps, parent, parentAst, scope, mpos, ourAst, optMap, depth)
 	}
 
 	nr := len(pr.Rules)
 	valid := true
 	creg := scope
 	for ri := 0; ri < nr; ri++ {
-		pr.DoActs(ps, ri, par, ourAst, parAst)
+		pr.DoActs(ps, ri, parent, ourAst, parentAst)
 		rr := &pr.Rules[ri]
 		if rr.IsToken() && !rr.Opt {
 			mp := mpos[ri].St
@@ -1348,12 +1348,12 @@ func (pr *Rule) DoRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, mpos M
 			pos, ok := ps.FindToken(kt, creg)
 			if !ok {
 				if ps.Trace.On {
-					ps.Trace.Out(ps, pr, NoMatch, creg.St, creg, parAst, fmt.Sprintf("%v token: %v", ri, kt.String()))
+					ps.Trace.Out(ps, pr, NoMatch, creg.St, creg, parentAst, fmt.Sprintf("%v token: %v", ri, kt.String()))
 				}
 				continue
 			}
 			if ps.Trace.On {
-				ps.Trace.Out(ps, pr, Match, pos, creg, parAst, fmt.Sprintf("%v token: %v", ri, kt))
+				ps.Trace.Out(ps, pr, Match, pos, creg, parentAst, fmt.Sprintf("%v token: %v", ri, kt))
 			}
 			ps.Pos, _ = ps.Src.NextTokenPos(pos)
 			continue
@@ -1373,7 +1373,7 @@ func (pr *Rule) DoRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, mpos M
 			valid = false
 			break // no point in continuing
 		}
-		useAst := parAst
+		useAst := parentAst
 		if pr.Ast == AnchorAst || anchorFirst || (pr.Ast == SubAst && ri < nr-1) {
 			useAst = ourAst
 		}
@@ -1400,7 +1400,7 @@ func (pr *Rule) DoRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, mpos M
 		}
 	}
 	if valid {
-		pr.DoActs(ps, -1, par, ourAst, parAst)
+		pr.DoActs(ps, -1, parent, ourAst, parentAst)
 	}
 	return valid
 }
@@ -1410,12 +1410,12 @@ func (pr *Rule) DoRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, mpos M
 // relative to that, and don't otherwise adjust scope or position.  In particular all
 // the position updating taking place in sup-rules is then just ignored and we set the
 // position to the end position matched by the "last" rule (which was the first processed)
-func (pr *Rule) DoRulesRevBinExp(ps *State, par *Rule, parAst *Ast, scope lex.Reg, mpos Matches, ourAst *Ast, optMap lex.TokenMap, depth int) bool {
+func (pr *Rule) DoRulesRevBinExp(ps *State, parent *Rule, parentAst *Ast, scope lex.Reg, mpos Matches, ourAst *Ast, optMap lex.TokenMap, depth int) bool {
 	nr := len(pr.Rules)
 	valid := true
 	creg := scope
 
-	trcAst := parAst
+	trcAst := parentAst
 	if ourAst != nil {
 		trcAst = ourAst
 	}
@@ -1449,7 +1449,7 @@ func (pr *Rule) DoRulesRevBinExp(ps *State, par *Rule, parAst *Ast, scope lex.Re
 				valid = false
 				continue
 			}
-			useAst := parAst
+			useAst := parentAst
 			if pr.Ast == AnchorAst {
 				useAst = ourAst
 			}
@@ -1484,7 +1484,7 @@ func (pr *Rule) DoRulesRevBinExp(ps *State, par *Rule, parAst *Ast, scope lex.Re
 }
 
 // DoActs performs actions at given point in rule execution (ri = rule index, is -1 at end)
-func (pr *Rule) DoActs(ps *State, ri int, par *Rule, ourAst, parAst *Ast) bool {
+func (pr *Rule) DoActs(ps *State, ri int, parent *Rule, ourAst, parentAst *Ast) bool {
 	if len(pr.Acts) == 0 {
 		return false
 	}
@@ -1496,7 +1496,7 @@ func (pr *Rule) DoActs(ps *State, ri int, par *Rule, ourAst, parAst *Ast) bool {
 		if act.RunIndex != ri {
 			continue
 		}
-		if !pr.DoAct(ps, act, par, ourAst, parAst) {
+		if !pr.DoAct(ps, act, parent, ourAst, parentAst) {
 			valid = false
 		}
 	}
@@ -1504,7 +1504,7 @@ func (pr *Rule) DoActs(ps *State, ri int, par *Rule, ourAst, parAst *Ast) bool {
 }
 
 // DoAct performs one action after a rule executes
-func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool {
+func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *Ast) bool {
 	if act.Act == PushStack {
 		ps.Stack.Push(act.Path)
 		return true
