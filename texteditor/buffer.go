@@ -517,7 +517,7 @@ func (tb *Buffer) FileModCheck() bool {
 func (tb *Buffer) Open(filename gi.Filename) error {
 	err := tb.OpenFile(filename)
 	if err != nil {
-		return grr.Log(err)
+		return err
 	}
 	tb.InitialMarkup()
 	tb.SignalViews(BufferNew, nil)
@@ -529,7 +529,7 @@ func (tb *Buffer) Open(filename gi.Filename) error {
 func (tb *Buffer) OpenFS(fsys fs.FS, filename string) error {
 	txt, err := fs.ReadFile(fsys, filename)
 	if err != nil {
-		return grr.Log(err)
+		return err
 	}
 	tb.Txt = txt
 	tb.SetFilename(filename)

@@ -9,7 +9,6 @@ import (
 	"io/fs"
 
 	"cogentcore.org/core/grows/images"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/styles"
 	"github.com/anthonynsimon/bild/clone"
@@ -51,7 +50,7 @@ func (im *Image) OnInit() {
 // Open sets the image to the image located at the given filename.
 func (im *Image) Open(filename Filename) error { //gti:add
 	img, _, err := images.Open(string(filename))
-	if grr.Log(err) != nil {
+	if err != nil {
 		return err
 	}
 	im.SetImage(img)
@@ -61,7 +60,7 @@ func (im *Image) Open(filename Filename) error { //gti:add
 // OpenFS sets the image to the image located at the given filename in the given fs.
 func (im *Image) OpenFS(fsys fs.FS, filename string) error {
 	img, _, err := images.OpenFS(fsys, filename)
-	if grr.Log(err) != nil {
+	if err != nil {
 		return err
 	}
 	im.SetImage(img)
