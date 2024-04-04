@@ -3537,8 +3537,8 @@
                 "FromToken": "None"
               }
             ],
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "Imports",
@@ -3551,8 +3551,8 @@
             "StackMatch": "",
             "Ast": "AnchorAst",
             "Acts": [],
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "Consts",
@@ -3565,8 +3565,8 @@
             "StackMatch": "",
             "Ast": "AnchorAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "Types",
@@ -3579,8 +3579,8 @@
             "StackMatch": "",
             "Ast": "AnchorAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "Vars",
@@ -3593,8 +3593,8 @@
             "StackMatch": "",
             "Ast": "AnchorAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "Funcs",
@@ -3607,8 +3607,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "Stmts",
@@ -3621,8 +3621,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           }
         ],
         "Off": false,
@@ -3631,8 +3631,8 @@
         "StackMatch": "",
         "Ast": "NoAst",
         "Acts": null,
-        "OptTokMap": false,
-        "FirstTokMap": false
+        "OptTokenMap": false,
+        "FirstTokenMap": false
       },
       {
         "Nm": "ExprRules",
@@ -3697,8 +3697,8 @@
                 "StackMatch": "",
                 "Ast": "AddAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "Name",
@@ -3723,8 +3723,8 @@
                     "StackMatch": "",
                     "Ast": "NoAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "KeyName",
@@ -3737,8 +3737,8 @@
                     "StackMatch": "",
                     "Ast": "NoAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   }
                 ],
                 "Off": false,
@@ -3747,8 +3747,8 @@
                 "StackMatch": "",
                 "Ast": "AddAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -3757,8 +3757,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "NameList",
@@ -3783,8 +3783,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorFirstAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "NameListEl",
@@ -3797,8 +3797,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -3807,8 +3807,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "ExprList",
@@ -3833,8 +3833,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "ExprListEl",
@@ -3847,8 +3847,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -3857,8 +3857,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": true,
-            "FirstTokMap": false
+            "OptTokenMap": true,
+            "FirstTokenMap": false
           },
           {
             "Nm": "Expr",
@@ -3889,8 +3889,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "FunLitCall",
@@ -3903,8 +3903,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "FunLit",
@@ -3917,8 +3917,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "BinExpr",
@@ -3931,8 +3931,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "UnryExpr",
@@ -3945,8 +3945,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -3955,8 +3955,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": true,
-            "FirstTokMap": false
+            "OptTokenMap": true,
+            "FirstTokenMap": false
           },
           {
             "Nm": "UnaryExpr",
@@ -3993,8 +3993,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "NegExpr",
@@ -4007,8 +4007,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "UnaryXorExpr",
@@ -4021,8 +4021,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "NotExpr",
@@ -4035,8 +4035,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "DePtrExpr",
@@ -4049,8 +4049,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "AddrExpr",
@@ -4063,8 +4063,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "SendExpr",
@@ -4077,8 +4077,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "PrimExpr",
@@ -4091,8 +4091,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -4101,8 +4101,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": true
+            "OptTokenMap": false,
+            "FirstTokenMap": true
           },
           {
             "Nm": "BinaryExpr",
@@ -4161,8 +4161,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "EqExpr",
@@ -4175,8 +4175,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "LogOrExpr",
@@ -4189,8 +4189,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "LogAndExpr",
@@ -4203,8 +4203,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "GtEqExpr",
@@ -4217,8 +4217,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "GreaterExpr",
@@ -4231,8 +4231,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "LtEqExpr",
@@ -4245,8 +4245,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "LessExpr",
@@ -4259,8 +4259,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "BitOrExpr",
@@ -4273,8 +4273,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "BitAndExpr",
@@ -4287,8 +4287,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "BitXorExpr",
@@ -4301,8 +4301,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "BitAndNotExpr",
@@ -4315,8 +4315,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "ShiftRightExpr",
@@ -4329,8 +4329,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "ShiftLeftExpr",
@@ -4343,8 +4343,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "SubExpr",
@@ -4357,8 +4357,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "AddExpr",
@@ -4371,8 +4371,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "RemExpr",
@@ -4385,8 +4385,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "DivExpr",
@@ -4399,8 +4399,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "MultExpr",
@@ -4413,8 +4413,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -4423,8 +4423,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "PrimaryExpr",
@@ -4499,8 +4499,8 @@
                     "StackMatch": "",
                     "Ast": "AddAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "LitNumInteger",
@@ -4513,8 +4513,8 @@
                     "StackMatch": "",
                     "Ast": "AddAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "LitNumFloat",
@@ -4527,8 +4527,8 @@
                     "StackMatch": "",
                     "Ast": "AddAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "LitNumImag",
@@ -4541,8 +4541,8 @@
                     "StackMatch": "",
                     "Ast": "AddAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "LitStringDbl",
@@ -4555,8 +4555,8 @@
                     "StackMatch": "",
                     "Ast": "AddAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "LitStringTicks",
@@ -4591,8 +4591,8 @@
                             "StackMatch": "",
                             "Ast": "NoAst",
                             "Acts": null,
-                            "OptTokMap": false,
-                            "FirstTokMap": false
+                            "OptTokenMap": false,
+                            "FirstTokenMap": false
                           },
                           {
                             "Nm": "LitStringTick",
@@ -4605,8 +4605,8 @@
                             "StackMatch": "",
                             "Ast": "AddAst",
                             "Acts": null,
-                            "OptTokMap": false,
-                            "FirstTokMap": false
+                            "OptTokenMap": false,
+                            "FirstTokenMap": false
                           }
                         ],
                         "Off": false,
@@ -4615,8 +4615,8 @@
                         "StackMatch": "",
                         "Ast": "NoAst",
                         "Acts": null,
-                        "OptTokMap": false,
-                        "FirstTokMap": false
+                        "OptTokenMap": false,
+                        "FirstTokenMap": false
                       }
                     ],
                     "Off": false,
@@ -4625,8 +4625,8 @@
                     "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "LitString",
@@ -4639,8 +4639,8 @@
                     "StackMatch": "",
                     "Ast": "AddAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   }
                 ],
                 "Off": false,
@@ -4649,8 +4649,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": true
+                "OptTokenMap": false,
+                "FirstTokenMap": true
               },
               {
                 "Nm": "FuncExpr",
@@ -4675,8 +4675,8 @@
                     "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "FuncLit",
@@ -4689,8 +4689,8 @@
                     "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   }
                 ],
                 "Off": false,
@@ -4699,8 +4699,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "MakeCall",
@@ -4713,8 +4713,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "NewCall",
@@ -4727,8 +4727,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "Paren",
@@ -4757,8 +4757,8 @@
                     "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "ConvertParens",
@@ -4771,8 +4771,8 @@
                     "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "ParenSelector",
@@ -4785,8 +4785,8 @@
                     "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "ParenExpr",
@@ -4799,8 +4799,8 @@
                     "StackMatch": "",
                     "Ast": "NoAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   }
                 ],
                 "Off": false,
@@ -4809,8 +4809,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "Convert",
@@ -4823,8 +4823,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "TypeAssertSel",
@@ -4837,8 +4837,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "TypeAssert",
@@ -4851,8 +4851,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "Selector",
@@ -4873,8 +4873,8 @@
                     "FromToken": "None"
                   }
                 ],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "CompositeLit",
@@ -4887,8 +4887,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "SliceCall",
@@ -4901,8 +4901,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "Slice",
@@ -4915,8 +4915,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "MethCall",
@@ -4937,8 +4937,8 @@
                     "FromToken": "None"
                   }
                 ],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "FuncCallFun",
@@ -4959,8 +4959,8 @@
                     "FromToken": "None"
                   }
                 ],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "FuncCall",
@@ -4981,8 +4981,8 @@
                     "FromToken": "None"
                   }
                 ],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "OpName",
@@ -4995,8 +4995,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -5005,8 +5005,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": true
+            "OptTokenMap": false,
+            "FirstTokenMap": true
           },
           {
             "Nm": "LiteralType",
@@ -5059,8 +5059,8 @@
                     "FromToken": "None"
                   }
                 ],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "LitIFaceType",
@@ -5073,8 +5073,8 @@
                 "StackMatch": "",
                 "Ast": "AddAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "LitSliceOrArray",
@@ -5116,8 +5116,8 @@
                         "FromToken": "None"
                       }
                     ],
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "LitArrayAutoType",
@@ -5145,8 +5145,8 @@
                         "FromToken": "None"
                       }
                     ],
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "LitArrayType",
@@ -5174,8 +5174,8 @@
                         "FromToken": "None"
                       }
                     ],
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   }
                 ],
                 "Off": false,
@@ -5184,8 +5184,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "LitMapType",
@@ -5213,8 +5213,8 @@
                     "FromToken": "None"
                   }
                 ],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "LitTypeName",
@@ -5227,8 +5227,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -5237,8 +5237,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": true
+            "OptTokenMap": false,
+            "FirstTokenMap": true
           },
           {
             "Nm": "LiteralValue",
@@ -5251,8 +5251,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "ElementList",
@@ -5277,8 +5277,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "KeyedEl",
@@ -5303,8 +5303,8 @@
                     "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "Element",
@@ -5331,8 +5331,8 @@
                         "StackMatch": "",
                         "Ast": "SubAst",
                         "Acts": null,
-                        "OptTokMap": false,
-                        "FirstTokMap": false
+                        "OptTokenMap": false,
+                        "FirstTokenMap": false
                       },
                       {
                         "Nm": "ElExpr",
@@ -5345,8 +5345,8 @@
                         "StackMatch": "",
                         "Ast": "AnchorAst",
                         "Acts": null,
-                        "OptTokMap": false,
-                        "FirstTokMap": false
+                        "OptTokenMap": false,
+                        "FirstTokenMap": false
                       },
                       {
                         "Nm": "ElLitVal",
@@ -5359,8 +5359,8 @@
                         "StackMatch": "",
                         "Ast": "NoAst",
                         "Acts": null,
-                        "OptTokMap": false,
-                        "FirstTokMap": false
+                        "OptTokenMap": false,
+                        "FirstTokenMap": false
                       }
                     ],
                     "Off": false,
@@ -5369,8 +5369,8 @@
                     "StackMatch": "",
                     "Ast": "NoAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   }
                 ],
                 "Off": false,
@@ -5379,8 +5379,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -5389,8 +5389,8 @@
             "StackMatch": "",
             "Ast": "AnchorAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "Key",
@@ -5415,8 +5415,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "KeyExpr",
@@ -5429,8 +5429,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -5439,8 +5439,8 @@
             "StackMatch": "",
             "Ast": "AnchorAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "RecvType",
@@ -5467,8 +5467,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "ParenRecvType",
@@ -5481,8 +5481,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "RecvTp",
@@ -5495,8 +5495,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -5505,8 +5505,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "SliceExpr",
@@ -5533,8 +5533,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "SliceTwo",
@@ -5547,8 +5547,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "SliceOne",
@@ -5561,8 +5561,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -5571,8 +5571,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "SliceIndexes",
@@ -5599,8 +5599,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "SliceIndex2",
@@ -5613,8 +5613,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "SliceIndex3",
@@ -5627,8 +5627,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -5637,8 +5637,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "ArgsExpr",
@@ -5663,8 +5663,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "Args",
@@ -5677,8 +5677,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -5687,8 +5687,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "ArgsList",
@@ -5713,8 +5713,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "ArgsListEl",
@@ -5727,8 +5727,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": [],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -5737,8 +5737,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           }
         ],
         "Off": false,
@@ -5747,8 +5747,8 @@
         "StackMatch": "",
         "Ast": "NoAst",
         "Acts": null,
-        "OptTokMap": false,
-        "FirstTokMap": false
+        "OptTokenMap": false,
+        "FirstTokenMap": false
       },
       {
         "Nm": "TypeRules",
@@ -5799,8 +5799,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "TypeLit",
@@ -5813,8 +5813,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "TypeName",
@@ -5843,8 +5843,8 @@
                     "StackMatch": "",
                     "Ast": "AddAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "QualType",
@@ -5865,8 +5865,8 @@
                         "FromToken": "None"
                       }
                     ],
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "QualBasicType",
@@ -5887,8 +5887,8 @@
                         "FromToken": "None"
                       }
                     ],
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "TypeNm",
@@ -5909,8 +5909,8 @@
                         "FromToken": "None"
                       }
                     ],
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   }
                 ],
                 "Off": false,
@@ -5919,8 +5919,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -5929,8 +5929,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": true,
-            "FirstTokMap": false
+            "OptTokenMap": true,
+            "FirstTokenMap": false
           },
           {
             "Nm": "TypeLiteral",
@@ -5996,8 +5996,8 @@
                         "FromToken": "None"
                       }
                     ],
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "ArrayAutoType",
@@ -6025,8 +6025,8 @@
                         "FromToken": "None"
                       }
                     ],
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "ArrayType",
@@ -6054,8 +6054,8 @@
                         "FromToken": "None"
                       }
                     ],
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   }
                 ],
                 "Off": false,
@@ -6064,8 +6064,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "StructType",
@@ -6100,8 +6100,8 @@
                     "FromToken": "None"
                   }
                 ],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "PointerType",
@@ -6114,8 +6114,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "FuncType",
@@ -6128,8 +6128,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "InterfaceType",
@@ -6164,8 +6164,8 @@
                     "FromToken": "None"
                   }
                 ],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "MapType",
@@ -6193,8 +6193,8 @@
                     "FromToken": "None"
                   }
                 ],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "SendChanType",
@@ -6207,8 +6207,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "ChannelType",
@@ -6233,8 +6233,8 @@
                     "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "SRChanType",
@@ -6247,8 +6247,8 @@
                     "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   }
                 ],
                 "Off": false,
@@ -6257,8 +6257,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -6267,8 +6267,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": true
+            "OptTokenMap": false,
+            "FirstTokenMap": true
           },
           {
             "Nm": "FieldDecls",
@@ -6281,8 +6281,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "FieldDecl",
@@ -6324,8 +6324,8 @@
                     "FromToken": "None"
                   }
                 ],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "AnonPtrField",
@@ -6353,8 +6353,8 @@
                     "FromToken": "None"
                   }
                 ],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "NamedField",
@@ -6382,8 +6382,8 @@
                     "FromToken": "None"
                   }
                 ],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -6392,8 +6392,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "FieldTag",
@@ -6406,8 +6406,8 @@
             "StackMatch": "",
             "Ast": "AddAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "TypeDeclN",
@@ -6432,8 +6432,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "TypeDeclEl",
@@ -6475,8 +6475,8 @@
                     "FromToken": "None"
                   }
                 ],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -6485,8 +6485,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "TypeDecls",
@@ -6499,8 +6499,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "TypeList",
@@ -6525,8 +6525,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorFirstAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "TypeListEl",
@@ -6539,8 +6539,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -6549,8 +6549,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           }
         ],
         "Off": false,
@@ -6559,8 +6559,8 @@
         "StackMatch": "",
         "Ast": "NoAst",
         "Acts": null,
-        "OptTokMap": false,
-        "FirstTokMap": false
+        "OptTokenMap": false,
+        "FirstTokenMap": false
       },
       {
         "Nm": "FuncRules",
@@ -6659,8 +6659,8 @@
                     "FromToken": "None"
                   }
                 ],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "FuncDecl",
@@ -6702,8 +6702,8 @@
                     "FromToken": "None"
                   }
                 ],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -6712,8 +6712,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "MethRecv",
@@ -6753,8 +6753,8 @@
                     "FromToken": "None"
                   }
                 ],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "MethRecvNoNm",
@@ -6775,8 +6775,8 @@
                     "FromToken": "None"
                   }
                 ],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -6785,8 +6785,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": [],
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "Signature",
@@ -6811,8 +6811,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "SigParams",
@@ -6825,8 +6825,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -6835,8 +6835,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "MethodSpec",
@@ -6880,8 +6880,8 @@
                     "FromToken": "None"
                   }
                 ],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "MethSpecName",
@@ -6909,8 +6909,8 @@
                     "FromToken": "None"
                   }
                 ],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "MethSpecAnonLocal",
@@ -6938,8 +6938,8 @@
                     "FromToken": "None"
                   }
                 ],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "MethSpecNone",
@@ -6952,8 +6952,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -6962,8 +6962,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "MethodSpecs",
@@ -6976,8 +6976,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "Result",
@@ -7002,8 +7002,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "ResultOne",
@@ -7016,8 +7016,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -7026,8 +7026,8 @@
             "StackMatch": "",
             "Ast": "AnchorAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "ParamsList",
@@ -7054,8 +7054,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "ParName",
@@ -7090,8 +7090,8 @@
                     "FromToken": "None"
                   }
                 ],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "ParType",
@@ -7104,8 +7104,8 @@
                 "StackMatch": "",
                 "Ast": "SubAst",
                 "Acts": [],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -7114,8 +7114,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "Params",
@@ -7128,8 +7128,8 @@
             "StackMatch": "",
             "Ast": "AnchorAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           }
         ],
         "Off": false,
@@ -7138,8 +7138,8 @@
         "StackMatch": "",
         "Ast": "NoAst",
         "Acts": null,
-        "OptTokMap": false,
-        "FirstTokMap": false
+        "OptTokenMap": false,
+        "FirstTokenMap": false
       },
       {
         "Nm": "StmtRules",
@@ -7174,8 +7174,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "BlockList",
@@ -7188,8 +7188,8 @@
             "StackMatch": "",
             "Ast": "AnchorAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "Stmt",
@@ -7248,8 +7248,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "TypeDeclStmt",
@@ -7262,8 +7262,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "VarDeclStmt",
@@ -7276,8 +7276,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "ReturnStmt",
@@ -7290,8 +7290,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "BreakStmt",
@@ -7304,8 +7304,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "ContStmt",
@@ -7318,8 +7318,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "GotoStmt",
@@ -7332,8 +7332,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "GoStmt",
@@ -7346,8 +7346,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "FallthroughStmt",
@@ -7360,8 +7360,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "DeferStmt",
@@ -7374,8 +7374,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "IfStmt",
@@ -7400,8 +7400,8 @@
                     "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "IfStmtInit",
@@ -7414,8 +7414,8 @@
                     "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   }
                 ],
                 "Off": false,
@@ -7424,8 +7424,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "ForStmt",
@@ -7458,8 +7458,8 @@
                     "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "ForRangeNewLit",
@@ -7487,8 +7487,8 @@
                         "FromToken": "None"
                       }
                     ],
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "ForRangeNew",
@@ -7516,8 +7516,8 @@
                         "FromToken": "None"
                       }
                     ],
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "ForRangeOnly",
@@ -7538,8 +7538,8 @@
                         "FromToken": "None"
                       }
                     ],
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "ForExpr",
@@ -7552,8 +7552,8 @@
                     "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "ForClauseStmt",
@@ -7566,8 +7566,8 @@
                     "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   }
                 ],
                 "Off": false,
@@ -7576,8 +7576,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "SwitchStmt",
@@ -7625,8 +7625,8 @@
                         "FromToken": "None"
                       }
                     ],
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "SwitchTypeAnon",
@@ -7654,8 +7654,8 @@
                         "FromToken": "None"
                       }
                     ],
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "SwitchExpr",
@@ -7668,8 +7668,8 @@
                     "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "SwitchTypeNameInit",
@@ -7697,8 +7697,8 @@
                         "FromToken": "None"
                       }
                     ],
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "SwitchTypeAnonInit",
@@ -7726,8 +7726,8 @@
                         "FromToken": "None"
                       }
                     ],
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "SwitchInit",
@@ -7740,8 +7740,8 @@
                     "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   }
                 ],
                 "Off": false,
@@ -7750,8 +7750,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "SelectStmt",
@@ -7764,8 +7764,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "CaseStmt",
@@ -7800,8 +7800,8 @@
                     "StackMatch": "SwitchType",
                     "Ast": "AnchorAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "TypeCaseStmt",
@@ -7814,8 +7814,8 @@
                     "StackMatch": "SwitchType",
                     "Ast": "AnchorAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "SelCaseRecvExistStmt",
@@ -7828,8 +7828,8 @@
                     "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "SelCaseRecvNewStmt",
@@ -7842,8 +7842,8 @@
                     "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "SelCaseSendStmt",
@@ -7856,8 +7856,8 @@
                     "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "CaseEmptyStmt",
@@ -7870,8 +7870,8 @@
                     "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "CaseExprStmt",
@@ -7884,8 +7884,8 @@
                     "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   }
                 ],
                 "Off": false,
@@ -7894,8 +7894,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "DefaultStmt",
@@ -7908,8 +7908,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "LabeledStmt",
@@ -7930,8 +7930,8 @@
                     "FromToken": "None"
                   }
                 ],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "Block",
@@ -7944,8 +7944,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "SimpleSt",
@@ -7958,8 +7958,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -7968,8 +7968,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": true
+            "OptTokenMap": false,
+            "FirstTokenMap": true
           },
           {
             "Nm": "SimpleStmt",
@@ -8000,8 +8000,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "DecrStmt",
@@ -8014,8 +8014,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "AsgnStmt",
@@ -8028,8 +8028,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "SendStmt",
@@ -8042,8 +8042,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "ExprStmt",
@@ -8056,8 +8056,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -8066,8 +8066,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "PostStmt",
@@ -8104,8 +8104,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "PostIncrStmt",
@@ -8118,8 +8118,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "PostDecrStmt",
@@ -8132,8 +8132,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "PostAsgnExisting",
@@ -8146,8 +8146,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": [],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "PostAsgnBit",
@@ -8160,8 +8160,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": [],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "PostAsgnMath",
@@ -8174,8 +8174,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": [],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "PostAsgnNew",
@@ -8210,8 +8210,8 @@
                     "FromToken": "None"
                   }
                 ],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "PostExprStmt",
@@ -8224,8 +8224,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -8234,8 +8234,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "Asgn",
@@ -8264,8 +8264,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": [],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "AsgnNew",
@@ -8300,8 +8300,8 @@
                     "FromToken": "None"
                   }
                 ],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "AsgnMath",
@@ -8314,8 +8314,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": [],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "AsgnBit",
@@ -8328,8 +8328,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": [],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -8338,8 +8338,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "Elses",
@@ -8366,8 +8366,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "ElseStmt",
@@ -8380,8 +8380,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "ElseIfStmtInit",
@@ -8394,8 +8394,8 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -8404,8 +8404,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           }
         ],
         "Off": false,
@@ -8414,8 +8414,8 @@
         "StackMatch": "",
         "Ast": "NoAst",
         "Acts": null,
-        "OptTokMap": false,
-        "FirstTokMap": false
+        "OptTokenMap": false,
+        "FirstTokenMap": false
       },
       {
         "Nm": "ImportRules",
@@ -8452,8 +8452,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "ImportOne",
@@ -8466,8 +8466,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -8476,8 +8476,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "ImportList",
@@ -8517,8 +8517,8 @@
                     "FromToken": "None"
                   }
                 ],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "Import",
@@ -8546,8 +8546,8 @@
                     "FromToken": "None"
                   }
                 ],
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -8556,8 +8556,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           }
         ],
         "Off": false,
@@ -8566,8 +8566,8 @@
         "StackMatch": "",
         "Ast": "NoAst",
         "Acts": null,
-        "OptTokMap": false,
-        "FirstTokMap": false
+        "OptTokenMap": false,
+        "FirstTokenMap": false
       },
       {
         "Nm": "DeclRules",
@@ -8602,8 +8602,8 @@
             "StackMatch": "",
             "Ast": "AnchorAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "ConstDecl",
@@ -8616,8 +8616,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "VarDecl",
@@ -8630,8 +8630,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "ConstDeclN",
@@ -8656,8 +8656,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "ConstOpts",
@@ -8704,8 +8704,8 @@
                         "FromToken": "None"
                       }
                     ],
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "ConstSpecName",
@@ -8733,8 +8733,8 @@
                         "FromToken": "None"
                       }
                     ],
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   }
                 ],
                 "Off": false,
@@ -8743,8 +8743,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -8753,8 +8753,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "ConstList",
@@ -8767,8 +8767,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "VarDeclN",
@@ -8793,8 +8793,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               },
               {
                 "Nm": "VarOpts",
@@ -8841,8 +8841,8 @@
                         "FromToken": "None"
                       }
                     ],
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   },
                   {
                     "Nm": "VarSpec",
@@ -8877,8 +8877,8 @@
                         "FromToken": "None"
                       }
                     ],
-                    "OptTokMap": false,
-                    "FirstTokMap": false
+                    "OptTokenMap": false,
+                    "FirstTokenMap": false
                   }
                 ],
                 "Off": false,
@@ -8887,8 +8887,8 @@
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
+                "OptTokenMap": false,
+                "FirstTokenMap": false
               }
             ],
             "Off": false,
@@ -8897,8 +8897,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           },
           {
             "Nm": "VarList",
@@ -8911,8 +8911,8 @@
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
+            "OptTokenMap": false,
+            "FirstTokenMap": false
           }
         ],
         "Off": false,
@@ -8921,8 +8921,8 @@
         "StackMatch": "",
         "Ast": "NoAst",
         "Acts": null,
-        "OptTokMap": false,
-        "FirstTokMap": false
+        "OptTokenMap": false,
+        "FirstTokenMap": false
       }
     ],
     "Off": false,
@@ -8931,8 +8931,8 @@
     "StackMatch": "",
     "Ast": "NoAst",
     "Acts": null,
-    "OptTokMap": false,
-    "FirstTokMap": false
+    "OptTokenMap": false,
+    "FirstTokenMap": false
   },
   "Filename": "",
   "ReportErrs": false

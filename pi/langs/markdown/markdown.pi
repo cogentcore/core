@@ -1212,8 +1212,8 @@
     "StackMatch": "",
     "Ast": "NoAst",
     "Acts": null,
-    "OptTokMap": false,
-    "FirstTokMap": false
+    "OptTokenMap": false,
+    "FirstTokenMap": false
   },
   "Filename": "",
   "ReportErrs": false

@@ -154,15 +154,15 @@ func (pt *PassTwo) NestDepth(ts *TwoState) {
 			continue
 		}
 		lx := ts.Src.LexAt(ts.Pos)
-		tok := lx.Tok.Tok
+		tok := lx.Token.Tok
 		if tok.IsPunctGpLeft() {
-			lx.Tok.Depth = len(ts.NestStack) // depth increments AFTER -- this turns out to be ESSENTIAL!
+			lx.Token.Depth = len(ts.NestStack) // depth increments AFTER -- this turns out to be ESSENTIAL!
 			pt.PushNest(ts, tok)
 		} else if tok.IsPunctGpRight() {
 			pt.PopNest(ts, tok)
-			lx.Tok.Depth = len(ts.NestStack) // end has same depth as start, which is same as SURROUND
+			lx.Token.Depth = len(ts.NestStack) // end has same depth as start, which is same as SURROUND
 		} else {
-			lx.Tok.Depth = len(ts.NestStack)
+			lx.Token.Depth = len(ts.NestStack)
 		}
 		ts.Pos.Ch++
 		if ts.Pos.Ch >= sz {
@@ -185,15 +185,15 @@ func (pt *PassTwo) NestDepthLine(line Line, initDepth int) {
 	depth := initDepth
 	for i := 0; i < sz; i++ {
 		lx := &line[i]
-		tok := lx.Tok.Tok
+		tok := lx.Token.Tok
 		if tok.IsPunctGpLeft() {
-			lx.Tok.Depth = depth
+			lx.Token.Depth = depth
 			depth++
 		} else if tok.IsPunctGpRight() {
 			depth--
-			lx.Tok.Depth = depth
+			lx.Token.Depth = depth
 		} else {
-			lx.Tok.Depth = depth
+			lx.Token.Depth = depth
 		}
 	}
 }
@@ -218,7 +218,7 @@ func (pt *PassTwo) EosDetectPos(ts *TwoState, pos Pos, nln int) {
 		if pt.Semi {
 			for ts.Pos.Ch = 0; ts.Pos.Ch < sz; ts.Pos.Ch++ {
 				lx := ts.Src.LexAt(ts.Pos)
-				if lx.Tok.Tok == token.PunctSepSemicolon {
+				if lx.Token.Tok == token.PunctSepSemicolon {
 					ts.Src.ReplaceEos(ts.Pos)
 				}
 			}
@@ -227,20 +227,20 @@ func (pt *PassTwo) EosDetectPos(ts *TwoState, pos Pos, nln int) {
 			skip := false
 			for ci := 0; ci < sz; ci++ {
 				lx := ts.Src.LexAt(Pos{ts.Pos.Ln, ci})
-				if lx.Tok.Tok == token.PunctGpRBrace {
+				if lx.Token.Tok == token.PunctGpRBrace {
 					if ci == 0 {
 						ip := Pos{ts.Pos.Ln, 0}
 						ip, ok = ts.Src.PrevTokenPos(ip)
 						if ok {
 							ilx := ts.Src.LexAt(ip)
-							if ilx.Tok.Tok != token.PunctGpLBrace && ilx.Tok.Tok != token.EOS {
+							if ilx.Token.Tok != token.PunctGpLBrace && ilx.Token.Tok != token.EOS {
 								ts.Src.InsertEos(ip)
 							}
 						}
 					} else {
 						ip := Pos{ts.Pos.Ln, ci - 1}
 						ilx := ts.Src.LexAt(ip)
-						if ilx.Tok.Tok != token.PunctGpLBrace {
+						if ilx.Token.Tok != token.PunctGpLBrace {
 							ts.Src.InsertEos(ip)
 							ci++
 							sz++
@@ -264,12 +264,12 @@ func (pt *PassTwo) EosDetectPos(ts *TwoState, pos Pos, nln int) {
 		if pt.Eol {
 			sp := Pos{ts.Pos.Ln, 0} // start of line token
 			slx := ts.Src.LexAt(sp)
-			if slx.Tok.Depth == elx.Tok.Depth {
+			if slx.Token.Depth == elx.Token.Depth {
 				ts.Src.InsertEos(ep)
 			}
 		}
 		if len(pt.EolToks) > 0 { // not depth specific
-			if pt.EolToks.Match(elx.Tok) {
+			if pt.EolToks.Match(elx.Token) {
 				ts.Src.InsertEos(ep)
 			}
 		}

@@ -155,7 +155,7 @@ func (gl *GoLang) IndentLine(fs *pi.FileStates, src [][]rune, tags []lex.Line, l
 	if len(tags[pLn]) >= 2 { // allow for comments
 		pl := tags[pLn][0]
 		ll := tags[pLn][1]
-		if ll.Tok.Tok == token.PunctGpRParen && pl.Tok.Tok == token.PunctGpRBrace {
+		if ll.Token.Tok == token.PunctGpRParen && pl.Token.Tok == token.PunctGpRBrace {
 			brackParen = true
 		}
 	}

@@ -90,13 +90,13 @@ func (ac Act) String() string {
 // ChgTok changes the token type, using FromToken logic
 func (ac *Act) ChgTok(lx *lex.Lex) {
 	if ac.FromToken == token.None {
-		lx.Tok.Tok = ac.Token
+		lx.Token.Tok = ac.Token
 		return
 	}
-	if lx.Tok.Tok != ac.FromToken {
+	if lx.Token.Tok != ac.FromToken {
 		return
 	}
-	lx.Tok.Tok = ac.Token
+	lx.Token.Tok = ac.Token
 }
 
 // Acts are multiple actions

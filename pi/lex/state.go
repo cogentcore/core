@@ -169,7 +169,7 @@ func (ls *State) Add(tok token.KeyToken, st, ed int) {
 	sz := len(*lxl)
 	if sz > 0 && tok.Tok.CombineRepeats() {
 		lst := &(*lxl)[sz-1]
-		if lst.Tok.Tok == tok.Tok && lst.Ed == st {
+		if lst.Token.Tok == tok.Tok && lst.Ed == st {
 			lst.Ed = ed
 			return
 		}

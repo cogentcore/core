@@ -351,7 +351,7 @@ func (fl *File) PrevTokenPos(pos Pos) (Pos, bool) {
 
 // Token gets lex token at given Pos (Ch = token index)
 func (fl *File) Token(pos Pos) token.KeyToken {
-	return fl.Lexs[pos.Ln][pos.Ch].Tok
+	return fl.Lexs[pos.Ln][pos.Ch].Token
 }
 
 // PrevDepth returns the depth of the token immediately prior to given line
@@ -362,8 +362,8 @@ func (fl *File) PrevDepth(ln int) int {
 		return 0
 	}
 	lx := fl.LexAt(pos)
-	depth := lx.Tok.Depth
-	if lx.Tok.Tok.IsPunctGpLeft() {
+	depth := lx.Token.Depth
+	if lx.Token.Tok.IsPunctGpLeft() {
 		depth++
 	}
 	return depth
@@ -489,8 +489,8 @@ func (fl *File) LexTagSrc() string {
 func (fl *File) InsertEos(cp Pos) Pos {
 	np := Pos{cp.Ln, cp.Ch + 1}
 	elx := fl.LexAt(cp)
-	depth := elx.Tok.Depth
-	fl.Lexs[cp.Ln].Insert(np.Ch, Lex{Tok: token.KeyToken{Tok: token.EOS, Depth: depth}, St: elx.Ed, Ed: elx.Ed})
+	depth := elx.Token.Depth
+	fl.Lexs[cp.Ln].Insert(np.Ch, Lex{Token: token.KeyToken{Tok: token.EOS, Depth: depth}, St: elx.Ed, Ed: elx.Ed})
 	fl.EosPos[np.Ln] = append(fl.EosPos[np.Ln], np.Ch)
 	return np
 }
@@ -498,7 +498,7 @@ func (fl *File) InsertEos(cp Pos) Pos {
 // ReplaceEos replaces given token with an EOS
 func (fl *File) ReplaceEos(cp Pos) {
 	clex := fl.LexAt(cp)
-	clex.Tok.Tok = token.EOS
+	clex.Token.Tok = token.EOS
 	fl.EosPos[cp.Ln] = append(fl.EosPos[cp.Ln], cp.Ch)
 }
 
@@ -516,7 +516,7 @@ func (fl *File) EnsureFinalEos(ln int) {
 	}
 	ep := Pos{ln, sz - 1}
 	elx := fl.LexAt(ep)
-	if elx.Tok.Tok == token.EOS {
+	if elx.Token.Tok == token.EOS {
 		return
 	}
 	fl.InsertEos(ep)
@@ -539,7 +539,7 @@ func (fl *File) NextEos(stpos Pos, depth int) (Pos, bool) {
 		}
 		ep.Ch = eps[i]
 		lx := fl.LexAt(ep)
-		if lx.Tok.Depth == depth {
+		if lx.Token.Depth == depth {
 			return ep, true
 		}
 	}
@@ -552,7 +552,7 @@ func (fl *File) NextEos(stpos Pos, depth int) (Pos, bool) {
 		for i := 0; i < sz; i++ {
 			ep.Ch = eps[i]
 			lx := fl.LexAt(ep)
-			if lx.Tok.Depth == depth {
+			if lx.Token.Depth == depth {
 				return ep, true
 			}
 		}

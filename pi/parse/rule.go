@@ -67,7 +67,7 @@ type Rule struct {
 	// description / comments about this rule
 	Desc string
 
-	// the rule as a space-separated list of rule names and token(s) -- use single quotes around 'tokens' (using token.Tokens names or symbols). For keywords use 'key:keyword'.  All tokens are matched at the same nesting depth as the start of the scope of this rule, unless they have a +D relative depth value differential before the token.  Use @ prefix for a sub-rule to require that rule to match -- by default explicit tokens are used if available, and then only the first sub-rule failing that.  Use ! by itself to define start of an exclusionary rule -- doesn't match when those rule elements DO match.  Use : prefix for a special group node that matches a single token at start of scope, and then defers to the child rules to perform full match -- this is used for FirstTokMap when there are multiple versions of a given keyword rule.  Use - prefix for tokens anchored by the end (next token) instead of the previous one -- typically just for token prior to 'EOS' but also a block of tokens that need to go backward in the middle of a sequence to avoid ambiguity can be marked with -
+	// the rule as a space-separated list of rule names and token(s) -- use single quotes around 'tokens' (using token.Tokens names or symbols). For keywords use 'key:keyword'.  All tokens are matched at the same nesting depth as the start of the scope of this rule, unless they have a +D relative depth value differential before the token.  Use @ prefix for a sub-rule to require that rule to match -- by default explicit tokens are used if available, and then only the first sub-rule failing that.  Use ! by itself to define start of an exclusionary rule -- doesn't match when those rule elements DO match.  Use : prefix for a special group node that matches a single token at start of scope, and then defers to the child rules to perform full match -- this is used for FirstTokenMap when there are multiple versions of a given keyword rule.  Use - prefix for tokens anchored by the end (next token) instead of the previous one -- typically just for token prior to 'EOS' but also a block of tokens that need to go backward in the middle of a sequence to avoid ambiguity can be marked with -
 	Rule string
 
 	// if present, this rule only fires if stack has this on it
@@ -80,10 +80,10 @@ type Rule struct {
 	Acts Acts
 
 	// for group-level rules having lots of children and lots of recursiveness, and also of high-frequency, when we first encounter such a rule, make a map of all the tokens in the entire scope, and use that for a first-pass rejection on matching tokens
-	OptTokMap bool
+	OptTokenMap bool
 
 	// for group-level rules with a number of rules that match based on first tokens / keywords, build map to directly go to that rule -- must also organize all of these rules sequentially from the start -- if no match, goes directly to first non-lookup case
-	FirstTokMap bool
+	FirstTokenMap bool
 
 	// rule elements compiled from Rule string
 	Rules RuleList `json:"-" xml:"-"`
@@ -91,11 +91,11 @@ type Rule struct {
 	// strategic matching order for matching the rules
 	Order []int `edit:"-" json:"-" xml:"-"`
 
-	// map from first tokens / keywords to rules for FirstTokMap case
-	FiTokMap map[string]*Rule `edit:"-" json:"-" xml:"-"`
+	// map from first tokens / keywords to rules for FirstTokenMap case
+	FiTokenMap map[string]*Rule `edit:"-" json:"-" xml:"-"`
 
-	// for FirstTokMap, the start of the else cases not covered by the map
-	FiTokElseIndex int `edit:"-" json:"-" xml:"-"`
+	// for FirstTokenMap, the start of the else cases not covered by the map
+	FiTokenElseIndex int `edit:"-" json:"-" xml:"-"`
 
 	// exclusionary key index -- this is the token in Rules that we need to exclude matches for using ExclFwd and ExclRev rules
 	ExclKeyIndex int `edit:"-" json:"-" xml:"-"`
@@ -121,13 +121,13 @@ const (
 	// in the middle.
 	Reverse
 
-	// NoToks means that this rule doesn't have any explicit tokens -- only refers to
+	// NoTokens means that this rule doesn't have any explicit tokens -- only refers to
 	// other rules
-	NoToks
+	NoTokens
 
-	// OnlyToks means that this rule only has explicit tokens for matching -- can be
+	// OnlyTokens means that this rule only has explicit tokens for matching -- can be
 	// optimized
-	OnlyToks
+	OnlyTokens
 
 	// MatchEOS means that the rule ends with a *matched* EOS with StInc = 1.
 	// SetsScope applies for optional and matching EOS rules alike.
@@ -137,9 +137,9 @@ const (
 	// changes some of the logic
 	MultiEOS
 
-	// TokMatchGroup is a group node that also has a single token match, so it can
-	// be used in a FirstTokMap to optimize lookup of rules
-	TokMatchGroup
+	// TokenMatchGroup is a group node that also has a single token match, so it can
+	// be used in a FirstTokenMap to optimize lookup of rules
+	TokenMatchGroup
 )
 
 // Parser is the interface type for parsers -- likely not necessary except is essential
@@ -173,7 +173,7 @@ type RuleEl struct {
 	Rule *Rule
 
 	// token, None if rule
-	Tok token.KeyToken
+	Token token.KeyToken
 
 	// start increment for matching -- this is the number of non-optional, non-match items between (start | last match) and this item -- increments start region for matching
 	StInc int
@@ -306,12 +306,12 @@ func (pr *Rule) Compile(ps *State) bool {
 	pr.Rules = make(RuleList, nr)
 	pr.ExclFwd = nil
 	pr.ExclRev = nil
-	pr.SetFlag(false, NoToks)
-	pr.SetFlag(true, OnlyToks) // default is this..
+	pr.SetFlag(false, NoTokens)
+	pr.SetFlag(true, OnlyTokens) // default is this..
 	pr.SetFlag(false, SetsScope)
 	pr.SetFlag(false, MatchEOS)
 	pr.SetFlag(false, MultiEOS)
-	pr.SetFlag(false, TokMatchGroup)
+	pr.SetFlag(false, TokenMatchGroup)
 	pr.Order = nil
 	nmatch := 0
 	ntok := 0
@@ -331,7 +331,7 @@ func (pr *Rule) Compile(ps *State) bool {
 			break
 		}
 		if rn[0] == ':' {
-			pr.SetFlag(true, TokMatchGroup)
+			pr.SetFlag(true, TokenMatchGroup)
 		}
 		rr := &pr.Rules[ri]
 		tokst := strings.Index(rn, "'")
@@ -349,26 +349,26 @@ func (pr *Rule) Compile(ps *State) bool {
 			sz := len(rn)
 			if rn[0] == '+' {
 				td, _ := strconv.ParseInt(rn[1:tokst], 10, 64)
-				rr.Tok.Depth = int(td)
+				rr.Token.Depth = int(td)
 			} else if rn[0] == '-' {
 				rr.FromNext = true
 			}
 			tn := rn[tokst+1 : sz-1]
 			if len(tn) > 4 && tn[:4] == "key:" {
-				rr.Tok.Tok = token.Keyword
-				rr.Tok.Key = tn[4:]
+				rr.Token.Tok = token.Keyword
+				rr.Token.Key = tn[4:]
 			} else {
 				if pmt, has := token.OpPunctMap[tn]; has {
-					rr.Tok.Tok = pmt
+					rr.Token.Tok = pmt
 				} else {
-					err := rr.Tok.Tok.SetString(tn)
+					err := rr.Token.Tok.SetString(tn)
 					if err != nil {
 						ps.Error(lex.PosZero, fmt.Sprintf("Compile: token convert error: %v", err.Error()), pr)
 						valid = false
 					}
 				}
 			}
-			if rr.Tok.Tok == token.EOS {
+			if rr.Token.Tok == token.EOS {
 				eoses++
 				if eoses > 1 {
 					pr.SetFlag(true, MultiEOS)
@@ -393,7 +393,7 @@ func (pr *Rule) Compile(ps *State) bool {
 			} else if rn[0] == '@' {
 				st = 1
 				rr.Match = true
-				pr.SetFlag(false, OnlyToks)
+				pr.SetFlag(false, OnlyTokens)
 				pr.Order = append(pr.Order, ri)
 				nmatch++
 			} else {
@@ -414,7 +414,7 @@ func (pr *Rule) Compile(ps *State) bool {
 	if ntok == 0 && nmatch == 0 {
 		pr.Rules[0].Match = true
 		pr.Order = append(pr.Order, 0)
-		pr.SetFlag(true, NoToks)
+		pr.SetFlag(true, NoTokens)
 	} else {
 		pr.OptimizeOrder(ps)
 	}
@@ -468,22 +468,22 @@ func (pr *Rule) OptimizeOrder(ps *State) {
 // CompileTokMap compiles first token map
 func (pr *Rule) CompileTokMap(ps *State) bool {
 	valid := true
-	pr.FiTokMap = make(map[string]*Rule, len(pr.Kids))
-	pr.FiTokElseIndex = len(pr.Kids)
+	pr.FiTokenMap = make(map[string]*Rule, len(pr.Kids))
+	pr.FiTokenElseIndex = len(pr.Kids)
 	for i, kpri := range pr.Kids {
 		kpr := kpri.(*Rule)
 		if len(kpr.Rules) == 0 || !kpr.Rules[0].IsToken() {
-			pr.FiTokElseIndex = i
+			pr.FiTokenElseIndex = i
 			break
 		}
 		fr := kpr.Rules[0]
-		skey := fr.Tok.StringKey()
-		if _, has := pr.FiTokMap[skey]; has {
-			ps.Error(lex.PosZero, fmt.Sprintf("CompileFirstTokMap: multiple rules have the same first token: %v -- must be unique -- use a :'tok' group to match that first token and put all the sub-rules as children of that node", fr.Tok), pr)
-			pr.FiTokElseIndex = 0
+		skey := fr.Token.StringKey()
+		if _, has := pr.FiTokenMap[skey]; has {
+			ps.Error(lex.PosZero, fmt.Sprintf("CompileFirstTokenMap: multiple rules have the same first token: %v -- must be unique -- use a :'tok' group to match that first token and put all the sub-rules as children of that node", fr.Token), pr)
+			pr.FiTokenElseIndex = 0
 			valid = false
 		} else {
-			pr.FiTokMap[skey] = kpr
+			pr.FiTokenMap[skey] = kpr
 		}
 	}
 	return valid
@@ -502,7 +502,7 @@ func (pr *Rule) CompileExcl(ps *State, rs []string, rist int) bool {
 		if !rr.IsToken() {
 			continue
 		}
-		ktok = rr.Tok
+		ktok = rr.Token
 		ktoki = ri
 		break
 	}
@@ -530,24 +530,24 @@ func (pr *Rule) CompileExcl(ps *State, rs []string, rist int) bool {
 		sz := len(rn)
 		if rn[0] == '+' {
 			td, _ := strconv.ParseInt(rn[1:tokst], 10, 64)
-			rr.Tok.Depth = int(td)
+			rr.Token.Depth = int(td)
 		}
 		tn := rn[tokst+1 : sz-1]
 		if len(tn) > 4 && tn[:4] == "key:" {
-			rr.Tok.Tok = token.Keyword
-			rr.Tok.Key = tn[4:]
+			rr.Token.Tok = token.Keyword
+			rr.Token.Key = tn[4:]
 		} else {
 			if pmt, has := token.OpPunctMap[tn]; has {
-				rr.Tok.Tok = pmt
+				rr.Token.Tok = pmt
 			} else {
-				err := rr.Tok.Tok.SetString(tn)
+				err := rr.Token.Tok.SetString(tn)
 				if err != nil {
 					ps.Error(lex.PosZero, fmt.Sprintf("CompileExcl: token convert error: %v", err.Error()), pr)
 					valid = false
 				}
 			}
 		}
-		if rr.Tok.Equal(ktok) {
+		if rr.Token.Equal(ktok) {
 			ki = ri
 		}
 	}
@@ -568,7 +568,7 @@ func (pr *Rule) Validate(ps *State) bool {
 	valid := true
 
 	// do this here so everything else is compiled
-	if len(pr.Rules) == 0 && pr.FirstTokMap {
+	if len(pr.Rules) == 0 && pr.FirstTokenMap {
 		pr.CompileTokMap(ps)
 	}
 
@@ -576,7 +576,7 @@ func (pr *Rule) Validate(ps *State) bool {
 		ps.Error(lex.PosZero, "Validate: rule has no rules and no children", pr)
 		valid = false
 	}
-	if !pr.Is(TokMatchGroup) && len(pr.Rules) > 0 && pr.HasChildren() {
+	if !pr.Is(TokenMatchGroup) && len(pr.Rules) > 0 && pr.HasChildren() {
 		ps.Error(lex.PosZero, "Validate: rule has both rules and children -- should be either-or", pr)
 		valid = false
 	}
@@ -687,11 +687,11 @@ func (pr *Rule) Parse(ps *State, parent *Rule, parAst *Ast, scope lex.Reg, optMa
 	}
 
 	nr := len(pr.Rules)
-	if !pr.Is(TokMatchGroup) && nr > 0 {
+	if !pr.Is(TokenMatchGroup) && nr > 0 {
 		return pr.ParseRules(ps, parent, parAst, scope, optMap, depth)
 	}
 
-	if optMap == nil && pr.OptTokMap {
+	if optMap == nil && pr.OptTokenMap {
 		optMap = ps.Src.TokenMapReg(scope)
 		if ps.Trace.On {
 			ps.Trace.Out(ps, pr, Run, scope.St, scope, parAst, fmt.Sprintf("made optmap of size: %d", len(optMap)))
@@ -765,7 +765,7 @@ func (pr *Rule) Scope(ps *State, parAst *Ast, scope lex.Reg) (lex.Reg, bool) {
 	lr := pr.Rules.Last()
 	for ei := 0; ei < lr.StInc; ei++ {
 		stlx := ps.Src.LexAt(creg.St)
-		ep, ok := ps.Src.NextEos(creg.St, stlx.Tok.Depth)
+		ep, ok := ps.Src.NextEos(creg.St, stlx.Token.Depth)
 		if !ok {
 			// ps.Error(creg.St, "could not find EOS at target nesting depth -- parens / bracket / brace mismatch?", pr)
 			return nscope, false
@@ -777,7 +777,7 @@ func (pr *Rule) Scope(ps *State, parAst *Ast, scope lex.Reg) (lex.Reg, bool) {
 		if ei == lr.StInc-1 {
 			nscope.Ed = ep
 			if ps.Trace.On {
-				ps.Trace.Out(ps, pr, SubMatch, nscope.St, nscope, parAst, fmt.Sprintf("from EOS: starting scope: %v new scope: %v end pos: %v depth: %v", scope, nscope, ep, stlx.Tok.Depth))
+				ps.Trace.Out(ps, pr, SubMatch, nscope.St, nscope, parAst, fmt.Sprintf("from EOS: starting scope: %v new scope: %v end pos: %v depth: %v", scope, nscope, ep, stlx.Token.Depth))
 			}
 		} else {
 			creg.St, ok = ps.Src.NextTokenPos(ep) // advance
@@ -820,7 +820,7 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap l
 	// defer prf.End()
 
 	nr := len(pr.Rules)
-	if pr.Is(TokMatchGroup) || nr == 0 { // Group
+	if pr.Is(TokenMatchGroup) || nr == 0 { // Group
 		return pr.MatchGroup(ps, parAst, scope, depth, optMap)
 	}
 
@@ -834,9 +834,9 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap l
 	var mpos Matches
 	match := false
 
-	if pr.Is(NoToks) {
+	if pr.Is(NoTokens) {
 		match, mpos = pr.MatchNoToks(ps, parAst, scope, depth, optMap)
-	} else if pr.Is(OnlyToks) {
+	} else if pr.Is(OnlyTokens) {
 		match, mpos = pr.MatchOnlyToks(ps, parAst, scope, depth, optMap)
 	} else {
 		match, mpos = pr.MatchMixed(ps, parAst, scope, depth, optMap)
@@ -872,14 +872,14 @@ func (pr *Rule) MatchOnlyToks(ps *State, parAst *Ast, scope lex.Reg, depth int, 
 	var mpos Matches
 
 	scstlx := ps.Src.LexAt(scope.St) // scope starting lex
-	scstDepth := scstlx.Tok.Depth
+	scstDepth := scstlx.Token.Depth
 
 	creg := scope
 	osz := len(pr.Order)
 	for oi := 0; oi < osz; oi++ {
 		ri := pr.Order[oi]
 		rr := &pr.Rules[ri]
-		kt := rr.Tok
+		kt := rr.Token
 		if optMap != nil && !optMap.Has(kt.Tok) { // not even a possibility
 			return false, nil
 		}
@@ -939,7 +939,7 @@ func (pr *Rule) MatchToken(ps *State, rr *RuleEl, ri int, kt token.KeyToken, cre
 	for stinc := 0; stinc < rr.StInc; stinc++ {
 		creg.St, _ = ps.Src.NextTokenPos(creg.St)
 	}
-	if ri == nr-1 && rr.Tok.Tok == token.EOS {
+	if ri == nr-1 && rr.Token.Tok == token.EOS {
 		return true, scope.Ed
 	}
 	if creg.IsNil() && !matched {
@@ -978,7 +978,7 @@ func (pr *Rule) MatchMixed(ps *State, parAst *Ast, scope lex.Reg, depth int, opt
 	var mpos Matches
 
 	scstlx := ps.Src.LexAt(scope.St) // scope starting lex
-	scstDepth := scstlx.Tok.Depth
+	scstDepth := scstlx.Token.Depth
 
 	creg := scope
 	osz := len(pr.Order)
@@ -989,7 +989,7 @@ func (pr *Rule) MatchMixed(ps *State, parAst *Ast, scope lex.Reg, depth int, opt
 			ri := pr.Order[oi]
 			rr := &pr.Rules[ri]
 			if rr.IsToken() {
-				kt := rr.Tok
+				kt := rr.Token
 				if !optMap.Has(kt.Tok) { // not even a possibility
 					return false, nil
 				}
@@ -1004,7 +1004,7 @@ func (pr *Rule) MatchMixed(ps *State, parAst *Ast, scope lex.Reg, depth int, opt
 		/////////////////////////////////////////////
 		// Token
 		if rr.IsToken() {
-			kt := rr.Tok
+			kt := rr.Token
 			if rr.FromNext {
 				if mpos == nil {
 					mpos = make(Matches, nr) // make on demand -- cuts out a lot of allocations!
@@ -1046,10 +1046,10 @@ func (pr *Rule) MatchMixed(ps *State, parAst *Ast, scope lex.Reg, depth int, opt
 		// overflow beyond natural boundaries
 		stlx := ps.Src.LexAt(creg.St) // scope starting lex
 		cp, _ := ps.Src.NextTokenPos(creg.St)
-		stdp := stlx.Tok.Depth
+		stdp := stlx.Token.Depth
 		for cp.IsLess(creg.Ed) {
 			lx := ps.Src.LexAt(cp)
-			if lx.Tok.Depth < stdp {
+			if lx.Token.Depth < stdp {
 				creg.Ed = cp
 				break
 			}
@@ -1124,9 +1124,9 @@ func (pr *Rule) MatchGroup(ps *State, parAst *Ast, scope lex.Reg, depth int, opt
 	// prf.End()
 	sti := 0
 	nk := len(pr.Kids)
-	if pr.FirstTokMap {
+	if pr.FirstTokenMap {
 		stlx := ps.Src.LexAt(scope.St)
-		if kpr, has := pr.FiTokMap[stlx.Tok.StringKey()]; has {
+		if kpr, has := pr.FiTokenMap[stlx.Token.StringKey()]; has {
 			match, nscope, mpos := kpr.Match(ps, parAst, scope, depth+1, optMap)
 			if match {
 				if ps.Trace.On {
@@ -1136,7 +1136,7 @@ func (pr *Rule) MatchGroup(ps *State, parAst *Ast, scope lex.Reg, depth int, opt
 				return true, nscope, mpos
 			}
 		}
-		sti = pr.FiTokElseIndex
+		sti = pr.FiTokenElseIndex
 	}
 
 	for i := sti; i < nk; i++ {
@@ -1161,7 +1161,7 @@ func (pr *Rule) MatchExclude(ps *State, scope lex.Reg, ktpos lex.Reg, depth int,
 	nf := len(pr.ExclFwd)
 	nr := len(pr.ExclRev)
 	scstlx := ps.Src.LexAt(scope.St) // scope starting lex
-	scstDepth := scstlx.Tok.Depth
+	scstDepth := scstlx.Token.Depth
 	if nf > 0 {
 		cp, ok := ps.Src.NextTokenPos(ktpos.St)
 		if !ok {
@@ -1170,7 +1170,7 @@ func (pr *Rule) MatchExclude(ps *State, scope lex.Reg, ktpos lex.Reg, depth int,
 		prevAny := false
 		for ri := 0; ri < nf; ri++ {
 			rr := pr.ExclFwd[ri]
-			kt := rr.Tok
+			kt := rr.Token
 			kt.Depth += scstDepth // always use starting scope depth
 			if kt.Tok == token.None {
 				prevAny = true // wild card
@@ -1190,7 +1190,7 @@ func (pr *Rule) MatchExclude(ps *State, scope lex.Reg, ktpos lex.Reg, depth int,
 						return false
 					}
 					lx := ps.Src.LexAt(cp)
-					if lx.Tok.Depth != kt.Depth {
+					if lx.Token.Depth != kt.Depth {
 						break
 					}
 					// ok, keep going -- no info..
@@ -1221,7 +1221,7 @@ func (pr *Rule) MatchExclude(ps *State, scope lex.Reg, ktpos lex.Reg, depth int,
 		prevAny := false
 		for ri := nr - 1; ri >= 0; ri-- {
 			rr := pr.ExclRev[ri]
-			kt := rr.Tok
+			kt := rr.Token
 			kt.Depth += scstDepth // always use starting scope depth
 			if kt.Tok == token.None {
 				prevAny = true // wild card
@@ -1241,7 +1241,7 @@ func (pr *Rule) MatchExclude(ps *State, scope lex.Reg, ktpos lex.Reg, depth int,
 						return false
 					}
 					lx := ps.Src.LexAt(cp)
-					if lx.Tok.Depth != kt.Depth {
+					if lx.Token.Depth != kt.Depth {
 						break
 					}
 					// ok, keep going -- no info..
@@ -1303,21 +1303,21 @@ func (pr *Rule) DoRules(ps *State, parent *Rule, parentAst *Ast, scope lex.Reg, 
 			if mp == ps.Pos {
 				ps.Pos, _ = ps.Src.NextTokenPos(ps.Pos) // already matched -- move past
 				if ps.Trace.On {
-					ps.Trace.Out(ps, pr, Run, mp, scope, trcAst, fmt.Sprintf("%v: token at expected pos: %v", ri, rr.Tok))
+					ps.Trace.Out(ps, pr, Run, mp, scope, trcAst, fmt.Sprintf("%v: token at expected pos: %v", ri, rr.Token))
 				}
 			} else if mp.IsLess(ps.Pos) {
 				// ps.Pos has moved beyond our expected token -- sub-rule has eaten more than expected!
-				if rr.Tok.Tok == token.EOS {
+				if rr.Token.Tok == token.EOS {
 					if ps.Trace.On {
-						ps.Trace.Out(ps, pr, Run, mp, scope, trcAst, fmt.Sprintf("%v: EOS token consumed by sub-rule: %v", ri, rr.Tok))
+						ps.Trace.Out(ps, pr, Run, mp, scope, trcAst, fmt.Sprintf("%v: EOS token consumed by sub-rule: %v", ri, rr.Token))
 					}
 				} else {
-					ps.Error(mp, fmt.Sprintf("expected token: %v (at rule index: %v) was consumed by prior sub-rule(s)", rr.Tok, ri), pr)
+					ps.Error(mp, fmt.Sprintf("expected token: %v (at rule index: %v) was consumed by prior sub-rule(s)", rr.Token, ri), pr)
 				}
-			} else if ri == nr-1 && rr.Tok.Tok == token.EOS {
+			} else if ri == nr-1 && rr.Token.Tok == token.EOS {
 				ps.ResetNonMatches() // passed this chunk of inputs -- don't need those nonmatches
 			} else {
-				ps.Error(mp, fmt.Sprintf("token: %v (at rule index: %v) has extra preceding input inconsistent with grammar", rr.Tok, ri), pr)
+				ps.Error(mp, fmt.Sprintf("token: %v (at rule index: %v) has extra preceding input inconsistent with grammar", rr.Token, ri), pr)
 				ps.Pos, _ = ps.Src.NextTokenPos(mp) // move to token for more robustness
 			}
 			if ourAst != nil {
@@ -1327,7 +1327,7 @@ func (pr *Rule) DoRules(ps *State, parent *Rule, parentAst *Ast, scope lex.Reg, 
 		}
 		creg.St = ps.Pos
 		creg.Ed = scope.Ed
-		if !pr.Is(NoToks) {
+		if !pr.Is(NoTokens) {
 			for mi := ri + 1; mi < nr; mi++ {
 				if mpos[mi].St != lex.PosZero {
 					creg.Ed = mpos[mi].St // only look up to point of next matching token
@@ -1338,13 +1338,13 @@ func (pr *Rule) DoRules(ps *State, parent *Rule, parentAst *Ast, scope lex.Reg, 
 		if rr.IsToken() { // opt by definition here
 			if creg.IsNil() { // no tokens left..
 				if ps.Trace.On {
-					ps.Trace.Out(ps, pr, Run, creg.St, scope, trcAst, fmt.Sprintf("%v: opt token: %v no more src", ri, rr.Tok))
+					ps.Trace.Out(ps, pr, Run, creg.St, scope, trcAst, fmt.Sprintf("%v: opt token: %v no more src", ri, rr.Token))
 				}
 				continue
 			}
 			stlx := ps.Src.LexAt(creg.St)
-			kt := rr.Tok
-			kt.Depth += stlx.Tok.Depth
+			kt := rr.Token
+			kt.Depth += stlx.Token.Depth
 			pos, ok := ps.FindToken(kt, creg)
 			if !ok {
 				if ps.Trace.On {
@@ -1435,7 +1435,7 @@ func (pr *Rule) DoRulesRevBinExp(ps *State, parent *Rule, parentAst *Ast, scope 
 			creg.Ed = scope.Ed
 		} else if i == 1 {
 			if ps.Trace.On {
-				ps.Trace.Out(ps, pr, Run, tokpos, scope, trcAst, fmt.Sprintf("%v: key token: %v", i, rr.Tok))
+				ps.Trace.Out(ps, pr, Run, tokpos, scope, trcAst, fmt.Sprintf("%v: key token: %v", i, rr.Token))
 			}
 			continue
 		} else { // start
@@ -1586,7 +1586,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *Ast) bo
 	}
 	ast := node.(*Ast)
 	lx := ps.Src.LexAt(ast.TokReg.St)
-	useTok := lx.Tok.Tok
+	useTok := lx.Token.Tok
 	if act.Token != token.None {
 		useTok = act.Token
 	}

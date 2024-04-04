@@ -108,7 +108,7 @@ func LastLexIgnoreComment(tags Line) (*Lex, int) {
 	nt := len(tags)
 	for i := nt - 1; i >= 0; i-- {
 		l := &tags[i]
-		if l.Tok.Tok.Cat() == token.Comment || l.Tok.Tok < token.Keyword {
+		if l.Token.Tok.Cat() == token.Comment || l.Token.Tok < token.Keyword {
 			continue
 		}
 		ll = l
@@ -127,7 +127,7 @@ func LineStartEndBracket(src []rune, tags Line) (start, end bool) {
 	}
 	nt := len(tags)
 	if nt > 0 {
-		ftok := tags[0].Tok.Tok
+		ftok := tags[0].Token.Tok
 		if ftok.InSubCat(token.PunctGp) {
 			if ftok.IsPunctGpRight() {
 				start = true
@@ -135,7 +135,7 @@ func LineStartEndBracket(src []rune, tags Line) (start, end bool) {
 		}
 		ll, _ := LastLexIgnoreComment(tags)
 		if ll != nil {
-			ltok := ll.Tok.Tok
+			ltok := ll.Token.Tok
 			if ltok.InSubCat(token.PunctGp) {
 				if ltok.IsPunctGpLeft() {
 					end = true

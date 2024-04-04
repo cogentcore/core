@@ -280,7 +280,7 @@ func (hm *HiMarkup) MarkupLine(txt []rune, hitags, tags lex.Line) []byte {
 			mu = append(mu, HTMLEscapeRunes(txt[cp:tr.St])...)
 		}
 		mu = append(mu, sps...)
-		clsnm := tr.Tok.Tok.StyleName()
+		clsnm := tr.Token.Tok.StyleName()
 		mu = append(mu, []byte(clsnm)...)
 		mu = append(mu, sps2...)
 		ep := tr.Ed

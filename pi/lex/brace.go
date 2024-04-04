@@ -59,14 +59,14 @@ func BraceMatch(src [][]rune, tags []Line, r rune, st Pos, maxLns int) (en Pos, 
 			for i := ch + 1; i < len(txt); i++ {
 				if txt[i] == r {
 					lx, _ := tln.AtPos(i)
-					if lx == nil || lx.Tok.Tok.Cat() != token.Comment {
+					if lx == nil || lx.Token.Tok.Cat() != token.Comment {
 						left++
 						continue
 					}
 				}
 				if txt[i] == match {
 					lx, _ := tln.AtPos(i)
-					if lx == nil || lx.Tok.Tok.Cat() != token.Comment {
+					if lx == nil || lx.Token.Tok.Cat() != token.Comment {
 						right++
 						if left == right {
 							en.Ln = l - 1
@@ -90,14 +90,14 @@ func BraceMatch(src [][]rune, tags []Line, r rune, st Pos, maxLns int) (en Pos, 
 			for i := ch - 1; i >= 0; i-- {
 				if txt[i] == r {
 					lx, _ := tln.AtPos(i)
-					if lx == nil || lx.Tok.Tok.Cat() != token.Comment {
+					if lx == nil || lx.Token.Tok.Cat() != token.Comment {
 						right++
 						continue
 					}
 				}
 				if txt[i] == match {
 					lx, _ := tln.AtPos(i)
-					if lx == nil || lx.Tok.Tok.Cat() != token.Comment {
+					if lx == nil || lx.Token.Tok.Cat() != token.Comment {
 						left++
 						if left == right {
 							en.Ln = l + 1

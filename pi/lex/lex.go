@@ -18,8 +18,8 @@ import (
 // all the parens, brackets, braces.  Todo: also support XML < > </ > tag depth.
 type Lex struct {
 
-	// token, includes cache of keyword for keyword types, and also has nesting depth: starting at 0 at start of file and going up for every increment in bracket / paren / start tag and down for every decrement. Is computed once and used extensively in parsing.
-	Tok token.KeyToken
+	// Token includes cache of keyword for keyword types, and also has nesting depth: starting at 0 at start of file and going up for every increment in bracket / paren / start tag and down for every decrement. Is computed once and used extensively in parsing.
+	Token token.KeyToken
 
 	// start rune index within original source line for this token
 	St int
@@ -32,7 +32,7 @@ type Lex struct {
 }
 
 func NewLex(tok token.KeyToken, st, ed int) Lex {
-	lx := Lex{Tok: tok, St: st, Ed: ed}
+	lx := Lex{Token: tok, St: st, Ed: ed}
 	return lx
 }
 
@@ -48,7 +48,7 @@ func (lx *Lex) Now() {
 
 // String satisfies the fmt.Stringer interface
 func (lx *Lex) String() string {
-	return fmt.Sprintf("[+%d:%v:%v:%v]", lx.Tok.Depth, lx.St, lx.Ed, lx.Tok.String())
+	return fmt.Sprintf("[+%d:%v:%v:%v]", lx.Token.Depth, lx.St, lx.Ed, lx.Token.String())
 }
 
 // ContainsPos returns true if the Lex element contains given character position

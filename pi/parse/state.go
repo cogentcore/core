@@ -177,16 +177,16 @@ func (ps *State) NextSrcLine() string {
 
 // MatchLex is our optimized matcher method, matching tkey depth as well
 func (ps *State) MatchLex(lx *lex.Lex, tkey token.KeyToken, isCat, isSubCat bool, cp lex.Pos) bool {
-	if lx.Tok.Depth != tkey.Depth {
+	if lx.Token.Depth != tkey.Depth {
 		return false
 	}
-	if !(lx.Tok.Tok == tkey.Tok || (isCat && lx.Tok.Tok.Cat() == tkey.Tok) || (isSubCat && lx.Tok.Tok.SubCat() == tkey.Tok)) {
+	if !(lx.Token.Tok == tkey.Tok || (isCat && lx.Token.Tok.Cat() == tkey.Tok) || (isSubCat && lx.Token.Tok.SubCat() == tkey.Tok)) {
 		return false
 	}
 	if tkey.Key == "" {
 		return true
 	}
-	return tkey.Key == lx.Tok.Key
+	return tkey.Key == lx.Token.Key
 }
 
 // FindToken looks for token in given region, returns position where found, false if not.
@@ -222,7 +222,7 @@ func (ps *State) MatchToken(tkey token.KeyToken, pos lex.Pos) bool {
 	isCat := tok.Cat() == tok
 	isSubCat := tok.SubCat() == tok
 	lx := ps.Src.LexAt(pos)
-	tkey.Depth = lx.Tok.Depth
+	tkey.Depth = lx.Token.Depth
 	return ps.MatchLex(lx, tkey, isCat, isSubCat, pos)
 }
 

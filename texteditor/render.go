@@ -189,12 +189,12 @@ func (ed *Editor) RenderDepthBackground(stln, edln int) {
 		lsted := 0
 		for ti := range ht {
 			lx := &ht[ti]
-			if lx.Tok.Depth > 0 {
+			if lx.Token.Depth > 0 {
 				var vdc color.RGBA
 				if isDark { // reverse order too
-					vdc = ViewDepthColors[nclrs-1-lx.Tok.Depth%nclrs]
+					vdc = ViewDepthColors[nclrs-1-lx.Token.Depth%nclrs]
 				} else {
-					vdc = ViewDepthColors[lx.Tok.Depth%nclrs]
+					vdc = ViewDepthColors[lx.Token.Depth%nclrs]
 				}
 				bg := gradient.Apply(sty.Background, func(c color.Color) color.Color {
 					if isDark { // reverse order too
@@ -206,7 +206,7 @@ func (ed *Editor) RenderDepthBackground(stln, edln int) {
 				st := min(lsted, lx.St)
 				reg := textbuf.Region{Start: lex.Pos{Ln: ln, Ch: st}, End: lex.Pos{Ln: ln, Ch: lx.Ed}}
 				lsted = lx.Ed
-				lstdp = lx.Tok.Depth
+				lstdp = lx.Token.Depth
 				ed.RenderRegionBoxSty(reg, sty, bg, true) // full width alway
 			}
 		}
