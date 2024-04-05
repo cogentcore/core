@@ -15,7 +15,7 @@ gi.NewLabel(parent).SetText("Name:")
 gi.NewTextField(parent).SetPlaceholder("Jane Doe")
 ```
 
-You can set the starting text of a text field:
+You can set the text of a text field:
 
 ```Go
 gi.NewTextField(parent).SetText("Hello, world!")

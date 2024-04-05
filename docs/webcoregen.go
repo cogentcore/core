@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/giv"
+	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/ki"
@@ -347,11 +348,11 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		gi.NewButton(parent).SetIcon(icons.Home.Fill())
 	},
 	"widgets/images-0": func(parent gi.Widget) {
-		gi.NewImage(parent).OpenFS(myImage, "image.png")
+		grr.Log(gi.NewImage(parent).OpenFS(myImage, "image.png"))
 	},
 	"widgets/images-1": func(parent gi.Widget) {
 		img := gi.NewImage(parent)
-		img.OpenFS(myImage, "image.png")
+		grr.Log(img.OpenFS(myImage, "image.png"))
 		img.Style(func(s *styles.Style) {
 			s.Min.Set(units.Dp(256))
 		})
@@ -693,6 +694,9 @@ func main() {
     fmt.Println("Hello, world!")
 }
 `)
+	},
+	"widgets/text-editors-3": func(parent gi.Widget) {
+		grr.Log(texteditor.NewSoloEditor(parent).Buffer.OpenFS(myFile, "file.go"))
 	},
 	"widgets/text-fields-0": func(parent gi.Widget) {
 		gi.NewTextField(parent)

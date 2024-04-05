@@ -10,7 +10,7 @@ You can make a text editor without any custom options:
 texteditor.NewSoloEditor(parent)
 ```
 
-You can set the starting text of a text editor:
+You can set the text of a text editor:
 
 ```Go
 texteditor.NewSoloEditor(parent).Buffer.SetTextString("Hello, world!")
@@ -25,4 +25,15 @@ func main() {
     fmt.Println("Hello, world!")
 }
 `)
+```
+
+You can set the text of a text editor from an embedded file:
+
+```go
+//go:embed file.go
+var myFile embed.FS
+```
+
+```Go
+grr.Log(texteditor.NewSoloEditor(parent).Buffer.OpenFS(myFile, "file.go"))
 ```
