@@ -147,11 +147,13 @@ type Buffer struct {
 	Listeners events.Listeners
 }
 
-// NewBuffer makes a new [Buffer] with default settings.
+// NewBuffer makes a new [Buffer] with default settings
+// and initializes it.
 func NewBuffer() *Buffer {
 	tb := &Buffer{}
 	tb.SetHiStyle(histyle.StyleDefault)
 	tb.Opts.EditorSettings = gi.SystemSettings.Editor
+	tb.SetText([]byte{}) // to initialize
 	return tb
 }
 

@@ -43,3 +43,11 @@ You can also set the text of a text editor directly from the system filesystem, 
 ```go
 grr.Log(texteditor.NewSoloEditor(parent).Buffer.Open("file.go"))
 ```
+
+You can make multiple text editors that edit the same underlying text buffer:
+
+```Go
+tb := texteditor.NewBuffer()
+texteditor.NewEditor(parent).SetBuffer(tb)
+texteditor.NewEditor(parent).SetBuffer(tb)
+```

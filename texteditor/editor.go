@@ -185,8 +185,7 @@ type Editor struct { //core:embedder
 // This is appropriate for making a standalone editor in which there
 // is there is one editor per buffer.
 func NewSoloEditor(parent ki.Ki, name ...string) *Editor {
-	tb := NewBuffer().SetText([]byte{})
-	return NewEditor(parent, name...).SetBuffer(tb)
+	return NewEditor(parent, name...).SetBuffer(NewBuffer())
 }
 
 func (ed *Editor) FlagType() enums.BitFlagSetter {

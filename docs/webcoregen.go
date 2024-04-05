@@ -698,6 +698,11 @@ func main() {
 	"widgets/text-editors-3": func(parent gi.Widget) {
 		grr.Log(texteditor.NewSoloEditor(parent).Buffer.OpenFS(myFile, "file.go"))
 	},
+	"widgets/text-editors-4": func(parent gi.Widget) {
+		tb := texteditor.NewBuffer()
+		texteditor.NewEditor(parent).SetBuffer(tb)
+		texteditor.NewEditor(parent).SetBuffer(tb)
+	},
 	"widgets/text-fields-0": func(parent gi.Widget) {
 		gi.NewTextField(parent)
 	},
