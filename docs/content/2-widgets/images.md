@@ -35,7 +35,7 @@ draw.Draw(img, image.Rect(60, 70, 80, 100), colors.C(colors.Scheme.Error.Base), 
 gi.NewImage(parent).SetImage(img)
 ```
 
-You can also open images directly from the system filesystem, but this is not recommended for images built into your app, since they may end up in a different location on different platforms:
+You can also open images directly from the system filesystem, but this is not recommended for images built into your app, since they will end up in a different location on different platforms:
 
 ```go
 grr.Log(gi.NewImage(parent).Open("image.png"))
