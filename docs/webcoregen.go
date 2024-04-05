@@ -589,6 +589,18 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 	"widgets/svgs-0": func(parent gi.Widget) {
 		grr.Log(gi.NewSVG(parent).OpenFS(mySVG, "icon.svg"))
 	},
+	"widgets/svgs-1": func(parent gi.Widget) {
+		svg := gi.NewSVG(parent)
+		grr.Log(svg.OpenFS(mySVG, "icon.svg"))
+		svg.Style(func(s *styles.Style) {
+			s.Min.Set(units.Dp(128))
+		})
+	},
+	"widgets/svgs-2": func(parent gi.Widget) {
+		svg := gi.NewSVG(parent)
+		svg.SetReadOnly(false)
+		grr.Log(svg.OpenFS(mySVG, "icon.svg"))
+	},
 	"widgets/switches-0": func(parent gi.Widget) {
 		gi.NewSwitch(parent)
 	},
