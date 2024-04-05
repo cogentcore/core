@@ -19,6 +19,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/glop/dirs"
+	"cogentcore.org/core/grr"
 	"cogentcore.org/core/spell"
 )
 
@@ -30,10 +31,7 @@ func InitSpell() error {
 	}
 	err := OpenSpellModel()
 	if err != nil {
-		err = spell.OpenDefault()
-		if err != nil {
-			slog.Error(err.Error())
-		}
+		grr.Log(spell.OpenDefault())
 	}
 	return nil
 }
@@ -42,11 +40,7 @@ func InitSpell() error {
 func OpenSpellModel() error {
 	pdir := gi.TheApp.CogentCoreDataDir()
 	openpath := filepath.Join(pdir, "spell_en_us.json")
-	err := spell.Open(openpath)
-	if err != nil {
-		slog.Error("opening spelling dictionary", "path", openpath, "err", err)
-	}
-	return err
+	return spell.Open(openpath)
 }
 
 // NewSpellModelFromText builds a NEW spelling model from text
