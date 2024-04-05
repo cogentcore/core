@@ -586,6 +586,9 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		gi.NewLabel(sp).SetText("First")
 		gi.NewLabel(sp).SetText("Second")
 	},
+	"widgets/svgs-0": func(parent gi.Widget) {
+		grr.Log(gi.NewSVG(parent).OpenFS(mySVG, "icon.svg"))
+	},
 	"widgets/switches-0": func(parent gi.Widget) {
 		gi.NewSwitch(parent)
 	},

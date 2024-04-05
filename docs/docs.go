@@ -26,6 +26,9 @@ var icon []byte
 //go:embed image.png
 var myImage embed.FS
 
+//go:embed icon.svg
+var mySVG embed.FS
+
 //go:embed file.go
 var myFile embed.FS
 

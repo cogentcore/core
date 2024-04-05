@@ -31,7 +31,7 @@ func ConfigSVGToolbar(tb *gi.Toolbar, sv *gi.SVG) {
 			fmt.Println("this will select select mode")
 		})
 	gi.NewSeparator(tb)
-	NewFuncButton(tb, sv.OpenSVG).SetIcon(icons.Open)
+	NewFuncButton(tb, sv.Open).SetIcon(icons.Open)
 	NewFuncButton(tb, sv.SaveSVG).SetIcon(icons.Save)
 	NewFuncButton(tb, sv.SavePNG).SetIcon(icons.Save)
 }

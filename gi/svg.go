@@ -85,18 +85,18 @@ func (sv *SVG) HandleEvents() {
 	})
 }
 
-// OpenSVG opens an XML-formatted SVG file
-func (sv *SVG) OpenSVG(filename Filename) error { //gti:add
+// Open opens an XML-formatted SVG file
+func (sv *SVG) Open(filename Filename) error { //gti:add
 	return sv.SVG.OpenXML(string(filename))
 }
 
-// OpenSVG opens an XML-formatted SVG file from the given fs
-func (sv *SVG) OpenFS(fsys fs.FS, filename Filename) error {
-	return sv.SVG.OpenFS(fsys, string(filename))
+// OpenSVG opens an XML-formatted SVG file from the given fs.
+func (sv *SVG) OpenFS(fsys fs.FS, filename string) error {
+	return sv.SVG.OpenFS(fsys, filename)
 }
 
-// ReadSVG reads an XML-formatted SVG file from the given reader
-func (sv *SVG) ReadSVG(r io.Reader) error {
+// Read reads an XML-formatted SVG file from the given reader
+func (sv *SVG) Read(r io.Reader) error {
 	return sv.SVG.ReadXML(r)
 }
 
