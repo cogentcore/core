@@ -32,3 +32,9 @@ svg := gi.NewSVG(parent)
 svg.SetReadOnly(false)
 grr.Log(svg.OpenFS(mySVG, "icon.svg"))
 ```
+
+You can directly set an SVG from an SVG data string:
+
+```Go
+grr.Log(gi.NewSVG(parent).ReadString(`<rect width="100" height="100" fill="red"/>`))
+```

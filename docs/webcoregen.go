@@ -601,6 +601,9 @@ var WebcoreExamples = map[string]func(parent gi.Widget){
 		svg.SetReadOnly(false)
 		grr.Log(svg.OpenFS(mySVG, "icon.svg"))
 	},
+	"widgets/svgs-3": func(parent gi.Widget) {
+		grr.Log(gi.NewSVG(parent).ReadString(`<rect width="100" height="100" fill="red"/>`))
+	},
 	"widgets/switches-0": func(parent gi.Widget) {
 		gi.NewSwitch(parent)
 	},

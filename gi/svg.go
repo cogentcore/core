@@ -9,6 +9,7 @@ import (
 	"image"
 	"io"
 	"io/fs"
+	"strings"
 
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/events"
@@ -95,22 +96,27 @@ func (sv *SVG) OpenFS(fsys fs.FS, filename string) error {
 	return sv.SVG.OpenFS(fsys, filename)
 }
 
-// Read reads an XML-formatted SVG file from the given reader
+// Read reads an XML-formatted SVG file from the given reader.
 func (sv *SVG) Read(r io.Reader) error {
 	return sv.SVG.ReadXML(r)
 }
 
-// ReadBytes reads an XML-formatted SVG file from the given bytes
+// ReadBytes reads an XML-formatted SVG file from the given bytes.
 func (sv *SVG) ReadBytes(b []byte) error {
 	return sv.SVG.ReadXML(bytes.NewReader(b))
 }
 
-// SaveSVG saves the current SVG to an XML-encoded standard SVG file
+// ReadString reads an XML-formatted SVG file from the given string.
+func (sv *SVG) ReadString(s string) error {
+	return sv.SVG.ReadXML(strings.NewReader(s))
+}
+
+// SaveSVG saves the current SVG to an XML-encoded standard SVG file.
 func (sv *SVG) SaveSVG(filename Filename) error { //gti:add
 	return sv.SVG.SaveXML(string(filename))
 }
 
-// SavePNG saves the current rendered SVG image to an PNG image file
+// SavePNG saves the current rendered SVG image to an PNG image file.
 func (sv *SVG) SavePNG(filename Filename) error { //gti:add
 	return sv.SVG.SavePNG(string(filename))
 }
