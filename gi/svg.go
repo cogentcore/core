@@ -12,7 +12,9 @@ import (
 	"strings"
 
 	"cogentcore.org/core/abilities"
+	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/svg"
 	"cogentcore.org/core/units"
@@ -40,9 +42,18 @@ func (sv *SVG) OnInit() {
 func (sv *SVG) SetStyles() {
 	sv.SetReadOnly(true)
 	sv.Style(func(s *styles.Style) {
-		ro := sv.IsReadOnly()
-		s.SetAbilities(!ro, abilities.Slideable, abilities.Clickable, abilities.Scrollable)
 		s.Min.Set(units.Dp(256))
+
+		ro := sv.IsReadOnly()
+		s.SetAbilities(!ro, abilities.Slideable, abilities.Activatable, abilities.Scrollable)
+		if !ro {
+			if s.Is(states.Active) {
+				s.Cursor = cursors.Grabbing
+				s.StateLayer = 0
+			} else {
+				s.Cursor = cursors.Grab
+			}
+		}
 	})
 	sv.StyleFinal(func(s *styles.Style) {
 		sv.SVG.Root.ViewBox.PreserveAspectRatio.SetFromStyle(s)
