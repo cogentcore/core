@@ -242,7 +242,6 @@ func (p Props) MarshalJSON() ([]byte, error) {
 // objects -- this is super inefficient and really needs a native parser, but
 // props are likely to be relatively small
 func (p *Props) UnmarshalJSON(b []byte) error {
-	// fmt.Printf("json in: %v\n", string(b))
 	if bytes.Equal(b, []byte("null")) {
 		*p = nil
 		return nil
@@ -257,43 +256,6 @@ func (p *Props) UnmarshalJSON(b []byte) error {
 
 	*p = make(Props, len(tmp))
 
-	// create all the structure objects from the list -- have to do this first to get all
-	// the structs made b/c the order is random..
-	// for key, val := range tmp {
-	// if strings.HasPrefix(key, struTypeKey) {
-	// 	pkey := strings.TrimPrefix(key, struTypeKey)
-	// 	rval := tmp[pkey]
-	// 	tn := val.(string)
-	// 	typ := kit.Types.Type(tn)
-	// 	if typ == nil {
-	// 		log.Printf("ki.Props: cannot load struct of type %v -- not registered in kit.Types\n", tn)
-	// 		continue
-	// 	}
-	// 	if IsKi(typ) { // note: not really a good idea to store ki's in maps, but..
-	// 		kival := NewOfType(typ)
-	// 		InitNode(kival)
-	// 		if kival != nil {
-	// 			// fmt.Printf("stored new ki of type %v in key: %v\n", typ.String(), pkey)
-	// 			tmpb, _ := json.Marshal(rval) // string rep of this
-	// 			err = kival.ReadJSON(bytes.NewReader(tmpb))
-	// 			if err != nil {
-	// 				log.Printf("ki.Props failed to load Ki struct of type %v with error: %v\n", typ.String(), err)
-	// 			}
-	// 			(*p)[pkey] = kival
-	// 		}
-	// 	} else {
-	// 		stval := reflect.New(typ).Interface()
-	// 		// fmt.Printf("stored new struct of type %v in key: %v\n", typ.String(), pkey)
-	// 		tmpb, _ := json.Marshal(rval) // string rep of this
-	// 		err = json.Unmarshal(tmpb, stval)
-	// 		if err != nil {
-	// 			log.Printf("ki.Props failed to load struct of type %v with error: %v\n", typ.String(), err)
-	// 		}
-	// 		(*p)[pkey] = reflect.ValueOf(stval).Elem().Interface()
-	// 	}
-	//   }
-	// }
-
 	// now can re-iterate
 	for key, val := range tmp {
 		if _, ok := (*p)[key]; ok { // already created -- was a struct -- skip
@@ -306,7 +268,7 @@ func (p *Props) UnmarshalJSON(b []byte) error {
 			tmpb, _ := json.Marshal(val) // string rep of this
 			err = json.Unmarshal(tmpb, &subp)
 			if err != nil {
-				log.Printf("ki.Props failed to load sub-Props with error: %v\n", err)
+				log.Printf("tree.Props failed to load sub-Props with error: %v\n", err)
 			}
 			(*p)[key] = subp
 		} else { // straight copy

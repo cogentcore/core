@@ -858,17 +858,17 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 	if iski && sv.SliceValue != nil {
 		vd := sv.SliceValue.AsValueData()
 		if vd.Owner != nil {
-			if ownki, ok := vd.Owner.(tree.Node); ok {
+			if owntree, ok := vd.Owner.(tree.Node); ok {
 				d := gi.NewBody().AddTitle("Add list items").AddText("Number and type of items to insert:")
 				nd := &gi.NewItemsData{}
 				w := NewValue(d, nd).AsWidget()
-				tree.ChildByType[*gi.Chooser](w, tree.Embeds).SetTypes(gti.AllEmbeddersOf(ownki.BaseType())...).SetCurrentIndex(0)
+				tree.ChildByType[*gi.Chooser](w, tree.Embeds).SetTypes(gti.AllEmbeddersOf(owntree.BaseType())...).SetCurrentIndex(0)
 				d.AddBottomBar(func(parent gi.Widget) {
 					d.AddCancel(parent)
 					d.AddOK(parent).OnClick(func(e events.Event) {
 						for i := 0; i < nd.Number; i++ {
 							nm := fmt.Sprintf("New%v%v", nd.Type.Name, idx+1+i)
-							ownki.InsertNewChild(nd.Type, idx+1+i, nm)
+							owntree.InsertNewChild(nd.Type, idx+1+i, nm)
 						}
 						sv.SetChanged()
 					})

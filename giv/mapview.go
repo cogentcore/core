@@ -110,8 +110,8 @@ func (mv *MapView) MapGrid() *gi.Frame {
 	return mv.ChildByName("map-grid", 0).(*gi.Frame)
 }
 
-// KiPropTag returns the PropTag value from Ki owner of this map, if it is..
-func (mv *MapView) KiPropTag() string {
+// TreePropTag returns the PropTag value from tree owner of this map, if it is..
+func (mv *MapView) TreePropTag() string {
 	if mv.MapValView == nil {
 		return ""
 	}
@@ -119,8 +119,8 @@ func (mv *MapView) KiPropTag() string {
 	if vd.Owner == nil {
 		return ""
 	}
-	if ownki, ok := vd.Owner.(tree.Node); ok {
-		pt := ownki.PropTag()
+	if owntree, ok := vd.Owner.(tree.Node); ok {
+		pt := owntree.PropTag()
 		return pt
 	}
 	return ""
@@ -161,7 +161,7 @@ func (mv *MapView) ConfigMapGrid() {
 	if valtyp.Kind() == reflect.Interface && valtyp.String() == "interface {}" {
 		ifaceType = true
 		ncol = 3
-		typeTag = mv.KiPropTag()
+		typeTag = mv.TreePropTag()
 		// todo: need some way of setting & getting
 		// this for given domain mapview could have a structview parent and
 		// the source node of that struct, if a Ki, could have a property --

@@ -36,7 +36,7 @@ func InitNode(this Node) {
 // and inserted.
 func ThisCheck(k Node) error {
 	if k.This() == nil {
-		err := fmt.Errorf("ki.Node %q ThisCheck: node has null 'this' pointer; must call Init or InitName on root nodes", k.Path())
+		err := fmt.Errorf("tree.NodeBase %q ThisCheck: node has null 'this' pointer; must call Init or InitName on root nodes", k.Path())
 		slog.Error(err.Error())
 		return err
 	}

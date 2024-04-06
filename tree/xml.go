@@ -111,7 +111,7 @@ func DecodeXMLStartEl(d *xml.Decoder) (start xml.StartElement, err error) {
 		var t xml.Token
 		t, err = d.Token()
 		if err != nil {
-			log.Printf("ki.DecodeXMLStartEl err %v\n", err)
+			log.Printf("tree.DecodeXMLStartEl err %v\n", err)
 			return
 		}
 		switch tv := t.(type) {
@@ -121,8 +121,8 @@ func DecodeXMLStartEl(d *xml.Decoder) (start xml.StartElement, err error) {
 		case xml.CharData: // actually passes the spaces and everything through here
 			continue
 		case xml.EndElement:
-			err = fmt.Errorf("ki.DecodeXMLStartEl: got unexpected EndElement")
-			log.Println(err)
+			err = fmt.Errorf("tree.DecodeXMLStartEl: got unexpected EndElement")
+			grr.Log(err)
 			return
 		default:
 			continue
@@ -135,22 +135,22 @@ func DecodeXMLEndEl(d *xml.Decoder, start xml.StartElement) error {
 	for {
 		t, err := d.Token()
 		if err != nil {
-			log.Printf("ki.DecodeXMLEndEl err %v\n", err)
+			log.Printf("tree.DecodeXMLEndEl err %v\n", err)
 			return err
 		}
 		switch tv := t.(type) {
 		case xml.EndElement:
 			if tv.Name != start.Name {
-				err = fmt.Errorf("ki.DecodeXMLEndEl: EndElement: %v does not match StartElement: %v", tv.Name, start.Name)
-				log.Println(err)
+				err = fmt.Errorf("tree.DecodeXMLEndEl: EndElement: %v does not match StartElement: %v", tv.Name, start.Name)
+				grr.Log(err)
 				return err
 			}
 			return nil
 		case xml.CharData: // actually passes the spaces and everything through here
 			continue
 		case xml.StartElement:
-			err = fmt.Errorf("ki.DecodeXMLEndEl: got unexpected StartElement: %v", tv.Name)
-			log.Println(err)
+			err = fmt.Errorf("tree.DecodeXMLEndEl: got unexpected StartElement: %v", tv.Name)
+			grr.Log(err)
 			return err
 		default:
 			continue
@@ -164,7 +164,7 @@ func DecodeXMLCharData(d *xml.Decoder) (val string, err error) {
 		var t xml.Token
 		t, err = d.Token()
 		if err != nil {
-			log.Printf("ki.DecodeXMLCharData err %v\n", err)
+			log.Printf("tree.DecodeXMLCharData err %v\n", err)
 			return
 		}
 		switch tv := t.(type) {
@@ -172,12 +172,12 @@ func DecodeXMLCharData(d *xml.Decoder) (val string, err error) {
 			val = string([]byte(tv))
 			return
 		case xml.StartElement:
-			err = fmt.Errorf("ki.DecodeXMLCharData: got unexpected StartElement: %v", tv.Name)
-			log.Println(err)
+			err = fmt.Errorf("tree.DecodeXMLCharData: got unexpected StartElement: %v", tv.Name)
+			grr.Log(err)
 			return
 		case xml.EndElement:
-			err = fmt.Errorf("ki.DecodeXMLCharData: got unexpected EndElement: %v", tv.Name)
-			log.Println(err)
+			err = fmt.Errorf("tree.DecodeXMLCharData: got unexpected EndElement: %v", tv.Name)
+			grr.Log(err)
 			return
 		}
 	}
@@ -234,7 +234,7 @@ func (sl *Slice) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 				tn := strings.TrimSpace(val)
 				typ, err := gti.TypeByNameTry(tn)
 				if typ == nil {
-					return fmt.Errorf("ki.Slice UnmarshalXML: %w", err)
+					return fmt.Errorf("tree.Slice UnmarshalXML: %w", err)
 				}
 				kid := NewOfType(typ)
 				InitNode(kid)

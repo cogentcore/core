@@ -118,7 +118,7 @@ type TreeView struct {
 	SyncNode tree.Node `set:"-" copier:"-" json:"-" xml:"-"`
 
 	// The text to display for the tree view item label, which automatically
-	// defaults to the [ki.Node.Name] of the tree view node. It has no effect
+	// defaults to the [tree.Node.Name] of the tree view node. It has no effect
 	// if [TreeView.SyncNode] is non-nil.
 	Text string
 
@@ -205,10 +205,10 @@ func (tv *TreeView) BaseType() *gti.Type {
 func (tv *TreeView) RootSetViewIndex() int {
 	idx := 0
 	tv.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
-		tvki := AsTreeView(wi)
-		if tvki != nil {
-			tvki.ViewIndex = idx
-			tvki.RootView = tv
+		tvn := AsTreeView(wi)
+		if tvn != nil {
+			tvn.ViewIndex = idx
+			tvn.RootView = tv
 			idx++
 		}
 		return tree.Continue
@@ -1135,9 +1135,9 @@ func (tv *TreeView) MoveEndAction(selMode events.SelectModes) *TreeView {
 
 func (tv *TreeView) SetKidsVisibility(parentClosed bool) {
 	for _, k := range *tv.Children() {
-		tvki := AsTreeView(k)
-		if tvki != nil {
-			tvki.SetState(parentClosed, states.Invisible)
+		tvn := AsTreeView(k)
+		if tvn != nil {
+			tvn.SetState(parentClosed, states.Invisible)
 		}
 	}
 }
@@ -1212,9 +1212,9 @@ func (tv *TreeView) ToggleClose() {
 // OpenAll opens the given node and all of its sub-nodes
 func (tv *TreeView) OpenAll() { //gti:add
 	tv.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
-		tvki := AsTreeView(wi)
-		if tvki != nil {
-			tvki.Open()
+		tvn := AsTreeView(wi)
+		if tvn != nil {
+			tvn.Open()
 			return tree.Continue
 		}
 		return tree.Break
@@ -1225,9 +1225,9 @@ func (tv *TreeView) OpenAll() { //gti:add
 // CloseAll closes the given node and all of its sub-nodes.
 func (tv *TreeView) CloseAll() { //gti:add
 	tv.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
-		tvki := AsTreeView(wi)
-		if tvki != nil {
-			tvki.Close()
+		tvn := AsTreeView(wi)
+		if tvn != nil {
+			tvn.Close()
 			return tree.Continue
 		}
 		return tree.Break
@@ -1239,9 +1239,9 @@ func (tv *TreeView) CloseAll() { //gti:add
 // so that it will be visible.
 func (tv *TreeView) OpenParents() {
 	tv.WalkUpParent(func(k tree.Node) bool {
-		tvki := AsTreeView(k)
-		if tvki != nil {
-			tvki.Open()
+		tvn := AsTreeView(k)
+		if tvn != nil {
+			tvn.Open()
 			return tree.Continue
 		}
 		return tree.Break

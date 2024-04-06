@@ -168,7 +168,7 @@ func (se StyleEntry) ToCSS() string {
 	return strings.Join(styles, "; ")
 }
 
-// ToProps converts StyleEntry to ki.Props attributes.
+// ToProps converts StyleEntry to [tree.Props] attributes.
 func (se StyleEntry) ToProps() tree.Props {
 	pr := tree.Props{}
 	if !colors.IsNil(se.Color) {
@@ -303,7 +303,7 @@ func (hs Style) ToCSS() map[token.Tokens]string {
 	return css
 }
 
-// ToProps generates list of ki.Props for this style
+// ToProps generates list of [tree.Props] for this style.
 func (hs Style) ToProps() tree.Props {
 	pr := tree.Props{}
 	for ht, nm := range token.Names {

@@ -119,7 +119,7 @@ func (fs *Font) SetStyleProps(parent *Font, props map[string]any, ctxt colors.Co
 /*
 // CopyNonDefaultProps does SetProp on given node for all of the style settings
 // that are not at their default values.
-func (fs *Font) CopyNonDefaultProps(node ki.Ki) {
+func (fs *Font) CopyNonDefaultProps(node tree.Node) {
 	// prefclr := ThePrefs.PrefColor("font")
 	preffont := ThePrefs.PrefFontFamily()
 	// if fs.Color != *prefclr {

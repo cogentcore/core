@@ -447,7 +447,7 @@ func (v *BitFlagValue) Update() {
 
 // EnumValue returns the underlying [enums.BitFlagSetter] value.
 func (v *BitFlagValue) EnumValue() enums.BitFlagSetter {
-	// special case to use [ki.Ki.FlagType] if we are the Flags field
+	// special case to use [tree.Node.FlagType] if we are the Flags field
 	if v.Field != nil && v.Field.Name == "Flags" {
 		if k, ok := v.Owner.(tree.Node); ok {
 			return k.FlagType()

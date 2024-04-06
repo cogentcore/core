@@ -380,7 +380,7 @@ func setScreen(scrIndex int, dpi, pixratio float32, widthPx, heightPx, widthMM, 
 
 func saff() {
 	switch apv := aps.Value.(type) {
-		case ki.BlankProp:
+		case tree.BlankProp:
 	}
 }
 
@@ -470,15 +470,15 @@ func (ft FileTime) String(reg string, pars int) string {
 
 var _ArgDataFlags_index = [...]uint8{0, 13, 26, 39}
 
-var FileInfoProps = ki.Props{
-	"CtxtMenu": ki.PropSlice{
-		{"Duplicate", ki.Props{
+var FileInfoProps = tree.Props{
+	"CtxtMenu": tree.PropSlice{
+		{"Duplicate", tree.Props{
 			"updtfunc": ActionUpdateFunc(func(fii interface{}, act *gi.Button) {
 				fi := fii.(*FileInfo)
 				act.SetInactiveState(fi.IsDir())
 			}),
 		}},
-		{"Delete", ki.Props{
+		{"Delete", tree.Props{
 			"desc":    "Ok to delete this file?  This is not undoable and is not moving to trash / recycle bin",
 			"confirm": true,
 			"updtfunc": ActionUpdateFunc(func(fii interface{}, act *gi.Button) {
@@ -486,10 +486,10 @@ var FileInfoProps = ki.Props{
 				act.SetInactiveState(fi.IsDir())
 			}),
 		}},
-		{"Rename", ki.Props{
+		{"Rename", tree.Props{
 			"desc": "Rename file to new file name",
-			"Args": ki.PropSlice{
-				{"New Name", ki.Props{
+			"Args": tree.PropSlice{
+				{"New Name", tree.Props{
 					"default-field": "Name",
 				}},
 			},
@@ -571,8 +571,8 @@ func (tv *TreeView) FocusChanged2D(change gi.FocusChanges) {
 func adlf() {
 	switch pr := bprpi.(type) {
 	case map[string]interface{}:
-		wb.SetIconProps(ki.Props(pr))
-	case ki.Props:
+		wb.SetIconProps(tree.Props(pr))
+	case tree.Props:
 		wb.SetIconProps(pr)
 	}	
 }
@@ -606,13 +606,13 @@ func tst() {
 }
 
 func tst() {
-	tvn, two := data.(ki.Ki).Embed(giv.KiT_TreeView).(*giv.TreeView)
+	tvn, two := data.(tree.Node).Embed(giv.KiT_TreeView).(*giv.TreeView)
 	for a, b := range cde {
 	}
 }
 
-var PiViewProps = ki.Props{
-	"MainMenu": ki.PropSlice{
+var PiViewProps = tree.Props{
+	"MainMenu": tree.PropSlice{
 		"updtfunc": giv.ActionUpdateFunc(func(pvi interface{}, act *gi.Button) {
 			pv := pvi.(*PiView)
 			act.SetActiveState(pv.Prefs.ProjFile != "")
@@ -653,7 +653,7 @@ func tst() {
 				gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
 					Prompt: "Do you want to save your changes?  If so, Cancel and then Save"},
 					[]string{"Close Without Saving", "Cancel"},
-					win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+					win.This(), func(recv, send tree.Node, sig int64, data interface{}) {
 						switch sig {
 						case 0:
 							w.Close()
@@ -780,7 +780,7 @@ func test() {
 func (pr *Rule) CompileAll(ps *State) bool {
 	pr.SetRuleMap(ps)
 	allok := true
-	pr.FuncDownMeFirst(0, pr.This(), func(k ki.Ki, level int, d interface{}) bool {
+	pr.FuncDownMeFirst(0, pr.This(), func(k tree.Node, level int, d interface{}) bool {
 		pri := k.Embed(KiT_Rule).(*Rule)
 		ok := pri.Compile(ps)
 		if !ok {
@@ -802,7 +802,7 @@ func test() {
 
 type Rule struct {
 	OnePar
-	ki.Node
+	tree.NodeBase
 	Off       bool     `desc:"disable this rule -- useful for testing"`
 }
 
@@ -1132,7 +1132,7 @@ type Lang interface {
 	LexLine(fs *FileState, line int) lex.Line
 }
 
-var TextViewProps = ki.Props{
+var TextViewProps = tree.Props{
 	"white-space":      gi.WhiteSpacePreWrap,
 	"font-family":      "Go Mono",
 	"border-width":     0, // don't render our own border
@@ -1146,19 +1146,19 @@ var TextViewProps = ki.Props{
 	"tab-size":         4,
 	"color":            &gi.Prefs.Colors.Font,
 	"background-color": &gi.Prefs.Colors.Background,
-	TextViewSelectors[TextViewActive]: ki.Props{
+	TextViewSelectors[TextViewActive]: tree.Props{
 		"background-color": "highlight-10",
 	},
-	TextViewSelectors[TextViewFocus]: ki.Props{
+	TextViewSelectors[TextViewFocus]: tree.Props{
 		"background-color": "lighter-0",
 	},
-	TextViewSelectors[TextViewInactive]: ki.Props{
+	TextViewSelectors[TextViewInactive]: tree.Props{
 		"background-color": "highlight-20",
 	},
-	TextViewSelectors[TextViewSel]: ki.Props{
+	TextViewSelectors[TextViewSel]: tree.Props{
 		"background-color": &gi.Prefs.Colors.Select,
 	},
-	TextViewSelectors[TextViewHighlight]: ki.Props{
+	TextViewSelectors[TextViewHighlight]: tree.Props{
 		"background-color": &gi.Prefs.Colors.Highlight,
 	},
 }

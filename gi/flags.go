@@ -12,7 +12,7 @@ import (
 )
 
 // WidgetFlags define Widget node bitflags for tracking common high-frequency GUI
-// state, mostly having to do with event processing. Extends ki.Flags
+// state, mostly having to do with event processing. Extends [tree.Flags].
 type WidgetFlags tree.Flags //enums:bitflag
 
 const (

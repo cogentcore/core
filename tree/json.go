@@ -64,9 +64,9 @@ func (sl Slice) MarshalJSON() ([]byte, error) {
 				b = append(b, []byte(",")...)
 			}
 		} else {
-			fmt.Println("ki.Slice.MarshalJSON: error doing json.Marshal from kid:", kid)
+			fmt.Println("tree.Slice.MarshalJSON: error doing json.Marshal from kid:", kid)
 			grr.Log(err)
-			fmt.Println("ki.Slice.MarshalJSON: output to point of error:", string(b))
+			fmt.Println("tree.Slice.MarshalJSON: output to point of error:", string(b))
 		}
 	}
 	b = append(b, []byte("]")...)
@@ -121,7 +121,7 @@ func (sl *Slice) UnmarshalJSON(b []byte) error {
 		// fmt.Printf("making type: %v\n", tn)
 		typ, err := gti.TypeByNameTry(tn)
 		if err != nil {
-			err = fmt.Errorf("ki.Slice UnmarshalJSON: %w", err)
+			err = fmt.Errorf("tree.Slice UnmarshalJSON: %w", err)
 			slog.Error(err.Error())
 		}
 		tnl[i].Type = typ
@@ -152,11 +152,11 @@ func (sl *Slice) UnmarshalJSON(b []byte) error {
 // The following are special versions for saving the type of
 // the root node, which should generally be relatively rare.
 
-// JSONTypePrefix is the first thing output in a ki tree JSON output file,
-// specifying the type of the root node of the ki tree -- this info appears
+// JSONTypePrefix is the first thing output in a tree JSON output file,
+// specifying the type of the root node of the tree -- this info appears
 // all on one { } bracketed line at the start of the file, and can also be
-// used to identify the file as a ki tree JSON file
-var JSONTypePrefix = []byte("{\"ki.RootType\": ")
+// used to identify the file as a tree JSON file
+var JSONTypePrefix = []byte("{\"tree.RootType\": ")
 
 // JSONTypeSuffix is just the } and \n at the end of the prefix line
 var JSONTypeSuffix = []byte("}\n")
@@ -204,7 +204,7 @@ func SaveNewJSON(k Node, filename string) error {
 // unmarshal, and an error.
 func ReadRootTypeJSON(b []byte) (*gti.Type, []byte, error) {
 	if !bytes.HasPrefix(b, JSONTypePrefix) {
-		return nil, b, fmt.Errorf("ki.ReadRootTypeJSON -- type prefix not found at start of file -- must be there to identify type of root node of tree")
+		return nil, b, fmt.Errorf("tree.ReadRootTypeJSON -- type prefix not found at start of file -- must be there to identify type of root node of tree")
 	}
 	stidx := len(JSONTypePrefix) + 1
 	eidx := bytes.Index(b, JSONTypeSuffix)
@@ -212,7 +212,7 @@ func ReadRootTypeJSON(b []byte) (*gti.Type, []byte, error) {
 	tn := string(bytes.Trim(bytes.TrimSpace(b[stidx:eidx]), "\""))
 	typ, err := gti.TypeByNameTry(tn)
 	if typ == nil {
-		return nil, b[bodyidx:], fmt.Errorf("ki.ReadRootTypeJSON: %w", err)
+		return nil, b[bodyidx:], fmt.Errorf("tree.ReadRootTypeJSON: %w", err)
 	}
 	return typ, b[bodyidx:], nil
 }

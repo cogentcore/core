@@ -11,21 +11,15 @@ import (
 	"cogentcore.org/core/gti"
 )
 
-// Slice is just a slice of ki elements: []Ki, providing methods for accessing
+// Slice is just a slice of tree nodes: []Node, providing methods for accessing
 // elements in the slice, and JSON marshal / unmarshal with encoding of
 // underlying types
 type Slice []Node
 
-// NOTE: we have to define Slice* functions operating on a generic *[]Ki
+// NOTE: we have to define [*Slice] functions operating on a generic *[]Node
 // element as the first (not receiver) argument, to be able to use these
-// functions in any other types that are based on ki.Slice or are other forms
-// of []Ki.  It doesn't seem like it would have been THAT hard to just grab
-// all the methods on Slice when you "inherit" from it -- unlike with structs,
-// where there are issues with the underlying representation, a simple "type A
-// B" kind of expression could easily have inherited the exact same code
-// because, underneath, it IS the same type.  Only for the receiver methods --
-// it does seem reasonable that other uses of different types should
-// differentiate them.  But there you still be able to directly cast!
+// functions in any other types that are based on [Slice] or are other forms
+// of []Node.
 
 // SliceIsValidIndex checks whether the given index is a valid index into slice,
 // within range of 0..len-1.  Returns error if not.
@@ -33,7 +27,7 @@ func SliceIsValidIndex(sl *[]Node, idx int) error {
 	if idx >= 0 && idx < len(*sl) {
 		return nil
 	}
-	return fmt.Errorf("ki.Slice: invalid index: %v -- len = %v", idx, len(*sl))
+	return fmt.Errorf("tree.Slice: invalid index: %v with len = %v", idx, len(*sl))
 }
 
 // IsValidIndex checks whether the given index is a valid index into slice,
@@ -42,15 +36,15 @@ func (sl *Slice) IsValidIndex(idx int) error {
 	if idx >= 0 && idx < len(*sl) {
 		return nil
 	}
-	return fmt.Errorf("ki.Slice: invalid index: %v -- len = %v", idx, len(*sl))
+	return fmt.Errorf("tree.Slice: invalid index: %v with len = %v", idx, len(*sl))
 }
 
-// Elem returns element at index -- panics if index is invalid
+// Elem returns element at index; panics if index is invalid.
 func (sl *Slice) Elem(idx int) Node {
 	return (*sl)[idx]
 }
 
-// ElemTry returns element at index -- Try version returns error if index is invalid.
+// ElemTry returns element at index; returns error if index is invalid.
 func (sl *Slice) ElemTry(idx int) (Node, error) {
 	if err := sl.IsValidIndex(idx); err != nil {
 		return nil, err
@@ -183,7 +177,7 @@ func (sl *Slice) ElemByName(name string, startIndex ...int) Node {
 func (sl *Slice) ElemByNameTry(name string, startIndex ...int) (Node, error) {
 	idx, ok := sl.IndexByName(name, startIndex...)
 	if !ok {
-		return nil, fmt.Errorf("ki.Slice: element named: %v not found", name)
+		return nil, fmt.Errorf("tree.Slice: element named: %v not found", name)
 	}
 	return (*sl)[idx], nil
 }
@@ -203,7 +197,7 @@ func (sl *Slice) ElemByType(t *gti.Type, embeds bool, startIndex ...int) Node {
 func (sl *Slice) ElemByTypeTry(t *gti.Type, embeds bool, startIndex ...int) (Node, error) {
 	idx, ok := sl.IndexByType(t, embeds, startIndex...)
 	if !ok {
-		return nil, fmt.Errorf("ki.Slice: element of type: %v not found", t)
+		return nil, fmt.Errorf("tree.Slice: element of type: %v not found", t)
 	}
 	return (*sl)[idx], nil
 }

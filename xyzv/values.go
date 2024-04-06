@@ -108,7 +108,7 @@ func (vv *TexValue) Config(widg gi.Node2D) {
 	vv.Widget = widg
 	ac := vv.Widget.(*gi.Button)
 	ac.SetProp("border-radius", units.NewPx(4))
-	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send tree.Node, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeTexValue).(*TexValue)
 		ac := vvv.Widget.(*gi.Button)
 		vvv.Activate(ac.ViewportSafe(), nil, nil)
@@ -120,7 +120,7 @@ func (vv *TexValue) HasAction() bool {
 	return true
 }
 
-func (vv *TexValue) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *TexValue) Activate(vp *gi.Viewport2D, dlgRecv tree.Node, dlgFunc tree.RecvFunc) {
 	if vv.IsInactive() {
 		return
 	}
@@ -131,7 +131,7 @@ func (vv *TexValue) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.RecvFu
 	if !ok {
 		return
 	}
-	sci, err := ndi.ParentByTypeTry(TypeScene, ki.Embeds)
+	sci, err := ndi.ParentByTypeTry(TypeScene, tree.Embeds)
 	if err != nil {
 		log.Println(err)
 		return
@@ -143,7 +143,7 @@ func (vv *TexValue) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.RecvFu
 	cur := laser.ToString(vv.Value.Interface())
 	desc, _ := vv.Tag("desc")
 	giv.SliceViewSelectDialog(vp, &sl, cur, giv.DlgOpts{Title: "Select a Texture", Prompt: desc}, nil,
-		vv.This(), func(recv, send ki.Ki, sig int64, data any) {
+		vv.This(), func(recv, send tree.Node, sig int64, data any) {
 			if sig == int64(gi.DialogAccepted) {
 				ddlg := send.Embed(gi.TypeDialog).(*gi.Dialog)
 				si := giv.SliceViewSelectDialogValue(ddlg)

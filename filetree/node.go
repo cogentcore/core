@@ -63,12 +63,6 @@ func (fn *Node) FlagType() enums.BitFlagSetter {
 	return (*NodeFlags)(&fn.Flags)
 }
 
-//	func (fn *Node) CopyFieldsFrom(frm any) {
-//		// note: not copying ki.Node as it doesn't have any copy fields
-//		// fr := frm.(*Node)
-//		// and indeed nothing here should be copied!
-//	}
-
 // NodeFlags define bitflags for Node state -- these extend TreeViewFlags
 // and storage is an int64
 type NodeFlags giv.TreeViewFlags //enums:bitflag -trim-prefix Node

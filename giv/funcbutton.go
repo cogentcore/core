@@ -244,7 +244,7 @@ func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButto
 		}
 		return r
 	}, snm)
-	// func name is not guaranteed to make it unique so we ensure it is (-1 because [ki.New] adds 1 first)
+	// func name is not guaranteed to make it unique so we ensure it is (-1 because [tree.New] adds 1 first)
 	fb.SetName(snm + "-" + strconv.FormatUint(fb.Parent().NumLifetimeChildren()-1, 10))
 	txt := strcase.ToSentence(snm)
 	fb.SetText(txt)

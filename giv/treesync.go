@@ -159,10 +159,10 @@ func (tv *TreeView) SelectedSyncNodes() tree.Slice {
 func (tv *TreeView) FindSyncNode(kn tree.Node) *TreeView {
 	var ttv *TreeView
 	tv.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
-		tvki := AsTreeView(wi)
-		if tvki != nil {
-			if tvki.SyncNode == kn {
-				ttv = tvki
+		tvn := AsTreeView(wi)
+		if tvn != nil {
+			if tvn.SyncNode == kn {
+				ttv = tvn
 				return tree.Break
 			}
 		}
@@ -208,17 +208,17 @@ func (tv *TreeView) AddTreeNodes(rel, myidx int, typ *gti.Type, n int) {
 
 func (tv *TreeView) AddSyncNodes(rel, myidx int, typ *gti.Type, n int) {
 	parent := tv.SyncNode
-	var ski tree.Node
+	var sn tree.Node
 	for i := 0; i < n; i++ {
 		nm := fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i)
 		nki := parent.InsertNewChild(typ, myidx+i, nm)
 		if i == n-1 {
-			ski = nki
+			sn = nki
 		}
 	}
 	tv.SendChangeEventReSync(nil)
-	if ski != nil {
-		if tvk := tv.ChildByName("tv_"+ski.Name(), 0); tvk != nil {
+	if sn != nil {
+		if tvk := tv.ChildByName("tv_"+sn.Name(), 0); tvk != nil {
 			stv := AsTreeView(tvk)
 			stv.SelectAction(events.SelectOne)
 		}

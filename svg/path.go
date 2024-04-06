@@ -375,7 +375,7 @@ func PathDataRender(data []PathData, pc *paint.Context) {
 // command, index of the points within that command, and coord values
 // (absolute, not relative, regardless of the command type), including
 // special control points for path commands that have them (else nil).
-// If function returns false (use ki.Break vs. ki.Continue) then
+// If function returns false (use [tree.Break] vs. [tree.Continue]) then
 // traversal is aborted.
 // For Control points, order is in same order as in standard path stream
 // when multiple, e.g., C,S.

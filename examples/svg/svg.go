@@ -95,7 +95,7 @@ func main() {
 	zmlb.Tooltip = "zoom scaling factor -- can use mouse scrollwheel to zoom as well"
 
 	zoomout := tbar.AddButton(gi.ActOpts{Icon: icons.ZoomOut, Name: "zoomout", Tooltip: "zoom out"},
-		win.This(), func(recv, send ki.Ki, sig int64, data any) {
+		win.This(), func(recv, send tree.Node, sig int64, data any) {
 			SetZoom(svge.Scale * 0.9)
 			win.FullReRender()
 		})
@@ -110,14 +110,14 @@ func main() {
 	zoom.SetValue(svge.Scale)
 	zoom.Tooltip = "zoom scaling factor -- can use mouse scrollwheel to zoom as well"
 	TheZoom = zoom
-	zoom.SpinBoxSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data any) {
+	zoom.SpinBoxSig.Connect(win.This(), func(recv, send tree.Node, sig int64, data any) {
 		sp := send.(*gi.Spinner)
 		SetZoom(sp.Value)
 		win.FullReRender()
 	})
 
 	zoomin := tbar.AddButton(gi.ActOpts{Icon: icons.ZoomIn, Name: "zoomin", Tooltip: " zoom in"},
-		win.This(), func(recv, send ki.Ki, sig int64, data any) {
+		win.This(), func(recv, send tree.Node, sig int64, data any) {
 			SetZoom(svge.Scale * 1.1)
 			win.FullReRender()
 		})
@@ -137,7 +137,7 @@ func main() {
 	// zoom.SetMinPrefWidth(units.NewEm(10))
 	trx.SetValue(svge.Trans.X)
 	TheTransX = trx
-	trx.SpinBoxSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data any) {
+	trx.SpinBoxSig.Connect(win.This(), func(recv, send tree.Node, sig int64, data any) {
 		SetTrans(trx.Value, svge.Trans.Y)
 		win.FullReRender()
 	})
@@ -146,12 +146,12 @@ func main() {
 	// zoom.SetMinPrefWidth(units.NewEm(10))
 	try.SetValue(svge.Trans.Y)
 	TheTransY = try
-	try.SpinBoxSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data any) {
+	try.SpinBoxSig.Connect(win.This(), func(recv, send tree.Node, sig int64, data any) {
 		SetTrans(svge.Trans.X, try.Value)
 		win.FullReRender()
 	})
 
-	fnm.TextFieldSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data any) {
+	fnm.TextFieldSig.Connect(win.This(), func(recv, send tree.Node, sig int64, data any) {
 		if sig == int64(gi.TextFieldDone) {
 			tf := send.(*gi.TextField)
 			fn, _ := homedir.Expand(tf.Text())
@@ -159,7 +159,7 @@ func main() {
 		}
 	})
 
-	svge.NodeSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data any) {
+	svge.NodeSig.Connect(win.This(), func(recv, send tree.Node, sig int64, data any) {
 		ssvg := send.Embed(svg.TypeEditor).(*svg.Editor)
 		SetZoom(ssvg.Scale)
 		SetTrans(ssvg.Trans.X, ssvg.Trans.Y)
@@ -189,7 +189,7 @@ func main() {
 	})
 	fmen.Menu.AddSeparator("csep")
 	fmen.Menu.AddButton(gi.ActOpts{Label: "Close RenderWin", Shortcut: "Command+W"},
-		win.This(), func(recv, send ki.Ki, sig int64, data any) {
+		win.This(), func(recv, send tree.Node, sig int64, data any) {
 			win.RenderWin.Close()
 		})
 

@@ -92,7 +92,7 @@ func (n *NodeBase) This() Node {
 	return n.Ths
 }
 
-// AsKi returns the *ki.Node base type for this node.
+// AsKi returns the *tree.NodeBase base type for this node.
 func (n *NodeBase) AsKi() *NodeBase {
 	return n
 }
@@ -235,7 +235,7 @@ func (n *NodeBase) NumLifetimeChildren() uint64 {
 }
 
 // Children returns a pointer to the slice of children (Node.Kids) -- use
-// methods on ki.Slice for further ways to access (ByName, ByType, etc).
+// methods on [tree.Slice] for further ways to access (ByName, ByType, etc).
 // Slice can be modified directly (e.g., sort, reorder) but Add* / Delete*
 // methods on parent node should be used to ensure proper tracking.
 func (n *NodeBase) Children() *Slice {
@@ -387,7 +387,7 @@ func (n *NodeBase) FindPath(path string) Node {
 				fe := UnescapePathName(fels[i])
 				fk, err := curn.FieldByName(fe)
 				if err != nil {
-					slog.Debug("ki.FindPath: %v", err)
+					slog.Debug("tree.FindPath: %v", err)
 					return nil
 				}
 				curn = fk
@@ -404,7 +404,7 @@ func (n *NodeBase) FindPath(path string) Node {
 }
 
 func (n *NodeBase) FieldByName(field string) (Node, error) {
-	return nil, errors.New("ki.FieldByName: no Ki fields defined for this node")
+	return nil, errors.New("tree.FieldByName: no tree fields defined for this node")
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1013,7 +1013,7 @@ func (n *NodeBase) WalkBreadth(fun func(k Node) bool) {
 // should not be copied (unexported, lower-case fields are not copyable).
 func (n *NodeBase) CopyFrom(frm Node) error {
 	if frm == nil {
-		err := fmt.Errorf("ki.Node CopyFrom into %v: nil 'from' source", n)
+		err := fmt.Errorf("tree.NodeBase CopyFrom into %v: nil 'from' source", n)
 		log.Println(err)
 		return err
 	}
@@ -1025,10 +1025,10 @@ func (n *NodeBase) CopyFrom(frm Node) error {
 // Any pointers within the cloned tree will correctly point within the new
 // cloned tree (see Copy info).
 func (n *NodeBase) Clone() Node {
-	nki := NewOfType(n.This().KiType())
-	nki.InitName(nki, n.Nm)
-	nki.CopyFrom(n.This())
-	return nki
+	nc := NewOfType(n.This().KiType())
+	nc.InitName(nc, n.Nm)
+	nc.CopyFrom(n.This())
+	return nc
 }
 
 // CopyFromRaw performs a raw copy that just does the deep copy of the
@@ -1055,6 +1055,6 @@ func CopyFromRaw(kn, frm Node) {
 func (n *NodeBase) CopyFieldsFrom(from Node) {
 	err := copier.CopyWithOption(n.This(), from.This(), copier.Option{CaseSensitive: true, DeepCopy: true})
 	if err != nil {
-		slog.Error("ki.Node.CopyFieldsFrom", "err", err)
+		slog.Error("tree.NodeBase.CopyFieldsFrom", "err", err)
 	}
 }

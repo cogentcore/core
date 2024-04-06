@@ -260,10 +260,10 @@ func (g *NodeBase) ReadGeom(sv *SVG, dat []float32) {
 	g.ReadTransform(dat, 0)
 }
 
-// SVGWalkPre does ki WalkPre on given node using given walk function
+// SVGWalkPre does [tree.Node.WalkPre] on given node using given walk function
 // with SVG Node parameters.  Automatically filters
-// nil or deleted items.  Return ki.Continue (true) to continue,
-// and ki.Break (false) to terminate.
+// nil or deleted items.  Return [tree.Continue] (true) to continue,
+// and [tree.Break] (false) to terminate.
 func SVGWalkPre(n Node, fun func(kni Node, knb *NodeBase) bool) {
 	n.WalkPre(func(k tree.Node) bool {
 		kni := k.(Node)
@@ -274,11 +274,11 @@ func SVGWalkPre(n Node, fun func(kni Node, knb *NodeBase) bool) {
 	})
 }
 
-// SVGWalkPreNoDefs does ki WalkPre on given node using given walk function
+// SVGWalkPreNoDefs does [tree.Node.WalkPre] on given node using given walk function
 // with SVG Node parameters.  Automatically filters
 // nil or deleted items, and Defs nodes (IsDef) and MetaData,
 // i.e., it only processes concrete graphical nodes.
-// Return ki.Continue (true) to continue, and ki.Break (false) to terminate.
+// Return [tree.Continue] (true) to continue, and [tree.Break] (false) to terminate.
 func SVGWalkPreNoDefs(n Node, fun func(kni Node, knb *NodeBase) bool) {
 	n.WalkPre(func(k tree.Node) bool {
 		kni := k.(Node)
@@ -502,12 +502,9 @@ func (g *NodeBase) Render(sv *SVG) {
 	rs.PopTransform()
 }
 
-// NodeFlags extend ki.Flags to hold SVG node state
+// NodeFlags extend [tree.Flags] to hold SVG node state.
 type NodeFlags tree.Flags //enums:bitflag
 
 const (
-	// Rendering means that the SVG is currently redrawing
-	// Can be useful to check for animations etc to decide whether to
-	// drive another update
 	IsDef NodeFlags = NodeFlags(tree.FlagsN) + iota
 )

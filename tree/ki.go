@@ -31,11 +31,11 @@ import (
 // otherwise nodes are typically created and deleted but not moved.
 //
 // The Node interface is designed to support virtual method calling in Go
-// and is only intended to be implemented once, by the ki.Node type
+// and is only intended to be implemented once, by the tree.NodeBase type
 // (as opposed to interfaces that are used for hiding multiple different
-// implementations of a common concept).  Thus, all of the fields in ki.Node
+// implementations of a common concept).  Thus, all of the fields in tree.NodeBase
 // are exported (have captital names), to be accessed directly in types
-// that embed and extend the ki.Node. The Node interface has the "formal" name
+// that embed and extend the tree.NodeBase. The Node interface has the "formal" name
 // (e.g., Children) while the Node has the "nickname" (e.g., Kids).  See the
 // Naming Conventions on the Cogent Core Wiki for more details.
 //
@@ -66,7 +66,7 @@ type Node interface {
 	// has been destroyed, or is improperly constructed.
 	This() Node
 
-	// AsKi returns the *ki.Node base type for this node.
+	// AsKi returns the *tree.NodeBase base type for this node.
 	AsKi() *NodeBase
 
 	// BaseType returns the base node type for all elements within this tree.
@@ -133,7 +133,7 @@ type Node interface {
 	NumLifetimeChildren() uint64
 
 	// Children returns a pointer to the slice of children (Node.Kids) -- use
-	// methods on ki.Slice for further ways to access (ByName, ByType, etc).
+	// methods on [tree.Slice] for further ways to access (ByName, ByType, etc).
 	// Slice can be modified, deleted directly (e.g., sort, reorder) but Add
 	// method on parent node should be used to ensure proper init.
 	Children() *Slice

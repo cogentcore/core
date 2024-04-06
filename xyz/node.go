@@ -141,7 +141,7 @@ type NodeBase struct {
 	ScBBox image.Rectangle `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 }
 
-// NodeFlags extend ki.Flags to hold 3D node state
+// NodeFlags extend [tree.Flags] to hold 3D node state.
 type NodeFlags tree.Flags //enums:bitflag
 
 const (

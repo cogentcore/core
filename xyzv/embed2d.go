@@ -44,7 +44,7 @@ const (
 // to that using window's current Logical DPI scaling).  If fitContent is true and
 // first and only element in Viewport is a gi.Layout, then it will be resized
 // to fit content size (though no smaller than given size).
-func NewEmbed2D(sc *Scene, parent ki.Ki, name string, width, height int, fitContent bool) *Embed2D {
+func NewEmbed2D(sc *Scene, parent tree.Node, name string, width, height int, fitContent bool) *Embed2D {
 	em := parent.NewChild(TypeEmbed2D, name).(*Embed2D)
 	em.Defaults(sc)
 	em.StdSize = image.Point{width, height}
@@ -175,19 +175,19 @@ func (em *Embed2D) UpdateBBox2D(size mat32.Vec2, sc *Scene) {
 	em.Viewport.WinBBox.Max = em.WinBBox.Min.Add(em.Viewport.Geom.Size)
 	em.BBoxMu.Unlock()
 	em.Viewport.BBoxMu.Unlock()
-	em.Viewport.FuncDownMeFirst(0, em.Viewport.This(), func(k ki.Ki, level int, d any) bool {
+	em.Viewport.FuncDownMeFirst(0, em.Viewport.This(), func(k tree.Node, level int, d any) bool {
 		if k == em.Viewport.This() {
-			return ki.Continue
+			return tree.Continue
 		}
 		_, ni := gi.KiToNode2D(k)
 		if ni == nil {
-			return ki.Break // going into a different type of thing, bail
+			return tree.Break // going into a different type of thing, bail
 		}
 		if ni.IsUpdating() {
-			return ki.Break
+			return tree.Break
 		}
 		ni.SetWinBBox()
-		return ki.Continue
+		return tree.Continue
 	})
 }
 
@@ -195,8 +195,8 @@ func (em *Embed2D) RenderClass() RenderClasses {
 	return RClassOpaqueTexture
 }
 
-var Embed2DProps = ki.Props{
-	ki.EnumTypeFlag: gi.TypeNodeFlags,
+var Embed2DProps = tree.Props{
+	tree.EnumTypeFlag: core.TypeNodeFlags,
 }
 
 func (em *Embed2D) Project2D(sc *Scene, pt image.Point) (image.Point, bool) {
@@ -235,7 +235,7 @@ func (em *Embed2D) Project2D(sc *Scene, pt image.Point) (image.Point, bool) {
 }
 
 func (em *Embed2D) ConnectEvents3D(sc *Scene) {
-	em.ConnectEvent(sc.Win, goosi.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	em.ConnectEvent(sc.Win, goosi.MouseEvent, gi.RegPri, func(recv, send tree.Node, sig int64, d any) {
 		emm := recv.Embed(TypeEmbed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
 		if !ssc.IsVisible() {
@@ -267,7 +267,7 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		}
 		me.SetProcessed() // must always
 	})
-	em.ConnectEvent(sc.Win, goosi.MouseMoveEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	em.ConnectEvent(sc.Win, goosi.MouseMoveEvent, gi.RegPri, func(recv, send tree.Node, sig int64, d any) {
 		emm := recv.Embed(TypeEmbed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
 		if !ssc.IsVisible() {
@@ -293,7 +293,7 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		emm.Viewport.EventMgr.MouseEventReset(md)
 		me.SetProcessed() // must always
 	})
-	em.ConnectEvent(sc.Win, goosi.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	em.ConnectEvent(sc.Win, goosi.MouseDragEvent, gi.RegPri, func(recv, send tree.Node, sig int64, d any) {
 		emm := recv.Embed(TypeEmbed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
 		if !ssc.IsVisible() {
@@ -318,7 +318,7 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		emm.Viewport.EventMgr.MouseEventReset(md)
 		me.SetProcessed() // must always
 	})
-	em.ConnectEvent(sc.Win, goosi.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
+	em.ConnectEvent(sc.Win, goosi.KeyChordEvent, gi.HiPri, func(recv, send tree.Node, sig int64, d any) {
 		// note: restylesering HiPri -- we are outside 2D focus system, and get *all* keyboard events
 		emm := recv.Embed(TypeEmbed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
@@ -441,11 +441,11 @@ func (vp *EmbedViewport) VpUploadRegion(vpBBox, winBBox image.Rectangle) {
 ///////////////////////////////////////
 //  EventMaster API
 
-func (vp *EmbedViewport) EventTopNode() ki.Ki {
+func (vp *EmbedViewport) EventTopNode() tree.Node {
 	return vp
 }
 
-func (vp *EmbedViewport) FocusTopNode() ki.Ki {
+func (vp *EmbedViewport) FocusTopNode() tree.Node {
 	return vp
 }
 
@@ -458,7 +458,7 @@ func (vp *EmbedViewport) EventTopUpdateEnd(updt bool) {
 }
 
 // IsInScope returns whether given node is in scope for receiving events
-func (vp *EmbedViewport) IsInScope(node ki.Ki, popup bool) bool {
+func (vp *EmbedViewport) IsInScope(node tree.Node, popup bool) bool {
 	return true // no popups for embedded
 }
 

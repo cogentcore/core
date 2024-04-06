@@ -42,11 +42,11 @@ The following functions defined in ki package can be used:
 * UniquifyNamesAll(node) to to uniquify all names in entire tree.
 
 The Ki interface is designed to support virtual method calling in Go
-and is only intended to be implemented once, by the ki.Node type
+and is only intended to be implemented once, by the tree.NodeBase type
 (as opposed to interfaces that are used for hiding multiple different
-implementations of a common concept).  Thus, all of the fields in ki.Node
+implementations of a common concept).  Thus, all of the fields in tree.NodeBase
 are exported (have captital names), to be accessed directly in types
-that embed and extend the ki.Node. The Ki interface has the "formal" name
+that embed and extend the tree.NodeBase. The Ki interface has the "formal" name
 (e.g., Children) while the Node has the "nickname" (e.g., Kids).  See the
 Naming Conventions on the Cogent Core Wiki for more details.
 

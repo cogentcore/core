@@ -275,7 +275,7 @@ func main() {
 		eabut := gi.NewCheckBox(evlay, "anim-but")
 		eabut.SetText("Animate")
 		eabut.Tooltip = "toggle animation on and off"
-		eabut.ButtonSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data any) {
+		eabut.ButtonSig.Connect(win.This(), func(recv, send tree.Node, sig int64, data any) {
 			if sig == int64(gi.ButtonToggled) {
 				anim.On = eabut.IsChecked()
 			}
@@ -285,15 +285,15 @@ func main() {
 		cmb.SetText("Anim Ctrl")
 		cmb.Tooltip = "options for what is animated (note: menu only works when not animating -- checkboxes would be more useful here but wanted to test menu function)"
 		cmb.Menu.AddAction(gi.ActOpts{Label: "Toggle Torus"},
-			win.This(), func(recv, send ki.Ki, sig int64, data any) {
+			win.This(), func(recv, send tree.Node, sig int64, data any) {
 				anim.DoTorus = !anim.DoTorus
 			})
 		cmb.Menu.AddAction(gi.ActOpts{Label: "Toggle Gopher"},
-			win.This(), func(recv, send ki.Ki, sig int64, data any) {
+			win.This(), func(recv, send tree.Node, sig int64, data any) {
 				anim.DoGopher = !anim.DoGopher
 			})
 		cmb.Menu.AddAction(gi.ActOpts{Label: "Edit Anim"},
-			win.This(), func(recv, send ki.Ki, sig int64, data any) {
+			win.This(), func(recv, send tree.Node, sig int64, data any) {
 				giv.StructViewDialog(vp, anim, giv.DlgOpts{Title: "Animation Parameters"}, nil, nil)
 			})
 
@@ -317,11 +317,11 @@ func main() {
 		// spsld.Tracking = true
 		spsld.Icon = icons.RadioButtonUnchecked
 
-		sb.SpinBoxSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
+		sb.SpinBoxSig.Connect(rec.This(), func(recv, send tree.Node, sig int64, data any) {
 			anim.Speed = sb.Value
 			spsld.SetValue(anim.Speed)
 		})
-		spsld.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
+		spsld.SliderSig.Connect(rec.This(), func(recv, send tree.Node, sig int64, data any) {
 			if gi.SliderSignals(sig) == gi.SliderValueChanged {
 				anim.Speed = data.(float32)
 				sb.SetValue(anim.Speed)

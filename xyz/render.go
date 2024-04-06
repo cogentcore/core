@@ -383,7 +383,7 @@ func (sc *Scene) RenderImpl() {
 			return tree.Break // going into a different type of thing, bail
 		}
 		// if !ni.IsVisible() || nb.ScBBox == (image.Rectangle{}) {
-		// 	return ki.Break
+		// 	return tree.Break
 		// }
 		if !ni.IsSolid() {
 			return tree.Continue

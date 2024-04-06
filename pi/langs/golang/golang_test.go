@@ -28,7 +28,7 @@ func TestParse(t *testing.T) {
 	pr := lp.Lang.Parser()
 	pr.ReportErrs = true
 
-	fs := pi.NewFileStates(filepath.Join("testdata", "treeview.go"), "", fi.Go)
+	fs := pi.NewFileStates(filepath.Join("..", "..", "..", "giv", "treeview.go"), "", fi.Go)
 	txt, err := lex.OpenFileBytes(fs.Filename) // and other stuff
 	if err != nil {
 		t.Error(err)

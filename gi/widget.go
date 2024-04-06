@@ -378,13 +378,6 @@ func (wb *WidgetBase) CopyFieldsFrom(from tree.Node) {
 	wb.Listeners.CopyFromExtra(frm.Listeners)
 	wb.FirstListeners.CopyFromExtra(frm.FirstListeners)
 	wb.FinalListeners.CopyFromExtra(frm.FinalListeners)
-
-	// if frm.Parts != nil {
-	// 	if wb.Parts == nil {
-	// 		wb.NewParts()
-	// 	}
-	// 	ki.CopyFromRaw(wb.Parts, frm.Parts)
-	// }
 }
 
 func (wb *WidgetBase) Destroy() {
@@ -489,7 +482,7 @@ func (wb *WidgetBase) WalkPreNode(fun func(tree.Node) bool) {
 }
 
 // WidgetKidsIter iterates through the Kids, as widgets, calling the given function.
-// Return ki.Continue (true) to continue, and ki.Break (false) to terminate.
+// Return [tree.Continue] (true) to continue, and [tree.Break] (false) to terminate.
 func (wb *WidgetBase) WidgetKidsIter(fun func(i int, kwi Widget, kwb *WidgetBase) bool) {
 	for i, k := range wb.Kids {
 		kwi, kwb := AsWidget(k)
@@ -506,7 +499,7 @@ func (wb *WidgetBase) WidgetKidsIter(fun func(i int, kwi Widget, kwb *WidgetBase
 // VisibleKidsIter iterates through the Kids, as widgets, calling the given function,
 // excluding any with the *local* states.Invisible flag set (does not check parents).
 // This is used e.g., for layout functions to exclude non-visible direct children.
-// Return ki.Continue (true) to continue, and ki.Break (false) to terminate.
+// Return [tree.Continue] (true) to continue, and [tree.Break] (false) to terminate.
 func (wb *WidgetBase) VisibleKidsIter(fun func(i int, kwi Widget, kwb *WidgetBase) bool) {
 	for i, k := range wb.Kids {
 		kwi, kwb := AsWidget(k)
@@ -525,7 +518,7 @@ func (wb *WidgetBase) VisibleKidsIter(fun func(i int, kwi Widget, kwb *WidgetBas
 
 // WidgetWalkPre is a version of the ki WalkPre iterator that automatically filters
 // nil or deleted items and operates on Widget types.
-// Return ki.Continue (true) to continue, and ki.Break (false) to terminate.
+// Return [tree.Continue] (true) to continue, and [tree.Break] (false) to terminate.
 func (wb *WidgetBase) WidgetWalkPre(fun func(kwi Widget, kwb *WidgetBase) bool) {
 	wb.WalkPre(func(k tree.Node) bool {
 		kwi, kwb := AsWidget(k)

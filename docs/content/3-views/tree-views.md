@@ -11,23 +11,23 @@ c2 := giv.NewTreeView(tv, "Child 2")
 giv.NewTreeView(c2, "Nested child")
 ```
 
-You can make a tree view represent another [[ki.Ki]] tree:
+You can make a tree view represent another [[tree.Node]] tree:
 
 ```Go
-n := ki.NewRoot[*ki.NodeBase]("Root")
-ki.New[*ki.NodeBase](n, "Child 1")
-c2 := ki.New[*ki.NodeBase](n, "Child 2")
-ki.New[*ki.NodeBase](c2, "Nested child")
+n := tree.NewRoot[*tree.NodeBase]("Root")
+tree.New[*tree.NodeBase](n, "Child 1")
+c2 := tree.New[*tree.NodeBase](n, "Child 2")
+tree.New[*tree.NodeBase](c2, "Nested child")
 giv.NewTreeView(parent).SyncTree(n)
 ```
 
 You can detect when the user changes the value of the tree value:
 
 ```Go
-n := ki.NewRoot[*ki.NodeBase]("Root")
-ki.New[*ki.NodeBase](n, "Child 1")
-c2 := ki.New[*ki.NodeBase](n, "Child 2")
-ki.New[*ki.NodeBase](c2, "Nested child")
+n := tree.NewRoot[*tree.NodeBase]("Root")
+tree.New[*tree.NodeBase](n, "Child 1")
+c2 := tree.New[*tree.NodeBase](n, "Child 2")
+tree.New[*tree.NodeBase](c2, "Nested child")
 giv.NewTreeView(parent).SyncTree(n).OnChange(func(e events.Event) {
     gi.MessageSnackbar(parent, "Tree view changed")
 })
@@ -36,19 +36,19 @@ giv.NewTreeView(parent).SyncTree(n).OnChange(func(e events.Event) {
 You can prevent the user from changing the tree:
 
 ```Go
-n := ki.NewRoot[*ki.NodeBase]("Root")
-ki.New[*ki.NodeBase](n, "Child 1")
-c2 := ki.New[*ki.NodeBase](n, "Child 2")
-ki.New[*ki.NodeBase](c2, "Nested child")
+n := tree.NewRoot[*tree.NodeBase]("Root")
+tree.New[*tree.NodeBase](n, "Child 1")
+c2 := tree.New[*tree.NodeBase](n, "Child 2")
+tree.New[*tree.NodeBase](c2, "Nested child")
 giv.NewTreeView(parent).SyncTree(n).SetReadOnly(true)
 ```
 
-When you use [[giv.NewValue]] with a [[ki.Ki]] tree node value, it will create a button that opens an interactive inspector of that node:
+When you use [[giv.NewValue]] with a [[tree.Node]] tree node value, it will create a button that opens an interactive inspector of that node:
 
 ```Go
-n := ki.NewRoot[*ki.NodeBase]("Root")
-ki.New[*ki.NodeBase](n, "Child 1")
-c2 := ki.New[*ki.NodeBase](n, "Child 2")
-ki.New[*ki.NodeBase](c2, "Nested child")
+n := tree.NewRoot[*tree.NodeBase]("Root")
+tree.New[*tree.NodeBase](n, "Child 1")
+c2 := tree.New[*tree.NodeBase](n, "Child 2")
+tree.New[*tree.NodeBase](c2, "Nested child")
 giv.NewValue(parent, n)
 ```

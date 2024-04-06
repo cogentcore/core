@@ -64,7 +64,7 @@ func (ly *Layout) ConfigScroll(d mat32.Dims) {
 	sb := ly.Scrolls[d]
 	sb.InitName(sb, fmt.Sprintf("scroll%v", d))
 	tree.SetParent(sb, ly.This())
-	// sr.SetFlag(true, ki.Field) // note: do not turn on -- breaks pos
+	// sr.SetFlag(true, tree.Field) // note: do not turn on -- breaks pos
 	sb.SetType(SliderScrollbar)
 	sb.InputThreshold = 1
 	sb.Min = 0.0

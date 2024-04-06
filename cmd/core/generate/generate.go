@@ -23,20 +23,20 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-// KiMethodsTmpl is a template that contains the methods
-// and functions specific to [ki.Ki] types.
-var KiMethodsTmpl = template.Must(template.New("KiMethods").
+// TreeMethodsTmpl is a template that contains the methods
+// and functions specific to [tree.Node] types.
+var TreeMethodsTmpl = template.Must(template.New("TreeMethods").
 	Funcs(template.FuncMap{
 		"HasEmbedDirective": HasEmbedDirective,
 		"HasNoNewDirective": HasNoNewDirective,
 		"DocToComment":      gtigen.DocToComment,
-		"KiPkg":             KiPkg,
+		"TreePkg":           TreePkg,
 	}).Parse(
 	`
 	{{if not (HasNoNewDirective .)}}
 	// New{{.LocalName}} adds a new [{{.LocalName}}] with the given name to the given parent:
 	{{DocToComment .Doc}}
-	func New{{.LocalName}}(parent {{KiPkg .}}Node, name ...string) *{{.LocalName}} {
+	func New{{.LocalName}}(parent {{TreePkg .}}Node, name ...string) *{{.LocalName}} {
 		return parent.NewChild({{.LocalName}}Type, name...).(*{{.LocalName}})
 	}
 	{{end}}
@@ -45,7 +45,7 @@ var KiMethodsTmpl = template.Must(template.New("KiMethods").
 	func (t *{{.LocalName}}) KiType() *gti.Type { return {{.LocalName}}Type }
 
 	// New returns a new [*{{.LocalName}}] value
-	func (t *{{.LocalName}}) New() {{KiPkg .}}Node { return &{{.LocalName}}{} }
+	func (t *{{.LocalName}}) New() {{TreePkg .}}Node { return &{{.LocalName}}{} }
 	
 	{{if HasEmbedDirective .}}
 	// {{.LocalName}}Embedder is an interface that all types that embed {{.LocalName}} satisfy
@@ -55,7 +55,7 @@ var KiMethodsTmpl = template.Must(template.New("KiMethods").
 	
 	// As{{.LocalName}} returns the given value as a value of type {{.LocalName}} if the type
 	// of the given value embeds {{.LocalName}}, or nil otherwise
-	func As{{.LocalName}}(k {{KiPkg .}}Node) *{{.LocalName}} {
+	func As{{.LocalName}}(k {{TreePkg .}}Node) *{{.LocalName}} {
 		if k == nil || k.This() == nil {
 			return nil
 		}
@@ -71,18 +71,18 @@ var KiMethodsTmpl = template.Must(template.New("KiMethods").
 	`,
 ))
 
-// KiPkg returns the package identifier for the ki package in
-// the context of the given type ("" if it is already in the ki
-// package, and "ki." otherwise)
-func KiPkg(typ *gtigen.Type) string {
-	if typ.Pkg == "ki" { // we are already in ki
+// TreePkg returns the package identifier for the tree package in
+// the context of the given type ("" if it is already in the tree
+// package, and "tree." otherwise)
+func TreePkg(typ *gtigen.Type) string {
+	if typ.Pkg == "tree" { // we are already in tree
 		return ""
 	}
-	return "ki."
+	return "tree."
 }
 
 // HasEmbedDirective returns whether the given [gtigen.Type] has a "core:embedder"
-// comment directive. This function is used in [KiMethodsTmpl].
+// comment directive. This function is used in [TreeMethodsTmpl].
 func HasEmbedDirective(typ *gtigen.Type) bool {
 	return slices.ContainsFunc(typ.Directives, func(d gti.Directive) bool {
 		return d.Tool == "core" && d.Directive == "embedder"
@@ -90,7 +90,7 @@ func HasEmbedDirective(typ *gtigen.Type) bool {
 }
 
 // HasNoNewDirective returns whether the given [gtigen.Type] has a "core:no-new"
-// comment directive. This function is used in [KiMethodsTmpl].
+// comment directive. This function is used in [TreeMethodsTmpl].
 func HasNoNewDirective(typ *gtigen.Type) bool {
 	return slices.ContainsFunc(typ.Directives, func(d gti.Directive) bool {
 		return d.Tool == "core" && d.Directive == "no-new"
@@ -104,12 +104,12 @@ func HasNoNewDirective(typ *gtigen.Type) bool {
 func Generate(c *config.Config) error { //gti:add
 	c.Generate.Gtigen.InterfaceConfigs = &ordmap.Map[string, *gtigen.Config]{}
 
-	c.Generate.Gtigen.InterfaceConfigs.Add("cogentcore.org/core/ki.Node", &gtigen.Config{
+	c.Generate.Gtigen.InterfaceConfigs.Add("cogentcore.org/core/tree.Node", &gtigen.Config{
 		AddTypes:  true,
 		Instance:  true,
 		TypeVar:   true,
 		Setters:   true,
-		Templates: []*template.Template{KiMethodsTmpl},
+		Templates: []*template.Template{TreeMethodsTmpl},
 	})
 
 	pkgs, err := ParsePackages(c)

@@ -1,6 +1,8 @@
 package gotypes
 
-import "cogentcore.org/core/ki"
+import (
+	"cogentcore.org/core/tree"
+)
 
 type Ityp int
 
@@ -18,7 +20,7 @@ type Artyp [20]float64
 
 type Sttyp struct {
 	Anon1
-	ki.Node
+	tree.Node
 	*APtrField
 	FieldA         int
 	FieldB         Sltyp
@@ -28,7 +30,7 @@ type Sttyp struct {
 type Sl2typ []Ityp
 
 type Iftyp interface {
-	ki.Ki
+	tree.Node
 	LocalIface
 	MethA(a, b Ityp) Ptyp
 	MethB(a, b Ityp) Ptyp
@@ -36,9 +38,9 @@ type Iftyp interface {
 
 type Dtyp Sttyp
 
-type DPtyp ki.Ki
+type DPtyp tree.Node
 
-type Futyp func(ab, bb string, st Sttyp, in int, kk ki.Ki) PMtyp
+type Futyp func(ab, bb string, st Sttyp, in int, kk tree.Node) PMtyp
 
 type Fustyp func()
 
@@ -56,7 +58,7 @@ var Svr2, Svr3 Sttyp
 
 var (
 	Mvar map[string]float32
-	Avar []ki.Ki
+	Avar []tree.Node
 )
 
 func (st *Sttyp) Method1(para int, meter string) {
