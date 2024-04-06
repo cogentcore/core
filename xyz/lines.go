@@ -99,7 +99,7 @@ func UnitConeMesh(sc *Scene, segs int) *Cylinder {
 
 // NewLine adds a new line between two specified points, using a shared
 // mesh unit line, which is rotated and positioned to go between the designated points.
-func NewLine(sc *Scene, parent ki.Ki, name string, st, ed mat32.Vec3, width float32, clr color.RGBA) *Solid {
+func NewLine(sc *Scene, parent ki.Node, name string, st, ed mat32.Vec3, width float32, clr color.RGBA) *Solid {
 	lm := UnitLineMesh(sc)
 	ln := NewSolid(parent, name).SetMesh(lm)
 	ln.Pose.Scale.Set(1, width, width)
@@ -139,7 +139,7 @@ const (
 // The arrowSize is a multiplier on the width for the radius and length of the arrow head, with width
 // providing an additional multiplicative factor for width to achieve "fat" vs. "thin" arrows.
 // arrowSegs determines how many faces there are on the arrowhead -- 4 = a 4-sided pyramid, etc.
-func NewArrow(sc *Scene, parent ki.Ki, name string, st, ed mat32.Vec3, width float32, clr color.RGBA, startArrow, endArrow bool, arrowSize, arrowWidth float32, arrowSegs int) *Group {
+func NewArrow(sc *Scene, parent ki.Node, name string, st, ed mat32.Vec3, width float32, clr color.RGBA, startArrow, endArrow bool, arrowSize, arrowWidth float32, arrowSegs int) *Group {
 	cm := UnitConeMesh(sc, arrowSegs)
 	gp := NewGroup(parent, name)
 
@@ -216,7 +216,7 @@ const (
 // initialized, e.g., using sc.InitMesh()
 // inactive indicates whether the box and solids should be flagged as inactive
 // (not selectable).
-func NewLineBox(sc *Scene, parent ki.Ki, meshNm, boxNm string, bbox mat32.Box3, width float32, clr color.RGBA, inactive bool) *Group {
+func NewLineBox(sc *Scene, parent ki.Node, meshNm, boxNm string, bbox mat32.Box3, width float32, clr color.RGBA, inactive bool) *Group {
 	sz := bbox.Size()
 	hSz := sz.MulScalar(0.5)
 

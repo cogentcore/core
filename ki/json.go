@@ -130,7 +130,7 @@ func (sl *Slice) UnmarshalJSON(b []byte) error {
 
 	sl.Config(nil, tnl)
 
-	nwk := make([]Ki, n) // allocate new slice containing *pointers* to kids
+	nwk := make([]Node, n) // allocate new slice containing *pointers* to kids
 	copy(nwk, *sl)
 
 	cb := make([]byte, 0, 1+len(b)-rb)
@@ -165,7 +165,7 @@ var JSONTypeSuffix = []byte("}\n")
 // root node (this node) which is written first using our custom
 // JSONEncoder type, to enable a file to be loaded de-novo
 // and recreate the proper root type for the tree.
-func RootTypeJSON(k Ki) []byte {
+func RootTypeJSON(k Node) []byte {
 	knm := k.KiType().Name
 	tstr := string(JSONTypePrefix) + fmt.Sprintf("\"%v\"}\n", knm)
 	return []byte(tstr)
@@ -174,7 +174,7 @@ func RootTypeJSON(k Ki) []byte {
 // WriteNewJSON writes JSON-encoded bytes to given writer
 // including key type information at start of file
 // so ReadNewJSON can create an object of the proper type.
-func WriteNewJSON(k Ki, writer io.Writer) error {
+func WriteNewJSON(k Node, writer io.Writer) error {
 	tb := RootTypeJSON(k)
 	writer.Write(tb)
 	return jsons.WriteIndent(k, writer)
@@ -183,7 +183,7 @@ func WriteNewJSON(k Ki, writer io.Writer) error {
 // SaveNewJSON writes JSON-encoded bytes to given writer
 // including key type information at start of file
 // so ReadNewJSON can create an object of the proper type.
-func SaveNewJSON(k Ki, filename string) error {
+func SaveNewJSON(k Node, filename string) error {
 	fp, err := os.Create(filename)
 	if err != nil {
 		return err
@@ -219,7 +219,7 @@ func ReadRootTypeJSON(b []byte) (*gti.Type, []byte, error) {
 
 // ReadNewJSON reads a new Ki tree from a JSON-encoded byte string,
 // using type information at start of file to create an object of the proper type
-func ReadNewJSON(reader io.Reader) (Ki, error) {
+func ReadNewJSON(reader io.Reader) (Node, error) {
 	b, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, grr.Log(err)
@@ -237,7 +237,7 @@ func ReadNewJSON(reader io.Reader) (Ki, error) {
 
 // OpenNewJSON opens a new Ki tree from a JSON-encoded file, using type
 // information at start of file to create an object of the proper type
-func OpenNewJSON(filename string) (Ki, error) {
+func OpenNewJSON(filename string) (Node, error) {
 	fp, err := os.Open(filename)
 	if err != nil {
 		return nil, grr.Log(err)
@@ -248,7 +248,7 @@ func OpenNewJSON(filename string) (Ki, error) {
 
 // ParentAllChildren walks the tree down from current node and call
 // SetParent on all children -- needed after an Unmarshal.
-func ParentAllChildren(kn Ki) {
+func ParentAllChildren(kn Node) {
 	for _, child := range *kn.Children() {
 		if child != nil {
 			child.AsKi().Par = kn
@@ -259,6 +259,6 @@ func ParentAllChildren(kn Ki) {
 
 // UnmarshalPost must be called after an Unmarshal -- calls
 // ParentAllChildren.
-func UnmarshalPost(kn Ki) {
+func UnmarshalPost(kn Node) {
 	ParentAllChildren(kn)
 }

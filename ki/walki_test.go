@@ -10,10 +10,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var testTree *Node
+var testTree *NodeBase
 
 func init() {
-	testTree = &Node{}
+	testTree = &NodeBase{}
 	typ := testTree.KiType()
 	testTree.InitName(testTree, "root")
 	// child1 :=
@@ -37,7 +37,7 @@ func TestDown(t *testing.T) {
 		if curi == nil {
 			break
 		}
-		cur = curi.(*Node)
+		cur = curi.(*NodeBase)
 	}
 	assert.Equal(t, []string{"/root", "/root/child0", "/root/child1", "/root/child1/subchild1", "/root/child1/subchild1/subsubchild1", "/root/child2", "/root/child3"}, res)
 }
@@ -51,7 +51,7 @@ func TestUp(t *testing.T) {
 		if curi == nil {
 			break
 		}
-		cur = curi.(*Node)
+		cur = curi.(*NodeBase)
 	}
 	assert.Equal(t, []string{"/root/child3", "/root/child2", "/root/child1/subchild1/subsubchild1", "/root/child1/subchild1", "/root/child1", "/root/child0", "/root"}, res)
 }

@@ -54,7 +54,7 @@ type Page struct {
 	URLToPagePath map[string]string `set:"-"`
 }
 
-var _ ki.Ki = (*Page)(nil)
+var _ ki.Node = (*Page)(nil)
 
 func (pg *Page) OnInit() {
 	pg.Frame.OnInit()

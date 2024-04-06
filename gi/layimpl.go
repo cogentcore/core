@@ -144,7 +144,7 @@ type Layouter interface {
 
 // AsLayout returns the given value as a value of type Layout if the type
 // of the given value embeds Layout, or nil otherwise
-func AsLayout(k ki.Ki) *Layout {
+func AsLayout(k ki.Node) *Layout {
 	if k == nil || k.This() == nil {
 		return nil
 	}

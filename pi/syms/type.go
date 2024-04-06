@@ -54,7 +54,7 @@ type Type struct {
 	Props ki.Props
 
 	// Ast node that corresponds to this type -- only valid during parsing
-	Ast ki.Ki `json:"-" xml:"-"`
+	Ast ki.Node `json:"-" xml:"-"`
 }
 
 // NewType returns a new Type struct initialized with given name and kind

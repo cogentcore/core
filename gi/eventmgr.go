@@ -190,7 +190,7 @@ func (em *EventMgr) HandleFocusEvent(e events.Event) {
 		}
 	}
 	if em.Focus != nil {
-		em.Focus.WalkUpParent(func(k ki.Ki) bool {
+		em.Focus.WalkUpParent(func(k ki.Node) bool {
 			_, wb := AsWidget(k)
 			if !wb.IsVisible() {
 				return ki.Break
@@ -202,7 +202,7 @@ func (em *EventMgr) HandleFocusEvent(e events.Event) {
 			em.Focus.HandleEvent(e)
 		}
 		if !e.IsHandled() {
-			em.Focus.WalkUpParent(func(k ki.Ki) bool {
+			em.Focus.WalkUpParent(func(k ki.Node) bool {
 				_, wb := AsWidget(k)
 				if !wb.IsVisible() {
 					return ki.Break

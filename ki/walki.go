@@ -11,10 +11,10 @@ these are for more dynamic, piecemeal processing.
 package ki
 
 // Last returns the last node in the tree
-func Last(nd Ki) Ki {
+func Last(nd Node) Node {
 	nd = LastChild(nd)
 	last := nd
-	nd.WalkPre(func(k Ki) bool {
+	nd.WalkPre(func(k Node) bool {
 		last = k
 		return Continue
 	})
@@ -22,7 +22,7 @@ func Last(nd Ki) Ki {
 }
 
 // LastChild returns the last child under given node, or node itself if no children
-func LastChild(nd Ki) Ki {
+func LastChild(nd Node) Node {
 	if nd.HasChildren() {
 		ek, err := nd.Children().ElemFromEndTry(0)
 		if err == nil {
@@ -33,7 +33,7 @@ func LastChild(nd Ki) Ki {
 }
 
 // Prev returns previous node in the tree -- nil if top
-func Prev(nd Ki) Ki {
+func Prev(nd Node) Node {
 	if nd.Parent() == nil {
 		return nil
 	}
@@ -46,7 +46,7 @@ func Prev(nd Ki) Ki {
 }
 
 // Next returns next node in the tree, nil if end
-func Next(nd Ki) Ki {
+func Next(nd Node) Node {
 	if !nd.HasChildren() {
 		return NextSibling(nd)
 	}
@@ -54,7 +54,7 @@ func Next(nd Ki) Ki {
 }
 
 // NextSibling returns next sibling or nil if none
-func NextSibling(nd Ki) Ki {
+func NextSibling(nd Node) Node {
 	if nd.Parent() == nil {
 		return nil
 	}

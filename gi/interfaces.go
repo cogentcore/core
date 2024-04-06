@@ -47,7 +47,7 @@ func ToLabel(it any) string {
 		switch v := it.(type) {
 		case reflect.Type:
 			return v.Name()
-		case ki.Ki:
+		case ki.Node:
 			return v.Name()
 		}
 		return laser.ToString(it)

@@ -118,7 +118,7 @@ type FuncButton struct { //core:no-new
 
 // NewFuncButton adds a new [FuncButton] with the given function
 // to the given parent.
-func NewFuncButton(parent ki.Ki, fun any) *FuncButton {
+func NewFuncButton(parent ki.Node, fun any) *FuncButton {
 	return parent.NewChild(FuncButtonType).(*FuncButton).SetFunc(fun)
 }
 

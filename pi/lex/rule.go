@@ -22,7 +22,7 @@ var Trace = false
 // Lexer is the interface type for lexers -- likely not necessary except is essential
 // for defining the BaseIface for gui in making new nodes
 type Lexer interface {
-	ki.Ki
+	ki.Node
 
 	// Compile performs any one-time compilation steps on the rule
 	Compile(ls *State) bool
@@ -49,7 +49,7 @@ type Lexer interface {
 // In general it is best to keep lexing as simple as possible and
 // leave the more complex things for the parsing step.
 type Rule struct {
-	ki.Node
+	ki.NodeBase
 
 	// disable this rule -- useful for testing and exploration
 	Off bool
@@ -106,7 +106,7 @@ func (lr *Rule) AsLexRule() *Rule {
 // returns true if everything is ok
 func (lr *Rule) CompileAll(ls *State) bool {
 	allok := false
-	lr.WalkPre(func(k ki.Ki) bool {
+	lr.WalkPre(func(k ki.Node) bool {
 		lri := k.(*Rule)
 		ok := lri.Compile(ls)
 		if !ok {
@@ -492,7 +492,7 @@ func (lr *Rule) DoAct(ls *State, act Actions, tok *token.KeyToken) {
 // Find looks for rules in the tree that contain given string in String or Name fields
 func (lr *Rule) Find(find string) []*Rule {
 	var res []*Rule
-	lr.WalkPre(func(k ki.Ki) bool {
+	lr.WalkPre(func(k ki.Node) bool {
 		lri := k.(*Rule)
 		if strings.Contains(lri.String, find) || strings.Contains(lri.Nm, find) {
 			res = append(res, lri)

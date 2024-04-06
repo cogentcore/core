@@ -9,7 +9,7 @@ package testdata
 import "cogentcore.org/core/ki"
 
 type TestNode struct {
-	ki.Node
+	ki.NodeBase
 }
 
 // NodeEmbed embeds ki.Node and adds a couple of fields.
@@ -17,7 +17,7 @@ type TestNode struct {
 //
 //direct:value
 type NodeEmbed struct {
-	ki.Node
+	ki.NodeBase
 	Mbr1 string
 	Mbr2 int
 }
@@ -27,7 +27,7 @@ type NodeField struct {
 	Field1 NodeEmbed
 }
 
-func (nf *NodeField) FieldByName(field string) (ki.Ki, error) {
+func (nf *NodeField) FieldByName(field string) (ki.Node, error) {
 	if field == "Field1" {
 		return &nf.Field1, nil
 	}
@@ -39,7 +39,7 @@ type NodeField2 struct {
 	Field2 NodeEmbed
 }
 
-func (nf *NodeField2) FieldByName(field string) (ki.Ki, error) {
+func (nf *NodeField2) FieldByName(field string) (ki.Node, error) {
 	if field == "Field2" {
 		return &nf.Field2, nil
 	}

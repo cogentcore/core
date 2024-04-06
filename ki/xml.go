@@ -21,7 +21,7 @@ import (
 
 // WriteXML writes the tree to an XML-encoded byte string over io.Writer
 // using MarshalXML.
-func (n *Node) WriteXML(writer io.Writer, indent bool) error {
+func (n *NodeBase) WriteXML(writer io.Writer, indent bool) error {
 	err := ThisCheck(n)
 	if err != nil {
 		return grr.Log(err)
@@ -44,7 +44,7 @@ func (n *Node) WriteXML(writer io.Writer, indent bool) error {
 
 // ReadXML reads the tree from an XML-encoded byte string over io.Reader, calls
 // UnmarshalPost to recover pointers from paths.
-func (n *Node) ReadXML(reader io.Reader) error {
+func (n *NodeBase) ReadXML(reader io.Reader) error {
 	var err error
 	if err = ThisCheck(n); err != nil {
 		log.Println(err)
@@ -223,7 +223,7 @@ func (sl *Slice) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 			return DecodeXMLEndEl(d, start)
 		}
 		// fmt.Printf("n parsed: %d from %v\n", n, string(val))
-		nwk := make([]Ki, 0, n) // allocate new slice
+		nwk := make([]Node, 0, n) // allocate new slice
 
 		for i := 0; i < n; i++ {
 			name, val, err = DecodeXMLCharEl(d)

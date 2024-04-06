@@ -15,7 +15,7 @@ var ManipPtType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyzv.ManipPt"
 func (t *ManipPoint) KiType() *gti.Type { return ManipPtType }
 
 // New returns a new [*ManipPoint] value
-func (t *ManipPoint) New() ki.Ki { return &ManipPoint{} }
+func (t *ManipPoint) New() ki.Node { return &ManipPoint{} }
 
 // SetMat sets the [ManipPoint.Mat]
 func (t *ManipPoint) SetMat(v xyz.Material) *ManipPoint { t.Mat = v; return t }
@@ -27,7 +27,7 @@ var SceneType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyzv.Scene", ID
 // Scene is a gi.Widget that manages a xyz.Scene,
 // providing the basic rendering logic for the 3D scene
 // in the 2D gi gui context.
-func NewScene(parent ki.Ki, name ...string) *Scene {
+func NewScene(parent ki.Node, name ...string) *Scene {
 	return parent.NewChild(SceneType, name...).(*Scene)
 }
 
@@ -35,7 +35,7 @@ func NewScene(parent ki.Ki, name ...string) *Scene {
 func (t *Scene) KiType() *gti.Type { return SceneType }
 
 // New returns a new [*Scene] value
-func (t *Scene) New() ki.Ki { return &Scene{} }
+func (t *Scene) New() ki.Node { return &Scene{} }
 
 // SetSelectionMode sets the [Scene.SelectionMode]:
 // how to deal with selection / manipulation events
@@ -62,7 +62,7 @@ var SceneViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyzv.SceneV
 // NewSceneView adds a new [SceneView] with the given name to the given parent:
 // SceneView provides a toolbar controller for an xyz.Scene,
 // and manipulation abilities.
-func NewSceneView(parent ki.Ki, name ...string) *SceneView {
+func NewSceneView(parent ki.Node, name ...string) *SceneView {
 	return parent.NewChild(SceneViewType, name...).(*SceneView)
 }
 
@@ -70,7 +70,7 @@ func NewSceneView(parent ki.Ki, name ...string) *SceneView {
 func (t *SceneView) KiType() *gti.Type { return SceneViewType }
 
 // New returns a new [*SceneView] value
-func (t *SceneView) New() ki.Ki { return &SceneView{} }
+func (t *SceneView) New() ki.Node { return &SceneView{} }
 
 // SetTooltip sets the [SceneView.Tooltip]
 func (t *SceneView) SetTooltip(v string) *SceneView { t.Tooltip = v; return t }

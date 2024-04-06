@@ -119,7 +119,7 @@ func (mv *MapView) KiPropTag() string {
 	if vd.Owner == nil {
 		return ""
 	}
-	if ownki, ok := vd.Owner.(ki.Ki); ok {
+	if ownki, ok := vd.Owner.(ki.Node); ok {
 		pt := ownki.PropTag()
 		return pt
 	}

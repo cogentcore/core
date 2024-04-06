@@ -159,7 +159,7 @@ func (wb *WidgetBase) Config() {
 
 // ConfigParts initializes the parts of the widget if they
 // are not already through [WidgetBase.NewParts], calls
-// [ki.Node.ConfigChildren] on those parts with the given config,
+// [ki.NodeBase.ConfigChildren] on those parts with the given config,
 // calls the given after function if it is specified,
 // and then handles necessary updating logic.
 func (wb *WidgetBase) ConfigParts(config ki.Config, after ...func()) {

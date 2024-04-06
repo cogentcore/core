@@ -18,7 +18,7 @@ var CircleType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Circle", I
 
 // NewCircle adds a new [Circle] with the given name to the given parent:
 // Circle is a SVG circle
-func NewCircle(parent ki.Ki, name ...string) *Circle {
+func NewCircle(parent ki.Node, name ...string) *Circle {
 	return parent.NewChild(CircleType, name...).(*Circle)
 }
 
@@ -26,7 +26,7 @@ func NewCircle(parent ki.Ki, name ...string) *Circle {
 func (t *Circle) KiType() *gti.Type { return CircleType }
 
 // New returns a new [*Circle] value
-func (t *Circle) New() ki.Ki { return &Circle{} }
+func (t *Circle) New() ki.Node { return &Circle{} }
 
 // SetPos sets the [Circle.Pos]:
 // position of the center of the circle
@@ -44,7 +44,7 @@ var ClipPathType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.ClipPath
 
 // NewClipPath adds a new [ClipPath] with the given name to the given parent:
 // ClipPath is used for holding a path that renders as a clip path
-func NewClipPath(parent ki.Ki, name ...string) *ClipPath {
+func NewClipPath(parent ki.Node, name ...string) *ClipPath {
 	return parent.NewChild(ClipPathType, name...).(*ClipPath)
 }
 
@@ -52,7 +52,7 @@ func NewClipPath(parent ki.Ki, name ...string) *ClipPath {
 func (t *ClipPath) KiType() *gti.Type { return ClipPathType }
 
 // New returns a new [*ClipPath] value
-func (t *ClipPath) New() ki.Ki { return &ClipPath{} }
+func (t *ClipPath) New() ki.Node { return &ClipPath{} }
 
 // SetClass sets the [ClipPath.Class]
 func (t *ClipPath) SetClass(v string) *ClipPath { t.Class = v; return t }
@@ -64,7 +64,7 @@ var StyleSheetType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.StyleS
 // StyleSheet is a Node2D node that contains a stylesheet -- property values
 // contained in this sheet can be transformed into ki.Props and set in CSS
 // field of appropriate node
-func NewStyleSheet(parent ki.Ki, name ...string) *StyleSheet {
+func NewStyleSheet(parent ki.Node, name ...string) *StyleSheet {
 	return parent.NewChild(StyleSheetType, name...).(*StyleSheet)
 }
 
@@ -72,7 +72,7 @@ func NewStyleSheet(parent ki.Ki, name ...string) *StyleSheet {
 func (t *StyleSheet) KiType() *gti.Type { return StyleSheetType }
 
 // New returns a new [*StyleSheet] value
-func (t *StyleSheet) New() ki.Ki { return &StyleSheet{} }
+func (t *StyleSheet) New() ki.Node { return &StyleSheet{} }
 
 // SetSheet sets the [StyleSheet.Sheet]
 func (t *StyleSheet) SetSheet(v *css.Stylesheet) *StyleSheet { t.Sheet = v; return t }
@@ -85,7 +85,7 @@ var MetaDataType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.MetaData
 
 // NewMetaData adds a new [MetaData] with the given name to the given parent:
 // MetaData is used for holding meta data info
-func NewMetaData(parent ki.Ki, name ...string) *MetaData {
+func NewMetaData(parent ki.Node, name ...string) *MetaData {
 	return parent.NewChild(MetaDataType, name...).(*MetaData)
 }
 
@@ -93,7 +93,7 @@ func NewMetaData(parent ki.Ki, name ...string) *MetaData {
 func (t *MetaData) KiType() *gti.Type { return MetaDataType }
 
 // New returns a new [*MetaData] value
-func (t *MetaData) New() ki.Ki { return &MetaData{} }
+func (t *MetaData) New() ki.Node { return &MetaData{} }
 
 // SetMetaData sets the [MetaData.MetaData]
 func (t *MetaData) SetMetaData(v string) *MetaData { t.MetaData = v; return t }
@@ -106,7 +106,7 @@ var EllipseType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Ellipse",
 
 // NewEllipse adds a new [Ellipse] with the given name to the given parent:
 // Ellipse is a SVG ellipse
-func NewEllipse(parent ki.Ki, name ...string) *Ellipse {
+func NewEllipse(parent ki.Node, name ...string) *Ellipse {
 	return parent.NewChild(EllipseType, name...).(*Ellipse)
 }
 
@@ -114,7 +114,7 @@ func NewEllipse(parent ki.Ki, name ...string) *Ellipse {
 func (t *Ellipse) KiType() *gti.Type { return EllipseType }
 
 // New returns a new [*Ellipse] value
-func (t *Ellipse) New() ki.Ki { return &Ellipse{} }
+func (t *Ellipse) New() ki.Node { return &Ellipse{} }
 
 // SetPos sets the [Ellipse.Pos]:
 // position of the center of the ellipse
@@ -132,7 +132,7 @@ var FilterType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Filter", I
 
 // NewFilter adds a new [Filter] with the given name to the given parent:
 // Filter represents SVG filter* elements
-func NewFilter(parent ki.Ki, name ...string) *Filter {
+func NewFilter(parent ki.Node, name ...string) *Filter {
 	return parent.NewChild(FilterType, name...).(*Filter)
 }
 
@@ -140,7 +140,7 @@ func NewFilter(parent ki.Ki, name ...string) *Filter {
 func (t *Filter) KiType() *gti.Type { return FilterType }
 
 // New returns a new [*Filter] value
-func (t *Filter) New() ki.Ki { return &Filter{} }
+func (t *Filter) New() ki.Node { return &Filter{} }
 
 // SetFilterType sets the [Filter.FilterType]
 func (t *Filter) SetFilterType(v string) *Filter { t.FilterType = v; return t }
@@ -153,7 +153,7 @@ var FlowType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Flow", IDNam
 
 // NewFlow adds a new [Flow] with the given name to the given parent:
 // Flow represents SVG flow* elements
-func NewFlow(parent ki.Ki, name ...string) *Flow {
+func NewFlow(parent ki.Node, name ...string) *Flow {
 	return parent.NewChild(FlowType, name...).(*Flow)
 }
 
@@ -161,7 +161,7 @@ func NewFlow(parent ki.Ki, name ...string) *Flow {
 func (t *Flow) KiType() *gti.Type { return FlowType }
 
 // New returns a new [*Flow] value
-func (t *Flow) New() ki.Ki { return &Flow{} }
+func (t *Flow) New() ki.Node { return &Flow{} }
 
 // SetFlowType sets the [Flow.FlowType]
 func (t *Flow) SetFlowType(v string) *Flow { t.FlowType = v; return t }
@@ -175,7 +175,7 @@ var GradientType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Gradient
 // NewGradient adds a new [Gradient] with the given name to the given parent:
 // Gradient is used for holding a specified color gradient.
 // The name is the id for lookup in url
-func NewGradient(parent ki.Ki, name ...string) *Gradient {
+func NewGradient(parent ki.Node, name ...string) *Gradient {
 	return parent.NewChild(GradientType, name...).(*Gradient)
 }
 
@@ -183,7 +183,7 @@ func NewGradient(parent ki.Ki, name ...string) *Gradient {
 func (t *Gradient) KiType() *gti.Type { return GradientType }
 
 // New returns a new [*Gradient] value
-func (t *Gradient) New() ki.Ki { return &Gradient{} }
+func (t *Gradient) New() ki.Node { return &Gradient{} }
 
 // SetGrad sets the [Gradient.Grad]:
 // the color gradient
@@ -203,7 +203,7 @@ var GroupType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Group", IDN
 // Group groups together SVG elements.
 // Provides a common transform for all group elements
 // and shared style properties.
-func NewGroup(parent ki.Ki, name ...string) *Group {
+func NewGroup(parent ki.Node, name ...string) *Group {
 	return parent.NewChild(GroupType, name...).(*Group)
 }
 
@@ -211,7 +211,7 @@ func NewGroup(parent ki.Ki, name ...string) *Group {
 func (t *Group) KiType() *gti.Type { return GroupType }
 
 // New returns a new [*Group] value
-func (t *Group) New() ki.Ki { return &Group{} }
+func (t *Group) New() ki.Node { return &Group{} }
 
 // SetClass sets the [Group.Class]
 func (t *Group) SetClass(v string) *Group { t.Class = v; return t }
@@ -221,7 +221,7 @@ var ImageType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Image", IDN
 
 // NewImage adds a new [Image] with the given name to the given parent:
 // Image is an SVG image (bitmap)
-func NewImage(parent ki.Ki, name ...string) *Image {
+func NewImage(parent ki.Node, name ...string) *Image {
 	return parent.NewChild(ImageType, name...).(*Image)
 }
 
@@ -229,7 +229,7 @@ func NewImage(parent ki.Ki, name ...string) *Image {
 func (t *Image) KiType() *gti.Type { return ImageType }
 
 // New returns a new [*Image] value
-func (t *Image) New() ki.Ki { return &Image{} }
+func (t *Image) New() ki.Node { return &Image{} }
 
 // SetPos sets the [Image.Pos]:
 // position of the top-left of the image
@@ -259,7 +259,7 @@ var LineType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Line", IDNam
 
 // NewLine adds a new [Line] with the given name to the given parent:
 // Line is a SVG line
-func NewLine(parent ki.Ki, name ...string) *Line {
+func NewLine(parent ki.Node, name ...string) *Line {
 	return parent.NewChild(LineType, name...).(*Line)
 }
 
@@ -267,7 +267,7 @@ func NewLine(parent ki.Ki, name ...string) *Line {
 func (t *Line) KiType() *gti.Type { return LineType }
 
 // New returns a new [*Line] value
-func (t *Line) New() ki.Ki { return &Line{} }
+func (t *Line) New() ki.Node { return &Line{} }
 
 // SetStart sets the [Line.Start]:
 // position of the start of the line
@@ -285,7 +285,7 @@ var MarkerType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Marker", I
 
 // NewMarker adds a new [Marker] with the given name to the given parent:
 // Marker represents marker elements that can be drawn along paths (arrow heads, etc)
-func NewMarker(parent ki.Ki, name ...string) *Marker {
+func NewMarker(parent ki.Node, name ...string) *Marker {
 	return parent.NewChild(MarkerType, name...).(*Marker)
 }
 
@@ -293,7 +293,7 @@ func NewMarker(parent ki.Ki, name ...string) *Marker {
 func (t *Marker) KiType() *gti.Type { return MarkerType }
 
 // New returns a new [*Marker] value
-func (t *Marker) New() ki.Ki { return &Marker{} }
+func (t *Marker) New() ki.Node { return &Marker{} }
 
 // SetRefPos sets the [Marker.RefPos]:
 // reference position to align the vertex position with, specified in ViewBox coordinates
@@ -343,7 +343,7 @@ var NodeBaseType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.NodeBase
 
 // NewNodeBase adds a new [NodeBase] with the given name to the given parent:
 // svg.NodeBase is the base type for elements within the SVG scenegraph
-func NewNodeBase(parent ki.Ki, name ...string) *NodeBase {
+func NewNodeBase(parent ki.Node, name ...string) *NodeBase {
 	return parent.NewChild(NodeBaseType, name...).(*NodeBase)
 }
 
@@ -351,7 +351,7 @@ func NewNodeBase(parent ki.Ki, name ...string) *NodeBase {
 func (t *NodeBase) KiType() *gti.Type { return NodeBaseType }
 
 // New returns a new [*NodeBase] value
-func (t *NodeBase) New() ki.Ki { return &NodeBase{} }
+func (t *NodeBase) New() ki.Node { return &NodeBase{} }
 
 // SetClass sets the [NodeBase.Class]:
 // user-defined class name(s) used primarily for attaching
@@ -365,7 +365,7 @@ var PathType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Path", IDNam
 
 // NewPath adds a new [Path] with the given name to the given parent:
 // Path renders SVG data sequences that can render just about anything
-func NewPath(parent ki.Ki, name ...string) *Path {
+func NewPath(parent ki.Node, name ...string) *Path {
 	return parent.NewChild(PathType, name...).(*Path)
 }
 
@@ -373,7 +373,7 @@ func NewPath(parent ki.Ki, name ...string) *Path {
 func (t *Path) KiType() *gti.Type { return PathType }
 
 // New returns a new [*Path] value
-func (t *Path) New() ki.Ki { return &Path{} }
+func (t *Path) New() ki.Node { return &Path{} }
 
 // SetDataStr sets the [Path.DataStr]:
 // string version of the path data
@@ -387,7 +387,7 @@ var PolygonType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Polygon",
 
 // NewPolygon adds a new [Polygon] with the given name to the given parent:
 // Polygon is a SVG polygon
-func NewPolygon(parent ki.Ki, name ...string) *Polygon {
+func NewPolygon(parent ki.Node, name ...string) *Polygon {
 	return parent.NewChild(PolygonType, name...).(*Polygon)
 }
 
@@ -395,7 +395,7 @@ func NewPolygon(parent ki.Ki, name ...string) *Polygon {
 func (t *Polygon) KiType() *gti.Type { return PolygonType }
 
 // New returns a new [*Polygon] value
-func (t *Polygon) New() ki.Ki { return &Polygon{} }
+func (t *Polygon) New() ki.Node { return &Polygon{} }
 
 // SetClass sets the [Polygon.Class]
 func (t *Polygon) SetClass(v string) *Polygon { t.Class = v; return t }
@@ -408,7 +408,7 @@ var PolylineType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Polyline
 
 // NewPolyline adds a new [Polyline] with the given name to the given parent:
 // Polyline is a SVG multi-line shape
-func NewPolyline(parent ki.Ki, name ...string) *Polyline {
+func NewPolyline(parent ki.Node, name ...string) *Polyline {
 	return parent.NewChild(PolylineType, name...).(*Polyline)
 }
 
@@ -416,7 +416,7 @@ func NewPolyline(parent ki.Ki, name ...string) *Polyline {
 func (t *Polyline) KiType() *gti.Type { return PolylineType }
 
 // New returns a new [*Polyline] value
-func (t *Polyline) New() ki.Ki { return &Polyline{} }
+func (t *Polyline) New() ki.Node { return &Polyline{} }
 
 // SetPoints sets the [Polyline.Points]:
 // the coordinates to draw -- does a moveto on the first, then lineto for all the rest
@@ -430,7 +430,7 @@ var RectType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Rect", IDNam
 
 // NewRect adds a new [Rect] with the given name to the given parent:
 // Rect is a SVG rectangle, optionally with rounded corners
-func NewRect(parent ki.Ki, name ...string) *Rect {
+func NewRect(parent ki.Node, name ...string) *Rect {
 	return parent.NewChild(RectType, name...).(*Rect)
 }
 
@@ -438,7 +438,7 @@ func NewRect(parent ki.Ki, name ...string) *Rect {
 func (t *Rect) KiType() *gti.Type { return RectType }
 
 // New returns a new [*Rect] value
-func (t *Rect) New() ki.Ki { return &Rect{} }
+func (t *Rect) New() ki.Node { return &Rect{} }
 
 // SetPos sets the [Rect.Pos]:
 // position of the top-left of the rectangle
@@ -460,7 +460,7 @@ var SVGNodeType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.SVGNode",
 
 // NewSVGNode adds a new [SVGNode] with the given name to the given parent:
 // SVGNode represents the root of an SVG tree
-func NewSVGNode(parent ki.Ki, name ...string) *SVGNode {
+func NewSVGNode(parent ki.Node, name ...string) *SVGNode {
 	return parent.NewChild(SVGNodeType, name...).(*SVGNode)
 }
 
@@ -468,7 +468,7 @@ func NewSVGNode(parent ki.Ki, name ...string) *SVGNode {
 func (t *SVGNode) KiType() *gti.Type { return SVGNodeType }
 
 // New returns a new [*SVGNode] value
-func (t *SVGNode) New() ki.Ki { return &SVGNode{} }
+func (t *SVGNode) New() ki.Node { return &SVGNode{} }
 
 // SetViewBox sets the [SVGNode.ViewBox]:
 // viewbox defines the coordinate system for the drawing.
@@ -485,7 +485,7 @@ var TextType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.Text", IDNam
 // NewText adds a new [Text] with the given name to the given parent:
 // Text renders SVG text, handling both text and tspan elements.
 // tspan is nested under a parent text -- text has empty Text string.
-func NewText(parent ki.Ki, name ...string) *Text {
+func NewText(parent ki.Node, name ...string) *Text {
 	return parent.NewChild(TextType, name...).(*Text)
 }
 
@@ -493,7 +493,7 @@ func NewText(parent ki.Ki, name ...string) *Text {
 func (t *Text) KiType() *gti.Type { return TextType }
 
 // New returns a new [*Text] value
-func (t *Text) New() ki.Ki { return &Text{} }
+func (t *Text) New() ki.Node { return &Text{} }
 
 // SetPos sets the [Text.Pos]:
 // position of the left, baseline of the text

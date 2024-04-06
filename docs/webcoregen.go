@@ -990,33 +990,33 @@ func main() {
 		giv.NewTreeView(c2, "Nested child")
 	},
 	"views/tree-views-1": func(parent gi.Widget) {
-		tree := ki.NewRoot[*ki.Node]("Root")
-		ki.New[*ki.Node](tree, "Child 1")
-		c2 := ki.New[*ki.Node](tree, "Child 2")
-		ki.New[*ki.Node](c2, "Nested child")
+		tree := ki.NewRoot[*ki.NodeBase]("Root")
+		ki.New[*ki.NodeBase](tree, "Child 1")
+		c2 := ki.New[*ki.NodeBase](tree, "Child 2")
+		ki.New[*ki.NodeBase](c2, "Nested child")
 		giv.NewTreeView(parent).SyncTree(tree)
 	},
 	"views/tree-views-2": func(parent gi.Widget) {
-		tree := ki.NewRoot[*ki.Node]("Root")
-		ki.New[*ki.Node](tree, "Child 1")
-		c2 := ki.New[*ki.Node](tree, "Child 2")
-		ki.New[*ki.Node](c2, "Nested child")
+		tree := ki.NewRoot[*ki.NodeBase]("Root")
+		ki.New[*ki.NodeBase](tree, "Child 1")
+		c2 := ki.New[*ki.NodeBase](tree, "Child 2")
+		ki.New[*ki.NodeBase](c2, "Nested child")
 		giv.NewTreeView(parent).SyncTree(tree).OnChange(func(e events.Event) {
 			gi.MessageSnackbar(parent, "Tree view changed")
 		})
 	},
 	"views/tree-views-3": func(parent gi.Widget) {
-		tree := ki.NewRoot[*ki.Node]("Root")
-		ki.New[*ki.Node](tree, "Child 1")
-		c2 := ki.New[*ki.Node](tree, "Child 2")
-		ki.New[*ki.Node](c2, "Nested child")
+		tree := ki.NewRoot[*ki.NodeBase]("Root")
+		ki.New[*ki.NodeBase](tree, "Child 1")
+		c2 := ki.New[*ki.NodeBase](tree, "Child 2")
+		ki.New[*ki.NodeBase](c2, "Nested child")
 		giv.NewTreeView(parent).SyncTree(tree).SetReadOnly(true)
 	},
 	"views/tree-views-4": func(parent gi.Widget) {
-		tree := ki.NewRoot[*ki.Node]("Root")
-		ki.New[*ki.Node](tree, "Child 1")
-		c2 := ki.New[*ki.Node](tree, "Child 2")
-		ki.New[*ki.Node](c2, "Nested child")
+		tree := ki.NewRoot[*ki.NodeBase]("Root")
+		ki.New[*ki.NodeBase](tree, "Child 1")
+		c2 := ki.New[*ki.NodeBase](tree, "Child 2")
+		ki.New[*ki.NodeBase](c2, "Nested child")
 		giv.NewValue(parent, tree)
 	},
 	"advanced/styling-0": func(parent gi.Widget) {

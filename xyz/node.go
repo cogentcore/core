@@ -17,7 +17,7 @@ import (
 
 // Node is the common interface for all xyz scenegraph nodes
 type Node interface {
-	ki.Ki
+	ki.Node
 
 	// IsSolid returns true if this is an Solid node (else a Group)
 	IsSolid() bool
@@ -112,7 +112,7 @@ type Node interface {
 // relative to parent, and computed bounding boxes, etc.
 // There are only two different kinds of Nodes: Group and Solid
 type NodeBase struct {
-	ki.Node
+	ki.NodeBase
 
 	// complete specification of position and orientation
 	Pose Pose `set:"-"`
@@ -156,7 +156,7 @@ const (
 )
 
 // AsNode converts Ki to a Node interface and a NodeBase obj -- nil if not.
-func AsNode(k ki.Ki) (Node, *NodeBase) {
+func AsNode(k ki.Node) (Node, *NodeBase) {
 	if k == nil || k.This() == nil { // this also checks for destroyed
 		return nil, nil
 	}
@@ -169,7 +169,7 @@ func AsNode(k ki.Ki) (Node, *NodeBase) {
 
 // AsNodeBase converts Ki to a *NodeBase -- use when known to be at
 // least of this type, not-nil, etc
-func AsNodeBase(k ki.Ki) *NodeBase {
+func AsNodeBase(k ki.Node) *NodeBase {
 	return k.(Node).AsNode()
 }
 

@@ -23,7 +23,7 @@ import (
 // underlying type (e.g., in reflect calls).  Calls Init on Ki fields
 // within struct, sets their names to the field name, and sets us as their
 // parent.
-func InitNode(this Ki) {
+func InitNode(this Node) {
 	n := this.AsKi()
 	if n.Ths != this {
 		n.Ths = this
@@ -34,7 +34,7 @@ func InitNode(this Ki) {
 // ThisCheck checks that the This pointer is set and issues a warning to
 // log if not -- returns error if not set -- called when nodes are added
 // and inserted.
-func ThisCheck(k Ki) error {
+func ThisCheck(k Node) error {
 	if k.This() == nil {
 		err := fmt.Errorf("ki.Node %q ThisCheck: node has null 'this' pointer; must call Init or InitName on root nodes", k.Path())
 		slog.Error(err.Error())
@@ -46,7 +46,7 @@ func ThisCheck(k Ki) error {
 // SetParent just sets parent of node (and inherits update count from
 // parent, to keep consistent).
 // Assumes not already in a tree or anything.
-func SetParent(kid Ki, parent Ki) {
+func SetParent(kid Node, parent Node) {
 	n := kid.AsKi()
 	n.Par = parent
 	if parent != nil {
@@ -57,7 +57,7 @@ func SetParent(kid Ki, parent Ki) {
 		}
 	}
 	kid.This().OnAdd()
-	n.WalkUpParent(func(k Ki) bool {
+	n.WalkUpParent(func(k Node) bool {
 		k.This().OnChildAdded(kid)
 		return Continue
 	})
@@ -65,7 +65,7 @@ func SetParent(kid Ki, parent Ki) {
 
 // MoveToParent deletes given node from its current parent and adds it as a child
 // of given new parent.  Parents could be in different trees or not.
-func MoveToParent(kid Ki, parent Ki) {
+func MoveToParent(kid Node, parent Node) {
 	// TODO(kai/ki): implement MoveToParent
 	// oldPar := kid.Parent()
 	// if oldPar != nil {
@@ -78,9 +78,9 @@ func MoveToParent(kid Ki, parent Ki) {
 // with the given name to the given parent.
 // If the name is unspecified, it defaults to the
 // ID (kebab-case) name of the type, plus the
-// [Ki.NumLifetimeChildren] of its parent.
-// It is a helper function that calls [Ki.NewChild].
-func New[T Ki](parent Ki, name ...string) T {
+// [Node.NumLifetimeChildren] of its parent.
+// It is a helper function that calls [Node.NewChild].
+func New[T Node](parent Node, name ...string) T {
 	var n T
 	return parent.NewChild(n.KiType(), name...).(T)
 }
@@ -88,41 +88,41 @@ func New[T Ki](parent Ki, name ...string) T {
 // NewRoot returns a new root node of the given the type
 // with the given name. If the name is unspecified, it
 // defaults to the ID (kebab-case) name of the type.
-// It is a helper function that calls [Ki.InitName].
-func NewRoot[T Ki](name ...string) T {
+// It is a helper function that calls [Node.InitName].
+func NewRoot[T Node](name ...string) T {
 	var n T
 	n = n.New().(T)
 	n.InitName(n, name...)
 	return n
 }
 
-// InsertNewChild is a generic helper function for [Ki.InsertNewChild]
-func InsertNewChild[T Ki](parent Ki, at int, name ...string) T {
+// InsertNewChild is a generic helper function for [Node.InsertNewChild]
+func InsertNewChild[T Node](parent Node, at int, name ...string) T {
 	var n T
 	return parent.InsertNewChild(n.KiType(), at, name...).(T)
 }
 
-// ParentByType is a generic helper function for [Ki.ParentByType]
-func ParentByType[T Ki](k Ki, embeds bool) T {
+// ParentByType is a generic helper function for [Node.ParentByType]
+func ParentByType[T Node](k Node, embeds bool) T {
 	var n T
 	v, _ := k.ParentByType(n.KiType(), embeds).(T)
 	return v
 }
 
-// ChildByType is a generic helper function for [Ki.ChildByType]
-func ChildByType[T Ki](k Ki, embeds bool, startIndex ...int) T {
+// ChildByType is a generic helper function for [Node.ChildByType]
+func ChildByType[T Node](k Node, embeds bool, startIndex ...int) T {
 	var n T
 	v, _ := k.ChildByType(n.KiType(), embeds, startIndex...).(T)
 	return v
 }
 
 // IsRoot tests if this node is the root node -- checks Parent = nil.
-func IsRoot(k Ki) bool {
+func IsRoot(k Node) bool {
 	return k.This() == nil || k.Parent() == nil || k.Parent().This() == nil
 }
 
 // Root returns the root node of given ki node in tree (the node with a nil parent).
-func Root(k Ki) Ki {
+func Root(k Node) Node {
 	if IsRoot(k) {
 		return k.This()
 	}
@@ -132,12 +132,12 @@ func Root(k Ki) Ki {
 // Depth returns the current depth of the node.
 // This is only valid in a given context, not a stable
 // property of the node (e.g., used in WalkBreadth).
-func Depth(kn Ki) int {
+func Depth(kn Node) int {
 	return kn.AsKi().depth
 }
 
 // SetDepth sets the current depth of the node to given value.
-func SetDepth(kn Ki, depth int) {
+func SetDepth(kn Node, depth int) {
 	kn.AsKi().depth = depth
 }
 
@@ -147,7 +147,7 @@ func SetDepth(kn Ki, depth int) {
 // UniqueNameCheck checks if all the children names are unique or not.
 // returns true if all names are unique; false if not
 // if not unique, call UniquifyNames or take other steps to ensure uniqueness.
-func UniqueNameCheck(k Ki) bool {
+func UniqueNameCheck(k Node) bool {
 	kk := *k.Children()
 	sz := len(kk)
 	nmap := make(map[string]struct{}, sz)
@@ -169,9 +169,9 @@ func UniqueNameCheck(k Ki) bool {
 // if all the children names are unique or not.
 // returns true if all names are unique; false if not
 // if not unique, call UniquifyNames or take other steps to ensure uniqueness.
-func UniqueNameCheckAll(kn Ki) bool {
+func UniqueNameCheckAll(kn Node) bool {
 	allunq := true
-	kn.WalkPre(func(k Ki) bool {
+	kn.WalkPre(func(k Node) bool {
 		unq := UniqueNameCheck(k)
 		if !unq {
 			allunq = false
@@ -192,7 +192,7 @@ var UniquifyIndexAbove = 1000
 // Empty names get the parent name as a prefix.
 // if there is an existing underbar, then whatever is after it is replaced with
 // the unique index, ensuring that multiple calls are safe!
-func UniquifyNamesAddIndex(kn Ki) {
+func UniquifyNamesAddIndex(kn Node) {
 	kk := *kn.Children()
 	sz := len(kk)
 	sfmt := "%s_%05d"
@@ -230,7 +230,7 @@ func UniquifyNamesAddIndex(kn Ki) {
 // is called, for faster performance.
 // Otherwise, existing names are preserved if they are unique, and only
 // duplicates are renamed.  This is a bit slower.
-func UniquifyNames(kn Ki) {
+func UniquifyNames(kn Node) {
 	kk := *kn.Children()
 	sz := len(kk)
 	if sz >= UniquifyIndexAbove {
@@ -270,8 +270,8 @@ func UniquifyNames(kn Ki) {
 // is called, for faster performance.
 // Otherwise, existing names are preserved if they are unique, and only
 // duplicates are renamed.  This is a bit slower.
-func UniquifyNamesAll(kn Ki) {
-	kn.WalkPre(func(k Ki) bool {
+func UniquifyNamesAll(kn Node) {
+	kn.WalkPre(func(k Node) bool {
 		UniquifyNames(k)
 		return Continue
 	})

@@ -85,7 +85,7 @@ func (fn *Node) Repo() (vci.Repo, *Node) {
 	}
 	var repo vci.Repo
 	var rnode *Node
-	fn.WalkUpParent(func(k ki.Ki) bool {
+	fn.WalkUpParent(func(k ki.Node) bool {
 		if k == nil || k.This() == nil {
 			return ki.Break
 		}

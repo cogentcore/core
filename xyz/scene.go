@@ -42,7 +42,7 @@ var Update3DTrace = false
 //core:no-new
 //core:embedder
 type Scene struct {
-	ki.Node
+	ki.NodeBase
 
 	// Viewport-level viewbox within any parent Viewport2D
 	Geom mat32.Geom2DInt `set:"-"`
@@ -159,7 +159,7 @@ func (sc *Scene) Validate() error {
 	// 	*errs = append(*errs, err)
 	// }
 	hasError := false
-	sc.WalkPre(func(k ki.Ki) bool {
+	sc.WalkPre(func(k ki.Node) bool {
 		if k == sc.This() {
 			return ki.Continue
 		}
@@ -237,7 +237,7 @@ func (sc *Scene) SolidsIntersectingPoint(pos image.Point) []Node {
 		if kii == nil {
 			continue
 		}
-		kii.WalkPre(func(k ki.Ki) bool {
+		kii.WalkPre(func(k ki.Node) bool {
 			ni, _ := AsNode(k)
 			if ni == nil {
 				return ki.Break // going into a different type of thing, bail

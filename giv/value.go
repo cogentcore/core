@@ -31,7 +31,7 @@ import (
 // NewValue is not appropriate for internal code configuring
 // non-solo values (for example, in StructView), but it should be fine
 // for end-user code.
-func NewValue(parent ki.Ki, val any, tags ...string) Value {
+func NewValue(parent ki.Node, val any, tags ...string) Value {
 	t := ""
 	if len(tags) > 0 {
 		t = tags[0]

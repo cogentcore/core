@@ -22,7 +22,7 @@ var ArgViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.ArgView",
 // ArgView represents a slice of reflect.Value's and associated names, for the
 // purpose of supplying arguments to methods called via the MethodView
 // framework.
-func NewArgView(parent ki.Ki, name ...string) *ArgView {
+func NewArgView(parent ki.Node, name ...string) *ArgView {
 	return parent.NewChild(ArgViewType, name...).(*ArgView)
 }
 
@@ -30,7 +30,7 @@ func NewArgView(parent ki.Ki, name ...string) *ArgView {
 func (t *ArgView) KiType() *gti.Type { return ArgViewType }
 
 // New returns a new [*ArgView] value
-func (t *ArgView) New() ki.Ki { return &ArgView{} }
+func (t *ArgView) New() ki.Node { return &ArgView{} }
 
 // SetArgs sets the [ArgView.Args]:
 // Args are the args that we are a view onto
@@ -44,7 +44,7 @@ var ColorViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.ColorVi
 
 // NewColorView adds a new [ColorView] with the given name to the given parent:
 // ColorView shows a color, using sliders or numbers to set values.
-func NewColorView(parent ki.Ki, name ...string) *ColorView {
+func NewColorView(parent ki.Node, name ...string) *ColorView {
 	return parent.NewChild(ColorViewType, name...).(*ColorView)
 }
 
@@ -52,7 +52,7 @@ func NewColorView(parent ki.Ki, name ...string) *ColorView {
 func (t *ColorView) KiType() *gti.Type { return ColorViewType }
 
 // New returns a new [*ColorView] value
-func (t *ColorView) New() ki.Ki { return &ColorView{} }
+func (t *ColorView) New() ki.Node { return &ColorView{} }
 
 // SetTooltip sets the [ColorView.Tooltip]
 func (t *ColorView) SetTooltip(v string) *ColorView { t.Tooltip = v; return t }
@@ -62,7 +62,7 @@ var FileViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.FileView
 
 // NewFileView adds a new [FileView] with the given name to the given parent:
 // FileView is a viewer onto files -- core of the file chooser dialog
-func NewFileView(parent ki.Ki, name ...string) *FileView {
+func NewFileView(parent ki.Node, name ...string) *FileView {
 	return parent.NewChild(FileViewType, name...).(*FileView)
 }
 
@@ -70,7 +70,7 @@ func NewFileView(parent ki.Ki, name ...string) *FileView {
 func (t *FileView) KiType() *gti.Type { return FileViewType }
 
 // New returns a new [*FileView] value
-func (t *FileView) New() ki.Ki { return &FileView{} }
+func (t *FileView) New() ki.Node { return &FileView{} }
 
 // SetFilterFunc sets the [FileView.FilterFunc]:
 // optional styling function
@@ -94,7 +94,7 @@ var FuncButtonType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.FuncBu
 func (t *FuncButton) KiType() *gti.Type { return FuncButtonType }
 
 // New returns a new [*FuncButton] value
-func (t *FuncButton) New() ki.Ki { return &FuncButton{} }
+func (t *FuncButton) New() ki.Node { return &FuncButton{} }
 
 // SetConfirm sets the [FuncButton.Confirm]:
 // Confirm is whether to prompt the user for confirmation
@@ -166,7 +166,7 @@ var InspectorType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.Inspect
 // constructs Children widgets to show the field names and editor fields for
 // each field, within an overall frame with an optional title, and a button
 // box at the bottom where methods can be invoked
-func NewInspector(parent ki.Ki, name ...string) *Inspector {
+func NewInspector(parent ki.Node, name ...string) *Inspector {
 	return parent.NewChild(InspectorType, name...).(*Inspector)
 }
 
@@ -174,11 +174,11 @@ func NewInspector(parent ki.Ki, name ...string) *Inspector {
 func (t *Inspector) KiType() *gti.Type { return InspectorType }
 
 // New returns a new [*Inspector] value
-func (t *Inspector) New() ki.Ki { return &Inspector{} }
+func (t *Inspector) New() ki.Node { return &Inspector{} }
 
 // SetKiRoot sets the [Inspector.KiRoot]:
 // root of tree being edited
-func (t *Inspector) SetKiRoot(v ki.Ki) *Inspector { t.KiRoot = v; return t }
+func (t *Inspector) SetKiRoot(v ki.Node) *Inspector { t.KiRoot = v; return t }
 
 // SetFilename sets the [Inspector.Filename]:
 // current filename for saving / loading
@@ -194,7 +194,7 @@ var MapViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.MapView",
 // MapView represents a map, creating a property editor of the values --
 // constructs Children widgets to show the key / value pairs, within an
 // overall frame.
-func NewMapView(parent ki.Ki, name ...string) *MapView {
+func NewMapView(parent ki.Node, name ...string) *MapView {
 	return parent.NewChild(MapViewType, name...).(*MapView)
 }
 
@@ -202,7 +202,7 @@ func NewMapView(parent ki.Ki, name ...string) *MapView {
 func (t *MapView) KiType() *gti.Type { return MapViewType }
 
 // New returns a new [*MapView] value
-func (t *MapView) New() ki.Ki { return &MapView{} }
+func (t *MapView) New() ki.Node { return &MapView{} }
 
 // SetMapValView sets the [MapView.MapValView]:
 // Value for the map itself, if this was created within value view framework; otherwise nil
@@ -226,7 +226,7 @@ var MapViewInlineType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.Map
 // NewMapViewInline adds a new [MapViewInline] with the given name to the given parent:
 // MapViewInline represents a map as a single line widget,
 // for smaller maps and those explicitly marked inline.
-func NewMapViewInline(parent ki.Ki, name ...string) *MapViewInline {
+func NewMapViewInline(parent ki.Node, name ...string) *MapViewInline {
 	return parent.NewChild(MapViewInlineType, name...).(*MapViewInline)
 }
 
@@ -234,7 +234,7 @@ func NewMapViewInline(parent ki.Ki, name ...string) *MapViewInline {
 func (t *MapViewInline) KiType() *gti.Type { return MapViewInlineType }
 
 // New returns a new [*MapViewInline] value
-func (t *MapViewInline) New() ki.Ki { return &MapViewInline{} }
+func (t *MapViewInline) New() ki.Node { return &MapViewInline{} }
 
 // SetViewPath sets the [MapViewInline.ViewPath]:
 // a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
@@ -252,7 +252,7 @@ var SliceViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.SliceVi
 // overall frame.
 // Set to ReadOnly for select-only mode, which emits WidgetSig WidgetSelected
 // signals when selection is updated.
-func NewSliceView(parent ki.Ki, name ...string) *SliceView {
+func NewSliceView(parent ki.Node, name ...string) *SliceView {
 	return parent.NewChild(SliceViewType, name...).(*SliceView)
 }
 
@@ -260,7 +260,7 @@ func NewSliceView(parent ki.Ki, name ...string) *SliceView {
 func (t *SliceView) KiType() *gti.Type { return SliceViewType }
 
 // New returns a new [*SliceView] value
-func (t *SliceView) New() ki.Ki { return &SliceView{} }
+func (t *SliceView) New() ki.Node { return &SliceView{} }
 
 // SetStyleFunc sets the [SliceView.StyleFunc]:
 // optional styling function
@@ -294,7 +294,7 @@ var SliceViewBaseType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.Sli
 // list of items, and supports row selection, copy / paste, Drag-n-Drop, etc.
 // Set to ReadOnly for select-only mode, which emits WidgetSig WidgetSelected
 // signals when selection is updated.
-func NewSliceViewBase(parent ki.Ki, name ...string) *SliceViewBase {
+func NewSliceViewBase(parent ki.Node, name ...string) *SliceViewBase {
 	return parent.NewChild(SliceViewBaseType, name...).(*SliceViewBase)
 }
 
@@ -302,7 +302,7 @@ func NewSliceViewBase(parent ki.Ki, name ...string) *SliceViewBase {
 func (t *SliceViewBase) KiType() *gti.Type { return SliceViewBaseType }
 
 // New returns a new [*SliceViewBase] value
-func (t *SliceViewBase) New() ki.Ki { return &SliceViewBase{} }
+func (t *SliceViewBase) New() ki.Node { return &SliceViewBase{} }
 
 // SetMinRows sets the [SliceViewBase.MinRows]:
 // MinRows specifies the minimum number of rows to display, to ensure
@@ -333,7 +333,7 @@ var SliceViewGridType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.Sli
 
 // NewSliceViewGrid adds a new [SliceViewGrid] with the given name to the given parent:
 // SliceViewGrid handles the resizing logic for SliceView, TableView.
-func NewSliceViewGrid(parent ki.Ki, name ...string) *SliceViewGrid {
+func NewSliceViewGrid(parent ki.Node, name ...string) *SliceViewGrid {
 	return parent.NewChild(SliceViewGridType, name...).(*SliceViewGrid)
 }
 
@@ -341,7 +341,7 @@ func NewSliceViewGrid(parent ki.Ki, name ...string) *SliceViewGrid {
 func (t *SliceViewGrid) KiType() *gti.Type { return SliceViewGridType }
 
 // New returns a new [*SliceViewGrid] value
-func (t *SliceViewGrid) New() ki.Ki { return &SliceViewGrid{} }
+func (t *SliceViewGrid) New() ki.Node { return &SliceViewGrid{} }
 
 // SetLastBackground sets the [SliceViewGrid.LastBackground]:
 // LastBackground is the background for which modified
@@ -360,7 +360,7 @@ var SliceViewInlineType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.S
 // NewSliceViewInline adds a new [SliceViewInline] with the given name to the given parent:
 // SliceViewInline represents a slice as a single line widget,
 // for smaller slices and those explicitly marked inline.
-func NewSliceViewInline(parent ki.Ki, name ...string) *SliceViewInline {
+func NewSliceViewInline(parent ki.Node, name ...string) *SliceViewInline {
 	return parent.NewChild(SliceViewInlineType, name...).(*SliceViewInline)
 }
 
@@ -368,7 +368,7 @@ func NewSliceViewInline(parent ki.Ki, name ...string) *SliceViewInline {
 func (t *SliceViewInline) KiType() *gti.Type { return SliceViewInlineType }
 
 // New returns a new [*SliceViewInline] value
-func (t *SliceViewInline) New() ki.Ki { return &SliceViewInline{} }
+func (t *SliceViewInline) New() ki.Node { return &SliceViewInline{} }
 
 // SetViewPath sets the [SliceViewInline.ViewPath]:
 // a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
@@ -384,7 +384,7 @@ var StructViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.Struct
 // StructView represents a struct, creating a property editor of the fields --
 // constructs Children widgets to show the field names and editor fields for
 // each field, within an overall frame.
-func NewStructView(parent ki.Ki, name ...string) *StructView {
+func NewStructView(parent ki.Node, name ...string) *StructView {
 	return parent.NewChild(StructViewType, name...).(*StructView)
 }
 
@@ -392,7 +392,7 @@ func NewStructView(parent ki.Ki, name ...string) *StructView {
 func (t *StructView) KiType() *gti.Type { return StructViewType }
 
 // New returns a new [*StructView] value
-func (t *StructView) New() ki.Ki { return &StructView{} }
+func (t *StructView) New() ki.Node { return &StructView{} }
 
 // SetViewPath sets the [StructView.ViewPath]:
 // a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
@@ -407,7 +407,7 @@ var StructViewInlineType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.
 // NewStructViewInline adds a new [StructViewInline] with the given name to the given parent:
 // StructViewInline represents a struct as a single line widget,
 // for smaller structs and those explicitly marked inline.
-func NewStructViewInline(parent ki.Ki, name ...string) *StructViewInline {
+func NewStructViewInline(parent ki.Node, name ...string) *StructViewInline {
 	return parent.NewChild(StructViewInlineType, name...).(*StructViewInline)
 }
 
@@ -415,7 +415,7 @@ func NewStructViewInline(parent ki.Ki, name ...string) *StructViewInline {
 func (t *StructViewInline) KiType() *gti.Type { return StructViewInlineType }
 
 // New returns a new [*StructViewInline] value
-func (t *StructViewInline) New() ki.Ki { return &StructViewInline{} }
+func (t *StructViewInline) New() ki.Node { return &StructViewInline{} }
 
 // SetAddButton sets the [StructViewInline.AddButton]:
 // if true, add an edit button at the end
@@ -441,7 +441,7 @@ var TableViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.TableVi
 // multiple-selection, cut-and-paste, and drag-and-drop.
 // If ReadOnly, it functions as a mutually-exclusive item
 // selector, highlighting the selected row and emitting a Selected action.
-func NewTableView(parent ki.Ki, name ...string) *TableView {
+func NewTableView(parent ki.Node, name ...string) *TableView {
 	return parent.NewChild(TableViewType, name...).(*TableView)
 }
 
@@ -449,7 +449,7 @@ func NewTableView(parent ki.Ki, name ...string) *TableView {
 func (t *TableView) KiType() *gti.Type { return TableViewType }
 
 // New returns a new [*TableView] value
-func (t *TableView) New() ki.Ki { return &TableView{} }
+func (t *TableView) New() ki.Node { return &TableView{} }
 
 // SetStyleFunc sets the [TableView.StyleFunc]:
 // optional styling function
@@ -490,7 +490,7 @@ var TimeViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.TimeView
 
 // NewTimeView adds a new [TimeView] with the given name to the given parent:
 // TimeView is a view for selecting a time
-func NewTimeView(parent ki.Ki, name ...string) *TimeView {
+func NewTimeView(parent ki.Node, name ...string) *TimeView {
 	return parent.NewChild(TimeViewType, name...).(*TimeView)
 }
 
@@ -498,7 +498,7 @@ func NewTimeView(parent ki.Ki, name ...string) *TimeView {
 func (t *TimeView) KiType() *gti.Type { return TimeViewType }
 
 // New returns a new [*TimeView] value
-func (t *TimeView) New() ki.Ki { return &TimeView{} }
+func (t *TimeView) New() ki.Node { return &TimeView{} }
 
 // SetTooltip sets the [TimeView.Tooltip]
 func (t *TimeView) SetTooltip(v string) *TimeView { t.Tooltip = v; return t }
@@ -508,7 +508,7 @@ var DateViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.DateView
 
 // NewDateView adds a new [DateView] with the given name to the given parent:
 // DateView is a view for selecting a date
-func NewDateView(parent ki.Ki, name ...string) *DateView {
+func NewDateView(parent ki.Node, name ...string) *DateView {
 	return parent.NewChild(DateViewType, name...).(*DateView)
 }
 
@@ -516,7 +516,7 @@ func NewDateView(parent ki.Ki, name ...string) *DateView {
 func (t *DateView) KiType() *gti.Type { return DateViewType }
 
 // New returns a new [*DateView] value
-func (t *DateView) New() ki.Ki { return &DateView{} }
+func (t *DateView) New() ki.Node { return &DateView{} }
 
 // SetTooltip sets the [DateView.Tooltip]
 func (t *DateView) SetTooltip(v string) *DateView { t.Tooltip = v; return t }
@@ -526,7 +526,7 @@ var TreeTableViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.Tre
 
 // NewTreeTableView adds a new [TreeTableView] with the given name to the given parent:
 // TreeTableView combines a [TreeView] and [TableView].
-func NewTreeTableView(parent ki.Ki, name ...string) *TreeTableView {
+func NewTreeTableView(parent ki.Node, name ...string) *TreeTableView {
 	return parent.NewChild(TreeTableViewType, name...).(*TreeTableView)
 }
 
@@ -534,7 +534,7 @@ func NewTreeTableView(parent ki.Ki, name ...string) *TreeTableView {
 func (t *TreeTableView) KiType() *gti.Type { return TreeTableViewType }
 
 // New returns a new [*TreeTableView] value
-func (t *TreeTableView) New() ki.Ki { return &TreeTableView{} }
+func (t *TreeTableView) New() ki.Node { return &TreeTableView{} }
 
 // SetTooltip sets the [TreeTableView.Tooltip]
 func (t *TreeTableView) SetTooltip(v string) *TreeTableView { t.Tooltip = v; return t }
@@ -561,7 +561,7 @@ var TreeViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.TreeView
 // Standard events.Event are sent to any listeners, including
 // Select, Change, and DoubleClick.  The selected nodes
 // are in the root SelectedNodes list.
-func NewTreeView(parent ki.Ki, name ...string) *TreeView {
+func NewTreeView(parent ki.Node, name ...string) *TreeView {
 	return parent.NewChild(TreeViewType, name...).(*TreeView)
 }
 
@@ -569,11 +569,11 @@ func NewTreeView(parent ki.Ki, name ...string) *TreeView {
 func (t *TreeView) KiType() *gti.Type { return TreeViewType }
 
 // New returns a new [*TreeView] value
-func (t *TreeView) New() ki.Ki { return &TreeView{} }
+func (t *TreeView) New() ki.Node { return &TreeView{} }
 
 // SetText sets the [TreeView.Text]:
 // The text to display for the tree view item label, which automatically
-// defaults to the [ki.Node.Name] of the tree view node. It has no effect
+// defaults to the [ki.NodeBase.Name] of the tree view node. It has no effect
 // if [TreeView.SyncNode] is non-nil.
 func (t *TreeView) SetText(v string) *TreeView { t.Text = v; return t }
 

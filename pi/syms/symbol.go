@@ -81,7 +81,7 @@ type Symbol struct {
 	Types TypeMap
 
 	// Ast node that created this symbol -- only valid during parsing
-	Ast ki.Ki `json:"-" xml:"-"`
+	Ast ki.Node `json:"-" xml:"-"`
 }
 
 // NewSymbol returns a new symbol with the basic info filled in -- SelectReg defaults to Region

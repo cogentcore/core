@@ -24,9 +24,9 @@ var (
 // have their ScBBox within given 2D scene point (excludes starting node).
 // This is a good first-pass step for node-level
 // event handling based on 2D mouse events.
-func NodesUnderPoint(n ki.Ki, pt image.Point) []Node {
+func NodesUnderPoint(n ki.Node, pt image.Point) []Node {
 	var ns []Node
-	n.WalkPre(func(k ki.Ki) bool {
+	n.WalkPre(func(k ki.Node) bool {
 		if k == n.This() {
 			return ki.Continue
 		}

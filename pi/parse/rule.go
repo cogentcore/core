@@ -59,7 +59,7 @@ var DepthLimit = 10000
 // After a rule matches, it then proceeds through the rules narrowing the scope
 // and calling the sub-nodes..
 type Rule struct {
-	ki.Node
+	ki.NodeBase
 
 	// disable this rule -- useful for testing and exploration
 	Off bool
@@ -145,7 +145,7 @@ const (
 // Parser is the interface type for parsers -- likely not necessary except is essential
 // for defining the BaseIface for gui in making new nodes
 type Parser interface {
-	ki.Ki
+	ki.Node
 
 	// Compile compiles string rules into their runnable elements
 	Compile(ps *State) bool
@@ -251,7 +251,7 @@ func (pr *Rule) IsGroup() bool {
 // SetRuleMap is called on the top-level Rule and initializes the RuleMap
 func (pr *Rule) SetRuleMap(ps *State) {
 	RuleMap = map[string]*Rule{}
-	pr.WalkPre(func(k ki.Ki) bool {
+	pr.WalkPre(func(k ki.Node) bool {
 		pri := k.(*Rule)
 		if epr, has := RuleMap[pri.Nm]; has {
 			ps.Error(lex.PosZero, fmt.Sprintf("Parser Compile: multiple rules with same name: %v and %v", pri.Path(), epr.Path()), pri)
@@ -268,7 +268,7 @@ func (pr *Rule) SetRuleMap(ps *State) {
 func (pr *Rule) CompileAll(ps *State) bool {
 	pr.SetRuleMap(ps)
 	allok := true
-	pr.WalkPre(func(k ki.Ki) bool {
+	pr.WalkPre(func(k ki.Node) bool {
 		pri := k.(*Rule)
 		ok := pri.Compile(ps)
 		if !ok {
@@ -1518,8 +1518,8 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *Ast) bo
 		useAst = parAst
 	}
 	apath := useAst.Path()
-	var node ki.Ki
-	var adnl []ki.Ki // additional nodes
+	var node ki.Node
+	var adnl []ki.Node // additional nodes
 	if act.Path == "" {
 		node = useAst
 	} else if andidx := strings.Index(act.Path, "&"); andidx >= 0 {
@@ -1530,7 +1530,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *Ast) bo
 				findAll = true
 				p = strings.TrimSuffix(p, "...")
 			}
-			var nd ki.Ki
+			var nd ki.Node
 			if p[:3] == "../" {
 				nd = parAst.FindPath(p[3:])
 			} else {
@@ -1745,7 +1745,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *Ast) bo
 // Find looks for rules in the tree that contain given string in Rule or Name fields
 func (pr *Rule) Find(find string) []*Rule {
 	var res []*Rule
-	pr.WalkPre(func(k ki.Ki) bool {
+	pr.WalkPre(func(k ki.Node) bool {
 		pri := k.(*Rule)
 		if strings.Contains(pri.Rule, find) || strings.Contains(pri.Nm, find) {
 			res = append(res, pri)

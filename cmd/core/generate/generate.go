@@ -36,7 +36,7 @@ var KiMethodsTmpl = template.Must(template.New("KiMethods").
 	{{if not (HasNoNewDirective .)}}
 	// New{{.LocalName}} adds a new [{{.LocalName}}] with the given name to the given parent:
 	{{DocToComment .Doc}}
-	func New{{.LocalName}}(parent {{KiPkg .}}Ki, name ...string) *{{.LocalName}} {
+	func New{{.LocalName}}(parent {{KiPkg .}}Node, name ...string) *{{.LocalName}} {
 		return parent.NewChild({{.LocalName}}Type, name...).(*{{.LocalName}})
 	}
 	{{end}}
@@ -45,7 +45,7 @@ var KiMethodsTmpl = template.Must(template.New("KiMethods").
 	func (t *{{.LocalName}}) KiType() *gti.Type { return {{.LocalName}}Type }
 
 	// New returns a new [*{{.LocalName}}] value
-	func (t *{{.LocalName}}) New() {{KiPkg .}}Ki { return &{{.LocalName}}{} }
+	func (t *{{.LocalName}}) New() {{KiPkg .}}Node { return &{{.LocalName}}{} }
 	
 	{{if HasEmbedDirective .}}
 	// {{.LocalName}}Embedder is an interface that all types that embed {{.LocalName}} satisfy
@@ -55,7 +55,7 @@ var KiMethodsTmpl = template.Must(template.New("KiMethods").
 	
 	// As{{.LocalName}} returns the given value as a value of type {{.LocalName}} if the type
 	// of the given value embeds {{.LocalName}}, or nil otherwise
-	func As{{.LocalName}}(k {{KiPkg .}}Ki) *{{.LocalName}} {
+	func As{{.LocalName}}(k {{KiPkg .}}Node) *{{.LocalName}} {
 		if k == nil || k.This() == nil {
 			return nil
 		}
@@ -104,7 +104,7 @@ func HasNoNewDirective(typ *gtigen.Type) bool {
 func Generate(c *config.Config) error { //gti:add
 	c.Generate.Gtigen.InterfaceConfigs = &ordmap.Map[string, *gtigen.Config]{}
 
-	c.Generate.Gtigen.InterfaceConfigs.Add("cogentcore.org/core/ki.Ki", &gtigen.Config{
+	c.Generate.Gtigen.InterfaceConfigs.Add("cogentcore.org/core/ki.Node", &gtigen.Config{
 		AddTypes:  true,
 		Instance:  true,
 		TypeVar:   true,

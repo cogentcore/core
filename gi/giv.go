@@ -13,7 +13,7 @@ import (
 
 // InspectorWindow opens an interactive editor of the given Ki tree at its root.
 // It is set to [giv.InspectorWindow] if giv is imported; otherwise; it is nil.
-var InspectorWindow func(obj ki.Ki)
+var InspectorWindow func(obj ki.Node)
 
 // SettingsWindow opens a window for editing the user settings.
 // It is set to [giv.SettingsWindow] if giv is imported; otherwise; it is nil.

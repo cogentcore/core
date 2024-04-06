@@ -136,11 +136,11 @@ func TestNodeEscapePaths(t *testing.T) {
 }
 
 func TestNodePathFrom(t *testing.T) {
-	a := NewRoot[*Node]("a")
-	b := NewNode(a, "b")
-	c := NewNode(b, "c")
-	d := NewNode(c, "d")
-	NewNode(d, "e")
+	a := NewRoot[*NodeBase]("a")
+	b := NewNodeBase(a, "b")
+	c := NewNodeBase(b, "c")
+	d := NewNodeBase(c, "d")
+	NewNodeBase(d, "e")
 
 	have := d.PathFrom(b)
 	want := "c/d"
@@ -169,7 +169,7 @@ func TestNodeDeleteChildName(t *testing.T) {
 
 func TestNodeFindName(t *testing.T) {
 	names := [...]string{"name0", "name1", "name2", "name3", "name4", "name5"}
-	parent := Node{}
+	parent := NodeBase{}
 	parent.InitName(&parent, "par")
 	typ := parent.KiType()
 	for _, nm := range names {
@@ -190,7 +190,7 @@ func TestNodeFindName(t *testing.T) {
 
 func TestNodeFindNameUnique(t *testing.T) {
 	names := [...]string{"child", "child_001", "child_002", "child_003", "child_004", "child_005"}
-	parent := Node{}
+	parent := NodeBase{}
 	parent.InitName(&parent, "par")
 	typ := parent.KiType()
 	for range names {
@@ -214,12 +214,12 @@ func TestNodeFindNameUnique(t *testing.T) {
 }
 
 func TestNodeFindType(t *testing.T) {
-	parent := Node{}
+	parent := NodeBase{}
 	parent.InitName(&parent, "par")
 	ne := parent.NewChild(testdata.NodeEmbedType, "child1")
-	parent.NewChild(NodeType, "child2")
+	parent.NewChild(NodeBaseType, "child2")
 
-	emb := ne.KiType().HasEmbed(NodeType)
+	emb := ne.KiType().HasEmbed(NodeBaseType)
 	if !emb {
 		t.Errorf("HasEmbed of NodeEmbedType failed")
 	}
@@ -228,15 +228,15 @@ func TestNodeFindType(t *testing.T) {
 	if !ok || idx != 0 {
 		t.Errorf("find index was not correct val of %d, was %d", 0, idx)
 	}
-	idx, ok = parent.Children().IndexByType(NodeType, NoEmbeds, 0)
+	idx, ok = parent.Children().IndexByType(NodeBaseType, NoEmbeds, 0)
 	if !ok || idx != 1 {
 		t.Errorf("find index was not correct val of %d, was %d", 1, idx)
 	}
-	_, err := parent.Children().ElemByTypeTry(NodeType, NoEmbeds, 0)
+	_, err := parent.Children().ElemByTypeTry(NodeBaseType, NoEmbeds, 0)
 	if err != nil {
 		t.Error(err)
 	}
-	idx, ok = parent.Children().IndexByType(NodeType, Embeds, 0)
+	idx, ok = parent.Children().IndexByType(NodeBaseType, Embeds, 0)
 	if !ok || idx != 0 {
 		t.Errorf("find index was not correct val of %d, was %d", 0, idx)
 	}
@@ -322,7 +322,7 @@ func TestNodeConfig(t *testing.T) {
 
 	config2 := Config{
 		{testdata.NodeEmbedType, "child4"},
-		{NodeType, "child1"}, // note: changing this to Node type removes child1.subchild1
+		{NodeBaseType, "child1"}, // note: changing this to Node type removes child1.subchild1
 		{testdata.NodeEmbedType, "child5"},
 		{testdata.NodeEmbedType, "child3"},
 		{testdata.NodeEmbedType, "child6"},
@@ -365,7 +365,7 @@ func TestNodeCallFun(t *testing.T) {
 	UniquifyNames(parent.This())
 
 	res := make([]string, 0, 10)
-	parent.WalkPreLevel(func(k Ki, level int) bool {
+	parent.WalkPreLevel(func(k Node, level int) bool {
 		res = append(res, fmt.Sprintf("[%v, lev %v]", k.Name(), level))
 		return true
 	})
@@ -377,7 +377,7 @@ func TestNodeCallFun(t *testing.T) {
 	res = res[:0]
 
 	// test return = false case
-	parent.WalkPreLevel(func(k Ki, level int) bool {
+	parent.WalkPreLevel(func(k Node, level int) bool {
 		res = append(res, fmt.Sprintf("[%v, lev %v]", k.Name(), level))
 		if k.Name() == "child1_001" {
 			return Break
@@ -391,7 +391,7 @@ func TestNodeCallFun(t *testing.T) {
 	}
 	res = res[:0]
 
-	schild2.WalkUp(func(k Ki) bool {
+	schild2.WalkUp(func(k Node) bool {
 		res = append(res, fmt.Sprintf("%v", k.Name()))
 		return Continue
 	})
@@ -403,10 +403,10 @@ func TestNodeCallFun(t *testing.T) {
 	}
 	res = res[:0]
 
-	parent.WalkPost(func(k Ki) bool {
+	parent.WalkPost(func(k Node) bool {
 		return Continue
 	},
-		func(k Ki) bool {
+		func(k Node) bool {
 			res = append(res, fmt.Sprintf("[%v]", k.Name()))
 			return Continue
 		})
@@ -418,13 +418,13 @@ func TestNodeCallFun(t *testing.T) {
 	res = res[:0]
 
 	// test for return = false working
-	parent.WalkPost(func(k Ki) bool {
+	parent.WalkPost(func(k Node) bool {
 		if k.Name() == "child1_001" {
 			return Break
 		}
 		return Continue
 	},
-		func(k Ki) bool {
+		func(k Node) bool {
 			if k.Name() == "child1_001" {
 				return Break
 			}
@@ -438,7 +438,7 @@ func TestNodeCallFun(t *testing.T) {
 	}
 	res = res[:0]
 
-	parent.WalkBreadth(func(k Ki) bool {
+	parent.WalkBreadth(func(k Node) bool {
 		res = append(res, fmt.Sprintf("[%v]", k.Name()))
 		return Continue
 	})
@@ -450,7 +450,7 @@ func TestNodeCallFun(t *testing.T) {
 	res = res[:0]
 
 	// test for return false
-	parent.WalkBreadth(func(k Ki) bool {
+	parent.WalkBreadth(func(k Node) bool {
 		if k.Name() == "child1_001" {
 			return Break
 		}
@@ -480,7 +480,7 @@ func TestNodeUpdate(t *testing.T) {
 
 	UniquifyNamesAll(parent.This())
 
-	parent.WalkPre(func(n Ki) bool {
+	parent.WalkPre(func(n Node) bool {
 		res = append(res, n.Path())
 		return Continue
 	})
@@ -552,7 +552,7 @@ func TestProps(t *testing.T) {
 }
 
 func TestTreeMod(t *testing.T) {
-	tree1 := Node{}
+	tree1 := NodeBase{}
 	typ := tree1.KiType()
 	tree1.InitName(&tree1, "tree1")
 	// child11 :=
@@ -563,7 +563,7 @@ func TestTreeMod(t *testing.T) {
 	// schild12 :=
 	child12.NewChild(typ, "subchild12")
 
-	tree2 := Node{}
+	tree2 := NodeBase{}
 	tree2.InitName(&tree2, "tree2")
 	// child21 :=
 	tree2.NewChild(typ, "child21")
@@ -691,10 +691,10 @@ func TestClone(t *testing.T) {
 }
 
 func TestAutoTypeName(t *testing.T) {
-	root := &Node{}
+	root := &NodeBase{}
 	root.InitName(root, "root")
 
-	child := root.NewChild(NodeType)
+	child := root.NewChild(NodeBaseType)
 	nm := child.Name()
 	want := "node-0"
 	if nm != want {
@@ -705,7 +705,7 @@ func TestAutoTypeName(t *testing.T) {
 // BuildGuiTreeSlow builds a tree that is typical of GUI structures where there are
 // many widgets in a container and each widget has some number of parts.
 // Uses slow AddChild method instead of fast one.
-func BuildGuiTreeSlow(widgets, parts int, typ *gti.Type) Ki {
+func BuildGuiTreeSlow(widgets, parts int, typ *gti.Type) Node {
 	win := NewOfType(typ)
 	win.InitName(win, "window")
 
@@ -723,7 +723,7 @@ func BuildGuiTreeSlow(widgets, parts int, typ *gti.Type) Ki {
 
 // BuildGuiTree builds a tree that is typical of GUI structures where there are
 // many widgets in a container and each widget has some number of parts.
-func BuildGuiTree(widgets, parts int, typ *gti.Type) Ki {
+func BuildGuiTree(widgets, parts int, typ *gti.Type) Node {
 	win := NewOfType(typ)
 	win.InitName(win, "window")
 
@@ -740,9 +740,9 @@ func BuildGuiTree(widgets, parts int, typ *gti.Type) Ki {
 }
 
 var TotNodes int
-var TestGUITree_NodeEmbed Ki
-var TestGUITree_NodeField Ki
-var TestGUITree_NodeField2 Ki
+var TestGUITree_NodeEmbed Node
+var TestGUITree_NodeField Node
+var TestGUITree_NodeField2 Node
 
 var NWidgets = 10000
 var NParts = 5
@@ -783,7 +783,7 @@ func BenchmarkWalkPre_NodeEmbed(b *testing.B) {
 	wt := TestGUITree_NodeEmbed
 	nnodes := 0
 	for n := 0; n < b.N; n++ {
-		wt.WalkPre(func(k Ki) bool {
+		wt.WalkPre(func(k Node) bool {
 			nnodes++
 			return Continue
 		})
@@ -796,7 +796,7 @@ func BenchmarkWalkPre_NodeField(b *testing.B) {
 	wt := TestGUITree_NodeField
 	nnodes := 0
 	for n := 0; n < b.N; n++ {
-		wt.WalkPre(func(k Ki) bool {
+		wt.WalkPre(func(k Node) bool {
 			nnodes++
 			return Continue
 		})
@@ -809,7 +809,7 @@ func BenchmarkWalkPre_NodeField2(b *testing.B) {
 	wt := TestGUITree_NodeField2
 	nnodes := 0
 	for n := 0; n < b.N; n++ {
-		wt.WalkPre(func(k Ki) bool {
+		wt.WalkPre(func(k Node) bool {
 			nnodes++
 			return Continue
 		})
@@ -820,14 +820,14 @@ func BenchmarkWalkPre_NodeField2(b *testing.B) {
 
 func BenchmarkNewOfType(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		n := NewOfType(NodeType)
+		n := NewOfType(NodeBaseType)
 		n.InitName(n)
 	}
 }
 
 func BenchmarkStdNew(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		n := new(Node)
+		n := new(NodeBase)
 		n.InitName(n)
 	}
 }

@@ -858,7 +858,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 	if iski && sv.SliceValue != nil {
 		vd := sv.SliceValue.AsValueData()
 		if vd.Owner != nil {
-			if ownki, ok := vd.Owner.(ki.Ki); ok {
+			if ownki, ok := vd.Owner.(ki.Node); ok {
 				d := gi.NewBody().AddTitle("Add list items").AddText("Number and type of items to insert:")
 				nd := &gi.NewItemsData{}
 				w := NewValue(d, nd).AsWidget()

@@ -8,10 +8,10 @@ import (
 )
 
 // TestNodeType is the [gti.Type] for [TestNode]
-var TestNodeType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/ki/testdata.TestNode", IDName: "test-node", Embeds: []gti.Field{{Name: "Node"}}, Instance: &TestNode{}})
+var TestNodeType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/ki/testdata.TestNode", IDName: "test-node", Embeds: []gti.Field{{Name: "NodeBase"}}, Instance: &TestNode{}})
 
 // NewTestNode adds a new [TestNode] with the given name to the given parent:
-func NewTestNode(parent ki.Ki, name ...string) *TestNode {
+func NewTestNode(parent ki.Node, name ...string) *TestNode {
 	return parent.NewChild(TestNodeType, name...).(*TestNode)
 }
 
@@ -19,15 +19,15 @@ func NewTestNode(parent ki.Ki, name ...string) *TestNode {
 func (t *TestNode) KiType() *gti.Type { return TestNodeType }
 
 // New returns a new [*TestNode] value
-func (t *TestNode) New() ki.Ki { return &TestNode{} }
+func (t *TestNode) New() ki.Node { return &TestNode{} }
 
 // NodeEmbedType is the [gti.Type] for [NodeEmbed]
-var NodeEmbedType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/ki/testdata.NodeEmbed", IDName: "node-embed", Doc: "NodeEmbed embeds ki.Node and adds a couple of fields.\nAlso has a directive processed by gti", Directives: []gti.Directive{{Tool: "direct", Directive: "value"}}, Embeds: []gti.Field{{Name: "Node"}}, Fields: []gti.Field{{Name: "Mbr1"}, {Name: "Mbr2"}}, Instance: &NodeEmbed{}})
+var NodeEmbedType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/ki/testdata.NodeEmbed", IDName: "node-embed", Doc: "NodeEmbed embeds ki.Node and adds a couple of fields.\nAlso has a directive processed by gti", Directives: []gti.Directive{{Tool: "direct", Directive: "value"}}, Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Mbr1"}, {Name: "Mbr2"}}, Instance: &NodeEmbed{}})
 
 // NewNodeEmbed adds a new [NodeEmbed] with the given name to the given parent:
 // NodeEmbed embeds ki.Node and adds a couple of fields.
 // Also has a directive processed by gti
-func NewNodeEmbed(parent ki.Ki, name ...string) *NodeEmbed {
+func NewNodeEmbed(parent ki.Node, name ...string) *NodeEmbed {
 	return parent.NewChild(NodeEmbedType, name...).(*NodeEmbed)
 }
 
@@ -35,7 +35,7 @@ func NewNodeEmbed(parent ki.Ki, name ...string) *NodeEmbed {
 func (t *NodeEmbed) KiType() *gti.Type { return NodeEmbedType }
 
 // New returns a new [*NodeEmbed] value
-func (t *NodeEmbed) New() ki.Ki { return &NodeEmbed{} }
+func (t *NodeEmbed) New() ki.Node { return &NodeEmbed{} }
 
 // SetMbr1 sets the [NodeEmbed.Mbr1]
 func (t *NodeEmbed) SetMbr1(v string) *NodeEmbed { t.Mbr1 = v; return t }
@@ -47,7 +47,7 @@ func (t *NodeEmbed) SetMbr2(v int) *NodeEmbed { t.Mbr2 = v; return t }
 var NodeFieldType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/ki/testdata.NodeField", IDName: "node-field", Embeds: []gti.Field{{Name: "NodeEmbed"}}, Fields: []gti.Field{{Name: "Field1"}}, Instance: &NodeField{}})
 
 // NewNodeField adds a new [NodeField] with the given name to the given parent:
-func NewNodeField(parent ki.Ki, name ...string) *NodeField {
+func NewNodeField(parent ki.Node, name ...string) *NodeField {
 	return parent.NewChild(NodeFieldType, name...).(*NodeField)
 }
 
@@ -55,7 +55,7 @@ func NewNodeField(parent ki.Ki, name ...string) *NodeField {
 func (t *NodeField) KiType() *gti.Type { return NodeFieldType }
 
 // New returns a new [*NodeField] value
-func (t *NodeField) New() ki.Ki { return &NodeField{} }
+func (t *NodeField) New() ki.Node { return &NodeField{} }
 
 // SetField1 sets the [NodeField.Field1]
 func (t *NodeField) SetField1(v NodeEmbed) *NodeField { t.Field1 = v; return t }
@@ -70,7 +70,7 @@ func (t *NodeField) SetMbr2(v int) *NodeField { t.Mbr2 = v; return t }
 var NodeField2Type = gti.AddType(&gti.Type{Name: "cogentcore.org/core/ki/testdata.NodeField2", IDName: "node-field2", Embeds: []gti.Field{{Name: "NodeField"}}, Fields: []gti.Field{{Name: "Field2"}}, Instance: &NodeField2{}})
 
 // NewNodeField2 adds a new [NodeField2] with the given name to the given parent:
-func NewNodeField2(parent ki.Ki, name ...string) *NodeField2 {
+func NewNodeField2(parent ki.Node, name ...string) *NodeField2 {
 	return parent.NewChild(NodeField2Type, name...).(*NodeField2)
 }
 
@@ -78,7 +78,7 @@ func NewNodeField2(parent ki.Ki, name ...string) *NodeField2 {
 func (t *NodeField2) KiType() *gti.Type { return NodeField2Type }
 
 // New returns a new [*NodeField2] value
-func (t *NodeField2) New() ki.Ki { return &NodeField2{} }
+func (t *NodeField2) New() ki.Node { return &NodeField2{} }
 
 // SetField2 sets the [NodeField2.Field2]
 func (t *NodeField2) SetField2(v NodeEmbed) *NodeField2 { t.Field2 = v; return t }

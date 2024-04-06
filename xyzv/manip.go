@@ -163,7 +163,7 @@ type ManipPoint struct {
 }
 
 // NewManipPoint adds a new manipulation point
-func NewManipPoint(parent ki.Ki, name string, meshName string, clr color.RGBA, pos mat32.Vec3) *ManipPoint {
+func NewManipPoint(parent ki.Node, name string, meshName string, clr color.RGBA, pos mat32.Vec3) *ManipPoint {
 	mpt := parent.NewChild(ManipPtType, name).(*ManipPoint)
 	mpt.SetMeshName(meshName)
 	mpt.Defaults()

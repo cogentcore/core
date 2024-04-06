@@ -89,7 +89,7 @@ type Layout struct {
 	FocusNameTime time.Time `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// last element focused on -- used as a starting point if name is the same
-	FocusNameLast ki.Ki `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
+	FocusNameLast ki.Node `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 }
 
 func (ly *Layout) FlagType() enums.BitFlagSetter {
@@ -411,10 +411,10 @@ func (ly *Layout) FocusOnName(e events.Event) bool {
 // the first focusable element within the layout whose Label (using
 // [ToLabel]) matches the given name using [complete.IsSeedMatching].
 // If after is non-nil, it only finds after that element.
-func ChildByLabelCanFocus(ly *Layout, name string, after ki.Ki) ki.Ki {
+func ChildByLabelCanFocus(ly *Layout, name string, after ki.Node) ki.Node {
 	gotAfter := false
 	completions := []complete.Completion{}
-	ly.WalkBreadth(func(k ki.Ki) bool {
+	ly.WalkBreadth(func(k ki.Node) bool {
 		if k == ly.This() { // skip us
 			return ki.Continue
 		}

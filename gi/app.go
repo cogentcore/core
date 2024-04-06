@@ -305,7 +305,7 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 // buttons using a recursive approach that updates path with context
 // about the original button menu. Consumers of this function should
 // typically set path to "".
-func AddButtonItems(items *[]ChooserItem, parent ki.Ki, path string) {
+func AddButtonItems(items *[]ChooserItem, parent ki.Node, path string) {
 	for _, kid := range *parent.Children() {
 		bt := AsButton(kid)
 		if bt == nil || bt.IsDisabled() {

@@ -29,7 +29,7 @@ type Inspector struct {
 	gi.Frame
 
 	// root of tree being edited
-	KiRoot ki.Ki
+	KiRoot ki.Node
 
 	// has the root changed via gui actions?  updated from treeview and structview for changes
 	Changed bool `set:"-"`
@@ -149,7 +149,7 @@ func (is *Inspector) SelectionMonitor() {
 		// if we can't be found, we are probably a part,
 		// so we keep going up until we find somebody in
 		// the tree
-		sw.WalkUpParent(func(k ki.Ki) bool {
+		sw.WalkUpParent(func(k ki.Node) bool {
 			tv = is.TreeView().FindSyncNode(k)
 			if tv != nil {
 				return ki.Break
@@ -187,7 +187,7 @@ func (is *Inspector) InspectApp() { //gti:add
 }
 
 // SetRoot sets the source root and ensures everything is configured
-func (is *Inspector) SetRoot(root ki.Ki) {
+func (is *Inspector) SetRoot(root ki.Node) {
 	if is.KiRoot != root {
 		is.KiRoot = root
 		// ge.GetAllUpdates(root)
@@ -212,7 +212,7 @@ func (is *Inspector) Config() {
 }
 
 // SetTitle sets the title to correspond to the given node.
-func (is *Inspector) SetTitle(k ki.Ki) {
+func (is *Inspector) SetTitle(k ki.Node) {
 	is.TitleWidget().SetText(fmt.Sprintf("Inspector of %s (%s)", k.Name(), laser.FriendlyTypeName(reflect.TypeOf(k))))
 }
 
@@ -329,7 +329,7 @@ func (is *Inspector) ConfigToolbar(tb *gi.Toolbar) {
 
 // InspectorWindow opens an interactive editor of the given Ki tree
 // in a new window.
-func InspectorWindow(k ki.Ki) {
+func InspectorWindow(k ki.Node) {
 	if gi.ActivateExistingMainWindow(k) {
 		return
 	}
@@ -340,7 +340,7 @@ func InspectorWindow(k ki.Ki) {
 
 // InspectorView configures the given body to have an interactive inspector
 // of the given Ki tree.
-func InspectorView(b *gi.Body, k ki.Ki) {
+func InspectorView(b *gi.Body, k ki.Node) {
 	b.SetTitle("Inspector").SetData(k).SetName("inspector")
 	if k != nil {
 		b.Nm += "-" + k.Name()

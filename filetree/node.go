@@ -101,7 +101,7 @@ func (fn *Node) IsIrregular() bool {
 // IsExternal returns true if file is external to main file tree
 func (fn *Node) IsExternal() bool {
 	isExt := false
-	fn.WalkUp(func(k ki.Ki) bool {
+	fn.WalkUp(func(k ki.Node) bool {
 		sfn := AsNode(k)
 		if sfn == nil {
 			return ki.Break
@@ -118,7 +118,7 @@ func (fn *Node) IsExternal() bool {
 // HasClosedParent returns true if node has a parent node with !IsOpen flag set
 func (fn *Node) HasClosedParent() bool {
 	hasClosed := false
-	fn.WalkUpParent(func(k ki.Ki) bool {
+	fn.WalkUpParent(func(k ki.Node) bool {
 		sfn := AsNode(k)
 		if sfn == nil {
 			return ki.Break

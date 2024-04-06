@@ -81,7 +81,7 @@ type SolidPoint struct {
 // from closest to furthest.
 func (gp *Group) RaySolidIntersections(ray mat32.Ray) []*SolidPoint {
 	var sp []*SolidPoint
-	gp.WalkPre(func(k ki.Ki) bool {
+	gp.WalkPre(func(k ki.Node) bool {
 		ni, nb := AsNode(k)
 		if ni == nil {
 			return ki.Break // going into a different type of thing, bail

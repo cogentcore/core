@@ -27,7 +27,7 @@ import (
 // for this TreeView, and syncs the rest of the tree to match.
 // It calls [ki.UniquifyNamesAll] on the source tree to ensure
 // that node names are unique, which is essential for proper viewing.
-func (tv *TreeView) SyncTree(tree ki.Ki) *TreeView {
+func (tv *TreeView) SyncTree(tree ki.Node) *TreeView {
 	ki.UniquifyNamesAll(tree)
 	if tv.SyncNode != tree {
 		tv.SyncNode = tree
@@ -43,7 +43,7 @@ func (tv *TreeView) SyncTree(tree ki.Ki) *TreeView {
 // via SyncToSrc during tree updating.
 // It uses ki Config mechanism to perform minimal updates to
 // remain in sync.
-func (tv *TreeView) SetSyncNode(sk ki.Ki, tvIndex *int, init bool, depth int) {
+func (tv *TreeView) SetSyncNode(sk ki.Node, tvIndex *int, init bool, depth int) {
 	if tv.SyncNode != sk {
 		tv.SyncNode = sk
 	}
@@ -156,7 +156,7 @@ func (tv *TreeView) SelectedSyncNodes() ki.Slice {
 
 // FindSyncNode finds TreeView node for given source node,
 // or nil if not found
-func (tv *TreeView) FindSyncNode(kn ki.Ki) *TreeView {
+func (tv *TreeView) FindSyncNode(kn ki.Node) *TreeView {
 	var ttv *TreeView
 	tv.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
 		tvki := AsTreeView(wi)
@@ -208,7 +208,7 @@ func (tv *TreeView) AddTreeNodes(rel, myidx int, typ *gti.Type, n int) {
 
 func (tv *TreeView) AddSyncNodes(rel, myidx int, typ *gti.Type, n int) {
 	parent := tv.SyncNode
-	var ski ki.Ki
+	var ski ki.Node
 	for i := 0; i < n; i++ {
 		nm := fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i)
 		nki := parent.InsertNewChild(typ, myidx+i, nm)
@@ -454,7 +454,7 @@ func (tv *TreeView) PasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int,
 	myidx += rel
 	sroot := tv.RootView.SyncNode
 	sz := len(sl)
-	var selKi ki.Ki
+	var selKi ki.Node
 	for i, ns := range sl {
 		orgpath := pl[i]
 		if mod != events.DropMove {

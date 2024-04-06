@@ -133,7 +133,7 @@ func (sv *StructView) UpdateField(field string) {
 
 // Config configures the view
 func (sv *StructView) Config() {
-	if ks, ok := sv.Struct.(ki.Ki); ok {
+	if ks, ok := sv.Struct.(ki.Node); ok {
 		if ks == nil || ks.This() == nil {
 			return
 		}

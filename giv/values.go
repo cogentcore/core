@@ -367,7 +367,7 @@ func (v *MapInlineValue) Update() {
 	}
 }
 
-// KiValue represents a [ki.Ki] value with a button.
+// KiValue represents a [ki.Node] value with a button.
 type KiValue struct {
 	ValueBase[*gi.Button]
 }
@@ -395,20 +395,20 @@ func (v *KiValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	return true, nil
 }
 
-// KiValue returns the actual underlying [ki.Ki] value, or nil.
-func (vv *KiValue) KiValue() ki.Ki {
+// KiValue returns the actual underlying [ki.Node] value, or nil.
+func (vv *KiValue) KiValue() ki.Node {
 	if !vv.Value.IsValid() || vv.Value.IsNil() {
 		return nil
 	}
 	npv := laser.NonPtrValue(vv.Value)
 	if npv.Kind() == reflect.Interface {
-		return npv.Interface().(ki.Ki)
+		return npv.Interface().(ki.Node)
 	}
 	opv := laser.OnePtrValue(vv.Value)
 	if opv.IsNil() {
 		return nil
 	}
-	return opv.Interface().(ki.Ki)
+	return opv.Interface().(ki.Node)
 }
 
 // EnumValue represents an [enums.Enum] value with a chooser.
@@ -449,7 +449,7 @@ func (v *BitFlagValue) Update() {
 func (v *BitFlagValue) EnumValue() enums.BitFlagSetter {
 	// special case to use [ki.Ki.FlagType] if we are the Flags field
 	if v.Field != nil && v.Field.Name == "Flags" {
-		if k, ok := v.Owner.(ki.Ki); ok {
+		if k, ok := v.Owner.(ki.Node); ok {
 			return k.FlagType()
 		}
 	}

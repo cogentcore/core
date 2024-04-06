@@ -20,7 +20,7 @@ import (
 
 // Node is the interface for all SVG nodes
 type Node interface {
-	ki.Ki
+	ki.Node
 
 	// AsNodeBase returns a generic svg.NodeBase for our node -- gives generic
 	// access to all the base-level data structures without requiring
@@ -82,7 +82,7 @@ type Node interface {
 
 // svg.NodeBase is the base type for elements within the SVG scenegraph
 type NodeBase struct {
-	ki.Node
+	ki.NodeBase
 
 	// user-defined class name(s) used primarily for attaching
 	// CSS styles to different display elements.
@@ -265,7 +265,7 @@ func (g *NodeBase) ReadGeom(sv *SVG, dat []float32) {
 // nil or deleted items.  Return ki.Continue (true) to continue,
 // and ki.Break (false) to terminate.
 func SVGWalkPre(n Node, fun func(kni Node, knb *NodeBase) bool) {
-	n.WalkPre(func(k ki.Ki) bool {
+	n.WalkPre(func(k ki.Node) bool {
 		kni := k.(Node)
 		if kni == nil || kni.This() == nil {
 			return ki.Break
@@ -280,7 +280,7 @@ func SVGWalkPre(n Node, fun func(kni Node, knb *NodeBase) bool) {
 // i.e., it only processes concrete graphical nodes.
 // Return ki.Continue (true) to continue, and ki.Break (false) to terminate.
 func SVGWalkPreNoDefs(n Node, fun func(kni Node, knb *NodeBase) bool) {
-	n.WalkPre(func(k ki.Ki) bool {
+	n.WalkPre(func(k ki.Node) bool {
 		kni := k.(Node)
 		if kni == nil || kni.This() == nil {
 			return ki.Break

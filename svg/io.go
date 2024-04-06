@@ -835,7 +835,7 @@ var InkscapeProps = map[string]bool{
 // SVGNodeMarshalXML encodes just the given node under SVG to XML.
 // returns name of node, for end tag -- if empty, then children will not be
 // output.
-func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
+func SVGNodeMarshalXML(itm ki.Node, enc *XMLEncoder, setName string) string {
 	if itm == nil || itm.This() == nil {
 		return ""
 	}

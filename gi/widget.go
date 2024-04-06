@@ -22,7 +22,7 @@ import (
 
 // Widget is the interface for all Cogent Core widgets.
 type Widget interface {
-	ki.Ki
+	ki.Node
 
 	// AsWidget returns the WidgetBase embedded field for any Widget node.
 	// The Widget interface defines only methods that can be overridden
@@ -207,7 +207,7 @@ type Widget interface {
 // function appropriately in a chooser (e.g., SliceView or TableView) -- this
 // includes toggling selection on left mouse press.
 type WidgetBase struct { //core:no-new
-	ki.Node
+	ki.NodeBase
 
 	// Tooltip is the text for the tooltip for this widget,
 	// which can use HTML formatting.
@@ -323,7 +323,7 @@ func (wb *WidgetBase) SetScene(sc *Scene) {
 	})
 }
 
-func (wb *WidgetBase) OnChildAdded(child ki.Ki) {
+func (wb *WidgetBase) OnChildAdded(child ki.Node) {
 	w, _ := AsWidget(child)
 	if w == nil {
 		return
@@ -342,7 +342,7 @@ func (wb *WidgetBase) OnWidgetAdded(fun func(w Widget)) *WidgetBase {
 
 // AsWidget returns the given Ki object
 // as a Widget interface and a WidgetBase.
-func AsWidget(k ki.Ki) (Widget, *WidgetBase) {
+func AsWidget(k ki.Node) (Widget, *WidgetBase) {
 	if k == nil || k.This() == nil {
 		return nil, nil
 	}
@@ -358,13 +358,13 @@ func (wb *WidgetBase) AsWidget() *WidgetBase {
 
 // AsWidgetBase returns the given Ki object as a WidgetBase, or nil.
 // for direct use of the return value in cases where that is needed.
-func AsWidgetBase(k ki.Ki) *WidgetBase {
+func AsWidgetBase(k ki.Node) *WidgetBase {
 	_, wb := AsWidget(k)
 	return wb
 }
 
-func (wb *WidgetBase) CopyFieldsFrom(from ki.Ki) {
-	wb.Node.CopyFieldsFrom(from)
+func (wb *WidgetBase) CopyFieldsFrom(from ki.Node) {
+	wb.NodeBase.CopyFieldsFrom(from)
 	_, frm := AsWidget(from)
 
 	n := len(wb.Stylers)
@@ -389,7 +389,7 @@ func (wb *WidgetBase) CopyFieldsFrom(from ki.Ki) {
 
 func (wb *WidgetBase) Destroy() {
 	wb.DeleteParts()
-	wb.Node.Destroy()
+	wb.NodeBase.Destroy()
 }
 
 func (wb *WidgetBase) DeleteParts() {
@@ -481,7 +481,7 @@ func (wb *WidgetBase) DirectRenderDraw(drw goosi.Drawer, idx int, flipY bool) {
 }
 
 // WalkPreNode extends WalkPre to Parts -- key for getting full Update protection!
-func (wb *WidgetBase) WalkPreNode(fun func(ki.Ki) bool) {
+func (wb *WidgetBase) WalkPreNode(fun func(ki.Node) bool) {
 	if wb.Parts == nil {
 		return
 	}
@@ -527,7 +527,7 @@ func (wb *WidgetBase) VisibleKidsIter(fun func(i int, kwi Widget, kwb *WidgetBas
 // nil or deleted items and operates on Widget types.
 // Return ki.Continue (true) to continue, and ki.Break (false) to terminate.
 func (wb *WidgetBase) WidgetWalkPre(fun func(kwi Widget, kwb *WidgetBase) bool) {
-	wb.WalkPre(func(k ki.Ki) bool {
+	wb.WalkPre(func(k ki.Node) bool {
 		kwi, kwb := AsWidget(k)
 		if kwi == nil || kwi.This() == nil {
 			return ki.Break

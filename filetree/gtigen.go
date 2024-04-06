@@ -20,7 +20,7 @@ var NodeType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/filetree.Node", 
 // Node represents a file in the file system, as a TreeView node.
 // The name of the node is the name of the file.
 // Folders have children containing further nodes.
-func NewNode(parent ki.Ki, name ...string) *Node {
+func NewNode(parent ki.Node, name ...string) *Node {
 	return parent.NewChild(NodeType, name...).(*Node)
 }
 
@@ -28,7 +28,7 @@ func NewNode(parent ki.Ki, name ...string) *Node {
 func (t *Node) KiType() *gti.Type { return NodeType }
 
 // New returns a new [*Node] value
-func (t *Node) New() ki.Ki { return &Node{} }
+func (t *Node) New() ki.Node { return &Node{} }
 
 // NodeEmbedder is an interface that all types that embed Node satisfy
 type NodeEmbedder interface {
@@ -37,7 +37,7 @@ type NodeEmbedder interface {
 
 // AsNode returns the given value as a value of type Node if the type
 // of the given value embeds Node, or nil otherwise
-func AsNode(k ki.Ki) *Node {
+func AsNode(k ki.Node) *Node {
 	if k == nil || k.This() == nil {
 		return nil
 	}
@@ -94,7 +94,7 @@ var TreeType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/filetree.Tree", 
 // (and subdirectories thereof), and has some overall management state for how to
 // view things.  The Tree can be viewed by a TreeView to provide a GUI
 // interface into it.
-func NewTree(parent ki.Ki, name ...string) *Tree {
+func NewTree(parent ki.Node, name ...string) *Tree {
 	return parent.NewChild(TreeType, name...).(*Tree)
 }
 
@@ -102,7 +102,7 @@ func NewTree(parent ki.Ki, name ...string) *Tree {
 func (t *Tree) KiType() *gti.Type { return TreeType }
 
 // New returns a new [*Tree] value
-func (t *Tree) New() ki.Ki { return &Tree{} }
+func (t *Tree) New() ki.Node { return &Tree{} }
 
 // SetDirsOnTop sets the [Tree.DirsOnTop]:
 // if true, then all directories are placed at the top of the tree view
@@ -159,7 +159,7 @@ var VCSLogViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/filetree.V
 
 // NewVCSLogView adds a new [VCSLogView] with the given name to the given parent:
 // VCSLogView is a view of the VCS log data
-func NewVCSLogView(parent ki.Ki, name ...string) *VCSLogView {
+func NewVCSLogView(parent ki.Node, name ...string) *VCSLogView {
 	return parent.NewChild(VCSLogViewType, name...).(*VCSLogView)
 }
 
@@ -167,7 +167,7 @@ func NewVCSLogView(parent ki.Ki, name ...string) *VCSLogView {
 func (t *VCSLogView) KiType() *gti.Type { return VCSLogViewType }
 
 // New returns a new [*VCSLogView] value
-func (t *VCSLogView) New() ki.Ki { return &VCSLogView{} }
+func (t *VCSLogView) New() ki.Node { return &VCSLogView{} }
 
 // SetLog sets the [VCSLogView.Log]:
 // current log

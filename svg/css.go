@@ -22,7 +22,7 @@ type StyleSheet struct {
 }
 
 // AddNewStyleSheet adds a new CSS stylesheet to given parent node, with given name.
-func AddNewStyleSheet(parent ki.Ki, name string) *StyleSheet {
+func AddNewStyleSheet(parent ki.Node, name string) *StyleSheet {
 	return parent.NewChild(StyleSheetType, name).(*StyleSheet)
 }
 

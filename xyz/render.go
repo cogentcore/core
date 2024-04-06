@@ -192,14 +192,14 @@ func (sc *Scene) UpdateMeshBBox() {
 		if kii == nil {
 			continue
 		}
-		kii.WalkPost(func(k ki.Ki) bool {
+		kii.WalkPost(func(k ki.Node) bool {
 			ni, _ := AsNode(k)
 			if ni == nil {
 				return ki.Break
 			}
 			return ki.Continue
 		},
-			func(k ki.Ki) bool {
+			func(k ki.Node) bool {
 				ni, _ := AsNode(k)
 				if ni == nil {
 					return ki.Break
@@ -211,9 +211,9 @@ func (sc *Scene) UpdateMeshBBox() {
 }
 
 // UpdateWorldMatrix updates the world matrix for node and everything inside it
-func UpdateWorldMatrix(n ki.Ki) {
+func UpdateWorldMatrix(n ki.Node) {
 	idmtx := mat32.Identity4()
-	n.WalkPre(func(k ki.Ki) bool {
+	n.WalkPre(func(k ki.Node) bool {
 		ni, _ := AsNode(k)
 		if ni == nil {
 			return ki.Continue
@@ -240,7 +240,7 @@ func (sc *Scene) UpdateMVPMatrix() {
 	sz := sc.Geom.Size
 	size := mat32.V2(float32(sz.X), float32(sz.Y))
 
-	sc.WalkPre(func(k ki.Ki) bool {
+	sc.WalkPre(func(k ki.Node) bool {
 		if k.This() == sc.This() {
 			return ki.Continue
 		}
@@ -256,7 +256,7 @@ func (sc *Scene) UpdateMVPMatrix() {
 
 // ConfigNodes runs Config on all nodes
 func (sc *Scene) ConfigNodes() {
-	sc.WalkPre(func(k ki.Ki) bool {
+	sc.WalkPre(func(k ki.Node) bool {
 		if k == sc.This() {
 			return ki.Continue
 		}
@@ -374,7 +374,7 @@ func (sc *Scene) RenderImpl() {
 	sc.Phong.Sync()
 
 	var rcs [RenderClassesN][]Node
-	sc.WalkPre(func(k ki.Ki) bool {
+	sc.WalkPre(func(k ki.Node) bool {
 		if k == sc.This() {
 			return ki.Continue
 		}

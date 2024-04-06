@@ -80,7 +80,7 @@ type TreeViewer interface {
 
 // AsTreeView returns the given value as a value of type TreeView if the type
 // of the given value embeds TreeView, or nil otherwise
-func AsTreeView(k ki.Ki) *TreeView {
+func AsTreeView(k ki.Node) *TreeView {
 	if k == nil || k.This() == nil {
 		return nil
 	}
@@ -115,7 +115,7 @@ type TreeView struct {
 	gi.WidgetBase
 
 	// If non-nil, the Ki Node that this widget is viewing in the tree (the source)
-	SyncNode ki.Ki `set:"-" copier:"-" json:"-" xml:"-"`
+	SyncNode ki.Node `set:"-" copier:"-" json:"-" xml:"-"`
 
 	// The text to display for the tree view item label, which automatically
 	// defaults to the [ki.Node.Name] of the tree view node. It has no effect
@@ -174,7 +174,7 @@ type TreeView struct {
 // separately from the surrounding context. If a name is provided, it
 // sets the name of the tree view to that and the name of the frame to
 // that plus "-frame".
-func NewTreeViewFrame(parent ki.Ki, name ...string) *TreeView {
+func NewTreeViewFrame(parent ki.Node, name ...string) *TreeView {
 	frnm := []string{}
 	if len(name) > 0 {
 		frnm = []string{name[0] + "-frame"}
@@ -1238,7 +1238,7 @@ func (tv *TreeView) CloseAll() { //gti:add
 // OpenParents opens all the parents of this node,
 // so that it will be visible.
 func (tv *TreeView) OpenParents() {
-	tv.WalkUpParent(func(k ki.Ki) bool {
+	tv.WalkUpParent(func(k ki.Node) bool {
 		tvki := AsTreeView(k)
 		if tvki != nil {
 			tvki.Open()
