@@ -6,7 +6,7 @@ import (
 	"io/fs"
 
 	"cogentcore.org/core/gti"
-	"cogentcore.org/core/ki"
+	"cogentcore.org/core/tree"
 )
 
 // PageType is the [gti.Type] for [Page]
@@ -14,7 +14,7 @@ var PageType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/webcore.Page", I
 
 // NewPage adds a new [Page] with the given name to the given parent:
 // Page represents one site page
-func NewPage(parent ki.Node, name ...string) *Page {
+func NewPage(parent tree.Node, name ...string) *Page {
 	return parent.NewChild(PageType, name...).(*Page)
 }
 
@@ -22,7 +22,7 @@ func NewPage(parent ki.Node, name ...string) *Page {
 func (t *Page) KiType() *gti.Type { return PageType }
 
 // New returns a new [*Page] value
-func (t *Page) New() ki.Node { return &Page{} }
+func (t *Page) New() tree.Node { return &Page{} }
 
 // SetSource sets the [Page.Source]:
 // Source is the filesystem in which the content is located.

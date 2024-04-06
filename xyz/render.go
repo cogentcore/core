@@ -9,8 +9,8 @@ import (
 	"image"
 	"sort"
 
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/vgpu"
 
 	vk "github.com/goki/vulkan"
@@ -192,31 +192,31 @@ func (sc *Scene) UpdateMeshBBox() {
 		if kii == nil {
 			continue
 		}
-		kii.WalkPost(func(k ki.Node) bool {
+		kii.WalkPost(func(k tree.Node) bool {
 			ni, _ := AsNode(k)
 			if ni == nil {
-				return ki.Break
+				return tree.Break
 			}
-			return ki.Continue
+			return tree.Continue
 		},
-			func(k ki.Node) bool {
+			func(k tree.Node) bool {
 				ni, _ := AsNode(k)
 				if ni == nil {
-					return ki.Break
+					return tree.Break
 				}
 				ni.UpdateMeshBBox()
-				return ki.Continue
+				return tree.Continue
 			})
 	}
 }
 
 // UpdateWorldMatrix updates the world matrix for node and everything inside it
-func UpdateWorldMatrix(n ki.Node) {
+func UpdateWorldMatrix(n tree.Node) {
 	idmtx := mat32.Identity4()
-	n.WalkPre(func(k ki.Node) bool {
+	n.WalkPre(func(k tree.Node) bool {
 		ni, _ := AsNode(k)
 		if ni == nil {
-			return ki.Continue
+			return tree.Continue
 		}
 		_, pd := AsNode(k.Parent())
 		if pd == nil {
@@ -226,7 +226,7 @@ func UpdateWorldMatrix(n ki.Node) {
 			ni.UpdateWorldMatrix(&pd.Pose.WorldMatrix)
 			pd.PoseMu.RUnlock()
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 }
 
@@ -240,32 +240,32 @@ func (sc *Scene) UpdateMVPMatrix() {
 	sz := sc.Geom.Size
 	size := mat32.V2(float32(sz.X), float32(sz.Y))
 
-	sc.WalkPre(func(k ki.Node) bool {
+	sc.WalkPre(func(k tree.Node) bool {
 		if k.This() == sc.This() {
-			return ki.Continue
+			return tree.Continue
 		}
 		ni, _ := AsNode(k)
 		if ni == nil {
-			return ki.Break // going into a different type of thing, bail
+			return tree.Break // going into a different type of thing, bail
 		}
 		ni.UpdateMVPMatrix(&sc.Camera.ViewMatrix, &sc.Camera.PrjnMatrix)
 		ni.UpdateBBox2D(size)
-		return ki.Continue
+		return tree.Continue
 	})
 }
 
 // ConfigNodes runs Config on all nodes
 func (sc *Scene) ConfigNodes() {
-	sc.WalkPre(func(k ki.Node) bool {
+	sc.WalkPre(func(k tree.Node) bool {
 		if k == sc.This() {
-			return ki.Continue
+			return tree.Continue
 		}
 		ni, _ := AsNode(k)
 		if ni == nil {
-			return ki.Break
+			return tree.Break
 		}
 		ni.Config()
-		return ki.Continue
+		return tree.Continue
 	})
 }
 
@@ -374,26 +374,26 @@ func (sc *Scene) RenderImpl() {
 	sc.Phong.Sync()
 
 	var rcs [RenderClassesN][]Node
-	sc.WalkPre(func(k ki.Node) bool {
+	sc.WalkPre(func(k tree.Node) bool {
 		if k == sc.This() {
-			return ki.Continue
+			return tree.Continue
 		}
 		ni, _ := AsNode(k)
 		if ni == nil {
-			return ki.Break // going into a different type of thing, bail
+			return tree.Break // going into a different type of thing, bail
 		}
 		// if !ni.IsVisible() || nb.ScBBox == (image.Rectangle{}) {
 		// 	return ki.Break
 		// }
 		if !ni.IsSolid() {
-			return ki.Continue
+			return tree.Continue
 		}
 		rc := ni.RenderClass()
 		if rc > RClassTransTexture { // all in one group b/c z-sorting is key
 			rc = RClassTransTexture
 		}
 		rcs[rc] = append(rcs[rc], ni)
-		return ki.Continue
+		return tree.Continue
 	})
 
 	sc.Phong.UpdateMu.Lock()

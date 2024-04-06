@@ -9,9 +9,9 @@ import (
 	"image"
 
 	"cogentcore.org/core/goosi"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/ordmap"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/vgpu/szalloc"
 	"golang.org/x/image/draw"
 )
@@ -28,7 +28,7 @@ type Sprite struct {
 	Name string
 
 	// properties for sprite -- allows user-extensible data
-	Props ki.Props
+	Props tree.Props
 
 	// position and size of the image within the overlay window texture
 	Geom mat32.Geom2DInt

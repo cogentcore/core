@@ -20,13 +20,13 @@ import (
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/pi/complete"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 	"golang.org/x/image/draw"
 )
@@ -1801,7 +1801,7 @@ func (tf *TextField) HandleKeyEvents() {
 }
 
 func (tf *TextField) Config() {
-	config := ki.Config{}
+	config := tree.Config{}
 
 	tf.EditTxt = []rune(tf.Txt)
 	tf.Edited = false

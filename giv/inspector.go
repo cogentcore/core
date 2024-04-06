@@ -15,9 +15,9 @@ import (
 	"cogentcore.org/core/grows/jsons"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 )
 
@@ -29,7 +29,7 @@ type Inspector struct {
 	gi.Frame
 
 	// root of tree being edited
-	KiRoot ki.Node
+	KiRoot tree.Node
 
 	// has the root changed via gui actions?  updated from treeview and structview for changes
 	Changed bool `set:"-"`
@@ -149,12 +149,12 @@ func (is *Inspector) SelectionMonitor() {
 		// if we can't be found, we are probably a part,
 		// so we keep going up until we find somebody in
 		// the tree
-		sw.WalkUpParent(func(k ki.Node) bool {
+		sw.WalkUpParent(func(k tree.Node) bool {
 			tv = is.TreeView().FindSyncNode(k)
 			if tv != nil {
-				return ki.Break
+				return tree.Break
 			}
-			return ki.Continue
+			return tree.Continue
 		})
 		if tv == nil {
 			gi.NewBody().AddSnackbarText(fmt.Sprintf("Inspector: tree view node missing: %v", sw)).NewSnackbar(is).Run()
@@ -187,7 +187,7 @@ func (is *Inspector) InspectApp() { //gti:add
 }
 
 // SetRoot sets the source root and ensures everything is configured
-func (is *Inspector) SetRoot(root ki.Node) {
+func (is *Inspector) SetRoot(root tree.Node) {
 	if is.KiRoot != root {
 		is.KiRoot = root
 		// ge.GetAllUpdates(root)
@@ -203,7 +203,7 @@ func (is *Inspector) Config() {
 	is.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
-	config := ki.Config{}
+	config := tree.Config{}
 	config.Add(gi.LabelType, "title")
 	config.Add(gi.SplitsType, "splits")
 	is.ConfigChildren(config)
@@ -212,7 +212,7 @@ func (is *Inspector) Config() {
 }
 
 // SetTitle sets the title to correspond to the given node.
-func (is *Inspector) SetTitle(k ki.Node) {
+func (is *Inspector) SetTitle(k tree.Node) {
 	is.TitleWidget().SetText(fmt.Sprintf("Inspector of %s (%s)", k.Name(), laser.FriendlyTypeName(reflect.TypeOf(k))))
 }
 
@@ -329,7 +329,7 @@ func (is *Inspector) ConfigToolbar(tb *gi.Toolbar) {
 
 // InspectorWindow opens an interactive editor of the given Ki tree
 // in a new window.
-func InspectorWindow(k ki.Node) {
+func InspectorWindow(k tree.Node) {
 	if gi.ActivateExistingMainWindow(k) {
 		return
 	}
@@ -340,7 +340,7 @@ func InspectorWindow(k ki.Node) {
 
 // InspectorView configures the given body to have an interactive inspector
 // of the given Ki tree.
-func InspectorView(b *gi.Body, k ki.Node) {
+func InspectorView(b *gi.Body, k tree.Node) {
 	b.SetTitle("Inspector").SetData(k).SetName("inspector")
 	if k != nil {
 		b.Nm += "-" + k.Name()

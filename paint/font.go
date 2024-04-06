@@ -12,8 +12,8 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/grr"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 	"github.com/goki/freetype/truetype"
 	"golang.org/x/image/font/opentype"
@@ -100,7 +100,7 @@ func FontStyleCSS(fs *styles.FontRender, tag string, cssAgg map[string]any, unit
 		OpenFont(fs, unit)
 		return true
 	}
-	kmap, ok := tp.(ki.Props) // must be a props map
+	kmap, ok := tp.(tree.Props) // must be a props map
 	if ok {
 		fs.SetStyleProps(nil, kmap, ctxt)
 		OpenFont(fs, unit)

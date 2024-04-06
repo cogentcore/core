@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/ki"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/pi/complete"
@@ -47,7 +47,7 @@ var BodyType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Body", IDName
 func (t *Body) KiType() *gti.Type { return BodyType }
 
 // New returns a new [*Body] value
-func (t *Body) New() ki.Node { return &Body{} }
+func (t *Body) New() tree.Node { return &Body{} }
 
 // SetTooltip sets the [Body.Tooltip]
 func (t *Body) SetTooltip(v string) *Body { t.Tooltip = v; return t }
@@ -57,7 +57,7 @@ var BoxType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Box", IDName: 
 
 // NewBox adds a new [Box] with the given name to the given parent:
 // Box is a simple base [Widget] that renders the standard box model.
-func NewBox(parent ki.Node, name ...string) *Box {
+func NewBox(parent tree.Node, name ...string) *Box {
 	return parent.NewChild(BoxType, name...).(*Box)
 }
 
@@ -65,7 +65,7 @@ func NewBox(parent ki.Node, name ...string) *Box {
 func (t *Box) KiType() *gti.Type { return BoxType }
 
 // New returns a new [*Box] value
-func (t *Box) New() ki.Node { return &Box{} }
+func (t *Box) New() tree.Node { return &Box{} }
 
 // SetTooltip sets the [Box.Tooltip]
 func (t *Box) SetTooltip(v string) *Box { t.Tooltip = v; return t }
@@ -77,7 +77,7 @@ var ButtonType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Button", ID
 // Button is an interactive button with text, an icon, an indicator, a shortcut,
 // and/or a menu. The standard behavior is to register a click event handler with
 // OnClick.
-func NewButton(parent ki.Node, name ...string) *Button {
+func NewButton(parent tree.Node, name ...string) *Button {
 	return parent.NewChild(ButtonType, name...).(*Button)
 }
 
@@ -85,7 +85,7 @@ func NewButton(parent ki.Node, name ...string) *Button {
 func (t *Button) KiType() *gti.Type { return ButtonType }
 
 // New returns a new [*Button] value
-func (t *Button) New() ki.Node { return &Button{} }
+func (t *Button) New() tree.Node { return &Button{} }
 
 // ButtonEmbedder is an interface that all types that embed Button satisfy
 type ButtonEmbedder interface {
@@ -94,7 +94,7 @@ type ButtonEmbedder interface {
 
 // AsButton returns the given value as a value of type Button if the type
 // of the given value embeds Button, or nil otherwise
-func AsButton(k ki.Node) *Button {
+func AsButton(k tree.Node) *Button {
 	if k == nil || k.This() == nil {
 		return nil
 	}
@@ -148,7 +148,7 @@ var CanvasType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Canvas", ID
 // NewCanvas adds a new [Canvas] with the given name to the given parent:
 // Canvas is a widget that can be arbitrarily drawn to by setting
 // its Draw function using [Canvas.SetDraw].
-func NewCanvas(parent ki.Node, name ...string) *Canvas {
+func NewCanvas(parent tree.Node, name ...string) *Canvas {
 	return parent.NewChild(CanvasType, name...).(*Canvas)
 }
 
@@ -156,7 +156,7 @@ func NewCanvas(parent ki.Node, name ...string) *Canvas {
 func (t *Canvas) KiType() *gti.Type { return CanvasType }
 
 // New returns a new [*Canvas] value
-func (t *Canvas) New() ki.Node { return &Canvas{} }
+func (t *Canvas) New() tree.Node { return &Canvas{} }
 
 // SetDraw sets the [Canvas.Draw]:
 // Draw is the function used to draw the content of the
@@ -177,7 +177,7 @@ var ChooserType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Chooser", 
 // The items can be of any type, including enum values -- they are converted
 // to strings for the display.  If the items are of type [icons.Icon], then they
 // are displayed using icons instead.
-func NewChooser(parent ki.Node, name ...string) *Chooser {
+func NewChooser(parent tree.Node, name ...string) *Chooser {
 	return parent.NewChild(ChooserType, name...).(*Chooser)
 }
 
@@ -185,7 +185,7 @@ func NewChooser(parent ki.Node, name ...string) *Chooser {
 func (t *Chooser) KiType() *gti.Type { return ChooserType }
 
 // New returns a new [*Chooser] value
-func (t *Chooser) New() ki.Node { return &Chooser{} }
+func (t *Chooser) New() tree.Node { return &Chooser{} }
 
 // SetType sets the [Chooser.Type]:
 // Type is the styling type of the chooser.
@@ -276,7 +276,7 @@ var FrameType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Frame", IDNa
 // NewFrame adds a new [Frame] with the given name to the given parent:
 // Frame is a Layout that renders a background according to the
 // background-color style setting, and optional striping for grid layouts
-func NewFrame(parent ki.Node, name ...string) *Frame {
+func NewFrame(parent tree.Node, name ...string) *Frame {
 	return parent.NewChild(FrameType, name...).(*Frame)
 }
 
@@ -284,7 +284,7 @@ func NewFrame(parent ki.Node, name ...string) *Frame {
 func (t *Frame) KiType() *gti.Type { return FrameType }
 
 // New returns a new [*Frame] value
-func (t *Frame) New() ki.Node { return &Frame{} }
+func (t *Frame) New() tree.Node { return &Frame{} }
 
 // SetTooltip sets the [Frame.Tooltip]
 func (t *Frame) SetTooltip(v string) *Frame { t.Tooltip = v; return t }
@@ -296,7 +296,7 @@ var HandleType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Handle", ID
 // Handle represents a draggable handle that can be used to
 // control the size of an element. The [Handle.Styles.Direction]
 // controls the direction in which the handle moves.
-func NewHandle(parent ki.Node, name ...string) *Handle {
+func NewHandle(parent tree.Node, name ...string) *Handle {
 	return parent.NewChild(HandleType, name...).(*Handle)
 }
 
@@ -304,7 +304,7 @@ func NewHandle(parent ki.Node, name ...string) *Handle {
 func (t *Handle) KiType() *gti.Type { return HandleType }
 
 // New returns a new [*Handle] value
-func (t *Handle) New() ki.Node { return &Handle{} }
+func (t *Handle) New() tree.Node { return &Handle{} }
 
 // SetMin sets the [Handle.Min]:
 // Min is the minimum value that the handle can go to
@@ -332,7 +332,7 @@ var IconType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Icon", IDName
 // The rendered version is cached for a given size.
 // Icons do not render a background or border independent of their SVG object.
 // The size of on Icon is determined by the [styles.Font.Size] property.
-func NewIcon(parent ki.Node, name ...string) *Icon {
+func NewIcon(parent tree.Node, name ...string) *Icon {
 	return parent.NewChild(IconType, name...).(*Icon)
 }
 
@@ -340,7 +340,7 @@ func NewIcon(parent ki.Node, name ...string) *Icon {
 func (t *Icon) KiType() *gti.Type { return IconType }
 
 // New returns a new [*Icon] value
-func (t *Icon) New() ki.Node { return &Icon{} }
+func (t *Icon) New() tree.Node { return &Icon{} }
 
 // SetTooltip sets the [Icon.Tooltip]
 func (t *Icon) SetTooltip(v string) *Icon { t.Tooltip = v; return t }
@@ -354,7 +354,7 @@ var ImageType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Image", IDNa
 // the allocated size. The default minimum requested size is the pixel
 // size in [units.Dp] units (1/160th of an inch). See [giv.ConfigImageToolbar]
 // for a toolbar with I/O buttons.
-func NewImage(parent ki.Node, name ...string) *Image {
+func NewImage(parent tree.Node, name ...string) *Image {
 	return parent.NewChild(ImageType, name...).(*Image)
 }
 
@@ -362,7 +362,7 @@ func NewImage(parent ki.Node, name ...string) *Image {
 func (t *Image) KiType() *gti.Type { return ImageType }
 
 // New returns a new [*Image] value
-func (t *Image) New() ki.Node { return &Image{} }
+func (t *Image) New() tree.Node { return &Image{} }
 
 // SetTooltip sets the [Image.Tooltip]
 func (t *Image) SetTooltip(v string) *Image { t.Tooltip = v; return t }
@@ -374,7 +374,7 @@ var LabelType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Label", IDNa
 // Label is a widget for rendering text labels. It supports full HTML styling,
 // including links. By default, labels wrap and collapse whitespace, although
 // you can change this by changing [styles.Text.WhiteSpace].
-func NewLabel(parent ki.Node, name ...string) *Label {
+func NewLabel(parent tree.Node, name ...string) *Label {
 	return parent.NewChild(LabelType, name...).(*Label)
 }
 
@@ -382,7 +382,7 @@ func NewLabel(parent ki.Node, name ...string) *Label {
 func (t *Label) KiType() *gti.Type { return LabelType }
 
 // New returns a new [*Label] value
-func (t *Label) New() ki.Node { return &Label{} }
+func (t *Label) New() tree.Node { return &Label{} }
 
 // LabelEmbedder is an interface that all types that embed Label satisfy
 type LabelEmbedder interface {
@@ -391,7 +391,7 @@ type LabelEmbedder interface {
 
 // AsLabel returns the given value as a value of type Label if the type
 // of the given value embeds Label, or nil otherwise
-func AsLabel(k ki.Node) *Label {
+func AsLabel(k tree.Node) *Label {
 	if k == nil || k.This() == nil {
 		return nil
 	}
@@ -437,7 +437,7 @@ var LayoutType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Layout", ID
 // generally be set to the desired number of columns, from which the number of rows
 // is computed; otherwise, it uses the square root of number of
 // elements.
-func NewLayout(parent ki.Node, name ...string) *Layout {
+func NewLayout(parent tree.Node, name ...string) *Layout {
 	return parent.NewChild(LayoutType, name...).(*Layout)
 }
 
@@ -445,7 +445,7 @@ func NewLayout(parent ki.Node, name ...string) *Layout {
 func (t *Layout) KiType() *gti.Type { return LayoutType }
 
 // New returns a new [*Layout] value
-func (t *Layout) New() ki.Node { return &Layout{} }
+func (t *Layout) New() tree.Node { return &Layout{} }
 
 // SetTooltip sets the [Layout.Tooltip]
 func (t *Layout) SetTooltip(v string) *Layout { t.Tooltip = v; return t }
@@ -457,7 +457,7 @@ var StretchType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Stretch", 
 // Stretch adds a stretchy element that grows to fill all
 // available space. You can set [styles.Style.Grow] to change
 // how much it grows relative to other growing elements.
-func NewStretch(parent ki.Node, name ...string) *Stretch {
+func NewStretch(parent tree.Node, name ...string) *Stretch {
 	return parent.NewChild(StretchType, name...).(*Stretch)
 }
 
@@ -465,7 +465,7 @@ func NewStretch(parent ki.Node, name ...string) *Stretch {
 func (t *Stretch) KiType() *gti.Type { return StretchType }
 
 // New returns a new [*Stretch] value
-func (t *Stretch) New() ki.Node { return &Stretch{} }
+func (t *Stretch) New() tree.Node { return &Stretch{} }
 
 // SetTooltip sets the [Stretch.Tooltip]
 func (t *Stretch) SetTooltip(v string) *Stretch { t.Tooltip = v; return t }
@@ -477,7 +477,7 @@ var SpaceType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Space", IDNa
 // Space is a fixed size blank space, with
 // a default width of 1ch and a height of 1em.
 // You can set [styles.Style.Min] to change its size.
-func NewSpace(parent ki.Node, name ...string) *Space {
+func NewSpace(parent tree.Node, name ...string) *Space {
 	return parent.NewChild(SpaceType, name...).(*Space)
 }
 
@@ -485,7 +485,7 @@ func NewSpace(parent ki.Node, name ...string) *Space {
 func (t *Space) KiType() *gti.Type { return SpaceType }
 
 // New returns a new [*Space] value
-func (t *Space) New() ki.Node { return &Space{} }
+func (t *Space) New() tree.Node { return &Space{} }
 
 // SetTooltip sets the [Space.Tooltip]
 func (t *Space) SetTooltip(v string) *Space { t.Tooltip = v; return t }
@@ -496,7 +496,7 @@ var MeterType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Meter", IDNa
 // NewMeter adds a new [Meter] with the given name to the given parent:
 // Meter is a widget that renders a current value on as a filled
 // bar/semicircle relative to a minimum and maximum potential value.
-func NewMeter(parent ki.Node, name ...string) *Meter {
+func NewMeter(parent tree.Node, name ...string) *Meter {
 	return parent.NewChild(MeterType, name...).(*Meter)
 }
 
@@ -504,7 +504,7 @@ func NewMeter(parent ki.Node, name ...string) *Meter {
 func (t *Meter) KiType() *gti.Type { return MeterType }
 
 // New returns a new [*Meter] value
-func (t *Meter) New() ki.Node { return &Meter{} }
+func (t *Meter) New() tree.Node { return &Meter{} }
 
 // SetType sets the [Meter.Type]:
 // Type is the styling type of the meter.
@@ -549,7 +549,7 @@ var ScrimType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Scrim", IDNa
 // NewScrim adds a new [Scrim] with the given name to the given parent:
 // A Scrim is just a dummy Widget used for rendering a Scrim.
 // Only used for its type. Everything else managed by RenderWin.
-func NewScrim(parent ki.Node, name ...string) *Scrim {
+func NewScrim(parent tree.Node, name ...string) *Scrim {
 	return parent.NewChild(ScrimType, name...).(*Scrim)
 }
 
@@ -557,7 +557,7 @@ func NewScrim(parent ki.Node, name ...string) *Scrim {
 func (t *Scrim) KiType() *gti.Type { return ScrimType }
 
 // New returns a new [*Scrim] value
-func (t *Scrim) New() ki.Node { return &Scrim{} }
+func (t *Scrim) New() tree.Node { return &Scrim{} }
 
 // SetTooltip sets the [Scrim.Tooltip]
 func (t *Scrim) SetTooltip(v string) *Scrim { t.Tooltip = v; return t }
@@ -569,7 +569,7 @@ var SceneType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Scene", IDNa
 func (t *Scene) KiType() *gti.Type { return SceneType }
 
 // New returns a new [*Scene] value
-func (t *Scene) New() ki.Node { return &Scene{} }
+func (t *Scene) New() tree.Node { return &Scene{} }
 
 // SceneEmbedder is an interface that all types that embed Scene satisfy
 type SceneEmbedder interface {
@@ -578,7 +578,7 @@ type SceneEmbedder interface {
 
 // AsScene returns the given value as a value of type Scene if the type
 // of the given value embeds Scene, or nil otherwise
-func AsScene(k ki.Node) *Scene {
+func AsScene(k tree.Node) *Scene {
 	if k == nil || k.This() == nil {
 		return nil
 	}
@@ -651,7 +651,7 @@ var SeparatorType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Separato
 // NewSeparator adds a new [Separator] with the given name to the given parent:
 // Separator draws a separator line. It goes in the direction
 // specified by [style.Style.Direction].
-func NewSeparator(parent ki.Node, name ...string) *Separator {
+func NewSeparator(parent tree.Node, name ...string) *Separator {
 	return parent.NewChild(SeparatorType, name...).(*Separator)
 }
 
@@ -659,7 +659,7 @@ func NewSeparator(parent ki.Node, name ...string) *Separator {
 func (t *Separator) KiType() *gti.Type { return SeparatorType }
 
 // New returns a new [*Separator] value
-func (t *Separator) New() ki.Node { return &Separator{} }
+func (t *Separator) New() tree.Node { return &Separator{} }
 
 // SetTooltip sets the [Separator.Tooltip]
 func (t *Separator) SetTooltip(v string) *Separator { t.Tooltip = v; return t }
@@ -694,7 +694,7 @@ var SliderType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Slider", ID
 // The Content size (inside the margin and padding) determines the outer bounds of
 // the rendered area.
 // The [styles.Style.Direction] determines the direction in which the slider slides.
-func NewSlider(parent ki.Node, name ...string) *Slider {
+func NewSlider(parent tree.Node, name ...string) *Slider {
 	return parent.NewChild(SliderType, name...).(*Slider)
 }
 
@@ -702,7 +702,7 @@ func NewSlider(parent ki.Node, name ...string) *Slider {
 func (t *Slider) KiType() *gti.Type { return SliderType }
 
 // New returns a new [*Slider] value
-func (t *Slider) New() ki.Node { return &Slider{} }
+func (t *Slider) New() tree.Node { return &Slider{} }
 
 // SliderEmbedder is an interface that all types that embed Slider satisfy
 type SliderEmbedder interface {
@@ -711,7 +711,7 @@ type SliderEmbedder interface {
 
 // AsSlider returns the given value as a value of type Slider if the type
 // of the given value embeds Slider, or nil otherwise
-func AsSlider(k ki.Node) *Slider {
+func AsSlider(k tree.Node) *Slider {
 	if k == nil || k.This() == nil {
 		return nil
 	}
@@ -812,7 +812,7 @@ var SpinnerType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Spinner", 
 // NewSpinner adds a new [Spinner] with the given name to the given parent:
 // Spinner combines a TextField with up / down buttons for incrementing /
 // decrementing values -- all configured within the Parts of the widget
-func NewSpinner(parent ki.Node, name ...string) *Spinner {
+func NewSpinner(parent tree.Node, name ...string) *Spinner {
 	return parent.NewChild(SpinnerType, name...).(*Spinner)
 }
 
@@ -820,7 +820,7 @@ func NewSpinner(parent ki.Node, name ...string) *Spinner {
 func (t *Spinner) KiType() *gti.Type { return SpinnerType }
 
 // New returns a new [*Spinner] value
-func (t *Spinner) New() ki.Node { return &Spinner{} }
+func (t *Spinner) New() tree.Node { return &Spinner{} }
 
 // SpinnerEmbedder is an interface that all types that embed Spinner satisfy
 type SpinnerEmbedder interface {
@@ -829,7 +829,7 @@ type SpinnerEmbedder interface {
 
 // AsSpinner returns the given value as a value of type Spinner if the type
 // of the given value embeds Spinner, or nil otherwise
-func AsSpinner(k ki.Node) *Spinner {
+func AsSpinner(k tree.Node) *Spinner {
 	if k == nil || k.This() == nil {
 		return nil
 	}
@@ -924,7 +924,7 @@ var SplitsType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Splits", ID
 // Splits allocates a certain proportion of its space to each of its children
 // along [styles.Style.Direction]. It adds [Handle] widgets to its parts that
 // allow the user to customize the amount of space allocated to each child.
-func NewSplits(parent ki.Node, name ...string) *Splits {
+func NewSplits(parent tree.Node, name ...string) *Splits {
 	return parent.NewChild(SplitsType, name...).(*Splits)
 }
 
@@ -932,7 +932,7 @@ func NewSplits(parent ki.Node, name ...string) *Splits {
 func (t *Splits) KiType() *gti.Type { return SplitsType }
 
 // New returns a new [*Splits] value
-func (t *Splits) New() ki.Node { return &Splits{} }
+func (t *Splits) New() tree.Node { return &Splits{} }
 
 // SplitsEmbedder is an interface that all types that embed Splits satisfy
 type SplitsEmbedder interface {
@@ -941,7 +941,7 @@ type SplitsEmbedder interface {
 
 // AsSplits returns the given value as a value of type Splits if the type
 // of the given value embeds Splits, or nil otherwise
-func AsSplits(k ki.Node) *Splits {
+func AsSplits(k tree.Node) *Splits {
 	if k == nil || k.This() == nil {
 		return nil
 	}
@@ -1063,7 +1063,7 @@ var SVGType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.SVG", IDName: 
 // If it is not [states.ReadOnly], the user can pan and zoom the display.
 // By default, it is [states.ReadOnly]. See [giv.ConfigSVGToolbar] for a
 // toolbar with panning, selecting, and I/O buttons.
-func NewSVG(parent ki.Node, name ...string) *SVG {
+func NewSVG(parent tree.Node, name ...string) *SVG {
 	return parent.NewChild(SVGType, name...).(*SVG)
 }
 
@@ -1071,7 +1071,7 @@ func NewSVG(parent ki.Node, name ...string) *SVG {
 func (t *SVG) KiType() *gti.Type { return SVGType }
 
 // New returns a new [*SVG] value
-func (t *SVG) New() ki.Node { return &SVG{} }
+func (t *SVG) New() tree.Node { return &SVG{} }
 
 // SetTooltip sets the [SVG.Tooltip]
 func (t *SVG) SetTooltip(v string) *SVG { t.Tooltip = v; return t }
@@ -1082,7 +1082,7 @@ var SwitchType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Switch", ID
 // NewSwitch adds a new [Switch] with the given name to the given parent:
 // Switch is a widget that can toggle between an on and off state.
 // It can be displayed as a switch, checkbox, or radio button.
-func NewSwitch(parent ki.Node, name ...string) *Switch {
+func NewSwitch(parent tree.Node, name ...string) *Switch {
 	return parent.NewChild(SwitchType, name...).(*Switch)
 }
 
@@ -1090,7 +1090,7 @@ func NewSwitch(parent ki.Node, name ...string) *Switch {
 func (t *Switch) KiType() *gti.Type { return SwitchType }
 
 // New returns a new [*Switch] value
-func (t *Switch) New() ki.Node { return &Switch{} }
+func (t *Switch) New() tree.Node { return &Switch{} }
 
 // SetText sets the [Switch.Text]:
 // the label text for the switch
@@ -1119,7 +1119,7 @@ var SwitchesType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Switches"
 // It can optionally enforce mutual exclusivity (i.e., Radio Buttons).
 // The buttons are all in the Parts of the widget and the Parts layout
 // determines how they are displayed.
-func NewSwitches(parent ki.Node, name ...string) *Switches {
+func NewSwitches(parent tree.Node, name ...string) *Switches {
 	return parent.NewChild(SwitchesType, name...).(*Switches)
 }
 
@@ -1127,7 +1127,7 @@ func NewSwitches(parent ki.Node, name ...string) *Switches {
 func (t *Switches) KiType() *gti.Type { return SwitchesType }
 
 // New returns a new [*Switches] value
-func (t *Switches) New() ki.Node { return &Switches{} }
+func (t *Switches) New() tree.Node { return &Switches{} }
 
 // SwitchesEmbedder is an interface that all types that embed Switches satisfy
 type SwitchesEmbedder interface {
@@ -1136,7 +1136,7 @@ type SwitchesEmbedder interface {
 
 // AsSwitches returns the given value as a value of type Switches if the type
 // of the given value embeds Switches, or nil otherwise
-func AsSwitches(k ki.Node) *Switches {
+func AsSwitches(k tree.Node) *Switches {
 	if k == nil || k.This() == nil {
 		return nil
 	}
@@ -1175,7 +1175,7 @@ var TabsType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Tabs", IDName
 // needed) and a Stacked Frame that actually contains all the children, and
 // provides scrollbars as needed to any content within.  Typically should have
 // max stretch and a set preferred size, so it expands.
-func NewTabs(parent ki.Node, name ...string) *Tabs {
+func NewTabs(parent tree.Node, name ...string) *Tabs {
 	return parent.NewChild(TabsType, name...).(*Tabs)
 }
 
@@ -1183,7 +1183,7 @@ func NewTabs(parent ki.Node, name ...string) *Tabs {
 func (t *Tabs) KiType() *gti.Type { return TabsType }
 
 // New returns a new [*Tabs] value
-func (t *Tabs) New() ki.Node { return &Tabs{} }
+func (t *Tabs) New() tree.Node { return &Tabs{} }
 
 // TabsEmbedder is an interface that all types that embed Tabs satisfy
 type TabsEmbedder interface {
@@ -1192,7 +1192,7 @@ type TabsEmbedder interface {
 
 // AsTabs returns the given value as a value of type Tabs if the type
 // of the given value embeds Tabs, or nil otherwise
-func AsTabs(k ki.Node) *Tabs {
+func AsTabs(k tree.Node) *Tabs {
 	if k == nil || k.This() == nil {
 		return nil
 	}
@@ -1238,7 +1238,7 @@ var TabType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Tab", IDName: 
 func (t *Tab) KiType() *gti.Type { return TabType }
 
 // New returns a new [*Tab] value
-func (t *Tab) New() ki.Node { return &Tab{} }
+func (t *Tab) New() tree.Node { return &Tab{} }
 
 // SetType sets the [Tab.Type]:
 // Type is the styling type of the tab. This property
@@ -1283,7 +1283,7 @@ var TextFieldType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.TextFiel
 // force everything to be on a single line.
 // With multi-line wrapped text, the text is still treated as a contiguous
 // wrapped text.
-func NewTextField(parent ki.Node, name ...string) *TextField {
+func NewTextField(parent tree.Node, name ...string) *TextField {
 	return parent.NewChild(TextFieldType, name...).(*TextField)
 }
 
@@ -1291,7 +1291,7 @@ func NewTextField(parent ki.Node, name ...string) *TextField {
 func (t *TextField) KiType() *gti.Type { return TextFieldType }
 
 // New returns a new [*TextField] value
-func (t *TextField) New() ki.Node { return &TextField{} }
+func (t *TextField) New() tree.Node { return &TextField{} }
 
 // TextFieldEmbedder is an interface that all types that embed TextField satisfy
 type TextFieldEmbedder interface {
@@ -1300,7 +1300,7 @@ type TextFieldEmbedder interface {
 
 // AsTextField returns the given value as a value of type TextField if the type
 // of the given value embeds TextField, or nil otherwise
-func AsTextField(k ki.Node) *TextField {
+func AsTextField(k tree.Node) *TextField {
 	if k == nil || k.This() == nil {
 		return nil
 	}
@@ -1399,7 +1399,7 @@ var ToolbarType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Toolbar", 
 // See [Widget.ConfigToolbar] for the standard toolbar config method for
 // any given widget, and [Scene.AppBars] for [ToolbarFuncs] for [Scene]
 // elements who should be represented in the main AppBar (e.g., TopAppBar).
-func NewToolbar(parent ki.Node, name ...string) *Toolbar {
+func NewToolbar(parent tree.Node, name ...string) *Toolbar {
 	return parent.NewChild(ToolbarType, name...).(*Toolbar)
 }
 
@@ -1407,7 +1407,7 @@ func NewToolbar(parent ki.Node, name ...string) *Toolbar {
 func (t *Toolbar) KiType() *gti.Type { return ToolbarType }
 
 // New returns a new [*Toolbar] value
-func (t *Toolbar) New() ki.Node { return &Toolbar{} }
+func (t *Toolbar) New() tree.Node { return &Toolbar{} }
 
 // ToolbarEmbedder is an interface that all types that embed Toolbar satisfy
 type ToolbarEmbedder interface {
@@ -1416,7 +1416,7 @@ type ToolbarEmbedder interface {
 
 // AsToolbar returns the given value as a value of type Toolbar if the type
 // of the given value embeds Toolbar, or nil otherwise
-func AsToolbar(k ki.Node) *Toolbar {
+func AsToolbar(k tree.Node) *Toolbar {
 	if k == nil || k.This() == nil {
 		return nil
 	}
@@ -1448,7 +1448,7 @@ var BasicBarType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.BasicBar"
 // BasicBar is just a styled Frame layout for holding buttons
 // and other widgets.  Use this when the more advanced features
 // of the Toolbar are not needed.
-func NewBasicBar(parent ki.Node, name ...string) *BasicBar {
+func NewBasicBar(parent tree.Node, name ...string) *BasicBar {
 	return parent.NewChild(BasicBarType, name...).(*BasicBar)
 }
 
@@ -1456,7 +1456,7 @@ func NewBasicBar(parent ki.Node, name ...string) *BasicBar {
 func (t *BasicBar) KiType() *gti.Type { return BasicBarType }
 
 // New returns a new [*BasicBar] value
-func (t *BasicBar) New() ki.Node { return &BasicBar{} }
+func (t *BasicBar) New() tree.Node { return &BasicBar{} }
 
 // SetTooltip sets the [BasicBar.Tooltip]
 func (t *BasicBar) SetTooltip(v string) *BasicBar { t.Tooltip = v; return t }
@@ -1468,7 +1468,7 @@ var WidgetBaseType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.WidgetB
 func (t *WidgetBase) KiType() *gti.Type { return WidgetBaseType }
 
 // New returns a new [*WidgetBase] value
-func (t *WidgetBase) New() ki.Node { return &WidgetBase{} }
+func (t *WidgetBase) New() tree.Node { return &WidgetBase{} }
 
 // SetTooltip sets the [WidgetBase.Tooltip]:
 // Tooltip is the text for the tooltip for this widget,

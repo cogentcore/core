@@ -24,10 +24,10 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/grows/images"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 	"golang.org/x/net/html/charset"
 )
 
@@ -747,7 +747,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				if curPar == sv.Root.This() {
 					break
 				}
-				curSvgk := curPar.ParentByType(SVGNodeType, ki.NoEmbeds)
+				curSvgk := curPar.ParentByType(SVGNodeType, tree.NoEmbeds)
 				if curSvgk != nil {
 					curSvg = curSvgk.(*SVGNode)
 				}
@@ -835,12 +835,12 @@ var InkscapeProps = map[string]bool{
 // SVGNodeMarshalXML encodes just the given node under SVG to XML.
 // returns name of node, for end tag -- if empty, then children will not be
 // output.
-func SVGNodeMarshalXML(itm ki.Node, enc *XMLEncoder, setName string) string {
+func SVGNodeMarshalXML(itm tree.Node, enc *XMLEncoder, setName string) string {
 	if itm == nil || itm.This() == nil {
 		return ""
 	}
 	se := xml.StartElement{}
-	var props ki.Props
+	var props tree.Props
 	if itm.Properties() != nil {
 		props = *itm.Properties()
 	}

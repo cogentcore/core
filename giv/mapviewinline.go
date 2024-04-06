@@ -10,9 +10,9 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 )
 
 // MapViewInline represents a map as a single line widget,
@@ -109,7 +109,7 @@ func (mv *MapViewInline) Config() {
 		mv.ConfigSize = 0
 		return
 	}
-	config := ki.Config{}
+	config := tree.Config{}
 	mv.Keys = make([]Value, 0)
 	mv.Values = make([]Value, 0)
 

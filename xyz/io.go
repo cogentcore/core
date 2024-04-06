@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/glop/dirs"
-	"cogentcore.org/core/ki"
+	"cogentcore.org/core/tree"
 )
 
 // Decoder parses 3D object / scene file(s) and imports into a Group or Scene.
@@ -157,7 +157,7 @@ func (sc *Scene) OpenObjFS(fsys fs.FS, fname string, gp *Group) error {
 // .obj = Wavefront OBJ format, including associated materials (.mtl) which
 //
 //	must have same name as .obj, or a default material is used.
-func (sc *Scene) OpenNewObj(fname string, parent ki.Node) (*Group, error) {
+func (sc *Scene) OpenNewObj(fname string, parent tree.Node) (*Group, error) {
 	dfs, fnm, err := dirs.DirFS(fname)
 	if err != nil {
 		return nil, err
@@ -171,7 +171,7 @@ func (sc *Scene) OpenNewObj(fname string, parent ki.Node) (*Group, error) {
 // .obj = Wavefront OBJ format, including associated materials (.mtl) which
 //
 //	must have same name as .obj, or a default material is used.
-func (sc *Scene) OpenNewObjFS(fsys fs.FS, fname string, parent ki.Node) (*Group, error) {
+func (sc *Scene) OpenNewObjFS(fsys fs.FS, fname string, parent tree.Node) (*Group, error) {
 	dec, err := DecodeFileFS(fsys, fname)
 	if err != nil {
 		return nil, err

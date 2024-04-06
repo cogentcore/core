@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package ki_test
+package tree_test
 
 import (
 	"bytes"
@@ -11,8 +11,8 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"cogentcore.org/core/grows/jsons"
-	"cogentcore.org/core/ki"
-	"cogentcore.org/core/ki/testdata"
+	"cogentcore.org/core/tree"
+	"cogentcore.org/core/tree/testdata"
 )
 
 func TestNodeJSON(t *testing.T) {
@@ -44,12 +44,12 @@ func TestNodeJSON(t *testing.T) {
 	}
 
 	var bufn bytes.Buffer
-	assert.NoError(t, ki.WriteNewJSON(parent.This(), &bufn))
+	assert.NoError(t, tree.WriteNewJSON(parent.This(), &bufn))
 	b = bufn.Bytes()
-	nwnd, err := ki.ReadNewJSON(bytes.NewReader(b))
+	nwnd, err := tree.ReadNewJSON(bytes.NewReader(b))
 	if assert.NoError(t, err) {
 		var buf2 bytes.Buffer
-		err = ki.WriteNewJSON(nwnd, &buf2)
+		err = tree.WriteNewJSON(nwnd, &buf2)
 		if err != nil {
 			t.Error(err)
 		}

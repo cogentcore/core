@@ -14,9 +14,9 @@ import (
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 )
 
@@ -334,7 +334,7 @@ func (bt *Button) HandleEvents() {
 }
 
 func (bt *Button) Config() {
-	config := ki.Config{}
+	config := tree.Config{}
 
 	// we check if the icons are unset, not if they are nil, so
 	// that people can manually set it to [icons.None]

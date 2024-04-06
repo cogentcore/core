@@ -11,8 +11,8 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/tree"
 )
 
 var (
@@ -24,20 +24,20 @@ var (
 // have their ScBBox within given 2D scene point (excludes starting node).
 // This is a good first-pass step for node-level
 // event handling based on 2D mouse events.
-func NodesUnderPoint(n ki.Node, pt image.Point) []Node {
+func NodesUnderPoint(n tree.Node, pt image.Point) []Node {
 	var ns []Node
-	n.WalkPre(func(k ki.Node) bool {
+	n.WalkPre(func(k tree.Node) bool {
 		if k == n.This() {
-			return ki.Continue
+			return tree.Continue
 		}
 		ni, nb := AsNode(k)
 		if !ni.IsVisible() {
-			return ki.Break
+			return tree.Break
 		}
 		if pt.In(nb.ScBBox) {
 			ns = append(ns, ni)
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	return ns
 }

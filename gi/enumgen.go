@@ -4,7 +4,7 @@ package gi
 
 import (
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/ki"
+	"cogentcore.org/core/tree"
 )
 
 var _ButtonTypesValues = []ButtonTypes{0, 1, 2, 3, 4, 5, 6}
@@ -149,14 +149,14 @@ var _WidgetFlagsMap = map[WidgetFlags]string{1: `NeedsRender`}
 
 // String returns the string representation of this WidgetFlags value.
 func (i WidgetFlags) String() string {
-	return enums.BitFlagStringExtended(i, _WidgetFlagsValues, ki.FlagsValues())
+	return enums.BitFlagStringExtended(i, _WidgetFlagsValues, tree.FlagsValues())
 }
 
 // BitIndexString returns the string representation of this WidgetFlags value
 // if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
 func (i WidgetFlags) BitIndexString() string {
-	return enums.BitIndexStringExtended[WidgetFlags, ki.Flags](i, _WidgetFlagsMap)
+	return enums.BitIndexStringExtended[WidgetFlags, tree.Flags](i, _WidgetFlagsMap)
 }
 
 // SetString sets the WidgetFlags value from its string representation,
@@ -167,7 +167,7 @@ func (i *WidgetFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s
 // while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *WidgetFlags) SetStringOr(s string) error {
-	return enums.SetStringOrExtended(i, (*ki.Flags)(i), s, _WidgetFlagsValueMap)
+	return enums.SetStringOrExtended(i, (*tree.Flags)(i), s, _WidgetFlagsValueMap)
 }
 
 // Int64 returns the WidgetFlags value as an int64.
@@ -178,17 +178,17 @@ func (i *WidgetFlags) SetInt64(in int64) { *i = WidgetFlags(in) }
 
 // Desc returns the description of the WidgetFlags value.
 func (i WidgetFlags) Desc() string {
-	return enums.DescExtended[WidgetFlags, ki.Flags](i, _WidgetFlagsDescMap)
+	return enums.DescExtended[WidgetFlags, tree.Flags](i, _WidgetFlagsDescMap)
 }
 
 // WidgetFlagsValues returns all possible values for the type WidgetFlags.
 func WidgetFlagsValues() []WidgetFlags {
-	return enums.ValuesGlobalExtended(_WidgetFlagsValues, ki.FlagsValues())
+	return enums.ValuesGlobalExtended(_WidgetFlagsValues, tree.FlagsValues())
 }
 
 // Values returns all possible values for the type WidgetFlags.
 func (i WidgetFlags) Values() []enums.Enum {
-	return enums.ValuesExtended(_WidgetFlagsValues, ki.FlagsValues())
+	return enums.ValuesExtended(_WidgetFlagsValues, tree.FlagsValues())
 }
 
 // HasFlag returns whether these bit flags have the given bit flag set.

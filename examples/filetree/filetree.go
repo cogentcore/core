@@ -19,9 +19,9 @@ import (
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 )
 
@@ -255,8 +255,8 @@ func (fb *FileBrowse) ViewFile(fnm string) bool {
 
 // StandardFrameConfig returns a Config for configuring a standard Frame
 // -- can modify as desired before calling ConfigChildren on Frame using this
-func (fb *FileBrowse) StandardFrameConfig() ki.Config {
-	config := ki.Config{}
+func (fb *FileBrowse) StandardFrameConfig() tree.Config {
+	config := tree.Config{}
 	config.Add(gi.LabelType, "title")
 	config.Add(gi.SplitsType, "splits")
 	return config
@@ -326,8 +326,8 @@ func (fb *FileBrowse) ConfigToolbar(tb *gi.Toolbar) { //gti:add
 }
 
 // SplitsConfig returns a Config for configuring the Splits
-func (fb *FileBrowse) SplitsConfig() ki.Config {
-	config := ki.Config{}
+func (fb *FileBrowse) SplitsConfig() tree.Config {
+	config := tree.Config{}
 	config.Add(gi.FrameType, "filetree-fr")
 	for i := 0; i < fb.NTextEditors; i++ {
 		config.Add(texteditor.EditorType, fmt.Sprintf("texteditor-%v", i))

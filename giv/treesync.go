@@ -14,10 +14,10 @@ import (
 	"cogentcore.org/core/fi"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/gti"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/states"
+	"cogentcore.org/core/tree"
 )
 
 // note: see this file has all the SyncNode specific
@@ -25,10 +25,10 @@ import (
 
 // SyncTree sets the root view to the root of the sync source tree node
 // for this TreeView, and syncs the rest of the tree to match.
-// It calls [ki.UniquifyNamesAll] on the source tree to ensure
+// It calls [tree.UniquifyNamesAll] on the source tree to ensure
 // that node names are unique, which is essential for proper viewing.
-func (tv *TreeView) SyncTree(n ki.Node) *TreeView {
-	ki.UniquifyNamesAll(n)
+func (tv *TreeView) SyncTree(n tree.Node) *TreeView {
+	tree.UniquifyNamesAll(n)
 	if tv.SyncNode != n {
 		tv.SyncNode = n
 	}
@@ -43,7 +43,7 @@ func (tv *TreeView) SyncTree(n ki.Node) *TreeView {
 // via SyncToSrc during tree updating.
 // It uses ki Config mechanism to perform minimal updates to
 // remain in sync.
-func (tv *TreeView) SetSyncNode(sn ki.Node, tvIndex *int, init bool, depth int) {
+func (tv *TreeView) SetSyncNode(sn tree.Node, tvIndex *int, init bool, depth int) {
 	if tv.SyncNode != sn {
 		tv.SyncNode = sn
 	}
@@ -77,7 +77,7 @@ func (tv *TreeView) SyncToSrc(tvIndex *int, init bool, depth int) {
 	// }
 	vcprop := "view-closed"
 	skids := *sk.Children()
-	tnl := make(ki.Config, 0, len(skids))
+	tnl := make(tree.Config, 0, len(skids))
 	typ := tv.This().KiType()
 	for _, skid := range skids {
 		tnl.Add(typ, "tv_"+skid.Name())
@@ -91,7 +91,7 @@ func (tv *TreeView) SyncToSrc(tvIndex *int, init bool, depth int) {
 		vk := AsTreeView(tv.Kids[idx])
 		vk.SetSyncNode(skid, tvIndex, init, depth+1)
 		if mods {
-			if vcp, ok := skid.PropInherit(vcprop, ki.NoInherit); ok {
+			if vcp, ok := skid.PropInherit(vcprop, tree.NoInherit); ok {
 				if vc, err := laser.ToBool(vcp); vc && err != nil {
 					vk.SetClosed(true)
 				}
@@ -145,8 +145,8 @@ func (tv *TreeView) UpdateReadOnly() bool {
 
 // SelectedSyncNodes returns a slice of the currently-selected
 // sync source nodes in the entire tree view
-func (tv *TreeView) SelectedSyncNodes() ki.Slice {
-	var sn ki.Slice
+func (tv *TreeView) SelectedSyncNodes() tree.Slice {
+	var sn tree.Slice
 	sl := tv.SelectedViews()
 	for _, v := range sl {
 		sn = append(sn, v.AsTreeView().SyncNode)
@@ -156,17 +156,17 @@ func (tv *TreeView) SelectedSyncNodes() ki.Slice {
 
 // FindSyncNode finds TreeView node for given source node,
 // or nil if not found
-func (tv *TreeView) FindSyncNode(kn ki.Node) *TreeView {
+func (tv *TreeView) FindSyncNode(kn tree.Node) *TreeView {
 	var ttv *TreeView
 	tv.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
 		tvki := AsTreeView(wi)
 		if tvki != nil {
 			if tvki.SyncNode == kn {
 				ttv = tvki
-				return ki.Break
+				return tree.Break
 			}
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	return ttv
 }
@@ -208,7 +208,7 @@ func (tv *TreeView) AddTreeNodes(rel, myidx int, typ *gti.Type, n int) {
 
 func (tv *TreeView) AddSyncNodes(rel, myidx int, typ *gti.Type, n int) {
 	parent := tv.SyncNode
-	var ski ki.Node
+	var ski tree.Node
 	for i := 0; i < n; i++ {
 		nm := fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i)
 		nki := parent.InsertNewChild(typ, myidx+i, nm)
@@ -246,7 +246,7 @@ func (tv *TreeView) InsertAt(rel int, actNm string) {
 	d := gi.NewBody().AddTitle(actNm).AddText("Number and type of items to insert:")
 	nd := &gi.NewItemsData{Number: 1, Type: typ}
 	sg := NewStructView(d).SetStruct(nd).StructGrid()
-	ki.ChildByType[*gi.Chooser](sg, ki.Embeds).SetTypes(gti.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
+	tree.ChildByType[*gi.Chooser](sg, tree.Embeds).SetTypes(gti.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
 	d.AddBottomBar(func(parent gi.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).OnClick(func(e events.Event) {
@@ -273,7 +273,7 @@ func (tv *TreeView) AddChildNode() { //gti:add
 	d := gi.NewBody().AddTitle(ttl).AddText("Number and type of items to insert:")
 	nd := &gi.NewItemsData{Number: 1, Type: typ}
 	sg := NewStructView(d).SetStruct(nd).StructGrid()
-	ki.ChildByType[*gi.Chooser](sg, ki.Embeds).SetTypes(gti.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
+	tree.ChildByType[*gi.Chooser](sg, tree.Embeds).SetTypes(gti.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
 	d.AddBottomBar(func(parent gi.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).OnClick(func(e events.Event) {
@@ -398,7 +398,7 @@ func (tv *TreeView) MimeDataSync(md *mimedata.Mimes) {
 	src := tv.SyncNode
 	*md = append(*md, mimedata.NewTextData(src.PathFrom(sroot)))
 	var buf bytes.Buffer
-	err := ki.WriteNewJSON(src, &buf)
+	err := tree.WriteNewJSON(src, &buf)
 	if err == nil {
 		*md = append(*md, &mimedata.Data{Type: fi.DataJson, Data: buf.Bytes()})
 	} else {
@@ -409,13 +409,13 @@ func (tv *TreeView) MimeDataSync(md *mimedata.Mimes) {
 // SyncNodesFromMimeData creates a slice of Ki node(s)
 // from given mime data and also a corresponding slice
 // of original paths.
-func (tv *TreeView) SyncNodesFromMimeData(md mimedata.Mimes) (ki.Slice, []string) {
+func (tv *TreeView) SyncNodesFromMimeData(md mimedata.Mimes) (tree.Slice, []string) {
 	ni := len(md) / 2
-	sl := make(ki.Slice, 0, ni)
+	sl := make(tree.Slice, 0, ni)
 	pl := make([]string, 0, ni)
 	for _, d := range md {
 		if d.Type == fi.DataJson {
-			nki, err := ki.ReadNewJSON(bytes.NewReader(d.Data))
+			nki, err := tree.ReadNewJSON(bytes.NewReader(d.Data))
 			if err == nil {
 				sl = append(sl, nki)
 			} else {
@@ -454,7 +454,7 @@ func (tv *TreeView) PasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int,
 	myidx += rel
 	sroot := tv.RootView.SyncNode
 	sz := len(sl)
-	var selKi ki.Node
+	var selKi tree.Node
 	for i, ns := range sl {
 		orgpath := pl[i]
 		if mod != events.DropMove {

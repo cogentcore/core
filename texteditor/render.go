@@ -14,12 +14,12 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/gi"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor/textbuf"
+	"cogentcore.org/core/tree"
 )
 
 // Rendering Notes: all rendering is done in Render call.
@@ -65,7 +65,7 @@ func (ed *Editor) RenderWidget() {
 }
 
 // TextStyleProps returns the styling properties for text based on HiStyle Markup
-func (ed *Editor) TextStyleProps() ki.Props {
+func (ed *Editor) TextStyleProps() tree.Props {
 	if ed.Buffer == nil || !ed.Buffer.Hi.HasHi() {
 		return nil
 	}

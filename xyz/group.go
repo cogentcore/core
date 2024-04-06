@@ -7,8 +7,8 @@ package xyz
 import (
 	"sort"
 
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/tree"
 )
 
 // Group collects individual elements in a scene but does not have a Mesh or Material of
@@ -81,21 +81,21 @@ type SolidPoint struct {
 // from closest to furthest.
 func (gp *Group) RaySolidIntersections(ray mat32.Ray) []*SolidPoint {
 	var sp []*SolidPoint
-	gp.WalkPre(func(k ki.Node) bool {
+	gp.WalkPre(func(k tree.Node) bool {
 		ni, nb := AsNode(k)
 		if ni == nil {
-			return ki.Break // going into a different type of thing, bail
+			return tree.Break // going into a different type of thing, bail
 		}
 		pt, has := ray.IntersectBox(nb.WorldBBox.BBox)
 		if !has {
-			return ki.Break
+			return tree.Break
 		}
 		if !ni.IsSolid() {
-			return ki.Continue
+			return tree.Continue
 		}
 		sd := ni.AsSolid()
 		sp = append(sp, &SolidPoint{sd, pt})
-		return ki.Break
+		return tree.Break
 	})
 
 	sort.Slice(sp, func(i, j int) bool {

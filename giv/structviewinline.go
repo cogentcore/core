@@ -12,9 +12,9 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 )
 
 // StructViewInline represents a struct as a single line widget,
@@ -67,7 +67,7 @@ func (sv *StructViewInline) Config() {
 	if laser.AnyIsNil(sv.Struct) {
 		return
 	}
-	config := ki.Config{}
+	config := tree.Config{}
 	// note: widget re-use does not work due to all the closures
 	sv.DeleteChildren()
 	sv.FieldViews = make([]Value, 0)

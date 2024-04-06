@@ -12,8 +12,8 @@ import (
 	"strings"
 	"unicode"
 
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
+	"cogentcore.org/core/tree"
 )
 
 /////////////////////////////////////////////////////////////////////////////
@@ -68,9 +68,9 @@ func NameID(nm string, id int) string {
 // It automatically renames any that are not unique or empty.
 func (sv *SVG) GatherIDs() {
 	sv.UniqueIds = make(map[int]struct{})
-	sv.Root.WalkPre(func(k ki.Node) bool {
+	sv.Root.WalkPre(func(k tree.Node) bool {
 		sv.NodeEnsureUniqueId(k.(Node))
-		return ki.Continue
+		return tree.Continue
 	})
 }
 
@@ -153,12 +153,12 @@ func (sv *SVG) FindNamedElement(name string) Node {
 	if def != nil {
 		return def
 	}
-	sv.Root.WalkPre(func(k ki.Node) bool {
+	sv.Root.WalkPre(func(k tree.Node) bool {
 		if k.Name() == name {
 			def = k.This().(Node)
-			return ki.Break
+			return tree.Break
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	if def != nil {
 		return def
@@ -224,7 +224,7 @@ func NodePropURL(gi Node, prop string) string {
 
 const SVGRefCountKey = "SVGRefCount"
 
-func IncRefCount(k ki.Node) {
+func IncRefCount(k tree.Node) {
 	rc := k.Prop(SVGRefCountKey).(int)
 	rc++
 	k.SetProp(SVGRefCountKey, rc)
@@ -239,7 +239,7 @@ func (sv *SVG) RemoveOrphanedDefs() bool {
 	for _, k := range sv.Defs.Kids {
 		k.SetProp(refkey, 0)
 	}
-	sv.Root.WalkPre(func(k ki.Node) bool {
+	sv.Root.WalkPre(func(k tree.Node) bool {
 		pr := k.Properties()
 		for _, v := range *pr {
 			ps := laser.ToString(v)
@@ -264,7 +264,7 @@ func (sv *SVG) RemoveOrphanedDefs() bool {
 				}
 			}
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	sz := len(sv.Defs.Kids)
 	del := false

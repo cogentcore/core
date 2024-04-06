@@ -16,11 +16,11 @@ import (
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/gti"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 )
 
 // NewValue makes and returns a new [Value] from the given value and creates
@@ -31,7 +31,7 @@ import (
 // NewValue is not appropriate for internal code configuring
 // non-solo values (for example, in StructView), but it should be fine
 // for end-user code.
-func NewValue(parent ki.Node, val any, tags ...string) Value {
+func NewValue(parent tree.Node, val any, tags ...string) Value {
 	t := ""
 	if len(tags) > 0 {
 		t = tags[0]

@@ -6,18 +6,18 @@ package testdata
 
 //go:generate core generate
 
-import "cogentcore.org/core/ki"
+import "cogentcore.org/core/tree"
 
 type TestNode struct {
-	ki.NodeBase
+	tree.NodeBase
 }
 
-// NodeEmbed embeds ki.Node and adds a couple of fields.
+// NodeEmbed embeds tree.Node and adds a couple of fields.
 // Also has a directive processed by gti
 //
 //direct:value
 type NodeEmbed struct {
-	ki.NodeBase
+	tree.NodeBase
 	Mbr1 string
 	Mbr2 int
 }
@@ -27,7 +27,7 @@ type NodeField struct {
 	Field1 NodeEmbed
 }
 
-func (nf *NodeField) FieldByName(field string) (ki.Node, error) {
+func (nf *NodeField) FieldByName(field string) (tree.Node, error) {
 	if field == "Field1" {
 		return &nf.Field1, nil
 	}
@@ -39,7 +39,7 @@ type NodeField2 struct {
 	Field2 NodeEmbed
 }
 
-func (nf *NodeField2) FieldByName(field string) (ki.Node, error) {
+func (nf *NodeField2) FieldByName(field string) (tree.Node, error) {
 	if field == "Field2" {
 		return &nf.Field2, nil
 	}

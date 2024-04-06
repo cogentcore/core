@@ -6,7 +6,7 @@ import (
 	"image/color"
 
 	"cogentcore.org/core/gti"
-	"cogentcore.org/core/ki"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/mat32"
 )
 
@@ -20,7 +20,7 @@ var GroupType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyz.Group", IDN
 // NewGroup adds a new [Group] with the given name to the given parent:
 // Group collects individual elements in a scene but does not have a Mesh or Material of
 // its own.  It does have a transform that applies to all nodes under it.
-func NewGroup(parent ki.Node, name ...string) *Group {
+func NewGroup(parent tree.Node, name ...string) *Group {
 	return parent.NewChild(GroupType, name...).(*Group)
 }
 
@@ -28,7 +28,7 @@ func NewGroup(parent ki.Node, name ...string) *Group {
 func (t *Group) KiType() *gti.Type { return GroupType }
 
 // New returns a new [*Group] value
-func (t *Group) New() ki.Node { return &Group{} }
+func (t *Group) New() tree.Node { return &Group{} }
 
 var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyz.SolidPoint", IDName: "solid-point", Doc: "SolidPoint contains a Solid and a Point on that solid", Fields: []gti.Field{{Name: "Solid"}, {Name: "Point"}}})
 
@@ -115,7 +115,7 @@ var NodeBaseType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyz.NodeBase
 // NodeBase is the basic 3D scenegraph node, which has the full transform information
 // relative to parent, and computed bounding boxes, etc.
 // There are only two different kinds of Nodes: Group and Solid
-func NewNodeBase(parent ki.Node, name ...string) *NodeBase {
+func NewNodeBase(parent tree.Node, name ...string) *NodeBase {
 	return parent.NewChild(NodeBaseType, name...).(*NodeBase)
 }
 
@@ -123,7 +123,7 @@ func NewNodeBase(parent ki.Node, name ...string) *NodeBase {
 func (t *NodeBase) KiType() *gti.Type { return NodeBaseType }
 
 // New returns a new [*NodeBase] value
-func (t *NodeBase) New() ki.Node { return &NodeBase{} }
+func (t *NodeBase) New() tree.Node { return &NodeBase{} }
 
 var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyz.NodeFlags", IDName: "node-flags", Doc: "NodeFlags extend ki.Flags to hold 3D node state"})
 
@@ -138,7 +138,7 @@ var SceneType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyz.Scene", IDN
 func (t *Scene) KiType() *gti.Type { return SceneType }
 
 // New returns a new [*Scene] value
-func (t *Scene) New() ki.Node { return &Scene{} }
+func (t *Scene) New() tree.Node { return &Scene{} }
 
 // SceneEmbedder is an interface that all types that embed Scene satisfy
 type SceneEmbedder interface {
@@ -147,7 +147,7 @@ type SceneEmbedder interface {
 
 // AsScene returns the given value as a value of type Scene if the type
 // of the given value embeds Scene, or nil otherwise
-func AsScene(k ki.Node) *Scene {
+func AsScene(k tree.Node) *Scene {
 	if k == nil || k.This() == nil {
 		return nil
 	}
@@ -399,7 +399,7 @@ var SolidType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyz.Solid", IDN
 // Solid represents an individual 3D solid element.
 // It has its own unique spatial transforms and material properties,
 // and points to a mesh structure defining the shape of the solid.
-func NewSolid(parent ki.Node, name ...string) *Solid {
+func NewSolid(parent tree.Node, name ...string) *Solid {
 	return parent.NewChild(SolidType, name...).(*Solid)
 }
 
@@ -407,7 +407,7 @@ func NewSolid(parent ki.Node, name ...string) *Solid {
 func (t *Solid) KiType() *gti.Type { return SolidType }
 
 // New returns a new [*Solid] value
-func (t *Solid) New() ki.Node { return &Solid{} }
+func (t *Solid) New() tree.Node { return &Solid{} }
 
 // SetMat sets the [Solid.Mat]:
 // material properties of the surface (color, shininess, texture, etc)
@@ -430,7 +430,7 @@ var Text2DType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyz.Text2D", I
 // The margin property creates blank margin of the background color around the text
 // (2 px default) and the background-color defaults to transparent
 // but can be set to any color.
-func NewText2D(parent ki.Node, name ...string) *Text2D {
+func NewText2D(parent tree.Node, name ...string) *Text2D {
 	return parent.NewChild(Text2DType, name...).(*Text2D)
 }
 
@@ -438,7 +438,7 @@ func NewText2D(parent ki.Node, name ...string) *Text2D {
 func (t *Text2D) KiType() *gti.Type { return Text2DType }
 
 // New returns a new [*Text2D] value
-func (t *Text2D) New() ki.Node { return &Text2D{} }
+func (t *Text2D) New() tree.Node { return &Text2D{} }
 
 // SetText sets the [Text2D.Text]:
 // the text string to display

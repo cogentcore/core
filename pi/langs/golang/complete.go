@@ -12,13 +12,13 @@ import (
 	"unicode"
 
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/pi"
 	"cogentcore.org/core/pi/complete"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/pi/parse"
 	"cogentcore.org/core/pi/syms"
 	"cogentcore.org/core/pi/token"
+	"cogentcore.org/core/tree"
 )
 
 var CompleteTrace = false
@@ -371,7 +371,7 @@ func (gl *GoLang) LookupString(fs *pi.FileState, pkg *syms.Symbol, scopes syms.S
 // CompleteAstStart finds the best starting point in the given current-line Ast
 // to start completion process, which walks back down from that starting point
 func (gl *GoLang) CompleteAstStart(ast *parse.Ast, scope token.Tokens) (start, last *parse.Ast) {
-	curi := ki.Last(ast)
+	curi := tree.Last(ast)
 	if curi == nil {
 		return
 	}

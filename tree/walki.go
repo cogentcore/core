@@ -8,7 +8,7 @@ of the tree in up / down directions.  As compared to the core Func methods,
 these are for more dynamic, piecemeal processing.
 */
 
-package ki
+package tree
 
 // Last returns the last node in the tree
 func Last(nd Node) Node {

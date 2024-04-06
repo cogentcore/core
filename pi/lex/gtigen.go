@@ -4,7 +4,7 @@ package lex
 
 import (
 	"cogentcore.org/core/gti"
-	"cogentcore.org/core/ki"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/pi/token"
 )
 
@@ -22,7 +22,7 @@ var RuleType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/pi/lex.Rule", ID
 //
 // In general it is best to keep lexing as simple as possible and
 // leave the more complex things for the parsing step.
-func NewRule(parent ki.Node, name ...string) *Rule {
+func NewRule(parent tree.Node, name ...string) *Rule {
 	return parent.NewChild(RuleType, name...).(*Rule)
 }
 
@@ -30,7 +30,7 @@ func NewRule(parent ki.Node, name ...string) *Rule {
 func (t *Rule) KiType() *gti.Type { return RuleType }
 
 // New returns a new [*Rule] value
-func (t *Rule) New() ki.Node { return &Rule{} }
+func (t *Rule) New() tree.Node { return &Rule{} }
 
 // SetOff sets the [Rule.Off]:
 // disable this rule -- useful for testing and exploration

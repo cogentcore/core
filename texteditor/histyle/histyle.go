@@ -21,9 +21,9 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/gi"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/pi/token"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 )
 
 // Trilean value for StyleEntry value inheritance.
@@ -169,8 +169,8 @@ func (se StyleEntry) ToCSS() string {
 }
 
 // ToProps converts StyleEntry to ki.Props attributes.
-func (se StyleEntry) ToProps() ki.Props {
-	pr := ki.Props{}
+func (se StyleEntry) ToProps() tree.Props {
+	pr := tree.Props{}
 	if !colors.IsNil(se.Color) {
 		pr["color"] = se.Color
 	}
@@ -304,8 +304,8 @@ func (hs Style) ToCSS() map[token.Tokens]string {
 }
 
 // ToProps generates list of ki.Props for this style
-func (hs Style) ToProps() ki.Props {
-	pr := ki.Props{}
+func (hs Style) ToProps() tree.Props {
+	pr := tree.Props{}
 	for ht, nm := range token.Names {
 		entry := hs.Tag(ht)
 		if entry.IsZero() {
@@ -347,7 +347,7 @@ func (hs Style) SaveJSON(filename gi.Filename) error {
 
 // TagsProps are default properties for custom tags (tokens) -- if set in style then used
 // there but otherwise we use these as a fallback -- typically not overridden
-var Props = map[token.Tokens]ki.Props{
+var Props = map[token.Tokens]tree.Props{
 	token.TextSpellErr: {
 		"text-decoration": 1 << uint32(styles.DecoDottedUnderline), // bitflag!
 	},

@@ -11,10 +11,10 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 )
 
@@ -63,7 +63,7 @@ func (ly *Layout) ConfigScroll(d mat32.Dims) {
 	ly.Scrolls[d] = &Slider{}
 	sb := ly.Scrolls[d]
 	sb.InitName(sb, fmt.Sprintf("scroll%v", d))
-	ki.SetParent(sb, ly.This())
+	tree.SetParent(sb, ly.This())
 	// sr.SetFlag(true, ki.Field) // note: do not turn on -- breaks pos
 	sb.SetType(SliderScrollbar)
 	sb.InputThreshold = 1
@@ -250,7 +250,7 @@ func (ly *Layout) ScrollDelta(e events.Event) {
 
 // ParentLayout returns the parent layout
 func (wb *WidgetBase) ParentLayout() *Layout {
-	ly := wb.ParentByType(LayoutType, ki.Embeds)
+	ly := wb.ParentByType(LayoutType, tree.Embeds)
 	if ly == nil {
 		return nil
 	}
@@ -259,7 +259,7 @@ func (wb *WidgetBase) ParentLayout() *Layout {
 
 // ParentScrollLayout returns the parent layout that has active scrollbars
 func (wb *WidgetBase) ParentScrollLayout() *Layout {
-	lyk := wb.ParentByType(LayoutType, ki.Embeds)
+	lyk := wb.ParentByType(LayoutType, tree.Embeds)
 	if lyk == nil {
 		return nil
 	}

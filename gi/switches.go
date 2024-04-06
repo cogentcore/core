@@ -12,10 +12,10 @@ import (
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gti"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 )
 
@@ -274,7 +274,7 @@ func (sw *Switches) HandleSwitchEvents(swi *Switch) {
 }
 
 func (sw *Switches) Config() {
-	config := ki.Config{}
+	config := tree.Config{}
 	for _, item := range sw.Items {
 		config.Add(SwitchType, item.Label)
 	}

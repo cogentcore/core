@@ -13,7 +13,7 @@ import (
 
 	"cogentcore.org/core/fi"
 	"cogentcore.org/core/gi"
-	"cogentcore.org/core/ki"
+	"cogentcore.org/core/tree"
 )
 
 // FindDirNode finds directory node by given path.
@@ -79,14 +79,14 @@ func (fn *Node) FindFile(fnm string) (*Node, bool) {
 	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
-			return ki.Continue
+			return tree.Continue
 		}
 		if strings.HasSuffix(string(sfn.FPath), fneff) {
 			ffn = sfn
 			found = true
-			return ki.Break
+			return tree.Break
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	return ffn, found
 }
@@ -101,7 +101,7 @@ func (fn *Node) FilesMatching(match string, ignoreCase bool) []*Node {
 	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
-			return ki.Continue
+			return tree.Continue
 		}
 		if ignoreCase {
 			nm := strings.ToLower(sfn.Nm)
@@ -113,7 +113,7 @@ func (fn *Node) FilesMatching(match string, ignoreCase bool) []*Node {
 				mls = append(mls, sfn)
 			}
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	return mls
 }
@@ -140,11 +140,11 @@ func (fn *Node) FileExtCounts(cat fi.Cat) []NodeNameCount {
 	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
-			return ki.Continue
+			return tree.Continue
 		}
 		if cat != fi.UnknownCat {
 			if sfn.Info.Cat != cat {
-				return ki.Continue
+				return tree.Continue
 			}
 		}
 		ext := strings.ToLower(filepath.Ext(sfn.Nm))
@@ -153,7 +153,7 @@ func (fn *Node) FileExtCounts(cat fi.Cat) []NodeNameCount {
 		} else {
 			cmap[ext] = 1
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	ecs := make([]NodeNameCount, len(cmap))
 	idx := 0
@@ -173,18 +173,18 @@ func (fn *Node) LatestFileMod(cat fi.Cat) time.Time {
 	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
-			return ki.Continue
+			return tree.Continue
 		}
 		if cat != fi.UnknownCat {
 			if sfn.Info.Cat != cat {
-				return ki.Continue
+				return tree.Continue
 			}
 		}
 		ft := (time.Time)(sfn.Info.ModTime)
 		if ft.After(tmod) {
 			tmod = ft
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	return tmod
 }

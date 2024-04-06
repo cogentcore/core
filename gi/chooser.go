@@ -21,11 +21,11 @@ import (
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/pi/complete"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 )
 
@@ -237,7 +237,7 @@ func (ch *Chooser) SetStyles() {
 }
 
 func (ch *Chooser) Config() {
-	config := ki.Config{}
+	config := tree.Config{}
 
 	// automatically select the first item if we have nothing selected and no placeholder
 	if !ch.Editable && ch.CurrentIndex < 0 && ch.CurrentItem.Label == "" {

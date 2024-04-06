@@ -19,13 +19,13 @@ import (
 	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/pi/token"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor/textbuf"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/vci"
 )
 
@@ -659,7 +659,7 @@ func (tv *DiffTextEditor) OnInit() {
 }
 
 func (tv *DiffTextEditor) DiffView() *DiffView {
-	dvi := tv.ParentByType(DiffViewType, ki.NoEmbeds)
+	dvi := tv.ParentByType(DiffViewType, tree.NoEmbeds)
 	if dvi == nil {
 		return nil
 	}

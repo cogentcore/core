@@ -15,9 +15,9 @@ import (
 	"time"
 
 	"cogentcore.org/core/fi"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/pi/parse"
+	"cogentcore.org/core/tree"
 )
 
 // Parser is the overall parser for managing the parsing
@@ -267,8 +267,8 @@ func (pr *Parser) ParseString(str string, fname string, sup fi.Known) *FileState
 // ReadJSON opens lexer and parser rules from Bytes, in a standard JSON-formatted file
 func (pr *Parser) ReadJSON(b []byte) error {
 	err := json.Unmarshal(b, pr)
-	ki.UnmarshalPost(pr.Lexer.This())
-	ki.UnmarshalPost(pr.Parser.This())
+	tree.UnmarshalPost(pr.Lexer.This())
+	tree.UnmarshalPost(pr.Parser.This())
 	if err != nil {
 		slog.Error(err.Error())
 	}

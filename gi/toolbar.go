@@ -7,10 +7,10 @@ package gi
 import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 )
 
@@ -27,7 +27,7 @@ type Toolbar struct { //core:embedder
 	Frame
 
 	// items moved from the main toolbar, will be shown in the overflow menu
-	OverflowItems ki.Slice `set:"-" json:"-" xml:"-"`
+	OverflowItems tree.Slice `set:"-" json:"-" xml:"-"`
 
 	// functions for overflow menu: use AddOverflowMenu to add.
 	// These are processed in _reverse_ order (last in, first called)
@@ -154,7 +154,7 @@ func (tb *Toolbar) MoveToOverflow() {
 	szsum := float32(0)
 	tb.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		if i >= n-1 {
-			return ki.Break
+			return tree.Break
 		}
 		ksz := kwb.Geom.Size.Alloc.Total.Dim(ma)
 		szsum += ksz
@@ -165,7 +165,7 @@ func (tb *Toolbar) MoveToOverflow() {
 			}
 			tb.OverflowItems = append(tb.OverflowItems, kwi)
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	if ovidx != n-1 {
 		tb.Kids.Move(n-1, ovidx)

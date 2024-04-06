@@ -28,12 +28,12 @@ import (
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 )
 
@@ -682,7 +682,7 @@ func (sv *SliceViewBase) ConfigRows() {
 	sg.Styles.Columns = nWidgPerRow
 
 	sv.Values = make([]Value, sv.VisRows)
-	sg.Kids = make(ki.Slice, nWidg)
+	sg.Kids = make(tree.Slice, nWidg)
 
 	for i := 0; i < sv.VisRows; i++ {
 		si := i
@@ -716,7 +716,7 @@ func (sv *SliceViewBase) ConfigRows() {
 			idxlab.SetProp(SliceViewRowProp, i)
 		}
 
-		w := ki.NewOfType(vtyp).(gi.Widget)
+		w := tree.NewOfType(vtyp).(gi.Widget)
 		sg.SetChild(w, ridx+idxOff, valnm)
 		Config(vv, w)
 		w.SetProp(SliceViewRowProp, i)
@@ -847,7 +847,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 	sv.SliceNewAtSelect(idx)
 
 	sltyp := laser.SliceElType(sv.Slice) // has pointer if it is there
-	iski := ki.IsKi(sltyp)
+	iski := tree.IsKi(sltyp)
 	slptr := sltyp.Kind() == reflect.Ptr
 
 	svl := reflect.ValueOf(sv.Slice)
@@ -858,11 +858,11 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 	if iski && sv.SliceValue != nil {
 		vd := sv.SliceValue.AsValueData()
 		if vd.Owner != nil {
-			if ownki, ok := vd.Owner.(ki.Node); ok {
+			if ownki, ok := vd.Owner.(tree.Node); ok {
 				d := gi.NewBody().AddTitle("Add list items").AddText("Number and type of items to insert:")
 				nd := &gi.NewItemsData{}
 				w := NewValue(d, nd).AsWidget()
-				ki.ChildByType[*gi.Chooser](w, ki.Embeds).SetTypes(gti.AllEmbeddersOf(ownki.BaseType())...).SetCurrentIndex(0)
+				tree.ChildByType[*gi.Chooser](w, tree.Embeds).SetTypes(gti.AllEmbeddersOf(ownki.BaseType())...).SetCurrentIndex(0)
 				d.AddBottomBar(func(parent gi.Widget) {
 					d.AddCancel(parent)
 					d.AddOK(parent).OnClick(func(e events.Event) {
@@ -2134,7 +2134,7 @@ func (sg *SliceViewGrid) SetScrollParams(d mat32.Dims, sb *gi.Slider) {
 }
 
 func (sg *SliceViewGrid) SliceView() (SliceViewer, *SliceViewBase) {
-	svi := sg.ParentByType(SliceViewBaseType, ki.Embeds)
+	svi := sg.ParentByType(SliceViewBaseType, tree.Embeds)
 	if svi == nil {
 		return nil, nil
 	}

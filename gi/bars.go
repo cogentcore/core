@@ -7,8 +7,8 @@ package gi
 import (
 	"strings"
 
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 )
 
 // BarFuncs are functions for creating control bars,
@@ -114,7 +114,7 @@ func (sc *Scene) GetTopAppBar() *Toolbar {
 	if tb == nil {
 		return nil
 	}
-	tab := tb.ChildByType(ToolbarType, ki.NoEmbeds)
+	tab := tb.ChildByType(ToolbarType, tree.NoEmbeds)
 	if tab != nil {
 		return tab.(*Toolbar)
 	}
@@ -123,7 +123,7 @@ func (sc *Scene) GetTopAppBar() *Toolbar {
 
 // RecycleToolbar constructs or returns a Toolbar in given parent Widget
 func RecycleToolbar(parent Widget) *Toolbar {
-	tb := parent.ChildByType(ToolbarType, ki.NoEmbeds)
+	tb := parent.ChildByType(ToolbarType, tree.NoEmbeds)
 	if tb != nil {
 		return tb.(*Toolbar)
 	}

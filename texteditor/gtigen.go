@@ -7,7 +7,7 @@ import (
 
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/gti"
-	"cogentcore.org/core/ki"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/texteditor/textbuf"
 	"cogentcore.org/core/units"
@@ -37,7 +37,7 @@ var DiffViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/texteditor.D
 // NewDiffView adds a new [DiffView] with the given name to the given parent:
 // DiffView presents two side-by-side TextEditor windows showing the differences
 // between two files (represented as lines of strings).
-func NewDiffView(parent ki.Node, name ...string) *DiffView {
+func NewDiffView(parent tree.Node, name ...string) *DiffView {
 	return parent.NewChild(DiffViewType, name...).(*DiffView)
 }
 
@@ -45,7 +45,7 @@ func NewDiffView(parent ki.Node, name ...string) *DiffView {
 func (t *DiffView) KiType() *gti.Type { return DiffViewType }
 
 // New returns a new [*DiffView] value
-func (t *DiffView) New() ki.Node { return &DiffView{} }
+func (t *DiffView) New() tree.Node { return &DiffView{} }
 
 // SetFileA sets the [DiffView.FileA]:
 // first file name being compared
@@ -76,7 +76,7 @@ var DiffTextEditorType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/texted
 // NewDiffTextEditor adds a new [DiffTextEditor] with the given name to the given parent:
 // DiffTextEditor supports double-click based application of edits from one
 // buffer to the other.
-func NewDiffTextEditor(parent ki.Node, name ...string) *DiffTextEditor {
+func NewDiffTextEditor(parent tree.Node, name ...string) *DiffTextEditor {
 	return parent.NewChild(DiffTextEditorType, name...).(*DiffTextEditor)
 }
 
@@ -84,7 +84,7 @@ func NewDiffTextEditor(parent ki.Node, name ...string) *DiffTextEditor {
 func (t *DiffTextEditor) KiType() *gti.Type { return DiffTextEditorType }
 
 // New returns a new [*DiffTextEditor] value
-func (t *DiffTextEditor) New() ki.Node { return &DiffTextEditor{} }
+func (t *DiffTextEditor) New() tree.Node { return &DiffTextEditor{} }
 
 // SetTooltip sets the [DiffTextEditor.Tooltip]
 func (t *DiffTextEditor) SetTooltip(v string) *DiffTextEditor { t.Tooltip = v; return t }
@@ -134,7 +134,7 @@ var EditorType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/texteditor.Edi
 // Multiple editors can be attached to a given buffer.  All updating in the
 // Editor should be within a single goroutine, as it would require
 // extensive protections throughout code otherwise.
-func NewEditor(parent ki.Node, name ...string) *Editor {
+func NewEditor(parent tree.Node, name ...string) *Editor {
 	return parent.NewChild(EditorType, name...).(*Editor)
 }
 
@@ -142,7 +142,7 @@ func NewEditor(parent ki.Node, name ...string) *Editor {
 func (t *Editor) KiType() *gti.Type { return EditorType }
 
 // New returns a new [*Editor] value
-func (t *Editor) New() ki.Node { return &Editor{} }
+func (t *Editor) New() tree.Node { return &Editor{} }
 
 // EditorEmbedder is an interface that all types that embed Editor satisfy
 type EditorEmbedder interface {
@@ -151,7 +151,7 @@ type EditorEmbedder interface {
 
 // AsEditor returns the given value as a value of type Editor if the type
 // of the given value embeds Editor, or nil otherwise
-func AsEditor(k ki.Node) *Editor {
+func AsEditor(k tree.Node) *Editor {
 	if k == nil || k.This() == nil {
 		return nil
 	}
@@ -197,7 +197,7 @@ var TwinEditorsType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/textedito
 // NewTwinEditors adds a new [TwinEditors] with the given name to the given parent:
 // TwinEditors presents two side-by-side [Editor]s in [gi.Splits]
 // that scroll in sync with each other.
-func NewTwinEditors(parent ki.Node, name ...string) *TwinEditors {
+func NewTwinEditors(parent tree.Node, name ...string) *TwinEditors {
 	return parent.NewChild(TwinEditorsType, name...).(*TwinEditors)
 }
 
@@ -205,7 +205,7 @@ func NewTwinEditors(parent ki.Node, name ...string) *TwinEditors {
 func (t *TwinEditors) KiType() *gti.Type { return TwinEditorsType }
 
 // New returns a new [*TwinEditors] value
-func (t *TwinEditors) New() ki.Node { return &TwinEditors{} }
+func (t *TwinEditors) New() tree.Node { return &TwinEditors{} }
 
 // SetBufA sets the [TwinEditors.BufA]:
 // textbuf for A

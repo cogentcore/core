@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package ki_test
+package tree_test
 
 import (
 	"fmt"
@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"cogentcore.org/core/gti"
-	. "cogentcore.org/core/ki"
-	"cogentcore.org/core/ki/testdata"
+	. "cogentcore.org/core/tree"
+	"cogentcore.org/core/tree/testdata"
 )
 
 func TestNodeAddChild(t *testing.T) {

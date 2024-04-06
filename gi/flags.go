@@ -7,17 +7,17 @@ package gi
 import (
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/states"
+	"cogentcore.org/core/tree"
 )
 
 // WidgetFlags define Widget node bitflags for tracking common high-frequency GUI
 // state, mostly having to do with event processing. Extends ki.Flags
-type WidgetFlags ki.Flags //enums:bitflag
+type WidgetFlags tree.Flags //enums:bitflag
 
 const (
 	// NeedsRender needs to be rendered on next render iteration
-	NeedsRender WidgetFlags = WidgetFlags(ki.FlagsN) + iota
+	NeedsRender WidgetFlags = WidgetFlags(tree.FlagsN) + iota
 )
 
 // StateIs returns whether the widget has the given [states.States] flag set
@@ -93,9 +93,9 @@ func (wb *WidgetBase) HasFlagWithin(flag enums.BitFlag) bool {
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		if wb.Is(flag) {
 			got = true
-			return ki.Break
+			return tree.Break
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	return got
 }
@@ -107,9 +107,9 @@ func (wb *WidgetBase) HasStateWithin(state states.States) bool {
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		if wb.StateIs(state) {
 			got = true
-			return ki.Break
+			return tree.Break
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	return got
 }

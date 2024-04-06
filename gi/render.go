@@ -16,10 +16,10 @@ import (
 
 	"cogentcore.org/core/cam/hct"
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/prof"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 )
 
 // Rendering logic:
@@ -109,7 +109,7 @@ func (wb *WidgetBase) NeedsRender() {
 	}
 	// parent of Parts needs to render if parent
 	fi := wb.ParentWidgetIf(func(p *WidgetBase) bool {
-		return p.Is(ki.Field)
+		return p.Is(tree.Field)
 	})
 	if fi != nil && fi.Parent() != nil && fi.Parent().This() != nil {
 		fi.Parent().(Widget).AsWidget().NeedsRender()
@@ -159,10 +159,10 @@ func (wb *WidgetBase) Config() {
 
 // ConfigParts initializes the parts of the widget if they
 // are not already through [WidgetBase.NewParts], calls
-// [ki.NodeBase.ConfigChildren] on those parts with the given config,
+// [tree.NodeBase.ConfigChildren] on those parts with the given config,
 // calls the given after function if it is specified,
 // and then handles necessary updating logic.
-func (wb *WidgetBase) ConfigParts(config ki.Config, after ...func()) {
+func (wb *WidgetBase) ConfigParts(config tree.Config, after ...func()) {
 	parts := wb.NewParts()
 	mods := parts.ConfigChildren(config)
 	if len(after) > 0 {
@@ -182,7 +182,7 @@ func (wb *WidgetBase) ConfigTree() {
 	pr := prof.Start(wb.This().KiType().ShortName())
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		wi.Config()
-		return ki.Continue
+		return tree.Continue
 	})
 	pr.End()
 }
@@ -208,7 +208,7 @@ func (wb *WidgetBase) Update() { //gti:add
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		wi.Config()
 		wi.ApplyStyle()
-		return ki.Continue
+		return tree.Continue
 	})
 	wb.NeedsLayout()
 }
@@ -222,7 +222,7 @@ func (wb *WidgetBase) ApplyStyleTree() {
 	pr := prof.Start(wb.This().KiType().ShortName())
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		wi.ApplyStyle()
-		return ki.Continue
+		return tree.Continue
 	})
 	pr.End()
 }
@@ -282,7 +282,7 @@ func (wb *WidgetBase) DoNeedsRender() {
 	wb.WidgetWalkPre(func(kwi Widget, kwb *WidgetBase) bool {
 		if kwi.Is(NeedsRender) {
 			kwi.RenderWidget()
-			return ki.Break // done
+			return tree.Break // done
 		}
 		if ly := AsLayout(kwi); ly != nil {
 			for d := mat32.X; d <= mat32.Y; d++ {
@@ -291,7 +291,7 @@ func (wb *WidgetBase) DoNeedsRender() {
 				}
 			}
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	pr.End()
 }
@@ -521,7 +521,7 @@ func (wb *WidgetBase) RenderParts() {
 func (wb *WidgetBase) RenderChildren() {
 	wb.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwi.RenderWidget()
-		return ki.Continue
+		return tree.Continue
 	})
 }
 
@@ -642,7 +642,7 @@ func (sc *Scene) ReportWinNodes() {
 	nn := 0
 	sc.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		nn++
-		return ki.Continue
+		return tree.Continue
 	})
 	fmt.Printf("Scene: %v has: %v nodes\n", sc.Name(), nn)
 }

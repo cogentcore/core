@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/gi"
-	"cogentcore.org/core/ki"
+	"cogentcore.org/core/tree"
 )
 
 type validator string
@@ -63,7 +63,7 @@ func TestFieldValidatorValid(t *testing.T) {
 	b.AssertRender(t, "text/field-validator-valid", func() {
 		v.WidgetWalkPre(func(kwi gi.Widget, kwb *gi.WidgetBase) bool {
 			kwb.SendChange() // trigger validation
-			return ki.Continue
+			return tree.Continue
 		})
 	})
 }
@@ -74,7 +74,7 @@ func TestFieldValidatorInvalid(t *testing.T) {
 	b.AssertRender(t, "text/field-validator-invalid", func() {
 		v.WidgetWalkPre(func(kwi gi.Widget, kwb *gi.WidgetBase) bool {
 			kwb.SendChange() // trigger validation
-			return ki.Continue
+			return tree.Continue
 		})
 	})
 }

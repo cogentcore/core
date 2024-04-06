@@ -18,10 +18,10 @@ import (
 	"text/tabwriter"
 
 	"cogentcore.org/core/glop/indent"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/pi/syms"
 	"cogentcore.org/core/pi/token"
+	"cogentcore.org/core/tree"
 )
 
 // Set GuiActive to true if the gui (piview) is active -- ensures that the
@@ -59,7 +59,7 @@ var DepthLimit = 10000
 // After a rule matches, it then proceeds through the rules narrowing the scope
 // and calling the sub-nodes..
 type Rule struct {
-	ki.NodeBase
+	tree.NodeBase
 
 	// disable this rule -- useful for testing and exploration
 	Off bool
@@ -108,11 +108,11 @@ type Rule struct {
 }
 
 // RuleFlags define bitflags for rule options compiled from rule syntax
-type RuleFlags ki.Flags //enums:bitflag
+type RuleFlags tree.Flags //enums:bitflag
 
 const (
 	// SetsScope means that this rule sets its own scope, because it ends with EOS
-	SetsScope RuleFlags = RuleFlags(ki.FlagsN) + iota
+	SetsScope RuleFlags = RuleFlags(tree.FlagsN) + iota
 
 	// Reverse means that this rule runs in reverse (starts with - sign) -- for arithmetic
 	// binary expressions only: this is needed to produce proper associativity result for
@@ -145,7 +145,7 @@ const (
 // Parser is the interface type for parsers -- likely not necessary except is essential
 // for defining the BaseIface for gui in making new nodes
 type Parser interface {
-	ki.Node
+	tree.Node
 
 	// Compile compiles string rules into their runnable elements
 	Compile(ps *State) bool
@@ -251,7 +251,7 @@ func (pr *Rule) IsGroup() bool {
 // SetRuleMap is called on the top-level Rule and initializes the RuleMap
 func (pr *Rule) SetRuleMap(ps *State) {
 	RuleMap = map[string]*Rule{}
-	pr.WalkPre(func(k ki.Node) bool {
+	pr.WalkPre(func(k tree.Node) bool {
 		pri := k.(*Rule)
 		if epr, has := RuleMap[pri.Nm]; has {
 			ps.Error(lex.PosZero, fmt.Sprintf("Parser Compile: multiple rules with same name: %v and %v", pri.Path(), epr.Path()), pri)
@@ -268,7 +268,7 @@ func (pr *Rule) SetRuleMap(ps *State) {
 func (pr *Rule) CompileAll(ps *State) bool {
 	pr.SetRuleMap(ps)
 	allok := true
-	pr.WalkPre(func(k ki.Node) bool {
+	pr.WalkPre(func(k tree.Node) bool {
 		pri := k.(*Rule)
 		ok := pri.Compile(ps)
 		if !ok {
@@ -572,7 +572,7 @@ func (pr *Rule) Validate(ps *State) bool {
 		pr.CompileTokMap(ps)
 	}
 
-	if len(pr.Rules) == 0 && !pr.HasChildren() && !ki.IsRoot(pr) {
+	if len(pr.Rules) == 0 && !pr.HasChildren() && !tree.IsRoot(pr) {
 		ps.Error(lex.PosZero, "Validate: rule has no rules and no children", pr)
 		valid = false
 	}
@@ -1518,8 +1518,8 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *Ast) bo
 		useAst = parAst
 	}
 	apath := useAst.Path()
-	var node ki.Node
-	var adnl []ki.Node // additional nodes
+	var node tree.Node
+	var adnl []tree.Node // additional nodes
 	if act.Path == "" {
 		node = useAst
 	} else if andidx := strings.Index(act.Path, "&"); andidx >= 0 {
@@ -1530,7 +1530,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *Ast) bo
 				findAll = true
 				p = strings.TrimSuffix(p, "...")
 			}
-			var nd ki.Node
+			var nd tree.Node
 			if p[:3] == "../" {
 				nd = parAst.FindPath(p[3:])
 			} else {
@@ -1745,7 +1745,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *Ast) bo
 // Find looks for rules in the tree that contain given string in Rule or Name fields
 func (pr *Rule) Find(find string) []*Rule {
 	var res []*Rule
-	pr.WalkPre(func(k ki.Node) bool {
+	pr.WalkPre(func(k tree.Node) bool {
 		pri := k.(*Rule)
 		if strings.Contains(pri.Rule, find) || strings.Contains(pri.Nm, find) {
 			res = append(res, pri)
@@ -1758,7 +1758,7 @@ func (pr *Rule) Find(find string) []*Rule {
 // WriteGrammar outputs the parser rules as a formatted grammar in a BNF-like format
 // it is called recursively
 func (pr *Rule) WriteGrammar(writer io.Writer, depth int) {
-	if ki.IsRoot(pr) {
+	if tree.IsRoot(pr) {
 		for _, k := range pr.Kids {
 			pri := k.(*Rule)
 			pri.WriteGrammar(writer, depth)

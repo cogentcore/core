@@ -10,9 +10,9 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 )
 
@@ -288,7 +288,7 @@ func (sw *Switch) ClearIcons() *Switch {
 }
 
 func (sw *Switch) Config() {
-	config := ki.Config{}
+	config := tree.Config{}
 	if sw.IconOn == "" {
 		sw.IconOn = icons.ToggleOn.Fill() // fallback
 	}

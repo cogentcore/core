@@ -4,7 +4,7 @@ package parse
 
 import (
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/ki"
+	"cogentcore.org/core/tree"
 )
 
 var _ActionsValues = []Actions{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
@@ -102,14 +102,14 @@ var _RuleFlagsMap = map[RuleFlags]string{1: `SetsScope`, 2: `Reverse`, 3: `NoTok
 
 // String returns the string representation of this RuleFlags value.
 func (i RuleFlags) String() string {
-	return enums.BitFlagStringExtended(i, _RuleFlagsValues, ki.FlagsValues())
+	return enums.BitFlagStringExtended(i, _RuleFlagsValues, tree.FlagsValues())
 }
 
 // BitIndexString returns the string representation of this RuleFlags value
 // if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
 func (i RuleFlags) BitIndexString() string {
-	return enums.BitIndexStringExtended[RuleFlags, ki.Flags](i, _RuleFlagsMap)
+	return enums.BitIndexStringExtended[RuleFlags, tree.Flags](i, _RuleFlagsMap)
 }
 
 // SetString sets the RuleFlags value from its string representation,
@@ -120,7 +120,7 @@ func (i *RuleFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) 
 // while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *RuleFlags) SetStringOr(s string) error {
-	return enums.SetStringOrExtended(i, (*ki.Flags)(i), s, _RuleFlagsValueMap)
+	return enums.SetStringOrExtended(i, (*tree.Flags)(i), s, _RuleFlagsValueMap)
 }
 
 // Int64 returns the RuleFlags value as an int64.
@@ -131,17 +131,17 @@ func (i *RuleFlags) SetInt64(in int64) { *i = RuleFlags(in) }
 
 // Desc returns the description of the RuleFlags value.
 func (i RuleFlags) Desc() string {
-	return enums.DescExtended[RuleFlags, ki.Flags](i, _RuleFlagsDescMap)
+	return enums.DescExtended[RuleFlags, tree.Flags](i, _RuleFlagsDescMap)
 }
 
 // RuleFlagsValues returns all possible values for the type RuleFlags.
 func RuleFlagsValues() []RuleFlags {
-	return enums.ValuesGlobalExtended(_RuleFlagsValues, ki.FlagsValues())
+	return enums.ValuesGlobalExtended(_RuleFlagsValues, tree.FlagsValues())
 }
 
 // Values returns all possible values for the type RuleFlags.
 func (i RuleFlags) Values() []enums.Enum {
-	return enums.ValuesExtended(_RuleFlagsValues, ki.FlagsValues())
+	return enums.ValuesExtended(_RuleFlagsValues, tree.FlagsValues())
 }
 
 // HasFlag returns whether these bit flags have the given bit flag set.

@@ -10,10 +10,10 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/goosi"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 )
 
 // Config notes: only needs config when number of kids changes
@@ -287,7 +287,7 @@ func (sl *Splits) SizeDownSetAllocs(iter int) {
 		ksz.Alloc.Total.SetDim(od, cszod)
 		ksz.SetContentFromTotal(&ksz.Alloc)
 		// ksz.Actual = ksz.Alloc
-		return ki.Continue
+		return tree.Continue
 	})
 }
 
@@ -323,7 +323,7 @@ func (sl *Splits) PositionSplits() {
 	sl.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwb.Geom.RelPos.SetZero()
 		if i == 0 {
-			return ki.Continue
+			return tree.Continue
 		}
 		sw := mat32.Round(sl.Splits[i-1] * cszd)
 		pos += sw + hwd
@@ -334,7 +334,7 @@ func (sl *Splits) PositionSplits() {
 		hl.Min = 0
 		hl.Max = cszd
 		hl.Pos = pos
-		return ki.Continue
+		return tree.Continue
 	})
 }
 
@@ -348,7 +348,7 @@ func (sl *Splits) RenderWidget() {
 				kwb.SetState(false, states.Invisible)
 			}
 			kwi.RenderWidget()
-			return ki.Continue
+			return tree.Continue
 		})
 		sl.RenderParts()
 		sl.PopBounds()

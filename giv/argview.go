@@ -8,10 +8,10 @@ import (
 	"fmt"
 
 	"cogentcore.org/core/gi"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 )
 
 // ArgView represents a slice of reflect.Value's and associated names, for the
@@ -58,7 +58,7 @@ func (av *ArgView) SetStyles() {
 
 // Config configures the view
 func (av *ArgView) Config() {
-	config := ki.Config{}
+	config := tree.Config{}
 	config.Add(gi.LabelType, "title")
 	config.Add(gi.FrameType, "args-grid")
 	av.ConfigChildren(config)
@@ -82,7 +82,7 @@ func (av *ArgView) ConfigArgsGrid() {
 		return
 	}
 	sg := av.ArgsGrid()
-	config := ki.Config{}
+	config := tree.Config{}
 	argnms := make(map[string]bool)
 	for i := range av.Args {
 		arg := av.Args[i]

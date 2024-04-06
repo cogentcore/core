@@ -10,7 +10,7 @@ import (
 	"github.com/aymerick/douceur/css"
 	"github.com/aymerick/douceur/parser"
 
-	"cogentcore.org/core/ki"
+	"cogentcore.org/core/tree"
 )
 
 // StyleSheet is a Node2D node that contains a stylesheet -- property values
@@ -22,7 +22,7 @@ type StyleSheet struct {
 }
 
 // AddNewStyleSheet adds a new CSS stylesheet to given parent node, with given name.
-func AddNewStyleSheet(parent ki.Node, name string) *StyleSheet {
+func AddNewStyleSheet(parent tree.Node, name string) *StyleSheet {
 	return parent.NewChild(StyleSheetType, name).(*StyleSheet)
 }
 
@@ -40,7 +40,7 @@ func (ss *StyleSheet) ParseString(str string) error {
 
 // CSSProps returns the properties for each of the rules in this style sheet,
 // suitable for setting the CSS value of a node -- returns nil if empty sheet
-func (ss *StyleSheet) CSSProps() ki.Props {
+func (ss *StyleSheet) CSSProps() tree.Props {
 	if ss.Sheet == nil {
 		return nil
 	}
@@ -48,7 +48,7 @@ func (ss *StyleSheet) CSSProps() ki.Props {
 	if sz == 0 {
 		return nil
 	}
-	pr := make(ki.Props, sz)
+	pr := make(tree.Props, sz)
 	for _, r := range ss.Sheet.Rules {
 		if r.Kind == css.AtRule {
 			continue // not supported
@@ -58,7 +58,7 @@ func (ss *StyleSheet) CSSProps() ki.Props {
 			continue
 		}
 		for _, sel := range r.Selectors {
-			sp := make(ki.Props, nd)
+			sp := make(tree.Props, nd)
 			for _, de := range r.Declarations {
 				sp[de.Property] = de.Value
 			}

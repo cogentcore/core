@@ -23,9 +23,9 @@ import (
 	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/texteditor/histyle"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/vci"
 )
 
@@ -101,16 +101,16 @@ func (fn *Node) IsIrregular() bool {
 // IsExternal returns true if file is external to main file tree
 func (fn *Node) IsExternal() bool {
 	isExt := false
-	fn.WalkUp(func(k ki.Node) bool {
+	fn.WalkUp(func(k tree.Node) bool {
 		sfn := AsNode(k)
 		if sfn == nil {
-			return ki.Break
+			return tree.Break
 		}
 		if sfn.IsIrregular() {
 			isExt = true
-			return ki.Break
+			return tree.Break
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	return isExt
 }
@@ -118,16 +118,16 @@ func (fn *Node) IsExternal() bool {
 // HasClosedParent returns true if node has a parent node with !IsOpen flag set
 func (fn *Node) HasClosedParent() bool {
 	hasClosed := false
-	fn.WalkUpParent(func(k ki.Node) bool {
+	fn.WalkUpParent(func(k tree.Node) bool {
 		sfn := AsNode(k)
 		if sfn == nil {
-			return ki.Break
+			return tree.Break
 		}
 		if !sfn.IsOpen() {
 			hasClosed = true
-			return ki.Break
+			return tree.Break
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	return hasClosed
 }
@@ -203,7 +203,7 @@ func (fn *Node) UpdateDir() {
 	hasExtFiles := false
 	if fn.This() == fn.FRoot.This() {
 		if len(fn.FRoot.ExtFiles) > 0 {
-			config = append(ki.Config{{Type: fn.FRoot.NodeType, Name: ExternalFilesName}}, config...)
+			config = append(tree.Config{{Type: fn.FRoot.NodeType, Name: ExternalFilesName}}, config...)
 			hasExtFiles = true
 		}
 	}
@@ -241,9 +241,9 @@ func (fn *Node) UpdateDir() {
 
 // ConfigOfFiles returns a type-and-name list for configuring nodes based on
 // files immediately within given path
-func (fn *Node) ConfigOfFiles(path string) ki.Config {
-	config1 := ki.Config{}
-	config2 := ki.Config{}
+func (fn *Node) ConfigOfFiles(path string) tree.Config {
+	config1 := tree.Config{}
+	config2 := tree.Config{}
 	typ := fn.FRoot.NodeType
 	filepath.Walk(path, func(pth string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -284,7 +284,7 @@ func (fn *Node) ConfigOfFiles(path string) ki.Config {
 }
 
 // SortConfigByModTime sorts given config list by mod time
-func (fn *Node) SortConfigByModTime(confg ki.Config) {
+func (fn *Node) SortConfigByModTime(confg tree.Config) {
 	sort.Slice(confg, func(i, j int) bool {
 		ifn, _ := os.Stat(filepath.Join(string(fn.FPath), confg[i].Name))
 		jfn, _ := os.Stat(filepath.Join(string(fn.FPath), confg[j].Name))
@@ -461,12 +461,12 @@ func (fn *Node) CloseAll() { //gti:add
 	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
-			return ki.Continue
+			return tree.Continue
 		}
 		if sfn.IsDir() {
 			sfn.Close()
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 }
 

@@ -24,9 +24,9 @@ import (
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/grows/tomls"
 	"cogentcore.org/core/grr"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/webcore/wpath"
 )
 
@@ -54,7 +54,7 @@ type Page struct {
 	URLToPagePath map[string]string `set:"-"`
 }
 
-var _ ki.Node = (*Page)(nil)
+var _ tree.Node = (*Page)(nil)
 
 func (pg *Page) OnInit() {
 	pg.Frame.OnInit()

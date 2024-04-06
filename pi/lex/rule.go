@@ -13,8 +13,8 @@ import (
 	"unicode"
 
 	"cogentcore.org/core/glop/indent"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/pi/token"
+	"cogentcore.org/core/tree"
 )
 
 var Trace = false
@@ -22,7 +22,7 @@ var Trace = false
 // Lexer is the interface type for lexers -- likely not necessary except is essential
 // for defining the BaseIface for gui in making new nodes
 type Lexer interface {
-	ki.Node
+	tree.Node
 
 	// Compile performs any one-time compilation steps on the rule
 	Compile(ls *State) bool
@@ -49,7 +49,7 @@ type Lexer interface {
 // In general it is best to keep lexing as simple as possible and
 // leave the more complex things for the parsing step.
 type Rule struct {
-	ki.NodeBase
+	tree.NodeBase
 
 	// disable this rule -- useful for testing and exploration
 	Off bool
@@ -106,7 +106,7 @@ func (lr *Rule) AsLexRule() *Rule {
 // returns true if everything is ok
 func (lr *Rule) CompileAll(ls *State) bool {
 	allok := false
-	lr.WalkPre(func(k ki.Node) bool {
+	lr.WalkPre(func(k tree.Node) bool {
 		lri := k.(*Rule)
 		ok := lri.Compile(ls)
 		if !ok {
@@ -163,7 +163,7 @@ func (lr *Rule) CompileNameMap(ls *State) bool {
 // returns true if valid (no err) and false if invalid (errs)
 func (lr *Rule) Validate(ls *State) bool {
 	valid := true
-	if !ki.IsRoot(lr) {
+	if !tree.IsRoot(lr) {
 		switch lr.Match {
 		case StrName:
 			fallthrough
@@ -492,7 +492,7 @@ func (lr *Rule) DoAct(ls *State, act Actions, tok *token.KeyToken) {
 // Find looks for rules in the tree that contain given string in String or Name fields
 func (lr *Rule) Find(find string) []*Rule {
 	var res []*Rule
-	lr.WalkPre(func(k ki.Node) bool {
+	lr.WalkPre(func(k tree.Node) bool {
 		lri := k.(*Rule)
 		if strings.Contains(lri.String, find) || strings.Contains(lri.Nm, find) {
 			res = append(res, lri)
@@ -505,7 +505,7 @@ func (lr *Rule) Find(find string) []*Rule {
 // WriteGrammar outputs the lexer rules as a formatted grammar in a BNF-like format
 // it is called recursively
 func (lr *Rule) WriteGrammar(writer io.Writer, depth int) {
-	if ki.IsRoot(lr) {
+	if tree.IsRoot(lr) {
 		for _, k := range lr.Kids {
 			lri := k.(*Rule)
 			lri.WriteGrammar(writer, depth)

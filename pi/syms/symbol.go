@@ -36,9 +36,9 @@ import (
 	"strings"
 
 	"cogentcore.org/core/glop/indent"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/pi/token"
+	"cogentcore.org/core/tree"
 )
 
 // Symbol contains the information for everything about a given
@@ -81,7 +81,7 @@ type Symbol struct {
 	Types TypeMap
 
 	// Ast node that created this symbol -- only valid during parsing
-	Ast ki.Node `json:"-" xml:"-"`
+	Ast tree.Node `json:"-" xml:"-"`
 }
 
 // NewSymbol returns a new symbol with the basic info filled in -- SelectReg defaults to Region

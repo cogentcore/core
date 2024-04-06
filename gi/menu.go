@@ -10,9 +10,9 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/keyfun"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 )
 
@@ -74,7 +74,7 @@ func NewMenuScene(menu func(m *Scene), name ...string) *Scene {
 	hasSelected := false
 	msc.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		if wi.This() == msc.This() {
-			return ki.Continue
+			return tree.Continue
 		}
 		if bt := AsButton(wi); bt != nil {
 			if bt.Menu == nil {
@@ -86,7 +86,7 @@ func NewMenuScene(menu func(m *Scene), name ...string) *Scene {
 			msc.EventMgr.SetStartFocus(wb)
 			hasSelected = true
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	if !hasSelected && msc.HasChildren() {
 		// fmt.Println("start focus first:", msc.Child(0).(Widget))

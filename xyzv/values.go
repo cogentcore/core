@@ -12,8 +12,8 @@ import (
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/xyz"
 )
 
@@ -48,7 +48,7 @@ func (v *MeshValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	if !ok {
 		return false, nil
 	}
-	sci := ndi.ParentByType(xyz.SceneType, ki.Embeds)
+	sci := ndi.ParentByType(xyz.SceneType, tree.Embeds)
 	if sci == nil {
 		slog.Error("missing parent scene for node", "node", ndi)
 		return false, nil

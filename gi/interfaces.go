@@ -7,8 +7,8 @@ package gi
 import (
 	"reflect"
 
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
+	"cogentcore.org/core/tree"
 )
 
 // This file contains all the special-purpose interfaces
@@ -47,7 +47,7 @@ func ToLabel(it any) string {
 		switch v := it.(type) {
 		case reflect.Type:
 			return v.Name()
-		case ki.Node:
+		case tree.Node:
 			return v.Name()
 		}
 		return laser.ToString(it)

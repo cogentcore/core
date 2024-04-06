@@ -18,10 +18,10 @@ import (
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 )
 
 // CallFunc calls the given function in the context of the given widget,
@@ -35,7 +35,7 @@ func CallFunc(ctx gi.Widget, fun any) {
 // NewSoloFuncButton returns a standalone FuncButton with the given context
 // for popping up any dialog elements.
 func NewSoloFuncButton(ctx gi.Widget, fun any) *FuncButton {
-	parent := ki.NewRoot[*gi.WidgetBase]("solo-func-button-parent")
+	parent := tree.NewRoot[*gi.WidgetBase]("solo-func-button-parent")
 	fb := NewFuncButton(parent, fun)
 	fb.SetContext(ctx)
 	return fb
@@ -118,7 +118,7 @@ type FuncButton struct { //core:no-new
 
 // NewFuncButton adds a new [FuncButton] with the given function
 // to the given parent.
-func NewFuncButton(parent ki.Node, fun any) *FuncButton {
+func NewFuncButton(parent tree.Node, fun any) *FuncButton {
 	return parent.NewChild(FuncButtonType).(*FuncButton).SetFunc(fun)
 }
 
@@ -486,5 +486,5 @@ func (fb *FuncButton) SetKey(kf keyfun.Funs) *FuncButton {
 
 // makeTmpWidget makes a temporary widget in a temporary parent for the given value.
 func makeTmpWidget(v Value) {
-	v.SetWidget(ki.NewRoot[*gi.WidgetBase]("value-tmp-parent").NewChild(v.WidgetType(), "value-tmp-widget").(gi.Widget))
+	v.SetWidget(tree.NewRoot[*gi.WidgetBase]("value-tmp-parent").NewChild(v.WidgetType(), "value-tmp-widget").(gi.Widget))
 }

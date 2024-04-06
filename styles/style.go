@@ -17,10 +17,10 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/states"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 )
 
@@ -429,7 +429,7 @@ func SubProps(prp map[string]any, selector string) (map[string]any, bool) {
 	if ok {
 		return spm, true
 	}
-	kpm, ok := sp.(ki.Props)
+	kpm, ok := sp.(tree.Props)
 	if ok {
 		return kpm, true
 	}

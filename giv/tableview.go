@@ -16,11 +16,11 @@ import (
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 )
 
@@ -252,7 +252,7 @@ func (tv *TableView) ConfigHeader() {
 	if sgh.HasChildren() || tv.NVisFields == 0 {
 		return
 	}
-	hcfg := ki.Config{}
+	hcfg := tree.Config{}
 	if tv.Is(SliceViewShowIndex) {
 		hcfg.Add(gi.LabelType, "head-idx")
 	}
@@ -341,7 +341,7 @@ func (tv *TableView) ConfigRows() {
 	sg.Styles.Columns = nWidgPerRow
 
 	tv.Values = make([]Value, tv.NVisFields*tv.VisRows)
-	sg.Kids = make(ki.Slice, nWidg)
+	sg.Kids = make(tree.Slice, nWidg)
 
 	for i := 0; i < tv.VisRows; i++ {
 		si := i
@@ -389,7 +389,7 @@ func (tv *TableView) ConfigRows() {
 			vtyp := vv.WidgetType()
 			valnm := fmt.Sprintf("value-%v.%v", fli, itxt)
 			cidx := ridx + idxOff + fli
-			w := ki.NewOfType(vtyp).(gi.Widget)
+			w := tree.NewOfType(vtyp).(gi.Widget)
 			sg.SetChild(w, cidx, valnm)
 			Config(vv, w)
 			w.SetProp(SliceViewRowProp, i)
@@ -805,7 +805,7 @@ func (tv *TableView) SizeFinal() {
 		ksz.Actual.Content.X = gsz.Actual.Content.X
 		ksz.Alloc.Total.X = gsz.Alloc.Total.X
 		ksz.Alloc.Content.X = gsz.Alloc.Content.X
-		return ki.Continue
+		return tree.Continue
 	})
 	gsz := &sg.Geom.Size
 	ksz := &sh.Geom.Size

@@ -16,8 +16,8 @@ import (
 	"path/filepath"
 	"sort"
 
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
+	"cogentcore.org/core/tree"
 )
 
 // In an ErrorList, an error is represented by an *Error.
@@ -39,7 +39,7 @@ type Error struct {
 	Src string
 
 	// lexer or parser rule that emitted the error
-	Rule ki.Node
+	Rule tree.Node
 }
 
 // Error implements the error interface -- gives the minimal version of error string
@@ -87,7 +87,7 @@ func (e Error) Report(basepath string, showSrc, showRule bool) string {
 type ErrorList []*Error
 
 // Add adds an Error with given position and error message to an ErrorList.
-func (p *ErrorList) Add(pos Pos, fname, msg string, srcln string, rule ki.Node) *Error {
+func (p *ErrorList) Add(pos Pos, fname, msg string, srcln string, rule tree.Node) *Error {
 	e := &Error{pos, fname, msg, srcln, rule}
 	*p = append(*p, e)
 	return e

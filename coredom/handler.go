@@ -19,11 +19,11 @@ import (
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/grows/images"
 	"cogentcore.org/core/grr"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor"
+	"cogentcore.org/core/tree"
 	"golang.org/x/net/html"
 )
 
@@ -39,7 +39,7 @@ var ElementHandlers = map[string]func(ctx *Context) bool{}
 // It automatically calls [Context.Config] on the resulting widget.
 func New[T gi.Widget](ctx *Context) T {
 	parent := ctx.Parent()
-	w := ki.New[T](parent)
+	w := tree.New[T](parent)
 	ctx.Config(w)
 	return w
 }

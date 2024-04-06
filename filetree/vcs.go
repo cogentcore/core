@@ -15,11 +15,11 @@ import (
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/grr"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/texteditor/textbuf"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/vci"
 	"github.com/Masterminds/vcs"
 )
@@ -32,14 +32,14 @@ func (fn *Node) FirstVCS() (vci.Repo, *Node) {
 	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
-			return ki.Continue
+			return tree.Continue
 		}
 		if sfn.DirRepo != nil {
 			repo = sfn.DirRepo
 			rnode = sfn
-			return ki.Break
+			return tree.Break
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	return repo, rnode
 }
@@ -85,23 +85,23 @@ func (fn *Node) Repo() (vci.Repo, *Node) {
 	}
 	var repo vci.Repo
 	var rnode *Node
-	fn.WalkUpParent(func(k ki.Node) bool {
+	fn.WalkUpParent(func(k tree.Node) bool {
 		if k == nil || k.This() == nil {
-			return ki.Break
+			return tree.Break
 		}
 		sfn := AsNode(k)
 		if sfn == nil {
-			return ki.Break
+			return tree.Break
 		}
 		if sfn.IsIrregular() {
-			return ki.Break
+			return tree.Break
 		}
 		if sfn.DirRepo != nil {
 			repo = sfn.DirRepo
 			rnode = sfn
-			return ki.Break
+			return tree.Break
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	return repo, rnode
 }
@@ -385,14 +385,14 @@ func (fn *Node) UpdateAllVCS() {
 	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
-			return ki.Continue
+			return tree.Continue
 		}
 		if !sfn.IsDir() {
-			return ki.Continue
+			return tree.Continue
 		}
 		if sfn.DirRepo == nil {
 			if !sfn.DetectVCSRepo(false) {
-				return ki.Continue
+				return tree.Continue
 			}
 		}
 		repo := sfn.DirRepo
@@ -401,7 +401,7 @@ func (fn *Node) UpdateAllVCS() {
 		if err != nil {
 			fmt.Printf("error: %v\n", err)
 		}
-		return ki.Break
+		return tree.Break
 	})
 }
 

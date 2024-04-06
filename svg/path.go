@@ -12,9 +12,9 @@ import (
 	"strings"
 	"unicode"
 
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/paint"
+	"cogentcore.org/core/tree"
 )
 
 // Path renders SVG data sequences that can render just about anything
@@ -573,7 +573,7 @@ func PathDataBBox(data []PathData) mat32.Box2 {
 	bb := mat32.B2Empty()
 	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIndex int, cp mat32.Vec2, ctrls []mat32.Vec2) bool {
 		bb.ExpandByPoint(cp)
-		return ki.Continue
+		return tree.Continue
 	})
 	return bb
 }
@@ -584,11 +584,11 @@ func PathDataStart(data []PathData) (vec mat32.Vec2, ang float32) {
 	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIndex int, cp mat32.Vec2, ctrls []mat32.Vec2) bool {
 		if gotSt {
 			ang = mat32.Atan2(cp.Y-vec.Y, cp.X-vec.X)
-			return ki.Break
+			return tree.Break
 		}
 		vec = cp
 		gotSt = true
-		return ki.Continue
+		return tree.Continue
 	})
 	return
 }
@@ -602,7 +602,7 @@ func PathDataEnd(data []PathData) (vec mat32.Vec2, ang float32) {
 		}
 		vec = cp
 		gotSome = true
-		return ki.Continue
+		return tree.Continue
 	})
 	return
 }

@@ -16,11 +16,11 @@ import (
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 )
 
 // This file contains the standard [Value]s built into giv.
@@ -367,7 +367,7 @@ func (v *MapInlineValue) Update() {
 	}
 }
 
-// KiValue represents a [ki.Node] value with a button.
+// KiValue represents a [tree.Node] value with a button.
 type KiValue struct {
 	ValueBase[*gi.Button]
 }
@@ -395,20 +395,20 @@ func (v *KiValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	return true, nil
 }
 
-// KiValue returns the actual underlying [ki.Node] value, or nil.
-func (vv *KiValue) KiValue() ki.Node {
+// KiValue returns the actual underlying [tree.Node] value, or nil.
+func (vv *KiValue) KiValue() tree.Node {
 	if !vv.Value.IsValid() || vv.Value.IsNil() {
 		return nil
 	}
 	npv := laser.NonPtrValue(vv.Value)
 	if npv.Kind() == reflect.Interface {
-		return npv.Interface().(ki.Node)
+		return npv.Interface().(tree.Node)
 	}
 	opv := laser.OnePtrValue(vv.Value)
 	if opv.IsNil() {
 		return nil
 	}
-	return opv.Interface().(ki.Node)
+	return opv.Interface().(tree.Node)
 }
 
 // EnumValue represents an [enums.Enum] value with a chooser.
@@ -449,7 +449,7 @@ func (v *BitFlagValue) Update() {
 func (v *BitFlagValue) EnumValue() enums.BitFlagSetter {
 	// special case to use [ki.Ki.FlagType] if we are the Flags field
 	if v.Field != nil && v.Field.Name == "Flags" {
-		if k, ok := v.Owner.(ki.Node); ok {
+		if k, ok := v.Owner.(tree.Node); ok {
 			return k.FlagType()
 		}
 	}

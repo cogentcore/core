@@ -5,7 +5,7 @@
 package gi
 
 import (
-	"cogentcore.org/core/ki"
+	"cogentcore.org/core/tree"
 )
 
 // Variables for functions the giv package, allowing for it to be a separate package
@@ -13,7 +13,7 @@ import (
 
 // InspectorWindow opens an interactive editor of the given Ki tree at its root.
 // It is set to [giv.InspectorWindow] if giv is imported; otherwise; it is nil.
-var InspectorWindow func(obj ki.Node)
+var InspectorWindow func(obj tree.Node)
 
 // SettingsWindow opens a window for editing the user settings.
 // It is set to [giv.SettingsWindow] if giv is imported; otherwise; it is nil.

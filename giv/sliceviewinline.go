@@ -11,9 +11,9 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 )
 
 // SliceViewInline represents a slice as a single line widget,
@@ -128,7 +128,7 @@ func (sv *SliceViewInline) Config() {
 		sv.ConfigSize = 0
 		return
 	}
-	config := ki.Config{}
+	config := tree.Config{}
 	// always start fresh!
 	sv.Values = make([]Value, 0)
 

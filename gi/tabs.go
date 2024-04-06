@@ -15,9 +15,9 @@ import (
 	"cogentcore.org/core/glop/elide"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 )
 
@@ -459,7 +459,7 @@ func (ts *Tabs) ConfigNewTabButton() bool {
 // Re-config is needed when the type of tabs changes, but not
 // when a new tab is added, which only requires a new layout pass.
 func (ts *Tabs) Config() {
-	config := ki.Config{}
+	config := tree.Config{}
 	// frame only comes before tabs in bottom nav bar
 	if ts.Type.Effective(ts) == NavigationBar {
 		config.Add(FrameType, "frame")
@@ -630,7 +630,7 @@ func (tb *Tab) SetStyles() {
 }
 
 func (tb *Tab) Tabs() *Tabs {
-	ts := tb.ParentByType(TabsType, ki.Embeds)
+	ts := tb.ParentByType(TabsType, tree.Embeds)
 	if ts == nil {
 		return nil
 	}
@@ -638,7 +638,7 @@ func (tb *Tab) Tabs() *Tabs {
 }
 
 func (tb *Tab) Config() {
-	config := ki.Config{}
+	config := tree.Config{}
 	if tb.MaxChars > 0 {
 		tb.Text = elide.Middle(tb.Text, tb.MaxChars)
 	}

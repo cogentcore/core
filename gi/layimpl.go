@@ -9,10 +9,10 @@ import (
 	"image"
 	"log/slog"
 
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 )
 
 // Layout uses 3 Size passes, 2 Position passes:
@@ -144,7 +144,7 @@ type Layouter interface {
 
 // AsLayout returns the given value as a value of type Layout if the type
 // of the given value embeds Layout, or nil otherwise
-func AsLayout(k ki.Node) *Layout {
+func AsLayout(k tree.Node) *Layout {
 	if k == nil || k.This() == nil {
 		return nil
 	}
@@ -748,7 +748,7 @@ func (ly *Layout) LayoutSpace() {
 func (wb *WidgetBase) SizeUpChildren() {
 	wb.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwi.SizeUp()
-		return ki.Continue
+		return tree.Continue
 	})
 }
 
@@ -757,13 +757,13 @@ func (ly *Layout) SizeUpChildren() {
 	if ly.Styles.Display == styles.Stacked && !ly.Is(LayoutStackTopOnly) {
 		ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			kwi.SizeUp()
-			return ki.Continue
+			return tree.Continue
 		})
 		return
 	}
 	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwi.SizeUp()
-		return ki.Continue
+		return tree.Continue
 	})
 }
 
@@ -809,7 +809,7 @@ func (ly *Layout) LaySetInitCellsFlex() {
 		mat32.SetPointDim(&kwb.Geom.Cell, li.MainAxis, idx)
 		mat32.SetPointDim(&kwb.Geom.Cell, ca, 0)
 		idx++
-		return ki.Continue
+		return tree.Continue
 	})
 	if idx == 0 {
 		if DebugSettings.LayoutTrace {
@@ -826,7 +826,7 @@ func (ly *Layout) LaySetInitCellsWrap() {
 	ni := 0
 	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		ni++
-		return ki.Continue
+		return tree.Continue
 	})
 	if ni == 0 {
 		li.Shape = image.Point{1, 1}
@@ -868,7 +868,7 @@ func (ly *Layout) LaySetWrapIndexes() {
 			maxc.Y = ic.Y
 		}
 		idx++
-		return ki.Continue
+		return tree.Continue
 	})
 	maxc.X++
 	maxc.Y++
@@ -881,7 +881,7 @@ func (ly *Layout) UpdateStackedVisibility() {
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwb.SetState(i != ly.StackTop, states.Invisible)
 		kwb.Geom.Cell = image.Point{0, 0}
-		return ki.Continue
+		return tree.Continue
 	})
 }
 
@@ -917,7 +917,7 @@ func (ly *Layout) LaySetInitCellsGrid() {
 			ci = 0
 			ri++
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 }
 
@@ -994,7 +994,7 @@ func (ly *Layout) SizeFromChildrenCells(iter int, pass LayoutPasses) mat32.Vec2 
 			sm += gsz
 			cd.Grow.SetDim(ma, sm)
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	if DebugSettings.LayoutTraceDetail {
 		fmt.Println(ly, "SizeFromChildren")
@@ -1073,7 +1073,7 @@ func (wb *WidgetBase) SizeDownChildren(iter int) bool {
 			fmt.Println(wb, "SizeDownChildren child:", kwb.Nm, "triggered redo")
 		}
 		redo = redo || re
-		return ki.Continue
+		return tree.Continue
 	})
 	return redo
 }
@@ -1090,7 +1090,7 @@ func (ly *Layout) SizeDownChildren(iter int) bool {
 			if i == ly.StackTop {
 				redo = redo || re
 			}
-			return ki.Continue
+			return tree.Continue
 		})
 		return redo
 	}
@@ -1309,7 +1309,7 @@ func (ly *Layout) SizeDownGrowCells(iter int, extra mat32.Vec2) bool {
 			ksz.Alloc.Total.SetDim(ma, asz)
 		}
 		ksz.SetContentFromTotal(&ksz.Alloc)
-		return ki.Continue
+		return tree.Continue
 	})
 	return redo
 }
@@ -1335,7 +1335,7 @@ func (ly *Layout) SizeDownWrap(iter int) bool {
 			n = 1
 			sum = ksz.Dim(d) + gap
 			first = false
-			return ki.Continue
+			return tree.Continue
 		}
 		if sum+ksz.Dim(d)+gap >= fit {
 			if DebugSettings.LayoutTraceDetail {
@@ -1348,7 +1348,7 @@ func (ly *Layout) SizeDownWrap(iter int) bool {
 			sum += ksz.Dim(d) + gap
 			n++
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	if n > 0 {
 		wraps = append(wraps, n)
@@ -1404,7 +1404,7 @@ func (ly *Layout) SizeDownGrowStacked(iter int, extra mat32.Vec2) bool {
 		}
 		ksz.Alloc.Total = asz
 		ksz.SetContentFromTotal(&ksz.Alloc)
-		return ki.Continue
+		return tree.Continue
 	})
 	return chg
 }
@@ -1435,7 +1435,7 @@ func (ly *Layout) SizeDownAllocActualCells(iter int) {
 			ksz.Alloc.Total.SetDim(ma, asz)
 		}
 		ksz.SetContentFromTotal(&ksz.Alloc)
-		return ki.Continue
+		return tree.Continue
 	})
 }
 
@@ -1458,7 +1458,7 @@ func (ly *Layout) SizeDownAllocActualStacked(iter int) {
 		ksz := &kwb.Geom.Size
 		ksz.Alloc.Total = asz
 		ksz.SetContentFromTotal(&ksz.Alloc)
-		return ki.Continue
+		return tree.Continue
 	})
 }
 
@@ -1555,7 +1555,7 @@ func (ly *Layout) SizeFinalLay() {
 func (wb *WidgetBase) SizeFinalChildren() {
 	wb.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwi.SizeFinal()
-		return ki.Continue
+		return tree.Continue
 	})
 }
 
@@ -1564,7 +1564,7 @@ func (ly *Layout) SizeFinalChildren() {
 	if ly.Styles.Display == styles.Stacked && !ly.Is(LayoutStackTopOnly) {
 		ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			kwi.SizeFinal()
-			return ki.Continue
+			return tree.Continue
 		})
 		return
 	}
@@ -1639,7 +1639,7 @@ func (wb *WidgetBase) PositionParts() {
 func (wb *WidgetBase) PositionChildren() {
 	wb.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwi.Position()
-		return ki.Continue
+		return tree.Continue
 	})
 }
 
@@ -1700,7 +1700,7 @@ func (ly *Layout) PositionCellsMainX() {
 		pos.X += alloc.X + gap.X
 		lastSz = alloc
 		idx++
-		return ki.Continue
+		return tree.Continue
 	})
 }
 
@@ -1728,7 +1728,7 @@ func (ly *Layout) PositionCellsMainY() {
 		pos.Y += alloc.Y + gap.Y
 		lastSz = alloc
 		idx++
-		return ki.Continue
+		return tree.Continue
 	})
 }
 
@@ -1741,7 +1741,7 @@ func (ly *Layout) PositionStacked() {
 		if !ly.Is(LayoutStackTopOnly) || i == ly.StackTop {
 			kwi.Position()
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 }
 
@@ -1829,7 +1829,7 @@ func (wb *WidgetBase) ScenePosParts() {
 func (wb *WidgetBase) ScenePosChildren() {
 	wb.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwi.ScenePos()
-		return ki.Continue
+		return tree.Continue
 	})
 }
 
@@ -1838,7 +1838,7 @@ func (ly *Layout) ScenePosChildren() {
 	if ly.Styles.Display == styles.Stacked && !ly.Is(LayoutStackTopOnly) {
 		ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			kwi.ScenePos()
-			return ki.Continue
+			return tree.Continue
 		})
 		return
 	}

@@ -17,7 +17,6 @@ import (
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/goosi"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/pi/lex"
@@ -25,6 +24,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor/histyle"
 	"cogentcore.org/core/texteditor/textbuf"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 )
 
@@ -184,7 +184,7 @@ type Editor struct { //core:embedder
 // NewSoloEditor returns a new [Editor] with an associated [Buffer].
 // This is appropriate for making a standalone editor in which there
 // is there is one editor per buffer.
-func NewSoloEditor(parent ki.Node, name ...string) *Editor {
+func NewSoloEditor(parent tree.Node, name ...string) *Editor {
 	return NewEditor(parent, name...).SetBuffer(NewBuffer())
 }
 

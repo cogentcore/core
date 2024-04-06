@@ -11,13 +11,13 @@ import (
 	"reflect"
 	"sync"
 
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/tree"
 )
 
 // Node is the common interface for all xyz scenegraph nodes
 type Node interface {
-	ki.Node
+	tree.Node
 
 	// IsSolid returns true if this is an Solid node (else a Group)
 	IsSolid() bool
@@ -112,7 +112,7 @@ type Node interface {
 // relative to parent, and computed bounding boxes, etc.
 // There are only two different kinds of Nodes: Group and Solid
 type NodeBase struct {
-	ki.NodeBase
+	tree.NodeBase
 
 	// complete specification of position and orientation
 	Pose Pose `set:"-"`
@@ -142,11 +142,11 @@ type NodeBase struct {
 }
 
 // NodeFlags extend ki.Flags to hold 3D node state
-type NodeFlags ki.Flags //enums:bitflag
+type NodeFlags tree.Flags //enums:bitflag
 
 const (
 	// WorldMatrixUpdated means that the Pose.WorldMatrix has been updated
-	WorldMatrixUpdated NodeFlags = NodeFlags(ki.FlagsN) + iota
+	WorldMatrixUpdated NodeFlags = NodeFlags(tree.FlagsN) + iota
 
 	// VectorsUpdated means that the rendering vectors information is updated
 	VectorsUpdated
@@ -156,7 +156,7 @@ const (
 )
 
 // AsNode converts Ki to a Node interface and a NodeBase obj -- nil if not.
-func AsNode(k ki.Node) (Node, *NodeBase) {
+func AsNode(k tree.Node) (Node, *NodeBase) {
 	if k == nil || k.This() == nil { // this also checks for destroyed
 		return nil, nil
 	}
@@ -169,7 +169,7 @@ func AsNode(k ki.Node) (Node, *NodeBase) {
 
 // AsNodeBase converts Ki to a *NodeBase -- use when known to be at
 // least of this type, not-nil, etc
-func AsNodeBase(k ki.Node) *NodeBase {
+func AsNodeBase(k tree.Node) *NodeBase {
 	return k.(Node).AsNode()
 }
 

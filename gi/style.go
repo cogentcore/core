@@ -10,11 +10,11 @@ import (
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 )
 
@@ -185,7 +185,7 @@ func (wb *WidgetBase) RunStylers() {
 // all other widgets inherit it. It must be called before
 // [WidgetBase.RunStylers] and [WidgetBase.ApplyStyleSettings].
 func (wb *WidgetBase) ResetStyleSettings() {
-	if ki.IsRoot(wb) {
+	if tree.IsRoot(wb) {
 		return
 	}
 	fsz := AppearanceSettings.FontSize / 100

@@ -12,15 +12,15 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/grr"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 )
 
 // Node is the interface for all SVG nodes
 type Node interface {
-	ki.Node
+	tree.Node
 
 	// AsNodeBase returns a generic svg.NodeBase for our node -- gives generic
 	// access to all the base-level data structures without requiring
@@ -82,7 +82,7 @@ type Node interface {
 
 // svg.NodeBase is the base type for elements within the SVG scenegraph
 type NodeBase struct {
-	ki.NodeBase
+	tree.NodeBase
 
 	// user-defined class name(s) used primarily for attaching
 	// CSS styles to different display elements.
@@ -94,10 +94,10 @@ type NodeBase struct {
 	// These styles apply here and to everything below, until superceded.
 	// Use .class and #name Props elements to apply entire styles
 	// to given elements, and type for element type.
-	CSS ki.Props `xml:"css" set:"-"`
+	CSS tree.Props `xml:"css" set:"-"`
 
 	// aggregated css properties from all higher nodes down to me
-	CSSAgg ki.Props `copier:"-" json:"-" xml:"-" set:"-" view:"no-inline"`
+	CSSAgg tree.Props `copier:"-" json:"-" xml:"-" set:"-" view:"no-inline"`
 
 	// bounding box for the node within the SVG Pixels image.
 	// This one can be outside the visible range of the SVG image.
@@ -265,10 +265,10 @@ func (g *NodeBase) ReadGeom(sv *SVG, dat []float32) {
 // nil or deleted items.  Return ki.Continue (true) to continue,
 // and ki.Break (false) to terminate.
 func SVGWalkPre(n Node, fun func(kni Node, knb *NodeBase) bool) {
-	n.WalkPre(func(k ki.Node) bool {
+	n.WalkPre(func(k tree.Node) bool {
 		kni := k.(Node)
 		if kni == nil || kni.This() == nil {
-			return ki.Break
+			return tree.Break
 		}
 		return fun(kni, kni.AsNodeBase())
 	})
@@ -280,13 +280,13 @@ func SVGWalkPre(n Node, fun func(kni Node, knb *NodeBase) bool) {
 // i.e., it only processes concrete graphical nodes.
 // Return ki.Continue (true) to continue, and ki.Break (false) to terminate.
 func SVGWalkPreNoDefs(n Node, fun func(kni Node, knb *NodeBase) bool) {
-	n.WalkPre(func(k ki.Node) bool {
+	n.WalkPre(func(k tree.Node) bool {
 		kni := k.(Node)
 		if kni == nil || kni.This() == nil {
-			return ki.Break
+			return tree.Break
 		}
 		if kni.Is(IsDef) || kni.KiType() == MetaDataType {
-			return ki.Break
+			return tree.Break
 		}
 		return fun(kni, kni.AsNodeBase())
 	})
@@ -298,10 +298,10 @@ func FirstNonGroupNode(n Node) Node {
 	var ngn Node
 	SVGWalkPreNoDefs(n, func(kni Node, knb *NodeBase) bool {
 		if _, isgp := kni.This().(*Group); isgp {
-			return ki.Continue
+			return tree.Continue
 		}
 		ngn = kni
-		return ki.Break
+		return tree.Break
 	})
 	return ngn
 }
@@ -313,18 +313,18 @@ func NodesContainingPoint(n Node, pt image.Point, leavesOnly bool) []Node {
 	var cn []Node
 	SVGWalkPre(n, func(kni Node, knb *NodeBase) bool {
 		if kni.This() == n.This() {
-			return ki.Continue
+			return tree.Continue
 		}
 		if leavesOnly && kni.HasChildren() {
-			return ki.Continue
+			return tree.Continue
 		}
 		if knb.Paint.Off {
-			return ki.Break
+			return tree.Break
 		}
 		if pt.In(knb.BBox) {
 			cn = append(cn, kni)
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	return cn
 }
@@ -339,7 +339,7 @@ func (g *NodeBase) Style(sv *SVG) {
 	ctxt := colors.Context(sv)
 	pc.StyleSet = false // this is always first call, restart
 
-	var parCSSAgg ki.Props
+	var parCSSAgg tree.Props
 	if g.Par != nil { // && g.Par != sv.Root.This()
 		pn := g.Par.(Node)
 		parCSSAgg = pn.AsNodeBase().CSSAgg
@@ -366,9 +366,9 @@ func (g *NodeBase) Style(sv *SVG) {
 }
 
 // AggCSS aggregates css properties
-func AggCSS(agg *ki.Props, css ki.Props) {
+func AggCSS(agg *tree.Props, css tree.Props) {
 	if *agg == nil {
-		*agg = make(ki.Props, len(css))
+		*agg = make(tree.Props, len(css))
 	}
 	for key, val := range css {
 		(*agg)[key] = val
@@ -377,12 +377,12 @@ func AggCSS(agg *ki.Props, css ki.Props) {
 
 // ApplyCSS applies css styles to given node,
 // using key to select sub-props from overall properties list
-func (g *NodeBase) ApplyCSS(sv *SVG, key string, css ki.Props) bool {
+func (g *NodeBase) ApplyCSS(sv *SVG, key string, css tree.Props) bool {
 	pp, got := css[key]
 	if !got {
 		return false
 	}
-	pmap, ok := pp.(ki.Props) // must be a props map
+	pmap, ok := pp.(tree.Props) // must be a props map
 	if !ok {
 		return false
 	}
@@ -399,7 +399,7 @@ func (g *NodeBase) ApplyCSS(sv *SVG, key string, css ki.Props) bool {
 
 // StyleCSS applies css style properties to given SVG node
 // parsing out type, .class, and #name selectors
-func (g *NodeBase) StyleCSS(sv *SVG, css ki.Props) {
+func (g *NodeBase) StyleCSS(sv *SVG, css tree.Props) {
 	tyn := strings.ToLower(g.KiType().Name) // type is most general, first
 	g.ApplyCSS(sv, tyn, css)
 	cln := "." + strings.ToLower(g.Class) // then class
@@ -503,11 +503,11 @@ func (g *NodeBase) Render(sv *SVG) {
 }
 
 // NodeFlags extend ki.Flags to hold SVG node state
-type NodeFlags ki.Flags //enums:bitflag
+type NodeFlags tree.Flags //enums:bitflag
 
 const (
 	// Rendering means that the SVG is currently redrawing
 	// Can be useful to check for animations etc to decide whether to
 	// drive another update
-	IsDef NodeFlags = NodeFlags(ki.FlagsN) + iota
+	IsDef NodeFlags = NodeFlags(tree.FlagsN) + iota
 )

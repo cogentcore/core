@@ -14,9 +14,9 @@ import (
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/keyfun"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 )
 
 // EventMgr returns the higher-level gi event manager
@@ -530,10 +530,10 @@ func (wb *WidgetBase) FocusableInMe() Widget {
 	var foc Widget
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		if !wb.AbilityIs(abilities.Focusable) {
-			return ki.Continue
+			return tree.Continue
 		}
 		foc = wi
-		return ki.Break // done
+		return tree.Break // done
 	})
 	return foc
 }

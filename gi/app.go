@@ -16,11 +16,11 @@ import (
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/svg"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 )
 
@@ -305,7 +305,7 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 // buttons using a recursive approach that updates path with context
 // about the original button menu. Consumers of this function should
 // typically set path to "".
-func AddButtonItems(items *[]ChooserItem, parent ki.Node, path string) {
+func AddButtonItems(items *[]ChooserItem, parent tree.Node, path string) {
 	for _, kid := range *parent.Children() {
 		bt := AsButton(kid)
 		if bt == nil || bt.IsDisabled() {

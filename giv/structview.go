@@ -17,11 +17,11 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/gti"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 )
 
 // NoSentenceCaseFor indicates to not transform field names in
@@ -133,7 +133,7 @@ func (sv *StructView) UpdateField(field string) {
 
 // Config configures the view
 func (sv *StructView) Config() {
-	if ks, ok := sv.Struct.(ki.Node); ok {
+	if ks, ok := sv.Struct.(tree.Node); ok {
 		if ks == nil || ks.This() == nil {
 			return
 		}
@@ -182,7 +182,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 	sg := sv.StructGrid()
 	// note: widget re-use does not work due to all the closures
 	sg.DeleteChildren()
-	config := ki.Config{}
+	config := tree.Config{}
 	dupeFields := map[string]bool{}
 	sv.FieldViews = make([]Value, 0)
 

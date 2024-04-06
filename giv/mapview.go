@@ -11,9 +11,9 @@ import (
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 )
 
 // MapView represents a map, creating a property editor of the values --
@@ -119,7 +119,7 @@ func (mv *MapView) KiPropTag() string {
 	if vd.Owner == nil {
 		return ""
 	}
-	if ownki, ok := vd.Owner.(ki.Node); ok {
+	if ownki, ok := vd.Owner.(tree.Node); ok {
 		pt := ownki.PropTag()
 		return pt
 	}
@@ -144,7 +144,7 @@ func (mv *MapView) ConfigMapGrid() {
 		return
 	}
 	sg := mv.MapGrid()
-	config := ki.Config{}
+	config := tree.Config{}
 	// always start fresh!
 	mv.Keys = make([]Value, 0)
 	mv.Values = make([]Value, 0)
@@ -173,7 +173,7 @@ func (mv *MapView) ConfigMapGrid() {
 	// valtypes := append(kit.Types.AllTagged(typeTag), kit.Enums.AllTagged(typeTag)...)
 	// valtypes = append(valtypes, kit.Types.AllTagged("basic-type")...)
 	// valtypes = append(valtypes, kit.TypeFor[reflect.Type]())
-	valtypes := gti.AllEmbeddersOf(ki.NodeBaseType) // todo: this is not right
+	valtypes := gti.AllEmbeddersOf(tree.NodeBaseType) // todo: this is not right
 
 	mv.NCols = ncol
 

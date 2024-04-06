@@ -19,7 +19,7 @@ import (
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
-	"cogentcore.org/core/ki"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
@@ -990,33 +990,33 @@ func main() {
 		giv.NewTreeView(c2, "Nested child")
 	},
 	"views/tree-views-1": func(parent gi.Widget) {
-		n := ki.NewRoot[*ki.NodeBase]("Root")
-		ki.New[*ki.NodeBase](n, "Child 1")
-		c2 := ki.New[*ki.NodeBase](n, "Child 2")
-		ki.New[*ki.NodeBase](c2, "Nested child")
+		n := tree.NewRoot[*tree.NodeBase]("Root")
+		tree.New[*tree.NodeBase](n, "Child 1")
+		c2 := tree.New[*tree.NodeBase](n, "Child 2")
+		tree.New[*tree.NodeBase](c2, "Nested child")
 		giv.NewTreeView(parent).SyncTree(n)
 	},
 	"views/tree-views-2": func(parent gi.Widget) {
-		n := ki.NewRoot[*ki.NodeBase]("Root")
-		ki.New[*ki.NodeBase](n, "Child 1")
-		c2 := ki.New[*ki.NodeBase](n, "Child 2")
-		ki.New[*ki.NodeBase](c2, "Nested child")
+		n := tree.NewRoot[*tree.NodeBase]("Root")
+		tree.New[*tree.NodeBase](n, "Child 1")
+		c2 := tree.New[*tree.NodeBase](n, "Child 2")
+		tree.New[*tree.NodeBase](c2, "Nested child")
 		giv.NewTreeView(parent).SyncTree(n).OnChange(func(e events.Event) {
 			gi.MessageSnackbar(parent, "Tree view changed")
 		})
 	},
 	"views/tree-views-3": func(parent gi.Widget) {
-		n := ki.NewRoot[*ki.NodeBase]("Root")
-		ki.New[*ki.NodeBase](n, "Child 1")
-		c2 := ki.New[*ki.NodeBase](n, "Child 2")
-		ki.New[*ki.NodeBase](c2, "Nested child")
+		n := tree.NewRoot[*tree.NodeBase]("Root")
+		tree.New[*tree.NodeBase](n, "Child 1")
+		c2 := tree.New[*tree.NodeBase](n, "Child 2")
+		tree.New[*tree.NodeBase](c2, "Nested child")
 		giv.NewTreeView(parent).SyncTree(n).SetReadOnly(true)
 	},
 	"views/tree-views-4": func(parent gi.Widget) {
-		n := ki.NewRoot[*ki.NodeBase]("Root")
-		ki.New[*ki.NodeBase](n, "Child 1")
-		c2 := ki.New[*ki.NodeBase](n, "Child 2")
-		ki.New[*ki.NodeBase](c2, "Nested child")
+		n := tree.NewRoot[*tree.NodeBase]("Root")
+		tree.New[*tree.NodeBase](n, "Child 1")
+		c2 := tree.New[*tree.NodeBase](n, "Child 2")
+		tree.New[*tree.NodeBase](c2, "Nested child")
 		giv.NewValue(parent, n)
 	},
 	"advanced/styling-0": func(parent gi.Widget) {

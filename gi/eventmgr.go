@@ -23,9 +23,9 @@ import (
 	"cogentcore.org/core/grows/images"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/keyfun"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/states"
+	"cogentcore.org/core/tree"
 	"github.com/anthonynsimon/bild/clone"
 )
 
@@ -190,10 +190,10 @@ func (em *EventMgr) HandleFocusEvent(e events.Event) {
 		}
 	}
 	if em.Focus != nil {
-		em.Focus.WalkUpParent(func(k ki.Node) bool {
+		em.Focus.WalkUpParent(func(k tree.Node) bool {
 			_, wb := AsWidget(k)
 			if !wb.IsVisible() {
-				return ki.Break
+				return tree.Break
 			}
 			wb.FirstHandleEvent(e)
 			return !e.IsHandled()
@@ -202,10 +202,10 @@ func (em *EventMgr) HandleFocusEvent(e events.Event) {
 			em.Focus.HandleEvent(e)
 		}
 		if !e.IsHandled() {
-			em.Focus.WalkUpParent(func(k ki.Node) bool {
+			em.Focus.WalkUpParent(func(k tree.Node) bool {
 				_, wb := AsWidget(k)
 				if !wb.IsVisible() {
-					return ki.Break
+					return tree.Break
 				}
 				wb.FinalHandleEvent(e)
 				return !e.IsHandled()
@@ -650,10 +650,10 @@ func (em *EventMgr) GetMouseInBBox(w Widget, pos image.Point) {
 		// we correctly process cursors for disabled elements.
 		// it needs to be handled downstream by anyone who needs it.
 		if !kwb.IsVisible() {
-			return ki.Break
+			return tree.Break
 		}
 		if !kwb.PosInScBBox(pos) {
-			return ki.Break
+			return tree.Break
 		}
 		em.MouseInBBox = append(em.MouseInBBox, kwi)
 		if kwb.Parts != nil {
@@ -667,7 +667,7 @@ func (em *EventMgr) GetMouseInBBox(w Widget, pos image.Point) {
 				}
 			}
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 }
 
@@ -1030,7 +1030,7 @@ func (em *EventMgr) FocusLast() bool {
 // FocusLastFrom sets the focus on the last focusable item in the given tree.
 // returns true if a focusable item was found.
 func (em *EventMgr) FocusLastFrom(from Widget) bool {
-	last := ki.Last(from.This()).(Widget)
+	last := tree.Last(from.This()).(Widget)
 	// fmt.Println("last:", last, "from:", from)
 	return em.FocusOnOrPrev(last)
 }
@@ -1041,13 +1041,13 @@ func (em *EventMgr) ClearNonFocus(foc Widget) {
 
 	focRoot.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		if wi == focRoot { // skip top-level
-			return ki.Continue
+			return tree.Continue
 		}
 		if !wb.IsVisible() {
-			return ki.Continue
+			return tree.Continue
 		}
 		if foc == wi {
-			return ki.Continue
+			return tree.Continue
 		}
 		if wb.StateIs(states.Focused) {
 			if DebugSettings.EventTrace {
@@ -1055,7 +1055,7 @@ func (em *EventMgr) ClearNonFocus(foc Widget) {
 			}
 			wi.Send(events.FocusLost)
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 }
 
@@ -1111,7 +1111,7 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 		}
 	case keyfun.Menu:
 		if tb := sc.GetTopAppBar(); tb != nil {
-			ch := ki.ChildByType[*Chooser](tb, true)
+			ch := tree.ChildByType[*Chooser](tb, true)
 			if ch != nil {
 				ch.SetFocusEvent()
 				ch.TextField().OfferComplete()
@@ -1178,7 +1178,7 @@ func (em *EventMgr) GetShortcutsIn(parent Widget) {
 	parent.AsWidget().WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		bt := AsButton(wi.This())
 		if bt == nil {
-			return ki.Continue
+			return tree.Continue
 		}
 		if bt.Shortcut != "" {
 			em.AddShortcut(bt.Shortcut, bt)
@@ -1188,7 +1188,7 @@ func (em *EventMgr) GetShortcutsIn(parent Widget) {
 			bt.Menu(tmps)
 			em.GetShortcutsIn(tmps)
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 }
 

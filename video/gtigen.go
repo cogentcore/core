@@ -6,7 +6,7 @@ import (
 	"image"
 
 	"cogentcore.org/core/gti"
-	"cogentcore.org/core/ki"
+	"cogentcore.org/core/tree"
 	"github.com/zergon321/reisen"
 )
 
@@ -16,7 +16,7 @@ var VideoType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/video.Video", I
 // NewVideo adds a new [Video] with the given name to the given parent:
 // Video represents a video playback widget without any controls.
 // See [Player] for a version with controls.
-func NewVideo(parent ki.Node, name ...string) *Video {
+func NewVideo(parent tree.Node, name ...string) *Video {
 	return parent.NewChild(VideoType, name...).(*Video)
 }
 
@@ -24,7 +24,7 @@ func NewVideo(parent ki.Node, name ...string) *Video {
 func (t *Video) KiType() *gti.Type { return VideoType }
 
 // New returns a new [*Video] value
-func (t *Video) New() ki.Node { return &Video{} }
+func (t *Video) New() tree.Node { return &Video{} }
 
 // SetMedia sets the [Video.Media]:
 // Media is the video media.

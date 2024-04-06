@@ -18,7 +18,7 @@ import (
 	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/gti"
-	"cogentcore.org/core/ki"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/vci"
 	"gopkg.in/fsnotify.v1"
 )
@@ -363,7 +363,7 @@ func (ft *Tree) ExtNodeByPath(fpath string) (*Node, error) {
 // for ExtFiles
 func (ft *Tree) UpdateExtFiles(efn *Node) {
 	efn.Info.Mode = os.ModeDir | os.ModeIrregular // mark as dir, irregular
-	config := ki.Config{}
+	config := tree.Config{}
 	typ := ft.NodeType
 	for _, f := range ft.ExtFiles {
 		config.Add(typ, dirs.DirAndFile(f))

@@ -4,7 +4,7 @@ package xyz
 
 import (
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/ki"
+	"cogentcore.org/core/tree"
 )
 
 var _LightColorsValues = []LightColors{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}
@@ -63,14 +63,14 @@ var _NodeFlagsMap = map[NodeFlags]string{1: `WorldMatrixUpdated`, 2: `VectorsUpd
 
 // String returns the string representation of this NodeFlags value.
 func (i NodeFlags) String() string {
-	return enums.BitFlagStringExtended(i, _NodeFlagsValues, ki.FlagsValues())
+	return enums.BitFlagStringExtended(i, _NodeFlagsValues, tree.FlagsValues())
 }
 
 // BitIndexString returns the string representation of this NodeFlags value
 // if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
 func (i NodeFlags) BitIndexString() string {
-	return enums.BitIndexStringExtended[NodeFlags, ki.Flags](i, _NodeFlagsMap)
+	return enums.BitIndexStringExtended[NodeFlags, tree.Flags](i, _NodeFlagsMap)
 }
 
 // SetString sets the NodeFlags value from its string representation,
@@ -81,7 +81,7 @@ func (i *NodeFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) 
 // while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *NodeFlags) SetStringOr(s string) error {
-	return enums.SetStringOrExtended(i, (*ki.Flags)(i), s, _NodeFlagsValueMap)
+	return enums.SetStringOrExtended(i, (*tree.Flags)(i), s, _NodeFlagsValueMap)
 }
 
 // Int64 returns the NodeFlags value as an int64.
@@ -92,17 +92,17 @@ func (i *NodeFlags) SetInt64(in int64) { *i = NodeFlags(in) }
 
 // Desc returns the description of the NodeFlags value.
 func (i NodeFlags) Desc() string {
-	return enums.DescExtended[NodeFlags, ki.Flags](i, _NodeFlagsDescMap)
+	return enums.DescExtended[NodeFlags, tree.Flags](i, _NodeFlagsDescMap)
 }
 
 // NodeFlagsValues returns all possible values for the type NodeFlags.
 func NodeFlagsValues() []NodeFlags {
-	return enums.ValuesGlobalExtended(_NodeFlagsValues, ki.FlagsValues())
+	return enums.ValuesGlobalExtended(_NodeFlagsValues, tree.FlagsValues())
 }
 
 // Values returns all possible values for the type NodeFlags.
 func (i NodeFlags) Values() []enums.Enum {
-	return enums.ValuesExtended(_NodeFlagsValues, ki.FlagsValues())
+	return enums.ValuesExtended(_NodeFlagsValues, tree.FlagsValues())
 }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
@@ -175,14 +175,14 @@ var _ScFlagsMap = map[ScFlags]string{1: `ScNeedsConfig`, 2: `ScNeedsUpdate`, 3: 
 
 // String returns the string representation of this ScFlags value.
 func (i ScFlags) String() string {
-	return enums.BitFlagStringExtended(i, _ScFlagsValues, ki.FlagsValues())
+	return enums.BitFlagStringExtended(i, _ScFlagsValues, tree.FlagsValues())
 }
 
 // BitIndexString returns the string representation of this ScFlags value
 // if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
 func (i ScFlags) BitIndexString() string {
-	return enums.BitIndexStringExtended[ScFlags, ki.Flags](i, _ScFlagsMap)
+	return enums.BitIndexStringExtended[ScFlags, tree.Flags](i, _ScFlagsMap)
 }
 
 // SetString sets the ScFlags value from its string representation,
@@ -193,7 +193,7 @@ func (i *ScFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
 // while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *ScFlags) SetStringOr(s string) error {
-	return enums.SetStringOrExtended(i, (*ki.Flags)(i), s, _ScFlagsValueMap)
+	return enums.SetStringOrExtended(i, (*tree.Flags)(i), s, _ScFlagsValueMap)
 }
 
 // Int64 returns the ScFlags value as an int64.
@@ -203,13 +203,13 @@ func (i ScFlags) Int64() int64 { return int64(i) }
 func (i *ScFlags) SetInt64(in int64) { *i = ScFlags(in) }
 
 // Desc returns the description of the ScFlags value.
-func (i ScFlags) Desc() string { return enums.DescExtended[ScFlags, ki.Flags](i, _ScFlagsDescMap) }
+func (i ScFlags) Desc() string { return enums.DescExtended[ScFlags, tree.Flags](i, _ScFlagsDescMap) }
 
 // ScFlagsValues returns all possible values for the type ScFlags.
-func ScFlagsValues() []ScFlags { return enums.ValuesGlobalExtended(_ScFlagsValues, ki.FlagsValues()) }
+func ScFlagsValues() []ScFlags { return enums.ValuesGlobalExtended(_ScFlagsValues, tree.FlagsValues()) }
 
 // Values returns all possible values for the type ScFlags.
-func (i ScFlags) Values() []enums.Enum { return enums.ValuesExtended(_ScFlagsValues, ki.FlagsValues()) }
+func (i ScFlags) Values() []enums.Enum { return enums.ValuesExtended(_ScFlagsValues, tree.FlagsValues()) }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
 func (i ScFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }

@@ -22,11 +22,11 @@ import (
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 )
 
@@ -80,7 +80,7 @@ type TreeViewer interface {
 
 // AsTreeView returns the given value as a value of type TreeView if the type
 // of the given value embeds TreeView, or nil otherwise
-func AsTreeView(k ki.Node) *TreeView {
+func AsTreeView(k tree.Node) *TreeView {
 	if k == nil || k.This() == nil {
 		return nil
 	}
@@ -115,7 +115,7 @@ type TreeView struct {
 	gi.WidgetBase
 
 	// If non-nil, the Ki Node that this widget is viewing in the tree (the source)
-	SyncNode ki.Node `set:"-" copier:"-" json:"-" xml:"-"`
+	SyncNode tree.Node `set:"-" copier:"-" json:"-" xml:"-"`
 
 	// The text to display for the tree view item label, which automatically
 	// defaults to the [ki.Node.Name] of the tree view node. It has no effect
@@ -174,7 +174,7 @@ type TreeView struct {
 // separately from the surrounding context. If a name is provided, it
 // sets the name of the tree view to that and the name of the frame to
 // that plus "-frame".
-func NewTreeViewFrame(parent ki.Node, name ...string) *TreeView {
+func NewTreeViewFrame(parent tree.Node, name ...string) *TreeView {
 	frnm := []string{}
 	if len(name) > 0 {
 		frnm = []string{name[0] + "-frame"}
@@ -211,7 +211,7 @@ func (tv *TreeView) RootSetViewIndex() int {
 			tvki.RootView = tv
 			idx++
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	return idx
 }
@@ -504,7 +504,7 @@ func (tv *TreeView) LabelPart() (*gi.Label, bool) {
 
 func (tv *TreeView) Config() {
 	parts := tv.NewParts()
-	config := ki.Config{}
+	config := tree.Config{}
 	config.Add(gi.SwitchType, "branch")
 	if tv.Icon.IsSet() {
 		config.Add(gi.IconType, "icon")
@@ -581,7 +581,7 @@ func (tv *TreeView) SizeUp() {
 				w = max(w, tv.Indent.Dots+kw)
 			}
 			// fmt.Println(kwb, w, h)
-			return ki.Continue
+			return tree.Continue
 		})
 	}
 	sz := &tv.Geom.Size
@@ -619,7 +619,7 @@ func (tv *TreeView) Position() {
 			kwb.Geom.RelPos.X = tv.Indent.Dots
 			h += kwb.Geom.Size.Actual.Total.Y
 			kwi.Position()
-			return ki.Continue
+			return tree.Continue
 		})
 	}
 }
@@ -1215,9 +1215,9 @@ func (tv *TreeView) OpenAll() { //gti:add
 		tvki := AsTreeView(wi)
 		if tvki != nil {
 			tvki.Open()
-			return ki.Continue
+			return tree.Continue
 		}
-		return ki.Break
+		return tree.Break
 	})
 	tv.NeedsLayout()
 }
@@ -1228,9 +1228,9 @@ func (tv *TreeView) CloseAll() { //gti:add
 		tvki := AsTreeView(wi)
 		if tvki != nil {
 			tvki.Close()
-			return ki.Continue
+			return tree.Continue
 		}
-		return ki.Break
+		return tree.Break
 	})
 	tv.NeedsLayout()
 }
@@ -1238,13 +1238,13 @@ func (tv *TreeView) CloseAll() { //gti:add
 // OpenParents opens all the parents of this node,
 // so that it will be visible.
 func (tv *TreeView) OpenParents() {
-	tv.WalkUpParent(func(k ki.Node) bool {
+	tv.WalkUpParent(func(k tree.Node) bool {
 		tvki := AsTreeView(k)
 		if tvki != nil {
 			tvki.Open()
-			return ki.Continue
+			return tree.Continue
 		}
-		return ki.Break
+		return tree.Break
 	})
 	tv.NeedsLayout()
 }
@@ -1366,7 +1366,7 @@ func (tv *TreeView) MimeData(md *mimedata.Mimes) {
 	}
 	*md = append(*md, mimedata.NewTextData(tv.PathFrom(tv.RootView)))
 	var buf bytes.Buffer
-	err := ki.WriteNewJSON(tv.This(), &buf)
+	err := tree.WriteNewJSON(tv.This(), &buf)
 	if err == nil {
 		*md = append(*md, &mimedata.Data{Type: fi.DataJson, Data: buf.Bytes()})
 	} else {
@@ -1376,13 +1376,13 @@ func (tv *TreeView) MimeData(md *mimedata.Mimes) {
 
 // NodesFromMimeData returns a slice of Ki nodes for
 // the TreeView nodes and paths from mime data.
-func (tv *TreeView) NodesFromMimeData(md mimedata.Mimes) (ki.Slice, []string) {
+func (tv *TreeView) NodesFromMimeData(md mimedata.Mimes) (tree.Slice, []string) {
 	ni := len(md) / 2
-	sl := make(ki.Slice, 0, ni)
+	sl := make(tree.Slice, 0, ni)
 	pl := make([]string, 0, ni)
 	for _, d := range md {
 		if d.Type == fi.DataJson {
-			nki, err := ki.ReadNewJSON(bytes.NewReader(d.Data))
+			nki, err := tree.ReadNewJSON(bytes.NewReader(d.Data))
 			if err == nil {
 				sl = append(sl, nki)
 			} else {

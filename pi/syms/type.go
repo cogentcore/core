@@ -10,8 +10,8 @@ import (
 	"slices"
 
 	"cogentcore.org/core/glop/indent"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/tree"
 )
 
 // Type contains all the information about types.  Types can be builtin
@@ -51,10 +51,10 @@ type Type struct {
 	Scopes SymNames
 
 	// additional type properties, such as const, virtual, static -- these are just recorded textually and not systematized to keep things open-ended -- many of the most important properties can be inferred from the Kind property
-	Props ki.Props
+	Props tree.Props
 
 	// Ast node that corresponds to this type -- only valid during parsing
-	Ast ki.Node `json:"-" xml:"-"`
+	Ast tree.Node `json:"-" xml:"-"`
 }
 
 // NewType returns a new Type struct initialized with given name and kind

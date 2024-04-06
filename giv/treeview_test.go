@@ -8,13 +8,13 @@ import (
 	"testing"
 
 	"cogentcore.org/core/gi"
-	"cogentcore.org/core/ki"
+	"cogentcore.org/core/tree"
 )
 
 func TestTreeView(t *testing.T) {
 	b := gi.NewBody()
 
-	fr := ki.NewRoot[*gi.Frame]("frame")
+	fr := tree.NewRoot[*gi.Frame]("frame")
 	gi.NewButton(fr)
 	gi.NewLabel(fr)
 	gi.NewButton(gi.NewLayout(fr))

@@ -13,7 +13,7 @@ import (
 	"cogentcore.org/core/glop/option"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
-	"cogentcore.org/core/ki"
+	"cogentcore.org/core/tree"
 )
 
 func TestValues(t *testing.T) {
@@ -23,7 +23,7 @@ func TestValues(t *testing.T) {
 		Tags  string
 	}
 	values := []test{
-		{"ki", gi.NewButton(ki.NewRoot[*gi.Frame]("frame")), ""},
+		{"ki", gi.NewButton(tree.NewRoot[*gi.Frame]("frame")), ""},
 		{"bool", true, ""},
 		{"int", 3, ""},
 		{"float", 6.7, ""},

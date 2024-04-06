@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/gi"
-	"cogentcore.org/core/ki"
+	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,6 +17,6 @@ func TestCallFunc(t *testing.T) {
 	myFunc := func() {
 		called = true
 	}
-	CallFunc(ki.NewRoot[*gi.Frame](), myFunc)
+	CallFunc(tree.NewRoot[*gi.Frame](), myFunc)
 	assert.True(t, called)
 }

@@ -13,9 +13,9 @@ import (
 	"sync"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/ordmap"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/vgpu"
 	"cogentcore.org/core/vgpu/vphong"
 )
@@ -42,7 +42,7 @@ var Update3DTrace = false
 //core:no-new
 //core:embedder
 type Scene struct {
-	ki.NodeBase
+	tree.NodeBase
 
 	// Viewport-level viewbox within any parent Viewport2D
 	Geom mat32.Geom2DInt `set:"-"`
@@ -159,19 +159,19 @@ func (sc *Scene) Validate() error {
 	// 	*errs = append(*errs, err)
 	// }
 	hasError := false
-	sc.WalkPre(func(k ki.Node) bool {
+	sc.WalkPre(func(k tree.Node) bool {
 		if k == sc.This() {
-			return ki.Continue
+			return tree.Continue
 		}
 		ni, _ := AsNode(k)
 		if !ni.IsVisible() {
-			return ki.Break
+			return tree.Break
 		}
 		err := ni.Validate()
 		if err != nil {
 			hasError = true
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	if hasError {
 		return fmt.Errorf("xyz.Scene: %v Validate found at least one error (see log)", sc.Path())
@@ -184,13 +184,13 @@ func (sc *Scene) Validate() error {
 
 // ScFlags has critical state information signaling when rendering,
 // updating, or config needs to be done
-type ScFlags ki.Flags //enums:bitflag
+type ScFlags tree.Flags //enums:bitflag
 
 const (
 	// ScNeedsConfig means that a GPU resource (Lights, Texture, Meshes,
 	// or more complex Nodes that require ConfigNodes) has been changed
 	// and a Config call is required.
-	ScNeedsConfig ScFlags = ScFlags(ki.FlagsN) + iota
+	ScNeedsConfig ScFlags = ScFlags(tree.FlagsN) + iota
 
 	// ScNeedsUpdate means that Node Pose has changed and an update pass
 	// is required to update matrix and bounding boxes.
@@ -237,18 +237,18 @@ func (sc *Scene) SolidsIntersectingPoint(pos image.Point) []Node {
 		if kii == nil {
 			continue
 		}
-		kii.WalkPre(func(k ki.Node) bool {
+		kii.WalkPre(func(k tree.Node) bool {
 			ni, _ := AsNode(k)
 			if ni == nil {
-				return ki.Break // going into a different type of thing, bail
+				return tree.Break // going into a different type of thing, bail
 			}
 			if !ni.IsSolid() {
-				return ki.Continue
+				return tree.Continue
 			}
 			// if nb.PosInWinBBox(pos) {
 			objs = append(objs, ni)
 			// }
-			return ki.Continue
+			return tree.Continue
 		})
 	}
 	return objs

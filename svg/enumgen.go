@@ -4,7 +4,7 @@ package svg
 
 import (
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/ki"
+	"cogentcore.org/core/tree"
 )
 
 var _NodeFlagsValues = []NodeFlags{1}
@@ -20,14 +20,14 @@ var _NodeFlagsMap = map[NodeFlags]string{1: `IsDef`}
 
 // String returns the string representation of this NodeFlags value.
 func (i NodeFlags) String() string {
-	return enums.BitFlagStringExtended(i, _NodeFlagsValues, ki.FlagsValues())
+	return enums.BitFlagStringExtended(i, _NodeFlagsValues, tree.FlagsValues())
 }
 
 // BitIndexString returns the string representation of this NodeFlags value
 // if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
 func (i NodeFlags) BitIndexString() string {
-	return enums.BitIndexStringExtended[NodeFlags, ki.Flags](i, _NodeFlagsMap)
+	return enums.BitIndexStringExtended[NodeFlags, tree.Flags](i, _NodeFlagsMap)
 }
 
 // SetString sets the NodeFlags value from its string representation,
@@ -38,7 +38,7 @@ func (i *NodeFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) 
 // while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *NodeFlags) SetStringOr(s string) error {
-	return enums.SetStringOrExtended(i, (*ki.Flags)(i), s, _NodeFlagsValueMap)
+	return enums.SetStringOrExtended(i, (*tree.Flags)(i), s, _NodeFlagsValueMap)
 }
 
 // Int64 returns the NodeFlags value as an int64.
@@ -49,17 +49,17 @@ func (i *NodeFlags) SetInt64(in int64) { *i = NodeFlags(in) }
 
 // Desc returns the description of the NodeFlags value.
 func (i NodeFlags) Desc() string {
-	return enums.DescExtended[NodeFlags, ki.Flags](i, _NodeFlagsDescMap)
+	return enums.DescExtended[NodeFlags, tree.Flags](i, _NodeFlagsDescMap)
 }
 
 // NodeFlagsValues returns all possible values for the type NodeFlags.
 func NodeFlagsValues() []NodeFlags {
-	return enums.ValuesGlobalExtended(_NodeFlagsValues, ki.FlagsValues())
+	return enums.ValuesGlobalExtended(_NodeFlagsValues, tree.FlagsValues())
 }
 
 // Values returns all possible values for the type NodeFlags.
 func (i NodeFlags) Values() []enums.Enum {
-	return enums.ValuesExtended(_NodeFlagsValues, ki.FlagsValues())
+	return enums.ValuesExtended(_NodeFlagsValues, tree.FlagsValues())
 }
 
 // HasFlag returns whether these bit flags have the given bit flag set.

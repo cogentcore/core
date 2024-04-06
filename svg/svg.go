@@ -14,10 +14,10 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/grows/images"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 )
 
@@ -177,14 +177,14 @@ func (sv *SVG) ImageByURL(url string) image.Image {
 
 func (sv *SVG) Style() {
 	// set the Defs flags
-	sv.Defs.WalkPre(func(k ki.Node) bool {
+	sv.Defs.WalkPre(func(k tree.Node) bool {
 		ni := k.(Node)
 		if ni == nil || ni.This() == nil {
-			return ki.Break
+			return tree.Break
 		}
 		ni.SetFlag(true, IsDef)
 		ni.Style(sv)
-		return ki.Continue
+		return tree.Continue
 	})
 
 	sv.Root.Paint.Defaults()
@@ -196,13 +196,13 @@ func (sv *SVG) Style() {
 	}
 	sv.SetUnitContext(&sv.Root.Paint, mat32.Vec2{}, mat32.Vec2{})
 
-	sv.Root.WalkPre(func(k ki.Node) bool {
+	sv.Root.WalkPre(func(k tree.Node) bool {
 		ni := k.(Node)
 		if ni == nil || ni.This() == nil {
-			return ki.Break
+			return tree.Break
 		}
 		ni.Style(sv)
-		return ki.Continue
+		return tree.Continue
 	})
 }
 

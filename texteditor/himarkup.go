@@ -11,12 +11,12 @@ import (
 
 	"cogentcore.org/core/fi"
 	"cogentcore.org/core/gi"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/pi"
 	"cogentcore.org/core/pi/lex"
 	_ "cogentcore.org/core/pi/suplangs"
 	"cogentcore.org/core/pi/token"
 	"cogentcore.org/core/texteditor/histyle"
+	"cogentcore.org/core/tree"
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/alecthomas/chroma/v2/lexers"
@@ -42,7 +42,7 @@ type HiMarkup struct {
 	TabSize int
 
 	// Commpiled CSS properties for given highlighting style
-	CSSProps ki.Props `json:"-" xml:"-"`
+	CSSProps tree.Props `json:"-" xml:"-"`
 
 	// pi parser state info
 	PiState *pi.FileStates

@@ -7,7 +7,7 @@ package xyz
 import (
 	"fmt"
 
-	"cogentcore.org/core/ki"
+	"cogentcore.org/core/tree"
 )
 
 // AddToLibrary adds given Group to library, using group's name as unique key
@@ -32,7 +32,7 @@ func (sc *Scene) NewInLibrary(nm string) *Group {
 
 // AddFromLibrary adds a Clone of named item in the Library under given parent
 // in the scenegraph.  Returns an error if item not found.
-func (sc *Scene) AddFromLibrary(nm string, parent ki.Node) (*Group, error) {
+func (sc *Scene) AddFromLibrary(nm string, parent tree.Node) (*Group, error) {
 	gp, ok := sc.Library[nm]
 	if !ok {
 		return nil, fmt.Errorf("Scene AddFromLibrary: Library item: %s not found", nm)
@@ -40,13 +40,13 @@ func (sc *Scene) AddFromLibrary(nm string, parent ki.Node) (*Group, error) {
 	nwgp := gp.Clone().(*Group)
 	parent.AddChild(nwgp)
 
-	parent.WalkPre(func(k ki.Node) bool {
+	parent.WalkPre(func(k tree.Node) bool {
 		ni, nb := AsNode(k)
 		if ni == nil {
-			return ki.Break
+			return tree.Break
 		}
 		nb.Sc = sc
-		return ki.Continue
+		return tree.Continue
 	})
 	return nwgp, nil
 }

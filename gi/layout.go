@@ -14,10 +14,10 @@ import (
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/keyfun"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/pi/complete"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 )
 
 var (
@@ -89,7 +89,7 @@ type Layout struct {
 	FocusNameTime time.Time `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// last element focused on -- used as a starting point if name is the same
-	FocusNameLast ki.Node `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
+	FocusNameLast tree.Node `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 }
 
 func (ly *Layout) FlagType() enums.BitFlagSetter {
@@ -160,7 +160,7 @@ func (ly *Layout) RenderChildren() {
 	}
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwi.RenderWidget()
-		return ki.Continue
+		return tree.Continue
 	})
 }
 
@@ -187,9 +187,9 @@ func (ly *Layout) ChildWithFocus() (Widget, int) {
 		if kwb.ContainsFocus() {
 			foc = kwi
 			focIndex = i
-			return ki.Break
+			return tree.Break
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	return foc, focIndex
 }
@@ -411,28 +411,28 @@ func (ly *Layout) FocusOnName(e events.Event) bool {
 // the first focusable element within the layout whose Label (using
 // [ToLabel]) matches the given name using [complete.IsSeedMatching].
 // If after is non-nil, it only finds after that element.
-func ChildByLabelCanFocus(ly *Layout, name string, after ki.Node) ki.Node {
+func ChildByLabelCanFocus(ly *Layout, name string, after tree.Node) tree.Node {
 	gotAfter := false
 	completions := []complete.Completion{}
-	ly.WalkBreadth(func(k ki.Node) bool {
+	ly.WalkBreadth(func(k tree.Node) bool {
 		if k == ly.This() { // skip us
-			return ki.Continue
+			return tree.Continue
 		}
 		_, ni := AsWidget(k)
 		if ni == nil || !ni.CanFocus() { // don't go any further
-			return ki.Continue
+			return tree.Continue
 		}
 		if after != nil && !gotAfter {
 			if k == after {
 				gotAfter = true
 			}
-			return ki.Continue // skip to next
+			return tree.Continue // skip to next
 		}
 		completions = append(completions, complete.Completion{
 			Text: ToLabel(k),
 			Desc: k.PathFrom(ly),
 		})
-		return ki.Continue
+		return tree.Continue
 	})
 	matches := complete.MatchSeedCompletion(completions, name)
 	if len(matches) > 0 {

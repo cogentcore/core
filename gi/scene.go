@@ -14,10 +14,10 @@ import (
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/goosi"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 )
 
@@ -137,7 +137,7 @@ func NewBodyScene(body *Body, name ...string) *Scene {
 	// need to set parent immediately so that SceneConfig works,
 	// but can not add it yet because it may go elsewhere due
 	// to app bars
-	ki.SetParent(body, sc)
+	tree.SetParent(body, sc)
 	return sc
 }
 

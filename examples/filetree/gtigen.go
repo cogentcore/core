@@ -6,7 +6,7 @@ import (
 	"cogentcore.org/core/filetree"
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/gti"
-	"cogentcore.org/core/ki"
+	"cogentcore.org/core/tree"
 )
 
 // FileBrowseType is the [gti.Type] for [FileBrowse]
@@ -16,7 +16,7 @@ var FileBrowseType = gti.AddType(&gti.Type{Name: "main.FileBrowse", IDName: "fil
 // FileBrowse is a simple file browser / viewer / editor with a file tree and
 // one or more editor windows.  It is based on an early version of the Gide
 // IDE framework, and remains simple to test / demo the file tree component.
-func NewFileBrowse(parent ki.Node, name ...string) *FileBrowse {
+func NewFileBrowse(parent tree.Node, name ...string) *FileBrowse {
 	return parent.NewChild(FileBrowseType, name...).(*FileBrowse)
 }
 
@@ -24,7 +24,7 @@ func NewFileBrowse(parent ki.Node, name ...string) *FileBrowse {
 func (t *FileBrowse) KiType() *gti.Type { return FileBrowseType }
 
 // New returns a new [*FileBrowse] value
-func (t *FileBrowse) New() ki.Node { return &FileBrowse{} }
+func (t *FileBrowse) New() tree.Node { return &FileBrowse{} }
 
 // SetProjRoot sets the [FileBrowse.ProjRoot]:
 // root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjFilename

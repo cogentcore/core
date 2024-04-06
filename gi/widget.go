@@ -15,14 +15,14 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/gti"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 )
 
 // Widget is the interface for all Cogent Core widgets.
 type Widget interface {
-	ki.Node
+	tree.Node
 
 	// AsWidget returns the WidgetBase embedded field for any Widget node.
 	// The Widget interface defines only methods that can be overridden
@@ -207,7 +207,7 @@ type Widget interface {
 // function appropriately in a chooser (e.g., SliceView or TableView) -- this
 // includes toggling selection on left mouse press.
 type WidgetBase struct { //core:no-new
-	ki.NodeBase
+	tree.NodeBase
 
 	// Tooltip is the text for the tooltip for this widget,
 	// which can use HTML formatting.
@@ -319,11 +319,11 @@ func (wb *WidgetBase) OnAdd() {
 func (wb *WidgetBase) SetScene(sc *Scene) {
 	wb.WidgetWalkPre(func(kwi Widget, kwb *WidgetBase) bool {
 		kwb.Scene = sc
-		return ki.Continue
+		return tree.Continue
 	})
 }
 
-func (wb *WidgetBase) OnChildAdded(child ki.Node) {
+func (wb *WidgetBase) OnChildAdded(child tree.Node) {
 	w, _ := AsWidget(child)
 	if w == nil {
 		return
@@ -342,7 +342,7 @@ func (wb *WidgetBase) OnWidgetAdded(fun func(w Widget)) *WidgetBase {
 
 // AsWidget returns the given Ki object
 // as a Widget interface and a WidgetBase.
-func AsWidget(k ki.Node) (Widget, *WidgetBase) {
+func AsWidget(k tree.Node) (Widget, *WidgetBase) {
 	if k == nil || k.This() == nil {
 		return nil, nil
 	}
@@ -358,12 +358,12 @@ func (wb *WidgetBase) AsWidget() *WidgetBase {
 
 // AsWidgetBase returns the given Ki object as a WidgetBase, or nil.
 // for direct use of the return value in cases where that is needed.
-func AsWidgetBase(k ki.Node) *WidgetBase {
+func AsWidgetBase(k tree.Node) *WidgetBase {
 	_, wb := AsWidget(k)
 	return wb
 }
 
-func (wb *WidgetBase) CopyFieldsFrom(from ki.Node) {
+func (wb *WidgetBase) CopyFieldsFrom(from tree.Node) {
 	wb.NodeBase.CopyFieldsFrom(from)
 	_, frm := AsWidget(from)
 
@@ -408,9 +408,9 @@ func (wb *WidgetBase) NewParts() *Layout {
 	if wb.Parts != nil {
 		return wb.Parts
 	}
-	parts := ki.NewRoot[*Layout]("parts")
-	ki.SetParent(parts, wb.This())
-	parts.SetFlag(true, ki.Field)
+	parts := tree.NewRoot[*Layout]("parts")
+	tree.SetParent(parts, wb.This())
+	parts.SetFlag(true, tree.Field)
 	parts.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 	})
@@ -481,7 +481,7 @@ func (wb *WidgetBase) DirectRenderDraw(drw goosi.Drawer, idx int, flipY bool) {
 }
 
 // WalkPreNode extends WalkPre to Parts -- key for getting full Update protection!
-func (wb *WidgetBase) WalkPreNode(fun func(ki.Node) bool) {
+func (wb *WidgetBase) WalkPreNode(fun func(tree.Node) bool) {
 	if wb.Parts == nil {
 		return
 	}
@@ -527,10 +527,10 @@ func (wb *WidgetBase) VisibleKidsIter(fun func(i int, kwi Widget, kwb *WidgetBas
 // nil or deleted items and operates on Widget types.
 // Return ki.Continue (true) to continue, and ki.Break (false) to terminate.
 func (wb *WidgetBase) WidgetWalkPre(fun func(kwi Widget, kwb *WidgetBase) bool) {
-	wb.WalkPre(func(k ki.Node) bool {
+	wb.WalkPre(func(k tree.Node) bool {
 		kwi, kwb := AsWidget(k)
 		if kwi == nil || kwi.This() == nil {
-			return ki.Break
+			return tree.Break
 		}
 		return fun(kwi, kwb)
 	})
@@ -564,7 +564,7 @@ func WidgetNextSibling(wi Widget) Widget {
 	if myidx >= 0 && myidx < wi.Parent().NumChildren()-1 {
 		return parent.Child(myidx + 1).(Widget)
 	}
-	if parent.Is(ki.Field) { // we are parts, go up
+	if parent.Is(tree.Field) { // we are parts, go up
 		return WidgetNextSibling(parent.Parent().(Widget))
 	}
 	return WidgetNextSibling(parent)
@@ -583,7 +583,7 @@ func WidgetPrev(wi Widget) Widget {
 		nn := parent.Child(myidx - 1).(Widget)
 		return WidgetLastChildParts(nn) // go to parts
 	}
-	if parent.Is(ki.Field) { // we are parts, go into children
+	if parent.Is(tree.Field) { // we are parts, go into children
 		parent = parent.Parent().(Widget)
 		return WidgetLastChild(parent) // go to children
 	}
