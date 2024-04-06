@@ -691,7 +691,7 @@ func (fv *FileView) FileSelectAction(idx int) {
 	if idx < 0 {
 		return
 	}
-	fv.SaveSortPrefs()
+	fv.SaveSortSettings()
 	fi := fv.Files[idx]
 	fv.SelectedIndex = idx
 	fv.CurrentSelectedFile = fi.Name
@@ -741,14 +741,14 @@ func (fv *FileView) FavSelect(idx int) {
 	fv.UpdateFilesAction()
 }
 
-// SaveSortPrefs saves current sorting preferences
-func (fv *FileView) SaveSortPrefs() {
+// SaveSortSettings saves current sorting preferences
+func (fv *FileView) SaveSortSettings() {
 	sv := fv.FilesView()
 	if sv == nil {
 		return
 	}
 	gi.SystemSettings.FileViewSort = sv.SortFieldName()
-	// fmt.Printf("sort: %v\n", gi.Prefs.FileViewSort)
+	// fmt.Printf("sort: %v\n", gi.Settings.FileViewSort)
 	gi.ErrorSnackbar(fv, gi.SaveSettings(gi.SystemSettings), "Error saving settings")
 }
 

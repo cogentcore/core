@@ -1083,7 +1083,7 @@ func (em *EventMgr) ActivateStartFocus() bool {
 }
 
 // MangerKeyChordEvents handles lower-priority manager-level key events.
-// Mainly tab, shift-tab, and Inspector and Prefs.
+// Mainly tab, shift-tab, and Inspector and Settings.
 // event will be marked as processed if handled here.
 func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 	if e.IsHandled() {

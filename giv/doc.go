@@ -52,7 +52,7 @@ Provides GUI for calling methods, prompting the user for any args, using the Val
 The gti tool can capture comment data to provide tooltips for users: specify //gti:add for
 types and methods that are called.  Much of your toolbar and menu level
 GUI can be implemented in this system.  See gi/settings.go and giv/settingsview.go for
-how the Cogent Core Prefs dialog is implemented, and see the Cogent Code project for a more
+how the Cogent Core Settings dialog is implemented, and see the Cogent Code project for a more
 complex case.
 */
 package giv

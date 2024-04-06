@@ -615,7 +615,7 @@ var PiViewProps = ki.Props{
 	"MainMenu": ki.PropSlice{
 		"updtfunc": giv.ActionUpdateFunc(func(pvi interface{}, act *gi.Button) {
 			pv := pvi.(*PiView)
-			act.SetActiveState(pv.Prefs.ProjFile != "")
+			act.SetActiveState(pv.Settings.ProjFile != "")
 		}),
 		"offguy": true,
 	},
@@ -751,7 +751,7 @@ func tst() {
 
 func tst() {
 	pv.SaveParser()
-	pv.GetPrefs()
+	pv.GetSettings()
 	Trace.Out(ps, pr, Run, creg.St, creg, trcAst, fmt.Sprintf("%v: optional rule: %v failed", ri, rr.Rule.Name()))
 }
 
@@ -1060,7 +1060,7 @@ Version: ` + pi.VersionInfo())
 		fmt.Printf("Doing final Quit cleanup here..\n")
 	})
 
-	pi.InitPrefs()
+	pi.InitSettings()
 
 	var path string
 	var proj string
@@ -1137,15 +1137,15 @@ var TextViewProps = ki.Props{
 	"font-family":      "Go Mono",
 	"border-width":     0, // don't render our own border
 	"cursor-width":     units.NewValue(3, units.Px),
-	"border-color":     &gi.Prefs.Colors.Border,
+	"border-color":     &gi.Settings.Colors.Border,
 	"border-style":     gi.BorderSolid,
 	"padding":          units.NewValue(2, units.Px),
 	"margin":           units.NewValue(2, units.Px),
 	"vertical-align":   gi.AlignTop,
 	"text-align":       gi.AlignLeft,
 	"tab-size":         4,
-	"color":            &gi.Prefs.Colors.Font,
-	"background-color": &gi.Prefs.Colors.Background,
+	"color":            &gi.Settings.Colors.Font,
+	"background-color": &gi.Settings.Colors.Background,
 	TextViewSelectors[TextViewActive]: ki.Props{
 		"background-color": "highlight-10",
 	},
@@ -1156,10 +1156,10 @@ var TextViewProps = ki.Props{
 		"background-color": "highlight-20",
 	},
 	TextViewSelectors[TextViewSel]: ki.Props{
-		"background-color": &gi.Prefs.Colors.Select,
+		"background-color": &gi.Settings.Colors.Select,
 	},
 	TextViewSelectors[TextViewHighlight]: ki.Props{
-		"background-color": &gi.Prefs.Colors.Highlight,
+		"background-color": &gi.Settings.Colors.Highlight,
 	},
 }
 
