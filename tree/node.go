@@ -2,7 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package tree provides a powerful and extensible tree system,
+// centered on the core Node interface.
 package tree
+
+//go:generate core generate
+//go:generate core generate ./testdata
 
 import (
 	"reflect"
@@ -11,43 +16,40 @@ import (
 	"cogentcore.org/core/gti"
 )
 
-// The Node interface provides the core functionality for a Cogent Core tree.
-// Each Node is a node in the tree and can have child nodes, and no cycles
+// Node is an interface that describes the core functionality of a tree node.
+// Each Node is a node in a tree and can have child nodes, and no cycles
 // are allowed (i.e., each node can only appear once in the tree).
 // All the usual methods are included for accessing and managing Children,
 // and efficiently traversing the tree and calling functions on the nodes.
-// In addition, Node nodes can have Fields that are also Node nodes that
-// are included in all the automatic tree traversal methods -- they are
-// effectively named fixed children that are automatically present.
 //
-// In general, the names of the children of a given node should all be unique.
-// The following functions defined in ki package can be used:
-// UniqueNameCheck(node) to check for unique names on node if uncertain.
-// UniqueNameCheckAll(node) to check entire tree under given node.
-// UniquifyNames(node) to add a suffix to name to ensure uniqueness.
-// UniquifyNamesAll(node) to to uniquify all names in entire tree.
+// When adding a new node, if you do not specify its name, it will automatically
+// be assigned a unique name of the ID (kebab-case) name of the type, plus the
+// [Node.NumLifetimeChildren] of the parent. In general, the names of the children
+// of a given node should all be unique.
 //
-// Use function MoveChild to move a node between trees or within a tree --
-// otherwise nodes are typically created and deleted but not moved.
+// Use the [MoveToParent] function to move a node between trees or within a tree;
+// otherwise, nodes are typically created and deleted but not moved.
 //
-// The Node interface is designed to support virtual method calling in Go
-// and is only intended to be implemented once, by the tree.NodeBase type
-// (as opposed to interfaces that are used for hiding multiple different
-// implementations of a common concept).  Thus, all of the fields in tree.NodeBase
-// are exported (have captital names), to be accessed directly in types
-// that embed and extend the tree.NodeBase. The Node interface has the "formal" name
-// (e.g., Children) while the Node has the "nickname" (e.g., Kids).  See the
-// Naming Conventions on the Cogent Core Wiki for more details.
+// Most Node functions are only implemented once, by the [tree.NodeBase] type.
+// Other Node types extend [tree.NodeBase] and provide their own functionality,
+// which can override methods defined by embedded types through a system of virtual
+// method calling, as described below.
 //
-// Each Node stores the Node interface version of itself, as This() / Ths
+// Each Node stores the Node interface version of itself, as [Node.This],
 // which enables full virtual function calling by calling the method
 // on that interface instead of directly on the receiver Node itself.
-// This requires proper initialization via Init method of the Node interface.
+// This allows, for example, a WidgetBase type to call methods defined
+// by higher-level Widgets. This requires proper initialization of nodes
+// via [Node.InitName], which is called automatically when adding children
+// and using [NewRoot].
 //
-// Node nodes also support the following core functionality:
-//   - ConfigChildren system for minimally updating children to fit a given
-//     Name & Type template.
-//   - Automatic JSON I/O of entire tree including type information.
+// Nodes support children configuration through [Node.ConfigChildren].
+// They also support full JSON I/O.
+//
+// All types that implement the Node interface will automatically
+// be added to the Cogent Core type registry (types)
+// in `core generate`, which is required for various
+// pieces of core functionality.
 type Node interface {
 	// InitName initializes this node to given actual object as a Ki interface
 	// and sets its name. The names should be unique among children of a node.

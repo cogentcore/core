@@ -4,7 +4,7 @@
 
 /*
 This file provides basic tree walking functions for iterative traversal
-of the tree in up / down directions.  As compared to the core Func methods,
+of the tree in up / down directions.  As compared to the core walk methods,
 these are for more dynamic, piecemeal processing.
 */
 

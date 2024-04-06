@@ -4,9 +4,6 @@
 
 package tree
 
-//go:generate core generate
-//go:generate core generate ./testdata
-
 import (
 	"errors"
 	"fmt"
@@ -22,11 +19,9 @@ import (
 	"cogentcore.org/core/gti"
 )
 
-// The NodeBase struct implements the [Node] interface and provides the core functionality
-// for the Cogent Core tree system. You can use the NodeBase as an embedded struct or as a struct
-// field; the embedded version supports full JSON saving and loading. All types that
-// implement the [Node] interface will automatically be added to gti in `core generate`, which
-// is required for various pieces of core functionality.
+// NodeBase implements the [Node] interface and provides the core functionality
+// for the Cogent Core tree system. You should use NodeBase as an embedded struct
+// in higher-level tree types.
 type NodeBase struct {
 
 	// Nm is the user-supplied name of this node, which can be empty and/or non-unique.
