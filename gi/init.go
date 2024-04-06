@@ -15,9 +15,9 @@ func init() {
 	goosi.HandleRecover = HandleRecover
 	goosi.InitScreenLogicalDPIFunc = AppearanceSettings.ApplyDPI // called when screens are initialized
 	TheApp.AppBarConfig = StandardAppBarConfig
-	TheApp.CogentCoreDataDir() // ensure it exists
-	WinGeomMgr.NeedToReload()  // gets time stamp associated with open, so it doesn't re-open
-	WinGeomMgr.Open()
+	TheApp.CogentCoreDataDir()     // ensure it exists
+	TheWinGeomSaver.NeedToReload() // gets time stamp associated with open, so it doesn't re-open
+	TheWinGeomSaver.Open()
 
 	if testing.Testing() {
 		TheApp.AppBarConfig = nil

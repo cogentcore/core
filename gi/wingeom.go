@@ -20,25 +20,25 @@ import (
 )
 
 var (
-	// WinGeomMgr is the manager of window geometry settings
-	WinGeomMgr = WinGeomPrefsMgr{}
+	// TheWinGeomSaver is the manager of window geometry settings
+	TheWinGeomSaver = WinGeomsSaver{}
 
 	ErrWinGeomNoLock = errors.New("WinGeom could not lock lock file")
 )
 
-// WinGeomPrefs is the data structure for recording the window geometry
+// WinGeoms is the data structure for recording the window geometry
 // by window name, screen name.
-type WinGeomPrefs map[string]map[string]RenderWinGeom
+type WinGeoms map[string]map[string]RenderWinGeom
 
-// WinGeomPrefsMgr is the manager of window geometry settings.
-// Records window geometry in a persistent file, used when opening new windows.
-type WinGeomPrefsMgr struct {
+// WinGeomsSaver records window geometry in a persistent file,
+// which is then used when opening new windows to restore.
+type WinGeomsSaver struct {
 
 	// the full set of window geometries
-	Geoms WinGeomPrefs
+	Geoms WinGeoms
 
 	// temporary cached geometries -- saved to Geoms after SaveDelay
-	Cache WinGeomPrefs
+	Cache WinGeoms
 
 	// base name of the settings file in Cogent Core prefs directory
 	Filename string
@@ -49,7 +49,7 @@ type WinGeomPrefsMgr struct {
 	// if true, we are setting geometry so don't save -- caller must call SettingStart() SettingEnd() to block
 	SettingNoSave bool
 
-	// read-write mutex that protects updating of WinGeomPrefs
+	// read-write mutex that protects updating of WinGeoms
 	Mu sync.RWMutex
 
 	// wait time before trying to lock file again
@@ -63,9 +63,9 @@ type WinGeomPrefsMgr struct {
 }
 
 // Init does initialization if not yet initialized
-func (mgr *WinGeomPrefsMgr) Init() {
+func (mgr *WinGeomsSaver) Init() {
 	if mgr.Geoms == nil {
-		mgr.Geoms = make(WinGeomPrefs, 1000)
+		mgr.Geoms = make(WinGeoms, 1000)
 		mgr.ResetCache()
 		mgr.Filename = "win-geom-prefs"
 		mgr.LockSleep = 100 * time.Millisecond
@@ -74,12 +74,12 @@ func (mgr *WinGeomPrefsMgr) Init() {
 }
 
 // ResetCache resets the cache -- call under mutex
-func (mgr *WinGeomPrefsMgr) ResetCache() {
-	mgr.Cache = make(WinGeomPrefs)
+func (mgr *WinGeomsSaver) ResetCache() {
+	mgr.Cache = make(WinGeoms)
 }
 
 // LockFile attempts to create the win_geom_prefs lock file
-func (mgr *WinGeomPrefsMgr) LockFile() error {
+func (mgr *WinGeomsSaver) LockFile() error {
 	pdir := TheApp.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, mgr.Filename+".lck")
 	for rep := 0; rep < 10; rep++ {
@@ -102,19 +102,19 @@ func (mgr *WinGeomPrefsMgr) LockFile() error {
 			continue
 		}
 		if time.Since(lts) > 1*time.Second {
-			// log.Printf("WinGeomPrefs: lock file stale: %v\n", lts.String())
+			// log.Printf("WinGeoms: lock file stale: %v\n", lts.String())
 			os.Remove(pnm)
 			continue
 		}
-		// log.Printf("WinGeomPrefs: waiting for lock file: %v\n", lts.String())
+		// log.Printf("WinGeoms: waiting for lock file: %v\n", lts.String())
 		time.Sleep(mgr.LockSleep)
 	}
-	// log.Printf("WinGeomPrefs: failed to lock file: %v\n", pnm)
+	// log.Printf("WinGeoms: failed to lock file: %v\n", pnm)
 	return ErrWinGeomNoLock
 }
 
 // UnLockFile unlocks the win_geom_prefs lock file (just removes it)
-func (mgr *WinGeomPrefsMgr) UnlockFile() {
+func (mgr *WinGeomsSaver) UnlockFile() {
 	pdir := TheApp.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, mgr.Filename+".lck")
 	os.Remove(pnm)
@@ -122,7 +122,7 @@ func (mgr *WinGeomPrefsMgr) UnlockFile() {
 
 // NeedToReload returns true if the last save time of prefs file is more recent than
 // when we last saved.  Called under mutex.
-func (mgr *WinGeomPrefsMgr) NeedToReload() bool {
+func (mgr *WinGeomsSaver) NeedToReload() bool {
 	pdir := TheApp.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, mgr.Filename+".lst")
 	if _, err := os.Stat(pnm); os.IsNotExist(err) {
@@ -147,7 +147,7 @@ func (mgr *WinGeomPrefsMgr) NeedToReload() bool {
 }
 
 // SaveLastSave saves timestamp (now) of last save to win geom
-func (mgr *WinGeomPrefsMgr) SaveLastSave() {
+func (mgr *WinGeomsSaver) SaveLastSave() {
 	pdir := TheApp.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, mgr.Filename+".lst")
 	mgr.LastSave = time.Now()
@@ -157,7 +157,7 @@ func (mgr *WinGeomPrefsMgr) SaveLastSave() {
 
 // Open RenderWin Geom settings from Cogent Core standard prefs directory
 // called under mutex or at start
-func (mgr *WinGeomPrefsMgr) Open() error {
+func (mgr *WinGeomsSaver) Open() error {
 	mgr.Init()
 	pdir := TheApp.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, mgr.Filename+".json")
@@ -181,8 +181,8 @@ func (mgr *WinGeomPrefsMgr) Open() error {
 		break
 	}
 	if oldFmt {
-		log.Printf("WinGeomPrefs: resetting prefs for new format\n")
-		mgr.Geoms = make(WinGeomPrefs, 1000)
+		log.Printf("WinGeoms: resetting prefs for new format\n")
+		mgr.Geoms = make(WinGeoms, 1000)
 		mgr.Save() // overwrite
 	}
 	return err
@@ -190,7 +190,7 @@ func (mgr *WinGeomPrefsMgr) Open() error {
 
 // Save RenderWin Geom Settings to Cogent Core standard prefs directory
 // assumed to be under mutex and lock still
-func (mgr *WinGeomPrefsMgr) Save() error {
+func (mgr *WinGeomsSaver) Save() error {
 	if mgr.Geoms == nil {
 		return nil
 	}
@@ -212,7 +212,7 @@ func (mgr *WinGeomPrefsMgr) Save() error {
 
 // WinName returns window name before first colon, if exists.
 // This is the part of the name used to record settings
-func (mgr *WinGeomPrefsMgr) WinName(winName string) string {
+func (mgr *WinGeomsSaver) WinName(winName string) string {
 	if ci := strings.Index(winName, ":"); ci > 0 {
 		return winName[:ci]
 	}
@@ -222,42 +222,42 @@ func (mgr *WinGeomPrefsMgr) WinName(winName string) string {
 // SettingStart turns on SettingNoSave to prevent subsequent redundant calls to
 // save a geometry that was being set from already-saved settings.
 // Must call SettingEnd to turn off (safe to call even if Start not called).
-func (mgr *WinGeomPrefsMgr) SettingStart() {
+func (mgr *WinGeomsSaver) SettingStart() {
 	mgr.Mu.Lock()
 	mgr.SettingNoSave = true
 	mgr.Mu.Unlock()
 }
 
 // SettingEnd turns off SettingNoSave -- safe to call even if Start not called.
-func (mgr *WinGeomPrefsMgr) SettingEnd() {
+func (mgr *WinGeomsSaver) SettingEnd() {
 	mgr.Mu.Lock()
 	mgr.SettingNoSave = false
 	mgr.Mu.Unlock()
 }
 
 // RecordPref records current state of window as preference
-func (mgr *WinGeomPrefsMgr) RecordPref(win *RenderWin) {
+func (mgr *WinGeomsSaver) RecordPref(win *RenderWin) {
 	if !win.IsVisible() {
 		return
 	}
 	wsz := win.GoosiWin.Size()
 	if wsz == (image.Point{}) {
 		if DebugSettings.WinGeomTrace {
-			log.Printf("WinGeomPrefs: RecordPref: NOT storing null size for win: %v\n", win.Name)
+			log.Printf("WinGeoms: RecordPref: NOT storing null size for win: %v\n", win.Name)
 		}
 		return
 	}
 	pos := win.GoosiWin.Position()
 	if pos.X == -32000 || pos.Y == -32000 { // windows badness
 		if DebugSettings.WinGeomTrace {
-			log.Printf("WinGeomPrefs: RecordPref: NOT storing very negative pos: %v for win: %v\n", pos, win.Name)
+			log.Printf("WinGeoms: RecordPref: NOT storing very negative pos: %v for win: %v\n", pos, win.Name)
 		}
 		return
 	}
 	mgr.Mu.Lock()
 	if mgr.SettingNoSave {
 		if DebugSettings.WinGeomTrace {
-			log.Printf("WinGeomPrefs: RecordPref: SettingNoSave so NOT storing for win: %v\n", win.Name)
+			log.Printf("WinGeoms: RecordPref: SettingNoSave so NOT storing for win: %v\n", win.Name)
 		}
 		mgr.Mu.Unlock()
 		return
@@ -287,7 +287,7 @@ func (mgr *WinGeomPrefsMgr) RecordPref(win *RenderWin) {
 
 // AbortSave cancels any pending saving of the currently-cached info.
 // this is called if a screen event occured
-func (mgr *WinGeomPrefsMgr) AbortSave() {
+func (mgr *WinGeomsSaver) AbortSave() {
 	mgr.Mu.Lock()
 	defer mgr.Mu.Unlock()
 	if mgr.saveTimer != nil {
@@ -295,14 +295,14 @@ func (mgr *WinGeomPrefsMgr) AbortSave() {
 		mgr.saveTimer = nil
 		if DebugSettings.WinGeomTrace {
 			if len(mgr.Cache) == 0 {
-				log.Printf("WinGeomPrefs: AbortSave: no cached geoms but timer was != nil -- probably already saved\n")
+				log.Printf("WinGeoms: AbortSave: no cached geoms but timer was != nil -- probably already saved\n")
 			} else {
-				log.Printf("WinGeomPrefs: AbortSave: there are cached geoms -- aborted in time!\n")
+				log.Printf("WinGeoms: AbortSave: there are cached geoms -- aborted in time!\n")
 			}
 		}
 	} else {
 		if DebugSettings.WinGeomTrace {
-			log.Printf("WinGeomPrefs: AbortSave: no saveTimer -- already happened or nothing to save\n")
+			log.Printf("WinGeoms: AbortSave: no saveTimer -- already happened or nothing to save\n")
 		}
 	}
 	mgr.ResetCache()
@@ -310,7 +310,7 @@ func (mgr *WinGeomPrefsMgr) AbortSave() {
 
 // SaveCached saves the cached prefs -- called after timer delay,
 // under the Mu.Lock
-func (mgr *WinGeomPrefsMgr) SaveCached() {
+func (mgr *WinGeomsSaver) SaveCached() {
 	mgr.LockFile() // not going to change our behavior if we can't lock!
 	if mgr.NeedToReload() {
 		mgr.Open()
@@ -326,7 +326,7 @@ func (mgr *WinGeomPrefsMgr) SaveCached() {
 			}
 			mgr.Geoms[winName][sc.Name] = wgr
 			if DebugSettings.WinGeomTrace {
-				log.Printf("WinGeomPrefs: RecordPref: Saving for window: %v pos: %v size: %v  screen: %v  dpi: %v  device pixel ratio: %v\n", winName, wgr.Pos(), wgr.Size(), sc.Name, sc.LogicalDPI, sc.DevicePixelRatio)
+				log.Printf("WinGeoms: RecordPref: Saving for window: %v pos: %v size: %v  screen: %v  dpi: %v  device pixel ratio: %v\n", winName, wgr.Pos(), wgr.Size(), sc.Name, sc.LogicalDPI, sc.DevicePixelRatio)
 			}
 		}
 	}
@@ -338,7 +338,7 @@ func (mgr *WinGeomPrefsMgr) SaveCached() {
 // Pref returns an existing preference for given window name, for given screen.
 // if the window name has a colon, only the part prior to the colon is used.
 // if no saved pref is available for that screen, nil is returned.
-func (mgr *WinGeomPrefsMgr) Pref(winName string, scrn *goosi.Screen) *RenderWinGeom {
+func (mgr *WinGeomsSaver) Pref(winName string, scrn *goosi.Screen) *RenderWinGeom {
 	mgr.Mu.RLock()
 	defer mgr.Mu.RUnlock()
 
@@ -357,14 +357,14 @@ func (mgr *WinGeomPrefsMgr) Pref(winName string, scrn *goosi.Screen) *RenderWinG
 	if scrn == nil {
 		scrn = goosi.TheApp.Screen(0)
 		if DebugSettings.WinGeomTrace {
-			log.Printf("WinGeomPrefs: Pref: scrn is nil, using scrn 0: %v\n", scrn.Name)
+			log.Printf("WinGeoms: Pref: scrn is nil, using scrn 0: %v\n", scrn.Name)
 		}
 	}
 	wp, ok := wps[scrn.Name]
 	if ok {
 		wp.ConstrainGeom(scrn)
 		if DebugSettings.WinGeomTrace {
-			log.Printf("WinGeomPrefs: Pref: Setting geom for window: %v pos: %v size: %v  screen: %v  dpi: %v  device pixel ratio: %v\n", winName, wp.Pos(), wp.Size(), scrn.Name, scrn.LogicalDPI, scrn.DevicePixelRatio)
+			log.Printf("WinGeoms: Pref: Setting geom for window: %v pos: %v size: %v  screen: %v  dpi: %v  device pixel ratio: %v\n", winName, wp.Pos(), wp.Size(), scrn.Name, scrn.LogicalDPI, scrn.DevicePixelRatio)
 		}
 		return &wp
 	}
@@ -374,37 +374,37 @@ func (mgr *WinGeomPrefsMgr) Pref(winName string, scrn *goosi.Screen) *RenderWinG
 // DeleteAll deletes the file that saves the position and size of each window,
 // by screen, and clear current in-memory cache.  You shouldn't need to use
 // this but sometimes useful for testing.
-func (mgr *WinGeomPrefsMgr) DeleteAll() {
+func (mgr *WinGeomsSaver) DeleteAll() {
 	mgr.Mu.Lock()
 	defer mgr.Mu.Unlock()
 
 	pdir := TheApp.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, mgr.Filename+".json")
 	os.Remove(pnm)
-	mgr.Geoms = make(WinGeomPrefs, 1000)
+	mgr.Geoms = make(WinGeoms, 1000)
 }
 
 // RestoreAll restores size and position of all windows, for current screen.
 // Called when screen changes.
-func (mgr *WinGeomPrefsMgr) RestoreAll() {
+func (mgr *WinGeomsSaver) RestoreAll() {
 	RenderWinGlobalMu.Lock()
 	defer RenderWinGlobalMu.Unlock()
 	if DebugSettings.WinGeomTrace {
-		log.Printf("WinGeomPrefs: RestoreAll: starting\n")
+		log.Printf("WinGeoms: RestoreAll: starting\n")
 	}
 	mgr.SettingStart()
 	for _, w := range AllRenderWins {
 		wgp := mgr.Pref(w.Title, w.GoosiWin.Screen())
 		if wgp != nil {
 			if DebugSettings.WinGeomTrace {
-				log.Printf("WinGeomPrefs: RestoreAll: restoring geom for window: %v pos: %v size: %v\n", w.Name, wgp.Pos(), wgp.Size())
+				log.Printf("WinGeoms: RestoreAll: restoring geom for window: %v pos: %v size: %v\n", w.Name, wgp.Pos(), wgp.Size())
 			}
 			w.GoosiWin.SetGeom(wgp.Pos(), wgp.Size())
 		}
 	}
 	mgr.SettingEnd()
 	if DebugSettings.WinGeomTrace {
-		log.Printf("WinGeomPrefs: RestoreAll: done\n")
+		log.Printf("WinGeoms: RestoreAll: done\n")
 	}
 }
 

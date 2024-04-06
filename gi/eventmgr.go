@@ -1136,7 +1136,7 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 		e.SetHandled()
 		goosi.TheApp.GetScreens()
 		UpdateAll()
-		WinGeomMgr.RestoreAll()
+		TheWinGeomSaver.RestoreAll()
 		// w.FocusInactivate()
 		// w.FullReRender()
 		// sz := w.GoosiWin.Size()

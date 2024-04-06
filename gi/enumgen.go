@@ -408,11 +408,11 @@ var _WinFlagsValues = []WinFlags{0, 1, 2, 3, 4, 5, 6, 7}
 // WinFlagsN is the highest valid value for type WinFlags, plus one.
 const WinFlagsN WinFlags = 8
 
-var _WinFlagsValueMap = map[string]WinFlags{`HasGeomPrefs`: 0, `Closing`: 1, `Resizing`: 2, `GotFocus`: 3, `SentShow`: 4, `GoLoop`: 5, `StopEventLoop`: 6, `SelectionMode`: 7}
+var _WinFlagsValueMap = map[string]WinFlags{`HasSavedGeom`: 0, `Closing`: 1, `Resizing`: 2, `GotFocus`: 3, `SentShow`: 4, `GoLoop`: 5, `StopEventLoop`: 6, `SelectionMode`: 7}
 
-var _WinFlagsDescMap = map[WinFlags]string{0: `WinHasGeomPrefs indicates if this window has WinGeomPrefs setting that sized it -- affects whether other default geom should be applied.`, 1: `WinClosing is atomic flag indicating window is closing`, 2: `WinResizing is atomic flag indicating window is resizing`, 3: `WinGotFocus indicates that have we received RenderWin focus`, 4: `WinSentShow have we sent the show event yet? Only ever sent ONCE`, 5: `WinGoLoop true if we are running from GoStartEventLoop -- requires a WinWait.Done at end`, 6: `WinStopEventLoop is set when event loop stop is requested`, 7: `WinSelectionMode indicates that the window is in Cogent Core inspect editor edit mode`}
+var _WinFlagsDescMap = map[WinFlags]string{0: `WinHasSavedGeom indicates if this window has WinGeoms setting that sized it -- affects whether other default geom should be applied.`, 1: `WinClosing is atomic flag indicating window is closing`, 2: `WinResizing is atomic flag indicating window is resizing`, 3: `WinGotFocus indicates that have we received RenderWin focus`, 4: `WinSentShow have we sent the show event yet? Only ever sent ONCE`, 5: `WinGoLoop true if we are running from GoStartEventLoop -- requires a WinWait.Done at end`, 6: `WinStopEventLoop is set when event loop stop is requested`, 7: `WinSelectionMode indicates that the window is in Cogent Core inspect editor edit mode`}
 
-var _WinFlagsMap = map[WinFlags]string{0: `HasGeomPrefs`, 1: `Closing`, 2: `Resizing`, 3: `GotFocus`, 4: `SentShow`, 5: `GoLoop`, 6: `StopEventLoop`, 7: `SelectionMode`}
+var _WinFlagsMap = map[WinFlags]string{0: `HasSavedGeom`, 1: `Closing`, 2: `Resizing`, 3: `GotFocus`, 4: `SentShow`, 5: `GoLoop`, 6: `StopEventLoop`, 7: `SelectionMode`}
 
 // String returns the string representation of this WinFlags value.
 func (i WinFlags) String() string { return enums.BitFlagString(i, _WinFlagsValues) }

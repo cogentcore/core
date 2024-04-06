@@ -57,8 +57,8 @@ var BoxType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Box", IDName: 
 
 // NewBox adds a new [Box] with the given name to the given parent:
 // Box is a simple base [Widget] that renders the standard box model.
-func NewBox(parent ki.Ki, name ...string) *Box {
-	return parent.NewChild(BoxType, name...).(*Box)
+func NewBox(par ki.Ki, name ...string) *Box {
+	return par.NewChild(BoxType, name...).(*Box)
 }
 
 // KiType returns the [*gti.Type] of [Box]
@@ -77,8 +77,8 @@ var ButtonType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Button", ID
 // Button is an interactive button with text, an icon, an indicator, a shortcut,
 // and/or a menu. The standard behavior is to register a click event handler with
 // OnClick.
-func NewButton(parent ki.Ki, name ...string) *Button {
-	return parent.NewChild(ButtonType, name...).(*Button)
+func NewButton(par ki.Ki, name ...string) *Button {
+	return par.NewChild(ButtonType, name...).(*Button)
 }
 
 // KiType returns the [*gti.Type] of [Button]
@@ -148,8 +148,8 @@ var CanvasType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Canvas", ID
 // NewCanvas adds a new [Canvas] with the given name to the given parent:
 // Canvas is a widget that can be arbitrarily drawn to by setting
 // its Draw function using [Canvas.SetDraw].
-func NewCanvas(parent ki.Ki, name ...string) *Canvas {
-	return parent.NewChild(CanvasType, name...).(*Canvas)
+func NewCanvas(par ki.Ki, name ...string) *Canvas {
+	return par.NewChild(CanvasType, name...).(*Canvas)
 }
 
 // KiType returns the [*gti.Type] of [Canvas]
@@ -177,8 +177,8 @@ var ChooserType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Chooser", 
 // The items can be of any type, including enum values -- they are converted
 // to strings for the display.  If the items are of type [icons.Icon], then they
 // are displayed using icons instead.
-func NewChooser(parent ki.Ki, name ...string) *Chooser {
-	return parent.NewChild(ChooserType, name...).(*Chooser)
+func NewChooser(par ki.Ki, name ...string) *Chooser {
+	return par.NewChild(ChooserType, name...).(*Chooser)
 }
 
 // KiType returns the [*gti.Type] of [Chooser]
@@ -276,8 +276,8 @@ var FrameType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Frame", IDNa
 // NewFrame adds a new [Frame] with the given name to the given parent:
 // Frame is a Layout that renders a background according to the
 // background-color style setting, and optional striping for grid layouts
-func NewFrame(parent ki.Ki, name ...string) *Frame {
-	return parent.NewChild(FrameType, name...).(*Frame)
+func NewFrame(par ki.Ki, name ...string) *Frame {
+	return par.NewChild(FrameType, name...).(*Frame)
 }
 
 // KiType returns the [*gti.Type] of [Frame]
@@ -296,8 +296,8 @@ var HandleType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Handle", ID
 // Handle represents a draggable handle that can be used to
 // control the size of an element. The [Handle.Styles.Direction]
 // controls the direction in which the handle moves.
-func NewHandle(parent ki.Ki, name ...string) *Handle {
-	return parent.NewChild(HandleType, name...).(*Handle)
+func NewHandle(par ki.Ki, name ...string) *Handle {
+	return par.NewChild(HandleType, name...).(*Handle)
 }
 
 // KiType returns the [*gti.Type] of [Handle]
@@ -332,8 +332,8 @@ var IconType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Icon", IDName
 // The rendered version is cached for a given size.
 // Icons do not render a background or border independent of their SVG object.
 // The size of on Icon is determined by the [styles.Font.Size] property.
-func NewIcon(parent ki.Ki, name ...string) *Icon {
-	return parent.NewChild(IconType, name...).(*Icon)
+func NewIcon(par ki.Ki, name ...string) *Icon {
+	return par.NewChild(IconType, name...).(*Icon)
 }
 
 // KiType returns the [*gti.Type] of [Icon]
@@ -354,8 +354,8 @@ var ImageType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Image", IDNa
 // the allocated size. The default minimum requested size is the pixel
 // size in [units.Dp] units (1/160th of an inch). See [giv.ConfigImageToolbar]
 // for a toolbar with I/O buttons.
-func NewImage(parent ki.Ki, name ...string) *Image {
-	return parent.NewChild(ImageType, name...).(*Image)
+func NewImage(par ki.Ki, name ...string) *Image {
+	return par.NewChild(ImageType, name...).(*Image)
 }
 
 // KiType returns the [*gti.Type] of [Image]
@@ -374,8 +374,8 @@ var LabelType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Label", IDNa
 // Label is a widget for rendering text labels. It supports full HTML styling,
 // including links. By default, labels wrap and collapse whitespace, although
 // you can change this by changing [styles.Text.WhiteSpace].
-func NewLabel(parent ki.Ki, name ...string) *Label {
-	return parent.NewChild(LabelType, name...).(*Label)
+func NewLabel(par ki.Ki, name ...string) *Label {
+	return par.NewChild(LabelType, name...).(*Label)
 }
 
 // KiType returns the [*gti.Type] of [Label]
@@ -437,8 +437,8 @@ var LayoutType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Layout", ID
 // generally be set to the desired number of columns, from which the number of rows
 // is computed; otherwise, it uses the square root of number of
 // elements.
-func NewLayout(parent ki.Ki, name ...string) *Layout {
-	return parent.NewChild(LayoutType, name...).(*Layout)
+func NewLayout(par ki.Ki, name ...string) *Layout {
+	return par.NewChild(LayoutType, name...).(*Layout)
 }
 
 // KiType returns the [*gti.Type] of [Layout]
@@ -457,8 +457,8 @@ var StretchType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Stretch", 
 // Stretch adds a stretchy element that grows to fill all
 // available space. You can set [styles.Style.Grow] to change
 // how much it grows relative to other growing elements.
-func NewStretch(parent ki.Ki, name ...string) *Stretch {
-	return parent.NewChild(StretchType, name...).(*Stretch)
+func NewStretch(par ki.Ki, name ...string) *Stretch {
+	return par.NewChild(StretchType, name...).(*Stretch)
 }
 
 // KiType returns the [*gti.Type] of [Stretch]
@@ -477,8 +477,8 @@ var SpaceType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Space", IDNa
 // Space is a fixed size blank space, with
 // a default width of 1ch and a height of 1em.
 // You can set [styles.Style.Min] to change its size.
-func NewSpace(parent ki.Ki, name ...string) *Space {
-	return parent.NewChild(SpaceType, name...).(*Space)
+func NewSpace(par ki.Ki, name ...string) *Space {
+	return par.NewChild(SpaceType, name...).(*Space)
 }
 
 // KiType returns the [*gti.Type] of [Space]
@@ -496,8 +496,8 @@ var MeterType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Meter", IDNa
 // NewMeter adds a new [Meter] with the given name to the given parent:
 // Meter is a widget that renders a current value on as a filled
 // bar/semicircle relative to a minimum and maximum potential value.
-func NewMeter(parent ki.Ki, name ...string) *Meter {
-	return parent.NewChild(MeterType, name...).(*Meter)
+func NewMeter(par ki.Ki, name ...string) *Meter {
+	return par.NewChild(MeterType, name...).(*Meter)
 }
 
 // KiType returns the [*gti.Type] of [Meter]
@@ -549,8 +549,8 @@ var ScrimType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Scrim", IDNa
 // NewScrim adds a new [Scrim] with the given name to the given parent:
 // A Scrim is just a dummy Widget used for rendering a Scrim.
 // Only used for its type. Everything else managed by RenderWin.
-func NewScrim(parent ki.Ki, name ...string) *Scrim {
-	return parent.NewChild(ScrimType, name...).(*Scrim)
+func NewScrim(par ki.Ki, name ...string) *Scrim {
+	return par.NewChild(ScrimType, name...).(*Scrim)
 }
 
 // KiType returns the [*gti.Type] of [Scrim]
@@ -651,8 +651,8 @@ var SeparatorType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Separato
 // NewSeparator adds a new [Separator] with the given name to the given parent:
 // Separator draws a separator line. It goes in the direction
 // specified by [style.Style.Direction].
-func NewSeparator(parent ki.Ki, name ...string) *Separator {
-	return parent.NewChild(SeparatorType, name...).(*Separator)
+func NewSeparator(par ki.Ki, name ...string) *Separator {
+	return par.NewChild(SeparatorType, name...).(*Separator)
 }
 
 // KiType returns the [*gti.Type] of [Separator]
@@ -694,8 +694,8 @@ var SliderType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Slider", ID
 // The Content size (inside the margin and padding) determines the outer bounds of
 // the rendered area.
 // The [styles.Style.Direction] determines the direction in which the slider slides.
-func NewSlider(parent ki.Ki, name ...string) *Slider {
-	return parent.NewChild(SliderType, name...).(*Slider)
+func NewSlider(par ki.Ki, name ...string) *Slider {
+	return par.NewChild(SliderType, name...).(*Slider)
 }
 
 // KiType returns the [*gti.Type] of [Slider]
@@ -812,8 +812,8 @@ var SpinnerType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Spinner", 
 // NewSpinner adds a new [Spinner] with the given name to the given parent:
 // Spinner combines a TextField with up / down buttons for incrementing /
 // decrementing values -- all configured within the Parts of the widget
-func NewSpinner(parent ki.Ki, name ...string) *Spinner {
-	return parent.NewChild(SpinnerType, name...).(*Spinner)
+func NewSpinner(par ki.Ki, name ...string) *Spinner {
+	return par.NewChild(SpinnerType, name...).(*Spinner)
 }
 
 // KiType returns the [*gti.Type] of [Spinner]
@@ -924,8 +924,8 @@ var SplitsType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Splits", ID
 // Splits allocates a certain proportion of its space to each of its children
 // along [styles.Style.Direction]. It adds [Handle] widgets to its parts that
 // allow the user to customize the amount of space allocated to each child.
-func NewSplits(parent ki.Ki, name ...string) *Splits {
-	return parent.NewChild(SplitsType, name...).(*Splits)
+func NewSplits(par ki.Ki, name ...string) *Splits {
+	return par.NewChild(SplitsType, name...).(*Splits)
 }
 
 // KiType returns the [*gti.Type] of [Splits]
@@ -1056,15 +1056,15 @@ func (t *Stage) SetSpriteDragging(v string) *Stage { t.SpriteDragging = v; retur
 var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.StageMgr", IDName: "stage-mgr", Doc: "StageMgr manages a stack of Stage elements", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Fields: []gti.Field{{Name: "Stack", Doc: "stack of stages managed by this stage manager."}, {Name: "Modified", Doc: "Modified is set to true whenever the stack has been modified.\nThis is cleared by the RenderWin each render cycle."}, {Name: "RenderContext", Doc: "rendering context provides key rendering information and locking\nfor the RenderWin in which the stages are running.\nthe MainStageMgr within the RenderWin"}, {Name: "RenderWin", Doc: "render window to which we are rendering.\nrely on the RenderContext wherever possible."}, {Name: "History", Doc: "growing stack of viewing history of all stages."}, {Name: "Main", Doc: "Main is the Main Stage that owns this StageMgr, only set for Popup stages"}, {Name: "Mu", Doc: "mutex protecting reading / updating of the Stack.\nDestructive stack updating gets a Write lock, else Read."}}})
 
 // SVGType is the [gti.Type] for [SVG]
-var SVGType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.SVG", IDName: "svg", Doc: "SVG is a Widget that renders an [svg.SVG] object.\nIf it is not [states.ReadOnly], the user can pan and zoom the display.\nBy default, it is [states.ReadOnly]. See [giv.ConfigSVGToolbar] for a\ntoolbar with panning, selecting, and I/O buttons.", Methods: []gti.Method{{Name: "OpenSVG", Doc: "OpenSVG opens an XML-formatted SVG file", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "SaveSVG", Doc: "SaveSVG saves the current SVG to an XML-encoded standard SVG file", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "SavePNG", Doc: "SavePNG saves the current rendered SVG image to an PNG image file", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}}, Embeds: []gti.Field{{Name: "Box"}}, Fields: []gti.Field{{Name: "SVG", Doc: "SVG is the SVG object associated with the element."}}, Instance: &SVG{}})
+var SVGType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.SVG", IDName: "svg", Doc: "SVG is a Widget that renders an [svg.SVG] object.\nIf it is not [states.ReadOnly], the user can pan and zoom the display.\nBy default, it is [states.ReadOnly]. See [giv.ConfigSVGToolbar] for a\ntoolbar with panning, selecting, and I/O buttons.", Methods: []gti.Method{{Name: "Open", Doc: "Open opens an XML-formatted SVG file", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "SaveSVG", Doc: "SaveSVG saves the current SVG to an XML-encoded standard SVG file.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "SavePNG", Doc: "SavePNG saves the current rendered SVG image to an PNG image file.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}}, Embeds: []gti.Field{{Name: "Box"}}, Fields: []gti.Field{{Name: "SVG", Doc: "SVG is the SVG object associated with the element."}}, Instance: &SVG{}})
 
 // NewSVG adds a new [SVG] with the given name to the given parent:
 // SVG is a Widget that renders an [svg.SVG] object.
 // If it is not [states.ReadOnly], the user can pan and zoom the display.
 // By default, it is [states.ReadOnly]. See [giv.ConfigSVGToolbar] for a
 // toolbar with panning, selecting, and I/O buttons.
-func NewSVG(parent ki.Ki, name ...string) *SVG {
-	return parent.NewChild(SVGType, name...).(*SVG)
+func NewSVG(par ki.Ki, name ...string) *SVG {
+	return par.NewChild(SVGType, name...).(*SVG)
 }
 
 // KiType returns the [*gti.Type] of [SVG]
@@ -1082,8 +1082,8 @@ var SwitchType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Switch", ID
 // NewSwitch adds a new [Switch] with the given name to the given parent:
 // Switch is a widget that can toggle between an on and off state.
 // It can be displayed as a switch, checkbox, or radio button.
-func NewSwitch(parent ki.Ki, name ...string) *Switch {
-	return parent.NewChild(SwitchType, name...).(*Switch)
+func NewSwitch(par ki.Ki, name ...string) *Switch {
+	return par.NewChild(SwitchType, name...).(*Switch)
 }
 
 // KiType returns the [*gti.Type] of [Switch]
@@ -1119,8 +1119,8 @@ var SwitchesType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Switches"
 // It can optionally enforce mutual exclusivity (i.e., Radio Buttons).
 // The buttons are all in the Parts of the widget and the Parts layout
 // determines how they are displayed.
-func NewSwitches(parent ki.Ki, name ...string) *Switches {
-	return parent.NewChild(SwitchesType, name...).(*Switches)
+func NewSwitches(par ki.Ki, name ...string) *Switches {
+	return par.NewChild(SwitchesType, name...).(*Switches)
 }
 
 // KiType returns the [*gti.Type] of [Switches]
@@ -1175,8 +1175,8 @@ var TabsType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Tabs", IDName
 // needed) and a Stacked Frame that actually contains all the children, and
 // provides scrollbars as needed to any content within.  Typically should have
 // max stretch and a set preferred size, so it expands.
-func NewTabs(parent ki.Ki, name ...string) *Tabs {
-	return parent.NewChild(TabsType, name...).(*Tabs)
+func NewTabs(par ki.Ki, name ...string) *Tabs {
+	return par.NewChild(TabsType, name...).(*Tabs)
 }
 
 // KiType returns the [*gti.Type] of [Tabs]
@@ -1283,8 +1283,8 @@ var TextFieldType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.TextFiel
 // force everything to be on a single line.
 // With multi-line wrapped text, the text is still treated as a contiguous
 // wrapped text.
-func NewTextField(parent ki.Ki, name ...string) *TextField {
-	return parent.NewChild(TextFieldType, name...).(*TextField)
+func NewTextField(par ki.Ki, name ...string) *TextField {
+	return par.NewChild(TextFieldType, name...).(*TextField)
 }
 
 // KiType returns the [*gti.Type] of [TextField]
@@ -1399,8 +1399,8 @@ var ToolbarType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Toolbar", 
 // See [Widget.ConfigToolbar] for the standard toolbar config method for
 // any given widget, and [Scene.AppBars] for [ToolbarFuncs] for [Scene]
 // elements who should be represented in the main AppBar (e.g., TopAppBar).
-func NewToolbar(parent ki.Ki, name ...string) *Toolbar {
-	return parent.NewChild(ToolbarType, name...).(*Toolbar)
+func NewToolbar(par ki.Ki, name ...string) *Toolbar {
+	return par.NewChild(ToolbarType, name...).(*Toolbar)
 }
 
 // KiType returns the [*gti.Type] of [Toolbar]
@@ -1448,8 +1448,8 @@ var BasicBarType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.BasicBar"
 // BasicBar is just a styled Frame layout for holding buttons
 // and other widgets.  Use this when the more advanced features
 // of the Toolbar are not needed.
-func NewBasicBar(parent ki.Ki, name ...string) *BasicBar {
-	return parent.NewChild(BasicBarType, name...).(*BasicBar)
+func NewBasicBar(par ki.Ki, name ...string) *BasicBar {
+	return par.NewChild(BasicBarType, name...).(*BasicBar)
 }
 
 // KiType returns the [*gti.Type] of [BasicBar]
