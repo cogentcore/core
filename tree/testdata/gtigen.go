@@ -15,8 +15,8 @@ func NewTestNode(parent tree.Node, name ...string) *TestNode {
 	return parent.NewChild(TestNodeType, name...).(*TestNode)
 }
 
-// KiType returns the [*gti.Type] of [TestNode]
-func (t *TestNode) KiType() *gti.Type { return TestNodeType }
+// NodeType returns the [*gti.Type] of [TestNode]
+func (t *TestNode) NodeType() *gti.Type { return TestNodeType }
 
 // New returns a new [*TestNode] value
 func (t *TestNode) New() tree.Node { return &TestNode{} }
@@ -31,8 +31,8 @@ func NewNodeEmbed(parent tree.Node, name ...string) *NodeEmbed {
 	return parent.NewChild(NodeEmbedType, name...).(*NodeEmbed)
 }
 
-// KiType returns the [*gti.Type] of [NodeEmbed]
-func (t *NodeEmbed) KiType() *gti.Type { return NodeEmbedType }
+// NodeType returns the [*gti.Type] of [NodeEmbed]
+func (t *NodeEmbed) NodeType() *gti.Type { return NodeEmbedType }
 
 // New returns a new [*NodeEmbed] value
 func (t *NodeEmbed) New() tree.Node { return &NodeEmbed{} }
@@ -51,8 +51,8 @@ func NewNodeField(parent tree.Node, name ...string) *NodeField {
 	return parent.NewChild(NodeFieldType, name...).(*NodeField)
 }
 
-// KiType returns the [*gti.Type] of [NodeField]
-func (t *NodeField) KiType() *gti.Type { return NodeFieldType }
+// NodeType returns the [*gti.Type] of [NodeField]
+func (t *NodeField) NodeType() *gti.Type { return NodeFieldType }
 
 // New returns a new [*NodeField] value
 func (t *NodeField) New() tree.Node { return &NodeField{} }
@@ -74,8 +74,8 @@ func NewNodeField2(parent tree.Node, name ...string) *NodeField2 {
 	return parent.NewChild(NodeField2Type, name...).(*NodeField2)
 }
 
-// KiType returns the [*gti.Type] of [NodeField2]
-func (t *NodeField2) KiType() *gti.Type { return NodeField2Type }
+// NodeType returns the [*gti.Type] of [NodeField2]
+func (t *NodeField2) NodeType() *gti.Type { return NodeField2Type }
 
 // New returns a new [*NodeField2] value
 func (t *NodeField2) New() tree.Node { return &NodeField2{} }

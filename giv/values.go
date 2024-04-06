@@ -381,7 +381,7 @@ func (v *KiValue) Update() {
 	path := "None"
 	k := v.KiValue()
 	if k != nil && k.This() != nil {
-		path = k.AsKi().String()
+		path = k.AsTreeNode().String()
 	}
 	v.Widget.SetText(path).Update()
 }

@@ -26,8 +26,8 @@ func NewRule(parent tree.Node, name ...string) *Rule {
 	return parent.NewChild(RuleType, name...).(*Rule)
 }
 
-// KiType returns the [*gti.Type] of [Rule]
-func (t *Rule) KiType() *gti.Type { return RuleType }
+// NodeType returns the [*gti.Type] of [Rule]
+func (t *Rule) NodeType() *gti.Type { return RuleType }
 
 // New returns a new [*Rule] value
 func (t *Rule) New() tree.Node { return &Rule{} }

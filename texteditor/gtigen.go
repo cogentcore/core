@@ -41,8 +41,8 @@ func NewDiffView(parent tree.Node, name ...string) *DiffView {
 	return parent.NewChild(DiffViewType, name...).(*DiffView)
 }
 
-// KiType returns the [*gti.Type] of [DiffView]
-func (t *DiffView) KiType() *gti.Type { return DiffViewType }
+// NodeType returns the [*gti.Type] of [DiffView]
+func (t *DiffView) NodeType() *gti.Type { return DiffViewType }
 
 // New returns a new [*DiffView] value
 func (t *DiffView) New() tree.Node { return &DiffView{} }
@@ -80,8 +80,8 @@ func NewDiffTextEditor(parent tree.Node, name ...string) *DiffTextEditor {
 	return parent.NewChild(DiffTextEditorType, name...).(*DiffTextEditor)
 }
 
-// KiType returns the [*gti.Type] of [DiffTextEditor]
-func (t *DiffTextEditor) KiType() *gti.Type { return DiffTextEditorType }
+// NodeType returns the [*gti.Type] of [DiffTextEditor]
+func (t *DiffTextEditor) NodeType() *gti.Type { return DiffTextEditorType }
 
 // New returns a new [*DiffTextEditor] value
 func (t *DiffTextEditor) New() tree.Node { return &DiffTextEditor{} }
@@ -138,8 +138,8 @@ func NewEditor(parent tree.Node, name ...string) *Editor {
 	return parent.NewChild(EditorType, name...).(*Editor)
 }
 
-// KiType returns the [*gti.Type] of [Editor]
-func (t *Editor) KiType() *gti.Type { return EditorType }
+// NodeType returns the [*gti.Type] of [Editor]
+func (t *Editor) NodeType() *gti.Type { return EditorType }
 
 // New returns a new [*Editor] value
 func (t *Editor) New() tree.Node { return &Editor{} }
@@ -201,8 +201,8 @@ func NewTwinEditors(parent tree.Node, name ...string) *TwinEditors {
 	return parent.NewChild(TwinEditorsType, name...).(*TwinEditors)
 }
 
-// KiType returns the [*gti.Type] of [TwinEditors]
-func (t *TwinEditors) KiType() *gti.Type { return TwinEditorsType }
+// NodeType returns the [*gti.Type] of [TwinEditors]
+func (t *TwinEditors) NodeType() *gti.Type { return TwinEditorsType }
 
 // New returns a new [*TwinEditors] value
 func (t *TwinEditors) New() tree.Node { return &TwinEditors{} }

@@ -179,7 +179,7 @@ func (wb *WidgetBase) ConfigTree() {
 	if wb.This() == nil {
 		return
 	}
-	pr := prof.Start(wb.This().KiType().ShortName())
+	pr := prof.Start(wb.This().NodeType().ShortName())
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		wi.Config()
 		return tree.Continue
@@ -219,7 +219,7 @@ func (wb *WidgetBase) ApplyStyleTree() {
 	if wb.This() == nil {
 		return
 	}
-	pr := prof.Start(wb.This().KiType().ShortName())
+	pr := prof.Start(wb.This().NodeType().ShortName())
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		wi.ApplyStyle()
 		return tree.Continue
@@ -278,7 +278,7 @@ func (wb *WidgetBase) DoNeedsRender() {
 	if wb.This() == nil {
 		return
 	}
-	pr := prof.Start(wb.This().KiType().ShortName())
+	pr := prof.Start(wb.This().NodeType().ShortName())
 	wb.WidgetWalkPre(func(kwi Widget, kwb *WidgetBase) bool {
 		if kwi.Is(NeedsRender) {
 			kwi.RenderWidget()

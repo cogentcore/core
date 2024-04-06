@@ -87,8 +87,8 @@ func (n *NodeBase) This() Node {
 	return n.Ths
 }
 
-// AsKi returns the *tree.NodeBase base type for this node.
-func (n *NodeBase) AsKi() *NodeBase {
+// AsTreeNode returns the *tree.NodeBase base type for this node.
+func (n *NodeBase) AsTreeNode() *NodeBase {
 	return n
 }
 
@@ -201,11 +201,11 @@ func (n *NodeBase) ParentByType(t *gti.Type, embeds bool) Node {
 		return nil
 	}
 	if embeds {
-		if n.Par.KiType().HasEmbed(t) {
+		if n.Par.NodeType().HasEmbed(t) {
 			return n.Par
 		}
 	} else {
-		if n.Par.KiType() == t {
+		if n.Par.NodeType() == t {
 			return n.Par
 		}
 	}
@@ -1020,7 +1020,7 @@ func (n *NodeBase) CopyFrom(frm Node) error {
 // Any pointers within the cloned tree will correctly point within the new
 // cloned tree (see Copy info).
 func (n *NodeBase) Clone() Node {
-	nc := NewOfType(n.This().KiType())
+	nc := NewOfType(n.This().NodeType())
 	nc.InitName(nc, n.Nm)
 	nc.CopyFrom(n.This())
 	return nc
@@ -1030,7 +1030,7 @@ func (n *NodeBase) Clone() Node {
 // bits and doesn't do anything with pointers.
 func CopyFromRaw(kn, frm Node) {
 	kn.Children().ConfigCopy(kn.This(), *frm.Children())
-	n := kn.AsKi()
+	n := kn.AsTreeNode()
 	fmp := *frm.Properties()
 	n.Props = make(Props, len(fmp))
 	n.Props.CopyFrom(fmp, DeepCopy)

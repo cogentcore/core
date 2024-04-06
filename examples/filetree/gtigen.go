@@ -20,8 +20,8 @@ func NewFileBrowse(parent tree.Node, name ...string) *FileBrowse {
 	return parent.NewChild(FileBrowseType, name...).(*FileBrowse)
 }
 
-// KiType returns the [*gti.Type] of [FileBrowse]
-func (t *FileBrowse) KiType() *gti.Type { return FileBrowseType }
+// NodeType returns the [*gti.Type] of [FileBrowse]
+func (t *FileBrowse) NodeType() *gti.Type { return FileBrowseType }
 
 // New returns a new [*FileBrowse] value
 func (t *FileBrowse) New() tree.Node { return &FileBrowse{} }

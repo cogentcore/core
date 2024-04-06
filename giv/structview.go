@@ -312,8 +312,8 @@ func (sv *StructView) ConfigStructGrid() bool {
 				}
 			})
 		}
-		if w.KiType() != vv.WidgetType() {
-			slog.Error("StructView: Widget Type is not the proper type.  This usually means there are duplicate field names (including across embedded types", "field:", lbl.Text, "is:", w.KiType().Name, "should be:", vv.WidgetType().Name)
+		if w.NodeType() != vv.WidgetType() {
+			slog.Error("StructView: Widget Type is not the proper type.  This usually means there are duplicate field names (including across embedded types", "field:", lbl.Text, "is:", w.NodeType().Name, "should be:", vv.WidgetType().Name)
 			break
 		}
 		Config(vv, w)

@@ -11,8 +11,8 @@ import (
 // ManipPtType is the [gti.Type] for [ManipPoint]
 var ManipPtType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyzv.ManipPt", IDName: "manip-pt", Doc: "ManipPt is a manipulation control point", Directives: []gti.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []gti.Field{{Name: "Solid"}}, Instance: &ManipPoint{}})
 
-// KiType returns the [*gti.Type] of [ManipPoint]
-func (t *ManipPoint) KiType() *gti.Type { return ManipPtType }
+// NodeType returns the [*gti.Type] of [ManipPoint]
+func (t *ManipPoint) NodeType() *gti.Type { return ManipPtType }
 
 // New returns a new [*ManipPoint] value
 func (t *ManipPoint) New() tree.Node { return &ManipPoint{} }
@@ -31,8 +31,8 @@ func NewScene(parent tree.Node, name ...string) *Scene {
 	return parent.NewChild(SceneType, name...).(*Scene)
 }
 
-// KiType returns the [*gti.Type] of [Scene]
-func (t *Scene) KiType() *gti.Type { return SceneType }
+// NodeType returns the [*gti.Type] of [Scene]
+func (t *Scene) NodeType() *gti.Type { return SceneType }
 
 // New returns a new [*Scene] value
 func (t *Scene) New() tree.Node { return &Scene{} }
@@ -66,8 +66,8 @@ func NewSceneView(parent tree.Node, name ...string) *SceneView {
 	return parent.NewChild(SceneViewType, name...).(*SceneView)
 }
 
-// KiType returns the [*gti.Type] of [SceneView]
-func (t *SceneView) KiType() *gti.Type { return SceneViewType }
+// NodeType returns the [*gti.Type] of [SceneView]
+func (t *SceneView) NodeType() *gti.Type { return SceneViewType }
 
 // New returns a new [*SceneView] value
 func (t *SceneView) New() tree.Node { return &SceneView{} }

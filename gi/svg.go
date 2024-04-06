@@ -90,7 +90,7 @@ func (sv *SVG) HandleEvents() {
 		if len(objs) > 0 {
 			els := ""
 			for _, o := range objs {
-				els += o.KiType().Name + ": " + o.Name() + "\n"
+				els += o.NodeType().Name + ": " + o.Name() + "\n"
 			}
 			sv.Tooltip = els
 		}

@@ -43,8 +43,8 @@ func (t *App) SetSceneConfig(v func(sc *Scene)) *App { t.SceneConfig = v; return
 // BodyType is the [gti.Type] for [Body]
 var BodyType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Body", IDName: "body", Doc: "Body holds the primary content of a Scene", Directives: []gti.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Title", Doc: "title of the Body, also used for window title where relevant"}}, Instance: &Body{}})
 
-// KiType returns the [*gti.Type] of [Body]
-func (t *Body) KiType() *gti.Type { return BodyType }
+// NodeType returns the [*gti.Type] of [Body]
+func (t *Body) NodeType() *gti.Type { return BodyType }
 
 // New returns a new [*Body] value
 func (t *Body) New() tree.Node { return &Body{} }
@@ -61,8 +61,8 @@ func NewBox(parent tree.Node, name ...string) *Box {
 	return parent.NewChild(BoxType, name...).(*Box)
 }
 
-// KiType returns the [*gti.Type] of [Box]
-func (t *Box) KiType() *gti.Type { return BoxType }
+// NodeType returns the [*gti.Type] of [Box]
+func (t *Box) NodeType() *gti.Type { return BoxType }
 
 // New returns a new [*Box] value
 func (t *Box) New() tree.Node { return &Box{} }
@@ -81,8 +81,8 @@ func NewButton(parent tree.Node, name ...string) *Button {
 	return parent.NewChild(ButtonType, name...).(*Button)
 }
 
-// KiType returns the [*gti.Type] of [Button]
-func (t *Button) KiType() *gti.Type { return ButtonType }
+// NodeType returns the [*gti.Type] of [Button]
+func (t *Button) NodeType() *gti.Type { return ButtonType }
 
 // New returns a new [*Button] value
 func (t *Button) New() tree.Node { return &Button{} }
@@ -152,8 +152,8 @@ func NewCanvas(parent tree.Node, name ...string) *Canvas {
 	return parent.NewChild(CanvasType, name...).(*Canvas)
 }
 
-// KiType returns the [*gti.Type] of [Canvas]
-func (t *Canvas) KiType() *gti.Type { return CanvasType }
+// NodeType returns the [*gti.Type] of [Canvas]
+func (t *Canvas) NodeType() *gti.Type { return CanvasType }
 
 // New returns a new [*Canvas] value
 func (t *Canvas) New() tree.Node { return &Canvas{} }
@@ -181,8 +181,8 @@ func NewChooser(parent tree.Node, name ...string) *Chooser {
 	return parent.NewChild(ChooserType, name...).(*Chooser)
 }
 
-// KiType returns the [*gti.Type] of [Chooser]
-func (t *Chooser) KiType() *gti.Type { return ChooserType }
+// NodeType returns the [*gti.Type] of [Chooser]
+func (t *Chooser) NodeType() *gti.Type { return ChooserType }
 
 // New returns a new [*Chooser] value
 func (t *Chooser) New() tree.Node { return &Chooser{} }
@@ -280,8 +280,8 @@ func NewFrame(parent tree.Node, name ...string) *Frame {
 	return parent.NewChild(FrameType, name...).(*Frame)
 }
 
-// KiType returns the [*gti.Type] of [Frame]
-func (t *Frame) KiType() *gti.Type { return FrameType }
+// NodeType returns the [*gti.Type] of [Frame]
+func (t *Frame) NodeType() *gti.Type { return FrameType }
 
 // New returns a new [*Frame] value
 func (t *Frame) New() tree.Node { return &Frame{} }
@@ -300,8 +300,8 @@ func NewHandle(parent tree.Node, name ...string) *Handle {
 	return parent.NewChild(HandleType, name...).(*Handle)
 }
 
-// KiType returns the [*gti.Type] of [Handle]
-func (t *Handle) KiType() *gti.Type { return HandleType }
+// NodeType returns the [*gti.Type] of [Handle]
+func (t *Handle) NodeType() *gti.Type { return HandleType }
 
 // New returns a new [*Handle] value
 func (t *Handle) New() tree.Node { return &Handle{} }
@@ -336,8 +336,8 @@ func NewIcon(parent tree.Node, name ...string) *Icon {
 	return parent.NewChild(IconType, name...).(*Icon)
 }
 
-// KiType returns the [*gti.Type] of [Icon]
-func (t *Icon) KiType() *gti.Type { return IconType }
+// NodeType returns the [*gti.Type] of [Icon]
+func (t *Icon) NodeType() *gti.Type { return IconType }
 
 // New returns a new [*Icon] value
 func (t *Icon) New() tree.Node { return &Icon{} }
@@ -358,8 +358,8 @@ func NewImage(parent tree.Node, name ...string) *Image {
 	return parent.NewChild(ImageType, name...).(*Image)
 }
 
-// KiType returns the [*gti.Type] of [Image]
-func (t *Image) KiType() *gti.Type { return ImageType }
+// NodeType returns the [*gti.Type] of [Image]
+func (t *Image) NodeType() *gti.Type { return ImageType }
 
 // New returns a new [*Image] value
 func (t *Image) New() tree.Node { return &Image{} }
@@ -378,8 +378,8 @@ func NewLabel(parent tree.Node, name ...string) *Label {
 	return parent.NewChild(LabelType, name...).(*Label)
 }
 
-// KiType returns the [*gti.Type] of [Label]
-func (t *Label) KiType() *gti.Type { return LabelType }
+// NodeType returns the [*gti.Type] of [Label]
+func (t *Label) NodeType() *gti.Type { return LabelType }
 
 // New returns a new [*Label] value
 func (t *Label) New() tree.Node { return &Label{} }
@@ -441,8 +441,8 @@ func NewLayout(parent tree.Node, name ...string) *Layout {
 	return parent.NewChild(LayoutType, name...).(*Layout)
 }
 
-// KiType returns the [*gti.Type] of [Layout]
-func (t *Layout) KiType() *gti.Type { return LayoutType }
+// NodeType returns the [*gti.Type] of [Layout]
+func (t *Layout) NodeType() *gti.Type { return LayoutType }
 
 // New returns a new [*Layout] value
 func (t *Layout) New() tree.Node { return &Layout{} }
@@ -461,8 +461,8 @@ func NewStretch(parent tree.Node, name ...string) *Stretch {
 	return parent.NewChild(StretchType, name...).(*Stretch)
 }
 
-// KiType returns the [*gti.Type] of [Stretch]
-func (t *Stretch) KiType() *gti.Type { return StretchType }
+// NodeType returns the [*gti.Type] of [Stretch]
+func (t *Stretch) NodeType() *gti.Type { return StretchType }
 
 // New returns a new [*Stretch] value
 func (t *Stretch) New() tree.Node { return &Stretch{} }
@@ -481,8 +481,8 @@ func NewSpace(parent tree.Node, name ...string) *Space {
 	return parent.NewChild(SpaceType, name...).(*Space)
 }
 
-// KiType returns the [*gti.Type] of [Space]
-func (t *Space) KiType() *gti.Type { return SpaceType }
+// NodeType returns the [*gti.Type] of [Space]
+func (t *Space) NodeType() *gti.Type { return SpaceType }
 
 // New returns a new [*Space] value
 func (t *Space) New() tree.Node { return &Space{} }
@@ -500,8 +500,8 @@ func NewMeter(parent tree.Node, name ...string) *Meter {
 	return parent.NewChild(MeterType, name...).(*Meter)
 }
 
-// KiType returns the [*gti.Type] of [Meter]
-func (t *Meter) KiType() *gti.Type { return MeterType }
+// NodeType returns the [*gti.Type] of [Meter]
+func (t *Meter) NodeType() *gti.Type { return MeterType }
 
 // New returns a new [*Meter] value
 func (t *Meter) New() tree.Node { return &Meter{} }
@@ -553,8 +553,8 @@ func NewScrim(parent tree.Node, name ...string) *Scrim {
 	return parent.NewChild(ScrimType, name...).(*Scrim)
 }
 
-// KiType returns the [*gti.Type] of [Scrim]
-func (t *Scrim) KiType() *gti.Type { return ScrimType }
+// NodeType returns the [*gti.Type] of [Scrim]
+func (t *Scrim) NodeType() *gti.Type { return ScrimType }
 
 // New returns a new [*Scrim] value
 func (t *Scrim) New() tree.Node { return &Scrim{} }
@@ -565,8 +565,8 @@ func (t *Scrim) SetTooltip(v string) *Scrim { t.Tooltip = v; return t }
 // SceneType is the [gti.Type] for [Scene]
 var SceneType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Scene", IDName: "scene", Doc: "Scene contains a Widget tree, rooted in an embedded Frame layout,\nwhich renders into its Pixels image.\nThe Scene is set in a Stage (pointer retained in Scene).\nStage has a StageMgr manager for controlling things like Popups\n(Menus and Dialogs, etc).\n\nEach Scene and Widget tree contains state specific to its particular usage\nwithin a given Stage and overall rendering context, representing the unit\nof rendering in the Cogent Core framework.", Directives: []gti.Directive{{Tool: "core", Directive: "no-new"}, {Tool: "core", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Bars", Doc: "Bars contains functions for constructing the control bars for this Scene,\nattached to different sides of a Scene (e.g., TopAppBar at Top,\nNavBar at Bottom, etc).  Functions are called in forward order\nso first added are called first."}, {Name: "BarsInherit", Doc: "BarsInherit determines which of the Bars side functions are inherited\nfrom the context widget, for FullWindow Dialogs"}, {Name: "AppBars", Doc: "AppBars contains functions for configuring a top-level App toolbar,\n(e.g., TopAppBar) for elements contained within this Scene,\nthat should be represented in any app-level toolbar constructed\nfor this Scene."}, {Name: "Body", Doc: "Body provides the main contents of scenes that use control Bars\nto allow the main window contents to be specified separately\nfrom that dynamic control content.  When constructing scenes using\na Body, you can operate directly on the [Body], which has wrappers\nfor most major Scene functions."}, {Name: "Data", Doc: "Data is the optional data value being represented by this scene.\nUsed e.g., for recycling views of a given item instead of creating new one."}, {Name: "SceneGeom", Doc: "Size and position relative to overall rendering context."}, {Name: "PaintContext", Doc: "paint context for rendering"}, {Name: "Pixels", Doc: "live pixels that we render into"}, {Name: "EventMgr", Doc: "event manager for this scene"}, {Name: "Stage", Doc: "current stage in which this Scene is set"}, {Name: "RenderBBoxHue", Doc: "RenderBBoxHue is current hue for rendering bounding box in ScRenderBBoxes mode"}, {Name: "SelectedWidget", Doc: "the currently selected/hovered widget through the inspect editor selection mode\nthat should be highlighted with a background color"}, {Name: "SelectedWidgetChan", Doc: "the channel on which the selected widget through the inspect editor\nselection mode is transmitted to the inspect editor after the user is done selecting"}, {Name: "LastRender", Doc: "LastRender captures key params from last render.\nIf different then a new ApplyStyleScene is needed."}, {Name: "StyleMu", Doc: "StyleMu is RW mutex protecting access to Style-related global vars"}, {Name: "ShowIter", Doc: "ShowIter counts up at start of showing a Scene\nto trigger Show event and other steps at start of first show"}, {Name: "ReRender", Doc: "ReRender items are re-rendered after the current pass"}, {Name: "hasShown", Doc: "hasShown is whether this scene has already been shown.\nThis is used to ensure that [events.Show] is only sent once."}, {Name: "DirectRenders", Doc: "DirectRenders are widgets that render directly to the RenderWin\ninstead of rendering into the Scene Pixels image."}}, Instance: &Scene{}})
 
-// KiType returns the [*gti.Type] of [Scene]
-func (t *Scene) KiType() *gti.Type { return SceneType }
+// NodeType returns the [*gti.Type] of [Scene]
+func (t *Scene) NodeType() *gti.Type { return SceneType }
 
 // New returns a new [*Scene] value
 func (t *Scene) New() tree.Node { return &Scene{} }
@@ -655,8 +655,8 @@ func NewSeparator(parent tree.Node, name ...string) *Separator {
 	return parent.NewChild(SeparatorType, name...).(*Separator)
 }
 
-// KiType returns the [*gti.Type] of [Separator]
-func (t *Separator) KiType() *gti.Type { return SeparatorType }
+// NodeType returns the [*gti.Type] of [Separator]
+func (t *Separator) NodeType() *gti.Type { return SeparatorType }
 
 // New returns a new [*Separator] value
 func (t *Separator) New() tree.Node { return &Separator{} }
@@ -698,8 +698,8 @@ func NewSlider(parent tree.Node, name ...string) *Slider {
 	return parent.NewChild(SliderType, name...).(*Slider)
 }
 
-// KiType returns the [*gti.Type] of [Slider]
-func (t *Slider) KiType() *gti.Type { return SliderType }
+// NodeType returns the [*gti.Type] of [Slider]
+func (t *Slider) NodeType() *gti.Type { return SliderType }
 
 // New returns a new [*Slider] value
 func (t *Slider) New() tree.Node { return &Slider{} }
@@ -816,8 +816,8 @@ func NewSpinner(parent tree.Node, name ...string) *Spinner {
 	return parent.NewChild(SpinnerType, name...).(*Spinner)
 }
 
-// KiType returns the [*gti.Type] of [Spinner]
-func (t *Spinner) KiType() *gti.Type { return SpinnerType }
+// NodeType returns the [*gti.Type] of [Spinner]
+func (t *Spinner) NodeType() *gti.Type { return SpinnerType }
 
 // New returns a new [*Spinner] value
 func (t *Spinner) New() tree.Node { return &Spinner{} }
@@ -928,8 +928,8 @@ func NewSplits(parent tree.Node, name ...string) *Splits {
 	return parent.NewChild(SplitsType, name...).(*Splits)
 }
 
-// KiType returns the [*gti.Type] of [Splits]
-func (t *Splits) KiType() *gti.Type { return SplitsType }
+// NodeType returns the [*gti.Type] of [Splits]
+func (t *Splits) NodeType() *gti.Type { return SplitsType }
 
 // New returns a new [*Splits] value
 func (t *Splits) New() tree.Node { return &Splits{} }
@@ -1067,8 +1067,8 @@ func NewSVG(parent tree.Node, name ...string) *SVG {
 	return parent.NewChild(SVGType, name...).(*SVG)
 }
 
-// KiType returns the [*gti.Type] of [SVG]
-func (t *SVG) KiType() *gti.Type { return SVGType }
+// NodeType returns the [*gti.Type] of [SVG]
+func (t *SVG) NodeType() *gti.Type { return SVGType }
 
 // New returns a new [*SVG] value
 func (t *SVG) New() tree.Node { return &SVG{} }
@@ -1086,8 +1086,8 @@ func NewSwitch(parent tree.Node, name ...string) *Switch {
 	return parent.NewChild(SwitchType, name...).(*Switch)
 }
 
-// KiType returns the [*gti.Type] of [Switch]
-func (t *Switch) KiType() *gti.Type { return SwitchType }
+// NodeType returns the [*gti.Type] of [Switch]
+func (t *Switch) NodeType() *gti.Type { return SwitchType }
 
 // New returns a new [*Switch] value
 func (t *Switch) New() tree.Node { return &Switch{} }
@@ -1123,8 +1123,8 @@ func NewSwitches(parent tree.Node, name ...string) *Switches {
 	return parent.NewChild(SwitchesType, name...).(*Switches)
 }
 
-// KiType returns the [*gti.Type] of [Switches]
-func (t *Switches) KiType() *gti.Type { return SwitchesType }
+// NodeType returns the [*gti.Type] of [Switches]
+func (t *Switches) NodeType() *gti.Type { return SwitchesType }
 
 // New returns a new [*Switches] value
 func (t *Switches) New() tree.Node { return &Switches{} }
@@ -1179,8 +1179,8 @@ func NewTabs(parent tree.Node, name ...string) *Tabs {
 	return parent.NewChild(TabsType, name...).(*Tabs)
 }
 
-// KiType returns the [*gti.Type] of [Tabs]
-func (t *Tabs) KiType() *gti.Type { return TabsType }
+// NodeType returns the [*gti.Type] of [Tabs]
+func (t *Tabs) NodeType() *gti.Type { return TabsType }
 
 // New returns a new [*Tabs] value
 func (t *Tabs) New() tree.Node { return &Tabs{} }
@@ -1234,8 +1234,8 @@ func (t *Tabs) SetTooltip(v string) *Tabs { t.Tooltip = v; return t }
 // TabType is the [gti.Type] for [Tab]
 var TabType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.Tab", IDName: "tab", Doc: "Tab is a tab button that contains any, all, or none of a label, an icon,\nand a close icon. Tabs should be made using the [Tabs.NewTab] function.", Directives: []gti.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []gti.Field{{Name: "Box"}}, Fields: []gti.Field{{Name: "Type", Doc: "Type is the styling type of the tab. This property\nmust be set on the parent [Tabs] for it to work correctly."}, {Name: "Text", Doc: "Text is the label text for the tab.\nIf it is nil, no label is shown.\nLabels are never shown for [NavigationRail] tabs."}, {Name: "Icon", Doc: "Icon is the icon for the tab.\nIf it is \"\" or [icons.None], no icon is shown."}, {Name: "CloseIcon", Doc: "CloseIcon is the icon used as a close button for the tab.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed."}, {Name: "MaxChars", Doc: "Maximum number of characters to include in tab label.\nElides labels that are longer than that"}}, Instance: &Tab{}})
 
-// KiType returns the [*gti.Type] of [Tab]
-func (t *Tab) KiType() *gti.Type { return TabType }
+// NodeType returns the [*gti.Type] of [Tab]
+func (t *Tab) NodeType() *gti.Type { return TabType }
 
 // New returns a new [*Tab] value
 func (t *Tab) New() tree.Node { return &Tab{} }
@@ -1287,8 +1287,8 @@ func NewTextField(parent tree.Node, name ...string) *TextField {
 	return parent.NewChild(TextFieldType, name...).(*TextField)
 }
 
-// KiType returns the [*gti.Type] of [TextField]
-func (t *TextField) KiType() *gti.Type { return TextFieldType }
+// NodeType returns the [*gti.Type] of [TextField]
+func (t *TextField) NodeType() *gti.Type { return TextFieldType }
 
 // New returns a new [*TextField] value
 func (t *TextField) New() tree.Node { return &TextField{} }
@@ -1403,8 +1403,8 @@ func NewToolbar(parent tree.Node, name ...string) *Toolbar {
 	return parent.NewChild(ToolbarType, name...).(*Toolbar)
 }
 
-// KiType returns the [*gti.Type] of [Toolbar]
-func (t *Toolbar) KiType() *gti.Type { return ToolbarType }
+// NodeType returns the [*gti.Type] of [Toolbar]
+func (t *Toolbar) NodeType() *gti.Type { return ToolbarType }
 
 // New returns a new [*Toolbar] value
 func (t *Toolbar) New() tree.Node { return &Toolbar{} }
@@ -1452,8 +1452,8 @@ func NewBasicBar(parent tree.Node, name ...string) *BasicBar {
 	return parent.NewChild(BasicBarType, name...).(*BasicBar)
 }
 
-// KiType returns the [*gti.Type] of [BasicBar]
-func (t *BasicBar) KiType() *gti.Type { return BasicBarType }
+// NodeType returns the [*gti.Type] of [BasicBar]
+func (t *BasicBar) NodeType() *gti.Type { return BasicBarType }
 
 // New returns a new [*BasicBar] value
 func (t *BasicBar) New() tree.Node { return &BasicBar{} }
@@ -1464,8 +1464,8 @@ func (t *BasicBar) SetTooltip(v string) *BasicBar { t.Tooltip = v; return t }
 // WidgetBaseType is the [gti.Type] for [WidgetBase]
 var WidgetBaseType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gi.WidgetBase", IDName: "widget-base", Doc: "WidgetBase is the base type for all Widget Widget elements, which are\nmanaged by a containing Layout, and use all 5 rendering passes.  All\nelemental widgets must support the ReadOnly and Selected states in a\nreasonable way (Selected only essential when also ReadOnly), so they can\nfunction appropriately in a chooser (e.g., SliceView or TableView) -- this\nincludes toggling selection on left mouse press.", Directives: []gti.Directive{{Tool: "core", Directive: "no-new"}}, Methods: []gti.Method{{Name: "Update", Doc: "Update does a general purpose update of the widget and everything\nbelow it by reconfiguring it, applying its styles, and indicating\nthat it needs a new layout pass. It is the main way that end users\nshould update widgets, and it should be called after making any\nchanges to the core properties of a widget (for example, the text\nof a label, the icon of a button, or the slice of a table view).\n\nIf you are calling this in a separate goroutine outside of the main\nconfiguration, rendering, and event handling structure, you need to\ncall [WidgetBase.AsyncLock] and [WidgetBase.AsyncUnlock] before and\nafter this, respectively.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}}, Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Tooltip", Doc: "Tooltip is the text for the tooltip for this widget,\nwhich can use HTML formatting."}, {Name: "Parts", Doc: "Parts are a separate tree of sub-widgets that implement discrete parts\nof a widget.  Positions are relative to the parent widget.\nThese are fully managed by the parent widget"}, {Name: "Geom", Doc: "Geom has the full layout geometry for size and position of this Widget"}, {Name: "OverrideStyle", Doc: "If true, Override the computed styles and allow directly editing Style"}, {Name: "Styles", Doc: "Styles are styling settings for this widget.\nThese are set in SetApplyStyle which should be called after any Config\nchange (e.g., as done by the Update method).  See Stylers for functions\nthat set all of the styles, ordered from initial base defaults to later\nadded overrides."}, {Name: "Stylers", Doc: "Stylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using Style function. FirstStylers and\nFinalStylers are called before and after these stylers, respectively."}, {Name: "FirstStylers", Doc: "FirstStylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using StyleFirst function. These stylers\nare called before Stylers and FinalStylers."}, {Name: "FinalStylers", Doc: "FinalStylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using StyleFinal function. These stylers\nare called after FirstStylers and Stylers."}, {Name: "Listeners", Doc: "Listeners are event listener functions for processing events on this widget.\nThey are called in sequential descending order (so the last added listener\nis called first). They should be added using the On function. FirstListeners\nand FinalListeners are called before and after these listeners, respectively."}, {Name: "FirstListeners", Doc: "FirstListeners are event listener functions for processing events on this widget.\nThey are called in sequential descending order (so the last added listener\nis called first). They should be added using the OnFirst function. These listeners\nare called before Listeners and FinalListeners."}, {Name: "FinalListeners", Doc: "FinalListeners are event listener functions for processing events on this widget.\nThey are called in sequential descending order (so the last added listener\nis called first). They should be added using the OnFinal function. These listeners\nare called after FirstListeners and Listeners."}, {Name: "OnWidgetAdders", Doc: "A slice of functions to call on all widgets that are added as children\nto this widget or its children.  These functions are called in sequential\nascending order, so the last added one is called last and thus can\noverride anything set by the other ones. These should be set using\nOnWidgetAdded, which can be called by both end-user and internal code."}, {Name: "ContextMenus", Doc: "ContextMenus is a slice of menu functions to call to construct\nthe widget's context menu on an [events.ContextMenu]. The\nfunctions are called in reverse order such that the elements\nadded in the last function are the first in the menu.\nContext menus should be added through [Widget.AddContextMenu].\nSeparators will be added between each context menu function."}, {Name: "Scene", Doc: "Scene is the overall Scene to which we belong. It is automatically\nby widgets whenever they are added to another widget parent."}}, Instance: &WidgetBase{}})
 
-// KiType returns the [*gti.Type] of [WidgetBase]
-func (t *WidgetBase) KiType() *gti.Type { return WidgetBaseType }
+// NodeType returns the [*gti.Type] of [WidgetBase]
+func (t *WidgetBase) NodeType() *gti.Type { return WidgetBaseType }
 
 // New returns a new [*WidgetBase] value
 func (t *WidgetBase) New() tree.Node { return &WidgetBase{} }

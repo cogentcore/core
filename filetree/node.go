@@ -79,7 +79,7 @@ const (
 )
 
 func (fn *Node) BaseType() *gti.Type {
-	return fn.KiType()
+	return fn.NodeType()
 }
 
 // IsDir returns true if file is a directory (folder)

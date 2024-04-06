@@ -72,7 +72,7 @@ func (sl Slice) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	nt := xml.StartElement{Name: xml.Name{Space: "", Local: "N"}}
 	tokens = append(tokens, nt, xml.CharData(fmt.Sprintf("%d", nk)), xml.EndElement{Name: nt.Name})
 	for _, kid := range sl {
-		knm := kid.KiType().Name
+		knm := kid.NodeType().Name
 		t := xml.StartElement{Name: xml.Name{Space: "", Local: "Type"}}
 		tokens = append(tokens, t, xml.CharData(knm), xml.EndElement{Name: t.Name})
 	}

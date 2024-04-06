@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package gi provides the core GUI functionality of Cogent Core.
 package gi
 
 //go:generate core generate
 
 import (
+	"fmt"
 	"image"
 	"log/slog"
 
@@ -473,7 +475,15 @@ func (wb *WidgetBase) DirectRenderImage(drw goosi.Drawer, idx int) {
 func (wb *WidgetBase) DirectRenderDraw(drw goosi.Drawer, idx int, flipY bool) {
 }
 
-// WalkPreNode extends WalkPre to Parts -- key for getting full Update protection!
+// FieldByName allows [tree.Node.FindPath] to go through parts.
+func (wb *WidgetBase) FieldByName(field string) (tree.Node, error) {
+	if field == "parts" {
+		return wb.Parts, nil
+	}
+	return nil, fmt.Errorf("no field %q for %v; only parts", field, wb)
+}
+
+// WalkPreNode extends WalkPre to Parts, which is key for getting full Update protection.
 func (wb *WidgetBase) WalkPreNode(fun func(tree.Node) bool) {
 	if wb.Parts == nil {
 		return

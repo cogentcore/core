@@ -14,7 +14,7 @@ var testTree *NodeBase
 
 func init() {
 	testTree = &NodeBase{}
-	typ := testTree.KiType()
+	typ := testTree.NodeType()
 	testTree.InitName(testTree, "root")
 	// child1 :=
 	testTree.NewChild(typ, "child0")

@@ -195,7 +195,7 @@ func (tv *TreeView) AsTreeView() *TreeView {
 }
 
 func (tv *TreeView) BaseType() *gti.Type {
-	return tv.KiType()
+	return tv.NodeType()
 }
 
 // RootSetViewIndex sets the RootView and ViewIndex for all nodes.

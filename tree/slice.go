@@ -157,9 +157,9 @@ func (sl *Slice) IndexByName(name string, startIndex ...int) (int, bool) {
 // that type, false if not found. See [Slice.IndexOf] for info on startIndex.
 func (sl *Slice) IndexByType(t *gti.Type, embeds bool, startIndex ...int) (int, bool) {
 	if embeds {
-		return sl.IndexByFunc(func(ch Node) bool { return ch.KiType().HasEmbed(t) }, startIndex...)
+		return sl.IndexByFunc(func(ch Node) bool { return ch.NodeType().HasEmbed(t) }, startIndex...)
 	}
-	return sl.IndexByFunc(func(ch Node) bool { return ch.KiType() == t }, startIndex...)
+	return sl.IndexByFunc(func(ch Node) bool { return ch.NodeType() == t }, startIndex...)
 }
 
 // ElemByName returns first element that has given name, nil if not found.
@@ -291,7 +291,7 @@ func (sl *Slice) Config(n Node, config Config) bool {
 		ti, ok := nm[knm]
 		if !ok {
 			sl.configDeleteKid(kid, i, &mods)
-		} else if kid.KiType() != config[ti].Type {
+		} else if kid.NodeType() != config[ti].Type {
 			sl.configDeleteKid(kid, i, &mods)
 		}
 	}
@@ -344,7 +344,7 @@ func (sl *Slice) ConfigCopy(n Node, frm Slice) {
 	if sz > 0 || n == nil {
 		cfg := make(Config, sz)
 		for i, kid := range frm {
-			cfg[i].Type = kid.KiType()
+			cfg[i].Type = kid.NodeType()
 			cfg[i].Name = kid.Name()
 		}
 		sl.Config(n, cfg)

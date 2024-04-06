@@ -24,7 +24,7 @@ import (
 // within struct, sets their names to the field name, and sets us as their
 // parent.
 func InitNode(this Node) {
-	n := this.AsKi()
+	n := this.AsTreeNode()
 	if n.Ths != this {
 		n.Ths = this
 		n.Ths.OnInit()
@@ -47,13 +47,13 @@ func ThisCheck(k Node) error {
 // parent, to keep consistent).
 // Assumes not already in a tree or anything.
 func SetParent(kid Node, parent Node) {
-	n := kid.AsKi()
+	n := kid.AsTreeNode()
 	n.Par = parent
 	if parent != nil {
-		pn := parent.AsKi()
+		pn := parent.AsTreeNode()
 		c := atomic.AddUint64(&pn.NumLifetimeKids, 1)
 		if kid.Name() == "" {
-			kid.SetName(kid.KiType().IDName + "-" + strconv.FormatUint(c-1, 10)) // must subtract 1 so we start at 0
+			kid.SetName(kid.NodeType().IDName + "-" + strconv.FormatUint(c-1, 10)) // must subtract 1 so we start at 0
 		}
 	}
 	kid.This().OnAdd()
@@ -82,7 +82,7 @@ func MoveToParent(kid Node, parent Node) {
 // It is a helper function that calls [Node.NewChild].
 func New[T Node](parent Node, name ...string) T {
 	var n T
-	return parent.NewChild(n.KiType(), name...).(T)
+	return parent.NewChild(n.NodeType(), name...).(T)
 }
 
 // NewRoot returns a new root node of the given the type
@@ -99,20 +99,20 @@ func NewRoot[T Node](name ...string) T {
 // InsertNewChild is a generic helper function for [Node.InsertNewChild]
 func InsertNewChild[T Node](parent Node, at int, name ...string) T {
 	var n T
-	return parent.InsertNewChild(n.KiType(), at, name...).(T)
+	return parent.InsertNewChild(n.NodeType(), at, name...).(T)
 }
 
 // ParentByType is a generic helper function for [Node.ParentByType]
 func ParentByType[T Node](k Node, embeds bool) T {
 	var n T
-	v, _ := k.ParentByType(n.KiType(), embeds).(T)
+	v, _ := k.ParentByType(n.NodeType(), embeds).(T)
 	return v
 }
 
 // ChildByType is a generic helper function for [Node.ChildByType]
 func ChildByType[T Node](k Node, embeds bool, startIndex ...int) T {
 	var n T
-	v, _ := k.ChildByType(n.KiType(), embeds, startIndex...).(T)
+	v, _ := k.ChildByType(n.NodeType(), embeds, startIndex...).(T)
 	return v
 }
 
@@ -133,12 +133,12 @@ func Root(k Node) Node {
 // This is only valid in a given context, not a stable
 // property of the node (e.g., used in WalkBreadth).
 func Depth(kn Node) int {
-	return kn.AsKi().depth
+	return kn.AsTreeNode().depth
 }
 
 // SetDepth sets the current depth of the node to given value.
 func SetDepth(kn Node, depth int) {
-	kn.AsKi().depth = depth
+	kn.AsTreeNode().depth = depth
 }
 
 //////////////////////////////////////////////////

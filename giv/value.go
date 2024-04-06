@@ -219,7 +219,7 @@ func (v *ValueBase[W]) AsWidgetBase() *gi.WidgetBase {
 
 func (v *ValueBase[W]) WidgetType() *gti.Type {
 	var w W
-	return w.KiType()
+	return w.NodeType()
 }
 
 func (v *ValueBase[W]) SetWidget(w gi.Widget) {

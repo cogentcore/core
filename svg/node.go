@@ -285,7 +285,7 @@ func SVGWalkPreNoDefs(n Node, fun func(kni Node, knb *NodeBase) bool) {
 		if kni == nil || kni.This() == nil {
 			return tree.Break
 		}
-		if kni.Is(IsDef) || kni.KiType() == MetaDataType {
+		if kni.Is(IsDef) || kni.NodeType() == MetaDataType {
 			return tree.Break
 		}
 		return fun(kni, kni.AsNodeBase())
@@ -400,7 +400,7 @@ func (g *NodeBase) ApplyCSS(sv *SVG, key string, css tree.Props) bool {
 // StyleCSS applies css style properties to given SVG node
 // parsing out type, .class, and #name selectors
 func (g *NodeBase) StyleCSS(sv *SVG, css tree.Props) {
-	tyn := strings.ToLower(g.KiType().Name) // type is most general, first
+	tyn := strings.ToLower(g.NodeType().Name) // type is most general, first
 	g.ApplyCSS(sv, tyn, css)
 	cln := "." + strings.ToLower(g.Class) // then class
 	g.ApplyCSS(sv, cln, css)

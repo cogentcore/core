@@ -57,7 +57,7 @@ func TestNodeEmbedNewChild(t *testing.T) {
 	// nod := Node{}
 	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	typ := parent.KiType()
+	typ := parent.NodeType()
 	child := parent.NewChild(typ, "child1")
 	if len(parent.Kids) != 1 {
 		t.Errorf("Children length != 1, was %d", len(parent.Kids))
@@ -65,7 +65,7 @@ func TestNodeEmbedNewChild(t *testing.T) {
 	if child.Path() != "/par1/child1" {
 		t.Errorf("child path != correct, was %v", child.Path())
 	}
-	if child.KiType() != parent.KiType() {
+	if child.NodeType() != parent.NodeType() {
 		t.Errorf("child type != correct, was %T", child)
 	}
 }
@@ -73,7 +73,7 @@ func TestNodeEmbedNewChild(t *testing.T) {
 func TestNodeUniqueNames(t *testing.T) {
 	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	typ := parent.KiType()
+	typ := parent.NodeType()
 	child := parent.NewChild(typ, "child1")
 	child2 := parent.NewChild(typ, "child1")
 	child3 := parent.NewChild(typ, "child1")
@@ -96,7 +96,7 @@ func TestNodeUniqueNames(t *testing.T) {
 func TestNodeEscapePaths(t *testing.T) {
 	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	typ := parent.KiType()
+	typ := parent.NodeType()
 	child := parent.NewChild(typ, "child1.go")
 	child2 := parent.NewChild(typ, "child1/child1")
 	child3 := parent.NewChild(typ, "child1/child1.go")
@@ -152,7 +152,7 @@ func TestNodePathFrom(t *testing.T) {
 func TestNodeDeleteChild(t *testing.T) {
 	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	typ := parent.KiType()
+	typ := parent.NodeType()
 	child := parent.NewChild(typ, "child1")
 	parent.DeleteChild(child)
 	assert.Zero(t, len(parent.Kids))
@@ -161,7 +161,7 @@ func TestNodeDeleteChild(t *testing.T) {
 func TestNodeDeleteChildName(t *testing.T) {
 	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	typ := parent.KiType()
+	typ := parent.NodeType()
 	parent.NewChild(typ, "child1")
 	parent.DeleteChildByName("child1")
 	assert.Zero(t, len(parent.Kids))
@@ -171,7 +171,7 @@ func TestNodeFindName(t *testing.T) {
 	names := [...]string{"name0", "name1", "name2", "name3", "name4", "name5"}
 	parent := NodeBase{}
 	parent.InitName(&parent, "par")
-	typ := parent.KiType()
+	typ := parent.NodeType()
 	for _, nm := range names {
 		parent.NewChild(typ, nm)
 	}
@@ -192,7 +192,7 @@ func TestNodeFindNameUnique(t *testing.T) {
 	names := [...]string{"child", "child_001", "child_002", "child_003", "child_004", "child_005"}
 	parent := NodeBase{}
 	parent.InitName(&parent, "par")
-	typ := parent.KiType()
+	typ := parent.NodeType()
 	for range names {
 		parent.NewChild(typ, "child")
 	}
@@ -219,7 +219,7 @@ func TestNodeFindType(t *testing.T) {
 	ne := parent.NewChild(testdata.NodeEmbedType, "child1")
 	parent.NewChild(NodeBaseType, "child2")
 
-	emb := ne.KiType().HasEmbed(NodeBaseType)
+	emb := ne.NodeType().HasEmbed(NodeBaseType)
 	if !emb {
 		t.Errorf("HasEmbed of NodeEmbedType failed")
 	}
@@ -245,7 +245,7 @@ func TestNodeFindType(t *testing.T) {
 func TestNodeMove(t *testing.T) {
 	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	typ := parent.KiType()
+	typ := parent.NodeType()
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=
@@ -295,7 +295,7 @@ func TestNodeMove(t *testing.T) {
 func TestNodeConfig(t *testing.T) {
 	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	typ := parent.KiType()
+	typ := parent.NodeType()
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=
@@ -353,7 +353,7 @@ func TestNodeConfig(t *testing.T) {
 func TestNodeCallFun(t *testing.T) {
 	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	typ := parent.KiType()
+	typ := parent.NodeType()
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=
@@ -468,7 +468,7 @@ func TestNodeCallFun(t *testing.T) {
 func TestNodeUpdate(t *testing.T) {
 	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	typ := parent.KiType()
+	typ := parent.NodeType()
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 
@@ -490,7 +490,7 @@ func TestNodeUpdate(t *testing.T) {
 func TestProps(t *testing.T) {
 	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	typ := parent.KiType()
+	typ := parent.NodeType()
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 
@@ -553,7 +553,7 @@ func TestProps(t *testing.T) {
 
 func TestTreeMod(t *testing.T) {
 	tree1 := NodeBase{}
-	typ := tree1.KiType()
+	typ := tree1.NodeType()
 	tree1.InitName(&tree1, "tree1")
 	// child11 :=
 	tree1.NewChild(typ, "child11")
@@ -593,7 +593,7 @@ func TestTreeMod(t *testing.T) {
 func TestNodeFieldJSONSave(t *testing.T) {
 	parent := testdata.NodeField2{}
 	parent.InitName(&parent, "par1")
-	typ := parent.KiType()
+	typ := parent.NodeType()
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=
@@ -654,7 +654,7 @@ func TestNodeFieldJSONSave(t *testing.T) {
 func TestClone(t *testing.T) {
 	parent := testdata.NodeField2{}
 	parent.InitName(&parent, "par1")
-	typ := parent.KiType()
+	typ := parent.NodeType()
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=

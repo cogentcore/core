@@ -18,7 +18,7 @@ import (
 func TestNodeJSON(t *testing.T) {
 	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	typ := parent.KiType()
+	typ := parent.NodeType()
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=
@@ -64,7 +64,7 @@ func TestNodeJSON(t *testing.T) {
 func TestNodeXML(t *testing.T) {
 	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	typ := parent.KiType()
+	typ := parent.NodeType()
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=

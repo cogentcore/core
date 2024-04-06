@@ -216,7 +216,7 @@ func (tb *Toolbar) SetShortcuts() {
 		return
 	}
 	for _, mi := range tb.Kids {
-		if mi.KiType().HasEmbed(ButtonType) {
+		if mi.NodeType().HasEmbed(ButtonType) {
 			bt := AsButton(mi)
 			em.AddShortcut(bt.Shortcut, bt)
 		}
@@ -235,7 +235,7 @@ func (tb *Toolbar) DeleteShortcuts() {
 		return
 	}
 	for _, mi := range tb.Kids {
-		if mi.KiType().HasEmbed(ButtonType) {
+		if mi.NodeType().HasEmbed(ButtonType) {
 			ac := AsButton(mi)
 			em.DeleteShortcut(ac.Shortcut, ac)
 		}
@@ -255,7 +255,7 @@ func (tb *Toolbar) UpdateBar() {
 // is empty)) -- returns false if not found
 func (tb *Toolbar) FindButtonByName(name string) (*Button, bool) {
 	for _, mi := range tb.Kids {
-		if mi.KiType().HasEmbed(ButtonType) {
+		if mi.NodeType().HasEmbed(ButtonType) {
 			ac := AsButton(mi)
 			if ac.Name() == name {
 				return ac, true

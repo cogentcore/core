@@ -19,8 +19,8 @@ func NewNodeBase(parent Node, name ...string) *NodeBase {
 	return parent.NewChild(NodeBaseType, name...).(*NodeBase)
 }
 
-// KiType returns the [*gti.Type] of [NodeBase]
-func (t *NodeBase) KiType() *gti.Type { return NodeBaseType }
+// NodeType returns the [*gti.Type] of [NodeBase]
+func (t *NodeBase) NodeType() *gti.Type { return NodeBaseType }
 
 // New returns a new [*NodeBase] value
 func (t *NodeBase) New() Node { return &NodeBase{} }

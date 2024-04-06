@@ -44,7 +44,7 @@ func (sl Slice) MarshalJSON() ([]byte, error) {
 	b = append(b, []byte(nstr)...)
 	for i, kid := range sl {
 		// fmt.Printf("json out of %v\n", kid.Path())
-		knm := kid.KiType().Name
+		knm := kid.NodeType().Name
 		tstr := fmt.Sprintf("\"type\":\"%v\", \"name\": \"%v\"", knm, kid.Name()) // todo: escape names!
 		b = append(b, []byte(tstr)...)
 		if i < nk-1 {
@@ -166,7 +166,7 @@ var JSONTypeSuffix = []byte("}\n")
 // JSONEncoder type, to enable a file to be loaded de-novo
 // and recreate the proper root type for the tree.
 func RootTypeJSON(k Node) []byte {
-	knm := k.KiType().Name
+	knm := k.NodeType().Name
 	tstr := string(JSONTypePrefix) + fmt.Sprintf("\"%v\"}\n", knm)
 	return []byte(tstr)
 }
@@ -251,7 +251,7 @@ func OpenNewJSON(filename string) (Node, error) {
 func ParentAllChildren(kn Node) {
 	for _, child := range *kn.Children() {
 		if child != nil {
-			child.AsKi().Par = kn
+			child.AsTreeNode().Par = kn
 			ParentAllChildren(child)
 		}
 	}

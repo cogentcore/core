@@ -977,7 +977,7 @@ func SVGNodeMarshalXML(itm tree.Node, enc *XMLEncoder, setName string) string {
 	case *StyleSheet:
 		nm = "style"
 	default:
-		nm = itm.KiType().Name
+		nm = itm.NodeType().Name
 	}
 	se.Name.Local = nm
 	if setName != "" {

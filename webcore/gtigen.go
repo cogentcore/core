@@ -18,8 +18,8 @@ func NewPage(parent tree.Node, name ...string) *Page {
 	return parent.NewChild(PageType, name...).(*Page)
 }
 
-// KiType returns the [*gti.Type] of [Page]
-func (t *Page) KiType() *gti.Type { return PageType }
+// NodeType returns the [*gti.Type] of [Page]
+func (t *Page) NodeType() *gti.Type { return PageType }
 
 // New returns a new [*Page] value
 func (t *Page) New() tree.Node { return &Page{} }

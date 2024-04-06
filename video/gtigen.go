@@ -20,8 +20,8 @@ func NewVideo(parent tree.Node, name ...string) *Video {
 	return parent.NewChild(VideoType, name...).(*Video)
 }
 
-// KiType returns the [*gti.Type] of [Video]
-func (t *Video) KiType() *gti.Type { return VideoType }
+// NodeType returns the [*gti.Type] of [Video]
+func (t *Video) NodeType() *gti.Type { return VideoType }
 
 // New returns a new [*Video] value
 func (t *Video) New() tree.Node { return &Video{} }

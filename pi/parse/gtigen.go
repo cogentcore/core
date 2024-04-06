@@ -19,8 +19,8 @@ func NewAst(parent tree.Node, name ...string) *Ast {
 	return parent.NewChild(AstType, name...).(*Ast)
 }
 
-// KiType returns the [*gti.Type] of [Ast]
-func (t *Ast) KiType() *gti.Type { return AstType }
+// NodeType returns the [*gti.Type] of [Ast]
+func (t *Ast) NodeType() *gti.Type { return AstType }
 
 // New returns a new [*Ast] value
 func (t *Ast) New() tree.Node { return &Ast{} }
@@ -41,8 +41,8 @@ func NewRule(parent tree.Node, name ...string) *Rule {
 	return parent.NewChild(RuleType, name...).(*Rule)
 }
 
-// KiType returns the [*gti.Type] of [Rule]
-func (t *Rule) KiType() *gti.Type { return RuleType }
+// NodeType returns the [*gti.Type] of [Rule]
+func (t *Rule) NodeType() *gti.Type { return RuleType }
 
 // New returns a new [*Rule] value
 func (t *Rule) New() tree.Node { return &Rule{} }
