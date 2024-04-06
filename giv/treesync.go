@@ -27,10 +27,10 @@ import (
 // for this TreeView, and syncs the rest of the tree to match.
 // It calls [ki.UniquifyNamesAll] on the source tree to ensure
 // that node names are unique, which is essential for proper viewing.
-func (tv *TreeView) SyncTree(tree ki.Node) *TreeView {
-	ki.UniquifyNamesAll(tree)
-	if tv.SyncNode != tree {
-		tv.SyncNode = tree
+func (tv *TreeView) SyncTree(n ki.Node) *TreeView {
+	ki.UniquifyNamesAll(n)
+	if tv.SyncNode != n {
+		tv.SyncNode = n
 	}
 	tvIndex := 0
 	tv.SyncToSrc(&tvIndex, true, 0)
@@ -43,9 +43,9 @@ func (tv *TreeView) SyncTree(tree ki.Node) *TreeView {
 // via SyncToSrc during tree updating.
 // It uses ki Config mechanism to perform minimal updates to
 // remain in sync.
-func (tv *TreeView) SetSyncNode(sk ki.Node, tvIndex *int, init bool, depth int) {
-	if tv.SyncNode != sk {
-		tv.SyncNode = sk
+func (tv *TreeView) SetSyncNode(sn ki.Node, tvIndex *int, init bool, depth int) {
+	if tv.SyncNode != sn {
+		tv.SyncNode = sn
 	}
 	tv.SyncToSrc(tvIndex, init, depth)
 }
