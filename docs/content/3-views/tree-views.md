@@ -14,21 +14,21 @@ giv.NewTreeView(c2, "Nested child")
 You can make a tree view represent another [[ki.Ki]] tree:
 
 ```Go
-tree := ki.NewRoot[*ki.NodeBase]("Root")
-ki.New[*ki.NodeBase](tree, "Child 1")
-c2 := ki.New[*ki.NodeBase](tree, "Child 2")
+n := ki.NewRoot[*ki.NodeBase]("Root")
+ki.New[*ki.NodeBase](n, "Child 1")
+c2 := ki.New[*ki.NodeBase](n, "Child 2")
 ki.New[*ki.NodeBase](c2, "Nested child")
-giv.NewTreeView(parent).SyncTree(tree)
+giv.NewTreeView(parent).SyncTree(n)
 ```
 
 You can detect when the user changes the value of the tree value:
 
 ```Go
-tree := ki.NewRoot[*ki.NodeBase]("Root")
-ki.New[*ki.NodeBase](tree, "Child 1")
-c2 := ki.New[*ki.NodeBase](tree, "Child 2")
+n := ki.NewRoot[*ki.NodeBase]("Root")
+ki.New[*ki.NodeBase](n, "Child 1")
+c2 := ki.New[*ki.NodeBase](n, "Child 2")
 ki.New[*ki.NodeBase](c2, "Nested child")
-giv.NewTreeView(parent).SyncTree(tree).OnChange(func(e events.Event) {
+giv.NewTreeView(parent).SyncTree(n).OnChange(func(e events.Event) {
     gi.MessageSnackbar(parent, "Tree view changed")
 })
 ```
@@ -36,19 +36,19 @@ giv.NewTreeView(parent).SyncTree(tree).OnChange(func(e events.Event) {
 You can prevent the user from changing the tree:
 
 ```Go
-tree := ki.NewRoot[*ki.NodeBase]("Root")
-ki.New[*ki.NodeBase](tree, "Child 1")
-c2 := ki.New[*ki.NodeBase](tree, "Child 2")
+n := ki.NewRoot[*ki.NodeBase]("Root")
+ki.New[*ki.NodeBase](n, "Child 1")
+c2 := ki.New[*ki.NodeBase](n, "Child 2")
 ki.New[*ki.NodeBase](c2, "Nested child")
-giv.NewTreeView(parent).SyncTree(tree).SetReadOnly(true)
+giv.NewTreeView(parent).SyncTree(n).SetReadOnly(true)
 ```
 
 When you use [[giv.NewValue]] with a [[ki.Ki]] tree node value, it will create a button that opens an interactive inspector of that node:
 
 ```Go
-tree := ki.NewRoot[*ki.NodeBase]("Root")
-ki.New[*ki.NodeBase](tree, "Child 1")
-c2 := ki.New[*ki.NodeBase](tree, "Child 2")
+n := ki.NewRoot[*ki.NodeBase]("Root")
+ki.New[*ki.NodeBase](n, "Child 1")
+c2 := ki.New[*ki.NodeBase](n, "Child 2")
 ki.New[*ki.NodeBase](c2, "Nested child")
-giv.NewValue(parent, tree)
+giv.NewValue(parent, n)
 ```
