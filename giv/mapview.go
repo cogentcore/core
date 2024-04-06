@@ -173,7 +173,7 @@ func (mv *MapView) ConfigMapGrid() {
 	// valtypes := append(kit.Types.AllTagged(typeTag), kit.Enums.AllTagged(typeTag)...)
 	// valtypes = append(valtypes, kit.Types.AllTagged("basic-type")...)
 	// valtypes = append(valtypes, kit.TypeFor[reflect.Type]())
-	valtypes := gti.AllEmbeddersOf(ki.NodeType) // todo: this is not right
+	valtypes := gti.AllEmbeddersOf(ki.NodeBaseType) // todo: this is not right
 
 	mv.NCols = ncol
 

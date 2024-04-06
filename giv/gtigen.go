@@ -573,7 +573,7 @@ func (t *TreeView) New() ki.Node { return &TreeView{} }
 
 // SetText sets the [TreeView.Text]:
 // The text to display for the tree view item label, which automatically
-// defaults to the [ki.NodeBase.Name] of the tree view node. It has no effect
+// defaults to the [ki.Node.Name] of the tree view node. It has no effect
 // if [TreeView.SyncNode] is non-nil.
 func (t *TreeView) SetText(v string) *TreeView { t.Text = v; return t }
 

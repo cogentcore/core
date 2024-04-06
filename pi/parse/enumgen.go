@@ -94,11 +94,11 @@ var _RuleFlagsValues = []RuleFlags{1, 2, 3, 4, 5, 6, 7}
 // RuleFlagsN is the highest valid value for type RuleFlags, plus one.
 const RuleFlagsN RuleFlags = 8
 
-var _RuleFlagsValueMap = map[string]RuleFlags{`SetsScope`: 1, `Reverse`: 2, `NoToks`: 3, `OnlyToks`: 4, `MatchEOS`: 5, `MultiEOS`: 6, `TokMatchGroup`: 7}
+var _RuleFlagsValueMap = map[string]RuleFlags{`SetsScope`: 1, `Reverse`: 2, `NoTokens`: 3, `OnlyTokens`: 4, `MatchEOS`: 5, `MultiEOS`: 6, `TokenMatchGroup`: 7}
 
-var _RuleFlagsDescMap = map[RuleFlags]string{1: `SetsScope means that this rule sets its own scope, because it ends with EOS`, 2: `Reverse means that this rule runs in reverse (starts with - sign) -- for arithmetic binary expressions only: this is needed to produce proper associativity result for mathematical expressions in the recursive descent parser. Only for rules of form: Expr &#39;+&#39; Expr -- two sub-rules with a token operator in the middle.`, 3: `NoToks means that this rule doesn&#39;t have any explicit tokens -- only refers to other rules`, 4: `OnlyToks means that this rule only has explicit tokens for matching -- can be optimized`, 5: `MatchEOS means that the rule ends with a *matched* EOS with StInc = 1. SetsScope applies for optional and matching EOS rules alike.`, 6: `MultiEOS means that the rule has multiple EOS tokens within it -- changes some of the logic`, 7: `TokMatchGroup is a group node that also has a single token match, so it can be used in a FirstTokenMap to optimize lookup of rules`}
+var _RuleFlagsDescMap = map[RuleFlags]string{1: `SetsScope means that this rule sets its own scope, because it ends with EOS`, 2: `Reverse means that this rule runs in reverse (starts with - sign) -- for arithmetic binary expressions only: this is needed to produce proper associativity result for mathematical expressions in the recursive descent parser. Only for rules of form: Expr &#39;+&#39; Expr -- two sub-rules with a token operator in the middle.`, 3: `NoTokens means that this rule doesn&#39;t have any explicit tokens -- only refers to other rules`, 4: `OnlyTokens means that this rule only has explicit tokens for matching -- can be optimized`, 5: `MatchEOS means that the rule ends with a *matched* EOS with StInc = 1. SetsScope applies for optional and matching EOS rules alike.`, 6: `MultiEOS means that the rule has multiple EOS tokens within it -- changes some of the logic`, 7: `TokenMatchGroup is a group node that also has a single token match, so it can be used in a FirstTokenMap to optimize lookup of rules`}
 
-var _RuleFlagsMap = map[RuleFlags]string{1: `SetsScope`, 2: `Reverse`, 3: `NoToks`, 4: `OnlyToks`, 5: `MatchEOS`, 6: `MultiEOS`, 7: `TokMatchGroup`}
+var _RuleFlagsMap = map[RuleFlags]string{1: `SetsScope`, 2: `Reverse`, 3: `NoTokens`, 4: `OnlyTokens`, 5: `MatchEOS`, 6: `MultiEOS`, 7: `TokenMatchGroup`}
 
 // String returns the string representation of this RuleFlags value.
 func (i RuleFlags) String() string {
