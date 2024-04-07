@@ -7,6 +7,7 @@ package syms
 import (
 	"fmt"
 	"io"
+	"maps"
 	"slices"
 
 	"cogentcore.org/core/glop/indent"
@@ -30,7 +31,7 @@ type Type struct {
 	Desc string
 
 	// set to true after type has been initialized during post-parse processing
-	Inited bool `inactive:"-"`
+	Initialized bool `inactive:"-"`
 
 	// elements of this type -- ordering and meaning varies depending on the Kind of type -- for Primitive types this is the parent type, for Composite types it describes the key elements of the type: Tuple = each element's type; Array = type of elements; Struct = each field, etc (see docs for each in Kinds)
 	Els TypeEls
@@ -51,7 +52,7 @@ type Type struct {
 	Scopes SymNames
 
 	// additional type properties, such as const, virtual, static -- these are just recorded textually and not systematized to keep things open-ended -- many of the most important properties can be inferred from the Kind property
-	Props tree.Props
+	Properties map[string]any
 
 	// Ast node that corresponds to this type -- only valid during parsing
 	Ast tree.Node `json:"-" xml:"-"`
@@ -80,15 +81,15 @@ func (ty *Type) CopyFromSrc(cp *Type) {
 }
 
 // Clone returns a deep copy of this type, cloning / copying all sub-elements
-// except the Ast, and Inited
+// except the Ast and Initialized
 func (ty *Type) Clone() *Type {
-	// note: not copying Inited
+	// note: not copying Initialized
 	nty := &Type{Name: ty.Name, Kind: ty.Kind, Desc: ty.Desc, Filename: ty.Filename, Region: ty.Region, Ast: ty.Ast}
 	nty.Els.CopyFrom(ty.Els)
 	nty.Meths = ty.Meths.Clone()
 	nty.Size = slices.Clone(ty.Size)
 	nty.Scopes = ty.Scopes.Clone()
-	nty.Props.CopyFrom(ty.Props, true)
+	maps.Copy(nty.Properties, ty.Properties)
 	return nty
 }
 

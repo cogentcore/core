@@ -876,7 +876,7 @@ func PathDataString(data []PathData) string {
 func (g *Path) ApplyTransform(sv *SVG, xf mat32.Mat2) {
 	// path may have horiz, vert elements -- only gen soln is to transform
 	g.Paint.Transform.SetMul(xf)
-	g.SetProp("transform", g.Paint.Transform.String())
+	g.SetProperty("transform", g.Paint.Transform.String())
 }
 
 // PathDataTransformAbs does the transform of next two data points as absolute coords
@@ -908,7 +908,7 @@ func (g *Path) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, 
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
 		g.Paint.Transform.SetMulCenter(xf, lpt)
-		g.SetProp("transform", g.Paint.Transform.String())
+		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self
 		g.ApplyTransformImpl(xf, lpt)

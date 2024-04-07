@@ -116,10 +116,10 @@ func (c *Context) Config(w gi.Widget) {
 			}
 			c.Styles[c.Node] = append(c.Styles[c.Node], rule)
 		default:
-			wb.SetProp(attr.Key, attr.Val)
+			wb.SetProperty(attr.Key, attr.Val)
 		}
 	}
-	wb.SetProp("tag", c.Node.Data)
+	wb.SetProperty("tag", c.Node.Data)
 	rules := c.Styles[c.Node]
 	w.Style(func(s *styles.Style) {
 		for _, rule := range rules {

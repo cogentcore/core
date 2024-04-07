@@ -5,11 +5,13 @@
 package tree_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"cogentcore.org/core/gti"
 	. "cogentcore.org/core/tree"
@@ -486,21 +488,41 @@ func TestProperties(t *testing.T) {
 	n := testdata.NodeEmbed{}
 	n.InitName(&n, "node")
 
-	n.SetProp("intprop", 42)
-	assert.Equal(t, 42, n.Prop("intprop"))
+	n.SetProperty("intprop", 42)
+	assert.Equal(t, 42, n.Property("intprop"))
 
-	n.SetProp("floatprop", 42.0)
-	assert.Equal(t, 42.0, n.Prop("floatprop"))
+	n.SetProperty("floatprop", 42.0)
+	assert.Equal(t, 42.0, n.Property("floatprop"))
 
-	n.SetProp("stringprop", "test string")
-	assert.Equal(t, "test string", n.Prop("stringprop"))
+	n.SetProperty("stringprop", "test string")
+	assert.Equal(t, "test string", n.Property("stringprop"))
 
-	n.DeleteProp("floatprop")
-	assert.Equal(t, nil, n.Prop("floatprop"))
+	n.DeleteProperty("floatprop")
+	assert.Equal(t, nil, n.Property("floatprop"))
 
-	assert.Equal(t, nil, n.Prop("randomprop"))
+	assert.Equal(t, nil, n.Property("randomprop"))
 
-	assert.Equal(t, &Props{"intprop": 42, "stringprop": "test string"}, n.Properties())
+	assert.Equal(t, map[string]any{"intprop": 42, "stringprop": "test string"}, n.Properties())
+}
+
+func TestPropertiesJSON(t *testing.T) {
+	testProperties := map[string]any{
+		"floatprop":  3.1415,
+		"stringprop": "type string",
+		"#subprops": map[string]any{
+			"sp1": "#FFE",
+			"sp2": 42.2,
+		},
+	}
+
+	b, err := json.MarshalIndent(testProperties, "", "  ")
+	require.NoError(t, err)
+
+	res := map[string]any{}
+	err = json.Unmarshal(b, &res)
+	require.NoError(t, err)
+
+	assert.Equal(t, testProperties, res)
 }
 
 func TestDirectives(t *testing.T) {

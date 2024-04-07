@@ -136,7 +136,7 @@ func HandleElement(ctx *Context) {
 		label := HandleLabel(ctx)
 		start := ""
 		if pw, ok := label.Parent().(gi.Widget); ok {
-			switch pw.Prop("tag") {
+			switch pw.Property("tag") {
 			case "ol":
 				number := 0
 				for _, k := range *pw.Children() {

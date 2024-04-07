@@ -20,7 +20,6 @@ import (
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/states"
-	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 )
 
@@ -422,10 +421,6 @@ func SubProps(prp map[string]any, selector string) (map[string]any, bool) {
 	spm, ok := sp.(map[string]any)
 	if ok {
 		return spm, true
-	}
-	kpm, ok := sp.(tree.Props)
-	if ok {
-		return kpm, true
 	}
 	return nil, false
 }

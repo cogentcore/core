@@ -287,25 +287,20 @@ type Node interface {
 	//	}
 	FlagType() enums.BitFlagSetter
 
-	//////////////////////////////////////////////////////////////////////////
-	//  Property interface with inheritance -- nodes can inherit props from parents
+	// Property Storage:
 
-	// Properties (Node.Props) tell the Cogent Core GUI or other frameworks operating
-	// on Trees about special features of each node -- functions below support
-	// inheritance up Tree -- see kit convert.go for robust convenience
-	// methods for converting interface{} values to standard types.
-	Properties() *Props
+	// Properties returns the key-value properties set for this node.
+	Properties() map[string]any
 
-	// SetProp sets given property key to value val -- initializes property
-	// map if nil.
-	SetProp(key string, val any)
+	// SetProperty sets given the given property to the given value.
+	SetProperty(key string, value any)
 
-	// Prop returns the property value for the given key.
+	// Property returns the property value for the given key.
 	// It returns nil if it doesn't exist.
-	Prop(key string) any
+	Property(key string) any
 
-	// DeleteProp deletes property key on this node.
-	DeleteProp(key string)
+	// DeleteProperty deletes the property with the given key.
+	DeleteProperty(key string)
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Tree walking and Paths

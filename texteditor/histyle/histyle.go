@@ -23,7 +23,6 @@ import (
 	"cogentcore.org/core/gi"
 	"cogentcore.org/core/pi/token"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/tree"
 )
 
 // Trilean value for StyleEntry value inheritance.
@@ -168,9 +167,9 @@ func (se StyleEntry) ToCSS() string {
 	return strings.Join(styles, "; ")
 }
 
-// ToProps converts StyleEntry to [tree.Props] attributes.
-func (se StyleEntry) ToProps() tree.Props {
-	pr := tree.Props{}
+// ToProps converts the StyleEntry to key-value properties.
+func (se StyleEntry) ToProps() map[string]any {
+	pr := map[string]any{}
 	if !colors.IsNil(se.Color) {
 		pr["color"] = se.Color
 	}
@@ -303,13 +302,13 @@ func (hs Style) ToCSS() map[token.Tokens]string {
 	return css
 }
 
-// ToProps generates list of [tree.Props] for this style.
-func (hs Style) ToProps() tree.Props {
-	pr := tree.Props{}
+// ToProps generates a list of key-value properties for this style.
+func (hs Style) ToProps() map[string]any {
+	pr := map[string]any{}
 	for ht, nm := range token.Names {
 		entry := hs.Tag(ht)
 		if entry.IsZero() {
-			if tp, ok := Props[ht]; ok {
+			if tp, ok := Properties[ht]; ok {
 				pr["."+nm] = tp
 			}
 			continue
@@ -345,9 +344,9 @@ func (hs Style) SaveJSON(filename gi.Filename) error {
 	return err
 }
 
-// TagsProps are default properties for custom tags (tokens) -- if set in style then used
-// there but otherwise we use these as a fallback -- typically not overridden
-var Props = map[token.Tokens]tree.Props{
+// Properties are default properties for custom tags (tokens); if set in style then used
+// there but otherwise we use these as a fallback; typically not overridden
+var Properties = map[token.Tokens]map[string]any{
 	token.TextSpellErr: {
 		"text-decoration": 1 << uint32(styles.DecoDottedUnderline), // bitflag!
 	},

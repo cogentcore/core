@@ -102,7 +102,7 @@ func (tv *TableView) SetStyles() {
 		if w.Parent().PathFrom(tv) == "header" {
 			w.Style(func(s *styles.Style) {
 				if hdr, ok := w.(*gi.Button); ok {
-					fli := hdr.Prop("field-index").(int)
+					fli := hdr.Property("field-index").(int)
 					if fli == tv.SortIndex {
 						if tv.SortDesc {
 							hdr.SetIcon(icons.KeyboardArrowDown)
@@ -278,7 +278,7 @@ func (tv *TableView) ConfigHeader() {
 		}
 		hdr.SetText(htxt)
 		tv.HeaderWidths[fli] = len(htxt)
-		hdr.SetProp("field-index", fli)
+		hdr.SetProperty("field-index", fli)
 		if fli == tv.SortIndex {
 			if tv.SortDesc {
 				hdr.SetIcon(icons.KeyboardArrowDown)
@@ -369,7 +369,7 @@ func (tv *TableView) ConfigRows() {
 				e.SetHandled()
 				tv.UpdateSelectRow(i, e.SelectMode())
 			})
-			idxlab.SetProp(SliceViewRowProp, i)
+			idxlab.SetProperty(SliceViewRowProperty, i)
 		}
 
 		vpath := tv.ViewPath + "[" + sitxt + "]"
@@ -392,8 +392,8 @@ func (tv *TableView) ConfigRows() {
 			w := tree.NewOfType(vtyp).(gi.Widget)
 			sg.SetChild(w, cidx, valnm)
 			Config(vv, w)
-			w.SetProp(SliceViewRowProp, i)
-			w.SetProp(SliceViewColProp, fli)
+			w.SetProperty(SliceViewRowProperty, i)
+			w.SetProperty(SliceViewColProperty, fli)
 
 			if !tv.IsReadOnly() {
 				vv.OnChange(func(e events.Event) {

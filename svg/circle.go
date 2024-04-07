@@ -61,7 +61,7 @@ func (g *Circle) ApplyTransform(sv *SVG, xf mat32.Mat2) {
 	rot := xf.ExtractRot()
 	if rot != 0 || !g.Paint.Transform.IsIdentity() {
 		g.Paint.Transform.SetMul(xf) // todo: could be backward
-		g.SetProp("transform", g.Paint.Transform.String())
+		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
 		g.Pos = xf.MulVec2AsPoint(g.Pos)
 		scx, scy := xf.ExtractScale()
@@ -80,7 +80,7 @@ func (g *Circle) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
 		g.Paint.Transform.SetMulCenter(xf, lpt)
-		g.SetProp("transform", g.Paint.Transform.String())
+		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self
 		g.Pos = xf.MulVec2AsPointCenter(g.Pos, lpt)

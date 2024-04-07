@@ -121,9 +121,9 @@ func (lr *Rule) CompileAll(ls *State) bool {
 // returns false if there are any problems.
 func (lr *Rule) Compile(ls *State) bool {
 	if lr.Off {
-		lr.SetProp("inactive", true)
+		lr.SetProperty("inactive", true)
 	} else {
-		lr.DeleteProp("inactive")
+		lr.DeleteProperty("inactive")
 	}
 	valid := true
 	lr.ComputeMatchLen(ls)

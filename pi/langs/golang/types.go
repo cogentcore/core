@@ -140,7 +140,7 @@ func (gl *GoLang) InitTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.T
 		}
 		return
 	}
-	if ty.Inited {
+	if ty.Initialized {
 		// if TraceTypes {
 		// 	fmt.Printf("Type: %v already initialized\n", ty.Name)
 		// }
@@ -148,7 +148,7 @@ func (gl *GoLang) InitTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.T
 	}
 	gl.TypeFromAst(fs, pkg, ty, tyast)
 	gl.TypeMeths(fs, pkg, ty) // all top-level named types might have methods
-	ty.Inited = true
+	ty.Initialized = true
 }
 
 // SubTypeFromAst returns a subtype from child ast at given index, nil if failed
@@ -468,7 +468,7 @@ func (gl *GoLang) StructInheritEls(fs *pi.FileState, pkg *syms.Symbol, ty *syms.
 		}
 		return
 	}
-	if !ety.Inited {
+	if !ety.Initialized {
 		// if TraceTypes {
 		// 	fmt.Printf("Embedded struct type not yet initialized, initializing: %v for type: %v\n", ety.Name, ty.Name)
 		// }

@@ -11,14 +11,13 @@ import (
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/ordmap"
-	"cogentcore.org/core/tree"
 	"cogentcore.org/core/vgpu/szalloc"
 	"golang.org/x/image/draw"
 )
 
 // A Sprite is just an image (with optional background) that can be drawn onto
 // the OverTex overlay texture of a window.  Sprites are used for text cursors/carets
-// and for dynamic editing / interactive GUI elements (e.g., drag-n-drop elments)
+// and for dynamic editing / interactive GUI elements (e.g., drag-n-drop elements)
 type Sprite struct {
 
 	// whether this sprite is active now or not
@@ -27,8 +26,8 @@ type Sprite struct {
 	// unique name of sprite
 	Name string
 
-	// properties for sprite -- allows user-extensible data
-	Props tree.Props
+	// properties for sprite, which allow for user-extensible data
+	Properties map[string]any
 
 	// position and size of the image within the overlay window texture
 	Geom mat32.Geom2DInt

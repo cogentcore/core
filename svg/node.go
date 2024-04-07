@@ -7,6 +7,7 @@ package svg
 import (
 	"fmt"
 	"image"
+	"maps"
 	"reflect"
 	"strings"
 
@@ -90,14 +91,14 @@ type NodeBase struct {
 	// use spaces to separate per css standard.
 	Class string
 
-	// cascading style sheet at this level.
+	// CSS is the cascading style sheet at this level.
 	// These styles apply here and to everything below, until superceded.
 	// Use .class and #name Props elements to apply entire styles
 	// to given elements, and type for element type.
-	CSS tree.Props `xml:"css" set:"-"`
+	CSS map[string]any `xml:"css" set:"-"`
 
-	// aggregated css properties from all higher nodes down to me
-	CSSAgg tree.Props `copier:"-" json:"-" xml:"-" set:"-" view:"no-inline"`
+	// CSSAgg is the aggregated css properties from all higher nodes down to this node.
+	CSSAgg map[string]any `copier:"-" json:"-" xml:"-" set:"-" view:"no-inline"`
 
 	// bounding box for the node within the SVG Pixels image.
 	// This one can be outside the visible range of the SVG image.
@@ -146,10 +147,10 @@ func (g *NodeBase) PaintStyle() *styles.Paint {
 // It breaks color alpha out as opacity.  prop is either "stroke" or "fill"
 func (g *NodeBase) SetColorProps(prop, color string) {
 	clr := grr.Log1(colors.FromString(color))
-	g.SetProp(prop+"-opacity", fmt.Sprintf("%g", float32(clr.A)/255))
+	g.SetProperty(prop+"-opacity", fmt.Sprintf("%g", float32(clr.A)/255))
 	// we have consumed the A via opacity, so we reset it to 255
 	clr.A = 255
-	g.SetProp(prop, colors.AsHex(clr))
+	g.SetProperty(prop, colors.AsHex(clr))
 }
 
 // ParTransform returns the full compounded 2D transform matrix for all
@@ -339,15 +340,15 @@ func (g *NodeBase) Style(sv *SVG) {
 	ctxt := colors.Context(sv)
 	pc.StyleSet = false // this is always first call, restart
 
-	var parCSSAgg tree.Props
+	var parCSSAgg map[string]any
 	if g.Par != nil { // && g.Par != sv.Root.This()
 		pn := g.Par.(Node)
 		parCSSAgg = pn.AsNodeBase().CSSAgg
 		pp := pn.PaintStyle()
 		pc.CopyStyleFrom(pp)
-		pc.SetStyleProps(pp, *g.Properties(), ctxt)
+		pc.SetStyleProps(pp, g.Properties(), ctxt)
 	} else {
-		pc.SetStyleProps(nil, *g.Properties(), ctxt)
+		pc.SetStyleProps(nil, g.Properties(), ctxt)
 	}
 	pc.ToDotsImpl(&pc.UnitContext) // we always inherit parent's unit context -- SVG sets it once-and-for-all
 
@@ -366,23 +367,21 @@ func (g *NodeBase) Style(sv *SVG) {
 }
 
 // AggCSS aggregates css properties
-func AggCSS(agg *tree.Props, css tree.Props) {
+func AggCSS(agg *map[string]any, css map[string]any) {
 	if *agg == nil {
-		*agg = make(tree.Props, len(css))
+		*agg = make(map[string]any)
 	}
-	for key, val := range css {
-		(*agg)[key] = val
-	}
+	maps.Copy(*agg, css)
 }
 
 // ApplyCSS applies css styles to given node,
 // using key to select sub-props from overall properties list
-func (g *NodeBase) ApplyCSS(sv *SVG, key string, css tree.Props) bool {
+func (g *NodeBase) ApplyCSS(sv *SVG, key string, css map[string]any) bool {
 	pp, got := css[key]
 	if !got {
 		return false
 	}
-	pmap, ok := pp.(tree.Props) // must be a props map
+	pmap, ok := pp.(map[string]any) // must be a props map
 	if !ok {
 		return false
 	}
@@ -399,7 +398,7 @@ func (g *NodeBase) ApplyCSS(sv *SVG, key string, css tree.Props) bool {
 
 // StyleCSS applies css style properties to given SVG node
 // parsing out type, .class, and #name selectors
-func (g *NodeBase) StyleCSS(sv *SVG, css tree.Props) {
+func (g *NodeBase) StyleCSS(sv *SVG, css map[string]any) {
 	tyn := strings.ToLower(g.NodeType().Name) // type is most general, first
 	g.ApplyCSS(sv, tyn, css)
 	cln := "." + strings.ToLower(g.Class) // then class

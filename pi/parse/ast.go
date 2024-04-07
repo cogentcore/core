@@ -113,19 +113,3 @@ func (ast *Ast) WriteTree(out io.Writer, depth int) {
 		ai.WriteTree(out, depth+1)
 	}
 }
-
-var AstProps = tree.Props{
-	"StructViewFields": tree.Props{ // hide in view
-		"Flag":  `view:"-"`,
-		"Props": `view:"-"`,
-	},
-	// "CallMethods": tree.PropSlice{
-	// 	{"SaveAs", tree.Props{
-	// 		"Args": tree.PropSlice{
-	// 			{"File Name", tree.Props{
-	// 				"default-field": "Filename",
-	// 			}},
-	// 		},
-	// 	}},
-	// },
-}

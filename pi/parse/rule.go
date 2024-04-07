@@ -283,9 +283,9 @@ func (pr *Rule) CompileAll(ps *State) bool {
 // Returns true if everything is ok, false if there were compile errors.
 func (pr *Rule) Compile(ps *State) bool {
 	if pr.Off {
-		pr.SetProp("inactive", true)
+		pr.SetProperty("inactive", true)
 	} else {
-		pr.DeleteProp("inactive")
+		pr.DeleteProperty("inactive")
 	}
 	if pr.Rule == "" { // parent
 		pr.Rules = nil

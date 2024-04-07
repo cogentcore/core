@@ -59,7 +59,7 @@ func (g *Group) Render(sv *SVG) {
 // each node must define this for itself
 func (g *Group) ApplyTransform(sv *SVG, xf mat32.Mat2) {
 	g.Paint.Transform.SetMul(xf)
-	g.SetProp("transform", g.Paint.Transform.String())
+	g.SetProperty("transform", g.Paint.Transform.String())
 }
 
 // ApplyDeltaTransform applies the given 2D delta transforms to the geometry of this node
@@ -70,7 +70,7 @@ func (g *Group) ApplyTransform(sv *SVG, xf mat32.Mat2) {
 func (g *Group) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
 	xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // group does NOT include self
 	g.Paint.Transform.SetMulCenter(xf, lpt)
-	g.SetProp("transform", g.Paint.Transform.String())
+	g.SetProperty("transform", g.Paint.Transform.String())
 }
 
 // WriteGeom writes the geometry of the node to a slice of floating point numbers

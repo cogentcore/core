@@ -123,8 +123,8 @@ const (
 )
 
 const (
-	SliceViewRowProp = "sv-row"
-	SliceViewColProp = "sv-col"
+	SliceViewRowProperty = "sv-row"
+	SliceViewColProperty = "sv-col"
 )
 
 // SliceViewer is the interface used by SliceViewBase to
@@ -609,10 +609,10 @@ func (sv *SliceViewBase) UpdateSliceSize() int {
 // WidgetIndex returns the row and column indexes for given widget,
 // from the props set during construction.
 func (sv *SliceViewBase) WidgetIndex(w gi.Widget) (row, col int) {
-	if rwi := w.Prop(SliceViewRowProp); rwi != nil {
+	if rwi := w.Property(SliceViewRowProperty); rwi != nil {
 		row = rwi.(int)
 	}
-	if cli := w.Prop(SliceViewColProp); cli != nil {
+	if cli := w.Property(SliceViewColProperty); cli != nil {
 		col = cli.(int)
 	}
 	return
@@ -713,13 +713,13 @@ func (sv *SliceViewBase) ConfigRows() {
 				sv.UpdateSelectRow(i, e.SelectMode())
 				sv.LastClick = i + sv.StartIndex
 			})
-			idxlab.SetProp(SliceViewRowProp, i)
+			idxlab.SetProperty(SliceViewRowProperty, i)
 		}
 
 		w := tree.NewOfType(vtyp).(gi.Widget)
 		sg.SetChild(w, ridx+idxOff, valnm)
 		Config(vv, w)
-		w.SetProp(SliceViewRowProp, i)
+		w.SetProperty(SliceViewRowProperty, i)
 
 		if !sv.IsReadOnly() {
 			vv.OnChange(func(e events.Event) {

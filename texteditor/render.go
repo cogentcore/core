@@ -19,7 +19,6 @@ import (
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor/textbuf"
-	"cogentcore.org/core/tree"
 )
 
 // Rendering Notes: all rendering is done in Render call.
@@ -65,7 +64,7 @@ func (ed *Editor) RenderWidget() {
 }
 
 // TextStyleProps returns the styling properties for text based on HiStyle Markup
-func (ed *Editor) TextStyleProps() tree.Props {
+func (ed *Editor) TextStyleProps() map[string]any {
 	if ed.Buffer == nil || !ed.Buffer.Hi.HasHi() {
 		return nil
 	}

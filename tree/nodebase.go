@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
+	"maps"
 	"strconv"
 	"strings"
 
@@ -30,8 +31,8 @@ type NodeBase struct {
 	// Flags are bit flags for internal node state, which can be extended using the enums package.
 	Flags Flags `tableview:"-" copier:"-" json:"-" xml:"-" set:"-" max-width:"80" height:"3"`
 
-	// Props is a property map for arbitrary extensible properties.
-	Props Props `tableview:"-" xml:"-" copier:"-" set:"-" label:"Properties"`
+	// Props is a property map for arbitrary key-value properties.
+	Props map[string]any `tableview:"-" xml:"-" copier:"-" set:"-" label:"Properties"`
 
 	// Par is the parent of this node, which is set automatically when this node is added as a child of a parent.
 	Par Node `tableview:"-" copier:"-" json:"-" xml:"-" view:"-" set:"-" label:"Parent"`
@@ -625,37 +626,27 @@ func (n *NodeBase) FlagType() enums.BitFlagSetter {
 // Properties (Node.Props) tell the Cogent Core GUI or other frameworks operating
 // on Trees about special features of each node -- functions below support
 // inheritance up Tree.
-func (n *NodeBase) Properties() *Props {
-	return &n.Props
+func (n *NodeBase) Properties() map[string]any {
+	return n.Props
 }
 
-// SetProp sets given property key to value val.
+// SetProperty sets given property key to value val.
 // initializes property map if nil.
-func (n *NodeBase) SetProp(key string, val any) {
+func (n *NodeBase) SetProperty(key string, value any) {
 	if n.Props == nil {
-		n.Props = make(Props)
+		n.Props = map[string]any{}
 	}
-	n.Props[key] = val
+	n.Props[key] = value
 }
 
-// SetProps sets a whole set of properties
-func (n *NodeBase) SetProps(props Props) {
-	if n.Props == nil {
-		n.Props = make(Props, len(props))
-	}
-	for key, val := range props {
-		n.Props[key] = val
-	}
-}
-
-// Prop returns the property value for the given key.
+// Property returns the property value for the given key.
 // It returns nil if it doesn't exist.
-func (n *NodeBase) Prop(key string) any {
+func (n *NodeBase) Property(key string) any {
 	return n.Props[key]
 }
 
-// DeleteProp deletes property key on this node.
-func (n *NodeBase) DeleteProp(key string) {
+// DeleteProperty deletes property key on this node.
+func (n *NodeBase) DeleteProperty(key string) {
 	if n.Props == nil {
 		return
 	}
@@ -1001,16 +992,13 @@ func (n *NodeBase) Clone() Node {
 
 // CopyFromRaw performs a raw copy that just does the deep copy of the
 // bits and doesn't do anything with pointers.
-func CopyFromRaw(kn, frm Node) {
-	kn.Children().ConfigCopy(kn.This(), *frm.Children())
-	n := kn.AsTreeNode()
-	fmp := *frm.Properties()
-	n.Props = make(Props, len(fmp))
-	n.Props.CopyFrom(fmp, DeepCopy)
+func CopyFromRaw(n, from Node) {
+	n.Children().ConfigCopy(n.This(), *from.Children())
+	maps.Copy(n.Properties(), from.Properties())
 
-	kn.This().CopyFieldsFrom(frm)
-	for i, kid := range *kn.Children() {
-		fmk := frm.Child(i)
+	n.This().CopyFieldsFrom(from)
+	for i, kid := range *n.Children() {
+		fmk := from.Child(i)
 		CopyFromRaw(kid, fmk)
 	}
 }
