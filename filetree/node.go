@@ -197,7 +197,7 @@ func (fn *Node) UpdateDir() {
 	hasExtFiles := false
 	if fn.This() == fn.FRoot.This() {
 		if len(fn.FRoot.ExtFiles) > 0 {
-			config = append(tree.Config{{Type: fn.FRoot.NodeType, Name: ExternalFilesName}}, config...)
+			config = append(tree.Config{{Type: fn.FRoot.FileNodeType, Name: ExternalFilesName}}, config...)
 			hasExtFiles = true
 		}
 	}
@@ -238,7 +238,7 @@ func (fn *Node) UpdateDir() {
 func (fn *Node) ConfigOfFiles(path string) tree.Config {
 	config1 := tree.Config{}
 	config2 := tree.Config{}
-	typ := fn.FRoot.NodeType
+	typ := fn.FRoot.FileNodeType
 	filepath.Walk(path, func(pth string, info os.FileInfo, err error) error {
 		if err != nil {
 			emsg := fmt.Sprintf("filetree.Node ConfigFilesIn Path %q: Error: %v", path, err)

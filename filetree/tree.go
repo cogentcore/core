@@ -47,7 +47,7 @@ type Tree struct {
 	DirsOnTop bool
 
 	// type of node to create -- defaults to filetree.Node but can use custom node types
-	NodeType *gti.Type `view:"-" json:"-" xml:"-"`
+	FileNodeType *gti.Type `view:"-" json:"-" xml:"-"`
 
 	// DoubleClickFun is a function to call when a node receives a DoubleClick event.
 	// if not set, defaults to OpenEmptyDir() (for folders)
@@ -94,8 +94,8 @@ func (fv *Tree) Destroy() {
 func (ft *Tree) OpenPath(path string) {
 	ft.FRoot = ft // we are our own root..
 	ft.Nm = "/"
-	if ft.NodeType == nil {
-		ft.NodeType = NodeType
+	if ft.FileNodeType == nil {
+		ft.FileNodeType = NodeType
 	}
 	effpath, err := filepath.EvalSymlinks(path)
 	if err != nil {
@@ -364,7 +364,7 @@ func (ft *Tree) ExtNodeByPath(fpath string) (*Node, error) {
 func (ft *Tree) UpdateExtFiles(efn *Node) {
 	efn.Info.Mode = os.ModeDir | os.ModeIrregular // mark as dir, irregular
 	config := tree.Config{}
-	typ := ft.NodeType
+	typ := ft.FileNodeType
 	for _, f := range ft.ExtFiles {
 		config.Add(typ, dirs.DirAndFile(f))
 	}

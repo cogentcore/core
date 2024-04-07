@@ -18,7 +18,7 @@ import (
 func (ft *Tree) OnInit() {
 	ft.Node.OnInit()
 	ft.FRoot = ft
-	ft.NodeType = NodeType
+	ft.FileNodeType = NodeType
 	ft.OpenDepth = 4
 }
 

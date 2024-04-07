@@ -7,8 +7,8 @@ import (
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/tree"
 	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 	"cogentcore.org/core/vci"
 )
@@ -87,7 +87,7 @@ func (t *Node) SetRootView(v *giv.TreeView) *Node { t.RootView = v; return t }
 func (t *Node) SetSelectedNodes(v ...giv.TreeViewer) *Node { t.SelectedNodes = v; return t }
 
 // TreeType is the [gti.Type] for [Tree]
-var TreeType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/filetree.Tree", IDName: "tree", Doc: "Tree is the root of a tree representing files in a given directory\n(and subdirectories thereof), and has some overall management state for how to\nview things.  The Tree can be viewed by a TreeView to provide a GUI\ninterface into it.", Embeds: []gti.Field{{Name: "Node"}}, Fields: []gti.Field{{Name: "ExtFiles", Doc: "external files outside the root path of the tree -- abs paths are stored -- these are shown in the first sub-node if present -- use AddExtFile to add and update"}, {Name: "Dirs", Doc: "records state of directories within the tree (encoded using paths relative to root),\ne.g., open (have been opened by the user) -- can persist this to restore prior view of a tree"}, {Name: "DirsOnTop", Doc: "if true, then all directories are placed at the top of the tree view\notherwise everything is mixed"}, {Name: "NodeType", Doc: "type of node to create -- defaults to filetree.Node but can use custom node types"}, {Name: "DoubleClickFun", Doc: "DoubleClickFun is a function to call when a node receives a DoubleClick event.\nif not set, defaults to OpenEmptyDir() (for folders)"}, {Name: "InOpenAll", Doc: "if true, we are in midst of an OpenAll call -- nodes should open all dirs"}, {Name: "Watcher", Doc: "change notify for all dirs"}, {Name: "DoneWatcher", Doc: "channel to close watcher watcher"}, {Name: "WatchedPaths", Doc: "map of paths that have been added to watcher -- only active if bool = true"}, {Name: "LastWatchUpdate", Doc: "last path updated by watcher"}, {Name: "LastWatchTime", Doc: "timestamp of last update"}, {Name: "UpdateMu", Doc: "Update mutex"}}, Instance: &Tree{}})
+var TreeType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/filetree.Tree", IDName: "tree", Doc: "Tree is the root of a tree representing files in a given directory\n(and subdirectories thereof), and has some overall management state for how to\nview things.  The Tree can be viewed by a TreeView to provide a GUI\ninterface into it.", Embeds: []gti.Field{{Name: "Node"}}, Fields: []gti.Field{{Name: "ExtFiles", Doc: "external files outside the root path of the tree -- abs paths are stored -- these are shown in the first sub-node if present -- use AddExtFile to add and update"}, {Name: "Dirs", Doc: "records state of directories within the tree (encoded using paths relative to root),\ne.g., open (have been opened by the user) -- can persist this to restore prior view of a tree"}, {Name: "DirsOnTop", Doc: "if true, then all directories are placed at the top of the tree view\notherwise everything is mixed"}, {Name: "FileNodeType", Doc: "type of node to create -- defaults to filetree.Node but can use custom node types"}, {Name: "DoubleClickFun", Doc: "DoubleClickFun is a function to call when a node receives a DoubleClick event.\nif not set, defaults to OpenEmptyDir() (for folders)"}, {Name: "InOpenAll", Doc: "if true, we are in midst of an OpenAll call -- nodes should open all dirs"}, {Name: "Watcher", Doc: "change notify for all dirs"}, {Name: "DoneWatcher", Doc: "channel to close watcher watcher"}, {Name: "WatchedPaths", Doc: "map of paths that have been added to watcher -- only active if bool = true"}, {Name: "LastWatchUpdate", Doc: "last path updated by watcher"}, {Name: "LastWatchTime", Doc: "timestamp of last update"}, {Name: "UpdateMu", Doc: "Update mutex"}}, Instance: &Tree{}})
 
 // NewTree adds a new [Tree] with the given name to the given parent:
 // Tree is the root of a tree representing files in a given directory
@@ -109,9 +109,9 @@ func (t *Tree) New() tree.Node { return &Tree{} }
 // otherwise everything is mixed
 func (t *Tree) SetDirsOnTop(v bool) *Tree { t.DirsOnTop = v; return t }
 
-// SetNodeType sets the [Tree.NodeType]:
+// SetFileNodeType sets the [Tree.FileNodeType]:
 // type of node to create -- defaults to filetree.Node but can use custom node types
-func (t *Tree) SetNodeType(v *gti.Type) *Tree { t.NodeType = v; return t }
+func (t *Tree) SetFileNodeType(v *gti.Type) *Tree { t.FileNodeType = v; return t }
 
 // SetDoubleClickFun sets the [Tree.DoubleClickFun]:
 // DoubleClickFun is a function to call when a node receives a DoubleClick event.
