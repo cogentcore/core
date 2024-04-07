@@ -104,25 +104,25 @@ func (hs *Styles) SaveJSON(filename gi.Filename) error { //gti:add
 	return err
 }
 
-// PrefsStylesFilename is the name of the preferences file in App prefs
+// SettingsStylesFilename is the name of the preferences file in App prefs
 // directory for saving / loading the custom styles
-var PrefsStylesFilename = "hi_styles.json"
+var SettingsStylesFilename = "hi_styles.json"
 
 // StylesChanged is used for gui updating while editing
 var StylesChanged = false
 
-// OpenPrefs opens Styles from Cogent Core standard prefs directory, using PrefsStylesFilename
-func (hs *Styles) OpenPrefs() error {
+// OpenSettings opens Styles from Cogent Core standard prefs directory, using SettingsStylesFilename
+func (hs *Styles) OpenSettings() error {
 	pdir := gi.TheApp.CogentCoreDataDir()
-	pnm := filepath.Join(pdir, PrefsStylesFilename)
+	pnm := filepath.Join(pdir, SettingsStylesFilename)
 	StylesChanged = false
 	return hs.OpenJSON(gi.Filename(pnm))
 }
 
-// SavePrefs saves Styles to Cogent Core standard prefs directory, using PrefsStylesFilename
-func (hs *Styles) SavePrefs() error {
+// SaveSettings saves Styles to Cogent Core standard prefs directory, using SettingsStylesFilename
+func (hs *Styles) SaveSettings() error {
 	pdir := gi.TheApp.CogentCoreDataDir()
-	pnm := filepath.Join(pdir, PrefsStylesFilename)
+	pnm := filepath.Join(pdir, SettingsStylesFilename)
 	StylesChanged = false
 	MergeAvailStyles()
 	return hs.SaveJSON(gi.Filename(pnm))
@@ -170,7 +170,7 @@ func (hs *Styles) ViewStandard() {
 func Init() {
 	pi.LangSupport.OpenStandard()
 	StandardStyles.OpenDefaults()
-	CustomStyles.OpenPrefs()
+	CustomStyles.OpenSettings()
 	if len(CustomStyles) == 0 {
 		cs := &Style{}
 		cs.CopyFrom(StandardStyles[string(StyleDefault)])

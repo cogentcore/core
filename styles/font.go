@@ -116,45 +116,6 @@ func (fs *Font) SetStyleProps(parent *Font, props map[string]any, ctxt colors.Co
 	fs.StyleFromProps(parent, props, ctxt)
 }
 
-/*
-// CopyNonDefaultProps does SetProp on given node for all of the style settings
-// that are not at their default values.
-func (fs *Font) CopyNonDefaultProps(node tree.Node) {
-	// prefclr := ThePrefs.PrefColor("font")
-	preffont := ThePrefs.PrefFontFamily()
-	// if fs.Color != *prefclr {
-	// 	node.SetProp("color", fs.Color)
-	// }
-	// if !fs.BackgroundColor.Color.IsNil() {
-	// 	node.SetProp("background-color", fs.BackgroundColor.Color)
-	// }
-	if fs.Opacity != 1 {
-		node.SetProp("opacity", fs.Opacity)
-	}
-	if fs.Family != "" && fs.Family != preffont {
-		node.SetProp("font-family", fs.Family)
-	}
-	if fs.Style != FontNormal {
-		node.SetProp("font-style", fs.Style)
-	}
-	if fs.Weight != WeightNormal {
-		node.SetProp("font-weight", fs.Weight)
-	}
-	if fs.Stretch != FontStrNormal {
-		node.SetProp("font-stretch", fs.Stretch)
-	}
-	if fs.Variant != FontVarNormal {
-		node.SetProp("font-variant", fs.Variant)
-	}
-	if fs.Deco != DecoNone {
-		node.SetProp("font-decoration", fs.Deco)
-	}
-	if fs.Shift != ShiftBaseline {
-		node.SetProp("baseline-shift", fs.Shift)
-	}
-}
-*/
-
 //////////////////////////////////////////////////////////////////////////////////
 // Font Style enums
 

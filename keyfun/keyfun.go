@@ -105,7 +105,7 @@ const (
 type Map map[key.Chord]Funs
 
 // ActiveMap points to the active map -- users can set this to an
-// alternative map in Prefs
+// alternative map in Settings
 var ActiveMap *Map
 
 // MapName has an associated Value for selecting from the list of

@@ -336,7 +336,7 @@ func (as *AppearanceSettingsData) ApplyDPI() {
 // need to do this, but sometimes it is useful for testing or windows that are
 // showing up in bad places that you can't recover from.
 func (as *AppearanceSettingsData) DeleteSavedWindowGeoms() { //gti:add
-	WinGeomMgr.DeleteAll()
+	TheWinGeomSaver.DeleteAll()
 }
 
 // ZebraStripesWeight returns a 0 to 0.2 alpha opacity factor to use in computing

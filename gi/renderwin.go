@@ -115,9 +115,9 @@ type RenderWin struct {
 type WinFlags int64 //enums:bitflag -trim-prefix Win
 
 const (
-	// WinHasGeomPrefs indicates if this window has WinGeomPrefs setting that
+	// WinHasSavedGeom indicates if this window has WinGeoms setting that
 	// sized it -- affects whether other default geom should be applied.
-	WinHasGeomPrefs WinFlags = iota
+	WinHasSavedGeom WinFlags = iota
 
 	// WinClosing is atomic flag indicating window is closing
 	WinClosing
@@ -261,17 +261,17 @@ func (w *RenderWin) SetName(name string) {
 		w.GoosiWin.SetName(name)
 	}
 	if isdif && w.GoosiWin != nil {
-		wgp := WinGeomMgr.Pref(w.Title, w.GoosiWin.Screen())
+		wgp := TheWinGeomSaver.Pref(w.Title, w.GoosiWin.Screen())
 		if wgp != nil {
-			WinGeomMgr.SettingStart()
+			TheWinGeomSaver.SettingStart()
 			if w.GoosiWin.Size() != wgp.Size() || w.GoosiWin.Position() != wgp.Pos() {
 				if DebugSettings.WinGeomTrace {
-					log.Printf("WinGeomPrefs: SetName setting geom for window: %v pos: %v size: %v\n", w.Name, wgp.Pos(), wgp.Size())
+					log.Printf("WinGeoms: SetName setting geom for window: %v pos: %v size: %v\n", w.Name, wgp.Pos(), wgp.Size())
 				}
 				w.GoosiWin.SetGeom(wgp.Pos(), wgp.Size())
 				goosi.TheApp.SendEmptyEvent()
 			}
-			WinGeomMgr.SettingEnd()
+			TheWinGeomSaver.SettingEnd()
 		}
 	}
 }
@@ -399,9 +399,9 @@ func (w *RenderWin) Resized() {
 	// fmt.Printf("resize dpi: %v\n", w.LogicalDPI())
 	w.MainStageMgr.Resize(rg)
 	if DebugSettings.WinGeomTrace {
-		log.Printf("WinGeomPrefs: recording from Resize\n")
+		log.Printf("WinGeoms: recording from Resize\n")
 	}
-	WinGeomMgr.RecordPref(w)
+	TheWinGeomSaver.RecordPref(w)
 }
 
 // Raise requests that the window be at the top of the stack of windows,
@@ -629,9 +629,9 @@ func (w *RenderWin) HandleWindowEvents(e events.Event) {
 			e.SetHandled()
 			// fmt.Printf("win move: %v\n", w.GoosiWin.Position())
 			if DebugSettings.WinGeomTrace {
-				log.Printf("WinGeomPrefs: recording from Move\n")
+				log.Printf("WinGeoms: recording from Move\n")
 			}
-			WinGeomMgr.RecordPref(w)
+			TheWinGeomSaver.RecordPref(w)
 		case events.WinFocus:
 			// if we are not already the last in AllRenderWins, we go there,
 			// as this allows focus to be restored to us in the future
@@ -661,10 +661,10 @@ func (w *RenderWin) HandleWindowEvents(e events.Event) {
 			w.Resized()
 			// TODO: figure out how to restore this stuff without breaking window size on mobile
 
-			// WinGeomMgr.AbortSave() // anything just prior to this is sus
+			// TheWinGeomSaver.AbortSave() // anything just prior to this is sus
 			// if !goosi.TheApp.NoScreens() {
-			// 	Prefs.UpdateAll()
-			// 	WinGeomMgr.RestoreAll()
+			// 	Settings.UpdateAll()
+			// 	WinGeomsSave.RestoreAll()
 			// }
 		}
 	}

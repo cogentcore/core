@@ -302,9 +302,9 @@ func (st *Stage) NewRenderWin() *RenderWin {
 		Size:      st.Scene.SceneGeom.Size,
 		StdPixels: false,
 	}
-	wgp := WinGeomMgr.Pref(title, nil)
+	wgp := TheWinGeomSaver.Pref(title, nil)
 	if TheApp.Platform() != goosi.Offscreen && wgp != nil {
-		WinGeomMgr.SettingStart()
+		TheWinGeomSaver.SettingStart()
 		opts.Size = wgp.Size()
 		opts.Pos = wgp.Pos()
 		opts.StdPixels = false
@@ -317,12 +317,12 @@ func (st *Stage) NewRenderWin() *RenderWin {
 		}
 	}
 	win := NewRenderWin(name, title, opts)
-	WinGeomMgr.SettingEnd()
+	TheWinGeomSaver.SettingEnd()
 	if win == nil {
 		return nil
 	}
 	if wgp != nil {
-		win.SetFlag(true, WinHasGeomPrefs)
+		win.SetFlag(true, WinHasSavedGeom)
 	}
 	AllRenderWins.Add(win)
 	WinNewCloseStamp()
