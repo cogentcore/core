@@ -54,7 +54,7 @@ func (tb *Opts) ConfigKnown(sup fi.Known) bool {
 	if sup == fi.Unknown {
 		return false
 	}
-	lp, ok := pi.StandardLangProps[sup]
+	lp, ok := pi.StandardLangProperties[sup]
 	if !ok {
 		return false
 	}
@@ -86,7 +86,7 @@ func KnownComments(fpath string) (comLn, comSt, comEd string) {
 	if sup == fi.Unknown {
 		return
 	}
-	lp, ok := pi.StandardLangProps[sup]
+	lp, ok := pi.StandardLangProperties[sup]
 	if !ok {
 		return
 	}

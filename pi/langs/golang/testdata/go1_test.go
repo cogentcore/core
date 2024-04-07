@@ -470,15 +470,15 @@ func (ft FileTime) String(reg string, pars int) string {
 
 var _ArgDataFlags_index = [...]uint8{0, 13, 26, 39}
 
-var FileInfoProps = tree.Props{
-	"CtxtMenu": tree.PropSlice{
-		{"Duplicate", tree.Props{
+var FileInfoProperties = tree.Properties{
+	"CtxtMenu": tree.Propertieslice{
+		{"Duplicate", tree.Properties{
 			"updtfunc": ActionUpdateFunc(func(fii interface{}, act *gi.Button) {
 				fi := fii.(*FileInfo)
 				act.SetInactiveState(fi.IsDir())
 			}),
 		}},
-		{"Delete", tree.Props{
+		{"Delete", tree.Properties{
 			"desc":    "Ok to delete this file?  This is not undoable and is not moving to trash / recycle bin",
 			"confirm": true,
 			"updtfunc": ActionUpdateFunc(func(fii interface{}, act *gi.Button) {
@@ -486,10 +486,10 @@ var FileInfoProps = tree.Props{
 				act.SetInactiveState(fi.IsDir())
 			}),
 		}},
-		{"Rename", tree.Props{
+		{"Rename", tree.Properties{
 			"desc": "Rename file to new file name",
-			"Args": tree.PropSlice{
-				{"New Name", tree.Props{
+			"Args": tree.Propertieslice{
+				{"New Name", tree.Properties{
 					"default-field": "Name",
 				}},
 			},
@@ -571,9 +571,9 @@ func (tv *TreeView) FocusChanged2D(change gi.FocusChanges) {
 func adlf() {
 	switch pr := bprpi.(type) {
 	case map[string]interface{}:
-		wb.SetIconProps(tree.Props(pr))
-	case tree.Props:
-		wb.SetIconProps(pr)
+		wb.SetIconProperties(tree.Properties(pr))
+	case tree.Properties:
+		wb.SetIconProperties(pr)
 	}	
 }
 
@@ -611,8 +611,8 @@ func tst() {
 	}
 }
 
-var PiViewProps = tree.Props{
-	"MainMenu": tree.PropSlice{
+var PiViewProperties = tree.Properties{
+	"MainMenu": tree.Propertieslice{
 		"updtfunc": giv.ActionUpdateFunc(func(pvi interface{}, act *gi.Button) {
 			pv := pvi.(*PiView)
 			act.SetActiveState(pv.Settings.ProjFile != "")
@@ -1132,7 +1132,7 @@ type Lang interface {
 	LexLine(fs *FileState, line int) lex.Line
 }
 
-var TextViewProps = tree.Props{
+var TextViewProperties = tree.Properties{
 	"white-space":      gi.WhiteSpacePreWrap,
 	"font-family":      "Go Mono",
 	"border-width":     0, // don't render our own border
@@ -1146,29 +1146,29 @@ var TextViewProps = tree.Props{
 	"tab-size":         4,
 	"color":            &gi.Settings.Colors.Font,
 	"background-color": &gi.Settings.Colors.Background,
-	TextViewSelectors[TextViewActive]: tree.Props{
+	TextViewSelectors[TextViewActive]: tree.Properties{
 		"color":            &gi.Settings.Colors.Font,
 		"background-color": &gi.Settings.Colors.Background,
 	},
-	TextViewSelectors[TextViewActive]: tree.Props{
+	TextViewSelectors[TextViewActive]: tree.Properties{
 		"background-color": "highlight-10",
 	},
-	TextViewSelectors[TextViewFocus]: tree.Props{
+	TextViewSelectors[TextViewFocus]: tree.Properties{
 		"background-color": "lighter-0",
 	},
-	TextViewSelectors[TextViewInactive]: tree.Props{
+	TextViewSelectors[TextViewInactive]: tree.Properties{
 		"background-color": "highlight-20",
 	},
-	TextViewSelectors[TextViewSel]: tree.Props{
+	TextViewSelectors[TextViewSel]: tree.Properties{
 		"background-color": &gi.Settings.Colors.Select,
 	},
-	TextViewSelectors[TextViewHighlight]: tree.Props{
+	TextViewSelectors[TextViewHighlight]: tree.Properties{
 		"background-color": &gi.Settings.Colors.Highlight,
 	},
-	TextViewSelectors[TextViewSel]: tree.Props{
+	TextViewSelectors[TextViewSel]: tree.Properties{
 		"background-color": &gi.Settings.Colors.Select,
 	},
-	TextViewSelectors[TextViewHighlight]: tree.Props{
+	TextViewSelectors[TextViewHighlight]: tree.Properties{
 		"background-color": &gi.Settings.Colors.Highlight,
 	},
 }

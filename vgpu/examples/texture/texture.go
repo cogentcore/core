@@ -63,7 +63,7 @@ func main() {
 	vgpu.Debug = true
 	gp.Config("texture")
 
-	// gp.PropsString(true) // print
+	// gp.PropertiesString(true) // print
 
 	surfPtr, err := window.CreateWindowSurface(gp.Instance, nil)
 	if err != nil {

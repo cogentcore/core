@@ -513,7 +513,7 @@ type SystemSettingsData struct { //gti:add
 	LayoutFocusNameTabTime time.Duration `default:"2s" min:"10ms" max:"10s" step:"100ms"`
 
 	// the number of map elements at or below which an inline representation
-	// of the map will be presented, which is more convenient for small #'s of props
+	// of the map will be presented, which is more convenient for small #'s of properties
 	MapInlineLength int `default:"2" min:"1" step:"1"`
 
 	// the number of elemental struct fields at or below which an inline representation

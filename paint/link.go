@@ -24,7 +24,7 @@ type TextLink struct {
 	Style styles.FontRender
 
 	// additional properties defined for the link, from the parsed HTML attributes
-	Props map[string]any
+	Properties map[string]any
 
 	// span index where link starts
 	StartSpan int

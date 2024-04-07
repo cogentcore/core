@@ -18,7 +18,7 @@ The `pi` repository is also home to various other basic file-level packages incl
 
 `pi/lang.go` defines the `Lang` interface, which each supported language implements (at least a nil stub) -- at a minimum the `Parser`, `ParseFile`(which includes just lexing if that is all that is needed), and `HiLine` methods should be implemented, to drive syntax highlighting / coloring / tagging.  Optionally, completion, lookup, etc can be implemented.  See `langs/golang` for a full implementation, and `langs/tex` for a more minimal lex-only case.
 
-`pi/langsup.go` has tables of supported languages and their properties, in `LangProps`.
+`pi/langsup.go` has tables of supported languages and their properties, in `LangProperties`.
 
 `pi` in general has overall management methods for coordinating the `lex` (lexing) and `parse` parsing steps.
 

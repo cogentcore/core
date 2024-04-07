@@ -28,7 +28,7 @@ func main() {
 	gp.Config("compute1")
 	fmt.Printf("Running on GPU: %s\n", gp.DeviceName)
 
-	// gp.PropsString(true) // print
+	// gp.PropertiesString(true) // print
 
 	sy := gp.NewComputeSystem("compute1")
 	pl := sy.NewPipeline("compute1")

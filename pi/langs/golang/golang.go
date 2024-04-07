@@ -33,7 +33,7 @@ type GoLang struct {
 var TheGoLang = GoLang{}
 
 func init() {
-	pi.StandardLangProps[fi.Go].Lang = &TheGoLang
+	pi.StandardLangProperties[fi.Go].Lang = &TheGoLang
 	langs.ParserBytes[fi.Go] = parserBytes
 }
 
@@ -41,7 +41,7 @@ func (gl *GoLang) Parser() *pi.Parser {
 	if gl.Pr != nil {
 		return gl.Pr
 	}
-	lp, _ := pi.LangSupport.Props(fi.Go)
+	lp, _ := pi.LangSupport.Properties(fi.Go)
 	if lp.Parser == nil {
 		pi.LangSupport.OpenStandard()
 	}

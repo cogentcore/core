@@ -2,7 +2,7 @@
   "Lexer": {
     "Nm": "Lexer",
     "UniqueNm": "Lexer",
-    "Props": null,
+    "Properties": null,
     "Kids": [
       {
         "n": 33,
@@ -76,7 +76,7 @@
       {
         "Nm": "InCommentMulti",
         "UniqueNm": "InCommentMulti",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 3,
@@ -90,7 +90,7 @@
           {
             "Nm": "EndMulti",
             "UniqueNm": "EndMulti",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -111,7 +111,7 @@
           {
             "Nm": "StartEmbededMulti",
             "UniqueNm": "StartEmbededMulti",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -132,7 +132,7 @@
           {
             "Nm": "Comment",
             "UniqueNm": "Comment",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -166,7 +166,7 @@
       {
         "Nm": "InStrBacktick",
         "UniqueNm": "InStrBacktick",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 3,
@@ -180,7 +180,7 @@
           {
             "Nm": "QuotedStrBacktick",
             "UniqueNm": "QuotedStrBacktick",
-            "Props": {
+            "Properties": {
               "inactive": true
             },
             "Kids": null,
@@ -202,7 +202,7 @@
           {
             "Nm": "EndStrBacktick",
             "UniqueNm": "EndStrBacktick",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -223,7 +223,7 @@
           {
             "Nm": "StrBacktick",
             "UniqueNm": "StrBacktick",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -257,7 +257,7 @@
       {
         "Nm": "StartCommentMulti",
         "UniqueNm": "StartCommentMulti",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "",
@@ -278,7 +278,7 @@
       {
         "Nm": "LitStrBacktick",
         "UniqueNm": "LitStrBacktick",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "",
@@ -299,7 +299,7 @@
       {
         "Nm": "CommentLine",
         "UniqueNm": "CommentLine",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "",
@@ -319,7 +319,7 @@
       {
         "Nm": "SkipWhite",
         "UniqueNm": "SkipWhite",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "",
@@ -339,7 +339,7 @@
       {
         "Nm": "Letter",
         "UniqueNm": "Letter",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 4,
@@ -355,7 +355,7 @@
           {
             "Nm": "Keyword",
             "UniqueNm": "Keyword",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 27,
@@ -417,7 +417,7 @@
               {
                 "Nm": "break",
                 "UniqueNm": "break",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -437,7 +437,7 @@
               {
                 "Nm": "case",
                 "UniqueNm": "case",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -457,7 +457,7 @@
               {
                 "Nm": "chan",
                 "UniqueNm": "chan",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -477,7 +477,7 @@
               {
                 "Nm": "const",
                 "UniqueNm": "const",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -497,7 +497,7 @@
               {
                 "Nm": "continue",
                 "UniqueNm": "continue",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -517,7 +517,7 @@
               {
                 "Nm": "default",
                 "UniqueNm": "default",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -537,7 +537,7 @@
               {
                 "Nm": "defer",
                 "UniqueNm": "defer",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -557,7 +557,7 @@
               {
                 "Nm": "else",
                 "UniqueNm": "else",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -577,7 +577,7 @@
               {
                 "Nm": "fallthrough",
                 "UniqueNm": "fallthrough",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -597,7 +597,7 @@
               {
                 "Nm": "for",
                 "UniqueNm": "for",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -617,7 +617,7 @@
               {
                 "Nm": "func",
                 "UniqueNm": "func",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -637,7 +637,7 @@
               {
                 "Nm": "go",
                 "UniqueNm": "go",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -657,7 +657,7 @@
               {
                 "Nm": "goto",
                 "UniqueNm": "goto",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -677,7 +677,7 @@
               {
                 "Nm": "if",
                 "UniqueNm": "if",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -697,7 +697,7 @@
               {
                 "Nm": "import",
                 "UniqueNm": "import",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -717,7 +717,7 @@
               {
                 "Nm": "interface",
                 "UniqueNm": "interface",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -737,7 +737,7 @@
               {
                 "Nm": "map",
                 "UniqueNm": "map",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -757,7 +757,7 @@
               {
                 "Nm": "make",
                 "UniqueNm": "make",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -777,7 +777,7 @@
               {
                 "Nm": "new",
                 "UniqueNm": "new",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -797,7 +797,7 @@
               {
                 "Nm": "package",
                 "UniqueNm": "package",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -817,7 +817,7 @@
               {
                 "Nm": "range",
                 "UniqueNm": "range",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -837,7 +837,7 @@
               {
                 "Nm": "return",
                 "UniqueNm": "return",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -857,7 +857,7 @@
               {
                 "Nm": "select",
                 "UniqueNm": "select",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -877,7 +877,7 @@
               {
                 "Nm": "struct",
                 "UniqueNm": "struct",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -897,7 +897,7 @@
               {
                 "Nm": "switch",
                 "UniqueNm": "switch",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -917,7 +917,7 @@
               {
                 "Nm": "type",
                 "UniqueNm": "type",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -937,7 +937,7 @@
               {
                 "Nm": "var",
                 "UniqueNm": "var",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -971,7 +971,7 @@
           {
             "Nm": "Type",
             "UniqueNm": "Type",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 19,
@@ -1017,7 +1017,7 @@
               {
                 "Nm": "bool",
                 "UniqueNm": "bool",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1037,7 +1037,7 @@
               {
                 "Nm": "byte",
                 "UniqueNm": "byte",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1057,7 +1057,7 @@
               {
                 "Nm": "complex64",
                 "UniqueNm": "complex64",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1077,7 +1077,7 @@
               {
                 "Nm": "complex128",
                 "UniqueNm": "complex128",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1097,7 +1097,7 @@
               {
                 "Nm": "float32",
                 "UniqueNm": "float32",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1117,7 +1117,7 @@
               {
                 "Nm": "float64",
                 "UniqueNm": "float64",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1137,7 +1137,7 @@
               {
                 "Nm": "int",
                 "UniqueNm": "int",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1157,7 +1157,7 @@
               {
                 "Nm": "int8",
                 "UniqueNm": "int8",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1177,7 +1177,7 @@
               {
                 "Nm": "int16",
                 "UniqueNm": "int16",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1197,7 +1197,7 @@
               {
                 "Nm": "int32",
                 "UniqueNm": "int32",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1217,7 +1217,7 @@
               {
                 "Nm": "int64",
                 "UniqueNm": "int64",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1237,7 +1237,7 @@
               {
                 "Nm": "rune",
                 "UniqueNm": "rune",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1257,7 +1257,7 @@
               {
                 "Nm": "string",
                 "UniqueNm": "string",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1277,7 +1277,7 @@
               {
                 "Nm": "uint",
                 "UniqueNm": "uint",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1297,7 +1297,7 @@
               {
                 "Nm": "uint8",
                 "UniqueNm": "uint8",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1317,7 +1317,7 @@
               {
                 "Nm": "uint16",
                 "UniqueNm": "uint16",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1337,7 +1337,7 @@
               {
                 "Nm": "uint32",
                 "UniqueNm": "uint32",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1357,7 +1357,7 @@
               {
                 "Nm": "uint64",
                 "UniqueNm": "uint64",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1377,7 +1377,7 @@
               {
                 "Nm": "uintptr",
                 "UniqueNm": "uintptr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1411,7 +1411,7 @@
           {
             "Nm": "Builtins",
             "UniqueNm": "Builtins",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 18,
@@ -1455,7 +1455,7 @@
               {
                 "Nm": "append",
                 "UniqueNm": "append",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1475,7 +1475,7 @@
               {
                 "Nm": "cap",
                 "UniqueNm": "cap",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1495,7 +1495,7 @@
               {
                 "Nm": "close",
                 "UniqueNm": "close",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1515,7 +1515,7 @@
               {
                 "Nm": "complex",
                 "UniqueNm": "complex",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1535,7 +1535,7 @@
               {
                 "Nm": "copy",
                 "UniqueNm": "copy",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1555,7 +1555,7 @@
               {
                 "Nm": "delete",
                 "UniqueNm": "delete",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1575,7 +1575,7 @@
               {
                 "Nm": "error",
                 "UniqueNm": "error",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1595,7 +1595,7 @@
               {
                 "Nm": "imag",
                 "UniqueNm": "imag",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1615,7 +1615,7 @@
               {
                 "Nm": "len",
                 "UniqueNm": "len",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1635,7 +1635,7 @@
               {
                 "Nm": "panic",
                 "UniqueNm": "panic",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1655,7 +1655,7 @@
               {
                 "Nm": "print",
                 "UniqueNm": "print",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1675,7 +1675,7 @@
               {
                 "Nm": "println",
                 "UniqueNm": "println",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1695,7 +1695,7 @@
               {
                 "Nm": "real",
                 "UniqueNm": "real",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1715,7 +1715,7 @@
               {
                 "Nm": "recover",
                 "UniqueNm": "recover",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1735,7 +1735,7 @@
               {
                 "Nm": "true",
                 "UniqueNm": "true",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1755,7 +1755,7 @@
               {
                 "Nm": "false",
                 "UniqueNm": "false",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1775,7 +1775,7 @@
               {
                 "Nm": "iota",
                 "UniqueNm": "iota",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1795,7 +1795,7 @@
               {
                 "Nm": "nil",
                 "UniqueNm": "nil",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1829,7 +1829,7 @@
           {
             "Nm": "Name",
             "UniqueNm": "Name",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -1863,7 +1863,7 @@
       {
         "Nm": "Number",
         "UniqueNm": "Number",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "",
@@ -1883,7 +1883,7 @@
       {
         "Nm": "Dot",
         "UniqueNm": "Dot",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 3,
@@ -1897,7 +1897,7 @@
           {
             "Nm": "NextNum",
             "UniqueNm": "NextNum",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "lookahead for number",
@@ -1917,7 +1917,7 @@
           {
             "Nm": "NextDot",
             "UniqueNm": "NextDot",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 1,
@@ -1927,7 +1927,7 @@
               {
                 "Nm": "Ellipsis",
                 "UniqueNm": "Ellipsis",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -1961,7 +1961,7 @@
           {
             "Nm": "Period",
             "UniqueNm": "Period",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "default is just a plain .",
@@ -1995,7 +1995,7 @@
       {
         "Nm": "LitStrSingle",
         "UniqueNm": "LitStrSingle",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "",
@@ -2015,7 +2015,7 @@
       {
         "Nm": "LitStrDouble",
         "UniqueNm": "LitStrDouble",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "",
@@ -2035,7 +2035,7 @@
       {
         "Nm": "LParen",
         "UniqueNm": "LParen",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "",
@@ -2055,7 +2055,7 @@
       {
         "Nm": "RParen",
         "UniqueNm": "RParen",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "",
@@ -2075,7 +2075,7 @@
       {
         "Nm": "LBrack",
         "UniqueNm": "LBrack",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "",
@@ -2095,7 +2095,7 @@
       {
         "Nm": "RBrack",
         "UniqueNm": "RBrack",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "",
@@ -2115,7 +2115,7 @@
       {
         "Nm": "LBrace",
         "UniqueNm": "LBrace",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "",
@@ -2135,7 +2135,7 @@
       {
         "Nm": "RBrace",
         "UniqueNm": "RBrace",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "",
@@ -2155,7 +2155,7 @@
       {
         "Nm": "Comma",
         "UniqueNm": "Comma",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "",
@@ -2175,7 +2175,7 @@
       {
         "Nm": "Semi",
         "UniqueNm": "Semi",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "",
@@ -2195,7 +2195,7 @@
       {
         "Nm": "Colon",
         "UniqueNm": "Colon",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 2,
@@ -2207,7 +2207,7 @@
           {
             "Nm": "Define",
             "UniqueNm": "Define",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -2227,7 +2227,7 @@
           {
             "Nm": "Colon",
             "UniqueNm": "Colon",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -2261,7 +2261,7 @@
       {
         "Nm": "Plus",
         "UniqueNm": "Plus",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 3,
@@ -2275,7 +2275,7 @@
           {
             "Nm": "AsgnAdd",
             "UniqueNm": "AsgnAdd",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -2295,7 +2295,7 @@
           {
             "Nm": "AsgnInc",
             "UniqueNm": "AsgnInc",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -2315,7 +2315,7 @@
           {
             "Nm": "Add",
             "UniqueNm": "Add",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -2349,7 +2349,7 @@
       {
         "Nm": "Minus",
         "UniqueNm": "Minus",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 3,
@@ -2363,7 +2363,7 @@
           {
             "Nm": "AsgnSub",
             "UniqueNm": "AsgnSub",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -2383,7 +2383,7 @@
           {
             "Nm": "AsgnDec",
             "UniqueNm": "AsgnDec",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -2403,7 +2403,7 @@
           {
             "Nm": "Sub",
             "UniqueNm": "Sub",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -2437,7 +2437,7 @@
       {
         "Nm": "Mult",
         "UniqueNm": "Mult",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 2,
@@ -2449,7 +2449,7 @@
           {
             "Nm": "AsgnMul",
             "UniqueNm": "AsgnMul",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -2469,7 +2469,7 @@
           {
             "Nm": "Mult",
             "UniqueNm": "Mult",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -2503,7 +2503,7 @@
       {
         "Nm": "Div",
         "UniqueNm": "Div",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 2,
@@ -2515,7 +2515,7 @@
           {
             "Nm": "AsgnDiv",
             "UniqueNm": "AsgnDiv",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -2535,7 +2535,7 @@
           {
             "Nm": "Div",
             "UniqueNm": "Div",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -2569,7 +2569,7 @@
       {
         "Nm": "Rem",
         "UniqueNm": "Rem",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 2,
@@ -2581,7 +2581,7 @@
           {
             "Nm": "AsgnRem",
             "UniqueNm": "AsgnRem",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -2601,7 +2601,7 @@
           {
             "Nm": "Rem",
             "UniqueNm": "Rem",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -2635,7 +2635,7 @@
       {
         "Nm": "Xor",
         "UniqueNm": "Xor",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 2,
@@ -2647,7 +2647,7 @@
           {
             "Nm": "AsgnXor",
             "UniqueNm": "AsgnXor",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -2667,7 +2667,7 @@
           {
             "Nm": "Xor",
             "UniqueNm": "Xor",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -2701,7 +2701,7 @@
       {
         "Nm": "Rangle",
         "UniqueNm": "Rangle",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 3,
@@ -2715,7 +2715,7 @@
           {
             "Nm": "GtEq",
             "UniqueNm": "GtEq",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -2735,7 +2735,7 @@
           {
             "Nm": "ShiftRight",
             "UniqueNm": "ShiftRight",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 2,
@@ -2747,7 +2747,7 @@
               {
                 "Nm": "AsgnShiftRight",
                 "UniqueNm": "AsgnShiftRight",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -2767,7 +2767,7 @@
               {
                 "Nm": "ShiftRight",
                 "UniqueNm": "ShiftRight",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -2801,7 +2801,7 @@
           {
             "Nm": "Greater",
             "UniqueNm": "Greater",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -2835,7 +2835,7 @@
       {
         "Nm": "Langle",
         "UniqueNm": "Langle",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 4,
@@ -2851,7 +2851,7 @@
           {
             "Nm": "LtEq",
             "UniqueNm": "LtEq",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -2871,7 +2871,7 @@
           {
             "Nm": "AsgnArrow",
             "UniqueNm": "AsgnArrow",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -2891,7 +2891,7 @@
           {
             "Nm": "ShiftLeft",
             "UniqueNm": "ShiftLeft",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 2,
@@ -2903,7 +2903,7 @@
               {
                 "Nm": "AsgnShiftLeft",
                 "UniqueNm": "AsgnShiftLeft",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -2923,7 +2923,7 @@
               {
                 "Nm": "ShiftLeft",
                 "UniqueNm": "ShiftLeft",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -2957,7 +2957,7 @@
           {
             "Nm": "Less",
             "UniqueNm": "Less",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -2991,7 +2991,7 @@
       {
         "Nm": "Equals",
         "UniqueNm": "Equals",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 2,
@@ -3003,7 +3003,7 @@
           {
             "Nm": "Equality",
             "UniqueNm": "Equality",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -3023,7 +3023,7 @@
           {
             "Nm": "Asgn",
             "UniqueNm": "Asgn",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -3057,7 +3057,7 @@
       {
         "Nm": "Not",
         "UniqueNm": "Not",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 2,
@@ -3069,7 +3069,7 @@
           {
             "Nm": "NotEqual",
             "UniqueNm": "NotEqual",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -3089,7 +3089,7 @@
           {
             "Nm": "Not",
             "UniqueNm": "Not",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -3123,7 +3123,7 @@
       {
         "Nm": "And",
         "UniqueNm": "And",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 4,
@@ -3139,7 +3139,7 @@
           {
             "Nm": "AsgnAnd",
             "UniqueNm": "AsgnAnd",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -3159,7 +3159,7 @@
           {
             "Nm": "AndNot",
             "UniqueNm": "AndNot",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 2,
@@ -3171,7 +3171,7 @@
               {
                 "Nm": "AsgnAndNot",
                 "UniqueNm": "AsgnAndNot",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -3191,7 +3191,7 @@
               {
                 "Nm": "AndNot",
                 "UniqueNm": "AndNot",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -3225,7 +3225,7 @@
           {
             "Nm": "LogAnd",
             "UniqueNm": "LogAnd",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -3245,7 +3245,7 @@
           {
             "Nm": "BitAnd",
             "UniqueNm": "BitAnd",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -3279,7 +3279,7 @@
       {
         "Nm": "Or",
         "UniqueNm": "Or",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 3,
@@ -3293,7 +3293,7 @@
           {
             "Nm": "AsgnOr",
             "UniqueNm": "AsgnOr",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -3313,7 +3313,7 @@
           {
             "Nm": "LogOr",
             "UniqueNm": "LogOr",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -3333,7 +3333,7 @@
           {
             "Nm": "BitOr",
             "UniqueNm": "BitOr",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -3367,7 +3367,7 @@
       {
         "Nm": "AnyText",
         "UniqueNm": "AnyText",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "all lexers should end with a default AnyRune rule so lexing is robust",
@@ -3470,7 +3470,7 @@
   "Parser": {
     "Nm": "Parser",
     "UniqueNm": "Parser",
-    "Props": null,
+    "Properties": null,
     "Kids": [
       {
         "n": 7,
@@ -3492,7 +3492,7 @@
       {
         "Nm": "File",
         "UniqueNm": "File",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 7,
@@ -3514,7 +3514,7 @@
           {
             "Nm": "PackageSpec",
             "UniqueNm": "PackageSpec",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -3543,7 +3543,7 @@
           {
             "Nm": "Imports",
             "UniqueNm": "Imports",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -3557,7 +3557,7 @@
           {
             "Nm": "Consts",
             "UniqueNm": "Consts",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "same as ConstDecl",
@@ -3571,7 +3571,7 @@
           {
             "Nm": "Types",
             "UniqueNm": "Types",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "same as TypeDecl",
@@ -3585,7 +3585,7 @@
           {
             "Nm": "Vars",
             "UniqueNm": "Vars",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "same as VarDecl",
@@ -3599,7 +3599,7 @@
           {
             "Nm": "Funcs",
             "UniqueNm": "Funcs",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -3613,7 +3613,7 @@
           {
             "Nm": "Stmts",
             "UniqueNm": "Stmts",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "this allows direct parsing of anything, for one-line parsing",
@@ -3637,7 +3637,7 @@
       {
         "Nm": "ExprRules",
         "UniqueNm": "ExprRules",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 16,
@@ -3677,7 +3677,7 @@
           {
             "Nm": "FullName",
             "UniqueNm": "FullName",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 2,
@@ -3689,7 +3689,7 @@
               {
                 "Nm": "QualName",
                 "UniqueNm": "QualName",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "package-qualified name",
@@ -3703,7 +3703,7 @@
               {
                 "Nm": "Name",
                 "UniqueNm": "Name",
-                "Props": null,
+                "Properties": null,
                 "Kids": [
                   {
                     "n": 2,
@@ -3715,7 +3715,7 @@
                   {
                     "Nm": "NameLit",
                     "UniqueNm": "NameLit",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -3729,7 +3729,7 @@
                   {
                     "Nm": "KeyName",
                     "UniqueNm": "KeyName",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "keyword used as a name -- allowed..",
@@ -3763,7 +3763,7 @@
           {
             "Nm": "NameList",
             "UniqueNm": "NameList",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 2,
@@ -3775,7 +3775,7 @@
               {
                 "Nm": "NameListEls",
                 "UniqueNm": "NameListEls",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -3789,7 +3789,7 @@
               {
                 "Nm": "NameListEl",
                 "UniqueNm": "NameListEl",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -3813,7 +3813,7 @@
           {
             "Nm": "ExprList",
             "UniqueNm": "ExprList",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 2,
@@ -3825,7 +3825,7 @@
               {
                 "Nm": "ExprListEls",
                 "UniqueNm": "ExprListEls",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -3839,7 +3839,7 @@
               {
                 "Nm": "ExprListEl",
                 "UniqueNm": "ExprListEl",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -3863,7 +3863,7 @@
           {
             "Nm": "Expr",
             "UniqueNm": "Expr",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 5,
@@ -3881,7 +3881,7 @@
               {
                 "Nm": "CompLit",
                 "UniqueNm": "CompLit",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "putting this first resolves ambiguity of * for pointers in types vs. mult",
@@ -3895,7 +3895,7 @@
               {
                 "Nm": "FunLitCall",
                 "UniqueNm": "FunLitCall",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -3909,7 +3909,7 @@
               {
                 "Nm": "FunLit",
                 "UniqueNm": "FunLit",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -3923,7 +3923,7 @@
               {
                 "Nm": "BinExpr",
                 "UniqueNm": "BinExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -3937,7 +3937,7 @@
               {
                 "Nm": "UnryExpr",
                 "UniqueNm": "UnryExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -3961,7 +3961,7 @@
           {
             "Nm": "UnaryExpr",
             "UniqueNm": "UnaryExpr",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 8,
@@ -3985,7 +3985,7 @@
               {
                 "Nm": "PosExpr",
                 "UniqueNm": "PosExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -3999,7 +3999,7 @@
               {
                 "Nm": "NegExpr",
                 "UniqueNm": "NegExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -4013,7 +4013,7 @@
               {
                 "Nm": "UnaryXorExpr",
                 "UniqueNm": "UnaryXorExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -4027,7 +4027,7 @@
               {
                 "Nm": "NotExpr",
                 "UniqueNm": "NotExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -4041,7 +4041,7 @@
               {
                 "Nm": "DePtrExpr",
                 "UniqueNm": "DePtrExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -4055,7 +4055,7 @@
               {
                 "Nm": "AddrExpr",
                 "UniqueNm": "AddrExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -4069,7 +4069,7 @@
               {
                 "Nm": "SendExpr",
                 "UniqueNm": "SendExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -4083,7 +4083,7 @@
               {
                 "Nm": "PrimExpr",
                 "UniqueNm": "PrimExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "essential that this is LAST in unary list, so that distinctive first-position unary tokens match instead of more general cases in primary",
@@ -4107,7 +4107,7 @@
           {
             "Nm": "BinaryExpr",
             "UniqueNm": "BinaryExpr",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 19,
@@ -4153,7 +4153,7 @@
               {
                 "Nm": "NotEqExpr",
                 "UniqueNm": "NotEqExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -4167,7 +4167,7 @@
               {
                 "Nm": "EqExpr",
                 "UniqueNm": "EqExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -4181,7 +4181,7 @@
               {
                 "Nm": "LogOrExpr",
                 "UniqueNm": "LogOrExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -4195,7 +4195,7 @@
               {
                 "Nm": "LogAndExpr",
                 "UniqueNm": "LogAndExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -4209,7 +4209,7 @@
               {
                 "Nm": "GtEqExpr",
                 "UniqueNm": "GtEqExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -4223,7 +4223,7 @@
               {
                 "Nm": "GreaterExpr",
                 "UniqueNm": "GreaterExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -4237,7 +4237,7 @@
               {
                 "Nm": "LtEqExpr",
                 "UniqueNm": "LtEqExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -4251,7 +4251,7 @@
               {
                 "Nm": "LessExpr",
                 "UniqueNm": "LessExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -4265,7 +4265,7 @@
               {
                 "Nm": "BitOrExpr",
                 "UniqueNm": "BitOrExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -4279,7 +4279,7 @@
               {
                 "Nm": "BitAndExpr",
                 "UniqueNm": "BitAndExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -4293,7 +4293,7 @@
               {
                 "Nm": "BitXorExpr",
                 "UniqueNm": "BitXorExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -4307,7 +4307,7 @@
               {
                 "Nm": "BitAndNotExpr",
                 "UniqueNm": "BitAndNotExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -4321,7 +4321,7 @@
               {
                 "Nm": "ShiftRightExpr",
                 "UniqueNm": "ShiftRightExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -4335,7 +4335,7 @@
               {
                 "Nm": "ShiftLeftExpr",
                 "UniqueNm": "ShiftLeftExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -4349,7 +4349,7 @@
               {
                 "Nm": "SubExpr",
                 "UniqueNm": "SubExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -4363,7 +4363,7 @@
               {
                 "Nm": "AddExpr",
                 "UniqueNm": "AddExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -4377,7 +4377,7 @@
               {
                 "Nm": "RemExpr",
                 "UniqueNm": "RemExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -4391,7 +4391,7 @@
               {
                 "Nm": "DivExpr",
                 "UniqueNm": "DivExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -4405,7 +4405,7 @@
               {
                 "Nm": "MultExpr",
                 "UniqueNm": "MultExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -4429,7 +4429,7 @@
           {
             "Nm": "PrimaryExpr",
             "UniqueNm": "PrimaryExpr",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 16,
@@ -4469,7 +4469,7 @@
               {
                 "Nm": "Lits",
                 "UniqueNm": "Lits",
-                "Props": null,
+                "Properties": null,
                 "Kids": [
                   {
                     "n": 7,
@@ -4491,7 +4491,7 @@
                   {
                     "Nm": "LitRune",
                     "UniqueNm": "LitRune",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "rune",
@@ -4505,7 +4505,7 @@
                   {
                     "Nm": "LitNumInteger",
                     "UniqueNm": "LitNumInteger",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -4519,7 +4519,7 @@
                   {
                     "Nm": "LitNumFloat",
                     "UniqueNm": "LitNumFloat",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -4533,7 +4533,7 @@
                   {
                     "Nm": "LitNumImag",
                     "UniqueNm": "LitNumImag",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -4547,7 +4547,7 @@
                   {
                     "Nm": "LitStringDbl",
                     "UniqueNm": "LitStringDbl",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -4561,7 +4561,7 @@
                   {
                     "Nm": "LitStringTicks",
                     "UniqueNm": "LitStringTicks",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": [
                       {
                         "n": 1,
@@ -4571,7 +4571,7 @@
                       {
                         "Nm": "LitStringTickGp",
                         "UniqueNm": "LitStringTickGp",
-                        "Props": null,
+                        "Properties": null,
                         "Kids": [
                           {
                             "n": 2,
@@ -4583,7 +4583,7 @@
                           {
                             "Nm": "LitStringTickList",
                             "UniqueNm": "LitStringTickList",
-                            "Props": null,
+                            "Properties": null,
                             "Kids": null,
                             "Off": false,
                             "Desc": "",
@@ -4597,7 +4597,7 @@
                           {
                             "Nm": "LitStringTick",
                             "UniqueNm": "LitStringTick",
-                            "Props": null,
+                            "Properties": null,
                             "Kids": null,
                             "Off": false,
                             "Desc": "",
@@ -4631,7 +4631,7 @@
                   {
                     "Nm": "LitString",
                     "UniqueNm": "LitString",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -4655,7 +4655,7 @@
               {
                 "Nm": "FuncExpr",
                 "UniqueNm": "FuncExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": [
                   {
                     "n": 2,
@@ -4667,7 +4667,7 @@
                   {
                     "Nm": "FuncLitCall",
                     "UniqueNm": "FuncLitCall",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -4681,7 +4681,7 @@
                   {
                     "Nm": "FuncLit",
                     "UniqueNm": "FuncLit",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -4705,7 +4705,7 @@
               {
                 "Nm": "MakeCall",
                 "UniqueNm": "MakeCall",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "takes type arg",
@@ -4719,7 +4719,7 @@
               {
                 "Nm": "NewCall",
                 "UniqueNm": "NewCall",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "takes type arg",
@@ -4733,7 +4733,7 @@
               {
                 "Nm": "Paren",
                 "UniqueNm": "Paren",
-                "Props": null,
+                "Properties": null,
                 "Kids": [
                   {
                     "n": 4,
@@ -4749,7 +4749,7 @@
                   {
                     "Nm": "ConvertParensSel",
                     "UniqueNm": "ConvertParensSel",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -4763,7 +4763,7 @@
                   {
                     "Nm": "ConvertParens",
                     "UniqueNm": "ConvertParens",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -4777,7 +4777,7 @@
                   {
                     "Nm": "ParenSelector",
                     "UniqueNm": "ParenSelector",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -4791,7 +4791,7 @@
                   {
                     "Nm": "ParenExpr",
                     "UniqueNm": "ParenExpr",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -4815,7 +4815,7 @@
               {
                 "Nm": "Convert",
                 "UniqueNm": "Convert",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "note: a regular type(expr) will be a FunCall",
@@ -4829,7 +4829,7 @@
               {
                 "Nm": "TypeAssertSel",
                 "UniqueNm": "TypeAssertSel",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "must be before FunCall to get . match",
@@ -4843,7 +4843,7 @@
               {
                 "Nm": "TypeAssert",
                 "UniqueNm": "TypeAssert",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "must be before FunCall to get . match",
@@ -4857,7 +4857,7 @@
               {
                 "Nm": "Selector",
                 "UniqueNm": "Selector",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "This must be after unary expr esp addr, DePtr",
@@ -4879,7 +4879,7 @@
               {
                 "Nm": "CompositeLit",
                 "UniqueNm": "CompositeLit",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "important to match sepcific '{' here -- must be before slice, to get map[] keyword instead of slice",
@@ -4893,7 +4893,7 @@
               {
                 "Nm": "SliceCall",
                 "UniqueNm": "SliceCall",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "function call on a slice -- meth must be after this so it doesn't match..",
@@ -4907,7 +4907,7 @@
               {
                 "Nm": "Slice",
                 "UniqueNm": "Slice",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "this needs further right recursion to keep matching more slices",
@@ -4921,7 +4921,7 @@
               {
                 "Nm": "MethCall",
                 "UniqueNm": "MethCall",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -4943,7 +4943,7 @@
               {
                 "Nm": "FuncCallFun",
                 "UniqueNm": "FuncCallFun",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "must be after parens",
@@ -4965,7 +4965,7 @@
               {
                 "Nm": "FuncCall",
                 "UniqueNm": "FuncCall",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "must be after parens",
@@ -4987,7 +4987,7 @@
               {
                 "Nm": "OpName",
                 "UniqueNm": "OpName",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "this is the least selective and must be at the end",
@@ -5011,7 +5011,7 @@
           {
             "Nm": "LiteralType",
             "UniqueNm": "LiteralType",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 5,
@@ -5029,7 +5029,7 @@
               {
                 "Nm": "LitStructType",
                 "UniqueNm": "LitStructType",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -5065,7 +5065,7 @@
               {
                 "Nm": "LitIFaceType",
                 "UniqueNm": "LitIFaceType",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -5079,7 +5079,7 @@
               {
                 "Nm": "LitSliceOrArray",
                 "UniqueNm": "LitSliceOrArray",
-                "Props": null,
+                "Properties": null,
                 "Kids": [
                   {
                     "n": 3,
@@ -5093,7 +5093,7 @@
                   {
                     "Nm": "LitSliceType",
                     "UniqueNm": "LitSliceType",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -5122,7 +5122,7 @@
                   {
                     "Nm": "LitArrayAutoType",
                     "UniqueNm": "LitArrayAutoType",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "array must be after slice b/c slice matches on sequence of tokens",
@@ -5151,7 +5151,7 @@
                   {
                     "Nm": "LitArrayType",
                     "UniqueNm": "LitArrayType",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "array must be after slice b/c slice matches on sequence of tokens",
@@ -5190,7 +5190,7 @@
               {
                 "Nm": "LitMapType",
                 "UniqueNm": "LitMapType",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -5219,7 +5219,7 @@
               {
                 "Nm": "LitTypeName",
                 "UniqueNm": "LitTypeName",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "this is very general, must be at end..",
@@ -5243,7 +5243,7 @@
           {
             "Nm": "LiteralValue",
             "UniqueNm": "LiteralValue",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -5257,7 +5257,7 @@
           {
             "Nm": "ElementList",
             "UniqueNm": "ElementList",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 2,
@@ -5269,7 +5269,7 @@
               {
                 "Nm": "ElementListEls",
                 "UniqueNm": "ElementListEls",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -5283,7 +5283,7 @@
               {
                 "Nm": "KeyedEl",
                 "UniqueNm": "KeyedEl",
-                "Props": null,
+                "Properties": null,
                 "Kids": [
                   {
                     "n": 2,
@@ -5295,7 +5295,7 @@
                   {
                     "Nm": "KeyEl",
                     "UniqueNm": "KeyEl",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -5309,7 +5309,7 @@
                   {
                     "Nm": "Element",
                     "UniqueNm": "Element",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": [
                       {
                         "n": 3,
@@ -5323,7 +5323,7 @@
                       {
                         "Nm": "EmptyEl",
                         "UniqueNm": "EmptyEl",
-                        "Props": null,
+                        "Properties": null,
                         "Kids": null,
                         "Off": false,
                         "Desc": "",
@@ -5337,7 +5337,7 @@
                       {
                         "Nm": "ElExpr",
                         "UniqueNm": "ElExpr",
-                        "Props": null,
+                        "Properties": null,
                         "Kids": null,
                         "Off": false,
                         "Desc": "",
@@ -5351,7 +5351,7 @@
                       {
                         "Nm": "ElLitVal",
                         "UniqueNm": "ElLitVal",
-                        "Props": null,
+                        "Properties": null,
                         "Kids": null,
                         "Off": false,
                         "Desc": "",
@@ -5395,7 +5395,7 @@
           {
             "Nm": "Key",
             "UniqueNm": "Key",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 2,
@@ -5407,7 +5407,7 @@
               {
                 "Nm": "KeyLitVal",
                 "UniqueNm": "KeyLitVal",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -5421,7 +5421,7 @@
               {
                 "Nm": "KeyExpr",
                 "UniqueNm": "KeyExpr",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -5445,7 +5445,7 @@
           {
             "Nm": "RecvType",
             "UniqueNm": "RecvType",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 3,
@@ -5459,7 +5459,7 @@
               {
                 "Nm": "RecvPtrType",
                 "UniqueNm": "RecvPtrType",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -5473,7 +5473,7 @@
               {
                 "Nm": "ParenRecvType",
                 "UniqueNm": "ParenRecvType",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -5487,7 +5487,7 @@
               {
                 "Nm": "RecvTp",
                 "UniqueNm": "RecvTp",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -5511,7 +5511,7 @@
           {
             "Nm": "SliceExpr",
             "UniqueNm": "SliceExpr",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 3,
@@ -5525,7 +5525,7 @@
               {
                 "Nm": "SliceThree",
                 "UniqueNm": "SliceThree",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -5539,7 +5539,7 @@
               {
                 "Nm": "SliceTwo",
                 "UniqueNm": "SliceTwo",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -5553,7 +5553,7 @@
               {
                 "Nm": "SliceOne",
                 "UniqueNm": "SliceOne",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -5577,7 +5577,7 @@
           {
             "Nm": "SliceIndexes",
             "UniqueNm": "SliceIndexes",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 3,
@@ -5591,7 +5591,7 @@
               {
                 "Nm": "SliceIndex1",
                 "UniqueNm": "SliceIndex1",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -5605,7 +5605,7 @@
               {
                 "Nm": "SliceIndex2",
                 "UniqueNm": "SliceIndex2",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -5619,7 +5619,7 @@
               {
                 "Nm": "SliceIndex3",
                 "UniqueNm": "SliceIndex3",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -5643,7 +5643,7 @@
           {
             "Nm": "ArgsExpr",
             "UniqueNm": "ArgsExpr",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 2,
@@ -5655,7 +5655,7 @@
               {
                 "Nm": "ArgsEllipsis",
                 "UniqueNm": "ArgsEllipsis",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -5669,7 +5669,7 @@
               {
                 "Nm": "Args",
                 "UniqueNm": "Args",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -5693,7 +5693,7 @@
           {
             "Nm": "ArgsList",
             "UniqueNm": "ArgsList",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 2,
@@ -5705,7 +5705,7 @@
               {
                 "Nm": "ArgsListEls",
                 "UniqueNm": "ArgsListEls",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -5719,7 +5719,7 @@
               {
                 "Nm": "ArgsListEl",
                 "UniqueNm": "ArgsListEl",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -5753,7 +5753,7 @@
       {
         "Nm": "TypeRules",
         "UniqueNm": "TypeRules",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 8,
@@ -5777,7 +5777,7 @@
           {
             "Nm": "Type",
             "UniqueNm": "Type",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 3,
@@ -5791,7 +5791,7 @@
               {
                 "Nm": "ParenType",
                 "UniqueNm": "ParenType",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -5805,7 +5805,7 @@
               {
                 "Nm": "TypeLit",
                 "UniqueNm": "TypeLit",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -5819,7 +5819,7 @@
               {
                 "Nm": "TypeName",
                 "UniqueNm": "TypeName",
-                "Props": null,
+                "Properties": null,
                 "Kids": [
                   {
                     "n": 4,
@@ -5835,7 +5835,7 @@
                   {
                     "Nm": "BasicType",
                     "UniqueNm": "BasicType",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "recognizes builtin types",
@@ -5849,7 +5849,7 @@
                   {
                     "Nm": "QualType",
                     "UniqueNm": "QualType",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "type equivalent to QualName",
@@ -5871,7 +5871,7 @@
                   {
                     "Nm": "QualBasicType",
                     "UniqueNm": "QualBasicType",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "type equivalent to QualName",
@@ -5893,7 +5893,7 @@
                   {
                     "Nm": "TypeNm",
                     "UniqueNm": "TypeNm",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "local unqualified type name",
@@ -5935,7 +5935,7 @@
           {
             "Nm": "TypeLiteral",
             "UniqueNm": "TypeLiteral",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 8,
@@ -5959,7 +5959,7 @@
               {
                 "Nm": "SliceOrArray",
                 "UniqueNm": "SliceOrArray",
-                "Props": null,
+                "Properties": null,
                 "Kids": [
                   {
                     "n": 3,
@@ -5973,7 +5973,7 @@
                   {
                     "Nm": "SliceType",
                     "UniqueNm": "SliceType",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -6002,7 +6002,7 @@
                   {
                     "Nm": "ArrayAutoType",
                     "UniqueNm": "ArrayAutoType",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "array must be after slice b/c slice matches on sequence of tokens",
@@ -6031,7 +6031,7 @@
                   {
                     "Nm": "ArrayType",
                     "UniqueNm": "ArrayType",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "array must be after slice b/c slice matches on sequence of tokens",
@@ -6070,7 +6070,7 @@
               {
                 "Nm": "StructType",
                 "UniqueNm": "StructType",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -6106,7 +6106,7 @@
               {
                 "Nm": "PointerType",
                 "UniqueNm": "PointerType",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -6120,7 +6120,7 @@
               {
                 "Nm": "FuncType",
                 "UniqueNm": "FuncType",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -6134,7 +6134,7 @@
               {
                 "Nm": "InterfaceType",
                 "UniqueNm": "InterfaceType",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -6170,7 +6170,7 @@
               {
                 "Nm": "MapType",
                 "UniqueNm": "MapType",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -6199,7 +6199,7 @@
               {
                 "Nm": "SendChanType",
                 "UniqueNm": "SendChanType",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -6213,7 +6213,7 @@
               {
                 "Nm": "ChannelType",
                 "UniqueNm": "ChannelType",
-                "Props": null,
+                "Properties": null,
                 "Kids": [
                   {
                     "n": 2,
@@ -6225,7 +6225,7 @@
                   {
                     "Nm": "RecvChanType",
                     "UniqueNm": "RecvChanType",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -6239,7 +6239,7 @@
                   {
                     "Nm": "SRChanType",
                     "UniqueNm": "SRChanType",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -6273,7 +6273,7 @@
           {
             "Nm": "FieldDecls",
             "UniqueNm": "FieldDecls",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -6287,7 +6287,7 @@
           {
             "Nm": "FieldDecl",
             "UniqueNm": "FieldDecl",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 3,
@@ -6301,7 +6301,7 @@
               {
                 "Nm": "AnonQualField",
                 "UniqueNm": "AnonQualField",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -6330,7 +6330,7 @@
               {
                 "Nm": "AnonPtrField",
                 "UniqueNm": "AnonPtrField",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -6359,7 +6359,7 @@
               {
                 "Nm": "NamedField",
                 "UniqueNm": "NamedField",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -6398,7 +6398,7 @@
           {
             "Nm": "FieldTag",
             "UniqueNm": "FieldTag",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -6412,7 +6412,7 @@
           {
             "Nm": "TypeDeclN",
             "UniqueNm": "TypeDeclN",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 2,
@@ -6424,7 +6424,7 @@
               {
                 "Nm": "TypeDeclGroup",
                 "UniqueNm": "TypeDeclGroup",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -6438,7 +6438,7 @@
               {
                 "Nm": "TypeDeclEl",
                 "UniqueNm": "TypeDeclEl",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -6491,7 +6491,7 @@
           {
             "Nm": "TypeDecls",
             "UniqueNm": "TypeDecls",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -6505,7 +6505,7 @@
           {
             "Nm": "TypeList",
             "UniqueNm": "TypeList",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 2,
@@ -6517,7 +6517,7 @@
               {
                 "Nm": "TypeListEls",
                 "UniqueNm": "TypeListEls",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -6531,7 +6531,7 @@
               {
                 "Nm": "TypeListEl",
                 "UniqueNm": "TypeListEl",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -6565,7 +6565,7 @@
       {
         "Nm": "FuncRules",
         "UniqueNm": "FuncRules",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 8,
@@ -6589,7 +6589,7 @@
           {
             "Nm": "FunDecl",
             "UniqueNm": "FunDecl",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 2,
@@ -6601,7 +6601,7 @@
               {
                 "Nm": "MethDecl",
                 "UniqueNm": "MethDecl",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -6665,7 +6665,7 @@
               {
                 "Nm": "FuncDecl",
                 "UniqueNm": "FuncDecl",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -6718,7 +6718,7 @@
           {
             "Nm": "MethRecv",
             "UniqueNm": "MethRecv",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 2,
@@ -6730,7 +6730,7 @@
               {
                 "Nm": "MethRecvName",
                 "UniqueNm": "MethRecvName",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -6759,7 +6759,7 @@
               {
                 "Nm": "MethRecvNoNm",
                 "UniqueNm": "MethRecvNoNm",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -6791,7 +6791,7 @@
           {
             "Nm": "Signature",
             "UniqueNm": "Signature",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 2,
@@ -6803,7 +6803,7 @@
               {
                 "Nm": "SigParamsResult",
                 "UniqueNm": "SigParamsResult",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "all types must fully match, using @",
@@ -6817,7 +6817,7 @@
               {
                 "Nm": "SigParams",
                 "UniqueNm": "SigParams",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -6841,7 +6841,7 @@
           {
             "Nm": "MethodSpec",
             "UniqueNm": "MethodSpec",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 4,
@@ -6857,7 +6857,7 @@
               {
                 "Nm": "MethSpecAnonQual",
                 "UniqueNm": "MethSpecAnonQual",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -6886,7 +6886,7 @@
               {
                 "Nm": "MethSpecName",
                 "UniqueNm": "MethSpecName",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -6915,7 +6915,7 @@
               {
                 "Nm": "MethSpecAnonLocal",
                 "UniqueNm": "MethSpecAnonLocal",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -6944,7 +6944,7 @@
               {
                 "Nm": "MethSpecNone",
                 "UniqueNm": "MethSpecNone",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -6968,7 +6968,7 @@
           {
             "Nm": "MethodSpecs",
             "UniqueNm": "MethodSpecs",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -6982,7 +6982,7 @@
           {
             "Nm": "Result",
             "UniqueNm": "Result",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 2,
@@ -6994,7 +6994,7 @@
               {
                 "Nm": "Results",
                 "UniqueNm": "Results",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -7008,7 +7008,7 @@
               {
                 "Nm": "ResultOne",
                 "UniqueNm": "ResultOne",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -7032,7 +7032,7 @@
           {
             "Nm": "ParamsList",
             "UniqueNm": "ParamsList",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 3,
@@ -7046,7 +7046,7 @@
               {
                 "Nm": "ParNameEllipsis",
                 "UniqueNm": "ParNameEllipsis",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -7060,7 +7060,7 @@
               {
                 "Nm": "ParName",
                 "UniqueNm": "ParName",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -7096,7 +7096,7 @@
               {
                 "Nm": "ParType",
                 "UniqueNm": "ParType",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "due to parsing, this is typically actually a name",
@@ -7120,7 +7120,7 @@
           {
             "Nm": "Params",
             "UniqueNm": "Params",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -7144,7 +7144,7 @@
       {
         "Nm": "StmtRules",
         "UniqueNm": "StmtRules",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 7,
@@ -7166,7 +7166,7 @@
           {
             "Nm": "StmtList",
             "UniqueNm": "StmtList",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -7180,7 +7180,7 @@
           {
             "Nm": "BlockList",
             "UniqueNm": "BlockList",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -7194,7 +7194,7 @@
           {
             "Nm": "Stmt",
             "UniqueNm": "Stmt",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 19,
@@ -7240,7 +7240,7 @@
               {
                 "Nm": "ConstDeclStmt",
                 "UniqueNm": "ConstDeclStmt",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -7254,7 +7254,7 @@
               {
                 "Nm": "TypeDeclStmt",
                 "UniqueNm": "TypeDeclStmt",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -7268,7 +7268,7 @@
               {
                 "Nm": "VarDeclStmt",
                 "UniqueNm": "VarDeclStmt",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -7282,7 +7282,7 @@
               {
                 "Nm": "ReturnStmt",
                 "UniqueNm": "ReturnStmt",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -7296,7 +7296,7 @@
               {
                 "Nm": "BreakStmt",
                 "UniqueNm": "BreakStmt",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -7310,7 +7310,7 @@
               {
                 "Nm": "ContStmt",
                 "UniqueNm": "ContStmt",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -7324,7 +7324,7 @@
               {
                 "Nm": "GotoStmt",
                 "UniqueNm": "GotoStmt",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -7338,7 +7338,7 @@
               {
                 "Nm": "GoStmt",
                 "UniqueNm": "GoStmt",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -7352,7 +7352,7 @@
               {
                 "Nm": "FallthroughStmt",
                 "UniqueNm": "FallthroughStmt",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -7366,7 +7366,7 @@
               {
                 "Nm": "DeferStmt",
                 "UniqueNm": "DeferStmt",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -7380,7 +7380,7 @@
               {
                 "Nm": "IfStmt",
                 "UniqueNm": "IfStmt",
-                "Props": null,
+                "Properties": null,
                 "Kids": [
                   {
                     "n": 2,
@@ -7392,7 +7392,7 @@
                   {
                     "Nm": "IfStmtExpr",
                     "UniqueNm": "IfStmtExpr",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -7406,7 +7406,7 @@
                   {
                     "Nm": "IfStmtInit",
                     "UniqueNm": "IfStmtInit",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -7430,7 +7430,7 @@
               {
                 "Nm": "ForStmt",
                 "UniqueNm": "ForStmt",
-                "Props": null,
+                "Properties": null,
                 "Kids": [
                   {
                     "n": 6,
@@ -7450,7 +7450,7 @@
                   {
                     "Nm": "ForRangeExisting",
                     "UniqueNm": "ForRangeExisting",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -7464,7 +7464,7 @@
                   {
                     "Nm": "ForRangeNewLit",
                     "UniqueNm": "ForRangeNewLit",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "composite lit will match but brackets won't be absorbed -- this does that..",
@@ -7493,7 +7493,7 @@
                   {
                     "Nm": "ForRangeNew",
                     "UniqueNm": "ForRangeNew",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -7522,7 +7522,7 @@
                   {
                     "Nm": "ForRangeOnly",
                     "UniqueNm": "ForRangeOnly",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -7544,7 +7544,7 @@
                   {
                     "Nm": "ForExpr",
                     "UniqueNm": "ForExpr",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "most general at end",
@@ -7558,7 +7558,7 @@
                   {
                     "Nm": "ForClauseStmt",
                     "UniqueNm": "ForClauseStmt",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "the embedded EOS's here require full expr here so final EOS has proper EOS StInc count",
@@ -7582,7 +7582,7 @@
               {
                 "Nm": "SwitchStmt",
                 "UniqueNm": "SwitchStmt",
-                "Props": null,
+                "Properties": null,
                 "Kids": [
                   {
                     "n": 6,
@@ -7602,7 +7602,7 @@
                   {
                     "Nm": "SwitchTypeName",
                     "UniqueNm": "SwitchTypeName",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -7631,7 +7631,7 @@
                   {
                     "Nm": "SwitchTypeAnon",
                     "UniqueNm": "SwitchTypeAnon",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -7660,7 +7660,7 @@
                   {
                     "Nm": "SwitchExpr",
                     "UniqueNm": "SwitchExpr",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -7674,7 +7674,7 @@
                   {
                     "Nm": "SwitchTypeNameInit",
                     "UniqueNm": "SwitchTypeNameInit",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -7703,7 +7703,7 @@
                   {
                     "Nm": "SwitchTypeAnonInit",
                     "UniqueNm": "SwitchTypeAnonInit",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -7732,7 +7732,7 @@
                   {
                     "Nm": "SwitchInit",
                     "UniqueNm": "SwitchInit",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -7756,7 +7756,7 @@
               {
                 "Nm": "SelectStmt",
                 "UniqueNm": "SelectStmt",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -7770,7 +7770,7 @@
               {
                 "Nm": "CaseStmt",
                 "UniqueNm": "CaseStmt",
-                "Props": null,
+                "Properties": null,
                 "Kids": [
                   {
                     "n": 7,
@@ -7792,7 +7792,7 @@
                   {
                     "Nm": "TypeCaseEmptyStmt",
                     "UniqueNm": "TypeCaseEmptyStmt",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
@@ -7806,7 +7806,7 @@
                   {
                     "Nm": "TypeCaseStmt",
                     "UniqueNm": "TypeCaseStmt",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
@@ -7820,7 +7820,7 @@
                   {
                     "Nm": "SelCaseRecvExistStmt",
                     "UniqueNm": "SelCaseRecvExistStmt",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
@@ -7834,7 +7834,7 @@
                   {
                     "Nm": "SelCaseRecvNewStmt",
                     "UniqueNm": "SelCaseRecvNewStmt",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
@@ -7848,7 +7848,7 @@
                   {
                     "Nm": "SelCaseSendStmt",
                     "UniqueNm": "SelCaseSendStmt",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
@@ -7862,7 +7862,7 @@
                   {
                     "Nm": "CaseEmptyStmt",
                     "UniqueNm": "CaseEmptyStmt",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
@@ -7876,7 +7876,7 @@
                   {
                     "Nm": "CaseExprStmt",
                     "UniqueNm": "CaseExprStmt",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
@@ -7900,7 +7900,7 @@
               {
                 "Nm": "DefaultStmt",
                 "UniqueNm": "DefaultStmt",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -7914,7 +7914,7 @@
               {
                 "Nm": "LabeledStmt",
                 "UniqueNm": "LabeledStmt",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -7936,7 +7936,7 @@
               {
                 "Nm": "Block",
                 "UniqueNm": "Block",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -7950,7 +7950,7 @@
               {
                 "Nm": "SimpleSt",
                 "UniqueNm": "SimpleSt",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -7974,7 +7974,7 @@
           {
             "Nm": "SimpleStmt",
             "UniqueNm": "SimpleStmt",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 5,
@@ -7992,7 +7992,7 @@
               {
                 "Nm": "IncrStmt",
                 "UniqueNm": "IncrStmt",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -8006,7 +8006,7 @@
               {
                 "Nm": "DecrStmt",
                 "UniqueNm": "DecrStmt",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -8020,7 +8020,7 @@
               {
                 "Nm": "AsgnStmt",
                 "UniqueNm": "AsgnStmt",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -8034,7 +8034,7 @@
               {
                 "Nm": "SendStmt",
                 "UniqueNm": "SendStmt",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -8048,7 +8048,7 @@
               {
                 "Nm": "ExprStmt",
                 "UniqueNm": "ExprStmt",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -8072,7 +8072,7 @@
           {
             "Nm": "PostStmt",
             "UniqueNm": "PostStmt",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 8,
@@ -8096,7 +8096,7 @@
               {
                 "Nm": "PostSendStmt",
                 "UniqueNm": "PostSendStmt",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -8110,7 +8110,7 @@
               {
                 "Nm": "PostIncrStmt",
                 "UniqueNm": "PostIncrStmt",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -8124,7 +8124,7 @@
               {
                 "Nm": "PostDecrStmt",
                 "UniqueNm": "PostDecrStmt",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -8138,7 +8138,7 @@
               {
                 "Nm": "PostAsgnExisting",
                 "UniqueNm": "PostAsgnExisting",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -8152,7 +8152,7 @@
               {
                 "Nm": "PostAsgnBit",
                 "UniqueNm": "PostAsgnBit",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -8166,7 +8166,7 @@
               {
                 "Nm": "PostAsgnMath",
                 "UniqueNm": "PostAsgnMath",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -8180,7 +8180,7 @@
               {
                 "Nm": "PostAsgnNew",
                 "UniqueNm": "PostAsgnNew",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -8216,7 +8216,7 @@
               {
                 "Nm": "PostExprStmt",
                 "UniqueNm": "PostExprStmt",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -8240,7 +8240,7 @@
           {
             "Nm": "Asgn",
             "UniqueNm": "Asgn",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 4,
@@ -8256,7 +8256,7 @@
               {
                 "Nm": "AsgnExisting",
                 "UniqueNm": "AsgnExisting",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -8270,7 +8270,7 @@
               {
                 "Nm": "AsgnNew",
                 "UniqueNm": "AsgnNew",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -8306,7 +8306,7 @@
               {
                 "Nm": "AsgnMath",
                 "UniqueNm": "AsgnMath",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -8320,7 +8320,7 @@
               {
                 "Nm": "AsgnBit",
                 "UniqueNm": "AsgnBit",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -8344,7 +8344,7 @@
           {
             "Nm": "Elses",
             "UniqueNm": "Elses",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 3,
@@ -8358,7 +8358,7 @@
               {
                 "Nm": "ElseIfStmt",
                 "UniqueNm": "ElseIfStmt",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -8372,7 +8372,7 @@
               {
                 "Nm": "ElseStmt",
                 "UniqueNm": "ElseStmt",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -8386,7 +8386,7 @@
               {
                 "Nm": "ElseIfStmtInit",
                 "UniqueNm": "ElseIfStmtInit",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -8420,7 +8420,7 @@
       {
         "Nm": "ImportRules",
         "UniqueNm": "ImportRules",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 2,
@@ -8432,7 +8432,7 @@
           {
             "Nm": "ImportN",
             "UniqueNm": "ImportN",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 2,
@@ -8444,7 +8444,7 @@
               {
                 "Nm": "ImportGroup",
                 "UniqueNm": "ImportGroup",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "group of multiple imports",
@@ -8458,7 +8458,7 @@
               {
                 "Nm": "ImportOne",
                 "UniqueNm": "ImportOne",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "single import -- ImportList also allows diff options",
@@ -8482,7 +8482,7 @@
           {
             "Nm": "ImportList",
             "UniqueNm": "ImportList",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 2,
@@ -8494,7 +8494,7 @@
               {
                 "Nm": "ImportAlias",
                 "UniqueNm": "ImportAlias",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "put more specialized rules first",
@@ -8523,7 +8523,7 @@
               {
                 "Nm": "Import",
                 "UniqueNm": "Import",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -8572,7 +8572,7 @@
       {
         "Nm": "DeclRules",
         "UniqueNm": "DeclRules",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 7,
@@ -8594,7 +8594,7 @@
           {
             "Nm": "TypeDecl",
             "UniqueNm": "TypeDecl",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -8608,7 +8608,7 @@
           {
             "Nm": "ConstDecl",
             "UniqueNm": "ConstDecl",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -8622,7 +8622,7 @@
           {
             "Nm": "VarDecl",
             "UniqueNm": "VarDecl",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -8636,7 +8636,7 @@
           {
             "Nm": "ConstDeclN",
             "UniqueNm": "ConstDeclN",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 2,
@@ -8648,7 +8648,7 @@
               {
                 "Nm": "ConstGroup",
                 "UniqueNm": "ConstGroup",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -8662,7 +8662,7 @@
               {
                 "Nm": "ConstOpts",
                 "UniqueNm": "ConstOpts",
-                "Props": null,
+                "Properties": null,
                 "Kids": [
                   {
                     "n": 2,
@@ -8674,7 +8674,7 @@
                   {
                     "Nm": "ConstSpec",
                     "UniqueNm": "ConstSpec",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -8710,7 +8710,7 @@
                   {
                     "Nm": "ConstSpecName",
                     "UniqueNm": "ConstSpecName",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "only a name, no expression",
@@ -8759,7 +8759,7 @@
           {
             "Nm": "ConstList",
             "UniqueNm": "ConstList",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -8773,7 +8773,7 @@
           {
             "Nm": "VarDeclN",
             "UniqueNm": "VarDeclN",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 2,
@@ -8785,7 +8785,7 @@
               {
                 "Nm": "VarGroup",
                 "UniqueNm": "VarGroup",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -8799,7 +8799,7 @@
               {
                 "Nm": "VarOpts",
                 "UniqueNm": "VarOpts",
-                "Props": null,
+                "Properties": null,
                 "Kids": [
                   {
                     "n": 2,
@@ -8811,7 +8811,7 @@
                   {
                     "Nm": "VarSpecExpr",
                     "UniqueNm": "VarSpecExpr",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -8847,7 +8847,7 @@
                   {
                     "Nm": "VarSpec",
                     "UniqueNm": "VarSpec",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "only a name and type, no expression",
@@ -8903,7 +8903,7 @@
           {
             "Nm": "VarList",
             "UniqueNm": "VarList",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",

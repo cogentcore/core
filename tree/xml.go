@@ -207,7 +207,7 @@ func DecodeXMLCharEl(d *xml.Decoder) (name, val string, err error) {
 // the remaining bytes which represent each element
 func (sl *Slice) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	// for _, attr := range start.Attr {
-	// 	// todo: need to set the props from name / value -- don't have parent though!
+	// 	// todo: need to set the properties from name / value -- don't have parent though!
 	// }
 	name, val, err := DecodeXMLCharEl(d)
 	if err != nil {

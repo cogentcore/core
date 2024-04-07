@@ -195,7 +195,7 @@ func (em *Embed2D) RenderClass() RenderClasses {
 	return RClassOpaqueTexture
 }
 
-var Embed2DProps = tree.Props{
+var Embed2DProperties = tree.Properties{
 	tree.EnumTypeFlag: core.TypeNodeFlags,
 }
 

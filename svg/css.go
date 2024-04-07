@@ -14,7 +14,7 @@ import (
 )
 
 // StyleSheet is a Node2D node that contains a stylesheet -- property values
-// contained in this sheet can be transformed into tree.Props and set in CSS
+// contained in this sheet can be transformed into tree.Properties and set in CSS
 // field of appropriate node
 type StyleSheet struct {
 	NodeBase
@@ -38,9 +38,9 @@ func (ss *StyleSheet) ParseString(str string) error {
 	return nil
 }
 
-// CSSProps returns the properties for each of the rules in this style sheet,
+// CSSProperties returns the properties for each of the rules in this style sheet,
 // suitable for setting the CSS value of a node -- returns nil if empty sheet
-func (ss *StyleSheet) CSSProps() map[string]any {
+func (ss *StyleSheet) CSSProperties() map[string]any {
 	if ss.Sheet == nil {
 		return nil
 	}

@@ -101,7 +101,7 @@ func main() {
 		})
 	zoomout.SetProp("margin", 0)
 	zoomout.SetProp("padding", 0)
-	zoomout.SetProp("#icon", ki.Props{
+	zoomout.SetProp("#icon", ki.Properties{
 		"width":  units.Em(1.5),
 		"height": units.Em(1.5),
 	})
@@ -123,7 +123,7 @@ func main() {
 		})
 	zoomin.SetProp("margin", 0)
 	zoomin.SetProp("padding", 0)
-	zoomin.SetProp("#icon", ki.Props{
+	zoomin.SetProp("#icon", ki.Properties{
 		"width":  units.Em(1.5),
 		"height": units.Em(1.5),
 	})

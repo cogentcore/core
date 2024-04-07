@@ -41,7 +41,7 @@ type HiMarkup struct {
 	TabSize int
 
 	// Commpiled CSS properties for given highlighting style
-	CSSProps map[string]any `json:"-" xml:"-"`
+	CSSProperties map[string]any `json:"-" xml:"-"`
 
 	// pi parser state info
 	PiState *pi.FileStates
@@ -77,7 +77,7 @@ func (hm *HiMarkup) Init(info *fi.FileInfo, pist *pi.FileStates) {
 	hm.PiState = pist
 
 	if hm.Info.Known != fi.Unknown {
-		if lp, err := pi.LangSupport.Props(hm.Info.Known); err == nil {
+		if lp, err := pi.LangSupport.Properties(hm.Info.Known); err == nil {
 			if lp.Lang != nil {
 				hm.lexer = nil
 				hm.PiLang = lp.Lang
@@ -106,7 +106,7 @@ func (hm *HiMarkup) Init(info *fi.FileInfo, pist *pi.FileStates) {
 
 	if hm.Style != hm.lastStyle {
 		hm.HiStyle = histyle.AvailableStyle(hm.Style)
-		hm.CSSProps = hm.HiStyle.ToProps()
+		hm.CSSProperties = hm.HiStyle.ToProperties()
 		hm.lastStyle = hm.Style
 	}
 
@@ -129,7 +129,7 @@ func (hm *HiMarkup) SetHiStyle(style gi.HiStyleName) {
 	}
 	hm.Style = style
 	hm.HiStyle = st
-	hm.CSSProps = hm.HiStyle.ToProps()
+	hm.CSSProperties = hm.HiStyle.ToProperties()
 	hm.lastStyle = hm.Style
 }
 

@@ -137,7 +137,7 @@ func (mm *Memory) AllocHostStorageBuff() {
 	})
 
 	mm.StorageBuffs = nil
-	maxBuff := int(mm.GPU.GPUProps.Limits.MaxStorageBufferRange)
+	maxBuff := int(mm.GPU.GPUProperties.Limits.MaxStorageBufferRange)
 	curSz := 0
 	var stb *MemBuff // current storage buffer
 	for mi, vm := range mm.StorageMems {
@@ -209,8 +209,8 @@ func (mm *Memory) NewBuffer(size int, usage vk.BufferUsageFlagBits) vk.Buffer {
 }
 
 // AllocBuffMem allocates memory for given buffer, with given properties
-func (mm *Memory) AllocBuffMem(buffer vk.Buffer, props vk.MemoryPropertyFlagBits) vk.DeviceMemory {
-	return AllocBuffMem(mm.GPU, mm.Device.Device, buffer, props)
+func (mm *Memory) AllocBuffMem(buffer vk.Buffer, properties vk.MemoryPropertyFlagBits) vk.DeviceMemory {
+	return AllocBuffMem(mm.GPU, mm.Device.Device, buffer, properties)
 }
 
 // FreeBuffMem frees given device memory to nil

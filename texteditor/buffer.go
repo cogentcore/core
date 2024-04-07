@@ -2325,7 +2325,7 @@ func (tb *Buffer) AutoIndent(ln int) (tbe *textbuf.Edit, indLev, chPos int) {
 
 	tb.LinesMu.RLock()
 	tb.MarkupMu.RLock()
-	lp, _ := pi.LangSupport.Props(tb.PiState.Sup)
+	lp, _ := pi.LangSupport.Properties(tb.PiState.Sup)
 	var pInd, delInd int
 	if lp != nil && lp.Lang != nil {
 		pInd, delInd, _, _ = lp.Lang.IndentLine(&tb.PiState, tb.Lines, tb.HiTags, ln, tabSz)

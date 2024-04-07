@@ -25,7 +25,7 @@ func CompletePi(data any, text string, posLn, posCh int) (md complete.Matches) {
 		// log.Printf("CompletePi: data is nil not FileStates or is nil - can't complete\n")
 		return md
 	}
-	lp, err := pi.LangSupport.Props(sfs.Sup)
+	lp, err := pi.LangSupport.Properties(sfs.Sup)
 	if err != nil {
 		// log.Printf("CompletePi: %v\n", err)
 		return md
@@ -49,7 +49,7 @@ func CompleteEditPi(data any, text string, cursorPos int, comp complete.Completi
 		// log.Printf("CompleteEditPi: data is nil not FileStates or is nil - can't complete\n")
 		return ed
 	}
-	lp, err := pi.LangSupport.Props(sfs.Sup)
+	lp, err := pi.LangSupport.Properties(sfs.Sup)
 	if err != nil {
 		// log.Printf("CompleteEditPi: %v\n", err)
 		return ed
@@ -69,7 +69,7 @@ func LookupPi(data any, text string, posLn, posCh int) (ld complete.Lookup) {
 		// log.Printf("LookupPi: data is nil not FileStates or is nil - can't lookup\n")
 		return ld
 	}
-	lp, err := pi.LangSupport.Props(sfs.Sup)
+	lp, err := pi.LangSupport.Properties(sfs.Sup)
 	if err != nil {
 		// log.Printf("LookupPi: %v\n", err)
 		return ld

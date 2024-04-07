@@ -476,7 +476,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles
 					curLinkIndex = len(tr.Links)
 					tl := &TextLink{StartSpan: len(tr.Spans) - 1, StartIndex: len(curSp.Text)}
 					sprop := make(map[string]any, len(se.Attr))
-					tl.Props = sprop
+					tl.Properties = sprop
 					for _, attr := range se.Attr {
 						if attr.Name.Local == "href" {
 							tl.URL = attr.Value
@@ -485,7 +485,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles
 					}
 					tr.Links = append(tr.Links, *tl)
 				case "span":
-					// just uses props
+					// just uses properties
 				case "q":
 					curf := fstack[len(fstack)-1]
 					atStart := len(curSp.Text) == 0
@@ -515,12 +515,12 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles
 				for _, attr := range se.Attr {
 					switch attr.Name.Local {
 					case "style":
-						styles.SetStylePropsXML(attr.Value, &sprop)
+						styles.SetStylePropertiesXML(attr.Value, &sprop)
 					case "class":
 						if cssAgg != nil {
 							clnm := "." + attr.Value
-							if aggp, ok := styles.SubProps(cssAgg, clnm); ok {
-								fs.SetStyleProps(nil, aggp, nil)
+							if aggp, ok := styles.SubProperties(cssAgg, clnm); ok {
+								fs.SetStyleProperties(nil, aggp, nil)
 								fs.Font = OpenFont(&fs, ctxt)
 							}
 						}
@@ -528,7 +528,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles
 						sprop[attr.Name.Local] = attr.Value
 					}
 				}
-				fs.SetStyleProps(nil, sprop, nil)
+				fs.SetStyleProperties(nil, sprop, nil)
 				fs.Font = OpenFont(&fs, ctxt)
 			}
 			if cssAgg != nil {
@@ -689,7 +689,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 						tl := &TextLink{StartSpan: len(tr.Spans) - 1, StartIndex: len(curSp.Text)}
 						if nattr > 0 {
 							sprop := make(map[string]any, len(parts)-1)
-							tl.Props = sprop
+							tl.Properties = sprop
 							for ai := 0; ai < nattr; ai++ {
 								nm := strings.TrimSpace(attr[ai*2])
 								vl := strings.TrimSuffix(strings.TrimPrefix(strings.TrimSpace(attr[ai*2+1]), `"`), `"`)
@@ -701,7 +701,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 						}
 						tr.Links = append(tr.Links, *tl)
 					case "span":
-						// just uses props
+						// just uses properties
 					case "q":
 						curf := fstack[len(fstack)-1]
 						atStart := len(curSp.Text) == 0
@@ -738,12 +738,12 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 						// fmt.Printf("nm: %v  val: %v\n", nm, vl)
 						switch nm {
 						case "style":
-							styles.SetStylePropsXML(vl, &sprop)
+							styles.SetStylePropertiesXML(vl, &sprop)
 						case "class":
 							if cssAgg != nil {
 								clnm := "." + vl
-								if aggp, ok := styles.SubProps(cssAgg, clnm); ok {
-									fs.SetStyleProps(nil, aggp, nil)
+								if aggp, ok := styles.SubProperties(cssAgg, clnm); ok {
+									fs.SetStyleProperties(nil, aggp, nil)
 									fs.Font = OpenFont(&fs, ctxt)
 								}
 							}
@@ -751,7 +751,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 							sprop[nm] = vl
 						}
 					}
-					fs.SetStyleProps(nil, sprop, nil)
+					fs.SetStyleProperties(nil, sprop, nil)
 					fs.Font = OpenFont(&fs, ctxt)
 				}
 				if cssAgg != nil {

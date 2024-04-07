@@ -93,7 +93,7 @@ type NodeBase struct {
 
 	// CSS is the cascading style sheet at this level.
 	// These styles apply here and to everything below, until superceded.
-	// Use .class and #name Props elements to apply entire styles
+	// Use .class and #name Properties elements to apply entire styles
 	// to given elements, and type for element type.
 	CSS map[string]any `xml:"css" set:"-"`
 
@@ -143,9 +143,9 @@ func (g *NodeBase) PaintStyle() *styles.Paint {
 	return &g.Paint
 }
 
-// SetColorProps sets color property from a string representation.
+// SetColorProperties sets color property from a string representation.
 // It breaks color alpha out as opacity.  prop is either "stroke" or "fill"
-func (g *NodeBase) SetColorProps(prop, color string) {
+func (g *NodeBase) SetColorProperties(prop, color string) {
 	clr := grr.Log1(colors.FromString(color))
 	g.SetProperty(prop+"-opacity", fmt.Sprintf("%g", float32(clr.A)/255))
 	// we have consumed the A via opacity, so we reset it to 255
@@ -346,9 +346,9 @@ func (g *NodeBase) Style(sv *SVG) {
 		parCSSAgg = pn.AsNodeBase().CSSAgg
 		pp := pn.PaintStyle()
 		pc.CopyStyleFrom(pp)
-		pc.SetStyleProps(pp, g.Properties(), ctxt)
+		pc.SetStyleProperties(pp, g.Properties(), ctxt)
 	} else {
-		pc.SetStyleProps(nil, g.Properties(), ctxt)
+		pc.SetStyleProperties(nil, g.Properties(), ctxt)
 	}
 	pc.ToDotsImpl(&pc.UnitContext) // we always inherit parent's unit context -- SVG sets it once-and-for-all
 
@@ -375,13 +375,13 @@ func AggCSS(agg *map[string]any, css map[string]any) {
 }
 
 // ApplyCSS applies css styles to given node,
-// using key to select sub-props from overall properties list
+// using key to select sub-properties from overall properties list
 func (g *NodeBase) ApplyCSS(sv *SVG, key string, css map[string]any) bool {
 	pp, got := css[key]
 	if !got {
 		return false
 	}
-	pmap, ok := pp.(map[string]any) // must be a props map
+	pmap, ok := pp.(map[string]any) // must be a properties map
 	if !ok {
 		return false
 	}
@@ -389,9 +389,9 @@ func (g *NodeBase) ApplyCSS(sv *SVG, key string, css map[string]any) bool {
 	ctxt := colors.Context(sv)
 	if g.Par != sv.Root.This() {
 		pp := g.Par.(Node).PaintStyle()
-		pc.SetStyleProps(pp, pmap, ctxt)
+		pc.SetStyleProperties(pp, pmap, ctxt)
 	} else {
-		pc.SetStyleProps(nil, pmap, ctxt)
+		pc.SetStyleProperties(nil, pmap, ctxt)
 	}
 	return true
 }

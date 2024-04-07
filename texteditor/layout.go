@@ -114,7 +114,7 @@ func (ed *Editor) LayoutAllLines() {
 		if ln >= len(ed.Renders) || ln >= len(buf.Markup) {
 			break
 		}
-		ed.Renders[ln].SetHTMLPre(buf.Markup[ln], fst, &sty.Text, &sty.UnitContext, ed.TextStyleProps())
+		ed.Renders[ln].SetHTMLPre(buf.Markup[ln], fst, &sty.Text, &sty.UnitContext, ed.TextStyleProperties())
 		ed.Renders[ln].Layout(&sty.Text, sty.FontRender(), &sty.UnitContext, sz)
 		if !ed.HasLinks && len(ed.Renders[ln].Links) > 0 {
 			ed.HasLinks = true
@@ -220,7 +220,7 @@ func (ed *Editor) LayoutLine(ln int) bool {
 
 	ed.Buffer.MarkupMu.RLock()
 	curspans := len(ed.Renders[ln].Spans)
-	ed.Renders[ln].SetHTMLPre(ed.Buffer.Markup[ln], fst, &sty.Text, &sty.UnitContext, ed.TextStyleProps())
+	ed.Renders[ln].SetHTMLPre(ed.Buffer.Markup[ln], fst, &sty.Text, &sty.UnitContext, ed.TextStyleProperties())
 	ed.Renders[ln].Layout(&sty.Text, sty.FontRender(), &sty.UnitContext, ed.LineLayoutSize)
 	if !ed.HasLinks && len(ed.Renders[ln].Links) > 0 {
 		ed.HasLinks = true

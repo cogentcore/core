@@ -167,8 +167,8 @@ func (se StyleEntry) ToCSS() string {
 	return strings.Join(styles, "; ")
 }
 
-// ToProps converts the StyleEntry to key-value properties.
-func (se StyleEntry) ToProps() map[string]any {
+// ToProperties converts the StyleEntry to key-value properties.
+func (se StyleEntry) ToProperties() map[string]any {
 	pr := map[string]any{}
 	if !colors.IsNil(se.Color) {
 		pr["color"] = se.Color
@@ -302,8 +302,8 @@ func (hs Style) ToCSS() map[token.Tokens]string {
 	return css
 }
 
-// ToProps generates a list of key-value properties for this style.
-func (hs Style) ToProps() map[string]any {
+// ToProperties generates a list of key-value properties for this style.
+func (hs Style) ToProperties() map[string]any {
 	pr := map[string]any{}
 	for ht, nm := range token.Names {
 		entry := hs.Tag(ht)
@@ -313,7 +313,7 @@ func (hs Style) ToProps() map[string]any {
 			}
 			continue
 		}
-		pr["."+nm] = entry.ToProps()
+		pr["."+nm] = entry.ToProperties()
 	}
 	return pr
 }

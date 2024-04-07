@@ -8,7 +8,7 @@ import (
 	"cogentcore.org/core/units"
 )
 
-// IMPORTANT: any changes here must be updated in style_props.go StyleTextFuncs
+// IMPORTANT: any changes here must be updated in style_properties.go StyleTextFuncs
 
 // Text is used for layout-level (widget, html-style) text styling --
 // FontStyle contains all the lower-level text rendering info used in SVG --

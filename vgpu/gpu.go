@@ -85,13 +85,13 @@ type GPU struct {
 	DebugCallback vk.DebugReportCallback
 
 	// properties of physical hardware -- populated after Config
-	GPUProps vk.PhysicalDeviceProperties
+	GPUProperties vk.PhysicalDeviceProperties
 
 	// features of physical hardware -- populated after Config
 	GPUFeats vk.PhysicalDeviceFeatures
 
 	// properties of device memory -- populated after Config
-	MemoryProps vk.PhysicalDeviceMemoryProperties
+	MemoryProperties vk.PhysicalDeviceMemoryProperties
 
 	// maximum number of compute threads per compute shader invokation, for a 1D number of threads per Warp, which is generally greater than MaxComputeWorkGroup, which allows for the and maxima as well.  This is not defined anywhere in the formal spec, unfortunately, but has been determined empirically for Mac and NVIDIA which are two of the most relevant use-cases.  If not a known case, the MaxComputeWorkGroupvalue is used, which can significantly slow down compute processing if more could actually be used.  Please file an issue or PR for other GPUs with known larger values.
 	MaxComputeWorkGroupCount1D int
@@ -279,13 +279,13 @@ func (gp *GPU) Config(name string, opts ...*GPUOpts) error {
 		return errors.New("vgpu: fatal config error found, see messages above")
 	}
 
-	vk.GetPhysicalDeviceProperties(gp.GPU, &gp.GPUProps)
-	gp.GPUProps.Deref()
-	gp.GPUProps.Limits.Deref()
-	vk.GetPhysicalDeviceMemoryProperties(gp.GPU, &gp.MemoryProps)
-	gp.MemoryProps.Deref()
+	vk.GetPhysicalDeviceProperties(gp.GPU, &gp.GPUProperties)
+	gp.GPUProperties.Deref()
+	gp.GPUProperties.Limits.Deref()
+	vk.GetPhysicalDeviceMemoryProperties(gp.GPU, &gp.MemoryProperties)
+	gp.MemoryProperties.Deref()
 
-	gp.MaxComputeWorkGroupCount1D = int(gp.GPUProps.Limits.MaxComputeWorkGroupCount[0])
+	gp.MaxComputeWorkGroupCount1D = int(gp.GPUProperties.Limits.MaxComputeWorkGroupCount[0])
 	// note: unclear what the limit is here.
 	// if gp.MaxComputeWorkGroupCount1D == 0 { // otherwise set per-platform in defaults (DARWIN)
 	// if strings.Contains(gp.DeviceName, "NVIDIA") {
@@ -325,17 +325,17 @@ func (gp *GPU) Config(name string, opts ...*GPUOpts) error {
 	return nil
 }
 
-func (gp *GPU) GetDeviceName(props *vk.PhysicalDeviceProperties, idx int) string {
-	nm := CleanString(string(props.DeviceName[:]))
-	return fmt.Sprintf("%s: id=%d idx=%d", nm, props.DeviceID, idx)
+func (gp *GPU) GetDeviceName(properties *vk.PhysicalDeviceProperties, idx int) string {
+	nm := CleanString(string(properties.DeviceName[:]))
+	return fmt.Sprintf("%s: id=%d idx=%d", nm, properties.DeviceID, idx)
 }
 
 func (gp *GPU) SelectGPU(gpus []vk.PhysicalDevice, gpuCount int) int {
 	if gpuCount == 1 {
-		var props vk.PhysicalDeviceProperties
-		vk.GetPhysicalDeviceProperties(gpus[0], &props)
-		props.Deref()
-		gp.DeviceName = gp.GetDeviceName(&props, 0)
+		var properties vk.PhysicalDeviceProperties
+		vk.GetPhysicalDeviceProperties(gpus[0], &properties)
+		properties.Deref()
+		gp.DeviceName = gp.GetDeviceName(&properties, 0)
 		if Debug {
 			log.Printf("vgpu: selected only device named: %s\n", gp.DeviceName)
 		}
@@ -358,12 +358,12 @@ func (gp *GPU) SelectGPU(gpus []vk.PhysicalDevice, gpuCount int) int {
 		if err == nil && idx >= 0 && idx < gpuCount {
 			curIndex := 0
 			for gi := 0; gi < gpuCount; gi++ {
-				var props vk.PhysicalDeviceProperties
-				vk.GetPhysicalDeviceProperties(gpus[gi], &props)
-				props.Deref()
-				if props.DeviceType == vk.PhysicalDeviceTypeDiscreteGpu {
+				var properties vk.PhysicalDeviceProperties
+				vk.GetPhysicalDeviceProperties(gpus[gi], &properties)
+				properties.Deref()
+				if properties.DeviceType == vk.PhysicalDeviceTypeDiscreteGpu {
 					if curIndex == idx {
-						gp.DeviceName = gp.GetDeviceName(&props, gi)
+						gp.DeviceName = gp.GetDeviceName(&properties, gi)
 						if Debug {
 							log.Printf("vgpu: selected device named: %s, specified by index in *_DEVICE_SELECT environment variable, index: %d\n", gp.DeviceName, gi)
 						}
@@ -376,11 +376,11 @@ func (gp *GPU) SelectGPU(gpus []vk.PhysicalDevice, gpuCount int) int {
 			panic(fmt.Sprintf("vgpu: device specified by index in *_DEVICE_SELECT environment variable, index: %d, NOT FOUND\n", idx))
 		}
 		for gi := 0; gi < gpuCount; gi++ {
-			var props vk.PhysicalDeviceProperties
-			vk.GetPhysicalDeviceProperties(gpus[gi], &props)
-			props.Deref()
-			if bytes.Contains(props.DeviceName[:], []byte(trgDevNm)) {
-				devNm := gp.GetDeviceName(&props, gi)
+			var properties vk.PhysicalDeviceProperties
+			vk.GetPhysicalDeviceProperties(gpus[gi], &properties)
+			properties.Deref()
+			if bytes.Contains(properties.DeviceName[:], []byte(trgDevNm)) {
+				devNm := gp.GetDeviceName(&properties, gi)
 				if Debug {
 					log.Printf("vgpu: selected device named: %s, specified in *_DEVICE_SELECT environment variable, index: %d\n", devNm, gi)
 				}
@@ -400,24 +400,24 @@ func (gp *GPU) SelectGPU(gpus []vk.PhysicalDevice, gpuCount int) int {
 		// note: we could potentially check for the optional features here
 		// but generally speaking the discrete device is going to be the most
 		// feature-full, so the practical benefit is unlikely to be significant.
-		var props vk.PhysicalDeviceProperties
-		vk.GetPhysicalDeviceProperties(gpus[gi], &props)
-		props.Deref()
-		dnm := gp.GetDeviceName(&props, gi)
-		if props.DeviceType == vk.PhysicalDeviceTypeDiscreteGpu {
-			var memProps vk.PhysicalDeviceMemoryProperties
-			vk.GetPhysicalDeviceMemoryProperties(gpus[gi], &memProps)
-			memProps.Deref()
+		var properties vk.PhysicalDeviceProperties
+		vk.GetPhysicalDeviceProperties(gpus[gi], &properties)
+		properties.Deref()
+		dnm := gp.GetDeviceName(&properties, gi)
+		if properties.DeviceType == vk.PhysicalDeviceTypeDiscreteGpu {
+			var memProperties vk.PhysicalDeviceMemoryProperties
+			vk.GetPhysicalDeviceMemoryProperties(gpus[gi], &memProperties)
+			memProperties.Deref()
 			if Debug {
 				log.Printf("vgpu: %d: evaluating discrete device named: %s\n", gi, dnm)
 			}
-			for mi := uint32(0); mi < memProps.MemoryHeapCount; mi++ {
-				heap := &memProps.MemoryHeaps[mi]
+			for mi := uint32(0); mi < memProperties.MemoryHeapCount; mi++ {
+				heap := &memProperties.MemoryHeaps[mi]
 				heap.Deref()
 				// if heap.Flags&vk.MemoryHeapFlags(vk.MemoryHeapDeviceLocalBit) != 0 {
 				sz := int(heap.Size)
 				if sz > maxSz {
-					devNm = gp.GetDeviceName(&props, gi)
+					devNm = gp.GetDeviceName(&properties, gi)
 					maxSz = sz
 					maxIndex = gi
 				}
@@ -465,16 +465,16 @@ func (gp *GPU) NewGraphicsSystem(name string, dev *Device) *System {
 	return sy
 }
 
-// PropsString returns a human-readable summary of the GPU properties.
-func (gp *GPU) PropsString(print bool) string {
-	ps := "\n\n######## GPU Props\n"
-	prs := laser.StringJSON(&gp.GPUProps)
+// PropertiesString returns a human-readable summary of the GPU properties.
+func (gp *GPU) PropertiesString(print bool) string {
+	ps := "\n\n######## GPU Properties\n"
+	prs := laser.StringJSON(&gp.GPUProperties)
 	devnm := `  "DeviceName": `
 	ps += prs[:strings.Index(prs, devnm)]
-	ps += devnm + string(gp.GPUProps.DeviceName[:]) + "\n"
+	ps += devnm + string(gp.GPUProperties.DeviceName[:]) + "\n"
 	ps += prs[strings.Index(prs, `  "Limits":`):]
-	// ps += "\n\n######## GPU Memory Props\n" // not really useful
-	// ps += laser.StringJSON(&gp.MemoryProps)
+	// ps += "\n\n######## GPU Memory Properties\n" // not really useful
+	// ps += laser.StringJSON(&gp.MemoryProperties)
 	ps += "\n"
 	if print {
 		fmt.Println(ps)

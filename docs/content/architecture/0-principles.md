@@ -40,7 +40,7 @@ Languages must be rational and consistent both internally and with other program
 
 # Struct fields are better than maps for things like configuration and styling
 
-Configuration settings, typically settable with a config file and / or command-line arguments, are stored as key-value maps in the widely used [cobra](https://github.com/spf13/cobra), viper and other such tools.  Likewise, in v1 of GoGi, styling was set using Props maps.
+Configuration settings, typically settable with a config file and / or command-line arguments, are stored as key-value maps in the widely used [cobra](https://github.com/spf13/cobra), viper and other such tools.  Likewise, in v1 of GoGi, styling was set using Properties maps.
 
 However, using a `struct` with appropriately-named fields has the following advantages:
 * Compile time name-safety: the compiler ensures you didn't mistype the key name.

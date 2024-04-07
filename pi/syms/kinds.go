@@ -96,7 +96,7 @@ const (
 	// Sub2Cat: Integer
 	Integer
 
-	// Sub3Cat: Signed -- track this using props in types, not using Sub3 level
+	// Sub3Cat: Signed -- track this using properties in types, not using Sub3 level
 	Signed
 	Int
 	Int8

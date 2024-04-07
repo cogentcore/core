@@ -2,7 +2,7 @@
   "Lexer": {
     "Nm": "Lexer",
     "UniqueNm": "Lexer",
-    "Props": null,
+    "Properties": null,
     "Kids": [
       {
         "n": 26,
@@ -62,7 +62,7 @@
       {
         "Nm": "InCode",
         "UniqueNm": "InCode",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 2,
@@ -74,7 +74,7 @@
           {
             "Nm": "CodeEnd",
             "UniqueNm": "CodeEnd",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -96,7 +96,7 @@
           {
             "Nm": "AnyCode",
             "UniqueNm": "AnyCode",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -130,7 +130,7 @@
       {
         "Nm": "InLinkAttr",
         "UniqueNm": "InLinkAttr",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 2,
@@ -142,7 +142,7 @@
           {
             "Nm": "EndLinkAttr",
             "UniqueNm": "EndLinkAttr",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -163,7 +163,7 @@
           {
             "Nm": "AnyLinkAttr",
             "UniqueNm": "AnyLinkAttr",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -197,7 +197,7 @@
       {
         "Nm": "InLinkAddr",
         "UniqueNm": "InLinkAddr",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 3,
@@ -211,7 +211,7 @@
           {
             "Nm": "LinkAttr",
             "UniqueNm": "LinkAttr",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -233,7 +233,7 @@
           {
             "Nm": "EndLinkAddr",
             "UniqueNm": "EndLinkAddr",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -254,7 +254,7 @@
           {
             "Nm": "AnyLinkAddr",
             "UniqueNm": "AnyLinkAddr",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -288,7 +288,7 @@
       {
         "Nm": "InLinkTag",
         "UniqueNm": "InLinkTag",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 3,
@@ -302,7 +302,7 @@
           {
             "Nm": "LinkAddr",
             "UniqueNm": "LinkAddr",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -324,7 +324,7 @@
           {
             "Nm": "EndLinkTag",
             "UniqueNm": "EndLinkTag",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "for a plain tag with no addr",
@@ -345,7 +345,7 @@
           {
             "Nm": "AnyLinkTag",
             "UniqueNm": "AnyLinkTag",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -379,7 +379,7 @@
       {
         "Nm": "LetterText",
         "UniqueNm": "LetterText",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "optimization for plain letters which are always text",
@@ -399,7 +399,7 @@
       {
         "Nm": "CodeStart",
         "UniqueNm": "CodeStart",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 2,
@@ -411,7 +411,7 @@
           {
             "Nm": "CodeLang",
             "UniqueNm": "CodeLang",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -432,7 +432,7 @@
           {
             "Nm": "CodePlain",
             "UniqueNm": "CodePlain",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -469,7 +469,7 @@
       {
         "Nm": "HeadPound",
         "UniqueNm": "HeadPound",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 2,
@@ -481,7 +481,7 @@
           {
             "Nm": "HeadPound2",
             "UniqueNm": "HeadPound2",
-            "Props": null,
+            "Properties": null,
             "Kids": [
               {
                 "n": 2,
@@ -493,7 +493,7 @@
               {
                 "Nm": "HeadPound3",
                 "UniqueNm": "HeadPound3",
-                "Props": null,
+                "Properties": null,
                 "Kids": [
                   {
                     "n": 1,
@@ -503,7 +503,7 @@
                   {
                     "Nm": "SubSubHeading",
                     "UniqueNm": "SubSubHeading",
-                    "Props": null,
+                    "Properties": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
@@ -537,7 +537,7 @@
               {
                 "Nm": "SubHeading",
                 "UniqueNm": "SubHeading",
-                "Props": null,
+                "Properties": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
@@ -571,7 +571,7 @@
           {
             "Nm": "Heading",
             "UniqueNm": "Heading",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -605,7 +605,7 @@
       {
         "Nm": "ItemCheck",
         "UniqueNm": "ItemCheck",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 2,
@@ -617,7 +617,7 @@
           {
             "Nm": "ItemCheckDone",
             "UniqueNm": "ItemCheckDone",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -637,7 +637,7 @@
           {
             "Nm": "ItemCheckTodo",
             "UniqueNm": "ItemCheckTodo",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -671,7 +671,7 @@
       {
         "Nm": "ItemStar",
         "UniqueNm": "ItemStar",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "note: these all have a space after them!",
@@ -691,7 +691,7 @@
       {
         "Nm": "ItemPlus",
         "UniqueNm": "ItemPlus",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "",
@@ -711,7 +711,7 @@
       {
         "Nm": "ItemMinus",
         "UniqueNm": "ItemMinus",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "",
@@ -731,7 +731,7 @@
       {
         "Nm": "NumList",
         "UniqueNm": "NumList",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "",
@@ -751,7 +751,7 @@
       {
         "Nm": "CommentStart",
         "UniqueNm": "CommentStart",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "",
@@ -771,7 +771,7 @@
       {
         "Nm": "QuotePara",
         "UniqueNm": "QuotePara",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "",
@@ -791,7 +791,7 @@
       {
         "Nm": "BoldStars",
         "UniqueNm": "BoldStars",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 1,
@@ -801,7 +801,7 @@
           {
             "Nm": "BoldText",
             "UniqueNm": "BoldText",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -837,7 +837,7 @@
       {
         "Nm": "BoldUnders",
         "UniqueNm": "BoldUnders",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 1,
@@ -847,7 +847,7 @@
           {
             "Nm": "BoldText",
             "UniqueNm": "BoldText",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -883,7 +883,7 @@
       {
         "Nm": "ItemStarSub",
         "UniqueNm": "ItemStarSub",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "note all have space after",
@@ -903,7 +903,7 @@
       {
         "Nm": "ItemPlusSub",
         "UniqueNm": "ItemPlusSub",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "",
@@ -923,7 +923,7 @@
       {
         "Nm": "ItemMinusSub",
         "UniqueNm": "ItemMinusSub",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "",
@@ -943,7 +943,7 @@
       {
         "Nm": "LinkTag",
         "UniqueNm": "LinkTag",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "",
@@ -964,7 +964,7 @@
       {
         "Nm": "BacktickCode",
         "UniqueNm": "BacktickCode",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "",
@@ -984,7 +984,7 @@
       {
         "Nm": "Quote",
         "UniqueNm": "Quote_021",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "",
@@ -1004,7 +1004,7 @@
       {
         "Nm": "Apostrophe",
         "UniqueNm": "Apostrophe",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 2,
@@ -1016,7 +1016,7 @@
           {
             "Nm": "QuoteSingle",
             "UniqueNm": "QuoteSingle",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -1036,7 +1036,7 @@
           {
             "Nm": "Apost",
             "UniqueNm": "Apost",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -1070,7 +1070,7 @@
       {
         "Nm": "EmphStar",
         "UniqueNm": "EmphStar",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 1,
@@ -1080,7 +1080,7 @@
           {
             "Nm": "EmphText",
             "UniqueNm": "EmphText",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -1116,7 +1116,7 @@
       {
         "Nm": "EmphUnder",
         "UniqueNm": "EmphUnder",
-        "Props": null,
+        "Properties": null,
         "Kids": [
           {
             "n": 1,
@@ -1126,7 +1126,7 @@
           {
             "Nm": "EmphUnder",
             "UniqueNm": "EmphUnder",
-            "Props": null,
+            "Properties": null,
             "Kids": null,
             "Off": false,
             "Desc": "",
@@ -1162,7 +1162,7 @@
       {
         "Nm": "AnyText",
         "UniqueNm": "AnyText",
-        "Props": null,
+        "Properties": null,
         "Kids": null,
         "Off": false,
         "Desc": "",
@@ -1204,7 +1204,7 @@
   "Parser": {
     "Nm": "Parser",
     "UniqueNm": "Parser",
-    "Props": null,
+    "Properties": null,
     "Kids": null,
     "Off": false,
     "Desc": "",

@@ -509,7 +509,7 @@ func TestPropertiesJSON(t *testing.T) {
 	testProperties := map[string]any{
 		"floatprop":  3.1415,
 		"stringprop": "type string",
-		"#subprops": map[string]any{
+		"#subproperties": map[string]any{
 			"sp1": "#FFE",
 			"sp2": 42.2,
 		},
@@ -526,7 +526,7 @@ func TestPropertiesJSON(t *testing.T) {
 }
 
 func TestDirectives(t *testing.T) {
-	// test type directives: replacement for type props
+	// test type directives: replacement for type properties
 	n := testdata.NodeEmbed{}
 	n.InitName(&n, "node")
 	typ := n.NodeType()

@@ -35,7 +35,7 @@ type MarkdownLang struct {
 var TheMarkdownLang = MarkdownLang{}
 
 func init() {
-	pi.StandardLangProps[fi.Markdown].Lang = &TheMarkdownLang
+	pi.StandardLangProperties[fi.Markdown].Lang = &TheMarkdownLang
 	langs.ParserBytes[fi.Markdown] = parserBytes
 }
 
@@ -43,7 +43,7 @@ func (ml *MarkdownLang) Parser() *pi.Parser {
 	if ml.Pr != nil {
 		return ml.Pr
 	}
-	lp, _ := pi.LangSupport.Props(fi.Markdown)
+	lp, _ := pi.LangSupport.Properties(fi.Markdown)
 	if lp.Parser == nil {
 		pi.LangSupport.OpenStandard()
 	}

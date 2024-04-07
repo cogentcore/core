@@ -28,9 +28,9 @@ func main() {
 	gp.Config("exptest")
 	fmt.Printf("Running on GPU: %s\n", gp.DeviceName)
 
-	fmt.Printf("Max StructuredBuffer Size: %X\n", gp.GPUProps.Limits.MaxStorageBufferRange)
+	fmt.Printf("Max StructuredBuffer Size: %X\n", gp.GPUProperties.Limits.MaxStorageBufferRange)
 
-	// gp.PropsString(true) // print
+	// gp.PropertiesString(true) // print
 
 	sy := gp.NewComputeSystem("exptest")
 	pl := sy.NewPipeline("exptest")

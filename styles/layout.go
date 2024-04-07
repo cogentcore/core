@@ -23,7 +23,7 @@ import (
 // align-content, so they are subsumed in the AlignH parameter in this style.
 // Vertical-align works as expected, and Text.Align uses left/center/right
 
-// IMPORTANT: any changes here must be updated in style_props.go StyleLayoutFuncs
+// IMPORTANT: any changes here must be updated in style_properties.go StyleLayoutFuncs
 
 // ScrollBarWidthDefault is the default width of a scrollbar in Dp
 var ScrollBarWidthDefault = float32(10)

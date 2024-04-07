@@ -212,95 +212,95 @@ func (ps *Pose) WorldScale() mat32.Vec3 {
 
 /*
 
-// PoseProps define the Toolbar and MenuBar for StructView
-var PoseProps = tree.Props{
-	"Toolbar": tree.PropSlice{
-		{"GenGoSet", tree.Props{
+// PoseProperties define the Toolbar and MenuBar for StructView
+var PoseProperties = tree.Properties{
+	"Toolbar": tree.Propertieslice{
+		{"GenGoSet", tree.Properties{
 			"label":       "Go Code",
 			"desc":        "returns Go Code that sets the current Pose, based on given path to Pose.",
 			"icon":        icons.Code,
 			"show-return": true,
-			"Args": tree.PropSlice{
+			"Args": tree.Propertieslice{
 				{"Path", tree.BlankProp{}},
 			},
 		}},
-		{"SetEulerRotation", tree.Props{
+		{"SetEulerRotation", tree.Properties{
 			"desc": "Set the local rotation (relative to parent) using Euler angles, in degrees.",
 			"icon": icons.X3DRotation,
-			"Args": tree.PropSlice{
-				{"Pitch", tree.Props{
+			"Args": tree.Propertieslice{
+				{"Pitch", tree.Properties{
 					"desc": "rotation up / down along the X axis (in the Y-Z plane), e.g., the altitude (climbing, descending) for motion along the Z depth axis",
 				}},
-				{"Yaw", tree.Props{
+				{"Yaw", tree.Properties{
 					"desc": "rotation along the Y axis (in the horizontal X-Z plane), e.g., the bearing or direction for motion along the Z depth axis",
 				}},
-				{"Roll", tree.Props{
+				{"Roll", tree.Properties{
 					"desc": "rotation along the Z axis (in the X-Y plane), e.g., the bank angle for motion along the Z depth axis",
 				}},
 			},
 		}},
-		{"SetAxisRotation", tree.Props{
+		{"SetAxisRotation", tree.Properties{
 			"desc": "Set the local rotation (relative to parent) using Axis about which to rotate, and the angle.",
 			"icon": icons.X3DRotation,
-			"Args": tree.PropSlice{
+			"Args": tree.Propertieslice{
 				{"X", tree.BlankProp{}},
 				{"Y", tree.BlankProp{}},
 				{"Z", tree.BlankProp{}},
 				{"Angle", tree.BlankProp{}},
 			},
 		}},
-		{"RotateEuler", tree.Props{
+		{"RotateEuler", tree.Properties{
 			"desc": "rotate (relative to current rotation) using Euler angles, in degrees.",
 			"icon": icons.X3DRotation,
-			"Args": tree.PropSlice{
-				{"Pitch", tree.Props{
+			"Args": tree.Propertieslice{
+				{"Pitch", tree.Properties{
 					"desc": "rotation up / down along the X axis (in the Y-Z plane), e.g., the altitude (climbing, descending) for motion along the Z depth axis",
 				}},
-				{"Yaw", tree.Props{
+				{"Yaw", tree.Properties{
 					"desc": "rotation along the Y axis (in the horizontal X-Z plane), e.g., the bearing or direction for motion along the Z depth axis",
 				}},
-				{"Roll", tree.Props{
+				{"Roll", tree.Properties{
 					"desc": "rotation along the Z axis (in the X-Y plane), e.g., the bank angle for motion along the Z depth axis",
 				}},
 			},
 		}},
-		{"RotateOnAxis", tree.Props{
+		{"RotateOnAxis", tree.Properties{
 			"desc": "Rotate (relative to current rotation) using Axis about which to rotate, and the angle.",
 			"icon": icons.X3DRotation,
-			"Args": tree.PropSlice{
+			"Args": tree.Propertieslice{
 				{"X", tree.BlankProp{}},
 				{"Y", tree.BlankProp{}},
 				{"Z", tree.BlankProp{}},
 				{"Angle", tree.BlankProp{}},
 			},
 		}},
-		{"LookAt", tree.Props{
+		{"LookAt", tree.Properties{
 			"icon": icons.X3DRotation,
-			"Args": tree.PropSlice{
+			"Args": tree.Propertieslice{
 				{"Target", tree.BlankProp{}},
 				{"UpDir", tree.BlankProp{}},
 			},
 		}},
-		{"EulerRotation", tree.Props{
+		{"EulerRotation", tree.Properties{
 			"desc":        "The local rotation (relative to parent) in Euler angles in degrees (X = Pitch, Y = Yaw, Z = Roll)",
 			"icon":        icons.X3DRotation,
 			"show-return": "true",
 		}},
 		{"sep-rot", tree.BlankProp{}},
-		{"MoveOnAxis", tree.Props{
+		{"MoveOnAxis", tree.Properties{
 			"desc": "Move given distance on given X,Y,Z axis relative to current rotation orientation.",
 			"icon": icons.PanTool,
-			"Args": tree.PropSlice{
+			"Args": tree.Propertieslice{
 				{"X", tree.BlankProp{}},
 				{"Y", tree.BlankProp{}},
 				{"Z", tree.BlankProp{}},
 				{"Dist", tree.BlankProp{}},
 			},
 		}},
-		{"MoveOnAxisAbs", tree.Props{
+		{"MoveOnAxisAbs", tree.Properties{
 			"desc": "Move given distance on given X,Y,Z axis in absolute coords, not relative to current rotation orientation.",
 			"icon": icons.PanTool,
-			"Args": tree.PropSlice{
+			"Args": tree.Propertieslice{
 				{"X", tree.BlankProp{}},
 				{"Y", tree.BlankProp{}},
 				{"Z", tree.BlankProp{}},

@@ -621,9 +621,9 @@ func (n *NodeBase) FlagType() enums.BitFlagSetter {
 }
 
 //////////////////////////////////////////////////////////////////////////
-//  Property interface with inheritance -- nodes can inherit props from parents
+//  Property interface with inheritance -- nodes can inherit properties from parents
 
-// Properties (Node.Props) tell the Cogent Core GUI or other frameworks operating
+// Properties (Node.Properties) tell the Cogent Core GUI or other frameworks operating
 // on Trees about special features of each node -- functions below support
 // inheritance up Tree.
 func (n *NodeBase) Properties() map[string]any {
@@ -962,7 +962,7 @@ func (n *NodeBase) WalkBreadth(fun func(k Node) bool) {
 
 // CopyFrom another Ki node.  It is essential that source has Unique names!
 // The Ki copy function recreates the entire tree in the copy, duplicating
-// children etc, copying Props too.  It is very efficient by
+// children etc, copying Properties too.  It is very efficient by
 // using the ConfigChildren method which attempts to preserve any existing
 // nodes in the destination if they have the same name and type -- so a
 // copy from a source to a target that only differ minimally will be

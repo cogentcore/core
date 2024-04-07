@@ -26,7 +26,7 @@ import (
 // style implements CSS-based styling, as in: https://www.w3schools.com/cssref/default.asp
 // list of inherited: https://stackoverflow.com/questions/5612302/which-css-properties-are-inherited
 
-// IMPORTANT: any changes here must be updated in style_props.go StyleStyleFuncs
+// IMPORTANT: any changes here must be updated in style_properties.go StyleStyleFuncs
 // and likewise for all sub-styles as fields here.
 
 // Style has all the CSS-based style elements -- used for widget-type GUI objects.
@@ -271,28 +271,28 @@ const (
 
 // transition -- animation of hover, etc
 
-// SetStylePropsXML sets style props from XML style string, which contains ';'
+// SetStylePropertiesXML sets style properties from XML style string, which contains ';'
 // separated name: value pairs
-func SetStylePropsXML(style string, props *map[string]any) {
+func SetStylePropertiesXML(style string, properties *map[string]any) {
 	st := strings.Split(style, ";")
 	for _, s := range st {
 		kv := strings.Split(s, ":")
 		if len(kv) >= 2 {
 			k := strings.TrimSpace(strings.ToLower(kv[0]))
 			v := strings.TrimSpace(kv[1])
-			if *props == nil {
-				*props = make(map[string]any)
+			if *properties == nil {
+				*properties = make(map[string]any)
 			}
-			(*props)[k] = v
+			(*properties)[k] = v
 		}
 	}
 }
 
-// StylePropsXML returns style props for XML style string, which contains ';'
+// StylePropertiesXML returns style properties for XML style string, which contains ';'
 // separated name: value pairs
-func StylePropsXML(props map[string]any) string {
+func StylePropertiesXML(properties map[string]any) string {
 	var sb strings.Builder
-	for k, v := range props {
+	for k, v := range properties {
 		if k == "transform" {
 			continue
 		}
@@ -410,10 +410,10 @@ func (s *Style) TotalMargin() SideFloats {
 	return s.Margin.Dots().Add(mbw).Add(mbsm)
 }
 
-// SubProps returns a sub-property map from given prop map for a given styling
+// SubProperties returns a sub-property map from given prop map for a given styling
 // selector (property name) -- e.g., :normal :active :hover etc -- returns
 // false if not found
-func SubProps(prp map[string]any, selector string) (map[string]any, bool) {
+func SubProperties(prp map[string]any, selector string) (map[string]any, bool) {
 	sp, ok := prp[selector]
 	if !ok {
 		return nil, false

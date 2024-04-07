@@ -57,7 +57,7 @@ func main() {
 
 func DoGoPath(path string) {
 	fmt.Printf("Processing path: %v\n", path)
-	lp, _ := pi.LangSupport.Props(fi.Go)
+	lp, _ := pi.LangSupport.Properties(fi.Go)
 	pr := lp.Lang.Parser()
 	pr.ReportErrs = true
 	fs := pi.NewFileState()

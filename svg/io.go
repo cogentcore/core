@@ -768,7 +768,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				curTxt.Text = trspc
 			case inCSS && curCSS != nil:
 				curCSS.ParseString(trspc)
-				cp := curCSS.CSSProps()
+				cp := curCSS.CSSProperties()
 				if cp != nil {
 					if inDef && defPrevPar != nil {
 						defPrevPar.AsNodeBase().CSS = cp
@@ -826,8 +826,8 @@ func XMLAddAttr(attr *[]xml.Attr, name, val string) {
 	*attr = append(*attr, at)
 }
 
-// InkscapeProps are property keys that should be prefixed with "inkscape:"
-var InkscapeProps = map[string]bool{
+// InkscapeProperties are property keys that should be prefixed with "inkscape:"
+var InkscapeProperties = map[string]bool{
 	"isstock": true,
 	"stockid": true,
 }
@@ -850,7 +850,7 @@ func SVGNodeMarshalXML(itm tree.Node, enc *XMLEncoder, setName string) string {
 	_, ismark := itm.(*Marker)
 	if !isgp {
 		if issvg && !ismark {
-			sp := styles.StylePropsXML(properties)
+			sp := styles.StylePropertiesXML(properties)
 			if sp != "" {
 				XMLAddAttr(&se.Attr, "style", sp)
 			}
@@ -860,7 +860,7 @@ func SVGNodeMarshalXML(itm tree.Node, enc *XMLEncoder, setName string) string {
 		} else {
 			for k, v := range properties {
 				sv := laser.ToString(v)
-				if _, has := InkscapeProps[k]; has {
+				if _, has := InkscapeProperties[k]; has {
 					k = "inkscape:" + k
 				} else if k == "overflow" {
 					k = "style"
@@ -1086,7 +1086,7 @@ func SVGNodeTreeMarshalXML(itm Node, enc *XMLEncoder, setName string) (string, e
 func (sv *SVG) MarshalXMLx(enc *XMLEncoder, se xml.StartElement) error {
 	me := xml.StartElement{}
 	me.Name.Local = "svg"
-	// todo: look for props about units?
+	// todo: look for properties about units?
 	XMLAddAttr(&me.Attr, "width", sv.PhysWidth.String())
 	XMLAddAttr(&me.Attr, "height", sv.PhysHeight.String())
 	XMLAddAttr(&me.Attr, "viewBox", fmt.Sprintf("%g %g %g %g", sv.Root.ViewBox.Min.X, sv.Root.ViewBox.Min.Y, sv.Root.ViewBox.Size.X, sv.Root.ViewBox.Size.Y))
@@ -1127,7 +1127,7 @@ func SetStdXMLAttr(ni Node, name, val string) bool {
 		nb.Class = val
 		return true
 	case "style":
-		styles.SetStylePropsXML(val, (*map[string]any)(&nb.Props))
+		styles.SetStylePropertiesXML(val, (*map[string]any)(&nb.Props))
 		return true
 	}
 	return false

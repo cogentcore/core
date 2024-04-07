@@ -63,12 +63,12 @@ func (ed *Editor) RenderWidget() {
 	}
 }
 
-// TextStyleProps returns the styling properties for text based on HiStyle Markup
-func (ed *Editor) TextStyleProps() map[string]any {
+// TextStyleProperties returns the styling properties for text based on HiStyle Markup
+func (ed *Editor) TextStyleProperties() map[string]any {
 	if ed.Buffer == nil || !ed.Buffer.Hi.HasHi() {
 		return nil
 	}
-	return ed.Buffer.Hi.CSSProps
+	return ed.Buffer.Hi.CSSProperties
 }
 
 // CharStartPos returns the starting (top left) render coords for the given

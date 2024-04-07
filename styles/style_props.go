@@ -241,7 +241,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 			s.Direction = Column
 		}
 	},
-	// TODO(kai/styprops): multi-dim flex-grow
+	// TODO(kai/styproperties): multi-dim flex-grow
 	"flex-grow": StyleFuncFloat(0, func(obj *Style) *float32 { return &obj.Grow.Y }),
 	"wrap": StyleFuncBool(false,
 		func(obj *Style) *bool { return &obj.Wrap }),
@@ -297,7 +297,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 		}
 		s.Padding.SetAny(val)
 	},
-	// TODO(kai/styprops): multi-dim overflow
+	// TODO(kai/styproperties): multi-dim overflow
 	"overflow": StyleFuncEnum(OverflowAuto,
 		func(obj *Style) enums.EnumSetter { return &obj.Overflow.Y }),
 	"columns": StyleFuncInt(int(0),

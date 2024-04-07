@@ -35,9 +35,9 @@ const (
 	ReAutoIndent
 )
 
-// LangProps contains properties of languages supported by the Pi parser
+// LangProperties contains properties of languages supported by the Pi parser
 // framework
-type LangProps struct {
+type LangProperties struct {
 
 	// known language -- must be a supported one from Known list
 	Known fi.Known
@@ -62,7 +62,7 @@ type LangProps struct {
 }
 
 // HasFlag returns true if given flag is set in Flags
-func (lp *LangProps) HasFlag(flg LangFlags) bool {
+func (lp *LangProperties) HasFlag(flg LangFlags) bool {
 	for _, f := range lp.Flags {
 		if f == flg {
 			return true
@@ -71,8 +71,8 @@ func (lp *LangProps) HasFlag(flg LangFlags) bool {
 	return false
 }
 
-// StandardLangProps is the standard compiled-in set of language properties
-var StandardLangProps = map[fi.Known]*LangProps{
+// StandardLangProperties is the standard compiled-in set of language properties
+var StandardLangProperties = map[fi.Known]*LangProperties{
 	fi.Ada:        {fi.Ada, "--", "", "", nil, nil, nil},
 	fi.Bash:       {fi.Bash, "# ", "", "", nil, nil, nil},
 	fi.Csh:        {fi.Csh, "# ", "", "", nil, nil, nil},
@@ -119,7 +119,7 @@ var LangSupport = LangSupporter{}
 func (ll *LangSupporter) OpenStandard() error {
 	lex.TheLangLexer = &LangSupport
 
-	for sl, lp := range StandardLangProps {
+	for sl, lp := range StandardLangProperties {
 		pib, err := langs.OpenParser(sl)
 		if err != nil {
 			continue
@@ -137,32 +137,32 @@ func (ll *LangSupporter) OpenStandard() error {
 	return nil
 }
 
-// Props looks up language properties by fi.Known const int type
-func (ll *LangSupporter) Props(sup fi.Known) (*LangProps, error) {
-	lp, has := StandardLangProps[sup]
+// Properties looks up language properties by fi.Known const int type
+func (ll *LangSupporter) Properties(sup fi.Known) (*LangProperties, error) {
+	lp, has := StandardLangProperties[sup]
 	if !has {
-		err := fmt.Errorf("pi.LangSupport.Props: no specific support for language: %v", sup)
+		err := fmt.Errorf("pi.LangSupport.Properties: no specific support for language: %v", sup)
 		//		log.Println(err.Error()) // don't want output
 		return nil, err
 	}
 	return lp, nil
 }
 
-// PropsByName looks up language properties by string name of language
+// PropertiesByName looks up language properties by string name of language
 // (with case-insensitive fallback). Returns error if not supported.
-func (ll *LangSupporter) PropsByName(lang string) (*LangProps, error) {
+func (ll *LangSupporter) PropertiesByName(lang string) (*LangProperties, error) {
 	sup, err := fi.KnownByName(lang)
 	if err != nil {
 		// log.Println(err.Error()) // don't want output during lexing..
 		return nil, err
 	}
-	return ll.Props(sup)
+	return ll.Properties(sup)
 }
 
 // LexerByName looks up Lexer for given language by name
 // (with case-insensitive fallback). Returns nil if not supported.
 func (ll *LangSupporter) LexerByName(lang string) *lex.Rule {
-	lp, err := ll.PropsByName(lang)
+	lp, err := ll.PropertiesByName(lang)
 	if err != nil {
 		return nil
 	}

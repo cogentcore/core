@@ -350,7 +350,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetHandled()
 			if ed.Buffer.Opts.AutoIndent {
-				lp, _ := pi.LangSupport.Props(ed.Buffer.PiState.Sup)
+				lp, _ := pi.LangSupport.Properties(ed.Buffer.PiState.Sup)
 				if lp != nil && lp.Lang != nil && lp.HasFlag(pi.ReAutoIndent) {
 					// only re-indent current line for supported types
 					tbe, _, _ := ed.Buffer.AutoIndent(ed.CursorPos.Ln) // reindent current line
@@ -420,7 +420,7 @@ func (ed *Editor) KeyInputInsertBra(kt events.Event) {
 	newLine := false
 	curLn := ed.Buffer.Line(pos.Ln)
 	lnLen := len(curLn)
-	lp, _ := pi.LangSupport.Props(ed.Buffer.PiState.Sup)
+	lp, _ := pi.LangSupport.Properties(ed.Buffer.PiState.Sup)
 	if lp != nil && lp.Lang != nil {
 		match, newLine = lp.Lang.AutoBracket(&ed.Buffer.PiState, kt.KeyRune(), pos, curLn)
 	} else {

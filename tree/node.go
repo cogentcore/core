@@ -370,7 +370,7 @@ type Node interface {
 
 	// CopyFrom another Ki node.  It is essential that source has Unique names!
 	// The Ki copy function recreates the entire tree in the copy, duplicating
-	// children etc, copying Props too.  It is very efficient by
+	// children etc, copying Properties too.  It is very efficient by
 	// using the ConfigChildren method which attempts to preserve any existing
 	// nodes in the destination if they have the same name and type -- so a
 	// copy from a source to a target that only differ minimally will be

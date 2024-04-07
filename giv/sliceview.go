@@ -607,7 +607,7 @@ func (sv *SliceViewBase) UpdateSliceSize() int {
 }
 
 // WidgetIndex returns the row and column indexes for given widget,
-// from the props set during construction.
+// from the properties set during construction.
 func (sv *SliceViewBase) WidgetIndex(w gi.Widget) (row, col int) {
 	if rwi := w.Property(SliceViewRowProperty); rwi != nil {
 		row = rwi.(int)

@@ -191,8 +191,8 @@ func (sv *SVG) Style() {
 	if sv.Color != nil {
 		// TODO(kai): consider handling non-uniform colors here
 		c := colors.ToUniform(sv.Color)
-		sv.Root.SetColorProps("stroke", colors.AsHex(c))
-		sv.Root.SetColorProps("fill", colors.AsHex(c))
+		sv.Root.SetColorProperties("stroke", colors.AsHex(c))
+		sv.Root.SetColorProperties("fill", colors.AsHex(c))
 	}
 	sv.SetUnitContext(&sv.Root.Paint, mat32.Vec2{}, mat32.Vec2{})
 

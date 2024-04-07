@@ -18,7 +18,7 @@ import (
 // features of those languages.  That is what this interface provides.
 //
 // Each language defines a type supporting this interface, which is
-// in turn registered with the StdLangProps map.  Each supported
+// in turn registered with the StdLangProperties map.  Each supported
 // language has its own .go file in this pi package that defines its
 // own implementation of the interface and any other associated
 // functionality.

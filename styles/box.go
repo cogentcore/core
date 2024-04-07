@@ -66,7 +66,7 @@ const (
 	BorderNone
 )
 
-// IMPORTANT: any changes here must be updated in style_props.go StyleBorderFuncs
+// IMPORTANT: any changes here must be updated in style_properties.go StyleBorderFuncs
 
 // Border contains style parameters for borders
 type Border struct { //gti:add
@@ -151,7 +151,7 @@ var (
 	BorderRadiusFull = NewSideValues(units.Dp(1_000_000_000))
 )
 
-// IMPORTANT: any changes here must be updated in style_props.go StyleShadowFuncs
+// IMPORTANT: any changes here must be updated in style_properties.go StyleShadowFuncs
 
 // style parameters for shadows
 type Shadow struct { //gti:add

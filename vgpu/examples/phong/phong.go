@@ -60,7 +60,7 @@ func main() {
 	vgpu.Debug = true
 	gp.Config("vPhong test")
 
-	// gp.PropsString(true) // print
+	// gp.PropertiesString(true) // print
 
 	surfPtr, err := window.CreateWindowSurface(gp.Instance, nil)
 	if err != nil {

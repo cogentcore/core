@@ -20,11 +20,11 @@ import (
 
 ////////////////////////////////////////////////////////////////////////////
 //   Styling functions for setting from properties
-//     see style_props.go for master version
+//     see style_properties.go for master version
 
-// StyleFromProps sets style field values based on map[string]any properties
-func (pc *Paint) StyleFromProps(parent *Paint, props map[string]any, cc colors.Context) {
-	for key, val := range props {
+// StyleFromProperties sets style field values based on map[string]any properties
+func (pc *Paint) StyleFromProperties(parent *Paint, properties map[string]any, cc colors.Context) {
+	for key, val := range properties {
 		if len(key) == 0 {
 			continue
 		}

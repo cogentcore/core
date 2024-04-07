@@ -27,7 +27,7 @@ func main() {
 	gp.Config("memtest")
 	fmt.Printf("Running on GPU: %s\n", gp.DeviceName)
 
-	// gp.PropsString(true) // print
+	// gp.PropertiesString(true) // print
 
 	sy := gp.NewComputeSystem("memtest")
 	sy.StaticVars = true // not working yet
@@ -44,7 +44,7 @@ func main() {
 	n = int(nInt)       // enforce optimal n's -- otherwise requires range checking
 	nGps := n / threads // dispatch n
 
-	maxBuff := (gp.GPUProps.Limits.MaxStorageBufferRange - 16) / 4
+	maxBuff := (gp.GPUProperties.Limits.MaxStorageBufferRange - 16) / 4
 	mem2g := ((1 << 31) - 1) / 4
 	mem1g := ((1 << 30) - 1) / 4
 

@@ -22,12 +22,12 @@ const (
 	// Passing this argument means to NOT look for embedded types for matches.
 	NoEmbeds = false
 
-	// ShallowCopy is used for Props CopyFrom functions to indicate a shallow copy of
-	// Props or PropSlice within Props (points to source props)
+	// ShallowCopy is used for Properties CopyFrom functions to indicate a shallow copy of
+	// Properties or Propertieslice within Properties (points to source properties)
 	ShallowCopy = true
 
-	// DeepCopy is used for Props CopyFrom functions to indicate a deep copy of
-	// Props or PropSlice within Props
+	// DeepCopy is used for Properties CopyFrom functions to indicate a deep copy of
+	// Properties or Propertieslice within Properties
 	DeepCopy = true
 
 	// Inherit is used for PropInherit to indicate that inherited properties

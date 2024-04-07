@@ -58,11 +58,11 @@ func (t *ClipPath) New() tree.Node { return &ClipPath{} }
 func (t *ClipPath) SetClass(v string) *ClipPath { t.Class = v; return t }
 
 // StyleSheetType is the [gti.Type] for [StyleSheet]
-var StyleSheetType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.StyleSheet", IDName: "style-sheet", Doc: "StyleSheet is a Node2D node that contains a stylesheet -- property values\ncontained in this sheet can be transformed into ki.Props and set in CSS\nfield of appropriate node", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Sheet"}}, Instance: &StyleSheet{}})
+var StyleSheetType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.StyleSheet", IDName: "style-sheet", Doc: "StyleSheet is a Node2D node that contains a stylesheet -- property values\ncontained in this sheet can be transformed into ki.Properties and set in CSS\nfield of appropriate node", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Sheet"}}, Instance: &StyleSheet{}})
 
 // NewStyleSheet adds a new [StyleSheet] with the given name to the given parent:
 // StyleSheet is a Node2D node that contains a stylesheet -- property values
-// contained in this sheet can be transformed into ki.Props and set in CSS
+// contained in this sheet can be transformed into ki.Properties and set in CSS
 // field of appropriate node
 func NewStyleSheet(parent tree.Node, name ...string) *StyleSheet {
 	return parent.NewChild(StyleSheetType, name...).(*StyleSheet)
@@ -339,7 +339,7 @@ func (t *Marker) SetEffSize(v mat32.Vec2) *Marker { t.EffSize = v; return t }
 func (t *Marker) SetClass(v string) *Marker { t.Class = v; return t }
 
 // NodeBaseType is the [gti.Type] for [NodeBase]
-var NodeBaseType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.NodeBase", IDName: "node-base", Doc: "svg.NodeBase is the base type for elements within the SVG scenegraph", Embeds: []gti.Field{{Name: "Node"}}, Fields: []gti.Field{{Name: "Class", Doc: "user-defined class name(s) used primarily for attaching\nCSS styles to different display elements.\nMultiple class names can be used to combine properties:\nuse spaces to separate per css standard."}, {Name: "CSS", Doc: "cascading style sheet at this level.\nThese styles apply here and to everything below, until superceded.\nUse .class and #name Props elements to apply entire styles\nto given elements, and type for element type."}, {Name: "CSSAgg", Doc: "aggregated css properties from all higher nodes down to me"}, {Name: "BBox", Doc: "bounding box for the node within the SVG Pixels image.\nThis one can be outside the visible range of the SVG image.\nVisBBox is intersected and only shows visible portion."}, {Name: "VisBBox", Doc: "visible bounding box for the node intersected with the SVG image geometry"}, {Name: "Paint", Doc: "paint style information for this node"}}, Instance: &NodeBase{}})
+var NodeBaseType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.NodeBase", IDName: "node-base", Doc: "svg.NodeBase is the base type for elements within the SVG scenegraph", Embeds: []gti.Field{{Name: "Node"}}, Fields: []gti.Field{{Name: "Class", Doc: "user-defined class name(s) used primarily for attaching\nCSS styles to different display elements.\nMultiple class names can be used to combine properties:\nuse spaces to separate per css standard."}, {Name: "CSS", Doc: "cascading style sheet at this level.\nThese styles apply here and to everything below, until superceded.\nUse .class and #name Properties elements to apply entire styles\nto given elements, and type for element type."}, {Name: "CSSAgg", Doc: "aggregated css properties from all higher nodes down to me"}, {Name: "BBox", Doc: "bounding box for the node within the SVG Pixels image.\nThis one can be outside the visible range of the SVG image.\nVisBBox is intersected and only shows visible portion."}, {Name: "VisBBox", Doc: "visible bounding box for the node intersected with the SVG image geometry"}, {Name: "Paint", Doc: "paint style information for this node"}}, Instance: &NodeBase{}})
 
 // NewNodeBase adds a new [NodeBase] with the given name to the given parent:
 // svg.NodeBase is the base type for elements within the SVG scenegraph

@@ -821,9 +821,9 @@ func (im *Image) AllocImage() {
 		SharingMode:   vk.SharingModeExclusive,
 	}
 
-	props := vk.MemoryPropertyDeviceLocalBit
+	properties := vk.MemoryPropertyDeviceLocalBit
 	if im.HasFlag(ImageOnHostOnly) {
-		props = vk.MemoryPropertyHostVisibleBit | vk.MemoryPropertyHostCoherentBit
+		properties = vk.MemoryPropertyHostVisibleBit | vk.MemoryPropertyHostCoherentBit
 		imgcfg.Tiling = vk.ImageTilingLinear // essential for grabbing
 	}
 
@@ -836,9 +836,9 @@ func (im *Image) AllocImage() {
 	memReqs.Deref()
 	sz := memReqs.Size
 
-	memProps := im.GPU.MemoryProps
-	memTypeIndex, _ := FindRequiredMemoryTypeFallback(memProps,
-		vk.MemoryPropertyFlagBits(memReqs.MemoryTypeBits), props)
+	memProperties := im.GPU.MemoryProperties
+	memTypeIndex, _ := FindRequiredMemoryTypeFallback(memProperties,
+		vk.MemoryPropertyFlagBits(memReqs.MemoryTypeBits), properties)
 	ma := &vk.MemoryAllocateInfo{
 		SType:           vk.StructureTypeMemoryAllocateInfo,
 		AllocationSize:  sz,

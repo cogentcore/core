@@ -138,13 +138,13 @@ func (bt BuffTypes) IsReadOnly() bool {
 func (bt BuffTypes) AlignBytes(gp *GPU) int {
 	switch bt {
 	case StorageBuff:
-		return int(gp.GPUProps.Limits.MinStorageBufferOffsetAlignment)
+		return int(gp.GPUProperties.Limits.MinStorageBufferOffsetAlignment)
 	case UniformBuff, VtxIndexBuff:
-		return int(gp.GPUProps.Limits.MinUniformBufferOffsetAlignment)
+		return int(gp.GPUProperties.Limits.MinUniformBufferOffsetAlignment)
 	case TextureBuff:
-		return int(gp.GPUProps.Limits.MinTexelBufferOffsetAlignment)
+		return int(gp.GPUProperties.Limits.MinTexelBufferOffsetAlignment)
 	}
-	return int(gp.GPUProps.Limits.MinUniformBufferOffsetAlignment)
+	return int(gp.GPUProperties.Limits.MinUniformBufferOffsetAlignment)
 }
 
 // BuffUsages maps BuffTypes into buffer usage flags
@@ -175,14 +175,14 @@ func NewBuffer(dev vk.Device, size int, usage vk.BufferUsageFlagBits) vk.Buffer 
 }
 
 // AllocBuffMem allocates memory for given buffer, with given properties
-func AllocBuffMem(gp *GPU, dev vk.Device, buffer vk.Buffer, props vk.MemoryPropertyFlagBits) vk.DeviceMemory {
+func AllocBuffMem(gp *GPU, dev vk.Device, buffer vk.Buffer, properties vk.MemoryPropertyFlagBits) vk.DeviceMemory {
 	// Ask device about its memory requirements.
 	var memReqs vk.MemoryRequirements
 	vk.GetBufferMemoryRequirements(dev, buffer, &memReqs)
 	memReqs.Deref()
 
-	memProps := gp.MemoryProps
-	memType, ok := FindRequiredMemoryType(memProps, vk.MemoryPropertyFlagBits(memReqs.MemoryTypeBits), props)
+	memProperties := gp.MemoryProperties
+	memType, ok := FindRequiredMemoryType(memProperties, vk.MemoryPropertyFlagBits(memReqs.MemoryTypeBits), properties)
 	if !ok {
 		log.Println("vulkan warning: failed to find required memory type")
 	}
@@ -240,13 +240,13 @@ func DestroyBuffer(dev vk.Device, buff *vk.Buffer) {
 	*buff = vk.NullBuffer
 }
 
-func FindRequiredMemoryType(props vk.PhysicalDeviceMemoryProperties,
+func FindRequiredMemoryType(properties vk.PhysicalDeviceMemoryProperties,
 	deviceRequirements, hostRequirements vk.MemoryPropertyFlagBits) (uint32, bool) {
 
 	for i := uint32(0); i < vk.MaxMemoryTypes; i++ {
 		if deviceRequirements&(vk.MemoryPropertyFlagBits(1)<<i) != 0 {
-			props.MemoryTypes[i].Deref()
-			flags := props.MemoryTypes[i].PropertyFlags
+			properties.MemoryTypes[i].Deref()
+			flags := properties.MemoryTypes[i].PropertyFlags
 			if flags&vk.MemoryPropertyFlags(hostRequirements) != 0 {
 				return i, true
 			}
@@ -255,13 +255,13 @@ func FindRequiredMemoryType(props vk.PhysicalDeviceMemoryProperties,
 	return 0, false
 }
 
-func FindRequiredMemoryTypeFallback(props vk.PhysicalDeviceMemoryProperties,
+func FindRequiredMemoryTypeFallback(properties vk.PhysicalDeviceMemoryProperties,
 	deviceRequirements, hostRequirements vk.MemoryPropertyFlagBits) (uint32, bool) {
 
 	for i := uint32(0); i < vk.MaxMemoryTypes; i++ {
 		if deviceRequirements&(vk.MemoryPropertyFlagBits(1)<<i) != 0 {
-			props.MemoryTypes[i].Deref()
-			flags := props.MemoryTypes[i].PropertyFlags
+			properties.MemoryTypes[i].Deref()
+			flags := properties.MemoryTypes[i].PropertyFlags
 			if flags&vk.MemoryPropertyFlags(hostRequirements) != 0 {
 				return i, true
 			}
@@ -269,7 +269,7 @@ func FindRequiredMemoryTypeFallback(props vk.PhysicalDeviceMemoryProperties,
 	}
 	// Fallback to the first one available.
 	if hostRequirements != 0 {
-		return FindRequiredMemoryType(props, deviceRequirements, 0)
+		return FindRequiredMemoryType(properties, deviceRequirements, 0)
 	}
 	return 0, false
 }

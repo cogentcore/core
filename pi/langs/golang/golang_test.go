@@ -24,7 +24,7 @@ func init() {
 
 func TestParse(t *testing.T) {
 	// t.Skip("todo: reenable soon")
-	lp, _ := pi.LangSupport.Props(fi.Go)
+	lp, _ := pi.LangSupport.Properties(fi.Go)
 	pr := lp.Lang.Parser()
 	pr.ReportErrs = true
 
