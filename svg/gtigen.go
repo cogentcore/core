@@ -58,11 +58,11 @@ func (t *ClipPath) New() tree.Node { return &ClipPath{} }
 func (t *ClipPath) SetClass(v string) *ClipPath { t.Class = v; return t }
 
 // StyleSheetType is the [gti.Type] for [StyleSheet]
-var StyleSheetType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.StyleSheet", IDName: "style-sheet", Doc: "StyleSheet is a Node2D node that contains a stylesheet -- property values\ncontained in this sheet can be transformed into ki.Properties and set in CSS\nfield of appropriate node", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Sheet"}}, Instance: &StyleSheet{}})
+var StyleSheetType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/svg.StyleSheet", IDName: "style-sheet", Doc: "StyleSheet is a Node2D node that contains a stylesheet -- property values\ncontained in this sheet can be transformed into tree.Properties and set in CSS\nfield of appropriate node", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Sheet"}}, Instance: &StyleSheet{}})
 
 // NewStyleSheet adds a new [StyleSheet] with the given name to the given parent:
 // StyleSheet is a Node2D node that contains a stylesheet -- property values
-// contained in this sheet can be transformed into ki.Properties and set in CSS
+// contained in this sheet can be transformed into tree.Properties and set in CSS
 // field of appropriate node
 func NewStyleSheet(parent tree.Node, name ...string) *StyleSheet {
 	return parent.NewChild(StyleSheetType, name...).(*StyleSheet)
