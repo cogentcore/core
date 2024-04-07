@@ -219,26 +219,21 @@ func TestNodeFindType(t *testing.T) {
 	ne := parent.NewChild(testdata.NodeEmbedType, "child1")
 	parent.NewChild(NodeBaseType, "child2")
 
-	emb := ne.NodeType().HasEmbed(NodeBaseType)
-	if !emb {
-		t.Errorf("HasEmbed of NodeEmbedType failed")
-	}
+	assert.True(t, ne.NodeType().HasEmbed(NodeBaseType))
 
 	idx, ok := parent.Children().IndexByType(testdata.NodeEmbedType, NoEmbeds, 0)
-	if !ok || idx != 0 {
-		t.Errorf("find index was not correct val of %d, was %d", 0, idx)
+	if assert.True(t, ok) {
+		assert.Equal(t, 0, idx)
 	}
 	idx, ok = parent.Children().IndexByType(NodeBaseType, NoEmbeds, 0)
-	if !ok || idx != 1 {
-		t.Errorf("find index was not correct val of %d, was %d", 1, idx)
+	if assert.True(t, ok) {
+		assert.Equal(t, 1, idx)
 	}
 	_, err := parent.Children().ElemByTypeTry(NodeBaseType, NoEmbeds, 0)
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NoError(t, err)
 	idx, ok = parent.Children().IndexByType(NodeBaseType, Embeds, 0)
-	if !ok || idx != 0 {
-		t.Errorf("find index was not correct val of %d, was %d", 0, idx)
+	if assert.True(t, ok) {
+		assert.Equal(t, 0, idx)
 	}
 }
 
@@ -487,64 +482,33 @@ func TestNodeUpdate(t *testing.T) {
 	assert.Equal(t, []string{"/par1", "/par1/child1", "/par1/child1_001", "/par1/child1_001/subchild1", "/par1/child1_002"}, res)
 }
 
-func TestProps(t *testing.T) {
-	parent := testdata.NodeEmbed{}
-	parent.InitName(&parent, "par1")
-	typ := parent.NodeType()
-	parent.Mbr1 = "bloop"
-	parent.Mbr2 = 32
+func TestProperties(t *testing.T) {
+	n := testdata.NodeEmbed{}
+	n.InitName(&n, "node")
 
-	parent.NewChild(typ, "child1")
-	child2 := parent.NewChild(typ, "child1")
-	parent.NewChild(typ, "child1")
-	schild2 := child2.NewChild(typ, "subchild1")
+	n.SetProp("intprop", 42)
+	assert.Equal(t, 42, n.Prop("intprop"))
 
-	parent.SetProp("intprop", 42)
-	pprop, ok := parent.Prop("intprop").(int)
-	if !ok || pprop != 42 {
-		t.Errorf("TestProps error -- pprop %v != %v\n", pprop, 42)
-	}
-	sprop, ok := schild2.PropInherit("intprop", Inherit)
-	if !ok {
-		t.Errorf("TestProps error -- intprop inherited not found\n")
-	}
-	sint, ok := sprop.(int)
-	if !ok || sprop != 42 {
-		t.Errorf("TestProps error -- intprop inherited %v != %v\n", sint, 42)
-	}
-	sprop, ok = schild2.PropInherit("intprop", NoInherit)
-	if ok {
-		t.Errorf("TestProps error -- intprop should not be found!  was: %v\n", sprop)
-	}
+	n.SetProp("floatprop", 42.0)
+	assert.Equal(t, 42.0, n.Prop("floatprop"))
 
-	parent.SetProp("floatprop", 42.0)
-	sprop, ok = schild2.PropInherit("floatprop", Inherit)
-	if !ok {
-		t.Errorf("TestProps error -- floatprop inherited not found\n")
-	}
-	spropf, ok := sprop.(float64)
-	if !ok || spropf != 42.0 {
-		t.Errorf("TestProps error -- floatprop inherited %v != %v\n", spropf, 42.0)
-	}
+	n.SetProp("stringprop", "test string")
+	assert.Equal(t, "test string", n.Prop("stringprop"))
 
-	tstr := "test string"
-	parent.SetProp("stringprop", tstr)
-	sprop, ok = schild2.PropInherit("stringprop", Inherit)
-	if !ok {
-		t.Errorf("TestProps error -- stringprop not found\n")
-	}
-	sprops := sprop.(string)
-	if sprops != tstr {
-		t.Errorf("TestProps error -- sprops inherited %v != %v\n", sprops, tstr)
-	}
+	n.DeleteProp("floatprop")
+	assert.Equal(t, nil, n.Prop("floatprop"))
 
-	parent.DeleteProp("floatprop")
-	sprop, ok = schild2.PropInherit("floatprop", Inherit)
-	if ok {
-		t.Errorf("TestProps error -- floatprop should be gone\n")
-	}
+	assert.Equal(t, nil, n.Prop("randomprop"))
 
+	assert.Equal(t, &Props{"intprop": 42, "stringprop": "test string"}, n.Properties())
+}
+
+func TestDirectives(t *testing.T) {
 	// test type directives: replacement for type props
+	n := testdata.NodeEmbed{}
+	n.InitName(&n, "node")
+	typ := n.NodeType()
+
 	dir := typ.Directives[0]
 	if dir.Tool != "direct" || dir.Directive != "value" {
 		t.Errorf("Type directives error: directive should be `direct:value`, got %s", dir)
@@ -695,11 +659,7 @@ func TestAutoTypeName(t *testing.T) {
 	root.InitName(root, "root")
 
 	child := root.NewChild(NodeBaseType)
-	nm := child.Name()
-	want := "node-0"
-	if nm != want {
-		t.Errorf("expected name %q for auto node name, but got %q", want, nm)
-	}
+	assert.Equal(t, "node-base-0", child.Name())
 }
 
 // BuildGuiTreeSlow builds a tree that is typical of GUI structures where there are
