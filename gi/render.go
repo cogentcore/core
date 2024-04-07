@@ -607,6 +607,7 @@ func StartCPUMemProfile() {
 	if err := pprof.StartCPUProfile(f); err != nil {
 		log.Fatal("could not start CPU profile: ", err)
 	}
+	f.Close()
 }
 
 // EndCPUMemProfile ends the standard Go cpu and memory profiling.
