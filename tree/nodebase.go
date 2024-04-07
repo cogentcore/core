@@ -654,39 +654,12 @@ func (n *NodeBase) Prop(key string) any {
 	return n.Props[key]
 }
 
-// PropInherit gets property value from key with options for inheriting
-// property from parents.  If inherit, then checks all parents.
-// Returns false if not set anywhere.
-func (n *NodeBase) PropInherit(key string, inherit bool) (any, bool) {
-	// pr := prof.Start("PropInherit")
-	// defer pr.End()
-	v, ok := n.Props[key]
-	if ok {
-		return v, ok
-	}
-	if inherit && n.Par != nil {
-		v, ok = n.Par.PropInherit(key, inherit)
-		if ok {
-			return v, ok
-		}
-	}
-	return nil, false
-}
-
 // DeleteProp deletes property key on this node.
 func (n *NodeBase) DeleteProp(key string) {
 	if n.Props == nil {
 		return
 	}
 	delete(n.Props, key)
-}
-
-// PropTag returns the name to look for in type properties, for types
-// that are valid options for values that can be set in Props.  For example
-// in Cogent Core, it is "style-props" which is then set for all types that can
-// be used in a style (colors, enum options, etc)
-func (n *NodeBase) PropTag() string {
-	return ""
 }
 
 //////////////////////////////////////////////////////////////////////////

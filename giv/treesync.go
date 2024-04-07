@@ -62,20 +62,16 @@ func (tv *TreeView) ReSync() {
 // init means we are doing initial build, and depth tracks depth
 // (only during init).
 func (tv *TreeView) SyncToSrc(tvIndex *int, init bool, depth int) {
-	// pr := prof.Start("TreeView.SyncToSrc")
-	// defer pr.End()
 	sk := tv.SyncNode
 	nm := "tv_" + sk.Name()
 	tv.SetName(nm)
 	tv.ViewIndex = *tvIndex
 	*tvIndex++
-	// tvPar := tv.TreeViewParent()
-	// if tvPar != nil {
-	// 	if init && depth >= tv.RootView.OpenDepth {
-	// 		tv.SetClosed(true)
-	// 	}
-	// }
-	vcprop := "view-closed"
+	if tvp := tv.TreeViewParent(); tvp != nil {
+		if init && depth >= tv.RootView.OpenDepth {
+			tv.SetClosed(true)
+		}
+	}
 	skids := *sk.Children()
 	tnl := make(tree.Config, 0, len(skids))
 	typ := tv.This().NodeType()
@@ -90,13 +86,6 @@ func (tv *TreeView) SyncToSrc(tvIndex *int, init bool, depth int) {
 		}
 		vk := AsTreeView(tv.Kids[idx])
 		vk.SetSyncNode(skid, tvIndex, init, depth+1)
-		if mods {
-			if vcp, ok := skid.PropInherit(vcprop, tree.NoInherit); ok {
-				if vc, err := laser.ToBool(vcp); vc && err != nil {
-					vk.SetClosed(true)
-				}
-			}
-		}
 		idx++
 	}
 	if !sk.HasChildren() {

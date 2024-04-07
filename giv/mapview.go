@@ -110,22 +110,6 @@ func (mv *MapView) MapGrid() *gi.Frame {
 	return mv.ChildByName("map-grid", 0).(*gi.Frame)
 }
 
-// TreePropTag returns the PropTag value from tree owner of this map, if it is..
-func (mv *MapView) TreePropTag() string {
-	if mv.MapValView == nil {
-		return ""
-	}
-	vd := mv.MapValView.AsValueData()
-	if vd.Owner == nil {
-		return ""
-	}
-	if owntree, ok := vd.Owner.(tree.Node); ok {
-		pt := owntree.PropTag()
-		return pt
-	}
-	return ""
-}
-
 func (mv *MapView) ContextMenu(m *gi.Scene, keyv reflect.Value) {
 	if mv.IsReadOnly() {
 		return
@@ -156,12 +140,9 @@ func (mv *MapView) ConfigMapGrid() {
 	valtyp := laser.NonPtrType(reflect.TypeOf(mv.Map)).Elem()
 	ncol := 2
 	ifaceType := false
-	typeTag := ""
-	strtyp := reflect.TypeOf(typeTag)
 	if valtyp.Kind() == reflect.Interface && valtyp.String() == "interface {}" {
 		ifaceType = true
 		ncol = 3
-		typeTag = mv.TreePropTag()
 		// todo: need some way of setting & getting
 		// this for given domain mapview could have a structview parent and
 		// the source node of that struct, if a Ki, could have a property --
@@ -238,7 +219,7 @@ func (mv *MapView) ConfigMapGrid() {
 			typw.SetTypes(valtypes...)
 			vtyp := laser.NonPtrType(reflect.TypeOf(vv.Val().Interface()))
 			if vtyp == nil {
-				vtyp = strtyp // default to string
+				vtyp = reflect.TypeOf("") // default to string
 			}
 			typw.SetCurrentValue(vtyp)
 		}

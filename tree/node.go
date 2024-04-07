@@ -164,7 +164,7 @@ type Node interface {
 	// characters in names are escaped to \\ and \,
 	Path() string
 
-	// PathFrom returns path to this node from he given parent node, using
+	// PathFrom returns path to this node from the given parent node, using
 	// [Node.Name]s separated by / and fields by .
 	// Path is only valid for finding items when child names
 	// are unique (see Unique* functions). Any existing / and .
@@ -194,11 +194,10 @@ type Node interface {
 	// by [Node.FindPath]. Returns error if not found.
 	FieldByName(field string) (Node, error)
 
-	//////////////////////////////////////////////////////////////////////////
-	//  Adding, Inserting Children
+	// Adding and Inserting Children:
 
 	// AddChild adds given child at end of children list.
-	// The kid node is assumed to not be on another tree (see MoveToParent)
+	// The kid node is assumed to not be on another tree (see [MoveToParent])
 	// and the existing name should be unique among children.
 	AddChild(kid Node) error
 
@@ -215,7 +214,7 @@ type Node interface {
 	SetChild(kid Node, idx int, name ...string) error
 
 	// InsertChild adds given child at position in children list.
-	// The kid node is assumed to not be on another tree (see MoveToParent)
+	// The kid node is assumed to not be on another tree (see [MoveToParent])
 	// and the existing name should be unique among children.
 	InsertChild(kid Node, at int) error
 
@@ -233,21 +232,20 @@ type Node interface {
 	// children.
 	//
 	// Note that this does not ensure existing children are of given type, or
-	// change their names, or call UniquifyNames -- use ConfigChildren for
-	// those cases -- this function is for simpler cases where a parent uses
+	// change their names, or call UniquifyNames; use ConfigChildren for
+	// those cases; this function is for simpler cases where a parent uses
 	// this function consistently to manage children all of the same type.
 	SetNChildren(n int, typ *gti.Type, nameStub ...string) bool
 
-	// ConfigChildren configures children according to given list of
-	// type-and-name's -- attempts to have minimal impact relative to existing
+	// ConfigChildren configures children according to the given list of
+	// [TypeAndName]s; it attempts to have minimal impact relative to existing
 	// items that fit the type and name constraints (they are moved into the
 	// corresponding positions), and any extra children are removed, and new
 	// ones added, to match the specified config. It is important that names
-	// are unique! It returns whether any changes were made to the children.
+	// are unique. It returns whether any changes were made to the children.
 	ConfigChildren(config Config) bool
 
-	//////////////////////////////////////////////////////////////////////////
-	//  Deleting Children
+	// Deleting Children:
 
 	// DeleteChildAtIndex deletes child at given index. It returns false
 	// if there is no child at the given index.
@@ -271,14 +269,14 @@ type Node interface {
 	// their children's children, etc.
 	Destroy()
 
-	//////////////////////////////////////////////////////////////////////////
-	//  Flags
+	// Flags:
 
-	// Is checks if flag is set, using atomic, safe for concurrent access
+	// Is checks if the given flag is set, using atomic,
+	// which is safe for concurrent access.
 	Is(f enums.BitFlag) bool
 
-	// SetFlag sets the given flag(s) to given state
-	// using atomic, safe for concurrent access
+	// SetFlag sets the given flag(s) to the given state
+	// using atomic, which is safe for concurrent access.
 	SetFlag(on bool, f ...enums.BitFlag)
 
 	// FlagType returns the flags of the node as the true flag type of the node,
@@ -306,19 +304,8 @@ type Node interface {
 	// It returns nil if it doesn't exist.
 	Prop(key string) any
 
-	// PropInherit gets property value from key with options for inheriting
-	// property from parents.  If inherit, then checks all parents.
-	// Returns false if not set anywhere.
-	PropInherit(key string, inherit bool) (any, bool)
-
 	// DeleteProp deletes property key on this node.
 	DeleteProp(key string)
-
-	// PropTag returns the name to look for in type properties, for types
-	// that are valid options for values that can be set in Props.  For example
-	// in Cogent Core, it is "style-props" which is then set for all types that can
-	// be used in a style (colors, enum options, etc)
-	PropTag() string
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Tree walking and Paths
