@@ -302,22 +302,19 @@ type Node interface {
 	// DeleteProperty deletes the property with the given key.
 	DeleteProperty(key string)
 
-	//////////////////////////////////////////////////////////////////////////
-	//  Tree walking and Paths
-	//   note: always put function args last -- looks better for inline functions
+	// Tree Walking:
 
-	// WalkUp calls function on given node and all the way up to its parents,
-	// and so on -- sequentially all in current go routine (generally
-	// necessary for going up, which is typically quite fast anyway) -- level
-	// is incremented after each step (starts at 0, goes up), and passed to
-	// function -- returns false if fun aborts with false, else true.
+	// WalkUp calls the given function on the node and all of its parents, sequentially in
+	// the current goroutine (generally necessary for going up, which is typically quite fast
+	// anyway). It stops walking if the function returns [Break] and keeps walking if it returns
+	// [Continue]. It returns whether walking was finished (false if it was aborted with [Break]).
 	WalkUp(fun func(k Node) bool) bool
 
-	// WalkUpParent calls function on parent of node and all the way up to its
-	// parents, and so on -- sequentially all in current go routine (generally
-	// necessary for going up, which is typically quite fast anyway) -- level
-	// is incremented after each step (starts at 0, goes up), and passed to
-	// function -- returns false if fun aborts with false, else true.
+	// WalkUpParent calls the given function on all of the node's parents (but not
+	// the node itself), sequentially in the current goroutine (generally necessary
+	// for going up, which is typically quite fast anyway). It stops walking if the
+	// function returns [Break] and keeps walking if it returns [Continue]. It returns
+	// whether walking was finished (false if it was aborted with [Break]).
 	WalkUpParent(fun func(k Node) bool) bool
 
 	// WalkPre calls function on this node (MeFirst) and then iterates
