@@ -30,11 +30,11 @@ The first and most important application of ki is the Cogent Core graphical inte
 
 The [parse](https://pkg.go.dev/cogentcore.org/core/parse) interactive parsing framework also leverages Cogent Core trees to represent the AST (abstract syntax tree) of programs in different languages.  Further, the parser grammar itself is written (in a GUI interactive way) as a tree of parsing elements using tree nodes.
 
-# Simple Example 
+## Examples
 
 See `node_test.go` for lots of simple usage examples.
 
-# Trick for fast finding in a slice
+## Trick for fast finding in a slice
 
 Cogent Core takes an extra starting index arg for all methods that lookup a value in a slice, such as ChildByName.  The search for the item starts at that index, and goes up and down from there.  Thus, if you have any idea where the item might be in the list, it can save (considerable for large lists) time finding it.
 
