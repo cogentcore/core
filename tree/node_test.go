@@ -362,7 +362,7 @@ func TestNodeCallFun(t *testing.T) {
 	UniquifyNames(parent.This())
 
 	res := make([]string, 0, 10)
-	parent.WalkPreLevel(func(k Node, level int) bool {
+	parent.WalkDownLevel(func(k Node, level int) bool {
 		res = append(res, fmt.Sprintf("[%v, lev %v]", k.Name(), level))
 		return true
 	})
@@ -374,7 +374,7 @@ func TestNodeCallFun(t *testing.T) {
 	res = res[:0]
 
 	// test return = false case
-	parent.WalkPreLevel(func(k Node, level int) bool {
+	parent.WalkDownLevel(func(k Node, level int) bool {
 		res = append(res, fmt.Sprintf("[%v, lev %v]", k.Name(), level))
 		if k.Name() == "child1_001" {
 			return Break

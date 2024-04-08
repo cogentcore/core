@@ -794,15 +794,15 @@ outer:
 // Ki Trees (e.g., Fields).
 func (n *NodeBase) NodeWalkDown(fun func(Node) bool) {}
 
-// WalkPreLevel calls function on this node (MeFirst) and then iterates
+// WalkDownLevel calls function on this node (MeFirst) and then iterates
 // in a depth-first manner over all the children.
 // This version has a level var that tracks overall depth in the tree.
 // If fun returns false then any further traversal of that branch of the tree is
 // aborted, but other branches continue -- i.e., if fun on current node
 // returns false, children are not processed further.
-// Because WalkPreLevel is not used within Ki itself, it does not have its
+// Because WalkDownLevel is not used within Ki itself, it does not have its
 // own version of WalkPreNode -- that can be handled within the closure.
-func (n *NodeBase) WalkPreLevel(fun func(k Node, level int) bool) {
+func (n *NodeBase) WalkDownLevel(fun func(k Node, level int) bool) {
 	if n.This() == nil {
 		return
 	}
