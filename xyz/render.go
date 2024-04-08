@@ -192,7 +192,7 @@ func (sc *Scene) UpdateMeshBBox() {
 		if kii == nil {
 			continue
 		}
-		kii.WalkPost(func(k tree.Node) bool {
+		kii.WalkDownPost(func(k tree.Node) bool {
 			ni, _ := AsNode(k)
 			if ni == nil {
 				return tree.Break

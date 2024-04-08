@@ -340,23 +340,22 @@ type Node interface {
 	// for concurrent calling.
 	WalkDownLevel(fun func(k Node, level int) bool)
 
-	// WalkPost iterates in a depth-first manner over the children, calling
-	// doChildTestFunc on each node to test if processing should proceed (if
-	// it returns false then that branch of the tree is not further processed),
-	// and then calls given fun function after all of a node's children
-	// have been iterated over ("Me Last").
-	// This uses node state information to manage the traversal and is very fast,
-	// but can only be called by one thread at a time -- use a Mutex if there is
-	// a chance of multiple threads running at the same time.
-	// Function calls are sequential all in current go routine.
-	// The level var tracks overall depth in the tree.
-	WalkPost(doChildTestFunc func(k Node) bool, fun func(k Node) bool)
+	// WalkDownPost iterates in a depth-first manner over the children, calling
+	// doChildTest on each node to test if processing should proceed (if it returns
+	// [Break] then that branch of the tree is not further processed),
+	// and then calls the given function after all of a node's children
+	// have been iterated over. In effect, this means that the given function
+	// is called for deeper nodes first. This uses node state information to manage
+	// the traversal and is very fast, but can only be called by one goroutine at a
+	// time, so you should use a Mutex if there is a chance of multiple threads
+	// running at the same time. The nodes are processed in the current goroutine.
+	WalkDownPost(doChildTest func(k Node) bool, fun func(k Node) bool)
 
-	// WalkBreadth calls function on all children in breadth-first order
-	// using the standard queue strategy.  This depends on and updates the
-	// Depth parameter of the node.  If fun returns false then any further
-	// traversal of that branch of the tree is aborted, but other branches continue.
-	WalkBreadth(fun func(k Node) bool)
+	// WalkDownBreadth calls the given function on the node and all of its children
+	// in breadth-first order. It stops walking the current branch of the tree if the
+	// function returns [Break] and keeps walking if it returns [Continue]. It is
+	// non-recursive, but not safe for concurrent calling.
+	WalkDownBreadth(fun func(k Node) bool)
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Deep Copy of Trees

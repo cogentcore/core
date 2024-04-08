@@ -858,7 +858,7 @@ outer:
 	}
 }
 
-// WalkPost iterates in a depth-first manner over the children, calling
+// WalkDownPost iterates in a depth-first manner over the children, calling
 // doChildTestFunc on each node to test if processing should proceed (if it returns
 // false then that branch of the tree is not further processed), and then
 // calls given fun function after all of a node's children.
@@ -867,7 +867,7 @@ outer:
 // for concurrent calling (modulo conflict management in function call itself).
 // Function calls are sequential all in current go routine.
 // The level var tracks overall depth in the tree.
-func (n *NodeBase) WalkPost(doChildTestFunc func(Node) bool, fun func(Node) bool) {
+func (n *NodeBase) WalkDownPost(doChildTestFunc func(Node) bool, fun func(Node) bool) {
 	if n.This() == nil {
 		return
 	}
@@ -923,15 +923,15 @@ outer:
 // https://herringtondarkholme.github.io/2014/02/17/generator/
 // https://stackoverflow.com/questions/2549541/performing-breadth-first-search-recursively/2549825#2549825
 
-// WalkBreadth calls function on all children in breadth-first order
+// WalkDownBreadth calls function on all children in breadth-first order
 // using the standard queue strategy.  This depends on and updates the
 // Depth parameter of the node.  If fun returns false then any further
 // traversal of that branch of the tree is aborted, but other branches continue.
-func (n *NodeBase) WalkBreadth(fun func(k Node) bool) {
+func (n *NodeBase) WalkDownBreadth(fun func(k Node) bool) {
 	start := n.This()
 
 	level := 0
-	SetDepth(start, level)
+	start.AsTreeNode().depth = level
 	queue := make([]Node, 1)
 	queue[0] = start
 
@@ -940,14 +940,14 @@ func (n *NodeBase) WalkBreadth(fun func(k Node) bool) {
 			break
 		}
 		cur := queue[0]
-		depth := Depth(cur)
+		depth := cur.AsTreeNode().depth
 		queue = queue[1:]
 
 		if cur.This() != nil && fun(cur) { // false return means don't proceed
-			for _, k := range *cur.Children() {
-				if k != nil && k.This() != nil {
-					SetDepth(k, depth+1)
-					queue = append(queue, k)
+			for _, cn := range *cur.Children() {
+				if cn != nil && cn.This() != nil {
+					cn.AsTreeNode().depth = depth + 1
+					queue = append(queue, cn)
 				}
 			}
 		}

@@ -400,7 +400,7 @@ func TestNodeCallFun(t *testing.T) {
 	}
 	res = res[:0]
 
-	parent.WalkPost(func(k Node) bool {
+	parent.WalkDownPost(func(k Node) bool {
 		return Continue
 	},
 		func(k Node) bool {
@@ -415,7 +415,7 @@ func TestNodeCallFun(t *testing.T) {
 	res = res[:0]
 
 	// test for return = false working
-	parent.WalkPost(func(k Node) bool {
+	parent.WalkDownPost(func(k Node) bool {
 		if k.Name() == "child1_001" {
 			return Break
 		}
@@ -435,7 +435,7 @@ func TestNodeCallFun(t *testing.T) {
 	}
 	res = res[:0]
 
-	parent.WalkBreadth(func(k Node) bool {
+	parent.WalkDownBreadth(func(k Node) bool {
 		res = append(res, fmt.Sprintf("[%v]", k.Name()))
 		return Continue
 	})
@@ -447,7 +447,7 @@ func TestNodeCallFun(t *testing.T) {
 	res = res[:0]
 
 	// test for return false
-	parent.WalkBreadth(func(k Node) bool {
+	parent.WalkDownBreadth(func(k Node) bool {
 		if k.Name() == "child1_001" {
 			return Break
 		}

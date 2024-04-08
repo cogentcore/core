@@ -414,7 +414,7 @@ func (ly *Layout) FocusOnName(e events.Event) bool {
 func ChildByLabelCanFocus(ly *Layout, name string, after tree.Node) tree.Node {
 	gotAfter := false
 	completions := []complete.Completion{}
-	ly.WalkBreadth(func(k tree.Node) bool {
+	ly.WalkDownBreadth(func(k tree.Node) bool {
 		if k == ly.This() { // skip us
 			return tree.Continue
 		}

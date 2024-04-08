@@ -129,18 +129,6 @@ func Root(k Node) Node {
 	return Root(k.Parent())
 }
 
-// Depth returns the current depth of the node.
-// This is only valid in a given context, not a stable
-// property of the node (e.g., used in WalkBreadth).
-func Depth(kn Node) int {
-	return kn.AsTreeNode().depth
-}
-
-// SetDepth sets the current depth of the node to given value.
-func SetDepth(kn Node, depth int) {
-	kn.AsTreeNode().depth = depth
-}
-
 //////////////////////////////////////////////////
 //  Unique Names
 
