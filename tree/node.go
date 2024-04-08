@@ -332,14 +332,6 @@ type Node interface {
 	// to [Node.WalkDown] after the function is called with the node itself.
 	NodeWalkDown(fun func(k Node) bool)
 
-	// WalkDownLevel calls the given function on the node and all of its children
-	// in a depth-first manner over all of the children, sequentially in the
-	// current goroutine, passing the current depth level to the function. It
-	// stops walking the current branch of the tree if the function returns [Break]
-	// and keeps walking if it returns [Continue]. It is non-recursive and safe
-	// for concurrent calling.
-	WalkDownLevel(fun func(k Node, level int) bool)
-
 	// WalkDownPost iterates in a depth-first manner over the children, calling
 	// doChildTest on each node to test if processing should proceed (if it returns
 	// [Break] then that branch of the tree is not further processed),

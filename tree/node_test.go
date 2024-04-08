@@ -7,7 +7,6 @@ package tree_test
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -347,7 +346,7 @@ func TestNodeConfig(t *testing.T) {
 //////////////////////////////////////////
 //  function calling
 
-func TestNodeCallFun(t *testing.T) {
+func TestNodeWalk(t *testing.T) {
 	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
 	typ := parent.NodeType()
@@ -361,32 +360,7 @@ func TestNodeCallFun(t *testing.T) {
 	schild2 := child2.NewChild(typ, "subchild1")
 	UniquifyNames(parent.This())
 
-	res := make([]string, 0, 10)
-	parent.WalkDownLevel(func(k Node, level int) bool {
-		res = append(res, fmt.Sprintf("[%v, lev %v]", k.Name(), level))
-		return true
-	})
-
-	trg := []string{"[par1, lev 0]", "[child1, lev 1]", "[child1_001, lev 1]", "[subchild1, lev 2]", "[child1_002, lev 1]"}
-	if !reflect.DeepEqual(res, trg) {
-		t.Errorf("FuncDown error -- results:\n%v\n != target:\n%v\n", res, trg)
-	}
-	res = res[:0]
-
-	// test return = false case
-	parent.WalkDownLevel(func(k Node, level int) bool {
-		res = append(res, fmt.Sprintf("[%v, lev %v]", k.Name(), level))
-		if k.Name() == "child1_001" {
-			return Break
-		}
-		return Continue
-	})
-
-	trg = []string{"[par1, lev 0]", "[child1, lev 1]", "[child1_001, lev 1]", "[child1_002, lev 1]"}
-	if !reflect.DeepEqual(res, trg) {
-		t.Errorf("FuncDown return false error -- results:\n%v\n != target:\n%v\n", res, trg)
-	}
-	res = res[:0]
+	res := []string{}
 
 	schild2.WalkUp(func(k Node) bool {
 		res = append(res, fmt.Sprintf("%v", k.Name()))
@@ -394,10 +368,8 @@ func TestNodeCallFun(t *testing.T) {
 	})
 	//	fmt.Printf("result: %v\n", res)
 
-	trg = []string{"subchild1", "child1_001", "par1"}
-	if !reflect.DeepEqual(res, trg) {
-		t.Errorf("WalkUp error -- results: %v != target: %v\n", res, trg)
-	}
+	trg := []string{"subchild1", "child1_001", "par1"}
+	assert.Equal(t, trg, res)
 	res = res[:0]
 
 	parent.WalkDownPost(func(k Node) bool {
@@ -409,9 +381,7 @@ func TestNodeCallFun(t *testing.T) {
 		})
 	// fmt.Printf("node field fun result: %v\n", res)
 	trg = []string{"[child1]", "[subchild1]", "[child1_001]", "[child1_002]", "[par1]"}
-	if !reflect.DeepEqual(res, trg) {
-		t.Errorf("NodeField WalkPost error -- results:\n%v\n!= target:\n%v\n", res, trg)
-	}
+	assert.Equal(t, trg, res)
 	res = res[:0]
 
 	// test for return = false working
@@ -430,9 +400,7 @@ func TestNodeCallFun(t *testing.T) {
 		})
 	// fmt.Printf("node field fun result: %v\n", res)
 	trg = []string{"[child1]", "[child1_002]", "[par1]"}
-	if !reflect.DeepEqual(res, trg) {
-		t.Errorf("NodeField WalkPost error -- results:\n%v\n!= target:\n%v\n", res, trg)
-	}
+	assert.Equal(t, trg, res)
 	res = res[:0]
 
 	parent.WalkDownBreadth(func(k Node) bool {
@@ -441,9 +409,7 @@ func TestNodeCallFun(t *testing.T) {
 	})
 	// fmt.Printf("node field fun result: %v\n", res)
 	trg = []string{"[par1]", "[child1]", "[child1_001]", "[child1_002]", "[subchild1]"}
-	if !reflect.DeepEqual(res, trg) {
-		t.Errorf("NodeField WalkBreadth error -- results:\n%v\n!= target:\n%v\n", res, trg)
-	}
+	assert.Equal(t, trg, res)
 	res = res[:0]
 
 	// test for return false
@@ -456,9 +422,7 @@ func TestNodeCallFun(t *testing.T) {
 	})
 	// fmt.Printf("node field fun result: %v\n", res)
 	trg = []string{"[par1]", "[child1]", "[child1_002]"}
-	if !reflect.DeepEqual(res, trg) {
-		t.Errorf("NodeField WalkBreadth error -- results:\n%v\n!= target:\n%v\n", res, trg)
-	}
+	assert.Equal(t, trg, res)
 	res = res[:0]
 }
 
