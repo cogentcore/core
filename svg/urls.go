@@ -68,7 +68,7 @@ func NameID(nm string, id int) string {
 // It automatically renames any that are not unique or empty.
 func (sv *SVG) GatherIDs() {
 	sv.UniqueIds = make(map[int]struct{})
-	sv.Root.WalkPre(func(k tree.Node) bool {
+	sv.Root.WalkDown(func(k tree.Node) bool {
 		sv.NodeEnsureUniqueId(k.(Node))
 		return tree.Continue
 	})
@@ -153,7 +153,7 @@ func (sv *SVG) FindNamedElement(name string) Node {
 	if def != nil {
 		return def
 	}
-	sv.Root.WalkPre(func(k tree.Node) bool {
+	sv.Root.WalkDown(func(k tree.Node) bool {
 		if k.Name() == name {
 			def = k.This().(Node)
 			return tree.Break
@@ -239,7 +239,7 @@ func (sv *SVG) RemoveOrphanedDefs() bool {
 	for _, k := range sv.Defs.Kids {
 		k.SetProperty(refkey, 0)
 	}
-	sv.Root.WalkPre(func(k tree.Node) bool {
+	sv.Root.WalkDown(func(k tree.Node) bool {
 		pr := k.Properties()
 		for _, v := range pr {
 			ps := laser.ToString(v)

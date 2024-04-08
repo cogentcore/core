@@ -40,7 +40,7 @@ func (sc *Scene) AddFromLibrary(nm string, parent tree.Node) (*Group, error) {
 	nwgp := gp.Clone().(*Group)
 	parent.AddChild(nwgp)
 
-	parent.WalkPre(func(k tree.Node) bool {
+	parent.WalkDown(func(k tree.Node) bool {
 		ni, nb := AsNode(k)
 		if ni == nil {
 			return tree.Break

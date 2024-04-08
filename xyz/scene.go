@@ -159,7 +159,7 @@ func (sc *Scene) Validate() error {
 	// 	*errs = append(*errs, err)
 	// }
 	hasError := false
-	sc.WalkPre(func(k tree.Node) bool {
+	sc.WalkDown(func(k tree.Node) bool {
 		if k == sc.This() {
 			return tree.Continue
 		}
@@ -237,7 +237,7 @@ func (sc *Scene) SolidsIntersectingPoint(pos image.Point) []Node {
 		if kii == nil {
 			continue
 		}
-		kii.WalkPre(func(k tree.Node) bool {
+		kii.WalkDown(func(k tree.Node) bool {
 			ni, _ := AsNode(k)
 			if ni == nil {
 				return tree.Break // going into a different type of thing, bail

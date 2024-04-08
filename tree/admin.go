@@ -171,7 +171,7 @@ func UniqueNameCheck(k Node) bool {
 // if not unique, call UniquifyNames or take other steps to ensure uniqueness.
 func UniqueNameCheckAll(kn Node) bool {
 	allunq := true
-	kn.WalkPre(func(k Node) bool {
+	kn.WalkDown(func(k Node) bool {
 		unq := UniqueNameCheck(k)
 		if !unq {
 			allunq = false
@@ -271,7 +271,7 @@ func UniquifyNames(kn Node) {
 // Otherwise, existing names are preserved if they are unique, and only
 // duplicates are renamed.  This is a bit slower.
 func UniquifyNamesAll(kn Node) {
-	kn.WalkPre(func(k Node) bool {
+	kn.WalkDown(func(k Node) bool {
 		UniquifyNames(k)
 		return Continue
 	})

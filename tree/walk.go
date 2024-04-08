@@ -14,7 +14,7 @@ package tree
 func Last(nd Node) Node {
 	nd = LastChild(nd)
 	last := nd
-	nd.WalkPre(func(k Node) bool {
+	nd.WalkDown(func(k Node) bool {
 		last = k
 		return Continue
 	})

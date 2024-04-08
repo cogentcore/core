@@ -177,7 +177,7 @@ func (sv *SVG) ImageByURL(url string) image.Image {
 
 func (sv *SVG) Style() {
 	// set the Defs flags
-	sv.Defs.WalkPre(func(k tree.Node) bool {
+	sv.Defs.WalkDown(func(k tree.Node) bool {
 		ni := k.(Node)
 		if ni == nil || ni.This() == nil {
 			return tree.Break
@@ -196,7 +196,7 @@ func (sv *SVG) Style() {
 	}
 	sv.SetUnitContext(&sv.Root.Paint, mat32.Vec2{}, mat32.Vec2{})
 
-	sv.Root.WalkPre(func(k tree.Node) bool {
+	sv.Root.WalkDown(func(k tree.Node) bool {
 		ni := k.(Node)
 		if ni == nil || ni.This() == nil {
 			return tree.Break

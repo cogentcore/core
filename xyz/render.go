@@ -213,7 +213,7 @@ func (sc *Scene) UpdateMeshBBox() {
 // UpdateWorldMatrix updates the world matrix for node and everything inside it
 func UpdateWorldMatrix(n tree.Node) {
 	idmtx := mat32.Identity4()
-	n.WalkPre(func(k tree.Node) bool {
+	n.WalkDown(func(k tree.Node) bool {
 		ni, _ := AsNode(k)
 		if ni == nil {
 			return tree.Continue
@@ -240,7 +240,7 @@ func (sc *Scene) UpdateMVPMatrix() {
 	sz := sc.Geom.Size
 	size := mat32.V2(float32(sz.X), float32(sz.Y))
 
-	sc.WalkPre(func(k tree.Node) bool {
+	sc.WalkDown(func(k tree.Node) bool {
 		if k.This() == sc.This() {
 			return tree.Continue
 		}
@@ -256,7 +256,7 @@ func (sc *Scene) UpdateMVPMatrix() {
 
 // ConfigNodes runs Config on all nodes
 func (sc *Scene) ConfigNodes() {
-	sc.WalkPre(func(k tree.Node) bool {
+	sc.WalkDown(func(k tree.Node) bool {
 		if k == sc.This() {
 			return tree.Continue
 		}
@@ -374,7 +374,7 @@ func (sc *Scene) RenderImpl() {
 	sc.Phong.Sync()
 
 	var rcs [RenderClassesN][]Node
-	sc.WalkPre(func(k tree.Node) bool {
+	sc.WalkDown(func(k tree.Node) bool {
 		if k == sc.This() {
 			return tree.Continue
 		}

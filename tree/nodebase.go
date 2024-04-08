@@ -726,7 +726,7 @@ func (tm TravMap) Get(k Node) int {
 // strategy -- same as used in TreeView:
 // https://stackoverflow.com/questions/5278580/non-recursive-depth-first-search-algorithm
 
-// WalkPre calls function on this node (MeFirst) and then iterates
+// WalkDown calls function on this node (MeFirst) and then iterates
 // in a depth-first manner over all the children.
 // The [WalkPreNode] method is called for every node, after the given function,
 // which e.g., enables nodes to also traverse additional Ki Trees (e.g., Fields).
@@ -736,7 +736,7 @@ func (tm TravMap) Get(k Node) int {
 // If fun returns false then any further traversal of that branch of the tree is
 // aborted, but other branches continue -- i.e., if fun on current node
 // returns false, children are not processed further.
-func (n *NodeBase) WalkPre(fun func(Node) bool) {
+func (n *NodeBase) WalkDown(fun func(Node) bool) {
 	if n.This() == nil {
 		return
 	}
@@ -747,7 +747,7 @@ func (n *NodeBase) WalkPre(fun func(Node) bool) {
 outer:
 	for {
 		if cur.This() != nil && fun(cur) { // false return means stop
-			n.This().WalkPreNode(fun)
+			n.This().NodeWalkDown(fun)
 			if cur.HasChildren() {
 				tm.Set(cur, 0) // 0 for no fields
 				nxt := cur.Child(0)
@@ -789,10 +789,10 @@ outer:
 	}
 }
 
-// WalkPreNode is called for every node during WalkPre with the function
+// NodeWalkDown is called for every node during WalkPre with the function
 // passed to WalkPre.  This e.g., enables nodes to also traverse additional
 // Ki Trees (e.g., Fields).
-func (n *NodeBase) WalkPreNode(fun func(Node) bool) {}
+func (n *NodeBase) NodeWalkDown(fun func(Node) bool) {}
 
 // WalkPreLevel calls function on this node (MeFirst) and then iterates
 // in a depth-first manner over all the children.

@@ -477,7 +477,7 @@ func TestNodeUpdate(t *testing.T) {
 
 	UniquifyNamesAll(parent.This())
 
-	parent.WalkPre(func(n Node) bool {
+	parent.WalkDown(func(n Node) bool {
 		res = append(res, n.Path())
 		return Continue
 	})
@@ -765,7 +765,7 @@ func BenchmarkWalkPre_NodeEmbed(b *testing.B) {
 	wt := TestGUITree_NodeEmbed
 	nnodes := 0
 	for n := 0; n < b.N; n++ {
-		wt.WalkPre(func(k Node) bool {
+		wt.WalkDown(func(k Node) bool {
 			nnodes++
 			return Continue
 		})
@@ -778,7 +778,7 @@ func BenchmarkWalkPre_NodeField(b *testing.B) {
 	wt := TestGUITree_NodeField
 	nnodes := 0
 	for n := 0; n < b.N; n++ {
-		wt.WalkPre(func(k Node) bool {
+		wt.WalkDown(func(k Node) bool {
 			nnodes++
 			return Continue
 		})
@@ -791,7 +791,7 @@ func BenchmarkWalkPre_NodeField2(b *testing.B) {
 	wt := TestGUITree_NodeField2
 	nnodes := 0
 	for n := 0; n < b.N; n++ {
-		wt.WalkPre(func(k Node) bool {
+		wt.WalkDown(func(k Node) bool {
 			nnodes++
 			return Continue
 		})

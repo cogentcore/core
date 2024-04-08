@@ -304,10 +304,11 @@ type Node interface {
 
 	// Tree Walking:
 
-	// WalkUp calls the given function on the node and all of its parents, sequentially in
-	// the current goroutine (generally necessary for going up, which is typically quite fast
-	// anyway). It stops walking if the function returns [Break] and keeps walking if it returns
-	// [Continue]. It returns whether walking was finished (false if it was aborted with [Break]).
+	// WalkUp calls the given function on the node and all of its parents,
+	// sequentially in the current goroutine (generally necessary for going up,
+	// which is typically quite fast anyway). It stops walking if the function
+	// returns [Break] and keeps walking if it returns [Continue]. It returns
+	// whether walking was finished (false if it was aborted with [Break]).
 	WalkUp(fun func(k Node) bool) bool
 
 	// WalkUpParent calls the given function on all of the node's parents (but not
@@ -317,22 +318,19 @@ type Node interface {
 	// whether walking was finished (false if it was aborted with [Break]).
 	WalkUpParent(fun func(k Node) bool) bool
 
-	// WalkPre calls function on this node (MeFirst) and then iterates
-	// in a depth-first manner over all the children.
-	// The [WalkPreNode] method is called for every node, after the given function,
-	// which e.g., enables nodes to also traverse additional Ki Trees (e.g., Fields).
-	// The node traversal is non-recursive and uses locally-allocated state -- safe
-	// for concurrent calling (modulo conflict management in function call itself).
-	// Function calls are sequential all in current go routine.
-	// If fun returns false then any further traversal of that branch of the tree is
-	// aborted, but other branches continue -- i.e., if fun on current node
-	// returns false, children are not processed further.
-	WalkPre(fun func(k Node) bool)
+	// WalkDown calls the given function on the node and all of its children
+	// in a depth-first manner over all of the children, sequentially in the
+	// current goroutine. It stops walking the current branch of the tree if
+	// the function returns [Break] and keeps walking if it returns [Continue].
+	// It is non-recursive and safe for concurrent calling. The [Node.NodeWalkDown]
+	// method is called for every node after the given function, which enables nodes
+	// to also traverse additional nodes, like widget parts.
+	WalkDown(fun func(k Node) bool)
 
-	// WalkPreNode is called for every node during WalkPre with the function
-	// passed to WalkPre.  This e.g., enables nodes to also traverse additional
-	// Ki Trees (e.g., Fields).
-	WalkPreNode(fun func(k Node) bool)
+	// NodeWalkDown is a method that nodes can implement to traverse additional nodes
+	// like widget parts during [Node.WalkDown]. It is called with the function passed
+	// to [Node.WalkDown] after the function is called with the node itself.
+	NodeWalkDown(fun func(k Node) bool)
 
 	// WalkPreLevel calls function on this node (MeFirst) and then iterates
 	// in a depth-first manner over all the children.

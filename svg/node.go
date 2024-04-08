@@ -266,7 +266,7 @@ func (g *NodeBase) ReadGeom(sv *SVG, dat []float32) {
 // nil or deleted items.  Return [tree.Continue] (true) to continue,
 // and [tree.Break] (false) to terminate.
 func SVGWalkPre(n Node, fun func(kni Node, knb *NodeBase) bool) {
-	n.WalkPre(func(k tree.Node) bool {
+	n.WalkDown(func(k tree.Node) bool {
 		kni := k.(Node)
 		if kni == nil || kni.This() == nil {
 			return tree.Break
@@ -281,7 +281,7 @@ func SVGWalkPre(n Node, fun func(kni Node, knb *NodeBase) bool) {
 // i.e., it only processes concrete graphical nodes.
 // Return [tree.Continue] (true) to continue, and [tree.Break] (false) to terminate.
 func SVGWalkPreNoDefs(n Node, fun func(kni Node, knb *NodeBase) bool) {
-	n.WalkPre(func(k tree.Node) bool {
+	n.WalkDown(func(k tree.Node) bool {
 		kni := k.(Node)
 		if kni == nil || kni.This() == nil {
 			return tree.Break

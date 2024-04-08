@@ -483,12 +483,12 @@ func (wb *WidgetBase) FieldByName(field string) (tree.Node, error) {
 	return nil, fmt.Errorf("no field %q for %v; only parts", field, wb)
 }
 
-// WalkPreNode extends WalkPre to Parts, which is key for getting full Update protection.
-func (wb *WidgetBase) WalkPreNode(fun func(tree.Node) bool) {
+// NodeWalkDown extends WalkPre to Parts, which is key for getting full Update protection.
+func (wb *WidgetBase) NodeWalkDown(fun func(tree.Node) bool) {
 	if wb.Parts == nil {
 		return
 	}
-	wb.Parts.WalkPre(fun)
+	wb.Parts.WalkDown(fun)
 }
 
 // WidgetKidsIter iterates through the Kids, as widgets, calling the given function.
@@ -530,7 +530,7 @@ func (wb *WidgetBase) VisibleKidsIter(fun func(i int, kwi Widget, kwb *WidgetBas
 // nil or deleted items and operates on Widget types.
 // Return [tree.Continue] (true) to continue, and [tree.Break] (false) to terminate.
 func (wb *WidgetBase) WidgetWalkPre(fun func(kwi Widget, kwb *WidgetBase) bool) {
-	wb.WalkPre(func(k tree.Node) bool {
+	wb.WalkDown(func(k tree.Node) bool {
 		kwi, kwb := AsWidget(k)
 		if kwi == nil || kwi.This() == nil {
 			return tree.Break
