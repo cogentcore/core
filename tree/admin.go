@@ -35,9 +35,9 @@ func checkThis(n Node) error {
 	return grr.Log(fmt.Errorf("tree.Node %q has nil Node.This; you must use NewRoot or call Node.InitName on root nodes", n.Path()))
 }
 
-// SetParent just sets parent of node (and inherits update count from
-// parent, to keep consistent).
-// Assumes not already in a tree or anything.
+// SetParent sets the parent of the given node to the given parent node.
+// This is only for nodes with no existing parent; see [MoveToParent] to
+// move nodes that already have a parent.
 func SetParent(kid Node, parent Node) {
 	n := kid.AsTreeNode()
 	n.Par = parent
