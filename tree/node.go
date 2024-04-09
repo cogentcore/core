@@ -10,6 +10,8 @@ package tree
 //go:generate core generate ./testdata
 
 import (
+	"fmt"
+
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/gti"
 )
@@ -49,6 +51,16 @@ import (
 // in `core generate`, which is required for various
 // pieces of core functionality.
 type Node interface {
+	fmt.Stringer
+
+	// This returns the Node as its true underlying type.
+	// It returns nil if the node is nil, has been destroyed,
+	// or is improperly constructed.
+	This() Node
+
+	// AsTreeNode returns the [NodeBase] for this Node.
+	AsTreeNode() *NodeBase
+
 	// InitName initializes this node to the given actual object as a Node interface
 	// and sets its name. The names should be unique among children of a node.
 	// This is called automatically when adding child nodes and using [NewRoot].
@@ -58,14 +70,6 @@ type Node interface {
 	// the proper Node interface pointer will be obtained. This is the only
 	// way to get virtual functional calling to work within the Go language.
 	InitName(this Node, name ...string)
-
-	// This returns the Node as its true underlying type.
-	// It returns nil if the node is nil, has been destroyed,
-	// or is improperly constructed.
-	This() Node
-
-	// AsTreeNode returns the [NodeBase] for this Node.
-	AsTreeNode() *NodeBase
 
 	// Name returns the user-defined name of the Node, which can be
 	// used for finding elements, generating paths, I/O, etc.

@@ -67,27 +67,14 @@ type NodeBase struct {
 	depth int
 }
 
-// check implementation of [Node] interface
-var _ = Node(&NodeBase{})
-
-// StringElideMax is the Max width for [NodeBase.String] path printout of Ki nodes.
-var StringElideMax = 38
-
-//////////////////////////////////////////////////////////////////////////
-//  fmt.Stringer
-
-// String implements the fmt.stringer interface -- returns the Path of the node
+// String implements the fmt.Stringer interface by returning the path of the node.
 func (n *NodeBase) String() string {
-	return elide.Middle(n.This().Path(), StringElideMax)
+	return elide.Middle(n.This().Path(), 38)
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  Basic Ki fields
-
-// This returns the Ki interface that guarantees access to the Ki
-// interface in a way that always reveals the underlying type
-// (e.g., in reflect calls).  Returns nil if node is nil,
-// has been destroyed, or is improperly constructed.
+// This returns the Node as its true underlying type.
+// It returns nil if the node is nil, has been destroyed,
+// or is improperly constructed.
 func (n *NodeBase) This() Node {
 	if n == nil {
 		return nil
@@ -95,19 +82,18 @@ func (n *NodeBase) This() Node {
 	return n.this
 }
 
-// AsTreeNode returns the *tree.NodeBase base type for this node.
+// AsTreeNode returns the [NodeBase] for this Node.
 func (n *NodeBase) AsTreeNode() *NodeBase {
 	return n
 }
 
-// InitName initializes this node to given actual object as a Ki interface
+// InitName initializes this node to the given actual object as a Node interface
 // and sets its name. The names should be unique among children of a node.
-// This is needed for root nodes -- automatically done for other nodes
-// when they are added to the Ki tree. If the name is unspecified, it
-// defaults to the ID (kebab-case) name of the type.
+// This is called automatically when adding child nodes and using [NewRoot].
+// If the name is unspecified, it defaults to the ID (kebab-case) name of the type.
 // Even though this is a method and gets the method receiver, it needs
 // an "external" version of itself passed as the first arg, from which
-// the proper Ki interface pointer will be obtained.  This is the only
+// the proper Node interface pointer will be obtained. This is the only
 // way to get virtual functional calling to work within the Go language.
 func (n *NodeBase) InitName(k Node, name ...string) {
 	InitNode(k)
@@ -116,40 +102,26 @@ func (n *NodeBase) InitName(k Node, name ...string) {
 	}
 }
 
-// BaseType returns the base node type for all elements within this tree.
-// Used e.g., for determining what types of children can be created.
-func (n *NodeBase) BaseType() *gti.Type {
-	return NodeBaseType
-}
-
-// Name returns the user-defined name of the object (Node.Nm),
-// for finding elements, generating paths, IO, etc.
+// Name returns the user-defined name of the Node, which can be
+// used for finding elements, generating paths, I/O, etc.
 func (n *NodeBase) Name() string {
 	return n.Nm
 }
 
-// SetName sets the name of this node.
-// Names should generally be unique across children of each node.
-// See Unique* functions to check / fix.
-// If node requires non-unique names, add a separate Label field.
+// SetName sets the name of this node. Names should generally be unique
+// across children of each node. If the node requires some non-unique name,
+// add a separate Label field.
 func (n *NodeBase) SetName(name string) {
 	n.Nm = name
 }
 
-// OnInit is a placeholder implementation of
-// [Node.OnInit] that does nothing.
-func (n *NodeBase) OnInit() {}
+// BaseType returns the base node type for all elements within this tree.
+// This is used in the GUI for determining what types of children can be created.
+func (n *NodeBase) BaseType() *gti.Type {
+	return NodeBaseType
+}
 
-// OnAdd is a placeholder implementation of
-// [Node.OnAdd] that does nothing.
-func (n *NodeBase) OnAdd() {}
-
-// OnChildAdded is a placeholder implementation of
-// [Node.OnChildAdded] that does nothing.
-func (n *NodeBase) OnChildAdded(child Node) {}
-
-//////////////////////////////////////////////////////////////////////////
-//  Parents
+// Parents:
 
 // Parent returns the parent of this Ki (Node.Par) -- Ki has strict
 // one-parent, no-cycles structure -- see SetParent.
@@ -957,3 +929,15 @@ func (n *NodeBase) CopyFieldsFrom(from Node) {
 		slog.Error("tree.NodeBase.CopyFieldsFrom", "err", err)
 	}
 }
+
+// OnInit is a placeholder implementation of
+// [Node.OnInit] that does nothing.
+func (n *NodeBase) OnInit() {}
+
+// OnAdd is a placeholder implementation of
+// [Node.OnAdd] that does nothing.
+func (n *NodeBase) OnAdd() {}
+
+// OnChildAdded is a placeholder implementation of
+// [Node.OnChildAdded] that does nothing.
+func (n *NodeBase) OnChildAdded(child Node) {}
