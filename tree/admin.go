@@ -9,7 +9,6 @@ import (
 	"log/slog"
 	"reflect"
 	"strconv"
-	"strings"
 	"sync/atomic"
 
 	"cogentcore.org/core/gti"
@@ -119,153 +118,17 @@ func ChildByType[T Node](k Node, embeds bool, startIndex ...int) T {
 	return v
 }
 
-// IsRoot tests if this node is the root node -- checks Parent = nil.
-func IsRoot(k Node) bool {
-	return k.This() == nil || k.Parent() == nil || k.Parent().This() == nil
+// IsRoot tests whether the given node is the root node in its tree.
+func IsRoot(n Node) bool {
+	return n.This() == nil || n.Parent() == nil || n.Parent().This() == nil
 }
 
-// Root returns the root node of given ki node in tree (the node with a nil parent).
-func Root(k Node) Node {
-	if IsRoot(k) {
-		return k.This()
+// Root returns the root node of the given node's tree.
+func Root(n Node) Node {
+	if IsRoot(n) {
+		return n.This()
 	}
-	return Root(k.Parent())
-}
-
-//////////////////////////////////////////////////
-//  Unique Names
-
-// UniqueNameCheck checks if all the children names are unique or not.
-// returns true if all names are unique; false if not
-// if not unique, call UniquifyNames or take other steps to ensure uniqueness.
-func UniqueNameCheck(k Node) bool {
-	kk := *k.Children()
-	sz := len(kk)
-	nmap := make(map[string]struct{}, sz)
-	for _, child := range kk {
-		if child == nil {
-			continue
-		}
-		nm := child.Name()
-		_, hasnm := nmap[nm]
-		if hasnm {
-			return false
-		}
-		nmap[nm] = struct{}{}
-	}
-	return true
-}
-
-// UniqueNameCheckAll checks entire tree from given node,
-// if all the children names are unique or not.
-// returns true if all names are unique; false if not
-// if not unique, call UniquifyNames or take other steps to ensure uniqueness.
-func UniqueNameCheckAll(kn Node) bool {
-	allunq := true
-	kn.WalkDown(func(k Node) bool {
-		unq := UniqueNameCheck(k)
-		if !unq {
-			allunq = false
-			return Break
-		}
-		return Continue
-	})
-	return allunq
-}
-
-// UniquifyIndexAbove is the number of children above which UniquifyNamesAddIndex
-// is called -- that is much faster for large numbers of children.
-// Must be < 1000
-var UniquifyIndexAbove = 1000
-
-// UniquifyNamesAddIndex makes sure that the names are unique by automatically
-// adding a suffix with index number, separated by underbar.
-// Empty names get the parent name as a prefix.
-// if there is an existing underbar, then whatever is after it is replaced with
-// the unique index, ensuring that multiple calls are safe!
-func UniquifyNamesAddIndex(kn Node) {
-	kk := *kn.Children()
-	sz := len(kk)
-	sfmt := "%s_%05d"
-	switch {
-	case sz > 9999999:
-		sfmt = "%s_%10d"
-	case sz > 999999:
-		sfmt = "%s_%07d"
-	case sz > 99999:
-		sfmt = "%s_%06d"
-	}
-	parnm := "c"
-	if kn.Parent() != nil {
-		parnm = kn.Parent().Name()
-	}
-	for i, child := range kk {
-		if child == nil {
-			continue
-		}
-		nm := child.Name()
-		if nm == "" {
-			child.SetName(fmt.Sprintf(sfmt, parnm, i))
-		} else {
-			ubi := strings.LastIndex(nm, "_")
-			if ubi > 0 {
-				nm = nm[ubi+1:]
-			}
-			child.SetName(fmt.Sprintf(sfmt, nm, i))
-		}
-	}
-}
-
-// UniquifyNames makes sure that the names are unique.
-// If number of children >= UniquifyIndexAbove, then UniquifyNamesAddIndex
-// is called, for faster performance.
-// Otherwise, existing names are preserved if they are unique, and only
-// duplicates are renamed.  This is a bit slower.
-func UniquifyNames(kn Node) {
-	kk := *kn.Children()
-	sz := len(kk)
-	if sz >= UniquifyIndexAbove {
-		UniquifyNamesAddIndex(kn)
-		return
-	}
-	parnm := "c"
-	if kn.Parent() != nil {
-		parnm = kn.Parent().Name()
-	}
-	nmap := make(map[string]struct{}, sz)
-	for i, child := range kk {
-		if child == nil {
-			continue
-		}
-		nm := child.Name()
-		if nm == "" {
-			nm = fmt.Sprintf("%s_%03d", parnm, i)
-			child.SetName(nm)
-		} else {
-			_, hasnm := nmap[nm]
-			if hasnm {
-				ubi := strings.LastIndex(nm, "_")
-				if ubi > 0 {
-					nm = nm[ubi+1:]
-				}
-				nm = fmt.Sprintf("%s_%03d", nm, i)
-				child.SetName(nm)
-			}
-		}
-		nmap[nm] = struct{}{}
-	}
-}
-
-// UniquifyNamesAll makes sure that the names are unique for entire tree
-// If number of children >= UniquifyIndexAbove, then UniquifyNamesAddIndex
-// is called, for faster performance.
-// Otherwise, existing names are preserved if they are unique, and only
-// duplicates are renamed.  This is a bit slower.
-func UniquifyNamesAll(kn Node) {
-	kn.WalkDown(func(k Node) bool {
-		UniquifyNames(k)
-		return Continue
-	})
+	return Root(n.Parent())
 }
 
 // nodeType is the [reflect.Type] of [Node].

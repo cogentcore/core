@@ -76,19 +76,18 @@ func TestNodeUniqueNames(t *testing.T) {
 	parent.InitName(&parent, "par1")
 	typ := parent.NodeType()
 	child := parent.NewChild(typ, "child1")
-	child2 := parent.NewChild(typ, "child1")
-	child3 := parent.NewChild(typ, "child1")
+	child2 := parent.NewChild(typ, "child2")
+	child3 := parent.NewChild(typ, "child3")
 	if len(parent.Kids) != 3 {
 		t.Errorf("Children length != 3, was %d", len(parent.Kids))
 	}
-	UniquifyNamesAll(parent.This())
 	if pth := child.Path(); pth != "/par1/child1" {
 		t.Errorf("child path != correct, was %v", pth)
 	}
-	if pth := child2.Path(); pth != "/par1/child1_001" {
+	if pth := child2.Path(); pth != "/par1/child2" {
 		t.Errorf("child2 path != correct, was %v", pth)
 	}
-	if pth := child3.Path(); pth != "/par1/child1_002" {
+	if pth := child3.Path(); pth != "/par1/child3" {
 		t.Errorf("child3 path != correct, was %v", pth)
 	}
 
@@ -179,31 +178,6 @@ func TestNodeFindName(t *testing.T) {
 	if len(parent.Kids) != len(names) {
 		t.Errorf("Children length != n, was %d", len(parent.Kids))
 	}
-	for i, nm := range names {
-		for st := range names { // test all starting indexes
-			idx, ok := parent.Children().IndexByName(nm, st)
-			if !ok || idx != i {
-				t.Errorf("find index was not correct val of %d, was %d", i, idx)
-			}
-		}
-	}
-}
-
-func TestNodeFindNameUnique(t *testing.T) {
-	names := [...]string{"child", "child_001", "child_002", "child_003", "child_004", "child_005"}
-	parent := NodeBase{}
-	parent.InitName(&parent, "par")
-	typ := parent.NodeType()
-	for range names {
-		parent.NewChild(typ, "child")
-	}
-	if len(parent.Kids) != len(names) {
-		t.Errorf("Children length != n, was %d", len(parent.Kids))
-	}
-	if UniqueNameCheckAll(parent.This()) {
-		t.Errorf("UniqeNameCheckAll failed: Children are not unique!")
-	}
-	UniquifyNamesAll(parent.This())
 	for i, nm := range names {
 		for st := range names { // test all starting indexes
 			idx, ok := parent.Children().IndexByName(nm, st)
@@ -354,11 +328,10 @@ func TestNodeWalk(t *testing.T) {
 	parent.Mbr2 = 32
 	// child1 :=
 	parent.NewChild(typ, "child1")
-	child2 := parent.NewChild(typ, "child1")
+	child2 := parent.NewChild(typ, "child2")
 	// child3 :=
-	parent.NewChild(typ, "child1")
+	parent.NewChild(typ, "child3")
 	schild2 := child2.NewChild(typ, "subchild1")
-	UniquifyNames(parent.This())
 
 	res := []string{}
 
@@ -368,7 +341,7 @@ func TestNodeWalk(t *testing.T) {
 	})
 	//	fmt.Printf("result: %v\n", res)
 
-	trg := []string{"subchild1", "child1_001", "par1"}
+	trg := []string{"subchild1", "child2", "par1"}
 	assert.Equal(t, trg, res)
 	res = res[:0]
 
@@ -380,26 +353,26 @@ func TestNodeWalk(t *testing.T) {
 			return Continue
 		})
 	// fmt.Printf("node field fun result: %v\n", res)
-	trg = []string{"[child1]", "[subchild1]", "[child1_001]", "[child1_002]", "[par1]"}
+	trg = []string{"[child1]", "[subchild1]", "[child2]", "[child3]", "[par1]"}
 	assert.Equal(t, trg, res)
 	res = res[:0]
 
 	// test for return = false working
 	parent.WalkDownPost(func(k Node) bool {
-		if k.Name() == "child1_001" {
+		if k.Name() == "child2" {
 			return Break
 		}
 		return Continue
 	},
 		func(k Node) bool {
-			if k.Name() == "child1_001" {
+			if k.Name() == "child2" {
 				return Break
 			}
 			res = append(res, fmt.Sprintf("[%v]", k.Name()))
 			return Continue
 		})
 	// fmt.Printf("node field fun result: %v\n", res)
-	trg = []string{"[child1]", "[child1_002]", "[par1]"}
+	trg = []string{"[child1]", "[child3]", "[par1]"}
 	assert.Equal(t, trg, res)
 	res = res[:0]
 
@@ -408,20 +381,20 @@ func TestNodeWalk(t *testing.T) {
 		return Continue
 	})
 	// fmt.Printf("node field fun result: %v\n", res)
-	trg = []string{"[par1]", "[child1]", "[child1_001]", "[child1_002]", "[subchild1]"}
+	trg = []string{"[par1]", "[child1]", "[child2]", "[child3]", "[subchild1]"}
 	assert.Equal(t, trg, res)
 	res = res[:0]
 
 	// test for return false
 	parent.WalkDownBreadth(func(k Node) bool {
-		if k.Name() == "child1_001" {
+		if k.Name() == "child2" {
 			return Break
 		}
 		res = append(res, fmt.Sprintf("[%v]", k.Name()))
 		return Continue
 	})
 	// fmt.Printf("node field fun result: %v\n", res)
-	trg = []string{"[par1]", "[child1]", "[child1_002]"}
+	trg = []string{"[par1]", "[child1]", "[child3]"}
 	assert.Equal(t, trg, res)
 	res = res[:0]
 }
@@ -435,17 +408,15 @@ func TestNodeUpdate(t *testing.T) {
 
 	res := make([]string, 0, 10)
 	parent.NewChild(typ, "child1")
-	child2 := parent.NewChild(typ, "child1")
-	parent.NewChild(typ, "child1")
+	child2 := parent.NewChild(typ, "child2")
+	parent.NewChild(typ, "child3")
 	child2.NewChild(typ, "subchild1")
-
-	UniquifyNamesAll(parent.This())
 
 	parent.WalkDown(func(n Node) bool {
 		res = append(res, n.Path())
 		return Continue
 	})
-	assert.Equal(t, []string{"/par1", "/par1/child1", "/par1/child1_001", "/par1/child1_001/subchild1", "/par1/child1_002"}, res)
+	assert.Equal(t, []string{"/par1", "/par1/child1", "/par1/child2", "/par1/child2/subchild1", "/par1/child3"}, res)
 }
 
 func TestProperties(t *testing.T) {

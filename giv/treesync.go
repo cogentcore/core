@@ -25,10 +25,8 @@ import (
 
 // SyncTree sets the root view to the root of the sync source tree node
 // for this TreeView, and syncs the rest of the tree to match.
-// It calls [tree.UniquifyNamesAll] on the source tree to ensure
-// that node names are unique, which is essential for proper viewing.
+// The source tree must have unique names for each child within a given parent.
 func (tv *TreeView) SyncTree(n tree.Node) *TreeView {
-	tree.UniquifyNamesAll(n)
 	if tv.SyncNode != n {
 		tv.SyncNode = n
 	}
