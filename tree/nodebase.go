@@ -95,7 +95,7 @@ func (n *NodeBase) AsTreeNode() *NodeBase {
 // the proper Node interface pointer will be obtained. This is the only
 // way to get virtual functional calling to work within the Go language.
 func (n *NodeBase) InitName(k Node, name ...string) {
-	InitNode(k)
+	initNode(k)
 	if len(name) > 0 {
 		n.SetName(name[0])
 	}
@@ -393,10 +393,10 @@ func (n *NodeBase) FieldByName(field string) (Node, error) {
 // The kid node is assumed to not be on another tree (see [MoveToParent])
 // and the existing name should be unique among children.
 func (n *NodeBase) AddChild(kid Node) error {
-	if err := ThisCheck(n); err != nil {
+	if err := checkThis(n); err != nil {
 		return err
 	}
-	InitNode(kid)
+	initNode(kid)
 	n.Kids = append(n.Kids, kid)
 	SetParent(kid, n.This()) // key to set new parent before deleting: indicates move instead of delete
 	return nil
@@ -407,11 +407,11 @@ func (n *NodeBase) AddChild(kid Node) error {
 // name is unspecified, it defaults to the ID (kebab-case) name of the
 // type, plus the [Ki.NumLifetimeChildren] of its parent.
 func (n *NodeBase) NewChild(typ *gti.Type, name ...string) Node {
-	if err := ThisCheck(n); err != nil {
+	if err := checkThis(n); err != nil {
 		return nil
 	}
 	kid := NewOfType(typ)
-	InitNode(kid)
+	initNode(kid)
 	n.Kids = append(n.Kids, kid)
 	if len(name) > 0 {
 		kid.SetName(name[0])
@@ -431,7 +431,7 @@ func (n *NodeBase) SetChild(kid Node, idx int, name ...string) error {
 	if len(name) > 0 {
 		kid.InitName(kid, name[0])
 	} else {
-		InitNode(kid)
+		initNode(kid)
 	}
 	n.Kids[idx] = kid
 	SetParent(kid, n.This())
@@ -442,10 +442,10 @@ func (n *NodeBase) SetChild(kid Node, idx int, name ...string) error {
 // The kid node is assumed to not be on another tree (see [MoveToParent])
 // and the existing name should be unique among children.
 func (n *NodeBase) InsertChild(kid Node, at int) error {
-	if err := ThisCheck(n); err != nil {
+	if err := checkThis(n); err != nil {
 		return err
 	}
-	InitNode(kid)
+	initNode(kid)
 	n.Kids.Insert(kid, at)
 	SetParent(kid, n.This())
 	return nil
@@ -456,11 +456,11 @@ func (n *NodeBase) InsertChild(kid Node, at int) error {
 // name is unspecified, it defaults to the ID (kebab-case) name of the
 // type, plus the [Ki.NumLifetimeChildren] of its parent.
 func (n *NodeBase) InsertNewChild(typ *gti.Type, at int, name ...string) Node {
-	if err := ThisCheck(n); err != nil {
+	if err := checkThis(n); err != nil {
 		return nil
 	}
 	kid := NewOfType(typ)
-	InitNode(kid)
+	initNode(kid)
 	n.Kids.Insert(kid, at)
 	if len(name) > 0 {
 		kid.SetName(name[0])

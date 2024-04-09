@@ -229,7 +229,7 @@ func ReadNewJSON(reader io.Reader) (Node, error) {
 		return nil, grr.Log(err)
 	}
 	root := NewOfType(typ)
-	InitNode(root)
+	initNode(root)
 	err = json.Unmarshal(rb, root)
 	UnmarshalPost(root)
 	return root, grr.Log(err)

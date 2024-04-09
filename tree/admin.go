@@ -6,26 +6,19 @@ package tree
 
 import (
 	"fmt"
-	"log/slog"
 	"reflect"
 	"strconv"
 	"sync/atomic"
 
+	"cogentcore.org/core/grr"
 	"cogentcore.org/core/gti"
 )
 
-// admin has infrastructure level code, outside of Node interface
+// admin.go has infrastructure code outside of the Node interface.
 
-// InitNode initializes the node -- automatically called during Add/Insert
-// Child -- sets the This pointer for this node as a Ki interface (pass
-// pointer to node as this arg) -- Go cannot always access the true
-// underlying type for structs using embedded Ki objects (when these objs
-// are receivers to methods) so we need a This interface pointer that
-// guarantees access to the Ki interface in a way that always reveals the
-// underlying type (e.g., in reflect calls).  Calls Init on Ki fields
-// within struct, sets their names to the field name, and sets us as their
-// parent.
-func InitNode(this Node) {
+// initNode initializes the node. See [Node.InitName] for more information
+// on what it does.
+func initNode(this Node) {
 	n := this.AsTreeNode()
 	if n.this != this {
 		n.this = this
@@ -33,16 +26,13 @@ func InitNode(this Node) {
 	}
 }
 
-// ThisCheck checks that the This pointer is set and issues a warning to
-// log if not -- returns error if not set -- called when nodes are added
-// and inserted.
-func ThisCheck(k Node) error {
-	if k.This() == nil {
-		err := fmt.Errorf("tree.NodeBase %q ThisCheck: node has null 'this' pointer; must call Init or InitName on root nodes", k.Path())
-		slog.Error(err.Error())
-		return err
+// checkThis checks that [Node.This] is non-nil.
+// It returns and logs an error otherwise.
+func checkThis(n Node) error {
+	if n.This() != nil {
+		return nil
 	}
-	return nil
+	return grr.Log(fmt.Errorf("tree.Node %q has nil Node.This; you must use NewRoot or call Node.InitName on root nodes", n.Path()))
 }
 
 // SetParent just sets parent of node (and inherits update count from

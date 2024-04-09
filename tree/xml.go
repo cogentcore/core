@@ -22,9 +22,9 @@ import (
 // WriteXML writes the tree to an XML-encoded byte string over io.Writer
 // using MarshalXML.
 func (n *NodeBase) WriteXML(writer io.Writer, indent bool) error {
-	err := ThisCheck(n)
+	err := checkThis(n)
 	if err != nil {
-		return grr.Log(err)
+		return err
 	}
 	var b []byte
 	if indent {
@@ -46,7 +46,7 @@ func (n *NodeBase) WriteXML(writer io.Writer, indent bool) error {
 // UnmarshalPost to recover pointers from paths.
 func (n *NodeBase) ReadXML(reader io.Reader) error {
 	var err error
-	if err = ThisCheck(n); err != nil {
+	if err = checkThis(n); err != nil {
 		log.Println(err)
 		return err
 	}
@@ -237,7 +237,7 @@ func (sl *Slice) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 					return fmt.Errorf("tree.Slice UnmarshalXML: %w", err)
 				}
 				kid := NewOfType(typ)
-				InitNode(kid)
+				initNode(kid)
 				nwk = append(nwk, kid)
 			}
 		}

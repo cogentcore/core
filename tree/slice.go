@@ -302,7 +302,7 @@ func (sl *Slice) Config(n Node, config Config) bool {
 			mods = true
 			nkid := NewOfType(tn.Type)
 			nkid.SetName(tn.Name)
-			InitNode(nkid)
+			initNode(nkid)
 			sl.Insert(nkid, i)
 			if n != nil {
 				SetParent(nkid, n)
