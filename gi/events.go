@@ -585,6 +585,5 @@ func (wb *WidgetBase) ContainsFocus() bool {
 		return true
 	}
 	plev := cur.ParentLevel(wb.This())
-	// fmt.Println("plev:", plev)
 	return plev >= 0
 }

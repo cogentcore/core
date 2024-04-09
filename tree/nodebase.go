@@ -123,13 +123,13 @@ func (n *NodeBase) BaseType() *gti.Type {
 
 // Parents:
 
-// Parent returns the parent of this Ki (Node.Par) -- Ki has strict
-// one-parent, no-cycles structure -- see SetParent.
+// Parent returns the parent of this Node.
+// Each Node can only have one parent.
 func (n *NodeBase) Parent() Node {
 	return n.Par
 }
 
-// IndexInParent returns our index within our parent object. It caches the
+// IndexInParent returns our index within our parent node. It caches the
 // last value and uses that for an optimized search so subsequent calls
 // are typically quite fast. Returns -1 if we don't have a parent.
 func (n *NodeBase) IndexInParent() int {
@@ -145,7 +145,7 @@ func (n *NodeBase) IndexInParent() int {
 }
 
 // ParentLevel finds a given potential parent node recursively up the
-// hierarchy, returning level above current node that the parent was
+// hierarchy, returning the level above the current node that the parent was
 // found, and -1 if not found.
 func (n *NodeBase) ParentLevel(parent Node) int {
 	parLev := -1
@@ -162,7 +162,7 @@ func (n *NodeBase) ParentLevel(parent Node) int {
 }
 
 // ParentByName finds first parent recursively up hierarchy that matches
-// given name -- returns nil if not found.
+// given name. Returns nil if not found.
 func (n *NodeBase) ParentByName(name string) Node {
 	if IsRoot(n) {
 		return nil
@@ -192,41 +192,43 @@ func (n *NodeBase) ParentByType(t *gti.Type, embeds bool) Node {
 	return n.Par.ParentByType(t, embeds)
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  Children
+// Children:
 
-// HasChildren tests whether this node has children (i.e., non-terminal).
+// HasChildren returns whether this node has any children.
 func (n *NodeBase) HasChildren() bool {
 	return len(n.Kids) > 0
 }
 
-// NumChildren returns the number of children of this node.
+// NumChildren returns the number of children this node has.
 func (n *NodeBase) NumChildren() int {
 	return len(n.Kids)
 }
 
+// NumLifetimeChildren returns the number of children that this node
+// has ever had added to it (it is not decremented when a child is removed).
+// It is used for unique naming of children.
 func (n *NodeBase) NumLifetimeChildren() uint64 {
 	return n.numLifetimeChildren
 }
 
-// Children returns a pointer to the slice of children (Node.Kids) -- use
-// methods on [tree.Slice] for further ways to access (ByName, ByType, etc).
-// Slice can be modified directly (e.g., sort, reorder) but Add* / Delete*
-// methods on parent node should be used to ensure proper tracking.
+// Children returns a pointer to the slice of children of this node.
+// The resultant slice can be modified directly (e.g., sort, reorder),
+// but new children should be added via New/Add/Insert Child methods on
+// Node to ensure proper initialization.
 func (n *NodeBase) Children() *Slice {
 	return &n.Kids
 }
 
-// Child returns the child at given index and returns nil if
+// Child returns the child of this node at the given index and returns nil if
 // the index is out of range.
-func (n *NodeBase) Child(idx int) Node {
-	if idx >= len(n.Kids) || idx < 0 {
+func (n *NodeBase) Child(i int) Node {
+	if i >= len(n.Kids) || i < 0 {
 		return nil
 	}
-	return n.Kids[idx]
+	return n.Kids[i]
 }
 
-// ChildByName returns the first element that has given name, and nil
+// ChildByName returns the first child that has the given name, and nil
 // if no such element is found. startIndex arg allows for optimized
 // bidirectional find if you have an idea where it might be, which
 // can be a key speedup for large lists. If no value is specified for
@@ -235,7 +237,7 @@ func (n *NodeBase) ChildByName(name string, startIndex ...int) Node {
 	return n.Kids.ElemByName(name, startIndex...)
 }
 
-// ChildByType returns the first element that has the given type, and nil
+// ChildByType returns the first child that has the given type, and nil
 // if not found. If embeds is true, then it also looks for any type that
 // embeds the given type at any level of anonymous embedding.
 // startIndex arg allows for optimized bidirectional find if you have an
@@ -246,8 +248,7 @@ func (n *NodeBase) ChildByType(t *gti.Type, embeds bool, startIndex ...int) Node
 	return n.Kids.ElemByType(t, embeds, startIndex...)
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  Paths
+// Paths:
 
 // TODO: is this the best way to escape paths?
 
@@ -263,10 +264,11 @@ func UnescapePathName(name string) string {
 	return strings.ReplaceAll(strings.ReplaceAll(name, `\,`, "."), `\\`, "/")
 }
 
-// Path returns path to this node from the tree root, using node Names
-// separated by / and fields by .
-// Node names escape any existing / and . characters to \\ and \,
-// Path is only valid when child names are unique (see Unique* functions)
+// Path returns the path to this node from the tree root,
+// using [Node.Name]s separated by / and fields by .
+// Path is only valid for finding items when child names
+// are unique. Any existing / and . characters in names
+// are escaped to \\ and \,
 func (n *NodeBase) Path() string {
 	if n.Par != nil {
 		if n.Is(Field) {
@@ -277,11 +279,13 @@ func (n *NodeBase) Path() string {
 	return "/" + EscapePathName(n.Nm)
 }
 
-// PathFrom returns path to this node from given parent node, using
-// node Names separated by / and fields by .
-// Node names escape any existing / and . characters to \\ and \,
-// Path is only valid for finding items when child names are unique
-// (see Unique* functions). The paths that it returns exclude the
+// PathFrom returns path to this node from the given parent node, using
+// [Node.Name]s separated by / and fields by .
+// Path is only valid for finding items when child names
+// are unique. Any existing / and . characters in names
+// are escaped to \\ and \,
+//
+// The paths that it returns exclude the
 // name of the parent and the leading slash; for example, in the tree
 // a/b/c/d/e, the result of d.PathFrom(b) would be c/d. PathFrom
 // automatically gets the [Node.This] version of the given parent,
@@ -327,11 +331,11 @@ func findPathChild(k Node, child string) (int, bool) {
 	return k.Children().IndexByName(child, 0)
 }
 
-// FindPath returns Ki object at given path, starting from this node
-// (e.g., the root).  If this node is not the root, then the path
-// to this node is subtracted from the start of the path if present there.
+// FindPath returns the node at the given path, starting from this node.
+// If this node is not the root, then the path to this node is subtracted
+// from the start of the path if present there.
 // FindPath only works correctly when names are unique.
-// Path has node Names separated by / and fields by .
+// Path has [Node.Name]s separated by / and fields by .
 // Node names escape any existing / and . characters to \\ and \,
 // There is also support for [idx] index-based access for any given path
 // element, for cases when indexes are more useful than names.
@@ -378,15 +382,16 @@ func (n *NodeBase) FindPath(path string) Node {
 	return curn
 }
 
+// FieldByName is a placeholder implementation of [Node.FieldByName]
+// that returns an error.
 func (n *NodeBase) FieldByName(field string) (Node, error) {
-	return nil, errors.New("tree.FieldByName: no tree fields defined for this node")
+	return nil, errors.New("tree.NodeBase.FieldByName: no tree fields defined for this node")
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  Adding, Inserting Children
+// Adding and Inserting Children:
 
 // AddChild adds given child at end of children list.
-// The kid node is assumed to not be on another tree (see MoveToParent)
+// The kid node is assumed to not be on another tree (see [MoveToParent])
 // and the existing name should be unique among children.
 func (n *NodeBase) AddChild(kid Node) error {
 	if err := ThisCheck(n); err != nil {
@@ -401,7 +406,7 @@ func (n *NodeBase) AddChild(kid Node) error {
 // NewChild creates a new child of the given type and adds it at end
 // of children list. The name should be unique among children. If the
 // name is unspecified, it defaults to the ID (kebab-case) name of the
-// type, plus the [Node.NumLifetimeChildren] of its parent.
+// type, plus the [Ki.NumLifetimeChildren] of its parent.
 func (n *NodeBase) NewChild(typ *gti.Type, name ...string) Node {
 	if err := ThisCheck(n); err != nil {
 		return nil
@@ -435,7 +440,7 @@ func (n *NodeBase) SetChild(kid Node, idx int, name ...string) error {
 }
 
 // InsertChild adds given child at position in children list.
-// The kid node is assumed to not be on another tree (see MoveToParent)
+// The kid node is assumed to not be on another tree (see [MoveToParent])
 // and the existing name should be unique among children.
 func (n *NodeBase) InsertChild(kid Node, at int) error {
 	if err := ThisCheck(n); err != nil {
@@ -450,7 +455,7 @@ func (n *NodeBase) InsertChild(kid Node, at int) error {
 // InsertNewChild creates a new child of given type and add at position
 // in children list. The name should be unique among children. If the
 // name is unspecified, it defaults to the ID (kebab-case) name of the
-// type, plus the [Node.NumLifetimeChildren] of its parent.
+// type, plus the [Ki.NumLifetimeChildren] of its parent.
 func (n *NodeBase) InsertNewChild(typ *gti.Type, at int, name ...string) Node {
 	if err := ThisCheck(n); err != nil {
 		return nil
@@ -469,11 +474,12 @@ func (n *NodeBase) InsertNewChild(typ *gti.Type, at int, name ...string) Node {
 // extra, and creating any new ones, using NewChild with given type and
 // naming according to nameStubX where X is the index of the child.
 // If nameStub is not specified, it defaults to the ID (kebab-case)
-// name of the type. It returns whether any changes were made to the children.
+// name of the type. It returns whether any changes were made to the
+// children.
 //
 // Note that this does not ensure existing children are of given type, or
-// change their names, or call UniquifyNames -- use ConfigChildren for
-// those cases -- this function is for simpler cases where a parent uses
+// change their names, or call UniquifyNames; use ConfigChildren for
+// those cases; this function is for simpler cases where a parent uses
 // this function consistently to manage children all of the same type.
 func (n *NodeBase) SetNChildren(trgn int, typ *gti.Type, nameStub ...string) bool {
 	sz := len(n.Kids)
@@ -499,18 +505,17 @@ func (n *NodeBase) SetNChildren(trgn int, typ *gti.Type, nameStub ...string) boo
 	return mods
 }
 
-// ConfigChildren configures children according to given list of
-// type-and-name's -- attempts to have minimal impact relative to existing
+// ConfigChildren configures children according to the given list of
+// [TypeAndName]s; it attempts to have minimal impact relative to existing
 // items that fit the type and name constraints (they are moved into the
 // corresponding positions), and any extra children are removed, and new
 // ones added, to match the specified config. It is important that names
-// are unique! It returns whether any changes were made to the children.
+// are unique. It returns whether any changes were made to the children.
 func (n *NodeBase) ConfigChildren(config Config) bool {
 	return n.Kids.Config(n.This(), config)
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  Deleting Children
+// Deleting Children:
 
 // DeleteChildAtIndex deletes child at given index. It returns false
 // if there is no child at the given index.
@@ -572,45 +577,46 @@ func (n *NodeBase) Delete() {
 // Destroy recursively deletes and destroys all children and
 // their children's children, etc.
 func (n *NodeBase) Destroy() {
-	if n.This() == nil { // already dead!
+	if n.This() == nil { // already destroyed
 		return
 	}
-	n.DeleteChildren() // delete and destroy all my children
-	n.this = nil       // last gasp: lose our own sense of self..
+	n.DeleteChildren()
+	n.this = nil
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  Flags
+// Flags:
 
-// Is checks if flag is set, using atomic, safe for concurrent access
+// Is checks if the given flag is set, using atomic,
+// which is safe for concurrent access.
 func (n *NodeBase) Is(f enums.BitFlag) bool {
 	return n.Flags.HasFlag(f)
 }
 
-// SetFlag sets the given flag(s) to given state
-// using atomic, safe for concurrent access
+// SetFlag sets the given flag(s) to the given state
+// using atomic, which is safe for concurrent access.
 func (n *NodeBase) SetFlag(on bool, f ...enums.BitFlag) {
 	n.Flags.SetFlag(on, f...)
 }
 
-// FlagType is the base implementation of [Node.FlagType] that returns a
-// value of type [Flags].
+// FlagType returns the flags of the node as the true flag type of the node,
+// which may be a type that extends the standard [Flags]. Each node type
+// that extends the flag type should define this method; for example:
+//
+//	func (wb *WidgetBase) FlagType() enums.BitFlagSetter {
+//		return (*WidgetFlags)(&wb.Flags)
+//	}
 func (n *NodeBase) FlagType() enums.BitFlagSetter {
 	return &n.Flags
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  Property interface with inheritance -- nodes can inherit properties from parents
+// Property Storage:
 
-// Properties (Node.Properties) tell the Cogent Core GUI or other frameworks operating
-// on Trees about special features of each node -- functions below support
-// inheritance up Tree.
+// Properties returns the key-value properties set for this node.
 func (n *NodeBase) Properties() map[string]any {
 	return n.Props
 }
 
-// SetProperty sets given property key to value val.
-// initializes property map if nil.
+// SetProperty sets given the given property to the given value.
 func (n *NodeBase) SetProperty(key string, value any) {
 	if n.Props == nil {
 		n.Props = map[string]any{}
@@ -624,7 +630,7 @@ func (n *NodeBase) Property(key string) any {
 	return n.Props[key]
 }
 
-// DeleteProperty deletes property key on this node.
+// DeleteProperty deletes the property with the given key.
 func (n *NodeBase) DeleteProperty(key string) {
 	if n.Props == nil {
 		return
@@ -632,14 +638,13 @@ func (n *NodeBase) DeleteProperty(key string) {
 	delete(n.Props, key)
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  Tree walking and state updating
+// Tree Walking:
 
-// WalkUp calls function on given node and all the way up to its parents,
-// and so on -- sequentially all in current go routine (generally
-// necessary for going up, which is typically quite fast anyway) -- level
-// is incremented after each step (starts at 0, goes up), and passed to
-// function -- returns false if fun aborts with false, else true.
+// WalkUp calls the given function on the node and all of its parents,
+// sequentially in the current goroutine (generally necessary for going up,
+// which is typically quite fast anyway). It stops walking if the function
+// returns [Break] and keeps walking if it returns [Continue]. It returns
+// whether walking was finished (false if it was aborted with [Break]).
 func (n *NodeBase) WalkUp(fun func(n Node) bool) bool {
 	cur := n.This()
 	for {
@@ -654,11 +659,11 @@ func (n *NodeBase) WalkUp(fun func(n Node) bool) bool {
 	}
 }
 
-// WalkUpParent calls function on parent of node and all the way up to its
-// parents, and so on -- sequentially all in current go routine (generally
-// necessary for going up, which is typically quite fast anyway) -- level
-// is incremented after each step (starts at 0, goes up), and passed to
-// function -- returns false if fun aborts with false, else true.
+// WalkUpParent calls the given function on all of the node's parents (but not
+// the node itself), sequentially in the current goroutine (generally necessary
+// for going up, which is typically quite fast anyway). It stops walking if the
+// function returns [Break] and keeps walking if it returns [Continue]. It returns
+// whether walking was finished (false if it was aborted with [Break]).
 func (n *NodeBase) WalkUpParent(fun func(n Node) bool) bool {
 	if IsRoot(n) {
 		return true

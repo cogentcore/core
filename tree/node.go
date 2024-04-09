@@ -105,7 +105,7 @@ type Node interface {
 	IndexInParent() int
 
 	// ParentLevel finds a given potential parent node recursively up the
-	// hierarchy, returning level above current node that the parent was
+	// hierarchy, returning the level above the current node that the parent was
 	// found, and -1 if not found.
 	ParentLevel(parent Node) int
 
@@ -139,7 +139,7 @@ type Node interface {
 
 	// Child returns the child of this node at the given index and returns nil if
 	// the index is out of range.
-	Child(idx int) Node
+	Child(i int) Node
 
 	// ChildByName returns the first child that has the given name, and nil
 	// if no such element is found. startIndex arg allows for optimized
