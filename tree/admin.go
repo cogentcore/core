@@ -7,12 +7,15 @@ package tree
 import (
 	"fmt"
 	"log/slog"
+	"reflect"
 	"strconv"
 	"strings"
 	"sync/atomic"
+
+	"cogentcore.org/core/gti"
 )
 
-// admin has infrastructure level code, outside of ki interface
+// admin has infrastructure level code, outside of Node interface
 
 // InitNode initializes the node -- automatically called during Add/Insert
 // Child -- sets the This pointer for this node as a Ki interface (pass
@@ -263,4 +266,21 @@ func UniquifyNamesAll(kn Node) {
 		UniquifyNames(k)
 		return Continue
 	})
+}
+
+// nodeType is the [reflect.Type] of [Node].
+var nodeType = reflect.TypeFor[Node]()
+
+// IsNode returns whether the given type or a pointer to it
+// implements the [Node] interface.
+func IsNode(typ reflect.Type) bool {
+	if typ == nil {
+		return false
+	}
+	return typ.Implements(nodeType) || reflect.PointerTo(typ).Implements(nodeType)
+}
+
+// NewOfType returns a new instance of the given [Node] type.
+func NewOfType(typ *gti.Type) Node {
+	return typ.Instance.(Node).New()
 }

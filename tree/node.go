@@ -10,8 +10,6 @@ package tree
 //go:generate core generate ./testdata
 
 import (
-	"reflect"
-
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/gti"
 )
@@ -405,24 +403,4 @@ type Node interface {
 	// This function does nothing by default, but it can be
 	// implemented by higher-level types that want to do something.
 	OnChildAdded(child Node)
-}
-
-// NodeType is a Ki reflect.Type, suitable for checking for Type.Implements.
-var NodeType = reflect.TypeFor[Node]()
-
-// todo: remove these if possible to eliminate reflect dependencies
-
-// IsKi returns true if the given type implements the Ki interface at any
-// level of embedded structure.
-func IsKi(typ reflect.Type) bool {
-	if typ == nil {
-		return false
-	}
-	return typ.Implements(NodeType) || reflect.PointerTo(typ).Implements(NodeType)
-}
-
-// NewOfType makes a new Ki struct of given type -- must be a Ki type -- will
-// return nil if not.
-func NewOfType(typ *gti.Type) Node {
-	return typ.Instance.(Node).New()
 }

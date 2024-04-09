@@ -847,7 +847,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 	sv.SliceNewAtSelect(idx)
 
 	sltyp := laser.SliceElType(sv.Slice) // has pointer if it is there
-	iski := tree.IsKi(sltyp)
+	iski := tree.IsNode(sltyp)
 	slptr := sltyp.Kind() == reflect.Ptr
 
 	svl := reflect.ValueOf(sv.Slice)

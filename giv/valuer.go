@@ -147,7 +147,7 @@ func ToValue(val any, tags string) Value {
 		// TODO: special value for complex numbers with two fields
 		return &StringValue{}
 	case vk == reflect.Ptr:
-		if tree.IsKi(nptyp) {
+		if tree.IsNode(nptyp) {
 			return &KiValue{}
 		}
 		if laser.AnyIsNil(val) {
@@ -168,7 +168,7 @@ func ToValue(val any, tags string) Value {
 			return &RuneSliceValue{}
 		}
 		isstru := (laser.NonPtrType(eltyp).Kind() == reflect.Struct)
-		if !forceNoInline && (forceInline || (!isstru && sz <= gi.SystemSettings.SliceInlineLength && !tree.IsKi(eltyp))) {
+		if !forceNoInline && (forceInline || (!isstru && sz <= gi.SystemSettings.SliceInlineLength && !tree.IsNode(eltyp))) {
 			return &SliceInlineValue{}
 		} else {
 			return &SliceValue{}
