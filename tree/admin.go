@@ -27,9 +27,9 @@ import (
 // parent.
 func InitNode(this Node) {
 	n := this.AsTreeNode()
-	if n.Ths != this {
-		n.Ths = this
-		n.Ths.OnInit()
+	if n.this != this {
+		n.this = this
+		n.this.OnInit()
 	}
 }
 
@@ -53,7 +53,7 @@ func SetParent(kid Node, parent Node) {
 	n.Par = parent
 	if parent != nil {
 		pn := parent.AsTreeNode()
-		c := atomic.AddUint64(&pn.NumLifetimeKids, 1)
+		c := atomic.AddUint64(&pn.numLifetimeChildren, 1)
 		if kid.Name() == "" {
 			kid.SetName(kid.NodeType().IDName + "-" + strconv.FormatUint(c-1, 10)) // must subtract 1 so we start at 0
 		}

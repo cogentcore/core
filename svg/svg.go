@@ -116,7 +116,7 @@ func (sv *SVG) Resize(nwsz image.Point) {
 	if nwsz.X == 0 || nwsz.Y == 0 {
 		return
 	}
-	if sv.Root.Ths == nil {
+	if sv.Root.This() == nil {
 		sv.Config(nwsz.X, nwsz.Y)
 		return
 	}

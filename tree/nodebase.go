@@ -26,38 +26,45 @@ import (
 type NodeBase struct {
 
 	// Nm is the user-supplied name of this node, which can be empty and/or non-unique.
+	// It is typically accessed through [Node.Name].
 	Nm string `copier:"-" set:"-" label:"Name"`
 
-	// Flags are bit flags for internal node state, which can be extended using the enums package.
+	// Flags are bit flags for internal node state, which can be extended using
+	// the enums package.
 	Flags Flags `tableview:"-" copier:"-" json:"-" xml:"-" set:"-" max-width:"80" height:"3"`
 
 	// Props is a property map for arbitrary key-value properties.
+	// They are typically accessed through the property methods on [Node].
 	Props map[string]any `tableview:"-" xml:"-" copier:"-" set:"-" label:"Properties"`
 
-	// Par is the parent of this node, which is set automatically when this node is added as a child of a parent.
-	Par Node `tableview:"-" copier:"-" json:"-" xml:"-" view:"-" set:"-" label:"Parent"`
+	// Par is the parent of this node, which is set automatically when this node is
+	// added as a child of a parent. It is typically accessed through [Node.Parent].
+	Par Node `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 
 	// Kids is the list of children of this node. All of them are set to have this node
-	// as their parent. They can be reordered, but you should generally use Ki Node methods
-	// to Add / Delete to ensure proper usage.
+	// as their parent. They can be reordered, but you should generally use [Node]
+	// methods when adding and deleting children to ensure everything gets updated.
+	// They are typically accessed through [Node.Children].
 	Kids Slice `tableview:"-" copier:"-" set:"-" label:"Children"`
 
-	// Ths is a pointer to ourselves as a Ki. It can always be used to extract the true underlying type
-	// of an object when [Node] is embedded in other structs; function receivers do not have this ability
-	// so this is necessary. This is set to nil when deleted. Typically use [Ki.This] convenience accessor
-	// which protects against concurrent access.
-	Ths Node `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
+	// this is a pointer to ourselves as a [Node]. It can always be used to extract the
+	// true underlying type of an object when [NodeBase] is embedded in other structs;
+	// function receivers do not have this ability, so this is necessary. This is set
+	// to nil when the node is deleted. It is typically accessed through [Node.This].
+	this Node
 
-	// NumLifetimeKids is the number of children that have ever been added to this node, which is used for automatic unique naming.
-	NumLifetimeKids uint64 `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
+	// numLifetimeChildren is the number of children that have ever been added to this
+	// node, which is used for automatic unique naming. It is typically accessed
+	// through [Node.NumLifetimeChildren].
+	numLifetimeChildren uint64
 
-	// index is the last value of our index, which is used as a starting point for finding us in our parent next time.
-	// It is not guaranteed to be accurate; use the [Ki.IndexInParent] method.
-	index int `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
+	// index is the last value of our index, which is used as a starting point for
+	// finding us in our parent next time. It is not guaranteed to be accurate;
+	// use the [Node.IndexInParent] method.
+	index int
 
-	// depth is an optional depth parameter of this node, which is only valid during specific contexts, not generally.
-	// For example, it is used in the WalkBreadth function
-	depth int `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
+	// depth is the depth of the node while using [Node.WalkDownBreadth].
+	depth int
 }
 
 // check implementation of [Node] interface
@@ -85,7 +92,7 @@ func (n *NodeBase) This() Node {
 	if n == nil {
 		return nil
 	}
-	return n.Ths
+	return n.this
 }
 
 // AsTreeNode returns the *tree.NodeBase base type for this node.
@@ -227,7 +234,7 @@ func (n *NodeBase) NumChildren() int {
 }
 
 func (n *NodeBase) NumLifetimeChildren() uint64 {
-	return n.NumLifetimeKids
+	return n.numLifetimeChildren
 }
 
 // Children returns a pointer to the slice of children (Node.Kids) -- use
@@ -597,7 +604,7 @@ func (n *NodeBase) Destroy() {
 		return
 	}
 	n.DeleteChildren() // delete and destroy all my children
-	n.Ths = nil        // last gasp: lose our own sense of self..
+	n.this = nil       // last gasp: lose our own sense of self..
 }
 
 //////////////////////////////////////////////////////////////////////////
