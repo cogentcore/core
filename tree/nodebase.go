@@ -681,34 +681,7 @@ func (n *NodeBase) WalkUpParent(fun func(n Node) bool) bool {
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-// FuncDown -- Traversal records
-
-// TravMap is a map for recording the traversal of nodes
-type TravMap map[Node]int
-
-// Start is called at start of traversal
-func (tm TravMap) Start(k Node) {
-	tm[k] = -1
-}
-
-// End deletes node once done at end of traversal
-func (tm TravMap) End(k Node) {
-	delete(tm, k)
-}
-
-// Set updates traversal state
-func (tm TravMap) Set(k Node, curChild int) {
-	tm[k] = curChild
-}
-
-// Get retrieves current traversal state
-func (tm TravMap) Get(k Node) int {
-	return tm[k]
-}
-
-// strategy -- same as used in TreeView:
-// https://stackoverflow.com/questions/5278580/non-recursive-depth-first-search-algorithm
+// walking strategy: https://stackoverflow.com/questions/5278580/non-recursive-depth-first-search-algorithm
 
 // WalkDown calls function on this node (MeFirst) and then iterates
 // in a depth-first manner over all the children.
@@ -724,41 +697,41 @@ func (n *NodeBase) WalkDown(fun func(n Node) bool) {
 	if n.This() == nil {
 		return
 	}
-	tm := TravMap{} // not significantly faster to pre-allocate larger size
+	tm := map[Node]int{} // traversal map
 	start := n.This()
 	cur := start
-	tm.Start(cur)
+	tm[cur] = -1
 outer:
 	for {
 		if cur.This() != nil && fun(cur) { // false return means stop
 			n.This().NodeWalkDown(fun)
 			if cur.HasChildren() {
-				tm.Set(cur, 0) // 0 for no fields
+				tm[cur] = 0 // 0 for no fields
 				nxt := cur.Child(0)
 				if nxt != nil && nxt.This() != nil {
 					cur = nxt.This()
-					tm.Start(cur)
+					tm[cur] = -1
 					continue
 				}
 			}
 		} else {
-			tm.Set(cur, cur.NumChildren())
+			tm[cur] = cur.NumChildren()
 		}
 		// if we get here, we're in the ascent branch -- move to the right and then up
 		for {
-			curChild := tm.Get(cur)
+			curChild := tm[cur]
 			if (curChild + 1) < cur.NumChildren() {
 				curChild++
-				tm.Set(cur, curChild)
+				tm[cur] = curChild
 				nxt := cur.Child(curChild)
 				if nxt != nil && nxt.This() != nil {
 					cur = nxt.This()
-					tm.Start(cur)
+					tm[cur] = -1
 					continue outer
 				}
 				continue
 			}
-			tm.End(cur)
+			delete(tm, cur)
 			// couldn't go right, move up..
 			if cur == start {
 				break outer // done!
@@ -791,42 +764,42 @@ func (n *NodeBase) WalkDownPost(doChildTestFunc func(n Node) bool, fun func(n No
 	if n.This() == nil {
 		return
 	}
-	tm := TravMap{} // not significantly faster to pre-allocate larger size
+	tm := map[Node]int{} // traversal map
 	start := n.This()
 	cur := start
-	tm.Start(cur)
+	tm[cur] = -1
 outer:
 	for {
 		if cur.This() != nil && doChildTestFunc(cur) { // false return means stop
 			if cur.HasChildren() {
-				tm.Set(cur, 0) // 0 for no fields
+				tm[cur] = 0 // 0 for no fields
 				nxt := cur.Child(0)
 				if nxt != nil && nxt.This() != nil {
 					cur = nxt.This()
-					tm.Set(cur, -1)
+					tm[cur] = -1
 					continue
 				}
 			}
 		} else {
-			tm.Set(cur, cur.NumChildren())
+			tm[cur] = cur.NumChildren()
 		}
 		// if we get here, we're in the ascent branch -- move to the right and then up
 		for {
-			curChild := tm.Get(cur)
+			curChild := tm[cur]
 			if (curChild + 1) < cur.NumChildren() {
 				curChild++
-				tm.Set(cur, curChild)
+				tm[cur] = curChild
 				nxt := cur.Child(curChild)
 				if nxt != nil && nxt.This() != nil {
 					cur = nxt.This()
-					tm.Start(cur)
+					tm[cur] = -1
 					continue outer
 				}
 				continue
 			}
 			fun(cur) // now we call the function, last..
 			// couldn't go right, move up..
-			tm.End(cur)
+			delete(tm, cur)
 			if cur == start {
 				break outer // done!
 			}
