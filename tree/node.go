@@ -72,8 +72,8 @@ type Node interface {
 	Name() string
 
 	// SetName sets the name of this node. Names should generally be unique
-	// across children of each node. See Unique* functions to check / fix.
-	// If the node requires some non-unique name, add a separate Label field.
+	// across children of each node. If the node requires some non-unique name,
+	// add a separate Label field.
 	SetName(name string)
 
 	// NodeType returns the [types.Type] record for this Node.
@@ -158,15 +158,15 @@ type Node interface {
 	// Path returns the path to this node from the tree root,
 	// using [Node.Name]s separated by / and fields by .
 	// Path is only valid for finding items when child names
-	// are unique (see Unique* functions). Any existing / and .
-	// characters in names are escaped to \\ and \,
+	// are unique. Any existing / and . characters in names
+	// are escaped to \\ and \,
 	Path() string
 
 	// PathFrom returns path to this node from the given parent node, using
 	// [Node.Name]s separated by / and fields by .
 	// Path is only valid for finding items when child names
-	// are unique (see Unique* functions). Any existing / and .
-	// characters in names are escaped to \\ and \,
+	// are unique. Any existing / and . characters in names
+	// are escaped to \\ and \,
 	//
 	// The paths that it returns exclude the
 	// name of the parent and the leading slash; for example, in the tree

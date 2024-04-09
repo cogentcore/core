@@ -71,7 +71,7 @@ func TestNodeEmbedNewChild(t *testing.T) {
 	}
 }
 
-func TestNodeUniqueNames(t *testing.T) {
+func TestNodePath(t *testing.T) {
 	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
 	typ := parent.NodeType()
