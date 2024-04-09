@@ -362,7 +362,7 @@ type Node interface {
 	// The struct field tag copier:"-" can be added for any fields that
 	// should not be copied. Also, unexported fields are not copied.
 	// See [Node.CopyFieldsFrom] for more information on field copying.
-	CopyFrom(from Node) error
+	CopyFrom(src Node)
 
 	// Clone creates and returns a deep copy of the tree from this node down.
 	// Any pointers within the cloned tree will correctly point within the new

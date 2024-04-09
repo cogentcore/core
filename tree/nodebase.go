@@ -7,7 +7,6 @@ package tree
 import (
 	"errors"
 	"fmt"
-	"log"
 	"log/slog"
 	"maps"
 	"strconv"
@@ -681,18 +680,15 @@ func (n *NodeBase) WalkUpParent(fun func(n Node) bool) bool {
 	}
 }
 
-// walking strategy: https://stackoverflow.com/questions/5278580/non-recursive-depth-first-search-algorithm
+// WalkDown strategy: https://stackoverflow.com/questions/5278580/non-recursive-depth-first-search-algorithm
 
-// WalkDown calls function on this node (MeFirst) and then iterates
-// in a depth-first manner over all the children.
-// The [WalkPreNode] method is called for every node, after the given function,
-// which e.g., enables nodes to also traverse additional Ki Trees (e.g., Fields).
-// The node traversal is non-recursive and uses locally-allocated state -- safe
-// for concurrent calling (modulo conflict management in function call itself).
-// Function calls are sequential all in current go routine.
-// If fun returns false then any further traversal of that branch of the tree is
-// aborted, but other branches continue -- i.e., if fun on current node
-// returns false, children are not processed further.
+// WalkDown calls the given function on the node and all of its children
+// in a depth-first manner over all of the children, sequentially in the
+// current goroutine. It stops walking the current branch of the tree if
+// the function returns [Break] and keeps walking if it returns [Continue].
+// It is non-recursive and safe for concurrent calling. The [Node.NodeWalkDown]
+// method is called for every node after the given function, which enables nodes
+// to also traverse additional nodes, like widget parts.
 func (n *NodeBase) WalkDown(fun func(n Node) bool) {
 	if n.This() == nil {
 		return
@@ -746,20 +742,19 @@ outer:
 	}
 }
 
-// NodeWalkDown is called for every node during WalkPre with the function
-// passed to WalkPre.  This e.g., enables nodes to also traverse additional
-// Ki Trees (e.g., Fields).
+// NodeWalkDown is a placeholder implementation of [Node.NodeWalkDown]
+// that does nothing.
 func (n *NodeBase) NodeWalkDown(fun func(n Node) bool) {}
 
 // WalkDownPost iterates in a depth-first manner over the children, calling
-// doChildTestFunc on each node to test if processing should proceed (if it returns
-// false then that branch of the tree is not further processed), and then
-// calls given fun function after all of a node's children.
-// have been iterated over ("Me Last").
-// The node traversal is non-recursive and uses locally-allocated state -- safe
-// for concurrent calling (modulo conflict management in function call itself).
-// Function calls are sequential all in current go routine.
-// The level var tracks overall depth in the tree.
+// doChildTest on each node to test if processing should proceed (if it returns
+// [Break] then that branch of the tree is not further processed),
+// and then calls the given function after all of a node's children
+// have been iterated over. In effect, this means that the given function
+// is called for deeper nodes first. This uses node state information to manage
+// the traversal and is very fast, but can only be called by one goroutine at a
+// time, so you should use a Mutex if there is a chance of multiple threads
+// running at the same time. The nodes are processed in the current goroutine.
 func (n *NodeBase) WalkDownPost(doChildTestFunc func(n Node) bool, fun func(n Node) bool) {
 	if n.This() == nil {
 		return
@@ -812,14 +807,15 @@ outer:
 	}
 }
 
-// Note: it does not appear that there is a good recursive BFS search strategy
+// Note: it does not appear that there is a good
+// recursive breadth-first-search strategy:
 // https://herringtondarkholme.github.io/2014/02/17/generator/
 // https://stackoverflow.com/questions/2549541/performing-breadth-first-search-recursively/2549825#2549825
 
-// WalkDownBreadth calls function on all children in breadth-first order
-// using the standard queue strategy.  This depends on and updates the
-// Depth parameter of the node.  If fun returns false then any further
-// traversal of that branch of the tree is aborted, but other branches continue.
+// WalkDownBreadth calls the given function on the node and all of its children
+// in breadth-first order. It stops walking the current branch of the tree if the
+// function returns [Break] and keeps walking if it returns [Continue]. It is
+// non-recursive, but not safe for concurrent calling.
 func (n *NodeBase) WalkDownBreadth(fun func(n Node) bool) {
 	start := n.This()
 
@@ -847,35 +843,44 @@ func (n *NodeBase) WalkDownBreadth(fun func(n Node) bool) {
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  Deep Copy / Clone
+// Deep Copy:
 
-// note: we use the copy from direction as the receiver is modified whereas the
-// from is not and assignment is typically in same direction
+// note: we use the copy from direction (instead of copy to), as the receiver
+// is modified whereas the from is not and assignment is typically in the same
+// direction.
 
-// CopyFrom another Ki node.  It is essential that source has Unique names!
-// The Ki copy function recreates the entire tree in the copy, duplicating
-// children etc, copying Properties too.  It is very efficient by
-// using the ConfigChildren method which attempts to preserve any existing
-// nodes in the destination if they have the same name and type -- so a
+// CopyFrom copies the data and children of the given node to this node.
+// It is essential that the source node has unique names. It is very efficient
+// by using the [Node.ConfigChildren] method which attempts to preserve any
+// existing nodes in the destination if they have the same name and type, so a
 // copy from a source to a target that only differ minimally will be
-// minimally destructive.  Only copies to same types are supported.
-// Signal connections are NOT copied.  No other Ki pointers are copied,
-// and the field tag copier:"-" can be added for any other fields that
-// should not be copied (unexported, lower-case fields are not copyable).
-func (n *NodeBase) CopyFrom(frm Node) error {
-	if frm == nil {
-		err := fmt.Errorf("tree.NodeBase CopyFrom into %v: nil 'from' source", n)
-		log.Println(err)
-		return err
+// minimally destructive. Only copying to the same type is supported.
+// The struct field tag copier:"-" can be added for any fields that
+// should not be copied. Also, unexported fields are not copied.
+// See [Node.CopyFieldsFrom] for more information on field copying.
+func (n *NodeBase) CopyFrom(src Node) {
+	if src == nil {
+		slog.Error("tree.NodeBase.CopyFrom: nil source", "destinationNode", n)
+		return
 	}
-	CopyFromRaw(n.This(), frm)
-	return nil
+	copyFrom(n.This(), src)
+}
+
+// copyFrom is the implementation of [NodeBase.CopyFrom].
+func copyFrom(dst, src Node) {
+	dst.Children().ConfigCopy(dst.This(), *src.Children())
+	maps.Copy(dst.Properties(), src.Properties())
+
+	dst.This().CopyFieldsFrom(src)
+	for i, kid := range *dst.Children() {
+		fmk := src.Child(i)
+		copyFrom(kid, fmk)
+	}
 }
 
 // Clone creates and returns a deep copy of the tree from this node down.
 // Any pointers within the cloned tree will correctly point within the new
-// cloned tree (see Copy info).
+// cloned tree (see [Node.CopyFrom] for more information).
 func (n *NodeBase) Clone() Node {
 	nc := NewOfType(n.This().NodeType())
 	nc.InitName(nc, n.Nm)
@@ -883,30 +888,24 @@ func (n *NodeBase) Clone() Node {
 	return nc
 }
 
-// CopyFromRaw performs a raw copy that just does the deep copy of the
-// bits and doesn't do anything with pointers.
-func CopyFromRaw(n, from Node) {
-	n.Children().ConfigCopy(n.This(), *from.Children())
-	maps.Copy(n.Properties(), from.Properties())
-
-	n.This().CopyFieldsFrom(from)
-	for i, kid := range *n.Children() {
-		fmk := from.Child(i)
-		CopyFromRaw(kid, fmk)
-	}
-}
-
-// CopyFieldsFrom is the base implementation of [Node.CopyFieldsFrom] that copies the fields
-// of the [NodeBase.This] from the fields of the given [Node.This], recursively following anonymous
-// embedded structs. It uses [copier.Copy] for this. It ignores any fields with a `copier:"-"`
-// struct tag. Other implementations of [Node.CopyFieldsFrom] should call this method first and
-// then only do manual handling of specific fields that can not be automatically copied.
+// CopyFieldsFrom copies the fields of the node from the given node.
+// By default, it is [NodeBase.CopyFieldsFrom], which automatically does
+// a deep copy of all of the fields of the node that do not a have a
+// `copier:"-"` struct tag. Node types should only implement a custom
+// CopyFieldsFrom method when they have fields that need special copying
+// logic that can not be automatically handled. All custom CopyFieldsFrom
+// methods should call [NodeBase.CopyFieldsFrom] first and then only do manual
+// handling of specific fields that can not be automatically copied. See
+// [cogentcore.org/core/core.WidgetBase.CopyFieldsFrom] for an example of a
+// custom CopyFieldsFrom method.
 func (n *NodeBase) CopyFieldsFrom(from Node) {
 	err := copier.CopyWithOption(n.This(), from.This(), copier.Option{CaseSensitive: true, DeepCopy: true})
 	if err != nil {
 		slog.Error("tree.NodeBase.CopyFieldsFrom", "err", err)
 	}
 }
+
+// Event methods:
 
 // OnInit is a placeholder implementation of
 // [Node.OnInit] that does nothing.
