@@ -661,7 +661,7 @@ func (n *NodeBase) DeleteProperty(key string) {
 // necessary for going up, which is typically quite fast anyway) -- level
 // is incremented after each step (starts at 0, goes up), and passed to
 // function -- returns false if fun aborts with false, else true.
-func (n *NodeBase) WalkUp(fun func(k Node) bool) bool {
+func (n *NodeBase) WalkUp(fun func(n Node) bool) bool {
 	cur := n.This()
 	for {
 		if !fun(cur) { // false return means stop
@@ -680,7 +680,7 @@ func (n *NodeBase) WalkUp(fun func(k Node) bool) bool {
 // necessary for going up, which is typically quite fast anyway) -- level
 // is incremented after each step (starts at 0, goes up), and passed to
 // function -- returns false if fun aborts with false, else true.
-func (n *NodeBase) WalkUpParent(fun func(k Node) bool) bool {
+func (n *NodeBase) WalkUpParent(fun func(n Node) bool) bool {
 	if IsRoot(n) {
 		return true
 	}
@@ -736,7 +736,7 @@ func (tm TravMap) Get(k Node) int {
 // If fun returns false then any further traversal of that branch of the tree is
 // aborted, but other branches continue -- i.e., if fun on current node
 // returns false, children are not processed further.
-func (n *NodeBase) WalkDown(fun func(Node) bool) {
+func (n *NodeBase) WalkDown(fun func(n Node) bool) {
 	if n.This() == nil {
 		return
 	}
@@ -792,7 +792,7 @@ outer:
 // NodeWalkDown is called for every node during WalkPre with the function
 // passed to WalkPre.  This e.g., enables nodes to also traverse additional
 // Ki Trees (e.g., Fields).
-func (n *NodeBase) NodeWalkDown(fun func(Node) bool) {}
+func (n *NodeBase) NodeWalkDown(fun func(n Node) bool) {}
 
 // WalkDownPost iterates in a depth-first manner over the children, calling
 // doChildTestFunc on each node to test if processing should proceed (if it returns
@@ -803,7 +803,7 @@ func (n *NodeBase) NodeWalkDown(fun func(Node) bool) {}
 // for concurrent calling (modulo conflict management in function call itself).
 // Function calls are sequential all in current go routine.
 // The level var tracks overall depth in the tree.
-func (n *NodeBase) WalkDownPost(doChildTestFunc func(Node) bool, fun func(Node) bool) {
+func (n *NodeBase) WalkDownPost(doChildTestFunc func(n Node) bool, fun func(n Node) bool) {
 	if n.This() == nil {
 		return
 	}
@@ -863,7 +863,7 @@ outer:
 // using the standard queue strategy.  This depends on and updates the
 // Depth parameter of the node.  If fun returns false then any further
 // traversal of that branch of the tree is aborted, but other branches continue.
-func (n *NodeBase) WalkDownBreadth(fun func(k Node) bool) {
+func (n *NodeBase) WalkDownBreadth(fun func(n Node) bool) {
 	start := n.This()
 
 	level := 0

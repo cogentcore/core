@@ -309,14 +309,14 @@ type Node interface {
 	// which is typically quite fast anyway). It stops walking if the function
 	// returns [Break] and keeps walking if it returns [Continue]. It returns
 	// whether walking was finished (false if it was aborted with [Break]).
-	WalkUp(fun func(k Node) bool) bool
+	WalkUp(fun func(n Node) bool) bool
 
 	// WalkUpParent calls the given function on all of the node's parents (but not
 	// the node itself), sequentially in the current goroutine (generally necessary
 	// for going up, which is typically quite fast anyway). It stops walking if the
 	// function returns [Break] and keeps walking if it returns [Continue]. It returns
 	// whether walking was finished (false if it was aborted with [Break]).
-	WalkUpParent(fun func(k Node) bool) bool
+	WalkUpParent(fun func(n Node) bool) bool
 
 	// WalkDown calls the given function on the node and all of its children
 	// in a depth-first manner over all of the children, sequentially in the
@@ -325,12 +325,12 @@ type Node interface {
 	// It is non-recursive and safe for concurrent calling. The [Node.NodeWalkDown]
 	// method is called for every node after the given function, which enables nodes
 	// to also traverse additional nodes, like widget parts.
-	WalkDown(fun func(k Node) bool)
+	WalkDown(fun func(n Node) bool)
 
 	// NodeWalkDown is a method that nodes can implement to traverse additional nodes
 	// like widget parts during [Node.WalkDown]. It is called with the function passed
 	// to [Node.WalkDown] after the function is called with the node itself.
-	NodeWalkDown(fun func(k Node) bool)
+	NodeWalkDown(fun func(n Node) bool)
 
 	// WalkDownPost iterates in a depth-first manner over the children, calling
 	// doChildTest on each node to test if processing should proceed (if it returns
@@ -341,51 +341,48 @@ type Node interface {
 	// the traversal and is very fast, but can only be called by one goroutine at a
 	// time, so you should use a Mutex if there is a chance of multiple threads
 	// running at the same time. The nodes are processed in the current goroutine.
-	WalkDownPost(doChildTest func(k Node) bool, fun func(k Node) bool)
+	WalkDownPost(doChildTest func(n Node) bool, fun func(n Node) bool)
 
 	// WalkDownBreadth calls the given function on the node and all of its children
 	// in breadth-first order. It stops walking the current branch of the tree if the
 	// function returns [Break] and keeps walking if it returns [Continue]. It is
 	// non-recursive, but not safe for concurrent calling.
-	WalkDownBreadth(fun func(k Node) bool)
+	WalkDownBreadth(fun func(n Node) bool)
 
-	//////////////////////////////////////////////////////////////////////////
-	//  Deep Copy of Trees
+	// Deep Copy:
 
-	// CopyFrom another Ki node.  It is essential that source has Unique names!
-	// The Ki copy function recreates the entire tree in the copy, duplicating
-	// children etc, copying Properties too.  It is very efficient by
-	// using the ConfigChildren method which attempts to preserve any existing
-	// nodes in the destination if they have the same name and type -- so a
+	// CopyFrom copies the data and children of the given node to this node.
+	// It is essential that the source node has unique names. It is very efficient
+	// by using the [Node.ConfigChildren] method which attempts to preserve any
+	// existing nodes in the destination if they have the same name and type, so a
 	// copy from a source to a target that only differ minimally will be
-	// minimally destructive.  Only copies to same types are supported.
-	// Signal connections are NOT copied.  No other Ki pointers are copied,
-	// and the field tag copier:"-" can be added for any other fields that
-	// should not be copied (unexported, lower-case fields are not copyable).
-	CopyFrom(frm Node) error
+	// minimally destructive. Only copying to the same type is supported.
+	// The struct field tag copier:"-" can be added for any fields that
+	// should not be copied. Also, unexported fields are not copied.
+	// See [Node.CopyFieldsFrom] for more information on field copying.
+	CopyFrom(from Node) error
 
 	// Clone creates and returns a deep copy of the tree from this node down.
 	// Any pointers within the cloned tree will correctly point within the new
-	// cloned tree (see Copy info).
+	// cloned tree (see [Node.CopyFrom] for more information).
 	Clone() Node
 
 	// CopyFieldsFrom copies the fields of the node from the given node.
-	// By default, it is [Node.CopyFieldsFrom], which automatically does
+	// By default, it is [NodeBase.CopyFieldsFrom], which automatically does
 	// a deep copy of all of the fields of the node that do not a have a
 	// `copier:"-"` struct tag. Node types should only implement a custom
 	// CopyFieldsFrom method when they have fields that need special copying
 	// logic that can not be automatically handled. All custom CopyFieldsFrom
-	// methods should call [Node.CopyFieldsFrom] first and then only do manual
+	// methods should call [NodeBase.CopyFieldsFrom] first and then only do manual
 	// handling of specific fields that can not be automatically copied. See
-	// [cogentcore.org/core/gi.WidgetBase.CopyFieldsFrom] for an example of a
+	// [cogentcore.org/core/core.WidgetBase.CopyFieldsFrom] for an example of a
 	// custom CopyFieldsFrom method.
 	CopyFieldsFrom(from Node)
 
-	//////////////////////////////////////////////////////////////////////////
-	// 	Event-specific methods
+	// Event methods:
 
 	// OnInit is called when the node is
-	// initialized (ie: through InitName).
+	// initialized (ie: through [Node.InitName]).
 	// It is called before the node is added to the tree,
 	// so it will not have any parents or siblings.
 	// It will be called only once in the lifetime of the node.
@@ -409,8 +406,6 @@ type Node interface {
 	// implemented by higher-level types that want to do something.
 	OnChildAdded(child Node)
 }
-
-// see node.go for struct implementing this interface
 
 // NodeType is a Ki reflect.Type, suitable for checking for Type.Implements.
 var NodeType = reflect.TypeFor[Node]()
