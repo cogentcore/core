@@ -6,13 +6,12 @@ package filetree
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"log/slog"
 	"strings"
 
 	"cogentcore.org/core/core"
-	errors1 "cogentcore.org/core/errors"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor"
@@ -131,7 +130,7 @@ func (fn *Node) AddToVCS() {
 	}
 	// fmt.Printf("adding to vcs: %v\n", fn.FPath)
 	err := repo.Add(string(fn.FPath))
-	if errors1.Log(err) == nil {
+	if errors.Log(err) == nil {
 		fn.Info.Vcs = vci.Added
 		fn.NeedsRender()
 	}
@@ -155,7 +154,7 @@ func (fn *Node) DeleteFromVCS() {
 	}
 	// fmt.Printf("deleting remote from vcs: %v\n", fn.FPath)
 	err := repo.DeleteRemote(string(fn.FPath))
-	if fn != nil && errors1.Log(err) == nil {
+	if fn != nil && errors.Log(err) == nil {
 		fn.Info.Vcs = vci.Deleted
 		fn.NeedsRender()
 	}

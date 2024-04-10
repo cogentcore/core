@@ -9,7 +9,6 @@ package webcore
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io/fs"
 	"log/slog"
@@ -18,7 +17,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/core"
-	errors1 "cogentcore.org/core/errors"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlview"
 	"cogentcore.org/core/strcase"
@@ -144,7 +143,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 		}
 		if len(fmb) > 0 {
 			var fm map[string]string
-			errors1.Log(tomls.ReadBytes(&fm, fmb))
+			errors.Log(tomls.ReadBytes(&fm, fmb))
 			fmt.Println("front matter", fm)
 		}
 	}
@@ -188,7 +187,7 @@ func (pg *Page) Config() {
 
 	pg.URLToPagePath = map[string]string{"": "index.md"}
 
-	errors1.Log(fs.WalkDir(pg.Source, ".", func(fpath string, d fs.DirEntry, err error) error {
+	errors.Log(fs.WalkDir(pg.Source, ".", func(fpath string, d fs.DirEntry, err error) error {
 		// already handled
 		if fpath == "" || fpath == "." {
 			return nil

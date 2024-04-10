@@ -6,7 +6,6 @@ package paint
 
 import (
 	"embed"
-	"errors"
 	"fmt"
 	"io/fs"
 	"log/slog"
@@ -16,7 +15,7 @@ import (
 	"strings"
 	"sync"
 
-	errors1 "cogentcore.org/core/errors"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 )
@@ -99,7 +98,7 @@ func (fl *FontLib) Init() {
 	if fl.FontPaths == nil {
 		loadFontMu.Lock()
 		// fmt.Printf("Initializing font lib\n")
-		fl.FontsFS = errors1.Log1(fs.Sub(defaultFonts, "fonts"))
+		fl.FontsFS = errors.Log1(fs.Sub(defaultFonts, "fonts"))
 		fl.FontPaths = make([]string, 0)
 		fl.FontsAvail = make(map[string]string)
 		fl.FontInfo = make([]FontInfo, 0)

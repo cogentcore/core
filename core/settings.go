@@ -5,7 +5,6 @@
 package core
 
 import (
-	"errors"
 	"image/color"
 	"io/fs"
 	"os"
@@ -17,7 +16,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/colors/matcolor"
-	errors1 "cogentcore.org/core/errors"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
@@ -168,7 +167,7 @@ func ResetAllSettings() error { //gti:add
 // If they are not already saved, it saves them. It process their `default:` struct
 // tags in addition to calling their [Settings.Default] method.
 func LoadSettings(se Settings) error {
-	errors1.Log(laser.SetFromDefaultTags(se))
+	errors.Log(laser.SetFromDefaultTags(se))
 	se.Defaults()
 	err := OpenSettings(se)
 	// we always apply the settings even if we can't open them
@@ -365,7 +364,7 @@ func (as *AppearanceSettingsData) SaveScreenZoom() { //gti:add
 		as.Screens = make(map[string]ScreenSettings)
 	}
 	as.Screens[sc.Name] = sp
-	errors1.Log(SaveSettings(as))
+	errors.Log(SaveSettings(as))
 }
 
 // DeviceSettingsData is the data type for the device settings.
@@ -674,12 +673,12 @@ var RecentPaths FilePaths
 
 // Open file paths from a json-formatted file.
 func (fp *FilePaths) Open(filename string) error { //gti:add
-	return errors1.Log(jsons.Open(fp, filename))
+	return errors.Log(jsons.Open(fp, filename))
 }
 
 // Save file paths to a json-formatted file.
 func (fp *FilePaths) Save(filename string) error { //gti:add
-	return errors1.Log(jsons.Save(fp, filename))
+	return errors.Log(jsons.Save(fp, filename))
 }
 
 // AddPath inserts a path to the file paths (at the start), subject to max
@@ -696,14 +695,14 @@ var SavedPathsFilename = "saved-paths.json"
 func SaveRecentPaths() {
 	pdir := TheApp.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, SavedPathsFilename)
-	errors1.Log(RecentPaths.Save(pnm))
+	errors.Log(RecentPaths.Save(pnm))
 }
 
 // OpenRecentPaths loads the active RecentPaths from data dir
 func OpenRecentPaths() {
 	pdir := TheApp.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, SavedPathsFilename)
-	errors1.Log(RecentPaths.Open(pnm))
+	errors.Log(RecentPaths.Open(pnm))
 }
 
 //////////////////////////////////////////////////////////////////

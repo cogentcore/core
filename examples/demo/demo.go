@@ -8,7 +8,6 @@ package main
 
 import (
 	"embed"
-	"errors"
 	"fmt"
 	"math/rand"
 	"strings"
@@ -16,7 +15,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
-	errors1 "cogentcore.org/core/errors"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/mat32"
@@ -25,7 +24,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/units"
-	views1 "cogentcore.org/core/views"
+	"cogentcore.org/core/views"
 )
 
 //go:embed icon.svg
@@ -42,9 +41,9 @@ func main() {
 
 	home(ts)
 	widgets(ts)
-	views(ts)
+	makeViews(ts)
 	values(ts)
-	style(ts)
+	makeStyles(ts)
 
 	b.RunMainWindow()
 }
@@ -58,7 +57,7 @@ func home(ts *core.Tabs) {
 		s.Text.Align = styles.Center
 	})
 
-	errors1.Log(core.NewSVG(tab).ReadBytes(appIcon))
+	errors.Log(core.NewSVG(tab).ReadBytes(appIcon))
 
 	core.NewLabel(tab).SetType(core.LabelDisplayLarge).SetText("The Cogent Core Demo")
 
@@ -74,7 +73,7 @@ func widgets(ts *core.Tabs) {
 	sliders(wts)
 	editors(wts)
 	dialogs(wts)
-	icon(wts)
+	makeIcons(wts)
 }
 
 func text(ts *core.Tabs) {
@@ -315,11 +314,11 @@ func editors(ts *core.Tabs) {
 
 	sp := core.NewSplits(tab)
 
-	errors1.Log(texteditor.NewSoloEditor(sp).Buffer.OpenFS(demoFile, "demo.go"))
+	errors.Log(texteditor.NewSoloEditor(sp).Buffer.OpenFS(demoFile, "demo.go"))
 	texteditor.NewSoloEditor(sp).Buffer.SetLang("svg").SetText(appIcon)
 }
 
-func icon(ts *core.Tabs) {
+func makeIcons(ts *core.Tabs) {
 	tab := ts.NewTab("Icons")
 
 	core.NewLabel(tab).SetType(core.LabelHeadlineLarge).SetText("Icons")
@@ -362,17 +361,17 @@ func values(ts *core.Tabs) {
 	core.NewLabel(tab).SetText("Cogent Core provides the value views system, which allows you to instantly turn Go values into interactive widgets bound to the original values with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.")
 
 	core.NewButton(tab).SetText("Inspector").OnClick(func(e events.Event) {
-		views1.InspectorWindow(ts.Scene)
+		views.InspectorWindow(ts.Scene)
 	})
 
-	views1.NewValue(tab, colors.Orange)
-	views1.NewValue(tab, time.Now())
-	views1.NewValue(tab, 5*time.Minute)
-	views1.NewValue(tab, 500*time.Millisecond)
-	views1.NewValue(tab, core.Filename("demo.go"))
-	views1.NewValue(tab, core.AppearanceSettings.FontFamily)
-	views1.NewValue(tab, views1.ColorMapName("ColdHot"))
-	views1.NewFuncButton(tab, hello).SetShowReturn(true)
+	views.NewValue(tab, colors.Orange)
+	views.NewValue(tab, time.Now())
+	views.NewValue(tab, 5*time.Minute)
+	views.NewValue(tab, 500*time.Millisecond)
+	views.NewValue(tab, core.Filename("demo.go"))
+	views.NewValue(tab, core.AppearanceSettings.FontFamily)
+	views.NewValue(tab, views.ColorMapName("ColdHot"))
+	views.NewFuncButton(tab, hello).SetShowReturn(true)
 }
 
 // Hello displays a greeting message and an age in weeks based on the given information.
@@ -387,7 +386,7 @@ func hello(firstName string, lastName string, age int, likesGo bool) (greeting s
 	return
 }
 
-func views(ts *core.Tabs) {
+func makeViews(ts *core.Tabs) {
 	tab := ts.NewTab("Views")
 
 	core.NewLabel(tab).SetType(core.LabelHeadlineLarge).SetText("Views")
@@ -411,7 +410,7 @@ func views(ts *core.Tabs) {
 		Stuff:  make([]float32, 3),
 	}
 
-	views1.NewStructView(vts.NewTab("Struct view")).SetStruct(&str)
+	views.NewStructView(vts.NewTab("Struct view")).SetStruct(&str)
 
 	mp := map[string]string{}
 
@@ -419,7 +418,7 @@ func views(ts *core.Tabs) {
 	mp["Python"] = "Slow and duck-typed"
 	mp["C++"] = "Hard to use and slow to compile"
 
-	views1.NewMapView(vts.NewTab("Map view")).SetMap(&mp)
+	views.NewMapView(vts.NewTab("Map view")).SetMap(&mp)
 
 	sl := make([]string, 20)
 
@@ -428,7 +427,7 @@ func views(ts *core.Tabs) {
 	}
 	sl[10] = "this is a particularly long slice value"
 
-	views1.NewSliceView(vts.NewTab("Slice view")).SetSlice(&sl)
+	views.NewSliceView(vts.NewTab("Slice view")).SetSlice(&sl)
 
 	tbl := make([]*tableStruct, 100)
 
@@ -439,14 +438,14 @@ func views(ts *core.Tabs) {
 
 	tbl[0].StrField = "this is a particularly long field"
 
-	views1.NewTableView(vts.NewTab("Table view")).SetSlice(&tbl)
+	views.NewTableView(vts.NewTab("Table view")).SetSlice(&tbl)
 
 	sp := core.NewSplits(vts.NewTab("Tree view")).SetSplits(0.3, 0.7)
 
-	tv := views1.NewTreeViewFrame(sp).SetText("Root")
+	tv := views.NewTreeViewFrame(sp).SetText("Root")
 	makeTree(tv, 0, 3, 5)
 
-	sv := views1.NewStructView(sp)
+	sv := views.NewStructView(sp)
 	sv.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 	})
@@ -459,7 +458,7 @@ func views(ts *core.Tabs) {
 	})
 }
 
-func makeTree(tv *views1.TreeView, iter, maxIter, maxKids int) {
+func makeTree(tv *views.TreeView, iter, maxIter, maxKids int) {
 	if iter > maxIter {
 		return
 	}
@@ -468,9 +467,9 @@ func makeTree(tv *views1.TreeView, iter, maxIter, maxKids int) {
 		n = maxKids
 	}
 	iter++
-	tv.SetNChildren(n, views1.TreeViewType, "Child ")
+	tv.SetNChildren(n, views.TreeViewType, "Child ")
 	for j := 0; j < n; j++ {
-		kt := tv.Child(j).(*views1.TreeView)
+		kt := tv.Child(j).(*views.TreeView)
 		makeTree(kt, iter, maxIter, maxKids)
 	}
 }
@@ -636,7 +635,7 @@ func dialogs(ts *core.Tabs) {
 	u := &core.User{}
 	fd.OnClick(func(e events.Event) {
 		d := core.NewBody().AddTitle("Full window dialog").AddText("Edit your information")
-		views1.NewStructView(d).SetStruct(u).OnInput(func(e events.Event) {
+		views.NewStructView(d).SetStruct(u).OnInput(func(e events.Event) {
 			fmt.Println("Got input event")
 		})
 		d.OnClose(func(e events.Event) {
@@ -685,7 +684,7 @@ func dialogs(ts *core.Tabs) {
 	})
 }
 
-func style(ts *core.Tabs) {
+func makeStyles(ts *core.Tabs) {
 	tab := ts.NewTab("Styles")
 
 	core.NewLabel(tab).SetType(core.LabelHeadlineLarge).SetText("Styles and layouts")
@@ -693,7 +692,7 @@ func style(ts *core.Tabs) {
 
 	sp := core.NewSplits(tab)
 
-	sv := views1.NewStructView(sp)
+	sv := views.NewStructView(sp)
 
 	fr := core.NewFrame(core.NewFrame(sp)) // can not control layout when directly in splits
 	sv.SetStruct(&fr.Styles)
