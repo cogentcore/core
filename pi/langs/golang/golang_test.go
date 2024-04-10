@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"cogentcore.org/core/fi"
+	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/pi"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/prof"
@@ -24,11 +24,11 @@ func init() {
 
 func TestParse(t *testing.T) {
 	// t.Skip("todo: reenable soon")
-	lp, _ := pi.LangSupport.Properties(fi.Go)
+	lp, _ := pi.LangSupport.Properties(fileinfo.Go)
 	pr := lp.Lang.Parser()
 	pr.ReportErrs = true
 
-	fs := pi.NewFileStates(filepath.Join("..", "..", "..", "giv", "treeview.go"), "", fi.Go)
+	fs := pi.NewFileStates(filepath.Join("..", "..", "..", "giv", "treeview.go"), "", fileinfo.Go)
 	txt, err := lex.OpenFileBytes(fs.Filename) // and other stuff
 	if err != nil {
 		t.Error(err)

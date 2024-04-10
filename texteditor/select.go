@@ -7,7 +7,7 @@ package texteditor
 import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/fi"
+	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/mimedata"
@@ -385,9 +385,9 @@ func (ed *Editor) Copy(reset bool) *textbuf.Edit {
 
 // Paste inserts text from the clipboard at current cursor position
 func (ed *Editor) Paste() {
-	data := ed.Clipboard().Read([]string{fi.TextPlain})
+	data := ed.Clipboard().Read([]string{fileinfo.TextPlain})
 	if data != nil {
-		ed.InsertAtCursor(data.TypeData(fi.TextPlain))
+		ed.InsertAtCursor(data.TypeData(fileinfo.TextPlain))
 		ed.SavePosHistory(ed.CursorPos)
 	}
 	ed.NeedsRender()

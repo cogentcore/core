@@ -13,7 +13,7 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/fi"
+	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/vci"
@@ -384,7 +384,7 @@ func (fn *Node) CopyFileToDir(filename string, perm os.FileMode) {
 	ppath := string(fn.FPath)
 	sfn := filepath.Base(filename)
 	tpath := filepath.Join(ppath, sfn)
-	fi.CopyFile(tpath, filename, perm)
+	fileinfo.CopyFile(tpath, filename, perm)
 	fn.FRoot.UpdatePath(ppath)
 	ofn, ok := fn.FRoot.FindFile(filename)
 	if ok && ofn.Info.Vcs >= vci.Stored {

@@ -14,7 +14,7 @@ import (
 	"os"
 	"time"
 
-	"cogentcore.org/core/fi"
+	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/pi/parse"
 	"cogentcore.org/core/tree"
@@ -245,7 +245,7 @@ func (pr *Parser) ParseLine(fs *FileState, ln int) *FileState {
 // FileState of results (can be nil if string is empty or no lexical tokens).
 // Also takes supporting contextual info for file / language that this string
 // is associated with (only for reference)
-func (pr *Parser) ParseString(str string, fname string, sup fi.Known) *FileState {
+func (pr *Parser) ParseString(str string, fname string, sup fileinfo.Known) *FileState {
 	if str == "" {
 		return nil
 	}

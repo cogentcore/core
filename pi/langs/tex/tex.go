@@ -9,7 +9,7 @@ import (
 	"strings"
 	"unicode"
 
-	"cogentcore.org/core/fi"
+	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/glop/indent"
 	"cogentcore.org/core/pi"
 	"cogentcore.org/core/pi/langs"
@@ -33,15 +33,15 @@ type TexLang struct {
 var TheTexLang = TexLang{}
 
 func init() {
-	pi.StandardLangProperties[fi.TeX].Lang = &TheTexLang
-	langs.ParserBytes[fi.TeX] = parserBytes
+	pi.StandardLangProperties[fileinfo.TeX].Lang = &TheTexLang
+	langs.ParserBytes[fileinfo.TeX] = parserBytes
 }
 
 func (tl *TexLang) Parser() *pi.Parser {
 	if tl.Pr != nil {
 		return tl.Pr
 	}
-	lp, _ := pi.LangSupport.Properties(fi.TeX)
+	lp, _ := pi.LangSupport.Properties(fileinfo.TeX)
 	if lp.Parser == nil {
 		pi.LangSupport.OpenStandard()
 	}

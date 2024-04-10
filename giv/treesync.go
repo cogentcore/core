@@ -12,7 +12,7 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/fi"
+	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/mimedata"
@@ -387,7 +387,7 @@ func (tv *TreeView) MimeDataSync(md *mimedata.Mimes) {
 	var buf bytes.Buffer
 	err := tree.WriteNewJSON(src, &buf)
 	if err == nil {
-		*md = append(*md, &mimedata.Data{Type: fi.DataJson, Data: buf.Bytes()})
+		*md = append(*md, &mimedata.Data{Type: fileinfo.DataJson, Data: buf.Bytes()})
 	} else {
 		core.ErrorSnackbar(tv, err, "Error encoding node")
 	}
@@ -401,14 +401,14 @@ func (tv *TreeView) SyncNodesFromMimeData(md mimedata.Mimes) (tree.Slice, []stri
 	sl := make(tree.Slice, 0, ni)
 	pl := make([]string, 0, ni)
 	for _, d := range md {
-		if d.Type == fi.DataJson {
+		if d.Type == fileinfo.DataJson {
 			nki, err := tree.ReadNewJSON(bytes.NewReader(d.Data))
 			if err == nil {
 				sl = append(sl, nki)
 			} else {
 				core.ErrorSnackbar(tv, err, "Error loading node")
 			}
-		} else if d.Type == fi.TextPlain { // paths
+		} else if d.Type == fileinfo.TextPlain { // paths
 			pl = append(pl, string(d.Data))
 		}
 	}
@@ -494,7 +494,7 @@ func (tv *TreeView) DropDeleteSourceSync(de *events.DragDrop) {
 	md := de.Data.(mimedata.Mimes)
 	sroot := tv.RootView.SyncNode
 	for _, d := range md {
-		if d.Type != fi.TextPlain { // link
+		if d.Type != fileinfo.TextPlain { // link
 			continue
 		}
 		path := string(d.Data)

@@ -14,7 +14,7 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/fi"
+	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/grr"
@@ -59,7 +59,7 @@ func (fn *Node) Cut() {
 }
 
 func (fn *Node) Paste() {
-	md := fn.Clipboard().Read([]string{fi.TextPlain})
+	md := fn.Clipboard().Read([]string{fileinfo.TextPlain})
 	if md != nil {
 		fn.PasteFiles(md, false, nil)
 	}
@@ -100,7 +100,7 @@ func (fn *Node) PasteCheckExisting(tfn *Node, md mimedata.Mimes, externalDrop bo
 		} else {
 			d = md[i] // just a list
 		}
-		if d.Type != fi.TextPlain {
+		if d.Type != fileinfo.TextPlain {
 			continue
 		}
 		path := string(d.Data)
@@ -139,7 +139,7 @@ func (fn *Node) PasteCopyFiles(tdir *Node, md mimedata.Mimes, externalDrop bool)
 		} else {
 			d = md[i] // just a list
 		}
-		if d.Type != fi.TextPlain {
+		if d.Type != fileinfo.TextPlain {
 			continue
 		}
 		path := string(d.Data)
@@ -219,7 +219,7 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 				texteditor.DiffFiles(fn, tpath, srcpath)
 			})
 			d.AddOK(parent).SetText("Overwrite").OnClick(func(e events.Event) {
-				fi.CopyFile(tpath, srcpath, mode)
+				fileinfo.CopyFile(tpath, srcpath, mode)
 				if dropFinal != nil {
 					dropFinal()
 				}
@@ -239,14 +239,14 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 				texteditor.DiffFiles(fn, npath, srcpath)
 			})
 			d.AddOK(parent).SetText("Overwrite target").OnClick(func(e events.Event) {
-				fi.CopyFile(tpath, srcpath, mode)
+				fileinfo.CopyFile(tpath, srcpath, mode)
 				if dropFinal != nil {
 					dropFinal()
 				}
 			})
 			d.AddOK(parent).SetText("Overwrite existing").OnClick(func(e events.Event) {
 				npath := filepath.Join(string(tdir.FPath), fname)
-				fi.CopyFile(npath, srcpath, mode)
+				fileinfo.CopyFile(npath, srcpath, mode)
 				if dropFinal != nil {
 					dropFinal()
 				}
@@ -262,7 +262,7 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 				texteditor.DiffFiles(fn, tpath, srcpath)
 			})
 			d.AddOK(parent).SetText("Overwrite target").OnClick(func(e events.Event) {
-				fi.CopyFile(tpath, srcpath, mode)
+				fileinfo.CopyFile(tpath, srcpath, mode)
 				if dropFinal != nil {
 					dropFinal()
 				}

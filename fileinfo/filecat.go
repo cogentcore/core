@@ -2,24 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package filecat categorizes file types -- it is the single, consolidated
-// place where mimetypes and filetypes etc are managed in Cogent Core.
-//
-// This whole space is a bit of a heterogenous mess -- most file types
-// we care about are not registered on the official iana registry, which
-// seems mainly to have paid registrations in application/ category,
-// and doesn't have any of the main programming languages etc.
-//
-// The official Go std library support depends on different platform
-// libraries and mac doesn't have one, so it has very limited support
-//
-// So we sucked it up and made a full list of all the major file types
-// that we really care about and also provide a broader category-level organization
-// that is useful for functionally organizing / operating on files.
-//
-// As fallback, we are this Go package:
-// github.com/h2non/filetype
-package fi
+package fileinfo
 
 // fi.Cat is a functional category for files -- a broad functional
 // categorization that can help decide what to do with the file.

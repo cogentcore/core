@@ -6,7 +6,7 @@ package textbuf
 
 import (
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/fi"
+	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/glop/indent"
 	"cogentcore.org/core/pi"
 )
@@ -50,8 +50,8 @@ func (tb *Opts) IndentChar() indent.Char {
 
 // ConfigKnown configures options based on the supported language info in GoPi
 // returns true if supported
-func (tb *Opts) ConfigKnown(sup fi.Known) bool {
-	if sup == fi.Unknown {
+func (tb *Opts) ConfigKnown(sup fileinfo.Known) bool {
+	if sup == fileinfo.Unknown {
 		return false
 	}
 	lp, ok := pi.StandardLangProperties[sup]
@@ -78,12 +78,12 @@ func KnownComments(fpath string) (comLn, comSt, comEd string) {
 	comLn = "//"
 	comSt = "/*"
 	comEd = "*/"
-	mtyp, _, err := fi.MimeFromFile(fpath)
+	mtyp, _, err := fileinfo.MimeFromFile(fpath)
 	if err != nil {
 		return
 	}
-	sup := fi.MimeKnown(mtyp)
-	if sup == fi.Unknown {
+	sup := fileinfo.MimeKnown(mtyp)
+	if sup == fileinfo.Unknown {
 		return
 	}
 	lp, ok := pi.StandardLangProperties[sup]

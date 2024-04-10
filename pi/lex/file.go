@@ -12,7 +12,7 @@ import (
 	"slices"
 	"strings"
 
-	"cogentcore.org/core/fi"
+	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/pi/token"
 )
 
@@ -25,7 +25,7 @@ type File struct {
 	Filename string
 
 	// the known file type, if known (typically only known files are processed)
-	Sup fi.Known
+	Sup fileinfo.Known
 
 	// base path for reporting file names -- this must be set externally e.g., by gide for the project root path
 	BasePath string
@@ -48,7 +48,7 @@ type File struct {
 
 // SetSrc sets the source to given content, and alloc Lexs -- if basepath is empty
 // then it is set to the path for the filename
-func (fl *File) SetSrc(src [][]rune, fname, basepath string, sup fi.Known) {
+func (fl *File) SetSrc(src [][]rune, fname, basepath string, sup fileinfo.Known) {
 	fl.Filename = fname
 	if basepath != "" {
 		fl.BasePath = basepath
@@ -158,7 +158,7 @@ func (fl *File) OpenFile(fname string) error {
 		return err
 	}
 	rns := RunesFromBytes(alltxt)
-	sup := fi.KnownFromFile(fname)
+	sup := fileinfo.KnownFromFile(fname)
 	fl.SetSrc(rns, fname, "", sup)
 	return nil
 }
@@ -198,7 +198,7 @@ func (fl *File) InitFromLine(sfl *File, ln int) bool {
 }
 
 // InitFromString initializes from given string. Returns false if string is empty
-func (fl *File) InitFromString(str string, fname string, sup fi.Known) bool {
+func (fl *File) InitFromString(str string, fname string, sup fileinfo.Known) bool {
 	if str == "" {
 		return false
 	}

@@ -23,7 +23,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/fi"
+	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
@@ -78,7 +78,7 @@ type FileView struct {
 	ExtMap map[string]string
 
 	// files for current directory
-	Files []*fi.FileInfo
+	Files []*fileinfo.FileInfo
 
 	// index of currently-selected file in Files list (-1 if none)
 	SelectedIndex int `set:"-" edit:"-"`
@@ -183,16 +183,16 @@ func (fv *FileView) Disconnect() {
 
 // FileViewFilterFunc is a filtering function for files -- returns true if the
 // file should be visible in the view, and false if not
-type FileViewFilterFunc func(fv *FileView, fi *fi.FileInfo) bool
+type FileViewFilterFunc func(fv *FileView, fi *fileinfo.FileInfo) bool
 
 // FileViewDirOnlyFilter is a FileViewFilterFunc that only shows directories (folders).
-func FileViewDirOnlyFilter(fv *FileView, fi *fi.FileInfo) bool {
+func FileViewDirOnlyFilter(fv *FileView, fi *fileinfo.FileInfo) bool {
 	return fi.IsDir()
 }
 
 // FileViewExtOnlyFilter is a FileViewFilterFunc that only shows files that
 // match the target extensions, and directories.
-func FileViewExtOnlyFilter(fv *FileView, fi *fi.FileInfo) bool {
+func FileViewExtOnlyFilter(fv *FileView, fi *fileinfo.FileInfo) bool {
 	if fi.IsDir() {
 		return true
 	}
@@ -224,7 +224,7 @@ func (fv *FileView) SelectedFile() string {
 
 // SelectedFileInfo returns the currently-selected fileinfo, returns
 // false if none
-func (fv *FileView) SelectedFileInfo() (*fi.FileInfo, bool) {
+func (fv *FileView) SelectedFileInfo() (*fileinfo.FileInfo, bool) {
 	if fv.SelectedIndex < 0 || fv.SelectedIndex >= len(fv.Files) {
 		return nil, false
 	}
@@ -527,7 +527,7 @@ func (fv *FileView) ReadFiles() {
 		return
 	}
 
-	fv.Files = make([]*fi.FileInfo, 0, 1000)
+	fv.Files = make([]*fileinfo.FileInfo, 0, 1000)
 	filepath.Walk(effpath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			emsg := fmt.Sprintf("Path %q: Error: %v", effpath, err)
@@ -541,7 +541,7 @@ func (fv *FileView) ReadFiles() {
 		if path == effpath { // proceed..
 			return nil
 		}
-		fi, ferr := fi.NewFileInfo(path)
+		fi, ferr := fileinfo.NewFileInfo(path)
 		keep := ferr == nil
 		if fv.FilterFunc != nil {
 			keep = fv.FilterFunc(fv, fi)

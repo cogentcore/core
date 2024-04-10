@@ -9,7 +9,7 @@ import (
 	"log"
 	"time"
 
-	"cogentcore.org/core/fi"
+	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/pi/langs"
 	"cogentcore.org/core/pi/lex"
 )
@@ -40,7 +40,7 @@ const (
 type LangProperties struct {
 
 	// known language -- must be a supported one from Known list
-	Known fi.Known
+	Known fileinfo.Known
 
 	// character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used
 	CommentLn string
@@ -72,36 +72,36 @@ func (lp *LangProperties) HasFlag(flg LangFlags) bool {
 }
 
 // StandardLangProperties is the standard compiled-in set of language properties
-var StandardLangProperties = map[fi.Known]*LangProperties{
-	fi.Ada:        {fi.Ada, "--", "", "", nil, nil, nil},
-	fi.Bash:       {fi.Bash, "# ", "", "", nil, nil, nil},
-	fi.Csh:        {fi.Csh, "# ", "", "", nil, nil, nil},
-	fi.C:          {fi.C, "// ", "/* ", " */", nil, nil, nil},
-	fi.CSharp:     {fi.CSharp, "// ", "/* ", " */", nil, nil, nil},
-	fi.D:          {fi.D, "// ", "/* ", " */", nil, nil, nil},
-	fi.ObjC:       {fi.ObjC, "// ", "/* ", " */", nil, nil, nil},
-	fi.Go:         {fi.Go, "// ", "/* ", " */", []LangFlags{IndentTab}, nil, nil},
-	fi.Java:       {fi.Java, "// ", "/* ", " */", nil, nil, nil},
-	fi.JavaScript: {fi.JavaScript, "// ", "/* ", " */", nil, nil, nil},
-	fi.Eiffel:     {fi.Eiffel, "--", "", "", nil, nil, nil},
-	fi.Haskell:    {fi.Haskell, "--", "{- ", "-}", nil, nil, nil},
-	fi.Lisp:       {fi.Lisp, "; ", "", "", nil, nil, nil},
-	fi.Lua:        {fi.Lua, "--", "---[[ ", "--]]", nil, nil, nil},
-	fi.Makefile:   {fi.Makefile, "# ", "", "", []LangFlags{IndentTab}, nil, nil},
-	fi.Matlab:     {fi.Matlab, "% ", "%{ ", " %}", nil, nil, nil},
-	fi.OCaml:      {fi.OCaml, "", "(* ", " *)", nil, nil, nil},
-	fi.Pascal:     {fi.Pascal, "// ", " ", " }", nil, nil, nil},
-	fi.Perl:       {fi.Perl, "# ", "", "", nil, nil, nil},
-	fi.Python:     {fi.Python, "# ", "", "", []LangFlags{IndentSpace}, nil, nil},
-	fi.Php:        {fi.Php, "// ", "/* ", " */", nil, nil, nil},
-	fi.R:          {fi.R, "# ", "", "", nil, nil, nil},
-	fi.Ruby:       {fi.Ruby, "# ", "", "", nil, nil, nil},
-	fi.Rust:       {fi.Rust, "// ", "/* ", " */", nil, nil, nil},
-	fi.Scala:      {fi.Scala, "// ", "/* ", " */", nil, nil, nil},
-	fi.Html:       {fi.Html, "", "<!-- ", " -->", nil, nil, nil},
-	fi.TeX:        {fi.TeX, "% ", "", "", nil, nil, nil},
-	fi.Markdown:   {fi.Markdown, "", "<!--- ", " -->", []LangFlags{IndentSpace}, nil, nil},
-	fi.Yaml:       {fi.Yaml, "#", "", "", []LangFlags{IndentSpace}, nil, nil},
+var StandardLangProperties = map[fileinfo.Known]*LangProperties{
+	fileinfo.Ada:        {fileinfo.Ada, "--", "", "", nil, nil, nil},
+	fileinfo.Bash:       {fileinfo.Bash, "# ", "", "", nil, nil, nil},
+	fileinfo.Csh:        {fileinfo.Csh, "# ", "", "", nil, nil, nil},
+	fileinfo.C:          {fileinfo.C, "// ", "/* ", " */", nil, nil, nil},
+	fileinfo.CSharp:     {fileinfo.CSharp, "// ", "/* ", " */", nil, nil, nil},
+	fileinfo.D:          {fileinfo.D, "// ", "/* ", " */", nil, nil, nil},
+	fileinfo.ObjC:       {fileinfo.ObjC, "// ", "/* ", " */", nil, nil, nil},
+	fileinfo.Go:         {fileinfo.Go, "// ", "/* ", " */", []LangFlags{IndentTab}, nil, nil},
+	fileinfo.Java:       {fileinfo.Java, "// ", "/* ", " */", nil, nil, nil},
+	fileinfo.JavaScript: {fileinfo.JavaScript, "// ", "/* ", " */", nil, nil, nil},
+	fileinfo.Eiffel:     {fileinfo.Eiffel, "--", "", "", nil, nil, nil},
+	fileinfo.Haskell:    {fileinfo.Haskell, "--", "{- ", "-}", nil, nil, nil},
+	fileinfo.Lisp:       {fileinfo.Lisp, "; ", "", "", nil, nil, nil},
+	fileinfo.Lua:        {fileinfo.Lua, "--", "---[[ ", "--]]", nil, nil, nil},
+	fileinfo.Makefile:   {fileinfo.Makefile, "# ", "", "", []LangFlags{IndentTab}, nil, nil},
+	fileinfo.Matlab:     {fileinfo.Matlab, "% ", "%{ ", " %}", nil, nil, nil},
+	fileinfo.OCaml:      {fileinfo.OCaml, "", "(* ", " *)", nil, nil, nil},
+	fileinfo.Pascal:     {fileinfo.Pascal, "// ", " ", " }", nil, nil, nil},
+	fileinfo.Perl:       {fileinfo.Perl, "# ", "", "", nil, nil, nil},
+	fileinfo.Python:     {fileinfo.Python, "# ", "", "", []LangFlags{IndentSpace}, nil, nil},
+	fileinfo.Php:        {fileinfo.Php, "// ", "/* ", " */", nil, nil, nil},
+	fileinfo.R:          {fileinfo.R, "# ", "", "", nil, nil, nil},
+	fileinfo.Ruby:       {fileinfo.Ruby, "# ", "", "", nil, nil, nil},
+	fileinfo.Rust:       {fileinfo.Rust, "// ", "/* ", " */", nil, nil, nil},
+	fileinfo.Scala:      {fileinfo.Scala, "// ", "/* ", " */", nil, nil, nil},
+	fileinfo.Html:       {fileinfo.Html, "", "<!-- ", " -->", nil, nil, nil},
+	fileinfo.TeX:        {fileinfo.TeX, "% ", "", "", nil, nil, nil},
+	fileinfo.Markdown:   {fileinfo.Markdown, "", "<!--- ", " -->", []LangFlags{IndentSpace}, nil, nil},
+	fileinfo.Yaml:       {fileinfo.Yaml, "#", "", "", []LangFlags{IndentSpace}, nil, nil},
 }
 
 // LangSupporter provides general support for supported languages.
@@ -138,7 +138,7 @@ func (ll *LangSupporter) OpenStandard() error {
 }
 
 // Properties looks up language properties by fi.Known const int type
-func (ll *LangSupporter) Properties(sup fi.Known) (*LangProperties, error) {
+func (ll *LangSupporter) Properties(sup fileinfo.Known) (*LangProperties, error) {
 	lp, has := StandardLangProperties[sup]
 	if !has {
 		err := fmt.Errorf("pi.LangSupport.Properties: no specific support for language: %v", sup)
@@ -151,7 +151,7 @@ func (ll *LangSupporter) Properties(sup fi.Known) (*LangProperties, error) {
 // PropertiesByName looks up language properties by string name of language
 // (with case-insensitive fallback). Returns error if not supported.
 func (ll *LangSupporter) PropertiesByName(lang string) (*LangProperties, error) {
-	sup, err := fi.KnownByName(lang)
+	sup, err := fileinfo.KnownByName(lang)
 	if err != nil {
 		// log.Println(err.Error()) // don't want output during lexing..
 		return nil, err

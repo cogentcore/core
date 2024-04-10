@@ -13,7 +13,7 @@ import (
 	"strings"
 	"unicode"
 
-	"cogentcore.org/core/fi"
+	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/glop/indent"
 	"cogentcore.org/core/pi"
 	"cogentcore.org/core/pi/langs"
@@ -33,15 +33,15 @@ type GoLang struct {
 var TheGoLang = GoLang{}
 
 func init() {
-	pi.StandardLangProperties[fi.Go].Lang = &TheGoLang
-	langs.ParserBytes[fi.Go] = parserBytes
+	pi.StandardLangProperties[fileinfo.Go].Lang = &TheGoLang
+	langs.ParserBytes[fileinfo.Go] = parserBytes
 }
 
 func (gl *GoLang) Parser() *pi.Parser {
 	if gl.Pr != nil {
 		return gl.Pr
 	}
-	lp, _ := pi.LangSupport.Properties(fi.Go)
+	lp, _ := pi.LangSupport.Properties(fileinfo.Go)
 	if lp.Parser == nil {
 		pi.LangSupport.OpenStandard()
 	}

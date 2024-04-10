@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"cogentcore.org/core/fi"
+	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/pi"
 	_ "cogentcore.org/core/pi/langs"
@@ -57,13 +57,13 @@ func main() {
 
 func DoGoPath(path string) {
 	fmt.Printf("Processing path: %v\n", path)
-	lp, _ := pi.LangSupport.Properties(fi.Go)
+	lp, _ := pi.LangSupport.Properties(fileinfo.Go)
 	pr := lp.Lang.Parser()
 	pr.ReportErrs = true
 	fs := pi.NewFileState()
 	pkgsym := lp.Lang.ParseDir(fs, path, pi.LangDirOpts{Rebuild: true})
 	if pkgsym != nil {
-		syms.SaveSymDoc(pkgsym, fi.Go, path)
+		syms.SaveSymDoc(pkgsym, fileinfo.Go, path)
 	}
 }
 

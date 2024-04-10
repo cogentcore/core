@@ -7,7 +7,7 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/fi"
+	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/mat32"
@@ -82,7 +82,7 @@ func (t *FileView) SetExtMap(v map[string]string) *FileView { t.ExtMap = v; retu
 
 // SetFiles sets the [FileView.Files]:
 // files for current directory
-func (t *FileView) SetFiles(v ...*fi.FileInfo) *FileView { t.Files = v; return t }
+func (t *FileView) SetFiles(v ...*fileinfo.FileInfo) *FileView { t.Files = v; return t }
 
 // SetTooltip sets the [FileView.Tooltip]
 func (t *FileView) SetTooltip(v string) *FileView { t.Tooltip = v; return t }

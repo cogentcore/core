@@ -24,7 +24,7 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/fi"
+	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
@@ -1521,7 +1521,7 @@ func (sv *SliceViewBase) MimeDataIndex(md *mimedata.Mimes, idx int) {
 	val := sv.SliceVal(idx)
 	b, err := json.MarshalIndent(val, "", "  ")
 	if err == nil {
-		*md = append(*md, &mimedata.Data{Type: fi.DataJson, Data: b})
+		*md = append(*md, &mimedata.Data{Type: fileinfo.DataJson, Data: b})
 	} else {
 		log.Printf("core.SliceViewBase MimeData JSON Marshall error: %v\n", err)
 	}
@@ -1533,7 +1533,7 @@ func (sv *SliceViewBase) FromMimeData(md mimedata.Mimes) []any {
 	svtyp := sv.SliceNPVal.Type()
 	sl := make([]any, 0, len(md))
 	for _, d := range md {
-		if d.Type == fi.DataJson {
+		if d.Type == fileinfo.DataJson {
 			nval := reflect.New(svtyp.Elem()).Interface()
 			err := json.Unmarshal(d.Data, nval)
 			if err == nil {
@@ -1549,7 +1549,7 @@ func (sv *SliceViewBase) FromMimeData(md mimedata.Mimes) []any {
 // MimeDataType returns the data type for mime clipboard (copy / paste) data
 // e.g., fi.DataJson
 func (sv *SliceViewBase) MimeDataType() string {
-	return fi.DataJson
+	return fileinfo.DataJson
 }
 
 // CopySelectToMime copies selected rows to mime data

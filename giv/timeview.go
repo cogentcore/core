@@ -11,7 +11,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/fi"
+	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
@@ -366,13 +366,13 @@ func (v *TimeValue) Update() {
 	v.Widget.ChildByName("time").(*core.TextField).SetText(tm.Format(core.SystemSettings.TimeFormat()))
 }
 
-// TimeValue decodes the value into a *time.Time value, also handling the [fi.FileTime] case.
+// TimeValue decodes the value into a *time.Time value, also handling the [fileinfo.FileTime] case.
 func (v *TimeValue) TimeValue() *time.Time {
 	tmi := laser.PtrValue(v.Value).Interface()
 	switch v := tmi.(type) {
 	case *time.Time:
 		return v
-	case *fi.FileTime:
+	case *fileinfo.FileTime:
 		return (*time.Time)(v)
 	}
 	return nil

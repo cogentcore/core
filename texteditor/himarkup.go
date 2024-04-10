@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/fi"
+	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/pi"
 	"cogentcore.org/core/pi/lex"
 	_ "cogentcore.org/core/pi/suplangs"
@@ -26,7 +26,7 @@ import (
 type HiMarkup struct {
 
 	// full info about the file including category etc
-	Info *fi.FileInfo
+	Info *fileinfo.FileInfo
 
 	// syntax highlighting style
 	Style core.HiStyleName
@@ -72,11 +72,11 @@ func (hm *HiMarkup) UsingPi() bool {
 }
 
 // Init initializes the syntax highlighting for current params
-func (hm *HiMarkup) Init(info *fi.FileInfo, pist *pi.FileStates) {
+func (hm *HiMarkup) Init(info *fileinfo.FileInfo, pist *pi.FileStates) {
 	hm.Info = info
 	hm.PiState = pist
 
-	if hm.Info.Known != fi.Unknown {
+	if hm.Info.Known != fileinfo.Unknown {
 		if lp, err := pi.LangSupport.Properties(hm.Info.Known); err == nil {
 			if lp.Lang != nil {
 				hm.lexer = nil

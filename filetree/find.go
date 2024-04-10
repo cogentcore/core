@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/fi"
+	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/tree"
 )
 
@@ -135,14 +135,14 @@ func NodeNameCountSort(ecs []NodeNameCount) {
 // from highest to lowest.
 // If cat is != fi.Unknown then it only uses files of that type
 // (e.g., fi.Code to find any code files)
-func (fn *Node) FileExtCounts(cat fi.Cat) []NodeNameCount {
+func (fn *Node) FileExtCounts(cat fileinfo.Cat) []NodeNameCount {
 	cmap := make(map[string]int, 20)
 	fn.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
 			return tree.Continue
 		}
-		if cat != fi.UnknownCat {
+		if cat != fileinfo.UnknownCat {
 			if sfn.Info.Cat != cat {
 				return tree.Continue
 			}
@@ -168,14 +168,14 @@ func (fn *Node) FileExtCounts(cat fi.Cat) []NodeNameCount {
 // LatestFileMod returns the most recent mod time of files in the tree.
 // If cat is != fi.Unknown then it only uses files of that type
 // (e.g., fi.Code to find any code files)
-func (fn *Node) LatestFileMod(cat fi.Cat) time.Time {
+func (fn *Node) LatestFileMod(cat fileinfo.Cat) time.Time {
 	tmod := time.Time{}
 	fn.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
 			return tree.Continue
 		}
-		if cat != fi.UnknownCat {
+		if cat != fileinfo.UnknownCat {
 			if sfn.Info.Cat != cat {
 				return tree.Continue
 			}

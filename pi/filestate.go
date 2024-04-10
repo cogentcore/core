@@ -10,7 +10,7 @@ import (
 	"strings"
 	"sync"
 
-	"cogentcore.org/core/fi"
+	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/pi/parse"
 	"cogentcore.org/core/pi/syms"
@@ -100,7 +100,7 @@ func (fs *FileState) Destroy() {
 // SetSrc sets source to be parsed, and filename it came from, and also the
 // base path for project for reporting filenames relative to
 // (if empty, path to filename is used)
-func (fs *FileState) SetSrc(src [][]rune, fname, basepath string, sup fi.Known) {
+func (fs *FileState) SetSrc(src [][]rune, fname, basepath string, sup fileinfo.Known) {
 	fs.Init()
 	fs.Src.SetSrc(src, fname, basepath, sup)
 	fs.LexState.Filename = fname

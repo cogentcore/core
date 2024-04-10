@@ -18,7 +18,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/fi"
+	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/gti"
@@ -43,7 +43,7 @@ type Node struct { //core:embedder
 	FPath core.Filename `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
 	// full standard file info about this file
-	Info fi.FileInfo `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
+	Info fileinfo.FileInfo `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
 	// file buffer for editing this file
 	Buffer *texteditor.Buffer `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`

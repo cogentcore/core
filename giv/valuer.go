@@ -14,7 +14,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/fi"
+	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
@@ -38,7 +38,7 @@ func init() {
 	AddValue(key.Chord(""), func() Value { return &KeyChordValue{} })
 	AddValue(time.Time{}, func() Value { return &TimeValue{} })
 	AddValue(time.Duration(0), func() Value { return &DurationValue{} })
-	AddValue(fi.FileTime{}, func() Value { return &TimeValue{} })
+	AddValue(fileinfo.FileTime{}, func() Value { return &TimeValue{} })
 }
 
 // Valuer is an interface that types can implement to specify the [Value]

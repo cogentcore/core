@@ -18,7 +18,7 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/fi"
+	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
@@ -1368,7 +1368,7 @@ func (tv *TreeView) MimeData(md *mimedata.Mimes) {
 	var buf bytes.Buffer
 	err := tree.WriteNewJSON(tv.This(), &buf)
 	if err == nil {
-		*md = append(*md, &mimedata.Data{Type: fi.DataJson, Data: buf.Bytes()})
+		*md = append(*md, &mimedata.Data{Type: fileinfo.DataJson, Data: buf.Bytes()})
 	} else {
 		core.ErrorSnackbar(tv, err, "Error encoding node")
 	}
@@ -1381,14 +1381,14 @@ func (tv *TreeView) NodesFromMimeData(md mimedata.Mimes) (tree.Slice, []string) 
 	sl := make(tree.Slice, 0, ni)
 	pl := make([]string, 0, ni)
 	for _, d := range md {
-		if d.Type == fi.DataJson {
+		if d.Type == fileinfo.DataJson {
 			nki, err := tree.ReadNewJSON(bytes.NewReader(d.Data))
 			if err == nil {
 				sl = append(sl, nki)
 			} else {
 				core.ErrorSnackbar(tv, err, "Error loading node")
 			}
-		} else if d.Type == fi.TextPlain { // paths
+		} else if d.Type == fileinfo.TextPlain { // paths
 			pl = append(pl, string(d.Data))
 		}
 	}
@@ -1436,7 +1436,7 @@ func (tv *TreeView) Cut() { //gti:add
 
 // Paste pastes clipboard at given node.
 func (tv *TreeView) Paste() { //gti:add
-	md := tv.Clipboard().Read([]string{fi.DataJson})
+	md := tv.Clipboard().Read([]string{fileinfo.DataJson})
 	if md != nil {
 		tv.PasteMenu(md)
 	}
@@ -1670,7 +1670,7 @@ func (tv *TreeView) DropDeleteSource(e events.Event) {
 	md := de.Data.(mimedata.Mimes)
 	root := tv.RootView
 	for _, d := range md {
-		if d.Type != fi.TextPlain { // link
+		if d.Type != fileinfo.TextPlain { // link
 			continue
 		}
 		path := string(d.Data)

@@ -14,7 +14,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"cogentcore.org/core/fi"
+	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/pi"
 	"cogentcore.org/core/pi/syms"
@@ -170,7 +170,7 @@ func (gl *GoLang) ParseDirImpl(fs *pi.FileState, path string, opts pi.LangDirOpt
 	}
 
 	if !opts.Rebuild {
-		csy, cts, err := syms.OpenSymCache(fi.Go, pkgPathAbs)
+		csy, cts, err := syms.OpenSymCache(fileinfo.Go, pkgPathAbs)
 		if err == nil && csy != nil {
 			sydir := filepath.Dir(csy.Filename)
 			diffPath := sydir != pkgPathAbs
@@ -252,7 +252,7 @@ func (gl *GoLang) ParseDirImpl(fs *pi.FileState, path string, opts pi.LangDirOpt
 	gl.ResolveTypes(pfs, pkgsym, false) // false = don't include function-internal scope items
 	gl.DeleteExternalTypes(pkgsym)
 	if !opts.Nocache {
-		syms.SaveSymCache(pkgsym, fi.Go, pkgPathAbs)
+		syms.SaveSymCache(pkgsym, fileinfo.Go, pkgPathAbs)
 	}
 	pkgsym.ClearAst() // otherwise memory can be huge -- can comment this out for debugging
 	for _, fs := range fss {

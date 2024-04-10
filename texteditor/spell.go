@@ -10,7 +10,7 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/fi"
+	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/pi/token"
@@ -120,7 +120,7 @@ func (ed *Editor) ISpellKeyInput(kt events.Event) {
 		return
 	}
 
-	isDoc := ed.Buffer.Info.Cat == fi.Doc
+	isDoc := ed.Buffer.Info.Cat == fileinfo.Doc
 	tp := ed.CursorPos
 
 	kf := keyfun.Of(kt.KeyChord())

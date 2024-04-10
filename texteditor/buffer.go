@@ -20,7 +20,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/fi"
+	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/glop/indent"
@@ -68,7 +68,7 @@ type Buffer struct {
 	Opts textbuf.Opts
 
 	// full info about file
-	Info fi.FileInfo
+	Info fileinfo.FileInfo
 
 	// Pi parsing state info for file
 	PiState pi.FileStates
@@ -484,7 +484,7 @@ func (tb *Buffer) Stat() error {
 // ConfigKnown configures options based on the supported language info in GoPi
 // returns true if supported
 func (tb *Buffer) ConfigKnown() bool {
-	if tb.Info.Known != fi.Unknown {
+	if tb.Info.Known != fileinfo.Unknown {
 		if tb.Spell == nil {
 			tb.SetSpell()
 		}
@@ -2670,9 +2670,9 @@ func (tb *Buffer) IsSpellEnabled(pos lex.Pos) bool {
 		return false
 	}
 	switch tb.Info.Cat {
-	case fi.Doc: // not in code!
+	case fileinfo.Doc: // not in code!
 		return !tb.InTokenCode(pos)
-	case fi.Code:
+	case fileinfo.Code:
 		return tb.InComment(pos) || tb.InLitString(pos)
 	default:
 		return false

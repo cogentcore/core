@@ -9,7 +9,7 @@ import (
 	"strings"
 	"unicode"
 
-	"cogentcore.org/core/fi"
+	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/glop/indent"
 	"cogentcore.org/core/pi"
 	"cogentcore.org/core/pi/complete"
@@ -35,15 +35,15 @@ type MarkdownLang struct {
 var TheMarkdownLang = MarkdownLang{}
 
 func init() {
-	pi.StandardLangProperties[fi.Markdown].Lang = &TheMarkdownLang
-	langs.ParserBytes[fi.Markdown] = parserBytes
+	pi.StandardLangProperties[fileinfo.Markdown].Lang = &TheMarkdownLang
+	langs.ParserBytes[fileinfo.Markdown] = parserBytes
 }
 
 func (ml *MarkdownLang) Parser() *pi.Parser {
 	if ml.Pr != nil {
 		return ml.Pr
 	}
-	lp, _ := pi.LangSupport.Properties(fi.Markdown)
+	lp, _ := pi.LangSupport.Properties(fileinfo.Markdown)
 	if lp.Parser == nil {
 		pi.LangSupport.OpenStandard()
 	}
