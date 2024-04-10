@@ -16,7 +16,7 @@ import (
 	"sync"
 	"time"
 
-	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/system"
 )
 
 var (
@@ -240,14 +240,14 @@ func (mgr *WinGeomsSaver) RecordPref(win *RenderWin) {
 	if !win.IsVisible() {
 		return
 	}
-	wsz := win.GoosiWin.Size()
+	wsz := win.SystemWin.Size()
 	if wsz == (image.Point{}) {
 		if DebugSettings.WinGeomTrace {
 			log.Printf("WinGeoms: RecordPref: NOT storing null size for win: %v\n", win.Name)
 		}
 		return
 	}
-	pos := win.GoosiWin.Position()
+	pos := win.SystemWin.Position()
 	if pos.X == -32000 || pos.Y == -32000 { // windows badness
 		if DebugSettings.WinGeomTrace {
 			log.Printf("WinGeoms: RecordPref: NOT storing very negative pos: %v for win: %v\n", pos, win.Name)
@@ -265,8 +265,8 @@ func (mgr *WinGeomsSaver) RecordPref(win *RenderWin) {
 	mgr.Init()
 
 	winName := mgr.WinName(win.Title)
-	sc := win.GoosiWin.Screen()
-	wgr := RenderWinGeom{DPI: win.LogicalDPI(), DPR: sc.DevicePixelRatio, Fullscreen: win.GoosiWin.Is(goosi.Fullscreen)}
+	sc := win.SystemWin.Screen()
+	wgr := RenderWinGeom{DPI: win.LogicalDPI(), DPR: sc.DevicePixelRatio, Fullscreen: win.SystemWin.Is(system.Fullscreen)}
 	wgr.SetPos(pos)
 	wgr.SetSize(wsz)
 
@@ -317,7 +317,7 @@ func (mgr *WinGeomsSaver) SaveCached() {
 	}
 	for winName, scmap := range mgr.Cache {
 		for scName, wgr := range scmap {
-			sc := goosi.TheApp.ScreenByName(scName)
+			sc := system.TheApp.ScreenByName(scName)
 			if sc == nil {
 				continue
 			}
@@ -338,7 +338,7 @@ func (mgr *WinGeomsSaver) SaveCached() {
 // Pref returns an existing preference for given window name, for given screen.
 // if the window name has a colon, only the part prior to the colon is used.
 // if no saved pref is available for that screen, nil is returned.
-func (mgr *WinGeomsSaver) Pref(winName string, scrn *goosi.Screen) *RenderWinGeom {
+func (mgr *WinGeomsSaver) Pref(winName string, scrn *system.Screen) *RenderWinGeom {
 	mgr.Mu.RLock()
 	defer mgr.Mu.RUnlock()
 
@@ -355,7 +355,7 @@ func (mgr *WinGeomsSaver) Pref(winName string, scrn *goosi.Screen) *RenderWinGeo
 	}
 
 	if scrn == nil {
-		scrn = goosi.TheApp.Screen(0)
+		scrn = system.TheApp.Screen(0)
 		if DebugSettings.WinGeomTrace {
 			log.Printf("WinGeoms: Pref: scrn is nil, using scrn 0: %v\n", scrn.Name)
 		}
@@ -394,12 +394,12 @@ func (mgr *WinGeomsSaver) RestoreAll() {
 	}
 	mgr.SettingStart()
 	for _, w := range AllRenderWins {
-		wgp := mgr.Pref(w.Title, w.GoosiWin.Screen())
+		wgp := mgr.Pref(w.Title, w.SystemWin.Screen())
 		if wgp != nil {
 			if DebugSettings.WinGeomTrace {
 				log.Printf("WinGeoms: RestoreAll: restoring geom for window: %v pos: %v size: %v\n", w.Name, wgp.Pos(), wgp.Size())
 			}
-			w.GoosiWin.SetGeom(wgp.Pos(), wgp.Size())
+			w.SystemWin.SetGeom(wgp.Pos(), wgp.Size())
 		}
 	}
 	mgr.SettingEnd()
@@ -441,7 +441,7 @@ func (wg *RenderWinGeom) SetPos(ps image.Point) {
 }
 
 // ConstrainGeom constrains geometry based on screen params
-func (wg *RenderWinGeom) ConstrainGeom(sc *goosi.Screen) {
+func (wg *RenderWinGeom) ConstrainGeom(sc *system.Screen) {
 	sz, pos := sc.ConstrainWinGeom(image.Point{wg.SX, wg.SY}, image.Point{wg.PX, wg.PY})
 	wg.SX = sz.X
 	wg.SY = sz.Y

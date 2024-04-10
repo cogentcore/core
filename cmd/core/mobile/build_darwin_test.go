@@ -32,7 +32,7 @@ func TestAppleBuild(t *testing.T) {
 		pkg  string
 		main bool
 	}{
-		{"cogentcore.org/core/goosi/examples/drawtri", true},
+		{"cogentcore.org/core/system/examples/drawtri", true},
 	}
 	for _, test := range tests {
 		buf := new(bytes.Buffer)

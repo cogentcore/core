@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"image"
 
-	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/ordmap"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/vgpu/szalloc"
 	"golang.org/x/image/draw"
 )
@@ -136,7 +136,7 @@ func (ss *Sprites) AllocSizes() {
 	if idx != ns {
 		szs = szs[:idx]
 	}
-	ss.SzAlloc.SetSizes(image.Point{4, 4}, goosi.MaxImageLayers, szs)
+	ss.SzAlloc.SetSizes(image.Point{4, 4}, system.MaxImageLayers, szs)
 	ss.SzAlloc.Alloc()
 }
 
@@ -223,7 +223,7 @@ func (ss *Sprites) InactivateAllSprites() {
 
 // ConfigSprites updates the Drawer configuration of sprites.
 // Does a new SzAlloc, and sets corresponding images.
-func (ss *Sprites) ConfigSprites(drw goosi.Drawer) {
+func (ss *Sprites) ConfigSprites(drw system.Drawer) {
 	// fmt.Println("config sprites")
 	ss.AllocSizes()
 	sa := &ss.SzAlloc
@@ -237,14 +237,14 @@ func (ss *Sprites) ConfigSprites(drw goosi.Drawer) {
 				continue
 			}
 			sp := ss.Names.ValueByIndex(spi)
-			drw.SetGoImage(imgidx, ii, sp.Pixels, goosi.NoFlipY)
+			drw.SetGoImage(imgidx, ii, sp.Pixels, system.NoFlipY)
 		}
 	}
 	ss.Modified = false
 }
 
 // DrawSprites draws sprites
-func (ss *Sprites) DrawSprites(drw goosi.Drawer) {
+func (ss *Sprites) DrawSprites(drw system.Drawer) {
 	// fmt.Println("draw sprites")
 	sa := &ss.SzAlloc
 	for gpi, ga := range sa.GpAllocs {
@@ -258,7 +258,7 @@ func (ss *Sprites) DrawSprites(drw goosi.Drawer) {
 				continue
 			}
 			// fmt.Println("ds", imgidx, ii, sp.Geom.Pos)
-			drw.Copy(imgidx, ii, sp.Geom.Pos, image.Rectangle{}, draw.Over, goosi.NoFlipY)
+			drw.Copy(imgidx, ii, sp.Geom.Pos, image.Rectangle{}, draw.Over, system.NoFlipY)
 		}
 	}
 }

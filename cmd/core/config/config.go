@@ -160,7 +160,7 @@ func VersionLinkerFlags() string {
 	res := ""
 	av, err := xe.Silent().Output("git", "describe", "--tags")
 	if err == nil {
-		res += "-X cogentcore.org/core/goosi.AppVersion=" + av
+		res += "-X cogentcore.org/core/system.AppVersion=" + av
 	}
 
 	// workspaces can interfere with getting the right version
@@ -170,7 +170,7 @@ func VersionLinkerFlags() string {
 		if cv == "" {
 			cv = av
 		}
-		res += " -X cogentcore.org/core/goosi.CoreVersion=" + cv
+		res += " -X cogentcore.org/core/system.CoreVersion=" + cv
 	}
 	return res
 }

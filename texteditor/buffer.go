@@ -143,7 +143,7 @@ type Buffer struct {
 	// current text editor -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always
 	CurView *Editor `json:"-" xml:"-"`
 
-	// supports standard goosi events sending: Change is sent for BufDone, BufInsert, BufDelete
+	// supports standard system events sending: Change is sent for BufDone, BufInsert, BufDelete
 	Listeners events.Listeners
 }
 

@@ -18,7 +18,6 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/grows/jsons"
 	"cogentcore.org/core/grows/tomls"
 	"cogentcore.org/core/grr"
@@ -26,6 +25,7 @@ import (
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/paint"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/xgo/option"
 )
 
@@ -292,7 +292,7 @@ func (as *AppearanceSettingsData) Apply() { //gti:add
 	case ThemeDark:
 		colors.SetScheme(true)
 	case ThemeAuto:
-		colors.SetScheme(goosi.TheApp.IsDark())
+		colors.SetScheme(system.TheApp.IsDark())
 	}
 	if as.HiStyle == "" {
 		as.HiStyle = "emacs" // todo: need light / dark versions
@@ -310,24 +310,24 @@ func (as *AppearanceSettingsData) Apply() { //gti:add
 // settings and zoom factor, and then updates all open windows as well.
 func (as *AppearanceSettingsData) ApplyDPI() {
 	// zoom is percentage, but LogicalDPIScale is multiplier
-	goosi.LogicalDPIScale = as.Zoom / 100
-	// fmt.Println("goosi ldpi:", goosi.LogicalDPIScale)
-	n := goosi.TheApp.NScreens()
+	system.LogicalDPIScale = as.Zoom / 100
+	// fmt.Println("system ldpi:", system.LogicalDPIScale)
+	n := system.TheApp.NScreens()
 	for i := 0; i < n; i++ {
-		sc := goosi.TheApp.Screen(i)
+		sc := system.TheApp.Screen(i)
 		if sc == nil {
 			continue
 		}
 		if scp, ok := as.Screens[sc.Name]; ok {
 			// zoom is percentage, but LogicalDPIScale is multiplier
-			goosi.SetLogicalDPIScale(sc.Name, scp.Zoom/100)
+			system.SetLogicalDPIScale(sc.Name, scp.Zoom/100)
 		}
 		sc.UpdateLogicalDPI()
 	}
 	for _, w := range AllRenderWins {
-		w.GoosiWin.SetLogicalDPI(w.GoosiWin.Screen().LogicalDPI)
+		w.SystemWin.SetLogicalDPI(w.SystemWin.Screen().LogicalDPI)
 		// this isn't DPI-related, but this is the most efficient place to do it
-		w.GoosiWin.SetTitleBarIsDark(matcolor.SchemeIsDark)
+		w.SystemWin.SetTitleBarIsDark(matcolor.SchemeIsDark)
 	}
 }
 
@@ -355,7 +355,7 @@ var DeviceSettings = &DeviceSettingsData{
 
 // SaveScreenZoom saves the current zoom factor for current screen.
 func (as *AppearanceSettingsData) SaveScreenZoom() { //gti:add
-	sc := goosi.TheApp.Screen(0)
+	sc := system.TheApp.Screen(0)
 	sp, ok := as.Screens[sc.Name]
 	if !ok {
 		sp = ScreenSettings{}
@@ -434,7 +434,7 @@ func (ds *DeviceSettingsData) Apply() {
 	events.ScrollWheelSpeed = ds.ScrollWheelSpeed
 }
 
-// ScreenSettings are the per-screen settings -- see [goosi.App.Screen] for
+// ScreenSettings are the per-screen settings -- see [system.App.Screen] for
 // info on the different screens -- these prefs are indexed by the Screen.Name
 // -- settings here override those in the global settings.
 type ScreenSettings struct { //gti:add

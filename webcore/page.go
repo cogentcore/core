@@ -19,12 +19,12 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/grows/tomls"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/htmlview"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/views"
 	"cogentcore.org/core/webcore/wpath"
@@ -80,7 +80,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 		return
 	}
 	if u.Scheme != "" {
-		goosi.TheApp.OpenURL(u.String())
+		system.TheApp.OpenURL(u.String())
 		return
 	}
 

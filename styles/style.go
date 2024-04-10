@@ -37,7 +37,7 @@ type Style struct { //gti:add
 
 	// Abilities specifies the abilities of this element, which determine
 	// which kinds of states the element can express.
-	// This is used by the goosi/events system.  Putting this info next
+	// This is used by the system/events system.  Putting this info next
 	// to the State info makes it easy to configure and manage.
 	Abilities abilities.Abilities
 

@@ -16,10 +16,10 @@ import (
 	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/system"
 	"golang.org/x/image/draw"
 )
 
@@ -32,13 +32,13 @@ var WinWait sync.WaitGroup
 // This should be put at the end of the main function, and is typically
 // called through [Stage.Wait].
 func Wait() {
-	defer func() { goosi.HandleRecover(recover()) }()
+	defer func() { system.HandleRecover(recover()) }()
 	go func() {
-		defer func() { goosi.HandleRecover(recover()) }()
+		defer func() { system.HandleRecover(recover()) }()
 		WinWait.Wait()
-		goosi.TheApp.Quit()
+		system.TheApp.Quit()
 	}()
-	goosi.TheApp.MainLoop()
+	system.TheApp.MainLoop()
 }
 
 // CurRenderWin is the current RenderWin window.
@@ -71,7 +71,7 @@ var (
 // and the Stage Pixels image is drawn to the RenderWin in the RenderWindow method.
 //
 // Rendering is handled by the vdraw.Drawer from the vgpu package, which is provided
-// by the goosi framework.  It is akin to a window manager overlaying Go image bitmaps
+// by the system framework.  It is akin to a window manager overlaying Go image bitmaps
 // on top of each other in the proper order, based on the StageMgr stacking order.
 //   - Sprites are managed by the Main Stage, as layered textures of the same size,
 //     to enable unlimited number packed into a few descriptors for standard sizes.
@@ -85,7 +85,7 @@ type RenderWin struct {
 	Title string
 
 	// OS-specific window interface -- handles all the os-specific functions, including delivering events etc
-	GoosiWin goosi.Window `json:"-" xml:"-"`
+	SystemWin system.Window `json:"-" xml:"-"`
 
 	// MainStageMgr controlling the Main Stage elements in this window.
 	// The Render Context in this manager is the original source for all Stages.
@@ -162,19 +162,19 @@ func (w *RenderWin) SetFlag(on bool, flag ...enums.BitFlag) {
 // NewRenderWin creates a new window with given internal name handle,
 // display name, and options.  This is called by Stage.NewRenderWin
 // which handles setting the opts and other infrastructure.
-func NewRenderWin(name, title string, opts *goosi.NewWindowOptions) *RenderWin {
+func NewRenderWin(name, title string, opts *system.NewWindowOptions) *RenderWin {
 	w := &RenderWin{}
 	w.Name = name
 	w.Title = title
 	var err error
-	w.GoosiWin, err = goosi.TheApp.NewWindow(opts)
+	w.SystemWin, err = system.TheApp.NewWindow(opts)
 	if err != nil {
 		fmt.Printf("Cogent Core NewRenderWin error: %v \n", err)
 		return nil
 	}
-	w.GoosiWin.SetName(title)
-	w.GoosiWin.SetTitleBarIsDark(matcolor.SchemeIsDark)
-	w.GoosiWin.SetCloseReqFunc(func(win goosi.Window) {
+	w.SystemWin.SetName(title)
+	w.SystemWin.SetTitleBarIsDark(matcolor.SchemeIsDark)
+	w.SystemWin.SetCloseReqFunc(func(win system.Window) {
 		rc := w.RenderContext()
 		rc.Lock()
 		defer rc.Unlock()
@@ -192,11 +192,11 @@ func NewRenderWin(name, title string, opts *goosi.NewWindowOptions) *RenderWin {
 		win.Close()
 	})
 
-	drw := w.GoosiWin.Drawer()
-	drw.SetMaxTextures(goosi.MaxTexturesPerSet * 3)       // use 3 sets
-	w.RenderScenes.MaxIndex = goosi.MaxTexturesPerSet * 2 // reserve last for sprites
+	drw := w.SystemWin.Drawer()
+	drw.SetMaxTextures(system.MaxTexturesPerSet * 3)       // use 3 sets
+	w.RenderScenes.MaxIndex = system.MaxTexturesPerSet * 2 // reserve last for sprites
 
-	// win.GoosiWin.SetDestroyGPUResourcesFunc(func() {
+	// win.SystemWin.SetDestroyGPUResourcesFunc(func() {
 	// 	for _, ph := range win.Phongs {
 	// 		ph.Destroy()
 	// 	}
@@ -257,55 +257,55 @@ func (w *RenderWin) SetName(name string) {
 	curnm := w.Name
 	isdif := curnm != name
 	w.Name = name
-	if w.GoosiWin != nil {
-		w.GoosiWin.SetName(name)
+	if w.SystemWin != nil {
+		w.SystemWin.SetName(name)
 	}
-	if isdif && w.GoosiWin != nil {
-		wgp := TheWinGeomSaver.Pref(w.Title, w.GoosiWin.Screen())
+	if isdif && w.SystemWin != nil {
+		wgp := TheWinGeomSaver.Pref(w.Title, w.SystemWin.Screen())
 		if wgp != nil {
 			TheWinGeomSaver.SettingStart()
-			if w.GoosiWin.Size() != wgp.Size() || w.GoosiWin.Position() != wgp.Pos() {
+			if w.SystemWin.Size() != wgp.Size() || w.SystemWin.Position() != wgp.Pos() {
 				if DebugSettings.WinGeomTrace {
 					log.Printf("WinGeoms: SetName setting geom for window: %v pos: %v size: %v\n", w.Name, wgp.Pos(), wgp.Size())
 				}
-				w.GoosiWin.SetGeom(wgp.Pos(), wgp.Size())
-				goosi.TheApp.SendEmptyEvent()
+				w.SystemWin.SetGeom(wgp.Pos(), wgp.Size())
+				system.TheApp.SendEmptyEvent()
 			}
 			TheWinGeomSaver.SettingEnd()
 		}
 	}
 }
 
-// SetTitle sets title of this window and its underlying GoosiWin.
+// SetTitle sets title of this window and its underlying SystemWin.
 func (w *RenderWin) SetTitle(title string) {
 	w.Title = title
-	if w.GoosiWin != nil {
-		w.GoosiWin.SetTitle(title)
+	if w.SystemWin != nil {
+		w.SystemWin.SetTitle(title)
 	}
 	WinNewCloseStamp()
 }
 
-// SetStageTitle sets the title of the underlying GoosiWin to the given stage title
+// SetStageTitle sets the title of the underlying SystemWin to the given stage title
 // combined with the RenderWin title.
 func (w *RenderWin) SetStageTitle(title string) {
 	if title != w.Title {
 		title = title + " • " + w.Title
 	}
-	w.GoosiWin.SetTitle(title)
+	w.SystemWin.SetTitle(title)
 }
 
 // LogicalDPI returns the current logical dots-per-inch resolution of the
 // window, which should be used for most conversion of standard units --
 // physical DPI can be found in the Screen
 func (w *RenderWin) LogicalDPI() float32 {
-	if w.GoosiWin == nil {
-		sc := goosi.TheApp.Screen(0)
+	if w.SystemWin == nil {
+		sc := system.TheApp.Screen(0)
 		if sc == nil {
 			return 160 // null default
 		}
 		return sc.LogicalDPI
 	}
-	return w.GoosiWin.LogicalDPI()
+	return w.SystemWin.LogicalDPI()
 }
 
 // StepZoom calls [SetZoom] with the current zoom plus 10 times the given number of steps.
@@ -344,14 +344,14 @@ func (w *RenderWin) SetZoom(zoom float32) {
 // This will trigger a resize event and be processed
 // that way when it occurs.
 func (w *RenderWin) SetWinSize(sz image.Point) {
-	w.GoosiWin.SetWinSize(sz)
+	w.SystemWin.SetWinSize(sz)
 }
 
 // SetSize requests that the window be resized to the given size
 // in underlying pixel coordinates, which means that the requested
 // size is divided by the screen's DevicePixelRatio
 func (w *RenderWin) SetSize(sz image.Point) {
-	w.GoosiWin.SetSize(sz)
+	w.SystemWin.SetSize(sz)
 }
 
 // Resized updates internal buffers after a window has been resized.
@@ -362,9 +362,9 @@ func (w *RenderWin) Resized() {
 		return
 	}
 
-	drw := w.GoosiWin.Drawer()
+	drw := w.SystemWin.Drawer()
 
-	rg := w.GoosiWin.RenderGeom()
+	rg := w.SystemWin.RenderGeom()
 
 	curRg := rc.Geom
 	if curRg == rg {
@@ -378,8 +378,8 @@ func (w *RenderWin) Resized() {
 		}
 		return
 	}
-	if drw.MaxTextures() != goosi.MaxTexturesPerSet*3 { // this is essential after hibernate
-		drw.SetMaxTextures(goosi.MaxTexturesPerSet * 3) // use 3 sets
+	if drw.MaxTextures() != system.MaxTexturesPerSet*3 { // this is essential after hibernate
+		drw.SetMaxTextures(system.MaxTexturesPerSet * 3) // use 3 sets
 	}
 	// w.FocusInactivate()
 	// w.InactivateAllSprites()
@@ -409,24 +409,24 @@ func (w *RenderWin) Resized() {
 // is the only supported mechanism for de-iconifying. This also sets
 // CurRenderWin to the window.
 func (w *RenderWin) Raise() {
-	w.GoosiWin.Raise()
+	w.SystemWin.Raise()
 	CurRenderWin = w
 }
 
 // Minimize requests that the window be iconified, making it no longer
 // visible or active -- rendering should not occur for minimized windows.
 func (w *RenderWin) Minimize() {
-	w.GoosiWin.Minimize()
+	w.SystemWin.Minimize()
 }
 
 // CloseReq requests that the window be closed, which could be rejected.
 // It firsts unlocks and then locks the [RenderContext] to prevent deadlocks.
 // If this is called asynchronously outside of the main event loop,
-// [RenderWin.GoosWin.CloseReq] should be called directly instead.
+// [RenderWin.SystemWin.CloseReq] should be called directly instead.
 func (w *RenderWin) CloseReq() {
 	rc := w.RenderContext()
 	rc.Unlock()
-	w.GoosiWin.CloseReq()
+	w.SystemWin.CloseReq()
 	rc.Lock()
 }
 
@@ -455,14 +455,14 @@ func (w *RenderWin) Closed() {
 
 // IsClosed reports if the window has been closed
 func (w *RenderWin) IsClosed() bool {
-	return w.GoosiWin.IsClosed() || w.MainStageMgr.Stack.Len() == 0
+	return w.SystemWin.IsClosed() || w.MainStageMgr.Stack.Len() == 0
 }
 
 // SetCloseReqFunc sets the function that is called whenever there is a
 // request to close the window (via a OS or a call to CloseReq() method).  That
 // function can then adjudicate whether and when to actually call Close.
 func (w *RenderWin) SetCloseReqFunc(fun func(win *RenderWin)) {
-	w.GoosiWin.SetCloseReqFunc(func(owin goosi.Window) {
+	w.SystemWin.SetCloseReqFunc(func(owin system.Window) {
 		fun(w)
 	})
 }
@@ -471,14 +471,14 @@ func (w *RenderWin) SetCloseReqFunc(fun func(win *RenderWin)) {
 // actually about to close (irrevocably) -- can do any necessary
 // last-minute cleanup here.
 func (w *RenderWin) SetCloseCleanFunc(fun func(win *RenderWin)) {
-	w.GoosiWin.SetCloseCleanFunc(func(owin goosi.Window) {
+	w.SystemWin.SetCloseCleanFunc(func(owin system.Window) {
 		fun(w)
 	})
 }
 
 // IsVisible is the main visibility check -- don't do any window updates if not visible!
 func (w *RenderWin) IsVisible() bool {
-	if w == nil || w.GoosiWin == nil || w.IsClosed() || w.Is(WinClosing) || !w.GoosiWin.IsVisible() {
+	if w == nil || w.SystemWin == nil || w.IsClosed() || w.Is(WinClosing) || !w.SystemWin.IsVisible() {
 		return false
 	}
 	return true
@@ -514,7 +514,7 @@ func (w *RenderWin) StopEventLoop() {
 // if nobody is listening (e.g., if a popup is posted without a surrounding
 // event, as in Complete.ShowCompletions
 func (w *RenderWin) SendCustomEvent(data any) {
-	w.GoosiWin.EventMgr().Custom(data)
+	w.SystemWin.EventMgr().Custom(data)
 }
 
 // todo: fix or remove
@@ -528,13 +528,13 @@ func (w *RenderWin) SendWinFocusEvent(act events.WinActions) {
 /////////////////////////////////////////////////////////////////////////////
 //                   Main Method: EventLoop
 
-// EventLoop runs the event processing loop for the RenderWin -- grabs goosi
+// EventLoop runs the event processing loop for the RenderWin -- grabs system
 // events for the window and dispatches them to receiving nodes, and manages
 // other state etc (popups, etc).
 func (w *RenderWin) EventLoop() {
-	defer func() { goosi.HandleRecover(recover()) }()
+	defer func() { system.HandleRecover(recover()) }()
 
-	d := &w.GoosiWin.EventMgr().Deque
+	d := &w.SystemWin.EventMgr().Deque
 
 	for {
 		if w.HasFlag(WinStopEventLoop) {
@@ -627,7 +627,7 @@ func (w *RenderWin) HandleWindowEvents(e events.Event) {
 			}
 		case events.WinMove:
 			e.SetHandled()
-			// fmt.Printf("win move: %v\n", w.GoosiWin.Position())
+			// fmt.Printf("win move: %v\n", w.SystemWin.Position())
 			if DebugSettings.WinGeomTrace {
 				log.Printf("WinGeoms: recording from Move\n")
 			}
@@ -662,7 +662,7 @@ func (w *RenderWin) HandleWindowEvents(e events.Event) {
 			// TODO: figure out how to restore this stuff without breaking window size on mobile
 
 			// TheWinGeomSaver.AbortSave() // anything just prior to this is sus
-			// if !goosi.TheApp.NoScreens() {
+			// if !system.TheApp.NoScreens() {
 			// 	Settings.UpdateAll()
 			// 	WinGeomsSave.RestoreAll()
 			// }
@@ -676,10 +676,10 @@ func (w *RenderWin) HandleWindowEvents(e events.Event) {
 const (
 	// Sprites are stored as arrays of same-sized textures,
 	// allocated by size in Set 2, starting at 32
-	SpriteStart = goosi.MaxTexturesPerSet * 2
+	SpriteStart = system.MaxTexturesPerSet * 2
 
 	// Full set of sprite textures in set = 2
-	MaxSpriteTextures = goosi.MaxTexturesPerSet
+	MaxSpriteTextures = system.MaxTexturesPerSet
 
 	// Allocate 128 layers within each sprite size
 	MaxSpritesPerTexture = 128
@@ -748,7 +748,7 @@ type RenderContext struct {
 // called after the window is created by the OS.
 func NewRenderContext() *RenderContext {
 	rc := &RenderContext{}
-	scr := goosi.TheApp.Screen(0)
+	scr := system.TheApp.Screen(0)
 	if scr != nil {
 		rc.Geom.SetRect(scr.Geometry)
 		rc.LogicalDPI = scr.LogicalDPI
@@ -851,7 +851,7 @@ func (rs *RenderScenes) Add(w Widget, scIndex map[Widget]int) int {
 }
 
 // SetImages calls drw.SetGoImage on all updated Scene images
-func (rs *RenderScenes) SetImages(drw goosi.Drawer) {
+func (rs *RenderScenes) SetImages(drw system.Drawer) {
 	if len(rs.Scenes) == 0 {
 		if DebugSettings.WinRenderTrace {
 			fmt.Println("RenderScene.SetImages: no scenes")
@@ -883,9 +883,9 @@ func (rs *RenderScenes) SetImages(drw goosi.Drawer) {
 }
 
 // DrawAll does drw.Copy drawing call for all Scenes,
-// using proper TextureSet for each of goosi.MaxTexturesPerSet Scenes.
-func (rs *RenderScenes) DrawAll(drw goosi.Drawer) {
-	nPerSet := goosi.MaxTexturesPerSet
+// using proper TextureSet for each of system.MaxTexturesPerSet Scenes.
+func (rs *RenderScenes) DrawAll(drw system.Drawer) {
+	nPerSet := system.MaxTexturesPerSet
 	if len(rs.Scenes) == 0 {
 		return
 	}
@@ -898,12 +898,12 @@ func (rs *RenderScenes) DrawAll(drw goosi.Drawer) {
 	}
 }
 
-func (sc *Scene) DirectRenderImage(drw goosi.Drawer, idx int) {
-	drw.SetGoImage(idx, 0, sc.Pixels, goosi.NoFlipY)
+func (sc *Scene) DirectRenderImage(drw system.Drawer, idx int) {
+	drw.SetGoImage(idx, 0, sc.Pixels, system.NoFlipY)
 	sc.SetFlag(false, ScImageUpdated)
 }
 
-func (sc *Scene) DirectRenderDraw(drw goosi.Drawer, idx int, flipY bool) {
+func (sc *Scene) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
 	op := draw.Over
 	if idx == 0 {
 		op = draw.Src
@@ -958,7 +958,7 @@ func (w *RenderWin) RenderWindow() {
 
 // DrawScenes does the drawing of RenderScenes to the window.
 func (w *RenderWin) DrawScenes() {
-	if !w.IsVisible() || w.GoosiWin.Is(goosi.Minimized) {
+	if !w.IsVisible() || w.SystemWin.Is(system.Minimized) {
 		if DebugSettings.WinRenderTrace {
 			fmt.Printf("RenderWindow: skipping update on inactive / minimized window: %v\n", w.Name)
 		}
@@ -967,17 +967,17 @@ func (w *RenderWin) DrawScenes() {
 	// if !w.HasFlag(WinSentShow) {
 	// 	return
 	// }
-	if !w.GoosiWin.Lock() {
+	if !w.SystemWin.Lock() {
 		if DebugSettings.WinRenderTrace {
 			fmt.Printf("RenderWindow: window was closed: %v\n", w.Name)
 		}
 		return
 	}
-	defer w.GoosiWin.Unlock()
+	defer w.SystemWin.Unlock()
 
 	// pr := prof.Start("win.DrawScenes")
 
-	drw := w.GoosiWin.Drawer()
+	drw := w.SystemWin.Drawer()
 	rs := &w.RenderScenes
 
 	rs.SetImages(drw) // ensure all updated images copied
@@ -1006,8 +1006,8 @@ func (w *RenderWin) DrawScenes() {
 // FillInsets fills the window insets, if any, with [colors.Scheme.Background].
 func (w *RenderWin) FillInsets() {
 	// render geom and window geom
-	rg := w.GoosiWin.RenderGeom()
-	wg := mat32.Geom2DInt{Size: w.GoosiWin.Size()}
+	rg := w.SystemWin.RenderGeom()
+	wg := mat32.Geom2DInt{Size: w.SystemWin.Size()}
 
 	// if our window geom is the same as our render geom, we have no
 	// window insets to fill
@@ -1015,7 +1015,7 @@ func (w *RenderWin) FillInsets() {
 		return
 	}
 
-	drw := w.GoosiWin.Drawer()
+	drw := w.SystemWin.Drawer()
 	if !drw.StartFill() {
 		return
 	}
@@ -1121,11 +1121,11 @@ func NewScrimForScene(sc *Scene) *Scrim {
 	return sr
 }
 
-func (sr *Scrim) DirectRenderImage(drw goosi.Drawer, idx int) {
+func (sr *Scrim) DirectRenderImage(drw system.Drawer, idx int) {
 	// no-op
 }
 
-func (sr *Scrim) DirectRenderDraw(drw goosi.Drawer, idx int, flipY bool) {
+func (sr *Scrim) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
 	sc := sr.Par.(*Scene)
 	drw.Fill(colors.ApplyOpacity(colors.Scheme.Scrim, .5), mat32.Identity3(), sc.Geom.TotalBBox, draw.Over)
 }

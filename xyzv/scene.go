@@ -13,8 +13,8 @@ import (
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/units"
 	"cogentcore.org/core/vgpu"
 	"cogentcore.org/core/xyz"
@@ -22,7 +22,7 @@ import (
 
 // Scene is a core.Widget that manages a xyz.Scene,
 // providing the basic rendering logic for the 3D scene
-// in the 2D core gui context.
+// in the 2D core GUI context.
 type Scene struct {
 	core.WidgetBase
 
@@ -119,8 +119,8 @@ func (sw *Scene) ConfigFrame() {
 	if win == nil {
 		return
 	}
-	drw := win.GoosiWin.Drawer()
-	goosi.TheApp.RunOnMain(func() {
+	drw := win.SystemWin.Drawer()
+	system.TheApp.RunOnMain(func() {
 		sw.XYZ.ConfigFrameFromSurface(drw.Surface().(*vgpu.Surface))
 		if doConfig {
 			sw.XYZ.Config()
@@ -136,7 +136,7 @@ func (sw *Scene) Render() {
 		return
 	}
 	if sw.XYZ.Is(xyz.ScNeedsConfig) {
-		goosi.TheApp.RunOnMain(func() {
+		system.TheApp.RunOnMain(func() {
 			sw.XYZ.Config()
 		})
 	}
@@ -144,7 +144,7 @@ func (sw *Scene) Render() {
 }
 
 // DirectRenderImage uploads framebuffer image
-func (sw *Scene) DirectRenderImage(drw goosi.Drawer, idx int) {
+func (sw *Scene) DirectRenderImage(drw system.Drawer, idx int) {
 	if sw.XYZ.Frame == nil || !sw.IsVisible() {
 		return
 	}
@@ -152,7 +152,7 @@ func (sw *Scene) DirectRenderImage(drw goosi.Drawer, idx int) {
 }
 
 // DirectRenderDraw draws the current image to RenderWin drawer
-func (sw *Scene) DirectRenderDraw(drw goosi.Drawer, idx int, flipY bool) {
+func (sw *Scene) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
 	if !sw.IsVisible() {
 		return
 	}

@@ -11,12 +11,12 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/grows/jsons"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 )
@@ -182,7 +182,7 @@ func (is *Inspector) SelectionMonitor() {
 // InspectApp displays the underlying operating system app
 func (is *Inspector) InspectApp() { //gti:add
 	d := core.NewBody().AddTitle("Inspect app")
-	NewStructView(d).SetStruct(goosi.TheApp).SetReadOnly(true)
+	NewStructView(d).SetStruct(system.TheApp).SetReadOnly(true)
 	d.NewFullDialog(is).Run()
 }
 

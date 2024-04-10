@@ -19,12 +19,12 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/grows/images"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/states"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 	"github.com/anthonynsimon/bild/clone"
 )
@@ -832,14 +832,14 @@ func (em *EventMgr) DropFinalize(de *events.DragDrop) {
 // 	// em.HandleEvent(&ke)
 // }
 
-// Clipboard returns the goosi goosi.Clipboard, supplying the window context
+// Clipboard returns the system system.Clipboard, supplying the window context
 // if available.
-func (em *EventMgr) Clipboard() goosi.Clipboard {
-	var gwin goosi.Window
+func (em *EventMgr) Clipboard() system.Clipboard {
+	var gwin system.Window
 	if win := em.RenderWin(); win != nil {
-		gwin = win.GoosiWin
+		gwin = win.SystemWin
 	}
-	return goosi.TheApp.Clipboard(gwin)
+	return system.TheApp.Clipboard(gwin)
 }
 
 // SetCursor sets window cursor to given Cursor
@@ -851,7 +851,7 @@ func (em *EventMgr) SetCursor(cur cursors.Cursor) {
 	if !win.IsVisible() {
 		return
 	}
-	grr.Log(goosi.TheApp.Cursor(win.GoosiWin).Set(cur))
+	grr.Log(system.TheApp.Cursor(win.SystemWin).Set(cur))
 }
 
 // FocusClear saves current focus to FocusPrev
@@ -1134,12 +1134,12 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 		e.SetHandled()
 	case keyfun.Refresh:
 		e.SetHandled()
-		goosi.TheApp.GetScreens()
+		system.TheApp.GetScreens()
 		UpdateAll()
 		TheWinGeomSaver.RestoreAll()
 		// w.FocusInactivate()
 		// w.FullReRender()
-		// sz := w.GoosiWin.Size()
+		// sz := w.SystemWin.Size()
 		// w.SetSize(sz)
 	case keyfun.WinFocusNext:
 		e.SetHandled()

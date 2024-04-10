@@ -6,8 +6,8 @@ package core
 
 import (
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/grows/images"
+	"cogentcore.org/core/system"
 )
 
 // AssertRender makes a new window from the body, waits until it is shown
@@ -41,7 +41,7 @@ func (b *Body) AssertScreenRender(t images.TestingT, filename string, fun ...fun
 	}
 	b.WaitNoEvents()
 
-	goosi.AssertCapture(t, filename)
+	system.AssertCapture(t, filename)
 	b.Close()
 }
 

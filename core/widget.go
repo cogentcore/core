@@ -15,10 +15,10 @@ import (
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 )
 
@@ -190,16 +190,16 @@ type Widget interface {
 	// specifically for the child (e.g., for zebra stripes in views.SliceViewGrid)
 	ChildBackground(child Widget) image.Image
 
-	// DirectRenderImage uploads image directly into given goosi.Drawer at given index
+	// DirectRenderImage uploads image directly into given system.Drawer at given index
 	// Typically this is a drw.SetGoImage call with an [image.RGBA], or
 	// drw.SetFrameImage with a [vgpu.FrameBuffer]
-	DirectRenderImage(drw goosi.Drawer, idx int)
+	DirectRenderImage(drw system.Drawer, idx int)
 
 	// DirectRenderDraw draws the current image at index onto the RenderWin window,
 	// typically using drw.Copy, drw.Scale, or drw.Fill.
 	// flipY is the default setting for whether the Y axis needs to be flipped during drawing,
 	// which is typically passed along to the Copy or Scale methods.
-	DirectRenderDraw(drw goosi.Drawer, idx int, flipY bool)
+	DirectRenderDraw(drw system.Drawer, idx int, flipY bool)
 }
 
 // WidgetBase is the base type for all Widget Widget elements, which are
@@ -462,17 +462,17 @@ func (wb *WidgetBase) IsVisible() bool {
 	return wb.Par.This().(Widget).IsVisible()
 }
 
-// DirectRenderImage uploads image directly into given goosi.Drawer at given index
+// DirectRenderImage uploads image directly into given system.Drawer at given index
 // Typically this is a drw.SetGoImage call with an [image.RGBA], or
 // drw.SetFrameImage with a [vgpu.FrameBuffer]
-func (wb *WidgetBase) DirectRenderImage(drw goosi.Drawer, idx int) {
+func (wb *WidgetBase) DirectRenderImage(drw system.Drawer, idx int) {
 }
 
 // DirectRenderDraw draws the current image at index onto the RenderWin window,
 // typically using drw.Copy, drw.Scale, or drw.Fill.
 // flipY is the default setting for whether the Y axis needs to be flipped during drawing,
 // which is typically passed along to the Copy or Scale methods.
-func (wb *WidgetBase) DirectRenderDraw(drw goosi.Drawer, idx int, flipY bool) {
+func (wb *WidgetBase) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
 }
 
 // FieldByName allows [tree.Node.FindPath] to go through parts.

@@ -15,8 +15,8 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/gti"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/vci"
 	"cogentcore.org/core/xgo/dirs"
@@ -225,7 +225,7 @@ func (ft *Tree) WatchUpdate(path string) {
 // WatchPath adds given path to those watched
 func (ft *Tree) WatchPath(path core.Filename) error {
 	return nil // TODO: disable for all platforms for now -- getting some issues
-	if core.TheApp.Platform() == goosi.MacOS {
+	if core.TheApp.Platform() == system.MacOS {
 		return nil // mac is not supported in a high-capacity fashion at this point
 	}
 	rp := ft.RelPath(path)

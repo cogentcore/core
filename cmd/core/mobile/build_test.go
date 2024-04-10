@@ -99,7 +99,7 @@ func TestAndroidBuild(t *testing.T) {
 	c.ID = "org.golang.todo"
 	pdir, err := os.Getwd()
 	assert.NoError(t, err)
-	assert.NoError(t, os.Chdir(filepath.Join("..", "..", "goosi", "examples", "drawtri")))
+	assert.NoError(t, os.Chdir(filepath.Join("..", "..", "system", "examples", "drawtri")))
 	err = Build(c)
 	if err != nil {
 		t.Fatal(err)
@@ -237,7 +237,7 @@ func TestBuildWithGoModules(t *testing.T) {
 	}
 	defer os.RemoveAll(dir)
 
-	if out, err := exec.Command("go", "build", "-o="+dir, "cogentcore.org/core/goosi/examples/drawtri").CombinedOutput(); err != nil {
+	if out, err := exec.Command("go", "build", "-o="+dir, "cogentcore.org/core/system/examples/drawtri").CombinedOutput(); err != nil {
 		t.Fatalf("%v: %s", err, string(out))
 	}
 	path := dir
@@ -264,7 +264,7 @@ func TestBuildWithGoModules(t *testing.T) {
 			}{
 				{
 					Name: "Relative Path",
-					Path: filepath.Join("..", "..", "goosi", "examples", "drawtri"),
+					Path: filepath.Join("..", "..", "system", "examples", "drawtri"),
 				},
 			}
 

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/system"
 )
 
 // StageTypes are the types of Stage containers.
@@ -275,15 +275,15 @@ func (st *Stage) SetModal(modal bool) *Stage {
 
 // Run runs the stage using the default run behavior based on the type of stage.
 func (st *Stage) Run() *Stage {
-	if goosi.OnSystemWindowCreated == nil {
+	if system.OnSystemWindowCreated == nil {
 		return st.RunImpl()
 	}
 	// need to prevent premature quitting by ensuring
 	// that WinWait is not done until we run the Stage
 	WinWait.Add(1)
 	go func() {
-		<-goosi.OnSystemWindowCreated
-		goosi.OnSystemWindowCreated = nil // no longer applicable
+		<-system.OnSystemWindowCreated
+		system.OnSystemWindowCreated = nil // no longer applicable
 		st.RunImpl()
 		// now that we have run the Stage, WinWait is accurate and
 		// we no longer need to prevent it from being done
@@ -294,7 +294,7 @@ func (st *Stage) Run() *Stage {
 
 // RunImpl is the implementation of [Stage.Run]; it should not typically be called by end-users.
 func (st *Stage) RunImpl() *Stage {
-	defer func() { goosi.HandleRecover(recover()) }()
+	defer func() { system.HandleRecover(recover()) }()
 	switch st.Type {
 	case WindowStage:
 		return st.RunWindow()

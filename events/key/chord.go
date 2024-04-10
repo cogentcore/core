@@ -71,7 +71,7 @@ func (ch Chord) Decode() (r rune, code Codes, mods Modifiers, err error) {
 		r = 0
 		return
 	}
-	err = fmt.Errorf("goosi/events/key.DecodeChord got more/less than one rune: %v from remaining chord: %v", rs, string(cs))
+	err = fmt.Errorf("system/events/key.DecodeChord got more/less than one rune: %v from remaining chord: %v", rs, string(cs))
 	return
 }
 

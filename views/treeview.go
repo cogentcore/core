@@ -1395,7 +1395,7 @@ func (tv *TreeView) NodesFromMimeData(md mimedata.Mimes) (tree.Slice, []string) 
 	return sl, pl
 }
 
-// Copy copies to goosi.Clipboard, optionally resetting the selection.
+// Copy copies to system.Clipboard, optionally resetting the selection.
 func (tv *TreeView) Copy(reset bool) { //gti:add
 	sels := tv.SelectedViews()
 	nitms := max(1, len(sels))
@@ -1414,7 +1414,7 @@ func (tv *TreeView) Copy(reset bool) { //gti:add
 	}
 }
 
-// Cut copies to goosi.Clipboard and deletes selected items.
+// Cut copies to system.Clipboard and deletes selected items.
 func (tv *TreeView) Cut() { //gti:add
 	if tv.IsRoot("Cut") {
 		return

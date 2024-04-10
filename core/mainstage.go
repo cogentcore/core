@@ -11,9 +11,9 @@ import (
 
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/units"
 )
 
@@ -84,7 +84,7 @@ func (st *Stage) AddDialogDecor() *Stage {
 		np.X = max(np.X, 0)
 		np.Y = max(np.Y, 0)
 		rw := sc.RenderWin()
-		sz := rw.GoosiWin.Size()
+		sz := rw.SystemWin.Size()
 		mx := sz.X - int(sc.SceneGeom.Size.X)
 		my := sz.Y - int(sc.SceneGeom.Size.Y)
 		np.X = min(np.X, mx)
@@ -119,7 +119,7 @@ func (st *Stage) InheritBars() {
 
 // FirstWinManager creates a temporary Main StageMgr for the first window
 // to be able to get sizing information prior to having a RenderWin,
-// based on the goosi App Screen Size. Only adds a RenderContext.
+// based on the system App Screen Size. Only adds a RenderContext.
 func (st *Stage) FirstWinManager() *StageMgr {
 	ms := &StageMgr{}
 	ms.RenderContext = NewRenderContext()
@@ -162,7 +162,7 @@ func (st *Stage) RunWindow() *Stage {
 	// non-offscreen mobile windows must take up the whole window
 	// and thus don't consider pref size
 	// desktop new windows and non-full windows can pref size
-	if TheApp.Platform() == goosi.Offscreen ||
+	if TheApp.Platform() == system.Offscreen ||
 		(!TheApp.Platform().IsMobile() &&
 			(st.NewWindow || !st.FullWindow || CurRenderWin == nil)) {
 		sz = sc.PrefSize(sz)
@@ -170,9 +170,9 @@ func (st *Stage) RunWindow() *Stage {
 		// possible representation of the content
 		// also, on offscreen, if the new size is bigger than the current size,
 		// we need to resize the window
-		if TheApp.Platform() == goosi.Offscreen {
+		if TheApp.Platform() == system.Offscreen {
 			if CurRenderWin != nil {
-				csz := CurRenderWin.GoosiWin.Size()
+				csz := CurRenderWin.SystemWin.Size()
 				nsz := csz
 				if sz.X > csz.X {
 					nsz.X = sz.X
@@ -181,8 +181,8 @@ func (st *Stage) RunWindow() *Stage {
 					nsz.Y = sz.Y
 				}
 				if nsz != csz {
-					CurRenderWin.GoosiWin.SetSize(nsz)
-					goosi.TheApp.GetScreens()
+					CurRenderWin.SystemWin.SetSize(nsz)
+					system.TheApp.GetScreens()
 				}
 			}
 		} else {
@@ -190,7 +190,7 @@ func (st *Stage) RunWindow() *Stage {
 			sz = sz.Add(image.Pt(20, 20))
 			if st.NewWindow {
 				// we require the window to be at least half of the screen size
-				scsz := goosi.TheApp.Screen(0).PixSize // TODO(kai): is there a better screen to get here?
+				scsz := system.TheApp.Screen(0).PixSize // TODO(kai): is there a better screen to get here?
 				sz = image.Pt(max(sz.X, scsz.X/2), max(sz.Y, scsz.Y/2))
 			}
 		}
@@ -296,14 +296,14 @@ func (st *Stage) RunDialog() *Stage {
 func (st *Stage) NewRenderWin() *RenderWin {
 	name := st.Name
 	title := st.Title
-	opts := &goosi.NewWindowOptions{
+	opts := &system.NewWindowOptions{
 		Title:     title,
 		Icon:      TheApp.Icon,
 		Size:      st.Scene.SceneGeom.Size,
 		StdPixels: false,
 	}
 	wgp := TheWinGeomSaver.Pref(title, nil)
-	if TheApp.Platform() != goosi.Offscreen && wgp != nil {
+	if TheApp.Platform() != system.Offscreen && wgp != nil {
 		TheWinGeomSaver.SettingStart()
 		opts.Size = wgp.Size()
 		opts.Pos = wgp.Pos()

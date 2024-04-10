@@ -10,13 +10,13 @@ import (
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/system"
 )
 
 // Label is a widget for rendering text labels. It supports full HTML styling,
@@ -199,7 +199,7 @@ func (lb *Label) SetStyles() {
 
 func (lb *Label) HandleEvents() {
 	lb.HandleLabelClick(func(tl *paint.TextLink) {
-		goosi.TheApp.OpenURL(tl.URL)
+		system.TheApp.OpenURL(tl.URL)
 	})
 	lb.OnDoubleClick(func(e events.Event) {
 		lb.SetSelected(true)

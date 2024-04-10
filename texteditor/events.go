@@ -14,13 +14,13 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/pi"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/states"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/texteditor/textbuf"
 	"cogentcore.org/core/xgo/indent"
 )
@@ -510,12 +510,12 @@ func (ed *Editor) KeyInputInsertRune(kt events.Event) {
 // OpenLink opens given link, either by sending LinkSig signal if there are
 // receivers, or by calling the TextLinkHandler if non-nil, or URLHandler if
 // non-nil (which by default opens user's default browser via
-// goosi/App.OpenURL())
+// system/App.OpenURL())
 func (ed *Editor) OpenLink(tl *paint.TextLink) {
 	if ed.LinkHandler != nil {
 		ed.LinkHandler(tl)
 	} else {
-		goosi.TheApp.OpenURL(tl.URL)
+		system.TheApp.OpenURL(tl.URL)
 	}
 }
 

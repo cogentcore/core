@@ -73,7 +73,7 @@ func IsText(typ string) bool {
 //    Mimes
 
 // Mimes is a slice of mime data, potentially encoding the same data in
-// different formats -- this is used for all oswin API's for maximum
+// different formats -- this is used for all system APIs for maximum
 // flexibility
 type Mimes []*Data
 
@@ -147,7 +147,7 @@ func (mi Mimes) Text(typ string) string {
 }
 
 // ToMultipart produces a MIME multipart representation of multiple data
-// elements present in the stream -- this should be used in goosi.Clipboard
+// elements present in the stream -- this should be used in system.Clipboard
 // whenever there are multiple elements to be pasted, because windows doesn't
 // support multiple clip elements, and linux isn't very convenient either
 func (mi Mimes) ToMultipart() []byte {

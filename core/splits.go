@@ -9,10 +9,10 @@ import (
 	"strings"
 
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 )
 
@@ -240,7 +240,7 @@ func (sl *Splits) HandleEvents() {
 	sl.OnKeyChord(func(e events.Event) {
 		kc := string(e.KeyChord())
 		mod := "Control+"
-		if TheApp.Platform() == goosi.MacOS {
+		if TheApp.Platform() == system.MacOS {
 			mod = "Meta+"
 		}
 		if !strings.HasPrefix(kc, mod) {

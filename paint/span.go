@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"image"
+	"runtime"
 	"sync"
 	"unicode"
 
@@ -170,12 +171,11 @@ func (sr *Span) AppendString(str string, face font.Face, clr image.Image, bg ima
 		return
 	}
 	ucfont := &styles.FontRender{}
-	// todo: oswin!
-	// if oswin.TheApp != nil && oswin.TheApp.Platform() == oswin.MacOS {
-	ucfont.Family = "Arial Unicode"
-	// } else {
-	// 	ucfont.Family = "Arial"
-	// }
+	if runtime.GOOS == "darwin" {
+		ucfont.Family = "Arial Unicode"
+	} else {
+		ucfont.Family = "Arial"
+	}
 	ucfont.Size = sty.Size
 	ucfont.Font = OpenFont(ucfont, ctxt) // note: this is lightweight once loaded in library
 
@@ -197,7 +197,6 @@ func (sr *Span) AppendString(str string, face font.Face, clr image.Image, bg ima
 	for i := 1; i < sz; i++ { // optimize by setting rest to nil for same
 		rp := Rune{Deco: deco, Background: bg}
 		r := nwr[i]
-		// if oswin.TheApp != nil && oswin.TheApp.Platform() == oswin.MacOS {
 		if _, ok := face.GlyphAdvance(r); !ok {
 			if !lastUc {
 				rp.Face = ucfont.Face.Face

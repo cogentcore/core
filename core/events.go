@@ -12,10 +12,10 @@ import (
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 )
 
@@ -25,14 +25,14 @@ func (wb *WidgetBase) EventMgr() *EventMgr {
 	return &wb.Scene.EventMgr
 }
 
-// GoosiEventMgr returns the lower-level goosi event
+// SystemEventMgr returns the lower-level system event
 // manager for this [Widget]'s [Scene].
-func (wb *WidgetBase) GoosiEventMgr() *events.Mgr {
-	return wb.Scene.RenderWin().GoosiWin.EventMgr()
+func (wb *WidgetBase) SystemEventMgr() *events.Mgr {
+	return wb.Scene.RenderWin().SystemWin.EventMgr()
 }
 
 // Clipboard returns the clipboard for the [Widget] to use.
-func (wb *WidgetBase) Clipboard() goosi.Clipboard {
+func (wb *WidgetBase) Clipboard() system.Clipboard {
 	return wb.EventMgr().Clipboard()
 }
 

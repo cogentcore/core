@@ -7,13 +7,13 @@ package core
 import (
 	"testing"
 
-	"cogentcore.org/core/goosi"
-	_ "cogentcore.org/core/goosi/driver"
+	"cogentcore.org/core/system"
+	_ "cogentcore.org/core/system/driver"
 )
 
 func init() {
-	goosi.HandleRecover = HandleRecover
-	goosi.InitScreenLogicalDPIFunc = AppearanceSettings.ApplyDPI // called when screens are initialized
+	system.HandleRecover = HandleRecover
+	system.InitScreenLogicalDPIFunc = AppearanceSettings.ApplyDPI // called when screens are initialized
 	TheApp.AppBarConfig = StandardAppBarConfig
 	TheApp.CogentCoreDataDir()     // ensure it exists
 	TheWinGeomSaver.NeedToReload() // gets time stamp associated with open, so it doesn't re-open

@@ -24,12 +24,12 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fileinfo"
-	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/pi/complete"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/system"
 )
 
 // FileViewDialog opens a dialog for selecting a file.
@@ -590,7 +590,7 @@ func (fv *FileView) UpdateFiles() {
 	}
 
 	if fv.PrevPath != fv.DirPath {
-		if core.TheApp.Platform() != goosi.MacOS {
+		if core.TheApp.Platform() != system.MacOS {
 			// mac is not supported in a high-capacity fashion at this point
 			if fv.PrevPath == "" {
 				fv.ConfigWatcher()

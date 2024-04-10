@@ -235,7 +235,7 @@ func (em *Embed2D) Project2D(sc *Scene, pt image.Point) (image.Point, bool) {
 }
 
 func (em *Embed2D) ConnectEvents3D(sc *Scene) {
-	em.ConnectEvent(sc.Win, goosi.MouseEvent, core.RegPri, func(recv, send tree.Node, sig int64, d any) {
+	em.ConnectEvent(sc.Win, system.MouseEvent, core.RegPri, func(recv, send tree.Node, sig int64, d any) {
 		emm := recv.Embed(TypeEmbed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
 		if !ssc.IsVisible() {
@@ -267,7 +267,7 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		}
 		me.SetProcessed() // must always
 	})
-	em.ConnectEvent(sc.Win, goosi.MouseMoveEvent, core.RegPri, func(recv, send tree.Node, sig int64, d any) {
+	em.ConnectEvent(sc.Win, system.MouseMoveEvent, core.RegPri, func(recv, send tree.Node, sig int64, d any) {
 		emm := recv.Embed(TypeEmbed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
 		if !ssc.IsVisible() {
@@ -293,7 +293,7 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		emm.Viewport.EventMgr.MouseEventReset(md)
 		me.SetProcessed() // must always
 	})
-	em.ConnectEvent(sc.Win, goosi.MouseDragEvent, core.RegPri, func(recv, send tree.Node, sig int64, d any) {
+	em.ConnectEvent(sc.Win, system.MouseDragEvent, core.RegPri, func(recv, send tree.Node, sig int64, d any) {
 		emm := recv.Embed(TypeEmbed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
 		if !ssc.IsVisible() {
@@ -318,7 +318,7 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		emm.Viewport.EventMgr.MouseEventReset(md)
 		me.SetProcessed() // must always
 	})
-	em.ConnectEvent(sc.Win, goosi.KeyChordEvent, core.HiPri, func(recv, send tree.Node, sig int64, d any) {
+	em.ConnectEvent(sc.Win, system.KeyChordEvent, core.HiPri, func(recv, send tree.Node, sig int64, d any) {
 		// note: restylesering HiPri -- we are outside 2D focus system, and get *all* keyboard events
 		emm := recv.Embed(TypeEmbed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene

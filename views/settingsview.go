@@ -7,8 +7,8 @@ package views
 import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/system"
 )
 
 // SettingsViewToolbarBase is the base toolbar configuration function used in [SettingsView].
@@ -24,8 +24,8 @@ func SettingsViewToolbarBase(tb *core.Toolbar) {
 		NewFuncButton(m, core.ResetAllSettings).SetText("Reset settings").SetIcon(icons.Delete).SetConfirm(true)
 		core.NewButton(m).SetText("App version").SetIcon(icons.Info).OnClick(func(e events.Event) {
 			d := core.NewBody().AddTitle("App version")
-			core.NewLabel(d).SetText("App version: " + goosi.AppVersion)
-			core.NewLabel(d).SetText("Core version: " + goosi.CoreVersion)
+			core.NewLabel(d).SetText("App version: " + system.AppVersion)
+			core.NewLabel(d).SetText("Core version: " + system.CoreVersion)
 			d.AddOKOnly().NewDialog(tb).Run()
 		})
 

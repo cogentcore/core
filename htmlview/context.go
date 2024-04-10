@@ -10,9 +10,9 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/system"
 	"github.com/aymerick/douceur/css"
 	"github.com/aymerick/douceur/parser"
 	selcss "github.com/ericchiang/css"
@@ -62,7 +62,7 @@ func NewContext() *Context {
 	return &Context{
 		Styles:  map[*html.Node][]*css.Rule{},
 		Widgets: map[*html.Node]core.Widget{},
-		OpenURL: goosi.TheApp.OpenURL,
+		OpenURL: system.TheApp.OpenURL,
 	}
 }
 

@@ -12,7 +12,6 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
@@ -20,20 +19,21 @@ import (
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/svg"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 )
 
 // TheApp is the current [App]; only one is ever in effect.
-var TheApp = &App{App: goosi.TheApp}
+var TheApp = &App{App: system.TheApp}
 
-// App represents a Cogent Core app. It extends [goosi.App] to provide both system-level
+// App represents a Cogent Core app. It extends [system.App] to provide both system-level
 // and high-level data and functions to do with the currently running application. The
-// single instance of it is [TheApp], which embeds [goosi.TheApp].
+// single instance of it is [TheApp], which embeds [system.TheApp].
 type App struct { //gti:add -setters
-	goosi.App `set:"-"`
+	system.App `set:"-"`
 
-	// Icon specifies the app icon, which is passed to [goosi.Window.SetIcon].
+	// Icon specifies the app icon, which is passed to [system.Window.SetIcon].
 	// It should typically be set using [App.SetIconSVG].
 	Icon []image.Image
 
@@ -84,8 +84,8 @@ func (a *App) SetIconBytes(b []byte) *App {
 
 // Quit closes all windows and exits the program.
 func Quit() {
-	if !goosi.TheApp.IsQuitting() {
-		goosi.TheApp.Quit()
+	if !system.TheApp.IsQuitting() {
+		system.TheApp.Quit()
 	}
 }
 

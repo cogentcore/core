@@ -10,10 +10,10 @@ import (
 	"runtime/debug"
 
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/system"
 )
 
 // timesCrashed is the number of times that the program has
@@ -21,15 +21,15 @@ import (
 // when rendering the crash window.
 var timesCrashed int
 
-// HandleRecover is the core value of [goosi.HandleRecover]. If r is not nil,
-// it makes a window displaying information about the panic. [goosi.HandleRecover]
+// HandleRecover is the core value of [system.HandleRecover]. If r is not nil,
+// it makes a window displaying information about the panic. [system.HandleRecover]
 // is initialized to this in init.
 func HandleRecover(r any) {
 	if r == nil {
 		return
 	}
 	timesCrashed++
-	goosi.HandleRecoverBase(r)
+	system.HandleRecoverBase(r)
 	if timesCrashed > 1 {
 		return
 	}
@@ -40,12 +40,12 @@ func HandleRecover(r any) {
 	// right stack for debugging when panicking
 	quit := make(chan struct{})
 
-	b := NewBody("app-stopped-unexpectedly").AddTitle(goosi.TheApp.Name() + " stopped unexpectedly").
-		AddText("There was an unexpected error and " + goosi.TheApp.Name() + " stopped running.")
+	b := NewBody("app-stopped-unexpectedly").AddTitle(system.TheApp.Name() + " stopped unexpectedly").
+		AddText("There was an unexpected error and " + system.TheApp.Name() + " stopped running.")
 	b.AddBottomBar(func(parent Widget) {
 		NewButton(parent).SetText("Details").SetType(ButtonOutlined).OnClick(func(e events.Event) {
 			clpath := filepath.Join(TheApp.AppDataDir(), "crash-logs")
-			txt := fmt.Sprintf("Crash log saved in %s\n\n%s", clpath, goosi.CrashLogText(r, stack))
+			txt := fmt.Sprintf("Crash log saved in %s\n\n%s", clpath, system.CrashLogText(r, stack))
 			d := NewBody("crash-details").AddTitle("Crash details")
 			NewLabel(d).SetText(txt).Style(func(s *styles.Style) {
 				s.Font.Family = string(AppearanceSettings.MonoFont)

@@ -13,10 +13,10 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 )
@@ -245,7 +245,7 @@ func (sc *Scene) FitInWindow(winGeom mat32.Geom2DInt) {
 	geom := sc.SceneGeom
 	// full offscreen windows ignore any window geometry constraints
 	// because they must be unbounded by any previous window sizes
-	if TheApp.Platform() != goosi.Offscreen || !sc.Stage.FullWindow {
+	if TheApp.Platform() != system.Offscreen || !sc.Stage.FullWindow {
 		geom = geom.FitInWindow(winGeom)
 	}
 	sc.Resize(geom)

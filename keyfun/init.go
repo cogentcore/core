@@ -4,14 +4,14 @@
 
 package keyfun
 
-import "cogentcore.org/core/goosi"
+import "cogentcore.org/core/system"
 
 func init() {
 	AvailableMaps.CopyFrom(StandardMaps)
-	switch goosi.TheApp.SystemPlatform() {
-	case goosi.MacOS:
+	switch system.TheApp.SystemPlatform() {
+	case system.MacOS:
 		DefaultMap = "MacStandard"
-	case goosi.Windows:
+	case system.Windows:
 		DefaultMap = "WindowsStandard"
 	default:
 		DefaultMap = "LinuxStandard"

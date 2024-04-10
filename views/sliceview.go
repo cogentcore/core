@@ -1566,7 +1566,7 @@ func (sv *SliceViewBase) CopySelectToMime() mimedata.Mimes {
 	return md
 }
 
-// CopyIndexes copies selected idxs to goosi.Clipboard, optionally resetting the selection
+// CopyIndexes copies selected idxs to system.Clipboard, optionally resetting the selection
 func (sv *SliceViewBase) CopyIndexes(reset bool) { //gti:add
 	nitms := len(sv.SelectedIndexes)
 	if nitms == 0 {
@@ -1596,7 +1596,7 @@ func (sv *SliceViewBase) DeleteIndexes() { //gti:add
 	sv.NeedsRender()
 }
 
-// CutIndexes copies selected indexes to goosi.Clipboard and deletes selected indexes
+// CutIndexes copies selected indexes to system.Clipboard and deletes selected indexes
 func (sv *SliceViewBase) CutIndexes() { //gti:add
 	if len(sv.SelectedIndexes) == 0 {
 		return

@@ -16,12 +16,12 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/texteditor/histyle"
 	"cogentcore.org/core/texteditor/textbuf"
 	"cogentcore.org/core/tree"
@@ -271,7 +271,7 @@ func (ed *Editor) EditDone() {
 	}
 	ed.ClearSelected()
 	ed.ClearCursor()
-	goosi.TheApp.HideVirtualKeyboard()
+	system.TheApp.HideVirtualKeyboard()
 }
 
 // Remarkup triggers a complete re-markup of the entire text --

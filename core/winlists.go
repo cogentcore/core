@@ -9,8 +9,8 @@ import (
 	"reflect"
 	"slices"
 
-	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/laser"
+	"cogentcore.org/core/system"
 )
 
 // RenderWinList is a list of windows.
@@ -71,13 +71,13 @@ func (wl *RenderWinList) FindData(data any) (*RenderWin, bool) {
 	return nil, false
 }
 
-// FindRenderWin finds window with given goosi.RenderWin on list -- returns
+// FindRenderWin finds window with given system.RenderWin on list -- returns
 // window and true if found, nil, false otherwise.
-func (wl *RenderWinList) FindRenderWin(osw goosi.Window) (*RenderWin, bool) {
+func (wl *RenderWinList) FindRenderWin(osw system.Window) (*RenderWin, bool) {
 	RenderWinGlobalMu.Lock()
 	defer RenderWinGlobalMu.Unlock()
 	for _, wi := range *wl {
-		if wi.GoosiWin == osw {
+		if wi.SystemWin == osw {
 			return wi, true
 		}
 	}
@@ -136,8 +136,8 @@ func (wl *RenderWinList) FocusNext() (*RenderWin, int) {
 			i++
 		}
 		fw = (*wl)[i]
-		if !fw.GoosiWin.Is(goosi.Minimized) {
-			fw.GoosiWin.Raise()
+		if !fw.SystemWin.Is(system.Minimized) {
+			fw.SystemWin.Raise()
 			break
 		}
 	}

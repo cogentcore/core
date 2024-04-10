@@ -14,7 +14,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fileinfo"
-	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/vci"
 	"cogentcore.org/core/views"
 )
@@ -23,11 +23,11 @@ import (
 // open on Mac, xdg-open on Linux, and start on Windows
 func OSOpenCommand() string {
 	switch core.TheApp.Platform() {
-	case goosi.MacOS:
+	case system.MacOS:
 		return "open"
-	case goosi.Linux:
+	case system.Linux:
 		return "xdg-open"
-	case goosi.Windows:
+	case system.Windows:
 		return "start"
 	}
 	return "open"
