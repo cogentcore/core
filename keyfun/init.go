@@ -4,7 +4,13 @@
 
 package keyfun
 
-import "cogentcore.org/core/system"
+import (
+	"cogentcore.org/core/system"
+
+	// we have to import system/driver here so that it is initialized
+	// in time for us to the get the system platform
+	_ "cogentcore.org/core/system/driver"
+)
 
 func init() {
 	AvailableMaps.CopyFrom(StandardMaps)

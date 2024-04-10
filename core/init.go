@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"cogentcore.org/core/system"
-	_ "cogentcore.org/core/system/driver"
 )
 
 func init() {
