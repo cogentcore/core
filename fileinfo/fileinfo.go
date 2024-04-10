@@ -59,7 +59,7 @@ type FileInfo struct { //gti:add
 	Mime string `tableview:"-"`
 
 	// functional category of the file, based on mime data etc
-	Cat Cat `tableview:"-"`
+	Cat Categories `tableview:"-"`
 
 	// known file type
 	Known Known `tableview:"-"`
@@ -113,15 +113,15 @@ func (fi *FileInfo) Stat() error {
 		fi.Cat = Folder
 		fi.Known = AnyFolder
 	} else {
-		fi.Cat = UnknownCat
+		fi.Cat = UnknownCategory
 		fi.Known = Unknown
 		fi.Kind = ""
 		mtyp, _, err := MimeFromFile(fi.Path)
 		if err == nil {
 			fi.Mime = mtyp
-			fi.Cat = CatFromMime(fi.Mime)
+			fi.Cat = CategoryFromMime(fi.Mime)
 			fi.Known = MimeKnown(fi.Mime)
-			if fi.Cat != UnknownCat {
+			if fi.Cat != UnknownCategory {
 				fi.Kind = fi.Cat.String() + ": "
 			}
 			if fi.Known != Unknown {
@@ -130,7 +130,7 @@ func (fi *FileInfo) Stat() error {
 				fi.Kind += MimeSub(fi.Mime)
 			}
 		}
-		if fi.Cat == UnknownCat {
+		if fi.Cat == UnknownCategory {
 			if fi.IsExec() {
 				fi.Cat = Exe
 			}
@@ -309,7 +309,7 @@ func (fi *FileInfo) FindIcon() (icons.Icon, bool) {
 			return icn, true
 		}
 	}
-	if fi.Cat != UnknownCat {
+	if fi.Cat != UnknownCategory {
 		cat := strings.ToLower(fi.Cat.String())
 		if icn := icons.Icon(cat); icn.IsValid() {
 			return icn, true

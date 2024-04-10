@@ -133,16 +133,16 @@ func NodeNameCountSort(ecs []NodeNameCount) {
 
 // FileExtCounts returns a count of all the different file extensions, sorted
 // from highest to lowest.
-// If cat is != fi.Unknown then it only uses files of that type
-// (e.g., fi.Code to find any code files)
-func (fn *Node) FileExtCounts(cat fileinfo.Cat) []NodeNameCount {
+// If cat is != fileinfo.Unknown then it only uses files of that type
+// (e.g., fileinfo.Code to find any code files)
+func (fn *Node) FileExtCounts(cat fileinfo.Categories) []NodeNameCount {
 	cmap := make(map[string]int, 20)
 	fn.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
 			return tree.Continue
 		}
-		if cat != fileinfo.UnknownCat {
+		if cat != fileinfo.UnknownCategory {
 			if sfn.Info.Cat != cat {
 				return tree.Continue
 			}
@@ -166,16 +166,16 @@ func (fn *Node) FileExtCounts(cat fileinfo.Cat) []NodeNameCount {
 }
 
 // LatestFileMod returns the most recent mod time of files in the tree.
-// If cat is != fi.Unknown then it only uses files of that type
-// (e.g., fi.Code to find any code files)
-func (fn *Node) LatestFileMod(cat fileinfo.Cat) time.Time {
+// If cat is != fileinfo.Unknown then it only uses files of that type
+// (e.g., fileinfo.Code to find any code files)
+func (fn *Node) LatestFileMod(cat fileinfo.Categories) time.Time {
 	tmod := time.Time{}
 	fn.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
 			return tree.Continue
 		}
-		if cat != fileinfo.UnknownCat {
+		if cat != fileinfo.UnknownCategory {
 			if sfn.Info.Cat != cat {
 				return tree.Continue
 			}

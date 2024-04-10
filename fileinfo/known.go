@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package fi
+package fileinfo
 
 //go:generate core generate
 
@@ -10,13 +10,13 @@ import (
 	"fmt"
 )
 
-// fi.Known is an enumerated list of known file types, for which
+// Known is an enumerated list of known file types, for which
 // appropriate actions can be taken etc.
 type Known int32 //enums:enum
 
 // KnownMimes maps from the known type into the MimeType info for each
-// known file type -- the known MimeType may be just one of
-// multiple that correspond to the known type -- it should be first in list
+// known file type; the known MimeType may be just one of
+// multiple that correspond to the known type; it should be first in list
 // and have extensions defined
 var KnownMimes map[Known]MimeType
 
@@ -25,21 +25,21 @@ var KnownMimes map[Known]MimeType
 func MimeString(kn Known) string {
 	mt, has := KnownMimes[kn]
 	if !has {
-		// log.Printf("fi.MimeString called with unrecognized 'Known' type: %v\n", sup)
+		// log.Printf("fileinfo.MimeString called with unrecognized 'Known' type: %v\n", sup)
 		return ""
 	}
 	return mt.Mime
 }
 
 // Cat returns the Cat category for given known file type
-func (kn Known) Cat() Cat {
+func (kn Known) Cat() Categories {
 	if kn == Unknown {
-		return UnknownCat
+		return UnknownCategory
 	}
 	mt, has := KnownMimes[kn]
 	if !has {
-		// log.Printf("fi.KnownCat called with unrecognized 'Known' type: %v\n", sup)
-		return UnknownCat
+		// log.Printf("fileinfo.KnownCat called with unrecognized 'Known' type: %v\n", sup)
+		return UnknownCategory
 	}
 	return mt.Cat
 }
@@ -111,7 +111,7 @@ func KnownByName(name string) (Known, error) {
 	var kn Known
 	err := kn.SetString(name)
 	if err != nil {
-		err = fmt.Errorf("fi.KnownByName: doesn't look like that is a known file type: %v", name)
+		err = fmt.Errorf("fileinfo.KnownByName: doesn't look like that is a known file type: %v", name)
 		return kn, err
 	}
 	return kn, nil

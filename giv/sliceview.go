@@ -182,7 +182,7 @@ type SliceViewer interface {
 	SliceDeleteAt(idx int)
 
 	// MimeDataType returns the data type for mime clipboard
-	// (copy / paste) data e.g., fi.DataJson
+	// (copy / paste) data e.g., fileinfo.DataJson
 	MimeDataType() string
 
 	// CopySelectToMime copies selected rows to mime data
@@ -1547,7 +1547,7 @@ func (sv *SliceViewBase) FromMimeData(md mimedata.Mimes) []any {
 }
 
 // MimeDataType returns the data type for mime clipboard (copy / paste) data
-// e.g., fi.DataJson
+// e.g., fileinfo.DataJson
 func (sv *SliceViewBase) MimeDataType() string {
 	return fileinfo.DataJson
 }

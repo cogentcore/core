@@ -4,7 +4,7 @@
 
 package fileinfo
 
-// fi.Cat is a functional category for files -- a broad functional
+// Categories is a functional category for files; a broad functional
 // categorization that can help decide what to do with the file.
 //
 // It is computed in part from the mime type, but some types require
@@ -13,11 +13,11 @@ package fileinfo
 // No single categorization scheme is perfect, so any given use
 // may require examination of the full mime type etc, but this
 // provides a useful broad-scope categorization of file types.
-type Cat int32 //enums:enum
+type Categories int32 //enums:enum
 
 const (
-	// UnknownCat is an unknown file category
-	UnknownCat Cat = iota
+	// UnknownCategory is an unknown file category
+	UnknownCategory Categories = iota
 
 	// Folder is a folder / directory
 	Folder
@@ -65,11 +65,11 @@ const (
 	Bin
 )
 
-// fi.CatFromMime returns the file category based on the mime type -- not all
-// Cats can be inferred from file types
-func CatFromMime(mime string) Cat {
+// CategoryFromMime returns the file category based on the mime type;
+// not all Categories can be inferred from file types
+func CategoryFromMime(mime string) Categories {
 	if mime == "" {
-		return UnknownCat
+		return UnknownCategory
 	}
 	mime = MimeNoChar(mime)
 	if mt, has := AvailableMimes[mime]; has {
@@ -78,7 +78,7 @@ func CatFromMime(mime string) Cat {
 	// try from type:
 	ms := MimeTop(mime)
 	if ms == "" {
-		return UnknownCat
+		return UnknownCategory
 	}
 	switch ms {
 	case "image":
@@ -95,5 +95,5 @@ func CatFromMime(mime string) Cat {
 	if ms == "text" {
 		return Text
 	}
-	return UnknownCat
+	return UnknownCategory
 }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package fi
+package fileinfo
 
 import (
 	"fmt"
@@ -93,7 +93,7 @@ func MimeFromFile(fname string) (mtype, ext string, err error) {
 	if strings.ToLower(fn) == "makefile" {
 		return MimeString(Makefile), ext, nil
 	}
-	return "", ext, fmt.Errorf("fi.MimeFromFile could not find mime type for ext: %v file: %v", ext, fn)
+	return "", ext, fmt.Errorf("fileinfo.MimeFromFile could not find mime type for ext: %v file: %v", ext, fn)
 }
 
 // todo: use this to check against mime types!
@@ -133,7 +133,7 @@ type MimeType struct {
 	Exts []string
 
 	// category of file
-	Cat Cat
+	Cat Categories
 
 	// if known, the name of the known file type, else NoSupporUnknown
 	Sup Known
@@ -202,17 +202,17 @@ func MergeAvailableMimes() {
 		if len(mt.Exts) > 0 { // first pass add only ext guys to support
 			for _, ex := range mt.Exts {
 				if ex[0] != '.' {
-					fmt.Printf("fi.MergeAvailMimes: ext: %v does not start with a . in type: %v\n", ex, mt.Mime)
+					fmt.Printf("fileinfo.MergeAvailMimes: ext: %v does not start with a . in type: %v\n", ex, mt.Mime)
 				}
 				if pmt, has := ExtMimeMap[ex]; has {
-					fmt.Printf("fi.MergeAvailMimes: non-unique ext: %v assigned to mime type: %v AND %v\n", ex, pmt, mt.Mime)
+					fmt.Printf("fileinfo.MergeAvailMimes: non-unique ext: %v assigned to mime type: %v AND %v\n", ex, pmt, mt.Mime)
 				} else {
 					ExtMimeMap[ex] = mt.Mime
 				}
 			}
 			if mt.Sup != Unknown {
 				if hsp, has := KnownMimes[mt.Sup]; has {
-					fmt.Printf("fi.MergeAvailMimes: more-than-one mimetype has extensions for same known file type: %v -- one: %v other %v\n", mt.Sup, hsp.Mime, mt.Mime)
+					fmt.Printf("fileinfo.MergeAvailMimes: more-than-one mimetype has extensions for same known file type: %v -- one: %v other %v\n", mt.Sup, hsp.Mime, mt.Mime)
 				} else {
 					KnownMimes[mt.Sup] = mt
 				}

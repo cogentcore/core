@@ -137,7 +137,7 @@ func (ll *LangSupporter) OpenStandard() error {
 	return nil
 }
 
-// Properties looks up language properties by fi.Known const int type
+// Properties looks up language properties by fileinfo.Known const int type
 func (ll *LangSupporter) Properties(sup fileinfo.Known) (*LangProperties, error) {
 	lp, has := StandardLangProperties[sup]
 	if !has {
