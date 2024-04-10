@@ -28,7 +28,7 @@ func (wb *WidgetBase) EventMgr() *EventMgr {
 // SystemEventMgr returns the lower-level system event
 // manager for this [Widget]'s [Scene].
 func (wb *WidgetBase) SystemEventMgr() *events.Mgr {
-	return wb.Scene.RenderWin().SystemWin.EventMgr()
+	return wb.Scene.RenderWin().SystemWindow.EventMgr()
 }
 
 // Clipboard returns the clipboard for the [Widget] to use.
@@ -458,7 +458,7 @@ func (wb *WidgetBase) HandleWidgetStateFromFocus() {
 	})
 }
 
-// HandleWidgetMagnifyEvent calls [RenderWin.StepZoom] on [events.Magnify]
+// HandleWidgetMagnifyEvent calls [RenderWindow.StepZoom] on [events.Magnify]
 func (wb *WidgetBase) HandleWidgetMagnify() {
 	wb.On(events.Magnify, func(e events.Event) {
 		ev := e.(*events.TouchMagnify)

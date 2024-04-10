@@ -185,7 +185,7 @@ func (sc *Scene) SetStyles() {
 func (sc *Scene) HandleEvents() {
 	sc.Frame.HandleEvents()
 	sc.OnShow(func(e events.Event) {
-		CurRenderWin.SetStageTitle(sc.Stage.Title)
+		CurrentRenderWindow.SetStageTitle(sc.Stage.Title)
 	})
 	sc.OnClose(func(e events.Event) {
 		sm := sc.MainStageMgr()
@@ -200,7 +200,7 @@ func (sc *Scene) HandleEvents() {
 		}
 		// the stage that will be visible next
 		st := sm.Stack.ValueByIndex(sm.Stack.Len() - 2)
-		CurRenderWin.SetStageTitle(st.Title)
+		CurrentRenderWindow.SetStageTitle(st.Title)
 	})
 }
 
@@ -220,7 +220,7 @@ func (sc *Scene) RenderContext() *RenderContext {
 // RenderWin returns the current render window for this scene.
 // In general it is best to go through RenderContext instead of the window.
 // This will be nil prior to actual rendering.
-func (sc *Scene) RenderWin() *RenderWin {
+func (sc *Scene) RenderWin() *RenderWindow {
 	if sc.Stage == nil {
 		return nil
 	}
@@ -308,7 +308,7 @@ func (sc *Scene) Close() bool {
 		return false // todo: needed, but not sure why
 	}
 	mm.DeleteStage(sc.Stage)
-	if sc.Stage.NewWindow && !TheApp.Platform().IsMobile() && !mm.RenderWin.Is(WinClosing) && !mm.RenderWin.Is(WinStopEventLoop) && !TheApp.IsQuitting() {
+	if sc.Stage.NewWindow && !TheApp.Platform().IsMobile() && !mm.RenderWin.Is(WindowClosing) && !mm.RenderWin.Is(WindowStopEventLoop) && !TheApp.IsQuitting() {
 		mm.RenderWin.CloseReq()
 	}
 	return true
@@ -329,7 +329,7 @@ func (sc *Scene) DeleteImpl() {
 }
 
 // UpdateTitle updates the title of the Scene's associated [Stage],
-// [RenderWin], and [Body], if applicable.
+// [RenderWindow], and [Body], if applicable.
 func (sc *Scene) UpdateTitle(title string) {
 	if sc.Scene != nil {
 		sc.Stage.Title = title

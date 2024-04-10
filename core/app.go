@@ -131,11 +131,11 @@ func StandardAppBarBack(tb *Toolbar) *Button {
 			}
 			return
 		}
-		if wlen := len(AllRenderWins); wlen > 1 {
+		if wlen := len(AllRenderWindows); wlen > 1 {
 			if tb.Scene.Stage.CloseOnBack {
-				CurRenderWin.CloseReq()
+				CurrentRenderWindow.CloseReq()
 			}
-			AllRenderWins[wlen-2].Raise()
+			AllRenderWindows[wlen-2].Raise()
 		}
 	})
 	return bt
@@ -189,7 +189,7 @@ func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //gti:add
 	NewButton(m).SetText("Window").SetMenu(func(m *Scene) {
 		NewButton(m).SetText("Focus next").SetIcon(icons.CenterFocusStrong).
 			SetKey(keyfun.WinFocusNext).OnClick(func(e events.Event) {
-			AllRenderWins.FocusNext()
+			AllRenderWindows.FocusNext()
 		})
 		NewButton(m).SetText("Minimize").SetIcon(icons.Minimize).
 			OnClick(func(e events.Event) {
@@ -211,16 +211,16 @@ func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //gti:add
 				go TheApp.QuitReq()
 			})
 		NewSeparator(m)
-		for _, w := range MainRenderWins {
+		for _, w := range MainRenderWindows {
 			if w != nil {
 				NewButton(m).SetText(w.Title).OnClick(func(e events.Event) {
 					w.Raise()
 				})
 			}
 		}
-		if len(DialogRenderWins) > 0 {
+		if len(DialogRenderWindows) > 0 {
 			NewSeparator(m)
-			for _, w := range DialogRenderWins {
+			for _, w := range DialogRenderWindows {
 				if w != nil {
 					NewButton(m).SetText(w.Title).OnClick(func(e events.Event) {
 						w.Raise()
@@ -264,7 +264,7 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 	})
 
 	ch.AddItemsFunc(func() {
-		for _, rw := range AllRenderWins {
+		for _, rw := range AllRenderWindows {
 			for _, kv := range rw.MainStageMgr.Stack.Order {
 				st := kv.Value
 				// we do not include ourself

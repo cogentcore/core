@@ -119,7 +119,7 @@ func (sw *Scene) ConfigFrame() {
 	if win == nil {
 		return
 	}
-	drw := win.SystemWin.Drawer()
+	drw := win.SystemWindow.Drawer()
 	system.TheApp.RunOnMain(func() {
 		sw.XYZ.ConfigFrameFromSurface(drw.Surface().(*vgpu.Surface))
 		if doConfig {

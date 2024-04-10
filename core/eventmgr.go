@@ -141,7 +141,7 @@ func (em *EventMgr) MainStageMgr() *StageMgr {
 }
 
 // RenderWin returns the overall render window, which could be nil
-func (em *EventMgr) RenderWin() *RenderWin {
+func (em *EventMgr) RenderWin() *RenderWindow {
 	mgr := em.MainStageMgr()
 	if mgr == nil {
 		return nil
@@ -837,7 +837,7 @@ func (em *EventMgr) DropFinalize(de *events.DragDrop) {
 func (em *EventMgr) Clipboard() system.Clipboard {
 	var gwin system.Window
 	if win := em.RenderWin(); win != nil {
-		gwin = win.SystemWin
+		gwin = win.SystemWindow
 	}
 	return system.TheApp.Clipboard(gwin)
 }
@@ -851,7 +851,7 @@ func (em *EventMgr) SetCursor(cur cursors.Cursor) {
 	if !win.IsVisible() {
 		return
 	}
-	grr.Log(system.TheApp.Cursor(win.SystemWin).Set(cur))
+	grr.Log(system.TheApp.Cursor(win.SystemWindow).Set(cur))
 }
 
 // FocusClear saves current focus to FocusPrev
@@ -1136,14 +1136,14 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 		e.SetHandled()
 		system.TheApp.GetScreens()
 		UpdateAll()
-		TheWinGeomSaver.RestoreAll()
+		TheWindowGeometrySaver.RestoreAll()
 		// w.FocusInactivate()
 		// w.FullReRender()
 		// sz := w.SystemWin.Size()
 		// w.SetSize(sz)
 	case keyfun.WinFocusNext:
 		e.SetHandled()
-		AllRenderWins.FocusNext()
+		AllRenderWindows.FocusNext()
 	}
 	// TODO(kai): maybe clean up / document this
 	switch cs { // some other random special codes, during dev..

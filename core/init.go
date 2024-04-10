@@ -15,9 +15,9 @@ func init() {
 	system.HandleRecover = HandleRecover
 	system.InitScreenLogicalDPIFunc = AppearanceSettings.ApplyDPI // called when screens are initialized
 	TheApp.AppBarConfig = StandardAppBarConfig
-	TheApp.CogentCoreDataDir()     // ensure it exists
-	TheWinGeomSaver.NeedToReload() // gets time stamp associated with open, so it doesn't re-open
-	TheWinGeomSaver.Open()
+	TheApp.CogentCoreDataDir()            // ensure it exists
+	TheWindowGeometrySaver.NeedToReload() // gets time stamp associated with open, so it doesn't re-open
+	TheWindowGeometrySaver.Open()
 
 	if testing.Testing() {
 		TheApp.AppBarConfig = nil

@@ -208,7 +208,7 @@ func SaveAllSettings() error {
 // It is typically called when user settings are changed.
 func UpdateAll() { //gti:add
 	gradient.Cache = nil // the cache is invalid now
-	for _, w := range AllRenderWins {
+	for _, w := range AllRenderWindows {
 		rctx := w.MainStageMgr.RenderContext
 		rctx.LogicalDPI = w.LogicalDPI()
 		rctx.SetFlag(true, RenderRebuild) // trigger full rebuild
@@ -324,10 +324,10 @@ func (as *AppearanceSettingsData) ApplyDPI() {
 		}
 		sc.UpdateLogicalDPI()
 	}
-	for _, w := range AllRenderWins {
-		w.SystemWin.SetLogicalDPI(w.SystemWin.Screen().LogicalDPI)
+	for _, w := range AllRenderWindows {
+		w.SystemWindow.SetLogicalDPI(w.SystemWindow.Screen().LogicalDPI)
 		// this isn't DPI-related, but this is the most efficient place to do it
-		w.SystemWin.SetTitleBarIsDark(matcolor.SchemeIsDark)
+		w.SystemWindow.SetTitleBarIsDark(matcolor.SchemeIsDark)
 	}
 }
 
@@ -336,7 +336,7 @@ func (as *AppearanceSettingsData) ApplyDPI() {
 // need to do this, but sometimes it is useful for testing or windows that are
 // showing up in bad places that you can't recover from.
 func (as *AppearanceSettingsData) DeleteSavedWindowGeoms() { //gti:add
-	TheWinGeomSaver.DeleteAll()
+	TheWindowGeometrySaver.DeleteAll()
 }
 
 // ZebraStripesWeight returns a 0 to 0.2 alpha opacity factor to use in computing

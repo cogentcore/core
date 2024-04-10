@@ -29,7 +29,7 @@ type StageMgr struct { //gti:add
 
 	// render window to which we are rendering.
 	// rely on the RenderContext wherever possible.
-	RenderWin *RenderWin
+	RenderWin *RenderWindow
 
 	// growing stack of viewing history of all stages.
 	History []*Stage `set:"-"`

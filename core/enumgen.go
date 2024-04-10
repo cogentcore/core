@@ -403,62 +403,64 @@ func (i *MeterTypes) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "MeterTypes")
 }
 
-var _WinFlagsValues = []WinFlags{0, 1, 2, 3, 4, 5, 6, 7}
+var _WindowFlagsValues = []WindowFlags{0, 1, 2, 3, 4, 5, 6}
 
-// WinFlagsN is the highest valid value for type WinFlags, plus one.
-const WinFlagsN WinFlags = 8
+// WindowFlagsN is the highest valid value for type WindowFlags, plus one.
+const WindowFlagsN WindowFlags = 7
 
-var _WinFlagsValueMap = map[string]WinFlags{`HasSavedGeom`: 0, `Closing`: 1, `Resizing`: 2, `GotFocus`: 3, `SentShow`: 4, `GoLoop`: 5, `StopEventLoop`: 6, `SelectionMode`: 7}
+var _WindowFlagsValueMap = map[string]WindowFlags{`HasSavedGeom`: 0, `Closing`: 1, `Resizing`: 2, `GotFocus`: 3, `SentShow`: 4, `StopEventLoop`: 5, `SelectionMode`: 6}
 
-var _WinFlagsDescMap = map[WinFlags]string{0: `WinHasSavedGeom indicates if this window has WinGeoms setting that sized it -- affects whether other default geom should be applied.`, 1: `WinClosing is atomic flag indicating window is closing`, 2: `WinResizing is atomic flag indicating window is resizing`, 3: `WinGotFocus indicates that have we received RenderWin focus`, 4: `WinSentShow have we sent the show event yet? Only ever sent ONCE`, 5: `WinGoLoop true if we are running from GoStartEventLoop -- requires a WinWait.Done at end`, 6: `WinStopEventLoop is set when event loop stop is requested`, 7: `WinSelectionMode indicates that the window is in Cogent Core inspect editor edit mode`}
+var _WindowFlagsDescMap = map[WindowFlags]string{0: `WindowHasSavedGeom indicates if this window has WindowGeometry setting that sized it -- affects whether other default geom should be applied.`, 1: `WindowClosing is atomic flag indicating window is closing`, 2: `WindowResizing is atomic flag indicating window is resizing`, 3: `WindowGotFocus indicates that have we received RenderWin focus`, 4: `WindowSentShow have we sent the show event yet? Only ever sent ONCE`, 5: `WindowStopEventLoop is set when event loop stop is requested`, 6: `WindowSelectionMode indicates that the window is in Cogent Core inspect editor edit mode`}
 
-var _WinFlagsMap = map[WinFlags]string{0: `HasSavedGeom`, 1: `Closing`, 2: `Resizing`, 3: `GotFocus`, 4: `SentShow`, 5: `GoLoop`, 6: `StopEventLoop`, 7: `SelectionMode`}
+var _WindowFlagsMap = map[WindowFlags]string{0: `HasSavedGeom`, 1: `Closing`, 2: `Resizing`, 3: `GotFocus`, 4: `SentShow`, 5: `StopEventLoop`, 6: `SelectionMode`}
 
-// String returns the string representation of this WinFlags value.
-func (i WinFlags) String() string { return enums.BitFlagString(i, _WinFlagsValues) }
+// String returns the string representation of this WindowFlags value.
+func (i WindowFlags) String() string { return enums.BitFlagString(i, _WindowFlagsValues) }
 
-// BitIndexString returns the string representation of this WinFlags value
+// BitIndexString returns the string representation of this WindowFlags value
 // if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
-func (i WinFlags) BitIndexString() string { return enums.String(i, _WinFlagsMap) }
+func (i WindowFlags) BitIndexString() string { return enums.String(i, _WindowFlagsMap) }
 
-// SetString sets the WinFlags value from its string representation,
+// SetString sets the WindowFlags value from its string representation,
 // and returns an error if the string is invalid.
-func (i *WinFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
+func (i *WindowFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
 
-// SetStringOr sets the WinFlags value from its string representation
+// SetStringOr sets the WindowFlags value from its string representation
 // while preserving any bit flags already set, and returns an
 // error if the string is invalid.
-func (i *WinFlags) SetStringOr(s string) error {
-	return enums.SetStringOr(i, s, _WinFlagsValueMap, "WinFlags")
+func (i *WindowFlags) SetStringOr(s string) error {
+	return enums.SetStringOr(i, s, _WindowFlagsValueMap, "WindowFlags")
 }
 
-// Int64 returns the WinFlags value as an int64.
-func (i WinFlags) Int64() int64 { return int64(i) }
+// Int64 returns the WindowFlags value as an int64.
+func (i WindowFlags) Int64() int64 { return int64(i) }
 
-// SetInt64 sets the WinFlags value from an int64.
-func (i *WinFlags) SetInt64(in int64) { *i = WinFlags(in) }
+// SetInt64 sets the WindowFlags value from an int64.
+func (i *WindowFlags) SetInt64(in int64) { *i = WindowFlags(in) }
 
-// Desc returns the description of the WinFlags value.
-func (i WinFlags) Desc() string { return enums.Desc(i, _WinFlagsDescMap) }
+// Desc returns the description of the WindowFlags value.
+func (i WindowFlags) Desc() string { return enums.Desc(i, _WindowFlagsDescMap) }
 
-// WinFlagsValues returns all possible values for the type WinFlags.
-func WinFlagsValues() []WinFlags { return _WinFlagsValues }
+// WindowFlagsValues returns all possible values for the type WindowFlags.
+func WindowFlagsValues() []WindowFlags { return _WindowFlagsValues }
 
-// Values returns all possible values for the type WinFlags.
-func (i WinFlags) Values() []enums.Enum { return enums.Values(_WinFlagsValues) }
+// Values returns all possible values for the type WindowFlags.
+func (i WindowFlags) Values() []enums.Enum { return enums.Values(_WindowFlagsValues) }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i WinFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
+func (i WindowFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
-func (i *WinFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
+func (i *WindowFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i WinFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
+func (i WindowFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *WinFlags) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "WinFlags") }
+func (i *WindowFlags) UnmarshalText(text []byte) error {
+	return enums.UnmarshalText(i, text, "WindowFlags")
+}
 
 var _RenderContextFlagsValues = []RenderContextFlags{0, 1}
 

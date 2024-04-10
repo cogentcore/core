@@ -280,14 +280,14 @@ func (st *Stage) Run() *Stage {
 	}
 	// need to prevent premature quitting by ensuring
 	// that WinWait is not done until we run the Stage
-	WinWait.Add(1)
+	WindowWait.Add(1)
 	go func() {
 		<-system.OnSystemWindowCreated
 		system.OnSystemWindowCreated = nil // no longer applicable
 		st.RunImpl()
 		// now that we have run the Stage, WinWait is accurate and
 		// we no longer need to prevent it from being done
-		WinWait.Done()
+		WindowWait.Done()
 	}()
 	return st
 }
@@ -330,13 +330,13 @@ func (st *Stage) DoUpdate() (stageMods, sceneMods bool) {
 }
 
 // Raise moves the Stage to the top of its main [StageMgr]
-// and raises the [RenderWin] it is in if necessary.
+// and raises the [RenderWindow] it is in if necessary.
 func (st *Stage) Raise() {
-	if st.MainMgr.RenderWin != CurRenderWin {
+	if st.MainMgr.RenderWin != CurrentRenderWindow {
 		st.MainMgr.RenderWin.Raise()
 	}
 	st.MainMgr.MoveToTop(st)
-	CurRenderWin.SetStageTitle(st.Title)
+	CurrentRenderWindow.SetStageTitle(st.Title)
 }
 
 func (st *Stage) Delete() {

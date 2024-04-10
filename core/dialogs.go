@@ -22,7 +22,7 @@ func NonNilContext(ctx Widget) Widget {
 	if !laser.AnyIsNil(ctx) {
 		return ctx
 	}
-	return CurRenderWin.MainStageMgr.Top().Scene
+	return CurrentRenderWindow.MainStageMgr.Top().Scene
 }
 
 // NewDialog returns a new [DialogStage] that does not take up the
@@ -56,7 +56,7 @@ func (bd *Body) NewFullDialog(ctx Widget) *Stage {
 // RecycleDialog looks for a dialog with the given data. If it
 // finds it, it shows it and returns true. Otherwise, it returns false.
 func RecycleDialog(data any) bool {
-	rw, got := DialogRenderWins.FindData(data)
+	rw, got := DialogRenderWindows.FindData(data)
 	if !got {
 		return false
 	}
