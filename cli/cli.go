@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package cli generates powerful CLIs from Go struct types and functions.
+// See package cliview to create a GUI representation of a CLI.
 package cli
 
 //go:generate core generate

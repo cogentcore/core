@@ -10,6 +10,6 @@ var _ = gti.AddType(&gti.Type{Name: "main.Config", IDName: "config", Fields: []g
 
 var _ = gti.AddType(&gti.Type{Name: "main.RenderConfig", IDName: "render-config", Fields: []gti.Field{{Name: "Width", Doc: "Width is the width of the rendered image"}, {Name: "Height", Doc: "Height is the height of the rendered image.\nDefaults to width."}}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "main.Render", Doc: "Render renders the input svg file to the output image file.", Directives: []gti.Directive{{Tool: "grease", Directive: "cmd", Args: []string{"-root"}}}, Args: []string{"c"}, Returns: []string{"error"}})
+var _ = gti.AddFunc(&gti.Func{Name: "main.Render", Doc: "Render renders the input svg file to the output image file.", Directives: []gti.Directive{{Tool: "cli", Directive: "cmd", Args: []string{"-root"}}}, Args: []string{"c"}, Returns: []string{"error"}})
 
 var _ = gti.AddFunc(&gti.Func{Name: "main.EmbedImage", Doc: "EmbedImage embeds the input image file into the output svg file.", Args: []string{"c"}, Returns: []string{"error"}})

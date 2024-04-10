@@ -13,7 +13,7 @@ import (
 	"cogentcore.org/core/views"
 )
 
-// GUI starts the GUI for the given Grease app, which must be passed as
+// GUI starts the GUI for the given cli app, which must be passed as
 // a pointer. It should typically not be called by end-user code; see [Run].
 func GUI[T any](opts *cli.Options, cfg T, cmds ...*cli.Cmd[T]) {
 	b := core.NewBody(opts.AppName)

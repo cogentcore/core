@@ -39,7 +39,7 @@ func ParsePackages(cfg *Config) ([]*packages.Package, error) {
 // of the steps; for more specific functionality, create
 // a new [Generator] with [NewGenerator] and call methods on it.
 //
-//grease:cmd -root
+//cli:cmd -root
 func Generate(cfg *Config) error { //gti:add
 	pkgs, err := ParsePackages(cfg)
 	if err != nil {

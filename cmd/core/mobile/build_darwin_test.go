@@ -11,7 +11,6 @@ import (
 	"text/template"
 
 	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/grease"
 	"cogentcore.org/core/xe"
 )
 
@@ -21,7 +20,7 @@ func TestAppleBuild(t *testing.T) {
 		t.Skip("Xcode is missing")
 	}
 	c := &config.Config{}
-	grease.SetFromDefaults(c)
+	cli.SetFromDefaults(c)
 	defer func() {
 		xe.SetMajor(nil)
 	}()

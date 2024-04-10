@@ -20,8 +20,8 @@ var _ = gti.AddFunc(&gti.Func{Name: "main.Run", Doc: "Run runs the app for the g
 
 var _ = gti.AddFunc(&gti.Func{Name: "main.Mod", Doc: "Mod configures module information.", Args: []string{"c"}, Returns: []string{"error"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "main.ModTidy", Doc: "ModTidy tidies module information.", Directives: []gti.Directive{{Tool: "grease", Directive: "cmd", Args: []string{"-name", "mod tidy"}}}, Args: []string{"c"}, Returns: []string{"error"}})
+var _ = gti.AddFunc(&gti.Func{Name: "main.ModTidy", Doc: "ModTidy tidies module information.", Directives: []gti.Directive{{Tool: "cli", Directive: "cmd", Args: []string{"-name", "mod tidy"}}}, Args: []string{"c"}, Returns: []string{"error"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "main.ModTidyRemote", Doc: "ModTidyRemote tidies module information for the remote.", Directives: []gti.Directive{{Tool: "grease", Directive: "cmd", Args: []string{"-name", "mod tidy remote"}}}, Args: []string{"c"}, Returns: []string{"error"}})
+var _ = gti.AddFunc(&gti.Func{Name: "main.ModTidyRemote", Doc: "ModTidyRemote tidies module information for the remote.", Directives: []gti.Directive{{Tool: "cli", Directive: "cmd", Args: []string{"-name", "mod tidy remote"}}}, Args: []string{"c"}, Returns: []string{"error"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "main.ModTidyRemoteSetURL", Doc: "ModTidyRemoteSetURL tidies module information for the remote\nand sets its URL.", Directives: []gti.Directive{{Tool: "grease", Directive: "cmd", Args: []string{"-name", "mod tidy remote set-url"}}}, Args: []string{"c"}, Returns: []string{"error"}})
+var _ = gti.AddFunc(&gti.Func{Name: "main.ModTidyRemoteSetURL", Doc: "ModTidyRemoteSetURL tidies module information for the remote\nand sets its URL.", Directives: []gti.Directive{{Tool: "cli", Directive: "cmd", Args: []string{"-name", "mod tidy remote set-url"}}}, Args: []string{"c"}, Returns: []string{"error"}})

@@ -11,7 +11,6 @@ import (
 	"testing"
 
 	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/grease"
 )
 
 func TestNdkRoot(t *testing.T) {
@@ -32,7 +31,7 @@ func TestNdkRoot(t *testing.T) {
 	}()
 
 	c := &config.Config{}
-	grease.SetFromDefaults(c)
+	cli.SetFromDefaults(c)
 
 	makeMockNDK := func(path, version, platforms, abis string) string {
 		dir := filepath.Join(home, path)

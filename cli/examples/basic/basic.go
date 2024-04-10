@@ -7,7 +7,7 @@ package main
 import (
 	"fmt"
 
-	"cogentcore.org/core/grease"
+	"cogentcore.org/core/cli"
 	"cogentcore.org/core/grog"
 )
 
@@ -88,7 +88,7 @@ func Mod(c *Config) error {
 
 // ModTidy tidies module information.
 //
-//grease:cmd -name "mod tidy"
+//cli:cmd -name "mod tidy"
 func ModTidy(c *Config) error {
 	fmt.Println("running mod tidy")
 	return nil
@@ -96,7 +96,7 @@ func ModTidy(c *Config) error {
 
 // ModTidyRemote tidies module information for the remote.
 //
-//grease:cmd -name "mod tidy remote"
+//cli:cmd -name "mod tidy remote"
 func ModTidyRemote(c *Config) error {
 	fmt.Println("running mod tidy remote")
 	return nil
@@ -105,7 +105,7 @@ func ModTidyRemote(c *Config) error {
 // ModTidyRemoteSetURL tidies module information for the remote
 // and sets its URL.
 //
-//grease:cmd -name "mod tidy remote set-url"
+//cli:cmd -name "mod tidy remote set-url"
 func ModTidyRemoteSetURL(c *Config) error {
 	fmt.Println("running mod tidy remote set-url")
 	return nil
@@ -113,6 +113,6 @@ func ModTidyRemoteSetURL(c *Config) error {
 
 //gti:skip
 func main() {
-	opts := grease.DefaultOptions("Basic", "Basic is a basic example application made with Grease.")
-	grease.Run(opts, &Config{}, Build, Run, Mod, ModTidy, ModTidyRemote, ModTidyRemoteSetURL)
+	opts := cli.DefaultOptions("Basic", "Basic is a basic example application made with cli.")
+	cli.Run(opts, &Config{}, Build, Run, Mod, ModTidy, ModTidyRemote, ModTidyRemoteSetURL)
 }

@@ -49,7 +49,7 @@ However, using a `struct` with appropriately-named fields has the following adva
 * GUI editor of config opts as a StructView has full access to field tag GUI hints, etc.
 * [[gti]] can provide access to field comments for full docs for each option -- the map impl requires  separate maps of docs vs. values.
 
-This is why the [[grease]] configuration and app command management system is based structs, and v2 of core uses "direct styling" functions that directly set values on the `styles.Style` style structs.
+This is why the [[cli]] configuration and app command management system is based structs, and v2 of core uses "direct styling" functions that directly set values on the `styles.Style` style structs.
 
 # Generate instead of `reflect`
 
@@ -72,7 +72,7 @@ This is what we look for, in considering whether to import a given package, so i
 Examples:
 * [[colors]] pulled out of gi
 * [[laser]] pulled reflection stuff out of kit
-* [[greasi]] separated from [[grease]] to keep grease free of core dependency
+* [[greasi]] separated from [[cli]] to keep cli free of core dependency
 
 # Use function libraries instead of putting lots of methods on a type
 

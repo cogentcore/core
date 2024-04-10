@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package grease
+package cli
 
 import (
 	"log/slog"
@@ -33,7 +33,7 @@ type Field struct {
 	Name string
 	// Names contains all of the possible end-user names for this field as a flag.
 	// It defaults to the name of the field, but custom names can be specified via
-	// the grease struct tag.
+	// the cli struct tag.
 	Names []string
 }
 
@@ -154,7 +154,7 @@ func AddFieldsImpl(obj any, path string, cmdPath string, allFields *Fields, used
 					obase = of.Name[:oli]
 				}
 				if nbase == obase {
-					slog.Error("programmer error: grease: two fields were assigned the same name", "name", name, "field0", of.Name, "field1", nf.Name)
+					slog.Error("programmer error: cli: two fields were assigned the same name", "name", name, "field0", of.Name, "field1", nf.Name)
 					os.Exit(1)
 				}
 
@@ -173,7 +173,7 @@ func AddFieldsImpl(obj any, path string, cmdPath string, allFields *Fields, used
 				ofn := ofns == "-" || ofns == "false"
 
 				if nfn && ofn {
-					slog.Error(`programmer error: grease: nest:"-" specified on two config fields with the same name; keep nest:"-" on the field you want to be able to access without nesting and remove it from the other one`, "name", name, "field0", of.Name, "field1", nf.Name, "exampleFlagWithoutNesting", "-"+name, "exampleFlagWithNesting", "-"+strcase.ToKebab(nf.Name))
+					slog.Error(`programmer error: cli: nest:"-" specified on two config fields with the same name; keep nest:"-" on the field you want to be able to access without nesting and remove it from the other one`, "name", name, "field0", of.Name, "field1", nf.Name, "exampleFlagWithoutNesting", "-"+name, "exampleFlagWithNesting", "-"+strcase.ToKebab(nf.Name))
 					os.Exit(1)
 				} else if !nfn && !ofn {
 					// neither one gets it, so we replace both with fully qualified name

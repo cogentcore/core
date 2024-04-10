@@ -8,7 +8,7 @@ Package GTI provides general purpose type information for Go types, methods, fun
 
 * generate tooltips for functions in func buttons
 
-* in grease, command method docs and config field docs
+* in cli, command method docs and config field docs
 
 * in tree (optional) generate a new token of given type by name (for Unmarshal)
 

@@ -6,14 +6,14 @@ package cli
 
 import "cogentcore.org/core/strcase"
 
-// Options contains the options passed to Grease
+// Options contains the options passed to cli
 // that control its behavior.
 type Options struct {
 
-	// AppName is the name of the Grease app.
+	// AppName is the name of the cli app.
 	AppName string
 
-	// AppAbout is the description of the Grease app.
+	// AppAbout is the description of the cli app.
 	AppAbout string
 
 	// Fatal is whether to, if there is an error in [Run],

@@ -48,7 +48,7 @@ type RenderConfig struct {
 
 // Render renders the input svg file to the output image file.
 //
-//grease:cmd -root
+//cli:cmd -root
 func Render(c *Config) error {
 	if c.Render.Height == 0 {
 		c.Render.Height = c.Render.Width

@@ -25,7 +25,7 @@ var ConfigFiles []string
 
 // MetaConfig contains meta configuration information specified
 // via command line arguments that controls the initial behavior
-// of grease for all apps before anything else is loaded. Its
+// of cli for all apps before anything else is loaded. Its
 // main purpose is to support the help command and flag and
 // the specification of custom config files on the command line.
 // In almost all circumstances, it should only be used internally
@@ -192,7 +192,7 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 	}
 
 	if opts.NeedConfigFile && len(cfgFiles) == 0 {
-		return "", errors.New("grease.Config: no config file or default files specified")
+		return "", errors.New("cli.Config: no config file or default files specified")
 	}
 
 	slices.Reverse(opts.IncludePaths)
@@ -207,7 +207,7 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 		}
 	}
 	if !gotAny && opts.NeedConfigFile {
-		return "", errors.New("grease.Config: no config files found")
+		return "", errors.New("cli.Config: no config files found")
 	}
 
 	cmd, err = SetFromArgs(cfg, args, ErrNotFound, cmds...)

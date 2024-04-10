@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package grease
+package cli
 
 import (
 	"fmt"
@@ -62,7 +62,7 @@ func CmdFromFunc[T any](fun func(T) error) (*Cmd[T], error) {
 	if f := gti.FuncByName(fn); f != nil {
 		cmd.Doc = f.Doc
 		for _, dir := range f.Directives {
-			if dir.Tool != "grease" {
+			if dir.Tool != "cli" {
 				continue
 			}
 			if dir.Directive != "cmd" {
@@ -88,7 +88,7 @@ func CmdFromCmdOrFunc[T any, C CmdOrFunc[T]](cmd C) (*Cmd[T], error) {
 	case func(T) error:
 		return CmdFromFunc(c)
 	default:
-		panic(fmt.Errorf("internal/programmer error: grease.CmdFromCmdOrFunc: impossible type %T for command %v", cmd, cmd))
+		panic(fmt.Errorf("internal/programmer error: cli.CmdFromCmdOrFunc: impossible type %T for command %v", cmd, cmd))
 	}
 }
 

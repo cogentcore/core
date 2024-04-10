@@ -8,12 +8,12 @@ import (
 	"cogentcore.org/core/cmd/core/cmd"
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/generate"
-	"cogentcore.org/core/grease"
+	"github.com/mkideal/cli"
 )
 
 func main() {
-	opts := grease.DefaultOptions("Cogent Core", "Command line tools for developing apps and libraries using the Cogent Core framework.")
+	opts := cli.DefaultOptions("Cogent Core", "Command line tools for developing apps and libraries using the Cogent Core framework.")
 	opts.DefaultFiles = []string{"core.toml"}
 	opts.SearchUp = true
-	grease.Run(opts, &config.Config{}, cmd.Setup, cmd.Build, cmd.Run, cmd.Pack, cmd.Install, generate.Generate, cmd.Changed, cmd.Pull, cmd.Log, cmd.Release, cmd.NextRelease)
+	cli.Run(opts, &config.Config{}, cmd.Setup, cmd.Build, cmd.Run, cmd.Pack, cmd.Install, generate.Generate, cmd.Changed, cmd.Pull, cmd.Log, cmd.Release, cmd.NextRelease)
 }

@@ -1,2 +1,2 @@
 # greasi
-Package greasi extends Grease by generating GUIs; it is the Grease graphical user Interface (Greasi)  
+Package greasi extends cli by generating GUIs; it is the cli graphical user Interface (Greasi)  
