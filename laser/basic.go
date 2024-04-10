@@ -14,7 +14,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/xgo/bools"
+	"cogentcore.org/core/gox/bools"
 )
 
 // Has convenience functions for converting any (e.g. properties) to given
@@ -50,7 +50,7 @@ func KindIsBasic(vk reflect.Kind) bool {
 
 // ToBool robustly converts to a bool any basic elemental type
 // (including pointers to such) using a big type switch organized
-// for greatest efficiency. It tries the [cogentcore.org/core/xgo/bools.Booler]
+// for greatest efficiency. It tries the [cogentcore.org/core/gox/bools.Booler]
 // interface if not a bool type. It falls back on reflection when all
 // else fails.
 //

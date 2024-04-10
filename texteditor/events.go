@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/gox/indent"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/paint"
@@ -22,7 +23,6 @@ import (
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/texteditor/textbuf"
-	"cogentcore.org/core/xgo/indent"
 )
 
 func (ed *Editor) HandleEvents() {

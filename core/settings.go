@@ -18,12 +18,12 @@ import (
 	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/gox/option"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/system"
-	"cogentcore.org/core/xgo/option"
 	"cogentcore.org/core/xio/jsons"
 	"cogentcore.org/core/xio/tomls"
 )

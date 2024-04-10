@@ -11,7 +11,7 @@ Some example functions:
 
 * `AnyIsNil()` -- checks if interface value is `nil` -- requires extra logic for multiple levels of nil.
 
-* `ToInt, ToFloat, ToString, ToBool` -- robustly converts any value to given type, using an efficient type switch for all basic types, including pointers, and using `strconv` parse from string.  See also [xgo/num](https://pkg.go.dev/cogentcore.org/core/xgo/num) for generics-based conversion.  The key difference is that if you have an `any`, you can't use generics, so these type-switch methods are necessary in that case.
+* `ToInt, ToFloat, ToString, ToBool` -- robustly converts any value to given type, using an efficient type switch for all basic types, including pointers, and using `strconv` parse from string.  See also [gox/num](https://pkg.go.dev/cogentcore.org/core/gox/num) for generics-based conversion.  The key difference is that if you have an `any`, you can't use generics, so these type-switch methods are necessary in that case.
 
 * `SetRobust(to, frm any) bool` -- robustly sets the 'to' value from the 'from' value, for any case, using the To* functions and JSON format for maps and slices.
 

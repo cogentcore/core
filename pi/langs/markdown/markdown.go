@@ -10,6 +10,7 @@ import (
 	"unicode"
 
 	"cogentcore.org/core/fileinfo"
+	"cogentcore.org/core/gox/indent"
 	"cogentcore.org/core/pi"
 	"cogentcore.org/core/pi/complete"
 	"cogentcore.org/core/pi/langs"
@@ -17,7 +18,6 @@ import (
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/pi/syms"
 	"cogentcore.org/core/pi/token"
-	"cogentcore.org/core/xgo/indent"
 )
 
 //go:embed markdown.pi

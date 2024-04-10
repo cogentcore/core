@@ -23,8 +23,8 @@ import (
 	"image/color"
 
 	"cogentcore.org/core/cam/cie"
+	"cogentcore.org/core/gox/num"
 	"cogentcore.org/core/mat32"
-	"cogentcore.org/core/xgo/num"
 )
 
 // CAM represents a point in the cam16 color model along 6 dimensions

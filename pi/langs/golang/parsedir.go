@@ -15,10 +15,10 @@ import (
 	"unicode/utf8"
 
 	"cogentcore.org/core/fileinfo"
+	"cogentcore.org/core/gox/dirs"
 	"cogentcore.org/core/pi"
 	"cogentcore.org/core/pi/syms"
 	"cogentcore.org/core/pi/token"
-	"cogentcore.org/core/xgo/dirs"
 	"golang.org/x/tools/go/packages"
 )
 

@@ -11,8 +11,8 @@ import (
 	"strings"
 
 	"cogentcore.org/core/errors"
+	"cogentcore.org/core/gox/dirs"
 	"cogentcore.org/core/mergefs"
-	"cogentcore.org/core/xgo/dirs"
 )
 
 //go:generate go run gen.go

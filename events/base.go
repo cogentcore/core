@@ -11,7 +11,7 @@ import (
 
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/xgo/nptime"
+	"cogentcore.org/core/gox/nptime"
 )
 
 // Base is the base type for events.

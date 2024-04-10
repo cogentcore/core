@@ -19,8 +19,8 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/gox/dirs"
 	"cogentcore.org/core/spell"
-	"cogentcore.org/core/xgo/dirs"
 )
 
 // InitSpell tries to load the saved fuzzy.spell model.

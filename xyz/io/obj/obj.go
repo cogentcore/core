@@ -25,8 +25,8 @@ import (
 	"strings"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/gox/dirs"
 	"cogentcore.org/core/mat32"
-	"cogentcore.org/core/xgo/dirs"
 	"cogentcore.org/core/xyz"
 )
 

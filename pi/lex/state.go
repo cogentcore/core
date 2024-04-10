@@ -9,8 +9,8 @@ import (
 	"strings"
 	"unicode"
 
+	"cogentcore.org/core/gox/nptime"
 	"cogentcore.org/core/pi/token"
-	"cogentcore.org/core/xgo/nptime"
 )
 
 // LangLexer looks up lexer for given language -- impl in parent pi package

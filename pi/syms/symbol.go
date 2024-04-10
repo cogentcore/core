@@ -35,10 +35,10 @@ import (
 	"os"
 	"strings"
 
+	"cogentcore.org/core/gox/indent"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/pi/token"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/xgo/indent"
 )
 
 // Symbol contains the information for everything about a given

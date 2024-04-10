@@ -15,6 +15,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/gox/dirs"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/pi/lex"
@@ -25,7 +26,6 @@ import (
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/vci"
 	"cogentcore.org/core/views"
-	"cogentcore.org/core/xgo/dirs"
 )
 
 // DiffFiles shows the diffs between this file as the A file, and other file as B file,

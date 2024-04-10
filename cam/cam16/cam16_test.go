@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"cogentcore.org/core/cam/cie"
+	"cogentcore.org/core/gox/tolassert"
 	"cogentcore.org/core/mat32"
-	"cogentcore.org/core/xgo/tolassert"
 	"github.com/stretchr/testify/assert"
 )
 

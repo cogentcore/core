@@ -16,10 +16,10 @@ import (
 	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fileinfo"
+	"cogentcore.org/core/gox/dirs"
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/views"
-	"cogentcore.org/core/xgo/dirs"
 )
 
 // MimeData adds mimedata for this node: a text/plain of the Path,

@@ -22,6 +22,9 @@ import (
 	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fileinfo"
+	"cogentcore.org/core/gox/dirs"
+	"cogentcore.org/core/gox/indent"
+	"cogentcore.org/core/gox/runes"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/pi"
 	"cogentcore.org/core/pi/complete"
@@ -32,9 +35,6 @@ import (
 	"cogentcore.org/core/texteditor/histyle"
 	"cogentcore.org/core/texteditor/textbuf"
 	"cogentcore.org/core/views"
-	"cogentcore.org/core/xgo/dirs"
-	"cogentcore.org/core/xgo/indent"
-	"cogentcore.org/core/xgo/runes"
 )
 
 // Buffer is a buffer of text, which can be viewed by [Editor](s).

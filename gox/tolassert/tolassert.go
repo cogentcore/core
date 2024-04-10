@@ -7,7 +7,7 @@
 package tolassert
 
 import (
-	"cogentcore.org/core/xgo/num"
+	"cogentcore.org/core/gox/num"
 	"github.com/stretchr/testify/assert"
 )
 

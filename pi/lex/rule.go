@@ -12,9 +12,9 @@ import (
 	"text/tabwriter"
 	"unicode"
 
+	"cogentcore.org/core/gox/indent"
 	"cogentcore.org/core/pi/token"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/xgo/indent"
 )
 
 var Trace = false

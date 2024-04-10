@@ -7,7 +7,7 @@ package cam02
 import (
 	"testing"
 
-	"cogentcore.org/core/xgo/tolassert"
+	"cogentcore.org/core/gox/tolassert"
 )
 
 func TestXYZToLMS(t *testing.T) {

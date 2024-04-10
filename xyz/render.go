@@ -150,7 +150,7 @@ func (sc *Scene) ImageDone() {
 // This same image is used across calls to avoid large memory allocations,
 // so it will automatically update after the next ImageCopy call.
 // The underlying image is in the [ImgCopy] field.
-// If a persistent image is required, call [xgo/images.CloneAsRGBA].
+// If a persistent image is required, call [gox/images.CloneAsRGBA].
 func (sc *Scene) ImageCopy() (*image.RGBA, error) {
 	fr := sc.Frame
 	if fr == nil {

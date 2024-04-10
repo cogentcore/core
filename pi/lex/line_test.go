@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"testing"
 
+	"cogentcore.org/core/gox/nptime"
 	"cogentcore.org/core/pi/token"
-	"cogentcore.org/core/xgo/nptime"
 )
 
 func TestLineMerge(t *testing.T) {

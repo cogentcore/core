@@ -11,9 +11,9 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/errors"
+	"cogentcore.org/core/gox/num"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/units"
-	"cogentcore.org/core/xgo/num"
 )
 
 // StyleInhInit detects the style values of "inherit" and "initial",
