@@ -75,7 +75,7 @@ func MoveToParent(child Node, parent Node) {
 // If the name is unspecified, it defaults to the
 // ID (kebab-case) name of the type, plus the
 // [Node.NumLifetimeChildren] of its parent.
-// It is a helper function that calls [Node.NewChild].
+// It is a generic helper function that calls [Node.NewChild].
 func New[T Node](parent Node, name ...string) T {
 	var n T
 	return parent.NewChild(n.NodeType(), name...).(T)
@@ -84,7 +84,7 @@ func New[T Node](parent Node, name ...string) T {
 // NewRoot returns a new root node of the given the type
 // with the given name. If the name is unspecified, it
 // defaults to the ID (kebab-case) name of the type.
-// It is a helper function that calls [Node.InitName].
+// It is a generic helper function that calls [Node.InitName].
 func NewRoot[T Node](name ...string) T {
 	var n T
 	n = n.New().(T)
@@ -92,20 +92,20 @@ func NewRoot[T Node](name ...string) T {
 	return n
 }
 
-// InsertNewChild is a generic helper function for [Node.InsertNewChild]
+// InsertNewChild is a generic helper function for [Node.InsertNewChild].
 func InsertNewChild[T Node](parent Node, at int, name ...string) T {
 	var n T
 	return parent.InsertNewChild(n.NodeType(), at, name...).(T)
 }
 
-// ParentByType is a generic helper function for [Node.ParentByType]
+// ParentByType is a generic helper function for [Node.ParentByType].
 func ParentByType[T Node](k Node, embeds bool) T {
 	var n T
 	v, _ := k.ParentByType(n.NodeType(), embeds).(T)
 	return v
 }
 
-// ChildByType is a generic helper function for [Node.ChildByType]
+// ChildByType is a generic helper function for [Node.ChildByType].
 func ChildByType[T Node](k Node, embeds bool, startIndex ...int) T {
 	var n T
 	v, _ := k.ChildByType(n.NodeType(), embeds, startIndex...).(T)
