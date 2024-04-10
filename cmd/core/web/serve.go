@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 
 	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/grog"
+	"cogentcore.org/core/xlog"
 )
 
 // Serve serves the build output directory on the default network address at the config port.
@@ -24,6 +24,6 @@ func Serve(c *config.Config) error {
 		fs.ServeHTTP(w, r)
 	})
 
-	grog.PrintlnWarn("Serving at http://localhost:" + c.Web.Port)
+	xlog.PrintlnWarn("Serving at http://localhost:" + c.Web.Port)
 	return http.ListenAndServe(":"+c.Web.Port, nil)
 }

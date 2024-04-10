@@ -16,8 +16,8 @@ import (
 
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/mobile/sdkpath"
-	"cogentcore.org/core/grog"
 	"cogentcore.org/core/xe"
+	"cogentcore.org/core/xlog"
 )
 
 // General mobile build environment. Initialized by envInit.
@@ -112,7 +112,7 @@ func BuildEnvInit(c *config.Config) (cleanup func(), err error) {
 		}
 	}
 
-	grog.PrintlnInfo("GOMOBILE=" + GoMobilePath)
+	xlog.PrintlnInfo("GOMOBILE=" + GoMobilePath)
 
 	// Check the toolchain is in a good state.
 	// Pick a temporary directory for assembling an apk/app.
@@ -127,7 +127,7 @@ func BuildEnvInit(c *config.Config) (cleanup func(), err error) {
 	if err != nil {
 		return nil, err
 	}
-	grog.PrintlnInfo("WORK=" + TmpDir)
+	xlog.PrintlnInfo("WORK=" + TmpDir)
 
 	if err := EnvInit(c); err != nil {
 		return nil, err

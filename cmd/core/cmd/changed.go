@@ -14,8 +14,8 @@ import (
 	"sync"
 
 	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/grog"
 	"cogentcore.org/core/xe"
+	"cogentcore.org/core/xlog"
 )
 
 // Changed concurrently prints all of the repositories within this directory
@@ -37,7 +37,7 @@ func Changed(c *config.Config) error { //gti:add
 				return
 			}
 			if out != "" { // if we have a diff, we have been changed
-				fmt.Println(grog.CmdColor(dir))
+				fmt.Println(xlog.CmdColor(dir))
 				return
 			}
 			// if we don't have a diff, we also check to make sure we aren't ahead of the remote
@@ -47,7 +47,7 @@ func Changed(c *config.Config) error { //gti:add
 				return
 			}
 			if strings.Contains(out, "Your branch is ahead") { // if we are ahead, we have been changed
-				fmt.Println(grog.CmdColor(dir))
+				fmt.Println(xlog.CmdColor(dir))
 			}
 		}()
 		return nil

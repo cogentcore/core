@@ -16,8 +16,8 @@ import (
 	"sync"
 
 	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/grog"
 	"cogentcore.org/core/xe"
+	"cogentcore.org/core/xlog"
 	"golang.org/x/mod/modfile"
 	"golang.org/x/tools/go/packages"
 )
@@ -44,7 +44,7 @@ func CopyFile(c *config.Config, dst, src string) error {
 }
 
 func WriteFile(c *config.Config, filename string, generate func(io.Writer) error) error {
-	grog.PrintlnInfo("write", filename)
+	xlog.PrintlnInfo("write", filename)
 
 	if err := xe.MkdirAll(filepath.Dir(filename), 0755); err != nil {
 		return err

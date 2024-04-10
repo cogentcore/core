@@ -14,7 +14,6 @@ import (
 )
 
 var (
-
 	// UseColor is whether to use color in log messages. It is on by default.
 	UseColor = true
 

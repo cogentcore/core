@@ -24,8 +24,8 @@ import (
 	"maps"
 
 	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/grog"
 	"cogentcore.org/core/xe"
+	"cogentcore.org/core/xlog"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -210,7 +210,7 @@ func GoCmdAt(c *config.Config, at string, subcmd string, srcs []string, env map[
 	if len(tags) > 0 {
 		cargs = append(cargs, "-tags", strings.Join(tags, ","))
 	}
-	if grog.UserLevel <= slog.LevelInfo {
+	if xlog.UserLevel <= slog.LevelInfo {
 		cargs = append(cargs, "-v")
 	}
 	cargs = append(cargs, args...)
@@ -229,7 +229,7 @@ func GoCmdAt(c *config.Config, at string, subcmd string, srcs []string, env map[
 
 func GoModTidyAt(c *config.Config, at string, env map[string]string) error {
 	args := []string{"mod", "tidy"}
-	if grog.UserLevel <= slog.LevelInfo {
+	if xlog.UserLevel <= slog.LevelInfo {
 		args = append(args, "-v")
 	}
 	xc := xe.Major().SetDir(at)

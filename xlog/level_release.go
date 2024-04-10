@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build debug
+//go:build release
 
-package grog
+package xlog
 
 import "log/slog"
 
-var defaultUserLevel = slog.LevelDebug
+var defaultUserLevel = slog.LevelWarn

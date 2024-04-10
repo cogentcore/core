@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package grog
+package xlog
 
 import "log/slog"
 
@@ -13,7 +13,7 @@ import "log/slog"
 // verbosity level is [slog.LevelInfo]. If the build tag "debug" is
 // specified, it is [slog.LevelDebug]. If the build tag "release" is
 // specified, it is [slog.levelWarn]. Any updates to this value will
-// be automatically reflected in the behavior of the grog default logger.
+// be automatically reflected in the behavior of the xlog default logger.
 var UserLevel = defaultUserLevel
 
 // LevelFromFlags returns the [slog.Level] object corresponding to the given

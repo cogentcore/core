@@ -12,9 +12,9 @@ import (
 	"cogentcore.org/core/cli"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/grog"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/views"
+	"cogentcore.org/core/xlog"
 )
 
 // Run runs the given app with the given default
@@ -36,7 +36,7 @@ func Run[T any, C cli.CmdOrFunc[T]](opts *cli.Options, cfg T, cmds ...C) error {
 	if err != nil {
 		err := fmt.Errorf("error getting commands from given commands: %w", err)
 		if opts.Fatal {
-			grog.PrintlnError(err)
+			xlog.PrintlnError(err)
 			os.Exit(1)
 		}
 		return err
@@ -68,7 +68,7 @@ func GUI[T any](opts *cli.Options, cfg T, cmds ...*cli.Cmd[T]) {
 					err := cmd.Func(cfg)
 					if err != nil {
 						// TODO: snackbar
-						grog.PrintlnError(err)
+						xlog.PrintlnError(err)
 					}
 				})
 		}

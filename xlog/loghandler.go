@@ -5,7 +5,9 @@
 // This code is based on https://github.com/jba/slog/blob/main/handlers/loghandler/log_handler.go
 // Copyright (c) 2022, Jonathan Amsterdam. All rights reserved. (BSD 3-Clause License)
 
-package grog
+// Package xlog implements structured log handling and provides
+// global log and print verbosity and color options.
+package xlog
 
 import (
 	"context"

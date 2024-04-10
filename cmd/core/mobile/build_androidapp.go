@@ -21,8 +21,8 @@ import (
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/mobile/binres"
 	"cogentcore.org/core/cmd/core/rendericon"
-	"cogentcore.org/core/grog"
 	"cogentcore.org/core/xe"
+	"cogentcore.org/core/xlog"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -61,7 +61,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 			return nil, err
 		}
 		manifestData = buf.Bytes()
-		grog.PrintfDebug("generated AndroidManifest.xml:\n%s\n", manifestData)
+		xlog.PrintfDebug("generated AndroidManifest.xml:\n%s\n", manifestData)
 	} else {
 		libName, err = ManifestLibName(manifestData)
 		if err != nil {
@@ -125,7 +125,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 	var apkw *Writer
 	apkw = NewWriter(out, privKey)
 	apkwCreate := func(name string) (io.Writer, error) {
-		grog.PrintfInfo("apk: %s\n", name)
+		xlog.PrintfInfo("apk: %s\n", name)
 		return apkw.Create(name)
 	}
 	apkwWriteFile := func(dst, src string) error {

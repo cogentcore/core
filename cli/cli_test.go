@@ -14,8 +14,8 @@ import (
 	"log/slog"
 
 	"cogentcore.org/core/cli/testdata"
-	"cogentcore.org/core/grog"
 	"cogentcore.org/core/grows/tomls"
+	"cogentcore.org/core/xlog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -167,8 +167,8 @@ func TestConfigFunc(t *testing.T) {
 	if cfg.NetData || !cfg.GPU || cfg.Note != "Hello, World" || cfg.PatParams.Sparseness != 4 || !reflect.DeepEqual(cfg.StrSlice, []string{"../main"}) {
 		t.Errorf("error setting configuration info (config: %#v)", cfg)
 	}
-	if grog.UserLevel != slog.LevelInfo {
-		t.Errorf("expected grog user level to be info but it is %v", grog.UserLevel)
+	if xlog.UserLevel != slog.LevelInfo {
+		t.Errorf("expected xlog user level to be info but it is %v", xlog.UserLevel)
 	}
 }
 
