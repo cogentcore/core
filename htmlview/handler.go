@@ -17,13 +17,13 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/errors"
+	"cogentcore.org/core/iox/images"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/views"
-	"cogentcore.org/core/xio/images"
 	"golang.org/x/net/html"
 )
 

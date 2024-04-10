@@ -10,9 +10,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"cogentcore.org/core/iox/jsons"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/tree/testdata"
-	"cogentcore.org/core/xio/jsons"
 )
 
 func TestNodeJSON(t *testing.T) {

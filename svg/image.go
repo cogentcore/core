@@ -9,9 +9,9 @@ import (
 	"image"
 	"log"
 
+	"cogentcore.org/core/iox/images"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/paint"
-	"cogentcore.org/core/xio/images"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/math/f64"
 )

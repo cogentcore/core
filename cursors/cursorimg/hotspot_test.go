@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/cursors"
-	"cogentcore.org/core/xio/images"
+	"cogentcore.org/core/iox/images"
 )
 
 func TestHotspot(t *testing.T) {

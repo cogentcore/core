@@ -16,7 +16,7 @@ import (
 
 	"cogentcore.org/core/errors"
 	"cogentcore.org/core/gti"
-	"cogentcore.org/core/xio/jsons"
+	"cogentcore.org/core/iox/jsons"
 )
 
 // note: use package grows/jsons for standard read / write of JSON files

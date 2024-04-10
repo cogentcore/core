@@ -16,8 +16,8 @@ import (
 	"time"
 	"unsafe"
 
+	"cogentcore.org/core/iox/images"
 	"cogentcore.org/core/mat32"
-	"cogentcore.org/core/xio/images"
 	vk "github.com/goki/vulkan"
 
 	"cogentcore.org/core/vgpu"

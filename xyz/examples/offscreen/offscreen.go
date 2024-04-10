@@ -11,9 +11,9 @@ import (
 	"log"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/iox/images"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/vgpu"
-	"cogentcore.org/core/xio/images"
 	"cogentcore.org/core/xyz"
 	"cogentcore.org/core/xyz/examples/assets"
 )

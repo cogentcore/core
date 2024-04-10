@@ -10,7 +10,7 @@ import (
 	"image/draw"
 	"testing"
 
-	"cogentcore.org/core/xio/images"
+	"cogentcore.org/core/iox/images"
 )
 
 func TestColorSpace(t *testing.T) {

@@ -13,12 +13,12 @@ import (
 	"sync"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/iox/images"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
-	"cogentcore.org/core/xio/images"
 )
 
 // SVG is an SVG object.

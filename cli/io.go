@@ -9,8 +9,8 @@ import (
 	"io/fs"
 
 	"cogentcore.org/core/gox/dirs"
+	"cogentcore.org/core/iox/tomls"
 	"cogentcore.org/core/laser"
-	"cogentcore.org/core/xio/tomls"
 )
 
 // OpenWithIncludes reads the config struct from the given config file

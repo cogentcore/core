@@ -20,12 +20,12 @@ import (
 	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/iox/images"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/xio/images"
 	"github.com/anthonynsimon/bild/clone"
 )
 

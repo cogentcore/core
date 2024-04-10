@@ -20,13 +20,13 @@ import (
 	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlview"
+	"cogentcore.org/core/iox/tomls"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/views"
 	"cogentcore.org/core/webcore/wpath"
-	"cogentcore.org/core/xio/tomls"
 )
 
 // Page represents one site page

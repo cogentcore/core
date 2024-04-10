@@ -12,8 +12,8 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/gox/dirs"
+	"cogentcore.org/core/iox/images"
 	"cogentcore.org/core/paint"
-	"cogentcore.org/core/xio/images"
 	"github.com/stretchr/testify/assert"
 )
 

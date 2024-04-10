@@ -12,8 +12,8 @@ import (
 	"reflect"
 
 	"cogentcore.org/core/gox/dirs"
+	"cogentcore.org/core/iox/tomls"
 	"cogentcore.org/core/laser"
-	"cogentcore.org/core/xio/tomls"
 )
 
 // TODO(kai): this seems bad

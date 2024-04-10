@@ -12,10 +12,10 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
+	"cogentcore.org/core/iox/images"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
-	"cogentcore.org/core/xio/images"
 	"github.com/stretchr/testify/assert"
 )
 
