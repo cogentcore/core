@@ -8,14 +8,14 @@ import (
 	"fmt"
 
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/giv"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/laser"
+	"cogentcore.org/core/views"
 )
 
 // Value represents a string with an [Editor].
 type Value struct {
-	giv.ValueBase[*Editor]
+	views.ValueBase[*Editor]
 }
 
 func (v *Value) Config() {

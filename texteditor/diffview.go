@@ -15,7 +15,6 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/giv"
 	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
@@ -27,6 +26,7 @@ import (
 	"cogentcore.org/core/texteditor/textbuf"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/vci"
+	"cogentcore.org/core/views"
 )
 
 // DiffFiles shows the diffs between this file as the A file, and other file as B file,
@@ -580,7 +580,7 @@ func (dv *DiffView) ConfigToolbar(tb *core.Toolbar) {
 	sa := core.NewButton(tb).SetText("Save").SetIcon(icons.Save).
 		SetTooltip("save edited version of file with the given -- prompts for filename")
 	sa.OnClick(func(e events.Event) {
-		fb := giv.NewSoloFuncButton(sa, dv.SaveFileA)
+		fb := views.NewSoloFuncButton(sa, dv.SaveFileA)
 		fb.Args[0].SetValue(dv.FileA)
 		fb.CallFunc()
 	}).Style(func(s *styles.Style) {
@@ -630,7 +630,7 @@ func (dv *DiffView) ConfigToolbar(tb *core.Toolbar) {
 	sb := core.NewButton(tb).SetText("Save").SetIcon(icons.Save).
 		SetTooltip("save edited version of file -- prompts for filename -- this will convert file back to its original form (removing side-by-side alignment) and end the diff editing function")
 	sb.OnClick(func(e events.Event) {
-		fb := giv.NewSoloFuncButton(sb, dv.SaveFileB)
+		fb := views.NewSoloFuncButton(sb, dv.SaveFileB)
 		fb.Args[0].SetValue(dv.FileB)
 		fb.CallFunc()
 	}).Style(func(s *styles.Style) {

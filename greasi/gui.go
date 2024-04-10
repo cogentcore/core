@@ -7,10 +7,10 @@ package greasi
 import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/giv"
 	"cogentcore.org/core/grease"
 	"cogentcore.org/core/grog"
 	"cogentcore.org/core/strcase"
+	"cogentcore.org/core/views"
 )
 
 // GUI starts the GUI for the given Grease app, which must be passed as
@@ -34,7 +34,7 @@ func GUI[T any](opts *grease.Options, cfg T, cmds ...*grease.Cmd[T]) {
 		}
 	})
 
-	sv := giv.NewStructView(b)
+	sv := views.NewStructView(b)
 	sv.SetStruct(cfg)
 
 	b.RunMainWindow()

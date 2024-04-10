@@ -17,7 +17,6 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/giv"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/mat32"
@@ -26,6 +25,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/units"
+	views1 "cogentcore.org/core/views"
 )
 
 //go:embed icon.svg
@@ -362,17 +362,17 @@ func values(ts *core.Tabs) {
 	core.NewLabel(tab).SetText("Cogent Core provides the giv value system, which allows you to instantly turn Go values into interactive widgets bound to the original values with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.")
 
 	core.NewButton(tab).SetText("Inspector").OnClick(func(e events.Event) {
-		giv.InspectorWindow(ts.Scene)
+		views1.InspectorWindow(ts.Scene)
 	})
 
-	giv.NewValue(tab, colors.Orange)
-	giv.NewValue(tab, time.Now())
-	giv.NewValue(tab, 5*time.Minute)
-	giv.NewValue(tab, 500*time.Millisecond)
-	giv.NewValue(tab, core.Filename("demo.go"))
-	giv.NewValue(tab, core.AppearanceSettings.FontFamily)
-	giv.NewValue(tab, giv.ColorMapName("ColdHot"))
-	giv.NewFuncButton(tab, hello).SetShowReturn(true)
+	views1.NewValue(tab, colors.Orange)
+	views1.NewValue(tab, time.Now())
+	views1.NewValue(tab, 5*time.Minute)
+	views1.NewValue(tab, 500*time.Millisecond)
+	views1.NewValue(tab, core.Filename("demo.go"))
+	views1.NewValue(tab, core.AppearanceSettings.FontFamily)
+	views1.NewValue(tab, views1.ColorMapName("ColdHot"))
+	views1.NewFuncButton(tab, hello).SetShowReturn(true)
 }
 
 // Hello displays a greeting message and an age in weeks based on the given information.
@@ -411,7 +411,7 @@ func views(ts *core.Tabs) {
 		Stuff:  make([]float32, 3),
 	}
 
-	giv.NewStructView(vts.NewTab("Struct view")).SetStruct(&str)
+	views1.NewStructView(vts.NewTab("Struct view")).SetStruct(&str)
 
 	mp := map[string]string{}
 
@@ -419,7 +419,7 @@ func views(ts *core.Tabs) {
 	mp["Python"] = "Slow and duck-typed"
 	mp["C++"] = "Hard to use and slow to compile"
 
-	giv.NewMapView(vts.NewTab("Map view")).SetMap(&mp)
+	views1.NewMapView(vts.NewTab("Map view")).SetMap(&mp)
 
 	sl := make([]string, 20)
 
@@ -428,7 +428,7 @@ func views(ts *core.Tabs) {
 	}
 	sl[10] = "this is a particularly long slice value"
 
-	giv.NewSliceView(vts.NewTab("Slice view")).SetSlice(&sl)
+	views1.NewSliceView(vts.NewTab("Slice view")).SetSlice(&sl)
 
 	tbl := make([]*tableStruct, 100)
 
@@ -439,14 +439,14 @@ func views(ts *core.Tabs) {
 
 	tbl[0].StrField = "this is a particularly long field"
 
-	giv.NewTableView(vts.NewTab("Table view")).SetSlice(&tbl)
+	views1.NewTableView(vts.NewTab("Table view")).SetSlice(&tbl)
 
 	sp := core.NewSplits(vts.NewTab("Tree view")).SetSplits(0.3, 0.7)
 
-	tv := giv.NewTreeViewFrame(sp).SetText("Root")
+	tv := views1.NewTreeViewFrame(sp).SetText("Root")
 	makeTree(tv, 0, 3, 5)
 
-	sv := giv.NewStructView(sp)
+	sv := views1.NewStructView(sp)
 	sv.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 	})
@@ -459,7 +459,7 @@ func views(ts *core.Tabs) {
 	})
 }
 
-func makeTree(tv *giv.TreeView, iter, maxIter, maxKids int) {
+func makeTree(tv *views1.TreeView, iter, maxIter, maxKids int) {
 	if iter > maxIter {
 		return
 	}
@@ -468,9 +468,9 @@ func makeTree(tv *giv.TreeView, iter, maxIter, maxKids int) {
 		n = maxKids
 	}
 	iter++
-	tv.SetNChildren(n, giv.TreeViewType, "Child ")
+	tv.SetNChildren(n, views1.TreeViewType, "Child ")
 	for j := 0; j < n; j++ {
-		kt := tv.Child(j).(*giv.TreeView)
+		kt := tv.Child(j).(*views1.TreeView)
 		makeTree(kt, iter, maxIter, maxKids)
 	}
 }
@@ -636,7 +636,7 @@ func dialogs(ts *core.Tabs) {
 	u := &core.User{}
 	fd.OnClick(func(e events.Event) {
 		d := core.NewBody().AddTitle("Full window dialog").AddText("Edit your information")
-		giv.NewStructView(d).SetStruct(u).OnInput(func(e events.Event) {
+		views1.NewStructView(d).SetStruct(u).OnInput(func(e events.Event) {
 			fmt.Println("Got input event")
 		})
 		d.OnClose(func(e events.Event) {
@@ -693,7 +693,7 @@ func style(ts *core.Tabs) {
 
 	sp := core.NewSplits(tab)
 
-	sv := giv.NewStructView(sp)
+	sv := views1.NewStructView(sp)
 
 	fr := core.NewFrame(core.NewFrame(sp)) // can not control layout when directly in splits
 	sv.SetStruct(&fr.Styles)

@@ -10,25 +10,25 @@ import (
 	"sort"
 
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/giv"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/views"
 	"cogentcore.org/core/xyz"
 )
 
 func init() {
-	giv.AddValue(xyz.MeshName(""), func() giv.Value { return &MeshValue{} })
+	views.AddValue(xyz.MeshName(""), func() views.Value { return &MeshValue{} })
 }
 
 // MeshValue represents an [xyz.MeshName] with a button.
 type MeshValue struct {
-	giv.ValueBase[*core.Button]
+	views.ValueBase[*core.Button]
 }
 
 func (v *MeshValue) Config() {
 	v.Widget.SetType(core.ButtonTonal).SetIcon(icons.DeployedCode)
-	giv.ConfigDialogWidget(v, false)
+	views.ConfigDialogWidget(v, false)
 }
 
 func (v *MeshValue) Update() {
@@ -59,7 +59,7 @@ func (v *MeshValue) ConfigDialog(d *core.Body) (bool, func()) {
 
 	si := 0
 	cur := laser.ToString(v.Value.Interface())
-	giv.NewSliceView(d).SetSlice(&sl).SetSelectedValue(cur).BindSelect(&si)
+	views.NewSliceView(d).SetSlice(&sl).SetSelectedValue(cur).BindSelect(&si)
 
 	return true, func() {
 		if si >= 0 {

@@ -9,7 +9,6 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/giv"
 	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
@@ -18,6 +17,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/vci"
+	"cogentcore.org/core/views"
 )
 
 // VCSLogView is a view of the VCS log data
@@ -73,7 +73,7 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 		s.Direction = styles.Column
 	})
 	core.NewToolbar(lv, "toolbar")
-	tv := giv.NewTableView(lv, "log")
+	tv := views.NewTableView(lv, "log")
 	tv.SetReadOnly(true)
 	tv.SetSlice(&lv.Log)
 	lv.RevA = "HEAD"
@@ -181,8 +181,8 @@ func (lv *VCSLogView) Toolbar() *core.Toolbar {
 }
 
 // TableView returns the tableview
-func (lv *VCSLogView) TableView() *giv.TableView {
-	return lv.ChildByName("log", 1).(*giv.TableView)
+func (lv *VCSLogView) TableView() *views.TableView {
+	return lv.ChildByName("log", 1).(*views.TableView)
 }
 
 // ConfigToolbar

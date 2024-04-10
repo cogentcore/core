@@ -16,7 +16,6 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/giv"
 	"cogentcore.org/core/grows/images"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/paint"
@@ -24,6 +23,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/views"
 	"golang.org/x/net/html"
 )
 
@@ -44,12 +44,12 @@ func New[T core.Widget](ctx *Context) T {
 	return w
 }
 
-// NewValue adds a new [giv.Value] with the given value to the
+// NewValue adds a new [views.Value] with the given value to the
 // context parent. It automatically calls [Context.Config] on
 // the resulting value widget.
-func NewValue(ctx *Context, val any) giv.Value {
+func NewValue(ctx *Context, val any) views.Value {
 	parent := ctx.Parent()
-	v := giv.NewValue(parent, val)
+	v := views.NewValue(parent, val)
 	ctx.Config(v.AsWidget())
 	return v
 }

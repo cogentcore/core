@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/giv"
 	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/laser"
@@ -21,6 +20,7 @@ import (
 	"cogentcore.org/core/texteditor/textbuf"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/vci"
+	"cogentcore.org/core/views"
 	"github.com/Masterminds/vcs"
 )
 
@@ -169,7 +169,7 @@ func (fn *Node) CommitToVCSSel() { //gti:add
 		return
 	}
 	sn := AsNode(sels[n-1])
-	giv.CallFunc(sn, fn.CommitToVCS)
+	views.CallFunc(sn, fn.CommitToVCS)
 }
 
 // CommitToVCS commits file changes to version control system
@@ -436,19 +436,19 @@ func VersionControlNameProper(vc string) VersionControlName {
 	return ""
 }
 
-// Value registers [VersionControlValue] as the [giv.Value] for [VersionControlName]
-func (kn VersionControlName) Value() giv.Value {
+// Value registers [VersionControlValue] as the [views.Value] for [VersionControlName]
+func (kn VersionControlName) Value() views.Value {
 	return &VersionControlValue{}
 }
 
 // VersionControlValue represents a [VersionControlName] with a button.
 type VersionControlValue struct {
-	giv.ValueBase[*core.Button]
+	views.ValueBase[*core.Button]
 }
 
 func (v *VersionControlValue) Config() {
 	v.Widget.SetType(core.ButtonTonal)
-	giv.ConfigDialogWidget(v, false)
+	views.ConfigDialogWidget(v, false)
 }
 
 func (v *VersionControlValue) Update() {

@@ -19,7 +19,6 @@ import (
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fileinfo"
-	"cogentcore.org/core/giv"
 	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
@@ -27,6 +26,7 @@ import (
 	"cogentcore.org/core/texteditor/histyle"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/vci"
+	"cogentcore.org/core/views"
 )
 
 // NodeHiStyle is the default style for syntax highlighting to use for
@@ -37,7 +37,7 @@ var NodeHiStyle = histyle.StyleDefault
 // The name of the node is the name of the file.
 // Folders have children containing further nodes.
 type Node struct { //core:embedder
-	giv.TreeView
+	views.TreeView
 
 	// full path to this file
 	FPath core.Filename `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
@@ -65,13 +65,13 @@ func (fn *Node) FlagType() enums.BitFlagSetter {
 
 // NodeFlags define bitflags for Node state -- these extend TreeViewFlags
 // and storage is an int64
-type NodeFlags giv.TreeViewFlags //enums:bitflag -trim-prefix Node
+type NodeFlags views.TreeViewFlags //enums:bitflag -trim-prefix Node
 
 const (
 	// NodeOpen means file is open. For directories, this means that
 	// sub-files should be / have been loaded. For files, means that they
 	// have been opened e.g., for editing.
-	NodeOpen NodeFlags = NodeFlags(giv.TreeViewFlagsN) + iota
+	NodeOpen NodeFlags = NodeFlags(views.TreeViewFlagsN) + iota
 
 	// NodeSymLink indicates that file is a symbolic link.
 	// File info is all for the target of the symlink.

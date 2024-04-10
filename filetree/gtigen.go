@@ -4,7 +4,7 @@ package filetree
 
 import (
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/giv"
+	"cogentcore.org/core/views"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/mat32"
@@ -81,10 +81,10 @@ func (t *Node) SetViewIndex(v int) *Node { t.ViewIndex = v; return t }
 func (t *Node) SetWidgetSize(v mat32.Vec2) *Node { t.WidgetSize = v; return t }
 
 // SetRootView sets the [Node.RootView]
-func (t *Node) SetRootView(v *giv.TreeView) *Node { t.RootView = v; return t }
+func (t *Node) SetRootView(v *views.TreeView) *Node { t.RootView = v; return t }
 
 // SetSelectedNodes sets the [Node.SelectedNodes]
-func (t *Node) SetSelectedNodes(v ...giv.TreeViewer) *Node { t.SelectedNodes = v; return t }
+func (t *Node) SetSelectedNodes(v ...views.TreeViewer) *Node { t.SelectedNodes = v; return t }
 
 // TreeType is the [gti.Type] for [Tree]
 var TreeType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/filetree.Tree", IDName: "tree", Doc: "Tree is the root of a tree representing files in a given directory\n(and subdirectories thereof), and has some overall management state for how to\nview things.  The Tree can be viewed by a TreeView to provide a GUI\ninterface into it.", Embeds: []gti.Field{{Name: "Node"}}, Fields: []gti.Field{{Name: "ExtFiles", Doc: "external files outside the root path of the tree -- abs paths are stored -- these are shown in the first sub-node if present -- use AddExtFile to add and update"}, {Name: "Dirs", Doc: "records state of directories within the tree (encoded using paths relative to root),\ne.g., open (have been opened by the user) -- can persist this to restore prior view of a tree"}, {Name: "DirsOnTop", Doc: "if true, then all directories are placed at the top of the tree view\notherwise everything is mixed"}, {Name: "FileNodeType", Doc: "type of node to create -- defaults to filetree.Node but can use custom node types"}, {Name: "DoubleClickFun", Doc: "DoubleClickFun is a function to call when a node receives a DoubleClick event.\nif not set, defaults to OpenEmptyDir() (for folders)"}, {Name: "InOpenAll", Doc: "if true, we are in midst of an OpenAll call -- nodes should open all dirs"}, {Name: "Watcher", Doc: "change notify for all dirs"}, {Name: "DoneWatcher", Doc: "channel to close watcher watcher"}, {Name: "WatchedPaths", Doc: "map of paths that have been added to watcher -- only active if bool = true"}, {Name: "LastWatchUpdate", Doc: "last path updated by watcher"}, {Name: "LastWatchTime", Doc: "timestamp of last update"}, {Name: "UpdateMu", Doc: "Update mutex"}}, Instance: &Tree{}})
@@ -149,10 +149,10 @@ func (t *Tree) SetViewIndex(v int) *Tree { t.ViewIndex = v; return t }
 func (t *Tree) SetWidgetSize(v mat32.Vec2) *Tree { t.WidgetSize = v; return t }
 
 // SetRootView sets the [Tree.RootView]
-func (t *Tree) SetRootView(v *giv.TreeView) *Tree { t.RootView = v; return t }
+func (t *Tree) SetRootView(v *views.TreeView) *Tree { t.RootView = v; return t }
 
 // SetSelectedNodes sets the [Tree.SelectedNodes]
-func (t *Tree) SetSelectedNodes(v ...giv.TreeViewer) *Tree { t.SelectedNodes = v; return t }
+func (t *Tree) SetSelectedNodes(v ...views.TreeViewer) *Tree { t.SelectedNodes = v; return t }
 
 // VCSLogViewType is the [gti.Type] for [VCSLogView]
 var VCSLogViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/filetree.VCSLogView", IDName: "vcs-log-view", Doc: "VCSLogView is a view of the VCS log data", Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Log", Doc: "current log"}, {Name: "File", Doc: "file that this is a log of -- if blank then it is entire repository"}, {Name: "Since", Doc: "date expression for how long ago to include log entries from"}, {Name: "Repo", Doc: "version control system repository"}, {Name: "RevA", Doc: "revision A -- defaults to HEAD"}, {Name: "RevB", Doc: "revision B -- blank means current working copy"}, {Name: "SetA", Doc: "double-click will set the A revision -- else B"}}, Instance: &VCSLogView{}})

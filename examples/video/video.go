@@ -2,10 +2,10 @@ package main
 
 import (
 	"cogentcore.org/core/core"
-	_ "cogentcore.org/core/giv"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/video"
+	_ "cogentcore.org/core/views"
 )
 
 func main() {

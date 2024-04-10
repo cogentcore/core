@@ -14,9 +14,9 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fileinfo"
-	"cogentcore.org/core/giv"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/vci"
+	"cogentcore.org/core/views"
 )
 
 // OSOpenCommand returns the generic file 'open' command to open file with default app
@@ -127,7 +127,7 @@ func (fn *Node) OpenFilesWith() {
 		if sn == nil {
 			continue
 		}
-		giv.CallFunc(sn, sn.OpenFileWith) // todo: not using interface?
+		views.CallFunc(sn, sn.OpenFileWith) // todo: not using interface?
 	}
 }
 
@@ -255,7 +255,7 @@ func (fn *Node) RenameFiles() { //gti:add
 			continue
 		}
 		// giv.NewSoloFuncButton(sn, sn.Rename).SetAfterFunc(fv.UpdateFilesAction).CallFunc()
-		giv.CallFunc(sn, sn.RenameFile) // todo: not using interface?
+		views.CallFunc(sn, sn.RenameFile) // todo: not using interface?
 	}
 }
 
@@ -406,7 +406,7 @@ func (fn *Node) ShowFileInfo() { //gti:add
 	for i := len(sels) - 1; i >= 0; i-- {
 		fn := AsNode(sels[i].This())
 		d := core.NewBody().AddTitle("File info")
-		giv.NewStructView(d).SetStruct(&fn.Info).SetReadOnly(true)
+		views.NewStructView(d).SetStruct(&fn.Info).SetReadOnly(true)
 		d.AddOKOnly().NewFullDialog(fn).Run()
 	}
 }

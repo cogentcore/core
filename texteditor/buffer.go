@@ -21,7 +21,6 @@ import (
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fileinfo"
-	"cogentcore.org/core/giv"
 	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/glop/indent"
 	"cogentcore.org/core/glop/runes"
@@ -35,6 +34,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor/histyle"
 	"cogentcore.org/core/texteditor/textbuf"
+	"cogentcore.org/core/views"
 )
 
 // Buffer is a buffer of text, which can be viewed by [Editor](s).
@@ -514,7 +514,7 @@ func (tb *Buffer) FileModCheck() bool {
 		d.AddBottomBar(func(parent core.Widget) {
 			core.NewButton(parent).SetText("Save as to different file").OnClick(func(e events.Event) {
 				d.Close()
-				giv.CallFunc(sc, tb.SaveAs)
+				views.CallFunc(sc, tb.SaveAs)
 			})
 			core.NewButton(parent).SetText("Revert from disk").OnClick(func(e events.Event) {
 				d.Close()
@@ -680,7 +680,7 @@ func (tb *Buffer) Save() error {
 		d.AddBottomBar(func(parent core.Widget) {
 			core.NewButton(parent).SetText("Save to different file").OnClick(func(e events.Event) {
 				d.Close()
-				giv.CallFunc(sc, tb.SaveAs)
+				views.CallFunc(sc, tb.SaveAs)
 			})
 			core.NewButton(parent).SetText("Open from disk, losing changes").OnClick(func(e events.Event) {
 				d.Close()

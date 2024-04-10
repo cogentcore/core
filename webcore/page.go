@@ -19,7 +19,6 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/giv"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/grows/tomls"
 	"cogentcore.org/core/grr"
@@ -27,6 +26,7 @@ import (
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/views"
 	"cogentcore.org/core/webcore/wpath"
 )
 
@@ -152,9 +152,9 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	// need to reset
 	NumExamples[pg.Context.PageURL] = 0
 
-	nav := pg.FindPath("splits/nav-frame/nav").(*giv.TreeView)
+	nav := pg.FindPath("splits/nav-frame/nav").(*views.TreeView)
 	nav.UnselectAll()
-	nav.FindPath(rawURL).(*giv.TreeView).Select()
+	nav.FindPath(rawURL).(*views.TreeView).Select()
 
 	fr := pg.FindPath("splits/body").(*core.Frame)
 	fr.DeleteChildren()
@@ -172,7 +172,7 @@ func (pg *Page) Config() {
 	}
 	sp := core.NewSplits(pg, "splits").SetSplits(0.2, 0.8)
 
-	nav := giv.NewTreeViewFrame(sp, "nav").SetText(core.TheApp.Name())
+	nav := views.NewTreeViewFrame(sp, "nav").SetText(core.TheApp.Name())
 	nav.OnSelect(func(e events.Event) {
 		if len(nav.SelectedNodes) == 0 {
 			return
@@ -211,12 +211,12 @@ func (pg *Page) Config() {
 
 		parent := nav
 		if pdir != "" && pdir != "." {
-			parent = nav.FindPath(pdir).(*giv.TreeView)
+			parent = nav.FindPath(pdir).(*views.TreeView)
 		}
 
 		nm := strings.TrimSuffix(base, ext)
 		txt := strcase.ToSentence(nm)
-		tv := giv.NewTreeView(parent, nm).SetText(txt)
+		tv := views.NewTreeView(parent, nm).SetText(txt)
 
 		// need index.md for page path
 		if d.IsDir() {

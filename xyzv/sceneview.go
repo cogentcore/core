@@ -11,9 +11,9 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/giv"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/views"
 	"cogentcore.org/core/xyz"
 )
 
@@ -217,7 +217,7 @@ func (sv *SceneView) ConfigToolbar(tb *core.Toolbar) {
 				return
 			}
 			d := core.NewBody().AddTitle("Selected Node")
-			giv.NewStructView(d).SetStruct(sw.CurrentSelected)
+			views.NewStructView(d).SetStruct(sw.CurrentSelected)
 			d.NewFullDialog(sv).SetNewWindow(true).Run()
 		})
 
@@ -225,7 +225,7 @@ func (sv *SceneView) ConfigToolbar(tb *core.Toolbar) {
 		SetTooltip("edit the 3D Scene object (for access to meshes, textures etc)").
 		OnClick(func(e events.Event) {
 			d := core.NewBody().AddTitle("xyz.Scene")
-			giv.NewStructView(d).SetStruct(sv.SceneXYZ())
+			views.NewStructView(d).SetStruct(sv.SceneXYZ())
 			d.NewFullDialog(sv).SetNewWindow(true).Run()
 		})
 }

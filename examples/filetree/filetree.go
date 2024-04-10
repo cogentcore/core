@@ -16,13 +16,13 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/filetree"
-	"cogentcore.org/core/giv"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
+	"cogentcore.org/core/views"
 )
 
 // FileBrowse is a simple file browser / viewer / editor with a file tree and
@@ -312,15 +312,15 @@ func (fb *FileBrowse) TextEditorByIndex(idx int) *texteditor.Editor {
 }
 
 func (fb *FileBrowse) ConfigToolbar(tb *core.Toolbar) { //gti:add
-	giv.NewFuncButton(tb, fb.UpdateFiles).SetIcon(icons.Refresh).SetShortcut("Command+U")
-	op := giv.NewFuncButton(tb, fb.OpenPath).SetKey(keyfun.Open)
+	views.NewFuncButton(tb, fb.UpdateFiles).SetIcon(icons.Refresh).SetShortcut("Command+U")
+	op := views.NewFuncButton(tb, fb.OpenPath).SetKey(keyfun.Open)
 	op.Args[0].SetValue(fb.ActiveFilename)
 	// op.Args[0].SetTag("ext", ".json")
-	giv.NewFuncButton(tb, fb.SaveActiveView).SetKey(keyfun.Save)
+	views.NewFuncButton(tb, fb.SaveActiveView).SetKey(keyfun.Save)
 	// save.SetUpdateFunc(func() {
 	// 	save.SetEnabledUpdate(fb.Changed && ge.Filename != "")
 	// })
-	sa := giv.NewFuncButton(tb, fb.SaveActiveViewAs).SetKey(keyfun.SaveAs)
+	sa := views.NewFuncButton(tb, fb.SaveActiveViewAs).SetKey(keyfun.SaveAs)
 	sa.Args[0].SetValue(fb.ActiveFilename)
 	// sa.Args[0].SetTag("ext", ".json")
 }
