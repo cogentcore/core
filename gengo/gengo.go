@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package gengo provides utilities for building code generators in Go
+// Package gengo provides utilities for building code generators in Go.
+// The standard path for a code generator is: [Load] -> [PrintHeader] -> [Inspect] -> [Write].
 package gengo
 
 import (
