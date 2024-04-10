@@ -8,11 +8,11 @@ import (
 	"log/slog"
 	"testing"
 
-	"cogentcore.org/core/xlog"
+	"cogentcore.org/core/logx"
 )
 
 func TestRun(t *testing.T) {
-	xlog.UserLevel = slog.LevelInfo
+	logx.UserLevel = slog.LevelInfo
 	xc := Major().SetFatal(true)
 	xc.RunSh("go version")
 	xc.RunSh("git version")

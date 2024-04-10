@@ -12,8 +12,8 @@ import (
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/mobile"
 	"cogentcore.org/core/cmd/core/web"
+	"cogentcore.org/core/logx"
 	"cogentcore.org/core/xe"
-	"cogentcore.org/core/xlog"
 )
 
 // Run builds and runs the config package. It also displays the logs generated
@@ -34,7 +34,7 @@ func Run(c *config.Config) error { //gti:add
 
 	if t.OS == "ios" && !c.Build.Debug {
 		// TODO: is there a way to launch without running the debugger?
-		xlog.PrintlnWarn("warning: only installing, not running, because there is no effective way to just launch an app on iOS from the terminal without debugging; pass the -d flag to run and debug")
+		logx.PrintlnWarn("warning: only installing, not running, because there is no effective way to just launch an app on iOS from the terminal without debugging; pass the -d flag to run and debug")
 	}
 
 	if t.OS == "web" {

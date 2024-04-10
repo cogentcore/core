@@ -4,7 +4,7 @@
 
 //go:build release
 
-package xlog
+package logx
 
 import "log/slog"
 

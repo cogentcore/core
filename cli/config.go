@@ -12,7 +12,7 @@ import (
 	"slices"
 	"strings"
 
-	"cogentcore.org/core/xlog"
+	"cogentcore.org/core/logx"
 )
 
 // TODO: can we get rid of ConfigFiles somehow? we need it in cliview and probably other places too
@@ -155,7 +155,7 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 		// if we can't do first set for meta flags, we return immediately (we only do AllErrors for more specific errors)
 		return cmd, fmt.Errorf("error doing meta configuration: %w", err)
 	}
-	xlog.UserLevel = xlog.LevelFromFlags(mc.VeryVerbose, mc.Verbose, mc.Quiet)
+	logx.UserLevel = logx.LevelFromFlags(mc.VeryVerbose, mc.Verbose, mc.Quiet)
 
 	// both flag and command trigger help
 	if mc.Help || cmd == "help" {

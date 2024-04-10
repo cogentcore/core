@@ -14,7 +14,7 @@ import (
 	"os"
 	"strings"
 
-	"cogentcore.org/core/xlog"
+	"cogentcore.org/core/logx"
 	"github.com/mattn/go-shellwords"
 )
 
@@ -76,7 +76,7 @@ func (c *Config) RunSh(cstr string) error {
 	if len(args) == 0 {
 		err := fmt.Errorf("command %q was not parsed correctly into content", cstr)
 		if c.Errors != nil {
-			c.Errors.Write([]byte(xlog.ErrorColor(err.Error())))
+			c.Errors.Write([]byte(logx.ErrorColor(err.Error())))
 		}
 		if c.Fatal {
 			os.Exit(1)

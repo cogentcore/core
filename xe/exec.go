@@ -15,7 +15,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"cogentcore.org/core/xlog"
+	"cogentcore.org/core/logx"
 )
 
 // Exec executes the command, piping its stdout and stderr to the config
@@ -86,7 +86,7 @@ func (c *Config) run(cmd string, args ...string) (ran bool, code int, err error)
 		// TODO(kai): maybe figure out a better solution to this
 		// or expand this list
 		if cmd == "cp" || cmd == "ls" || cmd == "mv" {
-			xlog.InitColor()
+			logx.InitColor()
 		}
 	}
 
@@ -103,7 +103,7 @@ func (c *Config) run(cmd string, args ...string) (ran bool, code int, err error)
 		}
 		estr := ebuf.String()
 		if estr != "" && c.Stderr != nil {
-			c.Stderr.Write([]byte(xlog.ErrorColor(estr)))
+			c.Stderr.Write([]byte(logx.ErrorColor(estr)))
 		}
 	}
 	return CmdRan(err), ExitStatus(err), err

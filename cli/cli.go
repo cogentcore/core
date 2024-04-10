@@ -15,7 +15,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"cogentcore.org/core/xlog"
+	"cogentcore.org/core/logx"
 )
 
 // Run runs an app with the given options, configuration struct,
@@ -35,7 +35,7 @@ func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
 	if err != nil {
 		err := fmt.Errorf("internal/programmer error: error getting commands from given commands: %w", err)
 		if opts.Fatal {
-			xlog.PrintError(err)
+			logx.PrintError(err)
 			os.Exit(1)
 		}
 		return err
@@ -43,7 +43,7 @@ func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
 	cmd, err := Config(opts, cfg, cs...)
 	if err != nil {
 		if opts.Fatal {
-			xlog.PrintlnError("error: ", err)
+			logx.PrintlnError("error: ", err)
 			os.Exit(1)
 		}
 		return err
@@ -51,14 +51,14 @@ func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
 	err = RunCmd(opts, cfg, cmd, cs...)
 	if err != nil {
 		if opts.Fatal {
-			fmt.Println(xlog.CmdColor(cmdString(opts, cmd)) + xlog.ErrorColor(" failed: "+err.Error()))
+			fmt.Println(logx.CmdColor(cmdString(opts, cmd)) + logx.ErrorColor(" failed: "+err.Error()))
 			os.Exit(1)
 		}
 		return fmt.Errorf("%s failed: %w", CmdName()+" "+cmd, err)
 	}
 	// if the user sets level to error (via -q), we don't show the success message
-	if opts.PrintSuccess && xlog.UserLevel <= slog.LevelWarn {
-		fmt.Println(xlog.CmdColor(cmdString(opts, cmd)) + xlog.SuccessColor(" succeeded"))
+	if opts.PrintSuccess && logx.UserLevel <= slog.LevelWarn {
+		fmt.Println(logx.CmdColor(cmdString(opts, cmd)) + logx.SuccessColor(" succeeded"))
 	}
 	return nil
 }

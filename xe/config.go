@@ -12,7 +12,7 @@ import (
 
 	"log/slog"
 
-	"cogentcore.org/core/xlog"
+	"cogentcore.org/core/logx"
 )
 
 // Config contains the configuration information that
@@ -66,10 +66,10 @@ type Config struct { //gti:add -setters
 var major *Config
 
 // Major returns the default [Config] object for a major command,
-// based on [xlog.UserLevel]. It should be used for commands that
+// based on [logx.UserLevel]. It should be used for commands that
 // are central to an app's logic and are more important for the user
 // to know about and be able to see the output of. It results in
-// commands and output being printed with a [xlog.UserLevel] of
+// commands and output being printed with a [logx.UserLevel] of
 // [slog.LevelInfo] or below, whereas [Minor] results in that when
 // it is [slog.LevelDebug] or below. Most commands in a typical use
 // case should be Major, which is why the global helper functions
@@ -81,7 +81,7 @@ func Major() *Config {
 		res := *major
 		return &res
 	}
-	if xlog.UserLevel <= slog.LevelInfo {
+	if logx.UserLevel <= slog.LevelInfo {
 		return &Config{
 			Buffer:   true,
 			Env:      map[string]string{},
@@ -113,10 +113,10 @@ func SetMajor(c *Config) {
 var minor *Config
 
 // Minor returns the default [Config] object for a minor command,
-// based on [xlog.UserLevel]. It should be used for commands that
+// based on [logx.UserLevel]. It should be used for commands that
 // support an app behind the scenes and are less important for the
 // user to know about and be able to see the output of. It results in
-// commands and output being printed with a [xlog.UserLevel] of
+// commands and output being printed with a [logx.UserLevel] of
 // [slog.LevelDebug] or below, whereas [Major] results in that when
 // it is [slog.LevelInfo] or below. The object returned by Minor is
 // guaranteed to be unique, so it can be modified directly.
@@ -126,7 +126,7 @@ func Minor() *Config {
 		res := *minor
 		return &res
 	}
-	if xlog.UserLevel <= slog.LevelDebug {
+	if logx.UserLevel <= slog.LevelDebug {
 		return &Config{
 			Buffer:   true,
 			Env:      map[string]string{},
@@ -158,10 +158,10 @@ func SetMinor(c *Config) {
 var verbose *Config
 
 // Verbose returns the default [Config] object for a verbose command,
-// based on [xlog.UserLevel]. It should be used for commands
+// based on [logx.UserLevel]. It should be used for commands
 // whose output are central to an application; for example, for a
 // logger or app runner. It results in commands and output being
-// printed with a [xlog.UserLevel] of [slog.LevelWarn] or below,
+// printed with a [logx.UserLevel] of [slog.LevelWarn] or below,
 // whereas [Major] and [Minor] result in that when it is [slog.LevelInfo]
 // and [slog.levelDebug] or below, respectively. The object returned by
 // Verbose is guaranteed to be unique, so it can be modified directly.
@@ -171,7 +171,7 @@ func Verbose() *Config {
 		res := *verbose
 		return &res
 	}
-	if xlog.UserLevel <= slog.LevelWarn {
+	if logx.UserLevel <= slog.LevelWarn {
 		return &Config{
 			Buffer:   true,
 			Env:      map[string]string{},
@@ -203,7 +203,7 @@ func SetVerbose(c *Config) {
 var silent *Config
 
 // Silent returns the default [Config] object for a silent command,
-// based on [xlog.UserLevel]. It should be used for commands that
+// based on [logx.UserLevel]. It should be used for commands that
 // whose output/input is private and needs to be always hidden from
 // the user; for example, for a command that involves passwords.
 // It results in commands and output never being printed. The object
@@ -248,9 +248,9 @@ func (c *Config) PrintCmd(cmd string, err error) {
 	cmds := c.GetWriter(c.Commands, err)
 	if cmds != nil {
 		if c.Dir != "" {
-			cmds.Write([]byte(xlog.SuccessColor(c.Dir) + ": "))
+			cmds.Write([]byte(logx.SuccessColor(c.Dir) + ": "))
 		}
-		cmds.Write([]byte(xlog.CmdColor(cmd) + "\n"))
+		cmds.Write([]byte(logx.CmdColor(cmd) + "\n"))
 	}
 }
 

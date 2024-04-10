@@ -13,8 +13,8 @@ import (
 	"strings"
 
 	"cogentcore.org/core/gti"
+	"cogentcore.org/core/logx"
 	"cogentcore.org/core/strcase"
-	"cogentcore.org/core/xlog"
 )
 
 // Indent is the value used for indentation in [Usage].
@@ -44,7 +44,7 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 			}
 		}
 		if !gotCmd {
-			fmt.Println(xlog.CmdColor(CmdName()+" help") + xlog.ErrorColor(fmt.Sprintf(" failed: command %q not found", cmd)))
+			fmt.Println(logx.CmdColor(CmdName()+" help") + logx.ErrorColor(fmt.Sprintf(" failed: command %q not found", cmd)))
 			os.Exit(1)
 		}
 	}
@@ -56,7 +56,7 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 	if cmd != "" {
 		cmdName += " " + cmd
 	}
-	b.WriteString(xlog.TitleColor("Usage:\n") + Indent + xlog.CmdColor(cmdName+" "))
+	b.WriteString(logx.TitleColor("Usage:\n") + Indent + logx.CmdColor(cmdName+" "))
 
 	posArgStrs := []string{}
 
@@ -78,9 +78,9 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 			nm := strcase.ToKebab(v.Names[0])
 			req, has := f.Tag.Lookup("required")
 			if req == "+" || req == "true" || !has { // default is required, so !has => required
-				posArgStrs[ui] = xlog.CmdColor("<" + nm + ">")
+				posArgStrs[ui] = logx.CmdColor("<" + nm + ">")
 			} else {
-				posArgStrs[ui] = xlog.SuccessColor("[" + nm + "]")
+				posArgStrs[ui] = logx.SuccessColor("[" + nm + "]")
 			}
 
 		}
@@ -89,13 +89,13 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 	if len(posArgStrs) > 0 {
 		b.WriteString(" ")
 	}
-	b.WriteString(xlog.SuccessColor("[flags]\n"))
+	b.WriteString(logx.SuccessColor("[flags]\n"))
 
 	CommandUsage(&b, cmdName, cmd, cmds...)
 
-	b.WriteString(xlog.TitleColor("\nFlags:\n") + Indent + xlog.TitleColor("Flags are case-insensitive, can be in kebab-case, snake_case,\n"))
-	b.WriteString(Indent + xlog.TitleColor("or CamelCase, and can have one or two leading dashes. Use a\n"))
-	b.WriteString(Indent + xlog.TitleColor("\"no\" prefix to turn off a bool flag.\n\n"))
+	b.WriteString(logx.TitleColor("\nFlags:\n") + Indent + logx.TitleColor("Flags are case-insensitive, can be in kebab-case, snake_case,\n"))
+	b.WriteString(Indent + logx.TitleColor("or CamelCase, and can have one or two leading dashes. Use a\n"))
+	b.WriteString(Indent + logx.TitleColor("\"no\" prefix to turn off a bool flag.\n\n"))
 
 	// add meta ones (help, config, verbose, etc) first
 	mcfields := &Fields{}
@@ -143,27 +143,27 @@ outer:
 	}
 
 	if len(acmds) != 0 {
-		b.WriteString(Indent + xlog.CmdColor(cmdName+" <subcommand> ") + xlog.SuccessColor("[flags]\n"))
+		b.WriteString(Indent + logx.CmdColor(cmdName+" <subcommand> ") + logx.SuccessColor("[flags]\n"))
 	}
 
 	if rcmd != nil {
-		b.WriteString(xlog.TitleColor("\nDefault command:\n"))
-		b.WriteString(Indent + xlog.CmdColor(rcmd.Name) + "\n" + Indent + Indent + strings.ReplaceAll(rcmd.Doc, "\n", "\n"+Indent+Indent) + "\n") // need to put two indents on every newline for formatting
+		b.WriteString(logx.TitleColor("\nDefault command:\n"))
+		b.WriteString(Indent + logx.CmdColor(rcmd.Name) + "\n" + Indent + Indent + strings.ReplaceAll(rcmd.Doc, "\n", "\n"+Indent+Indent) + "\n") // need to put two indents on every newline for formatting
 	}
 
 	if len(acmds) == 0 && cmd != "" { // nothing to do
 		return
 	}
 
-	b.WriteString(xlog.TitleColor("\nSubcommands:\n"))
+	b.WriteString(logx.TitleColor("\nSubcommands:\n"))
 
 	// if we are in root, we also add help
 	if cmd == "" {
-		b.WriteString(Indent + xlog.CmdColor("help") + "\n" + Indent + Indent + "Help shows usage information for a command\n")
+		b.WriteString(Indent + logx.CmdColor("help") + "\n" + Indent + Indent + "Help shows usage information for a command\n")
 	}
 
 	for _, c := range acmds {
-		b.WriteString(Indent + xlog.CmdColor(c.Name))
+		b.WriteString(Indent + logx.CmdColor(c.Name))
 		if c.Doc != "" {
 			// we only want the first paragraph of text for subcommand usage; after that is where more specific details can go
 			doc, _, _ := strings.Cut(c.Doc, "\n\n")
@@ -181,12 +181,12 @@ func FlagUsage(fields *Fields, b *strings.Builder) {
 		f := kv.Value
 		b.WriteString(Indent)
 		for i, name := range f.Names {
-			b.WriteString(xlog.CmdColor("-" + strcase.ToKebab(name)))
+			b.WriteString(logx.CmdColor("-" + strcase.ToKebab(name)))
 			if i != len(f.Names)-1 {
 				b.WriteString(", ")
 			}
 		}
-		b.WriteString(" " + xlog.SuccessColor(f.Field.Type.String()))
+		b.WriteString(" " + logx.SuccessColor(f.Field.Type.String()))
 		b.WriteString("\n")
 		field := gti.GetField(f.Struct, f.Field.Name)
 		if field != nil {
