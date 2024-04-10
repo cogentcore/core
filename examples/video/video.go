@@ -25,8 +25,8 @@ func main() {
 		s.SetTextWrap(false)
 	})
 	core.NewLabel(b).SetText("footer:")
-	// grr.Log(v.Open("deer.mp4"))
-	// grr.Log(v.Open("countdown.mp4"))
+	// errors.Log(v.Open("deer.mp4"))
+	// errors.Log(v.Open("countdown.mp4"))
 	errors.Log(v.Open("randy_first_360.mov")) // note: not uploaded -- good test case tho
 	v.Rotation = -90
 	w := b.NewWindow().Run()

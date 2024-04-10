@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 	"unsafe"
 
-	"cogentcore.org/core/grr"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/system"
 	"github.com/go-gl/glfw/v3.3/glfw"
@@ -27,7 +27,7 @@ func (a *App) Platform() system.Platforms {
 
 func (a *App) OpenURL(url string) {
 	cmd := exec.Command("rundll32", "url.dll,FileProtocolHandler", url)
-	grr.Log(cmd.Run())
+	errors.Log(cmd.Run())
 }
 
 func (a *App) DataDir() string {
@@ -36,7 +36,7 @@ func (a *App) DataDir() string {
 	// with FOLDERID_RoamingAppData
 	// https://stackoverflow.com/questions/6883779/what-are-the-best-practices-for-storing-user-preferences-and-settings-in-win32-d
 	usr, err := user.Current()
-	if grr.Log(err) != nil {
+	if errors.Log(err) != nil {
 		return "/tmp"
 	}
 	return filepath.Join(usr.HomeDir, "AppData", "Roaming")

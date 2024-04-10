@@ -12,7 +12,7 @@ import (
 	"os/user"
 	"path/filepath"
 
-	"cogentcore.org/core/grr"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/system"
 	"github.com/go-gl/glfw/v3.3/glfw"
@@ -39,7 +39,7 @@ func (a *App) Platform() system.Platforms {
 
 func (a *App) OpenURL(url string) {
 	cmd := exec.Command("xdg-open", url)
-	grr.Log(cmd.Run())
+	errors.Log(cmd.Run())
 }
 
 func (a *App) DataDir() string {

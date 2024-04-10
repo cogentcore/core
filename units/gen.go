@@ -13,7 +13,7 @@ import (
 	"strings"
 	"text/template"
 
-	"cogentcore.org/core/grr"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/units"
 )
@@ -43,9 +43,9 @@ package units
 		// actual desc after "represents"
 		_, d.Desc, _ = strings.Cut(v.Desc(), " represents ")
 		d.Desc = html.UnescapeString(d.Desc)
-		grr.Must(funcs.Execute(buf, d))
+		errors.Must(funcs.Execute(buf, d))
 	}
-	grr.Must(os.WriteFile("unitgen.go", buf.Bytes(), 0666))
+	errors.Must(os.WriteFile("unitgen.go", buf.Bytes(), 0666))
 }
 
 type data struct {

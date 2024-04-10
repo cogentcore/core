@@ -13,8 +13,8 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/driver/base"
 	"cogentcore.org/core/vgpu"
@@ -144,7 +144,7 @@ func (a *App) SetSystemWindow(winptr uintptr) error {
 
 func (a *App) DataDir() string {
 	usr, err := user.Current()
-	if grr.Log(err) != nil {
+	if errors.Log(err) != nil {
 		return "/tmp"
 	}
 	return filepath.Join(usr.HomeDir, "Library")

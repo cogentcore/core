@@ -10,9 +10,9 @@ import (
 	"image"
 	"syscall/js"
 
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/mat32"
 )
 
@@ -190,7 +190,7 @@ func (a *App) RuneAndCodeFromKey(k string, down bool) (rune, key.Codes) {
 		if len(r) > 1 {
 			kc := key.Codes(0)
 			err := kc.SetString(k)
-			if grr.Log(err) == nil {
+			if errors.Log(err) == nil {
 				return 0, kc
 			}
 		}

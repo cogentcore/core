@@ -12,14 +12,14 @@ var myImage embed.FS
 Then, you can open an image from your embedded filesystem:
 
 ```Go
-grr.Log(core.NewImage(parent).OpenFS(myImage, "image.png"))
+errors.Log(core.NewImage(parent).OpenFS(myImage, "image.png"))
 ```
 
 You can change the size of an image:
 
 ```Go
 img := core.NewImage(parent)
-grr.Log(img.OpenFS(myImage, "image.png"))
+errors.Log(img.OpenFS(myImage, "image.png"))
 img.Style(func(s *styles.Style) {
     s.Min.Set(units.Dp(256))
 })
@@ -38,5 +38,5 @@ core.NewImage(parent).SetImage(img)
 You can also open images directly from the system filesystem, but this is not recommended for images built into your app, since they will end up in a different location on different platforms:
 
 ```go
-grr.Log(core.NewImage(parent).Open("image.png"))
+errors.Log(core.NewImage(parent).Open("image.png"))
 ```

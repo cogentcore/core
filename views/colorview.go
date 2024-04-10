@@ -254,7 +254,7 @@ func (cv *ColorView) Config(sc *core.Scene) {
 	hex := core.NewTextField(hexlay, "nums-hex")
 	hex.Tooltip = "The color in hexadecimal form"
 	hex.OnChange(func(e events.Event) {
-		cv.SetColor(grr.Log(colors.FromHex(hex.Text())))
+		cv.SetColor(errors.Log(colors.FromHex(hex.Text())))
 	})
 
 	hexcopy := core.NewButton(hexlay, "hexcopy")
@@ -433,7 +433,7 @@ func (cv *ColorView) ConfigPalette() {
 		cbt.Tooltip = cn
 		cbt.SetText("  ")
 		cbt.OnChange(func(e events.Event) {
-			cv.SetColor(grr.Log(colors.FromName(cbt.Name())))
+			cv.SetColor(errors.Log(colors.FromName(cbt.Name())))
 		})
 	}
 }

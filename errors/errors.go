@@ -15,9 +15,9 @@ import (
 // Log takes the given error and logs it if it is non-nil.
 // The intended usage is:
 //
-//	grr.Log(MyFunc(v))
+//	errors.Log(MyFunc(v))
 //	// or
-//	return grr.Log(MyFunc(v))
+//	return errors.Log(MyFunc(v))
 func Log(err error) error {
 	if err != nil {
 		slog.Error(err.Error() + " | " + CallerInfo())
@@ -29,7 +29,7 @@ func Log(err error) error {
 // the error is nil, and logs the error and returns a zero value
 // if the error is non-nil. The intended usage is:
 //
-//	a := grr.Log1(MyFunc(v))
+//	a := errors.Log1(MyFunc(v))
 func Log1[T any](v T, err error) T {
 	if err != nil {
 		slog.Error(err.Error() + " | " + CallerInfo())
@@ -41,7 +41,7 @@ func Log1[T any](v T, err error) T {
 // the error is nil, and logs the error and returns zero values
 // if the error is non-nil. The intended usage is:
 //
-//	a, b := grr.Log2(MyFunc(v))
+//	a, b := errors.Log2(MyFunc(v))
 func Log2[T1, T2 any](v1 T1, v2 T2, err error) (T1, T2) {
 	if err != nil {
 		slog.Error(err.Error() + " | " + CallerInfo())
@@ -52,7 +52,7 @@ func Log2[T1, T2 any](v1 T1, v2 T2, err error) (T1, T2) {
 // Must takes the given error and panics if it is non-nil.
 // The intended usage is:
 //
-//	grr.Must(MyFunc(v))
+//	errors.Must(MyFunc(v))
 func Must(err error) {
 	if err != nil {
 		panic(err)
@@ -62,7 +62,7 @@ func Must(err error) {
 // Must1 takes the given value and error and returns the value if
 // the error is nil, and panics if the error is non-nil. The intended usage is:
 //
-//	a := grr.Must1(MyFunc(v))
+//	a := errors.Must1(MyFunc(v))
 func Must1[T any](v T, err error) T {
 	if err != nil {
 		panic(err)
@@ -73,7 +73,7 @@ func Must1[T any](v T, err error) T {
 // Must2 takes the given two values and error and returns the values if
 // the error is nil, and panics if the error is non-nil. The intended usage is:
 //
-//	a, b := grr.Must2(MyFunc(v))
+//	a, b := errors.Must2(MyFunc(v))
 func Must2[T1, T2 any](v1 T1, v2 T2, err error) (T1, T2) {
 	if err != nil {
 		panic(err)
@@ -85,7 +85,7 @@ func Must2[T1, T2 any](v1 T1, v2 T2, err error) (T1, T2) {
 // a value and an error, allowing direct usage of the value.
 // The intended usage is:
 //
-//	a := grr.Ignore1(MyFunc(v))
+//	a := errors.Ignore1(MyFunc(v))
 func Ignore1[T any](v T, err error) T {
 	return v
 }
@@ -94,7 +94,7 @@ func Ignore1[T any](v T, err error) T {
 // two values and an error, allowing direct usage of the values.
 // The intended usage is:
 //
-//	a, b := grr.Ignore2(MyFunc(v))
+//	a, b := errors.Ignore2(MyFunc(v))
 func Ignore2[T1, T2 any](v1 T1, v2 T2, err error) (T1, T2) {
 	return v1, v2
 }

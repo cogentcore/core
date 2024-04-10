@@ -35,13 +35,13 @@ var myFile embed.FS
 ```
 
 ```Go
-grr.Log(texteditor.NewSoloEditor(parent).Buffer.OpenFS(myFile, "file.go"))
+errors.Log(texteditor.NewSoloEditor(parent).Buffer.OpenFS(myFile, "file.go"))
 ```
 
 You can also set the text of a text editor directly from the system filesystem, but this is not recommended for files built into your app, since they will end up in a different location on different platforms:
 
 ```go
-grr.Log(texteditor.NewSoloEditor(parent).Buffer.Open("file.go"))
+errors.Log(texteditor.NewSoloEditor(parent).Buffer.Open("file.go"))
 ```
 
 You can make multiple text editors that edit the same underlying text buffer:

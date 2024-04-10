@@ -13,13 +13,13 @@ import (
 	"context"
 	"syscall/js"
 
-	"cogentcore.org/core/grr"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/jsfs"
 	"github.com/hack-pad/hackpadfs/indexeddb"
 )
 
 func main() {
-	idb := grr.Must1(indexeddb.NewFS(context.Background(), "idb", indexeddb.Options{}))
-	grr.Must(idb.MkdirAll("me", 0777))
-	js.Global().Get("console").Call("log", "stat file info", jsfs.JSStat(grr.Must1(idb.Stat("me"))))
+	idb := errors.Must1(indexeddb.NewFS(context.Background(), "idb", indexeddb.Options{}))
+	errors.Must(idb.MkdirAll("me", 0777))
+	js.Global().Get("console").Call("log", "stat file info", jsfs.JSStat(errors.Must1(idb.Stat("me"))))
 }
