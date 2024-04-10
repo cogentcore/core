@@ -22,15 +22,15 @@ func (g *Group) SVGName() string { return "g" }
 func (g *Group) EnforceSVGName() bool { return false }
 
 // BBoxFromChildren sets the Group BBox from children
-func BBoxFromChildren(gi Node) image.Rectangle {
+func BBoxFromChildren(n Node) image.Rectangle {
 	bb := image.Rectangle{}
-	for i, kid := range *core.Children() {
-		kgi := kid.(Node)
-		kg := kcore.AsNodeBase()
+	for i, kid := range *n.Children() {
+		kn := kid.(Node)
+		knb := kn.AsNodeBase()
 		if i == 0 {
-			bb = kg.BBox
+			bb = knb.BBox
 		} else {
-			bb = bb.Union(kg.BBox)
+			bb = bb.Union(knb.BBox)
 		}
 	}
 	return bb

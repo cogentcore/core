@@ -192,7 +192,7 @@ func NameToURL(nm string) string {
 // NodeFindURL finds a url element in the parent SVG of given node.
 // Returns nil if not found.
 // Works with full 'url(#Name)' string or plain name or "none"
-func (sv *SVG) NodeFindURL(gi Node, url string) Node {
+func (sv *SVG) NodeFindURL(n Node, url string) Node {
 	if url == "none" {
 		return nil
 	}
@@ -205,7 +205,7 @@ func (sv *SVG) NodeFindURL(gi Node, url string) Node {
 	}
 	rv := sv.FindNamedElement(ref)
 	if rv == nil {
-		log.Printf("svg.NodeFindURL could not find element named: %s for element: %s\n", url, core.Path())
+		log.Printf("svg.NodeFindURL could not find element named: %s for element: %s\n", url, n.Path())
 	}
 	return rv
 }
@@ -213,8 +213,8 @@ func (sv *SVG) NodeFindURL(gi Node, url string) Node {
 // NodePropURL returns a url(#name) url from given prop name on node,
 // or empty string if none.  Returned value is just the 'name' part
 // of the url, not the full string.
-func NodePropURL(gi Node, prop string) string {
-	fp := core.Property(prop)
+func NodePropURL(n Node, prop string) string {
+	fp := n.Property(prop)
 	fs, iss := fp.(string)
 	if !iss {
 		return ""
