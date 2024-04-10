@@ -4,8 +4,8 @@ package lex
 
 import (
 	"cogentcore.org/core/gti"
-	"cogentcore.org/core/tree"
 	"cogentcore.org/core/pi/token"
+	"cogentcore.org/core/tree"
 )
 
 // RuleType is the [gti.Type] for [Rule]

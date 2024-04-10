@@ -8,11 +8,11 @@ import (
 	"cogentcore.org/core/xyz"
 )
 
-// ManipPtType is the [gti.Type] for [ManipPoint]
-var ManipPtType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyzv.ManipPt", IDName: "manip-pt", Doc: "ManipPt is a manipulation control point", Directives: []gti.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []gti.Field{{Name: "Solid"}}, Instance: &ManipPoint{}})
+// ManipPointType is the [gti.Type] for [ManipPoint]
+var ManipPointType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyzv.ManipPoint", IDName: "manip-point", Doc: "ManipPoint is a manipulation control point", Directives: []gti.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []gti.Field{{Name: "Solid"}}, Instance: &ManipPoint{}})
 
 // NodeType returns the [*gti.Type] of [ManipPoint]
-func (t *ManipPoint) NodeType() *gti.Type { return ManipPtType }
+func (t *ManipPoint) NodeType() *gti.Type { return ManipPointType }
 
 // New returns a new [*ManipPoint] value
 func (t *ManipPoint) New() tree.Node { return &ManipPoint{} }

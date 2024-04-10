@@ -3,8 +3,8 @@
 package giv
 
 import (
-	"cogentcore.org/core/enums"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/enums"
 )
 
 var _SliceViewFlagsValues = []SliceViewFlags{2, 3, 4, 5, 6, 7, 8, 9}

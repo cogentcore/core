@@ -3,8 +3,8 @@
 package main
 
 import (
-	"cogentcore.org/core/filetree"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/filetree"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/tree"
 )

@@ -415,4 +415,6 @@ func (i *ValueFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int6
 func (i ValueFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *ValueFlags) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "ValueFlags") }
+func (i *ValueFlags) UnmarshalText(text []byte) error {
+	return enums.UnmarshalText(i, text, "ValueFlags")
+}

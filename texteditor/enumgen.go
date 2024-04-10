@@ -3,8 +3,8 @@
 package texteditor
 
 import (
-	"cogentcore.org/core/enums"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/enums"
 )
 
 var _SpellSignalsValues = []SpellSignals{0, 1}

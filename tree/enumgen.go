@@ -13,7 +13,7 @@ const FlagsN Flags = 1
 
 var _FlagsValueMap = map[string]Flags{`Field`: 0}
 
-var _FlagsDescMap = map[Flags]string{0: `Field indicates a node is a field in its parent node, not a child in children.`}
+var _FlagsDescMap = map[Flags]string{0: `Field indicates that a node is a field in its parent node, not a child in children.`}
 
 var _FlagsMap = map[Flags]string{0: `Field`}
 

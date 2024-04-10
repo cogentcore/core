@@ -3,8 +3,6 @@
 package video
 
 import (
-	"image"
-
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/tree"
 	"github.com/zergon321/reisen"
@@ -38,21 +36,6 @@ func (t *Video) SetRotation(v float32) *Video { t.Rotation = v; return t }
 // SetStop sets the [Video.Stop]:
 // setting this to true will stop the playing
 func (t *Video) SetStop(v bool) *Video { t.Stop = v; return t }
-
-// SetFrameBuffer sets the [Video.frameBuffer]
-func (t *Video) SetFrameBuffer(v <-chan *image.RGBA) *Video { t.frameBuffer = v; return t }
-
-// SetFrameTarg sets the [Video.frameTarg]:
-// target frame number to be played
-func (t *Video) SetFrameTarg(v int) *Video { t.frameTarg = v; return t }
-
-// SetFramePlayed sets the [Video.framePlayed]:
-// actual frame number displayed
-func (t *Video) SetFramePlayed(v int) *Video { t.framePlayed = v; return t }
-
-// SetFrameStop sets the [Video.frameStop]:
-// frame number to stop playing at, if > 0
-func (t *Video) SetFrameStop(v int) *Video { t.frameStop = v; return t }
 
 // SetTooltip sets the [Video.Tooltip]
 func (t *Video) SetTooltip(v string) *Video { t.Tooltip = v; return t }

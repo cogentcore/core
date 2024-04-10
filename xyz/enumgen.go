@@ -209,7 +209,9 @@ func (i ScFlags) Desc() string { return enums.DescExtended[ScFlags, tree.Flags](
 func ScFlagsValues() []ScFlags { return enums.ValuesGlobalExtended(_ScFlagsValues, tree.FlagsValues()) }
 
 // Values returns all possible values for the type ScFlags.
-func (i ScFlags) Values() []enums.Enum { return enums.ValuesExtended(_ScFlagsValues, tree.FlagsValues()) }
+func (i ScFlags) Values() []enums.Enum {
+	return enums.ValuesExtended(_ScFlagsValues, tree.FlagsValues())
+}
 
 // HasFlag returns whether these bit flags have the given bit flag set.
 func (i ScFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }

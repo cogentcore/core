@@ -14,7 +14,7 @@ const NodeFlagsN NodeFlags = 2
 
 var _NodeFlagsValueMap = map[string]NodeFlags{`IsDef`: 1}
 
-var _NodeFlagsDescMap = map[NodeFlags]string{1: `Rendering means that the SVG is currently redrawing Can be useful to check for animations etc to decide whether to drive another update`}
+var _NodeFlagsDescMap = map[NodeFlags]string{1: ``}
 
 var _NodeFlagsMap = map[NodeFlags]string{1: `IsDef`}
 

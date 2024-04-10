@@ -10,11 +10,11 @@ import (
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/tree"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/pi/complete"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 )
 
