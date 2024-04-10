@@ -3,7 +3,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"image"
 	"image/draw"
@@ -14,9 +13,8 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/views"
-	errors1 "cogentcore.org/core/errors"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/mat32"
@@ -25,6 +23,7 @@ import (
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
+	"cogentcore.org/core/views"
 	"cogentcore.org/core/webcore"
 )
 
@@ -348,11 +347,11 @@ var WebcoreExamples = map[string]func(parent core.Widget){
 		core.NewButton(parent).SetIcon(icons.Home.Fill())
 	},
 	"widgets/images-0": func(parent core.Widget) {
-		errors1.Log(core.NewImage(parent).OpenFS(myImage, "image.png"))
+		errors.Log(core.NewImage(parent).OpenFS(myImage, "image.png"))
 	},
 	"widgets/images-1": func(parent core.Widget) {
 		img := core.NewImage(parent)
-		errors1.Log(img.OpenFS(myImage, "image.png"))
+		errors.Log(img.OpenFS(myImage, "image.png"))
 		img.Style(func(s *styles.Style) {
 			s.Min.Set(units.Dp(256))
 		})
@@ -587,11 +586,11 @@ var WebcoreExamples = map[string]func(parent core.Widget){
 		core.NewLabel(sp).SetText("Second")
 	},
 	"widgets/svgs-0": func(parent core.Widget) {
-		errors1.Log(core.NewSVG(parent).OpenFS(mySVG, "icon.svg"))
+		errors.Log(core.NewSVG(parent).OpenFS(mySVG, "icon.svg"))
 	},
 	"widgets/svgs-1": func(parent core.Widget) {
 		svg := core.NewSVG(parent)
-		errors1.Log(svg.OpenFS(mySVG, "icon.svg"))
+		errors.Log(svg.OpenFS(mySVG, "icon.svg"))
 		svg.Style(func(s *styles.Style) {
 			s.Min.Set(units.Dp(128))
 		})
@@ -599,10 +598,10 @@ var WebcoreExamples = map[string]func(parent core.Widget){
 	"widgets/svgs-2": func(parent core.Widget) {
 		svg := core.NewSVG(parent)
 		svg.SetReadOnly(false)
-		errors1.Log(svg.OpenFS(mySVG, "icon.svg"))
+		errors.Log(svg.OpenFS(mySVG, "icon.svg"))
 	},
 	"widgets/svgs-3": func(parent core.Widget) {
-		errors1.Log(core.NewSVG(parent).ReadString(`<rect width="100" height="100" fill="red"/>`))
+		errors.Log(core.NewSVG(parent).ReadString(`<rect width="100" height="100" fill="red"/>`))
 	},
 	"widgets/switches-0": func(parent core.Widget) {
 		core.NewSwitch(parent)
@@ -714,7 +713,7 @@ func main() {
 `)
 	},
 	"widgets/text-editors-3": func(parent core.Widget) {
-		errors1.Log(texteditor.NewSoloEditor(parent).Buffer.OpenFS(myFile, "file.go"))
+		errors.Log(texteditor.NewSoloEditor(parent).Buffer.OpenFS(myFile, "file.go"))
 	},
 	"widgets/text-editors-4": func(parent core.Widget) {
 		tb := texteditor.NewBuffer()
