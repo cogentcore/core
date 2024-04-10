@@ -14,9 +14,9 @@ import (
 
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/rendericon"
-	"cogentcore.org/core/grows/images"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/xe"
+	"cogentcore.org/core/xio/images"
 	"github.com/jackmordaunt/icns/v2"
 )
 

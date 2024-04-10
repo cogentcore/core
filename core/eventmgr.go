@@ -19,13 +19,13 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/grows/images"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/xio/images"
 	"github.com/anthonynsimon/bild/clone"
 )
 

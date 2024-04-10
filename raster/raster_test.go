@@ -16,9 +16,9 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
-	"cogentcore.org/core/grows/images"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/scan"
+	"cogentcore.org/core/xio/images"
 	"golang.org/x/image/math/fixed"
 )
 

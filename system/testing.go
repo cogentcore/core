@@ -5,7 +5,7 @@
 package system
 
 import (
-	"cogentcore.org/core/grows/images"
+	"cogentcore.org/core/xio/images"
 )
 
 // AssertCapture asserts that the result of [Capture] is equivalent

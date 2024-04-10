@@ -11,10 +11,10 @@ import (
 	"log"
 	"log/slog"
 
-	"cogentcore.org/core/grows/images"
 	"cogentcore.org/core/vgpu"
 	"cogentcore.org/core/vgpu/vphong"
 	"cogentcore.org/core/xgo/dirs"
+	"cogentcore.org/core/xio/images"
 )
 
 // TexName provides a GUI interface for choosing textures

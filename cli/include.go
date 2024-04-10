@@ -11,9 +11,9 @@ import (
 	"errors"
 	"reflect"
 
-	"cogentcore.org/core/grows/tomls"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/xgo/dirs"
+	"cogentcore.org/core/xio/tomls"
 )
 
 // TODO(kai): this seems bad

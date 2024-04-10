@@ -9,67 +9,67 @@ import (
 	"io"
 	"io/fs"
 
-	"cogentcore.org/core/grows"
 	"cogentcore.org/core/xgo/dirs"
+	"cogentcore.org/core/xio"
 	"github.com/pelletier/go-toml/v2"
 )
 
-// NewDecoder returns a new [grows.Decoder]
-func NewDecoder(r io.Reader) grows.Decoder { return toml.NewDecoder(r) }
+// NewDecoder returns a new [xio.Decoder]
+func NewDecoder(r io.Reader) xio.Decoder { return toml.NewDecoder(r) }
 
 // Open reads the given object from the given filename using TOML encoding
 func Open(v any, filename string) error {
-	return grows.Open(v, filename, NewDecoder)
+	return xio.Open(v, filename, NewDecoder)
 }
 
 // OpenFiles reads the given object from the given filenames using TOML encoding
 func OpenFiles(v any, filenames []string) error {
-	return grows.OpenFiles(v, filenames, NewDecoder)
+	return xio.OpenFiles(v, filenames, NewDecoder)
 }
 
 // OpenFS reads the given object from the given filename using TOML encoding,
 // using the given [fs.FS] filesystem (e.g., for embed files)
 func OpenFS(v any, fsys fs.FS, filename string) error {
-	return grows.OpenFS(v, fsys, filename, NewDecoder)
+	return xio.OpenFS(v, fsys, filename, NewDecoder)
 }
 
 // OpenFilesFS reads the given object from the given filenames using TOML encoding,
 // using the given [fs.FS] filesystem (e.g., for embed files)
 func OpenFilesFS(v any, fsys fs.FS, filenames []string) error {
-	return grows.OpenFilesFS(v, fsys, filenames, NewDecoder)
+	return xio.OpenFilesFS(v, fsys, filenames, NewDecoder)
 }
 
 // Read reads the given object from the given reader,
 // using TOML encoding
 func Read(v any, reader io.Reader) error {
-	return grows.Read(v, reader, NewDecoder)
+	return xio.Read(v, reader, NewDecoder)
 }
 
 // ReadBytes reads the given object from the given bytes,
 // using TOML encoding
 func ReadBytes(v any, data []byte) error {
-	return grows.ReadBytes(v, data, NewDecoder)
+	return xio.ReadBytes(v, data, NewDecoder)
 }
 
-// NewEncoder returns a new [grows.Encoder]
-func NewEncoder(w io.Writer) grows.Encoder {
+// NewEncoder returns a new [xio.Encoder]
+func NewEncoder(w io.Writer) xio.Encoder {
 	return toml.NewEncoder(w).SetIndentTables(true).SetArraysMultiline(true)
 }
 
 // Save writes the given object to the given filename using TOML encoding
 func Save(v any, filename string) error {
-	return grows.Save(v, filename, NewEncoder)
+	return xio.Save(v, filename, NewEncoder)
 }
 
 // Write writes the given object using TOML encoding
 func Write(v any, writer io.Writer) error {
-	return grows.Write(v, writer, NewEncoder)
+	return xio.Write(v, writer, NewEncoder)
 }
 
 // WriteBytes writes the given object, returning bytes of the encoding,
 // using TOML encoding
 func WriteBytes(v any) ([]byte, error) {
-	return grows.WriteBytes(v, NewEncoder)
+	return xio.WriteBytes(v, NewEncoder)
 }
 
 // OpenFromPaths reads the given object from the given TOML file,

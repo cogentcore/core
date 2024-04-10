@@ -15,8 +15,8 @@ import (
 
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/rendericon"
-	"cogentcore.org/core/grows/images"
 	"cogentcore.org/core/xe"
+	"cogentcore.org/core/xio/images"
 )
 
 // Build builds an app for web using the given configuration information.

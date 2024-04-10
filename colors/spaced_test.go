@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/cam/hct"
-	"cogentcore.org/core/grows/images"
+	"cogentcore.org/core/xio/images"
 )
 
 func TestSpacedLight(t *testing.T) {

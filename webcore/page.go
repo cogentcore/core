@@ -19,7 +19,6 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/grows/tomls"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/htmlview"
 	"cogentcore.org/core/strcase"
@@ -28,6 +27,7 @@ import (
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/views"
 	"cogentcore.org/core/webcore/wpath"
+	"cogentcore.org/core/xio/tomls"
 )
 
 // Page represents one site page

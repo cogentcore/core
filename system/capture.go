@@ -7,8 +7,8 @@ package system
 import (
 	"image"
 
-	"cogentcore.org/core/grows/images"
 	"cogentcore.org/core/grr"
+	"cogentcore.org/core/xio/images"
 )
 
 // Capture tells the app drawer to capture its next frame as an image.

@@ -6,8 +6,8 @@ package core
 
 import (
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/grows/images"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/xio/images"
 )
 
 // AssertRender makes a new window from the body, waits until it is shown
