@@ -1218,7 +1218,7 @@ func (em *EventMgr) AddShortcut(chord key.Chord, bt *Button) {
 		if DebugSettings.KeyEventTrace {
 			old, exists := em.Shortcuts[cc]
 			if exists && old != bt {
-				slog.Error("gi.EventMgr.AddShortcut: overwriting duplicate shortcut", "shortcut", cc, "originalButton", old, "newButton", bt)
+				slog.Error("core.EventMgr.AddShortcut: overwriting duplicate shortcut", "shortcut", cc, "originalButton", old, "newButton", bt)
 			}
 		}
 		em.Shortcuts[cc] = bt

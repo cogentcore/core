@@ -281,7 +281,7 @@ func (ts *Tabs) TabAtIndex(idx int) (*Frame, *Tab, bool) {
 	tb := ts.Tabs()
 	sz := len(*fr.Children())
 	if idx < 0 || idx >= sz {
-		slog.Error("gi.Tabs: index out of range for number of tabs", "index", idx, "numTabs", sz)
+		slog.Error("core.Tabs: index out of range for number of tabs", "index", idx, "numTabs", sz)
 		return nil, nil, false
 	}
 	tab := tb.Child(idx).(*Tab)

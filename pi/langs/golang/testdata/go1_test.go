@@ -353,10 +353,10 @@ func slfaa() {
 	}
 }
 
-func (tv *TreeView) FocusChanged2D(change gi.FocusChanges) {
+func (tv *TreeView) FocusChanged2D(change core.FocusChanges) {
 	switch change {
-	case gi.FocusInactive: // don't care..
-	case gi.FocusActive:
+	case core.FocusInactive: // don't care..
+	case core.FocusActive:
 	}
 }
 
@@ -473,7 +473,7 @@ var _ArgDataFlags_index = [...]uint8{0, 13, 26, 39}
 var FileInfoProperties = tree.Properties{
 	"CtxtMenu": tree.Propertieslice{
 		{"Duplicate", tree.Properties{
-			"updtfunc": ActionUpdateFunc(func(fii interface{}, act *gi.Button) {
+			"updtfunc": ActionUpdateFunc(func(fii interface{}, act *core.Button) {
 				fi := fii.(*FileInfo)
 				act.SetInactiveState(fi.IsDir())
 			}),
@@ -481,7 +481,7 @@ var FileInfoProperties = tree.Properties{
 		{"Delete", tree.Properties{
 			"desc":    "Ok to delete this file?  This is not undoable and is not moving to trash / recycle bin",
 			"confirm": true,
-			"updtfunc": ActionUpdateFunc(func(fii interface{}, act *gi.Button) {
+			"updtfunc": ActionUpdateFunc(func(fii interface{}, act *core.Button) {
 				fi := fii.(*FileInfo)
 				act.SetInactiveState(fi.IsDir())
 			}),
@@ -498,13 +498,13 @@ var FileInfoProperties = tree.Properties{
 }
 
 func aaa() {
-	sf, ok := pv.(func(it interface{}, act *gi.Button) key.Chord)	
+	sf, ok := pv.(func(it interface{}, act *core.Button) key.Chord)	
 }
 
 func ccc() {
 	if sf, ok := pv.(ShortcutFunc); ok {
 		ac.Shortcut = sf(md.Val, ac)
-	} else if sf, ok := pv.(func(it interface{}, act *gi.Button) key.Chord); ok {
+	} else if sf, ok := pv.(func(it interface{}, act *core.Button) key.Chord); ok {
 		ac.Shortcut = sf(md.Val, ac)
 	} else {
 		MethodViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, shortcut-func must be of type ShortcutFunc", methNm))
@@ -516,7 +516,7 @@ func bbb() {
 	a := struct{}{}
 }
 
-func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
+func (tv *TableView) RowGrabFocus(row int) *core.WidgetBase {
 	
 	tv.inFocusGrab = slice{}
 
@@ -561,10 +561,10 @@ pil:
 	return nil
 }
 
-func (tv *TreeView) FocusChanged2D(change gi.FocusChanges) {
+func (tv *TreeView) FocusChanged2D(change core.FocusChanges) {
 	switch change {
-	case gi.FocusInactive: // don't care..
-	case gi.FocusActive:
+	case core.FocusInactive: // don't care..
+	case core.FocusActive:
 	}
 }
 
@@ -594,7 +594,7 @@ func (tv *TextView) FindNextLink(pos TextPos) (TextPos, TextRegion, bool) {
 }
 
 func tst() {
-	nwSz := gi.Vec2D{mxwd, off + extraHalf}.ToPointCeil()
+	nwSz := core.Vec2D{mxwd, off + extraHalf}.ToPointCeil()
 }
 
 func tst() {
@@ -613,7 +613,7 @@ func tst() {
 
 var PiViewProperties = tree.Properties{
 	"MainMenu": tree.Propertieslice{
-		"updtfunc": giv.ActionUpdateFunc(func(pvi interface{}, act *gi.Button) {
+		"updtfunc": giv.ActionUpdateFunc(func(pvi interface{}, act *core.Button) {
 			pv := pvi.(*PiView)
 			act.SetActiveState(pv.Settings.ProjFile != "")
 		}),
@@ -650,7 +650,7 @@ func tst() {
 		if !inClosePrompt {
 			inClosePrompt = true
 			if pv.Changed {
-				gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
+				core.ChoiceDialog(vp, core.DlgOpts{Title: "Close Without Saving?",
 					Prompt: "Do you want to save your changes?  If so, Cancel and then Save"},
 					[]string{"Close Without Saving", "Cancel"},
 					win.This(), func(recv, send tree.Node, sig int64, data interface{}) {
@@ -841,7 +841,7 @@ func tst() {
 	 			}
 	 		}
 		}
-	recv := gi.Node2DBase{}
+	recv := core.Node2DBase{}
 }
 
 func (pr *Parser) Init() {
@@ -970,7 +970,7 @@ type MyFloat float64
 
 type AStruct struct {
 	AField int
-	TField gi.Widget `desc:"tagged"`
+	TField core.Widget `desc:"tagged"`
 	AField []string
 	MField map[string]int
 }
@@ -1005,9 +1005,9 @@ var tree = (map[token.Tokens]struct{})(optMap)
 
 var partyp = (*int)(tree)
 
-var ExprTypeAssert = absfr.(gi.TreeView)
+var ExprTypeAssert = absfr.(core.TreeView)
 
-var ExprTypeAssertPtr = absfr.(*gi.TreeView)
+var ExprTypeAssertPtr = absfr.(*core.TreeView)
 
 var methexpr = abc.meth(a-b * 2 + bf.Meth(22 + 55) / long.meth.Call(tree))
 
@@ -1030,7 +1030,7 @@ func main() {
 	c[3] = 42 * 17
  	bf := a * b + c[32]
 	d += funcall(a, b, c...)
-	fmt.Printf("this is ok", gi.CallMe(a.(tree) + b.(*tree) + int(22) * string(17)))
+	fmt.Printf("this is ok", core.CallMe(a.(tree) + b.(*tree) + int(22) * string(17)))
 }
 
 func mainrun() {
@@ -1082,7 +1082,7 @@ Version: ` + pi.VersionInfo())
 		}
 	}
 
-	recv := gi.Node2DBase{}
+	recv := core.Node2DBase{}
 	recv.InitName(&recv, "pie_dummy")
 
 	inQuitPrompt := false
@@ -1110,7 +1110,7 @@ Version: ` + pi.VersionInfo())
 	piv.NewPiView()
 
 	// above NewGideProj calls will have added to WinWait..
-	gi.WinWait.Wait()
+	core.WinWait.Wait()
 }
 
 var someother int
@@ -1133,22 +1133,22 @@ type Lang interface {
 }
 
 var TextViewProperties = tree.Properties{
-	"white-space":      gi.WhiteSpacePreWrap,
+	"white-space":      core.WhiteSpacePreWrap,
 	"font-family":      "Go Mono",
 	"border-width":     0, // don't render our own border
 	"cursor-width":     units.NewValue(3, units.Px),
-	"border-color":     &gi.Settings.Colors.Border,
-	"border-style":     gi.BorderSolid,
+	"border-color":     &core.Settings.Colors.Border,
+	"border-style":     core.BorderSolid,
 	"padding":          units.NewValue(2, units.Px),
 	"margin":           units.NewValue(2, units.Px),
-	"vertical-align":   gi.AlignTop,
-	"text-align":       gi.AlignLeft,
+	"vertical-align":   core.AlignTop,
+	"text-align":       core.AlignLeft,
 	"tab-size":         4,
-	"color":            &gi.Settings.Colors.Font,
-	"background-color": &gi.Settings.Colors.Background,
+	"color":            &core.Settings.Colors.Font,
+	"background-color": &core.Settings.Colors.Background,
 	TextViewSelectors[TextViewActive]: tree.Properties{
-		"color":            &gi.Settings.Colors.Font,
-		"background-color": &gi.Settings.Colors.Background,
+		"color":            &core.Settings.Colors.Font,
+		"background-color": &core.Settings.Colors.Background,
 	},
 	TextViewSelectors[TextViewActive]: tree.Properties{
 		"background-color": "highlight-10",
@@ -1160,16 +1160,16 @@ var TextViewProperties = tree.Properties{
 		"background-color": "highlight-20",
 	},
 	TextViewSelectors[TextViewSel]: tree.Properties{
-		"background-color": &gi.Settings.Colors.Select,
+		"background-color": &core.Settings.Colors.Select,
 	},
 	TextViewSelectors[TextViewHighlight]: tree.Properties{
-		"background-color": &gi.Settings.Colors.Highlight,
+		"background-color": &core.Settings.Colors.Highlight,
 	},
 	TextViewSelectors[TextViewSel]: tree.Properties{
-		"background-color": &gi.Settings.Colors.Select,
+		"background-color": &core.Settings.Colors.Select,
 	},
 	TextViewSelectors[TextViewHighlight]: tree.Properties{
-		"background-color": &gi.Settings.Colors.Highlight,
+		"background-color": &core.Settings.Colors.Highlight,
 	},
 }
 

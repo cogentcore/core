@@ -280,7 +280,7 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 
 // Dragged is called after target accepts the drop -- we just remove
 // elements that were moved
-// satisfies gi.DragNDropper interface and can be overridden by subtypes
+// satisfies core.DragNDropper interface and can be overridden by subtypes
 func (fn *Node) DropDeleteSource(e events.Event) {
 	de := e.(*events.DragDrop)
 	froot := fn.FRoot

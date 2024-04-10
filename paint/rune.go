@@ -56,10 +56,10 @@ type Rune struct {
 // the first element must be non-nil
 func (rr *Rune) HasNil() error {
 	if rr.Face == nil {
-		return errors.New("gi.Rune: Face is nil")
+		return errors.New("core.Rune: Face is nil")
 	}
 	if rr.Color == nil {
-		return errors.New("gi.Rune: Color is nil")
+		return errors.New("core.Rune: Color is nil")
 	}
 	// note: BackgroundColor can be nil -- transparent
 	return nil

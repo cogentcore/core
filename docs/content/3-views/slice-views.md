@@ -13,7 +13,7 @@ You can detect when the user changes the value of the slice:
 ```Go
 sl := []int{1, 3, 5}
 giv.NewSliceView(parent).SetSlice(&sl).OnChange(func(e events.Event) {
-    gi.MessageSnackbar(parent, fmt.Sprintf("Slice: %v", sl))
+    core.MessageSnackbar(parent, fmt.Sprintf("Slice: %v", sl))
 })
 ```
 

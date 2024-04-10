@@ -1523,7 +1523,7 @@ func (sv *SliceViewBase) MimeDataIndex(md *mimedata.Mimes, idx int) {
 	if err == nil {
 		*md = append(*md, &mimedata.Data{Type: fi.DataJson, Data: b})
 	} else {
-		log.Printf("gi.SliceViewBase MimeData JSON Marshall error: %v\n", err)
+		log.Printf("core.SliceViewBase MimeData JSON Marshall error: %v\n", err)
 	}
 	sv.ViewMuUnlock()
 }
@@ -1539,7 +1539,7 @@ func (sv *SliceViewBase) FromMimeData(md mimedata.Mimes) []any {
 			if err == nil {
 				sl = append(sl, nval)
 			} else {
-				log.Printf("gi.SliceViewBase FromMimeData: JSON load error: %v\n", err)
+				log.Printf("core.SliceViewBase FromMimeData: JSON load error: %v\n", err)
 			}
 		}
 	}

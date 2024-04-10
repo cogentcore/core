@@ -15,7 +15,7 @@ import (
 var (
 	// ScrollWheelSpeed controls how fast the scroll wheel moves (typically
 	// interpreted as pixels per wheel step).
-	// This is also in gi.DeviceSettings and updated from there
+	// This is also in core.DeviceSettings and updated from there
 	ScrollWheelSpeed = float32(1)
 )
 

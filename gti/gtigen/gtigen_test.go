@@ -98,7 +98,7 @@ func TestPerson(t *testing.T) {
 }
 
 func BenchmarkIDName(b *testing.B) {
-	const path = "cogentcore.org/core/gi.Button"
+	const path = "cogentcore.org/core/core.Button"
 	for i := 0; i < b.N; i++ {
 		li := strings.LastIndex(path, ".")
 		_ = strcase.ToKebab(path[li+1:])

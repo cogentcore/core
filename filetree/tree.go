@@ -145,7 +145,7 @@ func (ft *Tree) UpdatePath(path string) {
 		fn.UpdateNode()
 		return
 	}
-	// gi.MessageSnackbar(ft, "UpdatePath: path not found in tree: "+path)
+	// core.MessageSnackbar(ft, "UpdatePath: path not found in tree: "+path)
 }
 
 // ConfigWatcher configures a new watcher for tree

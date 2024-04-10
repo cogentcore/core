@@ -13,7 +13,7 @@ You can detect when the user changes the value of the map:
 ```Go
 m := map[string]int{"Go": 1, "C++": 3, "Python": 5}
 giv.NewMapView(parent).SetMap(&m).OnChange(func(e events.Event) {
-    gi.MessageSnackbar(parent, fmt.Sprintf("Map: %v", m))
+    core.MessageSnackbar(parent, fmt.Sprintf("Map: %v", m))
 })
 ```
 

@@ -425,7 +425,7 @@ func (tr *Text) SetHTMLBytes(str []byte, font *styles.FontRender, txtSty *styles
 // This is the No-Pre parser that uses the golang XML decoder system, which
 // strips all whitespace and is thus unsuitable for any Pre case
 func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles.Text, ctxt *units.Context, cssAgg map[string]any) {
-	//	errstr := "gi.Text SetHTML"
+	//	errstr := "core.Text SetHTML"
 	sz := len(str)
 	if sz == 0 {
 		return
@@ -590,7 +590,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles
 // (including class names) are decoded.  Whitespace is decoded as-is,
 // including LF \n etc, except in WhiteSpacePreLine case which only preserves LF's
 func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.Text, ctxt *units.Context, cssAgg map[string]any) {
-	// errstr := "gi.Text SetHTMLPre"
+	// errstr := "core.Text SetHTMLPre"
 
 	sz := len(str)
 	tr.Spans = make([]Span, 1)

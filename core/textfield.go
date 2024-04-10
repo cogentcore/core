@@ -1218,7 +1218,7 @@ var (
 	TextFieldBlinker = Blinker{}
 
 	// TextFieldSpriteName is the name of the window sprite used for the cursor
-	TextFieldSpriteName = "gi.TextField.Cursor"
+	TextFieldSpriteName = "core.TextField.Cursor"
 )
 
 func init() {

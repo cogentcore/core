@@ -62,7 +62,7 @@ type StructView struct {
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string
 
-	// IsShouldShower is whether the struct implements [gi.ShouldShower], which results
+	// IsShouldShower is whether the struct implements [core.ShouldShower], which results
 	// in additional updating being done at certain points.
 	IsShouldShower bool `set:"-" json:"-" xml:"-" edit:"-"`
 

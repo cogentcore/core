@@ -21,7 +21,7 @@ type person struct {
 }
 p := person{Name: "Go", Age: 35}
 giv.NewStructView(parent).SetStruct(&p).OnChange(func(e events.Event) {
-    gi.MessageSnackbar(parent, fmt.Sprintf("You are %v", p))
+    core.MessageSnackbar(parent, fmt.Sprintf("You are %v", p))
 })
 ```
 
@@ -34,7 +34,7 @@ type person struct {
 }
 p := person{Name: "Go", Age: 35}
 giv.NewStructView(parent).SetStruct(&p).OnChange(func(e events.Event) {
-    gi.MessageSnackbar(parent, fmt.Sprintf("You are %v", p))
+    core.MessageSnackbar(parent, fmt.Sprintf("You are %v", p))
 })
 ```
 

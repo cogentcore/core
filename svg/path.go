@@ -646,7 +646,7 @@ func PathDataValidate(data *[]PathData, errstr string) error {
 	di := 0
 	fcmd, _ := PathDataNextCmd(*data, &di)
 	if !(fcmd == Pcm || fcmd == PcM) {
-		log.Printf("gi.PathDataValidate on %v: doesn't start with M or m -- adding\n", errstr)
+		log.Printf("core.PathDataValidate on %v: doesn't start with M or m -- adding\n", errstr)
 		ns := make([]PathData, 3, sz+3)
 		ns[0] = PcM.EncCmd(2)
 		ns[1], ns[2] = (*data)[1], (*data)[2]
@@ -658,12 +658,12 @@ func PathDataValidate(data *[]PathData, errstr string) error {
 		cmd, n := PathDataNextCmd(*data, &i)
 		trgn, ok := PathCmdNMap[cmd]
 		if !ok {
-			err := fmt.Errorf("gi.PathDataValidate on %v: Path Command not valid: %v", errstr, cmd)
+			err := fmt.Errorf("core.PathDataValidate on %v: Path Command not valid: %v", errstr, cmd)
 			log.Println(err)
 			return err
 		}
 		if (trgn == 0 && n > 0) || (trgn > 0 && n%trgn != 0) {
-			err := fmt.Errorf("gi.PathDataValidate on %v: Path Command %v has invalid n: %v -- should be: %v", errstr, cmd, n, trgn)
+			err := fmt.Errorf("core.PathDataValidate on %v: Path Command %v has invalid n: %v -- should be: %v", errstr, cmd, n, trgn)
 			log.Println(err)
 			return err
 		}
@@ -713,7 +713,7 @@ func PathDecodeCmd(r rune) PathCmds {
 	if ok {
 		return cmd
 	} else {
-		// log.Printf("gi.PathDecodeCmd unrecognized path command: %v %v\n", string(r), r)
+		// log.Printf("core.PathDecodeCmd unrecognized path command: %v %v\n", string(r), r)
 		return PcErr
 	}
 }
@@ -741,7 +741,7 @@ func PathDataParse(d string) ([]PathData, error) {
 				}
 				p, err := strconv.ParseFloat(nstr, 32)
 				if err != nil {
-					log.Printf("gi.PathDataParse could not parse string: %v into float\n", nstr)
+					log.Printf("core.PathDataParse could not parse string: %v into float\n", nstr)
 					return nil, err
 				}
 				pd = append(pd, PathData(p))
@@ -765,7 +765,7 @@ func PathDataParse(d string) ([]PathData, error) {
 					cmd := PathDecodeCmd(r)
 					if cmd == PcErr {
 						if i != endi {
-							err := fmt.Errorf("gi.PathDataParse invalid command rune: %v", r)
+							err := fmt.Errorf("core.PathDataParse invalid command rune: %v", r)
 							log.Println(err)
 							return nil, err
 						}

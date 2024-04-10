@@ -209,7 +209,7 @@ func ParseDashesString(str string) []float32 {
 	for i, dstr := range ds {
 		d, err := strconv.ParseFloat(strings.TrimSpace(dstr), 32)
 		if err != nil {
-			log.Printf("gi.ParseDashesString parsing error: %v\n", err)
+			log.Printf("core.ParseDashesString parsing error: %v\n", err)
 			return nil
 		}
 		dl[i] = float32(d)

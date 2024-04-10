@@ -45,7 +45,7 @@ func (sv *SceneView) ConfigSceneView() {
 	sv.ConfigToolbar(tb)
 }
 
-// SceneWidget returns the gi.Widget Scene (xyzv.Scene)
+// SceneWidget returns the core.Widget Scene (xyzv.Scene)
 func (sv *SceneView) SceneWidget() *Scene {
 	return sv.ChildByName("scene", 0).(*Scene)
 }

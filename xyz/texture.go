@@ -138,12 +138,12 @@ func (tx *TextureFile) Image() *image.RGBA {
 	return tx.Img
 }
 
-// TextureGi2D is a dynamic texture material driven by a gi.Viewport2D viewport
+// TextureGi2D is a dynamic texture material driven by a core.Viewport2D viewport
 // anything rendered to the viewport will be projected onto the surface of any
 // solid using this texture.
 type TextureGi2D struct {
 	TextureBase
-	// Scene2D *gi.Scene
+	// Scene2D *core.Scene
 }
 
 ///////////////////////////////////////////////////////////////////////////

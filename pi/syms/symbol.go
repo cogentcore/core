@@ -120,7 +120,7 @@ func (sy *Symbol) String() string {
 	return fmt.Sprintf("%v: %v (%v)", sy.Name, sy.Kind, sy.Region)
 }
 
-// Label satisfies gi.Labeler interface -- nicer presentation label
+// Label satisfies core.Labeler interface -- nicer presentation label
 func (sy *Symbol) Label() string {
 	lbl := sy.Name
 	switch {

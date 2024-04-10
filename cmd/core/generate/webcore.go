@@ -67,8 +67,8 @@ func GetWebcoreExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
 				gotMain = true
 			}
 
-			// gi.NewBody in a main function counts as a new start so that full examples work
-			if gotMain && !gotNewBody && bytes.Contains(b, []byte("gi.NewBody(")) {
+			// core.NewBody in a main function counts as a new start so that full examples work
+			if gotMain && !gotNewBody && bytes.Contains(b, []byte("core.NewBody(")) {
 				gotNewBody = true
 				curExample = nil
 				curExample = append(curExample, []byte("b := parent"))
@@ -113,10 +113,10 @@ func WriteWebcoregen(c *config.Config, examples ordmap.Map[string, []byte]) erro
 }
 
 // WebcoreExamples are the compiled webcore examples for this app.
-var WebcoreExamples = map[string]func(parent gi.Widget){`)
+var WebcoreExamples = map[string]func(parent core.Widget){`)
 	for _, kv := range examples.Order {
 		fmt.Fprintf(b, `
-	%q: func(parent gi.Widget){%s%s},`, kv.Key, "\n", kv.Value)
+	%q: func(parent core.Widget){%s%s},`, kv.Key, "\n", kv.Value)
 	}
 	b.WriteString("\n}")
 

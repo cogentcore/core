@@ -70,10 +70,10 @@ func (sr *Span) Init(capsz int) {
 // Text and Render slices are the same, and that the first render info is non-nil
 func (sr *Span) IsValid() error {
 	if len(sr.Text) == 0 {
-		return errors.New("gi.Text: Text is empty")
+		return errors.New("core.Text: Text is empty")
 	}
 	if len(sr.Text) != len(sr.Render) {
-		return fmt.Errorf("gi.Text: Render length %v != Text length %v for text: %v", len(sr.Render), len(sr.Text), string(sr.Text))
+		return fmt.Errorf("core.Text: Render length %v != Text length %v for text: %v", len(sr.Render), len(sr.Text), string(sr.Text))
 	}
 	return sr.Render[0].HasNil()
 }

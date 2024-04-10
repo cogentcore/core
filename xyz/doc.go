@@ -5,7 +5,7 @@
 /*
 Package xyz provides a 3D scenegraph for the Cogent Core GUI framework.
 
-The scenegraph is rooted at a xyz.Scene node which is like gi.Viewport2D,
+The scenegraph is rooted at a xyz.Scene node which is like core.Viewport2D,
 where the scene is rendered, similar to the svg.SVG node for SVG drawings.
 
 Children of the Scene are Node nodes, with Group and Solid as the main

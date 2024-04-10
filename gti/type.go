@@ -13,7 +13,7 @@ import (
 
 // Type represents a type
 type Type struct {
-	// Name is the fully package-path-qualified name of the type (eg: cogentcore.org/core/gi.Button)
+	// Name is the fully package-path-qualified name of the type (eg: cogentcore.org/core/core.Button)
 	Name string
 
 	// IDName is the short, package-unqualified, kebab-case name of the type that is suitable

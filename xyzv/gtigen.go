@@ -21,10 +21,10 @@ func (t *ManipPoint) New() tree.Node { return &ManipPoint{} }
 func (t *ManipPoint) SetMat(v xyz.Material) *ManipPoint { t.Mat = v; return t }
 
 // SceneType is the [gti.Type] for [Scene]
-var SceneType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyzv.Scene", IDName: "scene", Doc: "Scene is a gi.Widget that manages a xyz.Scene,\nproviding the basic rendering logic for the 3D scene\nin the 2D gi gui context.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "XYZ", Doc: "XYZ is the 3D xyz.Scene"}, {Name: "SelectionMode", Doc: "how to deal with selection / manipulation events"}, {Name: "CurrentSelected", Doc: "currently selected node"}, {Name: "CurrentManipPoint", Doc: "currently selected manipulation control point"}, {Name: "SelectionParams", Doc: "parameters for selection / manipulation box"}}, Instance: &Scene{}})
+var SceneType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyzv.Scene", IDName: "scene", Doc: "Scene is a core.Widget that manages a xyz.Scene,\nproviding the basic rendering logic for the 3D scene\nin the 2D gi gui context.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "XYZ", Doc: "XYZ is the 3D xyz.Scene"}, {Name: "SelectionMode", Doc: "how to deal with selection / manipulation events"}, {Name: "CurrentSelected", Doc: "currently selected node"}, {Name: "CurrentManipPoint", Doc: "currently selected manipulation control point"}, {Name: "SelectionParams", Doc: "parameters for selection / manipulation box"}}, Instance: &Scene{}})
 
 // NewScene adds a new [Scene] with the given name to the given parent:
-// Scene is a gi.Widget that manages a xyz.Scene,
+// Scene is a core.Widget that manages a xyz.Scene,
 // providing the basic rendering logic for the 3D scene
 // in the 2D gi gui context.
 func NewScene(parent tree.Node, name ...string) *Scene {

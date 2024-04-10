@@ -235,7 +235,7 @@ func (a Mat2) Inverse() Mat2 {
 func ParseFloat32(pstr string) (float32, error) {
 	r, err := strconv.ParseFloat(pstr, 32)
 	if err != nil {
-		log.Printf("gi.ParseFloat32: error parsing float32 number from: %v, %v\n", pstr, err)
+		log.Printf("core.ParseFloat32: error parsing float32 number from: %v, %v\n", pstr, err)
 		return float32(0.0), err
 	}
 	return float32(r), nil
@@ -258,7 +258,7 @@ func ParseAngle32(pstr string) (float32, error) {
 	}
 	r, err := strconv.ParseFloat(lstr, 32)
 	if err != nil {
-		log.Printf("gi.ParseAngle32: error parsing float32 number from: %v, %v\n", lstr, err)
+		log.Printf("core.ParseAngle32: error parsing float32 number from: %v, %v\n", lstr, err)
 		return float32(0.0), err
 	}
 	switch units {

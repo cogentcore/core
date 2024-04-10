@@ -743,7 +743,7 @@ func StructSliceIndexByValue(struSlice any, fldName string, fldVal any) (int, er
 	struTyp := laser.NonPtrType(reflect.TypeOf(struSlice).Elem().Elem())
 	fld, ok := struTyp.FieldByName(fldName)
 	if !ok {
-		err := fmt.Errorf("gi.StructSliceRowByValue: field name: %v not found", fldName)
+		err := fmt.Errorf("core.StructSliceRowByValue: field name: %v not found", fldName)
 		slog.Error(err.Error())
 		return -1, err
 	}

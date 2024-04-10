@@ -21,7 +21,7 @@ type language struct {
 }
 sl := []language{{"Go", 10}, {"Python", 5}}
 giv.NewTableView(parent).SetSlice(&sl).OnChange(func(e events.Event) {
-    gi.MessageSnackbar(parent, fmt.Sprintf("Languages: %v", sl))
+    core.MessageSnackbar(parent, fmt.Sprintf("Languages: %v", sl))
 })
 ```
 

@@ -15,15 +15,15 @@ var exe []byte
 var icon []byte
 
 func main() {
-	b := gi.NewBody("{{.Name}} Installer")
+	b := core.NewBody("{{.Name}} Installer")
 	b.App().SetAppBarConfig(nil).SetIconBytes(icon)
-	bt := gi.NewButton(b).SetText("Install {{.Name}}")
+	bt := core.NewButton(b).SetText("Install {{.Name}}")
 	bt.OnClick(func(e events.Event) {
 		dir := "C:\\Program Files\\{{.Name}}"
 		err := os.MkdirAll(dir, 0777)
-		gi.ErrorDialog(bt, err, "Error installing {{.Name}}")
+		core.ErrorDialog(bt, err, "Error installing {{.Name}}")
 		err = os.WriteFile(dir+"\\{{.Name}}.exe", exe, 0666)
-		gi.ErrorDialog(bt, err, "Error installing {{.Name}}")
+		core.ErrorDialog(bt, err, "Error installing {{.Name}}")
 	})
 	b.RunMainWindow()
 }

@@ -19,7 +19,7 @@ type Embed2D struct {
 	// overall scaling factor relative to an arbitrary but sensible default scale based on size of viewport -- increase to increase size of view
 	Zoom float32
 
-	// if true, will be resized to fit its contents during initialization (though it will never get smaller than original size specified at creation) -- this requires having a gi.Layout element (or derivative, such as gi.Frame) as the first and only child of the Viewport
+	// if true, will be resized to fit its contents during initialization (though it will never get smaller than original size specified at creation) -- this requires having a core.Layout element (or derivative, such as core.Frame) as the first and only child of the Viewport
 	FitContent bool
 
 	// original standardized 96 DPI size -- the original size specified on creation -- actual size is affected by device pixel ratio and resizing due to FitContent
@@ -42,7 +42,7 @@ const (
 // NewEmbed2D adds a new embedded 2D viewport of given name and nominal size
 // according to the standard 96 dpi resolution (i.e., actual size is adjusted relative
 // to that using window's current Logical DPI scaling).  If fitContent is true and
-// first and only element in Viewport is a gi.Layout, then it will be resized
+// first and only element in Viewport is a core.Layout, then it will be resized
 // to fit content size (though no smaller than given size).
 func NewEmbed2D(sc *Scene, parent tree.Node, name string, width, height int, fitContent bool) *Embed2D {
 	em := parent.NewChild(TypeEmbed2D, name).(*Embed2D)
@@ -179,7 +179,7 @@ func (em *Embed2D) UpdateBBox2D(size mat32.Vec2, sc *Scene) {
 		if k == em.Viewport.This() {
 			return tree.Continue
 		}
-		_, ni := gi.KiToNode2D(k)
+		_, ni := core.KiToNode2D(k)
 		if ni == nil {
 			return tree.Break // going into a different type of thing, bail
 		}
@@ -235,7 +235,7 @@ func (em *Embed2D) Project2D(sc *Scene, pt image.Point) (image.Point, bool) {
 }
 
 func (em *Embed2D) ConnectEvents3D(sc *Scene) {
-	em.ConnectEvent(sc.Win, goosi.MouseEvent, gi.RegPri, func(recv, send tree.Node, sig int64, d any) {
+	em.ConnectEvent(sc.Win, goosi.MouseEvent, core.RegPri, func(recv, send tree.Node, sig int64, d any) {
 		emm := recv.Embed(TypeEmbed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
 		if !ssc.IsVisible() {
@@ -267,7 +267,7 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		}
 		me.SetProcessed() // must always
 	})
-	em.ConnectEvent(sc.Win, goosi.MouseMoveEvent, gi.RegPri, func(recv, send tree.Node, sig int64, d any) {
+	em.ConnectEvent(sc.Win, goosi.MouseMoveEvent, core.RegPri, func(recv, send tree.Node, sig int64, d any) {
 		emm := recv.Embed(TypeEmbed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
 		if !ssc.IsVisible() {
@@ -293,7 +293,7 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		emm.Viewport.EventMgr.MouseEventReset(md)
 		me.SetProcessed() // must always
 	})
-	em.ConnectEvent(sc.Win, goosi.MouseDragEvent, gi.RegPri, func(recv, send tree.Node, sig int64, d any) {
+	em.ConnectEvent(sc.Win, goosi.MouseDragEvent, core.RegPri, func(recv, send tree.Node, sig int64, d any) {
 		emm := recv.Embed(TypeEmbed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
 		if !ssc.IsVisible() {
@@ -318,7 +318,7 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		emm.Viewport.EventMgr.MouseEventReset(md)
 		me.SetProcessed() // must always
 	})
-	em.ConnectEvent(sc.Win, goosi.KeyChordEvent, gi.HiPri, func(recv, send tree.Node, sig int64, d any) {
+	em.ConnectEvent(sc.Win, goosi.KeyChordEvent, core.HiPri, func(recv, send tree.Node, sig int64, d any) {
 		// note: restylesering HiPri -- we are outside 2D focus system, and get *all* keyboard events
 		emm := recv.Embed(TypeEmbed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
@@ -346,10 +346,10 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 // EmbedViewport is an embedded viewport with its own event manager to handle
 // events instead of using the Window.
 type EmbedViewport struct {
-	gi.Viewport2D
+	core.Viewport2D
 
 	// event manager that handles dispersing events to nodes
-	EventMgr gi.EventMgr `json:"-" xml:"-"`
+	EventMgr core.EventMgr `json:"-" xml:"-"`
 
 	// parent scene -- trigger updates
 	Scene *Scene `json:"-" xml:"-"`
@@ -366,7 +366,7 @@ type EmbedViewport struct {
 func NewEmbedViewport(sc *Scene, em *Embed2D, name string, width, height int) *EmbedViewport {
 	sz := image.Point{width, height}
 	vp := &EmbedViewport{}
-	vp.Geom = gi.Geom2DInt{Size: sz}
+	vp.Geom = core.Geom2DInt{Size: sz}
 	vp.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
 	vp.Render.Init(width, height, vp.Pixels)
 	vp.InitName(vp, name)
@@ -377,12 +377,12 @@ func NewEmbedViewport(sc *Scene, em *Embed2D, name string, width, height int) *E
 	return vp
 }
 
-func (vp *EmbedViewport) VpTop() gi.Viewport {
-	return vp.This().(gi.Viewport)
+func (vp *EmbedViewport) VpTop() core.Viewport {
+	return vp.This().(core.Viewport)
 }
 
-func (vp *EmbedViewport) VpTopNode() gi.Node {
-	return vp.This().(gi.Node)
+func (vp *EmbedViewport) VpTopNode() core.Node {
+	return vp.This().(core.Node)
 }
 
 func (vp *EmbedViewport) VpTopUpdateStart() bool {
@@ -401,7 +401,7 @@ func (vp *EmbedViewport) VpTopUpdateEnd(updt bool) {
 	vp.TopUpdated = false
 }
 
-func (vp *EmbedViewport) VpEventMgr() *gi.EventMgr {
+func (vp *EmbedViewport) VpEventMgr() *core.EventMgr {
 	return &vp.EventMgr
 }
 
@@ -413,7 +413,7 @@ func (vp *EmbedViewport) VpIsVisible() bool {
 }
 
 func (vp *EmbedViewport) VpUploadAll() {
-	if !vp.This().(gi.Viewport).VpIsVisible() {
+	if !vp.This().(core.Viewport).VpIsVisible() {
 		return
 	}
 	// fmt.Printf("embed vp upload all\n")

@@ -120,7 +120,7 @@ func (cv *ColorView) Config() {
 
 /*
 func (cv *ColorView) OnInit() {
-	cv.OnWidgetAdded(func(w gi.Widget) {
+	cv.OnWidgetAdded(func(w core.Widget) {
 		switch w.PathFrom(cv) {
 		case "value":
 			w.Style(func(s *styles.Style) {
@@ -146,7 +146,7 @@ func (cv *ColorView) OnInit() {
 				s.Min.X.Ch(20)
 			})
 		}
-		if sl, ok := w.(*gi.Slider); ok {
+		if sl, ok := w.(*core.Slider); ok {
 			sl.Style(func(s *styles.Style) {
 				s.Min.X.Ch(20)
 				s.Min.Y.Em(1)
@@ -154,7 +154,7 @@ func (cv *ColorView) OnInit() {
 			})
 		}
 		if w.Parent().Name() == "palette" {
-			if cbt, ok := w.(*gi.Button); ok {
+			if cbt, ok := w.(*core.Button); ok {
 				cbt.Style(func(s *styles.Style) {
 					c := colornames.Map[cbt.Name()]
 
@@ -179,15 +179,15 @@ func (cv *ColorView) SetColor(clr color.Color) *ColorView {
 }
 
 // Config configures a standard setup of entire view
-func (cv *ColorView) Config(sc *gi.Scene) {
+func (cv *ColorView) Config(sc *core.Scene) {
 	if cv.HasChildren() {
 		return
 	}
 	updt := cv.UpdateStart()
-	vl := gi.NewLayout(cv, "slider-lay")
-	nl := gi.NewLayout(cv, "num-lay")
+	vl := core.NewLayout(cv, "slider-lay")
+	nl := core.NewLayout(cv, "num-lay")
 
-	rgbalay := gi.NewLayout(nl, "nums-rgba-lay")
+	rgbalay := core.NewLayout(nl, "nums-rgba-lay")
 
 	nrgba := NewStructViewInline(rgbalay, "nums-rgba")
 	nrgba.SetStruct(&cv.Color)
@@ -195,29 +195,29 @@ func (cv *ColorView) Config(sc *gi.Scene) {
 		cv.SetColor(cv.Color)
 	})
 
-	rgbacopy := gi.NewButton(rgbalay, "rgbacopy")
+	rgbacopy := core.NewButton(rgbalay, "rgbacopy")
 	rgbacopy.Icon = icons.ContentCopy
 	rgbacopy.Tooltip = "Copy RGBA Color"
-	rgbacopy.Menu = func(m *gi.Scene) {
-		gi.NewButton(m).SetText("styles.ColorFromRGB(r, g, b)").OnClick(func(e events.Event) {
+	rgbacopy.Menu = func(m *core.Scene) {
+		core.NewButton(m).SetText("styles.ColorFromRGB(r, g, b)").OnClick(func(e events.Event) {
 			text := fmt.Sprintf("styles.ColorFromRGB(%d, %d, %d)", cv.Color.R, cv.Color.G, cv.Color.B)
 			cv.Clipboard().Write(mimedata.NewText(text))
 		})
-		gi.NewButton(m).SetText("styles.ColorFromRGBA(r, g, b, a)").OnClick(func(e events.Event) {
+		core.NewButton(m).SetText("styles.ColorFromRGBA(r, g, b, a)").OnClick(func(e events.Event) {
 			text := fmt.Sprintf("styles.ColorFromRGBA(%d, %d, %d, %d)", cv.Color.R, cv.Color.G, cv.Color.B, cv.Color.A)
 			cv.Clipboard().Write(mimedata.NewText(text))
 		})
-		gi.NewButton(m).SetText("rgb(r, g, b)").OnClick(func(e events.Event) {
+		core.NewButton(m).SetText("rgb(r, g, b)").OnClick(func(e events.Event) {
 			text := fmt.Sprintf("rgb(%d, %d, %d)", cv.Color.R, cv.Color.G, cv.Color.B)
 			cv.Clipboard().Write(mimedata.NewText(text))
 		})
-		gi.NewButton(m).SetText("rgba(r, g, b, a)").OnClick(func(e events.Event) {
+		core.NewButton(m).SetText("rgba(r, g, b, a)").OnClick(func(e events.Event) {
 			text := fmt.Sprintf("rgba(%d, %d, %d, %d)", cv.Color.R, cv.Color.G, cv.Color.B, cv.Color.A)
 			cv.Clipboard().Write(mimedata.NewText(text))
 		})
 	}
 
-	hslalay := gi.NewLayout(nl, "nums-hsla-lay")
+	hslalay := core.NewLayout(nl, "nums-hsla-lay")
 
 	nhsla := NewStructViewInline(hslalay, "nums-hsla")
 	nhsla.SetStruct(&cv.ColorHSLA)
@@ -225,80 +225,80 @@ func (cv *ColorView) Config(sc *gi.Scene) {
 		cv.SetColor(cv.ColorHSLA)
 	})
 
-	hslacopy := gi.NewButton(hslalay, "hslacopy")
+	hslacopy := core.NewButton(hslalay, "hslacopy")
 	hslacopy.Icon = icons.ContentCopy
 	hslacopy.Tooltip = "Copy HSLA Color"
-	hslacopy.Menu = func(m *gi.Scene) {
-		gi.NewButton(m).SetText("styles.ColorFromHSL(h, s, l)").OnClick(func(e events.Event) {
+	hslacopy.Menu = func(m *core.Scene) {
+		core.NewButton(m).SetText("styles.ColorFromHSL(h, s, l)").OnClick(func(e events.Event) {
 			text := fmt.Sprintf("styles.ColorFromHSL(%g, %g, %g)", cv.ColorHSLA.H, cv.ColorHSLA.S, cv.ColorHSLA.L)
 			cv.Clipboard().Write(mimedata.NewText(text))
 		})
-		gi.NewButton(m).SetText("styles.ColorFromHSLA(h, s, l, a)").OnClick(func(e events.Event) {
+		core.NewButton(m).SetText("styles.ColorFromHSLA(h, s, l, a)").OnClick(func(e events.Event) {
 			text := fmt.Sprintf("styles.ColorFromHSLA(%g, %g, %g, %g)", cv.ColorHSLA.H, cv.ColorHSLA.S, cv.ColorHSLA.L, cv.ColorHSLA.A)
 			cv.Clipboard().Write(mimedata.NewText(text))
 		})
-		gi.NewButton(m).SetText("hsl(h, s, l)").OnClick(func(e events.Event) {
+		core.NewButton(m).SetText("hsl(h, s, l)").OnClick(func(e events.Event) {
 			text := fmt.Sprintf("hsl(%g, %g, %g)", cv.ColorHSLA.H, cv.ColorHSLA.S, cv.ColorHSLA.L)
 			cv.Clipboard().Write(mimedata.NewText(text))
 		})
-		gi.NewButton(m).SetText("hsla(h, s, l, a)").OnClick(func(e events.Event) {
+		core.NewButton(m).SetText("hsla(h, s, l, a)").OnClick(func(e events.Event) {
 			text := fmt.Sprintf("hsla(%g, %g, %g, %g)", cv.ColorHSLA.H, cv.ColorHSLA.S, cv.ColorHSLA.L, cv.ColorHSLA.A)
 			cv.Clipboard().Write(mimedata.NewText(text))
 		})
 	}
 
-	hexlay := gi.NewLayout(nl, "nums-hex-lay")
+	hexlay := core.NewLayout(nl, "nums-hex-lay")
 
-	gi.NewLabel(hexlay, "hexlbl").SetText("Hex")
+	core.NewLabel(hexlay, "hexlbl").SetText("Hex")
 
-	hex := gi.NewTextField(hexlay, "nums-hex")
+	hex := core.NewTextField(hexlay, "nums-hex")
 	hex.Tooltip = "The color in hexadecimal form"
 	hex.OnChange(func(e events.Event) {
 		cv.SetColor(grr.Log(colors.FromHex(hex.Text())))
 	})
 
-	hexcopy := gi.NewButton(hexlay, "hexcopy")
+	hexcopy := core.NewButton(hexlay, "hexcopy")
 	hexcopy.Icon = icons.ContentCopy
 	hexcopy.Tooltip = "Copy Hex Color"
-	hexcopy.Menu = func(m *gi.Scene) {
-		gi.NewButton(m).SetText(`styles.ColorFromHex("#RRGGBB")`).OnClick(func(e events.Event) {
+	hexcopy.Menu = func(m *core.Scene) {
+		core.NewButton(m).SetText(`styles.ColorFromHex("#RRGGBB")`).OnClick(func(e events.Event) {
 			hs := colors.AsHex(cv.Color)
 			// get rid of transparency because this is just RRGGBB
 			text := fmt.Sprintf(`styles.ColorFromHex("%s")`, hs[:len(hs)-2])
 			cv.Clipboard().Write(mimedata.NewText(text))
 		})
-		gi.NewButton(m).SetText(`styles.ColorFromHex("#RRGGBBAA")`).OnClick(func(e events.Event) {
+		core.NewButton(m).SetText(`styles.ColorFromHex("#RRGGBBAA")`).OnClick(func(e events.Event) {
 			text := fmt.Sprintf(`styles.ColorFromHex("%s")`, colors.AsHex(cv.Color))
 			cv.Clipboard().Write(mimedata.NewText(text))
 		})
-		gi.NewButton(m).SetText("#RRGGBB").OnClick(func(e events.Event) {
+		core.NewButton(m).SetText("#RRGGBB").OnClick(func(e events.Event) {
 			hs := colors.AsHex(cv.Color)
 			text := hs[:len(hs)-2]
 			cv.Clipboard().Write(mimedata.NewText(text))
 		})
-		gi.NewButton(m).SetText("#RRGGBBAA").OnClick(func(e events.Event) {
+		core.NewButton(m).SetText("#RRGGBBAA").OnClick(func(e events.Event) {
 			text := colors.AsHex(cv.Color)
 			cv.Clipboard().Write(mimedata.NewText(text))
 		})
 	}
 
-	gi.NewFrame(vl, "value")
-	sg := gi.NewLayout(vl, "slider-grid").SetDisplay(styles.Grid)
+	core.NewFrame(vl, "value")
+	sg := core.NewLayout(vl, "slider-grid").SetDisplay(styles.Grid)
 
-	gi.NewLabel(sg, "rlab").SetText("Red:")
-	rs := gi.NewSlider(sg, "red")
-	gi.NewLabel(sg, "hlab").SetText("Hue:")
-	hs := gi.NewSlider(sg, "hue")
-	gi.NewLabel(sg, "glab").SetText("Green:")
-	gs := gi.NewSlider(sg, "green")
-	gi.NewLabel(sg, "slab").SetText("Sat:")
-	ss := gi.NewSlider(sg, "sat")
-	gi.NewLabel(sg, "blab").SetText("Blue:")
-	bs := gi.NewSlider(sg, "blue")
-	gi.NewLabel(sg, "llab").SetText("Light:")
-	ls := gi.NewSlider(sg, "light")
-	gi.NewLabel(sg, "alab").SetText("Alpha:")
-	as := gi.NewSlider(sg, "alpha")
+	core.NewLabel(sg, "rlab").SetText("Red:")
+	rs := core.NewSlider(sg, "red")
+	core.NewLabel(sg, "hlab").SetText("Hue:")
+	hs := core.NewSlider(sg, "hue")
+	core.NewLabel(sg, "glab").SetText("Green:")
+	gs := core.NewSlider(sg, "green")
+	core.NewLabel(sg, "slab").SetText("Sat:")
+	ss := core.NewSlider(sg, "sat")
+	core.NewLabel(sg, "blab").SetText("Blue:")
+	bs := core.NewSlider(sg, "blue")
+	core.NewLabel(sg, "llab").SetText("Light:")
+	ls := core.NewSlider(sg, "light")
+	core.NewLabel(sg, "alab").SetText("Alpha:")
+	as := core.NewSlider(sg, "alpha")
 
 	cv.ConfigRGBSlider(rs, 0)
 	cv.ConfigRGBSlider(gs, 1)
@@ -313,20 +313,20 @@ func (cv *ColorView) Config(sc *gi.Scene) {
 	cv.UpdateEnd(updt)
 }
 
-func (cv *ColorView) NumLay() *gi.Layout {
-	return cv.ChildByName("num-lay", 1).(*gi.Layout)
+func (cv *ColorView) NumLay() *core.Layout {
+	return cv.ChildByName("num-lay", 1).(*core.Layout)
 }
 
-func (cv *ColorView) SliderLay() *gi.Layout {
-	return cv.ChildByName("slider-lay", 0).(*gi.Layout)
+func (cv *ColorView) SliderLay() *core.Layout {
+	return cv.ChildByName("slider-lay", 0).(*core.Layout)
 }
 
-func (cv *ColorView) Value() *gi.Frame {
-	return cv.SliderLay().ChildByName("value", 0).(*gi.Frame)
+func (cv *ColorView) Value() *core.Frame {
+	return cv.SliderLay().ChildByName("value", 0).(*core.Frame)
 }
 
-func (cv *ColorView) SliderGrid() *gi.Layout {
-	return cv.SliderLay().ChildByName("slider-grid", 0).(*gi.Layout)
+func (cv *ColorView) SliderGrid() *core.Layout {
+	return cv.SliderLay().ChildByName("slider-grid", 0).(*core.Layout)
 }
 
 func (cv *ColorView) SetRGBValue(val float32, rgb int) {
@@ -345,7 +345,7 @@ func (cv *ColorView) SetRGBValue(val float32, rgb int) {
 	}
 }
 
-func (cv *ColorView) ConfigRGBSlider(sl *gi.Slider, rgb int) {
+func (cv *ColorView) ConfigRGBSlider(sl *core.Slider, rgb int) {
 	sl.Max = 255
 	sl.Step = 1
 	sl.PageStep = 16
@@ -360,7 +360,7 @@ func (cv *ColorView) ConfigRGBSlider(sl *gi.Slider, rgb int) {
 	})
 }
 
-func (cv *ColorView) UpdateRGBSlider(sl *gi.Slider, rgb int) {
+func (cv *ColorView) UpdateRGBSlider(sl *core.Slider, rgb int) {
 	switch rgb {
 	case 0:
 		sl.SetValue(float32(cv.Color.R))
@@ -384,7 +384,7 @@ func (cv *ColorView) SetHSLValue(val float32, hsln int) {
 	}
 }
 
-func (cv *ColorView) ConfigHSLSlider(sl *gi.Slider, hsl int) {
+func (cv *ColorView) ConfigHSLSlider(sl *core.Slider, hsl int) {
 	sl.Max = 360
 	sl.Step = 1
 	sl.PageStep = 15
@@ -398,7 +398,7 @@ func (cv *ColorView) ConfigHSLSlider(sl *gi.Slider, hsl int) {
 	})
 }
 
-func (cv *ColorView) UpdateHSLSlider(sl *gi.Slider, hsl int) {
+func (cv *ColorView) UpdateHSLSlider(sl *core.Slider, hsl int) {
 	switch hsl {
 	case 0:
 		sl.SetValue(cv.ColorHSLA.H)
@@ -412,24 +412,24 @@ func (cv *ColorView) UpdateHSLSlider(sl *gi.Slider, hsl int) {
 func (cv *ColorView) UpdateSliderGrid() {
 	sg := cv.SliderGrid()
 	updt := sg.UpdateStart()
-	cv.UpdateRGBSlider(sg.ChildByName("red", 0).(*gi.Slider), 0)
-	cv.UpdateRGBSlider(sg.ChildByName("green", 0).(*gi.Slider), 1)
-	cv.UpdateRGBSlider(sg.ChildByName("blue", 0).(*gi.Slider), 2)
-	cv.UpdateRGBSlider(sg.ChildByName("alpha", 0).(*gi.Slider), 3)
-	cv.UpdateHSLSlider(sg.ChildByName("hue", 0).(*gi.Slider), 0)
-	cv.UpdateHSLSlider(sg.ChildByName("sat", 0).(*gi.Slider), 1)
-	cv.UpdateHSLSlider(sg.ChildByName("light", 0).(*gi.Slider), 2)
+	cv.UpdateRGBSlider(sg.ChildByName("red", 0).(*core.Slider), 0)
+	cv.UpdateRGBSlider(sg.ChildByName("green", 0).(*core.Slider), 1)
+	cv.UpdateRGBSlider(sg.ChildByName("blue", 0).(*core.Slider), 2)
+	cv.UpdateRGBSlider(sg.ChildByName("alpha", 0).(*core.Slider), 3)
+	cv.UpdateHSLSlider(sg.ChildByName("hue", 0).(*core.Slider), 0)
+	cv.UpdateHSLSlider(sg.ChildByName("sat", 0).(*core.Slider), 1)
+	cv.UpdateHSLSlider(sg.ChildByName("light", 0).(*core.Slider), 2)
 	sg.UpdateEndRender(updt)
 }
 
 func (cv *ColorView) ConfigPalette() {
-	pg := gi.NewLayout(cv, "palette").SetDisplay(styles.Grid)
+	pg := core.NewLayout(cv, "palette").SetDisplay(styles.Grid)
 
 	// STYTOOD: use hct sorted names here (see https://github.com/cogentcore/core/issues/619)
 	nms := colors.Names
 
 	for _, cn := range nms {
-		cbt := gi.NewButton(pg, cn)
+		cbt := core.NewButton(pg, cn)
 		cbt.Tooltip = cn
 		cbt.SetText("  ")
 		cbt.OnChange(func(e events.Event) {
@@ -458,7 +458,7 @@ func (cv *ColorView) UpdateImpl() {
 // UpdateValueFrame updates the value frame of the color view
 // that displays the color.
 func (cv *ColorView) UpdateValueFrame() {
-	cv.SliderLay().ChildByName("value", 0).(*gi.Frame).Styles.BackgroundColor.Solid = cv.Color // direct copy
+	cv.SliderLay().ChildByName("value", 0).(*core.Frame).Styles.BackgroundColor.Solid = cv.Color // direct copy
 }
 
 // UpdateNums updates the values of the number inputs
@@ -472,10 +472,10 @@ func (cv *ColorView) UpdateNums() {
 	if cv.Color.A == 255 {
 		hs = hs[:len(hs)-2]
 	}
-	cv.NumLay().ChildByName("nums-hex-lay", 2).ChildByName("nums-hex", 1).(*gi.TextField).SetText(hs)
+	cv.NumLay().ChildByName("nums-hex-lay", 2).ChildByName("nums-hex", 1).(*core.TextField).SetText(hs)
 }
 
-// func (cv *ColorView) Render(sc *gi.Scene) {
+// func (cv *ColorView) Render(sc *core.Scene) {
 // 	if cv.PushBounds(sc) {
 // 		cv.RenderFrame(sc)
 // 		cv.RenderChildren(sc)

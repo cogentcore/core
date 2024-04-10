@@ -157,7 +157,7 @@ func (p *Profiler) Start(name string) *Profile {
 // Report generates a report of all the profile data collected
 func (p *Profiler) Report(units time.Duration) {
 	if !Profiling {
-		// fmt.Printf("Profiling not turned on -- set global gi.Profiling variable\n")
+		// fmt.Printf("Profiling not turned on -- set global core.Profiling variable\n")
 		return
 	}
 	list := make([]*Profile, len(p.Profs))

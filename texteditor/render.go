@@ -495,7 +495,7 @@ func (ed *Editor) RenderLineNo(ln int, defFill bool) {
 	// 	tBBox := image.Rectangle{sbox.ToPointFloor(), ebox.ToPointCeil()}
 	// 	winoff := bb.Min.Sub(bb.Min)
 	// 	tScBBox := tBBox.Add(winoff)
-	// 	sc.This().(gi.Scene).ScUploadRegion(tBBox, tScBBox)
+	// 	sc.This().(core.Scene).ScUploadRegion(tBBox, tScBBox)
 	// }
 }
 

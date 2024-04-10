@@ -13,7 +13,7 @@ You can detect when the user changes a value:
 ```Go
 t := time.Now()
 giv.NewValue(parent, &t).OnChange(func(e events.Event) {
-    gi.MessageSnackbar(parent, "The time is "+t.Format(time.DateTime))
+    core.MessageSnackbar(parent, "The time is "+t.Format(time.DateTime))
 })
 ```
 

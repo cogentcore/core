@@ -1720,7 +1720,7 @@ func (tb *Buffer) StartDelayedReMarkup() {
 	_ = sc
 	// if vp != nil {
 	// 	cpop := vp.Win.CurPopup()
-	// 	if gi.PopupIsCompleter(cpop) {
+	// 	if core.PopupIsCompleter(cpop) {
 	// 		return
 	// 	}
 	// }
@@ -2595,11 +2595,11 @@ func (tb *Buffer) SetCompleter(data any, matchFun complete.MatchFunc, editFun co
 	// todo: what about CompleteExtend event type?
 	// TODO(kai/complete): clean this up and figure out what to do about Extend and only connecting once
 	// note: only need to connect once..
-	// tb.Complete.CompleteSig.ConnectOnly(func(dlg *gi.Dialog) {
+	// tb.Complete.CompleteSig.ConnectOnly(func(dlg *core.Dialog) {
 	// 	tbf, _ := recv.Embed(TypeBuf).(*Buf)
-	// 	if sig == int64(gi.CompleteSelect) {
+	// 	if sig == int64(core.CompleteSelect) {
 	// 		tbf.CompleteText(data.(string)) // always use data
-	// 	} else if sig == int64(gi.CompleteExtend) {
+	// 	} else if sig == int64(core.CompleteExtend) {
 	// 		tbf.CompleteExtend(data.(string)) // always use data
 	// 	}
 	// })

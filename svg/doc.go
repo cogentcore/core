@@ -21,7 +21,7 @@ nodes do not use layout logic, and just draw directly into a parent SVG
 viewport, with cumulative transforms determining drawing position, etc.  The
 BBox values are only valid after rendering for these nodes.
 
-It uses srwiley/rasterx for SVG-compatible rasterization, and the gi.Paint
+It uses srwiley/rasterx for SVG-compatible rasterization, and the core.Paint
 interface for drawing.
 
 The Path element uses a compiled bytecode version of the Data path for

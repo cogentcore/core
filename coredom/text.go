@@ -12,7 +12,7 @@ import (
 
 // ExtractText recursively extracts all of the text from the children
 // of the given [*html.Node], adding any appropriate inline markup for
-// formatted text. It adds any non-text elements to the given [gi.Widget]
+// formatted text. It adds any non-text elements to the given [core.Widget]
 // using [ReadHTMLNode]. It should not be called on text nodes themselves;
 // for that, you can directly access the [html.Node.Data] field. It uses
 // the given page URL for context when resolving URLs, but it can be

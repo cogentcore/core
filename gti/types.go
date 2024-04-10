@@ -17,7 +17,7 @@ import (
 
 var (
 	// Types records all types (i.e., a type registry)
-	// key is long type name: package_url.Type, e.g., cogentcore.org/core/gi.Button
+	// key is long type name: package_url.Type, e.g., cogentcore.org/core/core.Button
 	Types = map[string]*Type{}
 
 	// TypeIDCounter is an atomically incremented uint64 used
@@ -25,7 +25,7 @@ var (
 	TypeIDCounter uint64
 )
 
-// TypeByName returns a Type by name (package_url.Type, e.g., cogentcore.org/core/gi.Button),
+// TypeByName returns a Type by name (package_url.Type, e.g., cogentcore.org/core/core.Button),
 func TypeByName(nm string) *Type {
 	tp, ok := Types[nm]
 	if !ok {
@@ -34,7 +34,7 @@ func TypeByName(nm string) *Type {
 	return tp
 }
 
-// TypeByNameTry returns a Type by name (package_url.Type, e.g., cogentcore.org/core/gi.Button),
+// TypeByNameTry returns a Type by name (package_url.Type, e.g., cogentcore.org/core/core.Button),
 // or error if not found
 func TypeByNameTry(nm string) (*Type, error) {
 	tp, ok := Types[nm]

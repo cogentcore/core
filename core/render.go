@@ -548,7 +548,7 @@ func (wb *WidgetBase) RenderStandardBox() {
 // Called prior to using -- logs an error if not.
 func (wb *WidgetBase) HasSc() bool {
 	if wb.This() == nil || wb.Scene == nil {
-		slog.Debug("gi.WidgetBase: object or scene is nil")
+		slog.Debug("core.WidgetBase: object or scene is nil")
 		return false
 	}
 	return true

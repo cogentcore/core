@@ -44,7 +44,7 @@ type App struct { //gti:add -setters
 	// will be created by default.
 	AppBarConfig func(parent Widget)
 
-	// SceneConfig is the function called on every newly created [gi.Scene]
+	// SceneConfig is the function called on every newly created [core.Scene]
 	// to configure it, if it is non-nil. This can be used to set global
 	// configuration and styling for all widgets using the OnWidgetAdded
 	// method.

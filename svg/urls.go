@@ -205,7 +205,7 @@ func (sv *SVG) NodeFindURL(gi Node, url string) Node {
 	}
 	rv := sv.FindNamedElement(ref)
 	if rv == nil {
-		log.Printf("svg.NodeFindURL could not find element named: %s for element: %s\n", url, gi.Path())
+		log.Printf("svg.NodeFindURL could not find element named: %s for element: %s\n", url, core.Path())
 	}
 	return rv
 }
@@ -214,7 +214,7 @@ func (sv *SVG) NodeFindURL(gi Node, url string) Node {
 // or empty string if none.  Returned value is just the 'name' part
 // of the url, not the full string.
 func NodePropURL(gi Node, prop string) string {
-	fp := gi.Property(prop)
+	fp := core.Property(prop)
 	fs, iss := fp.(string)
 	if !iss {
 		return ""

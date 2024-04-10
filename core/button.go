@@ -382,7 +382,7 @@ func (bt *Button) Config() {
 			sci = len(config)
 			config.Add(LabelType, "shortcut")
 		} else if bt.Shortcut != "" {
-			slog.Error("programmer error: gi.Button: shortcut cannot be used on a sub-menu for", "button", bt)
+			slog.Error("programmer error: core.Button: shortcut cannot be used on a sub-menu for", "button", bt)
 		}
 	}
 

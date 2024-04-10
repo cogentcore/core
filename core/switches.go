@@ -121,7 +121,7 @@ func (sw *Switches) SetStyles() {
 // returns error if index is out of range.
 func (sw *Switches) SelectItem(idx int) error {
 	if idx >= sw.NumChildren() || idx < 0 {
-		return fmt.Errorf("gi.Switches: SelectItem, index out of range: %v", idx)
+		return fmt.Errorf("core.Switches: SelectItem, index out of range: %v", idx)
 	}
 	if sw.Mutex {
 		sw.UnCheckAllBut(idx)

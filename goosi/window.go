@@ -32,7 +32,7 @@ import (
 //
 // vgpu.MaxTexturesPerSet = 16 to work cross-platform, meaning that a maximum of 16
 // images per descriptor set can be uploaded and be ready to use in one render pass.
-// gi.Window uses multiple sets to get around this limitation.
+// core.Window uses multiple sets to get around this limitation.
 type Window interface {
 
 	// Name returns the name of the window -- name is used strictly for

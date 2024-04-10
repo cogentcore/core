@@ -518,12 +518,12 @@ func (fv *FileView) UpdateFilesAction() { //gti:add
 func (fv *FileView) ReadFiles() {
 	effpath, err := filepath.EvalSymlinks(fv.DirPath)
 	if err != nil {
-		log.Printf("gi.FileView Path: %v could not be opened -- error: %v\n", effpath, err)
+		log.Printf("core.FileView Path: %v could not be opened -- error: %v\n", effpath, err)
 		return
 	}
 	_, err = os.Lstat(effpath)
 	if err != nil {
-		log.Printf("gi.FileView Path: %v could not be opened -- error: %v\n", effpath, err)
+		log.Printf("core.FileView Path: %v could not be opened -- error: %v\n", effpath, err)
 		return
 	}
 
@@ -532,9 +532,9 @@ func (fv *FileView) ReadFiles() {
 		if err != nil {
 			emsg := fmt.Sprintf("Path %q: Error: %v", effpath, err)
 			// if fv.Scene != nil {
-			// 	gi.PromptDialog(fv, gi.DlgOpts{Title: "FileView UpdateFiles", emsg, Ok: true, Cancel: false}, nil)
+			// 	core.PromptDialog(fv, core.DlgOpts{Title: "FileView UpdateFiles", emsg, Ok: true, Cancel: false}, nil)
 			// } else {
-			log.Printf("gi.FileView error: %v\n", emsg)
+			log.Printf("core.FileView error: %v\n", emsg)
 			// }
 			return nil // ignore
 		}
@@ -698,7 +698,7 @@ func (fv *FileView) FileSelectAction(idx int) {
 	sf := fv.SelectField()
 	sf.SetText(fv.CurrentSelectedFile)
 	fv.Send(events.Select)
-	// fv.WidgetSig.Emit(fv.This(), int64(gi.WidgetSelected), fv.SelectedFile())
+	// fv.WidgetSig.Emit(fv.This(), int64(core.WidgetSelected), fv.SelectedFile())
 }
 
 // SetExt updates the ext to given (list of, comma separated) extensions
@@ -748,7 +748,7 @@ func (fv *FileView) SaveSortSettings() {
 		return
 	}
 	core.SystemSettings.FileViewSort = sv.SortFieldName()
-	// fmt.Printf("sort: %v\n", gi.Settings.FileViewSort)
+	// fmt.Printf("sort: %v\n", core.Settings.FileViewSort)
 	core.ErrorSnackbar(fv, core.SaveSettings(core.SystemSettings), "Error saving settings")
 }
 

@@ -835,7 +835,7 @@ func (rs *RenderScenes) Add(w Widget, scIndex map[Widget]int) int {
 	}
 	idx := len(rs.Scenes)
 	if idx >= rs.MaxIndex {
-		slog.Error("gi.RenderScenes: too many Scenes to render all of them!", "max", rs.MaxIndex)
+		slog.Error("core.RenderScenes: too many Scenes to render all of them!", "max", rs.MaxIndex)
 		return -1
 	}
 	if prvIndex, has := rs.SceneIndex[w]; has {

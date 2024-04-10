@@ -29,7 +29,7 @@ tree.New[*tree.NodeBase](n, "Child 1")
 c2 := tree.New[*tree.NodeBase](n, "Child 2")
 tree.New[*tree.NodeBase](c2, "Nested child")
 giv.NewTreeView(parent).SyncTree(n).OnChange(func(e events.Event) {
-    gi.MessageSnackbar(parent, "Tree view changed")
+    core.MessageSnackbar(parent, "Tree view changed")
 })
 ```
 

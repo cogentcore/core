@@ -20,7 +20,7 @@ import (
 	"cogentcore.org/core/xyz"
 )
 
-// Scene is a gi.Widget that manages a xyz.Scene,
+// Scene is a core.Widget that manages a xyz.Scene,
 // providing the basic rendering logic for the 3D scene
 // in the 2D gi gui context.
 type Scene struct {

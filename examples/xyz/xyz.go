@@ -269,43 +269,43 @@ func main() {
 		emb := xyz.NewEmbed2D(sc, sc, "embed-but", 150, 100, xyz.FitContent)
 		emb.Pose.Pos.Set(-2, 2, 0)
 		// emb.Zoom = 1.5   // this is how to rescale overall size
-		evlay := gi.NewFrame(emb.Viewport, "vlay", gi.LayoutVert)
+		evlay := core.NewFrame(emb.Viewport, "vlay", core.LayoutVert)
 		evlay.SetProp("margin", units.Ex(1))
 
-		eabut := gi.NewCheckBox(evlay, "anim-but")
+		eabut := core.NewCheckBox(evlay, "anim-but")
 		eabut.SetText("Animate")
 		eabut.Tooltip = "toggle animation on and off"
 		eabut.ButtonSig.Connect(win.This(), func(recv, send tree.Node, sig int64, data any) {
-			if sig == int64(gi.ButtonToggled) {
+			if sig == int64(core.ButtonToggled) {
 				anim.On = eabut.IsChecked()
 			}
 		})
 
-		cmb := gi.NewButton(evlay, "anim-ctrl")
+		cmb := core.NewButton(evlay, "anim-ctrl")
 		cmb.SetText("Anim Ctrl")
 		cmb.Tooltip = "options for what is animated (note: menu only works when not animating -- checkboxes would be more useful here but wanted to test menu function)"
-		cmb.Menu.AddAction(gi.ActOpts{Label: "Toggle Torus"},
+		cmb.Menu.AddAction(core.ActOpts{Label: "Toggle Torus"},
 			win.This(), func(recv, send tree.Node, sig int64, data any) {
 				anim.DoTorus = !anim.DoTorus
 			})
-		cmb.Menu.AddAction(gi.ActOpts{Label: "Toggle Gopher"},
+		cmb.Menu.AddAction(core.ActOpts{Label: "Toggle Gopher"},
 			win.This(), func(recv, send tree.Node, sig int64, data any) {
 				anim.DoGopher = !anim.DoGopher
 			})
-		cmb.Menu.AddAction(gi.ActOpts{Label: "Edit Anim"},
+		cmb.Menu.AddAction(core.ActOpts{Label: "Edit Anim"},
 			win.This(), func(recv, send tree.Node, sig int64, data any) {
 				giv.StructViewDialog(vp, anim, giv.DlgOpts{Title: "Animation Parameters"}, nil, nil)
 			})
 
-		sprw := gi.NewLayout(evlay, "speed-lay", gi.LayoutHoriz)
-		gi.NewLabel(sprw, "speed-lbl", "Speed: ")
-		sb := gi.NewSpinBox(sprw, "anim-speed")
+		sprw := core.NewLayout(evlay, "speed-lay", core.LayoutHoriz)
+		core.NewLabel(sprw, "speed-lbl", "Speed: ")
+		sb := core.NewSpinBox(sprw, "anim-speed")
 		sb.SetMin(0.01)
 		sb.Step = 0.01
 		sb.SetValue(anim.Speed)
 		sb.Tooltip = "determines the speed of rotation (step size)"
 
-		spsld := gi.NewSlider(evlay, "speed-slider")
+		spsld := core.NewSlider(evlay, "speed-slider")
 		spsld.Dim = mat32.X
 		spsld.Min = 0.01
 		spsld.Max = 1
@@ -322,7 +322,7 @@ func main() {
 			spsld.SetValue(anim.Speed)
 		})
 		spsld.SliderSig.Connect(rec.This(), func(recv, send tree.Node, sig int64, data any) {
-			if gi.SliderSignals(sig) == gi.SliderValueChanged {
+			if core.SliderSignals(sig) == core.SliderValueChanged {
 				anim.Speed = data.(float32)
 				sb.SetValue(anim.Speed)
 			}
