@@ -15,7 +15,7 @@ import (
 	"os"
 	"strconv"
 
-	"cogentcore.org/core/grr"
+	errors1 "cogentcore.org/core/errors"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/xio/jsons"
 )
@@ -63,7 +63,7 @@ func (sl Slice) MarshalJSON() ([]byte, error) {
 			}
 		} else {
 			fmt.Println("tree.Slice.MarshalJSON: error doing json.Marshal from kid:", kid)
-			grr.Log(err)
+			errors1.Log(err)
 			fmt.Println("tree.Slice.MarshalJSON: output to point of error:", string(b))
 		}
 	}
@@ -220,17 +220,17 @@ func ReadRootTypeJSON(b []byte) (*gti.Type, []byte, error) {
 func ReadNewJSON(reader io.Reader) (Node, error) {
 	b, err := io.ReadAll(reader)
 	if err != nil {
-		return nil, grr.Log(err)
+		return nil, errors1.Log(err)
 	}
 	typ, rb, err := ReadRootTypeJSON(b)
 	if err != nil {
-		return nil, grr.Log(err)
+		return nil, errors1.Log(err)
 	}
 	root := NewOfType(typ)
 	initNode(root)
 	err = json.Unmarshal(rb, root)
 	UnmarshalPost(root)
-	return root, grr.Log(err)
+	return root, errors1.Log(err)
 }
 
 // OpenNewJSON opens a new tree from a JSON-encoded file, using type
@@ -238,7 +238,7 @@ func ReadNewJSON(reader io.Reader) (Node, error) {
 func OpenNewJSON(filename string) (Node, error) {
 	fp, err := os.Open(filename)
 	if err != nil {
-		return nil, grr.Log(err)
+		return nil, errors1.Log(err)
 	}
 	defer fp.Close()
 	return ReadNewJSON(bufio.NewReader(fp))

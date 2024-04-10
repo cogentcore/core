@@ -14,8 +14,8 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/enums"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/system"
@@ -301,7 +301,7 @@ func (w *RenderWindow) SetZoom(zoom float32) {
 	AppearanceSettings.Zoom = mat32.Clamp(zoom, 10, 500)
 	AppearanceSettings.Apply()
 	UpdateAll()
-	grr.Log(SaveSettings(AppearanceSettings))
+	errors.Log(SaveSettings(AppearanceSettings))
 
 	if ms := w.MainScene(); ms != nil {
 		b := NewBody().AddSnackbarText(fmt.Sprintf("%.f%%", AppearanceSettings.Zoom))

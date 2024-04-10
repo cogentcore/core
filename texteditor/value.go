@@ -7,8 +7,8 @@ package texteditor
 import (
 	"fmt"
 
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/views"
 )
@@ -20,7 +20,7 @@ type Value struct {
 
 func (v *Value) Config() {
 	tb := NewBuffer()
-	grr.Log(tb.Stat())
+	errors.Log(tb.Stat())
 	tb.OnChange(func(e events.Event) {
 		v.SetValue(string(tb.Text()))
 		fmt.Println(laser.OnePtrUnderlyingValue(v.Value).Interface())

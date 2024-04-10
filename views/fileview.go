@@ -22,9 +22,9 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fileinfo"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/pi/complete"
@@ -374,7 +374,7 @@ func (fv *FileView) ConfigFilesRow() {
 	fsv.SetSlice(&fv.Files)
 	fsv.StyleFunc = func(w core.Widget, s *styles.Style, row, col int) {
 		if clr, got := FileViewKindColorMap[fv.Files[row].Kind]; got {
-			s.Color = grr.Log1(gradient.FromString(clr))
+			s.Color = errors.Log1(gradient.FromString(clr))
 			return
 		}
 		fn := fv.Files[row].Name

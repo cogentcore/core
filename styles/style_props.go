@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/grr"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/units"
 	"cogentcore.org/core/xgo/num"
@@ -197,7 +197,7 @@ var StyleStyleFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		fs.Color = grr.Log1(gradient.FromAny(val, cc))
+		fs.Color = errors.Log1(gradient.FromAny(val, cc))
 	},
 	"background-color": func(obj any, key string, val any, parent any, cc colors.Context) {
 		fs := obj.(*Style)
@@ -209,7 +209,7 @@ var StyleStyleFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		fs.Background = grr.Log1(gradient.FromAny(val, cc))
+		fs.Background = errors.Log1(gradient.FromAny(val, cc))
 	},
 	"opacity": StyleFuncFloat(float32(1),
 		func(obj *Style) *float32 { return &obj.Opacity }),
@@ -407,7 +407,7 @@ var StyleFontRenderFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		fs.Color = grr.Log1(gradient.FromAny(val, cc))
+		fs.Color = errors.Log1(gradient.FromAny(val, cc))
 	},
 	"background-color": func(obj any, key string, val any, parent any, cc colors.Context) {
 		fs := obj.(*FontRender)
@@ -419,7 +419,7 @@ var StyleFontRenderFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		fs.Background = grr.Log1(gradient.FromAny(val, cc))
+		fs.Background = errors.Log1(gradient.FromAny(val, cc))
 	},
 	"opacity": StyleFuncFloat(float32(1),
 		func(obj *FontRender) *float32 { return &obj.Opacity }),
@@ -530,7 +530,7 @@ var StyleBorderFuncs = map[string]StyleFunc{
 			return
 		}
 		// TODO(kai): support side-specific border colors
-		bs.Color.Set(grr.Log1(gradient.FromAny(val, cc)))
+		bs.Color.Set(errors.Log1(gradient.FromAny(val, cc)))
 	},
 }
 
@@ -600,7 +600,7 @@ var StyleOutlineFuncs = map[string]StyleFunc{
 			return
 		}
 		// TODO(kai): support side-specific border colors
-		bs.Color.Set(grr.Log1(gradient.FromAny(val, cc)))
+		bs.Color.Set(errors.Log1(gradient.FromAny(val, cc)))
 	},
 }
 
@@ -627,7 +627,7 @@ var StyleShadowFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		ss.Color = grr.Log1(gradient.FromAny(val, cc))
+		ss.Color = errors.Log1(gradient.FromAny(val, cc))
 	},
 	"box-shadow.inset": StyleFuncBool(false,
 		func(obj *Shadow) *bool { return &obj.Inset }),

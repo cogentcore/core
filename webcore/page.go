@@ -18,8 +18,8 @@ import (
 	"strings"
 
 	"cogentcore.org/core/core"
+	errors1 "cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/htmlview"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
@@ -144,7 +144,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 		}
 		if len(fmb) > 0 {
 			var fm map[string]string
-			grr.Log(tomls.ReadBytes(&fm, fmb))
+			errors1.Log(tomls.ReadBytes(&fm, fmb))
 			fmt.Println("front matter", fm)
 		}
 	}
@@ -188,7 +188,7 @@ func (pg *Page) Config() {
 
 	pg.URLToPagePath = map[string]string{"": "index.md"}
 
-	grr.Log(fs.WalkDir(pg.Source, ".", func(fpath string, d fs.DirEntry, err error) error {
+	errors1.Log(fs.WalkDir(pg.Source, ".", func(fpath string, d fs.DirEntry, err error) error {
 		// already handled
 		if fpath == "" || fpath == "." {
 			return nil

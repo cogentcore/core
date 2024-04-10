@@ -10,8 +10,8 @@ import (
 	"image"
 	"os"
 
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/driver/base"
 )
@@ -20,7 +20,7 @@ func Init() {
 	TheApp.Draw = &Drawer{}
 	TheApp.GetScreens()
 
-	TheApp.TempDataDir = grr.Log1(os.MkdirTemp("", "cogent-core-offscreen-data-dir-"))
+	TheApp.TempDataDir = errors.Log1(os.MkdirTemp("", "cogent-core-offscreen-data-dir-"))
 
 	base.Init(TheApp, &TheApp.App)
 }
@@ -87,7 +87,7 @@ func (a *App) GetScreens() {
 
 func (a *App) QuitClean() bool {
 	if a.TempDataDir != "" {
-		grr.Log(os.RemoveAll(a.TempDataDir))
+		errors.Log(os.RemoveAll(a.TempDataDir))
 	}
 	return a.AppSingle.QuitClean()
 }

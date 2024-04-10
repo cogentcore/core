@@ -19,9 +19,9 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/enums"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fileinfo"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/pi"
 	"cogentcore.org/core/pi/complete"
@@ -586,7 +586,7 @@ func (tb *Buffer) Revert() bool {
 	if tb.NLines < DiffRevertLines {
 		ob := NewBuffer()
 		err := ob.OpenFile(tb.Filename)
-		if grr.Log(err) != nil {
+		if errors.Log(err) != nil {
 			sc := tb.SceneFromView()
 			if sc != nil { // only if viewing
 				core.ErrorSnackbar(sc, err, "Error reopening file")
@@ -619,7 +619,7 @@ func (tb *Buffer) Revert() bool {
 func (tb *Buffer) SaveAsFunc(filename core.Filename, afterFunc func(canceled bool)) {
 	// todo: filemodcheck!
 	tb.EditDone()
-	if !grr.Log1(dirs.FileExists(string(filename))) {
+	if !errors.Log1(dirs.FileExists(string(filename))) {
 		tb.SaveFile(filename)
 		if afterFunc != nil {
 			afterFunc(false)

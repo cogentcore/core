@@ -13,7 +13,7 @@ import (
 	"log"
 	"runtime"
 
-	"cogentcore.org/core/grr"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/driver/base"
 	"cogentcore.org/core/vgpu"
@@ -133,7 +133,7 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 	w.Draw = &vdraw.Drawer{}
 
 	a.RunOnMain(func() {
-		surfPtr := grr.Log1(glw.CreateWindowSurface(a.GPU.Instance, nil))
+		surfPtr := errors.Log1(glw.CreateWindowSurface(a.GPU.Instance, nil))
 		sf := vgpu.NewSurface(a.GPU, vk.SurfaceFromPointer(surfPtr))
 		w.Draw.YIsDown = true
 		w.Draw.ConfigSurface(sf, vgpu.MaxTexturesPerSet) // note: can expand

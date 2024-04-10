@@ -14,8 +14,8 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
+	errors1 "cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/pi/lex"
@@ -229,7 +229,7 @@ func (dv *DiffView) PrevDiff(ab int) bool {
 // SaveAs saves A or B edits into given file.
 // It checks for an existing file, prompts to overwrite or not.
 func (dv *DiffView) SaveAs(ab bool, filename core.Filename) {
-	if !grr.Log1(dirs.FileExists(string(filename))) {
+	if !errors1.Log1(dirs.FileExists(string(filename))) {
 		dv.SaveFile(ab, filename)
 	} else {
 		d := core.NewBody().AddTitle("File Exists, Overwrite?").

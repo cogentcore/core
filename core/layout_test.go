@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/grr"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
@@ -24,7 +24,7 @@ func LayoutTestFile(t *testing.T) string {
 	p := filepath.Join("testdata", "layout")
 	tnm := strcase.ToSnake(strings.TrimPrefix(t.Name(), "TestLayout"))
 	n := filepath.Join("layout", tnm)
-	grr.Log(os.MkdirAll(p, 0750))
+	errors.Log(os.MkdirAll(p, 0750))
 	return n
 }
 
@@ -32,7 +32,7 @@ func LayoutTestDir(t *testing.T) string {
 	tnm := strcase.ToSnake(strings.TrimPrefix(t.Name(), "TestLayout"))
 	n := filepath.Join("layout", tnm)
 	p := filepath.Join("testdata", n)
-	grr.Log(os.MkdirAll(p, 0750))
+	errors.Log(os.MkdirAll(p, 0750))
 	return n
 }
 

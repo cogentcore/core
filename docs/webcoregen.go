@@ -16,7 +16,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/views"
-	"cogentcore.org/core/grr"
+	errors1 "cogentcore.org/core/errors"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/mat32"
@@ -348,11 +348,11 @@ var WebcoreExamples = map[string]func(parent core.Widget){
 		core.NewButton(parent).SetIcon(icons.Home.Fill())
 	},
 	"widgets/images-0": func(parent core.Widget) {
-		grr.Log(core.NewImage(parent).OpenFS(myImage, "image.png"))
+		errors1.Log(core.NewImage(parent).OpenFS(myImage, "image.png"))
 	},
 	"widgets/images-1": func(parent core.Widget) {
 		img := core.NewImage(parent)
-		grr.Log(img.OpenFS(myImage, "image.png"))
+		errors1.Log(img.OpenFS(myImage, "image.png"))
 		img.Style(func(s *styles.Style) {
 			s.Min.Set(units.Dp(256))
 		})
@@ -587,11 +587,11 @@ var WebcoreExamples = map[string]func(parent core.Widget){
 		core.NewLabel(sp).SetText("Second")
 	},
 	"widgets/svgs-0": func(parent core.Widget) {
-		grr.Log(core.NewSVG(parent).OpenFS(mySVG, "icon.svg"))
+		errors1.Log(core.NewSVG(parent).OpenFS(mySVG, "icon.svg"))
 	},
 	"widgets/svgs-1": func(parent core.Widget) {
 		svg := core.NewSVG(parent)
-		grr.Log(svg.OpenFS(mySVG, "icon.svg"))
+		errors1.Log(svg.OpenFS(mySVG, "icon.svg"))
 		svg.Style(func(s *styles.Style) {
 			s.Min.Set(units.Dp(128))
 		})
@@ -599,10 +599,10 @@ var WebcoreExamples = map[string]func(parent core.Widget){
 	"widgets/svgs-2": func(parent core.Widget) {
 		svg := core.NewSVG(parent)
 		svg.SetReadOnly(false)
-		grr.Log(svg.OpenFS(mySVG, "icon.svg"))
+		errors1.Log(svg.OpenFS(mySVG, "icon.svg"))
 	},
 	"widgets/svgs-3": func(parent core.Widget) {
-		grr.Log(core.NewSVG(parent).ReadString(`<rect width="100" height="100" fill="red"/>`))
+		errors1.Log(core.NewSVG(parent).ReadString(`<rect width="100" height="100" fill="red"/>`))
 	},
 	"widgets/switches-0": func(parent core.Widget) {
 		core.NewSwitch(parent)
@@ -714,7 +714,7 @@ func main() {
 `)
 	},
 	"widgets/text-editors-3": func(parent core.Widget) {
-		grr.Log(texteditor.NewSoloEditor(parent).Buffer.OpenFS(myFile, "file.go"))
+		errors1.Log(texteditor.NewSoloEditor(parent).Buffer.OpenFS(myFile, "file.go"))
 	},
 	"widgets/text-editors-4": func(parent core.Widget) {
 		tb := texteditor.NewBuffer()

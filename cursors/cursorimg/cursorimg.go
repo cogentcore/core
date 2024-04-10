@@ -12,7 +12,7 @@ import (
 
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/grr"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/svg"
 )
 
@@ -53,7 +53,7 @@ func Get(cursor enums.Enum, size int) (*Cursor, error) {
 	err := sv.OpenFS(cursors.Cursors, "svg/"+name+".svg")
 	if err != nil {
 		err := fmt.Errorf("error opening SVG file for cursor %q: %w", name, err)
-		return nil, grr.Log(err)
+		return nil, errors.Log(err)
 	}
 	sv.Render()
 	return &Cursor{

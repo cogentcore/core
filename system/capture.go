@@ -7,7 +7,7 @@ package system
 import (
 	"image"
 
-	"cogentcore.org/core/grr"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/xio/images"
 )
 
@@ -23,7 +23,7 @@ func Capture() *image.RGBA {
 // CaptureAs is a helper function that saves the result of [Capture] to the given filename.
 // It automatically logs any error in addition to returning it.
 func CaptureAs(filename string) error {
-	return grr.Log(images.Save(Capture(), filename))
+	return errors.Log(images.Save(Capture(), filename))
 }
 
 var (

@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/grr"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/mat32"
 	"github.com/stretchr/testify/assert"
 )
@@ -22,8 +22,8 @@ func TestFromString(t *testing.T) {
 	}
 	tests := []test{
 		{"linear-gradient(#e66465, #9198e5)", NewLinear().
-			AddStop(grr.Log1(colors.FromHex("#e66465")), 0).
-			AddStop(grr.Log1(colors.FromHex("#9198e5")), 1)},
+			AddStop(errors.Log1(colors.FromHex("#e66465")), 0).
+			AddStop(errors.Log1(colors.FromHex("#9198e5")), 1)},
 		{"linear-gradient(to left, blue, purple, red)", NewLinear().
 			SetStart(mat32.V2(1, 0)).SetEnd(mat32.V2(0, 0)).
 			AddStop(colors.Blue, 0).
@@ -79,8 +79,8 @@ func TestReadXML(t *testing.T) {
 		<stop offset="1.2" stop-color="#bbbff6" />
 	  </linearGradient>`, NewLinear().
 			SetEnd(mat32.V2(1, 0)).
-			AddStop(grr.Log1(colors.FromHex("#f31")), 0.6).
-			AddStop(grr.Log1(colors.FromHex("#bbbff6")), 1.2)},
+			AddStop(errors.Log1(colors.FromHex("#f31")), 0.6).
+			AddStop(errors.Log1(colors.FromHex("#bbbff6")), 1.2)},
 
 		{`<linearGradient id="something" gradientTransform="rotate(90)">
 		<stop offset="5%" stop-color="gold" />

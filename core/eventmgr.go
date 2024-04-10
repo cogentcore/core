@@ -17,9 +17,9 @@ import (
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/cursors"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/states"
@@ -851,7 +851,7 @@ func (em *EventMgr) SetCursor(cur cursors.Cursor) {
 	if !win.IsVisible() {
 		return
 	}
-	grr.Log(system.TheApp.Cursor(win.SystemWindow).Set(cur))
+	errors.Log(system.TheApp.Cursor(win.SystemWindow).Set(cur))
 }
 
 // FocusClear saves current focus to FocusPrev

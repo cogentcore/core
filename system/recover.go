@@ -12,7 +12,7 @@ import (
 	"runtime/debug"
 	"time"
 
-	"cogentcore.org/core/grr"
+	"cogentcore.org/core/errors"
 )
 
 // HandleRecover takes the given value of recover, and, if it is not nil,
@@ -56,12 +56,12 @@ func HandleRecoverBase(r any) {
 
 	dnm := filepath.Join(TheApp.AppDataDir(), "crash-logs")
 	err := os.MkdirAll(dnm, 0755)
-	if grr.Log(err) != nil {
+	if errors.Log(err) != nil {
 		return
 	}
 	cfnm := filepath.Join(dnm, "crash_"+time.Now().Format("2006-01-02_15-04-05"))
 	err = os.WriteFile(cfnm, []byte(CrashLogText(r, stack)), 0666)
-	if grr.Log(err) != nil {
+	if errors.Log(err) != nil {
 		return
 	}
 	log.Println("SAVED CRASH LOG TO", cfnm)

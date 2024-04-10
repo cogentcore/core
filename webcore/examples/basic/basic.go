@@ -9,7 +9,7 @@ import (
 	"io/fs"
 
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/grr"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/webcore"
 )
 
@@ -18,7 +18,7 @@ var content embed.FS
 
 func main() {
 	b := core.NewBody("Webcore Example")
-	pg := webcore.NewPage(b).SetSource(grr.Log1(fs.Sub(content, "content")))
+	pg := webcore.NewPage(b).SetSource(errors.Log1(fs.Sub(content, "content")))
 	b.AddAppBar(pg.AppBar)
 	b.RunMainWindow()
 }

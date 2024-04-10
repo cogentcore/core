@@ -11,8 +11,8 @@ import (
 	"io"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/mat32"
@@ -59,7 +59,7 @@ func (a *App) SetIconSVG(r io.Reader) *App {
 	sv := svg.NewSVG(16, 16)
 	sv.Color = colors.C(colors.FromRGB(66, 133, 244)) // Google Blue (#4285f4)
 	err := sv.ReadXML(r)
-	if grr.Log(err) != nil {
+	if errors.Log(err) != nil {
 		return a
 	}
 

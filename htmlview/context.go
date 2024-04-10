@@ -10,7 +10,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/grr"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 	"github.com/aymerick/douceur/css"
@@ -107,7 +107,7 @@ func (c *Context) Config(w core.Widget) {
 				attr.Val += ";"
 			}
 			decls, err := parser.ParseDeclarations(attr.Val)
-			if grr.Log(err) != nil {
+			if errors.Log(err) != nil {
 				continue
 			}
 			rule := &css.Rule{Declarations: decls}
@@ -147,7 +147,7 @@ func (c *Context) InlineParent() core.Widget {
 // AddStyle adds the given CSS style string to the page's compiled styles.
 func (c *Context) AddStyle(style string) {
 	ss, err := parser.Parse(style)
-	if grr.Log(err) != nil {
+	if errors.Log(err) != nil {
 		return
 	}
 
@@ -157,7 +157,7 @@ func (c *Context) AddStyle(style string) {
 		var sel *selcss.Selector
 		if len(rule.Selectors) > 0 {
 			s, err := selcss.Parse(strings.Join(rule.Selectors, ","))
-			if grr.Log(err) != nil {
+			if errors.Log(err) != nil {
 				s = &selcss.Selector{}
 			}
 			sel = s

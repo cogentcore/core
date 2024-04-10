@@ -11,7 +11,7 @@ import (
 	"strings"
 	"unicode"
 
-	"cogentcore.org/core/grr"
+	"cogentcore.org/core/errors"
 	"golang.org/x/image/math/fixed"
 )
 
@@ -331,7 +331,7 @@ func (a *Mat2) SetString(str string) error {
 		pidx := strings.IndexByte(str, '(')
 		if pidx < 0 {
 			err := fmt.Errorf("%s no params for transform: %v", errmsg, str)
-			return grr.Log(err)
+			return errors.Log(err)
 		}
 		cmd := str[:pidx]
 		vals := str[pidx+1:]
@@ -348,7 +348,7 @@ func (a *Mat2) SetString(str string) error {
 		switch cmd {
 		case "matrix":
 			if err := PointsCheckN(pts, 6, errmsg); err != nil {
-				grr.Log(err)
+				errors.Log(err)
 			} else {
 				*a = Mat2{pts[0], pts[1], pts[2], pts[3], pts[4], pts[5]}
 			}
@@ -358,17 +358,17 @@ func (a *Mat2) SetString(str string) error {
 			} else if len(pts) == 2 {
 				*a = a.Translate(pts[0], pts[1])
 			} else {
-				grr.Log(PointsCheckN(pts, 2, errmsg))
+				errors.Log(PointsCheckN(pts, 2, errmsg))
 			}
 		case "translatex":
 			if err := PointsCheckN(pts, 1, errmsg); err != nil {
-				grr.Log(err)
+				errors.Log(err)
 			} else {
 				*a = a.Translate(pts[0], 0)
 			}
 		case "translatey":
 			if err := PointsCheckN(pts, 1, errmsg); err != nil {
-				grr.Log(err)
+				errors.Log(err)
 			} else {
 				*a = a.Translate(0, pts[0])
 			}
@@ -379,17 +379,17 @@ func (a *Mat2) SetString(str string) error {
 				*a = a.Scale(pts[0], pts[1])
 			} else {
 				err := fmt.Errorf("%v incorrect number of points: 2 != %v", errmsg, len(pts))
-				grr.Log(err)
+				errors.Log(err)
 			}
 		case "scalex":
 			if err := PointsCheckN(pts, 1, errmsg); err != nil {
-				grr.Log(err)
+				errors.Log(err)
 			} else {
 				*a = a.Scale(pts[0], 1)
 			}
 		case "scaley":
 			if err := PointsCheckN(pts, 1, errmsg); err != nil {
-				grr.Log(err)
+				errors.Log(err)
 			} else {
 				*a = a.Scale(1, pts[0])
 			}
@@ -400,23 +400,23 @@ func (a *Mat2) SetString(str string) error {
 			} else if len(pts) == 1 {
 				*a = a.Rotate(ang)
 			} else {
-				grr.Log(PointsCheckN(pts, 1, errmsg))
+				errors.Log(PointsCheckN(pts, 1, errmsg))
 			}
 		case "skew":
 			if err := PointsCheckN(pts, 2, errmsg); err != nil {
-				grr.Log(err)
+				errors.Log(err)
 			} else {
 				*a = a.Skew(pts[0], pts[1])
 			}
 		case "skewx":
 			if err := PointsCheckN(pts, 1, errmsg); err != nil {
-				grr.Log(err)
+				errors.Log(err)
 			} else {
 				*a = a.Skew(pts[0], 0)
 			}
 		case "skewy":
 			if err := PointsCheckN(pts, 1, errmsg); err != nil {
-				grr.Log(err)
+				errors.Log(err)
 			} else {
 				*a = a.Skew(0, pts[0])
 			}

@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/grr"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/units"
@@ -113,7 +113,7 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		fs.Color = grr.Log1(gradient.FromAny(val, cc))
+		fs.Color = errors.Log1(gradient.FromAny(val, cc))
 	},
 	"stroke-opacity": StyleFuncFloat(float32(1),
 		func(obj *Stroke) *float32 { return &(obj.Opacity) }),
@@ -163,7 +163,7 @@ var StyleFillFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		fs.Color = grr.Log1(gradient.FromAny(val, cc))
+		fs.Color = errors.Log1(gradient.FromAny(val, cc))
 	},
 	"fill-opacity": StyleFuncFloat(float32(1),
 		func(obj *Fill) *float32 { return &(obj.Opacity) }),

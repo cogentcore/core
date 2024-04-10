@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"strings"
 
-	"cogentcore.org/core/grr"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/gti"
 )
 
@@ -31,11 +31,11 @@ func (n *NodeBase) WriteXML(writer io.Writer, indent bool) error {
 		b, err = xml.Marshal(n.This())
 	}
 	if err != nil {
-		return grr.Log(err)
+		return errors.Log(err)
 	}
 	_, err = writer.Write(b)
 	if err != nil {
-		return grr.Log(err)
+		return errors.Log(err)
 	}
 	return nil
 }
@@ -120,7 +120,7 @@ func DecodeXMLStartEl(d *xml.Decoder) (start xml.StartElement, err error) {
 			continue
 		case xml.EndElement:
 			err = fmt.Errorf("tree.DecodeXMLStartEl: got unexpected EndElement")
-			grr.Log(err)
+			errors.Log(err)
 			return
 		default:
 			continue
@@ -140,7 +140,7 @@ func DecodeXMLEndEl(d *xml.Decoder, start xml.StartElement) error {
 		case xml.EndElement:
 			if tv.Name != start.Name {
 				err = fmt.Errorf("tree.DecodeXMLEndEl: EndElement: %v does not match StartElement: %v", tv.Name, start.Name)
-				grr.Log(err)
+				errors.Log(err)
 				return err
 			}
 			return nil
@@ -148,7 +148,7 @@ func DecodeXMLEndEl(d *xml.Decoder, start xml.StartElement) error {
 			continue
 		case xml.StartElement:
 			err = fmt.Errorf("tree.DecodeXMLEndEl: got unexpected StartElement: %v", tv.Name)
-			grr.Log(err)
+			errors.Log(err)
 			return err
 		default:
 			continue
@@ -171,11 +171,11 @@ func DecodeXMLCharData(d *xml.Decoder) (val string, err error) {
 			return
 		case xml.StartElement:
 			err = fmt.Errorf("tree.DecodeXMLCharData: got unexpected StartElement: %v", tv.Name)
-			grr.Log(err)
+			errors.Log(err)
 			return
 		case xml.EndElement:
 			err = fmt.Errorf("tree.DecodeXMLCharData: got unexpected EndElement: %v", tv.Name)
-			grr.Log(err)
+			errors.Log(err)
 			return
 		}
 	}
@@ -226,7 +226,7 @@ func (sl *Slice) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 		for i := 0; i < n; i++ {
 			name, val, err = DecodeXMLCharEl(d)
 			if err != nil {
-				return grr.Log(err)
+				return errors.Log(err)
 			}
 			if name == "Type" {
 				tn := strings.TrimSpace(val)

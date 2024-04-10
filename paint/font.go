@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/grr"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 	"github.com/goki/freetype/truetype"
@@ -38,7 +38,7 @@ func OpenFont(fs *styles.FontRender, uc *units.Context) styles.Font {
 	if err != nil {
 		log.Printf("%v\n", err)
 		if fs.Face == nil {
-			face = grr.Log1(FontLibrary.Font("Roboto", intDots)) // guaranteed to exist
+			face = errors.Log1(FontLibrary.Font("Roboto", intDots)) // guaranteed to exist
 			fs.Face = face
 		}
 	} else {

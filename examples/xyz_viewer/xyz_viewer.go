@@ -7,8 +7,8 @@ package main
 import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/views"
@@ -46,7 +46,7 @@ func main() {
 	// curFn := "objs/piano_005.obj"
 	exts := ".obj,.dae,.gltf"
 
-	grr.Log1(sc.OpenNewObj(curFn, objgp))
+	errors.Log1(sc.OpenNewObj(curFn, objgp))
 
 	b.AddAppBar(func(tb *core.Toolbar) {
 		core.NewButton(tb).SetText("Open").SetIcon(icons.Open).
@@ -57,7 +57,7 @@ func main() {
 					objgp.DeleteChildren()
 					sc.DeleteMeshes()
 					sc.DeleteTextures()
-					grr.Log1(sc.OpenNewObj(selFile, objgp))
+					errors.Log1(sc.OpenNewObj(selFile, objgp))
 					sc.SetCamera("default")
 					sc.NeedsUpdate()
 					sv.NeedsRender()

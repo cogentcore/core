@@ -2,7 +2,7 @@ package main
 
 import (
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/grr"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/video"
 	_ "cogentcore.org/core/views"
@@ -27,7 +27,7 @@ func main() {
 	core.NewLabel(b).SetText("footer:")
 	// grr.Log(v.Open("deer.mp4"))
 	// grr.Log(v.Open("countdown.mp4"))
-	grr.Log(v.Open("randy_first_360.mov")) // note: not uploaded -- good test case tho
+	errors.Log(v.Open("randy_first_360.mov")) // note: not uploaded -- good test case tho
 	v.Rotation = -90
 	w := b.NewWindow().Run()
 	v.Play(0, 0)

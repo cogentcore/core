@@ -8,8 +8,8 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/vci"
@@ -43,17 +43,17 @@ func (fn *Node) SetStyles() {
 		}
 		switch {
 		case vcs == vci.Untracked:
-			s.Color = grr.Must1(gradient.FromString("#808080"))
+			s.Color = errors.Must1(gradient.FromString("#808080"))
 		case vcs == vci.Modified:
-			s.Color = grr.Must1(gradient.FromString("#4b7fd1"))
+			s.Color = errors.Must1(gradient.FromString("#4b7fd1"))
 		case vcs == vci.Added:
-			s.Color = grr.Must1(gradient.FromString("#008800"))
+			s.Color = errors.Must1(gradient.FromString("#008800"))
 		case vcs == vci.Deleted:
-			s.Color = grr.Must1(gradient.FromString("#ff4252"))
+			s.Color = errors.Must1(gradient.FromString("#ff4252"))
 		case vcs == vci.Conflicted:
-			s.Color = grr.Must1(gradient.FromString("#ce8020"))
+			s.Color = errors.Must1(gradient.FromString("#ce8020"))
 		case vcs == vci.Updated:
-			s.Color = grr.Must1(gradient.FromString("#008060"))
+			s.Color = errors.Must1(gradient.FromString("#008060"))
 		case vcs == vci.Stored:
 			s.Color = colors.C(colors.Scheme.OnSurface)
 		}

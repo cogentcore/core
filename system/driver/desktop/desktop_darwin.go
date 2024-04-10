@@ -36,7 +36,6 @@ import (
 	"path/filepath"
 	"unsafe"
 
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/system"
 )
@@ -60,12 +59,12 @@ func (a *App) Platform() system.Platforms {
 
 func (a *App) OpenURL(url string) {
 	cmd := exec.Command("open", url)
-	grr.Log(cmd.Run())
+	errors.Log(cmd.Run())
 }
 
 func (a *App) DataDir() string {
 	usr, err := user.Current()
-	if grr.Log(err) != nil {
+	if errors.Log(err) != nil {
 		return "/tmp"
 	}
 	return filepath.Join(usr.HomeDir, "Library")

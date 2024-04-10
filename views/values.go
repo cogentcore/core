@@ -12,8 +12,8 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/enums"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/laser"
@@ -74,7 +74,7 @@ func (v *BoolValue) Config() {
 func (v *BoolValue) Update() {
 	npv := laser.NonPtrValue(v.Value)
 	bv, err := laser.ToBool(npv.Interface())
-	if grr.Log(err) == nil {
+	if errors.Log(err) == nil {
 		v.Widget.SetChecked(bv)
 	}
 }
@@ -94,19 +94,19 @@ func (v *NumberValue) Config() {
 	}
 	if min, ok := v.Tag("min"); ok {
 		minv, err := laser.ToFloat32(min)
-		if grr.Log(err) == nil {
+		if errors.Log(err) == nil {
 			v.Widget.SetMin(minv)
 		}
 	}
 	if max, ok := v.Tag("max"); ok {
 		maxv, err := laser.ToFloat32(max)
-		if grr.Log(err) == nil {
+		if errors.Log(err) == nil {
 			v.Widget.SetMax(maxv)
 		}
 	}
 	if step, ok := v.Tag("step"); ok {
 		step, err := laser.ToFloat32(step)
-		if grr.Log(err) == nil {
+		if errors.Log(err) == nil {
 			v.Widget.SetStep(step)
 		}
 	}
@@ -121,7 +121,7 @@ func (v *NumberValue) Config() {
 func (v *NumberValue) Update() {
 	npv := laser.NonPtrValue(v.Value)
 	fv, err := laser.ToFloat32(npv.Interface())
-	if grr.Log(err) == nil {
+	if errors.Log(err) == nil {
 		v.Widget.SetValue(fv)
 	}
 }
@@ -138,19 +138,19 @@ func (v *SliderValue) Config() {
 	}
 	if min, ok := v.Tag("min"); ok {
 		minv, err := laser.ToFloat32(min)
-		if grr.Log(err) == nil {
+		if errors.Log(err) == nil {
 			v.Widget.SetMin(minv)
 		}
 	}
 	if max, ok := v.Tag("max"); ok {
 		maxv, err := laser.ToFloat32(max)
-		if grr.Log(err) == nil {
+		if errors.Log(err) == nil {
 			v.Widget.SetMax(maxv)
 		}
 	}
 	if step, ok := v.Tag("step"); ok {
 		stepv, err := laser.ToFloat32(step)
-		if grr.Log(err) == nil {
+		if errors.Log(err) == nil {
 			v.Widget.SetStep(stepv)
 		}
 	}
@@ -162,7 +162,7 @@ func (v *SliderValue) Config() {
 func (v *SliderValue) Update() {
 	npv := laser.NonPtrValue(v.Value)
 	fv, err := laser.ToFloat32(npv.Interface())
-	if grr.Log(err) == nil {
+	if errors.Log(err) == nil {
 		v.Widget.SetValue(fv)
 	}
 }

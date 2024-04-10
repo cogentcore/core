@@ -17,8 +17,8 @@ import (
 	"sync"
 
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/spell"
 	"cogentcore.org/core/xgo/dirs"
 )
@@ -31,7 +31,7 @@ func InitSpell() error {
 	}
 	err := OpenSpellModel()
 	if err != nil {
-		grr.Log(spell.OpenDefault())
+		errors.Log(spell.OpenDefault())
 	}
 	return nil
 }

@@ -16,8 +16,8 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
+	errors1 "cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/states"
@@ -58,7 +58,7 @@ func home(ts *core.Tabs) {
 		s.Text.Align = styles.Center
 	})
 
-	grr.Log(core.NewSVG(tab).ReadBytes(appIcon))
+	errors1.Log(core.NewSVG(tab).ReadBytes(appIcon))
 
 	core.NewLabel(tab).SetType(core.LabelDisplayLarge).SetText("The Cogent Core Demo")
 
@@ -315,7 +315,7 @@ func editors(ts *core.Tabs) {
 
 	sp := core.NewSplits(tab)
 
-	grr.Log(texteditor.NewSoloEditor(sp).Buffer.OpenFS(demoFile, "demo.go"))
+	errors1.Log(texteditor.NewSoloEditor(sp).Buffer.OpenFS(demoFile, "demo.go"))
 	texteditor.NewSoloEditor(sp).Buffer.SetLang("svg").SetText(appIcon)
 }
 

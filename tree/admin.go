@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"sync/atomic"
 
-	"cogentcore.org/core/grr"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/gti"
 )
 
@@ -32,7 +32,7 @@ func checkThis(n Node) error {
 	if n.This() != nil {
 		return nil
 	}
-	return grr.Log(fmt.Errorf("tree.Node %q has nil Node.This; you must use NewRoot or call Node.InitName on root nodes", n.Path()))
+	return errors.Log(fmt.Errorf("tree.Node %q has nil Node.This; you must use NewRoot or call Node.InitName on root nodes", n.Path()))
 }
 
 // SetParent sets the parent of the given node to the given parent node.

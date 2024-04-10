@@ -11,7 +11,7 @@ import (
 	"io/fs"
 
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/grr"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/htmlview"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/webcore"
@@ -34,7 +34,7 @@ var myFile embed.FS
 
 func main() {
 	b := core.NewBody("Cogent Core Docs")
-	pg := webcore.NewPage(b).SetSource(grr.Log1(fs.Sub(content, "content")))
+	pg := webcore.NewPage(b).SetSource(errors.Log1(fs.Sub(content, "content")))
 	pg.Context.WikilinkResolver = htmlview.PkgGoDevWikilink("cogentcore.org/core")
 	b.AddAppBar(pg.AppBar)
 
@@ -46,7 +46,7 @@ func main() {
 			s.Align.Items = styles.Center
 			s.Text.Align = styles.Center
 		})
-		grr.Log(core.NewSVG(ly).ReadBytes(icon))
+		errors.Log(core.NewSVG(ly).ReadBytes(icon))
 		core.NewLabel(ly).SetType(core.LabelDisplayLarge).SetText("Cogent Core")
 		return true
 	}

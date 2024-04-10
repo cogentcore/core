@@ -8,7 +8,7 @@ import (
 	_ "embed"
 
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/grr"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/htmlview"
 )
 
@@ -17,6 +17,6 @@ var content string
 
 func main() {
 	b := core.NewBody("HTML View MD")
-	grr.Log(htmlview.ReadMDString(htmlview.NewContext(), b, content))
+	errors.Log(htmlview.ReadMDString(htmlview.NewContext(), b, content))
 	b.RunMainWindow()
 }

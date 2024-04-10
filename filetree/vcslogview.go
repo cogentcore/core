@@ -8,8 +8,8 @@ import (
 	"log/slog"
 
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/states"
@@ -103,7 +103,7 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 			SetTooltip("Checks out this revision").
 			OnClick(func(e events.Event) {
 				cmt := lv.Log[tv.SelectedIndex]
-				grr.Log(repo.UpdateVersion(cmt.Rev))
+				errors.Log(repo.UpdateVersion(cmt.Rev))
 			})
 	})
 	tv.OnDoubleClick(func(e events.Event) {

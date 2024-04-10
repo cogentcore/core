@@ -4,7 +4,7 @@
 
 // Package errors provides a set of error handling helpers,
 // extending the standard library errors package.
-package grr
+package errors
 
 import (
 	"log/slog"

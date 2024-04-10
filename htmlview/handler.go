@@ -16,7 +16,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/grr"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
@@ -85,12 +85,12 @@ func HandleElement(ctx *Context) {
 			return
 		}
 		resp, err := Get(ctx, GetAttr(ctx.Node, "href"))
-		if grr.Log(err) != nil {
+		if errors.Log(err) != nil {
 			return
 		}
 		defer resp.Body.Close()
 		b, err := io.ReadAll(resp.Body)
-		if grr.Log(err) != nil {
+		if errors.Log(err) != nil {
 			return
 		}
 		ctx.AddStyle(string(b))
@@ -159,7 +159,7 @@ func HandleElement(ctx *Context) {
 		go func() {
 			src := GetAttr(n, "src")
 			resp, err := Get(ctx, src)
-			if grr.Log(err) != nil {
+			if errors.Log(err) != nil {
 				return
 			}
 			defer resp.Body.Close()
@@ -180,7 +180,7 @@ func HandleElement(ctx *Context) {
 		val := GetAttr(ctx.Node, "value")
 		switch ityp {
 		case "number":
-			fval := float32(grr.Log1(strconv.ParseFloat(val, 32)))
+			fval := float32(errors.Log1(strconv.ParseFloat(val, 32)))
 			New[*core.Spinner](ctx).SetValue(fval)
 		case "checkbox":
 			New[*core.Switch](ctx).SetType(core.SwitchCheckbox).
@@ -189,7 +189,7 @@ func HandleElement(ctx *Context) {
 			New[*core.Switch](ctx).SetType(core.SwitchRadioButton).
 				SetState(HasAttr(ctx.Node, "checked"), states.Checked)
 		case "range":
-			fval := float32(grr.Log1(strconv.ParseFloat(val, 32)))
+			fval := float32(errors.Log1(strconv.ParseFloat(val, 32)))
 			New[*core.Slider](ctx).SetValue(fval)
 		case "button", "submit":
 			New[*core.Button](ctx).SetText(val)
