@@ -72,7 +72,7 @@ This is what we look for, in considering whether to import a given package, so i
 Examples:
 * [[colors]] pulled out of gi
 * [[laser]] pulled reflection stuff out of kit
-* [[greasi]] separated from [[cli]] to keep cli free of core dependency
+* [[cliview]] separated from [[cli]] to keep cli free of core dependency
 
 # Use function libraries instead of putting lots of methods on a type
 

@@ -8,7 +8,7 @@ import (
 	"fmt"
 
 	"cogentcore.org/core/cli"
-	"cogentcore.org/core/greasi"
+	"cogentcore.org/core/cliview"
 )
 
 //go:generate core generate -add-types -add-methods
@@ -42,6 +42,6 @@ func Run(c *Config) error {
 
 //gti:skip
 func main() {
-	opts := cli.DefaultOptions("Basic", "Basic is a basic example application made with Greasi.")
-	greasi.Run(opts, &Config{}, Build, Run)
+	opts := cli.DefaultOptions("Basic", "Basic is a basic example application made with cliview.")
+	cliview.Run(opts, &Config{}, Build, Run)
 }
