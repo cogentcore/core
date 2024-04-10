@@ -44,7 +44,7 @@ type Config struct { //gti:add
 	// whether to generate a global type variable of the form 'TypeNameType'
 	TypeVar bool
 
-	// Whether to generate chaining `Set*` methods for each field of each type (eg: "SetText" for field "Text").
+	// Whether to generate chaining `Set*` methods for each exported field of each type (eg: "SetText" for field "Text").
 	// If this is set to true, then you can add `set:"-"` struct tags to individual fields
 	// to prevent Set methods being generated for them.
 	Setters bool

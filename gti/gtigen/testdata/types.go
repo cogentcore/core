@@ -27,6 +27,8 @@ type Person struct { //core:embedder
 	// Type is the type of the person
 	Type *gti.Type
 
+	unexportedField int
+
 	// Nicknames are the nicknames of the person
 	Nicknames []string
 }

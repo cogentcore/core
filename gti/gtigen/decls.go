@@ -8,9 +8,9 @@ import (
 	"reflect"
 	"strings"
 	"text/template"
+	"unicode"
 
 	"cogentcore.org/core/gti"
-	"cogentcore.org/core/strcase"
 )
 
 // TypeTmpl is the template for [gti.Type] declarations.
@@ -54,25 +54,28 @@ var FuncTmpl = template.Must(template.New("Func").Parse(
 var SetterMethodsTmpl = template.Must(template.New("SetterMethods").
 	Funcs(template.FuncMap{
 		"SetterFields": SetterFields,
-		"ToCamel":      strcase.ToCamel,
 		"SetterType":   SetterType,
 		"DocToComment": DocToComment,
 	}).Parse(
 	`
 	{{$typ := .}}
 	{{range (SetterFields .)}}
-	// Set{{ToCamel .Name}} sets the [{{$typ.LocalName}}.{{.Name}}] {{- if ne .Doc ""}}:{{end}}
+	// Set{{.Name}} sets the [{{$typ.LocalName}}.{{.Name}}] {{- if ne .Doc ""}}:{{end}}
 	{{DocToComment .Doc}}
-	func (t *{{$typ.LocalName}}) Set{{ToCamel .Name}}(v {{SetterType . $typ}}) *{{$typ.LocalName}} { t.{{.Name}} = v; return t }
+	func (t *{{$typ.LocalName}}) Set{{.Name}}(v {{SetterType . $typ}}) *{{$typ.LocalName}} { t.{{.Name}} = v; return t }
 	{{end}}
 `))
 
-// SetterFields returns all of the fields and embedded fields of the given type
+// SetterFields returns all of the exported fields and embedded fields of the given type
 // that don't have a `set:"-"` struct tag.
 func SetterFields(typ *Type) []gti.Field {
 	res := []gti.Field{}
 	do := func(fields Fields) {
 		for _, f := range fields.Fields {
+			// we do not generate setters for unexported fields
+			if unicode.IsLower([]rune(f.Name)[0]) {
+				continue
+			}
 			// unspecified indicates to add a set method; only "-" means no set
 			hasSetter := reflect.StructTag(fields.Tags[f.Name]).Get("set") != "-"
 			if hasSetter {
