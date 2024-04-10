@@ -11,7 +11,7 @@ Therefore, the standard structure of a Cogent Core app looks like this:
 ```go
 package main
 
-import "cogentcore.org/core/gi"
+import "cogentcore.org/core/core"
 
 func main() {
 	b := core.NewBody("App Name")

@@ -9,7 +9,7 @@ import (
 	"embed"
 	"io/fs"
 
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/webcore"
 )
