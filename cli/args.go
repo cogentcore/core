@@ -6,7 +6,7 @@
 // Copyright (c) 2012 Alex Ogier. All rights reserved.
 // Copyright (c) 2012 The Go Authors. All rights reserved.
 
-package grease
+package cli
 
 import (
 	"fmt"
