@@ -4,7 +4,7 @@
 
 //go:build !debug && !release
 
-package grog
+package xlog
 
 import "log/slog"
 
