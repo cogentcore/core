@@ -7,7 +7,7 @@ package main
 import (
 	"fmt"
 
-	"cogentcore.org/core/grease"
+	"cogentcore.org/core/cli"
 	"cogentcore.org/core/greasi"
 )
 
@@ -42,6 +42,6 @@ func Run(c *Config) error {
 
 //gti:skip
 func main() {
-	opts := grease.DefaultOptions("Basic", "Basic is a basic example application made with Greasi.")
+	opts := cli.DefaultOptions("Basic", "Basic is a basic example application made with Greasi.")
 	greasi.Run(opts, &Config{}, Build, Run)
 }

@@ -5,9 +5,9 @@
 package greasi
 
 import (
+	"cogentcore.org/core/cli"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/grease"
 	"cogentcore.org/core/grog"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/views"
@@ -15,7 +15,7 @@ import (
 
 // GUI starts the GUI for the given Grease app, which must be passed as
 // a pointer. It should typically not be called by end-user code; see [Run].
-func GUI[T any](opts *grease.Options, cfg T, cmds ...*grease.Cmd[T]) {
+func GUI[T any](opts *cli.Options, cfg T, cmds ...*cli.Cmd[T]) {
 	b := core.NewBody(opts.AppName)
 
 	b.AddAppBar(func(tb *core.Toolbar) {

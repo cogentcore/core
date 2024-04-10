@@ -5,11 +5,11 @@
 package main
 
 import (
-	"cogentcore.org/core/grease"
+	"cogentcore.org/core/cli"
 	"cogentcore.org/core/gti/gtigen"
 )
 
 func main() {
-	opts := grease.DefaultOptions("gtigen", "GTIGen", "GTIGen provides the generation of general purpose type information for Go types, methods, functions and variables")
-	grease.Run(opts, &gtigen.Config{}, gtigen.Generate)
+	opts := cli.DefaultOptions("gtigen", "GTIGen", "GTIGen provides the generation of general purpose type information for Go types, methods, functions and variables")
+	cli.Run(opts, &gtigen.Config{}, gtigen.Generate)
 }

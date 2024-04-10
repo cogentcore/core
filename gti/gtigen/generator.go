@@ -17,8 +17,8 @@ import (
 
 	"log/slog"
 
+	"cogentcore.org/core/cli"
 	"cogentcore.org/core/gengo"
-	"cogentcore.org/core/grease"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/ordmap"
 	"cogentcore.org/core/strcase"
@@ -468,7 +468,7 @@ func LoadFromComment(c *ast.CommentGroup, cfg *Config) (dirs []gti.Directive, ha
 		return
 	}
 	for _, c := range c.List {
-		dir, err := grease.ParseDirective(c.Text)
+		dir, err := cli.ParseDirective(c.Text)
 		if err != nil {
 			return nil, false, false, fmt.Errorf("error parsing comment directive from %q: %w", c.Text, err)
 		}
@@ -483,7 +483,7 @@ func LoadFromComment(c *ast.CommentGroup, cfg *Config) (dirs []gti.Directive, ha
 				hasSkip = true
 			}
 			if dir.Directive == "add" || dir.Directive == "skip" {
-				leftovers, err := grease.SetFromArgs(cfg, dir.Args, grease.ErrNotFound)
+				leftovers, err := cli.SetFromArgs(cfg, dir.Args, cli.ErrNotFound)
 				if err != nil {
 					return nil, false, false, fmt.Errorf("error setting config info from comment directive args: %w (from directive %q)", err, c.Text)
 				}

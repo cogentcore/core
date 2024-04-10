@@ -25,8 +25,8 @@ import (
 	"strings"
 	"text/template"
 
+	"cogentcore.org/core/cli"
 	"cogentcore.org/core/gengo"
-	"cogentcore.org/core/grease"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -92,7 +92,7 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 		return true, nil
 	}
 	for _, c := range ts.Comment.List {
-		dir, err := grease.ParseDirective(c.Text)
+		dir, err := cli.ParseDirective(c.Text)
 		if err != nil {
 			return false, fmt.Errorf("error parsing comment directive %q: %w", c.Text, err)
 		}
@@ -113,7 +113,7 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 		// }
 		cfg := &Config{}
 		*cfg = *g.Config
-		leftovers, err := grease.SetFromArgs(cfg, dir.Args, grease.ErrNotFound)
+		leftovers, err := cli.SetFromArgs(cfg, dir.Args, cli.ErrNotFound)
 		if err != nil {
 			return false, fmt.Errorf("error setting config info from comment directive args: %w (from directive %q)", err, c.Text)
 		}

@@ -10,7 +10,7 @@ import (
 	"testing"
 	"text/template"
 
-	"cogentcore.org/core/grease"
+	"cogentcore.org/core/cli"
 	"cogentcore.org/core/ordmap"
 	"cogentcore.org/core/strcase"
 )
@@ -34,7 +34,7 @@ func TestGenerate(t *testing.T) {
 			},
 		}}),
 	}
-	err := grease.SetFromDefaults(c)
+	err := cli.SetFromDefaults(c)
 	if err != nil {
 		t.Errorf("programmer error: error setting config from default tags: %v", err)
 	}

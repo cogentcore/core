@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package grease
+package cli
 
 import "cogentcore.org/core/strcase"
 
 // Options contains the options passed to Grease
 // that control its behavior.
 type Options struct {
+
 	// AppName is the name of the Grease app.
 	AppName string
 

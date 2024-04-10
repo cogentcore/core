@@ -10,14 +10,14 @@ import (
 	"strings"
 	"testing"
 
+	"cogentcore.org/core/cli"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/enums/enumgen/testdata"
-	"cogentcore.org/core/grease"
 )
 
 func TestGenerate(t *testing.T) {
 	c := &Config{}
-	err := grease.SetFromDefaults(c)
+	err := cli.SetFromDefaults(c)
 	if err != nil {
 		t.Errorf("programmer error: error setting config from default tags: %v", err)
 	}

@@ -10,14 +10,14 @@ import (
 	"path/filepath"
 	"strings"
 
+	"cogentcore.org/core/cli"
 	"cogentcore.org/core/colors/gradient"
-	"cogentcore.org/core/grease"
 	"cogentcore.org/core/svg"
 )
 
 func main() { //gti:skip
-	opts := grease.DefaultOptions("svg", "svg", "Command line tools for rendering and creating svg files")
-	grease.Run(opts, &Config{}, Render, EmbedImage)
+	opts := cli.DefaultOptions("svg", "svg", "Command line tools for rendering and creating svg files")
+	cli.Run(opts, &Config{}, Render, EmbedImage)
 }
 
 type Config struct {

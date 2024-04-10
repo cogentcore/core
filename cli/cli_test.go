@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package grease
+package cli
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ import (
 
 	"log/slog"
 
-	"cogentcore.org/core/grease/testdata"
+	"cogentcore.org/core/cli/testdata"
 	"cogentcore.org/core/grog"
 	"cogentcore.org/core/grows/tomls"
 	"github.com/stretchr/testify/assert"
