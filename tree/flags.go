@@ -4,11 +4,11 @@
 
 package tree
 
-// Flags are bit flags for efficient core state of nodes -- see bitflag
-// package for using these ordinal values to manipulate bit flag field.
+// Flags are bit flags for efficient core state of nodes.
 type Flags int64 //enums:bitflag
 
 const (
-	// Field indicates a node is a field in its parent node, not a child in children.
+	// Field indicates that a node is a field in
+	// its parent node, not a child in children.
 	Field Flags = iota
 )

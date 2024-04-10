@@ -47,7 +47,7 @@ func TestUp(t *testing.T) {
 	res := []string{}
 	for {
 		res = append(res, cur.Path())
-		curi := Prev(cur)
+		curi := Previous(cur)
 		if curi == nil {
 			break
 		}

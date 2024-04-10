@@ -17,8 +17,6 @@ import (
 	"cogentcore.org/core/gti"
 )
 
-// see https://cogentcore.org/core/ki/wiki/Naming for IO naming conventions
-
 // WriteXML writes the tree to an XML-encoded byte string over io.Writer
 // using MarshalXML.
 func (n *NodeBase) WriteXML(writer io.Writer, indent bool) error {

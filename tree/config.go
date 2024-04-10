@@ -10,19 +10,19 @@ import (
 	"cogentcore.org/core/gti"
 )
 
-// TypeAndName holds a type and a name.
-// Used for specifying configurations of children in Ki,
-// for efficiently configuring the chilren.
+// TypeAndName holds a type and a name. It is used for specifying [Config]
+// objects in [Node.ConfigChildren].
 type TypeAndName struct {
 	Type *gti.Type
 	Name string
 }
 
-// list of type-and-names -- can be created from a string spec
+// Config is a list of [TypeAndName]s used in [Node.ConfigChildren].
 type Config []TypeAndName
 
-func (t *Config) Add(typ *gti.Type, nm string) {
-	*t = append(*t, TypeAndName{typ, nm})
+// Add adds a new configuration entry with the given type and name.
+func (t *Config) Add(typ *gti.Type, name string) {
+	*t = append(*t, TypeAndName{typ, name})
 }
 
 func (t Config) GoString() string {

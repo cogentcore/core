@@ -4,13 +4,13 @@
 
 /*
 This file provides basic tree walking functions for iterative traversal
-of the tree in up / down directions.  As compared to the core walk methods,
+of the tree in up / down directions.  As compared to the Node walk methods,
 these are for more dynamic, piecemeal processing.
 */
 
 package tree
 
-// Last returns the last node in the tree
+// Last returns the last node in the tree.
 func Last(nd Node) Node {
 	nd = LastChild(nd)
 	last := nd
@@ -21,7 +21,8 @@ func Last(nd Node) Node {
 	return last
 }
 
-// LastChild returns the last child under given node, or node itself if no children
+// LastChild returns the last child under the given node,
+// or the node itself if it has no children.
 func LastChild(nd Node) Node {
 	if nd.HasChildren() {
 		ek, err := nd.Children().ElemFromEndTry(0)
@@ -32,8 +33,9 @@ func LastChild(nd Node) Node {
 	return nd
 }
 
-// Prev returns previous node in the tree -- nil if top
-func Prev(nd Node) Node {
+// Previous returns the previous node in the tree,
+// or nil if this is the root node.
+func Previous(nd Node) Node {
 	if nd.Parent() == nil {
 		return nil
 	}
@@ -45,7 +47,8 @@ func Prev(nd Node) Node {
 	return nd.Parent()
 }
 
-// Next returns next node in the tree, nil if end
+// Next returns next node in the tree,
+// or nil if this is the last node.
 func Next(nd Node) Node {
 	if !nd.HasChildren() {
 		return NextSibling(nd)
@@ -53,7 +56,8 @@ func Next(nd Node) Node {
 	return nd.Child(0)
 }
 
-// NextSibling returns next sibling or nil if none
+// NextSibling returns the next sibling of this node,
+// or nil if it has none.
 func NextSibling(nd Node) Node {
 	if nd.Parent() == nil {
 		return nil

@@ -81,7 +81,7 @@ func (ast *Ast) NextSiblingAst() *Ast {
 
 // PrevAst returns the previous node in the Ast tree, or nil if none
 func (ast *Ast) PrevAst() *Ast {
-	nxti := tree.Prev(ast)
+	nxti := tree.Previous(ast)
 	if nxti == nil {
 		return nil
 	}

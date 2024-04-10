@@ -4,7 +4,7 @@
 
 package tree
 
-// Named consts for bool args
+// Named constants for bool args
 const (
 	// Continue = true can be returned from tree iteration functions to continue
 	// processing down the tree, as compared to Break = false which stops this branch.
@@ -21,20 +21,4 @@ const (
 	// NoEmbeds is used for methods that look for children or parents of different types.
 	// Passing this argument means to NOT look for embedded types for matches.
 	NoEmbeds = false
-
-	// ShallowCopy is used for Properties CopyFrom functions to indicate a shallow copy of
-	// Properties or Propertieslice within Properties (points to source properties)
-	ShallowCopy = true
-
-	// DeepCopy is used for Properties CopyFrom functions to indicate a deep copy of
-	// Properties or Propertieslice within Properties
-	DeepCopy = true
-
-	// Inherit is used for PropInherit to indicate that inherited properties
-	// from parent objects should be checked as well.  Otherwise not.
-	Inherit = true
-
-	// NoInherit is used for PropInherit to indicate that inherited properties
-	// from parent objects should NOT be checked.
-	NoInherit = false
 )
