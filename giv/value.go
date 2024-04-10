@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package views allows you to view and edit Go data in the GUI using reflection.
 package giv
 
 //go:generate core generate
