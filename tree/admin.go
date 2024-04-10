@@ -37,33 +37,37 @@ func checkThis(n Node) error {
 
 // SetParent sets the parent of the given node to the given parent node.
 // This is only for nodes with no existing parent; see [MoveToParent] to
-// move nodes that already have a parent.
-func SetParent(kid Node, parent Node) {
-	n := kid.AsTreeNode()
+// move nodes that already have a parent. It does not add the node to the
+// parent's list of children; see [Node.AddChild] for a version that does.
+func SetParent(child Node, parent Node) {
+	n := child.AsTreeNode()
 	n.Par = parent
 	if parent != nil {
 		pn := parent.AsTreeNode()
 		c := atomic.AddUint64(&pn.numLifetimeChildren, 1)
-		if kid.Name() == "" {
-			kid.SetName(kid.NodeType().IDName + "-" + strconv.FormatUint(c-1, 10)) // must subtract 1 so we start at 0
+		if child.Name() == "" {
+			child.SetName(child.NodeType().IDName + "-" + strconv.FormatUint(c-1, 10)) // must subtract 1 so we start at 0
 		}
 	}
-	kid.This().OnAdd()
+	child.This().OnAdd()
 	n.WalkUpParent(func(k Node) bool {
-		k.This().OnChildAdded(kid)
+		k.This().OnChildAdded(child)
 		return Continue
 	})
 }
 
-// MoveToParent deletes given node from its current parent and adds it as a child
-// of given new parent.  Parents could be in different trees or not.
-func MoveToParent(kid Node, parent Node) {
-	// TODO(kai/ki): implement MoveToParent
-	// oldPar := kid.Parent()
-	// if oldPar != nil {
-	// 	oldPar.DeleteChild(kid, false)
-	// }
-	// parent.AddChild(kid)
+// MoveToParent removes the given node from its current parent
+// and adds it as a child of the given new parent.
+// The old and new parents can be in different trees (or not).
+func MoveToParent(child Node, parent Node) {
+	oldParent := child.Parent()
+	if oldParent != nil {
+		idx, ok := oldParent.Children().IndexOf(child)
+		if ok {
+			oldParent.Children().DeleteAtIndex(idx)
+		}
+	}
+	parent.AddChild(child)
 }
 
 // New adds a new child of the given the type
