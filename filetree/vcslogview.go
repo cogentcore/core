@@ -9,7 +9,6 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/mimedata"
@@ -18,6 +17,7 @@ import (
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/vci"
 	"cogentcore.org/core/views"
+	"cogentcore.org/core/xgo/dirs"
 )
 
 // VCSLogView is a view of the VCS log data

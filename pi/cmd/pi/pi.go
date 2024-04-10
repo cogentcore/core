@@ -12,10 +12,10 @@ import (
 	"strings"
 
 	"cogentcore.org/core/fileinfo"
-	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/pi"
 	_ "cogentcore.org/core/pi/langs"
 	"cogentcore.org/core/pi/syms"
+	"cogentcore.org/core/xgo/dirs"
 )
 
 var Excludes []string

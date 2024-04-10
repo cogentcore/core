@@ -19,7 +19,6 @@ import (
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fileinfo"
-	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/texteditor"
@@ -27,6 +26,7 @@ import (
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/vci"
 	"cogentcore.org/core/views"
+	"cogentcore.org/core/xgo/dirs"
 )
 
 // NodeHiStyle is the default style for syntax highlighting to use for

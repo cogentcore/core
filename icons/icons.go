@@ -10,9 +10,9 @@ import (
 	"io/fs"
 	"strings"
 
-	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/mergefs"
+	"cogentcore.org/core/xgo/dirs"
 )
 
 //go:generate go run gen.go

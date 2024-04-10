@@ -17,11 +17,11 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"cogentcore.org/core/glop/indent"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/pi/syms"
 	"cogentcore.org/core/pi/token"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/xgo/indent"
 )
 
 // Set GuiActive to true if the gui (piview) is active -- ensures that the

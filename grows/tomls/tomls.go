@@ -9,8 +9,8 @@ import (
 	"io"
 	"io/fs"
 
-	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/grows"
+	"cogentcore.org/core/xgo/dirs"
 	"github.com/pelletier/go-toml/v2"
 )
 

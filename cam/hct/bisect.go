@@ -21,8 +21,8 @@ package hct
 
 import (
 	"cogentcore.org/core/cam/cam16"
-	"cogentcore.org/core/glop/num"
 	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/xgo/num"
 )
 
 // double ChromaticAdaptation(double component) {

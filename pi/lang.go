@@ -5,10 +5,10 @@
 package pi
 
 import (
-	"cogentcore.org/core/glop/indent"
 	"cogentcore.org/core/pi/complete"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/pi/syms"
+	"cogentcore.org/core/xgo/indent"
 )
 
 // Lang provides a general interface for language-specific management

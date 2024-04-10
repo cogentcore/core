@@ -9,8 +9,8 @@ package lex
 import (
 	"fmt"
 
-	"cogentcore.org/core/glop/nptime"
 	"cogentcore.org/core/pi/token"
+	"cogentcore.org/core/xgo/nptime"
 )
 
 // Lex represents a single lexical element, with a token, and start and end rune positions

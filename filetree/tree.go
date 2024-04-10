@@ -15,11 +15,11 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/vci"
+	"cogentcore.org/core/xgo/dirs"
 	"gopkg.in/fsnotify.v1"
 )
 

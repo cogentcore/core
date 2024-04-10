@@ -10,10 +10,10 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/glop/option"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/xgo/option"
 )
 
 func TestValues(t *testing.T) {

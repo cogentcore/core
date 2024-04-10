@@ -7,7 +7,7 @@ package hpe
 import (
 	"testing"
 
-	"cogentcore.org/core/glop/tolassert"
+	"cogentcore.org/core/xgo/tolassert"
 )
 
 func TestHPE(t *testing.T) {

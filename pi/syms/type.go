@@ -10,9 +10,9 @@ import (
 	"maps"
 	"slices"
 
-	"cogentcore.org/core/glop/indent"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/xgo/indent"
 )
 
 // Type contains all the information about types.  Types can be builtin

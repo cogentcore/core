@@ -13,8 +13,8 @@ import (
 	"regexp"
 	"unicode/utf8"
 
-	"cogentcore.org/core/glop/runes"
 	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/xgo/runes"
 )
 
 // Match records one match for search within file, positions in runes

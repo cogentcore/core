@@ -15,8 +15,8 @@ import (
 	"github.com/jinzhu/copier"
 
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/glop/elide"
 	"cogentcore.org/core/gti"
+	"cogentcore.org/core/xgo/elide"
 )
 
 // NodeBase implements the [Node] interface and provides the core functionality

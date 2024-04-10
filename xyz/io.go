@@ -11,8 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/xgo/dirs"
 )
 
 // Decoder parses 3D object / scene file(s) and imports into a Group or Scene.

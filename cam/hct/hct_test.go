@@ -8,8 +8,8 @@ import (
 	"image/color"
 	"testing"
 
-	"cogentcore.org/core/glop/tolassert"
 	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/xgo/tolassert"
 	"github.com/stretchr/testify/assert"
 )
 

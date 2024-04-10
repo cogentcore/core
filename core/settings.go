@@ -18,7 +18,6 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/glop/option"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/grows/jsons"
 	"cogentcore.org/core/grows/tomls"
@@ -27,6 +26,7 @@ import (
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/paint"
+	"cogentcore.org/core/xgo/option"
 )
 
 // AllSettings is a global slice containing all of the user [Settings]

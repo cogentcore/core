@@ -7,8 +7,8 @@ package textbuf
 import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/fileinfo"
-	"cogentcore.org/core/glop/indent"
 	"cogentcore.org/core/pi"
+	"cogentcore.org/core/xgo/indent"
 )
 
 // Opts contains options for textview.Bufs

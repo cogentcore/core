@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"io/fs"
 
-	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/grows/tomls"
 	"cogentcore.org/core/laser"
+	"cogentcore.org/core/xgo/dirs"
 )
 
 // OpenWithIncludes reads the config struct from the given config file

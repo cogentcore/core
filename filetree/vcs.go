@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
@@ -21,6 +20,7 @@ import (
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/vci"
 	"cogentcore.org/core/views"
+	"cogentcore.org/core/xgo/dirs"
 	"github.com/Masterminds/vcs"
 )
 

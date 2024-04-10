@@ -5,8 +5,8 @@
 package lex
 
 import (
-	"cogentcore.org/core/glop/indent"
 	"cogentcore.org/core/pi/token"
+	"cogentcore.org/core/xgo/indent"
 )
 
 // these functions support indentation algorithms,

@@ -7,4 +7,3 @@ Package bools has:
 * To/FromString functions converting `bool` to / from "true" / "false" (only)
 
 See [num](../num) for functions that convert `bool` to / from numbers.
-
