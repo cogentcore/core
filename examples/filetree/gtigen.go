@@ -4,7 +4,7 @@ package main
 
 import (
 	"cogentcore.org/core/filetree"
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/tree"
 )
@@ -28,11 +28,11 @@ func (t *FileBrowse) New() tree.Node { return &FileBrowse{} }
 
 // SetProjRoot sets the [FileBrowse.ProjRoot]:
 // root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjFilename
-func (t *FileBrowse) SetProjRoot(v gi.Filename) *FileBrowse { t.ProjRoot = v; return t }
+func (t *FileBrowse) SetProjRoot(v core.Filename) *FileBrowse { t.ProjRoot = v; return t }
 
 // SetActiveFilename sets the [FileBrowse.ActiveFilename]:
 // filename of the currently-active texteditor
-func (t *FileBrowse) SetActiveFilename(v gi.Filename) *FileBrowse { t.ActiveFilename = v; return t }
+func (t *FileBrowse) SetActiveFilename(v core.Filename) *FileBrowse { t.ActiveFilename = v; return t }
 
 // SetChanged sets the [FileBrowse.Changed]:
 // has the root changed?  we receive update signals from root for changes

@@ -9,19 +9,19 @@ import (
 	"image"
 	"image/draw"
 
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/states"
 )
 
 func init() {
-	gi.TheApp.AddQuitCleanFunc(EditorBlinker.QuitClean)
+	core.TheApp.AddQuitCleanFunc(EditorBlinker.QuitClean)
 }
 
 var (
 	// EditorBlinker manages cursor blinking
-	EditorBlinker = gi.Blinker{}
+	EditorBlinker = core.Blinker{}
 
 	// EditorSpriteName is the name of the window sprite used for the cursor
 	EditorSpriteName = "texteditor.Editor.Cursor"
@@ -32,15 +32,15 @@ func (ed *Editor) StartCursor() {
 	if ed == nil || ed.This() == nil {
 		return
 	}
-	if !ed.This().(gi.Widget).IsVisible() {
+	if !ed.This().(core.Widget).IsVisible() {
 		return
 	}
 	ed.BlinkOn = true
 	ed.RenderCursor(true)
-	if gi.SystemSettings.CursorBlinkTime == 0 {
+	if core.SystemSettings.CursorBlinkTime == 0 {
 		return
 	}
-	EditorBlinker.Blink(gi.SystemSettings.CursorBlinkTime, func(w gi.Widget) {
+	EditorBlinker.Blink(core.SystemSettings.CursorBlinkTime, func(w core.Widget) {
 		eed := AsEditor(w)
 		if !eed.StateIs(states.Focused) || !w.IsVisible() {
 			eed.BlinkOn = false
@@ -51,7 +51,7 @@ func (ed *Editor) StartCursor() {
 			eed.RenderCursor(eed.BlinkOn)
 		}
 	})
-	EditorBlinker.SetWidget(ed.This().(gi.Widget))
+	EditorBlinker.SetWidget(ed.This().(core.Widget))
 }
 
 // ClearCursor turns off cursor and stops it from blinking
@@ -65,7 +65,7 @@ func (ed *Editor) StopCursor() {
 	if ed == nil || ed.This() == nil {
 		return
 	}
-	EditorBlinker.ResetWidget(ed.This().(gi.Widget))
+	EditorBlinker.ResetWidget(ed.This().(core.Widget))
 }
 
 // CursorBBox returns a bounding-box for a cursor at given position
@@ -95,7 +95,7 @@ func (ed *Editor) RenderCursor(on bool) {
 		ms.Sprites.InactivateSprite(spnm)
 		return
 	}
-	if !ed.This().(gi.Widget).IsVisible() {
+	if !ed.This().(core.Widget).IsVisible() {
 		return
 	}
 	if ed.Renders == nil {
@@ -120,7 +120,7 @@ func (ed *Editor) CursorSpriteName() string {
 // CursorSprite returns the sprite for the cursor, which is
 // only rendered once with a vertical bar, and just activated and inactivated
 // depending on render status.
-func (ed *Editor) CursorSprite(on bool) *gi.Sprite {
+func (ed *Editor) CursorSprite(on bool) *core.Sprite {
 	sc := ed.Scene
 	if sc == nil {
 		return nil
@@ -136,7 +136,7 @@ func (ed *Editor) CursorSprite(on bool) *gi.Sprite {
 		if bbsz.X < 2 { // at least 2
 			bbsz.X = 2
 		}
-		sp = gi.NewSprite(spnm, bbsz, image.Point{})
+		sp = core.NewSprite(spnm, bbsz, image.Point{})
 		ibox := sp.Pixels.Bounds()
 		draw.Draw(sp.Pixels, ibox, ed.CursorColor, image.Point{}, draw.Src)
 		ms.Sprites.Add(sp)

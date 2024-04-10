@@ -10,9 +10,9 @@ import (
 	"log"
 	"strings"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fi"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/mimedata"
@@ -100,7 +100,7 @@ func (tv *TreeView) SyncToSrc(tvIndex *int, init bool, depth int) {
 // satisfying the Labeler interface
 func (tv *TreeView) Label() string {
 	if tv.SyncNode != nil {
-		if lbl, has := gi.ToLabeler(tv.SyncNode); has {
+		if lbl, has := core.ToLabeler(tv.SyncNode); has {
 			return lbl
 		}
 		return tv.SyncNode.Name()
@@ -145,7 +145,7 @@ func (tv *TreeView) SelectedSyncNodes() tree.Slice {
 // or nil if not found
 func (tv *TreeView) FindSyncNode(kn tree.Node) *TreeView {
 	var ttv *TreeView
-	tv.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+	tv.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
 		tvn := AsTreeView(wi)
 		if tvn != nil {
 			if tvn.SyncNode == kn {
@@ -230,11 +230,11 @@ func (tv *TreeView) InsertAt(rel int, actNm string) {
 	if tv.SyncNode != nil {
 		typ = tv.SyncNode.This().BaseType()
 	}
-	d := gi.NewBody().AddTitle(actNm).AddText("Number and type of items to insert:")
-	nd := &gi.NewItemsData{Number: 1, Type: typ}
+	d := core.NewBody().AddTitle(actNm).AddText("Number and type of items to insert:")
+	nd := &core.NewItemsData{Number: 1, Type: typ}
 	sg := NewStructView(d).SetStruct(nd).StructGrid()
-	tree.ChildByType[*gi.Chooser](sg, tree.Embeds).SetTypes(gti.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
-	d.AddBottomBar(func(parent gi.Widget) {
+	tree.ChildByType[*core.Chooser](sg, tree.Embeds).SetTypes(gti.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
+	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).OnClick(func(e events.Event) {
 			parent := AsTreeView(tv.Par)
@@ -257,11 +257,11 @@ func (tv *TreeView) AddChildNode() { //gti:add
 	if tv.SyncNode != nil {
 		typ = tv.SyncNode.This().BaseType()
 	}
-	d := gi.NewBody().AddTitle(ttl).AddText("Number and type of items to insert:")
-	nd := &gi.NewItemsData{Number: 1, Type: typ}
+	d := core.NewBody().AddTitle(ttl).AddText("Number and type of items to insert:")
+	nd := &core.NewItemsData{Number: 1, Type: typ}
 	sg := NewStructView(d).SetStruct(nd).StructGrid()
-	tree.ChildByType[*gi.Chooser](sg, tree.Embeds).SetTypes(gti.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
-	d.AddBottomBar(func(parent gi.Widget) {
+	tree.ChildByType[*core.Chooser](sg, tree.Embeds).SetTypes(gti.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
+	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).OnClick(func(e events.Event) {
 			if tv.SyncNode != nil {
@@ -357,12 +357,12 @@ func (tv *TreeView) DuplicateSync() {
 func (tv *TreeView) EditNode() { //gti:add
 	if tv.SyncNode != nil {
 		tynm := tv.SyncNode.NodeType().Name
-		d := gi.NewBody().AddTitle(tynm)
+		d := core.NewBody().AddTitle(tynm)
 		NewStructView(d).SetStruct(tv.SyncNode).SetReadOnly(tv.IsReadOnly())
 		d.NewFullDialog(tv).Run()
 	} else {
 		tynm := tv.NodeType().Name
-		d := gi.NewBody().AddTitle(tynm)
+		d := core.NewBody().AddTitle(tynm)
 		NewStructView(d).SetStruct(tv.This()).SetReadOnly(tv.IsReadOnly())
 		d.NewFullDialog(tv).Run()
 	}
@@ -389,7 +389,7 @@ func (tv *TreeView) MimeDataSync(md *mimedata.Mimes) {
 	if err == nil {
 		*md = append(*md, &mimedata.Data{Type: fi.DataJson, Data: buf.Bytes()})
 	} else {
-		gi.ErrorSnackbar(tv, err, "Error encoding node")
+		core.ErrorSnackbar(tv, err, "Error encoding node")
 	}
 }
 
@@ -406,7 +406,7 @@ func (tv *TreeView) SyncNodesFromMimeData(md mimedata.Mimes) (tree.Slice, []stri
 			if err == nil {
 				sl = append(sl, nki)
 			} else {
-				gi.ErrorSnackbar(tv, err, "Error loading node")
+				core.ErrorSnackbar(tv, err, "Error loading node")
 			}
 		} else if d.Type == fi.TextPlain { // paths
 			pl = append(pl, string(d.Data))
@@ -507,7 +507,7 @@ func (tv *TreeView) DropDeleteSourceSync(de *events.DragDrop) {
 			psplt := strings.Split(path, "/")
 			orgnm := psplt[len(psplt)-1]
 			sn.SetName(orgnm)
-			_, swb := gi.AsWidget(sn)
+			_, swb := core.AsWidget(sn)
 			swb.NeedsRender()
 		}
 	}

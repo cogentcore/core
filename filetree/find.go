@@ -11,15 +11,15 @@ import (
 	"strings"
 	"time"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/fi"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/tree"
 )
 
 // FindDirNode finds directory node by given path.
 // Must be a relative path already rooted at tree, or absolute path within tree.
 func (fn *Node) FindDirNode(path string) (*Node, error) {
-	rp := fn.RelPath(gi.Filename(path))
+	rp := fn.RelPath(core.Filename(path))
 	if rp == "" {
 		return nil, fmt.Errorf("FindDirNode: path: %s is not relative to this node's path: %s", path, fn.FPath)
 	}
@@ -76,7 +76,7 @@ func (fn *Node) FindFile(fnm string) (*Node, bool) {
 
 	var ffn *Node
 	found := false
-	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+	fn.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
 			return tree.Continue
@@ -98,7 +98,7 @@ func (fn *Node) FilesMatching(match string, ignoreCase bool) []*Node {
 	if ignoreCase {
 		match = strings.ToLower(match)
 	}
-	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+	fn.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
 			return tree.Continue
@@ -137,7 +137,7 @@ func NodeNameCountSort(ecs []NodeNameCount) {
 // (e.g., fi.Code to find any code files)
 func (fn *Node) FileExtCounts(cat fi.Cat) []NodeNameCount {
 	cmap := make(map[string]int, 20)
-	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+	fn.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
 			return tree.Continue
@@ -170,7 +170,7 @@ func (fn *Node) FileExtCounts(cat fi.Cat) []NodeNameCount {
 // (e.g., fi.Code to find any code files)
 func (fn *Node) LatestFileMod(cat fi.Cat) time.Time {
 	tmod := time.Time{}
-	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+	fn.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
 			return tree.Continue

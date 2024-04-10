@@ -10,8 +10,8 @@ import (
 	"embed"
 	"io/fs"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/coredom"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/webcore"
@@ -33,21 +33,21 @@ var mySVG embed.FS
 var myFile embed.FS
 
 func main() {
-	b := gi.NewBody("Cogent Core Docs")
+	b := core.NewBody("Cogent Core Docs")
 	pg := webcore.NewPage(b).SetSource(grr.Log1(fs.Sub(content, "content")))
 	pg.Context.WikilinkResolver = coredom.PkgGoDevWikilink("cogentcore.org/core")
 	b.AddAppBar(pg.AppBar)
 
 	coredom.ElementHandlers["home-header"] = func(ctx *coredom.Context) bool {
-		ly := gi.NewLayout(ctx.BlockParent).Style(func(s *styles.Style) {
+		ly := core.NewLayout(ctx.BlockParent).Style(func(s *styles.Style) {
 			s.Direction = styles.Column
 			s.Justify.Content = styles.Center
 			s.Align.Content = styles.Center
 			s.Align.Items = styles.Center
 			s.Text.Align = styles.Center
 		})
-		grr.Log(gi.NewSVG(ly).ReadBytes(icon))
-		gi.NewLabel(ly).SetType(gi.LabelDisplayLarge).SetText("Cogent Core")
+		grr.Log(core.NewSVG(ly).ReadBytes(icon))
+		core.NewLabel(ly).SetType(core.LabelDisplayLarge).SetText("Cogent Core")
 		return true
 	}
 

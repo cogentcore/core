@@ -11,7 +11,7 @@ import (
 	"log/slog"
 	"strings"
 
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/grr"
@@ -29,7 +29,7 @@ import (
 func (fn *Node) FirstVCS() (vci.Repo, *Node) {
 	var repo vci.Repo
 	var rnode *Node
-	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+	fn.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
 			return tree.Continue
@@ -312,10 +312,10 @@ func (fn *Node) BlameVCSSel() { //gti:add
 
 // BlameDialog opens a dialog for displaying VCS blame data using textview.TwinViews.
 // blame is the annotated blame code, while fbytes is the original file contents.
-func BlameDialog(ctx gi.Widget, fname string, blame, fbytes []byte) *texteditor.TwinEditors {
+func BlameDialog(ctx core.Widget, fname string, blame, fbytes []byte) *texteditor.TwinEditors {
 	title := "VCS Blame: " + dirs.DirAndFile(fname)
 
-	d := gi.NewBody().AddTitle(title)
+	d := core.NewBody().AddTitle(title)
 	tv := texteditor.NewTwinEditors(d, "twin-view")
 	tv.SetSplits(.3, .7)
 	tv.SetFiles(fname, fname, true)
@@ -382,7 +382,7 @@ func (fn *Node) BlameVCS() ([]byte, error) {
 
 // UpdateAllVCS does an update on any repositories below this one in file tree
 func (fn *Node) UpdateAllVCS() {
-	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+	fn.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
 			return tree.Continue
@@ -443,11 +443,11 @@ func (kn VersionControlName) Value() giv.Value {
 
 // VersionControlValue represents a [VersionControlName] with a button.
 type VersionControlValue struct {
-	giv.ValueBase[*gi.Button]
+	giv.ValueBase[*core.Button]
 }
 
 func (v *VersionControlValue) Config() {
-	v.Widget.SetType(gi.ButtonTonal)
+	v.Widget.SetType(core.ButtonTonal)
 	giv.ConfigDialogWidget(v, false)
 }
 
@@ -459,11 +459,11 @@ func (v *VersionControlValue) Update() {
 	v.Widget.SetText(txt).Update()
 }
 
-func (v *VersionControlValue) OpenDialog(ctx gi.Widget, fun func()) {
+func (v *VersionControlValue) OpenDialog(ctx core.Widget, fun func()) {
 	cur := laser.ToString(v.Value.Interface())
-	m := gi.NewMenuFromStrings(VersionControlSystems, cur, func(idx int) {
+	m := core.NewMenuFromStrings(VersionControlSystems, cur, func(idx int) {
 		v.SetValue(VersionControlSystems[idx])
 		v.Update()
 	})
-	gi.NewMenuStage(m, ctx, ctx.ContextMenuPos(nil)).Run()
+	core.NewMenuStage(m, ctx, ctx.ContextMenuPos(nil)).Run()
 }

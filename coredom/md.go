@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"fmt"
 
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 	"github.com/yuin/goldmark"
 	highlighting "github.com/yuin/goldmark-highlighting/v2"
 	"github.com/yuin/goldmark/extension"
@@ -18,14 +18,14 @@ import (
 )
 
 // ReadMD reads MD (markdown) from the given bytes and adds corresponding
-// Cogent Core widgets to the given [gi.Widget], using the given context.
-func ReadMD(ctx *Context, parent gi.Widget, b []byte) error {
+// Cogent Core widgets to the given [core.Widget], using the given context.
+func ReadMD(ctx *Context, parent core.Widget, b []byte) error {
 	md := goldmark.New(
 		goldmark.WithExtensions(
 			extension.GFM,
 			&wikilink.Extender{ctx},
 			highlighting.NewHighlighting(
-				highlighting.WithStyle(string(gi.AppearanceSettings.HiStyle)),
+				highlighting.WithStyle(string(core.AppearanceSettings.HiStyle)),
 				highlighting.WithWrapperRenderer(HighlightingWrapperRenderer),
 			),
 		),
@@ -42,8 +42,8 @@ func ReadMD(ctx *Context, parent gi.Widget, b []byte) error {
 }
 
 // ReadMDString reads MD (markdown) from the given string and adds
-// corresponding Cogent Core widgets to the given [gi.Widget], using the given context.
-func ReadMDString(ctx *Context, parent gi.Widget, s string) error {
+// corresponding Cogent Core widgets to the given [core.Widget], using the given context.
+func ReadMDString(ctx *Context, parent core.Widget, s string) error {
 	return ReadMD(ctx, parent, []byte(s))
 }
 

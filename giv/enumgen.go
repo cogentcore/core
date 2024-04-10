@@ -4,7 +4,7 @@ package giv
 
 import (
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 )
 
 var _SliceViewFlagsValues = []SliceViewFlags{2, 3, 4, 5, 6, 7, 8, 9}
@@ -20,14 +20,14 @@ var _SliceViewFlagsMap = map[SliceViewFlags]string{2: `Configured`, 3: `IsArray`
 
 // String returns the string representation of this SliceViewFlags value.
 func (i SliceViewFlags) String() string {
-	return enums.BitFlagStringExtended(i, _SliceViewFlagsValues, gi.WidgetFlagsValues())
+	return enums.BitFlagStringExtended(i, _SliceViewFlagsValues, core.WidgetFlagsValues())
 }
 
 // BitIndexString returns the string representation of this SliceViewFlags value
 // if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
 func (i SliceViewFlags) BitIndexString() string {
-	return enums.BitIndexStringExtended[SliceViewFlags, gi.WidgetFlags](i, _SliceViewFlagsMap)
+	return enums.BitIndexStringExtended[SliceViewFlags, core.WidgetFlags](i, _SliceViewFlagsMap)
 }
 
 // SetString sets the SliceViewFlags value from its string representation,
@@ -38,7 +38,7 @@ func (i *SliceViewFlags) SetString(s string) error { *i = 0; return i.SetStringO
 // while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *SliceViewFlags) SetStringOr(s string) error {
-	return enums.SetStringOrExtended(i, (*gi.WidgetFlags)(i), s, _SliceViewFlagsValueMap)
+	return enums.SetStringOrExtended(i, (*core.WidgetFlags)(i), s, _SliceViewFlagsValueMap)
 }
 
 // Int64 returns the SliceViewFlags value as an int64.
@@ -49,17 +49,17 @@ func (i *SliceViewFlags) SetInt64(in int64) { *i = SliceViewFlags(in) }
 
 // Desc returns the description of the SliceViewFlags value.
 func (i SliceViewFlags) Desc() string {
-	return enums.DescExtended[SliceViewFlags, gi.WidgetFlags](i, _SliceViewFlagsDescMap)
+	return enums.DescExtended[SliceViewFlags, core.WidgetFlags](i, _SliceViewFlagsDescMap)
 }
 
 // SliceViewFlagsValues returns all possible values for the type SliceViewFlags.
 func SliceViewFlagsValues() []SliceViewFlags {
-	return enums.ValuesGlobalExtended(_SliceViewFlagsValues, gi.WidgetFlagsValues())
+	return enums.ValuesGlobalExtended(_SliceViewFlagsValues, core.WidgetFlagsValues())
 }
 
 // Values returns all possible values for the type SliceViewFlags.
 func (i SliceViewFlags) Values() []enums.Enum {
-	return enums.ValuesExtended(_SliceViewFlagsValues, gi.WidgetFlagsValues())
+	return enums.ValuesExtended(_SliceViewFlagsValues, core.WidgetFlagsValues())
 }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
@@ -89,14 +89,14 @@ var _TreeViewFlagsMap = map[TreeViewFlags]string{2: `Closed`, 3: `SelectMode`, 4
 
 // String returns the string representation of this TreeViewFlags value.
 func (i TreeViewFlags) String() string {
-	return enums.BitFlagStringExtended(i, _TreeViewFlagsValues, gi.WidgetFlagsValues())
+	return enums.BitFlagStringExtended(i, _TreeViewFlagsValues, core.WidgetFlagsValues())
 }
 
 // BitIndexString returns the string representation of this TreeViewFlags value
 // if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
 func (i TreeViewFlags) BitIndexString() string {
-	return enums.BitIndexStringExtended[TreeViewFlags, gi.WidgetFlags](i, _TreeViewFlagsMap)
+	return enums.BitIndexStringExtended[TreeViewFlags, core.WidgetFlags](i, _TreeViewFlagsMap)
 }
 
 // SetString sets the TreeViewFlags value from its string representation,
@@ -107,7 +107,7 @@ func (i *TreeViewFlags) SetString(s string) error { *i = 0; return i.SetStringOr
 // while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *TreeViewFlags) SetStringOr(s string) error {
-	return enums.SetStringOrExtended(i, (*gi.WidgetFlags)(i), s, _TreeViewFlagsValueMap)
+	return enums.SetStringOrExtended(i, (*core.WidgetFlags)(i), s, _TreeViewFlagsValueMap)
 }
 
 // Int64 returns the TreeViewFlags value as an int64.
@@ -118,17 +118,17 @@ func (i *TreeViewFlags) SetInt64(in int64) { *i = TreeViewFlags(in) }
 
 // Desc returns the description of the TreeViewFlags value.
 func (i TreeViewFlags) Desc() string {
-	return enums.DescExtended[TreeViewFlags, gi.WidgetFlags](i, _TreeViewFlagsDescMap)
+	return enums.DescExtended[TreeViewFlags, core.WidgetFlags](i, _TreeViewFlagsDescMap)
 }
 
 // TreeViewFlagsValues returns all possible values for the type TreeViewFlags.
 func TreeViewFlagsValues() []TreeViewFlags {
-	return enums.ValuesGlobalExtended(_TreeViewFlagsValues, gi.WidgetFlagsValues())
+	return enums.ValuesGlobalExtended(_TreeViewFlagsValues, core.WidgetFlagsValues())
 }
 
 // Values returns all possible values for the type TreeViewFlags.
 func (i TreeViewFlags) Values() []enums.Enum {
-	return enums.ValuesExtended(_TreeViewFlagsValues, gi.WidgetFlagsValues())
+	return enums.ValuesExtended(_TreeViewFlagsValues, core.WidgetFlagsValues())
 }
 
 // HasFlag returns whether these bit flags have the given bit flag set.

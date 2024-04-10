@@ -9,8 +9,8 @@ import (
 	"reflect"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/grows/jsons"
 	"cogentcore.org/core/icons"
@@ -26,7 +26,7 @@ import (
 // each field, within an overall frame with an optional title, and a button
 // box at the bottom where methods can be invoked
 type Inspector struct {
-	gi.Frame
+	core.Frame
 
 	// root of tree being edited
 	KiRoot tree.Node
@@ -35,7 +35,7 @@ type Inspector struct {
 	Changed bool `set:"-"`
 
 	// current filename for saving / loading
-	Filename gi.Filename
+	Filename core.Filename
 }
 
 func (is *Inspector) OnInit() {
@@ -49,7 +49,7 @@ func (is *Inspector) SetStyles() {
 		s.Grow.Set(1, 1)
 		s.Margin.Set(units.Dp(8))
 	})
-	is.OnWidgetAdded(func(w gi.Widget) {
+	is.OnWidgetAdded(func(w core.Widget) {
 		if tw, ok := w.(*TreeView); ok {
 			tw.Style(func(s *styles.Style) {
 				s.Max.X.Em(20)
@@ -59,8 +59,8 @@ func (is *Inspector) SetStyles() {
 		path := w.PathFrom(is)
 		switch path {
 		case "title":
-			title := w.(*gi.Label)
-			title.Type = gi.LabelHeadlineSmall
+			title := w.(*core.Label)
+			title.Type = core.LabelHeadlineSmall
 			title.Style(func(s *styles.Style) {
 				s.Grow.Set(1, 0)
 				s.Align.Self = styles.Center
@@ -87,7 +87,7 @@ func (is *Inspector) Save() error { //gti:add
 }
 
 // SaveAs saves tree to given filename, in a standard JSON-formatted file
-func (is *Inspector) SaveAs(filename gi.Filename) error { //gti:add
+func (is *Inspector) SaveAs(filename core.Filename) error { //gti:add
 	if is.KiRoot == nil {
 		return nil
 	}
@@ -102,7 +102,7 @@ func (is *Inspector) SaveAs(filename gi.Filename) error { //gti:add
 }
 
 // Open opens tree from given filename, in a standard JSON-formatted file
-func (is *Inspector) Open(filename gi.Filename) error { //gti:add
+func (is *Inspector) Open(filename core.Filename) error { //gti:add
 	if is.KiRoot == nil {
 		return nil
 	}
@@ -119,10 +119,10 @@ func (is *Inspector) Open(filename gi.Filename) error { //gti:add
 // In selection mode, bounding boxes are rendered around each Widget,
 // and clicking on a Widget pulls it up in the inspector.
 func (is *Inspector) ToggleSelectionMode() { //gti:add
-	sc := gi.AsScene(is.KiRoot)
-	sc.SetFlag(!sc.Is(gi.ScRenderBBoxes), gi.ScRenderBBoxes)
-	if sc.Is(gi.ScRenderBBoxes) {
-		sc.SelectedWidgetChan = make(chan gi.Widget)
+	sc := core.AsScene(is.KiRoot)
+	sc.SetFlag(!sc.Is(core.ScRenderBBoxes), core.ScRenderBBoxes)
+	if sc.Is(core.ScRenderBBoxes) {
+		sc.SelectedWidgetChan = make(chan core.Widget)
 		go is.SelectionMonitor()
 	} else {
 		if sc.SelectedWidgetChan != nil {
@@ -135,7 +135,7 @@ func (is *Inspector) ToggleSelectionMode() { //gti:add
 
 // SelectionMonitor monitors for the selected widget
 func (is *Inspector) SelectionMonitor() {
-	sc := gi.AsScene(is.KiRoot)
+	sc := core.AsScene(is.KiRoot)
 	if sc == nil {
 		return
 	}
@@ -157,7 +157,7 @@ func (is *Inspector) SelectionMonitor() {
 			return tree.Continue
 		})
 		if tv == nil {
-			gi.NewBody().AddSnackbarText(fmt.Sprintf("Inspector: tree view node missing: %v", sw)).NewSnackbar(is).Run()
+			core.NewBody().AddSnackbarText(fmt.Sprintf("Inspector: tree view node missing: %v", sw)).NewSnackbar(is).Run()
 			return
 		}
 	}
@@ -170,7 +170,7 @@ func (is *Inspector) SelectionMonitor() {
 	is.Scene.Stage.Raise()
 
 	sc.AsyncLock()
-	sc.SetFlag(false, gi.ScRenderBBoxes)
+	sc.SetFlag(false, core.ScRenderBBoxes)
 	if sc.SelectedWidgetChan != nil {
 		close(sc.SelectedWidgetChan)
 	}
@@ -181,7 +181,7 @@ func (is *Inspector) SelectionMonitor() {
 
 // InspectApp displays the underlying operating system app
 func (is *Inspector) InspectApp() { //gti:add
-	d := gi.NewBody().AddTitle("Inspect app")
+	d := core.NewBody().AddTitle("Inspect app")
 	NewStructView(d).SetStruct(goosi.TheApp).SetReadOnly(true)
 	d.NewFullDialog(is).Run()
 }
@@ -204,8 +204,8 @@ func (is *Inspector) Config() {
 		s.Direction = styles.Column
 	})
 	config := tree.Config{}
-	config.Add(gi.LabelType, "title")
-	config.Add(gi.SplitsType, "splits")
+	config.Add(core.LabelType, "title")
+	config.Add(core.SplitsType, "splits")
 	is.ConfigChildren(config)
 	is.SetTitle(is.KiRoot)
 	is.ConfigSplits()
@@ -217,13 +217,13 @@ func (is *Inspector) SetTitle(k tree.Node) {
 }
 
 // TitleWidget returns the title label widget
-func (is *Inspector) TitleWidget() *gi.Label {
-	return is.ChildByName("title", 0).(*gi.Label)
+func (is *Inspector) TitleWidget() *core.Label {
+	return is.ChildByName("title", 0).(*core.Label)
 }
 
 // Splits returns the main Splits
-func (is *Inspector) Splits() *gi.Splits {
-	return is.ChildByName("splits", 2).(*gi.Splits)
+func (is *Inspector) Splits() *core.Splits {
+	return is.ChildByName("splits", 2).(*core.Splits)
 }
 
 // TreeView returns the main TreeSyncView
@@ -244,7 +244,7 @@ func (is *Inspector) ConfigSplits() {
 	split := is.Splits().SetSplits(.3, .7)
 
 	if len(split.Kids) == 0 {
-		tvfr := gi.NewFrame(split, "tvfr")
+		tvfr := core.NewFrame(split, "tvfr")
 		tvfr.Style(func(s *styles.Style) {
 			s.Direction = styles.Column
 			s.Overflow.Set(styles.OverflowAuto)
@@ -261,11 +261,11 @@ func (is *Inspector) ConfigSplits() {
 
 			is.SetTitle(sn)
 
-			sc := gi.AsScene(is.KiRoot)
+			sc := core.AsScene(is.KiRoot)
 			if sc == nil {
 				return
 			}
-			if w, wb := gi.AsWidget(sn); w != nil {
+			if w, wb := core.AsWidget(sn); w != nil {
 				pselw := sc.SelectedWidget
 				sc.SelectedWidget = w
 				wb.NeedsRender()
@@ -275,11 +275,11 @@ func (is *Inspector) ConfigSplits() {
 			}
 		})
 		renderRebuild := func() {
-			sc := gi.AsScene(is.KiRoot)
+			sc := core.AsScene(is.KiRoot)
 			if sc == nil {
 				return
 			}
-			sc.RenderContext().SetFlag(true, gi.RenderRebuild) // trigger full rebuild
+			sc.RenderContext().SetFlag(true, core.RenderRebuild) // trigger full rebuild
 		}
 		tv.OnChange(func(e events.Event) {
 			renderRebuild()
@@ -288,11 +288,11 @@ func (is *Inspector) ConfigSplits() {
 			renderRebuild()
 		})
 		sv.OnClose(func(e events.Event) {
-			sc := gi.AsScene(is.KiRoot)
+			sc := core.AsScene(is.KiRoot)
 			if sc == nil {
 				return
 			}
-			if sc.Is(gi.ScRenderBBoxes) {
+			if sc.Is(core.ScRenderBBoxes) {
 				is.ToggleSelectionMode()
 			}
 			pselw := sc.SelectedWidget
@@ -308,13 +308,13 @@ func (is *Inspector) ConfigSplits() {
 	sv.SetStruct(is.KiRoot)
 }
 
-func (is *Inspector) ConfigToolbar(tb *gi.Toolbar) {
+func (is *Inspector) ConfigToolbar(tb *core.Toolbar) {
 	NewFuncButton(tb, is.ToggleSelectionMode).SetText("Select element").SetIcon(icons.ArrowSelectorTool).
 		StyleFirst(func(s *styles.Style) {
-			_, ok := is.KiRoot.(*gi.Scene)
+			_, ok := is.KiRoot.(*core.Scene)
 			s.SetEnabled(ok)
 		})
-	gi.NewSeparator(tb)
+	core.NewSeparator(tb)
 	op := NewFuncButton(tb, is.Open).SetKey(keyfun.Open)
 	op.Args[0].SetValue(is.Filename)
 	op.Args[0].SetTag("ext", ".json")
@@ -323,24 +323,24 @@ func (is *Inspector) ConfigToolbar(tb *gi.Toolbar) {
 	sa := NewFuncButton(tb, is.SaveAs).SetKey(keyfun.SaveAs)
 	sa.Args[0].SetValue(is.Filename)
 	sa.Args[0].SetTag("ext", ".json")
-	gi.NewSeparator(tb)
+	core.NewSeparator(tb)
 	NewFuncButton(tb, is.InspectApp).SetIcon(icons.Devices)
 }
 
 // InspectorWindow opens an interactive editor of the given Ki tree
 // in a new window.
 func InspectorWindow(k tree.Node) {
-	if gi.ActivateExistingMainWindow(k) {
+	if core.ActivateExistingMainWindow(k) {
 		return
 	}
-	d := gi.NewBody("inspector")
+	d := core.NewBody("inspector")
 	InspectorView(d, k)
 	d.NewWindow().SetCloseOnBack(true).Run()
 }
 
 // InspectorView configures the given body to have an interactive inspector
 // of the given Ki tree.
-func InspectorView(b *gi.Body, k tree.Node) {
+func InspectorView(b *core.Body, k tree.Node) {
 	b.SetTitle("Inspector").SetData(k).SetName("inspector")
 	if k != nil {
 		b.Nm += "-" + k.Name()

@@ -13,7 +13,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/colors/matcolor"
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/states"
@@ -45,7 +45,7 @@ func (ed *Editor) RenderWidget() {
 			ed.RenderLayout()
 			ed.SetFlag(false, EditorNeedsLayout)
 		}
-		if !ed.Scene.Is(gi.ScNeedsLayout) && ed.Is(EditorTargetSet) {
+		if !ed.Scene.Is(core.ScNeedsLayout) && ed.Is(EditorTargetSet) {
 			ed.ScrollCursorToTarget()
 		}
 		ed.PositionScrolls()

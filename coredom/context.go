@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/styles"
@@ -30,21 +30,21 @@ type Context struct {
 	Styles map[*html.Node][]*css.Rule
 
 	// Widgets are the gi widgets for each node.
-	Widgets map[*html.Node]gi.Widget
+	Widgets map[*html.Node]core.Widget
 
 	// NewParent is the current parent widget that children of
 	// the previously read element should be added to, if any.
-	NewParent gi.Widget
+	NewParent core.Widget
 
 	// BlockParent is the current parent widget that non-inline elements
 	// should be added to.
-	BlockParent gi.Widget
+	BlockParent core.Widget
 
 	// InlinePw is the current parent widget that inline
 	// elements should be added to; it must be got through
 	// [Context.InlineParent], as it may need to be constructed
 	// on the fly. However, it can be set directly.
-	InlinePw gi.Widget
+	InlinePw core.Widget
 
 	// PageURL, if not "", is the URL of the current page.
 	// Otherwise, there is no current page.
@@ -61,7 +61,7 @@ type Context struct {
 func NewContext() *Context {
 	return &Context{
 		Styles:  map[*html.Node][]*css.Rule{},
-		Widgets: map[*html.Node]gi.Widget{},
+		Widgets: map[*html.Node]core.Widget{},
 		OpenURL: goosi.TheApp.OpenURL,
 	}
 }
@@ -70,7 +70,7 @@ func NewContext() *Context {
 // associated with the current node should be added to.
 // It may make changes to the widget tree, so the widget
 // must be added to the resulting parent immediately.
-func (c *Context) Parent() gi.Widget {
+func (c *Context) Parent() core.Widget {
 	rules := c.Styles[c.Node]
 	display := ""
 	for _, rule := range rules {
@@ -80,7 +80,7 @@ func (c *Context) Parent() gi.Widget {
 			}
 		}
 	}
-	var parent gi.Widget
+	var parent core.Widget
 	switch display {
 	case "inline", "inline-block", "":
 		parent = c.InlineParent()
@@ -94,7 +94,7 @@ func (c *Context) Parent() gi.Widget {
 // Config configures the given widget. It needs to be called
 // on all widgets that are not configured through the [New]
 // pathway.
-func (c *Context) Config(w gi.Widget) {
+func (c *Context) Config(w core.Widget) {
 	wb := w.AsWidget()
 	for _, attr := range c.Node.Attr {
 		switch attr.Key {
@@ -133,11 +133,11 @@ func (c *Context) Config(w gi.Widget) {
 
 // InlineParent returns the current parent widget that inline
 // elements should be added to.
-func (c *Context) InlineParent() gi.Widget {
+func (c *Context) InlineParent() core.Widget {
 	if c.InlinePw != nil {
 		return c.InlinePw
 	}
-	c.InlinePw = gi.NewLayout(c.BlockParent, fmt.Sprintf("inline-container-%d", c.BlockParent.NumLifetimeChildren()))
+	c.InlinePw = core.NewLayout(c.BlockParent, fmt.Sprintf("inline-container-%d", c.BlockParent.NumLifetimeChildren()))
 	c.InlinePw.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
 	})

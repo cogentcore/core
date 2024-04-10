@@ -7,8 +7,8 @@ package main
 import (
 	_ "embed"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/coredom"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/grr"
 )
 
@@ -16,7 +16,7 @@ import (
 var content string
 
 func main() {
-	b := gi.NewBody("Coredom MD")
+	b := core.NewBody("Coredom MD")
 	grr.Log(coredom.ReadMDString(coredom.NewContext(), b, content))
 	b.RunMainWindow()
 }

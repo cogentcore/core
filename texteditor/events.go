@@ -10,10 +10,10 @@ import (
 	"unicode"
 
 	"cogentcore.org/core/abilities"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/glop/indent"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/keyfun"
@@ -91,7 +91,7 @@ func (ed *Editor) ShiftSelectExtend(kt events.Event) {
 
 // KeyInput handles keyboard input into the text field and from the completion menu
 func (ed *Editor) KeyInput(kt events.Event) {
-	if gi.DebugSettings.KeyEventTrace {
+	if core.DebugSettings.KeyEventTrace {
 		fmt.Printf("View KeyInput: %v\n", ed.Path())
 	}
 	kf := keyfun.Of(kt.KeyChord())

@@ -8,11 +8,11 @@ import (
 	"strconv"
 	"testing"
 
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 )
 
 func TestMapViewInline(t *testing.T) {
-	b := gi.NewBody()
+	b := core.NewBody()
 	m := map[string]bool{}
 	for i := 0; i < 10; i++ {
 		m["Gopher "+strconv.Itoa(i)] = i%3 == 0

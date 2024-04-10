@@ -5,8 +5,8 @@
 package greasi
 
 import (
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/grease"
 	"cogentcore.org/core/grog"
@@ -16,14 +16,14 @@ import (
 // GUI starts the GUI for the given Grease app, which must be passed as
 // a pointer. It should typically not be called by end-user code; see [Run].
 func GUI[T any](opts *grease.Options, cfg T, cmds ...*grease.Cmd[T]) {
-	b := gi.NewBody(opts.AppName)
+	b := core.NewBody(opts.AppName)
 
-	b.AddAppBar(func(tb *gi.Toolbar) {
+	b.AddAppBar(func(tb *core.Toolbar) {
 		for _, cmd := range cmds {
 			if cmd.Name == "gui" { // we are already in GUI so that command is irrelevant
 				continue
 			}
-			gi.NewButton(tb, cmd.Name).SetText(strcase.ToSentence(cmd.Name)).SetTooltip(cmd.Doc).
+			core.NewButton(tb, cmd.Name).SetText(strcase.ToSentence(cmd.Name)).SetTooltip(cmd.Doc).
 				OnClick(func(e events.Event) {
 					err := cmd.Func(cfg)
 					if err != nil {

@@ -13,9 +13,9 @@ import (
 	"os"
 	"path/filepath"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/filetree"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
@@ -29,13 +29,13 @@ import (
 // one or more editor windows.  It is based on an early version of the Gide
 // IDE framework, and remains simple to test / demo the file tree component.
 type FileBrowse struct {
-	gi.Frame
+	core.Frame
 
 	// root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjFilename
-	ProjRoot gi.Filename `desc:"root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjFilename"`
+	ProjRoot core.Filename `desc:"root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjFilename"`
 
 	// filename of the currently-active texteditor
-	ActiveFilename gi.Filename `desc:"filename of the currently-active texteditor"`
+	ActiveFilename core.Filename `desc:"filename of the currently-active texteditor"`
 
 	// has the root changed?  we receive update signals from root for changes
 	Changed bool `json:"-" desc:"has the root changed?  we receive update signals from root for changes"`
@@ -63,11 +63,11 @@ func (fb *FileBrowse) OnInit() {
 		s.Grow.Set(1, 1)
 		s.Margin.Set(units.Dp(8))
 	})
-	fb.OnWidgetAdded(func(w gi.Widget) {
+	fb.OnWidgetAdded(func(w core.Widget) {
 		switch w.PathFrom(fb) {
 		case "title":
-			title := w.(*gi.Label)
-			title.Type = gi.LabelHeadlineSmall
+			title := w.(*core.Label)
+			title.Type = core.LabelHeadlineSmall
 			w.Style(func(s *styles.Style) {
 				s.Justify.Content = styles.Center
 			})
@@ -82,7 +82,7 @@ func (fb *FileBrowse) OnInit() {
 					s.Grow.Set(1, 1)
 					s.Min.X.Ch(20)
 					s.Min.Y.Ch(10)
-					s.Font.Family = string(gi.AppearanceSettings.MonoFont)
+					s.Font.Family = string(core.AppearanceSettings.MonoFont)
 					s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 					s.Text.TabSize = 4
 				})
@@ -108,7 +108,7 @@ func (fb *FileBrowse) IsEmpty() bool {
 // specific file or a directory containing multiple files of interest -- opens
 // in current FileBrowse object if it is empty, or otherwise opens a new
 // window.
-func (fb *FileBrowse) OpenPath(path gi.Filename) { //gti:add
+func (fb *FileBrowse) OpenPath(path core.Filename) { //gti:add
 	if !fb.IsEmpty() {
 		NewFileBrowser(string(path))
 		return
@@ -118,7 +118,7 @@ func (fb *FileBrowse) OpenPath(path gi.Filename) { //gti:add
 	if !ok {
 		return
 	}
-	fb.ProjRoot = gi.Filename(root)
+	fb.ProjRoot = core.Filename(root)
 	fb.SetName(pnm)
 	fb.UpdateProj()
 	fb.Files.OpenPath(root)
@@ -216,7 +216,7 @@ func (fb *FileBrowse) SaveActiveView() { //gti:add
 
 // SaveActiveViewAs save with specified filename the contents of the
 // currently-active texteditor
-func (fb *FileBrowse) SaveActiveViewAs(filename gi.Filename) { //gti:add
+func (fb *FileBrowse) SaveActiveViewAs(filename core.Filename) { //gti:add
 	tv := fb.ActiveTextEditor()
 	if tv.Buffer != nil {
 		tv.Buffer.SaveAs(filename)
@@ -257,8 +257,8 @@ func (fb *FileBrowse) ViewFile(fnm string) bool {
 // -- can modify as desired before calling ConfigChildren on Frame using this
 func (fb *FileBrowse) StandardFrameConfig() tree.Config {
 	config := tree.Config{}
-	config.Add(gi.LabelType, "title")
-	config.Add(gi.SplitsType, "splits")
+	config.Add(core.LabelType, "title")
+	config.Add(core.SplitsType, "splits")
 	return config
 }
 
@@ -279,21 +279,21 @@ func (fb *FileBrowse) SetTitle(title string) {
 
 // Title returns the title label widget, and its index, within frame -- nil,
 // -1 if not found
-func (fb *FileBrowse) TitleWidget() (*gi.Label, int) {
+func (fb *FileBrowse) TitleWidget() (*core.Label, int) {
 	idx, ok := fb.Children().IndexByName("title", 0)
 	if !ok {
 		return nil, -1
 	}
-	return fb.Child(idx).(*gi.Label), idx
+	return fb.Child(idx).(*core.Label), idx
 }
 
 // Splits returns the main Splits
-func (fb *FileBrowse) Splits() (*gi.Splits, int) {
+func (fb *FileBrowse) Splits() (*core.Splits, int) {
 	idx, ok := fb.Children().IndexByName("splits", 2)
 	if !ok {
 		return nil, -1
 	}
-	return fb.Child(idx).(*gi.Splits), idx
+	return fb.Child(idx).(*core.Splits), idx
 }
 
 // TextEditorByIndex returns the TextEditor by index, nil if not found
@@ -311,7 +311,7 @@ func (fb *FileBrowse) TextEditorByIndex(idx int) *texteditor.Editor {
 	return nil
 }
 
-func (fb *FileBrowse) ConfigToolbar(tb *gi.Toolbar) { //gti:add
+func (fb *FileBrowse) ConfigToolbar(tb *core.Toolbar) { //gti:add
 	giv.NewFuncButton(tb, fb.UpdateFiles).SetIcon(icons.Refresh).SetShortcut("Command+U")
 	op := giv.NewFuncButton(tb, fb.OpenPath).SetKey(keyfun.Open)
 	op.Args[0].SetValue(fb.ActiveFilename)
@@ -328,7 +328,7 @@ func (fb *FileBrowse) ConfigToolbar(tb *gi.Toolbar) { //gti:add
 // SplitsConfig returns a Config for configuring the Splits
 func (fb *FileBrowse) SplitsConfig() tree.Config {
 	config := tree.Config{}
-	config.Add(gi.FrameType, "filetree-fr")
+	config.Add(core.FrameType, "filetree-fr")
 	for i := 0; i < fb.NTextEditors; i++ {
 		config.Add(texteditor.EditorType, fmt.Sprintf("texteditor-%v", i))
 	}
@@ -346,7 +346,7 @@ func (fb *FileBrowse) ConfigSplits() {
 
 	config := fb.SplitsConfig()
 	if split.ConfigChildren(config) {
-		ftfr := split.Child(0).(*gi.Frame)
+		ftfr := split.Child(0).(*core.Frame)
 		fb.Files = filetree.NewTree(ftfr, "filetree")
 		fb.Files.OnSelect(func(e events.Event) {
 			e.SetHandled()
@@ -391,13 +391,13 @@ func (fb *FileBrowse) FileNodeOpened(fn *filetree.Node) {
 
 // NewFileBrowser creates a new FileBrowse window with a new FileBrowse project for given
 // path, returning the window and the path
-func NewFileBrowser(path string) (*FileBrowse, *gi.Stage) {
+func NewFileBrowser(path string) (*FileBrowse, *core.Stage) {
 	_, projnm, _, _ := ProjPathParse(path)
 
-	b := gi.NewBody("Browser: " + projnm)
+	b := core.NewBody("Browser: " + projnm)
 	fb := NewFileBrowse(b, "browser")
 	b.AddAppBar(fb.ConfigToolbar)
-	fb.OpenPath(gi.Filename(path))
+	fb.OpenPath(core.Filename(path))
 	return fb, b.NewWindow().Run()
 }
 

@@ -5,9 +5,9 @@
 package giv
 
 import (
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/states"
@@ -15,7 +15,7 @@ import (
 
 // KeyChordValue represents a [key.Chord] value with a button.
 type KeyChordValue struct {
-	ValueBase[*gi.Button]
+	ValueBase[*core.Button]
 }
 
 func (v *KeyChordValue) Config() {
@@ -30,8 +30,8 @@ func (v *KeyChordValue) Config() {
 		v.Update()
 		v.SendChange()
 	})
-	v.Widget.AddContextMenu(func(m *gi.Scene) {
-		gi.NewButton(m).SetText("Clear").SetIcon(icons.ClearAll).OnClick(func(e events.Event) {
+	v.Widget.AddContextMenu(func(m *core.Scene) {
+		core.NewButton(m).SetText("Clear").SetIcon(icons.ClearAll).OnClick(func(e events.Event) {
 			if !v.SetValue(key.Chord("")) {
 				return
 			}

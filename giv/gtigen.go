@@ -7,7 +7,7 @@ import (
 
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/fi"
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/tree"
@@ -133,7 +133,7 @@ func (t *FuncButton) SetWarnUnadded(v bool) *FuncButton { t.WarnUnadded = v; ret
 
 // SetContext sets the [FuncButton.Context]:
 // Context is used for opening Dialogs if non-nil.
-func (t *FuncButton) SetContext(v gi.Widget) *FuncButton { t.Context = v; return t }
+func (t *FuncButton) SetContext(v core.Widget) *FuncButton { t.Context = v; return t }
 
 // SetAfterFunc sets the [FuncButton.AfterFunc]:
 // AfterFunc is an optional function called after the funcbutton
@@ -144,7 +144,7 @@ func (t *FuncButton) SetAfterFunc(v func()) *FuncButton { t.AfterFunc = v; retur
 func (t *FuncButton) SetTooltip(v string) *FuncButton { t.Tooltip = v; return t }
 
 // SetType sets the [FuncButton.Type]
-func (t *FuncButton) SetType(v gi.ButtonTypes) *FuncButton { t.Type = v; return t }
+func (t *FuncButton) SetType(v core.ButtonTypes) *FuncButton { t.Type = v; return t }
 
 // SetIcon sets the [FuncButton.Icon]
 func (t *FuncButton) SetIcon(v icons.Icon) *FuncButton { t.Icon = v; return t }
@@ -156,7 +156,7 @@ func (t *FuncButton) SetIndicator(v icons.Icon) *FuncButton { t.Indicator = v; r
 func (t *FuncButton) SetShortcut(v key.Chord) *FuncButton { t.Shortcut = v; return t }
 
 // SetMenu sets the [FuncButton.Menu]
-func (t *FuncButton) SetMenu(v func(m *gi.Scene)) *FuncButton { t.Menu = v; return t }
+func (t *FuncButton) SetMenu(v func(m *core.Scene)) *FuncButton { t.Menu = v; return t }
 
 // InspectorType is the [gti.Type] for [Inspector]
 var InspectorType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/giv.Inspector", IDName: "inspector", Doc: "Inspector represents a struct, creating a property editor of the fields --\nconstructs Children widgets to show the field names and editor fields for\neach field, within an overall frame with an optional title, and a button\nbox at the bottom where methods can be invoked", Methods: []gti.Method{{Name: "Save", Doc: "Save saves tree to current filename, in a standard JSON-formatted file", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Returns: []string{"error"}}, {Name: "SaveAs", Doc: "SaveAs saves tree to given filename, in a standard JSON-formatted file", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "Open", Doc: "Open opens tree from given filename, in a standard JSON-formatted file", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "ToggleSelectionMode", Doc: "ToggleSelectionMode toggles the editor between selection mode or not.\nIn selection mode, bounding boxes are rendered around each Widget,\nand clicking on a Widget pulls it up in the inspector.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "InspectApp", Doc: "InspectApp displays the underlying operating system app", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}}, Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "KiRoot", Doc: "root of tree being edited"}, {Name: "Changed", Doc: "has the root changed via gui actions?  updated from treeview and structview for changes"}, {Name: "Filename", Doc: "current filename for saving / loading"}}, Instance: &Inspector{}})
@@ -182,7 +182,7 @@ func (t *Inspector) SetKiRoot(v tree.Node) *Inspector { t.KiRoot = v; return t }
 
 // SetFilename sets the [Inspector.Filename]:
 // current filename for saving / loading
-func (t *Inspector) SetFilename(v gi.Filename) *Inspector { t.Filename = v; return t }
+func (t *Inspector) SetFilename(v core.Filename) *Inspector { t.Filename = v; return t }
 
 // SetTooltip sets the [Inspector.Tooltip]
 func (t *Inspector) SetTooltip(v string) *Inspector { t.Tooltip = v; return t }

@@ -12,8 +12,8 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/laser"
@@ -68,7 +68,7 @@ var _ SliceViewer = (*TableView)(nil)
 
 // TableViewStyleFunc is a styling function for custom styling and
 // configuration of elements in the table view.
-type TableViewStyleFunc func(w gi.Widget, s *styles.Style, row, col int)
+type TableViewStyleFunc func(w core.Widget, s *styles.Style, row, col int)
 
 func (tv *TableView) OnInit() {
 	tv.Frame.OnInit()
@@ -83,25 +83,25 @@ func (tv *TableView) SetStyles() {
 	tv.SortIndex = -1
 
 	// we only have to handle the header
-	tv.OnWidgetAdded(func(w gi.Widget) {
+	tv.OnWidgetAdded(func(w core.Widget) {
 		switch w.PathFrom(tv) {
 		case "header": // slice header
-			sh := w.(*gi.Frame)
-			gi.ToolbarStyles(sh)
+			sh := w.(*core.Frame)
+			core.ToolbarStyles(sh)
 			sh.Style(func(s *styles.Style) {
 				s.Grow.Set(0, 0)
 				s.Gap.Set(units.Em(0.5)) // matches grid default
 			})
 		case "header/head-idx": // index header
-			lbl := w.(*gi.Label)
-			lbl.SetText("Index").SetType(gi.LabelBodyMedium)
+			lbl := w.(*core.Label)
+			lbl.SetText("Index").SetType(core.LabelBodyMedium)
 			w.Style(func(s *styles.Style) {
 				s.Align.Self = styles.Center
 			})
 		}
 		if w.Parent().PathFrom(tv) == "header" {
 			w.Style(func(s *styles.Style) {
-				if hdr, ok := w.(*gi.Button); ok {
+				if hdr, ok := w.(*core.Button); ok {
 					fli := hdr.Property("field-index").(int)
 					if fli == tv.SortIndex {
 						if tv.SortDesc {
@@ -117,7 +117,7 @@ func (tv *TableView) SetStyles() {
 }
 
 // StyleValueWidget performs additional value widget styling
-func (tv *TableView) StyleValueWidget(w gi.Widget, s *styles.Style, row, col int) {
+func (tv *TableView) StyleValueWidget(w core.Widget, s *styles.Style, row, col int) {
 	hw := float32(tv.HeaderWidths[col])
 	if col == tv.SortIndex {
 		hw += 6
@@ -242,7 +242,7 @@ func (tv *TableView) ConfigFrame() {
 		return
 	}
 	tv.SetFlag(true, SliceViewConfigured)
-	gi.NewFrame(tv, "header")
+	core.NewFrame(tv, "header")
 	NewSliceViewGrid(tv, "grid")
 	tv.ConfigHeader()
 }
@@ -254,22 +254,22 @@ func (tv *TableView) ConfigHeader() {
 	}
 	hcfg := tree.Config{}
 	if tv.Is(SliceViewShowIndex) {
-		hcfg.Add(gi.LabelType, "head-idx")
+		hcfg.Add(core.LabelType, "head-idx")
 	}
 	tv.HeaderWidths = make([]int, tv.NVisFields)
 	tv.ColMaxWidths = make([]int, tv.NVisFields)
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		fld := tv.VisFields[fli]
 		labnm := "head-" + fld.Name
-		hcfg.Add(gi.ButtonType, labnm)
+		hcfg.Add(core.ButtonType, labnm)
 	}
 	sgh.ConfigChildren(hcfg) // headers SHOULD be unique, but with labels..
 	_, idxOff := tv.RowWidgetNs()
 	nfld := tv.NVisFields
 	for fli := 0; fli < nfld; fli++ {
 		field := tv.VisFields[fli]
-		hdr := sgh.Child(idxOff + fli).(*gi.Button)
-		hdr.SetType(gi.ButtonMenu)
+		hdr := sgh.Child(idxOff + fli).(*core.Button)
+		hdr.SetType(core.ButtonMenu)
 		htxt := ""
 		if lbl, ok := field.Tag.Lookup("label"); ok {
 			htxt = lbl
@@ -298,8 +298,8 @@ func (tv *TableView) ConfigHeader() {
 }
 
 // SliceHeader returns the Frame header for slice grid
-func (tv *TableView) SliceHeader() *gi.Frame {
-	return tv.Child(0).(*gi.Frame)
+func (tv *TableView) SliceHeader() *core.Frame {
+	return tv.Child(0).(*core.Frame)
 }
 
 // RowWidgetNs returns number of widgets per row and offset for index label
@@ -322,7 +322,7 @@ func (tv *TableView) ConfigRows() {
 		return
 	}
 	tv.SetFlag(true, SliceViewConfigured)
-	sg.SetFlag(true, gi.LayoutNoKeys)
+	sg.SetFlag(true, core.LayoutNoKeys)
 
 	tv.ViewMuLock()
 	defer tv.ViewMuUnlock()
@@ -357,12 +357,12 @@ func (tv *TableView) ConfigRows() {
 		}
 		stru := val.Interface()
 
-		idxlab := &gi.Label{}
+		idxlab := &core.Label{}
 		itxt := strconv.Itoa(i)
 		sitxt := strconv.Itoa(si)
 		labnm := "index-" + itxt
 		if tv.Is(SliceViewShowIndex) {
-			idxlab = &gi.Label{}
+			idxlab = &core.Label{}
 			sg.SetChild(idxlab, ridx, labnm)
 			idxlab.SetText(sitxt)
 			idxlab.OnSelect(func(e events.Event) {
@@ -389,7 +389,7 @@ func (tv *TableView) ConfigRows() {
 			vtyp := vv.WidgetType()
 			valnm := fmt.Sprintf("value-%v.%v", fli, itxt)
 			cidx := ridx + idxOff + fli
-			w := tree.NewOfType(vtyp).(gi.Widget)
+			w := tree.NewOfType(vtyp).(core.Widget)
 			sg.SetChild(w, cidx, valnm)
 			Config(vv, w)
 			w.SetProperty(SliceViewRowProperty, i)
@@ -464,12 +464,12 @@ func (tv *TableView) UpdateWidgets() {
 		si := tv.StartIndex + i // slice idx
 		invis := si >= tv.SliceSize
 
-		var idxlab *gi.Label
+		var idxlab *core.Label
 		if tv.Is(SliceViewShowIndex) {
 			if len(sg.Kids) == 0 {
 				break
 			}
-			idxlab = sg.Kids[ridx].(*gi.Label)
+			idxlab = sg.Kids[ridx].(*core.Label)
 			idxlab.SetText(strconv.Itoa(si)).Config()
 			idxlab.SetState(invis, states.Invisible)
 		}
@@ -477,7 +477,7 @@ func (tv *TableView) UpdateWidgets() {
 		sitxt := strconv.Itoa(si)
 		vpath := tv.ViewPath + "[" + sitxt + "]"
 		if si < tv.SliceSize {
-			if lblr, ok := tv.Slice.(gi.SliceLabeler); ok {
+			if lblr, ok := tv.Slice.(core.SliceLabeler); ok {
 				slbl := lblr.ElemLabel(si)
 				if slbl != "" {
 					vpath = JoinViewPath(tv.ViewPath, slbl)
@@ -493,7 +493,7 @@ func (tv *TableView) UpdateWidgets() {
 			if sg.Kids[cidx] == nil {
 				return
 			}
-			w := sg.Kids[cidx].(gi.Widget)
+			w := sg.Kids[cidx].(core.Widget)
 			wb := w.AsWidget()
 
 			var val reflect.Value
@@ -535,7 +535,7 @@ func (tv *TableView) HasStyleFunc() bool {
 	return tv.StyleFunc != nil
 }
 
-func (tv *TableView) StyleRow(w gi.Widget, idx, fidx int) {
+func (tv *TableView) StyleRow(w core.Widget, idx, fidx int) {
 	if tv.StyleFunc != nil {
 		tv.StyleFunc(w, &w.AsWidget().Styles, idx, fidx)
 	}
@@ -598,8 +598,8 @@ func (tv *TableView) SortSliceAction(fldIndex int) {
 	ascending := true
 
 	for fli := 0; fli < tv.NVisFields; fli++ {
-		hdr := sgh.Child(idxOff + fli).(*gi.Button)
-		hdr.SetType(gi.ButtonAction)
+		hdr := sgh.Child(idxOff + fli).(*core.Button)
+		hdr.SetType(core.ButtonAction)
 		if fli == fldIndex {
 			if tv.SortIndex == fli {
 				tv.SortDesc = !tv.SortDesc
@@ -669,19 +669,19 @@ func (tv *TableView) SetSortFieldName(nm string) {
 
 // RowFirstVisWidget returns the first visible widget for given row (could be
 // index or not) -- false if out of range
-func (tv *TableView) RowFirstVisWidget(row int) (*gi.WidgetBase, bool) {
+func (tv *TableView) RowFirstVisWidget(row int) (*core.WidgetBase, bool) {
 	if !tv.IsRowInBounds(row) {
 		return nil, false
 	}
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 	sg := tv.SliceGrid()
-	w := sg.Kids[row*nWidgPerRow].(gi.Widget).AsWidget()
+	w := sg.Kids[row*nWidgPerRow].(core.Widget).AsWidget()
 	if w.Geom.TotalBBox != (image.Rectangle{}) {
 		return w, true
 	}
 	ridx := nWidgPerRow * row
 	for fli := 0; fli < tv.NVisFields; fli++ {
-		w := sg.Child(ridx + idxOff + fli).(gi.Widget).AsWidget()
+		w := sg.Child(ridx + idxOff + fli).(core.Widget).AsWidget()
 		if w.Geom.TotalBBox != (image.Rectangle{}) {
 			return w, true
 		}
@@ -692,7 +692,7 @@ func (tv *TableView) RowFirstVisWidget(row int) (*gi.WidgetBase, bool) {
 // RowGrabFocus grabs the focus for the first focusable widget in given row --
 // returns that element or nil if not successful -- note: grid must have
 // already rendered for focus to be grabbed!
-func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
+func (tv *TableView) RowGrabFocus(row int) *core.WidgetBase {
 	if !tv.IsRowInBounds(row) || tv.Is(SliceViewInFocusGrab) { // range check
 		return nil
 	}
@@ -701,7 +701,7 @@ func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
 	sg := tv.SliceGrid()
 	// first check if we already have focus
 	for fli := 0; fli < tv.NVisFields; fli++ {
-		w := sg.Child(ridx + idxOff + fli).(gi.Widget).AsWidget()
+		w := sg.Child(ridx + idxOff + fli).(core.Widget).AsWidget()
 		if w.StateIs(states.Focused) || w.ContainsFocus() {
 			return w
 		}
@@ -709,7 +709,7 @@ func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
 	tv.SetFlag(true, SliceViewInFocusGrab)
 	defer func() { tv.SetFlag(false, SliceViewInFocusGrab) }()
 	for fli := 0; fli < tv.NVisFields; fli++ {
-		w := sg.Child(ridx + idxOff + fli).(gi.Widget).AsWidget()
+		w := sg.Child(ridx + idxOff + fli).(core.Widget).AsWidget()
 		if w.CanFocus() {
 			w.SetFocusEvent()
 			return w
@@ -768,22 +768,22 @@ func (tv *TableView) EditIndex(idx int) {
 	val := laser.OnePtrUnderlyingValue(tv.SliceNPVal.Index(idx))
 	stru := val.Interface()
 	tynm := laser.NonPtrType(val.Type()).Name()
-	lbl := gi.ToLabel(stru)
+	lbl := core.ToLabel(stru)
 	if lbl != "" {
 		tynm += ": " + lbl
 	}
-	d := gi.NewBody().AddTitle(tynm)
+	d := core.NewBody().AddTitle(tynm)
 	NewStructView(d).SetStruct(stru).SetReadOnly(tv.IsReadOnly())
-	d.AddBottomBar(func(parent gi.Widget) {
+	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent)
 	})
 	d.NewFullDialog(tv).Run()
 }
 
-func (tv *TableView) ContextMenu(m *gi.Scene) {
+func (tv *TableView) ContextMenu(m *core.Scene) {
 	if !tv.Is(SliceViewIsArray) {
-		gi.NewButton(m).SetText("Edit").SetIcon(icons.Edit).
+		core.NewButton(m).SetText("Edit").SetIcon(icons.Edit).
 			OnClick(func(e events.Event) {
 				tv.EditIndex(tv.SelectedIndex)
 			})
@@ -797,8 +797,8 @@ func (tv *TableView) SizeFinal() {
 	tv.SliceViewBase.SizeFinal()
 	sg := tv.This().(SliceViewer).SliceGrid()
 	sh := tv.SliceHeader()
-	sh.WidgetKidsIter(func(i int, kwi gi.Widget, kwb *gi.WidgetBase) bool {
-		_, sgb := gi.AsWidget(sg.Child(i))
+	sh.WidgetKidsIter(func(i int, kwi core.Widget, kwb *core.WidgetBase) bool {
+		_, sgb := core.AsWidget(sg.Child(i))
 		gsz := &sgb.Geom.Size
 		ksz := &kwb.Geom.Size
 		ksz.Actual.Total.X = gsz.Actual.Total.X

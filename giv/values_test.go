@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/glop/option"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
@@ -23,21 +23,21 @@ func TestValues(t *testing.T) {
 		Tags  string
 	}
 	values := []test{
-		{"ki", gi.NewButton(tree.NewRoot[*gi.Frame]("frame")), ""},
+		{"ki", core.NewButton(tree.NewRoot[*core.Frame]("frame")), ""},
 		{"bool", true, ""},
 		{"int", 3, ""},
 		{"float", 6.7, ""},
 		{"slider", 0.4, `view:"slider"`},
-		{"enum", gi.ButtonElevated, ""},
-		{"bitflag", gi.WidgetFlags(0), ""},
-		{"type", gi.ButtonType, ""},
+		{"enum", core.ButtonElevated, ""},
+		{"bitflag", core.WidgetFlags(0), ""},
+		{"type", core.ButtonType, ""},
 		{"byte-slice", []byte("hello"), ""},
 		{"rune-slice", []rune("hello"), ""},
 		{"nil", (*int)(nil), ""},
 		{"icon", icons.Add, ""},
 		{"icon-show-name", icons.Add, `view:"show-name"`},
-		{"font", gi.AppearanceSettings.FontFamily, ""},
-		{"file", gi.Filename("README.md"), ""},
+		{"font", core.AppearanceSettings.FontFamily, ""},
+		{"file", core.Filename("README.md"), ""},
 		{"func", SettingsWindow, ""},
 		{"option", option.New("an option"), ""},
 		{"colormap", ColorMapName("ColdHot"), ""},
@@ -46,7 +46,7 @@ func TestValues(t *testing.T) {
 		{"keymap", keyfun.AvailableMaps[0], ""},
 	}
 	for _, value := range values {
-		b := gi.NewBody()
+		b := core.NewBody()
 		NewValue(b, value.Value, value.Tags)
 		b.AssertRender(t, "values/"+value.Name)
 	}

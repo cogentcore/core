@@ -5,58 +5,58 @@
 package giv
 
 import (
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/icons"
 )
 
 // SettingsViewToolbarBase is the base toolbar configuration function used in [SettingsView].
-func SettingsViewToolbarBase(tb *gi.Toolbar) {
-	NewFuncButton(tb, gi.AppearanceSettings.SaveScreenZoom).SetIcon(icons.ZoomIn).
+func SettingsViewToolbarBase(tb *core.Toolbar) {
+	NewFuncButton(tb, core.AppearanceSettings.SaveScreenZoom).SetIcon(icons.ZoomIn).
 		SetAfterFunc(func() {
-			gi.AppearanceSettings.Apply()
-			gi.UpdateAll()
+			core.AppearanceSettings.Apply()
+			core.UpdateAll()
 		})
 		// todo: doesn't work to update..
 
-	tb.AddOverflowMenu(func(m *gi.Scene) {
-		NewFuncButton(m, gi.ResetAllSettings).SetText("Reset settings").SetIcon(icons.Delete).SetConfirm(true)
-		gi.NewButton(m).SetText("App version").SetIcon(icons.Info).OnClick(func(e events.Event) {
-			d := gi.NewBody().AddTitle("App version")
-			gi.NewLabel(d).SetText("App version: " + goosi.AppVersion)
-			gi.NewLabel(d).SetText("Core version: " + goosi.CoreVersion)
+	tb.AddOverflowMenu(func(m *core.Scene) {
+		NewFuncButton(m, core.ResetAllSettings).SetText("Reset settings").SetIcon(icons.Delete).SetConfirm(true)
+		core.NewButton(m).SetText("App version").SetIcon(icons.Info).OnClick(func(e events.Event) {
+			d := core.NewBody().AddTitle("App version")
+			core.NewLabel(d).SetText("App version: " + goosi.AppVersion)
+			core.NewLabel(d).SetText("Core version: " + goosi.CoreVersion)
 			d.AddOKOnly().NewDialog(tb).Run()
 		})
 
-		NewFuncButton(m, gi.AppearanceSettings.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
-		NewFuncButton(m, gi.ProfileToggle).SetText("Profile performance").SetIcon(icons.Analytics)
-		gi.NewSeparator(m)
+		NewFuncButton(m, core.AppearanceSettings.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
+		NewFuncButton(m, core.ProfileToggle).SetText("Profile performance").SetIcon(icons.Analytics)
+		core.NewSeparator(m)
 	})
 }
 
 // SettingsWindow makes and runs a new window for viewing user settings.
 func SettingsWindow() {
-	if gi.ActivateExistingMainWindow(&gi.AllSettings) {
+	if core.ActivateExistingMainWindow(&core.AllSettings) {
 		return
 	}
-	d := gi.NewBody("settings").SetTitle("Settings").SetData(&gi.AllSettings)
+	d := core.NewBody("settings").SetTitle("Settings").SetData(&core.AllSettings)
 	SettingsView(d)
 	d.NewWindow().SetCloseOnBack(true).Run()
 }
 
 // SettingsView adds to the given body a view of user settings
-func SettingsView(b *gi.Body) {
-	b.AddAppBar(func(tb *gi.Toolbar) {
+func SettingsView(b *core.Body) {
+	b.AddAppBar(func(tb *core.Toolbar) {
 		SettingsViewToolbarBase(tb)
-		for _, se := range gi.AllSettings {
+		for _, se := range core.AllSettings {
 			se.ConfigToolbar(tb)
 		}
 	})
 
-	tabs := gi.NewTabs(b)
+	tabs := core.NewTabs(b)
 
-	for _, se := range gi.AllSettings {
+	for _, se := range core.AllSettings {
 		fr := tabs.NewTab(se.Label())
 
 		NewStructView(fr).SetStruct(se).OnChange(func(e events.Event) {
@@ -64,8 +64,8 @@ func SettingsView(b *gi.Body) {
 				tab.UpdateBar()
 			}
 			se.Apply()
-			gi.ErrorSnackbar(fr, gi.SaveSettings(se), "Error saving "+se.Label()+" settings")
-			gi.UpdateAll()
+			core.ErrorSnackbar(fr, core.SaveSettings(se), "Error saving "+se.Label()+" settings")
+			core.UpdateAll()
 		})
 	}
 }

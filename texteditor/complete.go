@@ -7,7 +7,7 @@ package texteditor
 import (
 	"fmt"
 
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/pi"
 	"cogentcore.org/core/pi/complete"
 	"cogentcore.org/core/pi/lex"
@@ -120,6 +120,6 @@ func CompleteText(data any, text string, posLn, posCh int) (md complete.Matches)
 
 // CompleteTextEdit uses the selected completion to edit the text
 func CompleteTextEdit(data any, text string, cursorPos int, completion complete.Completion, seed string) (ed complete.Edit) {
-	ed = gi.CompleteEditText(text, cursorPos, completion.Text, seed)
+	ed = core.CompleteEditText(text, cursorPos, completion.Text, seed)
 	return ed
 }

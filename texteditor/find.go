@@ -7,8 +7,8 @@ package texteditor
 import (
 	"unicode"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor/textbuf"
@@ -289,9 +289,9 @@ func (ed *Editor) QReplacePrompt() {
 	if ed.HasSelection() {
 		find = string(ed.Selection().ToBytes())
 	}
-	d := gi.NewBody().AddTitle("Query-Replace").
+	d := core.NewBody().AddTitle("Query-Replace").
 		AddText("Enter strings for find and replace, then select Query-Replace -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining")
-	fc := gi.NewChooser(d, "find").SetEditable(true).SetDefaultNew(true)
+	fc := core.NewChooser(d, "find").SetEditable(true).SetDefaultNew(true)
 	fc.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
 		s.Min.X.Ch(80)
@@ -301,7 +301,7 @@ func (ed *Editor) QReplacePrompt() {
 		fc.SetCurrentValue(find)
 	}
 
-	rc := gi.NewChooser(d, "repl").SetEditable(true).SetDefaultNew(true)
+	rc := core.NewChooser(d, "repl").SetEditable(true).SetDefaultNew(true)
 	rc.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
 		s.Min.X.Ch(80)
@@ -309,10 +309,10 @@ func (ed *Editor) QReplacePrompt() {
 	rc.SetStrings(PrevQReplaceRepls...).SetCurrentIndex(0)
 
 	lexitems := ed.QReplace.LexItems
-	lxi := gi.NewSwitch(d, "lexb").SetText("Lexical Items").SetChecked(lexitems)
+	lxi := core.NewSwitch(d, "lexb").SetText("Lexical Items").SetChecked(lexitems)
 	lxi.SetTooltip("search matches entire lexically tagged items -- good for finding local variable names like 'i' and not matching everything")
 
-	d.AddBottomBar(func(parent gi.Widget) {
+	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).SetText("Query-Replace").OnClick(func(e events.Event) {
 			var find, repl string
@@ -340,8 +340,8 @@ func (ed *Editor) QReplaceStart(find, repl string, lexItems bool) {
 	ed.QReplace.Matches = nil
 	ed.QReplace.Pos = -1
 
-	gi.StringsInsertFirstUnique(&PrevQReplaceFinds, find, gi.SystemSettings.SavedPathsMax)
-	gi.StringsInsertFirstUnique(&PrevQReplaceRepls, repl, gi.SystemSettings.SavedPathsMax)
+	core.StringsInsertFirstUnique(&PrevQReplaceFinds, find, core.SystemSettings.SavedPathsMax)
+	core.StringsInsertFirstUnique(&PrevQReplaceRepls, repl, core.SystemSettings.SavedPathsMax)
 
 	ed.QReplaceMatches()
 	ed.QReplace.Pos, _ = ed.MatchFromPos(ed.QReplace.Matches, ed.CursorPos)

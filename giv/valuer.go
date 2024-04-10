@@ -11,10 +11,10 @@ import (
 	"reflect"
 	"time"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/fi"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
@@ -25,12 +25,12 @@ import (
 // This file handles converting values to [Value]s.
 
 func init() {
-	gi.SettingsWindow = SettingsWindow
-	gi.InspectorWindow = InspectorWindow
+	core.SettingsWindow = SettingsWindow
+	core.InspectorWindow = InspectorWindow
 
 	AddValue(icons.Icon(""), func() Value { return &IconValue{} })
-	AddValue(gi.FontName(""), func() Value { return &FontValue{} })
-	AddValue(gi.Filename(""), func() Value { return &FileValue{} })
+	AddValue(core.FontName(""), func() Value { return &FontValue{} })
+	AddValue(core.Filename(""), func() Value { return &FileValue{} })
 	AddValue(keyfun.MapName(""), func() Value { return &KeyMapValue{} })
 	AddValue(gti.Type{}, func() Value { return &TypeValue{} })
 	AddValue(color.RGBA{}, func() Value { return &ColorValue{} })
@@ -168,21 +168,21 @@ func ToValue(val any, tags string) Value {
 			return &RuneSliceValue{}
 		}
 		isstru := (laser.NonPtrType(eltyp).Kind() == reflect.Struct)
-		if !forceNoInline && (forceInline || (!isstru && sz <= gi.SystemSettings.SliceInlineLength && !tree.IsNode(eltyp))) {
+		if !forceNoInline && (forceInline || (!isstru && sz <= core.SystemSettings.SliceInlineLength && !tree.IsNode(eltyp))) {
 			return &SliceInlineValue{}
 		} else {
 			return &SliceValue{}
 		}
 	case vk == reflect.Map:
 		sz := laser.MapStructElsN(val)
-		if !forceNoInline && (forceInline || sz <= gi.SystemSettings.MapInlineLength) {
+		if !forceNoInline && (forceInline || sz <= core.SystemSettings.MapInlineLength) {
 			return &MapInlineValue{}
 		} else {
 			return &MapValue{}
 		}
 	case vk == reflect.Struct:
 		nfld := laser.AllFieldsN(nptyp)
-		if nfld > 0 && !forceNoInline && (forceInline || nfld <= gi.SystemSettings.StructInlineLength) {
+		if nfld > 0 && !forceNoInline && (forceInline || nfld <= core.SystemSettings.StructInlineLength) {
 			return &StructInlineValue{}
 		} else {
 			return &StructValue{}

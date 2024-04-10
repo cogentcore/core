@@ -9,8 +9,8 @@ import (
 	"log/slog"
 	"strings"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/fi"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/pi"
 	"cogentcore.org/core/pi/lex"
 	_ "cogentcore.org/core/pi/suplangs"
@@ -29,7 +29,7 @@ type HiMarkup struct {
 	Info *fi.FileInfo
 
 	// syntax highlighting style
-	Style gi.HiStyleName
+	Style core.HiStyleName
 
 	// chroma-based language name for syntax highlighting the code
 	Lang string
@@ -55,7 +55,7 @@ type HiMarkup struct {
 	// external toggle to turn off automatic highlighting
 	Off       bool
 	lastLang  string
-	lastStyle gi.HiStyleName
+	lastStyle core.HiStyleName
 	lexer     chroma.Lexer
 	formatter *html.Formatter
 }
@@ -118,7 +118,7 @@ func (hm *HiMarkup) Init(info *fi.FileInfo, pist *pi.FileStates) {
 }
 
 // SetHiStyle sets the highlighting style and updates corresponding settings
-func (hm *HiMarkup) SetHiStyle(style gi.HiStyleName) {
+func (hm *HiMarkup) SetHiStyle(style core.HiStyleName) {
 	if style == "" {
 		return
 	}

@@ -7,8 +7,8 @@ package filetree
 import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
@@ -58,10 +58,10 @@ func (fn *Node) SetStyles() {
 			s.Color = colors.C(colors.Scheme.OnSurface)
 		}
 	})
-	fn.OnWidgetAdded(func(w gi.Widget) {
+	fn.OnWidgetAdded(func(w core.Widget) {
 		switch w.PathFrom(fn) {
 		case "parts":
-			parts := w.(*gi.Layout)
+			parts := w.(*core.Layout)
 			w.OnClick(func(e events.Event) {
 				fn.OpenEmptyDir()
 			})
@@ -75,8 +75,8 @@ func (fn *Node) SetStyles() {
 				}
 			})
 		case "parts/branch":
-			sw := w.(*gi.Switch)
-			sw.Type = gi.SwitchCheckbox
+			sw := w.(*core.Switch)
+			sw.Type = core.SwitchCheckbox
 			sw.SetIcons(icons.FolderOpen, icons.Folder, icons.Blank)
 		}
 	})

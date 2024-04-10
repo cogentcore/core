@@ -5,15 +5,15 @@
 package texteditor
 
 import (
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/styles"
 )
 
-// TwinEditors presents two side-by-side [Editor]s in [gi.Splits]
+// TwinEditors presents two side-by-side [Editor]s in [core.Splits]
 // that scroll in sync with each other.
 type TwinEditors struct {
-	gi.Splits
+	core.Splits
 
 	// textbuf for A
 	BufA *Buffer `json:"-" xml:"-"`
@@ -31,14 +31,14 @@ func (te *TwinEditors) SetStyles() {
 	te.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 	})
-	te.OnWidgetAdded(func(w gi.Widget) {
+	te.OnWidgetAdded(func(w core.Widget) {
 		switch w.PathFrom(te) {
 		case "text-a", "text-b":
 			w.Style(func(s *styles.Style) {
 				s.Grow.Set(1, 1)
 				s.Min.X.Ch(80)
 				s.Min.Y.Em(40)
-				s.Font.Family = string(gi.AppearanceSettings.MonoFont)
+				s.Font.Family = string(core.AppearanceSettings.MonoFont)
 			})
 		}
 	})
@@ -56,10 +56,10 @@ func (te *TwinEditors) MakeBufs() {
 // SetFiles sets files for each text buf
 func (te *TwinEditors) SetFiles(fileA, fileB string, lineNos bool) {
 	te.MakeBufs()
-	te.BufA.Filename = gi.Filename(fileA)
+	te.BufA.Filename = core.Filename(fileA)
 	te.BufA.Opts.LineNos = lineNos
 	te.BufA.Stat() // update markup
-	te.BufB.Filename = gi.Filename(fileB)
+	te.BufB.Filename = core.Filename(fileB)
 	te.BufB.Opts.LineNos = lineNos
 	te.BufB.Stat() // update markup
 }

@@ -7,8 +7,8 @@ package texteditor
 import (
 	"image"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/pi/lex"
@@ -222,7 +222,7 @@ func (ed *Editor) CursorForwardWord(steps int) {
 				if ch < sz-1 {
 					r2 = txt[ch+1]
 				}
-				if gi.IsWordBreak(r1, r2) {
+				if core.IsWordBreak(r1, r2) {
 					ch++
 				} else {
 					done = true
@@ -235,7 +235,7 @@ func (ed *Editor) CursorForwardWord(steps int) {
 				if ch < sz-1 {
 					r2 = txt[ch+1]
 				}
-				if !gi.IsWordBreak(r1, r2) {
+				if !core.IsWordBreak(r1, r2) {
 					ch++
 				} else {
 					done = true
@@ -356,7 +356,7 @@ func (ed *Editor) CursorBackwardWord(steps int) {
 				if ch > 0 {
 					r2 = txt[ch-1]
 				}
-				if gi.IsWordBreak(r1, r2) {
+				if core.IsWordBreak(r1, r2) {
 					ch--
 					if ch == -1 {
 						done = true
@@ -372,7 +372,7 @@ func (ed *Editor) CursorBackwardWord(steps int) {
 				if ch > 0 {
 					r2 = txt[ch-1]
 				}
-				if !gi.IsWordBreak(r1, r2) {
+				if !core.IsWordBreak(r1, r2) {
 					ch--
 				} else {
 					done = true
@@ -703,12 +703,12 @@ func (ed *Editor) CursorTransposeWord() {
 // JumpToLinePrompt jumps to given line number (minus 1) from prompt
 func (ed *Editor) JumpToLinePrompt() {
 	val := ""
-	d := gi.NewBody().AddTitle("Jump to line").AddText("Line number to jump to")
-	tf := gi.NewTextField(d).SetPlaceholder("Line number")
+	d := core.NewBody().AddTitle("Jump to line").AddText("Line number to jump to")
+	tf := core.NewTextField(d).SetPlaceholder("Line number")
 	tf.OnChange(func(e events.Event) {
 		val = tf.Text()
 	})
-	d.AddBottomBar(func(parent gi.Widget) {
+	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).SetText("Jump").OnClick(func(e events.Event) {
 			val = tf.Text()
@@ -848,7 +848,7 @@ func (ed *Editor) ScrollCursorInView() bool {
 	if ed == nil || ed.This() == nil {
 		return false
 	}
-	if ed.This().(gi.Widget).IsVisible() {
+	if ed.This().(core.Widget).IsVisible() {
 		curBBox := ed.CursorBBox(ed.CursorPos)
 		return ed.ScrollInView(curBBox)
 	}

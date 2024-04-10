@@ -14,11 +14,11 @@ import (
 
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fi"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
@@ -35,7 +35,7 @@ import (
 // overridable method hooks for actions taken on the TreeView,
 // including OnOpen, OnClose, etc.
 type TreeViewer interface {
-	gi.Widget
+	core.Widget
 
 	// AsTreeView returns the base *TreeView for this node
 	AsTreeView() *TreeView
@@ -75,7 +75,7 @@ type TreeViewer interface {
 	DragDrop(e events.Event)
 	DropFinalize(de *events.DragDrop)
 	DropDeleteSource(e events.Event)
-	MakePasteMenu(m *gi.Scene, md mimedata.Mimes, fun func())
+	MakePasteMenu(m *core.Scene, md mimedata.Mimes, fun func())
 }
 
 // AsTreeView returns the given value as a value of type TreeView if the type
@@ -112,7 +112,7 @@ func AsTreeView(k tree.Node) *TreeView {
 // Select, Change, and DoubleClick.  The selected nodes
 // are in the root SelectedNodes list.
 type TreeView struct {
-	gi.WidgetBase
+	core.WidgetBase
 
 	// If non-nil, the Ki Node that this widget is viewing in the tree (the source)
 	SyncNode tree.Node `set:"-" copier:"-" json:"-" xml:"-"`
@@ -179,7 +179,7 @@ func NewTreeViewFrame(parent tree.Node, name ...string) *TreeView {
 	if len(name) > 0 {
 		frnm = []string{name[0] + "-frame"}
 	}
-	fr := gi.NewFrame(parent, frnm...).Style(func(s *styles.Style) {
+	fr := core.NewFrame(parent, frnm...).Style(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowAuto)
 	})
 	return NewTreeView(fr, name...)
@@ -204,7 +204,7 @@ func (tv *TreeView) BaseType() *gti.Type {
 // Returns the total number of leaves in the tree.
 func (tv *TreeView) RootSetViewIndex() int {
 	idx := 0
-	tv.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+	tv.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
 		tvn := AsTreeView(wi)
 		if tvn != nil {
 			tvn.ViewIndex = idx
@@ -268,7 +268,7 @@ func (tv *TreeView) SetStyles() {
 		s.StateLayer = 0
 	})
 
-	tv.OnWidgetAdded(func(w gi.Widget) {
+	tv.OnWidgetAdded(func(w core.Widget) {
 		switch w.PathFrom(tv) {
 		case "parts":
 			w.Style(func(s *styles.Style) {
@@ -357,8 +357,8 @@ func (tv *TreeView) SetStyles() {
 				s.Padding.Zero()
 			})
 		case "parts/branch":
-			sw := w.(*gi.Switch)
-			sw.Type = gi.SwitchCheckbox
+			sw := w.(*core.Switch)
+			sw.Type = core.SwitchCheckbox
 			sw.SetIcons(tv.IconOpen, tv.IconClosed, tv.IconLeaf)
 			sw.Style(func(s *styles.Style) {
 				s.SetAbilities(false, abilities.Focusable)
@@ -420,19 +420,19 @@ func (tv *TreeView) SetStyles() {
 				s.Min.Y.Em(1.2)
 			})
 		case "parts/menu":
-			menu := w.(*gi.Button)
+			menu := w.(*core.Button)
 			menu.Indicator = icons.None
 		}
 	})
 }
 
 // TreeViewFlags extend WidgetFlags to hold TreeView state
-type TreeViewFlags gi.WidgetFlags //enums:bitflag -trim-prefix TreeViewFlag
+type TreeViewFlags core.WidgetFlags //enums:bitflag -trim-prefix TreeViewFlag
 
 const (
 	// TreeViewFlagClosed means node is toggled closed
 	// (children not visible)  Otherwise Open.
-	TreeViewFlagClosed TreeViewFlags = TreeViewFlags(gi.WidgetFlagsN) + iota
+	TreeViewFlagClosed TreeViewFlags = TreeViewFlags(core.WidgetFlagsN) + iota
 
 	// TreeViewFlagSelectMode, when set on the Root node, determines whether keyboard movements
 	// update selection or not.
@@ -470,34 +470,34 @@ func (tv *TreeView) RootIsReadOnly() bool {
 // http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtreeview
 
 // BranchPart returns the branch in parts, if it exists
-func (tv *TreeView) BranchPart() (*gi.Switch, bool) {
+func (tv *TreeView) BranchPart() (*core.Switch, bool) {
 	if tv.Parts == nil {
 		return nil, false
 	}
 	if icc := tv.Parts.ChildByName("branch", 0); icc != nil {
-		return icc.(*gi.Switch), true
+		return icc.(*core.Switch), true
 	}
 	return nil, false
 }
 
 // IconPart returns the icon in parts, if it exists
-func (tv *TreeView) IconPart() (*gi.Icon, bool) {
+func (tv *TreeView) IconPart() (*core.Icon, bool) {
 	if tv.Parts == nil {
 		return nil, false
 	}
 	if icc := tv.Parts.ChildByName("icon", 1); icc != nil {
-		return icc.(*gi.Icon), true
+		return icc.(*core.Icon), true
 	}
 	return nil, false
 }
 
 // LabelPart returns the label in parts, if it exists
-func (tv *TreeView) LabelPart() (*gi.Label, bool) {
+func (tv *TreeView) LabelPart() (*core.Label, bool) {
 	if tv.Parts == nil {
 		return nil, false
 	}
 	if lbl := tv.Parts.ChildByName("label", 1); lbl != nil {
-		return lbl.(*gi.Label), true
+		return lbl.(*core.Label), true
 	}
 	return nil, false
 }
@@ -505,11 +505,11 @@ func (tv *TreeView) LabelPart() (*gi.Label, bool) {
 func (tv *TreeView) Config() {
 	parts := tv.NewParts()
 	config := tree.Config{}
-	config.Add(gi.SwitchType, "branch")
+	config.Add(core.SwitchType, "branch")
 	if tv.Icon.IsSet() {
-		config.Add(gi.IconType, "icon")
+		config.Add(core.IconType, "icon")
 	}
-	config.Add(gi.LabelType, "label")
+	config.Add(core.LabelType, "label")
 	mods := parts.ConfigChildren(config)
 	if tv.This().(TreeViewer).CanOpen() {
 		if wb, ok := tv.BranchPart(); ok {
@@ -571,7 +571,7 @@ func (tv *TreeView) SizeUp() {
 
 	if !tv.IsClosed() {
 		// we layout children under us
-		tv.WidgetKidsIter(func(i int, kwi gi.Widget, kwb *gi.WidgetBase) bool {
+		tv.WidgetKidsIter(func(i int, kwi core.Widget, kwb *core.WidgetBase) bool {
 			kwi.SizeUp()
 			h += kwb.Geom.Size.Actual.Total.Y
 			kw := kwb.Geom.Size.Actual.Total.X
@@ -614,7 +614,7 @@ func (tv *TreeView) Position() {
 
 	if !tv.IsClosed() {
 		h := tv.WidgetSize.Y
-		tv.WidgetKidsIter(func(i int, kwi gi.Widget, kwb *gi.WidgetBase) bool {
+		tv.WidgetKidsIter(func(i int, kwi core.Widget, kwb *core.WidgetBase) bool {
 			kwb.Geom.RelPos.Y = h
 			kwb.Geom.RelPos.X = tv.Indent.Dots
 			h += kwb.Geom.Size.Actual.Total.Y
@@ -1211,7 +1211,7 @@ func (tv *TreeView) ToggleClose() {
 
 // OpenAll opens the given node and all of its sub-nodes
 func (tv *TreeView) OpenAll() { //gti:add
-	tv.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+	tv.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
 		tvn := AsTreeView(wi)
 		if tvn != nil {
 			tvn.Open()
@@ -1224,7 +1224,7 @@ func (tv *TreeView) OpenAll() { //gti:add
 
 // CloseAll closes the given node and all of its sub-nodes.
 func (tv *TreeView) CloseAll() { //gti:add
-	tv.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+	tv.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
 		tvn := AsTreeView(wi)
 		if tvn != nil {
 			tvn.Close()
@@ -1262,18 +1262,18 @@ func (tv *TreeView) ContextMenuPos(e events.Event) (pos image.Point) {
 	return
 }
 
-func (tv *TreeView) ContextMenuReadOnly(m *gi.Scene) {
-	gi.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy).
+func (tv *TreeView) ContextMenuReadOnly(m *core.Scene) {
+	core.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy).
 		SetEnabled(tv.HasSelection()).
 		OnClick(func(e events.Event) {
 			tv.Copy(true)
 		})
-	gi.NewButton(m).SetText("View").SetIcon(icons.Visibility).
+	core.NewButton(m).SetText("View").SetIcon(icons.Visibility).
 		SetEnabled(tv.HasSelection()).
 		OnClick(func(e events.Event) {
 			tv.EditNode()
 		})
-	gi.NewSeparator(m)
+	core.NewSeparator(m)
 
 	NewFuncButton(m, tv.OpenAll).SetIcon(icons.KeyboardArrowDown).
 		SetEnabled(tv.HasSelection())
@@ -1281,49 +1281,49 @@ func (tv *TreeView) ContextMenuReadOnly(m *gi.Scene) {
 		SetEnabled(tv.HasSelection())
 }
 
-func (tv *TreeView) ContextMenu(m *gi.Scene) {
+func (tv *TreeView) ContextMenu(m *core.Scene) {
 	if tv.IsReadOnly() || tv.RootIsReadOnly() {
 		tv.ContextMenuReadOnly(m)
 		return
 	}
 	tvi := tv.This().(TreeViewer)
-	gi.NewButton(m).SetText("Add child").SetIcon(icons.Add).
+	core.NewButton(m).SetText("Add child").SetIcon(icons.Add).
 		SetEnabled(tv.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.AddChildNode()
 		})
-	gi.NewButton(m).SetText("Insert before").SetIcon(icons.Add).
+	core.NewButton(m).SetText("Insert before").SetIcon(icons.Add).
 		SetEnabled(tv.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.InsertBefore()
 		})
-	gi.NewButton(m).SetText("Insert after").SetIcon(icons.Add).
+	core.NewButton(m).SetText("Insert after").SetIcon(icons.Add).
 		SetEnabled(tv.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.InsertAfter()
 		})
-	gi.NewButton(m).SetText("Duplicate").SetIcon(icons.ContentCopy).
+	core.NewButton(m).SetText("Duplicate").SetIcon(icons.ContentCopy).
 		SetEnabled(tv.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.Duplicate()
 		})
-	gi.NewButton(m).SetText("Delete").SetIcon(icons.Delete).
+	core.NewButton(m).SetText("Delete").SetIcon(icons.Delete).
 		SetEnabled(tv.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.DeleteNode()
 		})
-	gi.NewSeparator(m)
-	gi.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy).
+	core.NewSeparator(m)
+	core.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy).
 		SetEnabled(tv.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.Copy(true)
 		})
-	gi.NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keyfun.Cut).
+	core.NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keyfun.Cut).
 		SetEnabled(tv.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.Cut()
 		})
-	pbt := gi.NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keyfun.Paste).
+	pbt := core.NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keyfun.Paste).
 		OnClick(func(e events.Event) {
 			tvi.Paste()
 		})
@@ -1331,12 +1331,12 @@ func (tv *TreeView) ContextMenu(m *gi.Scene) {
 	if cb != nil {
 		pbt.SetState(cb.IsEmpty(), states.Disabled)
 	}
-	gi.NewSeparator(m)
+	core.NewSeparator(m)
 	NewFuncButton(m, tv.EditNode).SetText("Edit").SetIcon(icons.Edit).
 		SetEnabled(tv.HasSelection())
 	NewFuncButton(m, tv.InspectNode).SetText("Inspect").SetIcon(icons.EditDocument).
 		SetEnabled(tv.HasSelection())
-	gi.NewSeparator(m)
+	core.NewSeparator(m)
 
 	NewFuncButton(m, tv.OpenAll).SetIcon(icons.KeyboardArrowDown).
 		SetEnabled(tv.HasSelection())
@@ -1348,7 +1348,7 @@ func (tv *TreeView) ContextMenu(m *gi.Scene) {
 func (tv *TreeView) IsRoot(op string) bool {
 	if tv.This() == tv.RootView.This() {
 		if op != "" {
-			gi.MessageSnackbar(tv, fmt.Sprintf("Cannot %v the root of the tree", op))
+			core.MessageSnackbar(tv, fmt.Sprintf("Cannot %v the root of the tree", op))
 		}
 		return true
 	}
@@ -1370,7 +1370,7 @@ func (tv *TreeView) MimeData(md *mimedata.Mimes) {
 	if err == nil {
 		*md = append(*md, &mimedata.Data{Type: fi.DataJson, Data: buf.Bytes()})
 	} else {
-		gi.ErrorSnackbar(tv, err, "Error encoding node")
+		core.ErrorSnackbar(tv, err, "Error encoding node")
 	}
 }
 
@@ -1386,7 +1386,7 @@ func (tv *TreeView) NodesFromMimeData(md mimedata.Mimes) (tree.Slice, []string) 
 			if err == nil {
 				sl = append(sl, nki)
 			} else {
-				gi.ErrorSnackbar(tv, err, "Error loading node")
+				core.ErrorSnackbar(tv, err, "Error loading node")
 			}
 		} else if d.Type == fi.TextPlain { // paths
 			pl = append(pl, string(d.Data))
@@ -1446,44 +1446,44 @@ func (tv *TreeView) Paste() { //gti:add
 // by popping up a menu to determine what specifically to do.
 func (tv *TreeView) PasteMenu(md mimedata.Mimes) {
 	tv.UnselectAll()
-	mf := func(m *gi.Scene) {
+	mf := func(m *core.Scene) {
 		tv.This().(TreeViewer).MakePasteMenu(m, md, nil)
 	}
 	pos := tv.ContextMenuPos(nil)
-	gi.NewMenu(mf, tv.This().(gi.Widget), pos).Run()
+	core.NewMenu(mf, tv.This().(core.Widget), pos).Run()
 }
 
 // MakePasteMenu makes the menu of options for paste events
 // optional function is typically the DropFinalize but could also be other actions
 // to take after each optional action.
-func (tv *TreeView) MakePasteMenu(m *gi.Scene, md mimedata.Mimes, fun func()) {
-	gi.NewButton(m).SetText("Assign To").OnClick(func(e events.Event) {
+func (tv *TreeView) MakePasteMenu(m *core.Scene, md mimedata.Mimes, fun func()) {
+	core.NewButton(m).SetText("Assign To").OnClick(func(e events.Event) {
 		tv.PasteAssign(md)
 		if fun != nil {
 			fun()
 		}
 	})
-	gi.NewButton(m).SetText("Add to Children").OnClick(func(e events.Event) {
+	core.NewButton(m).SetText("Add to Children").OnClick(func(e events.Event) {
 		tv.PasteChildren(md, events.DropCopy)
 		if fun != nil {
 			fun()
 		}
 	})
 	if !tv.IsRoot("") && tv.RootView.This() != tv.This() {
-		gi.NewButton(m).SetText("Insert Before").OnClick(func(e events.Event) {
+		core.NewButton(m).SetText("Insert Before").OnClick(func(e events.Event) {
 			tv.PasteBefore(md, events.DropCopy)
 			if fun != nil {
 				fun()
 			}
 		})
-		gi.NewButton(m).SetText("Insert After").OnClick(func(e events.Event) {
+		core.NewButton(m).SetText("Insert After").OnClick(func(e events.Event) {
 			tv.PasteAfter(md, events.DropCopy)
 			if fun != nil {
 				fun()
 			}
 		})
 	}
-	gi.NewButton(m).SetText("Cancel")
+	core.NewButton(m).SetText("Cancel")
 }
 
 // PasteAssign assigns mime data (only the first one!) to this node
@@ -1532,7 +1532,7 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, act
 	}
 	parent := AsTreeView(tv.Par)
 	if parent == nil {
-		gi.MessageSnackbar(tv, "Error: cannot insert after the root of the tree")
+		core.MessageSnackbar(tv, "Error: cannot insert after the root of the tree")
 		return
 	}
 	if tv.SyncNode != nil {
@@ -1556,7 +1556,7 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, act
 			}
 		}
 		parent.InsertChild(ns, myidx+i)
-		_, nwb := gi.AsWidget(ns.This())
+		_, nwb := core.AsWidget(ns.This())
 		ntv := AsTreeView(ns.This())
 		ntv.RootView = tv.RootView
 		nwb.SetScene(tv.Scene)
@@ -1587,7 +1587,7 @@ func (tv *TreeView) PasteChildren(md mimedata.Mimes, mod events.DropMods) {
 
 	for _, ns := range sl {
 		tv.AddChild(ns)
-		_, nwb := gi.AsWidget(ns.This())
+		_, nwb := core.AsWidget(ns.This())
 		ntv := AsTreeView(ns.This())
 		ntv.RootView = tv.RootView
 		nwb.SetScene(tv.Scene)
@@ -1614,7 +1614,7 @@ func (tv *TreeView) DragStart(e events.Event) {
 			}
 		}
 	}
-	tv.Scene.EventMgr.DragStart(tv.This().(gi.Widget), md, e)
+	tv.Scene.EventMgr.DragStart(tv.This().(core.Widget), md, e)
 }
 
 // DropExternal is not handled by base case but could be in derived
@@ -1636,19 +1636,19 @@ func (tv *TreeView) DragDrop(e events.Event) {
 	tvi := tv.This().(TreeViewer)
 	tv.UnselectAll()
 	de := e.(*events.DragDrop)
-	stv := AsTreeView(de.Source.(gi.Widget))
+	stv := AsTreeView(de.Source.(core.Widget))
 	if stv != nil {
 		stv.DragClearStates()
 	}
 	md := de.Data.(mimedata.Mimes)
-	mf := func(m *gi.Scene) {
+	mf := func(m *core.Scene) {
 		tv.Scene.EventMgr.DragMenuAddModLabel(m, de.DropMod)
 		tvi.MakePasteMenu(m, md, func() {
 			tvi.DropFinalize(de)
 		})
 	}
 	pos := tv.ContextMenuPos(nil)
-	gi.NewMenu(mf, tv.This().(gi.Widget), pos).Run()
+	core.NewMenu(mf, tv.This().(core.Widget), pos).Run()
 }
 
 // DropFinalize is called to finalize Drop actions on the Source node.
@@ -1683,7 +1683,7 @@ func (tv *TreeView) DropDeleteSource(e events.Event) {
 			psplt := strings.Split(path, "/")
 			orgnm := psplt[len(psplt)-1]
 			sn.SetName(orgnm)
-			_, swb := gi.AsWidget(sn)
+			_, swb := core.AsWidget(sn)
 			swb.NeedsRender()
 		}
 	}
@@ -1708,7 +1708,7 @@ func (tv *TreeView) HandleKeys() {
 	tv.On(events.KeyChord, func(e events.Event) {
 		kf := keyfun.Of(e.KeyChord())
 		selMode := events.SelectModeBits(e.Modifiers())
-		if gi.DebugSettings.KeyEventTrace {
+		if core.DebugSettings.KeyEventTrace {
 			slog.Info("TreeView KeyInput", "widget", tv, "keyfun", kf, "selMode", selMode)
 		}
 

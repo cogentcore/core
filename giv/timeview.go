@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fi"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
@@ -20,7 +20,7 @@ import (
 
 // TimeView is a view for selecting a time
 type TimeView struct {
-	gi.Frame
+	core.Frame
 
 	// the time that we are viewing
 	Time time.Time `set:"-"`
@@ -45,9 +45,9 @@ func (tv *TimeView) Config() {
 		return
 	}
 
-	hour := gi.NewSpinner(tv, "hour")
+	hour := core.NewSpinner(tv, "hour")
 	hour.SetStep(1).SetEnforceStep(true)
-	if gi.SystemSettings.Clock24 {
+	if core.SystemSettings.Clock24 {
 		tv.Hour = tv.Time.Hour()
 		hour.SetMax(24).SetMin(0)
 	} else {
@@ -64,7 +64,7 @@ func (tv *TimeView) Config() {
 	})
 	hour.OnChange(func(e events.Event) {
 		hr := int(hour.Value)
-		if hr == 12 && !gi.SystemSettings.Clock24 {
+		if hr == 12 && !core.SystemSettings.Clock24 {
 			hr = 0
 		}
 		tv.Hour = hr
@@ -78,13 +78,13 @@ func (tv *TimeView) Config() {
 		tv.SendChange()
 	})
 
-	gi.NewLabel(tv, "colon").SetType(gi.LabelDisplayLarge).SetText(":").
+	core.NewLabel(tv, "colon").SetType(core.LabelDisplayLarge).SetText(":").
 		Style(func(s *styles.Style) {
 			s.SetTextWrap(false)
 			s.Min.X.Ch(1)
 		})
 
-	minute := gi.NewSpinner(tv, "minute").
+	minute := core.NewSpinner(tv, "minute").
 		SetStep(1).SetEnforceStep(true).
 		SetMin(0).SetMax(60).SetFormat("%02d").
 		SetValue(float32(tv.Time.Minute()))
@@ -99,8 +99,8 @@ func (tv *TimeView) Config() {
 		tv.SendChange()
 	})
 
-	if !gi.SystemSettings.Clock24 {
-		sw := gi.NewSwitches(tv, "am-pm").SetMutex(true).SetType(gi.SwitchSegmentedButton).SetItems(gi.SwitchItem{Label: "AM"}, gi.SwitchItem{Label: "PM"})
+	if !core.SystemSettings.Clock24 {
+		sw := core.NewSwitches(tv, "am-pm").SetMutex(true).SetType(core.SwitchSegmentedButton).SetItems(core.SwitchItem{Label: "AM"}, core.SwitchItem{Label: "PM"})
 		sw.Style(func(s *styles.Style) {
 			s.Direction = styles.Column
 		})
@@ -141,7 +141,7 @@ var shortMonths = []string{"Jan", "Feb", "Apr", "Mar", "May", "Jun", "Jul", "Aug
 
 // DateView is a view for selecting a date
 type DateView struct {
-	gi.Frame
+	core.Frame
 
 	// the time that we are viewing
 	Time time.Time `set:"-"`
@@ -168,7 +168,7 @@ func (dv *DateView) Config() {
 		})
 	}
 
-	trow := gi.NewLayout(dv)
+	trow := core.NewLayout(dv)
 	trow.Style(func(s *styles.Style) {
 		s.Gap.Zero()
 	})
@@ -178,36 +178,36 @@ func (dv *DateView) Config() {
 		s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 	}
 
-	gi.NewButton(trow).SetType(gi.ButtonAction).SetIcon(icons.NavigateBefore).OnClick(func(e events.Event) {
+	core.NewButton(trow).SetType(core.ButtonAction).SetIcon(icons.NavigateBefore).OnClick(func(e events.Event) {
 		dv.SetTime(dv.Time.AddDate(0, -1, 0))
 	}).Style(arrowStyle)
 
-	sms := make([]gi.ChooserItem, len(shortMonths))
+	sms := make([]core.ChooserItem, len(shortMonths))
 	for i, sm := range shortMonths {
-		sms[i] = gi.ChooserItem{Value: sm}
+		sms[i] = core.ChooserItem{Value: sm}
 	}
-	month := gi.NewChooser(trow, "month").SetItems(sms...)
+	month := core.NewChooser(trow, "month").SetItems(sms...)
 	month.SetCurrentIndex(int(dv.Time.Month() - 1))
 	month.OnChange(func(e events.Event) {
 		// set our month
 		dv.SetTime(dv.Time.AddDate(0, month.CurrentIndex+1-int(dv.Time.Month()), 0))
 	})
 
-	gi.NewButton(trow).SetType(gi.ButtonAction).SetIcon(icons.NavigateNext).OnClick(func(e events.Event) {
+	core.NewButton(trow).SetType(core.ButtonAction).SetIcon(icons.NavigateNext).OnClick(func(e events.Event) {
 		dv.SetTime(dv.Time.AddDate(0, 1, 0))
 	}).Style(arrowStyle)
 
-	gi.NewButton(trow).SetType(gi.ButtonAction).SetIcon(icons.NavigateBefore).OnClick(func(e events.Event) {
+	core.NewButton(trow).SetType(core.ButtonAction).SetIcon(icons.NavigateBefore).OnClick(func(e events.Event) {
 		dv.SetTime(dv.Time.AddDate(-1, 0, 0))
 	}).Style(arrowStyle)
 
 	yr := dv.Time.Year()
-	var yrs []gi.ChooserItem
+	var yrs []core.ChooserItem
 	// we go 100 in each direction from the current year
 	for i := yr - 100; i <= yr+100; i++ {
-		yrs = append(yrs, gi.ChooserItem{Value: i})
+		yrs = append(yrs, core.ChooserItem{Value: i})
 	}
-	year := gi.NewChooser(trow, "year").SetItems(yrs...)
+	year := core.NewChooser(trow, "year").SetItems(yrs...)
 	year.SetCurrentValue(yr)
 	year.OnChange(func(e events.Event) {
 		// we are centered at current year with 100 in each direction
@@ -216,7 +216,7 @@ func (dv *DateView) Config() {
 		dv.SetTime(dv.Time.AddDate(nyr-dv.Time.Year(), 0, 0))
 	})
 
-	gi.NewButton(trow).SetType(gi.ButtonAction).SetIcon(icons.NavigateNext).OnClick(func(e events.Event) {
+	core.NewButton(trow).SetType(core.ButtonAction).SetIcon(icons.NavigateNext).OnClick(func(e events.Event) {
 		dv.SetTime(dv.Time.AddDate(1, 0, 0))
 	}).Style(arrowStyle)
 
@@ -225,7 +225,7 @@ func (dv *DateView) Config() {
 }
 
 func (dv *DateView) ConfigDateGrid() {
-	grid := gi.NewLayout(dv, "grid")
+	grid := core.NewLayout(dv, "grid")
 	grid.Style(func(s *styles.Style) {
 		s.Display = styles.Grid
 		s.Columns = 7
@@ -254,7 +254,7 @@ func (dv *DateView) ConfigDateGrid() {
 		// actual time of this date
 		dt := somw.AddDate(0, 0, yd-somwyd)
 		ds := strconv.Itoa(dt.Day())
-		bt := gi.NewButton(grid, "day-"+yds).SetType(gi.ButtonAction).SetText(ds)
+		bt := core.NewButton(grid, "day-"+yds).SetType(core.ButtonAction).SetText(ds)
 		bt.OnClick(func(e events.Event) {
 			dv.SetTime(dt)
 		})
@@ -275,7 +275,7 @@ func (dv *DateView) ConfigDateGrid() {
 				s.Color = colors.C(colors.Scheme.Primary.On)
 			}
 		})
-		bt.OnWidgetAdded(func(w gi.Widget) {
+		bt.OnWidgetAdded(func(w core.Widget) {
 			switch w.PathFrom(bt) {
 			case "parts":
 				w.Style(func(s *styles.Style) {
@@ -283,8 +283,8 @@ func (dv *DateView) ConfigDateGrid() {
 					s.Justify.Items = styles.Center
 				})
 			case "parts/label":
-				lb := w.(*gi.Label)
-				lb.Type = gi.LabelBodyLarge
+				lb := w.(*core.Label)
+				lb.Type = core.LabelBodyLarge
 			}
 		})
 	}
@@ -293,7 +293,7 @@ func (dv *DateView) ConfigDateGrid() {
 // TimeValue presents two text fields for editing a date and time,
 // both of which can pull up corresponding picker view dialogs.
 type TimeValue struct {
-	ValueBase[*gi.Layout]
+	ValueBase[*core.Layout]
 }
 
 func (v *TimeValue) Config() {
@@ -301,11 +301,11 @@ func (v *TimeValue) Config() {
 		s.Grow.Set(0, 0)
 	})
 
-	dt := gi.NewTextField(v.Widget, "date").SetTooltip("The date")
+	dt := core.NewTextField(v.Widget, "date").SetTooltip("The date")
 	dt.SetLeadingIcon(icons.CalendarToday, func(e events.Event) {
-		d := gi.NewBody().AddTitle("Select date")
+		d := core.NewBody().AddTitle("Select date")
 		dv := NewDateView(d).SetTime(*v.TimeValue())
-		d.AddBottomBar(func(parent gi.Widget) {
+		d.AddBottomBar(func(parent core.Widget) {
 			d.AddCancel(parent)
 			d.AddOK(parent).OnClick(func(e events.Event) {
 				v.SetValue(dv.Time)
@@ -330,11 +330,11 @@ func (v *TimeValue) Config() {
 		return nil
 	})
 
-	tm := gi.NewTextField(v.Widget, "time").SetTooltip("The time")
+	tm := core.NewTextField(v.Widget, "time").SetTooltip("The time")
 	tm.SetLeadingIcon(icons.Schedule, func(e events.Event) {
-		d := gi.NewBody().AddTitle("Edit time")
+		d := core.NewBody().AddTitle("Edit time")
 		tv := NewTimeView(d).SetTime(*v.TimeValue())
-		d.AddBottomBar(func(parent gi.Widget) {
+		d.AddBottomBar(func(parent core.Widget) {
 			d.AddCancel(parent)
 			d.AddOK(parent).OnClick(func(e events.Event) {
 				v.SetValue(tv.Time)
@@ -349,7 +349,7 @@ func (v *TimeValue) Config() {
 	})
 	tm.SetReadOnly(v.IsReadOnly())
 	tm.SetValidator(func() error {
-		t, err := time.Parse(gi.SystemSettings.TimeFormat(), tm.Text())
+		t, err := time.Parse(core.SystemSettings.TimeFormat(), tm.Text())
 		if err != nil {
 			return err
 		}
@@ -362,8 +362,8 @@ func (v *TimeValue) Config() {
 
 func (v *TimeValue) Update() {
 	tm := v.TimeValue()
-	v.Widget.ChildByName("date").(*gi.TextField).SetText(tm.Format("1/2/2006"))
-	v.Widget.ChildByName("time").(*gi.TextField).SetText(tm.Format(gi.SystemSettings.TimeFormat()))
+	v.Widget.ChildByName("date").(*core.TextField).SetText(tm.Format("1/2/2006"))
+	v.Widget.ChildByName("time").(*core.TextField).SetText(tm.Format(core.SystemSettings.TimeFormat()))
 }
 
 // TimeValue decodes the value into a *time.Time value, also handling the [fi.FileTime] case.
@@ -380,7 +380,7 @@ func (v *TimeValue) TimeValue() *time.Time {
 
 // DurationValue represents a [time.Duration] value with a spinner and unit chooser.
 type DurationValue struct {
-	ValueBase[*gi.Layout]
+	ValueBase[*core.Layout]
 }
 
 func (v *DurationValue) Config() {
@@ -388,19 +388,19 @@ func (v *DurationValue) Config() {
 		s.Grow.Set(0, 0)
 	})
 
-	var ch *gi.Chooser
+	var ch *core.Chooser
 
-	sp := gi.NewSpinner(v.Widget, "value").SetTooltip("The value of time").SetStep(1).SetPageStep(10)
+	sp := core.NewSpinner(v.Widget, "value").SetTooltip("The value of time").SetStep(1).SetPageStep(10)
 	sp.OnChange(func(e events.Event) {
 		v.SetValue(sp.Value * float32(durationUnitsMap[ch.CurrentItem.Value.(string)]))
 	})
 
-	units := make([]gi.ChooserItem, len(durationUnits))
+	units := make([]core.ChooserItem, len(durationUnits))
 	for i, u := range durationUnits {
-		units[i] = gi.ChooserItem{Value: u}
+		units[i] = core.ChooserItem{Value: u}
 	}
 
-	ch = gi.NewChooser(v.Widget, "unit").SetTooltip("The unit of time").SetItems(units...)
+	ch = core.NewChooser(v.Widget, "unit").SetTooltip("The unit of time").SetItems(units...)
 	ch.OnChange(func(e events.Event) {
 		// we update the value to fit the unit
 		npv := laser.NonPtrValue(v.Value)
@@ -427,8 +427,8 @@ func (v *DurationValue) Update() {
 		adur /= float32(undur)
 	}
 
-	v.Widget.ChildByName("value").(*gi.Spinner).SetValue(adur)
-	v.Widget.ChildByName("unit").(*gi.Chooser).SetCurrentValue(un)
+	v.Widget.ChildByName("value").(*core.Spinner).SetValue(adur)
+	v.Widget.ChildByName("unit").(*core.Chooser).SetCurrentValue(un)
 }
 
 var durationUnits = []string{

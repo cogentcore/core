@@ -7,11 +7,11 @@ package giv
 import (
 	"testing"
 
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 )
 
 func TestTableView(t *testing.T) {
-	b := gi.NewBody()
+	b := core.NewBody()
 	sl := make([]myStruct, 10)
 	for i := range sl {
 		sl[i] = myStruct{

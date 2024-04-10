@@ -16,8 +16,8 @@ import (
 	"strings"
 	"sync"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/spell"
@@ -38,7 +38,7 @@ func InitSpell() error {
 
 // OpenSpellModel loads a saved spelling model
 func OpenSpellModel() error {
-	pdir := gi.TheApp.CogentCoreDataDir()
+	pdir := core.TheApp.CogentCoreDataDir()
 	openpath := filepath.Join(pdir, "spell_en_us.json")
 	return spell.Open(openpath)
 }
@@ -88,7 +88,7 @@ func AddToSpellModel(filepath string) error {
 
 // SaveSpellModel saves the spelling model which includes the data and parameters
 func SaveSpellModel() error {
-	pdir := gi.TheApp.CogentCoreDataDir()
+	pdir := core.TheApp.CogentCoreDataDir()
 	path := filepath.Join(pdir, "spell_en_us.json")
 	err := spell.Save(path)
 	if err != nil {
@@ -124,7 +124,7 @@ type Spell struct { //gti:add -setters
 	Listeners events.Listeners `set:"-" view:"-"`
 
 	// Stage is the [PopupStage] associated with the [Spell]
-	Stage *gi.Stage
+	Stage *core.Stage
 
 	ShowMu sync.Mutex `set:"-"`
 
@@ -167,7 +167,7 @@ func (sp *Spell) SetWord(word string, sugs []string, srcLn, srcCh int) *Spell {
 // Calls ShowNow which builds the correction popup menu
 // Similar to completion.Show but does not use a timer
 // Displays popup immediately for any unknown word
-func (sp *Spell) Show(text string, ctx gi.Widget, pos image.Point) {
+func (sp *Spell) Show(text string, ctx core.Widget, pos image.Point) {
 	if sp.Stage != nil {
 		sp.Cancel()
 	}
@@ -175,19 +175,19 @@ func (sp *Spell) Show(text string, ctx gi.Widget, pos image.Point) {
 }
 
 // ShowNow actually builds the correction popup menu
-func (sp *Spell) ShowNow(word string, ctx gi.Widget, pos image.Point) {
+func (sp *Spell) ShowNow(word string, ctx core.Widget, pos image.Point) {
 	if sp.Stage != nil {
 		sp.Cancel()
 	}
 	sp.ShowMu.Lock()
 	defer sp.ShowMu.Unlock()
 
-	sc := gi.NewScene(ctx.Name() + "-spell")
-	gi.MenuSceneConfigStyles(sc)
-	sp.Stage = gi.NewPopupStage(gi.CompleterStage, sc, ctx).SetPos(pos)
+	sc := core.NewScene(ctx.Name() + "-spell")
+	core.MenuSceneConfigStyles(sc)
+	sp.Stage = core.NewPopupStage(core.CompleterStage, sc, ctx).SetPos(pos)
 
 	if sp.IsLastLearned(word) {
-		gi.NewButton(sc).SetText("unlearn").SetTooltip("unlearn the last learned word").
+		core.NewButton(sc).SetText("unlearn").SetTooltip("unlearn the last learned word").
 			OnClick(func(e events.Event) {
 				sp.Cancel()
 				sp.UnLearnLast()
@@ -198,28 +198,28 @@ func (sp *Spell) ShowNow(word string, ctx gi.Widget, pos image.Point) {
 			return
 		}
 		if count == 0 {
-			gi.NewButton(sc).SetText("no suggestion")
+			core.NewButton(sc).SetText("no suggestion")
 		} else {
 			for i := 0; i < count; i++ {
 				text := sp.Suggest[i]
-				gi.NewButton(sc).SetText(text).OnClick(func(e events.Event) {
+				core.NewButton(sc).SetText(text).OnClick(func(e events.Event) {
 					sp.Cancel()
 					sp.Spell(text)
 				})
 			}
 		}
-		gi.NewSeparator(sc)
-		gi.NewButton(sc).SetText("learn").OnClick(func(e events.Event) {
+		core.NewSeparator(sc)
+		core.NewButton(sc).SetText("learn").OnClick(func(e events.Event) {
 			sp.Cancel()
 			sp.LearnWord()
 		})
-		gi.NewButton(sc).SetText("ignore").OnClick(func(e events.Event) {
+		core.NewButton(sc).SetText("ignore").OnClick(func(e events.Event) {
 			sp.Cancel()
 			sp.IgnoreWord()
 		})
 	}
 	if sc.NumChildren() > 0 {
-		sc.EventMgr.SetStartFocus(sc.Child(0).(gi.Widget))
+		sc.EventMgr.SetStartFocus(sc.Child(0).(core.Widget))
 	}
 	sp.Stage.RunPopup()
 }

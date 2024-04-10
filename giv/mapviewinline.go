@@ -7,8 +7,8 @@ package giv
 import (
 	"reflect"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
@@ -18,7 +18,7 @@ import (
 // MapViewInline represents a map as a single line widget,
 // for smaller maps and those explicitly marked inline.
 type MapViewInline struct {
-	gi.Layout
+	core.Layout
 
 	// the map that we are a view onto
 	Map any `set:"-"`
@@ -53,19 +53,19 @@ func (mv *MapViewInline) SetStyles() {
 	mv.Style(func(s *styles.Style) {
 		s.Grow.Set(0, 0)
 	})
-	mv.OnWidgetAdded(func(w gi.Widget) {
+	mv.OnWidgetAdded(func(w core.Widget) {
 		switch w.PathFrom(mv) {
 		case "add-button":
-			ab := w.(*gi.Button)
+			ab := w.(*core.Button)
 			w.Style(func(s *styles.Style) {
-				ab.SetType(gi.ButtonTonal)
+				ab.SetType(core.ButtonTonal)
 			})
 			w.OnClick(func(e events.Event) {
 				mv.MapAdd()
 			})
 		case "edit-button":
 			w.Style(func(s *styles.Style) {
-				w.(*gi.Button).SetType(gi.ButtonTonal)
+				w.(*core.Button).SetType(core.ButtonTonal)
 			})
 			w.OnClick(func(e events.Event) {
 				vpath := mv.ViewPath
@@ -82,7 +82,7 @@ func (mv *MapViewInline) SetStyles() {
 					tmptyp := laser.NonPtrType(reflect.TypeOf(mv.Map))
 					title = "Map of " + tmptyp.String()
 				}
-				d := gi.NewBody().AddTitle(title).AddText(mv.Tooltip)
+				d := core.NewBody().AddTitle(title).AddText(mv.Tooltip)
 				NewMapView(d).SetViewPath(vpath).SetMap(mv.Map)
 				d.OnClose(func(e events.Event) {
 					mv.Update()
@@ -120,7 +120,7 @@ func (mv *MapViewInline) Config() {
 
 	laser.ValueSliceSort(keys, true)
 	for i, key := range keys {
-		if i >= gi.SystemSettings.MapInlineLength {
+		if i >= core.SystemSettings.MapInlineLength {
 			break
 		}
 		kv := ToValue(key.Interface(), "")
@@ -145,8 +145,8 @@ func (mv *MapViewInline) Config() {
 		mv.Keys = append(mv.Keys, kv)
 		mv.Values = append(mv.Values, vv)
 	}
-	config.Add(gi.ButtonType, "add-button")
-	config.Add(gi.ButtonType, "edit-button")
+	config.Add(core.ButtonType, "add-button")
+	config.Add(core.ButtonType, "edit-button")
 	mv.ConfigChildren(config)
 	for i, vv := range mv.Values {
 		kv := mv.Keys[i]
@@ -155,8 +155,8 @@ func (mv *MapViewInline) Config() {
 			mv.SendChange()
 			mv.Update()
 		})
-		w, wb := gi.AsWidget(mv.Child((i * 2) + 1))
-		kw, kwb := gi.AsWidget(mv.Child(i * 2))
+		w, wb := core.AsWidget(mv.Child((i * 2) + 1))
+		kw, kwb := core.AsWidget(mv.Child(i * 2))
 		Config(vv, w)
 		Config(kv, kw)
 		vv.AsWidgetBase().OnInput(mv.HandleEvent)
@@ -171,26 +171,26 @@ func (mv *MapViewInline) Config() {
 			wb.SetReadOnly(true)
 			kwb.SetReadOnly(true)
 		} else {
-			wb.AddContextMenu(func(m *gi.Scene) {
+			wb.AddContextMenu(func(m *core.Scene) {
 				mv.ContextMenu(m, kv.Val())
 			})
-			kwb.AddContextMenu(func(m *gi.Scene) {
+			kwb.AddContextMenu(func(m *core.Scene) {
 				mv.ContextMenu(m, kv.Val())
 			})
 		}
 	}
 	adack, err := mv.Children().ElemFromEndTry(1)
 	if err == nil {
-		adbt := adack.(*gi.Button)
-		adbt.SetType(gi.ButtonTonal)
+		adbt := adack.(*core.Button)
+		adbt.SetType(core.ButtonTonal)
 		adbt.SetIcon(icons.Add)
 		adbt.Tooltip = "add an entry to the map"
 
 	}
 	edack, err := mv.Children().ElemFromEndTry(0)
 	if err == nil {
-		edbt := edack.(*gi.Button)
-		edbt.SetType(gi.ButtonTonal)
+		edbt := edack.(*core.Button)
+		edbt.SetType(core.ButtonTonal)
 		edbt.SetIcon(icons.Edit)
 		edbt.Tooltip = "map edit dialog"
 	}
@@ -227,14 +227,14 @@ func (mv *MapViewInline) MapDelete(key reflect.Value) {
 	mv.Update()
 }
 
-func (mv *MapViewInline) ContextMenu(m *gi.Scene, keyv reflect.Value) {
+func (mv *MapViewInline) ContextMenu(m *core.Scene, keyv reflect.Value) {
 	if mv.IsReadOnly() {
 		return
 	}
-	gi.NewButton(m).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
+	core.NewButton(m).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
 		mv.MapAdd()
 	})
-	gi.NewButton(m).SetText("Delete").SetIcon(icons.Delete).OnClick(func(e events.Event) {
+	core.NewButton(m).SetText("Delete").SetIcon(icons.Delete).OnClick(func(e events.Event) {
 		mv.MapDelete(keyv)
 	})
 }

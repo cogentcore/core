@@ -11,8 +11,8 @@ import (
 	"cogentcore.org/core/cam/hct"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
@@ -23,7 +23,7 @@ import (
 
 // ColorView shows a color, using sliders or numbers to set values.
 type ColorView struct {
-	gi.Frame
+	core.Frame
 
 	// the color that we view
 	Color hct.HCT `set:"-"`
@@ -63,7 +63,7 @@ func (cv *ColorView) Config() {
 		s.Grow.Set(1, 0)
 	}
 
-	hue := gi.NewSlider(cv, "hue").SetMin(0).SetMax(360).SetValue(cv.Color.Hue).
+	hue := core.NewSlider(cv, "hue").SetMin(0).SetMax(360).SetValue(cv.Color.Hue).
 		SetTooltip("The hue, which is the spectral identity of the color (red, green, blue, etc) in degrees")
 	hue.OnInput(func(e events.Event) {
 		cv.Color.SetHue(hue.Value)
@@ -81,7 +81,7 @@ func (cv *ColorView) Config() {
 	})
 	hue.StyleFinal(sf)
 
-	chroma := gi.NewSlider(cv, "chroma").SetMin(0).SetMax(150).SetValue(cv.Color.Chroma).
+	chroma := core.NewSlider(cv, "chroma").SetMin(0).SetMax(150).SetValue(cv.Color.Chroma).
 		SetTooltip("The chroma, which is the colorfulness/saturation of the color")
 	chroma.OnInput(func(e events.Event) {
 		cv.Color.SetChroma(chroma.Value)
@@ -99,7 +99,7 @@ func (cv *ColorView) Config() {
 	})
 	chroma.StyleFinal(sf)
 
-	tone := gi.NewSlider(cv, "tone").SetMin(0).SetMax(100).SetValue(cv.Color.Tone).
+	tone := core.NewSlider(cv, "tone").SetMin(0).SetMax(100).SetValue(cv.Color.Tone).
 		SetTooltip("The tone, which is the lightness of the color")
 	tone.OnInput(func(e events.Event) {
 		cv.Color.SetTone(tone.Value)
@@ -490,11 +490,11 @@ func (cv *ColorView) UpdateNums() {
 
 // ColorValue represents a color value with a button.
 type ColorValue struct {
-	ValueBase[*gi.Button]
+	ValueBase[*core.Button]
 }
 
 func (v *ColorValue) Config() {
-	v.Widget.SetType(gi.ButtonTonal).SetText("Edit color").SetIcon(icons.Colors)
+	v.Widget.SetType(core.ButtonTonal).SetText("Edit color").SetIcon(icons.Colors)
 	ConfigDialogWidget(v, false)
 	v.Widget.Style(func(s *styles.Style) {
 		// we need to display button as non-transparent
@@ -509,7 +509,7 @@ func (v *ColorValue) Update() {
 	v.Widget.Update()
 }
 
-func (v *ColorValue) ConfigDialog(d *gi.Body) (bool, func()) {
+func (v *ColorValue) ConfigDialog(d *core.Body) (bool, func()) {
 	d.SetTitle("Edit color")
 	cv := NewColorView(d).SetColor(v.ColorValue())
 	return true, func() {

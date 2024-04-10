@@ -10,9 +10,9 @@ import (
 	"reflect"
 	"strings"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
@@ -27,17 +27,17 @@ import (
 
 // StringValue represents any value with a text field.
 type StringValue struct {
-	ValueBase[*gi.TextField]
+	ValueBase[*core.TextField]
 }
 
 func (v *StringValue) Config() {
 	if vtag, _ := v.Tag("view"); vtag == "password" {
 		v.Widget.SetTypePassword()
 	}
-	if vl, ok := v.Value.Interface().(gi.Validator); ok {
+	if vl, ok := v.Value.Interface().(core.Validator); ok {
 		v.Widget.SetValidator(vl.Validate)
 	}
-	if fv, ok := v.Owner.(gi.FieldValidator); ok {
+	if fv, ok := v.Owner.(core.FieldValidator); ok {
 		v.Widget.SetValidator(func() error {
 			return fv.ValidateField(v.Field.Name)
 		})
@@ -62,7 +62,7 @@ func (v *StringValue) Update() {
 
 // BoolValue represents a bool value with a switch.
 type BoolValue struct {
-	ValueBase[*gi.Switch]
+	ValueBase[*core.Switch]
 }
 
 func (v *BoolValue) Config() {
@@ -81,7 +81,7 @@ func (v *BoolValue) Update() {
 
 // NumberValue represents an integer or float value with a spinner.
 type NumberValue struct {
-	ValueBase[*gi.Spinner]
+	ValueBase[*core.Spinner]
 }
 
 func (v *NumberValue) Config() {
@@ -128,7 +128,7 @@ func (v *NumberValue) Update() {
 
 // SliderValue represents an integer or float value with a slider.
 type SliderValue struct {
-	ValueBase[*gi.Slider]
+	ValueBase[*core.Slider]
 }
 
 func (v *SliderValue) Config() {
@@ -169,11 +169,11 @@ func (v *SliderValue) Update() {
 
 // StructValue represents a struct value with a button.
 type StructValue struct {
-	ValueBase[*gi.Button]
+	ValueBase[*core.Button]
 }
 
 func (v *StructValue) Config() {
-	v.Widget.SetType(gi.ButtonTonal).SetIcon(icons.Edit)
+	v.Widget.SetType(core.ButtonTonal).SetIcon(icons.Edit)
 	ConfigDialogWidget(v, true)
 }
 
@@ -183,7 +183,7 @@ func (v *StructValue) Update() {
 		v.Widget.SetText("None")
 	} else {
 		opv := laser.OnePtrUnderlyingValue(v.Value)
-		if lbler, ok := opv.Interface().(gi.Labeler); ok {
+		if lbler, ok := opv.Interface().(core.Labeler); ok {
 			v.Widget.SetText(lbler.Label())
 		} else {
 			v.Widget.SetText(laser.FriendlyTypeName(npv.Type()))
@@ -192,7 +192,7 @@ func (v *StructValue) Update() {
 	v.Widget.Update()
 }
 
-func (v *StructValue) ConfigDialog(d *gi.Body) (bool, func()) {
+func (v *StructValue) ConfigDialog(d *core.Body) (bool, func()) {
 	if v.Value.IsZero() {
 		return false, nil
 	}
@@ -200,7 +200,7 @@ func (v *StructValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	str := opv.Interface()
 	NewStructView(d).SetStruct(str).SetViewPath(v.ViewPath).
 		SetReadOnly(v.IsReadOnly())
-	if tb, ok := str.(gi.Toolbarer); ok {
+	if tb, ok := str.(core.Toolbarer); ok {
 		d.AddAppBar(tb.ConfigToolbar)
 	}
 	return true, nil
@@ -226,11 +226,11 @@ func (v *StructInlineValue) Update() {
 
 // SliceValue represents a slice or array value with a button.
 type SliceValue struct {
-	ValueBase[*gi.Button]
+	ValueBase[*core.Button]
 }
 
 func (v *SliceValue) Config() {
-	v.Widget.SetType(gi.ButtonTonal).SetIcon(icons.Edit)
+	v.Widget.SetType(core.ButtonTonal).SetIcon(icons.Edit)
 	ConfigDialogWidget(v, true)
 }
 
@@ -254,7 +254,7 @@ func (v *SliceValue) Update() {
 	v.Widget.SetText(txt).Update()
 }
 
-func (v *SliceValue) ConfigDialog(d *gi.Body) (bool, func()) {
+func (v *SliceValue) ConfigDialog(d *core.Body) (bool, func()) {
 	npv := laser.NonPtrValue(v.Value)
 	if v.Value.IsZero() || npv.IsZero() {
 		return false, nil
@@ -308,11 +308,11 @@ func (v *SliceInlineValue) Update() {
 
 // MapValue represents a map value with a button.
 type MapValue struct {
-	ValueBase[*gi.Button]
+	ValueBase[*core.Button]
 }
 
 func (v *MapValue) Config() {
-	v.Widget.SetType(gi.ButtonTonal).SetIcon(icons.Edit)
+	v.Widget.SetType(core.ButtonTonal).SetIcon(icons.Edit)
 	ConfigDialogWidget(v, true)
 }
 
@@ -333,7 +333,7 @@ func (v *MapValue) Update() {
 	v.Widget.SetText(txt).Update()
 }
 
-func (v *MapValue) ConfigDialog(d *gi.Body) (bool, func()) {
+func (v *MapValue) ConfigDialog(d *core.Body) (bool, func()) {
 	if v.Value.IsZero() || laser.NonPtrValue(v.Value).IsZero() {
 		return false, nil
 	}
@@ -369,11 +369,11 @@ func (v *MapInlineValue) Update() {
 
 // KiValue represents a [tree.Node] value with a button.
 type KiValue struct {
-	ValueBase[*gi.Button]
+	ValueBase[*core.Button]
 }
 
 func (v *KiValue) Config() {
-	v.Widget.SetType(gi.ButtonTonal).SetIcon(icons.Edit)
+	v.Widget.SetType(core.ButtonTonal).SetIcon(icons.Edit)
 	ConfigDialogWidget(v, true)
 }
 
@@ -386,7 +386,7 @@ func (v *KiValue) Update() {
 	v.Widget.SetText(path).Update()
 }
 
-func (v *KiValue) ConfigDialog(d *gi.Body) (bool, func()) {
+func (v *KiValue) ConfigDialog(d *core.Body) (bool, func()) {
 	k := v.KiValue()
 	if k == nil {
 		return false, nil
@@ -413,7 +413,7 @@ func (vv *KiValue) KiValue() tree.Node {
 
 // EnumValue represents an [enums.Enum] value with a chooser.
 type EnumValue struct {
-	ValueBase[*gi.Chooser]
+	ValueBase[*core.Chooser]
 }
 
 func (v *EnumValue) Config() {
@@ -431,11 +431,11 @@ func (v *EnumValue) Update() {
 
 // BitFlagValue represents an [enums.BitFlag] value with chip switches.
 type BitFlagValue struct {
-	ValueBase[*gi.Switches]
+	ValueBase[*core.Switches]
 }
 
 func (v *BitFlagValue) Config() {
-	v.Widget.SetType(gi.SwitchChip).SetEnum(v.EnumValue())
+	v.Widget.SetType(core.SwitchChip).SetEnum(v.EnumValue())
 	v.Widget.OnChange(func(e events.Event) {
 		v.Widget.UpdateBitFlag(v.EnumValue())
 	})
@@ -459,11 +459,11 @@ func (v *BitFlagValue) EnumValue() enums.BitFlagSetter {
 
 // TypeValue represents a [gti.Type] value with a chooser.
 type TypeValue struct {
-	ValueBase[*gi.Chooser]
+	ValueBase[*core.Chooser]
 }
 
 func (v *TypeValue) Config() {
-	typEmbeds := gi.WidgetBaseType
+	typEmbeds := core.WidgetBaseType
 	if tetag, ok := v.Tag("type-embeds"); ok {
 		typ := gti.TypeByName(tetag)
 		if typ != nil {
@@ -487,7 +487,7 @@ func (v *TypeValue) Update() {
 
 // ByteSliceValue represents a slice of bytes with a text field.
 type ByteSliceValue struct {
-	ValueBase[*gi.TextField]
+	ValueBase[*core.TextField]
 }
 
 func (v *ByteSliceValue) Config() {
@@ -504,7 +504,7 @@ func (v *ByteSliceValue) Update() {
 
 // RuneSliceValue represents a slice of runes with a text field.
 type RuneSliceValue struct {
-	ValueBase[*gi.TextField]
+	ValueBase[*core.TextField]
 }
 
 func (v *RuneSliceValue) Config() {
@@ -521,7 +521,7 @@ func (v *RuneSliceValue) Update() {
 
 // NilValue represents a nil value with a label that has text "None".
 type NilValue struct {
-	ValueBase[*gi.Label]
+	ValueBase[*core.Label]
 }
 
 func (v *NilValue) Config() {
@@ -532,11 +532,11 @@ func (vv *NilValue) Update() {}
 
 // IconValue represents an [icons.Icon] value with a button.
 type IconValue struct {
-	ValueBase[*gi.Button]
+	ValueBase[*core.Button]
 }
 
 func (v *IconValue) Config() {
-	v.Widget.SetType(gi.ButtonTonal)
+	v.Widget.SetType(core.ButtonTonal)
 	ConfigDialogWidget(v, false)
 }
 
@@ -558,13 +558,13 @@ func (v *IconValue) Update() {
 	v.Widget.Update()
 }
 
-func (v *IconValue) ConfigDialog(d *gi.Body) (bool, func()) {
+func (v *IconValue) ConfigDialog(d *core.Body) (bool, func()) {
 	d.SetTitle("Select an icon")
 	si := 0
 	ics := icons.All()
 	cur := icons.Icon(laser.ToString(v.Value.Interface()))
-	NewSliceView(d).SetStyleFunc(func(w gi.Widget, s *styles.Style, row int) {
-		w.(*gi.Button).SetText(strcase.ToSentence(string(ics[row])))
+	NewSliceView(d).SetStyleFunc(func(w core.Widget, s *styles.Style, row int) {
+		w.(*core.Button).SetText(strcase.ToSentence(string(ics[row])))
 	}).SetSlice(&ics).SetSelectedValue(cur).BindSelect(&si)
 	return true, func() {
 		if si >= 0 {
@@ -575,13 +575,13 @@ func (v *IconValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	}
 }
 
-// FontValue represents a [gi.FontName] value with a button.
+// FontValue represents a [core.FontName] value with a button.
 type FontValue struct {
-	ValueBase[*gi.Button]
+	ValueBase[*core.Button]
 }
 
 func (v *FontValue) Config() {
-	v.Widget.SetType(gi.ButtonTonal)
+	v.Widget.SetType(core.ButtonTonal)
 	v.Widget.Style(func(s *styles.Style) {
 		// TODO(kai): fix this not working (probably due to medium font weight)
 		s.Font.Family = laser.ToString(v.Value.Interface())
@@ -594,12 +594,12 @@ func (v *FontValue) Update() {
 	v.Widget.SetText(txt).Update()
 }
 
-func (v *FontValue) ConfigDialog(d *gi.Body) (bool, func()) {
+func (v *FontValue) ConfigDialog(d *core.Body) (bool, func()) {
 	d.SetTitle("Select a font")
 	si := 0
 	fi := paint.FontLibrary.FontInfo
-	cur := gi.FontName(laser.ToString(v.Value.Interface()))
-	NewTableView(d).SetStyleFunc(func(w gi.Widget, s *styles.Style, row, col int) {
+	cur := core.FontName(laser.ToString(v.Value.Interface()))
+	NewTableView(d).SetStyleFunc(func(w core.Widget, s *styles.Style, row, col int) {
 		if col != 4 {
 			return
 		}
@@ -619,13 +619,13 @@ func (v *FontValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	}
 }
 
-// FileValue represents a [gi.Filename] value with a button.
+// FileValue represents a [core.Filename] value with a button.
 type FileValue struct {
-	ValueBase[*gi.Button]
+	ValueBase[*core.Button]
 }
 
 func (v *FileValue) Config() {
-	v.Widget.SetType(gi.ButtonTonal).SetIcon(icons.File)
+	v.Widget.SetType(core.ButtonTonal).SetIcon(icons.File)
 	ConfigDialogWidget(v, false)
 }
 
@@ -637,7 +637,7 @@ func (v *FileValue) Update() {
 	v.Widget.SetText(txt).Update()
 }
 
-func (v *FileValue) ConfigDialog(d *gi.Body) (bool, func()) {
+func (v *FileValue) ConfigDialog(d *core.Body) (bool, func()) {
 	v.SetFlag(true, ValueDialogNewWindow) // default to new window on supported platforms
 	cur := laser.ToString(v.Value.Interface())
 	ext, _ := v.Tag("ext")
@@ -656,7 +656,7 @@ type FuncValue struct {
 }
 
 func (v *FuncValue) Config() {
-	v.Widget.SetType(gi.ButtonTonal)
+	v.Widget.SetType(core.ButtonTonal)
 }
 
 func (v *FuncValue) Update() {

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 	_ "cogentcore.org/core/giv"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/styles"
@@ -9,11 +9,11 @@ import (
 )
 
 func main() {
-	b := gi.NewBody("Basic Video Example")
-	bx := gi.NewLayout(b).Style(func(s *styles.Style) {
+	b := core.NewBody("Basic Video Example")
+	bx := core.NewLayout(b).Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 	})
-	gi.NewLabel(bx).SetText("video:").Style(func(s *styles.Style) {
+	core.NewLabel(bx).SetText("video:").Style(func(s *styles.Style) {
 		s.SetTextWrap(false)
 	})
 	v := video.NewVideo(bx)
@@ -21,10 +21,10 @@ func main() {
 		s.Min.X.Px(200)
 		s.Grow.Set(1, 1)
 	})
-	gi.NewLabel(bx).SetText("filler:").Style(func(s *styles.Style) {
+	core.NewLabel(bx).SetText("filler:").Style(func(s *styles.Style) {
 		s.SetTextWrap(false)
 	})
-	gi.NewLabel(b).SetText("footer:")
+	core.NewLabel(b).SetText("footer:")
 	// grr.Log(v.Open("deer.mp4"))
 	// grr.Log(v.Open("countdown.mp4"))
 	grr.Log(v.Open("randy_first_360.mov")) // note: not uploaded -- good test case tho

@@ -7,8 +7,8 @@ package giv
 import (
 	"reflect"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/laser"
@@ -20,7 +20,7 @@ import (
 // constructs Children widgets to show the key / value pairs, within an
 // overall frame.
 type MapView struct {
-	gi.Frame
+	core.Frame
 
 	// the map that we are a view onto
 	Map any `set:"-"`
@@ -59,7 +59,7 @@ func (mv *MapView) SetStyles() {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 	})
-	mv.OnWidgetAdded(func(w gi.Widget) {
+	mv.OnWidgetAdded(func(w core.Widget) {
 		switch w.PathFrom(mv) {
 		case "map-grid":
 			w.Style(func(s *styles.Style) {
@@ -95,7 +95,7 @@ func (mv *MapView) UpdateValues() {
 // Config configures the view
 func (mv *MapView) Config() {
 	if !mv.HasChildren() {
-		gi.NewFrame(mv, "map-grid")
+		core.NewFrame(mv, "map-grid")
 	}
 	mv.ConfigMapGrid()
 }
@@ -106,18 +106,18 @@ func (mv *MapView) IsConfiged() bool {
 }
 
 // MapGrid returns the MapGrid grid layout widget, which contains all the fields and values
-func (mv *MapView) MapGrid() *gi.Frame {
-	return mv.ChildByName("map-grid", 0).(*gi.Frame)
+func (mv *MapView) MapGrid() *core.Frame {
+	return mv.ChildByName("map-grid", 0).(*core.Frame)
 }
 
-func (mv *MapView) ContextMenu(m *gi.Scene, keyv reflect.Value) {
+func (mv *MapView) ContextMenu(m *core.Scene, keyv reflect.Value) {
 	if mv.IsReadOnly() {
 		return
 	}
-	gi.NewButton(m).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
+	core.NewButton(m).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
 		mv.MapAdd()
 	})
-	gi.NewButton(m).SetText("Delete").SetIcon(icons.Delete).OnClick(func(e events.Event) {
+	core.NewButton(m).SetText("Delete").SetIcon(icons.Delete).OnClick(func(e events.Event) {
 		mv.MapDelete(keyv)
 	})
 }
@@ -181,7 +181,7 @@ func (mv *MapView) ConfigMapGrid() {
 		config.Add(vv.WidgetType(), valnm)
 		if ifaceType {
 			typnm := "type-" + keytxt
-			config.Add(gi.ChooserType, typnm)
+			config.Add(core.ChooserType, typnm)
 		}
 		mv.Keys = append(mv.Keys, kv)
 		mv.Values = append(mv.Values, vv)
@@ -196,8 +196,8 @@ func (mv *MapView) ConfigMapGrid() {
 			mv.SendChange(e)
 			mv.Update()
 		})
-		keyw := sg.Child(i * ncol).(gi.Widget)
-		w := sg.Child(i*ncol + 1).(gi.Widget)
+		keyw := sg.Child(i * ncol).(core.Widget)
+		w := sg.Child(i*ncol + 1).(core.Widget)
 		Config(kv, keyw)
 		Config(vv, w)
 		vv.AsWidgetBase().OnInput(mv.HandleEvent)
@@ -208,14 +208,14 @@ func (mv *MapView) ConfigMapGrid() {
 		keyw.Style(func(s *styles.Style) {
 			s.SetTextWrap(false)
 		})
-		w.AddContextMenu(func(m *gi.Scene) {
+		w.AddContextMenu(func(m *core.Scene) {
 			mv.ContextMenu(m, kv.Val())
 		})
-		keyw.AddContextMenu(func(m *gi.Scene) {
+		keyw.AddContextMenu(func(m *core.Scene) {
 			mv.ContextMenu(m, kv.Val())
 		})
 		if ifaceType {
-			typw := sg.Child(i*ncol + 2).(*gi.Chooser)
+			typw := sg.Child(i*ncol + 2).(*core.Chooser)
 			typw.SetTypes(valtypes...)
 			vtyp := laser.NonPtrType(reflect.TypeOf(vv.Val().Interface()))
 			if vtyp == nil {
@@ -289,17 +289,17 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 	mv.Update()
 }
 
-// ConfigToolbar configures a [gi.Toolbar] for this view
-func (mv *MapView) ConfigToolbar(tb *gi.Toolbar) {
+// ConfigToolbar configures a [core.Toolbar] for this view
+func (mv *MapView) ConfigToolbar(tb *core.Toolbar) {
 	if laser.AnyIsNil(mv.Map) {
 		return
 	}
-	gi.NewButton(tb, "sort").SetText("Sort").SetIcon(icons.Sort).SetTooltip("Switch between sorting by the keys vs. the values").
+	core.NewButton(tb, "sort").SetText("Sort").SetIcon(icons.Sort).SetTooltip("Switch between sorting by the keys vs. the values").
 		OnClick(func(e events.Event) {
 			mv.ToggleSort()
 		})
 	if !mv.IsReadOnly() {
-		gi.NewButton(tb, "add").SetText("Add").SetIcon(icons.Add).SetTooltip("Add a new element to the map").
+		core.NewButton(tb, "add").SetText("Add").SetIcon(icons.Add).SetTooltip("Add a new element to the map").
 			OnClick(func(e events.Event) {
 				mv.MapAdd()
 			})

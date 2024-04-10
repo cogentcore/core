@@ -11,10 +11,10 @@ import (
 	"reflect"
 	"strconv"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/states"
@@ -38,7 +38,7 @@ func NewValue(parent tree.Node, val any, tags ...string) Value {
 	}
 	v := ToValue(val, t)
 	v.SetSoloValue(reflect.ValueOf(val))
-	w := parent.NewChild(v.WidgetType()).(gi.Widget)
+	w := parent.NewChild(v.WidgetType()).(core.Widget)
 	Config(v, w)
 	return v
 }
@@ -55,17 +55,17 @@ type Value interface {
 	AsValueData() *ValueData
 
 	// AsWidget returns the widget associated with the value.
-	AsWidget() gi.Widget
+	AsWidget() core.Widget
 
 	// AsWidgetBase returns the widget base associated with the value.
-	AsWidgetBase() *gi.WidgetBase
+	AsWidgetBase() *core.WidgetBase
 
 	// WidgetType returns the type of widget associated with this value.
 	WidgetType() *gti.Type
 
 	// SetWidget sets the widget used to represent the value.
 	// It is typically only used internally in [Config].
-	SetWidget(w gi.Widget)
+	SetWidget(w core.Widget)
 
 	// Config configures the widget to represent the value, including setting up
 	// the OnChange event listener to set the value when the user edits it
@@ -182,7 +182,7 @@ type ConfigDialoger interface {
 	// (e.g., for simple menu choosers).
 	// The returned function is an optional closure to be called
 	// in the Ok case, for cases where extra logic is required.
-	ConfigDialog(d *gi.Body) (bool, func())
+	ConfigDialog(d *core.Body) (bool, func())
 }
 
 // OpenDialoger is an optional interface that [Value]s may implement to
@@ -197,23 +197,23 @@ type OpenDialoger interface {
 	// Given function closure is called for the Ok action, after value
 	// has been updated, if using the dialog as part of another control flow.
 	// Note that some cases just pop up a menu chooser, not a full dialog.
-	OpenDialog(ctx gi.Widget, fun func())
+	OpenDialog(ctx core.Widget, fun func())
 }
 
 // ValueBase is the base type that all [Value] objects extend. It contains both
-// [ValueData] and a generically parameterized [gi.Widget].
-type ValueBase[W gi.Widget] struct {
+// [ValueData] and a generically parameterized [core.Widget].
+type ValueBase[W core.Widget] struct {
 	ValueData
 
 	// Widget is the GUI widget used to display and edit the value in the GUI.
 	Widget W
 }
 
-func (v *ValueBase[W]) AsWidget() gi.Widget {
+func (v *ValueBase[W]) AsWidget() core.Widget {
 	return v.Widget
 }
 
-func (v *ValueBase[W]) AsWidgetBase() *gi.WidgetBase {
+func (v *ValueBase[W]) AsWidgetBase() *core.WidgetBase {
 	return v.Widget.AsWidget()
 }
 
@@ -222,12 +222,12 @@ func (v *ValueBase[W]) WidgetType() *gti.Type {
 	return w.NodeType()
 }
 
-func (v *ValueBase[W]) SetWidget(w gi.Widget) {
+func (v *ValueBase[W]) SetWidget(w core.Widget) {
 	v.Widget = w.(W)
 }
 
-// Config configures the given [gi.Widget] to represent the given [Value].
-func Config(v Value, w gi.Widget) {
+// Config configures the given [core.Widget] to represent the given [Value].
+func Config(v Value, w core.Widget) {
 	if w == v.AsWidget() {
 		v.Update()
 		return
@@ -238,9 +238,9 @@ func Config(v Value, w gi.Widget) {
 	v.Update()
 }
 
-// ConfigBase does the base configuration for the given [gi.Widget]
+// ConfigBase does the base configuration for the given [core.Widget]
 // to represent the given [Value].
-func ConfigBase(v Value, w gi.Widget) {
+func ConfigBase(v Value, w core.Widget) {
 	w.AsWidget().SetTooltip(v.Doc())
 	w.SetState(v.IsReadOnly(), states.ReadOnly) // do right away
 	w.Style(func(s *styles.Style) {
@@ -296,7 +296,7 @@ func ConfigBase(v Value, w gi.Widget) {
 // context of the given widget. It first tries [OpenDialoger], then
 // [ConfigDialoger] with [OpenDialogBase]. If both of those fail, it
 // returns false. It calls the given beforeFunc before opening any dialog.
-func OpenDialog(v Value, ctx gi.Widget, fun, beforeFunc func()) bool {
+func OpenDialog(v Value, ctx core.Widget, fun, beforeFunc func()) bool {
 	if od, ok := v.(OpenDialoger); ok {
 		if beforeFunc != nil {
 			beforeFunc()
@@ -317,7 +317,7 @@ func OpenDialog(v Value, ctx gi.Widget, fun, beforeFunc func()) bool {
 // OpenDialogBase is a helper for [OpenDialog] for cases that
 // do not implement [OpenDialoger] but do implement [ConfigDialoger]
 // to configure the dialog contents.
-func OpenDialogBase(v Value, cd ConfigDialoger, ctx gi.Widget, fun func()) {
+func OpenDialogBase(v Value, cd ConfigDialoger, ctx core.Widget, fun func()) {
 	vd := v.AsValueData()
 	opv := laser.OnePtrUnderlyingValue(vd.Value)
 	if !opv.IsValid() {
@@ -325,10 +325,10 @@ func OpenDialogBase(v Value, cd ConfigDialoger, ctx gi.Widget, fun func()) {
 	}
 	title, _, _ := vd.GetTitle()
 	obj := opv.Interface()
-	if gi.RecycleDialog(obj) {
+	if core.RecycleDialog(obj) {
 		return
 	}
-	d := gi.NewBody().AddTitle(title).AddText(v.Doc())
+	d := core.NewBody().AddTitle(title).AddText(v.Doc())
 	ok, okfun := cd.ConfigDialog(d)
 	if !ok {
 		return
@@ -344,7 +344,7 @@ func OpenDialogBase(v Value, cd ConfigDialoger, ctx gi.Widget, fun func()) {
 		})
 	} else {
 		// otherwise, we have to make the bottom bar
-		d.AddBottomBar(func(parent gi.Widget) {
+		d.AddBottomBar(func(parent core.Widget) {
 			d.AddCancel(parent)
 			d.AddOK(parent).OnClick(func(e events.Event) {
 				if okfun != nil {
@@ -385,7 +385,7 @@ func (v *ValueBase[W]) SetValue(value any) bool {
 		case reflect.Slice:
 			err = laser.SetRobust(laser.PtrValue(v.Value).Interface(), value)
 		}
-		if updtr, ok := v.Owner.(gi.Updater); ok {
+		if updtr, ok := v.Owner.(core.Updater); ok {
 			updtr.Update()
 		}
 	} else {
@@ -394,7 +394,7 @@ func (v *ValueBase[W]) SetValue(value any) bool {
 	}
 	v.SendChange()
 	if err != nil {
-		gi.ErrorSnackbar(v.Widget, err, "Error setting value")
+		core.ErrorSnackbar(v.Widget, err, "Error setting value")
 		return false
 	}
 	return wasSet
@@ -411,9 +411,9 @@ func (v *ValueBase[W]) SetValueMap(val any) (bool, error) {
 		curnv := ov.MapIndex(nv) // see if new value there already
 		if val != kv.Interface() && curnv.IsValid() && !curnv.IsZero() {
 			// actually new key and current exists
-			d := gi.NewBody().AddTitle("Map key conflict").
+			d := core.NewBody().AddTitle("Map key conflict").
 				AddText(fmt.Sprintf("The map key value: %v already exists in the map; are you sure you want to overwrite the current value?", val))
-			d.AddBottomBar(func(parent gi.Widget) {
+			d.AddBottomBar(func(parent core.Widget) {
 				d.AddCancel(parent).SetText("Cancel change")
 				d.AddOK(parent).SetText("Overwrite").OnClick(func(e events.Event) {
 					cv := ov.MapIndex(kv)               // get current value
@@ -664,7 +664,7 @@ func (v *ValueData) SetSliceValue(val reflect.Value, owner any, idx int, viewPat
 	idxstr := fmt.Sprintf("%v", idx)
 	vpath := viewPath + "[" + idxstr + "]"
 	if v.Owner != nil {
-		if lblr, ok := v.Owner.(gi.SliceLabeler); ok {
+		if lblr, ok := v.Owner.(core.SliceLabeler); ok {
 			slbl := lblr.ElemLabel(idx)
 			if slbl != "" {
 				vpath = JoinViewPath(viewPath, slbl)
@@ -761,7 +761,7 @@ func (v *ValueData) Send(typ events.Types, orig ...events.Event) {
 // If more significant Config level changes are needed due to an event,
 // the event handler must do this itself.
 func (v *ValueData) HandleEvent(ev events.Event) {
-	if gi.DebugSettings.EventTrace {
+	if core.DebugSettings.EventTrace {
 		fmt.Println("Event to Value:", v.String(), ev.String())
 	}
 	v.Listeners.Call(ev)
@@ -838,7 +838,7 @@ func (v *ValueData) OwnerLabel() string {
 			return kystr
 		}
 	case reflect.Slice:
-		if lblr, ok := v.Owner.(gi.SliceLabeler); ok {
+		if lblr, ok := v.Owner.(core.SliceLabeler); ok {
 			slbl := lblr.ElemLabel(v.Index)
 			if slbl != "" {
 				return slbl
@@ -884,7 +884,7 @@ func ConfigDialogWidget(v Value, allowReadOnly bool) {
 	doc := v.Doc()
 	tip := ""
 	// windows are never new on mobile
-	if !gi.TheApp.Platform().IsMobile() {
+	if !core.TheApp.Platform().IsMobile() {
 		tip += "[Shift: new window]"
 		if doc != "" {
 			tip += " "

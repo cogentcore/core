@@ -11,13 +11,13 @@ import (
 	"io"
 	"strings"
 
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 	"golang.org/x/net/html"
 )
 
 // ReadHTML reads HTML from the given [io.Reader] and adds corresponding
-// Cogent Core widgets to the given [gi.Widget], using the given context.
-func ReadHTML(ctx *Context, parent gi.Widget, r io.Reader) error {
+// Cogent Core widgets to the given [core.Widget], using the given context.
+func ReadHTML(ctx *Context, parent core.Widget, r io.Reader) error {
 	n, err := html.Parse(r)
 	if err != nil {
 		return fmt.Errorf("error parsing HTML: %w", err)
@@ -26,15 +26,15 @@ func ReadHTML(ctx *Context, parent gi.Widget, r io.Reader) error {
 }
 
 // ReadHTMLString reads HTML from the given string and adds corresponding
-// Cogent Core widgets to the given [gi.Widget], using the given context.
-func ReadHTMLString(ctx *Context, parent gi.Widget, s string) error {
+// Cogent Core widgets to the given [core.Widget], using the given context.
+func ReadHTMLString(ctx *Context, parent core.Widget, s string) error {
 	b := bytes.NewBufferString(s)
 	return ReadHTML(ctx, parent, b)
 }
 
 // ReadHTMLNode reads HTML from the given [*html.Node] and adds corresponding
-// Cogent Core widgets to the given [gi.Widget], using the given context.
-func ReadHTMLNode(ctx *Context, parent gi.Widget, n *html.Node) error {
+// Cogent Core widgets to the given [core.Widget], using the given context.
+func ReadHTMLNode(ctx *Context, parent core.Widget, n *html.Node) error {
 	// nil parent means we are root, so we add user agent styles here
 	if n.Parent == nil {
 		ctx.Node = n
@@ -45,7 +45,7 @@ func ReadHTMLNode(ctx *Context, parent gi.Widget, n *html.Node) error {
 	case html.TextNode:
 		str := strings.TrimSpace(n.Data)
 		if str != "" {
-			New[*gi.Label](ctx).SetText(str)
+			New[*core.Label](ctx).SetText(str)
 		}
 	case html.ElementNode:
 		ctx.Node = n

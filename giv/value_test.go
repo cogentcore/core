@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/tree"
 )
 
@@ -23,7 +23,7 @@ func (v *validator) Validate() error {
 }
 
 func TestValidatorValid(t *testing.T) {
-	b := gi.NewBody()
+	b := core.NewBody()
 	v := NewValue(b, validator("my@string"))
 	b.AssertRender(t, "text/validator-valid", func() {
 		v.AsWidgetBase().SendChange() // trigger validation
@@ -31,7 +31,7 @@ func TestValidatorValid(t *testing.T) {
 }
 
 func TestValidatorInvalid(t *testing.T) {
-	b := gi.NewBody()
+	b := core.NewBody()
 	v := NewValue(b, validator("my string"))
 	b.AssertRender(t, "text/validator-invalid", func() {
 		v.AsWidgetBase().SendChange() // trigger validation
@@ -58,10 +58,10 @@ func (v *fieldValidator) ValidateField(field string) error {
 }
 
 func TestFieldValidatorValid(t *testing.T) {
-	b := gi.NewBody()
+	b := core.NewBody()
 	v := NewStructView(b).SetStruct(&fieldValidator{Name: "Go Gopher", Email: "me@example.com"})
 	b.AssertRender(t, "text/field-validator-valid", func() {
-		v.WidgetWalkPre(func(kwi gi.Widget, kwb *gi.WidgetBase) bool {
+		v.WidgetWalkPre(func(kwi core.Widget, kwb *core.WidgetBase) bool {
 			kwb.SendChange() // trigger validation
 			return tree.Continue
 		})
@@ -69,10 +69,10 @@ func TestFieldValidatorValid(t *testing.T) {
 }
 
 func TestFieldValidatorInvalid(t *testing.T) {
-	b := gi.NewBody()
+	b := core.NewBody()
 	v := NewStructView(b).SetStruct(&fieldValidator{Name: "Go Gopher", Email: "me@example"})
 	b.AssertRender(t, "text/field-validator-invalid", func() {
-		v.WidgetWalkPre(func(kwi gi.Widget, kwb *gi.WidgetBase) bool {
+		v.WidgetWalkPre(func(kwi core.Widget, kwb *core.WidgetBase) bool {
 			kwb.SendChange() // trigger validation
 			return tree.Continue
 		})

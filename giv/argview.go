@@ -7,7 +7,7 @@ package giv
 import (
 	"fmt"
 
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
@@ -18,7 +18,7 @@ import (
 // purpose of supplying arguments to methods called via the MethodView
 // framework.
 type ArgView struct {
-	gi.Frame
+	core.Frame
 
 	// Args are the args that we are a view onto
 	Args []Value
@@ -34,11 +34,11 @@ func (av *ArgView) SetStyles() {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 	})
-	av.OnWidgetAdded(func(w gi.Widget) {
+	av.OnWidgetAdded(func(w core.Widget) {
 		switch w.PathFrom(av) {
 		case "title":
-			title := w.(*gi.Label)
-			title.Type = gi.LabelTitleLarge
+			title := w.(*core.Label)
+			title.Type = core.LabelTitleLarge
 			title.Style(func(s *styles.Style) {
 				s.Grow.Set(1, 0)
 				s.Text.Align = styles.Center
@@ -59,21 +59,21 @@ func (av *ArgView) SetStyles() {
 // Config configures the view
 func (av *ArgView) Config() {
 	config := tree.Config{}
-	config.Add(gi.LabelType, "title")
-	config.Add(gi.FrameType, "args-grid")
+	config.Add(core.LabelType, "title")
+	config.Add(core.FrameType, "args-grid")
 	av.ConfigChildren(config)
 	av.ConfigArgsGrid()
 }
 
 // TitleWidget returns the title label widget
-func (av *ArgView) TitleWidget() *gi.Label {
-	return av.ChildByName("title", 0).(*gi.Label)
+func (av *ArgView) TitleWidget() *core.Label {
+	return av.ChildByName("title", 0).(*core.Label)
 }
 
 // ArgsGrid returns the grid layout widget, which contains all the fields
 // and values
-func (av *ArgView) ArgsGrid() *gi.Frame {
-	return av.ChildByName("args-grid", 0).(*gi.Frame)
+func (av *ArgView) ArgsGrid() *core.Frame {
+	return av.ChildByName("args-grid", 0).(*core.Frame)
 }
 
 // ConfigArgsGrid configures the ArgsGrid for the current struct
@@ -96,7 +96,7 @@ func (av *ArgView) ConfigArgsGrid() {
 		argnms[knm] = true
 		labnm := "label-" + knm
 		valnm := "value-" + knm
-		config.Add(gi.LabelType, labnm)
+		config.Add(core.LabelType, labnm)
 		config.Add(arg.WidgetType(), valnm)
 	}
 	if sg.ConfigChildren(config) {
@@ -109,10 +109,10 @@ func (av *ArgView) ConfigArgsGrid() {
 			continue
 		}
 		arg.SetTag("grow", "1")
-		lbl := sg.Child(idx * 2).(*gi.Label)
+		lbl := sg.Child(idx * 2).(*core.Label)
 		lbl.Text = arg.Label()
 		lbl.Tooltip = arg.Doc()
-		w, _ := gi.AsWidget(sg.Child((idx * 2) + 1))
+		w, _ := core.AsWidget(sg.Child((idx * 2) + 1))
 		Config(arg, w)
 		idx++
 	}

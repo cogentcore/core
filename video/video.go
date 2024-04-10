@@ -14,7 +14,7 @@ import (
 	"image/draw"
 	"time"
 
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/goosi"
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/speaker"
@@ -26,7 +26,7 @@ import (
 //
 //gti:add
 type Video struct {
-	gi.WidgetBase
+	core.WidgetBase
 
 	// Media is the video media.
 	Media *reisen.Media

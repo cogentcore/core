@@ -7,11 +7,11 @@ package giv
 import (
 	"testing"
 
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 )
 
 func TestSliceView(t *testing.T) {
-	b := gi.NewBody()
+	b := core.NewBody()
 	sl := make([]float32, 10)
 	for i := range sl {
 		fi := float32(i)

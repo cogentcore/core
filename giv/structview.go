@@ -13,9 +13,9 @@ import (
 	"strings"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/states"
@@ -46,7 +46,7 @@ func NoSentenceCaseForType(tnm string) bool {
 // constructs Children widgets to show the field names and editor fields for
 // each field, within an overall frame.
 type StructView struct {
-	gi.Frame
+	core.Frame
 
 	// the struct that we are a view onto
 	Struct any `set:"-"`
@@ -80,14 +80,14 @@ func (sv *StructView) SetStyles() {
 		s.Direction = styles.Column
 		s.Grow.Set(0, 0)
 	})
-	sv.OnWidgetAdded(func(w gi.Widget) {
+	sv.OnWidgetAdded(func(w core.Widget) {
 		pfrom := w.PathFrom(sv)
 		switch {
 		case pfrom == "struct-grid":
 			w.Style(func(s *styles.Style) {
 				s.Display = styles.Grid
 				s.Grow.Set(0, 0)
-				if sv.SizeClass() == gi.SizeCompact {
+				if sv.SizeClass() == core.SizeCompact {
 					s.Columns = 1
 				} else {
 					s.Columns = 2
@@ -142,7 +142,7 @@ func (sv *StructView) Config() {
 		sv.ConfigStructGrid()
 		return
 	}
-	gi.NewFrame(sv, "struct-grid")
+	core.NewFrame(sv, "struct-grid")
 	sv.ConfigStructGrid()
 	sv.NeedsLayout()
 }
@@ -153,8 +153,8 @@ func (sv *StructView) IsConfiged() bool {
 }
 
 // StructGrid returns the grid layout widget, which contains all the fields and values
-func (sv *StructView) StructGrid() *gi.Frame {
-	return sv.ChildByName("struct-grid", 2).(*gi.Frame)
+func (sv *StructView) StructGrid() *core.Frame {
+	return sv.ChildByName("struct-grid", 2).(*core.Frame)
 }
 
 // FieldTags returns the integrated tags for this field
@@ -192,7 +192,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 		if vwtag == "-" {
 			return false
 		}
-		if ss, ok := stru.(gi.ShouldShower); ok {
+		if ss, ok := stru.(core.ShouldShower); ok {
 			sv.IsShouldShower = true
 			if !ss.ShouldShow(field.Name) {
 				return false
@@ -244,7 +244,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 						}
 						labnm := fmt.Sprintf("label-%v", fnm)
 						valnm := fmt.Sprintf("value-%v", fnm)
-						config.Add(gi.LabelType, labnm)
+						config.Add(core.LabelType, labnm)
 						config.Add(svtyp, valnm) // todo: extend to diff types using interface..
 						sv.FieldViews = append(sv.FieldViews, svv)
 						return true
@@ -266,20 +266,20 @@ func (sv *StructView) ConfigStructGrid() bool {
 			// todo: other things with view tag..
 			labnm := fmt.Sprintf("label-%v", field.Name)
 			valnm := fmt.Sprintf("value-%v", field.Name)
-			config.Add(gi.LabelType, labnm)
+			config.Add(core.LabelType, labnm)
 			config.Add(vtyp, valnm) // todo: extend to diff types using interface..
 			sv.FieldViews = append(sv.FieldViews, vv)
 			return true
 		})
 	sg.ConfigChildren(config) // fields could be non-unique with labels..
 	for i, vv := range sv.FieldViews {
-		lbl := sg.Child(i * 2).(*gi.Label)
+		lbl := sg.Child(i * 2).(*core.Label)
 		lbl.Style(func(s *styles.Style) {
 			s.SetTextWrap(false)
 		})
 		lbl.Tooltip = vv.Doc()
 		vv.AsValueData().ViewPath = sv.ViewPath
-		w, wb := gi.AsWidget(sg.Child((i * 2) + 1))
+		w, wb := core.AsWidget(sg.Child((i * 2) + 1))
 		hasDef, readOnlyTag := StructViewFieldTags(vv, lbl, w, sv.IsReadOnly())
 		if hasDef {
 			lbl.Style(func(s *styles.Style) {
@@ -305,7 +305,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 				e.SetHandled()
 				err := laser.SetFromDefaultTag(vv.Val(), dtag)
 				if err != nil {
-					gi.ErrorSnackbar(lbl, err, "Error setting default value")
+					core.ErrorSnackbar(lbl, err, "Error setting default value")
 				} else {
 					vv.Update()
 					vv.SendChange(e)
@@ -329,7 +329,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 				sv.UpdateFieldAction()
 				// note: updating vv here is redundant -- relevant field will have already updated
 				if !laser.KindIsBasic(laser.NonPtrValue(vv.Val()).Kind()) {
-					if updtr, ok := sv.Struct.(gi.Updater); ok {
+					if updtr, ok := sv.Struct.(core.Updater); ok {
 						updtr.Update()
 					}
 				}
@@ -358,7 +358,7 @@ func (sv *StructView) UpdateFieldAction() {
 // StructViewFieldTags processes the tags for a field in a struct view, setting
 // the properties on the label or widget appropriately
 // returns true if there were any "default" default tags -- if so, needs updating
-func StructViewFieldTags(vv Value, lbl *gi.Label, w gi.Widget, isReadOnly bool) (hasDef, readOnlyTag bool) {
+func StructViewFieldTags(vv Value, lbl *core.Label, w core.Widget, isReadOnly bool) (hasDef, readOnlyTag bool) {
 	lbl.Text = vv.Label()
 	if et, has := vv.Tag("edit"); has && et == "-" {
 		readOnlyTag = true
@@ -505,10 +505,10 @@ func StructNonDefFieldsStr(structPtr any, path string) string {
 
 // StructViewDialog opens a dialog (optionally in a new, separate window)
 // for viewing / editing the given struct object, in the context of given ctx widget
-func StructViewDialog(ctx gi.Widget, stru any, title string, newWindow bool) {
-	d := gi.NewBody().AddTitle(title)
+func StructViewDialog(ctx core.Widget, stru any, title string, newWindow bool) {
+	d := core.NewBody().AddTitle(title)
 	NewStructView(d).SetStruct(stru)
-	if tb, ok := stru.(gi.Toolbarer); ok {
+	if tb, ok := stru.(core.Toolbarer); ok {
 		d.AddAppBar(tb.ConfigToolbar)
 	}
 	ds := d.NewFullDialog(ctx)

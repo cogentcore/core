@@ -11,8 +11,8 @@ import (
 	"image/draw"
 
 	"cogentcore.org/core/abilities"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -24,7 +24,7 @@ import (
 // providing the basic rendering logic for the 3D scene
 // in the 2D gi gui context.
 type Scene struct {
-	gi.WidgetBase
+	core.WidgetBase
 
 	// XYZ is the 3D xyz.Scene
 	XYZ *xyz.Scene `set:"-"`

@@ -7,7 +7,7 @@ package coredom
 import (
 	"testing"
 
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,7 +25,7 @@ func TestHTML(t *testing.T) {
 	}
 	for nm, s := range tests {
 		t.Run(nm, func(t *testing.T) {
-			b := gi.NewBody()
+			b := core.NewBody()
 			assert.NoError(t, ReadHTMLString(NewContext(), b, s))
 			b.AssertRender(t, "html/"+nm)
 		})

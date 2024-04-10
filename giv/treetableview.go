@@ -7,12 +7,12 @@ package giv
 import (
 	"image/color"
 
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 )
 
 // TreeTableView combines a [TreeView] and [TableView].
 type TreeTableView struct {
-	gi.Frame
+	core.Frame
 
 	// Tree is the tree view component of the tree table view.
 	Tree *TreeView `set:"-"`
@@ -25,7 +25,7 @@ func (tt *TreeTableView) Config() {
 	if tt.HasChildren() {
 		return
 	}
-	sp := gi.NewSplits(tt)
+	sp := core.NewSplits(tt)
 	tt.Tree = NewTreeView(sp)
 	tt.Table = NewTableView(sp).SetSlice(&[]color.RGBA{})
 	tt.NeedsLayout()

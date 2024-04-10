@@ -10,8 +10,6 @@ package tree
 //go:generate core generate ./testdata
 
 import (
-	"fmt"
-
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/gti"
 )
@@ -51,7 +49,6 @@ import (
 // in `core generate`, which is required for various
 // pieces of core functionality.
 type Node interface {
-	fmt.Stringer
 
 	// This returns the Node as its true underlying type.
 	// It returns nil if the node is nil, has been destroyed,

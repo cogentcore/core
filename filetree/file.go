@@ -11,9 +11,9 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fi"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/vci"
@@ -22,7 +22,7 @@ import (
 // OSOpenCommand returns the generic file 'open' command to open file with default app
 // open on Mac, xdg-open on Linux, and start on Windows
 func OSOpenCommand() string {
-	switch gi.TheApp.Platform() {
+	switch core.TheApp.Platform() {
 	case goosi.MacOS:
 		return "open"
 	case goosi.Linux:
@@ -172,9 +172,9 @@ func (fn *Node) DuplicateFile() error {
 // deletes any selected files or directories. If any directory is selected,
 // all files and subdirectories in that directory are also deleted.
 func (fn *Node) DeleteFiles() { //gti:add
-	d := gi.NewBody().AddTitle("Delete Files?").
+	d := core.NewBody().AddTitle("Delete Files?").
 		AddText("Ok to delete file(s)?  This is not undoable and files are not moving to trash / recycle bin. If any selections are directories all files and subdirectories will also be deleted.")
-	d.AddBottomBar(func(parent gi.Widget) {
+	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).SetText("Delete Files").OnClick(func(e events.Event) {
 			fn.This().(Filer).DeleteFilesImpl()
@@ -274,7 +274,7 @@ func (fn *Node) RenameFile(newpath string) error { //gti:add
 	}
 	if fn.IsDir() {
 		if fn.FRoot.IsDirOpen(orgpath) {
-			fn.FRoot.SetDirOpen(gi.Filename(newpath))
+			fn.FRoot.SetDirOpen(core.Filename(newpath))
 		}
 	}
 	repo, _ := fn.Repo()
@@ -291,7 +291,7 @@ func (fn *Node) RenameFile(newpath string) error { //gti:add
 		err = fn.Info.InitFile(newpath)
 	}
 	if err == nil {
-		fn.FPath = gi.Filename(fn.Info.Path)
+		fn.FPath = core.Filename(fn.Info.Path)
 		fn.SetName(fn.Info.Name)
 		fn.SetText(fn.Info.Name)
 	}
@@ -331,7 +331,7 @@ func (fn *Node) NewFile(filename string, addToVCS bool) { //gti:add
 	np := filepath.Join(ppath, filename)
 	_, err := os.Create(np)
 	if err != nil {
-		gi.ErrorSnackbar(fn, err)
+		core.ErrorSnackbar(fn, err)
 		return
 	}
 	if addToVCS {
@@ -369,7 +369,7 @@ func (fn *Node) NewFolder(foldername string) { //gti:add
 	np := filepath.Join(ppath, foldername)
 	err := os.MkdirAll(np, 0775)
 	if err != nil {
-		gi.ErrorSnackbar(fn, err)
+		core.ErrorSnackbar(fn, err)
 		return
 	}
 	fn.FRoot.UpdatePath(ppath)
@@ -405,7 +405,7 @@ func (fn *Node) ShowFileInfo() { //gti:add
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		fn := AsNode(sels[i].This())
-		d := gi.NewBody().AddTitle("File info")
+		d := core.NewBody().AddTitle("File info")
 		giv.NewStructView(d).SetStruct(&fn.Info).SetReadOnly(true)
 		d.AddOKOnly().NewFullDialog(fn).Run()
 	}

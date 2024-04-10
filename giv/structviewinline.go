@@ -9,9 +9,9 @@ import (
 	"strings"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
@@ -20,7 +20,7 @@ import (
 // StructViewInline represents a struct as a single line widget,
 // for smaller structs and those explicitly marked inline.
 type StructViewInline struct {
-	gi.Layout
+	core.Layout
 
 	// the struct that we are a view onto
 	Struct any `set:"-"`
@@ -77,7 +77,7 @@ func (sv *StructViewInline) Config() {
 		if vwtag == "-" {
 			return true
 		}
-		if ss, ok := sv.Struct.(gi.ShouldShower); ok {
+		if ss, ok := sv.Struct.(core.ShouldShower); ok {
 			sv.IsShouldShower = true
 			if !ss.ShouldShow(field.Name) {
 				return true
@@ -93,24 +93,24 @@ func (sv *StructViewInline) Config() {
 		// todo: other things with view tag..
 		labnm := "label-" + field.Name
 		valnm := "value-" + field.Name
-		config.Add(gi.LabelType, labnm)
+		config.Add(core.LabelType, labnm)
 		config.Add(vtyp, valnm) // todo: extend to diff types using interface..
 		sv.FieldViews = append(sv.FieldViews, vv)
 		return true
 	})
 	if sv.AddButton {
-		config.Add(gi.ButtonType, "edit-button")
+		config.Add(core.ButtonType, "edit-button")
 	}
 	sv.ConfigChildren(config)
 	for i, vv := range sv.FieldViews {
-		lbl := sv.Child(i * 2).(*gi.Label)
+		lbl := sv.Child(i * 2).(*core.Label)
 		lbl.Style(func(s *styles.Style) {
 			s.SetTextWrap(false)
 			s.Align.Self = styles.Center // was Start
 			s.Min.X.Em(2)
 		})
 		vv.AsValueData().ViewPath = sv.ViewPath
-		w, _ := gi.AsWidget(sv.Child((i * 2) + 1))
+		w, _ := core.AsWidget(sv.Child((i * 2) + 1))
 		hasDef, readOnlyTag := StructViewFieldTags(vv, lbl, w, sv.IsReadOnly()) // in structview.go
 		if hasDef {
 			lbl.Style(func(s *styles.Style) {
@@ -136,7 +136,7 @@ func (sv *StructViewInline) Config() {
 				e.SetHandled()
 				err := laser.SetFromDefaultTag(vv.Val(), dtag)
 				if err != nil {
-					gi.ErrorSnackbar(lbl, err, "Error setting default value")
+					core.ErrorSnackbar(lbl, err, "Error setting default value")
 				} else {
 					vv.Update()
 					vv.SendChange(e)
@@ -149,7 +149,7 @@ func (sv *StructViewInline) Config() {
 			vv.OnChange(func(e events.Event) {
 				sv.UpdateFieldAction()
 				if !laser.KindIsBasic(laser.NonPtrValue(vv.Val()).Kind()) {
-					if updtr, ok := sv.Struct.(gi.Updater); ok {
+					if updtr, ok := sv.Struct.(core.Updater); ok {
 						// fmt.Printf("updating: %v kind: %v\n", updtr, vvv.Value.Kind())
 						updtr.Update()
 					}

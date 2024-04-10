@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/grows/images"
 	"cogentcore.org/core/grr"
@@ -37,7 +37,7 @@ var ElementHandlers = map[string]func(ctx *Context) bool{}
 
 // New adds a new widget of the given type to the context parent.
 // It automatically calls [Context.Config] on the resulting widget.
-func New[T gi.Widget](ctx *Context) T {
+func New[T core.Widget](ctx *Context) T {
 	parent := ctx.Parent()
 	w := tree.New[T](parent)
 	ctx.Config(w)
@@ -97,21 +97,21 @@ func HandleElement(ctx *Context) {
 	case "style":
 		ctx.AddStyle(ExtractText(ctx))
 	case "body", "main", "div", "section", "nav", "footer", "header", "ol", "ul":
-		ctx.NewParent = New[*gi.Frame](ctx)
+		ctx.NewParent = New[*core.Frame](ctx)
 	case "button":
-		New[*gi.Button](ctx).SetText(ExtractText(ctx))
+		New[*core.Button](ctx).SetText(ExtractText(ctx))
 	case "h1":
-		HandleLabel(ctx).SetType(gi.LabelHeadlineLarge)
+		HandleLabel(ctx).SetType(core.LabelHeadlineLarge)
 	case "h2":
-		HandleLabel(ctx).SetType(gi.LabelHeadlineSmall)
+		HandleLabel(ctx).SetType(core.LabelHeadlineSmall)
 	case "h3":
-		HandleLabel(ctx).SetType(gi.LabelTitleLarge)
+		HandleLabel(ctx).SetType(core.LabelTitleLarge)
 	case "h4":
-		HandleLabel(ctx).SetType(gi.LabelTitleMedium)
+		HandleLabel(ctx).SetType(core.LabelTitleMedium)
 	case "h5":
-		HandleLabel(ctx).SetType(gi.LabelTitleSmall)
+		HandleLabel(ctx).SetType(core.LabelTitleSmall)
 	case "h6":
-		HandleLabel(ctx).SetType(gi.LabelLabelSmall)
+		HandleLabel(ctx).SetType(core.LabelLabelSmall)
 	case "p":
 		HandleLabel(ctx)
 	case "pre":
@@ -135,14 +135,14 @@ func HandleElement(ctx *Context) {
 
 		label := HandleLabel(ctx)
 		start := ""
-		if pw, ok := label.Parent().(gi.Widget); ok {
+		if pw, ok := label.Parent().(core.Widget); ok {
 			switch pw.Property("tag") {
 			case "ol":
 				number := 0
 				for _, k := range *pw.Children() {
 					// we only consider labels for the number (frames may be
 					// added for nested lists, interfering with the number)
-					if _, ok := k.(*gi.Label); ok {
+					if _, ok := k.(*core.Label); ok {
 						number++
 					}
 				}
@@ -154,7 +154,7 @@ func HandleElement(ctx *Context) {
 		}
 		label.SetText(start + label.Text)
 	case "img":
-		img := New[*gi.Image](ctx)
+		img := New[*core.Image](ctx)
 		n := ctx.Node
 		go func() {
 			src := GetAttr(n, "src")
@@ -181,26 +181,26 @@ func HandleElement(ctx *Context) {
 		switch ityp {
 		case "number":
 			fval := float32(grr.Log1(strconv.ParseFloat(val, 32)))
-			New[*gi.Spinner](ctx).SetValue(fval)
+			New[*core.Spinner](ctx).SetValue(fval)
 		case "checkbox":
-			New[*gi.Switch](ctx).SetType(gi.SwitchCheckbox).
+			New[*core.Switch](ctx).SetType(core.SwitchCheckbox).
 				SetState(HasAttr(ctx.Node, "checked"), states.Checked)
 		case "radio":
-			New[*gi.Switch](ctx).SetType(gi.SwitchRadioButton).
+			New[*core.Switch](ctx).SetType(core.SwitchRadioButton).
 				SetState(HasAttr(ctx.Node, "checked"), states.Checked)
 		case "range":
 			fval := float32(grr.Log1(strconv.ParseFloat(val, 32)))
-			New[*gi.Slider](ctx).SetValue(fval)
+			New[*core.Slider](ctx).SetValue(fval)
 		case "button", "submit":
-			New[*gi.Button](ctx).SetText(val)
+			New[*core.Button](ctx).SetText(val)
 		case "color":
 			NewValue(ctx, colors.Black).SetValue(val)
 		case "datetime":
 			NewValue(ctx, time.Now()).SetValue(val)
 		case "file":
-			NewValue(ctx, gi.Filename("")).SetValue(val)
+			NewValue(ctx, core.Filename("")).SetValue(val)
 		default:
-			New[*gi.TextField](ctx).SetText(val)
+			New[*core.TextField](ctx).SetText(val)
 		}
 	case "textarea":
 		buf := texteditor.NewBuffer()
@@ -213,8 +213,8 @@ func HandleElement(ctx *Context) {
 
 // HandleLabel creates a new label from the given information, setting the text and
 // the label click function so that URLs are opened according to [Context.OpenURL].
-func HandleLabel(ctx *Context) *gi.Label {
-	lb := New[*gi.Label](ctx).SetText(ExtractText(ctx))
+func HandleLabel(ctx *Context) *core.Label {
+	lb := New[*core.Label](ctx).SetText(ExtractText(ctx))
 	lb.HandleLabelClick(func(tl *paint.TextLink) {
 		ctx.OpenURL(tl.URL)
 	})
@@ -226,10 +226,10 @@ func HandleLabel(ctx *Context) *gi.Label {
 // it wraps the label text with the [NodeString] of the given node, meaning that it
 // should be used for standalone elements that are meant to only exist in labels
 // (eg: a, span, b, code, etc).
-func HandleLabelTag(ctx *Context) *gi.Label {
+func HandleLabelTag(ctx *Context) *core.Label {
 	start, end := NodeString(ctx.Node)
 	str := start + ExtractText(ctx) + end
-	lb := New[*gi.Label](ctx).SetText(str)
+	lb := New[*core.Label](ctx).SetText(str)
 	lb.HandleLabelClick(func(tl *paint.TextLink) {
 		ctx.OpenURL(tl.URL)
 	})

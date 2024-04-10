@@ -5,8 +5,8 @@
 package textbuf
 
 import (
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/fi"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/glop/indent"
 	"cogentcore.org/core/pi"
 )
@@ -17,7 +17,7 @@ import (
 type Opts struct {
 
 	// editor prefs from gogi prefs
-	gi.EditorSettings
+	core.EditorSettings
 
 	// character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used
 	CommentLn string

@@ -17,10 +17,10 @@ import (
 	"sync"
 	"time"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fi"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/glop/indent"
@@ -52,7 +52,7 @@ type Buffer struct {
 
 	// Filename is the filename of file last loaded or saved,
 	// which is used when highlighting code.
-	Filename gi.Filename `json:"-" xml:"-"`
+	Filename core.Filename `json:"-" xml:"-"`
 
 	// Flags are key state flags
 	Flags BufferFlags
@@ -87,7 +87,7 @@ type Buffer struct {
 	LineColors map[int]image.Image
 
 	// icons for each LineIcons being used
-	Icons map[icons.Icon]*gi.Icon `json:"-" xml:"-"`
+	Icons map[icons.Icon]*core.Icon `json:"-" xml:"-"`
 
 	// the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence -- all TextPos positions etc are in *rune* indexes, not byte indexes!
 	Lines [][]rune `json:"-" xml:"-"`
@@ -135,7 +135,7 @@ type Buffer struct {
 	PosHistory []lex.Pos `json:"-" xml:"-"`
 
 	// functions and data for text completion
-	Complete *gi.Complete `json:"-" xml:"-"`
+	Complete *core.Complete `json:"-" xml:"-"`
 
 	// functions and data for spelling correction
 	Spell *Spell `json:"-" xml:"-"`
@@ -152,7 +152,7 @@ type Buffer struct {
 func NewBuffer() *Buffer {
 	tb := &Buffer{}
 	tb.SetHiStyle(histyle.StyleDefault)
-	tb.Opts.EditorSettings = gi.SystemSettings.Editor
+	tb.Opts.EditorSettings = core.SystemSettings.Editor
 	tb.SetText([]byte{}) // to initialize
 	return tb
 }
@@ -220,11 +220,11 @@ func (tb *Buffer) OnInput(fun func(e events.Event)) {
 }
 
 // BufferFlags hold key Buf state
-type BufferFlags gi.WidgetFlags //enums:bitflag -trim-prefix Buffer
+type BufferFlags core.WidgetFlags //enums:bitflag -trim-prefix Buffer
 
 const (
 	// BufferAutoSaving is used in atomically safe way to protect autosaving
-	BufferAutoSaving BufferFlags = BufferFlags(gi.WidgetFlagsN) + iota
+	BufferAutoSaving BufferFlags = BufferFlags(core.WidgetFlagsN) + iota
 
 	// BufferMarkingUp indicates current markup operation in progress -- don't redo
 	BufferMarkingUp
@@ -403,7 +403,7 @@ func (tb *Buffer) SetLang(lang string) *Buffer {
 }
 
 // SetHiStyle sets the highlighting style -- needs to be protected by mutex
-func (tb *Buffer) SetHiStyle(style gi.HiStyleName) *Buffer {
+func (tb *Buffer) SetHiStyle(style core.HiStyleName) *Buffer {
 	tb.MarkupMu.Lock()
 	tb.Hi.SetHiStyle(style)
 	tb.MarkupMu.Unlock()
@@ -426,7 +426,7 @@ func (tb *Buffer) SetReadOnly(readonly bool) *Buffer {
 // SetFilename sets the filename associated with the buffer and updates
 // the code highlighting information accordingly.
 func (tb *Buffer) SetFilename(fn string) *Buffer {
-	tb.Filename = gi.Filename(fn)
+	tb.Filename = core.Filename(fn)
 	tb.Stat()
 	tb.Hi.Init(&tb.Info, &tb.PiState)
 	return tb
@@ -509,18 +509,18 @@ func (tb *Buffer) FileModCheck() bool {
 	}
 	if info.ModTime() != time.Time(tb.Info.ModTime) {
 		sc := tb.SceneFromView()
-		d := gi.NewBody().AddTitle("File changed on disk: " + dirs.DirAndFile(string(tb.Filename))).
+		d := core.NewBody().AddTitle("File changed on disk: " + dirs.DirAndFile(string(tb.Filename))).
 			AddText(fmt.Sprintf("File has changed on disk since being opened or saved by you; what do you want to do?  If you <code>Revert from Disk</code>, you will lose any existing edits in open buffer.  If you <code>Ignore and Proceed</code>, the next save will overwrite the changed file on disk, losing any changes there.  File: %v", tb.Filename))
-		d.AddBottomBar(func(parent gi.Widget) {
-			gi.NewButton(parent).SetText("Save as to different file").OnClick(func(e events.Event) {
+		d.AddBottomBar(func(parent core.Widget) {
+			core.NewButton(parent).SetText("Save as to different file").OnClick(func(e events.Event) {
 				d.Close()
 				giv.CallFunc(sc, tb.SaveAs)
 			})
-			gi.NewButton(parent).SetText("Revert from disk").OnClick(func(e events.Event) {
+			core.NewButton(parent).SetText("Revert from disk").OnClick(func(e events.Event) {
 				d.Close()
 				tb.Revert()
 			})
-			gi.NewButton(parent).SetText("Ignore and proceed").OnClick(func(e events.Event) {
+			core.NewButton(parent).SetText("Ignore and proceed").OnClick(func(e events.Event) {
 				d.Close()
 				tb.SetFlag(true, BufferFileModOK)
 			})
@@ -532,7 +532,7 @@ func (tb *Buffer) FileModCheck() bool {
 }
 
 // Open loads the given file into the buffer.
-func (tb *Buffer) Open(filename gi.Filename) error {
+func (tb *Buffer) Open(filename core.Filename) error {
 	err := tb.OpenFile(filename)
 	if err != nil {
 		return err
@@ -561,7 +561,7 @@ func (tb *Buffer) OpenFS(fsys fs.FS, filename string) error {
 // OpenFile just loads the given file into the buffer, without doing
 // any markup or signaling. It is typically used in other functions or
 // for temporary buffers.
-func (tb *Buffer) OpenFile(filename gi.Filename) error {
+func (tb *Buffer) OpenFile(filename core.Filename) error {
 	txt, err := os.ReadFile(string(filename))
 	if err != nil {
 		return err
@@ -589,7 +589,7 @@ func (tb *Buffer) Revert() bool {
 		if grr.Log(err) != nil {
 			sc := tb.SceneFromView()
 			if sc != nil { // only if viewing
-				gi.ErrorSnackbar(sc, err, "Error reopening file")
+				core.ErrorSnackbar(sc, err, "Error reopening file")
 			}
 			return false
 		}
@@ -616,7 +616,7 @@ func (tb *Buffer) Revert() bool {
 // Does an EditDone first to save edits and checks for an existing file.
 // If it does exist then prompts to overwrite or not.
 // If afterFunc is non-nil, then it is called with the status of the user action.
-func (tb *Buffer) SaveAsFunc(filename gi.Filename, afterFunc func(canceled bool)) {
+func (tb *Buffer) SaveAsFunc(filename core.Filename, afterFunc func(canceled bool)) {
 	// todo: filemodcheck!
 	tb.EditDone()
 	if !grr.Log1(dirs.FileExists(string(filename))) {
@@ -626,9 +626,9 @@ func (tb *Buffer) SaveAsFunc(filename gi.Filename, afterFunc func(canceled bool)
 		}
 	} else {
 		sc := tb.SceneFromView()
-		d := gi.NewBody().AddTitle("File Exists, Overwrite?").
+		d := core.NewBody().AddTitle("File Exists, Overwrite?").
 			AddText(fmt.Sprintf("File already exists, overwrite?  File: %v", filename))
-		d.AddBottomBar(func(parent gi.Widget) {
+		d.AddBottomBar(func(parent core.Widget) {
 			d.AddCancel(parent).OnClick(func(e events.Event) {
 				if afterFunc != nil {
 					afterFunc(true)
@@ -647,15 +647,15 @@ func (tb *Buffer) SaveAsFunc(filename gi.Filename, afterFunc func(canceled bool)
 
 // SaveAs saves the current text into given file -- does an EditDone first to save edits
 // and checks for an existing file -- if it does exist then prompts to overwrite or not.
-func (tb *Buffer) SaveAs(filename gi.Filename) {
+func (tb *Buffer) SaveAs(filename core.Filename) {
 	tb.SaveAsFunc(filename, nil)
 }
 
 // SaveFile writes current buffer to file, with no prompting, etc
-func (tb *Buffer) SaveFile(filename gi.Filename) error {
+func (tb *Buffer) SaveFile(filename core.Filename) error {
 	err := os.WriteFile(string(filename), tb.Txt, 0644)
 	if err != nil {
-		gi.ErrorSnackbar(tb.SceneFromView(), err)
+		core.ErrorSnackbar(tb.SceneFromView(), err)
 		slog.Error(err.Error())
 	} else {
 		tb.ClearNotSaved()
@@ -675,18 +675,18 @@ func (tb *Buffer) Save() error {
 	info, err := os.Stat(string(tb.Filename))
 	if err == nil && info.ModTime() != time.Time(tb.Info.ModTime) {
 		sc := tb.SceneFromView()
-		d := gi.NewBody().AddTitle("File Changed on Disk").
+		d := core.NewBody().AddTitle("File Changed on Disk").
 			AddText(fmt.Sprintf("File has changed on disk since you opened or saved it; what do you want to do?  File: %v", tb.Filename))
-		d.AddBottomBar(func(parent gi.Widget) {
-			gi.NewButton(parent).SetText("Save to different file").OnClick(func(e events.Event) {
+		d.AddBottomBar(func(parent core.Widget) {
+			core.NewButton(parent).SetText("Save to different file").OnClick(func(e events.Event) {
 				d.Close()
 				giv.CallFunc(sc, tb.SaveAs)
 			})
-			gi.NewButton(parent).SetText("Open from disk, losing changes").OnClick(func(e events.Event) {
+			core.NewButton(parent).SetText("Open from disk, losing changes").OnClick(func(e events.Event) {
 				d.Close()
 				tb.Revert()
 			})
-			gi.NewButton(parent).SetText("Save file, overwriting").OnClick(func(e events.Event) {
+			core.NewButton(parent).SetText("Save file, overwriting").OnClick(func(e events.Event) {
 				d.Close()
 				tb.SaveFile(tb.Filename)
 			})
@@ -703,31 +703,31 @@ func (tb *Buffer) Close(afterFun func(canceled bool)) bool {
 		tb.StopDelayedReMarkup()
 		sc := tb.SceneFromView()
 		if tb.Filename != "" {
-			d := gi.NewBody().AddTitle("Close without saving?").
+			d := core.NewBody().AddTitle("Close without saving?").
 				AddText(fmt.Sprintf("Do you want to save your changes to file: %v?", tb.Filename))
-			d.AddBottomBar(func(parent gi.Widget) {
-				gi.NewButton(parent).SetText("Cancel").OnClick(func(e events.Event) {
+			d.AddBottomBar(func(parent core.Widget) {
+				core.NewButton(parent).SetText("Cancel").OnClick(func(e events.Event) {
 					d.Close()
 					if afterFun != nil {
 						afterFun(true)
 					}
 				})
-				gi.NewButton(parent).SetText("Close without saving").OnClick(func(e events.Event) {
+				core.NewButton(parent).SetText("Close without saving").OnClick(func(e events.Event) {
 					d.Close()
 					tb.ClearNotSaved()
 					tb.AutoSaveDelete()
 					tb.Close(afterFun)
 				})
-				gi.NewButton(parent).SetText("Save").OnClick(func(e events.Event) {
+				core.NewButton(parent).SetText("Save").OnClick(func(e events.Event) {
 					tb.Save()
 					tb.Close(afterFun) // 2nd time through won't prompt
 				})
 			})
 			d.NewDialog(sc).Run()
 		} else {
-			d := gi.NewBody().AddTitle("Close without saving?").
+			d := core.NewBody().AddTitle("Close without saving?").
 				AddText("Do you want to save your changes (no filename for this buffer yet)?  If so, Cancel and then do Save As")
-			d.AddBottomBar(func(parent gi.Widget) {
+			d.AddBottomBar(func(parent core.Widget) {
 				d.AddCancel(parent).OnClick(func(e events.Event) {
 					if afterFun != nil {
 						afterFun(true)
@@ -945,7 +945,7 @@ func (tb *Buffer) DeleteView(vw *Editor) {
 }
 
 // SceneFromView returns Scene from text editor, if avail
-func (tb *Buffer) SceneFromView() *gi.Scene {
+func (tb *Buffer) SceneFromView() *core.Scene {
 	if len(tb.Editors) > 0 {
 		return tb.Editors[0].Scene
 	}
@@ -2215,12 +2215,12 @@ func (tb *Buffer) SetLineIcon(ln int, icon icons.Icon) {
 	defer tb.LinesMu.Unlock()
 	if tb.LineIcons == nil {
 		tb.LineIcons = make(map[int]icons.Icon)
-		tb.Icons = make(map[icons.Icon]*gi.Icon)
+		tb.Icons = make(map[icons.Icon]*core.Icon)
 	}
 	tb.LineIcons[ln] = icon
 	ic, has := tb.Icons[icon]
 	if !has {
-		ic = &gi.Icon{}
+		ic = &core.Icon{}
 		ic.InitName(ic, string(icon))
 		ic.SetIcon(icon)
 		ic.Style(func(s *styles.Style) {
@@ -2587,7 +2587,7 @@ func (tb *Buffer) SetCompleter(data any, matchFun complete.MatchFunc, editFun co
 		}
 		tb.DeleteCompleter()
 	}
-	tb.Complete = gi.NewComplete().SetContext(data).SetMatchFunc(matchFun).
+	tb.Complete = core.NewComplete().SetContext(data).SetMatchFunc(matchFun).
 		SetEditFunc(editFun).SetLookupFunc(lookupFun)
 	tb.Complete.OnSelect(func(e events.Event) {
 		tb.CompleteText(tb.Complete.Completion)

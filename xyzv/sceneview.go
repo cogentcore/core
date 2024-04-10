@@ -8,9 +8,9 @@ import (
 	"fmt"
 
 	"cogentcore.org/core/abilities"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
@@ -20,7 +20,7 @@ import (
 // SceneView provides a toolbar controller for an xyz.Scene,
 // and manipulation abilities.
 type SceneView struct {
-	gi.Layout
+	core.Layout
 }
 
 func (sv *SceneView) OnInit() {
@@ -41,7 +41,7 @@ func (sv *SceneView) ConfigSceneView() {
 		return
 	}
 	NewScene(sv, "scene")
-	tb := gi.NewToolbar(sv, "tb")
+	tb := core.NewToolbar(sv, "tb")
 	sv.ConfigToolbar(tb)
 }
 
@@ -55,12 +55,12 @@ func (sv *SceneView) SceneXYZ() *xyz.Scene {
 	return sv.SceneWidget().XYZ
 }
 
-func (sv *SceneView) Toolbar() *gi.Toolbar {
+func (sv *SceneView) Toolbar() *core.Toolbar {
 	tbi := sv.ChildByName("tb", 1)
 	if tbi == nil {
 		return nil
 	}
-	return tbi.(*gi.Toolbar)
+	return tbi.(*core.Toolbar)
 }
 
 func (sv *SceneView) UpdateToolbar() {
@@ -71,21 +71,21 @@ func (sv *SceneView) UpdateToolbar() {
 	sw := sv.SceneWidget()
 	smi := tb.ChildByName("selmode", 10)
 	if smi != nil {
-		sm := smi.(*gi.Chooser)
+		sm := smi.(*core.Chooser)
 		sm.SetCurrentValue(sw.SelectionMode)
 	}
 }
 
-func (sv *SceneView) ConfigToolbar(tb *gi.Toolbar) {
+func (sv *SceneView) ConfigToolbar(tb *core.Toolbar) {
 	sw := sv.SceneWidget()
 	sc := sv.SceneXYZ()
-	gi.NewButton(tb).SetIcon(icons.Update).SetTooltip("reset to default initial display").
+	core.NewButton(tb).SetIcon(icons.Update).SetTooltip("reset to default initial display").
 		OnClick(func(e events.Event) {
 			sc.SetCamera("default")
 			sc.NeedsUpdate()
 			sv.NeedsRender()
 		})
-	gi.NewButton(tb).SetIcon(icons.ZoomIn).SetTooltip("zoom in").
+	core.NewButton(tb).SetIcon(icons.ZoomIn).SetTooltip("zoom in").
 		Style(func(s *styles.Style) {
 			s.SetAbilities(true, abilities.RepeatClickable)
 		}).
@@ -94,7 +94,7 @@ func (sv *SceneView) ConfigToolbar(tb *gi.Toolbar) {
 			sc.NeedsUpdate()
 			sv.NeedsRender()
 		})
-	gi.NewButton(tb).SetIcon(icons.ZoomOut).SetTooltip("zoom out").
+	core.NewButton(tb).SetIcon(icons.ZoomOut).SetTooltip("zoom out").
 		Style(func(s *styles.Style) {
 			s.SetAbilities(true, abilities.RepeatClickable)
 		}).
@@ -103,9 +103,9 @@ func (sv *SceneView) ConfigToolbar(tb *gi.Toolbar) {
 			sc.NeedsUpdate()
 			sv.NeedsRender()
 		})
-	gi.NewSeparator(tb)
-	gi.NewLabel(tb).SetText("Rot:").SetTooltip("rotate display")
-	gi.NewButton(tb).SetIcon(icons.KeyboardArrowLeft).
+	core.NewSeparator(tb)
+	core.NewLabel(tb).SetText("Rot:").SetTooltip("rotate display")
+	core.NewButton(tb).SetIcon(icons.KeyboardArrowLeft).
 		Style(func(s *styles.Style) {
 			s.SetAbilities(true, abilities.RepeatClickable)
 		}).
@@ -114,7 +114,7 @@ func (sv *SceneView) ConfigToolbar(tb *gi.Toolbar) {
 			sc.NeedsUpdate()
 			sv.NeedsRender()
 		})
-	gi.NewButton(tb).SetIcon(icons.KeyboardArrowUp).
+	core.NewButton(tb).SetIcon(icons.KeyboardArrowUp).
 		Style(func(s *styles.Style) {
 			s.SetAbilities(true, abilities.RepeatClickable)
 		}).
@@ -123,7 +123,7 @@ func (sv *SceneView) ConfigToolbar(tb *gi.Toolbar) {
 			sc.NeedsUpdate()
 			sv.NeedsRender()
 		})
-	gi.NewButton(tb).SetIcon(icons.KeyboardArrowDown).
+	core.NewButton(tb).SetIcon(icons.KeyboardArrowDown).
 		Style(func(s *styles.Style) {
 			s.SetAbilities(true, abilities.RepeatClickable)
 		}).
@@ -132,7 +132,7 @@ func (sv *SceneView) ConfigToolbar(tb *gi.Toolbar) {
 			sc.NeedsUpdate()
 			sv.NeedsRender()
 		})
-	gi.NewButton(tb).SetIcon(icons.KeyboardArrowRight).
+	core.NewButton(tb).SetIcon(icons.KeyboardArrowRight).
 		Style(func(s *styles.Style) {
 			s.SetAbilities(true, abilities.RepeatClickable)
 		}).
@@ -141,10 +141,10 @@ func (sv *SceneView) ConfigToolbar(tb *gi.Toolbar) {
 			sc.NeedsUpdate()
 			sv.NeedsRender()
 		})
-	gi.NewSeparator(tb)
+	core.NewSeparator(tb)
 
-	gi.NewLabel(tb).SetText("Pan:").SetTooltip("pan display")
-	gi.NewButton(tb).SetIcon(icons.KeyboardArrowLeft).
+	core.NewLabel(tb).SetText("Pan:").SetTooltip("pan display")
+	core.NewButton(tb).SetIcon(icons.KeyboardArrowLeft).
 		Style(func(s *styles.Style) {
 			s.SetAbilities(true, abilities.RepeatClickable)
 		}).
@@ -153,7 +153,7 @@ func (sv *SceneView) ConfigToolbar(tb *gi.Toolbar) {
 			sc.NeedsUpdate()
 			sv.NeedsRender()
 		})
-	gi.NewButton(tb).SetIcon(icons.KeyboardArrowUp).
+	core.NewButton(tb).SetIcon(icons.KeyboardArrowUp).
 		Style(func(s *styles.Style) {
 			s.SetAbilities(true, abilities.RepeatClickable)
 		}).
@@ -162,7 +162,7 @@ func (sv *SceneView) ConfigToolbar(tb *gi.Toolbar) {
 			sc.NeedsUpdate()
 			sv.NeedsRender()
 		})
-	gi.NewButton(tb).SetIcon(icons.KeyboardArrowDown).
+	core.NewButton(tb).SetIcon(icons.KeyboardArrowDown).
 		Style(func(s *styles.Style) {
 			s.SetAbilities(true, abilities.RepeatClickable)
 		}).
@@ -171,7 +171,7 @@ func (sv *SceneView) ConfigToolbar(tb *gi.Toolbar) {
 			sc.NeedsUpdate()
 			sv.NeedsRender()
 		})
-	gi.NewButton(tb).SetIcon(icons.KeyboardArrowRight).
+	core.NewButton(tb).SetIcon(icons.KeyboardArrowRight).
 		Style(func(s *styles.Style) {
 			s.SetAbilities(true, abilities.RepeatClickable)
 		}).
@@ -180,12 +180,12 @@ func (sv *SceneView) ConfigToolbar(tb *gi.Toolbar) {
 			sc.NeedsUpdate()
 			sv.NeedsRender()
 		})
-	gi.NewSeparator(tb)
+	core.NewSeparator(tb)
 
-	gi.NewLabel(tb).SetText("Save:")
+	core.NewLabel(tb).SetText("Save:")
 	for i := 1; i <= 4; i++ {
 		nm := fmt.Sprintf("%d", i)
-		gi.NewButton(tb).SetText(nm).
+		core.NewButton(tb).SetText(nm).
 			SetTooltip("first click (or + Shift) saves current view, second click restores to saved state").
 			OnClick(func(e events.Event) {
 				cam := nm
@@ -202,29 +202,29 @@ func (sv *SceneView) ConfigToolbar(tb *gi.Toolbar) {
 				sv.NeedsRender()
 			})
 	}
-	gi.NewSeparator(tb)
+	core.NewSeparator(tb)
 
-	sm := gi.NewChooser(tb, "selmode").SetEnum(sw.SelectionMode)
+	sm := core.NewChooser(tb, "selmode").SetEnum(sw.SelectionMode)
 	sm.OnChange(func(e events.Event) {
 		sw.SelectionMode = sm.CurrentItem.Value.(SelectionModes)
 	})
 	sm.SetCurrentValue(sw.SelectionMode)
 
-	gi.NewButton(tb).SetText("Edit").SetIcon(icons.Edit).
+	core.NewButton(tb).SetText("Edit").SetIcon(icons.Edit).
 		SetTooltip("edit the currently-selected object").
 		OnClick(func(e events.Event) {
 			if sw.CurrentSelected == nil {
 				return
 			}
-			d := gi.NewBody().AddTitle("Selected Node")
+			d := core.NewBody().AddTitle("Selected Node")
 			giv.NewStructView(d).SetStruct(sw.CurrentSelected)
 			d.NewFullDialog(sv).SetNewWindow(true).Run()
 		})
 
-	gi.NewButton(tb).SetText("Edit Scene").SetIcon(icons.Edit).
+	core.NewButton(tb).SetText("Edit Scene").SetIcon(icons.Edit).
 		SetTooltip("edit the 3D Scene object (for access to meshes, textures etc)").
 		OnClick(func(e events.Event) {
-			d := gi.NewBody().AddTitle("xyz.Scene")
+			d := core.NewBody().AddTitle("xyz.Scene")
 			giv.NewStructView(d).SetStruct(sv.SceneXYZ())
 			d.NewFullDialog(sv).SetNewWindow(true).Run()
 		})

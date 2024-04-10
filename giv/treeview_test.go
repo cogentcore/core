@@ -7,17 +7,17 @@ package giv
 import (
 	"testing"
 
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/tree"
 )
 
 func TestTreeView(t *testing.T) {
-	b := gi.NewBody()
+	b := core.NewBody()
 
-	fr := tree.NewRoot[*gi.Frame]("frame")
-	gi.NewButton(fr)
-	gi.NewLabel(fr)
-	gi.NewButton(gi.NewLayout(fr))
+	fr := tree.NewRoot[*core.Frame]("frame")
+	core.NewButton(fr)
+	core.NewLabel(fr)
+	core.NewButton(core.NewLayout(fr))
 
 	NewTreeView(b).SyncTree(fr)
 	b.AssertRender(t, "treeview/basic")

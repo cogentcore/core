@@ -7,11 +7,11 @@ package giv
 import (
 	"testing"
 
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 )
 
 func TestStructViewInline(t *testing.T) {
-	b := gi.NewBody()
+	b := core.NewBody()
 	NewStructViewInline(b).SetStruct(myStructValue)
 	b.AssertRender(t, "structviewinline/basic")
 }

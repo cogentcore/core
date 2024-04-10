@@ -4,7 +4,7 @@ package texteditor
 
 import (
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 )
 
 var _SpellSignalsValues = []SpellSignals{0, 1}
@@ -106,14 +106,14 @@ var _BufferFlagsMap = map[BufferFlags]string{2: `AutoSaving`, 3: `MarkingUp`, 4:
 
 // String returns the string representation of this BufferFlags value.
 func (i BufferFlags) String() string {
-	return enums.BitFlagStringExtended(i, _BufferFlagsValues, gi.WidgetFlagsValues())
+	return enums.BitFlagStringExtended(i, _BufferFlagsValues, core.WidgetFlagsValues())
 }
 
 // BitIndexString returns the string representation of this BufferFlags value
 // if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
 func (i BufferFlags) BitIndexString() string {
-	return enums.BitIndexStringExtended[BufferFlags, gi.WidgetFlags](i, _BufferFlagsMap)
+	return enums.BitIndexStringExtended[BufferFlags, core.WidgetFlags](i, _BufferFlagsMap)
 }
 
 // SetString sets the BufferFlags value from its string representation,
@@ -124,7 +124,7 @@ func (i *BufferFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s
 // while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *BufferFlags) SetStringOr(s string) error {
-	return enums.SetStringOrExtended(i, (*gi.WidgetFlags)(i), s, _BufferFlagsValueMap)
+	return enums.SetStringOrExtended(i, (*core.WidgetFlags)(i), s, _BufferFlagsValueMap)
 }
 
 // Int64 returns the BufferFlags value as an int64.
@@ -135,17 +135,17 @@ func (i *BufferFlags) SetInt64(in int64) { *i = BufferFlags(in) }
 
 // Desc returns the description of the BufferFlags value.
 func (i BufferFlags) Desc() string {
-	return enums.DescExtended[BufferFlags, gi.WidgetFlags](i, _BufferFlagsDescMap)
+	return enums.DescExtended[BufferFlags, core.WidgetFlags](i, _BufferFlagsDescMap)
 }
 
 // BufferFlagsValues returns all possible values for the type BufferFlags.
 func BufferFlagsValues() []BufferFlags {
-	return enums.ValuesGlobalExtended(_BufferFlagsValues, gi.WidgetFlagsValues())
+	return enums.ValuesGlobalExtended(_BufferFlagsValues, core.WidgetFlagsValues())
 }
 
 // Values returns all possible values for the type BufferFlags.
 func (i BufferFlags) Values() []enums.Enum {
-	return enums.ValuesExtended(_BufferFlagsValues, gi.WidgetFlagsValues())
+	return enums.ValuesExtended(_BufferFlagsValues, core.WidgetFlagsValues())
 }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
@@ -175,14 +175,14 @@ var _EditorFlagsMap = map[EditorFlags]string{2: `EditorHasLineNos`, 3: `EditorNe
 
 // String returns the string representation of this EditorFlags value.
 func (i EditorFlags) String() string {
-	return enums.BitFlagStringExtended(i, _EditorFlagsValues, gi.WidgetFlagsValues())
+	return enums.BitFlagStringExtended(i, _EditorFlagsValues, core.WidgetFlagsValues())
 }
 
 // BitIndexString returns the string representation of this EditorFlags value
 // if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
 func (i EditorFlags) BitIndexString() string {
-	return enums.BitIndexStringExtended[EditorFlags, gi.WidgetFlags](i, _EditorFlagsMap)
+	return enums.BitIndexStringExtended[EditorFlags, core.WidgetFlags](i, _EditorFlagsMap)
 }
 
 // SetString sets the EditorFlags value from its string representation,
@@ -193,7 +193,7 @@ func (i *EditorFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s
 // while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *EditorFlags) SetStringOr(s string) error {
-	return enums.SetStringOrExtended(i, (*gi.WidgetFlags)(i), s, _EditorFlagsValueMap)
+	return enums.SetStringOrExtended(i, (*core.WidgetFlags)(i), s, _EditorFlagsValueMap)
 }
 
 // Int64 returns the EditorFlags value as an int64.
@@ -204,17 +204,17 @@ func (i *EditorFlags) SetInt64(in int64) { *i = EditorFlags(in) }
 
 // Desc returns the description of the EditorFlags value.
 func (i EditorFlags) Desc() string {
-	return enums.DescExtended[EditorFlags, gi.WidgetFlags](i, _EditorFlagsDescMap)
+	return enums.DescExtended[EditorFlags, core.WidgetFlags](i, _EditorFlagsDescMap)
 }
 
 // EditorFlagsValues returns all possible values for the type EditorFlags.
 func EditorFlagsValues() []EditorFlags {
-	return enums.ValuesGlobalExtended(_EditorFlagsValues, gi.WidgetFlagsValues())
+	return enums.ValuesGlobalExtended(_EditorFlagsValues, core.WidgetFlagsValues())
 }
 
 // Values returns all possible values for the type EditorFlags.
 func (i EditorFlags) Values() []enums.Enum {
-	return enums.ValuesExtended(_EditorFlagsValues, gi.WidgetFlagsValues())
+	return enums.ValuesExtended(_EditorFlagsValues, core.WidgetFlagsValues())
 }
 
 // HasFlag returns whether these bit flags have the given bit flag set.

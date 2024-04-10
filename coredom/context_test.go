@@ -8,12 +8,12 @@ import (
 	"strings"
 	"testing"
 
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestInlineContainer(t *testing.T) {
-	b := gi.NewBody()
+	b := core.NewBody()
 	assert.NoError(t, ReadHTMLString(NewContext(), b, `<button>Test</button>`))
 	if tag := b.Child(0).Property("tag"); tag != "body" {
 		t.Errorf("expected first child to be body but got %v", tag)
@@ -24,7 +24,7 @@ func TestInlineContainer(t *testing.T) {
 }
 
 func TestNoInlineContainer(t *testing.T) {
-	b := gi.NewBody()
+	b := core.NewBody()
 	assert.NoError(t, ReadHTMLString(NewContext(), b, `<h1>Test</h1>`))
 	if tag := b.Child(0).Property("tag"); tag != "body" {
 		t.Errorf("expected first child to be body but got %v", tag)

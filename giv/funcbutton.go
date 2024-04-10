@@ -12,9 +12,9 @@ import (
 	"unicode"
 
 	"cogentcore.org/core/abilities"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keyfun"
@@ -28,14 +28,14 @@ import (
 // popping up a dialog to prompt for any arguments and show the return
 // values of the function. It is a helper function that uses [NewSoloFuncButton]
 // under the hood.
-func CallFunc(ctx gi.Widget, fun any) {
+func CallFunc(ctx core.Widget, fun any) {
 	NewSoloFuncButton(ctx, fun).CallFunc()
 }
 
 // NewSoloFuncButton returns a standalone FuncButton with the given context
 // for popping up any dialog elements.
-func NewSoloFuncButton(ctx gi.Widget, fun any) *FuncButton {
-	parent := tree.NewRoot[*gi.WidgetBase]("solo-func-button-parent")
+func NewSoloFuncButton(ctx core.Widget, fun any) *FuncButton {
+	parent := tree.NewRoot[*core.WidgetBase]("solo-func-button-parent")
 	fb := NewFuncButton(parent, fun)
 	fb.SetContext(ctx)
 	return fb
@@ -51,7 +51,7 @@ func NewSoloFuncButton(ctx gi.Widget, fun any) *FuncButton {
 // if you want tooltips. If the function is a method, both the method and
 // its receiver type must be added to gti to get documentation.
 type FuncButton struct { //core:no-new
-	gi.Button
+	core.Button
 
 	// Func is the [gti.Func] associated with this button.
 	// This function can also be a method, but it must be
@@ -109,7 +109,7 @@ type FuncButton struct { //core:no-new
 	WarnUnadded bool `default:"true"`
 
 	// Context is used for opening Dialogs if non-nil.
-	Context gi.Widget
+	Context core.Widget
 
 	// AfterFunc is an optional function called after the funcbutton
 	// function is executed
@@ -262,13 +262,13 @@ func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButto
 	return fb
 }
 
-func (fb *FuncButton) GoodContext() gi.Widget {
+func (fb *FuncButton) GoodContext() core.Widget {
 	ctx := fb.Context
 	if fb.Context == nil {
 		if fb.This() == nil {
 			return nil
 		}
-		ctx = fb.This().(gi.Widget)
+		ctx = fb.This().(core.Widget)
 	}
 	return ctx
 }
@@ -293,8 +293,8 @@ func (fb *FuncButton) CallFuncShowReturns() {
 // ConfirmDialog runs the confirm dialog
 func (fb *FuncButton) ConfirmDialog() {
 	ctx := fb.GoodContext()
-	d := gi.NewBody().AddTitle(fb.Text + "?").AddText("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip)
-	d.AddBottomBar(func(parent gi.Widget) {
+	d := core.NewBody().AddTitle(fb.Text + "?").AddText("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip)
+	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).SetText(fb.Text).OnClick(func(e events.Event) {
 			fb.CallFuncShowReturns()
@@ -323,9 +323,9 @@ func (fb *FuncButton) CallFunc() {
 	}) {
 		return
 	}
-	d := gi.NewBody().AddTitle(fb.Text).AddText(fb.Tooltip)
+	d := core.NewBody().AddTitle(fb.Text).AddText(fb.Tooltip)
 	NewArgView(d).SetArgs(fb.Args...)
-	d.AddBottomBar(func(parent gi.Widget) {
+	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).SetText(fb.Text).OnClick(func(e events.Event) {
 			d.Scene.Send(events.Close, e) // note: the other Close event happens too late!
@@ -354,7 +354,7 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 	if !fb.ShowReturn {
 		for _, ret := range rets {
 			if err, ok := ret.Interface().(error); ok && err != nil {
-				gi.ErrorSnackbar(fb, err, fb.Text+" failed")
+				core.ErrorSnackbar(fb, err, fb.Text+" failed")
 				return
 			}
 		}
@@ -380,7 +380,7 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 				}
 			}
 		}
-		gi.NewBody().AddSnackbarText(txt).NewSnackbar(ctx).Run()
+		core.NewBody().AddSnackbarText(txt).NewSnackbar(ctx).Run()
 		return
 	}
 	// go directly to the dialog if there is one
@@ -389,7 +389,7 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 	}) {
 		return
 	}
-	d := gi.NewBody().AddTitle(main).AddText(fb.Tooltip).AddOKOnly()
+	d := core.NewBody().AddTitle(main).AddText(fb.Tooltip).AddOKOnly()
 	NewArgView(d).SetArgs(fb.Returns...).SetReadOnly(true)
 	if fb.NewWindow {
 		d.NewDialog(ctx).SetNewWindow(true).Run()
@@ -486,5 +486,5 @@ func (fb *FuncButton) SetKey(kf keyfun.Funs) *FuncButton {
 
 // makeTmpWidget makes a temporary widget in a temporary parent for the given value.
 func makeTmpWidget(v Value) {
-	v.SetWidget(tree.NewRoot[*gi.WidgetBase]("value-tmp-parent").NewChild(v.WidgetType(), "value-tmp-widget").(gi.Widget))
+	v.SetWidget(tree.NewRoot[*core.WidgetBase]("value-tmp-parent").NewChild(v.WidgetType(), "value-tmp-widget").(core.Widget))
 }

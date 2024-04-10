@@ -8,8 +8,8 @@ import (
 	"reflect"
 	"strconv"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
@@ -19,7 +19,7 @@ import (
 // SliceViewInline represents a slice as a single line widget,
 // for smaller slices and those explicitly marked inline.
 type SliceViewInline struct {
-	gi.Layout
+	core.Layout
 
 	// the slice that we are a view onto
 	Slice any `set:"-"`
@@ -57,19 +57,19 @@ func (sv *SliceViewInline) SetStyles() {
 	sv.Style(func(s *styles.Style) {
 		s.Grow.Set(0, 0)
 	})
-	sv.OnWidgetAdded(func(w gi.Widget) {
+	sv.OnWidgetAdded(func(w core.Widget) {
 		switch w.PathFrom(sv) {
 		case "add-button":
-			ab := w.(*gi.Button)
+			ab := w.(*core.Button)
 			w.Style(func(s *styles.Style) {
-				ab.SetType(gi.ButtonTonal)
+				ab.SetType(core.ButtonTonal)
 			})
 			ab.OnClick(func(e events.Event) {
 				sv.SliceNewAt(-1)
 			})
 		case "edit-button":
 			w.Style(func(s *styles.Style) {
-				w.(*gi.Button).SetType(gi.ButtonTonal)
+				w.(*core.Button).SetType(core.ButtonTonal)
 			})
 			w.OnClick(func(e events.Event) {
 				vpath := sv.ViewPath
@@ -86,7 +86,7 @@ func (sv *SliceViewInline) SetStyles() {
 					elType := laser.NonPtrType(reflect.TypeOf(sv.Slice).Elem().Elem())
 					title = "Slice of " + laser.NonPtrType(elType).Name()
 				}
-				d := gi.NewBody().AddTitle(title)
+				d := core.NewBody().AddTitle(title)
 				NewSliceView(d).SetViewPath(vpath).SetSlice(sv.Slice)
 				d.OnClose(func(e events.Event) {
 					sv.Update()
@@ -135,7 +135,7 @@ func (sv *SliceViewInline) Config() {
 	sl := laser.NonPtrValue(laser.OnePtrUnderlyingValue(reflect.ValueOf(sv.Slice)))
 	sv.ConfigSize = sl.Len()
 
-	sz := min(sl.Len(), gi.SystemSettings.SliceInlineLength)
+	sz := min(sl.Len(), core.SystemSettings.SliceInlineLength)
 	for i := 0; i < sz; i++ {
 		val := laser.OnePtrUnderlyingValue(sl.Index(i)) // deal with pointer lists
 		vv := ToValue(val.Interface(), "")
@@ -147,13 +147,13 @@ func (sv *SliceViewInline) Config() {
 		sv.Values = append(sv.Values, vv)
 	}
 	if !sv.IsArray && !sv.IsFixedLen {
-		config.Add(gi.ButtonType, "add-button")
+		config.Add(core.ButtonType, "add-button")
 	}
-	config.Add(gi.ButtonType, "edit-button")
+	config.Add(core.ButtonType, "edit-button")
 	sv.ConfigChildren(config)
 	for i, vv := range sv.Values {
 		vv.OnChange(func(e events.Event) { sv.SetChanged() })
-		w := sv.Child(i).(gi.Widget)
+		w := sv.Child(i).(core.Widget)
 		if sv.SliceValue != nil {
 			vv.SetTags(sv.SliceValue.AllTags())
 		}
@@ -169,7 +169,7 @@ func (sv *SliceViewInline) Config() {
 		if sv.IsReadOnly() {
 			wb.SetReadOnly(true)
 		} else {
-			wb.AddContextMenu(func(m *gi.Scene) {
+			wb.AddContextMenu(func(m *core.Scene) {
 				sv.ContextMenu(m, i)
 			})
 		}
@@ -177,16 +177,16 @@ func (sv *SliceViewInline) Config() {
 	if !sv.IsArray && !sv.IsFixedLen {
 		adbti, err := sv.Children().ElemFromEndTry(1)
 		if err == nil {
-			adbt := adbti.(*gi.Button)
-			adbt.SetType(gi.ButtonTonal)
+			adbt := adbti.(*core.Button)
+			adbt.SetType(core.ButtonTonal)
 			adbt.SetIcon(icons.Add)
 			adbt.Tooltip = "add an element to the slice"
 		}
 	}
 	edbti, err := sv.Children().ElemFromEndTry(0)
 	if err == nil {
-		edbt := edbti.(*gi.Button)
-		edbt.SetType(gi.ButtonTonal)
+		edbt := edbti.(*core.Button)
+		edbt.SetType(core.ButtonTonal)
 		edbt.SetIcon(icons.Edit)
 		edbt.Tooltip = "edit in a dialog"
 	}
@@ -225,14 +225,14 @@ func (sv *SliceViewInline) SliceDeleteAt(idx int) {
 	sv.Update()
 }
 
-func (sv *SliceViewInline) ContextMenu(m *gi.Scene, idx int) {
+func (sv *SliceViewInline) ContextMenu(m *core.Scene, idx int) {
 	if sv.IsReadOnly() || sv.IsArray || sv.IsFixedLen {
 		return
 	}
-	gi.NewButton(m).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
+	core.NewButton(m).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
 		sv.SliceNewAt(idx)
 	})
-	gi.NewButton(m).SetText("Delete").SetIcon(icons.Delete).OnClick(func(e events.Event) {
+	core.NewButton(m).SetText("Delete").SetIcon(icons.Delete).OnClick(func(e events.Event) {
 		sv.SliceDeleteAt(idx)
 	})
 }

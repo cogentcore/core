@@ -7,7 +7,7 @@ package giv
 import (
 	"testing"
 
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 )
 
 type myStruct struct {
@@ -20,7 +20,7 @@ type myStruct struct {
 var myStructValue = &myStruct{Name: "Gopher", Age: 30, Rating: 7.3}
 
 func TestStructView(t *testing.T) {
-	b := gi.NewBody()
+	b := core.NewBody()
 	NewStructView(b).SetStruct(myStructValue)
 	b.AssertRender(t, "structview/basic")
 }

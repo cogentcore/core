@@ -6,8 +6,8 @@ package main
 
 import (
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/giv"
 	_ "cogentcore.org/core/grows/images"
 	"cogentcore.org/core/grr"
@@ -19,7 +19,7 @@ import (
 )
 
 func main() {
-	b := gi.NewBody("XYZ Object Viewer")
+	b := core.NewBody("XYZ Object Viewer")
 
 	sv := xyzv.NewSceneView(b)
 	sv.Config()
@@ -48,8 +48,8 @@ func main() {
 
 	grr.Log1(sc.OpenNewObj(curFn, objgp))
 
-	b.AddAppBar(func(tb *gi.Toolbar) {
-		gi.NewButton(tb).SetText("Open").SetIcon(icons.Open).
+	b.AddAppBar(func(tb *core.Toolbar) {
+		core.NewButton(tb).SetText("Open").SetIcon(icons.Open).
 			SetTooltip("Open a 3D object file for viewing").
 			OnClick(func(e events.Event) {
 				giv.FileViewDialog(tb, curFn, exts, "Open 3D Object", func(selFile string) {

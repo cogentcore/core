@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"sort"
 
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/laser"
@@ -23,11 +23,11 @@ func init() {
 
 // MeshValue represents an [xyz.MeshName] with a button.
 type MeshValue struct {
-	giv.ValueBase[*gi.Button]
+	giv.ValueBase[*core.Button]
 }
 
 func (v *MeshValue) Config() {
-	v.Widget.SetType(gi.ButtonTonal).SetIcon(icons.DeployedCode)
+	v.Widget.SetType(core.ButtonTonal).SetIcon(icons.DeployedCode)
 	giv.ConfigDialogWidget(v, false)
 }
 
@@ -39,7 +39,7 @@ func (v *MeshValue) Update() {
 	v.Widget.SetText(txt).Update()
 }
 
-func (v *MeshValue) ConfigDialog(d *gi.Body) (bool, func()) {
+func (v *MeshValue) ConfigDialog(d *core.Body) (bool, func()) {
 	d.SetTitle("Select a mesh")
 	if v.OwnKind != reflect.Struct {
 		return false, nil

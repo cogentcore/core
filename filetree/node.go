@@ -15,10 +15,10 @@ import (
 	"sort"
 	"strings"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fi"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/glop/dirs"
 	"cogentcore.org/core/gti"
@@ -40,7 +40,7 @@ type Node struct { //core:embedder
 	giv.TreeView
 
 	// full path to this file
-	FPath gi.Filename `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
+	FPath core.Filename `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
 	// full standard file info about this file
 	Info fi.FileInfo `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
@@ -175,7 +175,7 @@ func (fn *Node) ReadDir(path string) error {
 	if err != nil {
 		return err
 	}
-	fn.FPath = gi.Filename(pth)
+	fn.FPath = core.Filename(pth)
 	err = fn.Info.InitFile(string(fn.FPath))
 	if err != nil {
 		log.Printf("giv.Tree: could not read directory: %v err: %v\n", fn.FPath, err)
@@ -263,7 +263,7 @@ func (fn *Node) ConfigOfFiles(path string) tree.Config {
 		}
 		return nil
 	})
-	modSort := fn.FRoot.DirSortByModTime(gi.Filename(path))
+	modSort := fn.FRoot.DirSortByModTime(core.Filename(path))
 	if fn.FRoot.DirsOnTop {
 		if modSort {
 			fn.SortConfigByModTime(config2) // just sort files, not dirs
@@ -308,7 +308,7 @@ func (fn *Node) SetNodePath(path string) error {
 	if err != nil {
 		return err
 	}
-	fn.FPath = gi.Filename(pth)
+	fn.FPath = core.Filename(pth)
 	err = fn.InitFileInfo()
 	if err != nil {
 		return err
@@ -331,7 +331,7 @@ func (fn *Node) InitFileInfo() error {
 		// log.Printf("filetree.Node Path: %v could not be opened -- error: %v\n", fn.FPath, err)
 		return err
 	}
-	fn.FPath = gi.Filename(effpath)
+	fn.FPath = core.Filename(effpath)
 	err = fn.Info.InitFile(string(fn.FPath))
 	if err != nil {
 		emsg := fmt.Errorf("filetree.Node InitFileInfo Path %q: Error: %v", fn.FPath, err)
@@ -452,7 +452,7 @@ func (fn *Node) OpenAll() { //gti:add
 
 // CloseAll closes all directories under this one, this included
 func (fn *Node) CloseAll() { //gti:add
-	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+	fn.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
 			return tree.Continue
@@ -513,7 +513,7 @@ func (fn *Node) CloseBuf() bool {
 }
 
 // RelPath returns the relative path from node for given full path
-func (fn *Node) RelPath(fpath gi.Filename) string {
+func (fn *Node) RelPath(fpath core.Filename) string {
 	return dirs.RelFilePath(string(fpath), string(fn.FPath))
 }
 
@@ -525,7 +525,7 @@ func (fn *Node) DirsTo(path string) (*Node, error) {
 		log.Printf("filetree.Node DirsTo path %v could not be turned into an absolute path: %v\n", path, err)
 		return nil, err
 	}
-	rpath := fn.RelPath(gi.Filename(pth))
+	rpath := fn.RelPath(core.Filename(pth))
 	if rpath == "." {
 		return fn, nil
 	}

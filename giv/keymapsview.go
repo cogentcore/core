@@ -5,18 +5,18 @@
 package giv
 
 import (
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/laser"
 )
 
 // KeyMapValue represents a [keyfun.MapName] value with a button.
 type KeyMapValue struct {
-	ValueBase[*gi.Button]
+	ValueBase[*core.Button]
 }
 
 func (v *KeyMapValue) Config() {
-	v.Widget.SetType(gi.ButtonTonal)
+	v.Widget.SetType(core.ButtonTonal)
 	ConfigDialogWidget(v, false)
 }
 
@@ -25,7 +25,7 @@ func (v *KeyMapValue) Update() {
 	v.Widget.SetText(txt).Update()
 }
 
-func (v *KeyMapValue) ConfigDialog(d *gi.Body) (bool, func()) {
+func (v *KeyMapValue) ConfigDialog(d *core.Body) (bool, func()) {
 	d.SetTitle("Select a key map")
 	si := 0
 	cur := laser.ToString(v.Value.Interface())

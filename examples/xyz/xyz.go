@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/xyz"
 	"cogentcore.org/core/xyz/examples/assets"
@@ -133,16 +133,16 @@ func (an *Anim) Animate() {
 
 func main() {
 	anim := &Anim{}
-	b := gi.NewBody("XYZ Demo")
+	b := core.NewBody("XYZ Demo")
 
-	gi.NewLabel(b).SetText(`This is a demonstration of <b>XYZ</b>, the <a href="https://cogentcore.org/core">Cogent Core</a> <i>3D</i> Framework.`).
-		SetType(gi.LabelHeadlineSmall).
+	core.NewLabel(b).SetText(`This is a demonstration of <b>XYZ</b>, the <a href="https://cogentcore.org/core">Cogent Core</a> <i>3D</i> Framework.`).
+		SetType(core.LabelHeadlineSmall).
 		Style(func(s *styles.Style) {
 			s.Text.Align = styles.Center
 			s.Text.AlignV = styles.Center
 		})
 
-	gi.NewButton(b).SetText("Toggle animation").OnClick(func(e events.Event) {
+	core.NewButton(b).SetText("Toggle animation").OnClick(func(e events.Event) {
 		anim.On = !anim.On
 	})
 

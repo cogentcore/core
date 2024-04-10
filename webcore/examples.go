@@ -9,8 +9,8 @@ import (
 	"strconv"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/coredom"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/styles"
 )
 
@@ -19,7 +19,7 @@ import (
 // by ID. Generated webcoregen.go files add to this by finding
 // all code blocks with language Go (must be uppercase, as that
 // indicates that is an "exported" example).
-var Examples = map[string]func(parent gi.Widget){}
+var Examples = map[string]func(parent core.Widget){}
 
 func init() {
 	coredom.ElementHandlers["webcore-example"] = ExampleHandler
@@ -34,7 +34,7 @@ func ExampleHandler(ctx *coredom.Context) bool {
 	// the node we actually care about is our first child, the <pre> element
 	ctx.Node = ctx.Node.FirstChild
 
-	gi.NewLabel(ctx.Parent()).SetText(coredom.ExtractText(ctx)).Style(func(s *styles.Style) {
+	core.NewLabel(ctx.Parent()).SetText(coredom.ExtractText(ctx)).Style(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 		s.Background = colors.C(colors.Scheme.SurfaceContainer)
 		s.Border.Radius = styles.BorderRadiusMedium

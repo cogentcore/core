@@ -11,8 +11,8 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/colormap"
 	"cogentcore.org/core/colors/gradient"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -29,7 +29,7 @@ func (cmn ColorMapName) Value() Value {
 // to display a dialog for selecting different color map options.
 // It represents a [ColorMapName] value.
 type ColorMapValue struct {
-	ValueBase[*gi.Frame]
+	ValueBase[*core.Frame]
 }
 
 func (v *ColorMapValue) Config() {
@@ -68,7 +68,7 @@ func (v *ColorMapValue) Update() {
 	v.Widget.NeedsRender()
 }
 
-func (v *ColorMapValue) ConfigDialog(d *gi.Body) (bool, func()) {
+func (v *ColorMapValue) ConfigDialog(d *core.Body) (bool, func()) {
 	d.SetTitle("Select a color map")
 	sl := colormap.AvailableMapsList()
 	cur := laser.ToString(v.Value.Interface())

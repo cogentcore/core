@@ -5,7 +5,7 @@ package texteditor
 import (
 	"image"
 
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/paint"
@@ -29,7 +29,7 @@ func (t *Spell) SetSuggest(v ...string) *Spell { t.Suggest = v; return t }
 
 // SetStage sets the [Spell.Stage]:
 // Stage is the [PopupStage] associated with the [Spell]
-func (t *Spell) SetStage(v *gi.Stage) *Spell { t.Stage = v; return t }
+func (t *Spell) SetStage(v *core.Stage) *Spell { t.Stage = v; return t }
 
 // DiffViewType is the [gti.Type] for [DiffView]
 var DiffViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/texteditor.DiffView", IDName: "diff-view", Doc: "DiffView presents two side-by-side TextEditor windows showing the differences\nbetween two files (represented as lines of strings).", Methods: []gti.Method{{Name: "SaveFileA", Doc: "SaveFileA saves the current state of file A to given filename", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"fname"}}, {Name: "SaveFileB", Doc: "SaveFileB saves the current state of file B to given filename", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"fname"}}}, Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "FileA", Doc: "first file name being compared"}, {Name: "FileB", Doc: "second file name being compared"}, {Name: "RevA", Doc: "revision for first file, if relevant"}, {Name: "RevB", Doc: "revision for second file, if relevant"}, {Name: "BufA", Doc: "textbuf for A showing the aligned edit view"}, {Name: "BufB", Doc: "textbuf for B showing the aligned edit view"}, {Name: "AlignD", Doc: "aligned diffs records diff for aligned lines"}, {Name: "Diffs", Doc: "Diffs applied"}}, Instance: &DiffView{}})
@@ -121,7 +121,7 @@ var EditorType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/texteditor.Edi
 
 // NewEditor adds a new [Editor] with the given name to the given parent:
 // Editor is a widget for editing multiple lines of complicated text (as compared to
-// [gi.TextField] for a single line of simple text).  The Editor is driven by a [Buffer]
+// [core.TextField] for a single line of simple text).  The Editor is driven by a [Buffer]
 // buffer which contains all the text, and manages all the edits,
 // sending update events out to the editors.
 //
@@ -195,7 +195,7 @@ func (t *Editor) SetTooltip(v string) *Editor { t.Tooltip = v; return t }
 var TwinEditorsType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/texteditor.TwinEditors", IDName: "twin-editors", Doc: "TwinEditors presents two side-by-side [Editor]s in [gi.Splits]\nthat scroll in sync with each other.", Embeds: []gti.Field{{Name: "Splits"}}, Fields: []gti.Field{{Name: "BufA", Doc: "textbuf for A"}, {Name: "BufB", Doc: "textbuf for B"}}, Instance: &TwinEditors{}})
 
 // NewTwinEditors adds a new [TwinEditors] with the given name to the given parent:
-// TwinEditors presents two side-by-side [Editor]s in [gi.Splits]
+// TwinEditors presents two side-by-side [Editor]s in [core.Splits]
 // that scroll in sync with each other.
 func NewTwinEditors(parent tree.Node, name ...string) *TwinEditors {
 	return parent.NewChild(TwinEditorsType, name...).(*TwinEditors)

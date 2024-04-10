@@ -20,10 +20,10 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fi"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
@@ -33,14 +33,14 @@ import (
 )
 
 // FileViewDialog opens a dialog for selecting a file.
-func FileViewDialog(ctx gi.Widget, filename, exts, title string, fun func(selfile string)) {
-	d := gi.NewBody()
+func FileViewDialog(ctx core.Widget, filename, exts, title string, fun func(selfile string)) {
+	d := core.NewBody()
 	if title != "" {
 		d.SetTitle(title)
 	}
 	fv := NewFileView(d).SetFilename(filename, exts)
 	d.AddAppBar(fv.ConfigToolbar)
-	d.AddBottomBar(func(parent gi.Widget) {
+	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).OnClick(func(e events.Event) {
 			fun(fv.SelectedFile())
@@ -60,7 +60,7 @@ func FileViewDialog(ctx gi.Widget, filename, exts, title string, fun func(selfil
 
 // FileView is a viewer onto files -- core of the file chooser dialog
 type FileView struct {
-	gi.Frame
+	core.Frame
 
 	// path to directory of files to display
 	DirPath string `set:"-"`
@@ -107,12 +107,12 @@ func (fv *FileView) SetStyles() {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 	})
-	fv.OnWidgetAdded(func(w gi.Widget) {
+	fv.OnWidgetAdded(func(w core.Widget) {
 		pfrom := w.PathFrom(fv)
 		switch pfrom {
 		case "path-tbar":
-			fr := w.(*gi.Frame)
-			gi.ToolbarStyles(fr)
+			fr := w.(*core.Frame)
+			core.ToolbarStyles(fr)
 			w.Style(func(s *styles.Style) {
 				s.Gap.X.Dp(4)
 			})
@@ -263,8 +263,8 @@ func (fv *FileView) ConfigFileView() {
 	if fv.HasChildren() {
 		return
 	}
-	gi.NewLayout(fv, "files-row")
-	gi.NewLayout(fv, "sel-row")
+	core.NewLayout(fv, "files-row")
+	core.NewLayout(fv, "sel-row")
 
 	fv.ConfigFilesRow()
 	fv.ConfigSelRow()
@@ -273,7 +273,7 @@ func (fv *FileView) ConfigFileView() {
 
 // ConfigToolbar configures the given toolbar to have file view
 // actions and completions.
-func (fv *FileView) ConfigToolbar(tb *gi.Toolbar) {
+func (fv *FileView) ConfigToolbar(tb *core.Toolbar) {
 	NewFuncButton(tb, fv.DirPathUp).SetIcon(icons.ArrowUpward).SetKey(keyfun.Jump).SetText("Up")
 	NewFuncButton(tb, fv.AddPathToFavs).SetIcon(icons.Favorite).SetText("Favorite")
 	NewFuncButton(tb, fv.UpdateFilesAction).SetIcon(icons.Refresh).SetText("Update")
@@ -284,8 +284,8 @@ func (fv *FileView) ConfigToolbar(tb *gi.Toolbar) {
 		return
 	}
 	ch.ItemsFuncs = slices.Insert(ch.ItemsFuncs, 0, func() {
-		for _, sp := range gi.RecentPaths {
-			ch.Items = append(ch.Items, gi.ChooserItem{
+		for _, sp := range core.RecentPaths {
+			ch.Items = append(ch.Items, core.ChooserItem{
 				Value: sp,
 				Icon:  icons.Folder,
 				Func: func() {
@@ -294,17 +294,17 @@ func (fv *FileView) ConfigToolbar(tb *gi.Toolbar) {
 				},
 			})
 		}
-		ch.Items = append(ch.Items, gi.ChooserItem{
+		ch.Items = append(ch.Items, core.ChooserItem{
 			Value:           "Reset recent paths",
 			Icon:            icons.Refresh,
 			SeparatorBefore: true,
 			Func: func() {
-				gi.RecentPaths = make(gi.FilePaths, 1, gi.SystemSettings.SavedPathsMax)
-				gi.RecentPaths[0] = fv.DirPath
+				core.RecentPaths = make(core.FilePaths, 1, core.SystemSettings.SavedPathsMax)
+				core.RecentPaths[0] = fv.DirPath
 				fv.UpdateFiles()
 			},
 		})
-		ch.Items = append(ch.Items, gi.ChooserItem{
+		ch.Items = append(ch.Items, core.ChooserItem{
 			Value: "Edit recent paths",
 			Icon:  icons.Edit,
 			Func: func() {
@@ -321,20 +321,20 @@ func (fv *FileView) ConfigFilesRow() {
 
 	sv.SelectedIndex = -1
 	sv.SetReadOnly(true)
-	sv.SetSlice(&gi.SystemSettings.FavPaths)
+	sv.SetSlice(&core.SystemSettings.FavPaths)
 	sv.OnSelect(func(e events.Event) {
 		fv.FavSelect(sv.SelectedIndex)
 	})
 
 	fsv.ContextMenus = nil
-	fsv.AddContextMenu(func(m *gi.Scene) {
-		gi.NewButton(m).SetText("Open").SetIcon(icons.Open).
+	fsv.AddContextMenu(func(m *core.Scene) {
+		core.NewButton(m).SetText("Open").SetIcon(icons.Open).
 			SetTooltip("Open the selected file using the default app").
 			OnClick(func(e events.Event) {
-				gi.TheApp.OpenURL(fv.SelectedFile())
+				core.TheApp.OpenURL(fv.SelectedFile())
 			})
-		gi.NewSeparator(m)
-		gi.NewButton(m).SetText("Duplicate").SetIcon(icons.FileCopy).
+		core.NewSeparator(m)
+		core.NewButton(m).SetText("Duplicate").SetIcon(icons.FileCopy).
 			SetTooltip("Make a copy of the selected file").
 			OnClick(func(e events.Event) {
 				fn := fv.Files[fsv.SelectedIndex]
@@ -342,37 +342,37 @@ func (fv *FileView) ConfigFilesRow() {
 				fv.UpdateFilesAction()
 			})
 		tip := "Delete moves the selected file to the trash / recycling bin"
-		if gi.TheApp.Platform().IsMobile() {
+		if core.TheApp.Platform().IsMobile() {
 			tip = "Delete deletes the selected file"
 		}
-		gi.NewButton(m).SetText("Delete").SetIcon(icons.Delete).
+		core.NewButton(m).SetText("Delete").SetIcon(icons.Delete).
 			SetTooltip(tip).
 			OnClick(func(e events.Event) {
 				fn := fv.Files[fsv.SelectedIndex]
 				NewSoloFuncButton(fsv, fn.Delete).SetTooltip(tip).SetConfirm(true).
 					SetAfterFunc(fv.UpdateFilesAction).CallFunc()
 			})
-		gi.NewButton(m).SetText("Rename").SetIcon(icons.EditNote).
+		core.NewButton(m).SetText("Rename").SetIcon(icons.EditNote).
 			SetTooltip("Rename the selected file").
 			OnClick(func(e events.Event) {
 				fn := fv.Files[fsv.SelectedIndex]
 				NewSoloFuncButton(fsv, fn.Rename).SetAfterFunc(fv.UpdateFilesAction).CallFunc()
 			})
-		gi.NewButton(m).SetText("Info").SetIcon(icons.Info).
+		core.NewButton(m).SetText("Info").SetIcon(icons.Info).
 			SetTooltip("View information about the selected file").
 			OnClick(func(e events.Event) {
 				fn := fv.Files[fsv.SelectedIndex]
-				d := gi.NewBody().AddTitle("Info: " + fn.Name)
+				d := core.NewBody().AddTitle("Info: " + fn.Name)
 				NewStructView(d).SetStruct(&fn).SetReadOnly(true)
 				d.AddOKOnly().NewFullDialog(fsv).Run()
 			})
-		gi.NewSeparator(m)
+		core.NewSeparator(m)
 		NewFuncButton(m, fv.NewFolder).SetIcon(icons.CreateNewFolder)
 	})
 	fv.ReadFiles()
 	fsv.SetReadOnly(true)
 	fsv.SetSlice(&fv.Files)
-	fsv.StyleFunc = func(w gi.Widget, s *styles.Style, row, col int) {
+	fsv.StyleFunc = func(w core.Widget, s *styles.Style, row, col int) {
 		if clr, got := FileViewKindColorMap[fv.Files[row].Kind]; got {
 			s.Color = grr.Log1(gradient.FromString(clr))
 			return
@@ -386,8 +386,8 @@ func (fv *FileView) ConfigFilesRow() {
 		}
 	}
 
-	if gi.SystemSettings.FileViewSort != "" {
-		fsv.SetSortFieldName(gi.SystemSettings.FileViewSort)
+	if core.SystemSettings.FileViewSort != "" {
+		fsv.SetSortFieldName(core.SystemSettings.FileViewSort)
 	}
 	fsv.Style(func(s *styles.Style) {
 		s.Cursor = cursors.Pointer
@@ -408,10 +408,10 @@ func (fv *FileView) ConfigFilesRow() {
 
 func (fv *FileView) ConfigSelRow() {
 	sr := fv.SelectRow()
-	gi.NewLabel(sr, "sel-lbl").SetText("File: ").
+	core.NewLabel(sr, "sel-lbl").SetText("File: ").
 		SetTooltip("enter file name here (or select from above list)")
 
-	sf := gi.NewTextField(sr, "sel").SetText(fv.CurrentSelectedFile).
+	sf := core.NewTextField(sr, "sel").SetText(fv.CurrentSelectedFile).
 		SetTooltip(fmt.Sprintf("Enter the file name. Special keys: up/down to move selection; %s or %s to go up to parent folder; %s or %s or %s or %s to select current file (if directory, goes into it, if file, selects and closes); %s or %s for prev / next history item; %s return to this field", keyfun.WordLeft.Label(), keyfun.Jump.Label(), keyfun.SelectMode.Label(), keyfun.Insert.Label(), keyfun.InsertAfter.Label(), keyfun.Open.Label(), keyfun.HistPrev.Label(), keyfun.HistNext.Label(), keyfun.Search.Label()))
 	sf.SetCompleter(fv, fv.FileComplete, fv.FileCompleteEdit)
 	sf.OnChange(func(e events.Event) {
@@ -425,9 +425,9 @@ func (fv *FileView) ConfigSelRow() {
 	})
 	sf.StartFocus()
 
-	gi.NewLabel(sr, "ext-lbl").SetText("Extension(s):").
+	core.NewLabel(sr, "ext-lbl").SetText("Extension(s):").
 		SetTooltip("target extension(s) to highlight; if multiple, separate with commas, and do include the . at the start")
-	ef := gi.NewTextField(sr, "ext").SetText(fv.Ext)
+	ef := core.NewTextField(sr, "ext").SetText(fv.Ext)
 	ef.OnChange(func(e events.Event) {
 		fv.SetExtAction(ef.Text())
 	})
@@ -471,8 +471,8 @@ func (fv *FileView) WatchWatcher() {
 	}()
 }
 
-func (fv *FileView) FilesRow() *gi.Layout {
-	return fv.ChildByName("files-row", 2).(*gi.Layout)
+func (fv *FileView) FilesRow() *core.Layout {
+	return fv.ChildByName("files-row", 2).(*core.Layout)
 }
 
 // FavsView returns the TableView of the favorites
@@ -485,18 +485,18 @@ func (fv *FileView) FilesView() *TableView {
 	return fv.FilesRow().ChildByName("files-view", 1).(*TableView)
 }
 
-func (fv *FileView) SelectRow() *gi.Layout {
-	return fv.ChildByName("sel-row", 4).(*gi.Layout)
+func (fv *FileView) SelectRow() *core.Layout {
+	return fv.ChildByName("sel-row", 4).(*core.Layout)
 }
 
 // SelectField returns the TextField of the select file
-func (fv *FileView) SelectField() *gi.TextField {
-	return fv.SelectRow().ChildByName("sel", 1).(*gi.TextField)
+func (fv *FileView) SelectField() *core.TextField {
+	return fv.SelectRow().ChildByName("sel", 1).(*core.TextField)
 }
 
 // ExtField returns the TextField of the extension
-func (fv *FileView) ExtField() *gi.TextField {
-	return fv.SelectRow().ChildByName("ext", 2).(*gi.TextField)
+func (fv *FileView) ExtField() *core.TextField {
+	return fv.SelectRow().ChildByName("ext", 2).(*core.TextField)
 }
 
 // UpdatePath ensures that path is in abs form and ready to be used..
@@ -562,11 +562,11 @@ func (fv *FileView) UpdateFiles() {
 	defer fv.UpdateMu.Unlock()
 
 	fv.UpdatePath()
-	if len(gi.RecentPaths) == 0 {
-		gi.OpenRecentPaths()
+	if len(core.RecentPaths) == 0 {
+		core.OpenRecentPaths()
 	}
-	gi.RecentPaths.AddPath(fv.DirPath, gi.SystemSettings.SavedPathsMax)
-	gi.SaveRecentPaths()
+	core.RecentPaths.AddPath(fv.DirPath, core.SystemSettings.SavedPathsMax)
+	core.SaveRecentPaths()
 	sf := fv.SelectField()
 	sf.SetText(fv.CurrentSelectedFile)
 
@@ -590,7 +590,7 @@ func (fv *FileView) UpdateFiles() {
 	}
 
 	if fv.PrevPath != fv.DirPath {
-		if gi.TheApp.Platform() != goosi.MacOS {
+		if core.TheApp.Platform() != goosi.MacOS {
 			// mac is not supported in a high-capacity fashion at this point
 			if fv.PrevPath == "" {
 				fv.ConfigWatcher()
@@ -627,13 +627,13 @@ func (fv *FileView) AddPathToFavs() { //gti:add
 	if fnm == "" {
 		fnm = dp
 	}
-	if _, found := gi.SystemSettings.FavPaths.FindPath(dp); found {
-		gi.MessageSnackbar(fv, "Error: path is already on the favorites list")
+	if _, found := core.SystemSettings.FavPaths.FindPath(dp); found {
+		core.MessageSnackbar(fv, "Error: path is already on the favorites list")
 		return
 	}
-	fi := gi.FavPathItem{"folder", fnm, dp}
-	gi.SystemSettings.FavPaths = append(gi.SystemSettings.FavPaths, fi)
-	gi.ErrorSnackbar(fv, gi.SaveSettings(gi.SystemSettings), "Error saving settings")
+	fi := core.FavPathItem{"folder", fnm, dp}
+	core.SystemSettings.FavPaths = append(core.SystemSettings.FavPaths, fi)
+	core.ErrorSnackbar(fv, core.SaveSettings(core.SystemSettings), "Error saving settings")
 	// fv.FileSig.Emit(fv.This(), int64(FileViewFavAdded), fi)
 	fv.UpdateFavs()
 }
@@ -733,10 +733,10 @@ func (fv *FileView) SetExtAction(ext string) *FileView {
 
 // FavSelect selects a favorite path and goes there
 func (fv *FileView) FavSelect(idx int) {
-	if idx < 0 || idx >= len(gi.SystemSettings.FavPaths) {
+	if idx < 0 || idx >= len(core.SystemSettings.FavPaths) {
 		return
 	}
-	fi := gi.SystemSettings.FavPaths[idx]
+	fi := core.SystemSettings.FavPaths[idx]
 	fv.DirPath, _ = homedir.Expand(fi.Path)
 	fv.UpdateFilesAction()
 }
@@ -747,9 +747,9 @@ func (fv *FileView) SaveSortSettings() {
 	if sv == nil {
 		return
 	}
-	gi.SystemSettings.FileViewSort = sv.SortFieldName()
+	core.SystemSettings.FileViewSort = sv.SortFieldName()
 	// fmt.Printf("sort: %v\n", gi.Settings.FileViewSort)
-	gi.ErrorSnackbar(fv, gi.SaveSettings(gi.SystemSettings), "Error saving settings")
+	core.ErrorSnackbar(fv, core.SaveSettings(core.SystemSettings), "Error saving settings")
 }
 
 func (fv *FileView) ApplyStyle() {
@@ -766,7 +766,7 @@ func (fv *FileView) HandleEvents() {
 
 func (fv *FileView) KeyInput(kt events.Event) {
 	kf := keyfun.Of(kt.KeyChord())
-	if gi.DebugSettings.KeyEventTrace {
+	if core.DebugSettings.KeyEventTrace {
 		slog.Info("FileView KeyInput", "widget", fv, "keyfun", kf)
 	}
 	switch kf {
@@ -861,12 +861,12 @@ func (fv *FileView) FileCompleteEdit(data any, text string, cursorPos int, c com
 // EditRecentPaths displays a dialog allowing the user to
 // edit the recent paths list.
 func (fv *FileView) EditRecentPaths() {
-	d := gi.NewBody().AddTitle("Recent file paths").AddText("You can delete paths you no longer use")
-	NewSliceView(d).SetSlice(&gi.RecentPaths)
-	d.AddBottomBar(func(parent gi.Widget) {
+	d := core.NewBody().AddTitle("Recent file paths").AddText("You can delete paths you no longer use")
+	NewSliceView(d).SetSlice(&core.RecentPaths)
+	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).OnClick(func(e events.Event) {
-			gi.SaveRecentPaths()
+			core.SaveRecentPaths()
 			fv.UpdateFiles()
 		})
 	})

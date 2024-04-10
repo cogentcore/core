@@ -17,9 +17,9 @@ import (
 	"path"
 	"strings"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/coredom"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/grows/tomls"
@@ -32,7 +32,7 @@ import (
 
 // Page represents one site page
 type Page struct {
-	gi.Frame
+	core.Frame
 
 	// Source is the filesystem in which the content is located.
 	Source fs.FS
@@ -76,7 +76,7 @@ func (pg *Page) OnInit() {
 func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	u, err := url.Parse(rawURL)
 	if err != nil {
-		gi.ErrorSnackbar(pg, err, "Invalid URL")
+		core.ErrorSnackbar(pg, err, "Invalid URL")
 		return
 	}
 	if u.Scheme != "" {
@@ -85,7 +85,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	}
 
 	if pg.Source == nil {
-		gi.MessageSnackbar(pg, "Programmer error: page source must not be nil")
+		core.MessageSnackbar(pg, "Programmer error: page source must not be nil")
 		return
 	}
 
@@ -120,7 +120,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 			b, err = fs.ReadFile(pg.Source, pg.PagePath)
 		}
 		if err != nil {
-			gi.ErrorSnackbar(pg, err, "Error opening page")
+			core.ErrorSnackbar(pg, err, "Error opening page")
 			return
 		}
 	}
@@ -156,11 +156,11 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	nav.UnselectAll()
 	nav.FindPath(rawURL).(*giv.TreeView).Select()
 
-	fr := pg.FindPath("splits/body").(*gi.Frame)
+	fr := pg.FindPath("splits/body").(*core.Frame)
 	fr.DeleteChildren()
 	err = coredom.ReadMD(pg.Context, fr, b)
 	if err != nil {
-		gi.ErrorSnackbar(pg, err, "Error loading page")
+		core.ErrorSnackbar(pg, err, "Error loading page")
 		return
 	}
 	fr.Update()
@@ -170,9 +170,9 @@ func (pg *Page) Config() {
 	if pg.HasChildren() {
 		return
 	}
-	sp := gi.NewSplits(pg, "splits").SetSplits(0.2, 0.8)
+	sp := core.NewSplits(pg, "splits").SetSplits(0.2, 0.8)
 
-	nav := giv.NewTreeViewFrame(sp, "nav").SetText(gi.TheApp.Name())
+	nav := giv.NewTreeViewFrame(sp, "nav").SetText(core.TheApp.Name())
 	nav.OnSelect(func(e events.Event) {
 		if len(nav.SelectedNodes) == 0 {
 			return
@@ -226,7 +226,7 @@ func (pg *Page) Config() {
 		return nil
 	}))
 
-	gi.NewFrame(sp, "body").Style(func(s *styles.Style) {
+	core.NewFrame(sp, "body").Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
 
@@ -236,10 +236,10 @@ func (pg *Page) Config() {
 }
 
 // AppBar is the default app bar for a [Page]
-func (pg *Page) AppBar(tb *gi.Toolbar) {
+func (pg *Page) AppBar(tb *core.Toolbar) {
 	// ch := tb.AppChooser()
 
-	back := tb.ChildByName("back").(*gi.Button)
+	back := tb.ChildByName("back").(*core.Button)
 	back.OnClick(func(e events.Event) {
 		if pg.HistoryIndex > 0 {
 			pg.HistoryIndex--
