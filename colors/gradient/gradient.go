@@ -126,7 +126,7 @@ const (
 	ObjectBoundingBox Units = iota
 	// UserSpaceOnUse indicates that coordinate values are specified
 	// in the current user coordinate system when the gradient is used
-	// (ie: actual SVG/gi coordinates).
+	// (ie: actual SVG/core coordinates).
 	UserSpaceOnUse
 )
 

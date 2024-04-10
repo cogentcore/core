@@ -103,7 +103,7 @@ func (ft *Tree) OpenPath(path string) {
 	}
 	abs, err := filepath.Abs(effpath)
 	if err != nil {
-		log.Printf("giv.Tree:OpenPath: %s\n", err)
+		log.Printf("views.Tree:OpenPath: %s\n", err)
 		abs = effpath
 	}
 	ft.FPath = core.Filename(abs)

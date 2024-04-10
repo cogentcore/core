@@ -138,9 +138,8 @@ type Value interface {
 	// Val returns the reflect.Value representation for this item.
 	Val() reflect.Value
 
-	// SetValue assigns given value to this item (if not ReadOnly), using
-	// Ki.SetField for Ki types and laser.SetRobust otherwise -- emits a ViewSig
-	// signal when set.
+	// SetValue assigns the given value to this item (if not ReadOnly),
+	// using [xreflect.SetRobust] and emitting a change event.
 	SetValue(val any) bool
 
 	// SendChange sends events.Change event to all listeners registered on this view.
@@ -478,7 +477,7 @@ type ValueData struct {
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string
 
-	// the object that owns this value, either a struct, slice, or map, if non-nil -- if a Ki Node, then SetField is used to set value, to provide proper updating
+	// the object that owns this value, either a struct, slice, or map, if non-nil
 	Owner any
 
 	// if Owner is a struct, this is the reflect.StructField associated with the value

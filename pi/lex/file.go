@@ -71,7 +71,7 @@ func (fl *File) AllocLines() {
 	fl.EosPos = make([]EosPos, nlines)
 }
 
-// LinesInserted inserts new lines -- called e.g., by giv.TextBuf to sync
+// LinesInserted inserts new lines -- called e.g., by views.TextBuf to sync
 // the markup with ongoing edits
 func (fl *File) LinesInserted(stln, nlns int) {
 	// Lexs
@@ -103,7 +103,7 @@ func (fl *File) LinesInserted(stln, nlns int) {
 	fl.EosPos = nep
 }
 
-// LinesDeleted deletes lines -- called e.g., by giv.TextBuf to sync
+// LinesDeleted deletes lines -- called e.g., by views.TextBuf to sync
 // the markup with ongoing edits
 func (fl *File) LinesDeleted(stln, edln int) {
 	fl.Lexs = append(fl.Lexs[:stln], fl.Lexs[edln:]...)

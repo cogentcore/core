@@ -847,7 +847,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 	sv.SliceNewAtSelect(idx)
 
 	sltyp := laser.SliceElType(sv.Slice) // has pointer if it is there
-	iski := tree.IsNode(sltyp)
+	isNode := tree.IsNode(sltyp)
 	slptr := sltyp.Kind() == reflect.Ptr
 
 	svl := reflect.ValueOf(sv.Slice)
@@ -855,7 +855,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 
 	svnp := sv.SliceNPVal
 
-	if iski && sv.SliceValue != nil {
+	if isNode && sv.SliceValue != nil {
 		vd := sv.SliceValue.AsValueData()
 		if vd.Owner != nil {
 			if owntree, ok := vd.Owner.(tree.Node); ok {
@@ -986,7 +986,7 @@ func (sv *SliceViewBase) ConfigToolbar(tb *core.Toolbar) {
 // must be protected by mutex
 func (sv *SliceViewBase) SliceVal(idx int) any {
 	if idx < 0 || idx >= sv.SliceSize {
-		fmt.Printf("giv.SliceViewBase: slice index out of range: %v\n", idx)
+		fmt.Printf("views.SliceViewBase: slice index out of range: %v\n", idx)
 		return nil
 	}
 	val := laser.OnePtrUnderlyingValue(sv.SliceNPVal.Index(idx)) // deal with pointer lists

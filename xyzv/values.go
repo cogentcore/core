@@ -75,7 +75,7 @@ func (v *MeshValue) ConfigDialog(d *core.Body) (bool, func()) {
 TODO: This doesn't work because texture is on Material which doesn't have a pointer to the Scene!
 
 // Value restylesers TexValue as the viewer of TexName
-func (mn TexName) Value() giv.Value {
+func (mn TexName) Value() views.Value {
 	vv := TexValue{}
 	vv.Init(&vv)
 	return &vv
@@ -84,7 +84,7 @@ func (mn TexName) Value() giv.Value {
 // TexValue presents an action for displaying a TexName and selecting
 // textures from a ChooserDialog
 type TexValue struct {
-	giv.ValueBase
+	views.ValueBase
 }
 
 func (vv *TexValue) WidgetType() reflect.Type {
@@ -142,11 +142,11 @@ func (vv *TexValue) Activate(vp *core.Viewport2D, dlgRecv tree.Node, dlgFunc tre
 
 	cur := laser.ToString(vv.Value.Interface())
 	desc, _ := vv.Tag("desc")
-	giv.SliceViewSelectDialog(vp, &sl, cur, giv.DlgOpts{Title: "Select a Texture", Prompt: desc}, nil,
+	views.SliceViewSelectDialog(vp, &sl, cur, views.DlgOpts{Title: "Select a Texture", Prompt: desc}, nil,
 		vv.This(), func(recv, send tree.Node, sig int64, data any) {
 			if sig == int64(core.DialogAccepted) {
 				ddlg := send.Embed(core.TypeDialog).(*core.Dialog)
-				si := giv.SliceViewSelectDialogValue(ddlg)
+				si := views.SliceViewSelectDialogValue(ddlg)
 				if si >= 0 {
 					vv.SetValue(sl[si])
 					vv.UpdateWidget()

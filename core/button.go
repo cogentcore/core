@@ -237,7 +237,7 @@ func (bt *Button) SetKey(kf keyfun.Funs) *Button {
 	return bt
 }
 
-// NOTE: Button.SetText must be defined manually so that [giv.FuncButton]
+// NOTE: Button.SetText must be defined manually so that [views.FuncButton]
 // can define its own SetText method that updates the tooltip
 
 // SetText sets the [Button.Text]:

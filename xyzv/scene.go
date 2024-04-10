@@ -22,7 +22,7 @@ import (
 
 // Scene is a core.Widget that manages a xyz.Scene,
 // providing the basic rendering logic for the 3D scene
-// in the 2D gi gui context.
+// in the 2D core gui context.
 type Scene struct {
 	core.WidgetBase
 

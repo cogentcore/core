@@ -23,7 +23,7 @@ import (
 
 // SVG is a Widget that renders an [svg.SVG] object.
 // If it is not [states.ReadOnly], the user can pan and zoom the display.
-// By default, it is [states.ReadOnly]. See [giv.ConfigSVGToolbar] for a
+// By default, it is [states.ReadOnly]. See [views.ConfigSVGToolbar] for a
 // toolbar with panning, selecting, and I/O buttons.
 type SVG struct {
 	Box

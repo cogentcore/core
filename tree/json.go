@@ -21,7 +21,7 @@ import (
 )
 
 // note: use package grows/jsons for standard read / write of JSON files
-// for Ki trees.  The Slice Marshal / Unmarshal methods save the type info
+// for trees.  The Slice Marshal / Unmarshal methods save the type info
 // of each child so that the full tree can be properly reconstructed.
 
 //////////////////////////////////////////////////////////////////////////
@@ -215,7 +215,7 @@ func ReadRootTypeJSON(b []byte) (*gti.Type, []byte, error) {
 	return typ, b[bodyidx:], nil
 }
 
-// ReadNewJSON reads a new Ki tree from a JSON-encoded byte string,
+// ReadNewJSON reads a new tree from a JSON-encoded byte string,
 // using type information at start of file to create an object of the proper type
 func ReadNewJSON(reader io.Reader) (Node, error) {
 	b, err := io.ReadAll(reader)
@@ -233,7 +233,7 @@ func ReadNewJSON(reader io.Reader) (Node, error) {
 	return root, grr.Log(err)
 }
 
-// OpenNewJSON opens a new Ki tree from a JSON-encoded file, using type
+// OpenNewJSON opens a new tree from a JSON-encoded file, using type
 // information at start of file to create an object of the proper type
 func OpenNewJSON(filename string) (Node, error) {
 	fp, err := os.Open(filename)

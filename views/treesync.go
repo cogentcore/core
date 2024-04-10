@@ -39,7 +39,7 @@ func (tv *TreeView) SyncTree(n tree.Node) *TreeView {
 // SetSyncNode sets the sync source node that we are viewing,
 // and syncs the view of its tree.  It is called routinely
 // via SyncToSrc during tree updating.
-// It uses ki Config mechanism to perform minimal updates to
+// It uses tree Config mechanism to perform minimal updates to
 // remain in sync.
 func (tv *TreeView) SetSyncNode(sn tree.Node, tvIndex *int, init bool, depth int) {
 	if tv.SyncNode != sn {
@@ -178,8 +178,8 @@ func (tv *TreeView) AddTreeNodes(rel, myidx int, typ *gti.Type, n int) {
 	var stv *TreeView
 	for i := 0; i < n; i++ {
 		nm := fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i)
-		nki := tv.InsertNewChild(typ, myidx+i, nm)
-		ntv := AsTreeView(nki)
+		nn := tv.InsertNewChild(typ, myidx+i, nm)
+		ntv := AsTreeView(nn)
 		ntv.Update()
 		if i == n-1 {
 			stv = ntv
@@ -198,9 +198,9 @@ func (tv *TreeView) AddSyncNodes(rel, myidx int, typ *gti.Type, n int) {
 	var sn tree.Node
 	for i := 0; i < n; i++ {
 		nm := fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i)
-		nki := parent.InsertNewChild(typ, myidx+i, nm)
+		nn := parent.InsertNewChild(typ, myidx+i, nm)
 		if i == n-1 {
-			sn = nki
+			sn = nn
 		}
 	}
 	tv.SendChangeEventReSync(nil)
@@ -393,7 +393,7 @@ func (tv *TreeView) MimeDataSync(md *mimedata.Mimes) {
 	}
 }
 
-// SyncNodesFromMimeData creates a slice of Ki node(s)
+// SyncNodesFromMimeData creates a slice of tree node(s)
 // from given mime data and also a corresponding slice
 // of original paths.
 func (tv *TreeView) SyncNodesFromMimeData(md mimedata.Mimes) (tree.Slice, []string) {
@@ -441,7 +441,7 @@ func (tv *TreeView) PasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int,
 	myidx += rel
 	sroot := tv.RootView.SyncNode
 	sz := len(sl)
-	var selKi tree.Node
+	var seln tree.Node
 	for i, ns := range sl {
 		orgpath := pl[i]
 		if mod != events.DropMove {
@@ -455,12 +455,12 @@ func (tv *TreeView) PasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int,
 			ns.SetName(ns.Name() + TreeViewTempMovedTag) // special keyword :)
 		}
 		if i == sz-1 {
-			selKi = ns
+			seln = ns
 		}
 	}
 	tvparent.SendChangeEventReSync(nil)
-	if selKi != nil {
-		if tvk := tvparent.ChildByName("tv_"+selKi.Name(), myidx); tvk != nil {
+	if seln != nil {
+		if tvk := tvparent.ChildByName("tv_"+seln.Name(), myidx); tvk != nil {
 			stv := AsTreeView(tvk)
 			stv.SelectAction(events.SelectOne)
 		}

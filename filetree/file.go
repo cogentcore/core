@@ -254,7 +254,7 @@ func (fn *Node) RenameFiles() { //gti:add
 		if sn == nil || sn.IsExternal() {
 			continue
 		}
-		// giv.NewSoloFuncButton(sn, sn.Rename).SetAfterFunc(fv.UpdateFilesAction).CallFunc()
+		// views.NewSoloFuncButton(sn, sn.Rename).SetAfterFunc(fv.UpdateFilesAction).CallFunc()
 		views.CallFunc(sn, sn.RenameFile) // todo: not using interface?
 	}
 }

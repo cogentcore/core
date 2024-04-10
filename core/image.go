@@ -18,7 +18,7 @@ import (
 // Image is a widget that renders a static bitmap image.
 // See [styles.ObjectFits] for how to control the image rendering within
 // the allocated size. The default minimum requested size is the pixel
-// size in [units.Dp] units (1/160th of an inch). See [giv.ConfigImageToolbar]
+// size in [units.Dp] units (1/160th of an inch). See [views.ConfigImageToolbar]
 // for a toolbar with I/O buttons.
 type Image struct {
 	Box

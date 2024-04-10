@@ -7,6 +7,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package goosi provides a Go Operating System Interface framework
+// to support events, window management, and other OS-specific
+// functionality needed for full GUI support.
 package goosi
 
 import "cogentcore.org/core/styles"

@@ -45,7 +45,7 @@ func init() {
 // that should be used to represent them in the GUI. If the return value is nil,
 // then the default [Value] for the value will be used. For example:
 //
-//	func (m *MyType) Value() giv.Value {
+//	func (m *MyType) Value() views.Value {
 //		return &MyValue{}
 //	}
 type Valuer interface {

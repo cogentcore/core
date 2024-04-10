@@ -4,7 +4,7 @@
 
 package texteditor
 
-// TODO: consider moving back to gi or somewhere else based on the
+// TODO: consider moving back to core or somewhere else based on the
 // result of https://github.com/cogentcore/core/issues/711
 
 import (

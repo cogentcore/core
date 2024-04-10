@@ -155,25 +155,26 @@ const (
 	Invisible
 )
 
-// AsNode converts Ki to a Node interface and a NodeBase obj -- nil if not.
-func AsNode(k tree.Node) (Node, *NodeBase) {
-	if k == nil || k.This() == nil { // this also checks for destroyed
+// AsNode converts the given tree node to a [Node] and [NodeBase],
+// returning nil if that is not possible.
+func AsNode(n tree.Node) (Node, *NodeBase) {
+	if n == nil || n.This() == nil { // this also checks for destroyed
 		return nil, nil
 	}
-	ni, ok := k.(Node)
+	ni, ok := n.(Node)
 	if ok {
 		return ni, ni.AsNode()
 	}
 	return nil, nil
 }
 
-// AsNodeBase converts Ki to a *NodeBase -- use when known to be at
-// least of this type, not-nil, etc
-func AsNodeBase(k tree.Node) *NodeBase {
-	return k.(Node).AsNode()
+// AsNodeBase converts the given tree node to a [NodeBase].
+// Only call this if you know that the given node is a non-nil [Node].
+func AsNodeBase(n tree.Node) *NodeBase {
+	return n.(Node).AsNode()
 }
 
-// AsNode returns a generic NodeBase for our node -- gives generic
+// AsNode returns a generic NodeBase for our node, giving generic
 // access to all the base-level data structures without requiring
 // interface methods.
 func (nb *NodeBase) AsNode() *NodeBase {

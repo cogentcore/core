@@ -309,11 +309,11 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 		})
 	case "structview": // structview
 		ts := &Test{}
-		giv.NewStructView(sc).SetStruct(ts)
+		views.NewStructView(sc).SetStruct(ts)
 	case "timeview": // time view
 		ts := &TestTime{}
 		ts.Date = time.Now()
-		giv.NewStructView(sc).SetStruct(ts)
+		views.NewStructView(sc).SetStruct(ts)
 	case "center-dialog":
 		d := NewBody(sc).FullWindow(true)
 		d.Style(func(s *styles.Style) {

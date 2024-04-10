@@ -101,7 +101,7 @@ func AsTreeView(k tree.Node) *TreeView {
 //
 // If the SyncNode field is non-nil, typically via
 // SyncRootNode method, then the TreeView mirrors another
-// Ki tree structure, and tree editing functions apply to
+// tree structure, and tree editing functions apply to
 // the source tree first, and then to the TreeView by sync.
 //
 // Otherwise, data can be directly encoded in a TreeView
@@ -114,7 +114,7 @@ func AsTreeView(k tree.Node) *TreeView {
 type TreeView struct {
 	core.WidgetBase
 
-	// If non-nil, the Ki Node that this widget is viewing in the tree (the source)
+	// If non-nil, the [tree.Node] that this widget is viewing in the tree (the source)
 	SyncNode tree.Node `set:"-" copier:"-" json:"-" xml:"-"`
 
 	// The text to display for the tree view item label, which automatically
@@ -601,7 +601,7 @@ func (tv *TreeView) SizeDown(iter int) bool {
 func (tv *TreeView) Position() {
 	rn := tv.RootView
 	if rn == nil {
-		slog.Error("giv.TreeView: RootView is nil", "in node:", tv)
+		slog.Error("views.TreeView: RootView is nil", "in node:", tv)
 		return
 	}
 	tv.SetBranchState()
@@ -1374,7 +1374,7 @@ func (tv *TreeView) MimeData(md *mimedata.Mimes) {
 	}
 }
 
-// NodesFromMimeData returns a slice of Ki nodes for
+// NodesFromMimeData returns a slice of tree nodes for
 // the TreeView nodes and paths from mime data.
 func (tv *TreeView) NodesFromMimeData(md mimedata.Mimes) (tree.Slice, []string) {
 	ni := len(md) / 2

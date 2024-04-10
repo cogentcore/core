@@ -359,7 +359,7 @@ func values(ts *core.Tabs) {
 	tab := ts.NewTab("Values")
 
 	core.NewLabel(tab).SetType(core.LabelHeadlineLarge).SetText("Values")
-	core.NewLabel(tab).SetText("Cogent Core provides the giv value system, which allows you to instantly turn Go values into interactive widgets bound to the original values with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.")
+	core.NewLabel(tab).SetText("Cogent Core provides the value views system, which allows you to instantly turn Go values into interactive widgets bound to the original values with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.")
 
 	core.NewButton(tab).SetText("Inspector").OnClick(func(e events.Event) {
 		views1.InspectorWindow(ts.Scene)

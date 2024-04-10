@@ -669,7 +669,7 @@ func (tb *Buffer) SaveFile(filename core.Filename) error {
 // buffer
 func (tb *Buffer) Save() error {
 	if tb.Filename == "" {
-		return fmt.Errorf("giv.Buf: filename is empty for Save")
+		return fmt.Errorf("views.Buf: filename is empty for Save")
 	}
 	tb.EditDone()
 	info, err := os.Stat(string(tb.Filename))
@@ -792,7 +792,7 @@ func (tb *Buffer) AutoSave() error {
 	b := tb.LinesToBytesCopy()
 	err := os.WriteFile(asfn, b, 0644)
 	if err != nil {
-		log.Printf("giv.Buf: Could not AutoSave file: %v, error: %v\n", asfn, err)
+		log.Printf("views.Buf: Could not AutoSave file: %v, error: %v\n", asfn, err)
 	}
 	tb.SetFlag(false, BufferAutoSaving)
 	return err
@@ -1154,7 +1154,7 @@ func (tb *Buffer) DeleteText(st, ed lex.Pos, signal bool) *textbuf.Edit {
 		return nil
 	}
 	if !st.IsLess(ed) {
-		log.Printf("giv.Buf DeleteText: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
+		log.Printf("views.Buf DeleteText: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
 		return nil
 	}
 	tb.FileModCheck()
@@ -1216,7 +1216,7 @@ func (tb *Buffer) DeleteTextRect(st, ed lex.Pos, signal bool) *textbuf.Edit {
 		return nil
 	}
 	if !st.IsLess(ed) {
-		log.Printf("giv.Buf DeleteTextRect: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
+		log.Printf("views.Buf DeleteTextRect: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
 		return nil
 	}
 	tb.FileModCheck()
@@ -1431,7 +1431,7 @@ func (tb *Buffer) RegionImpl(st, ed lex.Pos) *textbuf.Edit {
 		return nil
 	}
 	if !st.IsLess(ed) {
-		log.Printf("giv.Buf.Region: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
+		log.Printf("views.Buf.Region: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
 		return nil
 	}
 	tbe := &textbuf.Edit{Reg: textbuf.NewRegionPos(st, ed)}
@@ -1500,7 +1500,7 @@ func (tb *Buffer) RegionRectImpl(st, ed lex.Pos) *textbuf.Edit {
 		return nil
 	}
 	if !st.IsLess(ed) || st.Ch >= ed.Ch {
-		log.Printf("giv.Buf.RegionRect: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
+		log.Printf("views.Buf.RegionRect: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
 		return nil
 	}
 	tbe := &textbuf.Edit{Reg: textbuf.NewRegionPos(st, ed)}
@@ -2413,7 +2413,7 @@ func (tb *Buffer) CommentRegion(st, ed int) {
 
 	comst, comed := tb.Opts.CommentStrs()
 	if comst == "" {
-		fmt.Printf("giv.Buf: %v attempt to comment region without any comment syntax defined\n", tb.Filename)
+		fmt.Printf("views.Buf: %v attempt to comment region without any comment syntax defined\n", tb.Filename)
 		return
 	}
 

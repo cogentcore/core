@@ -40,7 +40,7 @@ Languages must be rational and consistent both internally and with other program
 
 # Struct fields are better than maps for things like configuration and styling
 
-Configuration settings, typically settable with a config file and / or command-line arguments, are stored as key-value maps in the widely used [cobra](https://github.com/spf13/cobra), viper and other such tools.  Likewise, in v1 of GoGi, styling was set using Properties maps.
+Configuration settings, typically settable with a config file and / or command-line arguments, are stored as key-value maps in the widely used [cobra](https://github.com/spf13/cobra), viper and other such tools.  Likewise, in v1 of core, styling was set using Properties maps.
 
 However, using a `struct` with appropriately-named fields has the following advantages:
 * Compile time name-safety: the compiler ensures you didn't mistype the key name.
@@ -49,11 +49,11 @@ However, using a `struct` with appropriately-named fields has the following adva
 * GUI editor of config opts as a StructView has full access to field tag GUI hints, etc.
 * [[gti]] can provide access to field comments for full docs for each option -- the map impl requires  separate maps of docs vs. values.
 
-This is why the [[grease]] configuration and app command management system is based structs, and v2 of GoGi uses "direct styling" functions that directly set values on the `styles.Style` style structs.
+This is why the [[grease]] configuration and app command management system is based structs, and v2 of core uses "direct styling" functions that directly set values on the `styles.Style` style structs.
 
 # Generate instead of `reflect`
 
-Generated code is faster and cleaner and can be targeted to just what is needed.  `reflect` should be reserved for things like `giv.StructView` and other such views which need to be truly generic and operate on any kind of type from any package, etc.
+Generated code is faster and cleaner and can be targeted to just what is needed.  `reflect` should be reserved for things like `views.StructView` and other such views which need to be truly generic and operate on any kind of type from any package, etc.
 
 # Interfaces instead of `reflect`
 
@@ -72,7 +72,7 @@ This is what we look for, in considering whether to import a given package, so i
 Examples:
 * [[colors]] pulled out of gi
 * [[laser]] pulled reflection stuff out of kit
-* [[greasi]] separated from [[grease]] to keep grease free of gi dependency
+* [[greasi]] separated from [[grease]] to keep grease free of core dependency
 
 # Use function libraries instead of putting lots of methods on a type
 

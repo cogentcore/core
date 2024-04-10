@@ -19,7 +19,7 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// EventMgr returns the higher-level gi event manager
+// EventMgr returns the higher-level core event manager
 // for this [Widget]'s [Scene].
 func (wb *WidgetBase) EventMgr() *EventMgr {
 	return &wb.Scene.EventMgr

@@ -170,7 +170,7 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 		var met *gti.Method
 		if gtyp == nil {
 			if fb.WarnUnadded {
-				slog.Warn("giv.FuncButton.SetFunc called with a method whose receiver type has not been added to gti", "function", fnm)
+				slog.Warn("views.FuncButton.SetFunc called with a method whose receiver type has not been added to gti", "function", fnm)
 			}
 			met = &gti.Method{Name: metnm}
 		} else {
@@ -182,7 +182,7 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 			}
 			if met == nil {
 				if fb.WarnUnadded {
-					slog.Warn("giv.FuncButton.SetFunc called with a method that has not been added to gti (even though the receiver type was, you still need to add the method itself)", "function", fnm)
+					slog.Warn("views.FuncButton.SetFunc called with a method that has not been added to gti (even though the receiver type was, you still need to add the method itself)", "function", fnm)
 				}
 				met = &gti.Method{Name: metnm}
 			}
@@ -198,7 +198,7 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 	f := gti.FuncByName(fnm)
 	if f == nil {
 		if fb.WarnUnadded {
-			slog.Warn("giv.FuncButton.SetFunc called with a function that has not been added to gti", "function", fnm)
+			slog.Warn("views.FuncButton.SetFunc called with a function that has not been added to gti", "function", fnm)
 		}
 		f = &gti.Func{Name: fnm}
 	}

@@ -44,7 +44,6 @@ func (fn *Node) KeyInput(kt events.Event) {
 		case keyfun.Delete:
 			fn.DeleteFiles()
 			kt.SetHandled()
-			// todo: remove when gi issue 237 is resolved
 		case keyfun.Backspace:
 			fn.DeleteFiles()
 			kt.SetHandled()

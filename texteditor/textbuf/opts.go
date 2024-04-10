@@ -16,7 +16,7 @@ import (
 // of a given text file.
 type Opts struct {
 
-	// editor prefs from gogi prefs
+	// editor settings from core settings
 	core.EditorSettings
 
 	// character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used

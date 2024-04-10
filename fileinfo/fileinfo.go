@@ -172,7 +172,7 @@ func (fi *FileInfo) IsHidden() bool {
 // directories.
 func (fi *FileInfo) Duplicate() (string, error) { //gti:add
 	if fi.IsDir() {
-		err := fmt.Errorf("giv.Duplicate: cannot copy directory: %v", fi.Path)
+		err := fmt.Errorf("views.Duplicate: cannot copy directory: %v", fi.Path)
 		log.Println(err)
 		return "", err
 	}
@@ -249,7 +249,7 @@ func (fi *FileInfo) Filenames(names *[]string) (err error) {
 // Does not actually do the renaming -- see Rename method.
 func (fi *FileInfo) RenamePath(path string) (newpath string, err error) {
 	if path == "" {
-		err = fmt.Errorf("giv.Rename: new name is empty")
+		err = fmt.Errorf("views.Rename: new name is empty")
 		log.Println(err)
 		return path, err
 	}

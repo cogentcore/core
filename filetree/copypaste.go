@@ -27,7 +27,7 @@ import (
 func (fn *Node) MimeData(md *mimedata.Mimes) {
 	froot := fn.FRoot
 	path := string(fn.FPath)
-	punq := fn.PathFrom(froot) // note: ki paths have . escaped -> \,
+	punq := fn.PathFrom(froot) // note: tree paths have . escaped -> \,
 	*md = append(*md, mimedata.NewTextData(punq))
 	*md = append(*md, mimedata.NewTextData(path))
 	if int(fn.Info.Size) < core.SystemSettings.BigFileSize {
@@ -200,7 +200,7 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 	if externalDrop {
 		srcpath = string(md[0].Data) // just file path
 	} else {
-		srcpath = string(md[1].Data) // 1 has file path, 0 = ki path, 2 = file data
+		srcpath = string(md[1].Data) // 1 has file path, 0 = tree path, 2 = file data
 	}
 	fname := filepath.Base(srcpath)
 	tdir := AsNode(fn.Parent())

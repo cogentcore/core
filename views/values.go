@@ -23,7 +23,7 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// This file contains the standard [Value]s built into giv.
+// This file contains the standard [Value]s built into views.
 
 // StringValue represents any value with a text field.
 type StringValue struct {
@@ -261,7 +261,7 @@ func (v *SliceValue) ConfigDialog(d *core.Body) (bool, func()) {
 	}
 	vvp := laser.OnePtrValue(v.Value)
 	if vvp.Kind() != reflect.Ptr {
-		slog.Error("giv.SliceValue: Cannot view unadressable (non-pointer) slices", "type", v.Value.Type())
+		slog.Error("views.SliceValue: Cannot view unadressable (non-pointer) slices", "type", v.Value.Type())
 		return false, nil
 	}
 	slci := vvp.Interface()

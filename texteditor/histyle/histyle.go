@@ -4,8 +4,8 @@
 
 // Package histyle provides syntax highlighting styles; it is based on
 // github.com/alecthomas/chroma, which in turn was based on the python
-// pygments package.  Note that this package depends on goki/gi and goki/pi
-// and cannot be imported there; is imported into goki/gi/giv.
+// pygments package.  Note that this package depends on core and pi
+// and cannot be imported there; is imported in texteditor.
 package histyle
 
 //go:generate core generate -add-types

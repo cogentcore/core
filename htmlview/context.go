@@ -29,7 +29,7 @@ type Context struct {
 	// Styles are the CSS styling rules for each node.
 	Styles map[*html.Node][]*css.Rule
 
-	// Widgets are the gi widgets for each node.
+	// Widgets are the core widgets for each node.
 	Widgets map[*html.Node]core.Widget
 
 	// NewParent is the current parent widget that children of

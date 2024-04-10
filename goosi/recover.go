@@ -19,7 +19,7 @@ import (
 // handles it. The behavior of HandleRecover can be customized by changing
 // it to a custom function, but by default it calls [HandleRecoverBase] and
 // [HandleRecoverPanic], which safely prints a stack trace, saves a crash log,
-// and panics on non-mobile platforms. It is set in gi to a function that does
+// and panics on non-mobile platforms. It is set in core to a function that does
 // the aforementioned things in addition to creating a GUI error dialog.
 // HandleRecover should be called at the start of every
 // goroutine whenever possible. The correct usage of HandleRecover is:

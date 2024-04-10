@@ -5,12 +5,12 @@
 package core
 
 // This file contains all the Name types that drive chooser menus when they
-// show up as fields or args, using the giv Value system.
+// show up as fields or args, using the [views.Value] system.
 
 // FontName is used to specify a font, as the unique name of
 // the font family.
 // This automatically provides a chooser menu for fonts
-// using giv Value.
+// using [views.Value].
 type FontName string
 
 // Filename is used to specify an filename (including path).

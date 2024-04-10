@@ -606,14 +606,14 @@ func tst() {
 }
 
 func tst() {
-	tvn, two := data.(tree.Node).Embed(giv.KiT_TreeView).(*giv.TreeView)
+	tvn, two := data.(tree.Node).Embed(views.KiT_TreeView).(*views.TreeView)
 	for a, b := range cde {
 	}
 }
 
 var PiViewProperties = tree.Properties{
 	"MainMenu": tree.Propertieslice{
-		"updtfunc": giv.ActionUpdateFunc(func(pvi interface{}, act *core.Button) {
+		"updtfunc": views.ActionUpdateFunc(func(pvi interface{}, act *core.Button) {
 			pv := pvi.(*PiView)
 			act.SetActiveState(pv.Settings.ProjFile != "")
 		}),

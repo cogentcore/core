@@ -178,7 +178,7 @@ func (fn *Node) ReadDir(path string) error {
 	fn.FPath = core.Filename(pth)
 	err = fn.Info.InitFile(string(fn.FPath))
 	if err != nil {
-		log.Printf("giv.Tree: could not read directory: %v err: %v\n", fn.FPath, err)
+		log.Printf("views.Tree: could not read directory: %v err: %v\n", fn.FPath, err)
 		return err
 	}
 

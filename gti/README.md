@@ -10,9 +10,9 @@ Package GTI provides general purpose type information for Go types, methods, fun
 
 * in grease, command method docs and config field docs
 
-* in Ki (optional) generate a new token of given type by name (for Unmarshal)
+* in tree (optional) generate a new token of given type by name (for Unmarshal)
 
-* Ki needs NameAndType, need to be able to use Type token to specify type.  Also for making a new child of given type.
+* tree needs NameAndType, need to be able to use Type token to specify type.  Also for making a new child of given type.
 
 # Notes
 

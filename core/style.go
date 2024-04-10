@@ -254,7 +254,7 @@ func SetUnitContext(st *styles.Style, sc *Scene, el, parent mat32.Vec2) {
 
 // ChildBackground returns the background color (Image) for given child Widget.
 // By default, this is just our [Styles.Actualbackground] but it can be computed
-// specifically for the child (e.g., for zebra stripes in giv.SliceViewGrid)
+// specifically for the child (e.g., for zebra stripes in views.SliceViewGrid)
 func (wb *WidgetBase) ChildBackground(child Widget) image.Image {
 	return wb.Styles.ActualBackground
 }

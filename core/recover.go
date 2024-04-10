@@ -21,7 +21,7 @@ import (
 // when rendering the crash window.
 var timesCrashed int
 
-// HandleRecover is the gi value of [goosi.HandleRecover]. If r is not nil,
+// HandleRecover is the core value of [goosi.HandleRecover]. If r is not nil,
 // it makes a window displaying information about the panic. [goosi.HandleRecover]
 // is initialized to this in init.
 func HandleRecover(r any) {

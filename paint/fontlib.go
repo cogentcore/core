@@ -78,7 +78,7 @@ type FontLib struct {
 	Faces map[string]map[int]*styles.FontFace
 }
 
-// FontLibrary is the gi font library, initialized from fonts available on font paths
+// FontLibrary is the core font library, initialized from fonts available on font paths
 var FontLibrary FontLib
 
 // FontAvail determines if a given font name is available (case insensitive)

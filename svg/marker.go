@@ -113,15 +113,15 @@ func (g *Marker) BBoxes(sv *SVG) {
 
 // MarkerByName finds marker property of given name, or generic "marker"
 // type, and if set, attempts to find that marker and return it
-func (sv *SVG) MarkerByName(gi Node, marker string) *Marker {
-	url := NodePropURL(gi, marker)
+func (sv *SVG) MarkerByName(n Node, marker string) *Marker {
+	url := NodePropURL(n, marker)
 	if url == "" {
-		url = NodePropURL(gi, "marker")
+		url = NodePropURL(n, "marker")
 	}
 	if url == "" {
 		return nil
 	}
-	mrkn := sv.NodeFindURL(gi, url)
+	mrkn := sv.NodeFindURL(n, url)
 	if mrkn == nil {
 		return nil
 	}

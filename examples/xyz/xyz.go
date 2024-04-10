@@ -294,7 +294,7 @@ func main() {
 			})
 		cmb.Menu.AddAction(core.ActOpts{Label: "Edit Anim"},
 			win.This(), func(recv, send tree.Node, sig int64, data any) {
-				giv.StructViewDialog(vp, anim, giv.DlgOpts{Title: "Animation Parameters"}, nil, nil)
+				views.StructViewDialog(vp, anim, views.DlgOpts{Title: "Animation Parameters"}, nil, nil)
 			})
 
 		sprw := core.NewLayout(evlay, "speed-lay", core.LayoutHoriz)

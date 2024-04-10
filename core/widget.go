@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package gi provides the core GUI functionality of Cogent Core.
+// Package core provides the core GUI functionality of Cogent Core.
 package core
 
 //go:generate core generate
@@ -187,7 +187,7 @@ type Widget interface {
 
 	// ChildBackground returns the background color (Image) for given child Widget.
 	// By default, this is just our [Styles.Actualbackground] but it can be computed
-	// specifically for the child (e.g., for zebra stripes in giv.SliceViewGrid)
+	// specifically for the child (e.g., for zebra stripes in views.SliceViewGrid)
 	ChildBackground(child Widget) image.Image
 
 	// DirectRenderImage uploads image directly into given goosi.Drawer at given index
@@ -296,10 +296,9 @@ func (wb *WidgetBase) FlagType() enums.BitFlagSetter {
 	return (*WidgetFlags)(&wb.Flags)
 }
 
-// OnInit for WidgetBase is not called by the usual ki mechanism,
-// but should be called by every Widget type in its own OnInit
-// to establish all the default styling and event handling
-// that applies to all widgets.
+// OnInit should be called by every Widget type in its custom
+// OnInit if it has one to establish all the default styling
+// and event handling that applies to all widgets.
 func (wb *WidgetBase) OnInit() {
 	wb.SetStyles()
 	wb.HandleEvents()
@@ -342,13 +341,13 @@ func (wb *WidgetBase) OnWidgetAdded(fun func(w Widget)) *WidgetBase {
 	return wb
 }
 
-// AsWidget returns the given Ki object
+// AsWidget returns the given tree node
 // as a Widget interface and a WidgetBase.
-func AsWidget(k tree.Node) (Widget, *WidgetBase) {
-	if k == nil || k.This() == nil {
+func AsWidget(n tree.Node) (Widget, *WidgetBase) {
+	if n == nil || n.This() == nil {
 		return nil, nil
 	}
-	if w, ok := k.This().(Widget); ok {
+	if w, ok := n.This().(Widget); ok {
 		return w, w.AsWidget()
 	}
 	return nil, nil
@@ -358,10 +357,11 @@ func (wb *WidgetBase) AsWidget() *WidgetBase {
 	return wb
 }
 
-// AsWidgetBase returns the given Ki object as a WidgetBase, or nil.
-// for direct use of the return value in cases where that is needed.
-func AsWidgetBase(k tree.Node) *WidgetBase {
-	_, wb := AsWidget(k)
+// AsWidgetBase returns the given tree node object as a WidgetBase,
+// or nil, for direct use of the return value in cases where that
+// is needed.
+func AsWidgetBase(n tree.Node) *WidgetBase {
+	_, wb := AsWidget(n)
 	return wb
 }
 

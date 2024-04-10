@@ -393,7 +393,7 @@ func StructFieldIsDef(defs string, valPtr any, kind reflect.Kind) (bool, string)
 		hi, _ := strconv.ParseFloat(dtags[1], 64)
 		vf, err := laser.ToFloat(valPtr)
 		if err != nil {
-			slog.Error("giv.StructFieldIsDef: error parsing struct field numerical range def tag", "type", laser.NonPtrType(reflect.TypeOf(valPtr)), "def", defs, "err", err)
+			slog.Error("views.StructFieldIsDef: error parsing struct field numerical range def tag", "type", laser.NonPtrType(reflect.TypeOf(valPtr)), "def", defs, "err", err)
 			return true, defStr
 		}
 		return lo <= vf && vf <= hi, defStr
@@ -414,7 +414,7 @@ func StructFieldIsDef(defs string, valPtr any, kind reflect.Kind) (bool, string)
 		dv := reflect.New(v.Type())
 		err := laser.SetRobust(dv.Interface(), def)
 		if err != nil {
-			slog.Error("giv.StructFieldIsDef: error parsing struct field def tag", "type", v.Type(), "def", def, "err", err)
+			slog.Error("views.StructFieldIsDef: error parsing struct field def tag", "type", v.Type(), "def", def, "err", err)
 			return true, defStr
 		}
 		if reflect.DeepEqual(v.Interface(), dv.Elem().Interface()) {

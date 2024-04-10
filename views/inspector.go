@@ -327,7 +327,7 @@ func (is *Inspector) ConfigToolbar(tb *core.Toolbar) {
 	NewFuncButton(tb, is.InspectApp).SetIcon(icons.Devices)
 }
 
-// InspectorWindow opens an interactive editor of the given Ki tree
+// InspectorWindow opens an interactive editor of the given tree
 // in a new window.
 func InspectorWindow(k tree.Node) {
 	if core.ActivateExistingMainWindow(k) {
@@ -339,7 +339,7 @@ func InspectorWindow(k tree.Node) {
 }
 
 // InspectorView configures the given body to have an interactive inspector
-// of the given Ki tree.
+// of the given tree.
 func InspectorView(b *core.Body, k tree.Node) {
 	b.SetTitle("Inspector").SetData(k).SetName("inspector")
 	if k != nil {

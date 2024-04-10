@@ -26,7 +26,7 @@ Three core Cogent Core features include:
 
 ## Cogent Core Graphical Interface
 
-The first and most important application of ki is the Cogent Core graphical interface system, in the [core](https://pkg.go.dev/cogentcore.org/core/core) package.  The scene graph of tree elements automatically drives minimal refresh updates, allowing Cogent Core to provide a complete interactive 2D and 3D GUI environment in native Go, in a compact codebase.  Part of this is the natural elegance of Go, but Cogent Core enhances that by providing the robust natural primitives needed to express all the GUI functionality.
+The first and most important application of `tree` is the Cogent Core graphical interface system, in the [core](https://pkg.go.dev/cogentcore.org/core/core) package.  The scene graph of tree elements automatically drives minimal refresh updates, allowing Cogent Core to provide a complete interactive 2D and 3D GUI environment in native Go, in a compact codebase.  Part of this is the natural elegance of Go, but Cogent Core enhances that by providing the robust natural primitives needed to express all the GUI functionality.
 
 The [parse](https://pkg.go.dev/cogentcore.org/core/parse) interactive parsing framework also leverages Cogent Core trees to represent the AST (abstract syntax tree) of programs in different languages.  Further, the parser grammar itself is written (in a GUI interactive way) as a tree of parsing elements using tree nodes.
 
