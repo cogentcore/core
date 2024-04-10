@@ -11,8 +11,8 @@ import (
 	"io/fs"
 
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/coredom"
 	"cogentcore.org/core/grr"
+	"cogentcore.org/core/htmlview"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/webcore"
 )
@@ -35,10 +35,10 @@ var myFile embed.FS
 func main() {
 	b := core.NewBody("Cogent Core Docs")
 	pg := webcore.NewPage(b).SetSource(grr.Log1(fs.Sub(content, "content")))
-	pg.Context.WikilinkResolver = coredom.PkgGoDevWikilink("cogentcore.org/core")
+	pg.Context.WikilinkResolver = htmlview.PkgGoDevWikilink("cogentcore.org/core")
 	b.AddAppBar(pg.AppBar)
 
-	coredom.ElementHandlers["home-header"] = func(ctx *coredom.Context) bool {
+	htmlview.ElementHandlers["home-header"] = func(ctx *htmlview.Context) bool {
 		ly := core.NewLayout(ctx.BlockParent).Style(func(s *styles.Style) {
 			s.Direction = styles.Column
 			s.Justify.Content = styles.Center

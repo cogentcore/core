@@ -8,15 +8,15 @@ import (
 	_ "embed"
 
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/coredom"
 	"cogentcore.org/core/grr"
+	"cogentcore.org/core/htmlview"
 )
 
 //go:embed example.md
 var content string
 
 func main() {
-	b := core.NewBody("Coredom MD")
-	grr.Log(coredom.ReadMDString(coredom.NewContext(), b, content))
+	b := core.NewBody("HTML View MD")
+	grr.Log(htmlview.ReadMDString(htmlview.NewContext(), b, content))
 	b.RunMainWindow()
 }

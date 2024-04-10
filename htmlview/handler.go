@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package coredom
+package htmlview
 
 import (
 	"fmt"
@@ -76,11 +76,11 @@ func HandleElement(ctx *Context) {
 		// we don't render anything
 	case "link":
 		rel := GetAttr(ctx.Node, "rel")
-		// TODO(kai/coredom): maybe handle preload
+		// TODO(kai/htmlview): maybe handle preload
 		if rel == "preload" {
 			return
 		}
-		// TODO(kai/coredom): support links other than stylesheets
+		// TODO(kai/htmlview): support links other than stylesheets
 		if rel != "stylesheet" {
 			return
 		}
@@ -148,7 +148,7 @@ func HandleElement(ctx *Context) {
 				}
 				start = strconv.Itoa(number) + ". "
 			case "ul":
-				// TODO(kai/coredom): have different bullets for different depths
+				// TODO(kai/htmlview): have different bullets for different depths
 				start = "• "
 			}
 		}
@@ -164,7 +164,7 @@ func HandleElement(ctx *Context) {
 			}
 			defer resp.Body.Close()
 			if strings.Contains(resp.Header.Get("Content-Type"), "svg") {
-				// TODO(kai/coredom): support svg
+				// TODO(kai/htmlview): support svg
 			} else {
 				im, _, err := images.Read(resp.Body)
 				if err != nil {

@@ -18,12 +18,12 @@ import (
 	"strings"
 
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/coredom"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/giv"
 	"cogentcore.org/core/goosi"
 	"cogentcore.org/core/grows/tomls"
 	"cogentcore.org/core/grr"
+	"cogentcore.org/core/htmlview"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
@@ -37,8 +37,8 @@ type Page struct {
 	// Source is the filesystem in which the content is located.
 	Source fs.FS
 
-	// Context is the page's [coredom.Context].
-	Context *coredom.Context `set:"-"`
+	// Context is the page's [htmlview.Context].
+	Context *htmlview.Context `set:"-"`
 
 	// The history of URLs that have been visited. The oldest page is first.
 	History []string `set:"-"`
@@ -58,7 +58,7 @@ var _ tree.Node = (*Page)(nil)
 
 func (pg *Page) OnInit() {
 	pg.Frame.OnInit()
-	pg.Context = coredom.NewContext()
+	pg.Context = htmlview.NewContext()
 	pg.Context.OpenURL = func(url string) {
 		pg.OpenURL(url, true)
 	}
@@ -158,7 +158,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 
 	fr := pg.FindPath("splits/body").(*core.Frame)
 	fr.DeleteChildren()
-	err = coredom.ReadMD(pg.Context, fr, b)
+	err = htmlview.ReadMD(pg.Context, fr, b)
 	if err != nil {
 		core.ErrorSnackbar(pg, err, "Error loading page")
 		return

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package coredom
+package htmlview
 
 import (
 	"fmt"
@@ -20,7 +20,7 @@ import (
 	"golang.org/x/net/html"
 )
 
-// Context contains context information about the current state of a coredom
+// Context contains context information about the current state of a htmlview
 // reader and its surrounding context. It should be created with [NewContext].
 type Context struct {
 	// Node is the node that is currently being read.

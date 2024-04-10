@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package coredom converts HTML and MD into Cogent Core DOM widget trees.
-package coredom
+// Package htmlview converts HTML and MD into Cogent Core widget trees.
+package htmlview
 
 import (
 	"bytes"
