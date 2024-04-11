@@ -10,7 +10,7 @@ type Commit struct {
 	// revision number / hash code / unique id
 	Rev string
 
-	// date (author's time) when comitted
+	// date (author's time) when committed
 	Date string
 
 	// author's name

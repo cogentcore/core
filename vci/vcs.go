@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package vcs provides a more complete version control system (ex: git)
+// interface, building on https://github.com/Masterminds/vcs.
 package vci
 
 //go:generate core generate
