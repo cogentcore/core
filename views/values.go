@@ -662,7 +662,7 @@ func (v *FuncValue) Config() {
 func (v *FuncValue) Update() {
 	fun := laser.NonPtrValue(v.Value).Interface()
 	// if someone is viewing an arbitrary function, there is a good chance
-	// that it is not added to gti (and that is out of their control)
+	// that it is not added to types (and that is out of their control)
 	// (eg: in the inspector), so we do not warn on unadded functions.
 	v.Widget.SetWarnUnadded(false).SetFunc(fun)
 }

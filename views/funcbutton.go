@@ -45,17 +45,17 @@ func NewSoloFuncButton(ctx core.Widget, fun any) *FuncButton {
 // is pressed, using a dialog to prompt the user for any arguments.
 // Also, it automatically sets various properties of the button like
 // the name, text, tooltip, and icon based on the properties of the
-// function, using reflect and gti. The function must be registered
-// with gti to get documentation information, but that is not required;
-// add a `//types:add` comment directive and run `core generate`
+// function, using [reflect] and [types]. The function must be registered
+// with [types] to get documentation information, but that is not
+// required; add a `//types:add` comment directive and run `core generate`
 // if you want tooltips. If the function is a method, both the method and
-// its receiver type must be added to gti to get documentation.
+// its receiver type must be added to [types] to get documentation.
 type FuncButton struct { //core:no-new
 	core.Button
 
-	// Func is the [gti.Func] associated with this button.
+	// Func is the [types.Func] associated with this button.
 	// This function can also be a method, but it must be
-	// converted to a [gti.Func] first. It should typically
+	// converted to a [types.Func] first. It should typically
 	// be set using [FuncButton.SetFunc].
 	Func *types.Func `set:"-"`
 
@@ -103,7 +103,7 @@ type FuncButton struct { //core:no-new
 	NewWindow bool
 
 	// WarnUnadded is whether to log warnings when a function that
-	// has not been added to gti is used. It is on by default and
+	// has not been added to [types] is used. It is on by default and
 	// must be set before [FuncButton.SetFunc] is called for it to
 	// have any effect.
 	WarnUnadded bool `default:"true"`
@@ -111,7 +111,7 @@ type FuncButton struct { //core:no-new
 	// Context is used for opening Dialogs if non-nil.
 	Context core.Widget
 
-	// AfterFunc is an optional function called after the funcbutton
+	// AfterFunc is an optional function called after the func button
 	// function is executed
 	AfterFunc func()
 }
@@ -151,7 +151,7 @@ func (fb *FuncButton) SetText(v string) *FuncButton {
 
 // SetFunc sets the function associated with the FuncButton to the
 // given function or method value. For documentation information for
-// the function to be obtained, it must be added to gti. SetFunc is
+// the function to be obtained, it must be added to [types]. SetFunc is
 // automatically called by [NewFuncButton].
 func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 	fnm := types.FuncName(fun)
@@ -170,7 +170,7 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 		var met *types.Method
 		if gtyp == nil {
 			if fb.WarnUnadded {
-				slog.Warn("views.FuncButton.SetFunc called with a method whose receiver type has not been added to gti", "function", fnm)
+				slog.Warn("views.FuncButton.SetFunc called with a method whose receiver type has not been added to types", "function", fnm)
 			}
 			met = &types.Method{Name: metnm}
 		} else {
@@ -182,7 +182,7 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 			}
 			if met == nil {
 				if fb.WarnUnadded {
-					slog.Warn("views.FuncButton.SetFunc called with a method that has not been added to gti (even though the receiver type was, you still need to add the method itself)", "function", fnm)
+					slog.Warn("views.FuncButton.SetFunc called with a method that has not been added to types (even though the receiver type was, you still need to add the method itself)", "function", fnm)
 				}
 				met = &types.Method{Name: metnm}
 			}
@@ -198,7 +198,7 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 	f := types.FuncByName(fnm)
 	if f == nil {
 		if fb.WarnUnadded {
-			slog.Warn("views.FuncButton.SetFunc called with a function that has not been added to gti", "function", fnm)
+			slog.Warn("views.FuncButton.SetFunc called with a function that has not been added to types", "function", fnm)
 		}
 		f = &types.Func{Name: fnm}
 	}

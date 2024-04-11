@@ -13,7 +13,7 @@ type TestNode struct {
 }
 
 // NodeEmbed embeds tree.Node and adds a couple of fields.
-// Also has a directive processed by gti
+// Also has a directive processed by typegen.
 //
 //direct:value
 type NodeEmbed struct {

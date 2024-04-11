@@ -46,7 +46,7 @@ type CmdOrFunc[T any] interface {
 
 // CmdFromFunc returns a new [Cmd] object from the given function
 // and any information specified on it using comment directives,
-// which requires the use of gti (see https://cogentcore.org/core/gti)
+// which requires the use of [types].
 func CmdFromFunc[T any](fun func(T) error) (*Cmd[T], error) {
 	cmd := &Cmd[T]{
 		Func: fun,

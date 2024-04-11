@@ -65,7 +65,7 @@ type language struct {
 views.NewTableView(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}}).SetReadOnly(true)
 ```
 
-You can make it so that the documentation comments for struct fields are used as tooltips for the column headers and value widgets by adding the type to [[gti]] and running `core generate`:
+You can make it so that the documentation comments for struct fields are used as tooltips for the column headers and value widgets by adding the type to [[types]] and running `core generate`:
 
 ```go
 // Add this once per package:

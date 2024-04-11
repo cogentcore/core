@@ -47,7 +47,7 @@ However, using a `struct` with appropriately-named fields has the following adva
 * Compile time type-safety: the type of the property is not `any` but the actual type needed.
 * Tab completion and full lookup in IDEs -- much easier when _using_ config values in an app, and also when setting styling in GUI.
 * GUI editor of config opts as a StructView has full access to field tag GUI hints, etc.
-* [[gti]] can provide access to field comments for full docs for each option -- the map impl requires  separate maps of docs vs. values.
+* [[types]] can provide access to field comments for full docs for each option, whereas the map implementation requires separate maps of docs and values.
 
 This is why the [[cli]] configuration and app command management system is based structs, and v2 of core uses "direct styling" functions that directly set values on the `styles.Style` style structs.
 
