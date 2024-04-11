@@ -5,9 +5,10 @@ package xyz
 import (
 	"image/color"
 
-	"cogentcore.org/core/types"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
+	"goki.dev/gti"
 )
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.BBox", IDName: "b-box", Doc: "BBox contains bounding box and other gross solid properties", Fields: []types.Field{{Name: "BBox", Doc: "bounding box in local coords"}, {Name: "BSphere", Doc: "bounding sphere in local coords"}, {Name: "Area", Doc: "area"}, {Name: "Volume", Doc: "volume"}}})
@@ -24,8 +25,8 @@ func NewGroup(parent tree.Node, name ...string) *Group {
 	return parent.NewChild(GroupType, name...).(*Group)
 }
 
-// NodeType returns the [*types.Type] of [Group]
-func (t *Group) NodeType() *types.Type { return GroupType }
+// NodeType returns the [*gti.Type] of [Group]
+func (t *Group) NodeType() *gti.Type { return GroupType }
 
 // New returns a new [*Group] value
 func (t *Group) New() tree.Node { return &Group{} }
@@ -52,7 +53,7 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Lines", IDName:
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Tiling", IDName: "tiling", Doc: "Tiling are the texture tiling parameters", Fields: []types.Field{{Name: "Repeat", Doc: "how often to repeat the texture in each direction"}, {Name: "Off", Doc: "offset for when to start the texure in each direction"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Material", IDName: "material", Doc: "Material describes the material properties of a surface (colors, shininess, texture)\ni.e., phong lighting parameters.\nMain color is used for both ambient and diffuse color, and alpha component\nis used for opacity.  The Emissive color is only for glowing objects.\nThe Specular color is always white (multiplied by light color).\nTextures are stored on the Scene and accessed by name", Directives: []types.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Color", Doc: "prop: color = main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering"}, {Name: "Emissive", Doc: "prop: emissive = color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object"}, {Name: "Shiny", Doc: "prop: shiny = specular shininess factor -- how focally vs. broad the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Reflective factor to change overall shininess effect."}, {Name: "Reflective", Doc: "prop: reflective = specular reflectiveness factor -- how much it shines back directional light.  The specular reflection color is always white * the incoming light."}, {Name: "Bright", Doc: "prop: bright = overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters"}, {Name: "Texture", Doc: "prop: texture = texture to provide color for the surface"}, {Name: "Tiling", Doc: "texture tiling parameters -- repeat and offset"}, {Name: "CullBack", Doc: "prop: cull-back = cull the back-facing surfaces"}, {Name: "CullFront", Doc: "prop: cull-front = cull the front-facing surfaces"}, {Name: "TexPtr", Doc: "pointer to texture"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Material", IDName: "material", Doc: "Material describes the material properties of a surface (colors, shininess, texture)\ni.e., phong lighting parameters.\nMain color is used for both ambient and diffuse color, and alpha component\nis used for opacity.  The Emissive color is only for glowing objects.\nThe Specular color is always white (multiplied by light color).\nTextures are stored on the Scene and accessed by name", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Color", Doc: "prop: color = main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering"}, {Name: "Emissive", Doc: "prop: emissive = color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object"}, {Name: "Shiny", Doc: "prop: shiny = specular shininess factor -- how focally vs. broad the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Reflective factor to change overall shininess effect."}, {Name: "Reflective", Doc: "prop: reflective = specular reflectiveness factor -- how much it shines back directional light.  The specular reflection color is always white * the incoming light."}, {Name: "Bright", Doc: "prop: bright = overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters"}, {Name: "Texture", Doc: "prop: texture = texture to provide color for the surface"}, {Name: "Tiling", Doc: "texture tiling parameters -- repeat and offset"}, {Name: "CullBack", Doc: "prop: cull-back = cull the back-facing surfaces"}, {Name: "CullFront", Doc: "prop: cull-front = cull the front-facing surfaces"}, {Name: "TexPtr", Doc: "pointer to texture"}}})
 
 // SetColor sets the [Material.Color]:
 // prop: color = main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering
@@ -90,7 +91,7 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.MeshName", IDNa
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Mesh", IDName: "mesh", Doc: "Mesh parameterizes the mesh-based shape used for rendering a Solid.\nOnly indexed triangle meshes are supported.\nAll Mesh's must know in advance the number of vertex and index points\nthey require, and the SetVerticies method operates on data from the\nvgpu staging buffer to set the relevant data post-allocation.\nThe vgpu vshape library is used for all basic shapes, and it follows\nthis same logic.\nPer-vertex Color is optional, as is the ability to update the data\nafter initial SetVerticies call (default is to do nothing)."})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.MeshBase", IDName: "mesh-base", Doc: "MeshBase provides the core implementation of Mesh interface", Directives: []types.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Nm", Doc: "name of mesh -- meshes are linked to Solids by name so this matters"}, {Name: "NVtx", Doc: "number of vertex points, as mat32.Vec3 -- always includes mat32.Vec3 normals and mat32.Vec2 texture coordinates -- only valid after Sizes() has been called"}, {Name: "NIndex", Doc: "number of indexes, as mat32.ArrayU32 -- only valid after Sizes() has been called"}, {Name: "Color", Doc: "has per-vertex colors, as mat32.Vec4 per vertex"}, {Name: "Dynamic", Doc: "if true, this mesh changes frequently -- otherwise considered to be static"}, {Name: "Trans", Doc: "set to true if color has transparency -- not worth checking manually"}, {Name: "BBox", Doc: "computed bounding-box and other gross solid properties"}, {Name: "BBoxMu", Doc: "mutex on bbox access"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.MeshBase", IDName: "mesh-base", Doc: "MeshBase provides the core implementation of Mesh interface", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Nm", Doc: "name of mesh -- meshes are linked to Solids by name so this matters"}, {Name: "NVtx", Doc: "number of vertex points, as mat32.Vec3 -- always includes mat32.Vec3 normals and mat32.Vec2 texture coordinates -- only valid after Sizes() has been called"}, {Name: "NIndex", Doc: "number of indexes, as mat32.ArrayU32 -- only valid after Sizes() has been called"}, {Name: "Color", Doc: "has per-vertex colors, as mat32.Vec4 per vertex"}, {Name: "Dynamic", Doc: "if true, this mesh changes frequently -- otherwise considered to be static"}, {Name: "Trans", Doc: "set to true if color has transparency -- not worth checking manually"}, {Name: "BBox", Doc: "computed bounding-box and other gross solid properties"}, {Name: "BBoxMu", Doc: "mutex on bbox access"}}})
 
 // SetColor sets the [MeshBase.Color]:
 // has per-vertex colors, as mat32.Vec4 per vertex
@@ -119,8 +120,8 @@ func NewNodeBase(parent tree.Node, name ...string) *NodeBase {
 	return parent.NewChild(NodeBaseType, name...).(*NodeBase)
 }
 
-// NodeType returns the [*types.Type] of [NodeBase]
-func (t *NodeBase) NodeType() *types.Type { return NodeBaseType }
+// NodeType returns the [*gti.Type] of [NodeBase]
+func (t *NodeBase) NodeType() *gti.Type { return NodeBaseType }
 
 // New returns a new [*NodeBase] value
 func (t *NodeBase) New() tree.Node { return &NodeBase{} }
@@ -134,8 +135,8 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.RenderClasses",
 // SceneType is the [types.Type] for [Scene]
 var SceneType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Scene", IDName: "scene", Doc: "Scene is the overall scenegraph containing nodes as children.\nIt renders to its own vgpu.RenderFrame.\nThe Image of this Frame is usable directly or, via xyzview.Scene,\nwhere it is copied into an overall core.Scene image.\n\nThere is default navigation event processing (disabled by setting NoNav)\nwhere mouse drag events Orbit the camera (Shift = Pan, Alt = PanTarget)\nand arrow keys do Orbit, Pan, PanTarget with same key modifiers.\nSpacebar restores original \"default\" camera, and numbers save (1st time)\nor restore (subsequently) camera views (Control = always save)\n\nA Group at the top-level named \"TrackCamera\" will automatically track\nthe camera (i.e., its Pose is copied) -- Solids in that group can\nset their relative Pos etc to display relative to the camera, to achieve\n\"first person\" effects.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}, {Tool: "core", Directive: "embedder"}}, Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Geom", Doc: "Viewport-level viewbox within any parent Viewport2D"}, {Name: "MultiSample", Doc: "number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame"}, {Name: "Wireframe", Doc: "render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system (i.e., just after Scene is made)"}, {Name: "Camera", Doc: "camera determines view onto scene"}, {Name: "BackgroundColor", Doc: "background color, which is used directly as an RGB color in vulkan"}, {Name: "Lights", Doc: "all lights used in the scene"}, {Name: "Meshes", Doc: "meshes -- holds all the mesh data -- must be configured prior to rendering"}, {Name: "Textures", Doc: "textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability"}, {Name: "Library", Doc: "library of objects that can be used in the scene"}, {Name: "NoNav", Doc: "don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene"}, {Name: "SavedCams", Doc: "saved cameras -- can Save and Set these to view the scene from different angles"}, {Name: "SetDragCursor", Doc: "has dragging cursor been set yet?"}, {Name: "Phong", Doc: "the vphong rendering system"}, {Name: "Frame", Doc: "the vgpu render frame holding the rendered scene"}, {Name: "ImgCopy", Doc: "image used to hold a copy of the Frame image, for ImageCopy() call.\nThis is re-used across calls to avoid large memory allocations,\nso it will automatically update after every ImageCopy call.\nIf a persistent image is required, call [iox/imagex.CloneAsRGBA]."}, {Name: "DirUpIndex", Doc: "index in list of window direct uploading images"}, {Name: "RenderMu", Doc: "mutex on rendering"}}, Instance: &Scene{}})
 
-// NodeType returns the [*types.Type] of [Scene]
-func (t *Scene) NodeType() *types.Type { return SceneType }
+// NodeType returns the [*gti.Type] of [Scene]
+func (t *Scene) NodeType() *gti.Type { return SceneType }
 
 // New returns a new [*Scene] value
 func (t *Scene) New() tree.Node { return &Scene{} }
@@ -178,7 +179,7 @@ func (t *Scene) SetNoNav(v bool) *Scene { t.NoNav = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.ScFlags", IDName: "sc-flags", Doc: "ScFlags has critical state information signaling when rendering,\nupdating, or config needs to be done"})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Plane", IDName: "plane", Doc: "Plane is a flat 2D plane, which can be oriented along any\naxis facing either positive or negative", Directives: []types.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "MeshBase"}}, Fields: []types.Field{{Name: "NormAxis", Doc: "axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormNeg for whether it is facing in the positive or negative of the given axis."}, {Name: "NormNeg", Doc: "if false, the plane normal facing in the positive direction along specified NormAxis, otherwise it faces in the negative if true"}, {Name: "Size", Doc: "2D size of plane"}, {Name: "Segs", Doc: "number of segments to divide plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1"}, {Name: "Offset", Doc: "offset from origin along direction of normal to the plane"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Plane", IDName: "plane", Doc: "Plane is a flat 2D plane, which can be oriented along any\naxis facing either positive or negative", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "MeshBase"}}, Fields: []types.Field{{Name: "NormAxis", Doc: "axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormNeg for whether it is facing in the positive or negative of the given axis."}, {Name: "NormNeg", Doc: "if false, the plane normal facing in the positive direction along specified NormAxis, otherwise it faces in the negative if true"}, {Name: "Size", Doc: "2D size of plane"}, {Name: "Segs", Doc: "number of segments to divide plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1"}, {Name: "Offset", Doc: "offset from origin along direction of normal to the plane"}}})
 
 // SetNormAxis sets the [Plane.NormAxis]:
 // axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormNeg for whether it is facing in the positive or negative of the given axis.
@@ -209,7 +210,7 @@ func (t *Plane) SetDynamic(v bool) *Plane { t.Dynamic = v; return t }
 // SetTrans sets the [Plane.Trans]
 func (t *Plane) SetTrans(v bool) *Plane { t.Trans = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Box", IDName: "box", Doc: "Box is a rectangular-shaped solid (cuboid)", Directives: []types.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "MeshBase"}}, Fields: []types.Field{{Name: "Size", Doc: "size along each dimension"}, {Name: "Segs", Doc: "number of segments to divide each plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Box", IDName: "box", Doc: "Box is a rectangular-shaped solid (cuboid)", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "MeshBase"}}, Fields: []types.Field{{Name: "Size", Doc: "size along each dimension"}, {Name: "Segs", Doc: "number of segments to divide each plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1"}}})
 
 // SetSize sets the [Box.Size]:
 // size along each dimension
@@ -228,7 +229,7 @@ func (t *Box) SetDynamic(v bool) *Box { t.Dynamic = v; return t }
 // SetTrans sets the [Box.Trans]
 func (t *Box) SetTrans(v bool) *Box { t.Trans = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Sphere", IDName: "sphere", Doc: "Sphere is a sphere mesh", Directives: []types.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "MeshBase"}}, Fields: []types.Field{{Name: "Radius", Doc: "radius of the sphere"}, {Name: "WidthSegs", Doc: "number of segments around the width of the sphere (32 is reasonable default for full circle)"}, {Name: "HeightSegs", Doc: "number of height segments (32 is reasonable default for full height)"}, {Name: "AngStart", Doc: "starting radial angle in degrees, relative to -1,0,0 left side starting point"}, {Name: "AngLen", Doc: "total radial angle to generate in degrees (max = 360)"}, {Name: "ElevStart", Doc: "starting elevation (height) angle in degrees - 0 = top of sphere, and Pi is bottom"}, {Name: "ElevLen", Doc: "total angle to generate in degrees (max = 180)"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Sphere", IDName: "sphere", Doc: "Sphere is a sphere mesh", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "MeshBase"}}, Fields: []types.Field{{Name: "Radius", Doc: "radius of the sphere"}, {Name: "WidthSegs", Doc: "number of segments around the width of the sphere (32 is reasonable default for full circle)"}, {Name: "HeightSegs", Doc: "number of height segments (32 is reasonable default for full height)"}, {Name: "AngStart", Doc: "starting radial angle in degrees, relative to -1,0,0 left side starting point"}, {Name: "AngLen", Doc: "total radial angle to generate in degrees (max = 360)"}, {Name: "ElevStart", Doc: "starting elevation (height) angle in degrees - 0 = top of sphere, and Pi is bottom"}, {Name: "ElevLen", Doc: "total angle to generate in degrees (max = 180)"}}})
 
 // SetRadius sets the [Sphere.Radius]:
 // radius of the sphere
@@ -267,7 +268,7 @@ func (t *Sphere) SetDynamic(v bool) *Sphere { t.Dynamic = v; return t }
 // SetTrans sets the [Sphere.Trans]
 func (t *Sphere) SetTrans(v bool) *Sphere { t.Trans = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Cylinder", IDName: "cylinder", Doc: "Cylinder is a generalized cylinder shape, including a cone\nor truncated cone by having different size circles at either end.\nHeight is up along the Y axis.", Directives: []types.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "MeshBase"}}, Fields: []types.Field{{Name: "Height", Doc: "height of the cylinder"}, {Name: "TopRad", Doc: "radius of the top -- set to 0 for a cone"}, {Name: "BotRad", Doc: "radius of the bottom"}, {Name: "RadialSegs", Doc: "number of radial segments (32 is a reasonable default for full circle)"}, {Name: "HeightSegs", Doc: "number of height segments"}, {Name: "Top", Doc: "render the top disc"}, {Name: "Bottom", Doc: "render the bottom disc"}, {Name: "AngStart", Doc: "starting angle in degrees, relative to -1,0,0 left side starting point"}, {Name: "AngLen", Doc: "total angle to generate in degrees (max 360)"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Cylinder", IDName: "cylinder", Doc: "Cylinder is a generalized cylinder shape, including a cone\nor truncated cone by having different size circles at either end.\nHeight is up along the Y axis.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "MeshBase"}}, Fields: []types.Field{{Name: "Height", Doc: "height of the cylinder"}, {Name: "TopRad", Doc: "radius of the top -- set to 0 for a cone"}, {Name: "BotRad", Doc: "radius of the bottom"}, {Name: "RadialSegs", Doc: "number of radial segments (32 is a reasonable default for full circle)"}, {Name: "HeightSegs", Doc: "number of height segments"}, {Name: "Top", Doc: "render the top disc"}, {Name: "Bottom", Doc: "render the bottom disc"}, {Name: "AngStart", Doc: "starting angle in degrees, relative to -1,0,0 left side starting point"}, {Name: "AngLen", Doc: "total angle to generate in degrees (max 360)"}}})
 
 // SetHeight sets the [Cylinder.Height]:
 // height of the cylinder
@@ -314,7 +315,7 @@ func (t *Cylinder) SetDynamic(v bool) *Cylinder { t.Dynamic = v; return t }
 // SetTrans sets the [Cylinder.Trans]
 func (t *Cylinder) SetTrans(v bool) *Cylinder { t.Trans = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Capsule", IDName: "capsule", Doc: "Capsule is a generalized capsule shape: a cylinder with hemisphere end caps.\nSupports different radii on each end.\nHeight is along the Y axis -- total height is Height + TopRad + BotRad.", Directives: []types.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "MeshBase"}}, Fields: []types.Field{{Name: "Height", Doc: "height of the cylinder portion"}, {Name: "TopRad", Doc: "radius of the top -- set to 0 for a cone"}, {Name: "BotRad", Doc: "radius of the bottom"}, {Name: "RadialSegs", Doc: "number of radial segments (32 is a reasonable default for full circle)"}, {Name: "HeightSegs", Doc: "number of height segments"}, {Name: "CapSegs", Doc: "number of segments in the hemisphere cap ends (16 is a reasonable default)"}, {Name: "AngStart", Doc: "starting angle in degrees, relative to -1,0,0 left side starting point"}, {Name: "AngLen", Doc: "total angle to generate in degrees (max 360)"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Capsule", IDName: "capsule", Doc: "Capsule is a generalized capsule shape: a cylinder with hemisphere end caps.\nSupports different radii on each end.\nHeight is along the Y axis -- total height is Height + TopRad + BotRad.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "MeshBase"}}, Fields: []types.Field{{Name: "Height", Doc: "height of the cylinder portion"}, {Name: "TopRad", Doc: "radius of the top -- set to 0 for a cone"}, {Name: "BotRad", Doc: "radius of the bottom"}, {Name: "RadialSegs", Doc: "number of radial segments (32 is a reasonable default for full circle)"}, {Name: "HeightSegs", Doc: "number of height segments"}, {Name: "CapSegs", Doc: "number of segments in the hemisphere cap ends (16 is a reasonable default)"}, {Name: "AngStart", Doc: "starting angle in degrees, relative to -1,0,0 left side starting point"}, {Name: "AngLen", Doc: "total angle to generate in degrees (max 360)"}}})
 
 // SetHeight sets the [Capsule.Height]:
 // height of the cylinder portion
@@ -357,7 +358,7 @@ func (t *Capsule) SetDynamic(v bool) *Capsule { t.Dynamic = v; return t }
 // SetTrans sets the [Capsule.Trans]
 func (t *Capsule) SetTrans(v bool) *Capsule { t.Trans = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Torus", IDName: "torus", Doc: "Torus is a torus mesh, defined by the radius of the solid tube and the\nlarger radius of the ring.", Directives: []types.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "MeshBase"}}, Fields: []types.Field{{Name: "Radius", Doc: "larger radius of the torus ring"}, {Name: "TubeRadius", Doc: "radius of the solid tube"}, {Name: "RadialSegs", Doc: "number of segments around the radius of the torus (32 is reasonable default for full circle)"}, {Name: "TubeSegs", Doc: "number of segments for the tube itself (32 is reasonable default for full height)"}, {Name: "AngStart", Doc: "starting radial angle in degrees relative to 1,0,0 starting point"}, {Name: "AngLen", Doc: "total radial angle to generate in degrees (max = 360)"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Torus", IDName: "torus", Doc: "Torus is a torus mesh, defined by the radius of the solid tube and the\nlarger radius of the ring.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "MeshBase"}}, Fields: []types.Field{{Name: "Radius", Doc: "larger radius of the torus ring"}, {Name: "TubeRadius", Doc: "radius of the solid tube"}, {Name: "RadialSegs", Doc: "number of segments around the radius of the torus (32 is reasonable default for full circle)"}, {Name: "TubeSegs", Doc: "number of segments for the tube itself (32 is reasonable default for full height)"}, {Name: "AngStart", Doc: "starting radial angle in degrees relative to 1,0,0 starting point"}, {Name: "AngLen", Doc: "total radial angle to generate in degrees (max = 360)"}}})
 
 // SetRadius sets the [Torus.Radius]:
 // larger radius of the torus ring
@@ -403,8 +404,8 @@ func NewSolid(parent tree.Node, name ...string) *Solid {
 	return parent.NewChild(SolidType, name...).(*Solid)
 }
 
-// NodeType returns the [*types.Type] of [Solid]
-func (t *Solid) NodeType() *types.Type { return SolidType }
+// NodeType returns the [*gti.Type] of [Solid]
+func (t *Solid) NodeType() *gti.Type { return SolidType }
 
 // New returns a new [*Solid] value
 func (t *Solid) New() tree.Node { return &Solid{} }
@@ -434,8 +435,8 @@ func NewText2D(parent tree.Node, name ...string) *Text2D {
 	return parent.NewChild(Text2DType, name...).(*Text2D)
 }
 
-// NodeType returns the [*types.Type] of [Text2D]
-func (t *Text2D) NodeType() *types.Type { return Text2DType }
+// NodeType returns the [*gti.Type] of [Text2D]
+func (t *Text2D) NodeType() *gti.Type { return Text2DType }
 
 // New returns a new [*Text2D] value
 func (t *Text2D) New() tree.Node { return &Text2D{} }

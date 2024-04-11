@@ -8,11 +8,12 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/fileinfo"
-	"cogentcore.org/core/types"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
 	"cogentcore.org/core/units"
+	"goki.dev/gti"
 )
 
 // ArgViewType is the [types.Type] for [ArgView]
@@ -26,8 +27,8 @@ func NewArgView(parent tree.Node, name ...string) *ArgView {
 	return parent.NewChild(ArgViewType, name...).(*ArgView)
 }
 
-// NodeType returns the [*types.Type] of [ArgView]
-func (t *ArgView) NodeType() *types.Type { return ArgViewType }
+// NodeType returns the [*gti.Type] of [ArgView]
+func (t *ArgView) NodeType() *gti.Type { return ArgViewType }
 
 // New returns a new [*ArgView] value
 func (t *ArgView) New() tree.Node { return &ArgView{} }
@@ -48,8 +49,8 @@ func NewColorView(parent tree.Node, name ...string) *ColorView {
 	return parent.NewChild(ColorViewType, name...).(*ColorView)
 }
 
-// NodeType returns the [*types.Type] of [ColorView]
-func (t *ColorView) NodeType() *types.Type { return ColorViewType }
+// NodeType returns the [*gti.Type] of [ColorView]
+func (t *ColorView) NodeType() *gti.Type { return ColorViewType }
 
 // New returns a new [*ColorView] value
 func (t *ColorView) New() tree.Node { return &ColorView{} }
@@ -58,7 +59,7 @@ func (t *ColorView) New() tree.Node { return &ColorView{} }
 func (t *ColorView) SetTooltip(v string) *ColorView { t.Tooltip = v; return t }
 
 // FileViewType is the [types.Type] for [FileView]
-var FileViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.FileView", IDName: "file-view", Doc: "FileView is a viewer onto files -- core of the file chooser dialog", Methods: []types.Method{{Name: "UpdateFilesAction", Doc: "UpdateFilesAction updates the list of files and other views for the current path.", Directives: []types.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "AddPathToFavs", Doc: "AddPathToFavs adds the current path to favorites", Directives: []types.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "DirPathUp", Doc: "DirPathUp moves up one directory in the path", Directives: []types.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "NewFolder", Doc: "NewFolder creates a new folder with the given name in the current directory.", Directives: []types.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"name"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "DirPath", Doc: "path to directory of files to display"}, {Name: "CurrentSelectedFile", Doc: "currently selected file"}, {Name: "Ext", Doc: "target extension(s) (comma separated if multiple, including initial .), if any"}, {Name: "FilterFunc", Doc: "optional styling function"}, {Name: "ExtMap", Doc: "map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value"}, {Name: "Files", Doc: "files for current directory"}, {Name: "SelectedIndex", Doc: "index of currently-selected file in Files list (-1 if none)"}, {Name: "Watcher", Doc: "change notify for current dir"}, {Name: "DoneWatcher", Doc: "channel to close watcher watcher"}, {Name: "UpdateMu", Doc: "UpdateFiles mutex"}, {Name: "PrevPath", Doc: "Previous path that was processed via UpdateFiles"}}, Instance: &FileView{}})
+var FileViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.FileView", IDName: "file-view", Doc: "FileView is a viewer onto files -- core of the file chooser dialog", Methods: []types.Method{{Name: "UpdateFilesAction", Doc: "UpdateFilesAction updates the list of files and other views for the current path.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "AddPathToFavs", Doc: "AddPathToFavs adds the current path to favorites", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "DirPathUp", Doc: "DirPathUp moves up one directory in the path", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "NewFolder", Doc: "NewFolder creates a new folder with the given name in the current directory.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"name"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "DirPath", Doc: "path to directory of files to display"}, {Name: "CurrentSelectedFile", Doc: "currently selected file"}, {Name: "Ext", Doc: "target extension(s) (comma separated if multiple, including initial .), if any"}, {Name: "FilterFunc", Doc: "optional styling function"}, {Name: "ExtMap", Doc: "map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value"}, {Name: "Files", Doc: "files for current directory"}, {Name: "SelectedIndex", Doc: "index of currently-selected file in Files list (-1 if none)"}, {Name: "Watcher", Doc: "change notify for current dir"}, {Name: "DoneWatcher", Doc: "channel to close watcher watcher"}, {Name: "UpdateMu", Doc: "UpdateFiles mutex"}, {Name: "PrevPath", Doc: "Previous path that was processed via UpdateFiles"}}, Instance: &FileView{}})
 
 // NewFileView adds a new [FileView] with the given name to the given parent:
 // FileView is a viewer onto files -- core of the file chooser dialog
@@ -66,8 +67,8 @@ func NewFileView(parent tree.Node, name ...string) *FileView {
 	return parent.NewChild(FileViewType, name...).(*FileView)
 }
 
-// NodeType returns the [*types.Type] of [FileView]
-func (t *FileView) NodeType() *types.Type { return FileViewType }
+// NodeType returns the [*gti.Type] of [FileView]
+func (t *FileView) NodeType() *gti.Type { return FileViewType }
 
 // New returns a new [*FileView] value
 func (t *FileView) New() tree.Node { return &FileView{} }
@@ -90,8 +91,8 @@ func (t *FileView) SetTooltip(v string) *FileView { t.Tooltip = v; return t }
 // FuncButtonType is the [types.Type] for [FuncButton]
 var FuncButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.FuncButton", IDName: "func-button", Doc: "FuncButton is a button that is set up to call a function when it\nis pressed, using a dialog to prompt the user for any arguments.\nAlso, it automatically sets various properties of the button like\nthe name, text, tooltip, and icon based on the properties of the\nfunction, using reflect and gti. The function must be registered\nwith gti to get documentation information, but that is not required;\nadd a `//types:add` comment directive and run `core generate`\nif you want tooltips. If the function is a method, both the method and\nits receiver type must be added to gti to get documentation.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Func", Doc: "Func is the [gti.Func] associated with this button.\nThis function can also be a method, but it must be\nconverted to a [gti.Func] first. It should typically\nbe set using [FuncButton.SetFunc]."}, {Name: "ReflectFunc", Doc: "ReflectFunc is the [reflect.Value] of the function or\nmethod associated with this button. It should typically\nbet set using [FuncButton.SetFunc]."}, {Name: "Args", Doc: "Args are the [Value] objects associated with the\narguments of the function. They are automatically set in\n[SetFunc], but they can be customized to configure\ndefault values and other options."}, {Name: "Returns", Doc: "Returns are the [Value] objects associated with the\nreturn values of the function. They are automatically\nset in [SetFunc], but they can be customized to configure\ndefault values and other options. The [reflect.Value]s of\nthe [Value] objects are not set until the function is\ncalled, and are thus not typically applicable to access."}, {Name: "Confirm", Doc: "Confirm is whether to prompt the user for confirmation\nbefore calling the function."}, {Name: "ShowReturn", Doc: "ShowReturn is whether to display the return values of\nthe function (and a success message if there are none).\nThe way that the return values are shown is determined\nby ShowReturnAsDialog. Non-nil error return values will\nalways be shown, even if ShowReturn is set to false."}, {Name: "ShowReturnAsDialog", Doc: "ShowReturnAsDialog, if and only if ShowReturn is true,\nindicates to show the return values of the function in\na dialog, instead of in a snackbar, as they are by default.\nIf there are multiple return values from the function, or if\none of them is a complex type (pointer, struct, slice,\narray, map), then ShowReturnAsDialog will\nautomatically be set to true."}, {Name: "NewWindow", Doc: "NewWindow makes the ReturnDialog a NewWindow dialog\n(if supported by platform)."}, {Name: "WarnUnadded", Doc: "WarnUnadded is whether to log warnings when a function that\nhas not been added to gti is used. It is on by default and\nmust be set before [FuncButton.SetFunc] is called for it to\nhave any effect."}, {Name: "Context", Doc: "Context is used for opening Dialogs if non-nil."}, {Name: "AfterFunc", Doc: "AfterFunc is an optional function called after the funcbutton\nfunction is executed"}}, Instance: &FuncButton{}})
 
-// NodeType returns the [*types.Type] of [FuncButton]
-func (t *FuncButton) NodeType() *types.Type { return FuncButtonType }
+// NodeType returns the [*gti.Type] of [FuncButton]
+func (t *FuncButton) NodeType() *gti.Type { return FuncButtonType }
 
 // New returns a new [*FuncButton] value
 func (t *FuncButton) New() tree.Node { return &FuncButton{} }
@@ -159,7 +160,7 @@ func (t *FuncButton) SetShortcut(v key.Chord) *FuncButton { t.Shortcut = v; retu
 func (t *FuncButton) SetMenu(v func(m *core.Scene)) *FuncButton { t.Menu = v; return t }
 
 // InspectorType is the [types.Type] for [Inspector]
-var InspectorType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.Inspector", IDName: "inspector", Doc: "Inspector represents a struct, creating a property editor of the fields --\nconstructs Children widgets to show the field names and editor fields for\neach field, within an overall frame with an optional title, and a button\nbox at the bottom where methods can be invoked", Methods: []types.Method{{Name: "Save", Doc: "Save saves tree to current filename, in a standard JSON-formatted file", Directives: []types.Directive{{Tool: "gti", Directive: "add"}}, Returns: []string{"error"}}, {Name: "SaveAs", Doc: "SaveAs saves tree to given filename, in a standard JSON-formatted file", Directives: []types.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "Open", Doc: "Open opens tree from given filename, in a standard JSON-formatted file", Directives: []types.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "ToggleSelectionMode", Doc: "ToggleSelectionMode toggles the editor between selection mode or not.\nIn selection mode, bounding boxes are rendered around each Widget,\nand clicking on a Widget pulls it up in the inspector.", Directives: []types.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "InspectApp", Doc: "InspectApp displays the underlying operating system app", Directives: []types.Directive{{Tool: "gti", Directive: "add"}}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "KiRoot", Doc: "root of tree being edited"}, {Name: "Changed", Doc: "has the root changed via gui actions?  updated from treeview and structview for changes"}, {Name: "Filename", Doc: "current filename for saving / loading"}}, Instance: &Inspector{}})
+var InspectorType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.Inspector", IDName: "inspector", Doc: "Inspector represents a struct, creating a property editor of the fields --\nconstructs Children widgets to show the field names and editor fields for\neach field, within an overall frame with an optional title, and a button\nbox at the bottom where methods can be invoked", Methods: []types.Method{{Name: "Save", Doc: "Save saves tree to current filename, in a standard JSON-formatted file", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Returns: []string{"error"}}, {Name: "SaveAs", Doc: "SaveAs saves tree to given filename, in a standard JSON-formatted file", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "Open", Doc: "Open opens tree from given filename, in a standard JSON-formatted file", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "ToggleSelectionMode", Doc: "ToggleSelectionMode toggles the editor between selection mode or not.\nIn selection mode, bounding boxes are rendered around each Widget,\nand clicking on a Widget pulls it up in the inspector.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "InspectApp", Doc: "InspectApp displays the underlying operating system app", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "KiRoot", Doc: "root of tree being edited"}, {Name: "Changed", Doc: "has the root changed via gui actions?  updated from treeview and structview for changes"}, {Name: "Filename", Doc: "current filename for saving / loading"}}, Instance: &Inspector{}})
 
 // NewInspector adds a new [Inspector] with the given name to the given parent:
 // Inspector represents a struct, creating a property editor of the fields --
@@ -170,8 +171,8 @@ func NewInspector(parent tree.Node, name ...string) *Inspector {
 	return parent.NewChild(InspectorType, name...).(*Inspector)
 }
 
-// NodeType returns the [*types.Type] of [Inspector]
-func (t *Inspector) NodeType() *types.Type { return InspectorType }
+// NodeType returns the [*gti.Type] of [Inspector]
+func (t *Inspector) NodeType() *gti.Type { return InspectorType }
 
 // New returns a new [*Inspector] value
 func (t *Inspector) New() tree.Node { return &Inspector{} }
@@ -198,8 +199,8 @@ func NewMapView(parent tree.Node, name ...string) *MapView {
 	return parent.NewChild(MapViewType, name...).(*MapView)
 }
 
-// NodeType returns the [*types.Type] of [MapView]
-func (t *MapView) NodeType() *types.Type { return MapViewType }
+// NodeType returns the [*gti.Type] of [MapView]
+func (t *MapView) NodeType() *gti.Type { return MapViewType }
 
 // New returns a new [*MapView] value
 func (t *MapView) New() tree.Node { return &MapView{} }
@@ -230,8 +231,8 @@ func NewMapViewInline(parent tree.Node, name ...string) *MapViewInline {
 	return parent.NewChild(MapViewInlineType, name...).(*MapViewInline)
 }
 
-// NodeType returns the [*types.Type] of [MapViewInline]
-func (t *MapViewInline) NodeType() *types.Type { return MapViewInlineType }
+// NodeType returns the [*gti.Type] of [MapViewInline]
+func (t *MapViewInline) NodeType() *gti.Type { return MapViewInlineType }
 
 // New returns a new [*MapViewInline] value
 func (t *MapViewInline) New() tree.Node { return &MapViewInline{} }
@@ -256,8 +257,8 @@ func NewSliceView(parent tree.Node, name ...string) *SliceView {
 	return parent.NewChild(SliceViewType, name...).(*SliceView)
 }
 
-// NodeType returns the [*types.Type] of [SliceView]
-func (t *SliceView) NodeType() *types.Type { return SliceViewType }
+// NodeType returns the [*gti.Type] of [SliceView]
+func (t *SliceView) NodeType() *gti.Type { return SliceViewType }
 
 // New returns a new [*SliceView] value
 func (t *SliceView) New() tree.Node { return &SliceView{} }
@@ -285,7 +286,7 @@ func (t *SliceView) SetSelectedIndex(v int) *SliceView { t.SelectedIndex = v; re
 func (t *SliceView) SetInitSelectedIndex(v int) *SliceView { t.InitSelectedIndex = v; return t }
 
 // SliceViewBaseType is the [types.Type] for [SliceViewBase]
-var SliceViewBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceViewBase", IDName: "slice-view-base", Doc: "SliceViewBase is the base for SliceView and TableView and any other viewers\nof array-like data.  It automatically computes the number of rows that fit\nwithin its allocated space, and manages the offset view window into the full\nlist of items, and supports row selection, copy / paste, Drag-n-Drop, etc.\nSet to ReadOnly for select-only mode, which emits WidgetSig WidgetSelected\nsignals when selection is updated.", Methods: []types.Method{{Name: "CopyIndexes", Doc: "CopyIndexes copies selected idxs to system.Clipboard, optionally resetting the selection", Directives: []types.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"reset"}}, {Name: "DeleteIndexes", Doc: "DeleteIndexes deletes all selected indexes", Directives: []types.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "CutIndexes", Doc: "CutIndexes copies selected indexes to system.Clipboard and deletes selected indexes", Directives: []types.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "PasteIndex", Doc: "PasteIndex pastes clipboard at given idx", Directives: []types.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"idx"}}, {Name: "Duplicate", Doc: "Duplicate copies selected items and inserts them after current selection --\nreturn idx of start of duplicates if successful, else -1", Directives: []types.Directive{{Tool: "gti", Directive: "add"}}, Returns: []string{"int"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Slice", Doc: "the slice that we are a view onto -- must be a pointer to that slice"}, {Name: "MinRows", Doc: "MinRows specifies the minimum number of rows to display, to ensure\nat least this amount is displayed."}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}, {Name: "ViewMu", Doc: "optional mutex that, if non-nil, will be used around any updates that\nread / modify the underlying Slice data.\nCan be used to protect against random updating if your code has specific\nupdate points that can be likewise protected with this same mutex."}, {Name: "Changed", Doc: "Changed indicates whether the underlying slice\nhas been edited in any way"}, {Name: "SelectedValue", Doc: "current selection value -- initially select this value if set"}, {Name: "SelectedIndex", Doc: "index of currently selected item"}, {Name: "InitSelectedIndex", Doc: "index of row to select at start"}, {Name: "SelectedIndexes", Doc: "list of currently-selected slice indexes"}, {Name: "LastClick", Doc: "LastClick is the last row that has been clicked on.\nThis is used to prevent erroneous double click events\nfrom being sent when the user clicks on multiple different\nrows in quick succession."}, {Name: "NormalCursor", Doc: "NormalCursor is the cached cursor to display when there\nis no row being hovered."}, {Name: "CurrentCursor", Doc: "CurrentCursor is the cached cursor that should currently be\ndisplayed."}, {Name: "SliceNPVal", Doc: "non-ptr reflect.Value of the slice"}, {Name: "SliceValue", Doc: "Value for the slice itself, if this was created within value view framework -- otherwise nil"}, {Name: "Values", Doc: "Value representations of the slice values"}, {Name: "HoverRow", Doc: "currently-hovered row"}, {Name: "DraggedIndexes", Doc: "list of currently-dragged indexes"}, {Name: "VisRows", Doc: "total number of rows visible in allocated display size"}, {Name: "StartIndex", Doc: "starting slice index of visible rows"}, {Name: "SliceSize", Doc: "size of slice"}, {Name: "ConfigIter", Doc: "iteration through the configuration process, reset when a new slice type is set"}, {Name: "TmpIndex", Doc: "temp idx state for e.g., dnd"}, {Name: "ElVal", Doc: "ElVal is a Value representation of the underlying element type\nwhich is used whenever there are no slice elements available"}, {Name: "MaxWidth", Doc: "maximum width of value column in chars, if string"}}, Instance: &SliceViewBase{}})
+var SliceViewBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceViewBase", IDName: "slice-view-base", Doc: "SliceViewBase is the base for SliceView and TableView and any other viewers\nof array-like data.  It automatically computes the number of rows that fit\nwithin its allocated space, and manages the offset view window into the full\nlist of items, and supports row selection, copy / paste, Drag-n-Drop, etc.\nSet to ReadOnly for select-only mode, which emits WidgetSig WidgetSelected\nsignals when selection is updated.", Methods: []types.Method{{Name: "CopyIndexes", Doc: "CopyIndexes copies selected idxs to system.Clipboard, optionally resetting the selection", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"reset"}}, {Name: "DeleteIndexes", Doc: "DeleteIndexes deletes all selected indexes", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "CutIndexes", Doc: "CutIndexes copies selected indexes to system.Clipboard and deletes selected indexes", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "PasteIndex", Doc: "PasteIndex pastes clipboard at given idx", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"idx"}}, {Name: "Duplicate", Doc: "Duplicate copies selected items and inserts them after current selection --\nreturn idx of start of duplicates if successful, else -1", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Returns: []string{"int"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Slice", Doc: "the slice that we are a view onto -- must be a pointer to that slice"}, {Name: "MinRows", Doc: "MinRows specifies the minimum number of rows to display, to ensure\nat least this amount is displayed."}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}, {Name: "ViewMu", Doc: "optional mutex that, if non-nil, will be used around any updates that\nread / modify the underlying Slice data.\nCan be used to protect against random updating if your code has specific\nupdate points that can be likewise protected with this same mutex."}, {Name: "Changed", Doc: "Changed indicates whether the underlying slice\nhas been edited in any way"}, {Name: "SelectedValue", Doc: "current selection value -- initially select this value if set"}, {Name: "SelectedIndex", Doc: "index of currently selected item"}, {Name: "InitSelectedIndex", Doc: "index of row to select at start"}, {Name: "SelectedIndexes", Doc: "list of currently-selected slice indexes"}, {Name: "LastClick", Doc: "LastClick is the last row that has been clicked on.\nThis is used to prevent erroneous double click events\nfrom being sent when the user clicks on multiple different\nrows in quick succession."}, {Name: "NormalCursor", Doc: "NormalCursor is the cached cursor to display when there\nis no row being hovered."}, {Name: "CurrentCursor", Doc: "CurrentCursor is the cached cursor that should currently be\ndisplayed."}, {Name: "SliceNPVal", Doc: "non-ptr reflect.Value of the slice"}, {Name: "SliceValue", Doc: "Value for the slice itself, if this was created within value view framework -- otherwise nil"}, {Name: "Values", Doc: "Value representations of the slice values"}, {Name: "HoverRow", Doc: "currently-hovered row"}, {Name: "DraggedIndexes", Doc: "list of currently-dragged indexes"}, {Name: "VisRows", Doc: "total number of rows visible in allocated display size"}, {Name: "StartIndex", Doc: "starting slice index of visible rows"}, {Name: "SliceSize", Doc: "size of slice"}, {Name: "ConfigIter", Doc: "iteration through the configuration process, reset when a new slice type is set"}, {Name: "TmpIndex", Doc: "temp idx state for e.g., dnd"}, {Name: "ElVal", Doc: "ElVal is a Value representation of the underlying element type\nwhich is used whenever there are no slice elements available"}, {Name: "MaxWidth", Doc: "maximum width of value column in chars, if string"}}, Instance: &SliceViewBase{}})
 
 // NewSliceViewBase adds a new [SliceViewBase] with the given name to the given parent:
 // SliceViewBase is the base for SliceView and TableView and any other viewers
@@ -298,8 +299,8 @@ func NewSliceViewBase(parent tree.Node, name ...string) *SliceViewBase {
 	return parent.NewChild(SliceViewBaseType, name...).(*SliceViewBase)
 }
 
-// NodeType returns the [*types.Type] of [SliceViewBase]
-func (t *SliceViewBase) NodeType() *types.Type { return SliceViewBaseType }
+// NodeType returns the [*gti.Type] of [SliceViewBase]
+func (t *SliceViewBase) NodeType() *gti.Type { return SliceViewBaseType }
 
 // New returns a new [*SliceViewBase] value
 func (t *SliceViewBase) New() tree.Node { return &SliceViewBase{} }
@@ -337,8 +338,8 @@ func NewSliceViewGrid(parent tree.Node, name ...string) *SliceViewGrid {
 	return parent.NewChild(SliceViewGridType, name...).(*SliceViewGrid)
 }
 
-// NodeType returns the [*types.Type] of [SliceViewGrid]
-func (t *SliceViewGrid) NodeType() *types.Type { return SliceViewGridType }
+// NodeType returns the [*gti.Type] of [SliceViewGrid]
+func (t *SliceViewGrid) NodeType() *gti.Type { return SliceViewGridType }
 
 // New returns a new [*SliceViewGrid] value
 func (t *SliceViewGrid) New() tree.Node { return &SliceViewGrid{} }
@@ -364,8 +365,8 @@ func NewSliceViewInline(parent tree.Node, name ...string) *SliceViewInline {
 	return parent.NewChild(SliceViewInlineType, name...).(*SliceViewInline)
 }
 
-// NodeType returns the [*types.Type] of [SliceViewInline]
-func (t *SliceViewInline) NodeType() *types.Type { return SliceViewInlineType }
+// NodeType returns the [*gti.Type] of [SliceViewInline]
+func (t *SliceViewInline) NodeType() *gti.Type { return SliceViewInlineType }
 
 // New returns a new [*SliceViewInline] value
 func (t *SliceViewInline) New() tree.Node { return &SliceViewInline{} }
@@ -388,8 +389,8 @@ func NewStructView(parent tree.Node, name ...string) *StructView {
 	return parent.NewChild(StructViewType, name...).(*StructView)
 }
 
-// NodeType returns the [*types.Type] of [StructView]
-func (t *StructView) NodeType() *types.Type { return StructViewType }
+// NodeType returns the [*gti.Type] of [StructView]
+func (t *StructView) NodeType() *gti.Type { return StructViewType }
 
 // New returns a new [*StructView] value
 func (t *StructView) New() tree.Node { return &StructView{} }
@@ -411,8 +412,8 @@ func NewStructViewInline(parent tree.Node, name ...string) *StructViewInline {
 	return parent.NewChild(StructViewInlineType, name...).(*StructViewInline)
 }
 
-// NodeType returns the [*types.Type] of [StructViewInline]
-func (t *StructViewInline) NodeType() *types.Type { return StructViewInlineType }
+// NodeType returns the [*gti.Type] of [StructViewInline]
+func (t *StructViewInline) NodeType() *gti.Type { return StructViewInlineType }
 
 // New returns a new [*StructViewInline] value
 func (t *StructViewInline) New() tree.Node { return &StructViewInline{} }
@@ -445,8 +446,8 @@ func NewTableView(parent tree.Node, name ...string) *TableView {
 	return parent.NewChild(TableViewType, name...).(*TableView)
 }
 
-// NodeType returns the [*types.Type] of [TableView]
-func (t *TableView) NodeType() *types.Type { return TableViewType }
+// NodeType returns the [*gti.Type] of [TableView]
+func (t *TableView) NodeType() *gti.Type { return TableViewType }
 
 // New returns a new [*TableView] value
 func (t *TableView) New() tree.Node { return &TableView{} }
@@ -494,8 +495,8 @@ func NewTimeView(parent tree.Node, name ...string) *TimeView {
 	return parent.NewChild(TimeViewType, name...).(*TimeView)
 }
 
-// NodeType returns the [*types.Type] of [TimeView]
-func (t *TimeView) NodeType() *types.Type { return TimeViewType }
+// NodeType returns the [*gti.Type] of [TimeView]
+func (t *TimeView) NodeType() *gti.Type { return TimeViewType }
 
 // New returns a new [*TimeView] value
 func (t *TimeView) New() tree.Node { return &TimeView{} }
@@ -512,8 +513,8 @@ func NewDateView(parent tree.Node, name ...string) *DateView {
 	return parent.NewChild(DateViewType, name...).(*DateView)
 }
 
-// NodeType returns the [*types.Type] of [DateView]
-func (t *DateView) NodeType() *types.Type { return DateViewType }
+// NodeType returns the [*gti.Type] of [DateView]
+func (t *DateView) NodeType() *gti.Type { return DateViewType }
 
 // New returns a new [*DateView] value
 func (t *DateView) New() tree.Node { return &DateView{} }
@@ -530,8 +531,8 @@ func NewTreeTableView(parent tree.Node, name ...string) *TreeTableView {
 	return parent.NewChild(TreeTableViewType, name...).(*TreeTableView)
 }
 
-// NodeType returns the [*types.Type] of [TreeTableView]
-func (t *TreeTableView) NodeType() *types.Type { return TreeTableViewType }
+// NodeType returns the [*gti.Type] of [TreeTableView]
+func (t *TreeTableView) NodeType() *gti.Type { return TreeTableViewType }
 
 // New returns a new [*TreeTableView] value
 func (t *TreeTableView) New() tree.Node { return &TreeTableView{} }
@@ -540,7 +541,7 @@ func (t *TreeTableView) New() tree.Node { return &TreeTableView{} }
 func (t *TreeTableView) SetTooltip(v string) *TreeTableView { t.Tooltip = v; return t }
 
 // TreeViewType is the [types.Type] for [TreeView]
-var TreeViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.TreeView", IDName: "tree-view", Doc: "TreeView provides a graphical representation of a tree structure,\nproviding full navigation and manipulation abilities.\n\nIt does not handle layout by itself, so if you want it to scroll\nseparately from the rest of the surrounding context, use [NewTreeViewFrame].\n\nIf the SyncNode field is non-nil, typically via\nSyncRootNode method, then the TreeView mirrors another\ntree structure, and tree editing functions apply to\nthe source tree first, and then to the TreeView by sync.\n\nOtherwise, data can be directly encoded in a TreeView\nderived type, to represent any kind of tree structure\nand associated data.\n\nStandard events.Event are sent to any listeners, including\nSelect, Change, and DoubleClick.  The selected nodes\nare in the root SelectedNodes list.", Methods: []types.Method{{Name: "InsertAfter", Doc: "InsertAfter inserts a new node in the tree\nafter this node, at the same (sibling) level,\nprompting for the type of node to insert.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "InsertBefore", Doc: "InsertBefore inserts a new node in the tree\nbefore this node, at the same (sibling) level,\nprompting for the type of node to insert\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "AddChildNode", Doc: "AddChildNode adds a new child node to this one in the tree,\nprompting the user for the type of node to add\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "DeleteNode", Doc: "DeleteNode deletes the tree node or sync node corresponding\nto this view node in the sync tree.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "Duplicate", Doc: "Duplicate duplicates the sync node corresponding to this view node in\nthe tree, and inserts the duplicate after this node (as a new sibling).\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "EditNode", Doc: "EditNode pulls up a StructViewDialog window on the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "InspectNode", Doc: "InspectNode pulls up a new Inspector window on the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "OpenAll", Doc: "OpenAll opens the given node and all of its sub-nodes", Directives: []types.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "CloseAll", Doc: "CloseAll closes the given node and all of its sub-nodes.", Directives: []types.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "Copy", Doc: "Copy copies to system.Clipboard, optionally resetting the selection.", Directives: []types.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"reset"}}, {Name: "Cut", Doc: "Cut copies to system.Clipboard and deletes selected items.", Directives: []types.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "Paste", Doc: "Paste pastes clipboard at given node.", Directives: []types.Directive{{Tool: "gti", Directive: "add"}}}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "SyncNode", Doc: "If non-nil, the [tree.Node] that this widget is viewing in the tree (the source)"}, {Name: "Text", Doc: "The text to display for the tree view item label, which automatically\ndefaults to the [tree.Node.Name] of the tree view node. It has no effect\nif [TreeView.SyncNode] is non-nil."}, {Name: "Icon", Doc: "optional icon, displayed to the the left of the text label"}, {Name: "IconOpen", Doc: "icon to use for an open (expanded) branch; defaults to [icons.KeyboardArrowDown]"}, {Name: "IconClosed", Doc: "icon to use for a closed (collapsed) branch; defaults to [icons.KeyboardArrowRight]"}, {Name: "IconLeaf", Doc: "icon to use for a terminal node branch that has no children; defaults to [icons.Blank]"}, {Name: "Indent", Doc: "amount to indent children relative to this node"}, {Name: "OpenDepth", Doc: "depth for nodes be initialized as open (default 4).\nNodes beyond this depth will be initialized as closed."}, {Name: "ViewIndex", Doc: "linear index of this node within the entire tree.\nupdated on full rebuilds and may sometimes be off,\nbut close enough for expected uses"}, {Name: "WidgetSize", Doc: "size of just this node widget.\nour alloc includes all of our children, but we only draw us."}, {Name: "RootView", Doc: "The cached root of the view. It is automatically set and does not need to be\nset by the end user."}, {Name: "SelectedNodes", Doc: "SelectedNodes holds the currently-selected nodes, on the\nRootView node only."}, {Name: "actStateLayer", Doc: "actStateLayer is the actual state layer of the tree view, which\nshould be used when rendering it and its parts (but not its children).\nthe reason that it exists is so that the children of the tree view\n(other tree views) do not inherit its stateful background color, as\nthat does not look good."}}, Instance: &TreeView{}})
+var TreeViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.TreeView", IDName: "tree-view", Doc: "TreeView provides a graphical representation of a tree structure,\nproviding full navigation and manipulation abilities.\n\nIt does not handle layout by itself, so if you want it to scroll\nseparately from the rest of the surrounding context, use [NewTreeViewFrame].\n\nIf the SyncNode field is non-nil, typically via\nSyncRootNode method, then the TreeView mirrors another\ntree structure, and tree editing functions apply to\nthe source tree first, and then to the TreeView by sync.\n\nOtherwise, data can be directly encoded in a TreeView\nderived type, to represent any kind of tree structure\nand associated data.\n\nStandard events.Event are sent to any listeners, including\nSelect, Change, and DoubleClick.  The selected nodes\nare in the root SelectedNodes list.", Methods: []types.Method{{Name: "InsertAfter", Doc: "InsertAfter inserts a new node in the tree\nafter this node, at the same (sibling) level,\nprompting for the type of node to insert.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "InsertBefore", Doc: "InsertBefore inserts a new node in the tree\nbefore this node, at the same (sibling) level,\nprompting for the type of node to insert\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "AddChildNode", Doc: "AddChildNode adds a new child node to this one in the tree,\nprompting the user for the type of node to add\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "DeleteNode", Doc: "DeleteNode deletes the tree node or sync node corresponding\nto this view node in the sync tree.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Duplicate", Doc: "Duplicate duplicates the sync node corresponding to this view node in\nthe tree, and inserts the duplicate after this node (as a new sibling).\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "EditNode", Doc: "EditNode pulls up a StructViewDialog window on the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "InspectNode", Doc: "InspectNode pulls up a new Inspector window on the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "OpenAll", Doc: "OpenAll opens the given node and all of its sub-nodes", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "CloseAll", Doc: "CloseAll closes the given node and all of its sub-nodes.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Copy", Doc: "Copy copies to system.Clipboard, optionally resetting the selection.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"reset"}}, {Name: "Cut", Doc: "Cut copies to system.Clipboard and deletes selected items.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Paste", Doc: "Paste pastes clipboard at given node.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "SyncNode", Doc: "If non-nil, the [tree.Node] that this widget is viewing in the tree (the source)"}, {Name: "Text", Doc: "The text to display for the tree view item label, which automatically\ndefaults to the [tree.Node.Name] of the tree view node. It has no effect\nif [TreeView.SyncNode] is non-nil."}, {Name: "Icon", Doc: "optional icon, displayed to the the left of the text label"}, {Name: "IconOpen", Doc: "icon to use for an open (expanded) branch; defaults to [icons.KeyboardArrowDown]"}, {Name: "IconClosed", Doc: "icon to use for a closed (collapsed) branch; defaults to [icons.KeyboardArrowRight]"}, {Name: "IconLeaf", Doc: "icon to use for a terminal node branch that has no children; defaults to [icons.Blank]"}, {Name: "Indent", Doc: "amount to indent children relative to this node"}, {Name: "OpenDepth", Doc: "depth for nodes be initialized as open (default 4).\nNodes beyond this depth will be initialized as closed."}, {Name: "ViewIndex", Doc: "linear index of this node within the entire tree.\nupdated on full rebuilds and may sometimes be off,\nbut close enough for expected uses"}, {Name: "WidgetSize", Doc: "size of just this node widget.\nour alloc includes all of our children, but we only draw us."}, {Name: "RootView", Doc: "The cached root of the view. It is automatically set and does not need to be\nset by the end user."}, {Name: "SelectedNodes", Doc: "SelectedNodes holds the currently-selected nodes, on the\nRootView node only."}, {Name: "actStateLayer", Doc: "actStateLayer is the actual state layer of the tree view, which\nshould be used when rendering it and its parts (but not its children).\nthe reason that it exists is so that the children of the tree view\n(other tree views) do not inherit its stateful background color, as\nthat does not look good."}}, Instance: &TreeView{}})
 
 // NewTreeView adds a new [TreeView] with the given name to the given parent:
 // TreeView provides a graphical representation of a tree structure,
@@ -565,8 +566,8 @@ func NewTreeView(parent tree.Node, name ...string) *TreeView {
 	return parent.NewChild(TreeViewType, name...).(*TreeView)
 }
 
-// NodeType returns the [*types.Type] of [TreeView]
-func (t *TreeView) NodeType() *types.Type { return TreeViewType }
+// NodeType returns the [*gti.Type] of [TreeView]
+func (t *TreeView) NodeType() *gti.Type { return TreeViewType }
 
 // New returns a new [*TreeView] value
 func (t *TreeView) New() tree.Node { return &TreeView{} }

@@ -6,11 +6,12 @@ import (
 	"image"
 
 	"cogentcore.org/core/colors/gradient"
-	"cogentcore.org/core/types"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
 	"github.com/aymerick/douceur/css"
+	"goki.dev/gti"
 )
 
 // CircleType is the [types.Type] for [Circle]
@@ -22,8 +23,8 @@ func NewCircle(parent tree.Node, name ...string) *Circle {
 	return parent.NewChild(CircleType, name...).(*Circle)
 }
 
-// NodeType returns the [*types.Type] of [Circle]
-func (t *Circle) NodeType() *types.Type { return CircleType }
+// NodeType returns the [*gti.Type] of [Circle]
+func (t *Circle) NodeType() *gti.Type { return CircleType }
 
 // New returns a new [*Circle] value
 func (t *Circle) New() tree.Node { return &Circle{} }
@@ -48,8 +49,8 @@ func NewClipPath(parent tree.Node, name ...string) *ClipPath {
 	return parent.NewChild(ClipPathType, name...).(*ClipPath)
 }
 
-// NodeType returns the [*types.Type] of [ClipPath]
-func (t *ClipPath) NodeType() *types.Type { return ClipPathType }
+// NodeType returns the [*gti.Type] of [ClipPath]
+func (t *ClipPath) NodeType() *gti.Type { return ClipPathType }
 
 // New returns a new [*ClipPath] value
 func (t *ClipPath) New() tree.Node { return &ClipPath{} }
@@ -68,8 +69,8 @@ func NewStyleSheet(parent tree.Node, name ...string) *StyleSheet {
 	return parent.NewChild(StyleSheetType, name...).(*StyleSheet)
 }
 
-// NodeType returns the [*types.Type] of [StyleSheet]
-func (t *StyleSheet) NodeType() *types.Type { return StyleSheetType }
+// NodeType returns the [*gti.Type] of [StyleSheet]
+func (t *StyleSheet) NodeType() *gti.Type { return StyleSheetType }
 
 // New returns a new [*StyleSheet] value
 func (t *StyleSheet) New() tree.Node { return &StyleSheet{} }
@@ -89,8 +90,8 @@ func NewMetaData(parent tree.Node, name ...string) *MetaData {
 	return parent.NewChild(MetaDataType, name...).(*MetaData)
 }
 
-// NodeType returns the [*types.Type] of [MetaData]
-func (t *MetaData) NodeType() *types.Type { return MetaDataType }
+// NodeType returns the [*gti.Type] of [MetaData]
+func (t *MetaData) NodeType() *gti.Type { return MetaDataType }
 
 // New returns a new [*MetaData] value
 func (t *MetaData) New() tree.Node { return &MetaData{} }
@@ -110,8 +111,8 @@ func NewEllipse(parent tree.Node, name ...string) *Ellipse {
 	return parent.NewChild(EllipseType, name...).(*Ellipse)
 }
 
-// NodeType returns the [*types.Type] of [Ellipse]
-func (t *Ellipse) NodeType() *types.Type { return EllipseType }
+// NodeType returns the [*gti.Type] of [Ellipse]
+func (t *Ellipse) NodeType() *gti.Type { return EllipseType }
 
 // New returns a new [*Ellipse] value
 func (t *Ellipse) New() tree.Node { return &Ellipse{} }
@@ -136,8 +137,8 @@ func NewFilter(parent tree.Node, name ...string) *Filter {
 	return parent.NewChild(FilterType, name...).(*Filter)
 }
 
-// NodeType returns the [*types.Type] of [Filter]
-func (t *Filter) NodeType() *types.Type { return FilterType }
+// NodeType returns the [*gti.Type] of [Filter]
+func (t *Filter) NodeType() *gti.Type { return FilterType }
 
 // New returns a new [*Filter] value
 func (t *Filter) New() tree.Node { return &Filter{} }
@@ -157,8 +158,8 @@ func NewFlow(parent tree.Node, name ...string) *Flow {
 	return parent.NewChild(FlowType, name...).(*Flow)
 }
 
-// NodeType returns the [*types.Type] of [Flow]
-func (t *Flow) NodeType() *types.Type { return FlowType }
+// NodeType returns the [*gti.Type] of [Flow]
+func (t *Flow) NodeType() *gti.Type { return FlowType }
 
 // New returns a new [*Flow] value
 func (t *Flow) New() tree.Node { return &Flow{} }
@@ -179,8 +180,8 @@ func NewGradient(parent tree.Node, name ...string) *Gradient {
 	return parent.NewChild(GradientType, name...).(*Gradient)
 }
 
-// NodeType returns the [*types.Type] of [Gradient]
-func (t *Gradient) NodeType() *types.Type { return GradientType }
+// NodeType returns the [*gti.Type] of [Gradient]
+func (t *Gradient) NodeType() *gti.Type { return GradientType }
 
 // New returns a new [*Gradient] value
 func (t *Gradient) New() tree.Node { return &Gradient{} }
@@ -207,8 +208,8 @@ func NewGroup(parent tree.Node, name ...string) *Group {
 	return parent.NewChild(GroupType, name...).(*Group)
 }
 
-// NodeType returns the [*types.Type] of [Group]
-func (t *Group) NodeType() *types.Type { return GroupType }
+// NodeType returns the [*gti.Type] of [Group]
+func (t *Group) NodeType() *gti.Type { return GroupType }
 
 // New returns a new [*Group] value
 func (t *Group) New() tree.Node { return &Group{} }
@@ -225,8 +226,8 @@ func NewImage(parent tree.Node, name ...string) *Image {
 	return parent.NewChild(ImageType, name...).(*Image)
 }
 
-// NodeType returns the [*types.Type] of [Image]
-func (t *Image) NodeType() *types.Type { return ImageType }
+// NodeType returns the [*gti.Type] of [Image]
+func (t *Image) NodeType() *gti.Type { return ImageType }
 
 // New returns a new [*Image] value
 func (t *Image) New() tree.Node { return &Image{} }
@@ -263,8 +264,8 @@ func NewLine(parent tree.Node, name ...string) *Line {
 	return parent.NewChild(LineType, name...).(*Line)
 }
 
-// NodeType returns the [*types.Type] of [Line]
-func (t *Line) NodeType() *types.Type { return LineType }
+// NodeType returns the [*gti.Type] of [Line]
+func (t *Line) NodeType() *gti.Type { return LineType }
 
 // New returns a new [*Line] value
 func (t *Line) New() tree.Node { return &Line{} }
@@ -289,8 +290,8 @@ func NewMarker(parent tree.Node, name ...string) *Marker {
 	return parent.NewChild(MarkerType, name...).(*Marker)
 }
 
-// NodeType returns the [*types.Type] of [Marker]
-func (t *Marker) NodeType() *types.Type { return MarkerType }
+// NodeType returns the [*gti.Type] of [Marker]
+func (t *Marker) NodeType() *gti.Type { return MarkerType }
 
 // New returns a new [*Marker] value
 func (t *Marker) New() tree.Node { return &Marker{} }
@@ -347,8 +348,8 @@ func NewNodeBase(parent tree.Node, name ...string) *NodeBase {
 	return parent.NewChild(NodeBaseType, name...).(*NodeBase)
 }
 
-// NodeType returns the [*types.Type] of [NodeBase]
-func (t *NodeBase) NodeType() *types.Type { return NodeBaseType }
+// NodeType returns the [*gti.Type] of [NodeBase]
+func (t *NodeBase) NodeType() *gti.Type { return NodeBaseType }
 
 // New returns a new [*NodeBase] value
 func (t *NodeBase) New() tree.Node { return &NodeBase{} }
@@ -369,8 +370,8 @@ func NewPath(parent tree.Node, name ...string) *Path {
 	return parent.NewChild(PathType, name...).(*Path)
 }
 
-// NodeType returns the [*types.Type] of [Path]
-func (t *Path) NodeType() *types.Type { return PathType }
+// NodeType returns the [*gti.Type] of [Path]
+func (t *Path) NodeType() *gti.Type { return PathType }
 
 // New returns a new [*Path] value
 func (t *Path) New() tree.Node { return &Path{} }
@@ -391,8 +392,8 @@ func NewPolygon(parent tree.Node, name ...string) *Polygon {
 	return parent.NewChild(PolygonType, name...).(*Polygon)
 }
 
-// NodeType returns the [*types.Type] of [Polygon]
-func (t *Polygon) NodeType() *types.Type { return PolygonType }
+// NodeType returns the [*gti.Type] of [Polygon]
+func (t *Polygon) NodeType() *gti.Type { return PolygonType }
 
 // New returns a new [*Polygon] value
 func (t *Polygon) New() tree.Node { return &Polygon{} }
@@ -412,8 +413,8 @@ func NewPolyline(parent tree.Node, name ...string) *Polyline {
 	return parent.NewChild(PolylineType, name...).(*Polyline)
 }
 
-// NodeType returns the [*types.Type] of [Polyline]
-func (t *Polyline) NodeType() *types.Type { return PolylineType }
+// NodeType returns the [*gti.Type] of [Polyline]
+func (t *Polyline) NodeType() *gti.Type { return PolylineType }
 
 // New returns a new [*Polyline] value
 func (t *Polyline) New() tree.Node { return &Polyline{} }
@@ -434,8 +435,8 @@ func NewRect(parent tree.Node, name ...string) *Rect {
 	return parent.NewChild(RectType, name...).(*Rect)
 }
 
-// NodeType returns the [*types.Type] of [Rect]
-func (t *Rect) NodeType() *types.Type { return RectType }
+// NodeType returns the [*gti.Type] of [Rect]
+func (t *Rect) NodeType() *gti.Type { return RectType }
 
 // New returns a new [*Rect] value
 func (t *Rect) New() tree.Node { return &Rect{} }
@@ -464,8 +465,8 @@ func NewSVGNode(parent tree.Node, name ...string) *SVGNode {
 	return parent.NewChild(SVGNodeType, name...).(*SVGNode)
 }
 
-// NodeType returns the [*types.Type] of [SVGNode]
-func (t *SVGNode) NodeType() *types.Type { return SVGNodeType }
+// NodeType returns the [*gti.Type] of [SVGNode]
+func (t *SVGNode) NodeType() *gti.Type { return SVGNodeType }
 
 // New returns a new [*SVGNode] value
 func (t *SVGNode) New() tree.Node { return &SVGNode{} }
@@ -489,8 +490,8 @@ func NewText(parent tree.Node, name ...string) *Text {
 	return parent.NewChild(TextType, name...).(*Text)
 }
 
-// NodeType returns the [*types.Type] of [Text]
-func (t *Text) NodeType() *types.Type { return TextType }
+// NodeType returns the [*gti.Type] of [Text]
+func (t *Text) NodeType() *gti.Type { return TextType }
 
 // New returns a new [*Text] value
 func (t *Text) New() tree.Node { return &Text{} }

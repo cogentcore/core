@@ -107,7 +107,7 @@ type person struct {
 views.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35, Precision: 50})
 ```
 
-You can make it so that the documentation comments for struct fields are used as tooltips for the field label and value widgets by adding the type to [[gti]] and running `core generate`:
+You can make it so that the documentation comments for struct fields are used as tooltips for the field label and value widgets by adding the type to [[types]] and running `core generate`:
 
 ```go
 // Add this once per package:
