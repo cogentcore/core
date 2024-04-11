@@ -9,7 +9,7 @@ import (
 	"image"
 	"log"
 
-	"cogentcore.org/core/iox/images"
+	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/paint"
 	"golang.org/x/image/draw"
@@ -186,7 +186,7 @@ func (g *Image) ReadGeom(sv *SVG, dat []float32) {
 // or the specified size -- pass 0 for width and/or height to use the actual image size
 // for that dimension
 func (g *Image) OpenImage(filename string, width, height float32) error {
-	img, _, err := images.Open(filename)
+	img, _, err := imagex.Open(filename)
 	if err != nil {
 		log.Printf("svg.OpenImage -- could not open file: %v, err: %v\n", filename, err)
 		return err
@@ -201,5 +201,5 @@ func (g *Image) SaveImage(filename string) error {
 	if g.Pixels == nil {
 		return errors.New("svg.SaveImage Pixels is nil")
 	}
-	return images.Save(g.Pixels, filename)
+	return imagex.Save(g.Pixels, filename)
 }

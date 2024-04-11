@@ -23,7 +23,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
-	"cogentcore.org/core/iox/images"
+	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/styles"
@@ -406,7 +406,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 								log.Printf("image base64 encoding string not properly formatted: %s\n", bs64)
 							}
 							eb := []byte(es[fmti+8:])
-							im, err := images.FromBase64(fm, eb)
+							im, err := imagex.FromBase64(fm, eb)
 							if err != nil {
 								log.Println(err)
 							} else {
@@ -953,8 +953,8 @@ func SVGNodeMarshalXML(itm tree.Node, enc *XMLEncoder, setName string) string {
 		XMLAddAttr(&se.Attr, "width", fmt.Sprintf("%g", nd.Size.X))
 		XMLAddAttr(&se.Attr, "height", fmt.Sprintf("%g", nd.Size.Y))
 		XMLAddAttr(&se.Attr, "preserveAspectRatio", nd.ViewBox.PreserveAspectRatio.String())
-		ib, fmt := images.ToBase64PNG(nd.Pixels)
-		XMLAddAttr(&se.Attr, "href", "data:"+fmt+";base64,"+string(images.Base64SplitLines(ib)))
+		ib, fmt := imagex.ToBase64PNG(nd.Pixels)
+		XMLAddAttr(&se.Attr, "href", "data:"+fmt+";base64,"+string(imagex.Base64SplitLines(ib)))
 	case *MetaData:
 		if strings.HasPrefix(nd.Nm, "namedview") {
 			nm = "sodipodi:namedview"

@@ -10,7 +10,7 @@ import (
 	"image/draw"
 	"testing"
 
-	"cogentcore.org/core/iox/images"
+	"cogentcore.org/core/iox/imagex"
 )
 
 func TestColorSpace(t *testing.T) {
@@ -60,5 +60,5 @@ func TestColorSpace(t *testing.T) {
 		xp += nTones
 	}
 
-	images.Assert(t, img, "hctspace")
+	imagex.Assert(t, img, "hctspace")
 }

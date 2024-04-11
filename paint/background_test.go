@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/iox/images"
+	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/styles"
 	"github.com/stretchr/testify/assert"
@@ -28,7 +28,7 @@ func TestBackgroundColor(t *testing.T) {
 }
 
 func TestBackgroundImage(t *testing.T) {
-	img, _, err := images.Open("test.png")
+	img, _, err := imagex.Open("test.png")
 	assert.NoError(t, err)
 	RunTest(t, "background-image", 1260, 200, func(pc *Context) {
 		pabg := colors.C(colors.White)
@@ -53,7 +53,7 @@ func TestBackgroundImage(t *testing.T) {
 }
 
 func TestObjectFit(t *testing.T) {
-	img, _, err := images.Open("test.png")
+	img, _, err := imagex.Open("test.png")
 	// obj := mat32.V2FromPoint(img.Bounds().Size())
 	assert.NoError(t, err)
 	RunTest(t, "object-fit", 1260, 300, func(pc *Context) {

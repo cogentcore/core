@@ -10,7 +10,7 @@ import (
 	"image/draw"
 	"testing"
 
-	"cogentcore.org/core/iox/images"
+	"cogentcore.org/core/iox/imagex"
 )
 
 func TestAlphaBlend(t *testing.T) {
@@ -36,7 +36,7 @@ func TestAlphaBlend(t *testing.T) {
 		draw.Draw(img, i3, &image.Uniform{src}, image.Point{}, draw.Over)
 
 		fnm := fmt.Sprintf("alpha_blend_%2d", int(a*100))
-		images.Assert(t, img, fnm)
+		imagex.Assert(t, img, fnm)
 	}
 }
 

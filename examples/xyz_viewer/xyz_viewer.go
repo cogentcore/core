@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	_ "cogentcore.org/core/iox/images"
+	_ "cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/views"
 	"cogentcore.org/core/xyz"

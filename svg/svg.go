@@ -13,7 +13,7 @@ import (
 	"sync"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/iox/images"
+	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
@@ -265,7 +265,7 @@ func (sv *SVG) SetDPITransform(logicalDPI float32) {
 
 // SavePNG saves the Pixels to a PNG file
 func (sv *SVG) SavePNG(fname string) error {
-	return images.Save(sv.Pixels, fname)
+	return imagex.Save(sv.Pixels, fname)
 }
 
 //////////////////////////////////////////////////////////////

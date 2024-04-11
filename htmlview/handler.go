@@ -17,7 +17,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/errors"
-	"cogentcore.org/core/iox/images"
+	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
@@ -166,7 +166,7 @@ func HandleElement(ctx *Context) {
 			if strings.Contains(resp.Header.Get("Content-Type"), "svg") {
 				// TODO(kai/htmlview): support svg
 			} else {
-				im, _, err := images.Read(resp.Body)
+				im, _, err := imagex.Read(resp.Body)
 				if err != nil {
 					slog.Error("error loading image", "url", src, "err", err)
 					return

@@ -5,7 +5,7 @@
 package system
 
 import (
-	"cogentcore.org/core/iox/images"
+	"cogentcore.org/core/iox/imagex"
 )
 
 // AssertCapture asserts that the result of [Capture] is equivalent
@@ -15,6 +15,6 @@ import (
 // If it is not, it fails the test with an error, but continues its
 // execution. If there is no image at the given filename in the testdata
 // directory, it creates the image.
-func AssertCapture(t images.TestingT, filename string) {
-	images.Assert(t, Capture(), filename)
+func AssertCapture(t imagex.TestingT, filename string) {
+	imagex.Assert(t, Capture(), filename)
 }

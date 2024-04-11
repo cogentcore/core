@@ -11,7 +11,7 @@ import (
 	"log"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/iox/images"
+	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/vgpu"
 	"cogentcore.org/core/xyz"
@@ -106,6 +106,6 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	images.Save(img, "render.png")
+	imagex.Save(img, "render.png")
 	// sc.ImageDone()
 }

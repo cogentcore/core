@@ -6,7 +6,7 @@ package core
 
 import (
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/iox/images"
+	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/system"
 )
 
@@ -20,7 +20,7 @@ import (
 // automatically added to the the filename, and forward slashes are automatically
 // replaced with backslashes on Windows. See [Body.AssertScreenRender] for a version
 // that asserts the rendered image of the entire screen, not just this body.
-func (b *Body) AssertRender(t images.TestingT, filename string, fun ...func()) {
+func (b *Body) AssertRender(t imagex.TestingT, filename string, fun ...func()) {
 	b.RunAndShowNewWindow()
 	if len(fun) > 0 {
 		fun[0]()
@@ -34,7 +34,7 @@ func (b *Body) AssertRender(t images.TestingT, filename string, fun ...func()) {
 // AssertScreenRender is the same as [Body.AssertRender] except that it asserts the
 // rendered image of the entire screen, not just this body. It should be used for
 // multi-scene tests like those of snackbars and dialogs.
-func (b *Body) AssertScreenRender(t images.TestingT, filename string, fun ...func()) {
+func (b *Body) AssertScreenRender(t imagex.TestingT, filename string, fun ...func()) {
 	b.RunAndShowNewWindow()
 	if len(fun) > 0 {
 		fun[0]()
@@ -77,6 +77,6 @@ func (b *Body) WaitNoEvents() {
 // If it is not, it fails the test with an error, but continues its
 // execution. If there is no image at the given filename in the testdata
 // directory, it creates the image.
-func (sc *Scene) AssertPixels(t images.TestingT, filename string) {
-	images.Assert(t, sc.Pixels, filename)
+func (sc *Scene) AssertPixels(t imagex.TestingT, filename string) {
+	imagex.Assert(t, sc.Pixels, filename)
 }

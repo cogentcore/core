@@ -15,7 +15,7 @@ import (
 
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/rendericon"
-	"cogentcore.org/core/iox/images"
+	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/xe"
 )
 
@@ -112,7 +112,7 @@ func MakeFiles(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	err = images.Save(ic192, filepath.Join(odir, "icons", "192.png"))
+	err = imagex.Save(ic192, filepath.Join(odir, "icons", "192.png"))
 	if err != nil {
 		return err
 	}
@@ -120,7 +120,7 @@ func MakeFiles(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	err = images.Save(ic512, filepath.Join(odir, "icons", "512.png"))
+	err = imagex.Save(ic512, filepath.Join(odir, "icons", "512.png"))
 	if err != nil {
 		return err
 	}

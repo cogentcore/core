@@ -20,7 +20,7 @@ import (
 	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/iox/images"
+	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/states"
@@ -1123,7 +1123,7 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 	case keyfun.WinSnapshot:
 		dstr := time.Now().Format("Mon_Jan_2_15:04:05_MST_2006")
 		fnm, _ := filepath.Abs("./GrabOf_" + sc.Name() + "_" + dstr + ".png")
-		images.Save(sc.Pixels, fnm)
+		imagex.Save(sc.Pixels, fnm)
 		fmt.Printf("Saved RenderWin Image to: %s\n", fnm)
 		e.SetHandled()
 	case keyfun.ZoomIn:

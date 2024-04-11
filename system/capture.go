@@ -8,7 +8,7 @@ import (
 	"image"
 
 	"cogentcore.org/core/errors"
-	"cogentcore.org/core/iox/images"
+	"cogentcore.org/core/iox/imagex"
 )
 
 // Capture tells the app drawer to capture its next frame as an image.
@@ -23,7 +23,7 @@ func Capture() *image.RGBA {
 // CaptureAs is a helper function that saves the result of [Capture] to the given filename.
 // It automatically logs any error in addition to returning it.
 func CaptureAs(filename string) error {
-	return errors.Log(images.Save(Capture(), filename))
+	return errors.Log(imagex.Save(Capture(), filename))
 }
 
 var (

@@ -12,7 +12,7 @@ import (
 	"log/slog"
 
 	"cogentcore.org/core/gox/dirs"
-	"cogentcore.org/core/iox/images"
+	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/vgpu"
 	"cogentcore.org/core/vgpu/vphong"
 )
@@ -129,7 +129,7 @@ func (tx *TextureFile) Image() *image.RGBA {
 		log.Println(err)
 		return nil
 	}
-	img, _, err := images.OpenFS(tx.FSys, tx.File)
+	img, _, err := imagex.OpenFS(tx.FSys, tx.File)
 	if err != nil {
 		slog.Error("xyz.TextureFile: Image load error", "file:", tx.File, "error", err)
 		return nil

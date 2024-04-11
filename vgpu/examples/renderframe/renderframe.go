@@ -16,7 +16,7 @@ import (
 	"time"
 	"unsafe"
 
-	"cogentcore.org/core/iox/images"
+	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/mat32"
 	vk "github.com/goki/vulkan"
 
@@ -202,7 +202,7 @@ func main() {
 			sy.MemCmdEndSubmitWaitFree()
 			gimg, err := fr.Render.Grab.DevGoImage()
 			if err == nil {
-				images.Save(gimg, "render.png")
+				imagex.Save(gimg, "render.png")
 				fr.Render.Grab.UnmapDev() // essential to call after DevGoImage
 			} else {
 				fmt.Printf("image grab err: %s\n", err)

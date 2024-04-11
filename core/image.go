@@ -8,7 +8,7 @@ import (
 	"image"
 	"io/fs"
 
-	"cogentcore.org/core/iox/images"
+	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/styles"
 	"github.com/anthonynsimon/bild/clone"
@@ -49,7 +49,7 @@ func (im *Image) OnInit() {
 
 // Open sets the image to the image located at the given filename.
 func (im *Image) Open(filename Filename) error { //gti:add
-	img, _, err := images.Open(string(filename))
+	img, _, err := imagex.Open(string(filename))
 	if err != nil {
 		return err
 	}
@@ -59,7 +59,7 @@ func (im *Image) Open(filename Filename) error { //gti:add
 
 // OpenFS sets the image to the image located at the given filename in the given fs.
 func (im *Image) OpenFS(fsys fs.FS, filename string) error {
-	img, _, err := images.OpenFS(fsys, filename)
+	img, _, err := imagex.OpenFS(fsys, filename)
 	if err != nil {
 		return err
 	}

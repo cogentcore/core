@@ -89,7 +89,7 @@ type Scene struct {
 	// image used to hold a copy of the Frame image, for ImageCopy() call.
 	// This is re-used across calls to avoid large memory allocations,
 	// so it will automatically update after every ImageCopy call.
-	// If a persistent image is required, call [gox/images.CloneAsRGBA].
+	// If a persistent image is required, call [iox/imagex.CloneAsRGBA].
 	ImgCopy image.RGBA `set:"-"`
 
 	// index in list of window direct uploading images

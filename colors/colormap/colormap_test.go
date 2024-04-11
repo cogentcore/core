@@ -12,7 +12,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/iox/images"
+	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/mat32"
 	"github.com/stretchr/testify/assert"
 )
@@ -73,7 +73,7 @@ func TestColorMaps(t *testing.T) {
 		idx++
 	}
 
-	images.Assert(t, img, "colormaps")
+	imagex.Assert(t, img, "colormaps")
 }
 
 func TestColorMapIndexed(t *testing.T) {

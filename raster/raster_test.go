@@ -16,7 +16,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
-	"cogentcore.org/core/iox/images"
+	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/scan"
 	"golang.org/x/image/math/fixed"
@@ -242,7 +242,7 @@ func TestRoundRect(t *testing.T) {
 	f.Draw()
 	f.Clear()
 
-	images.Assert(t, img, "roundRect")
+	imagex.Assert(t, img, "roundRect")
 }
 
 func isClose(a, b mat32.Mat2, epsilon float32) bool {
@@ -353,7 +353,7 @@ func TestShapes(t *testing.T) {
 	s.Draw()
 	s.Clear()
 
-	images.Assert(t, img, "shapeT1")
+	imagex.Assert(t, img, "shapeT1")
 
 	s.SetStroke(4<<6, 2<<6, SquareCap, nil, RoundGap, ArcClip)
 	getOpenCubicPath2().AddTo(s)
@@ -362,7 +362,7 @@ func TestShapes(t *testing.T) {
 	s.Draw()
 	s.Clear()
 
-	images.Assert(t, img, "shapeT2")
+	imagex.Assert(t, img, "shapeT2")
 
 	s.SetStroke(25<<6, 200<<6, CubicCap, CubicCap, CubicGap, ArcClip)
 	p := getOpenCubicPath2()
@@ -374,7 +374,7 @@ func TestShapes(t *testing.T) {
 	s.Clear()
 	p.Clear()
 
-	images.Assert(t, img, "shapeT3")
+	imagex.Assert(t, img, "shapeT3")
 
 	d.SetBounds(-20, -12) // Test min x and y value checking
 
@@ -424,7 +424,7 @@ func doShapes(t *testing.T, f Scanner, fa Adder, fname string, img image.Image) 
 	f.Draw()
 	f.Clear()
 
-	images.Assert(t, img, fname)
+	imagex.Assert(t, img, fname)
 }
 
 func TestFindElipsecenter(t *testing.T) {
@@ -562,7 +562,7 @@ func TestGradient(t *testing.T) {
 	f.Draw()
 	f.Clear()
 
-	images.Assert(t, img, "grad")
+	imagex.Assert(t, img, "grad")
 }
 
 // TestMultiFunction tests a Dasher's ability to function
@@ -611,5 +611,5 @@ func TestMultiFunction(t *testing.T) {
 	d.Draw()
 	d.Clear()
 
-	images.Assert(t, img, "tmf")
+	imagex.Assert(t, img, "tmf")
 }

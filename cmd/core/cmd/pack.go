@@ -14,7 +14,7 @@ import (
 
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/rendericon"
-	"cogentcore.org/core/iox/images"
+	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/xe"
 	"github.com/jackmordaunt/icns/v2"
@@ -86,7 +86,7 @@ func PackLinux(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	err = images.Save(ic, filepath.Join(i48path, anm+".png"))
+	err = imagex.Save(ic, filepath.Join(i48path, anm+".png"))
 	if err != nil {
 		return err
 	}

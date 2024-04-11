@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/iox/images"
+	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/mat32"
 )
 
@@ -113,7 +113,7 @@ func TestRenderLinear(t *testing.T) {
 	// g.AsBase().Blend = colors.HCT
 	g.Update(1, b, mat32.Rotate2D(mat32.DegToRad(45)))
 	draw.Draw(img, img.Bounds(), g, image.Point{}, draw.Src)
-	images.Assert(t, img, "linear")
+	imagex.Assert(t, img, "linear")
 
 	ug := CopyOf(g).(*Linear)
 	ug.SetUnits(UserSpaceOnUse)
@@ -121,7 +121,7 @@ func TestRenderLinear(t *testing.T) {
 	ug.End.SetMul(ug.Box.Size())
 	ug.Update(1, b, mat32.Rotate2D(mat32.DegToRad(45)))
 	draw.Draw(img, img.Bounds(), ug, image.Point{}, draw.Src)
-	images.Assert(t, img, "linear-user-space")
+	imagex.Assert(t, img, "linear-user-space")
 }
 
 func TestRenderRadial(t *testing.T) {
@@ -132,7 +132,7 @@ func TestRenderRadial(t *testing.T) {
 	// g.AsBase().Blend = colors.HCT
 	g.Update(1, b, mat32.Identity2())
 	draw.Draw(img, img.Bounds(), g, image.Point{}, draw.Src)
-	images.Assert(t, img, "radial")
+	imagex.Assert(t, img, "radial")
 
 	ug := CopyOf(g).(*Radial)
 	ug.SetUnits(UserSpaceOnUse)
@@ -141,7 +141,7 @@ func TestRenderRadial(t *testing.T) {
 	ug.Radius.SetMul(ug.Box.Size())
 	ug.Update(1, b, mat32.Identity2())
 	draw.Draw(img, img.Bounds(), ug, image.Point{}, draw.Src)
-	images.Assert(t, img, "radial-user-space")
+	imagex.Assert(t, img, "radial-user-space")
 }
 
 // func matToRasterx(mat *mat32.Mat2) rasterx.Matrix2D {

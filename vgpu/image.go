@@ -14,7 +14,7 @@ import (
 	"unsafe"
 
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/iox/images"
+	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/mat32"
 	vk "github.com/goki/vulkan"
 )
@@ -146,7 +146,7 @@ func SetImageSRGBToLinear(img *image.RGBA) {
 func ImageToRGBA(img image.Image) *image.RGBA {
 	rimg, ok := img.(*image.RGBA)
 	if !ok {
-		rimg = images.CloneAsRGBA(img)
+		rimg = imagex.CloneAsRGBA(img)
 	}
 	return rimg
 }

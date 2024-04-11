@@ -12,7 +12,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
-	"cogentcore.org/core/iox/images"
+	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -25,17 +25,17 @@ func TestMain(m *testing.M) {
 }
 
 // RunTest makes a rendering state, paint, and image with the given size, calls the given
-// function, and then asserts the image using [images.Assert] with the given name.
+// function, and then asserts the image using [imagex.Assert] with the given name.
 func RunTest(t *testing.T, nm string, width int, height int, f func(pc *Context)) {
 	pc := NewContext(width, height)
 	pc.PushBounds(pc.Image.Rect)
 	f(pc)
-	images.Assert(t, pc.Image, nm)
+	imagex.Assert(t, pc.Image, nm)
 }
 
 func TestRender(t *testing.T) {
 	RunTest(t, "render", 300, 300, func(pc *Context) {
-		testimg, _, err := images.Open("test.png")
+		testimg, _, err := imagex.Open("test.png")
 		assert.NoError(t, err)
 		imgs := []image.Image{
 			colors.C(colors.Blue),
