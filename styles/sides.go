@@ -187,7 +187,7 @@ func (s *Sides[T]) SetString(str string) error {
 	for i, field := range fields {
 		ss, ok := any(&vals[i]).(reflectx.SetStringer)
 		if !ok {
-			err := fmt.Errorf("(Sides).SetString('%s'): to set from a string, the sides type (%T) must implement laser.SetStringer (needs SetString(str string) error function)", str, s)
+			err := fmt.Errorf("(Sides).SetString('%s'): to set from a string, the sides type (%T) must implement reflectx.SetStringer (needs SetString(str string) error function)", str, s)
 			slog.Error(err.Error())
 			return err
 		}

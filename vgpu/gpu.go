@@ -474,7 +474,7 @@ func (gp *GPU) PropertiesString(print bool) string {
 	ps += devnm + string(gp.GPUProperties.DeviceName[:]) + "\n"
 	ps += prs[strings.Index(prs, `  "Limits":`):]
 	// ps += "\n\n######## GPU Memory Properties\n" // not really useful
-	// ps += laser.StringJSON(&gp.MemoryProperties)
+	// ps += reflectx.StringJSON(&gp.MemoryProperties)
 	ps += "\n"
 	if print {
 		fmt.Println(ps)

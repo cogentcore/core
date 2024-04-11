@@ -446,7 +446,7 @@ type StructFieldVals struct {
 // of fields in given struct and starting path, and returns all
 // fields not at their default values.
 // See also StructNoDefFieldsStr for a string representation of this information.
-// Uses laser.FlatFieldsValueFunc to get all embedded fields.
+// Uses reflectx.FlatFieldsValueFunc to get all embedded fields.
 // Uses a recursive strategy -- any fields that are themselves structs are
 // expanded, and the field name represented by dots path separators.
 func StructNonDefFields(structPtr any, path string) []StructFieldVals {

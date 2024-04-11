@@ -97,7 +97,7 @@ func (vv *TexValue) UpdateWidget() {
 		return
 	}
 	ac := vv.Widget.(*core.Button)
-	txt := laser.ToString(vv.Value.Interface())
+	txt := reflectx.ToString(vv.Value.Interface())
 	if txt == "" {
 		txt = "(none, click to select)"
 	}
@@ -140,7 +140,7 @@ func (vv *TexValue) Activate(vp *core.Viewport2D, dlgRecv tree.Node, dlgFunc tre
 	sl := sc.TextureList()
 	sort.Strings(sl)
 
-	cur := laser.ToString(vv.Value.Interface())
+	cur := reflectx.ToString(vv.Value.Interface())
 	desc, _ := vv.Tag("desc")
 	views.SliceViewSelectDialog(vp, &sl, cur, views.DlgOpts{Title: "Select a Texture", Prompt: desc}, nil,
 		vv.This(), func(recv, send tree.Node, sig int64, data any) {

@@ -41,7 +41,7 @@ func MapKeyType(mp any) reflect.Type {
 func MapElsValueFun(mp any, fun func(mp any, typ reflect.Type, key, val reflect.Value) bool) bool {
 	vv := reflect.ValueOf(mp)
 	if mp == nil {
-		log.Printf("laser.MapElsValueFun: must pass a non-nil pointer to the map: %v\n", mp)
+		log.Printf("reflectx.MapElsValueFun: must pass a non-nil pointer to the map: %v\n", mp)
 		return false
 	}
 	v := NonPtrValue(vv)
@@ -50,7 +50,7 @@ func MapElsValueFun(mp any, fun func(mp any, typ reflect.Type, key, val reflect.
 	}
 	typ := v.Type()
 	if typ.Kind() != reflect.Map {
-		log.Printf("laser.MapElsValueFun: non-pointer type is not a map: %v\n", typ.String())
+		log.Printf("reflectx.MapElsValueFun: non-pointer type is not a map: %v\n", typ.String())
 		return false
 	}
 	rval := true
@@ -99,7 +99,7 @@ func MapElsN(mp any) int {
 func MapStructElsValueFun(mp any, fun func(mp any, typ reflect.Type, val reflect.Value) bool) bool {
 	vv := reflect.ValueOf(mp)
 	if mp == nil {
-		log.Printf("laser.MapElsValueFun: must pass a non-nil pointer to the map: %v\n", mp)
+		log.Printf("reflectx.MapElsValueFun: must pass a non-nil pointer to the map: %v\n", mp)
 		return false
 	}
 	v := NonPtrValue(vv)
@@ -172,7 +172,7 @@ func MapStructElsValueFun(mp any, fun func(mp any, typ reflect.Type, val reflect
 			}
 		}
 	default:
-		log.Printf("laser.MapStructElsValueFun: non-pointer type is not a map or struct: %v\n", typ.String())
+		log.Printf("reflectx.MapStructElsValueFun: non-pointer type is not a map or struct: %v\n", typ.String())
 		return false
 	}
 	return rval
@@ -350,11 +350,11 @@ func MapValueSort(mpvnp reflect.Value, keys []reflect.Value, ascending bool) err
 func SetMapRobust(mp, ky, val reflect.Value) bool {
 	mtyp := mp.Type()
 	if mtyp.Kind() != reflect.Map {
-		log.Printf("laser.SetMapRobust: map arg is not map, is: %v\n", mtyp.String())
+		log.Printf("reflectx.SetMapRobust: map arg is not map, is: %v\n", mtyp.String())
 		return false
 	}
 	if !mp.CanSet() {
-		log.Printf("laser.SetMapRobust: map arg is not settable: %v\n", mtyp.String())
+		log.Printf("reflectx.SetMapRobust: map arg is not settable: %v\n", mtyp.String())
 		return false
 	}
 	ktyp := mtyp.Key()
@@ -383,13 +383,13 @@ func CopyMapRobust(to, fm any) error {
 	fmnp := NonPtrValue(fmv)
 	totyp := tonp.Type()
 	if totyp.Kind() != reflect.Map {
-		err := fmt.Errorf("laser.CopyMapRobust: 'to' is not map, is: %v", totyp.String())
+		err := fmt.Errorf("reflectx.CopyMapRobust: 'to' is not map, is: %v", totyp.String())
 		log.Println(err)
 		return err
 	}
 	fmtyp := fmnp.Type()
 	if fmtyp.Kind() != reflect.Map {
-		err := fmt.Errorf("laser.CopyMapRobust: 'from' is not map, is: %v", fmtyp.String())
+		err := fmt.Errorf("reflectx.CopyMapRobust: 'from' is not map, is: %v", fmtyp.String())
 		log.Println(err)
 		return err
 	}
