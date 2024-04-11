@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package iox provides boilerplate wrapper functions for the Go standard
+// io functions to Read, Open, Write, and Save, with implementations for
+// commonly used encoding formats.
 package iox
 
 import (

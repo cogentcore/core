@@ -1,6 +1,6 @@
 # iox
 
-Package iox provides "boilerplate" wrapper functions for the Go standard io functions to Read, Open, Write, and Save, with implementations for commonly used encoding formats.
+Package iox provides boilerplate wrapper functions for the Go standard io functions to Read, Open, Write, and Save, with implementations for commonly used encoding formats.
 
 The top-level `iox` functions define standard `Encoder` and `Decoder` interfaces, and functions to return these.
 
