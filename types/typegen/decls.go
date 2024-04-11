@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gtigen
+package typegen
 
 import (
 	"reflect"
@@ -10,10 +10,10 @@ import (
 	"text/template"
 	"unicode"
 
-	"cogentcore.org/core/gti"
+	"cogentcore.org/core/types"
 )
 
-// TypeTmpl is the template for [gti.Type] declarations.
+// TypeTmpl is the template for [types.Type] declarations.
 // It takes a [*Type] as its value.
 var TypeTmpl = template.Must(template.New("Type").
 	Funcs(template.FuncMap{
@@ -27,8 +27,8 @@ var TypeTmpl = template.Must(template.New("Type").
 	)
 	`))
 
-// GtiTypeOf converts the given [*Type] to a [*gti.Type]
-func GtiTypeOf(typ *Type) *gti.Type {
+// GtiTypeOf converts the given [*Type] to a [*types.Type]
+func GtiTypeOf(typ *Type) *types.Type {
 	cp := typ.Type
 	res := &cp
 	res.Fields = typ.Fields.Fields
@@ -40,8 +40,8 @@ func GtiTypeOf(typ *Type) *gti.Type {
 	return res
 }
 
-// FuncTmpl is the template for [gti.Func] declarations.
-// It takes a [*gti.Func] as its value.
+// FuncTmpl is the template for [types.Func] declarations.
+// It takes a [*types.Func] as its value.
 var FuncTmpl = template.Must(template.New("Func").Parse(
 	`
 	var _ = gti.AddFunc(&gti.Func
@@ -68,8 +68,8 @@ var SetterMethodsTmpl = template.Must(template.New("SetterMethods").
 
 // SetterFields returns all of the exported fields and embedded fields of the given type
 // that don't have a `set:"-"` struct tag.
-func SetterFields(typ *Type) []gti.Field {
-	res := []gti.Field{}
+func SetterFields(typ *Type) []types.Field {
+	res := []types.Field{}
 	do := func(fields Fields) {
 		for _, f := range fields.Fields {
 			// we do not generate setters for unexported fields
@@ -90,7 +90,7 @@ func SetterFields(typ *Type) []gti.Field {
 
 // SetterType returns the setter type name for the given field in the context of the
 // given type. It converts slices to variadic arguments.
-func SetterType(f gti.Field, typ *Type) string {
+func SetterType(f types.Field, typ *Type) string {
 	lt, ok := typ.Fields.LocalTypes[f.Name]
 	if !ok {
 		lt = typ.EmbeddedFields.LocalTypes[f.Name]

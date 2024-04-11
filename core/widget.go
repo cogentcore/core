@@ -15,11 +15,11 @@ import (
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
 )
 
 // Widget is the interface for all Cogent Core widgets.
@@ -394,7 +394,7 @@ func (wb *WidgetBase) DeleteParts() {
 	wb.Parts = nil
 }
 
-func (wb *WidgetBase) BaseType() *gti.Type {
+func (wb *WidgetBase) BaseType() *types.Type {
 	return WidgetBaseType
 }
 

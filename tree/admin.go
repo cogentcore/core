@@ -11,7 +11,7 @@ import (
 	"sync/atomic"
 
 	"cogentcore.org/core/errors"
-	"cogentcore.org/core/gti"
+	"cogentcore.org/core/types"
 )
 
 // admin.go has infrastructure code outside of the Node interface.
@@ -138,6 +138,6 @@ func IsNode(typ reflect.Type) bool {
 }
 
 // NewOfType returns a new instance of the given [Node] type.
-func NewOfType(typ *gti.Type) Node {
+func NewOfType(typ *types.Type) Node {
 	return typ.Instance.(Node).New()
 }

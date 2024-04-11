@@ -15,11 +15,11 @@ import (
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/fileinfo"
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
 )
 
 // This file handles converting values to [Value]s.
@@ -32,7 +32,7 @@ func init() {
 	AddValue(core.FontName(""), func() Value { return &FontValue{} })
 	AddValue(core.Filename(""), func() Value { return &FileValue{} })
 	AddValue(keymap.MapName(""), func() Value { return &KeyMapValue{} })
-	AddValue(gti.Type{}, func() Value { return &TypeValue{} })
+	AddValue(types.Type{}, func() Value { return &TypeValue{} })
 	AddValue(color.RGBA{}, func() Value { return &ColorValue{} })
 	AddValue(image.Uniform{}, func() Value { return &ColorValue{} })
 	AddValue(key.Chord(""), func() Value { return &KeyChordValue{} })
@@ -69,7 +69,7 @@ var ValueMap = map[string]func() Value{}
 //
 //	AddValue(icons.Icon(""), func() Value { return &IconValue{} })
 func AddValue(val any, fun func() Value) {
-	nm := gti.TypeNameObj(val)
+	nm := types.TypeNameObj(val)
 	ValueMap[nm] = fun
 }
 

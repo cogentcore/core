@@ -9,7 +9,7 @@ import (
 	"strings"
 	"unicode"
 
-	"cogentcore.org/core/gti"
+	"cogentcore.org/core/types"
 	"github.com/mattn/go-shellwords"
 )
 
@@ -19,7 +19,7 @@ import (
 // Directives are of the following form (the slashes are optional):
 //
 //	//tool:directive args...
-func ParseDirective(comment string) (*gti.Directive, error) {
+func ParseDirective(comment string) (*types.Directive, error) {
 	comment = strings.TrimPrefix(comment, "//")
 	rs := []rune(comment)
 	if len(rs) == 0 || unicode.IsSpace(rs[0]) { // directives must not have whitespace as their first character
@@ -33,7 +33,7 @@ func ParseDirective(comment string) (*gti.Directive, error) {
 	if !found {
 		return nil, nil
 	}
-	directive := &gti.Directive{}
+	directive := &types.Directive{}
 	directive.Tool = before
 	args, err := shellwords.Parse(after)
 	if err != nil {

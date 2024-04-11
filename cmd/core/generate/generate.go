@@ -17,9 +17,9 @@ import (
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/enums/enumgen"
 	"cogentcore.org/core/generate"
-	"cogentcore.org/core/gti"
-	"cogentcore.org/core/gti/gtigen"
 	"cogentcore.org/core/ordmap"
+	"cogentcore.org/core/types"
+	"cogentcore.org/core/types/typegen"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -29,7 +29,7 @@ var TreeMethodsTmpl = template.Must(template.New("TreeMethods").
 	Funcs(template.FuncMap{
 		"HasEmbedDirective": HasEmbedDirective,
 		"HasNoNewDirective": HasNoNewDirective,
-		"DocToComment":      gtigen.DocToComment,
+		"DocToComment":      typegen.DocToComment,
 		"TreePkg":           TreePkg,
 	}).Parse(
 	`
@@ -74,25 +74,25 @@ var TreeMethodsTmpl = template.Must(template.New("TreeMethods").
 // TreePkg returns the package identifier for the tree package in
 // the context of the given type ("" if it is already in the tree
 // package, and "tree." otherwise)
-func TreePkg(typ *gtigen.Type) string {
+func TreePkg(typ *typegen.Type) string {
 	if typ.Pkg == "tree" { // we are already in tree
 		return ""
 	}
 	return "tree."
 }
 
-// HasEmbedDirective returns whether the given [gtigen.Type] has a "core:embedder"
+// HasEmbedDirective returns whether the given [typegen.Type] has a "core:embedder"
 // comment directive. This function is used in [TreeMethodsTmpl].
-func HasEmbedDirective(typ *gtigen.Type) bool {
-	return slices.ContainsFunc(typ.Directives, func(d gti.Directive) bool {
+func HasEmbedDirective(typ *typegen.Type) bool {
+	return slices.ContainsFunc(typ.Directives, func(d types.Directive) bool {
 		return d.Tool == "core" && d.Directive == "embedder"
 	})
 }
 
-// HasNoNewDirective returns whether the given [gtigen.Type] has a "core:no-new"
+// HasNoNewDirective returns whether the given [typegen.Type] has a "core:no-new"
 // comment directive. This function is used in [TreeMethodsTmpl].
-func HasNoNewDirective(typ *gtigen.Type) bool {
-	return slices.ContainsFunc(typ.Directives, func(d gti.Directive) bool {
+func HasNoNewDirective(typ *typegen.Type) bool {
+	return slices.ContainsFunc(typ.Directives, func(d types.Directive) bool {
 		return d.Tool == "core" && d.Directive == "no-new"
 	})
 }
@@ -100,11 +100,11 @@ func HasNoNewDirective(typ *gtigen.Type) bool {
 // Generate is the main entry point to code generation
 // that does all of the generation according to the
 // given config info. It overrides the
-// [config.Config.Generate.Gtigen.InterfaceConfigs] info.
+// [config.Config.Generate.Typegen.InterfaceConfigs] info.
 func Generate(c *config.Config) error { //gti:add
-	c.Generate.Gtigen.InterfaceConfigs = &ordmap.Map[string, *gtigen.Config]{}
+	c.Generate.Typegen.InterfaceConfigs = &ordmap.Map[string, *typegen.Config]{}
 
-	c.Generate.Gtigen.InterfaceConfigs.Add("cogentcore.org/core/tree.Node", &gtigen.Config{
+	c.Generate.Typegen.InterfaceConfigs.Add("cogentcore.org/core/tree.Node", &typegen.Config{
 		AddTypes:  true,
 		Instance:  true,
 		TypeVar:   true,
@@ -121,9 +121,9 @@ func Generate(c *config.Config) error { //gti:add
 	if err != nil {
 		return fmt.Errorf("error running enumgen: %w", err)
 	}
-	err = gtigen.GeneratePkgs(&c.Generate.Gtigen, pkgs)
+	err = typegen.GeneratePkgs(&c.Generate.Typegen, pkgs)
 	if err != nil {
-		return fmt.Errorf("error running gtigen: %w", err)
+		return fmt.Errorf("error running typegen: %w", err)
 	}
 	err = Pages(c)
 	if err != nil {
@@ -135,7 +135,7 @@ func Generate(c *config.Config) error { //gti:add
 // ParsePackages parses the package(s) based on the given config info.
 func ParsePackages(cfg *config.Config) ([]*packages.Package, error) {
 	pcfg := &packages.Config{
-		Mode: enumgen.PackageModes() | gtigen.PackageModes(&cfg.Generate.Gtigen), // need superset of both
+		Mode: enumgen.PackageModes() | typegen.PackageModes(&cfg.Generate.Typegen), // need superset of both
 		// TODO: Need to think about constants in test files. Maybe write type_string_test.go
 		// in a separate pass? For later.
 		Tests: false,

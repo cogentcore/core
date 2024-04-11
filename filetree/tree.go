@@ -16,9 +16,9 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gox/dirs"
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
 	"cogentcore.org/core/vcs"
 	"gopkg.in/fsnotify.v1"
 )
@@ -47,7 +47,7 @@ type Tree struct {
 	DirsOnTop bool
 
 	// type of node to create -- defaults to filetree.Node but can use custom node types
-	FileNodeType *gti.Type `view:"-" json:"-" xml:"-"`
+	FileNodeType *types.Type `view:"-" json:"-" xml:"-"`
 
 	// DoubleClickFun is a function to call when a node receives a DoubleClick event.
 	// if not set, defaults to OpenEmptyDir() (for folders)

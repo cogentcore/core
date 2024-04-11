@@ -19,7 +19,6 @@ import (
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fileinfo"
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/mat32"
@@ -27,6 +26,7 @@ import (
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
 	"cogentcore.org/core/units"
 )
 
@@ -194,7 +194,7 @@ func (tv *TreeView) AsTreeView() *TreeView {
 	return tv
 }
 
-func (tv *TreeView) BaseType() *gti.Type {
+func (tv *TreeView) BaseType() *types.Type {
 	return tv.NodeType()
 }
 

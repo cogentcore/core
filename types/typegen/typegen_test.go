@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gtigen
+package typegen
 
 import (
 	"os"
@@ -43,11 +43,11 @@ func TestGenerate(t *testing.T) {
 	if err != nil {
 		t.Errorf("error while generating: %v", err)
 	}
-	have, err := os.ReadFile("testdata/gtigen.go")
+	have, err := os.ReadFile("testdata/typegen.go")
 	if err != nil {
 		t.Errorf("error while reading generated file: %v", err)
 	}
-	want, err := os.ReadFile("testdata/gtigen.golden")
+	want, err := os.ReadFile("testdata/typegen.golden")
 	if err != nil {
 		t.Errorf("error while reading golden file: %v", err)
 	}
@@ -55,21 +55,21 @@ func TestGenerate(t *testing.T) {
 	// that can change based on where go test is ran.
 	_, shave, got := strings.Cut(string(have), "\n")
 	if !got {
-		t.Errorf("expected string with newline in testdata/gtigen.go, but got %q", have)
+		t.Errorf("expected string with newline in testdata/typegen.go, but got %q", have)
 	}
 	_, swant, got := strings.Cut(string(want), "\n")
 	if !got {
-		t.Errorf("expected string with newline in testdata/gtigen.golden, but got %q", want)
+		t.Errorf("expected string with newline in testdata/typegen.golden, but got %q", want)
 	}
 	swant = strings.ReplaceAll(swant, "\r\n", "\n")
 	if shave != swant {
-		t.Errorf("expected generated file and expected file to be the same after the first line, but they are not (compare ./testdata/gtigen.go and ./testdata/gtigen.golden to see the difference)")
+		t.Errorf("expected generated file and expected file to be the same after the first line, but they are not (compare ./testdata/typegen.go and ./testdata/typegen.golden to see the difference)")
 	}
 }
 
 func TestPerson(t *testing.T) {
 	// want := testdata.PersonType
-	// have := gti.TypeByName("cogentcore.org/core/gti/gtigen/testdata.Person")
+	// have := gti.TypeByName("cogentcore.org/core/gti/typegen/testdata.Person")
 	// if have != want {
 	// 	t.Errorf("expected TypeByName to return %v, but got %v", want, have)
 	// }
@@ -80,8 +80,8 @@ func TestPerson(t *testing.T) {
 	// if _, ok := have.Instance.(*testdata.Person); !ok {
 	// 	t.Errorf("expected instance to be a Person, but it is a %T (value %v)", have.Instance, have.Instance)
 	// }
-	// if have.Name != "cogentcore.org/core/gti/gtigen/testdata.Person" {
-	// 	t.Errorf("expected name to be 'cogentcore.org/core/gti/gtigen/testdata.Person', but got %s", have.Name)
+	// if have.Name != "cogentcore.org/core/gti/typegen/testdata.Person" {
+	// 	t.Errorf("expected name to be 'cogentcore.org/core/gti/typegen/testdata.Person', but got %s", have.Name)
 	// }
 	// if len(have.Directives) != 2 {
 	// 	t.Errorf("expected 2 directives, but got %d", len(have.Directives))

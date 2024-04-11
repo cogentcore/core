@@ -20,11 +20,11 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/gox/dirs"
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/texteditor/histyle"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
 	"cogentcore.org/core/vcs"
 	"cogentcore.org/core/views"
 )
@@ -78,7 +78,7 @@ const (
 	NodeSymLink
 )
 
-func (fn *Node) BaseType() *gti.Type {
+func (fn *Node) BaseType() *types.Type {
 	return fn.NodeType()
 }
 

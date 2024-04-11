@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"strings"
 
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/strcase"
+	"cogentcore.org/core/types"
 )
 
 // Cmd represents a runnable command with configuration options.
@@ -52,14 +52,14 @@ func CmdFromFunc[T any](fun func(T) error) (*Cmd[T], error) {
 		Func: fun,
 	}
 
-	fn := gti.FuncName(fun)
+	fn := types.FuncName(fun)
 
 	// we need to get rid of package name and then convert to kebab
 	strs := strings.Split(fn, ".")
 	cfn := strs[len(strs)-1] // camel function name
 	cmd.Name = strcase.ToKebab(cfn)
 
-	if f := gti.FuncByName(fn); f != nil {
+	if f := types.FuncByName(fn); f != nil {
 		cmd.Doc = f.Doc
 		for _, dir := range f.Directives {
 			if dir.Tool != "cli" {
@@ -74,7 +74,7 @@ func CmdFromFunc[T any](fun func(T) error) (*Cmd[T], error) {
 			}
 		}
 		// we format the doc after the directives so that we have the up-to-date documentation and name
-		cmd.Doc = gti.FormatDoc(cmd.Doc, cfn, strcase.ToSentence(cmd.Name))
+		cmd.Doc = types.FormatDoc(cmd.Doc, cfn, strcase.ToSentence(cmd.Name))
 	}
 	return cmd, nil
 }

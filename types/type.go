@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gti
+package types
 
 import (
 	"fmt"
@@ -43,7 +43,7 @@ type Type struct {
 	ID uint64
 
 	// All embedded fields (including nested ones) for struct types;
-	// not set by gtigen -- HasEmbed automatically compiles it as needed.
+	// not set by typegen -- HasEmbed automatically compiles it as needed.
 	// Key is the ID of the type.
 	AllEmbeds map[uint64]*Type
 }

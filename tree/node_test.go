@@ -12,9 +12,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"cogentcore.org/core/gti"
 	. "cogentcore.org/core/tree"
 	"cogentcore.org/core/tree/testdata"
+	"cogentcore.org/core/types"
 )
 
 func TestNodeAddChild(t *testing.T) {
@@ -622,7 +622,7 @@ func TestAutoTypeName(t *testing.T) {
 // BuildGuiTreeSlow builds a tree that is typical of GUI structures where there are
 // many widgets in a container and each widget has some number of parts.
 // Uses slow AddChild method instead of fast one.
-func BuildGuiTreeSlow(widgets, parts int, typ *gti.Type) Node {
+func BuildGuiTreeSlow(widgets, parts int, typ *types.Type) Node {
 	win := NewOfType(typ)
 	win.InitName(win, "window")
 
@@ -640,7 +640,7 @@ func BuildGuiTreeSlow(widgets, parts int, typ *gti.Type) Node {
 
 // BuildGuiTree builds a tree that is typical of GUI structures where there are
 // many widgets in a container and each widget has some number of parts.
-func BuildGuiTree(widgets, parts int, typ *gti.Type) Node {
+func BuildGuiTree(widgets, parts int, typ *types.Type) Node {
 	win := NewOfType(typ)
 	win.InitName(win, "window")
 

@@ -25,7 +25,6 @@ import (
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fileinfo"
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/laser"
@@ -34,6 +33,7 @@ import (
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
 	"cogentcore.org/core/units"
 )
 
@@ -862,7 +862,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 				d := core.NewBody().AddTitle("Add list items").AddText("Number and type of items to insert:")
 				nd := &core.NewItemsData{}
 				w := NewValue(d, nd).AsWidget()
-				tree.ChildByType[*core.Chooser](w, tree.Embeds).SetTypes(gti.AllEmbeddersOf(owntree.BaseType())...).SetCurrentIndex(0)
+				tree.ChildByType[*core.Chooser](w, tree.Embeds).SetTypes(types.AllEmbeddersOf(owntree.BaseType())...).SetCurrentIndex(0)
 				d.AddBottomBar(func(parent core.Widget) {
 					d.AddCancel(parent)
 					d.AddOK(parent).OnClick(func(e events.Event) {

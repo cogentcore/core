@@ -13,11 +13,11 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fileinfo"
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
 )
 
 // note: see this file has all the SyncNode specific
@@ -174,7 +174,7 @@ func (tv *TreeView) InsertBefore() { //gti:add
 	tv.InsertAt(0, "Insert Before")
 }
 
-func (tv *TreeView) AddTreeNodes(rel, myidx int, typ *gti.Type, n int) {
+func (tv *TreeView) AddTreeNodes(rel, myidx int, typ *types.Type, n int) {
 	var stv *TreeView
 	for i := 0; i < n; i++ {
 		nm := fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i)
@@ -193,7 +193,7 @@ func (tv *TreeView) AddTreeNodes(rel, myidx int, typ *gti.Type, n int) {
 	}
 }
 
-func (tv *TreeView) AddSyncNodes(rel, myidx int, typ *gti.Type, n int) {
+func (tv *TreeView) AddSyncNodes(rel, myidx int, typ *types.Type, n int) {
 	parent := tv.SyncNode
 	var sn tree.Node
 	for i := 0; i < n; i++ {
@@ -233,7 +233,7 @@ func (tv *TreeView) InsertAt(rel int, actNm string) {
 	d := core.NewBody().AddTitle(actNm).AddText("Number and type of items to insert:")
 	nd := &core.NewItemsData{Number: 1, Type: typ}
 	sg := NewStructView(d).SetStruct(nd).StructGrid()
-	tree.ChildByType[*core.Chooser](sg, tree.Embeds).SetTypes(gti.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
+	tree.ChildByType[*core.Chooser](sg, tree.Embeds).SetTypes(types.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).OnClick(func(e events.Event) {
@@ -260,7 +260,7 @@ func (tv *TreeView) AddChildNode() { //gti:add
 	d := core.NewBody().AddTitle(ttl).AddText("Number and type of items to insert:")
 	nd := &core.NewItemsData{Number: 1, Type: typ}
 	sg := NewStructView(d).SetStruct(nd).StructGrid()
-	tree.ChildByType[*core.Chooser](sg, tree.Embeds).SetTypes(gti.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
+	tree.ChildByType[*core.Chooser](sg, tree.Embeds).SetTypes(types.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).OnClick(func(e events.Event) {

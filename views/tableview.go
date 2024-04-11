@@ -14,13 +14,13 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
 	"cogentcore.org/core/units"
 )
 
@@ -287,7 +287,7 @@ func (tv *TableView) ConfigHeader() {
 			}
 		}
 		hdr.Tooltip = hdr.Text + " (tap to sort by)"
-		doc, ok := gti.GetDoc(reflect.Value{}, tv.ElVal, &field, hdr.Text)
+		doc, ok := types.GetDoc(reflect.Value{}, tv.ElVal, &field, hdr.Text)
 		if ok && doc != "" {
 			hdr.Tooltip += ": " + doc
 		}

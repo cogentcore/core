@@ -3,7 +3,7 @@
 package generate
 
 import (
-	"cogentcore.org/core/gti"
+	"cogentcore.org/core/types"
 )
 
-var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/cmd/core/generate.Generate", Doc: "Generate is the main entry point to code generation\nthat does all of the generation according to the\ngiven config info. It overrides the\n[config.Config.Generate.Gtigen.InterfaceConfigs] info.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})
+var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/cmd/core/generate.Generate", Doc: "Generate is the main entry point to code generation\nthat does all of the generation according to the\ngiven config info. It overrides the\n[config.Config.Generate.Typegen.InterfaceConfigs] info.", Directives: []types.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"c"}, Returns: []string{"error"}})

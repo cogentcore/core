@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"slices"
 
-	"cogentcore.org/core/gti"
+	"cogentcore.org/core/types"
 )
 
 // Slice is just a slice of tree nodes: []Node, providing methods for accessing
@@ -155,7 +155,7 @@ func (sl *Slice) IndexByName(name string, startIndex ...int) (int, bool) {
 
 // IndexByType returns index of element that either is that type or embeds
 // that type, false if not found. See [Slice.IndexOf] for info on startIndex.
-func (sl *Slice) IndexByType(t *gti.Type, embeds bool, startIndex ...int) (int, bool) {
+func (sl *Slice) IndexByType(t *types.Type, embeds bool, startIndex ...int) (int, bool) {
 	if embeds {
 		return sl.IndexByFunc(func(ch Node) bool { return ch.NodeType().HasEmbed(t) }, startIndex...)
 	}
@@ -184,7 +184,7 @@ func (sl *Slice) ElemByNameTry(name string, startIndex ...int) (Node, error) {
 
 // ElemByType returns index of element that either is that type or embeds
 // that type, nil if not found. See [Slice.IndexOf] for info on startIndex.
-func (sl *Slice) ElemByType(t *gti.Type, embeds bool, startIndex ...int) Node {
+func (sl *Slice) ElemByType(t *types.Type, embeds bool, startIndex ...int) Node {
 	idx, ok := sl.IndexByType(t, embeds, startIndex...)
 	if !ok {
 		return nil
@@ -194,7 +194,7 @@ func (sl *Slice) ElemByType(t *gti.Type, embeds bool, startIndex ...int) Node {
 
 // ElemByTypeTry returns index of element that either is that type or embeds
 // that type, error if not found. See [Slice.IndexOf] for info on startIndex.
-func (sl *Slice) ElemByTypeTry(t *gti.Type, embeds bool, startIndex ...int) (Node, error) {
+func (sl *Slice) ElemByTypeTry(t *types.Type, embeds bool, startIndex ...int) (Node, error) {
 	idx, ok := sl.IndexByType(t, embeds, startIndex...)
 	if !ok {
 		return nil, fmt.Errorf("tree.Slice: element of type: %v not found", t)

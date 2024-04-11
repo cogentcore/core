@@ -7,10 +7,10 @@ package core
 import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/types"
 	"cogentcore.org/core/units"
 )
 
@@ -192,5 +192,5 @@ type NewItemsData struct {
 	// Number is the number of elements to create
 	Number int
 	// Type is the type of elements to create
-	Type *gti.Type
+	Type *types.Type
 }

@@ -16,7 +16,7 @@ import (
 
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/gox/elide"
-	"cogentcore.org/core/gti"
+	"cogentcore.org/core/types"
 )
 
 // NodeBase implements the [Node] interface and provides the core functionality
@@ -116,7 +116,7 @@ func (n *NodeBase) SetName(name string) {
 
 // BaseType returns the base node type for all elements within this tree.
 // This is used in the GUI for determining what types of children can be created.
-func (n *NodeBase) BaseType() *gti.Type {
+func (n *NodeBase) BaseType() *types.Type {
 	return NodeBaseType
 }
 
@@ -175,7 +175,7 @@ func (n *NodeBase) ParentByName(name string) Node {
 // ParentByType finds parent recursively up hierarchy, by type, and
 // returns nil if not found. If embeds is true, then it looks for any
 // type that embeds the given type at any level of anonymous embedding.
-func (n *NodeBase) ParentByType(t *gti.Type, embeds bool) Node {
+func (n *NodeBase) ParentByType(t *types.Type, embeds bool) Node {
 	if IsRoot(n) {
 		return nil
 	}
@@ -243,7 +243,7 @@ func (n *NodeBase) ChildByName(name string, startIndex ...int) Node {
 // idea where it might be, which can be a key speedup for large lists. If
 // no value is specified for startIndex, it starts in the middle, which is a
 // good default.
-func (n *NodeBase) ChildByType(t *gti.Type, embeds bool, startIndex ...int) Node {
+func (n *NodeBase) ChildByType(t *types.Type, embeds bool, startIndex ...int) Node {
 	return n.Kids.ElemByType(t, embeds, startIndex...)
 }
 
@@ -406,7 +406,7 @@ func (n *NodeBase) AddChild(kid Node) error {
 // of children list. The name should be unique among children. If the
 // name is unspecified, it defaults to the ID (kebab-case) name of the
 // type, plus the [Ki.NumLifetimeChildren] of its parent.
-func (n *NodeBase) NewChild(typ *gti.Type, name ...string) Node {
+func (n *NodeBase) NewChild(typ *types.Type, name ...string) Node {
 	if err := checkThis(n); err != nil {
 		return nil
 	}
@@ -455,7 +455,7 @@ func (n *NodeBase) InsertChild(kid Node, at int) error {
 // in children list. The name should be unique among children. If the
 // name is unspecified, it defaults to the ID (kebab-case) name of the
 // type, plus the [Ki.NumLifetimeChildren] of its parent.
-func (n *NodeBase) InsertNewChild(typ *gti.Type, at int, name ...string) Node {
+func (n *NodeBase) InsertNewChild(typ *types.Type, at int, name ...string) Node {
 	if err := checkThis(n); err != nil {
 		return nil
 	}
@@ -480,7 +480,7 @@ func (n *NodeBase) InsertNewChild(typ *gti.Type, at int, name ...string) Node {
 // change their names, or call UniquifyNames; use ConfigChildren for
 // those cases; this function is for simpler cases where a parent uses
 // this function consistently to manage children all of the same type.
-func (n *NodeBase) SetNChildren(trgn int, typ *gti.Type, nameStub ...string) bool {
+func (n *NodeBase) SetNChildren(trgn int, typ *types.Type, nameStub ...string) bool {
 	sz := len(n.Kids)
 	if trgn == sz {
 		return false

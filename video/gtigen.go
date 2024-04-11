@@ -3,13 +3,13 @@
 package video
 
 import (
-	"cogentcore.org/core/gti"
+	"cogentcore.org/core/types"
 	"cogentcore.org/core/tree"
 	"github.com/zergon321/reisen"
 )
 
-// VideoType is the [gti.Type] for [Video]
-var VideoType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/video.Video", IDName: "video", Doc: "Video represents a video playback widget without any controls.\nSee [Player] for a version with controls.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Media", Doc: "Media is the video media."}, {Name: "Rotation", Doc: "degrees of rotation to apply to the video images\n90 = left 90, -90 = right 90"}, {Name: "Stop", Doc: "setting this to true will stop the playing"}, {Name: "frameBuffer"}, {Name: "frameTarg", Doc: "target frame number to be played"}, {Name: "framePlayed", Doc: "actual frame number displayed"}, {Name: "frameStop", Doc: "frame number to stop playing at, if > 0"}}, Instance: &Video{}})
+// VideoType is the [types.Type] for [Video]
+var VideoType = types.AddType(&types.Type{Name: "cogentcore.org/core/video.Video", IDName: "video", Doc: "Video represents a video playback widget without any controls.\nSee [Player] for a version with controls.", Directives: []types.Directive{{Tool: "gti", Directive: "add"}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Media", Doc: "Media is the video media."}, {Name: "Rotation", Doc: "degrees of rotation to apply to the video images\n90 = left 90, -90 = right 90"}, {Name: "Stop", Doc: "setting this to true will stop the playing"}, {Name: "frameBuffer"}, {Name: "frameTarg", Doc: "target frame number to be played"}, {Name: "framePlayed", Doc: "actual frame number displayed"}, {Name: "frameStop", Doc: "frame number to stop playing at, if > 0"}}, Instance: &Video{}})
 
 // NewVideo adds a new [Video] with the given name to the given parent:
 // Video represents a video playback widget without any controls.
@@ -18,8 +18,8 @@ func NewVideo(parent tree.Node, name ...string) *Video {
 	return parent.NewChild(VideoType, name...).(*Video)
 }
 
-// NodeType returns the [*gti.Type] of [Video]
-func (t *Video) NodeType() *gti.Type { return VideoType }
+// NodeType returns the [*types.Type] of [Video]
+func (t *Video) NodeType() *types.Type { return VideoType }
 
 // New returns a new [*Video] value
 func (t *Video) New() tree.Node { return &Video{} }

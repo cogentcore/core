@@ -11,11 +11,11 @@ import (
 
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
 	"cogentcore.org/core/units"
 )
 
@@ -220,7 +220,7 @@ func (sw *Switches) SetEnums(es ...enums.Enum) *Switches {
 		if !strings.HasPrefix(desc, str) && len(desc) > 0 && unicode.IsUpper(rune(desc[0])) {
 			str, _, _ = strings.Cut(desc, " ")
 		}
-		tip := gti.FormatDoc(desc, str, lbl)
+		tip := types.FormatDoc(desc, str, lbl)
 		sw.Items[i] = SwitchItem{Label: lbl, Tooltip: tip}
 	}
 	return sw

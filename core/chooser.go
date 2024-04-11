@@ -18,7 +18,6 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/pi/complete"
@@ -26,6 +25,7 @@ import (
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
 	"cogentcore.org/core/units"
 )
 
@@ -346,7 +346,7 @@ func (ch *Chooser) CallItemsFuncs() {
 }
 
 // SetTypes sets the [Chooser.Items] from the given types.
-func (ch *Chooser) SetTypes(ts ...*gti.Type) *Chooser {
+func (ch *Chooser) SetTypes(ts ...*types.Type) *Chooser {
 	ch.Items = make([]ChooserItem, len(ts))
 	for i, typ := range ts {
 		ch.Items[i] = ChooserItem{Value: typ}
@@ -377,7 +377,7 @@ func (ch *Chooser) SetEnums(es ...enums.Enum) *Chooser {
 		if !strings.HasPrefix(desc, str) && len(desc) > 0 && unicode.IsUpper(rune(desc[0])) {
 			str, _, _ = strings.Cut(desc, " ")
 		}
-		tip := gti.FormatDoc(desc, str, lbl)
+		tip := types.FormatDoc(desc, str, lbl)
 		ch.Items[i] = ChooserItem{Value: enum, Label: lbl, Tooltip: tip}
 	}
 	return ch

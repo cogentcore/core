@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gtigen
+package typegen
 
 import (
 	"text/template"
@@ -11,31 +11,31 @@ import (
 )
 
 // Config contains the configuration information
-// used by gtigen
+// used by typegen
 type Config struct { //gti:add
 
-	// the source directory to run gtigen on (can be set to multiple through paths like ./...)
+	// the source directory to run typegen on (can be set to multiple through paths like ./...)
 	Dir string `default:"." posarg:"0" required:"-"`
 
-	// the output file location relative to the package on which gtigen is being called
-	Output string `default:"gtigen.go"`
+	// the output file location relative to the package on which typegen is being called
+	Output string `default:"typegen.go"`
 
-	// whether to add types to gtigen by default
+	// whether to add types to typegen by default
 	AddTypes bool
 
-	// whether to add methods to gtigen by default
+	// whether to add methods to typegen by default
 	AddMethods bool
 
-	// whether to add functions to gtigen by default
+	// whether to add functions to typegen by default
 	AddFuncs bool
 
 	// An ordered map of configs keyed by fully-qualified interface type names; if a type implements the interface, the config will be applied to it.
 	// The configs are applied in sequential ascending order, which means that
 	// the last config overrides the other ones, so the most specific
 	// interfaces should typically be put last.
-	// Note: the package gtigen is run on must explicitly reference this interface at some point for this to work; adding a simple
+	// Note: the package typegen is run on must explicitly reference this interface at some point for this to work; adding a simple
 	// `var _ MyInterface = (*MyType)(nil)` statement to check for interface implementation is an easy way to accomplish that.
-	// Note: gtigen will still succeed if it can not find one of the interfaces specified here in order to allow it to work generically across multiple directories; you can use the -v flag to get log warnings about this if you suspect that it is not finding interfaces when it should.
+	// Note: typegen will still succeed if it can not find one of the interfaces specified here in order to allow it to work generically across multiple directories; you can use the -v flag to get log warnings about this if you suspect that it is not finding interfaces when it should.
 	InterfaceConfigs *ordmap.Map[string, *Config]
 
 	// whether to generate an instance of the type(s)
@@ -51,6 +51,6 @@ type Config struct { //gti:add
 
 	// TODO: should this be called TypeTemplates and should there be a Func/Method Templates?
 
-	// a slice of templates to execute on each type being added; the template data is of the type gtigen.Type
+	// a slice of templates to execute on each type being added; the template data is of the type typegen.Type
 	Templates []*template.Template
 }

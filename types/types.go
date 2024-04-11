@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gti
+// Package types provides type information for Go types, methods,
+// and functions.
+package types
 
 import (
 	"fmt"

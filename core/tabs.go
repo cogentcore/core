@@ -13,11 +13,11 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gox/elide"
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
 	"cogentcore.org/core/units"
 )
 
@@ -383,7 +383,7 @@ func (ts *Tabs) RecycleTab(name string, sel bool) *Frame {
 // first by looking for an existing one, with given name, and if not found,
 // making and configuring a new one.
 // If sel, then select it. It returns the Widget item for the tab.
-func (ts *Tabs) RecycleTabWidget(name string, sel bool, typ *gti.Type) Widget {
+func (ts *Tabs) RecycleTabWidget(name string, sel bool, typ *types.Type) Widget {
 	fr := ts.RecycleTab(name, sel)
 	if fr.HasChildren() {
 		wi, _ := AsWidget(fr.Child(0))

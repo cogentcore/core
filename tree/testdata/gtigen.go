@@ -3,26 +3,26 @@
 package testdata
 
 import (
-	"cogentcore.org/core/gti"
+	"cogentcore.org/core/types"
 	"cogentcore.org/core/tree"
 )
 
-// TestNodeType is the [gti.Type] for [TestNode]
-var TestNodeType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/tree/testdata.TestNode", IDName: "test-node", Embeds: []gti.Field{{Name: "NodeBase"}}, Instance: &TestNode{}})
+// TestNodeType is the [types.Type] for [TestNode]
+var TestNodeType = types.AddType(&types.Type{Name: "cogentcore.org/core/tree/testdata.TestNode", IDName: "test-node", Embeds: []types.Field{{Name: "NodeBase"}}, Instance: &TestNode{}})
 
 // NewTestNode adds a new [TestNode] with the given name to the given parent:
 func NewTestNode(parent tree.Node, name ...string) *TestNode {
 	return parent.NewChild(TestNodeType, name...).(*TestNode)
 }
 
-// NodeType returns the [*gti.Type] of [TestNode]
-func (t *TestNode) NodeType() *gti.Type { return TestNodeType }
+// NodeType returns the [*types.Type] of [TestNode]
+func (t *TestNode) NodeType() *types.Type { return TestNodeType }
 
 // New returns a new [*TestNode] value
 func (t *TestNode) New() tree.Node { return &TestNode{} }
 
-// NodeEmbedType is the [gti.Type] for [NodeEmbed]
-var NodeEmbedType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/tree/testdata.NodeEmbed", IDName: "node-embed", Doc: "NodeEmbed embeds tree.Node and adds a couple of fields.\nAlso has a directive processed by gti", Directives: []gti.Directive{{Tool: "direct", Directive: "value"}}, Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Mbr1"}, {Name: "Mbr2"}}, Instance: &NodeEmbed{}})
+// NodeEmbedType is the [types.Type] for [NodeEmbed]
+var NodeEmbedType = types.AddType(&types.Type{Name: "cogentcore.org/core/tree/testdata.NodeEmbed", IDName: "node-embed", Doc: "NodeEmbed embeds tree.Node and adds a couple of fields.\nAlso has a directive processed by gti", Directives: []types.Directive{{Tool: "direct", Directive: "value"}}, Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Mbr1"}, {Name: "Mbr2"}}, Instance: &NodeEmbed{}})
 
 // NewNodeEmbed adds a new [NodeEmbed] with the given name to the given parent:
 // NodeEmbed embeds tree.Node and adds a couple of fields.
@@ -31,8 +31,8 @@ func NewNodeEmbed(parent tree.Node, name ...string) *NodeEmbed {
 	return parent.NewChild(NodeEmbedType, name...).(*NodeEmbed)
 }
 
-// NodeType returns the [*gti.Type] of [NodeEmbed]
-func (t *NodeEmbed) NodeType() *gti.Type { return NodeEmbedType }
+// NodeType returns the [*types.Type] of [NodeEmbed]
+func (t *NodeEmbed) NodeType() *types.Type { return NodeEmbedType }
 
 // New returns a new [*NodeEmbed] value
 func (t *NodeEmbed) New() tree.Node { return &NodeEmbed{} }
@@ -43,16 +43,16 @@ func (t *NodeEmbed) SetMbr1(v string) *NodeEmbed { t.Mbr1 = v; return t }
 // SetMbr2 sets the [NodeEmbed.Mbr2]
 func (t *NodeEmbed) SetMbr2(v int) *NodeEmbed { t.Mbr2 = v; return t }
 
-// NodeFieldType is the [gti.Type] for [NodeField]
-var NodeFieldType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/tree/testdata.NodeField", IDName: "node-field", Embeds: []gti.Field{{Name: "NodeEmbed"}}, Fields: []gti.Field{{Name: "Field1"}}, Instance: &NodeField{}})
+// NodeFieldType is the [types.Type] for [NodeField]
+var NodeFieldType = types.AddType(&types.Type{Name: "cogentcore.org/core/tree/testdata.NodeField", IDName: "node-field", Embeds: []types.Field{{Name: "NodeEmbed"}}, Fields: []types.Field{{Name: "Field1"}}, Instance: &NodeField{}})
 
 // NewNodeField adds a new [NodeField] with the given name to the given parent:
 func NewNodeField(parent tree.Node, name ...string) *NodeField {
 	return parent.NewChild(NodeFieldType, name...).(*NodeField)
 }
 
-// NodeType returns the [*gti.Type] of [NodeField]
-func (t *NodeField) NodeType() *gti.Type { return NodeFieldType }
+// NodeType returns the [*types.Type] of [NodeField]
+func (t *NodeField) NodeType() *types.Type { return NodeFieldType }
 
 // New returns a new [*NodeField] value
 func (t *NodeField) New() tree.Node { return &NodeField{} }
@@ -66,16 +66,16 @@ func (t *NodeField) SetMbr1(v string) *NodeField { t.Mbr1 = v; return t }
 // SetMbr2 sets the [NodeField.Mbr2]
 func (t *NodeField) SetMbr2(v int) *NodeField { t.Mbr2 = v; return t }
 
-// NodeField2Type is the [gti.Type] for [NodeField2]
-var NodeField2Type = gti.AddType(&gti.Type{Name: "cogentcore.org/core/tree/testdata.NodeField2", IDName: "node-field2", Embeds: []gti.Field{{Name: "NodeField"}}, Fields: []gti.Field{{Name: "Field2"}}, Instance: &NodeField2{}})
+// NodeField2Type is the [types.Type] for [NodeField2]
+var NodeField2Type = types.AddType(&types.Type{Name: "cogentcore.org/core/tree/testdata.NodeField2", IDName: "node-field2", Embeds: []types.Field{{Name: "NodeField"}}, Fields: []types.Field{{Name: "Field2"}}, Instance: &NodeField2{}})
 
 // NewNodeField2 adds a new [NodeField2] with the given name to the given parent:
 func NewNodeField2(parent tree.Node, name ...string) *NodeField2 {
 	return parent.NewChild(NodeField2Type, name...).(*NodeField2)
 }
 
-// NodeType returns the [*gti.Type] of [NodeField2]
-func (t *NodeField2) NodeType() *gti.Type { return NodeField2Type }
+// NodeType returns the [*types.Type] of [NodeField2]
+func (t *NodeField2) NodeType() *types.Type { return NodeField2Type }
 
 // New returns a new [*NodeField2] value
 func (t *NodeField2) New() tree.Node { return &NodeField2{} }

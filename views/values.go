@@ -14,13 +14,13 @@ import (
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
 )
 
 // This file contains the standard [Value]s built into views.
@@ -457,7 +457,7 @@ func (v *BitFlagValue) EnumValue() enums.BitFlagSetter {
 	return e
 }
 
-// TypeValue represents a [gti.Type] value with a chooser.
+// TypeValue represents a [types.Type] value with a chooser.
 type TypeValue struct {
 	ValueBase[*core.Chooser]
 }
@@ -465,23 +465,23 @@ type TypeValue struct {
 func (v *TypeValue) Config() {
 	typEmbeds := core.WidgetBaseType
 	if tetag, ok := v.Tag("type-embeds"); ok {
-		typ := gti.TypeByName(tetag)
+		typ := types.TypeByName(tetag)
 		if typ != nil {
 			typEmbeds = typ
 		}
 	}
 
-	tl := gti.AllEmbeddersOf(typEmbeds)
+	tl := types.AllEmbeddersOf(typEmbeds)
 	v.Widget.SetTypes(tl...)
 	v.Widget.OnChange(func(e events.Event) {
-		tval := v.Widget.CurrentItem.Value.(*gti.Type)
+		tval := v.Widget.CurrentItem.Value.(*types.Type)
 		v.SetValue(tval)
 	})
 }
 
 func (v *TypeValue) Update() {
 	opv := laser.OnePtrValue(v.Value)
-	typ := opv.Interface().(*gti.Type)
+	typ := opv.Interface().(*types.Type)
 	v.Widget.SetCurrentValue(typ)
 }
 

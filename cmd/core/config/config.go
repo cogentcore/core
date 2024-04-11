@@ -18,8 +18,8 @@ import (
 
 	"cogentcore.org/core/enums/enumgen"
 	"cogentcore.org/core/exec"
-	"cogentcore.org/core/gti/gtigen"
 	"cogentcore.org/core/strcase"
+	"cogentcore.org/core/types/typegen"
 )
 
 // Config is the main config struct
@@ -111,8 +111,8 @@ type Generate struct { //gti:add
 	// the enum generation configuration options passed to enumgen
 	Enumgen enumgen.Config
 
-	// the generation configuration options passed to gtigen
-	Gtigen gtigen.Config
+	// the generation configuration options passed to typegen
+	Typegen typegen.Config
 
 	// the source directory to run generate on (can be multiple through ./...)
 	Dir string `default:"." posarg:"0" required:"-" nest:"-"`

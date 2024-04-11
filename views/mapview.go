@@ -9,11 +9,11 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
 )
 
 // MapView represents a map, creating a property editor of the values --
@@ -154,7 +154,7 @@ func (mv *MapView) ConfigMapGrid() {
 	// valtypes := append(kit.Types.AllTagged(typeTag), kit.Enums.AllTagged(typeTag)...)
 	// valtypes = append(valtypes, kit.Types.AllTagged("basic-type")...)
 	// valtypes = append(valtypes, kit.TypeFor[reflect.Type]())
-	valtypes := gti.AllEmbeddersOf(tree.NodeBaseType) // todo: this is not right
+	valtypes := types.AllEmbeddersOf(tree.NodeBaseType) // todo: this is not right
 
 	mv.NCols = ncol
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gtigen
+package typegen
 
 import (
 	"bytes"
@@ -19,9 +19,9 @@ import (
 
 	"cogentcore.org/core/cli"
 	"cogentcore.org/core/generate"
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/ordmap"
 	"cogentcore.org/core/strcase"
+	types1 "cogentcore.org/core/types"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -35,8 +35,8 @@ type Generator struct {
 	File       *ast.File                            // The file we are currently on.
 	Cmap       ast.CommentMap                       // The comment map for the file we are currently on.
 	Types      []*Type                              // The types
-	Methods    ordmap.Map[string, []gti.Method]     // The methods, keyed by the the full package name of the type of the receiver
-	Funcs      ordmap.Map[string, gti.Func]         // The functions
+	Methods    ordmap.Map[string, []types1.Method]  // The methods, keyed by the the full package name of the type of the receiver
+	Funcs      ordmap.Map[string, types1.Func]      // The functions
 	Interfaces ordmap.Map[string, *types.Interface] // The cached interfaces, created from [Config.InterfaceConfigs]
 }
 
@@ -46,7 +46,7 @@ func NewGenerator(config *Config, pkgs []*packages.Package) *Generator {
 	return &Generator{Config: config, Pkgs: pkgs}
 }
 
-// PackageModes returns the package load modes needed for gtigen,
+// PackageModes returns the package load modes needed for typegen,
 // based on the given config information.
 func PackageModes(cfg *Config) packages.LoadMode {
 	res := packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles | packages.NeedImports | packages.NeedTypes | packages.NeedTypesSizes | packages.NeedSyntax | packages.NeedTypesInfo
@@ -184,7 +184,7 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 		}
 
 		typ := &Type{
-			Type: gti.Type{
+			Type: types1.Type{
 				Name:       FullName(g.Pkg, ts.Name.Name),
 				IDName:     strcase.ToKebab(ts.Name.Name),
 				Doc:        doc,
@@ -265,7 +265,7 @@ func (g *Generator) GetEmbeddedFields(efields *Fields, typ, startTyp types.Type)
 		if typ == startTyp {
 			continue
 		}
-		field := gti.Field{
+		field := types1.Field{
 			Name: f.Name(),
 		}
 		efields.Fields = append(efields.Fields, field)
@@ -289,7 +289,7 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 		if (!hasAdd && !cfg.AddFuncs) || hasSkip { // we must be told to add or we will not add
 			return true, nil
 		}
-		fun := gti.Func{
+		fun := types1.Func{
 			Name:       FullName(g.Pkg, fd.Name.Name),
 			Doc:        doc,
 			Directives: dirs,
@@ -313,7 +313,7 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 		if (!hasAdd && !cfg.AddMethods) || hasSkip { // we must be told to add or we will not add
 			return true, nil
 		}
-		method := gti.Method{
+		method := types1.Method{
 			Name:       fd.Name.Name,
 			Doc:        doc,
 			Directives: dirs,
@@ -353,11 +353,11 @@ func FullName(pkg *packages.Package, name string) string {
 	return pkg.PkgPath + "." + name
 }
 
-// GetFields creates and returns a new [gti.Fields] object
+// GetFields creates and returns a new [types1.Fields] object
 // from the given [ast.FieldList], in the context of the
 // given surrounding config. If the given field list is
 // nil, GetFields still returns an empty but valid
-// [gti.Fields] value and no error.
+// [types1.Fields] value and no error.
 func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (Fields, error) {
 	res := Fields{LocalTypes: map[string]string{}, Tags: map[string]string{}}
 	if list == nil {
@@ -407,7 +407,7 @@ func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (Fields, error) 
 			}
 			continue
 		}
-		fo := gti.Field{
+		fo := types1.Field{
 			Name: name,
 			Doc:  strings.TrimSuffix(field.Doc.Text(), "\n"),
 		}
@@ -427,7 +427,7 @@ func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (Fields, error) 
 
 // LoadFromNodeComments is a helper function that calls [LoadFromComments] with the correctly
 // filtered comment map comments of the given node.
-func (g *Generator) LoadFromNodeComments(cfg *Config, n ast.Node) (dirs []gti.Directive, hasAdd bool, hasSkip bool, err error) {
+func (g *Generator) LoadFromNodeComments(cfg *Config, n ast.Node) (dirs []types1.Directive, hasAdd bool, hasSkip bool, err error) {
 	cs := g.Cmap.Filter(n).Comments()
 	tf := g.Pkg.Fset.File(g.File.FileStart)
 	np := tf.Line(n.Pos())
@@ -444,7 +444,7 @@ func (g *Generator) LoadFromNodeComments(cfg *Config, n ast.Node) (dirs []gti.Di
 
 // LoadFromComments is a helper function that combines the results of [LoadFromComment]
 // for the given comment groups.
-func LoadFromComments(cfg *Config, c ...*ast.CommentGroup) (dirs []gti.Directive, hasAdd bool, hasSkip bool, err error) {
+func LoadFromComments(cfg *Config, c ...*ast.CommentGroup) (dirs []types1.Directive, hasAdd bool, hasSkip bool, err error) {
 	for _, cg := range c {
 		cdirs, cadd, cskip, err := LoadFromComment(cg, cfg)
 		if err != nil {
@@ -462,8 +462,8 @@ func LoadFromComments(cfg *Config, c ...*ast.CommentGroup) (dirs []gti.Directive
 // in the comment group, and returning all directives found, whether
 // there was a gti:add directive, and any error. If the given
 // documentation is nil, LoadFromComment still returns an empty but valid
-// [gti.Directives] value, false, and no error.
-func LoadFromComment(c *ast.CommentGroup, cfg *Config) (dirs []gti.Directive, hasAdd bool, hasSkip bool, err error) {
+// [types1.Directives] value, false, and no error.
+func LoadFromComment(c *ast.CommentGroup, cfg *Config) (dirs []types1.Directive, hasAdd bool, hasSkip bool, err error) {
 	if c == nil {
 		return
 	}
@@ -526,7 +526,7 @@ func (g *Generator) Generate() (bool, error) {
 
 // ExecTmpl executes the given template with the given data and
 // writes the result to [Generator.Buf]. It fatally logs any error.
-// All gtigen templates take a [*Type] or [*gti.Func] as their data.
+// All typegen templates take a [*Type] or [*types1.Func] as their data.
 func (g *Generator) ExecTmpl(t *template.Template, data any) {
 	err := t.Execute(&g.Buf, data)
 	if err != nil {

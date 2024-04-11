@@ -16,12 +16,12 @@ import (
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
 )
 
 // NewValue makes and returns a new [Value] from the given value and creates
@@ -62,7 +62,7 @@ type Value interface {
 	AsWidgetBase() *core.WidgetBase
 
 	// WidgetType returns the type of widget associated with this value.
-	WidgetType() *gti.Type
+	WidgetType() *types.Type
 
 	// SetWidget sets the widget used to represent the value.
 	// It is typically only used internally in [Config].
@@ -217,7 +217,7 @@ func (v *ValueBase[W]) AsWidgetBase() *core.WidgetBase {
 	return v.Widget.AsWidget()
 }
 
-func (v *ValueBase[W]) WidgetType() *gti.Type {
+func (v *ValueBase[W]) WidgetType() *types.Type {
 	var w W
 	return w.NodeType()
 }
@@ -548,7 +548,7 @@ func (v *ValueData) Label() string {
 	// whether to sentence case
 	sc := true
 	if v.Owner != nil && len(NoSentenceCaseFor) > 0 {
-		sc = !NoSentenceCaseForType(gti.TypeNameObj(v.Owner))
+		sc = !NoSentenceCaseForType(types.TypeNameObj(v.Owner))
 	}
 
 	switch {
@@ -581,7 +581,7 @@ func (v *ValueData) Doc() string {
 	if v.Is(ValueHasSavedDoc) {
 		return v.SavedDoc
 	}
-	doc, _ := gti.GetDoc(v.Value, reflect.ValueOf(v.Owner), v.Field, v.Label())
+	doc, _ := types.GetDoc(v.Value, reflect.ValueOf(v.Owner), v.Field, v.Label())
 	v.SavedDoc = doc
 	v.SetFlag(true, ValueHasSavedDoc)
 	return v.SavedDoc

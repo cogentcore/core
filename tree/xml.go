@@ -14,7 +14,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/errors"
-	"cogentcore.org/core/gti"
+	"cogentcore.org/core/types"
 )
 
 // WriteXML writes the tree to an XML-encoded byte string over io.Writer
@@ -230,7 +230,7 @@ func (sl *Slice) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 			}
 			if name == "Type" {
 				tn := strings.TrimSpace(val)
-				typ, err := gti.TypeByNameTry(tn)
+				typ, err := types.TypeByNameTry(tn)
 				if typ == nil {
 					return fmt.Errorf("tree.Slice UnmarshalXML: %w", err)
 				}

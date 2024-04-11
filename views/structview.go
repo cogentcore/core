@@ -16,12 +16,12 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
 )
 
 // NoSentenceCaseFor indicates to not transform field names in
@@ -177,7 +177,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 	}
 	sc := true
 	if len(NoSentenceCaseFor) > 0 {
-		sc = !NoSentenceCaseForType(gti.TypeNameObj(sv.Struct))
+		sc = !NoSentenceCaseForType(types.TypeNameObj(sv.Struct))
 	}
 	sg := sv.StructGrid()
 	// note: widget re-use does not work due to all the closures

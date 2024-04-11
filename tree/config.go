@@ -7,13 +7,13 @@ package tree
 import (
 	"fmt"
 
-	"cogentcore.org/core/gti"
+	"cogentcore.org/core/types"
 )
 
 // TypeAndName holds a type and a name. It is used for specifying [Config]
 // objects in [Node.ConfigChildren].
 type TypeAndName struct {
-	Type *gti.Type
+	Type *types.Type
 	Name string
 }
 
@@ -21,7 +21,7 @@ type TypeAndName struct {
 type Config []TypeAndName
 
 // Add adds a new configuration entry with the given type and name.
-func (t *Config) Add(typ *gti.Type, name string) {
+func (t *Config) Add(typ *types.Type, name string) {
 	*t = append(*t, TypeAndName{typ, name})
 }
 

@@ -15,8 +15,8 @@ import (
 	"strconv"
 
 	"cogentcore.org/core/errors"
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/iox/jsonx"
+	"cogentcore.org/core/types"
 )
 
 // note: use package iox/jsonx for standard read / write of JSON files
@@ -116,7 +116,7 @@ func (sl *Slice) UnmarshalJSON(b []byte) error {
 		ni := bytes.Index(fld, []byte("\"name\":"))
 		nm := string(bytes.Trim(bytes.TrimSpace(fld[ni+7:]), "\""))
 		// fmt.Printf("making type: %v\n", tn)
-		typ, err := gti.TypeByNameTry(tn)
+		typ, err := types.TypeByNameTry(tn)
 		if err != nil {
 			err = fmt.Errorf("tree.Slice UnmarshalJSON: %w", err)
 			slog.Error(err.Error())
@@ -199,7 +199,7 @@ func SaveNewJSON(k Node, filename string) error {
 // gti.Type for the saved type name (error if not found),
 // the remaining bytes to be decoded using a standard
 // unmarshal, and an error.
-func ReadRootTypeJSON(b []byte) (*gti.Type, []byte, error) {
+func ReadRootTypeJSON(b []byte) (*types.Type, []byte, error) {
 	if !bytes.HasPrefix(b, JSONTypePrefix) {
 		return nil, b, fmt.Errorf("tree.ReadRootTypeJSON -- type prefix not found at start of file -- must be there to identify type of root node of tree")
 	}
@@ -207,7 +207,7 @@ func ReadRootTypeJSON(b []byte) (*gti.Type, []byte, error) {
 	eidx := bytes.Index(b, JSONTypeSuffix)
 	bodyidx := eidx + len(JSONTypeSuffix)
 	tn := string(bytes.Trim(bytes.TrimSpace(b[stidx:eidx]), "\""))
-	typ, err := gti.TypeByNameTry(tn)
+	typ, err := types.TypeByNameTry(tn)
 	if typ == nil {
 		return nil, b[bodyidx:], fmt.Errorf("tree.ReadRootTypeJSON: %w", err)
 	}

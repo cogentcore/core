@@ -15,13 +15,13 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
 )
 
 // CallFunc calls the given function in the context of the given widget,
@@ -57,7 +57,7 @@ type FuncButton struct { //core:no-new
 	// This function can also be a method, but it must be
 	// converted to a [gti.Func] first. It should typically
 	// be set using [FuncButton.SetFunc].
-	Func *gti.Func `set:"-"`
+	Func *types.Func `set:"-"`
 
 	// ReflectFunc is the [reflect.Value] of the function or
 	// method associated with this button. It should typically
@@ -143,7 +143,7 @@ func (fb *FuncButton) SetText(v string) *FuncButton {
 	ptext := fb.Text
 	fb.Text = v
 	if fb.Func != nil && fb.Text != ptext && ptext != "" {
-		fb.Func.Doc = gti.FormatDoc(fb.Func.Doc, ptext, fb.Text)
+		fb.Func.Doc = types.FormatDoc(fb.Func.Doc, ptext, fb.Text)
 		fb.SetTooltip(fb.Func.Doc)
 	}
 	return fb
@@ -154,7 +154,7 @@ func (fb *FuncButton) SetText(v string) *FuncButton {
 // the function to be obtained, it must be added to gti. SetFunc is
 // automatically called by [NewFuncButton].
 func (fb *FuncButton) SetFunc(fun any) *FuncButton {
-	fnm := gti.FuncName(fun)
+	fnm := types.FuncName(fun)
 	// the "-fm" suffix indicates that it is a method
 	if strings.HasSuffix(fnm, "-fm") {
 		fnm = strings.TrimSuffix(fnm, "-fm")
@@ -166,13 +166,13 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 		// that may surround the type name
 		typnm = strings.ReplaceAll(typnm, "(*", "")
 		typnm = strings.TrimSuffix(typnm, ")")
-		gtyp := gti.TypeByName(typnm)
-		var met *gti.Method
+		gtyp := types.TypeByName(typnm)
+		var met *types.Method
 		if gtyp == nil {
 			if fb.WarnUnadded {
 				slog.Warn("views.FuncButton.SetFunc called with a method whose receiver type has not been added to gti", "function", fnm)
 			}
-			met = &gti.Method{Name: metnm}
+			met = &types.Method{Name: metnm}
 		} else {
 			for _, m := range gtyp.Methods {
 				if m.Name == metnm {
@@ -184,23 +184,23 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 				if fb.WarnUnadded {
 					slog.Warn("views.FuncButton.SetFunc called with a method that has not been added to gti (even though the receiver type was, you still need to add the method itself)", "function", fnm)
 				}
-				met = &gti.Method{Name: metnm}
+				met = &types.Method{Name: metnm}
 			}
 		}
 		return fb.SetMethodImpl(met, reflect.ValueOf(fun))
 	}
 
 	if isAnonymousFunction(fnm) {
-		f := &gti.Func{Name: fnm, Doc: "Anonymous function " + fnm}
+		f := &types.Func{Name: fnm, Doc: "Anonymous function " + fnm}
 		return fb.SetFuncImpl(f, reflect.ValueOf(fun))
 	}
 
-	f := gti.FuncByName(fnm)
+	f := types.FuncByName(fnm)
 	if f == nil {
 		if fb.WarnUnadded {
 			slog.Warn("views.FuncButton.SetFunc called with a function that has not been added to gti", "function", fnm)
 		}
-		f = &gti.Func{Name: fnm}
+		f = &types.Func{Name: fnm}
 	}
 	return fb.SetFuncImpl(f, reflect.ValueOf(fun))
 }
@@ -212,7 +212,7 @@ func isAnonymousFunction(fnm string) bool {
 
 // SetFuncImpl is the underlying implementation of [FuncButton.SetFunc].
 // It should typically not be used by end-user code.
-func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButton {
+func (fb *FuncButton) SetFuncImpl(gfun *types.Func, rfun reflect.Value) *FuncButton {
 	fb.Func = gfun
 	fb.ReflectFunc = rfun
 	fb.SetArgs()
@@ -250,7 +250,7 @@ func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButto
 	fb.SetText(txt)
 	// doc formatting interferes with anonymous functions
 	if !isAnonymous {
-		fb.Func.Doc = gti.FormatDoc(fb.Func.Doc, snm, txt)
+		fb.Func.Doc = types.FormatDoc(fb.Func.Doc, snm, txt)
 	}
 	fb.SetTooltip(fb.Func.Doc)
 	// we default to the icon with the same name as
@@ -337,8 +337,8 @@ func (fb *FuncButton) CallFunc() {
 
 // SetMethodImpl is the underlying implementation of [FuncButton.SetFunc] for methods.
 // It should typically not be used by end-user code.
-func (fb *FuncButton) SetMethodImpl(gmet *gti.Method, rmet reflect.Value) *FuncButton {
-	return fb.SetFuncImpl(&gti.Func{
+func (fb *FuncButton) SetMethodImpl(gmet *types.Method, rmet reflect.Value) *FuncButton {
+	return fb.SetFuncImpl(&types.Func{
 		Name:       gmet.Name,
 		Doc:        gmet.Doc,
 		Directives: gmet.Directives,

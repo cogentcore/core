@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gtigen
+package typegen
 
 import (
 	"go/ast"
 
-	"cogentcore.org/core/gti"
+	"cogentcore.org/core/types"
 )
 
 // Type represents a parsed type.
 type Type struct {
-	gti.Type
+	types.Type
 
 	// LocalName is the name of the type in its package
 	LocalName string
@@ -40,7 +40,7 @@ type Type struct {
 
 // Fields extends []gti.Field to provide the local type names and struct tags for each field.
 type Fields struct {
-	Fields     []gti.Field
+	Fields     []types.Field
 	LocalTypes map[string]string
 	Tags       map[string]string
 }
