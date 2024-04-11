@@ -20,8 +20,8 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gox/option"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/iox/jsons"
-	"cogentcore.org/core/iox/tomls"
+	"cogentcore.org/core/iox/jsonx"
+	"cogentcore.org/core/iox/tomlx"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/paint"
@@ -112,9 +112,9 @@ func OpenSettings(se Settings) error {
 	}
 	fnm := se.Filename()
 	if filepath.Ext(fnm) == ".json" {
-		return jsons.Open(se, fnm)
+		return jsonx.Open(se, fnm)
 	}
-	return tomls.Open(se, fnm)
+	return tomlx.Open(se, fnm)
 }
 
 // SaveSettings saves the given settings to their [Settings.Filename].
@@ -129,9 +129,9 @@ func SaveSettings(se Settings) error {
 	fnm := se.Filename()
 	ndf := laser.NonDefaultFields(se)
 	if filepath.Ext(fnm) == ".json" {
-		return jsons.Save(ndf, fnm)
+		return jsonx.Save(ndf, fnm)
 	}
-	return tomls.Save(ndf, fnm)
+	return tomlx.Save(ndf, fnm)
 }
 
 // ResetSettings resets the given settings to their default values.
@@ -547,7 +547,7 @@ func (ss *SystemSettingsData) Apply() { //gti:add
 
 func (ss *SystemSettingsData) Open() error {
 	fnm := ss.Filename()
-	err := tomls.Open(ss, fnm)
+	err := tomlx.Open(ss, fnm)
 	if len(ss.FavPaths) == 0 {
 		ss.FavPaths.SetToDefaults()
 	}
@@ -673,12 +673,12 @@ var RecentPaths FilePaths
 
 // Open file paths from a json-formatted file.
 func (fp *FilePaths) Open(filename string) error { //gti:add
-	return errors.Log(jsons.Open(fp, filename))
+	return errors.Log(jsonx.Open(fp, filename))
 }
 
 // Save file paths to a json-formatted file.
 func (fp *FilePaths) Save(filename string) error { //gti:add
-	return errors.Log(jsons.Save(fp, filename))
+	return errors.Log(jsonx.Save(fp, filename))
 }
 
 // AddPath inserts a path to the file paths (at the start), subject to max

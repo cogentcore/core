@@ -10,7 +10,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"cogentcore.org/core/iox/jsons"
+	"cogentcore.org/core/iox/jsonx"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/tree/testdata"
 )
@@ -29,14 +29,14 @@ func TestNodeJSON(t *testing.T) {
 	child2.NewChild(typ, "subchild1")
 
 	var buf bytes.Buffer
-	assert.NoError(t, jsons.Write(&parent, &buf))
+	assert.NoError(t, jsonx.Write(&parent, &buf))
 	b := buf.Bytes()
 
 	tstload := testdata.NodeEmbed{}
 	tstload.InitName(&tstload, "")
-	if assert.NoError(t, jsons.Read(&tstload, bytes.NewReader(b))) {
+	if assert.NoError(t, jsonx.Read(&tstload, bytes.NewReader(b))) {
 		var buf2 bytes.Buffer
-		assert.NoError(t, jsons.Write(tstload, &buf2))
+		assert.NoError(t, jsonx.Write(tstload, &buf2))
 		tstb := buf2.Bytes()
 		if !bytes.Equal(tstb, b) {
 			t.Error("original and unmarshal'd json rep are not equivalent")

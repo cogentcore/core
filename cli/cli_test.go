@@ -14,7 +14,7 @@ import (
 	"log/slog"
 
 	"cogentcore.org/core/cli/testdata"
-	"cogentcore.org/core/iox/tomls"
+	"cogentcore.org/core/iox/tomlx"
 	"cogentcore.org/core/logx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -350,7 +350,7 @@ func TestSave(t *testing.T) {
 	opts.IncludePaths = []string{".", "testdata"}
 	cfg := &TestConfig{}
 	OpenWithIncludes(opts, cfg, "testcfg.toml")
-	tomls.Save(cfg, "testdata/testwrite.toml")
+	tomlx.Save(cfg, "testdata/testwrite.toml")
 }
 
 func TestConfigOpen(t *testing.T) {

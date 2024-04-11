@@ -12,7 +12,7 @@ import (
 	"reflect"
 
 	"cogentcore.org/core/gox/dirs"
-	"cogentcore.org/core/iox/tomls"
+	"cogentcore.org/core/iox/tomlx"
 	"cogentcore.org/core/laser"
 )
 
@@ -53,7 +53,7 @@ func includeStackImpl(opts *Options, clone Includer, includes []string) ([]strin
 	var errs []error
 	for _, inc := range incs {
 		*clone.IncludesPtr() = nil
-		err := tomls.OpenFiles(clone, dirs.FindFilesOnPaths(opts.IncludePaths, inc))
+		err := tomlx.OpenFiles(clone, dirs.FindFilesOnPaths(opts.IncludePaths, inc))
 		if err == nil {
 			includes, err = includeStackImpl(opts, clone, includes)
 			if err != nil {

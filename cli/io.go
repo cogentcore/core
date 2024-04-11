@@ -9,7 +9,7 @@ import (
 	"io/fs"
 
 	"cogentcore.org/core/gox/dirs"
-	"cogentcore.org/core/iox/tomls"
+	"cogentcore.org/core/iox/tomlx"
 	"cogentcore.org/core/laser"
 )
 
@@ -24,7 +24,7 @@ func OpenWithIncludes(opts *Options, cfg any, file string) error {
 	if len(files) == 0 {
 		return fmt.Errorf("OpenWithIncludes: no files found for %q", file)
 	}
-	err := tomls.OpenFiles(cfg, files)
+	err := tomlx.OpenFiles(cfg, files)
 	if err != nil {
 		return err
 	}
@@ -39,13 +39,13 @@ func OpenWithIncludes(opts *Options, cfg any, file string) error {
 	}
 	for i := ni - 1; i >= 0; i-- {
 		inc := incs[i]
-		err = tomls.OpenFiles(cfg, dirs.FindFilesOnPaths(opts.IncludePaths, inc))
+		err = tomlx.OpenFiles(cfg, dirs.FindFilesOnPaths(opts.IncludePaths, inc))
 		if err != nil {
 			fmt.Println(err)
 		}
 	}
 	// reopen original
-	err = tomls.OpenFiles(cfg, dirs.FindFilesOnPaths(opts.IncludePaths, file))
+	err = tomlx.OpenFiles(cfg, dirs.FindFilesOnPaths(opts.IncludePaths, file))
 	if err != nil {
 		return err
 	}
@@ -55,18 +55,18 @@ func OpenWithIncludes(opts *Options, cfg any, file string) error {
 
 // OpenFS reads the given config object from the given file.
 func Open(cfg any, file string) error {
-	return tomls.Open(cfg, file)
+	return tomlx.Open(cfg, file)
 }
 
 // OpenFS reads the given config object from given file, using
 // the given [fs.FS] filesystem (e.g., for embed files).
 func OpenFS(cfg any, fsys fs.FS, file string) error {
-	return tomls.OpenFS(cfg, fsys, file)
+	return tomlx.OpenFS(cfg, fsys, file)
 }
 
 // Save writes the given config object to the given file.
 // It only saves the non-default fields of the given object,
 // as specified by [laser.NonDefaultFields].
 func Save(cfg any, file string) error {
-	return tomls.Save(laser.NonDefaultFields(cfg), file)
+	return tomlx.Save(laser.NonDefaultFields(cfg), file)
 }

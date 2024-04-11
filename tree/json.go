@@ -16,7 +16,7 @@ import (
 
 	"cogentcore.org/core/errors"
 	"cogentcore.org/core/gti"
-	"cogentcore.org/core/iox/jsons"
+	"cogentcore.org/core/iox/jsonx"
 )
 
 // note: use package iox/jsonx for standard read / write of JSON files
@@ -174,7 +174,7 @@ func RootTypeJSON(k Node) []byte {
 func WriteNewJSON(k Node, writer io.Writer) error {
 	tb := RootTypeJSON(k)
 	writer.Write(tb)
-	return jsons.WriteIndent(k, writer)
+	return jsonx.WriteIndent(k, writer)
 }
 
 // SaveNewJSON writes JSON-encoded bytes to given writer

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package xmls
+package jsonx
 
 import (
 	"path/filepath"
@@ -16,9 +16,9 @@ type testStruct struct {
 	B float32
 }
 
-func TestXML(t *testing.T) {
-	tpath := filepath.Join("testdata", "test.xml")
-	tipath := filepath.Join("testdata", "test-indent.xml")
+func TestJSON(t *testing.T) {
+	tpath := filepath.Join("testdata", "test.json")
+	tipath := filepath.Join("testdata", "test-indent.json")
 
 	s := &testStruct{A: "aaa", B: 3.14}
 	assert.NoError(t, Save(s, tpath))

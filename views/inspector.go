@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/iox/jsons"
+	"cogentcore.org/core/iox/jsonx"
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
@@ -78,7 +78,7 @@ func (is *Inspector) Save() error { //gti:add
 		return nil
 	}
 
-	err := jsons.Save(is.KiRoot, string(is.Filename))
+	err := jsonx.Save(is.KiRoot, string(is.Filename))
 	if err != nil {
 		return err
 	}
@@ -91,7 +91,7 @@ func (is *Inspector) SaveAs(filename core.Filename) error { //gti:add
 	if is.KiRoot == nil {
 		return nil
 	}
-	err := jsons.Save(is.KiRoot, string(filename))
+	err := jsonx.Save(is.KiRoot, string(filename))
 	if err != nil {
 		return err
 	}
@@ -106,7 +106,7 @@ func (is *Inspector) Open(filename core.Filename) error { //gti:add
 	if is.KiRoot == nil {
 		return nil
 	}
-	err := jsons.Open(is.KiRoot, string(filename))
+	err := jsonx.Open(is.KiRoot, string(filename))
 	if err != nil {
 		return err
 	}
