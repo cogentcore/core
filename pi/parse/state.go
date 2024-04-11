@@ -193,7 +193,7 @@ func (ps *State) MatchLex(lx *lex.Lex, tkey token.KeyToken, isCat, isSubCat bool
 // Only matches when depth is same as at reg.St start at the start of the search.
 // All positions in token indexes.
 func (ps *State) FindToken(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bool) {
-	// prf := prof.Start("FindToken")
+	// prf := profile.Start("FindToken")
 	// defer prf.End()
 	cp, ok := ps.Src.ValidTokenPos(reg.St)
 	if !ok {
@@ -233,7 +233,7 @@ func (ps *State) MatchToken(tkey token.KeyToken, pos lex.Pos) bool {
 // binary operator expressions (mathematical binary operators).
 // All positions are in token indexes.
 func (ps *State) FindTokenReverse(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bool) {
-	// prf := prof.Start("FindTokenReverse")
+	// prf := profile.Start("FindTokenReverse")
 	// defer prf.End()
 	cp, ok := ps.Src.PrevTokenPos(reg.Ed)
 	if !ok {

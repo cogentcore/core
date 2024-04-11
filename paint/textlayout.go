@@ -174,7 +174,7 @@ func (tr *Text) LayoutStdLR(txtSty *styles.Text, fontSty *styles.FontRender, ctx
 		return mat32.Vec2{}
 	}
 
-	// pr := prof.Start("TextLayout")
+	// pr := profile.Start("TextLayout")
 	// defer pr.End()
 	//
 	tr.Dir = styles.LRTB

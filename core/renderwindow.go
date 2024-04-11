@@ -946,7 +946,7 @@ func (w *RenderWindow) DrawScenes() {
 	}
 	defer w.SystemWindow.Unlock()
 
-	// pr := prof.Start("win.DrawScenes")
+	// pr := profile.Start("win.DrawScenes")
 
 	drw := w.SystemWindow.Drawer()
 	rs := &w.RenderScenes

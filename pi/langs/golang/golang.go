@@ -65,10 +65,10 @@ func (gl *GoLang) ParseFile(fss *pi.FileStates, txt []byte) {
 		return
 	}
 	// fmt.Println("\nstarting Parse:", pfs.Src.Filename)
-	// lprf := prof.Start("LexAll")
+	// lprf := profile.Start("LexAll")
 	pr.LexAll(pfs)
 	// lprf.End()
-	// pprf := prof.Start("ParseAll")
+	// pprf := profile.Start("ParseAll")
 	pr.ParseAll(pfs)
 	// pprf.End()
 	fss.EndProc() // only symbols still need locking, done separately

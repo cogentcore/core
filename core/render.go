@@ -17,7 +17,7 @@ import (
 	"cogentcore.org/core/cam/hct"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/mat32"
-	"cogentcore.org/core/prof"
+	"cogentcore.org/core/profile"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 )
@@ -179,7 +179,7 @@ func (wb *WidgetBase) ConfigTree() {
 	if wb.This() == nil {
 		return
 	}
-	pr := prof.Start(wb.This().NodeType().ShortName())
+	pr := profile.Start(wb.This().NodeType().ShortName())
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		wi.Config()
 		return tree.Continue
@@ -219,7 +219,7 @@ func (wb *WidgetBase) ApplyStyleTree() {
 	if wb.This() == nil {
 		return
 	}
-	pr := prof.Start(wb.This().NodeType().ShortName())
+	pr := profile.Start(wb.This().NodeType().ShortName())
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		wi.ApplyStyle()
 		return tree.Continue
@@ -278,7 +278,7 @@ func (wb *WidgetBase) DoNeedsRender() {
 	if wb.This() == nil {
 		return
 	}
-	pr := prof.Start(wb.This().NodeType().ShortName())
+	pr := profile.Start(wb.This().NodeType().ShortName())
 	wb.WidgetWalkPre(func(kwi Widget, kwb *WidgetBase) bool {
 		if kwi.Is(NeedsRender) {
 			kwi.RenderWidget()
@@ -588,7 +588,7 @@ func (wb *WidgetBase) WinPos(x, y float32) image.Point {
 // ProfileToggle turns profiling on or off, which does both
 // targeted and global CPU and Memory profiling.
 func ProfileToggle() { //gti:add
-	if prof.Profiling {
+	if profile.Profiling {
 		EndTargProfile()
 		EndCPUMemProfile()
 	} else {
@@ -627,14 +627,14 @@ func EndCPUMemProfile() {
 // StartTargProfile starts targeted profiling using the prof package.
 func StartTargProfile() {
 	fmt.Printf("Starting Targeted Profiling\n")
-	prof.Reset()
-	prof.Profiling = true
+	profile.Reset()
+	profile.Profiling = true
 }
 
 // EndTargProfile ends targeted profiling and prints report.
 func EndTargProfile() {
-	prof.Report(time.Millisecond)
-	prof.Profiling = false
+	profile.Report(time.Millisecond)
+	profile.Profiling = false
 }
 
 // ReportWinNodes reports the number of nodes in this scene

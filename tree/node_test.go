@@ -686,14 +686,14 @@ func BenchmarkBuildGuiTree_NodeField2(b *testing.B) {
 }
 
 func BenchmarkBuildGuiTreeSlow_NodeEmbed(b *testing.B) {
-	// prof.Reset()
-	// prof.Profiling = true
+	// profile.Reset()
+	// profile.Profiling = true
 	for n := 0; n < b.N; n++ {
 		wt := BuildGuiTreeSlow(NWidgets, NParts, testdata.NodeEmbedType)
 		TestGUITree_NodeEmbed = wt
 	}
-	// prof.Report(time.Millisecond)
-	// prof.Profiling = false
+	// profile.Report(time.Millisecond)
+	// profile.Profiling = false
 }
 
 func BenchmarkWalkPre_NodeEmbed(b *testing.B) {

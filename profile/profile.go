@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package prof provides very basic but effective profiling of targeted
+// Package profile provides basic but effective profiling of targeted
 // functions or code sections, which can often be more informative than
-// generic cpu profiling
+// generic cpu profiling.
 //
 // Here's how you use it:
 //
@@ -12,26 +12,27 @@
 //	profFlag := flag.Bool("prof", false, "turn on targeted profiling")
 //	...
 //	flag.Parse()
-//	prof.Profiling = *profFlag
+//	profile.Profiling = *profFlag
 //	...
 //	// surrounding the code of interest:
-//	pr := prof.Start()
+//	pr := profile.Start()
 //	... code
 //	pr.End()
 //	...
 //	// at end or whenever you've got enough data:
-//	prof.Report(time.Millisecond) // or time.Second or whatever
-package prof
+//	profile.Report(time.Millisecond) // or time.Second or whatever
+package profile
 
 import (
 	"cmp"
 	"fmt"
-	"log/slog"
 	"runtime"
 	"slices"
 	"strings"
 	"sync"
 	"time"
+
+	"cogentcore.org/core/errors"
 )
 
 // Main User API:
@@ -53,14 +54,14 @@ func Start(info ...string) *Profile {
 			name = name[li+1:]
 		}
 	} else {
-		err := "prof.Start: unexpected error: unable to get caller"
-		slog.Error(err)
+		err := "profile.Start: unexpected error: unable to get caller"
+		errors.Log(errors.New(err))
 		name = "!(" + err + ")"
 	}
 	if len(info) > 0 {
 		name += "-" + strings.Join(info, "-")
 	}
-	return Prof.Start(name)
+	return TheProfiler.Start(name)
 }
 
 // StartName starts profiling and returns a Profile struct that must have
@@ -74,26 +75,26 @@ func StartName(name string, info ...string) *Profile {
 	if len(info) > 0 {
 		name += "-" + strings.Join(info, "-")
 	}
-	return Prof.Start(name)
+	return TheProfiler.Start(name)
 }
 
 // Report generates a report of all the profile data collected
 func Report(units time.Duration) {
-	Prof.Report(units)
+	TheProfiler.Report(units)
 }
 
 // Reset all data
 func Reset() {
-	Prof.Reset()
+	TheProfiler.Reset()
 }
 
-////////////////////////////////////////////////////////////////////
-// IMPL:
-
+// Profiling is whether profiling is currently enabled.
 var Profiling = false
 
-var Prof = Profiler{}
+// TheProfiler is the global instance of [Profiler].
+var TheProfiler = Profiler{}
 
+// Profile represents one profiled function.
 type Profile struct {
 	Name   string
 	Tot    time.Duration
@@ -128,10 +129,10 @@ func (p *Profile) Report(tot, units float64) {
 		p.Name, float64(p.Tot)/units, p.Avg/units, p.N, 100.0*float64(p.Tot)/tot)
 }
 
-// Profiler manages a map of profiled functions
+// Profiler manages a map of profiled functions.
 type Profiler struct {
-	Profs map[string]*Profile
-	mu    sync.Mutex
+	Profiles map[string]*Profile
+	mu       sync.Mutex
 }
 
 // Start starts profiling and returns a Profile struct that must have .End()
@@ -141,13 +142,13 @@ func (p *Profiler) Start(name string) *Profile {
 		return nil
 	}
 	p.mu.Lock()
-	if p.Profs == nil {
-		p.Profs = make(map[string]*Profile, 0)
+	if p.Profiles == nil {
+		p.Profiles = make(map[string]*Profile, 0)
 	}
-	pr, ok := p.Profs[name]
+	pr, ok := p.Profiles[name]
 	if !ok {
 		pr = &Profile{Name: name}
-		p.Profs[name] = pr
+		p.Profiles[name] = pr
 	}
 	prval := pr.Start()
 	p.mu.Unlock()
@@ -160,10 +161,10 @@ func (p *Profiler) Report(units time.Duration) {
 		// fmt.Printf("Profiling not turned on -- set global core.Profiling variable\n")
 		return
 	}
-	list := make([]*Profile, len(p.Profs))
+	list := make([]*Profile, len(p.Profiles))
 	tot := 0.0
 	idx := 0
-	for _, pr := range p.Profs {
+	for _, pr := range p.Profiles {
 		tot += float64(pr.Tot)
 		list[idx] = pr
 		idx++
@@ -177,5 +178,5 @@ func (p *Profiler) Report(units time.Duration) {
 }
 
 func (p *Profiler) Reset() {
-	p.Profs = make(map[string]*Profile, 0)
+	p.Profiles = make(map[string]*Profile, 0)
 }

@@ -179,7 +179,7 @@ func (pr *Parser) DoPassTwo(fs *FileState) {
 // LexAll runs a complete pass of the lexer and pass two, on current state
 func (pr *Parser) LexAll(fs *FileState) {
 	pr.LexInit(fs)
-	// lprf := prof.Start("LexRun") // quite fast now..
+	// lprf := profile.Start("LexRun") // quite fast now..
 	pr.LexRun(fs)
 	// fs.LexErrReport()
 	// lprf.End()

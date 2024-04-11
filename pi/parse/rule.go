@@ -757,7 +757,7 @@ func (pr *Rule) ParseRules(ps *State, parent *Rule, parAst *Ast, scope lex.Reg, 
 // EOS position or State ScopeStack pushed from parents.
 // Returns new scope and false if no valid scope found.
 func (pr *Rule) Scope(ps *State, parAst *Ast, scope lex.Reg) (lex.Reg, bool) {
-	// prf := prof.Start("Scope")
+	// prf := profile.Start("Scope")
 	// defer prf.End()
 
 	nscope := scope
@@ -812,11 +812,11 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap l
 		}
 	}
 
-	// mprf := prof.Start("Match")
+	// mprf := profile.Start("Match")
 	// defer mprf.End()
 	// Note: uncomment the following to see which rules are taking the most
 	// time -- very helpful for focusing effort on optimizing those rules.
-	// prf := prof.Start(pr.Nm)
+	// prf := profile.Start(pr.Nm)
 	// defer prf.End()
 
 	nr := len(pr.Rules)
@@ -824,7 +824,7 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap l
 		return pr.MatchGroup(ps, parAst, scope, depth, optMap)
 	}
 
-	// prf := prof.Start("IsMatch")
+	// prf := profile.Start("IsMatch")
 	if mst, match := ps.IsMatch(pr, scope); match {
 		// prf.End()
 		return true, scope, mst.Regs
@@ -957,7 +957,7 @@ func (pr *Rule) MatchToken(ps *State, rr *RuleEl, ri int, kt token.KeyToken, cre
 		}
 		tpos = creg.Ed
 	} else {
-		// prf := prof.Start("FindToken")
+		// prf := profile.Start("FindToken")
 		if pr.Is(Reverse) {
 			tpos, ok = ps.FindTokenReverse(kt, *creg)
 		} else {
@@ -1116,7 +1116,7 @@ func (pr *Rule) MatchNoToks(ps *State, parAst *Ast, scope lex.Reg, depth int, op
 
 // MatchGroup does matching for Group rules
 func (pr *Rule) MatchGroup(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap lex.TokenMap) (bool, lex.Reg, Matches) {
-	// prf := prof.Start("SubMatch")
+	// prf := profile.Start("SubMatch")
 	if mst, match := ps.IsMatch(pr, scope); match {
 		// 	prf.End()
 		return true, scope, mst.Regs
@@ -1275,7 +1275,7 @@ func (pr *Rule) DoRules(ps *State, parent *Rule, parentAst *Ast, scope lex.Reg, 
 	anchorFirst := (pr.Ast == AnchorFirstAst && parentAst.Nm != pr.Nm)
 
 	if pr.Ast != NoAst {
-		// prf := prof.Start("AddAst")
+		// prf := profile.Start("AddAst")
 		ourAst = ps.AddAst(parentAst, pr.Name(), scope)
 		// prf.End()
 		trcAst = ourAst
@@ -1488,7 +1488,7 @@ func (pr *Rule) DoActs(ps *State, ri int, parent *Rule, ourAst, parentAst *Ast) 
 	if len(pr.Acts) == 0 {
 		return false
 	}
-	// prf := prof.Start("DoActs")
+	// prf := profile.Start("DoActs")
 	// defer prf.End()
 	valid := true
 	for ai := range pr.Acts {

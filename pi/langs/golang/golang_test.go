@@ -15,7 +15,7 @@ import (
 	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/pi"
 	"cogentcore.org/core/pi/lex"
-	"cogentcore.org/core/prof"
+	"cogentcore.org/core/profile"
 )
 
 func init() {
@@ -34,14 +34,14 @@ func TestParse(t *testing.T) {
 		t.Error(err)
 	}
 
-	prof.Profiling = true
+	profile.Profiling = true
 	stt := time.Now()
 	lp.Lang.ParseFile(fs, txt)
 	prdur := time.Since(stt)
 	fmt.Printf("pi parse: %v\n", prdur)
 
-	prof.Report(time.Millisecond)
-	prof.Profiling = false
+	profile.Report(time.Millisecond)
+	profile.Profiling = false
 }
 
 // Note: couldn't get benchmark to do anything reasonable on this one, so just

@@ -524,7 +524,7 @@ func (fl *File) EnsureFinalEos(ln int) {
 
 // NextEos finds the next EOS position at given depth, false if none
 func (fl *File) NextEos(stpos Pos, depth int) (Pos, bool) {
-	// prf := prof.Start("NextEos")
+	// prf := profile.Start("NextEos")
 	// defer prf.End()
 
 	ep := stpos

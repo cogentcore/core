@@ -82,7 +82,7 @@ func (tr *Text) InsertSpan(at int, ns *Span) {
 // stroking, only filling of text -- probably need to grab path from font and
 // use paint rendering for stroking.
 func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
-	// pr := prof.Start("RenderText")
+	// pr := profile.Start("RenderText")
 	// defer pr.End()
 
 	var ppaint styles.Paint
