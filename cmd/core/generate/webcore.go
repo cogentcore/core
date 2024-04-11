@@ -17,7 +17,7 @@ import (
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/generate"
 	"cogentcore.org/core/ordmap"
-	"cogentcore.org/core/webcore/wpath"
+	"cogentcore.org/core/pages/wpath"
 )
 
 // Webcore does any necessary generation for webcore.

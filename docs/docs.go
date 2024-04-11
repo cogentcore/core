@@ -13,8 +13,8 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/errors"
 	"cogentcore.org/core/htmlview"
+	"cogentcore.org/core/pages"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/webcore"
 )
 
 //go:embed content
@@ -34,7 +34,7 @@ var myFile embed.FS
 
 func main() {
 	b := core.NewBody("Cogent Core Docs")
-	pg := webcore.NewPage(b).SetSource(errors.Log1(fs.Sub(content, "content")))
+	pg := pages.NewPage(b).SetSource(errors.Log1(fs.Sub(content, "content")))
 	pg.Context.WikilinkResolver = htmlview.PkgGoDevWikilink("cogentcore.org/core")
 	b.AddAppBar(pg.AppBar)
 

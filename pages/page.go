@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package webcore is a framework designed for easily building content-focused sites
-package webcore
+// Package pages provides an easy way to make content-focused
+// sites consisting of Markdown, HTML, and Cogent Core pages.
+package pages
 
 //go:generate core generate
 
@@ -21,15 +22,16 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlview"
 	"cogentcore.org/core/iox/tomlx"
+	"cogentcore.org/core/pages/wpath"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/views"
-	"cogentcore.org/core/webcore/wpath"
 )
 
-// Page represents one site page
+// Page represents a content page with support for navigating
+// to other pages within the same source content.
 type Page struct {
 	core.Frame
 

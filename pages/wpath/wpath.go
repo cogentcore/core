@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package wpath handles webcore paths
+// Package wpath handles pages paths.
 package wpath
 
 import (
@@ -10,7 +10,7 @@ import (
 	"unicode"
 )
 
-// Format formats the given path into a correct webcore path
+// Format formats the given path into a correct pages path
 // by removing all `{digit(s)}-` prefixes at the start of path
 // segments, which are used for ordering files and folders and
 // thus should not be displayed.

@@ -24,11 +24,11 @@ import (
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 	"cogentcore.org/core/views"
-	"cogentcore.org/core/webcore"
+	"cogentcore.org/core/pages"
 )
 
 func init() {
-	maps.Copy(webcore.Examples, WebcoreExamples)
+	maps.Copy(pages.Examples, WebcoreExamples)
 }
 
 // WebcoreExamples are the compiled webcore examples for this app.
