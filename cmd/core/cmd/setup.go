@@ -7,7 +7,6 @@ package cmd
 import (
 	"fmt"
 	"log/slog"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 
@@ -48,7 +47,7 @@ func Setup(c *config.Config) error { //gti:add
 		}
 		return nil
 	case "linux":
-		_, err := exec.LookPath("apt-get")
+		_, err := xe.LookPath("apt-get")
 		if err == nil {
 			err := vc.Run("sudo", "apt-get", "update")
 			if err != nil {
@@ -56,7 +55,7 @@ func Setup(c *config.Config) error { //gti:add
 			}
 			return vc.Run("sudo", "apt-get", "install", "libgl1-mesa-dev", "xorg-dev")
 		}
-		_, err = exec.LookPath("dnf")
+		_, err = xe.LookPath("dnf")
 		if err == nil {
 			return vc.Run("sudo", "dnf", "install", "libX11-devel", "libXcursor-devel", "libXrandr-devel", "libXinerama-devel", "mesa-libGL-devel", "libXi-devel", "libXxf86vm-devel")
 		}

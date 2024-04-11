@@ -12,6 +12,8 @@ import (
 	"os"
 	"os/exec"
 	"testing"
+
+	"cogentcore.org/core/xe"
 )
 
 func TestSignPKCS7(t *testing.T) {
@@ -43,7 +45,7 @@ func TestSignPKCS7(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if openssl, err := exec.LookPath("openssl"); err != nil {
+	if openssl, err := xe.LookPath("openssl"); err != nil {
 		t.Log("command openssl not found, skipping")
 	} else {
 		cmd := exec.Command(
@@ -57,7 +59,7 @@ func TestSignPKCS7(t *testing.T) {
 		}
 	}
 
-	if keytool, err := exec.LookPath("keytool"); err != nil {
+	if keytool, err := xe.LookPath("keytool"); err != nil {
 		t.Log("command keytool not found, skipping")
 	} else if err := exec.Command(keytool, "-v").Run(); err != nil {
 		t.Logf("command keytool not functioning: %s, skipping", err)

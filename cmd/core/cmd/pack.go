@@ -7,7 +7,6 @@ package cmd
 import (
 	_ "embed"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"text/template"
@@ -255,7 +254,7 @@ func PackDarwin(c *config.Config) error {
 		return nil
 	}
 	// install dmgbuild if we don't already have it
-	if _, err := exec.LookPath("dmgbuild"); err != nil {
+	if _, err := xe.LookPath("dmgbuild"); err != nil {
 		err = xe.Verbose().SetBuffer(false).Run("pip", "install", "dmgbuild")
 		if err != nil {
 			return err

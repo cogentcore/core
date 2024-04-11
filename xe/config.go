@@ -2,6 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package exec provides an easy way to execute commands,
+// improving the ease-of-use and error handling of the
+// standard library os/exec package. For example:
+//
+//	err := exec.Run("git", "commit", "-am")
+//	// or
+//	err := exec.RunSh("git commit -am")
+//	// or
+//	err := exec.Verbose().Run("git", "commit", "-am")
 package xe
 
 //go:generate core generate
