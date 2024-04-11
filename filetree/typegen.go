@@ -11,7 +11,6 @@ import (
 	"cogentcore.org/core/units"
 	"cogentcore.org/core/vcs"
 	"cogentcore.org/core/views"
-	"goki.dev/gti"
 )
 
 // NodeType is the [types.Type] for [Node]
@@ -25,8 +24,8 @@ func NewNode(parent tree.Node, name ...string) *Node {
 	return parent.NewChild(NodeType, name...).(*Node)
 }
 
-// NodeType returns the [*gti.Type] of [Node]
-func (t *Node) NodeType() *gti.Type { return NodeType }
+// NodeType returns the [*types.Type] of [Node]
+func (t *Node) NodeType() *types.Type { return NodeType }
 
 // New returns a new [*Node] value
 func (t *Node) New() tree.Node { return &Node{} }
@@ -99,8 +98,8 @@ func NewTree(parent tree.Node, name ...string) *Tree {
 	return parent.NewChild(TreeType, name...).(*Tree)
 }
 
-// NodeType returns the [*gti.Type] of [Tree]
-func (t *Tree) NodeType() *gti.Type { return TreeType }
+// NodeType returns the [*types.Type] of [Tree]
+func (t *Tree) NodeType() *types.Type { return TreeType }
 
 // New returns a new [*Tree] value
 func (t *Tree) New() tree.Node { return &Tree{} }
@@ -164,8 +163,8 @@ func NewVCSLogView(parent tree.Node, name ...string) *VCSLogView {
 	return parent.NewChild(VCSLogViewType, name...).(*VCSLogView)
 }
 
-// NodeType returns the [*gti.Type] of [VCSLogView]
-func (t *VCSLogView) NodeType() *gti.Type { return VCSLogViewType }
+// NodeType returns the [*types.Type] of [VCSLogView]
+func (t *VCSLogView) NodeType() *types.Type { return VCSLogViewType }
 
 // New returns a new [*VCSLogView] value
 func (t *VCSLogView) New() tree.Node { return &VCSLogView{} }

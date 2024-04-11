@@ -196,7 +196,7 @@ func SaveNewJSON(k Node, filename string) error {
 
 // ReadRootTypeJSON reads the type of the root node
 // as encoded by WriteRootTypeJSON, returning the
-// gti.Type for the saved type name (error if not found),
+// types.Type for the saved type name (error if not found),
 // the remaining bytes to be decoded using a standard
 // unmarshal, and an error.
 func ReadRootTypeJSON(b []byte) (*types.Type, []byte, error) {

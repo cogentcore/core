@@ -41,8 +41,8 @@ var TreeMethodsTmpl = template.Must(template.New("TreeMethods").
 	}
 	{{end}}
 
-	// NodeType returns the [*gti.Type] of [{{.LocalName}}]
-	func (t *{{.LocalName}}) NodeType() *gti.Type { return {{.LocalName}}Type }
+	// NodeType returns the [*types.Type] of [{{.LocalName}}]
+	func (t *{{.LocalName}}) NodeType() *types.Type { return {{.LocalName}}Type }
 
 	// New returns a new [*{{.LocalName}}] value
 	func (t *{{.LocalName}}) New() {{TreePkg .}}Node { return &{{.LocalName}}{} }

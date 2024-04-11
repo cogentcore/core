@@ -4,7 +4,6 @@ package tree
 
 import (
 	"cogentcore.org/core/types"
-	"goki.dev/gti"
 )
 
 // NodeBaseType is the [types.Type] for [NodeBase]
@@ -18,8 +17,8 @@ func NewNodeBase(parent Node, name ...string) *NodeBase {
 	return parent.NewChild(NodeBaseType, name...).(*NodeBase)
 }
 
-// NodeType returns the [*gti.Type] of [NodeBase]
-func (t *NodeBase) NodeType() *gti.Type { return NodeBaseType }
+// NodeType returns the [*types.Type] of [NodeBase]
+func (t *NodeBase) NodeType() *types.Type { return NodeBaseType }
 
 // New returns a new [*NodeBase] value
 func (t *NodeBase) New() Node { return &NodeBase{} }

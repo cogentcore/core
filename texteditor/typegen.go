@@ -11,7 +11,6 @@ import (
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 	"cogentcore.org/core/units"
-	"goki.dev/gti"
 )
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/texteditor.Spell", IDName: "spell", Doc: "Spell", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "SrcLn", Doc: "line number in source that spelling is operating on, if relevant"}, {Name: "SrcCh", Doc: "character position in source that spelling is operating on (start of word to be corrected)"}, {Name: "Suggest", Doc: "list of suggested corrections"}, {Name: "Word", Doc: "word being checked"}, {Name: "LastLearned", Doc: "last word learned -- can be undone -- stored in lowercase format"}, {Name: "Correction", Doc: "the user's correction selection"}, {Name: "Listeners", Doc: "the event listeners for the spell (it sends Select events)"}, {Name: "Stage", Doc: "Stage is the [PopupStage] associated with the [Spell]"}, {Name: "ShowMu"}}})
@@ -42,8 +41,8 @@ func NewDiffView(parent tree.Node, name ...string) *DiffView {
 	return parent.NewChild(DiffViewType, name...).(*DiffView)
 }
 
-// NodeType returns the [*gti.Type] of [DiffView]
-func (t *DiffView) NodeType() *gti.Type { return DiffViewType }
+// NodeType returns the [*types.Type] of [DiffView]
+func (t *DiffView) NodeType() *types.Type { return DiffViewType }
 
 // New returns a new [*DiffView] value
 func (t *DiffView) New() tree.Node { return &DiffView{} }
@@ -81,8 +80,8 @@ func NewDiffTextEditor(parent tree.Node, name ...string) *DiffTextEditor {
 	return parent.NewChild(DiffTextEditorType, name...).(*DiffTextEditor)
 }
 
-// NodeType returns the [*gti.Type] of [DiffTextEditor]
-func (t *DiffTextEditor) NodeType() *gti.Type { return DiffTextEditorType }
+// NodeType returns the [*types.Type] of [DiffTextEditor]
+func (t *DiffTextEditor) NodeType() *types.Type { return DiffTextEditorType }
 
 // New returns a new [*DiffTextEditor] value
 func (t *DiffTextEditor) New() tree.Node { return &DiffTextEditor{} }
@@ -139,8 +138,8 @@ func NewEditor(parent tree.Node, name ...string) *Editor {
 	return parent.NewChild(EditorType, name...).(*Editor)
 }
 
-// NodeType returns the [*gti.Type] of [Editor]
-func (t *Editor) NodeType() *gti.Type { return EditorType }
+// NodeType returns the [*types.Type] of [Editor]
+func (t *Editor) NodeType() *types.Type { return EditorType }
 
 // New returns a new [*Editor] value
 func (t *Editor) New() tree.Node { return &Editor{} }
@@ -202,8 +201,8 @@ func NewTwinEditors(parent tree.Node, name ...string) *TwinEditors {
 	return parent.NewChild(TwinEditorsType, name...).(*TwinEditors)
 }
 
-// NodeType returns the [*gti.Type] of [TwinEditors]
-func (t *TwinEditors) NodeType() *gti.Type { return TwinEditorsType }
+// NodeType returns the [*types.Type] of [TwinEditors]
+func (t *TwinEditors) NodeType() *types.Type { return TwinEditorsType }
 
 // New returns a new [*TwinEditors] value
 func (t *TwinEditors) New() tree.Node { return &TwinEditors{} }

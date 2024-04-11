@@ -6,7 +6,6 @@ import (
 	"cogentcore.org/core/pi/token"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
-	"goki.dev/gti"
 )
 
 // RuleType is the [types.Type] for [Rule]
@@ -27,8 +26,8 @@ func NewRule(parent tree.Node, name ...string) *Rule {
 	return parent.NewChild(RuleType, name...).(*Rule)
 }
 
-// NodeType returns the [*gti.Type] of [Rule]
-func (t *Rule) NodeType() *gti.Type { return RuleType }
+// NodeType returns the [*types.Type] of [Rule]
+func (t *Rule) NodeType() *types.Type { return RuleType }
 
 // New returns a new [*Rule] value
 func (t *Rule) New() tree.Node { return &Rule{} }

@@ -6,7 +6,6 @@ import (
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 	"github.com/zergon321/reisen"
-	"goki.dev/gti"
 )
 
 // VideoType is the [types.Type] for [Video]
@@ -19,8 +18,8 @@ func NewVideo(parent tree.Node, name ...string) *Video {
 	return parent.NewChild(VideoType, name...).(*Video)
 }
 
-// NodeType returns the [*gti.Type] of [Video]
-func (t *Video) NodeType() *gti.Type { return VideoType }
+// NodeType returns the [*types.Type] of [Video]
+func (t *Video) NodeType() *types.Type { return VideoType }
 
 // New returns a new [*Video] value
 func (t *Video) New() tree.Node { return &Video{} }

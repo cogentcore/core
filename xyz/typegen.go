@@ -8,7 +8,6 @@ import (
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
-	"goki.dev/gti"
 )
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.BBox", IDName: "b-box", Doc: "BBox contains bounding box and other gross solid properties", Fields: []types.Field{{Name: "BBox", Doc: "bounding box in local coords"}, {Name: "BSphere", Doc: "bounding sphere in local coords"}, {Name: "Area", Doc: "area"}, {Name: "Volume", Doc: "volume"}}})
@@ -25,8 +24,8 @@ func NewGroup(parent tree.Node, name ...string) *Group {
 	return parent.NewChild(GroupType, name...).(*Group)
 }
 
-// NodeType returns the [*gti.Type] of [Group]
-func (t *Group) NodeType() *gti.Type { return GroupType }
+// NodeType returns the [*types.Type] of [Group]
+func (t *Group) NodeType() *types.Type { return GroupType }
 
 // New returns a new [*Group] value
 func (t *Group) New() tree.Node { return &Group{} }
@@ -120,8 +119,8 @@ func NewNodeBase(parent tree.Node, name ...string) *NodeBase {
 	return parent.NewChild(NodeBaseType, name...).(*NodeBase)
 }
 
-// NodeType returns the [*gti.Type] of [NodeBase]
-func (t *NodeBase) NodeType() *gti.Type { return NodeBaseType }
+// NodeType returns the [*types.Type] of [NodeBase]
+func (t *NodeBase) NodeType() *types.Type { return NodeBaseType }
 
 // New returns a new [*NodeBase] value
 func (t *NodeBase) New() tree.Node { return &NodeBase{} }
@@ -135,8 +134,8 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.RenderClasses",
 // SceneType is the [types.Type] for [Scene]
 var SceneType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Scene", IDName: "scene", Doc: "Scene is the overall scenegraph containing nodes as children.\nIt renders to its own vgpu.RenderFrame.\nThe Image of this Frame is usable directly or, via xyzview.Scene,\nwhere it is copied into an overall core.Scene image.\n\nThere is default navigation event processing (disabled by setting NoNav)\nwhere mouse drag events Orbit the camera (Shift = Pan, Alt = PanTarget)\nand arrow keys do Orbit, Pan, PanTarget with same key modifiers.\nSpacebar restores original \"default\" camera, and numbers save (1st time)\nor restore (subsequently) camera views (Control = always save)\n\nA Group at the top-level named \"TrackCamera\" will automatically track\nthe camera (i.e., its Pose is copied) -- Solids in that group can\nset their relative Pos etc to display relative to the camera, to achieve\n\"first person\" effects.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}, {Tool: "core", Directive: "embedder"}}, Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Geom", Doc: "Viewport-level viewbox within any parent Viewport2D"}, {Name: "MultiSample", Doc: "number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame"}, {Name: "Wireframe", Doc: "render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system (i.e., just after Scene is made)"}, {Name: "Camera", Doc: "camera determines view onto scene"}, {Name: "BackgroundColor", Doc: "background color, which is used directly as an RGB color in vulkan"}, {Name: "Lights", Doc: "all lights used in the scene"}, {Name: "Meshes", Doc: "meshes -- holds all the mesh data -- must be configured prior to rendering"}, {Name: "Textures", Doc: "textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability"}, {Name: "Library", Doc: "library of objects that can be used in the scene"}, {Name: "NoNav", Doc: "don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene"}, {Name: "SavedCams", Doc: "saved cameras -- can Save and Set these to view the scene from different angles"}, {Name: "SetDragCursor", Doc: "has dragging cursor been set yet?"}, {Name: "Phong", Doc: "the vphong rendering system"}, {Name: "Frame", Doc: "the vgpu render frame holding the rendered scene"}, {Name: "ImgCopy", Doc: "image used to hold a copy of the Frame image, for ImageCopy() call.\nThis is re-used across calls to avoid large memory allocations,\nso it will automatically update after every ImageCopy call.\nIf a persistent image is required, call [iox/imagex.CloneAsRGBA]."}, {Name: "DirUpIndex", Doc: "index in list of window direct uploading images"}, {Name: "RenderMu", Doc: "mutex on rendering"}}, Instance: &Scene{}})
 
-// NodeType returns the [*gti.Type] of [Scene]
-func (t *Scene) NodeType() *gti.Type { return SceneType }
+// NodeType returns the [*types.Type] of [Scene]
+func (t *Scene) NodeType() *types.Type { return SceneType }
 
 // New returns a new [*Scene] value
 func (t *Scene) New() tree.Node { return &Scene{} }
@@ -404,8 +403,8 @@ func NewSolid(parent tree.Node, name ...string) *Solid {
 	return parent.NewChild(SolidType, name...).(*Solid)
 }
 
-// NodeType returns the [*gti.Type] of [Solid]
-func (t *Solid) NodeType() *gti.Type { return SolidType }
+// NodeType returns the [*types.Type] of [Solid]
+func (t *Solid) NodeType() *types.Type { return SolidType }
 
 // New returns a new [*Solid] value
 func (t *Solid) New() tree.Node { return &Solid{} }
@@ -435,8 +434,8 @@ func NewText2D(parent tree.Node, name ...string) *Text2D {
 	return parent.NewChild(Text2DType, name...).(*Text2D)
 }
 
-// NodeType returns the [*gti.Type] of [Text2D]
-func (t *Text2D) NodeType() *gti.Type { return Text2DType }
+// NodeType returns the [*types.Type] of [Text2D]
+func (t *Text2D) NodeType() *types.Type { return Text2DType }
 
 // New returns a new [*Text2D] value
 func (t *Text2D) New() tree.Node { return &Text2D{} }

@@ -6,14 +6,13 @@ import (
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 	"cogentcore.org/core/xyz"
-	"goki.dev/gti"
 )
 
 // ManipPointType is the [types.Type] for [ManipPoint]
 var ManipPointType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyzview.ManipPoint", IDName: "manip-point", Doc: "ManipPoint is a manipulation control point", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "Solid"}}, Instance: &ManipPoint{}})
 
-// NodeType returns the [*gti.Type] of [ManipPoint]
-func (t *ManipPoint) NodeType() *gti.Type { return ManipPointType }
+// NodeType returns the [*types.Type] of [ManipPoint]
+func (t *ManipPoint) NodeType() *types.Type { return ManipPointType }
 
 // New returns a new [*ManipPoint] value
 func (t *ManipPoint) New() tree.Node { return &ManipPoint{} }
@@ -32,8 +31,8 @@ func NewScene(parent tree.Node, name ...string) *Scene {
 	return parent.NewChild(SceneType, name...).(*Scene)
 }
 
-// NodeType returns the [*gti.Type] of [Scene]
-func (t *Scene) NodeType() *gti.Type { return SceneType }
+// NodeType returns the [*types.Type] of [Scene]
+func (t *Scene) NodeType() *types.Type { return SceneType }
 
 // New returns a new [*Scene] value
 func (t *Scene) New() tree.Node { return &Scene{} }
@@ -67,8 +66,8 @@ func NewSceneView(parent tree.Node, name ...string) *SceneView {
 	return parent.NewChild(SceneViewType, name...).(*SceneView)
 }
 
-// NodeType returns the [*gti.Type] of [SceneView]
-func (t *SceneView) NodeType() *gti.Type { return SceneViewType }
+// NodeType returns the [*types.Type] of [SceneView]
+func (t *SceneView) NodeType() *types.Type { return SceneViewType }
 
 // New returns a new [*SceneView] value
 func (t *SceneView) New() tree.Node { return &SceneView{} }

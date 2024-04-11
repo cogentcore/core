@@ -7,7 +7,6 @@ import (
 	"cogentcore.org/core/filetree"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
-	"goki.dev/gti"
 )
 
 // FileBrowseType is the [types.Type] for [FileBrowse]
@@ -21,8 +20,8 @@ func NewFileBrowse(parent tree.Node, name ...string) *FileBrowse {
 	return parent.NewChild(FileBrowseType, name...).(*FileBrowse)
 }
 
-// NodeType returns the [*gti.Type] of [FileBrowse]
-func (t *FileBrowse) NodeType() *gti.Type { return FileBrowseType }
+// NodeType returns the [*types.Type] of [FileBrowse]
+func (t *FileBrowse) NodeType() *types.Type { return FileBrowseType }
 
 // New returns a new [*FileBrowse] value
 func (t *FileBrowse) New() tree.Node { return &FileBrowse{} }

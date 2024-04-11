@@ -13,7 +13,6 @@ import (
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 	"cogentcore.org/core/units"
-	"goki.dev/gti"
 )
 
 // ArgViewType is the [types.Type] for [ArgView]
@@ -27,8 +26,8 @@ func NewArgView(parent tree.Node, name ...string) *ArgView {
 	return parent.NewChild(ArgViewType, name...).(*ArgView)
 }
 
-// NodeType returns the [*gti.Type] of [ArgView]
-func (t *ArgView) NodeType() *gti.Type { return ArgViewType }
+// NodeType returns the [*types.Type] of [ArgView]
+func (t *ArgView) NodeType() *types.Type { return ArgViewType }
 
 // New returns a new [*ArgView] value
 func (t *ArgView) New() tree.Node { return &ArgView{} }
@@ -49,8 +48,8 @@ func NewColorView(parent tree.Node, name ...string) *ColorView {
 	return parent.NewChild(ColorViewType, name...).(*ColorView)
 }
 
-// NodeType returns the [*gti.Type] of [ColorView]
-func (t *ColorView) NodeType() *gti.Type { return ColorViewType }
+// NodeType returns the [*types.Type] of [ColorView]
+func (t *ColorView) NodeType() *types.Type { return ColorViewType }
 
 // New returns a new [*ColorView] value
 func (t *ColorView) New() tree.Node { return &ColorView{} }
@@ -67,8 +66,8 @@ func NewFileView(parent tree.Node, name ...string) *FileView {
 	return parent.NewChild(FileViewType, name...).(*FileView)
 }
 
-// NodeType returns the [*gti.Type] of [FileView]
-func (t *FileView) NodeType() *gti.Type { return FileViewType }
+// NodeType returns the [*types.Type] of [FileView]
+func (t *FileView) NodeType() *types.Type { return FileViewType }
 
 // New returns a new [*FileView] value
 func (t *FileView) New() tree.Node { return &FileView{} }
@@ -91,8 +90,8 @@ func (t *FileView) SetTooltip(v string) *FileView { t.Tooltip = v; return t }
 // FuncButtonType is the [types.Type] for [FuncButton]
 var FuncButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.FuncButton", IDName: "func-button", Doc: "FuncButton is a button that is set up to call a function when it\nis pressed, using a dialog to prompt the user for any arguments.\nAlso, it automatically sets various properties of the button like\nthe name, text, tooltip, and icon based on the properties of the\nfunction, using reflect and gti. The function must be registered\nwith gti to get documentation information, but that is not required;\nadd a `//types:add` comment directive and run `core generate`\nif you want tooltips. If the function is a method, both the method and\nits receiver type must be added to gti to get documentation.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Func", Doc: "Func is the [gti.Func] associated with this button.\nThis function can also be a method, but it must be\nconverted to a [gti.Func] first. It should typically\nbe set using [FuncButton.SetFunc]."}, {Name: "ReflectFunc", Doc: "ReflectFunc is the [reflect.Value] of the function or\nmethod associated with this button. It should typically\nbet set using [FuncButton.SetFunc]."}, {Name: "Args", Doc: "Args are the [Value] objects associated with the\narguments of the function. They are automatically set in\n[SetFunc], but they can be customized to configure\ndefault values and other options."}, {Name: "Returns", Doc: "Returns are the [Value] objects associated with the\nreturn values of the function. They are automatically\nset in [SetFunc], but they can be customized to configure\ndefault values and other options. The [reflect.Value]s of\nthe [Value] objects are not set until the function is\ncalled, and are thus not typically applicable to access."}, {Name: "Confirm", Doc: "Confirm is whether to prompt the user for confirmation\nbefore calling the function."}, {Name: "ShowReturn", Doc: "ShowReturn is whether to display the return values of\nthe function (and a success message if there are none).\nThe way that the return values are shown is determined\nby ShowReturnAsDialog. Non-nil error return values will\nalways be shown, even if ShowReturn is set to false."}, {Name: "ShowReturnAsDialog", Doc: "ShowReturnAsDialog, if and only if ShowReturn is true,\nindicates to show the return values of the function in\na dialog, instead of in a snackbar, as they are by default.\nIf there are multiple return values from the function, or if\none of them is a complex type (pointer, struct, slice,\narray, map), then ShowReturnAsDialog will\nautomatically be set to true."}, {Name: "NewWindow", Doc: "NewWindow makes the ReturnDialog a NewWindow dialog\n(if supported by platform)."}, {Name: "WarnUnadded", Doc: "WarnUnadded is whether to log warnings when a function that\nhas not been added to gti is used. It is on by default and\nmust be set before [FuncButton.SetFunc] is called for it to\nhave any effect."}, {Name: "Context", Doc: "Context is used for opening Dialogs if non-nil."}, {Name: "AfterFunc", Doc: "AfterFunc is an optional function called after the funcbutton\nfunction is executed"}}, Instance: &FuncButton{}})
 
-// NodeType returns the [*gti.Type] of [FuncButton]
-func (t *FuncButton) NodeType() *gti.Type { return FuncButtonType }
+// NodeType returns the [*types.Type] of [FuncButton]
+func (t *FuncButton) NodeType() *types.Type { return FuncButtonType }
 
 // New returns a new [*FuncButton] value
 func (t *FuncButton) New() tree.Node { return &FuncButton{} }
@@ -171,8 +170,8 @@ func NewInspector(parent tree.Node, name ...string) *Inspector {
 	return parent.NewChild(InspectorType, name...).(*Inspector)
 }
 
-// NodeType returns the [*gti.Type] of [Inspector]
-func (t *Inspector) NodeType() *gti.Type { return InspectorType }
+// NodeType returns the [*types.Type] of [Inspector]
+func (t *Inspector) NodeType() *types.Type { return InspectorType }
 
 // New returns a new [*Inspector] value
 func (t *Inspector) New() tree.Node { return &Inspector{} }
@@ -199,8 +198,8 @@ func NewMapView(parent tree.Node, name ...string) *MapView {
 	return parent.NewChild(MapViewType, name...).(*MapView)
 }
 
-// NodeType returns the [*gti.Type] of [MapView]
-func (t *MapView) NodeType() *gti.Type { return MapViewType }
+// NodeType returns the [*types.Type] of [MapView]
+func (t *MapView) NodeType() *types.Type { return MapViewType }
 
 // New returns a new [*MapView] value
 func (t *MapView) New() tree.Node { return &MapView{} }
@@ -231,8 +230,8 @@ func NewMapViewInline(parent tree.Node, name ...string) *MapViewInline {
 	return parent.NewChild(MapViewInlineType, name...).(*MapViewInline)
 }
 
-// NodeType returns the [*gti.Type] of [MapViewInline]
-func (t *MapViewInline) NodeType() *gti.Type { return MapViewInlineType }
+// NodeType returns the [*types.Type] of [MapViewInline]
+func (t *MapViewInline) NodeType() *types.Type { return MapViewInlineType }
 
 // New returns a new [*MapViewInline] value
 func (t *MapViewInline) New() tree.Node { return &MapViewInline{} }
@@ -257,8 +256,8 @@ func NewSliceView(parent tree.Node, name ...string) *SliceView {
 	return parent.NewChild(SliceViewType, name...).(*SliceView)
 }
 
-// NodeType returns the [*gti.Type] of [SliceView]
-func (t *SliceView) NodeType() *gti.Type { return SliceViewType }
+// NodeType returns the [*types.Type] of [SliceView]
+func (t *SliceView) NodeType() *types.Type { return SliceViewType }
 
 // New returns a new [*SliceView] value
 func (t *SliceView) New() tree.Node { return &SliceView{} }
@@ -299,8 +298,8 @@ func NewSliceViewBase(parent tree.Node, name ...string) *SliceViewBase {
 	return parent.NewChild(SliceViewBaseType, name...).(*SliceViewBase)
 }
 
-// NodeType returns the [*gti.Type] of [SliceViewBase]
-func (t *SliceViewBase) NodeType() *gti.Type { return SliceViewBaseType }
+// NodeType returns the [*types.Type] of [SliceViewBase]
+func (t *SliceViewBase) NodeType() *types.Type { return SliceViewBaseType }
 
 // New returns a new [*SliceViewBase] value
 func (t *SliceViewBase) New() tree.Node { return &SliceViewBase{} }
@@ -338,8 +337,8 @@ func NewSliceViewGrid(parent tree.Node, name ...string) *SliceViewGrid {
 	return parent.NewChild(SliceViewGridType, name...).(*SliceViewGrid)
 }
 
-// NodeType returns the [*gti.Type] of [SliceViewGrid]
-func (t *SliceViewGrid) NodeType() *gti.Type { return SliceViewGridType }
+// NodeType returns the [*types.Type] of [SliceViewGrid]
+func (t *SliceViewGrid) NodeType() *types.Type { return SliceViewGridType }
 
 // New returns a new [*SliceViewGrid] value
 func (t *SliceViewGrid) New() tree.Node { return &SliceViewGrid{} }
@@ -365,8 +364,8 @@ func NewSliceViewInline(parent tree.Node, name ...string) *SliceViewInline {
 	return parent.NewChild(SliceViewInlineType, name...).(*SliceViewInline)
 }
 
-// NodeType returns the [*gti.Type] of [SliceViewInline]
-func (t *SliceViewInline) NodeType() *gti.Type { return SliceViewInlineType }
+// NodeType returns the [*types.Type] of [SliceViewInline]
+func (t *SliceViewInline) NodeType() *types.Type { return SliceViewInlineType }
 
 // New returns a new [*SliceViewInline] value
 func (t *SliceViewInline) New() tree.Node { return &SliceViewInline{} }
@@ -389,8 +388,8 @@ func NewStructView(parent tree.Node, name ...string) *StructView {
 	return parent.NewChild(StructViewType, name...).(*StructView)
 }
 
-// NodeType returns the [*gti.Type] of [StructView]
-func (t *StructView) NodeType() *gti.Type { return StructViewType }
+// NodeType returns the [*types.Type] of [StructView]
+func (t *StructView) NodeType() *types.Type { return StructViewType }
 
 // New returns a new [*StructView] value
 func (t *StructView) New() tree.Node { return &StructView{} }
@@ -412,8 +411,8 @@ func NewStructViewInline(parent tree.Node, name ...string) *StructViewInline {
 	return parent.NewChild(StructViewInlineType, name...).(*StructViewInline)
 }
 
-// NodeType returns the [*gti.Type] of [StructViewInline]
-func (t *StructViewInline) NodeType() *gti.Type { return StructViewInlineType }
+// NodeType returns the [*types.Type] of [StructViewInline]
+func (t *StructViewInline) NodeType() *types.Type { return StructViewInlineType }
 
 // New returns a new [*StructViewInline] value
 func (t *StructViewInline) New() tree.Node { return &StructViewInline{} }
@@ -446,8 +445,8 @@ func NewTableView(parent tree.Node, name ...string) *TableView {
 	return parent.NewChild(TableViewType, name...).(*TableView)
 }
 
-// NodeType returns the [*gti.Type] of [TableView]
-func (t *TableView) NodeType() *gti.Type { return TableViewType }
+// NodeType returns the [*types.Type] of [TableView]
+func (t *TableView) NodeType() *types.Type { return TableViewType }
 
 // New returns a new [*TableView] value
 func (t *TableView) New() tree.Node { return &TableView{} }
@@ -495,8 +494,8 @@ func NewTimeView(parent tree.Node, name ...string) *TimeView {
 	return parent.NewChild(TimeViewType, name...).(*TimeView)
 }
 
-// NodeType returns the [*gti.Type] of [TimeView]
-func (t *TimeView) NodeType() *gti.Type { return TimeViewType }
+// NodeType returns the [*types.Type] of [TimeView]
+func (t *TimeView) NodeType() *types.Type { return TimeViewType }
 
 // New returns a new [*TimeView] value
 func (t *TimeView) New() tree.Node { return &TimeView{} }
@@ -513,8 +512,8 @@ func NewDateView(parent tree.Node, name ...string) *DateView {
 	return parent.NewChild(DateViewType, name...).(*DateView)
 }
 
-// NodeType returns the [*gti.Type] of [DateView]
-func (t *DateView) NodeType() *gti.Type { return DateViewType }
+// NodeType returns the [*types.Type] of [DateView]
+func (t *DateView) NodeType() *types.Type { return DateViewType }
 
 // New returns a new [*DateView] value
 func (t *DateView) New() tree.Node { return &DateView{} }
@@ -531,8 +530,8 @@ func NewTreeTableView(parent tree.Node, name ...string) *TreeTableView {
 	return parent.NewChild(TreeTableViewType, name...).(*TreeTableView)
 }
 
-// NodeType returns the [*gti.Type] of [TreeTableView]
-func (t *TreeTableView) NodeType() *gti.Type { return TreeTableViewType }
+// NodeType returns the [*types.Type] of [TreeTableView]
+func (t *TreeTableView) NodeType() *types.Type { return TreeTableViewType }
 
 // New returns a new [*TreeTableView] value
 func (t *TreeTableView) New() tree.Node { return &TreeTableView{} }
@@ -566,8 +565,8 @@ func NewTreeView(parent tree.Node, name ...string) *TreeView {
 	return parent.NewChild(TreeViewType, name...).(*TreeView)
 }
 
-// NodeType returns the [*gti.Type] of [TreeView]
-func (t *TreeView) NodeType() *gti.Type { return TreeViewType }
+// NodeType returns the [*types.Type] of [TreeView]
+func (t *TreeView) NodeType() *types.Type { return TreeViewType }
 
 // New returns a new [*TreeView] value
 func (t *TreeView) New() tree.Node { return &TreeView{} }
