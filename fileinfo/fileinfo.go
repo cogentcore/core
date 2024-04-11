@@ -40,7 +40,7 @@ import (
 
 // FileInfo represents the information about a given file / directory,
 // including icon, mimetype, etc
-type FileInfo struct { //gti:add
+type FileInfo struct { //types:add
 
 	// icon for file
 	Ic icons.Icon `tableview:"no-header"`
@@ -170,7 +170,7 @@ func (fi *FileInfo) IsHidden() bool {
 
 // Duplicate creates a copy of given file -- only works for regular files, not
 // directories.
-func (fi *FileInfo) Duplicate() (string, error) { //gti:add
+func (fi *FileInfo) Duplicate() (string, error) { //types:add
 	if fi.IsDir() {
 		err := fmt.Errorf("views.Duplicate: cannot copy directory: %v", fi.Path)
 		log.Println(err)
@@ -193,7 +193,7 @@ func (fi *FileInfo) Duplicate() (string, error) { //gti:add
 
 // Delete moves the file to the trash / recycling bin.
 // On mobile and web, it deletes it directly.
-func (fi *FileInfo) Delete() error { //gti:add
+func (fi *FileInfo) Delete() error { //types:add
 	err := wastebasket.Trash(fi.Path)
 	if errors.Is(err, wastebasket.ErrPlatformNotSupported) {
 		return os.RemoveAll(fi.Path)
@@ -270,7 +270,7 @@ func (fi *FileInfo) RenamePath(path string) (newpath string, err error) {
 // Rename renames (moves) this file to given new path name.
 // Updates the FileInfo setting to the new name, although it might
 // be out of scope if it moved into a new path
-func (fi *FileInfo) Rename(path string) (newpath string, err error) { //gti:add
+func (fi *FileInfo) Rename(path string) (newpath string, err error) { //types:add
 	orgpath := fi.Path
 	newpath, err = fi.RenamePath(path)
 	if err != nil {

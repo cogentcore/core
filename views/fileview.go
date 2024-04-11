@@ -509,7 +509,7 @@ func (fv *FileView) UpdatePath() {
 }
 
 // UpdateFilesAction updates the list of files and other views for the current path.
-func (fv *FileView) UpdateFilesAction() { //gti:add
+func (fv *FileView) UpdateFilesAction() { //types:add
 	fv.UpdateFiles()
 	sf := fv.SelectField()
 	sf.SetFocusEvent()
@@ -613,7 +613,7 @@ func (fv *FileView) UpdateFavs() {
 }
 
 // AddPathToFavs adds the current path to favorites
-func (fv *FileView) AddPathToFavs() { //gti:add
+func (fv *FileView) AddPathToFavs() { //types:add
 	dp := fv.DirPath
 	if dp == "" {
 		return
@@ -639,7 +639,7 @@ func (fv *FileView) AddPathToFavs() { //gti:add
 }
 
 // DirPathUp moves up one directory in the path
-func (fv *FileView) DirPathUp() { //gti:add
+func (fv *FileView) DirPathUp() { //types:add
 	pdr, _ := filepath.Split(fv.DirPath)
 	if pdr == "" {
 		return
@@ -649,7 +649,7 @@ func (fv *FileView) DirPathUp() { //gti:add
 }
 
 // NewFolder creates a new folder with the given name in the current directory.
-func (fv *FileView) NewFolder(name string) error { //gti:add
+func (fv *FileView) NewFolder(name string) error { //types:add
 	dp := fv.DirPath
 	if dp == "" {
 		return nil

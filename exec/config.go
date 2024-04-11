@@ -28,7 +28,7 @@ import (
 // controls the behavior of exec. It is passed to most
 // high-level functions, and a default version of it
 // can be easily constructed using [DefaultConfig].
-type Config struct { //gti:add -setters
+type Config struct { //types:add -setters
 
 	// Buffer is whether to buffer the output of Stdout and Stderr,
 	// which is necessary for the correct printing of commands and output

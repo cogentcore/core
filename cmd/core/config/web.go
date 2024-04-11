@@ -10,7 +10,7 @@ import (
 
 // Web containts the configuration information for building for web and creating
 // the HTML page that loads a Go wasm app and its resources.
-type Web struct { //gti:add
+type Web struct { //types:add
 
 	// Port is the port to serve the page at when using the serve command.
 	Port string `default:"8080"`

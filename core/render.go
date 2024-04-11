@@ -198,7 +198,7 @@ func (wb *WidgetBase) ConfigTree() {
 // configuration, rendering, and event handling structure, you need to
 // call [WidgetBase.AsyncLock] and [WidgetBase.AsyncUnlock] before and
 // after this, respectively.
-func (wb *WidgetBase) Update() { //gti:add
+func (wb *WidgetBase) Update() { //types:add
 	if wb == nil || wb.This() == nil {
 		return
 	}
@@ -587,7 +587,7 @@ func (wb *WidgetBase) WinPos(x, y float32) image.Point {
 
 // ProfileToggle turns profiling on or off, which does both
 // targeted and global CPU and Memory profiling.
-func ProfileToggle() { //gti:add
+func ProfileToggle() { //types:add
 	if profile.Profiling {
 		EndTargProfile()
 		EndCPUMemProfile()

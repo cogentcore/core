@@ -177,7 +177,7 @@ func AlignFactor(al Aligns) float32 {
 }
 
 // AlignSet specifies the 3 levels of Justify or Align: Content, Items, and Self
-type AlignSet struct { //gti:add
+type AlignSet struct { //types:add
 	// Content specifies the distribution of the entire collection of items within
 	// any larger amount of space allocated to the container.  By contrast, Items
 	// and Self specify distribution within the individual element's allocated space.

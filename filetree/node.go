@@ -428,7 +428,7 @@ func (fn *Node) OpenEmptyDir() bool {
 
 // SortBys determines how to sort the selected files in the directory.
 // Default is alpha by name, optionally can be sorted by modification time.
-func (fn *Node) SortBys(modTime bool) { //gti:add
+func (fn *Node) SortBys(modTime bool) { //types:add
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := AsNode(sels[i].This())
@@ -444,14 +444,14 @@ func (fn *Node) SortBy(modTime bool) {
 }
 
 // OpenAll opens all directories under this one
-func (fn *Node) OpenAll() { //gti:add
+func (fn *Node) OpenAll() { //types:add
 	fn.FRoot.InOpenAll = true // causes chaining of opening
 	fn.TreeView.OpenAll()
 	fn.FRoot.InOpenAll = false
 }
 
 // CloseAll closes all directories under this one, this included
-func (fn *Node) CloseAll() { //gti:add
+func (fn *Node) CloseAll() { //types:add
 	fn.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
@@ -489,7 +489,7 @@ func (fn *Node) OpenBuf() (bool, error) {
 }
 
 // RemoveFromExterns removes file from list of external files
-func (fn *Node) RemoveFromExterns() { //gti:add
+func (fn *Node) RemoveFromExterns() { //types:add
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := AsNode(sels[i].This())

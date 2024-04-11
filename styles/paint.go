@@ -14,7 +14,7 @@ import (
 )
 
 // Paint provides the styling parameters for SVG-style rendering
-type Paint struct { //gti:add
+type Paint struct { //types:add
 
 	// prop: display:none -- node and everything below it are off, non-rendering
 	Off bool

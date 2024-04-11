@@ -25,7 +25,7 @@ import (
 // Config is the main config struct
 // that contains all of the configuration
 // options for the Cogent Core tool
-type Config struct { //gti:add
+type Config struct { //types:add
 
 	// the user-friendly name of the project
 	Name string
@@ -67,7 +67,7 @@ type Config struct { //gti:add
 	Generate Generate `cmd:"generate"`
 }
 
-type Build struct { //gti:add
+type Build struct { //types:add
 
 	// the target platforms to build executables for
 	Target []Platform `flag:"t,target" posarg:"0" required:"-" save:"-"`
@@ -87,14 +87,14 @@ type Build struct { //gti:add
 	AndroidTargetSDK int `default:"29"`
 }
 
-type Pack struct { //gti:add
+type Pack struct { //types:add
 
 	// whether to build a .dmg file on macOS in addition to a .app file.
 	// This is automatically disabled for the install command.
 	DMG bool `default:"true"`
 }
 
-type Log struct { //gti:add
+type Log struct { //types:add
 
 	// the target platform to view the logs for (ios or android)
 	Target string `default:"android"`
@@ -106,7 +106,7 @@ type Log struct { //gti:add
 	All string `default:"F"`
 }
 
-type Generate struct { //gti:add
+type Generate struct { //types:add
 
 	// the enum generation configuration options passed to enumgen
 	Enumgen enumgen.Config

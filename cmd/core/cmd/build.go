@@ -22,7 +22,7 @@ import (
 
 // Build builds an executable for the package
 // at the config path for the config platforms.
-func Build(c *config.Config) error { //gti:add
+func Build(c *config.Config) error { //types:add
 	if len(c.Build.Target) == 0 {
 		return errors.New("build: expected at least 1 platform")
 	}

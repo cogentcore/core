@@ -101,7 +101,7 @@ func HasNoNewDirective(typ *typegen.Type) bool {
 // that does all of the generation according to the
 // given config info. It overrides the
 // [config.Config.Generate.Typegen.InterfaceConfigs] info.
-func Generate(c *config.Config) error { //gti:add
+func Generate(c *config.Config) error { //types:add
 	c.Generate.Typegen.InterfaceConfigs = &ordmap.Map[string, *typegen.Config]{}
 
 	c.Generate.Typegen.InterfaceConfigs.Add("cogentcore.org/core/tree.Node", &typegen.Config{

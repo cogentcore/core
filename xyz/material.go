@@ -36,7 +36,7 @@ func (tl *Tiling) Defaults() {
 // is used for opacity.  The Emissive color is only for glowing objects.
 // The Specular color is always white (multiplied by light color).
 // Textures are stored on the Scene and accessed by name
-type Material struct { //gti:add -setters
+type Material struct { //types:add -setters
 
 	// prop: color = main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering
 	Color color.RGBA

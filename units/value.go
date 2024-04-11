@@ -19,7 +19,7 @@ import (
 // makes sense and provides a nicer end-user experience.
 
 // Value and units, and converted value into raw pixels (dots in DPI)
-type Value struct { //gti:add
+type Value struct { //types:add
 
 	// Value is the value in terms of the specified unit
 	Value float32 `label:""`

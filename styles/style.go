@@ -30,7 +30,7 @@ import (
 // and likewise for all sub-styles as fields here.
 
 // Style has all the CSS-based style elements -- used for widget-type GUI objects.
-type Style struct { //gti:add
+type Style struct { //types:add
 	// State holds style-relevant state flags, for convenient styling access,
 	// given that styles typically depend on element states.
 	State states.States

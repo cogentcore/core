@@ -98,7 +98,7 @@ func (sv *SVG) HandleEvents() {
 }
 
 // Open opens an XML-formatted SVG file
-func (sv *SVG) Open(filename Filename) error { //gti:add
+func (sv *SVG) Open(filename Filename) error { //types:add
 	return sv.SVG.OpenXML(string(filename))
 }
 
@@ -123,12 +123,12 @@ func (sv *SVG) ReadString(s string) error {
 }
 
 // SaveSVG saves the current SVG to an XML-encoded standard SVG file.
-func (sv *SVG) SaveSVG(filename Filename) error { //gti:add
+func (sv *SVG) SaveSVG(filename Filename) error { //types:add
 	return sv.SVG.SaveXML(string(filename))
 }
 
 // SavePNG saves the current rendered SVG image to an PNG image file.
-func (sv *SVG) SavePNG(filename Filename) error { //gti:add
+func (sv *SVG) SavePNG(filename Filename) error { //types:add
 	return sv.SVG.SavePNG(string(filename))
 }
 

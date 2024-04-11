@@ -24,7 +24,7 @@ import (
 // Video represents a video playback widget without any controls.
 // See [Player] for a version with controls.
 //
-//gti:add
+//types:add
 type Video struct {
 	core.WidgetBase
 

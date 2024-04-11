@@ -17,24 +17,24 @@ import (
 // It takes a [*Type] as its value.
 var TypeTmpl = template.Must(template.New("Type").
 	Funcs(template.FuncMap{
-		"GtiTypeOf": GtiTypeOf,
+		"TypesTypeOf": TypesTypeOf,
 	}).Parse(
 	`
-	{{if .Config.TypeVar}} // {{.LocalName}}Type is the [gti.Type] for [{{.LocalName}}]
-	var {{.LocalName}}Type {{else}} var _ {{end}} = gti.AddType(&gti.Type
-		{{- $typ := GtiTypeOf . -}}
+	{{if .Config.TypeVar}} // {{.LocalName}}Type is the [types.Type] for [{{.LocalName}}]
+	var {{.LocalName}}Type {{else}} var _ {{end}} = types.AddType(&types.Type
+		{{- $typ := TypesTypeOf . -}}
 		{{- printf "%#v" $typ -}}
 	)
 	`))
 
-// GtiTypeOf converts the given [*Type] to a [*types.Type]
-func GtiTypeOf(typ *Type) *types.Type {
+// TypesTypeOf converts the given [*Type] to a [*types.Type].
+func TypesTypeOf(typ *Type) *types.Type {
 	cp := typ.Type
 	res := &cp
 	res.Fields = typ.Fields.Fields
 	res.Embeds = typ.Embeds.Fields
 	if typ.Config.Instance {
-		// quotes are removed in gti.Type.GoString
+		// quotes are removed in types.Type.GoString
 		res.Instance = "&" + typ.LocalName + "{}"
 	}
 	return res
@@ -44,7 +44,7 @@ func GtiTypeOf(typ *Type) *types.Type {
 // It takes a [*types.Func] as its value.
 var FuncTmpl = template.Must(template.New("Func").Parse(
 	`
-	var _ = gti.AddFunc(&gti.Func
+	var _ = types.AddFunc(&types.Func
 		{{- printf "%#v" . -}}
 	)
 	`))

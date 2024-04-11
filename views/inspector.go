@@ -70,7 +70,7 @@ func (is *Inspector) SetStyles() {
 }
 
 // Save saves tree to current filename, in a standard JSON-formatted file
-func (is *Inspector) Save() error { //gti:add
+func (is *Inspector) Save() error { //types:add
 	if is.KiRoot == nil {
 		return nil
 	}
@@ -87,7 +87,7 @@ func (is *Inspector) Save() error { //gti:add
 }
 
 // SaveAs saves tree to given filename, in a standard JSON-formatted file
-func (is *Inspector) SaveAs(filename core.Filename) error { //gti:add
+func (is *Inspector) SaveAs(filename core.Filename) error { //types:add
 	if is.KiRoot == nil {
 		return nil
 	}
@@ -102,7 +102,7 @@ func (is *Inspector) SaveAs(filename core.Filename) error { //gti:add
 }
 
 // Open opens tree from given filename, in a standard JSON-formatted file
-func (is *Inspector) Open(filename core.Filename) error { //gti:add
+func (is *Inspector) Open(filename core.Filename) error { //types:add
 	if is.KiRoot == nil {
 		return nil
 	}
@@ -118,7 +118,7 @@ func (is *Inspector) Open(filename core.Filename) error { //gti:add
 // ToggleSelectionMode toggles the editor between selection mode or not.
 // In selection mode, bounding boxes are rendered around each Widget,
 // and clicking on a Widget pulls it up in the inspector.
-func (is *Inspector) ToggleSelectionMode() { //gti:add
+func (is *Inspector) ToggleSelectionMode() { //types:add
 	sc := core.AsScene(is.KiRoot)
 	sc.SetFlag(!sc.Is(core.ScRenderBBoxes), core.ScRenderBBoxes)
 	if sc.Is(core.ScRenderBBoxes) {
@@ -180,7 +180,7 @@ func (is *Inspector) SelectionMonitor() {
 }
 
 // InspectApp displays the underlying operating system app
-func (is *Inspector) InspectApp() { //gti:add
+func (is *Inspector) InspectApp() { //types:add
 	d := core.NewBody().AddTitle("Inspect app")
 	NewStructView(d).SetStruct(system.TheApp).SetReadOnly(true)
 	d.NewFullDialog(is).Run()

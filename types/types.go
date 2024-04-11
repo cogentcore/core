@@ -72,7 +72,7 @@ func TypeByReflectTypeTry(typ reflect.Type) (*Type, error) {
 // and returns it. This sets the ID.
 func AddType(typ *Type) *Type {
 	if _, has := Types[typ.Name]; has {
-		slog.Debug("gti.AddType: Type already exists", "Type.Name", typ.Name)
+		slog.Debug("types.AddType: Type already exists", "Type.Name", typ.Name)
 		return typ
 	}
 	typ.ID = atomic.AddUint64(&TypeIDCounter, 1)
@@ -133,7 +133,7 @@ func GetDoc(val, owner reflect.Value, field *reflect.StructField, label string) 
 	if f != nil {
 		return FormatDoc(f.Doc, field.Name, label), true
 	}
-	// if we aren't in gti, we fall back on struct tag
+	// if we aren't in the type registry, we fall back on struct tag
 	desc, ok := field.Tag.Lookup("desc")
 	if !ok {
 		return "", false

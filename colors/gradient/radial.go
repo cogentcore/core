@@ -15,7 +15,7 @@ import (
 )
 
 // Radial represents a radial gradient. It implements the [image.Image] interface.
-type Radial struct { //gti:add -setters
+type Radial struct { //types:add -setters
 	Base
 
 	// the center point of the gradient (cx and cy in SVG)

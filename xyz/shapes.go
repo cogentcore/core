@@ -31,7 +31,7 @@ const (
 
 // Plane is a flat 2D plane, which can be oriented along any
 // axis facing either positive or negative
-type Plane struct { //gti:add -setters
+type Plane struct { //types:add -setters
 	MeshBase
 
 	// axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormNeg for whether it is facing in the positive or negative of the given axis.
@@ -86,7 +86,7 @@ func (pl *Plane) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, 
 //   Box
 
 // Box is a rectangular-shaped solid (cuboid)
-type Box struct { //gti:add -setters
+type Box struct { //types:add -setters
 	MeshBase
 
 	// size along each dimension
@@ -126,7 +126,7 @@ func (bx *Box) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, id
 //   Sphere
 
 // Sphere is a sphere mesh
-type Sphere struct { //gti:add -setters
+type Sphere struct { //types:add -setters
 	MeshBase
 
 	// radius of the sphere
@@ -197,7 +197,7 @@ func (sp *Sphere) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32,
 // Cylinder is a generalized cylinder shape, including a cone
 // or truncated cone by having different size circles at either end.
 // Height is up along the Y axis.
-type Cylinder struct { //gti:add -setters
+type Cylinder struct { //types:add -setters
 	MeshBase
 
 	// height of the cylinder
@@ -296,7 +296,7 @@ func (cy *Cylinder) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF3
 // Capsule is a generalized capsule shape: a cylinder with hemisphere end caps.
 // Supports different radii on each end.
 // Height is along the Y axis -- total height is Height + TopRad + BotRad.
-type Capsule struct { //gti:add -setters
+type Capsule struct { //types:add -setters
 	MeshBase
 
 	// height of the cylinder portion
@@ -403,7 +403,7 @@ func (cp *Capsule) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32
 
 // Torus is a torus mesh, defined by the radius of the solid tube and the
 // larger radius of the ring.
-type Torus struct { //gti:add -setters
+type Torus struct { //types:add -setters
 	MeshBase
 
 	// larger radius of the torus ring

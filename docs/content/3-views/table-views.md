@@ -71,8 +71,8 @@ You can make it so that the documentation comments for struct fields are used as
 // Add this once per package:
 //go:generate core generate
 
-// Add gti:add for every type you want the documentation for:
-type language struct { //gti:add
+// Add types:add for every type you want the documentation for:
+type language struct { //types:add
 
     // This comment will be displayed in the tooltip for this field
     Name string

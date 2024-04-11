@@ -162,7 +162,7 @@ func (tv *TreeView) FindSyncNode(kn tree.Node) *TreeView {
 // after this node, at the same (sibling) level,
 // prompting for the type of node to insert.
 // If SyncNode is set, operates on Sync Tree.
-func (tv *TreeView) InsertAfter() { //gti:add
+func (tv *TreeView) InsertAfter() { //types:add
 	tv.InsertAt(1, "Insert After")
 }
 
@@ -170,7 +170,7 @@ func (tv *TreeView) InsertAfter() { //gti:add
 // before this node, at the same (sibling) level,
 // prompting for the type of node to insert
 // If SyncNode is set, operates on Sync Tree.
-func (tv *TreeView) InsertBefore() { //gti:add
+func (tv *TreeView) InsertBefore() { //types:add
 	tv.InsertAt(0, "Insert Before")
 }
 
@@ -251,7 +251,7 @@ func (tv *TreeView) InsertAt(rel int, actNm string) {
 // AddChildNode adds a new child node to this one in the tree,
 // prompting the user for the type of node to add
 // If SyncNode is set, operates on Sync Tree.
-func (tv *TreeView) AddChildNode() { //gti:add
+func (tv *TreeView) AddChildNode() { //types:add
 	ttl := "Add child"
 	typ := tv.This().BaseType()
 	if tv.SyncNode != nil {
@@ -277,7 +277,7 @@ func (tv *TreeView) AddChildNode() { //gti:add
 // DeleteNode deletes the tree node or sync node corresponding
 // to this view node in the sync tree.
 // If SyncNode is set, operates on Sync Tree.
-func (tv *TreeView) DeleteNode() { //gti:add
+func (tv *TreeView) DeleteNode() { //types:add
 	ttl := "Delete"
 	if tv.IsRoot(ttl) {
 		return
@@ -300,7 +300,7 @@ func (tv *TreeView) DeleteNode() { //gti:add
 // Duplicate duplicates the sync node corresponding to this view node in
 // the tree, and inserts the duplicate after this node (as a new sibling).
 // If SyncNode is set, operates on Sync Tree.
-func (tv *TreeView) Duplicate() { //gti:add
+func (tv *TreeView) Duplicate() { //types:add
 	ttl := "TreeView Duplicate"
 	if tv.IsRoot(ttl) {
 		return
@@ -354,7 +354,7 @@ func (tv *TreeView) DuplicateSync() {
 
 // EditNode pulls up a StructViewDialog window on the node.
 // If SyncNode is set, operates on Sync Tree.
-func (tv *TreeView) EditNode() { //gti:add
+func (tv *TreeView) EditNode() { //types:add
 	if tv.SyncNode != nil {
 		tynm := tv.SyncNode.NodeType().Name
 		d := core.NewBody().AddTitle(tynm)
@@ -370,7 +370,7 @@ func (tv *TreeView) EditNode() { //gti:add
 
 // InspectNode pulls up a new Inspector window on the node.
 // If SyncNode is set, operates on Sync Tree.
-func (tv *TreeView) InspectNode() { //gti:add
+func (tv *TreeView) InspectNode() { //types:add
 	if tv.SyncNode != nil {
 		InspectorWindow(tv.SyncNode)
 	} else {

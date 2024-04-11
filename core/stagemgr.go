@@ -14,7 +14,7 @@ import (
 )
 
 // StageMgr manages a stack of Stage elements
-type StageMgr struct { //gti:add
+type StageMgr struct { //types:add
 	// stack of stages managed by this stage manager.
 	Stack ordmap.Map[string, *Stage] `set:"-"`
 

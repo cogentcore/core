@@ -77,7 +77,7 @@ func (st StageTypes) IsPopup() bool {
 // in different functional ways, defined by StageTypes, in two categories:
 // Main types (WindowStage and DialogStage) and Popup types
 // (Menu, Tooltip, Snackbar, Chooser).
-type Stage struct { //gti:add -setters
+type Stage struct { //types:add -setters
 	// type of Stage: determines behavior and Styling
 	Type StageTypes `set:"-"`
 

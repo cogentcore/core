@@ -78,7 +78,7 @@ func MergeAvailStyles() {
 
 // Open hi styles from a JSON-formatted file. You can save and open
 // styles to / from files to share, experiment, transfer, etc.
-func (hs *Styles) OpenJSON(filename core.Filename) error { //gti:add
+func (hs *Styles) OpenJSON(filename core.Filename) error { //types:add
 	b, err := os.ReadFile(string(filename))
 	if err != nil {
 		// PromptDialog(nil, "File Not Found", err.Error(), true, false, nil, nil, nil)
@@ -90,7 +90,7 @@ func (hs *Styles) OpenJSON(filename core.Filename) error { //gti:add
 
 // Save hi styles to a JSON-formatted file. You can save and open
 // styles to / from files to share, experiment, transfer, etc.
-func (hs *Styles) SaveJSON(filename core.Filename) error { //gti:add
+func (hs *Styles) SaveJSON(filename core.Filename) error { //types:add
 	b, err := json.MarshalIndent(hs, "", "  ")
 	if err != nil {
 		slog.Error(err.Error()) // unlikely

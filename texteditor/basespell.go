@@ -101,7 +101,7 @@ func SaveSpellModel() error {
 // Spell
 
 // Spell
-type Spell struct { //gti:add -setters
+type Spell struct { //types:add -setters
 	// line number in source that spelling is operating on, if relevant
 	SrcLn int
 

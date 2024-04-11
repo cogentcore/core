@@ -21,7 +21,7 @@ import (
 
 // Pack builds and packages the app for the target platform.
 // For android, ios, and web, it is equivalent to build.
-func Pack(c *config.Config) error { //gti:add
+func Pack(c *config.Config) error { //types:add
 	err := Build(c)
 	if err != nil {
 		return err

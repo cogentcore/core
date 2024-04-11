@@ -55,7 +55,7 @@ func FuncInfoTry(f any) (*Func, error) {
 // and returns it. This sets the ID.
 func AddFunc(fun *Func) *Func {
 	if _, has := Funcs[fun.Name]; has {
-		slog.Debug("gti.AddFunc: Func already exists", "Func.Name", fun.Name)
+		slog.Debug("types.AddFunc: Func already exists", "Func.Name", fun.Name)
 		return fun
 	}
 	fun.ID = atomic.AddUint64(&FuncIDCounter, 1)

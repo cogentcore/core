@@ -19,7 +19,7 @@ import (
 // Most of font information is inherited.
 // Font does not include all information needed
 // for rendering -- see [FontRender] for that.
-type Font struct { //gti:add
+type Font struct { //types:add
 
 	// size of font to render (inhereted); converted to points when getting font to use
 	Size units.Value
@@ -393,7 +393,7 @@ func FixFontMods(fn string) string {
 // used by end-user code -- see [Font] for that.
 // It stores all values as pointers so that they correspond
 // to the values of the style object it was derived from.
-type FontRender struct { //gti:add
+type FontRender struct { //types:add
 	Font
 
 	// text color (inhereted)

@@ -30,7 +30,7 @@ var TheApp = &App{App: system.TheApp}
 // App represents a Cogent Core app. It extends [system.App] to provide both system-level
 // and high-level data and functions to do with the currently running application. The
 // single instance of it is [TheApp], which embeds [system.TheApp].
-type App struct { //gti:add -setters
+type App struct { //types:add -setters
 	system.App `set:"-"`
 
 	// Icon specifies the app icon, which is passed to [system.Window.SetIcon].
@@ -162,7 +162,7 @@ func StandardOverflowMenu(tb *Toolbar) {
 // note: must be a method on toolbar to get scene
 
 // StandardOverflowMenu adds standard overflow menu items.
-func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //gti:add
+func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //types:add
 	if SettingsWindow != nil {
 		NewButton(m).SetText("Settings").SetIcon(icons.Settings).SetKey(keymap.Settings).
 			OnClick(func(e events.Event) {

@@ -1567,7 +1567,7 @@ func (sv *SliceViewBase) CopySelectToMime() mimedata.Mimes {
 }
 
 // CopyIndexes copies selected idxs to system.Clipboard, optionally resetting the selection
-func (sv *SliceViewBase) CopyIndexes(reset bool) { //gti:add
+func (sv *SliceViewBase) CopyIndexes(reset bool) { //types:add
 	nitms := len(sv.SelectedIndexes)
 	if nitms == 0 {
 		return
@@ -1582,7 +1582,7 @@ func (sv *SliceViewBase) CopyIndexes(reset bool) { //gti:add
 }
 
 // DeleteIndexes deletes all selected indexes
-func (sv *SliceViewBase) DeleteIndexes() { //gti:add
+func (sv *SliceViewBase) DeleteIndexes() { //types:add
 	if len(sv.SelectedIndexes) == 0 {
 		return
 	}
@@ -1597,7 +1597,7 @@ func (sv *SliceViewBase) DeleteIndexes() { //gti:add
 }
 
 // CutIndexes copies selected indexes to system.Clipboard and deletes selected indexes
-func (sv *SliceViewBase) CutIndexes() { //gti:add
+func (sv *SliceViewBase) CutIndexes() { //types:add
 	if len(sv.SelectedIndexes) == 0 {
 		return
 	}
@@ -1616,7 +1616,7 @@ func (sv *SliceViewBase) CutIndexes() { //gti:add
 }
 
 // PasteIndex pastes clipboard at given idx
-func (sv *SliceViewBase) PasteIndex(idx int) { //gti:add
+func (sv *SliceViewBase) PasteIndex(idx int) { //types:add
 	sv.TmpIndex = idx
 	dt := sv.This().(SliceViewer).MimeDataType()
 	md := sv.Clipboard().Read([]string{dt})
@@ -1705,7 +1705,7 @@ func (sv *SliceViewBase) PasteAtIndex(md mimedata.Mimes, idx int) {
 
 // Duplicate copies selected items and inserts them after current selection --
 // return idx of start of duplicates if successful, else -1
-func (sv *SliceViewBase) Duplicate() int { //gti:add
+func (sv *SliceViewBase) Duplicate() int { //types:add
 	nitms := len(sv.SelectedIndexes)
 	if nitms == 0 {
 		return -1

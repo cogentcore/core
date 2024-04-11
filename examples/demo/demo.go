@@ -375,7 +375,7 @@ func values(ts *core.Tabs) {
 }
 
 // Hello displays a greeting message and an age in weeks based on the given information.
-func hello(firstName string, lastName string, age int, likesGo bool) (greeting string, weeksOld int) { //gti:add
+func hello(firstName string, lastName string, age int, likesGo bool) (greeting string, weeksOld int) { //types:add
 	weeksOld = age * 52
 	greeting = "Hello, " + firstName + " " + lastName + "! "
 	if likesGo {
@@ -474,7 +474,7 @@ func makeTree(tv *views.TreeView, iter, maxIter, maxKids int) {
 	}
 }
 
-type tableStruct struct { //gti:add
+type tableStruct struct { //types:add
 
 	// an icon
 	Icon icons.Icon
@@ -492,7 +492,7 @@ type tableStruct struct { //gti:add
 	File core.Filename
 }
 
-type inlineStruct struct { //gti:add
+type inlineStruct struct { //types:add
 
 	// click to show next
 	On bool
@@ -525,7 +525,7 @@ func (il *inlineStruct) ShouldShow(field string) bool {
 	return true
 }
 
-type testStruct struct { //gti:add
+type testStruct struct { //types:add
 
 	// An enum value
 	Enum core.ButtonTypes

@@ -33,7 +33,7 @@ const (
 // If Sides contains corners, the struct field names correspond
 // to the corners as follows: Top = top left, Right = top right,
 // Bottom = bottom right, Left = bottom left.
-type Sides[T any] struct { //gti:add
+type Sides[T any] struct { //types:add
 
 	// top/top-left value
 	Top T
@@ -214,7 +214,7 @@ func SidesAreZero[T comparable](s Sides[T]) bool {
 }
 
 // SideValues contains units.Value values for each side/corner of a box
-type SideValues struct { //gti:add
+type SideValues struct { //types:add
 	Sides[units.Value]
 }
 
@@ -250,7 +250,7 @@ func (sv SideValues) Dots() SideFloats {
 }
 
 // SideFloats contains float32 values for each side/corner of a box
-type SideFloats struct { //gti:add
+type SideFloats struct { //types:add
 	Sides[float32]
 }
 
@@ -339,7 +339,7 @@ func (sf SideFloats) ToValues() SideValues {
 }
 
 // SideColors contains color values for each side/corner of a box
-type SideColors struct { //gti:add
+type SideColors struct { //types:add
 	Sides[color.RGBA]
 }
 

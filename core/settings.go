@@ -152,7 +152,7 @@ func ResetSettings(se Settings) error {
 }
 
 // ResetAllSettings resets all of the settings to their default values.
-func ResetAllSettings() error { //gti:add
+func ResetAllSettings() error { //types:add
 	for _, se := range AllSettings {
 		err := ResetSettings(se)
 		if err != nil {
@@ -205,7 +205,7 @@ func SaveAllSettings() error {
 
 // UpdateAll updates all windows and triggers a full render rebuild.
 // It is typically called when user settings are changed.
-func UpdateAll() { //gti:add
+func UpdateAll() { //types:add
 	gradient.Cache = nil // the cache is invalid now
 	for _, w := range AllRenderWindows {
 		rctx := w.MainStageMgr.RenderContext
@@ -223,7 +223,7 @@ var AppearanceSettings = &AppearanceSettingsData{
 }
 
 // AppearanceSettingsData is the data type for the global Cogent Core appearance settings.
-type AppearanceSettingsData struct { //gti:add
+type AppearanceSettingsData struct { //types:add
 	SettingsBase
 
 	// the color theme
@@ -279,7 +279,7 @@ var AppColor = color.RGBA{66, 133, 244, 255}
 // scheme and make it always based on [AppColor].
 var ForceAppColor bool
 
-func (as *AppearanceSettingsData) Apply() { //gti:add
+func (as *AppearanceSettingsData) Apply() { //types:add
 	if ForceAppColor || (as.Color == color.RGBA{66, 133, 244, 255}) {
 		colors.SetSchemes(AppColor)
 	} else {
@@ -334,7 +334,7 @@ func (as *AppearanceSettingsData) ApplyDPI() {
 // each window, by screen, and clear current in-memory cache. You shouldn't generally
 // need to do this, but sometimes it is useful for testing or windows that are
 // showing up in bad places that you can't recover from.
-func (as *AppearanceSettingsData) DeleteSavedWindowGeoms() { //gti:add
+func (as *AppearanceSettingsData) DeleteSavedWindowGeoms() { //types:add
 	TheWindowGeometrySaver.DeleteAll()
 }
 
@@ -353,7 +353,7 @@ var DeviceSettings = &DeviceSettingsData{
 }
 
 // SaveScreenZoom saves the current zoom factor for current screen.
-func (as *AppearanceSettingsData) SaveScreenZoom() { //gti:add
+func (as *AppearanceSettingsData) SaveScreenZoom() { //types:add
 	sc := system.TheApp.Screen(0)
 	sp, ok := as.Screens[sc.Name]
 	if !ok {
@@ -368,7 +368,7 @@ func (as *AppearanceSettingsData) SaveScreenZoom() { //gti:add
 }
 
 // DeviceSettingsData is the data type for the device settings.
-type DeviceSettingsData struct { //gti:add
+type DeviceSettingsData struct { //types:add
 	SettingsBase
 
 	// The keyboard shortcut map to use
@@ -436,7 +436,7 @@ func (ds *DeviceSettingsData) Apply() {
 // ScreenSettings are the per-screen settings -- see [system.App.Screen] for
 // info on the different screens -- these prefs are indexed by the Screen.Name
 // -- settings here override those in the global settings.
-type ScreenSettings struct { //gti:add
+type ScreenSettings struct { //types:add
 
 	// overall zoom factor as a percentage of the default zoom
 	Zoom float32 `default:"100" min:"10" max:"1000" step:"10"`
@@ -451,7 +451,7 @@ var SystemSettings = &SystemSettingsData{
 }
 
 // SystemSettingsData is the data type of the global Cogent Core settings.
-type SystemSettingsData struct { //gti:add
+type SystemSettingsData struct { //types:add
 	SettingsBase
 
 	// text editor settings
@@ -529,7 +529,7 @@ func (ss *SystemSettingsData) Defaults() {
 }
 
 // Apply detailed settings to all the relevant settings.
-func (ss *SystemSettingsData) Apply() { //gti:add
+func (ss *SystemSettingsData) Apply() { //types:add
 	if ss.FontPaths != nil {
 		paths := append(ss.FontPaths, paint.FontPaths...)
 		paint.FontLibrary.InitFontPaths(paths...)
@@ -573,7 +573,7 @@ func (ss *SystemSettingsData) UpdateUser() {
 }
 
 // User basic user information that might be needed for different apps
-type User struct { //gti:add
+type User struct { //types:add
 	user.User
 
 	// default email address -- e.g., for recording changes in a version control system
@@ -581,7 +581,7 @@ type User struct { //gti:add
 }
 
 // EditorSettings contains text editor settings.
-type EditorSettings struct { //gti:add
+type EditorSettings struct { //types:add
 
 	// size of a tab, in chars -- also determines indent level for space indent
 	TabSize int `default:"4" xml:"tab-size"`
@@ -617,7 +617,7 @@ type EditorSettings struct { //gti:add
 // FavPathItem represents one item in a favorite path list, for display of
 // favorites.  Is an ordered list instead of a map because user can organize
 // in order
-type FavPathItem struct { //gti:add
+type FavPathItem struct { //types:add
 
 	// icon for item
 	Ic icons.Icon
@@ -672,12 +672,12 @@ type FilePaths []string
 var RecentPaths FilePaths
 
 // Open file paths from a json-formatted file.
-func (fp *FilePaths) Open(filename string) error { //gti:add
+func (fp *FilePaths) Open(filename string) error { //types:add
 	return errors.Log(jsonx.Open(fp, filename))
 }
 
 // Save file paths to a json-formatted file.
-func (fp *FilePaths) Save(filename string) error { //gti:add
+func (fp *FilePaths) Save(filename string) error { //types:add
 	return errors.Log(jsonx.Save(fp, filename))
 }
 
@@ -717,7 +717,7 @@ var DebugSettings = &DebugSettingsData{
 }
 
 // DebugSettingsData is the data type for debugging settings.
-type DebugSettingsData struct { //gti:add
+type DebugSettingsData struct { //types:add
 	SettingsBase
 
 	// Print a trace of updates that trigger re-rendering

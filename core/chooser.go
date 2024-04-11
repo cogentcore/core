@@ -90,7 +90,7 @@ type Chooser struct {
 }
 
 // ChooserItem is an item that can be used in a [Chooser].
-type ChooserItem struct { //gti:add
+type ChooserItem struct { //types:add
 
 	// Value is the underlying value of the chooser item.
 	Value any

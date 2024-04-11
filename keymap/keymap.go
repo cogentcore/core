@@ -247,7 +247,7 @@ func (km *Map) Update(kmName MapName) {
 var DefaultMap MapName = "LinuxStandard"
 
 // MapsItem is an entry in a Maps list
-type MapsItem struct { //gti:add -setters
+type MapsItem struct { //types:add -setters
 
 	// name of keymap
 	Name string `width:"20"`
@@ -265,7 +265,7 @@ func (km MapsItem) Label() string {
 }
 
 // Maps is a list of [MapsItem]s; users can edit these in their settings.
-type Maps []MapsItem //gti:add
+type Maps []MapsItem //types:add
 
 // AvailableMaps is the current list of available keymaps for use.
 // This can be loaded / saved / edited in user settings. This is set

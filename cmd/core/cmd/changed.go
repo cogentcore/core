@@ -20,7 +20,7 @@ import (
 
 // Changed concurrently prints all of the repositories within this directory
 // that have been changed and need to be updated in Git.
-func Changed(c *config.Config) error { //gti:add
+func Changed(c *config.Config) error { //types:add
 	wg := sync.WaitGroup{}
 	errs := []error{}
 	fs.WalkDir(os.DirFS("."), ".", func(path string, d fs.DirEntry, err error) error {

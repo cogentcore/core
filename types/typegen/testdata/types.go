@@ -35,14 +35,14 @@ type Person struct { //core:embedder
 
 var _ = fmt.Stringer(&Person{})
 
-//gti:skip
+//types:skip
 func (p Person) String() string { return p.Name }
 
 // Introduction returns an introduction for the person.
 // It contains the name of the person and their age.
 //
 //gi:toolbar -name ShowIntroduction -icon play -show-result -confirm
-func (p *Person) Introduction() string { //gti:add
+func (p *Person) Introduction() string { //types:add
 	return fmt.Sprintf("%s is %d years old", p.Name, p.Age)
 }
 
@@ -53,10 +53,10 @@ func Alert(msg string) {
 
 type (
 	// BlockType is a type declared in a type block.
-	BlockType struct{} //gti:add
+	BlockType struct{} //types:add
 
 	// CommaFieldType is a type with inline comma fields.
-	CommaFieldType struct { //gti:add -setters
+	CommaFieldType struct { //types:add -setters
 		A, B int
 	}
 )

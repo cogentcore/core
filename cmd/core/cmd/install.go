@@ -16,7 +16,7 @@ import (
 
 // Install installs the package on the local system.
 // It uses the same config info as build.
-func Install(c *config.Config) error { //gti:add
+func Install(c *config.Config) error { //types:add
 	for i, p := range c.Build.Target {
 		err := config.OSSupported(p.OS)
 		if err != nil {

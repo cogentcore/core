@@ -40,7 +40,7 @@ func ParsePackages(cfg *Config) ([]*packages.Package, error) {
 // a new [Generator] with [NewGenerator] and call methods on it.
 //
 //cli:cmd -root
-func Generate(cfg *Config) error { //gti:add
+func Generate(cfg *Config) error { //types:add
 	pkgs, err := ParsePackages(cfg)
 	if err != nil {
 		return err

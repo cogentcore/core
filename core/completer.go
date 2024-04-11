@@ -38,7 +38,7 @@ func NewCompleter(sc *Scene, ctx Widget) *Stage {
 // Complete holds the current completion data and functions to call for building
 // the list of possible completions and for editing text after a completion is selected.
 // It also holds the [PopupStage] associated with it.
-type Complete struct { //gti:add -setters
+type Complete struct { //types:add -setters
 	// function to get the list of possible completions
 	MatchFunc complete.MatchFunc
 

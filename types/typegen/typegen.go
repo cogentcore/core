@@ -30,7 +30,7 @@ func ParsePackages(cfg *Config) ([]*packages.Package, error) {
 	return pkgs, err
 }
 
-// Generate generates gti type info, using the
+// Generate generates typegen type info, using the
 // configuration information, loading the packages from the
 // configuration source directory, and writing the result
 // to the configuration output file.
@@ -40,7 +40,7 @@ func ParsePackages(cfg *Config) ([]*packages.Package, error) {
 // a new [Generator] with [NewGenerator] and call methods on it.
 //
 //cli:cmd -root
-func Generate(cfg *Config) error { //gti:add
+func Generate(cfg *Config) error { //types:add
 	pkgs, err := ParsePackages(cfg)
 	if err != nil {
 		return err

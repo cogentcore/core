@@ -92,7 +92,7 @@ func (fb *FileBrowse) OnInit() {
 }
 
 // UpdateFiles updates the list of files saved in project
-func (fb *FileBrowse) UpdateFiles() { //gti:add
+func (fb *FileBrowse) UpdateFiles() { //types:add
 	if fb.Files == nil {
 		return
 	}
@@ -108,7 +108,7 @@ func (fb *FileBrowse) IsEmpty() bool {
 // specific file or a directory containing multiple files of interest -- opens
 // in current FileBrowse object if it is empty, or otherwise opens a new
 // window.
-func (fb *FileBrowse) OpenPath(path core.Filename) { //gti:add
+func (fb *FileBrowse) OpenPath(path core.Filename) { //types:add
 	if !fb.IsEmpty() {
 		NewFileBrowser(string(path))
 		return
@@ -206,7 +206,7 @@ func (fb *FileBrowse) NextTextEditor() (*texteditor.Editor, int) {
 }
 
 // SaveActiveView saves the contents of the currently-active texteditor
-func (fb *FileBrowse) SaveActiveView() { //gti:add
+func (fb *FileBrowse) SaveActiveView() { //types:add
 	tv := fb.ActiveTextEditor()
 	if tv.Buffer != nil {
 		tv.Buffer.Save() // todo: errs..
@@ -216,7 +216,7 @@ func (fb *FileBrowse) SaveActiveView() { //gti:add
 
 // SaveActiveViewAs save with specified filename the contents of the
 // currently-active texteditor
-func (fb *FileBrowse) SaveActiveViewAs(filename core.Filename) { //gti:add
+func (fb *FileBrowse) SaveActiveViewAs(filename core.Filename) { //types:add
 	tv := fb.ActiveTextEditor()
 	if tv.Buffer != nil {
 		tv.Buffer.SaveAs(filename)
@@ -311,7 +311,7 @@ func (fb *FileBrowse) TextEditorByIndex(idx int) *texteditor.Editor {
 	return nil
 }
 
-func (fb *FileBrowse) ConfigToolbar(tb *core.Toolbar) { //gti:add
+func (fb *FileBrowse) ConfigToolbar(tb *core.Toolbar) { //types:add
 	views.NewFuncButton(tb, fb.UpdateFiles).SetIcon(icons.Refresh).SetShortcut("Command+U")
 	op := views.NewFuncButton(tb, fb.OpenPath).SetKey(keymap.Open)
 	op.Args[0].SetValue(fb.ActiveFilename)

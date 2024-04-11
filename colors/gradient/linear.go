@@ -15,7 +15,7 @@ import (
 )
 
 // Linear represents a linear gradient. It implements the [image.Image] interface.
-type Linear struct { //gti:add -setters
+type Linear struct { //types:add -setters
 	Base
 
 	// the starting point of the gradient (x1 and y1 in SVG)

@@ -15,7 +15,7 @@ import (
 	"cogentcore.org/core/svg"
 )
 
-func main() { //gti:skip
+func main() { //types:skip
 	opts := cli.DefaultOptions("svg", "svg", "Command line tools for rendering and creating svg files")
 	cli.Run(opts, &Config{}, Render, EmbedImage)
 }
@@ -89,7 +89,7 @@ func EmbedImage(c *Config) error {
 }
 
 // ApplyFill applies [Config.Fill] to the given [svg.SVG].
-func ApplyFill(c *Config, sv *svg.SVG) error { //gti:skip
+func ApplyFill(c *Config, sv *svg.SVG) error { //types:skip
 	if c.Fill == "" {
 		return nil
 	}

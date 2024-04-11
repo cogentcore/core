@@ -260,13 +260,13 @@ func (dv *DiffView) SaveFile(ab bool, filename core.Filename) error {
 }
 
 // SaveFileA saves the current state of file A to given filename
-func (dv *DiffView) SaveFileA(fname core.Filename) { //gti:add
+func (dv *DiffView) SaveFileA(fname core.Filename) { //types:add
 	dv.SaveAs(false, fname)
 	// dv.UpdateToolbar()
 }
 
 // SaveFileB saves the current state of file B to given filename
-func (dv *DiffView) SaveFileB(fname core.Filename) { //gti:add
+func (dv *DiffView) SaveFileB(fname core.Filename) { //types:add
 	dv.SaveAs(true, fname)
 	// dv.UpdateToolbar()
 }

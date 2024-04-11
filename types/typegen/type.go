@@ -38,7 +38,7 @@ type Type struct {
 	Config *Config
 }
 
-// Fields extends []gti.Field to provide the local type names and struct tags for each field.
+// Fields extends []types.Field to provide the local type names and struct tags for each field.
 type Fields struct {
 	Fields     []types.Field
 	LocalTypes map[string]string

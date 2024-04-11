@@ -66,13 +66,13 @@ func (g *Generator) Printf(format string, args ...any) {
 // PrintHeader prints the header and package clause
 // to the accumulated output
 func (g *Generator) PrintHeader() {
-	// we need a manual import of gti and ordmap because they are
+	// we need a manual import of types and ordmap because they are
 	// external, but goimports will handle everything else
-	generate.PrintHeader(&g.Buf, g.Pkg.Name, "cogentcore.org/core/gti", "cogentcore.org/core/ordmap")
+	generate.PrintHeader(&g.Buf, g.Pkg.Name, "cogentcore.org/core/types", "cogentcore.org/core/ordmap")
 }
 
 // Find goes through all of the types, functions, variables,
-// and constants in the package, finds those marked with gti:add,
+// and constants in the package, finds those marked with types:add,
 // and adds them to [Generator.Types] and [Generator.Funcs]
 func (g *Generator) Find() error {
 	err := g.GetInterfaces()
@@ -458,9 +458,9 @@ func LoadFromComments(cfg *Config, c ...*ast.CommentGroup) (dirs []types1.Direct
 }
 
 // LoadFromComment processes the given comment group, setting the
-// values of the given config object based on any gti directives
+// values of the given config object based on any types directives
 // in the comment group, and returning all directives found, whether
-// there was a gti:add directive, and any error. If the given
+// there was a types:add directive, and any error. If the given
 // documentation is nil, LoadFromComment still returns an empty but valid
 // [types1.Directives] value, false, and no error.
 func LoadFromComment(c *ast.CommentGroup, cfg *Config) (dirs []types1.Directive, hasAdd bool, hasSkip bool, err error) {
@@ -475,10 +475,10 @@ func LoadFromComment(c *ast.CommentGroup, cfg *Config) (dirs []types1.Directive,
 		if dir == nil {
 			continue
 		}
-		if dir.Tool == "gti" && dir.Directive == "add" {
+		if dir.Tool == "types" && dir.Directive == "add" {
 			hasAdd = true
 		}
-		if dir.Tool == "gti" {
+		if dir.Tool == "types" {
 			if dir.Directive == "skip" {
 				hasSkip = true
 			}
@@ -491,7 +491,7 @@ func LoadFromComment(c *ast.CommentGroup, cfg *Config) (dirs []types1.Directive,
 					return nil, false, false, fmt.Errorf("expected 0 positional arguments but got %d (list: %v) (from directive %q)", len(leftovers), leftovers, c.Text)
 				}
 			} else {
-				return nil, false, false, fmt.Errorf("unrecognized gti directive %q (from %q)", dir.Directive, c.Text)
+				return nil, false, false, fmt.Errorf("unrecognized types directive %q (from %q)", dir.Directive, c.Text)
 			}
 		}
 		dirs = append(dirs, *dir)

@@ -1210,7 +1210,7 @@ func (tv *TreeView) ToggleClose() {
 }
 
 // OpenAll opens the given node and all of its sub-nodes
-func (tv *TreeView) OpenAll() { //gti:add
+func (tv *TreeView) OpenAll() { //types:add
 	tv.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
 		tvn := AsTreeView(wi)
 		if tvn != nil {
@@ -1223,7 +1223,7 @@ func (tv *TreeView) OpenAll() { //gti:add
 }
 
 // CloseAll closes the given node and all of its sub-nodes.
-func (tv *TreeView) CloseAll() { //gti:add
+func (tv *TreeView) CloseAll() { //types:add
 	tv.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
 		tvn := AsTreeView(wi)
 		if tvn != nil {
@@ -1396,7 +1396,7 @@ func (tv *TreeView) NodesFromMimeData(md mimedata.Mimes) (tree.Slice, []string) 
 }
 
 // Copy copies to system.Clipboard, optionally resetting the selection.
-func (tv *TreeView) Copy(reset bool) { //gti:add
+func (tv *TreeView) Copy(reset bool) { //types:add
 	sels := tv.SelectedViews()
 	nitms := max(1, len(sels))
 	md := make(mimedata.Mimes, 0, 2*nitms)
@@ -1415,7 +1415,7 @@ func (tv *TreeView) Copy(reset bool) { //gti:add
 }
 
 // Cut copies to system.Clipboard and deletes selected items.
-func (tv *TreeView) Cut() { //gti:add
+func (tv *TreeView) Cut() { //types:add
 	if tv.IsRoot("Cut") {
 		return
 	}
@@ -1435,7 +1435,7 @@ func (tv *TreeView) Cut() { //gti:add
 }
 
 // Paste pastes clipboard at given node.
-func (tv *TreeView) Paste() { //gti:add
+func (tv *TreeView) Paste() { //types:add
 	md := tv.Clipboard().Read([]string{fileinfo.DataJson})
 	if md != nil {
 		tv.PasteMenu(md)

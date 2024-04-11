@@ -9,7 +9,7 @@ import (
 )
 
 // XY represents unit Value for X and Y dimensions
-type XY struct { //gti:add
+type XY struct { //types:add
 	// X is the horizontal axis value
 	X Value
 

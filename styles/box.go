@@ -69,7 +69,7 @@ const (
 // IMPORTANT: any changes here must be updated in style_properties.go StyleBorderFuncs
 
 // Border contains style parameters for borders
-type Border struct { //gti:add
+type Border struct { //types:add
 
 	// Style specifies how to draw the border
 	Style Sides[BorderStyles]
@@ -154,7 +154,7 @@ var (
 // IMPORTANT: any changes here must be updated in style_properties.go StyleShadowFuncs
 
 // style parameters for shadows
-type Shadow struct { //gti:add
+type Shadow struct { //types:add
 
 	// OffsetX is th horizontal offset of the shadow.
 	// Positive moves it right, negative moves it left.

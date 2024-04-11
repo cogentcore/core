@@ -14,7 +14,7 @@ import (
 )
 
 // Release releases the project with the specified git version tag.
-func Release(c *config.Config) error { //gti:add
+func Release(c *config.Config) error { //types:add
 	err := exec.Run("git", "tag", "-a", c.Version, "-m", c.Version+" release")
 	if err != nil {
 		return fmt.Errorf("error tagging release: %w", err)
@@ -28,7 +28,7 @@ func Release(c *config.Config) error { //gti:add
 
 // NextRelease releases the project with the current git version
 // tag incremented by one patch version.
-func NextRelease(c *config.Config) error { //gti:add
+func NextRelease(c *config.Config) error { //types:add
 	ver, err := NextVersion(c)
 	if err != nil {
 		return err

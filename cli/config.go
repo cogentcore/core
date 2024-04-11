@@ -65,7 +65,7 @@ type MetaConfig struct {
 // everything, so it easier to just add through a separate struct.
 // TODO: maybe improve the structure of this
 // TODO: can we get HelpCmd to display correctly in usage?
-type metaConfigFields struct { //gti:add
+type metaConfigFields struct { //types:add
 	// the file name of the config file to load
 	Config string `flag:"cfg,config"`
 

@@ -17,7 +17,7 @@ import (
 
 // Setup installs platform-specific dependencies for the current platform.
 // It only needs to be called once per system.
-func Setup(c *config.Config) error { //gti:add
+func Setup(c *config.Config) error { //types:add
 	vc := exec.Verbose().SetBuffer(false)
 	switch runtime.GOOS {
 	case "darwin":

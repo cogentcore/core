@@ -66,7 +66,7 @@ type Mesh interface {
 }
 
 // MeshBase provides the core implementation of Mesh interface
-type MeshBase struct { //gti:add -setters
+type MeshBase struct { //types:add -setters
 
 	// name of mesh -- meshes are linked to Solids by name so this matters
 	Nm string `set:"-"`

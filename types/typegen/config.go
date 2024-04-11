@@ -12,7 +12,7 @@ import (
 
 // Config contains the configuration information
 // used by typegen
-type Config struct { //gti:add
+type Config struct { //types:add
 
 	// the source directory to run typegen on (can be set to multiple through paths like ./...)
 	Dir string `default:"." posarg:"0" required:"-"`

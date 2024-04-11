@@ -11,7 +11,7 @@ import (
 )
 
 // XY represents X,Y values
-type XY[T any] struct { //gti:add
+type XY[T any] struct { //types:add
 	// X is the horizontal axis value
 	X T
 

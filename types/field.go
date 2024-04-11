@@ -23,7 +23,7 @@ type Field struct {
 
 func (f Field) GoString() string { return StructGoString(f) }
 
-// GetField recursively attempts to extract the [gti.Field]
+// GetField recursively attempts to extract the [Field]
 // with the given name from the given struct [reflect.Value],
 // by searching through all of the embeds if it can not find
 // it directly in the struct.
@@ -33,7 +33,7 @@ func GetField(val reflect.Value, field string) *Field {
 		return nil
 	}
 	typ := TypeByName(TypeName(val.Type()))
-	// if we are not in the gti registry, there is nothing that we can do
+	// if we are not in the type registry, there is nothing that we can do
 	if typ == nil {
 		return nil
 	}

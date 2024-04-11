@@ -48,7 +48,7 @@ func (im *Image) OnInit() {
 }
 
 // Open sets the image to the image located at the given filename.
-func (im *Image) Open(filename Filename) error { //gti:add
+func (im *Image) Open(filename Filename) error { //types:add
 	img, _, err := imagex.Open(string(filename))
 	if err != nil {
 		return err
