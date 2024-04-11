@@ -4,13 +4,13 @@ package filetree
 
 import (
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/views"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 	"cogentcore.org/core/vci"
+	"cogentcore.org/core/views"
 )
 
 // NodeType is the [gti.Type] for [Node]

@@ -10,10 +10,11 @@ import (
 )
 
 // PageType is the [gti.Type] for [Page]
-var PageType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/webcore.Page", IDName: "page", Doc: "Page represents one site page", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Source", Doc: "Source is the filesystem in which the content is located."}, {Name: "Context", Doc: "Context is the page's [htmlview.Context]."}, {Name: "History", Doc: "The history of URLs that have been visited. The oldest page is first."}, {Name: "HistoryIndex", Doc: "HistoryIndex is the current place we are at in the History"}, {Name: "PagePath", Doc: "PagePath is the fs path of the current page in [Page.Source]"}, {Name: "URLToPagePath", Doc: "URLToPagePath is a map between user-facing page URLs and underlying\nFS page paths."}}, Instance: &Page{}})
+var PageType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/pages.Page", IDName: "page", Doc: "Page represents a content page with support for navigating\nto other pages within the same source content.", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Source", Doc: "Source is the filesystem in which the content is located."}, {Name: "Context", Doc: "Context is the page's [htmlview.Context]."}, {Name: "History", Doc: "The history of URLs that have been visited. The oldest page is first."}, {Name: "HistoryIndex", Doc: "HistoryIndex is the current place we are at in the History"}, {Name: "PagePath", Doc: "PagePath is the fs path of the current page in [Page.Source]"}, {Name: "URLToPagePath", Doc: "URLToPagePath is a map between user-facing page URLs and underlying\nFS page paths."}}, Instance: &Page{}})
 
 // NewPage adds a new [Page] with the given name to the given parent:
-// Page represents one site page
+// Page represents a content page with support for navigating
+// to other pages within the same source content.
 func NewPage(parent tree.Node, name ...string) *Page {
 	return parent.NewChild(PageType, name...).(*Page)
 }

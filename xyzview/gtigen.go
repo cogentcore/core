@@ -9,7 +9,7 @@ import (
 )
 
 // ManipPointType is the [gti.Type] for [ManipPoint]
-var ManipPointType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyzv.ManipPoint", IDName: "manip-point", Doc: "ManipPoint is a manipulation control point", Directives: []gti.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []gti.Field{{Name: "Solid"}}, Instance: &ManipPoint{}})
+var ManipPointType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyzview.ManipPoint", IDName: "manip-point", Doc: "ManipPoint is a manipulation control point", Directives: []gti.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []gti.Field{{Name: "Solid"}}, Instance: &ManipPoint{}})
 
 // NodeType returns the [*gti.Type] of [ManipPoint]
 func (t *ManipPoint) NodeType() *gti.Type { return ManipPointType }
@@ -21,12 +21,12 @@ func (t *ManipPoint) New() tree.Node { return &ManipPoint{} }
 func (t *ManipPoint) SetMat(v xyz.Material) *ManipPoint { t.Mat = v; return t }
 
 // SceneType is the [gti.Type] for [Scene]
-var SceneType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyzv.Scene", IDName: "scene", Doc: "Scene is a core.Widget that manages a xyz.Scene,\nproviding the basic rendering logic for the 3D scene\nin the 2D gi gui context.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "XYZ", Doc: "XYZ is the 3D xyz.Scene"}, {Name: "SelectionMode", Doc: "how to deal with selection / manipulation events"}, {Name: "CurrentSelected", Doc: "currently selected node"}, {Name: "CurrentManipPoint", Doc: "currently selected manipulation control point"}, {Name: "SelectionParams", Doc: "parameters for selection / manipulation box"}}, Instance: &Scene{}})
+var SceneType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyzview.Scene", IDName: "scene", Doc: "Scene is a core.Widget that manages a xyz.Scene,\nproviding the basic rendering logic for the 3D scene\nin the 2D core GUI context.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "XYZ", Doc: "XYZ is the 3D xyz.Scene"}, {Name: "SelectionMode", Doc: "how to deal with selection / manipulation events"}, {Name: "CurrentSelected", Doc: "currently selected node"}, {Name: "CurrentManipPoint", Doc: "currently selected manipulation control point"}, {Name: "SelectionParams", Doc: "parameters for selection / manipulation box"}}, Instance: &Scene{}})
 
 // NewScene adds a new [Scene] with the given name to the given parent:
 // Scene is a core.Widget that manages a xyz.Scene,
 // providing the basic rendering logic for the 3D scene
-// in the 2D gi gui context.
+// in the 2D core GUI context.
 func NewScene(parent tree.Node, name ...string) *Scene {
 	return parent.NewChild(SceneType, name...).(*Scene)
 }
@@ -57,7 +57,7 @@ func (t *Scene) SetSelectionParams(v SelectionParams) *Scene { t.SelectionParams
 func (t *Scene) SetTooltip(v string) *Scene { t.Tooltip = v; return t }
 
 // SceneViewType is the [gti.Type] for [SceneView]
-var SceneViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyzv.SceneView", IDName: "scene-view", Doc: "SceneView provides a toolbar controller for an xyz.Scene,\nand manipulation abilities.", Embeds: []gti.Field{{Name: "Layout"}}, Instance: &SceneView{}})
+var SceneViewType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/xyzview.SceneView", IDName: "scene-view", Doc: "SceneView provides a toolbar controller for an xyz.Scene,\nand manipulation abilities.", Embeds: []gti.Field{{Name: "Layout"}}, Instance: &SceneView{}})
 
 // NewSceneView adds a new [SceneView] with the given name to the given parent:
 // SceneView provides a toolbar controller for an xyz.Scene,
