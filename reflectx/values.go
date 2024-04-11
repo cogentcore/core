@@ -919,20 +919,22 @@ func ToStringPrec(v any, prec int) string {
 }
 
 // SetRobust robustly sets the 'to' value from the 'from' value.
-// destination must be a pointer-to. Copies slices and maps robustly,
-// and can set a struct, slice or map from a JSON-formatted string from value.
-// Note that a map is _not_ reset prior to setting, whereas a slice length
-// is set to the source length and is thus equivalent to the source slice.
-func SetRobust(to, frm any) error {
+// The 'to' value must be a pointer. It copies slices and maps robustly,
+// and it can set a struct, slice, or map from a JSON-formatted string
+// value. It also handles many other cases, so it is unlikely to fail.
+//
+// Note that maps are not reset prior to setting, whereas slices are
+// set to be fully equivalent to the source slice.
+func SetRobust(to, from any) error {
 	if sa, ok := to.(SetAnyer); ok {
-		err := sa.SetAny(frm)
+		err := sa.SetAny(from)
 		if err != nil {
 			return err
 		}
 		return nil
 	}
 	if ss, ok := to.(SetStringer); ok {
-		if s, ok := frm.(string); ok {
+		if s, ok := from.(string); ok {
 			err := ss.SetString(s)
 			if err != nil {
 				return err
@@ -941,14 +943,14 @@ func SetRobust(to, frm any) error {
 		}
 	}
 	if es, ok := to.(enums.EnumSetter); ok {
-		if en, ok := frm.(enums.Enum); ok {
+		if en, ok := from.(enums.Enum); ok {
 			es.SetInt64(en.Int64())
 			return nil
 		}
-		if str, ok := frm.(string); ok {
+		if str, ok := from.(string); ok {
 			return es.SetString(str)
 		}
-		fm, err := ToInt(frm)
+		fm, err := ToInt(from)
 		if err != nil {
 			return err
 		}
@@ -957,7 +959,7 @@ func SetRobust(to, frm any) error {
 	}
 
 	if bv, ok := to.(bools.BoolSetter); ok {
-		fb, err := ToBool(frm)
+		fb, err := ToBool(from)
 		if err != nil {
 			return err
 		}
@@ -965,7 +967,7 @@ func SetRobust(to, frm any) error {
 		return nil
 	}
 	if td, ok := to.(*time.Duration); ok {
-		if fs, ok := frm.(string); ok {
+		if fs, ok := from.(string); ok {
 			fd, err := time.ParseDuration(fs)
 			if err != nil {
 				return err
@@ -975,7 +977,7 @@ func SetRobust(to, frm any) error {
 		}
 	}
 	if cd, ok := to.(*color.RGBA); ok {
-		fc, err := colors.FromAny(frm)
+		fc, err := colors.FromAny(from)
 		if err != nil {
 			return err
 		}
@@ -1000,44 +1002,40 @@ func SetRobust(to, frm any) error {
 
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
-		fm, err := ToInt(frm)
+		fm, err := ToInt(from)
 		if err != nil {
 			return err
 		}
 		vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
 		return nil
 	case vk >= reflect.Uint && vk <= reflect.Uint64:
-		fm, err := ToInt(frm)
+		fm, err := ToInt(from)
 		if err != nil {
 			return err
 		}
 		vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
 		return nil
 	case vk == reflect.Bool:
-		fm, err := ToBool(frm)
+		fm, err := ToBool(from)
 		if err != nil {
 			return err
 		}
 		vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
 		return nil
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
-		fm, err := ToFloat(frm)
+		fm, err := ToFloat(from)
 		if err != nil {
 			return err
 		}
 		vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
 		return nil
-	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
-		// cv := v.Complex()
-		// rv := strconv.FormatFloat(real(cv), 'G', -1, 64) + "," + strconv.FormatFloat(imag(cv), 'G', -1, 64)
-		// return rv, nil
 	case vk == reflect.String:
-		fm := ToString(frm)
+		fm := ToString(from)
 		vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
 		return nil
 	case vk == reflect.Struct:
-		if NonPtrType(reflect.TypeOf(frm)).Kind() == reflect.String {
-			err := json.Unmarshal([]byte(ToString(frm)), to) // todo: this is not working -- see what marshal says, etc
+		if NonPtrType(reflect.TypeOf(from)).Kind() == reflect.String {
+			err := json.Unmarshal([]byte(ToString(from)), to) // todo: this is not working -- see what marshal says, etc
 			if err != nil {
 				marsh, _ := json.Marshal(to)
 				return fmt.Errorf("error setting struct from string: %w (example format for string: %s)", err, string(marsh))
@@ -1045,32 +1043,32 @@ func SetRobust(to, frm any) error {
 			return nil
 		}
 	case vk == reflect.Slice:
-		if NonPtrType(reflect.TypeOf(frm)).Kind() == reflect.String {
-			err := json.Unmarshal([]byte(ToString(frm)), to)
+		if NonPtrType(reflect.TypeOf(from)).Kind() == reflect.String {
+			err := json.Unmarshal([]byte(ToString(from)), to)
 			if err != nil {
 				marsh, _ := json.Marshal(to)
 				return fmt.Errorf("error setting slice from string: %w (example format for string: %s)", err, string(marsh))
 			}
 			return nil
 		}
-		return CopySliceRobust(to, frm)
+		return CopySliceRobust(to, from)
 	case vk == reflect.Map:
-		if NonPtrType(reflect.TypeOf(frm)).Kind() == reflect.String {
-			err := json.Unmarshal([]byte(ToString(frm)), to)
+		if NonPtrType(reflect.TypeOf(from)).Kind() == reflect.String {
+			err := json.Unmarshal([]byte(ToString(from)), to)
 			if err != nil {
 				marsh, _ := json.Marshal(to)
 				return fmt.Errorf("error setting map from string: %w (example format for string: %s)", err, string(marsh))
 			}
 			return nil
 		}
-		return CopyMapRobust(to, frm)
+		return CopyMapRobust(to, from)
 	}
 
-	fv := NonPtrValue(reflect.ValueOf(frm))
-	// Just set it if possible to assign
+	fv := NonPtrValue(reflect.ValueOf(from))
+	// just set it if possible to assign
 	if fv.Type().AssignableTo(typ) {
 		vp.Elem().Set(fv)
 		return nil
 	}
-	return fmt.Errorf("unable to set value %v of type %T from value %v of type %T (not a supported type pair and direct assigning is not possible)", to, to, frm, frm)
+	return fmt.Errorf("unable to set value %v of type %T from value %v of type %T (not a supported type pair and direct assigning is not possible)", to, to, from, from)
 }
