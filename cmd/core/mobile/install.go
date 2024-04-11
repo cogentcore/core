@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 
 	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/xe"
+	"cogentcore.org/core/exec"
 )
 
 // Install installs the app named by the import path on the attached mobile device.
@@ -23,9 +23,9 @@ func Install(c *config.Config) error {
 	t := c.Build.Target[0]
 	switch t.OS {
 	case "android":
-		return xe.Run("adb", "install", "-r", filepath.Join("bin", "android", c.Name+".apk"))
+		return exec.Run("adb", "install", "-r", filepath.Join("bin", "android", c.Name+".apk"))
 	case "ios":
-		return xe.Major().SetBuffer(false).Run("ios-deploy", "-b", filepath.Join("bin", "ios", c.Name+".app"))
+		return exec.Major().SetBuffer(false).Run("ios-deploy", "-b", filepath.Join("bin", "ios", c.Name+".app"))
 	default:
 		return fmt.Errorf("mobile.Install only supports target platforms android and ios, but got %q", t.OS)
 	}

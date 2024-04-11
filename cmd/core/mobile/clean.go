@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"cogentcore.org/core/exec"
 	"cogentcore.org/core/logx"
-	"cogentcore.org/core/xe"
 )
 
 // Clean removes object files and cached NDK files downloaded by gomobile init
@@ -20,5 +20,5 @@ func Clean() (err error) {
 	}
 	GoMobilePath = filepath.Join(gopaths[0], "pkg/gomobile")
 	logx.PrintlnInfo("GOMOBILE=" + GoMobilePath)
-	return xe.RemoveAll(GoMobilePath)
+	return exec.RemoveAll(GoMobilePath)
 }

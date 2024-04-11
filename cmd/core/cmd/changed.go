@@ -14,8 +14,8 @@ import (
 	"sync"
 
 	"cogentcore.org/core/cmd/core/config"
+	"cogentcore.org/core/exec"
 	"cogentcore.org/core/logx"
-	"cogentcore.org/core/xe"
 )
 
 // Changed concurrently prints all of the repositories within this directory
@@ -31,7 +31,7 @@ func Changed(c *config.Config) error { //gti:add
 				return
 			}
 			dir := filepath.Dir(path)
-			out, err := xe.Major().SetDir(dir).Output("git", "diff")
+			out, err := exec.Major().SetDir(dir).Output("git", "diff")
 			if err != nil {
 				errs = append(errs, fmt.Errorf("error getting diff of %q: %w", dir, err))
 				return
@@ -41,7 +41,7 @@ func Changed(c *config.Config) error { //gti:add
 				return
 			}
 			// if we don't have a diff, we also check to make sure we aren't ahead of the remote
-			out, err = xe.Minor().SetDir(dir).Output("git", "status")
+			out, err = exec.Minor().SetDir(dir).Output("git", "status")
 			if err != nil {
 				errs = append(errs, fmt.Errorf("error getting status of %q: %w", dir, err))
 				return

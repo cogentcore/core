@@ -16,8 +16,8 @@ import (
 
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/mobile/sdkpath"
+	exec1 "cogentcore.org/core/exec"
 	"cogentcore.org/core/logx"
-	"cogentcore.org/core/xe"
 )
 
 // General mobile build environment. Initialized by envInit.
@@ -121,7 +121,7 @@ func BuildEnvInit(c *config.Config) (cleanup func(), err error) {
 	}
 
 	cleanupFn := func() {
-		xe.RemoveAll(TmpDir)
+		exec1.RemoveAll(TmpDir)
 	}
 	TmpDir, err = os.MkdirTemp("", "gomobile-work-")
 	if err != nil {
@@ -406,13 +406,13 @@ func NDKRoot(c *config.Config, targets ...config.Platform) (string, error) {
 }
 
 func EnvClang(c *config.Config, sdkName string) (clang, cflags string, err error) {
-	out, err := xe.Minor().Output("xcrun", "--sdk", sdkName, "--find", "clang")
+	out, err := exec1.Minor().Output("xcrun", "--sdk", sdkName, "--find", "clang")
 	if err != nil {
 		return "", "", fmt.Errorf("xcrun --find: %v\n%s", err, out)
 	}
 	clang = strings.TrimSpace(string(out))
 
-	out, err = xe.Minor().Output("xcrun", "--sdk", sdkName, "--show-sdk-path")
+	out, err = exec1.Minor().Output("xcrun", "--sdk", sdkName, "--show-sdk-path")
 	if err != nil {
 		return "", "", fmt.Errorf("xcrun --show-sdk-path: %v\n%s", err, out)
 	}

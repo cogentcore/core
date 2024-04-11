@@ -11,7 +11,7 @@ import (
 
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/mobile"
-	"cogentcore.org/core/xe"
+	"cogentcore.org/core/exec"
 )
 
 // Install installs the package on the local system.
@@ -53,9 +53,9 @@ func Install(c *config.Config) error { //gti:add
 			if err != nil {
 				return err
 			}
-			return xe.Run("cp", "-a", filepath.Join("bin", "darwin", c.Name+".app"), "/Applications")
+			return exec.Run("cp", "-a", filepath.Join("bin", "darwin", c.Name+".app"), "/Applications")
 		default:
-			return xe.Major().SetEnv("GOOS", p.OS).SetEnv("GOARCH", runtime.GOARCH).Run("go", "install")
+			return exec.Major().SetEnv("GOOS", p.OS).SetEnv("GOARCH", runtime.GOARCH).Run("go", "install")
 		}
 	}
 	return nil

@@ -15,8 +15,8 @@ import (
 
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/rendericon"
+	"cogentcore.org/core/exec"
 	"cogentcore.org/core/iox/imagex"
-	"cogentcore.org/core/xe"
 )
 
 // Build builds an app for web using the given configuration information.
@@ -26,16 +26,16 @@ func Build(c *config.Config) error {
 	if c.Web.Gzip {
 		opath += ".orig"
 	}
-	err := xe.Major().SetEnv("GOOS", "js").SetEnv("GOARCH", "wasm").Run("go", "build", "-o", opath, "-ldflags", config.VersionLinkerFlags())
+	err := exec.Major().SetEnv("GOOS", "js").SetEnv("GOARCH", "wasm").Run("go", "build", "-o", opath, "-ldflags", config.VersionLinkerFlags())
 	if err != nil {
 		return err
 	}
 	if c.Web.Gzip {
-		err = xe.RemoveAll(output + ".orig.gz")
+		err = exec.RemoveAll(output + ".orig.gz")
 		if err != nil {
 			return err
 		}
-		err = xe.Run("gzip", output+".orig")
+		err = exec.Run("gzip", output+".orig")
 		if err != nil {
 			return err
 		}
@@ -124,7 +124,7 @@ func MakeFiles(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	err = xe.Run("cp", "icon.svg", filepath.Join(odir, "icons", "svg.svg"))
+	err = exec.Run("cp", "icon.svg", filepath.Join(odir, "icons", "svg.svg"))
 	if err != nil {
 		return err
 	}

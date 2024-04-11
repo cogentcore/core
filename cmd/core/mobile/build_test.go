@@ -18,8 +18,8 @@ import (
 
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/mobile/sdkpath"
+	exec1 "cogentcore.org/core/exec"
 	"cogentcore.org/core/laser"
-	"cogentcore.org/core/xe"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -89,7 +89,7 @@ func TestAndroidBuild(t *testing.T) {
 	c := &config.Config{}
 	laser.SetFromDefaultTags(c)
 	defer func() {
-		xe.SetMajor(nil)
+		exec1.SetMajor(nil)
 	}()
 	c.Build.Target = []config.Platform{{OS: "android", Arch: "arm"}}
 	gopath = filepath.ToSlash(filepath.SplitList(GoEnv("GOPATH"))[0])

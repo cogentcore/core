@@ -16,7 +16,7 @@ import (
 
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/rendericon"
-	"cogentcore.org/core/xe"
+	exec1 "cogentcore.org/core/exec"
 	"github.com/jackmordaunt/icns/v2"
 	"golang.org/x/tools/go/packages"
 )
@@ -65,10 +65,10 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 	}
 
 	for _, file := range files {
-		if err := xe.MkdirAll(filepath.Dir(file.name), 0755); err != nil {
+		if err := exec1.MkdirAll(filepath.Dir(file.name), 0755); err != nil {
 			return nil, err
 		}
-		xe.PrintCmd(fmt.Sprintf("echo \"%s\" > %s", file.contents, file.name), nil)
+		exec1.PrintCmd(fmt.Sprintf("echo \"%s\" > %s", file.contents, file.name), nil)
 		if err := os.WriteFile(file.name, file.contents, 0644); err != nil {
 			return nil, err
 		}
@@ -104,7 +104,7 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 
 	}
 
-	if err := xe.Run("xcrun", args...); err != nil {
+	if err := exec1.Run("xcrun", args...); err != nil {
 		return nil, err
 	}
 
@@ -113,7 +113,7 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 	}
 
 	// Build and move the release build to the output directory.
-	err = xe.Run("xcrun", "xcodebuild",
+	err = exec1.Run("xcrun", "xcodebuild",
 		"-configuration", "Release",
 		"-project", TmpDir+"/main.xcodeproj",
 		"-allowProvisioningUpdates",
@@ -145,9 +145,9 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 		return nil, err
 	}
 	output := filepath.Join("bin", "ios", c.Name+".app")
-	xe.PrintCmd(fmt.Sprintf("mv %s %s", TmpDir+"/build/Release-iphoneos/main.app", output), nil)
+	exec1.PrintCmd(fmt.Sprintf("mv %s %s", TmpDir+"/build/Release-iphoneos/main.app", output), nil)
 	// if output already exists, remove.
-	if err := xe.RemoveAll(output); err != nil {
+	if err := exec1.RemoveAll(output); err != nil {
 		return nil, err
 	}
 	if err := os.Rename(TmpDir+"/build/Release-iphoneos/main.app", output); err != nil {
@@ -156,7 +156,7 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 
 	// need to copy framework
 	// TODO(kai): could do framework setup step here
-	err = xe.Run("cp", "-r", "$HOME/Library/CogentCore/MoltenVK.framework", output)
+	err = exec1.Run("cp", "-r", "$HOME/Library/CogentCore/MoltenVK.framework", output)
 	if err != nil {
 		return nil, err
 	}
@@ -181,20 +181,20 @@ func SetupMoltenFramework() error {
 	if err != nil {
 		return err
 	}
-	err = xe.Major().SetDir(tmp).Run("git", "clone", "https://github.com/goki/vulkan_mac_deps")
+	err = exec1.Major().SetDir(tmp).Run("git", "clone", "https://github.com/goki/vulkan_mac_deps")
 	if err != nil {
 		return err
 	}
 
-	err = xe.MkdirAll(gdir, 0750)
+	err = exec1.MkdirAll(gdir, 0750)
 	if err != nil {
 		return err
 	}
-	err = xe.Run("cp", "-r", filepath.Join(tmp, "vulkan_mac_deps", "sdk", "ios", "MoltenVK.framework"), gdir)
+	err = exec1.Run("cp", "-r", filepath.Join(tmp, "vulkan_mac_deps", "sdk", "ios", "MoltenVK.framework"), gdir)
 	if err != nil {
 		return err
 	}
-	return xe.RemoveAll(tmp)
+	return exec1.RemoveAll(tmp)
 }
 
 // DetectTeamID determines the Apple Development Team ID on the system.
@@ -233,7 +233,7 @@ func DetectTeamID() (string, error) {
 
 func AppleCopyAssets(c *config.Config, pkg *packages.Package, xcodeProjDir string) error {
 	dstAssets := xcodeProjDir + "/main/assets"
-	return xe.MkdirAll(dstAssets, 0755)
+	return exec1.MkdirAll(dstAssets, 0755)
 }
 
 type InfoplistTmplData struct {

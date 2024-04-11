@@ -21,8 +21,8 @@ import (
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/mobile/binres"
 	"cogentcore.org/core/cmd/core/rendericon"
+	"cogentcore.org/core/exec"
 	"cogentcore.org/core/logx"
-	"cogentcore.org/core/xe"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -76,7 +76,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 		toolchain := NDK.Toolchain(t.Arch)
 		libPath := "lib/" + toolchain.ABI + "/lib" + libName + ".so"
 		libAbsPath := filepath.Join(TmpDir, libPath)
-		if err := xe.MkdirAll(filepath.Dir(libAbsPath), 0755); err != nil {
+		if err := exec.MkdirAll(filepath.Dir(libAbsPath), 0755); err != nil {
 			return nil, err
 		}
 		err = GoBuild(

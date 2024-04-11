@@ -11,17 +11,17 @@ import (
 	"runtime"
 
 	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/xe"
+	"cogentcore.org/core/exec"
 	"github.com/mitchellh/go-homedir"
 )
 
 // Setup installs platform-specific dependencies for the current platform.
 // It only needs to be called once per system.
 func Setup(c *config.Config) error { //gti:add
-	vc := xe.Verbose().SetBuffer(false)
+	vc := exec.Verbose().SetBuffer(false)
 	switch runtime.GOOS {
 	case "darwin":
-		p, err := xe.Output("xcode-select", "-p")
+		p, err := exec.Output("xcode-select", "-p")
 		if err != nil || p == "" {
 			err := vc.Run("xcode-select", "--install")
 			if err != nil {
@@ -32,7 +32,7 @@ func Setup(c *config.Config) error { //gti:add
 		if err != nil {
 			return err
 		}
-		err = xe.Run("sudo", "hdiutil", "attach", "vulkansdk-macos-1.3.261.1.dmg")
+		err = exec.Run("sudo", "hdiutil", "attach", "vulkansdk-macos-1.3.261.1.dmg")
 		if err != nil {
 			return err
 		}
@@ -47,7 +47,7 @@ func Setup(c *config.Config) error { //gti:add
 		}
 		return nil
 	case "linux":
-		_, err := xe.LookPath("apt-get")
+		_, err := exec.LookPath("apt-get")
 		if err == nil {
 			err := vc.Run("sudo", "apt-get", "update")
 			if err != nil {
@@ -55,7 +55,7 @@ func Setup(c *config.Config) error { //gti:add
 			}
 			return vc.Run("sudo", "apt-get", "install", "libgl1-mesa-dev", "xorg-dev")
 		}
-		_, err = xe.LookPath("dnf")
+		_, err = exec.LookPath("dnf")
 		if err == nil {
 			return vc.Run("sudo", "dnf", "install", "libX11-devel", "libXcursor-devel", "libXrandr-devel", "libXinerama-devel", "mesa-libGL-devel", "libXi-devel", "libXxf86vm-devel")
 		}

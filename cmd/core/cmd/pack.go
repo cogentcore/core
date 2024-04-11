@@ -13,9 +13,9 @@ import (
 
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/rendericon"
+	"cogentcore.org/core/exec"
 	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/strcase"
-	"cogentcore.org/core/xe"
 	"github.com/jackmordaunt/icns/v2"
 )
 
@@ -69,7 +69,7 @@ func PackLinux(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	err = xe.Run("cp", "-p", c.Name, filepath.Join(ulbpath, anm))
+	err = exec.Run("cp", "-p", c.Name, filepath.Join(ulbpath, anm))
 	if err != nil {
 		return err
 	}
@@ -94,7 +94,7 @@ func PackLinux(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	err = xe.Run("cp", "icon.svg", filepath.Join(iscpath, anm+".svg"))
+	err = exec.Run("cp", "icon.svg", filepath.Join(iscpath, anm+".svg"))
 	if err != nil {
 		return err
 	}
@@ -141,7 +141,7 @@ func PackLinux(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	return xe.Run("dpkg-deb", "--build", apath)
+	return exec.Run("dpkg-deb", "--build", apath)
 }
 
 // DesktopFileData is the data passed to [DesktopFileTmpl]
@@ -206,11 +206,11 @@ func PackDarwin(c *config.Config) error {
 		return err
 	}
 
-	err = xe.Run("cp", "-p", c.Name, filepath.Join(mpath, anm))
+	err = exec.Run("cp", "-p", c.Name, filepath.Join(mpath, anm))
 	if err != nil {
 		return err
 	}
-	err = xe.Run("chmod", "+x", mpath)
+	err = exec.Run("chmod", "+x", mpath)
 	if err != nil {
 		return err
 	}
@@ -254,8 +254,8 @@ func PackDarwin(c *config.Config) error {
 		return nil
 	}
 	// install dmgbuild if we don't already have it
-	if _, err := xe.LookPath("dmgbuild"); err != nil {
-		err = xe.Verbose().SetBuffer(false).Run("pip", "install", "dmgbuild")
+	if _, err := exec.LookPath("dmgbuild"); err != nil {
+		err = exec.Verbose().SetBuffer(false).Run("pip", "install", "dmgbuild")
 		if err != nil {
 			return err
 		}
@@ -275,7 +275,7 @@ func PackDarwin(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	err = xe.Run("dmgbuild",
+	err = exec.Run("dmgbuild",
 		"-s", dmgsnm,
 		c.Name, filepath.Join(bpath, c.Name+".dmg"))
 	if err != nil {
@@ -365,16 +365,16 @@ func PackWindows(c *config.Config) error {
 		return err
 	}
 
-	err = xe.Run("cp", c.Name+".exe", filepath.Join(ipath, "app.exe"))
+	err = exec.Run("cp", c.Name+".exe", filepath.Join(ipath, "app.exe"))
 	if err != nil {
 		return err
 	}
-	err = xe.Run("cp", "icon.svg", filepath.Join(ipath, "icon.svg"))
+	err = exec.Run("cp", "icon.svg", filepath.Join(ipath, "icon.svg"))
 	if err != nil {
 		return err
 	}
 
-	err = xe.Run("go", "build", "-o", epath, gpath)
+	err = exec.Run("go", "build", "-o", epath, gpath)
 	if err != nil {
 		return err
 	}

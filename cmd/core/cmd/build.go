@@ -17,7 +17,7 @@ import (
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/mobile"
 	"cogentcore.org/core/cmd/core/web"
-	"cogentcore.org/core/xe"
+	"cogentcore.org/core/exec"
 )
 
 // Build builds an executable for the package
@@ -58,7 +58,7 @@ func Build(c *config.Config) error { //gti:add
 // BuildDesktop builds an executable for the config package for the given desktop platform.
 // BuildDesktop does not check whether platforms are valid, so it should be called through Build in almost all cases.
 func BuildDesktop(c *config.Config, platform config.Platform) error {
-	xc := xe.Major()
+	xc := exec.Major()
 	xc.Env["GOOS"] = platform.OS
 	xc.Env["GOARCH"] = platform.Arch
 

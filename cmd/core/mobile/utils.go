@@ -16,8 +16,8 @@ import (
 	"sync"
 
 	"cogentcore.org/core/cmd/core/config"
+	"cogentcore.org/core/exec"
 	"cogentcore.org/core/logx"
-	"cogentcore.org/core/xe"
 	"golang.org/x/mod/modfile"
 	"golang.org/x/tools/go/packages"
 )
@@ -30,7 +30,7 @@ var (
 func CopyFile(c *config.Config, dst, src string) error {
 	return WriteFile(c, dst, func(w io.Writer) error {
 		f, err := os.Open(src)
-		xe.PrintCmd(fmt.Sprintf("cp %s %s", src, dst), err)
+		exec.PrintCmd(fmt.Sprintf("cp %s %s", src, dst), err)
 		if err != nil {
 			return err
 		}
@@ -46,7 +46,7 @@ func CopyFile(c *config.Config, dst, src string) error {
 func WriteFile(c *config.Config, filename string, generate func(io.Writer) error) error {
 	logx.PrintlnInfo("write", filename)
 
-	if err := xe.MkdirAll(filepath.Dir(filename), 0755); err != nil {
+	if err := exec.MkdirAll(filepath.Dir(filename), 0755); err != nil {
 		return err
 	}
 
@@ -77,7 +77,7 @@ func PackagesConfig(c *config.Config, t *config.Platform) *packages.Config {
 
 // GetModuleVersions returns a module information at the directory src.
 func GetModuleVersions(c *config.Config, targetPlatform string, targetArch string, src string) (*modfile.File, error) {
-	xc := xe.Minor().SetDir(src).SetEnv("GOOS", PlatformOS(targetPlatform)).SetEnv("GOARCH", targetArch)
+	xc := exec.Minor().SetDir(src).SetEnv("GOOS", PlatformOS(targetPlatform)).SetEnv("GOARCH", targetArch)
 
 	tags := PlatformTags(targetPlatform)
 
@@ -169,7 +169,7 @@ var (
 
 func AreGoModulesUsed() (bool, error) {
 	AreGoModulesUsedOnce.Do(func() {
-		out, err := xe.Minor().Output("go", "env", "GOMOD")
+		out, err := exec.Minor().Output("go", "env", "GOMOD")
 		if err != nil {
 			AreGoModulesUsedResult.err = err
 			return
@@ -181,7 +181,7 @@ func AreGoModulesUsed() (bool, error) {
 }
 
 func Symlink(c *config.Config, src, dst string) error {
-	xe.PrintCmd(fmt.Sprintf("ln -s %s %s", src, dst), nil)
+	exec.PrintCmd(fmt.Sprintf("ln -s %s %s", src, dst), nil)
 	if GOOS == "windows" {
 		return DoCopyAll(dst, src) // TODO: do we need to do this?
 	}
@@ -224,7 +224,7 @@ func GoEnv(name string) string {
 	if val := os.Getenv(name); val != "" {
 		return val
 	}
-	val, err := xe.Minor().Output("go", "env", name)
+	val, err := exec.Minor().Output("go", "env", name)
 	if err != nil {
 		panic(err) // the Go tool was tested to work earlier
 	}

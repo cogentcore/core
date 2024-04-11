@@ -12,8 +12,8 @@ import (
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/mobile"
 	"cogentcore.org/core/cmd/core/web"
+	"cogentcore.org/core/exec"
 	"cogentcore.org/core/logx"
-	"cogentcore.org/core/xe"
 )
 
 // Run builds and runs the config package. It also displays the logs generated
@@ -53,9 +53,9 @@ func Run(c *config.Config) error { //gti:add
 	}
 	switch t.OS {
 	case "darwin", "windows", "linux":
-		return xe.Verbose().SetBuffer(false).Run("." + string(filepath.Separator) + c.Name)
+		return exec.Verbose().SetBuffer(false).Run("." + string(filepath.Separator) + c.Name)
 	case "android":
-		err := xe.Run("adb", "install", "-r", filepath.Join("bin", "android", c.Name+".apk"))
+		err := exec.Run("adb", "install", "-r", filepath.Join("bin", "android", c.Name+".apk"))
 		if err != nil {
 			return fmt.Errorf("error installing app: %w", err)
 		}
@@ -65,7 +65,7 @@ func Run(c *config.Config) error { //gti:add
 		// if c.Build.Debug {
 		// args = append(args, "-D")
 		// }
-		err = xe.Run("adb", args...)
+		err = exec.Run("adb", args...)
 		if err != nil {
 			return fmt.Errorf("error starting app: %w", err)
 		}
@@ -77,7 +77,7 @@ func Run(c *config.Config) error { //gti:add
 		if !c.Build.Debug {
 			return mobile.Install(c)
 		}
-		return xe.Verbose().SetBuffer(false).Run("ios-deploy", "-b", filepath.Join("bin", "ios", c.Name+".app"), "-d")
+		return exec.Verbose().SetBuffer(false).Run("ios-deploy", "-b", filepath.Join("bin", "ios", c.Name+".app"), "-d")
 	case "web":
 		return web.Serve(c)
 	}

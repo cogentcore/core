@@ -8,7 +8,7 @@ import (
 	"fmt"
 
 	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/xe"
+	"cogentcore.org/core/exec"
 )
 
 // Log prints the logs from your app running on Android to the terminal.
@@ -19,13 +19,13 @@ func Log(c *config.Config) error { //gti:add
 		return fmt.Errorf("only android is supported for log; use the -debug flag on run for other platforms")
 	}
 	if !c.Log.Keep {
-		err := xe.Run("adb", "logcat", "-c")
+		err := exec.Run("adb", "logcat", "-c")
 		if err != nil {
 			return fmt.Errorf("error clearing logs: %w", err)
 		}
 	}
 	// we are logging continiously so we can't buffer, and we must be verbose
-	err := xe.Verbose().SetBuffer(false).Run("adb", "logcat", "*:"+c.Log.All, "Go:D", "GoLog:D")
+	err := exec.Verbose().SetBuffer(false).Run("adb", "logcat", "*:"+c.Log.All, "Go:D", "GoLog:D")
 	if err != nil {
 		return fmt.Errorf("erroring getting logs: %w", err)
 	}

@@ -17,9 +17,9 @@ import (
 	"unicode"
 
 	"cogentcore.org/core/enums/enumgen"
+	"cogentcore.org/core/exec"
 	"cogentcore.org/core/gti/gtigen"
 	"cogentcore.org/core/strcase"
-	"cogentcore.org/core/xe"
 )
 
 // Config is the main config struct
@@ -158,13 +158,13 @@ func (c *Config) OnConfig(cmd string) error {
 // VersionLinkerFlags returns the ld linker flags that specify the app and core version.
 func VersionLinkerFlags() string {
 	res := ""
-	av, err := xe.Silent().Output("git", "describe", "--tags")
+	av, err := exec.Silent().Output("git", "describe", "--tags")
 	if err == nil {
 		res += "-X cogentcore.org/core/system.AppVersion=" + av
 	}
 
 	// workspaces can interfere with getting the right version
-	cv, err := xe.Silent().SetEnv("GOWORK", "off").Output("go", "list", "-m", "-f", "{{.Version}}", "cogentcore.org/core")
+	cv, err := exec.Silent().SetEnv("GOWORK", "off").Output("go", "list", "-m", "-f", "{{.Version}}", "cogentcore.org/core")
 	if err == nil {
 		// we must be in core itself if it is blank
 		if cv == "" {

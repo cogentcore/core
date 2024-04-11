@@ -6,7 +6,7 @@
 // Copyright presumably by Nate Finch, primary contributor
 // Apache License, Version 2.0, January 2004
 
-package xe
+package exec
 
 import (
 	"bytes"

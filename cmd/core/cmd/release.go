@@ -9,17 +9,17 @@ import (
 	"strings"
 
 	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/xe"
+	"cogentcore.org/core/exec"
 	"github.com/Masterminds/semver/v3"
 )
 
 // Release releases the project with the specified git version tag.
 func Release(c *config.Config) error { //gti:add
-	err := xe.Run("git", "tag", "-a", c.Version, "-m", c.Version+" release")
+	err := exec.Run("git", "tag", "-a", c.Version, "-m", c.Version+" release")
 	if err != nil {
 		return fmt.Errorf("error tagging release: %w", err)
 	}
-	err = xe.Run("git", "push", "origin", "--tags")
+	err = exec.Run("git", "push", "origin", "--tags")
 	if err != nil {
 		return fmt.Errorf("error pushing tags: %w", err)
 	}
@@ -40,7 +40,7 @@ func NextRelease(c *config.Config) error { //gti:add
 // NextVersion returns the version of the project
 // incremented by one patch version.
 func NextVersion(c *config.Config) (string, error) {
-	cur, err := xe.Output("git", "describe", "--tags", "--abbrev=0")
+	cur, err := exec.Output("git", "describe", "--tags", "--abbrev=0")
 	if err != nil {
 		return "", err
 	}

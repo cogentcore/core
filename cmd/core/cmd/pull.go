@@ -13,7 +13,7 @@ import (
 	"sync"
 
 	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/xe"
+	"cogentcore.org/core/exec"
 )
 
 // Pull concurrently pulls all of the Git repositories within the current directory.
@@ -28,7 +28,7 @@ func Pull(c *config.Config) error { //gti:add
 				return
 			}
 			dir := filepath.Dir(path)
-			err := xe.Major().SetDir(dir).Run("git", "pull")
+			err := exec.Major().SetDir(dir).Run("git", "pull")
 			if err != nil {
 				errs = append(errs, fmt.Errorf("error pulling %q: %w", dir, err))
 			}

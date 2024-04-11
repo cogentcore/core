@@ -10,8 +10,8 @@ import (
 	"testing"
 	"text/template"
 
+	"cogentcore.org/core/cli"
 	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/xe"
 )
 
 func TestAppleBuild(t *testing.T) {
@@ -22,7 +22,7 @@ func TestAppleBuild(t *testing.T) {
 	c := &config.Config{}
 	cli.SetFromDefaults(c)
 	defer func() {
-		xe.SetMajor(nil)
+		exec.SetMajor(nil)
 	}()
 	c.Build.Target = []config.Platform{{OS: "ios", Arch: "arm64"}}
 	c.ID = "org.golang.todo"
@@ -35,7 +35,7 @@ func TestAppleBuild(t *testing.T) {
 	}
 	for _, test := range tests {
 		buf := new(bytes.Buffer)
-		xe.SetMajor(xe.Major().SetStdout(buf).SetStderr(buf))
+		exec.SetMajor(exec.Major().SetStdout(buf).SetStderr(buf))
 		var tmpl *template.Template
 		if test.main {
 			tmpl = appleMainBuildTmpl

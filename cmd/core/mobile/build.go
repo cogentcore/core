@@ -24,8 +24,8 @@ import (
 	"maps"
 
 	"cogentcore.org/core/cmd/core/config"
+	exec1 "cogentcore.org/core/exec"
 	"cogentcore.org/core/logx"
-	"cogentcore.org/core/xe"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -216,7 +216,7 @@ func GoCmdAt(c *config.Config, at string, subcmd string, srcs []string, env map[
 	cargs = append(cargs, args...)
 	cargs = append(cargs, srcs...)
 
-	xc := xe.Major().SetDir(at)
+	xc := exec1.Major().SetDir(at)
 	maps.Copy(xc.Env, env)
 
 	// Specify GOMODCACHE explicitly. The default cache path is GOPATH[0]/pkg/mod,
@@ -232,7 +232,7 @@ func GoModTidyAt(c *config.Config, at string, env map[string]string) error {
 	if logx.UserLevel <= slog.LevelInfo {
 		args = append(args, "-v")
 	}
-	xc := xe.Major().SetDir(at)
+	xc := exec1.Major().SetDir(at)
 	maps.Copy(xc.Env, env)
 
 	// Specify GOMODCACHE explicitly. The default cache path is GOPATH[0]/pkg/mod,
@@ -240,11 +240,11 @@ func GoModTidyAt(c *config.Config, at string, env map[string]string) error {
 	if gmc, err := GoModCachePath(); err == nil {
 		xc.SetEnv("GOMODCACHE", gmc)
 	}
-	return xe.Run("go", args...)
+	return exec1.Run("go", args...)
 }
 
 func GoModCachePath() (string, error) {
-	out, err := xe.Output("go", "env", "GOMODCACHE")
+	out, err := exec1.Output("go", "env", "GOMODCACHE")
 	if err != nil {
 		return "", err
 	}
