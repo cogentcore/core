@@ -18,7 +18,7 @@ func (km *Maps) MarkdownDoc() string { //gti:add
 
 	fmap := make([][][]string, len(*km)) // km, kf, ch
 	for i := range *km {
-		fmap[i] = make([][]string, FunsN)
+		fmap[i] = make([][]string, FunctionsN)
 	}
 
 	for _, md := range mods {
@@ -83,7 +83,7 @@ func (km *Maps) MarkdownDoc() string { //gti:add
 	}
 	b.WriteString("|\n")
 
-	for kf := MoveUp; kf < FunsN; kf++ {
+	for kf := MoveUp; kf < FunctionsN; kf++ {
 		b.WriteString("| " + kf.String() + " ")
 		for mi, m := range *km {
 			f := fmap[mi][kf]
