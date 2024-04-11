@@ -25,7 +25,7 @@ var Update3DTrace = false
 
 // Scene is the overall scenegraph containing nodes as children.
 // It renders to its own vgpu.RenderFrame.
-// The Image of this Frame is usable directly or, via xyzv.Scene,
+// The Image of this Frame is usable directly or, via xyzview.Scene,
 // where it is copied into an overall core.Scene image.
 //
 // There is default navigation event processing (disabled by setting NoNav)

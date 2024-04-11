@@ -15,13 +15,13 @@ import (
 	"cogentcore.org/core/views"
 	"cogentcore.org/core/xyz"
 	_ "cogentcore.org/core/xyz/io/obj"
-	"cogentcore.org/core/xyzv"
+	"cogentcore.org/core/xyzview"
 )
 
 func main() {
 	b := core.NewBody("XYZ Object Viewer")
 
-	sv := xyzv.NewSceneView(b)
+	sv := xyzview.NewSceneView(b)
 	sv.Config()
 	sc := sv.SceneXYZ()
 

@@ -17,7 +17,7 @@ import (
 	"cogentcore.org/core/xyz"
 	"cogentcore.org/core/xyz/examples/assets"
 	_ "cogentcore.org/core/xyz/io/obj"
-	"cogentcore.org/core/xyzv"
+	"cogentcore.org/core/xyzview"
 
 	"cogentcore.org/core/mat32"
 )
@@ -44,7 +44,7 @@ type Anim struct {
 	Ticker *time.Ticker `view:"-"`
 
 	// the scene viewer
-	SceneView *xyzv.SceneView
+	SceneView *xyzview.SceneView
 
 	// the torus
 	Torus *xyz.Solid
@@ -61,7 +61,7 @@ type Anim struct {
 
 // Start starts the animation ticker timer -- if on is true, then
 // animation will actually start too.
-func (an *Anim) Start(sv *xyzv.SceneView, on bool) {
+func (an *Anim) Start(sv *xyzview.SceneView, on bool) {
 	an.SceneView = sv
 	an.On = on
 	an.DoTorus = true
@@ -146,11 +146,11 @@ func main() {
 		anim.On = !anim.On
 	})
 
-	sv := xyzv.NewSceneView(b)
+	sv := xyzview.NewSceneView(b)
 	sv.Config()
 	sw := sv.SceneWidget()
 	sc := sv.SceneXYZ()
-	sw.SelectionMode = xyzv.Manipulable
+	sw.SelectionMode = xyzview.Manipulable
 
 	// options - must be set here
 	// sc.MultiSample = 1

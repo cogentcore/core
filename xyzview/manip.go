@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package xyzv
+package xyzview
 
 import (
 	"image/color"
@@ -164,7 +164,7 @@ type ManipPoint struct {
 
 // NewManipPoint adds a new manipulation point
 func NewManipPoint(parent tree.Node, name string, meshName string, clr color.RGBA, pos mat32.Vec3) *ManipPoint {
-	mpt := parent.NewChild(ManipPtType, name).(*ManipPoint)
+	mpt := parent.NewChild(ManipPointType, name).(*ManipPoint)
 	mpt.SetMeshName(meshName)
 	mpt.Defaults()
 	mpt.Pose.Pos = pos
