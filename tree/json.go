@@ -19,7 +19,7 @@ import (
 	"cogentcore.org/core/iox/jsons"
 )
 
-// note: use package grows/jsons for standard read / write of JSON files
+// note: use package iox/jsonx for standard read / write of JSON files
 // for trees.  The Slice Marshal / Unmarshal methods save the type info
 // of each child so that the full tree can be properly reconstructed.
 

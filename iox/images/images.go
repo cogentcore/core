@@ -140,7 +140,7 @@ func Write(im image.Image, w io.Writer, f Formats) error {
 	case BMP:
 		return bmp.Encode(w, im)
 	default:
-		return fmt.Errorf("grows/images.Save: format %q not valid", f)
+		return fmt.Errorf("iox/imagex.Save: format %q not valid", f)
 	}
 }
 
