@@ -27,7 +27,7 @@ import (
 	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/mimedata"
@@ -548,7 +548,7 @@ func (sv *SliceViewBase) BindSelect(val *int) *SliceViewBase {
 	sv.OnDoubleClick(func(e events.Event) {
 		if sv.ClickSelectEvent(e) {
 			*val = sv.SelectedIndex
-			sv.Scene.SendKeyFun(keyfun.Accept, e) // activates Ok button code
+			sv.Scene.SendKey(keymap.Accept, e) // activates Ok button code
 		}
 	})
 	return sv
@@ -1852,7 +1852,7 @@ func (sv *SliceViewBase) ContextMenu(m *core.Scene) {
 
 // KeyInputNav supports multiple selection navigation keys
 func (sv *SliceViewBase) KeyInputNav(kt events.Event) {
-	kf := keyfun.Of(kt.KeyChord())
+	kf := keymap.Of(kt.KeyChord())
 	selMode := events.SelectModeBits(kt.Modifiers())
 	if selMode == events.SelectOne {
 		if sv.Is(SliceViewSelectMode) {
@@ -1860,26 +1860,26 @@ func (sv *SliceViewBase) KeyInputNav(kt events.Event) {
 		}
 	}
 	switch kf {
-	case keyfun.CancelSelect:
+	case keymap.CancelSelect:
 		sv.UnselectAllIndexes()
 		sv.SetFlag(false, SliceViewSelectMode)
 		kt.SetHandled()
-	case keyfun.MoveDown:
+	case keymap.MoveDown:
 		sv.MoveDownAction(selMode)
 		kt.SetHandled()
-	case keyfun.MoveUp:
+	case keymap.MoveUp:
 		sv.MoveUpAction(selMode)
 		kt.SetHandled()
-	case keyfun.PageDown:
+	case keymap.PageDown:
 		sv.MovePageDownAction(selMode)
 		kt.SetHandled()
-	case keyfun.PageUp:
+	case keymap.PageUp:
 		sv.MovePageUpAction(selMode)
 		kt.SetHandled()
-	case keyfun.SelectMode:
+	case keymap.SelectMode:
 		sv.SetFlag(!sv.Is(SliceViewSelectMode), SliceViewSelectMode)
 		kt.SetHandled()
-	case keyfun.SelectAll:
+	case keymap.SelectAll:
 		sv.SelectAllIndexes()
 		sv.SetFlag(false, SliceViewSelectMode)
 		kt.SetHandled()
@@ -1892,43 +1892,43 @@ func (sv *SliceViewBase) KeyInputEditable(kt events.Event) {
 		return
 	}
 	idx := sv.SelectedIndex
-	kf := keyfun.Of(kt.KeyChord())
+	kf := keymap.Of(kt.KeyChord())
 	if core.DebugSettings.KeyEventTrace {
-		slog.Info("SliceViewBase KeyInput", "widget", sv, "keyfun", kf)
+		slog.Info("SliceViewBase KeyInput", "widget", sv, "keyFunction", kf)
 	}
 	switch kf {
-	// case keyfun.Delete: // too dangerous
+	// case keymap.Delete: // too dangerous
 	// 	sv.This().(SliceViewer).SliceDeleteAt(sv.SelectedIndex)
 	// 	sv.SelectMode = false
 	// 	sv.SelectIndexAction(idx, events.SelectOne)
 	// 	kt.SetHandled()
-	case keyfun.Duplicate:
+	case keymap.Duplicate:
 		nidx := sv.Duplicate()
 		sv.SetFlag(false, SliceViewSelectMode)
 		if nidx >= 0 {
 			sv.SelectIndexAction(nidx, events.SelectOne)
 		}
 		kt.SetHandled()
-	case keyfun.Insert:
+	case keymap.Insert:
 		sv.This().(SliceViewer).SliceNewAt(idx)
 		sv.SetFlag(false, SliceViewSelectMode)
 		sv.SelectIndexAction(idx+1, events.SelectOne) // todo: somehow nidx not working
 		kt.SetHandled()
-	case keyfun.InsertAfter:
+	case keymap.InsertAfter:
 		sv.This().(SliceViewer).SliceNewAt(idx + 1)
 		sv.SetFlag(false, SliceViewSelectMode)
 		sv.SelectIndexAction(idx+1, events.SelectOne)
 		kt.SetHandled()
-	case keyfun.Copy:
+	case keymap.Copy:
 		sv.CopyIndexes(true)
 		sv.SetFlag(false, SliceViewSelectMode)
 		sv.SelectIndexAction(idx, events.SelectOne)
 		kt.SetHandled()
-	case keyfun.Cut:
+	case keymap.Cut:
 		sv.CutIndexes()
 		sv.SetFlag(false, SliceViewSelectMode)
 		kt.SetHandled()
-	case keyfun.Paste:
+	case keymap.Paste:
 		sv.PasteIndex(sv.SelectedIndex)
 		sv.SetFlag(false, SliceViewSelectMode)
 		kt.SetHandled()
@@ -1946,37 +1946,37 @@ func (sv *SliceViewBase) KeyInputReadOnly(kt events.Event) {
 	if sv.Is(SliceViewSelectMode) {
 		selMode = events.ExtendOne
 	}
-	kf := keyfun.Of(kt.KeyChord())
+	kf := keymap.Of(kt.KeyChord())
 	if core.DebugSettings.KeyEventTrace {
-		slog.Info("SliceViewBase ReadOnly KeyInput", "widget", sv, "keyfun", kf)
+		slog.Info("SliceViewBase ReadOnly KeyInput", "widget", sv, "keyFunction", kf)
 	}
 	idx := sv.SelectedIndex
 	switch {
-	case kf == keyfun.MoveDown:
+	case kf == keymap.MoveDown:
 		ni := idx + 1
 		if ni < sv.SliceSize {
 			sv.ScrollToIndex(ni)
 			sv.UpdateSelectIndex(ni, true, selMode)
 			kt.SetHandled()
 		}
-	case kf == keyfun.MoveUp:
+	case kf == keymap.MoveUp:
 		ni := idx - 1
 		if ni >= 0 {
 			sv.ScrollToIndex(ni)
 			sv.UpdateSelectIndex(ni, true, selMode)
 			kt.SetHandled()
 		}
-	case kf == keyfun.PageDown:
+	case kf == keymap.PageDown:
 		ni := min(idx+sv.VisRows-1, sv.SliceSize-1)
 		sv.ScrollToIndex(ni)
 		sv.UpdateSelectIndex(ni, true, selMode)
 		kt.SetHandled()
-	case kf == keyfun.PageUp:
+	case kf == keymap.PageUp:
 		ni := max(idx-(sv.VisRows-1), 0)
 		sv.ScrollToIndex(ni)
 		sv.UpdateSelectIndex(ni, true, selMode)
 		kt.SetHandled()
-	case kf == keyfun.Enter || kf == keyfun.Accept || kt.KeyRune() == ' ':
+	case kf == keymap.Enter || kf == keymap.Accept || kt.KeyRune() == ' ':
 		sv.Send(events.DoubleClick, kt)
 		kt.SetHandled()
 	}

@@ -19,7 +19,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/paint"
@@ -999,16 +999,16 @@ func (tf *TextField) InsertAtCursor(str string) {
 }
 
 func (tf *TextField) ContextMenu(m *Scene) {
-	NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled).
+	NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keymap.Copy).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
 			tf.Copy(true)
 		})
 	if !tf.IsReadOnly() {
-		NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keyfun.Cut).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled).
+		NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keymap.Cut).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled).
 			OnClick(func(e events.Event) {
 				tf.Cut()
 			})
-		pbt := NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keyfun.Paste).
+		pbt := NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keymap.Paste).
 			OnClick(func(e events.Event) {
 				tf.Paste()
 			})
@@ -1626,71 +1626,71 @@ func (tf *TextField) HandleEvents() {
 
 func (tf *TextField) HandleKeyEvents() {
 	tf.OnKeyChord(func(e events.Event) {
-		kf := keyfun.Of(e.KeyChord())
+		kf := keymap.Of(e.KeyChord())
 		if DebugSettings.KeyEventTrace {
-			slog.Info("TextField KeyInput", "widget", tf, "keyfun", kf)
+			slog.Info("TextField KeyInput", "widget", tf, "keyFunction", kf)
 		}
-		if !tf.StateIs(states.Focused) && kf == keyfun.Abort {
+		if !tf.StateIs(states.Focused) && kf == keymap.Abort {
 			return
 		}
 
 		// first all the keys that work for both inactive and active
 		switch kf {
-		case keyfun.MoveRight:
+		case keymap.MoveRight:
 			e.SetHandled()
 			tf.ShiftSelect(e)
 			tf.CursorForward(1)
 			tf.OfferComplete()
-		case keyfun.WordRight:
+		case keymap.WordRight:
 			e.SetHandled()
 			tf.ShiftSelect(e)
 			tf.CursorForwardWord(1)
 			tf.OfferComplete()
-		case keyfun.MoveLeft:
+		case keymap.MoveLeft:
 			e.SetHandled()
 			tf.ShiftSelect(e)
 			tf.CursorBackward(1)
 			tf.OfferComplete()
-		case keyfun.WordLeft:
+		case keymap.WordLeft:
 			e.SetHandled()
 			tf.ShiftSelect(e)
 			tf.CursorBackwardWord(1)
 			tf.OfferComplete()
-		case keyfun.MoveDown:
+		case keymap.MoveDown:
 			if tf.NLines > 1 {
 				e.SetHandled()
 				tf.ShiftSelect(e)
 				tf.CursorDown(1)
 			}
-		case keyfun.MoveUp:
+		case keymap.MoveUp:
 			if tf.NLines > 1 {
 				e.SetHandled()
 				tf.ShiftSelect(e)
 				tf.CursorUp(1)
 			}
-		case keyfun.Home:
+		case keymap.Home:
 			e.SetHandled()
 			tf.ShiftSelect(e)
 			tf.CancelComplete()
 			tf.CursorStart()
-		case keyfun.End:
+		case keymap.End:
 			e.SetHandled()
 			tf.ShiftSelect(e)
 			tf.CancelComplete()
 			tf.CursorEnd()
-		case keyfun.SelectMode:
+		case keymap.SelectMode:
 			e.SetHandled()
 			tf.CancelComplete()
 			tf.SelectModeToggle()
-		case keyfun.CancelSelect:
+		case keymap.CancelSelect:
 			e.SetHandled()
 			tf.CancelComplete()
 			tf.SelectReset()
-		case keyfun.SelectAll:
+		case keymap.SelectAll:
 			e.SetHandled()
 			tf.CancelComplete()
 			tf.SelectAll()
-		case keyfun.Copy:
+		case keymap.Copy:
 			e.SetHandled()
 			tf.CancelComplete()
 			tf.Copy(true) // reset
@@ -1699,78 +1699,78 @@ func (tf *TextField) HandleKeyEvents() {
 			return
 		}
 		switch kf {
-		case keyfun.Enter:
+		case keymap.Enter:
 			fallthrough
-		case keyfun.FocusNext: // we process tab to make it EditDone as opposed to other ways of losing focus
+		case keymap.FocusNext: // we process tab to make it EditDone as opposed to other ways of losing focus
 			e.SetHandled()
 			tf.CancelComplete()
 			tf.EditDone()
 			tf.FocusNext()
-		case keyfun.Accept: // ctrl+enter
+		case keymap.Accept: // ctrl+enter
 			e.SetHandled()
 			tf.CancelComplete()
 			tf.EditDone()
-		case keyfun.FocusPrev:
+		case keymap.FocusPrev:
 			e.SetHandled()
 			tf.CancelComplete()
 			tf.EditDone()
 			tf.FocusPrev()
-		case keyfun.Abort: // esc
+		case keymap.Abort: // esc
 			e.SetHandled()
 			tf.CancelComplete()
 			tf.Revert()
 			// tf.FocusChanged(FocusInactive)
-		case keyfun.Backspace:
+		case keymap.Backspace:
 			e.SetHandled()
 			tf.SaveUndo()
 			tf.CursorBackspace(1)
 			tf.OfferComplete()
 			tf.Send(events.Input, e)
-		case keyfun.Kill:
+		case keymap.Kill:
 			e.SetHandled()
 			tf.CancelComplete()
 			tf.CursorKill()
 			tf.Send(events.Input, e)
-		case keyfun.Delete:
+		case keymap.Delete:
 			e.SetHandled()
 			tf.SaveUndo()
 			tf.CursorDelete(1)
 			tf.OfferComplete()
 			tf.Send(events.Input, e)
-		case keyfun.BackspaceWord:
+		case keymap.BackspaceWord:
 			e.SetHandled()
 			tf.SaveUndo()
 			tf.CursorBackspaceWord(1)
 			tf.OfferComplete()
 			tf.Send(events.Input, e)
-		case keyfun.DeleteWord:
+		case keymap.DeleteWord:
 			e.SetHandled()
 			tf.SaveUndo()
 			tf.CursorDeleteWord(1)
 			tf.OfferComplete()
 			tf.Send(events.Input, e)
-		case keyfun.Cut:
+		case keymap.Cut:
 			e.SetHandled()
 			tf.SaveUndo()
 			tf.CancelComplete()
 			tf.Cut()
 			tf.Send(events.Input, e)
-		case keyfun.Paste:
+		case keymap.Paste:
 			e.SetHandled()
 			tf.SaveUndo()
 			tf.CancelComplete()
 			tf.Paste()
 			tf.Send(events.Input, e)
-		case keyfun.Undo:
+		case keymap.Undo:
 			e.SetHandled()
 			tf.Undo()
-		case keyfun.Redo:
+		case keymap.Redo:
 			e.SetHandled()
 			tf.Redo()
-		case keyfun.Complete:
+		case keymap.Complete:
 			e.SetHandled()
 			tf.OfferComplete()
-		case keyfun.Nil:
+		case keymap.None:
 			if unicode.IsPrint(e.KeyRune()) {
 				if !e.HasAnyModifier(key.Control, key.Meta) {
 					e.SetHandled()

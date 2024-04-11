@@ -14,7 +14,7 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
@@ -444,39 +444,39 @@ func (sr *Slider) HandleMouse() {
 
 func (sr *Slider) HandleKeys() {
 	sr.OnKeyChord(func(e events.Event) {
-		kf := keyfun.Of(e.KeyChord())
+		kf := keymap.Of(e.KeyChord())
 		if DebugSettings.KeyEventTrace {
-			slog.Info("SliderBase KeyInput", "widget", sr, "keyfun", kf)
+			slog.Info("SliderBase KeyInput", "widget", sr, "keyFunction", kf)
 		}
 		switch kf {
-		case keyfun.MoveUp:
+		case keymap.MoveUp:
 			sr.SetValueAction(sr.Value - sr.Step)
 			e.SetHandled()
-		case keyfun.MoveLeft:
+		case keymap.MoveLeft:
 			sr.SetValueAction(sr.Value - sr.Step)
 			e.SetHandled()
-		case keyfun.MoveDown:
+		case keymap.MoveDown:
 			sr.SetValueAction(sr.Value + sr.Step)
 			e.SetHandled()
-		case keyfun.MoveRight:
+		case keymap.MoveRight:
 			sr.SetValueAction(sr.Value + sr.Step)
 			e.SetHandled()
-		case keyfun.PageUp:
+		case keymap.PageUp:
 			if sr.PageStep < sr.Step {
 				sr.PageStep = 2 * sr.Step
 			}
 			sr.SetValueAction(sr.Value - sr.PageStep)
 			e.SetHandled()
-		case keyfun.PageDown:
+		case keymap.PageDown:
 			if sr.PageStep < sr.Step {
 				sr.PageStep = 2 * sr.Step
 			}
 			sr.SetValueAction(sr.Value + sr.PageStep)
 			e.SetHandled()
-		case keyfun.Home:
+		case keymap.Home:
 			sr.SetValueAction(sr.Min)
 			e.SetHandled()
-		case keyfun.End:
+		case keymap.End:
 			sr.SetValueAction(sr.Max)
 			e.SetHandled()
 		}

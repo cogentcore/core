@@ -11,7 +11,7 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/pi/complete"
 )
 
@@ -191,11 +191,11 @@ func (c *Complete) ShowNowImpl(ctx Widget, pos image.Point, text string) bool {
 				c.Complete(cmp.Text)
 			}).
 			OnKeyChord(func(e events.Event) {
-				kf := keyfun.Of(e.KeyChord())
+				kf := keymap.Of(e.KeyChord())
 				if e.KeyRune() == ' ' {
 					ctx.HandleEvent(e) // bypass button handler!
 				}
-				if kf == keyfun.Enter {
+				if kf == keymap.Enter {
 					e.SetHandled()
 					c.Complete(cmp.Text)
 				}

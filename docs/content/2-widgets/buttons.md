@@ -48,7 +48,7 @@ core.NewButton(parent).SetText("Save").SetShortcut("Command+S").OnClick(func(e e
 You can make a button trigger on a certain semantic key function, which have default bindings that the user can customize in their settings:
 
 ```Go
-core.NewButton(parent).SetText("Open").SetKey(keyfun.Open).OnClick(func(e events.Event) {
+core.NewButton(parent).SetText("Open").SetKey(keymap.Open).OnClick(func(e events.Event) {
     core.MessageSnackbar(parent, "File opened")
 })
 ```

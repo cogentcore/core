@@ -8,7 +8,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gti"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -112,8 +112,8 @@ func (bd *Body) AddOK(parent Widget, name ...string) *Button {
 		bd.Close()
 	})
 	bd.Scene.OnFirst(events.KeyChord, func(e events.Event) {
-		kf := keyfun.Of(e.KeyChord())
-		if kf == keyfun.Accept {
+		kf := keymap.Of(e.KeyChord())
+		if kf == keymap.Accept {
 			e.SetHandled()
 			bt.Send(events.Click, e)
 		}
@@ -146,16 +146,16 @@ func (bd *Body) AddCancel(parent Widget, name ...string) *Button {
 		bd.Close()
 	})
 	bd.OnFirst(events.KeyChord, func(e events.Event) {
-		kf := keyfun.Of(e.KeyChord())
-		if kf == keyfun.Abort {
+		kf := keymap.Of(e.KeyChord())
+		if kf == keymap.Abort {
 			e.SetHandled()
 			bt.Send(events.Click, e)
 			bd.Close()
 		}
 	})
 	bt.OnFirst(events.KeyChord, func(e events.Event) {
-		kf := keyfun.Of(e.KeyChord())
-		if kf == keyfun.Abort {
+		kf := keymap.Of(e.KeyChord())
+		if kf == keymap.Abort {
 			e.SetHandled()
 			bt.Send(events.Click, e)
 			bd.Close()

@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
@@ -197,7 +197,7 @@ func (wb *WidgetBase) SendChange(orig ...events.Event) {
 	wb.Send(events.Change, orig...)
 }
 
-func (wb *WidgetBase) SendKeyFun(kf keyfun.Funs, orig ...events.Event) {
+func (wb *WidgetBase) SendKey(kf keymap.Functions, orig ...events.Event) {
 	if wb.This() == nil {
 		return
 	}
@@ -471,13 +471,13 @@ func (wb *WidgetBase) HandleWidgetMagnify() {
 // but is added in Button and Switch Widgets for example.
 func (wb *WidgetBase) HandleClickOnEnterSpace() {
 	wb.OnKeyChord(func(e events.Event) {
-		kf := keyfun.Of(e.KeyChord())
+		kf := keymap.Of(e.KeyChord())
 		if DebugSettings.KeyEventTrace {
-			slog.Info("WidgetBase HandleClickOnEnterSpace", "widget", wb, "keyfun", kf)
+			slog.Info("WidgetBase HandleClickOnEnterSpace", "widget", wb, "keyFunction", kf)
 		}
-		if kf == keyfun.Accept {
+		if kf == keymap.Accept {
 			wb.Send(events.Click, e) // don't handle
-		} else if kf == keyfun.Enter || e.KeyRune() == ' ' {
+		} else if kf == keymap.Enter || e.KeyRune() == ' ' {
 			e.SetHandled()
 			wb.Send(events.Click, e)
 		}

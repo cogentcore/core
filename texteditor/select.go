@@ -9,7 +9,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/states"
@@ -508,18 +508,18 @@ func (ed *Editor) ShowContextMenu(e events.Event) {
 // ContextMenu builds the text editor context menu
 func (ed *Editor) ContextMenu(m *core.Scene) {
 	core.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).
-		SetKey(keyfun.Copy).SetState(!ed.HasSelection(), states.Disabled).
+		SetKey(keymap.Copy).SetState(!ed.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
 			ed.Copy(true)
 		})
 	if !ed.IsReadOnly() {
 		core.NewButton(m).SetText("Cut").SetIcon(icons.ContentCopy).
-			SetKey(keyfun.Cut).SetState(!ed.HasSelection(), states.Disabled).
+			SetKey(keymap.Cut).SetState(!ed.HasSelection(), states.Disabled).
 			OnClick(func(e events.Event) {
 				ed.Cut()
 			})
 		core.NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).
-			SetKey(keyfun.Paste).SetState(ed.Clipboard().IsEmpty(), states.Disabled).
+			SetKey(keymap.Paste).SetState(ed.Clipboard().IsEmpty(), states.Disabled).
 			OnClick(func(e events.Event) {
 				ed.Paste()
 			})

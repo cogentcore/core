@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
@@ -303,21 +303,21 @@ func (sp *Spinner) HandleEvents() {
 		if sp.IsReadOnly() {
 			return
 		}
-		kf := keyfun.Of(e.KeyChord())
+		kf := keymap.Of(e.KeyChord())
 		if DebugSettings.KeyEventTrace {
-			slog.Info("Spinner KeyChordEvent", "widget", sp, "keyfun", kf)
+			slog.Info("Spinner KeyChordEvent", "widget", sp, "keyFunction", kf)
 		}
 		switch {
-		case kf == keyfun.MoveUp:
+		case kf == keymap.MoveUp:
 			e.SetHandled()
 			sp.IncrementValue(1)
-		case kf == keyfun.MoveDown:
+		case kf == keymap.MoveDown:
 			e.SetHandled()
 			sp.IncrementValue(-1)
-		case kf == keyfun.PageUp:
+		case kf == keymap.PageUp:
 			e.SetHandled()
 			sp.PageIncrementValue(1)
-		case kf == keyfun.PageDown:
+		case kf == keymap.PageDown:
 			e.SetHandled()
 			sp.PageIncrementValue(-1)
 		}

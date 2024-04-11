@@ -13,7 +13,7 @@ import (
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/pi/complete"
 	"cogentcore.org/core/styles"
@@ -287,11 +287,11 @@ func (ly *Layout) HandleKeys() {
 		if ly.Is(LayoutNoKeys) {
 			return
 		}
-		kf := keyfun.Of(e.KeyChord())
+		kf := keymap.Of(e.KeyChord())
 		if DebugSettings.KeyEventTrace {
-			slog.Info("Layout KeyInput", "widget", ly, "keyfun", kf)
+			slog.Info("Layout KeyInput", "widget", ly, "keyFunction", kf)
 		}
-		if kf == keyfun.Abort {
+		if kf == keymap.Abort {
 			if ly.Scene.Stage.ClosePopupAndBelow() {
 				e.SetHandled()
 			}
@@ -304,12 +304,12 @@ func (ly *Layout) HandleKeys() {
 		grid := ly.Styles.Display == styles.Grid
 		if ly.Styles.Direction == styles.Row || grid {
 			switch kf {
-			case keyfun.MoveRight:
+			case keymap.MoveRight:
 				if ly.FocusNextChild(false) {
 					e.SetHandled()
 				}
 				return
-			case keyfun.MoveLeft:
+			case keymap.MoveLeft:
 				if ly.FocusPrevChild(false) {
 					e.SetHandled()
 				}
@@ -318,17 +318,17 @@ func (ly *Layout) HandleKeys() {
 		}
 		if ly.Styles.Direction == styles.Column || grid {
 			switch kf {
-			case keyfun.MoveDown:
+			case keymap.MoveDown:
 				if ly.FocusNextChild(true) {
 					e.SetHandled()
 				}
 				return
-			case keyfun.MoveUp:
+			case keymap.MoveUp:
 				if ly.FocusPrevChild(true) {
 					e.SetHandled()
 				}
 				return
-			case keyfun.PageDown:
+			case keymap.PageDown:
 				proc := false
 				for st := 0; st < SystemSettings.LayoutPageSteps; st++ {
 					if !ly.FocusNextChild(true) {
@@ -340,7 +340,7 @@ func (ly *Layout) HandleKeys() {
 					e.SetHandled()
 				}
 				return
-			case keyfun.PageUp:
+			case keymap.PageUp:
 				proc := false
 				for st := 0; st < SystemSettings.LayoutPageSteps; st++ {
 					if !ly.FocusPrevChild(true) {
@@ -360,13 +360,13 @@ func (ly *Layout) HandleKeys() {
 
 // FocusOnName processes key events to look for an element starting with given name
 func (ly *Layout) FocusOnName(e events.Event) bool {
-	kf := keyfun.Of(e.KeyChord())
+	kf := keymap.Of(e.KeyChord())
 	if DebugSettings.KeyEventTrace {
-		slog.Info("Layout FocusOnName", "widget", ly, "keyfun", kf)
+		slog.Info("Layout FocusOnName", "widget", ly, "keyFunction", kf)
 	}
 	delay := e.Time().Sub(ly.FocusNameTime)
 	ly.FocusNameTime = e.Time()
-	if kf == keyfun.FocusNext { // tab means go to next match -- don't worry about time
+	if kf == keymap.FocusNext { // tab means go to next match -- don't worry about time
 		if ly.FocusName == "" || delay > SystemSettings.LayoutFocusNameTabTime {
 			ly.FocusName = ""
 			ly.FocusNameLast = nil

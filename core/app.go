@@ -14,7 +14,7 @@ import (
 	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
@@ -114,7 +114,7 @@ func StandardAppBarStart(tb *Toolbar) {
 
 // StandardAppBarBack adds a back button
 func StandardAppBarBack(tb *Toolbar) *Button {
-	bt := NewButton(tb, "back").SetIcon(icons.ArrowBack).SetTooltip("Back").SetKey(keyfun.HistPrev)
+	bt := NewButton(tb, "back").SetIcon(icons.ArrowBack).SetTooltip("Back").SetKey(keymap.HistPrev)
 	// TODO(kai/abc): app bar back button disabling
 	// bt.StyleFirst(func(s *styles.Style) {
 	// 	if tb.Scene.Stage.MainMgr == nil {
@@ -164,22 +164,22 @@ func StandardOverflowMenu(tb *Toolbar) {
 // StandardOverflowMenu adds standard overflow menu items.
 func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //gti:add
 	if SettingsWindow != nil {
-		NewButton(m).SetText("Settings").SetIcon(icons.Settings).SetKey(keyfun.Settings).
+		NewButton(m).SetText("Settings").SetIcon(icons.Settings).SetKey(keymap.Settings).
 			OnClick(func(e events.Event) {
 				SettingsWindow()
 			})
 	}
 	if InspectorWindow != nil {
-		NewButton(m).SetText("Inspect").SetIcon(icons.Edit).SetKey(keyfun.Inspector).
+		NewButton(m).SetText("Inspect").SetIcon(icons.Edit).SetKey(keymap.Inspector).
 			OnClick(func(e events.Event) {
 				InspectorWindow(tb.Scene)
 			})
 	}
 	NewButton(m).SetText("Edit").SetMenu(func(m *Scene) {
 		// todo: these need to actually do something -- currently just show keyboard shortcut
-		NewButton(m).SetText("Copy").SetIcon(icons.Copy).SetKey(keyfun.Copy)
-		NewButton(m).SetText("Cut").SetIcon(icons.Cut).SetKey(keyfun.Cut)
-		NewButton(m).SetText("Paste").SetIcon(icons.Paste).SetKey(keyfun.Paste)
+		NewButton(m).SetText("Copy").SetIcon(icons.Copy).SetKey(keymap.Copy)
+		NewButton(m).SetText("Cut").SetIcon(icons.Cut).SetKey(keymap.Cut)
+		NewButton(m).SetText("Paste").SetIcon(icons.Paste).SetKey(keymap.Paste)
 	})
 
 	// no window menu on single-window platforms
@@ -188,7 +188,7 @@ func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //gti:add
 	}
 	NewButton(m).SetText("Window").SetMenu(func(m *Scene) {
 		NewButton(m).SetText("Focus next").SetIcon(icons.CenterFocusStrong).
-			SetKey(keyfun.WinFocusNext).OnClick(func(e events.Event) {
+			SetKey(keymap.WinFocusNext).OnClick(func(e events.Event) {
 			AllRenderWindows.FocusNext()
 		})
 		NewButton(m).SetText("Minimize").SetIcon(icons.Minimize).
@@ -199,7 +199,7 @@ func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //gti:add
 				}
 			})
 		NewSeparator(m)
-		NewButton(m).SetText("Close window").SetIcon(icons.Close).SetKey(keyfun.WinClose).
+		NewButton(m).SetText("Close window").SetIcon(icons.Close).SetKey(keymap.WinClose).
 			OnClick(func(e events.Event) {
 				win := tb.Scene.RenderWin()
 				if win != nil {
@@ -244,7 +244,7 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 	if TheApp.SystemPlatform().IsMobile() {
 		ch.SetPlaceholder("Search")
 	} else {
-		ch.SetPlaceholder(fmt.Sprintf("Search (%s)", keyfun.Menu.Label()))
+		ch.SetPlaceholder(fmt.Sprintf("Search (%s)", keymap.Menu.Label()))
 	}
 
 	ch.OnWidgetAdded(func(w Widget) {
@@ -291,8 +291,8 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 		ch.ShowCurrentItem()
 	})
 	ch.OnFirst(events.KeyChord, func(e events.Event) {
-		kf := keyfun.Of(e.KeyChord())
-		if kf == keyfun.Menu {
+		kf := keymap.Of(e.KeyChord())
+		if kf == keymap.Menu {
 			e.SetHandled()
 			ch.Send(events.Click, e)
 		}

@@ -15,7 +15,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/gox/indent"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/pi"
@@ -94,7 +94,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 	if core.DebugSettings.KeyEventTrace {
 		fmt.Printf("View KeyInput: %v\n", ed.Path())
 	}
-	kf := keyfun.Of(kt.KeyChord())
+	kf := keymap.Of(kt.KeyChord())
 
 	if kt.IsHandled() {
 		return
@@ -112,11 +112,11 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		ed.lastAutoInsert = 0
 	}
 
-	if kf != keyfun.Recenter { // always start at centering
+	if kf != keymap.Recenter { // always start at centering
 		ed.lastRecenter = 0
 	}
 
-	if kf != keyfun.Undo && ed.Is(EditorLastWasUndo) {
+	if kf != keymap.Undo && ed.Is(EditorLastWasUndo) {
 		ed.Buffer.EmacsUndoSave()
 		ed.SetFlag(false, EditorLastWasUndo)
 	}
@@ -125,141 +125,141 @@ func (ed *Editor) KeyInput(kt events.Event) {
 
 	// first all the keys that work for both inactive and active
 	switch kf {
-	case keyfun.MoveRight:
+	case keymap.MoveRight:
 		cancelAll()
 		kt.SetHandled()
 		ed.ShiftSelect(kt)
 		ed.CursorForward(1)
 		ed.ShiftSelectExtend(kt)
 		ed.ISpellKeyInput(kt)
-	case keyfun.WordRight:
+	case keymap.WordRight:
 		cancelAll()
 		kt.SetHandled()
 		ed.ShiftSelect(kt)
 		ed.CursorForwardWord(1)
 		ed.ShiftSelectExtend(kt)
-	case keyfun.MoveLeft:
+	case keymap.MoveLeft:
 		cancelAll()
 		kt.SetHandled()
 		ed.ShiftSelect(kt)
 		ed.CursorBackward(1)
 		ed.ShiftSelectExtend(kt)
-	case keyfun.WordLeft:
+	case keymap.WordLeft:
 		cancelAll()
 		kt.SetHandled()
 		ed.ShiftSelect(kt)
 		ed.CursorBackwardWord(1)
 		ed.ShiftSelectExtend(kt)
-	case keyfun.MoveUp:
+	case keymap.MoveUp:
 		cancelAll()
 		kt.SetHandled()
 		ed.ShiftSelect(kt)
 		ed.CursorUp(1)
 		ed.ShiftSelectExtend(kt)
 		ed.ISpellKeyInput(kt)
-	case keyfun.MoveDown:
+	case keymap.MoveDown:
 		cancelAll()
 		kt.SetHandled()
 		ed.ShiftSelect(kt)
 		ed.CursorDown(1)
 		ed.ShiftSelectExtend(kt)
 		ed.ISpellKeyInput(kt)
-	case keyfun.PageUp:
+	case keymap.PageUp:
 		cancelAll()
 		kt.SetHandled()
 		ed.ShiftSelect(kt)
 		ed.CursorPageUp(1)
 		ed.ShiftSelectExtend(kt)
-	case keyfun.PageDown:
+	case keymap.PageDown:
 		cancelAll()
 		kt.SetHandled()
 		ed.ShiftSelect(kt)
 		ed.CursorPageDown(1)
 		ed.ShiftSelectExtend(kt)
-	case keyfun.Home:
+	case keymap.Home:
 		cancelAll()
 		kt.SetHandled()
 		ed.ShiftSelect(kt)
 		ed.CursorStartLine()
 		ed.ShiftSelectExtend(kt)
-	case keyfun.End:
+	case keymap.End:
 		cancelAll()
 		kt.SetHandled()
 		ed.ShiftSelect(kt)
 		ed.CursorEndLine()
 		ed.ShiftSelectExtend(kt)
-	case keyfun.DocHome:
+	case keymap.DocHome:
 		cancelAll()
 		kt.SetHandled()
 		ed.ShiftSelect(kt)
 		ed.CursorStartDoc()
 		ed.ShiftSelectExtend(kt)
-	case keyfun.DocEnd:
+	case keymap.DocEnd:
 		cancelAll()
 		kt.SetHandled()
 		ed.ShiftSelect(kt)
 		ed.CursorEndDoc()
 		ed.ShiftSelectExtend(kt)
-	case keyfun.Recenter:
+	case keymap.Recenter:
 		cancelAll()
 		kt.SetHandled()
 		ed.ReMarkup()
 		ed.CursorRecenter()
-	case keyfun.SelectMode:
+	case keymap.SelectMode:
 		cancelAll()
 		kt.SetHandled()
 		ed.SelectModeToggle()
-	case keyfun.CancelSelect:
+	case keymap.CancelSelect:
 		ed.CancelComplete()
 		kt.SetHandled()
 		ed.EscPressed() // generic cancel
-	case keyfun.SelectAll:
+	case keymap.SelectAll:
 		cancelAll()
 		kt.SetHandled()
 		ed.SelectAll()
-	case keyfun.Copy:
+	case keymap.Copy:
 		cancelAll()
 		kt.SetHandled()
 		ed.Copy(true) // reset
-	case keyfun.Search:
+	case keymap.Search:
 		kt.SetHandled()
 		ed.QReplaceCancel()
 		ed.CancelComplete()
 		ed.ISearchStart()
-	case keyfun.Abort:
+	case keymap.Abort:
 		cancelAll()
 		kt.SetHandled()
 		ed.EscPressed()
-	case keyfun.Jump:
+	case keymap.Jump:
 		cancelAll()
 		kt.SetHandled()
 		ed.JumpToLinePrompt()
-	case keyfun.HistPrev:
+	case keymap.HistPrev:
 		cancelAll()
 		kt.SetHandled()
 		ed.CursorToHistPrev()
-	case keyfun.HistNext:
+	case keymap.HistNext:
 		cancelAll()
 		kt.SetHandled()
 		ed.CursorToHistNext()
-	case keyfun.Lookup:
+	case keymap.Lookup:
 		cancelAll()
 		kt.SetHandled()
 		ed.Lookup()
 	}
 	if ed.IsReadOnly() {
 		switch {
-		case kf == keyfun.FocusNext: // tab
+		case kf == keymap.FocusNext: // tab
 			kt.SetHandled()
 			ed.CursorNextLink(true)
-		case kf == keyfun.FocusPrev: // tab
+		case kf == keymap.FocusPrev: // tab
 			kt.SetHandled()
 			ed.CursorPrevLink(true)
-		case kf == keyfun.Nil && ed.ISearch.On:
+		case kf == keymap.None && ed.ISearch.On:
 			if unicode.IsPrint(kt.KeyRune()) && !kt.HasAnyModifier(key.Control, key.Meta) {
 				ed.ISearchKeyInput(kt)
 			}
-		case kt.KeyRune() == ' ' || kf == keyfun.Accept || kf == keyfun.Enter:
+		case kt.KeyRune() == ' ' || kf == keymap.Accept || kf == keymap.Enter:
 			kt.SetHandled()
 			ed.CursorPos.Ch--
 			ed.CursorNextLink(true) // todo: cursorcurlink
@@ -272,12 +272,12 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		return
 	}
 	switch kf {
-	case keyfun.Replace:
+	case keymap.Replace:
 		kt.SetHandled()
 		ed.CancelComplete()
 		ed.ISearchCancel()
 		ed.QReplacePrompt()
-	case keyfun.Backspace:
+	case keymap.Backspace:
 		// todo: previous item in qreplace
 		if ed.ISearch.On {
 			ed.ISearchBackspace()
@@ -287,57 +287,57 @@ func (ed *Editor) KeyInput(kt events.Event) {
 			ed.ISpellKeyInput(kt)
 			ed.OfferComplete()
 		}
-	case keyfun.Kill:
+	case keymap.Kill:
 		cancelAll()
 		kt.SetHandled()
 		ed.CursorKill()
-	case keyfun.Delete:
+	case keymap.Delete:
 		cancelAll()
 		kt.SetHandled()
 		ed.CursorDelete(1)
 		ed.ISpellKeyInput(kt)
-	case keyfun.BackspaceWord:
+	case keymap.BackspaceWord:
 		cancelAll()
 		kt.SetHandled()
 		ed.CursorBackspaceWord(1)
-	case keyfun.DeleteWord:
+	case keymap.DeleteWord:
 		cancelAll()
 		kt.SetHandled()
 		ed.CursorDeleteWord(1)
-	case keyfun.Cut:
+	case keymap.Cut:
 		cancelAll()
 		kt.SetHandled()
 		ed.Cut()
-	case keyfun.Paste:
+	case keymap.Paste:
 		cancelAll()
 		kt.SetHandled()
 		ed.Paste()
-	case keyfun.Transpose:
+	case keymap.Transpose:
 		cancelAll()
 		kt.SetHandled()
 		ed.CursorTranspose()
-	case keyfun.TransposeWord:
+	case keymap.TransposeWord:
 		cancelAll()
 		kt.SetHandled()
 		ed.CursorTransposeWord()
-	case keyfun.PasteHist:
+	case keymap.PasteHist:
 		cancelAll()
 		kt.SetHandled()
 		ed.PasteHist()
-	case keyfun.Accept:
+	case keymap.Accept:
 		cancelAll()
 		kt.SetHandled()
 		ed.EditDone()
-	case keyfun.Undo:
+	case keymap.Undo:
 		cancelAll()
 		kt.SetHandled()
 		ed.Undo()
 		ed.SetFlag(true, EditorLastWasUndo)
-	case keyfun.Redo:
+	case keymap.Redo:
 		cancelAll()
 		kt.SetHandled()
 		ed.Redo()
-	case keyfun.Complete:
+	case keymap.Complete:
 		ed.ISearchCancel()
 		kt.SetHandled()
 		if ed.Buffer.IsSpellEnabled(ed.CursorPos) {
@@ -345,7 +345,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		} else {
 			ed.OfferComplete()
 		}
-	case keyfun.Enter:
+	case keymap.Enter:
 		cancelAll()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetHandled()
@@ -371,7 +371,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 			ed.ISpellKeyInput(kt)
 		}
 		// todo: KeFunFocusPrev -- unindent
-	case keyfun.FocusNext: // tab
+	case keymap.FocusNext: // tab
 		cancelAll()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetHandled()
@@ -387,7 +387,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 			ed.NeedsRender()
 			ed.ISpellKeyInput(kt)
 		}
-	case keyfun.FocusPrev: // shift-tab
+	case keymap.FocusPrev: // shift-tab
 		cancelAll()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetHandled()
@@ -402,7 +402,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 			}
 			ed.ISpellKeyInput(kt)
 		}
-	case keyfun.Nil:
+	case keymap.None:
 		if unicode.IsPrint(kt.KeyRune()) {
 			if !kt.HasAnyModifier(key.Control, key.Meta) {
 				ed.KeyInputInsertRune(kt)

@@ -20,7 +20,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/pi/complete"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/strcase"
@@ -549,12 +549,12 @@ func (ch *Chooser) HandleEvents() {
 	})
 	ch.OnFinal(events.KeyChord, func(e events.Event) {
 		tf := ch.TextField()
-		kf := keyfun.Of(e.KeyChord())
+		kf := keymap.Of(e.KeyChord())
 		if DebugSettings.KeyEventTrace {
-			slog.Info("Chooser KeyChordEvent", "widget", ch, "keyfun", kf)
+			slog.Info("Chooser KeyChordEvent", "widget", ch, "keyFunction", kf)
 		}
 		switch {
-		case kf == keyfun.MoveUp:
+		case kf == keymap.MoveUp:
 			e.SetHandled()
 			if len(ch.Items) > 0 {
 				idx := ch.CurrentIndex - 1
@@ -563,7 +563,7 @@ func (ch *Chooser) HandleEvents() {
 				}
 				ch.SelectItemAction(idx)
 			}
-		case kf == keyfun.MoveDown:
+		case kf == keymap.MoveDown:
 			e.SetHandled()
 			if len(ch.Items) > 0 {
 				idx := ch.CurrentIndex + 1
@@ -572,7 +572,7 @@ func (ch *Chooser) HandleEvents() {
 				}
 				ch.SelectItemAction(idx)
 			}
-		case kf == keyfun.PageUp:
+		case kf == keymap.PageUp:
 			e.SetHandled()
 			if len(ch.Items) > 10 {
 				idx := ch.CurrentIndex - 10
@@ -581,7 +581,7 @@ func (ch *Chooser) HandleEvents() {
 				}
 				ch.SelectItemAction(idx)
 			}
-		case kf == keyfun.PageDown:
+		case kf == keymap.PageDown:
 			e.SetHandled()
 			if len(ch.Items) > 10 {
 				idx := ch.CurrentIndex + 10
@@ -590,7 +590,7 @@ func (ch *Chooser) HandleEvents() {
 				}
 				ch.SelectItemAction(idx)
 			}
-		case kf == keyfun.Enter || (!ch.Editable && e.KeyRune() == ' '):
+		case kf == keymap.Enter || (!ch.Editable && e.KeyRune() == ' '):
 			// if !(kt.Rune == ' ' && chb.Sc.Type == ScCompleter) {
 			e.SetHandled()
 			ch.Send(events.Click, e)
@@ -642,8 +642,8 @@ func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 		tf.OfferComplete()
 	})
 	tf.OnKeyChord(func(e events.Event) {
-		kf := keyfun.Of(e.KeyChord())
-		if kf == keyfun.Abort {
+		kf := keymap.Of(e.KeyChord())
+		if kf == keymap.Abort {
 			if tf.Error != nil {
 				tf.Clear()
 				e.SetHandled()

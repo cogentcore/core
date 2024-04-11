@@ -21,7 +21,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/iox/imagex"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/system"
@@ -802,36 +802,6 @@ func (em *EventMgr) DropFinalize(de *events.DragDrop) {
 	de.Source.(Widget).HandleEvent(de)
 }
 
-///////////////////////////////////////////////////////////////////
-//   Key events
-
-// SendKeyChordEvent sends a KeyChord event with given values.  If popup is
-// true, then only items on popup are in scope, otherwise items NOT on popup
-// are in scope (if no popup, everything is in scope).
-// func (em *EventMgr) SendKeyChordEvent(popup bool, r rune, mods ...key.Modifiers) {
-// 	ke := key.NewEvent(r, 0, key.Press, 0)
-// 	ke.SetTime()
-// 	// ke.SetModifiers(mods...)
-// 	// em.HandleEvent(ke)
-// }
-
-// Sendkeyfun.Event sends a KeyChord event with params from the given keyfun..
-// If popup is true, then only items on popup are in scope, otherwise items
-// NOT on popup are in scope (if no popup, everything is in scope).
-// func (em *EventMgr) Sendkeyfun.Event(kf keyfun.Funs, popup bool) {
-// 	chord := ActiveKeyMap.ChordFor(kf)
-// 	if chord == "" {
-// 		return
-// 	}
-// 	r, code, mods, err := chord.Decode()
-// 	if err != nil {
-// 		return
-// 	}
-// 	ke := key.NewEvent(r, 0, key.Press, mods)
-// 	ke.SetTime()
-// 	// em.HandleEvent(&ke)
-// }
-
 // Clipboard returns the system system.Clipboard, supplying the window context
 // if available.
 func (em *EventMgr) Clipboard() system.Clipboard {
@@ -1098,18 +1068,18 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 	}
 	sc := em.Scene
 	cs := e.KeyChord()
-	kf := keyfun.Of(cs)
+	kf := keymap.Of(cs)
 	// fmt.Println(kf, cs)
 	switch kf {
-	case keyfun.FocusNext: // tab
+	case keymap.FocusNext: // tab
 		if em.FocusNext() {
 			e.SetHandled()
 		}
-	case keyfun.FocusPrev: // shift-tab
+	case keymap.FocusPrev: // shift-tab
 		if em.FocusPrev() {
 			e.SetHandled()
 		}
-	case keyfun.Menu:
+	case keymap.Menu:
 		if tb := sc.GetTopAppBar(); tb != nil {
 			ch := tree.ChildByType[*Chooser](tb, true)
 			if ch != nil {
@@ -1120,19 +1090,19 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 			}
 			e.SetHandled()
 		}
-	case keyfun.WinSnapshot:
+	case keymap.WinSnapshot:
 		dstr := time.Now().Format("Mon_Jan_2_15:04:05_MST_2006")
 		fnm, _ := filepath.Abs("./GrabOf_" + sc.Name() + "_" + dstr + ".png")
 		imagex.Save(sc.Pixels, fnm)
 		fmt.Printf("Saved RenderWin Image to: %s\n", fnm)
 		e.SetHandled()
-	case keyfun.ZoomIn:
+	case keymap.ZoomIn:
 		win.StepZoom(1)
 		e.SetHandled()
-	case keyfun.ZoomOut:
+	case keymap.ZoomOut:
 		win.StepZoom(-1)
 		e.SetHandled()
-	case keyfun.Refresh:
+	case keymap.Refresh:
 		e.SetHandled()
 		system.TheApp.GetScreens()
 		UpdateAll()
@@ -1141,7 +1111,7 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 		// w.FullReRender()
 		// sz := w.SystemWin.Size()
 		// w.SetSize(sz)
-	case keyfun.WinFocusNext:
+	case keymap.WinFocusNext:
 		e.SetHandled()
 		AllRenderWindows.FocusNext()
 	}

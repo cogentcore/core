@@ -6,11 +6,11 @@ package views
 
 import (
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/laser"
 )
 
-// KeyMapValue represents a [keyfun.MapName] value with a button.
+// KeyMapValue represents a [keymap.MapName] value with a button.
 type KeyMapValue struct {
 	ValueBase[*core.Button]
 }
@@ -29,12 +29,12 @@ func (v *KeyMapValue) ConfigDialog(d *core.Body) (bool, func()) {
 	d.SetTitle("Select a key map")
 	si := 0
 	cur := laser.ToString(v.Value.Interface())
-	_, curRow, _ := keyfun.AvailableMaps.MapByName(keyfun.MapName(cur))
-	NewTableView(d).SetSlice(&keyfun.AvailableMaps).SetSelectedIndex(curRow).BindSelect(&si)
+	_, curRow, _ := keymap.AvailableMaps.MapByName(keymap.MapName(cur))
+	NewTableView(d).SetSlice(&keymap.AvailableMaps).SetSelectedIndex(curRow).BindSelect(&si)
 	return true, func() {
 		if si >= 0 {
-			km := keyfun.AvailableMaps[si]
-			v.SetValue(keyfun.MapName(km.Name))
+			km := keymap.AvailableMaps[si]
+			v.SetValue(keymap.MapName(km.Name))
 			v.Update()
 		}
 	}

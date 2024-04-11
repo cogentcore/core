@@ -11,7 +11,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fileinfo"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/pi/token"
 	"cogentcore.org/core/texteditor/textbuf"
@@ -123,17 +123,17 @@ func (ed *Editor) ISpellKeyInput(kt events.Event) {
 	isDoc := ed.Buffer.Info.Cat == fileinfo.Doc
 	tp := ed.CursorPos
 
-	kf := keyfun.Of(kt.KeyChord())
+	kf := keymap.Of(kt.KeyChord())
 	switch kf {
-	case keyfun.MoveUp:
+	case keymap.MoveUp:
 		if isDoc {
 			ed.Buffer.SpellCheckLineTag(tp.Ln)
 		}
-	case keyfun.MoveDown:
+	case keymap.MoveDown:
 		if isDoc {
 			ed.Buffer.SpellCheckLineTag(tp.Ln)
 		}
-	case keyfun.MoveRight:
+	case keymap.MoveRight:
 		if ed.IsWordEnd(tp) {
 			reg := ed.WordBefore(tp)
 			ed.SpellCheck(reg)
@@ -163,7 +163,7 @@ func (ed *Editor) ISpellKeyInput(kt events.Event) {
 			reg := ed.WordBefore(tp)
 			ed.SpellCheck(reg)
 		}
-	case keyfun.Enter:
+	case keymap.Enter:
 		tp.Ln--
 		if isDoc {
 			ed.Buffer.SpellCheckLineTag(tp.Ln) // redo prior line
@@ -171,11 +171,11 @@ func (ed *Editor) ISpellKeyInput(kt events.Event) {
 		tp.Ch = ed.Buffer.LineLen(tp.Ln)
 		reg := ed.WordBefore(tp)
 		ed.SpellCheck(reg)
-	case keyfun.FocusNext:
+	case keymap.FocusNext:
 		tp.Ch-- // we are one past the end of word
 		reg := ed.WordBefore(tp)
 		ed.SpellCheck(reg)
-	case keyfun.Backspace, keyfun.Delete:
+	case keymap.Backspace, keymap.Delete:
 		if ed.IsWordMiddle(ed.CursorPos) {
 			reg := ed.WordAt()
 			ed.SpellCheck(ed.Buffer.Region(reg.Start, reg.End))
@@ -183,7 +183,7 @@ func (ed *Editor) ISpellKeyInput(kt events.Event) {
 			reg := ed.WordBefore(tp)
 			ed.SpellCheck(reg)
 		}
-	case keyfun.Nil:
+	case keymap.None:
 		if unicode.IsSpace(kt.KeyRune()) || unicode.IsPunct(kt.KeyRune()) && kt.KeyRune() != '\'' { // contractions!
 			tp.Ch-- // we are one past the end of word
 			reg := ed.WordBefore(tp)

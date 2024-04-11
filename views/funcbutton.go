@@ -17,7 +17,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
@@ -478,8 +478,8 @@ func (fb *FuncButton) SetReturnValues(rets []reflect.Value) {
 	}
 }
 
-// SetKey sets the shortcut of the function button from the given [keyfun.Funs]
-func (fb *FuncButton) SetKey(kf keyfun.Funs) *FuncButton {
+// SetKey sets the shortcut of the function button from the given [keymap.Functions]
+func (fb *FuncButton) SetKey(kf keymap.Functions) *FuncButton {
 	fb.Button.SetKey(kf)
 	return fb
 }

@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/gox/option"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/tree"
 )
 
@@ -43,7 +43,7 @@ func TestValues(t *testing.T) {
 		{"colormap", ColorMapName("ColdHot"), ""},
 		{"color", colors.Orange, ""},
 		{"keychord", key.CodeReturnEnter, ""},
-		{"keymap", keyfun.AvailableMaps[0], ""},
+		{"keymap", keymap.AvailableMaps[0], ""},
 	}
 	for _, value := range values {
 		b := core.NewBody()

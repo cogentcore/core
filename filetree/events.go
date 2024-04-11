@@ -11,7 +11,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/vcs"
@@ -29,7 +29,7 @@ func (fn *Node) KeyInput(kt events.Event) {
 	if core.DebugSettings.KeyEventTrace {
 		fmt.Printf("TreeView KeyInput: %v\n", fn.Path())
 	}
-	kf := keyfun.Of(kt.KeyChord())
+	kf := keymap.Of(kt.KeyChord())
 	selMode := events.SelectModeBits(kt.Modifiers())
 
 	if selMode == events.SelectOne {
@@ -41,19 +41,19 @@ func (fn *Node) KeyInput(kt events.Event) {
 	// first all the keys that work for ReadOnly and active
 	if !fn.IsReadOnly() && !kt.IsHandled() {
 		switch kf {
-		case keyfun.Delete:
+		case keymap.Delete:
 			fn.DeleteFiles()
 			kt.SetHandled()
-		case keyfun.Backspace:
+		case keymap.Backspace:
 			fn.DeleteFiles()
 			kt.SetHandled()
-		case keyfun.Duplicate:
+		case keymap.Duplicate:
 			fn.DuplicateFiles()
 			kt.SetHandled()
-		case keyfun.Insert: // New File
+		case keymap.Insert: // New File
 			views.CallFunc(fn, fn.NewFile)
 			kt.SetHandled()
-		case keyfun.InsertAfter: // New Folder
+		case keymap.InsertAfter: // New Folder
 			views.CallFunc(fn, fn.NewFolder)
 			kt.SetHandled()
 		}
@@ -119,13 +119,13 @@ func (fn *Node) ContextMenu(m *core.Scene) {
 	core.NewSeparator(m)
 
 	core.NewButton(m).SetText("Duplicate").SetIcon(icons.Copy).
-		SetKey(keyfun.Duplicate).Style(func(s *styles.Style) {
+		SetKey(keymap.Duplicate).Style(func(s *styles.Style) {
 		s.SetState(!fn.HasSelection(), states.Disabled)
 	}).OnClick(func(e events.Event) {
 		fn.This().(Filer).DuplicateFiles()
 	})
 	core.NewButton(m).SetText("Delete").SetIcon(icons.Delete).
-		SetKey(keyfun.Delete).Style(func(s *styles.Style) {
+		SetKey(keymap.Delete).Style(func(s *styles.Style) {
 		s.SetState(!fn.HasSelection(), states.Disabled)
 	}).OnClick(func(e events.Event) {
 		fn.This().(Filer).DeleteFiles()
@@ -171,21 +171,21 @@ func (fn *Node) ContextMenu(m *core.Scene) {
 		})
 
 	core.NewSeparator(m)
-	core.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy).
+	core.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keymap.Copy).
 		Style(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection(), states.Disabled)
 		}).
 		OnClick(func(e events.Event) {
 			fn.Copy(true)
 		})
-	core.NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keyfun.Cut).
+	core.NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keymap.Cut).
 		Style(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection(), states.Disabled)
 		}).
 		OnClick(func(e events.Event) {
 			fn.Cut()
 		})
-	pbt := core.NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keyfun.Paste).
+	pbt := core.NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keymap.Paste).
 		Style(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection(), states.Disabled)
 		}).

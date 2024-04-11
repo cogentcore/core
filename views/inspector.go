@@ -13,7 +13,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/iox/jsonx"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
@@ -315,12 +315,12 @@ func (is *Inspector) ConfigToolbar(tb *core.Toolbar) {
 			s.SetEnabled(ok)
 		})
 	core.NewSeparator(tb)
-	op := NewFuncButton(tb, is.Open).SetKey(keyfun.Open)
+	op := NewFuncButton(tb, is.Open).SetKey(keymap.Open)
 	op.Args[0].SetValue(is.Filename)
 	op.Args[0].SetTag("ext", ".json")
-	NewFuncButton(tb, is.Save).SetKey(keyfun.Save).
+	NewFuncButton(tb, is.Save).SetKey(keymap.Save).
 		StyleFirst(func(s *styles.Style) { s.SetEnabled(is.Changed && is.Filename != "") })
-	sa := NewFuncButton(tb, is.SaveAs).SetKey(keyfun.SaveAs)
+	sa := NewFuncButton(tb, is.SaveAs).SetKey(keymap.SaveAs)
 	sa.Args[0].SetValue(is.Filename)
 	sa.Args[0].SetTag("ext", ".json")
 	core.NewSeparator(tb)

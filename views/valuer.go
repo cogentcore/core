@@ -17,7 +17,7 @@ import (
 	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/tree"
 )
@@ -31,7 +31,7 @@ func init() {
 	AddValue(icons.Icon(""), func() Value { return &IconValue{} })
 	AddValue(core.FontName(""), func() Value { return &FontValue{} })
 	AddValue(core.Filename(""), func() Value { return &FileValue{} })
-	AddValue(keyfun.MapName(""), func() Value { return &KeyMapValue{} })
+	AddValue(keymap.MapName(""), func() Value { return &KeyMapValue{} })
 	AddValue(gti.Type{}, func() Value { return &TypeValue{} })
 	AddValue(color.RGBA{}, func() Value { return &ColorValue{} })
 	AddValue(image.Uniform{}, func() Value { return &ColorValue{} })

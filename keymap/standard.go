@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package keyfun
+package keymap
 
 // StandardMaps is the original compiled-in set of standard keymaps that have
 // the lastest key functions bound to standard key chords.

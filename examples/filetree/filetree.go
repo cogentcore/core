@@ -17,7 +17,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/filetree"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/tree"
@@ -313,14 +313,14 @@ func (fb *FileBrowse) TextEditorByIndex(idx int) *texteditor.Editor {
 
 func (fb *FileBrowse) ConfigToolbar(tb *core.Toolbar) { //gti:add
 	views.NewFuncButton(tb, fb.UpdateFiles).SetIcon(icons.Refresh).SetShortcut("Command+U")
-	op := views.NewFuncButton(tb, fb.OpenPath).SetKey(keyfun.Open)
+	op := views.NewFuncButton(tb, fb.OpenPath).SetKey(keymap.Open)
 	op.Args[0].SetValue(fb.ActiveFilename)
 	// op.Args[0].SetTag("ext", ".json")
-	views.NewFuncButton(tb, fb.SaveActiveView).SetKey(keyfun.Save)
+	views.NewFuncButton(tb, fb.SaveActiveView).SetKey(keymap.Save)
 	// save.SetUpdateFunc(func() {
 	// 	save.SetEnabledUpdate(fb.Changed && ge.Filename != "")
 	// })
-	sa := views.NewFuncButton(tb, fb.SaveActiveViewAs).SetKey(keyfun.SaveAs)
+	sa := views.NewFuncButton(tb, fb.SaveActiveViewAs).SetKey(keymap.SaveAs)
 	sa.Args[0].SetValue(fb.ActiveFilename)
 	// sa.Args[0].SetTag("ext", ".json")
 }

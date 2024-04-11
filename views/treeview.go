@@ -21,7 +21,7 @@ import (
 	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/states"
@@ -1263,7 +1263,7 @@ func (tv *TreeView) ContextMenuPos(e events.Event) (pos image.Point) {
 }
 
 func (tv *TreeView) ContextMenuReadOnly(m *core.Scene) {
-	core.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy).
+	core.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keymap.Copy).
 		SetEnabled(tv.HasSelection()).
 		OnClick(func(e events.Event) {
 			tv.Copy(true)
@@ -1313,17 +1313,17 @@ func (tv *TreeView) ContextMenu(m *core.Scene) {
 			tvi.DeleteNode()
 		})
 	core.NewSeparator(m)
-	core.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy).
+	core.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keymap.Copy).
 		SetEnabled(tv.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.Copy(true)
 		})
-	core.NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keyfun.Cut).
+	core.NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keymap.Cut).
 		SetEnabled(tv.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.Cut()
 		})
-	pbt := core.NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keyfun.Paste).
+	pbt := core.NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keymap.Paste).
 		OnClick(func(e events.Event) {
 			tvi.Paste()
 		})
@@ -1706,10 +1706,10 @@ func (tv *TreeView) HandleEvents() {
 
 func (tv *TreeView) HandleKeys() {
 	tv.On(events.KeyChord, func(e events.Event) {
-		kf := keyfun.Of(e.KeyChord())
+		kf := keymap.Of(e.KeyChord())
 		selMode := events.SelectModeBits(e.Modifiers())
 		if core.DebugSettings.KeyEventTrace {
-			slog.Info("TreeView KeyInput", "widget", tv, "keyfun", kf, "selMode", selMode)
+			slog.Info("TreeView KeyInput", "widget", tv, "keyFunction", kf, "selMode", selMode)
 		}
 
 		if selMode == events.SelectOne {
@@ -1722,65 +1722,65 @@ func (tv *TreeView) HandleKeys() {
 
 		// first all the keys that work for ReadOnly and active
 		switch kf {
-		case keyfun.CancelSelect:
+		case keymap.CancelSelect:
 			tv.UnselectAll()
 			tv.SetSelectMode(false)
 			e.SetHandled()
-		case keyfun.MoveRight:
+		case keymap.MoveRight:
 			tv.Open()
 			e.SetHandled()
-		case keyfun.MoveLeft:
+		case keymap.MoveLeft:
 			tv.Close()
 			e.SetHandled()
-		case keyfun.MoveDown:
+		case keymap.MoveDown:
 			tv.MoveDownAction(selMode)
 			e.SetHandled()
-		case keyfun.MoveUp:
+		case keymap.MoveUp:
 			tv.MoveUpAction(selMode)
 			e.SetHandled()
-		case keyfun.PageUp:
+		case keymap.PageUp:
 			tv.MovePageUpAction(selMode)
 			e.SetHandled()
-		case keyfun.PageDown:
+		case keymap.PageDown:
 			tv.MovePageDownAction(selMode)
 			e.SetHandled()
-		case keyfun.Home:
+		case keymap.Home:
 			tv.MoveHomeAction(selMode)
 			e.SetHandled()
-		case keyfun.End:
+		case keymap.End:
 			tv.MoveEndAction(selMode)
 			e.SetHandled()
-		case keyfun.SelectMode:
+		case keymap.SelectMode:
 			tv.SelectModeToggle()
 			e.SetHandled()
-		case keyfun.SelectAll:
+		case keymap.SelectAll:
 			tv.SelectAll()
 			e.SetHandled()
-		case keyfun.Enter:
+		case keymap.Enter:
 			tv.ToggleClose()
 			e.SetHandled()
-		case keyfun.Copy:
+		case keymap.Copy:
 			tvi.Copy(true)
 			e.SetHandled()
 		}
 		if !tv.RootIsReadOnly() && !e.IsHandled() {
 			switch kf {
-			case keyfun.Delete:
+			case keymap.Delete:
 				tvi.DeleteNode()
 				e.SetHandled()
-			case keyfun.Duplicate:
+			case keymap.Duplicate:
 				tvi.Duplicate()
 				e.SetHandled()
-			case keyfun.Insert:
+			case keymap.Insert:
 				tvi.InsertBefore()
 				e.SetHandled()
-			case keyfun.InsertAfter:
+			case keymap.InsertAfter:
 				tvi.InsertAfter()
 				e.SetHandled()
-			case keyfun.Cut:
+			case keymap.Cut:
 				tvi.Cut()
 				e.SetHandled()
-			case keyfun.Paste:
+			case keymap.Paste:
 				tvi.Paste()
 				e.SetHandled()
 			}

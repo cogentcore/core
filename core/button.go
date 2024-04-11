@@ -13,7 +13,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
@@ -231,8 +231,8 @@ func (bt *Button) SetStyles() {
 	})
 }
 
-// SetKey sets the shortcut of the button from the given [keyfun.Funs]
-func (bt *Button) SetKey(kf keyfun.Funs) *Button {
+// SetKey sets the shortcut of the button from the given [keymap.Functions]
+func (bt *Button) SetKey(kf keymap.Functions) *Button {
 	bt.SetShortcut(kf.Chord())
 	return bt
 }

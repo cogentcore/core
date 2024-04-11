@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/paint"
@@ -213,8 +213,8 @@ func (lb *Label) HandleEvents() {
 		if !lb.StateIs(states.Selected) {
 			return
 		}
-		kf := keyfun.Of(e.KeyChord())
-		if kf == keyfun.Copy {
+		kf := keymap.Of(e.KeyChord())
+		if kf == keymap.Copy {
 			e.SetHandled()
 			lb.Copy(true)
 		}

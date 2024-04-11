@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package keyfun
+// Package keymap implements maps from keyboard shortcuts to
+// semantic GUI keyboard functions.
+package keymap
 
 //go:generate core generate
 
@@ -20,13 +22,12 @@ import (
 // https://www.cs.colorado.edu/~main/cs1300/lab/emacs.html
 // https://help.ubuntu.com/community/KeyboardShortcuts
 
-// Funs are functions that keyboard events can perform in the GUI.
-// It seems possible to keep this flat and consistent across different contexts,
-// as long as the functions can be appropriately reinterpreted for each context.
-type Funs int32 //enums:enum
+// Functions are semantic functions that keyboard events
+// can perform in the GUI.
+type Functions int32 //enums:enum
 
 const (
-	Nil Funs = iota
+	None Functions = iota
 	MoveUp
 	MoveDown
 	MoveRight
@@ -99,10 +100,10 @@ const (
 	CloseAlt2 // alternative version (e.g., alt)
 )
 
-// Map is a map between a key sequence (chord) and a specific KeyFun
-// function.  This mapping must be unique, in that each chord has unique
-// KeyFun, but multiple chords can trigger the same function.
-type Map map[key.Chord]Funs
+// Map is a map between a key sequence (chord) and a specific key
+// function.  This mapping must be unique, in that each chord has a
+// unique function, but multiple chords can trigger the same function.
+type Map map[key.Chord]Functions
 
 // ActiveMap points to the active map -- users can set this to an
 // alternative map in Settings
@@ -131,7 +132,7 @@ func SetActiveMapName(mapnm MapName) {
 	if ok {
 		SetActiveMap(km, mapnm)
 	} else {
-		slog.Error("keyfun.SetActiveKeyMapName: key map named not found, using default", "requested", mapnm, "default", DefaultMap)
+		slog.Error("keymap.SetActiveKeyMapName: key map named not found, using default", "requested", mapnm, "default", DefaultMap)
 		km, _, ok = AvailableMaps.MapByName(DefaultMap)
 		if ok {
 			SetActiveMap(km, DefaultMap)
@@ -140,7 +141,7 @@ func SetActiveMapName(mapnm MapName) {
 			for i, km := range AvailableMaps {
 				avail[i] = km.Name
 			}
-			slog.Error("keyfun.SetActiveKeyMapName: DefaultKeyMap not found either; trying first one", "default", DefaultMap, "available", avail)
+			slog.Error("keymap.SetActiveKeyMapName: DefaultKeyMap not found either; trying first one", "default", DefaultMap, "available", avail)
 			if len(AvailableMaps) > 0 {
 				nkm := AvailableMaps[0]
 				SetActiveMap(&nkm.Map, MapName(nkm.Name))
@@ -150,7 +151,7 @@ func SetActiveMapName(mapnm MapName) {
 }
 
 // Of converts the given [key.Chord] into a keyboard function.
-func Of(chord key.Chord) Funs {
+func Of(chord key.Chord) Functions {
 	return (*ActiveMap)[chord]
 }
 
@@ -161,7 +162,7 @@ type MapItem struct {
 	Key key.Chord
 
 	// the function of that key
-	Fun Funs
+	Fun Functions
 }
 
 // ToSlice copies this keymap to a slice of [MapItem]s.
@@ -177,7 +178,7 @@ func (km *Map) ToSlice() []MapItem {
 
 // ChordFor returns all of the key chord triggers for the given
 // key function in the map, separating them with newlines.
-func (km *Map) ChordFor(kf Funs) key.Chord {
+func (km *Map) ChordFor(kf Functions) key.Chord {
 	res := []string{}
 	for key, fun := range *km {
 		if fun == kf {
@@ -190,23 +191,24 @@ func (km *Map) ChordFor(kf Funs) key.Chord {
 
 // Chord returns all of the key chord triggers for this
 // key function in the current active map, separating them with newlines.
-func (kf Funs) Chord() key.Chord {
+func (kf Functions) Chord() key.Chord {
 	return ActiveMap.ChordFor(kf)
 }
 
 // Label transforms the key function into a string representing
 // its underlying key chord(s) in a form suitable for display to users.
-func (kf Funs) Label() string {
+func (kf Functions) Label() string {
 	return kf.Chord().Label()
 }
 
 // Update ensures that the given keymap has at least one entry for every
-// defined KeyFun, grabbing ones from the default map if not, and also
-// eliminates any Nil entries which might reflect out-of-date functions
+// defined key function, grabbing ones from the default map if not, and
+// also eliminates any [None] entries which might reflect out-of-date
+// functions.
 func (km *Map) Update(kmName MapName) {
 	for key, val := range *km {
-		if val == Nil {
-			slog.Error("keyfun.KeyMap: key function is nil; probably renamed", "key", key)
+		if val == None {
+			slog.Error("keymap.KeyMap: key function is nil; probably renamed", "key", key)
 			delete(*km, key)
 		}
 	}
@@ -217,16 +219,15 @@ func (km *Map) Update(kmName MapName) {
 		return kms[i].Fun < kms[j].Fun
 	})
 
-	lfun := Nil
+	lfun := None
 	for _, ki := range kms {
 		fun := ki.Fun
 		if fun != lfun {
 			del := fun - lfun
 			if del > 1 {
 				for mi := lfun + 1; mi < fun; mi++ {
-					slog.Error("keyfun.KeyMap: key map is missing a key for a key function", "keyMap", kmName, "function", mi)
+					slog.Error("keymap.KeyMap: key map is missing a key for a key function", "keyMap", kmName, "function", mi)
 					s := mi.String()
-					s = strings.TrimPrefix(s, "KeyFun")
 					s = "- Not Set - " + s
 					nski := MapItem{Key: key.Chord(s), Fun: mi}
 					addkm = append(addkm, nski)
@@ -251,7 +252,7 @@ type MapsItem struct { //gti:add -setters
 	// name of keymap
 	Name string `width:"20"`
 
-	// description of keymap -- good idea to include source it was derived from
+	// description of keymap; good idea to include source it was derived from
 	Desc string
 
 	// to edit key sequence click button and type new key combination; to edit function mapped to key sequence choose from menu
@@ -263,24 +264,23 @@ func (km MapsItem) Label() string {
 	return km.Name
 }
 
-// Maps is a list of KeyMap's -- users can edit these in their settings -- to create
-// a custom one, just duplicate an existing map, rename, and customize
+// Maps is a list of [MapsItem]s; users can edit these in their settings.
 type Maps []MapsItem //gti:add
 
-// AvailableMaps is the current list of available keymaps for use -- can be
-// loaded / saved / edited with preferences.  This is set to StdKeyMaps at
-// startup.
+// AvailableMaps is the current list of available keymaps for use.
+// This can be loaded / saved / edited in user settings. This is set
+// to [StandardMaps] at startup.
 var AvailableMaps Maps
 
-// MapByName returns a keymap and index by name -- returns false and emits a
-// message to stdout if not found
+// MapByName returns a [Map] and index by name. It returns false
+// and prints an error message if not found.
 func (km *Maps) MapByName(name MapName) (*Map, int, bool) {
 	for i, it := range *km {
 		if it.Name == string(name) {
 			return &it.Map, i, true
 		}
 	}
-	slog.Error("keyfun.KeyMaps.MapByName: key map not found", "name", name)
+	slog.Error("keymap.KeyMaps.MapByName: key map not found", "name", name)
 	return nil, -1, false
 }
 

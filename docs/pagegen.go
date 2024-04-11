@@ -16,7 +16,7 @@ import (
 	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/pages"
 	"cogentcore.org/core/paint"
@@ -93,7 +93,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		})
 	},
 	"widgets/buttons-6": func(parent core.Widget) {
-		core.NewButton(parent).SetText("Open").SetKey(keyfun.Open).OnClick(func(e events.Event) {
+		core.NewButton(parent).SetText("Open").SetKey(keymap.Open).OnClick(func(e events.Event) {
 			core.MessageSnackbar(parent, "File opened")
 		})
 	},

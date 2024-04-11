@@ -22,7 +22,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/iox/jsonx"
 	"cogentcore.org/core/iox/tomlx"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/laser"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/system"
@@ -372,12 +372,12 @@ type DeviceSettingsData struct { //gti:add
 	SettingsBase
 
 	// The keyboard shortcut map to use
-	KeyMap keyfun.MapName
+	KeyMap keymap.MapName
 
 	// The keyboard shortcut maps available as options for Key map.
 	// If you do not want to have custom key maps, you should leave
 	// this unset so that you always have the latest standard key maps.
-	KeyMaps option.Option[keyfun.Maps]
+	KeyMaps option.Option[keymap.Maps]
 
 	// The maximum time interval between button press events to count as a double-click
 	DoubleClickInterval time.Duration `default:"500ms" min:"100ms" step:"50ms"`
@@ -418,16 +418,16 @@ type DeviceSettingsData struct { //gti:add
 }
 
 func (ds *DeviceSettingsData) Defaults() {
-	ds.KeyMap = keyfun.DefaultMap
-	ds.KeyMaps.Value = keyfun.AvailableMaps
+	ds.KeyMap = keymap.DefaultMap
+	ds.KeyMaps.Value = keymap.AvailableMaps
 }
 
 func (ds *DeviceSettingsData) Apply() {
 	if ds.KeyMaps.Valid {
-		keyfun.AvailableMaps = ds.KeyMaps.Value
+		keymap.AvailableMaps = ds.KeyMaps.Value
 	}
 	if ds.KeyMap != "" {
-		keyfun.SetActiveMapName(ds.KeyMap)
+		keymap.SetActiveMapName(ds.KeyMap)
 	}
 
 	events.ScrollWheelSpeed = ds.ScrollWheelSpeed

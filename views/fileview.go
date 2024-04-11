@@ -26,7 +26,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/pi/complete"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
@@ -274,7 +274,7 @@ func (fv *FileView) ConfigFileView() {
 // ConfigToolbar configures the given toolbar to have file view
 // actions and completions.
 func (fv *FileView) ConfigToolbar(tb *core.Toolbar) {
-	NewFuncButton(tb, fv.DirPathUp).SetIcon(icons.ArrowUpward).SetKey(keyfun.Jump).SetText("Up")
+	NewFuncButton(tb, fv.DirPathUp).SetIcon(icons.ArrowUpward).SetKey(keymap.Jump).SetText("Up")
 	NewFuncButton(tb, fv.AddPathToFavs).SetIcon(icons.Favorite).SetText("Favorite")
 	NewFuncButton(tb, fv.UpdateFilesAction).SetIcon(icons.Refresh).SetText("Update")
 	NewFuncButton(tb, fv.NewFolder).SetIcon(icons.CreateNewFolder)
@@ -400,7 +400,7 @@ func (fv *FileView) ConfigFilesRow() {
 			if !fv.SelectFile() {
 				e.SetHandled() // don't pass along; keep dialog open
 			} else {
-				fv.Scene.SendKeyFun(keyfun.Accept, e) // activates Ok button code
+				fv.Scene.SendKey(keymap.Accept, e) // activates Ok button code
 			}
 		}
 	})
@@ -412,14 +412,14 @@ func (fv *FileView) ConfigSelRow() {
 		SetTooltip("enter file name here (or select from above list)")
 
 	sf := core.NewTextField(sr, "sel").SetText(fv.CurrentSelectedFile).
-		SetTooltip(fmt.Sprintf("Enter the file name. Special keys: up/down to move selection; %s or %s to go up to parent folder; %s or %s or %s or %s to select current file (if directory, goes into it, if file, selects and closes); %s or %s for prev / next history item; %s return to this field", keyfun.WordLeft.Label(), keyfun.Jump.Label(), keyfun.SelectMode.Label(), keyfun.Insert.Label(), keyfun.InsertAfter.Label(), keyfun.Open.Label(), keyfun.HistPrev.Label(), keyfun.HistNext.Label(), keyfun.Search.Label()))
+		SetTooltip(fmt.Sprintf("Enter the file name. Special keys: up/down to move selection; %s or %s to go up to parent folder; %s or %s or %s or %s to select current file (if directory, goes into it, if file, selects and closes); %s or %s for prev / next history item; %s return to this field", keymap.WordLeft.Label(), keymap.Jump.Label(), keymap.SelectMode.Label(), keymap.Insert.Label(), keymap.InsertAfter.Label(), keymap.Open.Label(), keymap.HistPrev.Label(), keymap.HistNext.Label(), keymap.Search.Label()))
 	sf.SetCompleter(fv, fv.FileComplete, fv.FileCompleteEdit)
 	sf.OnChange(func(e events.Event) {
 		fv.SetSelFileAction(sf.Text())
 	})
 	sf.OnKeyChord(func(e events.Event) {
-		kf := keyfun.Of(e.KeyChord())
-		if kf == keyfun.Accept {
+		kf := keymap.Of(e.KeyChord())
+		if kf == keymap.Accept {
 			fv.SetSelFileAction(sf.Text())
 		}
 	})
@@ -765,20 +765,20 @@ func (fv *FileView) HandleEvents() {
 }
 
 func (fv *FileView) KeyInput(kt events.Event) {
-	kf := keyfun.Of(kt.KeyChord())
+	kf := keymap.Of(kt.KeyChord())
 	if core.DebugSettings.KeyEventTrace {
-		slog.Info("FileView KeyInput", "widget", fv, "keyfun", kf)
+		slog.Info("FileView KeyInput", "widget", fv, "keyFunction", kf)
 	}
 	switch kf {
-	case keyfun.Jump, keyfun.WordLeft:
+	case keymap.Jump, keymap.WordLeft:
 		kt.SetHandled()
 		fv.DirPathUp()
-	case keyfun.Insert, keyfun.InsertAfter, keyfun.Open, keyfun.SelectMode:
+	case keymap.Insert, keymap.InsertAfter, keymap.Open, keymap.SelectMode:
 		kt.SetHandled()
 		if fv.SelectFile() {
 			fv.Send(events.DoubleClick, kt) // will close dialog
 		}
-	case keyfun.Search:
+	case keymap.Search:
 		kt.SetHandled()
 		sf := fv.SelectField()
 		sf.SetFocusEvent()

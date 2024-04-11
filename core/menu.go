@@ -9,7 +9,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
@@ -32,13 +32,13 @@ func MenuSceneConfigStyles(msc *Scene) {
 		if bt := AsButton(w); bt != nil {
 			bt.Type = ButtonMenu
 			bt.OnKeyChord(func(e events.Event) {
-				kf := keyfun.Of(e.KeyChord())
+				kf := keymap.Of(e.KeyChord())
 				switch kf {
-				case keyfun.MoveRight:
+				case keymap.MoveRight:
 					if bt.OpenMenu(e) {
 						e.SetHandled()
 					}
-				case keyfun.MoveLeft:
+				case keymap.MoveLeft:
 					// need to be able to use arrow keys to navigate in completer
 					if msc.Stage.Type != CompleterStage {
 						msc.Stage.ClosePopup()

@@ -455,7 +455,8 @@ func (ed *Editor) QReplaceCancel() {
 	ed.NeedsRender()
 }
 
-// EscPressed emitted for keyfun.Abort or keyfun.CancelSelect -- effect depends on state..
+// EscPressed emitted for [keymap.Abort] or [keymap.CancelSelect];
+// effect depends on state.
 func (ed *Editor) EscPressed() {
 	switch {
 	case ed.ISearch.On:
