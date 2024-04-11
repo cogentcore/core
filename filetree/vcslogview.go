@@ -16,7 +16,7 @@ import (
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor"
-	"cogentcore.org/core/vci"
+	"cogentcore.org/core/vcs"
 	"cogentcore.org/core/views"
 )
 
@@ -25,7 +25,7 @@ type VCSLogView struct {
 	core.Layout
 
 	// current log
-	Log vci.Log
+	Log vcs.Log
 
 	// file that this is a log of -- if blank then it is entire repository
 	File string
@@ -34,7 +34,7 @@ type VCSLogView struct {
 	Since string
 
 	// version control system repository
-	Repo vci.Repo `json:"-" xml:"-" copier:"-"`
+	Repo vcs.Repo `json:"-" xml:"-" copier:"-"`
 
 	// revision A -- defaults to HEAD
 	RevA string `set:"-"`
@@ -61,7 +61,7 @@ func (lv *VCSLogView) OnInit() {
 }
 
 // ConfigRepo configures to given repo, log and file (file could be empty)
-func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) {
+func (lv *VCSLogView) ConfigRepo(repo vcs.Repo, lg vcs.Log, file, since string) {
 	lv.Repo = repo
 	lv.Log = lg
 	lv.File = file
@@ -241,7 +241,7 @@ func (lv *VCSLogView) ConfigToolbar() {
 }
 
 // VCSLogViewDialog returns a VCS Log View for given repo, log and file (file could be empty)
-func VCSLogViewDialog(ctx core.Widget, repo vci.Repo, lg vci.Log, file, since string) *core.Body {
+func VCSLogViewDialog(ctx core.Widget, repo vcs.Repo, lg vcs.Log, file, since string) *core.Body {
 	title := "VCS Log: "
 	if file == "" {
 		title += "All files"
@@ -259,7 +259,7 @@ func VCSLogViewDialog(ctx core.Widget, repo vci.Repo, lg vci.Log, file, since st
 }
 
 // FileAtRevDialog Shows a file at a given revision in a new dialog window
-func FileAtRevDialog(ctx core.Widget, repo vci.Repo, file, rev string) *core.Body {
+func FileAtRevDialog(ctx core.Widget, repo vcs.Repo, file, rev string) *core.Body {
 	fb, err := repo.FileContents(file, rev)
 	if err != nil {
 		core.ErrorDialog(ctx, err)

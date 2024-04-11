@@ -34,7 +34,7 @@ import (
 
 	"cogentcore.org/core/gox/datasize"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/vci"
+	"cogentcore.org/core/vcs"
 	"github.com/Bios-Marcel/wastebasket"
 )
 
@@ -71,7 +71,7 @@ type FileInfo struct { //gti:add
 	ModTime FileTime `label:"Last modified"`
 
 	// version control system status, when enabled
-	Vcs vci.FileStatus `tableview:"-"`
+	VCS vcs.FileStatus `tableview:"-"`
 
 	// full path to file, including name; for file functions
 	Path string `tableview:"-"`

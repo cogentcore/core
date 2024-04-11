@@ -24,7 +24,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor/textbuf"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/vci"
+	"cogentcore.org/core/vcs"
 	"cogentcore.org/core/views"
 )
 
@@ -51,7 +51,7 @@ func DiffFiles(ctx core.Widget, afile, bfile string) (*DiffView, error) {
 // at two different revisions from given repository
 // if empty, defaults to: A = current HEAD, B = current WC file.
 // -1, -2 etc also work as universal ways of specifying prior revisions.
-func DiffViewDialogFromRevs(ctx core.Widget, repo vci.Repo, file string, fbuf *Buffer, rev_a, rev_b string) (*DiffView, error) {
+func DiffViewDialogFromRevs(ctx core.Widget, repo vcs.Repo, file string, fbuf *Buffer, rev_a, rev_b string) (*DiffView, error) {
 	var astr, bstr []string
 	if rev_b == "" { // default to current file
 		if fbuf != nil {

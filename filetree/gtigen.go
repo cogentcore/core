@@ -9,7 +9,7 @@ import (
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
-	"cogentcore.org/core/vci"
+	"cogentcore.org/core/vcs"
 	"cogentcore.org/core/views"
 )
 
@@ -171,7 +171,7 @@ func (t *VCSLogView) New() tree.Node { return &VCSLogView{} }
 
 // SetLog sets the [VCSLogView.Log]:
 // current log
-func (t *VCSLogView) SetLog(v vci.Log) *VCSLogView { t.Log = v; return t }
+func (t *VCSLogView) SetLog(v vcs.Log) *VCSLogView { t.Log = v; return t }
 
 // SetFile sets the [VCSLogView.File]:
 // file that this is a log of -- if blank then it is entire repository
@@ -183,7 +183,7 @@ func (t *VCSLogView) SetSince(v string) *VCSLogView { t.Since = v; return t }
 
 // SetRepo sets the [VCSLogView.Repo]:
 // version control system repository
-func (t *VCSLogView) SetRepo(v vci.Repo) *VCSLogView { t.Repo = v; return t }
+func (t *VCSLogView) SetRepo(v vcs.Repo) *VCSLogView { t.Repo = v; return t }
 
 // SetSetA sets the [VCSLogView.SetA]:
 // double-click will set the A revision -- else B

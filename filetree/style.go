@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/vci"
+	"cogentcore.org/core/vcs"
 )
 
 func (ft *Tree) OnInit() {
@@ -32,7 +32,7 @@ func (fn *Node) OnInit() {
 
 func (fn *Node) SetStyles() {
 	fn.Style(func(s *styles.Style) {
-		vcs := fn.Info.Vcs
+		status := fn.Info.VCS
 		s.Font.Weight = styles.WeightNormal
 		s.Font.Style = styles.FontNormal
 		if fn.IsExec() && !fn.IsDir() {
@@ -42,19 +42,19 @@ func (fn *Node) SetStyles() {
 			s.Font.Style = styles.Italic
 		}
 		switch {
-		case vcs == vci.Untracked:
+		case status == vcs.Untracked:
 			s.Color = errors.Must1(gradient.FromString("#808080"))
-		case vcs == vci.Modified:
+		case status == vcs.Modified:
 			s.Color = errors.Must1(gradient.FromString("#4b7fd1"))
-		case vcs == vci.Added:
+		case status == vcs.Added:
 			s.Color = errors.Must1(gradient.FromString("#008800"))
-		case vcs == vci.Deleted:
+		case status == vcs.Deleted:
 			s.Color = errors.Must1(gradient.FromString("#ff4252"))
-		case vcs == vci.Conflicted:
+		case status == vcs.Conflicted:
 			s.Color = errors.Must1(gradient.FromString("#ce8020"))
-		case vcs == vci.Updated:
+		case status == vcs.Updated:
 			s.Color = errors.Must1(gradient.FromString("#008060"))
-		case vcs == vci.Stored:
+		case status == vcs.Stored:
 			s.Color = colors.C(colors.Scheme.OnSurface)
 		}
 	})

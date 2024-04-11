@@ -25,7 +25,7 @@ import (
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/texteditor/histyle"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/vci"
+	"cogentcore.org/core/vcs"
 	"cogentcore.org/core/views"
 )
 
@@ -53,10 +53,10 @@ type Node struct { //core:embedder
 
 	// version control system repository for this directory,
 	// only non-nil if this is the highest-level directory in the tree under vcs control
-	DirRepo vci.Repo `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
+	DirRepo vcs.Repo `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
 	// version control system repository file status -- only valid during ReadDir
-	RepoFiles vci.Files `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
+	RepoFiles vcs.Files `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 }
 
 func (fn *Node) FlagType() enums.BitFlagSetter {
@@ -216,12 +216,12 @@ func (fn *Node) UpdateDir() {
 		// }
 		sf.SetNodePath(fp)
 		if sf.IsDir() {
-			sf.Info.Vcs = vci.Stored // always
+			sf.Info.VCS = vcs.Stored // always
 		} else if repo != nil {
 			rstat := rnode.RepoFiles.Status(repo, string(sf.FPath))
-			sf.Info.Vcs = rstat
+			sf.Info.VCS = rstat
 		} else {
-			sf.Info.Vcs = vci.Stored
+			sf.Info.VCS = vcs.Stored
 		}
 	}
 	if mods {
@@ -367,7 +367,7 @@ func (fn *Node) UpdateNode() error {
 	} else {
 		repo, _ := fn.Repo()
 		if repo != nil {
-			fn.Info.Vcs, _ = repo.Status(string(fn.FPath))
+			fn.Info.VCS, _ = repo.Status(string(fn.FPath))
 		}
 		fn.Update()
 		fn.SetFileIcon()
@@ -479,8 +479,8 @@ func (fn *Node) OpenBuf() (bool, error) {
 	} else {
 		fn.Buffer = texteditor.NewBuffer()
 		fn.Buffer.OnChange(func(e events.Event) {
-			if fn.Info.Vcs == vci.Stored {
-				fn.Info.Vcs = vci.Modified
+			if fn.Info.VCS == vcs.Stored {
+				fn.Info.VCS = vcs.Modified
 			}
 		})
 	}

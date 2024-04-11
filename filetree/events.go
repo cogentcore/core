@@ -14,7 +14,7 @@ import (
 	"cogentcore.org/core/keyfun"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/vci"
+	"cogentcore.org/core/vcs"
 	"cogentcore.org/core/views"
 )
 
@@ -72,33 +72,33 @@ func VCSLabelFunc(fn *Node, label string) string {
 func (fn *Node) VCSContextMenu(m *core.Scene) {
 	views.NewFuncButton(m, fn.AddToVCSSel).SetText(VCSLabelFunc(fn, "Add to VCS")).SetIcon(icons.Add).
 		Style(func(s *styles.Style) {
-			s.SetState(!fn.HasSelection() || fn.Info.Vcs != vci.Untracked, states.Disabled)
+			s.SetState(!fn.HasSelection() || fn.Info.VCS != vcs.Untracked, states.Disabled)
 		})
 	views.NewFuncButton(m, fn.DeleteFromVCSSel).SetText(VCSLabelFunc(fn, "Delete from VCS")).SetIcon(icons.Delete).
 		Style(func(s *styles.Style) {
-			s.SetState(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
+			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})
 	views.NewFuncButton(m, fn.CommitToVCSSel).SetText(VCSLabelFunc(fn, "Commit to VCS")).SetIcon(icons.Star).
 		Style(func(s *styles.Style) {
-			s.SetState(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
+			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})
 	views.NewFuncButton(m, fn.RevertVCSSel).SetText(VCSLabelFunc(fn, "Revert from VCS")).SetIcon(icons.Undo).
 		Style(func(s *styles.Style) {
-			s.SetState(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
+			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})
 	core.NewSeparator(m)
 
 	views.NewFuncButton(m, fn.DiffVCSSel).SetText(VCSLabelFunc(fn, "Diff VCS")).SetIcon(icons.Add).
 		Style(func(s *styles.Style) {
-			s.SetState(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
+			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})
 	views.NewFuncButton(m, fn.LogVCSSel).SetText(VCSLabelFunc(fn, "Log VCS")).SetIcon(icons.List).
 		Style(func(s *styles.Style) {
-			s.SetState(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
+			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})
 	views.NewFuncButton(m, fn.BlameVCSSel).SetText(VCSLabelFunc(fn, "Blame VCS")).SetIcon(icons.CreditScore).
 		Style(func(s *styles.Style) {
-			s.SetState(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
+			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})
 }
 

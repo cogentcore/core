@@ -19,7 +19,7 @@ import (
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/vci"
+	"cogentcore.org/core/vcs"
 	"gopkg.in/fsnotify.v1"
 )
 
@@ -375,6 +375,6 @@ func (ft *Tree) UpdateExtFiles(efn *Node) {
 		sf.FRoot = ft
 		fp := ft.ExtFiles[i]
 		sf.SetNodePath(fp)
-		sf.Info.Vcs = vci.Stored // no vcs in general
+		sf.Info.VCS = vcs.Stored // no vcs in general
 	}
 }

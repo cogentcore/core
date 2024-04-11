@@ -18,14 +18,14 @@ import (
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/texteditor/textbuf"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/vci"
+	"cogentcore.org/core/vcs"
 	"cogentcore.org/core/views"
 )
 
 // FirstVCS returns the first VCS repository starting from this node and going down.
 // also returns the node having that repository
-func (fn *Node) FirstVCS() (vci.Repo, *Node) {
-	var repo vci.Repo
+func (fn *Node) FirstVCS() (vcs.Repo, *Node) {
+	var repo vcs.Repo
 	var rnode *Node
 	fn.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
 		sfn := AsNode(wi)
@@ -54,12 +54,12 @@ func (fn *Node) DetectVCSRepo(updateFiles bool) bool {
 		return false
 	}
 	path := string(fn.FPath)
-	rtyp := vci.DetectRepo(path)
+	rtyp := vcs.DetectRepo(path)
 	if rtyp == "" {
 		return false
 	}
 	var err error
-	repo, err = vci.NewRepo("origin", path)
+	repo, err = vcs.NewRepo("origin", path)
 	if err != nil {
 		slog.Error(err.Error())
 		return false
@@ -74,14 +74,14 @@ func (fn *Node) DetectVCSRepo(updateFiles bool) bool {
 // Repo returns the version control repository associated with this file,
 // and the node for the directory where the repo is based.
 // Goes up the tree until a repository is found.
-func (fn *Node) Repo() (vci.Repo, *Node) {
+func (fn *Node) Repo() (vcs.Repo, *Node) {
 	if fn.IsExternal() {
 		return nil, nil
 	}
 	if fn.DirRepo != nil {
 		return fn.DirRepo, fn
 	}
-	var repo vci.Repo
+	var repo vcs.Repo
 	var rnode *Node
 	fn.WalkUpParent(func(k tree.Node) bool {
 		if k == nil || k.This() == nil {
@@ -130,7 +130,7 @@ func (fn *Node) AddToVCS() {
 	// fmt.Printf("adding to vcs: %v\n", fn.FPath)
 	err := repo.Add(string(fn.FPath))
 	if errors.Log(err) == nil {
-		fn.Info.Vcs = vci.Added
+		fn.Info.VCS = vcs.Added
 		fn.NeedsRender()
 	}
 }
@@ -154,7 +154,7 @@ func (fn *Node) DeleteFromVCS() {
 	// fmt.Printf("deleting remote from vcs: %v\n", fn.FPath)
 	err := repo.DeleteRemote(string(fn.FPath))
 	if fn != nil && errors.Log(err) == nil {
-		fn.Info.Vcs = vci.Deleted
+		fn.Info.VCS = vcs.Deleted
 		fn.NeedsRender()
 	}
 }
@@ -176,14 +176,14 @@ func (fn *Node) CommitToVCS(message string) (err error) {
 	if repo == nil {
 		return
 	}
-	if fn.Info.Vcs == vci.Untracked {
+	if fn.Info.VCS == vcs.Untracked {
 		return errors.New("file not in vcs repo: " + string(fn.FPath))
 	}
 	err = repo.CommitFile(string(fn.FPath), message)
 	if err != nil {
 		return err
 	}
-	fn.Info.Vcs = vci.Stored
+	fn.Info.VCS = vcs.Stored
 	fn.NeedsRender()
 	return err
 }
@@ -204,16 +204,16 @@ func (fn *Node) RevertVCS() (err error) {
 	if repo == nil {
 		return
 	}
-	if fn.Info.Vcs == vci.Untracked {
+	if fn.Info.VCS == vcs.Untracked {
 		return errors.New("file not in vcs repo: " + string(fn.FPath))
 	}
 	err = repo.RevertFile(string(fn.FPath))
 	if err != nil {
 		return err
 	}
-	if fn.Info.Vcs == vci.Modified {
-		fn.Info.Vcs = vci.Stored
-	} else if fn.Info.Vcs == vci.Added {
+	if fn.Info.VCS == vcs.Modified {
+		fn.Info.VCS = vcs.Stored
+	} else if fn.Info.VCS == vcs.Added {
 		// do nothing - leave in "added" state
 	}
 	if fn.Buffer != nil {
@@ -245,7 +245,7 @@ func (fn *Node) DiffVCS(rev_a, rev_b string) error {
 	if repo == nil {
 		return errors.New("file not in vcs repo: " + string(fn.FPath))
 	}
-	if fn.Info.Vcs == vci.Untracked {
+	if fn.Info.VCS == vcs.Untracked {
 		return errors.New("file not in vcs repo: " + string(fn.FPath))
 	}
 	_, err := texteditor.DiffViewDialogFromRevs(fn, repo, string(fn.FPath), fn.Buffer, rev_a, rev_b)
@@ -277,12 +277,12 @@ func (fn *Node) LogVCSSel(allFiles bool, since string) { //gti:add
 // If allFiles is true, then the log will show revisions for all files, not just
 // this one.
 // Returns the Log and also shows it in a VCSLogView which supports further actions.
-func (fn *Node) LogVCS(allFiles bool, since string) (vci.Log, error) {
+func (fn *Node) LogVCS(allFiles bool, since string) (vcs.Log, error) {
 	repo, _ := fn.Repo()
 	if repo == nil {
 		return nil, errors.New("file not in vcs repo: " + string(fn.FPath))
 	}
-	if fn.Info.Vcs == vci.Untracked {
+	if fn.Info.VCS == vcs.Untracked {
 		return nil, errors.New("file not in vcs repo: " + string(fn.FPath))
 	}
 	fnm := string(fn.FPath)
@@ -362,7 +362,7 @@ func (fn *Node) BlameVCS() ([]byte, error) {
 	if repo == nil {
 		return nil, errors.New("file not in vcs repo: " + string(fn.FPath))
 	}
-	if fn.Info.Vcs == vci.Untracked {
+	if fn.Info.VCS == vcs.Untracked {
 		return nil, errors.New("file not in vcs repo: " + string(fn.FPath))
 	}
 	fnm := string(fn.FPath)
@@ -404,7 +404,7 @@ func (fn *Node) UpdateAllVCS() {
 }
 
 // VersionControlSystems is a list of supported Version Control Systems.
-// These must match the VCS Types from vci which in turn
+// These must match the VCS Types from vcs which in turn
 // is based on masterminds/vcs
 var VersionControlSystems = []string{"git", "svn", "bzr", "hg"}
 

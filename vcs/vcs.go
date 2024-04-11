@@ -4,7 +4,7 @@
 
 // Package vcs provides a more complete version control system (ex: git)
 // interface, building on https://github.com/Masterminds/vcs.
-package vci
+package vcs
 
 //go:generate core generate
 
@@ -19,7 +19,7 @@ import (
 
 var (
 	// ErrUnknownVCS is returned when VCS cannot be determined from the vcs Repo
-	ErrUnknownVCS = errors.New("Unknown VCS")
+	ErrUnknownVCS = errors.New("unknown VCS")
 )
 
 // Repo provides an interface extending vcs.Repo

@@ -25,10 +25,10 @@ func (tl *TexLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md
 		return tl.CompleteCite(fss, origStr, str, pos)
 	}
 	md.Seed = str
-	if len(LaTeXCmdsAll) == 0 {
-		LaTeXCmdsAll = append(LaTeXCmds, CiteCmds...)
+	if len(LaTeXCommandsAll) == 0 {
+		LaTeXCommandsAll = append(LaTeXCommands, CiteCommands...)
 	}
-	for _, ls := range LaTeXCmdsAll {
+	for _, ls := range LaTeXCommandsAll {
 		if strings.HasPrefix(ls, str) {
 			c := complete.Completion{Text: ls, Label: ls, Icon: string(icons.Function)}
 			md.Matches = append(md.Matches, c)
@@ -82,13 +82,13 @@ func (tl *TexLang) CompleteEdit(fss *pi.FileStates, text string, cp int, comp co
 	return ed
 }
 
-// CiteCmds is a list of latex citation commands (APA style requires many variations).
+// CiteCommands is a list of latex citation commands (APA style requires many variations).
 // We include all the variations so they show up in completion.
-var CiteCmds = []string{`\cite`, `\citep`, `\citet`, `\citeNP`, `\citeyearpar`, `\citeyear`, `\citeauthor`, `\citeA`, `\citealp`, `\citeyearNP`, `\parencite`, `\textcite`, `\nptextcite`, `\incite`, `\nopcite`, `\yrcite`, `\yrnopcite`, `\abbrevcite`, `\abbrevincite`}
+var CiteCommands = []string{`\cite`, `\citep`, `\citet`, `\citeNP`, `\citeyearpar`, `\citeyear`, `\citeauthor`, `\citeA`, `\citealp`, `\citeyearNP`, `\parencite`, `\textcite`, `\nptextcite`, `\incite`, `\nopcite`, `\yrcite`, `\yrnopcite`, `\abbrevcite`, `\abbrevincite`}
 
 // HasCite returns true if string has Prefix in CiteCmds
 func HasCite(str string) bool {
-	for _, cc := range CiteCmds {
+	for _, cc := range CiteCommands {
 		if strings.HasPrefix(str, cc) {
 			return true
 		}
@@ -96,11 +96,11 @@ func HasCite(str string) bool {
 	return false
 }
 
-// LaTeXCmdsAll concatenates LaTeXCmds and CiteCmds
-var LaTeXCmdsAll []string
+// LaTeXCommandsAll concatenates LaTeXCmds and CiteCmds
+var LaTeXCommandsAll []string
 
-// LaTeXCmds is a big list of standard commands
-var LaTeXCmds = []string{
+// LaTeXCommands is a big list of standard commands
+var LaTeXCommands = []string{
 	`\em`,
 	`\emph`,
 	`\textbf`,

@@ -15,7 +15,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/system"
-	"cogentcore.org/core/vci"
+	"cogentcore.org/core/vcs"
 	"cogentcore.org/core/views"
 )
 
@@ -229,7 +229,7 @@ func (fn *Node) DeleteFile() error {
 	fn.CloseBuf()
 	repo, _ := fn.Repo()
 	var err error
-	if !fn.Info.IsDir() && repo != nil && fn.Info.Vcs >= vci.Stored {
+	if !fn.Info.IsDir() && repo != nil && fn.Info.VCS >= vcs.Stored {
 		// fmt.Printf("del repo: %v\n", fn.FPath)
 		err = repo.Delete(string(fn.FPath))
 	} else {
@@ -281,7 +281,7 @@ func (fn *Node) RenameFile(newpath string) error { //gti:add
 	stored := false
 	if fn.IsDir() && !fn.HasChildren() {
 		err = os.Rename(string(orgpath), newpath)
-	} else if repo != nil && fn.Info.Vcs >= vci.Stored {
+	} else if repo != nil && fn.Info.VCS >= vcs.Stored {
 		stored = true
 		err = repo.Move(string(orgpath), newpath)
 	} else {
@@ -387,7 +387,7 @@ func (fn *Node) CopyFileToDir(filename string, perm os.FileMode) {
 	fileinfo.CopyFile(tpath, filename, perm)
 	fn.FRoot.UpdatePath(ppath)
 	ofn, ok := fn.FRoot.FindFile(filename)
-	if ok && ofn.Info.Vcs >= vci.Stored {
+	if ok && ofn.Info.VCS >= vcs.Stored {
 		nfn, ok := fn.FRoot.FindFile(tpath)
 		if ok && nfn.This() != fn.FRoot.This() {
 			if string(nfn.FPath) != tpath {
