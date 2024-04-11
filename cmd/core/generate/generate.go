@@ -16,7 +16,7 @@ import (
 
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/enums/enumgen"
-	"cogentcore.org/core/gengo"
+	"cogentcore.org/core/generate"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/gti/gtigen"
 	"cogentcore.org/core/ordmap"
@@ -140,5 +140,5 @@ func ParsePackages(cfg *config.Config) ([]*packages.Package, error) {
 		// in a separate pass? For later.
 		Tests: false,
 	}
-	return gengo.Load(pcfg, cfg.Generate.Dir)
+	return generate.Load(pcfg, cfg.Generate.Dir)
 }

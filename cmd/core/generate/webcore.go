@@ -15,7 +15,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/gengo"
+	"cogentcore.org/core/generate"
 	"cogentcore.org/core/ordmap"
 	"cogentcore.org/core/webcore/wpath"
 )
@@ -107,7 +107,7 @@ func GetWebcoreExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
 // WriteWebcoregen constructs the webcoregen.go file from the given examples.
 func WriteWebcoregen(c *config.Config, examples ordmap.Map[string, []byte]) error {
 	b := &bytes.Buffer{}
-	gengo.PrintHeader(b, "main")
+	generate.PrintHeader(b, "main")
 	b.WriteString(`func init() {
 	maps.Copy(webcore.Examples, WebcoreExamples)
 }
@@ -120,5 +120,5 @@ var WebcoreExamples = map[string]func(parent core.Widget){`)
 	}
 	b.WriteString("\n}")
 
-	return gengo.Write("webcoregen.go", b.Bytes(), nil)
+	return generate.Write("webcoregen.go", b.Bytes(), nil)
 }

@@ -11,7 +11,7 @@ package gtigen
 import (
 	"fmt"
 
-	"cogentcore.org/core/gengo"
+	"cogentcore.org/core/generate"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -23,7 +23,7 @@ func ParsePackages(cfg *Config) ([]*packages.Package, error) {
 		// in a separate pass? For later.
 		Tests: false,
 	}
-	pkgs, err := gengo.Load(pcfg, cfg.Dir)
+	pkgs, err := generate.Load(pcfg, cfg.Dir)
 	if err != nil {
 		return nil, fmt.Errorf("gtigen: Generate: error parsing package: %w", err)
 	}

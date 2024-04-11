@@ -18,7 +18,7 @@ import (
 	"log/slog"
 
 	"cogentcore.org/core/cli"
-	"cogentcore.org/core/gengo"
+	"cogentcore.org/core/generate"
 	"cogentcore.org/core/gti"
 	"cogentcore.org/core/ordmap"
 	"cogentcore.org/core/strcase"
@@ -68,7 +68,7 @@ func (g *Generator) Printf(format string, args ...any) {
 func (g *Generator) PrintHeader() {
 	// we need a manual import of gti and ordmap because they are
 	// external, but goimports will handle everything else
-	gengo.PrintHeader(&g.Buf, g.Pkg.Name, "cogentcore.org/core/gti", "cogentcore.org/core/ordmap")
+	generate.PrintHeader(&g.Buf, g.Pkg.Name, "cogentcore.org/core/gti", "cogentcore.org/core/ordmap")
 }
 
 // Find goes through all of the types, functions, variables,
@@ -80,7 +80,7 @@ func (g *Generator) Find() error {
 		return err
 	}
 	g.Types = []*Type{}
-	err = gengo.Inspect(g.Pkg, g.Inspect)
+	err = generate.Inspect(g.Pkg, g.Inspect)
 	if err != nil {
 		return fmt.Errorf("error while inspecting: %w", err)
 	}
@@ -539,5 +539,5 @@ func (g *Generator) ExecTmpl(t *template.Template, data any) {
 // ([Generator.Buf]) and writes it to the file specified by
 // [Generator.Config.Output].
 func (g *Generator) Write() error {
-	return gengo.Write(gengo.Filepath(g.Pkg, g.Config.Output), g.Buf.Bytes(), nil)
+	return generate.Write(generate.Filepath(g.Pkg, g.Config.Output), g.Buf.Bytes(), nil)
 }
