@@ -125,9 +125,9 @@ func Generate(c *config.Config) error { //gti:add
 	if err != nil {
 		return fmt.Errorf("error running gtigen: %w", err)
 	}
-	err = Webcore(c)
+	err = Pages(c)
 	if err != nil {
-		return fmt.Errorf("error running webcoregen: %w", err)
+		return fmt.Errorf("error running pagegen: %w", err)
 	}
 	return nil
 }

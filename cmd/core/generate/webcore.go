@@ -20,22 +20,22 @@ import (
 	"cogentcore.org/core/pages/wpath"
 )
 
-// Webcore does any necessary generation for webcore.
-func Webcore(c *config.Config) error {
-	if c.Webcore == "" {
+// Pages does any necessary generation for pages.
+func Pages(c *config.Config) error {
+	if c.Pages == "" {
 		return nil
 	}
-	examples, err := GetWebcoreExamples(c)
+	examples, err := GetPagesExamples(c)
 	if err != nil {
 		return err
 	}
-	return WriteWebcoregen(c, examples)
+	return WritePagegen(c, examples)
 }
 
-// GetWebcoreExamples collects and returns all of the webcore examples.
-func GetWebcoreExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
+// GetPagesExamples collects and returns all of the pages examples.
+func GetPagesExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
 	var examples ordmap.Map[string, []byte]
-	err := filepath.WalkDir(c.Webcore, func(path string, d fs.DirEntry, err error) error {
+	err := filepath.WalkDir(c.Pages, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -80,7 +80,7 @@ func GetWebcoreExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
 				if curExample == nil {
 					continue
 				}
-				rel, err := filepath.Rel(c.Webcore, path)
+				rel, err := filepath.Rel(c.Pages, path)
 				if err != nil {
 					return err
 				}
@@ -104,21 +104,21 @@ func GetWebcoreExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
 	return examples, err
 }
 
-// WriteWebcoregen constructs the webcoregen.go file from the given examples.
-func WriteWebcoregen(c *config.Config, examples ordmap.Map[string, []byte]) error {
+// WritePagegen constructs the pagegen.go file from the given examples.
+func WritePagegen(c *config.Config, examples ordmap.Map[string, []byte]) error {
 	b := &bytes.Buffer{}
 	generate.PrintHeader(b, "main")
 	b.WriteString(`func init() {
-	maps.Copy(webcore.Examples, WebcoreExamples)
+	maps.Copy(pages.Examples, PagesExamples)
 }
 
-// WebcoreExamples are the compiled webcore examples for this app.
-var WebcoreExamples = map[string]func(parent core.Widget){`)
+// PagesExamples are the compiled pages examples for this app.
+var PagesExamples = map[string]func(parent core.Widget){`)
 	for _, kv := range examples.Order {
 		fmt.Fprintf(b, `
 	%q: func(parent core.Widget){%s%s},`, kv.Key, "\n", kv.Value)
 	}
 	b.WriteString("\n}")
 
-	return generate.Write("webcoregen.go", b.Bytes(), nil)
+	return generate.Write("pagegen.go", b.Bytes(), nil)
 }

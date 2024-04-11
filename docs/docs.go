@@ -4,7 +4,7 @@
 
 package main
 
-//go:generate core generate -webcore content
+//go:generate core generate -pages content
 
 import (
 	"embed"

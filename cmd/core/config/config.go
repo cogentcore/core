@@ -43,13 +43,13 @@ type Config struct { //gti:add
 	// the type of the project (App/Library)
 	Type Types `def:"App"`
 
-	// Webcore, if specified, indicates that the app has webcore
+	// Pages, if specified, indicates that the app has core
 	// pages located at this directory. If so, markdown code blocks with
 	// language Go (must be uppercase, as that indicates that is an
-	// "exported" example) will be collected and stored at webcoregen.go, and
+	// "exported" example) will be collected and stored at pagegen.go, and
 	// a directory tree will be made for all of the pages when building
 	// for platform web.
-	Webcore string
+	Pages string
 
 	// the configuration options for the build, install, run, and pack commands
 	Build Build `cmd:"build,install,run,pack"`
