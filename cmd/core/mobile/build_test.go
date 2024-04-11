@@ -10,7 +10,6 @@ import (
 	"bytes"
 	"io"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -18,7 +17,7 @@ import (
 
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/mobile/sdkpath"
-	exec1 "cogentcore.org/core/exec"
+	"cogentcore.org/core/exec"
 	"cogentcore.org/core/laser"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -89,7 +88,7 @@ func TestAndroidBuild(t *testing.T) {
 	c := &config.Config{}
 	laser.SetFromDefaultTags(c)
 	defer func() {
-		exec1.SetMajor(nil)
+		exec.SetMajor(nil)
 	}()
 	c.Build.Target = []config.Platform{{OS: "android", Arch: "arm"}}
 	gopath = filepath.ToSlash(filepath.SplitList(GoEnv("GOPATH"))[0])
@@ -237,8 +236,8 @@ func TestBuildWithGoModules(t *testing.T) {
 	}
 	defer os.RemoveAll(dir)
 
-	if out, err := exec.Command("go", "build", "-o="+dir, "cogentcore.org/core/system/examples/drawtri").CombinedOutput(); err != nil {
-		t.Fatalf("%v: %s", err, string(out))
+	if err := exec.Run("go", "build", "-o="+dir, "cogentcore.org/core/system/examples/drawtri"); err != nil {
+		t.Fatal(err)
 	}
 	path := dir
 	if p := os.Getenv("PATH"); p != "" {

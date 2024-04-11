@@ -10,10 +10,9 @@ import (
 	"encoding/pem"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"testing"
 
-	exec1 "cogentcore.org/core/exec"
+	"cogentcore.org/core/exec"
 )
 
 func TestSignPKCS7(t *testing.T) {
@@ -45,28 +44,25 @@ func TestSignPKCS7(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if openssl, err := exec1.LookPath("openssl"); err != nil {
+	if openssl, err := exec.LookPath("openssl"); err != nil {
 		t.Log("command openssl not found, skipping")
 	} else {
-		cmd := exec.Command(
+		err := exec.Run(
 			openssl, "asn1parse",
 			"-inform", "DER",
 			"-i",
-			"-in", sigPath,
-		)
-		if err := cmd.Run(); err != nil {
+			"-in", sigPath)
+		if err != nil {
 			t.Errorf("bad asn.1: %v", err)
 		}
 	}
 
-	if keytool, err := exec1.LookPath("keytool"); err != nil {
+	if keytool, err := exec.LookPath("keytool"); err != nil {
 		t.Log("command keytool not found, skipping")
-	} else if err := exec.Command(keytool, "-v").Run(); err != nil {
+	} else if err := exec.Run(keytool, "-v"); err != nil {
 		t.Logf("command keytool not functioning: %s, skipping", err)
 	} else {
-		cmd := exec.Command(keytool, "-v", "-printcert", "-file", sigPath)
-		out, err := cmd.CombinedOutput()
-		t.Logf("%v:\n%s", cmd.Args, out)
+		err := exec.Run(keytool, "-v", "-printcert", "-file", sigPath)
 		if err != nil {
 			t.Errorf("keytool cannot parse signature: %v", err)
 		}

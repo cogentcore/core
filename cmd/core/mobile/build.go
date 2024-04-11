@@ -11,8 +11,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
-	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
@@ -24,7 +22,7 @@ import (
 	"maps"
 
 	"cogentcore.org/core/cmd/core/config"
-	exec1 "cogentcore.org/core/exec"
+	"cogentcore.org/core/exec"
 	"cogentcore.org/core/logx"
 	"golang.org/x/tools/go/packages"
 )
@@ -157,9 +155,6 @@ var NmRE = regexp.MustCompile(`[0-9a-f]{8} t _?(?:.*/vendor/)?(golang.org/x.*/[^
 
 func ExtractPkgs(c *config.Config, nm string, path string) (map[string]bool, error) {
 	r, w := io.Pipe()
-	cmd := exec.Command(nm, path)
-	cmd.Stdout = w
-	cmd.Stderr = os.Stderr
 
 	nmpkgs := make(map[string]bool)
 	errc := make(chan error, 1)
@@ -173,7 +168,7 @@ func ExtractPkgs(c *config.Config, nm string, path string) (map[string]bool, err
 		errc <- s.Err()
 	}()
 
-	err := cmd.Run()
+	err := exec.Major().SetStdout(w).Run(nm, path)
 	w.Close()
 	if err != nil {
 		return nil, fmt.Errorf("%s %s: %v", nm, path, err)
@@ -216,7 +211,7 @@ func GoCmdAt(c *config.Config, at string, subcmd string, srcs []string, env map[
 	cargs = append(cargs, args...)
 	cargs = append(cargs, srcs...)
 
-	xc := exec1.Major().SetDir(at)
+	xc := exec.Major().SetDir(at)
 	maps.Copy(xc.Env, env)
 
 	// Specify GOMODCACHE explicitly. The default cache path is GOPATH[0]/pkg/mod,
@@ -232,7 +227,7 @@ func GoModTidyAt(c *config.Config, at string, env map[string]string) error {
 	if logx.UserLevel <= slog.LevelInfo {
 		args = append(args, "-v")
 	}
-	xc := exec1.Major().SetDir(at)
+	xc := exec.Major().SetDir(at)
 	maps.Copy(xc.Env, env)
 
 	// Specify GOMODCACHE explicitly. The default cache path is GOPATH[0]/pkg/mod,
@@ -240,11 +235,11 @@ func GoModTidyAt(c *config.Config, at string, env map[string]string) error {
 	if gmc, err := GoModCachePath(); err == nil {
 		xc.SetEnv("GOMODCACHE", gmc)
 	}
-	return exec1.Run("go", args...)
+	return exec.Run("go", args...)
 }
 
 func GoModCachePath() (string, error) {
-	out, err := exec1.Output("go", "env", "GOMODCACHE")
+	out, err := exec.Output("go", "env", "GOMODCACHE")
 	if err != nil {
 		return "", err
 	}

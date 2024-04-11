@@ -10,13 +10,12 @@ import (
 	"encoding/pem"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"text/template"
 
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/rendericon"
-	exec1 "cogentcore.org/core/exec"
+	"cogentcore.org/core/exec"
 	"github.com/jackmordaunt/icns/v2"
 	"golang.org/x/tools/go/packages"
 )
@@ -65,10 +64,10 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 	}
 
 	for _, file := range files {
-		if err := exec1.MkdirAll(filepath.Dir(file.name), 0755); err != nil {
+		if err := exec.MkdirAll(filepath.Dir(file.name), 0755); err != nil {
 			return nil, err
 		}
-		exec1.PrintCmd(fmt.Sprintf("echo \"%s\" > %s", file.contents, file.name), nil)
+		exec.PrintCmd(fmt.Sprintf("echo \"%s\" > %s", file.contents, file.name), nil)
 		if err := os.WriteFile(file.name, file.contents, 0644); err != nil {
 			return nil, err
 		}
@@ -104,7 +103,7 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 
 	}
 
-	if err := exec1.Run("xcrun", args...); err != nil {
+	if err := exec.Run("xcrun", args...); err != nil {
 		return nil, err
 	}
 
@@ -113,7 +112,7 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 	}
 
 	// Build and move the release build to the output directory.
-	err = exec1.Run("xcrun", "xcodebuild",
+	err = exec.Run("xcrun", "xcodebuild",
 		"-configuration", "Release",
 		"-project", TmpDir+"/main.xcodeproj",
 		"-allowProvisioningUpdates",
@@ -145,9 +144,9 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 		return nil, err
 	}
 	output := filepath.Join("bin", "ios", c.Name+".app")
-	exec1.PrintCmd(fmt.Sprintf("mv %s %s", TmpDir+"/build/Release-iphoneos/main.app", output), nil)
+	exec.PrintCmd(fmt.Sprintf("mv %s %s", TmpDir+"/build/Release-iphoneos/main.app", output), nil)
 	// if output already exists, remove.
-	if err := exec1.RemoveAll(output); err != nil {
+	if err := exec.RemoveAll(output); err != nil {
 		return nil, err
 	}
 	if err := os.Rename(TmpDir+"/build/Release-iphoneos/main.app", output); err != nil {
@@ -156,7 +155,7 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 
 	// need to copy framework
 	// TODO(kai): could do framework setup step here
-	err = exec1.Run("cp", "-r", "$HOME/Library/CogentCore/MoltenVK.framework", output)
+	err = exec.Run("cp", "-r", "$HOME/Library/CogentCore/MoltenVK.framework", output)
 	if err != nil {
 		return nil, err
 	}
@@ -181,37 +180,36 @@ func SetupMoltenFramework() error {
 	if err != nil {
 		return err
 	}
-	err = exec1.Major().SetDir(tmp).Run("git", "clone", "https://github.com/goki/vulkan_mac_deps")
+	err = exec.Major().SetDir(tmp).Run("git", "clone", "https://github.com/goki/vulkan_mac_deps")
 	if err != nil {
 		return err
 	}
 
-	err = exec1.MkdirAll(gdir, 0750)
+	err = exec.MkdirAll(gdir, 0750)
 	if err != nil {
 		return err
 	}
-	err = exec1.Run("cp", "-r", filepath.Join(tmp, "vulkan_mac_deps", "sdk", "ios", "MoltenVK.framework"), gdir)
+	err = exec.Run("cp", "-r", filepath.Join(tmp, "vulkan_mac_deps", "sdk", "ios", "MoltenVK.framework"), gdir)
 	if err != nil {
 		return err
 	}
-	return exec1.RemoveAll(tmp)
+	return exec.RemoveAll(tmp)
 }
 
 // DetectTeamID determines the Apple Development Team ID on the system.
 func DetectTeamID() (string, error) {
 	// Grabs the first certificate for "Apple Development"; will not work if there
 	// are multiple certificates and the first is not desired.
-	cmd := exec.Command(
+	pemString, err := exec.Output(
 		"security", "find-certificate",
 		"-c", "Apple Development", "-p",
 	)
-	pemString, err := cmd.Output()
 	if err != nil {
 		err = fmt.Errorf("failed to pull the signing certificate to determine your team ID: %v", err)
 		return "", err
 	}
 
-	block, _ := pem.Decode(pemString)
+	block, _ := pem.Decode([]byte(pemString))
 	if block == nil {
 		err = fmt.Errorf("failed to decode the PEM to determine your team ID: %s", pemString)
 		return "", err
@@ -233,7 +231,7 @@ func DetectTeamID() (string, error) {
 
 func AppleCopyAssets(c *config.Config, pkg *packages.Package, xcodeProjDir string) error {
 	dstAssets := xcodeProjDir + "/main/assets"
-	return exec1.MkdirAll(dstAssets, 0755)
+	return exec.MkdirAll(dstAssets, 0755)
 }
 
 type InfoplistTmplData struct {

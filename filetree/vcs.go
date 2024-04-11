@@ -20,7 +20,6 @@ import (
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/vci"
 	"cogentcore.org/core/views"
-	"github.com/Masterminds/vcs"
 )
 
 // FirstVCS returns the first VCS repository starting from this node and going down.
@@ -56,7 +55,7 @@ func (fn *Node) DetectVCSRepo(updateFiles bool) bool {
 	}
 	path := string(fn.FPath)
 	rtyp := vci.DetectRepo(path)
-	if rtyp == vcs.NoVCS {
+	if rtyp == "" {
 		return false
 	}
 	var err error
