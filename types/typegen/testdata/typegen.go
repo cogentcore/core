@@ -3,11 +3,11 @@
 package testdata
 
 import (
-	"cogentcore.org/core/gti"
+	"cogentcore.org/core/types"
 )
 
-// PersonType is the [gti.Type] for [Person]
-var PersonType = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gti/typegen/testdata.Person", IDName: "person", Doc: "Person represents a person and their attributes.\nThe zero value of a Person is not valid.", Directives: []gti.Directive{{Tool: "ki", Directive: "flagtype", Args: []string{"NodeFlags", "-field", "Flag"}}, {Tool: "core", Directive: "embedder"}}, Methods: []gti.Method{{Name: "Introduction", Doc: "Introduction returns an introduction for the person.\nIt contains the name of the person and their age.", Directives: []gti.Directive{{Tool: "gi", Directive: "toolbar", Args: []string{"-name", "ShowIntroduction", "-icon", "play", "-show-result", "-confirm"}}, {Tool: "gti", Directive: "add"}}, Returns: []string{"string"}}}, Embeds: []gti.Field{{Name: "RGBA"}}, Fields: []gti.Field{{Name: "Name", Doc: "Name is the name of the person"}, {Name: "Age", Doc: "Age is the age of the person"}, {Name: "Type", Doc: "Type is the type of the person"}, {Name: "unexportedField"}, {Name: "Nicknames", Doc: "Nicknames are the nicknames of the person"}}, Instance: &Person{}})
+// PersonType is the [types.Type] for [Person]
+var PersonType = types.AddType(&types.Type{Name: "cogentcore.org/core/types/typegen/testdata.Person", IDName: "person", Doc: "Person represents a person and their attributes.\nThe zero value of a Person is not valid.", Directives: []types.Directive{{Tool: "ki", Directive: "flagtype", Args: []string{"NodeFlags", "-field", "Flag"}}, {Tool: "core", Directive: "embedder"}}, Methods: []types.Method{{Name: "Introduction", Doc: "Introduction returns an introduction for the person.\nIt contains the name of the person and their age.", Directives: []types.Directive{{Tool: "gi", Directive: "toolbar", Args: []string{"-name", "ShowIntroduction", "-icon", "play", "-show-result", "-confirm"}}, {Tool: "types", Directive: "add"}}, Returns: []string{"string"}}}, Embeds: []types.Field{{Name: "RGBA"}}, Fields: []types.Field{{Name: "Name", Doc: "Name is the name of the person"}, {Name: "Age", Doc: "Age is the age of the person"}, {Name: "Type", Doc: "Type is the type of the person"}, {Name: "unexportedField"}, {Name: "Nicknames", Doc: "Nicknames are the nicknames of the person"}}, Instance: &Person{}})
 
 func (t *Person) MyCustomFuncForStringers(a any) error {
 	return nil
@@ -23,7 +23,7 @@ func (t *Person) SetAge(v int) *Person { t.Age = v; return t }
 
 // SetType sets the [Person.Type]:
 // Type is the type of the person
-func (t *Person) SetType(v *gti.Type) *Person { t.Type = v; return t }
+func (t *Person) SetType(v *types.Type) *Person { t.Type = v; return t }
 
 // SetNicknames sets the [Person.Nicknames]:
 // Nicknames are the nicknames of the person
@@ -41,9 +41,9 @@ func (t *Person) SetB(v uint8) *Person { t.B = v; return t }
 // SetA sets the [Person.A]
 func (t *Person) SetA(v uint8) *Person { t.A = v; return t }
 
-var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gti/typegen/testdata.BlockType", IDName: "block-type", Doc: "BlockType is a type declared in a type block.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/types/typegen/testdata.BlockType", IDName: "block-type", Doc: "BlockType is a type declared in a type block.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}})
 
-var _ = gti.AddType(&gti.Type{Name: "cogentcore.org/core/gti/typegen/testdata.CommaFieldType", IDName: "comma-field-type", Doc: "CommaFieldType is a type with inline comma fields.", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Fields: []gti.Field{{Name: "A"}, {Name: "B"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/types/typegen/testdata.CommaFieldType", IDName: "comma-field-type", Doc: "CommaFieldType is a type with inline comma fields.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "A"}, {Name: "B"}}})
 
 // SetA sets the [CommaFieldType.A]
 func (t *CommaFieldType) SetA(v int) *CommaFieldType { t.A = v; return t }
@@ -51,14 +51,14 @@ func (t *CommaFieldType) SetA(v int) *CommaFieldType { t.A = v; return t }
 // SetB sets the [CommaFieldType.B]
 func (t *CommaFieldType) SetB(v int) *CommaFieldType { t.B = v; return t }
 
-var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/gti/typegen/testdata.Alert", Doc: "Alert prints an alert with the given message", Args: []string{"msg"}})
+var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/types/typegen/testdata.Alert", Doc: "Alert prints an alert with the given message", Args: []string{"msg"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/gti/typegen/testdata.TypeOmittedArgs0", Args: []string{"x", "y"}})
+var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/types/typegen/testdata.TypeOmittedArgs0", Args: []string{"x", "y"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/gti/typegen/testdata.TypeOmittedArgs1", Args: []string{"x", "y", "z"}})
+var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/types/typegen/testdata.TypeOmittedArgs1", Args: []string{"x", "y", "z"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/gti/typegen/testdata.TypeOmittedArgs2", Args: []string{"x", "y", "z"}})
+var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/types/typegen/testdata.TypeOmittedArgs2", Args: []string{"x", "y", "z"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/gti/typegen/testdata.TypeOmittedArgs3", Args: []string{"x", "y", "z", "w"}})
+var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/types/typegen/testdata.TypeOmittedArgs3", Args: []string{"x", "y", "z", "w"}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "cogentcore.org/core/gti/typegen/testdata.TypeOmittedArgs4", Args: []string{"x", "y", "z", "w"}})
+var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/types/typegen/testdata.TypeOmittedArgs4", Args: []string{"x", "y", "z", "w"}})

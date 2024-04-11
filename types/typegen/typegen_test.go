@@ -15,6 +15,7 @@ import (
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/types"
 	"cogentcore.org/core/types/typegen/testdata"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGenerate(t *testing.T) {
@@ -72,31 +73,17 @@ func TestGenerate(t *testing.T) {
 func TestPerson(t *testing.T) {
 	want := testdata.PersonType
 	have := types.TypeByName("cogentcore.org/core/types/typegen/testdata.Person")
-	if have != want {
-		t.Errorf("expected TypeByName to return %v, but got %v", want, have)
-	}
+	assert.Equal(t, want, have)
 	have = types.TypeByValue(testdata.Person{})
-	if have != want {
-		t.Errorf("expected TypeByValue to return %v, but got %v", want, have)
-	}
+	assert.Equal(t, want, have)
 	if _, ok := have.Instance.(*testdata.Person); !ok {
 		t.Errorf("expected instance to be a Person, but it is a %T (value %v)", have.Instance, have.Instance)
 	}
-	if have.Name != "cogentcore.org/core/types/typegen/testdata.Person" {
-		t.Errorf("expected name to be 'cogentcore.org/core/types/typegen/testdata.Person', but got %s", have.Name)
-	}
-	if len(have.Directives) != 2 {
-		t.Errorf("expected 2 directives, but got %d", len(have.Directives))
-	}
-	if len(have.Fields) != 4 {
-		t.Errorf("expected 4 fields, but got %d", len(have.Fields))
-	}
-	if len(have.Embeds) != 1 {
-		t.Errorf("expected 1 embed, but got %v", len(have.Embeds))
-	}
-	if len(have.Methods) != 1 {
-		t.Errorf("expected 1 method, but got %d", len(have.Methods))
-	}
+	assert.Equal(t, "cogentcore.org/core/types/typegen/testdata.Person", have.Name)
+	assert.Equal(t, 2, len(have.Directives))
+	assert.Equal(t, 5, len(have.Fields))
+	assert.Equal(t, 1, len(have.Embeds))
+	assert.Equal(t, 1, len(have.Methods))
 }
 
 func BenchmarkIDName(b *testing.B) {

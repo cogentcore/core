@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"image/color"
 
-	"cogentcore.org/core/gti"
+	"cogentcore.org/core/types"
 )
 
 // Person represents a person and their attributes.
@@ -25,7 +25,7 @@ type Person struct { //core:embedder
 	Age int `json:"-"`
 
 	// Type is the type of the person
-	Type *gti.Type
+	Type *types.Type
 
 	unexportedField int
 
