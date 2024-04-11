@@ -48,15 +48,15 @@ func ReadMDString(ctx *Context, parent core.Widget, s string) error {
 }
 
 // HighlightingWrapperRenderer is the [highlighting.WrapperRenderer] for markdown rendering
-// that enables webcore runnable Go code examples to work correctly.
+// that enables pages runnable Go code examples to work correctly.
 func HighlightingWrapperRenderer(w util.BufWriter, context highlighting.CodeBlockContext, entering bool) {
 	lang, ok := context.Language()
 	if !ok || string(lang) != "Go" {
 		return
 	}
 	if entering {
-		w.WriteString("<webcore-example>")
+		w.WriteString("<pages-example>")
 	} else {
-		w.WriteString("</webcore-example>")
+		w.WriteString("</pages-example>")
 	}
 }

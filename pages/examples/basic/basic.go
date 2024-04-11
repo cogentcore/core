@@ -10,15 +10,15 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/errors"
-	"cogentcore.org/core/webcore"
+	"cogentcore.org/core/pages"
 )
 
 //go:embed content
 var content embed.FS
 
 func main() {
-	b := core.NewBody("Webcore Example")
-	pg := webcore.NewPage(b).SetSource(errors.Log1(fs.Sub(content, "content")))
+	b := core.NewBody("Pages Example")
+	pg := pages.NewPage(b).SetSource(errors.Log1(fs.Sub(content, "content")))
 	b.AddAppBar(pg.AppBar)
 	b.RunMainWindow()
 }

@@ -1,3 +1,3 @@
-# Welcome to the Webcore docs!
+# Welcome to the Pages docs!
 
-To get started, read [our helpful guide on getting started!](gettingstarted)
+To get started, read [our helpful guide on getting started!](getting-started)
