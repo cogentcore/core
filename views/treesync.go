@@ -13,8 +13,8 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fileinfo"
-	"cogentcore.org/core/laser"
 	"cogentcore.org/core/mimedata"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
@@ -123,7 +123,7 @@ func (tv *TreeView) UpdateReadOnly() bool {
 	}
 	tv.SetState(false, states.Disabled)
 	if inact := tv.SyncNode.Property("ReadOnly"); inact != nil {
-		if bo, err := laser.ToBool(inact); bo && err == nil {
+		if bo, err := reflectx.ToBool(inact); bo && err == nil {
 			tv.SetReadOnly(true)
 		}
 	}

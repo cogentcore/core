@@ -11,7 +11,7 @@ import (
 	"unicode"
 
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/strcase"
 )
@@ -42,7 +42,7 @@ var (
 func testName(elems ...any) string {
 	strs := []string{}
 	for _, elem := range elems {
-		str := laser.ToString(elem)
+		str := reflectx.ToString(elem)
 		fields := strings.FieldsFunc(str, func(r rune) bool {
 			return !(unicode.IsLetter(r) || unicode.IsDigit(r) || r == '|')
 		})

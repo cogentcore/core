@@ -11,7 +11,7 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/views"
 	"cogentcore.org/core/xyz"
@@ -32,7 +32,7 @@ func (v *MeshValue) Config() {
 }
 
 func (v *MeshValue) Update() {
-	txt := laser.ToString(v.Value.Interface())
+	txt := reflectx.ToString(v.Value.Interface())
 	if txt == "" {
 		txt = "(none, click to select)"
 	}
@@ -58,7 +58,7 @@ func (v *MeshValue) ConfigDialog(d *core.Body) (bool, func()) {
 	sort.Strings(sl)
 
 	si := 0
-	cur := laser.ToString(v.Value.Interface())
+	cur := reflectx.ToString(v.Value.Interface())
 	views.NewSliceView(d).SetSlice(&sl).SetSelectedValue(cur).BindSelect(&si)
 
 	return true, func() {

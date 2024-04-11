@@ -16,7 +16,7 @@ import (
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
@@ -246,13 +246,13 @@ func ConfigBase(v Value, w core.Widget) {
 	w.Style(func(s *styles.Style) {
 		s.SetState(v.IsReadOnly(), states.ReadOnly) // and in style
 		if tv, ok := v.Tag("width"); ok {
-			v, err := laser.ToFloat32(tv)
+			v, err := reflectx.ToFloat32(tv)
 			if err == nil {
 				s.Min.X.Ch(v)
 			}
 		}
 		if tv, ok := v.Tag("max-width"); ok {
-			v, err := laser.ToFloat32(tv)
+			v, err := reflectx.ToFloat32(tv)
 			if err == nil {
 				if v < 0 {
 					s.Grow.X = 1 // support legacy
@@ -262,13 +262,13 @@ func ConfigBase(v Value, w core.Widget) {
 			}
 		}
 		if tv, ok := v.Tag("height"); ok {
-			v, err := laser.ToFloat32(tv)
+			v, err := reflectx.ToFloat32(tv)
 			if err == nil {
 				s.Min.Y.Em(v)
 			}
 		}
 		if tv, ok := v.Tag("max-height"); ok {
-			v, err := laser.ToFloat32(tv)
+			v, err := reflectx.ToFloat32(tv)
 			if err == nil {
 				if v < 0 {
 					s.Grow.Y = 1
@@ -278,13 +278,13 @@ func ConfigBase(v Value, w core.Widget) {
 			}
 		}
 		if tv, ok := v.Tag("grow"); ok {
-			v, err := laser.ToFloat32(tv)
+			v, err := reflectx.ToFloat32(tv)
 			if err == nil {
 				s.Grow.X = v
 			}
 		}
 		if tv, ok := v.Tag("grow-y"); ok {
-			v, err := laser.ToFloat32(tv)
+			v, err := reflectx.ToFloat32(tv)
 			if err == nil {
 				s.Grow.Y = v
 			}
@@ -319,7 +319,7 @@ func OpenDialog(v Value, ctx core.Widget, fun, beforeFunc func()) bool {
 // to configure the dialog contents.
 func OpenDialogBase(v Value, cd ConfigDialoger, ctx core.Widget, fun func()) {
 	vd := v.AsValueData()
-	opv := laser.OnePtrUnderlyingValue(vd.Value)
+	opv := reflectx.OnePtrUnderlyingValue(vd.Value)
 	if !opv.IsValid() {
 		return
 	}
@@ -378,18 +378,18 @@ func (v *ValueBase[W]) SetValue(value any) bool {
 	if v.Owner != nil {
 		switch v.OwnKind {
 		case reflect.Struct:
-			err = laser.SetRobust(laser.PtrValue(v.Value).Interface(), value)
+			err = reflectx.SetRobust(reflectx.PtrValue(v.Value).Interface(), value)
 			wasSet = true
 		case reflect.Map:
 			wasSet, err = v.SetValueMap(value)
 		case reflect.Slice:
-			err = laser.SetRobust(laser.PtrValue(v.Value).Interface(), value)
+			err = reflectx.SetRobust(reflectx.PtrValue(v.Value).Interface(), value)
 		}
 		if updtr, ok := v.Owner.(core.Updater); ok {
 			updtr.Update()
 		}
 	} else {
-		err = laser.SetRobust(laser.PtrValue(v.Value).Interface(), value)
+		err = reflectx.SetRobust(reflectx.PtrValue(v.Value).Interface(), value)
 		wasSet = true
 	}
 	v.SendChange()
@@ -401,12 +401,12 @@ func (v *ValueBase[W]) SetValue(value any) bool {
 }
 
 func (v *ValueBase[W]) SetValueMap(val any) (bool, error) {
-	ov := laser.NonPtrValue(reflect.ValueOf(v.Owner))
+	ov := reflectx.NonPtrValue(reflect.ValueOf(v.Owner))
 	wasSet := false
 	var err error
 	if v.Is(ValueMapKey) {
-		nv := laser.NonPtrValue(reflect.ValueOf(val)) // new key value
-		kv := laser.NonPtrValue(v.Value)
+		nv := reflectx.NonPtrValue(reflect.ValueOf(val)) // new key value
+		kv := reflectx.NonPtrValue(v.Value)
 		cv := ov.MapIndex(kv)    // get current value
 		curnv := ov.MapIndex(nv) // see if new value there already
 		if val != kv.Interface() && curnv.IsValid() && !curnv.IsZero() {
@@ -431,12 +431,12 @@ func (v *ValueBase[W]) SetValueMap(val any) (bool, error) {
 		v.Value = nv                        // update value to new key
 		wasSet = true
 	} else {
-		v.Value = laser.NonPtrValue(reflect.ValueOf(val))
+		v.Value = reflectx.NonPtrValue(reflect.ValueOf(val))
 		if v.KeyView != nil {
-			ck := laser.NonPtrValue(v.KeyView.Val())                  // current key value
-			wasSet = laser.SetMapRobust(ov, ck, reflect.ValueOf(val)) // todo: error
+			ck := reflectx.NonPtrValue(v.KeyView.Val())                  // current key value
+			wasSet = reflectx.SetMapRobust(ov, ck, reflect.ValueOf(val)) // todo: error
 		} else { // static, key not editable?
-			wasSet = laser.SetMapRobust(ov, laser.NonPtrValue(reflect.ValueOf(v.Key)), v.Value) // todo: error
+			wasSet = reflectx.SetMapRobust(ov, reflectx.NonPtrValue(reflect.ValueOf(v.Key)), v.Value) // todo: error
 		}
 		// wasSet = true
 	}
@@ -642,7 +642,7 @@ func (v *ValueData) SetMapKey(key reflect.Value, owner any) {
 	v.SetFlag(true, ValueMapKey)
 	v.Value = key
 	v.Owner = owner
-	v.SetName(laser.ToString(key.Interface()))
+	v.SetName(reflectx.ToString(key.Interface()))
 }
 
 func (v *ValueData) SetMapValue(val reflect.Value, owner any, key any, keyView Value, viewPath string) {
@@ -651,7 +651,7 @@ func (v *ValueData) SetMapValue(val reflect.Value, owner any, key any, keyView V
 	v.Owner = owner
 	v.Key = key
 	v.KeyView = keyView
-	keystr := laser.ToString(key)
+	keystr := reflectx.ToString(key)
 	v.ViewPath = JoinViewPath(viewPath, keystr)
 	v.SetName(keystr)
 }
@@ -681,7 +681,7 @@ func (v *ValueData) SetSoloValue(val reflect.Value) {
 	v.OwnKind = reflect.Invalid
 	// we must ensure that it is a pointer value so that it has
 	// an underlying value that updates when changes occur
-	v.Value = laser.PtrValue(val)
+	v.Value = reflectx.PtrValue(val)
 }
 
 // SetSoloValueIface sets the value for a singleton standalone value
@@ -709,7 +709,7 @@ func (v *ValueData) IsReadOnly() bool {
 			return true
 		}
 	}
-	npv := laser.NonPtrValue(v.Value)
+	npv := reflectx.NonPtrValue(v.Value)
 	if npv.Kind() == reflect.Interface && npv.IsZero() {
 		v.SetReadOnly(true) // cache
 		return true
@@ -805,7 +805,7 @@ func (v *ValueData) AllTags() map[string]string {
 	if !(v.Owner != nil && v.OwnKind == reflect.Struct) {
 		return rvt
 	}
-	smap := laser.StructTags(v.Field.Tag)
+	smap := reflectx.StructTags(v.Field.Tag)
 	for key, val := range smap {
 		rvt[key] = val
 	}
@@ -824,14 +824,14 @@ func (v *ValueData) OwnerLabel() string {
 	case reflect.Map:
 		kystr := ""
 		if v.Is(ValueMapKey) {
-			kv := laser.NonPtrValue(v.Value)
-			kystr = laser.ToString(kv.Interface())
+			kv := reflectx.NonPtrValue(v.Value)
+			kystr = reflectx.ToString(kv.Interface())
 		} else {
 			if v.KeyView != nil {
-				ck := laser.NonPtrValue(v.KeyView.Val()) // current key value
-				kystr = laser.ToString(ck.Interface())
+				ck := reflectx.NonPtrValue(v.KeyView.Val()) // current key value
+				kystr = reflectx.ToString(ck.Interface())
 			} else {
-				kystr = laser.ToString(v.Key)
+				kystr = reflectx.ToString(v.Key)
 			}
 		}
 		if kystr != "" {
@@ -856,14 +856,14 @@ func (v *ValueData) OwnerLabel() string {
 // can be used for not proceeding in case of non-value-based types.
 func (v *ValueData) GetTitle() (label, newPath string, isZero bool) {
 	var npt reflect.Type
-	if v.Value.IsZero() || !laser.NonPtrValue(v.Value).IsValid() || laser.NonPtrValue(v.Value).IsZero() {
-		npt = laser.NonPtrType(v.Value.Type())
+	if v.Value.IsZero() || !reflectx.NonPtrValue(v.Value).IsValid() || reflectx.NonPtrValue(v.Value).IsZero() {
+		npt = reflectx.NonPtrType(v.Value.Type())
 		isZero = true
 	} else {
-		opv := laser.OnePtrUnderlyingValue(v.Value)
-		npt = laser.NonPtrType(opv.Type())
+		opv := reflectx.OnePtrUnderlyingValue(v.Value)
+		npt = reflectx.NonPtrType(opv.Type())
 	}
-	newPath = laser.FriendlyTypeName(npt)
+	newPath = reflectx.FriendlyTypeName(npt)
 	olbl := v.OwnerLabel()
 	if olbl != "" && olbl != newPath {
 		label = olbl + " (" + newPath + ")"

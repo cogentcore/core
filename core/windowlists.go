@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"slices"
 
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/system"
 )
 
@@ -49,7 +49,7 @@ func (wl *RenderWindowList) FindName(name string) (*RenderWindow, bool) {
 // window and true if found, nil, false otherwise.
 // data of type string works fine -- does equality comparison on string contents.
 func (wl *RenderWindowList) FindData(data any) (*RenderWindow, bool) {
-	if laser.AnyIsNil(data) {
+	if reflectx.AnyIsNil(data) {
 		return nil, false
 	}
 	typ := reflect.TypeOf(data)

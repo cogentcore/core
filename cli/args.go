@@ -16,7 +16,7 @@ import (
 
 	"maps"
 
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/strcase"
 )
 
@@ -311,7 +311,7 @@ func ParseFlag(name string, value string, allFlags *Fields, errNotFound bool) er
 		return nil
 	}
 
-	isBool := laser.NonPtrValue(f.Value).Kind() == reflect.Bool
+	isBool := reflectx.NonPtrValue(f.Value).Kind() == reflect.Bool
 
 	if isBool {
 		// check if we have a "no" prefix and set negate based on that
@@ -355,7 +355,7 @@ func ParseFlag(name string, value string, allFlags *Fields, errNotFound bool) er
 // SetFieldValue sets the value of the given configuration field
 // to the given string argument value.
 func SetFieldValue(f *Field, value string) error {
-	nptyp := laser.NonPtrType(f.Value.Type())
+	nptyp := reflectx.NonPtrType(f.Value.Type())
 	vk := nptyp.Kind()
 	switch {
 	// TODO: more robust parsing of maps and slices
@@ -369,12 +369,12 @@ func SetFieldValue(f *Field, value string) error {
 			}
 			mval[k] = v
 		}
-		err := laser.CopyMapRobust(f.Value.Interface(), mval)
+		err := reflectx.CopyMapRobust(f.Value.Interface(), mval)
 		if err != nil {
 			return fmt.Errorf("unable to set map flag %q from flag value %q: %w", f.Names[0], value, err)
 		}
 	case vk == reflect.Slice:
-		err := laser.CopySliceRobust(f.Value.Interface(), strings.Split(value, ","))
+		err := reflectx.CopySliceRobust(f.Value.Interface(), strings.Split(value, ","))
 		if err != nil {
 			return fmt.Errorf("unable to set slice flag %q from flag value %q: %w", f.Names[0], value, err)
 		}
@@ -384,7 +384,7 @@ func SetFieldValue(f *Field, value string) error {
 		if f.Value.IsNil() {
 			f.Value.Set(reflect.New(nptyp))
 		}
-		err := laser.SetRobust(f.Value.Interface(), value) // overkill but whatever
+		err := reflectx.SetRobust(f.Value.Interface(), value) // overkill but whatever
 		if err != nil {
 			return fmt.Errorf("error setting set flag %q from flag value %q: %w", f.Names[0], value, err)
 		}
@@ -431,7 +431,7 @@ func AddFlags(allFields *Fields, allFlags *Fields, args []string, flags map[stri
 		posArgTag, ok := f.Tag.Lookup("posarg")
 		if ok {
 			if posArgTag == "all" {
-				err := laser.SetRobust(v.Value.Interface(), args)
+				err := reflectx.SetRobust(v.Value.Interface(), args)
 				if err != nil {
 					return nil, fmt.Errorf("error setting field %q to all positional arguments: %v: %w", f.Name, args, err)
 				}

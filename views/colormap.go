@@ -13,7 +13,7 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 )
@@ -43,7 +43,7 @@ func (v *ColorMapValue) Config() {
 		s.Grow.Set(0, 0)
 		s.Min.Set(units.Em(10), units.Em(1.5))
 
-		cmn, ok := laser.NonPtrValue(v.Value).Interface().(ColorMapName)
+		cmn, ok := reflectx.NonPtrValue(v.Value).Interface().(ColorMapName)
 		if !ok || cmn == "" {
 			s.Background = colors.C(colors.Scheme.OutlineVariant)
 			return
@@ -71,7 +71,7 @@ func (v *ColorMapValue) Update() {
 func (v *ColorMapValue) ConfigDialog(d *core.Body) (bool, func()) {
 	d.SetTitle("Select a color map")
 	sl := colormap.AvailableMapsList()
-	cur := laser.ToString(v.Value.Interface())
+	cur := reflectx.ToString(v.Value.Interface())
 	si := 0
 	NewSliceView(d).SetSlice(&sl).SetSelectedValue(cur).BindSelect(&si)
 	return true, func() {

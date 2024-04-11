@@ -8,7 +8,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/views"
 )
 
@@ -27,14 +27,14 @@ func (v *Value) Config() {
 }
 
 func (v *Value) Update() {
-	txt := laser.ToString(v.Value.Interface())
+	txt := reflectx.ToString(v.Value.Interface())
 	v.Widget.SetText(txt).Update()
 }
 
 func (v *Value) ConfigDialog(d *core.Body) (bool, func()) {
 	d.SetTitle("Select a syntax highlighting style")
 	si := 0
-	cur := laser.ToString(v.Value.Interface())
+	cur := reflectx.ToString(v.Value.Interface())
 	views.NewSliceView(d).SetSlice(&StyleNames).SetSelectedValue(cur).BindSelect(&si)
 	return true, func() {
 		if si >= 0 {

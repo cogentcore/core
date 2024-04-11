@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package laser
+package reflectx
 
 import (
 	"fmt"
 	"testing"
 
-	"cogentcore.org/core/laser/testdata"
+	"cogentcore.org/core/reflectx/testdata"
 )
 
 func AFun(aa any) bool {

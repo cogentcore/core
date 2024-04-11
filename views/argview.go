@@ -8,7 +8,7 @@ import (
 	"fmt"
 
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
@@ -78,7 +78,7 @@ func (av *ArgView) ArgsGrid() *core.Frame {
 
 // ConfigArgsGrid configures the ArgsGrid for the current struct
 func (av *ArgView) ConfigArgsGrid() {
-	if laser.AnyIsNil(av.Args) {
+	if reflectx.AnyIsNil(av.Args) {
 		return
 	}
 	sg := av.ArgsGrid()

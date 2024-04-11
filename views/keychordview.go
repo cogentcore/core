@@ -9,7 +9,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/states"
 )
 
@@ -42,6 +42,6 @@ func (v *KeyChordValue) Config() {
 }
 
 func (v *KeyChordValue) Update() {
-	txt := laser.ToString(v.Value.Interface())
+	txt := reflectx.ToString(v.Value.Interface())
 	v.Widget.SetText(txt)
 }

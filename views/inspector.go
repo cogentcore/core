@@ -14,7 +14,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/iox/jsonx"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
@@ -213,7 +213,7 @@ func (is *Inspector) Config() {
 
 // SetTitle sets the title to correspond to the given node.
 func (is *Inspector) SetTitle(k tree.Node) {
-	is.TitleWidget().SetText(fmt.Sprintf("Inspector of %s (%s)", k.Name(), laser.FriendlyTypeName(reflect.TypeOf(k))))
+	is.TitleWidget().SetText(fmt.Sprintf("Inspector of %s (%s)", k.Name(), reflectx.FriendlyTypeName(reflect.TypeOf(k))))
 }
 
 // TitleWidget returns the title label widget

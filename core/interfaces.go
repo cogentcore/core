@@ -7,7 +7,7 @@ package core
 import (
 	"reflect"
 
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/tree"
 )
 
@@ -38,7 +38,7 @@ type Labeler interface {
 }
 
 // ToLabel returns the gui-appropriate label for an item, using the Labeler
-// interface if it is defined, and falling back on [laser.ToString] converter
+// interface if it is defined, and falling back on [reflectx.ToString] converter
 // otherwise -- also contains label impls for basic interface types for which
 // we cannot easily define the Labeler interface
 func ToLabel(it any) string {
@@ -50,7 +50,7 @@ func ToLabel(it any) string {
 		case tree.Node:
 			return v.Name()
 		}
-		return laser.ToString(it)
+		return reflectx.ToString(it)
 	}
 	return lbler.Label()
 }

@@ -12,8 +12,8 @@ import (
 
 	"slices"
 
-	"cogentcore.org/core/laser"
 	"cogentcore.org/core/ordmap"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/strcase"
 )
 
@@ -64,26 +64,26 @@ func AddFields(obj any, allFields *Fields, cmd string) {
 // the "cmd" struct tag, as the user already knows what command they are
 // running, so they do not need that duplicated specificity for every flag.
 func AddFieldsImpl(obj any, path string, cmdPath string, allFields *Fields, usedNames map[string]*Field, cmd string) {
-	if laser.AnyIsNil(obj) {
+	if reflectx.AnyIsNil(obj) {
 		return
 	}
 	ov := reflect.ValueOf(obj)
 	if ov.Kind() == reflect.Pointer && ov.IsNil() {
 		return
 	}
-	val := laser.NonPtrValue(ov)
+	val := reflectx.NonPtrValue(ov)
 	typ := val.Type()
 
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		fv := val.Field(i)
-		pval := laser.PtrValue(fv)
+		pval := reflectx.PtrValue(fv)
 		cmdTag, hct := f.Tag.Lookup("cmd")
 		cmds := strings.Split(cmdTag, ",")
 		if hct && !slices.Contains(cmds, cmd) && !slices.Contains(cmds, AddAllFields) { // if we are associated with a different command, skip
 			continue
 		}
-		if laser.NonPtrType(f.Type).Kind() == reflect.Struct {
+		if reflectx.NonPtrType(f.Type).Kind() == reflect.Struct {
 			nwPath := f.Name
 			if path != "" {
 				nwPath = path + "." + nwPath
@@ -98,7 +98,7 @@ func AddFieldsImpl(obj any, path string, cmdPath string, allFields *Fields, used
 				nwCmdPath = cmdPath + "." + nwCmdPath
 			}
 
-			AddFieldsImpl(laser.PtrValue(fv).Interface(), nwPath, nwCmdPath, allFields, usedNames, cmd)
+			AddFieldsImpl(reflectx.PtrValue(fv).Interface(), nwPath, nwCmdPath, allFields, usedNames, cmd)
 			// we still add ourself if we are a struct, so we keep going,
 			// unless we are associated with a command, in which case there
 			// is no point in adding ourself

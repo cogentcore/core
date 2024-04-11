@@ -7,7 +7,7 @@ package types
 import (
 	"reflect"
 
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 )
 
 // Field represents a field or embed in a struct.
@@ -28,7 +28,7 @@ func (f Field) GoString() string { return StructGoString(f) }
 // by searching through all of the embeds if it can not find
 // it directly in the struct.
 func GetField(val reflect.Value, field string) *Field {
-	val = laser.NonPtrValue(val)
+	val = reflectx.NonPtrValue(val)
 	if !val.IsValid() {
 		return nil
 	}

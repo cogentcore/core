@@ -9,8 +9,8 @@ import (
 	"log"
 
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/laser"
 	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/system"
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
@@ -106,7 +106,7 @@ func (a *App) GetScreens() {
 					sc.RefreshRate = 60
 					sc.UpdateLogicalDPI()
 					if MonitorDebug {
-						log.Printf("MonitorDebug: getScreens: MacOS unknown display set to Built-in Retina Display %d:\n%s\n", i, laser.StringJSON(sc))
+						log.Printf("MonitorDebug: getScreens: MacOS unknown display set to Built-in Retina Display %d:\n%s\n", i, reflectx.StringJSON(sc))
 					}
 					scNo++
 					continue
@@ -157,7 +157,7 @@ func (a *App) GetScreens() {
 		sc.UpdateLogicalDPI()
 		sc.RefreshRate = float32(vm.RefreshRate)
 		if MonitorDebug {
-			log.Printf("MonitorDebug: screen %d:\n%s\n", scNo, laser.StringJSON(sc))
+			log.Printf("MonitorDebug: screen %d:\n%s\n", scNo, reflectx.StringJSON(sc))
 		}
 		a.SaveScreenInfo(sc)
 		scNo++

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package laser
+package reflectx
 
 // SetAnyer represents a type that can be set from any value.
 // It is checked in [SetRobust].

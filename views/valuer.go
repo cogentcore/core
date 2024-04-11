@@ -17,7 +17,7 @@ import (
 	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )
@@ -93,7 +93,7 @@ func ToValue(val any, tags string) Value {
 			return v
 		}
 	}
-	if vl, ok := laser.PtrInterface(val).(Valuer); ok {
+	if vl, ok := reflectx.PtrInterface(val).(Valuer); ok {
 		v := vl.Value()
 		if v != nil {
 			return v
@@ -108,10 +108,10 @@ func ToValue(val any, tags string) Value {
 	}
 
 	typ := reflect.TypeOf(val)
-	nptyp := laser.NonPtrType(typ)
+	nptyp := reflectx.NonPtrType(typ)
 	vk := typ.Kind()
 
-	nptypnm := laser.LongTypeName(nptyp)
+	nptypnm := reflectx.LongTypeName(nptyp)
 	if vf, has := ValueMap[nptypnm]; has {
 		v := vf()
 		if v != nil {
@@ -150,7 +150,7 @@ func ToValue(val any, tags string) Value {
 		if tree.IsNode(nptyp) {
 			return &KiValue{}
 		}
-		if laser.AnyIsNil(val) {
+		if reflectx.AnyIsNil(val) {
 			return &NilValue{}
 		}
 		v := reflect.ValueOf(val)
@@ -160,35 +160,35 @@ func ToValue(val any, tags string) Value {
 	case vk == reflect.Array, vk == reflect.Slice:
 		v := reflect.ValueOf(val)
 		sz := v.Len()
-		eltyp := laser.SliceElType(val)
+		eltyp := reflectx.SliceElType(val)
 		if _, ok := val.([]byte); ok {
 			return &ByteSliceValue{}
 		}
 		if _, ok := val.([]rune); ok {
 			return &RuneSliceValue{}
 		}
-		isstru := (laser.NonPtrType(eltyp).Kind() == reflect.Struct)
+		isstru := (reflectx.NonPtrType(eltyp).Kind() == reflect.Struct)
 		if !forceNoInline && (forceInline || (!isstru && sz <= core.SystemSettings.SliceInlineLength && !tree.IsNode(eltyp))) {
 			return &SliceInlineValue{}
 		} else {
 			return &SliceValue{}
 		}
 	case vk == reflect.Map:
-		sz := laser.MapStructElsN(val)
+		sz := reflectx.MapStructElsN(val)
 		if !forceNoInline && (forceInline || sz <= core.SystemSettings.MapInlineLength) {
 			return &MapInlineValue{}
 		} else {
 			return &MapValue{}
 		}
 	case vk == reflect.Struct:
-		nfld := laser.AllFieldsN(nptyp)
+		nfld := reflectx.AllFieldsN(nptyp)
 		if nfld > 0 && !forceNoInline && (forceInline || nfld <= core.SystemSettings.StructInlineLength) {
 			return &StructInlineValue{}
 		} else {
 			return &StructValue{}
 		}
 	case vk == reflect.Func:
-		if laser.AnyIsNil(val) {
+		if reflectx.AnyIsNil(val) {
 			return &NilValue{}
 		}
 		return &FuncValue{}
@@ -212,7 +212,7 @@ func FieldToValue(str any, field string, val any) Value {
 			return v
 		}
 	}
-	if vl, ok := laser.PtrInterface(str).(FieldValuer); ok {
+	if vl, ok := reflectx.PtrInterface(str).(FieldValuer); ok {
 		v := vl.FieldValue(field, val)
 		if v != nil {
 			return v
@@ -220,7 +220,7 @@ func FieldToValue(str any, field string, val any) Value {
 	}
 
 	typ := reflect.TypeOf(str)
-	nptyp := laser.NonPtrType(typ)
+	nptyp := reflectx.NonPtrType(typ)
 
 	ftyp, ok := nptyp.FieldByName(field)
 	if ok {

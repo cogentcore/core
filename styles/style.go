@@ -17,8 +17,8 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/laser"
 	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/units"
 )
@@ -296,7 +296,7 @@ func StylePropertiesXML(properties map[string]any) string {
 		if k == "transform" {
 			continue
 		}
-		sb.WriteString(fmt.Sprintf("%s:%s;", k, laser.ToString(v)))
+		sb.WriteString(fmt.Sprintf("%s:%s;", k, reflectx.ToString(v)))
 	}
 	return sb.String()
 }

@@ -13,7 +13,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/errors"
 	"cogentcore.org/core/gox/dirs"
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/texteditor/textbuf"
@@ -450,7 +450,7 @@ func (v *VersionControlValue) Config() {
 }
 
 func (v *VersionControlValue) Update() {
-	txt := laser.ToString(v.Value.Interface())
+	txt := reflectx.ToString(v.Value.Interface())
 	if txt == "" {
 		txt = "(none)"
 	}
@@ -458,7 +458,7 @@ func (v *VersionControlValue) Update() {
 }
 
 func (v *VersionControlValue) OpenDialog(ctx core.Widget, fun func()) {
-	cur := laser.ToString(v.Value.Interface())
+	cur := reflectx.ToString(v.Value.Interface())
 	m := core.NewMenuFromStrings(VersionControlSystems, cur, func(idx int) {
 		v.SetValue(VersionControlSystems[idx])
 		v.Update()

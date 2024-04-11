@@ -7,7 +7,7 @@ package views
 import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 )
 
 // KeyMapValue represents a [keymap.MapName] value with a button.
@@ -21,14 +21,14 @@ func (v *KeyMapValue) Config() {
 }
 
 func (v *KeyMapValue) Update() {
-	txt := laser.ToString(v.Value.Interface())
+	txt := reflectx.ToString(v.Value.Interface())
 	v.Widget.SetText(txt).Update()
 }
 
 func (v *KeyMapValue) ConfigDialog(d *core.Body) (bool, func()) {
 	d.SetTitle("Select a key map")
 	si := 0
-	cur := laser.ToString(v.Value.Interface())
+	cur := reflectx.ToString(v.Value.Interface())
 	_, curRow, _ := keymap.AvailableMaps.MapByName(keymap.MapName(cur))
 	NewTableView(d).SetSlice(&keymap.AvailableMaps).SetSelectedIndex(curRow).BindSelect(&si)
 	return true, func() {

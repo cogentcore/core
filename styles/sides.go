@@ -12,8 +12,8 @@ import (
 	"log/slog"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/laser"
 	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/units"
 )
 
@@ -185,7 +185,7 @@ func (s *Sides[T]) SetString(str string) error {
 	fields := strings.Fields(str)
 	vals := make([]T, len(fields))
 	for i, field := range fields {
-		ss, ok := any(&vals[i]).(laser.SetStringer)
+		ss, ok := any(&vals[i]).(reflectx.SetStringer)
 		if !ok {
 			err := fmt.Errorf("(Sides).SetString('%s'): to set from a string, the sides type (%T) must implement laser.SetStringer (needs SetString(str string) error function)", str, s)
 			slog.Error(err.Error())

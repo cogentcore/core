@@ -13,7 +13,7 @@ import (
 
 	"cogentcore.org/core/gox/dirs"
 	"cogentcore.org/core/iox/tomlx"
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 )
 
 // TODO(kai): this seems bad
@@ -34,7 +34,7 @@ type Includer interface {
 // Returns an error if any of the include files cannot be found on IncludePath.
 // Does not alter cfg. It typically should not be used by end-user code.
 func IncludeStack(opts *Options, cfg Includer) ([]string, error) {
-	clone := reflect.New(laser.NonPtrType(reflect.TypeOf(cfg))).Interface().(Includer)
+	clone := reflect.New(reflectx.NonPtrType(reflect.TypeOf(cfg))).Interface().(Includer)
 	*clone.IncludesPtr() = *cfg.IncludesPtr()
 	return includeStackImpl(opts, clone, nil)
 }

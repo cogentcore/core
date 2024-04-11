@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/errors"
 	"cogentcore.org/core/gox/num"
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/units"
 )
 
@@ -22,7 +22,7 @@ func StyleInhInit(val, parent any) (inh, init bool) {
 	if str, ok := val.(string); ok {
 		switch str {
 		case "inherit":
-			return !laser.AnyIsNil(parent), false
+			return !reflectx.AnyIsNil(parent), false
 		case "initial":
 			return false, true
 		default:
@@ -44,7 +44,7 @@ func StyleFuncInt[T any, F num.Integer](initVal F, getField func(obj *T) *F) Sty
 			}
 			return
 		}
-		fv, _ := laser.ToInt(val)
+		fv, _ := reflectx.ToInt(val)
 		num.SetNumber(fp, fv)
 	}
 }
@@ -61,7 +61,7 @@ func StyleFuncFloat[T any, F num.Float](initVal F, getField func(obj *T) *F) Sty
 			}
 			return
 		}
-		fv, _ := laser.ToFloat(val) // can represent any number, ToFloat is fast type switch
+		fv, _ := reflectx.ToFloat(val) // can represent any number, ToFloat is fast type switch
 		num.SetNumber(fp, fv)
 	}
 }
@@ -78,7 +78,7 @@ func StyleFuncBool[T any](initVal bool, getField func(obj *T) *bool) StyleFunc {
 			}
 			return
 		}
-		fv, _ := laser.ToBool(val)
+		fv, _ := reflectx.ToBool(val)
 		*fp = fv
 	}
 }
@@ -119,7 +119,7 @@ func StyleFuncEnum[T any](initVal enums.Enum, getField func(obj *T) enums.EnumSe
 			fp.SetInt64(en.Int64())
 			return
 		}
-		iv, _ := laser.ToInt(val)
+		iv, _ := reflectx.ToInt(val)
 		fp.SetInt64(int64(iv))
 	}
 }
@@ -234,7 +234,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		str := laser.ToString(val)
+		str := reflectx.ToString(val)
 		if str == "row" || str == "row-reverse" {
 			s.Direction = Row
 		} else {
@@ -352,7 +352,7 @@ var StyleFontFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		fs.Family = laser.ToString(val)
+		fs.Family = reflectx.ToString(val)
 	},
 	"font-style": StyleFuncEnum(FontNormal,
 		func(obj *Font) enums.EnumSetter { return &obj.Style }),
@@ -384,7 +384,7 @@ var StyleFontFuncs = map[string]StyleFunc{
 		case TextDecorations:
 			fs.Decoration = vt
 		default:
-			iv, err := laser.ToInt(val)
+			iv, err := reflectx.ToInt(val)
 			if err == nil {
 				fs.Decoration = TextDecorations(iv)
 			} else {
@@ -487,7 +487,7 @@ var StyleBorderFuncs = map[string]StyleFunc{
 		case []BorderStyles:
 			bs.Style.Set(vt...)
 		default:
-			iv, err := laser.ToInt(val)
+			iv, err := reflectx.ToInt(val)
 			if err == nil {
 				bs.Style.Set(BorderStyles(iv))
 			} else {
@@ -557,7 +557,7 @@ var StyleOutlineFuncs = map[string]StyleFunc{
 		case []BorderStyles:
 			bs.Style.Set(vt...)
 		default:
-			iv, err := laser.ToInt(val)
+			iv, err := reflectx.ToInt(val)
 			if err == nil {
 				bs.Style.Set(BorderStyles(iv))
 			} else {

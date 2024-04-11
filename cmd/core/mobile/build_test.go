@@ -18,7 +18,7 @@ import (
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/mobile/sdkpath"
 	"cogentcore.org/core/exec"
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -86,7 +86,7 @@ func TestAndroidBuild(t *testing.T) {
 	os.Stdout = w
 
 	c := &config.Config{}
-	laser.SetFromDefaultTags(c)
+	reflectx.SetFromDefaultTags(c)
 	defer func() {
 		exec.SetMajor(nil)
 	}()
@@ -270,7 +270,7 @@ func TestBuildWithGoModules(t *testing.T) {
 			for _, tc := range tests {
 				t.Run(tc.Name, func(t *testing.T) {
 					c := &config.Config{}
-					laser.SetFromDefaultTags(c)
+					reflectx.SetFromDefaultTags(c)
 					c.ID = "org.golang.todo"
 					c.Build.Target = make([]config.Platform, 1)
 					assert.NoError(t, c.Build.Target[0].SetString(target))

@@ -8,7 +8,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/types"
 	"cogentcore.org/core/units"
@@ -19,7 +19,7 @@ import (
 // NonNilContext returns a non-nil context widget, falling back on the top
 // scene of the current window.
 func NonNilContext(ctx Widget) Widget {
-	if !laser.AnyIsNil(ctx) {
+	if !reflectx.AnyIsNil(ctx) {
 		return ctx
 	}
 	return CurrentRenderWindow.MainStageMgr.Top().Scene

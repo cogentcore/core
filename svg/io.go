@@ -24,8 +24,8 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/iox/imagex"
-	"cogentcore.org/core/laser"
 	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 	"golang.org/x/net/html/charset"
@@ -855,11 +855,11 @@ func SVGNodeMarshalXML(itm tree.Node, enc *XMLEncoder, setName string) string {
 				XMLAddAttr(&se.Attr, "style", sp)
 			}
 			if txp, has := properties["transform"]; has {
-				XMLAddAttr(&se.Attr, "transform", laser.ToString(txp))
+				XMLAddAttr(&se.Attr, "transform", reflectx.ToString(txp))
 			}
 		} else {
 			for k, v := range properties {
-				sv := laser.ToString(v)
+				sv := reflectx.ToString(v)
 				if _, has := InkscapeProperties[k]; has {
 					k = "inkscape:" + k
 				} else if k == "overflow" {
@@ -882,14 +882,14 @@ func SVGNodeMarshalXML(itm tree.Node, enc *XMLEncoder, setName string) string {
 		if strings.HasPrefix(strings.ToLower(itm.Name()), "layer") {
 		}
 		for k, v := range properties {
-			sv := laser.ToString(v)
+			sv := reflectx.ToString(v)
 			switch k {
 			case "opacity", "transform":
 				XMLAddAttr(&se.Attr, k, sv)
 			case "groupmode":
 				XMLAddAttr(&se.Attr, "inkscape:groupmode", sv)
 				if st, has := properties["style"]; has {
-					XMLAddAttr(&se.Attr, "style", laser.ToString(st))
+					XMLAddAttr(&se.Attr, "style", reflectx.ToString(st))
 				} else {
 					XMLAddAttr(&se.Attr, "style", "display:inline")
 				}

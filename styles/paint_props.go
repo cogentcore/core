@@ -13,8 +13,8 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/errors"
-	"cogentcore.org/core/laser"
 	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/units"
 )
 
@@ -40,7 +40,7 @@ func (pc *Paint) StyleFromProperties(parent *Paint, properties map[string]any, c
 				}
 				return
 			}
-			sval := laser.ToString(val)
+			sval := reflectx.ToString(val)
 			switch sval {
 			case "none":
 				pc.Display = false

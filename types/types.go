@@ -14,7 +14,7 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 )
 
 var (
@@ -83,14 +83,14 @@ func AddType(typ *Type) *Type {
 // TypeName returns the long, full package-path qualified type name.
 // This is guaranteed to be unique and used for the Types registry.
 func TypeName(typ reflect.Type) string {
-	return laser.LongTypeName(typ)
+	return reflectx.LongTypeName(typ)
 }
 
 // TypeNameObj returns the long, full package-path qualified type name
 // from given object.  Automatically finds the non-pointer base type.
 // This is guaranteed to be unique and used for the Types registry.
 func TypeNameObj(v any) string {
-	typ := laser.NonPtrType(reflect.TypeOf(v))
+	typ := reflectx.NonPtrType(reflect.TypeOf(v))
 	return TypeName(typ)
 }
 
@@ -120,7 +120,7 @@ func GetDoc(val, owner reflect.Value, field *reflect.StructField, label string) 
 		if !val.IsValid() {
 			return "", false
 		}
-		rtyp := laser.NonPtrType(val.Type())
+		rtyp := reflectx.NonPtrType(val.Type())
 		typ := TypeByName(TypeName(rtyp))
 		if typ == nil {
 			return "", false

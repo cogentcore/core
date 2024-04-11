@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
@@ -124,7 +124,7 @@ func (mv *MapView) ContextMenu(m *core.Scene, keyv reflect.Value) {
 
 // ConfigMapGrid configures the MapGrid for the current map
 func (mv *MapView) ConfigMapGrid() {
-	if laser.AnyIsNil(mv.Map) {
+	if reflectx.AnyIsNil(mv.Map) {
 		return
 	}
 	sg := mv.MapGrid()
@@ -135,9 +135,9 @@ func (mv *MapView) ConfigMapGrid() {
 	sg.DeleteChildren()
 
 	mpv := reflect.ValueOf(mv.Map)
-	mpvnp := laser.NonPtrValue(mpv)
+	mpvnp := reflectx.NonPtrValue(mpv)
 
-	valtyp := laser.NonPtrType(reflect.TypeOf(mv.Map)).Elem()
+	valtyp := reflectx.NonPtrType(reflect.TypeOf(mv.Map)).Elem()
 	ncol := 2
 	ifaceType := false
 	if valtyp.Kind() == reflect.Interface && valtyp.String() == "interface {}" {
@@ -158,7 +158,7 @@ func (mv *MapView) ConfigMapGrid() {
 
 	mv.NCols = ncol
 
-	keys := laser.MapSort(mv.Map, !mv.SortVals, true) // note: this is a slice of reflect.Value!
+	keys := reflectx.MapSort(mv.Map, !mv.SortVals, true) // note: this is a slice of reflect.Value!
 	for _, key := range keys {
 		kv := ToValue(key.Interface(), "")
 		if kv == nil { // shouldn't happen
@@ -166,14 +166,14 @@ func (mv *MapView) ConfigMapGrid() {
 		}
 		kv.SetMapKey(key, mv.Map)
 
-		val := laser.OnePtrUnderlyingValue(mpvnp.MapIndex(key))
+		val := reflectx.OnePtrUnderlyingValue(mpvnp.MapIndex(key))
 		vv := ToValue(val.Interface(), "")
 		if vv == nil { // shouldn't happen
 			continue
 		}
 		vv.SetMapValue(val, mv.Map, key.Interface(), kv, mv.ViewPath) // needs key value value to track updates
 
-		keytxt := laser.ToString(key.Interface())
+		keytxt := reflectx.ToString(key.Interface())
 		keynm := "key-" + keytxt
 		valnm := "value-" + keytxt
 
@@ -217,7 +217,7 @@ func (mv *MapView) ConfigMapGrid() {
 		if ifaceType {
 			typw := sg.Child(i*ncol + 2).(*core.Chooser)
 			typw.SetTypes(valtypes...)
-			vtyp := laser.NonPtrType(reflect.TypeOf(vv.Val().Interface()))
+			vtyp := reflectx.NonPtrType(reflect.TypeOf(vv.Val().Interface()))
 			if vtyp == nil {
 				vtyp = reflect.TypeOf("") // default to string
 			}
@@ -237,23 +237,23 @@ func (mv *MapView) SetChanged() {
 // MapChangeValueType changes the type of the value for given map element at
 // idx -- for maps with any values
 func (mv *MapView) MapChangeValueType(idx int, typ reflect.Type) {
-	if laser.AnyIsNil(mv.Map) {
+	if reflectx.AnyIsNil(mv.Map) {
 		return
 	}
 
 	keyv := mv.Keys[idx]
-	ck := laser.NonPtrValue(keyv.Val()) // current key value
+	ck := reflectx.NonPtrValue(keyv.Val()) // current key value
 	valv := mv.Values[idx]
-	cv := laser.NonPtrValue(valv.Val()) // current val value
+	cv := reflectx.NonPtrValue(valv.Val()) // current val value
 
 	// create a new item of selected type, and attempt to convert existing to it
 	var evn reflect.Value
 	if cv.IsZero() {
-		evn = laser.MakeOfType(typ)
+		evn = reflectx.MakeOfType(typ)
 	} else {
-		evn = laser.CloneToType(typ, cv.Interface())
+		evn = reflectx.CloneToType(typ, cv.Interface())
 	}
-	ov := laser.NonPtrValue(reflect.ValueOf(mv.Map))
+	ov := reflectx.NonPtrValue(reflect.ValueOf(mv.Map))
 	valv.AsValueData().Value = evn.Elem()
 	ov.SetMapIndex(ck, evn.Elem())
 	mv.ConfigMapGrid()
@@ -269,10 +269,10 @@ func (mv *MapView) ToggleSort() {
 
 // MapAdd adds a new entry to the map
 func (mv *MapView) MapAdd() {
-	if laser.AnyIsNil(mv.Map) {
+	if reflectx.AnyIsNil(mv.Map) {
 		return
 	}
-	laser.MapAdd(mv.Map)
+	reflectx.MapAdd(mv.Map)
 
 	mv.SetChanged()
 	mv.Update()
@@ -280,10 +280,10 @@ func (mv *MapView) MapAdd() {
 
 // MapDelete deletes a key-value from the map
 func (mv *MapView) MapDelete(key reflect.Value) {
-	if laser.AnyIsNil(mv.Map) {
+	if reflectx.AnyIsNil(mv.Map) {
 		return
 	}
-	laser.MapDeleteValue(mv.Map, laser.NonPtrValue(key))
+	reflectx.MapDeleteValue(mv.Map, reflectx.NonPtrValue(key))
 
 	mv.SetChanged()
 	mv.Update()
@@ -291,7 +291,7 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 
 // ConfigToolbar configures a [core.Toolbar] for this view
 func (mv *MapView) ConfigToolbar(tb *core.Toolbar) {
-	if laser.AnyIsNil(mv.Map) {
+	if reflectx.AnyIsNil(mv.Map) {
 		return
 	}
 	core.NewButton(tb, "sort").SetText("Sort").SetIcon(icons.Sort).SetTooltip("Switch between sorting by the keys vs. the values").

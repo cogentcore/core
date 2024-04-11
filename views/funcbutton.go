@@ -17,7 +17,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
@@ -374,7 +374,7 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 		if len(fb.Returns) > 0 {
 			txt += ": "
 			for i, ret := range fb.Returns {
-				txt += laser.NonPtrValue(ret.Val()).String()
+				txt += reflectx.NonPtrValue(ret.Val()).String()
 				if i < len(fb.Returns)-1 {
 					txt += ", "
 				}
@@ -413,7 +413,7 @@ func (fb *FuncButton) SetArgs() {
 		if fb.Func.Args != nil && len(fb.Func.Args) > i {
 			name = fb.Func.Args[i]
 		} else {
-			name = laser.NonPtrType(atyp).Name()
+			name = reflectx.NonPtrType(atyp).Name()
 		}
 
 		label := strcase.ToSentence(name)
@@ -450,7 +450,7 @@ func (fb *FuncButton) SetReturns() {
 		if fb.Func.Returns != nil && len(fb.Func.Returns) > i {
 			name = fb.Func.Returns[i]
 		} else {
-			name = laser.NonPtrType(rtyp).Name()
+			name = reflectx.NonPtrType(rtyp).Name()
 		}
 
 		label := strcase.ToSentence(name)

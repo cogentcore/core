@@ -12,7 +12,7 @@ import (
 	"strings"
 	"unicode"
 
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/tree"
 )
 
@@ -242,7 +242,7 @@ func (sv *SVG) RemoveOrphanedDefs() bool {
 	sv.Root.WalkDown(func(k tree.Node) bool {
 		pr := k.Properties()
 		for _, v := range pr {
-			ps := laser.ToString(v)
+			ps := reflectx.ToString(v)
 			if !strings.HasPrefix(ps, "url(#") {
 				continue
 			}

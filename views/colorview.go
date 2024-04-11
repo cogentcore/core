@@ -14,7 +14,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/styles"
 )
 
@@ -513,7 +513,7 @@ func (v *ColorValue) ConfigDialog(d *core.Body) (bool, func()) {
 	d.SetTitle("Edit color")
 	cv := NewColorView(d).SetColor(v.ColorValue())
 	return true, func() {
-		if u, ok := laser.OnePtrUnderlyingValue(v.Value).Interface().(*image.Uniform); ok {
+		if u, ok := reflectx.OnePtrUnderlyingValue(v.Value).Interface().(*image.Uniform); ok {
 			u.C = cv.Color.AsRGBA()
 		} else {
 			v.SetValue(cv.Color.AsRGBA())
@@ -525,6 +525,6 @@ func (v *ColorValue) ConfigDialog(d *core.Body) (bool, func()) {
 // ColorValue returns a standardized color value from whatever value is represented
 // internally, or nil.
 func (v *ColorValue) ColorValue() color.RGBA {
-	c := laser.NonPtrValue(v.Value).Interface().(color.Color)
+	c := reflectx.NonPtrValue(v.Value).Interface().(color.Color)
 	return colors.AsRGBA(c)
 }

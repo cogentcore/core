@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 )
@@ -64,14 +64,14 @@ func (sv *StructViewInline) SetStruct(st any) *StructViewInline {
 }
 
 func (sv *StructViewInline) Config() {
-	if laser.AnyIsNil(sv.Struct) {
+	if reflectx.AnyIsNil(sv.Struct) {
 		return
 	}
 	config := tree.Config{}
 	// note: widget re-use does not work due to all the closures
 	sv.DeleteChildren()
 	sv.FieldViews = make([]Value, 0)
-	laser.FlatFieldsValueFunc(sv.Struct, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+	reflectx.FlatFieldsValueFunc(sv.Struct, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		// todo: check tags, skip various etc
 		vwtag := field.Tag.Get("view")
 		if vwtag == "-" {
@@ -115,7 +115,7 @@ func (sv *StructViewInline) Config() {
 		if hasDef {
 			lbl.Style(func(s *styles.Style) {
 				dtag, _ := vv.Tag("default")
-				isDef, _ := StructFieldIsDef(dtag, vv.Val().Interface(), laser.NonPtrValue(vv.Val()).Kind())
+				isDef, _ := StructFieldIsDef(dtag, vv.Val().Interface(), reflectx.NonPtrValue(vv.Val()).Kind())
 				dcr := "(Double click to reset to default) "
 				if !isDef {
 					s.Color = colors.C(colors.Scheme.Primary.Base)
@@ -129,12 +129,12 @@ func (sv *StructViewInline) Config() {
 			})
 			lbl.OnDoubleClick(func(e events.Event) {
 				dtag, _ := vv.Tag("default")
-				isDef, _ := StructFieldIsDef(dtag, vv.Val().Interface(), laser.NonPtrValue(vv.Val()).Kind())
+				isDef, _ := StructFieldIsDef(dtag, vv.Val().Interface(), reflectx.NonPtrValue(vv.Val()).Kind())
 				if isDef {
 					return
 				}
 				e.SetHandled()
-				err := laser.SetFromDefaultTag(vv.Val(), dtag)
+				err := reflectx.SetFromDefaultTag(vv.Val(), dtag)
 				if err != nil {
 					core.ErrorSnackbar(lbl, err, "Error setting default value")
 				} else {
@@ -148,7 +148,7 @@ func (sv *StructViewInline) Config() {
 		if !sv.IsReadOnly() && !readOnlyTag {
 			vv.OnChange(func(e events.Event) {
 				sv.UpdateFieldAction()
-				if !laser.KindIsBasic(laser.NonPtrValue(vv.Val()).Kind()) {
+				if !reflectx.KindIsBasic(reflectx.NonPtrValue(vv.Val()).Kind()) {
 					if updtr, ok := sv.Struct.(core.Updater); ok {
 						// fmt.Printf("updating: %v kind: %v\n", updtr, vvv.Value.Kind())
 						updtr.Update()

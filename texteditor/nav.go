@@ -9,9 +9,9 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/laser"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/texteditor/textbuf"
 )
 
@@ -712,7 +712,7 @@ func (ed *Editor) JumpToLinePrompt() {
 		d.AddCancel(parent)
 		d.AddOK(parent).SetText("Jump").OnClick(func(e events.Event) {
 			val = tf.Text()
-			ln, err := laser.ToInt(val)
+			ln, err := reflectx.ToInt(val)
 			if err == nil {
 				ed.JumpToLine(int(ln))
 			}

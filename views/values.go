@@ -15,8 +15,8 @@ import (
 	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/laser"
 	"cogentcore.org/core/paint"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
@@ -51,11 +51,11 @@ func (v *StringValue) Config() {
 }
 
 func (v *StringValue) Update() {
-	npv := laser.NonPtrValue(v.Value)
+	npv := reflectx.NonPtrValue(v.Value)
 	if npv.Kind() == reflect.Interface && npv.IsZero() {
 		v.Widget.SetText("None")
 	} else {
-		txt := laser.ToString(v.Value.Interface())
+		txt := reflectx.ToString(v.Value.Interface())
 		v.Widget.SetText(txt)
 	}
 }
@@ -72,8 +72,8 @@ func (v *BoolValue) Config() {
 }
 
 func (v *BoolValue) Update() {
-	npv := laser.NonPtrValue(v.Value)
-	bv, err := laser.ToBool(npv.Interface())
+	npv := reflectx.NonPtrValue(v.Value)
+	bv, err := reflectx.ToBool(npv.Interface())
 	if errors.Log(err) == nil {
 		v.Widget.SetChecked(bv)
 	}
@@ -85,7 +85,7 @@ type NumberValue struct {
 }
 
 func (v *NumberValue) Config() {
-	vk := laser.NonPtrType(v.Value.Type()).Kind()
+	vk := reflectx.NonPtrType(v.Value.Type()).Kind()
 	if vk >= reflect.Int && vk <= reflect.Uintptr {
 		v.Widget.SetStep(1).SetEnforceStep(true)
 	}
@@ -93,19 +93,19 @@ func (v *NumberValue) Config() {
 		v.Widget.SetMin(0)
 	}
 	if min, ok := v.Tag("min"); ok {
-		minv, err := laser.ToFloat32(min)
+		minv, err := reflectx.ToFloat32(min)
 		if errors.Log(err) == nil {
 			v.Widget.SetMin(minv)
 		}
 	}
 	if max, ok := v.Tag("max"); ok {
-		maxv, err := laser.ToFloat32(max)
+		maxv, err := reflectx.ToFloat32(max)
 		if errors.Log(err) == nil {
 			v.Widget.SetMax(maxv)
 		}
 	}
 	if step, ok := v.Tag("step"); ok {
-		step, err := laser.ToFloat32(step)
+		step, err := reflectx.ToFloat32(step)
 		if errors.Log(err) == nil {
 			v.Widget.SetStep(step)
 		}
@@ -119,8 +119,8 @@ func (v *NumberValue) Config() {
 }
 
 func (v *NumberValue) Update() {
-	npv := laser.NonPtrValue(v.Value)
-	fv, err := laser.ToFloat32(npv.Interface())
+	npv := reflectx.NonPtrValue(v.Value)
+	fv, err := reflectx.ToFloat32(npv.Interface())
 	if errors.Log(err) == nil {
 		v.Widget.SetValue(fv)
 	}
@@ -132,24 +132,24 @@ type SliderValue struct {
 }
 
 func (v *SliderValue) Config() {
-	vk := laser.NonPtrType(v.Value.Type()).Kind()
+	vk := reflectx.NonPtrType(v.Value.Type()).Kind()
 	if vk >= reflect.Int && vk <= reflect.Uintptr {
 		v.Widget.SetStep(1).SetEnforceStep(true).SetMax(100)
 	}
 	if min, ok := v.Tag("min"); ok {
-		minv, err := laser.ToFloat32(min)
+		minv, err := reflectx.ToFloat32(min)
 		if errors.Log(err) == nil {
 			v.Widget.SetMin(minv)
 		}
 	}
 	if max, ok := v.Tag("max"); ok {
-		maxv, err := laser.ToFloat32(max)
+		maxv, err := reflectx.ToFloat32(max)
 		if errors.Log(err) == nil {
 			v.Widget.SetMax(maxv)
 		}
 	}
 	if step, ok := v.Tag("step"); ok {
-		stepv, err := laser.ToFloat32(step)
+		stepv, err := reflectx.ToFloat32(step)
 		if errors.Log(err) == nil {
 			v.Widget.SetStep(stepv)
 		}
@@ -160,8 +160,8 @@ func (v *SliderValue) Config() {
 }
 
 func (v *SliderValue) Update() {
-	npv := laser.NonPtrValue(v.Value)
-	fv, err := laser.ToFloat32(npv.Interface())
+	npv := reflectx.NonPtrValue(v.Value)
+	fv, err := reflectx.ToFloat32(npv.Interface())
 	if errors.Log(err) == nil {
 		v.Widget.SetValue(fv)
 	}
@@ -178,15 +178,15 @@ func (v *StructValue) Config() {
 }
 
 func (v *StructValue) Update() {
-	npv := laser.NonPtrValue(v.Value)
+	npv := reflectx.NonPtrValue(v.Value)
 	if v.Value.IsZero() {
 		v.Widget.SetText("None")
 	} else {
-		opv := laser.OnePtrUnderlyingValue(v.Value)
+		opv := reflectx.OnePtrUnderlyingValue(v.Value)
 		if lbler, ok := opv.Interface().(core.Labeler); ok {
 			v.Widget.SetText(lbler.Label())
 		} else {
-			v.Widget.SetText(laser.FriendlyTypeName(npv.Type()))
+			v.Widget.SetText(reflectx.FriendlyTypeName(npv.Type()))
 		}
 	}
 	v.Widget.Update()
@@ -196,7 +196,7 @@ func (v *StructValue) ConfigDialog(d *core.Body) (bool, func()) {
 	if v.Value.IsZero() {
 		return false, nil
 	}
-	opv := laser.OnePtrUnderlyingValue(v.Value)
+	opv := reflectx.OnePtrUnderlyingValue(v.Value)
 	str := opv.Interface()
 	NewStructView(d).SetStruct(str).SetViewPath(v.ViewPath).
 		SetReadOnly(v.IsReadOnly())
@@ -235,13 +235,13 @@ func (v *SliceValue) Config() {
 }
 
 func (v *SliceValue) Update() {
-	npv := laser.OnePtrUnderlyingValue(v.Value).Elem()
+	npv := reflectx.OnePtrUnderlyingValue(v.Value).Elem()
 	txt := ""
 	if !npv.IsValid() {
 		txt = "None"
 	} else {
 		if npv.Kind() == reflect.Array || !npv.IsNil() {
-			bnm := laser.FriendlyTypeName(laser.SliceElType(v.Value.Interface()))
+			bnm := reflectx.FriendlyTypeName(reflectx.SliceElType(v.Value.Interface()))
 			if strings.HasSuffix(bnm, "s") {
 				txt = strcase.ToSentence(fmt.Sprintf("%d lists of %s", npv.Len(), bnm))
 			} else {
@@ -255,17 +255,17 @@ func (v *SliceValue) Update() {
 }
 
 func (v *SliceValue) ConfigDialog(d *core.Body) (bool, func()) {
-	npv := laser.NonPtrValue(v.Value)
+	npv := reflectx.NonPtrValue(v.Value)
 	if v.Value.IsZero() || npv.IsZero() {
 		return false, nil
 	}
-	vvp := laser.OnePtrValue(v.Value)
+	vvp := reflectx.OnePtrValue(v.Value)
 	if vvp.Kind() != reflect.Ptr {
 		slog.Error("views.SliceValue: Cannot view unadressable (non-pointer) slices", "type", v.Value.Type())
 		return false, nil
 	}
 	slci := vvp.Interface()
-	if npv.Kind() != reflect.Array && laser.NonPtrType(laser.SliceElType(v.Value.Interface())).Kind() == reflect.Struct {
+	if npv.Kind() != reflect.Array && reflectx.NonPtrType(reflectx.SliceElType(v.Value.Interface())).Kind() == reflect.Struct {
 		tv := NewTableView(d).SetSlice(slci).SetViewPath(v.ViewPath)
 		tv.SetReadOnly(v.IsReadOnly())
 		d.AddAppBar(tv.ConfigToolbar)
@@ -317,13 +317,13 @@ func (v *MapValue) Config() {
 }
 
 func (v *MapValue) Update() {
-	npv := laser.NonPtrValue(v.Value)
+	npv := reflectx.NonPtrValue(v.Value)
 	mpi := v.Value.Interface()
 	txt := ""
 	if !npv.IsValid() || npv.IsNil() {
 		txt = "None"
 	} else {
-		bnm := laser.FriendlyTypeName(laser.MapValueType(mpi))
+		bnm := reflectx.FriendlyTypeName(reflectx.MapValueType(mpi))
 		if strings.HasSuffix(bnm, "s") {
 			txt = strcase.ToSentence(fmt.Sprintf("%d lists of %s", npv.Len(), bnm))
 		} else {
@@ -334,7 +334,7 @@ func (v *MapValue) Update() {
 }
 
 func (v *MapValue) ConfigDialog(d *core.Body) (bool, func()) {
-	if v.Value.IsZero() || laser.NonPtrValue(v.Value).IsZero() {
+	if v.Value.IsZero() || reflectx.NonPtrValue(v.Value).IsZero() {
 		return false, nil
 	}
 	mpi := v.Value.Interface()
@@ -400,11 +400,11 @@ func (vv *KiValue) KiValue() tree.Node {
 	if !vv.Value.IsValid() || vv.Value.IsNil() {
 		return nil
 	}
-	npv := laser.NonPtrValue(vv.Value)
+	npv := reflectx.NonPtrValue(vv.Value)
 	if npv.Kind() == reflect.Interface {
 		return npv.Interface().(tree.Node)
 	}
-	opv := laser.OnePtrValue(vv.Value)
+	opv := reflectx.OnePtrValue(vv.Value)
 	if opv.IsNil() {
 		return nil
 	}
@@ -417,7 +417,7 @@ type EnumValue struct {
 }
 
 func (v *EnumValue) Config() {
-	e := laser.OnePtrUnderlyingValue(v.Value).Interface().(enums.Enum)
+	e := reflectx.OnePtrUnderlyingValue(v.Value).Interface().(enums.Enum)
 	v.Widget.SetEnum(e)
 	v.Widget.OnChange(func(e events.Event) {
 		v.SetValue(v.Widget.CurrentItem.Value)
@@ -425,7 +425,7 @@ func (v *EnumValue) Config() {
 }
 
 func (v *EnumValue) Update() {
-	npv := laser.NonPtrValue(v.Value)
+	npv := reflectx.NonPtrValue(v.Value)
 	v.Widget.SetCurrentValue(npv.Interface())
 }
 
@@ -480,7 +480,7 @@ func (v *TypeValue) Config() {
 }
 
 func (v *TypeValue) Update() {
-	opv := laser.OnePtrValue(v.Value)
+	opv := reflectx.OnePtrValue(v.Value)
 	typ := opv.Interface().(*types.Type)
 	v.Widget.SetCurrentValue(typ)
 }
@@ -497,7 +497,7 @@ func (v *ByteSliceValue) Config() {
 }
 
 func (v *ByteSliceValue) Update() {
-	npv := laser.NonPtrValue(v.Value)
+	npv := reflectx.NonPtrValue(v.Value)
 	bv := npv.Interface().([]byte)
 	v.Widget.SetText(string(bv))
 }
@@ -514,7 +514,7 @@ func (v *RuneSliceValue) Config() {
 }
 
 func (v *RuneSliceValue) Update() {
-	npv := laser.NonPtrValue(v.Value)
+	npv := reflectx.NonPtrValue(v.Value)
 	rv := npv.Interface().([]rune)
 	v.Widget.SetText(string(rv))
 }
@@ -541,7 +541,7 @@ func (v *IconValue) Config() {
 }
 
 func (v *IconValue) Update() {
-	txt := laser.ToString(v.Value.Interface())
+	txt := reflectx.ToString(v.Value.Interface())
 	if icons.Icon(txt).IsNil() {
 		v.Widget.SetIcon(icons.Blank)
 	} else {
@@ -562,7 +562,7 @@ func (v *IconValue) ConfigDialog(d *core.Body) (bool, func()) {
 	d.SetTitle("Select an icon")
 	si := 0
 	ics := icons.All()
-	cur := icons.Icon(laser.ToString(v.Value.Interface()))
+	cur := icons.Icon(reflectx.ToString(v.Value.Interface()))
 	NewSliceView(d).SetStyleFunc(func(w core.Widget, s *styles.Style, row int) {
 		w.(*core.Button).SetText(strcase.ToSentence(string(ics[row])))
 	}).SetSlice(&ics).SetSelectedValue(cur).BindSelect(&si)
@@ -584,13 +584,13 @@ func (v *FontValue) Config() {
 	v.Widget.SetType(core.ButtonTonal)
 	v.Widget.Style(func(s *styles.Style) {
 		// TODO(kai): fix this not working (probably due to medium font weight)
-		s.Font.Family = laser.ToString(v.Value.Interface())
+		s.Font.Family = reflectx.ToString(v.Value.Interface())
 	})
 	ConfigDialogWidget(v, false)
 }
 
 func (v *FontValue) Update() {
-	txt := laser.ToString(v.Value.Interface())
+	txt := reflectx.ToString(v.Value.Interface())
 	v.Widget.SetText(txt).Update()
 }
 
@@ -598,7 +598,7 @@ func (v *FontValue) ConfigDialog(d *core.Body) (bool, func()) {
 	d.SetTitle("Select a font")
 	si := 0
 	fi := paint.FontLibrary.FontInfo
-	cur := core.FontName(laser.ToString(v.Value.Interface()))
+	cur := core.FontName(reflectx.ToString(v.Value.Interface()))
 	NewTableView(d).SetStyleFunc(func(w core.Widget, s *styles.Style, row, col int) {
 		if col != 4 {
 			return
@@ -630,7 +630,7 @@ func (v *FileValue) Config() {
 }
 
 func (v *FileValue) Update() {
-	txt := laser.ToString(v.Value.Interface())
+	txt := reflectx.ToString(v.Value.Interface())
 	if txt == "" {
 		txt = "(click to open file chooser)"
 	}
@@ -639,7 +639,7 @@ func (v *FileValue) Update() {
 
 func (v *FileValue) ConfigDialog(d *core.Body) (bool, func()) {
 	v.SetFlag(true, ValueDialogNewWindow) // default to new window on supported platforms
-	cur := laser.ToString(v.Value.Interface())
+	cur := reflectx.ToString(v.Value.Interface())
 	ext, _ := v.Tag("ext")
 	fv := NewFileView(d).SetFilename(cur, ext)
 	d.AddAppBar(fv.ConfigToolbar)
@@ -660,7 +660,7 @@ func (v *FuncValue) Config() {
 }
 
 func (v *FuncValue) Update() {
-	fun := laser.NonPtrValue(v.Value).Interface()
+	fun := reflectx.NonPtrValue(v.Value).Interface()
 	// if someone is viewing an arbitrary function, there is a good chance
 	// that it is not added to types (and that is out of their control)
 	// (eg: in the inspector), so we do not warn on unadded functions.

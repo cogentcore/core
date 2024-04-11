@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 )
@@ -79,7 +79,7 @@ func (mv *MapViewInline) SetStyles() {
 					}
 					vpath = JoinViewPath(mv.ViewPath, newPath)
 				} else {
-					tmptyp := laser.NonPtrType(reflect.TypeOf(mv.Map))
+					tmptyp := reflectx.NonPtrType(reflect.TypeOf(mv.Map))
 					title = "Map of " + tmptyp.String()
 				}
 				d := core.NewBody().AddTitle(title).AddText(mv.Tooltip)
@@ -105,7 +105,7 @@ func (mv *MapViewInline) SetMap(mp any) *MapViewInline {
 
 func (mv *MapViewInline) Config() {
 	mv.DeleteChildren()
-	if laser.AnyIsNil(mv.Map) {
+	if reflectx.AnyIsNil(mv.Map) {
 		mv.ConfigSize = 0
 		return
 	}
@@ -114,11 +114,11 @@ func (mv *MapViewInline) Config() {
 	mv.Values = make([]Value, 0)
 
 	mpv := reflect.ValueOf(mv.Map)
-	mpvnp := laser.NonPtrValue(laser.OnePtrUnderlyingValue(mpv))
+	mpvnp := reflectx.NonPtrValue(reflectx.OnePtrUnderlyingValue(mpv))
 	keys := mpvnp.MapKeys() // this is a slice of reflect.Value
 	mv.ConfigSize = len(keys)
 
-	laser.ValueSliceSort(keys, true)
+	reflectx.ValueSliceSort(keys, true)
 	for i, key := range keys {
 		if i >= core.SystemSettings.MapInlineLength {
 			break
@@ -129,14 +129,14 @@ func (mv *MapViewInline) Config() {
 		}
 		kv.SetMapKey(key, mv.Map)
 
-		val := laser.OnePtrUnderlyingValue(mpvnp.MapIndex(key))
+		val := reflectx.OnePtrUnderlyingValue(mpvnp.MapIndex(key))
 		vv := ToValue(val.Interface(), "")
 		if vv == nil { // shouldn't happen
 			continue
 		}
 		vv.SetMapValue(val, mv.Map, key.Interface(), kv, mv.ViewPath) // needs key value to track updates
 
-		keytxt := laser.ToString(key.Interface())
+		keytxt := reflectx.ToString(key.Interface())
 		keynm := "key-" + keytxt
 		valnm := "value-" + keytxt
 
@@ -207,10 +207,10 @@ func (mv *MapViewInline) SetChanged() {
 
 // MapAdd adds a new entry to the map
 func (mv *MapViewInline) MapAdd() {
-	if laser.AnyIsNil(mv.Map) {
+	if reflectx.AnyIsNil(mv.Map) {
 		return
 	}
-	laser.MapAdd(mv.Map)
+	reflectx.MapAdd(mv.Map)
 
 	mv.SetChanged()
 	mv.Update()
@@ -218,10 +218,10 @@ func (mv *MapViewInline) MapAdd() {
 
 // MapDelete deletes a key-value from the map
 func (mv *MapViewInline) MapDelete(key reflect.Value) {
-	if laser.AnyIsNil(mv.Map) {
+	if reflectx.AnyIsNil(mv.Map) {
 		return
 	}
-	laser.MapDeleteValue(mv.Map, laser.NonPtrValue(key))
+	reflectx.MapDeleteValue(mv.Map, reflectx.NonPtrValue(key))
 
 	mv.SetChanged()
 	mv.Update()
@@ -245,11 +245,11 @@ func (mv *MapViewInline) UpdateValues() {
 }
 
 func (mv *MapViewInline) MapSizeChanged() bool {
-	if laser.AnyIsNil(mv.Map) {
+	if reflectx.AnyIsNil(mv.Map) {
 		return mv.ConfigSize != 0
 	}
 	mpv := reflect.ValueOf(mv.Map)
-	mpvnp := laser.NonPtrValue(laser.OnePtrUnderlyingValue(mpv))
+	mpvnp := reflectx.NonPtrValue(reflectx.OnePtrUnderlyingValue(mpv))
 	keys := mpvnp.MapKeys()
 	return mv.ConfigSize != len(keys)
 }

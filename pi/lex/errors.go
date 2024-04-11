@@ -16,7 +16,7 @@ import (
 	"path/filepath"
 	"sort"
 
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/tree"
 )
 
@@ -67,7 +67,7 @@ func (e Error) Report(basepath string, showSrc, showRule bool) string {
 		}
 	}
 	str := fnm + ":" + e.Pos.String() + ": " + e.Msg
-	if showRule && !laser.AnyIsNil(e.Rule) {
+	if showRule && !reflectx.AnyIsNil(e.Rule) {
 		str += fmt.Sprintf(" (rule: %v)", e.Rule.Name())
 	}
 	ssz := len(e.Src)

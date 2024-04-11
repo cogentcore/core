@@ -23,8 +23,8 @@ import (
 	"cogentcore.org/core/iox/jsonx"
 	"cogentcore.org/core/iox/tomlx"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/laser"
 	"cogentcore.org/core/paint"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/system"
 )
 
@@ -121,13 +121,13 @@ func OpenSettings(se Settings) error {
 // The settings will be encoded in TOML unless they have a .json file
 // extension. If they satisfy the [SettingsSaver] interface,
 // [SettingsSaver.Save] will be used instead. Any non default
-// fields are not saved, following [laser.NonDefaultFields].
+// fields are not saved, following [reflectx.NonDefaultFields].
 func SaveSettings(se Settings) error {
 	if ss, ok := se.(SettingsSaver); ok {
 		return ss.Save()
 	}
 	fnm := se.Filename()
-	ndf := laser.NonDefaultFields(se)
+	ndf := reflectx.NonDefaultFields(se)
 	if filepath.Ext(fnm) == ".json" {
 		return jsonx.Save(ndf, fnm)
 	}
@@ -140,10 +140,10 @@ func ResetSettings(se Settings) error {
 	if err != nil {
 		return err
 	}
-	npv := laser.NonPtrValue(reflect.ValueOf(se))
+	npv := reflectx.NonPtrValue(reflect.ValueOf(se))
 	// we only reset the non-default fields to avoid removing the base
 	// information (name, filename, etc)
-	ndf := laser.NonDefaultFields(se)
+	ndf := reflectx.NonDefaultFields(se)
 	for f := range ndf {
 		rf := npv.FieldByName(f)
 		rf.Set(reflect.Zero(rf.Type()))
@@ -167,7 +167,7 @@ func ResetAllSettings() error { //types:add
 // If they are not already saved, it saves them. It process their `default:` struct
 // tags in addition to calling their [Settings.Default] method.
 func LoadSettings(se Settings) error {
-	errors.Log(laser.SetFromDefaultTags(se))
+	errors.Log(reflectx.SetFromDefaultTags(se))
 	se.Defaults()
 	err := OpenSettings(se)
 	// we always apply the settings even if we can't open them

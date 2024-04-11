@@ -21,7 +21,7 @@ import (
 
 	"log/slog"
 
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/vgpu/vkinit"
 	vk "github.com/goki/vulkan"
 )
@@ -468,7 +468,7 @@ func (gp *GPU) NewGraphicsSystem(name string, dev *Device) *System {
 // PropertiesString returns a human-readable summary of the GPU properties.
 func (gp *GPU) PropertiesString(print bool) string {
 	ps := "\n\n######## GPU Properties\n"
-	prs := laser.StringJSON(&gp.GPUProperties)
+	prs := reflectx.StringJSON(&gp.GPUProperties)
 	devnm := `  "DeviceName": `
 	ps += prs[:strings.Index(prs, devnm)]
 	ps += devnm + string(gp.GPUProperties.DeviceName[:]) + "\n"

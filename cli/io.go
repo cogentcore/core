@@ -10,7 +10,7 @@ import (
 
 	"cogentcore.org/core/gox/dirs"
 	"cogentcore.org/core/iox/tomlx"
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 )
 
 // OpenWithIncludes reads the config struct from the given config file
@@ -66,7 +66,7 @@ func OpenFS(cfg any, fsys fs.FS, file string) error {
 
 // Save writes the given config object to the given file.
 // It only saves the non-default fields of the given object,
-// as specified by [laser.NonDefaultFields].
+// as specified by [reflectx.NonDefaultFields].
 func Save(cfg any, file string) error {
-	return tomlx.Save(laser.NonDefaultFields(cfg), file)
+	return tomlx.Save(reflectx.NonDefaultFields(cfg), file)
 }

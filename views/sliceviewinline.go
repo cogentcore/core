@@ -11,7 +11,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 )
@@ -83,8 +83,8 @@ func (sv *SliceViewInline) SetStyles() {
 					}
 					vpath = JoinViewPath(sv.ViewPath, newPath)
 				} else {
-					elType := laser.NonPtrType(reflect.TypeOf(sv.Slice).Elem().Elem())
-					title = "Slice of " + laser.NonPtrType(elType).Name()
+					elType := reflectx.NonPtrType(reflect.TypeOf(sv.Slice).Elem().Elem())
+					title = "Slice of " + reflectx.NonPtrType(elType).Name()
 				}
 				d := core.NewBody().AddTitle(title)
 				NewSliceView(d).SetViewPath(vpath).SetSlice(sv.Slice)
@@ -100,7 +100,7 @@ func (sv *SliceViewInline) SetStyles() {
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children to represent this slice
 func (sv *SliceViewInline) SetSlice(sl any) *SliceViewInline {
-	if laser.AnyIsNil(sl) {
+	if reflectx.AnyIsNil(sl) {
 		sv.Slice = nil
 		return sv
 	}
@@ -112,7 +112,7 @@ func (sv *SliceViewInline) SetSlice(sl any) *SliceViewInline {
 	}
 	if newslc {
 		sv.Slice = sl
-		sv.IsArray = laser.NonPtrType(reflect.TypeOf(sl)).Kind() == reflect.Array
+		sv.IsArray = reflectx.NonPtrType(reflect.TypeOf(sl)).Kind() == reflect.Array
 		sv.IsFixedLen = false
 		if sv.SliceValue != nil {
 			_, sv.IsFixedLen = sv.SliceValue.Tag("fixed-len")
@@ -124,7 +124,7 @@ func (sv *SliceViewInline) SetSlice(sl any) *SliceViewInline {
 
 func (sv *SliceViewInline) Config() {
 	sv.DeleteChildren()
-	if laser.AnyIsNil(sv.Slice) {
+	if reflectx.AnyIsNil(sv.Slice) {
 		sv.ConfigSize = 0
 		return
 	}
@@ -132,12 +132,12 @@ func (sv *SliceViewInline) Config() {
 	// always start fresh!
 	sv.Values = make([]Value, 0)
 
-	sl := laser.NonPtrValue(laser.OnePtrUnderlyingValue(reflect.ValueOf(sv.Slice)))
+	sl := reflectx.NonPtrValue(reflectx.OnePtrUnderlyingValue(reflect.ValueOf(sv.Slice)))
 	sv.ConfigSize = sl.Len()
 
 	sz := min(sl.Len(), core.SystemSettings.SliceInlineLength)
 	for i := 0; i < sz; i++ {
-		val := laser.OnePtrUnderlyingValue(sl.Index(i)) // deal with pointer lists
+		val := reflectx.OnePtrUnderlyingValue(sl.Index(i)) // deal with pointer lists
 		vv := ToValue(val.Interface(), "")
 		vv.SetSliceValue(val, sv.Slice, i, sv.ViewPath)
 		vtyp := vv.WidgetType()
@@ -208,7 +208,7 @@ func (sv *SliceViewInline) SliceNewAt(idx int) {
 	if sv.IsArray || sv.IsFixedLen {
 		return
 	}
-	laser.SliceNewAt(sv.Slice, idx)
+	reflectx.SliceNewAt(sv.Slice, idx)
 
 	sv.SetChanged()
 	sv.Update()
@@ -219,7 +219,7 @@ func (sv *SliceViewInline) SliceDeleteAt(idx int) {
 	if sv.IsArray || sv.IsFixedLen {
 		return
 	}
-	laser.SliceDeleteAt(sv.Slice, idx)
+	reflectx.SliceDeleteAt(sv.Slice, idx)
 
 	sv.SetChanged()
 	sv.Update()
@@ -245,10 +245,10 @@ func (sv *SliceViewInline) UpdateValues() {
 }
 
 func (sv *SliceViewInline) SliceSizeChanged() bool {
-	if laser.AnyIsNil(sv.Slice) {
+	if reflectx.AnyIsNil(sv.Slice) {
 		return sv.ConfigSize != 0
 	}
-	sl := laser.NonPtrValue(laser.OnePtrUnderlyingValue(reflect.ValueOf(sv.Slice)))
+	sl := reflectx.NonPtrValue(reflectx.OnePtrUnderlyingValue(reflect.ValueOf(sv.Slice)))
 	return sv.ConfigSize != sl.Len()
 }
 

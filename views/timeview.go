@@ -13,7 +13,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 )
@@ -368,7 +368,7 @@ func (v *TimeValue) Update() {
 
 // TimeValue decodes the value into a *time.Time value, also handling the [fileinfo.FileTime] case.
 func (v *TimeValue) TimeValue() *time.Time {
-	tmi := laser.PtrValue(v.Value).Interface()
+	tmi := reflectx.PtrValue(v.Value).Interface()
 	switch v := tmi.(type) {
 	case *time.Time:
 		return v
@@ -403,14 +403,14 @@ func (v *DurationValue) Config() {
 	ch = core.NewChooser(v.Widget, "unit").SetTooltip("The unit of time").SetItems(units...)
 	ch.OnChange(func(e events.Event) {
 		// we update the value to fit the unit
-		npv := laser.NonPtrValue(v.Value)
+		npv := reflectx.NonPtrValue(v.Value)
 		dur := npv.Interface().(time.Duration)
 		sp.SetValue(float32(dur) / float32(durationUnitsMap[ch.CurrentItem.Value.(string)]))
 	})
 }
 
 func (v *DurationValue) Update() {
-	npv := laser.NonPtrValue(v.Value)
+	npv := reflectx.NonPtrValue(v.Value)
 	dur := npv.Interface().(time.Duration)
 	un := "seconds"
 	undur := time.Duration(0)

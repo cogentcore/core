@@ -16,7 +16,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
@@ -172,7 +172,7 @@ func (sv *StructView) FieldTags(fld reflect.StructField) reflect.StructTag {
 // ConfigStructGrid configures the StructGrid for the current struct.
 // returns true if any fields changed.
 func (sv *StructView) ConfigStructGrid() bool {
-	if laser.AnyIsNil(sv.Struct) {
+	if reflectx.AnyIsNil(sv.Struct) {
 		return false
 	}
 	sc := true
@@ -201,7 +201,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 		return true
 	}
 
-	laser.FlatFieldsValueFuncIf(sv.Struct,
+	reflectx.FlatFieldsValueFuncIf(sv.Struct,
 		func(stru any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 			return shouldShow(field, sv.Struct)
 		},
@@ -214,7 +214,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 			}
 			if vwtag == "add-fields" && field.Type.Kind() == reflect.Struct {
 				fvalp := fieldVal.Addr().Interface()
-				laser.FlatFieldsValueFuncIf(fvalp,
+				reflectx.FlatFieldsValueFuncIf(fvalp,
 					func(stru any, typ reflect.Type, sfield reflect.StructField, fieldVal reflect.Value) bool {
 						return shouldShow(sfield, fvalp)
 					},
@@ -284,7 +284,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 		if hasDef {
 			lbl.Style(func(s *styles.Style) {
 				dtag, _ := vv.Tag("default")
-				isDef, _ := StructFieldIsDef(dtag, vv.Val().Interface(), laser.NonPtrValue(vv.Val()).Kind())
+				isDef, _ := StructFieldIsDef(dtag, vv.Val().Interface(), reflectx.NonPtrValue(vv.Val()).Kind())
 				dcr := "(Double click to reset to default) "
 				if !isDef {
 					s.Color = colors.C(colors.Scheme.Primary.Base)
@@ -298,12 +298,12 @@ func (sv *StructView) ConfigStructGrid() bool {
 			})
 			lbl.OnDoubleClick(func(e events.Event) {
 				dtag, _ := vv.Tag("default")
-				isDef, _ := StructFieldIsDef(dtag, vv.Val().Interface(), laser.NonPtrValue(vv.Val()).Kind())
+				isDef, _ := StructFieldIsDef(dtag, vv.Val().Interface(), reflectx.NonPtrValue(vv.Val()).Kind())
 				if isDef {
 					return
 				}
 				e.SetHandled()
-				err := laser.SetFromDefaultTag(vv.Val(), dtag)
+				err := reflectx.SetFromDefaultTag(vv.Val(), dtag)
 				if err != nil {
 					core.ErrorSnackbar(lbl, err, "Error setting default value")
 				} else {
@@ -328,7 +328,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 			vv.OnChange(func(e events.Event) {
 				sv.UpdateFieldAction()
 				// note: updating vv here is redundant -- relevant field will have already updated
-				if !laser.KindIsBasic(laser.NonPtrValue(vv.Val()).Kind()) {
+				if !reflectx.KindIsBasic(reflectx.NonPtrValue(vv.Val()).Kind()) {
 					if updtr, ok := sv.Struct.(core.Updater); ok {
 						updtr.Update()
 					}
@@ -391,20 +391,20 @@ func StructFieldIsDef(defs string, valPtr any, kind reflect.Kind) (bool, string)
 		dtags := strings.Split(defs, ":")
 		lo, _ := strconv.ParseFloat(dtags[0], 64)
 		hi, _ := strconv.ParseFloat(dtags[1], 64)
-		vf, err := laser.ToFloat(valPtr)
+		vf, err := reflectx.ToFloat(valPtr)
 		if err != nil {
-			slog.Error("views.StructFieldIsDef: error parsing struct field numerical range def tag", "type", laser.NonPtrType(reflect.TypeOf(valPtr)), "def", defs, "err", err)
+			slog.Error("views.StructFieldIsDef: error parsing struct field numerical range def tag", "type", reflectx.NonPtrType(reflect.TypeOf(valPtr)), "def", defs, "err", err)
 			return true, defStr
 		}
 		return lo <= vf && vf <= hi, defStr
 	}
-	v := laser.NonPtrValue(reflect.ValueOf(valPtr))
+	v := reflectx.NonPtrValue(reflect.ValueOf(valPtr))
 	dtags := strings.Split(defs, ",")
 	if strings.ContainsAny(defs, "{[") { // complex type, so don't split on commas
 		dtags = []string{defs}
 	}
 	for _, def := range dtags {
-		def = laser.FormatDefault(def)
+		def = reflectx.FormatDefault(def)
 		if def == "" {
 			if v.IsZero() {
 				return true, defStr
@@ -412,7 +412,7 @@ func StructFieldIsDef(defs string, valPtr any, kind reflect.Kind) (bool, string)
 			continue
 		}
 		dv := reflect.New(v.Type())
-		err := laser.SetRobust(dv.Interface(), def)
+		err := reflectx.SetRobust(dv.Interface(), def)
 		if err != nil {
 			slog.Error("views.StructFieldIsDef: error parsing struct field def tag", "type", v.Type(), "def", def, "err", err)
 			return true, defStr
@@ -451,7 +451,7 @@ type StructFieldVals struct {
 // expanded, and the field name represented by dots path separators.
 func StructNonDefFields(structPtr any, path string) []StructFieldVals {
 	var flds []StructFieldVals
-	laser.FlatFieldsValueFunc(structPtr, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+	reflectx.FlatFieldsValueFunc(structPtr, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		vvp := fieldVal.Addr()
 		dtag, got := field.Tag.Lookup("default")
 		if field.Type.Kind() == reflect.Struct && (!got || dtag == "") {
@@ -493,7 +493,7 @@ func StructNonDefFieldsStr(structPtr any, path string) string {
 	for _, fld := range flds {
 		pth := fld.Path
 		fnm := fld.Field.Name
-		val := laser.ToStringPrec(fld.Val.Interface(), 6)
+		val := reflectx.ToStringPrec(fld.Val.Interface(), 6)
 		dfs := fld.Defs
 		if len(pth) > 0 {
 			fnm = pth + "." + fnm

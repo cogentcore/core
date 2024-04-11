@@ -9,8 +9,8 @@ import (
 	"log"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/laser"
 	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/reflectx"
 )
 
 // Tiling are the texture tiling parameters
@@ -94,7 +94,7 @@ func (mt *Material) Disconnect() {
 }
 
 func (mt Material) String() string {
-	return laser.StringJSON(mt)
+	return reflectx.StringJSON(mt)
 }
 
 // IsTransparent returns true if texture says it is, or if color has alpha < 255

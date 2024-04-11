@@ -27,9 +27,9 @@ import (
 	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/laser"
 	"cogentcore.org/core/mat32"
 	"cogentcore.org/core/mimedata"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
@@ -469,7 +469,7 @@ func (sv *SliceViewBase) SetSliceBase() {
 // Note: it is important to at least set an empty slice of
 // the desired type at the start to enable initial configuration.
 func (sv *SliceViewBase) SetSlice(sl any) *SliceViewBase {
-	if laser.AnyIsNil(sl) {
+	if reflectx.AnyIsNil(sl) {
 		sv.Slice = nil
 		return sv
 	}
@@ -487,25 +487,25 @@ func (sv *SliceViewBase) SetSlice(sl any) *SliceViewBase {
 
 	sv.SetSliceBase()
 	sv.Slice = sl
-	sv.SliceNPVal = laser.NonPtrValue(reflect.ValueOf(sv.Slice))
-	isArray := laser.NonPtrType(reflect.TypeOf(sl)).Kind() == reflect.Array
+	sv.SliceNPVal = reflectx.NonPtrValue(reflect.ValueOf(sv.Slice))
+	isArray := reflectx.NonPtrType(reflect.TypeOf(sl)).Kind() == reflect.Array
 	sv.SetFlag(isArray, SliceViewIsArray)
 	// make sure elements aren't nil to prevent later panics
 	for i := 0; i < sv.SliceNPVal.Len(); i++ {
 		val := sv.SliceNPVal.Index(i)
 		k := val.Kind()
 		if (k == reflect.Chan || k == reflect.Func || k == reflect.Interface || k == reflect.Map || k == reflect.Pointer || k == reflect.Slice) && val.IsNil() {
-			val.Set(reflect.New(laser.NonPtrType(val.Type())))
+			val.Set(reflect.New(reflectx.NonPtrType(val.Type())))
 		}
 	}
-	sv.ElVal = laser.SliceElValue(sl)
+	sv.ElVal = reflectx.SliceElValue(sl)
 	sv.Update()
 	return sv
 }
 
 // IsNil returns true if the Slice is nil
 func (sv *SliceViewBase) IsNil() bool {
-	return laser.AnyIsNil(sv.Slice)
+	return reflectx.AnyIsNil(sv.Slice)
 }
 
 // RowFromEventPos returns the widget row, slice index, and
@@ -689,7 +689,7 @@ func (sv *SliceViewBase) ConfigRows() {
 		ridx := i * nWidgPerRow
 		var val reflect.Value
 		if si < sv.SliceSize {
-			val = laser.OnePtrUnderlyingValue(sv.SliceNPVal.Index(si)) // deal with pointer lists
+			val = reflectx.OnePtrUnderlyingValue(sv.SliceNPVal.Index(si)) // deal with pointer lists
 		} else {
 			val = sv.ElVal
 		}
@@ -730,11 +730,11 @@ func (sv *SliceViewBase) ConfigRows() {
 		if i == 0 {
 			sv.MaxWidth = 0
 			_, isString := vv.(*StringValue)
-			npv := laser.NonPtrValue(val)
+			npv := reflectx.NonPtrValue(val)
 			if isString && sv.SliceSize > 0 && npv.Kind() == reflect.String {
 				mxw := 0
 				for rw := 0; rw < sv.SliceSize; rw++ {
-					val := laser.OnePtrUnderlyingValue(sv.SliceNPVal.Index(rw)).Elem()
+					val := reflectx.OnePtrUnderlyingValue(sv.SliceNPVal.Index(rw)).Elem()
 					str := val.String()
 					mxw = max(mxw, len(str))
 				}
@@ -798,7 +798,7 @@ func (sv *SliceViewBase) UpdateWidgets() {
 		}
 		w.SetState(invis, states.Invisible)
 		if si < sv.SliceSize {
-			val := laser.OnePtrUnderlyingValue(sv.SliceNPVal.Index(si)) // deal with pointer lists
+			val := reflectx.OnePtrUnderlyingValue(sv.SliceNPVal.Index(si)) // deal with pointer lists
 			vv.SetSliceValue(val, sv.Slice, si, sv.ViewPath)
 			vv.SetReadOnly(sv.IsReadOnly())
 			vv.Update()
@@ -846,7 +846,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 
 	sv.SliceNewAtSelect(idx)
 
-	sltyp := laser.SliceElType(sv.Slice) // has pointer if it is there
+	sltyp := reflectx.SliceElType(sv.Slice) // has pointer if it is there
 	isNode := tree.IsNode(sltyp)
 	slptr := sltyp.Kind() == reflect.Ptr
 
@@ -877,7 +877,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 			}
 		}
 	} else {
-		nval := reflect.New(laser.NonPtrType(sltyp)) // make the concrete el
+		nval := reflect.New(reflectx.NonPtrType(sltyp)) // make the concrete el
 		if !slptr {
 			nval = nval.Elem() // use concrete value
 		}
@@ -892,7 +892,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 		idx = sz
 	}
 
-	sv.SliceNPVal = laser.NonPtrValue(reflect.ValueOf(sv.Slice)) // need to update after changes
+	sv.SliceNPVal = reflectx.NonPtrValue(reflect.ValueOf(sv.Slice)) // need to update after changes
 
 	sv.This().(SliceViewer).UpdateSliceSize()
 
@@ -953,7 +953,7 @@ func (sv *SliceViewBase) SliceDeleteAt(i int) {
 
 	sv.SliceDeleteAtSelect(i)
 
-	laser.SliceDeleteAt(sv.Slice, i)
+	reflectx.SliceDeleteAt(sv.Slice, i)
 
 	sv.This().(SliceViewer).UpdateSliceSize()
 
@@ -965,7 +965,7 @@ func (sv *SliceViewBase) SliceDeleteAt(i int) {
 
 // ConfigToolbar configures a [core.Toolbar] for this view
 func (sv *SliceViewBase) ConfigToolbar(tb *core.Toolbar) {
-	if laser.AnyIsNil(sv.Slice) {
+	if reflectx.AnyIsNil(sv.Slice) {
 		return
 	}
 	if sv.Is(SliceViewIsArray) || sv.IsReadOnly() {
@@ -989,7 +989,7 @@ func (sv *SliceViewBase) SliceVal(idx int) any {
 		fmt.Printf("views.SliceViewBase: slice index out of range: %v\n", idx)
 		return nil
 	}
-	val := laser.OnePtrUnderlyingValue(sv.SliceNPVal.Index(idx)) // deal with pointer lists
+	val := reflectx.OnePtrUnderlyingValue(sv.SliceNPVal.Index(idx)) // deal with pointer lists
 	vali := val.Interface()
 	return vali
 }
@@ -1140,10 +1140,10 @@ func (sv *SliceViewBase) SelectValue(val string) bool {
 // SliceIndexByValue searches for first index that contains given value in slice
 // -- returns false if not found
 func SliceIndexByValue(slc any, fldVal any) (int, bool) {
-	svnp := laser.NonPtrValue(reflect.ValueOf(slc))
+	svnp := reflectx.NonPtrValue(reflect.ValueOf(slc))
 	sz := svnp.Len()
 	for idx := 0; idx < sz; idx++ {
-		rval := laser.NonPtrValue(svnp.Index(idx))
+		rval := reflectx.NonPtrValue(svnp.Index(idx))
 		if rval.Interface() == fldVal {
 			return idx, true
 		}
@@ -1695,7 +1695,7 @@ func (sv *SliceViewBase) PasteAtIndex(md mimedata.Mimes, idx int) {
 		idx++
 	}
 
-	sv.SliceNPVal = laser.NonPtrValue(reflect.ValueOf(sv.Slice)) // need to update after changes
+	sv.SliceNPVal = reflectx.NonPtrValue(reflect.ValueOf(sv.Slice)) // need to update after changes
 
 	sv.SetChanged()
 	sv.SelectIndexAction(idx, events.SelectOne)

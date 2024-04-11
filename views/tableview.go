@@ -15,7 +15,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
@@ -133,7 +133,7 @@ func (tv *TableView) StyleValueWidget(w core.Widget, s *styles.Style, row, col i
 // SetSlice sets the source slice that we are viewing -- rebuilds the children
 // to represent this slice (does Update if already viewing).
 func (tv *TableView) SetSlice(sl any) *TableView {
-	if laser.AnyIsNil(sl) {
+	if reflectx.AnyIsNil(sl) {
 		tv.Slice = nil
 		return tv
 	}
@@ -151,7 +151,7 @@ func (tv *TableView) SetSlice(sl any) *TableView {
 		slog.Error("TableView requires that you pass a pointer to a slice of struct elements, but ptr doesn't point to a slice", "type", slpTyp.Elem())
 		return tv
 	}
-	eltyp := laser.NonPtrType(laser.SliceElType(sl))
+	eltyp := reflectx.NonPtrType(reflectx.SliceElType(sl))
 	if eltyp.Kind() != reflect.Struct {
 		slog.Error("TableView requires that you pass a slice of struct elements, but type is not a Struct", "type", eltyp.String())
 		return tv
@@ -159,8 +159,8 @@ func (tv *TableView) SetSlice(sl any) *TableView {
 
 	tv.SetSliceBase()
 	tv.Slice = sl
-	tv.SliceNPVal = laser.NonPtrValue(reflect.ValueOf(tv.Slice))
-	tv.ElVal = laser.OnePtrValue(laser.SliceElValue(sl))
+	tv.SliceNPVal = reflectx.NonPtrValue(reflect.ValueOf(tv.Slice))
+	tv.ElVal = reflectx.OnePtrValue(reflectx.SliceElValue(sl))
 	tv.CacheVisFields()
 	tv.Update()
 	return tv
@@ -169,7 +169,7 @@ func (tv *TableView) SetSlice(sl any) *TableView {
 // StructType sets the StruType and returns the type of the struct within the
 // slice -- this is a non-ptr type even if slice has pointers to structs
 func (tv *TableView) StructType() reflect.Type {
-	tv.StruType = laser.NonPtrType(laser.SliceElType(tv.Slice))
+	tv.StruType = reflectx.NonPtrType(reflectx.SliceElType(tv.Slice))
 	return tv.StruType
 }
 
@@ -196,7 +196,7 @@ func (tv *TableView) CacheVisFields() {
 			return fld.Tag.Get("view") != "-"
 		}
 	}
-	laser.FlatFieldsTypeFuncIf(styp,
+	reflectx.FlatFieldsTypeFuncIf(styp,
 		func(typ reflect.Type, fld reflect.StructField) bool {
 			return shouldShow(fld)
 		},
@@ -348,7 +348,7 @@ func (tv *TableView) ConfigRows() {
 		ridx := i * nWidgPerRow
 		var val reflect.Value
 		if si < tv.SliceSize {
-			val = laser.OnePtrUnderlyingValue(tv.SliceNPVal.Index(si)) // deal with pointer lists
+			val = reflectx.OnePtrUnderlyingValue(tv.SliceNPVal.Index(si)) // deal with pointer lists
 		} else {
 			val = tv.ElVal
 		}
@@ -407,7 +407,7 @@ func (tv *TableView) ConfigRows() {
 				if !isicon && fval.Kind() == reflect.String {
 					mxw := 0
 					for rw := 0; rw < tv.SliceSize; rw++ {
-						sval := laser.OnePtrUnderlyingValue(tv.SliceNPVal.Index(rw))
+						sval := reflectx.OnePtrUnderlyingValue(tv.SliceNPVal.Index(rw))
 						elem := sval.Elem()
 						if !elem.IsValid() {
 							continue
@@ -498,7 +498,7 @@ func (tv *TableView) UpdateWidgets() {
 
 			var val reflect.Value
 			if !invis {
-				val = laser.OnePtrUnderlyingValue(tv.SliceNPVal.Index(si)) // deal with pointer lists
+				val = reflectx.OnePtrUnderlyingValue(tv.SliceNPVal.Index(si)) // deal with pointer lists
 				if val.IsZero() {
 					val = tv.ElVal
 				}
@@ -547,7 +547,7 @@ func (tv *TableView) SliceNewAt(idx int) {
 	tv.ViewMuLock()
 
 	tv.SliceNewAtSelect(idx)
-	laser.SliceNewAt(tv.Slice, idx)
+	reflectx.SliceNewAt(tv.Slice, idx)
 	if idx < 0 {
 		idx = tv.SliceSize
 	}
@@ -570,7 +570,7 @@ func (tv *TableView) SliceDeleteAt(idx int) {
 
 	tv.SliceDeleteAtSelect(idx)
 
-	laser.SliceDeleteAt(tv.Slice, idx)
+	reflectx.SliceDeleteAt(tv.Slice, idx)
 
 	tv.This().(SliceViewer).UpdateSliceSize()
 
@@ -586,7 +586,7 @@ func (tv *TableView) SortSlice() {
 		return
 	}
 	rawIndex := tv.VisFields[tv.SortIndex].Index
-	laser.StructSliceSort(tv.Slice, rawIndex, !tv.SortDesc)
+	reflectx.StructSliceSort(tv.Slice, rawIndex, !tv.SortDesc)
 }
 
 // SortSliceAction sorts the slice for given field index -- toggles ascending
@@ -738,9 +738,9 @@ func (tv *TableView) SelectFieldVal(fld, val string) bool {
 // StructSliceIndexByValue searches for first index that contains given value in field of
 // given name.
 func StructSliceIndexByValue(struSlice any, fldName string, fldVal any) (int, error) {
-	svnp := laser.NonPtrValue(reflect.ValueOf(struSlice))
+	svnp := reflectx.NonPtrValue(reflect.ValueOf(struSlice))
 	sz := svnp.Len()
-	struTyp := laser.NonPtrType(reflect.TypeOf(struSlice).Elem().Elem())
+	struTyp := reflectx.NonPtrType(reflect.TypeOf(struSlice).Elem().Elem())
 	fld, ok := struTyp.FieldByName(fldName)
 	if !ok {
 		err := fmt.Errorf("core.StructSliceRowByValue: field name: %v not found", fldName)
@@ -749,7 +749,7 @@ func StructSliceIndexByValue(struSlice any, fldName string, fldVal any) (int, er
 	}
 	fldIndex := fld.Index
 	for idx := 0; idx < sz; idx++ {
-		rval := laser.OnePtrUnderlyingValue(svnp.Index(idx))
+		rval := reflectx.OnePtrUnderlyingValue(svnp.Index(idx))
 		fval := rval.Elem().FieldByIndex(fldIndex)
 		if !fval.IsValid() {
 			continue
@@ -765,9 +765,9 @@ func (tv *TableView) EditIndex(idx int) {
 	if idx < 0 || idx >= tv.SliceNPVal.Len() {
 		return
 	}
-	val := laser.OnePtrUnderlyingValue(tv.SliceNPVal.Index(idx))
+	val := reflectx.OnePtrUnderlyingValue(tv.SliceNPVal.Index(idx))
 	stru := val.Interface()
-	tynm := laser.NonPtrType(val.Type()).Name()
+	tynm := reflectx.NonPtrType(val.Type()).Name()
 	lbl := core.ToLabel(stru)
 	if lbl != "" {
 		tynm += ": " + lbl
