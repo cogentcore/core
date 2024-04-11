@@ -22,19 +22,19 @@ import (
 // TheWindowGeometrySaver is the manager of window geometry settings
 var TheWindowGeometrySaver = WindowGeometrySaver{}
 
-// WindowGeometry is the data structure for recording the window geometry
-// by window name and screen name.
-type WindowGeometry map[string]map[string]RenderWindowGeometry
+// WindowGeometries is the data structure for recording the window
+// geometries by window name and screen name.
+type WindowGeometries map[string]map[string]WindowGeometry
 
-// WindowGeometrySaver records window geometry in a persistent file,
+// WindowGeometrySaver records window geometries in a persistent file,
 // which is then used when opening new windows to restore.
 type WindowGeometrySaver struct {
 
 	// the full set of window geometries
-	Geometries WindowGeometry
+	Geometries WindowGeometries
 
 	// temporary cached geometries -- saved to Geometries after SaveDelay
-	Cache WindowGeometry
+	Cache WindowGeometries
 
 	// base name of the settings file in Cogent Core settings directory
 	Filename string
@@ -61,7 +61,7 @@ type WindowGeometrySaver struct {
 // Init does initialization if not yet initialized
 func (mgr *WindowGeometrySaver) Init() {
 	if mgr.Geometries == nil {
-		mgr.Geometries = make(WindowGeometry, 1000)
+		mgr.Geometries = make(WindowGeometries, 1000)
 		mgr.ResetCache()
 		mgr.Filename = "window-geometry"
 		mgr.LockSleep = 100 * time.Millisecond
@@ -71,7 +71,7 @@ func (mgr *WindowGeometrySaver) Init() {
 
 // ResetCache resets the cache -- call under mutex
 func (mgr *WindowGeometrySaver) ResetCache() {
-	mgr.Cache = make(WindowGeometry)
+	mgr.Cache = make(WindowGeometries)
 }
 
 // LockFile attempts to create the window geometry lock file
@@ -177,7 +177,7 @@ func (mgr *WindowGeometrySaver) Open() error {
 	}
 	if oldFmt {
 		log.Printf("WindowGeometry: resetting prefs for new format\n")
-		mgr.Geometries = make(WindowGeometry, 1000)
+		mgr.Geometries = make(WindowGeometries, 1000)
 		mgr.Save() // overwrite
 	}
 	return err
@@ -261,12 +261,12 @@ func (mgr *WindowGeometrySaver) RecordPref(win *RenderWindow) {
 
 	winName := mgr.WinName(win.Title)
 	sc := win.SystemWindow.Screen()
-	wgr := RenderWindowGeometry{DPI: win.LogicalDPI(), DPR: sc.DevicePixelRatio, Fullscreen: win.SystemWindow.Is(system.Fullscreen)}
+	wgr := WindowGeometry{DPI: win.LogicalDPI(), DPR: sc.DevicePixelRatio, Fullscreen: win.SystemWindow.Is(system.Fullscreen)}
 	wgr.SetPos(pos)
 	wgr.SetSize(wsz)
 
 	if mgr.Cache[winName] == nil {
-		mgr.Cache[winName] = make(map[string]RenderWindowGeometry)
+		mgr.Cache[winName] = make(map[string]WindowGeometry)
 	}
 	mgr.Cache[winName][sc.Name] = wgr
 	if mgr.saveTimer == nil {
@@ -317,7 +317,7 @@ func (mgr *WindowGeometrySaver) SaveCached() {
 				continue
 			}
 			if mgr.Geometries[winName] == nil {
-				mgr.Geometries[winName] = make(map[string]RenderWindowGeometry)
+				mgr.Geometries[winName] = make(map[string]WindowGeometry)
 			}
 			mgr.Geometries[winName][sc.Name] = wgr
 			if DebugSettings.WinGeomTrace {
@@ -333,7 +333,7 @@ func (mgr *WindowGeometrySaver) SaveCached() {
 // Pref returns an existing preference for given window name, for given screen.
 // if the window name has a colon, only the part prior to the colon is used.
 // if no saved pref is available for that screen, nil is returned.
-func (mgr *WindowGeometrySaver) Pref(winName string, scrn *system.Screen) *RenderWindowGeometry {
+func (mgr *WindowGeometrySaver) Pref(winName string, scrn *system.Screen) *WindowGeometry {
 	mgr.Mu.RLock()
 	defer mgr.Mu.RUnlock()
 
@@ -376,7 +376,7 @@ func (mgr *WindowGeometrySaver) DeleteAll() {
 	pdir := TheApp.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, mgr.Filename+".json")
 	os.Remove(pnm)
-	mgr.Geometries = make(WindowGeometry, 1000)
+	mgr.Geometries = make(WindowGeometries, 1000)
 }
 
 // RestoreAll restores size and position of all windows, for current screen.
@@ -403,8 +403,8 @@ func (mgr *WindowGeometrySaver) RestoreAll() {
 	}
 }
 
-// RenderWindowGeometry records the geometry settings used for a given window
-type RenderWindowGeometry struct {
+// WindowGeometry records the geometry settings used for a given window
+type WindowGeometry struct {
 	DPI        float32
 	DPR        float32
 	SX         int
@@ -414,26 +414,26 @@ type RenderWindowGeometry struct {
 	Fullscreen bool
 }
 
-func (wg *RenderWindowGeometry) Size() image.Point {
+func (wg *WindowGeometry) Size() image.Point {
 	return image.Point{wg.SX, wg.SY}
 }
 
-func (wg *RenderWindowGeometry) SetSize(sz image.Point) {
+func (wg *WindowGeometry) SetSize(sz image.Point) {
 	wg.SX = sz.X
 	wg.SY = sz.Y
 }
 
-func (wg *RenderWindowGeometry) Pos() image.Point {
+func (wg *WindowGeometry) Pos() image.Point {
 	return image.Point{wg.PX, wg.PY}
 }
 
-func (wg *RenderWindowGeometry) SetPos(ps image.Point) {
+func (wg *WindowGeometry) SetPos(ps image.Point) {
 	wg.PX = ps.X
 	wg.PY = ps.Y
 }
 
 // ConstrainGeom constrains geometry based on screen params
-func (wg *RenderWindowGeometry) ConstrainGeom(sc *system.Screen) {
+func (wg *WindowGeometry) ConstrainGeom(sc *system.Screen) {
 	sz, pos := sc.ConstrainWinGeom(image.Point{wg.SX, wg.SY}, image.Point{wg.PX, wg.PY})
 	wg.SX = sz.X
 	wg.SY = sz.Y

@@ -70,15 +70,19 @@ Try to make these packages as independent as possible; don't have them depend on
 This is what we look for, in considering whether to import a given package, so it is what we should provide.
 
 Examples:
-* [[colors]] pulled out of gi
-* [[laser]] pulled reflection stuff out of kit
+* [[colors]] pulled out of core
+* [[laser]] pulled reflection stuff out of tree
 * [[cliview]] separated from [[cli]] to keep cli free of core dependency
 
 # Use function libraries instead of putting lots of methods on a type
 
 Go uses the `strings` package instead of adding a lot of builtin methods on the `string` type.  The advantages are:
-* More flexibility to add and change impls -- can even have a replacement impl with the same signatures.
+* More flexibility to add and change implementations; can even have a replacement implementation with the same signatures.
 * Multiple different such packages can be used for different subsets of functionality (e.g., regex, unicode etc are all separate).
 * Type itself remains small and only handles most basic functionality -- presumably this works better for checking Interface implementation etc.
 
 Consistent with this approach, [[colors]] implements functions operating on the standard `color.RGBA` data type, instead of the many methods we defined on `gist.Color` in V1.
+
+# Collections are plural
+
+Packages and types whose primary purpose is to describe/hold a collection of something should be named in the plural. For example, [[events]] holds a collection of different event types, so it has a plural name. Also, per this rule, enum types are almost always named in the plural, as they describe a collection of possible values.
