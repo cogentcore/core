@@ -1,21 +1,21 @@
-# gti
+# types
 
-Package GTI provides general purpose type information for Go types, methods, functions and variables.
+Package types provides type information for Go types, methods, and functions.
 
 # Key functionality
 
-* generate tooltips for fields in struct views
+* Generate tooltips for fields in struct views
 
-* generate tooltips for functions in func buttons
+* Generate tooltips for functions in func buttons
 
-* in cli, command method docs and config field docs
+* In cli, generate command function docs and config field docs
 
-* in tree (optional) generate a new token of given type by name (for Unmarshal)
+* In tree (optional) generate a new token of given type by name
 
-* tree needs NameAndType, need to be able to use Type token to specify type.  Also for making a new child of given type.
+* Package tree needs type variables when making children
 
 # Notes
 
-* GTI is NOT Go ast because it doesn't store Type info for Fields, methods, etc.  There is no assumption that all types are processed -- only designated types.  It only records names, comments and directives.
+* It is NOT Go ast because it doesn't store type info for fields, methods, etc.  There is no assumption that all types are processed, only designated types.  It only records names, comments and directives.
 
 
