@@ -684,16 +684,6 @@ func (v *ValueData) SetSoloValue(val reflect.Value) {
 	v.Value = reflectx.PtrValue(val)
 }
 
-// SetSoloValueIface sets the value for a singleton standalone value
-// using an interface for the value -- you must pass a pointer.
-// for now, this cannot be a method because gopy doesn't find the
-// key comment below that tells it what to do with the interface
-// gopy:interface=handle
-func SetSoloValueIface(v *ValueData, val any) {
-	v.OwnKind = reflect.Invalid
-	v.Value = reflect.ValueOf(val)
-}
-
 // OwnerKind we have this one accessor b/c it is more useful for outside consumers vs. internal usage
 func (v *ValueData) OwnerKind() reflect.Kind {
 	return v.OwnKind

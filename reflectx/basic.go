@@ -19,44 +19,32 @@ import (
 	"cogentcore.org/core/gox/bools"
 )
 
-// Has convenience functions for converting any (e.g. properties) to given
-// types uses the "ok" bool mechanism to report failure -- are as robust and
-// general as possible.
-//
-// WARNING: these violate many of the type-safety features of Go but OTOH give
-// maximum robustness, appropriate for the world of end-user settable
-// properties, and deal with most common-sense cases, e.g., string <-> number,
-// etc.  nil values return !ok
-
-// AnyIsNil checks if an interface value is nil -- the interface itself could be
-// nil, or the value pointed to by the interface could be nil -- this checks
-// both, safely
-// gopy:interface=handle
-func AnyIsNil(it any) bool {
-	if it == nil {
+// AnyIsNil checks if an interface value is nil. The interface itself
+// could be nil, or the value pointed to by the interface could be nil.
+// This safely checks both.
+func AnyIsNil(v any) bool {
+	if v == nil {
 		return true
 	}
-	v := reflect.ValueOf(it)
-	vk := v.Kind()
+	rv := reflect.ValueOf(v)
+	vk := rv.Kind()
 	if vk == reflect.Ptr || vk == reflect.Interface || vk == reflect.Map || vk == reflect.Slice || vk == reflect.Func || vk == reflect.Chan {
-		return v.IsNil()
+		return rv.IsNil()
 	}
 	return false
 }
 
-// KindIsBasic returns true if the reflect.Kind is a basic, elemental
-// type such as Int, Float, etc
+// KindIsBasic returns whether the given [reflect.Kind] is a basic,
+// elemental type such as Int, Float, etc.
 func KindIsBasic(vk reflect.Kind) bool {
 	return vk >= reflect.Bool && vk <= reflect.Complex128
 }
 
 // ToBool robustly converts to a bool any basic elemental type
 // (including pointers to such) using a big type switch organized
-// for greatest efficiency. It tries the [cogentcore.org/core/gox/bools.Booler]
+// for greatest efficiency. It tries the [bools.Booler]
 // interface if not a bool type. It falls back on reflection when all
 // else fails.
-//
-//gopy:interface=handle
 func ToBool(v any) (bool, error) {
 	switch vt := v.(type) {
 	case bool:
@@ -213,8 +201,6 @@ func ToBool(v any) (bool, error) {
 // (including pointers to such) using a big type switch organized
 // for greatest efficiency, only falling back on reflection when all
 // else fails.
-//
-//gopy:interface=handle
 func ToInt(v any) (int64, error) {
 	switch vt := v.(type) {
 	case int:
@@ -374,8 +360,6 @@ func ToInt(v any) (int64, error) {
 // ToFloat robustly converts to a float64 any basic elemental type
 // (including pointers to such) using a big type switch organized for
 // greatest efficiency, only falling back on reflection when all else fails.
-//
-//gopy:interface=handle
 func ToFloat(v any) (float64, error) {
 	switch vt := v.(type) {
 	case float64:
@@ -533,8 +517,6 @@ func ToFloat(v any) (float64, error) {
 // ToFloat32 robustly converts to a float32 any basic elemental type
 // (including pointers to such) using a big type switch organized for
 // greatest efficiency, only falling back on reflection when all else fails.
-//
-//gopy:interface=handle
 func ToFloat32(v any) (float32, error) {
 	switch vt := v.(type) {
 	case float32:
@@ -698,8 +680,6 @@ func ToFloat32(v any) (float32, error) {
 // so there is no need for an error return value.
 //   - returns "nil" for any nil pointers
 //   - byte is converted as string(byte) not the decimal representation
-//
-//gopy:interface=handle
 func ToString(v any) string {
 	nilstr := "nil"
 	switch vt := v.(type) {
@@ -882,8 +862,6 @@ func ToString(v any) string {
 // nuisance random imprecision of actual floating point values due to the
 // fact that they are represented with binary bits.
 // Otherwise is identical to ToString for any other cases.
-//
-//gopy:interface=handle
 func ToStringPrec(v any, prec int) string {
 	nilstr := "nil"
 	switch vt := v.(type) {
@@ -945,8 +923,6 @@ func ToStringPrec(v any, prec int) string {
 // and can set a struct, slice or map from a JSON-formatted string from value.
 // Note that a map is _not_ reset prior to setting, whereas a slice length
 // is set to the source length and is thus equivalent to the source slice.
-//
-//gopy:interface=handle
 func SetRobust(to, frm any) error {
 	if sa, ok := to.(SetAnyer); ok {
 		err := sa.SetAny(frm)

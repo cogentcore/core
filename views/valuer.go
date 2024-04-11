@@ -81,8 +81,6 @@ func AddValue(val any, fun func() Value) {
 // can affect what [Value] is returned; see the Tags page in the Cogent Core Docs
 // to learn more. You should use [FieldToValue] when making a value in the context
 // of a broader struct owner.
-//
-//gopy:interface=handle
 func ToValue(val any, tags string) Value {
 	if val == nil {
 		return &NilValue{}
@@ -200,8 +198,6 @@ func ToValue(val any, tags string) Value {
 // using its type, tags, value, field name, and parent struct. It checks [FieldValuer]
 // before falling back on [ToValue], which you should use for values that are not struct
 // fields.
-//
-//gopy:interface=handle
 func FieldToValue(str any, field string, val any) Value {
 	if str == nil || field == "" {
 		return ToValue(val, "")
