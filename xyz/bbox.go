@@ -25,7 +25,7 @@ type BBox struct {
 }
 
 // SetBounds sets BBox from min, max and updates other factors based on that
-func (bb *BBox) SetBounds(min, max math32.Vec3) {
+func (bb *BBox) SetBounds(min, max math32.Vector3) {
 	bb.BBox.Set(&min, &max)
 	bb.UpdateFromBBox()
 }

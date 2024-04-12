@@ -39,33 +39,33 @@ func SRGBToLinear(sr float32) float32 {
 
 */
 
-// NewVec3Color returns a Vec3 from Go standard color.Color
+// NewVector3Color returns a Vector3 from Go standard color.Color
 // (R,G,B components only)
-func NewVec3Color(clr color.Color) Vec3 {
-	v3 := Vec3{}
+func NewVector3Color(clr color.Color) Vector3 {
+	v3 := Vector3{}
 	v3.SetColor(clr)
 	return v3
 }
 
 // SetColor sets from Go standard color.Color
 // (R,G,B components only)
-func (v *Vec3) SetColor(clr color.Color) {
+func (v *Vector3) SetColor(clr color.Color) {
 	r, g, b, _ := clr.RGBA()
 	v.X = float32(r) / 0xffff
 	v.Y = float32(g) / 0xffff
 	v.Z = float32(b) / 0xffff
 }
 
-// NewVec4Color returns a Vec4 from Go standard color.Color
+// NewVector4Color returns a Vector4 from Go standard color.Color
 // (full R,G,B,A components)
-func NewVec4Color(clr color.Color) Vec4 {
-	v4 := Vec4{}
+func NewVector4Color(clr color.Color) Vector4 {
+	v4 := Vector4{}
 	v4.SetColor(clr)
 	return v4
 }
 
-// SetColor sets a Vec4 from Go standard color.Color
-func (v *Vec4) SetColor(clr color.Color) {
+// SetColor sets a Vector4 from Go standard color.Color
+func (v *Vector4) SetColor(clr color.Color) {
 	r, g, b, a := clr.RGBA()
 	v.X = float32(r) / 0xffff
 	v.Y = float32(g) / 0xffff
@@ -74,8 +74,8 @@ func (v *Vec4) SetColor(clr color.Color) {
 }
 
 // SRGBFromLinear returns an SRGB color space value from a linear source
-func (v Vec3) SRGBFromLinear() Vec3 {
-	nv := Vec3{}
+func (v Vector3) SRGBFromLinear() Vector3 {
+	nv := Vector3{}
 	nv.X = SRGBFromLinear(v.X)
 	nv.Y = SRGBFromLinear(v.Y)
 	nv.Z = SRGBFromLinear(v.Z)
@@ -83,8 +83,8 @@ func (v Vec3) SRGBFromLinear() Vec3 {
 }
 
 // SRGBToLinear returns a linear color space value from a SRGB source
-func (v Vec3) SRGBToLinear() Vec3 {
-	nv := Vec3{}
+func (v Vector3) SRGBToLinear() Vector3 {
+	nv := Vector3{}
 	nv.X = SRGBToLinear(v.X)
 	nv.Y = SRGBToLinear(v.Y)
 	nv.Z = SRGBToLinear(v.Z)
@@ -92,8 +92,8 @@ func (v Vec3) SRGBToLinear() Vec3 {
 }
 
 // SRGBFromLinear returns an SRGB color space value from a linear source
-func (v Vec4) SRGBFromLinear() Vec4 {
-	nv := Vec4{}
+func (v Vector4) SRGBFromLinear() Vector4 {
+	nv := Vector4{}
 	nv.X = SRGBFromLinear(v.X)
 	nv.Y = SRGBFromLinear(v.Y)
 	nv.Z = SRGBFromLinear(v.Z)
@@ -102,8 +102,8 @@ func (v Vec4) SRGBFromLinear() Vec4 {
 }
 
 // SRGBToLinear returns a linear color space value from a SRGB source
-func (v Vec4) SRGBToLinear() Vec4 {
-	nv := Vec4{}
+func (v Vector4) SRGBToLinear() Vector4 {
+	nv := Vector4{}
 	nv.X = SRGBToLinear(v.X)
 	nv.Y = SRGBToLinear(v.Y)
 	nv.Z = SRGBToLinear(v.Z)

@@ -29,7 +29,7 @@ type Lines struct {
 	MeshBase
 
 	// line points (must be 2 or more)
-	Points []math32.Vec3
+	Points []math32.Vector3
 
 	// line width, Y = height perpendicular to line direction, and X = depth
 	Width math32.Vector2
@@ -52,7 +52,7 @@ const (
 )
 
 // NewLines adds Lines mesh to given scene, with given start, end, and width
-func NewLines(sc *Scene, name string, points []math32.Vec3, width math32.Vector2, closed bool) *Lines {
+func NewLines(sc *Scene, name string, points []math32.Vector3, width math32.Vector2, closed bool) *Lines {
 	ln := &Lines{}
 	ln.Nm = name
 	ln.Points = points
@@ -69,7 +69,7 @@ func (ln *Lines) Sizes() (nVtx, nIndex int, hasColor bool) {
 }
 
 func (ln *Lines) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
-	pos := math32.Vec3{}
+	pos := math32.Vector3{}
 	bb := vshape.SetLines(vtxAry, normAry, texAry, idxAry, 0, 0, ln.Points, ln.Width, ln.Closed, pos)
 	ln.BBox.SetBounds(bb.Min, bb.Max)
 	// todo: colors!
@@ -82,7 +82,7 @@ func UnitLineMesh(sc *Scene) *Lines {
 	if lm != nil {
 		return lm.(*Lines)
 	}
-	lmm := NewLines(sc, LineMeshName, []math32.Vec3{{-.5, 0, 0}, {.5, 0, 0}}, math32.V2(1, 1), OpenLines)
+	lmm := NewLines(sc, LineMeshName, []math32.Vector3{{-.5, 0, 0}, {.5, 0, 0}}, math32.V2(1, 1), OpenLines)
 	return lmm
 }
 
@@ -99,7 +99,7 @@ func UnitConeMesh(sc *Scene, segs int) *Cylinder {
 
 // NewLine adds a new line between two specified points, using a shared
 // mesh unit line, which is rotated and positioned to go between the designated points.
-func NewLine(sc *Scene, parent tree.Node, name string, st, ed math32.Vec3, width float32, clr color.RGBA) *Solid {
+func NewLine(sc *Scene, parent tree.Node, name string, st, ed math32.Vector3, width float32, clr color.RGBA) *Solid {
 	lm := UnitLineMesh(sc)
 	ln := NewSolid(parent, name).SetMesh(lm)
 	ln.Pose.Scale.Set(1, width, width)
@@ -109,7 +109,7 @@ func NewLine(sc *Scene, parent tree.Node, name string, st, ed math32.Vec3, width
 }
 
 // SetLineStartEnd sets line Pose such that it starts / ends at given poitns.
-func SetLineStartEnd(ln *Solid, st, ed math32.Vec3) {
+func SetLineStartEnd(ln *Solid, st, ed math32.Vector3) {
 	wd := ln.Pose.Scale.Y
 	d := ed.Sub(st)
 	midp := st.Add(d.DivScalar(2))
@@ -139,7 +139,7 @@ const (
 // The arrowSize is a multiplier on the width for the radius and length of the arrow head, with width
 // providing an additional multiplicative factor for width to achieve "fat" vs. "thin" arrows.
 // arrowSegs determines how many faces there are on the arrowhead -- 4 = a 4-sided pyramid, etc.
-func NewArrow(sc *Scene, parent tree.Node, name string, st, ed math32.Vec3, width float32, clr color.RGBA, startArrow, endArrow bool, arrowSize, arrowWidth float32, arrowSegs int) *Group {
+func NewArrow(sc *Scene, parent tree.Node, name string, st, ed math32.Vector3, width float32, clr color.RGBA, startArrow, endArrow bool, arrowSize, arrowWidth float32, arrowSegs int) *Group {
 	cm := UnitConeMesh(sc, arrowSegs)
 	gp := NewGroup(parent, name)
 
@@ -190,14 +190,14 @@ func NewLineBoxMeshes(sc *Scene, meshNm string, bbox math32.Box3, width float32)
 	ftl := math32.V3(-hSz.X, hSz.Y, 0)
 	ftr := math32.V3(hSz.X, hSz.Y, 0)
 	fbr := math32.V3(hSz.X, -hSz.Y, 0)
-	front = NewLines(sc, meshNm+"-front", []math32.Vec3{fbl, ftl, ftr, fbr}, wd, CloseLines)
+	front = NewLines(sc, meshNm+"-front", []math32.Vector3{fbl, ftl, ftr, fbr}, wd, CloseLines)
 
 	// side mesh in XY plane, Z -> X
 	sbl := math32.V3(-hSz.Z, -hSz.Y, 0)
 	stl := math32.V3(-hSz.Z, hSz.Y, 0)
 	str := math32.V3(hSz.Z, hSz.Y, 0)
 	sbr := math32.V3(hSz.Z, -hSz.Y, 0)
-	side = NewLines(sc, meshNm+"-side", []math32.Vec3{sbl, stl, str, sbr}, wd, CloseLines)
+	side = NewLines(sc, meshNm+"-side", []math32.Vector3{sbl, stl, str, sbr}, wd, CloseLines)
 	return
 }
 

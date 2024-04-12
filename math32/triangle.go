@@ -12,28 +12,28 @@ package math32
 
 // Triangle represents a triangle made of three vertices.
 type Triangle struct {
-	A Vec3
-	B Vec3
-	C Vec3
+	A Vector3
+	B Vector3
+	C Vector3
 }
 
 // NewTriangle returns a new Triangle object.
-func NewTriangle(a, b, c Vec3) Triangle {
+func NewTriangle(a, b, c Vector3) Triangle {
 	return Triangle{a, b, c}
 }
 
 // Normal returns the triangle's normal.
-func Normal(a, b, c Vec3) Vec3 {
+func Normal(a, b, c Vector3) Vector3 {
 	nv := c.Sub(b).Cross(a.Sub(b))
 	lenSq := nv.LengthSq()
 	if lenSq > 0 {
 		return nv.MulScalar(1 / Sqrt(lenSq))
 	}
-	return Vec3{}
+	return Vector3{}
 }
 
 // BarycoordFromPoint returns the barycentric coordinates for the specified point.
-func BarycoordFromPoint(point, a, b, c Vec3) Vec3 {
+func BarycoordFromPoint(point, a, b, c Vector3) Vector3 {
 	v0 := c.Sub(a)
 	v1 := b.Sub(a)
 	v2 := point.Sub(a)
@@ -62,20 +62,20 @@ func BarycoordFromPoint(point, a, b, c Vec3) Vec3 {
 }
 
 // ContainsPoint returns whether a triangle contains a point.
-func ContainsPoint(point, a, b, c Vec3) bool {
+func ContainsPoint(point, a, b, c Vector3) bool {
 	rv := BarycoordFromPoint(point, a, b, c)
 	return (rv.X >= 0) && (rv.Y >= 0) && ((rv.X + rv.Y) <= 1)
 }
 
 // Set sets the triangle's three vertices.
-func (t *Triangle) Set(a, b, c Vec3) {
+func (t *Triangle) Set(a, b, c Vector3) {
 	t.A = a
 	t.B = b
 	t.C = c
 }
 
 // SetFromPointsAndIndices sets the triangle's vertices based on the specified points and indices.
-func (t *Triangle) SetFromPointsAndIndices(points []Vec3, i0, i1, i2 int) {
+func (t *Triangle) SetFromPointsAndIndices(points []Vector3, i0, i1, i2 int) {
 	t.A = points[i0]
 	t.B = points[i1]
 	t.C = points[i2]
@@ -89,12 +89,12 @@ func (t *Triangle) Area() float32 {
 }
 
 // Midpoint returns the triangle's midpoint.
-func (t *Triangle) Midpoint() Vec3 {
+func (t *Triangle) Midpoint() Vector3 {
 	return t.A.Add(t.B).Add(t.C).MulScalar(float32(1) / 3)
 }
 
 // Normal returns the triangle's normal.
-func (t *Triangle) Normal() Vec3 {
+func (t *Triangle) Normal() Vector3 {
 	return Normal(t.A, t.B, t.C)
 }
 
@@ -106,12 +106,12 @@ func (t *Triangle) Plane() Plane {
 }
 
 // BarycoordFromPoint returns the barycentric coordinates for the specified point.
-func (t *Triangle) BarycoordFromPoint(point Vec3) Vec3 {
+func (t *Triangle) BarycoordFromPoint(point Vector3) Vector3 {
 	return BarycoordFromPoint(point, t.A, t.B, t.C)
 }
 
 // ContainsPoint returns whether the triangle contains a point.
-func (t *Triangle) ContainsPoint(point Vec3) bool {
+func (t *Triangle) ContainsPoint(point Vector3) bool {
 	return ContainsPoint(point, t.A, t.B, t.C)
 }
 

@@ -82,7 +82,7 @@ func TorusSectorN(radialSegs, tubeSegs int) (nVtx, nIndex int) {
 // radial sector start angle and length in degrees (0 - 360)
 // pos is an arbitrary offset (for composing shapes),
 // returns bounding box.
-func SetTorusSector(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, radius, tubeRadius float32, radialSegs, tubeSegs int, angStart, angLen float32, pos math32.Vec3) math32.Box3 {
+func SetTorusSector(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, radius, tubeRadius float32, radialSegs, tubeSegs int, angStart, angLen float32, pos math32.Vector3) math32.Box3 {
 	angStRad := math32.DegToRad(angStart)
 	angLenRad := math32.DegToRad(angLen)
 
@@ -93,7 +93,7 @@ func SetTorusSector(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.Array
 	bb := math32.Box3{}
 	bb.SetEmpty()
 
-	var center math32.Vec3
+	var center math32.Vector3
 	for j := 0; j <= radialSegs; j++ {
 		for i := 0; i <= tubeSegs; i++ {
 			u := angStRad + float32(i)/float32(tubeSegs)*angLenRad
@@ -102,14 +102,14 @@ func SetTorusSector(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.Array
 			center.X = radius * math32.Cos(u)
 			center.Y = radius * math32.Sin(u)
 
-			var pt math32.Vec3
+			var pt math32.Vector3
 			pt.X = (radius + tubeRadius*math32.Cos(v)) * math32.Cos(u)
 			pt.Y = (radius + tubeRadius*math32.Cos(v)) * math32.Sin(u)
 			pt.Z = tubeRadius * math32.Sin(v)
 			pt.SetAdd(pos)
-			vtxAry.SetVec3(vidx+idx*3, pt)
+			vtxAry.SetVector3(vidx+idx*3, pt)
 			texAry.Set(tidx+idx*2, float32(i)/float32(tubeSegs), float32(j)/float32(radialSegs))
-			normAry.SetVec3(vidx+idx*3, pt.Sub(center).Normal())
+			normAry.SetVector3(vidx+idx*3, pt.Sub(center).Normal())
 			bb.ExpandByPoint(pt)
 			idx++
 		}

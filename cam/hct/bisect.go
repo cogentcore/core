@@ -30,7 +30,7 @@ import (
 //   return Signum(component) * 400.0 * af / (af + 27.13);
 // }
 
-func MatMul(v math32.Vec3, mat [3][3]float32) math32.Vec3 {
+func MatMul(v math32.Vector3, mat [3][3]float32) math32.Vector3 {
 	x := v.X*mat[0][0] + v.Y*mat[0][1] + v.Z*mat[0][2]
 	y := v.X*mat[1][0] + v.Y*mat[1][1] + v.Z*mat[1][2]
 	z := v.X*mat[2][0] + v.Y*mat[2][1] + v.Z*mat[2][2]
@@ -38,7 +38,7 @@ func MatMul(v math32.Vec3, mat [3][3]float32) math32.Vec3 {
 }
 
 // HueOf Returns the hue of a linear RGB color in CAM16.
-func HueOf(linrgb math32.Vec3) float32 {
+func HueOf(linrgb math32.Vector3) float32 {
 	sd := MatMul(linrgb, kScaledDiscountFromLinrgb)
 	rA := cam16.LuminanceAdaptComp(sd.X, 1, 1)
 	gA := cam16.LuminanceAdaptComp(sd.Y, 1, 1)
@@ -62,7 +62,7 @@ func Intercept(source, mid, target float32) float32 {
 
 // GetAxis returns value along axis 0,1,2 -- result is divided by 100
 // so that resulting numbers are in 0-1 range.
-func GetAxis(v math32.Vec3, axis int) float32 {
+func GetAxis(v math32.Vector3, axis int) float32 {
 	switch axis {
 	case 0:
 		return v.X
@@ -85,7 +85,7 @@ func GetAxis(v math32.Vec3, axis int) float32 {
  * @return The intersection point of the segment AB with the plane R=coordinate,
  * G=coordinate, or B=coordinate
  */
-func SetCoordinate(source, target math32.Vec3, coord float32, axis int) math32.Vec3 {
+func SetCoordinate(source, target math32.Vector3, coord float32, axis int) math32.Vector3 {
 	t := Intercept(GetAxis(source, axis), coord, GetAxis(target, axis))
 	return source.Lerp(target, t)
 }
@@ -102,7 +102,7 @@ func IsBounded(x float32) bool {
 // vertex lies outside of the cube,
 //
 //	[-1.0, -1.0, -1.0] is returned.
-func NthVertex(y float32, n int) math32.Vec3 {
+func NthVertex(y float32, n int) math32.Vector3 {
 	k_r := kYFromLinrgb[0]
 	k_g := kYFromLinrgb[1]
 	k_b := kYFromLinrgb[2]
@@ -149,7 +149,7 @@ func NthVertex(y float32, n int) math32.Vec3 {
 // @param target_hue The hue of the color.
 // @return A list of two sets of linear RGB coordinates, each corresponding to
 // an endpoint of the segment containing the desired color.
-func BisectToSegment(y, target_hue float32) [2]math32.Vec3 {
+func BisectToSegment(y, target_hue float32) [2]math32.Vector3 {
 	left := math32.V3(-1.0, -1.0, -1.0)
 	right := left
 	left_hue := float32(0.0)
@@ -181,13 +181,13 @@ func BisectToSegment(y, target_hue float32) [2]math32.Vec3 {
 			}
 		}
 	}
-	var out [2]math32.Vec3
+	var out [2]math32.Vector3
 	out[0] = left
 	out[1] = right
 	return out
 }
 
-func Midpoint(a, b math32.Vec3) math32.Vec3 {
+func Midpoint(a, b math32.Vector3) math32.Vector3 {
 	return math32.V3((a.X+b.X)/2, (a.Y+b.Y)/2, (a.Z+b.Z)/2)
 }
 
@@ -214,7 +214,7 @@ func TrueDelinearized(comp float32) float32 {
 // @param y The Y value of the color.
 // @param target_hue The hue of the color.
 // @return The desired color, in linear RGB coordinates.
-func BisectToLimit(y, target_hue float32) math32.Vec3 {
+func BisectToLimit(y, target_hue float32) math32.Vector3 {
 	segment := BisectToSegment(y, target_hue)
 	left := segment[0]
 	left_hue := HueOf(left)

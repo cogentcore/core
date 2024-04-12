@@ -12,11 +12,11 @@ import (
 
 // Types is a list of supported GPU data types, which can be stored
 // properly aligned in device memory, and used by the shader code.
-// Note that a Vec3 or arrays of single scalar values such as Float32
+// Note that a Vector3 or arrays of single scalar values such as Float32
 // are not well supported outside of Vertex due to the std410 convention:
 // http://www.opengl.org/registry/doc/glspec45.core.pdf#page=159
 // The Struct type is particularly challenging as each member
-// must be aligned in general on a 16 byte boundary (i.e., vec4)
+// must be aligned in general on a 16 byte boundary (i.e., vector4)
 // (unless all elements are exactly 4 bytes, which might work?).
 // Go automatically aligns members to 8 bytes on 64 bit machines,
 // but that doesn't quite cut it.
@@ -31,21 +31,21 @@ const (
 
 	Int32
 	Int32Vector2
-	Int32Vec4
+	Int32Vector4
 
 	Uint32
 	Uint32Vector2
-	Uint32Vec4
+	Uint32Vector4
 
 	Float32
 	Float32Vector2
-	Float32Vec3 // note: only use for vertex data -- not properly aligned for uniforms
-	Float32Vec4
+	Float32Vector3 // note: only use for vertex data -- not properly aligned for uniforms
+	Float32Vector4
 
 	Float64
 	Float64Vector2
-	Float64Vec3
-	Float64Vec4
+	Float64Vector3
+	Float64Vector4
 
 	Float32Mat4 // std transform matrix: math32.Mat4 works directly
 	Float32Mat3 // std transform matrix: math32.Mat3 works directly
@@ -119,18 +119,18 @@ var VulkanTypes = map[Types]vk.Format{
 	Uint16:         vk.FormatR16Uint,
 	Int32:          vk.FormatR32Sint,
 	Int32Vector2:   vk.FormatR32g32Sint,
-	Int32Vec4:      vk.FormatR32g32b32a32Sint,
+	Int32Vector4:   vk.FormatR32g32b32a32Sint,
 	Uint32:         vk.FormatR32Uint,
 	Uint32Vector2:  vk.FormatR32g32Uint,
-	Uint32Vec4:     vk.FormatR32g32b32a32Uint,
+	Uint32Vector4:  vk.FormatR32g32b32a32Uint,
 	Float32:        vk.FormatR32Sfloat,
 	Float32Vector2: vk.FormatR32g32Sfloat,
-	Float32Vec3:    vk.FormatR32g32b32Sfloat,
-	Float32Vec4:    vk.FormatR32g32b32a32Sfloat,
+	Float32Vector3: vk.FormatR32g32b32Sfloat,
+	Float32Vector4: vk.FormatR32g32b32a32Sfloat,
 	Float64:        vk.FormatR64Sfloat,
 	Float64Vector2: vk.FormatR64g64Sfloat,
-	Float64Vec3:    vk.FormatR64g64b64Sfloat,
-	Float64Vec4:    vk.FormatR64g64b64a64Sfloat,
+	Float64Vector3: vk.FormatR64g64b64Sfloat,
+	Float64Vector4: vk.FormatR64g64b64a64Sfloat,
 	ImageRGBA32:    vk.FormatR8g8b8a8Srgb,
 	Depth32:        vk.FormatD32Sfloat,
 	Depth24Sten8:   vk.FormatD24UnormS8Uint,

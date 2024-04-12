@@ -12,27 +12,27 @@ package math32
 
 // Ray represents an oriented 3D line segment defined by an origin point and a direction vector.
 type Ray struct {
-	Origin Vec3
-	Dir    Vec3
+	Origin Vector3
+	Dir    Vector3
 }
 
 // NewRay creates and returns a pointer to a Ray object with
 // the specified origin and direction vectors.
 // If a nil pointer is supplied for any of the parameters,
 // the zero vector will be used.
-func NewRay(origin, dir Vec3) *Ray {
+func NewRay(origin, dir Vector3) *Ray {
 	return &Ray{origin, dir}
 }
 
 // Set sets the origin and direction vectors of this Ray.
-func (ray *Ray) Set(origin, dir Vec3) {
+func (ray *Ray) Set(origin, dir Vector3) {
 	ray.Origin = origin
 	ray.Dir = dir
 }
 
 // At calculates the point in the ray which is at the specified t distance from the origin
 // along its direction.
-func (ray *Ray) At(t float32) Vec3 {
+func (ray *Ray) At(t float32) Vector3 {
 	return ray.Dir.MulScalar(t).Add(ray.Origin)
 }
 
@@ -43,7 +43,7 @@ func (ray *Ray) Recast(t float32) {
 }
 
 // ClosestPointToPoint calculates the point in the ray which is closest to the specified point.
-func (ray *Ray) ClosestPointToPoint(point Vec3) Vec3 {
+func (ray *Ray) ClosestPointToPoint(point Vector3) Vector3 {
 	dirDist := point.Sub(ray.Origin).Dot(ray.Dir)
 	if dirDist < 0 {
 		return ray.Origin
@@ -53,14 +53,14 @@ func (ray *Ray) ClosestPointToPoint(point Vec3) Vec3 {
 
 // DistToPoint returns the smallest distance
 // from the ray direction vector to the specified point.
-func (ray *Ray) DistToPoint(point Vec3) float32 {
+func (ray *Ray) DistToPoint(point Vector3) float32 {
 	return Sqrt(ray.DistSqToPoint(point))
 }
 
 // DistSqToPoint returns the smallest squared distance
 // from the ray direction vector to the specified point.
 // If the ray was pointed directly at the point this distance would be 0.
-func (ray *Ray) DistSqToPoint(point Vec3) float32 {
+func (ray *Ray) DistSqToPoint(point Vector3) float32 {
 	dirDist := point.Sub(ray.Origin).Dot(ray.Dir)
 	// point behind the ray
 	if dirDist < 0 {
@@ -71,11 +71,11 @@ func (ray *Ray) DistSqToPoint(point Vec3) float32 {
 
 // DistSqToSegment returns the smallest squared distance
 // from this ray to the line segment from v0 to v1.
-// If optPointOnRay Vec3 is not nil,
+// If optPointOnRay Vector3 is not nil,
 // it is set with the coordinates of the point on the ray.
-// if optPointOnSegment Vec3 is not nil,
+// if optPointOnSegment Vector3 is not nil,
 // it is set with the coordinates of the point on the segment.
-func (ray *Ray) DistSqToSegment(v0, v1 Vec3, optPointOnRay, optPointOnSegment *Vec3) float32 {
+func (ray *Ray) DistSqToSegment(v0, v1 Vector3, optPointOnRay, optPointOnSegment *Vector3) float32 {
 	segCenter := v0.Add(v1).MulScalar(0.5)
 	segDir := v1.Sub(v0).Normal()
 	diff := ray.Origin.Sub(segCenter)
@@ -170,7 +170,7 @@ func (ray *Ray) IsIntersectionSphere(sphere Sphere) bool {
 
 // IntersectSphere calculates the point which is the intersection of this ray with the specified sphere.
 // If no intersection is found false is returne.
-func (ray *Ray) IntersectSphere(sphere Sphere) (Vec3, bool) {
+func (ray *Ray) IntersectSphere(sphere Sphere) (Vector3, bool) {
 	v1 := sphere.Center.Sub(ray.Origin)
 	tca := v1.Dot(ray.Dir)
 	d2 := v1.Dot(v1) - tca*tca
@@ -231,7 +231,7 @@ func (ray *Ray) DistToPlane(plane Plane) float32 {
 
 // IntersectPlane calculates the point which is the intersection of this ray with the specified plane.
 // If no intersection is found false is returned.
-func (ray *Ray) IntersectPlane(plane Plane) (Vec3, bool) {
+func (ray *Ray) IntersectPlane(plane Plane) (Vector3, bool) {
 	t := ray.DistToPlane(plane)
 	if t == NaN() {
 		return ray.Origin, false
@@ -247,7 +247,7 @@ func (ray *Ray) IntersectsBox(box Box3) bool {
 
 // IntersectBox calculates the point which is the intersection of this ray with the specified box.
 // If no intersection is found false is returned.
-func (ray *Ray) IntersectBox(box Box3) (Vec3, bool) {
+func (ray *Ray) IntersectBox(box Box3) (Vector3, bool) {
 	// http://www.scratchapixel.com/lessons/3d-basic-lessons/lesson-7-intersecting-simple-shapes/ray-box-intersection/
 
 	var tmin, tmax, tymin, tymax, tzmin, tzmax float32
@@ -326,7 +326,7 @@ func (ray *Ray) IntersectBox(box Box3) (Vec3, bool) {
 // parameter with the intersected point coordinates.
 // If backfaceCulling is false it ignores the intersection if the face is not oriented
 // in the ray direction.
-func (ray *Ray) IntersectTriangle(a, b, c Vec3, backfaceCulling bool) (Vec3, bool) {
+func (ray *Ray) IntersectTriangle(a, b, c Vector3, backfaceCulling bool) (Vector3, bool) {
 	edge1 := b.Sub(a)
 	edge2 := c.Sub(a)
 	normal := edge1.Cross(edge2)

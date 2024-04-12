@@ -11,10 +11,10 @@ type Box struct {
 	ShapeBase
 
 	// size along each dimension
-	Size math32.Vec3
+	Size math32.Vector3
 
 	// number of segments to divide each plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1
-	Segs math32.Vec3i
+	Segs math32.Vector3i
 }
 
 // NewBox returns a Box shape with given size
@@ -48,7 +48,7 @@ func (bx *Box) Set(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU
 // vertex and index data with given number of segments.
 // Note: In *vertex* units, not float units (i.e., x3 to get
 // actual float offset in Vtx array).
-func BoxN(segs math32.Vec3i) (nVtx, nIndex int) {
+func BoxN(segs math32.Vector3i) (nVtx, nIndex int) {
 	nv, ni := PlaneN(int(segs.X), int(segs.Y))
 	nVtx += 2 * nv
 	nIndex += 2 * ni
@@ -68,7 +68,7 @@ func BoxN(segs math32.Vec3i) (nVtx, nIndex int) {
 // finely subdividing a plane allows for higher-quality lighting
 // and texture rendering (minimum of 1 will be enforced).
 // pos is a 3D position offset. returns 3D size of plane.
-func SetBox(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, size math32.Vec3, segs math32.Vec3i, pos math32.Vec3) math32.Vec3 {
+func SetBox(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, size math32.Vector3, segs math32.Vector3i, pos math32.Vector3) math32.Vector3 {
 	hSz := size.DivScalar(2)
 
 	nVtx, nIndex := PlaneN(int(segs.X), int(segs.Y))

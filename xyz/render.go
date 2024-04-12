@@ -283,7 +283,7 @@ func (sc *Scene) Config() {
 	sc.Camera.CamMu.Lock()
 	sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
 	sc.Camera.CamMu.Unlock()
-	clr := math32.NewVec3Color(sc.BackgroundColor).SRGBToLinear()
+	clr := math32.NewVector3Color(sc.BackgroundColor).SRGBToLinear()
 	sc.Frame.Render.SetClearColor(clr.X, clr.Y, clr.Z, 1)
 	// gpu.Draw.Wireframe(sc.Wireframe)
 	sc.ConfigNodes()

@@ -15,18 +15,18 @@ import "log"
 // Plane represents a plane in 3D space by its normal vector and a constant offset.
 // When the the normal vector is the unit vector the offset is the distance from the origin.
 type Plane struct {
-	Norm Vec3
+	Norm Vector3
 	Off  float32
 }
 
 // NewPlane creates and returns a new plane from a normal vector and a offset.
-func NewPlane(normal Vec3, offset float32) *Plane {
+func NewPlane(normal Vector3, offset float32) *Plane {
 	p := &Plane{normal, offset}
 	return p
 }
 
 // Set sets this plane normal vector and offset.
-func (p *Plane) Set(normal Vec3, offset float32) {
+func (p *Plane) Set(normal Vector3, offset float32) {
 	p.Norm = normal
 	p.Off = offset
 }
@@ -38,16 +38,16 @@ func (p *Plane) SetDims(x, y, z, w float32) {
 }
 
 // SetFromNormalAndCoplanarPoint sets this plane from a normal vector and a point on the plane.
-func (p *Plane) SetFromNormalAndCoplanarPoint(normal Vec3, point Vec3) {
+func (p *Plane) SetFromNormalAndCoplanarPoint(normal Vector3, point Vector3) {
 	p.Norm = normal
 	p.Off = -point.Dot(p.Norm)
 }
 
 // SetFromCoplanarPoints sets this plane from three coplanar points.
-func (p *Plane) SetFromCoplanarPoints(a, b, c Vec3) {
+func (p *Plane) SetFromCoplanarPoints(a, b, c Vector3) {
 	norm := c.Sub(b).Cross(a.Sub(b))
 	norm.SetNormal()
-	if norm == (Vec3{}) {
+	if norm == (Vector3{}) {
 		log.Printf("math32.SetFromCoplanarPonts: points not actually coplanar: %v %v %v\n", a, b, c)
 	}
 	p.SetFromNormalAndCoplanarPoint(norm, a)
@@ -68,7 +68,7 @@ func (p *Plane) Negate() {
 }
 
 // DistToPoint returns the distance of this plane from point.
-func (p *Plane) DistToPoint(point Vec3) float32 {
+func (p *Plane) DistToPoint(point Vector3) float32 {
 	return p.Norm.Dot(point) + p.Off
 }
 
@@ -86,7 +86,7 @@ func (p *Plane) IsIntersectionLine(line Line3) bool {
 
 // IntersectLine calculates the point in the plane which intersets the specified line.
 // Returns false if the line does not intersects the plane.
-func (p *Plane) IntersectLine(line Line3) (Vec3, bool) {
+func (p *Plane) IntersectLine(line Line3) (Vector3, bool) {
 	dir := line.Delta()
 	denom := p.Norm.Dot(dir)
 	if denom == 0 {
@@ -105,12 +105,12 @@ func (p *Plane) IntersectLine(line Line3) (Vec3, bool) {
 }
 
 // CoplanarPoint returns a point in the plane that is the closest point from the origin.
-func (p *Plane) CoplanarPoint() Vec3 {
+func (p *Plane) CoplanarPoint() Vector3 {
 	return p.Norm.MulScalar(-p.Off)
 }
 
 // SetTranslate translates this plane in the direction of its normal by offset.
-func (p *Plane) SetTranslate(offset Vec3) {
+func (p *Plane) SetTranslate(offset Vector3) {
 	p.Off -= offset.Dot(p.Norm)
 }
 

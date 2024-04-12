@@ -56,15 +56,15 @@ func (a *ArrayF32) AppendVector2(v ...Vector2) {
 	}
 }
 
-// AppendVec3 appends any number of Vec3 to the array
-func (a *ArrayF32) AppendVec3(v ...Vec3) {
+// AppendVector3 appends any number of Vector3 to the array
+func (a *ArrayF32) AppendVector3(v ...Vector3) {
 	for i := 0; i < len(v); i++ {
 		*a = append(*a, v[i].X, v[i].Y, v[i].Z)
 	}
 }
 
-// AppendVec4 appends any number of Vec4 to the array
-func (a *ArrayF32) AppendVec4(v ...Vec4) {
+// AppendVector4 appends any number of Vector4 to the array
+func (a *ArrayF32) AppendVector4(v ...Vector4) {
 	for i := 0; i < len(v); i++ {
 		*a = append(*a, v[i].X, v[i].Y, v[i].Z, v[i].W)
 	}
@@ -93,17 +93,17 @@ func (a ArrayF32) GetVector2(pos int, v *Vector2) {
 	v.Y = a[pos+1]
 }
 
-// GetVec3 stores in the specified Vec3 the
+// GetVector3 stores in the specified Vector3 the
 // values from the array starting at the specified pos.
-func (a ArrayF32) GetVec3(pos int, v *Vec3) {
+func (a ArrayF32) GetVector3(pos int, v *Vector3) {
 	v.X = a[pos]
 	v.Y = a[pos+1]
 	v.Z = a[pos+2]
 }
 
-// GetVec4 stores in the specified Vec4 the
+// GetVector4 stores in the specified Vector4 the
 // values from the array starting at the specified pos.
-func (a ArrayF32) GetVec4(pos int, v *Vec4) {
+func (a ArrayF32) GetVector4(pos int, v *Vector4) {
 	v.X = a[pos]
 	v.Y = a[pos+1]
 	v.Z = a[pos+2]
@@ -146,17 +146,17 @@ func (a ArrayF32) SetVector2(pos int, v Vector2) {
 	a[pos+1] = v.Y
 }
 
-// SetVec3 sets the values of the array at the specified pos
-// from the XYZ values of the specified Vec3
-func (a ArrayF32) SetVec3(pos int, v Vec3) {
+// SetVector3 sets the values of the array at the specified pos
+// from the XYZ values of the specified Vector3
+func (a ArrayF32) SetVector3(pos int, v Vector3) {
 	a[pos] = v.X
 	a[pos+1] = v.Y
 	a[pos+2] = v.Z
 }
 
-// SetVec4 sets the values of the array at the specified pos
-// from the XYZ values of the specified Vec4
-func (a ArrayF32) SetVec4(pos int, v Vec4) {
+// SetVector4 sets the values of the array at the specified pos
+// from the XYZ values of the specified Vector4
+func (a ArrayF32) SetVector4(pos int, v Vector4) {
 	a[pos] = v.X
 	a[pos+1] = v.Y
 	a[pos+2] = v.Z

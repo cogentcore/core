@@ -40,7 +40,7 @@ type ShapeBase struct {
 	CBBox math32.Box3
 
 	// all shapes take a 3D position offset to enable composition
-	Pos math32.Vec3
+	Pos math32.Vector3
 }
 
 // Offs returns starting offset for verticies, indexes in full shape array,
@@ -62,7 +62,7 @@ func (sb *ShapeBase) BBox() math32.Box3 {
 }
 
 // SetColor sets color for given range of vertex indexes
-func SetColor(clrAry math32.ArrayF32, vtxOff int, nvtxs int, clr math32.Vec4) {
+func SetColor(clrAry math32.ArrayF32, vtxOff int, nvtxs int, clr math32.Vector4) {
 	cidx := vtxOff * 4
 	for vi := 0; vi < nvtxs; vi++ {
 		clr.ToArray(clrAry, cidx+vi*4)
@@ -73,7 +73,7 @@ func SetColor(clrAry math32.ArrayF32, vtxOff int, nvtxs int, clr math32.Vec4) {
 func BBoxFromVtxs(vtxAry math32.ArrayF32, vtxOff int, nvtxs int) math32.Box3 {
 	bb := math32.B3Empty()
 	vidx := vtxOff * 3
-	var vtx math32.Vec3
+	var vtx math32.Vector3
 	for vi := 0; vi < nvtxs; vi++ {
 		vtx.FromArray(vtxAry, vidx+vi*3)
 		bb.ExpandByPoint(vtx)

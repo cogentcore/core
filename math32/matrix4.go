@@ -99,7 +99,7 @@ func (m *Mat4) CopyPos(src *Mat4) {
 }
 
 // ExtractBasis returns the x,y,z basis vectors of this matrix.
-func (m *Mat4) ExtractBasis() (xAxis, yAxis, zAxis Vec3) {
+func (m *Mat4) ExtractBasis() (xAxis, yAxis, zAxis Vector3) {
 	xAxis.Set(m[0], m[1], m[2])
 	yAxis.Set(m[4], m[5], m[6])
 	zAxis.Set(m[8], m[9], m[10])
@@ -107,7 +107,7 @@ func (m *Mat4) ExtractBasis() (xAxis, yAxis, zAxis Vec3) {
 }
 
 // SetBasis sets this matrix basis vectors from the specified vectors.
-func (m *Mat4) SetBasis(xAxis, yAxis, zAxis Vec3) {
+func (m *Mat4) SetBasis(xAxis, yAxis, zAxis Vector3) {
 	m.Set(
 		xAxis.X, yAxis.X, zAxis.X, 0,
 		xAxis.Y, yAxis.Y, zAxis.Y, 0,
@@ -205,10 +205,10 @@ func (m *Mat4) MulScalar(s float32) {
 	m[15] *= s
 }
 
-// MulVec3Array multiplies count vectors (i.e., 3 sequential array values per each increment in count)
+// MulVector3Array multiplies count vectors (i.e., 3 sequential array values per each increment in count)
 // in the array starting at start index by this matrix.
-func (m *Mat4) MulVec3Array(array []float32, start, count int) {
-	var v1 Vec3
+func (m *Mat4) MulVector3Array(array []float32, start, count int) {
+	var v1 Vector3
 	j := start
 	for i := 0; i < count; i++ {
 		v1.FromArray(array, j)
@@ -333,7 +333,7 @@ func (m *Mat4) Transpose() *Mat4 {
 // ScaleCols returns matrix with first column of this matrix multiplied by the vector X component,
 // the second column by the vector Y component and the third column by
 // the vector Z component. The matrix fourth column is unchanged.
-func (m *Mat4) ScaleCols(v Vec3) *Mat4 {
+func (m *Mat4) ScaleCols(v Vector3) *Mat4 {
 	nm := &Mat4{}
 	nm.SetScaleCols(v)
 	return nm
@@ -342,7 +342,7 @@ func (m *Mat4) ScaleCols(v Vec3) *Mat4 {
 // SetScaleCols multiplies the first column of this matrix by the vector X component,
 // the second column by the vector Y component and the third column by
 // the vector Z component. The matrix fourth column is unchanged.
-func (m *Mat4) SetScaleCols(v Vec3) {
+func (m *Mat4) SetScaleCols(v Vector3) {
 	m[0] *= v.X
 	m[4] *= v.Y
 	m[8] *= v.Z
@@ -413,7 +413,7 @@ func (m *Mat4) SetRotationZ(theta float32) {
 }
 
 // SetRotationAxis sets this matrix to a rotation matrix of the specified angle around the specified axis.
-func (m *Mat4) SetRotationAxis(axis *Vec3, angle float32) {
+func (m *Mat4) SetRotationAxis(axis *Vector3, angle float32) {
 	c := Cos(angle)
 	s := Sin(angle)
 	t := 1 - c
@@ -441,15 +441,15 @@ func (m *Mat4) SetScale(x, y, z float32) {
 }
 
 // SetPos sets this transformation matrix position fields from the specified vector v.
-func (m *Mat4) SetPos(v Vec3) {
+func (m *Mat4) SetPos(v Vector3) {
 	m[12] = v.X
 	m[13] = v.Y
 	m[14] = v.Z
 }
 
 // Pos returns the position component of the matrix
-func (m *Mat4) Pos() Vec3 {
-	pos := Vec3{}
+func (m *Mat4) Pos() Vector3 {
+	pos := Vector3{}
 	pos.X = m[12]
 	pos.Y = m[13]
 	pos.Z = m[14]
@@ -458,14 +458,14 @@ func (m *Mat4) Pos() Vec3 {
 
 // SetTransform sets this matrix to a transformation matrix for the specified position,
 // rotation specified by the quaternion and scale.
-func (m *Mat4) SetTransform(pos Vec3, quat Quat, scale Vec3) {
+func (m *Mat4) SetTransform(pos Vector3, quat Quat, scale Vector3) {
 	m.SetRotationFromQuat(quat)
 	m.SetScaleCols(scale)
 	m.SetPos(pos)
 }
 
 // Decompose updates the position vector, quaternion and scale from this transformation matrix.
-func (m *Mat4) Decompose() (pos Vec3, quat Quat, scale Vec3) {
+func (m *Mat4) Decompose() (pos Vector3, quat Quat, scale Vector3) {
 	sx := V3(m[0], m[1], m[2]).Length()
 	sy := V3(m[4], m[5], m[6]).Length()
 	sz := V3(m[8], m[9], m[10]).Length()
@@ -526,7 +526,7 @@ func (m *Mat4) ExtractRotation(src *Mat4) {
 }
 
 // SetRotationFromEuler set this a matrix as a rotation matrix from the specified euler angles.
-func (m *Mat4) SetRotationFromEuler(euler Vec3) {
+func (m *Mat4) SetRotationFromEuler(euler Vector3) {
 	x := euler.X
 	y := euler.Y
 	z := euler.Z
@@ -607,7 +607,7 @@ func (m *Mat4) SetRotationFromQuat(q Quat) {
 
 // LookAt sets this matrix as view transform matrix with origin at eye,
 // looking at target and using the up vector.
-func (m *Mat4) LookAt(eye, target, up Vec3) {
+func (m *Mat4) LookAt(eye, target, up Vector3) {
 	z := eye.Sub(target)
 	if z.LengthSq() == 0 {
 		// Eye and target are in the same position
@@ -644,7 +644,7 @@ func (m *Mat4) LookAt(eye, target, up Vec3) {
 
 // NewLookAt returns Mat4 matrix as view transform matrix with origin at eye,
 // looking at target and using the up vector.
-func NewLookAt(eye, target, up Vec3) *Mat4 {
+func NewLookAt(eye, target, up Vector3) *Mat4 {
 	rotMat := &Mat4{}
 	rotMat.LookAt(eye, target, up)
 	return rotMat

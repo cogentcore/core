@@ -96,8 +96,8 @@ func (f *Frustum) IntersectsSphere(sphere Sphere) bool {
 
 // IntersectsBox determines whether the specified box is intersecting the frustum
 func (f *Frustum) IntersectsBox(box Box3) bool {
-	var p1 Vec3
-	var p2 Vec3
+	var p1 Vector3
+	var p2 Vector3
 
 	for i := 0; i < 6; i++ {
 		plane := &f.Planes[i]
@@ -144,7 +144,7 @@ func (f *Frustum) IntersectsBox(box Box3) bool {
 }
 
 // ContainsPoint determines whether the frustum contains the specified point
-func (f *Frustum) ContainsPoint(point Vec3) bool {
+func (f *Frustum) ContainsPoint(point Vector3) bool {
 	for i := 0; i < 6; i++ {
 		if f.Planes[i].DistToPoint(point) < 0 {
 			return false

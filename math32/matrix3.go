@@ -202,10 +202,10 @@ func (a Mat3) MulVector2AsPt(v Vector2) Vector2 {
 	return V2(tx, ty)
 }
 
-// MulVec3Array multiplies count vectors (i.e., 3 sequential array values per each increment in count)
+// MulVector3Array multiplies count vectors (i.e., 3 sequential array values per each increment in count)
 // in the array starting at start index by this matrix.
-func (m *Mat3) MulVec3Array(array []float32, start, count int) {
-	var v1 Vec3
+func (m *Mat3) MulVector3Array(array []float32, start, count int) {
+	var v1 Vector3
 	j := start
 	for i := 0; i < count; i++ {
 		v1.FromArray(array, j)
@@ -302,7 +302,7 @@ func (m Mat3) Transpose() Mat3 {
 // ScaleCols returns matrix with columns multiplied by the vector components.
 // This can be used when multiplying this matrix by a diagonal matrix if we store
 // the diagonal components as a vector.
-func (m *Mat3) ScaleCols(v Vec3) *Mat3 {
+func (m *Mat3) ScaleCols(v Vector3) *Mat3 {
 	nm := &Mat3{}
 	nm.SetScaleCols(v)
 	return nm
@@ -311,7 +311,7 @@ func (m *Mat3) ScaleCols(v Vec3) *Mat3 {
 // SetScaleCols multiplies the matrix columns by the vector components.
 // This can be used when multiplying this matrix by a diagonal matrix if we store
 // the diagonal components as a vector.
-func (m *Mat3) SetScaleCols(v Vec3) {
+func (m *Mat3) SetScaleCols(v Vector3) {
 	m[0] *= v.X
 	m[1] *= v.X
 	m[2] *= v.X

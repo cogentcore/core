@@ -258,13 +258,13 @@ func (dec *Decoder) addNorms(ms *xyz.GenMesh, ai, bi, ci int, idxs []int) {
 	if ms.Norm.Size() >= ms.Vtx.Size() {
 		return
 	}
-	var a, b, c math32.Vec3
-	ms.Vtx.GetVec3(3*idxs[ai], &a)
-	ms.Vtx.GetVec3(3*idxs[bi], &b)
-	ms.Vtx.GetVec3(3*idxs[ci], &c)
+	var a, b, c math32.Vector3
+	ms.Vtx.GetVector3(3*idxs[ai], &a)
+	ms.Vtx.GetVector3(3*idxs[bi], &b)
+	ms.Vtx.GetVector3(3*idxs[ci], &c)
 	nrm := math32.Normal(a, b, c)
 	for {
-		ms.Norm.AppendVec3(nrm)
+		ms.Norm.AppendVector3(nrm)
 		if ms.Norm.Size() >= ms.Vtx.Size() {
 			break
 		}
@@ -280,21 +280,21 @@ func (dec *Decoder) setIndex(ms *xyz.GenMesh, face *Face, idx int, idxs *[]int) 
 }
 
 func (dec *Decoder) copyVertex(ms *xyz.GenMesh, face *Face, idx int) int {
-	var vec3 math32.Vec3
+	var vector3 math32.Vector3
 	var vector2 math32.Vector2
 
 	vidx := ms.Vtx.Size() / 3
 	// Copy vertex position and append to geometry
-	dec.Vertices.GetVec3(3*face.Vertices[idx], &vec3)
-	ms.Vtx.AppendVec3(vec3)
+	dec.Vertices.GetVector3(3*face.Vertices[idx], &vector3)
+	ms.Vtx.AppendVector3(vector3)
 
 	// Copy vertex normal and append to geometry
 	if face.Normals[idx] != invINDEX {
 		i := 3 * face.Normals[idx]
 		if dec.Normals.Size() > i {
-			dec.Normals.GetVec3(i, &vec3)
+			dec.Normals.GetVector3(i, &vector3)
 		}
-		ms.Norm.AppendVec3(vec3)
+		ms.Norm.AppendVector3(vector3)
 	}
 
 	// Copy vertex uv and append to geometry

@@ -45,8 +45,8 @@ func main() {
 	nGps := n / threads // dispatch n
 	fmt.Printf("n: %d\n", n)
 
-	inv := set.Add("In", vgpu.Float32Vec4, n, vgpu.Storage, vgpu.ComputeShader)
-	outv := set.Add("Out", vgpu.Float32Vec4, n, vgpu.Storage, vgpu.ComputeShader)
+	inv := set.Add("In", vgpu.Float32Vector4, n, vgpu.Storage, vgpu.ComputeShader)
+	outv := set.Add("Out", vgpu.Float32Vector4, n, vgpu.Storage, vgpu.ComputeShader)
 	_ = outv
 
 	set.ConfigValues(1) // one val per var

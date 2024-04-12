@@ -163,7 +163,7 @@ type ManipPoint struct {
 }
 
 // NewManipPoint adds a new manipulation point
-func NewManipPoint(parent tree.Node, name string, meshName string, clr color.RGBA, pos math32.Vec3) *ManipPoint {
+func NewManipPoint(parent tree.Node, name string, meshName string, clr color.RGBA, pos math32.Vector3) *ManipPoint {
 	mpt := parent.NewChild(ManipPointType, name).(*ManipPoint)
 	mpt.SetMeshName(meshName)
 	mpt.Defaults()
@@ -239,7 +239,7 @@ func (sw *Scene) HandleSlideEvents() {
 		dy := float32(del.Y)
 		mpos := mpt.Nm[len(ManipBoxName)+1:] // has ull etc for where positioned
 		camd, sgn := xy.Camera.ViewMainAxis()
-		var dm math32.Vec3 // delta multiplier
+		var dm math32.Vector3 // delta multiplier
 		if mpos[math32.X] == 'u' {
 			dm.X = 1
 		} else {
@@ -255,7 +255,7 @@ func (sw *Scene) HandleSlideEvents() {
 		} else {
 			dm.Z = -1
 		}
-		var dd math32.Vec3
+		var dd math32.Vector3
 		switch camd {
 		case math32.X:
 			dd.Z = -sgn * dx
@@ -276,7 +276,7 @@ func (sw *Scene) HandleSlideEvents() {
 		case e.HasAllModifiers(key.Control): // scale
 			dsc := dd.Mul(dm).MulScalar(scDel)
 			mb.Pose.Scale.SetAdd(dsc)
-			msc := dsc.MulMat4AsVec4(&sn.Pose.ParMatrix, 0) // this is not quite right but close enough
+			msc := dsc.MulMat4AsVector4(&sn.Pose.ParMatrix, 0) // this is not quite right but close enough
 			sn.Pose.Scale.SetAdd(msc)
 		case e.HasAllModifiers(key.Alt): // rotation
 			dang := -sgn * dm.Y * (dx + dy)
@@ -284,17 +284,17 @@ func (sw *Scene) HandleSlideEvents() {
 				dang = -sgn * dm.X * (dy + dx)
 			}
 			dang *= 0.01 * cdist
-			var rvec math32.Vec3
+			var rvec math32.Vector3
 			rvec.SetDim(camd, 1)
 			mb.Pose.RotateOnAxis(rvec.X, rvec.Y, rvec.Z, dang)
 			inv, _ := sn.Pose.WorldMatrix.Inverse() // undo full transform
-			mvec := rvec.MulMat4AsVec4(inv, 0)
+			mvec := rvec.MulMat4AsVector4(inv, 0)
 			sn.Pose.RotateOnAxis(mvec.X, mvec.Y, mvec.Z, dang)
 		// case key.HasAllModifierBits(e.Modifiers, key.Shift):
 		default: // position
 			dpos := dd.MulScalar(panDel)
 			inv, _ := sn.Pose.ParMatrix.Inverse() // undo parent's transform
-			mpos := dpos.MulMat4AsVec4(inv, 0)
+			mpos := dpos.MulMat4AsVector4(inv, 0)
 			sn.Pose.Pos.SetAdd(mpos)
 			mb.Pose.Pos.SetAdd(dpos)
 		}

@@ -81,19 +81,19 @@ layout(push_constant) uniform Mtxs {
 
 layout(set = 0, binding = 0) uniform sampler2DArray Tex[]; //
 layout(location = 0) in vector2 uv;
-layout(location = 0) out vec4 outputColor;
+layout(location = 0) out vector4 outputColor;
 
 void main() {
 	int idx = int(mvp[3][0]);   // packing into unused part of mat4 matrix push constant
 	int layer = int(mvp[3][1]);
-	outputColor = texture(Tex[idx], vec3(uv,layer)); // layer selection as 3rd dim here
+	outputColor = texture(Tex[idx], vector3(uv,layer)); // layer selection as 3rd dim here
 }
 ```
     
 * `Var`s are accessed at a given `location` or `binding` number by the shader code, and these bindings can be organized into logical sets called DescriptorSets (see Graphics Rendering example below).  In [HLSL](https://www.lei.chat/posts/hlsl-for-vulkan-resources/), these are specified like this: `[[vk::binding(5, 1)]] Texture2D MyTexture2;` for descriptor 5 in set 1 (set 0 is the first set).
     + You manage these sets explicitly by calling `AddSet` or `AddVertexSet` / `AddPushConstSet` to create new `VarSet`s, and then add `Var`s directly to each set.
     + `Values` represent the values of Vars, with each `Value` representing a distinct value of a corresponding `Var`. The `ConfigValues` call on a given `VarSet` specifies how many Values to create per each Var within a Set -- this is a shared property of the Set, and should be a consideration in organizing the sets.  For example, Sets that are per object should contain one Value per object, etc, while others that are per material would have one Value per material.
-    + There is no support for interleaved arrays -- if you want to achieve such a thing, you need to use an array of structs, but the main use-case is for VertexInput, which actually works faster with non-interleaved simple arrays of vec4 points in most cases (e.g., for the points and their normals).
+    + There is no support for interleaved arrays -- if you want to achieve such a thing, you need to use an array of structs, but the main use-case is for VertexInput, which actually works faster with non-interleaved simple arrays of vector4 points in most cases (e.g., for the points and their normals).
     + You can allocate multiple bindings of all the variables, with each binding being used for a different parallel threaded rendering pass.  However, there is only one shared set of Values, so your logic will have to take that into account (e.g., allocating 2x Values per object to allow 2 separate threads to each update and bind their own unique subset of these Values for their own render pass).  See discussion under `Texture` about how this is done in that case.  The number of such DescriptorSets is configured in `Memory.Vars.NDescs` (defaults to 1). Note that these are orthogonal to the number of `VarSet`s -- the terminology is confusing.  Various methods take a `descIndex` to determine which such descriptor set to use -- typically in a threaded swapchain logic you would use the acquired frame index as the descIndex to determine what binding to use.
 
 ## Naming conventions

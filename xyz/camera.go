@@ -21,10 +21,10 @@ type Camera struct {
 	CamMu sync.RWMutex
 
 	// target location for the camera -- where it is pointing at -- defaults to the origin, but moves with panning movements, and is reset by a call to LookAt method
-	Target math32.Vec3
+	Target math32.Vector3
 
 	// up direction for camera -- which way is up -- defaults to positive Y axis, and is reset by call to LookAt method
-	UpDir math32.Vec3
+	UpDir math32.Vector3
 
 	// default is a Perspective camera -- set this to make it Orthographic instead, in which case the view includes the volume specified by the Near - Far distance (i.e., you probably want to decrease Far).
 	Ortho bool
@@ -101,10 +101,10 @@ func (cm *Camera) UpdateMatrix() {
 
 // LookAt points the camera at given target location, using given up direction,
 // and sets the Target, UpDir fields for future camera movements.
-func (cm *Camera) LookAt(target, upDir math32.Vec3) {
+func (cm *Camera) LookAt(target, upDir math32.Vector3) {
 	cm.CamMu.Lock()
 	cm.Target = target
-	if upDir == (math32.Vec3{}) {
+	if upDir == (math32.Vector3{}) {
 		upDir = math32.V3(0, 1, 0)
 	}
 	cm.UpDir = upDir
@@ -115,7 +115,7 @@ func (cm *Camera) LookAt(target, upDir math32.Vec3) {
 
 // LookAtOrigin points the camera at origin with Y axis pointing Up (i.e., standard)
 func (cm *Camera) LookAtOrigin() {
-	cm.LookAt(math32.Vec3{}, math32.V3(0, 1, 0))
+	cm.LookAt(math32.Vector3{}, math32.V3(0, 1, 0))
 }
 
 // LookAtTarget points the camera at current target using current up direction
@@ -124,14 +124,14 @@ func (cm *Camera) LookAtTarget() {
 }
 
 // ViewVector is the vector between the camera position and target
-func (cm *Camera) ViewVector() math32.Vec3 {
+func (cm *Camera) ViewVector() math32.Vector3 {
 	cm.CamMu.RLock()
 	defer cm.CamMu.RUnlock()
 	return cm.Pose.Pos.Sub(cm.Target)
 }
 
 // DistTo is the distance from camera to given point
-func (cm *Camera) DistTo(pt math32.Vec3) float32 {
+func (cm *Camera) DistTo(pt math32.Vector3) float32 {
 	cm.CamMu.RLock()
 	defer cm.CamMu.RUnlock()
 	dv := cm.Pose.Pos.Sub(pt)
@@ -161,7 +161,7 @@ func (cm *Camera) ViewMainAxis() (dim math32.Dims, sign float32) {
 // the Up direction vector to keep looking at the target.
 func (cm *Camera) Orbit(delX, delY float32) {
 	ctdir := cm.ViewVector()
-	if ctdir == (math32.Vec3{}) {
+	if ctdir == (math32.Vector3{}) {
 		ctdir.Set(0, 0, 1)
 	}
 	dir := ctdir.Normal()
@@ -239,7 +239,7 @@ func (cm *Camera) TargetFromView() {
 func (cm *Camera) Zoom(zoomPct float32) {
 	ctaxis := cm.ViewVector()
 	cm.CamMu.Lock()
-	if ctaxis == (math32.Vec3{}) {
+	if ctaxis == (math32.Vector3{}) {
 		ctaxis.Set(0, 0, 1)
 	}
 	dist := ctaxis.Length()

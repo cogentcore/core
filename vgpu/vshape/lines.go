@@ -20,7 +20,7 @@ type Lines struct {
 	ShapeBase
 
 	// line points (must be 2 or more)
-	Points []math32.Vec3
+	Points []math32.Vector3
 
 	// line width, Y = height perpendicular to line direction, and X = depth
 	Width math32.Vector2
@@ -33,7 +33,7 @@ type Lines struct {
 }
 
 // NewLines returns a Lines shape with given size
-func NewLines(points []math32.Vec3, width math32.Vector2, closed bool) *Lines {
+func NewLines(points []math32.Vector3, width math32.Vector2, closed bool) *Lines {
 	ln := &Lines{}
 	ln.Defaults()
 	ln.Points = points
@@ -77,7 +77,7 @@ func LinesN(npoints int, closed bool) (nVtx, nIndex int) {
 // and width parameters.  The Mesh must be drawn in the XY plane (i.e., use Z = 0
 // or a constant unless specifically relevant to have full 3D variation).
 // Rotate to put into other planes.
-func SetLines(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, points []math32.Vec3, width math32.Vector2, closed bool, pos math32.Vec3) math32.Box3 {
+func SetLines(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, points []math32.Vector3, width math32.Vector2, closed bool, pos math32.Vector3) math32.Box3 {
 	np := len(points)
 	if np < 2 {
 		log.Printf("vshape.SetLines: need 2 or more Points\n")
@@ -211,40 +211,40 @@ func SetLines(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, v
 		// two triangles are: 0,1,2;  0,2,3
 
 		if swap {
-			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vec3{sypzm, symzm, eymzm, eypzm}, nil, pos)
+			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vector3{sypzm, symzm, eymzm, eypzm}, nil, pos)
 			voff += qvn
 			ioff += qin
-			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vec3{sypzp, sypzm, eypzm, eypzp}, nil, pos) // bottom (yp, upside down)
+			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vector3{sypzp, sypzm, eypzm, eypzp}, nil, pos) // bottom (yp, upside down)
 			voff += qvn
 			ioff += qin
-			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vec3{symzm, symzp, eymzp, eymzm}, nil, pos) // top (ym)
+			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vector3{symzm, symzp, eymzp, eymzm}, nil, pos) // top (ym)
 			voff += qvn
 			ioff += qin
-			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vec3{symzp, sypzp, eypzp, eymzp}, nil, pos) // front (zp)
+			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vector3{symzp, sypzp, eypzp, eymzp}, nil, pos) // front (zp)
 			voff += qvn
 			ioff += qin
 		} else {
-			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vec3{symzm, sypzm, eypzm, eymzm}, nil, pos) // back (zm)
+			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vector3{symzm, sypzm, eypzm, eymzm}, nil, pos) // back (zm)
 			voff += qvn
 			ioff += qin
-			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vec3{symzp, symzm, eymzm, eymzp}, nil, pos) // bottom (ym)
+			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vector3{symzp, symzm, eymzm, eymzp}, nil, pos) // bottom (ym)
 			voff += qvn
 			ioff += qin
-			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vec3{sypzm, sypzp, eypzp, eypzm}, nil, pos) // top (yp)
+			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vector3{sypzm, sypzp, eypzp, eypzm}, nil, pos) // top (yp)
 			voff += qvn
 			ioff += qin
-			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vec3{sypzp, symzp, eymzp, eypzp}, nil, pos) // front (zp)
+			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vector3{sypzp, symzp, eymzp, eypzp}, nil, pos) // front (zp)
 			voff += qvn
 			ioff += qin
 		}
 
 		if spSt { // do cap
-			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vec3{sypzm, symzm, symzp, sypzp}, nil, pos)
+			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vector3{sypzm, symzm, symzp, sypzp}, nil, pos)
 			voff += qvn
 			ioff += qin
 		}
 		if epEd {
-			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vec3{eypzp, eymzp, eymzm, eypzm}, nil, pos)
+			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vector3{eypzp, eymzp, eymzm, eypzm}, nil, pos)
 			voff += qvn
 			ioff += qin
 		}

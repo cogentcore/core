@@ -22,7 +22,7 @@ func TriangleN() (nVtx, nIndex int) {
 // Norm is auto-computed, and bounds expanded.
 // pos is a 3D position offset. returns 3D size of plane.
 // returns bounding box.
-func SetTriangle(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, a, b, c math32.Vec3, texs []math32.Vector2, pos math32.Vec3) math32.Box3 {
+func SetTriangle(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, a, b, c math32.Vector3, texs []math32.Vector2, pos math32.Vector3) math32.Box3 {
 	hasTex := texs != nil
 	vidx := vtxOff * 3
 	tidx := vtxOff * 2
@@ -44,7 +44,7 @@ func SetTriangle(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32
 	idxAry.Set(idxOff, uint32(vtxOff), uint32(vtxOff+1), uint32(vtxOff+2))
 
 	bb := math32.B3Empty()
-	bb.ExpandByPoints([]math32.Vec3{a, b, c})
+	bb.ExpandByPoints([]math32.Vector3{a, b, c})
 	return bb
 }
 
@@ -62,7 +62,7 @@ func QuadN() (nVtx, nIndex int) {
 // Norm is auto-computed, and bbox expanded by points.
 // pos is a 3D position offset. returns 3D size of plane.
 // returns bounding box.
-func SetQuad(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, vtxs []math32.Vec3, texs []math32.Vector2, pos math32.Vec3) math32.Box3 {
+func SetQuad(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, vtxs []math32.Vector3, texs []math32.Vector2, pos math32.Vector3) math32.Box3 {
 	hasTex := texs != nil
 	vidx := vtxOff * 3
 	tidx := vtxOff * 2

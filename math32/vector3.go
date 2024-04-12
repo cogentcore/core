@@ -12,60 +12,60 @@ package math32
 
 import "fmt"
 
-// Vec3 is a 3D vector/point with X, Y and Z components.
-type Vec3 struct {
+// Vector3 is a 3D vector/point with X, Y and Z components.
+type Vector3 struct {
 	X float32
 	Y float32
 	Z float32
 }
 
-// V3 returns a new [Vec3] with the given x, y and z components.
-func V3(x, y, z float32) Vec3 {
-	return Vec3{x, y, z}
+// V3 returns a new [Vector3] with the given x, y and z components.
+func V3(x, y, z float32) Vector3 {
+	return Vector3{x, y, z}
 }
 
-// V3Scalar returns a new [Vec3] with all components set to the given scalar value.
-func V3Scalar(s float32) Vec3 {
-	return Vec3{s, s, s}
+// V3Scalar returns a new [Vector3] with all components set to the given scalar value.
+func V3Scalar(s float32) Vector3 {
+	return Vector3{s, s, s}
 }
 
-// V3FromV4 returns a new [Vec3] from the given [Vec4].
-func V3FromV4(v Vec4) Vec3 {
-	nv := Vec3{}
-	nv.SetFromVec4(v)
+// V3FromV4 returns a new [Vector3] from the given [Vector4].
+func V3FromV4(v Vector4) Vector3 {
+	nv := Vector3{}
+	nv.SetFromVector4(v)
 	return nv
 }
 
 // Set sets this vector X, Y and Z components.
-func (v *Vec3) Set(x, y, z float32) {
+func (v *Vector3) Set(x, y, z float32) {
 	v.X = x
 	v.Y = y
 	v.Z = z
 }
 
 // SetScalar sets all vector X, Y and Z components to same scalar value.
-func (v *Vec3) SetScalar(s float32) {
+func (v *Vector3) SetScalar(s float32) {
 	v.X = s
 	v.Y = s
 	v.Z = s
 }
 
-// SetFromVec4 sets this vector from a Vec4
-func (v *Vec3) SetFromVec4(other Vec4) {
+// SetFromVector4 sets this vector from a Vector4
+func (v *Vector3) SetFromVector4(other Vector4) {
 	v.X = other.X
 	v.Y = other.Y
 	v.Z = other.Z
 }
 
-// SetFromVec3i sets from a Vec3i (int32) vector.
-func (v *Vec3) SetFromVec3i(vi Vec3i) {
+// SetFromVector3i sets from a Vector3i (int32) vector.
+func (v *Vector3) SetFromVector3i(vi Vector3i) {
 	v.X = float32(vi.X)
 	v.Y = float32(vi.Y)
 	v.Z = float32(vi.Z)
 }
 
 // SetDim sets this vector component value by dimension index.
-func (v *Vec3) SetDim(dim Dims, value float32) {
+func (v *Vector3) SetDim(dim Dims, value float32) {
 	switch dim {
 	case X:
 		v.X = value
@@ -79,7 +79,7 @@ func (v *Vec3) SetDim(dim Dims, value float32) {
 }
 
 // Dim returns this vector component
-func (v Vec3) Dim(dim Dims) float32 {
+func (v Vector3) Dim(dim Dims) float32 {
 	switch dim {
 	case X:
 		return v.X
@@ -92,12 +92,12 @@ func (v Vec3) Dim(dim Dims) float32 {
 	}
 }
 
-func (a Vec3) String() string {
+func (a Vector3) String() string {
 	return fmt.Sprintf("(%v, %v, %v)", a.X, a.Y, a.Z)
 }
 
 // SetByName sets this vector component value by its case insensitive name: "x", "y", or "z".
-func (v *Vec3) SetByName(name string, value float32) {
+func (v *Vector3) SetByName(name string, value float32) {
 	switch name {
 	case "x", "X":
 		v.X = value
@@ -106,34 +106,34 @@ func (v *Vec3) SetByName(name string, value float32) {
 	case "z", "Z":
 		v.Z = value
 	default:
-		panic("Invalid Vec3 component name: " + name)
+		panic("Invalid Vector3 component name: " + name)
 	}
 }
 
 // GenGoSet returns code to set values in object at given path (var.member etc)
-func (v *Vec3) GenGoSet(path string) string {
+func (v *Vector3) GenGoSet(path string) string {
 	return fmt.Sprintf("%s.Set(%g, %g, %g)", path, v.X, v.Y, v.Z)
 }
 
 // GenGoNew returns code to create new
-func (v *Vec3) GenGoNew() string {
+func (v *Vector3) GenGoNew() string {
 	return fmt.Sprintf("math32.V3(%g, %g, %g)", v.X, v.Y, v.Z)
 }
 
 // SetZero sets this vector X, Y and Z components to be zero.
-func (v *Vec3) SetZero() {
+func (v *Vector3) SetZero() {
 	v.SetScalar(0)
 }
 
 // FromArray sets this vector's components from the specified array and offset.
-func (v *Vec3) FromArray(array []float32, offset int) {
+func (v *Vector3) FromArray(array []float32, offset int) {
 	v.X = array[offset]
 	v.Y = array[offset+1]
 	v.Z = array[offset+2]
 }
 
 // ToArray copies this vector's components to array starting at offset.
-func (v Vec3) ToArray(array []float32, offset int) {
+func (v Vector3) ToArray(array []float32, offset int) {
 	array[offset] = v.X
 	array[offset+1] = v.Y
 	array[offset+2] = v.Z
@@ -143,48 +143,48 @@ func (v Vec3) ToArray(array []float32, offset int) {
 //  Basic math operations
 
 // Add adds other vector to this one and returns result in a new vector.
-func (v Vec3) Add(other Vec3) Vec3 {
+func (v Vector3) Add(other Vector3) Vector3 {
 	return V3(v.X+other.X, v.Y+other.Y, v.Z+other.Z)
 }
 
 // AddScalar adds scalar s to each component of this vector and returns new vector.
-func (v Vec3) AddScalar(s float32) Vec3 {
+func (v Vector3) AddScalar(s float32) Vector3 {
 	return V3(v.X+s, v.Y+s, v.Z+s)
 }
 
 // SetAdd sets this to addition with other vector (i.e., += or plus-equals).
-func (v *Vec3) SetAdd(other Vec3) {
+func (v *Vector3) SetAdd(other Vector3) {
 	v.X += other.X
 	v.Y += other.Y
 	v.Z += other.Z
 }
 
 // SetAddScalar sets this to addition with scalar.
-func (v *Vec3) SetAddScalar(s float32) {
+func (v *Vector3) SetAddScalar(s float32) {
 	v.X += s
 	v.Y += s
 	v.Z += s
 }
 
 // Sub subtracts other vector from this one and returns result in new vector.
-func (v Vec3) Sub(other Vec3) Vec3 {
+func (v Vector3) Sub(other Vector3) Vector3 {
 	return V3(v.X-other.X, v.Y-other.Y, v.Z-other.Z)
 }
 
 // SubScalar subtracts scalar s from each component of this vector and returns new vector.
-func (v Vec3) SubScalar(s float32) Vec3 {
+func (v Vector3) SubScalar(s float32) Vector3 {
 	return V3(v.X-s, v.Y-s, v.Z-s)
 }
 
 // SetSub sets this to subtraction with other vector (i.e., -= or minus-equals).
-func (v *Vec3) SetSub(other Vec3) {
+func (v *Vector3) SetSub(other Vector3) {
 	v.X -= other.X
 	v.Y -= other.Y
 	v.Z -= other.Z
 }
 
 // SetSubScalar sets this to subtraction of scalar.
-func (v *Vec3) SetSubScalar(s float32) {
+func (v *Vector3) SetSubScalar(s float32) {
 	v.X -= s
 	v.Y -= s
 	v.Z -= s
@@ -192,24 +192,24 @@ func (v *Vec3) SetSubScalar(s float32) {
 
 // Mul multiplies each component of this vector by the corresponding one from other
 // and returns resulting vector.
-func (v Vec3) Mul(other Vec3) Vec3 {
+func (v Vector3) Mul(other Vector3) Vector3 {
 	return V3(v.X*other.X, v.Y*other.Y, v.Z*other.Z)
 }
 
 // MulScalar multiplies each component of this vector by the scalar s and returns resulting vector.
-func (v Vec3) MulScalar(s float32) Vec3 {
+func (v Vector3) MulScalar(s float32) Vector3 {
 	return V3(v.X*s, v.Y*s, v.Z*s)
 }
 
 // SetMul sets this to multiplication with other vector (i.e., *= or times-equals).
-func (v *Vec3) SetMul(other Vec3) {
+func (v *Vector3) SetMul(other Vector3) {
 	v.X *= other.X
 	v.Y *= other.Y
 	v.Z *= other.Z
 }
 
 // SetMulScalar sets this to multiplication by scalar.
-func (v *Vec3) SetMulScalar(s float32) {
+func (v *Vector3) SetMulScalar(s float32) {
 	v.X *= s
 	v.Y *= s
 	v.Z *= s
@@ -217,29 +217,29 @@ func (v *Vec3) SetMulScalar(s float32) {
 
 // Div divides each component of this vector by the corresponding one from other vector
 // and returns resulting vector.
-func (v Vec3) Div(other Vec3) Vec3 {
+func (v Vector3) Div(other Vector3) Vector3 {
 	return V3(v.X/other.X, v.Y/other.Y, v.Z/other.Z)
 }
 
 // DivScalar divides each component of this vector by the scalar s and returns resulting vector.
 // If scalar is zero, returns zero.
-func (v Vec3) DivScalar(scalar float32) Vec3 {
+func (v Vector3) DivScalar(scalar float32) Vector3 {
 	if scalar != 0 {
 		return v.MulScalar(1 / scalar)
 	} else {
-		return Vec3{}
+		return Vector3{}
 	}
 }
 
 // SetDiv sets this to division by other vector (i.e., /= or divide-equals).
-func (v *Vec3) SetDiv(other Vec3) {
+func (v *Vector3) SetDiv(other Vector3) {
 	v.X /= other.X
 	v.Y /= other.Y
 	v.Z /= other.Z
 }
 
 // SetDivScalar sets this to division by scalar.
-func (v *Vec3) SetDivScalar(s float32) {
+func (v *Vector3) SetDivScalar(s float32) {
 	if s != 0 {
 		v.SetMulScalar(1 / s)
 	} else {
@@ -248,24 +248,24 @@ func (v *Vec3) SetDivScalar(s float32) {
 }
 
 // Min returns min of this vector components vs. other vector.
-func (v Vec3) Min(other Vec3) Vec3 {
+func (v Vector3) Min(other Vector3) Vector3 {
 	return V3(Min(v.X, other.X), Min(v.Y, other.Y), Min(v.Z, other.Z))
 }
 
 // SetMin sets this vector components to the minimum values of itself and other vector.
-func (v *Vec3) SetMin(other Vec3) {
+func (v *Vector3) SetMin(other Vector3) {
 	v.X = Min(v.X, other.X)
 	v.Y = Min(v.Y, other.Y)
 	v.Z = Min(v.Z, other.Z)
 }
 
 // Max returns max of this vector components vs. other vector.
-func (v Vec3) Max(other Vec3) Vec3 {
+func (v Vector3) Max(other Vector3) Vector3 {
 	return V3(Max(v.X, other.X), Max(v.Y, other.Y), Max(v.Z, other.Z))
 }
 
 // SetMax sets this vector components to the maximum value of itself and other vector.
-func (v *Vec3) SetMax(other Vec3) {
+func (v *Vector3) SetMax(other Vector3) {
 	v.X = Max(v.X, other.X)
 	v.Y = Max(v.Y, other.Y)
 	v.Z = Max(v.Z, other.Z)
@@ -274,7 +274,7 @@ func (v *Vec3) SetMax(other Vec3) {
 // Clamp sets this vector components to be no less than the corresponding components of min
 // and not greater than the corresponding component of max.
 // Assumes min < max, if this assumption isn't true it will not operate correctly.
-func (v *Vec3) Clamp(min, max Vec3) {
+func (v *Vector3) Clamp(min, max Vector3) {
 	if v.X < min.X {
 		v.X = min.X
 	} else if v.X > max.X {
@@ -293,60 +293,60 @@ func (v *Vec3) Clamp(min, max Vec3) {
 }
 
 // ClampScalar sets this vector components to be no less than minVal and not greater than maxVal.
-func (v *Vec3) ClampScalar(minVal, maxVal float32) {
+func (v *Vector3) ClampScalar(minVal, maxVal float32) {
 	v.Clamp(V3Scalar(minVal), V3Scalar(maxVal))
 }
 
 // Floor returns vector with math32.Floor() applied to each of this vector's components.
-func (v Vec3) Floor() Vec3 {
+func (v Vector3) Floor() Vector3 {
 	return V3(Floor(v.X), Floor(v.Y), Floor(v.Z))
 }
 
 // SetFloor applies math32.Floor() to each of this vector's components.
-func (v *Vec3) SetFloor() {
+func (v *Vector3) SetFloor() {
 	v.X = Floor(v.X)
 	v.Y = Floor(v.Y)
 	v.Z = Floor(v.Z)
 }
 
 // Ceil returns vector with math32.Ceil() applied to each of this vector's components.
-func (v Vec3) Ceil() Vec3 {
+func (v Vector3) Ceil() Vector3 {
 	return V3(Ceil(v.X), Ceil(v.Y), Ceil(v.Z))
 }
 
 // SetCeil applies math32.Ceil() to each of this vector's components.
-func (v *Vec3) SetCeil() {
+func (v *Vector3) SetCeil() {
 	v.X = Ceil(v.X)
 	v.Y = Ceil(v.Y)
 	v.Z = Ceil(v.Z)
 }
 
 // Round returns vector with math32.Round() applied to each of this vector's components.
-func (v Vec3) Round() Vec3 {
+func (v Vector3) Round() Vector3 {
 	return V3(Round(v.X), Round(v.Y), Round(v.Z))
 }
 
 // SetRound rounds each of this vector's components.
-func (v *Vec3) SetRound() {
+func (v *Vector3) SetRound() {
 	v.X = Round(v.X)
 	v.Y = Round(v.Y)
 	v.Z = Round(v.Z)
 }
 
 // Negate returns vector with each component negated.
-func (v Vec3) Negate() Vec3 {
+func (v Vector3) Negate() Vector3 {
 	return V3(-v.X, -v.Y, -v.Z)
 }
 
 // SetNegate negates each of this vector's components.
-func (v *Vec3) SetNegate() {
+func (v *Vector3) SetNegate() {
 	v.X = -v.X
 	v.Y = -v.Y
 	v.Z = -v.Z
 }
 
 // Abs returns vector with Abs of each component.
-func (v Vec3) Abs() Vec3 {
+func (v Vector3) Abs() Vector3 {
 	return V3(Abs(v.X), Abs(v.Y), Abs(v.Z))
 }
 
@@ -354,55 +354,55 @@ func (v Vec3) Abs() Vec3 {
 //  Distance, Norm
 
 // IsEqual returns if this vector is equal to other.
-func (v Vec3) IsEqual(other Vec3) bool {
+func (v Vector3) IsEqual(other Vector3) bool {
 	return (other.X == v.X) && (other.Y == v.Y) && (other.Z == v.Z)
 }
 
 // AlmostEqual returns whether the vector is almost equal to another vector within the specified tolerance.
-func (v *Vec3) AlmostEqual(other Vec3, tol float32) bool {
+func (v *Vector3) AlmostEqual(other Vector3, tol float32) bool {
 	return (Abs(v.X-other.X) < tol) &&
 		(Abs(v.Y-other.Y) < tol) &&
 		(Abs(v.Z-other.Z) < tol)
 }
 
 // Dot returns the dot product of this vector with other.
-func (v Vec3) Dot(other Vec3) float32 {
+func (v Vector3) Dot(other Vector3) float32 {
 	return v.X*other.X + v.Y*other.Y + v.Z*other.Z
 }
 
 // LengthSq returns the length squared of this vector.
 // LengthSq can be used to compare vectors' lengths without the need to perform a square root.
-func (v Vec3) LengthSq() float32 {
+func (v Vector3) LengthSq() float32 {
 	return v.X*v.X + v.Y*v.Y + v.Z*v.Z
 }
 
 // Length returns the length of this vector.
-func (v Vec3) Length() float32 {
+func (v Vector3) Length() float32 {
 	return Sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z)
 }
 
 // Normal returns this vector divided by its length
-func (v Vec3) Normal() Vec3 {
+func (v Vector3) Normal() Vector3 {
 	return v.DivScalar(v.Length())
 }
 
 // SetNormal normalizes this vector so its length will be 1.
-func (v *Vec3) SetNormal() {
+func (v *Vector3) SetNormal() {
 	v.SetDivScalar(v.Length())
 }
 
 // Normalize normalizes this vector so its length will be 1.
-func (v *Vec3) Normalize() {
+func (v *Vector3) Normalize() {
 	v.SetDivScalar(v.Length())
 }
 
 // DistTo returns the distance of this point to other.
-func (v Vec3) DistTo(other Vec3) float32 {
+func (v Vector3) DistTo(other Vector3) float32 {
 	return Sqrt(v.DistToSquared(other))
 }
 
 // DistToSquared returns the distance squared of this point to other.
-func (v Vec3) DistToSquared(other Vec3) float32 {
+func (v Vector3) DistToSquared(other Vector3) float32 {
 	dx := v.X - other.X
 	dy := v.Y - other.Y
 	dz := v.Z - other.Z
@@ -411,7 +411,7 @@ func (v Vec3) DistToSquared(other Vec3) float32 {
 
 // SetLength sets this vector to have the specified length.
 // If the current length is zero, does nothing.
-func (v *Vec3) SetLength(l float32) {
+func (v *Vector3) SetLength(l float32) {
 	oldLength := v.Length()
 	if oldLength != 0 && l != oldLength {
 		v.SetMulScalar(l / oldLength)
@@ -420,13 +420,13 @@ func (v *Vec3) SetLength(l float32) {
 
 // Lerp returns vector with each components as the linear interpolated value of
 // alpha between itself and the corresponding other component.
-func (v Vec3) Lerp(other Vec3, alpha float32) Vec3 {
+func (v Vector3) Lerp(other Vector3, alpha float32) Vector3 {
 	return V3(v.X+(other.X-v.X)*alpha, v.Y+(other.Y-v.Y)*alpha, v.Z+(other.Z-v.Z)*alpha)
 }
 
 // SetLerp sets each of this vector's components to the linear interpolated value of
 // alpha between itself and the corresponding other component.
-func (v *Vec3) SetLerp(other Vec3, alpha float32) {
+func (v *Vector3) SetLerp(other Vector3, alpha float32) {
 	v.X += (other.X - v.X) * alpha
 	v.Y += (other.Y - v.Y) * alpha
 	v.Z += (other.Z - v.Z) * alpha
@@ -436,52 +436,52 @@ func (v *Vec3) SetLerp(other Vec3, alpha float32) {
 //  Matrix operations
 
 // RotateAxisAngle returns vector rotated around axis by angle.
-func (v Vec3) RotateAxisAngle(axis Vec3, angle float32) Vec3 {
+func (v Vector3) RotateAxisAngle(axis Vector3, angle float32) Vector3 {
 	return v.MulQuat(NewQuatAxisAngle(axis, angle))
 }
 
 // SetRotateAxisAngle sets vector rotated around axis by angle.
-func (v *Vec3) SetRotateAxisAngle(axis Vec3, angle float32) {
+func (v *Vector3) SetRotateAxisAngle(axis Vector3, angle float32) {
 	*v = v.RotateAxisAngle(axis, angle)
 }
 
 // MulMat3 returns vector multiplied by specified 3x3 matrix.
-func (v Vec3) MulMat3(m *Mat3) Vec3 {
-	return Vec3{m[0]*v.X + m[3]*v.Y + m[6]*v.Z,
+func (v Vector3) MulMat3(m *Mat3) Vector3 {
+	return Vector3{m[0]*v.X + m[3]*v.Y + m[6]*v.Z,
 		m[1]*v.X + m[4]*v.Y + m[7]*v.Z,
 		m[2]*v.X + m[5]*v.Y + m[8]*v.Z}
 }
 
 // SetMulMat3 sets vector multiplied by specified 3x3 matrix.
-func (v *Vec3) SetMulMat3(m *Mat3) {
+func (v *Vector3) SetMulMat3(m *Mat3) {
 	*v = v.MulMat3(m)
 }
 
 // MulMat4 returns vector multiplied by specified 4x4 matrix.
-func (v Vec3) MulMat4(m *Mat4) Vec3 {
-	return Vec3{m[0]*v.X + m[4]*v.Y + m[8]*v.Z + m[12],
+func (v Vector3) MulMat4(m *Mat4) Vector3 {
+	return Vector3{m[0]*v.X + m[4]*v.Y + m[8]*v.Z + m[12],
 		m[1]*v.X + m[5]*v.Y + m[9]*v.Z + m[13],
 		m[2]*v.X + m[6]*v.Y + m[10]*v.Z + m[14]}
 }
 
-// MulMat4AsVec4 returns 3-dim vector multiplied by specified 4x4 matrix
+// MulMat4AsVector4 returns 3-dim vector multiplied by specified 4x4 matrix
 // using a 4-dim vector with given 4th dimensional value, then reduced back to
 // a 3-dimensional vector.  This is somehow different from just straight
 // MulMat4 on the 3-dim vector.  Use 0 for normals and 1 for positions
 // as the 4th dim to set.
-func (v Vec3) MulMat4AsVec4(m *Mat4, w float32) Vec3 {
+func (v Vector3) MulMat4AsVector4(m *Mat4, w float32) Vector3 {
 	return V3FromV4(V4FromV3(v, w).MulMat4(m))
 }
 
 // SetMulMat4 sets vector multiplied by specified 4x4 matrix.
-func (v *Vec3) SetMulMat4(m *Mat4) {
+func (v *Vector3) SetMulMat4(m *Mat4) {
 	*v = v.MulMat4(m)
 }
 
 // MVProjToNDC project given vector through given MVP model-view-projection Mat4
 // and do perspective divide to return normalized display coordinates (NDC).
 // w is value for 4th coordinate -- use 1 for positions, 0 for normals.
-func (v Vec3) MVProjToNDC(m *Mat4, w float32) Vec3 {
+func (v Vector3) MVProjToNDC(m *Mat4, w float32) Vector3 {
 	clip := V4FromV3(v, w).MulMat4(m)
 	return clip.PerspDiv()
 }
@@ -490,8 +490,8 @@ func (v Vec3) MVProjToNDC(m *Mat4, w float32) Vec3 {
 // (pixel) coordinates, using given window size parameters.
 // near, far are 0, 1 by default (glDepthRange defaults).
 // flipY if true means flip the Y axis (top = 0 for windows vs. bottom = 0 for 3D coords)
-func (v Vec3) NDCToWindow(size, off Vector2, near, far float32, flipY bool) Vec3 {
-	w := Vec3{}
+func (v Vector3) NDCToWindow(size, off Vector2, near, far float32, flipY bool) Vector3 {
+	w := Vector3{}
 	half := size.MulScalar(0.5)
 	w.X = half.X*v.X + half.X
 	w.Y = half.Y*v.Y + half.Y
@@ -508,8 +508,8 @@ func (v Vec3) NDCToWindow(size, off Vector2, near, far float32, flipY bool) Vec3
 // normalized display coordinates (NDC), using given window size parameters.
 // The Z depth coordinate (0-1) must be set manually or by reading from framebuffer
 // flipY if true means flip the Y axis (top = 0 for windows vs. bottom = 0 for 3D coords)
-func (v Vector2) WindowToNDC(size, off Vector2, flipY bool) Vec3 {
-	n := Vec3{}
+func (v Vector2) WindowToNDC(size, off Vector2, flipY bool) Vector3 {
+	n := Vector3{}
 	half := size.MulScalar(0.5)
 	n.X = v.X - off.X
 	n.Y = v.Y - off.Y
@@ -522,9 +522,9 @@ func (v Vector2) WindowToNDC(size, off Vector2, flipY bool) Vec3 {
 }
 
 // MulProjection returns vector multiplied by the projection matrix m
-func (v Vec3) MulProjection(m *Mat4) Vec3 {
+func (v Vector3) MulProjection(m *Mat4) Vector3 {
 	d := 1 / (m[3]*v.X + m[7]*v.Y + m[11]*v.Z + m[15]) // perspective divide
-	return Vec3{(m[0]*v.X + m[4]*v.Y + m[8]*v.Z + m[12]) * d,
+	return Vector3{(m[0]*v.X + m[4]*v.Y + m[8]*v.Z + m[12]) * d,
 		(m[1]*v.X + m[5]*v.Y + m[9]*v.Z + m[13]) * d,
 		(m[2]*v.X + m[6]*v.Y + m[10]*v.Z + m[14]) * d}
 }
@@ -532,7 +532,7 @@ func (v Vec3) MulProjection(m *Mat4) Vec3 {
 // MulQuat returns vector multiplied by specified quaternion and
 // then by the quaternion inverse.
 // It basically applies the rotation encoded in the quaternion to this vector.
-func (v Vec3) MulQuat(q Quat) Vec3 {
+func (v Vector3) MulQuat(q Quat) Vector3 {
 	qx := q.X
 	qy := q.Y
 	qz := q.Z
@@ -543,7 +543,7 @@ func (v Vec3) MulQuat(q Quat) Vec3 {
 	iz := qw*v.Z + qx*v.Y - qy*v.X
 	iw := -qx*v.X - qy*v.Y - qz*v.Z
 	// calculate result * inverse quat
-	return Vec3{ix*qw + iw*-qx + iy*-qz - iz*-qy,
+	return Vector3{ix*qw + iw*-qx + iy*-qz - iz*-qy,
 		iy*qw + iw*-qy + iz*-qx - ix*-qz,
 		iz*qw + iw*-qz + ix*-qy - iy*-qx}
 }
@@ -551,40 +551,40 @@ func (v Vec3) MulQuat(q Quat) Vec3 {
 // SetMulQuat multiplies vector by specified quaternion and
 // then by the quaternion inverse.
 // It basically applies the rotation encoded in the quaternion to this vector.
-func (v *Vec3) SetMulQuat(q Quat) {
+func (v *Vector3) SetMulQuat(q Quat) {
 	*v = v.MulQuat(q)
 }
 
 // Cross returns the cross product of this vector with other.
-func (v Vec3) Cross(other Vec3) Vec3 {
+func (v Vector3) Cross(other Vector3) Vector3 {
 	return V3(v.Y*other.Z-v.Z*other.Y, v.Z*other.X-v.X*other.Z, v.X*other.Y-v.Y*other.X)
 }
 
 // ProjectOnVector returns vector projected on other vector.
-func (v *Vec3) ProjectOnVector(other Vec3) Vec3 {
+func (v *Vector3) ProjectOnVector(other Vector3) Vector3 {
 	on := other.Normal()
 	return on.MulScalar(v.Dot(on))
 }
 
 // ProjectOnPlane returns vector projected on the plane specified by normal vector.
-func (v *Vec3) ProjectOnPlane(planeNormal Vec3) Vec3 {
+func (v *Vector3) ProjectOnPlane(planeNormal Vector3) Vector3 {
 	return v.Sub(v.ProjectOnVector(planeNormal))
 }
 
 // Reflect returns vector reflected relative to the normal vector (assumed to be
 // already normalized).
-func (v *Vec3) Reflect(normal Vec3) Vec3 {
+func (v *Vector3) Reflect(normal Vector3) Vector3 {
 	return v.Sub(normal.MulScalar(2 * v.Dot(normal)))
 }
 
 // CosTo returns the cosine (normalized dot product) between this vector and other.
-func (v Vec3) CosTo(other Vec3) float32 {
+func (v Vector3) CosTo(other Vector3) float32 {
 	return v.Dot(other) / (v.Length() * other.Length())
 }
 
 // AngleTo returns the angle between this vector and other.
 // Returns angles in range of -PI to PI (not 0 to 2 PI).
-func (v Vec3) AngleTo(other Vec3) float32 {
+func (v Vector3) AngleTo(other Vector3) float32 {
 	ang := Acos(Clamp(v.CosTo(other), -1, 1))
 	cross := v.Cross(other)
 	switch {
@@ -606,14 +606,14 @@ func (v Vec3) AngleTo(other Vec3) float32 {
 
 // SetFromMatrixPos set this vector from the translation coordinates
 // in the specified transformation matrix.
-func (v *Vec3) SetFromMatrixPos(m *Mat4) {
+func (v *Vector3) SetFromMatrixPos(m *Mat4) {
 	v.X = m[12]
 	v.Y = m[13]
 	v.Z = m[14]
 }
 
 // SetFromMatrixCol set this vector with the column at index of the m matrix.
-func (v *Vec3) SetFromMatrixCol(index int, m *Mat4) {
+func (v *Vector3) SetFromMatrixCol(index int, m *Mat4) {
 	offset := index * 4
 	v.X = m[offset]
 	v.Y = m[offset+1]
@@ -622,7 +622,7 @@ func (v *Vec3) SetFromMatrixCol(index int, m *Mat4) {
 
 // SetEulerAnglesFromMatrix sets this vector components to the Euler angles
 // from the specified pure rotation matrix.
-func (v *Vec3) SetEulerAnglesFromMatrix(m *Mat4) {
+func (v *Vector3) SetEulerAnglesFromMatrix(m *Mat4) {
 	m11 := m[0]
 	m12 := m[4]
 	m13 := m[8]
@@ -641,30 +641,30 @@ func (v *Vec3) SetEulerAnglesFromMatrix(m *Mat4) {
 	}
 }
 
-// NewEulerAnglesFromMatrix returns a Vec3 with components as the Euler angles
+// NewEulerAnglesFromMatrix returns a Vector3 with components as the Euler angles
 // from the specified pure rotation matrix.
-func NewEulerAnglesFromMatrix(m *Mat4) Vec3 {
-	rot := Vec3{}
+func NewEulerAnglesFromMatrix(m *Mat4) Vector3 {
+	rot := Vector3{}
 	rot.SetEulerAnglesFromMatrix(m)
 	return rot
 }
 
 // SetEulerAnglesFromQuat sets this vector components to the Euler angles
 // from the specified quaternion.
-func (v *Vec3) SetEulerAnglesFromQuat(q Quat) {
+func (v *Vector3) SetEulerAnglesFromQuat(q Quat) {
 	mat := Identity4()
 	mat.SetRotationFromQuat(q)
 	v.SetEulerAnglesFromMatrix(mat)
 }
 
 // RandomTangents computes and returns two arbitrary tangents to the vector.
-func (v *Vec3) RandomTangents() (Vec3, Vec3) {
-	t1 := Vec3{}
-	t2 := Vec3{}
+func (v *Vector3) RandomTangents() (Vector3, Vector3) {
+	t1 := Vector3{}
+	t2 := Vector3{}
 	length := v.Length()
 	if length > 0 {
 		n := v.Normal()
-		randVec := Vec3{}
+		randVec := Vector3{}
 		if Abs(n.X) < 0.9 {
 			randVec.X = 1
 			t1 = n.Cross(randVec)

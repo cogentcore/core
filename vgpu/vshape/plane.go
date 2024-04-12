@@ -84,10 +84,10 @@ func PlaneN(wsegs, hsegs int) (nVtx, nIndex int) {
 // offset is the distance to place the plane along the orthogonal axis.
 // pos is a 3D position offset. returns 3D size of plane.
 // returns bounding box.
-func SetPlaneAxisSize(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, normAxis math32.Dims, normNeg bool, size math32.Vector2, segs math32.Vector2i, offset float32, pos math32.Vec3) math32.Vec3 {
+func SetPlaneAxisSize(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, normAxis math32.Dims, normNeg bool, size math32.Vector2, segs math32.Vector2i, offset float32, pos math32.Vector3) math32.Vector3 {
 	hSz := size.DivScalar(2)
 	thin := float32(.0000001)
-	sz := math32.Vec3{}
+	sz := math32.Vector3{}
 	switch normAxis {
 	case math32.X:
 		sz.Set(thin, hSz.Y, hSz.X)
@@ -129,7 +129,7 @@ func SetPlaneAxisSize(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.Arr
 // and texture rendering (minimum of 1 will be enforced).
 // offset is the distance to place the plane along the orthogonal axis.
 // pos is a 3D position offset.
-func SetPlane(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, waxis, haxis math32.Dims, wdir, hdir int, width, height, woff, hoff, zoff float32, wsegs, hsegs int, pos math32.Vec3) {
+func SetPlane(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, waxis, haxis math32.Dims, wdir, hdir int, width, height, woff, hoff, zoff float32, wsegs, hsegs int, pos math32.Vector3) {
 	w := math32.Z
 	if (waxis == math32.X && haxis == math32.Y) || (waxis == math32.Y && haxis == math32.X) {
 		w = math32.Z
@@ -141,7 +141,7 @@ func SetPlane(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, v
 	wsegs = max(wsegs, 1)
 	hsegs = max(hsegs, 1)
 
-	norm := math32.Vec3{}
+	norm := math32.Vector3{}
 	if zoff > 0 {
 		norm.SetDim(w, 1)
 	} else {
@@ -162,7 +162,7 @@ func SetPlane(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, v
 		hoff = height + hoff
 	}
 
-	vtx := math32.Vec3{}
+	vtx := math32.Vector3{}
 	tex := math32.Vector2{}
 	vidx := vtxOff * 3
 	tidx := vtxOff * 2

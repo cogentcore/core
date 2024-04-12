@@ -12,29 +12,29 @@ package math32
 
 // Line3 represents a 3D line segment defined by a start and an end point.
 type Line3 struct {
-	Start Vec3
-	End   Vec3
+	Start Vector3
+	End   Vector3
 }
 
 // NewLine3 creates and returns a new Line3 with the
 // specified start and end points.
-func NewLine3(start, end Vec3) Line3 {
+func NewLine3(start, end Vector3) Line3 {
 	return Line3{start, end}
 }
 
 // Set sets this line segment start and end points.
-func (l *Line3) Set(start, end Vec3) {
+func (l *Line3) Set(start, end Vector3) {
 	l.Start = start
 	l.End = end
 }
 
 // Center calculates this line segment center point.
-func (l *Line3) Center() Vec3 {
+func (l *Line3) Center() Vector3 {
 	return l.Start.Add(l.End).MulScalar(0.5)
 }
 
 // Delta calculates the vector from the start to end point of this line segment.
-func (l *Line3) Delta() Vec3 {
+func (l *Line3) Delta() Vector3 {
 	return l.End.Sub(l.Start)
 }
 

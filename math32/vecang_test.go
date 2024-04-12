@@ -20,10 +20,10 @@ func TestV3AngleTo(t *testing.T) {
 		// cross := v.Cross(ref)
 		// fmt.Printf("ang: %v  cross: %v\n", ang, cross)
 		if Abs(vcos-cos) > 1.0e-6 {
-			t.Errorf("Vec3.AngleTo: Cos: %v != orig Cos: %v\n", vcos, cos)
+			t.Errorf("Vector3.AngleTo: Cos: %v != orig Cos: %v\n", vcos, cos)
 		}
 		if Abs(vsin-sin) > 1.0e-6 {
-			t.Errorf("Vec3.AngleTo: Sin: %v != orig Sin: %v\n", vsin, sin)
+			t.Errorf("Vector3.AngleTo: Sin: %v != orig Sin: %v\n", vsin, sin)
 		}
 	}
 	ref = V3(0, 1, 0)
@@ -37,10 +37,10 @@ func TestV3AngleTo(t *testing.T) {
 		// cross := v.Cross(ref)
 		// fmt.Printf("ang: %v  cross: %v\n", ang, cross)
 		if Abs(vcos-cos) > 1.0e-6 {
-			t.Errorf("Vec3.AngleTo: Cos: %v != orig Cos: %v\n", vcos, cos)
+			t.Errorf("Vector3.AngleTo: Cos: %v != orig Cos: %v\n", vcos, cos)
 		}
 		if Abs(vsin-sin) > 1.0e-6 {
-			t.Errorf("Vec3.AngleTo: Sin: %v != orig Sin: %v\n", vsin, sin)
+			t.Errorf("Vector3.AngleTo: Sin: %v != orig Sin: %v\n", vsin, sin)
 		}
 	}
 	ref = V3(0, 0, 1)
@@ -54,10 +54,10 @@ func TestV3AngleTo(t *testing.T) {
 		// cross := v.Cross(ref)
 		// fmt.Printf("ang: %v  cross: %v\n", ang, cross)
 		if Abs(vcos-cos) > 1.0e-6 {
-			t.Errorf("Vec3.AngleTo: Cos: %v != orig Cos: %v\n", vcos, cos)
+			t.Errorf("Vector3.AngleTo: Cos: %v != orig Cos: %v\n", vcos, cos)
 		}
 		if Abs(vsin-sin) > 1.0e-6 {
-			t.Errorf("Vec3.AngleTo: Sin: %v != orig Sin: %v\n", vsin, sin)
+			t.Errorf("Vector3.AngleTo: Sin: %v != orig Sin: %v\n", vsin, sin)
 		}
 	}
 }

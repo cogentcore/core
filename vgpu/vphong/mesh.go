@@ -17,13 +17,13 @@ import (
 // optionally per-vertex colors.
 type Mesh struct {
 
-	// number of vertex points, as math32.Vec3 -- always includes math32.Vec3 normals and math32.Vector2 texture coordinates
+	// number of vertex points, as math32.Vector3 -- always includes math32.Vector3 normals and math32.Vector2 texture coordinates
 	NVtx int
 
 	// number of indexes, as math32.ArrayU32
 	NIndex int
 
-	// has per-vertex colors, as math32.Vec4 per vertex
+	// has per-vertex colors, as math32.Vector4 per vertex
 	HasColor bool
 }
 

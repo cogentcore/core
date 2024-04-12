@@ -13,10 +13,10 @@ import (
 type Pose struct {
 
 	// position of center of element (relative to parent)
-	Pos math32.Vec3
+	Pos math32.Vector3
 
 	// scale (relative to parent)
-	Scale math32.Vec3
+	Scale math32.Vector3
 
 	// Node rotation specified as a Quat (relative to parent)
 	Quat math32.Quat
@@ -42,7 +42,7 @@ type Pose struct {
 
 // Defaults sets defaults only if current values are nil
 func (ps *Pose) Defaults() {
-	if ps.Scale == (math32.Vec3{}) {
+	if ps.Scale == (math32.Vector3{}) {
 		ps.Scale.Set(1, 1, 1)
 	}
 	if ps.Quat.IsNil() {
@@ -133,12 +133,12 @@ func (ps *Pose) SetEulerRotationRad(x, y, z float32) {
 }
 
 // EulerRotation returns the current rotation in Euler angles (degrees).
-func (ps *Pose) EulerRotation() math32.Vec3 {
+func (ps *Pose) EulerRotation() math32.Vector3 {
 	return ps.Quat.ToEuler().MulScalar(math32.RadToDegFactor)
 }
 
 // EulerRotationRad returns the current rotation in Euler angles (radians).
-func (ps *Pose) EulerRotationRad() math32.Vec3 {
+func (ps *Pose) EulerRotationRad() math32.Vector3 {
 	return ps.Quat.ToEuler()
 }
 
@@ -179,7 +179,7 @@ func (ps *Pose) SetMatrix(m *math32.Mat4) {
 }
 
 // LookAt points the element at given target location using given up direction.
-func (ps *Pose) LookAt(target, upDir math32.Vec3) {
+func (ps *Pose) LookAt(target, upDir math32.Vector3) {
 	ps.Quat.SetFromRotationMatrix(math32.NewLookAt(ps.Pos, target, upDir))
 }
 
@@ -187,8 +187,8 @@ func (ps *Pose) LookAt(target, upDir math32.Vec3) {
 // 		World values
 
 // WorldPos returns the current world position.
-func (ps *Pose) WorldPos() math32.Vec3 {
-	pos := math32.Vec3{}
+func (ps *Pose) WorldPos() math32.Vector3 {
+	pos := math32.Vector3{}
 	pos.SetFromMatrixPos(&ps.WorldMatrix)
 	return pos
 }
@@ -200,12 +200,12 @@ func (ps *Pose) WorldQuat() math32.Quat {
 }
 
 // WorldEulerRotation returns the current world rotation in Euler angles.
-func (ps *Pose) WorldEulerRotation() math32.Vec3 {
+func (ps *Pose) WorldEulerRotation() math32.Vector3 {
 	return ps.Quat.ToEuler()
 }
 
 // WorldScale returns he current world scale.
-func (ps *Pose) WorldScale() math32.Vec3 {
+func (ps *Pose) WorldScale() math32.Vector3 {
 	_, _, scale := ps.WorldMatrix.Decompose()
 	return scale
 }

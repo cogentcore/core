@@ -73,7 +73,7 @@ func (pl *Plane) Sizes() (nVtx, nIndex int, hasColor bool) {
 }
 
 func (pl *Plane) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
-	pos := math32.Vec3{}
+	pos := math32.Vector3{}
 	sz := vshape.SetPlaneAxisSize(vtxAry, normAry, texAry, idxAry, 0, 0, pl.NormAxis, pl.NormNeg, pl.Size, pl.Segs, pl.Offset, pos)
 	mn := pos.Sub(sz)
 	mx := pos.Add(sz)
@@ -90,10 +90,10 @@ type Box struct { //types:add -setters
 	MeshBase
 
 	// size along each dimension
-	Size math32.Vec3
+	Size math32.Vector3
 
 	// number of segments to divide each plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1
-	Segs math32.Vec3i
+	Segs math32.Vector3i
 }
 
 // NewBox adds Box mesh to given scene, with given name and size
@@ -113,7 +113,7 @@ func (bx *Box) Sizes() (nVtx, nIndex int, hasColor bool) {
 }
 
 func (bx *Box) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
-	pos := math32.Vec3{}
+	pos := math32.Vector3{}
 	hSz := vshape.SetBox(vtxAry, normAry, texAry, idxAry, 0, 0, bx.Size, bx.Segs, pos)
 	mn := pos.Sub(hSz)
 	mx := pos.Add(hSz)
@@ -184,7 +184,7 @@ func (sp *Sphere) Sizes() (nVtx, nIndex int, hasColor bool) {
 }
 
 func (sp *Sphere) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
-	pos := math32.Vec3{}
+	pos := math32.Vector3{}
 	bb := vshape.SetSphereSector(vtxAry, normAry, texAry, idxAry, 0, 0, sp.Radius, sp.WidthSegs, sp.HeightSegs, sp.AngStart, sp.AngLen, sp.ElevStart, sp.ElevLen, pos)
 	sp.BBoxMu.Lock()
 	sp.BBox.SetBounds(bb.Min, bb.Max)
@@ -283,7 +283,7 @@ func (cy *Cylinder) Sizes() (nVtx, nIndex int, hasColor bool) {
 }
 
 func (cy *Cylinder) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
-	pos := math32.Vec3{}
+	pos := math32.Vector3{}
 	bb := vshape.SetCylinderSector(vtxAry, normAry, texAry, idxAry, 0, 0, cy.Height, cy.TopRad, cy.BotRad, cy.RadialSegs, cy.HeightSegs, cy.AngStart, cy.AngLen, cy.Top, cy.Bottom, pos)
 	cy.BBoxMu.Lock()
 	cy.BBox.SetBounds(bb.Min, bb.Max)
@@ -370,7 +370,7 @@ func (cp *Capsule) Sizes() (nVtx, nIndex int, hasColor bool) {
 }
 
 func (cp *Capsule) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
-	pos := math32.Vec3{}
+	pos := math32.Vector3{}
 	voff := 0
 	ioff := 0
 	bb := vshape.SetCylinderSector(vtxAry, normAry, texAry, idxAry, voff, ioff, cp.Height, cp.TopRad, cp.BotRad, cp.RadialSegs, cp.HeightSegs, cp.AngStart, cp.AngLen, false, false, pos)
@@ -456,7 +456,7 @@ func (tr *Torus) Sizes() (nVtx, nIndex int, hasColor bool) {
 
 // Set sets points for torus in given allocated arrays
 func (tr *Torus) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
-	pos := math32.Vec3{}
+	pos := math32.Vector3{}
 	bb := vshape.SetTorusSector(vtxAry, normAry, texAry, idxAry, 0, 0, tr.Radius, tr.TubeRadius, tr.RadialSegs, tr.TubeSegs, tr.AngStart, tr.AngLen, pos)
 	tr.BBoxMu.Lock()
 	tr.BBox.SetBounds(bb.Min, bb.Max)

@@ -30,7 +30,7 @@ import (
 type View struct {
 
 	// white point illumination -- typically cie.WhiteD65
-	WhitePoint math32.Vec3
+	WhitePoint math32.Vector3
 
 	// the ambient light strength in lux
 	Luminance float32 `default:"200"`
@@ -75,14 +75,14 @@ type View struct {
 	Z float32 `view:"-"`
 
 	// inverse of the RGBD factors
-	DRGBInverse math32.Vec3 `view:"-"`
+	DRGBInverse math32.Vector3 `view:"-"`
 
 	// cone responses to white point, adjusted for discounting
-	RGBD math32.Vec3 `view:"-"`
+	RGBD math32.Vector3 `view:"-"`
 }
 
 // NewView returns a new view with all parameters initialized based on given major params
-func NewView(whitePoint math32.Vec3, lum, bgLum, surround float32, adapt bool) *View {
+func NewView(whitePoint math32.Vector3, lum, bgLum, surround float32, adapt bool) *View {
 	vw := &View{WhitePoint: whitePoint, Luminance: lum, BgLuminance: bgLum, Surround: surround, Adapted: adapt}
 	vw.Update()
 	return vw

@@ -26,14 +26,14 @@ func NewQuat(x, y, z, w float32) Quat {
 }
 
 // NewQuatAxisAngle returns a new quaternion from given axis and angle rotation (radians).
-func NewQuatAxisAngle(axis Vec3, angle float32) Quat {
+func NewQuatAxisAngle(axis Vector3, angle float32) Quat {
 	nq := Quat{}
 	nq.SetFromAxisAngle(axis, angle)
 	return nq
 }
 
 // NewQuatEuler returns a new quaternion from given Euler angles.
-func NewQuatEuler(euler Vec3) Quat {
+func NewQuatEuler(euler Vector3) Quat {
 	nq := Quat{}
 	nq.SetFromEuler(euler)
 	return nq
@@ -88,7 +88,7 @@ func (q Quat) String() string {
 // SetFromEuler sets this quaternion from the specified vector with
 // Euler angles for each axis. It is assumed that the Euler angles
 // are in XYZ order.
-func (q *Quat) SetFromEuler(euler Vec3) {
+func (q *Quat) SetFromEuler(euler Vector3) {
 	c1 := Cos(euler.X / 2)
 	c2 := Cos(euler.Y / 2)
 	c3 := Cos(euler.Z / 2)
@@ -102,17 +102,17 @@ func (q *Quat) SetFromEuler(euler Vec3) {
 	q.W = c1*c2*c3 + s1*s2*s3
 }
 
-// ToEuler returns a Vec3 with components as the Euler angles
+// ToEuler returns a Vector3 with components as the Euler angles
 // from the given quaternion.
-func (q *Quat) ToEuler() Vec3 {
-	rot := Vec3{}
+func (q *Quat) ToEuler() Vector3 {
+	rot := Vector3{}
 	rot.SetEulerAnglesFromQuat(*q)
 	return rot
 }
 
 // SetFromAxisAngle sets this quaternion with the rotation
 // specified by the given axis and angle.
-func (q *Quat) SetFromAxisAngle(axis Vec3, angle float32) {
+func (q *Quat) SetFromAxisAngle(axis Vector3, angle float32) {
 	halfAngle := angle / 2
 	s := Sin(halfAngle)
 	q.X = axis.X * s
@@ -121,9 +121,9 @@ func (q *Quat) SetFromAxisAngle(axis Vec3, angle float32) {
 	q.W = Cos(halfAngle)
 }
 
-// ToAxisAngle returns the Vec4 holding axis and angle of this Quaternion
-func (q *Quat) ToAxisAngle() Vec4 {
-	aa := Vec4{}
+// ToAxisAngle returns the Vector4 holding axis and angle of this Quaternion
+func (q *Quat) ToAxisAngle() Vector4 {
+	aa := Vector4{}
 	aa.SetAxisAngleFromQuat(*q)
 	return aa
 }
@@ -182,8 +182,8 @@ func (q *Quat) SetFromRotationMatrix(m *Mat4) {
 
 // SetFromUnitVectors sets this quaternion to the rotation from vector vFrom to vTo.
 // The vectors must be normalized.
-func (q *Quat) SetFromUnitVectors(vFrom, vTo Vec3) {
-	var v1 Vec3
+func (q *Quat) SetFromUnitVectors(vFrom, vTo Vector3) {
+	var v1 Vector3
 	var EPS float32 = 0.000001
 
 	r := vFrom.Dot(vTo) + 1

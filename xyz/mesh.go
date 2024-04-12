@@ -71,13 +71,13 @@ type MeshBase struct { //types:add -setters
 	// name of mesh -- meshes are linked to Solids by name so this matters
 	Nm string `set:"-"`
 
-	// number of vertex points, as math32.Vec3 -- always includes math32.Vec3 normals and math32.Vector2 texture coordinates -- only valid after Sizes() has been called
+	// number of vertex points, as math32.Vector3 -- always includes math32.Vector3 normals and math32.Vector2 texture coordinates -- only valid after Sizes() has been called
 	NVtx int `set:"-"`
 
 	// number of indexes, as math32.ArrayU32 -- only valid after Sizes() has been called
 	NIndex int `set:"-"`
 
-	// has per-vertex colors, as math32.Vec4 per vertex
+	// has per-vertex colors, as math32.Vector4 per vertex
 	Color bool
 
 	// if true, this mesh changes frequently -- otherwise considered to be static

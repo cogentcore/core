@@ -25,11 +25,11 @@ import (
 	"cogentcore.org/core/math32"
 )
 
-// SolveToRGBLin Finds an sRGB linear color (represented by math32.Vec3, 0-100 range)
+// SolveToRGBLin Finds an sRGB linear color (represented by math32.Vector3, 0-100 range)
 // with the given hue, chroma, and tone, if possible.
 // if not possible to represent the target values, the hue and tone will be
 // sufficiently close, and chroma will be maximized.
-func SolveToRGBLin(hue, chroma, tone float32) math32.Vec3 {
+func SolveToRGBLin(hue, chroma, tone float32) math32.Vector3 {
 	if chroma < 0.0001 || tone < 0.0001 || tone > 99.9999 {
 		y := cie.LToY(tone)
 		return math32.V3(y, y, y)
@@ -60,7 +60,7 @@ func SolveToRGB(hue, chroma, tone float32) (r, g, b float32) {
 // @param chroma The desired chroma.
 // @param y The desired Y.
 // @return The desired color as linear sRGB values.
-func FindResultByJ(hue_rad, chroma, y float32) *math32.Vec3 {
+func FindResultByJ(hue_rad, chroma, y float32) *math32.Vector3 {
 	// Initial estimate of j.
 	j := math32.Sqrt(y) * 11
 

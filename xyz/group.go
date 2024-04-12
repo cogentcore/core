@@ -73,7 +73,7 @@ func (gp *Group) SetEulerRotation(x, y, z float32) *Group {
 // SolidPoint contains a Solid and a Point on that solid
 type SolidPoint struct {
 	Solid *Solid
-	Point math32.Vec3
+	Point math32.Vector3
 }
 
 // RaySolidIntersections returns a list of solids whose bounding box intersects

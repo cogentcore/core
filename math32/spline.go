@@ -13,12 +13,12 @@ package math32
 //"math"
 
 type Spline struct {
-	points []Vec3
+	points []Vector3
 }
 
-func NewSpline(points []Vec3) Spline {
+func NewSpline(points []Vector3) Spline {
 	sp := Spline{}
-	sp.points = make([]Vec3, len(points))
+	sp.points = make([]Vector3, len(points))
 	copy(sp.points, points)
 	return sp
 }

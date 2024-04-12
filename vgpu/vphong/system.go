@@ -108,12 +108,12 @@ func (ph *Phong) ConfigSys() {
 	liteset := vars.AddSet()  // set = 2
 	txset := vars.AddSet()    // set = 3
 
-	vec4sz := vgpu.Float32Vec4.Bytes()
+	vector4sz := vgpu.Float32Vector4.Bytes()
 
-	vset.Add("Pos", vgpu.Float32Vec3, 0, vgpu.Vertex, vgpu.VertexShader)
-	vset.Add("Norm", vgpu.Float32Vec3, 0, vgpu.Vertex, vgpu.VertexShader)
+	vset.Add("Pos", vgpu.Float32Vector3, 0, vgpu.Vertex, vgpu.VertexShader)
+	vset.Add("Norm", vgpu.Float32Vector3, 0, vgpu.Vertex, vgpu.VertexShader)
 	vset.Add("Tex", vgpu.Float32Vector2, 0, vgpu.Vertex, vgpu.VertexShader)
-	vset.Add("Color", vgpu.Float32Vec4, 0, vgpu.Vertex, vgpu.VertexShader)
+	vset.Add("Color", vgpu.Float32Vector4, 0, vgpu.Vertex, vgpu.VertexShader)
 	vset.Add("Index", vgpu.Uint32, 0, vgpu.Index, vgpu.VertexShader)
 
 	pcset.AddStruct("PushU", int(unsafe.Sizeof(PushU{})), 1, vgpu.Push, vgpu.VertexShader, vgpu.FragmentShader)
@@ -121,10 +121,10 @@ func (ph *Phong) ConfigSys() {
 	mtxset.AddStruct("Mtxs", vgpu.Float32Mat4.Bytes()*2, 1, vgpu.Uniform, vgpu.VertexShader, vgpu.FragmentShader)
 
 	nliteset.AddStruct("NLights", 4*4, 1, vgpu.Uniform, vgpu.FragmentShader)
-	liteset.AddStruct("AmbLights", vec4sz*1, MaxLights, vgpu.Uniform, vgpu.FragmentShader)
-	liteset.AddStruct("DirLights", vec4sz*2, MaxLights, vgpu.Uniform, vgpu.FragmentShader)
-	liteset.AddStruct("PointLights", vec4sz*3, MaxLights, vgpu.Uniform, vgpu.FragmentShader)
-	liteset.AddStruct("SpotLights", vec4sz*4, MaxLights, vgpu.Uniform, vgpu.FragmentShader)
+	liteset.AddStruct("AmbLights", vector4sz*1, MaxLights, vgpu.Uniform, vgpu.FragmentShader)
+	liteset.AddStruct("DirLights", vector4sz*2, MaxLights, vgpu.Uniform, vgpu.FragmentShader)
+	liteset.AddStruct("PointLights", vector4sz*3, MaxLights, vgpu.Uniform, vgpu.FragmentShader)
+	liteset.AddStruct("SpotLights", vector4sz*4, MaxLights, vgpu.Uniform, vgpu.FragmentShader)
 
 	txset.Add("Tex", vgpu.ImageRGBA32, 1, vgpu.TextureRole, vgpu.FragmentShader)
 	// tximgv.TextureOwns = true

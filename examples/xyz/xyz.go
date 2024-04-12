@@ -53,10 +53,10 @@ type Anim struct {
 	Gopher *xyz.Group
 
 	// original position
-	TorusPosOrig math32.Vec3
+	TorusPosOrig math32.Vector3
 
 	// original position
-	GopherPosOrig math32.Vec3
+	GopherPosOrig math32.Vector3
 }
 
 // Start starts the animation ticker timer -- if on is true, then
@@ -167,7 +167,7 @@ func main() {
 	// se.Camera.Pose.Pos.Set(-2, 9, 3)
 	sc.Camera.Pose.Pos.Set(0, 2, 10)
 	// se.Camera.Pose.Pos.Set(0, 0, 10)              // default position
-	sc.Camera.LookAt(math32.Vec3{}, math32.V3(0, 1, 0)) // defaults to looking at origin
+	sc.Camera.LookAt(math32.Vector3{}, math32.V3(0, 1, 0)) // defaults to looking at origin
 
 	// point := xyz.NewPointLight(sc, "point", 1, xyz.DirectSun)
 	// point.Pos.Set(0, 5, 5)
@@ -204,7 +204,7 @@ func main() {
 	// floor.Mat.Bright = 2 // .5 for wood / brown
 	// floor.SetDisabled() // not selectable
 
-	lnsm := xyz.NewLines(sc, "Lines", []math32.Vec3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, math32.V2(.2, .1), xyz.CloseLines)
+	lnsm := xyz.NewLines(sc, "Lines", []math32.Vector3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, math32.V2(.2, .1), xyz.CloseLines)
 	lns := xyz.NewSolid(sc, "hi-line").SetMesh(lnsm).SetColor(color.RGBA{255, 255, 0, 128})
 	lns.Pose.Pos.Set(0, 0, 1)
 

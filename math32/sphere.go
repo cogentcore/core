@@ -12,18 +12,18 @@ package math32
 
 // Sphere represents a 3D sphere defined by its center point and a radius
 type Sphere struct {
-	Center Vec3    // center of the sphere
+	Center Vector3 // center of the sphere
 	Radius float32 // radius of the sphere
 }
 
 // NewSphere creates and returns a pointer to a new sphere with
 // the specified center and radius.
-func NewSphere(center Vec3, radius float32) *Sphere {
+func NewSphere(center Vector3, radius float32) *Sphere {
 	return &Sphere{center, radius}
 }
 
 // Set sets the center and radius of this sphere.
-func (s *Sphere) Set(center Vec3, radius float32) {
+func (s *Sphere) Set(center Vector3, radius float32) {
 	s.Center = center
 	s.Radius = radius
 }
@@ -35,7 +35,7 @@ func (s *Sphere) SetFromBox(box Box3) {
 }
 
 // SetFromPoints sets this sphere from the specified points array and optional center.
-func (s *Sphere) SetFromPoints(points []Vec3, optCenter *Vec3) {
+func (s *Sphere) SetFromPoints(points []Vector3, optCenter *Vector3) {
 	box := B3Empty()
 	if optCenter != nil {
 		s.Center = *optCenter
@@ -56,12 +56,12 @@ func (s *Sphere) IsEmpty(sphere *Sphere) bool {
 }
 
 // ContainsPoint returns if this sphere contains the specified point.
-func (s *Sphere) ContainsPoint(point Vec3) bool {
+func (s *Sphere) ContainsPoint(point Vector3) bool {
 	return point.DistToSquared(s.Center) <= (s.Radius * s.Radius)
 }
 
 // DistToPoint returns the distance from the sphere surface to the specified point.
-func (s *Sphere) DistToPoint(point Vec3) float32 {
+func (s *Sphere) DistToPoint(point Vector3) float32 {
 	return point.DistTo(s.Center) - s.Radius
 }
 
@@ -75,7 +75,7 @@ func (s *Sphere) IntersectSphere(other Sphere) bool {
 // If the specified point is inside the sphere, it is the clamped point.
 // Otherwise the clamped point is the the point in the sphere surface in the
 // nearest of the specified point.
-func (s *Sphere) ClampPoint(point Vec3) Vec3 {
+func (s *Sphere) ClampPoint(point Vector3) Vector3 {
 	deltaLengthSq := s.Center.DistToSquared(point)
 	rv := point
 	if deltaLengthSq > (s.Radius * s.Radius) {
@@ -98,6 +98,6 @@ func (s *Sphere) MulMat4(mat *Mat4) {
 }
 
 // Translate translates this sphere by the specified offset.
-func (s *Sphere) Translate(offset Vec3) {
+func (s *Sphere) Translate(offset Vector3) {
 	s.Center.SetAdd(offset)
 }

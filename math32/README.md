@@ -14,7 +14,7 @@ So, in this `math32` package, `Add` looks like this:
 
 ```Go
 // Add adds other vector to this one and returns result in a new vector.
-func (v Vec3) Add(other Vec3) Vec3 {
+func (v Vector3) Add(other Vector3) Vector3 {
 	return V3(v.X + other.X, v.Y + other.Y, v.Z + other.Z)
 }
 ```
@@ -36,7 +36,7 @@ The value-based design allows you to just string together sequences of expressio
 
 ```Go
 // Normal returns the triangle's normal.
-func Normal(a, b, c Vec3) Vec3 {
+func Normal(a, b, c Vector3) Vector3 {
 	nv := c.Sub(b).Cross(a.Sub(b))
    ...
 }

@@ -99,10 +99,10 @@ type Node interface {
 	// Convenience methods for external setting of Pose values with appropriate locking
 
 	// SetPosePos sets Pose.Pos position to given value, under write lock protection
-	SetPosePos(pos math32.Vec3)
+	SetPosePos(pos math32.Vector3)
 
 	// SetPoseScale sets Pose.Scale scale to given value, under write lock protection
-	SetPoseScale(scale math32.Vec3)
+	SetPoseScale(scale math32.Vector3)
 
 	// SetPoseQuat sets Pose.Quat to given value, under write lock protection
 	SetPoseQuat(quat math32.Quat)
@@ -335,14 +335,14 @@ func (nb *NodeBase) Render() {
 }
 
 // SetPosePos sets Pose.Pos position to given value, under write lock protection
-func (nb *NodeBase) SetPosePos(pos math32.Vec3) {
+func (nb *NodeBase) SetPosePos(pos math32.Vector3) {
 	nb.PoseMu.Lock()
 	nb.Pose.Pos = pos
 	nb.PoseMu.Unlock()
 }
 
 // SetPoseScale sets Pose.Scale scale to given value, under write lock protection
-func (nb *NodeBase) SetPoseScale(scale math32.Vec3) {
+func (nb *NodeBase) SetPoseScale(scale math32.Vector3) {
 	nb.PoseMu.Lock()
 	nb.Pose.Scale = scale
 	nb.PoseMu.Unlock()

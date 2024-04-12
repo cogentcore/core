@@ -8,7 +8,7 @@ import "cogentcore.org/core/math32"
 
 // CameraViewMat returns the camera view matrix, based position
 // of camera facing at target position, with given up vector.
-func CameraViewMat(pos, target, up math32.Vec3) *math32.Mat4 {
+func CameraViewMat(pos, target, up math32.Vector3) *math32.Mat4 {
 	var lookq math32.Quat
 	lookq.SetFromRotationMatrix(math32.NewLookAt(pos, target, up))
 	scale := math32.V3(1, 1, 1)

@@ -9,10 +9,10 @@ layout(push_constant) uniform Mtxs {
 	mat4 uvp;
 };
 
-layout(location = 0) out vec4 outputColor;
+layout(location = 0) out vector4 outputColor;
 
 void main() {
-	vec4 color = uvp[3];
+	vector4 color = uvp[3];
 	outputColor = color;
 }
 

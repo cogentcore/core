@@ -10,46 +10,46 @@
 
 package math32
 
-// Vec3i is a 3D vector/point with X, Y and Z int32 components.
-type Vec3i struct {
+// Vector3i is a 3D vector/point with X, Y and Z int32 components.
+type Vector3i struct {
 	X int32
 	Y int32
 	Z int32
 }
 
-// V3i returns a new [Vec3i] with the given x, y and y components.
-func V3i(x, y, z int32) Vec3i {
-	return Vec3i{X: x, Y: y, Z: z}
+// V3i returns a new [Vector3i] with the given x, y and y components.
+func V3i(x, y, z int32) Vector3i {
+	return Vector3i{X: x, Y: y, Z: z}
 }
 
-// V3iScalar returns a new [Vec3i] with all components set to the given scalar value.
-func V3iScalar(s int32) Vec3i {
-	return Vec3i{X: s, Y: s, Z: s}
+// V3iScalar returns a new [Vector3i] with all components set to the given scalar value.
+func V3iScalar(s int32) Vector3i {
+	return Vector3i{X: s, Y: s, Z: s}
 }
 
 // Set sets this vector X, Y and Z components.
-func (v *Vec3i) Set(x, y, z int32) {
+func (v *Vector3i) Set(x, y, z int32) {
 	v.X = x
 	v.Y = y
 	v.Z = z
 }
 
 // SetScalar sets all vector X, Y and Z components to same scalar value.
-func (v *Vec3i) SetScalar(s int32) {
+func (v *Vector3i) SetScalar(s int32) {
 	v.X = s
 	v.Y = s
 	v.Z = s
 }
 
-// SetFromVec3 sets from a Vec3 (float32) vector.
-func (v *Vec3i) SetFromVec3(vf Vec3) {
+// SetFromVector3 sets from a Vector3 (float32) vector.
+func (v *Vector3i) SetFromVector3(vf Vector3) {
 	v.X = int32(vf.X)
 	v.Y = int32(vf.Y)
 	v.Z = int32(vf.Z)
 }
 
 // SetDim sets this vector component value by dimension index.
-func (v *Vec3i) SetDim(dim Dims, value int32) {
+func (v *Vector3i) SetDim(dim Dims, value int32) {
 	switch dim {
 	case X:
 		v.X = value
@@ -63,7 +63,7 @@ func (v *Vec3i) SetDim(dim Dims, value int32) {
 }
 
 // Dim returns this vector component
-func (v Vec3i) Dim(dim Dims) int32 {
+func (v Vector3i) Dim(dim Dims) int32 {
 	switch dim {
 	case X:
 		return v.X
@@ -77,7 +77,7 @@ func (v Vec3i) Dim(dim Dims) int32 {
 }
 
 // SetByName sets this vector component value by its case insensitive name: "x", "y", or "z".
-func (v *Vec3i) SetByName(name string, value int32) {
+func (v *Vector3i) SetByName(name string, value int32) {
 	switch name {
 	case "x", "X":
 		v.X = value
@@ -86,24 +86,24 @@ func (v *Vec3i) SetByName(name string, value int32) {
 	case "z", "Z":
 		v.Z = value
 	default:
-		panic("Invalid Vec3i component name: " + name)
+		panic("Invalid Vector3i component name: " + name)
 	}
 }
 
 // SetZero sets this vector X, Y and Z components to be zero.
-func (v *Vec3i) SetZero() {
+func (v *Vector3i) SetZero() {
 	v.SetScalar(0)
 }
 
 // FromArray sets this vector's components from the specified array and offset
-func (v *Vec3i) FromArray(array []int32, offset int) {
+func (v *Vector3i) FromArray(array []int32, offset int) {
 	v.X = array[offset]
 	v.Y = array[offset+1]
 	v.Z = array[offset+2]
 }
 
 // ToArray copies this vector's components to array starting at offset.
-func (v Vec3i) ToArray(array []int32, offset int) {
+func (v Vector3i) ToArray(array []int32, offset int) {
 	array[offset] = v.X
 	array[offset+1] = v.Y
 	array[offset+2] = v.Z
@@ -113,48 +113,48 @@ func (v Vec3i) ToArray(array []int32, offset int) {
 //  Basic math operations
 
 // Add adds other vector to this one and returns result in a new vector.
-func (v Vec3i) Add(other Vec3i) Vec3i {
-	return Vec3i{v.X + other.X, v.Y + other.Y, v.Z + other.Z}
+func (v Vector3i) Add(other Vector3i) Vector3i {
+	return Vector3i{v.X + other.X, v.Y + other.Y, v.Z + other.Z}
 }
 
 // AddScalar adds scalar s to each component of this vector and returns new vector.
-func (v Vec3i) AddScalar(s int32) Vec3i {
-	return Vec3i{v.X + s, v.Y + s, v.Z + s}
+func (v Vector3i) AddScalar(s int32) Vector3i {
+	return Vector3i{v.X + s, v.Y + s, v.Z + s}
 }
 
 // SetAdd sets this to addition with other vector (i.e., += or plus-equals).
-func (v *Vec3i) SetAdd(other Vec3i) {
+func (v *Vector3i) SetAdd(other Vector3i) {
 	v.X += other.X
 	v.Y += other.Y
 	v.Z += other.Z
 }
 
 // SetAddScalar sets this to addition with scalar.
-func (v *Vec3i) SetAddScalar(s int32) {
+func (v *Vector3i) SetAddScalar(s int32) {
 	v.X += s
 	v.Y += s
 	v.Z += s
 }
 
 // Sub subtracts other vector from this one and returns result in new vector.
-func (v Vec3i) Sub(other Vec3i) Vec3i {
-	return Vec3i{v.X - other.X, v.Y - other.Y, v.Z - other.Z}
+func (v Vector3i) Sub(other Vector3i) Vector3i {
+	return Vector3i{v.X - other.X, v.Y - other.Y, v.Z - other.Z}
 }
 
 // SubScalar subtracts scalar s from each component of this vector and returns new vector.
-func (v Vec3i) SubScalar(s int32) Vec3i {
-	return Vec3i{v.X - s, v.Y - s, v.Z - s}
+func (v Vector3i) SubScalar(s int32) Vector3i {
+	return Vector3i{v.X - s, v.Y - s, v.Z - s}
 }
 
 // SetSub sets this to subtraction with other vector (i.e., -= or minus-equals).
-func (v *Vec3i) SetSub(other Vec3i) {
+func (v *Vector3i) SetSub(other Vector3i) {
 	v.X -= other.X
 	v.Y -= other.Y
 	v.Z -= other.Z
 }
 
 // SetSubScalar sets this to subtraction of scalar.
-func (v *Vec3i) SetSubScalar(s int32) {
+func (v *Vector3i) SetSubScalar(s int32) {
 	v.X -= s
 	v.Y -= s
 	v.Z -= s
@@ -162,24 +162,24 @@ func (v *Vec3i) SetSubScalar(s int32) {
 
 // Mul multiplies each component of this vector by the corresponding one from other
 // and returns resulting vector.
-func (v Vec3i) Mul(other Vec3i) Vec3i {
-	return Vec3i{v.X * other.X, v.Y * other.Y, v.Z * other.Z}
+func (v Vector3i) Mul(other Vector3i) Vector3i {
+	return Vector3i{v.X * other.X, v.Y * other.Y, v.Z * other.Z}
 }
 
 // MulScalar multiplies each component of this vector by the scalar s and returns resulting vector.
-func (v Vec3i) MulScalar(s int32) Vec3i {
-	return Vec3i{v.X * s, v.Y * s, v.Z * s}
+func (v Vector3i) MulScalar(s int32) Vector3i {
+	return Vector3i{v.X * s, v.Y * s, v.Z * s}
 }
 
 // SetMul sets this to multiplication with other vector (i.e., *= or times-equals).
-func (v *Vec3i) SetMul(other Vec3i) {
+func (v *Vector3i) SetMul(other Vector3i) {
 	v.X *= other.X
 	v.Y *= other.Y
 	v.Z *= other.Z
 }
 
 // SetMulScalar sets this to multiplication by scalar.
-func (v *Vec3i) SetMulScalar(s int32) {
+func (v *Vector3i) SetMulScalar(s int32) {
 	v.X *= s
 	v.Y *= s
 	v.Z *= s
@@ -187,29 +187,29 @@ func (v *Vec3i) SetMulScalar(s int32) {
 
 // Div divides each component of this vector by the corresponding one from other vector
 // and returns resulting vector.
-func (v Vec3i) Div(other Vec3i) Vec3i {
-	return Vec3i{v.X / other.X, v.Y / other.Y, v.Z / other.Z}
+func (v Vector3i) Div(other Vector3i) Vector3i {
+	return Vector3i{v.X / other.X, v.Y / other.Y, v.Z / other.Z}
 }
 
 // DivScalar divides each component of this vector by the scalar s and returns resulting vector.
 // If scalar is zero, returns zero.
-func (v Vec3i) DivScalar(scalar int32) Vec3i {
+func (v Vector3i) DivScalar(scalar int32) Vector3i {
 	if scalar != 0 {
 		return v.MulScalar(1 / scalar)
 	} else {
-		return Vec3i{}
+		return Vector3i{}
 	}
 }
 
 // SetDiv sets this to division by other vector (i.e., /= or divide-equals).
-func (v *Vec3i) SetDiv(other Vec3i) {
+func (v *Vector3i) SetDiv(other Vector3i) {
 	v.X /= other.X
 	v.Y /= other.Y
 	v.Z /= other.Z
 }
 
 // SetDivScalar sets this to division by scalar.
-func (v *Vec3i) SetDivScalar(s int32) {
+func (v *Vector3i) SetDivScalar(s int32) {
 	if s != 0 {
 		v.SetMulScalar(1 / s)
 	} else {
@@ -218,24 +218,24 @@ func (v *Vec3i) SetDivScalar(s int32) {
 }
 
 // Min returns min of this vector components vs. other vector.
-func (v Vec3i) Min(other Vec3i) Vec3i {
-	return Vec3i{Min32i(v.X, other.X), Min32i(v.Y, other.Y), Min32i(v.Z, other.Z)}
+func (v Vector3i) Min(other Vector3i) Vector3i {
+	return Vector3i{Min32i(v.X, other.X), Min32i(v.Y, other.Y), Min32i(v.Z, other.Z)}
 }
 
 // SetMin sets this vector components to the minimum values of itself and other vector.
-func (v *Vec3i) SetMin(other Vec3i) {
+func (v *Vector3i) SetMin(other Vector3i) {
 	v.X = Min32i(v.X, other.X)
 	v.Y = Min32i(v.Y, other.Y)
 	v.Z = Min32i(v.Z, other.Z)
 }
 
 // Max returns max of this vector components vs. other vector.
-func (v Vec3i) Max(other Vec3i) Vec3i {
-	return Vec3i{Max32i(v.X, other.X), Max32i(v.Y, other.Y), Max32i(v.Z, other.Z)}
+func (v Vector3i) Max(other Vector3i) Vector3i {
+	return Vector3i{Max32i(v.X, other.X), Max32i(v.Y, other.Y), Max32i(v.Z, other.Z)}
 }
 
 // SetMax sets this vector components to the maximum value of itself and other vector.
-func (v *Vec3i) SetMax(other Vec3i) {
+func (v *Vector3i) SetMax(other Vector3i) {
 	v.X = Max32i(v.X, other.X)
 	v.Y = Max32i(v.Y, other.Y)
 	v.Z = Max32i(v.Z, other.Z)
@@ -244,7 +244,7 @@ func (v *Vec3i) SetMax(other Vec3i) {
 // Clamp sets this vector components to be no less than the corresponding components of min
 // and not greater than the corresponding component of max.
 // Assumes min < max, if this assumption isn't true it will not operate correctly.
-func (v *Vec3i) Clamp(min, max Vec3i) {
+func (v *Vector3i) Clamp(min, max Vector3i) {
 	if v.X < min.X {
 		v.X = min.X
 	} else if v.X > max.X {
@@ -263,23 +263,23 @@ func (v *Vec3i) Clamp(min, max Vec3i) {
 }
 
 // ClampScalar sets this vector components to be no less than minVal and not greater than maxVal.
-func (v *Vec3i) ClampScalar(minVal, maxVal int32) {
+func (v *Vector3i) ClampScalar(minVal, maxVal int32) {
 	v.Clamp(V3iScalar(minVal), V3iScalar(maxVal))
 }
 
 // Negate returns vector with each component negated.
-func (v Vec3i) Negate() Vec3i {
-	return Vec3i{-v.X, -v.Y, -v.Z}
+func (v Vector3i) Negate() Vector3i {
+	return Vector3i{-v.X, -v.Y, -v.Z}
 }
 
 // SetNegate negates each of this vector's components.
-func (v *Vec3i) SetNegate() {
+func (v *Vector3i) SetNegate() {
 	v.X = -v.X
 	v.Y = -v.Y
 	v.Z = -v.Z
 }
 
 // IsEqual returns if this vector is equal to other.
-func (v Vec3i) IsEqual(other Vec3i) bool {
+func (v Vector3i) IsEqual(other Vector3i) bool {
 	return (other.X == v.X) && (other.Y == v.Y) && (other.Z == v.Z)
 }
