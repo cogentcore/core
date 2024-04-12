@@ -18,7 +18,7 @@ import (
 type State struct {
 
 	// current transform
-	CurrentTransform math32.Mat2
+	CurrentTransform math32.Matrix2
 
 	// current path
 	Path raster.Path
@@ -54,7 +54,7 @@ type State struct {
 	LastRenderBBox image.Rectangle
 
 	// stack of transforms
-	TransformStack []math32.Mat2
+	TransformStack []math32.Matrix2
 
 	// stack of bounds -- every render starts with a push onto this stack, and finishes with a pop
 	BoundsStack []image.Rectangle
@@ -74,9 +74,9 @@ func (rs *State) Init(width, height int, img *image.RGBA) {
 
 // PushTransform pushes current transform onto stack and apply new transform on top of it
 // must protect within render mutex lock (see Lock version)
-func (rs *State) PushTransform(tf math32.Mat2) {
+func (rs *State) PushTransform(tf math32.Matrix2) {
 	if rs.TransformStack == nil {
-		rs.TransformStack = make([]math32.Mat2, 0)
+		rs.TransformStack = make([]math32.Matrix2, 0)
 	}
 	rs.TransformStack = append(rs.TransformStack, rs.CurrentTransform)
 	rs.CurrentTransform.SetMul(tf)

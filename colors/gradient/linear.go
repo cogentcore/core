@@ -54,7 +54,7 @@ func (l *Linear) AddStop(color color.RGBA, pos float32, opacity ...float32) *Lin
 // object-level transform (i.e., the current painting transform),
 // which is applied in addition to the gradient's own Transform.
 // This must be called before rendering the gradient, and it should only be called then.
-func (l *Linear) Update(opacity float32, box math32.Box2, objTransform math32.Mat2) {
+func (l *Linear) Update(opacity float32, box math32.Box2, objTransform math32.Matrix2) {
 	l.Box = box
 	l.Opacity = opacity
 	l.UpdateBase()

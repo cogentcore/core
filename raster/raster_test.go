@@ -245,7 +245,7 @@ func TestRoundRect(t *testing.T) {
 	imagex.Assert(t, img, "roundRect")
 }
 
-func isClose(a, b math32.Mat2, epsilon float32) bool {
+func isClose(a, b math32.Matrix2, epsilon float32) bool {
 	return !(math32.Abs(a.XX-b.XX) > epsilon ||
 		math32.Abs(a.YX-b.YX) > epsilon ||
 		math32.Abs(a.XY-b.XY) > epsilon ||

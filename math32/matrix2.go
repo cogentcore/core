@@ -39,70 +39,65 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-// note: golang.org/x/image/math/f64 defines Vector2 as [2]float64
-// elabored then by https://godoc.org/github.com/go-gl/mathgl/mgl64
-// it is instead very convenient and clear to use .X .Y fields for 2D math
-// original gg package used Point2D but Vector2 is more general, e.g., for sizes etc
-// in go much better to use fewer types so only using Vector2
-
-type Mat2 struct {
+// Matrix2 is a 3x2 matrix.
+type Matrix2 struct {
 	XX, YX, XY, YY, X0, Y0 float32
 }
 
-// Identity2 returns a new identity [Mat2] matrix
-func Identity2() Mat2 {
-	return Mat2{
+// Identity2 returns a new identity [Matrix2] matrix.
+func Identity2() Matrix2 {
+	return Matrix2{
 		1, 0,
 		0, 1,
 		0, 0,
 	}
 }
 
-func (m Mat2) IsIdentity() bool {
+func (m Matrix2) IsIdentity() bool {
 	return m.XX == 1 && m.YX == 0 && m.XY == 0 && m.YY == 1 && m.X0 == 0 && m.Y0 == 0
 }
 
-// Translate2D returns a Mat2 2D matrix with given translations
-func Translate2D(x, y float32) Mat2 {
-	return Mat2{
+// Translate2D returns a Matrix2 2D matrix with given translations
+func Translate2D(x, y float32) Matrix2 {
+	return Matrix2{
 		1, 0,
 		0, 1,
 		x, y,
 	}
 }
 
-// Scale2D returns a Mat2 2D matrix with given scaling factors
-func Scale2D(x, y float32) Mat2 {
-	return Mat2{
+// Scale2D returns a Matrix2 2D matrix with given scaling factors
+func Scale2D(x, y float32) Matrix2 {
+	return Matrix2{
 		x, 0,
 		0, y,
 		0, 0,
 	}
 }
 
-// Rotate2D returns a Mat2 2D matrix with given rotation, specified in radians
-func Rotate2D(angle float32) Mat2 {
+// Rotate2D returns a Matrix2 2D matrix with given rotation, specified in radians
+func Rotate2D(angle float32) Matrix2 {
 	c := float32(Cos(angle))
 	s := float32(Sin(angle))
-	return Mat2{
+	return Matrix2{
 		c, s,
 		-s, c,
 		0, 0,
 	}
 }
 
-// Shear2D returns a Mat2 2D matrix with given shearing
-func Shear2D(x, y float32) Mat2 {
-	return Mat2{
+// Shear2D returns a Matrix2 2D matrix with given shearing
+func Shear2D(x, y float32) Matrix2 {
+	return Matrix2{
 		1, y,
 		x, 1,
 		0, 0,
 	}
 }
 
-// Skew2D returns a Mat2 2D matrix with given skewing
-func Skew2D(x, y float32) Mat2 {
-	return Mat2{
+// Skew2D returns a Matrix2 2D matrix with given skewing
+func Skew2D(x, y float32) Matrix2 {
+	return Matrix2{
 		1, Tan(y),
 		Tan(x), 1,
 		0, 0,
@@ -110,8 +105,8 @@ func Skew2D(x, y float32) Mat2 {
 }
 
 // Mul returns a*b
-func (a Mat2) Mul(b Mat2) Mat2 {
-	return Mat2{
+func (a Matrix2) Mul(b Matrix2) Matrix2 {
+	return Matrix2{
 		XX: a.XX*b.XX + a.XY*b.YX,
 		YX: a.YX*b.XX + a.YY*b.YX,
 		XY: a.XX*b.XY + a.XY*b.YY,
@@ -122,20 +117,20 @@ func (a Mat2) Mul(b Mat2) Mat2 {
 }
 
 // SetMul sets a to a*b
-func (a *Mat2) SetMul(b Mat2) {
+func (a *Matrix2) SetMul(b Matrix2) {
 	*a = a.Mul(b)
 }
 
 // MulVector2AsVector multiplies the Vector2 as a vector without adding translations.
 // This is for directional vectors and not points.
-func (a Mat2) MulVector2AsVector(v Vector2) Vector2 {
+func (a Matrix2) MulVector2AsVector(v Vector2) Vector2 {
 	tx := a.XX*v.X + a.XY*v.Y
 	ty := a.YX*v.X + a.YY*v.Y
 	return Vec2(tx, ty)
 }
 
 // MulVector2AsPoint multiplies the Vector2 as a point, including adding translations.
-func (a Mat2) MulVector2AsPoint(v Vector2) Vector2 {
+func (a Matrix2) MulVector2AsPoint(v Vector2) Vector2 {
 	tx := a.XX*v.X + a.XY*v.Y + a.X0
 	ty := a.YX*v.X + a.YY*v.Y + a.Y0
 	return Vec2(tx, ty)
@@ -143,16 +138,16 @@ func (a Mat2) MulVector2AsPoint(v Vector2) Vector2 {
 
 // MulVector2AsPointCenter multiplies the Vector2 as a point relative to given center-point
 // including adding translations.
-func (a Mat2) MulVector2AsPointCenter(v, ctr Vector2) Vector2 {
+func (a Matrix2) MulVector2AsPointCenter(v, ctr Vector2) Vector2 {
 	rel := v.Sub(ctr)
 	tx := ctr.X + a.XX*rel.X + a.XY*rel.Y + a.X0
 	ty := ctr.Y + a.YX*rel.X + a.YY*rel.Y + a.Y0
 	return Vec2(tx, ty)
 }
 
-// MulCenter multiplies the Mat2, first subtracting given translation center point
+// MulCenter multiplies the Matrix2, first subtracting given translation center point
 // from the translation components, and then adding it back in.
-func (a Mat2) MulCenter(b Mat2, ctr Vector2) Mat2 {
+func (a Matrix2) MulCenter(b Matrix2, ctr Vector2) Matrix2 {
 	a.X0 -= ctr.X
 	a.Y0 -= ctr.Y
 	rv := a.Mul(b)
@@ -161,46 +156,46 @@ func (a Mat2) MulCenter(b Mat2, ctr Vector2) Mat2 {
 	return rv
 }
 
-// SetMulCenter sets the matrix to the result of [Mat2.MulCenter].
-func (a *Mat2) SetMulCenter(b Mat2, ctr Vector2) {
+// SetMulCenter sets the matrix to the result of [Matrix2.MulCenter].
+func (a *Matrix2) SetMulCenter(b Matrix2, ctr Vector2) {
 	*a = a.MulCenter(b, ctr)
 }
 
 // MulFixedAsPoint multiplies the fixed point as a point, including adding translations.
-func (a Mat2) MulFixedAsPoint(fp fixed.Point26_6) fixed.Point26_6 {
+func (a Matrix2) MulFixedAsPoint(fp fixed.Point26_6) fixed.Point26_6 {
 	x := fixed.Int26_6((float32(fp.X)*a.XX + float32(fp.Y)*a.XY) + a.X0*32)
 	y := fixed.Int26_6((float32(fp.X)*a.YX + float32(fp.Y)*a.YY) + a.Y0*32)
 	return fixed.Point26_6{x, y}
 }
 
-func (a Mat2) Translate(x, y float32) Mat2 {
+func (a Matrix2) Translate(x, y float32) Matrix2 {
 	return a.Mul(Translate2D(x, y))
 }
 
-func (a Mat2) Scale(x, y float32) Mat2 {
+func (a Matrix2) Scale(x, y float32) Matrix2 {
 	return a.Mul(Scale2D(x, y))
 }
 
-func (a Mat2) Rotate(angle float32) Mat2 {
+func (a Matrix2) Rotate(angle float32) Matrix2 {
 	return a.Mul(Rotate2D(angle))
 }
 
-func (a Mat2) Shear(x, y float32) Mat2 {
+func (a Matrix2) Shear(x, y float32) Matrix2 {
 	return a.Mul(Shear2D(x, y))
 }
 
-func (a Mat2) Skew(x, y float32) Mat2 {
+func (a Matrix2) Skew(x, y float32) Matrix2 {
 	return a.Mul(Skew2D(x, y))
 }
 
 // ExtractRot extracts the rotation component from a given matrix
-func (a Mat2) ExtractRot() float32 {
+func (a Matrix2) ExtractRot() float32 {
 	return Atan2(-a.XY, a.XX)
 }
 
 // ExtractXYScale extracts the X and Y scale factors after undoing any
 // rotation present -- i.e., in the original X, Y coordinates
-func (a Mat2) ExtractScale() (scx, scy float32) {
+func (a Matrix2) ExtractScale() (scx, scy float32) {
 	rot := a.ExtractRot()
 	tx := a.Rotate(-rot)
 	scxv := tx.MulVector2AsVector(Vec2(1, 0))
@@ -209,7 +204,7 @@ func (a Mat2) ExtractScale() (scx, scy float32) {
 }
 
 // Inverse returns inverse of matrix, for inverting transforms
-func (a Mat2) Inverse() Mat2 {
+func (a Matrix2) Inverse() Matrix2 {
 	// homogenous rep, rc indexes, mapping into Mat3 code
 	// XX YX X0   n11 n12 n13    a b x
 	// XY YY Y0   n21 n22 n23    c d y
@@ -221,7 +216,7 @@ func (a Mat2) Inverse() Mat2 {
 	det := a.XX*a.YY - a.XY*a.YX // ad - bc
 	detInv := 1 / det
 
-	b := Mat2{}
+	b := Matrix2{}
 	b.XX = a.YY * detInv  // a = d
 	b.XY = -a.XY * detInv // c = -c
 	b.YX = -a.YX * detInv // b = -b
@@ -318,8 +313,8 @@ func PointsCheckN(pts []float32, n int, errmsg string) error {
 }
 
 // SetString processes the standard SVG-style transform strings
-func (a *Mat2) SetString(str string) error {
-	errmsg := "math32.Mat2.SetString:"
+func (a *Matrix2) SetString(str string) error {
+	errmsg := "math32.Matrix2.SetString:"
 	str = strings.ToLower(strings.TrimSpace(str))
 	*a = Identity2()
 	if str == "none" {
@@ -350,7 +345,7 @@ func (a *Mat2) SetString(str string) error {
 			if err := PointsCheckN(pts, 6, errmsg); err != nil {
 				errors.Log(err)
 			} else {
-				*a = Mat2{pts[0], pts[1], pts[2], pts[3], pts[4], pts[5]}
+				*a = Matrix2{pts[0], pts[1], pts[2], pts[3], pts[4], pts[5]}
 			}
 		case "translate":
 			if len(pts) == 1 {
@@ -433,7 +428,7 @@ func (a *Mat2) SetString(str string) error {
 }
 
 // String returns the XML-based string representation of the transform
-func (a *Mat2) String() string {
+func (a *Matrix2) String() string {
 	if a.IsIdentity() {
 		return "none"
 	}

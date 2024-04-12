@@ -18,7 +18,7 @@ func TolAssertEqualVector(t *testing.T, tol float32, vt, va Vector2) {
 
 const StandardTol = float32(1.0e-6)
 
-func TestMat2(t *testing.T) {
+func TestMatrix2(t *testing.T) {
 	v0 := Vec2(0, 0)
 	vx := Vec2(1, 0)
 	vy := Vec2(0, 1)
@@ -64,17 +64,17 @@ func TestMat3(t *testing.T) {
 	assert.Equal(t, vy, Identity3().MulVector2AsPt(vy))
 	assert.Equal(t, vxy, Identity3().MulVector2AsPt(vxy))
 
-	assert.Equal(t, vxy, Mat3FromMat2(Translate2D(1, 1)).MulVector2AsPt(v0))
+	assert.Equal(t, vxy, Mat3FromMatrix2(Translate2D(1, 1)).MulVector2AsPt(v0))
 
-	assert.Equal(t, vxy.MulScalar(2), Mat3FromMat2(Scale2D(2, 2)).MulVector2AsPt(vxy))
+	assert.Equal(t, vxy.MulScalar(2), Mat3FromMatrix2(Scale2D(2, 2)).MulVector2AsPt(vxy))
 
-	TolAssertEqualVector(t, StandardTol, vy, Mat3FromMat2(Rotate2D(DegToRad(90))).MulVector2AsPt(vx))  // left
-	TolAssertEqualVector(t, StandardTol, vx, Mat3FromMat2(Rotate2D(DegToRad(-90))).MulVector2AsPt(vy)) // right
-	TolAssertEqualVector(t, StandardTol, vxy.Normal(), Mat3FromMat2(Rotate2D(DegToRad(45))).MulVector2AsPt(vx))
-	TolAssertEqualVector(t, StandardTol, vxy.Normal(), Mat3FromMat2(Rotate2D(DegToRad(-45))).MulVector2AsPt(vy))
+	TolAssertEqualVector(t, StandardTol, vy, Mat3FromMatrix2(Rotate2D(DegToRad(90))).MulVector2AsPt(vx))  // left
+	TolAssertEqualVector(t, StandardTol, vx, Mat3FromMatrix2(Rotate2D(DegToRad(-90))).MulVector2AsPt(vy)) // right
+	TolAssertEqualVector(t, StandardTol, vxy.Normal(), Mat3FromMatrix2(Rotate2D(DegToRad(45))).MulVector2AsPt(vx))
+	TolAssertEqualVector(t, StandardTol, vxy.Normal(), Mat3FromMatrix2(Rotate2D(DegToRad(-45))).MulVector2AsPt(vy))
 
-	TolAssertEqualVector(t, StandardTol, vy, Mat3FromMat2(Rotate2D(DegToRad(-90))).Inverse().MulVector2AsPt(vx)) // left
-	TolAssertEqualVector(t, StandardTol, vx, Mat3FromMat2(Rotate2D(DegToRad(90))).Inverse().MulVector2AsPt(vy))  // right
+	TolAssertEqualVector(t, StandardTol, vy, Mat3FromMatrix2(Rotate2D(DegToRad(-90))).Inverse().MulVector2AsPt(vx)) // left
+	TolAssertEqualVector(t, StandardTol, vx, Mat3FromMatrix2(Rotate2D(DegToRad(90))).Inverse().MulVector2AsPt(vy))  // right
 
 	// 1,0 -> scale(2) = 2,0 -> rotate 90 = 0,2 -> trans 1,1 -> 1,3
 	// multiplication order is *reverse* of "logical" order:

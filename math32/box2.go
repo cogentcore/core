@@ -135,9 +135,9 @@ func (b *Box2) ExpandByBox(box Box2) {
 	b.ExpandByPoint(box.Max)
 }
 
-// MulMat2 multiplies the specified matrix to the vertices of this bounding box
+// MulMatrix2 multiplies the specified matrix to the vertices of this bounding box
 // and computes the resulting spanning Box2 of the transformed points
-func (b Box2) MulMat2(m Mat2) Box2 {
+func (b Box2) MulMatrix2(m Matrix2) Box2 {
 	var cs [4]Vector2
 	cs[0] = m.MulVector2AsPoint(Vec2(b.Min.X, b.Min.Y))
 	cs[1] = m.MulVector2AsPoint(Vec2(b.Min.X, b.Max.Y))

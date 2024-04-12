@@ -144,7 +144,7 @@ func TestRenderRadial(t *testing.T) {
 	imagex.Assert(t, img, "radial-user-space")
 }
 
-// func matToRasterx(mat *math32.Mat2) rasterx.Matrix2D {
+// func matToRasterx(mat *math32.Matrix2) rasterx.Matrix2D {
 // 	// A = XX
 // 	// B = YX
 // 	// C = XY
@@ -169,7 +169,7 @@ func TestTransform(t *testing.T) {
 	// fmt.Println(gb.Transform)
 	g.Update(1, b, math32.Identity2())
 	// fmt.Println(gb.boxTransform)
-	btcorrect := math32.Mat2{XX: 0.9063079, YX: -0.42261833, XY: 0.42261833, YY: 0.9063079, X0: -6.5785227, Y0: 10.326212}
+	btcorrect := math32.Matrix2{XX: 0.9063079, YX: -0.42261833, XY: 0.42261833, YY: 0.9063079, X0: -6.5785227, Y0: 10.326212}
 	compareTol(t, gb.boxTransform.XX, btcorrect.XX)
 	compareTol(t, gb.boxTransform.YX, btcorrect.YX)
 	compareTol(t, gb.boxTransform.XY, btcorrect.XY)

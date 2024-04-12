@@ -54,7 +54,7 @@ type Node interface {
 
 	// ApplyTransform applies the given 2D transform to the geometry of this node
 	// this just does a direct transform multiplication on coordinates.
-	ApplyTransform(sv *SVG, xf math32.Mat2)
+	ApplyTransform(sv *SVG, xf math32.Matrix2)
 
 	// ApplyDeltaTransform applies the given 2D delta transforms to the geometry of this node
 	// relative to given point.  Trans translation and point are in top-level coordinates,
@@ -156,7 +156,7 @@ func (g *NodeBase) SetColorProperties(prop, color string) {
 // ParTransform returns the full compounded 2D transform matrix for all
 // of the parents of this node.  If self is true, then include our
 // own transform too.
-func (g *NodeBase) ParTransform(self bool) math32.Mat2 {
+func (g *NodeBase) ParTransform(self bool) math32.Matrix2 {
 	pars := []Node{}
 	xf := math32.Identity2()
 	n := g.This().(Node)
@@ -183,14 +183,14 @@ func (g *NodeBase) ParTransform(self bool) math32.Mat2 {
 
 // ApplyTransform applies the given 2D transform to the geometry of this node
 // this just does a direct transform multiplication on coordinates.
-func (g *NodeBase) ApplyTransform(sv *SVG, xf math32.Mat2) {
+func (g *NodeBase) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 }
 
 // DeltaTransform computes the net transform matrix for given delta transform parameters
 // and the transformed version of the reference point.  If self is true, then
 // include the current node self transform, otherwise don't.  Groups do not
 // but regular rendering nodes do.
-func (g *NodeBase) DeltaTransform(trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2, self bool) (math32.Mat2, math32.Vector2) {
+func (g *NodeBase) DeltaTransform(trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2, self bool) (math32.Matrix2, math32.Vector2) {
 	mxi := g.ParTransform(self)
 	mxi = mxi.Inverse()
 	lpt := mxi.MulVector2AsPoint(pt)
@@ -415,7 +415,7 @@ func (g *NodeBase) IsDefs() bool {
 // LocalBBoxToWin converts a local bounding box to SVG coordinates
 func (g *NodeBase) LocalBBoxToWin(bb math32.Box2) image.Rectangle {
 	mxi := g.ParTransform(true) // include self
-	return bb.MulMat2(mxi).ToRect()
+	return bb.MulMatrix2(mxi).ToRect()
 }
 
 func (g *NodeBase) NodeBBox(sv *SVG) image.Rectangle {

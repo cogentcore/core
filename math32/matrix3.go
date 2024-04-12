@@ -12,19 +12,19 @@ package math32
 
 import "errors"
 
-// Mat3 is 3x3 matrix organized internally as column matrix
+// Mat3 is 3x3 matrix organized internally as column matrix.
 type Mat3 [9]float32
 
-// Identity3 returns a new identity [Mat3] matrix
+// Identity3 returns a new identity [Mat3] matrix.
 func Identity3() Mat3 {
 	m := Mat3{}
 	m.SetIdentity()
 	return m
 }
 
-func Mat3FromMat2(m Mat2) Mat3 {
+func Mat3FromMatrix2(m Matrix2) Mat3 {
 	nm := Mat3{}
-	nm.SetFromMat2(m)
+	nm.SetFromMatrix2(m)
 	return nm
 }
 
@@ -36,17 +36,17 @@ func Mat3FromMat4(m *Mat4) Mat3 {
 
 // Mat3Translate2D returns a Mat3 2D matrix with given translations
 func Mat3Translate2D(x, y float32) Mat3 {
-	return Mat3FromMat2(Translate2D(x, y))
+	return Mat3FromMatrix2(Translate2D(x, y))
 }
 
 // Mat3Scale2D returns a Mat3 2D matrix with given scaling factors
 func Mat3Scale2D(x, y float32) Mat3 {
-	return Mat3FromMat2(Scale2D(x, y))
+	return Mat3FromMatrix2(Scale2D(x, y))
 }
 
-// Rotate2D returns a Mat2 2D matrix with given rotation, specified in radians
+// Rotate2D returns a Matrix2 2D matrix with given rotation, specified in radians
 func Mat3Rotate2D(angle float32) Mat3 {
-	return Mat3FromMat2(Rotate2D(angle))
+	return Mat3FromMatrix2(Rotate2D(angle))
 }
 
 // Set sets all the elements of the matrix row by row starting at row1, column1,
@@ -73,11 +73,11 @@ func (m *Mat3) SetFromMat4(src *Mat4) {
 }
 
 // note: following use of [2], [5] for translation works
-// exactly as the 2x3 Mat2 case works.  But vulkan and wikipedia
+// exactly as the 2x3 Matrix2 case works.  But vulkan and wikipedia
 // use [6][7] for translation.  Not sure exactly what is going on.
 
-// SetFromMat2 sets the matrix elements based on a Mat2.
-func (m *Mat3) SetFromMat2(src Mat2) {
+// SetFromMatrix2 sets the matrix elements based on a Matrix2.
+func (m *Mat3) SetFromMatrix2(src Matrix2) {
 	m.Set(
 		src.XX, src.YX, src.X0,
 		src.XY, src.YY, src.Y0,

@@ -15,7 +15,7 @@ import "errors"
 // Mat4 is 4x4 matrix organized internally as column matrix.
 type Mat4 [16]float32
 
-// Identity4 returns a new identity [Mat4] matrix
+// Identity4 returns a new identity [Mat4] matrix.
 func Identity4() *Mat4 {
 	m := &Mat4{}
 	m.SetIdentity()

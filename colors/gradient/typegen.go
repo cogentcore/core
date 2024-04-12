@@ -30,7 +30,7 @@ func (t *Base) SetBox(v math32.Box2) *Base { t.Box = v; return t }
 // SetTransform sets the [Base.Transform]:
 // Transform is the gradient's own transformation matrix applied to the gradient's points.
 // This is a property of the Gradient itself.
-func (t *Base) SetTransform(v math32.Mat2) *Base { t.Transform = v; return t }
+func (t *Base) SetTransform(v math32.Matrix2) *Base { t.Transform = v; return t }
 
 // SetOpacity sets the [Base.Opacity]:
 // Opacity is the overall object opacity multiplier, applied in conjunction with the
@@ -60,7 +60,7 @@ func (t *Linear) SetUnits(v Units) *Linear { t.Units = v; return t }
 func (t *Linear) SetBox(v math32.Box2) *Linear { t.Box = v; return t }
 
 // SetTransform sets the [Linear.Transform]
-func (t *Linear) SetTransform(v math32.Mat2) *Linear { t.Transform = v; return t }
+func (t *Linear) SetTransform(v math32.Matrix2) *Linear { t.Transform = v; return t }
 
 // SetOpacity sets the [Linear.Opacity]
 func (t *Linear) SetOpacity(v float32) *Linear { t.Opacity = v; return t }
@@ -92,7 +92,7 @@ func (t *Radial) SetUnits(v Units) *Radial { t.Units = v; return t }
 func (t *Radial) SetBox(v math32.Box2) *Radial { t.Box = v; return t }
 
 // SetTransform sets the [Radial.Transform]
-func (t *Radial) SetTransform(v math32.Mat2) *Radial { t.Transform = v; return t }
+func (t *Radial) SetTransform(v math32.Matrix2) *Radial { t.Transform = v; return t }
 
 // SetOpacity sets the [Radial.Opacity]
 func (t *Radial) SetOpacity(v float32) *Radial { t.Opacity = v; return t }

@@ -54,7 +54,7 @@ func (sv *SVG) GradientByName(n Node, grnm string) *Gradient {
 
 // GradientApplyTransform applies the given transform to any gradients for this node,
 // that are using specific coordinates (not bounding box which is automatic)
-func (g *NodeBase) GradientApplyTransform(sv *SVG, xf math32.Mat2) {
+func (g *NodeBase) GradientApplyTransform(sv *SVG, xf math32.Matrix2) {
 	gi := g.This().(Node)
 	gnm := NodePropURL(gi, "fill")
 	if gnm != "" {
@@ -75,7 +75,7 @@ func (g *NodeBase) GradientApplyTransform(sv *SVG, xf math32.Mat2) {
 // GradientApplyTransformPt applies the given transform with ctr point
 // to any gradients for this node, that are using specific coordinates
 // (not bounding box which is automatic)
-func (g *NodeBase) GradientApplyTransformPt(sv *SVG, xf math32.Mat2, pt math32.Vector2) {
+func (g *NodeBase) GradientApplyTransformPt(sv *SVG, xf math32.Matrix2, pt math32.Vector2) {
 	gi := g.This().(Node)
 	gnm := NodePropURL(gi, "fill")
 	if gnm != "" {

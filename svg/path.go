@@ -873,14 +873,14 @@ func PathDataString(data []PathData) string {
 
 // ApplyTransform applies the given 2D transform to the geometry of this node
 // each node must define this for itself
-func (g *Path) ApplyTransform(sv *SVG, xf math32.Mat2) {
+func (g *Path) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 	// path may have horiz, vert elements -- only gen soln is to transform
 	g.Paint.Transform.SetMul(xf)
 	g.SetProperty("transform", g.Paint.Transform.String())
 }
 
 // PathDataTransformAbs does the transform of next two data points as absolute coords
-func PathDataTransformAbs(data []PathData, i *int, xf math32.Mat2, lpt math32.Vector2) math32.Vector2 {
+func PathDataTransformAbs(data []PathData, i *int, xf math32.Matrix2, lpt math32.Vector2) math32.Vector2 {
 	cp := PathDataNextVector(data, i)
 	tc := xf.MulVector2AsPointCenter(cp, lpt)
 	data[*i-2] = PathData(tc.X)
@@ -890,7 +890,7 @@ func PathDataTransformAbs(data []PathData, i *int, xf math32.Mat2, lpt math32.Ve
 
 // PathDataTransformRel does the transform of next two data points as relative coords
 // compared to given cp coordinate.  returns new *absolute* coordinate
-func PathDataTransformRel(data []PathData, i *int, xf math32.Mat2, cp math32.Vector2) math32.Vector2 {
+func PathDataTransformRel(data []PathData, i *int, xf math32.Matrix2, cp math32.Vector2) math32.Vector2 {
 	rp := PathDataNextVector(data, i)
 	tc := xf.MulVector2AsVector(rp)
 	data[*i-2] = PathData(tc.X)
@@ -917,7 +917,7 @@ func (g *Path) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.V
 }
 
 // ApplyTransformImpl does the implementation of applying a transform to all points
-func (g *Path) ApplyTransformImpl(xf math32.Mat2, lpt math32.Vector2) {
+func (g *Path) ApplyTransformImpl(xf math32.Matrix2, lpt math32.Vector2) {
 	sz := len(g.Data)
 	data := g.Data
 	lastCmd := PcErr

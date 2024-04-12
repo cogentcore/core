@@ -72,7 +72,7 @@ func (g *Rect) Render(sv *SVG) {
 
 // ApplyTransform applies the given 2D transform to the geometry of this node
 // each node must define this for itself
-func (g *Rect) ApplyTransform(sv *SVG, xf math32.Mat2) {
+func (g *Rect) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 	rot := xf.ExtractRot()
 	if rot != 0 || !g.Paint.Transform.IsIdentity() {
 		g.Paint.Transform.SetMul(xf)

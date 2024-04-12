@@ -39,7 +39,7 @@ type Marker struct {
 	StrokeWidth float32
 
 	// net transform computed from settings and current values -- applied prior to rendering
-	Transform math32.Mat2
+	Transform math32.Matrix2
 
 	// effective size for actual rendering
 	EffSize math32.Vector2

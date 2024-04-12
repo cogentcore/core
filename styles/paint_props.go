@@ -191,9 +191,9 @@ var StylePaintFuncs = map[string]StyleFunc{
 		switch vt := val.(type) {
 		case string:
 			pc.Transform.SetString(vt)
-		case *math32.Mat2:
+		case *math32.Matrix2:
 			pc.Transform = *vt
-		case math32.Mat2:
+		case math32.Matrix2:
 			pc.Transform = vt
 		}
 	},

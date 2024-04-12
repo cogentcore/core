@@ -329,7 +329,7 @@ func (t *Marker) SetStrokeWidth(v float32) *Marker { t.StrokeWidth = v; return t
 
 // SetTransform sets the [Marker.Transform]:
 // net transform computed from settings and current values -- applied prior to rendering
-func (t *Marker) SetTransform(v math32.Mat2) *Marker { t.Transform = v; return t }
+func (t *Marker) SetTransform(v math32.Matrix2) *Marker { t.Transform = v; return t }
 
 // SetEffSize sets the [Marker.EffSize]:
 // effective size for actual rendering

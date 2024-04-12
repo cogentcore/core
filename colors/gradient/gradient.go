@@ -31,7 +31,7 @@ type Gradient interface {
 	// object-level transform (i.e., the current painting transform),
 	// which is applied in addition to the gradient's own Transform.
 	// This must be called before rendering the gradient, and it should only be called then.
-	Update(opacity float32, box math32.Box2, objTransform math32.Mat2)
+	Update(opacity float32, box math32.Box2, objTransform math32.Matrix2)
 }
 
 // Base contains the data and logic common to all gradient types.
@@ -55,7 +55,7 @@ type Base struct { //types:add -setters
 
 	// Transform is the gradient's own transformation matrix applied to the gradient's points.
 	// This is a property of the Gradient itself.
-	Transform math32.Mat2
+	Transform math32.Matrix2
 
 	// Opacity is the overall object opacity multiplier, applied in conjunction with the
 	// stop-level opacity blending.
@@ -70,7 +70,7 @@ type Base struct { //types:add -setters
 
 	// boxTransform is the Transform applied to the bounding Box,
 	// only for [Units] == [ObjectBoundingBox].
-	boxTransform math32.Mat2 `set:"-"`
+	boxTransform math32.Matrix2 `set:"-"`
 
 	// stopsRGB are the computed RGB stops for blend types other than RGB
 	stopsRGB []Stop `set:"-"`

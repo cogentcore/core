@@ -312,7 +312,7 @@ func RayCircleIntersectionF(s1X, s1Y, s2X, s2Y, cX, cY, r float32) (x, y float32
 // MatrixAdder is an adder that applies matrix M to all points
 type MatrixAdder struct {
 	Adder
-	M math32.Mat2
+	M math32.Matrix2
 }
 
 // Reset sets the matrix M to identity

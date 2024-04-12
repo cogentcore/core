@@ -38,7 +38,7 @@ type Paint struct { //types:add
 	VectorEffect VectorEffects
 
 	// our additions to transform -- pushed to render state
-	Transform math32.Mat2
+	Transform math32.Matrix2
 
 	// unit context -- parameters necessary for anchoring relative units
 	UnitContext units.Context
