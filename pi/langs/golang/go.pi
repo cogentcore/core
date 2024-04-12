@@ -6,71 +6,71 @@
     "Kids": [
       {
         "n": 33,
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "InCommentMulti",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "InStrBacktick",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "StartCommentMulti",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "LitStrBacktick",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "CommentLine",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "SkipWhite",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "Letter",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "Number",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "Dot",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "LitStrSingle",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "LitStrDouble",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "LParen",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "RParen",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "LBrack",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "RBrack",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "LBrace",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "RBrace",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "Comma",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "Semi",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "Colon",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "Plus",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "Minus",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "Mult",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "Div",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "Rem",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "Xor",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "Rangle",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "Langle",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "Equals",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "Not",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "And",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "Or",
-        "type": "cogentcore.org/core/pi/lex.Rule",
+        "type": "cogentcore.org/core/pi/lexer.Rule",
         "name": "AnyText"
       },
       {
@@ -80,11 +80,11 @@
         "Kids": [
           {
             "n": 3,
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "EndMulti",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "StartEmbededMulti",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "Comment"
           },
           {
@@ -170,11 +170,11 @@
         "Kids": [
           {
             "n": 3,
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "QuotedStrBacktick",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "EndStrBacktick",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "StrBacktick"
           },
           {
@@ -343,13 +343,13 @@
         "Kids": [
           {
             "n": 4,
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "Keyword",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "Type",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "Builtins",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "Name"
           },
           {
@@ -359,59 +359,59 @@
             "Kids": [
               {
                 "n": 27,
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "break",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "case",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "chan",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "const",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "continue",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "default",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "defer",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "else",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "fallthrough",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "for",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "func",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "go",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "goto",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "if",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "import",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "interface",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "map",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "make",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "new",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "package",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "range",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "return",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "select",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "struct",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "switch",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "type",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "var"
               },
               {
@@ -975,43 +975,43 @@
             "Kids": [
               {
                 "n": 19,
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "bool",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "byte",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "complex64",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "complex128",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "float32",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "float64",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "int",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "int8",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "int16",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "int32",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "int64",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "rune",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "string",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "uint",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "uint8",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "uint16",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "uint32",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "uint64",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "uintptr"
               },
               {
@@ -1415,41 +1415,41 @@
             "Kids": [
               {
                 "n": 18,
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "append",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "cap",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "close",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "complex",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "copy",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "delete",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "error",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "imag",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "len",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "panic",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "print",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "println",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "real",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "recover",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "true",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "false",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "iota",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "nil"
               },
               {
@@ -1887,11 +1887,11 @@
         "Kids": [
           {
             "n": 3,
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "NextNum",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "NextDot",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "Period"
           },
           {
@@ -1921,7 +1921,7 @@
             "Kids": [
               {
                 "n": 1,
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "Ellipsis"
               },
               {
@@ -2199,9 +2199,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "Define",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "Colon"
           },
           {
@@ -2265,11 +2265,11 @@
         "Kids": [
           {
             "n": 3,
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "AsgnAdd",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "AsgnInc",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "Add"
           },
           {
@@ -2353,11 +2353,11 @@
         "Kids": [
           {
             "n": 3,
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "AsgnSub",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "AsgnDec",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "Sub"
           },
           {
@@ -2441,9 +2441,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "AsgnMul",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "Mult"
           },
           {
@@ -2507,9 +2507,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "AsgnDiv",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "Div"
           },
           {
@@ -2573,9 +2573,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "AsgnRem",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "Rem"
           },
           {
@@ -2639,9 +2639,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "AsgnXor",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "Xor"
           },
           {
@@ -2705,11 +2705,11 @@
         "Kids": [
           {
             "n": 3,
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "GtEq",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "ShiftRight",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "Greater"
           },
           {
@@ -2739,9 +2739,9 @@
             "Kids": [
               {
                 "n": 2,
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "AsgnShiftRight",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "ShiftRight"
               },
               {
@@ -2839,13 +2839,13 @@
         "Kids": [
           {
             "n": 4,
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "LtEq",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "AsgnArrow",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "ShiftLeft",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "Less"
           },
           {
@@ -2895,9 +2895,9 @@
             "Kids": [
               {
                 "n": 2,
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "AsgnShiftLeft",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "ShiftLeft"
               },
               {
@@ -2995,9 +2995,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "Equality",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "Asgn"
           },
           {
@@ -3061,9 +3061,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "NotEqual",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "Not"
           },
           {
@@ -3127,13 +3127,13 @@
         "Kids": [
           {
             "n": 4,
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "AsgnAnd",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "AndNot",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "LogAnd",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "BitAnd"
           },
           {
@@ -3163,9 +3163,9 @@
             "Kids": [
               {
                 "n": 2,
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "AsgnAndNot",
-                "type": "cogentcore.org/core/pi/lex.Rule",
+                "type": "cogentcore.org/core/pi/lexer.Rule",
                 "name": "AndNot"
               },
               {
@@ -3283,11 +3283,11 @@
         "Kids": [
           {
             "n": 3,
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "AsgnOr",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "LogOr",
-            "type": "cogentcore.org/core/pi/lex.Rule",
+            "type": "cogentcore.org/core/pi/lexer.Rule",
             "name": "BitOr"
           },
           {

@@ -1656,7 +1656,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *Ast) bo
 	case PushScope:
 		sy, has := ps.FindNameTopScope(nm) // Scoped(nm)
 		if !has {
-			sy = syms.NewSymbol(nm, useTok, ps.Src.Filename, ast.SrcReg) // lex.RegZero) // zero = tmp
+			sy = syms.NewSymbol(nm, useTok, ps.Src.Filename, ast.SrcReg) // lexer.RegZero) // zero = tmp
 			added := sy.AddScopesStack(ps.Scopes)
 			if !added {
 				ps.Syms.Add(sy)

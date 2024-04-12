@@ -16,7 +16,7 @@ import (
 // LangLexer looks up lexer for given language -- impl in parent pi package
 // so we need the interface
 type LangLexer interface {
-	// LexerByName returns the top-level lex.Rule for given language (case invariant lookup)
+	// LexerByName returns the top-level [Rule] for given language (case invariant lookup)
 	LexerByName(lang string) *Rule
 }
 
@@ -24,7 +24,7 @@ type LangLexer interface {
 // for languages -- is set in pi/langs.go
 var TheLangLexer LangLexer
 
-// lex.State is the state maintained for lexing
+// State is the state maintained for lexing
 type State struct {
 
 	// the current file being lex'd

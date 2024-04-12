@@ -5,7 +5,8 @@
 package pi
 
 import (
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
+	"cogentcore.org/core/pi/parser"
 	"cogentcore.org/core/pi/syms"
 )
 
@@ -42,7 +43,7 @@ type Lang interface {
 	// if available from prior lexing / parsing. Line is in 0-indexed "internal" line indexes.
 	// The rune source information is assumed to have already been updated in FileState.
 	// languages can run the parser on the line to augment the lex token output as appropriate.
-	LexLine(fs *FileState, line int) lex.Line
+	LexLine(fs *FileState, line int) lexer.Line
 
 	// ParseLine does complete parser processing of a single line from given file, and returns
 	// the Ast generated for that line.  Line is in 0-indexed "internal" line indexes.
@@ -57,7 +58,7 @@ type Lang interface {
 	// to guide the selection of relevant symbols that can complete the code at
 	// the given point.  A stack (slice) of symbols is returned so that the completer
 	// can control the order of items presented, as compared to the SymMap.
-	CompleteLine(fs *FileState, pos lex.Pos) syms.SymStack
+	CompleteLine(fs *FileState, pos lexer.Pos) syms.SymStack
 
 	// ParseDir does the complete processing of a given directory, optionally including
 	// subdirectories, and optionally forcing the re-processing of the directory(s),

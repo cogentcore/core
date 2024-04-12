@@ -1129,7 +1129,7 @@ type Lang interface {
 	// if available from prior lexing / parsing. Line is in 0-indexed "internal" line indexes.
 	// The rune source information is assumed to have already been updated in FileState.
 	// languages can run the parser on the line to augment the lex token output as appropriate.
-	LexLine(fs *FileState, line int) lex.Line
+	LexLine(fs *FileState, line int) lexer.Line
 }
 
 var TextViewProperties = tree.Properties{

@@ -89,7 +89,7 @@ func (ed *Editor) SelectAll() {
 	ed.NeedsRender()
 }
 
-// WordBefore returns the word before the lex.Pos
+// WordBefore returns the word before the lexer.Pos
 // uses IsWordBreak to determine the bounds of the word
 func (ed *Editor) WordBefore(tp lexer.Pos) *textbuf.Edit {
 	txt := ed.Buffer.Line(tp.Ln)

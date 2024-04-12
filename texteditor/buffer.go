@@ -1530,7 +1530,7 @@ func (tb *Buffer) RegionRectImpl(st, ed lexer.Pos) *textbuf.Edit {
 
 // ReplaceText does DeleteText for given region, and then InsertText at given position
 // (typically same as delSt but not necessarily), optionally emitting a signal after the insert.
-// if matchCase is true, then the lex.MatchCase function is called to match the
+// if matchCase is true, then the lexer.MatchCase function is called to match the
 // case (upper / lower) of the new inserted text to that of the text being replaced.
 // returns the textbuf.Edit for the inserted text.
 func (tb *Buffer) ReplaceText(delSt, delEd, insPos lexer.Pos, insTxt string, signal, matchCase bool) *textbuf.Edit {
@@ -1777,7 +1777,7 @@ func (tb *Buffer) AdjustedTagsImpl(tags lexer.Line, ln int) lexer.Line {
 			ntr.Time.Now()
 		}
 	}
-	// lex.LexsCleanup(&ntags)
+	// lexer.LexsCleanup(&ntags)
 	return ntags
 }
 

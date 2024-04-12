@@ -23,7 +23,7 @@ import (
 // Separate State structs are maintained for each stage (Lexing, PassTwo, Parsing) and
 // the final output of Parsing goes into the Ast and Syms fields.
 //
-// The Src lex.File field maintains all the info about the source file, and the basic
+// The Src lexer.File field maintains all the info about the source file, and the basic
 // tokenized version of the source produced initially by lexing and updated by the
 // remaining passes.  It has everything that is maintained at a line-by-line level.
 type FileState struct {

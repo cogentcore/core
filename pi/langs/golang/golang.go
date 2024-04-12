@@ -142,7 +142,7 @@ func (gl *GoLang) HiLine(fss *pi.FileStates, line int, txt []rune) lexer.Line {
 // IndentLine returns the indentation level for given line based on
 // previous line's indentation level, and any delta change based on
 // e.g., brackets starting or ending the previous or current line, or
-// other language-specific keywords.  See lex.BracketIndentLine for example.
+// other language-specific keywords.  See lexer.BracketIndentLine for example.
 // Indent level is in increments of tabSz for spaces, and tabs for tabs.
 // Operates on rune source with markup lex tags per line.
 func (gl *GoLang) IndentLine(fs *pi.FileStates, src [][]rune, tags []lexer.Line, ln int, tabSz int) (pInd, delInd, pLn int, ichr indent.Char) {

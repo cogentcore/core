@@ -106,7 +106,7 @@ var StandardLangProperties = map[fileinfo.Known]*LangProperties{
 
 // LangSupporter provides general support for supported languages.
 // e.g., looking up lexers and parsers by name.
-// Also implements the lex.LangLexer interface to provide access to other
+// Also implements the lexer.LangLexer interface to provide access to other
 // Guest Lexers
 type LangSupporter struct {
 }

@@ -34,11 +34,11 @@ type Lexer interface {
 	// Lex tries to apply rule to given input state, returns true if matched, false if not
 	Lex(ls *State) *Rule
 
-	// AsLexRule returns object as a lex.Rule
-	AsLexRule() *Rule
+	// AsLexerRule returns object as a [Rule].
+	AsLexerRule() *Rule
 }
 
-// lex.Rule operates on the text input to produce the lexical tokens.
+// Rule operates on the text input to produce the lexical tokens.
 //
 // Lexing is done line-by-line -- you must push and pop states to
 // coordinate across multiple lines, e.g., for multi-line comments.
