@@ -51,7 +51,7 @@ func TestColorAt(t *testing.T) {
 				{81, 94, color.RGBA{255, 1, 0, 255}},
 			}},
 		{NewRadial().
-			SetCenter(math32.V2(0.9, 0.5)).SetFocal(math32.V2(0.9, 0.5)).
+			SetCenter(math32.Vec2(0.9, 0.5)).SetFocal(math32.Vec2(0.9, 0.5)).
 			AddStop(colors.Blue, 0.1).
 			AddStop(colors.Yellow, 0.85),
 			[]value{
@@ -177,7 +177,7 @@ func TestTransform(t *testing.T) {
 	compareTol(t, gb.boxTransform.X0, btcorrect.X0)
 	compareTol(t, gb.boxTransform.Y0, btcorrect.Y0)
 
-	// szf := math32.V2FromPoint(r.Size())
+	// szf := math32.Vec2FromPoint(r.Size())
 	// w := float64(szf.X)
 	// h := float64(szf.Y)
 	// oriX := float64(r.Min.X)

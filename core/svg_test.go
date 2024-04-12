@@ -17,7 +17,7 @@ func TestSVG(t *testing.T) {
 	b := NewBody()
 	sv := NewSVG(b)
 	sv.SVG.Root.ViewBox.Size.SetScalar(10)
-	svg.NewCircle(&sv.SVG.Root).SetPos(math32.V2(5, 5)).SetRadius(5)
+	svg.NewCircle(&sv.SVG.Root).SetPos(math32.Vec2(5, 5)).SetRadius(5)
 	b.AssertRender(t, "svg/basic-circle")
 }
 
@@ -30,6 +30,6 @@ func TestSVGZoom(t *testing.T) {
 	})
 	sv.SVG.Root.ViewBox.Size.SetScalar(1000)
 	sv.SVG.Scale = 100
-	svg.NewText(&sv.SVG.Root).SetText("Hello, world!").SetPos(math32.V2(0, 10))
+	svg.NewText(&sv.SVG.Root).SetText("Hello, world!").SetPos(math32.Vec2(0, 10))
 	b.AssertRender(t, "svg/zoom")
 }

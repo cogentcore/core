@@ -68,7 +68,7 @@ func (g *Image) SetImage(img image.Image, width, height float32) {
 		g.SetImageSize(sz)
 		draw.Draw(g.Pixels, g.Pixels.Bounds(), img, image.Point{}, draw.Src)
 		if g.Size.X == 0 && g.Size.Y == 0 {
-			g.Size = math32.V2FromPoint(sz)
+			g.Size = math32.Vec2FromPoint(sz)
 		}
 	} else {
 		tsz := sz
@@ -88,7 +88,7 @@ func (g *Image) SetImage(img image.Image, width, height float32) {
 		s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
 		transformer.Transform(g.Pixels, s2d, img, img.Bounds(), draw.Over, nil)
 		if g.Size.X == 0 && g.Size.Y == 0 {
-			g.Size = math32.V2FromPoint(tsz)
+			g.Size = math32.Vec2FromPoint(tsz)
 		}
 	}
 }

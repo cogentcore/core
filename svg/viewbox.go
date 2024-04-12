@@ -32,7 +32,7 @@ type ViewBox struct {
 // Defaults returns viewbox to defaults
 func (vb *ViewBox) Defaults() {
 	vb.Min = math32.Vector2{}
-	vb.Size = math32.V2(100, 100)
+	vb.Size = math32.Vec2(100, 100)
 	vb.PreserveAspectRatio.Align.Set(AlignMid)
 	vb.PreserveAspectRatio.MeetOrSlice = Meet
 }
@@ -60,7 +60,7 @@ func (vb *ViewBox) Transform(box math32.Vector2) (size, trans, scale math32.Vect
 		of = styles.FitCover
 	}
 	if vb.Size.X == 0 || vb.Size.Y == 0 {
-		vb.Size = math32.V2(100, 100)
+		vb.Size = math32.Vec2(100, 100)
 	}
 	size = styles.ObjectSizeFromFit(of, vb.Size, box)
 	scale = size.Div(vb.Size)

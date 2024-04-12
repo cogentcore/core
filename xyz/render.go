@@ -238,7 +238,7 @@ func (sc *Scene) UpdateMVPMatrix() {
 
 	sc.Camera.Pose.UpdateMatrix()
 	sz := sc.Geom.Size
-	size := math32.V2(float32(sz.X), float32(sz.Y))
+	size := math32.Vec2(float32(sz.X), float32(sz.Y))
 
 	sc.WalkDown(func(k tree.Node) bool {
 		if k.This() == sc.This() {

@@ -143,7 +143,7 @@ func (a *App) OnTouchMove(this js.Value, args []js.Value) any {
 func (a *App) OnWheel(this js.Value, args []js.Value) any {
 	e := args[0]
 	delta := a.EventPosFor(e.Get("deltaX"), e.Get("deltaY"))
-	a.EvMgr.Scroll(a.EventPos(e), math32.V2FromPoint(delta).DivScalar(8))
+	a.EvMgr.Scroll(a.EventPos(e), math32.Vec2FromPoint(delta).DivScalar(8))
 	e.Call("preventDefault")
 	return nil
 }

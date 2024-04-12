@@ -80,5 +80,5 @@ func (xy *XY) SetDim(d math32.Dims, val Value) {
 
 // Dots returns the dots values as a math32.Vector2 vector
 func (xy *XY) Dots() math32.Vector2 {
-	return math32.V2(xy.X.Dots, xy.Y.Dots)
+	return math32.Vec2(xy.X.Dots, xy.Y.Dots)
 }

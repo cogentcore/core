@@ -2012,7 +2012,7 @@ func (sv *SliceViewBase) HandleEvents() {
 		if !isValid {
 			return
 		}
-		sv.This().(SliceViewer).SliceGrid().AutoScroll(math32.V2(0, float32(idx)))
+		sv.This().(SliceViewer).SliceGrid().AutoScroll(math32.Vec2(0, float32(idx)))
 		prevHoverRow := sv.HoverRow
 		if !isValid {
 			sv.HoverRow = -1
@@ -2305,8 +2305,8 @@ func (sg *SliceViewGrid) IndexFromPixel(pt image.Point) (row, col int, isValid b
 	if !sg.MousePosInGrid(pt) {
 		return
 	}
-	ptf := math32.V2FromPoint(sg.PointToRelPos(pt))
-	sz := math32.V2FromPoint(sg.Geom.ContentBBox.Size())
+	ptf := math32.Vec2FromPoint(sg.PointToRelPos(pt))
+	sz := math32.Vec2FromPoint(sg.Geom.ContentBBox.Size())
 	isValid = true
 	rows := sg.LayImpl.Shape.Y
 	cols := sg.LayImpl.Shape.X

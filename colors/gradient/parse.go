@@ -352,7 +352,7 @@ func UnmarshalXML(g *Gradient, decoder *xml.Decoder, se xml.StartElement) error 
 		case xml.StartElement:
 			switch se.Name.Local {
 			case "linearGradient":
-				l := NewLinear().SetEnd(math32.V2(1, 0)) // SVG is LTR by default
+				l := NewLinear().SetEnd(math32.Vec2(1, 0)) // SVG is LTR by default
 
 				// if we don't already have a gradient, we use this one
 				if *g == nil {

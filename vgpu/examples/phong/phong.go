@@ -135,7 +135,7 @@ func main() {
 	nVtx, nIndex = torus.N()
 	ph.AddMesh("torus", nVtx, nIndex, false)
 
-	lines := vshape.NewLines([]math32.Vector3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, math32.V2(.2, .1), false)
+	lines := vshape.NewLines([]math32.Vector3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, math32.Vec2(.2, .1), false)
 	nVtx, nIndex = lines.N()
 	ph.AddMesh("lines", nVtx, nIndex, false)
 
@@ -254,7 +254,7 @@ func main() {
 		ph.SetModelMtx(&floortx)
 		ph.UseMeshName("floor")
 		// ph.UseNoTexture()
-		ph.UseTexturePars(math32.V2(50, 50), math32.Vector2{})
+		ph.UseTexturePars(math32.Vec2(50, 50), math32.Vector2{})
 		ph.UseTextureName("ground.png")
 		ph.Render()
 

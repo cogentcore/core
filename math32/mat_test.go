@@ -19,10 +19,10 @@ func TolAssertEqualVec(t *testing.T, tol float32, vt, va Vector2) {
 const StandardTol = float32(1.0e-6)
 
 func TestMat2(t *testing.T) {
-	v0 := V2(0, 0)
-	vx := V2(1, 0)
-	vy := V2(0, 1)
-	vxy := V2(1, 1)
+	v0 := Vec2(0, 0)
+	vx := Vec2(1, 0)
+	vy := Vec2(0, 1)
+	vxy := Vec2(1, 1)
 
 	assert.Equal(t, vx, Identity3().MulVector2AsPt(vx))
 	assert.Equal(t, vy, Identity3().MulVector2AsPt(vy))
@@ -50,15 +50,15 @@ func TestMat2(t *testing.T) {
 
 	// 1,0 -> scale(2) = 2,0 -> rotate 90 = 0,2 -> trans 1,1 -> 1,3
 	// multiplication order is *reverse* of "logical" order:
-	TolAssertEqualVec(t, StandardTol, V2(1, 3), Translate2D(1, 1).Mul(Rotate2D(DegToRad(90))).Mul(Scale2D(2, 2)).MulVector2AsPoint(vx))
+	TolAssertEqualVec(t, StandardTol, Vec2(1, 3), Translate2D(1, 1).Mul(Rotate2D(DegToRad(90))).Mul(Scale2D(2, 2)).MulVector2AsPoint(vx))
 
 }
 
 func TestMat3(t *testing.T) {
-	v0 := V2(0, 0)
-	vx := V2(1, 0)
-	vy := V2(0, 1)
-	vxy := V2(1, 1)
+	v0 := Vec2(0, 0)
+	vx := Vec2(1, 0)
+	vy := Vec2(0, 1)
+	vxy := Vec2(1, 1)
 
 	assert.Equal(t, vx, Identity3().MulVector2AsPt(vx))
 	assert.Equal(t, vy, Identity3().MulVector2AsPt(vy))
@@ -78,7 +78,7 @@ func TestMat3(t *testing.T) {
 
 	// 1,0 -> scale(2) = 2,0 -> rotate 90 = 0,2 -> trans 1,1 -> 1,3
 	// multiplication order is *reverse* of "logical" order:
-	TolAssertEqualVec(t, StandardTol, V2(1, 3), Mat3Translate2D(1, 1).Mul(Mat3Rotate2D(DegToRad(90))).Mul(Mat3Scale2D(2, 2)).MulVector2AsPt(vx))
+	TolAssertEqualVec(t, StandardTol, Vec2(1, 3), Mat3Translate2D(1, 1).Mul(Mat3Rotate2D(DegToRad(90))).Mul(Mat3Scale2D(2, 2)).MulVector2AsPt(vx))
 
 	// xmat := Mat3Translate2D(1, 1).Mul(Mat3Rotate2D(DegToRad(90))).Mul(Mat3Scale2D(2, 2)).MulVector2AsPt(vx))
 }

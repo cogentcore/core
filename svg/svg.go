@@ -226,14 +226,14 @@ func (sv *SVG) Render() {
 
 func (sv *SVG) FillViewport() {
 	pc := &paint.Context{&sv.RenderState, &sv.Root.Paint}
-	pc.FillBox(math32.Vector2{}, math32.V2FromPoint(sv.Geom.Size), sv.Background)
+	pc.FillBox(math32.Vector2{}, math32.Vec2FromPoint(sv.Geom.Size), sv.Background)
 }
 
 // SetRootTransform sets the Root node transform based on ViewBox, Translate, Scale
 // parameters set on the SVG object.
 func (sv *SVG) SetRootTransform() {
 	vb := &sv.Root.ViewBox
-	box := math32.V2FromPoint(sv.Geom.Size)
+	box := math32.Vec2FromPoint(sv.Geom.Size)
 	if vb.Size.X == 0 {
 		vb.Size.X = sv.PhysWidth.Dots
 	}

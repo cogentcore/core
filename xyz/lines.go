@@ -82,7 +82,7 @@ func UnitLineMesh(sc *Scene) *Lines {
 	if lm != nil {
 		return lm.(*Lines)
 	}
-	lmm := NewLines(sc, LineMeshName, []math32.Vector3{{-.5, 0, 0}, {.5, 0, 0}}, math32.V2(1, 1), OpenLines)
+	lmm := NewLines(sc, LineMeshName, []math32.Vector3{{-.5, 0, 0}, {.5, 0, 0}}, math32.Vec2(1, 1), OpenLines)
 	return lmm
 }
 
@@ -181,7 +181,7 @@ func NewArrow(sc *Scene, parent tree.Node, name string, st, ed math32.Vector3, w
 // Meshes are named meshNm+"-front" and meshNm+"-side" -- need to be
 // initialized, e.g., using sc.InitMesh()
 func NewLineBoxMeshes(sc *Scene, meshNm string, bbox math32.Box3, width float32) (front, side *Lines) {
-	wd := math32.V2(width, width)
+	wd := math32.Vec2(width, width)
 	sz := bbox.Size()
 	hSz := sz.MulScalar(0.5)
 

@@ -44,9 +44,9 @@ func NewRadial() *Radial {
 	return &Radial{
 		Base: NewBase(),
 		// default is fully centered
-		Center: math32.V2Scalar(0.5),
-		Focal:  math32.V2Scalar(0.5),
-		Radius: math32.V2Scalar(0.5),
+		Center: math32.Vec2Scalar(0.5),
+		Focal:  math32.Vec2Scalar(0.5),
+		Radius: math32.Vec2Scalar(0.5),
 	}
 }
 
@@ -111,7 +111,7 @@ func (r *Radial) At(x, y int) color.Color {
 	if r.rCenter == r.rFocal {
 		// When the center and focal are the same things are much simpler;
 		// pos is just distance from center scaled by radius
-		pt := math32.V2(float32(x)+0.5, float32(y)+0.5)
+		pt := math32.Vec2(float32(x)+0.5, float32(y)+0.5)
 		if r.Units == ObjectBoundingBox {
 			pt = r.boxTransform.MulVector2AsPoint(pt)
 		}
@@ -119,11 +119,11 @@ func (r *Radial) At(x, y int) color.Color {
 		pos := math32.Sqrt(d.X*d.X/(r.rRadius.X*r.rRadius.X) + (d.Y*d.Y)/(r.rRadius.Y*r.rRadius.Y))
 		return r.GetColor(pos)
 	}
-	if r.rFocal == math32.V2(0, 0) {
+	if r.rFocal == math32.Vec2(0, 0) {
 		return color.RGBA{} // should not happen
 	}
 
-	pt := math32.V2(float32(x)+0.5, float32(y)+0.5)
+	pt := math32.Vec2(float32(x)+0.5, float32(y)+0.5)
 	if r.Units == ObjectBoundingBox {
 		pt = r.boxTransform.MulVector2AsPoint(pt)
 	}
@@ -182,5 +182,5 @@ func RayCircleIntersectionF(s1, s2, c math32.Vector2, r float32) (pt math32.Vect
 	default: // Neither solution is on the ray
 		return
 	}
-	return math32.V2((n-e*t1)+c.X, (m-d*t1)+c.Y), true
+	return math32.Vec2((n-e*t1)+c.X, (m-d*t1)+c.Y), true
 }

@@ -338,7 +338,7 @@ func (sr *Span) SetRunePosLR(letterSpace, wordSpace, chsz float32, tabSize int) 
 		if a32 == 0 {
 			a32 = .1 * fht // something..
 		}
-		rr.Size = math32.V2(a32, fht)
+		rr.Size = math32.Vec2(a32, fht)
 
 		if r == '\t' {
 			col := int(math32.Ceil(fpos / chsz))
@@ -405,7 +405,7 @@ func (sr *Span) SetRunePosTB(letterSpace, wordSpace, chsz float32, tabSize int) 
 		if a32 == 0 {
 			a32 = .1 * fht // something..
 		}
-		rr.Size = math32.V2(a32, fht)
+		rr.Size = math32.Vec2(a32, fht)
 
 		if r == '\t' {
 			curtab := col / tabSize
@@ -477,7 +477,7 @@ func (sr *Span) SetRunePosTBRot(letterSpace, wordSpace, chsz float32, tabSize in
 		if a32 == 0 {
 			a32 = .1 * fht // something..
 		}
-		rr.Size = math32.V2(fht, a32)
+		rr.Size = math32.Vec2(fht, a32)
 
 		if r == '\t' {
 			curtab := col / tabSize
@@ -697,8 +697,8 @@ func (sr *Span) RenderBg(pc *Context, tpos math32.Vector2) {
 			scx = rr.ScaleX
 		}
 		tx := math32.Scale2D(scx, 1).Rotate(rr.RotRad)
-		ll := rp.Add(tx.MulVector2AsVec(math32.V2(0, dsc32)))
-		ur := ll.Add(tx.MulVector2AsVec(math32.V2(rr.Size.X, -rr.Size.Y)))
+		ll := rp.Add(tx.MulVector2AsVec(math32.Vec2(0, dsc32)))
+		ur := ll.Add(tx.MulVector2AsVec(math32.Vec2(rr.Size.X, -rr.Size.Y)))
 		if int(math32.Floor(ll.X)) > pc.Bounds.Max.X || int(math32.Floor(ur.Y)) > pc.Bounds.Max.Y ||
 			int(math32.Ceil(ur.X)) < pc.Bounds.Min.X || int(math32.Ceil(ll.Y)) < pc.Bounds.Min.Y {
 			if didLast {
@@ -708,10 +708,10 @@ func (sr *Span) RenderBg(pc *Context, tpos math32.Vector2) {
 			continue
 		}
 		pc.FillStyle.Color = rr.Background
-		szt := math32.V2(rr.Size.X, -rr.Size.Y)
-		sp := rp.Add(tx.MulVector2AsVec(math32.V2(0, dsc32)))
-		ul := sp.Add(tx.MulVector2AsVec(math32.V2(0, szt.Y)))
-		lr := sp.Add(tx.MulVector2AsVec(math32.V2(szt.X, 0)))
+		szt := math32.Vec2(rr.Size.X, -rr.Size.Y)
+		sp := rp.Add(tx.MulVector2AsVec(math32.Vec2(0, dsc32)))
+		ul := sp.Add(tx.MulVector2AsVec(math32.Vec2(0, szt.Y)))
+		lr := sp.Add(tx.MulVector2AsVec(math32.Vec2(szt.X, 0)))
 		pc.DrawPolygon([]math32.Vector2{sp, ul, ur, lr})
 		didLast = true
 	}
@@ -749,8 +749,8 @@ func (sr *Span) RenderUnderline(pc *Context, tpos math32.Vector2) {
 			scx = rr.ScaleX
 		}
 		tx := math32.Scale2D(scx, 1).Rotate(rr.RotRad)
-		ll := rp.Add(tx.MulVector2AsVec(math32.V2(0, dsc32)))
-		ur := ll.Add(tx.MulVector2AsVec(math32.V2(rr.Size.X, -rr.Size.Y)))
+		ll := rp.Add(tx.MulVector2AsVec(math32.Vec2(0, dsc32)))
+		ur := ll.Add(tx.MulVector2AsVec(math32.Vec2(rr.Size.X, -rr.Size.Y)))
 		if int(math32.Floor(ll.X)) > pc.Bounds.Max.X || int(math32.Floor(ur.Y)) > pc.Bounds.Max.Y ||
 			int(math32.Ceil(ur.X)) < pc.Bounds.Min.X || int(math32.Ceil(ll.Y)) < pc.Bounds.Min.Y {
 			if didLast {
@@ -766,8 +766,8 @@ func (sr *Span) RenderUnderline(pc *Context, tpos math32.Vector2) {
 		if rr.Deco.HasFlag(styles.DecoDottedUnderline) {
 			pc.StrokeStyle.Dashes = []float32{2, 2}
 		}
-		sp := rp.Add(tx.MulVector2AsVec(math32.V2(0, 2*dw)))
-		ep := rp.Add(tx.MulVector2AsVec(math32.V2(rr.Size.X, 2*dw)))
+		sp := rp.Add(tx.MulVector2AsVec(math32.Vec2(0, 2*dw)))
+		ep := rp.Add(tx.MulVector2AsVec(math32.Vec2(rr.Size.X, 2*dw)))
 
 		if didLast {
 			pc.LineTo(sp.X, sp.Y)
@@ -811,8 +811,8 @@ func (sr *Span) RenderLine(pc *Context, tpos math32.Vector2, deco styles.TextDec
 			scx = rr.ScaleX
 		}
 		tx := math32.Scale2D(scx, 1).Rotate(rr.RotRad)
-		ll := rp.Add(tx.MulVector2AsVec(math32.V2(0, dsc32)))
-		ur := ll.Add(tx.MulVector2AsVec(math32.V2(rr.Size.X, -rr.Size.Y)))
+		ll := rp.Add(tx.MulVector2AsVec(math32.Vec2(0, dsc32)))
+		ur := ll.Add(tx.MulVector2AsVec(math32.Vec2(rr.Size.X, -rr.Size.Y)))
 		if int(math32.Floor(ll.X)) > pc.Bounds.Max.X || int(math32.Floor(ur.Y)) > pc.Bounds.Max.Y ||
 			int(math32.Ceil(ur.X)) < pc.Bounds.Min.X || int(math32.Ceil(ll.Y)) < pc.Bounds.Min.Y {
 			if didLast {
@@ -829,8 +829,8 @@ func (sr *Span) RenderLine(pc *Context, tpos math32.Vector2, deco styles.TextDec
 			pc.StrokeStyle.Color = curColor
 		}
 		yo := ascPct * asc32
-		sp := rp.Add(tx.MulVector2AsVec(math32.V2(0, -yo)))
-		ep := rp.Add(tx.MulVector2AsVec(math32.V2(rr.Size.X, -yo)))
+		sp := rp.Add(tx.MulVector2AsVec(math32.Vec2(0, -yo)))
+		ep := rp.Add(tx.MulVector2AsVec(math32.Vec2(rr.Size.X, -yo)))
 
 		if didLast {
 			pc.LineTo(sp.X, sp.Y)

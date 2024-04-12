@@ -201,7 +201,7 @@ func (s *Shadow) BasePos(startPos math32.Vector2) math32.Vector2 {
 	// Offset directly affects position.
 	// We need to subtract spread
 	// to compensate for size changes and stay centered.
-	return startPos.Add(math32.V2(s.OffsetX.Dots, s.OffsetY.Dots)).SubScalar(s.Spread.Dots)
+	return startPos.Add(math32.Vec2(s.OffsetX.Dots, s.OffsetY.Dots)).SubScalar(s.Spread.Dots)
 }
 
 // BaseSize returns the total size the base box shadow

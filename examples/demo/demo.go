@@ -398,7 +398,7 @@ func makeViews(ts *core.Tabs) {
 		Name:   "happy",
 		Cond:   2,
 		Value:  3.1415,
-		Vec:    math32.V2(5, 7),
+		Vec:    math32.Vec2(5, 7),
 		Inline: inlineStruct{Value: 3},
 		Cond2: tableStruct{
 			IntField:   22,

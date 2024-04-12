@@ -163,7 +163,7 @@ func (m *Meter) Render() {
 		return
 	}
 
-	r := size.Mul(math32.V2(0.5, 1))
+	r := size.Mul(math32.Vec2(0.5, 1))
 	c := pos.Add(r)
 
 	pc.DrawEllipticalArc(c.X, c.Y, r.X, r.Y, math32.Pi, 2*math32.Pi)
@@ -176,6 +176,6 @@ func (m *Meter) Render() {
 		pc.Stroke()
 	}
 	if txt != nil {
-		txt.Render(pc, c.Sub(size.Mul(math32.V2(0, 0.3))).Sub(toff))
+		txt.Render(pc, c.Sub(size.Mul(math32.Vec2(0, 0.3))).Sub(toff))
 	}
 }

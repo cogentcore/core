@@ -297,7 +297,7 @@ func (tr *Text) LayoutStdLR(txtSty *styles.Text, fontSty *styles.FontRender, ctx
 		size.Y = vht
 	}
 
-	tr.Size = math32.V2(maxw, vht)
+	tr.Size = math32.Vec2(maxw, vht)
 
 	vpad := float32(0) // padding at top to achieve vertical alignment
 	vextra := size.Y - vht

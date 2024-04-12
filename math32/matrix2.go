@@ -131,14 +131,14 @@ func (a *Mat2) SetMul(b Mat2) {
 func (a Mat2) MulVector2AsVec(v Vector2) Vector2 {
 	tx := a.XX*v.X + a.XY*v.Y
 	ty := a.YX*v.X + a.YY*v.Y
-	return V2(tx, ty)
+	return Vec2(tx, ty)
 }
 
 // MulVector2AsPoint multiplies the Vector2 as a point, including adding translations.
 func (a Mat2) MulVector2AsPoint(v Vector2) Vector2 {
 	tx := a.XX*v.X + a.XY*v.Y + a.X0
 	ty := a.YX*v.X + a.YY*v.Y + a.Y0
-	return V2(tx, ty)
+	return Vec2(tx, ty)
 }
 
 // MulVector2AsPointCenter multiplies the Vector2 as a point relative to given center-point
@@ -147,7 +147,7 @@ func (a Mat2) MulVector2AsPointCenter(v, ctr Vector2) Vector2 {
 	rel := v.Sub(ctr)
 	tx := ctr.X + a.XX*rel.X + a.XY*rel.Y + a.X0
 	ty := ctr.Y + a.YX*rel.X + a.YY*rel.Y + a.Y0
-	return V2(tx, ty)
+	return Vec2(tx, ty)
 }
 
 // MulCenter multiplies the Mat2, first subtracting given translation center point
@@ -203,8 +203,8 @@ func (a Mat2) ExtractRot() float32 {
 func (a Mat2) ExtractScale() (scx, scy float32) {
 	rot := a.ExtractRot()
 	tx := a.Rotate(-rot)
-	scxv := tx.MulVector2AsVec(V2(1, 0))
-	scyv := tx.MulVector2AsVec(V2(0, 1))
+	scxv := tx.MulVector2AsVec(Vec2(1, 0))
+	scyv := tx.MulVector2AsVec(Vec2(0, 1))
 	return scxv.X, scyv.Y
 }
 

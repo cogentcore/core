@@ -110,7 +110,7 @@ func (w *Window) ScrollEvent(gw *glfw.Window, xoff, yoff float64) {
 		xoff *= 4 * float64(events.ScrollWheelSpeed)
 		yoff *= 4 * float64(events.ScrollWheelSpeed)
 	}
-	delta := math32.V2(float32(-xoff), float32(-yoff))
+	delta := math32.Vec2(float32(-xoff), float32(-yoff))
 	where := w.CurMousePosPoint(gw)
 	w.EvMgr.Scroll(where, delta)
 	glfw.PostEmptyEvent()

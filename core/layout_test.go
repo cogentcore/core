@@ -52,7 +52,7 @@ func TestLayoutFramesAlignItems(t *testing.T) {
 					s.Wrap = wrap
 					s.Align.Items = align
 				})
-				PlainFrames(b, math32.V2(0, 0))
+				PlainFrames(b, math32.Vec2(0, 0))
 				b.AssertRender(t, tdir+tnm)
 			}
 		}
@@ -80,7 +80,7 @@ func TestLayoutFramesAlignContent(t *testing.T) {
 					s.Wrap = wrap
 					s.Align.Content = align
 				})
-				PlainFrames(b, math32.V2(0, 0))
+				PlainFrames(b, math32.Vec2(0, 0))
 				b.AssertRender(t, tdir+tnm)
 			}
 		}
@@ -112,7 +112,7 @@ func TestLayoutFramesJustifyContent(t *testing.T) {
 					s.Wrap = wrap
 					s.Justify.Content = align
 				})
-				PlainFrames(b, math32.V2(0, 0))
+				PlainFrames(b, math32.Vec2(0, 0))
 				b.AssertRender(t, tdir+tnm)
 			}
 		}
@@ -132,7 +132,7 @@ func TestLayoutFramesJustifyItems(t *testing.T) {
 			s.Columns = 2
 			s.Justify.Items = align
 		})
-		PlainFrames(b, math32.V2(0, 0))
+		PlainFrames(b, math32.Vec2(0, 0))
 		b.AssertRender(t, tdir+tnm)
 	}
 }
@@ -150,7 +150,7 @@ func TestLayoutFramesJustifySelf(t *testing.T) {
 			s.Columns = 2
 			s.Justify.Items = align
 		})
-		PlainFrames(b, math32.V2(0, 0))
+		PlainFrames(b, math32.Vec2(0, 0))
 		_, fr2 := AsWidget(b.ChildByName("fr2"))
 		fr2.Style(func(s *styles.Style) {
 			s.Justify.Self = aligns[(ai+1)%len(aligns)]
@@ -172,7 +172,7 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 			s.Columns = 2
 			s.Align.Items = align
 		})
-		PlainFrames(b, math32.V2(0, 0))
+		PlainFrames(b, math32.Vec2(0, 0))
 		_, fr2 := AsWidget(b.ChildByName("fr2"))
 		fr2.Style(func(s *styles.Style) {
 			s.Align.Self = aligns[(ai+1)%len(aligns)]
@@ -189,7 +189,7 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 			// s.Align.X = styles.End
 			s.Wrap = true
 		})
-		PlainFrames(row, math32.V2(0, 0))
+		PlainFrames(row, math32.Vec2(0, 0))
 		// NewLabel(sc, "lbl").SetText(ShortText).Style(func(s *styles.Style) {
 		// })
 		HorizRow(sc).Style(func(s *styles.Style) {

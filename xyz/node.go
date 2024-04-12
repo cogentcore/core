@@ -286,8 +286,8 @@ func (nb *NodeBase) RayPick(pos image.Point) math32.Ray {
 	// nb.PoseMu.RLock()
 	// nb.Sc.Camera.CamMu.RLock()
 	sz := nb.Sc.Geom.Size
-	size := math32.V2(float32(sz.X), float32(sz.Y))
-	fpos := math32.V2(float32(pos.X), float32(pos.Y))
+	size := math32.Vec2(float32(sz.X), float32(sz.Y))
+	fpos := math32.Vec2(float32(pos.X), float32(pos.Y))
 	ndc := fpos.WindowToNDC(size, math32.Vector2{}, true) // flipY
 	var err error
 	ndc.Z = -1 // at closest point

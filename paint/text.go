@@ -121,9 +121,9 @@ func (tr *Text) Render(pc *Context, pos math32.Vector2) {
 		if !overBoxSet {
 			overWd, _ := curFace.GlyphAdvance(elipses)
 			overWd32 := math32.FromFixed(overWd)
-			overEnd := math32.V2FromPoint(pc.Bounds.Max)
-			overStart = overEnd.Sub(math32.V2(overWd32, 0.1*tr.FontHeight))
-			overBox = math32.Box2{Min: math32.V2(overStart.X, overEnd.Y-tr.FontHeight), Max: overEnd}
+			overEnd := math32.Vec2FromPoint(pc.Bounds.Max)
+			overStart = overEnd.Sub(math32.Vec2(overWd32, 0.1*tr.FontHeight))
+			overBox = math32.Box2{Min: math32.Vec2(overStart.X, overEnd.Y-tr.FontHeight), Max: overEnd}
 			overFace = curFace
 			overColor = curColor
 			overBoxSet = true
@@ -165,8 +165,8 @@ func (tr *Text) Render(pc *Context, pos math32.Vector2) {
 				scx = rr.ScaleX
 			}
 			tx := math32.Scale2D(scx, 1).Rotate(rr.RotRad)
-			ll := rp.Add(tx.MulVector2AsVec(math32.V2(0, dsc32)))
-			ur := ll.Add(tx.MulVector2AsVec(math32.V2(rr.Size.X, -rr.Size.Y)))
+			ll := rp.Add(tx.MulVector2AsVec(math32.Vec2(0, dsc32)))
+			ur := ll.Add(tx.MulVector2AsVec(math32.Vec2(rr.Size.X, -rr.Size.Y)))
 
 			if int(math32.Ceil(ur.X)) < pc.Bounds.Min.X || int(math32.Ceil(ll.Y)) < pc.Bounds.Min.Y {
 				continue
@@ -174,7 +174,7 @@ func (tr *Text) Render(pc *Context, pos math32.Vector2) {
 
 			doingOverflow := false
 			if tr.HasOverflow {
-				cmid := ll.Add(math32.V2(0.5*rr.Size.X, -0.5*rr.Size.Y))
+				cmid := ll.Add(math32.Vec2(0.5*rr.Size.X, -0.5*rr.Size.Y))
 				if overBox.ContainsPoint(cmid) {
 					doingOverflow = true
 					r = elipses
@@ -213,7 +213,7 @@ func (tr *Text) Render(pc *Context, pos math32.Vector2) {
 				draw.DrawMask(d.Dst, idr, d.Src, soff, mask, maskp, draw.Over)
 			} else {
 				srect := dr.Sub(dr.Min)
-				dbase := math32.V2(rp.X-float32(dr.Min.X), rp.Y-float32(dr.Min.Y))
+				dbase := math32.Vec2(rp.X-float32(dr.Min.X), rp.Y-float32(dr.Min.Y))
 
 				transformer := draw.BiLinear
 				fx, fy := float32(dr.Min.X), float32(dr.Min.Y)
@@ -284,7 +284,7 @@ func (tr *Text) SetString(str string, fontSty *styles.FontRender, ctxt *units.Co
 	sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots, fontSty.Face.Metrics.Ch, txtSty.TabSize)
 	ssz := sr.SizeHV()
 	vht := fontSty.Face.Face.Metrics().Height
-	tr.Size = math32.V2(ssz.X, math32.FromFixed(vht))
+	tr.Size = math32.Vec2(ssz.X, math32.FromFixed(vht))
 
 }
 
@@ -304,7 +304,7 @@ func (tr *Text) SetStringRot90(str string, fontSty *styles.FontRender, ctxt *uni
 	sr.SetRunePosTBRot(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots, fontSty.Face.Metrics.Ch, txtSty.TabSize)
 	ssz := sr.SizeHV()
 	vht := fontSty.Face.Face.Metrics().Height
-	tr.Size = math32.V2(math32.FromFixed(vht), ssz.Y)
+	tr.Size = math32.Vec2(math32.FromFixed(vht), ssz.Y)
 }
 
 // SetRunes is for basic text rendering with a single style of text (see
@@ -324,7 +324,7 @@ func (tr *Text) SetRunes(str []rune, fontSty *styles.FontRender, ctxt *units.Con
 	sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots, fontSty.Face.Metrics.Ch, txtSty.TabSize)
 	ssz := sr.SizeHV()
 	vht := fontSty.Face.Face.Metrics().Height
-	tr.Size = math32.V2(ssz.X, math32.FromFixed(vht))
+	tr.Size = math32.Vec2(ssz.X, math32.FromFixed(vht))
 }
 
 // SetHTMLSimpleTag sets the styling parameters for simple html style tags

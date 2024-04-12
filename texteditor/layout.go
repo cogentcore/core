@@ -125,7 +125,7 @@ func (ed *Editor) LayoutAllLines() {
 		mxwd = math32.Max(mxwd, ed.Renders[ln].Size.X)
 	}
 	buf.MarkupMu.RUnlock()
-	ed.LinesSize = math32.V2(mxwd, off)
+	ed.LinesSize = math32.Vec2(mxwd, off)
 	ed.lastlineLayoutSize = ed.LineLayoutSize
 	ed.InternalSizeFromLines()
 }
@@ -170,7 +170,7 @@ func (ed *Editor) ReLayoutAllLines() {
 	}
 	buf.MarkupMu.RUnlock()
 
-	ed.LinesSize = math32.V2(mxwd, off)
+	ed.LinesSize = math32.Vec2(mxwd, off)
 	ed.lastlineLayoutSize = ed.LineLayoutSize
 	ed.InternalSizeFromLines()
 }

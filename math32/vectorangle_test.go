@@ -62,12 +62,12 @@ func TestV3AngleTo(t *testing.T) {
 	}
 }
 
-func TestV2AngleTo(t *testing.T) {
-	ref := V2(1, 0)
+func TestVec2AngleTo(t *testing.T) {
+	ref := Vec2(1, 0)
 	for ang := float32(0); ang < Pi*2; ang += Pi / 10 {
 		cos := Cos(ang)
 		sin := Sin(ang)
-		v := V2(cos, sin)
+		v := Vec2(cos, sin)
 		vang := v.AngleTo(ref)
 		vcos := Cos(vang)
 		vsin := Sin(vang)

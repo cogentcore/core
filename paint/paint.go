@@ -112,7 +112,7 @@ func (pc *Context) FillStrokeClear() {
 // TransformPoint multiplies the specified point by the current transform matrix,
 // returning a transformed position.
 func (pc *Context) TransformPoint(x, y float32) math32.Vector2 {
-	return pc.CurrentTransform.MulVector2AsPoint(math32.V2(x, y))
+	return pc.CurrentTransform.MulVector2AsPoint(math32.Vec2(x, y))
 }
 
 // BoundingBox computes the bounding box for an element in pixel int
@@ -122,10 +122,10 @@ func (pc *Context) BoundingBox(minX, minY, maxX, maxY float32) image.Rectangle {
 	if pc.StrokeStyle.Color != nil {
 		sw = 0.5 * pc.StrokeWidth()
 	}
-	tmin := pc.CurrentTransform.MulVector2AsPoint(math32.V2(minX, minY))
-	tmax := pc.CurrentTransform.MulVector2AsPoint(math32.V2(maxX, maxY))
-	tp1 := math32.V2(tmin.X-sw, tmin.Y-sw).ToPointFloor()
-	tp2 := math32.V2(tmax.X+sw, tmax.Y+sw).ToPointCeil()
+	tmin := pc.CurrentTransform.MulVector2AsPoint(math32.Vec2(minX, minY))
+	tmax := pc.CurrentTransform.MulVector2AsPoint(math32.Vec2(maxX, maxY))
+	tp1 := math32.Vec2(tmin.X-sw, tmin.Y-sw).ToPointFloor()
+	tp2 := math32.Vec2(tmax.X+sw, tmax.Y+sw).ToPointCeil()
 	return image.Rect(tp1.X, tp1.Y, tp2.X, tp2.Y)
 }
 
@@ -952,8 +952,8 @@ func (pc *Context) DrawImageAnchored(fmIm image.Image, x, y, ax, ay float32) {
 // (an additional scaling is applied to the transform matrix used in rendering)
 func (pc *Context) DrawImageScaled(fmIm image.Image, x, y, w, h float32) {
 	s := fmIm.Bounds().Size()
-	isz := math32.V2FromPoint(s)
-	isc := math32.V2(w, h).Div(isz)
+	isz := math32.Vec2FromPoint(s)
+	isc := math32.Vec2(w, h).Div(isz)
 
 	transformer := draw.BiLinear
 	m := pc.CurrentTransform.Translate(x, y).Scale(isc.X, isc.Y)

@@ -38,7 +38,7 @@ func NewLinear() *Linear {
 	return &Linear{
 		Base: NewBase(),
 		// default in SVG is LTR
-		End: math32.V2(1, 0),
+		End: math32.Vec2(1, 0),
 	}
 }
 
@@ -83,7 +83,7 @@ func (l *Linear) At(x, y int) color.Color {
 	d := l.rEnd.Sub(l.rStart)
 	dd := d.X*d.X + d.Y*d.Y // self inner prod
 
-	pt := math32.V2(float32(x)+0.5, float32(y)+0.5)
+	pt := math32.Vec2(float32(x)+0.5, float32(y)+0.5)
 	if l.Units == ObjectBoundingBox {
 		pt = l.boxTransform.MulVector2AsPoint(pt)
 	}

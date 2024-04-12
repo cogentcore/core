@@ -346,7 +346,7 @@ func TextWrapSizeEstimate(csz math32.Vector2, nChars int, fs *styles.Font) math3
 		h = area / w
 		h = max(h, csz.Y)
 	}
-	sz := math32.V2(w, h)
+	sz := math32.Vec2(w, h)
 	if DebugSettings.LayoutTrace {
 		fmt.Println("TextWrapSizeEstimate chars:", chars, "area:", area, "sz:", sz)
 	}

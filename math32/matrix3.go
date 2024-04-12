@@ -192,14 +192,14 @@ func (m *Mat3) SetMulScalar(s float32) {
 func (a Mat3) MulVector2AsVec(v Vector2) Vector2 {
 	tx := a[0]*v.X + a[1]*v.Y
 	ty := a[3]*v.X + a[4]*v.Y
-	return V2(tx, ty)
+	return Vec2(tx, ty)
 }
 
 // MulVector2AsPt multiplies the Vector2 as a point, including adding translations.
 func (a Mat3) MulVector2AsPt(v Vector2) Vector2 {
 	tx := a[0]*v.X + a[1]*v.Y + a[2]
 	ty := a[3]*v.X + a[4]*v.Y + a[5]
-	return V2(tx, ty)
+	return Vec2(tx, ty)
 }
 
 // MulVector3Array multiplies count vectors (i.e., 3 sequential array values per each increment in count)

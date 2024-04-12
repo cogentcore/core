@@ -20,7 +20,7 @@ func TestCanvas(t *testing.T) {
 		pc.StrokeStyle.Color = colors.C(colors.Blue)
 		pc.Stroke()
 
-		pc.FillBox(math32.V2(0.7, 0.3), math32.V2(0.2, 0.5), colors.C(colors.Scheme.Success.Container))
+		pc.FillBox(math32.Vec2(0.7, 0.3), math32.Vec2(0.2, 0.5), colors.C(colors.Scheme.Success.Container))
 
 		pc.FillStyle.Color = colors.C(colors.Orange)
 		pc.DrawCircle(0.4, 0.5, 0.15)

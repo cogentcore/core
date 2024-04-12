@@ -258,8 +258,8 @@ func (cm *Camera) Zoom(zoomPct float32) {
 // ZoomPct is proportion closer (positive) or further (negative) from the target.
 func (cm *Camera) ZoomTo(pt, size image.Point, zoomPct float32) {
 	cm.CamMu.Lock()
-	fsize := math32.V2(float32(size.X), float32(size.Y))
-	fpt := math32.V2(float32(pt.X), float32(pt.Y))
+	fsize := math32.Vec2(float32(size.X), float32(size.Y))
+	fpt := math32.Vec2(float32(pt.X), float32(pt.Y))
 	ndc := fpt.WindowToNDC(fsize, math32.Vector2{}, true) // flipY
 	ndc.Z = -1                                            // at closest point
 	cdir := math32.V4FromV3(ndc, 1).MulMat4(&cm.InvPrjnMatrix)

@@ -22,8 +22,8 @@ func TestBackgroundColor(t *testing.T) {
 		st.ComputeActualBackground(pabg)
 		st.ToDots()
 
-		sz := st.BoxSpace().Size().Add(math32.V2(200, 100))
-		pc.DrawStandardBox(st, math32.V2(50, 100), sz, pabg)
+		sz := st.BoxSpace().Size().Add(math32.Vec2(200, 100))
+		pc.DrawStandardBox(st, math32.Vec2(50, 100), sz, pabg)
 	})
 }
 
@@ -37,29 +37,29 @@ func TestBackgroundImage(t *testing.T) {
 		st.ComputeActualBackground(pabg)
 		st.ToDots()
 
-		sz := st.BoxSpace().Size().Add(math32.V2(200, 100))
+		sz := st.BoxSpace().Size().Add(math32.Vec2(200, 100))
 
 		test := func(of styles.ObjectFits, pos math32.Vector2) {
 			st.ObjectFit = of
 			pc.DrawStandardBox(st, pos, sz, pabg)
 		}
 
-		test(styles.FitFill, math32.V2(0, 0))
-		test(styles.FitContain, math32.V2(220, 0))
-		test(styles.FitCover, math32.V2(440, 0))
-		test(styles.FitScaleDown, math32.V2(660, 0))
-		test(styles.FitNone, math32.V2(880, 0))
+		test(styles.FitFill, math32.Vec2(0, 0))
+		test(styles.FitContain, math32.Vec2(220, 0))
+		test(styles.FitCover, math32.Vec2(440, 0))
+		test(styles.FitScaleDown, math32.Vec2(660, 0))
+		test(styles.FitNone, math32.Vec2(880, 0))
 	})
 }
 
 func TestObjectFit(t *testing.T) {
 	img, _, err := imagex.Open("test.png")
-	// obj := math32.V2FromPoint(img.Bounds().Size())
+	// obj := math32.Vec2FromPoint(img.Bounds().Size())
 	assert.NoError(t, err)
 	RunTest(t, "object-fit", 1260, 300, func(pc *Context) {
 		st := styles.NewStyle()
 		st.ToDots()
-		box := math32.V2(200, 100)
+		box := math32.Vec2(200, 100)
 
 		test := func(of styles.ObjectFits, pos math32.Vector2) {
 			st.ObjectFit = of
@@ -69,10 +69,10 @@ func TestObjectFit(t *testing.T) {
 			// fmt.Println(of, trgsz)
 		}
 
-		test(styles.FitFill, math32.V2(0, 0))
-		test(styles.FitContain, math32.V2(220, 0))
-		test(styles.FitCover, math32.V2(440, 0))
-		test(styles.FitScaleDown, math32.V2(660, 0))
-		test(styles.FitNone, math32.V2(880, 0))
+		test(styles.FitFill, math32.Vec2(0, 0))
+		test(styles.FitContain, math32.Vec2(220, 0))
+		test(styles.FitCover, math32.Vec2(440, 0))
+		test(styles.FitScaleDown, math32.Vec2(660, 0))
+		test(styles.FitNone, math32.Vec2(880, 0))
 	})
 }

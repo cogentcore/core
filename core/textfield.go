@@ -1195,7 +1195,7 @@ func (tf *TextField) CharRenderPos(charidx int, wincoords bool) math32.Vector2 {
 	pos := tf.EffPos
 	if wincoords {
 		sc := tf.Scene
-		pos = pos.Add(math32.V2FromPoint(sc.SceneGeom.Pos))
+		pos = pos.Add(math32.Vec2FromPoint(sc.SceneGeom.Pos))
 	}
 	cpos := tf.RelCharPos(tf.StartPos, charidx)
 	return pos.Add(cpos)
@@ -1356,7 +1356,7 @@ func (tf *TextField) RenderSelect() {
 	pc := &tf.Scene.PaintContext
 	tsz := tf.RelCharPos(effst, effed)
 	if !tf.HasWordWrap() || tsz.Y == 0 {
-		pc.FillBox(spos, math32.V2(tsz.X, tf.FontHeight), tf.SelectColor)
+		pc.FillBox(spos, math32.Vec2(tsz.X, tf.FontHeight), tf.SelectColor)
 		return
 	}
 	ex := float32(tf.Geom.ContentBBox.Max.X)
@@ -1365,15 +1365,15 @@ func (tf *TextField) RenderSelect() {
 	esi, _, _ := tf.RenderAll.RuneSpanPos(effed)
 	ep := tf.CharRenderPos(effed, false)
 
-	pc.FillBox(spos, math32.V2(ex-spos.X, tf.FontHeight), tf.SelectColor)
+	pc.FillBox(spos, math32.Vec2(ex-spos.X, tf.FontHeight), tf.SelectColor)
 
 	spos.X = sx
 	spos.Y += tf.RenderAll.Spans[ssi+1].RelPos.Y - tf.RenderAll.Spans[ssi].RelPos.Y
 	for si := ssi + 1; si <= esi; si++ {
 		if si < esi {
-			pc.FillBox(spos, math32.V2(ex-spos.X, tf.FontHeight), tf.SelectColor)
+			pc.FillBox(spos, math32.Vec2(ex-spos.X, tf.FontHeight), tf.SelectColor)
 		} else {
-			pc.FillBox(spos, math32.V2(ep.X-spos.X, tf.FontHeight), tf.SelectColor)
+			pc.FillBox(spos, math32.Vec2(ep.X-spos.X, tf.FontHeight), tf.SelectColor)
 		}
 		spos.Y += tf.RenderAll.Spans[si].RelPos.Y - tf.RenderAll.Spans[si-1].RelPos.Y
 	}
@@ -1488,7 +1488,7 @@ func (tf *TextField) AutoScroll() {
 
 // PixelToCursor finds the cursor position that corresponds to the given pixel location
 func (tf *TextField) PixelToCursor(pt image.Point) int {
-	ptf := math32.V2FromPoint(pt)
+	ptf := math32.Vec2FromPoint(pt)
 	rpt := ptf.Sub(tf.EffPos)
 	if rpt.X <= 0 || rpt.Y < 0 {
 		return tf.StartPos
