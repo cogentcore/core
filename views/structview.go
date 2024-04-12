@@ -201,7 +201,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 		return true
 	}
 
-	reflectx.FlatFieldsValueFuncIf(sv.Struct,
+	reflectx.WalkValueFlatFieldsIf(sv.Struct,
 		func(stru any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 			return shouldShow(field, sv.Struct)
 		},
@@ -214,7 +214,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 			}
 			if vwtag == "add-fields" && field.Type.Kind() == reflect.Struct {
 				fvalp := fieldVal.Addr().Interface()
-				reflectx.FlatFieldsValueFuncIf(fvalp,
+				reflectx.WalkValueFlatFieldsIf(fvalp,
 					func(stru any, typ reflect.Type, sfield reflect.StructField, fieldVal reflect.Value) bool {
 						return shouldShow(sfield, fvalp)
 					},
@@ -451,7 +451,7 @@ type StructFieldVals struct {
 // expanded, and the field name represented by dots path separators.
 func StructNonDefFields(structPtr any, path string) []StructFieldVals {
 	var flds []StructFieldVals
-	reflectx.FlatFieldsValueFunc(structPtr, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+	reflectx.WalkValueFlatFields(structPtr, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		vvp := fieldVal.Addr()
 		dtag, got := field.Tag.Lookup("default")
 		if field.Type.Kind() == reflect.Struct && (!got || dtag == "") {

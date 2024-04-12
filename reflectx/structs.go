@@ -5,37 +5,39 @@
 package reflectx
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"log/slog"
 	"reflect"
 	"strings"
+
+	"cogentcore.org/core/errors"
+	"cogentcore.org/core/iox/jsonx"
 )
 
-// FlatFieldsTypeFunc calls a function on all the primary fields of a given
+// WalkTypeFlatFields calls a function on all the primary fields of a given
 // struct type, including those on anonymous embedded structs that this struct
-// has, passing the current (embedded) type and StructField -- effectively
-// flattens the reflect field list -- if fun returns false then iteration
-// stops -- overall rval is false if iteration was stopped or there was an
-// error (logged), true otherwise
-func FlatFieldsTypeFunc(typ reflect.Type, fun func(typ reflect.Type, field reflect.StructField) bool) bool {
-	return FlatFieldsTypeFuncIf(typ, nil, fun)
+// has, passing the current (embedded) type and StructField, effectively
+// flattening the reflect field list; if fun returns false then iteration
+// stops; overall return value is false if iteration was stopped or there was an
+// error (logged), true otherwise.
+func WalkTypeFlatFields(typ reflect.Type, fun func(typ reflect.Type, field reflect.StructField) bool) bool {
+	return WalkTypeFlatFieldsIf(typ, nil, fun)
 }
 
-// FlatFieldsTypeFunc calls a function on all the primary fields of a given
+// WalkTypeFlatFieldsIf calls a function on all the primary fields of a given
 // struct type, including those on anonymous embedded structs that this struct
-// has, passing the current (embedded) type and StructField -- effectively
-// flattens the reflect field list -- if fun returns false then iteration
-// stops -- overall rval is false if iteration was stopped or there was an
+// has, passing the current (embedded) type and StructField, effectively
+// flattening the reflect field list; if fun returns false then iteration
+// stops; overall return value is false if iteration was stopped or there was an
 // error (logged), true otherwise. If the given ifFun is non-nil, it is called
 // on every embedded struct field to determine whether the fields of that embedded
 // field should be handled (a return value of true indicates to continue down and
 // a value of false indicates to not).
-func FlatFieldsTypeFuncIf(typ reflect.Type, ifFun, fun func(typ reflect.Type, field reflect.StructField) bool) bool {
+func WalkTypeFlatFieldsIf(typ reflect.Type, ifFun, fun func(typ reflect.Type, field reflect.StructField) bool) bool {
 	typ = NonPointerType(typ)
 	if typ.Kind() != reflect.Struct {
-		log.Printf("reflectx.FlatFieldsTypeFunc: Must call on a struct type, not: %v\n", typ)
+		log.Printf("reflectx.WalkTypeFlatFieldsIf: Must call on a struct type, not: %v\n", typ)
 		return false
 	}
 	rval := true
@@ -47,7 +49,7 @@ func FlatFieldsTypeFuncIf(typ reflect.Type, ifFun, fun func(typ reflect.Type, fi
 					continue
 				}
 			}
-			rval = FlatFieldsTypeFunc(f.Type, fun) // no err here
+			rval = WalkTypeFlatFields(f.Type, fun) // no err here
 			if !rval {
 				break
 			}
@@ -61,21 +63,21 @@ func FlatFieldsTypeFuncIf(typ reflect.Type, ifFun, fun func(typ reflect.Type, fi
 	return rval
 }
 
-// AllFieldsTypeFunc calls a function on all the fields of a given struct type,
-// including those on *any* fields of struct fields that this struct has -- if fun
-// returns false then iteration stops -- overall rval is false if iteration
+// WalkTypeAllFields calls a function on all the fields of a given struct type,
+// including those on *any* fields of struct fields that this struct has; if fun
+// returns false then iteration stops; overall return value is false if iteration
 // was stopped or there was an error (logged), true otherwise.
-func AllFieldsTypeFunc(typ reflect.Type, fun func(typ reflect.Type, field reflect.StructField) bool) bool {
+func WalkTypeAllFields(typ reflect.Type, fun func(typ reflect.Type, field reflect.StructField) bool) bool {
 	typ = NonPointerType(typ)
 	if typ.Kind() != reflect.Struct {
-		log.Printf("reflectx.AllFieldsTypeFunc: Must call on a struct type, not: %v\n", typ)
+		log.Printf("reflectx.WalkTypeAllFields: Must call on a struct type, not: %v\n", typ)
 		return false
 	}
 	rval := true
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		if f.Type.Kind() == reflect.Struct {
-			rval = AllFieldsTypeFunc(f.Type, fun) // no err here
+			rval = WalkTypeAllFields(f.Type, fun) // no err here
 			if !rval {
 				break
 			}
@@ -89,25 +91,25 @@ func AllFieldsTypeFunc(typ reflect.Type, fun func(typ reflect.Type, field reflec
 	return rval
 }
 
-// FlatFieldsValueFunc calls a function on all the primary fields of a
+// WalkValueFlatFields calls a function on all the primary fields of a
 // given struct value (must pass a pointer to the struct) including those on
 // anonymous embedded structs that this struct has, passing the current
 // (embedded) type and StructField, which effectively flattens the reflect field list.
-func FlatFieldsValueFunc(stru any, fun func(stru any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool) bool {
-	return FlatFieldsValueFuncIf(stru, nil, fun)
+func WalkValueFlatFields(stru any, fun func(str any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool) bool {
+	return WalkValueFlatFieldsIf(stru, nil, fun)
 }
 
-// FlatFieldsValueFunc calls a function on all the primary fields of a
+// WalkValueFlatFieldsIf calls a function on all the primary fields of a
 // given struct value (must pass a pointer to the struct) including those on
 // anonymous embedded structs that this struct has, passing the current
 // (embedded) type and StructField, which effectively flattens the reflect field
 // list. If the given ifFun is non-nil, it is called on every embedded struct field to
 // determine whether the fields of that embedded field should be handled (a return value
 // of true indicates to continue down and a value of false indicates to not).
-func FlatFieldsValueFuncIf(stru any, ifFun, fun func(stru any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool) bool {
+func WalkValueFlatFieldsIf(stru any, ifFun, fun func(str any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool) bool {
 	vv := reflect.ValueOf(stru)
 	if stru == nil || vv.Kind() != reflect.Pointer {
-		log.Printf("reflectx.FlatFieldsValueFunc: must pass a non-nil pointer to the struct: %v\n", stru)
+		log.Printf("reflectx.WalkValueFlatFieldsIf: must pass a non-nil pointer to the struct: %v\n", stru)
 		return false
 	}
 	v := NonPointerValue(vv)
@@ -116,7 +118,7 @@ func FlatFieldsValueFuncIf(stru any, ifFun, fun func(stru any, typ reflect.Type,
 	}
 	typ := v.Type()
 	if typ.Kind() != reflect.Struct {
-		// log.Printf("reflectx.FlatFieldsValueFunc: non-pointer type is not a struct: %v\n", typ.String())
+		log.Printf("reflectx.WalkValueFlatFieldsIf: non-pointer type is not a struct: %v\n", typ.String())
 		return false
 	}
 	rval := true
@@ -137,7 +139,7 @@ func FlatFieldsValueFuncIf(stru any, ifFun, fun func(stru any, typ reflect.Type,
 				}
 			}
 			// key to take addr here so next level is addressable
-			rval = FlatFieldsValueFunc(PointerValue(vf).Interface(), fun)
+			rval = WalkValueFlatFields(PointerValue(vf).Interface(), fun)
 			if !rval {
 				break
 			}
@@ -151,250 +153,21 @@ func FlatFieldsValueFuncIf(stru any, ifFun, fun func(stru any, typ reflect.Type,
 	return rval
 }
 
-// FlatFields returns a slice list of all the StructField type information for
-// fields of given type and any embedded types -- returns nil on error
-// (logged)
-func FlatFields(typ reflect.Type) []reflect.StructField {
-	ff := make([]reflect.StructField, 0)
-	falseErr := FlatFieldsTypeFunc(typ, func(typ reflect.Type, field reflect.StructField) bool {
-		ff = append(ff, field)
-		return true
-	})
-	if falseErr == false {
-		return nil
-	}
-	return ff
-}
-
-// AllFields returns a slice list of all the StructField type information for
-// all elemental fields of given type and all embedded types -- returns nil on
-// error (logged)
-func AllFields(typ reflect.Type) []reflect.StructField {
-	ff := make([]reflect.StructField, 0)
-	falseErr := AllFieldsTypeFunc(typ, func(typ reflect.Type, field reflect.StructField) bool {
-		ff = append(ff, field)
-		return true
-	})
-	if falseErr == false {
-		return nil
-	}
-	return ff
-}
-
-// AllFieldsN returns number of elemental fields in given type
-func AllFieldsN(typ reflect.Type) int {
+// NumAllFields returns the number of elemental fields in the given struct type.
+func NumAllFields(typ reflect.Type) int {
 	n := 0
-	falseErr := AllFieldsTypeFunc(typ, func(typ reflect.Type, field reflect.StructField) bool {
+	falseErr := WalkTypeAllFields(typ, func(typ reflect.Type, field reflect.StructField) bool {
 		n++
 		return true
 	})
-	if falseErr == false {
+	if !falseErr {
 		return 0
 	}
 	return n
 }
 
-// FlatFieldsVals returns a slice list of all the field reflect.Value's for
-// fields of given struct (must pass a pointer to the struct) and any of its
-// embedded structs -- returns nil on error (logged)
-func FlatFieldVals(stru any) []reflect.Value {
-	ff := make([]reflect.Value, 0)
-	falseErr := FlatFieldsValueFunc(stru, func(stru any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
-		ff = append(ff, fieldVal)
-		return true
-	})
-	if falseErr == false {
-		return nil
-	}
-	return ff
-}
-
-// FlatFieldInterfaces returns a slice list of all the field interface{}
-// values *as pointers to the field value* (i.e., calling Addr() on the Field
-// Value) for fields of given struct (must pass a pointer to the struct) and
-// any of its embedded structs -- returns nil on error (logged)
-func FlatFieldInterfaces(stru any) []any {
-	ff := make([]any, 0)
-	falseErr := FlatFieldsValueFunc(stru, func(stru any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
-		ff = append(ff, PointerValue(fieldVal).Interface())
-		return true
-	})
-	if falseErr == false {
-		return nil
-	}
-	return ff
-}
-
-// FlatFieldByName returns field in type or embedded structs within type, by
-// name -- native function already does flat version, so this is just for
-// reference and consistency
-func FlatFieldByName(typ reflect.Type, nm string) (reflect.StructField, bool) {
-	return typ.FieldByName(nm)
-}
-
-// FieldByPath returns field in type or embedded structs within type, by a
-// dot-separated path -- finds field by name for each level of the path, and
-// recurses.
-func FieldByPath(typ reflect.Type, path string) (reflect.StructField, bool) {
-	pels := strings.Split(path, ".")
-	ctyp := typ
-	plen := len(pels)
-	for i, pe := range pels {
-		fld, ok := ctyp.FieldByName(pe)
-		if !ok {
-			log.Printf("reflectx.FieldByPath: field: %v not found in type: %v, starting from path: %v, in type: %v\n", pe, ctyp.String(), path, typ.String())
-			return fld, false
-		}
-		if i == plen-1 {
-			return fld, true
-		}
-		ctyp = fld.Type
-	}
-	return reflect.StructField{}, false
-}
-
-// FieldValueByPath returns field interface in type or embedded structs within
-// type, by a dot-separated path -- finds field by name for each level of the
-// path, and recurses.
-func FieldValueByPath(stru any, path string) (reflect.Value, bool) {
-	pels := strings.Split(path, ".")
-	sval := reflect.ValueOf(stru)
-	cval := sval
-	typ := sval.Type()
-	ctyp := typ
-	plen := len(pels)
-	for i, pe := range pels {
-		_, ok := ctyp.FieldByName(pe)
-		if !ok {
-			log.Printf("reflectx.FieldValueByPath: field: %v not found in type: %v, starting from path: %v, in type: %v\n", pe, cval.Type().String(), path, typ.String())
-			return cval, false
-		}
-		fval := cval.FieldByName(pe)
-		if i == plen-1 {
-			return fval, true
-		}
-		cval = fval
-		ctyp = fval.Type()
-	}
-	return reflect.Value{}, false
-}
-
-// FlatFieldTag returns given tag value in field in type or embedded structs
-// within type, by name -- empty string if not set or field not found
-func FlatFieldTag(typ reflect.Type, nm, tag string) string {
-	fld, ok := typ.FieldByName(nm)
-	if !ok {
-		return ""
-	}
-	return fld.Tag.Get(tag)
-}
-
-// FlatFieldValueByName finds field in object and embedded objects, by name,
-// returning reflect.Value of field -- native version of Value function
-// already does flat find, so this just provides a convenient wrapper
-func FlatFieldValueByName(stru any, nm string) reflect.Value {
-	vv := reflect.ValueOf(stru)
-	if stru == nil || vv.Kind() != reflect.Pointer {
-		log.Printf("reflectx.FlatFieldsValueFunc: must pass a non-nil pointer to the struct: %v\n", stru)
-		return reflect.Value{}
-	}
-	v := NonPointerValue(vv)
-	return v.FieldByName(nm)
-}
-
-// FlatFieldInterfaceByName finds field in object and embedded objects, by
-// name, returning interface{} to pointer of field, or nil if not found
-func FlatFieldInterfaceByName(stru any, nm string) any {
-	ff := FlatFieldValueByName(stru, nm)
-	if !ff.IsValid() {
-		return nil
-	}
-	return PointerValue(ff).Interface()
-}
-
-// TypeEmbeds checks if given type embeds another type, at any level of
-// recursive embedding (including being the type itself)
-func TypeEmbeds(typ, embed reflect.Type) bool {
-	typ = NonPointerType(typ)
-	embed = NonPointerType(embed)
-	if typ == embed {
-		return true
-	}
-	for i := 0; i < typ.NumField(); i++ {
-		f := typ.Field(i)
-		if f.Type.Kind() == reflect.Struct && f.Anonymous {
-			// fmt.Printf("typ %v anon struct %v\n", typ.Name(), f.Name)
-			if f.Type == embed {
-				return true
-			}
-			return TypeEmbeds(f.Type, embed)
-		}
-	}
-	return false
-}
-
-// Embed returns the embedded struct of given type within given struct
-func Embed(stru any, embed reflect.Type) any {
-	if AnyIsNil(stru) {
-		return nil
-	}
-	v := NonPointerValue(reflect.ValueOf(stru))
-	typ := v.Type()
-	if typ == embed {
-		return PointerValue(v).Interface()
-	}
-	for i := 0; i < typ.NumField(); i++ {
-		f := typ.Field(i)
-		if f.Type.Kind() == reflect.Struct && f.Anonymous { // anon only avail on StructField fm typ
-			vf := v.Field(i)
-			vfpi := PointerValue(vf).Interface()
-			if f.Type == embed {
-				return vfpi
-			}
-			rv := Embed(vfpi, embed)
-			if rv != nil {
-				return rv
-			}
-		}
-	}
-	return nil
-}
-
-// EmbedImplements checks if given type implements given interface, or
-// it embeds a type that does so -- must pass a type constructed like this:
-// reflect.TypeOf((*core.Node2D)(nil)).Elem() or just reflect.TypeOf(reflectx.BaseIface())
-func EmbedImplements(typ, iface reflect.Type) bool {
-	if iface.Kind() != reflect.Interface {
-		log.Printf("reflectx.EmbedImplements -- type is not an interface: %v\n", iface)
-		return false
-	}
-	if typ.Implements(iface) {
-		return true
-	}
-	if reflect.PointerTo(typ).Implements(iface) { // typically need the pointer type to impl
-		return true
-	}
-	typ = NonPointerType(typ)
-	if typ.Implements(iface) { // try it all possible ways..
-		return true
-	}
-	if typ.Kind() != reflect.Struct {
-		return false
-	}
-	for i := 0; i < typ.NumField(); i++ {
-		f := typ.Field(i)
-		if f.Type.Kind() == reflect.Struct && f.Anonymous {
-			rv := EmbedImplements(f.Type, iface)
-			if rv {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-// SetFromDefaultTags sets values of fields in given struct based on
-// `default:` default value field tags.
+// SetFromDefaultTags sets the values of fields in the given struct based on
+// `default:` default value struct field tags.
 func SetFromDefaultTags(obj any) error {
 	if AnyIsNil(obj) {
 		return nil
@@ -496,8 +269,7 @@ func FormatDefault(def string) string {
 	return def
 }
 
-// StructTags returns a map[string]string of the tag string from a reflect.StructTag value
-// e.g., from StructField.Tag
+// StructTags returns a map[string]string of the tag string from a [reflect.StructTag] value.
 func StructTags(tags reflect.StructTag) map[string]string {
 	if len(tags) == 0 {
 		return nil
@@ -515,24 +287,7 @@ func StructTags(tags reflect.StructTag) map[string]string {
 	return smap
 }
 
-// StringJSON returns a JSON representation of item, as a string
-// e.g., for printing / debugging etc.
-func StringJSON(it any) string {
-	b, _ := json.MarshalIndent(it, "", "  ")
-	return string(b)
-}
-
-// SetField sets given field name on given struct object to given value,
-// using very robust conversion routines to e.g., convert from strings to numbers, and
-// vice-versa, automatically.  Returns error if not successfully set.
-func SetField(obj any, field string, val any) error {
-	fv := FlatFieldValueByName(obj, field)
-	if !fv.IsValid() {
-		return fmt.Errorf("reflectx.SetField: could not find field %q", field)
-	}
-	err := SetRobust(PointerValue(fv).Interface(), val)
-	if err != nil {
-		return fmt.Errorf("reflectx.SetField: SetRobust failed to set field %q to value: %v: %w", field, val, err)
-	}
-	return nil
+// StringJSON returns a JSON string representation of the given value for printing/debugging.
+func StringJSON(v any) string {
+	return string(errors.Log1(jsonx.WriteBytes(v)))
 }

@@ -11,6 +11,35 @@ import (
 	"cogentcore.org/core/reflectx/testdata"
 )
 
+type A struct {
+	Mbr1 string
+	Mbr2 int
+}
+
+type B struct {
+	A
+	Mbr3 string
+	Mbr4 int
+}
+
+type C struct {
+	B
+	Mbr5 string
+	Mbr6 int
+}
+
+var a = A{}
+var c = C{}
+
+func InitC() {
+	c.Mbr1 = "mbr1 string"
+	c.Mbr2 = 2
+	c.Mbr3 = "mbr3 string"
+	c.Mbr4 = 4
+	c.Mbr5 = "mbr5 string"
+	c.Mbr6 = 6
+}
+
 func AFun(aa any) bool {
 	return AnyIsNil(aa)
 }

@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-type TstStruct struct {
+type TestStruct struct {
 	Field1 string
 }
 

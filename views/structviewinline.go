@@ -71,7 +71,7 @@ func (sv *StructViewInline) Config() {
 	// note: widget re-use does not work due to all the closures
 	sv.DeleteChildren()
 	sv.FieldViews = make([]Value, 0)
-	reflectx.FlatFieldsValueFunc(sv.Struct, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+	reflectx.WalkValueFlatFields(sv.Struct, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		// todo: check tags, skip various etc
 		vwtag := field.Tag.Get("view")
 		if vwtag == "-" {
