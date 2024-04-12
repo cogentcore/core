@@ -126,9 +126,9 @@ func (a *Mat2) SetMul(b Mat2) {
 	*a = a.Mul(b)
 }
 
-// MulVector2AsVec multiplies the Vector2 as a vector without adding translations.
+// MulVector2AsVector multiplies the Vector2 as a vector without adding translations.
 // This is for directional vectors and not points.
-func (a Mat2) MulVector2AsVec(v Vector2) Vector2 {
+func (a Mat2) MulVector2AsVector(v Vector2) Vector2 {
 	tx := a.XX*v.X + a.XY*v.Y
 	ty := a.YX*v.X + a.YY*v.Y
 	return Vec2(tx, ty)
@@ -203,8 +203,8 @@ func (a Mat2) ExtractRot() float32 {
 func (a Mat2) ExtractScale() (scx, scy float32) {
 	rot := a.ExtractRot()
 	tx := a.Rotate(-rot)
-	scxv := tx.MulVector2AsVec(Vec2(1, 0))
-	scyv := tx.MulVector2AsVec(Vec2(0, 1))
+	scxv := tx.MulVector2AsVector(Vec2(1, 0))
+	scyv := tx.MulVector2AsVector(Vec2(0, 1))
 	return scxv.X, scyv.Y
 }
 

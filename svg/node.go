@@ -194,7 +194,7 @@ func (g *NodeBase) DeltaTransform(trans math32.Vector2, scale math32.Vector2, ro
 	mxi := g.ParTransform(self)
 	mxi = mxi.Inverse()
 	lpt := mxi.MulVector2AsPoint(pt)
-	ldel := mxi.MulVector2AsVec(trans)
+	ldel := mxi.MulVector2AsVector(trans)
 	xf := math32.Scale2D(scale.X, scale.Y).Rotate(rot)
 	xf.X0 = ldel.X
 	xf.Y0 = ldel.Y

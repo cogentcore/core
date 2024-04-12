@@ -183,8 +183,8 @@ func PathDataNext(data []PathData, i *int) float32 {
 	return float32(pd)
 }
 
-// PathDataNextVec gets the next 2 path data points as a vector
-func PathDataNextVec(data []PathData, i *int) math32.Vector2 {
+// PathDataNextVector gets the next 2 path data points as a vector
+func PathDataNextVector(data []PathData, i *int) math32.Vector2 {
 	v := math32.Vector2{}
 	v.X = float32(data[*i])
 	(*i)++
@@ -230,11 +230,11 @@ func PathDataRender(data []PathData, pc *paint.Context) {
 		rel := false
 		switch cmd {
 		case PcM:
-			cp = PathDataNextVec(data, &i)
+			cp = PathDataNextVector(data, &i)
 			pc.MoveTo(cp.X, cp.Y)
 			st = cp
 			for np := 1; np < n/2; np++ {
-				cp = PathDataNextVec(data, &i)
+				cp = PathDataNextVector(data, &i)
 				pc.LineTo(cp.X, cp.Y)
 			}
 		case Pcm:
@@ -247,7 +247,7 @@ func PathDataRender(data []PathData, pc *paint.Context) {
 			}
 		case PcL:
 			for np := 0; np < n/2; np++ {
-				cp = PathDataNextVec(data, &i)
+				cp = PathDataNextVector(data, &i)
 				pc.LineTo(cp.X, cp.Y)
 			}
 		case Pcl:
@@ -277,9 +277,9 @@ func PathDataRender(data []PathData, pc *paint.Context) {
 			}
 		case PcC:
 			for np := 0; np < n/6; np++ {
-				xp = PathDataNextVec(data, &i)
-				ctrl = PathDataNextVec(data, &i)
-				cp = PathDataNextVec(data, &i)
+				xp = PathDataNextVector(data, &i)
+				ctrl = PathDataNextVector(data, &i)
+				cp = PathDataNextVector(data, &i)
 				pc.CubicTo(xp.X, xp.Y, ctrl.X, ctrl.Y, cp.X, cp.Y)
 			}
 		case Pcc:
@@ -304,8 +304,8 @@ func PathDataRender(data []PathData, pc *paint.Context) {
 					xp = PathDataNextRel(data, &i, cp)
 					cp = PathDataNextRel(data, &i, cp)
 				} else {
-					xp = PathDataNextVec(data, &i)
-					cp = PathDataNextVec(data, &i)
+					xp = PathDataNextVector(data, &i)
+					cp = PathDataNextVector(data, &i)
 				}
 				pc.CubicTo(ctrl.X, ctrl.Y, xp.X, xp.Y, cp.X, cp.Y)
 				lastCmd = cmd
@@ -313,8 +313,8 @@ func PathDataRender(data []PathData, pc *paint.Context) {
 			}
 		case PcQ:
 			for np := 0; np < n/4; np++ {
-				ctrl = PathDataNextVec(data, &i)
-				cp = PathDataNextVec(data, &i)
+				ctrl = PathDataNextVector(data, &i)
+				cp = PathDataNextVector(data, &i)
 				pc.QuadraticTo(ctrl.X, ctrl.Y, cp.X, cp.Y)
 			}
 		case Pcq:
@@ -337,7 +337,7 @@ func PathDataRender(data []PathData, pc *paint.Context) {
 				if rel {
 					cp = PathDataNextRel(data, &i, cp)
 				} else {
-					cp = PathDataNextVec(data, &i)
+					cp = PathDataNextVector(data, &i)
 				}
 				pc.QuadraticTo(ctrl.X, ctrl.Y, cp.X, cp.Y)
 				lastCmd = cmd
@@ -347,7 +347,7 @@ func PathDataRender(data []PathData, pc *paint.Context) {
 			fallthrough
 		case PcA:
 			for np := 0; np < n/7; np++ {
-				rad := PathDataNextVec(data, &i)
+				rad := PathDataNextVector(data, &i)
 				ang := PathDataNext(data, &i)
 				largeArc := (PathDataNext(data, &i) != 0)
 				sweep := (PathDataNext(data, &i) != 0)
@@ -355,7 +355,7 @@ func PathDataRender(data []PathData, pc *paint.Context) {
 				if rel {
 					cp = PathDataNextRel(data, &i, cp)
 				} else {
-					cp = PathDataNextVec(data, &i)
+					cp = PathDataNextVector(data, &i)
 				}
 				ncx, ncy := paint.FindEllipseCenter(&rad.X, &rad.Y, ang*math.Pi/180, prv.X, prv.Y, cp.X, cp.Y, sweep, largeArc)
 				cp.X, cp.Y = pc.DrawEllipticalArcPath(ncx, ncy, cp.X, cp.Y, prv.X, prv.Y, rad.X, rad.Y, ang, largeArc, sweep)
@@ -392,13 +392,13 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIndex i
 		rel := false
 		switch cmd {
 		case PcM:
-			cp = PathDataNextVec(data, &i)
+			cp = PathDataNextVector(data, &i)
 			if !fun(i-2, cmd, 0, cp, nil) {
 				return
 			}
 			st = cp
 			for np := 1; np < n/2; np++ {
-				cp = PathDataNextVec(data, &i)
+				cp = PathDataNextVector(data, &i)
 				if !fun(i-2, cmd, np, cp, nil) {
 					return
 				}
@@ -417,7 +417,7 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIndex i
 			}
 		case PcL:
 			for np := 0; np < n/2; np++ {
-				cp = PathDataNextVec(data, &i)
+				cp = PathDataNextVector(data, &i)
 				if !fun(i-2, cmd, np, cp, nil) {
 					return
 				}
@@ -459,9 +459,9 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIndex i
 			}
 		case PcC:
 			for np := 0; np < n/6; np++ {
-				xp = PathDataNextVec(data, &i)
-				ctrl = PathDataNextVec(data, &i)
-				cp = PathDataNextVec(data, &i)
+				xp = PathDataNextVector(data, &i)
+				ctrl = PathDataNextVector(data, &i)
+				cp = PathDataNextVector(data, &i)
 				if !fun(i-2, cmd, np, cp, []math32.Vector2{xp, ctrl}) {
 					return
 				}
@@ -490,8 +490,8 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIndex i
 					xp = PathDataNextRel(data, &i, cp)
 					cp = PathDataNextRel(data, &i, cp)
 				} else {
-					xp = PathDataNextVec(data, &i)
-					cp = PathDataNextVec(data, &i)
+					xp = PathDataNextVector(data, &i)
+					cp = PathDataNextVector(data, &i)
 				}
 				if !fun(i-2, cmd, np, cp, []math32.Vector2{xp, ctrl}) {
 					return
@@ -501,8 +501,8 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIndex i
 			}
 		case PcQ:
 			for np := 0; np < n/4; np++ {
-				ctrl = PathDataNextVec(data, &i)
-				cp = PathDataNextVec(data, &i)
+				ctrl = PathDataNextVector(data, &i)
+				cp = PathDataNextVector(data, &i)
 				if !fun(i-2, cmd, np, cp, []math32.Vector2{ctrl}) {
 					return
 				}
@@ -529,7 +529,7 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIndex i
 				if rel {
 					cp = PathDataNextRel(data, &i, cp)
 				} else {
-					cp = PathDataNextVec(data, &i)
+					cp = PathDataNextVector(data, &i)
 				}
 				if !fun(i-2, cmd, np, cp, []math32.Vector2{ctrl}) {
 					return
@@ -541,7 +541,7 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIndex i
 			fallthrough
 		case PcA:
 			for np := 0; np < n/7; np++ {
-				rad := PathDataNextVec(data, &i)
+				rad := PathDataNextVector(data, &i)
 				ang := PathDataNext(data, &i)
 				laf := PathDataNext(data, &i)
 				largeArc := (laf != 0)
@@ -552,7 +552,7 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIndex i
 				if rel {
 					cp = PathDataNextRel(data, &i, cp)
 				} else {
-					cp = PathDataNextVec(data, &i)
+					cp = PathDataNextVector(data, &i)
 				}
 				nc.X, nc.Y = paint.FindEllipseCenter(&rad.X, &rad.Y, ang*math.Pi/180, prv.X, prv.Y, cp.X, cp.Y, sweep, largeArc)
 				if !fun(i-2, cmd, np, cp, []math32.Vector2{nc, prv, rad, {X: ang}, {laf, sf}}) {
@@ -807,15 +807,15 @@ func PathDataString(data []PathData) string {
 		sb.WriteString(fmt.Sprintf("%c ", PathCmdToRune[cmd]))
 		switch cmd {
 		case PcM, Pcm:
-			cp = PathDataNextVec(data, &i)
+			cp = PathDataNextVector(data, &i)
 			sb.WriteString(fmt.Sprintf("%g,%g ", cp.X, cp.Y))
 			for np := 1; np < n/2; np++ {
-				cp = PathDataNextVec(data, &i)
+				cp = PathDataNextVector(data, &i)
 				sb.WriteString(fmt.Sprintf("%g,%g ", cp.X, cp.Y))
 			}
 		case PcL, Pcl:
 			for np := 0; np < n/2; np++ {
-				rp = PathDataNextVec(data, &i)
+				rp = PathDataNextVector(data, &i)
 				sb.WriteString(fmt.Sprintf("%g,%g ", rp.X, rp.Y))
 			}
 		case PcH, Pch, PcV, Pcv:
@@ -825,41 +825,41 @@ func PathDataString(data []PathData) string {
 			}
 		case PcC, Pcc:
 			for np := 0; np < n/6; np++ {
-				xp = PathDataNextVec(data, &i)
+				xp = PathDataNextVector(data, &i)
 				sb.WriteString(fmt.Sprintf("%g,%g ", xp.X, xp.Y))
-				ctrl = PathDataNextVec(data, &i)
+				ctrl = PathDataNextVector(data, &i)
 				sb.WriteString(fmt.Sprintf("%g,%g ", ctrl.X, ctrl.Y))
-				cp = PathDataNextVec(data, &i)
+				cp = PathDataNextVector(data, &i)
 				sb.WriteString(fmt.Sprintf("%g,%g ", cp.X, cp.Y))
 			}
 		case Pcs, PcS:
 			for np := 0; np < n/4; np++ {
-				xp = PathDataNextVec(data, &i)
+				xp = PathDataNextVector(data, &i)
 				sb.WriteString(fmt.Sprintf("%g,%g ", xp.X, xp.Y))
-				cp = PathDataNextVec(data, &i)
+				cp = PathDataNextVector(data, &i)
 				sb.WriteString(fmt.Sprintf("%g,%g ", cp.X, cp.Y))
 			}
 		case PcQ, Pcq:
 			for np := 0; np < n/4; np++ {
-				ctrl = PathDataNextVec(data, &i)
+				ctrl = PathDataNextVector(data, &i)
 				sb.WriteString(fmt.Sprintf("%g,%g ", ctrl.X, ctrl.Y))
-				cp = PathDataNextVec(data, &i)
+				cp = PathDataNextVector(data, &i)
 				sb.WriteString(fmt.Sprintf("%g,%g ", cp.X, cp.Y))
 			}
 		case PcT, Pct:
 			for np := 0; np < n/2; np++ {
-				cp = PathDataNextVec(data, &i)
+				cp = PathDataNextVector(data, &i)
 				sb.WriteString(fmt.Sprintf("%g,%g ", cp.X, cp.Y))
 			}
 		case PcA, Pca:
 			for np := 0; np < n/7; np++ {
-				rad := PathDataNextVec(data, &i)
+				rad := PathDataNextVector(data, &i)
 				sb.WriteString(fmt.Sprintf("%g,%g ", rad.X, rad.Y))
 				ang := PathDataNext(data, &i)
 				largeArc := PathDataNext(data, &i)
 				sweep := PathDataNext(data, &i)
 				sb.WriteString(fmt.Sprintf("%g %g %g ", ang, largeArc, sweep))
-				cp = PathDataNextVec(data, &i)
+				cp = PathDataNextVector(data, &i)
 				sb.WriteString(fmt.Sprintf("%g,%g ", cp.X, cp.Y))
 			}
 		case PcZ, Pcz:
@@ -881,7 +881,7 @@ func (g *Path) ApplyTransform(sv *SVG, xf math32.Mat2) {
 
 // PathDataTransformAbs does the transform of next two data points as absolute coords
 func PathDataTransformAbs(data []PathData, i *int, xf math32.Mat2, lpt math32.Vector2) math32.Vector2 {
-	cp := PathDataNextVec(data, i)
+	cp := PathDataNextVector(data, i)
 	tc := xf.MulVector2AsPointCenter(cp, lpt)
 	data[*i-2] = PathData(tc.X)
 	data[*i-1] = PathData(tc.Y)
@@ -891,8 +891,8 @@ func PathDataTransformAbs(data []PathData, i *int, xf math32.Mat2, lpt math32.Ve
 // PathDataTransformRel does the transform of next two data points as relative coords
 // compared to given cp coordinate.  returns new *absolute* coordinate
 func PathDataTransformRel(data []PathData, i *int, xf math32.Mat2, cp math32.Vector2) math32.Vector2 {
-	rp := PathDataNextVec(data, i)
-	tc := xf.MulVector2AsVec(rp)
+	rp := PathDataNextVector(data, i)
+	tc := xf.MulVector2AsVector(rp)
 	data[*i-2] = PathData(tc.X)
 	data[*i-1] = PathData(tc.Y)
 	return cp.Add(tc) // new abs
@@ -961,7 +961,7 @@ func (g *Path) ApplyTransformImpl(xf math32.Mat2, lpt math32.Vector2) {
 			for np := 0; np < n; np++ {
 				rp.X = PathDataNext(data, &i)
 				rp.Y = 0
-				rp = xf.MulVector2AsVec(rp)
+				rp = xf.MulVector2AsVector(rp)
 				data[i-1] = PathData(rp.X)
 				cp.SetAdd(rp) // new abs
 			}
@@ -975,7 +975,7 @@ func (g *Path) ApplyTransformImpl(xf math32.Mat2, lpt math32.Vector2) {
 			for np := 0; np < n; np++ {
 				rp.Y = PathDataNext(data, &i)
 				rp.X = 0
-				rp = xf.MulVector2AsVec(rp)
+				rp = xf.MulVector2AsVector(rp)
 				data[i-1] = PathData(rp.Y)
 				cp.SetAdd(rp) // new abs
 			}

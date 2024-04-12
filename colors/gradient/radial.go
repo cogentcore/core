@@ -76,10 +76,10 @@ func (r *Radial) Update(opacity float32, box math32.Box2, objTransform math32.Ma
 	} else {
 		c = r.Transform.MulVector2AsPoint(c)
 		f = r.Transform.MulVector2AsPoint(f)
-		rs = r.Transform.MulVector2AsVec(rs)
+		rs = r.Transform.MulVector2AsVector(rs)
 		c = objTransform.MulVector2AsPoint(c)
 		f = objTransform.MulVector2AsPoint(f)
-		rs = objTransform.MulVector2AsVec(rs)
+		rs = objTransform.MulVector2AsVector(rs)
 	}
 	if c != f {
 		f.SetDiv(rs)

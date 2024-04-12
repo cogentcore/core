@@ -165,8 +165,8 @@ func (tr *Text) Render(pc *Context, pos math32.Vector2) {
 				scx = rr.ScaleX
 			}
 			tx := math32.Scale2D(scx, 1).Rotate(rr.RotRad)
-			ll := rp.Add(tx.MulVector2AsVec(math32.Vec2(0, dsc32)))
-			ur := ll.Add(tx.MulVector2AsVec(math32.Vec2(rr.Size.X, -rr.Size.Y)))
+			ll := rp.Add(tx.MulVector2AsVector(math32.Vec2(0, dsc32)))
+			ur := ll.Add(tx.MulVector2AsVector(math32.Vec2(rr.Size.X, -rr.Size.Y)))
 
 			if int(math32.Ceil(ur.X)) < pc.Bounds.Min.X || int(math32.Ceil(ll.Y)) < pc.Bounds.Min.Y {
 				continue

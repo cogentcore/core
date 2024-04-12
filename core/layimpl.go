@@ -230,13 +230,13 @@ func (ls GeomSize) String() string {
 func (ls *GeomSize) SetInitContentMin(styMin math32.Vector2) {
 	csz := &ls.Actual.Content
 	*csz = styMin
-	styles.SetClampMaxVec(csz, ls.Max)
+	styles.SetClampMaxVector(csz, ls.Max)
 }
 
 // FitSizeMax increases given size to fit given fm value, subject to Max constraints
 func (ls *GeomSize) FitSizeMax(to *math32.Vector2, fm math32.Vector2) {
-	styles.SetClampMinVec(to, fm)
-	styles.SetClampMaxVec(to, ls.Max)
+	styles.SetClampMinVector(to, fm)
+	styles.SetClampMaxVector(to, ls.Max)
 }
 
 // SetTotalFromContent sets the Total size as Content plus Space
@@ -658,8 +658,8 @@ func (ly *Layout) LaySetContentFitOverflow(nsz math32.Vector2, pass LayoutPasses
 		asz.SetDim(d, styles.ClampMin(asz.Dim(d), nsz.Dim(d)))
 	}
 	mx := sz.Max
-	styles.SetClampMaxVec(isz, mx)
-	styles.SetClampMaxVec(asz, mx)
+	styles.SetClampMaxVector(isz, mx)
+	styles.SetClampMaxVector(asz, mx)
 	sz.SetTotalFromContent(&sz.Actual)
 }
 
@@ -1139,7 +1139,7 @@ func (ly *Layout) SizeDownLay(iter int) bool {
 		return ly.SizeDownWidget(iter) // behave like a widget
 	}
 	sz := &ly.Geom.Size
-	styles.SetClampMaxVec(&sz.Alloc.Content, sz.Max) // can't be more than max..
+	styles.SetClampMaxVector(&sz.Alloc.Content, sz.Max) // can't be more than max..
 	sz.SetTotalFromContent(&sz.Alloc)
 	if DebugSettings.LayoutTrace {
 		fmt.Println(ly, "Managing Alloc:", sz.Alloc.Content)

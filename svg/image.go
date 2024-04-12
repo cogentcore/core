@@ -138,7 +138,7 @@ func (g *Image) ApplyTransform(sv *SVG, xf math32.Mat2) {
 		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
 		g.Pos = xf.MulVector2AsPoint(g.Pos)
-		g.Size = xf.MulVector2AsVec(g.Size)
+		g.Size = xf.MulVector2AsVector(g.Size)
 	}
 }
 
@@ -156,7 +156,7 @@ func (g *Image) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.
 	} else {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self
 		g.Pos = xf.MulVector2AsPointCenter(g.Pos, lpt)
-		g.Size = xf.MulVector2AsVec(g.Size)
+		g.Size = xf.MulVector2AsVector(g.Size)
 	}
 }
 

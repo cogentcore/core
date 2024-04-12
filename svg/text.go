@@ -195,7 +195,7 @@ func (g *Text) RenderText(sv *SVG) {
 		pos.X -= g.TextRender.Size.X
 	}
 	for i := range sr.Render {
-		sr.Render[i].RelPos = pc.CurrentTransform.MulVector2AsVec(sr.Render[i].RelPos)
+		sr.Render[i].RelPos = pc.CurrentTransform.MulVector2AsVector(sr.Render[i].RelPos)
 		sr.Render[i].Size.Y *= scy
 		sr.Render[i].Size.X *= scx
 	}
@@ -204,7 +204,7 @@ func (g *Text) RenderText(sv *SVG) {
 		mx := min(len(g.CharPosX), len(sr.Render))
 		for i := 0; i < mx; i++ {
 			// todo: this may not be fully correct, given relativity constraints
-			cpx := pc.CurrentTransform.MulVector2AsVec(math32.Vec2(g.CharPosX[i], 0))
+			cpx := pc.CurrentTransform.MulVector2AsVector(math32.Vec2(g.CharPosX[i], 0))
 			sr.Render[i].RelPos.X = cpx.X
 		}
 	}
@@ -218,7 +218,7 @@ func (g *Text) RenderText(sv *SVG) {
 	if len(g.CharPosDX) > 0 {
 		mx := min(len(g.CharPosDX), len(sr.Render))
 		for i := 0; i < mx; i++ {
-			dx := pc.CurrentTransform.MulVector2AsVec(math32.Vec2(g.CharPosDX[i], 0))
+			dx := pc.CurrentTransform.MulVector2AsVector(math32.Vec2(g.CharPosDX[i], 0))
 			if i > 0 {
 				sr.Render[i].RelPos.X = sr.Render[i-1].RelPos.X + dx.X
 			} else {
@@ -229,7 +229,7 @@ func (g *Text) RenderText(sv *SVG) {
 	if len(g.CharPosDY) > 0 {
 		mx := min(len(g.CharPosDY), len(sr.Render))
 		for i := 0; i < mx; i++ {
-			dy := pc.CurrentTransform.MulVector2AsVec(math32.Vec2(g.CharPosDY[i], 0))
+			dy := pc.CurrentTransform.MulVector2AsVector(math32.Vec2(g.CharPosDY[i], 0))
 			if i > 0 {
 				sr.Render[i].RelPos.Y = sr.Render[i-1].RelPos.Y + dy.Y
 			} else {

@@ -38,30 +38,30 @@ func SetClampMin(v *float32, mn float32) {
 	*v = max(*v, mn)
 }
 
-// ClampMaxVec returns given Vector2 values, not greater than given max _only if_ max > 0
-func ClampMaxVec(v, mx math32.Vector2) math32.Vector2 {
+// ClampMaxVector returns given Vector2 values, not greater than given max _only if_ max > 0
+func ClampMaxVector(v, mx math32.Vector2) math32.Vector2 {
 	var nv math32.Vector2
 	nv.X = ClampMax(v.X, mx.X)
 	nv.Y = ClampMax(v.Y, mx.Y)
 	return nv
 }
 
-// ClampMinVec returns given Vector2 values, not less than given min _only if_ min > 0
-func ClampMinVec(v, mn math32.Vector2) math32.Vector2 {
+// ClampMinVector returns given Vector2 values, not less than given min _only if_ min > 0
+func ClampMinVector(v, mn math32.Vector2) math32.Vector2 {
 	var nv math32.Vector2
 	nv.X = ClampMin(v.X, mn.X)
 	nv.Y = ClampMin(v.Y, mn.Y)
 	return nv
 }
 
-// SetClampMaxVec ensures the given Vector2 values are not greater than given max _only if_ max > 0
-func SetClampMaxVec(v *math32.Vector2, mx math32.Vector2) {
+// SetClampMaxVector ensures the given Vector2 values are not greater than given max _only if_ max > 0
+func SetClampMaxVector(v *math32.Vector2, mx math32.Vector2) {
 	SetClampMax(&v.X, mx.X)
 	SetClampMax(&v.Y, mx.Y)
 }
 
-// SetClampMinVec ensures the given Vector2 values are not less than given min _only if_ min > 0
-func SetClampMinVec(v *math32.Vector2, mn math32.Vector2) {
+// SetClampMinVector ensures the given Vector2 values are not less than given min _only if_ min > 0
+func SetClampMinVector(v *math32.Vector2, mn math32.Vector2) {
 	SetClampMin(&v.X, mn.X)
 	SetClampMin(&v.Y, mn.Y)
 }
