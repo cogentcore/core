@@ -108,7 +108,7 @@ type Drawer interface {
 	// reg is the region to fill
 	// op is the drawing operation: Src = copy source directly (blit),
 	// Over = alpha blend with existing
-	Fill(clr color.Color, src2dst math32.Mat3, reg image.Rectangle, op draw.Op) error
+	Fill(clr color.Color, src2dst math32.Matrix3, reg image.Rectangle, op draw.Op) error
 
 	// StartFill starts color fill drawing rendering process on render target
 	// It returns false if rendering can not proceed.
@@ -234,7 +234,7 @@ func (dw *DrawerBase) StartDraw(descIndex int) bool {
 // reg is the region to fill
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
-func (dw *DrawerBase) Fill(clr color.Color, src2dst math32.Mat3, reg image.Rectangle, op draw.Op) error {
+func (dw *DrawerBase) Fill(clr color.Color, src2dst math32.Matrix3, reg image.Rectangle, op draw.Op) error {
 	draw.Draw(dw.Image, reg, image.NewUniform(clr), image.Point{}, op)
 	return nil
 }

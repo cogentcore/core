@@ -205,7 +205,7 @@ func (a Matrix2) ExtractScale() (scx, scy float32) {
 
 // Inverse returns inverse of matrix, for inverting transforms
 func (a Matrix2) Inverse() Matrix2 {
-	// homogenous rep, rc indexes, mapping into Mat3 code
+	// homogenous rep, rc indexes, mapping into Matrix3 code
 	// XX YX X0   n11 n12 n13    a b x
 	// XY YY Y0   n21 n22 n23    c d y
 	// 0  0  1    n31 n32 n33    0 0 1

@@ -149,7 +149,7 @@ func (dw *Drawer) SyncImages() {
 // Over = alpha blend with existing
 // flipY = flipY axis when drawing this image
 func (dw *Drawer) Copy(idx, layer int, dp image.Point, sr image.Rectangle, op draw.Op, flipY bool) error {
-	mat := math32.Mat3{
+	mat := math32.Matrix3{
 		1, 0, 0,
 		0, 1, 0,
 		float32(dp.X - sr.Min.X), float32(dp.Y - sr.Min.Y), 1,
@@ -162,14 +162,14 @@ func (dw *Drawer) Copy(idx, layer int, dp image.Point, sr image.Rectangle, op dr
 // to make it fit within the destination rectangle dr, given its original size sr (unrotated).
 // To avoid scaling, ensure that the dr and sr are the same dimensions (post rotation).
 // rotDeg = rotation degrees to apply in the mapping: 90 = left, -90 = right, 180 = invert
-func TransformMatrix(dr image.Rectangle, sr image.Rectangle, rotDeg float32) math32.Mat3 {
+func TransformMatrix(dr image.Rectangle, sr image.Rectangle, rotDeg float32) math32.Matrix3 {
 	sx := float32(dr.Dx()) / float32(sr.Dx())
 	sy := float32(dr.Dy()) / float32(sr.Dy())
 	tx := float32(dr.Min.X) - sx*float32(sr.Min.X)
 	ty := float32(dr.Min.Y) - sy*float32(sr.Min.Y)
 
 	if rotDeg == 0 {
-		return math32.Mat3{
+		return math32.Matrix3{
 			sx, 0, 0,
 			0, sy, 0,
 			tx, ty, 1,
@@ -195,13 +195,13 @@ func TransformMatrix(dr image.Rectangle, sr image.Rectangle, rotDeg float32) mat
 		tx -= dsz.X
 	}
 
-	mat := math32.Mat3{
+	mat := math32.Matrix3{
 		sx, 0, 0,
 		0, sy, 0,
 		tx, ty, 1,
 	}
 
-	return mat.Mul(math32.Mat3FromMatrix2(rmat))
+	return mat.Mul(math32.Matrix3FromMatrix2(rmat))
 
 	/*  stuff that didn't work, but theoretically should?
 	rad := math32.DegToRad(rotDeg)
@@ -211,7 +211,7 @@ func TransformMatrix(dr image.Rectangle, sr image.Rectangle, rotDeg float32) mat
 	// mat2 := math32.Translate2D(dctr.X, 0).Mul(math32.Rotate2D(rad)).Mul(math32.Translate2D(tx, ty)).Mul(math32.Scale2D(sx, sy))
 	mat2 := math32.Translate2D(tx, ty).Mul(math32.Scale2D(sx, sy)).Mul(math32.Translate2D(dctr.X, 0)).Mul(math32.Rotate2D(rad))
 	// mat2 := math32.Rotate2D(rad).MulCtr(math32.Translate2D(tx, ty).Mul(math32.Scale2D(sx, sy)), dctr)
-	mat := math32.Mat3FromMatrix2(mat2)
+	mat := math32.Matrix3FromMatrix2(mat2)
 	*/
 }
 
@@ -240,7 +240,7 @@ func (dw *Drawer) Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, 
 // sr is the source region (set to image.ZR for all)
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
-func (dw *Drawer) Draw(idx, layer int, src2dst math32.Mat3, sr image.Rectangle, op draw.Op, flipY bool) error {
+func (dw *Drawer) Draw(idx, layer int, src2dst math32.Matrix3, sr image.Rectangle, op draw.Op, flipY bool) error {
 	dw.UpdateMu.Lock()
 	sy := &dw.Sys
 	dpl := dw.SelectPipeline(op)

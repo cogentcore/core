@@ -445,16 +445,16 @@ func (v *Vector3) SetRotateAxisAngle(axis Vector3, angle float32) {
 	*v = v.RotateAxisAngle(axis, angle)
 }
 
-// MulMat3 returns vector multiplied by specified 3x3 matrix.
-func (v Vector3) MulMat3(m *Mat3) Vector3 {
+// MulMatrix3 returns vector multiplied by specified 3x3 matrix.
+func (v Vector3) MulMatrix3(m *Matrix3) Vector3 {
 	return Vector3{m[0]*v.X + m[3]*v.Y + m[6]*v.Z,
 		m[1]*v.X + m[4]*v.Y + m[7]*v.Z,
 		m[2]*v.X + m[5]*v.Y + m[8]*v.Z}
 }
 
-// SetMulMat3 sets vector multiplied by specified 3x3 matrix.
-func (v *Vector3) SetMulMat3(m *Mat3) {
-	*v = v.MulMat3(m)
+// SetMulMatrix3 sets vector multiplied by specified 3x3 matrix.
+func (v *Vector3) SetMulMatrix3(m *Matrix3) {
+	*v = v.MulMatrix3(m)
 }
 
 // MulMat4 returns vector multiplied by specified 4x4 matrix.

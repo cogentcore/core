@@ -47,8 +47,8 @@ const (
 	Float64Vector3
 	Float64Vector4
 
-	Float32Mat4 // std transform matrix: math32.Mat4 works directly
-	Float32Mat3 // std transform matrix: math32.Mat3 works directly
+	Float32Mat4    // std transform matrix: math32.Mat4 works directly
+	Float32Matrix3 // std transform matrix: math32.Matrix3 works directly
 
 	ImageRGBA32 // 32 bits with 8 bits per component of R,G,B,A -- std image format
 
@@ -77,7 +77,7 @@ func (tp Types) Bytes() int {
 	switch tp {
 	case Float32Mat4:
 		return 64
-	case Float32Mat3:
+	case Float32Matrix3:
 		return 36
 	}
 	if vf, has := VulkanTypes[tp]; has {

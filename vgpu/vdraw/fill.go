@@ -27,7 +27,7 @@ func (dw *Drawer) FillRect(clr color.Color, reg image.Rectangle, op draw.Op) err
 // reg is the region to fill
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
-func (dw *Drawer) Fill(clr color.Color, src2dst math32.Mat3, reg image.Rectangle, op draw.Op) error {
+func (dw *Drawer) Fill(clr color.Color, src2dst math32.Matrix3, reg image.Rectangle, op draw.Op) error {
 	sy := &dw.Sys
 	cmd := sy.CmdPool.Buff
 	vars := sy.Vars()

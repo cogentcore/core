@@ -37,7 +37,7 @@ type Pose struct {
 	MVPMatrix math32.Mat4 `view:"-"`
 
 	// normal matrix has no offsets, for normal vector rotation only, based on MVMatrix
-	NormMatrix math32.Mat3 `view:"-"`
+	NormMatrix math32.Matrix3 `view:"-"`
 }
 
 // Defaults sets defaults only if current values are nil
