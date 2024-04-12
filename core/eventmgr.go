@@ -22,7 +22,7 @@ import (
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
@@ -562,7 +562,7 @@ func (em *EventMgr) HandleLong(e events.Event, deep Widget, w *Widget, pos *imag
 	}
 
 	cpos := e.WindowPos()
-	dst := int(mat32.Hypot(float32(pos.X-cpos.X), float32(pos.Y-cpos.Y)))
+	dst := int(math32.Hypot(float32(pos.X-cpos.X), float32(pos.Y-cpos.Y)))
 	// fmt.Println("dist:", dst)
 
 	// we have no long hovers, so we must be done
@@ -660,7 +660,7 @@ func (em *EventMgr) GetMouseInBBox(w Widget, pos image.Point) {
 			em.GetMouseInBBox(kwb.Parts, pos)
 		}
 		if ly := AsLayout(kwi); ly != nil {
-			for d := mat32.X; d <= mat32.Y; d++ {
+			for d := math32.X; d <= math32.Y; d++ {
 				if ly.HasScroll[d] {
 					sb := ly.Scrolls[d]
 					em.GetMouseInBBox(sb, pos)
@@ -710,7 +710,7 @@ func (em *EventMgr) DragStartCheck(e events.Event, dur time.Duration, dist int) 
 	if since < dur {
 		return false
 	}
-	dst := int(mat32.V2FromPoint(e.StartDelta()).Length())
+	dst := int(math32.V2FromPoint(e.StartDelta()).Length())
 	return dst >= dist
 }
 

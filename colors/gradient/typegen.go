@@ -4,7 +4,7 @@ package gradient
 
 import (
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/types"
 )
 
@@ -25,12 +25,12 @@ func (t *Base) SetUnits(v Units) *Base { t.Units = v; return t }
 // SetBox sets the [Base.Box]:
 // the bounding box of the object with the gradient; this is used when rendering
 // gradients with [Units] of [ObjectBoundingBox].
-func (t *Base) SetBox(v mat32.Box2) *Base { t.Box = v; return t }
+func (t *Base) SetBox(v math32.Box2) *Base { t.Box = v; return t }
 
 // SetTransform sets the [Base.Transform]:
 // Transform is the gradient's own transformation matrix applied to the gradient's points.
 // This is a property of the Gradient itself.
-func (t *Base) SetTransform(v mat32.Mat2) *Base { t.Transform = v; return t }
+func (t *Base) SetTransform(v math32.Mat2) *Base { t.Transform = v; return t }
 
 // SetOpacity sets the [Base.Opacity]:
 // Opacity is the overall object opacity multiplier, applied in conjunction with the
@@ -41,11 +41,11 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/colors/gradient.Lin
 
 // SetStart sets the [Linear.Start]:
 // the starting point of the gradient (x1 and y1 in SVG)
-func (t *Linear) SetStart(v mat32.Vec2) *Linear { t.Start = v; return t }
+func (t *Linear) SetStart(v math32.Vec2) *Linear { t.Start = v; return t }
 
 // SetEnd sets the [Linear.End]:
 // the ending point of the gradient (x2 and y2 in SVG)
-func (t *Linear) SetEnd(v mat32.Vec2) *Linear { t.End = v; return t }
+func (t *Linear) SetEnd(v math32.Vec2) *Linear { t.End = v; return t }
 
 // SetSpread sets the [Linear.Spread]
 func (t *Linear) SetSpread(v Spreads) *Linear { t.Spread = v; return t }
@@ -57,10 +57,10 @@ func (t *Linear) SetBlend(v colors.BlendTypes) *Linear { t.Blend = v; return t }
 func (t *Linear) SetUnits(v Units) *Linear { t.Units = v; return t }
 
 // SetBox sets the [Linear.Box]
-func (t *Linear) SetBox(v mat32.Box2) *Linear { t.Box = v; return t }
+func (t *Linear) SetBox(v math32.Box2) *Linear { t.Box = v; return t }
 
 // SetTransform sets the [Linear.Transform]
-func (t *Linear) SetTransform(v mat32.Mat2) *Linear { t.Transform = v; return t }
+func (t *Linear) SetTransform(v math32.Mat2) *Linear { t.Transform = v; return t }
 
 // SetOpacity sets the [Linear.Opacity]
 func (t *Linear) SetOpacity(v float32) *Linear { t.Opacity = v; return t }
@@ -69,15 +69,15 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/colors/gradient.Rad
 
 // SetCenter sets the [Radial.Center]:
 // the center point of the gradient (cx and cy in SVG)
-func (t *Radial) SetCenter(v mat32.Vec2) *Radial { t.Center = v; return t }
+func (t *Radial) SetCenter(v math32.Vec2) *Radial { t.Center = v; return t }
 
 // SetFocal sets the [Radial.Focal]:
 // the focal point of the gradient (fx and fy in SVG)
-func (t *Radial) SetFocal(v mat32.Vec2) *Radial { t.Focal = v; return t }
+func (t *Radial) SetFocal(v math32.Vec2) *Radial { t.Focal = v; return t }
 
 // SetRadius sets the [Radial.Radius]:
 // the radius of the gradient (rx and ry in SVG)
-func (t *Radial) SetRadius(v mat32.Vec2) *Radial { t.Radius = v; return t }
+func (t *Radial) SetRadius(v math32.Vec2) *Radial { t.Radius = v; return t }
 
 // SetSpread sets the [Radial.Spread]
 func (t *Radial) SetSpread(v Spreads) *Radial { t.Spread = v; return t }
@@ -89,10 +89,10 @@ func (t *Radial) SetBlend(v colors.BlendTypes) *Radial { t.Blend = v; return t }
 func (t *Radial) SetUnits(v Units) *Radial { t.Units = v; return t }
 
 // SetBox sets the [Radial.Box]
-func (t *Radial) SetBox(v mat32.Box2) *Radial { t.Box = v; return t }
+func (t *Radial) SetBox(v math32.Box2) *Radial { t.Box = v; return t }
 
 // SetTransform sets the [Radial.Transform]
-func (t *Radial) SetTransform(v mat32.Mat2) *Radial { t.Transform = v; return t }
+func (t *Radial) SetTransform(v math32.Mat2) *Radial { t.Transform = v; return t }
 
 // SetOpacity sets the [Radial.Opacity]
 func (t *Radial) SetOpacity(v float32) *Radial { t.Opacity = v; return t }

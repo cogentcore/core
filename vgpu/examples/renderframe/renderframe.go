@@ -17,7 +17,7 @@ import (
 	"unsafe"
 
 	"cogentcore.org/core/iox/imagex"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	vk "github.com/goki/vulkan"
 
 	"cogentcore.org/core/vgpu"
@@ -26,9 +26,9 @@ import (
 )
 
 type CamView struct {
-	Model mat32.Mat4
-	View  mat32.Mat4
-	Prjn  mat32.Mat4
+	Model math32.Mat4
+	View  math32.Mat4
+	Prjn  math32.Mat4
 }
 
 func init() {
@@ -147,12 +147,12 @@ func main() {
 
 	// This is the standard camera view projection computation
 	cam, _ := camv.Values.ValueByIndexTry(0)
-	campos := mat32.V3(0, 0, 2)
-	target := mat32.V3(0, 0, 0)
-	var lookq mat32.Quat
-	lookq.SetFromRotationMatrix(mat32.NewLookAt(campos, target, mat32.V3(0, 1, 0)))
-	scale := mat32.V3(1, 1, 1)
-	var cview mat32.Mat4
+	campos := math32.V3(0, 0, 2)
+	target := math32.V3(0, 0, 0)
+	var lookq math32.Quat
+	lookq.SetFromRotationMatrix(math32.NewLookAt(campos, target, math32.V3(0, 1, 0)))
+	scale := math32.V3(1, 1, 1)
+	var cview math32.Mat4
 	cview.SetTransform(campos, lookq, scale)
 	view, _ := cview.Inverse()
 

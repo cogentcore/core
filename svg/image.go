@@ -10,7 +10,7 @@ import (
 	"log"
 
 	"cogentcore.org/core/iox/imagex"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/math/f64"
@@ -21,10 +21,10 @@ type Image struct {
 	NodeBase
 
 	// position of the top-left of the image
-	Pos mat32.Vec2 `xml:"{x,y}"`
+	Pos math32.Vec2 `xml:"{x,y}"`
 
 	// rendered size of the image (imposes a scaling on image when it is rendered)
-	Size mat32.Vec2 `xml:"{width,height}"`
+	Size math32.Vec2 `xml:"{width,height}"`
 
 	// file name of image loaded -- set by OpenImage
 	Filename string
@@ -38,11 +38,11 @@ type Image struct {
 
 func (g *Image) SVGName() string { return "image" }
 
-func (g *Image) SetNodePos(pos mat32.Vec2) {
+func (g *Image) SetNodePos(pos math32.Vec2) {
 	g.Pos = pos
 }
 
-func (g *Image) SetNodeSize(sz mat32.Vec2) {
+func (g *Image) SetNodeSize(sz math32.Vec2) {
 	g.Size = sz
 }
 
@@ -68,7 +68,7 @@ func (g *Image) SetImage(img image.Image, width, height float32) {
 		g.SetImageSize(sz)
 		draw.Draw(g.Pixels, g.Pixels.Bounds(), img, image.Point{}, draw.Src)
 		if g.Size.X == 0 && g.Size.Y == 0 {
-			g.Size = mat32.V2FromPoint(sz)
+			g.Size = math32.V2FromPoint(sz)
 		}
 	} else {
 		tsz := sz
@@ -84,11 +84,11 @@ func (g *Image) SetImage(img image.Image, width, height float32) {
 			tsz.Y = int(height)
 		}
 		g.SetImageSize(tsz)
-		m := mat32.Scale2D(scx, scy)
+		m := math32.Scale2D(scx, scy)
 		s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
 		transformer.Transform(g.Pixels, s2d, img, img.Bounds(), draw.Over, nil)
 		if g.Size.X == 0 && g.Size.Y == 0 {
-			g.Size = mat32.V2FromPoint(tsz)
+			g.Size = math32.V2FromPoint(tsz)
 		}
 	}
 }
@@ -111,8 +111,8 @@ func (g *Image) NodeBBox(sv *SVG) image.Rectangle {
 	return image.Rectangle{posi, maxi}.Canon()
 }
 
-func (g *Image) LocalBBox() mat32.Box2 {
-	bb := mat32.Box2{}
+func (g *Image) LocalBBox() math32.Box2 {
+	bb := math32.Box2{}
 	bb.Min = g.Pos
 	bb.Max = g.Pos.Add(g.Size)
 	return bb
@@ -131,7 +131,7 @@ func (g *Image) Render(sv *SVG) {
 
 // ApplyTransform applies the given 2D transform to the geometry of this node
 // each node must define this for itself
-func (g *Image) ApplyTransform(sv *SVG, xf mat32.Mat2) {
+func (g *Image) ApplyTransform(sv *SVG, xf math32.Mat2) {
 	rot := xf.ExtractRot()
 	if rot != 0 || !g.Paint.Transform.IsIdentity() {
 		g.Paint.Transform.SetMul(xf)
@@ -147,7 +147,7 @@ func (g *Image) ApplyTransform(sv *SVG, xf mat32.Mat2) {
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Image) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+func (g *Image) ApplyDeltaTransform(sv *SVG, trans math32.Vec2, scale math32.Vec2, rot float32, pt math32.Vec2) {
 	crot := g.Paint.Transform.ExtractRot()
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self

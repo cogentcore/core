@@ -9,7 +9,7 @@ import (
 	"image"
 	"sort"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/vgpu"
 
@@ -212,7 +212,7 @@ func (sc *Scene) UpdateMeshBBox() {
 
 // UpdateWorldMatrix updates the world matrix for node and everything inside it
 func UpdateWorldMatrix(n tree.Node) {
-	idmtx := mat32.Identity4()
+	idmtx := math32.Identity4()
 	n.WalkDown(func(k tree.Node) bool {
 		ni, _ := AsNode(k)
 		if ni == nil {
@@ -238,7 +238,7 @@ func (sc *Scene) UpdateMVPMatrix() {
 
 	sc.Camera.Pose.UpdateMatrix()
 	sz := sc.Geom.Size
-	size := mat32.V2(float32(sz.X), float32(sz.Y))
+	size := math32.V2(float32(sz.X), float32(sz.Y))
 
 	sc.WalkDown(func(k tree.Node) bool {
 		if k.This() == sc.This() {
@@ -283,7 +283,7 @@ func (sc *Scene) Config() {
 	sc.Camera.CamMu.Lock()
 	sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
 	sc.Camera.CamMu.Unlock()
-	clr := mat32.NewVec3Color(sc.BackgroundColor).SRGBToLinear()
+	clr := math32.NewVec3Color(sc.BackgroundColor).SRGBToLinear()
 	sc.Frame.Render.SetClearColor(clr.X, clr.Y, clr.Z, 1)
 	// gpu.Draw.Wireframe(sc.Wireframe)
 	sc.ConfigNodes()

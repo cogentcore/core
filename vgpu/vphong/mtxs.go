@@ -7,22 +7,22 @@ package vphong
 import (
 	"unsafe"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // Mtxs contains the camera view and projection matricies, for uniform uploading
 type Mtxs struct {
 
 	// View Matrix: transforms world into camera-centered, 3D coordinates
-	View mat32.Mat4
+	View math32.Mat4
 
 	// Projection Matrix: transforms camera coords into 2D render coordinates
-	Prjn mat32.Mat4
+	Prjn math32.Mat4
 }
 
 // SetViewPrjn sets the camera view and projection matrixes, and updates
 // uniform data, so they are ready to use.
-func (ph *Phong) SetViewPrjn(view, prjn *mat32.Mat4) {
+func (ph *Phong) SetViewPrjn(view, prjn *math32.Mat4) {
 	ph.Cur.VPMtx.View = *view
 	ph.Cur.VPMtx.Prjn = *prjn
 	vars := ph.Sys.Vars()
@@ -34,6 +34,6 @@ func (ph *Phong) SetViewPrjn(view, prjn *mat32.Mat4) {
 
 // SetModelMtx sets the model pose matrix -- must be set per render step
 // (otherwise last one will be used)
-func (ph *Phong) SetModelMtx(model *mat32.Mat4) {
+func (ph *Phong) SetModelMtx(model *math32.Mat4) {
 	ph.Cur.ModelMtx = *model
 }

@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/xyz"
 )
@@ -133,7 +133,7 @@ func (sw *Scene) ManipBox() {
 	xy.DeleteChildByName(nm) // get rid of existing
 	clr := sw.SelectionParams.Color
 
-	cdist := mat32.Max(xy.Camera.DistTo(xy.Camera.Target), 1.0)
+	cdist := math32.Max(xy.Camera.DistTo(xy.Camera.Target), 1.0)
 
 	bbox := nb.WorldBBox.BBox
 	mb := xyz.NewLineBox(xy, xy, nm, nm, bbox, sw.SelectionParams.Width*cdist, clr, xyz.Inactive)
@@ -143,12 +143,12 @@ func (sw *Scene) ManipBox() {
 	bbox.Min.SetSub(mb.Pose.Pos)
 	bbox.Max.SetSub(mb.Pose.Pos)
 	NewManipPoint(mb, nm+"-lll", mbspm.Name(), clr, bbox.Min)
-	NewManipPoint(mb, nm+"-llu", mbspm.Name(), clr, mat32.V3(bbox.Min.X, bbox.Min.Y, bbox.Max.Z))
-	NewManipPoint(mb, nm+"-lul", mbspm.Name(), clr, mat32.V3(bbox.Min.X, bbox.Max.Y, bbox.Min.Z))
-	NewManipPoint(mb, nm+"-ull", mbspm.Name(), clr, mat32.V3(bbox.Max.X, bbox.Min.Y, bbox.Min.Z))
-	NewManipPoint(mb, nm+"-luu", mbspm.Name(), clr, mat32.V3(bbox.Min.X, bbox.Max.Y, bbox.Max.Z))
-	NewManipPoint(mb, nm+"-ulu", mbspm.Name(), clr, mat32.V3(bbox.Max.X, bbox.Min.Y, bbox.Max.Z))
-	NewManipPoint(mb, nm+"-uul", mbspm.Name(), clr, mat32.V3(bbox.Max.X, bbox.Max.Y, bbox.Min.Z))
+	NewManipPoint(mb, nm+"-llu", mbspm.Name(), clr, math32.V3(bbox.Min.X, bbox.Min.Y, bbox.Max.Z))
+	NewManipPoint(mb, nm+"-lul", mbspm.Name(), clr, math32.V3(bbox.Min.X, bbox.Max.Y, bbox.Min.Z))
+	NewManipPoint(mb, nm+"-ull", mbspm.Name(), clr, math32.V3(bbox.Max.X, bbox.Min.Y, bbox.Min.Z))
+	NewManipPoint(mb, nm+"-luu", mbspm.Name(), clr, math32.V3(bbox.Min.X, bbox.Max.Y, bbox.Max.Z))
+	NewManipPoint(mb, nm+"-ulu", mbspm.Name(), clr, math32.V3(bbox.Max.X, bbox.Min.Y, bbox.Max.Z))
+	NewManipPoint(mb, nm+"-uul", mbspm.Name(), clr, math32.V3(bbox.Max.X, bbox.Max.Y, bbox.Min.Z))
 	NewManipPoint(mb, nm+"-uuu", mbspm.Name(), clr, bbox.Max)
 
 	xy.NeedsConfig()
@@ -163,7 +163,7 @@ type ManipPoint struct {
 }
 
 // NewManipPoint adds a new manipulation point
-func NewManipPoint(parent tree.Node, name string, meshName string, clr color.RGBA, pos mat32.Vec3) *ManipPoint {
+func NewManipPoint(parent tree.Node, name string, meshName string, clr color.RGBA, pos math32.Vec3) *ManipPoint {
 	mpt := parent.NewChild(ManipPointType, name).(*ManipPoint)
 	mpt.SetMeshName(meshName)
 	mpt.Defaults()
@@ -239,31 +239,31 @@ func (sw *Scene) HandleSlideEvents() {
 		dy := float32(del.Y)
 		mpos := mpt.Nm[len(ManipBoxName)+1:] // has ull etc for where positioned
 		camd, sgn := xy.Camera.ViewMainAxis()
-		var dm mat32.Vec3 // delta multiplier
-		if mpos[mat32.X] == 'u' {
+		var dm math32.Vec3 // delta multiplier
+		if mpos[math32.X] == 'u' {
 			dm.X = 1
 		} else {
 			dm.X = -1
 		}
-		if mpos[mat32.Y] == 'u' {
+		if mpos[math32.Y] == 'u' {
 			dm.Y = 1
 		} else {
 			dm.Y = -1
 		}
-		if mpos[mat32.Z] == 'u' {
+		if mpos[math32.Z] == 'u' {
 			dm.Z = 1
 		} else {
 			dm.Z = -1
 		}
-		var dd mat32.Vec3
+		var dd math32.Vec3
 		switch camd {
-		case mat32.X:
+		case math32.X:
 			dd.Z = -sgn * dx
 			dd.Y = -dy
-		case mat32.Y:
+		case math32.Y:
 			dd.X = dx
 			dd.Z = sgn * dy
-		case mat32.Z:
+		case math32.Z:
 			dd.X = sgn * dx
 			dd.Y = -dy
 		}
@@ -280,11 +280,11 @@ func (sw *Scene) HandleSlideEvents() {
 			sn.Pose.Scale.SetAdd(msc)
 		case e.HasAllModifiers(key.Alt): // rotation
 			dang := -sgn * dm.Y * (dx + dy)
-			if camd == mat32.Y {
+			if camd == math32.Y {
 				dang = -sgn * dm.X * (dy + dx)
 			}
 			dang *= 0.01 * cdist
-			var rvec mat32.Vec3
+			var rvec math32.Vec3
 			rvec.SetDim(camd, 1)
 			mb.Pose.RotateOnAxis(rvec.X, rvec.Y, rvec.Z, dang)
 			inv, _ := sn.Pose.WorldMatrix.Inverse() // undo full transform

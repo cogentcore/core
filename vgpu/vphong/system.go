@@ -8,7 +8,7 @@ import (
 	"embed"
 	"unsafe"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/vgpu"
 	vk "github.com/goki/vulkan"
 )
@@ -31,7 +31,7 @@ type CurRender struct {
 	UseVtxColor bool
 
 	// current model pose matrix
-	ModelMtx mat32.Mat4
+	ModelMtx math32.Mat4
 
 	// camera view and projection matrixes
 	VPMtx Mtxs
@@ -51,7 +51,7 @@ type CurRender struct {
 type PushU struct {
 
 	// Model Matrix: poses object in world coordinates
-	ModelMtx mat32.Mat4
+	ModelMtx math32.Mat4
 
 	// surface colors
 	Color Colors

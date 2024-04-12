@@ -13,7 +13,7 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
@@ -69,7 +69,7 @@ type Scene struct {
 	Data any
 
 	// Size and position relative to overall rendering context.
-	SceneGeom mat32.Geom2DInt `edit:"-" set:"-"`
+	SceneGeom math32.Geom2DInt `edit:"-" set:"-"`
 
 	// paint context for rendering
 	PaintContext paint.Context `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
@@ -241,7 +241,7 @@ func (sc *Scene) MainStageMgr() *StageMgr {
 
 // FitInWindow fits Scene geometry (pos, size) into given window geom.
 // Calls resize for the new size.
-func (sc *Scene) FitInWindow(winGeom mat32.Geom2DInt) {
+func (sc *Scene) FitInWindow(winGeom math32.Geom2DInt) {
 	geom := sc.SceneGeom
 	// full offscreen windows ignore any window geometry constraints
 	// because they must be unbounded by any previous window sizes
@@ -254,7 +254,7 @@ func (sc *Scene) FitInWindow(winGeom mat32.Geom2DInt) {
 }
 
 // Resize resizes the scene, creating a new image; updates Geom
-func (sc *Scene) Resize(geom mat32.Geom2DInt) {
+func (sc *Scene) Resize(geom math32.Geom2DInt) {
 	if geom.Size.X <= 0 || geom.Size.Y <= 0 {
 		return
 	}
@@ -357,7 +357,7 @@ func (sc *Scene) ScenePos() {
 	}
 	mv := mvi.(Widget).AsWidget()
 
-	sc.Parts.Geom.Pos.Total.Y = mat32.Ceil(0.5 * mv.Geom.Size.Actual.Total.Y)
+	sc.Parts.Geom.Pos.Total.Y = math32.Ceil(0.5 * mv.Geom.Size.Actual.Total.Y)
 	sc.Parts.Geom.Size.Actual = sc.Geom.Size.Actual
 	sc.Parts.SetContentPosFromPos()
 	sc.Parts.SetBBoxesFromAllocs()

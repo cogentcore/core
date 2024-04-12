@@ -22,7 +22,7 @@ package hct
 import (
 	"cogentcore.org/core/cam/cam16"
 	"cogentcore.org/core/gox/num"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // double ChromaticAdaptation(double component) {
@@ -30,15 +30,15 @@ import (
 //   return Signum(component) * 400.0 * af / (af + 27.13);
 // }
 
-func MatMul(v mat32.Vec3, mat [3][3]float32) mat32.Vec3 {
+func MatMul(v math32.Vec3, mat [3][3]float32) math32.Vec3 {
 	x := v.X*mat[0][0] + v.Y*mat[0][1] + v.Z*mat[0][2]
 	y := v.X*mat[1][0] + v.Y*mat[1][1] + v.Z*mat[1][2]
 	z := v.X*mat[2][0] + v.Y*mat[2][1] + v.Z*mat[2][2]
-	return mat32.V3(x, y, z)
+	return math32.V3(x, y, z)
 }
 
 // HueOf Returns the hue of a linear RGB color in CAM16.
-func HueOf(linrgb mat32.Vec3) float32 {
+func HueOf(linrgb math32.Vec3) float32 {
 	sd := MatMul(linrgb, kScaledDiscountFromLinrgb)
 	rA := cam16.LuminanceAdaptComp(sd.X, 1, 1)
 	gA := cam16.LuminanceAdaptComp(sd.Y, 1, 1)
@@ -48,7 +48,7 @@ func HueOf(linrgb mat32.Vec3) float32 {
 	a := (11*rA + -12*gA + bA) / 11
 	// yellowness-blueness
 	b := (rA + gA - 2*bA) / 9
-	return mat32.Atan2(b, a)
+	return math32.Atan2(b, a)
 }
 
 // Solves the lerp equation.
@@ -62,7 +62,7 @@ func Intercept(source, mid, target float32) float32 {
 
 // GetAxis returns value along axis 0,1,2 -- result is divided by 100
 // so that resulting numbers are in 0-1 range.
-func GetAxis(v mat32.Vec3, axis int) float32 {
+func GetAxis(v math32.Vec3, axis int) float32 {
 	switch axis {
 	case 0:
 		return v.X
@@ -85,7 +85,7 @@ func GetAxis(v mat32.Vec3, axis int) float32 {
  * @return The intersection point of the segment AB with the plane R=coordinate,
  * G=coordinate, or B=coordinate
  */
-func SetCoordinate(source, target mat32.Vec3, coord float32, axis int) mat32.Vec3 {
+func SetCoordinate(source, target math32.Vec3, coord float32, axis int) math32.Vec3 {
 	t := Intercept(GetAxis(source, axis), coord, GetAxis(target, axis))
 	return source.Lerp(target, t)
 }
@@ -102,7 +102,7 @@ func IsBounded(x float32) bool {
 // vertex lies outside of the cube,
 //
 //	[-1.0, -1.0, -1.0] is returned.
-func NthVertex(y float32, n int) mat32.Vec3 {
+func NthVertex(y float32, n int) math32.Vec3 {
 	k_r := kYFromLinrgb[0]
 	k_g := kYFromLinrgb[1]
 	k_b := kYFromLinrgb[2]
@@ -119,27 +119,27 @@ func NthVertex(y float32, n int) mat32.Vec3 {
 		b := coord_b
 		r := (y - g*k_g - b*k_b) / k_r
 		if IsBounded(r) {
-			return mat32.V3(r, g, b)
+			return math32.V3(r, g, b)
 		} else {
-			return mat32.V3(-1.0, -1.0, -1.0)
+			return math32.V3(-1.0, -1.0, -1.0)
 		}
 	} else if n < 8 {
 		b := coord_a
 		r := coord_b
 		g := (y - r*k_r - b*k_b) / k_g
 		if IsBounded(g) {
-			return mat32.V3(r, g, b)
+			return math32.V3(r, g, b)
 		} else {
-			return mat32.V3(-1.0, -1.0, -1.0)
+			return math32.V3(-1.0, -1.0, -1.0)
 		}
 	} else {
 		r := coord_a
 		g := coord_b
 		b := (y - r*k_r - g*k_g) / k_b
 		if IsBounded(b) {
-			return mat32.V3(r, g, b)
+			return math32.V3(r, g, b)
 		} else {
-			return mat32.V3(-1.0, -1.0, -1.0)
+			return math32.V3(-1.0, -1.0, -1.0)
 		}
 	}
 }
@@ -149,8 +149,8 @@ func NthVertex(y float32, n int) mat32.Vec3 {
 // @param target_hue The hue of the color.
 // @return A list of two sets of linear RGB coordinates, each corresponding to
 // an endpoint of the segment containing the desired color.
-func BisectToSegment(y, target_hue float32) [2]mat32.Vec3 {
-	left := mat32.V3(-1.0, -1.0, -1.0)
+func BisectToSegment(y, target_hue float32) [2]math32.Vec3 {
+	left := math32.V3(-1.0, -1.0, -1.0)
 	right := left
 	left_hue := float32(0.0)
 	right_hue := float32(0.0)
@@ -181,19 +181,19 @@ func BisectToSegment(y, target_hue float32) [2]mat32.Vec3 {
 			}
 		}
 	}
-	var out [2]mat32.Vec3
+	var out [2]math32.Vec3
 	out[0] = left
 	out[1] = right
 	return out
 }
 
-func Midpoint(a, b mat32.Vec3) mat32.Vec3 {
-	return mat32.V3((a.X+b.X)/2, (a.Y+b.Y)/2, (a.Z+b.Z)/2)
+func Midpoint(a, b math32.Vec3) math32.Vec3 {
+	return math32.V3((a.X+b.X)/2, (a.Y+b.Y)/2, (a.Z+b.Z)/2)
 }
 
-func CriticalPlaneBelow(x float32) int { return int(mat32.Floor(x - 0.5)) }
+func CriticalPlaneBelow(x float32) int { return int(math32.Floor(x - 0.5)) }
 
-func CriticalPlaneAbove(x float32) int { return int(mat32.Ceil(x - 0.5)) }
+func CriticalPlaneAbove(x float32) int { return int(math32.Ceil(x - 0.5)) }
 
 // Delinearizes an RGB component, returning a floating-point number.
 // @param rgb_component 0.0 <= rgb_component <= 100.0, represents linear R/G/B
@@ -205,7 +205,7 @@ func TrueDelinearized(comp float32) float32 {
 	if normalized <= 0.0031308 {
 		delinearized = normalized * 12.92
 	} else {
-		delinearized = 1.055*mat32.Pow(normalized, 1.0/2.4) - 0.055
+		delinearized = 1.055*math32.Pow(normalized, 1.0/2.4) - 0.055
 	}
 	return delinearized * 255
 }
@@ -214,7 +214,7 @@ func TrueDelinearized(comp float32) float32 {
 // @param y The Y value of the color.
 // @param target_hue The hue of the color.
 // @return The desired color, in linear RGB coordinates.
-func BisectToLimit(y, target_hue float32) mat32.Vec3 {
+func BisectToLimit(y, target_hue float32) math32.Vec3 {
 	segment := BisectToSegment(y, target_hue)
 	left := segment[0]
 	left_hue := HueOf(left)
@@ -234,7 +234,7 @@ func BisectToLimit(y, target_hue float32) mat32.Vec3 {
 				if num.Abs(r_plane-l_plane) <= 1 {
 					break
 				} else {
-					m_plane := int(mat32.Floor(float32(l_plane+r_plane) / 2.0))
+					m_plane := int(math32.Floor(float32(l_plane+r_plane) / 2.0))
 					mid_plane_coordinate := kCriticalPlanes[m_plane]
 					mid := SetCoordinate(left, right, mid_plane_coordinate, axis)
 					mid_hue := HueOf(mid)

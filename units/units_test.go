@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"testing"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 func TestToDots(t *testing.T) {
@@ -46,7 +46,7 @@ func TestToDots(t *testing.T) {
 	for unit, want := range tests {
 		v := New(50, unit)
 		have := v.ToDots(&uc)
-		if mat32.Abs(have-want) > 0.001 {
+		if math32.Abs(have-want) > 0.001 {
 			t.Errorf("expected %g for %v, but got %g", want, unit, have)
 		}
 	}

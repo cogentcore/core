@@ -8,7 +8,7 @@ import (
 	"image"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/units"
 )
 
@@ -197,17 +197,17 @@ func (s *Shadow) ToDots(uc *units.Context) {
 // BasePos returns the position at which the base box shadow
 // (the actual solid, unblurred box part) should be rendered
 // if the shadow is on an element with the given starting position.
-func (s *Shadow) BasePos(startPos mat32.Vec2) mat32.Vec2 {
+func (s *Shadow) BasePos(startPos math32.Vec2) math32.Vec2 {
 	// Offset directly affects position.
 	// We need to subtract spread
 	// to compensate for size changes and stay centered.
-	return startPos.Add(mat32.V2(s.OffsetX.Dots, s.OffsetY.Dots)).SubScalar(s.Spread.Dots)
+	return startPos.Add(math32.V2(s.OffsetX.Dots, s.OffsetY.Dots)).SubScalar(s.Spread.Dots)
 }
 
 // BaseSize returns the total size the base box shadow
 // (the actual solid, unblurred part) should be if
 // the shadow is on an element with the given starting size.
-func (s *Shadow) BaseSize(startSize mat32.Vec2) mat32.Vec2 {
+func (s *Shadow) BaseSize(startSize math32.Vec2) math32.Vec2 {
 	// Spread goes on all sides, so need to count twice per dimension.
 	return startSize.AddScalar(2 * s.Spread.Dots)
 }
@@ -215,7 +215,7 @@ func (s *Shadow) BaseSize(startSize mat32.Vec2) mat32.Vec2 {
 // Pos returns the position at which the blurred box shadow
 // should start if the shadow is on an element
 // with the given starting position.
-func (s *Shadow) Pos(startPos mat32.Vec2) mat32.Vec2 {
+func (s *Shadow) Pos(startPos math32.Vec2) math32.Vec2 {
 	// We need to subtract half of blur
 	// to compensate for size changes and stay centered.
 	return s.BasePos(startPos).SubScalar(s.Blur.Dots / 2)
@@ -223,7 +223,7 @@ func (s *Shadow) Pos(startPos mat32.Vec2) mat32.Vec2 {
 
 // Size returns the total size occupied by the blurred box shadow
 // if the shadow is on an element with the given starting size.
-func (s *Shadow) Size(startSize mat32.Vec2) mat32.Vec2 {
+func (s *Shadow) Size(startSize math32.Vec2) math32.Vec2 {
 	// Blur goes on all sides, but it is rendered as half of actual
 	// because CSS does the same, so we only count it once.
 	return s.BaseSize(startSize).AddScalar(s.Blur.Dots)
@@ -249,17 +249,17 @@ func (s *Shadow) Margin() SideFloats {
 
 	sdots := float32(0)
 	if s.Blur.Dots > 0 {
-		sdots = mat32.Ceil(0.5 * s.Blur.Dots)
+		sdots = math32.Ceil(0.5 * s.Blur.Dots)
 		if sdots < 2 { // for tight dp = 1 case, the render antialiasing requires a min width..
 			sdots = 2
 		}
 	}
 
 	return NewSideFloats(
-		mat32.Max(s.Spread.Dots-s.OffsetY.Dots+sdots, 0),
-		mat32.Max(s.Spread.Dots+s.OffsetX.Dots+sdots, 0),
-		mat32.Max(s.Spread.Dots+s.OffsetY.Dots+sdots, 0),
-		mat32.Max(s.Spread.Dots-s.OffsetX.Dots+sdots, 0),
+		math32.Max(s.Spread.Dots-s.OffsetY.Dots+sdots, 0),
+		math32.Max(s.Spread.Dots+s.OffsetX.Dots+sdots, 0),
+		math32.Max(s.Spread.Dots+s.OffsetY.Dots+sdots, 0),
+		math32.Max(s.Spread.Dots-s.OffsetX.Dots+sdots, 0),
 	)
 }
 

@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"strings"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 )
 
@@ -20,10 +20,10 @@ import (
 type ViewBox struct {
 
 	// offset or starting point in parent Viewport2D
-	Min mat32.Vec2
+	Min math32.Vec2
 
 	// size of viewbox within parent Viewport2D
-	Size mat32.Vec2
+	Size math32.Vec2
 
 	// how to scale the view box within parent
 	PreserveAspectRatio ViewBoxPreserveAspectRatio
@@ -31,8 +31,8 @@ type ViewBox struct {
 
 // Defaults returns viewbox to defaults
 func (vb *ViewBox) Defaults() {
-	vb.Min = mat32.Vec2{}
-	vb.Size = mat32.V2(100, 100)
+	vb.Min = math32.Vec2{}
+	vb.Size = math32.V2(100, 100)
 	vb.PreserveAspectRatio.Align.Set(AlignMid)
 	vb.PreserveAspectRatio.MeetOrSlice = Meet
 }
@@ -49,7 +49,7 @@ func (vb *ViewBox) String() string {
 
 // Transform returns the transform based on viewbox size relative to given box
 // (viewport) size that it will be rendered into
-func (vb *ViewBox) Transform(box mat32.Vec2) (size, trans, scale mat32.Vec2) {
+func (vb *ViewBox) Transform(box math32.Vec2) (size, trans, scale math32.Vec2) {
 	of := styles.FitFill
 	switch {
 	case vb.PreserveAspectRatio.Align.X == AlignNone:
@@ -60,7 +60,7 @@ func (vb *ViewBox) Transform(box mat32.Vec2) (size, trans, scale mat32.Vec2) {
 		of = styles.FitCover
 	}
 	if vb.Size.X == 0 || vb.Size.Y == 0 {
-		vb.Size = mat32.V2(100, 100)
+		vb.Size = math32.V2(100, 100)
 	}
 	size = styles.ObjectSizeFromFit(of, vb.Size, box)
 	scale = size.Div(vb.Size)

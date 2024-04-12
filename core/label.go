@@ -11,7 +11,7 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/states"
@@ -293,7 +293,7 @@ func (lb *Label) Config() {
 
 // ConfigLabel does the HTML and Layout in TextRender for label text,
 // using given size to constrain layout.
-func (lb *Label) ConfigLabelSize(sz mat32.Vec2) {
+func (lb *Label) ConfigLabelSize(sz math32.Vec2) {
 	// todo: last arg is CSSAgg.  Can synthesize that some other way?
 	fs := lb.Styles.FontRender()
 	txs := &lb.Styles.Text
@@ -306,7 +306,7 @@ func (lb *Label) ConfigLabelSize(sz mat32.Vec2) {
 // In this case, alignment factors are turned off,
 // because they otherwise can absorb much more space, which should
 // instead be controlled by the base Align X,Y factors.
-func (lb *Label) ConfigLabelAlloc(sz mat32.Vec2) mat32.Vec2 {
+func (lb *Label) ConfigLabelAlloc(sz math32.Vec2) math32.Vec2 {
 	// todo: last arg is CSSAgg.  Can synthesize that some other way?
 	fs := lb.Styles.FontRender()
 	txs := &lb.Styles.Text
@@ -324,7 +324,7 @@ func (lb *Label) ConfigLabelAlloc(sz mat32.Vec2) mat32.Vec2 {
 // for word wrap case, where the sizing actually matters,
 // based on trying to fit the given number of characters into the given content size
 // with given font height.
-func TextWrapSizeEstimate(csz mat32.Vec2, nChars int, fs *styles.Font) mat32.Vec2 {
+func TextWrapSizeEstimate(csz math32.Vec2, nChars int, fs *styles.Font) math32.Vec2 {
 	chars := float32(nChars)
 	fht := float32(16)
 	if fs.Face != nil {
@@ -339,14 +339,14 @@ func TextWrapSizeEstimate(csz mat32.Vec2, nChars int, fs *styles.Font) mat32.Vec
 	// w = ratio * h
 	// w^2 + h^2 = a
 	// (ratio*h)^2 + h^2 = a
-	h := mat32.Sqrt(area) / mat32.Sqrt(ratio+1)
+	h := math32.Sqrt(area) / math32.Sqrt(ratio+1)
 	w := ratio * h
 	if w < csz.X { // must be at least this
 		w = csz.X
 		h = area / w
 		h = max(h, csz.Y)
 	}
-	sz := mat32.V2(w, h)
+	sz := math32.V2(w, h)
 	if DebugSettings.LayoutTrace {
 		fmt.Println("TextWrapSizeEstimate chars:", chars, "area:", area, "sz:", sz)
 	}

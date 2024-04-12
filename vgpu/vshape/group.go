@@ -4,7 +4,7 @@
 
 package vshape
 
-import "cogentcore.org/core/mat32"
+import "cogentcore.org/core/math32"
 
 // ShapeGroup is a group of shapes -- returns summary data for shape elements
 type ShapeGroup struct {
@@ -27,7 +27,7 @@ func (sb *ShapeGroup) N() (nVtx, nIndex int) {
 }
 
 // Set sets points in given allocated arrays, also updates offsets
-func (sb *ShapeGroup) Set(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
+func (sb *ShapeGroup) Set(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32) {
 	vo := sb.VtxOff
 	io := sb.IndexOff
 	sb.CBBox.SetEmpty()

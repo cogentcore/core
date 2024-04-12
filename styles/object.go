@@ -8,7 +8,7 @@ import (
 	"image"
 	"image/draw"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"github.com/anthonynsimon/bild/transform"
 )
 
@@ -43,10 +43,10 @@ const (
 // ObjectSizeFromFit returns the target object size based on the given
 // ObjectFits setting, original object size, and target box size
 // for the object to fit into.
-func ObjectSizeFromFit(fit ObjectFits, obj, box mat32.Vec2) mat32.Vec2 {
+func ObjectSizeFromFit(fit ObjectFits, obj, box math32.Vec2) math32.Vec2 {
 	oar := obj.X / obj.Y
 	bar := box.X / box.Y
-	var sz mat32.Vec2
+	var sz math32.Vec2
 	switch fit {
 	case FitFill:
 		return box
@@ -80,8 +80,8 @@ func ObjectSizeFromFit(fit ObjectFits, obj, box mat32.Vec2) mat32.Vec2 {
 
 // ResizeImage resizes the given image according to [Style.ObjectFit]
 // in an object of the given box size.
-func (s *Style) ResizeImage(img image.Image, box mat32.Vec2) image.Image {
-	obj := mat32.V2FromPoint(img.Bounds().Size())
+func (s *Style) ResizeImage(img image.Image, box math32.Vec2) image.Image {
+	obj := math32.V2FromPoint(img.Bounds().Size())
 	sz := ObjectSizeFromFit(s.ObjectFit, obj, box)
 
 	if s.ObjectFit == FitScaleDown && sz.X >= obj.X {

@@ -11,7 +11,7 @@ package gradient
 import (
 	"image/color"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // Radial represents a radial gradient. It implements the [image.Image] interface.
@@ -19,22 +19,22 @@ type Radial struct { //types:add -setters
 	Base
 
 	// the center point of the gradient (cx and cy in SVG)
-	Center mat32.Vec2
+	Center math32.Vec2
 
 	// the focal point of the gradient (fx and fy in SVG)
-	Focal mat32.Vec2
+	Focal math32.Vec2
 
 	// the radius of the gradient (rx and ry in SVG)
-	Radius mat32.Vec2
+	Radius math32.Vec2
 
 	// current render version -- transformed by object matrix
-	rCenter mat32.Vec2 `set:"-"`
+	rCenter math32.Vec2 `set:"-"`
 
 	// current render version -- transformed by object matrix
-	rFocal mat32.Vec2 `set:"-"`
+	rFocal math32.Vec2 `set:"-"`
 
 	// current render version -- transformed by object matrix
-	rRadius mat32.Vec2 `set:"-"`
+	rRadius math32.Vec2 `set:"-"`
 }
 
 var _ Gradient = &Radial{}
@@ -44,9 +44,9 @@ func NewRadial() *Radial {
 	return &Radial{
 		Base: NewBase(),
 		// default is fully centered
-		Center: mat32.V2Scalar(0.5),
-		Focal:  mat32.V2Scalar(0.5),
-		Radius: mat32.V2Scalar(0.5),
+		Center: math32.V2Scalar(0.5),
+		Focal:  math32.V2Scalar(0.5),
+		Radius: math32.V2Scalar(0.5),
 	}
 }
 
@@ -62,7 +62,7 @@ func (r *Radial) AddStop(color color.RGBA, pos float32, opacity ...float32) *Rad
 // object-level transform (i.e., the current painting transform),
 // which is applied in addition to the gradient's own Transform.
 // This must be called before rendering the gradient, and it should only be called then.
-func (r *Radial) Update(opacity float32, box mat32.Box2, objTransform mat32.Mat2) {
+func (r *Radial) Update(opacity float32, box math32.Box2, objTransform math32.Mat2) {
 	r.Box = box
 	r.Opacity = opacity
 	r.UpdateBase()
@@ -111,19 +111,19 @@ func (r *Radial) At(x, y int) color.Color {
 	if r.rCenter == r.rFocal {
 		// When the center and focal are the same things are much simpler;
 		// pos is just distance from center scaled by radius
-		pt := mat32.V2(float32(x)+0.5, float32(y)+0.5)
+		pt := math32.V2(float32(x)+0.5, float32(y)+0.5)
 		if r.Units == ObjectBoundingBox {
 			pt = r.boxTransform.MulVec2AsPoint(pt)
 		}
 		d := pt.Sub(r.rCenter)
-		pos := mat32.Sqrt(d.X*d.X/(r.rRadius.X*r.rRadius.X) + (d.Y*d.Y)/(r.rRadius.Y*r.rRadius.Y))
+		pos := math32.Sqrt(d.X*d.X/(r.rRadius.X*r.rRadius.X) + (d.Y*d.Y)/(r.rRadius.Y*r.rRadius.Y))
 		return r.GetColor(pos)
 	}
-	if r.rFocal == mat32.V2(0, 0) {
+	if r.rFocal == math32.V2(0, 0) {
 		return color.RGBA{} // should not happen
 	}
 
-	pt := mat32.V2(float32(x)+0.5, float32(y)+0.5)
+	pt := math32.V2(float32(x)+0.5, float32(y)+0.5)
 	if r.Units == ObjectBoundingBox {
 		pt = r.boxTransform.MulVec2AsPoint(pt)
 	}
@@ -142,7 +142,7 @@ func (r *Radial) At(x, y int) color.Color {
 		return s.Color
 	}
 
-	pos := mat32.Sqrt(d.X*d.X+d.Y*d.Y) / mat32.Sqrt(td.X*td.X+td.Y*td.Y)
+	pos := math32.Sqrt(d.X*d.X+d.Y*d.Y) / math32.Sqrt(td.X*td.X+td.Y*td.Y)
 	return r.GetColor(pos)
 }
 
@@ -150,7 +150,7 @@ func (r *Radial) At(x, y int) color.Color {
 // a ray starting at s2 passing through s1 and a circle in fixed point.
 // Returns intersects == false if no solution is possible. If two
 // solutions are possible, the point closest to s2 is returned
-func RayCircleIntersectionF(s1, s2, c mat32.Vec2, r float32) (pt mat32.Vec2, intersects bool) {
+func RayCircleIntersectionF(s1, s2, c math32.Vec2, r float32) (pt math32.Vec2, intersects bool) {
 	n := s2.X - c.X // Calculating using 64* rather than divide
 	m := s2.Y - c.Y
 
@@ -166,7 +166,7 @@ func RayCircleIntersectionF(s1, s2, c mat32.Vec2, r float32) (pt mat32.Vec2, int
 		return // No intersection or is tangent
 	}
 
-	D = mat32.Sqrt(D)
+	D = math32.Sqrt(D)
 	t1, t2 := (-B+D)/(2*A), (-B-D)/(2*A)
 	p1OnSide := t1 > 0
 	p2OnSide := t2 > 0
@@ -182,5 +182,5 @@ func RayCircleIntersectionF(s1, s2, c mat32.Vec2, r float32) (pt mat32.Vec2, int
 	default: // Neither solution is on the ray
 		return
 	}
-	return mat32.V2((n-e*t1)+c.X, (m-d*t1)+c.Y), true
+	return math32.V2((n-e*t1)+c.X, (m-d*t1)+c.Y), true
 }

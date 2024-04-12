@@ -8,7 +8,7 @@ import (
 	"image"
 	"sort"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // UniqSortedInts returns the ints in sorted order with only unique vals
@@ -35,7 +35,7 @@ func SizeGroups(sizes []int, maxN int) []int {
 
 	idxs := make([]int, mxgp)
 	for i := 0; i < mxgp; i++ {
-		cut := int(mat32.Round(float32(i+1) * nper))
+		cut := int(math32.Round(float32(i+1) * nper))
 		if cut >= ns {
 			cut = ns - 1
 		}

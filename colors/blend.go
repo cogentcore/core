@@ -10,7 +10,7 @@ import (
 
 	"cogentcore.org/core/cam/cam16"
 	"cogentcore.org/core/cam/hct"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // BlendTypes are different algorithms (colorspaces) to use for blending
@@ -55,7 +55,7 @@ func Blend(bt BlendTypes, p float32, x, y color.Color) color.RGBA {
 func BlendRGB(pct float32, x, y color.Color) color.RGBA {
 	fx := NRGBAF32Model.Convert(x).(NRGBAF32)
 	fy := NRGBAF32Model.Convert(y).(NRGBAF32)
-	pct = mat32.Clamp(pct, 0, 100.0)
+	pct = math32.Clamp(pct, 0, 100.0)
 	px := pct / 100
 	py := 1.0 - px
 	fx.R = px*fx.R + py*fy.R

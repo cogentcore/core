@@ -13,7 +13,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/errors"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
@@ -41,27 +41,27 @@ type Node interface {
 	BBoxes(sv *SVG)
 
 	// LocalBBox returns the bounding box of node in local dimensions
-	LocalBBox() mat32.Box2
+	LocalBBox() math32.Box2
 
 	// NodeBBox returns the bounding box in image coordinates for this node
 	NodeBBox(sv *SVG) image.Rectangle
 
 	// SetNodePos sets the upper left effective position of this element, in local dimensions
-	SetNodePos(pos mat32.Vec2)
+	SetNodePos(pos math32.Vec2)
 
 	// SetNodeSize sets the overall effective size of this element, in local dimensions
-	SetNodeSize(sz mat32.Vec2)
+	SetNodeSize(sz math32.Vec2)
 
 	// ApplyTransform applies the given 2D transform to the geometry of this node
 	// this just does a direct transform multiplication on coordinates.
-	ApplyTransform(sv *SVG, xf mat32.Mat2)
+	ApplyTransform(sv *SVG, xf math32.Mat2)
 
 	// ApplyDeltaTransform applies the given 2D delta transforms to the geometry of this node
 	// relative to given point.  Trans translation and point are in top-level coordinates,
 	// so must be transformed into local coords first.
 	// Point is upper left corner of selection box that anchors the translation and scaling,
 	// and for rotation it is the center point around which to rotate
-	ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2)
+	ApplyDeltaTransform(sv *SVG, trans math32.Vec2, scale math32.Vec2, rot float32, pt math32.Vec2)
 
 	// WriteGeom writes the geometry of the node to a slice of floating point numbers
 	// the length and ordering of which is specific to each node type.
@@ -124,14 +124,14 @@ func (g *NodeBase) EnforceSVGName() bool {
 	return true
 }
 
-func (g *NodeBase) SetPos(pos mat32.Vec2) {
+func (g *NodeBase) SetPos(pos math32.Vec2) {
 }
 
-func (g *NodeBase) SetSize(sz mat32.Vec2) {
+func (g *NodeBase) SetSize(sz math32.Vec2) {
 }
 
-func (g *NodeBase) LocalBBox() mat32.Box2 {
-	bb := mat32.Box2{}
+func (g *NodeBase) LocalBBox() math32.Box2 {
+	bb := math32.Box2{}
 	return bb
 }
 
@@ -156,9 +156,9 @@ func (g *NodeBase) SetColorProperties(prop, color string) {
 // ParTransform returns the full compounded 2D transform matrix for all
 // of the parents of this node.  If self is true, then include our
 // own transform too.
-func (g *NodeBase) ParTransform(self bool) mat32.Mat2 {
+func (g *NodeBase) ParTransform(self bool) math32.Mat2 {
 	pars := []Node{}
-	xf := mat32.Identity2()
+	xf := math32.Identity2()
 	n := g.This().(Node)
 	for {
 		if n.Parent() == nil {
@@ -183,19 +183,19 @@ func (g *NodeBase) ParTransform(self bool) mat32.Mat2 {
 
 // ApplyTransform applies the given 2D transform to the geometry of this node
 // this just does a direct transform multiplication on coordinates.
-func (g *NodeBase) ApplyTransform(sv *SVG, xf mat32.Mat2) {
+func (g *NodeBase) ApplyTransform(sv *SVG, xf math32.Mat2) {
 }
 
 // DeltaTransform computes the net transform matrix for given delta transform parameters
 // and the transformed version of the reference point.  If self is true, then
 // include the current node self transform, otherwise don't.  Groups do not
 // but regular rendering nodes do.
-func (g *NodeBase) DeltaTransform(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2, self bool) (mat32.Mat2, mat32.Vec2) {
+func (g *NodeBase) DeltaTransform(trans math32.Vec2, scale math32.Vec2, rot float32, pt math32.Vec2, self bool) (math32.Mat2, math32.Vec2) {
 	mxi := g.ParTransform(self)
 	mxi = mxi.Inverse()
 	lpt := mxi.MulVec2AsPoint(pt)
 	ldel := mxi.MulVec2AsVec(trans)
-	xf := mat32.Scale2D(scale.X, scale.Y).Rotate(rot)
+	xf := math32.Scale2D(scale.X, scale.Y).Rotate(rot)
 	xf.X0 = ldel.X
 	xf.Y0 = ldel.Y
 	return xf, lpt
@@ -206,7 +206,7 @@ func (g *NodeBase) DeltaTransform(trans mat32.Vec2, scale mat32.Vec2, rot float3
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *NodeBase) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+func (g *NodeBase) ApplyDeltaTransform(sv *SVG, trans math32.Vec2, scale math32.Vec2, rot float32, pt math32.Vec2) {
 }
 
 // SetFloat32SliceLen is a utility function to set given slice of float32 values
@@ -413,7 +413,7 @@ func (g *NodeBase) IsDefs() bool {
 }
 
 // LocalBBoxToWin converts a local bounding box to SVG coordinates
-func (g *NodeBase) LocalBBoxToWin(bb mat32.Box2) image.Rectangle {
+func (g *NodeBase) LocalBBoxToWin(bb math32.Box2) image.Rectangle {
 	mxi := g.ParTransform(true) // include self
 	return bb.MulMat2(mxi).ToRect()
 }
@@ -423,11 +423,11 @@ func (g *NodeBase) NodeBBox(sv *SVG) image.Rectangle {
 	return rs.LastRenderBBox
 }
 
-func (g *NodeBase) SetNodePos(pos mat32.Vec2) {
+func (g *NodeBase) SetNodePos(pos math32.Vec2) {
 	// no-op by default
 }
 
-func (g *NodeBase) SetNodeSize(sz mat32.Vec2) {
+func (g *NodeBase) SetNodeSize(sz math32.Vec2) {
 	// no-op by default
 }
 

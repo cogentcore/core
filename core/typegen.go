@@ -9,7 +9,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/pi/complete"
 	"cogentcore.org/core/styles"
@@ -764,7 +764,7 @@ func (t *Slider) SetIcon(v icons.Icon) *Slider { t.Icon = v; return t }
 // Size of the thumb as a proportion of the slider thickness, which is
 // Content size (inside the padding).  This is for actual X,Y dimensions,
 // so must be sensitive to Dim dimension alignment.
-func (t *Slider) SetThumbSize(v mat32.Vec2) *Slider { t.ThumbSize = v; return t }
+func (t *Slider) SetThumbSize(v math32.Vec2) *Slider { t.ThumbSize = v; return t }
 
 // SetTrackSize sets the [Slider.TrackSize]:
 // TrackSize is the proportion of slider thickness for the visible track

@@ -13,7 +13,7 @@ import (
 	"sync"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/ordmap"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/vgpu"
@@ -45,7 +45,7 @@ type Scene struct {
 	tree.NodeBase
 
 	// Viewport-level viewbox within any parent Viewport2D
-	Geom mat32.Geom2DInt `set:"-"`
+	Geom math32.Geom2DInt `set:"-"`
 
 	// number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame
 	MultiSample int `default:"4"`

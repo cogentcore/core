@@ -20,7 +20,7 @@ import (
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/pi/complete"
@@ -112,10 +112,10 @@ type TextField struct { //core:embedder
 	Error error `json:"-" xml:"-" set:"-"`
 
 	// EffPos is the effective position with any leading icon space added.
-	EffPos mat32.Vec2 `copier:"-" json:"-" xml:"-" set:"-"`
+	EffPos math32.Vec2 `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// EffSize is the effective size, subtracting any leading and trailing icon space.
-	EffSize mat32.Vec2 `copier:"-" json:"-" xml:"-" set:"-"`
+	EffSize math32.Vec2 `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// StartPos is the starting display position in the string.
 	StartPos int `copier:"-" json:"-" xml:"-" set:"-"`
@@ -1172,9 +1172,9 @@ func (tf *TextField) HasWordWrap() bool {
 // CharPos returns the relative starting position of the given rune,
 // in the overall RenderAll of all the text.
 // These positions can be out of visible range: see CharRenderPos
-func (tf *TextField) CharPos(idx int) mat32.Vec2 {
+func (tf *TextField) CharPos(idx int) math32.Vec2 {
 	if idx <= 0 || len(tf.RenderAll.Spans) == 0 {
-		return mat32.Vec2{}
+		return math32.Vec2{}
 	}
 	pos, _, _, _ := tf.RenderAll.RuneRelPos(idx)
 	pos.Y -= tf.RenderAll.Spans[0].RelPos.Y
@@ -1183,7 +1183,7 @@ func (tf *TextField) CharPos(idx int) mat32.Vec2 {
 
 // RelCharPos returns the text width in dots between the two text string
 // positions (ed is exclusive -- +1 beyond actual char).
-func (tf *TextField) RelCharPos(st, ed int) mat32.Vec2 {
+func (tf *TextField) RelCharPos(st, ed int) math32.Vec2 {
 	return tf.CharPos(ed).Sub(tf.CharPos(st))
 }
 
@@ -1191,11 +1191,11 @@ func (tf *TextField) RelCharPos(st, ed int) mat32.Vec2 {
 // position in string -- makes no attempt to rationalize that pos (i.e., if
 // not in visible range, position will be out of range too).
 // if wincoords is true, then adds window box offset -- for cursor, popups
-func (tf *TextField) CharRenderPos(charidx int, wincoords bool) mat32.Vec2 {
+func (tf *TextField) CharRenderPos(charidx int, wincoords bool) math32.Vec2 {
 	pos := tf.EffPos
 	if wincoords {
 		sc := tf.Scene
-		pos = pos.Add(mat32.V2FromPoint(sc.SceneGeom.Pos))
+		pos = pos.Add(math32.V2FromPoint(sc.SceneGeom.Pos))
 	}
 	cpos := tf.RelCharPos(tf.StartPos, charidx)
 	return pos.Add(cpos)
@@ -1208,7 +1208,7 @@ func (tf *TextField) ScrollLayoutToCursor() bool {
 		return false
 	}
 	cpos := tf.CharRenderPos(tf.CursorPos, false).ToPointFloor()
-	bbsz := image.Point{int(mat32.Ceil(tf.CursorWidth.Dots)), int(mat32.Ceil(tf.FontHeight))}
+	bbsz := image.Point{int(math32.Ceil(tf.CursorWidth.Dots)), int(math32.Ceil(tf.FontHeight))}
 	bbox := image.Rectangle{Min: cpos, Max: cpos.Add(bbsz)}
 	return ly.ScrollToBox(bbox)
 }
@@ -1316,7 +1316,7 @@ func (tf *TextField) CursorSprite(on bool) *Sprite {
 	sp, ok := ms.Sprites.SpriteByName(spnm)
 	// TODO: figure out how to update caret color on color scheme change
 	if !ok {
-		bbsz := image.Point{int(mat32.Ceil(tf.CursorWidth.Dots)), int(mat32.Ceil(tf.FontHeight))}
+		bbsz := image.Point{int(math32.Ceil(tf.CursorWidth.Dots)), int(math32.Ceil(tf.FontHeight))}
 		if bbsz.X < 2 { // at least 2
 			bbsz.X = 2
 		}
@@ -1356,7 +1356,7 @@ func (tf *TextField) RenderSelect() {
 	pc := &tf.Scene.PaintContext
 	tsz := tf.RelCharPos(effst, effed)
 	if !tf.HasWordWrap() || tsz.Y == 0 {
-		pc.FillBox(spos, mat32.V2(tsz.X, tf.FontHeight), tf.SelectColor)
+		pc.FillBox(spos, math32.V2(tsz.X, tf.FontHeight), tf.SelectColor)
 		return
 	}
 	ex := float32(tf.Geom.ContentBBox.Max.X)
@@ -1365,15 +1365,15 @@ func (tf *TextField) RenderSelect() {
 	esi, _, _ := tf.RenderAll.RuneSpanPos(effed)
 	ep := tf.CharRenderPos(effed, false)
 
-	pc.FillBox(spos, mat32.V2(ex-spos.X, tf.FontHeight), tf.SelectColor)
+	pc.FillBox(spos, math32.V2(ex-spos.X, tf.FontHeight), tf.SelectColor)
 
 	spos.X = sx
 	spos.Y += tf.RenderAll.Spans[ssi+1].RelPos.Y - tf.RenderAll.Spans[ssi].RelPos.Y
 	for si := ssi + 1; si <= esi; si++ {
 		if si < esi {
-			pc.FillBox(spos, mat32.V2(ex-spos.X, tf.FontHeight), tf.SelectColor)
+			pc.FillBox(spos, math32.V2(ex-spos.X, tf.FontHeight), tf.SelectColor)
 		} else {
-			pc.FillBox(spos, mat32.V2(ep.X-spos.X, tf.FontHeight), tf.SelectColor)
+			pc.FillBox(spos, math32.V2(ep.X-spos.X, tf.FontHeight), tf.SelectColor)
 		}
 		spos.Y += tf.RenderAll.Spans[si].RelPos.Y - tf.RenderAll.Spans[si-1].RelPos.Y
 	}
@@ -1386,7 +1386,7 @@ func (tf *TextField) AutoScroll() {
 	availSz := sz.Actual.Content.Sub(icsz)
 	tf.ConfigTextSize(availSz)
 	n := len(tf.EditTxt)
-	tf.CursorPos = mat32.ClampInt(tf.CursorPos, 0, n)
+	tf.CursorPos = math32.ClampInt(tf.CursorPos, 0, n)
 
 	if tf.HasWordWrap() { // does not scroll
 		tf.StartPos = 0
@@ -1421,7 +1421,7 @@ func (tf *TextField) AutoScroll() {
 		tf.StartPos = max(0, tf.EndPos-tf.CharWidth)
 	}
 
-	inc := int(mat32.Ceil(.1 * float32(tf.CharWidth)))
+	inc := int(math32.Ceil(.1 * float32(tf.CharWidth)))
 	inc = max(4, inc)
 
 	// keep cursor in view with buffer
@@ -1488,7 +1488,7 @@ func (tf *TextField) AutoScroll() {
 
 // PixelToCursor finds the cursor position that corresponds to the given pixel location
 func (tf *TextField) PixelToCursor(pt image.Point) int {
-	ptf := mat32.V2FromPoint(pt)
+	ptf := math32.V2FromPoint(pt)
 	rpt := ptf.Sub(tf.EffPos)
 	if rpt.X <= 0 || rpt.Y < 0 {
 		return tf.StartPos
@@ -1838,7 +1838,7 @@ func (tf *TextField) ApplyStyle() {
 	tf.CursorWidth.ToDots(&tf.Styles.UnitContext)
 }
 
-func (tf *TextField) ConfigTextSize(sz mat32.Vec2) mat32.Vec2 {
+func (tf *TextField) ConfigTextSize(sz math32.Vec2) math32.Vec2 {
 	st := &tf.Styles
 	txs := &st.Text
 	fs := st.FontRender()
@@ -1856,8 +1856,8 @@ func (tf *TextField) ConfigTextSize(sz mat32.Vec2) mat32.Vec2 {
 	return rsz
 }
 
-func (tf *TextField) IconsSize() mat32.Vec2 {
-	var sz mat32.Vec2
+func (tf *TextField) IconsSize() math32.Vec2 {
+	var sz math32.Vec2
 	if lead := tf.LeadingIconButton(); lead != nil {
 		sz.X += lead.Geom.Size.Actual.Total.X
 	}
@@ -1882,7 +1882,7 @@ func (tf *TextField) SizeUp() {
 	icsz := tf.IconsSize()
 	availSz := sz.Actual.Content.Sub(icsz)
 
-	var rsz mat32.Vec2
+	var rsz math32.Vec2
 	if tf.HasWordWrap() {
 		rsz = tf.ConfigTextSize(availSz) // TextWrapSizeEstimate(availSz, len(tf.EditTxt), &tf.Styles.Font))
 	} else {

@@ -5,7 +5,7 @@
 package vshape
 
 import (
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 ////////////////////////////////////////////////////////////////
@@ -22,12 +22,12 @@ func TriangleN() (nVtx, nIndex int) {
 // Norm is auto-computed, and bounds expanded.
 // pos is a 3D position offset. returns 3D size of plane.
 // returns bounding box.
-func SetTriangle(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtxOff, idxOff int, a, b, c mat32.Vec3, texs []mat32.Vec2, pos mat32.Vec3) mat32.Box3 {
+func SetTriangle(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, a, b, c math32.Vec3, texs []math32.Vec2, pos math32.Vec3) math32.Box3 {
 	hasTex := texs != nil
 	vidx := vtxOff * 3
 	tidx := vtxOff * 2
 
-	norm := mat32.Normal(a, b, c)
+	norm := math32.Normal(a, b, c)
 
 	a.Add(pos).ToArray(vtxAry, vidx)
 	norm.ToArray(normAry, vidx)
@@ -43,8 +43,8 @@ func SetTriangle(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, 
 
 	idxAry.Set(idxOff, uint32(vtxOff), uint32(vtxOff+1), uint32(vtxOff+2))
 
-	bb := mat32.B3Empty()
-	bb.ExpandByPoints([]mat32.Vec3{a, b, c})
+	bb := math32.B3Empty()
+	bb.ExpandByPoints([]math32.Vec3{a, b, c})
 	return bb
 }
 
@@ -62,12 +62,12 @@ func QuadN() (nVtx, nIndex int) {
 // Norm is auto-computed, and bbox expanded by points.
 // pos is a 3D position offset. returns 3D size of plane.
 // returns bounding box.
-func SetQuad(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtxOff, idxOff int, vtxs []mat32.Vec3, texs []mat32.Vec2, pos mat32.Vec3) mat32.Box3 {
+func SetQuad(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, vtxs []math32.Vec3, texs []math32.Vec2, pos math32.Vec3) math32.Box3 {
 	hasTex := texs != nil
 	vidx := vtxOff * 3
 	tidx := vtxOff * 2
 
-	norm := mat32.Normal(vtxs[0], vtxs[1], vtxs[2])
+	norm := math32.Normal(vtxs[0], vtxs[1], vtxs[2])
 
 	for vi := range vtxs {
 		vtxs[vi].Add(pos).ToArray(vtxAry, vidx)
@@ -82,7 +82,7 @@ func SetQuad(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtxO
 	idxAry.Set(idxOff, uint32(vtxOff), uint32(vtxOff+1), uint32(vtxOff+2),
 		uint32(vtxOff), uint32(vtxOff+2), uint32(vtxOff+3))
 
-	bb := mat32.B3Empty()
+	bb := math32.B3Empty()
 	bb.ExpandByPoints(vtxs)
 	return bb
 }

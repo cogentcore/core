@@ -9,7 +9,7 @@ import (
 	"sync"
 
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/ordmap"
 )
 
@@ -253,7 +253,7 @@ func (sm *StageMgr) DeleteAll() {
 
 // Resize calls Resize on all stages within based on the given
 // window render geom.
-func (sm *StageMgr) Resize(rg mat32.Geom2DInt) {
+func (sm *StageMgr) Resize(rg math32.Geom2DInt) {
 	for _, kv := range sm.Stack.Order {
 		st := kv.Value
 		if st.Type == WindowStage || (st.Type == DialogStage && st.FullWindow) {

@@ -5,7 +5,7 @@
 package core
 
 import (
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -42,7 +42,7 @@ func (c *Canvas) Render() {
 	c.Context = paint.NewContext(szp.X, szp.Y)
 	c.Context.UnitContext = c.Styles.UnitContext
 	c.Context.ToDots()
-	c.Context.PushTransform(mat32.Scale2D(sz.X, sz.Y))
+	c.Context.PushTransform(math32.Scale2D(sz.X, sz.Y))
 	c.Context.VectorEffect = styles.VectorEffectNonScalingStroke
 	c.Draw(c.Context)
 

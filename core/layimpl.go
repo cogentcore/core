@@ -9,7 +9,7 @@ import (
 	"image"
 	"log/slog"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
@@ -106,7 +106,7 @@ type Layouter interface {
 	// Different Layout types can alter this to present different Content
 	// sizes for the layout process, e.g., if Content is sized to fit allocation,
 	// as in the TopAppBar and Sliceview types.
-	SizeFromChildren(iter int, pass LayoutPasses) mat32.Vec2
+	SizeFromChildren(iter int, pass LayoutPasses) math32.Vec2
 
 	// SizeDownSetAllocs is the key SizeDown step that sets the allocations
 	// in the children, based on our allocation.  In the default implementation
@@ -124,22 +124,22 @@ type Layouter interface {
 
 	// ScrollChanged is called in the OnInput event handler for updating
 	// when the scrollbar value has changed, for given dimension
-	ScrollChanged(d mat32.Dims, sb *Slider)
+	ScrollChanged(d math32.Dims, sb *Slider)
 
 	// ScrollValues returns the maximum size that could be scrolled,
 	// the visible size (which could be less than the max size, in which
 	// case no scrollbar is needed), and visSize / maxSize as the VisiblePct.
 	// This is used in updating the scrollbar and determining whether one is
 	// needed in the first place
-	ScrollValues(d mat32.Dims) (maxSize, visSize, visPct float32)
+	ScrollValues(d math32.Dims) (maxSize, visSize, visPct float32)
 
 	// ScrollGeom returns the target position and size for scrollbars
-	ScrollGeom(d mat32.Dims) (pos, sz mat32.Vec2)
+	ScrollGeom(d math32.Dims) (pos, sz math32.Vec2)
 
 	// SetScrollParams sets scrollbar parameters.  Must set Step and PageStep,
 	// but can also set others as needed.
 	// Max and VisiblePct are automatically set based on ScrollValues maxSize, visPct.
-	SetScrollParams(d mat32.Dims, sb *Slider)
+	SetScrollParams(d math32.Dims, sb *Slider)
 }
 
 // AsLayout returns the given value as a value of type Layout if the type
@@ -168,10 +168,10 @@ type GeomCT struct { //types:add
 	// excluding the Space (margin, padding, scrollbars).
 	// This content includes the InnerSpace factor (Gaps in Layout)
 	// which must therefore be subtracted when allocating down to children.
-	Content mat32.Vec2
+	Content math32.Vec2
 
 	// Total is for the total exterior of the widget: Content + Space
-	Total mat32.Vec2
+	Total math32.Vec2
 }
 
 func (ct GeomCT) String() string {
@@ -204,21 +204,21 @@ type GeomSize struct { //types:add
 	// factors but its internal contents did not grow accordingly, or it can
 	// be more than Actual.Content if it has scrollbars (OverflowAuto).
 	// Note that this includes InnerSpace (Gap).
-	Internal mat32.Vec2
+	Internal math32.Vec2
 
 	// Space is the padding, total effective margin (border, shadow, etc),
 	// and scrollbars that subtracts from Total size to get Content size.
-	Space mat32.Vec2
+	Space math32.Vec2
 
 	// InnerSpace is total extra space that is included within the Content Size region
 	// and must be subtracted from Content when passing sizes down to children.
-	InnerSpace mat32.Vec2
+	InnerSpace math32.Vec2
 
 	// Min is the Styles.Min.Dots() (Ceil int) that constrains the Actual.Content size
-	Min mat32.Vec2
+	Min math32.Vec2
 
 	// Max is the Styles.Max.Dots() (Ceil int) that constrains the Actual.Content size
-	Max mat32.Vec2
+	Max math32.Vec2
 }
 
 func (ls GeomSize) String() string {
@@ -227,14 +227,14 @@ func (ls GeomSize) String() string {
 
 // SetInitContentMin sets initial Actual.Content size from given Styles.Min,
 // further subject to the current Max constraint.
-func (ls *GeomSize) SetInitContentMin(styMin mat32.Vec2) {
+func (ls *GeomSize) SetInitContentMin(styMin math32.Vec2) {
 	csz := &ls.Actual.Content
 	*csz = styMin
 	styles.SetClampMaxVec(csz, ls.Max)
 }
 
 // FitSizeMax increases given size to fit given fm value, subject to Max constraints
-func (ls *GeomSize) FitSizeMax(to *mat32.Vec2, fm mat32.Vec2) {
+func (ls *GeomSize) FitSizeMax(to *math32.Vec2, fm math32.Vec2) {
 	styles.SetClampMinVec(to, fm)
 	styles.SetClampMaxVec(to, ls.Max)
 }
@@ -270,10 +270,10 @@ type GeomState struct { //types:add
 	Cell image.Point
 
 	// RelPos is top, left position relative to parent Content size space
-	RelPos mat32.Vec2
+	RelPos math32.Vec2
 
 	// Scroll is additional scrolling offset within our parent layout
-	Scroll mat32.Vec2
+	Scroll math32.Vec2
 
 	// 2D bounding box for Actual.Total size occupied within parent Scene
 	// that we render onto, starting at Pos.Total and ending at Pos.Total + Size.Total.
@@ -295,22 +295,22 @@ func (ls *GeomState) String() string {
 
 // ContentRangeDim returns the Content bounding box min, max
 // along given dimension
-func (ls *GeomState) ContentRangeDim(d mat32.Dims) (cmin, cmax float32) {
-	cmin = float32(mat32.PointDim(ls.ContentBBox.Min, d))
-	cmax = float32(mat32.PointDim(ls.ContentBBox.Max, d))
+func (ls *GeomState) ContentRangeDim(d math32.Dims) (cmin, cmax float32) {
+	cmin = float32(math32.PointDim(ls.ContentBBox.Min, d))
+	cmax = float32(math32.PointDim(ls.ContentBBox.Max, d))
 	return
 }
 
 // TotalRect returns Pos.Total -- Size.Actual.Total
 // as an image.Rectangle, e.g., for bounding box
 func (ls *GeomState) TotalRect() image.Rectangle {
-	return mat32.RectFromPosSizeMax(ls.Pos.Total, ls.Size.Actual.Total)
+	return math32.RectFromPosSizeMax(ls.Pos.Total, ls.Size.Actual.Total)
 }
 
 // ContentRect returns Pos.Content, Size.Actual.Content
 // as an image.Rectangle, e.g., for bounding box.
 func (ls *GeomState) ContentRect() image.Rectangle {
-	return mat32.RectFromPosSizeMax(ls.Pos.Content, ls.Size.Actual.Content)
+	return math32.RectFromPosSizeMax(ls.Pos.Content, ls.Size.Actual.Content)
 }
 
 // ScrollOffset computes the net scrolling offset as a function of
@@ -326,10 +326,10 @@ func (ls *GeomState) ScrollOffset() image.Point {
 // LayCell holds the layout implementation data for col, row Cells
 type LayCell struct {
 	// Size has the Actual size of elements (not Alloc)
-	Size mat32.Vec2
+	Size math32.Vec2
 
 	// Grow has the Grow factors
-	Grow mat32.Vec2
+	Grow math32.Vec2
 }
 
 func (ls *LayCell) String() string {
@@ -356,7 +356,7 @@ type LayCells struct {
 
 // Cell returns the cell for given dimension and index along that
 // dimension (X = Cols, idx = col, Y = Rows, idx = row)
-func (lc *LayCells) Cell(d mat32.Dims, idx int) *LayCell {
+func (lc *LayCells) Cell(d math32.Dims, idx int) *LayCell {
 	if len(lc.ColRow[d]) <= idx {
 		return nil
 	}
@@ -366,8 +366,8 @@ func (lc *LayCells) Cell(d mat32.Dims, idx int) *LayCell {
 // Init initializes Cells for given shape
 func (lc *LayCells) Init(shape image.Point) {
 	lc.Shape = shape
-	for d := mat32.X; d <= mat32.Y; d++ {
-		n := mat32.PointDim(lc.Shape, d)
+	for d := math32.X; d <= math32.Y; d++ {
+		n := math32.PointDim(lc.Shape, d)
 		if len(lc.ColRow[d]) != n {
 			lc.ColRow[d] = make([]LayCell, n)
 		}
@@ -379,10 +379,10 @@ func (lc *LayCells) Init(shape image.Point) {
 
 // CellsSize returns the total Size represented by the current Cells,
 // which is the Sum of the Max values along each dimension.
-func (lc *LayCells) CellsSize() mat32.Vec2 {
-	var ksz mat32.Vec2
-	for ma := mat32.X; ma <= mat32.Y; ma++ { // main axis = X then Y
-		n := mat32.PointDim(lc.Shape, ma) // cols, rows
+func (lc *LayCells) CellsSize() math32.Vec2 {
+	var ksz math32.Vec2
+	for ma := math32.X; ma <= math32.Y; ma++ { // main axis = X then Y
+		n := math32.PointDim(lc.Shape, ma) // cols, rows
 		sum := float32(0)
 		for mi := 0; mi < n; mi++ {
 			md := lc.Cell(ma, mi) // X, Y
@@ -395,8 +395,8 @@ func (lc *LayCells) CellsSize() mat32.Vec2 {
 }
 
 // GapSizeDim returns the gap size for given dimension, based on Shape and given gap size
-func (lc *LayCells) GapSizeDim(d mat32.Dims, gap float32) float32 {
-	n := mat32.PointDim(lc.Shape, d)
+func (lc *LayCells) GapSizeDim(d math32.Dims, gap float32) float32 {
+	n := math32.PointDim(lc.Shape, d)
 	return float32(n-1) * gap
 }
 
@@ -404,12 +404,12 @@ func (lc *LayCells) String() string {
 	s := ""
 	n := lc.Shape.X
 	for i := 0; i < n; i++ {
-		col := lc.Cell(mat32.X, i)
+		col := lc.Cell(math32.X, i)
 		s += fmt.Sprintln("col:", i, "\tmax X:", col.Size.X, "\tsum Y:", col.Size.Y, "\tmax grX:", col.Grow.X, "\tsum grY:", col.Grow.Y)
 	}
 	n = lc.Shape.Y
 	for i := 0; i < n; i++ {
-		row := lc.Cell(mat32.Y, i)
+		row := lc.Cell(math32.Y, i)
 		s += fmt.Sprintln("row:", i, "\tsum X:", row.Size.X, "\tmax Y:", row.Size.Y, "\tsum grX:", row.Grow.X, "\tmax grY:", row.Grow.Y)
 	}
 	return s
@@ -426,7 +426,7 @@ type LayImplState struct {
 	Shape image.Point `edit:"-"`
 
 	// MainAxis cached here from Styles, to enable Wrap-based access.
-	MainAxis mat32.Dims
+	MainAxis math32.Dims
 
 	// Wraps is the number of actual items in each Wrap for Wrap case:
 	// MainAxis X: Len = Rows, Val = Cols; MainAxis Y: Len = Cols, Val = Rows.
@@ -442,17 +442,17 @@ type LayImplState struct {
 
 	// ScrollSize has the scrollbar sizes (widths) for each dim, which adds to Space.
 	// If there is a vertical scrollbar, X has width; if horizontal, Y has "width" = height
-	ScrollSize mat32.Vec2
+	ScrollSize math32.Vec2
 
 	// Gap is the Styles.Gap size
-	Gap mat32.Vec2
+	Gap math32.Vec2
 
 	// GapSize has the total extra gap sizing between elements, which adds to Space.
 	// This depends on cell layout so it can vary for Wrap case.
 	// For SizeUp / Down Gap contributes to Space like other cases,
 	// but for BoundingBox rendering and Alignment, it does NOT, and must be
 	// subtracted.  This happens in the Position phase.
-	GapSize mat32.Vec2
+	GapSize math32.Vec2
 }
 
 // InitCells initializes the Cells based on Shape, MainAxis, and Wraps
@@ -473,8 +473,8 @@ func (ls *LayImplState) InitCells() {
 	}
 	for wi, wn := range ls.Wraps {
 		var shp image.Point
-		mat32.SetPointDim(&shp, ma, wn)
-		mat32.SetPointDim(&shp, ca, 1)
+		math32.SetPointDim(&shp, ma, wn)
+		math32.SetPointDim(&shp, ca, 1)
 		ls.Cells[wi].Init(shp)
 	}
 }
@@ -491,7 +491,7 @@ func (ls *LayImplState) ShapeCheck(w Widget, phase string) bool {
 // Cell returns the cell for given dimension and index along that
 // dimension, and given other-dimension axis which is ignored for non-Wrap cases.
 // Does no range checking and will crash if out of bounds.
-func (ls *LayImplState) Cell(d mat32.Dims, dIndex, odIndex int) *LayCell {
+func (ls *LayImplState) Cell(d math32.Dims, dIndex, odIndex int) *LayCell {
 	if ls.Wraps == nil {
 		return ls.Cells[0].Cell(d, dIndex)
 	}
@@ -506,7 +506,7 @@ func (ls *LayImplState) WrapIndexToCoord(idx int) image.Point {
 	y := 0
 	x := 0
 	sum := 0
-	if ls.MainAxis == mat32.X {
+	if ls.MainAxis == math32.X {
 		for _, nx := range ls.Wraps {
 			if idx >= sum && idx < sum+nx {
 				x = idx - sum
@@ -531,11 +531,11 @@ func (ls *LayImplState) WrapIndexToCoord(idx int) image.Point {
 // CellsSize returns the total Size represented by the current Cells,
 // which is the Sum of the Max values along each dimension within each Cell,
 // Maxed over cross-axis dimension for Wrap case, plus GapSize.
-func (ls *LayImplState) CellsSize() mat32.Vec2 {
+func (ls *LayImplState) CellsSize() math32.Vec2 {
 	if ls.Wraps == nil {
 		return ls.Cells[0].CellsSize().Add(ls.GapSize)
 	}
-	var ksz mat32.Vec2
+	var ksz math32.Vec2
 	d := ls.MainAxis
 	od := d.Other()
 	gap := ls.Gap.Dim(d)
@@ -558,14 +558,14 @@ func (ls *LayImplState) CellsSize() mat32.Vec2 {
 // Returns error if out of range.
 func (ls *LayImplState) ColWidth(row, col int) (float32, error) {
 	if ls.Wraps == nil {
-		n := mat32.PointDim(ls.Shape, mat32.X)
+		n := math32.PointDim(ls.Shape, math32.X)
 		if col >= n {
 			return 0, fmt.Errorf("Layout.ColWidth: col: %d > number of columns: %d", col, n)
 		}
-		return ls.Cell(mat32.X, col, 0).Size.X, nil
+		return ls.Cell(math32.X, col, 0).Size.X, nil
 	}
 	nw := len(ls.Wraps)
-	if ls.MainAxis == mat32.X {
+	if ls.MainAxis == math32.X {
 		if row >= nw {
 			return 0, fmt.Errorf("Layout.ColWidth: row: %d > number of rows: %d", row, nw)
 		}
@@ -573,7 +573,7 @@ func (ls *LayImplState) ColWidth(row, col int) (float32, error) {
 		if col >= wn {
 			return 0, fmt.Errorf("Layout.ColWidth: col: %d > number of columns: %d", col, wn)
 		}
-		return ls.Cell(mat32.X, col, row).Size.X, nil
+		return ls.Cell(math32.X, col, row).Size.X, nil
 	}
 	if col >= nw {
 		return 0, fmt.Errorf("Layout.ColWidth: col: %d > number of columns: %d", col, nw)
@@ -582,7 +582,7 @@ func (ls *LayImplState) ColWidth(row, col int) (float32, error) {
 	if row >= wn {
 		return 0, fmt.Errorf("Layout.ColWidth: row: %d > number of rows: %d", row, wn)
 	}
-	return ls.Cell(mat32.X, col, row).Size.X, nil
+	return ls.Cell(math32.X, col, row).Size.X, nil
 }
 
 // RowHeight returns the height of given row for given
@@ -590,14 +590,14 @@ func (ls *LayImplState) ColWidth(row, col int) (float32, error) {
 // Returns error if out of range.
 func (ls *LayImplState) RowHeight(row, col int) (float32, error) {
 	if ls.Wraps == nil {
-		n := mat32.PointDim(ls.Shape, mat32.Y)
+		n := math32.PointDim(ls.Shape, math32.Y)
 		if row >= n {
 			return 0, fmt.Errorf("Layout.RowHeight: row: %d > number of rows: %d", row, n)
 		}
-		return ls.Cell(mat32.Y, 0, row).Size.Y, nil
+		return ls.Cell(math32.Y, 0, row).Size.Y, nil
 	}
 	nw := len(ls.Wraps)
-	if ls.MainAxis == mat32.Y {
+	if ls.MainAxis == math32.Y {
 		if col >= nw {
 			return 0, fmt.Errorf("Layout.RowHeight: col: %d > number of columns: %d", col, nw)
 		}
@@ -605,7 +605,7 @@ func (ls *LayImplState) RowHeight(row, col int) (float32, error) {
 		if col >= wn {
 			return 0, fmt.Errorf("Layout.RowHeight: row: %d > number of rows: %d", row, wn)
 		}
-		return ls.Cell(mat32.Y, col, row).Size.Y, nil
+		return ls.Cell(math32.Y, col, row).Size.Y, nil
 	}
 	if row >= nw {
 		return 0, fmt.Errorf("Layout.RowHeight: row: %d > number of rows: %d", row, nw)
@@ -614,7 +614,7 @@ func (ls *LayImplState) RowHeight(row, col int) (float32, error) {
 	if col >= wn {
 		return 0, fmt.Errorf("Layout.RowHeight: col: %d > number of columns: %d", col, wn)
 	}
-	return ls.Cell(mat32.Y, row, col).Size.Y, nil
+	return ls.Cell(math32.Y, row, col).Size.Y, nil
 }
 
 func (ls *LayImplState) String() string {
@@ -640,7 +640,7 @@ func (ly *Layout) StackTopWidget() (Widget, *WidgetBase) {
 // expand Actual and remain at their current styled actual values,
 // absorbing the extra content size within their own scrolling zone
 // (full size recorded in Internal).
-func (ly *Layout) LaySetContentFitOverflow(nsz mat32.Vec2, pass LayoutPasses) {
+func (ly *Layout) LaySetContentFitOverflow(nsz math32.Vec2, pass LayoutPasses) {
 	// todo: potentially the diff between Visible & Hidden is
 	// that Hidden also does Not expand beyond Alloc?
 	// can expt with that.
@@ -651,7 +651,7 @@ func (ly *Layout) LaySetContentFitOverflow(nsz mat32.Vec2, pass LayoutPasses) {
 	*isz = nsz                   // internal is always accurate!
 	oflow := &ly.Styles.Overflow
 	nosz := pass == SizeUpPass && ly.Styles.IsFlexWrap()
-	for d := mat32.X; d <= mat32.Y; d++ {
+	for d := math32.X; d <= math32.Y; d++ {
 		if (nosz || (!(ly.Scene != nil && ly.Scene.Is(ScPrefSizing)) && oflow.Dim(d) >= styles.OverflowAuto)) && ly.Par != nil {
 			continue
 		}
@@ -801,13 +801,13 @@ func (ly *Layout) LaySetGapSizeFromCells() {
 
 func (ly *Layout) LaySetInitCellsFlex() {
 	li := &ly.LayImpl
-	li.MainAxis = mat32.Dims(ly.Styles.Direction)
+	li.MainAxis = math32.Dims(ly.Styles.Direction)
 	ca := li.MainAxis.Other()
 	li.Wraps = nil
 	idx := 0
 	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		mat32.SetPointDim(&kwb.Geom.Cell, li.MainAxis, idx)
-		mat32.SetPointDim(&kwb.Geom.Cell, ca, 0)
+		math32.SetPointDim(&kwb.Geom.Cell, li.MainAxis, idx)
+		math32.SetPointDim(&kwb.Geom.Cell, ca, 0)
 		idx++
 		return tree.Continue
 	})
@@ -816,13 +816,13 @@ func (ly *Layout) LaySetInitCellsFlex() {
 			fmt.Println(ly, "no items:", idx)
 		}
 	}
-	mat32.SetPointDim(&li.Shape, li.MainAxis, max(idx, 1)) // must be at least 1
-	mat32.SetPointDim(&li.Shape, ca, 1)
+	math32.SetPointDim(&li.Shape, li.MainAxis, max(idx, 1)) // must be at least 1
+	math32.SetPointDim(&li.Shape, ca, 1)
 }
 
 func (ly *Layout) LaySetInitCellsWrap() {
 	li := &ly.LayImpl
-	li.MainAxis = mat32.Dims(ly.Styles.Direction)
+	li.MainAxis = math32.Dims(ly.Styles.Direction)
 	ni := 0
 	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		ni++
@@ -838,7 +838,7 @@ func (ly *Layout) LaySetInitCellsWrap() {
 		}
 		return
 	}
-	nm := max(int(mat32.Sqrt(float32(ni))), 1)
+	nm := max(int(math32.Sqrt(float32(ni))), 1)
 	nc := max(ni/nm, 1)
 	for nm*nc < ni {
 		nm++
@@ -894,7 +894,7 @@ func (ly *Layout) LaySetInitCellsGrid() {
 	n := len(*ly.Children())
 	cols := ly.Styles.Columns
 	if cols == 0 {
-		cols = int(mat32.Sqrt(float32(n)))
+		cols = int(math32.Sqrt(float32(n)))
 	}
 	rows := n / cols
 	for rows*cols < n {
@@ -939,8 +939,8 @@ func (ly *Layout) SizeFromChildrenFit(iter int, pass LayoutPasses) {
 // Different Layout types can alter this to present different Content
 // sizes for the layout process, e.g., if Content is sized to fit allocation,
 // as in the TopAppBar and Sliceview types.
-func (ly *Layout) SizeFromChildren(iter int, pass LayoutPasses) mat32.Vec2 {
-	var ksz mat32.Vec2
+func (ly *Layout) SizeFromChildren(iter int, pass LayoutPasses) math32.Vec2 {
+	var ksz math32.Vec2
 	if ly.Styles.Display == styles.Stacked {
 		ksz = ly.SizeFromChildrenStacked()
 	} else {
@@ -950,7 +950,7 @@ func (ly *Layout) SizeFromChildren(iter int, pass LayoutPasses) mat32.Vec2 {
 }
 
 // SizeFromChildrenCells for Flex, Grid
-func (ly *Layout) SizeFromChildrenCells(iter int, pass LayoutPasses) mat32.Vec2 {
+func (ly *Layout) SizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vec2 {
 	// r   0   1   col X = max(X over rows), Y = sum(Y over rows)
 	//   +--+--+
 	// 0 |  |  |   row X = sum(X over cols), Y = max(Y over cols)
@@ -969,10 +969,10 @@ func (ly *Layout) SizeFromChildrenCells(iter int, pass LayoutPasses) mat32.Vec2 
 		if DebugSettings.LayoutTraceDetail {
 			fmt.Println("SzUp i:", i, kwb, "cidx:", cidx, "sz:", sz, "grw:", grw)
 		}
-		for ma := mat32.X; ma <= mat32.Y; ma++ { // main axis = X then Y
-			ca := ma.Other()               // cross axis = Y then X
-			mi := mat32.PointDim(cidx, ma) // X, Y
-			ci := mat32.PointDim(cidx, ca) // Y, X
+		for ma := math32.X; ma <= math32.Y; ma++ { // main axis = X then Y
+			ca := ma.Other()                // cross axis = Y then X
+			mi := math32.PointDim(cidx, ma) // X, Y
+			ci := math32.PointDim(cidx, ca) // Y, X
 
 			md := li.Cell(ma, mi, ci) // X, Y
 			cd := li.Cell(ca, ci, mi) // Y, X
@@ -1005,15 +1005,15 @@ func (ly *Layout) SizeFromChildrenCells(iter int, pass LayoutPasses) mat32.Vec2 
 }
 
 // SizeFromChildrenStacked for stacked case
-func (ly *Layout) SizeFromChildrenStacked() mat32.Vec2 {
+func (ly *Layout) SizeFromChildrenStacked() math32.Vec2 {
 	ly.LayImpl.InitCells()
 	_, kwb := ly.StackTopWidget()
 	li := &ly.LayImpl
-	var ksz mat32.Vec2
+	var ksz math32.Vec2
 	if kwb != nil {
 		ksz = kwb.Geom.Size.Actual.Total
 		kgrw := kwb.Styles.Grow
-		for ma := mat32.X; ma <= mat32.Y; ma++ { // main axis = X then Y
+		for ma := math32.X; ma <= math32.Y; ma++ { // main axis = X then Y
 			md := li.Cell(ma, 0, 0)
 			md.Size = ksz
 			md.Grow = kgrw
@@ -1102,15 +1102,15 @@ func (ly *Layout) SizeDownChildren(iter int) bool {
 // If Grow is < 1, then the size is increased in proportion, but
 // any factor > 1 produces a full fill along that dimension.
 // Returns true if this resulted in a change.
-func (wb *WidgetBase) GrowToAllocSize(act, alloc mat32.Vec2) (mat32.Vec2, bool) {
+func (wb *WidgetBase) GrowToAllocSize(act, alloc math32.Vec2) (math32.Vec2, bool) {
 	change := false
-	for d := mat32.X; d <= mat32.Y; d++ {
+	for d := math32.X; d <= math32.Y; d++ {
 		grw := wb.Styles.Grow.Dim(d)
 		allocd := alloc.Dim(d)
 		actd := act.Dim(d)
 		if grw > 0 && allocd > actd {
 			grw := min(1, grw)
-			nsz := mat32.Ceil(actd + grw*(allocd-actd))
+			nsz := math32.Ceil(actd + grw*(allocd-actd))
 			styles.SetClampMax(&nsz, wb.Geom.Size.Max.Dim(d))
 			if nsz != actd {
 				change = true
@@ -1185,12 +1185,12 @@ func (ly *Layout) SizeDownSetAllocs(iter int) {
 // (generally should be true, but some cases not)
 func (ly *Layout) ManageOverflow(iter int, updtSize bool) bool {
 	sz := &ly.Geom.Size
-	sbw := mat32.Ceil(ly.Styles.ScrollBarWidth.Dots)
+	sbw := math32.Ceil(ly.Styles.ScrollBarWidth.Dots)
 	change := false
 	if iter == 0 {
 		ly.LayImpl.ScrollSize.SetZero()
 		ly.SetScrollsOff()
-		for d := mat32.X; d <= mat32.Y; d++ {
+		for d := math32.X; d <= math32.Y; d++ {
 			if ly.Styles.Overflow.Dim(d) == styles.OverflowScroll {
 				if !ly.HasScroll[d] {
 					change = true
@@ -1200,7 +1200,7 @@ func (ly *Layout) ManageOverflow(iter int, updtSize bool) bool {
 			}
 		}
 	}
-	for d := mat32.X; d <= mat32.Y; d++ {
+	for d := math32.X; d <= math32.Y; d++ {
 		maxSize, visSize, _ := ly.This().(Layouter).ScrollValues(d)
 		ofd := maxSize - visSize
 		switch ly.Styles.Overflow.Dim(d) {
@@ -1241,7 +1241,7 @@ func (ly *Layout) ManageOverflow(iter int, updtSize bool) bool {
 }
 
 // SizeDownGrow grows the element sizes based on total extra and Grow
-func (ly *Layout) SizeDownGrow(iter int, extra mat32.Vec2) bool {
+func (ly *Layout) SizeDownGrow(iter int, extra math32.Vec2) bool {
 	redo := false
 	if ly.Styles.Display == styles.Stacked {
 		redo = ly.SizeDownGrowStacked(iter, extra)
@@ -1251,7 +1251,7 @@ func (ly *Layout) SizeDownGrow(iter int, extra mat32.Vec2) bool {
 	return redo
 }
 
-func (ly *Layout) SizeDownGrowCells(iter int, extra mat32.Vec2) bool {
+func (ly *Layout) SizeDownGrowCells(iter int, extra math32.Vec2) bool {
 	redo := false
 	sz := &ly.Geom.Size
 	alloc := sz.Alloc.Content.Sub(sz.InnerSpace) // inner is fixed
@@ -1271,17 +1271,17 @@ func (ly *Layout) SizeDownGrowCells(iter int, extra mat32.Vec2) bool {
 		// if DebugSettings.LayoutTrace {
 		// 	fmt.Println("szdn i:", i, kwb, "cidx:", cidx, "sz:", sz, "grw:", grw)
 		// }
-		for ma := mat32.X; ma <= mat32.Y; ma++ { // main axis = X then Y
+		for ma := math32.X; ma <= math32.Y; ma++ { // main axis = X then Y
 			gr := grw.Dim(ma)
 			ca := ma.Other()     // cross axis = Y then X
 			exd := extra.Dim(ma) // row.X = extra width for cols; col.Y = extra height for rows in this col
 			if exd < 0 {
 				exd = 0
 			}
-			mi := mat32.PointDim(cidx, ma) // X, Y
-			ci := mat32.PointDim(cidx, ca) // Y, X
-			md := li.Cell(ma, mi, ci)      // X, Y
-			cd := li.Cell(ca, ci, mi)      // Y, X
+			mi := math32.PointDim(cidx, ma) // X, Y
+			ci := math32.PointDim(cidx, ca) // Y, X
+			md := li.Cell(ma, mi, ci)       // X, Y
+			cd := li.Cell(ca, ci, mi)       // Y, X
 			if md == nil || cd == nil {
 				break
 			}
@@ -1294,9 +1294,9 @@ func (ly *Layout) SizeDownGrowCells(iter int, extra mat32.Vec2) bool {
 					gr = gsum
 				}
 				redo = true
-				asz = mat32.Round(mx + exd*(gr/gsum))
+				asz = math32.Round(mx + exd*(gr/gsum))
 				styles.SetClampMax(&asz, ksz.Max.Dim(ma))
-				if asz > mat32.Ceil(alloc.Dim(ma))+1 { // bug!
+				if asz > math32.Ceil(alloc.Dim(ma))+1 { // bug!
 					fmt.Println(ly, "SizeDownGrowCells error: sub alloc > total to alloc:", asz, alloc.Dim(ma))
 					fmt.Println("ma:", ma, "mi:", mi, "ci:", ci, "mx:", mx, "gsum:", gsum, "gr:", gr, "ex:", exd, "par act:", sz.Actual.Content.Dim(ma))
 					fmt.Println(ly.LayImpl.String())
@@ -1378,7 +1378,7 @@ func (ly *Layout) SizeDownWrap(iter int) bool {
 	return wrapped
 }
 
-func (ly *Layout) SizeDownGrowStacked(iter int, extra mat32.Vec2) bool {
+func (ly *Layout) SizeDownGrowStacked(iter int, extra math32.Vec2) bool {
 	// stack just gets everything from us
 	chg := false
 	asz := ly.Geom.Size.Alloc.Content
@@ -1426,10 +1426,10 @@ func (ly *Layout) SizeDownAllocActualCells(iter int) {
 	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		ksz := &kwb.Geom.Size
 		cidx := kwb.Geom.Cell
-		for ma := mat32.X; ma <= mat32.Y; ma++ { // main axis = X then Y
+		for ma := math32.X; ma <= math32.Y; ma++ { // main axis = X then Y
 			ca := ma.Other()                  // cross axis = Y then X
-			mi := mat32.PointDim(cidx, ma)    // X, Y
-			ci := mat32.PointDim(cidx, ca)    // Y, X
+			mi := math32.PointDim(cidx, ma)   // X, Y
+			ci := math32.PointDim(cidx, ca)   // Y, X
 			md := ly.LayImpl.Cell(ma, mi, ci) // X, Y
 			asz := md.Size.Dim(ma)
 			ksz.Alloc.Total.SetDim(ma, asz)
@@ -1575,7 +1575,7 @@ func (ly *Layout) SizeFinalChildren() {
 // which should be called after these are updated.  Returns true if any changed.
 func (wb *WidgetBase) StyleSizeUpdate() bool {
 	el := wb.Geom.Size.Actual.Content
-	var parent mat32.Vec2
+	var parent math32.Vec2
 	pwb := wb.ParentWidget()
 	if pwb != nil {
 		parent = pwb.Geom.Size.Actual.Content
@@ -1601,7 +1601,7 @@ func (wb *WidgetBase) PositionWidget() {
 	wb.PositionParts()
 }
 
-func (wb *WidgetBase) PositionWithinAllocMainX(pos mat32.Vec2, parJustify, parAlign styles.Aligns) {
+func (wb *WidgetBase) PositionWithinAllocMainX(pos math32.Vec2, parJustify, parAlign styles.Aligns) {
 	sz := &wb.Geom.Size
 	pos.X += styles.AlignPos(styles.ItemAlign(parJustify, wb.Styles.Justify.Self), sz.Actual.Total.X, sz.Alloc.Total.X)
 	pos.Y += styles.AlignPos(styles.ItemAlign(parAlign, wb.Styles.Align.Self), sz.Actual.Total.Y, sz.Alloc.Total.Y)
@@ -1611,7 +1611,7 @@ func (wb *WidgetBase) PositionWithinAllocMainX(pos mat32.Vec2, parJustify, parAl
 	}
 }
 
-func (wb *WidgetBase) PositionWithinAllocMainY(pos mat32.Vec2, parJustify, parAlign styles.Aligns) {
+func (wb *WidgetBase) PositionWithinAllocMainY(pos math32.Vec2, parJustify, parAlign styles.Aligns) {
 	sz := &wb.Geom.Size
 	pos.Y += styles.AlignPos(styles.ItemAlign(parJustify, wb.Styles.Justify.Self), sz.Actual.Total.Y, sz.Alloc.Total.Y)
 	pos.X += styles.AlignPos(styles.ItemAlign(parAlign, wb.Styles.Align.Self), sz.Actual.Total.X, sz.Alloc.Total.X)
@@ -1655,7 +1655,7 @@ func (ly *Layout) PositionLay() {
 		return
 	}
 	if ly.Par == nil {
-		ly.PositionWithinAllocMainY(mat32.Vec2{}, ly.Styles.Justify.Items, ly.Styles.Align.Items)
+		ly.PositionWithinAllocMainY(math32.Vec2{}, ly.Styles.Justify.Items, ly.Styles.Align.Items)
 	}
 	ly.ConfigScrolls() // and configure the scrolls
 	if ly.Styles.Display == styles.Stacked {
@@ -1683,11 +1683,11 @@ func (ly *Layout) PositionCellsMainX() {
 	if DebugSettings.LayoutTraceDetail {
 		fmt.Println(ly, "PositionCells Main X, alloc:", sz.Alloc.Content, "internal:", sz.Internal)
 	}
-	var stPos mat32.Vec2
+	var stPos math32.Vec2
 	stPos.X = styles.AlignPos(ly.Styles.Justify.Content, sz.Internal.X, sz.Alloc.Content.X)
 	stPos.Y = styles.AlignPos(ly.Styles.Align.Content, sz.Internal.Y, sz.Alloc.Content.Y)
 	pos := stPos
-	var lastSz mat32.Vec2
+	var lastSz math32.Vec2
 	idx := 0
 	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		cidx := kwb.Geom.Cell
@@ -1711,8 +1711,8 @@ func (ly *Layout) PositionCellsMainY() {
 	if DebugSettings.LayoutTraceDetail {
 		fmt.Println(ly, "PositionCells, alloc:", sz.Alloc.Content, "internal:", sz.Internal)
 	}
-	var lastSz mat32.Vec2
-	var stPos mat32.Vec2
+	var lastSz math32.Vec2
+	var stPos math32.Vec2
 	stPos.Y = styles.AlignPos(ly.Styles.Justify.Content, sz.Internal.Y, sz.Alloc.Content.Y)
 	stPos.X = styles.AlignPos(ly.Styles.Align.Content, sz.Internal.X, sz.Alloc.Content.X)
 	pos := stPos
@@ -1770,7 +1770,7 @@ func (wb *WidgetBase) SetContentPosFromPos() {
 
 func (wb *WidgetBase) SetPosFromParent() {
 	pwb := wb.ParentWidget()
-	var parPos mat32.Vec2
+	var parPos math32.Vec2
 	if pwb != nil {
 		parPos = pwb.Geom.Pos.Content.Add(pwb.Geom.Scroll) // critical that parent adds here but not to self
 	}
@@ -1794,9 +1794,9 @@ func (wb *WidgetBase) SetBBoxes() {
 	var parBB image.Rectangle
 	if pwb == nil { // scene
 		sz := &wb.Geom.Size
-		wb.Geom.TotalBBox = mat32.RectFromPosSizeMax(mat32.Vec2{}, sz.Alloc.Total)
+		wb.Geom.TotalBBox = math32.RectFromPosSizeMax(math32.Vec2{}, sz.Alloc.Total)
 		off := wb.Styles.BoxSpace().Pos().Floor()
-		wb.Geom.ContentBBox = mat32.RectFromPosSizeMax(off, sz.Alloc.Content)
+		wb.Geom.ContentBBox = math32.RectFromPosSizeMax(off, sz.Alloc.Content)
 		if DebugSettings.LayoutTrace {
 			fmt.Println(wb, "Total BBox:", wb.Geom.TotalBBox)
 			fmt.Println(wb, "Content BBox:", wb.Geom.ContentBBox)
@@ -1854,7 +1854,7 @@ func (ly *Layout) ScenePos() {
 
 // ScrollResetIfNone resets the scroll offsets if there are no scrollbars
 func (ly *Layout) ScrollResetIfNone() {
-	for d := mat32.X; d <= mat32.Y; d++ {
+	for d := math32.X; d <= math32.Y; d++ {
 		if !ly.HasScroll[d] {
 			ly.Geom.Scroll.SetDim(d, 0)
 		}

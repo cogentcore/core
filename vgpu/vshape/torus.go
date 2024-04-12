@@ -7,7 +7,7 @@ package vshape
 import (
 	"math"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // Torus is a torus mesh, defined by the radius of the solid tube and the
@@ -61,7 +61,7 @@ func (tr *Torus) N() (nVtx, nIndex int) {
 }
 
 // Set sets points for torus in given allocated arrays
-func (tr *Torus) Set(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
+func (tr *Torus) Set(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32) {
 	tr.CBBox = SetTorusSector(vtxAry, normAry, texAry, idxAry, tr.VtxOff, tr.IndexOff, tr.Radius, tr.TubeRadius, tr.RadialSegs, tr.TubeSegs, tr.AngStart, tr.AngLen, tr.Pos)
 }
 
@@ -82,30 +82,30 @@ func TorusSectorN(radialSegs, tubeSegs int) (nVtx, nIndex int) {
 // radial sector start angle and length in degrees (0 - 360)
 // pos is an arbitrary offset (for composing shapes),
 // returns bounding box.
-func SetTorusSector(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtxOff, idxOff int, radius, tubeRadius float32, radialSegs, tubeSegs int, angStart, angLen float32, pos mat32.Vec3) mat32.Box3 {
-	angStRad := mat32.DegToRad(angStart)
-	angLenRad := mat32.DegToRad(angLen)
+func SetTorusSector(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, radius, tubeRadius float32, radialSegs, tubeSegs int, angStart, angLen float32, pos math32.Vec3) math32.Box3 {
+	angStRad := math32.DegToRad(angStart)
+	angLenRad := math32.DegToRad(angLen)
 
 	idx := 0
 	vidx := vtxOff * 3
 	tidx := vtxOff * 2
 
-	bb := mat32.Box3{}
+	bb := math32.Box3{}
 	bb.SetEmpty()
 
-	var center mat32.Vec3
+	var center math32.Vec3
 	for j := 0; j <= radialSegs; j++ {
 		for i := 0; i <= tubeSegs; i++ {
 			u := angStRad + float32(i)/float32(tubeSegs)*angLenRad
 			v := float32(j) / float32(radialSegs) * math.Pi * 2
 
-			center.X = radius * mat32.Cos(u)
-			center.Y = radius * mat32.Sin(u)
+			center.X = radius * math32.Cos(u)
+			center.Y = radius * math32.Sin(u)
 
-			var pt mat32.Vec3
-			pt.X = (radius + tubeRadius*mat32.Cos(v)) * mat32.Cos(u)
-			pt.Y = (radius + tubeRadius*mat32.Cos(v)) * mat32.Sin(u)
-			pt.Z = tubeRadius * mat32.Sin(v)
+			var pt math32.Vec3
+			pt.X = (radius + tubeRadius*math32.Cos(v)) * math32.Cos(u)
+			pt.Y = (radius + tubeRadius*math32.Cos(v)) * math32.Sin(u)
+			pt.Z = tubeRadius * math32.Sin(v)
 			pt.SetAdd(pos)
 			vtxAry.SetVec3(vidx+idx*3, pt)
 			texAry.Set(tidx+idx*2, float32(i)/float32(tubeSegs), float32(j)/float32(radialSegs))

@@ -16,7 +16,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/states"
@@ -150,19 +150,19 @@ type Editor struct { //core:embedder
 	NLinesChars image.Point `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// total size of all lines as rendered
-	LinesSize mat32.Vec2 `set:"-" edit:"-" json:"-" xml:"-"`
+	LinesSize math32.Vec2 `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// the LinesSize plus extra space and line numbers etc
-	TotalSize mat32.Vec2 `set:"-" edit:"-" json:"-" xml:"-"`
+	TotalSize math32.Vec2 `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// the Geom.Size.Actual.Total subtracting
 	// extra space and line numbers -- this is what
 	// LayoutStdLR sees for laying out each line
-	LineLayoutSize mat32.Vec2 `set:"-" edit:"-" json:"-" xml:"-"`
+	LineLayoutSize math32.Vec2 `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// the last LineLayoutSize used in laying out lines.
 	// Used to trigger a new layout only when needed.
-	lastlineLayoutSize mat32.Vec2 `set:"-" edit:"-" json:"-" xml:"-"`
+	lastlineLayoutSize math32.Vec2 `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// oscillates between on and off for blinking
 	BlinkOn bool `set:"-" edit:"-" json:"-" xml:"-"`

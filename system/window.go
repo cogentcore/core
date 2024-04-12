@@ -14,7 +14,7 @@ import (
 	"unicode/utf8"
 
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // Window is a double-buffered OS-specific hardware window.
@@ -70,7 +70,7 @@ type Window interface {
 	// RenderGeom returns the actual effective geometry of the window used
 	// for rendering content, which may be different from {0, [Window.Size]}
 	// due to insets caused by things like status bars and button overlays.
-	RenderGeom() mat32.Geom2DInt
+	RenderGeom() math32.Geom2DInt
 
 	// SetWinSize sets the size of the window, in OS-specific window manager
 	// units that may not include any high DPI factors (DevPixRatio)

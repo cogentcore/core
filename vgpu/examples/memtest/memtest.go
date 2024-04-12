@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"runtime"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/vgpu"
 )
 
@@ -40,7 +40,7 @@ func main() {
 	n := 64
 
 	threads := 64
-	nInt := mat32.IntMultiple(float32(n), float32(threads))
+	nInt := math32.IntMultiple(float32(n), float32(threads))
 	n = int(nInt)       // enforce optimal n's -- otherwise requires range checking
 	nGps := n / threads // dispatch n
 

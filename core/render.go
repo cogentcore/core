@@ -16,7 +16,7 @@ import (
 
 	"cogentcore.org/core/cam/hct"
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/profile"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
@@ -285,7 +285,7 @@ func (wb *WidgetBase) DoNeedsRender() {
 			return tree.Break // done
 		}
 		if ly := AsLayout(kwi); ly != nil {
-			for d := mat32.X; d <= mat32.Y; d++ {
+			for d := math32.X; d <= math32.Y; d++ {
 				if ly.HasScroll[d] {
 					ly.Scrolls[d].DoNeedsRender()
 				}
@@ -460,8 +460,8 @@ func (wb *WidgetBase) PopBounds() {
 
 	isSelw := wb.Scene.SelectedWidget == wb.This()
 	if wb.Scene.Is(ScRenderBBoxes) || isSelw {
-		pos := mat32.V2FromPoint(wb.Geom.TotalBBox.Min)
-		sz := mat32.V2FromPoint(wb.Geom.TotalBBox.Size())
+		pos := math32.V2FromPoint(wb.Geom.TotalBBox.Min)
+		sz := math32.V2FromPoint(wb.Geom.TotalBBox.Size())
 		// node: we won't necc. get a push prior to next update, so saving these.
 		pcsw := pc.StrokeStyle.Width
 		pcsc := pc.StrokeStyle.Color
@@ -530,7 +530,7 @@ func (wb *WidgetBase) RenderChildren() {
 
 // RenderBoxImpl implements the standard box model rendering -- assumes all
 // paint params have already been set
-func (wb *WidgetBase) RenderBoxImpl(pos mat32.Vec2, sz mat32.Vec2, bs styles.Border) {
+func (wb *WidgetBase) RenderBoxImpl(pos math32.Vec2, sz math32.Vec2, bs styles.Border) {
 	wb.Scene.PaintContext.DrawBorder(pos.X, pos.Y, sz.X, sz.Y, bs)
 }
 
@@ -577,8 +577,8 @@ func (wb *WidgetBase) WinPos(x, y float32) image.Point {
 	bb := wb.WinBBox()
 	sz := bb.Size()
 	var pt image.Point
-	pt.X = bb.Min.X + int(mat32.Round(float32(sz.X)*x))
-	pt.Y = bb.Min.Y + int(mat32.Round(float32(sz.Y)*y))
+	pt.X = bb.Min.X + int(math32.Round(float32(sz.X)*x))
+	pt.Y = bb.Min.Y + int(math32.Round(float32(sz.Y)*y))
 	return pt
 }
 

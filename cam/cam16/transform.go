@@ -8,7 +8,7 @@ import (
 	"image/color"
 
 	"cogentcore.org/core/cam/cie"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // Blend returns a color that is the given percent blend between the first
@@ -16,7 +16,7 @@ import (
 // blending is done directly on non-premultiplied CAM16-UCS values, and
 // a correctly premultiplied color is returned.
 func Blend(pct float32, x, y color.Color) color.RGBA {
-	pct = mat32.Clamp(pct, 0, 100)
+	pct = math32.Clamp(pct, 0, 100)
 	amt := pct / 100
 
 	xsr, xsg, xsb, _ := cie.SRGBUint32ToFloat(x.RGBA())

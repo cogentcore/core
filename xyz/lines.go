@@ -9,7 +9,7 @@ import (
 	"image/color"
 	"math"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/vgpu/vshape"
 )
@@ -29,10 +29,10 @@ type Lines struct {
 	MeshBase
 
 	// line points (must be 2 or more)
-	Points []mat32.Vec3
+	Points []math32.Vec3
 
 	// line width, Y = height perpendicular to line direction, and X = depth
-	Width mat32.Vec2
+	Width math32.Vec2
 
 	// optional colors for each point -- actual color interpolates between
 	Colors []color.RGBA
@@ -52,7 +52,7 @@ const (
 )
 
 // NewLines adds Lines mesh to given scene, with given start, end, and width
-func NewLines(sc *Scene, name string, points []mat32.Vec3, width mat32.Vec2, closed bool) *Lines {
+func NewLines(sc *Scene, name string, points []math32.Vec3, width math32.Vec2, closed bool) *Lines {
 	ln := &Lines{}
 	ln.Nm = name
 	ln.Points = points
@@ -68,8 +68,8 @@ func (ln *Lines) Sizes() (nVtx, nIndex int, hasColor bool) {
 	return ln.NVtx, ln.NIndex, ln.Color
 }
 
-func (ln *Lines) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
-	pos := mat32.Vec3{}
+func (ln *Lines) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
+	pos := math32.Vec3{}
 	bb := vshape.SetLines(vtxAry, normAry, texAry, idxAry, 0, 0, ln.Points, ln.Width, ln.Closed, pos)
 	ln.BBox.SetBounds(bb.Min, bb.Max)
 	// todo: colors!
@@ -82,7 +82,7 @@ func UnitLineMesh(sc *Scene) *Lines {
 	if lm != nil {
 		return lm.(*Lines)
 	}
-	lmm := NewLines(sc, LineMeshName, []mat32.Vec3{{-.5, 0, 0}, {.5, 0, 0}}, mat32.V2(1, 1), OpenLines)
+	lmm := NewLines(sc, LineMeshName, []math32.Vec3{{-.5, 0, 0}, {.5, 0, 0}}, math32.V2(1, 1), OpenLines)
 	return lmm
 }
 
@@ -99,7 +99,7 @@ func UnitConeMesh(sc *Scene, segs int) *Cylinder {
 
 // NewLine adds a new line between two specified points, using a shared
 // mesh unit line, which is rotated and positioned to go between the designated points.
-func NewLine(sc *Scene, parent tree.Node, name string, st, ed mat32.Vec3, width float32, clr color.RGBA) *Solid {
+func NewLine(sc *Scene, parent tree.Node, name string, st, ed math32.Vec3, width float32, clr color.RGBA) *Solid {
 	lm := UnitLineMesh(sc)
 	ln := NewSolid(parent, name).SetMesh(lm)
 	ln.Pose.Scale.Set(1, width, width)
@@ -109,7 +109,7 @@ func NewLine(sc *Scene, parent tree.Node, name string, st, ed mat32.Vec3, width 
 }
 
 // SetLineStartEnd sets line Pose such that it starts / ends at given poitns.
-func SetLineStartEnd(ln *Solid, st, ed mat32.Vec3) {
+func SetLineStartEnd(ln *Solid, st, ed math32.Vec3) {
 	wd := ln.Pose.Scale.Y
 	d := ed.Sub(st)
 	midp := st.Add(d.DivScalar(2))
@@ -117,7 +117,7 @@ func SetLineStartEnd(ln *Solid, st, ed mat32.Vec3) {
 	dst := st.DistTo(ed)
 	ln.Pose.Scale.Set(dst, wd, wd)
 	dn := d.Normal()
-	ln.Pose.Quat.SetFromUnitVectors(mat32.V3(1, 0, 0), dn)
+	ln.Pose.Quat.SetFromUnitVectors(math32.V3(1, 0, 0), dn)
 }
 
 const (
@@ -139,7 +139,7 @@ const (
 // The arrowSize is a multiplier on the width for the radius and length of the arrow head, with width
 // providing an additional multiplicative factor for width to achieve "fat" vs. "thin" arrows.
 // arrowSegs determines how many faces there are on the arrowhead -- 4 = a 4-sided pyramid, etc.
-func NewArrow(sc *Scene, parent tree.Node, name string, st, ed mat32.Vec3, width float32, clr color.RGBA, startArrow, endArrow bool, arrowSize, arrowWidth float32, arrowSegs int) *Group {
+func NewArrow(sc *Scene, parent tree.Node, name string, st, ed math32.Vec3, width float32, clr color.RGBA, startArrow, endArrow bool, arrowSize, arrowWidth float32, arrowSegs int) *Group {
 	cm := UnitConeMesh(sc, arrowSegs)
 	gp := NewGroup(parent, name)
 
@@ -160,8 +160,8 @@ func NewArrow(sc *Scene, parent tree.Node, name string, st, ed mat32.Vec3, width
 
 	if startArrow {
 		ar := NewSolid(gp, name+"-start-arrow").SetMesh(cm)
-		ar.Pose.Scale.Set(awd, asz, awd)                            // Y is up
-		ar.Pose.Quat.SetFromAxisAngle(mat32.V3(0, 0, 1), math.Pi/2) // rotate from XY up to -X
+		ar.Pose.Scale.Set(awd, asz, awd)                             // Y is up
+		ar.Pose.Quat.SetFromAxisAngle(math32.V3(0, 0, 1), math.Pi/2) // rotate from XY up to -X
 		ar.Pose.Quat.SetMul(ln.Pose.Quat)
 		ar.Pose.Pos = st.Add(dn.MulScalar(.5 * asz))
 		ar.Mat.Color = clr
@@ -169,7 +169,7 @@ func NewArrow(sc *Scene, parent tree.Node, name string, st, ed mat32.Vec3, width
 	if endArrow {
 		ar := NewSolid(gp, name+"-end-arrow").SetMesh(cm)
 		ar.Pose.Scale.Set(awd, asz, awd)
-		ar.Pose.Quat.SetFromAxisAngle(mat32.V3(0, 0, 1), -math.Pi/2) // rotate from XY up to +X
+		ar.Pose.Quat.SetFromAxisAngle(math32.V3(0, 0, 1), -math.Pi/2) // rotate from XY up to +X
 		ar.Pose.Quat.SetMul(ln.Pose.Quat)
 		ar.Pose.Pos = ed.Add(dn.MulScalar(-.5 * asz))
 		ar.Mat.Color = clr
@@ -180,24 +180,24 @@ func NewArrow(sc *Scene, parent tree.Node, name string, st, ed mat32.Vec3, width
 // NewLineBoxMeshes adds two Meshes defining the edges of a Box.
 // Meshes are named meshNm+"-front" and meshNm+"-side" -- need to be
 // initialized, e.g., using sc.InitMesh()
-func NewLineBoxMeshes(sc *Scene, meshNm string, bbox mat32.Box3, width float32) (front, side *Lines) {
-	wd := mat32.V2(width, width)
+func NewLineBoxMeshes(sc *Scene, meshNm string, bbox math32.Box3, width float32) (front, side *Lines) {
+	wd := math32.V2(width, width)
 	sz := bbox.Size()
 	hSz := sz.MulScalar(0.5)
 
 	// front mesh
-	fbl := mat32.V3(-hSz.X, -hSz.Y, 0)
-	ftl := mat32.V3(-hSz.X, hSz.Y, 0)
-	ftr := mat32.V3(hSz.X, hSz.Y, 0)
-	fbr := mat32.V3(hSz.X, -hSz.Y, 0)
-	front = NewLines(sc, meshNm+"-front", []mat32.Vec3{fbl, ftl, ftr, fbr}, wd, CloseLines)
+	fbl := math32.V3(-hSz.X, -hSz.Y, 0)
+	ftl := math32.V3(-hSz.X, hSz.Y, 0)
+	ftr := math32.V3(hSz.X, hSz.Y, 0)
+	fbr := math32.V3(hSz.X, -hSz.Y, 0)
+	front = NewLines(sc, meshNm+"-front", []math32.Vec3{fbl, ftl, ftr, fbr}, wd, CloseLines)
 
 	// side mesh in XY plane, Z -> X
-	sbl := mat32.V3(-hSz.Z, -hSz.Y, 0)
-	stl := mat32.V3(-hSz.Z, hSz.Y, 0)
-	str := mat32.V3(hSz.Z, hSz.Y, 0)
-	sbr := mat32.V3(hSz.Z, -hSz.Y, 0)
-	side = NewLines(sc, meshNm+"-side", []mat32.Vec3{sbl, stl, str, sbr}, wd, CloseLines)
+	sbl := math32.V3(-hSz.Z, -hSz.Y, 0)
+	stl := math32.V3(-hSz.Z, hSz.Y, 0)
+	str := math32.V3(hSz.Z, hSz.Y, 0)
+	sbr := math32.V3(hSz.Z, -hSz.Y, 0)
+	side = NewLines(sc, meshNm+"-side", []math32.Vec3{sbl, stl, str, sbr}, wd, CloseLines)
 	return
 }
 
@@ -216,7 +216,7 @@ const (
 // initialized, e.g., using sc.InitMesh()
 // inactive indicates whether the box and solids should be flagged as inactive
 // (not selectable).
-func NewLineBox(sc *Scene, parent tree.Node, meshNm, boxNm string, bbox mat32.Box3, width float32, clr color.RGBA, inactive bool) *Group {
+func NewLineBox(sc *Scene, parent tree.Node, meshNm, boxNm string, bbox math32.Box3, width float32, clr color.RGBA, inactive bool) *Group {
 	sz := bbox.Size()
 	hSz := sz.MulScalar(0.5)
 

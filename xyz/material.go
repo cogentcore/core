@@ -9,7 +9,7 @@ import (
 	"log"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/reflectx"
 )
 
@@ -17,15 +17,15 @@ import (
 type Tiling struct {
 
 	// how often to repeat the texture in each direction
-	Repeat mat32.Vec2
+	Repeat math32.Vec2
 
 	// offset for when to start the texure in each direction
-	Off mat32.Vec2
+	Off math32.Vec2
 }
 
 // Defaults sets default tiling params if not yet initialized
 func (tl *Tiling) Defaults() {
-	if tl.Repeat == (mat32.Vec2{}) {
+	if tl.Repeat == (math32.Vec2{}) {
 		tl.Repeat.Set(1, 1)
 	}
 }

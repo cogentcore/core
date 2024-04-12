@@ -21,7 +21,7 @@ package cam16
 
 import (
 	"cogentcore.org/core/cam/cie"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // View represents viewing conditions under which a color is being perceived,
@@ -30,7 +30,7 @@ import (
 type View struct {
 
 	// white point illumination -- typically cie.WhiteD65
-	WhitePoint mat32.Vec3
+	WhitePoint math32.Vec3
 
 	// the ambient light strength in lux
 	Luminance float32 `default:"200"`
@@ -75,14 +75,14 @@ type View struct {
 	Z float32 `view:"-"`
 
 	// inverse of the RGBD factors
-	DRGBInverse mat32.Vec3 `view:"-"`
+	DRGBInverse math32.Vec3 `view:"-"`
 
 	// cone responses to white point, adjusted for discounting
-	RGBD mat32.Vec3 `view:"-"`
+	RGBD math32.Vec3 `view:"-"`
 }
 
 // NewView returns a new view with all parameters initialized based on given major params
-func NewView(whitePoint mat32.Vec3, lum, bgLum, surround float32, adapt bool) *View {
+func NewView(whitePoint math32.Vec3, lum, bgLum, surround float32, adapt bool) *View {
 	vw := &View{WhitePoint: whitePoint, Luminance: lum, BgLuminance: bgLum, Surround: surround, Adapted: adapt}
 	vw.Update()
 	return vw
@@ -104,31 +104,31 @@ func NewStdView() *View {
 
 // Update updates all the computed values based on main parameters
 func (vw *View) Update() {
-	vw.AdaptingLuminance = (vw.Luminance / mat32.Pi) * (cie.LToY(50) / 100)
+	vw.AdaptingLuminance = (vw.Luminance / math32.Pi) * (cie.LToY(50) / 100)
 	// A background of pure black is non-physical and leads to infinities that
 	// represent the idea that any color viewed in pure black can't be seen.
-	vw.BgLuminance = mat32.Max(0.1, vw.BgLuminance)
+	vw.BgLuminance = math32.Max(0.1, vw.BgLuminance)
 
 	// Transform test illuminant white in XYZ to 'cone'/'rgb' responses
 	rW, gW, bW := XYZToLMS(vw.WhitePoint.X, vw.WhitePoint.Y, vw.WhitePoint.Z)
 
 	// Scale input surround, domain (0, 2), to CAM16 surround, domain (0.8, 1.0)
-	vw.Surround = mat32.Clamp(vw.Surround, 0, 2)
+	vw.Surround = math32.Clamp(vw.Surround, 0, 2)
 	f := 0.8 + (vw.Surround / 10)
 	// "Exponential non-linearity"
 	if f >= 0.9 {
-		vw.C = mat32.Lerp(0.59, 0.69, ((f - 0.9) * 10))
+		vw.C = math32.Lerp(0.59, 0.69, ((f - 0.9) * 10))
 	} else {
-		vw.C = mat32.Lerp(0.525, 0.59, ((f - 0.8) * 10))
+		vw.C = math32.Lerp(0.525, 0.59, ((f - 0.8) * 10))
 	}
 	// Calculate degree of adaptation to illuminant
 	d := float32(1)
 	if !vw.Adapted {
-		d = f * (1 - ((1 / 3.6) * mat32.Exp((-vw.AdaptingLuminance-42)/92)))
+		d = f * (1 - ((1 / 3.6) * math32.Exp((-vw.AdaptingLuminance-42)/92)))
 	}
 
 	// Per Li et al, if D is greater than 1 or less than 0, set it to 1 or 0.
-	d = mat32.Clamp(d, 0, 1)
+	d = math32.Clamp(d, 0, 1)
 
 	// chromatic induction factor
 	vw.NC = f
@@ -154,9 +154,9 @@ func (vw *View) Update() {
 
 	// Luminance-level adaptation factor
 	vw.FL = (k4 * vw.AdaptingLuminance) +
-		(0.1 * k4F * k4F * mat32.Pow(5*vw.AdaptingLuminance, 1.0/3.0))
+		(0.1 * k4F * k4F * math32.Pow(5*vw.AdaptingLuminance, 1.0/3.0))
 
-	vw.FLRoot = mat32.Pow(vw.FL, 0.25)
+	vw.FLRoot = math32.Pow(vw.FL, 0.25)
 
 	// Intermediate factor, ratio of background relative luminance to white relative luminance
 	n := cie.LToY(vw.BgLuminance) / vw.WhitePoint.Y
@@ -164,10 +164,10 @@ func (vw *View) Update() {
 
 	// Base exponential nonlinearity
 	// note Schlomer 2018 has a typo and uses 1.58, the correct factor is 1.48
-	vw.Z = 1.48 + mat32.Sqrt(n)
+	vw.Z = 1.48 + math32.Sqrt(n)
 
 	// Luminance-level induction factors
-	vw.NBB = 0.725 / mat32.Pow(n, 0.2)
+	vw.NBB = 0.725 / math32.Pow(n, 0.2)
 	vw.NCB = vw.NBB
 
 	// Discounted cone responses to the white point, adjusted for post-saturation

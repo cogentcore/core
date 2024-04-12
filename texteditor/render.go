@@ -14,7 +14,7 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
@@ -74,7 +74,7 @@ func (ed *Editor) TextStyleProperties() map[string]any {
 // CharStartPos returns the starting (top left) render coords for the given
 // position -- makes no attempt to rationalize that pos (i.e., if not in
 // visible range, position will be out of range too)
-func (ed *Editor) CharStartPos(pos lex.Pos) mat32.Vec2 {
+func (ed *Editor) CharStartPos(pos lex.Pos) math32.Vec2 {
 	spos := ed.RenderStartPos()
 	spos.X += ed.LineNoOff
 	if pos.Ln >= len(ed.Offs) {
@@ -101,12 +101,12 @@ func (ed *Editor) CharStartPos(pos lex.Pos) mat32.Vec2 {
 
 // CharStartPosVis returns the starting pos for given position
 // that is currently visible, based on bounding boxes.
-func (ed *Editor) CharStartPosVis(pos lex.Pos) mat32.Vec2 {
+func (ed *Editor) CharStartPosVis(pos lex.Pos) math32.Vec2 {
 	spos := ed.CharStartPos(pos)
 	bb := ed.Geom.ContentBBox
-	bbmin := mat32.V2FromPoint(bb.Min)
+	bbmin := math32.V2FromPoint(bb.Min)
 	bbmin.X += ed.LineNoOff
-	bbmax := mat32.V2FromPoint(bb.Max)
+	bbmax := math32.V2FromPoint(bb.Max)
 	spos.SetMax(bbmin)
 	spos.SetMin(bbmax)
 	return spos
@@ -115,7 +115,7 @@ func (ed *Editor) CharStartPosVis(pos lex.Pos) mat32.Vec2 {
 // CharEndPos returns the ending (bottom right) render coords for the given
 // position -- makes no attempt to rationalize that pos (i.e., if not in
 // visible range, position will be out of range too)
-func (ed *Editor) CharEndPos(pos lex.Pos) mat32.Vec2 {
+func (ed *Editor) CharEndPos(pos lex.Pos) math32.Vec2 {
 	spos := ed.RenderStartPos()
 	pos.Ln = min(pos.Ln, ed.NLines-1)
 	if pos.Ln < 0 {
@@ -174,11 +174,11 @@ func (ed *Editor) RenderDepthBackground(stln, edln int) {
 	lstdp := 0
 	for ln := stln; ln <= edln; ln++ {
 		lst := ed.CharStartPos(lex.Pos{Ln: ln}).Y // note: charstart pos includes descent
-		led := lst + mat32.Max(ed.Renders[ln].Size.Y, ed.LineHeight)
-		if int(mat32.Ceil(led)) < bb.Min.Y {
+		led := lst + math32.Max(ed.Renders[ln].Size.Y, ed.LineHeight)
+		if int(math32.Ceil(led)) < bb.Min.Y {
 			continue
 		}
-		if int(mat32.Floor(lst)) > bb.Max.Y {
+		if int(math32.Floor(lst)) > bb.Max.Y {
 			continue
 		}
 		if ln >= len(buf.HiTags) { // may be out of sync
@@ -260,8 +260,8 @@ func (ed *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bg i
 	epos := ed.CharStartPosVis(end)
 	epos.Y += ed.LineHeight
 	bb := ed.Geom.ContentBBox
-	stx := mat32.Ceil(float32(bb.Min.X) + ed.LineNoOff)
-	if int(mat32.Ceil(epos.Y)) < bb.Min.Y || int(mat32.Floor(spos.Y)) > bb.Max.Y {
+	stx := math32.Ceil(float32(bb.Min.X) + ed.LineNoOff)
+	if int(math32.Ceil(epos.Y)) < bb.Min.Y || int(math32.Floor(spos.Y)) > bb.Max.Y {
 		return
 	}
 	ex := float32(ed.Geom.ContentBBox.Max.X)
@@ -310,7 +310,7 @@ func (ed *Editor) RenderRegionToEnd(st lex.Pos, sty *styles.Style, bg image.Imag
 
 // RenderStartPos is absolute rendering start position from our content pos with scroll
 // This can be offscreen (left, up) based on scrolling.
-func (ed *Editor) RenderStartPos() mat32.Vec2 {
+func (ed *Editor) RenderStartPos() math32.Vec2 {
 	pos := ed.Geom.Pos.Content.Add(ed.Geom.Scroll)
 	return pos
 }
@@ -321,8 +321,8 @@ func (ed *Editor) RenderAllLines() {
 	pc := &ed.Scene.PaintContext
 	sty := &ed.Styles
 	bb := ed.Geom.ContentBBox
-	bbmin := mat32.V2FromPoint(bb.Min)
-	bbmax := mat32.V2FromPoint(bb.Max)
+	bbmin := math32.V2FromPoint(bb.Min)
+	bbmax := math32.V2FromPoint(bb.Max)
 	pc.FillBox(bbmin, bbmax.Sub(bbmin), sty.Background)
 	pos := ed.RenderStartPos()
 	stln := -1
@@ -332,11 +332,11 @@ func (ed *Editor) RenderAllLines() {
 			break
 		}
 		lst := pos.Y + ed.Offs[ln]
-		led := lst + mat32.Max(ed.Renders[ln].Size.Y, ed.LineHeight)
-		if int(mat32.Ceil(led)) < bb.Min.Y {
+		led := lst + math32.Max(ed.Renders[ln].Size.Y, ed.LineHeight)
+		if int(math32.Ceil(led)) < bb.Min.Y {
 			continue
 		}
-		if int(mat32.Floor(lst)) > bb.Max.Y {
+		if int(math32.Floor(lst)) > bb.Max.Y {
 			continue
 		}
 		if stln < 0 {
@@ -387,8 +387,8 @@ func (ed *Editor) RenderLineNosBoxAll() {
 	}
 	pc := &ed.Scene.PaintContext
 	bb := ed.Geom.ContentBBox
-	spos := mat32.V2FromPoint(bb.Min)
-	epos := mat32.V2FromPoint(bb.Max)
+	spos := math32.V2FromPoint(bb.Min)
+	epos := math32.V2FromPoint(bb.Max)
 	epos.X = spos.X + ed.LineNoOff
 	pc.FillBox(spos, epos.Sub(spos), ed.LineNumberColor)
 }
@@ -466,7 +466,7 @@ func (ed *Editor) RenderLineNo(ln int, defFill bool) {
 		fst.Color = colors.C(hct.ContrastColor(uActClr, hct.ContrastAA))
 	}
 	ed.LineNoRender.SetString(lnstr, fst, &sty.UnitContext, &sty.Text, true, 0, 0)
-	pos := mat32.Vec2{
+	pos := math32.Vec2{
 		X: float32(bb.Min.X), // + spc.Pos().X
 		Y: ed.CharEndPos(lex.Pos{Ln: ln}).Y - ed.FontDescent,
 	}
@@ -512,7 +512,7 @@ func (ed *Editor) FirstVisibleLine(stln int) int {
 		}
 		for ln := stln; ln < ed.NLines; ln++ {
 			cpos := ed.CharStartPos(lex.Pos{Ln: ln})
-			if int(mat32.Floor(cpos.Y)) >= bb.Min.Y { // top definitely on screen
+			if int(math32.Floor(cpos.Y)) >= bb.Min.Y { // top definitely on screen
 				stln = ln
 				break
 			}
@@ -521,7 +521,7 @@ func (ed *Editor) FirstVisibleLine(stln int) int {
 	lastln := stln
 	for ln := stln - 1; ln >= 0; ln-- {
 		cpos := ed.CharStartPos(lex.Pos{Ln: ln})
-		if int(mat32.Ceil(cpos.Y)) < bb.Min.Y { // top just offscreen
+		if int(math32.Ceil(cpos.Y)) < bb.Min.Y { // top just offscreen
 			break
 		}
 		lastln = ln
@@ -537,7 +537,7 @@ func (ed *Editor) LastVisibleLine(stln int) int {
 	for ln := stln + 1; ln < ed.NLines; ln++ {
 		pos := lex.Pos{Ln: ln}
 		cpos := ed.CharStartPos(pos)
-		if int(mat32.Floor(cpos.Y)) > bb.Max.Y { // just offscreen
+		if int(math32.Floor(cpos.Y)) > bb.Max.Y { // just offscreen
 			break
 		}
 		lastln = ln
@@ -559,7 +559,7 @@ func (ed *Editor) PixelToCursor(pt image.Point) lex.Pos {
 	stln := ed.FirstVisibleLine(0)
 	cln := stln
 	fls := ed.CharStartPos(lex.Pos{Ln: stln}).Y - yoff
-	if pt.Y < int(mat32.Floor(fls)) {
+	if pt.Y < int(math32.Floor(fls)) {
 		cln = stln
 	} else if pt.Y > bb.Max.Y {
 		cln = ed.NLines - 1
@@ -568,8 +568,8 @@ func (ed *Editor) PixelToCursor(pt image.Point) lex.Pos {
 		for ln := stln; ln < ed.NLines; ln++ {
 			ls := ed.CharStartPos(lex.Pos{Ln: ln}).Y - yoff
 			es := ls
-			es += mat32.Max(ed.Renders[ln].Size.Y, ed.LineHeight)
-			if pt.Y >= int(mat32.Floor(ls)) && pt.Y < int(mat32.Ceil(es)) {
+			es += math32.Max(ed.Renders[ln].Size.Y, ed.LineHeight)
+			if pt.Y >= int(math32.Floor(ls)) && pt.Y < int(math32.Ceil(es)) {
 				got = true
 				cln = ln
 				break
@@ -597,7 +597,7 @@ func (ed *Editor) PixelToCursor(pt image.Point) lex.Pos {
 	lnst := ed.CharStartPos(lex.Pos{Ln: cln})
 	lnst.Y -= yoff
 	lnst.X -= xoff
-	rpt := mat32.V2FromPoint(pt).Sub(lnst)
+	rpt := math32.V2FromPoint(pt).Sub(lnst)
 
 	si, ri, ok := ed.Renders[cln].PosToRune(rpt)
 	if ok {

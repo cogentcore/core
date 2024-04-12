@@ -9,12 +9,12 @@ import (
 
 	"cogentcore.org/core/cam/cie"
 	"cogentcore.org/core/gox/tolassert"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"github.com/stretchr/testify/assert"
 )
 
 func expect(t *testing.T, ref, val float32) {
-	if mat32.Abs(ref-val) > 0.001 {
+	if math32.Abs(ref-val) > 0.001 {
 		t.Errorf("expected value: %g != %g\n", ref, val)
 	}
 }
@@ -132,7 +132,7 @@ func TestLMS(t *testing.T) {
 
 func TestSanitize(t *testing.T) {
 	tolassert.Equal(t, float32(80), SanitizeDegrees(800))
-	tolassert.Equal(t, float32(3.141593), SanitizeRadians(5*mat32.Pi))
+	tolassert.Equal(t, float32(3.141593), SanitizeRadians(5*math32.Pi))
 }
 
 func TestInCyclicOrder(t *testing.T) {

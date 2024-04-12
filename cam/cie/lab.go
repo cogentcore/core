@@ -4,14 +4,14 @@
 
 package cie
 
-import "cogentcore.org/core/mat32"
+import "cogentcore.org/core/math32"
 
 // LABCompress does cube-root compression of the X, Y, Z components
 // prior to performing the LAB conversion
 func LABCompress(t float32) float32 {
 	e := float32(216.0 / 24389.0)
 	if t > e {
-		return mat32.Pow(t, 1.0/3.0)
+		return math32.Pow(t, 1.0/3.0)
 	}
 	kappa := float32(24389.0 / 27.0)
 	return (kappa*t + 16) / 116

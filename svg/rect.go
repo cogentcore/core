@@ -5,7 +5,7 @@
 package svg
 
 import (
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 )
@@ -15,13 +15,13 @@ type Rect struct {
 	NodeBase
 
 	// position of the top-left of the rectangle
-	Pos mat32.Vec2 `xml:"{x,y}"`
+	Pos math32.Vec2 `xml:"{x,y}"`
 
 	// size of the rectangle
-	Size mat32.Vec2 `xml:"{width,height}"`
+	Size math32.Vec2 `xml:"{width,height}"`
 
 	// radii for curved corners, as a proportion of width, height
-	Radius mat32.Vec2 `xml:"{rx,ry}"`
+	Radius math32.Vec2 `xml:"{rx,ry}"`
 }
 
 func (g *Rect) SVGName() string { return "rect" }
@@ -30,16 +30,16 @@ func (g *Rect) OnInit() {
 	g.Size.Set(1, 1)
 }
 
-func (g *Rect) SetNodePos(pos mat32.Vec2) {
+func (g *Rect) SetNodePos(pos math32.Vec2) {
 	g.Pos = pos
 }
 
-func (g *Rect) SetNodeSize(sz mat32.Vec2) {
+func (g *Rect) SetNodeSize(sz math32.Vec2) {
 	g.Size = sz
 }
 
-func (g *Rect) LocalBBox() mat32.Box2 {
-	bb := mat32.Box2{}
+func (g *Rect) LocalBBox() math32.Box2 {
+	bb := math32.Box2{}
 	hlw := 0.5 * g.LocalLineWidth()
 	bb.Min = g.Pos.SubScalar(hlw)
 	bb.Max = g.Pos.Add(g.Size).AddScalar(hlw)
@@ -72,7 +72,7 @@ func (g *Rect) Render(sv *SVG) {
 
 // ApplyTransform applies the given 2D transform to the geometry of this node
 // each node must define this for itself
-func (g *Rect) ApplyTransform(sv *SVG, xf mat32.Mat2) {
+func (g *Rect) ApplyTransform(sv *SVG, xf math32.Mat2) {
 	rot := xf.ExtractRot()
 	if rot != 0 || !g.Paint.Transform.IsIdentity() {
 		g.Paint.Transform.SetMul(xf)
@@ -89,7 +89,7 @@ func (g *Rect) ApplyTransform(sv *SVG, xf mat32.Mat2) {
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Rect) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+func (g *Rect) ApplyDeltaTransform(sv *SVG, trans math32.Vec2, scale math32.Vec2, rot float32, pt math32.Vec2) {
 	crot := g.Paint.Transform.ExtractRot()
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self

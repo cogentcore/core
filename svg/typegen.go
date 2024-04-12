@@ -6,7 +6,7 @@ import (
 	"image"
 
 	"cogentcore.org/core/colors/gradient"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
@@ -30,7 +30,7 @@ func (t *Circle) New() tree.Node { return &Circle{} }
 
 // SetPos sets the [Circle.Pos]:
 // position of the center of the circle
-func (t *Circle) SetPos(v mat32.Vec2) *Circle { t.Pos = v; return t }
+func (t *Circle) SetPos(v math32.Vec2) *Circle { t.Pos = v; return t }
 
 // SetRadius sets the [Circle.Radius]:
 // radius of the circle
@@ -118,11 +118,11 @@ func (t *Ellipse) New() tree.Node { return &Ellipse{} }
 
 // SetPos sets the [Ellipse.Pos]:
 // position of the center of the ellipse
-func (t *Ellipse) SetPos(v mat32.Vec2) *Ellipse { t.Pos = v; return t }
+func (t *Ellipse) SetPos(v math32.Vec2) *Ellipse { t.Pos = v; return t }
 
 // SetRadii sets the [Ellipse.Radii]:
 // radii of the ellipse in the horizontal, vertical axes
-func (t *Ellipse) SetRadii(v mat32.Vec2) *Ellipse { t.Radii = v; return t }
+func (t *Ellipse) SetRadii(v math32.Vec2) *Ellipse { t.Radii = v; return t }
 
 // SetClass sets the [Ellipse.Class]
 func (t *Ellipse) SetClass(v string) *Ellipse { t.Class = v; return t }
@@ -233,11 +233,11 @@ func (t *Image) New() tree.Node { return &Image{} }
 
 // SetPos sets the [Image.Pos]:
 // position of the top-left of the image
-func (t *Image) SetPos(v mat32.Vec2) *Image { t.Pos = v; return t }
+func (t *Image) SetPos(v math32.Vec2) *Image { t.Pos = v; return t }
 
 // SetSize sets the [Image.Size]:
 // rendered size of the image (imposes a scaling on image when it is rendered)
-func (t *Image) SetSize(v mat32.Vec2) *Image { t.Size = v; return t }
+func (t *Image) SetSize(v math32.Vec2) *Image { t.Size = v; return t }
 
 // SetFilename sets the [Image.Filename]:
 // file name of image loaded -- set by OpenImage
@@ -271,11 +271,11 @@ func (t *Line) New() tree.Node { return &Line{} }
 
 // SetStart sets the [Line.Start]:
 // position of the start of the line
-func (t *Line) SetStart(v mat32.Vec2) *Line { t.Start = v; return t }
+func (t *Line) SetStart(v math32.Vec2) *Line { t.Start = v; return t }
 
 // SetEnd sets the [Line.End]:
 // position of the end of the line
-func (t *Line) SetEnd(v mat32.Vec2) *Line { t.End = v; return t }
+func (t *Line) SetEnd(v math32.Vec2) *Line { t.End = v; return t }
 
 // SetClass sets the [Line.Class]
 func (t *Line) SetClass(v string) *Line { t.Class = v; return t }
@@ -297,11 +297,11 @@ func (t *Marker) New() tree.Node { return &Marker{} }
 
 // SetRefPos sets the [Marker.RefPos]:
 // reference position to align the vertex position with, specified in ViewBox coordinates
-func (t *Marker) SetRefPos(v mat32.Vec2) *Marker { t.RefPos = v; return t }
+func (t *Marker) SetRefPos(v math32.Vec2) *Marker { t.RefPos = v; return t }
 
 // SetSize sets the [Marker.Size]:
 // size of marker to render, in Units units
-func (t *Marker) SetSize(v mat32.Vec2) *Marker { t.Size = v; return t }
+func (t *Marker) SetSize(v math32.Vec2) *Marker { t.Size = v; return t }
 
 // SetUnits sets the [Marker.Units]:
 // units to use
@@ -317,7 +317,7 @@ func (t *Marker) SetOrient(v string) *Marker { t.Orient = v; return t }
 
 // SetVertexPos sets the [Marker.VertexPos]:
 // current vertex position
-func (t *Marker) SetVertexPos(v mat32.Vec2) *Marker { t.VertexPos = v; return t }
+func (t *Marker) SetVertexPos(v math32.Vec2) *Marker { t.VertexPos = v; return t }
 
 // SetVertexAngle sets the [Marker.VertexAngle]:
 // current vertex angle in radians
@@ -329,11 +329,11 @@ func (t *Marker) SetStrokeWidth(v float32) *Marker { t.StrokeWidth = v; return t
 
 // SetTransform sets the [Marker.Transform]:
 // net transform computed from settings and current values -- applied prior to rendering
-func (t *Marker) SetTransform(v mat32.Mat2) *Marker { t.Transform = v; return t }
+func (t *Marker) SetTransform(v math32.Mat2) *Marker { t.Transform = v; return t }
 
 // SetEffSize sets the [Marker.EffSize]:
 // effective size for actual rendering
-func (t *Marker) SetEffSize(v mat32.Vec2) *Marker { t.EffSize = v; return t }
+func (t *Marker) SetEffSize(v math32.Vec2) *Marker { t.EffSize = v; return t }
 
 // SetClass sets the [Marker.Class]
 func (t *Marker) SetClass(v string) *Marker { t.Class = v; return t }
@@ -401,7 +401,7 @@ func (t *Polygon) New() tree.Node { return &Polygon{} }
 func (t *Polygon) SetClass(v string) *Polygon { t.Class = v; return t }
 
 // SetPoints sets the [Polygon.Points]
-func (t *Polygon) SetPoints(v ...mat32.Vec2) *Polygon { t.Points = v; return t }
+func (t *Polygon) SetPoints(v ...math32.Vec2) *Polygon { t.Points = v; return t }
 
 // PolylineType is the [types.Type] for [Polyline]
 var PolylineType = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Polyline", IDName: "polyline", Doc: "Polyline is a SVG multi-line shape", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Points", Doc: "the coordinates to draw -- does a moveto on the first, then lineto for all the rest"}}, Instance: &Polyline{}})
@@ -420,7 +420,7 @@ func (t *Polyline) New() tree.Node { return &Polyline{} }
 
 // SetPoints sets the [Polyline.Points]:
 // the coordinates to draw -- does a moveto on the first, then lineto for all the rest
-func (t *Polyline) SetPoints(v ...mat32.Vec2) *Polyline { t.Points = v; return t }
+func (t *Polyline) SetPoints(v ...math32.Vec2) *Polyline { t.Points = v; return t }
 
 // SetClass sets the [Polyline.Class]
 func (t *Polyline) SetClass(v string) *Polyline { t.Class = v; return t }
@@ -442,15 +442,15 @@ func (t *Rect) New() tree.Node { return &Rect{} }
 
 // SetPos sets the [Rect.Pos]:
 // position of the top-left of the rectangle
-func (t *Rect) SetPos(v mat32.Vec2) *Rect { t.Pos = v; return t }
+func (t *Rect) SetPos(v math32.Vec2) *Rect { t.Pos = v; return t }
 
 // SetSize sets the [Rect.Size]:
 // size of the rectangle
-func (t *Rect) SetSize(v mat32.Vec2) *Rect { t.Size = v; return t }
+func (t *Rect) SetSize(v math32.Vec2) *Rect { t.Size = v; return t }
 
 // SetRadius sets the [Rect.Radius]:
 // radii for curved corners, as a proportion of width, height
-func (t *Rect) SetRadius(v mat32.Vec2) *Rect { t.Radius = v; return t }
+func (t *Rect) SetRadius(v math32.Vec2) *Rect { t.Radius = v; return t }
 
 // SetClass sets the [Rect.Class]
 func (t *Rect) SetClass(v string) *Rect { t.Class = v; return t }
@@ -497,7 +497,7 @@ func (t *Text) New() tree.Node { return &Text{} }
 
 // SetPos sets the [Text.Pos]:
 // position of the left, baseline of the text
-func (t *Text) SetPos(v mat32.Vec2) *Text { t.Pos = v; return t }
+func (t *Text) SetPos(v math32.Vec2) *Text { t.Pos = v; return t }
 
 // SetWidth sets the [Text.Width]:
 // width of text to render if using word-wrapping
@@ -541,11 +541,11 @@ func (t *Text) SetAdjustGlyphs(v bool) *Text { t.AdjustGlyphs = v; return t }
 
 // SetLastPos sets the [Text.LastPos]:
 // last text render position -- lower-left baseline of start
-func (t *Text) SetLastPos(v mat32.Vec2) *Text { t.LastPos = v; return t }
+func (t *Text) SetLastPos(v math32.Vec2) *Text { t.LastPos = v; return t }
 
 // SetLastBBox sets the [Text.LastBBox]:
 // last actual bounding box in display units (dots)
-func (t *Text) SetLastBBox(v mat32.Box2) *Text { t.LastBBox = v; return t }
+func (t *Text) SetLastBBox(v math32.Box2) *Text { t.LastBBox = v; return t }
 
 // SetClass sets the [Text.Class]
 func (t *Text) SetClass(v string) *Text { t.Class = v; return t }

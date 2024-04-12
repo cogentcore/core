@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 	"github.com/stretchr/testify/assert"
@@ -49,6 +49,6 @@ func TestImageScrolled(t *testing.T) {
 	img := NewImage(fr)
 	assert.NoError(t, img.Open(testImagePath))
 	b.AssertRender(t, "image/scrolled", func() {
-		b.SystemEventMgr().Scroll(image.Pt(10, 10), mat32.V2(2, 3))
+		b.SystemEventMgr().Scroll(image.Pt(10, 10), math32.V2(2, 3))
 	})
 }

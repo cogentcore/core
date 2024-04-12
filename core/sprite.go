@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"image"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/ordmap"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/vgpu/szalloc"
@@ -30,7 +30,7 @@ type Sprite struct {
 	Properties map[string]any
 
 	// position and size of the image within the overlay window texture
-	Geom mat32.Geom2DInt
+	Geom math32.Geom2DInt
 
 	// pixels to render -- should be same size as Geom.Size
 	Pixels *image.RGBA

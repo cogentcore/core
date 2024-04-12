@@ -26,7 +26,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/gox/dirs"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/xyz"
 )
 
@@ -43,9 +43,9 @@ type Decoder struct {
 	Objects       []Object             // decoded objects
 	Matlib        string               // name of the material lib
 	Materials     map[string]*Material // maps material name to object
-	Vertices      mat32.ArrayF32       // vertices positions array
-	Normals       mat32.ArrayF32       // vertices normals
-	Uvs           mat32.ArrayF32       // vertices texture coordinates
+	Vertices      math32.ArrayF32      // vertices positions array
+	Normals       math32.ArrayF32      // vertices normals
+	Uvs           math32.ArrayF32      // vertices texture coordinates
 	Warnings      []string             // warning messages
 	line          uint                 // current line number
 	objCurrent    *Object              // current object
@@ -58,9 +58,9 @@ func (dec *Decoder) New() xyz.Decoder {
 	di.Objects = make([]Object, 0)
 	di.Warnings = make([]string, 0)
 	di.Materials = make(map[string]*Material)
-	di.Vertices = mat32.NewArrayF32(0, 0)
-	di.Normals = mat32.NewArrayF32(0, 0)
-	di.Uvs = mat32.NewArrayF32(0, 0)
+	di.Vertices = math32.NewArrayF32(0, 0)
+	di.Normals = math32.NewArrayF32(0, 0)
+	di.Uvs = math32.NewArrayF32(0, 0)
 	di.line = 1
 	return di
 }
@@ -258,11 +258,11 @@ func (dec *Decoder) addNorms(ms *xyz.GenMesh, ai, bi, ci int, idxs []int) {
 	if ms.Norm.Size() >= ms.Vtx.Size() {
 		return
 	}
-	var a, b, c mat32.Vec3
+	var a, b, c math32.Vec3
 	ms.Vtx.GetVec3(3*idxs[ai], &a)
 	ms.Vtx.GetVec3(3*idxs[bi], &b)
 	ms.Vtx.GetVec3(3*idxs[ci], &c)
-	nrm := mat32.Normal(a, b, c)
+	nrm := math32.Normal(a, b, c)
 	for {
 		ms.Norm.AppendVec3(nrm)
 		if ms.Norm.Size() >= ms.Vtx.Size() {
@@ -280,8 +280,8 @@ func (dec *Decoder) setIndex(ms *xyz.GenMesh, face *Face, idx int, idxs *[]int) 
 }
 
 func (dec *Decoder) copyVertex(ms *xyz.GenMesh, face *Face, idx int) int {
-	var vec3 mat32.Vec3
-	var vec2 mat32.Vec2
+	var vec3 math32.Vec3
+	var vec2 math32.Vec2
 
 	vidx := ms.Vtx.Size() / 3
 	// Copy vertex position and append to geometry

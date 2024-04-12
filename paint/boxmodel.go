@@ -8,14 +8,14 @@ import (
 	"image"
 
 	"cogentcore.org/core/colors/gradient"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 )
 
 // DrawStandardBox draws the CSS "standard box" model using the given styling information,
 // position, size, and parent actual background. This is used for rendering
 // widgets such as buttons, textfields, etc in a GUI.
-func (pc *Context) DrawStandardBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, pabg image.Image) {
+func (pc *Context) DrawStandardBox(st *styles.Style, pos math32.Vec2, sz math32.Vec2, pabg image.Image) {
 	tm := st.TotalMargin().Round()
 	mpos := pos.Add(tm.Pos())
 	msz := sz.Sub(tm.Size())

@@ -7,7 +7,7 @@ package styles
 import (
 	"log/slog"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/units"
 )
 
@@ -78,7 +78,7 @@ func AlignPos(align Aligns, inner, outer float32) float32 {
 	if extra > 0 {
 		pos += AlignFactor(align) * extra
 	}
-	return mat32.Floor(pos)
+	return math32.Floor(pos)
 }
 
 /////////////////////////////////////////////////////////////////
@@ -98,8 +98,8 @@ const (
 )
 
 // Dim returns the corresponding dimension for the direction.
-func (d Directions) Dim() mat32.Dims {
-	return mat32.Dims(d)
+func (d Directions) Dim() math32.Dims {
+	return math32.Dims(d)
 }
 
 // Other returns the opposite (other) direction.

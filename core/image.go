@@ -9,7 +9,7 @@ import (
 	"io/fs"
 
 	"cogentcore.org/core/iox/imagex"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"github.com/anthonynsimon/bild/clone"
 	"golang.org/x/image/draw"
@@ -33,7 +33,7 @@ type Image struct {
 	prevObjectFit styles.ObjectFits `xml:"-" json:"-" set:"-"`
 
 	// prevSize is the cached allocated size for the last rendered image.
-	prevSize mat32.Vec2 `xml:"-" json:"-" set:"-"`
+	prevSize math32.Vec2 `xml:"-" json:"-" set:"-"`
 }
 
 func (im *Image) OnInit() {

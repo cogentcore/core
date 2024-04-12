@@ -11,7 +11,7 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tree"
 )
 
@@ -43,7 +43,7 @@ func NodesUnderPoint(n tree.Node, pt image.Point) []Node {
 }
 
 func (sc *Scene) SlideMoveEvent(e events.Event) {
-	cdist := mat32.Max(sc.Camera.DistTo(sc.Camera.Target), 1.0)
+	cdist := math32.Max(sc.Camera.DistTo(sc.Camera.Target), 1.0)
 	orbDel := OrbitFactor * cdist
 	panDel := PanFactor * cdist
 
@@ -58,7 +58,7 @@ func (sc *Scene) SlideMoveEvent(e events.Event) {
 	case e.HasAllModifiers(key.Alt):
 		sc.Camera.PanTarget(dx*panDel, -dy*panDel, 0)
 	default:
-		if mat32.Abs(dx) > mat32.Abs(dy) {
+		if math32.Abs(dx) > math32.Abs(dy) {
 			dy = 0
 		} else {
 			dx = 0
@@ -75,7 +75,7 @@ func (sc *Scene) MouseScrollEvent(e *events.MouseScroll) {
 	e.SetHandled()
 	pt := e.Pos()
 	sz := sc.Geom.Size
-	cdist := mat32.Max(sc.Camera.DistTo(sc.Camera.Target), 1.0)
+	cdist := math32.Max(sc.Camera.DistTo(sc.Camera.Target), 1.0)
 	zoom := float32(e.Delta.Y) // float32(e.ScrollNonZeroDelta(false))
 	zoomDel := float32(.02) * cdist
 	switch {

@@ -8,7 +8,7 @@ import (
 	"image"
 	"log/slog"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/raster"
 	"cogentcore.org/core/scan"
 )
@@ -18,7 +18,7 @@ import (
 type State struct {
 
 	// current transform
-	CurrentTransform mat32.Mat2
+	CurrentTransform math32.Mat2
 
 	// current path
 	Path raster.Path
@@ -33,10 +33,10 @@ type State struct {
 	ImgSpanner *scan.ImgSpanner
 
 	// starting point, for close path
-	Start mat32.Vec2
+	Start math32.Vec2
 
 	// current point
-	Current mat32.Vec2
+	Current math32.Vec2
 
 	// is current point current?
 	HasCurrent bool
@@ -54,7 +54,7 @@ type State struct {
 	LastRenderBBox image.Rectangle
 
 	// stack of transforms
-	TransformStack []mat32.Mat2
+	TransformStack []math32.Mat2
 
 	// stack of bounds -- every render starts with a push onto this stack, and finishes with a pop
 	BoundsStack []image.Rectangle
@@ -65,7 +65,7 @@ type State struct {
 
 // Init initializes State -- must be called whenever image size changes
 func (rs *State) Init(width, height int, img *image.RGBA) {
-	rs.CurrentTransform = mat32.Identity2()
+	rs.CurrentTransform = math32.Identity2()
 	rs.Image = img
 	rs.ImgSpanner = scan.NewImgSpanner(img)
 	rs.Scanner = scan.NewScanner(rs.ImgSpanner, width, height)
@@ -74,9 +74,9 @@ func (rs *State) Init(width, height int, img *image.RGBA) {
 
 // PushTransform pushes current transform onto stack and apply new transform on top of it
 // must protect within render mutex lock (see Lock version)
-func (rs *State) PushTransform(tf mat32.Mat2) {
+func (rs *State) PushTransform(tf math32.Mat2) {
 	if rs.TransformStack == nil {
-		rs.TransformStack = make([]mat32.Mat2, 0)
+		rs.TransformStack = make([]math32.Mat2, 0)
 	}
 	rs.TransformStack = append(rs.TransformStack, rs.CurrentTransform)
 	rs.CurrentTransform.SetMul(tf)
@@ -88,7 +88,7 @@ func (rs *State) PopTransform() {
 	sz := len(rs.TransformStack)
 	if sz == 0 {
 		slog.Error("programmer error: paint.State.PopTransform: stack is empty")
-		rs.CurrentTransform = mat32.Identity2()
+		rs.CurrentTransform = math32.Identity2()
 		return
 	}
 	rs.CurrentTransform = rs.TransformStack[sz-1]
@@ -147,7 +147,7 @@ func (rs *State) PopClip() {
 	rs.ClipStack = rs.ClipStack[:sz-1]
 }
 
-// Size returns the size of the underlying image as a [mat32.Vec2].
-func (rs *State) Size() mat32.Vec2 {
-	return mat32.V2FromPoint(rs.Image.Rect.Size())
+// Size returns the size of the underlying image as a [math32.Vec2].
+func (rs *State) Size() math32.Vec2 {
+	return math32.V2FromPoint(rs.Image.Rect.Size())
 }

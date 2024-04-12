@@ -24,7 +24,7 @@ import (
 
 	"cogentcore.org/core/cam/cie"
 	"cogentcore.org/core/gox/num"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // CAM represents a point in the cam16 color model along 6 dimensions
@@ -69,10 +69,10 @@ func (cam *CAM) AsRGBA() color.RGBA {
 // UCS returns the CAM16-UCS components based on the the CAM values
 func (cam *CAM) UCS() (j, m, a, b float32) {
 	j = (1 + 100*0.007) * cam.Lightness / (1 + 0.007*cam.Lightness)
-	m = mat32.Log(1+0.0228*cam.Colorfulness) / 0.0228
-	hr := mat32.DegToRad(cam.Hue)
-	a = m * mat32.Cos(hr)
-	b = m * mat32.Sin(hr)
+	m = math32.Log(1+0.0228*cam.Colorfulness) / 0.0228
+	hr := math32.DegToRad(cam.Hue)
+	a = m * math32.Cos(hr)
+	b = m * math32.Sin(hr)
 	return
 }
 
@@ -85,10 +85,10 @@ func FromUCS(j, a, b float32) *CAM {
 // FromUCS returns CAM values from the given CAM16-UCS coordinates
 // (jstar, astar, and bstar), using the given viewing conditions
 func FromUCSView(j, a, b float32, vw *View) *CAM {
-	m := mat32.Sqrt(a*a + b*b)
-	M := (mat32.Exp(m*0.0228) - 1) / 0.0228
+	m := math32.Sqrt(a*a + b*b)
+	M := (math32.Exp(m*0.0228) - 1) / 0.0228
 	c := M / vw.FLRoot
-	h := mat32.RadToDeg(mat32.Atan2(b, a))
+	h := math32.RadToDeg(math32.Atan2(b, a))
 	if h < 0 {
 		h += 360
 	}
@@ -108,12 +108,12 @@ func FromJCH(j, c, h float32) *CAM {
 func FromJCHView(j, c, h float32, vw *View) *CAM {
 	cam := &CAM{Lightness: j, Chroma: c, Hue: h}
 	cam.Brightness = (4 / vw.C) *
-		mat32.Sqrt(cam.Lightness/100) *
+		math32.Sqrt(cam.Lightness/100) *
 		(vw.AW + 4) *
 		(vw.FLRoot)
 	cam.Colorfulness = cam.Chroma * vw.FLRoot
-	alpha := cam.Chroma / mat32.Sqrt(cam.Lightness/100)
-	cam.Saturation = 50 * mat32.Sqrt((alpha*vw.C)/(vw.AW+4))
+	alpha := cam.Chroma / math32.Sqrt(cam.Lightness/100)
+	cam.Saturation = 50 * math32.Sqrt((alpha*vw.C)/(vw.AW+4))
 	return cam
 }
 
@@ -136,27 +136,27 @@ func FromXYZView(x, y, z float32, vw *View) *CAM {
 	l, m, s := XYZToLMS(x, y, z)
 	redVgreen, yellowVblue, grey, greyNorm := LMSToOps(l, m, s, vw)
 
-	hue := SanitizeDegrees(mat32.RadToDeg(mat32.Atan2(yellowVblue, redVgreen)))
+	hue := SanitizeDegrees(math32.RadToDeg(math32.Atan2(yellowVblue, redVgreen)))
 	// achromatic response to color
 	ac := grey * vw.NBB
 
 	// CAM16 lightness and brightness
-	J := 100 * mat32.Pow(ac/vw.AW, vw.C*vw.Z)
-	Q := (4 / vw.C) * mat32.Sqrt(J/100) * (vw.AW + 4) * (vw.FLRoot)
+	J := 100 * math32.Pow(ac/vw.AW, vw.C*vw.Z)
+	Q := (4 / vw.C) * math32.Sqrt(J/100) * (vw.AW + 4) * (vw.FLRoot)
 
 	huePrime := hue
 	if hue < 20.14 {
 		huePrime += 360
 	}
-	eHue := 0.25 * (mat32.Cos(huePrime*mat32.Pi/180+2) + 3.8)
+	eHue := 0.25 * (math32.Cos(huePrime*math32.Pi/180+2) + 3.8)
 	p1 := 50000 / 13 * eHue * vw.NC * vw.NCB
-	t := p1 * mat32.Sqrt(redVgreen*redVgreen+yellowVblue*yellowVblue) / (greyNorm + 0.305)
-	alpha := mat32.Pow(t, 0.9) * mat32.Pow(1.64-mat32.Pow(0.29, vw.BgYToWhiteY), 0.73)
+	t := p1 * math32.Sqrt(redVgreen*redVgreen+yellowVblue*yellowVblue) / (greyNorm + 0.305)
+	alpha := math32.Pow(t, 0.9) * math32.Pow(1.64-math32.Pow(0.29, vw.BgYToWhiteY), 0.73)
 
 	// CAM16 chroma, colorfulness, chroma
-	C := alpha * mat32.Sqrt(J/100)
+	C := alpha * math32.Sqrt(J/100)
 	M := C * vw.FLRoot
-	s = 50 * mat32.Sqrt((alpha*vw.C)/(vw.AW+4))
+	s = 50 * math32.Sqrt((alpha*vw.C)/(vw.AW+4))
 	return &CAM{Hue: hue, Chroma: C, Colorfulness: M, Saturation: s, Brightness: Q, Lightness: J}
 }
 
@@ -173,27 +173,27 @@ func (cam *CAM) XYZ() (x, y, z float32) {
 func (cam *CAM) XYZView(vw *View) (x, y, z float32) {
 	alpha := float32(0)
 	if cam.Chroma != 0 || cam.Lightness != 0 {
-		alpha = cam.Chroma / mat32.Sqrt(cam.Lightness/100)
+		alpha = cam.Chroma / math32.Sqrt(cam.Lightness/100)
 	}
 
-	t := mat32.Pow(
+	t := math32.Pow(
 		alpha/
-			mat32.Pow(
+			math32.Pow(
 				1.64-
-					mat32.Pow(0.29, vw.BgYToWhiteY),
+					math32.Pow(0.29, vw.BgYToWhiteY),
 				0.73),
 		1.0/0.9)
 
-	hRad := mat32.DegToRad(cam.Hue)
+	hRad := math32.DegToRad(cam.Hue)
 
-	eHue := 0.25 * (mat32.Cos(hRad+2) + 3.8)
-	ac := vw.AW * mat32.Pow(cam.Lightness/100, 1/vw.C/vw.Z)
+	eHue := 0.25 * (math32.Cos(hRad+2) + 3.8)
+	ac := vw.AW * math32.Pow(cam.Lightness/100, 1/vw.C/vw.Z)
 	p1 := eHue * (50000 / 13) * vw.NC * vw.NCB
 
 	p2 := ac / vw.NBB
 
-	hSin := mat32.Sin(hRad)
-	hCos := mat32.Cos(hRad)
+	hSin := math32.Sin(hRad)
+	hCos := math32.Cos(hRad)
 
 	gamma := 23 *
 		(p2 + 0.305) *
@@ -207,17 +207,17 @@ func (cam *CAM) XYZView(vw *View) (x, y, z float32) {
 
 	rCBase := max(0, (27.13*num.Abs(rA))/(400-num.Abs(rA)))
 	// TODO(kai): their sign function returns 0 for 0, but we return 1, so this might break
-	rC := mat32.Sign(rA) *
+	rC := math32.Sign(rA) *
 		(100 / vw.FL) *
-		mat32.Pow(rCBase, 1/0.42)
+		math32.Pow(rCBase, 1/0.42)
 	gCBase := max(0, (27.13*num.Abs(gA))/(400-num.Abs(gA)))
-	gC := mat32.Sign(gA) *
+	gC := math32.Sign(gA) *
 		(100 / vw.FL) *
-		mat32.Pow(gCBase, 1/0.42)
+		math32.Pow(gCBase, 1/0.42)
 	bCBase := max(0, (27.13*num.Abs(bA))/(400-num.Abs(bA)))
-	bC := mat32.Sign(bA) *
+	bC := math32.Sign(bA) *
 		(100 / vw.FL) *
-		mat32.Pow(bCBase, 1/0.42)
+		math32.Pow(bCBase, 1/0.42)
 	rF := rC / vw.RGBD.X
 	gF := gC / vw.RGBD.Y
 	bF := bC / vw.RGBD.Z

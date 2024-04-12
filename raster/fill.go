@@ -9,7 +9,7 @@
 package raster
 
 import (
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"golang.org/x/image/math/fixed"
 )
 
@@ -58,7 +58,7 @@ func QuadTo(ax, ay, bx, by, cx, cy float32, LineTo func(dx, dy float32)) {
 	devsq := DevSquared(ax, ay, bx, by, cx, cy)
 	if devsq >= 0.333 {
 		const tol = 3
-		n := 1 + int(mat32.Sqrt(mat32.Sqrt(tol*float32(devsq))))
+		n := 1 + int(math32.Sqrt(math32.Sqrt(tol*float32(devsq))))
 		t, nInv := float32(0), 1/float32(n)
 		for i := 0; i < n-1; i++ {
 			t += nInv
@@ -85,7 +85,7 @@ func CubeTo(ax, ay, bx, by, cx, cy, dx, dy float32, LineTo func(ex, ey float32))
 	}
 	if devsq >= 0.333 {
 		const tol = 3
-		n := 1 + int(mat32.Sqrt(mat32.Sqrt(tol*float32(devsq))))
+		n := 1 + int(math32.Sqrt(math32.Sqrt(tol*float32(devsq))))
 		t, nInv := float32(0), 1/float32(n)
 		for i := 0; i < n-1; i++ {
 			t += nInv

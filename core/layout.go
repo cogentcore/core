@@ -14,7 +14,7 @@ import (
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/pi/complete"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
@@ -103,7 +103,7 @@ func (ly *Layout) OnInit() {
 }
 
 func (ly *Layout) Config() {
-	for d := mat32.X; d <= mat32.Y; d++ {
+	for d := math32.X; d <= math32.Y; d++ {
 		if ly.HasScroll[d] && ly.Scrolls[d] != nil {
 			ly.Scrolls[d].ApplyStyle()
 		}
@@ -134,14 +134,14 @@ func (ly *Layout) SetStyles() {
 }
 
 func (ly *Layout) Destroy() {
-	for d := mat32.X; d <= mat32.Y; d++ {
+	for d := math32.X; d <= math32.Y; d++ {
 		ly.DeleteScroll(d)
 	}
 	ly.WidgetBase.Destroy()
 }
 
 // DeleteScroll deletes scrollbar along given dimesion.
-func (ly *Layout) DeleteScroll(d mat32.Dims) {
+func (ly *Layout) DeleteScroll(d math32.Dims) {
 	if ly.Scrolls[d] == nil {
 		return
 	}
@@ -274,7 +274,7 @@ func (ly *Layout) HandleEvents() {
 	// we treat slide events on layouts as scroll events
 	// we must reverse the delta for "natural" scrolling behavior
 	ly.On(events.SlideMove, func(e events.Event) {
-		del := mat32.V2FromPoint(e.PrevDelta()).MulScalar(-0.1)
+		del := math32.V2FromPoint(e.PrevDelta()).MulScalar(-0.1)
 		ly.ScrollDelta(events.NewScroll(e.WindowPos(), del, e.Modifiers()))
 	})
 }

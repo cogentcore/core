@@ -4,17 +4,17 @@
 
 package vshape
 
-import "cogentcore.org/core/mat32"
+import "cogentcore.org/core/math32"
 
 // Box is a rectangular-shaped solid (cuboid)
 type Box struct {
 	ShapeBase
 
 	// size along each dimension
-	Size mat32.Vec3
+	Size math32.Vec3
 
 	// number of segments to divide each plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1
-	Segs mat32.Vec3i
+	Segs math32.Vec3i
 }
 
 // NewBox returns a Box shape with given size
@@ -36,7 +36,7 @@ func (bx *Box) N() (nVtx, nIndex int) {
 }
 
 // SetBox sets points in given allocated arrays
-func (bx *Box) Set(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
+func (bx *Box) Set(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32) {
 	hSz := SetBox(vtxAry, normAry, texAry, idxAry, bx.VtxOff, bx.IndexOff, bx.Size, bx.Segs, bx.Pos)
 
 	mn := bx.Pos.Sub(hSz)
@@ -48,7 +48,7 @@ func (bx *Box) Set(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32
 // vertex and index data with given number of segments.
 // Note: In *vertex* units, not float units (i.e., x3 to get
 // actual float offset in Vtx array).
-func BoxN(segs mat32.Vec3i) (nVtx, nIndex int) {
+func BoxN(segs math32.Vec3i) (nVtx, nIndex int) {
 	nv, ni := PlaneN(int(segs.X), int(segs.Y))
 	nVtx += 2 * nv
 	nIndex += 2 * ni
@@ -68,7 +68,7 @@ func BoxN(segs mat32.Vec3i) (nVtx, nIndex int) {
 // finely subdividing a plane allows for higher-quality lighting
 // and texture rendering (minimum of 1 will be enforced).
 // pos is a 3D position offset. returns 3D size of plane.
-func SetBox(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtxOff, idxOff int, size mat32.Vec3, segs mat32.Vec3i, pos mat32.Vec3) mat32.Vec3 {
+func SetBox(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, size math32.Vec3, segs math32.Vec3i, pos math32.Vec3) math32.Vec3 {
 	hSz := size.DivScalar(2)
 
 	nVtx, nIndex := PlaneN(int(segs.X), int(segs.Y))
@@ -77,21 +77,21 @@ func SetBox(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtxOf
 	ioff := idxOff
 
 	// start with neg z as typically back
-	SetPlane(vtxAry, normAry, texAry, idxAry, voff, ioff, mat32.X, mat32.Y, -1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -hSz.Z, int(segs.X), int(segs.Y), pos) // nz
+	SetPlane(vtxAry, normAry, texAry, idxAry, voff, ioff, math32.X, math32.Y, -1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -hSz.Z, int(segs.X), int(segs.Y), pos) // nz
 	voff += nVtx
 	ioff += nIndex
-	SetPlane(vtxAry, normAry, texAry, idxAry, voff, ioff, mat32.X, mat32.Z, 1, -1, size.X, size.Z, -hSz.X, -hSz.Z, -hSz.Y, int(segs.X), int(segs.Z), pos) // ny
+	SetPlane(vtxAry, normAry, texAry, idxAry, voff, ioff, math32.X, math32.Z, 1, -1, size.X, size.Z, -hSz.X, -hSz.Z, -hSz.Y, int(segs.X), int(segs.Z), pos) // ny
 	voff += nVtx
 	ioff += nIndex
-	SetPlane(vtxAry, normAry, texAry, idxAry, voff, ioff, mat32.Z, mat32.Y, -1, -1, size.Z, size.Y, -hSz.Z, -hSz.Y, hSz.X, int(segs.Z), int(segs.Y), pos) // px
+	SetPlane(vtxAry, normAry, texAry, idxAry, voff, ioff, math32.Z, math32.Y, -1, -1, size.Z, size.Y, -hSz.Z, -hSz.Y, hSz.X, int(segs.Z), int(segs.Y), pos) // px
 	voff += nVtx
 	ioff += nIndex
-	SetPlane(vtxAry, normAry, texAry, idxAry, voff, ioff, mat32.Z, mat32.Y, 1, -1, size.Z, size.Y, -hSz.Z, -hSz.Y, -hSz.X, int(segs.Z), int(segs.Y), pos) // nx
+	SetPlane(vtxAry, normAry, texAry, idxAry, voff, ioff, math32.Z, math32.Y, 1, -1, size.Z, size.Y, -hSz.Z, -hSz.Y, -hSz.X, int(segs.Z), int(segs.Y), pos) // nx
 	voff += nVtx
 	ioff += nIndex
-	SetPlane(vtxAry, normAry, texAry, idxAry, voff, ioff, mat32.X, mat32.Z, 1, 1, size.X, size.Z, -hSz.X, -hSz.Z, hSz.Y, int(segs.X), int(segs.Z), pos) // py
+	SetPlane(vtxAry, normAry, texAry, idxAry, voff, ioff, math32.X, math32.Z, 1, 1, size.X, size.Z, -hSz.X, -hSz.Z, hSz.Y, int(segs.X), int(segs.Z), pos) // py
 	voff += nVtx
 	ioff += nIndex
-	SetPlane(vtxAry, normAry, texAry, idxAry, voff, ioff, mat32.X, mat32.Y, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, hSz.Z, int(segs.X), int(segs.Y), pos) // pz
+	SetPlane(vtxAry, normAry, texAry, idxAry, voff, ioff, math32.X, math32.Y, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, hSz.Z, int(segs.X), int(segs.Y), pos) // pz
 	return hSz
 }

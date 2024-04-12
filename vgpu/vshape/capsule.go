@@ -4,7 +4,7 @@
 
 package vshape
 
-import "cogentcore.org/core/mat32"
+import "cogentcore.org/core/math32"
 
 // Capsule is a generalized capsule shape: a cylinder with hemisphere end caps.
 // Supports different radii on each end.
@@ -81,7 +81,7 @@ func (cp *Capsule) N() (nVtx, nIndex int) {
 }
 
 // SetCapsuleSector sets points in given allocated arrays
-func (cp *Capsule) Set(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
+func (cp *Capsule) Set(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32) {
 	voff := cp.VtxOff
 	ioff := cp.IndexOff
 	cp.CBBox = SetCylinderSector(vtxAry, normAry, texAry, idxAry, voff, ioff, cp.Height, cp.TopRad, cp.BotRad, cp.RadialSegs, cp.HeightSegs, cp.AngStart, cp.AngLen, false, false, cp.Pos)

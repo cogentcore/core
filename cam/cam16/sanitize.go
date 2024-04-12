@@ -19,14 +19,14 @@
 
 package cam16
 
-import "cogentcore.org/core/mat32"
+import "cogentcore.org/core/math32"
 
 // SanitizeDegrees ensures that degrees is in [0-360) range
 func SanitizeDegrees(deg float32) float32 {
 	if deg < 0 {
-		return mat32.Mod(deg, 360) + 360
+		return math32.Mod(deg, 360) + 360
 	} else if deg >= 360 {
-		return mat32.Mod(deg, 360)
+		return math32.Mod(deg, 360)
 	} else {
 		return deg
 	}
@@ -36,7 +36,7 @@ func SanitizeDegrees(deg float32) float32 {
 // Takes an angle in radians; must not deviate too much from 0,
 // and returns a coterminal angle between 0 and 2pi.
 func SanitizeRadians(angle float32) float32 {
-	return mat32.Mod(angle+mat32.Pi*8, mat32.Pi*2)
+	return math32.Mod(angle+math32.Pi*8, math32.Pi*2)
 }
 
 // InCyclicOrder returns true a, b, c are in order around a circle

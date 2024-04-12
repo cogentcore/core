@@ -7,7 +7,7 @@ package svg
 import (
 	"image"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // Group groups together SVG elements.
@@ -57,7 +57,7 @@ func (g *Group) Render(sv *SVG) {
 
 // ApplyTransform applies the given 2D transform to the geometry of this node
 // each node must define this for itself
-func (g *Group) ApplyTransform(sv *SVG, xf mat32.Mat2) {
+func (g *Group) ApplyTransform(sv *SVG, xf math32.Mat2) {
 	g.Paint.Transform.SetMul(xf)
 	g.SetProperty("transform", g.Paint.Transform.String())
 }
@@ -67,7 +67,7 @@ func (g *Group) ApplyTransform(sv *SVG, xf mat32.Mat2) {
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Group) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+func (g *Group) ApplyDeltaTransform(sv *SVG, trans math32.Vec2, scale math32.Vec2, rot float32, pt math32.Vec2) {
 	xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // group does NOT include self
 	g.Paint.Transform.SetMulCenter(xf, lpt)
 	g.SetProperty("transform", g.Paint.Transform.String())

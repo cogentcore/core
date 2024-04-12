@@ -10,7 +10,7 @@ import (
 	"image/draw"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -40,7 +40,7 @@ type Text2D struct {
 	Styles styles.Style `set:"-" json:"-" xml:"-"`
 
 	// position offset of start of text rendering relative to upper-left corner
-	TxtPos mat32.Vec2 `set:"-" xml:"-" json:"-"`
+	TxtPos math32.Vec2 `set:"-" xml:"-" json:"-"`
 
 	// render data for text label
 	TxtRender paint.Text `set:"-" xml:"-" json:"-"`
@@ -64,9 +64,9 @@ func (txt *Text2D) Defaults() {
 
 // TextSize returns the size of the text plane, applying all *local* scaling factors
 // if nothing rendered yet, returns false
-func (txt *Text2D) TextSize() (mat32.Vec2, bool) {
+func (txt *Text2D) TextSize() (math32.Vec2, bool) {
 	txt.Pose.Defaults() // only if nil
-	sz := mat32.Vec2{}
+	sz := math32.Vec2{}
 	tx := txt.Mat.TexPtr
 	if tx == nil {
 		return sz, false
@@ -165,12 +165,12 @@ func (txt *Text2D) Validate() error {
 	return txt.Solid.Validate()
 }
 
-func (txt *Text2D) UpdateWorldMatrix(parWorld *mat32.Mat4) {
+func (txt *Text2D) UpdateWorldMatrix(parWorld *math32.Mat4) {
 	txt.PoseMu.Lock()
 	defer txt.PoseMu.Unlock()
 	sz, ok := txt.TextSize()
 	if ok {
-		sc := mat32.V3(sz.X, sz.Y, txt.Pose.Scale.Z)
+		sc := math32.V3(sz.X, sz.Y, txt.Pose.Scale.Z)
 		ax, ay := txt.Styles.Text.AlignFactors()
 		al := txt.Styles.Text.AlignV
 		switch al {

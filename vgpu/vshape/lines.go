@@ -9,7 +9,7 @@ import (
 	"log"
 	"math"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // Lines are lines rendered as long thin boxes defined by points
@@ -20,10 +20,10 @@ type Lines struct {
 	ShapeBase
 
 	// line points (must be 2 or more)
-	Points []mat32.Vec3
+	Points []math32.Vec3
 
 	// line width, Y = height perpendicular to line direction, and X = depth
-	Width mat32.Vec2
+	Width math32.Vec2
 
 	// optional colors for each point -- actual color interpolates between
 	Colors []color.Color
@@ -33,7 +33,7 @@ type Lines struct {
 }
 
 // NewLines returns a Lines shape with given size
-func NewLines(points []mat32.Vec3, width mat32.Vec2, closed bool) *Lines {
+func NewLines(points []math32.Vec3, width math32.Vec2, closed bool) *Lines {
 	ln := &Lines{}
 	ln.Defaults()
 	ln.Points = points
@@ -52,7 +52,7 @@ func (ln *Lines) N() (nVtx, nIndex int) {
 }
 
 // Set sets points in given allocated arrays
-func (ln *Lines) Set(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
+func (ln *Lines) Set(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32) {
 	ln.CBBox = SetLines(vtxAry, normAry, texAry, idxAry, ln.VtxOff, ln.IndexOff, ln.Points, ln.Width, ln.Closed, ln.Pos)
 	// todo: colors!
 }
@@ -77,11 +77,11 @@ func LinesN(npoints int, closed bool) (nVtx, nIndex int) {
 // and width parameters.  The Mesh must be drawn in the XY plane (i.e., use Z = 0
 // or a constant unless specifically relevant to have full 3D variation).
 // Rotate to put into other planes.
-func SetLines(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtxOff, idxOff int, points []mat32.Vec3, width mat32.Vec2, closed bool, pos mat32.Vec3) mat32.Box3 {
+func SetLines(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, points []math32.Vec3, width math32.Vec2, closed bool, pos math32.Vec3) math32.Box3 {
 	np := len(points)
 	if np < 2 {
 		log.Printf("vshape.SetLines: need 2 or more Points\n")
-		return mat32.Box3{}
+		return math32.Box3{}
 	}
 
 	pts := points
@@ -120,8 +120,8 @@ func SetLines(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtx
 
 		v := ep.Sub(sp)
 		vn := v.Normal()
-		xyang := mat32.Atan2(vn.Y, vn.X)
-		xy := mat32.V2(wdy*mat32.Cos(xyang+pi2), wdy*mat32.Sin(xyang+pi2))
+		xyang := math32.Atan2(vn.Y, vn.X)
+		xy := math32.V2(wdy*math32.Cos(xyang+pi2), wdy*math32.Sin(xyang+pi2))
 
 		//   sypzm --- eypzm
 		//   / |        / |
@@ -211,40 +211,40 @@ func SetLines(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtx
 		// two triangles are: 0,1,2;  0,2,3
 
 		if swap {
-			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []mat32.Vec3{sypzm, symzm, eymzm, eypzm}, nil, pos)
+			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vec3{sypzm, symzm, eymzm, eypzm}, nil, pos)
 			voff += qvn
 			ioff += qin
-			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []mat32.Vec3{sypzp, sypzm, eypzm, eypzp}, nil, pos) // bottom (yp, upside down)
+			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vec3{sypzp, sypzm, eypzm, eypzp}, nil, pos) // bottom (yp, upside down)
 			voff += qvn
 			ioff += qin
-			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []mat32.Vec3{symzm, symzp, eymzp, eymzm}, nil, pos) // top (ym)
+			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vec3{symzm, symzp, eymzp, eymzm}, nil, pos) // top (ym)
 			voff += qvn
 			ioff += qin
-			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []mat32.Vec3{symzp, sypzp, eypzp, eymzp}, nil, pos) // front (zp)
+			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vec3{symzp, sypzp, eypzp, eymzp}, nil, pos) // front (zp)
 			voff += qvn
 			ioff += qin
 		} else {
-			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []mat32.Vec3{symzm, sypzm, eypzm, eymzm}, nil, pos) // back (zm)
+			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vec3{symzm, sypzm, eypzm, eymzm}, nil, pos) // back (zm)
 			voff += qvn
 			ioff += qin
-			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []mat32.Vec3{symzp, symzm, eymzm, eymzp}, nil, pos) // bottom (ym)
+			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vec3{symzp, symzm, eymzm, eymzp}, nil, pos) // bottom (ym)
 			voff += qvn
 			ioff += qin
-			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []mat32.Vec3{sypzm, sypzp, eypzp, eypzm}, nil, pos) // top (yp)
+			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vec3{sypzm, sypzp, eypzp, eypzm}, nil, pos) // top (yp)
 			voff += qvn
 			ioff += qin
-			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []mat32.Vec3{sypzp, symzp, eymzp, eypzp}, nil, pos) // front (zp)
+			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vec3{sypzp, symzp, eymzp, eypzp}, nil, pos) // front (zp)
 			voff += qvn
 			ioff += qin
 		}
 
 		if spSt { // do cap
-			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []mat32.Vec3{sypzm, symzm, symzp, sypzp}, nil, pos)
+			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vec3{sypzm, symzm, symzp, sypzp}, nil, pos)
 			voff += qvn
 			ioff += qin
 		}
 		if epEd {
-			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []mat32.Vec3{eypzp, eymzp, eymzm, eypzm}, nil, pos)
+			SetQuad(vtxAry, normAry, texAry, idxAry, voff, ioff, []math32.Vec3{eypzp, eymzp, eymzm, eypzm}, nil, pos)
 			voff += qvn
 			ioff += qin
 		}
@@ -254,16 +254,16 @@ func SetLines(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtx
 }
 
 // MiterPts returns the miter points
-func MiterPts(ax, ay, bx, by, cx, cy, w2 float32) mat32.Vec2 {
-	ppd := mat32.V2(ax-bx, ay-by)
+func MiterPts(ax, ay, bx, by, cx, cy, w2 float32) math32.Vec2 {
+	ppd := math32.V2(ax-bx, ay-by)
 	ppu := ppd.Normal()
 
-	epd := mat32.V2(cx-bx, cy-by)
+	epd := math32.V2(cx-bx, cy-by)
 	epv := epd.Normal()
 
 	dp := ppu.Dot(epv)
-	jang := mat32.Acos(dp)
-	wfact := w2 / mat32.Sin(jang)
+	jang := math32.Acos(dp)
+	wfact := w2 / math32.Sin(jang)
 
 	uv := ppu.MulScalar(-wfact)
 	vv := epv.MulScalar(-wfact)

@@ -13,7 +13,7 @@ import (
 	"image"
 
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 )
@@ -56,7 +56,7 @@ type AppSingler interface {
 	// RenderGeom returns the actual effective geometry of the window used
 	// for rendering content, which may be different from {0, [system.Screen.PixSize]}
 	// due to insets caused by things like status bars and button overlays.
-	RenderGeom() mat32.Geom2DInt
+	RenderGeom() math32.Geom2DInt
 }
 
 // NewAppSingle makes a new [AppSingle].
@@ -74,9 +74,9 @@ func (a *AppSingle[D, W]) Drawer() system.Drawer {
 	return a.Draw
 }
 
-func (a *AppSingle[D, W]) RenderGeom() mat32.Geom2DInt {
+func (a *AppSingle[D, W]) RenderGeom() math32.Geom2DInt {
 	pos := image.Pt(a.Insets.Left, a.Insets.Top)
-	return mat32.Geom2DInt{
+	return math32.Geom2DInt{
 		Pos:  pos,
 		Size: a.Scrn.PixSize.Sub(pos).Sub(image.Pt(a.Insets.Right, a.Insets.Bottom)),
 	}

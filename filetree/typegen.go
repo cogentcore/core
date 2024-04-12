@@ -5,7 +5,7 @@ package filetree
 import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 	"cogentcore.org/core/units"
@@ -78,7 +78,7 @@ func (t *Node) SetOpenDepth(v int) *Node { t.OpenDepth = v; return t }
 func (t *Node) SetViewIndex(v int) *Node { t.ViewIndex = v; return t }
 
 // SetWidgetSize sets the [Node.WidgetSize]
-func (t *Node) SetWidgetSize(v mat32.Vec2) *Node { t.WidgetSize = v; return t }
+func (t *Node) SetWidgetSize(v math32.Vec2) *Node { t.WidgetSize = v; return t }
 
 // SetRootView sets the [Node.RootView]
 func (t *Node) SetRootView(v *views.TreeView) *Node { t.RootView = v; return t }
@@ -146,7 +146,7 @@ func (t *Tree) SetOpenDepth(v int) *Tree { t.OpenDepth = v; return t }
 func (t *Tree) SetViewIndex(v int) *Tree { t.ViewIndex = v; return t }
 
 // SetWidgetSize sets the [Tree.WidgetSize]
-func (t *Tree) SetWidgetSize(v mat32.Vec2) *Tree { t.WidgetSize = v; return t }
+func (t *Tree) SetWidgetSize(v math32.Vec2) *Tree { t.WidgetSize = v; return t }
 
 // SetRootView sets the [Tree.RootView]
 func (t *Tree) SetRootView(v *views.TreeView) *Tree { t.RootView = v; return t }

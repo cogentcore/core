@@ -15,7 +15,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -75,7 +75,7 @@ type Slider struct { //core:embedder
 	// Size of the thumb as a proportion of the slider thickness, which is
 	// Content size (inside the padding).  This is for actual X,Y dimensions,
 	// so must be sensitive to Dim dimension alignment.
-	ThumbSize mat32.Vec2
+	ThumbSize math32.Vec2
 
 	// TrackSize is the proportion of slider thickness for the visible track
 	// for the Slider type.  It is often thinner than the thumb, achieved by
@@ -225,7 +225,7 @@ func (sr *Slider) SnapValue() {
 		return
 	}
 	// round to the nearest step
-	sr.Value = sr.Step * mat32.Round(sr.Value/sr.Step)
+	sr.Value = sr.Step * math32.Round(sr.Value/sr.Step)
 }
 
 // SendChanged sends a Changed message if given new value is
@@ -256,7 +256,7 @@ func (sr *Slider) SliderThickness() float32 {
 
 // ThumbSizeDots returns the thumb size in dots, based on ThumbSize
 // and the content thickness
-func (sr *Slider) ThumbSizeDots() mat32.Vec2 {
+func (sr *Slider) ThumbSizeDots() math32.Vec2 {
 	return sr.ThumbSize.MulScalar(sr.SliderThickness())
 }
 
@@ -264,7 +264,7 @@ func (sr *Slider) ThumbSizeDots() mat32.Vec2 {
 func (sr *Slider) SlideThumbSize() float32 {
 	if sr.Type == SliderScrollbar {
 		minsz := sr.SliderThickness()
-		return max(mat32.Clamp(sr.VisiblePct, 0, 1)*sr.SliderSize(), minsz)
+		return max(math32.Clamp(sr.VisiblePct, 0, 1)*sr.SliderSize(), minsz)
 	}
 	return sr.ThumbSizeDots().Dim(sr.Styles.Direction.Dim())
 }
@@ -274,7 +274,7 @@ func (sr *Slider) SlideThumbSize() float32 {
 // for the Scrollbar type, it is Max - Value of thumb size
 func (sr *Slider) EffectiveMax() float32 {
 	if sr.Type == SliderScrollbar {
-		return sr.Max - mat32.Clamp(sr.VisiblePct, 0, 1)*(sr.Max-sr.Min)
+		return sr.Max - math32.Clamp(sr.VisiblePct, 0, 1)*(sr.Max-sr.Min)
 	}
 	return sr.Max
 }
@@ -282,7 +282,7 @@ func (sr *Slider) EffectiveMax() float32 {
 // ScrollThumbValue returns the current scroll VisiblePct
 // in terms of the Min - Max range of values.
 func (sr *Slider) ScrollThumbValue() float32 {
-	return mat32.Clamp(sr.VisiblePct, 0, 1) * (sr.Max - sr.Min)
+	return math32.Clamp(sr.VisiblePct, 0, 1) * (sr.Max - sr.Min)
 }
 
 // SetSliderPos sets the position of the slider at the given
@@ -296,11 +296,11 @@ func (sr *Slider) SetSliderPos(pos float32) {
 
 	thsz := sr.SlideThumbSize()
 	thszh := .5 * thsz
-	sr.Pos = mat32.Clamp(pos, thszh, sz-thszh)
+	sr.Pos = math32.Clamp(pos, thszh, sz-thszh)
 	prel := (sr.Pos - thszh) / (sz - thsz)
 	effmax := sr.EffectiveMax()
-	val := mat32.Truncate(sr.Min+prel*(effmax-sr.Min), sr.Prec)
-	val = mat32.Clamp(val, sr.Min, effmax)
+	val := math32.Truncate(sr.Min+prel*(effmax-sr.Min), sr.Prec)
+	val = math32.Clamp(val, sr.Min, effmax)
 	// fmt.Println(pos, thsz, prel, val)
 	sr.Value = val
 	if sr.EnforceStep {
@@ -315,7 +315,7 @@ func (sr *Slider) SetSliderPos(pos float32) {
 // This version sends tracking changes
 func (sr *Slider) SetSliderPosAction(pos float32) {
 	sr.SetSliderPos(pos)
-	if mat32.Abs(sr.PrevSlide-sr.Value) > sr.InputThreshold {
+	if math32.Abs(sr.PrevSlide-sr.Value) > sr.InputThreshold {
 		sr.PrevSlide = sr.Value
 		sr.Send(events.Input)
 	}
@@ -330,18 +330,18 @@ func (sr *Slider) SetPosFromValue(val float32) {
 	}
 
 	effmax := sr.EffectiveMax()
-	val = mat32.Clamp(val, sr.Min, effmax)
+	val = math32.Clamp(val, sr.Min, effmax)
 	prel := (val - sr.Min) / (effmax - sr.Min) // relative position 0-1
 	thsz := sr.SlideThumbSize()
 	thszh := .5 * thsz
 	sr.Pos = 0.5*thsz + prel*(sz-thsz)
-	sr.Pos = mat32.Clamp(sr.Pos, thszh, sz-thszh)
+	sr.Pos = math32.Clamp(sr.Pos, thszh, sz-thszh)
 	sr.NeedsRender()
 }
 
 // SetVisiblePct sets the visible pct value for Scrollbar type.
 func (sr *Slider) SetVisiblePct(val float32) *Slider {
-	sr.VisiblePct = mat32.Clamp(val, 0, 1)
+	sr.VisiblePct = math32.Clamp(val, 0, 1)
 	return sr
 }
 
@@ -349,7 +349,7 @@ func (sr *Slider) SetVisiblePct(val float32) *Slider {
 // but does not send a Change event (see Action version)
 func (sr *Slider) SetValue(val float32) *Slider {
 	effmax := sr.EffectiveMax()
-	val = mat32.Clamp(val, sr.Min, effmax)
+	val = math32.Clamp(val, sr.Min, effmax)
 	if sr.Value != val {
 		sr.Value = val
 		sr.SetPosFromValue(val)
@@ -392,7 +392,7 @@ func (sr *Slider) HandleEvents() {
 // PointToRelPos translates a point in scene local pixel coords into relative
 // position within the slider content range
 func (sr *Slider) PointToRelPos(pt image.Point) float32 {
-	ptf := mat32.V2FromPoint(pt).Dim(sr.Styles.Direction.Dim())
+	ptf := math32.V2FromPoint(pt).Dim(sr.Styles.Direction.Dim())
 	return ptf - sr.Geom.Pos.Content.Dim(sr.Styles.Direction.Dim())
 }
 
@@ -592,8 +592,8 @@ func (sr *Slider) ScenePos() {
 	if !pwb.IsVisible() || pwb.Geom.TotalBBox == zr {
 		return
 	}
-	sbw := mat32.Ceil(sr.Styles.ScrollBarWidth.Dots)
-	scmax := mat32.V2FromPoint(sr.Scene.Geom.ContentBBox.Max).SubScalar(sbw)
+	sbw := math32.Ceil(sr.Styles.ScrollBarWidth.Dots)
+	scmax := math32.V2FromPoint(sr.Scene.Geom.ContentBBox.Max).SubScalar(sbw)
 	sr.Geom.Pos.Total.SetMin(scmax)
 	sr.SetContentPosFromPos()
 	sr.SetBBoxesFromAllocs()

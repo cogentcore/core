@@ -10,7 +10,7 @@ import (
 	"sort"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // Map maps a value onto a color by interpolating between a list of colors
@@ -46,7 +46,7 @@ func (cm *Map) Map(val float32) color.RGBA {
 	if nc == 1 {
 		return cm.Colors[0]
 	}
-	if mat32.IsNaN(val) {
+	if math32.IsNaN(val) {
 		return cm.NoColor
 	}
 	if val <= 0 {
@@ -55,8 +55,8 @@ func (cm *Map) Map(val float32) color.RGBA {
 		return cm.Colors[nc-1]
 	}
 	ival := val * float32(nc-1)
-	lidx := mat32.Floor(ival)
-	uidx := mat32.Ceil(ival)
+	lidx := math32.Floor(ival)
+	uidx := math32.Ceil(ival)
 	if lidx == uidx {
 		return cm.Colors[int(lidx)]
 	}

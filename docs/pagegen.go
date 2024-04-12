@@ -17,7 +17,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/pages"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
@@ -117,7 +117,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 	},
 	"widgets/canvases-0": func(parent core.Widget) {
 		core.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
-			pc.FillBox(mat32.Vec2{}, mat32.V2(1, 1), colors.C(colors.Scheme.Primary.Base))
+			pc.FillBox(math32.Vec2{}, math32.V2(1, 1), colors.C(colors.Scheme.Primary.Base))
 		})
 	},
 	"widgets/canvases-1": func(parent core.Widget) {
@@ -154,14 +154,14 @@ var PagesExamples = map[string]func(parent core.Widget){
 	},
 	"widgets/canvases-5": func(parent core.Widget) {
 		core.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
-			pc.DrawEllipticalArc(0.5, 0.5, 0.5, 0.25, mat32.Pi, 2*mat32.Pi)
+			pc.DrawEllipticalArc(0.5, 0.5, 0.5, 0.25, math32.Pi, 2*math32.Pi)
 			pc.FillStyle.Color = colors.C(colors.Scheme.Success.Base)
 			pc.Fill()
 		})
 	},
 	"widgets/canvases-6": func(parent core.Widget) {
 		core.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
-			pc.DrawRegularPolygon(6, 0.5, 0.5, 0.5, mat32.Pi)
+			pc.DrawRegularPolygon(6, 0.5, 0.5, 0.5, math32.Pi)
 			pc.FillStyle.Color = colors.C(colors.Scheme.Success.Base)
 			pc.Fill()
 		})
@@ -184,7 +184,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 	},
 	"widgets/canvases-9": func(parent core.Widget) {
 		c := core.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
-			pc.FillBox(mat32.Vec2{}, mat32.V2(1, 1), colors.C(colors.Scheme.Warn.Base))
+			pc.FillBox(math32.Vec2{}, math32.V2(1, 1), colors.C(colors.Scheme.Warn.Base))
 		})
 		c.Style(func(s *styles.Style) {
 			s.Min.Set(units.Dp(128))

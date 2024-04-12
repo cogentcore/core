@@ -11,7 +11,7 @@ package raster
 import (
 	"fmt"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"golang.org/x/image/math/fixed"
 )
 
@@ -38,7 +38,7 @@ func DotProd(p fixed.Point26_6, q fixed.Point26_6) fixed.Int52_12 {
 // Length is the distance from the origin of the point
 func Length(v fixed.Point26_6) fixed.Int26_6 {
 	vx, vy := float32(v.X), float32(v.Y)
-	return fixed.Int26_6(mat32.Sqrt(vx*vx + vy*vy))
+	return fixed.Int26_6(math32.Sqrt(vx*vx + vy*vy))
 }
 
 // PathCommand is the type for the path command token
@@ -162,7 +162,7 @@ func ToLength(p fixed.Point26_6, ln fixed.Int26_6) (q fixed.Point26_6) {
 
 	pX, pY := float32(p.X), float32(p.Y)
 	lnF := float32(ln)
-	pLen := mat32.Sqrt(pX*pX + pY*pY)
+	pLen := math32.Sqrt(pX*pX + pY*pY)
 
 	qX, qY := pX*lnF/pLen, pY*lnF/pLen
 	q.X, q.Y = fixed.Int26_6(qX), fixed.Int26_6(qY)
@@ -236,7 +236,7 @@ func CircleCircleIntersection(ct, cl fixed.Point26_6, rt, rl fixed.Int26_6) (xt1
 
 	rlf, rtf, df := float32(rl), float32(rt), float32(d)
 	af := (rtf*rtf - rlf*rlf + df*df) / df / 2.0
-	hfd := mat32.Sqrt(rtf*rtf-af*af) / df
+	hfd := math32.Sqrt(rtf*rtf-af*af) / df
 	afd := af / df
 
 	rOffx, rOffy := float32(-dc.Y)*hfd, float32(dc.X)*hfd
@@ -290,7 +290,7 @@ func RayCircleIntersectionF(s1X, s1Y, s2X, s2Y, cX, cY, r float32) (x, y float32
 		return // No intersection or is tangent
 	}
 
-	D = mat32.Sqrt(D)
+	D = math32.Sqrt(D)
 	t1, t2 := (-B+D)/(2*A), (-B-D)/(2*A)
 	p1OnSide := t1 > 0
 	p2OnSide := t2 > 0
@@ -312,12 +312,12 @@ func RayCircleIntersectionF(s1X, s1Y, s2X, s2Y, cX, cY, r float32) (x, y float32
 // MatrixAdder is an adder that applies matrix M to all points
 type MatrixAdder struct {
 	Adder
-	M mat32.Mat2
+	M math32.Mat2
 }
 
 // Reset sets the matrix M to identity
 func (t *MatrixAdder) Reset() {
-	t.M = mat32.Identity2()
+	t.M = math32.Identity2()
 }
 
 // Start starts a new path

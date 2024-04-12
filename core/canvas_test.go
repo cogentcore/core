@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 )
 
@@ -20,7 +20,7 @@ func TestCanvas(t *testing.T) {
 		pc.StrokeStyle.Color = colors.C(colors.Blue)
 		pc.Stroke()
 
-		pc.FillBox(mat32.V2(0.7, 0.3), mat32.V2(0.2, 0.5), colors.C(colors.Scheme.Success.Container))
+		pc.FillBox(math32.V2(0.7, 0.3), math32.V2(0.2, 0.5), colors.C(colors.Scheme.Success.Container))
 
 		pc.FillStyle.Color = colors.C(colors.Orange)
 		pc.DrawCircle(0.4, 0.5, 0.15)

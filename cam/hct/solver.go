@@ -22,21 +22,21 @@ package hct
 import (
 	"cogentcore.org/core/cam/cam16"
 	"cogentcore.org/core/cam/cie"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // SolveToRGBLin Finds an sRGB linear color (represented by mat32.Vec3, 0-100 range)
 // with the given hue, chroma, and tone, if possible.
 // if not possible to represent the target values, the hue and tone will be
 // sufficiently close, and chroma will be maximized.
-func SolveToRGBLin(hue, chroma, tone float32) mat32.Vec3 {
+func SolveToRGBLin(hue, chroma, tone float32) math32.Vec3 {
 	if chroma < 0.0001 || tone < 0.0001 || tone > 99.9999 {
 		y := cie.LToY(tone)
-		return mat32.V3(y, y, y)
+		return math32.V3(y, y, y)
 	}
-	tone = mat32.Clamp(tone, 0, 100)
+	tone = math32.Clamp(tone, 0, 100)
 	hue_deg := cam16.SanitizeDegrees(hue)
-	hue_rad := mat32.DegToRad(hue_deg)
+	hue_rad := math32.DegToRad(hue_deg)
 	y := cie.LToY(tone)
 	exact := FindResultByJ(hue_rad, chroma, y)
 	if exact != nil {
@@ -60,27 +60,27 @@ func SolveToRGB(hue, chroma, tone float32) (r, g, b float32) {
 // @param chroma The desired chroma.
 // @param y The desired Y.
 // @return The desired color as linear sRGB values.
-func FindResultByJ(hue_rad, chroma, y float32) *mat32.Vec3 {
+func FindResultByJ(hue_rad, chroma, y float32) *math32.Vec3 {
 	// Initial estimate of j.
-	j := mat32.Sqrt(y) * 11
+	j := math32.Sqrt(y) * 11
 
 	// ===========================================================
 	// Operations inlined from Cam16 to avoid repeated calculation
 	// ===========================================================
 	vw := cam16.NewStdView()
-	t_inner_coeff := 1 / mat32.Pow(1.64-mat32.Pow(0.29, vw.BgYToWhiteY), 0.73)
-	e_hue := 0.25 * (mat32.Cos(hue_rad+2) + 3.8)
+	t_inner_coeff := 1 / math32.Pow(1.64-math32.Pow(0.29, vw.BgYToWhiteY), 0.73)
+	e_hue := 0.25 * (math32.Cos(hue_rad+2) + 3.8)
 	p1 := e_hue * (50000 / 13) * vw.NC * vw.NCB
-	h_sin := mat32.Sin(hue_rad)
-	h_cos := mat32.Cos(hue_rad)
+	h_sin := math32.Sin(hue_rad)
+	h_cos := math32.Cos(hue_rad)
 	for itr := 0; itr < 5; itr++ {
 		j_norm := j / 100
 		alpha := float32(0)
 		if !(chroma == 0 || j == 0) {
-			alpha = chroma / mat32.Sqrt(j_norm)
+			alpha = chroma / math32.Sqrt(j_norm)
 		}
-		t := mat32.Pow(alpha*t_inner_coeff, 1/0.9)
-		ac := vw.AW * mat32.Pow(j_norm, 1/vw.C/vw.Z)
+		t := math32.Pow(alpha*t_inner_coeff, 1/0.9)
+		ac := vw.AW * math32.Pow(j_norm, 1/vw.C/vw.Z)
 		p2 := ac / vw.NBB
 		gamma := 23 * (p2 + 0.305) * t / (23*p1 + 11*t*h_cos + 108*t*h_sin)
 		a := gamma * h_cos
@@ -91,7 +91,7 @@ func FindResultByJ(hue_rad, chroma, y float32) *mat32.Vec3 {
 		r_c_scaled := cam16.InverseChromaticAdapt(r_a)
 		g_c_scaled := cam16.InverseChromaticAdapt(g_a)
 		b_c_scaled := cam16.InverseChromaticAdapt(b_a)
-		scaled := mat32.V3(r_c_scaled, g_c_scaled, b_c_scaled)
+		scaled := math32.V3(r_c_scaled, g_c_scaled, b_c_scaled)
 		linrgb := MatMul(scaled, kLinrgbFromScaledDiscount)
 
 		if linrgb.X < 0 || linrgb.Y < 0 || linrgb.Z < 0 {
@@ -104,7 +104,7 @@ func FindResultByJ(hue_rad, chroma, y float32) *mat32.Vec3 {
 		if fnj <= 0 {
 			return nil
 		}
-		if itr == 4 || mat32.Abs(fnj-y) < 0.002 {
+		if itr == 4 || math32.Abs(fnj-y) < 0.002 {
 			if linrgb.X > 100.01 || linrgb.Y > 100.01 || linrgb.Z > 100.01 {
 				return nil
 			}

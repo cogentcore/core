@@ -21,7 +21,7 @@ import (
 	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
@@ -151,7 +151,7 @@ type TreeView struct {
 
 	// size of just this node widget.
 	// our alloc includes all of our children, but we only draw us.
-	WidgetSize mat32.Vec2 `copier:"-" json:"-" xml:"-" edit:"-"`
+	WidgetSize math32.Vec2 `copier:"-" json:"-" xml:"-" edit:"-"`
 
 	// The cached root of the view. It is automatically set and does not need to be
 	// set by the end user.
@@ -575,7 +575,7 @@ func (tv *TreeView) SizeUp() {
 			kwi.SizeUp()
 			h += kwb.Geom.Size.Actual.Total.Y
 			kw := kwb.Geom.Size.Actual.Total.X
-			if mat32.IsNaN(kw) { // somehow getting a nan
+			if math32.IsNaN(kw) { // somehow getting a nan
 				slog.Error("TreeView, node width is NaN", "node:", kwb)
 			} else {
 				w = max(w, tv.Indent.Dots+kw)
@@ -585,7 +585,7 @@ func (tv *TreeView) SizeUp() {
 		})
 	}
 	sz := &tv.Geom.Size
-	sz.Actual.Content = mat32.V2(w, h)
+	sz.Actual.Content = math32.V2(w, h)
 	sz.SetTotalFromContent(&sz.Actual)
 	sz.Alloc = sz.Actual // need allocation to match!
 	tv.WidgetSize.X = w  // stretch

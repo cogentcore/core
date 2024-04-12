@@ -17,7 +17,7 @@ import (
 	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/system"
 	"golang.org/x/image/draw"
 )
@@ -298,7 +298,7 @@ func (w *RenderWindow) StepZoom(steps float32) {
 // SetZoom sets [AppearanceSettingsData.Zoom] to the given value and then triggers
 // necessary updating and makes a snackbar.
 func (w *RenderWindow) SetZoom(zoom float32) {
-	AppearanceSettings.Zoom = mat32.Clamp(zoom, 10, 500)
+	AppearanceSettings.Zoom = math32.Clamp(zoom, 10, 500)
 	AppearanceSettings.Apply()
 	UpdateAll()
 	errors.Log(SaveSettings(AppearanceSettings))
@@ -664,7 +664,7 @@ type RenderParams struct {
 	LogicalDPI float32
 
 	// Geometry of the rendering window, in actual "dot" pixels used for rendering.
-	Geom mat32.Geom2DInt
+	Geom math32.Geom2DInt
 }
 
 // NeedsRestyle returns true if the current render context
@@ -703,7 +703,7 @@ type RenderContext struct {
 	LogicalDPI float32
 
 	// Geometry of the rendering window, in actual "dot" pixels used for rendering.
-	Geom mat32.Geom2DInt
+	Geom math32.Geom2DInt
 
 	// Mu is mutex for locking out rendering and any destructive updates.
 	// It is locked at the RenderWin level during rendering and
@@ -724,7 +724,7 @@ func NewRenderContext() *RenderContext {
 		rc.Geom.SetRect(scr.Geometry)
 		rc.LogicalDPI = scr.LogicalDPI
 	} else {
-		rc.Geom = mat32.Geom2DInt{Size: image.Pt(1080, 720)}
+		rc.Geom = math32.Geom2DInt{Size: image.Pt(1080, 720)}
 		rc.LogicalDPI = 160
 	}
 	rc.SetFlag(true, RenderVisible)
@@ -978,7 +978,7 @@ func (w *RenderWindow) DrawScenes() {
 func (w *RenderWindow) FillInsets() {
 	// render geom and window geom
 	rg := w.SystemWindow.RenderGeom()
-	wg := mat32.Geom2DInt{Size: w.SystemWindow.Size()}
+	wg := math32.Geom2DInt{Size: w.SystemWindow.Size()}
 
 	// if our window geom is the same as our render geom, we have no
 	// window insets to fill
@@ -996,7 +996,7 @@ func (w *RenderWindow) FillInsets() {
 		if r.Dx() == 0 || r.Dy() == 0 {
 			return
 		}
-		drw.Fill(colors.Scheme.Background, mat32.Identity3(), r, draw.Src)
+		drw.Fill(colors.Scheme.Background, math32.Identity3(), r, draw.Src)
 	}
 	rb := rg.Bounds()
 	wb := wg.Bounds()
@@ -1098,5 +1098,5 @@ func (sr *Scrim) DirectRenderImage(drw system.Drawer, idx int) {
 
 func (sr *Scrim) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
 	sc := sr.Par.(*Scene)
-	drw.Fill(colors.ApplyOpacity(colors.Scheme.Scrim, .5), mat32.Identity3(), sc.Geom.TotalBBox, draw.Over)
+	drw.Fill(colors.ApplyOpacity(colors.Scheme.Scrim, .5), math32.Identity3(), sc.Geom.TotalBBox, draw.Over)
 }

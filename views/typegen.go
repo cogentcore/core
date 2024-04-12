@@ -9,7 +9,7 @@ import (
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 	"cogentcore.org/core/units"
@@ -611,7 +611,7 @@ func (t *TreeView) SetViewIndex(v int) *TreeView { t.ViewIndex = v; return t }
 // SetWidgetSize sets the [TreeView.WidgetSize]:
 // size of just this node widget.
 // our alloc includes all of our children, but we only draw us.
-func (t *TreeView) SetWidgetSize(v mat32.Vec2) *TreeView { t.WidgetSize = v; return t }
+func (t *TreeView) SetWidgetSize(v math32.Vec2) *TreeView { t.WidgetSize = v; return t }
 
 // SetRootView sets the [TreeView.RootView]:
 // The cached root of the view. It is automatically set and does not need to be

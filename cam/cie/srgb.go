@@ -4,7 +4,7 @@
 
 package cie
 
-import "cogentcore.org/core/mat32"
+import "cogentcore.org/core/math32"
 
 // SRGBToLinearComp converts an sRGB rgb component to linear space (removes gamma).
 // Used in converting from sRGB to XYZ colors.
@@ -12,7 +12,7 @@ func SRGBToLinearComp(srgb float32) float32 {
 	if srgb <= 0.04045 {
 		return srgb / 12.92
 	}
-	return mat32.Pow((srgb+0.055)/1.055, 2.4)
+	return math32.Pow((srgb+0.055)/1.055, 2.4)
 }
 
 // SRGBFromLinearComp converts an sRGB rgb linear component
@@ -23,9 +23,9 @@ func SRGBFromLinearComp(lin float32) float32 {
 	if lin <= 0.0031308 {
 		gv = 12.92 * lin
 	} else {
-		gv = (1.055*mat32.Pow(lin, 1.0/2.4) - 0.055)
+		gv = (1.055*math32.Pow(lin, 1.0/2.4) - 0.055)
 	}
-	return mat32.Clamp(gv, 0, 1)
+	return math32.Clamp(gv, 0, 1)
 }
 
 // SRGBToLinear converts set of sRGB components to linear values,

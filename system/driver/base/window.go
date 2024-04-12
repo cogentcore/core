@@ -16,7 +16,7 @@ import (
 	"time"
 
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/system"
 )
 
@@ -163,9 +163,9 @@ func (w *Window[A]) SetDestroyGPUResourcesFunc(f func()) {
 	w.DestroyGPUFunc = f
 }
 
-func (w *Window[A]) RenderGeom() mat32.Geom2DInt {
+func (w *Window[A]) RenderGeom() math32.Geom2DInt {
 	// {0, Size} by default
-	return mat32.Geom2DInt{Size: w.This.Size()}
+	return math32.Geom2DInt{Size: w.This.Size()}
 }
 
 func (w *Window[A]) SetCloseReqFunc(fun func(win system.Window)) {

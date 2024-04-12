@@ -4,7 +4,7 @@
 
 package styles
 
-import "cogentcore.org/core/mat32"
+import "cogentcore.org/core/math32"
 
 // ClampMax returns given value, not greater than given max _only if_ max > 0
 func ClampMax(v, mx float32) float32 {
@@ -39,29 +39,29 @@ func SetClampMin(v *float32, mn float32) {
 }
 
 // ClampMaxVec returns given Vec2 values, not greater than given max _only if_ max > 0
-func ClampMaxVec(v, mx mat32.Vec2) mat32.Vec2 {
-	var nv mat32.Vec2
+func ClampMaxVec(v, mx math32.Vec2) math32.Vec2 {
+	var nv math32.Vec2
 	nv.X = ClampMax(v.X, mx.X)
 	nv.Y = ClampMax(v.Y, mx.Y)
 	return nv
 }
 
 // ClampMinVec returns given Vec2 values, not less than given min _only if_ min > 0
-func ClampMinVec(v, mn mat32.Vec2) mat32.Vec2 {
-	var nv mat32.Vec2
+func ClampMinVec(v, mn math32.Vec2) math32.Vec2 {
+	var nv math32.Vec2
 	nv.X = ClampMin(v.X, mn.X)
 	nv.Y = ClampMin(v.Y, mn.Y)
 	return nv
 }
 
 // SetClampMaxVec ensures the given Vec2 values are not greater than given max _only if_ max > 0
-func SetClampMaxVec(v *mat32.Vec2, mx mat32.Vec2) {
+func SetClampMaxVec(v *math32.Vec2, mx math32.Vec2) {
 	SetClampMax(&v.X, mx.X)
 	SetClampMax(&v.Y, mx.Y)
 }
 
 // SetClampMinVec ensures the given Vec2 values are not less than given min _only if_ min > 0
-func SetClampMinVec(v *mat32.Vec2, mn mat32.Vec2) {
+func SetClampMinVec(v *math32.Vec2, mn math32.Vec2) {
 	SetClampMin(&v.X, mn.X)
 	SetClampMin(&v.Y, mn.Y)
 }

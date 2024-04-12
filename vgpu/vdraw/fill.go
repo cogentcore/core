@@ -10,7 +10,7 @@ import (
 	"image/draw"
 	"unsafe"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/vgpu"
 )
 
@@ -18,7 +18,7 @@ import (
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
 func (dw *Drawer) FillRect(clr color.Color, reg image.Rectangle, op draw.Op) error {
-	return dw.Fill(clr, mat32.Identity3(), reg, op)
+	return dw.Fill(clr, math32.Identity3(), reg, op)
 }
 
 // Fill fills given color to to render target.
@@ -27,14 +27,14 @@ func (dw *Drawer) FillRect(clr color.Color, reg image.Rectangle, op draw.Op) err
 // reg is the region to fill
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
-func (dw *Drawer) Fill(clr color.Color, src2dst mat32.Mat3, reg image.Rectangle, op draw.Op) error {
+func (dw *Drawer) Fill(clr color.Color, src2dst math32.Mat3, reg image.Rectangle, op draw.Op) error {
 	sy := &dw.Sys
 	cmd := sy.CmdPool.Buff
 	vars := sy.Vars()
 
 	dsz := dw.DestSize()
 	tmat := dw.ConfigMtxs(src2dst, dsz, reg, op, false)
-	clr4 := mat32.NewVec4Color(clr)
+	clr4 := math32.NewVec4Color(clr)
 	clr4.ToArray(tmat.UVP[:], 12) // last column holds color
 
 	matv, _ := vars.VarByNameTry(vgpu.PushSet, "Mtxs")

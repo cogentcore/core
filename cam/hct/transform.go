@@ -7,7 +7,7 @@ package hct
 import (
 	"image/color"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // Lighten returns a color that is lighter by the
@@ -87,9 +87,9 @@ func MinHueDistance(a, b float32) float32 {
 	d1 := b - a
 	d2 := (b + 360) - a
 	d3 := (b - (a + 360))
-	d1a := mat32.Abs(d1)
-	d2a := mat32.Abs(d2)
-	d3a := mat32.Abs(d3)
+	d1a := math32.Abs(d1)
+	d2a := math32.Abs(d2)
+	d3a := math32.Abs(d3)
 	if d1a < d2a && d1a < d3a {
 		return d1
 	}
@@ -106,7 +106,7 @@ func MinHueDistance(a, b float32) float32 {
 func Blend(pct float32, x, y color.Color) color.RGBA {
 	hx := FromColor(x)
 	hy := FromColor(y)
-	pct = mat32.Clamp(pct, 0, 100)
+	pct = math32.Clamp(pct, 0, 100)
 	px := pct / 100
 	py := 1 - px
 

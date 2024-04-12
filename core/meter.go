@@ -9,7 +9,7 @@ import (
 	"image"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -136,7 +136,7 @@ func (m *Meter) Render() {
 	size := m.Geom.Size.Actual.Content.SubScalar(sw)
 
 	var txt *paint.Text
-	var toff mat32.Vec2
+	var toff math32.Vec2
 	if m.Text != "" {
 		txt = &paint.Text{}
 		txt.SetHTML(m.Text, st.FontRender(), &st.Text, &st.UnitContext, nil)
@@ -148,12 +148,12 @@ func (m *Meter) Render() {
 		r := size.DivScalar(2)
 		c := pos.Add(r)
 
-		pc.DrawEllipticalArc(c.X, c.Y, r.X, r.Y, 0, 2*mat32.Pi)
+		pc.DrawEllipticalArc(c.X, c.Y, r.X, r.Y, 0, 2*math32.Pi)
 		pc.StrokeStyle.Color = st.Background
 		pc.Stroke()
 
 		if m.ValueColor != nil {
-			pc.DrawEllipticalArc(c.X, c.Y, r.X, r.Y, -mat32.Pi/2, prop*2*mat32.Pi-mat32.Pi/2)
+			pc.DrawEllipticalArc(c.X, c.Y, r.X, r.Y, -math32.Pi/2, prop*2*math32.Pi-math32.Pi/2)
 			pc.StrokeStyle.Color = m.ValueColor
 			pc.Stroke()
 		}
@@ -163,19 +163,19 @@ func (m *Meter) Render() {
 		return
 	}
 
-	r := size.Mul(mat32.V2(0.5, 1))
+	r := size.Mul(math32.V2(0.5, 1))
 	c := pos.Add(r)
 
-	pc.DrawEllipticalArc(c.X, c.Y, r.X, r.Y, mat32.Pi, 2*mat32.Pi)
+	pc.DrawEllipticalArc(c.X, c.Y, r.X, r.Y, math32.Pi, 2*math32.Pi)
 	pc.StrokeStyle.Color = st.Background
 	pc.Stroke()
 
 	if m.ValueColor != nil {
-		pc.DrawEllipticalArc(c.X, c.Y, r.X, r.Y, mat32.Pi, (1+prop)*mat32.Pi)
+		pc.DrawEllipticalArc(c.X, c.Y, r.X, r.Y, math32.Pi, (1+prop)*math32.Pi)
 		pc.StrokeStyle.Color = m.ValueColor
 		pc.Stroke()
 	}
 	if txt != nil {
-		txt.Render(pc, c.Sub(size.Mul(mat32.V2(0, 0.3))).Sub(toff))
+		txt.Render(pc, c.Sub(size.Mul(math32.V2(0, 0.3))).Sub(toff))
 	}
 }

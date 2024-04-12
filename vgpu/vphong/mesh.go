@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"log"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/vgpu"
 )
 
@@ -105,7 +105,7 @@ func (ph *Phong) UseMeshIndex(idx int) error {
 // MeshFloatsByName returns the mat32.ArrayF32's and mat32.ArrayU32 for given mesh
 // for assigning values to the mesh.
 // Must call ModMeshByName after setting these values to mark as modified.
-func (ph *Phong) MeshFloatsByName(name string) (pos, norm, tex, clr mat32.ArrayF32, idx mat32.ArrayU32) {
+func (ph *Phong) MeshFloatsByName(name string) (pos, norm, tex, clr math32.ArrayF32, idx math32.ArrayU32) {
 	i, ok := ph.Meshes.IndexByKeyTry(name)
 	if !ok {
 		err := fmt.Errorf("vphong:UseMeshName -- name not found: %s", name)
@@ -119,7 +119,7 @@ func (ph *Phong) MeshFloatsByName(name string) (pos, norm, tex, clr mat32.ArrayF
 // MeshFloatsByIndex returns the mat32.ArrayF32's and mat32.ArrayU32 for given mesh
 // for assigning values to the mesh.
 // Must call ModMeshByIndex after setting these values to mark as modified.
-func (ph *Phong) MeshFloatsByIndex(i int) (pos, norm, tex, clr mat32.ArrayF32, idx mat32.ArrayU32) {
+func (ph *Phong) MeshFloatsByIndex(i int) (pos, norm, tex, clr math32.ArrayF32, idx math32.ArrayU32) {
 	vars := ph.Sys.Vars()
 	vset := vars.VertexSet()
 	_, vp, _ := vset.ValueByIndexTry("Pos", i)

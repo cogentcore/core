@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
@@ -90,7 +90,7 @@ func (wb *WidgetBase) ApplyStyleWidget() {
 		if wb.Styles.Display == styles.DisplayNone {
 			wb.SetState(true, states.Invisible)
 		}
-		SetUnitContext(&wb.Styles, wb.Scene, mat32.Vec2{}, mat32.Vec2{})
+		SetUnitContext(&wb.Styles, wb.Scene, math32.Vec2{}, math32.Vec2{})
 		wb.ApplyStyleParts()
 	}()
 
@@ -231,7 +231,7 @@ func (wb *WidgetBase) ApplyStyle() {
 // element (from bbox) and then caches everything out in terms of raw pixel
 // dots for rendering.
 // Zero values for element and parent size are ignored.
-func SetUnitContext(st *styles.Style, sc *Scene, el, parent mat32.Vec2) {
+func SetUnitContext(st *styles.Style, sc *Scene, el, parent math32.Vec2) {
 	rebuild := false
 	var rc *RenderContext
 	sz := image.Point{1920, 1280}

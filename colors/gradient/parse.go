@@ -20,7 +20,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"golang.org/x/net/html/charset"
 )
 
@@ -178,7 +178,7 @@ outer:
 			fallthrough
 		case strings.HasPrefix(par, "to "):
 			sides := strings.Split(par[3:], " ")
-			l.Start, l.End = mat32.Vec2{}, mat32.Vec2{}
+			l.Start, l.End = math32.Vec2{}, math32.Vec2{}
 			for _, side := range sides {
 				switch side {
 				case "bottom":
@@ -352,7 +352,7 @@ func UnmarshalXML(g *Gradient, decoder *xml.Decoder, se xml.StartElement) error 
 		case xml.StartElement:
 			switch se.Name.Local {
 			case "linearGradient":
-				l := NewLinear().SetEnd(mat32.V2(1, 0)) // SVG is LTR by default
+				l := NewLinear().SetEnd(math32.V2(1, 0)) // SVG is LTR by default
 
 				// if we don't already have a gradient, we use this one
 				if *g == nil {

@@ -5,7 +5,7 @@
 package texteditor
 
 import (
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 )
 
@@ -16,9 +16,9 @@ func (ed *Editor) StyleSizes() {
 	sty.Font = paint.OpenFont(sty.FontRender(), &sty.UnitContext)
 	ed.FontHeight = sty.Font.Face.Metrics.Height
 	ed.LineHeight = sty.Text.EffLineHeight(ed.FontHeight)
-	ed.FontDescent = mat32.FromFixed(ed.Styles.Font.Face.Face.Metrics().Descent)
-	ed.FontAscent = mat32.FromFixed(ed.Styles.Font.Face.Face.Metrics().Ascent)
-	ed.LineNoDigs = max(1+int(mat32.Log10(float32(ed.NLines))), 3)
+	ed.FontDescent = math32.FromFixed(ed.Styles.Font.Face.Face.Metrics().Descent)
+	ed.FontAscent = math32.FromFixed(ed.Styles.Font.Face.Face.Metrics().Ascent)
+	ed.LineNoDigs = max(1+int(math32.Log10(float32(ed.NLines))), 3)
 	lno := true
 	if ed.Buffer != nil {
 		lno = ed.Buffer.Opts.LineNos
@@ -37,22 +37,22 @@ func (ed *Editor) StyleSizes() {
 func (ed *Editor) UpdateFromAlloc() {
 	sty := &ed.Styles
 	asz := ed.Geom.Size.Alloc.Content
-	sbw := mat32.Ceil(ed.Styles.ScrollBarWidth.Dots)
+	sbw := math32.Ceil(ed.Styles.ScrollBarWidth.Dots)
 	// if ed.HasScroll[mat32.Y] {
 	asz.X -= sbw
 	// }
-	if ed.HasScroll[mat32.X] {
+	if ed.HasScroll[math32.X] {
 		asz.Y -= sbw
 	}
 	ed.LineLayoutSize = asz
-	nv := mat32.Vec2{}
+	nv := math32.Vec2{}
 	if asz == nv {
 		ed.NLinesChars.Y = 20
 		ed.NLinesChars.X = 80
 	} else {
-		ed.NLinesChars.Y = int(mat32.Floor(float32(asz.Y) / ed.LineHeight))
+		ed.NLinesChars.Y = int(math32.Floor(float32(asz.Y) / ed.LineHeight))
 		if sty.Font.Face != nil {
-			ed.NLinesChars.X = int(mat32.Floor(float32(asz.X) / sty.Font.Face.Metrics.Ch))
+			ed.NLinesChars.X = int(math32.Floor(float32(asz.X) / sty.Font.Face.Metrics.Ch))
 		}
 	}
 	ed.LineLayoutSize.X -= ed.LineNoOff
@@ -120,12 +120,12 @@ func (ed *Editor) LayoutAllLines() {
 			ed.HasLinks = true
 		}
 		ed.Offs[ln] = off
-		lsz := mat32.Max(ed.Renders[ln].Size.Y, ed.LineHeight)
+		lsz := math32.Max(ed.Renders[ln].Size.Y, ed.LineHeight)
 		off += lsz
-		mxwd = mat32.Max(mxwd, ed.Renders[ln].Size.X)
+		mxwd = math32.Max(mxwd, ed.Renders[ln].Size.X)
 	}
 	buf.MarkupMu.RUnlock()
-	ed.LinesSize = mat32.V2(mxwd, off)
+	ed.LinesSize = math32.V2(mxwd, off)
 	ed.lastlineLayoutSize = ed.LineLayoutSize
 	ed.InternalSizeFromLines()
 }
@@ -164,13 +164,13 @@ func (ed *Editor) ReLayoutAllLines() {
 		}
 		ed.Renders[ln].Layout(&sty.Text, sty.FontRender(), &sty.UnitContext, sz)
 		ed.Offs[ln] = off
-		lsz := mat32.Max(ed.Renders[ln].Size.Y, ed.LineHeight)
+		lsz := math32.Max(ed.Renders[ln].Size.Y, ed.LineHeight)
 		off += lsz
-		mxwd = mat32.Max(mxwd, ed.Renders[ln].Size.X)
+		mxwd = math32.Max(mxwd, ed.Renders[ln].Size.X)
 	}
 	buf.MarkupMu.RUnlock()
 
-	ed.LinesSize = mat32.V2(mxwd, off)
+	ed.LinesSize = math32.V2(mxwd, off)
 	ed.lastlineLayoutSize = ed.LineLayoutSize
 	ed.InternalSizeFromLines()
 }

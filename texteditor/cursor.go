@@ -10,7 +10,7 @@ import (
 	"image/draw"
 
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/states"
 )
@@ -132,7 +132,7 @@ func (ed *Editor) CursorSprite(on bool) *core.Sprite {
 	spnm := ed.CursorSpriteName()
 	sp, ok := ms.Sprites.SpriteByName(spnm)
 	if !ok {
-		bbsz := image.Point{int(mat32.Ceil(ed.CursorWidth.Dots)), int(mat32.Ceil(ed.FontHeight))}
+		bbsz := image.Point{int(math32.Ceil(ed.CursorWidth.Dots)), int(math32.Ceil(ed.FontHeight))}
 		if bbsz.X < 2 { // at least 2
 			bbsz.X = 2
 		}

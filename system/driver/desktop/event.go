@@ -9,7 +9,7 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/system"
 	"github.com/go-gl/glfw/v3.3/glfw"
@@ -110,7 +110,7 @@ func (w *Window) ScrollEvent(gw *glfw.Window, xoff, yoff float64) {
 		xoff *= 4 * float64(events.ScrollWheelSpeed)
 		yoff *= 4 * float64(events.ScrollWheelSpeed)
 	}
-	delta := mat32.V2(float32(-xoff), float32(-yoff))
+	delta := math32.V2(float32(-xoff), float32(-yoff))
 	where := w.CurMousePosPoint(gw)
 	w.EvMgr.Scroll(where, delta)
 	glfw.PostEmptyEvent()

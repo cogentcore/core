@@ -18,7 +18,7 @@ import (
 	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
@@ -398,7 +398,7 @@ func makeViews(ts *core.Tabs) {
 		Name:   "happy",
 		Cond:   2,
 		Value:  3.1415,
-		Vec:    mat32.V2(5, 7),
+		Vec:    math32.V2(5, 7),
 		Inline: inlineStruct{Value: 3},
 		Cond2: tableStruct{
 			IntField:   22,
@@ -554,7 +554,7 @@ type testStruct struct { //types:add
 	// a value
 	Value float32
 
-	Vec mat32.Vec2
+	Vec math32.Vec2
 
 	Things []tableStruct
 
@@ -709,7 +709,7 @@ func makeStyles(ts *core.Tabs) {
 		fr.Update()
 	})
 
-	frameSizes := []mat32.Vec2{
+	frameSizes := []math32.Vec2{
 		{20, 100},
 		{80, 20},
 		{60, 80},

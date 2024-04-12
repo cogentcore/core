@@ -15,7 +15,7 @@ import (
 
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/iox/imagex"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	vk "github.com/goki/vulkan"
 )
 
@@ -25,7 +25,7 @@ func SRGBToLinearComp(srgb float32) float32 {
 	if srgb <= 0.04045 {
 		return srgb / 12.92
 	}
-	return mat32.Pow((srgb+0.055)/1.055, 2.4)
+	return math32.Pow((srgb+0.055)/1.055, 2.4)
 }
 
 // SRGBFromLinearComp converts an sRGB rgb linear component
@@ -35,7 +35,7 @@ func SRGBFromLinearComp(lin float32) float32 {
 	if lin <= 0.0031308 {
 		return 12.92 * lin
 	}
-	return (1.055*mat32.Pow(lin, 1/2.4) + 0.055)
+	return (1.055*math32.Pow(lin, 1/2.4) + 0.055)
 }
 
 // SRGBToLinear converts set of sRGB components to linear values,

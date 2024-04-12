@@ -5,7 +5,7 @@
 package svg
 
 import (
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // Ellipse is a SVG ellipse
@@ -13,10 +13,10 @@ type Ellipse struct {
 	NodeBase
 
 	// position of the center of the ellipse
-	Pos mat32.Vec2 `xml:"{cx,cy}"`
+	Pos math32.Vec2 `xml:"{cx,cy}"`
 
 	// radii of the ellipse in the horizontal, vertical axes
-	Radii mat32.Vec2 `xml:"{rx,ry}"`
+	Radii math32.Vec2 `xml:"{rx,ry}"`
 }
 
 func (g *Ellipse) SVGName() string { return "ellipse" }
@@ -25,16 +25,16 @@ func (g *Ellipse) OnInit() {
 	g.Radii.Set(1, 1)
 }
 
-func (g *Ellipse) SetNodePos(pos mat32.Vec2) {
+func (g *Ellipse) SetNodePos(pos math32.Vec2) {
 	g.Pos = pos.Sub(g.Radii)
 }
 
-func (g *Ellipse) SetNodeSize(sz mat32.Vec2) {
+func (g *Ellipse) SetNodeSize(sz math32.Vec2) {
 	g.Radii = sz.MulScalar(0.5)
 }
 
-func (g *Ellipse) LocalBBox() mat32.Box2 {
-	bb := mat32.Box2{}
+func (g *Ellipse) LocalBBox() math32.Box2 {
+	bb := math32.Box2{}
 	hlw := 0.5 * g.LocalLineWidth()
 	bb.Min = g.Pos.Sub(g.Radii.AddScalar(hlw))
 	bb.Max = g.Pos.Add(g.Radii.AddScalar(hlw))
@@ -57,7 +57,7 @@ func (g *Ellipse) Render(sv *SVG) {
 
 // ApplyTransform applies the given 2D transform to the geometry of this node
 // each node must define this for itself
-func (g *Ellipse) ApplyTransform(sv *SVG, xf mat32.Mat2) {
+func (g *Ellipse) ApplyTransform(sv *SVG, xf math32.Mat2) {
 	rot := xf.ExtractRot()
 	if rot != 0 || !g.Paint.Transform.IsIdentity() {
 		g.Paint.Transform.SetMul(xf)
@@ -74,7 +74,7 @@ func (g *Ellipse) ApplyTransform(sv *SVG, xf mat32.Mat2) {
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Ellipse) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+func (g *Ellipse) ApplyDeltaTransform(sv *SVG, trans math32.Vec2, scale math32.Vec2, rot float32, pt math32.Vec2) {
 	crot := g.Paint.Transform.ExtractRot()
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self

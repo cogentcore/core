@@ -13,7 +13,7 @@ import (
 	"image"
 
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/system"
 )
 
@@ -113,6 +113,6 @@ func (w *WindowSingle[A]) Minimize() {
 	// no-op
 }
 
-func (w *WindowSingle[A]) RenderGeom() mat32.Geom2DInt {
+func (w *WindowSingle[A]) RenderGeom() math32.Geom2DInt {
 	return w.App.RenderGeom()
 }

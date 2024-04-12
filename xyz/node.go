@@ -11,7 +11,7 @@ import (
 	"reflect"
 	"sync"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tree"
 )
 
@@ -36,12 +36,12 @@ type Node interface {
 	// UpdateWorldMatrix updates this node's local and world matrix based on parent's world matrix
 	// This sets the WorldMatrixUpdated flag but does not check that flag -- calling
 	// routine can optionally do so.
-	UpdateWorldMatrix(parWorld *mat32.Mat4)
+	UpdateWorldMatrix(parWorld *math32.Mat4)
 
 	// UpdateMVPMatrix updates this node's MVP matrix based on
 	// given view and prjn matrix from camera.
 	// Called during rendering.
-	UpdateMVPMatrix(viewMat, prjnMat *mat32.Mat4)
+	UpdateMVPMatrix(viewMat, prjnMat *math32.Mat4)
 
 	// UpdateMeshBBox updates the Mesh-based BBox info for all nodes.
 	// groups aggregate over elements.  called from WalkPost traversal
@@ -49,21 +49,21 @@ type Node interface {
 
 	// UpdateBBox2D updates this node's 2D bounding-box information based on scene
 	// size and other scene bbox info from scene
-	UpdateBBox2D(size mat32.Vec2)
+	UpdateBBox2D(size math32.Vec2)
 
 	// RayPick converts a given 2D point in scene image coordinates
 	// into a ray from the camera position pointing through line of sight of camera
 	// into *local* coordinates of the solid.
 	// This can be used to find point of intersection in local coordinates relative
 	// to a given plane of interest, for example (see Ray methods for intersections).
-	RayPick(pos image.Point) mat32.Ray
+	RayPick(pos image.Point) math32.Ray
 
 	// WorldMatrix returns the world matrix for this node, under read-lock protection.
-	WorldMatrix() *mat32.Mat4
+	WorldMatrix() *math32.Mat4
 
 	// NormDCBBox returns the normalized display coordinates bounding box
 	// which is used for clipping.  This is read-lock protected.
-	NormDCBBox() mat32.Box3
+	NormDCBBox() math32.Box3
 
 	// IsVisible provides the definitive answer as to whether a given node
 	// is currently visible.  It is only entirely valid after a render pass
@@ -99,13 +99,13 @@ type Node interface {
 	// Convenience methods for external setting of Pose values with appropriate locking
 
 	// SetPosePos sets Pose.Pos position to given value, under write lock protection
-	SetPosePos(pos mat32.Vec3)
+	SetPosePos(pos math32.Vec3)
 
 	// SetPoseScale sets Pose.Scale scale to given value, under write lock protection
-	SetPoseScale(scale mat32.Vec3)
+	SetPoseScale(scale math32.Vec3)
 
 	// SetPoseQuat sets Pose.Quat to given value, under write lock protection
-	SetPoseQuat(quat mat32.Quat)
+	SetPoseQuat(quat math32.Quat)
 }
 
 // NodeBase is the basic 3D scenegraph node, which has the full transform information
@@ -130,7 +130,7 @@ type NodeBase struct {
 	WorldBBox BBox `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// normalized display coordinates bounding box, used for frustrum clipping
-	NDCBBox mat32.Box3 `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
+	NDCBBox math32.Box3 `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// raw original bounding box for the widget within its parent Scene.
 	// This is prior to intersecting with Frame bounds.
@@ -230,7 +230,7 @@ func (nb *NodeBase) IsTransparent() bool {
 // If a nil matrix is passed, then the previously-set parent world matrix is used.
 // This sets the WorldMatrixUpdated flag but does not check that flag -- calling
 // routine can optionally do so.
-func (nb *NodeBase) UpdateWorldMatrix(parWorld *mat32.Mat4) {
+func (nb *NodeBase) UpdateWorldMatrix(parWorld *math32.Mat4) {
 	nb.PoseMu.Lock()
 	defer nb.PoseMu.Unlock()
 	nb.Pose.UpdateMatrix() // note: can do this in special ways to bake in other
@@ -241,7 +241,7 @@ func (nb *NodeBase) UpdateWorldMatrix(parWorld *mat32.Mat4) {
 
 // UpdateMVPMatrix updates this node's MVP matrix based on given view, prjn matricies from camera.
 // Called during rendering.
-func (nb *NodeBase) UpdateMVPMatrix(viewMat, prjnMat *mat32.Mat4) {
+func (nb *NodeBase) UpdateMVPMatrix(viewMat, prjnMat *math32.Mat4) {
 	nb.PoseMu.Lock()
 	nb.Pose.UpdateMVPMatrix(viewMat, prjnMat)
 	nb.PoseMu.Unlock()
@@ -249,8 +249,8 @@ func (nb *NodeBase) UpdateMVPMatrix(viewMat, prjnMat *mat32.Mat4) {
 
 // UpdateBBox2D updates this node's 2D bounding-box information based on scene
 // size and min offset position.
-func (nb *NodeBase) UpdateBBox2D(size mat32.Vec2) {
-	off := mat32.Vec2{}
+func (nb *NodeBase) UpdateBBox2D(size math32.Vec2) {
+	off := math32.Vec2{}
 	nb.PoseMu.RLock()
 	nb.WorldBBox.BBox = nb.MeshBBox.BBox.MulMat4(&nb.Pose.WorldMatrix)
 	nb.NDCBBox = nb.MeshBBox.BBox.MVProjToNDC(&nb.Pose.MVPMatrix)
@@ -282,16 +282,16 @@ func (nb *NodeBase) UpdateBBox2D(size mat32.Vec2) {
 // to a given plane of interest, for example (see Ray methods for intersections).
 // To convert mouse window-relative coords into scene-relative coords
 // subtract the sc.ObjBBox.Min which includes any scrolling effects
-func (nb *NodeBase) RayPick(pos image.Point) mat32.Ray {
+func (nb *NodeBase) RayPick(pos image.Point) math32.Ray {
 	// nb.PoseMu.RLock()
 	// nb.Sc.Camera.CamMu.RLock()
 	sz := nb.Sc.Geom.Size
-	size := mat32.V2(float32(sz.X), float32(sz.Y))
-	fpos := mat32.V2(float32(pos.X), float32(pos.Y))
-	ndc := fpos.WindowToNDC(size, mat32.Vec2{}, true) // flipY
+	size := math32.V2(float32(sz.X), float32(sz.Y))
+	fpos := math32.V2(float32(pos.X), float32(pos.Y))
+	ndc := fpos.WindowToNDC(size, math32.Vec2{}, true) // flipY
 	var err error
 	ndc.Z = -1 // at closest point
-	cdir := mat32.V4FromV3(ndc, 1).MulMat4(&nb.Sc.Camera.InvPrjnMatrix)
+	cdir := math32.V4FromV3(ndc, 1).MulMat4(&nb.Sc.Camera.InvPrjnMatrix)
 	cdir.Z = -1
 	cdir.W = 0 // vec
 	// get world position / transform of camera: matrix is inverse of ViewMatrix
@@ -303,15 +303,15 @@ func (nb *NodeBase) RayPick(pos image.Point) mat32.Ray {
 	if err != nil {
 		log.Println(err)
 	}
-	lpos := mat32.V4FromV3(wpos, 1).MulMat4(invM)
+	lpos := math32.V4FromV3(wpos, 1).MulMat4(invM)
 	ldir := wdir.MulMat4(invM)
 	ldir.SetNormal()
-	ray := mat32.NewRay(mat32.V3(lpos.X, lpos.Y, lpos.Z), mat32.V3(ldir.X, ldir.Y, ldir.Z))
+	ray := math32.NewRay(math32.V3(lpos.X, lpos.Y, lpos.Z), math32.V3(ldir.X, ldir.Y, ldir.Z))
 	return *ray
 }
 
 // WorldMatrix returns the world matrix for this node, under read lock protection
-func (nb *NodeBase) WorldMatrix() *mat32.Mat4 {
+func (nb *NodeBase) WorldMatrix() *math32.Mat4 {
 	nb.PoseMu.RLock()
 	defer nb.PoseMu.RUnlock()
 	return &nb.Pose.WorldMatrix
@@ -319,7 +319,7 @@ func (nb *NodeBase) WorldMatrix() *mat32.Mat4 {
 
 // NormDCBBox returns the normalized display coordinates bounding box
 // which is used for clipping.  This is read-lock protected.
-func (nb *NodeBase) NormDCBBox() mat32.Box3 {
+func (nb *NodeBase) NormDCBBox() math32.Box3 {
 	return nb.NDCBBox
 }
 
@@ -335,21 +335,21 @@ func (nb *NodeBase) Render() {
 }
 
 // SetPosePos sets Pose.Pos position to given value, under write lock protection
-func (nb *NodeBase) SetPosePos(pos mat32.Vec3) {
+func (nb *NodeBase) SetPosePos(pos math32.Vec3) {
 	nb.PoseMu.Lock()
 	nb.Pose.Pos = pos
 	nb.PoseMu.Unlock()
 }
 
 // SetPoseScale sets Pose.Scale scale to given value, under write lock protection
-func (nb *NodeBase) SetPoseScale(scale mat32.Vec3) {
+func (nb *NodeBase) SetPoseScale(scale math32.Vec3) {
 	nb.PoseMu.Lock()
 	nb.Pose.Scale = scale
 	nb.PoseMu.Unlock()
 }
 
 // SetPoseQuat sets Pose.Quat to given value, under write lock protection
-func (nb *NodeBase) SetPoseQuat(quat mat32.Quat) {
+func (nb *NodeBase) SetPoseQuat(quat math32.Quat) {
 	nb.PoseMu.Lock()
 	nb.Pose.Quat = quat
 	nb.PoseMu.Unlock()

@@ -8,7 +8,7 @@ import (
 	"errors"
 	"image"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"golang.org/x/image/font"
 )
@@ -39,10 +39,10 @@ type Rune struct {
 
 	// relative position from start of Text for the lower-left baseline
 	// rendering position of the font character
-	RelPos mat32.Vec2
+	RelPos math32.Vec2
 
 	// size of the rune itself, exclusive of spacing that might surround it
-	Size mat32.Vec2
+	Size math32.Vec2
 
 	// rotation in radians for this character, relative to its lower-left
 	// baseline rendering position

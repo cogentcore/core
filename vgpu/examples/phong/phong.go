@@ -16,7 +16,7 @@ import (
 	"runtime"
 	"time"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	vk "github.com/goki/vulkan"
 
 	"cogentcore.org/core/vgpu"
@@ -91,11 +91,11 @@ func main() {
 	/////////////////////////////
 	// Lights
 
-	amblt := mat32.NewVec3Color(color.White).MulScalar(.1)
+	amblt := math32.NewVec3Color(color.White).MulScalar(.1)
 	ph.AddAmbientLight(amblt)
 
-	dirlt := mat32.NewVec3Color(color.White).MulScalar(1)
-	ph.AddDirLight(dirlt, mat32.V3(0, 1, 1))
+	dirlt := math32.NewVec3Color(color.White).MulScalar(1)
+	ph.AddDirLight(dirlt, math32.V3(0, 1, 1))
 
 	// ph.AddPointLight(mat32.NewVec3Color(color.White), mat32.V3(0, 2, 5), .1, .01)
 	//
@@ -104,7 +104,7 @@ func main() {
 	/////////////////////////////
 	// Meshes
 
-	floor := vshape.NewPlane(mat32.Y, 100, 100)
+	floor := vshape.NewPlane(math32.Y, 100, 100)
 	floor.Segs.Set(100, 100) // won't show lighting without
 	nVtx, nIndex := floor.N()
 	ph.AddMesh("floor", nVtx, nIndex, false)
@@ -135,7 +135,7 @@ func main() {
 	nVtx, nIndex = torus.N()
 	ph.AddMesh("torus", nVtx, nIndex, false)
 
-	lines := vshape.NewLines([]mat32.Vec3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, mat32.V2(.2, .1), false)
+	lines := vshape.NewLines([]math32.Vec3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, math32.V2(.2, .1), false)
 	nVtx, nIndex = lines.N()
 	ph.AddMesh("lines", nVtx, nIndex, false)
 
@@ -173,29 +173,29 @@ func main() {
 	// Camera / Mtxs
 
 	// This is the standard camera view projection computation
-	campos := mat32.V3(0, 2, 10)
-	view := vphong.CameraViewMat(campos, mat32.V3(0, 0, 0), mat32.V3(0, 1, 0))
+	campos := math32.V3(0, 2, 10)
+	view := vphong.CameraViewMat(campos, math32.V3(0, 0, 0), math32.V3(0, 1, 0))
 
 	aspect := sf.Format.Aspect()
-	var prjn mat32.Mat4
+	var prjn math32.Mat4
 	prjn.SetVkPerspective(45, aspect, 0.01, 100)
 
-	var model1 mat32.Mat4
+	var model1 math32.Mat4
 	model1.SetRotationY(0.5)
 
-	var model2 mat32.Mat4
+	var model2 math32.Mat4
 	model2.SetTranslation(-2, 0, 0)
 
-	var model3 mat32.Mat4
+	var model3 math32.Mat4
 	model3.SetTranslation(0, 0, -2)
 
-	var model4 mat32.Mat4
+	var model4 math32.Mat4
 	model4.SetTranslation(-1, 0, -2)
 
-	var model5 mat32.Mat4
+	var model5 math32.Mat4
 	model5.SetTranslation(1, 0, -1)
 
-	var floortx mat32.Mat4
+	var floortx math32.Mat4
 	floortx.SetTranslation(0, -2, -2)
 
 	/////////////////////////////
@@ -244,7 +244,7 @@ func main() {
 
 	updateMats := func() {
 		aspect := sf.Format.Aspect()
-		view = vphong.CameraViewMat(campos, mat32.V3(0, 0, 0), mat32.V3(0, 1, 0))
+		view = vphong.CameraViewMat(campos, math32.V3(0, 0, 0), math32.V3(0, 1, 0))
 		prjn.SetVkPerspective(45, aspect, 0.01, 100)
 		ph.SetViewPrjn(view, &prjn)
 	}
@@ -254,7 +254,7 @@ func main() {
 		ph.SetModelMtx(&floortx)
 		ph.UseMeshName("floor")
 		// ph.UseNoTexture()
-		ph.UseTexturePars(mat32.V2(50, 50), mat32.Vec2{})
+		ph.UseTexturePars(math32.V2(50, 50), math32.Vec2{})
 		ph.UseTextureName("ground.png")
 		ph.Render()
 

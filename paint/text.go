@@ -18,7 +18,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 	"golang.org/x/image/draw"
@@ -44,7 +44,7 @@ type Text struct {
 	Spans []Span
 
 	// last size of overall rendered text
-	Size mat32.Vec2
+	Size math32.Vec2
 
 	// fontheight computed in last Layout
 	FontHeight float32
@@ -81,16 +81,16 @@ func (tr *Text) InsertSpan(at int, ns *Span) {
 // runes, and the overall font size, etc.  todo: does not currently support
 // stroking, only filling of text -- probably need to grab path from font and
 // use paint rendering for stroking.
-func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
+func (tr *Text) Render(pc *Context, pos math32.Vec2) {
 	// pr := profile.Start("RenderText")
 	// defer pr.End()
 
 	var ppaint styles.Paint
 	ppaint.CopyStyleFrom(pc.Paint)
 
-	pc.PushTransform(mat32.Identity2()) // needed for SVG
+	pc.PushTransform(math32.Identity2()) // needed for SVG
 	defer pc.PopTransform()
-	pc.CurrentTransform = mat32.Identity2()
+	pc.CurrentTransform = math32.Identity2()
 
 	TextFontRenderMu.Lock()
 	defer TextFontRenderMu.Unlock()
@@ -99,8 +99,8 @@ func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 	hadOverflow := false
 	rendOverflow := false
 	overBoxSet := false
-	var overStart mat32.Vec2
-	var overBox mat32.Box2
+	var overStart math32.Vec2
+	var overBox math32.Box2
 	var overFace font.Face
 	var overColor image.Image
 
@@ -112,7 +112,7 @@ func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 		curFace := sr.Render[0].Face
 		curColor := sr.Render[0].Color
 		if g, ok := curColor.(gradient.Gradient); ok {
-			g.Update(pc.FontStyle.Opacity, mat32.B2FromRect(pc.LastRenderBBox), pc.CurrentTransform)
+			g.Update(pc.FontStyle.Opacity, math32.B2FromRect(pc.LastRenderBBox), pc.CurrentTransform)
 		} else {
 			curColor = gradient.ApplyOpacityImage(curColor, pc.FontStyle.Opacity)
 		}
@@ -120,10 +120,10 @@ func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 
 		if !overBoxSet {
 			overWd, _ := curFace.GlyphAdvance(elipses)
-			overWd32 := mat32.FromFixed(overWd)
-			overEnd := mat32.V2FromPoint(pc.Bounds.Max)
-			overStart = overEnd.Sub(mat32.V2(overWd32, 0.1*tr.FontHeight))
-			overBox = mat32.Box2{Min: mat32.V2(overStart.X, overEnd.Y-tr.FontHeight), Max: overEnd}
+			overWd32 := math32.FromFixed(overWd)
+			overEnd := math32.V2FromPoint(pc.Bounds.Max)
+			overStart = overEnd.Sub(math32.V2(overWd32, 0.1*tr.FontHeight))
+			overBox = math32.Box2{Min: math32.V2(overStart.X, overEnd.Y-tr.FontHeight), Max: overEnd}
 			overFace = curFace
 			overColor = curColor
 			overBoxSet = true
@@ -158,30 +158,30 @@ func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 			if !unicode.IsPrint(r) {
 				continue
 			}
-			dsc32 := mat32.FromFixed(curFace.Metrics().Descent)
+			dsc32 := math32.FromFixed(curFace.Metrics().Descent)
 			rp := tpos.Add(rr.RelPos)
 			scx := float32(1)
 			if rr.ScaleX != 0 {
 				scx = rr.ScaleX
 			}
-			tx := mat32.Scale2D(scx, 1).Rotate(rr.RotRad)
-			ll := rp.Add(tx.MulVec2AsVec(mat32.V2(0, dsc32)))
-			ur := ll.Add(tx.MulVec2AsVec(mat32.V2(rr.Size.X, -rr.Size.Y)))
+			tx := math32.Scale2D(scx, 1).Rotate(rr.RotRad)
+			ll := rp.Add(tx.MulVec2AsVec(math32.V2(0, dsc32)))
+			ur := ll.Add(tx.MulVec2AsVec(math32.V2(rr.Size.X, -rr.Size.Y)))
 
-			if int(mat32.Ceil(ur.X)) < pc.Bounds.Min.X || int(mat32.Ceil(ll.Y)) < pc.Bounds.Min.Y {
+			if int(math32.Ceil(ur.X)) < pc.Bounds.Min.X || int(math32.Ceil(ll.Y)) < pc.Bounds.Min.Y {
 				continue
 			}
 
 			doingOverflow := false
 			if tr.HasOverflow {
-				cmid := ll.Add(mat32.V2(0.5*rr.Size.X, -0.5*rr.Size.Y))
+				cmid := ll.Add(math32.V2(0.5*rr.Size.X, -0.5*rr.Size.Y))
 				if overBox.ContainsPoint(cmid) {
 					doingOverflow = true
 					r = elipses
 				}
 			}
 
-			if int(mat32.Floor(ll.X)) > pc.Bounds.Max.X+1 || int(mat32.Floor(ur.Y)) > pc.Bounds.Max.Y+1 {
+			if int(math32.Floor(ll.X)) > pc.Bounds.Max.X+1 || int(math32.Floor(ur.Y)) > pc.Bounds.Max.Y+1 {
 				hadOverflow = true
 				if !doingOverflow {
 					continue
@@ -213,11 +213,11 @@ func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 				draw.DrawMask(d.Dst, idr, d.Src, soff, mask, maskp, draw.Over)
 			} else {
 				srect := dr.Sub(dr.Min)
-				dbase := mat32.V2(rp.X-float32(dr.Min.X), rp.Y-float32(dr.Min.Y))
+				dbase := math32.V2(rp.X-float32(dr.Min.X), rp.Y-float32(dr.Min.Y))
 
 				transformer := draw.BiLinear
 				fx, fy := float32(dr.Min.X), float32(dr.Min.Y)
-				m := mat32.Translate2D(fx+dbase.X, fy+dbase.Y).Scale(scx, 1).Rotate(rr.RotRad).Translate(-dbase.X, -dbase.Y)
+				m := math32.Translate2D(fx+dbase.X, fy+dbase.Y).Scale(scx, 1).Rotate(rr.RotRad).Translate(-dbase.X, -dbase.Y)
 				s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
 				transformer.Transform(d.Dst, s2d, d.Src, srect, draw.Over, &draw.Options{
 					SrcMask:  mask,
@@ -253,7 +253,7 @@ func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 // RenderTopPos renders at given top position -- uses first font info to
 // compute baseline offset and calls overall Render -- convenience for simple
 // widget rendering without layouts
-func (tr *Text) RenderTopPos(pc *Context, tpos mat32.Vec2) {
+func (tr *Text) RenderTopPos(pc *Context, tpos math32.Vec2) {
 	if len(tr.Spans) == 0 {
 		return
 	}
@@ -263,7 +263,7 @@ func (tr *Text) RenderTopPos(pc *Context, tpos mat32.Vec2) {
 	}
 	curFace := sr.Render[0].Face
 	pos := tpos
-	pos.Y += mat32.FromFixed(curFace.Metrics().Ascent)
+	pos.Y += math32.FromFixed(curFace.Metrics().Ascent)
 	tr.Render(pc, pos)
 }
 
@@ -284,7 +284,7 @@ func (tr *Text) SetString(str string, fontSty *styles.FontRender, ctxt *units.Co
 	sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots, fontSty.Face.Metrics.Ch, txtSty.TabSize)
 	ssz := sr.SizeHV()
 	vht := fontSty.Face.Face.Metrics().Height
-	tr.Size = mat32.V2(ssz.X, mat32.FromFixed(vht))
+	tr.Size = math32.V2(ssz.X, math32.FromFixed(vht))
 
 }
 
@@ -299,12 +299,12 @@ func (tr *Text) SetStringRot90(str string, fontSty *styles.FontRender, ctxt *uni
 	}
 	tr.Links = nil
 	sr := &(tr.Spans[0])
-	rot := float32(mat32.Pi / 2)
+	rot := float32(math32.Pi / 2)
 	sr.SetString(str, fontSty, ctxt, noBG, rot, scalex)
 	sr.SetRunePosTBRot(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots, fontSty.Face.Metrics.Ch, txtSty.TabSize)
 	ssz := sr.SizeHV()
 	vht := fontSty.Face.Face.Metrics().Height
-	tr.Size = mat32.V2(mat32.FromFixed(vht), ssz.Y)
+	tr.Size = math32.V2(math32.FromFixed(vht), ssz.Y)
 }
 
 // SetRunes is for basic text rendering with a single style of text (see
@@ -324,7 +324,7 @@ func (tr *Text) SetRunes(str []rune, fontSty *styles.FontRender, ctxt *units.Con
 	sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots, fontSty.Face.Metrics.Ch, txtSty.TabSize)
 	ssz := sr.SizeHV()
 	vht := fontSty.Face.Face.Metrics().Height
-	tr.Size = mat32.V2(ssz.X, mat32.FromFixed(vht))
+	tr.Size = math32.V2(ssz.X, math32.FromFixed(vht))
 }
 
 // SetHTMLSimpleTag sets the styling parameters for simple html style tags

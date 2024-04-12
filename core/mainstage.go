@@ -11,7 +11,7 @@ import (
 
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/units"
@@ -201,7 +201,7 @@ func (st *Stage) RunWindow() *Stage {
 	}
 
 	if st.NewWindow || CurrentRenderWindow == nil {
-		sc.Resize(mat32.Geom2DInt{st.RenderContext.Geom.Pos, sz})
+		sc.Resize(math32.Geom2DInt{st.RenderContext.Geom.Pos, sz})
 		win := st.NewRenderWin()
 		MainRenderWindows.Add(win)
 		CurrentRenderWindow = win
@@ -276,7 +276,7 @@ func (st *Stage) RunDialog() *Stage {
 
 	if st.NewWindow {
 		st.MainMgr = nil
-		sc.Resize(mat32.Geom2DInt{st.RenderContext.Geom.Pos, sz})
+		sc.Resize(math32.Geom2DInt{st.RenderContext.Geom.Pos, sz})
 		st.Type = WindowStage            // critical: now is its own window!
 		sc.SceneGeom.Pos = image.Point{} // ignore pos
 		win := st.NewRenderWin()

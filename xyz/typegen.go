@@ -5,7 +5,7 @@ package xyz
 import (
 	"image/color"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )
@@ -182,7 +182,7 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Plane", IDName:
 
 // SetNormAxis sets the [Plane.NormAxis]:
 // axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormNeg for whether it is facing in the positive or negative of the given axis.
-func (t *Plane) SetNormAxis(v mat32.Dims) *Plane { t.NormAxis = v; return t }
+func (t *Plane) SetNormAxis(v math32.Dims) *Plane { t.NormAxis = v; return t }
 
 // SetNormNeg sets the [Plane.NormNeg]:
 // if false, the plane normal facing in the positive direction along specified NormAxis, otherwise it faces in the negative if true
@@ -190,11 +190,11 @@ func (t *Plane) SetNormNeg(v bool) *Plane { t.NormNeg = v; return t }
 
 // SetSize sets the [Plane.Size]:
 // 2D size of plane
-func (t *Plane) SetSize(v mat32.Vec2) *Plane { t.Size = v; return t }
+func (t *Plane) SetSize(v math32.Vec2) *Plane { t.Size = v; return t }
 
 // SetSegs sets the [Plane.Segs]:
 // number of segments to divide plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1
-func (t *Plane) SetSegs(v mat32.Vec2i) *Plane { t.Segs = v; return t }
+func (t *Plane) SetSegs(v math32.Vec2i) *Plane { t.Segs = v; return t }
 
 // SetOffset sets the [Plane.Offset]:
 // offset from origin along direction of normal to the plane
@@ -213,11 +213,11 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Box", IDName: "
 
 // SetSize sets the [Box.Size]:
 // size along each dimension
-func (t *Box) SetSize(v mat32.Vec3) *Box { t.Size = v; return t }
+func (t *Box) SetSize(v math32.Vec3) *Box { t.Size = v; return t }
 
 // SetSegs sets the [Box.Segs]:
 // number of segments to divide each plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1
-func (t *Box) SetSegs(v mat32.Vec3i) *Box { t.Segs = v; return t }
+func (t *Box) SetSegs(v math32.Vec3i) *Box { t.Segs = v; return t }
 
 // SetColor sets the [Box.Color]
 func (t *Box) SetColor(v bool) *Box { t.Color = v; return t }

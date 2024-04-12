@@ -9,7 +9,7 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/pi/lex"
 	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/texteditor/textbuf"
@@ -881,7 +881,7 @@ func (ed *Editor) ScrollCursorToCenterIfHidden() bool {
 // coordinate at top of view to extent possible -- returns true if scrolled
 func (ed *Editor) ScrollToTop(pos int) bool {
 	ed.NeedsRender()
-	return ed.ScrollDimToStart(mat32.Y, pos)
+	return ed.ScrollDimToStart(math32.Y, pos)
 }
 
 // ScrollCursorToTop tells any parent scroll layout to scroll to get cursor
@@ -896,7 +896,7 @@ func (ed *Editor) ScrollCursorToTop() bool {
 // scrolled
 func (ed *Editor) ScrollToBottom(pos int) bool {
 	ed.NeedsRender()
-	return ed.ScrollDimToEnd(mat32.Y, pos)
+	return ed.ScrollDimToEnd(math32.Y, pos)
 }
 
 // ScrollCursorToBottom tells any parent scroll layout to scroll to get cursor
@@ -911,7 +911,7 @@ func (ed *Editor) ScrollCursorToBottom() bool {
 // scrolled
 func (ed *Editor) ScrollToVertCenter(pos int) bool {
 	ed.NeedsRender()
-	return ed.ScrollDimToCenter(mat32.Y, pos)
+	return ed.ScrollDimToCenter(math32.Y, pos)
 }
 
 // ScrollCursorToVertCenter tells any parent scroll layout to scroll to get
@@ -937,7 +937,7 @@ func (ed *Editor) ScrollCursorToTarget() {
 // horizontal coordinate at left of view to extent possible -- returns true if
 // scrolled
 func (ed *Editor) ScrollToLeft(pos int) bool {
-	return ed.ScrollDimToStart(mat32.X, pos)
+	return ed.ScrollDimToStart(math32.X, pos)
 }
 
 // ScrollCursorToLeft tells any parent scroll layout to scroll to get cursor
@@ -956,7 +956,7 @@ func (ed *Editor) ScrollCursorToLeft() bool {
 // horizontal coordinate at right of view to extent possible -- returns true
 // if scrolled
 func (ed *Editor) ScrollToRight(pos int) bool {
-	return ed.ScrollDimToEnd(mat32.X, pos)
+	return ed.ScrollDimToEnd(math32.X, pos)
 }
 
 // ScrollCursorToRight tells any parent scroll layout to scroll to get cursor
@@ -970,7 +970,7 @@ func (ed *Editor) ScrollCursorToRight() bool {
 // horizontal coordinate to center of view to extent possible -- returns true if
 // scrolled
 func (ed *Editor) ScrollToHorizCenter(pos int) bool {
-	return ed.ScrollDimToCenter(mat32.X, pos)
+	return ed.ScrollDimToCenter(math32.X, pos)
 }
 
 // ScrollCursorToHorizCenter tells any parent scroll layout to scroll to get
@@ -978,7 +978,7 @@ func (ed *Editor) ScrollToHorizCenter(pos int) bool {
 // scrolled.
 func (ed *Editor) ScrollCursorToHorizCenter() bool {
 	curBBox := ed.CursorBBox(ed.CursorPos)
-	mn := int(mat32.Ceil(float32(curBBox.Min.X) + ed.LineNoOff))
+	mn := int(math32.Ceil(float32(curBBox.Min.X) + ed.LineNoOff))
 	mid := (mn + curBBox.Max.X) / 2
 	return ed.ScrollToHorizCenter(mid)
 }

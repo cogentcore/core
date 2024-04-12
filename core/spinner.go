@@ -13,7 +13,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 )
@@ -136,10 +136,10 @@ func (sp *Spinner) SetValue(val float32) *Spinner {
 	} else if sp.HasMin && sp.Value < sp.Min {
 		sp.Value = sp.Min
 	}
-	sp.Value = mat32.Truncate(sp.Value, sp.Prec)
+	sp.Value = math32.Truncate(sp.Value, sp.Prec)
 	if sp.EnforceStep {
 		// round to the nearest step
-		sp.Value = sp.Step * mat32.Round(sp.Value/sp.Step)
+		sp.Value = sp.Step * math32.Round(sp.Value/sp.Step)
 	}
 	sp.SetTextToValue()
 	sp.NeedsRender()
@@ -161,7 +161,7 @@ func (sp *Spinner) IncrementValue(steps float32) *Spinner {
 		return sp
 	}
 	val := sp.Value + steps*sp.Step
-	val = mat32.IntMultiple(val, sp.Step)
+	val = math32.IntMultiple(val, sp.Step)
 	val = sp.WrapAround(val)
 	return sp.SetValueAction(val)
 }
@@ -177,7 +177,7 @@ func (sp *Spinner) PageIncrementValue(steps float32) *Spinner {
 		sp.PageStep = 2 * sp.Step
 	}
 	val := sp.Value + steps*sp.PageStep
-	val = mat32.IntMultiple(val, sp.PageStep)
+	val = math32.IntMultiple(val, sp.PageStep)
 	val = sp.WrapAround(val)
 	return sp.SetValueAction(val)
 }

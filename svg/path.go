@@ -12,7 +12,7 @@ import (
 	"strings"
 	"unicode"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/tree"
 )
@@ -30,11 +30,11 @@ type Path struct {
 
 func (g *Path) SVGName() string { return "path" }
 
-func (g *Path) SetPos(pos mat32.Vec2) {
+func (g *Path) SetPos(pos math32.Vec2) {
 	// todo: set first point
 }
 
-func (g *Path) SetSize(sz mat32.Vec2) {
+func (g *Path) SetSize(sz math32.Vec2) {
 	// todo: scale bbox
 }
 
@@ -51,7 +51,7 @@ func (g *Path) SetData(data string) error {
 	return err
 }
 
-func (g *Path) LocalBBox() mat32.Box2 {
+func (g *Path) LocalBBox() math32.Box2 {
 	bb := PathDataBBox(g.Data)
 	hlw := 0.5 * g.LocalLineWidth()
 	bb.Min.SetSubScalar(hlw)
@@ -83,9 +83,9 @@ func (g *Path) Render(sv *SVG) {
 		mrk.RenderMarker(sv, env, ang, g.Paint.StrokeStyle.Width.Dots)
 	}
 	if mrk := sv.MarkerByName(g, "marker-mid"); mrk != nil {
-		var ptm2, ptm1, pt mat32.Vec2
+		var ptm2, ptm1, pt math32.Vec2
 		gotidx := 0
-		PathDataIterFunc(g.Data, func(idx int, cmd PathCmds, ptIndex int, cp mat32.Vec2, ctrls []mat32.Vec2) bool {
+		PathDataIterFunc(g.Data, func(idx int, cmd PathCmds, ptIndex int, cp math32.Vec2, ctrls []math32.Vec2) bool {
 			ptm2 = ptm1
 			ptm1 = pt
 			pt = cp
@@ -96,7 +96,7 @@ func (g *Path) Render(sv *SVG) {
 			if idx >= sz-3 { // todo: this is approximate...
 				return false
 			}
-			ang := 0.5 * (mat32.Atan2(pt.Y-ptm1.Y, pt.X-ptm1.X) + mat32.Atan2(ptm1.Y-ptm2.Y, ptm1.X-ptm2.X))
+			ang := 0.5 * (math32.Atan2(pt.Y-ptm1.Y, pt.X-ptm1.X) + math32.Atan2(ptm1.Y-ptm2.Y, ptm1.X-ptm2.X))
 			mrk.RenderMarker(sv, ptm1, ang, g.Paint.StrokeStyle.Width.Dots)
 			gotidx++
 			return true
@@ -184,8 +184,8 @@ func PathDataNext(data []PathData, i *int) float32 {
 }
 
 // PathDataNextVec gets the next 2 path data points as a vector
-func PathDataNextVec(data []PathData, i *int) mat32.Vec2 {
-	v := mat32.Vec2{}
+func PathDataNextVec(data []PathData, i *int) math32.Vec2 {
+	v := math32.Vec2{}
 	v.X = float32(data[*i])
 	(*i)++
 	v.Y = float32(data[*i])
@@ -195,8 +195,8 @@ func PathDataNextVec(data []PathData, i *int) mat32.Vec2 {
 
 // PathDataNextRel gets the next 2 path data points as a relative vector
 // and returns that relative vector added to current point
-func PathDataNextRel(data []PathData, i *int, cp mat32.Vec2) mat32.Vec2 {
-	v := mat32.Vec2{}
+func PathDataNextRel(data []PathData, i *int, cp math32.Vec2) math32.Vec2 {
+	v := math32.Vec2{}
 	v.X = float32(data[*i])
 	(*i)++
 	v.Y = float32(data[*i])
@@ -212,7 +212,7 @@ func PathDataNextCmd(data []PathData, i *int) (PathCmds, int) {
 	return pd.Cmd()
 }
 
-func reflectPt(pt, rp mat32.Vec2) mat32.Vec2 {
+func reflectPt(pt, rp math32.Vec2) math32.Vec2 {
 	return pt.MulScalar(2).Sub(rp)
 }
 
@@ -224,7 +224,7 @@ func PathDataRender(data []PathData, pc *paint.Context) {
 		return
 	}
 	lastCmd := PcErr
-	var st, cp, xp, ctrl mat32.Vec2
+	var st, cp, xp, ctrl math32.Vec2
 	for i := 0; i < sz; {
 		cmd, n := PathDataNextCmd(data, &i)
 		rel := false
@@ -380,13 +380,13 @@ func PathDataRender(data []PathData, pc *paint.Context) {
 // For Control points, order is in same order as in standard path stream
 // when multiple, e.g., C,S.
 // For A: order is: nc, prv, rad, mat32.Vec2{X: ang}, mat32.V2(laf, sf)}
-func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIndex int, cp mat32.Vec2, ctrls []mat32.Vec2) bool) {
+func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIndex int, cp math32.Vec2, ctrls []math32.Vec2) bool) {
 	sz := len(data)
 	if sz == 0 {
 		return
 	}
 	lastCmd := PcErr
-	var st, cp, xp, ctrl, nc mat32.Vec2
+	var st, cp, xp, ctrl, nc math32.Vec2
 	for i := 0; i < sz; {
 		cmd, n := PathDataNextCmd(data, &i)
 		rel := false
@@ -462,7 +462,7 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIndex i
 				xp = PathDataNextVec(data, &i)
 				ctrl = PathDataNextVec(data, &i)
 				cp = PathDataNextVec(data, &i)
-				if !fun(i-2, cmd, np, cp, []mat32.Vec2{xp, ctrl}) {
+				if !fun(i-2, cmd, np, cp, []math32.Vec2{xp, ctrl}) {
 					return
 				}
 			}
@@ -471,7 +471,7 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIndex i
 				xp = PathDataNextRel(data, &i, cp)
 				ctrl = PathDataNextRel(data, &i, cp)
 				cp = PathDataNextRel(data, &i, cp)
-				if !fun(i-2, cmd, np, cp, []mat32.Vec2{xp, ctrl}) {
+				if !fun(i-2, cmd, np, cp, []math32.Vec2{xp, ctrl}) {
 					return
 				}
 			}
@@ -493,7 +493,7 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIndex i
 					xp = PathDataNextVec(data, &i)
 					cp = PathDataNextVec(data, &i)
 				}
-				if !fun(i-2, cmd, np, cp, []mat32.Vec2{xp, ctrl}) {
+				if !fun(i-2, cmd, np, cp, []math32.Vec2{xp, ctrl}) {
 					return
 				}
 				lastCmd = cmd
@@ -503,7 +503,7 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIndex i
 			for np := 0; np < n/4; np++ {
 				ctrl = PathDataNextVec(data, &i)
 				cp = PathDataNextVec(data, &i)
-				if !fun(i-2, cmd, np, cp, []mat32.Vec2{ctrl}) {
+				if !fun(i-2, cmd, np, cp, []math32.Vec2{ctrl}) {
 					return
 				}
 			}
@@ -511,7 +511,7 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIndex i
 			for np := 0; np < n/4; np++ {
 				ctrl = PathDataNextRel(data, &i, cp)
 				cp = PathDataNextRel(data, &i, cp)
-				if !fun(i-2, cmd, np, cp, []mat32.Vec2{ctrl}) {
+				if !fun(i-2, cmd, np, cp, []math32.Vec2{ctrl}) {
 					return
 				}
 			}
@@ -531,7 +531,7 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIndex i
 				} else {
 					cp = PathDataNextVec(data, &i)
 				}
-				if !fun(i-2, cmd, np, cp, []mat32.Vec2{ctrl}) {
+				if !fun(i-2, cmd, np, cp, []math32.Vec2{ctrl}) {
 					return
 				}
 				lastCmd = cmd
@@ -555,7 +555,7 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIndex i
 					cp = PathDataNextVec(data, &i)
 				}
 				nc.X, nc.Y = paint.FindEllipseCenter(&rad.X, &rad.Y, ang*math.Pi/180, prv.X, prv.Y, cp.X, cp.Y, sweep, largeArc)
-				if !fun(i-2, cmd, np, cp, []mat32.Vec2{nc, prv, rad, {X: ang}, {laf, sf}}) {
+				if !fun(i-2, cmd, np, cp, []math32.Vec2{nc, prv, rad, {X: ang}, {laf, sf}}) {
 					return
 				}
 			}
@@ -569,9 +569,9 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIndex i
 }
 
 // PathDataBBox traverses the path data and extracts the local bounding box
-func PathDataBBox(data []PathData) mat32.Box2 {
-	bb := mat32.B2Empty()
-	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIndex int, cp mat32.Vec2, ctrls []mat32.Vec2) bool {
+func PathDataBBox(data []PathData) math32.Box2 {
+	bb := math32.B2Empty()
+	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIndex int, cp math32.Vec2, ctrls []math32.Vec2) bool {
 		bb.ExpandByPoint(cp)
 		return tree.Continue
 	})
@@ -579,11 +579,11 @@ func PathDataBBox(data []PathData) mat32.Box2 {
 }
 
 // PathDataStart gets the starting coords and angle from the path
-func PathDataStart(data []PathData) (vec mat32.Vec2, ang float32) {
+func PathDataStart(data []PathData) (vec math32.Vec2, ang float32) {
 	gotSt := false
-	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIndex int, cp mat32.Vec2, ctrls []mat32.Vec2) bool {
+	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIndex int, cp math32.Vec2, ctrls []math32.Vec2) bool {
 		if gotSt {
-			ang = mat32.Atan2(cp.Y-vec.Y, cp.X-vec.X)
+			ang = math32.Atan2(cp.Y-vec.Y, cp.X-vec.X)
 			return tree.Break
 		}
 		vec = cp
@@ -594,11 +594,11 @@ func PathDataStart(data []PathData) (vec mat32.Vec2, ang float32) {
 }
 
 // PathDataEnd gets the ending coords and angle from the path
-func PathDataEnd(data []PathData) (vec mat32.Vec2, ang float32) {
+func PathDataEnd(data []PathData) (vec math32.Vec2, ang float32) {
 	gotSome := false
-	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIndex int, cp mat32.Vec2, ctrls []mat32.Vec2) bool {
+	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIndex int, cp math32.Vec2, ctrls []math32.Vec2) bool {
 		if gotSome {
-			ang = mat32.Atan2(cp.Y-vec.Y, cp.X-vec.X)
+			ang = math32.Atan2(cp.Y-vec.Y, cp.X-vec.X)
 		}
 		vec = cp
 		gotSome = true
@@ -801,7 +801,7 @@ func PathDataString(data []PathData) string {
 		return ""
 	}
 	var sb strings.Builder
-	var rp, cp, xp, ctrl mat32.Vec2
+	var rp, cp, xp, ctrl math32.Vec2
 	for i := 0; i < sz; {
 		cmd, n := PathDataNextCmd(data, &i)
 		sb.WriteString(fmt.Sprintf("%c ", PathCmdToRune[cmd]))
@@ -873,14 +873,14 @@ func PathDataString(data []PathData) string {
 
 // ApplyTransform applies the given 2D transform to the geometry of this node
 // each node must define this for itself
-func (g *Path) ApplyTransform(sv *SVG, xf mat32.Mat2) {
+func (g *Path) ApplyTransform(sv *SVG, xf math32.Mat2) {
 	// path may have horiz, vert elements -- only gen soln is to transform
 	g.Paint.Transform.SetMul(xf)
 	g.SetProperty("transform", g.Paint.Transform.String())
 }
 
 // PathDataTransformAbs does the transform of next two data points as absolute coords
-func PathDataTransformAbs(data []PathData, i *int, xf mat32.Mat2, lpt mat32.Vec2) mat32.Vec2 {
+func PathDataTransformAbs(data []PathData, i *int, xf math32.Mat2, lpt math32.Vec2) math32.Vec2 {
 	cp := PathDataNextVec(data, i)
 	tc := xf.MulVec2AsPointCenter(cp, lpt)
 	data[*i-2] = PathData(tc.X)
@@ -890,7 +890,7 @@ func PathDataTransformAbs(data []PathData, i *int, xf mat32.Mat2, lpt mat32.Vec2
 
 // PathDataTransformRel does the transform of next two data points as relative coords
 // compared to given cp coordinate.  returns new *absolute* coordinate
-func PathDataTransformRel(data []PathData, i *int, xf mat32.Mat2, cp mat32.Vec2) mat32.Vec2 {
+func PathDataTransformRel(data []PathData, i *int, xf math32.Mat2, cp math32.Vec2) math32.Vec2 {
 	rp := PathDataNextVec(data, i)
 	tc := xf.MulVec2AsVec(rp)
 	data[*i-2] = PathData(tc.X)
@@ -903,7 +903,7 @@ func PathDataTransformRel(data []PathData, i *int, xf mat32.Mat2, cp mat32.Vec2)
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Path) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+func (g *Path) ApplyDeltaTransform(sv *SVG, trans math32.Vec2, scale math32.Vec2, rot float32, pt math32.Vec2) {
 	crot := g.Paint.Transform.ExtractRot()
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
@@ -917,12 +917,12 @@ func (g *Path) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, 
 }
 
 // ApplyTransformImpl does the implementation of applying a transform to all points
-func (g *Path) ApplyTransformImpl(xf mat32.Mat2, lpt mat32.Vec2) {
+func (g *Path) ApplyTransformImpl(xf math32.Mat2, lpt math32.Vec2) {
 	sz := len(g.Data)
 	data := g.Data
 	lastCmd := PcErr
-	var cp, st mat32.Vec2
-	var xp, ctrl, rp mat32.Vec2
+	var cp, st math32.Vec2
+	var xp, ctrl, rp math32.Vec2
 	for i := 0; i < sz; {
 		cmd, n := PathDataNextCmd(data, &i)
 		rel := false
@@ -1045,7 +1045,7 @@ func (g *Path) ApplyTransformImpl(xf mat32.Mat2, lpt mat32.Vec2) {
 			fallthrough
 		case PcA:
 			for np := 0; np < n/7; np++ {
-				rad := PathDataTransformRel(data, &i, xf, mat32.Vec2{})
+				rad := PathDataTransformRel(data, &i, xf, math32.Vec2{})
 				ang := PathDataNext(data, &i)
 				largeArc := (PathDataNext(data, &i) != 0)
 				sweep := (PathDataNext(data, &i) != 0)

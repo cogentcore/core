@@ -8,7 +8,7 @@ import (
 	"image"
 	"math"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"github.com/anthonynsimon/bild/clone"
 	"github.com/anthonynsimon/bild/convolution"
 )
@@ -65,7 +65,7 @@ func GaussianBlur(src image.Image, sigma float64) *image.RGBA {
 // because values beyond 1 sigma are effectively invisible, but 2 looks
 // better for greater contrast cases.
 func EdgeBlurFactors(sigma, radiusFactor float32) []float32 {
-	radius := mat32.Ceil(sigma * radiusFactor)
+	radius := math32.Ceil(sigma * radiusFactor)
 	irad := int(radius)
 	klen := irad*2 + 1
 	sfactor := -0.5 / (sigma * sigma)
@@ -77,7 +77,7 @@ func EdgeBlurFactors(sigma, radiusFactor float32) []float32 {
 	sum := float32(0)
 	rstart := -radius + 0.5
 	for i, x := 0, rstart; i < klen; i, x = i+1, x+1 {
-		v := mat32.FastExp(sfactor * (x * x))
+		v := math32.FastExp(sfactor * (x * x))
 		sum += v
 		k[i] = v
 	}

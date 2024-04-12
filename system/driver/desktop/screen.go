@@ -9,7 +9,7 @@ import (
 	"log"
 
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/system"
 	"github.com/go-gl/glfw/v3.3/glfw"
@@ -124,7 +124,7 @@ func (a *App) GetScreens() {
 		}
 		x, y := mon.GetPos()
 		cscx, _ := mon.GetContentScale() // note: requires glfw 3.3
-		if mat32.IsNaN(cscx) {
+		if math32.IsNaN(cscx) {
 			if MonitorDebug {
 				log.Printf("MonitorDebug: GetContentScale on %s returned NaN -- trying saved info..\n", mon.GetName())
 			}

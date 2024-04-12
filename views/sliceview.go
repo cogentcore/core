@@ -27,7 +27,7 @@ import (
 	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/states"
@@ -385,7 +385,7 @@ func (sv *SliceViewBase) SetStyles() {
 					s.SetAbilities(true, abilities.DoubleClickable)
 					s.SetAbilities(!sv.IsReadOnly(), abilities.Draggable, abilities.Droppable)
 					s.Cursor = cursors.None
-					nd := mat32.Log10(float32(sv.SliceSize))
+					nd := math32.Log10(float32(sv.SliceSize))
 					nd = max(nd, 3)
 					s.Min.X.Ch(nd + 2)
 					s.Padding.Right.Dp(4)
@@ -2012,7 +2012,7 @@ func (sv *SliceViewBase) HandleEvents() {
 		if !isValid {
 			return
 		}
-		sv.This().(SliceViewer).SliceGrid().AutoScroll(mat32.V2(0, float32(idx)))
+		sv.This().(SliceViewer).SliceGrid().AutoScroll(math32.V2(0, float32(idx)))
 		prevHoverRow := sv.HoverRow
 		if !isValid {
 			sv.HoverRow = -1
@@ -2091,7 +2091,7 @@ func (sg *SliceViewGrid) OnInit() {
 	})
 }
 
-func (sg *SliceViewGrid) SizeFromChildren(iter int, pass core.LayoutPasses) mat32.Vec2 {
+func (sg *SliceViewGrid) SizeFromChildren(iter int, pass core.LayoutPasses) math32.Vec2 {
 	csz := sg.Frame.SizeFromChildren(iter, pass)
 	rht, err := sg.LayImpl.RowHeight(0, 0)
 	if err != nil {
@@ -2109,7 +2109,7 @@ func (sg *SliceViewGrid) SizeFromChildren(iter int, pass core.LayoutPasses) mat3
 	}
 	allocHt := sg.Geom.Size.Alloc.Content.Y - sg.Geom.Size.InnerSpace.Y
 	if allocHt > sg.RowHeight {
-		sg.VisRows = int(mat32.Floor(allocHt / sg.RowHeight))
+		sg.VisRows = int(math32.Floor(allocHt / sg.RowHeight))
 	}
 	sg.VisRows = max(sg.VisRows, sg.MinRows)
 	minHt := sg.RowHeight * float32(sg.MinRows)
@@ -2118,8 +2118,8 @@ func (sg *SliceViewGrid) SizeFromChildren(iter int, pass core.LayoutPasses) mat3
 	return csz
 }
 
-func (sg *SliceViewGrid) SetScrollParams(d mat32.Dims, sb *core.Slider) {
-	if d == mat32.X {
+func (sg *SliceViewGrid) SetScrollParams(d math32.Dims, sb *core.Slider) {
+	if d == math32.X {
 		sg.Frame.SetScrollParams(d, sb)
 		return
 	}
@@ -2142,8 +2142,8 @@ func (sg *SliceViewGrid) SliceView() (SliceViewer, *SliceViewBase) {
 	return sv, sv.AsSliceViewBase()
 }
 
-func (sg *SliceViewGrid) ScrollChanged(d mat32.Dims, sb *core.Slider) {
-	if d == mat32.X {
+func (sg *SliceViewGrid) ScrollChanged(d math32.Dims, sb *core.Slider) {
+	if d == math32.X {
 		sg.Frame.ScrollChanged(d, sb)
 		return
 	}
@@ -2151,13 +2151,13 @@ func (sg *SliceViewGrid) ScrollChanged(d mat32.Dims, sb *core.Slider) {
 	if sv == nil {
 		return
 	}
-	sv.StartIndex = int(mat32.Round(sb.Value))
+	sv.StartIndex = int(math32.Round(sb.Value))
 	sv.This().(SliceViewer).UpdateWidgets()
 	sg.NeedsRender()
 }
 
-func (sg *SliceViewGrid) ScrollValues(d mat32.Dims) (maxSize, visSize, visPct float32) {
-	if d == mat32.X {
+func (sg *SliceViewGrid) ScrollValues(d math32.Dims) (maxSize, visSize, visPct float32) {
+	if d == math32.X {
 		return sg.Frame.ScrollValues(d)
 	}
 	_, sv := sg.SliceView()
@@ -2171,10 +2171,10 @@ func (sg *SliceViewGrid) ScrollValues(d mat32.Dims) (maxSize, visSize, visPct fl
 }
 
 func (sg *SliceViewGrid) UpdateScroll(idx int) {
-	if !sg.HasScroll[mat32.Y] || sg.Scrolls[mat32.Y] == nil {
+	if !sg.HasScroll[math32.Y] || sg.Scrolls[math32.Y] == nil {
 		return
 	}
-	sb := sg.Scrolls[mat32.Y]
+	sb := sg.Scrolls[math32.Y]
 	sb.SetValue(float32(idx))
 }
 
@@ -2270,7 +2270,7 @@ func (sg *SliceViewGrid) RenderStripes() {
 		miny := st.Y
 		for c := 0; c < cols; c++ {
 			kw := sg.Child(r*cols + c).(core.Widget).AsWidget()
-			pyi := mat32.Floor(kw.Geom.Pos.Total.Y)
+			pyi := math32.Floor(kw.Geom.Pos.Total.Y)
 			if pyi < miny {
 				miny = pyi
 			}
@@ -2305,12 +2305,12 @@ func (sg *SliceViewGrid) IndexFromPixel(pt image.Point) (row, col int, isValid b
 	if !sg.MousePosInGrid(pt) {
 		return
 	}
-	ptf := mat32.V2FromPoint(sg.PointToRelPos(pt))
-	sz := mat32.V2FromPoint(sg.Geom.ContentBBox.Size())
+	ptf := math32.V2FromPoint(sg.PointToRelPos(pt))
+	sz := math32.V2FromPoint(sg.Geom.ContentBBox.Size())
 	isValid = true
 	rows := sg.LayImpl.Shape.Y
 	cols := sg.LayImpl.Shape.X
-	st := mat32.Vec2{}
+	st := math32.Vec2{}
 	got := false
 	for r := 0; r < rows; r++ {
 		ht, _ := sg.LayImpl.RowHeight(r, 0)
@@ -2319,7 +2319,7 @@ func (sg *SliceViewGrid) IndexFromPixel(pt image.Point) (row, col int, isValid b
 		if r > 0 {
 			for c := 0; c < cols; c++ {
 				kw := sg.Child(r*cols + c).(core.Widget).AsWidget()
-				pyi := mat32.Floor(kw.Geom.Pos.Total.Y)
+				pyi := math32.Floor(kw.Geom.Pos.Total.Y)
 				if pyi < miny {
 					miny = pyi
 				}

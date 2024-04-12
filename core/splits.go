@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
@@ -281,7 +281,7 @@ func (sl *Splits) SizeDownSetAllocs(iter int) {
 	cszd := csz.Dim(dim)
 	cszod := csz.Dim(od)
 	sl.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		sw := mat32.Round(sl.Splits[i] * cszd)
+		sw := math32.Round(sl.Splits[i] * cszd)
 		ksz := &kwb.Geom.Size
 		ksz.Alloc.Total.SetDim(dim, sw)
 		ksz.Alloc.Total.SetDim(od, cszod)
@@ -325,7 +325,7 @@ func (sl *Splits) PositionSplits() {
 		if i == 0 {
 			return tree.Continue
 		}
-		sw := mat32.Round(sl.Splits[i-1] * cszd)
+		sw := math32.Round(sl.Splits[i-1] * cszd)
 		pos += sw + hwd
 		kwb.Geom.RelPos.SetDim(dim, pos)
 		hl := sl.Parts.Child(i - 1).(*Handle)

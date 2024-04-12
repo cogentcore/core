@@ -7,7 +7,7 @@ package szalloc
 import (
 	"image"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // Indexes contains the indexes where a given item image size is allocated
@@ -15,7 +15,7 @@ import (
 type Indexes struct {
 
 	// percent size of this image relative to max size allocated
-	PctSize mat32.Vec2
+	PctSize math32.Vec2
 
 	// group index
 	GpIndex int

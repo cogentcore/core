@@ -9,7 +9,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 )
@@ -68,7 +68,7 @@ func (hl *Handle) SetStyles() {
 func (hl *Handle) HandleEvents() {
 	hl.On(events.SlideMove, func(e events.Event) {
 		pos := hl.ParentWidget().PointToRelPos(e.Pos())
-		hl.Pos = mat32.V2FromPoint(pos).Dim(hl.Styles.Direction.Dim())
+		hl.Pos = math32.V2FromPoint(pos).Dim(hl.Styles.Direction.Dim())
 		hl.SendChange(e)
 	})
 }

@@ -19,7 +19,7 @@ import (
 	_ "cogentcore.org/core/xyz/io/obj"
 	"cogentcore.org/core/xyzview"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // Anim has control for animating
@@ -53,10 +53,10 @@ type Anim struct {
 	Gopher *xyz.Group
 
 	// original position
-	TorusPosOrig mat32.Vec3
+	TorusPosOrig math32.Vec3
 
 	// original position
-	GopherPosOrig mat32.Vec3
+	GopherPosOrig math32.Vec3
 }
 
 // Start starts the animation ticker timer -- if on is true, then
@@ -108,8 +108,8 @@ func (an *Anim) Animate() {
 		radius := float32(0.3)
 
 		if an.DoTorus {
-			tdx := radius * mat32.Cos(an.Ang)
-			tdz := radius * mat32.Sin(an.Ang)
+			tdx := radius * math32.Cos(an.Ang)
+			tdz := radius * math32.Sin(an.Ang)
 			tp := an.TorusPosOrig
 			tp.X += tdx
 			tp.Z += tdz
@@ -117,8 +117,8 @@ func (an *Anim) Animate() {
 		}
 
 		if an.DoGopher {
-			gdx := 0.1 * radius * mat32.Cos(an.Ang+math.Pi)
-			gdz := 0.1 * radius * mat32.Sin(an.Ang+math.Pi)
+			gdx := 0.1 * radius * math32.Cos(an.Ang+math.Pi)
+			gdz := 0.1 * radius * math32.Sin(an.Ang+math.Pi)
 			gp := an.GopherPosOrig
 			gp.X += gdx
 			gp.Z += gdz
@@ -167,7 +167,7 @@ func main() {
 	// se.Camera.Pose.Pos.Set(-2, 9, 3)
 	sc.Camera.Pose.Pos.Set(0, 2, 10)
 	// se.Camera.Pose.Pos.Set(0, 0, 10)              // default position
-	sc.Camera.LookAt(mat32.Vec3{}, mat32.V3(0, 1, 0)) // defaults to looking at origin
+	sc.Camera.LookAt(math32.Vec3{}, math32.V3(0, 1, 0)) // defaults to looking at origin
 
 	// point := xyz.NewPointLight(sc, "point", 1, xyz.DirectSun)
 	// point.Pos.Set(0, 5, 5)
@@ -204,13 +204,13 @@ func main() {
 	// floor.Mat.Bright = 2 // .5 for wood / brown
 	// floor.SetDisabled() // not selectable
 
-	lnsm := xyz.NewLines(sc, "Lines", []mat32.Vec3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, mat32.V2(.2, .1), xyz.CloseLines)
+	lnsm := xyz.NewLines(sc, "Lines", []math32.Vec3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, math32.V2(.2, .1), xyz.CloseLines)
 	lns := xyz.NewSolid(sc, "hi-line").SetMesh(lnsm).SetColor(color.RGBA{255, 255, 0, 128})
 	lns.Pose.Pos.Set(0, 0, 1)
 
 	// this line should go from lower left front of red cube to upper vertex of above hi-line
 	cyan := colors.FromRGB(0, 255, 255)
-	xyz.NewArrow(sc, sc, "arrow", mat32.V3(-1.5, -.5, .5), mat32.V3(2, 1, 1), .05, cyan, xyz.StartArrow, xyz.EndArrow, 4, .5, 4)
+	xyz.NewArrow(sc, sc, "arrow", math32.V3(-1.5, -.5, .5), math32.V3(2, 1, 1), .05, cyan, xyz.StartArrow, xyz.EndArrow, 4, .5, 4)
 
 	// bbclr := styles.Color{}
 	// bbclr.SetUInt8(255, 255, 0, 255)

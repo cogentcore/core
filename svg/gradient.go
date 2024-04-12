@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/colors/gradient"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 /////////////////////////////////////////////////////////////////////////////
@@ -54,7 +54,7 @@ func (sv *SVG) GradientByName(n Node, grnm string) *Gradient {
 
 // GradientApplyTransform applies the given transform to any gradients for this node,
 // that are using specific coordinates (not bounding box which is automatic)
-func (g *NodeBase) GradientApplyTransform(sv *SVG, xf mat32.Mat2) {
+func (g *NodeBase) GradientApplyTransform(sv *SVG, xf math32.Mat2) {
 	gi := g.This().(Node)
 	gnm := NodePropURL(gi, "fill")
 	if gnm != "" {
@@ -75,7 +75,7 @@ func (g *NodeBase) GradientApplyTransform(sv *SVG, xf mat32.Mat2) {
 // GradientApplyTransformPt applies the given transform with ctr point
 // to any gradients for this node, that are using specific coordinates
 // (not bounding box which is automatic)
-func (g *NodeBase) GradientApplyTransformPt(sv *SVG, xf mat32.Mat2, pt mat32.Vec2) {
+func (g *NodeBase) GradientApplyTransformPt(sv *SVG, xf math32.Mat2, pt math32.Vec2) {
 	gi := g.This().(Node)
 	gnm := NodePropURL(gi, "fill")
 	if gnm != "" {
@@ -280,7 +280,7 @@ func (sv *SVG) GradientUpdateNodePoints(n Node, prop string) {
 	}
 	gb := gr.Grad.AsBase()
 	gb.SetBox(n.LocalBBox())
-	gb.SetTransform(mat32.Identity2())
+	gb.SetTransform(math32.Identity2())
 }
 
 // GradientCloneNodeProp creates a new clone of the existing gradient for node

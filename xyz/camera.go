@@ -8,7 +8,7 @@ import (
 	"image"
 	"sync"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // Camera defines the properties of the camera
@@ -21,10 +21,10 @@ type Camera struct {
 	CamMu sync.RWMutex
 
 	// target location for the camera -- where it is pointing at -- defaults to the origin, but moves with panning movements, and is reset by a call to LookAt method
-	Target mat32.Vec3
+	Target math32.Vec3
 
 	// up direction for camera -- which way is up -- defaults to positive Y axis, and is reset by call to LookAt method
-	UpDir mat32.Vec3
+	UpDir math32.Vec3
 
 	// default is a Perspective camera -- set this to make it Orthographic instead, in which case the view includes the volume specified by the Near - Far distance (i.e., you probably want to decrease Far).
 	Ortho bool
@@ -42,19 +42,19 @@ type Camera struct {
 	Far float32
 
 	// view matrix (inverse of the Pose.Matrix)
-	ViewMatrix mat32.Mat4 `view:"-"`
+	ViewMatrix math32.Mat4 `view:"-"`
 
 	// projection matrix, defining the camera perspective / ortho transform
-	PrjnMatrix mat32.Mat4 `view:"-"`
+	PrjnMatrix math32.Mat4 `view:"-"`
 
 	// vulkan projection matrix -- required for vgpu -- produces same effect as PrjnMatrix, which should be used for all other math
-	VkPrjnMatrix mat32.Mat4 `view:"-"`
+	VkPrjnMatrix math32.Mat4 `view:"-"`
 
 	// inverse of the projection matrix
-	InvPrjnMatrix mat32.Mat4 `view:"-"`
+	InvPrjnMatrix math32.Mat4 `view:"-"`
 
 	// frustum of projection -- viewable space defined by 6 planes of a pyrammidal shape
-	Frustum *mat32.Frustum `view:"-"`
+	Frustum *math32.Frustum `view:"-"`
 }
 
 func (cm *Camera) Defaults() {
@@ -86,7 +86,7 @@ func (cm *Camera) UpdateMatrix() {
 	cm.Pose.UpdateMatrix()
 	cm.ViewMatrix.SetInverse(&cm.Pose.Matrix)
 	if cm.Ortho {
-		height := 2 * cm.Far * mat32.Tan(mat32.DegToRad(cm.FOV*0.5))
+		height := 2 * cm.Far * math32.Tan(math32.DegToRad(cm.FOV*0.5))
 		width := cm.Aspect * height
 		cm.PrjnMatrix.SetOrthographic(width, height, cm.Near, cm.Far)
 	} else {
@@ -94,18 +94,18 @@ func (cm *Camera) UpdateMatrix() {
 		cm.VkPrjnMatrix.SetVkPerspective(cm.FOV, cm.Aspect, cm.Near, cm.Far) // Vk use for render
 	}
 	cm.InvPrjnMatrix.SetInverse(&cm.PrjnMatrix)
-	var proj mat32.Mat4
+	var proj math32.Mat4
 	proj.MulMatrices(&cm.PrjnMatrix, &cm.ViewMatrix)
-	cm.Frustum = mat32.NewFrustumFromMatrix(&proj)
+	cm.Frustum = math32.NewFrustumFromMatrix(&proj)
 }
 
 // LookAt points the camera at given target location, using given up direction,
 // and sets the Target, UpDir fields for future camera movements.
-func (cm *Camera) LookAt(target, upDir mat32.Vec3) {
+func (cm *Camera) LookAt(target, upDir math32.Vec3) {
 	cm.CamMu.Lock()
 	cm.Target = target
-	if upDir == (mat32.Vec3{}) {
-		upDir = mat32.V3(0, 1, 0)
+	if upDir == (math32.Vec3{}) {
+		upDir = math32.V3(0, 1, 0)
 	}
 	cm.UpDir = upDir
 	cm.Pose.LookAt(target, upDir)
@@ -115,7 +115,7 @@ func (cm *Camera) LookAt(target, upDir mat32.Vec3) {
 
 // LookAtOrigin points the camera at origin with Y axis pointing Up (i.e., standard)
 func (cm *Camera) LookAtOrigin() {
-	cm.LookAt(mat32.Vec3{}, mat32.V3(0, 1, 0))
+	cm.LookAt(math32.Vec3{}, math32.V3(0, 1, 0))
 }
 
 // LookAtTarget points the camera at current target using current up direction
@@ -124,14 +124,14 @@ func (cm *Camera) LookAtTarget() {
 }
 
 // ViewVector is the vector between the camera position and target
-func (cm *Camera) ViewVector() mat32.Vec3 {
+func (cm *Camera) ViewVector() math32.Vec3 {
 	cm.CamMu.RLock()
 	defer cm.CamMu.RUnlock()
 	return cm.Pose.Pos.Sub(cm.Target)
 }
 
 // DistTo is the distance from camera to given point
-func (cm *Camera) DistTo(pt mat32.Vec3) float32 {
+func (cm *Camera) DistTo(pt math32.Vec3) float32 {
 	cm.CamMu.RLock()
 	defer cm.CamMu.RUnlock()
 	dv := cm.Pose.Pos.Sub(pt)
@@ -141,16 +141,16 @@ func (cm *Camera) DistTo(pt mat32.Vec3) float32 {
 // ViewMainAxis returns the dimension along which the view vector is largest
 // along with the sign of that axis (+1 for positive, -1 for negative).
 // this is useful for determining how manipulations should function, for example.
-func (cm *Camera) ViewMainAxis() (dim mat32.Dims, sign float32) {
+func (cm *Camera) ViewMainAxis() (dim math32.Dims, sign float32) {
 	vv := cm.ViewVector()
 	va := vv.Abs()
 	switch {
 	case va.X > va.Y && va.X > va.Z:
-		return mat32.X, mat32.Sign(vv.X)
+		return math32.X, math32.Sign(vv.X)
 	case va.Y > va.X && va.Y > va.Z:
-		return mat32.Y, mat32.Sign(vv.Y)
+		return math32.Y, math32.Sign(vv.Y)
 	default:
-		return mat32.Z, mat32.Sign(vv.Z)
+		return math32.Z, math32.Sign(vv.Z)
 	}
 }
 
@@ -161,7 +161,7 @@ func (cm *Camera) ViewMainAxis() (dim mat32.Dims, sign float32) {
 // the Up direction vector to keep looking at the target.
 func (cm *Camera) Orbit(delX, delY float32) {
 	ctdir := cm.ViewVector()
-	if ctdir == (mat32.Vec3{}) {
+	if ctdir == (math32.Vec3{}) {
 		ctdir.Set(0, 0, 1)
 	}
 	dir := ctdir.Normal()
@@ -172,10 +172,10 @@ func (cm *Camera) Orbit(delX, delY float32) {
 	// up := dir.Cross(right).Normal() // ensure ortho -- not needed
 
 	// delX rotates around the up vector
-	dxq := mat32.NewQuatAxisAngle(up, mat32.DegToRad(delX))
+	dxq := math32.NewQuatAxisAngle(up, math32.DegToRad(delX))
 	dx := ctdir.MulQuat(dxq).Sub(ctdir)
 	// delY rotates around the right vector
-	dyq := mat32.NewQuatAxisAngle(right, mat32.DegToRad(delY))
+	dyq := math32.NewQuatAxisAngle(right, math32.DegToRad(delY))
 	dy := ctdir.MulQuat(dyq).Sub(ctdir)
 
 	cm.Pose.Pos = cm.Pose.Pos.Add(dx).Add(dy)
@@ -191,8 +191,8 @@ func (cm *Camera) Orbit(delX, delY float32) {
 // and it moves the target by the same increment, changing the target position.
 func (cm *Camera) Pan(delX, delY float32) {
 	cm.CamMu.Lock()
-	dx := mat32.V3(-delX, 0, 0).MulQuat(cm.Pose.Quat)
-	dy := mat32.V3(0, -delY, 0).MulQuat(cm.Pose.Quat)
+	dx := math32.V3(-delX, 0, 0).MulQuat(cm.Pose.Quat)
+	dy := math32.V3(0, -delY, 0).MulQuat(cm.Pose.Quat)
 	td := dx.Add(dy)
 	cm.Pose.Pos.SetAdd(td)
 	cm.Target.SetAdd(td)
@@ -202,7 +202,7 @@ func (cm *Camera) Pan(delX, delY float32) {
 // PanAxis moves the camera and target along world X,Y axes
 func (cm *Camera) PanAxis(delX, delY float32) {
 	cm.CamMu.Lock()
-	td := mat32.V3(-delX, -delY, 0)
+	td := math32.V3(-delX, -delY, 0)
 	cm.Pose.Pos.SetAdd(td)
 	cm.Target.SetAdd(td)
 	cm.CamMu.Unlock()
@@ -212,7 +212,7 @@ func (cm *Camera) PanAxis(delX, delY float32) {
 // at the new target location.  It ensures that the target is not
 // identical to the camera position.
 func (cm *Camera) PanTarget(delX, delY, delZ float32) {
-	td := mat32.V3(-delX, -delY, delZ)
+	td := math32.V3(-delX, -delY, delZ)
 	cm.Target.SetAdd(td)
 	dist := cm.ViewVector().Length()
 	cm.CamMu.Lock()
@@ -229,8 +229,8 @@ func (cm *Camera) PanTarget(delX, delY, delZ float32) {
 func (cm *Camera) TargetFromView() {
 	cm.CamMu.Lock()
 	trgdist := cm.Pose.Pos.Sub(cm.Target).Length() // distance to existing target
-	tpos := mat32.V4(0, 0, -trgdist, 1)            // target is that distance along -Z axis in front of me
-	cm.Target = mat32.V3FromV4(tpos.MulMat4(&cm.Pose.Matrix))
+	tpos := math32.V4(0, 0, -trgdist, 1)           // target is that distance along -Z axis in front of me
+	cm.Target = math32.V3FromV4(tpos.MulMat4(&cm.Pose.Matrix))
 	cm.CamMu.Unlock()
 }
 
@@ -239,7 +239,7 @@ func (cm *Camera) TargetFromView() {
 func (cm *Camera) Zoom(zoomPct float32) {
 	ctaxis := cm.ViewVector()
 	cm.CamMu.Lock()
-	if ctaxis == (mat32.Vec3{}) {
+	if ctaxis == (math32.Vec3{}) {
 		ctaxis.Set(0, 0, 1)
 	}
 	dist := ctaxis.Length()
@@ -258,15 +258,15 @@ func (cm *Camera) Zoom(zoomPct float32) {
 // ZoomPct is proportion closer (positive) or further (negative) from the target.
 func (cm *Camera) ZoomTo(pt, size image.Point, zoomPct float32) {
 	cm.CamMu.Lock()
-	fsize := mat32.V2(float32(size.X), float32(size.Y))
-	fpt := mat32.V2(float32(pt.X), float32(pt.Y))
-	ndc := fpt.WindowToNDC(fsize, mat32.Vec2{}, true) // flipY
-	ndc.Z = -1                                        // at closest point
-	cdir := mat32.V4FromV3(ndc, 1).MulMat4(&cm.InvPrjnMatrix)
+	fsize := math32.V2(float32(size.X), float32(size.Y))
+	fpt := math32.V2(float32(pt.X), float32(pt.Y))
+	ndc := fpt.WindowToNDC(fsize, math32.Vec2{}, true) // flipY
+	ndc.Z = -1                                         // at closest point
+	cdir := math32.V4FromV3(ndc, 1).MulMat4(&cm.InvPrjnMatrix)
 	cdir.Z = -1
 	cdir.W = 0 // vec
 	// get world position / transform of camera: matrix is inverse of ViewMatrix
-	wdir := mat32.V3FromV4(cdir.MulMat4(&cm.Pose.Matrix))
+	wdir := math32.V3FromV4(cdir.MulMat4(&cm.Pose.Matrix))
 	del := wdir.MulScalar(zoomPct)
 	cm.Pose.Pos.SetAdd(del)
 	cm.CamMu.Unlock()

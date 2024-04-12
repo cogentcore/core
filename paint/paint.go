@@ -11,7 +11,7 @@ import (
 	"slices"
 
 	"cogentcore.org/core/colors/gradient"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/raster"
 	"cogentcore.org/core/styles"
 	"github.com/anthonynsimon/bild/clone"
@@ -111,8 +111,8 @@ func (pc *Context) FillStrokeClear() {
 
 // TransformPoint multiplies the specified point by the current transform matrix,
 // returning a transformed position.
-func (pc *Context) TransformPoint(x, y float32) mat32.Vec2 {
-	return pc.CurrentTransform.MulVec2AsPoint(mat32.V2(x, y))
+func (pc *Context) TransformPoint(x, y float32) math32.Vec2 {
+	return pc.CurrentTransform.MulVec2AsPoint(math32.V2(x, y))
 }
 
 // BoundingBox computes the bounding box for an element in pixel int
@@ -122,15 +122,15 @@ func (pc *Context) BoundingBox(minX, minY, maxX, maxY float32) image.Rectangle {
 	if pc.StrokeStyle.Color != nil {
 		sw = 0.5 * pc.StrokeWidth()
 	}
-	tmin := pc.CurrentTransform.MulVec2AsPoint(mat32.V2(minX, minY))
-	tmax := pc.CurrentTransform.MulVec2AsPoint(mat32.V2(maxX, maxY))
-	tp1 := mat32.V2(tmin.X-sw, tmin.Y-sw).ToPointFloor()
-	tp2 := mat32.V2(tmax.X+sw, tmax.Y+sw).ToPointCeil()
+	tmin := pc.CurrentTransform.MulVec2AsPoint(math32.V2(minX, minY))
+	tmax := pc.CurrentTransform.MulVec2AsPoint(math32.V2(maxX, maxY))
+	tp1 := math32.V2(tmin.X-sw, tmin.Y-sw).ToPointFloor()
+	tp2 := math32.V2(tmax.X+sw, tmax.Y+sw).ToPointCeil()
 	return image.Rect(tp1.X, tp1.Y, tp2.X, tp2.Y)
 }
 
 // BoundingBoxFromPoints computes the bounding box for a slice of points
-func (pc *Context) BoundingBoxFromPoints(points []mat32.Vec2) image.Rectangle {
+func (pc *Context) BoundingBoxFromPoints(points []math32.Vec2) image.Rectangle {
 	sz := len(points)
 	if sz == 0 {
 		return image.Rectangle{}
@@ -270,8 +270,8 @@ func (pc *Context) StrokeWidth() float32 {
 		return dw
 	}
 	scx, scy := pc.CurrentTransform.ExtractScale()
-	sc := 0.5 * (mat32.Abs(scx) + mat32.Abs(scy))
-	lw := mat32.Max(sc*dw, pc.StrokeStyle.MinWidth.Dots)
+	sc := 0.5 * (math32.Abs(scx) + math32.Abs(scy))
+	lw := math32.Max(sc*dw, pc.StrokeStyle.MinWidth.Dots)
 	return lw
 }
 
@@ -286,15 +286,15 @@ func (pc *Context) StrokePreserve() {
 	dash := slices.Clone(pc.StrokeStyle.Dashes)
 	if dash != nil {
 		scx, scy := pc.CurrentTransform.ExtractScale()
-		sc := 0.5 * (mat32.Abs(scx) + mat32.Abs(scy))
+		sc := 0.5 * (math32.Abs(scx) + math32.Abs(scy))
 		for i := range dash {
 			dash[i] *= sc
 		}
 	}
 
 	pc.Raster.SetStroke(
-		mat32.ToFixed(pc.StrokeWidth()),
-		mat32.ToFixed(pc.StrokeStyle.MiterLimit),
+		math32.ToFixed(pc.StrokeWidth()),
+		math32.ToFixed(pc.StrokeStyle.MiterLimit),
 		pc.capfunc(), nil, nil, pc.joinmode(), // todo: supports leading / trailing caps, and "gaps"
 		dash, 0)
 	pc.Scanner.SetClip(pc.Bounds)
@@ -303,7 +303,7 @@ func (pc *Context) StrokePreserve() {
 	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
 	if g, ok := pc.StrokeStyle.Color.(gradient.Gradient); ok {
-		g.Update(pc.StrokeStyle.Opacity, mat32.B2FromRect(pc.LastRenderBBox), pc.CurrentTransform)
+		g.Update(pc.StrokeStyle.Opacity, math32.B2FromRect(pc.LastRenderBBox), pc.CurrentTransform)
 		pc.Raster.SetColor(pc.StrokeStyle.Color)
 	} else {
 		if pc.StrokeStyle.Opacity < 1 {
@@ -339,7 +339,7 @@ func (pc *Context) FillPreserve() {
 	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
 	if g, ok := pc.FillStyle.Color.(gradient.Gradient); ok {
-		g.Update(pc.FillStyle.Opacity, mat32.B2FromRect(pc.LastRenderBBox), pc.CurrentTransform)
+		g.Update(pc.FillStyle.Opacity, math32.B2FromRect(pc.LastRenderBBox), pc.CurrentTransform)
 		rf.SetColor(pc.FillStyle.Color)
 	} else {
 		if pc.FillStyle.Opacity < 1 {
@@ -361,27 +361,27 @@ func (pc *Context) Fill() {
 
 // FillBox performs an optimized fill of the given
 // rectangular region with the given image.
-func (pc *Context) FillBox(pos, size mat32.Vec2, img image.Image) {
+func (pc *Context) FillBox(pos, size math32.Vec2, img image.Image) {
 	pc.DrawBox(pos, size, img, draw.Over)
 }
 
 // BlitBox performs an optimized overwriting fill (blit) of the given
 // rectangular region with the given image.
-func (pc *Context) BlitBox(pos, size mat32.Vec2, img image.Image) {
+func (pc *Context) BlitBox(pos, size math32.Vec2, img image.Image) {
 	pc.DrawBox(pos, size, img, draw.Src)
 }
 
 // DrawBox performs an optimized fill/blit of the given rectangular region
 // with the given image, using the given draw operation.
-func (pc *Context) DrawBox(pos, size mat32.Vec2, img image.Image, op draw.Op) {
+func (pc *Context) DrawBox(pos, size math32.Vec2, img image.Image, op draw.Op) {
 	if img == nil {
 		return
 	}
 	pos = pc.CurrentTransform.MulVec2AsPoint(pos)
 	size = pc.CurrentTransform.MulVec2AsVec(size)
-	b := pc.Bounds.Intersect(mat32.RectFromPosSizeMax(pos, size))
+	b := pc.Bounds.Intersect(math32.RectFromPosSizeMax(pos, size))
 	if g, ok := img.(gradient.Gradient); ok {
-		g.Update(pc.FillStyle.Opacity, mat32.B2FromRect(b), pc.CurrentTransform)
+		g.Update(pc.FillStyle.Opacity, math32.B2FromRect(b), pc.CurrentTransform)
 	} else {
 		img = gradient.ApplyOpacityImage(img, pc.FillStyle.Opacity)
 	}
@@ -393,8 +393,8 @@ func (pc *Context) DrawBox(pos, size mat32.Vec2, img image.Image, op draw.Op) {
 // standard deviation (σ). This means that you need to divide a CSS-standard
 // blur radius value by two before passing it this function
 // (see https://stackoverflow.com/questions/65454183/how-does-blur-radius-value-in-box-shadow-property-affect-the-resulting-blur).
-func (pc *Context) BlurBox(pos, size mat32.Vec2, blurRadius float32) {
-	rect := mat32.RectFromPosSizeMax(pos, size)
+func (pc *Context) BlurBox(pos, size math32.Vec2, blurRadius float32) {
+	rect := math32.RectFromPosSizeMax(pos, size)
 	sub := pc.Image.SubImage(rect)
 	sub = GaussianBlur(sub, float64(blurRadius))
 	draw.Draw(pc.Image, rect, sub, rect.Min, draw.Src)
@@ -469,7 +469,7 @@ func (pc *Context) DrawLine(x1, y1, x2, y2 float32) {
 	pc.LineTo(x2, y2)
 }
 
-func (pc *Context) DrawPolyline(points []mat32.Vec2) {
+func (pc *Context) DrawPolyline(points []math32.Vec2) {
 	sz := len(points)
 	if sz < 2 {
 		return
@@ -480,7 +480,7 @@ func (pc *Context) DrawPolyline(points []mat32.Vec2) {
 	}
 }
 
-func (pc *Context) DrawPolylinePxToDots(points []mat32.Vec2) {
+func (pc *Context) DrawPolylinePxToDots(points []math32.Vec2) {
 	pu := &pc.UnitContext
 	sz := len(points)
 	if sz < 2 {
@@ -492,12 +492,12 @@ func (pc *Context) DrawPolylinePxToDots(points []mat32.Vec2) {
 	}
 }
 
-func (pc *Context) DrawPolygon(points []mat32.Vec2) {
+func (pc *Context) DrawPolygon(points []math32.Vec2) {
 	pc.DrawPolyline(points)
 	pc.ClosePath()
 }
 
-func (pc *Context) DrawPolygonPxToDots(points []mat32.Vec2) {
+func (pc *Context) DrawPolygonPxToDots(points []math32.Vec2) {
 	pc.DrawPolylinePxToDots(points)
 	pc.ClosePath()
 }
@@ -528,11 +528,11 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 	pc.Fill()
 
 	// clamp border radius values
-	min := mat32.Min(w/2, h/2)
-	r.Top = mat32.Clamp(r.Top, 0, min)
-	r.Right = mat32.Clamp(r.Right, 0, min)
-	r.Bottom = mat32.Clamp(r.Bottom, 0, min)
-	r.Left = mat32.Clamp(r.Left, 0, min)
+	min := math32.Min(w/2, h/2)
+	r.Top = math32.Clamp(r.Top, 0, min)
+	r.Right = math32.Clamp(r.Right, 0, min)
+	r.Bottom = math32.Clamp(r.Bottom, 0, min)
+	r.Left = math32.Clamp(r.Left, 0, min)
 
 	// position values
 	var (
@@ -562,7 +562,7 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 	pc.StrokeStyle.Width = bs.Width.Top
 	pc.LineTo(xtri, ytr)
 	if r.Right != 0 {
-		pc.DrawArc(xtri, ytri, r.Right, mat32.DegToRad(270), mat32.DegToRad(360))
+		pc.DrawArc(xtri, ytri, r.Right, math32.DegToRad(270), math32.DegToRad(360))
 	}
 	// if the color or width is changing for the next one, we have to stroke now
 	if bs.Color.Top != bs.Color.Right || bs.Width.Top.Dots != bs.Width.Right.Dots {
@@ -577,7 +577,7 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 	pc.StrokeStyle.Width = bs.Width.Right
 	pc.LineTo(xbr, ybri)
 	if r.Bottom != 0 {
-		pc.DrawArc(xbri, ybri, r.Bottom, mat32.DegToRad(0), mat32.DegToRad(90))
+		pc.DrawArc(xbri, ybri, r.Bottom, math32.DegToRad(0), math32.DegToRad(90))
 	}
 	if bs.Color.Right != bs.Color.Bottom || bs.Width.Right.Dots != bs.Width.Bottom.Dots {
 		pc.Stroke()
@@ -591,7 +591,7 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 	pc.StrokeStyle.Width = bs.Width.Bottom
 	pc.LineTo(xbli, ybl)
 	if r.Left != 0 {
-		pc.DrawArc(xbli, ybli, r.Left, mat32.DegToRad(90), mat32.DegToRad(180))
+		pc.DrawArc(xbli, ybli, r.Left, math32.DegToRad(90), math32.DegToRad(180))
 	}
 	if bs.Color.Bottom != bs.Color.Left || bs.Width.Bottom.Dots != bs.Width.Left.Dots {
 		pc.Stroke()
@@ -605,7 +605,7 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 	pc.StrokeStyle.Width = bs.Width.Left
 	pc.LineTo(xtl, ytli)
 	if r.Top != 0 {
-		pc.DrawArc(xtli, ytli, r.Top, mat32.DegToRad(180), mat32.DegToRad(270))
+		pc.DrawArc(xtli, ytli, r.Top, math32.DegToRad(180), math32.DegToRad(270))
 	}
 	pc.LineTo(xtli, ytl)
 	pc.Stroke()
@@ -626,11 +626,11 @@ func (pc *Context) DrawRectangle(x, y, w, h float32) {
 // width and height, and border radius for each corner.
 func (pc *Context) DrawRoundedRectangle(x, y, w, h float32, r styles.SideFloats) {
 	// clamp border radius values
-	min := mat32.Min(w/2, h/2)
-	r.Top = mat32.Clamp(r.Top, 0, min)
-	r.Right = mat32.Clamp(r.Right, 0, min)
-	r.Bottom = mat32.Clamp(r.Bottom, 0, min)
-	r.Left = mat32.Clamp(r.Left, 0, min)
+	min := math32.Min(w/2, h/2)
+	r.Top = math32.Clamp(r.Top, 0, min)
+	r.Right = math32.Clamp(r.Right, 0, min)
+	r.Bottom = math32.Clamp(r.Bottom, 0, min)
+	r.Left = math32.Clamp(r.Left, 0, min)
 
 	// position values; some variables are missing because they are unused
 	var (
@@ -655,22 +655,22 @@ func (pc *Context) DrawRoundedRectangle(x, y, w, h float32, r styles.SideFloats)
 
 	pc.LineTo(xtri, ytr)
 	if r.Right != 0 {
-		pc.DrawArc(xtri, ytri, r.Right, mat32.DegToRad(270), mat32.DegToRad(360))
+		pc.DrawArc(xtri, ytri, r.Right, math32.DegToRad(270), math32.DegToRad(360))
 	}
 
 	pc.LineTo(xbr, ybri)
 	if r.Bottom != 0 {
-		pc.DrawArc(xbri, ybri, r.Bottom, mat32.DegToRad(0), mat32.DegToRad(90))
+		pc.DrawArc(xbri, ybri, r.Bottom, math32.DegToRad(0), math32.DegToRad(90))
 	}
 
 	pc.LineTo(xbli, ybl)
 	if r.Left != 0 {
-		pc.DrawArc(xbli, ybli, r.Left, mat32.DegToRad(90), mat32.DegToRad(180))
+		pc.DrawArc(xbli, ybli, r.Left, math32.DegToRad(90), math32.DegToRad(180))
 	}
 
 	pc.LineTo(xtl, ytli)
 	if r.Top != 0 {
-		pc.DrawArc(xtli, ytli, r.Top, mat32.DegToRad(180), mat32.DegToRad(270))
+		pc.DrawArc(xtli, ytli, r.Top, math32.DegToRad(180), math32.DegToRad(270))
 	}
 	pc.ClosePath()
 }
@@ -692,13 +692,13 @@ func (pc *Context) DrawRoundedShadowBlur(blurSigma, radiusFactor, x, y, w, h flo
 		pc.DrawRoundedRectangle(x, y, w, h, r)
 		return
 	}
-	x = mat32.Floor(x)
-	y = mat32.Floor(y)
-	w = mat32.Ceil(w)
-	h = mat32.Ceil(h)
-	br := mat32.Ceil(radiusFactor * blurSigma)
-	br = mat32.Clamp(br, 1, w/2-2)
-	br = mat32.Clamp(br, 1, h/2-2)
+	x = math32.Floor(x)
+	y = math32.Floor(y)
+	w = math32.Ceil(w)
+	h = math32.Ceil(h)
+	br := math32.Ceil(radiusFactor * blurSigma)
+	br = math32.Clamp(br, 1, w/2-2)
+	br = math32.Clamp(br, 1, h/2-2)
 	// radiusFactor = mat32.Ceil(br / blurSigma)
 	radiusFactor = br / blurSigma
 	blurs := EdgeBlurFactors(blurSigma, radiusFactor)
@@ -736,12 +736,12 @@ func (pc *Context) DrawEllipticalArc(cx, cy, rx, ry, angle1, angle2 float32) {
 		p2 := float32(i+1) / n
 		a1 := angle1 + (angle2-angle1)*p1
 		a2 := angle1 + (angle2-angle1)*p2
-		x0 := cx + rx*mat32.Cos(a1)
-		y0 := cy + ry*mat32.Sin(a1)
-		x1 := cx + rx*mat32.Cos((a1+a2)/2)
-		y1 := cy + ry*mat32.Sin((a1+a2)/2)
-		x2 := cx + rx*mat32.Cos(a2)
-		y2 := cy + ry*mat32.Sin(a2)
+		x0 := cx + rx*math32.Cos(a1)
+		y0 := cy + ry*math32.Sin(a1)
+		x1 := cx + rx*math32.Cos((a1+a2)/2)
+		y1 := cy + ry*math32.Sin((a1+a2)/2)
+		x2 := cx + rx*math32.Cos(a2)
+		y2 := cy + ry*math32.Sin(a2)
 		ncx := 2*x1 - x0/2 - x2/2
 		ncy := 2*y1 - y0/2 - y2/2
 		if i == 0 && !pc.HasCurrent {
@@ -760,8 +760,8 @@ const MaxDx float32 = math.Pi / 8
 // ellipsePrime gives tangent vectors for parameterized ellipse; a, b, radii,
 // eta parameter, center cx, cy
 func ellipsePrime(a, b, sinTheta, cosTheta, eta, cx, cy float32) (px, py float32) {
-	bCosEta := b * mat32.Cos(eta)
-	aSinEta := a * mat32.Sin(eta)
+	bCosEta := b * math32.Cos(eta)
+	aSinEta := a * math32.Sin(eta)
 	px = -aSinEta*cosTheta - bCosEta*sinTheta
 	py = -aSinEta*sinTheta + bCosEta*cosTheta
 	return
@@ -770,8 +770,8 @@ func ellipsePrime(a, b, sinTheta, cosTheta, eta, cx, cy float32) (px, py float32
 // ellipsePointAt gives points for parameterized ellipse; a, b, radii, eta
 // parameter, center cx, cy
 func ellipsePointAt(a, b, sinTheta, cosTheta, eta, cx, cy float32) (px, py float32) {
-	aCosEta := a * mat32.Cos(eta)
-	bSinEta := b * mat32.Sin(eta)
+	aCosEta := a * math32.Cos(eta)
+	bSinEta := b * math32.Sin(eta)
 	px = cx + aCosEta*cosTheta - bSinEta*sinTheta
 	py = cy + aCosEta*sinTheta + bSinEta*cosTheta
 	return
@@ -786,7 +786,7 @@ func ellipsePointAt(a, b, sinTheta, cosTheta, eta, cx, cy float32) (px, py float
 // arbitrary point. The center of the circle is then transformed back to the
 // original coordinates and returned.
 func FindEllipseCenter(rx, ry *float32, rotX, startX, startY, endX, endY float32, sweep, largeArc bool) (cx, cy float32) {
-	cos, sin := mat32.Cos(rotX), mat32.Sin(rotX)
+	cos, sin := math32.Cos(rotX), math32.Sin(rotX)
 
 	// Move origin to start point
 	nx, ny := endX-startX, endY-startY
@@ -803,7 +803,7 @@ func FindEllipseCenter(rx, ry *float32, rotX, startX, startY, endX, endY float32
 	if *ry**ry < midlenSq {
 		// Requested ellipse does not exist; scale rx, ry to fit. Length of
 		// span is greater than max width of ellipse, must scale *rx, *ry
-		nry := mat32.Sqrt(midlenSq)
+		nry := math32.Sqrt(midlenSq)
 		if *rx == *ry {
 			*rx = nry // prevents roundoff
 		} else {
@@ -811,7 +811,7 @@ func FindEllipseCenter(rx, ry *float32, rotX, startX, startY, endX, endY float32
 		}
 		*ry = nry
 	} else {
-		hr = mat32.Sqrt(*ry**ry-midlenSq) / mat32.Sqrt(midlenSq)
+		hr = math32.Sqrt(*ry**ry-midlenSq) / math32.Sqrt(midlenSq)
 	}
 	// Notice that if hr is zero, both answers are the same.
 	if (!sweep && !largeArc) || (sweep && largeArc) {
@@ -834,14 +834,14 @@ func FindEllipseCenter(rx, ry *float32, rotX, startX, startY, endX, endY float32
 // for the path drawer
 func (pc *Context) DrawEllipticalArcPath(cx, cy, ocx, ocy, pcx, pcy, rx, ry, angle float32, largeArc, sweep bool) (lx, ly float32) {
 	rotX := angle * math.Pi / 180 // Convert degrees to radians
-	startAngle := mat32.Atan2(pcy-cy, pcx-cx) - rotX
-	endAngle := mat32.Atan2(ocy-cy, ocx-cx) - rotX
+	startAngle := math32.Atan2(pcy-cy, pcx-cx) - rotX
+	endAngle := math32.Atan2(ocy-cy, ocx-cx) - rotX
 	deltaTheta := endAngle - startAngle
-	arcBig := mat32.Abs(deltaTheta) > math.Pi
+	arcBig := math32.Abs(deltaTheta) > math.Pi
 
 	// Approximate ellipse using cubic bezier splines
-	etaStart := mat32.Atan2(mat32.Sin(startAngle)/ry, mat32.Cos(startAngle)/rx)
-	etaEnd := mat32.Atan2(mat32.Sin(endAngle)/ry, mat32.Cos(endAngle)/rx)
+	etaStart := math32.Atan2(math32.Sin(startAngle)/ry, math32.Cos(startAngle)/rx)
+	etaEnd := math32.Atan2(math32.Sin(endAngle)/ry, math32.Cos(endAngle)/rx)
 	deltaEta := etaEnd - etaStart
 	if (arcBig && !largeArc) || (!arcBig && largeArc) { // Go has no boolean XOR
 		if deltaEta < 0 {
@@ -859,16 +859,16 @@ func (pc *Context) DrawEllipticalArcPath(cx, cy, ocx, ocy, pcx, pcy, rx, ry, ang
 	}
 
 	// Round up to determine number of cubic splines to approximate bezier curve
-	segs := int(mat32.Abs(deltaEta)/MaxDx) + 1
+	segs := int(math32.Abs(deltaEta)/MaxDx) + 1
 	dEta := deltaEta / float32(segs) // span of each segment
 	// Approximate the ellipse using a set of cubic bezier curves by the method of
 	// L. Maisonobe, "Drawing an elliptical arc using polylines, quadratic
 	// or cubic Bezier curves", 2003
 	// https://www.spaceroots.org/documents/ellipse/elliptical-arc.pdf
-	tde := mat32.Tan(dEta / 2)
-	alpha := mat32.Sin(dEta) * (mat32.Sqrt(4+3*tde*tde) - 1) / 3 // Math is fun!
+	tde := math32.Tan(dEta / 2)
+	alpha := math32.Sin(dEta) * (math32.Sqrt(4+3*tde*tde) - 1) / 3 // Math is fun!
 	lx, ly = pcx, pcy
-	sinTheta, cosTheta := mat32.Sin(rotX), mat32.Cos(rotX)
+	sinTheta, cosTheta := math32.Sin(rotX), math32.Cos(rotX)
 	ldx, ldy := ellipsePrime(rx, ry, sinTheta, cosTheta, etaStart, cx, cy)
 
 	for i := 1; i <= segs; i++ {
@@ -889,7 +889,7 @@ func (pc *Context) DrawEllipticalArcPath(cx, cy, ocx, ocy, pcx, pcy, rx, ry, ang
 // DrawEllipse draws an ellipse at the given position with the given radii.
 func (pc *Context) DrawEllipse(x, y, rx, ry float32) {
 	pc.NewSubPath()
-	pc.DrawEllipticalArc(x, y, rx, ry, 0, 2*mat32.Pi)
+	pc.DrawEllipticalArc(x, y, rx, ry, 0, 2*math32.Pi)
 	pc.ClosePath()
 }
 
@@ -902,22 +902,22 @@ func (pc *Context) DrawArc(x, y, r, angle1, angle2 float32) {
 // DrawCircle draws a circle at the given position with the given radius.
 func (pc *Context) DrawCircle(x, y, r float32) {
 	pc.NewSubPath()
-	pc.DrawEllipticalArc(x, y, r, r, 0, 2*mat32.Pi)
+	pc.DrawEllipticalArc(x, y, r, r, 0, 2*math32.Pi)
 	pc.ClosePath()
 }
 
 // DrawRegularPolygon draws a regular polygon with the given number of sides
 // at the given position with the given rotation.
 func (pc *Context) DrawRegularPolygon(n int, x, y, r, rotation float32) {
-	angle := 2 * mat32.Pi / float32(n)
-	rotation -= mat32.Pi / 2
+	angle := 2 * math32.Pi / float32(n)
+	rotation -= math32.Pi / 2
 	if n%2 == 0 {
 		rotation += angle / 2
 	}
 	pc.NewSubPath()
 	for i := 0; i < n; i++ {
 		a := rotation + angle*float32(i)
-		pc.LineTo(x+r*mat32.Cos(a), y+r*mat32.Sin(a))
+		pc.LineTo(x+r*math32.Cos(a), y+r*math32.Sin(a))
 	}
 	pc.ClosePath()
 }
@@ -952,8 +952,8 @@ func (pc *Context) DrawImageAnchored(fmIm image.Image, x, y, ax, ay float32) {
 // (an additional scaling is applied to the transform matrix used in rendering)
 func (pc *Context) DrawImageScaled(fmIm image.Image, x, y, w, h float32) {
 	s := fmIm.Bounds().Size()
-	isz := mat32.V2FromPoint(s)
-	isc := mat32.V2(w, h).Div(isz)
+	isz := math32.V2FromPoint(s)
+	isc := math32.V2(w, h).Div(isz)
 
 	transformer := draw.BiLinear
 	m := pc.CurrentTransform.Translate(x, y).Scale(isc.X, isc.Y)
@@ -974,7 +974,7 @@ func (pc *Context) DrawImageScaled(fmIm image.Image, x, y, w, h float32) {
 // Identity resets the current transformation matrix to the identity matrix.
 // This results in no translating, scaling, rotating, or shearing.
 func (pc *Context) Identity() {
-	pc.Transform = mat32.Identity2()
+	pc.Transform = math32.Identity2()
 }
 
 // Translate updates the current matrix with a translation.

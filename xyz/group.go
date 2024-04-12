@@ -7,7 +7,7 @@ package xyz
 import (
 	"sort"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tree"
 )
 
@@ -73,13 +73,13 @@ func (gp *Group) SetEulerRotation(x, y, z float32) *Group {
 // SolidPoint contains a Solid and a Point on that solid
 type SolidPoint struct {
 	Solid *Solid
-	Point mat32.Vec3
+	Point math32.Vec3
 }
 
 // RaySolidIntersections returns a list of solids whose bounding box intersects
 // with the given ray, with the point of intersection.  Results are sorted
 // from closest to furthest.
-func (gp *Group) RaySolidIntersections(ray mat32.Ray) []*SolidPoint {
+func (gp *Group) RaySolidIntersections(ray math32.Ray) []*SolidPoint {
 	var sp []*SolidPoint
 	gp.WalkDown(func(k tree.Node) bool {
 		ni, nb := AsNode(k)

@@ -9,7 +9,7 @@ import (
 	"image/color"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/units"
 )
 
@@ -38,7 +38,7 @@ type Paint struct { //types:add
 	VectorEffect VectorEffects
 
 	// our additions to transform -- pushed to render state
-	Transform mat32.Mat2
+	Transform math32.Mat2
 
 	// unit context -- parameters necessary for anchoring relative units
 	UnitContext units.Context
@@ -59,7 +59,7 @@ func (pc *Paint) Defaults() {
 	pc.FillStyle.Defaults()
 	pc.FontStyle.Defaults()
 	pc.TextStyle.Defaults()
-	pc.Transform = mat32.Identity2()
+	pc.Transform = math32.Identity2()
 }
 
 // CopyStyleFrom copies styles from another paint

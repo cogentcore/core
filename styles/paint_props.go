@@ -13,7 +13,7 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/errors"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/units"
 )
@@ -135,9 +135,9 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 		case string:
 			fs.Dashes = ParseDashesString(vt)
 		case []float32:
-			mat32.CopyFloat32s(&fs.Dashes, vt)
+			math32.CopyFloat32s(&fs.Dashes, vt)
 		case *[]float32:
-			mat32.CopyFloat32s(&fs.Dashes, *vt)
+			math32.CopyFloat32s(&fs.Dashes, *vt)
 		}
 	},
 	"stroke-linecap": StyleFuncEnum(LineCapButt,
@@ -184,16 +184,16 @@ var StylePaintFuncs = map[string]StyleFunc{
 			if inh {
 				pc.Transform = parent.(*Paint).Transform
 			} else if init {
-				pc.Transform = mat32.Identity2()
+				pc.Transform = math32.Identity2()
 			}
 			return
 		}
 		switch vt := val.(type) {
 		case string:
 			pc.Transform.SetString(vt)
-		case *mat32.Mat2:
+		case *math32.Mat2:
 			pc.Transform = *vt
-		case mat32.Mat2:
+		case math32.Mat2:
 			pc.Transform = vt
 		}
 	},

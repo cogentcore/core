@@ -14,7 +14,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/errors"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -52,7 +52,7 @@ func TestLayoutFramesAlignItems(t *testing.T) {
 					s.Wrap = wrap
 					s.Align.Items = align
 				})
-				PlainFrames(b, mat32.V2(0, 0))
+				PlainFrames(b, math32.V2(0, 0))
 				b.AssertRender(t, tdir+tnm)
 			}
 		}
@@ -80,7 +80,7 @@ func TestLayoutFramesAlignContent(t *testing.T) {
 					s.Wrap = wrap
 					s.Align.Content = align
 				})
-				PlainFrames(b, mat32.V2(0, 0))
+				PlainFrames(b, math32.V2(0, 0))
 				b.AssertRender(t, tdir+tnm)
 			}
 		}
@@ -112,7 +112,7 @@ func TestLayoutFramesJustifyContent(t *testing.T) {
 					s.Wrap = wrap
 					s.Justify.Content = align
 				})
-				PlainFrames(b, mat32.V2(0, 0))
+				PlainFrames(b, math32.V2(0, 0))
 				b.AssertRender(t, tdir+tnm)
 			}
 		}
@@ -132,7 +132,7 @@ func TestLayoutFramesJustifyItems(t *testing.T) {
 			s.Columns = 2
 			s.Justify.Items = align
 		})
-		PlainFrames(b, mat32.V2(0, 0))
+		PlainFrames(b, math32.V2(0, 0))
 		b.AssertRender(t, tdir+tnm)
 	}
 }
@@ -150,7 +150,7 @@ func TestLayoutFramesJustifySelf(t *testing.T) {
 			s.Columns = 2
 			s.Justify.Items = align
 		})
-		PlainFrames(b, mat32.V2(0, 0))
+		PlainFrames(b, math32.V2(0, 0))
 		_, fr2 := AsWidget(b.ChildByName("fr2"))
 		fr2.Style(func(s *styles.Style) {
 			s.Justify.Self = aligns[(ai+1)%len(aligns)]
@@ -172,7 +172,7 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 			s.Columns = 2
 			s.Align.Items = align
 		})
-		PlainFrames(b, mat32.V2(0, 0))
+		PlainFrames(b, math32.V2(0, 0))
 		_, fr2 := AsWidget(b.ChildByName("fr2"))
 		fr2.Style(func(s *styles.Style) {
 			s.Align.Self = aligns[(ai+1)%len(aligns)]
@@ -402,7 +402,7 @@ func WrapText(parent Widget, txt string) *Label {
 	return lbl
 }
 
-func PlainFrames(parent Widget, grow mat32.Vec2) {
+func PlainFrames(parent Widget, grow math32.Vec2) {
 	for i, sz := range FrameSizes {
 		nm := fmt.Sprintf("fr%v", i)
 		fr := BoxFrame(parent, nm)
@@ -423,7 +423,7 @@ type Wide struct {
 
 type Test struct {
 	Wide Wide `view:"inline"`
-	Vec  mat32.Vec2
+	Vec  math32.Vec2
 }
 
 type TestTime struct {
@@ -439,7 +439,7 @@ var (
 
 	AlignText = "This is text to test for text align<br>This line is short<br>This is text to test for text align, this one is longer"
 
-	FrameSizes = [5]mat32.Vec2{
+	FrameSizes = [5]math32.Vec2{
 		{20, 100},
 		{80, 20},
 		{60, 80},
