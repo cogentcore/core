@@ -15,7 +15,7 @@ import (
 	"sync"
 	"time"
 
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
 )
 
 //go:embed spell_en_us.json
@@ -193,7 +193,7 @@ func CheckWord(word string) ([]string, bool) {
 		OpenDefault() // backup
 	}
 	known := false
-	w := lex.FirstWordApostrophe(word) // only lookup words
+	w := lexer.FirstWordApostrophe(word) // only lookup words
 	orig := w
 	w = strings.ToLower(w)
 
@@ -208,7 +208,7 @@ func CheckWord(word string) ([]string, bool) {
 		return nil, false
 	}
 	for i, s := range suggests {
-		suggests[i] = lex.MatchCase(orig, s)
+		suggests[i] = lexer.MatchCase(orig, s)
 	}
 	if len(suggests) > 0 && suggests[0] == orig {
 		known = true

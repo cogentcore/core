@@ -7,7 +7,7 @@ package spell
 import (
 	"strings"
 
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
 	"cogentcore.org/core/pi/token"
 )
 
@@ -15,12 +15,12 @@ import (
 // within given line of text with existing Lex tags -- automatically
 // excludes any Code token regions (see token.IsCode).  Token is set
 // to token.TextSpellErr on returned Lex's
-func CheckLexLine(src []rune, tags lex.Line) lex.Line {
+func CheckLexLine(src []rune, tags lexer.Line) lexer.Line {
 	wrds := tags.NonCodeWords(src)
-	var ser lex.Line
+	var ser lexer.Line
 	for _, t := range wrds {
 		wrd := string(t.Src(src))
-		lwrd := lex.FirstWordApostrophe(wrd)
+		lwrd := lexer.FirstWordApostrophe(wrd)
 		if len(lwrd) <= 2 {
 			continue
 		}

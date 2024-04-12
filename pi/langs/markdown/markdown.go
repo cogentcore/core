@@ -15,7 +15,7 @@ import (
 	"cogentcore.org/core/pi/complete"
 	"cogentcore.org/core/pi/langs"
 	"cogentcore.org/core/pi/langs/bibtex"
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
 	"cogentcore.org/core/pi/syms"
 	"cogentcore.org/core/pi/token"
 )
@@ -66,7 +66,7 @@ func (ml *MarkdownLang) ParseFile(fss *pi.FileStates, txt []byte) {
 	// no parser
 }
 
-func (ml *MarkdownLang) LexLine(fs *pi.FileState, line int, txt []rune) lex.Line {
+func (ml *MarkdownLang) LexLine(fs *pi.FileState, line int, txt []rune) lexer.Line {
 	pr := ml.Parser()
 	if pr == nil {
 		return nil
@@ -79,15 +79,15 @@ func (ml *MarkdownLang) ParseLine(fs *pi.FileState, line int) *pi.FileState {
 	return nil
 }
 
-func (ml *MarkdownLang) HiLine(fss *pi.FileStates, line int, txt []rune) lex.Line {
+func (ml *MarkdownLang) HiLine(fss *pi.FileStates, line int, txt []rune) lexer.Line {
 	fs := fss.Done()
 	return ml.LexLine(fs, line, txt)
 }
 
-func (ml *MarkdownLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md complete.Matches) {
+func (ml *MarkdownLang) CompleteLine(fss *pi.FileStates, str string, pos lexer.Pos) (md complete.Matches) {
 	origStr := str
-	lfld := lex.LastField(str)
-	str = lex.InnerBracketScope(lfld, "[", "]")
+	lfld := lexer.LastField(str)
+	str = lexer.InnerBracketScope(lfld, "[", "]")
 	if len(str) > 1 {
 		if str[0] == '@' {
 			return ml.CompleteCite(fss, origStr, str[1:], pos)
@@ -98,10 +98,10 @@ func (ml *MarkdownLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos
 }
 
 // Lookup is the main api called by completion code in giv/complete.go to lookup item
-func (ml *MarkdownLang) Lookup(fss *pi.FileStates, str string, pos lex.Pos) (ld complete.Lookup) {
+func (ml *MarkdownLang) Lookup(fss *pi.FileStates, str string, pos lexer.Pos) (ld complete.Lookup) {
 	origStr := str
-	lfld := lex.LastField(str)
-	str = lex.InnerBracketScope(lfld, "[", "]")
+	lfld := lexer.LastField(str)
+	str = lexer.InnerBracketScope(lfld, "[", "]")
 	if len(str) > 1 {
 		if str[0] == '@' {
 			return ml.LookupCite(fss, origStr, str[1:], pos)
@@ -116,7 +116,7 @@ func (ml *MarkdownLang) CompleteEdit(fs *pi.FileStates, text string, cp int, com
 	// the cursor to delete
 	s2 := text[cp:]
 	// gotParen := false
-	if len(s2) > 0 && lex.IsLetterOrDigit(rune(s2[0])) {
+	if len(s2) > 0 && lexer.IsLetterOrDigit(rune(s2[0])) {
 		for i, c := range s2 {
 			if c == '{' {
 				// gotParen = true
@@ -158,8 +158,8 @@ var ListKeys = map[string]struct{}{"*": {}, "+": {}, "-": {}}
 // other language-specific keywords.  See lex.BracketIndentLine for example.
 // Indent level is in increments of tabSz for spaces, and tabs for tabs.
 // Operates on rune source with markup lex tags per line.
-func (ml *MarkdownLang) IndentLine(fs *pi.FileStates, src [][]rune, tags []lex.Line, ln int, tabSz int) (pInd, delInd, pLn int, ichr indent.Char) {
-	pInd, pLn, ichr = lex.PrevLineIndent(src, tags, ln, tabSz)
+func (ml *MarkdownLang) IndentLine(fs *pi.FileStates, src [][]rune, tags []lexer.Line, ln int, tabSz int) (pInd, delInd, pLn int, ichr indent.Char) {
+	pInd, pLn, ichr = lexer.PrevLineIndent(src, tags, ln, tabSz)
 	delInd = 0
 	ptg := tags[pLn]
 	ctg := tags[ln]
@@ -200,7 +200,7 @@ func (ml *MarkdownLang) IndentLine(fs *pi.FileStates, src [][]rune, tags []lex.L
 // (bracket, brace, paren) while typing.
 // pos = position where bra will be inserted, and curLn is the current line
 // match = insert the matching ket, and newLine = insert a new line.
-func (ml *MarkdownLang) AutoBracket(fs *pi.FileStates, bra rune, pos lex.Pos, curLn []rune) (match, newLine bool) {
+func (ml *MarkdownLang) AutoBracket(fs *pi.FileStates, bra rune, pos lexer.Pos, curLn []rune) (match, newLine bool) {
 	lnLen := len(curLn)
 	match = pos.Ch == lnLen || unicode.IsSpace(curLn[pos.Ch]) // at end or if space after
 	newLine = false

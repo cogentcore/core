@@ -12,11 +12,11 @@ import (
 	"cogentcore.org/core/pi"
 	"cogentcore.org/core/pi/complete"
 	"cogentcore.org/core/pi/langs/bibtex"
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
 )
 
 // CompleteCite does completion on citation
-func (ml *MarkdownLang) CompleteCite(fss *pi.FileStates, origStr, str string, pos lex.Pos) (md complete.Matches) {
+func (ml *MarkdownLang) CompleteCite(fss *pi.FileStates, origStr, str string, pos lexer.Pos) (md complete.Matches) {
 	bfile, has := fss.MetaData("bibfile")
 	if !has {
 		return
@@ -36,7 +36,7 @@ func (ml *MarkdownLang) CompleteCite(fss *pi.FileStates, origStr, str string, po
 }
 
 // LookupCite does lookup on citation
-func (ml *MarkdownLang) LookupCite(fss *pi.FileStates, origStr, str string, pos lex.Pos) (ld complete.Lookup) {
+func (ml *MarkdownLang) LookupCite(fss *pi.FileStates, origStr, str string, pos lexer.Pos) (ld complete.Lookup) {
 	bfile, has := fss.MetaData("bibfile")
 	if !has {
 		return

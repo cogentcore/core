@@ -14,7 +14,7 @@ import (
 
 	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/pi"
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
 	"cogentcore.org/core/profile"
 )
 
@@ -29,7 +29,7 @@ func TestParse(t *testing.T) {
 	pr.ReportErrs = true
 
 	fs := pi.NewFileStates(filepath.Join("..", "..", "..", "giv", "treeview.go"), "", fileinfo.Go)
-	txt, err := lex.OpenFileBytes(fs.Filename) // and other stuff
+	txt, err := lexer.OpenFileBytes(fs.Filename) // and other stuff
 	if err != nil {
 		t.Error(err)
 	}

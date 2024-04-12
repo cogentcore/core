@@ -9,7 +9,7 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor/textbuf"
 )
@@ -43,7 +43,7 @@ func (ed *Editor) FindMatches(find string, useCase, lexItems bool) ([]textbuf.Ma
 }
 
 // MatchFromPos finds the match at or after the given text position -- returns 0, false if none
-func (ed *Editor) MatchFromPos(matches []textbuf.Match, cpos lex.Pos) (int, bool) {
+func (ed *Editor) MatchFromPos(matches []textbuf.Match, cpos lexer.Pos) (int, bool) {
 	for i, m := range matches {
 		reg := ed.Buffer.AdjustReg(m.Reg)
 		if reg.Start == cpos || cpos.IsLess(reg.Start) {
@@ -75,7 +75,7 @@ type ISearch struct {
 	PrevPos int `json:"-" xml:"-"`
 
 	// starting position for search -- returns there after on cancel
-	StartPos lex.Pos `json:"-" xml:"-"`
+	StartPos lexer.Pos `json:"-" xml:"-"`
 }
 
 // ViewMaxFindHighlights is the maximum number of regions to highlight on find
@@ -93,7 +93,7 @@ func (ed *Editor) ISearchMatches() bool {
 
 // ISearchNextMatch finds next match after given cursor position, and highlights
 // it, etc
-func (ed *Editor) ISearchNextMatch(cpos lex.Pos) bool {
+func (ed *Editor) ISearchNextMatch(cpos lexer.Pos) bool {
 	if len(ed.ISearch.Matches) == 0 {
 		ed.ISearchSig()
 		return false
@@ -142,7 +142,7 @@ func (ed *Editor) ISearchStart() {
 		} else { // restore prev
 			if PrevISearchString != "" {
 				ed.ISearch.Find = PrevISearchString
-				ed.ISearch.UseCase = lex.HasUpperCase(ed.ISearch.Find)
+				ed.ISearch.UseCase = lexer.HasUpperCase(ed.ISearch.Find)
 				ed.ISearchMatches()
 				ed.ISearchNextMatch(ed.CursorPos)
 				ed.ISearch.StartPos = ed.CursorPos
@@ -266,7 +266,7 @@ type QReplace struct {
 	PrevPos int `json:"-" xml:"-"`
 
 	// starting position for search -- returns there after on cancel
-	StartPos lex.Pos `json:"-" xml:"-"`
+	StartPos lexer.Pos `json:"-" xml:"-"`
 }
 
 var (
@@ -336,7 +336,7 @@ func (ed *Editor) QReplaceStart(find, repl string, lexItems bool) {
 	ed.QReplace.Replace = repl
 	ed.QReplace.LexItems = lexItems
 	ed.QReplace.StartPos = ed.CursorPos
-	ed.QReplace.UseCase = lex.HasUpperCase(find)
+	ed.QReplace.UseCase = lexer.HasUpperCase(find)
 	ed.QReplace.Matches = nil
 	ed.QReplace.Pos = -1
 
@@ -397,7 +397,7 @@ func (ed *Editor) QReplaceReplace(midx int) {
 	reg := ed.Buffer.AdjustReg(m.Reg)
 	pos := reg.Start
 	// last arg is matchCase, only if not using case to match and rep is also lower case
-	matchCase := !ed.QReplace.UseCase && !lex.HasUpperCase(rep)
+	matchCase := !ed.QReplace.UseCase && !lexer.HasUpperCase(rep)
 	ed.Buffer.ReplaceText(reg.Start, reg.End, pos, rep, EditSignal, matchCase)
 	ed.Highlights[midx] = textbuf.RegionNil
 	ed.SetCursor(pos)

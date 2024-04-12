@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
 	"cogentcore.org/core/pi/token"
 	"cogentcore.org/core/texteditor/textbuf"
 )
@@ -35,8 +35,8 @@ func (ed *Editor) OfferComplete() {
 
 	ed.Buffer.Complete.SrcLn = ed.CursorPos.Ln
 	ed.Buffer.Complete.SrcCh = ed.CursorPos.Ch
-	st := lex.Pos{ed.CursorPos.Ln, 0}
-	en := lex.Pos{ed.CursorPos.Ln, ed.CursorPos.Ch}
+	st := lexer.Pos{ed.CursorPos.Ln, 0}
+	en := lexer.Pos{ed.CursorPos.Ln, ed.CursorPos.Ch}
 	tbe := ed.Buffer.Region(st, en)
 	var s string
 	if tbe != nil {
@@ -94,8 +94,8 @@ func (ed *Editor) Lookup() { //types:add
 	}
 	ed.Buffer.Complete.SrcLn = ln
 	ed.Buffer.Complete.SrcCh = ch
-	st := lex.Pos{ed.CursorPos.Ln, 0}
-	en := lex.Pos{ed.CursorPos.Ln, ch}
+	st := lexer.Pos{ed.CursorPos.Ln, 0}
+	en := lexer.Pos{ed.CursorPos.Ln, ch}
 
 	tbe := ed.Buffer.Region(st, en)
 	var s string
@@ -204,7 +204,7 @@ func (ed *Editor) SpellCheck(reg *textbuf.Edit) bool {
 		return false
 	}
 	wb := string(reg.ToBytes())
-	lwb := lex.FirstWordApostrophe(wb) // only lookup words
+	lwb := lexer.FirstWordApostrophe(wb) // only lookup words
 	if len(lwb) <= 2 {
 		return false
 	}

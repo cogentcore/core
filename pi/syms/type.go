@@ -11,7 +11,7 @@ import (
 	"slices"
 
 	"cogentcore.org/core/gox/indent"
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
 	"cogentcore.org/core/tree"
 )
 
@@ -46,7 +46,7 @@ type Type struct {
 	Filename string
 
 	// region in source encompassing this type
-	Region lex.Reg
+	Region lexer.Reg
 
 	// relevant scoping / parent symbols, e.g., namespace, package, module, class, function, etc..
 	Scopes SymNames

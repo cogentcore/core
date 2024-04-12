@@ -12,7 +12,7 @@ import (
 	"sort"
 	"strings"
 
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
 	"cogentcore.org/core/pi/token"
 )
 
@@ -39,7 +39,7 @@ func (sm *SymMap) Add(sy *Symbol) {
 }
 
 // AddNew adds a new symbol to the map with the basic info
-func (sm *SymMap) AddNew(name string, kind token.Tokens, fname string, reg lex.Reg) *Symbol {
+func (sm *SymMap) AddNew(name string, kind token.Tokens, fname string, reg lexer.Reg) *Symbol {
 	sy := NewSymbol(name, kind, fname, reg)
 	sm.Alloc()
 	(*sm)[name] = sy
@@ -196,7 +196,7 @@ func (sm *SymMap) FindKindScoped(kind token.Tokens, matches *SymMap) {
 // in that group.  if you specify kind = token.None then all tokens that contain
 // region will be returned.  extraLns are extra lines added to the symbol region
 // for purposes of matching.
-func (sm *SymMap) FindContainsRegion(fpath string, pos lex.Pos, extraLns int, kind token.Tokens, matches *SymMap) {
+func (sm *SymMap) FindContainsRegion(fpath string, pos lexer.Pos, extraLns int, kind token.Tokens, matches *SymMap) {
 	if *sm == nil {
 		return
 	}
@@ -288,7 +288,7 @@ func (sm *SymMap) WriteDoc(out io.Writer, depth int) {
 // adds to given matches map (which can be nil), for more efficient recursive use
 func (sm *SymMap) FindNamePrefix(seed string, matches *SymMap) {
 	noCase := true
-	if lex.HasUpperCase(seed) {
+	if lexer.HasUpperCase(seed) {
 		noCase = false
 	}
 	for _, sy := range *sm {
@@ -310,7 +310,7 @@ func (sm *SymMap) FindNamePrefix(seed string, matches *SymMap) {
 // adds to given matches map (which can be nil), for more efficient recursive use
 func (sm *SymMap) FindNamePrefixRecursive(seed string, matches *SymMap) {
 	noCase := true
-	if lex.HasUpperCase(seed) {
+	if lexer.HasUpperCase(seed) {
 		noCase = false
 	}
 	for _, sy := range *sm {
@@ -336,7 +336,7 @@ func (sm *SymMap) FindNamePrefixRecursive(seed string, matches *SymMap) {
 // adds to given matches map (which can be nil), for more efficient recursive use
 func (sm *SymMap) FindNamePrefixScoped(seed string, matches *SymMap) {
 	noCase := true
-	if lex.HasUpperCase(seed) {
+	if lexer.HasUpperCase(seed) {
 		noCase = false
 	}
 	for _, sy := range *sm {

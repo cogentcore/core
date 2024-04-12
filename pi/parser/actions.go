@@ -7,7 +7,7 @@ package parser
 import (
 	"fmt"
 
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
 	"cogentcore.org/core/pi/token"
 )
 
@@ -88,7 +88,7 @@ func (ac Act) String() string {
 }
 
 // ChangeToken changes the token type, using FromToken logic
-func (ac *Act) ChangeToken(lx *lex.Lex) {
+func (ac *Act) ChangeToken(lx *lexer.Lex) {
 	if ac.FromToken == token.None {
 		lx.Token.Token = ac.Token
 		return

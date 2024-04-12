@@ -18,7 +18,7 @@ import (
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
@@ -99,10 +99,10 @@ type Editor struct { //core:embedder
 	LineNoRender paint.Text `set:"-" view:"-" json:"-" xml:"-"`
 
 	// current cursor position
-	CursorPos lex.Pos `set:"-" edit:"-" json:"-" xml:"-"`
+	CursorPos lexer.Pos `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// target cursor position for externally-set targets: ensures that it is visible
-	CursorTarg lex.Pos `set:"-" edit:"-" json:"-" xml:"-"`
+	CursorTarg lexer.Pos `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns
 	CursorCol int `set:"-" edit:"-" json:"-" xml:"-"`
@@ -111,7 +111,7 @@ type Editor struct { //core:embedder
 	PosHistIndex int `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// starting point for selection -- will either be the start or end of selected region depending on subsequent selection.
-	SelectStart lex.Pos `set:"-" edit:"-" json:"-" xml:"-"`
+	SelectStart lexer.Pos `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// current selection region
 	SelectRegion textbuf.Region `set:"-" edit:"-" json:"-" xml:"-"`
@@ -317,7 +317,7 @@ func (ed *Editor) ResetState() {
 	ed.ISearch.On = false
 	ed.QReplace.On = false
 	if ed.Buffer == nil || ed.lastFilename != ed.Buffer.Filename { // don't reset if reopening..
-		ed.CursorPos = lex.Pos{}
+		ed.CursorPos = lexer.Pos{}
 	}
 	if ed.Buffer != nil {
 		ed.Buffer.SetReadOnly(ed.IsReadOnly())
@@ -344,7 +344,7 @@ func (ed *Editor) SetBuffer(buf *Buffer) *Editor {
 			ed.PosHistIndex = bhl - 1
 			ed.SetCursorShow(cp)
 		} else {
-			ed.SetCursorShow(lex.Pos{})
+			ed.SetCursorShow(lexer.Pos{})
 		}
 	}
 	ed.LayoutAllLines()

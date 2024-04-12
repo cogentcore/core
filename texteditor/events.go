@@ -19,7 +19,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/pi"
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/texteditor/textbuf"
@@ -356,14 +356,14 @@ func (ed *Editor) KeyInput(kt events.Event) {
 					tbe, _, _ := ed.Buffer.AutoIndent(ed.CursorPos.Ln) // reindent current line
 					if tbe != nil {
 						// go back to end of line!
-						npos := lex.Pos{Ln: ed.CursorPos.Ln, Ch: ed.Buffer.LineLen(ed.CursorPos.Ln)}
+						npos := lexer.Pos{Ln: ed.CursorPos.Ln, Ch: ed.Buffer.LineLen(ed.CursorPos.Ln)}
 						ed.SetCursor(npos)
 					}
 				}
 				ed.InsertAtCursor([]byte("\n"))
 				tbe, _, cpos := ed.Buffer.AutoIndent(ed.CursorPos.Ln)
 				if tbe != nil {
-					ed.SetCursorShow(lex.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos})
+					ed.SetCursorShow(lexer.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos})
 				}
 			} else {
 				ed.InsertAtCursor([]byte("\n"))
@@ -392,11 +392,11 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetHandled()
 			if ed.CursorPos.Ch > 0 {
-				ind, _ := lex.LineIndent(ed.Buffer.Line(ed.CursorPos.Ln), ed.Styles.Text.TabSize)
+				ind, _ := lexer.LineIndent(ed.Buffer.Line(ed.CursorPos.Ln), ed.Styles.Text.TabSize)
 				if ind > 0 {
 					ed.Buffer.IndentLine(ed.CursorPos.Ln, ind-1)
 					intxt := indent.Bytes(ed.Buffer.Opts.IndentChar(), ind-1, ed.Styles.Text.TabSize)
-					npos := lex.Pos{Ln: ed.CursorPos.Ln, Ch: len(intxt)}
+					npos := lexer.Pos{Ln: ed.CursorPos.Ln, Ch: len(intxt)}
 					ed.SetCursorShow(npos)
 				}
 			}
@@ -438,12 +438,12 @@ func (ed *Editor) KeyInputInsertBra(kt events.Event) {
 		}
 	}
 	if match {
-		ket, _ := lex.BracePair(kt.KeyRune())
+		ket, _ := lexer.BracePair(kt.KeyRune())
 		if newLine && ed.Buffer.Opts.AutoIndent {
 			ed.InsertAtCursor([]byte(string(kt.KeyRune()) + "\n"))
 			tbe, _, cpos := ed.Buffer.AutoIndent(ed.CursorPos.Ln)
 			if tbe != nil {
-				pos = lex.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos}
+				pos = lexer.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos}
 				ed.SetCursorShow(pos)
 			}
 			ed.InsertAtCursor([]byte("\n" + string(ket)))
@@ -479,7 +479,7 @@ func (ed *Editor) KeyInputInsertRune(kt events.Event) {
 			ed.InsertAtCursor([]byte(string(kt.KeyRune())))
 			tbe, _, cpos := ed.Buffer.AutoIndent(ed.CursorPos.Ln)
 			if tbe != nil {
-				ed.SetCursorShow(lex.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos})
+				ed.SetCursorShow(lexer.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos})
 			}
 		} else if ed.lastAutoInsert == kt.KeyRune() { // if we type what we just inserted, just move past
 			ed.CursorPos.Ch++
@@ -500,8 +500,8 @@ func (ed *Editor) KeyInputInsertRune(kt events.Event) {
 			np.Ch--
 			tp, found := ed.Buffer.BraceMatch(kt.KeyRune(), np)
 			if found {
-				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(tp, lex.Pos{tp.Ln, tp.Ch + 1}))
-				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(np, lex.Pos{cp.Ln, cp.Ch}))
+				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(tp, lexer.Pos{tp.Ln, tp.Ch + 1}))
+				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(np, lexer.Pos{cp.Ln, cp.Ch}))
 			}
 		}
 	}
@@ -521,14 +521,14 @@ func (ed *Editor) OpenLink(tl *paint.TextLink) {
 
 // LinkAt returns link at given cursor position, if one exists there --
 // returns true and the link if there is a link, and false otherwise
-func (ed *Editor) LinkAt(pos lex.Pos) (*paint.TextLink, bool) {
+func (ed *Editor) LinkAt(pos lexer.Pos) (*paint.TextLink, bool) {
 	if !(pos.Ln < len(ed.Renders) && len(ed.Renders[pos.Ln].Links) > 0) {
 		return nil, false
 	}
 	cpos := ed.CharStartPos(pos).ToPointCeil()
 	cpos.Y += 2
 	cpos.X += 2
-	lpos := ed.CharStartPos(lex.Pos{Ln: pos.Ln})
+	lpos := ed.CharStartPos(lexer.Pos{Ln: pos.Ln})
 	rend := &ed.Renders[pos.Ln]
 	for ti := range rend.Links {
 		tl := &rend.Links[ti]
@@ -542,7 +542,7 @@ func (ed *Editor) LinkAt(pos lex.Pos) (*paint.TextLink, bool) {
 
 // OpenLinkAt opens a link at given cursor position, if one exists there --
 // returns true and the link if there is a link, and false otherwise -- highlights selected link
-func (ed *Editor) OpenLinkAt(pos lex.Pos) (*paint.TextLink, bool) {
+func (ed *Editor) OpenLinkAt(pos lexer.Pos) (*paint.TextLink, bool) {
 	tl, ok := ed.LinkAt(pos)
 	if ok {
 		rend := &ed.Renders[pos.Ln]
@@ -659,7 +659,7 @@ func (ed *Editor) HandleLinkCursor() {
 
 // SetCursorFromMouse sets cursor position from mouse mouse action -- handles
 // the selection updating etc.
-func (ed *Editor) SetCursorFromMouse(pt image.Point, newPos lex.Pos, selMode events.SelectModes) {
+func (ed *Editor) SetCursorFromMouse(pt image.Point, newPos lexer.Pos, selMode events.SelectModes) {
 	oldPos := ed.CursorPos
 	if newPos == oldPos {
 		return

@@ -11,7 +11,7 @@ import (
 	"sync"
 
 	"cogentcore.org/core/fileinfo"
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
 	"cogentcore.org/core/pi/parser"
 	"cogentcore.org/core/pi/syms"
 )
@@ -29,13 +29,13 @@ import (
 type FileState struct {
 
 	// the source to be parsed -- also holds the full lexed tokens
-	Src lex.File `json:"-" xml:"-"`
+	Src lexer.File `json:"-" xml:"-"`
 
 	// state for lexing
-	LexState lex.State `json:"_" xml:"-"`
+	LexState lexer.State `json:"_" xml:"-"`
 
 	// state for second pass nesting depth and EOS matching
-	TwoState lex.TwoState `json:"-" xml:"-"`
+	TwoState lexer.TwoState `json:"-" xml:"-"`
 
 	// state for parsing
 	ParseState parser.State `json:"-" xml:"-"`
@@ -113,7 +113,7 @@ func (fs *FileState) LexAtEnd() bool {
 
 // LexLine returns the lexing output for given line, combining comments and all other tokens
 // and allocating new memory using clone
-func (fs *FileState) LexLine(ln int) lex.Line {
+func (fs *FileState) LexLine(ln int) lexer.Line {
 	return fs.Src.LexLine(ln)
 }
 

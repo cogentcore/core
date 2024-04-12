@@ -14,7 +14,7 @@ import (
 	"cogentcore.org/core/pi"
 	"cogentcore.org/core/pi/langs"
 	"cogentcore.org/core/pi/langs/bibtex"
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
 	"cogentcore.org/core/pi/syms"
 )
 
@@ -64,7 +64,7 @@ func (tl *TexLang) ParseFile(fss *pi.FileStates, txt []byte) {
 	// no parser
 }
 
-func (tl *TexLang) LexLine(fs *pi.FileState, line int, txt []rune) lex.Line {
+func (tl *TexLang) LexLine(fs *pi.FileState, line int, txt []rune) lexer.Line {
 	pr := tl.Parser()
 	if pr == nil {
 		return nil
@@ -77,7 +77,7 @@ func (tl *TexLang) ParseLine(fs *pi.FileState, line int) *pi.FileState {
 	return nil
 }
 
-func (tl *TexLang) HiLine(fss *pi.FileStates, line int, txt []rune) lex.Line {
+func (tl *TexLang) HiLine(fss *pi.FileStates, line int, txt []rune) lexer.Line {
 	fs := fss.Done()
 	return tl.LexLine(fs, line, txt)
 }
@@ -93,11 +93,11 @@ func (tl *TexLang) ParseDir(fs *pi.FileState, path string, opts pi.LangDirOpts) 
 // other language-specific keywords.  See lex.BracketIndentLine for example.
 // Indent level is in increments of tabSz for spaces, and tabs for tabs.
 // Operates on rune source with markup lex tags per line.
-func (tl *TexLang) IndentLine(fs *pi.FileStates, src [][]rune, tags []lex.Line, ln int, tabSz int) (pInd, delInd, pLn int, ichr indent.Char) {
-	pInd, pLn, ichr = lex.PrevLineIndent(src, tags, ln, tabSz)
+func (tl *TexLang) IndentLine(fs *pi.FileStates, src [][]rune, tags []lexer.Line, ln int, tabSz int) (pInd, delInd, pLn int, ichr indent.Char) {
+	pInd, pLn, ichr = lexer.PrevLineIndent(src, tags, ln, tabSz)
 
-	curUnd, _ := lex.LineStartEndBracket(src[ln], tags[ln])
-	_, prvInd := lex.LineStartEndBracket(src[pLn], tags[pLn])
+	curUnd, _ := lexer.LineStartEndBracket(src[ln], tags[ln])
+	_, prvInd := lexer.LineStartEndBracket(src[pLn], tags[pLn])
 
 	delInd = 0
 	switch {
@@ -109,8 +109,8 @@ func (tl *TexLang) IndentLine(fs *pi.FileStates, src [][]rune, tags []lex.Line, 
 		delInd = -1 // undent
 	}
 
-	pst := lex.FirstNonSpaceRune(src[pLn])
-	cst := lex.FirstNonSpaceRune(src[ln])
+	pst := lexer.FirstNonSpaceRune(src[pLn])
+	cst := lexer.FirstNonSpaceRune(src[ln])
 
 	pbeg := false
 	if pst >= 0 {
@@ -147,7 +147,7 @@ func (tl *TexLang) IndentLine(fs *pi.FileStates, src [][]rune, tags []lex.Line, 
 // (bracket, brace, paren) while typing.
 // pos = position where bra will be inserted, and curLn is the current line
 // match = insert the matching ket, and newLine = insert a new line.
-func (tl *TexLang) AutoBracket(fs *pi.FileStates, bra rune, pos lex.Pos, curLn []rune) (match, newLine bool) {
+func (tl *TexLang) AutoBracket(fs *pi.FileStates, bra rune, pos lexer.Pos, curLn []rune) (match, newLine bool) {
 	lnLen := len(curLn)
 	match = pos.Ch == lnLen || unicode.IsSpace(curLn[pos.Ch]) // at end or if space after
 	newLine = false

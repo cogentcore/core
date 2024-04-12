@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"cogentcore.org/core/fileinfo"
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
 	"cogentcore.org/core/pi/parser"
 	"cogentcore.org/core/tree"
 )
@@ -24,10 +24,10 @@ import (
 type Parser struct {
 
 	// lexer rules for first pass of lexing file
-	Lexer lex.Rule
+	Lexer lexer.Rule
 
 	// second pass after lexing -- computes nesting depth and EOS finding
-	PassTwo lex.PassTwo
+	PassTwo lexer.PassTwo
 
 	// parser rules for parsing lexed tokens
 	Parser parser.Rule
@@ -78,7 +78,7 @@ func (pr *Parser) LexInit(fs *FileState) {
 
 // LexNext does next step of lexing -- returns lowest-level rule that
 // matched, and nil when nomatch err or at end of source input
-func (pr *Parser) LexNext(fs *FileState) *lex.Rule {
+func (pr *Parser) LexNext(fs *FileState) *lexer.Rule {
 	if fs.LexState.Ln >= fs.Src.NLines() {
 		return nil
 	}
@@ -104,11 +104,11 @@ func (pr *Parser) LexNext(fs *FileState) *lex.Rule {
 
 // LexNextLine does next line of lexing -- returns lowest-level rule that
 // matched at end, and nil when nomatch err or at end of source input
-func (pr *Parser) LexNextLine(fs *FileState) *lex.Rule {
+func (pr *Parser) LexNextLine(fs *FileState) *lexer.Rule {
 	if fs.LexState.Ln >= fs.Src.NLines() {
 		return nil
 	}
-	var mrule *lex.Rule
+	var mrule *lexer.Rule
 	for {
 		if fs.LexState.AtEol() {
 			fs.Src.SetLine(fs.LexState.Ln, fs.LexState.Lex, fs.LexState.Comments, fs.LexState.Stack)
@@ -138,7 +138,7 @@ func (pr *Parser) LexRun(fs *FileState) {
 // LexLine runs lexer for given single line of source, which is updated
 // from the given text (if non-nil)
 // Returns merged regular and token comment lines, cloned and ready for use.
-func (pr *Parser) LexLine(fs *FileState, ln int, txt []rune) lex.Line {
+func (pr *Parser) LexLine(fs *FileState, ln int, txt []rune) lexer.Line {
 	nlines := fs.Src.NLines()
 	if ln >= nlines || ln < 0 {
 		return nil
@@ -158,8 +158,8 @@ func (pr *Parser) LexLine(fs *FileState, ln int, txt []rune) lex.Line {
 	fs.Src.SetLine(ln, fs.LexState.Lex, fs.LexState.Comments, fs.LexState.Stack) // before saving here
 	fs.TwoState.SetSrc(&fs.Src)
 	fs.Src.EosPos[ln] = nil // reset eos
-	pr.PassTwo.EosDetectPos(&fs.TwoState, lex.Pos{Ln: ln}, 1)
-	merge := lex.MergeLines(fs.LexState.Lex, fs.LexState.Comments)
+	pr.PassTwo.EosDetectPos(&fs.TwoState, lexer.Pos{Ln: ln}, 1)
+	merge := lexer.MergeLines(fs.LexState.Lex, fs.LexState.Comments)
 	mc := merge.Clone()
 	if len(fs.LexState.Comments) > 0 {
 		pr.PassTwo.NestDepthLine(mc, initDepth)

@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/pi"
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
 	_ "cogentcore.org/core/pi/suplangs"
 	"cogentcore.org/core/pi/token"
 	"cogentcore.org/core/texteditor/histyle"
@@ -135,7 +135,7 @@ func (hm *HiMarkup) SetHiStyle(style core.HiStyleName) {
 
 // MarkupTagsAll returns all the markup tags according to current
 // syntax highlighting settings
-func (hm *HiMarkup) MarkupTagsAll(txt []byte) ([]lex.Line, error) {
+func (hm *HiMarkup) MarkupTagsAll(txt []byte) ([]lexer.Line, error) {
 	if hm.Off {
 		return nil, nil
 	}
@@ -150,7 +150,7 @@ func (hm *HiMarkup) MarkupTagsAll(txt []byte) ([]lex.Line, error) {
 
 // MarkupTagsLine returns tags for one line according to current
 // syntax highlighting settings
-func (hm *HiMarkup) MarkupTagsLine(ln int, txt []rune) (lex.Line, error) {
+func (hm *HiMarkup) MarkupTagsLine(ln int, txt []rune) (lexer.Line, error) {
 	if hm.Off {
 		return nil, nil
 	}
@@ -164,7 +164,7 @@ func (hm *HiMarkup) MarkupTagsLine(ln int, txt []rune) (lex.Line, error) {
 }
 
 // ChromaTagsForLine generates the chroma tags for one line of chroma tokens
-func ChromaTagsForLine(tags *lex.Line, toks []chroma.Token) {
+func ChromaTagsForLine(tags *lexer.Line, toks []chroma.Token) {
 	cp := 0
 	for _, tok := range toks {
 		str := []rune(strings.TrimSuffix(tok.Value, "\n"))
@@ -187,7 +187,7 @@ func ChromaTagsForLine(tags *lex.Line, toks []chroma.Token) {
 
 // ChromaTagsAll returns all the markup tags according to current
 // syntax highlighting settings
-func (hm *HiMarkup) ChromaTagsAll(txt []byte) ([]lex.Line, error) {
+func (hm *HiMarkup) ChromaTagsAll(txt []byte) ([]lexer.Line, error) {
 	txtstr := string(txt) // expensive!
 	iterator, err := hm.lexer.Tokenise(nil, txtstr)
 	if err != nil {
@@ -196,7 +196,7 @@ func (hm *HiMarkup) ChromaTagsAll(txt []byte) ([]lex.Line, error) {
 	}
 	lines := chroma.SplitTokensIntoLines(iterator.Tokens())
 	sz := len(lines)
-	tags := make([]lex.Line, sz)
+	tags := make([]lexer.Line, sz)
 	for li, lt := range lines {
 		ChromaTagsForLine(&tags[li], lt)
 	}
@@ -205,20 +205,20 @@ func (hm *HiMarkup) ChromaTagsAll(txt []byte) ([]lex.Line, error) {
 
 // ChromaTagsLine returns tags for one line according to current
 // syntax highlighting settings
-func (hm *HiMarkup) ChromaTagsLine(txt []rune) (lex.Line, error) {
+func (hm *HiMarkup) ChromaTagsLine(txt []rune) (lexer.Line, error) {
 	return ChromaTagsLine(hm.lexer, txt)
 }
 
 // ChromaTagsLine returns tags for one line according to current
 // syntax highlighting settings
-func ChromaTagsLine(lexer chroma.Lexer, txt []rune) (lex.Line, error) {
+func ChromaTagsLine(clex chroma.Lexer, txt []rune) (lexer.Line, error) {
 	txtstr := string(txt) + "\n"
-	iterator, err := lexer.Tokenise(nil, txtstr)
+	iterator, err := clex.Tokenise(nil, txtstr)
 	if err != nil {
 		slog.Error(err.Error())
 		return nil, err
 	}
-	var tags lex.Line
+	var tags lexer.Line
 	toks := iterator.Tokens()
 	ChromaTagsForLine(&tags, toks)
 	return tags, nil
@@ -233,7 +233,7 @@ const (
 // MarkupLine returns the line with html class tags added for each tag
 // takes both the hi tags and extra tags.  Only fully nested tags are supported --
 // any dangling ends are truncated.
-func (hm *HiMarkup) MarkupLine(txt []rune, hitags, tags lex.Line) []byte {
+func (hm *HiMarkup) MarkupLine(txt []rune, hitags, tags lexer.Line) []byte {
 	if len(txt) > MaxLineLen { // avoid overflow
 		return nil
 	}
@@ -241,7 +241,7 @@ func (hm *HiMarkup) MarkupLine(txt []rune, hitags, tags lex.Line) []byte {
 	if sz == 0 {
 		return nil
 	}
-	ttags := lex.MergeLines(hitags, tags) // ensures that inner-tags are *after* outer tags
+	ttags := lexer.MergeLines(hitags, tags) // ensures that inner-tags are *after* outer tags
 	nt := len(ttags)
 	if nt == 0 || nt > MaxNTags {
 		return HTMLEscapeRunes(txt)

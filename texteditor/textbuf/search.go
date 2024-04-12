@@ -14,7 +14,7 @@ import (
 	"unicode/utf8"
 
 	"cogentcore.org/core/gox/runes"
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
 )
 
 // Match records one match for search within file, positions in runes
@@ -105,7 +105,7 @@ func SearchRuneLines(src [][]rune, find []byte, ignoreCase bool) (int, []Match) 
 // as entire lexically tagged items,
 // with given case-sensitivity returning number of occurrences
 // and specific match position list.  Column positions are in runes.
-func SearchLexItems(src [][]rune, lexs []lex.Line, find []byte, ignoreCase bool) (int, []Match) {
+func SearchLexItems(src [][]rune, lexs []lexer.Line, find []byte, ignoreCase bool) (int, []Match) {
 	fr := bytes.Runes(find)
 	fsz := len(fr)
 	if fsz == 0 {

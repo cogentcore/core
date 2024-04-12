@@ -14,7 +14,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/pi"
 	"cogentcore.org/core/pi/complete"
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
 	"cogentcore.org/core/pi/parser"
 	"cogentcore.org/core/pi/syms"
 	"cogentcore.org/core/pi/token"
@@ -24,12 +24,12 @@ import (
 var CompleteTrace = false
 
 // Lookup is the main api called by completion code in giv/complete.go to lookup item
-func (gl *GoLang) Lookup(fss *pi.FileStates, str string, pos lex.Pos) (ld complete.Lookup) {
+func (gl *GoLang) Lookup(fss *pi.FileStates, str string, pos lexer.Pos) (ld complete.Lookup) {
 	if str == "" {
 		return
 	}
 	origStr := str
-	str = lex.LastScopedString(str)
+	str = lexer.LastScopedString(str)
 	if len(str) == 0 {
 		return
 	}
@@ -129,15 +129,15 @@ func (gl *GoLang) Lookup(fss *pi.FileStates, str string, pos lex.Pos) (ld comple
 }
 
 // CompleteLine is the main api called by completion code in giv/complete.go
-func (gl *GoLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md complete.Matches) {
+func (gl *GoLang) CompleteLine(fss *pi.FileStates, str string, pos lexer.Pos) (md complete.Matches) {
 	if str == "" {
 		return
 	}
 	origStr := str
-	str = lex.LastScopedString(str)
+	str = lexer.LastScopedString(str)
 	if len(str) > 0 {
 		lstchr := str[len(str)-1]
-		mbrace, right := lex.BracePair(rune(lstchr))
+		mbrace, right := lexer.BracePair(rune(lstchr))
 		if mbrace != 0 && right { // don't try to match after closing expr
 			return
 		}
@@ -250,7 +250,7 @@ func (gl *GoLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md 
 
 // CompletePosScope returns the scope for given position in given filename,
 // and fills in the scoping symbol(s) in scMap
-func (gl *GoLang) CompletePosScope(fs *pi.FileState, pos lex.Pos, fpath string, scopes *syms.SymMap) token.Tokens {
+func (gl *GoLang) CompletePosScope(fs *pi.FileState, pos lexer.Pos, fpath string, scopes *syms.SymMap) token.Tokens {
 	fs.Syms.FindContainsRegion(fpath, pos, 2, token.None, scopes) // None matches any, 2 extra lines to add for new typing
 	if len(*scopes) == 0 {
 		return token.None
@@ -309,12 +309,12 @@ func (gl *GoLang) CompleteTypeName(fs *pi.FileState, pkg *syms.Symbol, seed stri
 // LookupString attempts to lookup a string, which could be a type name,
 // (with package qualifier), could be partial, etc
 func (gl *GoLang) LookupString(fs *pi.FileState, pkg *syms.Symbol, scopes syms.SymMap, str string) (ld complete.Lookup) {
-	str = lex.TrimLeftToAlpha(str)
+	str = lexer.TrimLeftToAlpha(str)
 	pnm, tnm := SplitType(str)
 	if pnm != "" && tnm != "" {
 		psym, has := gl.PkgSyms(fs, pkg.Children, pnm)
 		if has {
-			tnm = lex.TrimLeftToAlpha(tnm)
+			tnm = lexer.TrimLeftToAlpha(tnm)
 			var matches syms.SymMap
 			psym.Children.FindNamePrefixScoped(tnm, &matches)
 			if len(matches) == 1 {
@@ -453,7 +453,7 @@ func (gl *GoLang) CompleteEdit(fss *pi.FileStates, text string, cp int, comp com
 	// the cursor to delete
 	s2 := text[cp:]
 	gotParen := false
-	if len(s2) > 0 && lex.IsLetterOrDigit(rune(s2[0])) {
+	if len(s2) > 0 && lexer.IsLetterOrDigit(rune(s2[0])) {
 		for i, c := range s2 {
 			if c == '(' {
 				gotParen = true

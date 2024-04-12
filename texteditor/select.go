@@ -11,7 +11,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/mimedata"
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/texteditor/textbuf"
@@ -84,14 +84,14 @@ func (ed *Editor) SelectModeToggle() {
 
 // SelectAll selects all the text
 func (ed *Editor) SelectAll() {
-	ed.SelectRegion.Start = lex.PosZero
+	ed.SelectRegion.Start = lexer.PosZero
 	ed.SelectRegion.End = ed.Buffer.EndPos()
 	ed.NeedsRender()
 }
 
 // WordBefore returns the word before the lex.Pos
 // uses IsWordBreak to determine the bounds of the word
-func (ed *Editor) WordBefore(tp lex.Pos) *textbuf.Edit {
+func (ed *Editor) WordBefore(tp lexer.Pos) *textbuf.Edit {
 	txt := ed.Buffer.Line(tp.Ln)
 	ch := tp.Ch
 	ch = min(ch, len(txt))
@@ -109,14 +109,14 @@ func (ed *Editor) WordBefore(tp lex.Pos) *textbuf.Edit {
 		}
 	}
 	if st != ch {
-		return ed.Buffer.Region(lex.Pos{Ln: tp.Ln, Ch: st}, tp)
+		return ed.Buffer.Region(lexer.Pos{Ln: tp.Ln, Ch: st}, tp)
 	}
 	return nil
 }
 
 // IsWordStart returns true if the cursor is just before the start of a word
 // word is a string of characters none of which are classified as a word break
-func (ed *Editor) IsWordStart(tp lex.Pos) bool {
+func (ed *Editor) IsWordStart(tp lexer.Pos) bool {
 	txt := ed.Buffer.Line(ed.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
@@ -139,7 +139,7 @@ func (ed *Editor) IsWordStart(tp lex.Pos) bool {
 
 // IsWordEnd returns true if the cursor is just past the last letter of a word
 // word is a string of characters none of which are classified as a word break
-func (ed *Editor) IsWordEnd(tp lex.Pos) bool {
+func (ed *Editor) IsWordEnd(tp lexer.Pos) bool {
 	txt := ed.Buffer.Line(ed.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
@@ -167,7 +167,7 @@ func (ed *Editor) IsWordEnd(tp lex.Pos) bool {
 // IsWordMiddle - returns true if the cursor is anywhere inside a word,
 // i.e. the character before the cursor and the one after the cursor
 // are not classified as word break characters
-func (ed *Editor) IsWordMiddle(tp lex.Pos) bool {
+func (ed *Editor) IsWordMiddle(tp lexer.Pos) bool {
 	txt := ed.Buffer.Line(ed.CursorPos.Ln)
 	sz := len(txt)
 	if sz < 2 {
@@ -426,7 +426,7 @@ func (ed *Editor) CutRect() *textbuf.Edit {
 	if !ed.HasSelection() {
 		return nil
 	}
-	npos := lex.Pos{Ln: ed.SelectRegion.End.Ln, Ch: ed.SelectRegion.Start.Ch}
+	npos := lexer.Pos{Ln: ed.SelectRegion.End.Ln, Ch: ed.SelectRegion.Start.Ch}
 	cut := ed.Buffer.DeleteTextRect(ed.SelectRegion.Start, ed.SelectRegion.End, EditSignal)
 	if cut != nil {
 		cb := cut.ToBytes()

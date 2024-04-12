@@ -11,13 +11,13 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/pi"
 	"cogentcore.org/core/pi/complete"
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
 )
 
-func (tl *TexLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md complete.Matches) {
+func (tl *TexLang) CompleteLine(fss *pi.FileStates, str string, pos lexer.Pos) (md complete.Matches) {
 	origStr := str
-	lfld := lex.LastField(str)
-	str = lex.LastScopedString(str)
+	lfld := lexer.LastField(str)
+	str = lexer.LastScopedString(str)
 	if lfld[0] == '\\' && lfld[1:] == str { // use the /
 		str = lfld
 	}
@@ -38,10 +38,10 @@ func (tl *TexLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md
 }
 
 // Lookup is the main api called by completion code in giv/complete.go to lookup item
-func (tl *TexLang) Lookup(fss *pi.FileStates, str string, pos lex.Pos) (ld complete.Lookup) {
+func (tl *TexLang) Lookup(fss *pi.FileStates, str string, pos lexer.Pos) (ld complete.Lookup) {
 	origStr := str
-	lfld := lex.LastField(str)
-	str = lex.LastScopedString(str)
+	lfld := lexer.LastField(str)
+	str = lexer.LastScopedString(str)
 	if HasCite(lfld) {
 		return tl.LookupCite(fss, origStr, str, pos)
 	}
@@ -54,7 +54,7 @@ func (tl *TexLang) CompleteEdit(fss *pi.FileStates, text string, cp int, comp co
 	// the cursor to delete
 	s2 := text[cp:]
 	// gotParen := false
-	if len(s2) > 0 && lex.IsLetterOrDigit(rune(s2[0])) {
+	if len(s2) > 0 && lexer.IsLetterOrDigit(rune(s2[0])) {
 		for i, c := range s2 {
 			if c == '{' {
 				// gotParen = true

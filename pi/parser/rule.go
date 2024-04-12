@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package parse does the parsing stage after lexing, using a top-down recursive-descent
+// Package parser does the parsing stage after lexing, using a top-down recursive-descent
 // (TDRD) strategy, with a special reverse mode to deal with left-associative binary expressions
 // which otherwise end up being right-associative for TDRD parsing.
 // Higher-level rules provide scope to lower-level ones, with a special EOS end-of-statement
@@ -18,7 +18,7 @@ import (
 	"text/tabwriter"
 
 	"cogentcore.org/core/gox/indent"
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
 	"cogentcore.org/core/pi/syms"
 	"cogentcore.org/core/pi/token"
 	"cogentcore.org/core/tree"
@@ -157,7 +157,7 @@ type Parser interface {
 	// Parse tries to apply rule to given input state, returns rule that matched or nil
 	// parent is the parent rule that we're being called from
 	// ast is the current ast node that we add to
-	Parse(ps *State, parent *Rule, ast *Ast, scope lex.Reg, optMap lex.TokenMap, depth int) *Rule
+	Parse(ps *State, parent *Rule, ast *Ast, scope lexer.Reg, optMap lexer.TokenMap, depth int) *Rule
 
 	// AsParseRule returns object as a parser.Rule
 	AsParseRule() *Rule
@@ -208,14 +208,14 @@ func (rl RuleList) Last() *RuleEl {
 var RuleMap map[string]*Rule
 
 // Matches encodes the regions of each match, Err for no match
-type Matches []lex.Reg
+type Matches []lexer.Reg
 
 // StartEnd returns the first and last non-zero positions in the Matches list as a region
-func (mm Matches) StartEnd() lex.Reg {
-	reg := lex.RegZero
+func (mm Matches) StartEnd() lexer.Reg {
+	reg := lexer.RegZero
 	for _, mp := range mm {
-		if mp.St != lex.PosZero {
-			if reg.St == lex.PosZero {
+		if mp.St != lexer.PosZero {
+			if reg.St == lexer.PosZero {
 				reg.St = mp.St
 			}
 			reg.Ed = mp.Ed
@@ -226,7 +226,7 @@ func (mm Matches) StartEnd() lex.Reg {
 
 // StartEndExcl returns the first and last non-zero positions in the Matches list as a region
 // moves the end to next toke to make it the usual exclusive end pos
-func (mm Matches) StartEndExcl(ps *State) lex.Reg {
+func (mm Matches) StartEndExcl(ps *State) lexer.Reg {
 	reg := mm.StartEnd()
 	reg.Ed, _ = ps.Src.NextTokenPos(reg.Ed)
 	return reg
@@ -254,7 +254,7 @@ func (pr *Rule) SetRuleMap(ps *State) {
 	pr.WalkDown(func(k tree.Node) bool {
 		pri := k.(*Rule)
 		if epr, has := RuleMap[pri.Nm]; has {
-			ps.Error(lex.PosZero, fmt.Sprintf("Parser Compile: multiple rules with same name: %v and %v", pri.Path(), epr.Path()), pri)
+			ps.Error(lexer.PosZero, fmt.Sprintf("Parser Compile: multiple rules with same name: %v and %v", pri.Path(), epr.Path()), pri)
 		} else {
 			RuleMap[pri.Nm] = pri
 		}
@@ -320,7 +320,7 @@ func (pr *Rule) Compile(ps *State) bool {
 	for ri := range rs {
 		rn := strings.TrimSpace(rs[ri])
 		if len(rn) == 0 {
-			ps.Error(lex.PosZero, "Compile: Rules has empty string -- make sure there is only one space between rule elements", pr)
+			ps.Error(lexer.PosZero, "Compile: Rules has empty string -- make sure there is only one space between rule elements", pr)
 			valid = false
 			break
 		}
@@ -363,7 +363,7 @@ func (pr *Rule) Compile(ps *State) bool {
 				} else {
 					err := rr.Token.Token.SetString(tn)
 					if err != nil {
-						ps.Error(lex.PosZero, fmt.Sprintf("Compile: token convert error: %v", err.Error()), pr)
+						ps.Error(lexer.PosZero, fmt.Sprintf("Compile: token convert error: %v", err.Error()), pr)
 						valid = false
 					}
 				}
@@ -401,7 +401,7 @@ func (pr *Rule) Compile(ps *State) bool {
 			}
 			rp, ok := RuleMap[rn[st:]]
 			if !ok {
-				ps.Error(lex.PosZero, fmt.Sprintf("Compile: refers to rule %v not found", rn), pr)
+				ps.Error(lexer.PosZero, fmt.Sprintf("Compile: refers to rule %v not found", rn), pr)
 				valid = false
 			} else {
 				rr.Rule = rp
@@ -479,7 +479,7 @@ func (pr *Rule) CompileTokMap(ps *State) bool {
 		fr := kpr.Rules[0]
 		skey := fr.Token.StringKey()
 		if _, has := pr.FiTokenMap[skey]; has {
-			ps.Error(lex.PosZero, fmt.Sprintf("CompileFirstTokenMap: multiple rules have the same first token: %v -- must be unique -- use a :'tok' group to match that first token and put all the sub-rules as children of that node", fr.Token), pr)
+			ps.Error(lexer.PosZero, fmt.Sprintf("CompileFirstTokenMap: multiple rules have the same first token: %v -- must be unique -- use a :'tok' group to match that first token and put all the sub-rules as children of that node", fr.Token), pr)
 			pr.FiTokenElseIndex = 0
 			valid = false
 		} else {
@@ -508,7 +508,7 @@ func (pr *Rule) CompileExcl(ps *State, rs []string, rist int) bool {
 	}
 
 	if ktoki < 0 {
-		ps.Error(lex.PosZero, "CompileExcl: no token found for matching exclusion rules", pr)
+		ps.Error(lexer.PosZero, "CompileExcl: no token found for matching exclusion rules", pr)
 		return false
 	}
 
@@ -542,7 +542,7 @@ func (pr *Rule) CompileExcl(ps *State, rs []string, rist int) bool {
 			} else {
 				err := rr.Token.Token.SetString(tn)
 				if err != nil {
-					ps.Error(lex.PosZero, fmt.Sprintf("CompileExcl: token convert error: %v", err.Error()), pr)
+					ps.Error(lexer.PosZero, fmt.Sprintf("CompileExcl: token convert error: %v", err.Error()), pr)
 					valid = false
 				}
 			}
@@ -552,7 +552,7 @@ func (pr *Rule) CompileExcl(ps *State, rs []string, rist int) bool {
 		}
 	}
 	if ki < 0 {
-		ps.Error(lex.PosZero, fmt.Sprintf("CompileExcl: key token: %v not found in exclusion rule", ktok), pr)
+		ps.Error(lexer.PosZero, fmt.Sprintf("CompileExcl: key token: %v not found in exclusion rule", ktok), pr)
 		valid = false
 		return valid
 	}
@@ -573,20 +573,20 @@ func (pr *Rule) Validate(ps *State) bool {
 	}
 
 	if len(pr.Rules) == 0 && !pr.HasChildren() && !tree.IsRoot(pr) {
-		ps.Error(lex.PosZero, "Validate: rule has no rules and no children", pr)
+		ps.Error(lexer.PosZero, "Validate: rule has no rules and no children", pr)
 		valid = false
 	}
 	if !pr.Is(TokenMatchGroup) && len(pr.Rules) > 0 && pr.HasChildren() {
-		ps.Error(lex.PosZero, "Validate: rule has both rules and children -- should be either-or", pr)
+		ps.Error(lexer.PosZero, "Validate: rule has both rules and children -- should be either-or", pr)
 		valid = false
 	}
 	if pr.Is(Reverse) {
 		if len(pr.Rules) != 3 {
-			ps.Error(lex.PosZero, "Validate: a Reverse (-) rule must have 3 children -- for binary operator expressions only", pr)
+			ps.Error(lexer.PosZero, "Validate: a Reverse (-) rule must have 3 children -- for binary operator expressions only", pr)
 			valid = false
 		} else {
 			if !pr.Rules[1].IsToken() {
-				ps.Error(lex.PosZero, "Validate: a Reverse (-) rule must have a token to be recognized in the middle of two rules -- for binary operator expressions only", pr)
+				ps.Error(lexer.PosZero, "Validate: a Reverse (-) rule must have a token to be recognized in the middle of two rules -- for binary operator expressions only", pr)
 			}
 		}
 	}
@@ -594,7 +594,7 @@ func (pr *Rule) Validate(ps *State) bool {
 	if len(pr.Rules) > 0 {
 		if pr.Rules[0].IsRule() && (pr.Rules[0].Rule == pr || pr.ParentLevel(pr.Rules[0].Rule) >= 0) { // left recursive
 			if pr.Rules[0].Match {
-				ps.Error(lex.PosZero, fmt.Sprintf("Validate: rule refers to itself recursively in first sub-rule: %v and that sub-rule is marked as a Match -- this is infinite recursion and is not allowed!  Must use distinctive tokens in rule to match this rule, and then left-recursive elements will be filled in when the rule runs, but they cannot be used for matching rule.", pr.Rules[0].Rule.Name()), pr)
+				ps.Error(lexer.PosZero, fmt.Sprintf("Validate: rule refers to itself recursively in first sub-rule: %v and that sub-rule is marked as a Match -- this is infinite recursion and is not allowed!  Must use distinctive tokens in rule to match this rule, and then left-recursive elements will be filled in when the rule runs, but they cannot be used for matching rule.", pr.Rules[0].Rule.Name()), pr)
 				valid = false
 			}
 			ntok := 0
@@ -604,7 +604,7 @@ func (pr *Rule) Validate(ps *State) bool {
 				}
 			}
 			if ntok == 0 {
-				ps.Error(lex.PosZero, fmt.Sprintf("Validate: rule refers to itself recursively in first sub-rule: %v, and does not have any tokens in the rule -- MUST promote tokens to this rule to disambiguate match, otherwise will just do infinite recursion!", pr.Rules[0].Rule.Name()), pr)
+				ps.Error(lexer.PosZero, fmt.Sprintf("Validate: rule refers to itself recursively in first sub-rule: %v, and does not have any tokens in the rule -- MUST promote tokens to this rule to disambiguate match, otherwise will just do infinite recursion!", pr.Rules[0].Rule.Name()), pr)
 				valid = false
 			}
 		}
@@ -628,7 +628,7 @@ func (pr *Rule) StartParse(ps *State) *Rule {
 	}
 	kpr := pr.Kids[0].(*Rule) // first rule is special set of valid top-level matches
 	var parAst *Ast
-	scope := lex.Reg{St: ps.Pos}
+	scope := lexer.Reg{St: ps.Pos}
 	if ps.Ast.HasChildren() {
 		parAst = ps.Ast.ChildAst(0)
 	} else {
@@ -676,7 +676,7 @@ func (pr *Rule) StartParse(ps *State) *Rule {
 // parAst is the current ast node that we add to.
 // scope is the region to search within, defined by parent or EOS if we have a terminal
 // one
-func (pr *Rule) Parse(ps *State, parent *Rule, parAst *Ast, scope lex.Reg, optMap lex.TokenMap, depth int) *Rule {
+func (pr *Rule) Parse(ps *State, parent *Rule, parAst *Ast, scope lexer.Reg, optMap lexer.TokenMap, depth int) *Rule {
 	if pr.Off {
 		return nil
 	}
@@ -709,7 +709,7 @@ func (pr *Rule) Parse(ps *State, parent *Rule, parAst *Ast, scope lex.Reg, optMa
 }
 
 // ParseRules parses rules and returns this rule if it matches, nil if not
-func (pr *Rule) ParseRules(ps *State, parent *Rule, parAst *Ast, scope lex.Reg, optMap lex.TokenMap, depth int) *Rule {
+func (pr *Rule) ParseRules(ps *State, parent *Rule, parAst *Ast, scope lexer.Reg, optMap lexer.TokenMap, depth int) *Rule {
 	ok := false
 	if pr.Is(SetsScope) {
 		scope, ok = pr.Scope(ps, parAst, scope)
@@ -717,7 +717,7 @@ func (pr *Rule) ParseRules(ps *State, parent *Rule, parAst *Ast, scope lex.Reg, 
 			return nil
 		}
 	} else if GuiActive {
-		if scope == lex.RegZero {
+		if scope == lexer.RegZero {
 			ps.Error(scope.St, "scope is empty and no EOS in rule -- invalid rules -- starting rules must all have EOS", pr)
 			return nil
 		}
@@ -756,7 +756,7 @@ func (pr *Rule) ParseRules(ps *State, parent *Rule, parAst *Ast, scope lex.Reg, 
 // Scope finds the potential scope region for looking for tokens -- either from
 // EOS position or State ScopeStack pushed from parents.
 // Returns new scope and false if no valid scope found.
-func (pr *Rule) Scope(ps *State, parAst *Ast, scope lex.Reg) (lex.Reg, bool) {
+func (pr *Rule) Scope(ps *State, parAst *Ast, scope lexer.Reg) (lexer.Reg, bool) {
 	// prf := profile.Start("Scope")
 	// defer prf.End()
 
@@ -770,7 +770,7 @@ func (pr *Rule) Scope(ps *State, parAst *Ast, scope lex.Reg) (lex.Reg, bool) {
 			// ps.Error(creg.St, "could not find EOS at target nesting depth -- parens / bracket / brace mismatch?", pr)
 			return nscope, false
 		}
-		if scope.Ed != lex.PosZero && lr.Opt && scope.Ed.IsLess(ep) {
+		if scope.Ed != lexer.PosZero && lr.Opt && scope.Ed.IsLess(ep) {
 			// optional tokens can't take us out of scope
 			return scope, true
 		}
@@ -792,7 +792,7 @@ func (pr *Rule) Scope(ps *State, parAst *Ast, scope lex.Reg) (lex.Reg, bool) {
 
 // Match attempts to match the rule, returns true if it matches, and the
 // match positions, along with any update to the scope
-func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap lex.TokenMap) (bool, lex.Reg, Matches) {
+func (pr *Rule) Match(ps *State, parAst *Ast, scope lexer.Reg, depth int, optMap lexer.TokenMap) (bool, lexer.Reg, Matches) {
 	if pr.Off {
 		return false, scope, nil
 	}
@@ -866,7 +866,7 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap l
 }
 
 // MatchOnlyToks matches rules having only tokens
-func (pr *Rule) MatchOnlyToks(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap lex.TokenMap) (bool, Matches) {
+func (pr *Rule) MatchOnlyToks(ps *State, parAst *Ast, scope lexer.Reg, depth int, optMap lexer.TokenMap) (bool, Matches) {
 	nr := len(pr.Rules)
 
 	var mpos Matches
@@ -887,13 +887,13 @@ func (pr *Rule) MatchOnlyToks(ps *State, parAst *Ast, scope lex.Reg, depth int, 
 			if mpos == nil {
 				mpos = make(Matches, nr) // make on demand -- cuts out a lot of allocations!
 			}
-			mpos[nr-1] = lex.Reg{scope.Ed, scope.Ed}
+			mpos[nr-1] = lexer.Reg{scope.Ed, scope.Ed}
 		}
 		kt.Depth += scstDepth // always use starting scope depth
 		match, tpos := pr.MatchToken(ps, rr, ri, kt, &creg, mpos, parAst, scope, depth, optMap)
 		if !match {
 			if ps.Trace.On {
-				if tpos != lex.PosZero {
+				if tpos != lexer.PosZero {
 					tlx := ps.Src.LexAt(tpos)
 					ps.Trace.Out(ps, pr, NoMatch, creg.St, creg, parAst, fmt.Sprintf("%v token: %v, was: %v", ri, kt.String(), tlx.String()))
 				} else {
@@ -905,7 +905,7 @@ func (pr *Rule) MatchOnlyToks(ps *State, parAst *Ast, scope lex.Reg, depth int, 
 		if mpos == nil {
 			mpos = make(Matches, nr) // make on demand -- cuts out a lot of allocations!
 		}
-		mpos[ri] = lex.Reg{tpos, tpos}
+		mpos[ri] = lexer.Reg{tpos, tpos}
 		if ps.Trace.On {
 			ps.Trace.Out(ps, pr, SubMatch, creg.St, creg, parAst, fmt.Sprintf("%v token: %v", ri, kt.String()))
 		}
@@ -916,21 +916,21 @@ func (pr *Rule) MatchOnlyToks(ps *State, parAst *Ast, scope lex.Reg, depth int, 
 
 // MatchToken matches one token sub-rule -- returns true for match and
 // false if no match -- and the position where it was / should have been
-func (pr *Rule) MatchToken(ps *State, rr *RuleEl, ri int, kt token.KeyToken, creg *lex.Reg, mpos Matches, parAst *Ast, scope lex.Reg, depth int, optMap lex.TokenMap) (bool, lex.Pos) {
+func (pr *Rule) MatchToken(ps *State, rr *RuleEl, ri int, kt token.KeyToken, creg *lexer.Reg, mpos Matches, parAst *Ast, scope lexer.Reg, depth int, optMap lexer.TokenMap) (bool, lexer.Pos) {
 	nr := len(pr.Rules)
 	ok := false
 	matchst := false // match start of creg
 	matched := false // match end of creg
-	var tpos lex.Pos
+	var tpos lexer.Pos
 	if ri == 0 {
 		matchst = true
 	} else if mpos != nil {
 		lpos := mpos[ri-1].Ed
-		if lpos != lex.PosZero { // previous has matched
+		if lpos != lexer.PosZero { // previous has matched
 			matchst = true
 		} else if ri < nr-1 && rr.FromNext {
 			lpos := mpos[ri+1].St
-			if lpos != lex.PosZero { // previous has matched
+			if lpos != lexer.PosZero { // previous has matched
 				creg.Ed, _ = ps.Src.PrevTokenPos(lpos)
 				matched = true
 			}
@@ -973,7 +973,7 @@ func (pr *Rule) MatchToken(ps *State, rr *RuleEl, ri int, kt token.KeyToken, cre
 }
 
 // MatchMixed matches mixed tokens and non-tokens
-func (pr *Rule) MatchMixed(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap lex.TokenMap) (bool, Matches) {
+func (pr *Rule) MatchMixed(ps *State, parAst *Ast, scope lexer.Reg, depth int, optMap lexer.TokenMap) (bool, Matches) {
 	nr := len(pr.Rules)
 	var mpos Matches
 
@@ -1009,13 +1009,13 @@ func (pr *Rule) MatchMixed(ps *State, parAst *Ast, scope lex.Reg, depth int, opt
 				if mpos == nil {
 					mpos = make(Matches, nr) // make on demand -- cuts out a lot of allocations!
 				}
-				mpos[nr-1] = lex.Reg{scope.Ed, scope.Ed}
+				mpos[nr-1] = lexer.Reg{scope.Ed, scope.Ed}
 			}
 			kt.Depth += scstDepth // always use starting scope depth
 			match, tpos := pr.MatchToken(ps, rr, ri, kt, &creg, mpos, parAst, scope, depth, optMap)
 			if !match {
 				if ps.Trace.On {
-					if tpos != lex.PosZero {
+					if tpos != lexer.PosZero {
 						tlx := ps.Src.LexAt(tpos)
 						ps.Trace.Out(ps, pr, NoMatch, creg.St, creg, parAst, fmt.Sprintf("%v token: %v, was: %v", ri, kt.String(), tlx.String()))
 					} else {
@@ -1027,7 +1027,7 @@ func (pr *Rule) MatchMixed(ps *State, parAst *Ast, scope lex.Reg, depth int, opt
 			if mpos == nil {
 				mpos = make(Matches, nr) // make on demand -- cuts out a lot of allocations!
 			}
-			mpos[ri] = lex.Reg{tpos, tpos}
+			mpos[ri] = lexer.Reg{tpos, tpos}
 			if ps.Trace.On {
 				ps.Trace.Out(ps, pr, SubMatch, creg.St, creg, parAst, fmt.Sprintf("%v token: %v", ri, kt.String()))
 			}
@@ -1093,7 +1093,7 @@ func (pr *Rule) MatchMixed(ps *State, parAst *Ast, scope lex.Reg, depth int, opt
 }
 
 // MatchNoToks matches NoToks case -- just does single sub-rule match
-func (pr *Rule) MatchNoToks(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap lex.TokenMap) (bool, Matches) {
+func (pr *Rule) MatchNoToks(ps *State, parAst *Ast, scope lexer.Reg, depth int, optMap lexer.TokenMap) (bool, Matches) {
 	creg := scope
 	ri := 0
 	rr := &pr.Rules[0]
@@ -1115,7 +1115,7 @@ func (pr *Rule) MatchNoToks(ps *State, parAst *Ast, scope lex.Reg, depth int, op
 }
 
 // MatchGroup does matching for Group rules
-func (pr *Rule) MatchGroup(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap lex.TokenMap) (bool, lex.Reg, Matches) {
+func (pr *Rule) MatchGroup(ps *State, parAst *Ast, scope lexer.Reg, depth int, optMap lexer.TokenMap) (bool, lexer.Reg, Matches) {
 	// prf := profile.Start("SubMatch")
 	if mst, match := ps.IsMatch(pr, scope); match {
 		// 	prf.End()
@@ -1157,7 +1157,7 @@ func (pr *Rule) MatchGroup(ps *State, parAst *Ast, scope lex.Reg, depth int, opt
 
 // MatchExclude looks for matches of exclusion tokens -- if found, they exclude this rule
 // return is true if exclude matches and rule should be excluded
-func (pr *Rule) MatchExclude(ps *State, scope lex.Reg, ktpos lex.Reg, depth int, optMap lex.TokenMap) bool {
+func (pr *Rule) MatchExclude(ps *State, scope lexer.Reg, ktpos lexer.Reg, depth int, optMap lexer.TokenMap) bool {
 	nf := len(pr.ExclFwd)
 	nr := len(pr.ExclRev)
 	scstlx := ps.Src.LexAt(scope.St) // scope starting lex
@@ -1269,7 +1269,7 @@ func (pr *Rule) MatchExclude(ps *State, scope lex.Reg, ktpos lex.Reg, depth int,
 
 // DoRules after we have matched, goes through rest of the rules -- returns false if
 // there were any issues encountered
-func (pr *Rule) DoRules(ps *State, parent *Rule, parentAst *Ast, scope lex.Reg, mpos Matches, optMap lex.TokenMap, depth int) bool {
+func (pr *Rule) DoRules(ps *State, parent *Rule, parentAst *Ast, scope lexer.Reg, mpos Matches, optMap lexer.TokenMap, depth int) bool {
 	trcAst := parentAst
 	var ourAst *Ast
 	anchorFirst := (pr.Ast == AnchorFirstAst && parentAst.Nm != pr.Nm)
@@ -1329,7 +1329,7 @@ func (pr *Rule) DoRules(ps *State, parent *Rule, parentAst *Ast, scope lex.Reg, 
 		creg.Ed = scope.Ed
 		if !pr.Is(NoTokens) {
 			for mi := ri + 1; mi < nr; mi++ {
-				if mpos[mi].St != lex.PosZero {
+				if mpos[mi].St != lexer.PosZero {
 					creg.Ed = mpos[mi].St // only look up to point of next matching token
 					break
 				}
@@ -1410,7 +1410,7 @@ func (pr *Rule) DoRules(ps *State, parent *Rule, parentAst *Ast, scope lex.Reg, 
 // relative to that, and don't otherwise adjust scope or position.  In particular all
 // the position updating taking place in sup-rules is then just ignored and we set the
 // position to the end position matched by the "last" rule (which was the first processed)
-func (pr *Rule) DoRulesRevBinExp(ps *State, parent *Rule, parentAst *Ast, scope lex.Reg, mpos Matches, ourAst *Ast, optMap lex.TokenMap, depth int) bool {
+func (pr *Rule) DoRulesRevBinExp(ps *State, parent *Rule, parentAst *Ast, scope lexer.Reg, mpos Matches, ourAst *Ast, optMap lexer.TokenMap, depth int) bool {
 	nr := len(pr.Rules)
 	valid := true
 	creg := scope
@@ -1580,7 +1580,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *Ast) bo
 	}
 	if node == nil {
 		if ps.Trace.On {
-			ps.Trace.Out(ps, pr, RunAct, ps.Pos, lex.RegZero, useAst, fmt.Sprintf("Act %v: ERROR: node not found at path(s): %v in node: %v", act.Act, act.Path, apath))
+			ps.Trace.Out(ps, pr, RunAct, ps.Pos, lexer.RegZero, useAst, fmt.Sprintf("Act %v: ERROR: node not found at path(s): %v in node: %v", act.Act, act.Path, apath))
 		}
 		return false
 	}

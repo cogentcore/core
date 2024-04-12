@@ -7,7 +7,7 @@ package parser
 import (
 	"fmt"
 
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
 	"cogentcore.org/core/pi/syms"
 	"cogentcore.org/core/pi/token"
 )
@@ -16,7 +16,7 @@ import (
 type State struct {
 
 	// source and lexed version of source we're parsing
-	Src *lex.File `view:"no-inline"`
+	Src *lexer.File `view:"no-inline"`
 
 	// tracing for this parser
 	Trace TraceOptions
@@ -31,10 +31,10 @@ type State struct {
 	Scopes syms.SymStack
 
 	// the current lex token position
-	Pos lex.Pos
+	Pos lexer.Pos
 
 	// any error messages accumulated during parsing specifically
-	Errs lex.ErrorList `view:"no-inline"`
+	Errs lexer.ErrorList `view:"no-inline"`
 
 	// rules that matched and ran at each point, in 1-to-1 correspondence with the Src.Lex tokens for the lines and char pos dims
 	Matches [][]MatchStack `view:"no-inline"`
@@ -43,11 +43,11 @@ type State struct {
 	NonMatches ScopeRuleSet `view:"no-inline"`
 
 	// stack for context-sensitive rules
-	Stack lex.Stack `view:"no-inline"`
+	Stack lexer.Stack `view:"no-inline"`
 }
 
 // Init initializes the state at start of parsing
-func (ps *State) Init(src *lex.File, ast *Ast) {
+func (ps *State) Init(src *lexer.File, ast *Ast) {
 	// fmt.Println("in init")
 	// if ps.Src != nil {
 	// 	fmt.Println("was:", ps.Src.Filename)
@@ -70,7 +70,7 @@ func (ps *State) Init(src *lex.File, ast *Ast) {
 	ps.Scopes.Reset()
 	ps.Stack.Reset()
 	if ps.Src != nil {
-		ps.Pos, _ = ps.Src.ValidTokenPos(lex.PosZero)
+		ps.Pos, _ = ps.Src.ValidTokenPos(lexer.PosZero)
 	}
 	ps.Errs.Reset()
 	ps.Trace.Init()
@@ -92,7 +92,7 @@ func (ps *State) Destroy() {
 	ps.Scopes.Reset()
 	ps.Stack.Reset()
 	if ps.Src != nil {
-		ps.Pos, _ = ps.Src.ValidTokenPos(lex.PosZero)
+		ps.Pos, _ = ps.Src.ValidTokenPos(lexer.PosZero)
 	}
 	ps.Errs.Reset()
 	ps.Trace.Init()
@@ -120,8 +120,8 @@ func (ps *State) AllocRules() {
 }
 
 // Error adds a parsing error at given lex token position
-func (ps *State) Error(pos lex.Pos, msg string, rule *Rule) {
-	if pos != lex.PosZero {
+func (ps *State) Error(pos lexer.Pos, msg string, rule *Rule) {
+	if pos != lexer.PosZero {
 		pos = ps.Src.TokenSrcPos(pos).St
 	}
 	e := ps.Errs.Add(pos, ps.Src.Filename, msg, ps.Src.SrcLine(pos.Ln), rule)
@@ -171,12 +171,12 @@ func (ps *State) NextSrcLine() string {
 			ep.Ch = ps.Src.NTokens(ep.Ln)
 		}
 	}
-	reg := lex.Reg{St: sp, Ed: ep}
+	reg := lexer.Reg{St: sp, Ed: ep}
 	return ps.Src.TokenRegSrc(reg)
 }
 
 // MatchLex is our optimized matcher method, matching tkey depth as well
-func (ps *State) MatchLex(lx *lex.Lex, tkey token.KeyToken, isCat, isSubCat bool, cp lex.Pos) bool {
+func (ps *State) MatchLex(lx *lexer.Lex, tkey token.KeyToken, isCat, isSubCat bool, cp lexer.Pos) bool {
 	if lx.Token.Depth != tkey.Depth {
 		return false
 	}
@@ -192,7 +192,7 @@ func (ps *State) MatchLex(lx *lex.Lex, tkey token.KeyToken, isCat, isSubCat bool
 // FindToken looks for token in given region, returns position where found, false if not.
 // Only matches when depth is same as at reg.St start at the start of the search.
 // All positions in token indexes.
-func (ps *State) FindToken(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bool) {
+func (ps *State) FindToken(tkey token.KeyToken, reg lexer.Reg) (lexer.Pos, bool) {
 	// prf := profile.Start("FindToken")
 	// defer prf.End()
 	cp, ok := ps.Src.ValidTokenPos(reg.St)
@@ -217,7 +217,7 @@ func (ps *State) FindToken(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bool) {
 
 // MatchToken returns true if token matches at given position -- must be
 // a valid position!
-func (ps *State) MatchToken(tkey token.KeyToken, pos lex.Pos) bool {
+func (ps *State) MatchToken(tkey token.KeyToken, pos lexer.Pos) bool {
 	tok := tkey.Token
 	isCat := tok.Cat() == tok
 	isSubCat := tok.SubCat() == tok
@@ -232,7 +232,7 @@ func (ps *State) MatchToken(tkey token.KeyToken, pos lex.Pos) bool {
 // ambiguous operators in a row, automatically gets the first one.  This is mainly / only used for
 // binary operator expressions (mathematical binary operators).
 // All positions are in token indexes.
-func (ps *State) FindTokenReverse(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bool) {
+func (ps *State) FindTokenReverse(tkey token.KeyToken, reg lexer.Reg) (lexer.Pos, bool) {
 	// prf := profile.Start("FindTokenReverse")
 	// defer prf.End()
 	cp, ok := ps.Src.PrevTokenPos(reg.Ed)
@@ -277,7 +277,7 @@ func (ps *State) FindTokenReverse(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bo
 }
 
 // AddAst adds a child Ast node to given parent Ast node
-func (ps *State) AddAst(parAst *Ast, rule string, reg lex.Reg) *Ast {
+func (ps *State) AddAst(parAst *Ast, rule string, reg lexer.Reg) *Ast {
 	chAst := &Ast{}
 	chAst.InitName(chAst, rule)
 	parAst.AddChild(chAst)
@@ -295,7 +295,7 @@ type MatchState struct {
 	Rule *Rule
 
 	// scope for match
-	Scope lex.Reg
+	Scope lexer.Reg
 
 	// regions of match for each sub-region
 	Regs Matches
@@ -313,12 +313,12 @@ func (rs MatchState) String() string {
 type MatchStack []MatchState
 
 // Add given rule to stack
-func (rs *MatchStack) Add(pr *Rule, scope lex.Reg, regs Matches) {
+func (rs *MatchStack) Add(pr *Rule, scope lexer.Reg, regs Matches) {
 	*rs = append(*rs, MatchState{Rule: pr, Scope: scope, Regs: regs})
 }
 
 // Find looks for given rule and scope on the stack
-func (rs *MatchStack) Find(pr *Rule, scope lex.Reg) (*MatchState, bool) {
+func (rs *MatchStack) Find(pr *Rule, scope lexer.Reg) (*MatchState, bool) {
 	for i := range *rs {
 		r := &(*rs)[i]
 		if r.Rule == pr && r.Scope == scope {
@@ -329,14 +329,14 @@ func (rs *MatchStack) Find(pr *Rule, scope lex.Reg) (*MatchState, bool) {
 }
 
 // AddMatch adds given rule to rule stack at given scope
-func (ps *State) AddMatch(pr *Rule, scope lex.Reg, regs Matches) {
+func (ps *State) AddMatch(pr *Rule, scope lexer.Reg, regs Matches) {
 	rs := &ps.Matches[scope.St.Ln][scope.St.Ch]
 	rs.Add(pr, scope, regs)
 }
 
 // IsMatch looks for rule at given scope in list of matches, if found
 // returns match state info
-func (ps *State) IsMatch(pr *Rule, scope lex.Reg) (*MatchState, bool) {
+func (ps *State) IsMatch(pr *Rule, scope lexer.Reg) (*MatchState, bool) {
 	rs := &ps.Matches[scope.St.Ln][scope.St.Ch]
 	sz := len(*rs)
 	if sz == 0 {
@@ -359,7 +359,7 @@ func (ps *State) RuleString(full bool) string {
 			for ch := 0; ch < sz; ch++ {
 				rs := ps.Matches[ln][ch]
 				sd := len(rs)
-				txt += ` "` + string(ps.Src.TokenSrc(lex.Pos{ln, ch})) + `"`
+				txt += ` "` + string(ps.Src.TokenSrc(lexer.Pos{ln, ch})) + `"`
 				if sd == 0 {
 					txt += "-"
 				} else {
@@ -385,7 +385,7 @@ func (ps *State) RuleString(full bool) string {
 
 // ScopeRule is a scope and a rule, for storing matches / nonmatch
 type ScopeRule struct {
-	Scope lex.Reg
+	Scope lexer.Reg
 	Rule  *Rule
 }
 
@@ -393,25 +393,25 @@ type ScopeRule struct {
 type ScopeRuleSet map[ScopeRule]struct{}
 
 // Add a rule to scope set, with auto-alloc
-func (rs ScopeRuleSet) Add(scope lex.Reg, pr *Rule) {
+func (rs ScopeRuleSet) Add(scope lexer.Reg, pr *Rule) {
 	sr := ScopeRule{scope, pr}
 	rs[sr] = struct{}{}
 }
 
 // Has checks if scope rule set has given scope, rule
-func (rs ScopeRuleSet) Has(scope lex.Reg, pr *Rule) bool {
+func (rs ScopeRuleSet) Has(scope lexer.Reg, pr *Rule) bool {
 	sr := ScopeRule{scope, pr}
 	_, has := rs[sr]
 	return has
 }
 
 // AddNonMatch adds given rule to non-matching rule set for this scope
-func (ps *State) AddNonMatch(scope lex.Reg, pr *Rule) {
+func (ps *State) AddNonMatch(scope lexer.Reg, pr *Rule) {
 	ps.NonMatches.Add(scope, pr)
 }
 
 // IsNonMatch looks for rule in nonmatch list at given scope
-func (ps *State) IsNonMatch(scope lex.Reg, pr *Rule) bool {
+func (ps *State) IsNonMatch(scope lexer.Reg, pr *Rule) bool {
 	return ps.NonMatches.Has(scope, pr)
 }
 

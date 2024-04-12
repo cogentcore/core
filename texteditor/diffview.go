@@ -18,7 +18,7 @@ import (
 	"cogentcore.org/core/gox/dirs"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/mimedata"
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
 	"cogentcore.org/core/pi/token"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
@@ -195,7 +195,7 @@ func (dv *DiffView) NextDiff(ab int) bool {
 			break
 		}
 	}
-	tva.SetCursorTarget(lex.Pos{Ln: df.I1})
+	tva.SetCursorTarget(lexer.Pos{Ln: df.I1})
 	return true
 }
 
@@ -221,7 +221,7 @@ func (dv *DiffView) PrevDiff(ab int) bool {
 			break
 		}
 	}
-	tva.SetCursorTarget(lex.Pos{Ln: df.I1})
+	tva.SetCursorTarget(lexer.Pos{Ln: df.I1})
 	return true
 }
 
@@ -396,8 +396,8 @@ func (dv *DiffView) TagWordDiffs() {
 			ln := stln + i
 			ra := dv.BufA.Lines[ln]
 			rb := dv.BufB.Lines[ln]
-			lna := lex.RuneFields(ra)
-			lnb := lex.RuneFields(rb)
+			lna := lexer.RuneFields(ra)
+			lnb := lexer.RuneFields(rb)
 			fla := lna.RuneStrings(ra)
 			flb := lnb.RuneStrings(rb)
 			nab := max(len(fla), len(flb))
@@ -448,16 +448,16 @@ func (dv *DiffView) ApplyDiff(ab int, line int) bool {
 	if ab == 0 {
 		dv.BufA.Undos.Off = false
 		// srcLen := len(dv.BufB.Lines[df.J2])
-		spos := lex.Pos{Ln: df.I1, Ch: 0}
-		epos := lex.Pos{Ln: df.I2, Ch: 0}
+		spos := lexer.Pos{Ln: df.I1, Ch: 0}
+		epos := lexer.Pos{Ln: df.I2, Ch: 0}
 		src := dv.BufB.Region(spos, epos)
 		dv.BufA.DeleteText(spos, epos, true)
 		dv.BufA.InsertText(spos, src.ToBytes(), true) // we always just copy, is blank for delete..
 		dv.Diffs.BtoA(di)
 	} else {
 		dv.BufB.Undos.Off = false
-		spos := lex.Pos{Ln: df.J1, Ch: 0}
-		epos := lex.Pos{Ln: df.J2, Ch: 0}
+		spos := lexer.Pos{Ln: df.J1, Ch: 0}
+		epos := lexer.Pos{Ln: df.J2, Ch: 0}
 		src := dv.BufA.Region(spos, epos)
 		dv.BufB.DeleteText(spos, epos, true)
 		dv.BufB.InsertText(spos, src.ToBytes(), true)

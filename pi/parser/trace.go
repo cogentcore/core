@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
 )
 
 // TraceOptions provides options for debugging / monitoring the rule matching and execution process
@@ -105,7 +105,7 @@ func (pt *TraceOptions) CheckRule(rule string) bool {
 }
 
 // Out outputs a trace message -- returns true if actually output
-func (pt *TraceOptions) Out(ps *State, pr *Rule, step Steps, pos lex.Pos, scope lex.Reg, ast *Ast, msg string) bool {
+func (pt *TraceOptions) Out(ps *State, pr *Rule, step Steps, pos lexer.Pos, scope lexer.Reg, ast *Ast, msg string) bool {
 	if !pt.On {
 		return false
 	}

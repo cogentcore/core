@@ -2,7 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package lex
+// Package lexer provides all the lexing functions that transform text
+// into lexical tokens, using token types defined in the token package.
+// It also has the basic file source and position / region management
+// functionality.
+package lexer
 
 //go:generate core generate
 

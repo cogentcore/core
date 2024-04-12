@@ -17,7 +17,7 @@ import (
 	"cogentcore.org/core/gox/indent"
 	"cogentcore.org/core/pi"
 	"cogentcore.org/core/pi/langs"
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
 	"cogentcore.org/core/pi/token"
 )
 
@@ -97,7 +97,7 @@ func (gl *GoLang) ParseFile(fss *pi.FileStates, txt []byte) {
 	}
 }
 
-func (gl *GoLang) LexLine(fs *pi.FileState, line int, txt []rune) lex.Line {
+func (gl *GoLang) LexLine(fs *pi.FileState, line int, txt []rune) lexer.Line {
 	pr := gl.Parser()
 	if pr == nil {
 		return nil
@@ -114,7 +114,7 @@ func (gl *GoLang) ParseLine(fs *pi.FileState, line int) *pi.FileState {
 	return lfs
 }
 
-func (gl *GoLang) HiLine(fss *pi.FileStates, line int, txt []rune) lex.Line {
+func (gl *GoLang) HiLine(fss *pi.FileStates, line int, txt []rune) lexer.Line {
 	pr := gl.Parser()
 	if pr == nil {
 		return nil
@@ -125,7 +125,7 @@ func (gl *GoLang) HiLine(fss *pi.FileStates, line int, txt []rune) lex.Line {
 	if lfs != nil {
 		ll = lfs.Src.Lexs[0]
 		cml := pfs.Src.Comments[line]
-		merge := lex.MergeLines(ll, cml)
+		merge := lexer.MergeLines(ll, cml)
 		mc := merge.Clone()
 		if len(cml) > 0 {
 			initDepth := pfs.Src.PrevDepth(line)
@@ -145,11 +145,11 @@ func (gl *GoLang) HiLine(fss *pi.FileStates, line int, txt []rune) lex.Line {
 // other language-specific keywords.  See lex.BracketIndentLine for example.
 // Indent level is in increments of tabSz for spaces, and tabs for tabs.
 // Operates on rune source with markup lex tags per line.
-func (gl *GoLang) IndentLine(fs *pi.FileStates, src [][]rune, tags []lex.Line, ln int, tabSz int) (pInd, delInd, pLn int, ichr indent.Char) {
-	pInd, pLn, ichr = lex.PrevLineIndent(src, tags, ln, tabSz)
+func (gl *GoLang) IndentLine(fs *pi.FileStates, src [][]rune, tags []lexer.Line, ln int, tabSz int) (pInd, delInd, pLn int, ichr indent.Char) {
+	pInd, pLn, ichr = lexer.PrevLineIndent(src, tags, ln, tabSz)
 
-	curUnd, _ := lex.LineStartEndBracket(src[ln], tags[ln])
-	_, prvInd := lex.LineStartEndBracket(src[pLn], tags[pLn])
+	curUnd, _ := lexer.LineStartEndBracket(src[ln], tags[ln])
+	_, prvInd := lexer.LineStartEndBracket(src[pLn], tags[pLn])
 
 	brackParen := false      // true if line only has bracket and paren -- outdent current
 	if len(tags[pLn]) >= 2 { // allow for comments
@@ -172,8 +172,8 @@ func (gl *GoLang) IndentLine(fs *pi.FileStates, src [][]rune, tags []lex.Line, l
 		delInd--
 	}
 
-	pwrd := lex.FirstWord(string(src[pLn]))
-	cwrd := lex.FirstWord(string(src[ln]))
+	pwrd := lexer.FirstWord(string(src[pLn]))
+	cwrd := lexer.FirstWord(string(src[ln]))
 
 	if cwrd == "case" || cwrd == "default" {
 		if pwrd == "switch" {
@@ -197,7 +197,7 @@ func (gl *GoLang) IndentLine(fs *pi.FileStates, src [][]rune, tags []lex.Line, l
 // (bracket, brace, paren) while typing.
 // pos = position where bra will be inserted, and curLn is the current line
 // match = insert the matching ket, and newLine = insert a new line.
-func (gl *GoLang) AutoBracket(fs *pi.FileStates, bra rune, pos lex.Pos, curLn []rune) (match, newLine bool) {
+func (gl *GoLang) AutoBracket(fs *pi.FileStates, bra rune, pos lexer.Pos, curLn []rune) (match, newLine bool) {
 	lnLen := len(curLn)
 	if bra == '{' {
 		if pos.Ch == lnLen {

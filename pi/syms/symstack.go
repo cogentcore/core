@@ -5,7 +5,7 @@
 package syms
 
 import (
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
 	"cogentcore.org/core/pi/token"
 )
 
@@ -27,7 +27,7 @@ func (ss *SymStack) Push(sy *Symbol) {
 }
 
 // PushNew adds a new symbol to the stack with the basic info
-func (ss *SymStack) PushNew(name string, kind token.Tokens, fname string, reg lex.Reg) *Symbol {
+func (ss *SymStack) PushNew(name string, kind token.Tokens, fname string, reg lexer.Reg) *Symbol {
 	sy := NewSymbol(name, kind, fname, reg)
 	ss.Push(sy)
 	return sy

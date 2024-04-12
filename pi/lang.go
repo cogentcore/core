@@ -7,7 +7,7 @@ package pi
 import (
 	"cogentcore.org/core/gox/indent"
 	"cogentcore.org/core/pi/complete"
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
 	"cogentcore.org/core/pi/syms"
 )
 
@@ -50,14 +50,14 @@ type Lang interface {
 	// and provides relevant context for the overall parsing, which is performed
 	// on the given line of text runes, and also updates corresponding source in FileState
 	// (via a copy).  If txt is nil then any existing source in fs is used.
-	HiLine(fs *FileStates, line int, txt []rune) lex.Line
+	HiLine(fs *FileStates, line int, txt []rune) lexer.Line
 
 	// CompleteLine provides the list of relevant completions for given text
 	// which is at given position within the file.
 	// Typically the language will call ParseLine on that line, and use the Ast
 	// to guide the selection of relevant symbols that can complete the code at
 	// the given point.
-	CompleteLine(fs *FileStates, text string, pos lex.Pos) complete.Matches
+	CompleteLine(fs *FileStates, text string, pos lexer.Pos) complete.Matches
 
 	// CompleteEdit returns the completion edit data for integrating the
 	// selected completion into the source
@@ -66,7 +66,7 @@ type Lang interface {
 	// Lookup returns lookup results for given text which is at given position
 	// within the file.  This can either be a file and position in file to
 	// open and view, or direct text to show.
-	Lookup(fs *FileStates, text string, pos lex.Pos) complete.Lookup
+	Lookup(fs *FileStates, text string, pos lexer.Pos) complete.Lookup
 
 	// IndentLine returns the indentation level for given line based on
 	// previous line's indentation level, and any delta change based on
@@ -74,13 +74,13 @@ type Lang interface {
 	// other language-specific keywords.  See lex.BracketIndentLine for example.
 	// Indent level is in increments of tabSz for spaces, and tabs for tabs.
 	// Operates on rune source with markup lex tags per line.
-	IndentLine(fs *FileStates, src [][]rune, tags []lex.Line, ln int, tabSz int) (pInd, delInd, pLn int, ichr indent.Char)
+	IndentLine(fs *FileStates, src [][]rune, tags []lexer.Line, ln int, tabSz int) (pInd, delInd, pLn int, ichr indent.Char)
 
 	// AutoBracket returns what to do when a user types a starting bracket character
 	// (bracket, brace, paren) while typing.
 	// pos = position where bra will be inserted, and curLn is the current line
 	// match = insert the matching ket, and newLine = insert a new line.
-	AutoBracket(fs *FileStates, bra rune, pos lex.Pos, curLn []rune) (match, newLine bool)
+	AutoBracket(fs *FileStates, bra rune, pos lexer.Pos, curLn []rune) (match, newLine bool)
 
 	// below are more implementational methods not called externally typically
 
@@ -97,7 +97,7 @@ type Lang interface {
 	// if available from prior lexing / parsing.
 	// Line is in 0-indexed "internal" line indexes.
 	// The rune source is updated from the given text if non-nil.
-	LexLine(fs *FileState, line int, txt []rune) lex.Line
+	LexLine(fs *FileState, line int, txt []rune) lexer.Line
 
 	// ParseLine is a lower-level call (mostly used internally to the language) that
 	// does complete parser processing of a single line from given file, and returns

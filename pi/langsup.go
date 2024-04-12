@@ -11,7 +11,7 @@ import (
 
 	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/pi/langs"
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/pi/lexer"
 )
 
 // LangFlags are special properties of a given language
@@ -117,7 +117,7 @@ var LangSupport = LangSupporter{}
 
 // OpenStandard opens all the standard parsers for languages, from the langs/ directory
 func (ll *LangSupporter) OpenStandard() error {
-	lex.TheLangLexer = &LangSupport
+	lexer.TheLangLexer = &LangSupport
 
 	for sl, lp := range StandardLangProperties {
 		pib, err := langs.OpenParser(sl)
@@ -161,7 +161,7 @@ func (ll *LangSupporter) PropertiesByName(lang string) (*LangProperties, error) 
 
 // LexerByName looks up Lexer for given language by name
 // (with case-insensitive fallback). Returns nil if not supported.
-func (ll *LangSupporter) LexerByName(lang string) *lex.Rule {
+func (ll *LangSupporter) LexerByName(lang string) *lexer.Rule {
 	lp, err := ll.PropertiesByName(lang)
 	if err != nil {
 		return nil
