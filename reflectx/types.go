@@ -94,8 +94,9 @@ func FriendlyTypeName(typ reflect.Type) string {
 	return nptyp.String()
 }
 
-// CloneToType creates a new object of given type, and uses SetRobust to copy
-// an existing value (of perhaps another type) into it
+// CloneToType creates a new pointer to the given type
+// and uses [SetRobust] to copy an existing value
+// (of potentially another type) to it.
 func CloneToType(typ reflect.Type, val any) reflect.Value {
 	vn := reflect.New(typ)
 	evi := vn.Interface()

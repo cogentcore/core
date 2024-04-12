@@ -676,10 +676,9 @@ func ToFloat32(v any) (float32, error) {
 // First checks for string or []byte and returns that immediately,
 // then checks for the Stringer interface as the preferred conversion
 // (e.g., for enums), and then falls back on strconv calls for numeric types.
-// If everything else fails, it uses Sprintf("%v") which always works,
-// so there is no need for an error return value.
-//   - returns "nil" for any nil pointers
-//   - byte is converted as string(byte) not the decimal representation
+// If everything else fails, it uses fmt.Sprintf("%v") which always works,
+// so there is no need for an error return value. It returns "nil" for any nil
+// pointers, and byte is converted as string(byte), not the decimal representation.
 func ToString(v any) string {
 	nilstr := "nil"
 	switch vt := v.(type) {
@@ -858,7 +857,7 @@ func ToString(v any) string {
 }
 
 // ToStringPrec robustly converts anything to a String using given precision
-// for converting floating values -- using a value like 6 truncates the
+// for converting floating values; using a value like 6 truncates the
 // nuisance random imprecision of actual floating point values due to the
 // fact that they are represented with binary bits.
 // Otherwise is identical to ToString for any other cases.
