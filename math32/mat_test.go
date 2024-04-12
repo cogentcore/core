@@ -24,9 +24,9 @@ func TestMatrix2(t *testing.T) {
 	vy := Vec2(0, 1)
 	vxy := Vec2(1, 1)
 
-	assert.Equal(t, vx, Identity3().MulVector2AsPt(vx))
-	assert.Equal(t, vy, Identity3().MulVector2AsPt(vy))
-	assert.Equal(t, vxy, Identity3().MulVector2AsPt(vxy))
+	assert.Equal(t, vx, Identity3().MulVector2AsPoint(vx))
+	assert.Equal(t, vy, Identity3().MulVector2AsPoint(vy))
+	assert.Equal(t, vxy, Identity3().MulVector2AsPoint(vxy))
 
 	assert.Equal(t, vxy, Translate2D(1, 1).MulVector2AsPoint(v0))
 
@@ -60,27 +60,27 @@ func TestMatrix3(t *testing.T) {
 	vy := Vec2(0, 1)
 	vxy := Vec2(1, 1)
 
-	assert.Equal(t, vx, Identity3().MulVector2AsPt(vx))
-	assert.Equal(t, vy, Identity3().MulVector2AsPt(vy))
-	assert.Equal(t, vxy, Identity3().MulVector2AsPt(vxy))
+	assert.Equal(t, vx, Identity3().MulVector2AsPoint(vx))
+	assert.Equal(t, vy, Identity3().MulVector2AsPoint(vy))
+	assert.Equal(t, vxy, Identity3().MulVector2AsPoint(vxy))
 
-	assert.Equal(t, vxy, Matrix3FromMatrix2(Translate2D(1, 1)).MulVector2AsPt(v0))
+	assert.Equal(t, vxy, Matrix3FromMatrix2(Translate2D(1, 1)).MulVector2AsPoint(v0))
 
-	assert.Equal(t, vxy.MulScalar(2), Matrix3FromMatrix2(Scale2D(2, 2)).MulVector2AsPt(vxy))
+	assert.Equal(t, vxy.MulScalar(2), Matrix3FromMatrix2(Scale2D(2, 2)).MulVector2AsPoint(vxy))
 
-	TolAssertEqualVector(t, StandardTol, vy, Matrix3FromMatrix2(Rotate2D(DegToRad(90))).MulVector2AsPt(vx))  // left
-	TolAssertEqualVector(t, StandardTol, vx, Matrix3FromMatrix2(Rotate2D(DegToRad(-90))).MulVector2AsPt(vy)) // right
-	TolAssertEqualVector(t, StandardTol, vxy.Normal(), Matrix3FromMatrix2(Rotate2D(DegToRad(45))).MulVector2AsPt(vx))
-	TolAssertEqualVector(t, StandardTol, vxy.Normal(), Matrix3FromMatrix2(Rotate2D(DegToRad(-45))).MulVector2AsPt(vy))
+	TolAssertEqualVector(t, StandardTol, vy, Matrix3FromMatrix2(Rotate2D(DegToRad(90))).MulVector2AsPoint(vx))  // left
+	TolAssertEqualVector(t, StandardTol, vx, Matrix3FromMatrix2(Rotate2D(DegToRad(-90))).MulVector2AsPoint(vy)) // right
+	TolAssertEqualVector(t, StandardTol, vxy.Normal(), Matrix3FromMatrix2(Rotate2D(DegToRad(45))).MulVector2AsPoint(vx))
+	TolAssertEqualVector(t, StandardTol, vxy.Normal(), Matrix3FromMatrix2(Rotate2D(DegToRad(-45))).MulVector2AsPoint(vy))
 
-	TolAssertEqualVector(t, StandardTol, vy, Matrix3FromMatrix2(Rotate2D(DegToRad(-90))).Inverse().MulVector2AsPt(vx)) // left
-	TolAssertEqualVector(t, StandardTol, vx, Matrix3FromMatrix2(Rotate2D(DegToRad(90))).Inverse().MulVector2AsPt(vy))  // right
+	TolAssertEqualVector(t, StandardTol, vy, Matrix3FromMatrix2(Rotate2D(DegToRad(-90))).Inverse().MulVector2AsPoint(vx)) // left
+	TolAssertEqualVector(t, StandardTol, vx, Matrix3FromMatrix2(Rotate2D(DegToRad(90))).Inverse().MulVector2AsPoint(vy))  // right
 
 	// 1,0 -> scale(2) = 2,0 -> rotate 90 = 0,2 -> trans 1,1 -> 1,3
 	// multiplication order is *reverse* of "logical" order:
-	TolAssertEqualVector(t, StandardTol, Vec2(1, 3), Matrix3Translate2D(1, 1).Mul(Matrix3Rotate2D(DegToRad(90))).Mul(Matrix3Scale2D(2, 2)).MulVector2AsPt(vx))
+	TolAssertEqualVector(t, StandardTol, Vec2(1, 3), Matrix3Translate2D(1, 1).Mul(Matrix3Rotate2D(DegToRad(90))).Mul(Matrix3Scale2D(2, 2)).MulVector2AsPoint(vx))
 
-	// xmat := Matrix3Translate2D(1, 1).Mul(Matrix3Rotate2D(DegToRad(90))).Mul(Matrix3Scale2D(2, 2)).MulVector2AsPt(vx))
+	// xmat := Matrix3Translate2D(1, 1).Mul(Matrix3Rotate2D(DegToRad(90))).Mul(Matrix3Scale2D(2, 2)).MulVector2AsPoint(vx))
 }
 
 func TestMatrix4Prjn(t *testing.T) {

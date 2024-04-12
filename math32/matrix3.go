@@ -195,8 +195,8 @@ func (a Matrix3) MulVector2AsVector(v Vector2) Vector2 {
 	return Vec2(tx, ty)
 }
 
-// MulVector2AsPt multiplies the Vector2 as a point, including adding translations.
-func (a Matrix3) MulVector2AsPt(v Vector2) Vector2 {
+// MulVector2AsPoint multiplies the Vector2 as a point, including adding translations.
+func (a Matrix3) MulVector2AsPoint(v Vector2) Vector2 {
 	tx := a[0]*v.X + a[1]*v.Y + a[2]
 	ty := a[3]*v.X + a[4]*v.Y + a[5]
 	return Vec2(tx, ty)
