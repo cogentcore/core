@@ -167,7 +167,7 @@ func main() {
 	// se.Camera.Pose.Pos.Set(-2, 9, 3)
 	sc.Camera.Pose.Pos.Set(0, 2, 10)
 	// se.Camera.Pose.Pos.Set(0, 0, 10)              // default position
-	sc.Camera.LookAt(math32.Vector3{}, math32.V3(0, 1, 0)) // defaults to looking at origin
+	sc.Camera.LookAt(math32.Vector3{}, math32.Vec3(0, 1, 0)) // defaults to looking at origin
 
 	// point := xyz.NewPointLight(sc, "point", 1, xyz.DirectSun)
 	// point.Pos.Set(0, 5, 5)
@@ -210,11 +210,11 @@ func main() {
 
 	// this line should go from lower left front of red cube to upper vertex of above hi-line
 	cyan := colors.FromRGB(0, 255, 255)
-	xyz.NewArrow(sc, sc, "arrow", math32.V3(-1.5, -.5, .5), math32.V3(2, 1, 1), .05, cyan, xyz.StartArrow, xyz.EndArrow, 4, .5, 4)
+	xyz.NewArrow(sc, sc, "arrow", math32.Vec3(-1.5, -.5, .5), math32.Vec3(2, 1, 1), .05, cyan, xyz.StartArrow, xyz.EndArrow, 4, .5, 4)
 
 	// bbclr := styles.Color{}
 	// bbclr.SetUInt8(255, 255, 0, 255)
-	// xyz.NewLineBox(sc, sc, "bbox", "bbox", math32.Box3{Min: math32.V3(-2, -2, -1), Max: math32.V3(-1, -1, .5)}, .01, bbclr, xyz.Active)
+	// xyz.NewLineBox(sc, sc, "bbox", "bbox", math32.Box3{Min: math32.Vec3(-2, -2, -1), Max: math32.Vec3(-1, -1, .5)}, .01, bbclr, xyz.Active)
 
 	cylm := xyz.NewCylinder(sc, "cylinder", 1.5, .5, 32, 1, true, true)
 	xyz.NewSolid(sc, "cylinder").SetMesh(cylm).SetPos(-2.25, 0, 0)

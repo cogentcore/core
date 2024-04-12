@@ -50,7 +50,7 @@ func BarycoordFromPoint(point, a, b, c Vector3) Vector3 {
 	if denom == 0 {
 		// arbitrary location outside of triangle?
 		// not sure if this is the best idea, maybe should be returning undefined
-		return V3(-2, -1, -1)
+		return Vec3(-2, -1, -1)
 	}
 
 	invDenom := 1 / denom
@@ -58,7 +58,7 @@ func BarycoordFromPoint(point, a, b, c Vector3) Vector3 {
 	v := (dot00*dot12 - dot01*dot02) * invDenom
 
 	// barycoordinates must always sum to 1
-	return V3(1-u-v, v, u)
+	return Vec3(1-u-v, v, u)
 }
 
 // ContainsPoint returns whether a triangle contains a point.

@@ -170,7 +170,7 @@ func (txt *Text2D) UpdateWorldMatrix(parWorld *math32.Mat4) {
 	defer txt.PoseMu.Unlock()
 	sz, ok := txt.TextSize()
 	if ok {
-		sc := math32.V3(sz.X, sz.Y, txt.Pose.Scale.Z)
+		sc := math32.Vec3(sz.X, sz.Y, txt.Pose.Scale.Z)
 		ax, ay := txt.Styles.Text.AlignFactors()
 		al := txt.Styles.Text.AlignV
 		switch al {

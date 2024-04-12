@@ -110,13 +110,13 @@ func (ps *Pose) UpdateMVPMatrix(viewMat, prjnMat *math32.Mat4) {
 // MoveOnAxis moves (translates) the specified distance on the specified local axis,
 // relative to the current rotation orientation.
 func (ps *Pose) MoveOnAxis(x, y, z, dist float32) {
-	ps.Pos.SetAdd(math32.V3(x, y, z).Normal().MulQuat(ps.Quat).MulScalar(dist))
+	ps.Pos.SetAdd(math32.Vec3(x, y, z).Normal().MulQuat(ps.Quat).MulScalar(dist))
 }
 
 // MoveOnAxisAbs moves (translates) the specified distance on the specified local axis,
 // in absolute X,Y,Z coordinates.
 func (ps *Pose) MoveOnAxisAbs(x, y, z, dist float32) {
-	ps.Pos.SetAdd(math32.V3(x, y, z).Normal().MulScalar(dist))
+	ps.Pos.SetAdd(math32.Vec3(x, y, z).Normal().MulScalar(dist))
 }
 
 ///////////////////////////////////////////////////////
@@ -124,12 +124,12 @@ func (ps *Pose) MoveOnAxisAbs(x, y, z, dist float32) {
 
 // SetEulerRotation sets the rotation in Euler angles (degrees).
 func (ps *Pose) SetEulerRotation(x, y, z float32) {
-	ps.Quat.SetFromEuler(math32.V3(x, y, z).MulScalar(math32.DegToRadFactor))
+	ps.Quat.SetFromEuler(math32.Vec3(x, y, z).MulScalar(math32.DegToRadFactor))
 }
 
 // SetEulerRotationRad sets the rotation in Euler angles (radians).
 func (ps *Pose) SetEulerRotationRad(x, y, z float32) {
-	ps.Quat.SetFromEuler(math32.V3(x, y, z))
+	ps.Quat.SetFromEuler(math32.Vec3(x, y, z))
 }
 
 // EulerRotation returns the current rotation in Euler angles (degrees).
@@ -144,32 +144,32 @@ func (ps *Pose) EulerRotationRad() math32.Vector3 {
 
 // SetAxisRotation sets rotation from local axis and angle in degrees.
 func (ps *Pose) SetAxisRotation(x, y, z, angle float32) {
-	ps.Quat.SetFromAxisAngle(math32.V3(x, y, z), math32.DegToRad(angle))
+	ps.Quat.SetFromAxisAngle(math32.Vec3(x, y, z), math32.DegToRad(angle))
 }
 
 // SetAxisRotationRad sets rotation from local axis and angle in radians.
 func (ps *Pose) SetAxisRotationRad(x, y, z, angle float32) {
-	ps.Quat.SetFromAxisAngle(math32.V3(x, y, z), angle)
+	ps.Quat.SetFromAxisAngle(math32.Vec3(x, y, z), angle)
 }
 
 // RotateOnAxis rotates around the specified local axis the specified angle in degrees.
 func (ps *Pose) RotateOnAxis(x, y, z, angle float32) {
-	ps.Quat.SetMul(math32.NewQuatAxisAngle(math32.V3(x, y, z), math32.DegToRad(angle)))
+	ps.Quat.SetMul(math32.NewQuatAxisAngle(math32.Vec3(x, y, z), math32.DegToRad(angle)))
 }
 
 // RotateOnAxisRad rotates around the specified local axis the specified angle in radians.
 func (ps *Pose) RotateOnAxisRad(x, y, z, angle float32) {
-	ps.Quat.SetMul(math32.NewQuatAxisAngle(math32.V3(x, y, z), angle))
+	ps.Quat.SetMul(math32.NewQuatAxisAngle(math32.Vec3(x, y, z), angle))
 }
 
 // RotateEuler rotates by given Euler angles (in degrees) relative to existing rotation.
 func (ps *Pose) RotateEuler(x, y, z float32) {
-	ps.Quat.SetMul(math32.NewQuatEuler(math32.V3(x, y, z).MulScalar(math32.DegToRadFactor)))
+	ps.Quat.SetMul(math32.NewQuatEuler(math32.Vec3(x, y, z).MulScalar(math32.DegToRadFactor)))
 }
 
 // RotateEulerRad rotates by given Euler angles (in radians) relative to existing rotation.
 func (ps *Pose) RotateEulerRad(x, y, z, angle float32) {
-	ps.Quat.SetMul(math32.NewQuatEuler(math32.V3(x, y, z)))
+	ps.Quat.SetMul(math32.NewQuatEuler(math32.Vec3(x, y, z)))
 }
 
 // SetMatrix sets the local transformation matrix and updates Pos, Scale, Quat.

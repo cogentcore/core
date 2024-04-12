@@ -466,9 +466,9 @@ func (m *Mat4) SetTransform(pos Vector3, quat Quat, scale Vector3) {
 
 // Decompose updates the position vector, quaternion and scale from this transformation matrix.
 func (m *Mat4) Decompose() (pos Vector3, quat Quat, scale Vector3) {
-	sx := V3(m[0], m[1], m[2]).Length()
-	sy := V3(m[4], m[5], m[6]).Length()
-	sz := V3(m[8], m[9], m[10]).Length()
+	sx := Vec3(m[0], m[1], m[2]).Length()
+	sy := Vec3(m[4], m[5], m[6]).Length()
+	sz := Vec3(m[8], m[9], m[10]).Length()
 
 	// If determinant is negative, we need to invert one scale
 	det := m.Determinant()
@@ -508,9 +508,9 @@ func (m *Mat4) Decompose() (pos Vector3, quat Quat, scale Vector3) {
 
 // ExtractRotation sets this matrix as rotation matrix from the src transformation matrix.
 func (m *Mat4) ExtractRotation(src *Mat4) {
-	scaleX := 1 / V3(src[0], src[1], src[2]).Length()
-	scaleY := 1 / V3(src[4], src[5], src[6]).Length()
-	scaleZ := 1 / V3(src[8], src[9], src[10]).Length()
+	scaleX := 1 / Vec3(src[0], src[1], src[2]).Length()
+	scaleY := 1 / Vec3(src[4], src[5], src[6]).Length()
+	scaleZ := 1 / Vec3(src[8], src[9], src[10]).Length()
 
 	m[0] = src[0] * scaleX
 	m[1] = src[1] * scaleX

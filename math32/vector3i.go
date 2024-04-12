@@ -17,13 +17,13 @@ type Vector3i struct {
 	Z int32
 }
 
-// V3i returns a new [Vector3i] with the given x, y and y components.
-func V3i(x, y, z int32) Vector3i {
+// Vec3i returns a new [Vector3i] with the given x, y and y components.
+func Vec3i(x, y, z int32) Vector3i {
 	return Vector3i{X: x, Y: y, Z: z}
 }
 
-// V3iScalar returns a new [Vector3i] with all components set to the given scalar value.
-func V3iScalar(s int32) Vector3i {
+// Vector3iScalar returns a new [Vector3i] with all components set to the given scalar value.
+func Vector3iScalar(s int32) Vector3i {
 	return Vector3i{X: s, Y: s, Z: s}
 }
 
@@ -264,7 +264,7 @@ func (v *Vector3i) Clamp(min, max Vector3i) {
 
 // ClampScalar sets this vector components to be no less than minVal and not greater than maxVal.
 func (v *Vector3i) ClampScalar(minVal, maxVal int32) {
-	v.Clamp(V3iScalar(minVal), V3iScalar(maxVal))
+	v.Clamp(Vector3iScalar(minVal), Vector3iScalar(maxVal))
 }
 
 // Negate returns vector with each component negated.

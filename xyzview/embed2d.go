@@ -157,7 +157,7 @@ func (em *Embed2D) UpdateWorldMatrix(parWorld *math32.Mat4) {
 	defer em.PoseMu.Unlock()
 	if em.Viewport != nil {
 		sz := em.Viewport.Geom.Size
-		sc := math32.V3(.006 * em.Zoom * float32(sz.X), .006 * em.Zoom * float32(sz.Y), em.Pose.Scale.Z)
+		sc := math32.Vec3(.006 * em.Zoom * float32(sz.X), .006 * em.Zoom * float32(sz.Y), em.Pose.Scale.Z)
 		em.Pose.Matrix.SetTransform(em.Pose.Pos, em.Pose.Quat, sc)
 	} else {
 		em.Pose.UpdateMatrix()
@@ -217,7 +217,7 @@ func (em *Embed2D) Project2D(sc *Scene, pt image.Point) (image.Point, bool) {
 	relpos := pt.Sub(sc.ObjBBox.Min)
 	ray := em.RayPick(relpos, sc)
 	// is in XY plane with norm pointing up in Z axis
-	plane := math32.Plane{Norm: math32.V3(0, 0, 1), Off: 0}
+	plane := math32.Plane{Norm: math32.Vec3(0, 0, 1), Off: 0}
 	ispt, ok := ray.IntersectPlane(plane)
 	if !ok || ispt.Z > 1.0e-5 { // Z > 0 means clicked "in front" of plane -- with tolerance
 		fmt.Printf("in front: ok: %v   ispt: %v\n", ok, ispt)

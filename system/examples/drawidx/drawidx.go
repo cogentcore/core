@@ -111,11 +111,11 @@ func main() {
 
 		// This is the standard camera view projection computation
 		cam, _ = camv.Values.ValueByIndexTry(0)
-		campos := math32.V3(0, 0, 2)
-		target := math32.V3(0, 0, 0)
+		campos := math32.Vec3(0, 0, 2)
+		target := math32.Vec3(0, 0, 0)
 		var lookq math32.Quat
-		lookq.SetFromRotationMatrix(math32.NewLookAt(campos, target, math32.V3(0, 1, 0)))
-		scale := math32.V3(1, 1, 1)
+		lookq.SetFromRotationMatrix(math32.NewLookAt(campos, target, math32.Vec3(0, 1, 0)))
+		scale := math32.Vec3(1, 1, 1)
 		var cview math32.Mat4
 		cview.SetTransform(campos, lookq, scale)
 		view, _ := cview.Inverse()

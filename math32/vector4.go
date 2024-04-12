@@ -30,8 +30,8 @@ func V4Scalar(s float32) Vector4 {
 	return Vector4{X: s, Y: s, Z: s, W: s}
 }
 
-// V4FromV3 returns a new [Vector4] from the given [Vector3] and w component.
-func V4FromV3(v Vector3, w float32) Vector4 {
+// Vector4FromVector3 returns a new [Vector4] from the given [Vector3] and w component.
+func Vector4FromVector3(v Vector3, w float32) Vector4 {
 	nv := Vector4{}
 	nv.SetFromVector3(v, w)
 	return nv
@@ -555,5 +555,5 @@ func (v *Vector4) SetAxisFromRotationMatrix(m *Mat4) {
 // PerspDiv returns the 3-vector of normalized display coordinates (NDC) from given 4-vector
 // By dividing by the 4th W component
 func (v Vector4) PerspDiv() Vector3 {
-	return V3(v.X/v.W, v.Y/v.W, v.Z/v.W)
+	return Vec3(v.X/v.W, v.Y/v.W, v.Z/v.W)
 }

@@ -34,7 +34,7 @@ func MatMul(v math32.Vector3, mat [3][3]float32) math32.Vector3 {
 	x := v.X*mat[0][0] + v.Y*mat[0][1] + v.Z*mat[0][2]
 	y := v.X*mat[1][0] + v.Y*mat[1][1] + v.Z*mat[1][2]
 	z := v.X*mat[2][0] + v.Y*mat[2][1] + v.Z*mat[2][2]
-	return math32.V3(x, y, z)
+	return math32.Vec3(x, y, z)
 }
 
 // HueOf Returns the hue of a linear RGB color in CAM16.
@@ -119,27 +119,27 @@ func NthVertex(y float32, n int) math32.Vector3 {
 		b := coord_b
 		r := (y - g*k_g - b*k_b) / k_r
 		if IsBounded(r) {
-			return math32.V3(r, g, b)
+			return math32.Vec3(r, g, b)
 		} else {
-			return math32.V3(-1.0, -1.0, -1.0)
+			return math32.Vec3(-1.0, -1.0, -1.0)
 		}
 	} else if n < 8 {
 		b := coord_a
 		r := coord_b
 		g := (y - r*k_r - b*k_b) / k_g
 		if IsBounded(g) {
-			return math32.V3(r, g, b)
+			return math32.Vec3(r, g, b)
 		} else {
-			return math32.V3(-1.0, -1.0, -1.0)
+			return math32.Vec3(-1.0, -1.0, -1.0)
 		}
 	} else {
 		r := coord_a
 		g := coord_b
 		b := (y - r*k_r - g*k_g) / k_b
 		if IsBounded(b) {
-			return math32.V3(r, g, b)
+			return math32.Vec3(r, g, b)
 		} else {
-			return math32.V3(-1.0, -1.0, -1.0)
+			return math32.Vec3(-1.0, -1.0, -1.0)
 		}
 	}
 }
@@ -150,7 +150,7 @@ func NthVertex(y float32, n int) math32.Vector3 {
 // @return A list of two sets of linear RGB coordinates, each corresponding to
 // an endpoint of the segment containing the desired color.
 func BisectToSegment(y, target_hue float32) [2]math32.Vector3 {
-	left := math32.V3(-1.0, -1.0, -1.0)
+	left := math32.Vec3(-1.0, -1.0, -1.0)
 	right := left
 	left_hue := float32(0.0)
 	right_hue := float32(0.0)
@@ -188,7 +188,7 @@ func BisectToSegment(y, target_hue float32) [2]math32.Vector3 {
 }
 
 func Midpoint(a, b math32.Vector3) math32.Vector3 {
-	return math32.V3((a.X+b.X)/2, (a.Y+b.Y)/2, (a.Z+b.Z)/2)
+	return math32.Vec3((a.X+b.X)/2, (a.Y+b.Y)/2, (a.Z+b.Z)/2)
 }
 
 func CriticalPlaneBelow(x float32) int { return int(math32.Floor(x - 0.5)) }

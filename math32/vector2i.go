@@ -21,8 +21,8 @@ func Vec2i(x, y int32) Vector2i {
 	return Vector2i{X: x, Y: y}
 }
 
-// Vec2iScalar returns a new [Vector2i] with all components set to the given scalar value.
-func Vec2iScalar(s int32) Vector2i {
+// Vector2iScalar returns a new [Vector2i] with all components set to the given scalar value.
+func Vector2iScalar(s int32) Vector2i {
 	return Vector2i{X: s, Y: s}
 }
 
@@ -254,7 +254,7 @@ func (v *Vector2i) Clamp(min, max Vector2i) {
 
 // ClampScalar sets this vector components to be no less than minVal and not greater than maxVal.
 func (v *Vector2i) ClampScalar(minVal, maxVal int32) {
-	v.Clamp(Vec2iScalar(minVal), Vec2iScalar(maxVal))
+	v.Clamp(Vector2iScalar(minVal), Vector2iScalar(maxVal))
 }
 
 // Negate returns vector with each component negated.

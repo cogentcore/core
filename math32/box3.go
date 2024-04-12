@@ -19,7 +19,7 @@ type Box3 struct {
 
 // B3 returns a new [Box3] from the given minimum and maximum x, y, and z coordinates.
 func B3(x0, y0, z0, x1, y1, z1 float32) Box3 {
-	return Box3{V3(x0, y0, z0), V3(x1, y1, z1)}
+	return Box3{Vec3(x0, y0, z0), Vec3(x1, y1, z1)}
 }
 
 // B3Empty returns a new [Box3] with empty minimum and maximum values.
@@ -208,15 +208,15 @@ func (b Box3) MulMat4(m *Mat4) Box3 {
 // and computes the resulting spanning Box3 of the transformed points
 func (b Box3) MulQuat(q Quat) Box3 {
 	var cs [8]Vector3
-	cs[0] = V3(b.Min.X, b.Min.Y, b.Min.Z).MulQuat(q)
-	cs[1] = V3(b.Min.X, b.Min.Y, b.Max.Z).MulQuat(q)
-	cs[2] = V3(b.Min.X, b.Max.Y, b.Min.Z).MulQuat(q)
-	cs[3] = V3(b.Max.X, b.Min.Y, b.Min.Z).MulQuat(q)
+	cs[0] = Vec3(b.Min.X, b.Min.Y, b.Min.Z).MulQuat(q)
+	cs[1] = Vec3(b.Min.X, b.Min.Y, b.Max.Z).MulQuat(q)
+	cs[2] = Vec3(b.Min.X, b.Max.Y, b.Min.Z).MulQuat(q)
+	cs[3] = Vec3(b.Max.X, b.Min.Y, b.Min.Z).MulQuat(q)
 
-	cs[4] = V3(b.Max.X, b.Max.Y, b.Max.Z).MulQuat(q)
-	cs[5] = V3(b.Max.X, b.Max.Y, b.Min.Z).MulQuat(q)
-	cs[6] = V3(b.Max.X, b.Min.Y, b.Max.Z).MulQuat(q)
-	cs[7] = V3(b.Min.X, b.Max.Y, b.Max.Z).MulQuat(q)
+	cs[4] = Vec3(b.Max.X, b.Max.Y, b.Max.Z).MulQuat(q)
+	cs[5] = Vec3(b.Max.X, b.Max.Y, b.Min.Z).MulQuat(q)
+	cs[6] = Vec3(b.Max.X, b.Min.Y, b.Max.Z).MulQuat(q)
+	cs[7] = Vec3(b.Min.X, b.Max.Y, b.Max.Z).MulQuat(q)
 
 	nb := B3Empty()
 	for i := 0; i < 8; i++ {

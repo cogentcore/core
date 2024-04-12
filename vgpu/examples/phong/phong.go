@@ -95,11 +95,11 @@ func main() {
 	ph.AddAmbientLight(amblt)
 
 	dirlt := math32.NewVector3Color(color.White).MulScalar(1)
-	ph.AddDirLight(dirlt, math32.V3(0, 1, 1))
+	ph.AddDirLight(dirlt, math32.Vec3(0, 1, 1))
 
-	// ph.AddPointLight(math32.NewVector3Color(color.White), math32.V3(0, 2, 5), .1, .01)
+	// ph.AddPointLight(math32.NewVector3Color(color.White), math32.Vec3(0, 2, 5), .1, .01)
 	//
-	// ph.AddSpotLight(math32.NewVector3Color(color.White), math32.V3(-2, 5, -2), math32.V3(0, -1, 0), 10, 45, .01, .001)
+	// ph.AddSpotLight(math32.NewVector3Color(color.White), math32.Vec3(-2, 5, -2), math32.Vec3(0, -1, 0), 10, 45, .01, .001)
 
 	/////////////////////////////
 	// Meshes
@@ -173,8 +173,8 @@ func main() {
 	// Camera / Mtxs
 
 	// This is the standard camera view projection computation
-	campos := math32.V3(0, 2, 10)
-	view := vphong.CameraViewMat(campos, math32.V3(0, 0, 0), math32.V3(0, 1, 0))
+	campos := math32.Vec3(0, 2, 10)
+	view := vphong.CameraViewMat(campos, math32.Vec3(0, 0, 0), math32.Vec3(0, 1, 0))
 
 	aspect := sf.Format.Aspect()
 	var prjn math32.Mat4
@@ -244,7 +244,7 @@ func main() {
 
 	updateMats := func() {
 		aspect := sf.Format.Aspect()
-		view = vphong.CameraViewMat(campos, math32.V3(0, 0, 0), math32.V3(0, 1, 0))
+		view = vphong.CameraViewMat(campos, math32.Vec3(0, 0, 0), math32.Vec3(0, 1, 0))
 		prjn.SetVkPerspective(45, aspect, 0.01, 100)
 		ph.SetViewPrjn(view, &prjn)
 	}

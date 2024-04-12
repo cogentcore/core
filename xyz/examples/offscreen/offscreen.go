@@ -52,7 +52,7 @@ func main() {
 
 	// sc.Camera.Pose.Pos.Set(-2, 9, 3)
 	sc.Camera.Pose.Pos.Set(-2, 2, 10)
-	sc.Camera.LookAt(math32.Vector3{}, math32.V3(0, 1, 0)) // defaults to looking at origin
+	sc.Camera.LookAt(math32.Vector3{}, math32.Vec3(0, 1, 0)) // defaults to looking at origin
 
 	dir := xyz.NewDirLight(sc, "dir", 1, xyz.DirectSun)
 	dir.Pos.Set(0, 2, 1) // default: 0,1,1 = above and behind us (we are at 0,0,X)

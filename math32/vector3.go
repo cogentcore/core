@@ -19,18 +19,18 @@ type Vector3 struct {
 	Z float32
 }
 
-// V3 returns a new [Vector3] with the given x, y and z components.
-func V3(x, y, z float32) Vector3 {
+// Vec3 returns a new [Vector3] with the given x, y and z components.
+func Vec3(x, y, z float32) Vector3 {
 	return Vector3{x, y, z}
 }
 
-// V3Scalar returns a new [Vector3] with all components set to the given scalar value.
-func V3Scalar(s float32) Vector3 {
+// Vector3Scalar returns a new [Vector3] with all components set to the given scalar value.
+func Vector3Scalar(s float32) Vector3 {
 	return Vector3{s, s, s}
 }
 
-// V3FromV4 returns a new [Vector3] from the given [Vector4].
-func V3FromV4(v Vector4) Vector3 {
+// Vector3FromVector4 returns a new [Vector3] from the given [Vector4].
+func Vector3FromVector4(v Vector4) Vector3 {
 	nv := Vector3{}
 	nv.SetFromVector4(v)
 	return nv
@@ -117,7 +117,7 @@ func (v *Vector3) GenGoSet(path string) string {
 
 // GenGoNew returns code to create new
 func (v *Vector3) GenGoNew() string {
-	return fmt.Sprintf("math32.V3(%g, %g, %g)", v.X, v.Y, v.Z)
+	return fmt.Sprintf("math32.Vec3(%g, %g, %g)", v.X, v.Y, v.Z)
 }
 
 // SetZero sets this vector X, Y and Z components to be zero.
@@ -144,12 +144,12 @@ func (v Vector3) ToArray(array []float32, offset int) {
 
 // Add adds other vector to this one and returns result in a new vector.
 func (v Vector3) Add(other Vector3) Vector3 {
-	return V3(v.X+other.X, v.Y+other.Y, v.Z+other.Z)
+	return Vec3(v.X+other.X, v.Y+other.Y, v.Z+other.Z)
 }
 
 // AddScalar adds scalar s to each component of this vector and returns new vector.
 func (v Vector3) AddScalar(s float32) Vector3 {
-	return V3(v.X+s, v.Y+s, v.Z+s)
+	return Vec3(v.X+s, v.Y+s, v.Z+s)
 }
 
 // SetAdd sets this to addition with other vector (i.e., += or plus-equals).
@@ -168,12 +168,12 @@ func (v *Vector3) SetAddScalar(s float32) {
 
 // Sub subtracts other vector from this one and returns result in new vector.
 func (v Vector3) Sub(other Vector3) Vector3 {
-	return V3(v.X-other.X, v.Y-other.Y, v.Z-other.Z)
+	return Vec3(v.X-other.X, v.Y-other.Y, v.Z-other.Z)
 }
 
 // SubScalar subtracts scalar s from each component of this vector and returns new vector.
 func (v Vector3) SubScalar(s float32) Vector3 {
-	return V3(v.X-s, v.Y-s, v.Z-s)
+	return Vec3(v.X-s, v.Y-s, v.Z-s)
 }
 
 // SetSub sets this to subtraction with other vector (i.e., -= or minus-equals).
@@ -193,12 +193,12 @@ func (v *Vector3) SetSubScalar(s float32) {
 // Mul multiplies each component of this vector by the corresponding one from other
 // and returns resulting vector.
 func (v Vector3) Mul(other Vector3) Vector3 {
-	return V3(v.X*other.X, v.Y*other.Y, v.Z*other.Z)
+	return Vec3(v.X*other.X, v.Y*other.Y, v.Z*other.Z)
 }
 
 // MulScalar multiplies each component of this vector by the scalar s and returns resulting vector.
 func (v Vector3) MulScalar(s float32) Vector3 {
-	return V3(v.X*s, v.Y*s, v.Z*s)
+	return Vec3(v.X*s, v.Y*s, v.Z*s)
 }
 
 // SetMul sets this to multiplication with other vector (i.e., *= or times-equals).
@@ -218,7 +218,7 @@ func (v *Vector3) SetMulScalar(s float32) {
 // Div divides each component of this vector by the corresponding one from other vector
 // and returns resulting vector.
 func (v Vector3) Div(other Vector3) Vector3 {
-	return V3(v.X/other.X, v.Y/other.Y, v.Z/other.Z)
+	return Vec3(v.X/other.X, v.Y/other.Y, v.Z/other.Z)
 }
 
 // DivScalar divides each component of this vector by the scalar s and returns resulting vector.
@@ -249,7 +249,7 @@ func (v *Vector3) SetDivScalar(s float32) {
 
 // Min returns min of this vector components vs. other vector.
 func (v Vector3) Min(other Vector3) Vector3 {
-	return V3(Min(v.X, other.X), Min(v.Y, other.Y), Min(v.Z, other.Z))
+	return Vec3(Min(v.X, other.X), Min(v.Y, other.Y), Min(v.Z, other.Z))
 }
 
 // SetMin sets this vector components to the minimum values of itself and other vector.
@@ -261,7 +261,7 @@ func (v *Vector3) SetMin(other Vector3) {
 
 // Max returns max of this vector components vs. other vector.
 func (v Vector3) Max(other Vector3) Vector3 {
-	return V3(Max(v.X, other.X), Max(v.Y, other.Y), Max(v.Z, other.Z))
+	return Vec3(Max(v.X, other.X), Max(v.Y, other.Y), Max(v.Z, other.Z))
 }
 
 // SetMax sets this vector components to the maximum value of itself and other vector.
@@ -294,12 +294,12 @@ func (v *Vector3) Clamp(min, max Vector3) {
 
 // ClampScalar sets this vector components to be no less than minVal and not greater than maxVal.
 func (v *Vector3) ClampScalar(minVal, maxVal float32) {
-	v.Clamp(V3Scalar(minVal), V3Scalar(maxVal))
+	v.Clamp(Vector3Scalar(minVal), Vector3Scalar(maxVal))
 }
 
 // Floor returns vector with math32.Floor() applied to each of this vector's components.
 func (v Vector3) Floor() Vector3 {
-	return V3(Floor(v.X), Floor(v.Y), Floor(v.Z))
+	return Vec3(Floor(v.X), Floor(v.Y), Floor(v.Z))
 }
 
 // SetFloor applies math32.Floor() to each of this vector's components.
@@ -311,7 +311,7 @@ func (v *Vector3) SetFloor() {
 
 // Ceil returns vector with math32.Ceil() applied to each of this vector's components.
 func (v Vector3) Ceil() Vector3 {
-	return V3(Ceil(v.X), Ceil(v.Y), Ceil(v.Z))
+	return Vec3(Ceil(v.X), Ceil(v.Y), Ceil(v.Z))
 }
 
 // SetCeil applies math32.Ceil() to each of this vector's components.
@@ -323,7 +323,7 @@ func (v *Vector3) SetCeil() {
 
 // Round returns vector with math32.Round() applied to each of this vector's components.
 func (v Vector3) Round() Vector3 {
-	return V3(Round(v.X), Round(v.Y), Round(v.Z))
+	return Vec3(Round(v.X), Round(v.Y), Round(v.Z))
 }
 
 // SetRound rounds each of this vector's components.
@@ -335,7 +335,7 @@ func (v *Vector3) SetRound() {
 
 // Negate returns vector with each component negated.
 func (v Vector3) Negate() Vector3 {
-	return V3(-v.X, -v.Y, -v.Z)
+	return Vec3(-v.X, -v.Y, -v.Z)
 }
 
 // SetNegate negates each of this vector's components.
@@ -347,7 +347,7 @@ func (v *Vector3) SetNegate() {
 
 // Abs returns vector with Abs of each component.
 func (v Vector3) Abs() Vector3 {
-	return V3(Abs(v.X), Abs(v.Y), Abs(v.Z))
+	return Vec3(Abs(v.X), Abs(v.Y), Abs(v.Z))
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -421,7 +421,7 @@ func (v *Vector3) SetLength(l float32) {
 // Lerp returns vector with each components as the linear interpolated value of
 // alpha between itself and the corresponding other component.
 func (v Vector3) Lerp(other Vector3, alpha float32) Vector3 {
-	return V3(v.X+(other.X-v.X)*alpha, v.Y+(other.Y-v.Y)*alpha, v.Z+(other.Z-v.Z)*alpha)
+	return Vec3(v.X+(other.X-v.X)*alpha, v.Y+(other.Y-v.Y)*alpha, v.Z+(other.Z-v.Z)*alpha)
 }
 
 // SetLerp sets each of this vector's components to the linear interpolated value of
@@ -470,7 +470,7 @@ func (v Vector3) MulMat4(m *Mat4) Vector3 {
 // MulMat4 on the 3-dim vector.  Use 0 for normals and 1 for positions
 // as the 4th dim to set.
 func (v Vector3) MulMat4AsVector4(m *Mat4, w float32) Vector3 {
-	return V3FromV4(V4FromV3(v, w).MulMat4(m))
+	return Vector3FromVector4(Vector4FromVector3(v, w).MulMat4(m))
 }
 
 // SetMulMat4 sets vector multiplied by specified 4x4 matrix.
@@ -482,7 +482,7 @@ func (v *Vector3) SetMulMat4(m *Mat4) {
 // and do perspective divide to return normalized display coordinates (NDC).
 // w is value for 4th coordinate -- use 1 for positions, 0 for normals.
 func (v Vector3) MVProjToNDC(m *Mat4, w float32) Vector3 {
-	clip := V4FromV3(v, w).MulMat4(m)
+	clip := Vector4FromVector3(v, w).MulMat4(m)
 	return clip.PerspDiv()
 }
 
@@ -557,7 +557,7 @@ func (v *Vector3) SetMulQuat(q Quat) {
 
 // Cross returns the cross product of this vector with other.
 func (v Vector3) Cross(other Vector3) Vector3 {
-	return V3(v.Y*other.Z-v.Z*other.Y, v.Z*other.X-v.X*other.Z, v.X*other.Y-v.Y*other.X)
+	return Vec3(v.Y*other.Z-v.Z*other.Y, v.Z*other.X-v.X*other.Z, v.X*other.Y-v.Y*other.X)
 }
 
 // ProjectOnVector returns vector projected on other vector.

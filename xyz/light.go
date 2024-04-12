@@ -184,7 +184,7 @@ func (sl *SpotLight) ViewDir() math32.Vector3 {
 	sl.Pose.UpdateMatrix()
 	sl.Pose.UpdateWorldMatrix(idmat)
 	// sl.Pose.UpdateMVPMatrix(viewMat, idmat)
-	vd := math32.V3(0, 0, -1).MulMat4AsVector4(&sl.Pose.WorldMatrix, 0).Normal()
+	vd := math32.Vec3(0, 0, -1).MulMat4AsVector4(&sl.Pose.WorldMatrix, 0).Normal()
 	return vd
 }
 
@@ -195,7 +195,7 @@ func (sl *SpotLight) LookAt(target, upDir math32.Vector3) {
 
 // LookAtOrigin points the spotlight at origin with Y axis pointing Up (i.e., standard)
 func (sl *SpotLight) LookAtOrigin() {
-	sl.LookAt(math32.Vector3{}, math32.V3(0, 1, 0))
+	sl.LookAt(math32.Vector3{}, math32.Vec3(0, 1, 0))
 }
 
 /////////////////////////////////////////////////////////////////////////

@@ -86,11 +86,11 @@ func TestMat3(t *testing.T) {
 func TestMat4Prjn(t *testing.T) {
 	pts := []Vector3{{0.0, 0.0, 0.0}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1}, {0.5, 0.5, 0.5}, {-0.5, -0.5, -0.5}, {1, 1, 1}, {-1, -1, -1}}
 
-	campos := V3(0, 0, 10)
-	target := V3(0, 0, 0)
+	campos := Vec3(0, 0, 10)
+	target := Vec3(0, 0, 0)
 	var lookq Quat
-	lookq.SetFromRotationMatrix(NewLookAt(campos, target, V3(0, 1, 0)))
-	scale := V3(1, 1, 1)
+	lookq.SetFromRotationMatrix(NewLookAt(campos, target, Vec3(0, 1, 0)))
+	scale := Vec3(1, 1, 1)
 	var cview Mat4
 	cview.SetTransform(campos, lookq, scale)
 	view, _ := cview.Inverse()
