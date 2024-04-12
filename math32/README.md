@@ -4,7 +4,7 @@
 
 The [go-gl/mathgl](https://github.com/go-gl/mathgl) package is also comparable, which in turn is based on [image/math/f32](https://golang.org/x/image/math/f32) types, which use arrays instead of `struct`s with named X, Y, Z components.  The named components make things easier to read overall.  The G3N and this package support a much more complete set of vector and matrix math, covering almost everything you might need, including aggregate types such as triangles, planes, etc.
 
-This package also includes the Matrix class from [fogleman/gg](https://github.com/fogleman/gg) (as `Mat2`) for 2D graphics -- this also includes additional support for SVG-style configuring of a matrix, in the `SetString` method.
+This package also includes the Matrix type from [fogleman/gg](https://github.com/fogleman/gg) (as `Mat2`) for 2D graphics; this also includes additional support for SVG-style configuring of a matrix, in the `SetString` method.
 
 # Value-based Vectors
 
