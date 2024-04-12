@@ -8,11 +8,8 @@ import (
 	"reflect"
 )
 
-// These are a set of consistently-named functions for navigating pointer
+// These are a set of consistently named functions for navigating pointer
 // types and values within the reflect system
-
-/////////////////////////////////////////////////
-//  reflect.Type versions
 
 // NonPtrType returns the non-pointer underlying type
 func NonPtrType(typ reflect.Type) reflect.Type {

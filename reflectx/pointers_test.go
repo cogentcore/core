@@ -10,22 +10,20 @@ import (
 	"unsafe"
 )
 
-// structs are in embeds_test.go
-
-type PtrTstSub struct {
+type PointerTestSub struct {
 	Mbr1 string
 	Mbr2 int
 }
 
-type PtrTst struct {
+type PointerTest struct {
 	Mbr1     string
 	Mbr2     int
-	SubField PtrTstSub
+	SubField PointerTestSub
 }
 
-var pt = PtrTst{}
+var pt = PointerTest{}
 
-func InitPtrTst() {
+func InitPointerTest() {
 	pt.Mbr1 = "mbr1 string"
 	pt.Mbr2 = 2
 }
@@ -46,7 +44,7 @@ func SubFieldValue(obj any, fld reflect.StructField, sub reflect.StructField) re
 
 // test ability to create an addressable pointer value to fields of a struct
 func TestNewAt(t *testing.T) {
-	InitPtrTst()
+	InitPointerTest()
 	typ := reflect.TypeOf(pt)
 	fld, _ := typ.FieldByName("Mbr2")
 	vf := FieldValue(&pt, fld)
