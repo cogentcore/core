@@ -16,7 +16,7 @@ import (
 
 	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/pi/lex"
-	"cogentcore.org/core/pi/parse"
+	"cogentcore.org/core/pi/parser"
 	"cogentcore.org/core/tree"
 )
 
@@ -30,7 +30,7 @@ type Parser struct {
 	PassTwo lex.PassTwo
 
 	// parser rules for parsing lexed tokens
-	Parser parse.Rule
+	Parser parser.Rule
 
 	// file name for overall parser (not file being parsed!)
 	Filename string
@@ -195,7 +195,7 @@ func (pr *Parser) ParserInit(fs *FileState) bool {
 
 // ParseNext does next step of parsing -- returns lowest-level rule that matched
 // or nil if no match error or at end
-func (pr *Parser) ParseNext(fs *FileState) *parse.Rule {
+func (pr *Parser) ParseNext(fs *FileState) *parser.Rule {
 	mrule := pr.Parser.StartParse(&fs.ParseState)
 	return mrule
 }

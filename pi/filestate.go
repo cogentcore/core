@@ -12,7 +12,7 @@ import (
 
 	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/pi/lex"
-	"cogentcore.org/core/pi/parse"
+	"cogentcore.org/core/pi/parser"
 	"cogentcore.org/core/pi/syms"
 )
 
@@ -38,10 +38,10 @@ type FileState struct {
 	TwoState lex.TwoState `json:"-" xml:"-"`
 
 	// state for parsing
-	ParseState parse.State `json:"-" xml:"-"`
+	ParseState parser.State `json:"-" xml:"-"`
 
 	// ast output tree from parsing
-	Ast parse.Ast `json:"-" xml:"-"`
+	Ast parser.Ast `json:"-" xml:"-"`
 
 	// symbols contained within this file -- initialized at start of parsing and created by AddSymbol or PushNewScope actions.  These are then processed after parsing by the language-specific code, via Lang interface.
 	Syms syms.SymMap `json:"-" xml:"-"`

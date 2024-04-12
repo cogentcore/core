@@ -7,7 +7,7 @@
 // which otherwise end up being right-associative for TDRD parsing.
 // Higher-level rules provide scope to lower-level ones, with a special EOS end-of-statement
 // scope recognized for
-package parse
+package parser
 
 import (
 	"fmt"

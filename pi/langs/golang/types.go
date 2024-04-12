@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/pi"
-	"cogentcore.org/core/pi/parse"
+	"cogentcore.org/core/pi/parser"
 	"cogentcore.org/core/pi/syms"
 	"cogentcore.org/core/pi/token"
 )
@@ -127,7 +127,7 @@ func (gl *GoLang) InitTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.T
 		// }
 		return
 	}
-	tyast := ty.Ast.(*parse.Ast).ChildAst(1)
+	tyast := ty.Ast.(*parser.Ast).ChildAst(1)
 	if tyast == nil {
 		if TraceTypes {
 			fmt.Printf("TypesFromAst: Type has invalid Ast! %v missing child 1\n", ty.String())
@@ -152,7 +152,7 @@ func (gl *GoLang) InitTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.T
 }
 
 // SubTypeFromAst returns a subtype from child ast at given index, nil if failed
-func (gl *GoLang) SubTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse.Ast, idx int) (*syms.Type, bool) {
+func (gl *GoLang) SubTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parser.Ast, idx int) (*syms.Type, bool) {
 	sast := ast.ChildAst(idx)
 	if sast == nil {
 		if TraceTypes {
@@ -186,7 +186,7 @@ var TypeToKindMap = map[string]syms.Kinds{
 
 // AstTypeName returns the effective type name from ast node
 // dropping the "Lit" for example.
-func (gl *GoLang) AstTypeName(tyast *parse.Ast) string {
+func (gl *GoLang) AstTypeName(tyast *parser.Ast) string {
 	tnm := tyast.Nm
 	if strings.HasPrefix(tnm, "Lit") {
 		tnm = tnm[3:]
@@ -203,7 +203,7 @@ func (gl *GoLang) AstTypeName(tyast *parse.Ast) string {
 // tyast node may have a Src name that will first be looked up to determine
 // if a previously-processed type is already available.  The tyast.Name is
 // the parser categorization of the type  (BasicType, StructType, etc).
-func (gl *GoLang) TypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type, tyast *parse.Ast) (*syms.Type, bool) {
+func (gl *GoLang) TypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type, tyast *parser.Ast) (*syms.Type, bool) {
 	tnm := gl.AstTypeName(tyast)
 	bkind, ok := TypeToKindMap[tnm]
 	if !ok { // must be some kind of expression
@@ -222,7 +222,7 @@ func (gl *GoLang) TypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type,
 }
 
 // TypeFromAstPrim handles primitive (non composite) type processing
-func (gl *GoLang) TypeFromAstPrim(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type, tyast *parse.Ast) (*syms.Type, bool) {
+func (gl *GoLang) TypeFromAstPrim(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type, tyast *parser.Ast) (*syms.Type, bool) {
 	tnm := gl.AstTypeName(tyast)
 	src := tyast.Src
 	etyp, tpkg := gl.FindTypeName(src, fs, pkg)
@@ -295,7 +295,7 @@ func (gl *GoLang) TypeFromAstPrim(fs *pi.FileState, pkg *syms.Symbol, ty *syms.T
 }
 
 // TypeFromAstComp handles composite type processing
-func (gl *GoLang) TypeFromAstComp(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type, tyast *parse.Ast) (*syms.Type, bool) {
+func (gl *GoLang) TypeFromAstComp(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type, tyast *parser.Ast) (*syms.Type, bool) {
 	tnm := gl.AstTypeName(tyast)
 	newTy := false
 	if ty == nil {
@@ -346,7 +346,7 @@ func (gl *GoLang) TypeFromAstComp(fs *pi.FileState, pkg *syms.Symbol, ty *syms.T
 		}
 		ty.Size = []int{nfld}
 		for i := 0; i < nfld; i++ {
-			fld := tyast.Kids[i].(*parse.Ast)
+			fld := tyast.Kids[i].(*parser.Ast)
 			fsrc := fld.Src
 			switch fld.Nm {
 			case "NamedField":
@@ -382,7 +382,7 @@ func (gl *GoLang) TypeFromAstComp(fs *pi.FileState, pkg *syms.Symbol, ty *syms.T
 		}
 		ty.Size = []int{nmth}
 		for i := 0; i < nmth; i++ {
-			fld := tyast.Kids[i].(*parse.Ast)
+			fld := tyast.Kids[i].(*parser.Ast)
 			fsrc := fld.Src
 			switch fld.Nm {
 			case "MethSpecAnonLocal":
@@ -430,7 +430,7 @@ func (gl *GoLang) TypeFromAstComp(fs *pi.FileState, pkg *syms.Symbol, ty *syms.T
 }
 
 // TypeFromAstLit gets type from literals
-func (gl *GoLang) TypeFromAstLit(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type, tyast *parse.Ast) (*syms.Type, bool) {
+func (gl *GoLang) TypeFromAstLit(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type, tyast *parser.Ast) (*syms.Type, bool) {
 	tnm := tyast.Nm
 	var bty *syms.Type
 	switch tnm {

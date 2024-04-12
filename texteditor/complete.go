@@ -11,7 +11,7 @@ import (
 	"cogentcore.org/core/pi"
 	"cogentcore.org/core/pi/complete"
 	"cogentcore.org/core/pi/lex"
-	"cogentcore.org/core/pi/parse"
+	"cogentcore.org/core/pi/parser"
 	"cogentcore.org/core/spell"
 	"cogentcore.org/core/texteditor/textbuf"
 )
@@ -36,7 +36,7 @@ func CompletePi(data any, text string, posLn, posCh int) (md complete.Matches) {
 
 	// note: must have this set to ture to allow viewing of AST
 	// must set it in pi/parse directly -- so it is changed in the fileparse too
-	parse.GuiActive = true // note: this is key for debugging -- runs slower but makes the tree unique
+	parser.GuiActive = true // note: this is key for debugging -- runs slower but makes the tree unique
 
 	md = lp.Lang.CompleteLine(sfs, text, lex.Pos{posLn, posCh})
 	return md
@@ -80,7 +80,7 @@ func LookupPi(data any, text string, posLn, posCh int) (ld complete.Lookup) {
 
 	// note: must have this set to ture to allow viewing of AST
 	// must set it in pi/parse directly -- so it is changed in the fileparse too
-	parse.GuiActive = true // note: this is key for debugging -- runs slower but makes the tree unique
+	parser.GuiActive = true // note: this is key for debugging -- runs slower but makes the tree unique
 
 	ld = lp.Lang.Lookup(sfs, text, lex.Pos{posLn, posCh})
 	if len(ld.Text) > 0 {

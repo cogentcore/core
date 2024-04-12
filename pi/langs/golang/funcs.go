@@ -9,7 +9,7 @@ import (
 	"unicode"
 
 	"cogentcore.org/core/pi"
-	"cogentcore.org/core/pi/parse"
+	"cogentcore.org/core/pi/parser"
 	"cogentcore.org/core/pi/syms"
 	"cogentcore.org/core/pi/token"
 )
@@ -29,7 +29,7 @@ func (gl *GoLang) TypeMeths(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type) {
 			continue
 		}
 
-		fty := gl.FuncTypeFromAst(fs, pkg, sy.Ast.(*parse.Ast), nil)
+		fty := gl.FuncTypeFromAst(fs, pkg, sy.Ast.(*parser.Ast), nil)
 		if fty != nil {
 			fty.Kind = syms.Method
 			fty.Name = sy.Name
@@ -48,7 +48,7 @@ func (gl *GoLang) TypeMeths(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type) {
 }
 
 // NamesFromAst returns a slice of name(s) from namelist nodes
-func (gl *GoLang) NamesFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse.Ast, idx int) []string {
+func (gl *GoLang) NamesFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parser.Ast, idx int) []string {
 	sast := ast.ChildAst(idx)
 	if sast == nil {
 		if TraceTypes {
@@ -69,7 +69,7 @@ func (gl *GoLang) NamesFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse.As
 
 // FuncTypeFromAst initializes a function type from ast -- type can either be anon
 // or a named type -- if anon then the name is the full type signature without param names
-func (gl *GoLang) FuncTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse.Ast, fty *syms.Type) *syms.Type {
+func (gl *GoLang) FuncTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parser.Ast, fty *syms.Type) *syms.Type {
 	// ast.WriteTree(os.Stdout, 0)
 
 	if ast == nil || !ast.HasChildren() {
@@ -90,8 +90,8 @@ func (gl *GoLang) FuncTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse
 	isMeth := false
 	if pars.Nm == "MethRecvName" && len(ast.Kids) > 2 {
 		isMeth = true
-		rcv := pars.Kids[0].(*parse.Ast)
-		rtyp := pars.Kids[1].(*parse.Ast)
+		rcv := pars.Kids[0].(*parser.Ast)
+		rtyp := pars.Kids[1].(*parser.Ast)
 		fty.Els.Add(rcv.Src, rtyp.Src)
 		poff = 2
 		pars = ast.ChildAst(2)
@@ -100,7 +100,7 @@ func (gl *GoLang) FuncTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse
 		pars = ast.ChildAst(1)
 	}
 	npars := len(pars.Kids)
-	var sigpars *parse.Ast
+	var sigpars *parser.Ast
 	if npars > 0 && (pars.Nm == "SigParams" || pars.Nm == "SigParamsResult") {
 		if ps := pars.ChildAst(0); ps == nil {
 			sigpars = pars
@@ -133,14 +133,14 @@ func (gl *GoLang) FuncTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse
 }
 
 // ParamsFromAst sets params as Els for given function type (also for return types)
-func (gl *GoLang) ParamsFromAst(fs *pi.FileState, pkg *syms.Symbol, pars *parse.Ast, fty *syms.Type, name string) {
+func (gl *GoLang) ParamsFromAst(fs *pi.FileState, pkg *syms.Symbol, pars *parser.Ast, fty *syms.Type, name string) {
 	npars := len(pars.Kids)
 	var pnames []string // param names that all share same type
 	for i := 0; i < npars; i++ {
-		par := pars.Kids[i].(*parse.Ast)
+		par := pars.Kids[i].(*parser.Ast)
 		psz := len(par.Kids)
 		if par.Nm == "ParType" && psz == 1 {
-			ptypa := par.Kids[0].(*parse.Ast)
+			ptypa := par.Kids[0].(*parser.Ast)
 			if ptypa.Nm == "TypeNm" { // could be multiple args with same type or a separate type-only arg
 				if ptl, _ := gl.FindTypeName(par.Src, fs, pkg); ptl != nil {
 					fty.Els.Add(fmt.Sprintf("%s_%v", name, i), par.Src)
@@ -162,7 +162,7 @@ func (gl *GoLang) ParamsFromAst(fs *pi.FileState, pkg *syms.Symbol, pars *parse.
 				pnames = nil
 			}
 		} else if psz == 2 { // ParName
-			pnm := par.Kids[0].(*parse.Ast)
+			pnm := par.Kids[0].(*parser.Ast)
 			ptyp, ok := gl.SubTypeFromAst(fs, pkg, par, 1)
 			if ok {
 				pnsz := len(pnames)
@@ -180,7 +180,7 @@ func (gl *GoLang) ParamsFromAst(fs *pi.FileState, pkg *syms.Symbol, pars *parse.
 }
 
 // RvalsFromAst sets return value(s) as Els for given function type
-func (gl *GoLang) RvalsFromAst(fs *pi.FileState, pkg *syms.Symbol, rvals *parse.Ast, fty *syms.Type) {
+func (gl *GoLang) RvalsFromAst(fs *pi.FileState, pkg *syms.Symbol, rvals *parser.Ast, fty *syms.Type) {
 	if rvals.Nm == "Block" { // todo: maybe others
 		return
 	}

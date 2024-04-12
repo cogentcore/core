@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package parse does the parsing stage after lexing
-package parse
+package parser
 
 //go:generate core generate
 

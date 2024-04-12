@@ -15,7 +15,7 @@ import (
 	"cogentcore.org/core/pi"
 	"cogentcore.org/core/pi/complete"
 	"cogentcore.org/core/pi/lex"
-	"cogentcore.org/core/pi/parse"
+	"cogentcore.org/core/pi/parser"
 	"cogentcore.org/core/pi/syms"
 	"cogentcore.org/core/pi/token"
 	"cogentcore.org/core/tree"
@@ -370,19 +370,19 @@ func (gl *GoLang) LookupString(fs *pi.FileState, pkg *syms.Symbol, scopes syms.S
 
 // CompleteAstStart finds the best starting point in the given current-line Ast
 // to start completion process, which walks back down from that starting point
-func (gl *GoLang) CompleteAstStart(ast *parse.Ast, scope token.Tokens) (start, last *parse.Ast) {
+func (gl *GoLang) CompleteAstStart(ast *parser.Ast, scope token.Tokens) (start, last *parser.Ast) {
 	curi := tree.Last(ast)
 	if curi == nil {
 		return
 	}
-	cur := curi.(*parse.Ast)
+	cur := curi.(*parser.Ast)
 	last = cur
 	start = cur
 	prv := cur
 	for {
-		var parent *parse.Ast
+		var parent *parser.Ast
 		if cur.Par != nil {
-			parent = cur.Par.(*parse.Ast)
+			parent = cur.Par.(*parser.Ast)
 		}
 		switch {
 		case cur.Nm == "TypeNm":

@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/pi"
-	"cogentcore.org/core/pi/parse"
+	"cogentcore.org/core/pi/parser"
 	"cogentcore.org/core/pi/syms"
 	"cogentcore.org/core/pi/token"
 )
@@ -35,7 +35,7 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 		return
 	}
 	if sy.Ast != nil {
-		ast := sy.Ast.(*parse.Ast)
+		ast := sy.Ast.(*parser.Ast)
 		switch {
 		case sy.Kind == token.NameField:
 			stsc, ok := sy.Scopes[token.NameStruct]
@@ -70,7 +70,7 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 				sy.Type = stsc
 			}
 		case sy.Kind.SubCat() == token.NameVar:
-			var astyp *parse.Ast
+			var astyp *parser.Ast
 			if ast.HasChildren() {
 				if strings.HasPrefix(ast.Nm, "ForRange") {
 					gl.InferForRangeSymbolType(sy, fs, pkg)
@@ -190,7 +190,7 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 // InferForRangeSymbolType infers the type of a ForRange expr
 // gets the container type properly
 func (gl *GoLang) InferForRangeSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.Symbol) {
-	ast := sy.Ast.(*parse.Ast)
+	ast := sy.Ast.(*parser.Ast)
 	if ast.NumChildren() < 2 {
 		sy.Type = TypeErr // actively mark as err so not re-processed
 		if TraceTypes {
