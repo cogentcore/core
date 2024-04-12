@@ -1,6 +1,6 @@
 # math32
 
-`math32` is a float32 based vector and matrix package for 2D & 3D graphics, based on the [G3N math32](https://github.com/g3n/engine) package, but using a value-based design instead of pointer-based, which simplifies chained expressions of multiple operators.
+`math32` is a float32 based vector, matrix, and math package for 2D & 3D graphics, based on the [G3N math32](https://github.com/g3n/engine) package, but using a value-based design instead of pointer-based, which simplifies chained expressions of multiple operators.
 
 The [go-gl/mathgl](https://github.com/go-gl/mathgl) package is also comparable, which in turn is based on [image/math/f32](https://golang.org/x/image/math/f32) types, which use arrays instead of `struct`s with named X, Y, Z components.  The named components make things easier to read overall.  The G3N and this package support a much more complete set of vector and matrix math, covering almost everything you might need, including aggregate types such as triangles, planes, etc.
 

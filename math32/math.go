@@ -8,6 +8,8 @@
 // license that can be found in the LICENSE file.
 // with modifications needed to suit Cogent Core functionality.
 
+// Package math32 is a float32 based vector, matrix, and math package
+// for 2D & 3D graphics.
 package math32
 
 import (
