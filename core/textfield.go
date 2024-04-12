@@ -112,10 +112,10 @@ type TextField struct { //core:embedder
 	Error error `json:"-" xml:"-" set:"-"`
 
 	// EffPos is the effective position with any leading icon space added.
-	EffPos math32.Vec2 `copier:"-" json:"-" xml:"-" set:"-"`
+	EffPos math32.Vector2 `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// EffSize is the effective size, subtracting any leading and trailing icon space.
-	EffSize math32.Vec2 `copier:"-" json:"-" xml:"-" set:"-"`
+	EffSize math32.Vector2 `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// StartPos is the starting display position in the string.
 	StartPos int `copier:"-" json:"-" xml:"-" set:"-"`
@@ -1172,9 +1172,9 @@ func (tf *TextField) HasWordWrap() bool {
 // CharPos returns the relative starting position of the given rune,
 // in the overall RenderAll of all the text.
 // These positions can be out of visible range: see CharRenderPos
-func (tf *TextField) CharPos(idx int) math32.Vec2 {
+func (tf *TextField) CharPos(idx int) math32.Vector2 {
 	if idx <= 0 || len(tf.RenderAll.Spans) == 0 {
-		return math32.Vec2{}
+		return math32.Vector2{}
 	}
 	pos, _, _, _ := tf.RenderAll.RuneRelPos(idx)
 	pos.Y -= tf.RenderAll.Spans[0].RelPos.Y
@@ -1183,7 +1183,7 @@ func (tf *TextField) CharPos(idx int) math32.Vec2 {
 
 // RelCharPos returns the text width in dots between the two text string
 // positions (ed is exclusive -- +1 beyond actual char).
-func (tf *TextField) RelCharPos(st, ed int) math32.Vec2 {
+func (tf *TextField) RelCharPos(st, ed int) math32.Vector2 {
 	return tf.CharPos(ed).Sub(tf.CharPos(st))
 }
 
@@ -1191,7 +1191,7 @@ func (tf *TextField) RelCharPos(st, ed int) math32.Vec2 {
 // position in string -- makes no attempt to rationalize that pos (i.e., if
 // not in visible range, position will be out of range too).
 // if wincoords is true, then adds window box offset -- for cursor, popups
-func (tf *TextField) CharRenderPos(charidx int, wincoords bool) math32.Vec2 {
+func (tf *TextField) CharRenderPos(charidx int, wincoords bool) math32.Vector2 {
 	pos := tf.EffPos
 	if wincoords {
 		sc := tf.Scene
@@ -1838,7 +1838,7 @@ func (tf *TextField) ApplyStyle() {
 	tf.CursorWidth.ToDots(&tf.Styles.UnitContext)
 }
 
-func (tf *TextField) ConfigTextSize(sz math32.Vec2) math32.Vec2 {
+func (tf *TextField) ConfigTextSize(sz math32.Vector2) math32.Vector2 {
 	st := &tf.Styles
 	txs := &st.Text
 	fs := st.FontRender()
@@ -1856,8 +1856,8 @@ func (tf *TextField) ConfigTextSize(sz math32.Vec2) math32.Vec2 {
 	return rsz
 }
 
-func (tf *TextField) IconsSize() math32.Vec2 {
-	var sz math32.Vec2
+func (tf *TextField) IconsSize() math32.Vector2 {
+	var sz math32.Vector2
 	if lead := tf.LeadingIconButton(); lead != nil {
 		sz.X += lead.Geom.Size.Actual.Total.X
 	}
@@ -1882,7 +1882,7 @@ func (tf *TextField) SizeUp() {
 	icsz := tf.IconsSize()
 	availSz := sz.Actual.Content.Sub(icsz)
 
-	var rsz math32.Vec2
+	var rsz math32.Vector2
 	if tf.HasWordWrap() {
 		rsz = tf.ConfigTextSize(availSz) // TextWrapSizeEstimate(availSz, len(tf.EditTxt), &tf.Styles.Font))
 	} else {

@@ -9,7 +9,7 @@ layout(push_constant) uniform Mtxs {
 	mat4 uvp;
 };
 
-layout(location = 0) in vec2 pos;
+layout(location = 0) in vector2 pos;
 
 void main() {
 	vec3 p = vec3(pos, 1);

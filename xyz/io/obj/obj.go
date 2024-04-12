@@ -281,7 +281,7 @@ func (dec *Decoder) setIndex(ms *xyz.GenMesh, face *Face, idx int, idxs *[]int) 
 
 func (dec *Decoder) copyVertex(ms *xyz.GenMesh, face *Face, idx int) int {
 	var vec3 math32.Vec3
-	var vec2 math32.Vec2
+	var vector2 math32.Vector2
 
 	vidx := ms.Vtx.Size() / 3
 	// Copy vertex position and append to geometry
@@ -301,9 +301,9 @@ func (dec *Decoder) copyVertex(ms *xyz.GenMesh, face *Face, idx int) int {
 	if face.Uvs[idx] != invINDEX {
 		i := 2 * face.Uvs[idx]
 		if dec.Uvs.Size() > i {
-			dec.Uvs.GetVec2(i, &vec2)
+			dec.Uvs.GetVector2(i, &vector2)
 		}
-		ms.Tex.AppendVec2(vec2)
+		ms.Tex.AppendVector2(vector2)
 	}
 	ms.Index.Append(uint32(vidx))
 	return vidx

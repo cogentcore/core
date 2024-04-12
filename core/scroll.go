@@ -24,7 +24,7 @@ func (ly *Layout) HasAnyScroll() bool {
 }
 
 // ScrollGeom returns the target position and size for scrollbars
-func (ly *Layout) ScrollGeom(d math32.Dims) (pos, sz math32.Vec2) {
+func (ly *Layout) ScrollGeom(d math32.Dims) (pos, sz math32.Vector2) {
 	sbw := math32.Ceil(ly.Styles.ScrollBarWidth.Dots)
 	od := d.Other()
 	bbmin := math32.V2FromPoint(ly.Geom.ContentBBox.Min)
@@ -323,7 +323,7 @@ var LayoutLastAutoScroll time.Time
 
 // AutoScroll scrolls the layout based on given position in scroll
 // coordinates (i.e., already subtracing the BBox Min for a mouse event).
-func (ly *Layout) AutoScroll(pos math32.Vec2) bool {
+func (ly *Layout) AutoScroll(pos math32.Vector2) bool {
 	now := time.Now()
 	lag := now.Sub(LayoutLastAutoScroll)
 	if lag < SystemSettings.LayoutAutoScrollDelay {

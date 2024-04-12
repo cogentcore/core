@@ -15,7 +15,7 @@ import (
 type Indexes struct {
 
 	// percent size of this image relative to max size allocated
-	PctSize math32.Vec2
+	PctSize math32.Vector2
 
 	// group index
 	GpIndex int

@@ -18,7 +18,7 @@ layout(set = 0, binding = 0) uniform MtxsU {
 layout(location = 0) in vec4 Pos;
 layout(location = 1) in vec3 Norm;
 layout(location = 2) in vec3 CamDir;
-// layout(location = 3) in vec2 TexCoord;
+// layout(location = 3) in vector2 TexCoord;
 layout(location = 3) in vec4 VtxColor;
 
 layout(location = 0) out vec4 outColor;

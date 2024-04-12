@@ -33,7 +33,7 @@ func AddCircle(cx, cy, r float32, p Adder) {
 // x and y radius, (rx, ry), rotated around the center by rot degrees.
 func AddEllipse(cx, cy, rx, ry, rot float32, p Adder) {
 	rotRads := rot * math32.Pi / 180
-	pt := math32.Identity2().Translate(cx, cy).Rotate(rotRads).Translate(-cx, -cy).MulVec2AsPoint(math32.V2(cx+rx, cy))
+	pt := math32.Identity2().Translate(cx, cy).Rotate(rotRads).Translate(-cx, -cy).MulVector2AsPoint(math32.V2(cx+rx, cy))
 	points := []float32{rx, ry, rot, 1.0, 0.0, pt.X, pt.Y}
 	p.Start(pt.Fixed())
 	AddArc(points, cx, cy, pt.X, pt.Y, p)

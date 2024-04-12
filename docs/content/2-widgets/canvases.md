@@ -6,7 +6,7 @@ You can set the function used to draw the canvas:
 
 ```Go
 core.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
-    pc.FillBox(math32.Vec2{}, math32.V2(1, 1), colors.C(colors.Scheme.Primary.Base))
+    pc.FillBox(math32.Vector2{}, math32.V2(1, 1), colors.C(colors.Scheme.Primary.Base))
 })
 ```
 
@@ -100,7 +100,7 @@ You can change the size of the canvas:
 
 ```Go
 c := core.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
-    pc.FillBox(math32.Vec2{}, math32.V2(1, 1), colors.C(colors.Scheme.Warn.Base))
+    pc.FillBox(math32.Vector2{}, math32.V2(1, 1), colors.C(colors.Scheme.Warn.Base))
 })
 c.Style(func(s *styles.Style) {
     s.Min.Set(units.Dp(128))

@@ -20,10 +20,10 @@ type Plane struct {
 	NormNeg bool
 
 	// 2D size of plane
-	Size math32.Vec2
+	Size math32.Vector2
 
 	// number of segments to divide plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1
-	Segs math32.Vec2i
+	Segs math32.Vector2i
 
 	// offset from origin along direction of normal to the plane
 	Offset float32
@@ -84,7 +84,7 @@ func PlaneN(wsegs, hsegs int) (nVtx, nIndex int) {
 // offset is the distance to place the plane along the orthogonal axis.
 // pos is a 3D position offset. returns 3D size of plane.
 // returns bounding box.
-func SetPlaneAxisSize(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, normAxis math32.Dims, normNeg bool, size math32.Vec2, segs math32.Vec2i, offset float32, pos math32.Vec3) math32.Vec3 {
+func SetPlaneAxisSize(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, normAxis math32.Dims, normNeg bool, size math32.Vector2, segs math32.Vector2i, offset float32, pos math32.Vec3) math32.Vec3 {
 	hSz := size.DivScalar(2)
 	thin := float32(.0000001)
 	sz := math32.Vec3{}
@@ -163,7 +163,7 @@ func SetPlane(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, v
 	}
 
 	vtx := math32.Vec3{}
-	tex := math32.Vec2{}
+	tex := math32.Vector2{}
 	vidx := vtxOff * 3
 	tidx := vtxOff * 2
 

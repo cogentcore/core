@@ -74,10 +74,10 @@ func TestV2AngleTo(t *testing.T) {
 		// cross := v.Cross(ref)
 		// fmt.Printf("ang: %v  cross: %v\n", ang, cross)
 		if Abs(vcos-cos) > 1.0e-6 {
-			t.Errorf("Vec2.AngleTo: Cos: %v != orig Cos: %v\n", vcos, cos)
+			t.Errorf("Vector2.AngleTo: Cos: %v != orig Cos: %v\n", vcos, cos)
 		}
 		if Abs(vsin-sin) > 1.0e-6 {
-			t.Errorf("Vec2.AngleTo: Sin: %v != orig Sin: %v\n", vsin, sin)
+			t.Errorf("Vector2.AngleTo: Sin: %v != orig Sin: %v\n", vsin, sin)
 		}
 	}
 }

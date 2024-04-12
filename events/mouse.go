@@ -88,14 +88,14 @@ type MouseScroll struct {
 	Mouse
 
 	// Delta is the amount of scrolling in each axis
-	Delta math32.Vec2
+	Delta math32.Vector2
 }
 
 func (ev *MouseScroll) String() string {
 	return fmt.Sprintf("%v{Delta: %v, Pos: %v, Mods: %v, Time: %v}", ev.Type(), ev.Delta, ev.Where, key.ModsString(ev.Mods), ev.Time().Format("04:05"))
 }
 
-func NewScroll(where image.Point, delta math32.Vec2, mods key.Modifiers) *MouseScroll {
+func NewScroll(where image.Point, delta math32.Vector2, mods key.Modifiers) *MouseScroll {
 	ev := &MouseScroll{}
 	ev.Typ = Scroll
 	// not unique, but delta integrated!

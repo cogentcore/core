@@ -58,7 +58,7 @@ type SVG struct {
 
 	// Translate specifies a translation to apply beyond what is specified in the SVG,
 	// and its ViewBox transform.
-	Translate math32.Vec2
+	Translate math32.Vector2
 
 	// Scale specifies a zoom scale factor to apply beyond what is specified in the SVG,
 	// and its ViewBox transform.
@@ -194,7 +194,7 @@ func (sv *SVG) Style() {
 		sv.Root.SetColorProperties("stroke", colors.AsHex(c))
 		sv.Root.SetColorProperties("fill", colors.AsHex(c))
 	}
-	sv.SetUnitContext(&sv.Root.Paint, math32.Vec2{}, math32.Vec2{})
+	sv.SetUnitContext(&sv.Root.Paint, math32.Vector2{}, math32.Vector2{})
 
 	sv.Root.WalkDown(func(k tree.Node) bool {
 		ni := k.(Node)
@@ -226,7 +226,7 @@ func (sv *SVG) Render() {
 
 func (sv *SVG) FillViewport() {
 	pc := &paint.Context{&sv.RenderState, &sv.Root.Paint}
-	pc.FillBox(math32.Vec2{}, math32.V2FromPoint(sv.Geom.Size), sv.Background)
+	pc.FillBox(math32.Vector2{}, math32.V2FromPoint(sv.Geom.Size), sv.Background)
 }
 
 // SetRootTransform sets the Root node transform based on ViewBox, Translate, Scale
@@ -293,7 +293,7 @@ func (g *SVGNode) NodeBBox(sv *SVG) image.Rectangle {
 // SetUnitContext sets the unit context based on size of viewport, element,
 // and parent element (from bbox) and then caches everything out in terms of raw pixel
 // dots for rendering -- call at start of render
-func (sv *SVG) SetUnitContext(pc *styles.Paint, el, parent math32.Vec2) {
+func (sv *SVG) SetUnitContext(pc *styles.Paint, el, parent math32.Vector2) {
 	pc.UnitContext.Defaults()
 	pc.UnitContext.DPI = 96 // paint (SVG) context is always 96 = 1to1
 	if sv.RenderState.Image != nil {

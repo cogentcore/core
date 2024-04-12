@@ -90,7 +90,7 @@ func (dw *Drawer) ConfigSys() {
 	nPts := 4
 	nIndexes := 6
 
-	posv := vset.Add("Pos", vgpu.Float32Vec2, nPts, vgpu.Vertex, vgpu.VertexShader)
+	posv := vset.Add("Pos", vgpu.Float32Vector2, nPts, vgpu.Vertex, vgpu.VertexShader)
 	idxv := vset.Add("Index", vgpu.Uint16, nIndexes, vgpu.Index, vgpu.VertexShader)
 
 	pcset.AddStruct("Mtxs", vgpu.Float32Mat4.Bytes()*2, 1, vgpu.Push, vgpu.VertexShader, vgpu.FragmentShader)

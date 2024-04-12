@@ -490,7 +490,7 @@ func (v Vec3) MVProjToNDC(m *Mat4, w float32) Vec3 {
 // (pixel) coordinates, using given window size parameters.
 // near, far are 0, 1 by default (glDepthRange defaults).
 // flipY if true means flip the Y axis (top = 0 for windows vs. bottom = 0 for 3D coords)
-func (v Vec3) NDCToWindow(size, off Vec2, near, far float32, flipY bool) Vec3 {
+func (v Vec3) NDCToWindow(size, off Vector2, near, far float32, flipY bool) Vec3 {
 	w := Vec3{}
 	half := size.MulScalar(0.5)
 	w.X = half.X*v.X + half.X
@@ -508,7 +508,7 @@ func (v Vec3) NDCToWindow(size, off Vec2, near, far float32, flipY bool) Vec3 {
 // normalized display coordinates (NDC), using given window size parameters.
 // The Z depth coordinate (0-1) must be set manually or by reading from framebuffer
 // flipY if true means flip the Y axis (top = 0 for windows vs. bottom = 0 for 3D coords)
-func (v Vec2) WindowToNDC(size, off Vec2, flipY bool) Vec3 {
+func (v Vector2) WindowToNDC(size, off Vector2, flipY bool) Vec3 {
 	n := Vec3{}
 	half := size.MulScalar(0.5)
 	n.X = v.X - off.X

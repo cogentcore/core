@@ -90,7 +90,7 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.MeshName", IDNa
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Mesh", IDName: "mesh", Doc: "Mesh parameterizes the mesh-based shape used for rendering a Solid.\nOnly indexed triangle meshes are supported.\nAll Mesh's must know in advance the number of vertex and index points\nthey require, and the SetVerticies method operates on data from the\nvgpu staging buffer to set the relevant data post-allocation.\nThe vgpu vshape library is used for all basic shapes, and it follows\nthis same logic.\nPer-vertex Color is optional, as is the ability to update the data\nafter initial SetVerticies call (default is to do nothing)."})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.MeshBase", IDName: "mesh-base", Doc: "MeshBase provides the core implementation of Mesh interface", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Nm", Doc: "name of mesh -- meshes are linked to Solids by name so this matters"}, {Name: "NVtx", Doc: "number of vertex points, as math32.Vec3 -- always includes math32.Vec3 normals and math32.Vec2 texture coordinates -- only valid after Sizes() has been called"}, {Name: "NIndex", Doc: "number of indexes, as math32.ArrayU32 -- only valid after Sizes() has been called"}, {Name: "Color", Doc: "has per-vertex colors, as math32.Vec4 per vertex"}, {Name: "Dynamic", Doc: "if true, this mesh changes frequently -- otherwise considered to be static"}, {Name: "Trans", Doc: "set to true if color has transparency -- not worth checking manually"}, {Name: "BBox", Doc: "computed bounding-box and other gross solid properties"}, {Name: "BBoxMu", Doc: "mutex on bbox access"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.MeshBase", IDName: "mesh-base", Doc: "MeshBase provides the core implementation of Mesh interface", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Nm", Doc: "name of mesh -- meshes are linked to Solids by name so this matters"}, {Name: "NVtx", Doc: "number of vertex points, as math32.Vec3 -- always includes math32.Vec3 normals and math32.Vector2 texture coordinates -- only valid after Sizes() has been called"}, {Name: "NIndex", Doc: "number of indexes, as math32.ArrayU32 -- only valid after Sizes() has been called"}, {Name: "Color", Doc: "has per-vertex colors, as math32.Vec4 per vertex"}, {Name: "Dynamic", Doc: "if true, this mesh changes frequently -- otherwise considered to be static"}, {Name: "Trans", Doc: "set to true if color has transparency -- not worth checking manually"}, {Name: "BBox", Doc: "computed bounding-box and other gross solid properties"}, {Name: "BBoxMu", Doc: "mutex on bbox access"}}})
 
 // SetColor sets the [MeshBase.Color]:
 // has per-vertex colors, as math32.Vec4 per vertex
@@ -190,11 +190,11 @@ func (t *Plane) SetNormNeg(v bool) *Plane { t.NormNeg = v; return t }
 
 // SetSize sets the [Plane.Size]:
 // 2D size of plane
-func (t *Plane) SetSize(v math32.Vec2) *Plane { t.Size = v; return t }
+func (t *Plane) SetSize(v math32.Vector2) *Plane { t.Size = v; return t }
 
 // SetSegs sets the [Plane.Segs]:
 // number of segments to divide plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1
-func (t *Plane) SetSegs(v math32.Vec2i) *Plane { t.Segs = v; return t }
+func (t *Plane) SetSegs(v math32.Vector2i) *Plane { t.Segs = v; return t }
 
 // SetOffset sets the [Plane.Offset]:
 // offset from origin along direction of normal to the plane

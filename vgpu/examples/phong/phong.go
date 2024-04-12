@@ -254,7 +254,7 @@ func main() {
 		ph.SetModelMtx(&floortx)
 		ph.UseMeshName("floor")
 		// ph.UseNoTexture()
-		ph.UseTexturePars(math32.V2(50, 50), math32.Vec2{})
+		ph.UseTexturePars(math32.V2(50, 50), math32.Vector2{})
 		ph.UseTextureName("ground.png")
 		ph.Render()
 

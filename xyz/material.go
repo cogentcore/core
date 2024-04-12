@@ -17,15 +17,15 @@ import (
 type Tiling struct {
 
 	// how often to repeat the texture in each direction
-	Repeat math32.Vec2
+	Repeat math32.Vector2
 
 	// offset for when to start the texure in each direction
-	Off math32.Vec2
+	Off math32.Vector2
 }
 
 // Defaults sets default tiling params if not yet initialized
 func (tl *Tiling) Defaults() {
-	if tl.Repeat == (math32.Vec2{}) {
+	if tl.Repeat == (math32.Vector2{}) {
 		tl.Repeat.Set(1, 1)
 	}
 }

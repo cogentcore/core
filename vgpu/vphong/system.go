@@ -112,7 +112,7 @@ func (ph *Phong) ConfigSys() {
 
 	vset.Add("Pos", vgpu.Float32Vec3, 0, vgpu.Vertex, vgpu.VertexShader)
 	vset.Add("Norm", vgpu.Float32Vec3, 0, vgpu.Vertex, vgpu.VertexShader)
-	vset.Add("Tex", vgpu.Float32Vec2, 0, vgpu.Vertex, vgpu.VertexShader)
+	vset.Add("Tex", vgpu.Float32Vector2, 0, vgpu.Vertex, vgpu.VertexShader)
 	vset.Add("Color", vgpu.Float32Vec4, 0, vgpu.Vertex, vgpu.VertexShader)
 	vset.Add("Index", vgpu.Uint32, 0, vgpu.Index, vgpu.VertexShader)
 

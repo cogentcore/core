@@ -41,10 +41,10 @@ type Plane struct { //types:add -setters
 	NormNeg bool
 
 	// 2D size of plane
-	Size math32.Vec2
+	Size math32.Vector2
 
 	// number of segments to divide plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1
-	Segs math32.Vec2i
+	Segs math32.Vector2i
 
 	// offset from origin along direction of normal to the plane
 	Offset float32

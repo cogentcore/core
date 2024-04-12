@@ -88,7 +88,7 @@ type Style struct { //types:add
 	// Extra available space is allocated as: Grow / sum (all Grow).
 	// Important: grow elements absorb available space and thus are not
 	// subject to alignment (Center, End).
-	Grow math32.Vec2
+	Grow math32.Vector2
 
 	// GrowWrap is a special case for Text elements where it grows initially
 	// in the horizontal axis to allow for longer, word wrapped text to fill

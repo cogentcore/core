@@ -49,7 +49,7 @@ type Node interface {
 
 	// UpdateBBox2D updates this node's 2D bounding-box information based on scene
 	// size and other scene bbox info from scene
-	UpdateBBox2D(size math32.Vec2)
+	UpdateBBox2D(size math32.Vector2)
 
 	// RayPick converts a given 2D point in scene image coordinates
 	// into a ray from the camera position pointing through line of sight of camera
@@ -249,8 +249,8 @@ func (nb *NodeBase) UpdateMVPMatrix(viewMat, prjnMat *math32.Mat4) {
 
 // UpdateBBox2D updates this node's 2D bounding-box information based on scene
 // size and min offset position.
-func (nb *NodeBase) UpdateBBox2D(size math32.Vec2) {
-	off := math32.Vec2{}
+func (nb *NodeBase) UpdateBBox2D(size math32.Vector2) {
+	off := math32.Vector2{}
 	nb.PoseMu.RLock()
 	nb.WorldBBox.BBox = nb.MeshBBox.BBox.MulMat4(&nb.Pose.WorldMatrix)
 	nb.NDCBBox = nb.MeshBBox.BBox.MVProjToNDC(&nb.Pose.MVPMatrix)
@@ -288,7 +288,7 @@ func (nb *NodeBase) RayPick(pos image.Point) math32.Ray {
 	sz := nb.Sc.Geom.Size
 	size := math32.V2(float32(sz.X), float32(sz.Y))
 	fpos := math32.V2(float32(pos.X), float32(pos.Y))
-	ndc := fpos.WindowToNDC(size, math32.Vec2{}, true) // flipY
+	ndc := fpos.WindowToNDC(size, math32.Vector2{}, true) // flipY
 	var err error
 	ndc.Z = -1 // at closest point
 	cdir := math32.V4FromV3(ndc, 1).MulMat4(&nb.Sc.Camera.InvPrjnMatrix)

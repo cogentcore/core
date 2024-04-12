@@ -8,7 +8,7 @@ layout(push_constant) uniform TexIndexUni {
 layout(set = 1, binding = 0) uniform sampler2DArray TexSampler[];
 
 layout(location = 0) in vec3 FragColor;
-layout(location = 1) in vec2 FragTexCoord;
+layout(location = 1) in vector2 FragTexCoord;
 
 layout(location = 0) out vec4 OutColor;
 

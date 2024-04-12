@@ -136,7 +136,7 @@ func (m *Meter) Render() {
 	size := m.Geom.Size.Actual.Content.SubScalar(sw)
 
 	var txt *paint.Text
-	var toff math32.Vec2
+	var toff math32.Vector2
 	if m.Text != "" {
 		txt = &paint.Text{}
 		txt.SetHTML(m.Text, st.FontRender(), &st.Text, &st.UnitContext, nil)

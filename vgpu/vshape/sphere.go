@@ -203,7 +203,7 @@ func SetDiskSector(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU
 	norm.Z = 1
 	normAry.SetVec3(vidx, norm)
 	centerUV := math32.V2(0.5, 0.5)
-	texAry.SetVec2(tidx, centerUV)
+	texAry.SetVector2(tidx, centerUV)
 	idx++
 
 	var pt math32.Vec3

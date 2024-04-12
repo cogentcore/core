@@ -39,10 +39,10 @@ type Rune struct {
 
 	// relative position from start of Text for the lower-left baseline
 	// rendering position of the font character
-	RelPos math32.Vec2
+	RelPos math32.Vector2
 
 	// size of the rune itself, exclusive of spacing that might surround it
-	Size math32.Vec2
+	Size math32.Vector2
 
 	// rotation in radians for this character, relative to its lower-left
 	// baseline rendering position

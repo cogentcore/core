@@ -44,7 +44,7 @@ type Text struct {
 	Spans []Span
 
 	// last size of overall rendered text
-	Size math32.Vec2
+	Size math32.Vector2
 
 	// fontheight computed in last Layout
 	FontHeight float32
@@ -81,7 +81,7 @@ func (tr *Text) InsertSpan(at int, ns *Span) {
 // runes, and the overall font size, etc.  todo: does not currently support
 // stroking, only filling of text -- probably need to grab path from font and
 // use paint rendering for stroking.
-func (tr *Text) Render(pc *Context, pos math32.Vec2) {
+func (tr *Text) Render(pc *Context, pos math32.Vector2) {
 	// pr := profile.Start("RenderText")
 	// defer pr.End()
 
@@ -99,7 +99,7 @@ func (tr *Text) Render(pc *Context, pos math32.Vec2) {
 	hadOverflow := false
 	rendOverflow := false
 	overBoxSet := false
-	var overStart math32.Vec2
+	var overStart math32.Vector2
 	var overBox math32.Box2
 	var overFace font.Face
 	var overColor image.Image
@@ -165,8 +165,8 @@ func (tr *Text) Render(pc *Context, pos math32.Vec2) {
 				scx = rr.ScaleX
 			}
 			tx := math32.Scale2D(scx, 1).Rotate(rr.RotRad)
-			ll := rp.Add(tx.MulVec2AsVec(math32.V2(0, dsc32)))
-			ur := ll.Add(tx.MulVec2AsVec(math32.V2(rr.Size.X, -rr.Size.Y)))
+			ll := rp.Add(tx.MulVector2AsVec(math32.V2(0, dsc32)))
+			ur := ll.Add(tx.MulVector2AsVec(math32.V2(rr.Size.X, -rr.Size.Y)))
 
 			if int(math32.Ceil(ur.X)) < pc.Bounds.Min.X || int(math32.Ceil(ll.Y)) < pc.Bounds.Min.Y {
 				continue
@@ -253,7 +253,7 @@ func (tr *Text) Render(pc *Context, pos math32.Vec2) {
 // RenderTopPos renders at given top position -- uses first font info to
 // compute baseline offset and calls overall Render -- convenience for simple
 // widget rendering without layouts
-func (tr *Text) RenderTopPos(pc *Context, tpos math32.Vec2) {
+func (tr *Text) RenderTopPos(pc *Context, tpos math32.Vector2) {
 	if len(tr.Spans) == 0 {
 		return
 	}

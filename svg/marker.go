@@ -15,10 +15,10 @@ type Marker struct {
 	NodeBase
 
 	// reference position to align the vertex position with, specified in ViewBox coordinates
-	RefPos math32.Vec2 `xml:"{refX,refY}"`
+	RefPos math32.Vector2 `xml:"{refX,refY}"`
 
 	// size of marker to render, in Units units
-	Size math32.Vec2 `xml:"{markerWidth,markerHeight}"`
+	Size math32.Vector2 `xml:"{markerWidth,markerHeight}"`
 
 	// units to use
 	Units MarkerUnits `xml:"markerUnits"`
@@ -30,7 +30,7 @@ type Marker struct {
 	Orient string `xml:"orient"`
 
 	// current vertex position
-	VertexPos math32.Vec2
+	VertexPos math32.Vector2
 
 	// current vertex angle in radians
 	VertexAngle float32
@@ -42,7 +42,7 @@ type Marker struct {
 	Transform math32.Mat2
 
 	// effective size for actual rendering
-	EffSize math32.Vec2
+	EffSize math32.Vector2
 }
 
 func (g *Marker) SVGName() string { return "marker" }
@@ -60,7 +60,7 @@ const (
 
 // RenderMarker renders the marker using given vertex position, angle (in
 // radians), and stroke width
-func (mrk *Marker) RenderMarker(sv *SVG, vertexPos math32.Vec2, vertexAng, strokeWidth float32) {
+func (mrk *Marker) RenderMarker(sv *SVG, vertexPos math32.Vector2, vertexAng, strokeWidth float32) {
 	mrk.VertexPos = vertexPos
 	mrk.VertexAngle = vertexAng
 	mrk.StrokeWidth = strokeWidth
@@ -74,7 +74,7 @@ func (mrk *Marker) RenderMarker(sv *SVG, vertexPos math32.Vec2, vertexAng, strok
 	if mrk.Orient != "auto" {
 		ang, _ = math32.ParseAngle32(mrk.Orient)
 	}
-	if mrk.ViewBox.Size == (math32.Vec2{}) {
+	if mrk.ViewBox.Size == (math32.Vector2{}) {
 		mrk.ViewBox.Size = math32.V2(3, 3)
 	}
 	mrk.Transform = math32.Rotate2D(ang).Scale(mrk.EffSize.X/mrk.ViewBox.Size.X, mrk.EffSize.Y/mrk.ViewBox.Size.Y).Translate(-mrk.RefPos.X, -mrk.RefPos.Y)

@@ -13,10 +13,10 @@ type Ellipse struct {
 	NodeBase
 
 	// position of the center of the ellipse
-	Pos math32.Vec2 `xml:"{cx,cy}"`
+	Pos math32.Vector2 `xml:"{cx,cy}"`
 
 	// radii of the ellipse in the horizontal, vertical axes
-	Radii math32.Vec2 `xml:"{rx,ry}"`
+	Radii math32.Vector2 `xml:"{rx,ry}"`
 }
 
 func (g *Ellipse) SVGName() string { return "ellipse" }
@@ -25,11 +25,11 @@ func (g *Ellipse) OnInit() {
 	g.Radii.Set(1, 1)
 }
 
-func (g *Ellipse) SetNodePos(pos math32.Vec2) {
+func (g *Ellipse) SetNodePos(pos math32.Vector2) {
 	g.Pos = pos.Sub(g.Radii)
 }
 
-func (g *Ellipse) SetNodeSize(sz math32.Vec2) {
+func (g *Ellipse) SetNodeSize(sz math32.Vector2) {
 	g.Radii = sz.MulScalar(0.5)
 }
 
@@ -63,8 +63,8 @@ func (g *Ellipse) ApplyTransform(sv *SVG, xf math32.Mat2) {
 		g.Paint.Transform.SetMul(xf)
 		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
-		g.Pos = xf.MulVec2AsPoint(g.Pos)
-		g.Radii = xf.MulVec2AsVec(g.Radii)
+		g.Pos = xf.MulVector2AsPoint(g.Pos)
+		g.Radii = xf.MulVector2AsVec(g.Radii)
 		g.GradientApplyTransform(sv, xf)
 	}
 }
@@ -74,7 +74,7 @@ func (g *Ellipse) ApplyTransform(sv *SVG, xf math32.Mat2) {
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Ellipse) ApplyDeltaTransform(sv *SVG, trans math32.Vec2, scale math32.Vec2, rot float32, pt math32.Vec2) {
+func (g *Ellipse) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) {
 	crot := g.Paint.Transform.ExtractRot()
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
@@ -82,8 +82,8 @@ func (g *Ellipse) ApplyDeltaTransform(sv *SVG, trans math32.Vec2, scale math32.V
 		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self
-		g.Pos = xf.MulVec2AsPointCenter(g.Pos, lpt)
-		g.Radii = xf.MulVec2AsVec(g.Radii)
+		g.Pos = xf.MulVector2AsPointCenter(g.Pos, lpt)
+		g.Radii = xf.MulVector2AsVec(g.Radii)
 		g.GradientApplyTransformPt(sv, xf, lpt)
 	}
 }

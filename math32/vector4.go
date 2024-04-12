@@ -53,8 +53,8 @@ func (v *Vec4) SetFromVec3(other Vec3, w float32) {
 	v.W = w
 }
 
-// SetFromVec2 sets this vector from a Vec2 with 0,1 for Z,W
-func (v *Vec4) SetFromVec2(other Vec2) {
+// SetFromVector2 sets this vector from a Vector2 with 0,1 for Z,W
+func (v *Vec4) SetFromVector2(other Vector2) {
 	v.X = other.X
 	v.Y = other.Y
 	v.Z = 0

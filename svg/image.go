@@ -21,10 +21,10 @@ type Image struct {
 	NodeBase
 
 	// position of the top-left of the image
-	Pos math32.Vec2 `xml:"{x,y}"`
+	Pos math32.Vector2 `xml:"{x,y}"`
 
 	// rendered size of the image (imposes a scaling on image when it is rendered)
-	Size math32.Vec2 `xml:"{width,height}"`
+	Size math32.Vector2 `xml:"{width,height}"`
 
 	// file name of image loaded -- set by OpenImage
 	Filename string
@@ -38,11 +38,11 @@ type Image struct {
 
 func (g *Image) SVGName() string { return "image" }
 
-func (g *Image) SetNodePos(pos math32.Vec2) {
+func (g *Image) SetNodePos(pos math32.Vector2) {
 	g.Pos = pos
 }
 
-func (g *Image) SetNodeSize(sz math32.Vec2) {
+func (g *Image) SetNodeSize(sz math32.Vector2) {
 	g.Size = sz
 }
 
@@ -104,8 +104,8 @@ func (g *Image) DrawImage(sv *SVG) {
 
 func (g *Image) NodeBBox(sv *SVG) image.Rectangle {
 	rs := &sv.RenderState
-	pos := rs.CurrentTransform.MulVec2AsPoint(g.Pos)
-	max := rs.CurrentTransform.MulVec2AsPoint(g.Pos.Add(g.Size))
+	pos := rs.CurrentTransform.MulVector2AsPoint(g.Pos)
+	max := rs.CurrentTransform.MulVector2AsPoint(g.Pos.Add(g.Size))
 	posi := pos.ToPointCeil()
 	maxi := max.ToPointCeil()
 	return image.Rectangle{posi, maxi}.Canon()
@@ -137,8 +137,8 @@ func (g *Image) ApplyTransform(sv *SVG, xf math32.Mat2) {
 		g.Paint.Transform.SetMul(xf)
 		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
-		g.Pos = xf.MulVec2AsPoint(g.Pos)
-		g.Size = xf.MulVec2AsVec(g.Size)
+		g.Pos = xf.MulVector2AsPoint(g.Pos)
+		g.Size = xf.MulVector2AsVec(g.Size)
 	}
 }
 
@@ -147,7 +147,7 @@ func (g *Image) ApplyTransform(sv *SVG, xf math32.Mat2) {
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Image) ApplyDeltaTransform(sv *SVG, trans math32.Vec2, scale math32.Vec2, rot float32, pt math32.Vec2) {
+func (g *Image) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) {
 	crot := g.Paint.Transform.ExtractRot()
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
@@ -155,8 +155,8 @@ func (g *Image) ApplyDeltaTransform(sv *SVG, trans math32.Vec2, scale math32.Vec
 		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self
-		g.Pos = xf.MulVec2AsPointCenter(g.Pos, lpt)
-		g.Size = xf.MulVec2AsVec(g.Size)
+		g.Pos = xf.MulVector2AsPointCenter(g.Pos, lpt)
+		g.Size = xf.MulVector2AsVec(g.Size)
 	}
 }
 

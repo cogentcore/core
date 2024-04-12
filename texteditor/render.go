@@ -74,7 +74,7 @@ func (ed *Editor) TextStyleProperties() map[string]any {
 // CharStartPos returns the starting (top left) render coords for the given
 // position -- makes no attempt to rationalize that pos (i.e., if not in
 // visible range, position will be out of range too)
-func (ed *Editor) CharStartPos(pos lex.Pos) math32.Vec2 {
+func (ed *Editor) CharStartPos(pos lex.Pos) math32.Vector2 {
 	spos := ed.RenderStartPos()
 	spos.X += ed.LineNoOff
 	if pos.Ln >= len(ed.Offs) {
@@ -101,7 +101,7 @@ func (ed *Editor) CharStartPos(pos lex.Pos) math32.Vec2 {
 
 // CharStartPosVis returns the starting pos for given position
 // that is currently visible, based on bounding boxes.
-func (ed *Editor) CharStartPosVis(pos lex.Pos) math32.Vec2 {
+func (ed *Editor) CharStartPosVis(pos lex.Pos) math32.Vector2 {
 	spos := ed.CharStartPos(pos)
 	bb := ed.Geom.ContentBBox
 	bbmin := math32.V2FromPoint(bb.Min)
@@ -115,7 +115,7 @@ func (ed *Editor) CharStartPosVis(pos lex.Pos) math32.Vec2 {
 // CharEndPos returns the ending (bottom right) render coords for the given
 // position -- makes no attempt to rationalize that pos (i.e., if not in
 // visible range, position will be out of range too)
-func (ed *Editor) CharEndPos(pos lex.Pos) math32.Vec2 {
+func (ed *Editor) CharEndPos(pos lex.Pos) math32.Vector2 {
 	spos := ed.RenderStartPos()
 	pos.Ln = min(pos.Ln, ed.NLines-1)
 	if pos.Ln < 0 {
@@ -310,7 +310,7 @@ func (ed *Editor) RenderRegionToEnd(st lex.Pos, sty *styles.Style, bg image.Imag
 
 // RenderStartPos is absolute rendering start position from our content pos with scroll
 // This can be offscreen (left, up) based on scrolling.
-func (ed *Editor) RenderStartPos() math32.Vec2 {
+func (ed *Editor) RenderStartPos() math32.Vector2 {
 	pos := ed.Geom.Pos.Content.Add(ed.Geom.Scroll)
 	return pos
 }
@@ -466,7 +466,7 @@ func (ed *Editor) RenderLineNo(ln int, defFill bool) {
 		fst.Color = colors.C(hct.ContrastColor(uActClr, hct.ContrastAA))
 	}
 	ed.LineNoRender.SetString(lnstr, fst, &sty.UnitContext, &sty.Text, true, 0, 0)
-	pos := math32.Vec2{
+	pos := math32.Vector2{
 		X: float32(bb.Min.X), // + spc.Pos().X
 		Y: ed.CharEndPos(lex.Pos{Ln: ln}).Y - ed.FontDescent,
 	}

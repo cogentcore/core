@@ -41,13 +41,13 @@ type Span struct {
 	// position for start of text relative to an absolute coordinate that is provided at the time of rendering.
 	// This typically includes the baseline offset to align all rune rendering there.
 	// Individual rune RelPos are added to this plus the render-time offset to get the final position.
-	RelPos math32.Vec2
+	RelPos math32.Vector2
 
 	// rune position for further edge of last rune.
 	// For standard flat strings this is the overall length of the string.
 	// Used for size / layout computations: you do not add RelPos to this,
 	// as it is in same Text relative coordinates
-	LastPos math32.Vec2
+	LastPos math32.Vector2
 
 	// where relevant, this is the (default, dominant) text direction for the span
 	Dir styles.TextDirections
@@ -82,9 +82,9 @@ func (sr *Span) IsValid() error {
 // SizeHV computes the size of the text span from the first char to the last
 // position, which is valid for purely horizontal or vertical text lines --
 // either X or Y will be zero depending on orientation
-func (sr *Span) SizeHV() math32.Vec2 {
+func (sr *Span) SizeHV() math32.Vector2 {
 	if sr.IsValid() != nil {
-		return math32.Vec2{}
+		return math32.Vector2{}
 	}
 	sz := sr.Render[0].RelPos.Sub(sr.LastPos)
 	if sz.X < 0 {
@@ -114,7 +114,7 @@ func (sr *Span) SetBackground(bg image.Image) {
 // (adds Span RelPos and rune RelPos) -- this is typically the baseline
 // position where rendering will start, not the upper left corner. if index >
 // length, then uses LastPos
-func (sr *Span) RuneRelPos(idx int) math32.Vec2 {
+func (sr *Span) RuneRelPos(idx int) math32.Vector2 {
 	if idx >= len(sr.Render) {
 		return sr.LastPos
 	}
@@ -124,7 +124,7 @@ func (sr *Span) RuneRelPos(idx int) math32.Vec2 {
 // RuneEndPos returns the relative ending position of the given rune index
 // (adds Span RelPos and rune RelPos + rune Size.X for LR writing). If index >
 // length, then uses LastPos
-func (sr *Span) RuneEndPos(idx int) math32.Vec2 {
+func (sr *Span) RuneEndPos(idx int) math32.Vector2 {
 	if idx >= len(sr.Render) {
 		return sr.LastPos
 	}
@@ -675,7 +675,7 @@ func (sr *Span) LastFont() (face font.Face, color image.Image) {
 }
 
 // RenderBg renders the background behind chars
-func (sr *Span) RenderBg(pc *Context, tpos math32.Vec2) {
+func (sr *Span) RenderBg(pc *Context, tpos math32.Vector2) {
 	curFace := sr.Render[0].Face
 	didLast := false
 	// first := true
@@ -697,8 +697,8 @@ func (sr *Span) RenderBg(pc *Context, tpos math32.Vec2) {
 			scx = rr.ScaleX
 		}
 		tx := math32.Scale2D(scx, 1).Rotate(rr.RotRad)
-		ll := rp.Add(tx.MulVec2AsVec(math32.V2(0, dsc32)))
-		ur := ll.Add(tx.MulVec2AsVec(math32.V2(rr.Size.X, -rr.Size.Y)))
+		ll := rp.Add(tx.MulVector2AsVec(math32.V2(0, dsc32)))
+		ur := ll.Add(tx.MulVector2AsVec(math32.V2(rr.Size.X, -rr.Size.Y)))
 		if int(math32.Floor(ll.X)) > pc.Bounds.Max.X || int(math32.Floor(ur.Y)) > pc.Bounds.Max.Y ||
 			int(math32.Ceil(ur.X)) < pc.Bounds.Min.X || int(math32.Ceil(ll.Y)) < pc.Bounds.Min.Y {
 			if didLast {
@@ -709,10 +709,10 @@ func (sr *Span) RenderBg(pc *Context, tpos math32.Vec2) {
 		}
 		pc.FillStyle.Color = rr.Background
 		szt := math32.V2(rr.Size.X, -rr.Size.Y)
-		sp := rp.Add(tx.MulVec2AsVec(math32.V2(0, dsc32)))
-		ul := sp.Add(tx.MulVec2AsVec(math32.V2(0, szt.Y)))
-		lr := sp.Add(tx.MulVec2AsVec(math32.V2(szt.X, 0)))
-		pc.DrawPolygon([]math32.Vec2{sp, ul, ur, lr})
+		sp := rp.Add(tx.MulVector2AsVec(math32.V2(0, dsc32)))
+		ul := sp.Add(tx.MulVector2AsVec(math32.V2(0, szt.Y)))
+		lr := sp.Add(tx.MulVector2AsVec(math32.V2(szt.X, 0)))
+		pc.DrawPolygon([]math32.Vector2{sp, ul, ur, lr})
 		didLast = true
 	}
 	if didLast {
@@ -721,7 +721,7 @@ func (sr *Span) RenderBg(pc *Context, tpos math32.Vec2) {
 }
 
 // RenderUnderline renders the underline for span -- ensures continuity to do it all at once
-func (sr *Span) RenderUnderline(pc *Context, tpos math32.Vec2) {
+func (sr *Span) RenderUnderline(pc *Context, tpos math32.Vector2) {
 	curFace := sr.Render[0].Face
 	curColor := sr.Render[0].Color
 	didLast := false
@@ -749,8 +749,8 @@ func (sr *Span) RenderUnderline(pc *Context, tpos math32.Vec2) {
 			scx = rr.ScaleX
 		}
 		tx := math32.Scale2D(scx, 1).Rotate(rr.RotRad)
-		ll := rp.Add(tx.MulVec2AsVec(math32.V2(0, dsc32)))
-		ur := ll.Add(tx.MulVec2AsVec(math32.V2(rr.Size.X, -rr.Size.Y)))
+		ll := rp.Add(tx.MulVector2AsVec(math32.V2(0, dsc32)))
+		ur := ll.Add(tx.MulVector2AsVec(math32.V2(rr.Size.X, -rr.Size.Y)))
 		if int(math32.Floor(ll.X)) > pc.Bounds.Max.X || int(math32.Floor(ur.Y)) > pc.Bounds.Max.Y ||
 			int(math32.Ceil(ur.X)) < pc.Bounds.Min.X || int(math32.Ceil(ll.Y)) < pc.Bounds.Min.Y {
 			if didLast {
@@ -766,8 +766,8 @@ func (sr *Span) RenderUnderline(pc *Context, tpos math32.Vec2) {
 		if rr.Deco.HasFlag(styles.DecoDottedUnderline) {
 			pc.StrokeStyle.Dashes = []float32{2, 2}
 		}
-		sp := rp.Add(tx.MulVec2AsVec(math32.V2(0, 2*dw)))
-		ep := rp.Add(tx.MulVec2AsVec(math32.V2(rr.Size.X, 2*dw)))
+		sp := rp.Add(tx.MulVector2AsVec(math32.V2(0, 2*dw)))
+		ep := rp.Add(tx.MulVector2AsVec(math32.V2(rr.Size.X, 2*dw)))
 
 		if didLast {
 			pc.LineTo(sp.X, sp.Y)
@@ -785,7 +785,7 @@ func (sr *Span) RenderUnderline(pc *Context, tpos math32.Vec2) {
 }
 
 // RenderLine renders overline or line-through -- anything that is a function of ascent
-func (sr *Span) RenderLine(pc *Context, tpos math32.Vec2, deco styles.TextDecorations, ascPct float32) {
+func (sr *Span) RenderLine(pc *Context, tpos math32.Vector2, deco styles.TextDecorations, ascPct float32) {
 	curFace := sr.Render[0].Face
 	curColor := sr.Render[0].Color
 	didLast := false
@@ -811,8 +811,8 @@ func (sr *Span) RenderLine(pc *Context, tpos math32.Vec2, deco styles.TextDecora
 			scx = rr.ScaleX
 		}
 		tx := math32.Scale2D(scx, 1).Rotate(rr.RotRad)
-		ll := rp.Add(tx.MulVec2AsVec(math32.V2(0, dsc32)))
-		ur := ll.Add(tx.MulVec2AsVec(math32.V2(rr.Size.X, -rr.Size.Y)))
+		ll := rp.Add(tx.MulVector2AsVec(math32.V2(0, dsc32)))
+		ur := ll.Add(tx.MulVector2AsVec(math32.V2(rr.Size.X, -rr.Size.Y)))
 		if int(math32.Floor(ll.X)) > pc.Bounds.Max.X || int(math32.Floor(ur.Y)) > pc.Bounds.Max.Y ||
 			int(math32.Ceil(ur.X)) < pc.Bounds.Min.X || int(math32.Ceil(ll.Y)) < pc.Bounds.Min.Y {
 			if didLast {
@@ -829,8 +829,8 @@ func (sr *Span) RenderLine(pc *Context, tpos math32.Vec2, deco styles.TextDecora
 			pc.StrokeStyle.Color = curColor
 		}
 		yo := ascPct * asc32
-		sp := rp.Add(tx.MulVec2AsVec(math32.V2(0, -yo)))
-		ep := rp.Add(tx.MulVec2AsVec(math32.V2(rr.Size.X, -yo)))
+		sp := rp.Add(tx.MulVector2AsVec(math32.V2(0, -yo)))
+		ep := rp.Add(tx.MulVector2AsVec(math32.V2(rr.Size.X, -yo)))
 
 		if didLast {
 			pc.LineTo(sp.X, sp.Y)

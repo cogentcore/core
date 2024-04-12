@@ -67,7 +67,7 @@ func (g *Group) ApplyTransform(sv *SVG, xf math32.Mat2) {
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Group) ApplyDeltaTransform(sv *SVG, trans math32.Vec2, scale math32.Vec2, rot float32, pt math32.Vec2) {
+func (g *Group) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) {
 	xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // group does NOT include self
 	g.Paint.Transform.SetMulCenter(xf, lpt)
 	g.SetProperty("transform", g.Paint.Transform.String())

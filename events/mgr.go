@@ -133,7 +133,7 @@ func (em *Mgr) MouseMove(where image.Point) {
 }
 
 // Scroll creates and sends a scroll event with given values
-func (em *Mgr) Scroll(where image.Point, delta math32.Vec2) {
+func (em *Mgr) Scroll(where image.Point, delta math32.Vector2) {
 	ev := NewScroll(where, delta, em.Last.Mods)
 	ev.Init()
 	em.Deque.Send(ev)

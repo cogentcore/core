@@ -39,11 +39,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-// note: golang.org/x/image/math/f64 defines Vec2 as [2]float64
+// note: golang.org/x/image/math/f64 defines Vector2 as [2]float64
 // elabored then by https://godoc.org/github.com/go-gl/mathgl/mgl64
 // it is instead very convenient and clear to use .X .Y fields for 2D math
-// original gg package used Point2D but Vec2 is more general, e.g., for sizes etc
-// in go much better to use fewer types so only using Vec2
+// original gg package used Point2D but Vector2 is more general, e.g., for sizes etc
+// in go much better to use fewer types so only using Vector2
 
 type Mat2 struct {
 	XX, YX, XY, YY, X0, Y0 float32
@@ -126,24 +126,24 @@ func (a *Mat2) SetMul(b Mat2) {
 	*a = a.Mul(b)
 }
 
-// MulVec2AsVec multiplies the Vec2 as a vector without adding translations.
+// MulVector2AsVec multiplies the Vector2 as a vector without adding translations.
 // This is for directional vectors and not points.
-func (a Mat2) MulVec2AsVec(v Vec2) Vec2 {
+func (a Mat2) MulVector2AsVec(v Vector2) Vector2 {
 	tx := a.XX*v.X + a.XY*v.Y
 	ty := a.YX*v.X + a.YY*v.Y
 	return V2(tx, ty)
 }
 
-// MulVec2AsPoint multiplies the Vec2 as a point, including adding translations.
-func (a Mat2) MulVec2AsPoint(v Vec2) Vec2 {
+// MulVector2AsPoint multiplies the Vector2 as a point, including adding translations.
+func (a Mat2) MulVector2AsPoint(v Vector2) Vector2 {
 	tx := a.XX*v.X + a.XY*v.Y + a.X0
 	ty := a.YX*v.X + a.YY*v.Y + a.Y0
 	return V2(tx, ty)
 }
 
-// MulVec2AsPointCenter multiplies the Vec2 as a point relative to given center-point
+// MulVector2AsPointCenter multiplies the Vector2 as a point relative to given center-point
 // including adding translations.
-func (a Mat2) MulVec2AsPointCenter(v, ctr Vec2) Vec2 {
+func (a Mat2) MulVector2AsPointCenter(v, ctr Vector2) Vector2 {
 	rel := v.Sub(ctr)
 	tx := ctr.X + a.XX*rel.X + a.XY*rel.Y + a.X0
 	ty := ctr.Y + a.YX*rel.X + a.YY*rel.Y + a.Y0
@@ -152,7 +152,7 @@ func (a Mat2) MulVec2AsPointCenter(v, ctr Vec2) Vec2 {
 
 // MulCenter multiplies the Mat2, first subtracting given translation center point
 // from the translation components, and then adding it back in.
-func (a Mat2) MulCenter(b Mat2, ctr Vec2) Mat2 {
+func (a Mat2) MulCenter(b Mat2, ctr Vector2) Mat2 {
 	a.X0 -= ctr.X
 	a.Y0 -= ctr.Y
 	rv := a.Mul(b)
@@ -162,7 +162,7 @@ func (a Mat2) MulCenter(b Mat2, ctr Vec2) Mat2 {
 }
 
 // SetMulCenter sets the matrix to the result of [Mat2.MulCenter].
-func (a *Mat2) SetMulCenter(b Mat2, ctr Vec2) {
+func (a *Mat2) SetMulCenter(b Mat2, ctr Vector2) {
 	*a = a.MulCenter(b, ctr)
 }
 
@@ -203,8 +203,8 @@ func (a Mat2) ExtractRot() float32 {
 func (a Mat2) ExtractScale() (scx, scy float32) {
 	rot := a.ExtractRot()
 	tx := a.Rotate(-rot)
-	scxv := tx.MulVec2AsVec(V2(1, 0))
-	scyv := tx.MulVec2AsVec(V2(0, 1))
+	scxv := tx.MulVector2AsVec(V2(1, 0))
+	scyv := tx.MulVector2AsVec(V2(0, 1))
 	return scxv.X, scyv.Y
 }
 

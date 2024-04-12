@@ -49,8 +49,8 @@ func (a *ArrayF32) Append(v ...float32) {
 	*a = append(*a, v...)
 }
 
-// AppendVec2 appends any number of Vec2 to the array
-func (a *ArrayF32) AppendVec2(v ...Vec2) {
+// AppendVector2 appends any number of Vector2 to the array
+func (a *ArrayF32) AppendVector2(v ...Vector2) {
 	for i := 0; i < len(v); i++ {
 		*a = append(*a, v[i].X, v[i].Y)
 	}
@@ -86,9 +86,9 @@ func (a *ArrayF32) CopyFrom(src ArrayF32) {
 	CopyFloat32s((*[]float32)(a), src)
 }
 
-// GetVec2 stores in the specified Vec2 the
+// GetVector2 stores in the specified Vector2 the
 // values from the array starting at the specified pos.
-func (a ArrayF32) GetVec2(pos int, v *Vec2) {
+func (a ArrayF32) GetVector2(pos int, v *Vector2) {
 	v.X = a[pos]
 	v.Y = a[pos+1]
 }
@@ -139,9 +139,9 @@ func (a ArrayF32) Set(pos int, v ...float32) {
 	}
 }
 
-// SetVec2 sets the values of the array at the specified pos
-// from the XY values of the specified Vec2
-func (a ArrayF32) SetVec2(pos int, v Vec2) {
+// SetVector2 sets the values of the array at the specified pos
+// from the XY values of the specified Vector2
+func (a ArrayF32) SetVector2(pos int, v Vector2) {
 	a[pos] = v.X
 	a[pos+1] = v.Y
 }

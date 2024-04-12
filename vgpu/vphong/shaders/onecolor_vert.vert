@@ -16,13 +16,13 @@ layout(set = 0, binding = 0) uniform MtxsU {
 
 layout(location = 0) in vec3 VtxPos;
 layout(location = 1) in vec3 VtxNorm;
-// layout(location = 2) in vec2 VtxTex;
+// layout(location = 2) in vector2 VtxTex;
 // layout(location = 3) in vec4 VtxColor;
 
 layout(location = 0) out vec4 Pos;
 layout(location = 1) out vec3 Norm;
 layout(location = 2) out vec3 CamDir;
-// layout(location = 3) out vec2 TexCoord;
+// layout(location = 3) out vector2 TexCoord;
 
 void main() {
 	vec4 vPos = vec4(VtxPos, 1.0);

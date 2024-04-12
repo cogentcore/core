@@ -105,7 +105,7 @@ func main() {
 
 	posv := vset.Add("Pos", vgpu.Float32Vec3, nPts, vgpu.Vertex, vgpu.VertexShader)
 	clrv := vset.Add("Color", vgpu.Float32Vec3, nPts, vgpu.Vertex, vgpu.VertexShader)
-	txcv := vset.Add("TexCoord", vgpu.Float32Vec2, nPts, vgpu.Vertex, vgpu.VertexShader)
+	txcv := vset.Add("TexCoord", vgpu.Float32Vector2, nPts, vgpu.Vertex, vgpu.VertexShader)
 	// note: always put indexes last so there isn't a gap in the location indexes!
 	idxv := vset.Add("Index", vgpu.Uint16, nIndexes, vgpu.Index, vgpu.VertexShader)
 

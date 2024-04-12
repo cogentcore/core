@@ -90,7 +90,7 @@ func (wb *WidgetBase) ApplyStyleWidget() {
 		if wb.Styles.Display == styles.DisplayNone {
 			wb.SetState(true, states.Invisible)
 		}
-		SetUnitContext(&wb.Styles, wb.Scene, math32.Vec2{}, math32.Vec2{})
+		SetUnitContext(&wb.Styles, wb.Scene, math32.Vector2{}, math32.Vector2{})
 		wb.ApplyStyleParts()
 	}()
 
@@ -231,7 +231,7 @@ func (wb *WidgetBase) ApplyStyle() {
 // element (from bbox) and then caches everything out in terms of raw pixel
 // dots for rendering.
 // Zero values for element and parent size are ignored.
-func SetUnitContext(st *styles.Style, sc *Scene, el, parent math32.Vec2) {
+func SetUnitContext(st *styles.Style, sc *Scene, el, parent math32.Vector2) {
 	rebuild := false
 	var rc *RenderContext
 	sz := image.Point{1920, 1280}

@@ -46,7 +46,7 @@ Package cli generates powerful CLIs from Go struct types and functions. See pack
 The Cogent Core GUI processes `default:"value"` struct tags to highlight values that are not at their defaults.  cli uses these same tags to auto-initialize fields as well, ensuring that the tag and the actual initial value are the same.  The value for strings or numbers is just the string representation.  For more complex types, here ar some examples:
 
 * `struct`: specify using standard Go literal expression as a string, with single-quotes `'` used instead of double-quotes around strings, such as t he name of the fields:
-    + `evec.Vec2i`: `default:"{'X':10,'Y':10}"`
+    + `evec.Vector2i`: `default:"{'X':10,'Y':10}"`
 
 * `slice`: comma-separated list of values in square braces -- use `'` for internal string boundaries:
     + `[]float32`: `default:"[1, 2.14, 3.14]"`

@@ -318,12 +318,12 @@ func (sf SideFloats) Round() SideFloats {
 }
 
 // Pos returns the position offset casued by the side/corner values (Left, Top)
-func (sf SideFloats) Pos() math32.Vec2 {
+func (sf SideFloats) Pos() math32.Vector2 {
 	return math32.V2(sf.Left, sf.Top)
 }
 
 // Size returns the toal size the side/corner values take up (Left + Right, Top + Bottom)
-func (sf SideFloats) Size() math32.Vec2 {
+func (sf SideFloats) Size() math32.Vector2 {
 	return math32.V2(sf.Left+sf.Right, sf.Top+sf.Bottom)
 }
 

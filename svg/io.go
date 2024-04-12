@@ -317,7 +317,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 								log.Println(err)
 								return err
 							}
-							pvec := make([]math32.Vec2, sz/2)
+							pvec := make([]math32.Vector2, sz/2)
 							for ci := 0; ci < sz/2; ci++ {
 								pvec[ci].Set(pts[ci*2], pts[ci*2+1])
 							}
@@ -346,7 +346,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 								log.Println(err)
 								return err
 							}
-							pvec := make([]math32.Vec2, sz/2)
+							pvec := make([]math32.Vector2, sz/2)
 							for ci := 0; ci < sz/2; ci++ {
 								pvec[ci].Set(pts[ci*2], pts[ci*2+1])
 							}
@@ -1020,15 +1020,15 @@ func SVGNodeXMLGrad(nd *Gradient, name string, enc *XMLEncoder) {
 	} else {
 		r := gr.(*gradient.Radial)
 		// must be non-zero to add
-		if r.Center != (math32.Vec2{}) {
+		if r.Center != (math32.Vector2{}) {
 			XMLAddAttr(&me.Attr, "cx", fmt.Sprintf("%g", r.Center.X))
 			XMLAddAttr(&me.Attr, "cy", fmt.Sprintf("%g", r.Center.Y))
 		}
-		if r.Focal != (math32.Vec2{}) {
+		if r.Focal != (math32.Vector2{}) {
 			XMLAddAttr(&me.Attr, "fx", fmt.Sprintf("%g", r.Focal.X))
 			XMLAddAttr(&me.Attr, "fy", fmt.Sprintf("%g", r.Focal.Y))
 		}
-		if r.Radius != (math32.Vec2{}) {
+		if r.Radius != (math32.Vector2{}) {
 			XMLAddAttr(&me.Attr, "r", fmt.Sprintf("%g", max(r.Radius.X, r.Radius.Y)))
 		}
 	}

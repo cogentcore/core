@@ -75,7 +75,7 @@ type Slider struct { //core:embedder
 	// Size of the thumb as a proportion of the slider thickness, which is
 	// Content size (inside the padding).  This is for actual X,Y dimensions,
 	// so must be sensitive to Dim dimension alignment.
-	ThumbSize math32.Vec2
+	ThumbSize math32.Vector2
 
 	// TrackSize is the proportion of slider thickness for the visible track
 	// for the Slider type.  It is often thinner than the thumb, achieved by
@@ -256,7 +256,7 @@ func (sr *Slider) SliderThickness() float32 {
 
 // ThumbSizeDots returns the thumb size in dots, based on ThumbSize
 // and the content thickness
-func (sr *Slider) ThumbSizeDots() math32.Vec2 {
+func (sr *Slider) ThumbSizeDots() math32.Vector2 {
 	return sr.ThumbSize.MulScalar(sr.SliderThickness())
 }
 

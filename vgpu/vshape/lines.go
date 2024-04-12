@@ -23,7 +23,7 @@ type Lines struct {
 	Points []math32.Vec3
 
 	// line width, Y = height perpendicular to line direction, and X = depth
-	Width math32.Vec2
+	Width math32.Vector2
 
 	// optional colors for each point -- actual color interpolates between
 	Colors []color.Color
@@ -33,7 +33,7 @@ type Lines struct {
 }
 
 // NewLines returns a Lines shape with given size
-func NewLines(points []math32.Vec3, width math32.Vec2, closed bool) *Lines {
+func NewLines(points []math32.Vec3, width math32.Vector2, closed bool) *Lines {
 	ln := &Lines{}
 	ln.Defaults()
 	ln.Points = points
@@ -77,7 +77,7 @@ func LinesN(npoints int, closed bool) (nVtx, nIndex int) {
 // and width parameters.  The Mesh must be drawn in the XY plane (i.e., use Z = 0
 // or a constant unless specifically relevant to have full 3D variation).
 // Rotate to put into other planes.
-func SetLines(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, points []math32.Vec3, width math32.Vec2, closed bool, pos math32.Vec3) math32.Box3 {
+func SetLines(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, points []math32.Vec3, width math32.Vector2, closed bool, pos math32.Vec3) math32.Box3 {
 	np := len(points)
 	if np < 2 {
 		log.Printf("vshape.SetLines: need 2 or more Points\n")
@@ -254,7 +254,7 @@ func SetLines(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, v
 }
 
 // MiterPts returns the miter points
-func MiterPts(ax, ay, bx, by, cx, cy, w2 float32) math32.Vec2 {
+func MiterPts(ax, ay, bx, by, cx, cy, w2 float32) math32.Vector2 {
 	ppd := math32.V2(ax-bx, ay-by)
 	ppu := ppd.Normal()
 

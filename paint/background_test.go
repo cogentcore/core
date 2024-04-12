@@ -39,7 +39,7 @@ func TestBackgroundImage(t *testing.T) {
 
 		sz := st.BoxSpace().Size().Add(math32.V2(200, 100))
 
-		test := func(of styles.ObjectFits, pos math32.Vec2) {
+		test := func(of styles.ObjectFits, pos math32.Vector2) {
 			st.ObjectFit = of
 			pc.DrawStandardBox(st, pos, sz, pabg)
 		}
@@ -61,7 +61,7 @@ func TestObjectFit(t *testing.T) {
 		st.ToDots()
 		box := math32.V2(200, 100)
 
-		test := func(of styles.ObjectFits, pos math32.Vec2) {
+		test := func(of styles.ObjectFits, pos math32.Vector2) {
 			st.ObjectFit = of
 			fitimg := st.ResizeImage(img, box)
 			pc.DrawImage(fitimg, pos.X, pos.Y)

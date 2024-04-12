@@ -117,7 +117,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 	},
 	"widgets/canvases-0": func(parent core.Widget) {
 		core.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
-			pc.FillBox(math32.Vec2{}, math32.V2(1, 1), colors.C(colors.Scheme.Primary.Base))
+			pc.FillBox(math32.Vector2{}, math32.V2(1, 1), colors.C(colors.Scheme.Primary.Base))
 		})
 	},
 	"widgets/canvases-1": func(parent core.Widget) {
@@ -184,7 +184,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 	},
 	"widgets/canvases-9": func(parent core.Widget) {
 		c := core.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
-			pc.FillBox(math32.Vec2{}, math32.V2(1, 1), colors.C(colors.Scheme.Warn.Base))
+			pc.FillBox(math32.Vector2{}, math32.V2(1, 1), colors.C(colors.Scheme.Warn.Base))
 		})
 		c.Style(func(s *styles.Style) {
 			s.Min.Set(units.Dp(128))

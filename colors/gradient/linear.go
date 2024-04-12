@@ -19,16 +19,16 @@ type Linear struct { //types:add -setters
 	Base
 
 	// the starting point of the gradient (x1 and y1 in SVG)
-	Start math32.Vec2
+	Start math32.Vector2
 
 	// the ending point of the gradient (x2 and y2 in SVG)
-	End math32.Vec2
+	End math32.Vector2
 
 	// current render version -- transformed by object matrix
-	rStart math32.Vec2 `set:"-"`
+	rStart math32.Vector2 `set:"-"`
 
 	// current render version -- transformed by object matrix
-	rEnd math32.Vec2 `set:"-"`
+	rEnd math32.Vector2 `set:"-"`
 }
 
 var _ Gradient = &Linear{}
@@ -64,10 +64,10 @@ func (l *Linear) Update(opacity float32, box math32.Box2, objTransform math32.Ma
 		l.rStart = l.Box.Min.Add(sz.Mul(l.Start))
 		l.rEnd = l.Box.Min.Add(sz.Mul(l.End))
 	} else {
-		l.rStart = l.Transform.MulVec2AsPoint(l.Start)
-		l.rEnd = l.Transform.MulVec2AsPoint(l.End)
-		l.rStart = objTransform.MulVec2AsPoint(l.rStart)
-		l.rEnd = objTransform.MulVec2AsPoint(l.rEnd)
+		l.rStart = l.Transform.MulVector2AsPoint(l.Start)
+		l.rEnd = l.Transform.MulVector2AsPoint(l.End)
+		l.rStart = objTransform.MulVector2AsPoint(l.rStart)
+		l.rEnd = objTransform.MulVector2AsPoint(l.rEnd)
 	}
 }
 
@@ -85,7 +85,7 @@ func (l *Linear) At(x, y int) color.Color {
 
 	pt := math32.V2(float32(x)+0.5, float32(y)+0.5)
 	if l.Units == ObjectBoundingBox {
-		pt = l.boxTransform.MulVec2AsPoint(pt)
+		pt = l.boxTransform.MulVector2AsPoint(pt)
 	}
 	df := pt.Sub(l.rStart)
 	pos := (d.X*df.X + d.Y*df.Y) / dd

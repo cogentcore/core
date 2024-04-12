@@ -40,7 +40,7 @@ type TextLink struct {
 }
 
 // Bounds returns the bounds of the link
-func (tl *TextLink) Bounds(tr *Text, pos math32.Vec2) image.Rectangle {
+func (tl *TextLink) Bounds(tr *Text, pos math32.Vector2) image.Rectangle {
 	stsp := &tr.Spans[tl.StartSpan]
 	tpos := pos.Add(stsp.RelPos)
 	sr := &(stsp.Render[tl.StartIndex])

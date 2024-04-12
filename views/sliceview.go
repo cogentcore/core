@@ -2091,7 +2091,7 @@ func (sg *SliceViewGrid) OnInit() {
 	})
 }
 
-func (sg *SliceViewGrid) SizeFromChildren(iter int, pass core.LayoutPasses) math32.Vec2 {
+func (sg *SliceViewGrid) SizeFromChildren(iter int, pass core.LayoutPasses) math32.Vector2 {
 	csz := sg.Frame.SizeFromChildren(iter, pass)
 	rht, err := sg.LayImpl.RowHeight(0, 0)
 	if err != nil {
@@ -2310,7 +2310,7 @@ func (sg *SliceViewGrid) IndexFromPixel(pt image.Point) (row, col int, isValid b
 	isValid = true
 	rows := sg.LayImpl.Shape.Y
 	cols := sg.LayImpl.Shape.X
-	st := math32.Vec2{}
+	st := math32.Vector2{}
 	got := false
 	for r := 0; r < rows; r++ {
 		ht, _ := sg.LayImpl.RowHeight(r, 0)

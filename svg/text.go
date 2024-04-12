@@ -19,7 +19,7 @@ type Text struct {
 	NodeBase
 
 	// position of the left, baseline of the text
-	Pos math32.Vec2 `xml:"{x,y}"`
+	Pos math32.Vector2 `xml:"{x,y}"`
 
 	// width of text to render if using word-wrapping
 	Width float32 `xml:"width"`
@@ -52,7 +52,7 @@ type Text struct {
 	AdjustGlyphs bool
 
 	// last text render position -- lower-left baseline of start
-	LastPos math32.Vec2 `xml:"-" json:"-" copier:"-"`
+	LastPos math32.Vector2 `xml:"-" json:"-" copier:"-"`
 
 	// last actual bounding box in display units (dots)
 	LastBBox math32.Box2 `xml:"-" json:"-" copier:"-"`
@@ -72,15 +72,15 @@ func (g *Text) IsParText() bool {
 	return g.NumChildren() > 0 && g.Text == ""
 }
 
-func (g *Text) SetNodePos(pos math32.Vec2) {
+func (g *Text) SetNodePos(pos math32.Vector2) {
 	g.Pos = pos
 	for _, kii := range g.Kids {
 		kt := kii.(*Text)
-		kt.Pos = g.Paint.Transform.MulVec2AsPoint(pos)
+		kt.Pos = g.Paint.Transform.MulVector2AsPoint(pos)
 	}
 }
 
-func (g *Text) SetNodeSize(sz math32.Vec2) {
+func (g *Text) SetNodeSize(sz math32.Vector2) {
 	g.Width = sz.X
 	scx, _ := g.Paint.Transform.ExtractScale()
 	for _, kii := range g.Kids {
@@ -150,7 +150,7 @@ func (g *Text) TextBBox() math32.Box2 {
 	// todo: TextLength, AdjustGlyphs -- also svg2 at least supports word wrapping!
 
 	// accumulate final bbox
-	sz := math32.Vec2{}
+	sz := math32.Vector2{}
 	maxh := float32(0)
 	for i := range sr.Render {
 		mxp := sr.Render[i].RelPos.Add(sr.Render[i].Size)
@@ -168,7 +168,7 @@ func (g *Text) TextBBox() math32.Box2 {
 func (g *Text) RenderText(sv *SVG) {
 	pc := &paint.Context{&sv.RenderState, &g.Paint}
 	orgsz := pc.FontStyle.Size
-	pos := pc.CurrentTransform.MulVec2AsPoint(math32.V2(g.Pos.X, g.Pos.Y))
+	pos := pc.CurrentTransform.MulVector2AsPoint(math32.V2(g.Pos.X, g.Pos.Y))
 	rot := pc.CurrentTransform.ExtractRot()
 	scx, scy := pc.CurrentTransform.ExtractScale()
 	scalex := scx / scy
@@ -195,7 +195,7 @@ func (g *Text) RenderText(sv *SVG) {
 		pos.X -= g.TextRender.Size.X
 	}
 	for i := range sr.Render {
-		sr.Render[i].RelPos = pc.CurrentTransform.MulVec2AsVec(sr.Render[i].RelPos)
+		sr.Render[i].RelPos = pc.CurrentTransform.MulVector2AsVec(sr.Render[i].RelPos)
 		sr.Render[i].Size.Y *= scy
 		sr.Render[i].Size.X *= scx
 	}
@@ -204,21 +204,21 @@ func (g *Text) RenderText(sv *SVG) {
 		mx := min(len(g.CharPosX), len(sr.Render))
 		for i := 0; i < mx; i++ {
 			// todo: this may not be fully correct, given relativity constraints
-			cpx := pc.CurrentTransform.MulVec2AsVec(math32.V2(g.CharPosX[i], 0))
+			cpx := pc.CurrentTransform.MulVector2AsVec(math32.V2(g.CharPosX[i], 0))
 			sr.Render[i].RelPos.X = cpx.X
 		}
 	}
 	if len(g.CharPosY) > 0 {
 		mx := min(len(g.CharPosY), len(sr.Render))
 		for i := 0; i < mx; i++ {
-			cpy := pc.CurrentTransform.MulVec2AsPoint(math32.V2(g.CharPosY[i], 0))
+			cpy := pc.CurrentTransform.MulVector2AsPoint(math32.V2(g.CharPosY[i], 0))
 			sr.Render[i].RelPos.Y = cpy.Y
 		}
 	}
 	if len(g.CharPosDX) > 0 {
 		mx := min(len(g.CharPosDX), len(sr.Render))
 		for i := 0; i < mx; i++ {
-			dx := pc.CurrentTransform.MulVec2AsVec(math32.V2(g.CharPosDX[i], 0))
+			dx := pc.CurrentTransform.MulVector2AsVec(math32.V2(g.CharPosDX[i], 0))
 			if i > 0 {
 				sr.Render[i].RelPos.X = sr.Render[i-1].RelPos.X + dx.X
 			} else {
@@ -229,7 +229,7 @@ func (g *Text) RenderText(sv *SVG) {
 	if len(g.CharPosDY) > 0 {
 		mx := min(len(g.CharPosDY), len(sr.Render))
 		for i := 0; i < mx; i++ {
-			dy := pc.CurrentTransform.MulVec2AsVec(math32.V2(g.CharPosDY[i], 0))
+			dy := pc.CurrentTransform.MulVector2AsVec(math32.V2(g.CharPosDY[i], 0))
 			if i > 0 {
 				sr.Render[i].RelPos.Y = sr.Render[i-1].RelPos.Y + dy.Y
 			} else {
@@ -240,7 +240,7 @@ func (g *Text) RenderText(sv *SVG) {
 	// todo: TextLength, AdjustGlyphs -- also svg2 at least supports word wrapping!
 
 	// accumulate final bbox
-	sz := math32.Vec2{}
+	sz := math32.Vector2{}
 	maxh := float32(0)
 	for i := range sr.Render {
 		mxp := sr.Render[i].RelPos.Add(sr.Render[i].Size)
@@ -300,7 +300,7 @@ func (g *Text) ApplyTransform(sv *SVG, xf math32.Mat2) {
 				kt.ApplyTransform(sv, xf)
 			}
 		} else {
-			g.Pos = xf.MulVec2AsPoint(g.Pos)
+			g.Pos = xf.MulVector2AsPoint(g.Pos)
 			scx, _ := xf.ExtractScale()
 			g.Width *= scx
 			g.GradientApplyTransform(sv, xf)
@@ -313,7 +313,7 @@ func (g *Text) ApplyTransform(sv *SVG, xf math32.Mat2) {
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Text) ApplyDeltaTransform(sv *SVG, trans math32.Vec2, scale math32.Vec2, rot float32, pt math32.Vec2) {
+func (g *Text) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) {
 	crot := g.Paint.Transform.ExtractRot()
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
@@ -330,17 +330,17 @@ func (g *Text) ApplyDeltaTransform(sv *SVG, trans math32.Vec2, scale math32.Vec2
 			g.Paint.Transform.SetMulCenter(xf, lpt)
 			g.SetProperty("transform", g.Paint.Transform.String())
 
-			g.Pos = xft.MulVec2AsPointCenter(g.Pos, lptt)
+			g.Pos = xft.MulVector2AsPointCenter(g.Pos, lptt)
 			scx, _ := xft.ExtractScale()
 			g.Width *= scx
 			for _, kii := range g.Kids {
 				kt := kii.(*Text)
-				kt.Pos = xft.MulVec2AsPointCenter(kt.Pos, lptt)
+				kt.Pos = xft.MulVector2AsPointCenter(kt.Pos, lptt)
 				kt.Width *= scx
 			}
 		} else {
 			xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self when not a parent
-			g.Pos = xf.MulVec2AsPointCenter(g.Pos, lpt)
+			g.Pos = xf.MulVector2AsPointCenter(g.Pos, lpt)
 			scx, _ := xf.ExtractScale()
 			g.Width *= scx
 		}

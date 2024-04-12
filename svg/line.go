@@ -13,10 +13,10 @@ type Line struct {
 	NodeBase
 
 	// position of the start of the line
-	Start math32.Vec2 `xml:"{x1,y1}"`
+	Start math32.Vector2 `xml:"{x1,y1}"`
 
 	// position of the end of the line
-	End math32.Vec2 `xml:"{x2,y2}"`
+	End math32.Vector2 `xml:"{x2,y2}"`
 }
 
 func (g *Line) SVGName() string { return "line" }
@@ -25,11 +25,11 @@ func (g *Line) OnInit() {
 	g.End.Set(1, 1)
 }
 
-func (g *Line) SetPos(pos math32.Vec2) {
+func (g *Line) SetPos(pos math32.Vector2) {
 	g.Start = pos
 }
 
-func (g *Line) SetSize(sz math32.Vec2) {
+func (g *Line) SetSize(sz math32.Vector2) {
 	g.End = g.Start.Add(sz)
 }
 
@@ -73,8 +73,8 @@ func (g *Line) ApplyTransform(sv *SVG, xf math32.Mat2) {
 		g.Paint.Transform.SetMul(xf)
 		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
-		g.Start = xf.MulVec2AsPoint(g.Start)
-		g.End = xf.MulVec2AsPoint(g.End)
+		g.Start = xf.MulVector2AsPoint(g.Start)
+		g.End = xf.MulVector2AsPoint(g.End)
 		g.GradientApplyTransform(sv, xf)
 	}
 }
@@ -84,7 +84,7 @@ func (g *Line) ApplyTransform(sv *SVG, xf math32.Mat2) {
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Line) ApplyDeltaTransform(sv *SVG, trans math32.Vec2, scale math32.Vec2, rot float32, pt math32.Vec2) {
+func (g *Line) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) {
 	crot := g.Paint.Transform.ExtractRot()
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
@@ -92,8 +92,8 @@ func (g *Line) ApplyDeltaTransform(sv *SVG, trans math32.Vec2, scale math32.Vec2
 		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self
-		g.Start = xf.MulVec2AsPointCenter(g.Start, lpt)
-		g.End = xf.MulVec2AsPointCenter(g.End, lpt)
+		g.Start = xf.MulVector2AsPointCenter(g.Start, lpt)
+		g.End = xf.MulVector2AsPointCenter(g.End, lpt)
 		g.GradientApplyTransformPt(sv, xf, lpt)
 	}
 }

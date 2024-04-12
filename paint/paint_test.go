@@ -91,7 +91,7 @@ func TestRender(t *testing.T) {
 func TestPaintPath(t *testing.T) {
 	test := func(nm string, f func(pc *Context)) {
 		RunTest(t, nm, 300, 300, func(pc *Context) {
-			pc.FillBox(math32.Vec2{}, math32.V2(300, 300), colors.C(colors.White))
+			pc.FillBox(math32.Vector2{}, math32.V2(300, 300), colors.C(colors.White))
 			f(pc)
 			pc.StrokeStyle.Color = colors.C(colors.Blue)
 			pc.FillStyle.Color = colors.C(colors.Yellow)

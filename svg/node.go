@@ -47,10 +47,10 @@ type Node interface {
 	NodeBBox(sv *SVG) image.Rectangle
 
 	// SetNodePos sets the upper left effective position of this element, in local dimensions
-	SetNodePos(pos math32.Vec2)
+	SetNodePos(pos math32.Vector2)
 
 	// SetNodeSize sets the overall effective size of this element, in local dimensions
-	SetNodeSize(sz math32.Vec2)
+	SetNodeSize(sz math32.Vector2)
 
 	// ApplyTransform applies the given 2D transform to the geometry of this node
 	// this just does a direct transform multiplication on coordinates.
@@ -61,7 +61,7 @@ type Node interface {
 	// so must be transformed into local coords first.
 	// Point is upper left corner of selection box that anchors the translation and scaling,
 	// and for rotation it is the center point around which to rotate
-	ApplyDeltaTransform(sv *SVG, trans math32.Vec2, scale math32.Vec2, rot float32, pt math32.Vec2)
+	ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2)
 
 	// WriteGeom writes the geometry of the node to a slice of floating point numbers
 	// the length and ordering of which is specific to each node type.
@@ -124,10 +124,10 @@ func (g *NodeBase) EnforceSVGName() bool {
 	return true
 }
 
-func (g *NodeBase) SetPos(pos math32.Vec2) {
+func (g *NodeBase) SetPos(pos math32.Vector2) {
 }
 
-func (g *NodeBase) SetSize(sz math32.Vec2) {
+func (g *NodeBase) SetSize(sz math32.Vector2) {
 }
 
 func (g *NodeBase) LocalBBox() math32.Box2 {
@@ -190,11 +190,11 @@ func (g *NodeBase) ApplyTransform(sv *SVG, xf math32.Mat2) {
 // and the transformed version of the reference point.  If self is true, then
 // include the current node self transform, otherwise don't.  Groups do not
 // but regular rendering nodes do.
-func (g *NodeBase) DeltaTransform(trans math32.Vec2, scale math32.Vec2, rot float32, pt math32.Vec2, self bool) (math32.Mat2, math32.Vec2) {
+func (g *NodeBase) DeltaTransform(trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2, self bool) (math32.Mat2, math32.Vector2) {
 	mxi := g.ParTransform(self)
 	mxi = mxi.Inverse()
-	lpt := mxi.MulVec2AsPoint(pt)
-	ldel := mxi.MulVec2AsVec(trans)
+	lpt := mxi.MulVector2AsPoint(pt)
+	ldel := mxi.MulVector2AsVec(trans)
 	xf := math32.Scale2D(scale.X, scale.Y).Rotate(rot)
 	xf.X0 = ldel.X
 	xf.Y0 = ldel.Y
@@ -206,7 +206,7 @@ func (g *NodeBase) DeltaTransform(trans math32.Vec2, scale math32.Vec2, rot floa
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *NodeBase) ApplyDeltaTransform(sv *SVG, trans math32.Vec2, scale math32.Vec2, rot float32, pt math32.Vec2) {
+func (g *NodeBase) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) {
 }
 
 // SetFloat32SliceLen is a utility function to set given slice of float32 values
@@ -423,11 +423,11 @@ func (g *NodeBase) NodeBBox(sv *SVG) image.Rectangle {
 	return rs.LastRenderBBox
 }
 
-func (g *NodeBase) SetNodePos(pos math32.Vec2) {
+func (g *NodeBase) SetNodePos(pos math32.Vector2) {
 	// no-op by default
 }
 
-func (g *NodeBase) SetNodeSize(sz math32.Vec2) {
+func (g *NodeBase) SetNodeSize(sz math32.Vector2) {
 	// no-op by default
 }
 

@@ -59,7 +59,7 @@ func TestActualBackgroundColor(t *testing.T) {
 		a := styles.NewStyle()
 		a.Background = colors.C(colors.Lightgray)
 		a.ComputeActualBackground(pabg)
-		pc.DrawStandardBox(a, math32.Vec2{}, math32.V2(300, 300), pabg)
+		pc.DrawStandardBox(a, math32.Vector2{}, math32.V2(300, 300), pabg)
 
 		b := styles.NewStyle()
 		b.Background = colors.C(colors.Red)

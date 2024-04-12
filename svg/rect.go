@@ -15,13 +15,13 @@ type Rect struct {
 	NodeBase
 
 	// position of the top-left of the rectangle
-	Pos math32.Vec2 `xml:"{x,y}"`
+	Pos math32.Vector2 `xml:"{x,y}"`
 
 	// size of the rectangle
-	Size math32.Vec2 `xml:"{width,height}"`
+	Size math32.Vector2 `xml:"{width,height}"`
 
 	// radii for curved corners, as a proportion of width, height
-	Radius math32.Vec2 `xml:"{rx,ry}"`
+	Radius math32.Vector2 `xml:"{rx,ry}"`
 }
 
 func (g *Rect) SVGName() string { return "rect" }
@@ -30,11 +30,11 @@ func (g *Rect) OnInit() {
 	g.Size.Set(1, 1)
 }
 
-func (g *Rect) SetNodePos(pos math32.Vec2) {
+func (g *Rect) SetNodePos(pos math32.Vector2) {
 	g.Pos = pos
 }
 
-func (g *Rect) SetNodeSize(sz math32.Vec2) {
+func (g *Rect) SetNodeSize(sz math32.Vector2) {
 	g.Size = sz
 }
 
@@ -78,8 +78,8 @@ func (g *Rect) ApplyTransform(sv *SVG, xf math32.Mat2) {
 		g.Paint.Transform.SetMul(xf)
 		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
-		g.Pos = xf.MulVec2AsPoint(g.Pos)
-		g.Size = xf.MulVec2AsVec(g.Size)
+		g.Pos = xf.MulVector2AsPoint(g.Pos)
+		g.Size = xf.MulVector2AsVec(g.Size)
 		g.GradientApplyTransform(sv, xf)
 	}
 }
@@ -89,7 +89,7 @@ func (g *Rect) ApplyTransform(sv *SVG, xf math32.Mat2) {
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Rect) ApplyDeltaTransform(sv *SVG, trans math32.Vec2, scale math32.Vec2, rot float32, pt math32.Vec2) {
+func (g *Rect) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) {
 	crot := g.Paint.Transform.ExtractRot()
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
@@ -97,8 +97,8 @@ func (g *Rect) ApplyDeltaTransform(sv *SVG, trans math32.Vec2, scale math32.Vec2
 		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self
-		g.Pos = xf.MulVec2AsPointCenter(g.Pos, lpt)
-		g.Size = xf.MulVec2AsVec(g.Size)
+		g.Pos = xf.MulVector2AsPointCenter(g.Pos, lpt)
+		g.Size = xf.MulVector2AsVec(g.Size)
 		g.GradientApplyTransformPt(sv, xf, lpt)
 	}
 }

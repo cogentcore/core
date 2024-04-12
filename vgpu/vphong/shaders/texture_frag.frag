@@ -20,13 +20,13 @@ layout(set = 3, binding = 0) uniform sampler2DArray TexSampler[];
 layout(location = 0) in vec4 Pos;
 layout(location = 1) in vec3 Norm;
 layout(location = 2) in vec3 CamDir;
-layout(location = 3) in vec2 TexCoord;
+layout(location = 3) in vector2 TexCoord;
 
 layout(location = 0) out vec4 outColor;
 
 #include "phong_frag.frag"
 
-void TexWin(vec2 pct, out vec2 tc) {
+void TexWin(vector2 pct, out vector2 tc) {
 	tc = mod(pct * (TexCoord * TexRepeatOff.xy + TexRepeatOff.zw), pct);
 }
 
@@ -34,8 +34,8 @@ void main() {
 	int TexIndexP = int(ShinyBright.w);
 	int TexIndex = TexIndexP / 1024;
 	int TexLay = TexIndexP % 1024;
-	vec2 TexPct = vec2(ModelMtx[3][3], Emissive.a);
-	vec2 tc;
+	vector2 TexPct = vector2(ModelMtx[3][3], Emissive.a);
+	vector2 tc;
 	TexWin(TexPct, tc);
 	vec4 TColor = texture(TexSampler[TexIndex], vec3(tc, TexLay));
 	float opacity = TColor.a;

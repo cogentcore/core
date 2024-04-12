@@ -197,7 +197,7 @@ func (s *Shadow) ToDots(uc *units.Context) {
 // BasePos returns the position at which the base box shadow
 // (the actual solid, unblurred box part) should be rendered
 // if the shadow is on an element with the given starting position.
-func (s *Shadow) BasePos(startPos math32.Vec2) math32.Vec2 {
+func (s *Shadow) BasePos(startPos math32.Vector2) math32.Vector2 {
 	// Offset directly affects position.
 	// We need to subtract spread
 	// to compensate for size changes and stay centered.
@@ -207,7 +207,7 @@ func (s *Shadow) BasePos(startPos math32.Vec2) math32.Vec2 {
 // BaseSize returns the total size the base box shadow
 // (the actual solid, unblurred part) should be if
 // the shadow is on an element with the given starting size.
-func (s *Shadow) BaseSize(startSize math32.Vec2) math32.Vec2 {
+func (s *Shadow) BaseSize(startSize math32.Vector2) math32.Vector2 {
 	// Spread goes on all sides, so need to count twice per dimension.
 	return startSize.AddScalar(2 * s.Spread.Dots)
 }
@@ -215,7 +215,7 @@ func (s *Shadow) BaseSize(startSize math32.Vec2) math32.Vec2 {
 // Pos returns the position at which the blurred box shadow
 // should start if the shadow is on an element
 // with the given starting position.
-func (s *Shadow) Pos(startPos math32.Vec2) math32.Vec2 {
+func (s *Shadow) Pos(startPos math32.Vector2) math32.Vector2 {
 	// We need to subtract half of blur
 	// to compensate for size changes and stay centered.
 	return s.BasePos(startPos).SubScalar(s.Blur.Dots / 2)
@@ -223,7 +223,7 @@ func (s *Shadow) Pos(startPos math32.Vec2) math32.Vec2 {
 
 // Size returns the total size occupied by the blurred box shadow
 // if the shadow is on an element with the given starting size.
-func (s *Shadow) Size(startSize math32.Vec2) math32.Vec2 {
+func (s *Shadow) Size(startSize math32.Vector2) math32.Vector2 {
 	// Blur goes on all sides, but it is rendered as half of actual
 	// because CSS does the same, so we only count it once.
 	return s.BaseSize(startSize).AddScalar(s.Blur.Dots)

@@ -554,7 +554,7 @@ type testStruct struct { //types:add
 	// a value
 	Value float32
 
-	Vec math32.Vec2
+	Vec math32.Vector2
 
 	Things []tableStruct
 
@@ -709,7 +709,7 @@ func makeStyles(ts *core.Tabs) {
 		fr.Update()
 	})
 
-	frameSizes := []math32.Vec2{
+	frameSizes := []math32.Vector2{
 		{20, 100},
 		{80, 20},
 		{60, 80},

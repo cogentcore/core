@@ -764,7 +764,7 @@ func (t *Slider) SetIcon(v icons.Icon) *Slider { t.Icon = v; return t }
 // Size of the thumb as a proportion of the slider thickness, which is
 // Content size (inside the padding).  This is for actual X,Y dimensions,
 // so must be sensitive to Dim dimension alignment.
-func (t *Slider) SetThumbSize(v math32.Vec2) *Slider { t.ThumbSize = v; return t }
+func (t *Slider) SetThumbSize(v math32.Vector2) *Slider { t.ThumbSize = v; return t }
 
 // SetTrackSize sets the [Slider.TrackSize]:
 // TrackSize is the proportion of slider thickness for the visible track

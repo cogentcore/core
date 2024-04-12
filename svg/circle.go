@@ -13,7 +13,7 @@ type Circle struct {
 	NodeBase
 
 	// position of the center of the circle
-	Pos math32.Vec2 `xml:"{cx,cy}"`
+	Pos math32.Vector2 `xml:"{cx,cy}"`
 
 	// radius of the circle
 	Radius float32 `xml:"r"`
@@ -25,11 +25,11 @@ func (g *Circle) OnInit() {
 	g.Radius = 1
 }
 
-func (g *Circle) SetNodePos(pos math32.Vec2) {
+func (g *Circle) SetNodePos(pos math32.Vector2) {
 	g.Pos = pos.SubScalar(g.Radius)
 }
 
-func (g *Circle) SetNodeSize(sz math32.Vec2) {
+func (g *Circle) SetNodeSize(sz math32.Vector2) {
 	g.Radius = 0.25 * (sz.X + sz.Y)
 }
 
@@ -63,7 +63,7 @@ func (g *Circle) ApplyTransform(sv *SVG, xf math32.Mat2) {
 		g.Paint.Transform.SetMul(xf) // todo: could be backward
 		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
-		g.Pos = xf.MulVec2AsPoint(g.Pos)
+		g.Pos = xf.MulVector2AsPoint(g.Pos)
 		scx, scy := xf.ExtractScale()
 		g.Radius *= 0.5 * (scx + scy)
 		g.GradientApplyTransform(sv, xf)
@@ -75,7 +75,7 @@ func (g *Circle) ApplyTransform(sv *SVG, xf math32.Mat2) {
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Circle) ApplyDeltaTransform(sv *SVG, trans math32.Vec2, scale math32.Vec2, rot float32, pt math32.Vec2) {
+func (g *Circle) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) {
 	crot := g.Paint.Transform.ExtractRot()
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
@@ -83,7 +83,7 @@ func (g *Circle) ApplyDeltaTransform(sv *SVG, trans math32.Vec2, scale math32.Ve
 		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self
-		g.Pos = xf.MulVec2AsPointCenter(g.Pos, lpt)
+		g.Pos = xf.MulVector2AsPointCenter(g.Pos, lpt)
 		scx, scy := xf.ExtractScale()
 		g.Radius *= 0.5 * (scx + scy)
 		g.GradientApplyTransformPt(sv, xf, lpt)

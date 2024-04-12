@@ -33,10 +33,10 @@ type State struct {
 	ImgSpanner *scan.ImgSpanner
 
 	// starting point, for close path
-	Start math32.Vec2
+	Start math32.Vector2
 
 	// current point
-	Current math32.Vec2
+	Current math32.Vector2
 
 	// is current point current?
 	HasCurrent bool
@@ -147,7 +147,7 @@ func (rs *State) PopClip() {
 	rs.ClipStack = rs.ClipStack[:sz-1]
 }
 
-// Size returns the size of the underlying image as a [math32.Vec2].
-func (rs *State) Size() math32.Vec2 {
+// Size returns the size of the underlying image as a [math32.Vector2].
+func (rs *State) Size() math32.Vector2 {
 	return math32.V2FromPoint(rs.Image.Rect.Size())
 }

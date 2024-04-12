@@ -151,7 +151,7 @@ type TreeView struct {
 
 	// size of just this node widget.
 	// our alloc includes all of our children, but we only draw us.
-	WidgetSize math32.Vec2 `copier:"-" json:"-" xml:"-" edit:"-"`
+	WidgetSize math32.Vector2 `copier:"-" json:"-" xml:"-" edit:"-"`
 
 	// The cached root of the view. It is automatically set and does not need to be
 	// set by the end user.

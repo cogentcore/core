@@ -40,7 +40,7 @@ type Text2D struct {
 	Styles styles.Style `set:"-" json:"-" xml:"-"`
 
 	// position offset of start of text rendering relative to upper-left corner
-	TxtPos math32.Vec2 `set:"-" xml:"-" json:"-"`
+	TxtPos math32.Vector2 `set:"-" xml:"-" json:"-"`
 
 	// render data for text label
 	TxtRender paint.Text `set:"-" xml:"-" json:"-"`
@@ -64,9 +64,9 @@ func (txt *Text2D) Defaults() {
 
 // TextSize returns the size of the text plane, applying all *local* scaling factors
 // if nothing rendered yet, returns false
-func (txt *Text2D) TextSize() (math32.Vec2, bool) {
+func (txt *Text2D) TextSize() (math32.Vector2, bool) {
 	txt.Pose.Defaults() // only if nil
-	sz := math32.Vec2{}
+	sz := math32.Vector2{}
 	tx := txt.Mat.TexPtr
 	if tx == nil {
 		return sz, false

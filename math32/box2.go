@@ -15,8 +15,8 @@ import "image"
 // Box2 represents a 2D bounding box defined by two points:
 // the point with minimum coordinates and the point with maximum coordinates.
 type Box2 struct {
-	Min Vec2
-	Max Vec2
+	Min Vector2
+	Max Vector2
 }
 
 // B2 returns a new [Box2] from the given minimum and maximum x and y coordinates.
@@ -51,7 +51,7 @@ func (b *Box2) IsEmpty() bool {
 
 // Set sets this bounding box minimum and maximum coordinates.
 // If either min or max are nil, then corresponding values are set to +/- Infinity.
-func (b *Box2) Set(min, max *Vec2) {
+func (b *Box2) Set(min, max *Vector2) {
 	if min != nil {
 		b.Min = *min
 	} else {
@@ -65,7 +65,7 @@ func (b *Box2) Set(min, max *Vec2) {
 }
 
 // SetFromPoints set this bounding box from the specified array of points.
-func (b *Box2) SetFromPoints(points []Vec2) {
+func (b *Box2) SetFromPoints(points []Vector2) {
 	b.SetEmpty()
 	for i := 0; i < len(points); i++ {
 		b.ExpandByPoint(points[i])
@@ -112,13 +112,13 @@ func (b Box2) Canon() Box2 {
 }
 
 // ExpandByPoint may expand this bounding box to include the specified point.
-func (b *Box2) ExpandByPoint(point Vec2) {
+func (b *Box2) ExpandByPoint(point Vector2) {
 	b.Min.SetMin(point)
 	b.Max.SetMax(point)
 }
 
 // ExpandByVector expands this bounding box by the specified vector.
-func (b *Box2) ExpandByVector(vector Vec2) {
+func (b *Box2) ExpandByVector(vector Vector2) {
 	b.Min.SetSub(vector)
 	b.Max.SetAdd(vector)
 }
@@ -138,11 +138,11 @@ func (b *Box2) ExpandByBox(box Box2) {
 // MulMat2 multiplies the specified matrix to the vertices of this bounding box
 // and computes the resulting spanning Box2 of the transformed points
 func (b Box2) MulMat2(m Mat2) Box2 {
-	var cs [4]Vec2
-	cs[0] = m.MulVec2AsPoint(V2(b.Min.X, b.Min.Y))
-	cs[1] = m.MulVec2AsPoint(V2(b.Min.X, b.Max.Y))
-	cs[2] = m.MulVec2AsPoint(V2(b.Max.X, b.Min.Y))
-	cs[3] = m.MulVec2AsPoint(V2(b.Max.X, b.Max.Y))
+	var cs [4]Vector2
+	cs[0] = m.MulVector2AsPoint(V2(b.Min.X, b.Min.Y))
+	cs[1] = m.MulVector2AsPoint(V2(b.Min.X, b.Max.Y))
+	cs[2] = m.MulVector2AsPoint(V2(b.Max.X, b.Min.Y))
+	cs[3] = m.MulVector2AsPoint(V2(b.Max.X, b.Max.Y))
 
 	nb := B2Empty()
 	for i := 0; i < 4; i++ {
@@ -153,25 +153,25 @@ func (b Box2) MulMat2(m Mat2) Box2 {
 
 // SetFromCenterAndSize set this bounding box from a center point and size.
 // Size is a vector from the minimum point to the maximum point.
-func (b *Box2) SetFromCenterAndSize(center, size Vec2) {
+func (b *Box2) SetFromCenterAndSize(center, size Vector2) {
 	halfSize := size.MulScalar(0.5)
 	b.Min = center.Sub(halfSize)
 	b.Max = center.Add(halfSize)
 }
 
 // Center calculates the center point of this bounding box.
-func (b Box2) Center() Vec2 {
+func (b Box2) Center() Vector2 {
 	return b.Min.Add(b.Max).MulScalar(0.5)
 }
 
 // Size calculates the size of this bounding box: the vector from
 // its minimum point to its maximum point.
-func (b Box2) Size() Vec2 {
+func (b Box2) Size() Vector2 {
 	return b.Max.Sub(b.Min)
 }
 
 // ContainsPoint returns if this bounding box contains the specified point.
-func (b Box2) ContainsPoint(point Vec2) bool {
+func (b Box2) ContainsPoint(point Vector2) bool {
 	if point.X < b.Min.X || point.X > b.Max.X ||
 		point.Y < b.Min.Y || point.Y > b.Max.Y {
 		return false
@@ -194,13 +194,13 @@ func (b Box2) IntersectsBox(other Box2) bool {
 }
 
 // ClampPoint calculates a new point which is the specified point clamped inside this box.
-func (b Box2) ClampPoint(point Vec2) Vec2 {
+func (b Box2) ClampPoint(point Vector2) Vector2 {
 	point.Clamp(b.Min, b.Max)
 	return point
 }
 
 // DistToPoint returns the distance from this box to the specified point.
-func (b Box2) DistToPoint(point Vec2) float32 {
+func (b Box2) DistToPoint(point Vector2) float32 {
 	clamp := b.ClampPoint(point)
 	return clamp.Sub(point).Length()
 }
@@ -220,7 +220,7 @@ func (b Box2) Union(other Box2) Box2 {
 }
 
 // Translate returns translated position of this box by offset.
-func (b Box2) Translate(offset Vec2) Box2 {
+func (b Box2) Translate(offset Vector2) Box2 {
 	nb := Box2{}
 	nb.Min = b.Min.Add(offset)
 	nb.Max = b.Max.Add(offset)

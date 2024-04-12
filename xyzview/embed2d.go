@@ -166,7 +166,7 @@ func (em *Embed2D) UpdateWorldMatrix(parWorld *math32.Mat4) {
 	em.SetFlag(int(WorldMatrixUpdated))
 }
 
-func (em *Embed2D) UpdateBBox2D(size math32.Vec2, sc *Scene) {
+func (em *Embed2D) UpdateBBox2D(size math32.Vector2, sc *Scene) {
 	em.Solid.UpdateBBox2D(size, sc)
 	em.Viewport.BBoxMu.Lock()
 	em.BBoxMu.Lock()

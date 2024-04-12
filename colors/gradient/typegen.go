@@ -41,11 +41,11 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/colors/gradient.Lin
 
 // SetStart sets the [Linear.Start]:
 // the starting point of the gradient (x1 and y1 in SVG)
-func (t *Linear) SetStart(v math32.Vec2) *Linear { t.Start = v; return t }
+func (t *Linear) SetStart(v math32.Vector2) *Linear { t.Start = v; return t }
 
 // SetEnd sets the [Linear.End]:
 // the ending point of the gradient (x2 and y2 in SVG)
-func (t *Linear) SetEnd(v math32.Vec2) *Linear { t.End = v; return t }
+func (t *Linear) SetEnd(v math32.Vector2) *Linear { t.End = v; return t }
 
 // SetSpread sets the [Linear.Spread]
 func (t *Linear) SetSpread(v Spreads) *Linear { t.Spread = v; return t }
@@ -69,15 +69,15 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/colors/gradient.Rad
 
 // SetCenter sets the [Radial.Center]:
 // the center point of the gradient (cx and cy in SVG)
-func (t *Radial) SetCenter(v math32.Vec2) *Radial { t.Center = v; return t }
+func (t *Radial) SetCenter(v math32.Vector2) *Radial { t.Center = v; return t }
 
 // SetFocal sets the [Radial.Focal]:
 // the focal point of the gradient (fx and fy in SVG)
-func (t *Radial) SetFocal(v math32.Vec2) *Radial { t.Focal = v; return t }
+func (t *Radial) SetFocal(v math32.Vector2) *Radial { t.Focal = v; return t }
 
 // SetRadius sets the [Radial.Radius]:
 // the radius of the gradient (rx and ry in SVG)
-func (t *Radial) SetRadius(v math32.Vec2) *Radial { t.Radius = v; return t }
+func (t *Radial) SetRadius(v math32.Vector2) *Radial { t.Radius = v; return t }
 
 // SetSpread sets the [Radial.Spread]
 func (t *Radial) SetSpread(v Spreads) *Radial { t.Spread = v; return t }

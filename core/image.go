@@ -33,7 +33,7 @@ type Image struct {
 	prevObjectFit styles.ObjectFits `xml:"-" json:"-" set:"-"`
 
 	// prevSize is the cached allocated size for the last rendered image.
-	prevSize math32.Vec2 `xml:"-" json:"-" set:"-"`
+	prevSize math32.Vector2 `xml:"-" json:"-" set:"-"`
 }
 
 func (im *Image) OnInit() {

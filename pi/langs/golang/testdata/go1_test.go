@@ -594,7 +594,7 @@ func (tv *TextView) FindNextLink(pos TextPos) (TextPos, TextRegion, bool) {
 }
 
 func tst() {
-	nwSz := core.Vec2D{mxwd, off + extraHalf}.ToPointCeil()
+	nwSz := core.Vector2D{mxwd, off + extraHalf}.ToPointCeil()
 }
 
 func tst() {

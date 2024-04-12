@@ -88,7 +88,7 @@ func (tb *Toolbar) SizeDown(iter int) bool {
 	return redo
 }
 
-func (tb *Toolbar) SizeFromChildren(iter int, pass LayoutPasses) math32.Vec2 {
+func (tb *Toolbar) SizeFromChildren(iter int, pass LayoutPasses) math32.Vector2 {
 	csz := tb.Frame.SizeFromChildren(iter, pass)
 	if pass == SizeUpPass || (pass == SizeDownPass && iter == 0) {
 		dim := tb.Styles.Direction.Dim()

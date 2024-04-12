@@ -32,7 +32,7 @@ type Lines struct {
 	Points []math32.Vec3
 
 	// line width, Y = height perpendicular to line direction, and X = depth
-	Width math32.Vec2
+	Width math32.Vector2
 
 	// optional colors for each point -- actual color interpolates between
 	Colors []color.RGBA
@@ -52,7 +52,7 @@ const (
 )
 
 // NewLines adds Lines mesh to given scene, with given start, end, and width
-func NewLines(sc *Scene, name string, points []math32.Vec3, width math32.Vec2, closed bool) *Lines {
+func NewLines(sc *Scene, name string, points []math32.Vec3, width math32.Vector2, closed bool) *Lines {
 	ln := &Lines{}
 	ln.Nm = name
 	ln.Points = points

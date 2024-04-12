@@ -60,7 +60,7 @@ func (tx *Text) SpanPosToRuneIndex(si, ri int) (idx int, ok bool) {
 // LastPos.  Returns also the index of the span that holds that char (-1 = no
 // spans at all) and the rune index within that span, and false if index is
 // out of range.
-func (tx *Text) RuneRelPos(idx int) (pos math32.Vec2, si, ri int, ok bool) {
+func (tx *Text) RuneRelPos(idx int) (pos math32.Vector2, si, ri int, ok bool) {
 	si, ri, ok = tx.RuneSpanPos(idx)
 	if ok {
 		sr := &tx.Spans[si]
@@ -71,7 +71,7 @@ func (tx *Text) RuneRelPos(idx int) (pos math32.Vec2, si, ri int, ok bool) {
 		sr := &tx.Spans[nsp-1]
 		return sr.LastPos, nsp - 1, len(sr.Render), false
 	}
-	return math32.Vec2{}, -1, -1, false
+	return math32.Vector2{}, -1, -1, false
 }
 
 // RuneEndPos returns the relative ending position of the given rune index,
@@ -80,7 +80,7 @@ func (tx *Text) RuneRelPos(idx int) (pos math32.Vec2, si, ri int, ok bool) {
 // Returns also the index of the span that holds that char (-1 = no spans at
 // all) and the rune index within that span, and false if index is out of
 // range.
-func (tx *Text) RuneEndPos(idx int) (pos math32.Vec2, si, ri int, ok bool) {
+func (tx *Text) RuneEndPos(idx int) (pos math32.Vector2, si, ri int, ok bool) {
 	si, ri, ok = tx.RuneSpanPos(idx)
 	if ok {
 		sr := &tx.Spans[si]
@@ -93,14 +93,14 @@ func (tx *Text) RuneEndPos(idx int) (pos math32.Vec2, si, ri int, ok bool) {
 		sr := &tx.Spans[nsp-1]
 		return sr.LastPos, nsp - 1, len(sr.Render), false
 	}
-	return math32.Vec2{}, -1, -1, false
+	return math32.Vector2{}, -1, -1, false
 }
 
 // PosToRune returns the rune span and rune indexes for given relative X,Y
 // pixel position, if the pixel position lies within the given text area.
 // If not, returns false.  It is robust to left-right out-of-range positions,
 // returning the first or last rune index respectively.
-func (tx *Text) PosToRune(pos math32.Vec2) (si, ri int, ok bool) {
+func (tx *Text) PosToRune(pos math32.Vector2) (si, ri int, ok bool) {
 	ok = false
 	if pos.X < 0 || pos.Y < 0 { // note: don't bail on X yet
 		return
@@ -163,15 +163,15 @@ func (tx *Text) PosToRune(pos math32.Vec2) (si, ri int, ok bool) {
 // size, if the text requires more size to fit everything.
 // Font face in styles.Font is used for determining line spacing here.
 // Other versions can do more expensive calculations of variable line spacing as needed.
-func (tr *Text) Layout(txtSty *styles.Text, fontSty *styles.FontRender, ctxt *units.Context, size math32.Vec2) math32.Vec2 {
+func (tr *Text) Layout(txtSty *styles.Text, fontSty *styles.FontRender, ctxt *units.Context, size math32.Vector2) math32.Vector2 {
 	// todo: switch on layout types once others are supported
 	return tr.LayoutStdLR(txtSty, fontSty, ctxt, size)
 }
 
 // LayoutStdLR does basic standard layout of text in LR direction.
-func (tr *Text) LayoutStdLR(txtSty *styles.Text, fontSty *styles.FontRender, ctxt *units.Context, size math32.Vec2) math32.Vec2 {
+func (tr *Text) LayoutStdLR(txtSty *styles.Text, fontSty *styles.FontRender, ctxt *units.Context, size math32.Vector2) math32.Vector2 {
 	if len(tr.Spans) == 0 {
-		return math32.Vec2{}
+		return math32.Vector2{}
 	}
 
 	// pr := profile.Start("TextLayout")

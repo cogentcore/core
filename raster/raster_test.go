@@ -521,7 +521,7 @@ func TestGradient(t *testing.T) {
 	f.Clear()
 
 	radial.SetUnits(gradient.ObjectBoundingBox).
-		SetFocal(math32.Vec2{}).SetRadius(math32.V2Scalar(0.2)) // move focus away from
+		SetFocal(math32.Vector2{}).SetRadius(math32.V2Scalar(0.2)) // move focus away from
 	scanner.SetColor(radial)
 	AddRect(300, 210, 450, 300, 0, f)
 	f.Draw()

@@ -13,16 +13,16 @@ type Polyline struct {
 	NodeBase
 
 	// the coordinates to draw -- does a moveto on the first, then lineto for all the rest
-	Points []math32.Vec2 `xml:"points"`
+	Points []math32.Vector2 `xml:"points"`
 }
 
 func (g *Polyline) SVGName() string { return "polyline" }
 
-func (g *Polyline) SetPos(pos math32.Vec2) {
+func (g *Polyline) SetPos(pos math32.Vector2) {
 	// todo: set offset relative to bbox
 }
 
-func (g *Polyline) SetSize(sz math32.Vec2) {
+func (g *Polyline) SetSize(sz math32.Vector2) {
 	// todo: scale bbox
 }
 
@@ -85,7 +85,7 @@ func (g *Polyline) ApplyTransform(sv *SVG, xf math32.Mat2) {
 		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
 		for i, p := range g.Points {
-			p = xf.MulVec2AsPoint(p)
+			p = xf.MulVector2AsPoint(p)
 			g.Points[i] = p
 		}
 		g.GradientApplyTransform(sv, xf)
@@ -97,7 +97,7 @@ func (g *Polyline) ApplyTransform(sv *SVG, xf math32.Mat2) {
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Polyline) ApplyDeltaTransform(sv *SVG, trans math32.Vec2, scale math32.Vec2, rot float32, pt math32.Vec2) {
+func (g *Polyline) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) {
 	crot := g.Paint.Transform.ExtractRot()
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
@@ -106,7 +106,7 @@ func (g *Polyline) ApplyDeltaTransform(sv *SVG, trans math32.Vec2, scale math32.
 	} else {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self
 		for i, p := range g.Points {
-			p = xf.MulVec2AsPointCenter(p, lpt)
+			p = xf.MulVector2AsPointCenter(p, lpt)
 			g.Points[i] = p
 		}
 		g.GradientApplyTransformPt(sv, xf, lpt)

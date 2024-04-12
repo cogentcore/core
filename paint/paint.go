@@ -111,8 +111,8 @@ func (pc *Context) FillStrokeClear() {
 
 // TransformPoint multiplies the specified point by the current transform matrix,
 // returning a transformed position.
-func (pc *Context) TransformPoint(x, y float32) math32.Vec2 {
-	return pc.CurrentTransform.MulVec2AsPoint(math32.V2(x, y))
+func (pc *Context) TransformPoint(x, y float32) math32.Vector2 {
+	return pc.CurrentTransform.MulVector2AsPoint(math32.V2(x, y))
 }
 
 // BoundingBox computes the bounding box for an element in pixel int
@@ -122,15 +122,15 @@ func (pc *Context) BoundingBox(minX, minY, maxX, maxY float32) image.Rectangle {
 	if pc.StrokeStyle.Color != nil {
 		sw = 0.5 * pc.StrokeWidth()
 	}
-	tmin := pc.CurrentTransform.MulVec2AsPoint(math32.V2(minX, minY))
-	tmax := pc.CurrentTransform.MulVec2AsPoint(math32.V2(maxX, maxY))
+	tmin := pc.CurrentTransform.MulVector2AsPoint(math32.V2(minX, minY))
+	tmax := pc.CurrentTransform.MulVector2AsPoint(math32.V2(maxX, maxY))
 	tp1 := math32.V2(tmin.X-sw, tmin.Y-sw).ToPointFloor()
 	tp2 := math32.V2(tmax.X+sw, tmax.Y+sw).ToPointCeil()
 	return image.Rect(tp1.X, tp1.Y, tp2.X, tp2.Y)
 }
 
 // BoundingBoxFromPoints computes the bounding box for a slice of points
-func (pc *Context) BoundingBoxFromPoints(points []math32.Vec2) image.Rectangle {
+func (pc *Context) BoundingBoxFromPoints(points []math32.Vector2) image.Rectangle {
 	sz := len(points)
 	if sz == 0 {
 		return image.Rectangle{}
@@ -361,24 +361,24 @@ func (pc *Context) Fill() {
 
 // FillBox performs an optimized fill of the given
 // rectangular region with the given image.
-func (pc *Context) FillBox(pos, size math32.Vec2, img image.Image) {
+func (pc *Context) FillBox(pos, size math32.Vector2, img image.Image) {
 	pc.DrawBox(pos, size, img, draw.Over)
 }
 
 // BlitBox performs an optimized overwriting fill (blit) of the given
 // rectangular region with the given image.
-func (pc *Context) BlitBox(pos, size math32.Vec2, img image.Image) {
+func (pc *Context) BlitBox(pos, size math32.Vector2, img image.Image) {
 	pc.DrawBox(pos, size, img, draw.Src)
 }
 
 // DrawBox performs an optimized fill/blit of the given rectangular region
 // with the given image, using the given draw operation.
-func (pc *Context) DrawBox(pos, size math32.Vec2, img image.Image, op draw.Op) {
+func (pc *Context) DrawBox(pos, size math32.Vector2, img image.Image, op draw.Op) {
 	if img == nil {
 		return
 	}
-	pos = pc.CurrentTransform.MulVec2AsPoint(pos)
-	size = pc.CurrentTransform.MulVec2AsVec(size)
+	pos = pc.CurrentTransform.MulVector2AsPoint(pos)
+	size = pc.CurrentTransform.MulVector2AsVec(size)
 	b := pc.Bounds.Intersect(math32.RectFromPosSizeMax(pos, size))
 	if g, ok := img.(gradient.Gradient); ok {
 		g.Update(pc.FillStyle.Opacity, math32.B2FromRect(b), pc.CurrentTransform)
@@ -393,7 +393,7 @@ func (pc *Context) DrawBox(pos, size math32.Vec2, img image.Image, op draw.Op) {
 // standard deviation (σ). This means that you need to divide a CSS-standard
 // blur radius value by two before passing it this function
 // (see https://stackoverflow.com/questions/65454183/how-does-blur-radius-value-in-box-shadow-property-affect-the-resulting-blur).
-func (pc *Context) BlurBox(pos, size math32.Vec2, blurRadius float32) {
+func (pc *Context) BlurBox(pos, size math32.Vector2, blurRadius float32) {
 	rect := math32.RectFromPosSizeMax(pos, size)
 	sub := pc.Image.SubImage(rect)
 	sub = GaussianBlur(sub, float64(blurRadius))
@@ -469,7 +469,7 @@ func (pc *Context) DrawLine(x1, y1, x2, y2 float32) {
 	pc.LineTo(x2, y2)
 }
 
-func (pc *Context) DrawPolyline(points []math32.Vec2) {
+func (pc *Context) DrawPolyline(points []math32.Vector2) {
 	sz := len(points)
 	if sz < 2 {
 		return
@@ -480,7 +480,7 @@ func (pc *Context) DrawPolyline(points []math32.Vec2) {
 	}
 }
 
-func (pc *Context) DrawPolylinePxToDots(points []math32.Vec2) {
+func (pc *Context) DrawPolylinePxToDots(points []math32.Vector2) {
 	pu := &pc.UnitContext
 	sz := len(points)
 	if sz < 2 {
@@ -492,12 +492,12 @@ func (pc *Context) DrawPolylinePxToDots(points []math32.Vec2) {
 	}
 }
 
-func (pc *Context) DrawPolygon(points []math32.Vec2) {
+func (pc *Context) DrawPolygon(points []math32.Vector2) {
 	pc.DrawPolyline(points)
 	pc.ClosePath()
 }
 
-func (pc *Context) DrawPolygonPxToDots(points []math32.Vec2) {
+func (pc *Context) DrawPolygonPxToDots(points []math32.Vector2) {
 	pc.DrawPolylinePxToDots(points)
 	pc.ClosePath()
 }

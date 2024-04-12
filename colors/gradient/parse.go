@@ -178,7 +178,7 @@ outer:
 			fallthrough
 		case strings.HasPrefix(par, "to "):
 			sides := strings.Split(par[3:], " ")
-			l.Start, l.End = math32.Vec2{}, math32.Vec2{}
+			l.Start, l.End = math32.Vector2{}, math32.Vector2{}
 			for _, side := range sides {
 				switch side {
 				case "bottom":

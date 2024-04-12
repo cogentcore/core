@@ -150,19 +150,19 @@ type Editor struct { //core:embedder
 	NLinesChars image.Point `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// total size of all lines as rendered
-	LinesSize math32.Vec2 `set:"-" edit:"-" json:"-" xml:"-"`
+	LinesSize math32.Vector2 `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// the LinesSize plus extra space and line numbers etc
-	TotalSize math32.Vec2 `set:"-" edit:"-" json:"-" xml:"-"`
+	TotalSize math32.Vector2 `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// the Geom.Size.Actual.Total subtracting
 	// extra space and line numbers -- this is what
 	// LayoutStdLR sees for laying out each line
-	LineLayoutSize math32.Vec2 `set:"-" edit:"-" json:"-" xml:"-"`
+	LineLayoutSize math32.Vector2 `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// the last LineLayoutSize used in laying out lines.
 	// Used to trigger a new layout only when needed.
-	lastlineLayoutSize math32.Vec2 `set:"-" edit:"-" json:"-" xml:"-"`
+	lastlineLayoutSize math32.Vector2 `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// oscillates between on and off for blinking
 	BlinkOn bool `set:"-" edit:"-" json:"-" xml:"-"`

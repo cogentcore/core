@@ -402,7 +402,7 @@ func WrapText(parent Widget, txt string) *Label {
 	return lbl
 }
 
-func PlainFrames(parent Widget, grow math32.Vec2) {
+func PlainFrames(parent Widget, grow math32.Vector2) {
 	for i, sz := range FrameSizes {
 		nm := fmt.Sprintf("fr%v", i)
 		fr := BoxFrame(parent, nm)
@@ -423,7 +423,7 @@ type Wide struct {
 
 type Test struct {
 	Wide Wide `view:"inline"`
-	Vec  math32.Vec2
+	Vec  math32.Vector2
 }
 
 type TestTime struct {
@@ -439,7 +439,7 @@ var (
 
 	AlignText = "This is text to test for text align<br>This line is short<br>This is text to test for text align, this one is longer"
 
-	FrameSizes = [5]math32.Vec2{
+	FrameSizes = [5]math32.Vector2{
 		{20, 100},
 		{80, 20},
 		{60, 80},

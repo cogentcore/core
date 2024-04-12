@@ -293,7 +293,7 @@ func (lb *Label) Config() {
 
 // ConfigLabel does the HTML and Layout in TextRender for label text,
 // using given size to constrain layout.
-func (lb *Label) ConfigLabelSize(sz math32.Vec2) {
+func (lb *Label) ConfigLabelSize(sz math32.Vector2) {
 	// todo: last arg is CSSAgg.  Can synthesize that some other way?
 	fs := lb.Styles.FontRender()
 	txs := &lb.Styles.Text
@@ -306,7 +306,7 @@ func (lb *Label) ConfigLabelSize(sz math32.Vec2) {
 // In this case, alignment factors are turned off,
 // because they otherwise can absorb much more space, which should
 // instead be controlled by the base Align X,Y factors.
-func (lb *Label) ConfigLabelAlloc(sz math32.Vec2) math32.Vec2 {
+func (lb *Label) ConfigLabelAlloc(sz math32.Vector2) math32.Vector2 {
 	// todo: last arg is CSSAgg.  Can synthesize that some other way?
 	fs := lb.Styles.FontRender()
 	txs := &lb.Styles.Text
@@ -324,7 +324,7 @@ func (lb *Label) ConfigLabelAlloc(sz math32.Vec2) math32.Vec2 {
 // for word wrap case, where the sizing actually matters,
 // based on trying to fit the given number of characters into the given content size
 // with given font height.
-func TextWrapSizeEstimate(csz math32.Vec2, nChars int, fs *styles.Font) math32.Vec2 {
+func TextWrapSizeEstimate(csz math32.Vector2, nChars int, fs *styles.Font) math32.Vector2 {
 	chars := float32(nChars)
 	fht := float32(16)
 	if fs.Face != nil {

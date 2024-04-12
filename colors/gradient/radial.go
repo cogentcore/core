@@ -19,22 +19,22 @@ type Radial struct { //types:add -setters
 	Base
 
 	// the center point of the gradient (cx and cy in SVG)
-	Center math32.Vec2
+	Center math32.Vector2
 
 	// the focal point of the gradient (fx and fy in SVG)
-	Focal math32.Vec2
+	Focal math32.Vector2
 
 	// the radius of the gradient (rx and ry in SVG)
-	Radius math32.Vec2
+	Radius math32.Vector2
 
 	// current render version -- transformed by object matrix
-	rCenter math32.Vec2 `set:"-"`
+	rCenter math32.Vector2 `set:"-"`
 
 	// current render version -- transformed by object matrix
-	rFocal math32.Vec2 `set:"-"`
+	rFocal math32.Vector2 `set:"-"`
 
 	// current render version -- transformed by object matrix
-	rRadius math32.Vec2 `set:"-"`
+	rRadius math32.Vector2 `set:"-"`
 }
 
 var _ Gradient = &Radial{}
@@ -74,12 +74,12 @@ func (r *Radial) Update(opacity float32, box math32.Box2, objTransform math32.Ma
 		f = r.Box.Min.Add(sz.Mul(f))
 		rs.SetMul(sz)
 	} else {
-		c = r.Transform.MulVec2AsPoint(c)
-		f = r.Transform.MulVec2AsPoint(f)
-		rs = r.Transform.MulVec2AsVec(rs)
-		c = objTransform.MulVec2AsPoint(c)
-		f = objTransform.MulVec2AsPoint(f)
-		rs = objTransform.MulVec2AsVec(rs)
+		c = r.Transform.MulVector2AsPoint(c)
+		f = r.Transform.MulVector2AsPoint(f)
+		rs = r.Transform.MulVector2AsVec(rs)
+		c = objTransform.MulVector2AsPoint(c)
+		f = objTransform.MulVector2AsPoint(f)
+		rs = objTransform.MulVector2AsVec(rs)
 	}
 	if c != f {
 		f.SetDiv(rs)
@@ -113,7 +113,7 @@ func (r *Radial) At(x, y int) color.Color {
 		// pos is just distance from center scaled by radius
 		pt := math32.V2(float32(x)+0.5, float32(y)+0.5)
 		if r.Units == ObjectBoundingBox {
-			pt = r.boxTransform.MulVec2AsPoint(pt)
+			pt = r.boxTransform.MulVector2AsPoint(pt)
 		}
 		d := pt.Sub(r.rCenter)
 		pos := math32.Sqrt(d.X*d.X/(r.rRadius.X*r.rRadius.X) + (d.Y*d.Y)/(r.rRadius.Y*r.rRadius.Y))
@@ -125,7 +125,7 @@ func (r *Radial) At(x, y int) color.Color {
 
 	pt := math32.V2(float32(x)+0.5, float32(y)+0.5)
 	if r.Units == ObjectBoundingBox {
-		pt = r.boxTransform.MulVec2AsPoint(pt)
+		pt = r.boxTransform.MulVector2AsPoint(pt)
 	}
 	e := pt.Div(r.rRadius)
 
@@ -150,7 +150,7 @@ func (r *Radial) At(x, y int) color.Color {
 // a ray starting at s2 passing through s1 and a circle in fixed point.
 // Returns intersects == false if no solution is possible. If two
 // solutions are possible, the point closest to s2 is returned
-func RayCircleIntersectionF(s1, s2, c math32.Vec2, r float32) (pt math32.Vec2, intersects bool) {
+func RayCircleIntersectionF(s1, s2, c math32.Vector2, r float32) (pt math32.Vector2, intersects bool) {
 	n := s2.X - c.X // Calculating using 64* rather than divide
 	m := s2.Y - c.Y
 

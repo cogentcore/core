@@ -17,7 +17,7 @@ func TestText(t *testing.T) {
 	size := image.Point{100, 40}
 	sizef := math32.V2FromPoint(size)
 	RunTest(t, "text", size.X, size.Y, func(pc *Context) {
-		pc.BlitBox(math32.Vec2{}, sizef, colors.C(colors.White))
+		pc.BlitBox(math32.Vector2{}, sizef, colors.C(colors.White))
 		tsty := &styles.Text{}
 		tsty.Defaults()
 		fsty := &styles.FontRender{}
@@ -33,6 +33,6 @@ func TestText(t *testing.T) {
 		// 	t.Errorf("unexpected text size: %v", tsz)
 		// }
 		txt.HasOverflow = true
-		txt.Render(pc, math32.Vec2{})
+		txt.Render(pc, math32.Vector2{})
 	})
 }

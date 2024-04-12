@@ -20,10 +20,10 @@ import (
 type ViewBox struct {
 
 	// offset or starting point in parent Viewport2D
-	Min math32.Vec2
+	Min math32.Vector2
 
 	// size of viewbox within parent Viewport2D
-	Size math32.Vec2
+	Size math32.Vector2
 
 	// how to scale the view box within parent
 	PreserveAspectRatio ViewBoxPreserveAspectRatio
@@ -31,7 +31,7 @@ type ViewBox struct {
 
 // Defaults returns viewbox to defaults
 func (vb *ViewBox) Defaults() {
-	vb.Min = math32.Vec2{}
+	vb.Min = math32.Vector2{}
 	vb.Size = math32.V2(100, 100)
 	vb.PreserveAspectRatio.Align.Set(AlignMid)
 	vb.PreserveAspectRatio.MeetOrSlice = Meet
@@ -49,7 +49,7 @@ func (vb *ViewBox) String() string {
 
 // Transform returns the transform based on viewbox size relative to given box
 // (viewport) size that it will be rendered into
-func (vb *ViewBox) Transform(box math32.Vec2) (size, trans, scale math32.Vec2) {
+func (vb *ViewBox) Transform(box math32.Vector2) (size, trans, scale math32.Vector2) {
 	of := styles.FitFill
 	switch {
 	case vb.PreserveAspectRatio.Align.X == AlignNone:

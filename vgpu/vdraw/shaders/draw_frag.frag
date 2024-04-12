@@ -12,7 +12,7 @@ layout(push_constant) uniform Mtxs {
 
 layout(set = 0, binding = 0) uniform sampler2DArray Tex[];
 
-layout(location = 0) in vec2 uv;
+layout(location = 0) in vector2 uv;
 layout(location = 0) out vec4 outputColor;
 
 void main() {
