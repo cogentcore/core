@@ -151,7 +151,7 @@ func (tv *TableView) SetSlice(sl any) *TableView {
 		slog.Error("TableView requires that you pass a pointer to a slice of struct elements, but ptr doesn't point to a slice", "type", slpTyp.Elem())
 		return tv
 	}
-	eltyp := reflectx.NonPointerType(reflectx.SliceElType(sl))
+	eltyp := reflectx.NonPointerType(reflectx.SliceElementType(sl))
 	if eltyp.Kind() != reflect.Struct {
 		slog.Error("TableView requires that you pass a slice of struct elements, but type is not a Struct", "type", eltyp.String())
 		return tv
@@ -160,7 +160,7 @@ func (tv *TableView) SetSlice(sl any) *TableView {
 	tv.SetSliceBase()
 	tv.Slice = sl
 	tv.SliceNPVal = reflectx.NonPointerValue(reflect.ValueOf(tv.Slice))
-	tv.ElVal = reflectx.OnePointerValue(reflectx.SliceElValue(sl))
+	tv.ElVal = reflectx.OnePointerValue(reflectx.SliceElementValue(sl))
 	tv.CacheVisFields()
 	tv.Update()
 	return tv
@@ -169,7 +169,7 @@ func (tv *TableView) SetSlice(sl any) *TableView {
 // StructType sets the StruType and returns the type of the struct within the
 // slice -- this is a non-ptr type even if slice has pointers to structs
 func (tv *TableView) StructType() reflect.Type {
-	tv.StruType = reflectx.NonPointerType(reflectx.SliceElType(tv.Slice))
+	tv.StruType = reflectx.NonPointerType(reflectx.SliceElementType(tv.Slice))
 	return tv.StruType
 }
 

@@ -92,36 +92,36 @@ func TestCopySlice(t *testing.T) {
 func TestSliceType(t *testing.T) {
 	var sl []string
 
-	ts := SliceElType(sl).String()
+	ts := SliceElementType(sl).String()
 	if ts != "string" {
 		t.Errorf("slice el type should be string, not: %v\n", ts)
 	}
 
-	ts = SliceElType(&sl).String()
+	ts = SliceElementType(&sl).String()
 	if ts != "string" {
 		t.Errorf("slice el type should be string, not: %v\n", ts)
 	}
 
 	var slp []*string
 
-	ts = SliceElType(slp).String()
+	ts = SliceElementType(slp).String()
 	if ts != "*string" {
 		t.Errorf("slice el type should be *string, not: %v\n", ts)
 	}
 
-	ts = SliceElType(&slp).String()
+	ts = SliceElementType(&slp).String()
 	if ts != "*string" {
 		t.Errorf("slice el type should be *string, not: %v\n", ts)
 	}
 
 	var slsl [][]string
 
-	ts = SliceElType(slsl).String()
+	ts = SliceElementType(slsl).String()
 	if ts != "[]string" {
 		t.Errorf("slice el type should be []string, not: %v\n", ts)
 	}
 
-	ts = SliceElType(&slsl).String()
+	ts = SliceElementType(&slsl).String()
 	if ts != "[]string" {
 		t.Errorf("slice el type should be []string, not: %v\n", ts)
 	}

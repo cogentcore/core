@@ -847,7 +847,7 @@ func ToString(v any) string {
 	case vk == reflect.String:
 		return npv.String()
 	case vk == reflect.Slice:
-		eltyp := SliceElType(v)
+		eltyp := SliceElementType(v)
 		if eltyp.Kind() == reflect.Uint8 { // []byte
 			return string(v.([]byte))
 		}

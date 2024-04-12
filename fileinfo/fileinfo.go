@@ -345,14 +345,9 @@ func (fi *FileInfo) FindIcon() (icons.Icon, bool) {
 // other useful methods -- will plug into Value with date / time editor.
 type FileTime time.Time
 
-// Int satisfies the ints.Inter interface for sorting etc
+// Int satisfies the [reflectx.Inter] interface for sorting.
 func (ft FileTime) Int() int64 {
 	return (time.Time(ft)).Unix()
-}
-
-// FromInt satisfies the ints.Inter interface
-func (ft *FileTime) FromInt(val int64) {
-	*ft = FileTime(time.Unix(val, 0))
 }
 
 func (ft FileTime) String() string {

@@ -241,7 +241,7 @@ func (v *SliceValue) Update() {
 		txt = "None"
 	} else {
 		if npv.Kind() == reflect.Array || !npv.IsNil() {
-			bnm := reflectx.FriendlyTypeName(reflectx.SliceElType(v.Value.Interface()))
+			bnm := reflectx.FriendlyTypeName(reflectx.SliceElementType(v.Value.Interface()))
 			if strings.HasSuffix(bnm, "s") {
 				txt = strcase.ToSentence(fmt.Sprintf("%d lists of %s", npv.Len(), bnm))
 			} else {
@@ -265,7 +265,7 @@ func (v *SliceValue) ConfigDialog(d *core.Body) (bool, func()) {
 		return false, nil
 	}
 	slci := vvp.Interface()
-	if npv.Kind() != reflect.Array && reflectx.NonPointerType(reflectx.SliceElType(v.Value.Interface())).Kind() == reflect.Struct {
+	if npv.Kind() != reflect.Array && reflectx.NonPointerType(reflectx.SliceElementType(v.Value.Interface())).Kind() == reflect.Struct {
 		tv := NewTableView(d).SetSlice(slci).SetViewPath(v.ViewPath)
 		tv.SetReadOnly(v.IsReadOnly())
 		d.AddAppBar(tv.ConfigToolbar)

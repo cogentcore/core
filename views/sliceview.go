@@ -498,7 +498,7 @@ func (sv *SliceViewBase) SetSlice(sl any) *SliceViewBase {
 			val.Set(reflect.New(reflectx.NonPointerType(val.Type())))
 		}
 	}
-	sv.ElVal = reflectx.SliceElValue(sl)
+	sv.ElVal = reflectx.SliceElementValue(sl)
 	sv.Update()
 	return sv
 }
@@ -846,7 +846,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 
 	sv.SliceNewAtSelect(idx)
 
-	sltyp := reflectx.SliceElType(sv.Slice) // has pointer if it is there
+	sltyp := reflectx.SliceElementType(sv.Slice) // has pointer if it is there
 	isNode := tree.IsNode(sltyp)
 	slptr := sltyp.Kind() == reflect.Pointer
 

@@ -376,7 +376,7 @@ func CopyMapRobust(to, from any) error {
 	if fmnp.Len() == 0 {
 		return nil
 	}
-	eltyp := SliceElType(to)
+	eltyp := SliceElementType(to)
 	itr := fmnp.MapRange()
 	for itr.Next() {
 		tonp.SetMapIndex(itr.Key(), CloneToType(eltyp, itr.Value().Interface()).Elem())

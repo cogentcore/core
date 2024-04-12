@@ -158,7 +158,7 @@ func ToValue(val any, tags string) Value {
 	case vk == reflect.Array, vk == reflect.Slice:
 		v := reflect.ValueOf(val)
 		sz := v.Len()
-		eltyp := reflectx.SliceElType(val)
+		eltyp := reflectx.SliceElementType(val)
 		if _, ok := val.([]byte); ok {
 			return &ByteSliceValue{}
 		}
