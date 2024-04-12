@@ -436,8 +436,8 @@ func (v *Vector4) SetLerp(other *Vector4, alpha float32) {
 /////////////////////////////////////////////////////////////////////////////
 //  Matrix operations
 
-// MulMat4 returns vector multiplied by specified 4x4 matrix.
-func (v Vector4) MulMat4(m *Mat4) Vector4 {
+// MulMatrix4 returns vector multiplied by specified 4x4 matrix.
+func (v Vector4) MulMatrix4(m *Matrix4) Vector4 {
 	return Vector4{m[0]*v.X + m[4]*v.Y + m[8]*v.Z + m[12]*v.W,
 		m[1]*v.X + m[5]*v.Y + m[9]*v.Z + m[13]*v.W,
 		m[2]*v.X + m[6]*v.Y + m[10]*v.Z + m[14]*v.W,
@@ -466,7 +466,7 @@ func (v *Vector4) SetAxisAngleFromQuat(q Quat) {
 // SetAxisFromRotationMatrix sets this vector to be the axis (x, y, z) and angle (w)
 // of a rotation specified the matrix m.
 // Assumes the upper 3x3 of m is a pure rotation matrix (i.e, unscaled).
-func (v *Vector4) SetAxisFromRotationMatrix(m *Mat4) {
+func (v *Vector4) SetAxisFromRotationMatrix(m *Matrix4) {
 	// http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToAngle/index.htm
 	var angle, x, y, z float32 // variables for result
 	var epsilon float32 = 0.01 // margin to allow for rounding errors

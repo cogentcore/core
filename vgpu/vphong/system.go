@@ -31,7 +31,7 @@ type CurRender struct {
 	UseVtxColor bool
 
 	// current model pose matrix
-	ModelMtx math32.Mat4
+	ModelMtx math32.Matrix4
 
 	// camera view and projection matrixes
 	VPMtx Mtxs
@@ -51,7 +51,7 @@ type CurRender struct {
 type PushU struct {
 
 	// Model Matrix: poses object in world coordinates
-	ModelMtx math32.Mat4
+	ModelMtx math32.Matrix4
 
 	// surface colors
 	Color Colors
@@ -118,7 +118,7 @@ func (ph *Phong) ConfigSys() {
 
 	pcset.AddStruct("PushU", int(unsafe.Sizeof(PushU{})), 1, vgpu.Push, vgpu.VertexShader, vgpu.FragmentShader)
 
-	mtxset.AddStruct("Mtxs", vgpu.Float32Mat4.Bytes()*2, 1, vgpu.Uniform, vgpu.VertexShader, vgpu.FragmentShader)
+	mtxset.AddStruct("Mtxs", vgpu.Float32Matrix4.Bytes()*2, 1, vgpu.Uniform, vgpu.VertexShader, vgpu.FragmentShader)
 
 	nliteset.AddStruct("NLights", 4*4, 1, vgpu.Uniform, vgpu.FragmentShader)
 	liteset.AddStruct("AmbLights", vector4sz*1, MaxLights, vgpu.Uniform, vgpu.FragmentShader)

@@ -140,7 +140,7 @@ func (q *Quat) GenGoNew() string {
 }
 
 // SetFromRotationMatrix sets this quaternion from the specified rotation matrix.
-func (q *Quat) SetFromRotationMatrix(m *Mat4) {
+func (q *Quat) SetFromRotationMatrix(m *Matrix4) {
 	m11 := m[0]
 	m12 := m[4]
 	m13 := m[8]

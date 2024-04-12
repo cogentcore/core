@@ -47,7 +47,7 @@ const (
 	Float64Vector3
 	Float64Vector4
 
-	Float32Mat4    // std transform matrix: math32.Mat4 works directly
+	Float32Matrix4 // std transform matrix: math32.Matrix4 works directly
 	Float32Matrix3 // std transform matrix: math32.Matrix3 works directly
 
 	ImageRGBA32 // 32 bits with 8 bits per component of R,G,B,A -- std image format
@@ -75,7 +75,7 @@ func (tp Types) VkIndexType() vk.IndexType {
 // Bytes returns number of bytes for this type
 func (tp Types) Bytes() int {
 	switch tp {
-	case Float32Mat4:
+	case Float32Matrix4:
 		return 64
 	case Float32Matrix3:
 		return 36

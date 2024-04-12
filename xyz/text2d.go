@@ -165,7 +165,7 @@ func (txt *Text2D) Validate() error {
 	return txt.Solid.Validate()
 }
 
-func (txt *Text2D) UpdateWorldMatrix(parWorld *math32.Mat4) {
+func (txt *Text2D) UpdateWorldMatrix(parWorld *math32.Matrix4) {
 	txt.PoseMu.Lock()
 	defer txt.PoseMu.Unlock()
 	sz, ok := txt.TextSize()

@@ -20,8 +20,8 @@ var content embed.FS
 
 // Mtxs are the projection matricies
 type Mtxs struct {
-	MVP math32.Mat4
-	UVP math32.Mat4
+	MVP math32.Matrix4
+	UVP math32.Matrix4
 }
 
 // DrawerImpl contains implementation state -- ignore..
@@ -93,7 +93,7 @@ func (dw *Drawer) ConfigSys() {
 	posv := vset.Add("Pos", vgpu.Float32Vector2, nPts, vgpu.Vertex, vgpu.VertexShader)
 	idxv := vset.Add("Index", vgpu.Uint16, nIndexes, vgpu.Index, vgpu.VertexShader)
 
-	pcset.AddStruct("Mtxs", vgpu.Float32Mat4.Bytes()*2, 1, vgpu.Push, vgpu.VertexShader, vgpu.FragmentShader)
+	pcset.AddStruct("Mtxs", vgpu.Float32Matrix4.Bytes()*2, 1, vgpu.Push, vgpu.VertexShader, vgpu.FragmentShader)
 	// note: packing texidx into mvp[0][3] to fit within 128 byte limit
 
 	tximgv := txset.Add("Tex", vgpu.ImageRGBA32, 1, vgpu.TextureRole, vgpu.FragmentShader)

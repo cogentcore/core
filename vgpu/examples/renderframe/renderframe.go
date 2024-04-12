@@ -26,9 +26,9 @@ import (
 )
 
 type CamView struct {
-	Model math32.Mat4
-	View  math32.Mat4
-	Prjn  math32.Mat4
+	Model math32.Matrix4
+	View  math32.Matrix4
+	Prjn  math32.Matrix4
 }
 
 func init() {
@@ -119,7 +119,7 @@ func main() {
 	idxv := vset.Add("Index", vgpu.Uint16, nPts, vgpu.Index, vgpu.VertexShader)
 
 	camv := set.Add("Camera", vgpu.Struct, 1, vgpu.Uniform, vgpu.VertexShader)
-	camv.SizeOf = vgpu.Float32Mat4.Bytes() * 3 // no padding for these
+	camv.SizeOf = vgpu.Float32Matrix4.Bytes() * 3 // no padding for these
 
 	vset.ConfigValues(1) // one val per var
 	set.ConfigValues(1)  // one val per var
@@ -152,7 +152,7 @@ func main() {
 	var lookq math32.Quat
 	lookq.SetFromRotationMatrix(math32.NewLookAt(campos, target, math32.Vec3(0, 1, 0)))
 	scale := math32.Vec3(1, 1, 1)
-	var cview math32.Mat4
+	var cview math32.Matrix4
 	cview.SetTransform(campos, lookq, scale)
 	view, _ := cview.Inverse()
 

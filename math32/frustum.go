@@ -16,7 +16,7 @@ type Frustum struct {
 }
 
 // NewFrustumFromMatrix creates and returns a Frustum based on the provided matrix
-func NewFrustumFromMatrix(m *Mat4) *Frustum {
+func NewFrustumFromMatrix(m *Matrix4) *Frustum {
 	f := new(Frustum)
 	f.SetFromMatrix(m)
 	return f
@@ -51,8 +51,8 @@ func (f *Frustum) Set(p0, p1, p2, p3, p4, p5 *Plane) {
 	}
 }
 
-// SetFromMatrix sets the frustum's planes based on the specified Mat4
-func (f *Frustum) SetFromMatrix(m *Mat4) {
+// SetFromMatrix sets the frustum's planes based on the specified Matrix4
+func (f *Frustum) SetFromMatrix(m *Matrix4) {
 	me0 := m[0]
 	me1 := m[1]
 	me2 := m[2]

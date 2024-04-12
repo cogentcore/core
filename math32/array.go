@@ -110,9 +110,9 @@ func (a ArrayF32) GetVector4(pos int, v *Vector4) {
 	v.W = a[pos+3]
 }
 
-// GetMat4 stores in the specified Mat4 the
+// GetMatrix4 stores in the specified Matrix4 the
 // values from the array starting at the specified pos.
-func (a ArrayF32) GetMat4(pos int, m *Mat4) {
+func (a ArrayF32) GetMatrix4(pos int, m *Matrix4) {
 	m[0] = a[pos]
 	m[1] = a[pos+1]
 	m[2] = a[pos+2]

@@ -276,7 +276,7 @@ func (sw *Scene) HandleSlideEvents() {
 		case e.HasAllModifiers(key.Control): // scale
 			dsc := dd.Mul(dm).MulScalar(scDel)
 			mb.Pose.Scale.SetAdd(dsc)
-			msc := dsc.MulMat4AsVector4(&sn.Pose.ParMatrix, 0) // this is not quite right but close enough
+			msc := dsc.MulMatrix4AsVector4(&sn.Pose.ParMatrix, 0) // this is not quite right but close enough
 			sn.Pose.Scale.SetAdd(msc)
 		case e.HasAllModifiers(key.Alt): // rotation
 			dang := -sgn * dm.Y * (dx + dy)
@@ -288,13 +288,13 @@ func (sw *Scene) HandleSlideEvents() {
 			rvec.SetDim(camd, 1)
 			mb.Pose.RotateOnAxis(rvec.X, rvec.Y, rvec.Z, dang)
 			inv, _ := sn.Pose.WorldMatrix.Inverse() // undo full transform
-			mvec := rvec.MulMat4AsVector4(inv, 0)
+			mvec := rvec.MulMatrix4AsVector4(inv, 0)
 			sn.Pose.RotateOnAxis(mvec.X, mvec.Y, mvec.Z, dang)
 		// case key.HasAllModifierBits(e.Modifiers, key.Shift):
 		default: // position
 			dpos := dd.MulScalar(panDel)
 			inv, _ := sn.Pose.ParMatrix.Inverse() // undo parent's transform
-			mpos := dpos.MulMat4AsVector4(inv, 0)
+			mpos := dpos.MulMatrix4AsVector4(inv, 0)
 			sn.Pose.Pos.SetAdd(mpos)
 			mb.Pose.Pos.SetAdd(dpos)
 		}

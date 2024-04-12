@@ -152,7 +152,7 @@ func (em *Embed2D) Validate() error {
 	return em.Solid.Validate(sc)
 }
 
-func (em *Embed2D) UpdateWorldMatrix(parWorld *math32.Mat4) {
+func (em *Embed2D) UpdateWorldMatrix(parWorld *math32.Matrix4) {
 	em.PoseMu.Lock()
 	defer em.PoseMu.Unlock()
 	if em.Viewport != nil {

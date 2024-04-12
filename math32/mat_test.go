@@ -83,7 +83,7 @@ func TestMatrix3(t *testing.T) {
 	// xmat := Matrix3Translate2D(1, 1).Mul(Matrix3Rotate2D(DegToRad(90))).Mul(Matrix3Scale2D(2, 2)).MulVector2AsPt(vx))
 }
 
-func TestMat4Prjn(t *testing.T) {
+func TestMatrix4Prjn(t *testing.T) {
 	pts := []Vector3{{0.0, 0.0, 0.0}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1}, {0.5, 0.5, 0.5}, {-0.5, -0.5, -0.5}, {1, 1, 1}, {-1, -1, -1}}
 
 	campos := Vec3(0, 0, 10)
@@ -91,18 +91,18 @@ func TestMat4Prjn(t *testing.T) {
 	var lookq Quat
 	lookq.SetFromRotationMatrix(NewLookAt(campos, target, Vec3(0, 1, 0)))
 	scale := Vec3(1, 1, 1)
-	var cview Mat4
+	var cview Matrix4
 	cview.SetTransform(campos, lookq, scale)
 	view, _ := cview.Inverse()
 
-	var glprjn Mat4
+	var glprjn Matrix4
 	glprjn.SetPerspective(90, 1.5, 0.01, 100)
 
-	var proj Mat4
+	var proj Matrix4
 	proj.MulMatrices(&glprjn, view)
 
 	for _, pt := range pts {
-		pjpt := pt.MulMat4(&proj)
+		pjpt := pt.MulMatrix4(&proj)
 		_ = pjpt
 		// fmt.Printf("pt: %v\t   pj: %v\n", pt, pjpt)
 	}

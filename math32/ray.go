@@ -382,11 +382,11 @@ func (ray *Ray) IntersectTriangle(a, b, c Vector3, backfaceCulling bool) (Vector
 	return ray.At(QdN / DdN), true
 }
 
-// MulMat4 multiplies this ray origin and direction
+// MulMatrix4 multiplies this ray origin and direction
 // by the specified matrix4, basically transforming this ray coordinates.
-func (ray *Ray) ApplyMat4(mat4 *Mat4) {
-	ray.Dir = ray.Dir.Add(ray.Origin).MulMat4(mat4)
-	ray.Origin = ray.Origin.MulMat4(mat4)
+func (ray *Ray) ApplyMatrix4(mat4 *Matrix4) {
+	ray.Dir = ray.Dir.Add(ray.Origin).MulMatrix4(mat4)
+	ray.Origin = ray.Origin.MulMatrix4(mat4)
 	ray.Dir.SetSub(ray.Origin)
 	ray.Dir.SetNormal()
 }

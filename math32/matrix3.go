@@ -28,9 +28,9 @@ func Matrix3FromMatrix2(m Matrix2) Matrix3 {
 	return nm
 }
 
-func Matrix3FromMat4(m *Mat4) Matrix3 {
+func Matrix3FromMatrix4(m *Matrix4) Matrix3 {
 	nm := Matrix3{}
-	nm.SetFromMat4(m)
+	nm.SetFromMatrix4(m)
 	return nm
 }
 
@@ -63,8 +63,8 @@ func (m *Matrix3) Set(n11, n12, n13, n21, n22, n23, n31, n32, n33 float32) {
 	m[8] = n33
 }
 
-// SetFromMat4 sets the matrix elements based on a Mat4.
-func (m *Matrix3) SetFromMat4(src *Mat4) {
+// SetFromMatrix4 sets the matrix elements based on a Matrix4.
+func (m *Matrix3) SetFromMatrix4(src *Matrix4) {
 	m.Set(
 		src[0], src[4], src[8],
 		src[1], src[5], src[9],
@@ -329,9 +329,9 @@ func (m *Matrix3) SetScaleCols(v Vector3) {
 // SetNormalMatrix set this matrix to the matrix that can transform the normal vectors
 // from the src matrix which is used transform the vertices (e.g., a ModelView matrix).
 // If the src matrix cannot be inverted returns error.
-func (m *Matrix3) SetNormalMatrix(src *Mat4) error {
+func (m *Matrix3) SetNormalMatrix(src *Matrix4) error {
 	var err error
-	*m, err = Matrix3FromMat4(src).InverseTry()
+	*m, err = Matrix3FromMatrix4(src).InverseTry()
 	m.SetTranspose()
 	return err
 }

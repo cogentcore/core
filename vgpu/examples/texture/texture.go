@@ -29,9 +29,9 @@ func init() {
 }
 
 type CamView struct {
-	Model math32.Mat4
-	View  math32.Mat4
-	Prjn  math32.Mat4
+	Model math32.Matrix4
+	View  math32.Matrix4
+	Prjn  math32.Matrix4
 }
 
 func OpenImage(fname string) image.Image {
@@ -109,7 +109,7 @@ func main() {
 	// note: always put indexes last so there isn't a gap in the location indexes!
 	idxv := vset.Add("Index", vgpu.Uint16, nIndexes, vgpu.Index, vgpu.VertexShader)
 
-	camv := uset.AddStruct("Camera", vgpu.Float32Mat4.Bytes()*3, 1, vgpu.Uniform, vgpu.VertexShader)
+	camv := uset.AddStruct("Camera", vgpu.Float32Matrix4.Bytes()*3, 1, vgpu.Uniform, vgpu.VertexShader)
 
 	txidxv := pcset.Add("TexIndex", vgpu.Int32, 1, vgpu.Push, vgpu.FragmentShader)
 	tximgv := txset.Add("TexSampler", vgpu.ImageRGBA32, 1, vgpu.TextureRole, vgpu.FragmentShader)
@@ -176,7 +176,7 @@ func main() {
 	var lookq math32.Quat
 	lookq.SetFromRotationMatrix(math32.NewLookAt(campos, target, math32.Vec3(0, 1, 0)))
 	scale := math32.Vec3(1, 1, 1)
-	var cview math32.Mat4
+	var cview math32.Matrix4
 	cview.SetTransform(campos, lookq, scale)
 	view, _ := cview.Inverse()
 

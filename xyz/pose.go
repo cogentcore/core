@@ -22,19 +22,19 @@ type Pose struct {
 	Quat math32.Quat
 
 	// Local matrix. Contains all position/rotation/scale information (relative to parent)
-	Matrix math32.Mat4 `view:"-"`
+	Matrix math32.Matrix4 `view:"-"`
 
 	// Parent's world matrix -- we cache this so that we can independently update our own matrix
-	ParMatrix math32.Mat4 `view:"-"`
+	ParMatrix math32.Matrix4 `view:"-"`
 
 	// World matrix. Contains all absolute position/rotation/scale information (i.e. relative to very top parent, generally the scene)
-	WorldMatrix math32.Mat4 `view:"-"`
+	WorldMatrix math32.Matrix4 `view:"-"`
 
 	// model * view matrix -- tranforms into camera-centered coords
-	MVMatrix math32.Mat4 `view:"-"`
+	MVMatrix math32.Matrix4 `view:"-"`
 
 	// model * view * projection matrix -- full final render matrix
-	MVPMatrix math32.Mat4 `view:"-"`
+	MVPMatrix math32.Matrix4 `view:"-"`
 
 	// normal matrix has no offsets, for normal vector rotation only, based on MVMatrix
 	NormMatrix math32.Matrix3 `view:"-"`
@@ -77,7 +77,7 @@ func (ps *Pose) UpdateMatrix() {
 
 // MulMatrix multiplies current pose Matrix by given Matrix, and re-extracts the
 // Pos, Scale, Quat from resulting matrix.
-func (ps *Pose) MulMatrix(mat *math32.Mat4) {
+func (ps *Pose) MulMatrix(mat *math32.Matrix4) {
 	ps.Matrix.SetMul(mat)
 	pos, quat, sc := ps.Matrix.Decompose()
 	ps.Pos = pos
@@ -87,7 +87,7 @@ func (ps *Pose) MulMatrix(mat *math32.Mat4) {
 
 // UpdateWorldMatrix updates the world transform matrix based on Matrix and parent's WorldMatrix.
 // Does NOT call UpdateMatrix so that can include other factors as needed.
-func (ps *Pose) UpdateWorldMatrix(parWorld *math32.Mat4) {
+func (ps *Pose) UpdateWorldMatrix(parWorld *math32.Matrix4) {
 	if parWorld != nil {
 		ps.ParMatrix.CopyFrom(parWorld)
 	}
@@ -96,7 +96,7 @@ func (ps *Pose) UpdateWorldMatrix(parWorld *math32.Mat4) {
 
 // UpdateMVPMatrix updates the model * view, * projection matricies based on camera view, prjn matricies
 // Assumes that WorldMatrix has been updated
-func (ps *Pose) UpdateMVPMatrix(viewMat, prjnMat *math32.Mat4) {
+func (ps *Pose) UpdateMVPMatrix(viewMat, prjnMat *math32.Matrix4) {
 	ps.MVMatrix.MulMatrices(viewMat, &ps.WorldMatrix)
 	ps.NormMatrix.SetNormalMatrix(&ps.MVMatrix)
 	ps.MVPMatrix.MulMatrices(prjnMat, &ps.MVMatrix)
@@ -173,7 +173,7 @@ func (ps *Pose) RotateEulerRad(x, y, z, angle float32) {
 }
 
 // SetMatrix sets the local transformation matrix and updates Pos, Scale, Quat.
-func (ps *Pose) SetMatrix(m *math32.Mat4) {
+func (ps *Pose) SetMatrix(m *math32.Matrix4) {
 	ps.Matrix = *m
 	ps.Pos, ps.Quat, ps.Scale = ps.Matrix.Decompose()
 }

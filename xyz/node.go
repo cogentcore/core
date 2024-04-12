@@ -36,12 +36,12 @@ type Node interface {
 	// UpdateWorldMatrix updates this node's local and world matrix based on parent's world matrix
 	// This sets the WorldMatrixUpdated flag but does not check that flag -- calling
 	// routine can optionally do so.
-	UpdateWorldMatrix(parWorld *math32.Mat4)
+	UpdateWorldMatrix(parWorld *math32.Matrix4)
 
 	// UpdateMVPMatrix updates this node's MVP matrix based on
 	// given view and prjn matrix from camera.
 	// Called during rendering.
-	UpdateMVPMatrix(viewMat, prjnMat *math32.Mat4)
+	UpdateMVPMatrix(viewMat, prjnMat *math32.Matrix4)
 
 	// UpdateMeshBBox updates the Mesh-based BBox info for all nodes.
 	// groups aggregate over elements.  called from WalkPost traversal
@@ -59,7 +59,7 @@ type Node interface {
 	RayPick(pos image.Point) math32.Ray
 
 	// WorldMatrix returns the world matrix for this node, under read-lock protection.
-	WorldMatrix() *math32.Mat4
+	WorldMatrix() *math32.Matrix4
 
 	// NormDCBBox returns the normalized display coordinates bounding box
 	// which is used for clipping.  This is read-lock protected.
@@ -230,7 +230,7 @@ func (nb *NodeBase) IsTransparent() bool {
 // If a nil matrix is passed, then the previously-set parent world matrix is used.
 // This sets the WorldMatrixUpdated flag but does not check that flag -- calling
 // routine can optionally do so.
-func (nb *NodeBase) UpdateWorldMatrix(parWorld *math32.Mat4) {
+func (nb *NodeBase) UpdateWorldMatrix(parWorld *math32.Matrix4) {
 	nb.PoseMu.Lock()
 	defer nb.PoseMu.Unlock()
 	nb.Pose.UpdateMatrix() // note: can do this in special ways to bake in other
@@ -241,7 +241,7 @@ func (nb *NodeBase) UpdateWorldMatrix(parWorld *math32.Mat4) {
 
 // UpdateMVPMatrix updates this node's MVP matrix based on given view, prjn matricies from camera.
 // Called during rendering.
-func (nb *NodeBase) UpdateMVPMatrix(viewMat, prjnMat *math32.Mat4) {
+func (nb *NodeBase) UpdateMVPMatrix(viewMat, prjnMat *math32.Matrix4) {
 	nb.PoseMu.Lock()
 	nb.Pose.UpdateMVPMatrix(viewMat, prjnMat)
 	nb.PoseMu.Unlock()
@@ -252,7 +252,7 @@ func (nb *NodeBase) UpdateMVPMatrix(viewMat, prjnMat *math32.Mat4) {
 func (nb *NodeBase) UpdateBBox2D(size math32.Vector2) {
 	off := math32.Vector2{}
 	nb.PoseMu.RLock()
-	nb.WorldBBox.BBox = nb.MeshBBox.BBox.MulMat4(&nb.Pose.WorldMatrix)
+	nb.WorldBBox.BBox = nb.MeshBBox.BBox.MulMatrix4(&nb.Pose.WorldMatrix)
 	nb.NDCBBox = nb.MeshBBox.BBox.MVProjToNDC(&nb.Pose.MVPMatrix)
 	nb.PoseMu.RUnlock()
 	Wmin := nb.NDCBBox.Min.NDCToWindow(size, off, 0, 1, true) // true = flipY
@@ -291,11 +291,11 @@ func (nb *NodeBase) RayPick(pos image.Point) math32.Ray {
 	ndc := fpos.WindowToNDC(size, math32.Vector2{}, true) // flipY
 	var err error
 	ndc.Z = -1 // at closest point
-	cdir := math32.Vector4FromVector3(ndc, 1).MulMat4(&nb.Sc.Camera.InvPrjnMatrix)
+	cdir := math32.Vector4FromVector3(ndc, 1).MulMatrix4(&nb.Sc.Camera.InvPrjnMatrix)
 	cdir.Z = -1
 	cdir.W = 0 // vec
 	// get world position / transform of camera: matrix is inverse of ViewMatrix
-	wdir := cdir.MulMat4(&nb.Sc.Camera.Pose.Matrix)
+	wdir := cdir.MulMatrix4(&nb.Sc.Camera.Pose.Matrix)
 	wpos := nb.Sc.Camera.Pose.Matrix.Pos()
 	// nb.Sc.Camera.CamMu.RUnlock()
 	invM, err := nb.Pose.WorldMatrix.Inverse()
@@ -303,15 +303,15 @@ func (nb *NodeBase) RayPick(pos image.Point) math32.Ray {
 	if err != nil {
 		log.Println(err)
 	}
-	lpos := math32.Vector4FromVector3(wpos, 1).MulMat4(invM)
-	ldir := wdir.MulMat4(invM)
+	lpos := math32.Vector4FromVector3(wpos, 1).MulMatrix4(invM)
+	ldir := wdir.MulMatrix4(invM)
 	ldir.SetNormal()
 	ray := math32.NewRay(math32.Vec3(lpos.X, lpos.Y, lpos.Z), math32.Vec3(ldir.X, ldir.Y, ldir.Z))
 	return *ray
 }
 
 // WorldMatrix returns the world matrix for this node, under read lock protection
-func (nb *NodeBase) WorldMatrix() *math32.Mat4 {
+func (nb *NodeBase) WorldMatrix() *math32.Matrix4 {
 	nb.PoseMu.RLock()
 	defer nb.PoseMu.RUnlock()
 	return &nb.Pose.WorldMatrix

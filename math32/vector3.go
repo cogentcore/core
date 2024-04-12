@@ -457,32 +457,32 @@ func (v *Vector3) SetMulMatrix3(m *Matrix3) {
 	*v = v.MulMatrix3(m)
 }
 
-// MulMat4 returns vector multiplied by specified 4x4 matrix.
-func (v Vector3) MulMat4(m *Mat4) Vector3 {
+// MulMatrix4 returns vector multiplied by specified 4x4 matrix.
+func (v Vector3) MulMatrix4(m *Matrix4) Vector3 {
 	return Vector3{m[0]*v.X + m[4]*v.Y + m[8]*v.Z + m[12],
 		m[1]*v.X + m[5]*v.Y + m[9]*v.Z + m[13],
 		m[2]*v.X + m[6]*v.Y + m[10]*v.Z + m[14]}
 }
 
-// MulMat4AsVector4 returns 3-dim vector multiplied by specified 4x4 matrix
+// MulMatrix4AsVector4 returns 3-dim vector multiplied by specified 4x4 matrix
 // using a 4-dim vector with given 4th dimensional value, then reduced back to
 // a 3-dimensional vector.  This is somehow different from just straight
-// MulMat4 on the 3-dim vector.  Use 0 for normals and 1 for positions
+// MulMatrix4 on the 3-dim vector.  Use 0 for normals and 1 for positions
 // as the 4th dim to set.
-func (v Vector3) MulMat4AsVector4(m *Mat4, w float32) Vector3 {
-	return Vector3FromVector4(Vector4FromVector3(v, w).MulMat4(m))
+func (v Vector3) MulMatrix4AsVector4(m *Matrix4, w float32) Vector3 {
+	return Vector3FromVector4(Vector4FromVector3(v, w).MulMatrix4(m))
 }
 
-// SetMulMat4 sets vector multiplied by specified 4x4 matrix.
-func (v *Vector3) SetMulMat4(m *Mat4) {
-	*v = v.MulMat4(m)
+// SetMulMatrix4 sets vector multiplied by specified 4x4 matrix.
+func (v *Vector3) SetMulMatrix4(m *Matrix4) {
+	*v = v.MulMatrix4(m)
 }
 
-// MVProjToNDC project given vector through given MVP model-view-projection Mat4
+// MVProjToNDC project given vector through given MVP model-view-projection Matrix4
 // and do perspective divide to return normalized display coordinates (NDC).
 // w is value for 4th coordinate -- use 1 for positions, 0 for normals.
-func (v Vector3) MVProjToNDC(m *Mat4, w float32) Vector3 {
-	clip := Vector4FromVector3(v, w).MulMat4(m)
+func (v Vector3) MVProjToNDC(m *Matrix4, w float32) Vector3 {
+	clip := Vector4FromVector3(v, w).MulMatrix4(m)
 	return clip.PerspDiv()
 }
 
@@ -522,7 +522,7 @@ func (v Vector2) WindowToNDC(size, off Vector2, flipY bool) Vector3 {
 }
 
 // MulProjection returns vector multiplied by the projection matrix m
-func (v Vector3) MulProjection(m *Mat4) Vector3 {
+func (v Vector3) MulProjection(m *Matrix4) Vector3 {
 	d := 1 / (m[3]*v.X + m[7]*v.Y + m[11]*v.Z + m[15]) // perspective divide
 	return Vector3{(m[0]*v.X + m[4]*v.Y + m[8]*v.Z + m[12]) * d,
 		(m[1]*v.X + m[5]*v.Y + m[9]*v.Z + m[13]) * d,
@@ -606,14 +606,14 @@ func (v Vector3) AngleTo(other Vector3) float32 {
 
 // SetFromMatrixPos set this vector from the translation coordinates
 // in the specified transformation matrix.
-func (v *Vector3) SetFromMatrixPos(m *Mat4) {
+func (v *Vector3) SetFromMatrixPos(m *Matrix4) {
 	v.X = m[12]
 	v.Y = m[13]
 	v.Z = m[14]
 }
 
 // SetFromMatrixCol set this vector with the column at index of the m matrix.
-func (v *Vector3) SetFromMatrixCol(index int, m *Mat4) {
+func (v *Vector3) SetFromMatrixCol(index int, m *Matrix4) {
 	offset := index * 4
 	v.X = m[offset]
 	v.Y = m[offset+1]
@@ -622,7 +622,7 @@ func (v *Vector3) SetFromMatrixCol(index int, m *Mat4) {
 
 // SetEulerAnglesFromMatrix sets this vector components to the Euler angles
 // from the specified pure rotation matrix.
-func (v *Vector3) SetEulerAnglesFromMatrix(m *Mat4) {
+func (v *Vector3) SetEulerAnglesFromMatrix(m *Matrix4) {
 	m11 := m[0]
 	m12 := m[4]
 	m13 := m[8]
@@ -643,7 +643,7 @@ func (v *Vector3) SetEulerAnglesFromMatrix(m *Mat4) {
 
 // NewEulerAnglesFromMatrix returns a Vector3 with components as the Euler angles
 // from the specified pure rotation matrix.
-func NewEulerAnglesFromMatrix(m *Mat4) Vector3 {
+func NewEulerAnglesFromMatrix(m *Matrix4) Vector3 {
 	rot := Vector3{}
 	rot.SetEulerAnglesFromMatrix(m)
 	return rot

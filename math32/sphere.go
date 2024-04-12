@@ -91,9 +91,9 @@ func (s *Sphere) GetBoundingBox() Box3 {
 	return box
 }
 
-// MulMat4 applies the specified matrix transform to this sphere.
-func (s *Sphere) MulMat4(mat *Mat4) {
-	s.Center = s.Center.MulMat4(mat)
+// MulMatrix4 applies the specified matrix transform to this sphere.
+func (s *Sphere) MulMatrix4(mat *Matrix4) {
+	s.Center = s.Center.MulMatrix4(mat)
 	s.Radius = s.Radius * mat.GetMaxScaleOnAxis()
 }
 

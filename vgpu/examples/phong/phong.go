@@ -177,25 +177,25 @@ func main() {
 	view := vphong.CameraViewMat(campos, math32.Vec3(0, 0, 0), math32.Vec3(0, 1, 0))
 
 	aspect := sf.Format.Aspect()
-	var prjn math32.Mat4
+	var prjn math32.Matrix4
 	prjn.SetVkPerspective(45, aspect, 0.01, 100)
 
-	var model1 math32.Mat4
+	var model1 math32.Matrix4
 	model1.SetRotationY(0.5)
 
-	var model2 math32.Mat4
+	var model2 math32.Matrix4
 	model2.SetTranslation(-2, 0, 0)
 
-	var model3 math32.Mat4
+	var model3 math32.Matrix4
 	model3.SetTranslation(0, 0, -2)
 
-	var model4 math32.Mat4
+	var model4 math32.Matrix4
 	model4.SetTranslation(-1, 0, -2)
 
-	var model5 math32.Mat4
+	var model5 math32.Matrix4
 	model5.SetTranslation(1, 0, -1)
 
-	var floortx math32.Mat4
+	var floortx math32.Matrix4
 	floortx.SetTranslation(0, -2, -2)
 
 	/////////////////////////////

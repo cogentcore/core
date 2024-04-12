@@ -42,16 +42,16 @@ type Camera struct {
 	Far float32
 
 	// view matrix (inverse of the Pose.Matrix)
-	ViewMatrix math32.Mat4 `view:"-"`
+	ViewMatrix math32.Matrix4 `view:"-"`
 
 	// projection matrix, defining the camera perspective / ortho transform
-	PrjnMatrix math32.Mat4 `view:"-"`
+	PrjnMatrix math32.Matrix4 `view:"-"`
 
 	// vulkan projection matrix -- required for vgpu -- produces same effect as PrjnMatrix, which should be used for all other math
-	VkPrjnMatrix math32.Mat4 `view:"-"`
+	VkPrjnMatrix math32.Matrix4 `view:"-"`
 
 	// inverse of the projection matrix
-	InvPrjnMatrix math32.Mat4 `view:"-"`
+	InvPrjnMatrix math32.Matrix4 `view:"-"`
 
 	// frustum of projection -- viewable space defined by 6 planes of a pyrammidal shape
 	Frustum *math32.Frustum `view:"-"`
@@ -94,7 +94,7 @@ func (cm *Camera) UpdateMatrix() {
 		cm.VkPrjnMatrix.SetVkPerspective(cm.FOV, cm.Aspect, cm.Near, cm.Far) // Vk use for render
 	}
 	cm.InvPrjnMatrix.SetInverse(&cm.PrjnMatrix)
-	var proj math32.Mat4
+	var proj math32.Matrix4
 	proj.MulMatrices(&cm.PrjnMatrix, &cm.ViewMatrix)
 	cm.Frustum = math32.NewFrustumFromMatrix(&proj)
 }
@@ -230,7 +230,7 @@ func (cm *Camera) TargetFromView() {
 	cm.CamMu.Lock()
 	trgdist := cm.Pose.Pos.Sub(cm.Target).Length() // distance to existing target
 	tpos := math32.Vec4(0, 0, -trgdist, 1)         // target is that distance along -Z axis in front of me
-	cm.Target = math32.Vector3FromVector4(tpos.MulMat4(&cm.Pose.Matrix))
+	cm.Target = math32.Vector3FromVector4(tpos.MulMatrix4(&cm.Pose.Matrix))
 	cm.CamMu.Unlock()
 }
 
@@ -262,11 +262,11 @@ func (cm *Camera) ZoomTo(pt, size image.Point, zoomPct float32) {
 	fpt := math32.Vec2(float32(pt.X), float32(pt.Y))
 	ndc := fpt.WindowToNDC(fsize, math32.Vector2{}, true) // flipY
 	ndc.Z = -1                                            // at closest point
-	cdir := math32.Vector4FromVector3(ndc, 1).MulMat4(&cm.InvPrjnMatrix)
+	cdir := math32.Vector4FromVector3(ndc, 1).MulMatrix4(&cm.InvPrjnMatrix)
 	cdir.Z = -1
 	cdir.W = 0 // vec
 	// get world position / transform of camera: matrix is inverse of ViewMatrix
-	wdir := math32.Vector3FromVector4(cdir.MulMat4(&cm.Pose.Matrix))
+	wdir := math32.Vector3FromVector4(cdir.MulMatrix4(&cm.Pose.Matrix))
 	del := wdir.MulScalar(zoomPct)
 	cm.Pose.Pos.SetAdd(del)
 	cm.CamMu.Unlock()

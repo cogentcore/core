@@ -96,9 +96,9 @@ func NewDirLight(sc *Scene, name string, lumens float32, color LightColors) *Dir
 }
 
 // ViewDir gets the direction normal vector, pre-computing the view transform
-func (dl *DirLight) ViewDir(viewMat *math32.Mat4) math32.Vector3 {
+func (dl *DirLight) ViewDir(viewMat *math32.Matrix4) math32.Vector3 {
 	// adding the 0 in the 4-vector negates any translation factors from the 4 matrix
-	return dl.Pos.MulMat4AsVector4(viewMat, 0)
+	return dl.Pos.MulMatrix4AsVector4(viewMat, 0)
 }
 
 // PointLight is an omnidirectional light with a position
@@ -133,8 +133,8 @@ func NewPointLight(sc *Scene, name string, lumens float32, color LightColors) *P
 }
 
 // ViewPos gets the position vector, pre-computing the view transform
-func (pl *PointLight) ViewPos(viewMat *math32.Mat4) math32.Vector3 {
-	return pl.Pos.MulMat4AsVector4(viewMat, 1)
+func (pl *PointLight) ViewPos(viewMat *math32.Matrix4) math32.Vector3 {
+	return pl.Pos.MulMatrix4AsVector4(viewMat, 1)
 }
 
 // Spotlight is a light with a position and direction and associated decay factors and angles.
@@ -184,7 +184,7 @@ func (sl *SpotLight) ViewDir() math32.Vector3 {
 	sl.Pose.UpdateMatrix()
 	sl.Pose.UpdateWorldMatrix(idmat)
 	// sl.Pose.UpdateMVPMatrix(viewMat, idmat)
-	vd := math32.Vec3(0, 0, -1).MulMat4AsVector4(&sl.Pose.WorldMatrix, 0).Normal()
+	vd := math32.Vec3(0, 0, -1).MulMatrix4AsVector4(&sl.Pose.WorldMatrix, 0).Normal()
 	return vd
 }
 

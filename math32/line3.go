@@ -48,9 +48,9 @@ func (l *Line3) Dist() float32 {
 	return l.Start.DistTo(l.End)
 }
 
-// MulMat4 returns specified matrix multiplied to this line segment start and end points.
-func (l *Line3) MulMat4(mat *Mat4) Line3 {
-	return Line3{l.Start.MulMat4(mat), l.End.MulMat4(mat)}
+// MulMatrix4 returns specified matrix multiplied to this line segment start and end points.
+func (l *Line3) MulMatrix4(mat *Matrix4) Line3 {
+	return Line3{l.Start.MulMatrix4(mat), l.End.MulMatrix4(mat)}
 }
 
 // IsEqual returns if this line segement is equal to other.

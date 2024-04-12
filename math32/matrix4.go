@@ -12,19 +12,19 @@ package math32
 
 import "errors"
 
-// Mat4 is 4x4 matrix organized internally as column matrix.
-type Mat4 [16]float32
+// Matrix4 is 4x4 matrix organized internally as column matrix.
+type Matrix4 [16]float32
 
-// Identity4 returns a new identity [Mat4] matrix.
-func Identity4() *Mat4 {
-	m := &Mat4{}
+// Identity4 returns a new identity [Matrix4] matrix.
+func Identity4() *Matrix4 {
+	m := &Matrix4{}
 	m.SetIdentity()
 	return m
 }
 
 // Set sets all the elements of this matrix row by row starting at row1, column1,
 // row1, column2, row1, column3 and so forth.
-func (m *Mat4) Set(n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34, n41, n42, n43, n44 float32) {
+func (m *Matrix4) Set(n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34, n41, n42, n43, n44 float32) {
 	m[0] = n11
 	m[4] = n12
 	m[8] = n13
@@ -46,7 +46,7 @@ func (m *Mat4) Set(n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34, n
 // SetFromMatrix3 sets the matrix elements based on a Matrix3,
 // filling in 0's for missing off-diagonal elements,
 // and 1 on the diagonal.
-func (m *Mat4) SetFromMatrix3(src *Matrix3) {
+func (m *Matrix4) SetFromMatrix3(src *Matrix3) {
 	m.Set(
 		src[0], src[3], src[6], 0,
 		src[1], src[4], src[7], 0,
@@ -56,17 +56,17 @@ func (m *Mat4) SetFromMatrix3(src *Matrix3) {
 }
 
 // FromArray set this matrix elements from the array starting at offset.
-func (m *Mat4) FromArray(array []float32, offset int) {
+func (m *Matrix4) FromArray(array []float32, offset int) {
 	copy(m[:], array[offset:])
 }
 
 // ToArray copies this matrix elements to array starting at offset.
-func (m *Mat4) ToArray(array []float32, offset int) {
+func (m *Matrix4) ToArray(array []float32, offset int) {
 	copy(array[offset:], m[:])
 }
 
 // SetIdentity sets this matrix as the identity matrix.
-func (m *Mat4) SetIdentity() {
+func (m *Matrix4) SetIdentity() {
 	m.Set(
 		1, 0, 0, 0,
 		0, 1, 0, 0,
@@ -76,7 +76,7 @@ func (m *Mat4) SetIdentity() {
 }
 
 // SetZero sets this matrix as the zero matrix.
-func (m *Mat4) SetZero() {
+func (m *Matrix4) SetZero() {
 	m.Set(
 		0, 0, 0, 0,
 		0, 0, 0, 0,
@@ -87,19 +87,19 @@ func (m *Mat4) SetZero() {
 
 // CopyFrom copies from source matrix into this matrix
 // (a regular = assign does not copy data, just the pointer!)
-func (m *Mat4) CopyFrom(src *Mat4) {
+func (m *Matrix4) CopyFrom(src *Matrix4) {
 	copy(m[:], src[:])
 }
 
 // CopyPos copies the position elements of the src matrix into this one.
-func (m *Mat4) CopyPos(src *Mat4) {
+func (m *Matrix4) CopyPos(src *Matrix4) {
 	m[12] = src[12]
 	m[13] = src[13]
 	m[14] = src[14]
 }
 
 // ExtractBasis returns the x,y,z basis vectors of this matrix.
-func (m *Mat4) ExtractBasis() (xAxis, yAxis, zAxis Vector3) {
+func (m *Matrix4) ExtractBasis() (xAxis, yAxis, zAxis Vector3) {
 	xAxis.Set(m[0], m[1], m[2])
 	yAxis.Set(m[4], m[5], m[6])
 	zAxis.Set(m[8], m[9], m[10])
@@ -107,7 +107,7 @@ func (m *Mat4) ExtractBasis() (xAxis, yAxis, zAxis Vector3) {
 }
 
 // SetBasis sets this matrix basis vectors from the specified vectors.
-func (m *Mat4) SetBasis(xAxis, yAxis, zAxis Vector3) {
+func (m *Matrix4) SetBasis(xAxis, yAxis, zAxis Vector3) {
 	m.Set(
 		xAxis.X, yAxis.X, zAxis.X, 0,
 		xAxis.Y, yAxis.Y, zAxis.Y, 0,
@@ -117,7 +117,7 @@ func (m *Mat4) SetBasis(xAxis, yAxis, zAxis Vector3) {
 }
 
 // MulMatrices sets this matrix as matrix multiplication a by b (i.e. a*b).
-func (m *Mat4) MulMatrices(a, b *Mat4) {
+func (m *Matrix4) MulMatrices(a, b *Matrix4) {
 	a11 := a[0]
 	a12 := a[4]
 	a13 := a[8]
@@ -174,19 +174,19 @@ func (m *Mat4) MulMatrices(a, b *Mat4) {
 }
 
 // Mul returns this matrix times other matrix (this matrix is unchanged)
-func (m *Mat4) Mul(other *Mat4) *Mat4 {
-	nm := &Mat4{}
+func (m *Matrix4) Mul(other *Matrix4) *Matrix4 {
+	nm := &Matrix4{}
 	nm.MulMatrices(m, other)
 	return nm
 }
 
 // SetMul sets this matrix to this matrix times other
-func (m *Mat4) SetMul(other *Mat4) {
+func (m *Matrix4) SetMul(other *Matrix4) {
 	m.MulMatrices(m, other)
 }
 
 // SetMulScalar multiplies each element of this matrix by the specified scalar.
-func (m *Mat4) MulScalar(s float32) {
+func (m *Matrix4) MulScalar(s float32) {
 	m[0] *= s
 	m[4] *= s
 	m[8] *= s
@@ -207,19 +207,19 @@ func (m *Mat4) MulScalar(s float32) {
 
 // MulVector3Array multiplies count vectors (i.e., 3 sequential array values per each increment in count)
 // in the array starting at start index by this matrix.
-func (m *Mat4) MulVector3Array(array []float32, start, count int) {
+func (m *Matrix4) MulVector3Array(array []float32, start, count int) {
 	var v1 Vector3
 	j := start
 	for i := 0; i < count; i++ {
 		v1.FromArray(array, j)
-		mv := v1.MulMat4(m)
+		mv := v1.MulMatrix4(m)
 		mv.ToArray(array, j)
 		j += 3
 	}
 }
 
 // Determinant calculates and returns the determinat of this matrix.
-func (m *Mat4) Determinant() float32 {
+func (m *Matrix4) Determinant() float32 {
 	n11 := m[0]
 	n12 := m[4]
 	n13 := m[8]
@@ -246,7 +246,7 @@ func (m *Mat4) Determinant() float32 {
 // SetInverse sets this matrix to the inverse of the src matrix.
 // If the src matrix cannot be inverted returns error and
 // sets this matrix to the identity matrix.
-func (m *Mat4) SetInverse(src *Mat4) error {
+func (m *Matrix4) SetInverse(src *Matrix4) error {
 	n11 := src[0]
 	n12 := src[4]
 	n13 := src[8]
@@ -304,14 +304,14 @@ func (m *Mat4) SetInverse(src *Mat4) error {
 // Inverse returns the inverse of this matrix.
 // If the matrix cannot be inverted returns error and
 // sets this matrix to the identity matrix.
-func (m *Mat4) Inverse() (*Mat4, error) {
-	nm := &Mat4{}
+func (m *Matrix4) Inverse() (*Matrix4, error) {
+	nm := &Matrix4{}
 	err := nm.SetInverse(m)
 	return nm, err
 }
 
 // SetTranspose transposes this matrix.
-func (m *Mat4) SetTranspose() {
+func (m *Matrix4) SetTranspose() {
 	m[1], m[4] = m[4], m[1]
 	m[2], m[8] = m[8], m[2]
 	m[6], m[9] = m[9], m[6]
@@ -321,7 +321,7 @@ func (m *Mat4) SetTranspose() {
 }
 
 // Transpose returns the transpose of this matrix.
-func (m *Mat4) Transpose() *Mat4 {
+func (m *Matrix4) Transpose() *Matrix4 {
 	nm := *m
 	nm.SetTranspose()
 	return &nm
@@ -333,8 +333,8 @@ func (m *Mat4) Transpose() *Mat4 {
 // ScaleCols returns matrix with first column of this matrix multiplied by the vector X component,
 // the second column by the vector Y component and the third column by
 // the vector Z component. The matrix fourth column is unchanged.
-func (m *Mat4) ScaleCols(v Vector3) *Mat4 {
-	nm := &Mat4{}
+func (m *Matrix4) ScaleCols(v Vector3) *Matrix4 {
+	nm := &Matrix4{}
 	nm.SetScaleCols(v)
 	return nm
 }
@@ -342,7 +342,7 @@ func (m *Mat4) ScaleCols(v Vector3) *Mat4 {
 // SetScaleCols multiplies the first column of this matrix by the vector X component,
 // the second column by the vector Y component and the third column by
 // the vector Z component. The matrix fourth column is unchanged.
-func (m *Mat4) SetScaleCols(v Vector3) {
+func (m *Matrix4) SetScaleCols(v Vector3) {
 	m[0] *= v.X
 	m[4] *= v.Y
 	m[8] *= v.Z
@@ -358,7 +358,7 @@ func (m *Mat4) SetScaleCols(v Vector3) {
 }
 
 // GetMaxScaleOnAxis returns the maximum scale value of the 3 axes.
-func (m *Mat4) GetMaxScaleOnAxis() float32 {
+func (m *Matrix4) GetMaxScaleOnAxis() float32 {
 	scaleXSq := m[0]*m[0] + m[1]*m[1] + m[2]*m[2]
 	scaleYSq := m[4]*m[4] + m[5]*m[5] + m[6]*m[6]
 	scaleZSq := m[8]*m[8] + m[9]*m[9] + m[10]*m[10]
@@ -366,7 +366,7 @@ func (m *Mat4) GetMaxScaleOnAxis() float32 {
 }
 
 // SetTranslation sets this matrix to a translation matrix from the specified x, y and z values.
-func (m *Mat4) SetTranslation(x, y, z float32) {
+func (m *Matrix4) SetTranslation(x, y, z float32) {
 	m.Set(
 		1, 0, 0, x,
 		0, 1, 0, y,
@@ -376,7 +376,7 @@ func (m *Mat4) SetTranslation(x, y, z float32) {
 }
 
 // SetRotationX sets this matrix to a rotation matrix of angle theta around the X axis.
-func (m *Mat4) SetRotationX(theta float32) {
+func (m *Matrix4) SetRotationX(theta float32) {
 	c := Cos(theta)
 	s := Sin(theta)
 
@@ -389,7 +389,7 @@ func (m *Mat4) SetRotationX(theta float32) {
 }
 
 // SetRotationY sets this matrix to a rotation matrix of angle theta around the Y axis.
-func (m *Mat4) SetRotationY(theta float32) {
+func (m *Matrix4) SetRotationY(theta float32) {
 	c := Cos(theta)
 	s := Sin(theta)
 	m.Set(
@@ -401,7 +401,7 @@ func (m *Mat4) SetRotationY(theta float32) {
 }
 
 // SetRotationZ sets this matrix to a rotation matrix of angle theta around the Z axis.
-func (m *Mat4) SetRotationZ(theta float32) {
+func (m *Matrix4) SetRotationZ(theta float32) {
 	c := Cos(theta)
 	s := Sin(theta)
 	m.Set(
@@ -413,7 +413,7 @@ func (m *Mat4) SetRotationZ(theta float32) {
 }
 
 // SetRotationAxis sets this matrix to a rotation matrix of the specified angle around the specified axis.
-func (m *Mat4) SetRotationAxis(axis *Vector3, angle float32) {
+func (m *Matrix4) SetRotationAxis(axis *Vector3, angle float32) {
 	c := Cos(angle)
 	s := Sin(angle)
 	t := 1 - c
@@ -431,7 +431,7 @@ func (m *Mat4) SetRotationAxis(axis *Vector3, angle float32) {
 }
 
 // SetScale sets this matrix to a scale transformation matrix using the specified x, y and z values.
-func (m *Mat4) SetScale(x, y, z float32) {
+func (m *Matrix4) SetScale(x, y, z float32) {
 	m.Set(
 		x, 0, 0, 0,
 		0, y, 0, 0,
@@ -441,14 +441,14 @@ func (m *Mat4) SetScale(x, y, z float32) {
 }
 
 // SetPos sets this transformation matrix position fields from the specified vector v.
-func (m *Mat4) SetPos(v Vector3) {
+func (m *Matrix4) SetPos(v Vector3) {
 	m[12] = v.X
 	m[13] = v.Y
 	m[14] = v.Z
 }
 
 // Pos returns the position component of the matrix
-func (m *Mat4) Pos() Vector3 {
+func (m *Matrix4) Pos() Vector3 {
 	pos := Vector3{}
 	pos.X = m[12]
 	pos.Y = m[13]
@@ -458,14 +458,14 @@ func (m *Mat4) Pos() Vector3 {
 
 // SetTransform sets this matrix to a transformation matrix for the specified position,
 // rotation specified by the quaternion and scale.
-func (m *Mat4) SetTransform(pos Vector3, quat Quat, scale Vector3) {
+func (m *Matrix4) SetTransform(pos Vector3, quat Quat, scale Vector3) {
 	m.SetRotationFromQuat(quat)
 	m.SetScaleCols(scale)
 	m.SetPos(pos)
 }
 
 // Decompose updates the position vector, quaternion and scale from this transformation matrix.
-func (m *Mat4) Decompose() (pos Vector3, quat Quat, scale Vector3) {
+func (m *Matrix4) Decompose() (pos Vector3, quat Quat, scale Vector3) {
 	sx := Vec3(m[0], m[1], m[2]).Length()
 	sy := Vec3(m[4], m[5], m[6]).Length()
 	sz := Vec3(m[8], m[9], m[10]).Length()
@@ -507,7 +507,7 @@ func (m *Mat4) Decompose() (pos Vector3, quat Quat, scale Vector3) {
 }
 
 // ExtractRotation sets this matrix as rotation matrix from the src transformation matrix.
-func (m *Mat4) ExtractRotation(src *Mat4) {
+func (m *Matrix4) ExtractRotation(src *Matrix4) {
 	scaleX := 1 / Vec3(src[0], src[1], src[2]).Length()
 	scaleY := 1 / Vec3(src[4], src[5], src[6]).Length()
 	scaleZ := 1 / Vec3(src[8], src[9], src[10]).Length()
@@ -526,7 +526,7 @@ func (m *Mat4) ExtractRotation(src *Mat4) {
 }
 
 // SetRotationFromEuler set this a matrix as a rotation matrix from the specified euler angles.
-func (m *Mat4) SetRotationFromEuler(euler Vector3) {
+func (m *Matrix4) SetRotationFromEuler(euler Vector3) {
 	x := euler.X
 	y := euler.Y
 	z := euler.Z
@@ -563,7 +563,7 @@ func (m *Mat4) SetRotationFromEuler(euler Vector3) {
 }
 
 // SetRotationFromQuat sets this matrix as a rotation matrix from the specified quaternion.
-func (m *Mat4) SetRotationFromQuat(q Quat) {
+func (m *Matrix4) SetRotationFromQuat(q Quat) {
 	x := q.X
 	y := q.Y
 	z := q.Z
@@ -607,7 +607,7 @@ func (m *Mat4) SetRotationFromQuat(q Quat) {
 
 // LookAt sets this matrix as view transform matrix with origin at eye,
 // looking at target and using the up vector.
-func (m *Mat4) LookAt(eye, target, up Vector3) {
+func (m *Matrix4) LookAt(eye, target, up Vector3) {
 	z := eye.Sub(target)
 	if z.LengthSq() == 0 {
 		// Eye and target are in the same position
@@ -642,16 +642,16 @@ func (m *Mat4) LookAt(eye, target, up Vector3) {
 	m[10] = z.Z
 }
 
-// NewLookAt returns Mat4 matrix as view transform matrix with origin at eye,
+// NewLookAt returns Matrix4 matrix as view transform matrix with origin at eye,
 // looking at target and using the up vector.
-func NewLookAt(eye, target, up Vector3) *Mat4 {
-	rotMat := &Mat4{}
+func NewLookAt(eye, target, up Vector3) *Matrix4 {
+	rotMat := &Matrix4{}
 	rotMat.LookAt(eye, target, up)
 	return rotMat
 }
 
 // SetFrustum sets this matrix to a projection frustum matrix bounded by the specified planes.
-func (m *Mat4) SetFrustum(left, right, bottom, top, near, far float32) {
+func (m *Matrix4) SetFrustum(left, right, bottom, top, near, far float32) {
 	fmn := far - near
 	m[0] = 2 * near / (right - left)
 	m[1] = 0
@@ -674,7 +674,7 @@ func (m *Mat4) SetFrustum(left, right, bottom, top, near, far float32) {
 // SetPerspective sets this matrix to a perspective projection matrix
 // with the specified field of view in degrees,
 // aspect ratio (width/height) and near and far planes.
-func (m *Mat4) SetPerspective(fov, aspect, near, far float32) {
+func (m *Matrix4) SetPerspective(fov, aspect, near, far float32) {
 	ymax := near * Tan(DegToRad(fov*0.5))
 	ymin := -ymax
 	xmin := ymin * aspect
@@ -683,7 +683,7 @@ func (m *Mat4) SetPerspective(fov, aspect, near, far float32) {
 }
 
 // SetOrthographic sets this matrix to an orthographic projection matrix.
-func (m *Mat4) SetOrthographic(width, height, near, far float32) {
+func (m *Matrix4) SetOrthographic(width, height, near, far float32) {
 	p := far - near
 	z := (far + near) / p
 
@@ -711,7 +711,7 @@ func (m *Mat4) SetOrthographic(width, height, near, far float32) {
 // OpenGL provides a "natural" coordinate system for the physical world
 // so it is useful to retain that for the world system and just convert
 // on the way out to the render using this projection matrix.
-func (m *Mat4) SetVkFrustum(left, right, bottom, top, near, far float32) {
+func (m *Matrix4) SetVkFrustum(left, right, bottom, top, near, far float32) {
 	fmn := far - near
 	m[0] = 2 * near / (right - left)
 	m[1] = 0
@@ -739,7 +739,7 @@ func (m *Mat4) SetVkFrustum(left, right, bottom, top, near, far float32) {
 // on the way out to the render using this projection matrix.
 // The specified field of view is in degrees,
 // aspect ratio (width/height) and near and far planes.
-func (m *Mat4) SetVkPerspective(fov, aspect, near, far float32) {
+func (m *Matrix4) SetVkPerspective(fov, aspect, near, far float32) {
 	ymax := near * Tan(DegToRad(fov*0.5))
 	ymin := -ymax
 	xmin := ymin * aspect

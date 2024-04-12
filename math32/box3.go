@@ -172,9 +172,9 @@ func (b Box3) Union(other Box3) Box3 {
 	return other
 }
 
-// MulMat4 multiplies the specified matrix to the vertices of this bounding box
+// MulMatrix4 multiplies the specified matrix to the vertices of this bounding box
 // and computes the resulting spanning Box3 of the transformed points
-func (b Box3) MulMat4(m *Mat4) Box3 {
+func (b Box3) MulMatrix4(m *Matrix4) Box3 {
 	xax := m[0] * b.Min.X
 	xay := m[1] * b.Min.X
 	xaz := m[2] * b.Min.X
@@ -238,20 +238,20 @@ func (b Box3) IsEqual(other Box3) bool {
 	return other.Min.IsEqual(b.Min) && other.Max.IsEqual(b.Max)
 }
 
-// MVProjToNDC projects bounding box through given MVP model-view-projection Mat4
+// MVProjToNDC projects bounding box through given MVP model-view-projection Matrix4
 // with perspective divide to return normalized display coordinates (NDC).
-func (b Box3) MVProjToNDC(m *Mat4) Box3 {
+func (b Box3) MVProjToNDC(m *Matrix4) Box3 {
 	// all corners: i = min, a = max
 	var cs [8]Vector3
-	cs[0] = Vector4{b.Min.X, b.Min.Y, b.Min.Z, 1}.MulMat4(m).PerspDiv()
-	cs[1] = Vector4{b.Min.X, b.Min.Y, b.Max.Z, 1}.MulMat4(m).PerspDiv()
-	cs[2] = Vector4{b.Min.X, b.Max.Y, b.Min.Z, 1}.MulMat4(m).PerspDiv()
-	cs[3] = Vector4{b.Max.X, b.Min.Y, b.Min.Z, 1}.MulMat4(m).PerspDiv()
+	cs[0] = Vector4{b.Min.X, b.Min.Y, b.Min.Z, 1}.MulMatrix4(m).PerspDiv()
+	cs[1] = Vector4{b.Min.X, b.Min.Y, b.Max.Z, 1}.MulMatrix4(m).PerspDiv()
+	cs[2] = Vector4{b.Min.X, b.Max.Y, b.Min.Z, 1}.MulMatrix4(m).PerspDiv()
+	cs[3] = Vector4{b.Max.X, b.Min.Y, b.Min.Z, 1}.MulMatrix4(m).PerspDiv()
 
-	cs[4] = Vector4{b.Max.X, b.Max.Y, b.Max.Z, 1}.MulMat4(m).PerspDiv()
-	cs[5] = Vector4{b.Max.X, b.Max.Y, b.Min.Z, 1}.MulMat4(m).PerspDiv()
-	cs[6] = Vector4{b.Max.X, b.Min.Y, b.Max.Z, 1}.MulMat4(m).PerspDiv()
-	cs[7] = Vector4{b.Min.X, b.Max.Y, b.Max.Z, 1}.MulMat4(m).PerspDiv()
+	cs[4] = Vector4{b.Max.X, b.Max.Y, b.Max.Z, 1}.MulMatrix4(m).PerspDiv()
+	cs[5] = Vector4{b.Max.X, b.Max.Y, b.Min.Z, 1}.MulMatrix4(m).PerspDiv()
+	cs[6] = Vector4{b.Max.X, b.Min.Y, b.Max.Z, 1}.MulMatrix4(m).PerspDiv()
+	cs[7] = Vector4{b.Min.X, b.Max.Y, b.Max.Z, 1}.MulMatrix4(m).PerspDiv()
 
 	nb := B3Empty()
 	for i := 0; i < 8; i++ {
