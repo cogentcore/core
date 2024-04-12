@@ -221,7 +221,7 @@ func (mv *MapViewInline) MapDelete(key reflect.Value) {
 	if reflectx.AnyIsNil(mv.Map) {
 		return
 	}
-	reflectx.MapDeleteValue(mv.Map, reflectx.NonPtrValue(key))
+	reflectx.MapDelete(mv.Map, reflectx.NonPtrValue(key))
 
 	mv.SetChanged()
 	mv.Update()

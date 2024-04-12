@@ -172,7 +172,7 @@ func ToValue(val any, tags string) Value {
 			return &SliceValue{}
 		}
 	case vk == reflect.Map:
-		sz := reflectx.MapStructElsN(val)
+		sz := reflectx.NumMapStructElements(val)
 		if !forceNoInline && (forceInline || sz <= core.SystemSettings.MapInlineLength) {
 			return &MapInlineValue{}
 		} else {

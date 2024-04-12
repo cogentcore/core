@@ -13,8 +13,8 @@ import (
 	"time"
 )
 
-// This file contains helpful functions for dealing with maps, in the reflect
-// system
+// This file contains helpful functions for dealing with maps
+// in the reflect system
 
 // MakeMap makes a map that is actually addressable, getting around the hidden
 // interface{} that reflect.MakeMap makes, by calling UnhideIfaceValue (from ptrs.go)
@@ -36,9 +36,10 @@ func MapKeyType(mp any) reflect.Type {
 	return NonPtrType(reflect.TypeOf(mp)).Key()
 }
 
-// MapElsValueFun calls a function on all the "basic" elements of given map --
-// iterates over maps within maps (but not structs, slices within maps).
-func MapElsValueFun(mp any, fun func(mp any, typ reflect.Type, key, val reflect.Value) bool) bool {
+// WalkMapElements calls a function on all the "basic" elements of
+// the given map; it iterates over maps within maps (but not structs
+// and slices within maps).
+func WalkMapElements(mp any, fun func(mp any, typ reflect.Type, key, val reflect.Value) bool) bool {
 	vv := reflect.ValueOf(mp)
 	if mp == nil {
 		log.Printf("reflectx.MapElsValueFun: must pass a non-nil pointer to the map: %v\n", mp)
@@ -62,7 +63,7 @@ func MapElsValueFun(mp any, fun func(mp any, typ reflect.Type, key, val reflect.
 		vt := reflect.TypeOf(vali)
 		// fmt.Printf("key %v val %v kind: %v\n", key, val, vt.Kind())
 		if vt.Kind() == reflect.Map {
-			rval = MapElsValueFun(vali, fun)
+			rval = WalkMapElements(vali, fun)
 			if !rval {
 				break
 			}
@@ -81,22 +82,10 @@ func MapElsValueFun(mp any, fun func(mp any, typ reflect.Type, key, val reflect.
 	return rval
 }
 
-// MapElsN returns number of elemental fields in given map type
-func MapElsN(mp any) int {
-	n := 0
-	falseErr := MapElsValueFun(mp, func(mp any, typ reflect.Type, key, val reflect.Value) bool {
-		n++
-		return true
-	})
-	if falseErr == false {
-		return 0
-	}
-	return n
-}
-
-// MapStructElsValueFun calls a function on all the "basic" elements of given
-// map or struct -- iterates over maps within maps and fields within structs
-func MapStructElsValueFun(mp any, fun func(mp any, typ reflect.Type, val reflect.Value) bool) bool {
+// WalkMapStructElements calls a function on all the "basic" elements
+// of the given map or struct; it iterates over maps within maps and
+// fields within structs.
+func WalkMapStructElements(mp any, fun func(mp any, typ reflect.Type, val reflect.Value) bool) bool {
 	vv := reflect.ValueOf(mp)
 	if mp == nil {
 		log.Printf("reflectx.MapElsValueFun: must pass a non-nil pointer to the map: %v\n", mp)
@@ -125,12 +114,12 @@ func MapStructElsValueFun(mp any, fun func(mp any, typ reflect.Type, val reflect
 			vtk := vt.Kind()
 			switch vtk {
 			case reflect.Map:
-				rval = MapStructElsValueFun(vali, fun)
+				rval = WalkMapStructElements(vali, fun)
 				if !rval {
 					break
 				}
 			case reflect.Struct:
-				rval = MapStructElsValueFun(vali, fun)
+				rval = WalkMapStructElements(vali, fun)
 				if !rval {
 					break
 				}
@@ -155,12 +144,12 @@ func MapStructElsValueFun(mp any, fun func(mp any, typ reflect.Type, val reflect
 			vtk := f.Type.Kind()
 			switch vtk {
 			case reflect.Map:
-				rval = MapStructElsValueFun(vfi, fun)
+				rval = WalkMapStructElements(vfi, fun)
 				if !rval {
 					break
 				}
 			case reflect.Struct:
-				rval = MapStructElsValueFun(vfi, fun)
+				rval = WalkMapStructElements(vfi, fun)
 				if !rval {
 					break
 				}
@@ -178,10 +167,11 @@ func MapStructElsValueFun(mp any, fun func(mp any, typ reflect.Type, val reflect
 	return rval
 }
 
-// MapStructElsN returns number of elemental fields in given map / struct types
-func MapStructElsN(mp any) int {
+// NumMapStructElements returns the number of elemental fields
+// in the given map / struct, using [WalkMapStructElements].
+func NumMapStructElements(mp any) int {
 	n := 0
-	falseErr := MapStructElsValueFun(mp, func(mp any, typ reflect.Type, val reflect.Value) bool {
+	falseErr := WalkMapStructElements(mp, func(mp any, typ reflect.Type, val reflect.Value) bool {
 		n++
 		return true
 	})
@@ -191,7 +181,7 @@ func MapStructElsN(mp any) int {
 	return n
 }
 
-// MapAdd adds a new blank entry to the map
+// MapAdd adds a new blank entry to the map.
 func MapAdd(mv any) {
 	mpv := reflect.ValueOf(mv)
 	mpvnp := NonPtrValue(mpv)
@@ -211,22 +201,14 @@ func MapAdd(mv any) {
 	mpvnp.SetMapIndex(nkey.Elem(), nval.Elem())
 }
 
-// MapDelete deletes a key-value from the map (set key to a zero value)
-func MapDelete(mv any, key any) {
-	mpv := reflect.ValueOf(mv)
-	mpvnp := NonPtrValue(mpv)
-	mpvnp.SetMapIndex(reflect.ValueOf(key), reflect.Value{}) // delete
-}
-
-// MapDeleteValue deletes a key-value from the map (set key to a zero value)
-// -- key is already a reflect.Value
-func MapDeleteValue(mv any, key reflect.Value) {
+// MapDelete deletes the given key from the given map.
+func MapDelete(mv any, key reflect.Value) {
 	mpv := reflect.ValueOf(mv)
 	mpvnp := NonPtrValue(mpv)
 	mpvnp.SetMapIndex(key, reflect.Value{}) // delete
 }
 
-// MapDeleteAll deletes everything from map
+// MapDeleteAll deletes everything from the given map.
 func MapDeleteAll(mv any) {
 	mpv := reflect.ValueOf(mv)
 	mpvnp := NonPtrValue(mpv)
@@ -239,8 +221,8 @@ func MapDeleteAll(mv any) {
 	}
 }
 
-// MapSort sorts keys of map either by key or by value, returns those keys as
-// a slice of reflect.Value, as returned by reflect.Value.MapKeys() method
+// MapSort sorts the keys of the map either by key or by value,
+// and returns those keys as a slice of [reflect.Value]s.
 func MapSort(mp any, byKey, ascending bool) []reflect.Value {
 	mpv := reflect.ValueOf(mp)
 	mpvnp := NonPtrValue(mpv)
@@ -253,7 +235,7 @@ func MapSort(mp any, byKey, ascending bool) []reflect.Value {
 	return keys
 }
 
-// MapValueSort sorts keys of map by values
+// MapValueSort sorts the keys of the given map by their values.
 func MapValueSort(mpvnp reflect.Value, keys []reflect.Value, ascending bool) error {
 	if len(keys) == 0 {
 		return nil
@@ -343,10 +325,10 @@ func MapValueSort(mpvnp reflect.Value, keys []reflect.Value, ascending bool) err
 	return err
 }
 
-// SetMapRobust robustly sets a map value using reflect.Value representations
-// of the map, key, and value elements, ensuring that the proper types are
-// used for the key and value elements using sensible conversions.
-// map value must be a valid map value -- that is not checked.
+// SetMapRobust robustly sets a map value using [reflect.Value]
+// representations of the map, key, and value elements, ensuring that the
+// proper types are used for the key and value elements using sensible
+// conversions.
 func SetMapRobust(mp, ky, val reflect.Value) bool {
 	mtyp := mp.Type()
 	if mtyp.Kind() != reflect.Map {
@@ -375,10 +357,10 @@ func SetMapRobust(mp, ky, val reflect.Value) bool {
 	return true
 }
 
-// CopyMapRobust robustly copies maps using SetRobust method for the elements.
-func CopyMapRobust(to, fm any) error {
+// CopyMapRobust robustly copies maps.
+func CopyMapRobust(to, from any) error {
 	tov := reflect.ValueOf(to)
-	fmv := reflect.ValueOf(fm)
+	fmv := reflect.ValueOf(from)
 	tonp := NonPtrValue(tov)
 	fmnp := NonPtrValue(fmv)
 	totyp := tonp.Type()
