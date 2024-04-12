@@ -487,15 +487,15 @@ func (sv *SliceViewBase) SetSlice(sl any) *SliceViewBase {
 
 	sv.SetSliceBase()
 	sv.Slice = sl
-	sv.SliceNPVal = reflectx.NonPtrValue(reflect.ValueOf(sv.Slice))
-	isArray := reflectx.NonPtrType(reflect.TypeOf(sl)).Kind() == reflect.Array
+	sv.SliceNPVal = reflectx.NonPointerValue(reflect.ValueOf(sv.Slice))
+	isArray := reflectx.NonPointerType(reflect.TypeOf(sl)).Kind() == reflect.Array
 	sv.SetFlag(isArray, SliceViewIsArray)
 	// make sure elements aren't nil to prevent later panics
 	for i := 0; i < sv.SliceNPVal.Len(); i++ {
 		val := sv.SliceNPVal.Index(i)
 		k := val.Kind()
 		if (k == reflect.Chan || k == reflect.Func || k == reflect.Interface || k == reflect.Map || k == reflect.Pointer || k == reflect.Slice) && val.IsNil() {
-			val.Set(reflect.New(reflectx.NonPtrType(val.Type())))
+			val.Set(reflect.New(reflectx.NonPointerType(val.Type())))
 		}
 	}
 	sv.ElVal = reflectx.SliceElValue(sl)
@@ -689,7 +689,7 @@ func (sv *SliceViewBase) ConfigRows() {
 		ridx := i * nWidgPerRow
 		var val reflect.Value
 		if si < sv.SliceSize {
-			val = reflectx.OnePtrUnderlyingValue(sv.SliceNPVal.Index(si)) // deal with pointer lists
+			val = reflectx.OnePointerUnderlyingValue(sv.SliceNPVal.Index(si)) // deal with pointer lists
 		} else {
 			val = sv.ElVal
 		}
@@ -730,11 +730,11 @@ func (sv *SliceViewBase) ConfigRows() {
 		if i == 0 {
 			sv.MaxWidth = 0
 			_, isString := vv.(*StringValue)
-			npv := reflectx.NonPtrValue(val)
+			npv := reflectx.NonPointerValue(val)
 			if isString && sv.SliceSize > 0 && npv.Kind() == reflect.String {
 				mxw := 0
 				for rw := 0; rw < sv.SliceSize; rw++ {
-					val := reflectx.OnePtrUnderlyingValue(sv.SliceNPVal.Index(rw)).Elem()
+					val := reflectx.OnePointerUnderlyingValue(sv.SliceNPVal.Index(rw)).Elem()
 					str := val.String()
 					mxw = max(mxw, len(str))
 				}
@@ -798,7 +798,7 @@ func (sv *SliceViewBase) UpdateWidgets() {
 		}
 		w.SetState(invis, states.Invisible)
 		if si < sv.SliceSize {
-			val := reflectx.OnePtrUnderlyingValue(sv.SliceNPVal.Index(si)) // deal with pointer lists
+			val := reflectx.OnePointerUnderlyingValue(sv.SliceNPVal.Index(si)) // deal with pointer lists
 			vv.SetSliceValue(val, sv.Slice, si, sv.ViewPath)
 			vv.SetReadOnly(sv.IsReadOnly())
 			vv.Update()
@@ -848,7 +848,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 
 	sltyp := reflectx.SliceElType(sv.Slice) // has pointer if it is there
 	isNode := tree.IsNode(sltyp)
-	slptr := sltyp.Kind() == reflect.Ptr
+	slptr := sltyp.Kind() == reflect.Pointer
 
 	svl := reflect.ValueOf(sv.Slice)
 	sz := sv.SliceSize
@@ -877,7 +877,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 			}
 		}
 	} else {
-		nval := reflect.New(reflectx.NonPtrType(sltyp)) // make the concrete el
+		nval := reflect.New(reflectx.NonPointerType(sltyp)) // make the concrete el
 		if !slptr {
 			nval = nval.Elem() // use concrete value
 		}
@@ -892,7 +892,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 		idx = sz
 	}
 
-	sv.SliceNPVal = reflectx.NonPtrValue(reflect.ValueOf(sv.Slice)) // need to update after changes
+	sv.SliceNPVal = reflectx.NonPointerValue(reflect.ValueOf(sv.Slice)) // need to update after changes
 
 	sv.This().(SliceViewer).UpdateSliceSize()
 
@@ -989,7 +989,7 @@ func (sv *SliceViewBase) SliceVal(idx int) any {
 		fmt.Printf("views.SliceViewBase: slice index out of range: %v\n", idx)
 		return nil
 	}
-	val := reflectx.OnePtrUnderlyingValue(sv.SliceNPVal.Index(idx)) // deal with pointer lists
+	val := reflectx.OnePointerUnderlyingValue(sv.SliceNPVal.Index(idx)) // deal with pointer lists
 	vali := val.Interface()
 	return vali
 }
@@ -1140,10 +1140,10 @@ func (sv *SliceViewBase) SelectValue(val string) bool {
 // SliceIndexByValue searches for first index that contains given value in slice
 // -- returns false if not found
 func SliceIndexByValue(slc any, fldVal any) (int, bool) {
-	svnp := reflectx.NonPtrValue(reflect.ValueOf(slc))
+	svnp := reflectx.NonPointerValue(reflect.ValueOf(slc))
 	sz := svnp.Len()
 	for idx := 0; idx < sz; idx++ {
-		rval := reflectx.NonPtrValue(svnp.Index(idx))
+		rval := reflectx.NonPointerValue(svnp.Index(idx))
 		if rval.Interface() == fldVal {
 			return idx, true
 		}
@@ -1695,7 +1695,7 @@ func (sv *SliceViewBase) PasteAtIndex(md mimedata.Mimes, idx int) {
 		idx++
 	}
 
-	sv.SliceNPVal = reflectx.NonPtrValue(reflect.ValueOf(sv.Slice)) // need to update after changes
+	sv.SliceNPVal = reflectx.NonPointerValue(reflect.ValueOf(sv.Slice)) // need to update after changes
 
 	sv.SetChanged()
 	sv.SelectIndexAction(idx, events.SelectOne)

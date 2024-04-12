@@ -143,7 +143,7 @@ func (tv *TableView) SetSlice(sl any) *TableView {
 	}
 
 	slpTyp := reflect.TypeOf(sl)
-	if slpTyp.Kind() != reflect.Ptr {
+	if slpTyp.Kind() != reflect.Pointer {
 		slog.Error("TableView requires that you pass a pointer to a slice of struct elements, but type is not a Ptr", "type", slpTyp)
 		return tv
 	}
@@ -151,7 +151,7 @@ func (tv *TableView) SetSlice(sl any) *TableView {
 		slog.Error("TableView requires that you pass a pointer to a slice of struct elements, but ptr doesn't point to a slice", "type", slpTyp.Elem())
 		return tv
 	}
-	eltyp := reflectx.NonPtrType(reflectx.SliceElType(sl))
+	eltyp := reflectx.NonPointerType(reflectx.SliceElType(sl))
 	if eltyp.Kind() != reflect.Struct {
 		slog.Error("TableView requires that you pass a slice of struct elements, but type is not a Struct", "type", eltyp.String())
 		return tv
@@ -159,8 +159,8 @@ func (tv *TableView) SetSlice(sl any) *TableView {
 
 	tv.SetSliceBase()
 	tv.Slice = sl
-	tv.SliceNPVal = reflectx.NonPtrValue(reflect.ValueOf(tv.Slice))
-	tv.ElVal = reflectx.OnePtrValue(reflectx.SliceElValue(sl))
+	tv.SliceNPVal = reflectx.NonPointerValue(reflect.ValueOf(tv.Slice))
+	tv.ElVal = reflectx.OnePointerValue(reflectx.SliceElValue(sl))
 	tv.CacheVisFields()
 	tv.Update()
 	return tv
@@ -169,7 +169,7 @@ func (tv *TableView) SetSlice(sl any) *TableView {
 // StructType sets the StruType and returns the type of the struct within the
 // slice -- this is a non-ptr type even if slice has pointers to structs
 func (tv *TableView) StructType() reflect.Type {
-	tv.StruType = reflectx.NonPtrType(reflectx.SliceElType(tv.Slice))
+	tv.StruType = reflectx.NonPointerType(reflectx.SliceElType(tv.Slice))
 	return tv.StruType
 }
 
@@ -348,7 +348,7 @@ func (tv *TableView) ConfigRows() {
 		ridx := i * nWidgPerRow
 		var val reflect.Value
 		if si < tv.SliceSize {
-			val = reflectx.OnePtrUnderlyingValue(tv.SliceNPVal.Index(si)) // deal with pointer lists
+			val = reflectx.OnePointerUnderlyingValue(tv.SliceNPVal.Index(si)) // deal with pointer lists
 		} else {
 			val = tv.ElVal
 		}
@@ -407,7 +407,7 @@ func (tv *TableView) ConfigRows() {
 				if !isicon && fval.Kind() == reflect.String {
 					mxw := 0
 					for rw := 0; rw < tv.SliceSize; rw++ {
-						sval := reflectx.OnePtrUnderlyingValue(tv.SliceNPVal.Index(rw))
+						sval := reflectx.OnePointerUnderlyingValue(tv.SliceNPVal.Index(rw))
 						elem := sval.Elem()
 						if !elem.IsValid() {
 							continue
@@ -498,7 +498,7 @@ func (tv *TableView) UpdateWidgets() {
 
 			var val reflect.Value
 			if !invis {
-				val = reflectx.OnePtrUnderlyingValue(tv.SliceNPVal.Index(si)) // deal with pointer lists
+				val = reflectx.OnePointerUnderlyingValue(tv.SliceNPVal.Index(si)) // deal with pointer lists
 				if val.IsZero() {
 					val = tv.ElVal
 				}
@@ -738,9 +738,9 @@ func (tv *TableView) SelectFieldVal(fld, val string) bool {
 // StructSliceIndexByValue searches for first index that contains given value in field of
 // given name.
 func StructSliceIndexByValue(struSlice any, fldName string, fldVal any) (int, error) {
-	svnp := reflectx.NonPtrValue(reflect.ValueOf(struSlice))
+	svnp := reflectx.NonPointerValue(reflect.ValueOf(struSlice))
 	sz := svnp.Len()
-	struTyp := reflectx.NonPtrType(reflect.TypeOf(struSlice).Elem().Elem())
+	struTyp := reflectx.NonPointerType(reflect.TypeOf(struSlice).Elem().Elem())
 	fld, ok := struTyp.FieldByName(fldName)
 	if !ok {
 		err := fmt.Errorf("core.StructSliceRowByValue: field name: %v not found", fldName)
@@ -749,7 +749,7 @@ func StructSliceIndexByValue(struSlice any, fldName string, fldVal any) (int, er
 	}
 	fldIndex := fld.Index
 	for idx := 0; idx < sz; idx++ {
-		rval := reflectx.OnePtrUnderlyingValue(svnp.Index(idx))
+		rval := reflectx.OnePointerUnderlyingValue(svnp.Index(idx))
 		fval := rval.Elem().FieldByIndex(fldIndex)
 		if !fval.IsValid() {
 			continue
@@ -765,9 +765,9 @@ func (tv *TableView) EditIndex(idx int) {
 	if idx < 0 || idx >= tv.SliceNPVal.Len() {
 		return
 	}
-	val := reflectx.OnePtrUnderlyingValue(tv.SliceNPVal.Index(idx))
+	val := reflectx.OnePointerUnderlyingValue(tv.SliceNPVal.Index(idx))
 	stru := val.Interface()
-	tynm := reflectx.NonPtrType(val.Type()).Name()
+	tynm := reflectx.NonPointerType(val.Type()).Name()
 	lbl := core.ToLabel(stru)
 	if lbl != "" {
 		tynm += ": " + lbl

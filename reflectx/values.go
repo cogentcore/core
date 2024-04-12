@@ -28,7 +28,7 @@ func AnyIsNil(v any) bool {
 	}
 	rv := reflect.ValueOf(v)
 	vk := rv.Kind()
-	if vk == reflect.Ptr || vk == reflect.Interface || vk == reflect.Map || vk == reflect.Slice || vk == reflect.Func || vk == reflect.Chan {
+	if vk == reflect.Pointer || vk == reflect.Interface || vk == reflect.Map || vk == reflect.Slice || vk == reflect.Func || vk == reflect.Chan {
 		return rv.IsNil()
 	}
 	return false
@@ -173,7 +173,7 @@ func ToBool(v any) (bool, error) {
 	if AnyIsNil(v) {
 		return false, fmt.Errorf("got nil value of type %T", v)
 	}
-	npv := NonPtrValue(reflect.ValueOf(v))
+	npv := NonPointerValue(reflect.ValueOf(v))
 	vk := npv.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
@@ -330,7 +330,7 @@ func ToInt(v any) (int64, error) {
 	if AnyIsNil(v) {
 		return 0, fmt.Errorf("got nil value of type %T", v)
 	}
-	npv := NonPtrValue(reflect.ValueOf(v))
+	npv := NonPointerValue(reflect.ValueOf(v))
 	vk := npv.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
@@ -487,7 +487,7 @@ func ToFloat(v any) (float64, error) {
 	if AnyIsNil(v) {
 		return 0, fmt.Errorf("got nil value of type %T", v)
 	}
-	npv := NonPtrValue(reflect.ValueOf(v))
+	npv := NonPointerValue(reflect.ValueOf(v))
 	vk := npv.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
@@ -644,7 +644,7 @@ func ToFloat32(v any) (float32, error) {
 	if AnyIsNil(v) {
 		return 0, fmt.Errorf("got nil value of type %T", v)
 	}
-	npv := NonPtrValue(reflect.ValueOf(v))
+	npv := NonPointerValue(reflect.ValueOf(v))
 	vk := npv.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
@@ -829,7 +829,7 @@ func ToString(v any) string {
 	if AnyIsNil(v) {
 		return nilstr
 	}
-	npv := NonPtrValue(reflect.ValueOf(v))
+	npv := NonPointerValue(reflect.ValueOf(v))
 	vk := npv.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
@@ -989,12 +989,12 @@ func SetRobust(to, from any) error {
 		return fmt.Errorf("got nil destination value")
 	}
 	v := reflect.ValueOf(to)
-	vnp := NonPtrValue(v)
+	vnp := NonPointerValue(v)
 	if !vnp.IsValid() {
 		return fmt.Errorf("got invalid destination value %v of type %T", to, to)
 	}
 	typ := vnp.Type()
-	vp := OnePtrValue(vnp)
+	vp := OnePointerValue(vnp)
 	vk := vnp.Kind()
 	if !vp.Elem().CanSet() {
 		return fmt.Errorf("destination value cannot be set; it must be a variable or field, not a const or tmp or other value that cannot be set (value: %v of type %T)", vp, vp)
@@ -1034,7 +1034,7 @@ func SetRobust(to, from any) error {
 		vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
 		return nil
 	case vk == reflect.Struct:
-		if NonPtrType(reflect.TypeOf(from)).Kind() == reflect.String {
+		if NonPointerType(reflect.TypeOf(from)).Kind() == reflect.String {
 			err := json.Unmarshal([]byte(ToString(from)), to) // todo: this is not working -- see what marshal says, etc
 			if err != nil {
 				marsh, _ := json.Marshal(to)
@@ -1043,7 +1043,7 @@ func SetRobust(to, from any) error {
 			return nil
 		}
 	case vk == reflect.Slice:
-		if NonPtrType(reflect.TypeOf(from)).Kind() == reflect.String {
+		if NonPointerType(reflect.TypeOf(from)).Kind() == reflect.String {
 			err := json.Unmarshal([]byte(ToString(from)), to)
 			if err != nil {
 				marsh, _ := json.Marshal(to)
@@ -1053,7 +1053,7 @@ func SetRobust(to, from any) error {
 		}
 		return CopySliceRobust(to, from)
 	case vk == reflect.Map:
-		if NonPtrType(reflect.TypeOf(from)).Kind() == reflect.String {
+		if NonPointerType(reflect.TypeOf(from)).Kind() == reflect.String {
 			err := json.Unmarshal([]byte(ToString(from)), to)
 			if err != nil {
 				marsh, _ := json.Marshal(to)
@@ -1064,7 +1064,7 @@ func SetRobust(to, from any) error {
 		return CopyMapRobust(to, from)
 	}
 
-	fv := NonPtrValue(reflect.ValueOf(from))
+	fv := NonPointerValue(reflect.ValueOf(from))
 	// just set it if possible to assign
 	if fv.Type().AssignableTo(typ) {
 		vp.Elem().Set(fv)

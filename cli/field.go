@@ -71,19 +71,19 @@ func AddFieldsImpl(obj any, path string, cmdPath string, allFields *Fields, used
 	if ov.Kind() == reflect.Pointer && ov.IsNil() {
 		return
 	}
-	val := reflectx.NonPtrValue(ov)
+	val := reflectx.NonPointerValue(ov)
 	typ := val.Type()
 
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		fv := val.Field(i)
-		pval := reflectx.PtrValue(fv)
+		pval := reflectx.PointerValue(fv)
 		cmdTag, hct := f.Tag.Lookup("cmd")
 		cmds := strings.Split(cmdTag, ",")
 		if hct && !slices.Contains(cmds, cmd) && !slices.Contains(cmds, AddAllFields) { // if we are associated with a different command, skip
 			continue
 		}
-		if reflectx.NonPtrType(f.Type).Kind() == reflect.Struct {
+		if reflectx.NonPointerType(f.Type).Kind() == reflect.Struct {
 			nwPath := f.Name
 			if path != "" {
 				nwPath = path + "." + nwPath
@@ -98,7 +98,7 @@ func AddFieldsImpl(obj any, path string, cmdPath string, allFields *Fields, used
 				nwCmdPath = cmdPath + "." + nwCmdPath
 			}
 
-			AddFieldsImpl(reflectx.PtrValue(fv).Interface(), nwPath, nwCmdPath, allFields, usedNames, cmd)
+			AddFieldsImpl(reflectx.PointerValue(fv).Interface(), nwPath, nwCmdPath, allFields, usedNames, cmd)
 			// we still add ourself if we are a struct, so we keep going,
 			// unless we are associated with a command, in which case there
 			// is no point in adding ourself

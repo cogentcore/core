@@ -83,8 +83,8 @@ func (sv *SliceViewInline) SetStyles() {
 					}
 					vpath = JoinViewPath(sv.ViewPath, newPath)
 				} else {
-					elType := reflectx.NonPtrType(reflect.TypeOf(sv.Slice).Elem().Elem())
-					title = "Slice of " + reflectx.NonPtrType(elType).Name()
+					elType := reflectx.NonPointerType(reflect.TypeOf(sv.Slice).Elem().Elem())
+					title = "Slice of " + reflectx.NonPointerType(elType).Name()
 				}
 				d := core.NewBody().AddTitle(title)
 				NewSliceView(d).SetViewPath(vpath).SetSlice(sv.Slice)
@@ -112,7 +112,7 @@ func (sv *SliceViewInline) SetSlice(sl any) *SliceViewInline {
 	}
 	if newslc {
 		sv.Slice = sl
-		sv.IsArray = reflectx.NonPtrType(reflect.TypeOf(sl)).Kind() == reflect.Array
+		sv.IsArray = reflectx.NonPointerType(reflect.TypeOf(sl)).Kind() == reflect.Array
 		sv.IsFixedLen = false
 		if sv.SliceValue != nil {
 			_, sv.IsFixedLen = sv.SliceValue.Tag("fixed-len")
@@ -132,12 +132,12 @@ func (sv *SliceViewInline) Config() {
 	// always start fresh!
 	sv.Values = make([]Value, 0)
 
-	sl := reflectx.NonPtrValue(reflectx.OnePtrUnderlyingValue(reflect.ValueOf(sv.Slice)))
+	sl := reflectx.NonPointerValue(reflectx.OnePointerUnderlyingValue(reflect.ValueOf(sv.Slice)))
 	sv.ConfigSize = sl.Len()
 
 	sz := min(sl.Len(), core.SystemSettings.SliceInlineLength)
 	for i := 0; i < sz; i++ {
-		val := reflectx.OnePtrUnderlyingValue(sl.Index(i)) // deal with pointer lists
+		val := reflectx.OnePointerUnderlyingValue(sl.Index(i)) // deal with pointer lists
 		vv := ToValue(val.Interface(), "")
 		vv.SetSliceValue(val, sv.Slice, i, sv.ViewPath)
 		vtyp := vv.WidgetType()
@@ -248,7 +248,7 @@ func (sv *SliceViewInline) SliceSizeChanged() bool {
 	if reflectx.AnyIsNil(sv.Slice) {
 		return sv.ConfigSize != 0
 	}
-	sl := reflectx.NonPtrValue(reflectx.OnePtrUnderlyingValue(reflect.ValueOf(sv.Slice)))
+	sl := reflectx.NonPointerValue(reflectx.OnePointerUnderlyingValue(reflect.ValueOf(sv.Slice)))
 	return sv.ConfigSize != sl.Len()
 }
 

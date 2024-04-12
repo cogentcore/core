@@ -368,7 +368,7 @@ func (v *TimeValue) Update() {
 
 // TimeValue decodes the value into a *time.Time value, also handling the [fileinfo.FileTime] case.
 func (v *TimeValue) TimeValue() *time.Time {
-	tmi := reflectx.PtrValue(v.Value).Interface()
+	tmi := reflectx.PointerValue(v.Value).Interface()
 	switch v := tmi.(type) {
 	case *time.Time:
 		return v
@@ -403,14 +403,14 @@ func (v *DurationValue) Config() {
 	ch = core.NewChooser(v.Widget, "unit").SetTooltip("The unit of time").SetItems(units...)
 	ch.OnChange(func(e events.Event) {
 		// we update the value to fit the unit
-		npv := reflectx.NonPtrValue(v.Value)
+		npv := reflectx.NonPointerValue(v.Value)
 		dur := npv.Interface().(time.Duration)
 		sp.SetValue(float32(dur) / float32(durationUnitsMap[ch.CurrentItem.Value.(string)]))
 	})
 }
 
 func (v *DurationValue) Update() {
-	npv := reflectx.NonPtrValue(v.Value)
+	npv := reflectx.NonPointerValue(v.Value)
 	dur := npv.Interface().(time.Duration)
 	un := "seconds"
 	undur := time.Duration(0)

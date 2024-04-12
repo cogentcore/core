@@ -9,74 +9,73 @@ import (
 )
 
 // These are a set of consistently named functions for navigating pointer
-// types and values within the reflect system
+// types and values within the reflect system.
 
-// NonPtrType returns the non-pointer underlying type
-func NonPtrType(typ reflect.Type) reflect.Type {
+// NonPointerType returns a non-pointer version of the given type.
+func NonPointerType(typ reflect.Type) reflect.Type {
 	if typ == nil {
 		return typ
 	}
-	for typ.Kind() == reflect.Ptr {
+	for typ.Kind() == reflect.Pointer {
 		typ = typ.Elem()
 	}
 	return typ
 }
 
-// PtrType returns the pointer type for given type, if given type is not already a Ptr
-func PtrType(typ reflect.Type) reflect.Type {
+// PointerType returns the pointer version of the given type
+// if it is not already a pointer type.
+func PointerType(typ reflect.Type) reflect.Type {
 	if typ == nil {
 		return typ
 	}
-	if typ.Kind() != reflect.Ptr {
-		typ = reflect.PtrTo(typ)
+	if typ.Kind() != reflect.Pointer {
+		typ = reflect.PointerTo(typ)
 	}
 	return typ
 }
 
-// OnePtrType returns a type that is exactly one pointer away from a non-pointer type
-func OnePtrType(typ reflect.Type) reflect.Type {
+// OnePointerType returns a type that is exactly one pointer away
+// from a non-pointer type.
+func OnePointerType(typ reflect.Type) reflect.Type {
 	if typ == nil {
 		return typ
 	}
-	if typ.Kind() != reflect.Ptr {
-		typ = reflect.PtrTo(typ)
+	if typ.Kind() != reflect.Pointer {
+		typ = reflect.PointerTo(typ)
 	} else {
-		for typ.Elem().Kind() == reflect.Ptr {
+		for typ.Elem().Kind() == reflect.Pointer {
 			typ = typ.Elem()
 		}
 	}
 	return typ
 }
 
-/////////////////////////////////////////////////
-//  reflect.Value versions
-
-// NonPtrValue returns the non-pointer underlying value
-func NonPtrValue(v reflect.Value) reflect.Value {
-	for v.Kind() == reflect.Ptr {
+// NonPointerValue returns a non-pointer version of the given value.
+func NonPointerValue(v reflect.Value) reflect.Value {
+	for v.Kind() == reflect.Pointer {
 		v = v.Elem()
 	}
 	return v
 }
 
-// PtrValue returns the pointer version (Addr()) of the underlying value if
-// the value is not already a Ptr
-func PtrValue(v reflect.Value) reflect.Value {
-	if v.Kind() != reflect.Ptr {
-		if v.CanAddr() {
-			return v.Addr()
-		}
-		pv := reflect.New(v.Type())
-		pv.Elem().Set(v)
-		return pv
+// PointerValue returns a pointer to the given value if it is not already
+// a pointer.
+func PointerValue(v reflect.Value) reflect.Value {
+	if v.Kind() == reflect.Pointer {
+		return v
 	}
-	return v
+	if v.CanAddr() {
+		return v.Addr()
+	}
+	pv := reflect.New(v.Type())
+	pv.Elem().Set(v)
+	return pv
 }
 
-// OnePtrValue returns a value that is exactly one pointer away
-// from a non-pointer type
-func OnePtrValue(v reflect.Value) reflect.Value {
-	if v.Kind() != reflect.Ptr {
+// OnePointerValue returns a value that is exactly one pointer away
+// from a non-pointer value.
+func OnePointerValue(v reflect.Value) reflect.Value {
+	if v.Kind() != reflect.Pointer {
 		if v.CanAddr() {
 			return v.Addr()
 		}
@@ -84,28 +83,28 @@ func OnePtrValue(v reflect.Value) reflect.Value {
 		pv.Elem().Set(v)
 		return pv
 	} else {
-		for v.Elem().Kind() == reflect.Ptr {
+		for v.Elem().Kind() == reflect.Pointer {
 			v = v.Elem()
 		}
 	}
 	return v
 }
 
-// OnePtrUnderlyingValue returns a value that is exactly one pointer away
-// from a non-pointer type, and also goes through an interface to find the
-// actual underlying type behind the interface.
-func OnePtrUnderlyingValue(v reflect.Value) reflect.Value {
-	npv := NonPtrValue(v)
+// OnePointerUnderlyingValue returns a value that is exactly one pointer
+// away from a non-pointer value. It also goes through any interfaces to
+// find the actual underlying value.
+func OnePointerUnderlyingValue(v reflect.Value) reflect.Value {
+	npv := NonPointerValue(v)
 	if !npv.IsValid() {
 		return v
 	}
 	if npv.IsZero() {
-		return OnePtrValue(npv)
+		return OnePointerValue(npv)
 	}
 	for npv.Type().Kind() == reflect.Interface || npv.Type().Kind() == reflect.Pointer {
 		npv = npv.Elem()
 	}
-	return OnePtrValue(npv)
+	return OnePointerValue(npv)
 }
 
 // UnhideAnyValue returns a reflect.Value for any of the Make* functions
@@ -119,33 +118,4 @@ func UnhideAnyValue(v reflect.Value) reflect.Value {
 	ptr := reflect.New(typ)
 	ptr.Elem().Set(vn)
 	return ptr
-}
-
-/////////////////////////////////////////////////
-//  interface{} versions
-
-// NonPtrInterface returns the non-pointer value of an interface
-func NonPtrInterface(el any) any {
-	v := reflect.ValueOf(el)
-	for v.Kind() == reflect.Ptr {
-		v = v.Elem()
-	}
-	return v.Interface()
-}
-
-// PtrInterface returns the pointer value of an interface, if it is possible to get one through Addr()
-func PtrInterface(el any) any {
-	v := reflect.ValueOf(el)
-	if v.Kind() == reflect.Ptr {
-		return el
-	}
-	if v.CanAddr() {
-		return v.Addr().Interface()
-	}
-	return el
-}
-
-// OnePtrInterface returns the pointer value of an interface, if it is possible to get one through Addr()
-func OnePtrInterface(el any) any {
-	return OnePtrValue(reflect.ValueOf(el)).Interface()
 }

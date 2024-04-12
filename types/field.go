@@ -28,7 +28,7 @@ func (f Field) GoString() string { return StructGoString(f) }
 // by searching through all of the embeds if it can not find
 // it directly in the struct.
 func GetField(val reflect.Value, field string) *Field {
-	val = reflectx.NonPtrValue(val)
+	val = reflectx.NonPointerValue(val)
 	if !val.IsValid() {
 		return nil
 	}

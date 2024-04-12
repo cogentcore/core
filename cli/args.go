@@ -311,7 +311,7 @@ func ParseFlag(name string, value string, allFlags *Fields, errNotFound bool) er
 		return nil
 	}
 
-	isBool := reflectx.NonPtrValue(f.Value).Kind() == reflect.Bool
+	isBool := reflectx.NonPointerValue(f.Value).Kind() == reflect.Bool
 
 	if isBool {
 		// check if we have a "no" prefix and set negate based on that
@@ -355,7 +355,7 @@ func ParseFlag(name string, value string, allFlags *Fields, errNotFound bool) er
 // SetFieldValue sets the value of the given configuration field
 // to the given string argument value.
 func SetFieldValue(f *Field, value string) error {
-	nptyp := reflectx.NonPtrType(f.Value.Type())
+	nptyp := reflectx.NonPointerType(f.Value.Type())
 	vk := nptyp.Kind()
 	switch {
 	// TODO: more robust parsing of maps and slices

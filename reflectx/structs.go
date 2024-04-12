@@ -33,7 +33,7 @@ func FlatFieldsTypeFunc(typ reflect.Type, fun func(typ reflect.Type, field refle
 // field should be handled (a return value of true indicates to continue down and
 // a value of false indicates to not).
 func FlatFieldsTypeFuncIf(typ reflect.Type, ifFun, fun func(typ reflect.Type, field reflect.StructField) bool) bool {
-	typ = NonPtrType(typ)
+	typ = NonPointerType(typ)
 	if typ.Kind() != reflect.Struct {
 		log.Printf("reflectx.FlatFieldsTypeFunc: Must call on a struct type, not: %v\n", typ)
 		return false
@@ -66,7 +66,7 @@ func FlatFieldsTypeFuncIf(typ reflect.Type, ifFun, fun func(typ reflect.Type, fi
 // returns false then iteration stops -- overall rval is false if iteration
 // was stopped or there was an error (logged), true otherwise.
 func AllFieldsTypeFunc(typ reflect.Type, fun func(typ reflect.Type, field reflect.StructField) bool) bool {
-	typ = NonPtrType(typ)
+	typ = NonPointerType(typ)
 	if typ.Kind() != reflect.Struct {
 		log.Printf("reflectx.AllFieldsTypeFunc: Must call on a struct type, not: %v\n", typ)
 		return false
@@ -106,11 +106,11 @@ func FlatFieldsValueFunc(stru any, fun func(stru any, typ reflect.Type, field re
 // of true indicates to continue down and a value of false indicates to not).
 func FlatFieldsValueFuncIf(stru any, ifFun, fun func(stru any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool) bool {
 	vv := reflect.ValueOf(stru)
-	if stru == nil || vv.Kind() != reflect.Ptr {
+	if stru == nil || vv.Kind() != reflect.Pointer {
 		log.Printf("reflectx.FlatFieldsValueFunc: must pass a non-nil pointer to the struct: %v\n", stru)
 		return false
 	}
-	v := NonPtrValue(vv)
+	v := NonPointerValue(vv)
 	if !v.IsValid() {
 		return true
 	}
@@ -137,7 +137,7 @@ func FlatFieldsValueFuncIf(stru any, ifFun, fun func(stru any, typ reflect.Type,
 				}
 			}
 			// key to take addr here so next level is addressable
-			rval = FlatFieldsValueFunc(PtrValue(vf).Interface(), fun)
+			rval = FlatFieldsValueFunc(PointerValue(vf).Interface(), fun)
 			if !rval {
 				break
 			}
@@ -216,7 +216,7 @@ func FlatFieldVals(stru any) []reflect.Value {
 func FlatFieldInterfaces(stru any) []any {
 	ff := make([]any, 0)
 	falseErr := FlatFieldsValueFunc(stru, func(stru any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
-		ff = append(ff, PtrValue(fieldVal).Interface())
+		ff = append(ff, PointerValue(fieldVal).Interface())
 		return true
 	})
 	if falseErr == false {
@@ -294,11 +294,11 @@ func FlatFieldTag(typ reflect.Type, nm, tag string) string {
 // already does flat find, so this just provides a convenient wrapper
 func FlatFieldValueByName(stru any, nm string) reflect.Value {
 	vv := reflect.ValueOf(stru)
-	if stru == nil || vv.Kind() != reflect.Ptr {
+	if stru == nil || vv.Kind() != reflect.Pointer {
 		log.Printf("reflectx.FlatFieldsValueFunc: must pass a non-nil pointer to the struct: %v\n", stru)
 		return reflect.Value{}
 	}
-	v := NonPtrValue(vv)
+	v := NonPointerValue(vv)
 	return v.FieldByName(nm)
 }
 
@@ -309,14 +309,14 @@ func FlatFieldInterfaceByName(stru any, nm string) any {
 	if !ff.IsValid() {
 		return nil
 	}
-	return PtrValue(ff).Interface()
+	return PointerValue(ff).Interface()
 }
 
 // TypeEmbeds checks if given type embeds another type, at any level of
 // recursive embedding (including being the type itself)
 func TypeEmbeds(typ, embed reflect.Type) bool {
-	typ = NonPtrType(typ)
-	embed = NonPtrType(embed)
+	typ = NonPointerType(typ)
+	embed = NonPointerType(embed)
 	if typ == embed {
 		return true
 	}
@@ -338,16 +338,16 @@ func Embed(stru any, embed reflect.Type) any {
 	if AnyIsNil(stru) {
 		return nil
 	}
-	v := NonPtrValue(reflect.ValueOf(stru))
+	v := NonPointerValue(reflect.ValueOf(stru))
 	typ := v.Type()
 	if typ == embed {
-		return PtrValue(v).Interface()
+		return PointerValue(v).Interface()
 	}
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		if f.Type.Kind() == reflect.Struct && f.Anonymous { // anon only avail on StructField fm typ
 			vf := v.Field(i)
-			vfpi := PtrValue(vf).Interface()
+			vfpi := PointerValue(vf).Interface()
 			if f.Type == embed {
 				return vfpi
 			}
@@ -371,10 +371,10 @@ func EmbedImplements(typ, iface reflect.Type) bool {
 	if typ.Implements(iface) {
 		return true
 	}
-	if reflect.PtrTo(typ).Implements(iface) { // typically need the pointer type to impl
+	if reflect.PointerTo(typ).Implements(iface) { // typically need the pointer type to impl
 		return true
 	}
-	typ = NonPtrType(typ)
+	typ = NonPointerType(typ)
 	if typ.Implements(iface) { // try it all possible ways..
 		return true
 	}
@@ -403,14 +403,14 @@ func SetFromDefaultTags(obj any) error {
 	if ov.Kind() == reflect.Pointer && ov.IsNil() {
 		return nil
 	}
-	val := NonPtrValue(ov)
+	val := NonPointerValue(ov)
 	typ := val.Type()
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		fv := val.Field(i)
 		def := f.Tag.Get("default")
-		if NonPtrType(f.Type).Kind() == reflect.Struct && def == "" {
-			SetFromDefaultTags(PtrValue(fv).Interface())
+		if NonPointerType(f.Type).Kind() == reflect.Struct && def == "" {
+			SetFromDefaultTags(PointerValue(fv).Interface())
 			continue
 		}
 		err := SetFromDefaultTag(fv, def)
@@ -427,7 +427,7 @@ func SetFromDefaultTag(v reflect.Value, def string) error {
 	if def == "" {
 		return nil
 	}
-	return SetRobust(PtrValue(v).Interface(), def)
+	return SetRobust(PointerValue(v).Interface(), def)
 }
 
 // NonDefaultFields returns a map representing all of the fields of the given
@@ -439,7 +439,7 @@ func SetFromDefaultTag(v reflect.Value, def string) error {
 func NonDefaultFields(v any) map[string]any {
 	res := map[string]any{}
 
-	rv := NonPtrValue(reflect.ValueOf(v))
+	rv := NonPointerValue(reflect.ValueOf(v))
 	if !rv.IsValid() {
 		return nil
 	}
@@ -452,7 +452,7 @@ func NonDefaultFields(v any) map[string]any {
 			continue
 		}
 		def := ft.Tag.Get("default")
-		if NonPtrType(ft.Type).Kind() == reflect.Struct && def == "" {
+		if NonPointerType(ft.Type).Kind() == reflect.Struct && def == "" {
 			sfm := NonDefaultFields(fv.Interface())
 			if len(sfm) > 0 {
 				res[ft.Name] = sfm
@@ -530,7 +530,7 @@ func SetField(obj any, field string, val any) error {
 	if !fv.IsValid() {
 		return fmt.Errorf("reflectx.SetField: could not find field %q", field)
 	}
-	err := SetRobust(PtrValue(fv).Interface(), val)
+	err := SetRobust(PointerValue(fv).Interface(), val)
 	if err != nil {
 		return fmt.Errorf("reflectx.SetField: SetRobust failed to set field %q to value: %v: %w", field, val, err)
 	}

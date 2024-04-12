@@ -16,7 +16,7 @@ import (
 // This is guaranteed to be unique and used for internal storage of
 // several maps to avoid any conflicts.  It is also very quick to compute.
 func LongTypeName(typ reflect.Type) string {
-	nptyp := NonPtrType(typ)
+	nptyp := NonPointerType(typ)
 	nm := nptyp.Name()
 	if nm != "" {
 		return nptyp.PkgPath() + "." + nm
@@ -33,7 +33,7 @@ func LongTypeName(typ reflect.Type) string {
 // This is cached in ShortNames because the path.Base computation is apparently
 // a bit slow.
 func ShortTypeName(typ reflect.Type) string {
-	nptyp := NonPtrType(typ)
+	nptyp := NonPointerType(typ)
 	nm := nptyp.Name()
 	if nm != "" {
 		return path.Base(nptyp.PkgPath()) + "." + nm
@@ -45,7 +45,7 @@ func ShortTypeName(typ reflect.Type) string {
 // It transforms it into sentence case, excludes the package, and converts various
 // builtin types into more friendly forms (eg: "int" to "Number").
 func FriendlyTypeName(typ reflect.Type) string {
-	nptyp := NonPtrType(typ)
+	nptyp := NonPointerType(typ)
 	nm := nptyp.Name()
 
 	// if it is named, we use that
@@ -106,9 +106,9 @@ func CloneToType(typ reflect.Type, val any) reflect.Value {
 // MakeOfType creates a new object of given type with appropriate magic foo to
 // make it usable
 func MakeOfType(typ reflect.Type) reflect.Value {
-	if NonPtrType(typ).Kind() == reflect.Map {
+	if NonPointerType(typ).Kind() == reflect.Map {
 		return MakeMap(typ)
-	} else if NonPtrType(typ).Kind() == reflect.Slice {
+	} else if NonPointerType(typ).Kind() == reflect.Slice {
 		return MakeSlice(typ, 0, 0)
 	}
 	vn := reflect.New(typ)

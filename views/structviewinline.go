@@ -115,7 +115,7 @@ func (sv *StructViewInline) Config() {
 		if hasDef {
 			lbl.Style(func(s *styles.Style) {
 				dtag, _ := vv.Tag("default")
-				isDef, _ := StructFieldIsDef(dtag, vv.Val().Interface(), reflectx.NonPtrValue(vv.Val()).Kind())
+				isDef, _ := StructFieldIsDef(dtag, vv.Val().Interface(), reflectx.NonPointerValue(vv.Val()).Kind())
 				dcr := "(Double click to reset to default) "
 				if !isDef {
 					s.Color = colors.C(colors.Scheme.Primary.Base)
@@ -129,7 +129,7 @@ func (sv *StructViewInline) Config() {
 			})
 			lbl.OnDoubleClick(func(e events.Event) {
 				dtag, _ := vv.Tag("default")
-				isDef, _ := StructFieldIsDef(dtag, vv.Val().Interface(), reflectx.NonPtrValue(vv.Val()).Kind())
+				isDef, _ := StructFieldIsDef(dtag, vv.Val().Interface(), reflectx.NonPointerValue(vv.Val()).Kind())
 				if isDef {
 					return
 				}
@@ -148,7 +148,7 @@ func (sv *StructViewInline) Config() {
 		if !sv.IsReadOnly() && !readOnlyTag {
 			vv.OnChange(func(e events.Event) {
 				sv.UpdateFieldAction()
-				if !reflectx.KindIsBasic(reflectx.NonPtrValue(vv.Val()).Kind()) {
+				if !reflectx.KindIsBasic(reflectx.NonPointerValue(vv.Val()).Kind()) {
 					if updtr, ok := sv.Struct.(core.Updater); ok {
 						// fmt.Printf("updating: %v kind: %v\n", updtr, vvv.Value.Kind())
 						updtr.Update()

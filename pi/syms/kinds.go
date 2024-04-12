@@ -335,7 +335,7 @@ var ReflectKindMap = map[reflect.Kind]Kinds{
 	reflect.Func:          Func,
 	reflect.Interface:     Interface,
 	reflect.Map:           Map,
-	reflect.Ptr:           Ptr,
+	reflect.Pointer:       Ptr,
 	reflect.Slice:         List,
 	reflect.String:        String,
 	reflect.Struct:        Struct,

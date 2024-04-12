@@ -79,7 +79,7 @@ func (mv *MapViewInline) SetStyles() {
 					}
 					vpath = JoinViewPath(mv.ViewPath, newPath)
 				} else {
-					tmptyp := reflectx.NonPtrType(reflect.TypeOf(mv.Map))
+					tmptyp := reflectx.NonPointerType(reflect.TypeOf(mv.Map))
 					title = "Map of " + tmptyp.String()
 				}
 				d := core.NewBody().AddTitle(title).AddText(mv.Tooltip)
@@ -114,7 +114,7 @@ func (mv *MapViewInline) Config() {
 	mv.Values = make([]Value, 0)
 
 	mpv := reflect.ValueOf(mv.Map)
-	mpvnp := reflectx.NonPtrValue(reflectx.OnePtrUnderlyingValue(mpv))
+	mpvnp := reflectx.NonPointerValue(reflectx.OnePointerUnderlyingValue(mpv))
 	keys := mpvnp.MapKeys() // this is a slice of reflect.Value
 	mv.ConfigSize = len(keys)
 
@@ -129,7 +129,7 @@ func (mv *MapViewInline) Config() {
 		}
 		kv.SetMapKey(key, mv.Map)
 
-		val := reflectx.OnePtrUnderlyingValue(mpvnp.MapIndex(key))
+		val := reflectx.OnePointerUnderlyingValue(mpvnp.MapIndex(key))
 		vv := ToValue(val.Interface(), "")
 		if vv == nil { // shouldn't happen
 			continue
@@ -221,7 +221,7 @@ func (mv *MapViewInline) MapDelete(key reflect.Value) {
 	if reflectx.AnyIsNil(mv.Map) {
 		return
 	}
-	reflectx.MapDelete(mv.Map, reflectx.NonPtrValue(key))
+	reflectx.MapDelete(mv.Map, reflectx.NonPointerValue(key))
 
 	mv.SetChanged()
 	mv.Update()
@@ -249,7 +249,7 @@ func (mv *MapViewInline) MapSizeChanged() bool {
 		return mv.ConfigSize != 0
 	}
 	mpv := reflect.ValueOf(mv.Map)
-	mpvnp := reflectx.NonPtrValue(reflectx.OnePtrUnderlyingValue(mpv))
+	mpvnp := reflectx.NonPointerValue(reflectx.OnePointerUnderlyingValue(mpv))
 	keys := mpvnp.MapKeys()
 	return mv.ConfigSize != len(keys)
 }

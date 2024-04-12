@@ -91,7 +91,7 @@ func ToValue(val any, tags string) Value {
 			return v
 		}
 	}
-	if vl, ok := reflectx.PtrInterface(val).(Valuer); ok {
+	if vl, ok := reflectx.PointerValue(reflect.ValueOf(val)).Interface().(Valuer); ok {
 		v := vl.Value()
 		if v != nil {
 			return v
@@ -106,7 +106,7 @@ func ToValue(val any, tags string) Value {
 	}
 
 	typ := reflect.TypeOf(val)
-	nptyp := reflectx.NonPtrType(typ)
+	nptyp := reflectx.NonPointerType(typ)
 	vk := typ.Kind()
 
 	nptypnm := reflectx.LongTypeName(nptyp)
@@ -144,7 +144,7 @@ func ToValue(val any, tags string) Value {
 	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
 		// TODO: special value for complex numbers with two fields
 		return &StringValue{}
-	case vk == reflect.Ptr:
+	case vk == reflect.Pointer:
 		if tree.IsNode(nptyp) {
 			return &KiValue{}
 		}
@@ -165,7 +165,7 @@ func ToValue(val any, tags string) Value {
 		if _, ok := val.([]rune); ok {
 			return &RuneSliceValue{}
 		}
-		isstru := (reflectx.NonPtrType(eltyp).Kind() == reflect.Struct)
+		isstru := (reflectx.NonPointerType(eltyp).Kind() == reflect.Struct)
 		if !forceNoInline && (forceInline || (!isstru && sz <= core.SystemSettings.SliceInlineLength && !tree.IsNode(eltyp))) {
 			return &SliceInlineValue{}
 		} else {
@@ -208,7 +208,7 @@ func FieldToValue(str any, field string, val any) Value {
 			return v
 		}
 	}
-	if vl, ok := reflectx.PtrInterface(str).(FieldValuer); ok {
+	if vl, ok := reflectx.PointerValue(reflect.ValueOf(str)).Interface().(FieldValuer); ok {
 		v := vl.FieldValue(field, val)
 		if v != nil {
 			return v
@@ -216,7 +216,7 @@ func FieldToValue(str any, field string, val any) Value {
 	}
 
 	typ := reflect.TypeOf(str)
-	nptyp := reflectx.NonPtrType(typ)
+	nptyp := reflectx.NonPointerType(typ)
 
 	ftyp, ok := nptyp.FieldByName(field)
 	if ok {

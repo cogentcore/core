@@ -135,9 +135,9 @@ func (mv *MapView) ConfigMapGrid() {
 	sg.DeleteChildren()
 
 	mpv := reflect.ValueOf(mv.Map)
-	mpvnp := reflectx.NonPtrValue(mpv)
+	mpvnp := reflectx.NonPointerValue(mpv)
 
-	valtyp := reflectx.NonPtrType(reflect.TypeOf(mv.Map)).Elem()
+	valtyp := reflectx.NonPointerType(reflect.TypeOf(mv.Map)).Elem()
 	ncol := 2
 	ifaceType := false
 	if valtyp.Kind() == reflect.Interface && valtyp.String() == "interface {}" {
@@ -166,7 +166,7 @@ func (mv *MapView) ConfigMapGrid() {
 		}
 		kv.SetMapKey(key, mv.Map)
 
-		val := reflectx.OnePtrUnderlyingValue(mpvnp.MapIndex(key))
+		val := reflectx.OnePointerUnderlyingValue(mpvnp.MapIndex(key))
 		vv := ToValue(val.Interface(), "")
 		if vv == nil { // shouldn't happen
 			continue
@@ -217,7 +217,7 @@ func (mv *MapView) ConfigMapGrid() {
 		if ifaceType {
 			typw := sg.Child(i*ncol + 2).(*core.Chooser)
 			typw.SetTypes(valtypes...)
-			vtyp := reflectx.NonPtrType(reflect.TypeOf(vv.Val().Interface()))
+			vtyp := reflectx.NonPointerType(reflect.TypeOf(vv.Val().Interface()))
 			if vtyp == nil {
 				vtyp = reflect.TypeOf("") // default to string
 			}
@@ -242,9 +242,9 @@ func (mv *MapView) MapChangeValueType(idx int, typ reflect.Type) {
 	}
 
 	keyv := mv.Keys[idx]
-	ck := reflectx.NonPtrValue(keyv.Val()) // current key value
+	ck := reflectx.NonPointerValue(keyv.Val()) // current key value
 	valv := mv.Values[idx]
-	cv := reflectx.NonPtrValue(valv.Val()) // current val value
+	cv := reflectx.NonPointerValue(valv.Val()) // current val value
 
 	// create a new item of selected type, and attempt to convert existing to it
 	var evn reflect.Value
@@ -253,7 +253,7 @@ func (mv *MapView) MapChangeValueType(idx int, typ reflect.Type) {
 	} else {
 		evn = reflectx.CloneToType(typ, cv.Interface())
 	}
-	ov := reflectx.NonPtrValue(reflect.ValueOf(mv.Map))
+	ov := reflectx.NonPointerValue(reflect.ValueOf(mv.Map))
 	valv.AsValueData().Value = evn.Elem()
 	ov.SetMapIndex(ck, evn.Elem())
 	mv.ConfigMapGrid()
@@ -283,7 +283,7 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 	if reflectx.AnyIsNil(mv.Map) {
 		return
 	}
-	reflectx.MapDelete(mv.Map, reflectx.NonPtrValue(key))
+	reflectx.MapDelete(mv.Map, reflectx.NonPointerValue(key))
 
 	mv.SetChanged()
 	mv.Update()

@@ -51,7 +51,7 @@ func (v *StringValue) Config() {
 }
 
 func (v *StringValue) Update() {
-	npv := reflectx.NonPtrValue(v.Value)
+	npv := reflectx.NonPointerValue(v.Value)
 	if npv.Kind() == reflect.Interface && npv.IsZero() {
 		v.Widget.SetText("None")
 	} else {
@@ -72,7 +72,7 @@ func (v *BoolValue) Config() {
 }
 
 func (v *BoolValue) Update() {
-	npv := reflectx.NonPtrValue(v.Value)
+	npv := reflectx.NonPointerValue(v.Value)
 	bv, err := reflectx.ToBool(npv.Interface())
 	if errors.Log(err) == nil {
 		v.Widget.SetChecked(bv)
@@ -85,7 +85,7 @@ type NumberValue struct {
 }
 
 func (v *NumberValue) Config() {
-	vk := reflectx.NonPtrType(v.Value.Type()).Kind()
+	vk := reflectx.NonPointerType(v.Value.Type()).Kind()
 	if vk >= reflect.Int && vk <= reflect.Uintptr {
 		v.Widget.SetStep(1).SetEnforceStep(true)
 	}
@@ -119,7 +119,7 @@ func (v *NumberValue) Config() {
 }
 
 func (v *NumberValue) Update() {
-	npv := reflectx.NonPtrValue(v.Value)
+	npv := reflectx.NonPointerValue(v.Value)
 	fv, err := reflectx.ToFloat32(npv.Interface())
 	if errors.Log(err) == nil {
 		v.Widget.SetValue(fv)
@@ -132,7 +132,7 @@ type SliderValue struct {
 }
 
 func (v *SliderValue) Config() {
-	vk := reflectx.NonPtrType(v.Value.Type()).Kind()
+	vk := reflectx.NonPointerType(v.Value.Type()).Kind()
 	if vk >= reflect.Int && vk <= reflect.Uintptr {
 		v.Widget.SetStep(1).SetEnforceStep(true).SetMax(100)
 	}
@@ -160,7 +160,7 @@ func (v *SliderValue) Config() {
 }
 
 func (v *SliderValue) Update() {
-	npv := reflectx.NonPtrValue(v.Value)
+	npv := reflectx.NonPointerValue(v.Value)
 	fv, err := reflectx.ToFloat32(npv.Interface())
 	if errors.Log(err) == nil {
 		v.Widget.SetValue(fv)
@@ -178,11 +178,11 @@ func (v *StructValue) Config() {
 }
 
 func (v *StructValue) Update() {
-	npv := reflectx.NonPtrValue(v.Value)
+	npv := reflectx.NonPointerValue(v.Value)
 	if v.Value.IsZero() {
 		v.Widget.SetText("None")
 	} else {
-		opv := reflectx.OnePtrUnderlyingValue(v.Value)
+		opv := reflectx.OnePointerUnderlyingValue(v.Value)
 		if lbler, ok := opv.Interface().(core.Labeler); ok {
 			v.Widget.SetText(lbler.Label())
 		} else {
@@ -196,7 +196,7 @@ func (v *StructValue) ConfigDialog(d *core.Body) (bool, func()) {
 	if v.Value.IsZero() {
 		return false, nil
 	}
-	opv := reflectx.OnePtrUnderlyingValue(v.Value)
+	opv := reflectx.OnePointerUnderlyingValue(v.Value)
 	str := opv.Interface()
 	NewStructView(d).SetStruct(str).SetViewPath(v.ViewPath).
 		SetReadOnly(v.IsReadOnly())
@@ -235,7 +235,7 @@ func (v *SliceValue) Config() {
 }
 
 func (v *SliceValue) Update() {
-	npv := reflectx.OnePtrUnderlyingValue(v.Value).Elem()
+	npv := reflectx.OnePointerUnderlyingValue(v.Value).Elem()
 	txt := ""
 	if !npv.IsValid() {
 		txt = "None"
@@ -255,17 +255,17 @@ func (v *SliceValue) Update() {
 }
 
 func (v *SliceValue) ConfigDialog(d *core.Body) (bool, func()) {
-	npv := reflectx.NonPtrValue(v.Value)
+	npv := reflectx.NonPointerValue(v.Value)
 	if v.Value.IsZero() || npv.IsZero() {
 		return false, nil
 	}
-	vvp := reflectx.OnePtrValue(v.Value)
-	if vvp.Kind() != reflect.Ptr {
+	vvp := reflectx.OnePointerValue(v.Value)
+	if vvp.Kind() != reflect.Pointer {
 		slog.Error("views.SliceValue: Cannot view unadressable (non-pointer) slices", "type", v.Value.Type())
 		return false, nil
 	}
 	slci := vvp.Interface()
-	if npv.Kind() != reflect.Array && reflectx.NonPtrType(reflectx.SliceElType(v.Value.Interface())).Kind() == reflect.Struct {
+	if npv.Kind() != reflect.Array && reflectx.NonPointerType(reflectx.SliceElType(v.Value.Interface())).Kind() == reflect.Struct {
 		tv := NewTableView(d).SetSlice(slci).SetViewPath(v.ViewPath)
 		tv.SetReadOnly(v.IsReadOnly())
 		d.AddAppBar(tv.ConfigToolbar)
@@ -317,7 +317,7 @@ func (v *MapValue) Config() {
 }
 
 func (v *MapValue) Update() {
-	npv := reflectx.NonPtrValue(v.Value)
+	npv := reflectx.NonPointerValue(v.Value)
 	mpi := v.Value.Interface()
 	txt := ""
 	if !npv.IsValid() || npv.IsNil() {
@@ -334,7 +334,7 @@ func (v *MapValue) Update() {
 }
 
 func (v *MapValue) ConfigDialog(d *core.Body) (bool, func()) {
-	if v.Value.IsZero() || reflectx.NonPtrValue(v.Value).IsZero() {
+	if v.Value.IsZero() || reflectx.NonPointerValue(v.Value).IsZero() {
 		return false, nil
 	}
 	mpi := v.Value.Interface()
@@ -400,11 +400,11 @@ func (vv *KiValue) KiValue() tree.Node {
 	if !vv.Value.IsValid() || vv.Value.IsNil() {
 		return nil
 	}
-	npv := reflectx.NonPtrValue(vv.Value)
+	npv := reflectx.NonPointerValue(vv.Value)
 	if npv.Kind() == reflect.Interface {
 		return npv.Interface().(tree.Node)
 	}
-	opv := reflectx.OnePtrValue(vv.Value)
+	opv := reflectx.OnePointerValue(vv.Value)
 	if opv.IsNil() {
 		return nil
 	}
@@ -417,7 +417,7 @@ type EnumValue struct {
 }
 
 func (v *EnumValue) Config() {
-	e := reflectx.OnePtrUnderlyingValue(v.Value).Interface().(enums.Enum)
+	e := reflectx.OnePointerUnderlyingValue(v.Value).Interface().(enums.Enum)
 	v.Widget.SetEnum(e)
 	v.Widget.OnChange(func(e events.Event) {
 		v.SetValue(v.Widget.CurrentItem.Value)
@@ -425,7 +425,7 @@ func (v *EnumValue) Config() {
 }
 
 func (v *EnumValue) Update() {
-	npv := reflectx.NonPtrValue(v.Value)
+	npv := reflectx.NonPointerValue(v.Value)
 	v.Widget.SetCurrentValue(npv.Interface())
 }
 
@@ -480,7 +480,7 @@ func (v *TypeValue) Config() {
 }
 
 func (v *TypeValue) Update() {
-	opv := reflectx.OnePtrValue(v.Value)
+	opv := reflectx.OnePointerValue(v.Value)
 	typ := opv.Interface().(*types.Type)
 	v.Widget.SetCurrentValue(typ)
 }
@@ -497,7 +497,7 @@ func (v *ByteSliceValue) Config() {
 }
 
 func (v *ByteSliceValue) Update() {
-	npv := reflectx.NonPtrValue(v.Value)
+	npv := reflectx.NonPointerValue(v.Value)
 	bv := npv.Interface().([]byte)
 	v.Widget.SetText(string(bv))
 }
@@ -514,7 +514,7 @@ func (v *RuneSliceValue) Config() {
 }
 
 func (v *RuneSliceValue) Update() {
-	npv := reflectx.NonPtrValue(v.Value)
+	npv := reflectx.NonPointerValue(v.Value)
 	rv := npv.Interface().([]rune)
 	v.Widget.SetText(string(rv))
 }
@@ -660,7 +660,7 @@ func (v *FuncValue) Config() {
 }
 
 func (v *FuncValue) Update() {
-	fun := reflectx.NonPtrValue(v.Value).Interface()
+	fun := reflectx.NonPointerValue(v.Value).Interface()
 	// if someone is viewing an arbitrary function, there is a good chance
 	// that it is not added to types (and that is out of their control)
 	// (eg: in the inspector), so we do not warn on unadded functions.

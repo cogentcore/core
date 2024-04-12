@@ -27,7 +27,7 @@ func MakeSlice(typ reflect.Type, len, cap int) reflect.Value {
 // this function makes it more explicit what is going on.  And it uses
 // OnePtrUnderlyingValue to get past any interface wrapping.
 func SliceElType(sl any) reflect.Type {
-	return NonPtrValue(OnePtrUnderlyingValue(reflect.ValueOf(sl))).Type().Elem()
+	return NonPointerValue(OnePointerUnderlyingValue(reflect.ValueOf(sl))).Type().Elem()
 }
 
 // SliceElValue returns a reflect.Value of the Slice element type.
@@ -35,8 +35,8 @@ func SliceElType(sl any) reflect.Type {
 // a concrete element has been made and the value is a pointer to it.
 func SliceElValue(sl any) reflect.Value {
 	typ := SliceElType(sl)
-	isPtr := typ.Kind() == reflect.Ptr
-	val := reflect.New(NonPtrType(typ)) // make the concrete el
+	isPtr := typ.Kind() == reflect.Pointer
+	val := reflect.New(NonPointerType(typ)) // make the concrete el
 	if !isPtr {
 		val = val.Elem() // use concrete value
 	}
@@ -46,8 +46,8 @@ func SliceElValue(sl any) reflect.Value {
 // SliceNewAt inserts a new blank element at given index in the slice.
 // -1 means the end.
 func SliceNewAt(sl any, idx int) {
-	svl := OnePtrValue(reflect.ValueOf(sl))
-	svnp := NonPtrValue(svl)
+	svl := OnePointerValue(reflect.ValueOf(sl))
+	svnp := NonPointerValue(svl)
 	val := SliceElValue(sl)
 	sz := svnp.Len()
 	svnp = reflect.Append(svnp, val)
@@ -60,8 +60,8 @@ func SliceNewAt(sl any, idx int) {
 
 // SliceDeleteAt deletes element at given index from slice
 func SliceDeleteAt(sl any, idx int) {
-	svl := OnePtrValue(reflect.ValueOf(sl))
-	svnp := NonPtrValue(svl)
+	svl := OnePointerValue(reflect.ValueOf(sl))
+	svnp := NonPointerValue(svl)
 	svtyp := svnp.Type()
 	nval := reflect.New(svtyp.Elem())
 	sz := svnp.Len()
@@ -82,20 +82,20 @@ type SortInter interface {
 // (first fmt.Stringer String()) and supporting time.Time directly as well.
 func SliceSort(sl any, ascending bool) error {
 	sv := reflect.ValueOf(sl)
-	svnp := NonPtrValue(sv)
+	svnp := NonPointerValue(sv)
 	if svnp.Len() == 0 {
 		return nil
 	}
 	eltyp := SliceElType(sl)
-	elnptyp := NonPtrType(eltyp)
+	elnptyp := NonPointerType(eltyp)
 	vk := elnptyp.Kind()
-	elval := OnePtrValue(svnp.Index(0))
+	elval := OnePointerValue(svnp.Index(0))
 	elif := elval.Interface()
 
 	if _, ok := elif.(SortInter); ok {
 		sort.Slice(svnp.Interface(), func(i, j int) bool {
-			iv := NonPtrValue(svnp.Index(i)).Interface().(SortInter).Int()
-			jv := NonPtrValue(svnp.Index(j)).Interface().(SortInter).Int()
+			iv := NonPointerValue(svnp.Index(i)).Interface().(SortInter).Int()
+			jv := NonPointerValue(svnp.Index(j)).Interface().(SortInter).Int()
 			if ascending {
 				return iv < jv
 			}
@@ -108,8 +108,8 @@ func SliceSort(sl any, ascending bool) error {
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
 		sort.Slice(svnp.Interface(), func(i, j int) bool {
-			iv := NonPtrValue(svnp.Index(i)).Int()
-			jv := NonPtrValue(svnp.Index(j)).Int()
+			iv := NonPointerValue(svnp.Index(i)).Int()
+			jv := NonPointerValue(svnp.Index(j)).Int()
 			if ascending {
 				return iv < jv
 			}
@@ -118,8 +118,8 @@ func SliceSort(sl any, ascending bool) error {
 		return nil
 	case vk >= reflect.Uint && vk <= reflect.Uint64:
 		sort.Slice(svnp.Interface(), func(i, j int) bool {
-			iv := NonPtrValue(svnp.Index(i)).Uint()
-			jv := NonPtrValue(svnp.Index(j)).Uint()
+			iv := NonPointerValue(svnp.Index(i)).Uint()
+			jv := NonPointerValue(svnp.Index(j)).Uint()
 			if ascending {
 				return iv < jv
 			}
@@ -128,8 +128,8 @@ func SliceSort(sl any, ascending bool) error {
 		return nil
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
 		sort.Slice(svnp.Interface(), func(i, j int) bool {
-			iv := NonPtrValue(svnp.Index(i)).Float()
-			jv := NonPtrValue(svnp.Index(j)).Float()
+			iv := NonPointerValue(svnp.Index(i)).Float()
+			jv := NonPointerValue(svnp.Index(j)).Float()
 			if ascending {
 				return iv < jv
 			}
@@ -138,8 +138,8 @@ func SliceSort(sl any, ascending bool) error {
 		return nil
 	case vk == reflect.Struct && ShortTypeName(elnptyp) == "time.Time":
 		sort.Slice(svnp.Interface(), func(i, j int) bool {
-			iv := NonPtrValue(svnp.Index(i)).Interface().(time.Time)
-			jv := NonPtrValue(svnp.Index(j)).Interface().(time.Time)
+			iv := NonPointerValue(svnp.Index(i)).Interface().(time.Time)
+			jv := NonPointerValue(svnp.Index(j)).Interface().(time.Time)
 			if ascending {
 				return iv.Before(jv)
 			}
@@ -151,8 +151,8 @@ func SliceSort(sl any, ascending bool) error {
 	switch elif.(type) {
 	case fmt.Stringer:
 		sort.Slice(svnp.Interface(), func(i, j int) bool {
-			iv := NonPtrValue(svnp.Index(i)).Interface().(fmt.Stringer).String()
-			jv := NonPtrValue(svnp.Index(j)).Interface().(fmt.Stringer).String()
+			iv := NonPointerValue(svnp.Index(i)).Interface().(fmt.Stringer).String()
+			jv := NonPointerValue(svnp.Index(j)).Interface().(fmt.Stringer).String()
 			if ascending {
 				return iv < jv
 			}
@@ -165,8 +165,8 @@ func SliceSort(sl any, ascending bool) error {
 	switch {
 	case vk == reflect.String:
 		sort.Slice(svnp.Interface(), func(i, j int) bool {
-			iv := NonPtrValue(svnp.Index(i)).String()
-			jv := NonPtrValue(svnp.Index(j)).String()
+			iv := NonPointerValue(svnp.Index(i)).String()
+			jv := NonPointerValue(svnp.Index(j)).String()
 			if ascending {
 				return strings.ToLower(iv) < strings.ToLower(jv)
 			}
@@ -187,23 +187,23 @@ func SliceSort(sl any, ascending bool) error {
 // are assumed to be accurate -- will panic if not!
 func StructSliceSort(struSlice any, fldIndex []int, ascending bool) error {
 	sv := reflect.ValueOf(struSlice)
-	svnp := NonPtrValue(sv)
+	svnp := NonPointerValue(sv)
 	if svnp.Len() == 0 {
 		return nil
 	}
 	struTyp := SliceElType(struSlice)
-	struNpTyp := NonPtrType(struTyp)
+	struNpTyp := NonPointerType(struTyp)
 	fld := struNpTyp.FieldByIndex(fldIndex) // not easy to check.
 	vk := fld.Type.Kind()
-	struVal := OnePtrValue(svnp.Index(0))
+	struVal := OnePointerValue(svnp.Index(0))
 	fldVal := struVal.Elem().FieldByIndex(fldIndex)
 	fldIf := fldVal.Interface()
 
 	if _, ok := fldIf.(SortInter); ok {
 		sort.Slice(svnp.Interface(), func(i, j int) bool {
-			ival := OnePtrValue(svnp.Index(i))
+			ival := OnePointerValue(svnp.Index(i))
 			iv := ival.Elem().FieldByIndex(fldIndex).Interface().(SortInter).Int()
-			jval := OnePtrValue(svnp.Index(j))
+			jval := OnePointerValue(svnp.Index(j))
 			jv := jval.Elem().FieldByIndex(fldIndex).Interface().(SortInter).Int()
 			if ascending {
 				return iv < jv
@@ -217,9 +217,9 @@ func StructSliceSort(struSlice any, fldIndex []int, ascending bool) error {
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
 		sort.Slice(svnp.Interface(), func(i, j int) bool {
-			ival := OnePtrValue(svnp.Index(i))
+			ival := OnePointerValue(svnp.Index(i))
 			iv := ival.Elem().FieldByIndex(fldIndex).Int()
-			jval := OnePtrValue(svnp.Index(j))
+			jval := OnePointerValue(svnp.Index(j))
 			jv := jval.Elem().FieldByIndex(fldIndex).Int()
 			if ascending {
 				return iv < jv
@@ -229,9 +229,9 @@ func StructSliceSort(struSlice any, fldIndex []int, ascending bool) error {
 		return nil
 	case vk >= reflect.Uint && vk <= reflect.Uint64:
 		sort.Slice(svnp.Interface(), func(i, j int) bool {
-			ival := OnePtrValue(svnp.Index(i))
+			ival := OnePointerValue(svnp.Index(i))
 			iv := ival.Elem().FieldByIndex(fldIndex).Uint()
-			jval := OnePtrValue(svnp.Index(j))
+			jval := OnePointerValue(svnp.Index(j))
 			jv := jval.Elem().FieldByIndex(fldIndex).Uint()
 			if ascending {
 				return iv < jv
@@ -241,9 +241,9 @@ func StructSliceSort(struSlice any, fldIndex []int, ascending bool) error {
 		return nil
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
 		sort.Slice(svnp.Interface(), func(i, j int) bool {
-			ival := OnePtrValue(svnp.Index(i))
+			ival := OnePointerValue(svnp.Index(i))
 			iv := ival.Elem().FieldByIndex(fldIndex).Float()
-			jval := OnePtrValue(svnp.Index(j))
+			jval := OnePointerValue(svnp.Index(j))
 			jv := jval.Elem().FieldByIndex(fldIndex).Float()
 			if ascending {
 				return iv < jv
@@ -253,9 +253,9 @@ func StructSliceSort(struSlice any, fldIndex []int, ascending bool) error {
 		return nil
 	case vk == reflect.Struct && ShortTypeName(fld.Type) == "time.Time":
 		sort.Slice(svnp.Interface(), func(i, j int) bool {
-			ival := OnePtrValue(svnp.Index(i))
+			ival := OnePointerValue(svnp.Index(i))
 			iv := ival.Elem().FieldByIndex(fldIndex).Interface().(time.Time)
-			jval := OnePtrValue(svnp.Index(j))
+			jval := OnePointerValue(svnp.Index(j))
 			jv := jval.Elem().FieldByIndex(fldIndex).Interface().(time.Time)
 			if ascending {
 				return iv.Before(jv)
@@ -268,9 +268,9 @@ func StructSliceSort(struSlice any, fldIndex []int, ascending bool) error {
 	switch fldIf.(type) {
 	case fmt.Stringer:
 		sort.Slice(svnp.Interface(), func(i, j int) bool {
-			ival := OnePtrValue(svnp.Index(i))
+			ival := OnePointerValue(svnp.Index(i))
 			iv := ival.Elem().FieldByIndex(fldIndex).Interface().(fmt.Stringer).String()
-			jval := OnePtrValue(svnp.Index(j))
+			jval := OnePointerValue(svnp.Index(j))
 			jv := jval.Elem().FieldByIndex(fldIndex).Interface().(fmt.Stringer).String()
 			if ascending {
 				return iv < jv
@@ -284,9 +284,9 @@ func StructSliceSort(struSlice any, fldIndex []int, ascending bool) error {
 	switch {
 	case vk == reflect.String:
 		sort.Slice(svnp.Interface(), func(i, j int) bool {
-			ival := OnePtrValue(svnp.Index(i))
+			ival := OnePointerValue(svnp.Index(i))
 			iv := ival.Elem().FieldByIndex(fldIndex).String()
-			jval := OnePtrValue(svnp.Index(j))
+			jval := OnePointerValue(svnp.Index(j))
 			jv := jval.Elem().FieldByIndex(fldIndex).String()
 			if ascending {
 				return strings.ToLower(iv) < strings.ToLower(jv)
@@ -308,17 +308,17 @@ func ValueSliceSort(sl []reflect.Value, ascending bool) error {
 	}
 	felval := sl[0] // reflect.Value
 	eltyp := felval.Type()
-	elnptyp := NonPtrType(eltyp)
+	elnptyp := NonPointerType(eltyp)
 	vk := elnptyp.Kind()
-	elval := OnePtrValue(felval)
+	elval := OnePointerValue(felval)
 	elif := elval.Interface()
 
 	// try all the numeric types first!
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
 		sort.Slice(sl, func(i, j int) bool {
-			iv := NonPtrValue(sl[i]).Int()
-			jv := NonPtrValue(sl[j]).Int()
+			iv := NonPointerValue(sl[i]).Int()
+			jv := NonPointerValue(sl[j]).Int()
 			if ascending {
 				return iv < jv
 			}
@@ -327,8 +327,8 @@ func ValueSliceSort(sl []reflect.Value, ascending bool) error {
 		return nil
 	case vk >= reflect.Uint && vk <= reflect.Uint64:
 		sort.Slice(sl, func(i, j int) bool {
-			iv := NonPtrValue(sl[i]).Uint()
-			jv := NonPtrValue(sl[j]).Uint()
+			iv := NonPointerValue(sl[i]).Uint()
+			jv := NonPointerValue(sl[j]).Uint()
 			if ascending {
 				return iv < jv
 			}
@@ -337,8 +337,8 @@ func ValueSliceSort(sl []reflect.Value, ascending bool) error {
 		return nil
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
 		sort.Slice(sl, func(i, j int) bool {
-			iv := NonPtrValue(sl[i]).Float()
-			jv := NonPtrValue(sl[j]).Float()
+			iv := NonPointerValue(sl[i]).Float()
+			jv := NonPointerValue(sl[j]).Float()
 			if ascending {
 				return iv < jv
 			}
@@ -347,8 +347,8 @@ func ValueSliceSort(sl []reflect.Value, ascending bool) error {
 		return nil
 	case vk == reflect.Struct && ShortTypeName(elnptyp) == "time.Time":
 		sort.Slice(sl, func(i, j int) bool {
-			iv := NonPtrValue(sl[i]).Interface().(time.Time)
-			jv := NonPtrValue(sl[j]).Interface().(time.Time)
+			iv := NonPointerValue(sl[i]).Interface().(time.Time)
+			jv := NonPointerValue(sl[j]).Interface().(time.Time)
 			if ascending {
 				return iv.Before(jv)
 			}
@@ -360,8 +360,8 @@ func ValueSliceSort(sl []reflect.Value, ascending bool) error {
 	switch elif.(type) {
 	case fmt.Stringer:
 		sort.Slice(sl, func(i, j int) bool {
-			iv := NonPtrValue(sl[i]).Interface().(fmt.Stringer).String()
-			jv := NonPtrValue(sl[j]).Interface().(fmt.Stringer).String()
+			iv := NonPointerValue(sl[i]).Interface().(fmt.Stringer).String()
+			jv := NonPointerValue(sl[j]).Interface().(fmt.Stringer).String()
 			if ascending {
 				return iv < jv
 			}
@@ -374,8 +374,8 @@ func ValueSliceSort(sl []reflect.Value, ascending bool) error {
 	switch {
 	case vk == reflect.String:
 		sort.Slice(sl, func(i, j int) bool {
-			iv := NonPtrValue(sl[i]).String()
-			jv := NonPtrValue(sl[j]).String()
+			iv := NonPointerValue(sl[i]).String()
+			jv := NonPointerValue(sl[j]).String()
 			if ascending {
 				return strings.ToLower(iv) < strings.ToLower(jv)
 			}
@@ -393,8 +393,8 @@ func ValueSliceSort(sl []reflect.Value, ascending bool) error {
 func CopySliceRobust(to, fm any) error {
 	tov := reflect.ValueOf(to)
 	fmv := reflect.ValueOf(fm)
-	tonp := NonPtrValue(tov)
-	fmnp := NonPtrValue(fmv)
+	tonp := NonPointerValue(tov)
+	fmnp := NonPointerValue(fmv)
 	totyp := tonp.Type()
 	// eltyp := SliceElType(tonp)
 	if totyp.Kind() != reflect.Slice {
@@ -410,7 +410,7 @@ func CopySliceRobust(to, fm any) error {
 	}
 	fmlen := fmnp.Len()
 	if tonp.IsNil() {
-		OnePtrValue(tonp).Elem().Set(MakeSlice(totyp, fmlen, fmlen).Elem())
+		OnePointerValue(tonp).Elem().Set(MakeSlice(totyp, fmlen, fmlen).Elem())
 	} else {
 		if tonp.Len() > fmlen {
 			tonp.SetLen(fmlen)
@@ -421,7 +421,7 @@ func CopySliceRobust(to, fm any) error {
 		if i >= tolen {
 			SliceNewAt(to, i)
 		}
-		SetRobust(PtrValue(tonp.Index(i)).Interface(), fmnp.Index(i).Interface())
+		SetRobust(PointerValue(tonp.Index(i)).Interface(), fmnp.Index(i).Interface())
 	}
 	return nil
 }

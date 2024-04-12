@@ -90,7 +90,7 @@ func TypeName(typ reflect.Type) string {
 // from given object.  Automatically finds the non-pointer base type.
 // This is guaranteed to be unique and used for the Types registry.
 func TypeNameObj(v any) string {
-	typ := reflectx.NonPtrType(reflect.TypeOf(v))
+	typ := reflectx.NonPointerType(reflect.TypeOf(v))
 	return TypeName(typ)
 }
 
@@ -120,7 +120,7 @@ func GetDoc(val, owner reflect.Value, field *reflect.StructField, label string) 
 		if !val.IsValid() {
 			return "", false
 		}
-		rtyp := reflectx.NonPtrType(val.Type())
+		rtyp := reflectx.NonPointerType(val.Type())
 		typ := TypeByName(TypeName(rtyp))
 		if typ == nil {
 			return "", false

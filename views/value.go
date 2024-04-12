@@ -319,7 +319,7 @@ func OpenDialog(v Value, ctx core.Widget, fun, beforeFunc func()) bool {
 // to configure the dialog contents.
 func OpenDialogBase(v Value, cd ConfigDialoger, ctx core.Widget, fun func()) {
 	vd := v.AsValueData()
-	opv := reflectx.OnePtrUnderlyingValue(vd.Value)
+	opv := reflectx.OnePointerUnderlyingValue(vd.Value)
 	if !opv.IsValid() {
 		return
 	}
@@ -378,18 +378,18 @@ func (v *ValueBase[W]) SetValue(value any) bool {
 	if v.Owner != nil {
 		switch v.OwnKind {
 		case reflect.Struct:
-			err = reflectx.SetRobust(reflectx.PtrValue(v.Value).Interface(), value)
+			err = reflectx.SetRobust(reflectx.PointerValue(v.Value).Interface(), value)
 			wasSet = true
 		case reflect.Map:
 			wasSet, err = v.SetValueMap(value)
 		case reflect.Slice:
-			err = reflectx.SetRobust(reflectx.PtrValue(v.Value).Interface(), value)
+			err = reflectx.SetRobust(reflectx.PointerValue(v.Value).Interface(), value)
 		}
 		if updtr, ok := v.Owner.(core.Updater); ok {
 			updtr.Update()
 		}
 	} else {
-		err = reflectx.SetRobust(reflectx.PtrValue(v.Value).Interface(), value)
+		err = reflectx.SetRobust(reflectx.PointerValue(v.Value).Interface(), value)
 		wasSet = true
 	}
 	v.SendChange()
@@ -401,12 +401,12 @@ func (v *ValueBase[W]) SetValue(value any) bool {
 }
 
 func (v *ValueBase[W]) SetValueMap(val any) (bool, error) {
-	ov := reflectx.NonPtrValue(reflect.ValueOf(v.Owner))
+	ov := reflectx.NonPointerValue(reflect.ValueOf(v.Owner))
 	wasSet := false
 	var err error
 	if v.Is(ValueMapKey) {
-		nv := reflectx.NonPtrValue(reflect.ValueOf(val)) // new key value
-		kv := reflectx.NonPtrValue(v.Value)
+		nv := reflectx.NonPointerValue(reflect.ValueOf(val)) // new key value
+		kv := reflectx.NonPointerValue(v.Value)
 		cv := ov.MapIndex(kv)    // get current value
 		curnv := ov.MapIndex(nv) // see if new value there already
 		if val != kv.Interface() && curnv.IsValid() && !curnv.IsZero() {
@@ -431,12 +431,12 @@ func (v *ValueBase[W]) SetValueMap(val any) (bool, error) {
 		v.Value = nv                        // update value to new key
 		wasSet = true
 	} else {
-		v.Value = reflectx.NonPtrValue(reflect.ValueOf(val))
+		v.Value = reflectx.NonPointerValue(reflect.ValueOf(val))
 		if v.KeyView != nil {
-			ck := reflectx.NonPtrValue(v.KeyView.Val())                  // current key value
+			ck := reflectx.NonPointerValue(v.KeyView.Val())              // current key value
 			wasSet = reflectx.SetMapRobust(ov, ck, reflect.ValueOf(val)) // todo: error
 		} else { // static, key not editable?
-			wasSet = reflectx.SetMapRobust(ov, reflectx.NonPtrValue(reflect.ValueOf(v.Key)), v.Value) // todo: error
+			wasSet = reflectx.SetMapRobust(ov, reflectx.NonPointerValue(reflect.ValueOf(v.Key)), v.Value) // todo: error
 		}
 		// wasSet = true
 	}
@@ -681,7 +681,7 @@ func (v *ValueData) SetSoloValue(val reflect.Value) {
 	v.OwnKind = reflect.Invalid
 	// we must ensure that it is a pointer value so that it has
 	// an underlying value that updates when changes occur
-	v.Value = reflectx.PtrValue(val)
+	v.Value = reflectx.PointerValue(val)
 }
 
 // OwnerKind we have this one accessor b/c it is more useful for outside consumers vs. internal usage
@@ -699,7 +699,7 @@ func (v *ValueData) IsReadOnly() bool {
 			return true
 		}
 	}
-	npv := reflectx.NonPtrValue(v.Value)
+	npv := reflectx.NonPointerValue(v.Value)
 	if npv.Kind() == reflect.Interface && npv.IsZero() {
 		v.SetReadOnly(true) // cache
 		return true
@@ -814,11 +814,11 @@ func (v *ValueData) OwnerLabel() string {
 	case reflect.Map:
 		kystr := ""
 		if v.Is(ValueMapKey) {
-			kv := reflectx.NonPtrValue(v.Value)
+			kv := reflectx.NonPointerValue(v.Value)
 			kystr = reflectx.ToString(kv.Interface())
 		} else {
 			if v.KeyView != nil {
-				ck := reflectx.NonPtrValue(v.KeyView.Val()) // current key value
+				ck := reflectx.NonPointerValue(v.KeyView.Val()) // current key value
 				kystr = reflectx.ToString(ck.Interface())
 			} else {
 				kystr = reflectx.ToString(v.Key)
@@ -846,12 +846,12 @@ func (v *ValueData) OwnerLabel() string {
 // can be used for not proceeding in case of non-value-based types.
 func (v *ValueData) GetTitle() (label, newPath string, isZero bool) {
 	var npt reflect.Type
-	if v.Value.IsZero() || !reflectx.NonPtrValue(v.Value).IsValid() || reflectx.NonPtrValue(v.Value).IsZero() {
-		npt = reflectx.NonPtrType(v.Value.Type())
+	if v.Value.IsZero() || !reflectx.NonPointerValue(v.Value).IsValid() || reflectx.NonPointerValue(v.Value).IsZero() {
+		npt = reflectx.NonPointerType(v.Value.Type())
 		isZero = true
 	} else {
-		opv := reflectx.OnePtrUnderlyingValue(v.Value)
-		npt = reflectx.NonPtrType(opv.Type())
+		opv := reflectx.OnePointerUnderlyingValue(v.Value)
+		npt = reflectx.NonPointerType(opv.Type())
 	}
 	newPath = reflectx.FriendlyTypeName(npt)
 	olbl := v.OwnerLabel()

@@ -43,7 +43,7 @@ func (v *ColorMapValue) Config() {
 		s.Grow.Set(0, 0)
 		s.Min.Set(units.Em(10), units.Em(1.5))
 
-		cmn, ok := reflectx.NonPtrValue(v.Value).Interface().(ColorMapName)
+		cmn, ok := reflectx.NonPointerValue(v.Value).Interface().(ColorMapName)
 		if !ok || cmn == "" {
 			s.Background = colors.C(colors.Scheme.OutlineVariant)
 			return

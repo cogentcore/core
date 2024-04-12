@@ -284,7 +284,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 		if hasDef {
 			lbl.Style(func(s *styles.Style) {
 				dtag, _ := vv.Tag("default")
-				isDef, _ := StructFieldIsDef(dtag, vv.Val().Interface(), reflectx.NonPtrValue(vv.Val()).Kind())
+				isDef, _ := StructFieldIsDef(dtag, vv.Val().Interface(), reflectx.NonPointerValue(vv.Val()).Kind())
 				dcr := "(Double click to reset to default) "
 				if !isDef {
 					s.Color = colors.C(colors.Scheme.Primary.Base)
@@ -298,7 +298,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 			})
 			lbl.OnDoubleClick(func(e events.Event) {
 				dtag, _ := vv.Tag("default")
-				isDef, _ := StructFieldIsDef(dtag, vv.Val().Interface(), reflectx.NonPtrValue(vv.Val()).Kind())
+				isDef, _ := StructFieldIsDef(dtag, vv.Val().Interface(), reflectx.NonPointerValue(vv.Val()).Kind())
 				if isDef {
 					return
 				}
@@ -328,7 +328,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 			vv.OnChange(func(e events.Event) {
 				sv.UpdateFieldAction()
 				// note: updating vv here is redundant -- relevant field will have already updated
-				if !reflectx.KindIsBasic(reflectx.NonPtrValue(vv.Val()).Kind()) {
+				if !reflectx.KindIsBasic(reflectx.NonPointerValue(vv.Val()).Kind()) {
 					if updtr, ok := sv.Struct.(core.Updater); ok {
 						updtr.Update()
 					}
@@ -393,12 +393,12 @@ func StructFieldIsDef(defs string, valPtr any, kind reflect.Kind) (bool, string)
 		hi, _ := strconv.ParseFloat(dtags[1], 64)
 		vf, err := reflectx.ToFloat(valPtr)
 		if err != nil {
-			slog.Error("views.StructFieldIsDef: error parsing struct field numerical range def tag", "type", reflectx.NonPtrType(reflect.TypeOf(valPtr)), "def", defs, "err", err)
+			slog.Error("views.StructFieldIsDef: error parsing struct field numerical range def tag", "type", reflectx.NonPointerType(reflect.TypeOf(valPtr)), "def", defs, "err", err)
 			return true, defStr
 		}
 		return lo <= vf && vf <= hi, defStr
 	}
-	v := reflectx.NonPtrValue(reflect.ValueOf(valPtr))
+	v := reflectx.NonPointerValue(reflect.ValueOf(valPtr))
 	dtags := strings.Split(defs, ",")
 	if strings.ContainsAny(defs, "{[") { // complex type, so don't split on commas
 		dtags = []string{defs}

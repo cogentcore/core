@@ -143,7 +143,7 @@ func TestFlatFields(t *testing.T) {
 	ffi := FlatFieldInterfaces(&c)
 	ffis := ""
 	for _, fi := range ffi {
-		ffis += fmt.Sprintf("%v,", NonPtrInterface(fi))
+		ffis += fmt.Sprintf("%v,", NonPointerValue(reflect.ValueOf(fi)))
 	}
 	ffit := `mbr1 string,2,mbr3 string,4,mbr5 string,6,`
 	if ffis != ffit {
@@ -176,7 +176,7 @@ func TestFlatFieldsByName(t *testing.T) {
 	}
 
 	fifi := FlatFieldInterfaceByName(&c, "Mbr2")
-	fifis := fmt.Sprintf("%v", NonPtrInterface(fifi))
+	fifis := fmt.Sprintf("%v", NonPointerValue(reflect.ValueOf(fifi)))
 	fifit := `2`
 	if fifis != fifit {
 		t.Errorf("Didn't get proper find flat field value by name: %v != %v\n", fifis, fifit)

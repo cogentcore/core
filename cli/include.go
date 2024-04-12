@@ -34,7 +34,7 @@ type Includer interface {
 // Returns an error if any of the include files cannot be found on IncludePath.
 // Does not alter cfg. It typically should not be used by end-user code.
 func IncludeStack(opts *Options, cfg Includer) ([]string, error) {
-	clone := reflect.New(reflectx.NonPtrType(reflect.TypeOf(cfg))).Interface().(Includer)
+	clone := reflect.New(reflectx.NonPointerType(reflect.TypeOf(cfg))).Interface().(Includer)
 	*clone.IncludesPtr() = *cfg.IncludesPtr()
 	return includeStackImpl(opts, clone, nil)
 }

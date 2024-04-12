@@ -140,7 +140,7 @@ func ResetSettings(se Settings) error {
 	if err != nil {
 		return err
 	}
-	npv := reflectx.NonPtrValue(reflect.ValueOf(se))
+	npv := reflectx.NonPointerValue(reflect.ValueOf(se))
 	// we only reset the non-default fields to avoid removing the base
 	// information (name, filename, etc)
 	ndf := reflectx.NonDefaultFields(se)

@@ -23,12 +23,12 @@ func (v *Value) Config() {
 	errors.Log(tb.Stat())
 	tb.OnChange(func(e events.Event) {
 		v.SetValue(string(tb.Text()))
-		fmt.Println(reflectx.OnePtrUnderlyingValue(v.Value).Interface())
+		fmt.Println(reflectx.OnePointerUnderlyingValue(v.Value).Interface())
 	})
 	v.Widget.SetBuffer(tb)
 }
 
 func (v *Value) Update() {
-	npv := reflectx.NonPtrValue(v.Value)
+	npv := reflectx.NonPointerValue(v.Value)
 	v.Widget.Buffer.SetText([]byte(npv.String()))
 }
