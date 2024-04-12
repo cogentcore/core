@@ -32,7 +32,7 @@ var GuiActive = false
 // DepthLimit is the infinite recursion prevention cutoff
 var DepthLimit = 10000
 
-// parse.Rule operates on the lexically-tokenized input, not the raw source.
+// parser.Rule operates on the lexically-tokenized input, not the raw source.
 //
 // The overall strategy is pragmatically based on the current known form of
 // most languages, which are organized around a sequence of statements having
@@ -159,7 +159,7 @@ type Parser interface {
 	// ast is the current ast node that we add to
 	Parse(ps *State, parent *Rule, ast *Ast, scope lex.Reg, optMap lex.TokenMap, depth int) *Rule
 
-	// AsParseRule returns object as a parse.Rule
+	// AsParseRule returns object as a parser.Rule
 	AsParseRule() *Rule
 }
 

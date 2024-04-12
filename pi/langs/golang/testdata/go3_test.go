@@ -6,7 +6,6 @@ package pi
 
 import (
 	"cogentcore.org/core/pi/lex"
-	"cogentcore.org/core/pi/parse"
 	"cogentcore.org/core/pi/syms"
 )
 
@@ -51,7 +50,7 @@ type Lang interface {
 	// Existing context information from full-file parsing is used as appropriate, but
 	// the results will NOT be used to update any existing full-file Ast representation --
 	// should call ParseFile to update that as appropriate.
-	ParseLine(fs *FileState, line int) *parse.Ast
+	ParseLine(fs *FileState, line int) *parser.Ast
 
 	// CompleteLine provides the list of relevant completions for given position within
 	// the file -- typically language will call ParseLine on that line, and use the Ast
