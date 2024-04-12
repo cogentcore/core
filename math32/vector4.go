@@ -20,13 +20,13 @@ type Vector4 struct {
 	W float32
 }
 
-// V4 returns a new [Vector4] with the given x, y, z, and w components.
-func V4(x, y, z, w float32) Vector4 {
+// Vec4 returns a new [Vector4] with the given x, y, z, and w components.
+func Vec4(x, y, z, w float32) Vector4 {
 	return Vector4{X: x, Y: y, Z: z, W: w}
 }
 
-// V4Scalar returns a new [Vector4] with all components set to the given scalar value.
-func V4Scalar(s float32) Vector4 {
+// Vector4Scalar returns a new [Vector4] with all components set to the given scalar value.
+func Vector4Scalar(s float32) Vector4 {
 	return Vector4{X: s, Y: s, Z: s, W: s}
 }
 
@@ -306,7 +306,7 @@ func (v *Vector4) Clamp(min, max Vector4) {
 
 // ClampScalar sets this vector components to be no less than minVal and not greater than maxVal.
 func (v *Vector4) ClampScalar(minVal, maxVal float32) {
-	v.Clamp(V4Scalar(minVal), V4Scalar(maxVal))
+	v.Clamp(Vector4Scalar(minVal), Vector4Scalar(maxVal))
 }
 
 // Floor returns vector with math32.Floor() applied to each of this vector's components.

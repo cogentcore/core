@@ -229,7 +229,7 @@ func (cm *Camera) PanTarget(delX, delY, delZ float32) {
 func (cm *Camera) TargetFromView() {
 	cm.CamMu.Lock()
 	trgdist := cm.Pose.Pos.Sub(cm.Target).Length() // distance to existing target
-	tpos := math32.V4(0, 0, -trgdist, 1)           // target is that distance along -Z axis in front of me
+	tpos := math32.Vec4(0, 0, -trgdist, 1)         // target is that distance along -Z axis in front of me
 	cm.Target = math32.Vector3FromVector4(tpos.MulMat4(&cm.Pose.Matrix))
 	cm.CamMu.Unlock()
 }
