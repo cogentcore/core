@@ -102,15 +102,3 @@ func CloneToType(typ reflect.Type, val any) reflect.Value {
 	SetRobust(evi, val)
 	return vn
 }
-
-// MakeOfType creates a new object of given type with appropriate magic foo to
-// make it usable
-func MakeOfType(typ reflect.Type) reflect.Value {
-	if NonPointerType(typ).Kind() == reflect.Map {
-		return MakeMap(typ)
-	} else if NonPointerType(typ).Kind() == reflect.Slice {
-		return MakeSlice(typ, 0, 0)
-	}
-	vn := reflect.New(typ)
-	return vn
-}

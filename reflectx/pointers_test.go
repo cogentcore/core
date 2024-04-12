@@ -32,14 +32,14 @@ func FieldValue(obj any, fld reflect.StructField) reflect.Value {
 	ov := reflect.ValueOf(obj)
 	f := unsafe.Pointer(ov.Pointer() + fld.Offset)
 	nw := reflect.NewAt(fld.Type, f)
-	return UnhideAnyValue(nw).Elem()
+	return nw
 }
 
 func SubFieldValue(obj any, fld reflect.StructField, sub reflect.StructField) reflect.Value {
 	ov := reflect.ValueOf(obj)
 	f := unsafe.Pointer(ov.Pointer() + fld.Offset + sub.Offset)
 	nw := reflect.NewAt(sub.Type, f)
-	return UnhideAnyValue(nw).Elem()
+	return nw
 }
 
 // test ability to create an addressable pointer value to fields of a struct

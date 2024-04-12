@@ -234,33 +234,6 @@ func (mv *MapView) SetChanged() {
 	mv.SendChange()
 }
 
-// MapChangeValueType changes the type of the value for given map element at
-// idx -- for maps with any values
-func (mv *MapView) MapChangeValueType(idx int, typ reflect.Type) {
-	if reflectx.AnyIsNil(mv.Map) {
-		return
-	}
-
-	keyv := mv.Keys[idx]
-	ck := reflectx.NonPointerValue(keyv.Val()) // current key value
-	valv := mv.Values[idx]
-	cv := reflectx.NonPointerValue(valv.Val()) // current val value
-
-	// create a new item of selected type, and attempt to convert existing to it
-	var evn reflect.Value
-	if cv.IsZero() {
-		evn = reflectx.MakeOfType(typ)
-	} else {
-		evn = reflectx.CloneToType(typ, cv.Interface())
-	}
-	ov := reflectx.NonPointerValue(reflect.ValueOf(mv.Map))
-	valv.AsValueData().Value = evn.Elem()
-	ov.SetMapIndex(ck, evn.Elem())
-	mv.ConfigMapGrid()
-	mv.SetChanged()
-	mv.NeedsRender()
-}
-
 // ToggleSort toggles sorting by values vs. keys
 func (mv *MapView) ToggleSort() {
 	mv.SortVals = !mv.SortVals

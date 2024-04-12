@@ -106,16 +106,3 @@ func OnePointerUnderlyingValue(v reflect.Value) reflect.Value {
 	}
 	return OnePointerValue(npv)
 }
-
-// UnhideAnyValue returns a reflect.Value for any of the Make* functions
-// that is actually assignable -- even though these functions return a pointer
-// to the new object, it is somehow hidden behind an interface{} and this
-// magic code, posted by someone somewhere that I cannot now find again,
-// un-hides it..
-func UnhideAnyValue(v reflect.Value) reflect.Value {
-	vn := reflect.ValueOf(v.Interface())
-	typ := vn.Type()
-	ptr := reflect.New(typ)
-	ptr.Elem().Set(vn)
-	return ptr
-}

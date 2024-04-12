@@ -16,12 +16,6 @@ import (
 // This file contains helpful functions for dealing with maps
 // in the reflect system
 
-// MakeMap makes a map that is actually addressable, getting around the hidden
-// interface{} that reflect.MakeMap makes, by calling UnhideIfaceValue (from ptrs.go)
-func MakeMap(typ reflect.Type) reflect.Value {
-	return UnhideAnyValue(reflect.MakeMap(typ))
-}
-
 // MapValueType returns the type of the value for the given map (which can be
 // a pointer to a map or a direct map) -- just Elem() of map type, but using
 // this function makes it more explicit what is going on.
@@ -194,8 +188,7 @@ func MapAdd(mv any) {
 	nkey := reflect.New(MapKeyType(mv))
 	nval := reflect.New(valtyp)
 	if mpvnp.IsNil() { // make a new map
-		nmp := MakeMap(mvtyp)
-		mpv.Elem().Set(nmp.Elem())
+		mpv.Elem().Set(reflect.MakeMap(mvtyp))
 		mpvnp = NonPointerValue(mpv)
 	}
 	mpvnp.SetMapIndex(nkey.Elem(), nval.Elem())
@@ -376,7 +369,7 @@ func CopyMapRobust(to, from any) error {
 		return err
 	}
 	if tonp.IsNil() {
-		OnePointerValue(tov).Elem().Set(MakeMap(totyp).Elem())
+		OnePointerValue(tov).Elem().Set(reflect.MakeMap(totyp))
 	} else {
 		MapDeleteAll(to)
 	}
