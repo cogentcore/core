@@ -17,13 +17,13 @@ import (
 // optionally per-vertex colors.
 type Mesh struct {
 
-	// number of vertex points, as mat32.Vec3 -- always includes mat32.Vec3 normals and mat32.Vec2 texture coordinates
+	// number of vertex points, as math32.Vec3 -- always includes math32.Vec3 normals and math32.Vec2 texture coordinates
 	NVtx int
 
-	// number of indexes, as mat32.ArrayU32
+	// number of indexes, as math32.ArrayU32
 	NIndex int
 
-	// has per-vertex colors, as mat32.Vec4 per vertex
+	// has per-vertex colors, as math32.Vec4 per vertex
 	HasColor bool
 }
 
@@ -102,7 +102,7 @@ func (ph *Phong) UseMeshIndex(idx int) error {
 	return nil
 }
 
-// MeshFloatsByName returns the mat32.ArrayF32's and mat32.ArrayU32 for given mesh
+// MeshFloatsByName returns the math32.ArrayF32's and math32.ArrayU32 for given mesh
 // for assigning values to the mesh.
 // Must call ModMeshByName after setting these values to mark as modified.
 func (ph *Phong) MeshFloatsByName(name string) (pos, norm, tex, clr math32.ArrayF32, idx math32.ArrayU32) {
@@ -116,7 +116,7 @@ func (ph *Phong) MeshFloatsByName(name string) (pos, norm, tex, clr math32.Array
 	return ph.MeshFloatsByIndex(i)
 }
 
-// MeshFloatsByIndex returns the mat32.ArrayF32's and mat32.ArrayU32 for given mesh
+// MeshFloatsByIndex returns the math32.ArrayF32's and math32.ArrayU32 for given mesh
 // for assigning values to the mesh.
 // Must call ModMeshByIndex after setting these values to mark as modified.
 func (ph *Phong) MeshFloatsByIndex(i int) (pos, norm, tex, clr math32.ArrayF32, idx math32.ArrayU32) {

@@ -204,14 +204,14 @@ func TransformMatrix(dr image.Rectangle, sr image.Rectangle, rotDeg float32) mat
 	return mat.Mul(math32.Mat3FromMat2(rmat))
 
 	/*  stuff that didn't work, but theoretically should?
-	rad := mat32.DegToRad(rotDeg)
-	dsz := mat32.V2FromPoint(dr.Size())
+	rad := math32.DegToRad(rotDeg)
+	dsz := math32.V2FromPoint(dr.Size())
 	dctr := dsz.MulScalar(0.5)
 	_ = dctr
-	// mat2 := mat32.Translate2D(dctr.X, 0).Mul(mat32.Rotate2D(rad)).Mul(mat32.Translate2D(tx, ty)).Mul(mat32.Scale2D(sx, sy))
-	mat2 := mat32.Translate2D(tx, ty).Mul(mat32.Scale2D(sx, sy)).Mul(mat32.Translate2D(dctr.X, 0)).Mul(mat32.Rotate2D(rad))
-	// mat2 := mat32.Rotate2D(rad).MulCtr(mat32.Translate2D(tx, ty).Mul(mat32.Scale2D(sx, sy)), dctr)
-	mat := mat32.Mat3FromMat2(mat2)
+	// mat2 := math32.Translate2D(dctr.X, 0).Mul(math32.Rotate2D(rad)).Mul(math32.Translate2D(tx, ty)).Mul(math32.Scale2D(sx, sy))
+	mat2 := math32.Translate2D(tx, ty).Mul(math32.Scale2D(sx, sy)).Mul(math32.Translate2D(dctr.X, 0)).Mul(math32.Rotate2D(rad))
+	// mat2 := math32.Rotate2D(rad).MulCtr(math32.Translate2D(tx, ty).Mul(math32.Scale2D(sx, sy)), dctr)
+	mat := math32.Mat3FromMat2(mat2)
 	*/
 }
 

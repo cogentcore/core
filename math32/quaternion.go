@@ -131,12 +131,12 @@ func (q *Quat) ToAxisAngle() Vec4 {
 // GenGoSet returns code to set values in object at given path (var.member etc)
 func (q *Quat) GenGoSet(path string) string {
 	aa := q.ToAxisAngle()
-	return fmt.Sprintf("%s.SetFromAxisAngle(mat32.V3(%g, %g, %g), %g)", path, aa.X, aa.Y, aa.Z, aa.W)
+	return fmt.Sprintf("%s.SetFromAxisAngle(math32.V3(%g, %g, %g), %g)", path, aa.X, aa.Y, aa.Z, aa.W)
 }
 
 // GenGoNew returns code to create new
 func (q *Quat) GenGoNew() string {
-	return fmt.Sprintf("mat32.Quat{%g, %g, %g, %g}", q.X, q.Y, q.Z, q.W)
+	return fmt.Sprintf("math32.Quat{%g, %g, %g, %g}", q.X, q.Y, q.Z, q.W)
 }
 
 // SetFromRotationMatrix sets this quaternion from the specified rotation matrix.

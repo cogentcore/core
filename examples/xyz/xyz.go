@@ -214,7 +214,7 @@ func main() {
 
 	// bbclr := styles.Color{}
 	// bbclr.SetUInt8(255, 255, 0, 255)
-	// xyz.NewLineBox(sc, sc, "bbox", "bbox", mat32.Box3{Min: mat32.V3(-2, -2, -1), Max: mat32.V3(-1, -1, .5)}, .01, bbclr, xyz.Active)
+	// xyz.NewLineBox(sc, sc, "bbox", "bbox", math32.Box3{Min: math32.V3(-2, -2, -1), Max: math32.V3(-1, -1, .5)}, .01, bbclr, xyz.Active)
 
 	cylm := xyz.NewCylinder(sc, "cylinder", 1.5, .5, 32, 1, true, true)
 	xyz.NewSolid(sc, "cylinder").SetMesh(cylm).SetPos(-2.25, 0, 0)
@@ -306,7 +306,7 @@ func main() {
 		sb.Tooltip = "determines the speed of rotation (step size)"
 
 		spsld := core.NewSlider(evlay, "speed-slider")
-		spsld.Dim = mat32.X
+		spsld.Dim = math32.X
 		spsld.Min = 0.01
 		spsld.Max = 1
 		spsld.Step = 0.01

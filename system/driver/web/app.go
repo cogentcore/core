@@ -18,7 +18,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/jsfs"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/driver/base"
@@ -123,7 +123,7 @@ func (a *App) Resize() {
 	w, h := js.Global().Get("innerWidth").Int(), js.Global().Get("innerHeight").Int()
 	sz := image.Pt(w, h)
 	a.Scrn.Geometry.Max = sz
-	a.Scrn.PixSize = image.Pt(int(mat32.Ceil(float32(sz.X)*a.Scrn.DevicePixelRatio)), int(mat32.Ceil(float32(sz.Y)*a.Scrn.DevicePixelRatio)))
+	a.Scrn.PixSize = image.Pt(int(math32.Ceil(float32(sz.X)*a.Scrn.DevicePixelRatio)), int(math32.Ceil(float32(sz.Y)*a.Scrn.DevicePixelRatio)))
 	physX := 25.4 * float32(w) / dpi
 	physY := 25.4 * float32(h) / dpi
 	a.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))

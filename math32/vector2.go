@@ -495,29 +495,29 @@ func (v *Vec2) ClampScalar(minVal, maxVal float32) {
 	v.Clamp(V2Scalar(minVal), V2Scalar(maxVal))
 }
 
-// Floor returns vector with mat32.Floor() applied to each of this vector's components.
+// Floor returns vector with math32.Floor() applied to each of this vector's components.
 func (v Vec2) Floor() Vec2 {
 	return V2(Floor(v.X), Floor(v.Y))
 }
 
-// SetFloor applies mat32.Floor() to each of this vector's components.
+// SetFloor applies math32.Floor() to each of this vector's components.
 func (v *Vec2) SetFloor() {
 	v.X = Floor(v.X)
 	v.Y = Floor(v.Y)
 }
 
-// Ceil returns vector with mat32.Ceil() applied to each of this vector's components.
+// Ceil returns vector with math32.Ceil() applied to each of this vector's components.
 func (v Vec2) Ceil() Vec2 {
 	return V2(Ceil(v.X), Ceil(v.Y))
 }
 
-// SetCeil applies mat32.Ceil() to each of this vector's components.
+// SetCeil applies math32.Ceil() to each of this vector's components.
 func (v *Vec2) SetCeil() {
 	v.X = Ceil(v.X)
 	v.Y = Ceil(v.Y)
 }
 
-// Round returns vector with mat32.Round() applied to each of this vector's components.
+// Round returns vector with math32.Round() applied to each of this vector's components.
 func (v Vec2) Round() Vec2 {
 	return V2(Round(v.X), Round(v.Y))
 }

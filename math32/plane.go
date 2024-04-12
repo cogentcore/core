@@ -48,7 +48,7 @@ func (p *Plane) SetFromCoplanarPoints(a, b, c Vec3) {
 	norm := c.Sub(b).Cross(a.Sub(b))
 	norm.SetNormal()
 	if norm == (Vec3{}) {
-		log.Printf("mat32.SetFromCoplanarPonts: points not actually coplanar: %v %v %v\n", a, b, c)
+		log.Printf("math32.SetFromCoplanarPonts: points not actually coplanar: %v %v %v\n", a, b, c)
 	}
 	p.SetFromNormalAndCoplanarPoint(norm, a)
 }

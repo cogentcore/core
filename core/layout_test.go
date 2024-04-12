@@ -189,7 +189,7 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 			// s.Align.X = styles.End
 			s.Wrap = true
 		})
-		PlainFrames(row, mat32.V2(0, 0))
+		PlainFrames(row, math32.V2(0, 0))
 		// NewLabel(sc, "lbl").SetText(ShortText).Style(func(s *styles.Style) {
 		// })
 		HorizRow(sc).Style(func(s *styles.Style) {

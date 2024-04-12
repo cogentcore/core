@@ -117,7 +117,7 @@ func AddArc(points []float32, cx, cy, px, py float32, p Adder) (lx, ly float32) 
 			deltaEta -= math32.Pi * 2
 		}
 	}
-	// This check might be needed if the center point of the elipse is
+	// This check might be needed if the center point of the ellipse is
 	// at the midpoint of the start and end lines.
 	if deltaEta < 0 && sweep {
 		deltaEta += math32.Pi * 2
@@ -133,7 +133,7 @@ func AddArc(points []float32, cx, cy, px, py float32, p Adder) (lx, ly float32) 
 	// or cubic Bezier curves", 2003
 	// https://www.spaceroots.org/documents/elllipse/elliptical-arc.pdf
 	tde := math32.Tan(dEta / 2)
-	alpha := math32.Sin(dEta) * (math32.Sqrt(4+3*tde*tde) - 1) / 3 // Mat32 is fun!
+	alpha := math32.Sin(dEta) * (math32.Sqrt(4+3*tde*tde) - 1) / 3 // math32 is fun!
 	lx, ly = px, py
 	sinTheta, cosTheta := math32.Sin(rotX), math32.Cos(rotX)
 	ldx, ldy := EllipsePrime(points[0], points[1], sinTheta, cosTheta, etaStart, cx, cy)
@@ -153,7 +153,7 @@ func AddArc(points []float32, cx, cy, px, py float32, p Adder) (lx, ly float32) 
 	return lx, ly
 }
 
-// EllipsePrime gives tangent vectors for parameterized elipse; a, b, radii, eta parameter, center cx, cy
+// EllipsePrime gives tangent vectors for parameterized ellipse; a, b, radii, eta parameter, center cx, cy
 func EllipsePrime(a, b, sinTheta, cosTheta, eta, cx, cy float32) (px, py float32) {
 	bCosEta := b * math32.Cos(eta)
 	aSinEta := a * math32.Sin(eta)
@@ -162,7 +162,7 @@ func EllipsePrime(a, b, sinTheta, cosTheta, eta, cx, cy float32) (px, py float32
 	return
 }
 
-// EllipsePointAt gives points for parameterized elipse; a, b, radii, eta parameter, center cx, cy
+// EllipsePointAt gives points for parameterized ellipse; a, b, radii, eta parameter, center cx, cy
 func EllipsePointAt(a, b, sinTheta, cosTheta, eta, cx, cy float32) (px, py float32) {
 	aCosEta := a * math32.Cos(eta)
 	bSinEta := b * math32.Sin(eta)

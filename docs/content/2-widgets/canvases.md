@@ -6,7 +6,7 @@ You can set the function used to draw the canvas:
 
 ```Go
 core.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
-    pc.FillBox(mat32.Vec2{}, mat32.V2(1, 1), colors.C(colors.Scheme.Primary.Base))
+    pc.FillBox(math32.Vec2{}, math32.V2(1, 1), colors.C(colors.Scheme.Primary.Base))
 })
 ```
 
@@ -58,7 +58,7 @@ You can draw elliptical arcs:
 
 ```Go
 core.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
-    pc.DrawEllipticalArc(0.5, 0.5, 0.5, 0.25, mat32.Pi, 2*mat32.Pi)
+    pc.DrawEllipticalArc(0.5, 0.5, 0.5, 0.25, math32.Pi, 2*math32.Pi)
     pc.FillStyle.Color = colors.C(colors.Scheme.Success.Base)
     pc.Fill()
 })
@@ -68,7 +68,7 @@ You can draw regular polygons:
 
 ```Go
 core.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
-    pc.DrawRegularPolygon(6, 0.5, 0.5, 0.5, mat32.Pi)
+    pc.DrawRegularPolygon(6, 0.5, 0.5, 0.5, math32.Pi)
     pc.FillStyle.Color = colors.C(colors.Scheme.Success.Base)
     pc.Fill()
 })
@@ -100,7 +100,7 @@ You can change the size of the canvas:
 
 ```Go
 c := core.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
-    pc.FillBox(mat32.Vec2{}, mat32.V2(1, 1), colors.C(colors.Scheme.Warn.Base))
+    pc.FillBox(math32.Vec2{}, math32.V2(1, 1), colors.C(colors.Scheme.Warn.Base))
 })
 c.Style(func(s *styles.Style) {
     s.Min.Set(units.Dp(128))

@@ -144,7 +144,7 @@ func TestRenderRadial(t *testing.T) {
 	imagex.Assert(t, img, "radial-user-space")
 }
 
-// func matToRasterx(mat *mat32.Mat2) rasterx.Matrix2D {
+// func matToRasterx(mat *math32.Mat2) rasterx.Matrix2D {
 // 	// A = XX
 // 	// B = YX
 // 	// C = XY
@@ -177,7 +177,7 @@ func TestTransform(t *testing.T) {
 	compareTol(t, gb.boxTransform.X0, btcorrect.X0)
 	compareTol(t, gb.boxTransform.Y0, btcorrect.Y0)
 
-	// szf := mat32.V2FromPoint(r.Size())
+	// szf := math32.V2FromPoint(r.Size())
 	// w := float64(szf.X)
 	// h := float64(szf.Y)
 	// oriX := float64(r.Min.X)

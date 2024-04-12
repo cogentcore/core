@@ -699,7 +699,7 @@ func (pc *Context) DrawRoundedShadowBlur(blurSigma, radiusFactor, x, y, w, h flo
 	br := math32.Ceil(radiusFactor * blurSigma)
 	br = math32.Clamp(br, 1, w/2-2)
 	br = math32.Clamp(br, 1, h/2-2)
-	// radiusFactor = mat32.Ceil(br / blurSigma)
+	// radiusFactor = math32.Ceil(br / blurSigma)
 	radiusFactor = br / blurSigma
 	blurs := EdgeBlurFactors(blurSigma, radiusFactor)
 

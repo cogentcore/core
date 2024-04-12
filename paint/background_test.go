@@ -54,7 +54,7 @@ func TestBackgroundImage(t *testing.T) {
 
 func TestObjectFit(t *testing.T) {
 	img, _, err := imagex.Open("test.png")
-	// obj := mat32.V2FromPoint(img.Bounds().Size())
+	// obj := math32.V2FromPoint(img.Bounds().Size())
 	assert.NoError(t, err)
 	RunTest(t, "object-fit", 1260, 300, func(pc *Context) {
 		st := styles.NewStyle()

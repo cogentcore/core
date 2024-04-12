@@ -64,13 +64,13 @@ func main() {
 	cur := st
 	for i := 0; i < n; i++ {
 		ivals[i] = cur
-		// cpuValues[i] = mat32.FastExp(ivals[i]) // 0 diffs
+		// cpuValues[i] = math32.FastExp(ivals[i]) // 0 diffs
 		vbio := ivals[i]
 		eval := 0.1 * ((vbio + 90.0) + 10.0)
-		// cpuValues[i] = (vbio + 90.0) / (1.0 + mat32.FastExp(eval)) // lots of diffs
+		// cpuValues[i] = (vbio + 90.0) / (1.0 + math32.FastExp(eval)) // lots of diffs
 		// cpuValues[i] = eval // 0 diff
 		cpuValues[i] = float32(1.0) / eval // no diff from casting
-		// cpuValues[i] = 1.0 / mat32.FastExp(eval)
+		// cpuValues[i] = 1.0 / math32.FastExp(eval)
 		cur += inc
 	}
 

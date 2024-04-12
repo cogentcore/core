@@ -117,7 +117,7 @@ func (v *Vec3) GenGoSet(path string) string {
 
 // GenGoNew returns code to create new
 func (v *Vec3) GenGoNew() string {
-	return fmt.Sprintf("mat32.V3(%g, %g, %g)", v.X, v.Y, v.Z)
+	return fmt.Sprintf("math32.V3(%g, %g, %g)", v.X, v.Y, v.Z)
 }
 
 // SetZero sets this vector X, Y and Z components to be zero.
@@ -297,31 +297,31 @@ func (v *Vec3) ClampScalar(minVal, maxVal float32) {
 	v.Clamp(V3Scalar(minVal), V3Scalar(maxVal))
 }
 
-// Floor returns vector with mat32.Floor() applied to each of this vector's components.
+// Floor returns vector with math32.Floor() applied to each of this vector's components.
 func (v Vec3) Floor() Vec3 {
 	return V3(Floor(v.X), Floor(v.Y), Floor(v.Z))
 }
 
-// SetFloor applies mat32.Floor() to each of this vector's components.
+// SetFloor applies math32.Floor() to each of this vector's components.
 func (v *Vec3) SetFloor() {
 	v.X = Floor(v.X)
 	v.Y = Floor(v.Y)
 	v.Z = Floor(v.Z)
 }
 
-// Ceil returns vector with mat32.Ceil() applied to each of this vector's components.
+// Ceil returns vector with math32.Ceil() applied to each of this vector's components.
 func (v Vec3) Ceil() Vec3 {
 	return V3(Ceil(v.X), Ceil(v.Y), Ceil(v.Z))
 }
 
-// SetCeil applies mat32.Ceil() to each of this vector's components.
+// SetCeil applies math32.Ceil() to each of this vector's components.
 func (v *Vec3) SetCeil() {
 	v.X = Ceil(v.X)
 	v.Y = Ceil(v.Y)
 	v.Z = Ceil(v.Z)
 }
 
-// Round returns vector with mat32.Round() applied to each of this vector's components.
+// Round returns vector with math32.Round() applied to each of this vector's components.
 func (v Vec3) Round() Vec3 {
 	return V3(Round(v.X), Round(v.Y), Round(v.Z))
 }

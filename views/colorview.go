@@ -350,7 +350,7 @@ func (cv *ColorView) ConfigRGBSlider(sl *core.Slider, rgb int) {
 	sl.Step = 1
 	sl.PageStep = 16
 	sl.Prec = 3
-	sl.Dim = mat32.X
+	sl.Dim = math32.X
 	sl.Tracking = true
 	sl.TrackThr = 1
 	cv.UpdateRGBSlider(sl, rgb)
@@ -389,7 +389,7 @@ func (cv *ColorView) ConfigHSLSlider(sl *core.Slider, hsl int) {
 	sl.Step = 1
 	sl.PageStep = 15
 	sl.Prec = 3
-	sl.Dim = mat32.X
+	sl.Dim = math32.X
 	sl.Tracking = true
 	sl.TrackThr = 1
 	sl.OnChange(func(e events.Event) {

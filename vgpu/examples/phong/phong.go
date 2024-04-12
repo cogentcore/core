@@ -97,9 +97,9 @@ func main() {
 	dirlt := math32.NewVec3Color(color.White).MulScalar(1)
 	ph.AddDirLight(dirlt, math32.V3(0, 1, 1))
 
-	// ph.AddPointLight(mat32.NewVec3Color(color.White), mat32.V3(0, 2, 5), .1, .01)
+	// ph.AddPointLight(math32.NewVec3Color(color.White), math32.V3(0, 2, 5), .1, .01)
 	//
-	// ph.AddSpotLight(mat32.NewVec3Color(color.White), mat32.V3(-2, 5, -2), mat32.V3(0, -1, 0), 10, 45, .01, .001)
+	// ph.AddSpotLight(math32.NewVec3Color(color.White), math32.V3(-2, 5, -2), math32.V3(0, -1, 0), 10, 45, .01, .001)
 
 	/////////////////////////////
 	// Meshes

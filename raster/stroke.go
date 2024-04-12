@@ -243,7 +243,7 @@ func StrokeArc(p Adder, a, s1, s2 fixed.Point26_6, clockwise bool, trimStart,
 	segs := int(math32.Abs(deltaTheta)/(math32.Pi/CubicsPerHalfCircle)) + 1
 	dTheta := deltaTheta / float32(segs)
 	tde := math32.Tan(dTheta / 2)
-	alpha := fixed.Int26_6(math32.Sin(dTheta) * (math32.Sqrt(4+3*tde*tde) - 1) * (64.0 / 3.0)) // Mat32 is fun!
+	alpha := fixed.Int26_6(math32.Sin(dTheta) * (math32.Sqrt(4+3*tde*tde) - 1) * (64.0 / 3.0)) // math32 is fun!
 	r := float32(Length(s1.Sub(a)))                                                            // Note r is *64
 	ldp := fixed.Point26_6{X: -fixed.Int26_6(r * math32.Sin(theta1)), Y: fixed.Int26_6(r * math32.Cos(theta1))}
 	ds1 = ldp

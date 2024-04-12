@@ -379,7 +379,7 @@ func PathDataRender(data []PathData, pc *paint.Context) {
 // traversal is aborted.
 // For Control points, order is in same order as in standard path stream
 // when multiple, e.g., C,S.
-// For A: order is: nc, prv, rad, mat32.Vec2{X: ang}, mat32.V2(laf, sf)}
+// For A: order is: nc, prv, rad, math32.Vec2{X: ang}, math32.V2(laf, sf)}
 func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIndex int, cp math32.Vec2, ctrls []math32.Vec2) bool) {
 	sz := len(data)
 	if sz == 0 {

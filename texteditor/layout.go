@@ -38,7 +38,7 @@ func (ed *Editor) UpdateFromAlloc() {
 	sty := &ed.Styles
 	asz := ed.Geom.Size.Alloc.Content
 	sbw := math32.Ceil(ed.Styles.ScrollBarWidth.Dots)
-	// if ed.HasScroll[mat32.Y] {
+	// if ed.HasScroll[math32.Y] {
 	asz.X -= sbw
 	// }
 	if ed.HasScroll[math32.X] {

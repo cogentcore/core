@@ -71,13 +71,13 @@ type MeshBase struct { //types:add -setters
 	// name of mesh -- meshes are linked to Solids by name so this matters
 	Nm string `set:"-"`
 
-	// number of vertex points, as mat32.Vec3 -- always includes mat32.Vec3 normals and mat32.Vec2 texture coordinates -- only valid after Sizes() has been called
+	// number of vertex points, as math32.Vec3 -- always includes math32.Vec3 normals and math32.Vec2 texture coordinates -- only valid after Sizes() has been called
 	NVtx int `set:"-"`
 
-	// number of indexes, as mat32.ArrayU32 -- only valid after Sizes() has been called
+	// number of indexes, as math32.ArrayU32 -- only valid after Sizes() has been called
 	NIndex int `set:"-"`
 
-	// has per-vertex colors, as mat32.Vec4 per vertex
+	// has per-vertex colors, as math32.Vec4 per vertex
 	Color bool
 
 	// if true, this mesh changes frequently -- otherwise considered to be static
@@ -116,7 +116,7 @@ func (ms *MeshBase) SetMod(sc *Scene) {
 
 // todo!!
 func (ms *MeshBase) ComputeNorms(pos, norm math32.ArrayF32) {
-	// norm := mat32.Normal(vtxs[0], vtxs[1], vtxs[2])
+	// norm := math32.Normal(vtxs[0], vtxs[1], vtxs[2])
 }
 
 ////////////////////////////////////////////////////////////////////////

@@ -319,7 +319,7 @@ func PointsCheckN(pts []float32, n int, errmsg string) error {
 
 // SetString processes the standard SVG-style transform strings
 func (a *Mat2) SetString(str string) error {
-	errmsg := "mat32.Mat2.SetString:"
+	errmsg := "math32.Mat2.SetString:"
 	str = strings.ToLower(strings.TrimSpace(str))
 	*a = Identity2()
 	if str == "none" {

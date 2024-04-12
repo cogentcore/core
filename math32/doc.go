@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// mat32 is our version of the G3N math32 32-bit, 3D rendering-based
+// math32 is our version of the G3N math32 32-bit, 3D rendering-based
 // math library.
 //
 // Initially copied from G3N: github.com/g3n/engine/math32

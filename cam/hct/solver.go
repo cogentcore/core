@@ -25,7 +25,7 @@ import (
 	"cogentcore.org/core/math32"
 )
 
-// SolveToRGBLin Finds an sRGB linear color (represented by mat32.Vec3, 0-100 range)
+// SolveToRGBLin Finds an sRGB linear color (represented by math32.Vec3, 0-100 range)
 // with the given hue, chroma, and tone, if possible.
 // if not possible to represent the target values, the hue and tone will be
 // sufficiently close, and chroma will be maximized.
