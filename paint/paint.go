@@ -952,7 +952,7 @@ func (pc *Context) DrawImageAnchored(fmIm image.Image, x, y, ax, ay float32) {
 // (an additional scaling is applied to the transform matrix used in rendering)
 func (pc *Context) DrawImageScaled(fmIm image.Image, x, y, w, h float32) {
 	s := fmIm.Bounds().Size()
-	isz := math32.Vec2FromPoint(s)
+	isz := math32.Vector2FromPoint(s)
 	isc := math32.Vec2(w, h).Div(isz)
 
 	transformer := draw.BiLinear

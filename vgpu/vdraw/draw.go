@@ -176,11 +176,11 @@ func TransformMatrix(dr image.Rectangle, sr image.Rectangle, rotDeg float32) mat
 		}
 	}
 	rad := math32.DegToRad(rotDeg)
-	dsz := math32.Vec2FromPoint(dr.Size())
+	dsz := math32.Vector2FromPoint(dr.Size())
 	rmat := math32.Rotate2D(rad)
 
-	dmnr := rmat.MulVector2AsPoint(math32.Vec2FromPoint(dr.Min))
-	dmxr := rmat.MulVector2AsPoint(math32.Vec2FromPoint(dr.Max))
+	dmnr := rmat.MulVector2AsPoint(math32.Vector2FromPoint(dr.Min))
+	dmxr := rmat.MulVector2AsPoint(math32.Vector2FromPoint(dr.Max))
 	sx = math32.Abs(dmxr.X-dmnr.X) / float32(sr.Dx())
 	sy = math32.Abs(dmxr.Y-dmnr.Y) / float32(sr.Dy())
 	tx = dmnr.X - sx*float32(sr.Min.X)
@@ -205,7 +205,7 @@ func TransformMatrix(dr image.Rectangle, sr image.Rectangle, rotDeg float32) mat
 
 	/*  stuff that didn't work, but theoretically should?
 	rad := math32.DegToRad(rotDeg)
-	dsz := math32.Vec2FromPoint(dr.Size())
+	dsz := math32.Vector2FromPoint(dr.Size())
 	dctr := dsz.MulScalar(0.5)
 	_ = dctr
 	// mat2 := math32.Translate2D(dctr.X, 0).Mul(math32.Rotate2D(rad)).Mul(math32.Translate2D(tx, ty)).Mul(math32.Scale2D(sx, sy))

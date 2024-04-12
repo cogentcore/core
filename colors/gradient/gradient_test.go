@@ -177,7 +177,7 @@ func TestTransform(t *testing.T) {
 	compareTol(t, gb.boxTransform.X0, btcorrect.X0)
 	compareTol(t, gb.boxTransform.Y0, btcorrect.Y0)
 
-	// szf := math32.Vec2FromPoint(r.Size())
+	// szf := math32.Vector2FromPoint(r.Size())
 	// w := float64(szf.X)
 	// h := float64(szf.Y)
 	// oriX := float64(r.Min.X)

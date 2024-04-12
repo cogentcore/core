@@ -121,7 +121,7 @@ func (tr *Text) Render(pc *Context, pos math32.Vector2) {
 		if !overBoxSet {
 			overWd, _ := curFace.GlyphAdvance(elipses)
 			overWd32 := math32.FromFixed(overWd)
-			overEnd := math32.Vec2FromPoint(pc.Bounds.Max)
+			overEnd := math32.Vector2FromPoint(pc.Bounds.Max)
 			overStart = overEnd.Sub(math32.Vec2(overWd32, 0.1*tr.FontHeight))
 			overBox = math32.Box2{Min: math32.Vec2(overStart.X, overEnd.Y-tr.FontHeight), Max: overEnd}
 			overFace = curFace

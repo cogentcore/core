@@ -460,8 +460,8 @@ func (wb *WidgetBase) PopBounds() {
 
 	isSelw := wb.Scene.SelectedWidget == wb.This()
 	if wb.Scene.Is(ScRenderBBoxes) || isSelw {
-		pos := math32.Vec2FromPoint(wb.Geom.TotalBBox.Min)
-		sz := math32.Vec2FromPoint(wb.Geom.TotalBBox.Size())
+		pos := math32.Vector2FromPoint(wb.Geom.TotalBBox.Min)
+		sz := math32.Vector2FromPoint(wb.Geom.TotalBBox.Size())
 		// node: we won't necc. get a push prior to next update, so saving these.
 		pcsw := pc.StrokeStyle.Width
 		pcsc := pc.StrokeStyle.Color

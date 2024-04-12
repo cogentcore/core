@@ -2305,8 +2305,8 @@ func (sg *SliceViewGrid) IndexFromPixel(pt image.Point) (row, col int, isValid b
 	if !sg.MousePosInGrid(pt) {
 		return
 	}
-	ptf := math32.Vec2FromPoint(sg.PointToRelPos(pt))
-	sz := math32.Vec2FromPoint(sg.Geom.ContentBBox.Size())
+	ptf := math32.Vector2FromPoint(sg.PointToRelPos(pt))
+	sz := math32.Vector2FromPoint(sg.Geom.ContentBBox.Size())
 	isValid = true
 	rows := sg.LayImpl.Shape.Y
 	cols := sg.LayImpl.Shape.X

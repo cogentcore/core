@@ -104,9 +104,9 @@ func (ed *Editor) CharStartPos(pos lex.Pos) math32.Vector2 {
 func (ed *Editor) CharStartPosVis(pos lex.Pos) math32.Vector2 {
 	spos := ed.CharStartPos(pos)
 	bb := ed.Geom.ContentBBox
-	bbmin := math32.Vec2FromPoint(bb.Min)
+	bbmin := math32.Vector2FromPoint(bb.Min)
 	bbmin.X += ed.LineNoOff
-	bbmax := math32.Vec2FromPoint(bb.Max)
+	bbmax := math32.Vector2FromPoint(bb.Max)
 	spos.SetMax(bbmin)
 	spos.SetMin(bbmax)
 	return spos
@@ -321,8 +321,8 @@ func (ed *Editor) RenderAllLines() {
 	pc := &ed.Scene.PaintContext
 	sty := &ed.Styles
 	bb := ed.Geom.ContentBBox
-	bbmin := math32.Vec2FromPoint(bb.Min)
-	bbmax := math32.Vec2FromPoint(bb.Max)
+	bbmin := math32.Vector2FromPoint(bb.Min)
+	bbmax := math32.Vector2FromPoint(bb.Max)
 	pc.FillBox(bbmin, bbmax.Sub(bbmin), sty.Background)
 	pos := ed.RenderStartPos()
 	stln := -1
@@ -387,8 +387,8 @@ func (ed *Editor) RenderLineNosBoxAll() {
 	}
 	pc := &ed.Scene.PaintContext
 	bb := ed.Geom.ContentBBox
-	spos := math32.Vec2FromPoint(bb.Min)
-	epos := math32.Vec2FromPoint(bb.Max)
+	spos := math32.Vector2FromPoint(bb.Min)
+	epos := math32.Vector2FromPoint(bb.Max)
 	epos.X = spos.X + ed.LineNoOff
 	pc.FillBox(spos, epos.Sub(spos), ed.LineNumberColor)
 }
@@ -597,7 +597,7 @@ func (ed *Editor) PixelToCursor(pt image.Point) lex.Pos {
 	lnst := ed.CharStartPos(lex.Pos{Ln: cln})
 	lnst.Y -= yoff
 	lnst.X -= xoff
-	rpt := math32.Vec2FromPoint(pt).Sub(lnst)
+	rpt := math32.Vector2FromPoint(pt).Sub(lnst)
 
 	si, ri, ok := ed.Renders[cln].PosToRune(rpt)
 	if ok {

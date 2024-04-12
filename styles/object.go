@@ -81,7 +81,7 @@ func ObjectSizeFromFit(fit ObjectFits, obj, box math32.Vector2) math32.Vector2 {
 // ResizeImage resizes the given image according to [Style.ObjectFit]
 // in an object of the given box size.
 func (s *Style) ResizeImage(img image.Image, box math32.Vector2) image.Image {
-	obj := math32.Vec2FromPoint(img.Bounds().Size())
+	obj := math32.Vector2FromPoint(img.Bounds().Size())
 	sz := ObjectSizeFromFit(s.ObjectFit, obj, box)
 
 	if s.ObjectFit == FitScaleDown && sz.X >= obj.X {

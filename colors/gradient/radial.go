@@ -44,9 +44,9 @@ func NewRadial() *Radial {
 	return &Radial{
 		Base: NewBase(),
 		// default is fully centered
-		Center: math32.Vec2Scalar(0.5),
-		Focal:  math32.Vec2Scalar(0.5),
-		Radius: math32.Vec2Scalar(0.5),
+		Center: math32.Vector2Scalar(0.5),
+		Focal:  math32.Vector2Scalar(0.5),
+		Radius: math32.Vector2Scalar(0.5),
 	}
 }
 

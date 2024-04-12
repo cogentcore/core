@@ -28,20 +28,20 @@ func Vec2(x, y float32) Vector2 {
 	return Vector2{x, y}
 }
 
-// Vec2Scalar returns a new [Vector2] with all components set to the given scalar value.
-func Vec2Scalar(s float32) Vector2 {
+// Vector2Scalar returns a new [Vector2] with all components set to the given scalar value.
+func Vector2Scalar(s float32) Vector2 {
 	return Vector2{s, s}
 }
 
-// Vec2FromPoint returns a new [Vector2] from the given [image.Point].
-func Vec2FromPoint(pt image.Point) Vector2 {
+// Vector2FromPoint returns a new [Vector2] from the given [image.Point].
+func Vector2FromPoint(pt image.Point) Vector2 {
 	v := Vector2{}
 	v.SetPoint(pt)
 	return v
 }
 
-// Vec2FromFixed returns a new [Vector2] from the given [fixed.Point26_6].
-func Vec2FromFixed(pt fixed.Point26_6) Vector2 {
+// Vector2FromFixed returns a new [Vector2] from the given [fixed.Point26_6].
+func Vector2FromFixed(pt fixed.Point26_6) Vector2 {
 	v := Vector2{}
 	v.SetFixed(pt)
 	return v
@@ -492,7 +492,7 @@ func (v *Vector2) Clamp(min, max Vector2) {
 
 // ClampScalar sets this vector components to be no less than minVal and not greater than maxVal.
 func (v *Vector2) ClampScalar(minVal, maxVal float32) {
-	v.Clamp(Vec2Scalar(minVal), Vec2Scalar(maxVal))
+	v.Clamp(Vector2Scalar(minVal), Vector2Scalar(maxVal))
 }
 
 // Floor returns vector with math32.Floor() applied to each of this vector's components.

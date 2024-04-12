@@ -149,5 +149,5 @@ func (rs *State) PopClip() {
 
 // Size returns the size of the underlying image as a [math32.Vector2].
 func (rs *State) Size() math32.Vector2 {
-	return math32.Vec2FromPoint(rs.Image.Rect.Size())
+	return math32.Vector2FromPoint(rs.Image.Rect.Size())
 }

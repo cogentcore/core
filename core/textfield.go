@@ -1195,7 +1195,7 @@ func (tf *TextField) CharRenderPos(charidx int, wincoords bool) math32.Vector2 {
 	pos := tf.EffPos
 	if wincoords {
 		sc := tf.Scene
-		pos = pos.Add(math32.Vec2FromPoint(sc.SceneGeom.Pos))
+		pos = pos.Add(math32.Vector2FromPoint(sc.SceneGeom.Pos))
 	}
 	cpos := tf.RelCharPos(tf.StartPos, charidx)
 	return pos.Add(cpos)
@@ -1488,7 +1488,7 @@ func (tf *TextField) AutoScroll() {
 
 // PixelToCursor finds the cursor position that corresponds to the given pixel location
 func (tf *TextField) PixelToCursor(pt image.Point) int {
-	ptf := math32.Vec2FromPoint(pt)
+	ptf := math32.Vector2FromPoint(pt)
 	rpt := ptf.Sub(tf.EffPos)
 	if rpt.X <= 0 || rpt.Y < 0 {
 		return tf.StartPos

@@ -392,7 +392,7 @@ func (sr *Slider) HandleEvents() {
 // PointToRelPos translates a point in scene local pixel coords into relative
 // position within the slider content range
 func (sr *Slider) PointToRelPos(pt image.Point) float32 {
-	ptf := math32.Vec2FromPoint(pt).Dim(sr.Styles.Direction.Dim())
+	ptf := math32.Vector2FromPoint(pt).Dim(sr.Styles.Direction.Dim())
 	return ptf - sr.Geom.Pos.Content.Dim(sr.Styles.Direction.Dim())
 }
 
@@ -593,7 +593,7 @@ func (sr *Slider) ScenePos() {
 		return
 	}
 	sbw := math32.Ceil(sr.Styles.ScrollBarWidth.Dots)
-	scmax := math32.Vec2FromPoint(sr.Scene.Geom.ContentBBox.Max).SubScalar(sbw)
+	scmax := math32.Vector2FromPoint(sr.Scene.Geom.ContentBBox.Max).SubScalar(sbw)
 	sr.Geom.Pos.Total.SetMin(scmax)
 	sr.SetContentPosFromPos()
 	sr.SetBBoxesFromAllocs()
