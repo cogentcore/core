@@ -111,7 +111,7 @@ var StandardLangProperties = map[fileinfo.Known]*LangProperties{
 type LangSupporter struct {
 }
 
-// LangSupport is the main language support hub for accessing GoPi
+// LangSupport is the main language support hub for accessing parse
 // support interfaces for each supported language
 var LangSupport = LangSupporter{}
 

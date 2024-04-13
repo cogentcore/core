@@ -12,7 +12,7 @@ import (
 
 // Lang provides a general interface for language-specific management
 // of the lexing, parsing, and symbol lookup process.
-// The GoPi lexer and parser machinery is entirely language-general
+// The lexer and parser machinery is entirely language-general
 // but specific languages may need specific ways of managing these
 // processes, and processing their outputs, to best support the
 // features of those languages.  That is what this interface provides.

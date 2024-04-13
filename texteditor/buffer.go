@@ -481,8 +481,8 @@ func (tb *Buffer) Stat() error {
 	return nil
 }
 
-// ConfigKnown configures options based on the supported language info in GoPi
-// returns true if supported
+// ConfigKnown configures options based on the supported language info in parse.
+// Returns true if supported.
 func (tb *Buffer) ConfigKnown() bool {
 	if tb.Info.Known != fileinfo.Unknown {
 		if tb.Spell == nil {

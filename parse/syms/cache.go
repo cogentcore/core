@@ -16,16 +16,16 @@ import (
 	"cogentcore.org/core/fileinfo"
 )
 
-// GoPiCacheDir returns the GoPi cache directory for given language, and ensures that it exists
-func GoPiCacheDir(lang fileinfo.Known) (string, error) {
+// ParseCacheDir returns the parse cache directory for given language, and ensures that it exists.
+func ParseCacheDir(lang fileinfo.Known) (string, error) {
 	ucdir, err := os.UserCacheDir()
 	if err != nil {
 		return "", err
 	}
-	cdir := filepath.Join(filepath.Join(ucdir, "GoPi"), lang.String())
+	cdir := filepath.Join(filepath.Join(ucdir, "CogentCore", "parse"), lang.String())
 	err = os.MkdirAll(cdir, 0775)
 	if err != nil {
-		log.Printf("GoPiCacheDir: cache not available: %v\n", err)
+		log.Printf("ParseCacheDir: cache not available: %v\n", err)
 	}
 	return cdir, err
 }
@@ -61,7 +61,7 @@ func GoRelPath(filename string) (string, error) {
 
 // CacheFilename returns the filename to use for cache file for given filename
 func CacheFilename(lang fileinfo.Known, filename string) (string, error) {
-	cdir, err := GoPiCacheDir(lang)
+	cdir, err := ParseCacheDir(lang)
 	if err != nil {
 		return "", err
 	}

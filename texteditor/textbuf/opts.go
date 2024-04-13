@@ -48,8 +48,8 @@ func (tb *Opts) IndentChar() indent.Char {
 	return indent.Tab
 }
 
-// ConfigKnown configures options based on the supported language info in GoPi
-// returns true if supported
+// ConfigKnown configures options based on the supported language info in parse.
+// Returns true if supported.
 func (tb *Opts) ConfigKnown(sup fileinfo.Known) bool {
 	if sup == fileinfo.Unknown {
 		return false

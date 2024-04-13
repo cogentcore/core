@@ -5,7 +5,7 @@
 // Package lsp contains types for the Language Server Protocol
 // LSP: https://microsoft.github.io/language-server-protocol/specification
 // and mappings from these elements into the token.Tokens types
-// which are used internally in GoPi.
+// which are used internally in parse.
 package lsp
 
 //go:generate core generate

@@ -9,7 +9,7 @@
 // We looked at several different standards for formats, types, etc:
 //
 // LSP: https://microsoft.github.io/language-server-protocol/specification
-// useful to enable GoPi to act as an LSP server at some point.
+// useful to enable parse to act as an LSP server at some point.
 // additional symbol kinds:
 // https://github.com/Microsoft/language-server-protocol/issues/344
 //
