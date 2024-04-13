@@ -298,7 +298,7 @@ func (pr *Parser) SaveJSON(filename string) error {
 	return err
 }
 
-// SaveGrammar saves lexer and parser grammar rules to BNF-like .pig file
+// SaveGrammar saves lexer and parser grammar rules to BNF-like .parsegrammar file
 func (pr *Parser) SaveGrammar(filename string) error {
 	ofl, err := os.Create(filename)
 	if err != nil {

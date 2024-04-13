@@ -49,7 +49,7 @@ and here are some of the more complicated statements (in Go):
     }
 ```
 
-See the [complete grammar for Go](https://github.com/cogentcore/core/blob/main/parse/langs/golang/go.pig) for everything, including the lexer rules (at the top).
+See the [complete grammar for Go](https://github.com/cogentcore/core/blob/main/parse/langs/golang/go.parsegrammar) for everything, including the lexer rules (at the top).
 
 While parse is likely to be a lot easier to use than `yacc` and `bison`, the latest version 4 of [ANTLR](https://en.wikipedia.org/wiki/ANTLR) with its `ALL(*)` algorithm sounds like it offers similar abilities to robustly handle intuitive grammars, and is likely more generalizable to a wider range of languages, and is probably faster overall than parse.  *But* parse is much simpler and more transparent in terms of how it actually works (disclaimer: I have no idea whatsoever how ANTLR V4 actually works!  And that's kind of the point..).  Anyone should be able to understand how parse works, and tweak it as needed, etc.  And it operates directly in AST-order, creating the corresponding AST on the fly as it parses, so you can interactively understand what it is doing as it goes along, making it relatively easy to create your grammar (although this process is, in truth, always a bit complicated and never as easy as one might hope).  And parse is fast enough for most uses, taking just a few hundred msec for even relatively large and complex source code, and it processes the entire Go standard library in around 40 sec (on a 2016 Macbook laptop).
 
