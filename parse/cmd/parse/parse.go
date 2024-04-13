@@ -34,8 +34,8 @@ func main() {
 	}
 
 	// process command args
-	flag.StringVar(&path, "path", "", "path to open -- can be to a directory or a filename within the directory -- or just last arg without a flag")
-	flag.BoolVar(&recurse, "r", false, "recursive -- apply to subdirectories")
+	flag.StringVar(&path, "path", "", "path to open; can be to a directory or a filename within the directory; or just last arg without a flag")
+	flag.BoolVar(&recurse, "r", false, "recursive; apply to subdirectories")
 	flag.StringVar(&excl, "ex", "", "comma-separated list of directory names to exclude, for recursive case")
 	flag.Parse()
 	if path == "" {
