@@ -20,7 +20,7 @@ import (
 	"cogentcore.org/core/parse/token"
 )
 
-//go:embed markdown.pi
+//go:embed markdown.parse
 var parserBytes []byte
 
 // MarkdownLang implements the Lang interface for the Markdown language

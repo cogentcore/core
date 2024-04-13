@@ -18,7 +18,7 @@ import (
 	"cogentcore.org/core/parse/syms"
 )
 
-//go:embed tex.pi
+//go:embed tex.parse
 var parserBytes []byte
 
 // TexLang implements the Lang interface for the Tex / LaTeX language

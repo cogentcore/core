@@ -1,6 +1,6 @@
 {
   "ProjectFile": "/Users/oreilly/go/src/cogentcore.org/core/parse/langs/tex/tex.parseproject",
-  "ParserFile": "/Users/oreilly/goki/pi/langs/tex/tex.pi",
+  "ParserFile": "/Users/oreilly/goki/pi/langs/tex/tex.parse",
   "TestFile": "/Users/oreilly/goki/pi/langs/tex/testdata/tex_test.tex",
   "TraceOpts": {
     "On": false,

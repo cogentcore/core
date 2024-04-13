@@ -21,7 +21,7 @@ import (
 	"cogentcore.org/core/parse/token"
 )
 
-//go:embed go.pi
+//go:embed go.parse
 var parserBytes []byte
 
 // GoLang implements the Lang interface for the Go language
