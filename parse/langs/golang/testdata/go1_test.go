@@ -615,7 +615,7 @@ var PiViewProperties = tree.Properties{
 	"MainMenu": tree.Propertieslice{
 		"updtfunc": views.ActionUpdateFunc(func(pvi interface{}, act *core.Button) {
 			pv := pvi.(*PiView)
-			act.SetActiveState(pv.Settings.ProjFile != "")
+			act.SetActiveState(pv.Settings.ProjectFile != "")
 		}),
 		"offguy": true,
 	},
@@ -1104,7 +1104,7 @@ Version: ` + pi.VersionInfo())
 		if path != "" {
 			path, _ = filepath.Abs(path)
 		}
-		gide.NewGideProjPath(path)
+		gide.NewGideProjectPath(path)
 	}
 
 	piv.NewPiView()

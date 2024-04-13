@@ -31,8 +31,8 @@ import (
 type FileBrowse struct {
 	core.Frame
 
-	// root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjFilename
-	ProjRoot core.Filename `desc:"root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjFilename"`
+	// root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjectFilename
+	ProjectRoot core.Filename `desc:"root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjectFilename"`
 
 	// filename of the currently-active texteditor
 	ActiveFilename core.Filename `desc:"filename of the currently-active texteditor"`
@@ -101,7 +101,7 @@ func (fb *FileBrowse) UpdateFiles() { //types:add
 
 // IsEmpty returns true if given FileBrowse project is empty -- has not been set to a valid path
 func (fb *FileBrowse) IsEmpty() bool {
-	return fb.ProjRoot == ""
+	return fb.ProjectRoot == ""
 }
 
 // OpenPath opens a new browser viewer at given path, which can either be a
@@ -114,13 +114,13 @@ func (fb *FileBrowse) OpenPath(path core.Filename) { //types:add
 		return
 	}
 	fb.Defaults()
-	root, pnm, fnm, ok := ProjPathParse(string(path))
+	root, pnm, fnm, ok := ProjectPathParse(string(path))
 	if !ok {
 		return
 	}
-	fb.ProjRoot = core.Filename(root)
+	fb.ProjectRoot = core.Filename(root)
 	fb.SetName(pnm)
-	fb.UpdateProj()
+	fb.UpdateProject()
 	fb.Files.OpenPath(root)
 	// win := fb.ParentRenderWin()
 	// if win != nil {
@@ -134,25 +134,25 @@ func (fb *FileBrowse) OpenPath(path core.Filename) { //types:add
 	fb.UpdateFiles()
 }
 
-// UpdateProj does full update to current proj
-func (fb *FileBrowse) UpdateProj() {
+// UpdateProject does full update to current proj
+func (fb *FileBrowse) UpdateProject() {
 	fb.StandardConfig()
-	fb.SetTitle(fmt.Sprintf("FileBrowse of: %v", fb.ProjRoot)) // todo: get rid of title
+	fb.SetTitle(fmt.Sprintf("FileBrowse of: %v", fb.ProjectRoot)) // todo: get rid of title
 	fb.UpdateFiles()
 	fb.ConfigSplits()
 }
 
-// ProjPathParse parses given project path into a root directory (which could
+// ProjectPathParse parses given project path into a root directory (which could
 // be the path or just the directory portion of the path, depending in whether
 // the path is a directory or not), and a bool if all is good (otherwise error
 // message has been reported). projnm is always the last directory of the path.
-func ProjPathParse(path string) (root, projnm, fnm string, ok bool) {
+func ProjectPathParse(path string) (root, projnm, fnm string, ok bool) {
 	if path == "" {
 		return "", "blank", "", false
 	}
 	info, err := os.Lstat(path)
 	if err != nil {
-		emsg := fmt.Errorf("ProjPathParse: Cannot open at given path: %q: Error: %v", path, err)
+		emsg := fmt.Errorf("ProjectPathParse: Cannot open at given path: %q: Error: %v", path, err)
 		log.Println(emsg)
 		return
 	}
@@ -392,7 +392,7 @@ func (fb *FileBrowse) FileNodeOpened(fn *filetree.Node) {
 // NewFileBrowser creates a new FileBrowse window with a new FileBrowse project for given
 // path, returning the window and the path
 func NewFileBrowser(path string) (*FileBrowse, *core.Stage) {
-	_, projnm, _, _ := ProjPathParse(path)
+	_, projnm, _, _ := ProjectPathParse(path)
 
 	b := core.NewBody("Browser: " + projnm)
 	fb := NewFileBrowse(b, "browser")

@@ -1,5 +1,5 @@
 {
-  "ProjFile": "/Users/oreilly/goki/pi/langs/markdown/markdown.parseproject",
+  "ProjectFile": "/Users/oreilly/goki/pi/langs/markdown/markdown.parseproject",
   "ParserFile": "/Users/oreilly/goki/pi/langs/markdown/markdown.pi",
   "TestFile": "/Users/oreilly/goki/pi/langs/markdown/testdata/markdown_test.md",
   "TraceOpts": {
