@@ -21,7 +21,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/pi/token"
+	"cogentcore.org/core/parse/token"
 	"cogentcore.org/core/styles"
 )
 

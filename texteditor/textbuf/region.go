@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"cogentcore.org/core/gox/nptime"
-	"cogentcore.org/core/pi/lexer"
+	"cogentcore.org/core/parse/lexer"
 )
 
 // Region represents a text region as a start / end position, and includes

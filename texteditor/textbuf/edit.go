@@ -8,7 +8,7 @@ import (
 	"slices"
 	"time"
 
-	"cogentcore.org/core/pi/lexer"
+	"cogentcore.org/core/parse/lexer"
 )
 
 // Edit describes an edit action to a buffer -- this is the data passed

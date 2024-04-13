@@ -18,7 +18,7 @@ import (
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
-	"cogentcore.org/core/pi/lexer"
+	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"

@@ -14,7 +14,7 @@ import (
 	"unicode/utf8"
 
 	"cogentcore.org/core/gox/runes"
-	"cogentcore.org/core/pi/lexer"
+	"cogentcore.org/core/parse/lexer"
 )
 
 // Match records one match for search within file, positions in runes

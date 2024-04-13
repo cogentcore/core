@@ -18,8 +18,8 @@ import (
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
-	"cogentcore.org/core/pi"
-	"cogentcore.org/core/pi/lexer"
+	"cogentcore.org/core/parse"
+	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/texteditor/textbuf"
@@ -350,8 +350,8 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetHandled()
 			if ed.Buffer.Opts.AutoIndent {
-				lp, _ := pi.LangSupport.Properties(ed.Buffer.PiState.Sup)
-				if lp != nil && lp.Lang != nil && lp.HasFlag(pi.ReAutoIndent) {
+				lp, _ := parse.LangSupport.Properties(ed.Buffer.PiState.Sup)
+				if lp != nil && lp.Lang != nil && lp.HasFlag(parse.ReAutoIndent) {
 					// only re-indent current line for supported types
 					tbe, _, _ := ed.Buffer.AutoIndent(ed.CursorPos.Ln) // reindent current line
 					if tbe != nil {
@@ -420,7 +420,7 @@ func (ed *Editor) KeyInputInsertBra(kt events.Event) {
 	newLine := false
 	curLn := ed.Buffer.Line(pos.Ln)
 	lnLen := len(curLn)
-	lp, _ := pi.LangSupport.Properties(ed.Buffer.PiState.Sup)
+	lp, _ := parse.LangSupport.Properties(ed.Buffer.PiState.Sup)
 	if lp != nil && lp.Lang != nil {
 		match, newLine = lp.Lang.AutoBracket(&ed.Buffer.PiState, kt.KeyRune(), pos, curLn)
 	} else {

@@ -12,8 +12,8 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/pi/lexer"
-	"cogentcore.org/core/pi/token"
+	"cogentcore.org/core/parse/lexer"
+	"cogentcore.org/core/parse/token"
 	"cogentcore.org/core/texteditor/textbuf"
 )
 

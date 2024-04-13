@@ -8,10 +8,10 @@ import (
 	"fmt"
 
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/pi"
-	"cogentcore.org/core/pi/complete"
-	"cogentcore.org/core/pi/lexer"
-	"cogentcore.org/core/pi/parser"
+	"cogentcore.org/core/parse"
+	"cogentcore.org/core/parse/complete"
+	"cogentcore.org/core/parse/lexer"
+	"cogentcore.org/core/parse/parser"
 	"cogentcore.org/core/spell"
 	"cogentcore.org/core/texteditor/textbuf"
 )
@@ -20,12 +20,12 @@ import (
 // up to point where user has typed.
 // The data must be the *FileState from which the language type is obtained.
 func CompletePi(data any, text string, posLn, posCh int) (md complete.Matches) {
-	sfs := data.(*pi.FileStates)
+	sfs := data.(*parse.FileStates)
 	if sfs == nil {
 		// log.Printf("CompletePi: data is nil not FileStates or is nil - can't complete\n")
 		return md
 	}
-	lp, err := pi.LangSupport.Properties(sfs.Sup)
+	lp, err := parse.LangSupport.Properties(sfs.Sup)
 	if err != nil {
 		// log.Printf("CompletePi: %v\n", err)
 		return md
@@ -44,12 +44,12 @@ func CompletePi(data any, text string, posLn, posCh int) (md complete.Matches) {
 
 // CompleteEditPi uses the selected completion to edit the text
 func CompleteEditPi(data any, text string, cursorPos int, comp complete.Completion, seed string) (ed complete.Edit) {
-	sfs := data.(*pi.FileStates)
+	sfs := data.(*parse.FileStates)
 	if sfs == nil {
 		// log.Printf("CompleteEditPi: data is nil not FileStates or is nil - can't complete\n")
 		return ed
 	}
-	lp, err := pi.LangSupport.Properties(sfs.Sup)
+	lp, err := parse.LangSupport.Properties(sfs.Sup)
 	if err != nil {
 		// log.Printf("CompleteEditPi: %v\n", err)
 		return ed
@@ -64,12 +64,12 @@ func CompleteEditPi(data any, text string, cursorPos int, comp complete.Completi
 // up to point where user has typed.
 // The data must be the *FileState from which the language type is obtained.
 func LookupPi(data any, text string, posLn, posCh int) (ld complete.Lookup) {
-	sfs := data.(*pi.FileStates)
+	sfs := data.(*parse.FileStates)
 	if sfs == nil {
 		// log.Printf("LookupPi: data is nil not FileStates or is nil - can't lookup\n")
 		return ld
 	}
-	lp, err := pi.LangSupport.Properties(sfs.Sup)
+	lp, err := parse.LangSupport.Properties(sfs.Sup)
 	if err != nil {
 		// log.Printf("LookupPi: %v\n", err)
 		return ld

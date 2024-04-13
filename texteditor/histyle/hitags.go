@@ -5,7 +5,7 @@
 package histyle
 
 import (
-	"cogentcore.org/core/pi/token"
+	"cogentcore.org/core/parse/token"
 	"github.com/alecthomas/chroma/v2"
 )
 

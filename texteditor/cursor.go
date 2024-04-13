@@ -11,7 +11,7 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/pi/lexer"
+	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/states"
 )
 

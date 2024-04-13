@@ -11,10 +11,10 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/fileinfo"
-	"cogentcore.org/core/pi"
-	"cogentcore.org/core/pi/lexer"
-	_ "cogentcore.org/core/pi/suplangs"
-	"cogentcore.org/core/pi/token"
+	"cogentcore.org/core/parse"
+	"cogentcore.org/core/parse/lexer"
+	_ "cogentcore.org/core/parse/suplangs"
+	"cogentcore.org/core/parse/token"
 	"cogentcore.org/core/texteditor/histyle"
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/formatters/html"
@@ -44,10 +44,10 @@ type HiMarkup struct {
 	CSSProperties map[string]any `json:"-" xml:"-"`
 
 	// pi parser state info
-	PiState *pi.FileStates
+	PiState *parse.FileStates
 
 	// if supported, this is the pi Lang support for parsing
-	PiLang pi.Lang
+	PiLang parse.Lang
 
 	// current highlighting style
 	HiStyle *histyle.Style
@@ -72,12 +72,12 @@ func (hm *HiMarkup) UsingPi() bool {
 }
 
 // Init initializes the syntax highlighting for current params
-func (hm *HiMarkup) Init(info *fileinfo.FileInfo, pist *pi.FileStates) {
+func (hm *HiMarkup) Init(info *fileinfo.FileInfo, pist *parse.FileStates) {
 	hm.Info = info
 	hm.PiState = pist
 
 	if hm.Info.Known != fileinfo.Unknown {
-		if lp, err := pi.LangSupport.Properties(hm.Info.Known); err == nil {
+		if lp, err := parse.LangSupport.Properties(hm.Info.Known); err == nil {
 			if lp.Lang != nil {
 				hm.lexer = nil
 				hm.PiLang = lp.Lang

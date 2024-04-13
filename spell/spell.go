@@ -15,7 +15,7 @@ import (
 	"sync"
 	"time"
 
-	"cogentcore.org/core/pi/lexer"
+	"cogentcore.org/core/parse/lexer"
 )
 
 //go:embed spell_en_us.json

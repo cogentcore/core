@@ -15,7 +15,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/pi/complete"
+	"cogentcore.org/core/parse/complete"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 )

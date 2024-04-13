@@ -8,7 +8,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/gox/indent"
-	"cogentcore.org/core/pi"
+	"cogentcore.org/core/parse"
 )
 
 // Opts contains options for textview.Bufs
@@ -54,7 +54,7 @@ func (tb *Opts) ConfigKnown(sup fileinfo.Known) bool {
 	if sup == fileinfo.Unknown {
 		return false
 	}
-	lp, ok := pi.StandardLangProperties[sup]
+	lp, ok := parse.StandardLangProperties[sup]
 	if !ok {
 		return false
 	}
@@ -63,9 +63,9 @@ func (tb *Opts) ConfigKnown(sup fileinfo.Known) bool {
 	tb.CommentEd = lp.CommentEd
 	for _, flg := range lp.Flags {
 		switch flg {
-		case pi.IndentSpace:
+		case parse.IndentSpace:
 			tb.SpaceIndent = true
-		case pi.IndentTab:
+		case parse.IndentTab:
 			tb.SpaceIndent = false
 		}
 	}
@@ -86,7 +86,7 @@ func KnownComments(fpath string) (comLn, comSt, comEd string) {
 	if sup == fileinfo.Unknown {
 		return
 	}
-	lp, ok := pi.StandardLangProperties[sup]
+	lp, ok := parse.StandardLangProperties[sup]
 	if !ok {
 		return
 	}

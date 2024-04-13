@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"cogentcore.org/core/pi/lexer"
+	"cogentcore.org/core/parse/lexer"
 )
 
 // UndoTrace; set to true to get a report of undo actions

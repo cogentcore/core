@@ -26,10 +26,10 @@ import (
 	"cogentcore.org/core/gox/indent"
 	"cogentcore.org/core/gox/runes"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/pi"
-	"cogentcore.org/core/pi/complete"
-	"cogentcore.org/core/pi/lexer"
-	"cogentcore.org/core/pi/token"
+	"cogentcore.org/core/parse"
+	"cogentcore.org/core/parse/complete"
+	"cogentcore.org/core/parse/lexer"
+	"cogentcore.org/core/parse/token"
 	"cogentcore.org/core/spell"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor/histyle"
@@ -71,7 +71,7 @@ type Buffer struct {
 	Info fileinfo.FileInfo
 
 	// Pi parsing state info for file
-	PiState pi.FileStates
+	PiState parse.FileStates
 
 	// syntax highlighting markup parameters (language, style, etc)
 	Hi HiMarkup
@@ -2325,7 +2325,7 @@ func (tb *Buffer) AutoIndent(ln int) (tbe *textbuf.Edit, indLev, chPos int) {
 
 	tb.LinesMu.RLock()
 	tb.MarkupMu.RLock()
-	lp, _ := pi.LangSupport.Properties(tb.PiState.Sup)
+	lp, _ := parse.LangSupport.Properties(tb.PiState.Sup)
 	var pInd, delInd int
 	if lp != nil && lp.Lang != nil {
 		pInd, delInd, _, _ = lp.Lang.IndentLine(&tb.PiState, tb.Lines, tb.HiTags, ln, tabSz)

@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/pi/complete"
+	"cogentcore.org/core/parse/complete"
 )
 
 // Completer interface supports the SetCompleter method for setting completer parameters
