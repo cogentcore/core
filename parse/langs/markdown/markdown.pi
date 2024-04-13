@@ -6,57 +6,57 @@
     "Kids": [
       {
         "n": 26,
-        "type": "cogentcore.org/core/pi/lexer.Rule",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
         "name": "InCode",
-        "type": "cogentcore.org/core/pi/lexer.Rule",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
         "name": "InLinkAttr",
-        "type": "cogentcore.org/core/pi/lexer.Rule",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
         "name": "InLinkAddr",
-        "type": "cogentcore.org/core/pi/lexer.Rule",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
         "name": "InLinkTag",
-        "type": "cogentcore.org/core/pi/lexer.Rule",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
         "name": "LetterText",
-        "type": "cogentcore.org/core/pi/lexer.Rule",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
         "name": "CodeStart",
-        "type": "cogentcore.org/core/pi/lexer.Rule",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
         "name": "HeadPound",
-        "type": "cogentcore.org/core/pi/lexer.Rule",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
         "name": "ItemCheck",
-        "type": "cogentcore.org/core/pi/lexer.Rule",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
         "name": "ItemStar",
-        "type": "cogentcore.org/core/pi/lexer.Rule",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
         "name": "ItemPlus",
-        "type": "cogentcore.org/core/pi/lexer.Rule",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
         "name": "ItemMinus",
-        "type": "cogentcore.org/core/pi/lexer.Rule",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
         "name": "NumList",
-        "type": "cogentcore.org/core/pi/lexer.Rule",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
         "name": "CommentStart",
-        "type": "cogentcore.org/core/pi/lexer.Rule",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
         "name": "QuotePara",
-        "type": "cogentcore.org/core/pi/lexer.Rule",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
         "name": "BoldStars",
-        "type": "cogentcore.org/core/pi/lexer.Rule",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
         "name": "BoldUnders",
-        "type": "cogentcore.org/core/pi/lexer.Rule",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
         "name": "ItemStarSub",
-        "type": "cogentcore.org/core/pi/lexer.Rule",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
         "name": "ItemPlusSub",
-        "type": "cogentcore.org/core/pi/lexer.Rule",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
         "name": "ItemMinusSub",
-        "type": "cogentcore.org/core/pi/lexer.Rule",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
         "name": "LinkTag",
-        "type": "cogentcore.org/core/pi/lexer.Rule",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
         "name": "BacktickCode",
-        "type": "cogentcore.org/core/pi/lexer.Rule",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
         "name": "Quote_021",
-        "type": "cogentcore.org/core/pi/lexer.Rule",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
         "name": "Apostrophe",
-        "type": "cogentcore.org/core/pi/lexer.Rule",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
         "name": "EmphStar",
-        "type": "cogentcore.org/core/pi/lexer.Rule",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
         "name": "EmphUnder",
-        "type": "cogentcore.org/core/pi/lexer.Rule",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
         "name": "AnyText"
       },
       {
@@ -66,9 +66,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "cogentcore.org/core/pi/lexer.Rule",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
             "name": "CodeEnd",
-            "type": "cogentcore.org/core/pi/lexer.Rule",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
             "name": "AnyCode"
           },
           {
@@ -134,9 +134,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "cogentcore.org/core/pi/lexer.Rule",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
             "name": "EndLinkAttr",
-            "type": "cogentcore.org/core/pi/lexer.Rule",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
             "name": "AnyLinkAttr"
           },
           {
@@ -201,11 +201,11 @@
         "Kids": [
           {
             "n": 3,
-            "type": "cogentcore.org/core/pi/lexer.Rule",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
             "name": "LinkAttr",
-            "type": "cogentcore.org/core/pi/lexer.Rule",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
             "name": "EndLinkAddr",
-            "type": "cogentcore.org/core/pi/lexer.Rule",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
             "name": "AnyLinkAddr"
           },
           {
@@ -292,11 +292,11 @@
         "Kids": [
           {
             "n": 3,
-            "type": "cogentcore.org/core/pi/lexer.Rule",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
             "name": "LinkAddr",
-            "type": "cogentcore.org/core/pi/lexer.Rule",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
             "name": "EndLinkTag",
-            "type": "cogentcore.org/core/pi/lexer.Rule",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
             "name": "AnyLinkTag"
           },
           {
@@ -403,9 +403,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "cogentcore.org/core/pi/lexer.Rule",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
             "name": "CodeLang",
-            "type": "cogentcore.org/core/pi/lexer.Rule",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
             "name": "CodePlain"
           },
           {
@@ -473,9 +473,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "cogentcore.org/core/pi/lexer.Rule",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
             "name": "HeadPound2",
-            "type": "cogentcore.org/core/pi/lexer.Rule",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
             "name": "Heading"
           },
           {
@@ -485,9 +485,9 @@
             "Kids": [
               {
                 "n": 2,
-                "type": "cogentcore.org/core/pi/lexer.Rule",
+                "type": "cogentcore.org/core/parse/lexer.Rule",
                 "name": "HeadPound3",
-                "type": "cogentcore.org/core/pi/lexer.Rule",
+                "type": "cogentcore.org/core/parse/lexer.Rule",
                 "name": "SubHeading"
               },
               {
@@ -497,7 +497,7 @@
                 "Kids": [
                   {
                     "n": 1,
-                    "type": "cogentcore.org/core/pi/lexer.Rule",
+                    "type": "cogentcore.org/core/parse/lexer.Rule",
                     "name": "SubSubHeading"
                   },
                   {
@@ -609,9 +609,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "cogentcore.org/core/pi/lexer.Rule",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
             "name": "ItemCheckDone",
-            "type": "cogentcore.org/core/pi/lexer.Rule",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
             "name": "ItemCheckTodo"
           },
           {
@@ -795,7 +795,7 @@
         "Kids": [
           {
             "n": 1,
-            "type": "cogentcore.org/core/pi/lexer.Rule",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
             "name": "BoldText"
           },
           {
@@ -841,7 +841,7 @@
         "Kids": [
           {
             "n": 1,
-            "type": "cogentcore.org/core/pi/lexer.Rule",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
             "name": "BoldText"
           },
           {
@@ -1008,9 +1008,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "cogentcore.org/core/pi/lexer.Rule",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
             "name": "QuoteSingle",
-            "type": "cogentcore.org/core/pi/lexer.Rule",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
             "name": "Apost"
           },
           {
@@ -1074,7 +1074,7 @@
         "Kids": [
           {
             "n": 1,
-            "type": "cogentcore.org/core/pi/lexer.Rule",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
             "name": "EmphText"
           },
           {
@@ -1120,7 +1120,7 @@
         "Kids": [
           {
             "n": 1,
-            "type": "cogentcore.org/core/pi/lexer.Rule",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
             "name": "EmphUnder"
           },
           {

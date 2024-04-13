@@ -628,8 +628,8 @@ import (
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/oswin"
 	gogide "github.com/goki/gide/gide"
-	"cogentcore.org/core/pi"
-	"cogentcore.org/core/pi/piv"
+	"cogentcore.org/core/parse"
+	"cogentcore.org/core/parse/piv"
 )
 
 var av1, av2 int
@@ -1035,7 +1035,7 @@ func main() {
 
 func mainrun() {
 	oswin.TheApp.SetName("pie")
-	oswin.TheApp.SetAbout(`<code>Pie</code> is the interactive parser (pi) editor written in the <b>Cogent Core</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://cogentcore.org/core/pi">Gide on GitHub</a> and <a href="https://cogentcore.org/core/pi/wiki">Gide wiki</a> for documentation.<br>
+	oswin.TheApp.SetAbout(`<code>Pie</code> is the interactive parser (pi) editor written in the <b>Cogent Core</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://cogentcore.org/core/parse">Gide on GitHub</a> and <a href="https://cogentcore.org/core/parse/wiki">Gide wiki</a> for documentation.<br>
 <br>
 Version: ` + pi.VersionInfo())
 	if peas++; this > that {

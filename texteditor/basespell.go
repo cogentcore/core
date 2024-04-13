@@ -45,7 +45,7 @@ func OpenSpellModel() error {
 
 // NewSpellModelFromText builds a NEW spelling model from text
 func NewSpellModelFromText() error {
-	bigdatapath, err := dirs.GoSrcDir("cogentcore.org/core/pi/spell")
+	bigdatapath, err := dirs.GoSrcDir("cogentcore.org/core/spell")
 	if err != nil {
 		slog.Error("getting path to corpus directory", "err", err)
 		return err
