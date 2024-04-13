@@ -21,8 +21,8 @@ import (
 	"github.com/alecthomas/chroma/v2/lexers"
 )
 
-// HiMarkup manages the syntax highlighting state for Buf.
-// It uses Pi if available, otherwise falls back on chroma
+// HiMarkup manages the syntax highlighting state for [Buffer].
+// It uses [parse] if available, otherwise falls back on chroma.
 type HiMarkup struct {
 
 	// full info about the file including category etc
@@ -43,11 +43,11 @@ type HiMarkup struct {
 	// Commpiled CSS properties for given highlighting style
 	CSSProperties map[string]any `json:"-" xml:"-"`
 
-	// pi parser state info
-	PiState *parse.FileStates
+	// parser state info
+	ParseState *parse.FileStates
 
-	// if supported, this is the pi Lang support for parsing
-	PiLang parse.Lang
+	// if supported, this is the [parse.Lang] support for parsing
+	ParseLang parse.Lang
 
 	// current highlighting style
 	HiStyle *histyle.Style
@@ -65,29 +65,29 @@ func (hm *HiMarkup) HasHi() bool {
 	return hm.Has
 }
 
-// UsingPi returns true if markup is using pi lexer / parser, which affects
+// UsingParse returns true if markup is using parse lexer / parser, which affects
 // use of results
-func (hm *HiMarkup) UsingPi() bool {
-	return hm.PiLang != nil
+func (hm *HiMarkup) UsingParse() bool {
+	return hm.ParseLang != nil
 }
 
 // Init initializes the syntax highlighting for current params
 func (hm *HiMarkup) Init(info *fileinfo.FileInfo, pist *parse.FileStates) {
 	hm.Info = info
-	hm.PiState = pist
+	hm.ParseState = pist
 
 	if hm.Info.Known != fileinfo.Unknown {
 		if lp, err := parse.LangSupport.Properties(hm.Info.Known); err == nil {
 			if lp.Lang != nil {
 				hm.lexer = nil
-				hm.PiLang = lp.Lang
+				hm.ParseLang = lp.Lang
 			} else {
-				hm.PiLang = nil
+				hm.ParseLang = nil
 			}
 		}
 	}
 
-	if hm.PiLang == nil {
+	if hm.ParseLang == nil {
 		lexer := lexers.MatchMimeType(hm.Info.Mime)
 		if lexer == nil {
 			lexer = lexers.Match(hm.Info.Name)
@@ -98,7 +98,7 @@ func (hm *HiMarkup) Init(info *fileinfo.FileInfo, pist *parse.FileStates) {
 		}
 	}
 
-	if hm.Style == "" || (hm.PiLang == nil && hm.lexer == nil) {
+	if hm.Style == "" || (hm.ParseLang == nil && hm.lexer == nil) {
 		hm.Has = false
 		return
 	}
@@ -139,9 +139,9 @@ func (hm *HiMarkup) MarkupTagsAll(txt []byte) ([]lexer.Line, error) {
 	if hm.Off {
 		return nil, nil
 	}
-	if hm.PiLang != nil {
-		hm.PiLang.ParseFile(hm.PiState, txt)   // processes in Proc(), does Switch()
-		return hm.PiState.Done().Src.Lexs, nil // Done() is previous Proc() -- still has type info coming in later, but lexs are good
+	if hm.ParseLang != nil {
+		hm.ParseLang.ParseFile(hm.ParseState, txt) // processes in Proc(), does Switch()
+		return hm.ParseState.Done().Src.Lexs, nil  // Done() is previous Proc() -- still has type info coming in later, but lexs are good
 	} else if hm.lexer != nil {
 		return hm.ChromaTagsAll(txt)
 	}
@@ -154,8 +154,8 @@ func (hm *HiMarkup) MarkupTagsLine(ln int, txt []rune) (lexer.Line, error) {
 	if hm.Off {
 		return nil, nil
 	}
-	if hm.PiLang != nil {
-		ll := hm.PiLang.HiLine(hm.PiState, ln, txt)
+	if hm.ParseLang != nil {
+		ll := hm.ParseLang.HiLine(hm.ParseState, ln, txt)
 		return ll, nil
 	} else if hm.lexer != nil {
 		return hm.ChromaTagsLine(txt)

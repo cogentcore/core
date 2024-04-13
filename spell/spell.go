@@ -133,7 +133,7 @@ func Save(filename string) error {
 	if err == nil {
 		openTime, err = ModTime(filename)
 	} else {
-		log.Printf("pi.Spell: Error saving file: %s  %s\n", filename, err)
+		log.Printf("spell.Spell: Error saving file %q: %v\n", filename, err)
 	}
 	return err
 }

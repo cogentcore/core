@@ -248,7 +248,7 @@ func (gl *GoLang) ParseDirImpl(fs *parse.FileState, path string, opts parse.Lang
 	if pkgsym == nil || len(fss) == 0 {
 		return nil
 	}
-	pfs := fss[0]                       // pi.NewFileState()            // master overall package file state
+	pfs := fss[0]                       // parse.NewFileState()            // master overall package file state
 	gl.ResolveTypes(pfs, pkgsym, false) // false = don't include function-internal scope items
 	gl.DeleteExternalTypes(pkgsym)
 	if !opts.Nocache {
@@ -341,7 +341,7 @@ func (gl *GoLang) PkgSyms(fs *parse.FileState, psyms syms.SymMap, pnm string) (*
 	return psym, has
 }
 
-// AddImportsToExts adds imports from given package into pi.FileState.ExtSyms list
+// AddImportsToExts adds imports from given package into parse.FileState.ExtSyms list
 // imports are coded as NameLibrary symbols with names = import path
 func (gl *GoLang) AddImportsToExts(fss *parse.FileStates, pfs *parse.FileState, pkg *syms.Symbol) {
 	var imps syms.SymMap
@@ -374,7 +374,7 @@ reset:
 	// }
 }
 
-// AddImportToExts adds given import into pi.FileState.ExtSyms list
+// AddImportToExts adds given import into parse.FileState.ExtSyms list
 // assumed to be called as a separate goroutine
 func (gl *GoLang) AddImportToExts(fs *parse.FileState, im string, lock bool) {
 	im, _, pkg := gl.ImportPathPkg(im)
@@ -394,7 +394,7 @@ func (gl *GoLang) AddImportToExts(fs *parse.FileState, im string, lock bool) {
 	}
 }
 
-// AddPathToSyms adds given path into pi.FileState.Syms list
+// AddPathToSyms adds given path into parse.FileState.Syms list
 // Is called as a separate goroutine in ParseFile with WaitGp
 func (gl *GoLang) AddPathToSyms(fs *parse.FileState, path string) {
 	psym := gl.ParseDir(fs, path, parse.LangDirOpts{})
@@ -405,7 +405,7 @@ func (gl *GoLang) AddPathToSyms(fs *parse.FileState, path string) {
 }
 
 // AddPkgToSyms adds given package symbol, with children from package
-// to pi.FileState.Syms map -- merges with anything already there
+// to parse.FileState.Syms map -- merges with anything already there
 // does NOT add imports -- that is an optional second step.
 // Returns true if there was an existing entry for this package.
 func (gl *GoLang) AddPkgToSyms(fs *parse.FileState, pkg *syms.Symbol) bool {
@@ -424,7 +424,7 @@ func (gl *GoLang) AddPkgToSyms(fs *parse.FileState, pkg *syms.Symbol) bool {
 	return has
 }
 
-// AddPathToExts adds given path into pi.FileState.ExtSyms list
+// AddPathToExts adds given path into parse.FileState.ExtSyms list
 // assumed to be called as a separate goroutine
 func (gl *GoLang) AddPathToExts(fs *parse.FileState, path string) {
 	psym := gl.ParseDir(fs, path, parse.LangDirOpts{})
@@ -434,7 +434,7 @@ func (gl *GoLang) AddPathToExts(fs *parse.FileState, path string) {
 }
 
 // AddPkgToExts adds given package symbol, with children from package
-// to pi.FileState.ExtSyms map -- merges with anything already there
+// to parse.FileState.ExtSyms map -- merges with anything already there
 // does NOT add imports -- that is an optional second step.
 // Returns true if there was an existing entry for this package.
 func (gl *GoLang) AddPkgToExts(fs *parse.FileState, pkg *syms.Symbol) bool {

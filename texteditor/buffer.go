@@ -70,8 +70,8 @@ type Buffer struct {
 	// full info about file
 	Info fileinfo.FileInfo
 
-	// Pi parsing state info for file
-	PiState parse.FileStates
+	// Parsing state info for file
+	ParseState parse.FileStates
 
 	// syntax highlighting markup parameters (language, style, etc)
 	Hi HiMarkup
@@ -428,7 +428,7 @@ func (tb *Buffer) SetReadOnly(readonly bool) *Buffer {
 func (tb *Buffer) SetFilename(fn string) *Buffer {
 	tb.Filename = core.Filename(fn)
 	tb.Stat()
-	tb.Hi.Init(&tb.Info, &tb.PiState)
+	tb.Hi.Init(&tb.Info, &tb.ParseState)
 	return tb
 }
 
@@ -462,8 +462,8 @@ func (tb *Buffer) NewBuffer(nlines int) {
 
 	tb.NLines = nlines
 
-	tb.PiState.SetSrc(string(tb.Filename), "", tb.Info.Known)
-	tb.Hi.Init(&tb.Info, &tb.PiState)
+	tb.ParseState.SetSrc(string(tb.Filename), "", tb.Info.Known)
+	tb.Hi.Init(&tb.Info, &tb.ParseState)
 
 	tb.MarkupMu.Unlock()
 	tb.LinesMu.Unlock()
@@ -489,7 +489,7 @@ func (tb *Buffer) ConfigKnown() bool {
 			tb.SetSpell()
 		}
 		if tb.Complete == nil {
-			tb.SetCompleter(&tb.PiState, CompletePi, CompleteEditPi, LookupPi)
+			tb.SetCompleter(&tb.ParseState, CompleteParse, CompleteEditParse, LookupParse)
 		}
 		return tb.Opts.ConfigKnown(tb.Info.Known)
 	}
@@ -1625,8 +1625,8 @@ func (tb *Buffer) LinesInserted(tbe *textbuf.Edit) {
 	copy(nof[stln:], tmpof)
 	tb.ByteOffs = nof
 
-	if tb.Hi.UsingPi() {
-		pfs := tb.PiState.Done()
+	if tb.Hi.UsingParse() {
+		pfs := tb.ParseState.Done()
 		pfs.Src.LinesInserted(stln, nsz)
 	}
 
@@ -1660,8 +1660,8 @@ func (tb *Buffer) LinesDeleted(tbe *textbuf.Edit) {
 	tb.HiTags = append(tb.HiTags[:stln], tb.HiTags[edln:]...)
 	tb.ByteOffs = append(tb.ByteOffs[:stln], tb.ByteOffs[edln:]...)
 
-	if tb.Hi.UsingPi() {
-		pfs := tb.PiState.Done()
+	if tb.Hi.UsingParse() {
+		pfs := tb.ParseState.Done()
 		pfs.Src.LinesDeleted(stln, edln)
 	}
 
@@ -1697,8 +1697,8 @@ func (tb *Buffer) IsMarkingUp() bool {
 
 // InitialMarkup does the first-pass markup on the file
 func (tb *Buffer) InitialMarkup() {
-	if tb.Hi.UsingPi() {
-		fs := tb.PiState.Done() // initialize
+	if tb.Hi.UsingParse() {
+		fs := tb.ParseState.Done() // initialize
 		fs.Src.SetBytes(tb.Txt)
 	}
 	mxhi := min(100, tb.NLines-1)
@@ -1823,8 +1823,8 @@ func (tb *Buffer) MarkupAllLines(maxLines int) {
 		maxln = min(maxln, maxLines)
 	}
 
-	if tb.Hi.UsingPi() {
-		pfs := tb.PiState.Done()
+	if tb.Hi.UsingParse() {
+		pfs := tb.ParseState.Done()
 		// first update mtags with any changes since it was generated
 		for _, tbe := range tb.MarkupEdits {
 			if tbe.Delete {
@@ -1920,7 +1920,7 @@ func (tb *Buffer) MarkupLines(st, ed int) bool {
 			allgood = false
 		}
 	}
-	// Now we trigger a background reparse of everything in a separate pi.FilesState
+	// Now we trigger a background reparse of everything in a separate parse.FilesState
 	// that gets switched into the current.
 	return allgood
 }
@@ -2325,10 +2325,10 @@ func (tb *Buffer) AutoIndent(ln int) (tbe *textbuf.Edit, indLev, chPos int) {
 
 	tb.LinesMu.RLock()
 	tb.MarkupMu.RLock()
-	lp, _ := parse.LangSupport.Properties(tb.PiState.Sup)
+	lp, _ := parse.LangSupport.Properties(tb.ParseState.Sup)
 	var pInd, delInd int
 	if lp != nil && lp.Lang != nil {
-		pInd, delInd, _, _ = lp.Lang.IndentLine(&tb.PiState, tb.Lines, tb.HiTags, ln, tabSz)
+		pInd, delInd, _, _ = lp.Lang.IndentLine(&tb.ParseState, tb.Lines, tb.HiTags, ln, tabSz)
 	} else {
 		pInd, delInd, _, _ = lexer.BracketIndentLine(tb.Lines, tb.HiTags, ln, tabSz)
 	}

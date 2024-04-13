@@ -762,7 +762,7 @@ type DebugSettingsData struct { //types:add
 }
 
 func (db *DebugSettingsData) Defaults() {
-	// TODO(kai/binsize): figure out how to do this without dragging in pi langs dependency
+	// TODO(kai/binsize): figure out how to do this without dragging in parse langs dependency
 	// db.GoCompleteTrace = golang.CompleteTrace
 	// db.GoTypeTrace = golang.TraceTypes
 }

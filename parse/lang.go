@@ -20,19 +20,19 @@ import (
 //
 // Each language defines a type supporting this interface, which is
 // in turn registered with the StdLangProperties map.  Each supported
-// language has its own .go file in this pi package that defines its
+// language has its own .go file in this parse package that defines its
 // own implementation of the interface and any other associated
 // functionality.
 //
-// The Lang is responsible for accessing the appropriate pi.Parser for this
+// The Lang is responsible for accessing the appropriate [Parser] for this
 // language (initialized and managed via LangSupport.OpenStd() etc)
-// and the pi.FileState structure contains all the input and output
+// and the [FileState] structure contains all the input and output
 // state information for a given file.
 //
 // This interface is likely to evolve as we expand the range of supported
 // languages.
 type Lang interface {
-	// Parser returns the pi.Parser for this language
+	// Parser returns the [Parser] for this language
 	Parser() *Parser
 
 	// ParseFile does the complete processing of a given single file, given by txt bytes,

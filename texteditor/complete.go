@@ -16,10 +16,10 @@ import (
 	"cogentcore.org/core/texteditor/textbuf"
 )
 
-// CompletePi uses GoPi symbols and language -- the string is a line of text
+// CompleteParse uses [parse] symbols and language; the string is a line of text
 // up to point where user has typed.
 // The data must be the *FileState from which the language type is obtained.
-func CompletePi(data any, text string, posLn, posCh int) (md complete.Matches) {
+func CompleteParse(data any, text string, posLn, posCh int) (md complete.Matches) {
 	sfs := data.(*parse.FileStates)
 	if sfs == nil {
 		// log.Printf("CompletePi: data is nil not FileStates or is nil - can't complete\n")
@@ -42,8 +42,8 @@ func CompletePi(data any, text string, posLn, posCh int) (md complete.Matches) {
 	return md
 }
 
-// CompleteEditPi uses the selected completion to edit the text
-func CompleteEditPi(data any, text string, cursorPos int, comp complete.Completion, seed string) (ed complete.Edit) {
+// CompleteEditParse uses the selected completion to edit the text.
+func CompleteEditParse(data any, text string, cursorPos int, comp complete.Completion, seed string) (ed complete.Edit) {
 	sfs := data.(*parse.FileStates)
 	if sfs == nil {
 		// log.Printf("CompleteEditPi: data is nil not FileStates or is nil - can't complete\n")
@@ -60,10 +60,10 @@ func CompleteEditPi(data any, text string, cursorPos int, comp complete.Completi
 	return lp.Lang.CompleteEdit(sfs, text, cursorPos, comp, seed)
 }
 
-// LookupPi uses GoPi symbols and language -- the string is a line of text
+// LookupParse uses [parse] symbols and language; the string is a line of text
 // up to point where user has typed.
 // The data must be the *FileState from which the language type is obtained.
-func LookupPi(data any, text string, posLn, posCh int) (ld complete.Lookup) {
+func LookupParse(data any, text string, posLn, posCh int) (ld complete.Lookup) {
 	sfs := data.(*parse.FileStates)
 	if sfs == nil {
 		// log.Printf("LookupPi: data is nil not FileStates or is nil - can't lookup\n")

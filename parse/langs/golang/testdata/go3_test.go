@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package pi
+package parse
 
 import (
 	"cogentcore.org/core/parse/lexer"
@@ -19,7 +19,7 @@ import (
 //
 // Each language defines a type supporting this interface, which is
 // in turn registered with the StdLangProperties map.  Each supported
-// language has its own .go file in this pi package that defines its
+// language has its own .go file in this parse package that defines its
 // own implementation of the interface and any other associated
 // functionality.
 //
@@ -31,7 +31,7 @@ import (
 // This interface is likely to evolve as we expand the range of supported
 // languages.
 type Lang interface {
-	// Parser returns the pi.Parser for this language
+	// Parser returns the [Parser] for this language
 	Parser() *Parser
 
 	// ParseFile does the complete processing of a given single file, as appropriate

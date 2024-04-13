@@ -56,7 +56,7 @@ func (gl *GoLang) Parser() *parse.Parser {
 func (gl *GoLang) ParseFile(fss *parse.FileStates, txt []byte) {
 	pr := gl.Parser()
 	if pr == nil {
-		log.Println("ParseFile: no parser -- must call pi.LangSupport.OpenStd() at startup!")
+		log.Println("ParseFile: no parser; must call parse.LangSupport.OpenStd() at startup!")
 		return
 	}
 	pfs := fss.StartProc(txt) // current processing one

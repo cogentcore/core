@@ -13,7 +13,7 @@ import (
 	"cogentcore.org/core/parse/token"
 )
 
-// LangLexer looks up lexer for given language -- impl in parent pi package
+// LangLexer looks up lexer for given language; implementation in parent parse package
 // so we need the interface
 type LangLexer interface {
 	// LexerByName returns the top-level [Rule] for given language (case invariant lookup)

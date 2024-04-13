@@ -141,8 +141,7 @@ func (ll *LangSupporter) OpenStandard() error {
 func (ll *LangSupporter) Properties(sup fileinfo.Known) (*LangProperties, error) {
 	lp, has := StandardLangProperties[sup]
 	if !has {
-		err := fmt.Errorf("pi.LangSupport.Properties: no specific support for language: %v", sup)
-		//		log.Println(err.Error()) // don't want output
+		err := fmt.Errorf("parse.LangSupport.Properties: no specific support for language: %v", sup)
 		return nil, err
 	}
 	return lp, nil
