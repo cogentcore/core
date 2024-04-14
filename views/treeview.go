@@ -411,7 +411,6 @@ func (tv *TreeView) SetStyles() {
 			})
 		case "parts/label":
 			w.Style(func(s *styles.Style) {
-				// TODO(kai): need to change these for clickable links in glide
 				s.SetNonSelectable()
 				s.SetTextWrap(false)
 				s.Margin.Zero()
