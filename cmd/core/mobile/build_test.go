@@ -98,7 +98,7 @@ func TestAndroidBuild(t *testing.T) {
 	c.ID = "org.golang.todo"
 	pdir, err := os.Getwd()
 	assert.NoError(t, err)
-	assert.NoError(t, os.Chdir(filepath.Join("..", "..", "system", "examples", "drawtri")))
+	assert.NoError(t, os.Chdir(filepath.Join("..", "..", "..", "system", "examples", "drawtri")))
 	err = Build(c)
 	if err != nil {
 		t.Fatal(err)
@@ -263,7 +263,7 @@ func TestBuildWithGoModules(t *testing.T) {
 			}{
 				{
 					Name: "Relative Path",
-					Path: filepath.Join("..", "..", "system", "examples", "drawtri"),
+					Path: filepath.Join("..", "..", "..", "system", "examples", "drawtri"),
 				},
 			}
 
