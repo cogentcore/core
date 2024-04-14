@@ -1,4 +1,4 @@
-// /Users/oreilly/goki/pi/langs/markdown/markdown.parsegrammar Lexer
+// /Users/oreilly/cogent/core/parse/langs/markdown/markdown.parsegrammar Lexer
 
 InCode:		 None		 if CurState == "Code" {
     CodeEnd:       LitStrBacktick       if @StartOfLine:String == "```"   do: PopGuestLex; PopState; Next; 
@@ -72,5 +72,5 @@ AnyText:		 Text		 if AnyRune	 do: Next;
 
 
 ///////////////////////////////////////////////////
-// /Users/oreilly/goki/pi/langs/markdown/markdown.parsegrammar Parser
+// /Users/oreilly/cogent/core/parse/langs/markdown/markdown.parsegrammar Parser
 

@@ -1,6 +1,6 @@
 {
   "ProjectFile": "/Users/oreilly/go/src/cogentcore.org/core/parse/langs/golang/go.parseproject",
-  "ParserFile": "/Users/oreilly/goki/pi/langs/golang/go.parse",
+  "ParserFile": "/Users/oreilly/cogent/core/parse/langs/golang/go.parse",
   "TestFile": "/Users/oreilly/go/src/cogentcore.org/core/parse/langs/golang/testdata/gotypes/tmptest.go",
   "TraceOpts": {
     "On": false,

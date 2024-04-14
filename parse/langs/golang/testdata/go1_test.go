@@ -621,13 +621,12 @@ var PiViewProperties = tree.Properties{
 	},
 }
 
-import "github.com/goki/gi/gi"
+import "cogentcore.org/core/core"
 
 import (
-	gi "github.com/goki/gi/gi"
-	"github.com/goki/gi/gimain"
-	"github.com/goki/gi/oswin"
-	gogide "github.com/goki/gide/gide"
+	core "cogentcore.org/core/core"
+	"cogentcore.org/core/system"
+	gocode "cogentcore.org/cogent/code/code"
 	"cogentcore.org/core/parse"
 	"cogentcore.org/core/parse/piv"
 )
@@ -1035,9 +1034,6 @@ func main() {
 
 func mainrun() {
 	oswin.TheApp.SetName("pie")
-	oswin.TheApp.SetAbout(`<code>Pie</code> is the interactive parser (pi) editor written in the <b>Cogent Core</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://cogentcore.org/core/parse">Gide on GitHub</a> and <a href="https://cogentcore.org/core/parse/wiki">Gide wiki</a> for documentation.<br>
-<br>
-Version: ` + pi.VersionInfo())
 	if peas++; this > that {
 		fmt.Printf("test")
 		break
